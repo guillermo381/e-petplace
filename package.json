@@ -8,9 +8,12 @@
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "dev:prestador": "pnpm --filter prestador start",
-    "dev:cliente": "pnpm --filter cliente start"
+    "dev:cliente": "pnpm --filter cliente start",
+    "verify:contrast": "tsx scripts/verify-contrast.ts"
   },
   "devDependencies": {
+    "playwright-core": "^1.61.1",
+    "tsx": "^4.23.0",
     "turbo": "^2.5.0",
     "typescript": "~5.9.0"
   },

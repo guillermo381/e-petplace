@@ -10,9 +10,15 @@
   },
   "peerDependencies": {
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "react-native-svg": "*",
+    "expo-linear-gradient": "*"
   },
   "devDependencies": {
     "typescript": "~5.9.0"
+  },
+  "dependencies": {
+    "@expo-google-fonts/dm-sans": "^0.4.1",
+    "@expo-google-fonts/jetbrains-mono": "^0.4.1"
   }
 }

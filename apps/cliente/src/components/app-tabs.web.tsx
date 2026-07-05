@@ -27,6 +27,10 @@ export default function AppTabs() {
           <TabTrigger name="explore" href="/explore" asChild>
             <TabButton>Explore</TabButton>
           </TabTrigger>
+          {/* S43-B2: galería de verificación de tokens — se retira en B3 */}
+          <TabTrigger name="gallery" href="/gallery" asChild>
+            <TabButton>Tokens</TabButton>
+          </TabTrigger>
         </CustomTabList>
       </TabList>
     </Tabs>

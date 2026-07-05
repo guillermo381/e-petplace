@@ -1,5 +1,28 @@
-// @epetplace/ui — design system e-PetPlace.
-// Placeholder pre-S43: los tokens y componentes nacen en la sesión de design system.
-// Candado S42 (ESTRATEGIA_2026H2.md Sección 13.4): ninguna pantalla se toca sin design system.
+// @epetplace/ui — design system e-PetPlace v4.
+// REGLA DE ORO: ningún componente escribe un color, tamaño o sombra
+// hardcodeado. Si no está acá, no existe en el producto.
 
-export const UI_PACKAGE_READY = false;
+export { palette, gradients, type GradientToken } from './tokens/palette'
+export { typography, type TypeSizeKey } from './tokens/typography'
+export { spacing, type SpacingKey } from './tokens/spacing'
+export { radius, type RadiusKey } from './tokens/radius'
+export { shadows, type ShadowToken } from './tokens/shadows'
+export { motion } from './tokens/motion'
+export { dosis, type DosisKey, type DosisNivel } from './tokens/dosis'
+
+export {
+  lightTheme,
+  darkTheme,
+  memorialTheme,
+  getTheme,
+  type Theme,
+  type ThemeMode,
+  type ServiceKey,
+  type StatusKey,
+  type CapaKey,
+} from './themes'
+
+export { ThemeProvider, useTheme } from './ThemeProvider'
+export { epetplaceFonts } from './fonts'
+export { Isotipo, type IsotipoVariant } from './brand/Isotipo'
+export { TokenGallery } from './gallery/TokenGallery'
