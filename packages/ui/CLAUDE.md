@@ -1,6 +1,8 @@
 # packages/ui — Design system e-PetPlace
 
-**Estado: S43-B2 CERRADO (pendiente gate visual del founder) — Design Tokens v4 construidos.**
+**Estado: S43-B2.1 (recalibración de esencia en claro) — pendiente gate visual del founder.**
+
+B2.1 (hotfix aprobado sobre B2): REGLA DE DOS REGISTROS (palette.ts) — hex PUROS para gráfica (puntos, tints, indicadores), variantes *Dark AA solo para texto. `verdeVital #2BE86B` = capa Vida + success en los 3 temas (texto AA claro: `verdeVitalDark #1E7A33`); el menta #90FF8B quedó solo-marca. Tints claros saturados sobre hex puro. `accent.active` = pink puro (indicador de activo, uno por vista). Temas light/dark ganan `capaText` (registro de texto); memorial INTACTO. Gate: 97 pares, 0 fallos (ajustes: ochreDark→#925F0C, coralDark→#BE3535).
 
 Qué hay:
 - `src/tokens/` — palette (marca canonizada del SVG: pink #FF00AF, teal #28E8DA, verde #90FF8B; amarillo #FFF645 SOLO logo; alphas precomputadas rgba — nada se interpola en runtime), typography (DM Sans única familia UI + JetBrains Mono con REGLA DE VOZ), spacing/radius/motion (v3.1 intactos), shadows (objetos RN, glow SOLO dark), dosis (asimetría prestador=baja / dueño=alta).

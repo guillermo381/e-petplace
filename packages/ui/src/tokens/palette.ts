@@ -11,7 +11,8 @@
  *   · pink   #FF2D9B → #FF00AF  (hex real del logo)
  *   · cyan   #00E5FF → teal #28E8DA  (hex real del logo; B1 lo llama "cyan")
  *   · lime   #C5FF3A → ELIMINADO — su rol (capa vida / success) lo toma
- *     el verde de marca #90FF8B (dark) / #2E7A28 (light)
+ *     verdeVital #2BE86B (B2.1; el menta de marca #90FF8B quedó solo-marca).
+ *     Jade #00F5A0 también sigue deprecado.
  *   · yellow #FFE600 → ELIMINADO — amarillo #FFF645 existe SOLO como
  *     color de marca/logo. JAMÁS rol funcional (status, capa, acento).
  *   · Extensiones v3.1 conservadas con los mismos hex.
@@ -21,6 +22,15 @@
  *   Nada de interpolar hex+opacidad en runtime. Toda transparencia vive
  *   acá como string rgba lista para usar. Si algún día entra NativeWind,
  *   el patrón twin -rgb (variables por canal) es obligatorio — anotado.
+ *
+ * ═══════════════════════════════════════════════════════════════════
+ * REGLA DE DOS REGISTROS (S43-B2.1, firmada por el founder):
+ *
+ *   Cada color de marca/capa vive en DOS registros: el PURO para
+ *   rellenos gráficos (puntos, tints de fondo, indicadores, isotipo,
+ *   decoración) en cualquier tema; la variante *Dark AA exclusivamente
+ *   donde hay texto o elemento funcional. AA gobierna texto, no gráfica.
+ * ═══════════════════════════════════════════════════════════════════
  */
 
 export const palette = {
@@ -30,9 +40,14 @@ export const palette = {
   pinkDark:  '#C4008A',  // variante AA para light — rgb(196,0,138)
   teal:      '#28E8DA',  // Capa 2 · cuidado (B1 lo llama "cyan") — rgb(40,232,218)
   tealDark:  '#0A7268',  // variante AA para light — rgb(10,114,104)
-  verde:     '#90FF8B',  // Capa 1 · vida + success — rgb(144,255,139)
-  verdeDark: '#2E7A28',  // variante AA para light — rgb(46,122,40)
+  verde:     '#90FF8B',  // menta de marca — SOLO marca/logo/gradientLogo, no funcional
+                         // (acotado en B2.1: la capa vida usa verdeVital) — rgb(144,255,139)
+  verdeDark: '#2E7A28',  // AA del menta de marca — sin rol funcional desde B2.1 — rgb(46,122,40)
   amarillo:  '#FFF645',  // SOLO marca/logo. JAMÁS funcional — rgb(255,246,69)
+
+  // ── Capa Vida (B2.1 — semántica, no cambia por tema) ──
+  verdeVital:     '#2BE86B',  // capa vida + success en LOS TRES temas (registro gráfico) — rgb(43,232,107)
+  verdeVitalDark: '#1E7A33',  // texto AA de vida/success en claro — rgb(30,122,51)
 
   // ── Extensiones v3.1 (mismos hex) ──
   violet:         '#9E3AFF',  // Capa 3 · comunidad amplia — rgb(158,58,255)
@@ -40,10 +55,11 @@ export const palette = {
   violetText:     '#A64BFF',  // violet aclarado MÍNIMO para AA como texto en dark
                               // (#9E3AFF da 4.16:1 sobre card — gate S43-B2). rgb(166,75,255)
   coral:          '#FF5C5C',  // danger · separado del pink de marca — rgb(255,92,92)
-  coralDark:      '#C73A3A',  // rgb(199,58,58)
+  coralDark:      '#BE3535',  // rgb(190,53,53) — oscurecido MÍNIMO en B2.1: #C73A3A
+                              // daba 4.30:1 sobre el tint danger saturado (gate WCAG)
   ochre:          '#E8B547',  // warning — rgb(232,181,71)
-  ochreDark:      '#97620C',  // rgb(151,98,12) — oscurecido en S43-B2: el v3.1 #A66E10
-                              // daba 4.32:1 sobre card y 3.91:1 sobre warningBg (gate WCAG)
+  ochreDark:      '#925F0C',  // rgb(146,95,12) — oscurecido en B2.1: #97620C daba 4.44:1
+                              // sobre el tint warning saturado (v3.1 #A66E10 ya había fallado en B2)
   terracotta:     '#D97757',  // hogar, familia — rgb(217,119,87)
   terracottaDark: '#AF5433',  // rgb(175,84,51) — oscurecido MÍNIMO en S43-B2: el v3.1
                               // #B85937 daba 4.25:1 sobre bg.base claro (gate WCAG)
@@ -89,6 +105,17 @@ export const palette = {
   textMemorialDark:  '#E8DCC8',
   textMemorialLight: '#2A2A1F',
 
+  // ── Tints claros B2.1 (construidos sobre el hex PURO — valores aprobados en mockup) ──
+  verdeVitalAlpha20: 'rgba(43,232,107,.20)',   // vida/success (light)
+  tealAlpha16:       'rgba(40,232,218,.16)',   // cuidado/info (light)
+  pinkAlpha08:       'rgba(255,0,175,.08)',    // comunidad (light)
+  ochreAlpha24:      'rgba(232,181,71,.24)',   // warning (light)
+  coralAlpha16:      'rgba(255,92,92,.16)',    // danger (light)
+
+  // ── Tint dark de vida ──
+  verdeVitalAlpha15: 'rgba(43,232,107,.15)',
+  verdeVitalBorder:  'rgba(43,232,107,.30)',
+
   // ── Alphas dark (precomputadas) ──
   tealAlpha15:       'rgba(40,232,218,.15)',
   tealAlpha10:       'rgba(40,232,218,.10)',
@@ -109,8 +136,8 @@ export const palette = {
   pinkAlphaL:       'rgba(196,0,138,.08)',
   verdeAlphaL:      'rgba(46,122,40,.10)',
   violetAlphaL:     'rgba(124,45,212,.08)',
-  coralAlphaL:      'rgba(199,58,58,.08)',
-  ochreAlphaL:      'rgba(151,98,12,.08)',
+  coralAlphaL:      'rgba(190,53,53,.08)',
+  ochreAlphaL:      'rgba(146,95,12,.08)',
   terracottaAlphaL: 'rgba(175,84,51,.06)',
   sageAlphaL:       'rgba(107,122,106,.10)',
 
@@ -126,8 +153,8 @@ export const palette = {
   pinkBorderL:       'rgba(196,0,138,.22)',
   verdeBorderL:      'rgba(46,122,40,.25)',
   violetBorderL:     'rgba(124,45,212,.22)',
-  coralBorderL:      'rgba(199,58,58,.22)',
-  ochreBorderL:      'rgba(151,98,12,.22)',
+  coralBorderL:      'rgba(190,53,53,.22)',
+  ochreBorderL:      'rgba(146,95,12,.22)',
   terracottaBorderL: 'rgba(175,84,51,.22)',
 
   // ── Neutros puros ──

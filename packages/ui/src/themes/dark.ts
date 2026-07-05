@@ -40,6 +40,10 @@ export const darkTheme = {
     warmBg:        palette.terracottaAlpha14,
     warmBorder:    palette.terracottaBorder,
 
+    // B2.1 — indicador de estado ACTIVO (subrayado de tab, selección, paso
+    // actual). Registro gráfico: pink puro. Un solo elemento activo por vista lo usa.
+    active:        palette.pink,
+
     gradient:       gradients.firmaUIDark,  // contextos cerrados (ver palette.ts)
     gradientSubtle: {
       colors: [palette.pinkAlpha15, palette.tealAlpha15],
@@ -48,18 +52,27 @@ export const darkTheme = {
     },
   },
 
+  // B2.1 — REGISTRO GRÁFICO: hex puros. Para TEXTO usar capaText.
   capa: {
-    identidad:       palette.verde,
+    identidad:       palette.verdeVital,  // B2.1: vida = verdeVital en los 3 temas
+    cuidado:         palette.teal,
+    comunidad:       palette.pink,
+    comunidadAmplia: palette.violet,
+  },
+
+  // B2.1 — REGISTRO DE TEXTO (AA sobre superficies dark)
+  capaText: {
+    identidad:       palette.verdeVital,
     cuidado:         palette.teal,
     comunidad:       palette.pink,
     comunidadAmplia: palette.violetText,  // violet base da 4.16:1 en dark (gate S43-B2)
   },
 
   status: {
-    success:       palette.verde,
-    successBg:     palette.verdeAlpha15,
-    successBorder: palette.verdeBorder,
-    successText:   palette.verde,
+    success:       palette.verdeVital,
+    successBg:     palette.verdeVitalAlpha15,
+    successBorder: palette.verdeVitalBorder,
+    successText:   palette.verdeVital,
 
     warning:       palette.ochre,
     warningBg:     palette.ochreAlpha15,
@@ -83,8 +96,8 @@ export const darkTheme = {
     walking:   palette.teal,
     boarding:  palette.teal,
     store:     palette.teal,
-    insurance: palette.verde,
-    wearable:  palette.verde,
+    insurance: palette.verdeVital,  // B2.1: vida = verdeVital
+    wearable:  palette.verdeVital,  // B2.1: vida = verdeVital
     adoption:  palette.pink,
   },
 

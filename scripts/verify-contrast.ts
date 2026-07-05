@@ -10,6 +10,8 @@
  *   · text.tertiary — placeholder/decorativo, no texto funcional
  *   · bordes y gradientSubtle — no son fondos de texto
  *   · palette.amarillo — solo marca/logo, jamás porta texto
+ *   · capa.* y accent.active (B2.1) — REGISTRO GRÁFICO (puntos, indicadores,
+ *     subrayados): AA gobierna texto, no gráfica. El texto usa capaText.*
  *
  * Correr: pnpm exec tsx scripts/verify-contrast.ts
  */
@@ -98,10 +100,12 @@ function paresDe(t: Theme, nombre: string): Pair[] {
   add('accent.warm / bg.base', t.accent.warm, t.bg.base)
   add('accent.warm / bg.card', t.accent.warm, t.bg.card)
 
-  // Capas como etiqueta de texto
+  // Capas como etiqueta de texto — B2.1: el registro de texto es capaText.
+  // Memorial no tiene capaText (INTACTO de v3.1): ahí capa.* cumple ambos roles.
+  const capaTexto = 'capaText' in t ? t.capaText : t.capa
   for (const c of ['identidad', 'cuidado', 'comunidad', 'comunidadAmplia'] as const) {
-    add(`capa.${c} / bg.base`, t.capa[c], t.bg.base)
-    add(`capa.${c} / bg.card`, t.capa[c], t.bg.card)
+    add(`capaText.${c} / bg.base`, capaTexto[c], t.bg.base)
+    add(`capaText.${c} / bg.card`, capaTexto[c], t.bg.card)
   }
 
   // Status: su texto sobre su fondo tinteado (compositado sobre card) y sobre card pelada

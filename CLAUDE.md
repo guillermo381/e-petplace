@@ -23,7 +23,7 @@ Monorepo pnpm workspaces + Turborepo del rumbo S42: reforma móvil-first con amb
 - **Candado S42:** ninguna pantalla se toca hasta que el design system (`packages/ui`) exista.
 - **Puerta única a la DB:** los apps jamás llaman `supabase.from()/rpc()` directo — todo pasa por wrappers de `@epetplace/api` con `ResultadoWrapper<T>`.
 - **Migraciones:** las escribe y ejecuta Code con la DB a la vista (regla 73); founder conserva gate de aprobación. Skill `epetplace-db` se autocarga en tareas de SQL.
-- **Deudas D-NNN y lecciones L-NNN:** viven en `docs/DEUDAS_CANONICAS.md` y en el CLAUDE.md del repo viejo. La numeración continúa, no se reinicia.
+- **Deudas D-NNN y lecciones L-NNN:** las nuevas viven en `docs/DEUDAS_CANONICAS.md` de ESTE repo (deudas por sesión + sección "Lecciones del monorepo"). El histórico L-001–L-130 y D-001–D-282 vive en el repo viejo congelado. La numeración continúa, no se reinicia.
 
 ## Skills del proyecto — cuándo y cuál manda
 

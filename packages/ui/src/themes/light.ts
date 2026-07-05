@@ -31,12 +31,16 @@ export const lightTheme = {
 
   accent: {
     primary:       palette.tealDark,
-    primaryBg:     palette.tealAlphaL,
+    primaryBg:     palette.tealAlpha16,     // B2.1: tint sobre el hex puro
     primaryBorder: palette.tealBorderL,
 
     brand:         palette.pinkDark,
-    brandBg:       palette.pinkAlphaL,
+    brandBg:       palette.pinkAlpha08,     // B2.1: tint sobre el hex puro
     brandBorder:   palette.pinkBorderL,
+
+    // B2.1 — indicador de estado ACTIVO (subrayado de tab, selección, paso
+    // actual). Registro gráfico: pink puro. Un solo elemento activo por vista lo usa.
+    active:        palette.pink,
 
     warm:          palette.terracottaDark,
     warmBg:        palette.terracottaAlphaL,
@@ -50,46 +54,58 @@ export const lightTheme = {
     },
   },
 
-  // El color codifica CAPA, no servicio (v3 — intacto)
+  // El color codifica CAPA, no servicio (v3 — intacto).
+  // B2.1 — REGISTRO GRÁFICO: hex PUROS para puntos/indicadores/decoración
+  // (el punto vida ya no necesita anillo). Para TEXTO usar capaText.
   capa: {
-    identidad:       palette.verdeDark,   // Capa 1 · vida (ex lime)
-    cuidado:         palette.tealDark,    // Capa 2 · cuidado activo
-    comunidad:       palette.pinkDark,    // Capa 3 · vínculo propio
-    comunidadAmplia: palette.violetDark,  // Capa 3 · comunidad amplia
+    identidad:       palette.verdeVital,  // Capa 1 · vida
+    cuidado:         palette.teal,        // Capa 2 · cuidado activo
+    comunidad:       palette.pink,        // Capa 3 · vínculo propio
+    comunidadAmplia: palette.violet,      // Capa 3 · comunidad amplia
+  },
+
+  // B2.1 — REGISTRO DE TEXTO: variantes AA. AA gobierna texto, no gráfica.
+  capaText: {
+    identidad:       palette.verdeVitalDark,
+    cuidado:         palette.tealDark,
+    comunidad:       palette.pinkDark,
+    comunidadAmplia: palette.violetDark,
   },
 
   status: {
-    success:       palette.verdeDark,
-    successBg:     palette.verdeAlphaL,
-    successBorder: palette.verdeBorderL,
-    successText:   palette.verdeDark,
+    // campo base = registro gráfico (íconos, barras); *Text = registro AA
+    success:       palette.verdeVital,
+    successBg:     palette.verdeVitalAlpha20,
+    successBorder: palette.verdeVitalBorder,
+    successText:   palette.verdeVitalDark,
 
-    warning:       palette.ochreDark,
-    warningBg:     palette.ochreAlphaL,
+    warning:       palette.ochre,
+    warningBg:     palette.ochreAlpha24,
     warningBorder: palette.ochreBorderL,
     warningText:   palette.ochreDark,
 
-    danger:        palette.coralDark,
-    dangerBg:      palette.coralAlphaL,
+    danger:        palette.coral,
+    dangerBg:      palette.coralAlpha16,
     dangerBorder:  palette.coralBorderL,
     dangerText:    palette.coralDark,
 
-    info:          palette.tealDark,
-    infoBg:        palette.tealAlphaL,
+    info:          palette.teal,
+    infoBg:        palette.tealAlpha16,
     infoBorder:    palette.tealBorderL,
     infoText:      palette.tealDark,
   },
 
-  // Servicio identificado por ícono; el color es el de su capa
+  // Servicio identificado por ícono; el color es el de su capa (registro AA:
+  // los íconos de servicio acompañan texto funcional en listas)
   services: {
     vet:       palette.tealDark,
     grooming:  palette.tealDark,
     walking:   palette.tealDark,
     boarding:  palette.tealDark,
     store:     palette.tealDark,
-    insurance: palette.verdeDark,  // Capa 1 · protección de vida
-    wearable:  palette.verdeDark,  // Capa 1 · monitoreo de vida
-    adoption:  palette.pinkDark,   // Capa 3 · comunidad
+    insurance: palette.verdeVitalDark,  // Capa 1 · protección de vida
+    wearable:  palette.verdeVitalDark,  // Capa 1 · monitoreo de vida
+    adoption:  palette.pinkDark,        // Capa 3 · comunidad
   },
 
   shadow: shadows.light,

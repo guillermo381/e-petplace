@@ -74,6 +74,9 @@ export function TokenGallery() {
   // Capturados fuera de los callbacks: el narrowing de `in` no sobrevive closures
   const shadowLg = 'lg' in theme.shadow ? theme.shadow.lg : null
   const shadowGlow = 'glow' in theme.shadow ? theme.shadow.glow : null
+  // B2.1 — dos registros: capaText para etiquetas; memorial (intacto) no lo tiene
+  const capaTexto = 'capaText' in theme ? theme.capaText : theme.capa
+  const accentActive = 'active' in theme.accent ? theme.accent.active : theme.accent.primary
   const gradColors = [...theme.accent.gradient.colors] as [string, string, ...string[]]
   const gradLocations = [...theme.accent.gradient.locations] as [number, number, ...number[]]
 
@@ -125,16 +128,17 @@ export function TokenGallery() {
           <Fila>
             <Swatch name="pink" hex={palette.pink} />
             <Swatch name="teal" hex={palette.teal} />
-            <Swatch name="verde" hex={palette.verde} />
+            <Swatch name="verdeVital" hex={palette.verdeVital} />
+            <Swatch name="menta*" hex={palette.verde} />
             <Swatch name="amarillo*" hex={palette.amarillo} />
           </Fila>
           <Text style={{ fontFamily: sans.regular, fontSize: typography.size.sm, color: theme.text.secondary, marginBottom: spacing[4] }}>
-            *amarillo = SOLO marca/logo. Jamás rol funcional.
+            *menta y amarillo = SOLO marca/logo. La capa Vida es verdeVital (B2.1).
           </Text>
           <Fila>
             <Swatch name="pinkDark" hex={palette.pinkDark} />
             <Swatch name="tealDark" hex={palette.tealDark} />
-            <Swatch name="verdeDark" hex={palette.verdeDark} />
+            <Swatch name="verdeVitalDark" hex={palette.verdeVitalDark} />
           </Fila>
           <Text style={{ fontFamily: sans.regular, fontSize: typography.size.sm, color: theme.text.secondary, marginBottom: spacing[4] }}>
             Variantes AA para claro — validadas por scripts/verify-contrast.ts
@@ -275,7 +279,7 @@ export function TokenGallery() {
         </Seccion>
 
         {/* Capas */}
-        <Seccion titulo="Capas — el color codifica capa, no servicio">
+        <Seccion titulo="Capas — dos registros: punto puro, texto AA">
           <Fila>
             {(
               [
@@ -287,10 +291,38 @@ export function TokenGallery() {
             ).map(([k, label]) => (
               <View key={k} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
                 <View style={{ width: 12, height: 12, borderRadius: radius.full, backgroundColor: theme.capa[k] }} />
-                <Text style={{ fontFamily: sans.medium, fontSize: typography.size.sm, color: theme.text.primary }}>{label}</Text>
+                <Text style={{ fontFamily: sans.medium, fontSize: typography.size.sm, color: capaTexto[k] }}>{label}</Text>
               </View>
             ))}
           </Fila>
+          <Text style={{ fontFamily: sans.regular, fontSize: typography.size.sm, color: theme.text.secondary, marginTop: spacing[3] }}>
+            El punto usa el hex puro (registro gráfico, sin anillo); la etiqueta usa capaText (registro AA).
+          </Text>
+        </Seccion>
+
+        {/* accentActive */}
+        <Seccion titulo="Estado activo — accent.active (pink puro, un solo elemento por vista)">
+          <View style={{ backgroundColor: theme.bg.card, borderRadius: radius.md, borderWidth: 1, borderColor: theme.border.default, padding: spacing[4] }}>
+            <View style={{ flexDirection: 'row', gap: spacing[6] }}>
+              {(['Hoy', 'Agenda', 'Perfil'] as const).map((tab, i) => (
+                <View key={tab} style={{ alignItems: 'center', gap: spacing[1.5] }}>
+                  <Text
+                    style={{
+                      fontFamily: i === 0 ? sans.medium : sans.regular,
+                      fontSize: typography.size.base,
+                      color: i === 0 ? theme.text.primary : theme.text.secondary,
+                    }}
+                  >
+                    {tab}
+                  </Text>
+                  <View style={{ height: 3, alignSelf: 'stretch', borderRadius: radius.full, backgroundColor: i === 0 ? accentActive : 'transparent' }} />
+                </View>
+              ))}
+            </View>
+            <Text style={{ fontFamily: sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary, marginTop: spacing[3] }}>
+              Subrayado de tab, selección, paso actual — registro gráfico, no porta texto.
+            </Text>
+          </View>
         </Seccion>
 
         {/* Isotipo */}
@@ -322,7 +354,7 @@ export function TokenGallery() {
               </Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2], marginBottom: spacing[3] }}>
                 <View style={{ width: 8, height: 8, borderRadius: radius.full, backgroundColor: theme.capa.cuidado }} />
-                <Text style={{ fontFamily: sans.medium, fontSize: typography.size.sm, color: theme.capa.cuidado }}>Grooming · hoy</Text>
+                <Text style={{ fontFamily: sans.medium, fontSize: typography.size.sm, color: capaTexto.cuidado }}>Grooming · hoy</Text>
               </View>
               <Text style={{ fontFamily: sans.bold, fontSize: typography.size.lg, color: theme.text.primary, marginBottom: spacing[1] }}>Zeus — 15:00</Text>
               <Text style={{ fontFamily: sans.regular, fontSize: typography.size.base, color: theme.text.secondary, marginBottom: spacing[4] }}>

@@ -1238,4 +1238,15 @@ Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en 
 #### D-283 — Reconciliación del modelo v2 en la DB principal
 🟠 ALTA. e-petplace-v2 apunta al mismo proyecto Supabase y dejó tablas de un modelo paralelo (pedidos, productos, mascotas_adopcion, solicitudes_adopcion, consentimientos, profiles); sus queries fallan en runtime post-refactor (mascotas cambió de shape; vacunas y citas no existen), y la Edge Function extract-vacuna escribe contra tabla inexistente (su herencia requiere reescritura de destino hacia eventos_mascota). Disparo: ANTES de construir el alta de mascota en apps/cliente — relevamiento FK completo (regla 41) y decisión archivar/migrar/eliminar por tabla. Origen: S42 Tarea 4.
 
+### Deudas de Sesión 43 (monorepo e-petplace)
+
+#### D-284 — Verificación nativa de packages/ui pendiente
+🟡 ALTA. La galería de tokens B2/B2.1 fue verificada solo en RN-web (Chrome real vía `scripts/verify-gallery.mjs`); la máquina de desarrollo no tiene Xcode ni Android SDK. Disparo: ningún componente de B3 cierra su revisión visual sin dispositivo (Expo Go o build nativa). Origen: S43-B2.
+
+---
+
+## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)
+
+- **L-131** — La verificación de accesibilidad es programática o no existe: v3.1 shippeó memorial con texto cream sobre fondo cream (1.00:1) sin que nadie lo viera — los temas de baja frecuencia jamás se auditan a ojo. Origen: S43-B2.
+
 ---
