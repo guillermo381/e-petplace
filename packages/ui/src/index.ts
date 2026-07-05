@@ -22,7 +22,9 @@ export {
   type CapaKey,
 } from './themes'
 
+export { opacity } from './tokens/opacity'
 export { ThemeProvider, useTheme } from './ThemeProvider'
+export { Boton, type BotonProps, type BotonVariante, type BotonTamaño } from './components/Boton'
 export { epetplaceFonts } from './fonts'
 export { Isotipo, type IsotipoVariant } from './brand/Isotipo'
 export { TokenGallery } from './gallery/TokenGallery'

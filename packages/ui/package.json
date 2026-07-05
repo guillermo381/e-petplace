@@ -12,7 +12,8 @@
     "react": "*",
     "react-native": "*",
     "react-native-svg": "*",
-    "expo-linear-gradient": "*"
+    "expo-linear-gradient": "*",
+    "react-native-reanimated": "*"
   },
   "devDependencies": {
     "typescript": "~5.9.0"

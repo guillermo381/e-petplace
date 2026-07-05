@@ -6,7 +6,8 @@
  */
 
 import { Pressable, ScrollView, Text, View } from 'react-native'
-import { LinearGradient } from 'expo-linear-gradient'
+
+import { useState } from 'react'
 
 import { palette, gradients } from '../tokens/palette'
 import { typography } from '../tokens/typography'
@@ -14,6 +15,7 @@ import { spacing } from '../tokens/spacing'
 import { radius } from '../tokens/radius'
 import { useTheme } from '../ThemeProvider'
 import { Isotipo } from '../brand/Isotipo'
+import { Boton, type BotonVariante } from '../components/Boton'
 import type { ThemeMode } from '../themes'
 
 const sans = typography.family.sans
@@ -69,6 +71,7 @@ function Fila({ children }: { children: React.ReactNode }) {
 // ── galería ───────────────────────────────────────────────────────────────────
 export function TokenGallery() {
   const { theme, mode, setMode } = useTheme()
+  const [cargandoDemo, setCargandoDemo] = useState(false)
   const esDark = mode === 'dark'
   const esMemorial = mode === 'memorial'
   // Capturados fuera de los callbacks: el narrowing de `in` no sobrevive closures
@@ -77,8 +80,6 @@ export function TokenGallery() {
   // B2.1 — dos registros: capaText para etiquetas; memorial (intacto) no lo tiene
   const capaTexto = 'capaText' in theme ? theme.capaText : theme.capa
   const accentActive = 'active' in theme.accent ? theme.accent.active : theme.accent.primary
-  const gradColors = [...theme.accent.gradient.colors] as [string, string, ...string[]]
-  const gradLocations = [...theme.accent.gradient.locations] as [number, number, ...number[]]
 
   const modos: { key: ThemeMode; label: string }[] = [
     { key: 'light', label: 'Claro' },
@@ -325,6 +326,54 @@ export function TokenGallery() {
           </View>
         </Seccion>
 
+        {/* Botón — B3.1 */}
+        <Seccion titulo="Botón — variantes × estados (presioná de verdad)">
+          <View style={{ backgroundColor: theme.bg.card, borderRadius: radius.md, borderWidth: 1, borderColor: theme.border.default, padding: spacing[5], gap: spacing[5] }}>
+            {(
+              [
+                ['primario', 'Iniciar atención'],
+                ['marca', 'Agendar un paseo'],
+                ['secundario', 'Ver detalle'],
+                ['ghost', 'Cancelar'],
+                ['destructivo', 'Eliminar mascota'],
+              ] as const satisfies ReadonlyArray<readonly [BotonVariante, string]>
+            ).map(([v, etiqueta]) => (
+              <View key={v} style={{ gap: spacing[2] }}>
+                <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary }}>
+                  {v}
+                </Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3], alignItems: 'center' }}>
+                  <Boton variante={v} etiqueta={etiqueta} onPress={() => {}} />
+                  <Boton variante={v} etiqueta={etiqueta} deshabilitado onPress={() => {}} />
+                  <Boton variante={v} etiqueta={etiqueta} cargando={cargandoDemo} onPress={() => {}} />
+                </View>
+              </View>
+            ))}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+              <Boton
+                variante="secundario"
+                tamaño="sm"
+                etiqueta={cargandoDemo ? 'Apagar loading' : 'Prender loading'}
+                onPress={() => setCargandoDemo((x) => !x)}
+              />
+              <Text style={{ fontFamily: sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary, flexShrink: 1 }}>
+                default · disabled · loading (el spinner respeta la regla de 150ms y no mueve el layout)
+              </Text>
+            </View>
+            <View style={{ gap: spacing[3] }}>
+              <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary }}>
+                tamaños · sm 36 / md 48 / lg 56
+              </Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3], alignItems: 'center' }}>
+                <Boton variante="primario" tamaño="sm" etiqueta="Pequeño" onPress={() => {}} />
+                <Boton variante="primario" tamaño="md" etiqueta="Mediano" onPress={() => {}} />
+                <Boton variante="primario" tamaño="lg" etiqueta="Grande" onPress={() => {}} />
+              </View>
+              <Boton variante="primario" etiqueta="Bloque — full width" bloque onPress={() => {}} />
+            </View>
+          </View>
+        </Seccion>
+
         {/* Isotipo */}
         <Seccion titulo="Isotipo — 24 / 32 / 48 / 96">
           <View style={{ backgroundColor: theme.bg.card, borderRadius: radius.md, padding: spacing[5], borderWidth: 1, borderColor: theme.border.default, gap: spacing[5] }}>
@@ -360,11 +409,9 @@ export function TokenGallery() {
               <Text style={{ fontFamily: sans.regular, fontSize: typography.size.base, color: theme.text.secondary, marginBottom: spacing[4] }}>
                 Baño y corte · familia González
               </Text>
-              <View style={{ backgroundColor: esMemorial ? theme.accent.primary : theme.text.primary, borderRadius: radius.md, paddingVertical: spacing[3], alignItems: 'center' }}>
-                <Text style={{ fontFamily: sans.medium, fontSize: typography.size.base, color: theme.text.inverse }}>Iniciar atención</Text>
-              </View>
+              <Boton variante="primario" etiqueta="Iniciar atención" bloque onPress={() => {}} />
               <Text style={{ fontFamily: sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary, marginTop: spacing[2] }}>
-                Un acento de capa por vista · CTA en tinta · sin gradiente
+                Un acento de capa por vista · CTA en tinta (Boton primario real) · sin gradiente
               </Text>
             </View>
 
@@ -390,21 +437,12 @@ export function TokenGallery() {
                   </View>
                 ))}
               </View>
-              {esMemorial ? (
-                <View style={{ backgroundColor: theme.accent.primaryBg, borderWidth: 1, borderColor: theme.accent.primaryBorder, borderRadius: radius.md, paddingVertical: spacing[3], alignItems: 'center' }}>
-                  <Text style={{ fontFamily: sans.medium, fontSize: typography.size.base, color: theme.accent.primary }}>Recordar a Zeus</Text>
-                </View>
-              ) : (
-                <LinearGradient
-                  colors={gradColors}
-                  locations={gradLocations}
-                  start={{ x: 0.13, y: 0 }}
-                  end={{ x: 0.87, y: 1 }}
-                  style={{ borderRadius: radius.md, paddingVertical: spacing[3], alignItems: 'center' }}
-                >
-                  <Text style={{ fontFamily: sans.medium, fontSize: typography.size.base, color: theme.text.onGradient }}>Agendar un paseo</Text>
-                </LinearGradient>
-              )}
+              <Boton
+                variante="marca"
+                etiqueta={esMemorial ? 'Recordar a Zeus' : 'Agendar un paseo'}
+                bloque
+                onPress={() => {}}
+              />
               <Text style={{ fontFamily: sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary, marginTop: spacing[2] }}>
                 Capas visibles · gradiente firma solo en contextos cerrados{esMemorial ? ' · en memorial el gradiente no existe' : ''}
               </Text>

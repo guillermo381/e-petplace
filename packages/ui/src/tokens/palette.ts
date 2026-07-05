@@ -42,7 +42,7 @@ export const palette = {
   tealDark:  '#0A7268',  // variante AA para light — rgb(10,114,104)
   verde:     '#90FF8B',  // menta de marca — SOLO marca/logo/gradientLogo, no funcional
                          // (acotado en B2.1: la capa vida usa verdeVital) — rgb(144,255,139)
-  verdeDark: '#2E7A28',  // AA del menta de marca — sin rol funcional desde B2.1 — rgb(46,122,40)
+                         // verdeDark #2E7A28 eliminado en B3.1 (huérfano — decisión founder)
   amarillo:  '#FFF645',  // SOLO marca/logo. JAMÁS funcional — rgb(255,246,69)
 
   // ── Capa Vida (B2.1 — semántica, no cambia por tema) ──
@@ -134,7 +134,6 @@ export const palette = {
   // ── Alphas light (más sutiles, sobre base clara) ──
   tealAlphaL:       'rgba(10,114,104,.08)',
   pinkAlphaL:       'rgba(196,0,138,.08)',
-  verdeAlphaL:      'rgba(46,122,40,.10)',
   violetAlphaL:     'rgba(124,45,212,.08)',
   coralAlphaL:      'rgba(190,53,53,.08)',
   ochreAlphaL:      'rgba(146,95,12,.08)',
@@ -151,7 +150,6 @@ export const palette = {
   terracottaBorder:  'rgba(217,119,87,.30)',
   tealBorderL:       'rgba(10,114,104,.25)',
   pinkBorderL:       'rgba(196,0,138,.22)',
-  verdeBorderL:      'rgba(46,122,40,.25)',
   violetBorderL:     'rgba(124,45,212,.22)',
   coralBorderL:      'rgba(190,53,53,.22)',
   ochreBorderL:      'rgba(146,95,12,.22)',
