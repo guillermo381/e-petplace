@@ -1,0 +1,49 @@
+# e-petplace — Monorepo del ecosistema e-PetPlace
+
+> Estado: **scaffold S43-B0 (5 Jul 2026)** — estructura, tooling, tipos y skills. CERO pantallas, CERO lógica de negocio.
+> Arranque de sesión obligatorio: leer `docs/CONTRATO_TRABAJO.md` (v1.7, reglas 73-74 activas) y `docs/ESTRATEGIA_2026H2.md` (rumbo firmado S42) ANTES que cualquier backlog.
+
+## Qué es esto
+
+Monorepo pnpm workspaces + Turborepo del rumbo S42: reforma móvil-first con ambos lados en paralelo, React Native/Expo, vistas web del mismo código (RN-web).
+
+| Ruta | Qué es | Estado |
+|---|---|---|
+| `apps/prestador/` | App Expo del prestador (iOS/Android/web) | Template limpio, pre-design-system |
+| `apps/cliente/` | App Expo del dueño (iOS/Android/web) | Template limpio, pre-design-system |
+| `packages/ui/` | Design system: tokens, componentes, motion | Placeholder — nace en S43 |
+| `packages/api/` | Tipos generados de Supabase + wrappers discriminated-union (puerta única a la DB) | Tipos reales generados + 1 wrapper ejemplo del patrón |
+| `packages/domain/` | Helpers puros (periodo, validaciones, países/servicios) | Placeholder |
+| `supabase/` | Migraciones + config. Proyecto linkeado: `zyltipqscdsdsxnjclhp`. Las migraciones nuevas nacen ACÁ y las crea Code (regla 73) | `migrations/` vacía |
+| `docs/` | Docs maestros únicos del ecosistema (copiados verbatim del repo viejo en S43-B0) | 9 docs |
+| `.claude/skills/` | Skills del proyecto (`epetplace-db`; `epetplace-design-system` nace al cierre de S43) | ver Sección 11 de ESTRATEGIA |
+
+## Reglas de la casa (índice, no reemplazo del contrato)
+
+- **Candado S42:** ninguna pantalla se toca hasta que el design system (`packages/ui`) exista.
+- **Puerta única a la DB:** los apps jamás llaman `supabase.from()/rpc()` directo — todo pasa por wrappers de `@epetplace/api` con `ResultadoWrapper<T>`.
+- **Migraciones:** las escribe y ejecuta Code con la DB a la vista (regla 73); founder conserva gate de aprobación. Skill `epetplace-db` se autocarga en tareas de SQL.
+- **Deudas D-NNN y lecciones L-NNN:** viven en `docs/DEUDAS_CANONICAS.md` y en el CLAUDE.md del repo viejo. La numeración continúa, no se reinicia.
+
+## Skills del proyecto — cuándo y cuál manda
+
+| Skill | Dispara en | Autoridad |
+|---|---|---|
+| `expo/skills` (19: expo-ui, expo-deployment, use-dom, native-data-fetching, upgrading-expo…) + Expo MCP (`.mcp.json`) | Todo lo que toque Expo Router, builds, EAS, deployment, data fetching nativo | PRIMERA autoridad del stack. Ante conflicto con conocimiento propio del agente, gana la skill |
+| `software-mansion-labs/skills` (8: react-native-best-practices, animation, radon-mcp…) | Animaciones, gestos, performance nativa (Reanimated, Skia) | El CÓDIGO del motion nativo sale de acá |
+| `emil-design-eng` + `animation-vocabulary` + `review-animations` | Decidir QUÉ animar, duraciones, curvas; auditar motion existente | El CRITERIO del motion. Sus recetas son web: en nativo aplica la filosofía, Software Mansion pone el código |
+| `impeccable` | Revisión visual de UI, anti-slop, audits | Vara de calidad visual. No autoridad final en patrones nativos |
+| `epetplace-db` | TODA tarea SQL, migración, RPC, wrapper | NO NEGOCIABLE — encima de cualquier otra fuente |
+| `epetplace-design-system` | (nace al cierre de S43) Toda pantalla o componente | Cuando exista: obliga tokens y componentes propios, prohíbe inventar |
+
+Reglas de uso:
+- (a) Ante tarea que matchea una skill, leerla ANTES de escribir código — no después de equivocarse.
+- (b) Si dos skills opinan distinto, manda la columna Autoridad; si la duda persiste, se escala (regla 6 del contrato).
+
+## Referencia al repo viejo (congelado)
+
+`../e-petplace-prestadores` — **CONGELADO en S42** como referencia de flujos y RPCs (último commit: `a9b48d3`, cierre documental S42). Ahí viven: el CLAUDE.md histórico completo (S1-S42), las L-001 a L-130, los flujos del portal web y las migraciones históricas. No abrir sesiones de construcción sobre ese repo.
+
+## Historial
+
+- **S43-B0 (5 Jul 2026):** scaffold. Apps Expo SDK 57 (Expo Router, TS estricto, RN-web), packages ui/api/domain, supabase linkeado, `database.types.ts` generado de la DB real (verificaciones L-031 ✓), docs copiados verbatim, skills instaladas + `epetplace-db` creada.

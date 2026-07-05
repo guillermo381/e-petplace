@@ -1,0 +1,14 @@
+{
+  "name": "@epetplace/domain",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Helpers puros de dominio e-PetPlace (periodo, validaciones, strings, países/servicios)",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.0"
+  }
+}

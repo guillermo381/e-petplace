@@ -1,0 +1,21 @@
+{
+  "name": "e-petplace",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Monorepo e-PetPlace — apps Expo (prestador + cliente) + packages compartidos (ui/api/domain)",
+  "scripts": {
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "dev:prestador": "pnpm --filter prestador start",
+    "dev:cliente": "pnpm --filter cliente start"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0",
+    "typescript": "~5.9.0"
+  },
+  "packageManager": "pnpm@11.10.0",
+  "engines": {
+    "node": ">=22"
+  }
+}

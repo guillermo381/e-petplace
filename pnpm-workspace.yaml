@@ -1,0 +1,6 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Expo/React Native + pnpm: node_modules hoisted (recomendación oficial Expo para monorepos pnpm)
+nodeLinker: hoisted

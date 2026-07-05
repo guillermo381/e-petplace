@@ -1,0 +1,19 @@
+{
+  "name": "@epetplace/api",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Tipos generados de Supabase + wrappers tipados con discriminated unions (puerta única a la DB)",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "gen:types": "supabase gen types typescript --project-id zyltipqscdsdsxnjclhp --schema public > src/database.types.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.104.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.0",
+    "typescript": "~5.9.0"
+  }
+}
