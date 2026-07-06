@@ -146,7 +146,14 @@ export function Encabezado(props: EncabezadoProps) {
     )
   }
 
-  const { saludo, subtitulo, isotipo = 'ninguno', accionDer } = props
+  // Default GRADIENTE OFICIAL en claro y dark, ambos lados (founder, B3.7):
+  // el logo es identidad, no acento — queda fuera de la contabilidad de dosis
+  // (sigue siendo UNO por pantalla). 'tinta' queda para contextos especiales.
+  // En memorial degrada automáticamente (patrón Boton marca): la marca habla
+  // bajito — y sobre bosque nocturno la tinta se traduce a blanco.
+  const { saludo, subtitulo, isotipo = 'gradiente', accionDer } = props
+  const varianteIsotipo =
+    theme.mode === 'memorial' ? 'blanco' : isotipo === 'tinta' && theme.mode === 'dark' ? 'blanco' : isotipo
   return (
     <View
       style={{
@@ -159,7 +166,11 @@ export function Encabezado(props: EncabezadoProps) {
     >
       {isotipo !== 'ninguno' || accionDer ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 28 }}>
-          {isotipo !== 'ninguno' ? <Isotipo size={28} variant={isotipo} /> : <View />}
+          {isotipo !== 'ninguno' && varianteIsotipo !== 'ninguno' ? (
+            <Isotipo size={28} variant={varianteIsotipo} />
+          ) : (
+            <View />
+          )}
           {accionDer ?? null}
         </View>
       ) : null}

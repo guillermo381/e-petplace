@@ -1,6 +1,8 @@
 # packages/ui — Design system e-PetPlace
 
-**Estado: S43-B3.6 — base atómica cerrada (Boton/Tarjeta/Campo/Celda/Separador/Insignia) + Encabezado construido (pendiente gate en dispositivo).**
+**Estado: S43-B3.7 — 7 componentes; BarraTabs construida (pendiente gate en dispositivo). La pantalla embrión es ahora el template de S44.**
+
+B3.7: `src/components/BarraTabs.tsx` — wrapper visual para el tabBar custom de expo-router Tabs (JSDoc con ejemplo completo de integración: S44 la enchufa sin pensar). Activo: primary + EL GESTO (pill accent.active 3×18 bajo el icono — el subrayado de B2.1 formalizado; único accent.active de la vista raíz). Inactivo: tertiary (exención documentada en el gate con medición informativa). El subrayado aparece con opacity — JAMÁS se desliza (pelea con gestos swipe). Badge = Insignia estado sm. A11y: role tab + aria-selected directo (RN-web 0.21 ya no mapea accessibilityState.selected — lección) + label con pendientes. Ajuste previo (founder): el isotipo de portada va en GRADIENTE OFICIAL por default ambos lados — identidad, no acento, fuera de la contabilidad de dosis (uno por pantalla); memorial/tinta-en-dark degradan a blanco.
 
 B3.6: `src/components/Encabezado.tsx` — primer componente de ESTRUCTURA. Dos variantes: `navegacion` (56 + safe area, chevron con onAtras forzado por TS y pressed que resalta, título con centrado ÓPTICO — ambas zonas laterales reservan 44 siempre, el título no baila entre pantallas; divisor opcional) y `portada` (la VOZ HUMANA en la estructura: saludo DM Sans 300 2xl, isotipo tinta=dosis baja / gradiente-de-marca=dosis alta vía <Isotipo/>, aire spacing[4]/[6]). NADA SE ANIMA en el Encabezado (ni colapso al scroll — sería decisión de motion propia). Peer nuevo: react-native-safe-area-context ~5.7.0 (rango del workspace, lección B3.1b). Ensamble mayor en galería: "Pantalla embrión prestador" — portada + agenda + CTA, todo componentes reales.
 

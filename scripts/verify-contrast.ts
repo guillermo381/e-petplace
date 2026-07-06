@@ -12,6 +12,9 @@
  *   · palette.amarillo — solo marca/logo, jamás porta texto
  *   · capa.* y accent.active (B2.1) — REGISTRO GRÁFICO (puntos, indicadores,
  *     subrayados): AA gobierna texto, no gráfica. El texto usa capaText.*
+ *   · tab INACTIVO de BarraTabs (B3.7) — text.tertiary por espec firmada
+ *     (convención de plataforma: el tab no seleccionado se atenúa; el icono
+ *     duplica el canal y el activo sí gatea). Se imprime medición informativa.
  *
  * Correr: pnpm exec tsx scripts/verify-contrast.ts
  */
@@ -173,6 +176,13 @@ const todos: Pair[] = [
   ...paresDe(darkTheme, 'DARK'),
   ...paresDe(memorialTheme, 'MEMORIAL'),
 ]
+
+// Informativa (no gatea): tab inactivo de BarraTabs — decisión B3.7
+for (const [n, t] of [['LIGHT', lightTheme], ['DARK', darkTheme], ['MEMORIAL', memorialTheme]] as const) {
+  console.log(
+    `  (info) ${n} · tab inactivo (text.tertiary / bg.base) → ${contrast(t.text.tertiary, t.bg.base).toFixed(2)}:1 — exento por espec`,
+  )
+}
 
 let fallos = 0
 for (const par of todos) {

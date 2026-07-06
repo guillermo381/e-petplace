@@ -43,6 +43,7 @@ export {
   type InsigniaTamaño,
 } from './components/Insignia'
 export { Encabezado, type EncabezadoProps } from './components/Encabezado'
+export { BarraTabs, type BarraTabsItem } from './components/BarraTabs'
 export { epetplaceFonts } from './fonts'
 export { Isotipo, type IsotipoVariant } from './brand/Isotipo'
 export { TokenGallery } from './gallery/TokenGallery'

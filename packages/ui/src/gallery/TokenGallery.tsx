@@ -23,6 +23,7 @@ import { Celda } from '../components/Celda'
 import { Separador } from '../components/Separador'
 import { Insignia } from '../components/Insignia'
 import { Encabezado } from '../components/Encabezado'
+import { BarraTabs, type BarraTabsItem } from '../components/BarraTabs'
 import type { ThemeMode } from '../themes'
 
 const sans = typography.family.sans
@@ -96,10 +97,44 @@ function CampanaDemo() {
   )
 }
 
+// iconos outline 1.75 de demo para la BarraTabs (el slot es del consumidor)
+const ICONOS_TABS: BarraTabsItem[] = [
+  {
+    key: 'hoy',
+    etiqueta: 'Hoy',
+    icono: ({ color }) => (
+      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+        <Path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4" stroke={color} strokeWidth={1.75} strokeLinecap="round" />
+        <Path d="M12 8a4 4 0 100 8 4 4 0 000-8z" stroke={color} strokeWidth={1.75} />
+      </Svg>
+    ),
+  },
+  {
+    key: 'agenda',
+    etiqueta: 'Agenda',
+    badge: 3,
+    icono: ({ color }) => (
+      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+        <Path d="M5 5h14a1 1 0 011 1v13a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1zM4 9.5h16M8.5 3v4M15.5 3v4" stroke={color} strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" />
+      </Svg>
+    ),
+  },
+  {
+    key: 'perfil',
+    etiqueta: 'Perfil',
+    icono: ({ color }) => (
+      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+        <Path d="M12 4a4 4 0 100 8 4 4 0 000-8zM5 20c.8-3.5 3.7-5.5 7-5.5s6.2 2 7 5.5" stroke={color} strokeWidth={1.75} strokeLinecap="round" />
+      </Svg>
+    ),
+  },
+]
+
 // ── galería ───────────────────────────────────────────────────────────────────
 export function TokenGallery() {
   const { theme, mode, setMode } = useTheme()
   const [cargandoDemo, setCargandoDemo] = useState(false)
+  const [tabActivo, setTabActivo] = useState('hoy')
   const esDark = mode === 'dark'
   const esMemorial = mode === 'memorial'
   // Capturados fuera de los callbacks: el narrowing de `in` no sobrevive closures
@@ -585,7 +620,6 @@ export function TokenGallery() {
             <View style={{ borderWidth: 1, borderColor: theme.border.default, borderRadius: radius.md, overflow: 'hidden' }}>
               <Encabezado
                 variante="portada"
-                isotipo={esDark || esMemorial ? 'gradiente' : 'tinta'}
                 saludo="Buen día, Marcela."
                 subtitulo="Dos atenciones hoy."
               />
@@ -602,12 +636,21 @@ export function TokenGallery() {
           </View>
         </Seccion>
 
+        {/* BarraTabs — B3.7 */}
+        <Seccion titulo="Barra de tabs — conmutá de verdad (el subrayado aparece, no se desliza)">
+          <View style={{ borderWidth: 1, borderColor: theme.border.default, borderRadius: radius.md, overflow: 'hidden' }}>
+            <BarraTabs items={ICONOS_TABS} activo={tabActivo} onCambiar={setTabActivo} />
+          </View>
+          <Text style={{ fontFamily: sans.regular, fontSize: typography.size.sm, color: theme.text.secondary, marginTop: spacing[3] }}>
+            Activo: primary + pill accent.active 3×18 · inactivo: tertiary · badge = Insignia estado sm
+          </Text>
+        </Seccion>
+
         {/* ENSAMBLE MAYOR — pantalla embrión del prestador */}
         <Seccion titulo="Pantalla embrión — prestador (portada + agenda + CTA)">
           <View style={{ borderWidth: 1, borderColor: theme.border.default, borderRadius: radius['2xl'], overflow: 'hidden', backgroundColor: theme.bg.base }}>
             <Encabezado
               variante="portada"
-              isotipo="tinta"
               saludo="Buen día, Marcela."
               subtitulo="Dos atenciones hoy."
             />
@@ -640,9 +683,10 @@ export function TokenGallery() {
               </Tarjeta>
               <Boton variante="primario" etiqueta="Iniciar la primera atención" bloque onPress={() => {}} />
             </View>
+            <BarraTabs items={ICONOS_TABS} activo={tabActivo} onCambiar={setTabActivo} />
           </View>
           <Text style={{ fontFamily: sans.regular, fontSize: typography.size.sm, color: theme.text.secondary, marginTop: spacing[3] }}>
-            Portada + Tarjeta + Celdas + Separador + Insignia + Boton — todo real, cero Views a mano.
+            Portada + Tarjeta + Celdas + Separador + Insignia + Boton + BarraTabs — la pantalla raíz completa, techo a piso. El template de S44.
           </Text>
         </Seccion>
 

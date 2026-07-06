@@ -4,6 +4,10 @@
  * NO son dos temas. Es UNA constante que gobierna cuánta marca recibe
  * cada superficie. La skill epetplace-design-system (B4) la hará exigible.
  *
+ *   NOTA B3.7 (founder): el logo/isotipo es IDENTIDAD, no acento —
+ *   queda FUERA de la contabilidad de dosis en ambos lados (va en
+ *   gradiente oficial por default; sigue siendo UNO por pantalla).
+ *
  *   prestador → dosis 'baja':
  *     · UN acento de capa por vista (no mezclar capas en una pantalla)
  *     · CTA principal en tinta (#1D1A2E = text.primary light), no en color
