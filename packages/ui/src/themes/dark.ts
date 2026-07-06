@@ -23,7 +23,7 @@ export const darkTheme = {
     secondary:  palette.textDark1,
     tertiary:   palette.textDark2,
     inverse:    palette.dark0,
-    onGradient: palette.dark0,   // sobre firmaUIDark (#FF00AF→#28E8DA), tinta oscura
+    onGradient: palette.white,   // B3.1c: blanco en AMBOS temas (gradiente v2 con violeta dominante)
     warm:       palette.cream,
   },
 

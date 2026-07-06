@@ -117,11 +117,30 @@ function paresDe(t: Theme, nombre: string): Pair[] {
   // CTA "tinta" (dosis prestador): texto inverso sobre text.primary como fondo
   add('text.inverse / text.primary(CTA tinta)', t.text.inverse, t.text.primary)
 
-  // Gradiente firma: onGradient contra CADA stop (salvo memorial: transparent)
+  // Gradiente firma v2 (B3.1c) — REGLA DE PEOR PUNTO: onGradient contra cada
+  // stop con location ≤ 0.7 DEBE pasar 4.5. La COLA (location 1, teal) queda
+  // EXENTA por geometría verificada — no es un agujero:
+  //   (a) el stop central está en location ≥ .5 (violeta dominante), y
+  //   (b) Boton marca garantiza paddingHorizontal ≥ 24 (spacing[6]),
+  //   por lo que el texto jamás se apoya sobre la zona de la cola.
+  // Condiciones (a)+(b) se verifican acá abajo; el resto es gate visual.
   if (t.accent.gradient.colors[0] !== 'transparent') {
-    t.accent.gradient.colors.forEach((stop, i) =>
-      add(`text.onGradient / gradient.stop${i}(${stop})`, t.text.onGradient, stop),
-    )
+    const g = t.accent.gradient
+    if ((g.locations[1] ?? 0) < 0.5) {
+      throw new Error(
+        `Exención de cola inválida en ${nombre}: el stop central está en ${g.locations[1]} (< .5)`,
+      )
+    }
+    g.colors.forEach((stop, i) => {
+      const loc = g.locations[i]
+      if (loc <= 0.7) {
+        add(`text.onGradient / gradient.stop${i}@${loc}(${stop})`, t.text.onGradient, stop)
+      } else {
+        console.log(
+          `  (exenta) ${nombre} · gradient.stop${i}@${loc}(${stop}) — cola fuera del área de texto (padding ≥ 24 en Boton marca)`,
+        )
+      }
+    })
   }
 
   return p

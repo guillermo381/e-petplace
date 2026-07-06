@@ -38,6 +38,8 @@ export const palette = {
   // ── Marca (canonizada desde SVG del logo) ──
   pink:      '#FF00AF',  // Capa 3 · comunidad — rgb(255,0,175)
   pinkDark:  '#C4008A',  // variante AA para light — rgb(196,0,138)
+  pinkVivo:  '#DF00A1',  // B3.1c — el magenta más vivo que pasa 4.5:1 con blanco
+                         // (4.514:1; #E000A2 falla). SOLO stop 0 del gradiente firma dark. rgb(223,0,161)
   teal:      '#28E8DA',  // Capa 2 · cuidado (B1 lo llama "cyan") — rgb(40,232,218)
   tealDark:  '#0A7268',  // variante AA para light — rgb(10,114,104)
   verde:     '#90FF8B',  // menta de marca — SOLO marca/logo/gradientLogo, no funcional
@@ -167,7 +169,12 @@ export const palette = {
  * gradientLogo — los 6 stops EXACTOS del SVG de marca (vertical).
  *   USO CERRADO: splash y logo. Nada más. El amarillo solo existe acá.
  *
- * gradientFirmaUI — 165deg, 2 stops.
+ * gradientFirmaUI v2 (B3.1c — hallazgo del gate en OLED real): 2 stops le
+ *   daban al cyan media superficie (se dispara a verde) y el texto perdia
+ *   contraste en la zona media. Receta de la app vieja formalizada: violeta
+ *   DOMINANTE al centro (location .5), cyan solo en la cola, texto BLANCO
+ *   en ambos temas. pinkVivo #DF00A1 = el magenta mas vivo que pasa 4.5:1
+ *   con blanco (derivado por script; #E000A2 ya falla con 4.476:1).
  *   CONTEXTOS CERRADOS (B1): hero de onboarding, CTA principal del
  *   dueño, momento adopción. Fuera de eso NO se usa (dosis prestador:
  *   jamás). En memorial: transparent — la marca habla bajito ahí.
@@ -179,13 +186,13 @@ export const gradients = {
     angle: 180, // vertical, como el SVG (x1=x2)
   },
   firmaUILight: {
-    colors: [palette.pinkDark, palette.tealDark],
-    locations: [0, 1],
+    colors: [palette.pinkDark, palette.violetDark, palette.tealDark],
+    locations: [0, 0.5, 1],
     angle: 165,
   },
   firmaUIDark: {
-    colors: [palette.pink, palette.teal],
-    locations: [0, 1],
+    colors: [palette.pinkVivo, palette.violet, palette.teal],
+    locations: [0, 0.5, 1],
     angle: 165,
   },
   transparent: {

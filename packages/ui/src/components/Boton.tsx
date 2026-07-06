@@ -106,9 +106,14 @@ export function Boton({
   }
   const c = colores[varianteEfectiva]
 
+  // B3.1c — constraint del gradiente v2: la exención WCAG de la cola del
+  // gradiente (location 1, teal) vale SOLO si el texto nunca la alcanza.
+  // marca garantiza paddingHorizontal ≥ 24 (spacing[6]) en todo tamaño.
+  const padX = esMarca ? Math.max(t.padX, spacing[6]) : t.padX
+
   const cuerpo: ViewStyle = {
     height: t.alto,
-    paddingHorizontal: t.padX,
+    paddingHorizontal: padX,
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
