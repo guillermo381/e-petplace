@@ -6,6 +6,7 @@
  */
 
 import { Pressable, ScrollView, Text, View } from 'react-native'
+import Svg, { Path } from 'react-native-svg'
 
 import { useState } from 'react'
 
@@ -21,6 +22,7 @@ import { Campo } from '../components/Campo'
 import { Celda } from '../components/Celda'
 import { Separador } from '../components/Separador'
 import { Insignia } from '../components/Insignia'
+import { Encabezado } from '../components/Encabezado'
 import type { ThemeMode } from '../themes'
 
 const sans = typography.family.sans
@@ -71,6 +73,27 @@ function Seccion({ titulo, children }: { titulo: string; children: React.ReactNo
 
 function Fila({ children }: { children: React.ReactNode }) {
   return <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] }}>{children}</View>
+}
+
+// campana de demo para la portada dueño (el slot accionDer es del consumidor)
+function CampanaDemo() {
+  const { theme } = useTheme()
+  return (
+    <View accessibilityLabel="Notificaciones — hay novedades">
+      <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
+        <Path
+          d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"
+          stroke={theme.text.primary}
+          strokeWidth={1.8}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </Svg>
+      <View style={{ position: 'absolute', top: -1, right: -2 }}>
+        <Insignia capa="comunidad" soloPunto etiqueta="Notificaciones nuevas" />
+      </View>
+    </View>
+  )
 }
 
 // ── galería ───────────────────────────────────────────────────────────────────
@@ -532,6 +555,95 @@ export function TokenGallery() {
               <Boton variante="primario" etiqueta="Ver toda la agenda" bloque onPress={() => {}} />
             </View>
           </Tarjeta>
+        </Seccion>
+
+        {/* Encabezado — B3.6 */}
+        <Seccion titulo="Encabezado — navegación y portada">
+          <View style={{ gap: spacing[4] }}>
+            {[
+              { k: 'solo', atras: false, accion: false, divisor: false, titulo: 'Solo título' },
+              { k: 'atras', atras: true, accion: false, divisor: false, titulo: 'Con atrás (centrado óptico)' },
+              { k: 'ambos', atras: true, accion: true, divisor: false, titulo: 'Atrás + acción' },
+              { k: 'divisor', atras: false, accion: false, divisor: true, titulo: 'Con divisor' },
+            ].map((c) => (
+              <View key={c.k} style={{ borderWidth: 1, borderColor: theme.border.default, borderRadius: radius.md, overflow: 'hidden' }}>
+                {c.atras ? (
+                  <Encabezado
+                    variante="navegacion"
+                    titulo={c.titulo}
+                    atras
+                    onAtras={() => {}}
+                    divisor={c.divisor}
+                    accionDer={c.accion ? <Insignia estado="info" etiqueta="2" tamaño="sm" /> : undefined}
+                  />
+                ) : (
+                  <Encabezado variante="navegacion" titulo={c.titulo} divisor={c.divisor} />
+                )}
+              </View>
+            ))}
+
+            <View style={{ borderWidth: 1, borderColor: theme.border.default, borderRadius: radius.md, overflow: 'hidden' }}>
+              <Encabezado
+                variante="portada"
+                isotipo={esDark || esMemorial ? 'gradiente' : 'tinta'}
+                saludo="Buen día, Marcela."
+                subtitulo="Dos atenciones hoy."
+              />
+            </View>
+            <View style={{ borderWidth: 1, borderColor: theme.border.default, borderRadius: radius.md, overflow: 'hidden' }}>
+              <Encabezado
+                variante="portada"
+                isotipo="gradiente"
+                saludo="Zeus está listo."
+                subtitulo="Su paseo empieza en 20 minutos."
+                accionDer={<CampanaDemo />}
+              />
+            </View>
+          </View>
+        </Seccion>
+
+        {/* ENSAMBLE MAYOR — pantalla embrión del prestador */}
+        <Seccion titulo="Pantalla embrión — prestador (portada + agenda + CTA)">
+          <View style={{ borderWidth: 1, borderColor: theme.border.default, borderRadius: radius['2xl'], overflow: 'hidden', backgroundColor: theme.bg.base }}>
+            <Encabezado
+              variante="portada"
+              isotipo="tinta"
+              saludo="Buen día, Marcela."
+              subtitulo="Dos atenciones hoy."
+            />
+            <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[6], gap: spacing[4] }}>
+              <Tarjeta elevacion="sm" relleno="ninguno">
+                <View style={{ padding: spacing[4], paddingBottom: spacing[2] }}>
+                  <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary }}>
+                    hoy · 2 citas
+                  </Text>
+                </View>
+                <Celda
+                  interactiva
+                  onPress={() => {}}
+                  accessibilityRole="button"
+                  titulo="Zeus"
+                  subtitulo="Paseo · familia González"
+                  inicio={<Insignia capa="cuidado" soloPunto etiqueta="Capa cuidado" />}
+                  metadataMono="17:30 · 45 min"
+                />
+                <Separador indentacion={spacing[3] + 10 + spacing[3]} />
+                <Celda
+                  interactiva
+                  onPress={() => {}}
+                  accessibilityRole="button"
+                  titulo="Pati"
+                  subtitulo="Grooming · baño y corte"
+                  inicio={<Insignia capa="cuidado" soloPunto etiqueta="Capa cuidado" />}
+                  metadataMono="19:00"
+                />
+              </Tarjeta>
+              <Boton variante="primario" etiqueta="Iniciar la primera atención" bloque onPress={() => {}} />
+            </View>
+          </View>
+          <Text style={{ fontFamily: sans.regular, fontSize: typography.size.sm, color: theme.text.secondary, marginTop: spacing[3] }}>
+            Portada + Tarjeta + Celdas + Separador + Insignia + Boton — todo real, cero Views a mano.
+          </Text>
         </Seccion>
 
         {/* Isotipo */}

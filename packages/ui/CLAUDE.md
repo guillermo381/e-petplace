@@ -1,6 +1,8 @@
 # packages/ui — Design system e-PetPlace
 
-**Estado: S43-B3.5 — Boton + Tarjeta + Campo + Celda/Separador (gates cerrados) + Insignia construida (pendiente gate en dispositivo).**
+**Estado: S43-B3.6 — base atómica cerrada (Boton/Tarjeta/Campo/Celda/Separador/Insignia) + Encabezado construido (pendiente gate en dispositivo).**
+
+B3.6: `src/components/Encabezado.tsx` — primer componente de ESTRUCTURA. Dos variantes: `navegacion` (56 + safe area, chevron con onAtras forzado por TS y pressed que resalta, título con centrado ÓPTICO — ambas zonas laterales reservan 44 siempre, el título no baila entre pantallas; divisor opcional) y `portada` (la VOZ HUMANA en la estructura: saludo DM Sans 300 2xl, isotipo tinta=dosis baja / gradiente-de-marca=dosis alta vía <Isotipo/>, aire spacing[4]/[6]). NADA SE ANIMA en el Encabezado (ni colapso al scroll — sería decisión de motion propia). Peer nuevo: react-native-safe-area-context ~5.7.0 (rango del workspace, lección B3.1b). Ensamble mayor en galería: "Pantalla embrión prestador" — portada + agenda + CTA, todo componentes reales.
 
 B3.5: `src/components/Insignia.tsx` — el chip de estado. JAMÁS Pressable (un badge que se toca es un botón disfrazado). Dos familias por discriminated union: `estado` (alDia/atencion/proximo/info — pareja tint+texto AA sellada desde tokens, el consumidor no elige colores) y `capa` (vida/cuidado/comunidad/comunidadAmplia — punto puro + capaText, dos registros cableados). `soloPunto` para celdas densas con etiqueta obligatoria como accessibilityLabel (el color jamás es único canal). Tamaños 22/26, radius full. TODOS los chips artesanales de la galería migrados — cero sobrevivientes (grep verificado). Nota de diseño en shadows.ts: glow es SEMÁNTICO ("en vivo/en curso"), claro lo traduce a anillo 1.5 + pill "● vivo"; se implementa con el componente de cita en curso (S44).
 
