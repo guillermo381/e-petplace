@@ -68,6 +68,15 @@ export const darkTheme = {
     comunidadAmplia: palette.violetText,  // violet base da 4.16:1 en dark (gate S43-B2)
   },
 
+  // S44-B2.3 — REGISTRO DE TINTS: fondo suave por capa (AvatarMascota
+  // fallback; mismos tokens que los tintes de Tarjeta, ahora nombrados).
+  capaBg: {
+    identidad:       palette.verdeVitalAlpha15,
+    cuidado:         palette.tealAlpha15,
+    comunidad:       palette.pinkAlpha09,
+    comunidadAmplia: palette.violetAlpha15,
+  },
+
   status: {
     success:       palette.verdeVital,
     successBg:     palette.verdeVitalAlpha15,

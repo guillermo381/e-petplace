@@ -127,6 +127,18 @@ function paresDe(t: Theme, nombre: string): Pair[] {
   add('capaText.cuidado / Tarjeta cuidado (infoBg⊕card)', capaTexto.cuidado, t.status.infoBg, t.bg.card)
   add('capaText.comunidad / Tarjeta comunidad (brandBg⊕card)', capaTexto.comunidad, t.accent.brandBg, t.bg.card)
 
+  // AvatarMascota (S44-B2.3): iniciales (capaText AA) sobre el tint capaBg
+  // de su capa, compositado sobre card y sobre base (el avatar vive en ambas).
+  // Memorial no tiene capaBg: su fallback es neutral (par de abajo).
+  if ('capaBg' in t) {
+    for (const c of ['identidad', 'cuidado', 'comunidad', 'comunidadAmplia'] as const) {
+      add(`Avatar iniciales capaText.${c} / capaBg.${c}⊕card`, capaTexto[c], t.capaBg[c], t.bg.card)
+      add(`Avatar iniciales capaText.${c} / capaBg.${c}⊕base`, capaTexto[c], t.capaBg[c], t.bg.base)
+    }
+  }
+  // Fallback neutral del avatar (los 3 temas): text.secondary sobre bg.overlay.
+  add('Avatar iniciales text.secondary / bg.overlay⊕card', t.text.secondary, t.bg.overlay, t.bg.card)
+
   // Campo (B3.3): mensaje de error sobre las superficies donde vive el form,
   // y los bordes de ESTADO como gráficos funcionales a 3:1 (WCAG 1.4.11 —
   // usan el flag `large`). El borde default queda fuera del gate: el campo

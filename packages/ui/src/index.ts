@@ -47,6 +47,13 @@ export { BarraTabs, type BarraTabsItem } from './components/BarraTabs'
 export { Hoja, type HojaProps, type HojaAltura } from './components/Hoja'
 export { CitaEnVivo, type CitaEnVivoProps, type CitaEnVivoCapa } from './components/CitaEnVivo'
 export { Esqueleto, EsqueletoGrupo, type EsqueletoProps, type EsqueletoForma } from './components/Esqueleto'
+export {
+  AvatarMascota,
+  type AvatarMascotaProps,
+  type AvatarMascotaTamano,
+  type AvatarMascotaCapa,
+  type AvatarMascotaEspecie,
+} from './components/AvatarMascota'
 export { AvisoProvider, useAviso, type AvisoInput, type AvisoVariante } from './components/Aviso'
 export { EstadoVacio } from './components/EstadoVacio'
 export { epetplaceFonts } from './fonts'

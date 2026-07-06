@@ -72,6 +72,17 @@ export const lightTheme = {
     comunidadAmplia: palette.violetDark,
   },
 
+  // S44-B2.3 — REGISTRO DE TINTS: fondo suave por capa (AvatarMascota
+  // fallback; mismos tokens que los tintes de Tarjeta, ahora nombrados).
+  capaBg: {
+    // identidad a .15 (no .20 como el tint de Tarjeta): con .20 el par
+    // verdeVitalDark/tint⊕base daba 4.46 — bajo AA (gate S44-B2.3).
+    identidad:       palette.verdeVitalAlpha15,
+    cuidado:         palette.tealAlpha16,
+    comunidad:       palette.pinkAlpha08,
+    comunidadAmplia: palette.violetAlphaL,
+  },
+
   status: {
     // campo base = registro gráfico (íconos, barras); *Text = registro AA
     success:       palette.verdeVital,

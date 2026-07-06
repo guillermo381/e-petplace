@@ -27,6 +27,11 @@ import { BarraTabs, type BarraTabsItem } from '../components/BarraTabs'
 import { Hoja, type HojaAltura } from '../components/Hoja'
 import { CitaEnVivo } from '../components/CitaEnVivo'
 import { Esqueleto, EsqueletoGrupo } from '../components/Esqueleto'
+import { AvatarMascota } from '../components/AvatarMascota'
+
+// Foto local de ejemplo (generada, sin URL remota) — demuestra cover,
+// recorte circular y la desaturación memorial.
+const FOTO_MASCOTA_EJEMPLO = require('../../assets/gallery/mascota-ejemplo.png')
 import { AvisoProvider, useAviso } from '../components/Aviso'
 import { EstadoVacio } from '../components/EstadoVacio'
 import type { ThemeMode } from '../themes'
@@ -123,6 +128,26 @@ function EjemploCitaEnVivo() {
         />
       </Tarjeta>
     </CitaEnVivo>
+  )
+}
+
+function EjemploAvatarMascota() {
+  return (
+    <View style={{ gap: spacing[4] }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing[4], flexWrap: 'wrap' }}>
+        <AvatarMascota nombre="Zeus" fotoUrl={FOTO_MASCOTA_EJEMPLO} tamano="sm" />
+        <AvatarMascota nombre="Zeus" fotoUrl={FOTO_MASCOTA_EJEMPLO} tamano="md" />
+        <AvatarMascota nombre="Zeus" fotoUrl={FOTO_MASCOTA_EJEMPLO} tamano="lg" />
+      </View>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing[3], flexWrap: 'wrap' }}>
+        <AvatarMascota nombre="Zeus" capa="vida" />
+        <AvatarMascota nombre="Pati" capa="cuidado" />
+        <AvatarMascota nombre="Nube" capa="comunidad" />
+        <AvatarMascota nombre="Kiwi" capa="comunidadAmplia" />
+        <AvatarMascota nombre="Bruno" />
+        <AvatarMascota nombre="Bruno" tamano="sm" />
+      </View>
+    </View>
   )
 }
 
@@ -713,6 +738,27 @@ function GaleriaInterna() {
             <ThemeProvider defaultMode="memorial">
               <PanelTema etiqueta="memorial — degrada solo por token, nada que animar">
                 <EjemploEsqueletoFila />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* AvatarMascota — S44-B2.3: foto + fallbacks, los 3 temas */}
+        <Seccion titulo="AvatarMascota — la cara de la mascota (no porta estado)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — 40/64/96 con foto · huella por capa (tint + AA) · huella neutral">
+                <EjemploAvatarMascota />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — mismos registros, tints del tema">
+                <EjemploAvatarMascota />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — foto desaturada leve, fallback neutral sin capa">
+                <EjemploAvatarMascota />
               </PanelTema>
             </ThemeProvider>
           </View>

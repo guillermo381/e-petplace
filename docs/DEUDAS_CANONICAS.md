@@ -1251,6 +1251,12 @@ Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en 
 #### D-286 — TalkBack sobre EsqueletoGrupo sin verificar en dispositivo
 🟢 MEDIA. El gate visual de Esqueleto (S44-B2.2) cerró en Android, pero la pasada de TalkBack (anunciar "Cargando, barra de progreso" una vez y no leer formas vacías) no se corrió en el teléfono — solo se verificó el DOM en RN-web (`[role=progressbar][aria-busy=true]`). Disparo: B4, primera pantalla real con Esqueleto. Origen: S44-B2.2.
 
+#### D-287 — Activar en cat_especies las familias F1 faltantes
+🟡 ALTA. Activar en `cat_especies` las familias F1 faltantes: conejo, ave, pez, roedor (`activo=true`, `acepta_nuevos_registros=true`). Decisión founder S44 — la DB refleja niveles de soporte de S16 (D15.x) que quedaron viejos; al ejecutar, revisar ese contexto y los `motivo_estado` para que la activación sea consciente. Es migración sobre catálogo con FK viva (`mascotas_especie_fk` RESTRICT) → gate del founder (regla 73). Disparo: antes del onboarding de mascotas de la app dueño (bloquea registrar 4 de las 6 familias F1). Origen: S44-B2.3 (verificación regla 21-22 del fallback por especie de AvatarMascota).
+
+#### D-288 — Set de avatares ilustrados por especie (6 F1) — dirección de arte
+🟢 MEDIA. Assets con licencia comercial verificada (LICENCIA.txt en el repo), curaduría founder/Ana María, estilo único, SVG fondo transparente, legibles a 40px. Integración: solo assets + mapeo, la API de AvatarMascota ya recibe `especie` (códigos reales de cat_especies). Evolución posterior: por raza (perro/gato) — requiere dato raza confiable + set ampliado. Disparo: founder entrega la carpeta, o a más tardar onboarding de mascotas de la app dueño. Origen: S44-B2.3 (enmienda final — las siluetas outline propias se descartaron; queda huella genérica).
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)

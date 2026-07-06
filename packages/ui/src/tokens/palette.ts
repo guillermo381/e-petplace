@@ -54,7 +54,9 @@ export const palette = {
   // ── Extensiones v3.1 (mismos hex) ──
   violet:         '#9E3AFF',  // Capa 3 · comunidad amplia — rgb(158,58,255)
   violetDark:     '#7C2DD4',  // rgb(124,45,212)
-  violetText:     '#A64BFF',  // violet aclarado MÍNIMO para AA como texto en dark
+  violetText:     '#AE59FF',  // violet aclarado MÍNIMO para AA como texto en dark
+                              // (S44-B2.3: subió de #A64BFF para pasar también
+                              // sobre el tint capaBg — 4.63:1 en el peor par)
                               // (#9E3AFF da 4.16:1 sobre card — gate S43-B2). rgb(166,75,255)
   coral:          '#FF5C5C',  // danger · separado del pink de marca — rgb(255,92,92)
   coralDark:      '#BE3535',  // rgb(190,53,53) — oscurecido MÍNIMO en B2.1: #C73A3A
