@@ -8,8 +8,8 @@
  * spring se reemplaza por slide+fade suave easeOut.
  *
  * Cierre: swipe down (umbral 25% o velocity >800 — receta SM), tap en
- * backdrop, X opcional, y back de Android (via onRequestClose del Modal
- * de RN — cableado siempre, no opcional).
+ * backdrop, X opcional, y back de Android por DOBLE VÍA (B4):
+ * onRequestClose del Modal + BackHandler explícito mientras está abierta.
  *
  * Scroll interno sin pelear con el gesto (receta SM, gesture-composition):
  * Gesture.Native() en el ScrollView + Pan simultáneo; el pan solo arrastra
@@ -28,6 +28,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
   AccessibilityInfo,
+  BackHandler,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -134,6 +135,23 @@ export function Hoja({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible])
+
+  // BACK DE ANDROID — doble vía (B4). onRequestClose del Modal cubre el
+  // camino legacy (KeyEvent al Dialog); este listener explícito cubre los
+  // dispositivos donde el evento llega a nivel actividad. Registrado SOLO
+  // mientras la hoja está montada y desregistrado al salir (leak = bug).
+  // Si el dispositivo tiene predictive back (OnBackInvokedDispatcher) y RN
+  // no registra callback en la ventana del Dialog, NINGUNA de las dos vías
+  // recibe el evento — esa causa raíz se confirma o descarta en teléfono.
+  useEffect(() => {
+    if (!montada) return
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      cerrarAnimado()
+      return true   // consumimos el evento: el back no navega detrás de la hoja
+    })
+    return () => sub.remove()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [montada])
 
   const nativeScroll = useMemo(() => Gesture.Native(), [])
   const pan = useMemo(

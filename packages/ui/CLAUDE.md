@@ -1,6 +1,8 @@
 # packages/ui — Design system e-PetPlace
 
-**Estado: S43-B3.9 — BASE DE B3 COMPLETA: 10 componentes (pendiente gate en dispositivo de Aviso/EstadoVacio).**
+**Estado: S43-B4 — sistema completo (10 componentes + tokens v4) y EXIGIBLE: skill `epetplace-design-system` activa.**
+
+B4: skill creada en `.claude/skills/epetplace-design-system/SKILL.md` — las leyes (PR rechazado si se violan), ejemplos correcto/incorrecto reales de S43, índice de los 11 exports y cómo correr los gates. Fix Hoja/back Android: DOBLE VÍA (onRequestClose del Modal + BackHandler explícito registrado solo mientras está abierta, leak-free). Causa raíz sospechada: predictive back (OnBackInvokedDispatcher) no entrega el KeyEvent a la ventana del Dialog del Modal de RN — **B3.8 sigue REABIERTO hasta verificación del founder en teléfono**; si la doble vía tampoco recibe el evento, plan B documentado: Hoja sin Modal (overlay+portal) o dev build propia sin predictive back.
 
 B3.9: `src/components/Aviso.tsx` (+AvisoProvider/useAviso) — feedback efímero imperativo. UNO a la vez con cola FIFO (ocupación en ref síncrono: dos mostrar() en el mismo tick pisaban el primero — bug cazado por el test de browser y arreglado). Variantes neutro/exito/error con parejas selladas; fondo compositado en capas OPACAS (superficie + tint) = los pares exactos ya gateados. Auto-cierre 3s/3s/5s (6s con accion), tap cierra, FadeInDown fast (memorial: solo fade), announceForAccessibility + role alert en error, offsetInferior para no tapar la BarraTabs. NO es banner persistente. `src/components/EstadoVacio.tsx` — dignidad, no hueco: icono slot + titulo en VOZ HUMANA (300 xl) + descripcion + accion; SIN animación de entrada (un vacío que anima llama la atención sobre sí mismo); UNO por pantalla.
 

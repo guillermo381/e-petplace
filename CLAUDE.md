@@ -34,7 +34,7 @@ Monorepo pnpm workspaces + Turborepo del rumbo S42: reforma móvil-first con amb
 | `emil-design-eng` + `animation-vocabulary` + `review-animations` | Decidir QUÉ animar, duraciones, curvas; auditar motion existente | El CRITERIO del motion. Sus recetas son web: en nativo aplica la filosofía, Software Mansion pone el código |
 | `impeccable` | Revisión visual de UI, anti-slop, audits | Vara de calidad visual. No autoridad final en patrones nativos |
 | `epetplace-db` | TODA tarea SQL, migración, RPC, wrapper | NO NEGOCIABLE — encima de cualquier otra fuente |
-| `epetplace-design-system` | (nace al cierre de S43) Toda pantalla o componente | Cuando exista: obliga tokens y componentes propios, prohíbe inventar |
+| `epetplace-design-system` | **ACTIVA desde B4.** Toda pantalla, componente, estilo o UI del monorepo | Obliga tokens y componentes de `@epetplace/ui`, prohíbe inventar. Conflictos de stack los ganan expo/SM; `epetplace-db` sigue arriba en SQL |
 
 Reglas de uso:
 - (a) Ante tarea que matchea una skill, leerla ANTES de escribir código — no después de equivocarse.
