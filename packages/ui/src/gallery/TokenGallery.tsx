@@ -25,6 +25,8 @@ import { Insignia } from '../components/Insignia'
 import { Encabezado } from '../components/Encabezado'
 import { BarraTabs, type BarraTabsItem } from '../components/BarraTabs'
 import { Hoja, type HojaAltura } from '../components/Hoja'
+import { AvisoProvider, useAviso } from '../components/Aviso'
+import { EstadoVacio } from '../components/EstadoVacio'
 import type { ThemeMode } from '../themes'
 
 const sans = typography.family.sans
@@ -133,7 +135,16 @@ const ICONOS_TABS: BarraTabsItem[] = [
 
 // ── galería ───────────────────────────────────────────────────────────────────
 export function TokenGallery() {
+  return (
+    <AvisoProvider>
+      <GaleriaInterna />
+    </AvisoProvider>
+  )
+}
+
+function GaleriaInterna() {
   const { theme, mode, setMode } = useTheme()
+  const { mostrar } = useAviso()
   const [cargandoDemo, setCargandoDemo] = useState(false)
   const [tabActivo, setTabActivo] = useState('hoy')
   const [hoja, setHoja] = useState<'ninguna' | HojaAltura | 'form' | 'confirmar' | 'scroll'>('ninguna')
@@ -695,6 +706,69 @@ export function TokenGallery() {
               </Text>
             ))}
           </Hoja>
+        </Seccion>
+
+        {/* Aviso — B3.9 */}
+        <Seccion titulo="Aviso — feedback efímero (uno a la vez, cola)">
+          <Fila>
+            <Boton variante="secundario" tamaño="sm" etiqueta="Neutro" onPress={() => mostrar({ texto: 'Datos actualizados' })} />
+            <Boton variante="secundario" tamaño="sm" etiqueta="Éxito" onPress={() => mostrar({ texto: 'Atención cerrada con calidad', variante: 'exito' })} />
+            <Boton variante="secundario" tamaño="sm" etiqueta="Error" onPress={() => mostrar({ texto: 'No pudimos guardar los cambios. Revisá tu conexión.', variante: 'error' })} />
+            <Boton
+              variante="secundario"
+              tamaño="sm"
+              etiqueta="Con Deshacer"
+              onPress={() =>
+                mostrar({
+                  texto: 'Paseo cancelado',
+                  variante: 'neutro',
+                  accion: { etiqueta: 'Deshacer', onPress: () => mostrar({ texto: 'Paseo restaurado', variante: 'exito' }) },
+                })
+              }
+            />
+            <Boton
+              variante="secundario"
+              tamaño="sm"
+              etiqueta="Cola (2 seguidos)"
+              onPress={() => {
+                mostrar({ texto: 'Primero: guardando…' })
+                mostrar({ texto: 'Segundo: esperó su turno en la cola', variante: 'exito' })
+              }}
+            />
+          </Fila>
+        </Seccion>
+
+        {/* EstadoVacio — B3.9 */}
+        <Seccion titulo="Estado vacío — dignidad, no hueco">
+          <View style={{ gap: spacing[4] }}>
+            <Tarjeta elevacion="sm">
+              <View style={{ minHeight: 320 }}>
+                <EstadoVacio
+                  icono={
+                    <Svg width={56} height={56} viewBox="0 0 24 24" fill="none">
+                      <Path d="M5 5h14a1 1 0 011 1v13a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1zM4 9.5h16M8.5 3v4M15.5 3v4" stroke={theme.text.tertiary} strokeWidth={1.25} strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  }
+                  titulo="Todavía nada por acá"
+                  descripcion="Cuando agendes tu primera atención, va a aparecer acá."
+                  accion={<Boton variante="primario" etiqueta="Configurar mi agenda" onPress={() => mostrar({ texto: 'Vamos a configurarla', variante: 'exito' })} />}
+                />
+              </View>
+            </Tarjeta>
+            <Tarjeta elevacion="sm">
+              <View style={{ minHeight: 240 }}>
+                <EstadoVacio
+                  icono={
+                    <Svg width={48} height={48} viewBox="0 0 24 24" fill="none">
+                      <Path d="M11 4a7 7 0 105.2 11.7L21 20.5M18 11a7 7 0 01-.3 2" stroke={theme.text.tertiary} strokeWidth={1.25} strokeLinecap="round" />
+                    </Svg>
+                  }
+                  titulo="Sin resultados"
+                  descripcion="Probá con otro nombre — a veces Zeus está guardado como Zeusito."
+                />
+              </View>
+            </Tarjeta>
+          </View>
         </Seccion>
 
         {/* ENSAMBLE MAYOR — pantalla embrión del prestador */}

@@ -1,6 +1,8 @@
 # packages/ui — Design system e-PetPlace
 
-**Estado: S43-B3.8 — 8 componentes; Hoja construida (pendiente EL gate físico más importante de B3).**
+**Estado: S43-B3.9 — BASE DE B3 COMPLETA: 10 componentes (pendiente gate en dispositivo de Aviso/EstadoVacio).**
+
+B3.9: `src/components/Aviso.tsx` (+AvisoProvider/useAviso) — feedback efímero imperativo. UNO a la vez con cola FIFO (ocupación en ref síncrono: dos mostrar() en el mismo tick pisaban el primero — bug cazado por el test de browser y arreglado). Variantes neutro/exito/error con parejas selladas; fondo compositado en capas OPACAS (superficie + tint) = los pares exactos ya gateados. Auto-cierre 3s/3s/5s (6s con accion), tap cierra, FadeInDown fast (memorial: solo fade), announceForAccessibility + role alert en error, offsetInferior para no tapar la BarraTabs. NO es banner persistente. `src/components/EstadoVacio.tsx` — dignidad, no hueco: icono slot + titulo en VOZ HUMANA (300 xl) + descripcion + accion; SIN animación de entrada (un vacío que anima llama la atención sobre sí mismo); UNO por pantalla.
 
 B3.8: `src/components/Hoja.tsx` — el modal del sistema, bottom sheet SIEMPRE (nada de modales centrados). Entrada: spring normal(250) duration-based + backdrop fade (token nuevo `palette.scrim`); memorial: slide+fade easeOut, nada rebota. Cierre: swipe down (Pan de RNGH, umbral 25% o velocity>800), tap backdrop, X opcional target 44, back de Android (onRequestClose del Modal — siempre). Scroll interno con la receta SM de gesture-composition: Gesture.Native() en el ScrollView + Pan simultáneo, el swipe solo cierra con scroll en top. Reanimated 4: scheduleOnRN (jamás runOnJS). Alturas contenido(≤60%)/media(50%)/completa(90%), radius 24 arriba, KeyboardAvoidingView, accessibilityViewIsModal + anuncio del título + patrón de retorno de foco documentado en JSDoc. LIMITACIÓN de verificación web: gesto/teclado/back solo se prueban en dispositivo (D-284).
 
