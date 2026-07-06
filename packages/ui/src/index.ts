@@ -54,6 +54,7 @@ export {
   type AvatarMascotaCapa,
   type AvatarMascotaEspecie,
 } from './components/AvatarMascota'
+export { Cronometro, type CronometroProps } from './components/Cronometro'
 export { AvisoProvider, useAviso, type AvisoInput, type AvisoVariante } from './components/Aviso'
 export { EstadoVacio } from './components/EstadoVacio'
 export { epetplaceFonts } from './fonts'

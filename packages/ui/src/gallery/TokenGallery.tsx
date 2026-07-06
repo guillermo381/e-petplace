@@ -28,6 +28,7 @@ import { Hoja, type HojaAltura } from '../components/Hoja'
 import { CitaEnVivo } from '../components/CitaEnVivo'
 import { Esqueleto, EsqueletoGrupo } from '../components/Esqueleto'
 import { AvatarMascota } from '../components/AvatarMascota'
+import { Cronometro } from '../components/Cronometro'
 
 // Foto local de ejemplo (generada, sin URL remota) — demuestra cover,
 // recorte circular y la desaturación memorial.
@@ -146,6 +147,38 @@ function EjemploAvatarMascota() {
         <AvatarMascota nombre="Kiwi" capa="comunidadAmplia" />
         <AvatarMascota nombre="Bruno" />
         <AvatarMascota nombre="Bruno" tamano="sm" />
+      </View>
+    </View>
+  )
+}
+
+function CaptionGaleria({ texto }: { texto: string }) {
+  const { theme } = useTheme()
+  return (
+    <Text style={{ fontFamily: sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+      {texto}
+    </Text>
+  )
+}
+
+// Cronometro: corriendo (12m34s y 1h02m33s atrás) + pausado congelado.
+// Los inicios se fijan UNA vez por montaje (useState initializer).
+function EjemploCronometro() {
+  const [inicioCorto] = useState(() => Date.now() - 754_000)
+  const [inicioLargo] = useState(() => Date.now() - 3_753_000)
+  return (
+    <View style={{ gap: spacing[4] }}>
+      <View style={{ gap: spacing[1] }}>
+        <CaptionGaleria texto="corriendo (tick 1s, tabular-nums)" />
+        <Cronometro inicioTs={inicioCorto} />
+      </View>
+      <View style={{ gap: spacing[1] }}>
+        <CaptionGaleria texto="pausado en 23:45 — congelado, sin parpadeo ni opacidad" />
+        <Cronometro inicioTs={inicioCorto} pausadoEnMs={1_425_000} />
+      </View>
+      <View style={{ gap: spacing[1] }}>
+        <CaptionGaleria texto="≥1h — formato h:mm:ss, corriendo" />
+        <Cronometro inicioTs={inicioLargo} />
       </View>
     </View>
   )
@@ -759,6 +792,27 @@ function GaleriaInterna() {
             <ThemeProvider defaultMode="memorial">
               <PanelTema etiqueta="memorial — foto desaturada leve, fallback neutral sin capa">
                 <EjemploAvatarMascota />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* Cronometro — S44-B2.4: voz de máquina en display, sin baile */}
+        <Seccion titulo="Cronometro — tiempo transcurrido (voz de máquina, sin label)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — text.primary, mono display, tick por diferencia">
+                <EjemploCronometro />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — mismo token, cero caso especial">
+                <EjemploCronometro />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — hereda por token (si corre acá, lo decide la pantalla)">
+                <EjemploCronometro />
               </PanelTema>
             </ThemeProvider>
           </View>
