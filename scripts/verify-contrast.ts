@@ -121,6 +121,21 @@ function paresDe(t: Theme, nombre: string): Pair[] {
   add('capaText.cuidado / Tarjeta cuidado (infoBg⊕card)', capaTexto.cuidado, t.status.infoBg, t.bg.card)
   add('capaText.comunidad / Tarjeta comunidad (brandBg⊕card)', capaTexto.comunidad, t.accent.brandBg, t.bg.card)
 
+  // Campo (B3.3): mensaje de error sobre las superficies donde vive el form,
+  // y los bordes de ESTADO como gráficos funcionales a 3:1 (WCAG 1.4.11 —
+  // usan el flag `large`). El borde default queda fuera del gate: el campo
+  // se identifica por su label siempre visible, no por el borde en reposo.
+  const bgCampo = t.mode === 'light' ? t.bg.card : t.bg.elevated
+  add('dangerText / bg.base (mensaje error Campo)', t.status.dangerText, t.bg.base)
+  add('borde error Campo (danger gráfico 3:1) / bgCampo', t.status.danger, bgCampo, undefined, true)
+  add(
+    'borde focus Campo (accent.active gráfico 3:1) / bgCampo',
+    'active' in t.accent ? t.accent.active : t.accent.primary,
+    bgCampo,
+    undefined,
+    true,
+  )
+
   // CTA "tinta" (dosis prestador): texto inverso sobre text.primary como fondo
   add('text.inverse / text.primary(CTA tinta)', t.text.inverse, t.text.primary)
 

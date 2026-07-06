@@ -32,6 +32,7 @@ export {
   type TarjetaElevacion,
   type TarjetaRelleno,
 } from './components/Tarjeta'
+export { Campo, type CampoProps } from './components/Campo'
 export { epetplaceFonts } from './fonts'
 export { Isotipo, type IsotipoVariant } from './brand/Isotipo'
 export { TokenGallery } from './gallery/TokenGallery'

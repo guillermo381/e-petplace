@@ -119,10 +119,16 @@ export const palette = {
   verdeVitalBorder:  'rgba(43,232,107,.30)',
 
   // ── Alphas dark (precomputadas) ──
+  // PARIDAD PERCEPTUAL (B3.3): la paridad de tints es perceptual, no
+  // numérica — el magenta satura más por alfa (OLED lo agrava); en claro
+  // ya era .08 por esto mismo. Por eso comunidad usa .09/.21 en dark
+  // mientras vida/cuidado quedan en .15/.25-.30.
   tealAlpha15:       'rgba(40,232,218,.15)',
   tealAlpha10:       'rgba(40,232,218,.10)',
   pinkAlpha15:       'rgba(255,0,175,.15)',
   pinkAlpha10:       'rgba(255,0,175,.10)',
+  pinkAlpha09:       'rgba(255,0,175,.09)',   // tint comunidad dark (paridad perceptual)
+  pinkBorderSuave:   'rgba(255,0,175,.21)',   // border comunidad dark (paridad perceptual)
   verdeAlpha15:      'rgba(144,255,139,.15)',
   verdeAlpha10:      'rgba(144,255,139,.10)',
   violetAlpha15:     'rgba(158,58,255,.15)',

@@ -17,6 +17,7 @@ import { useTheme } from '../ThemeProvider'
 import { Isotipo } from '../brand/Isotipo'
 import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
+import { Campo } from '../components/Campo'
 import type { ThemeMode } from '../themes'
 
 const sans = typography.family.sans
@@ -427,6 +428,38 @@ export function TokenGallery() {
                   relleno=ninguno — imagen edge-to-edge (el bloque simula la foto)
                 </Text>
               </View>
+            </Tarjeta>
+          </View>
+        </Seccion>
+
+        {/* Campo — B3.3 */}
+        <Seccion titulo="Campo — tocá para ver el foco (nada se anima al tipear)">
+          <View style={{ backgroundColor: theme.bg.card, borderRadius: radius.md, borderWidth: 1, borderColor: theme.border.default, padding: spacing[5] }}>
+            <Campo label="Nombre de la mascota" placeholder="ej: Zeus" />
+            <Campo label="Con ayuda" placeholder="ej: 8 kg" ayuda="El peso aparece en el carnet" keyboardType="numeric" />
+            <Campo label="Con error" defaultValue="zeus@" error="Ese correo no parece completo" />
+            <Campo label="Deshabilitado" defaultValue="No editable" deshabilitado />
+            <Campo label="Contraseña" placeholder="mínimo 8 caracteres" secure />
+            <Campo
+              label="Con iconos"
+              placeholder="Buscar veterinaria"
+              iconoIzq={<View style={{ width: 16, height: 16, borderRadius: radius.full, borderWidth: 2, borderColor: theme.text.tertiary }} />}
+            />
+            <Campo label="Notas (multilínea, alto fijo)" placeholder="Observaciones del paseo…" multilinea={3} />
+          </View>
+
+          {/* Tercer ensamble del sistema: Campo + Boton dentro de Tarjeta */}
+          <View style={{ marginTop: spacing[4] }}>
+            <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary, marginBottom: spacing[2] }}>
+              ensamble · registrar mascota
+            </Text>
+            <Tarjeta elevacion="sm" relleno="amplio">
+              <Text style={{ fontFamily: sans.bold, fontSize: typography.size.lg, color: theme.text.primary, marginBottom: spacing[4] }}>
+                Registrá a tu mascota
+              </Text>
+              <Campo label="Nombre" placeholder="ej: Zeus" autoCapitalize="words" />
+              <Campo label="Notas" placeholder="Lo que su cuidador debería saber…" multilinea={3} />
+              <Boton variante="primario" etiqueta="Guardar" bloque onPress={() => {}} />
             </Tarjeta>
           </View>
         </Seccion>

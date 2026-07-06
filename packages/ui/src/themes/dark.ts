@@ -33,8 +33,8 @@ export const darkTheme = {
     primaryBorder: palette.tealBorder,
 
     brand:         palette.pink,
-    brandBg:       palette.pinkAlpha15,
-    brandBorder:   palette.pinkBorder,
+    brandBg:       palette.pinkAlpha09,     // B3.3: paridad perceptual (el magenta grita a .15)
+    brandBorder:   palette.pinkBorderSuave,
 
     warm:          palette.terracotta,
     warmBg:        palette.terracottaAlpha14,

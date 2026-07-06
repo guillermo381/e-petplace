@@ -1,6 +1,8 @@
 # packages/ui — Design system e-PetPlace
 
-**Estado: S43-B3.2 — Boton (gate cerrado en dispositivo) + Tarjeta construida (pendiente gate en dispositivo).**
+**Estado: S43-B3.3 — Boton + Tarjeta (gates cerrados) + Campo construido (pendiente gate en dispositivo).**
+
+B3.3: `src/components/Campo.tsx` — input del sistema. Regla emil rectora: nada se anima al tipear — sin labels flotantes, sin layout shift al enfocar/errar. Label siempre visible (accessibilityLabel forzado por TS), borde 1.5 SIEMPRE (los estados cambian color: default border / focus accent.active / error coral gráfico + mensaje dangerText con liveRegion), slot de mensaje con altura reservada, única animación = color del borde (receta SM), secure con toggle a11y, multilínea de alto fijo, passthrough tipado de TextInput. Ajuste previo del gate de Tarjeta: tint comunidad dark a paridad PERCEPTUAL (pinkAlpha09/.21 — el magenta satura más por alfa, doc en palette.ts). Gate: 115 pares (9 nuevos: mensajes 4.5 + bordes de estado como gráficos 3:1), 0 fallos.
 
 B3.2: `src/components/Tarjeta.tsx` — superficie contenedora. Tintes (ninguno/warning/danger/success/vida/cuidado/comunidad — fondo+borde del tema; el texto lo pone el consumidor con el token AA documentado en el JSDoc), `interactiva` (Pressable + scale 0.99, misma receta del Boton; rol+etiqueta forzados por TS; si no, View plana sin costo), `elevacion` plana/sm/md (la sombra JAMÁS se anima), `relleno` 12/16/ninguno (edge-to-edge con overflow hidden), radius 16 fijo. Sin margin propio (anti-slop), sin header/footer, no es botón. Gate WCAG: 106 pares (9 nuevos de tintes×capaText), 0 fallos. Las cards de dosis de la galería son el primer ensamble Tarjeta+Boton real.
 B3.1c: gradiente firma v2 — 3 stops, violeta dominante al centro, texto blanco ambos temas; `pinkVivo #DF00A1` (máximo magenta AA con blanco); regla de peor punto en el gate con exención de cola verificada (Boton marca fuerza padding ≥ 24).
