@@ -62,6 +62,23 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 10. **Peers nativos de `packages/ui` con el rango del app, jamás `"*"`**
     (lección B3.1b: pnpm auto-instala peers y `"*"` resuelve otra versión
     → módulo nativo duplicado → build nativa rota).
+11. **Protocolo del componente faltante.** Si la UI necesita algo que los
+    11 no cubren, PROHIBIDO inline en apps. Camino: (a) proponer al
+    founder espec mínima (qué es, qué no es, estados), (b) nace en
+    `packages/ui` con el método completo — tokens, WCAG si trae pares
+    nuevos, galería, gate en dispositivo —, (c) se agrega al índice de
+    esta skill. Sin excepción "por esta vez": la deuda visual no se paga
+    nunca.
+12. **Iconografía.** Outline ~1.75px, remates redondeados (`strokeLinecap
+    ="round"`), UN color por ícono (el de su capa o el text del contexto),
+    cero emojis en UI de producto, cero librerías de íconos nuevas sin
+    decisión del founder.
+13. **Carga de datos.** Listas y pantallas esperan con skeleton ESTÁTICO
+    (formas en `bg.overlay`/hover, SIN shimmer — el shimmer es animación
+    de espera y está prohibido); spinner solo pasado el umbral de 150ms
+    (el patrón del `Boton`, generalizado); cuando llegan los datos,
+    reemplazo directo — JAMÁS layout shift animado. `EstadoVacio` solo
+    cuando se CONFIRMÓ el vacío, nunca como estado de carga.
 
 ## 2. CORRECTO / INCORRECTO (casos reales de S43)
 
@@ -102,6 +119,13 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 ```json
 // ✗ "react-native-svg": "*"            → pnpm instaló 15.15.5 al lado del 15.15.4 del app
 // ✓ "react-native-svg": "^15.15.4"     → una sola copia (expo-doctor 20/20)
+```
+
+**Iconografía (la campana de B3.6)**
+```tsx
+// ✗ <Text style={{ fontSize: 20 }}>🔔</Text>   — emoji en UI de producto (murió en review)
+// ✓ <Svg …><Path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"
+//     stroke={theme.text.primary} strokeWidth={1.75} strokeLinecap="round" /></Svg>
 ```
 
 ## 3. ÍNDICE — los 11 componentes (import de `@epetplace/ui`)

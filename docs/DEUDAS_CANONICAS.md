@@ -1241,12 +1241,16 @@ Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en 
 ### Deudas de Sesión 43 (monorepo e-petplace)
 
 #### D-284 — Verificación nativa de packages/ui pendiente
-🟡 ALTA. La galería de tokens B2/B2.1 fue verificada solo en RN-web (Chrome real vía `scripts/verify-gallery.mjs`); la máquina de desarrollo no tiene Xcode ni Android SDK. Disparo: ningún componente de B3 cierra su revisión visual sin dispositivo (Expo Go o build nativa). Origen: S43-B2.
+✅ RESUELTA-CONVERTIDA (S43-B5). La verificación nativa dejó de ser deuda y es PRÁCTICA: Ley 9 de la skill `epetplace-design-system` ("la web no cierra gates de componentes") + sección "Gate en dispositivo" del CLAUDE.md raíz. Los 10 componentes de B3 cerraron con gate en el teléfono del founder (Expo Go 57 por túnel). Origen: S43-B2.
+
+#### D-285 — Gates de S43 solo en Android — iOS sin verificar
+🟡 ALTA. Todos los gates en dispositivo de S43 corrieron en Android (teléfono del founder); iOS jamás se probó (safe areas, KeyboardAvoidingView behavior=padding, gestos de la Hoja, fuentes). Disparo: ANTES del primer TestFlight, pasada completa de la galería en iPhone (Expo Go iOS o dev build). Origen: S43-B5.
 
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)
 
 - **L-131** — La verificación de accesibilidad es programática o no existe: v3.1 shippeó memorial con texto cream sobre fondo cream (1.00:1) sin que nadie lo viera — los temas de baja frecuencia jamás se auditan a ojo. Origen: S43-B2.
+- **L-132** — El gate físico audita también los reportes: "cableado" no es "funciona" — el back de Android de la Hoja estaba correctamente cableado según el código y muerto en el dispositivo (predictive back). Origen: S43-B3.8/B4.
 
 ---
