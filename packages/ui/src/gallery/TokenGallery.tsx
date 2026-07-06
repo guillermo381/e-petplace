@@ -16,6 +16,7 @@ import { radius } from '../tokens/radius'
 import { useTheme } from '../ThemeProvider'
 import { Isotipo } from '../brand/Isotipo'
 import { Boton, type BotonVariante } from '../components/Boton'
+import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
 import type { ThemeMode } from '../themes'
 
 const sans = typography.family.sans
@@ -374,6 +375,62 @@ export function TokenGallery() {
           </View>
         </Seccion>
 
+        {/* Tarjeta — B3.2 */}
+        <Seccion titulo="Tarjeta — superficie contenedora">
+          <View style={{ gap: spacing[4] }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[4] }}>
+              {(['plana', 'sm', 'md'] as const).map((e) => (
+                <Tarjeta key={e} elevacion={e}>
+                  <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.secondary }}>
+                    elevacion {e}
+                  </Text>
+                  <Text style={{ fontFamily: sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
+                    Contenido libre
+                  </Text>
+                </Tarjeta>
+              ))}
+            </View>
+
+            {(
+              [
+                ['warning', 'Vacuna próxima', theme.status.warningText],
+                ['danger', 'Necesita atención', theme.status.dangerText],
+                ['success', 'Todo al día', theme.status.successText],
+                ['vida', 'Salud de Zeus', capaTexto.identidad],
+                ['cuidado', 'Paseo agendado', capaTexto.cuidado],
+                ['comunidad', '3 amigos nuevos', capaTexto.comunidad],
+              ] as const satisfies ReadonlyArray<readonly [TarjetaTinte, string, string]>
+            ).map(([tinte, texto, colorTexto]) => (
+              <Tarjeta key={tinte} tinte={tinte}>
+                <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: colorTexto, opacity: 0.7 }}>
+                  tinte {tinte}
+                </Text>
+                <Text style={{ fontFamily: sans.medium, fontSize: typography.size.base, color: colorTexto }}>
+                  {texto}
+                </Text>
+              </Tarjeta>
+            ))}
+
+            <Tarjeta interactiva onPress={() => {}} accessibilityRole="button" etiqueta="Abrir la atención de Zeus">
+              <Text style={{ fontFamily: sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
+                Interactiva — presioname
+              </Text>
+              <Text style={{ fontFamily: sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                Scale 0.99 con la misma receta del Boton
+              </Text>
+            </Tarjeta>
+
+            <Tarjeta relleno="ninguno">
+              <View style={{ height: 96, backgroundColor: theme.capa.cuidado, opacity: 0.35 }} />
+              <View style={{ padding: spacing[3] }}>
+                <Text style={{ fontFamily: sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
+                  relleno=ninguno — imagen edge-to-edge (el bloque simula la foto)
+                </Text>
+              </View>
+            </Tarjeta>
+          </View>
+        </Seccion>
+
         {/* Isotipo */}
         <Seccion titulo="Isotipo — 24 / 32 / 48 / 96">
           <View style={{ backgroundColor: theme.bg.card, borderRadius: radius.md, padding: spacing[5], borderWidth: 1, borderColor: theme.border.default, gap: spacing[5] }}>
@@ -388,7 +445,7 @@ export function TokenGallery() {
               ))}
             </View>
             <Text style={{ fontFamily: sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-              Gradiente de 6 stops = SOLO splash/logo (gradientLogo). En UI, el gradiente firma es de 2 stops.
+              Gradiente de 6 stops = SOLO splash/logo (gradientLogo). En UI, el gradiente firma v2 es de 3 stops (violeta dominante al centro).
             </Text>
           </View>
         </Seccion>
@@ -396,8 +453,8 @@ export function TokenGallery() {
         {/* Dosis */}
         <Seccion titulo="Dosificación asimétrica — una marca, dos dosis">
           <View style={{ gap: spacing[5] }}>
-            {/* Prestador — dosis baja */}
-            <View style={[{ backgroundColor: theme.bg.card, borderRadius: radius.lg, padding: spacing[5], borderWidth: 1, borderColor: theme.border.default }, theme.shadow.sm]}>
+            {/* Prestador — dosis baja: primer ensamble Tarjeta+Boton del sistema */}
+            <Tarjeta elevacion="sm" relleno="amplio">
               <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary, marginBottom: spacing[2] }}>
                 prestador · dosis baja
               </Text>
@@ -411,12 +468,12 @@ export function TokenGallery() {
               </Text>
               <Boton variante="primario" etiqueta="Iniciar atención" bloque onPress={() => {}} />
               <Text style={{ fontFamily: sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary, marginTop: spacing[2] }}>
-                Un acento de capa por vista · CTA en tinta (Boton primario real) · sin gradiente
+                Un acento de capa por vista · CTA en tinta · Tarjeta plana+sm real
               </Text>
-            </View>
+            </Tarjeta>
 
-            {/* Dueño — dosis alta */}
-            <View style={[{ backgroundColor: theme.bg.card, borderRadius: radius.lg, padding: spacing[5], borderWidth: 1, borderColor: theme.border.default }, theme.shadow.sm]}>
+            {/* Dueño — dosis alta: tintes reales en las mini-cards */}
+            <Tarjeta elevacion="sm" relleno="amplio">
               <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary, marginBottom: spacing[2] }}>
                 dueño · dosis alta
               </Text>
@@ -426,15 +483,17 @@ export function TokenGallery() {
               <View style={{ flexDirection: 'row', gap: spacing[2], marginBottom: spacing[4], flexWrap: 'wrap' }}>
                 {(
                   [
-                    ['identidad', 'Salud al día'],
-                    ['cuidado', 'Paseo hoy'],
-                    ['comunidad', '3 amigos nuevos'],
+                    ['vida', 'identidad', 'Salud al día'],
+                    ['cuidado', 'cuidado', 'Paseo hoy'],
+                    ['comunidad', 'comunidad', '3 amigos nuevos'],
                   ] as const
-                ).map(([capa, label]) => (
-                  <View key={capa} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: theme.bg.elevated, borderRadius: radius.full, paddingHorizontal: spacing[3], paddingVertical: spacing[1.5] }}>
-                    <View style={{ width: 8, height: 8, borderRadius: radius.full, backgroundColor: theme.capa[capa] }} />
-                    <Text style={{ fontFamily: sans.medium, fontSize: typography.size.sm, color: theme.text.primary }}>{label}</Text>
-                  </View>
+                ).map(([tinte, capa, label]) => (
+                  <Tarjeta key={tinte} tinte={tinte}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <View style={{ width: 8, height: 8, borderRadius: radius.full, backgroundColor: theme.capa[capa] }} />
+                      <Text style={{ fontFamily: sans.medium, fontSize: typography.size.sm, color: capaTexto[capa] }}>{label}</Text>
+                    </View>
+                  </Tarjeta>
                 ))}
               </View>
               <Boton
@@ -446,7 +505,7 @@ export function TokenGallery() {
               <Text style={{ fontFamily: sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary, marginTop: spacing[2] }}>
                 Capas visibles · gradiente firma solo en contextos cerrados{esMemorial ? ' · en memorial el gradiente no existe' : ''}
               </Text>
-            </View>
+            </Tarjeta>
           </View>
         </Seccion>
 

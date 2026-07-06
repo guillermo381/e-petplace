@@ -25,6 +25,13 @@ export {
 export { opacity } from './tokens/opacity'
 export { ThemeProvider, useTheme } from './ThemeProvider'
 export { Boton, type BotonProps, type BotonVariante, type BotonTamaño } from './components/Boton'
+export {
+  Tarjeta,
+  type TarjetaProps,
+  type TarjetaTinte,
+  type TarjetaElevacion,
+  type TarjetaRelleno,
+} from './components/Tarjeta'
 export { epetplaceFonts } from './fonts'
 export { Isotipo, type IsotipoVariant } from './brand/Isotipo'
 export { TokenGallery } from './gallery/TokenGallery'

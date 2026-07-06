@@ -1,6 +1,9 @@
 # packages/ui — Design system e-PetPlace
 
-**Estado: S43-B3.1 — primer componente (Boton) construido; pendiente gate del founder EN DISPOSITIVO (D-284 dispara acá).**
+**Estado: S43-B3.2 — Boton (gate cerrado en dispositivo) + Tarjeta construida (pendiente gate en dispositivo).**
+
+B3.2: `src/components/Tarjeta.tsx` — superficie contenedora. Tintes (ninguno/warning/danger/success/vida/cuidado/comunidad — fondo+borde del tema; el texto lo pone el consumidor con el token AA documentado en el JSDoc), `interactiva` (Pressable + scale 0.99, misma receta del Boton; rol+etiqueta forzados por TS; si no, View plana sin costo), `elevacion` plana/sm/md (la sombra JAMÁS se anima), `relleno` 12/16/ninguno (edge-to-edge con overflow hidden), radius 16 fijo. Sin margin propio (anti-slop), sin header/footer, no es botón. Gate WCAG: 106 pares (9 nuevos de tintes×capaText), 0 fallos. Las cards de dosis de la galería son el primer ensamble Tarjeta+Boton real.
+B3.1c: gradiente firma v2 — 3 stops, violeta dominante al centro, texto blanco ambos temas; `pinkVivo #DF00A1` (máximo magenta AA con blanco); regla de peor punto en el gate con exención de cola verificada (Boton marca fuerza padding ≥ 24).
 
 B3.1: `src/components/Boton.tsx` — 5 variantes (primario tinta = default de todo el producto; marca gradiente gated a dosis alta, degrada a primario en memorial; secundario tonal; ghost; destructivo tonal — la destrucción no grita), 3 tamaños (36/48/56, sm con hitSlop → target 44), estados default/pressed/disabled/loading/focus-web. Motion: receta SM (CSS transitions de Reanimated + Pressable + estado, sin worklets) — pressed scale 0.97, spring de motion.ts, nada más se anima. Loading respeta la regla emil de 150ms y no mueve layout (label invisible preserva ancho). Token nuevo: `opacity.disabled` 0.45. Limpieza: verdeDark #2E7A28 + verdeAlphaL/verdeBorderL eliminados (huérfanos). B3 construye componentes DE A UNO: nada más nace hasta que el botón tenga gate.
 

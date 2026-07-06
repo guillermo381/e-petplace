@@ -114,6 +114,13 @@ function paresDe(t: Theme, nombre: string): Pair[] {
     add(`status.${s}Text / bg.card`, t.status[`${s}Text`], t.bg.card)
   }
 
+  // Tintes de Tarjeta (B3.2): el texto AA de cada capa sobre su tint compositado.
+  // (warning/danger/success ya están cubiertos por los pares de status de arriba;
+  // vida comparte tint con success.)
+  add('capaText.identidad / Tarjeta vida (successBg⊕card)', capaTexto.identidad, t.status.successBg, t.bg.card)
+  add('capaText.cuidado / Tarjeta cuidado (infoBg⊕card)', capaTexto.cuidado, t.status.infoBg, t.bg.card)
+  add('capaText.comunidad / Tarjeta comunidad (brandBg⊕card)', capaTexto.comunidad, t.accent.brandBg, t.bg.card)
+
   // CTA "tinta" (dosis prestador): texto inverso sobre text.primary como fondo
   add('text.inverse / text.primary(CTA tinta)', t.text.inverse, t.text.primary)
 
