@@ -40,6 +40,12 @@ Reglas de uso:
 - (a) Ante tarea que matchea una skill, leerla ANTES de escribir código — no después de equivocarse.
 - (b) Si dos skills opinan distinto, manda la columna Autoridad; si la duda persiste, se escala (regla 6 del contrato).
 
+## Gate en dispositivo (D-284) — camino nativo vigente
+
+- **Expo Go del Play Store NO sirve** (quedó atrás de SDK 57). Instalar el APK oficial por SDK: **https://expo.dev/go** → SDK 57 → Android (sirve `Expo-Go-57.0.2.apk` desde los releases de GitHub de Expo). Se instala por fuera del Play Store (permitir "orígenes desconocidos").
+- Conexión: `npx expo start --tunnel` en el app a revisar → abrir la URL `exp://<id>.exp.direct` en Expo Go (misma mecánica que una dev build: la dev build también se conecta al Metro por túnel con la misma URL exp://).
+- Si algún módulo futuro exige development build (BLE del wearable, GPS background), la vía es EAS cloud: `eas login` (cuenta del founder, jamás credenciales en el repo) + profile `development` en eas.json + `eas build -p android --profile development`.
+
 ## Referencia al repo viejo (congelado)
 
 `../e-petplace-prestadores` — **CONGELADO en S42** como referencia de flujos y RPCs (último commit: `a9b48d3`, cierre documental S42). Ahí viven: el CLAUDE.md histórico completo (S1-S42), las L-001 a L-130, los flujos del portal web y las migraciones históricas. No abrir sesiones de construcción sobre ese repo.

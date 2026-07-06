@@ -11,9 +11,9 @@
   "peerDependencies": {
     "react": "*",
     "react-native": "*",
-    "react-native-svg": "*",
-    "expo-linear-gradient": "*",
-    "react-native-reanimated": "*"
+    "react-native-svg": "^15.15.4",
+    "expo-linear-gradient": "~57.0.0",
+    "react-native-reanimated": "~4.5.0"
   },
   "devDependencies": {
     "typescript": "~5.9.0"
