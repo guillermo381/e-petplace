@@ -1,6 +1,8 @@
 # packages/ui — Design system e-PetPlace
 
-**Estado: S43-B3.4 — Boton + Tarjeta + Campo (gates cerrados) + Celda/Separador construidos (pendiente gate en dispositivo).**
+**Estado: S43-B3.5 — Boton + Tarjeta + Campo + Celda/Separador (gates cerrados) + Insignia construida (pendiente gate en dispositivo).**
+
+B3.5: `src/components/Insignia.tsx` — el chip de estado. JAMÁS Pressable (un badge que se toca es un botón disfrazado). Dos familias por discriminated union: `estado` (alDia/atencion/proximo/info — pareja tint+texto AA sellada desde tokens, el consumidor no elige colores) y `capa` (vida/cuidado/comunidad/comunidadAmplia — punto puro + capaText, dos registros cableados). `soloPunto` para celdas densas con etiqueta obligatoria como accessibilityLabel (el color jamás es único canal). Tamaños 22/26, radius full. TODOS los chips artesanales de la galería migrados — cero sobrevivientes (grep verificado). Nota de diseño en shadows.ts: glow es SEMÁNTICO ("en vivo/en curso"), claro lo traduce a anillo 1.5 + pill "● vivo"; se implementa con el componente de cita en curso (S44).
 
 B3.4: `src/components/Celda.tsx` — la fila de lista. Tres zonas: inicio (slot) · contenido (titulo/subtitulo como STRINGS, jerarquía protegida, ellipsis 1/2 líneas) · fin (slot) XOR metadataMono (regla de voz CABLEADA: mono + minúsculas forzadas + tracking suave). Densidades 56/48. REGLA: el pressed de fila resalta fondo (bg.overlay, receta SM) — JAMÁS escala; el scale es de botones y cards sueltas. A11y: label compuesto (titulo, subtitulo, metadata). `src/components/Separador.tsx` — hairline bg.border con indentación, para ItemSeparatorComponent. Sin margin ni divisor propios. Ensamble "Agenda de hoy" en la galería = la pantalla del prestador en embrión.
 

@@ -20,6 +20,7 @@ import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
 import { Campo } from '../components/Campo'
 import { Celda } from '../components/Celda'
 import { Separador } from '../components/Separador'
+import { Insignia } from '../components/Insignia'
 import type { ThemeMode } from '../themes'
 
 const sans = typography.family.sans
@@ -260,49 +261,38 @@ export function TokenGallery() {
           </Fila>
         </Seccion>
 
-        {/* Status */}
-        <Seccion titulo="Status — semántica del sistema">
+        {/* Status — Insignia estado (B3.5) */}
+        <Seccion titulo="Status — Insignia · familia estado">
           <Fila>
-            {(['success', 'warning', 'danger', 'info'] as const).map((s) => (
-              <View
-                key={s}
-                style={{
-                  backgroundColor: theme.status[`${s}Bg`],
-                  borderWidth: 1,
-                  borderColor: theme.status[`${s}Border`],
-                  borderRadius: radius.sm,
-                  paddingHorizontal: spacing[3],
-                  paddingVertical: spacing[2],
-                }}
-              >
-                <Text style={{ fontFamily: sans.medium, fontSize: typography.size.sm, color: theme.status[`${s}Text`] }}>
-                  {s === 'success' ? 'Al día' : s === 'warning' ? 'Vacuna próxima' : s === 'danger' ? 'Atención' : 'Nota del vet'}
-                </Text>
-              </View>
-            ))}
+            <Insignia estado="alDia" etiqueta="Al día" />
+            <Insignia estado="proximo" etiqueta="Vacuna próxima" />
+            <Insignia estado="atencion" etiqueta="Atención" />
+            <Insignia estado="info" etiqueta="Nota del vet" />
           </Fila>
+          <View style={{ marginTop: spacing[3] }}>
+            <Fila>
+              <Insignia estado="alDia" etiqueta="sm" tamaño="sm" />
+              <Insignia estado="info" etiqueta="md (default)" />
+            </Fila>
+          </View>
         </Seccion>
 
-        {/* Capas */}
-        <Seccion titulo="Capas — dos registros: punto puro, texto AA">
+        {/* Capas — Insignia capa (B3.5) */}
+        <Seccion titulo="Capas — Insignia · familia capa (dos registros cableados)">
           <Fila>
-            {(
-              [
-                ['identidad', 'Vida'],
-                ['cuidado', 'Cuidado'],
-                ['comunidad', 'Comunidad'],
-                ['comunidadAmplia', 'Comunidad amplia'],
-              ] as const
-            ).map(([k, label]) => (
-              <View key={k} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
-                <View style={{ width: 12, height: 12, borderRadius: radius.full, backgroundColor: theme.capa[k] }} />
-                <Text style={{ fontFamily: sans.medium, fontSize: typography.size.sm, color: capaTexto[k] }}>{label}</Text>
-              </View>
-            ))}
+            <Insignia capa="vida" etiqueta="Vida" />
+            <Insignia capa="cuidado" etiqueta="Cuidado" />
+            <Insignia capa="comunidad" etiqueta="Comunidad" />
+            <Insignia capa="comunidadAmplia" etiqueta="Comunidad amplia" />
           </Fila>
-          <Text style={{ fontFamily: sans.regular, fontSize: typography.size.sm, color: theme.text.secondary, marginTop: spacing[3] }}>
-            El punto usa el hex puro (registro gráfico, sin anillo); la etiqueta usa capaText (registro AA).
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3], marginTop: spacing[3] }}>
+            <Insignia capa="vida" soloPunto etiqueta="Capa vida" />
+            <Insignia capa="cuidado" soloPunto etiqueta="Capa cuidado" />
+            <Insignia capa="comunidad" soloPunto etiqueta="Capa comunidad" />
+            <Text style={{ fontFamily: sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+              soloPunto — para celdas densas; la etiqueta sigue obligatoria (a11y)
+            </Text>
+          </View>
         </Seccion>
 
         {/* accentActive */}
@@ -473,12 +463,8 @@ export function TokenGallery() {
               <Celda
                 titulo="Normal con punto de capa"
                 subtitulo="Subtítulo en secondary"
-                inicio={<View style={{ width: 10, height: 10, borderRadius: radius.full, backgroundColor: theme.capa.cuidado }} />}
-                fin={
-                  <View style={{ backgroundColor: theme.status.successBg, borderWidth: 1, borderColor: theme.status.successBorder, borderRadius: radius.sm, paddingHorizontal: spacing[2], paddingVertical: spacing[0.5] }}>
-                    <Text style={{ fontFamily: sans.medium, fontSize: typography.size.xs, color: theme.status.successText }}>Al día</Text>
-                  </View>
-                }
+                inicio={<Insignia capa="cuidado" soloPunto etiqueta="Capa cuidado" />}
+                fin={<Insignia estado="alDia" etiqueta="Al día" tamaño="sm" />}
               />
               <Separador indentacion={spacing[3] + 10 + spacing[3]} />
               <Celda titulo="Con metadata mono" subtitulo="La voz de máquina, cableada" metadataMono="17:30 · 45 MIN" />
@@ -519,7 +505,7 @@ export function TokenGallery() {
               accessibilityRole="button"
               titulo="Zeus"
               subtitulo="Paseo · familia González"
-              inicio={<View style={{ width: 10, height: 10, borderRadius: radius.full, backgroundColor: theme.capa.cuidado }} />}
+              inicio={<Insignia capa="cuidado" soloPunto etiqueta="Capa cuidado" />}
               metadataMono="17:30 · 45 min"
             />
             <Separador indentacion={spacing[3] + 10 + spacing[3]} />
@@ -529,7 +515,7 @@ export function TokenGallery() {
               accessibilityRole="button"
               titulo="Pati"
               subtitulo="Grooming · baño y corte"
-              inicio={<View style={{ width: 10, height: 10, borderRadius: radius.full, backgroundColor: theme.capa.cuidado }} />}
+              inicio={<Insignia capa="cuidado" soloPunto etiqueta="Capa cuidado" />}
               metadataMono="jue · 10:00"
             />
             <Separador indentacion={spacing[3] + 10 + spacing[3]} />
@@ -539,7 +525,7 @@ export function TokenGallery() {
               accessibilityRole="button"
               titulo="Rocky"
               subtitulo="Primera visita — la familia pide que el paseador tenga experiencia con perros grandes y ansiosos"
-              inicio={<View style={{ width: 10, height: 10, borderRadius: radius.full, backgroundColor: theme.capa.cuidado }} />}
+              inicio={<Insignia capa="cuidado" soloPunto etiqueta="Capa cuidado" />}
               metadataMono="vie · 09:15"
             />
             <View style={{ padding: spacing[4], paddingTop: spacing[3] }}>
@@ -575,9 +561,8 @@ export function TokenGallery() {
               <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary, marginBottom: spacing[2] }}>
                 prestador · dosis baja
               </Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2], marginBottom: spacing[3] }}>
-                <View style={{ width: 8, height: 8, borderRadius: radius.full, backgroundColor: theme.capa.cuidado }} />
-                <Text style={{ fontFamily: sans.medium, fontSize: typography.size.sm, color: capaTexto.cuidado }}>Grooming · hoy</Text>
+              <View style={{ marginBottom: spacing[3] }}>
+                <Insignia capa="cuidado" etiqueta="Grooming · hoy" />
               </View>
               <Text style={{ fontFamily: sans.bold, fontSize: typography.size.lg, color: theme.text.primary, marginBottom: spacing[1] }}>Zeus — 15:00</Text>
               <Text style={{ fontFamily: sans.regular, fontSize: typography.size.base, color: theme.text.secondary, marginBottom: spacing[4] }}>
@@ -598,20 +583,9 @@ export function TokenGallery() {
                 Zeus tuvo una gran semana
               </Text>
               <View style={{ flexDirection: 'row', gap: spacing[2], marginBottom: spacing[4], flexWrap: 'wrap' }}>
-                {(
-                  [
-                    ['vida', 'identidad', 'Salud al día'],
-                    ['cuidado', 'cuidado', 'Paseo hoy'],
-                    ['comunidad', 'comunidad', '3 amigos nuevos'],
-                  ] as const
-                ).map(([tinte, capa, label]) => (
-                  <Tarjeta key={tinte} tinte={tinte}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <View style={{ width: 8, height: 8, borderRadius: radius.full, backgroundColor: theme.capa[capa] }} />
-                      <Text style={{ fontFamily: sans.medium, fontSize: typography.size.sm, color: capaTexto[capa] }}>{label}</Text>
-                    </View>
-                  </Tarjeta>
-                ))}
+                <Insignia capa="vida" etiqueta="Salud al día" />
+                <Insignia capa="cuidado" etiqueta="Paseo hoy" />
+                <Insignia capa="comunidad" etiqueta="3 amigos nuevos" />
               </View>
               <Boton
                 variante="marca"

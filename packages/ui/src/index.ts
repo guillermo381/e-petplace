@@ -35,6 +35,13 @@ export {
 export { Campo, type CampoProps } from './components/Campo'
 export { Celda, type CeldaProps, type CeldaDensidad } from './components/Celda'
 export { Separador } from './components/Separador'
+export {
+  Insignia,
+  type InsigniaProps,
+  type InsigniaEstado,
+  type InsigniaCapa,
+  type InsigniaTamaño,
+} from './components/Insignia'
 export { epetplaceFonts } from './fonts'
 export { Isotipo, type IsotipoVariant } from './brand/Isotipo'
 export { TokenGallery } from './gallery/TokenGallery'

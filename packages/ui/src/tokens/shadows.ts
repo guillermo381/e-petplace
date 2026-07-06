@@ -7,6 +7,13 @@
  * REGLA v4: glow SOLO en dark. En light no existe (v3.1 tenía glow
  * light; B1 lo elimina — la elevación en claro es sombra lavanda sutil).
  * Memorial NUNCA usa glow (v3.1): la luz no encaja con el momento.
+ *
+ * GLOW ES SEMÁNTICO, no decorativo (decisión founder + dirección, S43-B3.5):
+ * reservado a estados "en vivo/en curso" (una cita ejecutándose ahora).
+ * Dark: glow real del color de capa. Claro: se traduce a anillo nítido
+ * 1.5px del hex puro + pill "● vivo" — el glow difuso sobre claro se
+ * ensucia y está prohibido. Un solo elemento vivo por pantalla.
+ * Se implementa con el componente de cita en curso (S44).
  */
 
 import { palette } from './palette'
