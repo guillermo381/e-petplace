@@ -24,6 +24,7 @@ import { Separador } from '../components/Separador'
 import { Insignia } from '../components/Insignia'
 import { Encabezado } from '../components/Encabezado'
 import { BarraTabs, type BarraTabsItem } from '../components/BarraTabs'
+import { Hoja, type HojaAltura } from '../components/Hoja'
 import type { ThemeMode } from '../themes'
 
 const sans = typography.family.sans
@@ -135,6 +136,7 @@ export function TokenGallery() {
   const { theme, mode, setMode } = useTheme()
   const [cargandoDemo, setCargandoDemo] = useState(false)
   const [tabActivo, setTabActivo] = useState('hoy')
+  const [hoja, setHoja] = useState<'ninguna' | HojaAltura | 'form' | 'confirmar' | 'scroll'>('ninguna')
   const esDark = mode === 'dark'
   const esMemorial = mode === 'memorial'
   // Capturados fuera de los callbacks: el narrowing de `in` no sobrevive closures
@@ -644,6 +646,55 @@ export function TokenGallery() {
           <Text style={{ fontFamily: sans.regular, fontSize: typography.size.sm, color: theme.text.secondary, marginTop: spacing[3] }}>
             Activo: primary + pill accent.active 3×18 · inactivo: tertiary · badge = Insignia estado sm
           </Text>
+        </Seccion>
+
+        {/* Hoja — B3.8 */}
+        <Seccion titulo="Hoja — el modal del sistema (swipe down para cerrar)">
+          <Fila>
+            <Boton variante="secundario" tamaño="sm" etiqueta="Contenido (auto)" onPress={() => setHoja('contenido')} />
+            <Boton variante="secundario" tamaño="sm" etiqueta="Media (50%)" onPress={() => setHoja('media')} />
+            <Boton variante="secundario" tamaño="sm" etiqueta="Completa (90%)" onPress={() => setHoja('completa')} />
+            <Boton variante="secundario" tamaño="sm" etiqueta="Formulario" onPress={() => setHoja('form')} />
+            <Boton variante="secundario" tamaño="sm" etiqueta="Confirmación" onPress={() => setHoja('confirmar')} />
+            <Boton variante="secundario" tamaño="sm" etiqueta="Scroll largo" onPress={() => setHoja('scroll')} />
+          </Fila>
+
+          <Hoja
+            visible={hoja === 'contenido' || hoja === 'media' || hoja === 'completa'}
+            altura={hoja === 'ninguna' || hoja === 'form' || hoja === 'confirmar' || hoja === 'scroll' ? 'contenido' : hoja}
+            titulo="Detalle rápido"
+            conCerrar
+            onCerrar={() => setHoja('ninguna')}
+          >
+            <Text style={{ fontFamily: sans.regular, fontSize: typography.size.base, lineHeight: typography.size.base * typography.leading.normal, color: theme.text.secondary, paddingBottom: spacing[4] }}>
+              Cerrá con swipe down, tocando el fondo, la X o el back de Android. El agarre de arriba
+              es la señal de swipeable.
+            </Text>
+          </Hoja>
+
+          <Hoja visible={hoja === 'form'} altura="completa" titulo="Editar mascota" conCerrar onCerrar={() => setHoja('ninguna')}>
+            <Campo label="Nombre" placeholder="ej: Zeus" />
+            <Campo label="Notas" placeholder="Tocá acá y mirá el teclado empujar la hoja…" multilinea={3} />
+            <Boton variante="primario" etiqueta="Guardar" bloque onPress={() => setHoja('ninguna')} />
+          </Hoja>
+
+          <Hoja visible={hoja === 'confirmar'} titulo="¿Cancelar el paseo?" onCerrar={() => setHoja('ninguna')}>
+            <Text style={{ fontFamily: sans.regular, fontSize: typography.size.base, lineHeight: typography.size.base * typography.leading.normal, color: theme.text.secondary, paddingBottom: spacing[4] }}>
+              La familia González va a recibir el aviso. Esta acción no se puede deshacer.
+            </Text>
+            <View style={{ gap: spacing[2], paddingBottom: spacing[2] }}>
+              <Boton variante="destructivo" etiqueta="Cancelar el paseo" bloque onPress={() => setHoja('ninguna')} />
+              <Boton variante="ghost" etiqueta="Volver" bloque onPress={() => setHoja('ninguna')} />
+            </View>
+          </Hoja>
+
+          <Hoja visible={hoja === 'scroll'} altura="media" titulo="Scroll interno" onCerrar={() => setHoja('ninguna')}>
+            {Array.from({ length: 24 }, (_, i) => (
+              <Text key={i} style={{ fontFamily: sans.regular, fontSize: typography.size.base, lineHeight: typography.size.base * 2, color: theme.text.secondary }}>
+                Línea {i + 1} — el swipe-down solo cierra con el scroll en top.
+              </Text>
+            ))}
+          </Hoja>
         </Seccion>
 
         {/* ENSAMBLE MAYOR — pantalla embrión del prestador */}

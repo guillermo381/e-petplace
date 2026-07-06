@@ -167,6 +167,9 @@ export const palette = {
   white: '#FFFFFF',
   black: '#000000',
 
+  // ── Scrim (B3.8) — backdrop de la Hoja, derivado de dark0 ──
+  scrim: 'rgba(5,5,8,.52)',
+
 } as const
 
 /**
