@@ -18,6 +18,8 @@ import { Isotipo } from '../brand/Isotipo'
 import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
 import { Campo } from '../components/Campo'
+import { Celda } from '../components/Celda'
+import { Separador } from '../components/Separador'
 import type { ThemeMode } from '../themes'
 
 const sans = typography.family.sans
@@ -462,6 +464,88 @@ export function TokenGallery() {
               <Boton variante="primario" etiqueta="Guardar" bloque onPress={() => {}} />
             </Tarjeta>
           </View>
+        </Seccion>
+
+        {/* Celda — B3.4 */}
+        <Seccion titulo="Celda — la fila de lista (el pressed resalta, no escala)">
+          <View style={{ gap: spacing[4] }}>
+            <Tarjeta relleno="ninguno">
+              <Celda
+                titulo="Normal con punto de capa"
+                subtitulo="Subtítulo en secondary"
+                inicio={<View style={{ width: 10, height: 10, borderRadius: radius.full, backgroundColor: theme.capa.cuidado }} />}
+                fin={
+                  <View style={{ backgroundColor: theme.status.successBg, borderWidth: 1, borderColor: theme.status.successBorder, borderRadius: radius.sm, paddingHorizontal: spacing[2], paddingVertical: spacing[0.5] }}>
+                    <Text style={{ fontFamily: sans.medium, fontSize: typography.size.xs, color: theme.status.successText }}>Al día</Text>
+                  </View>
+                }
+              />
+              <Separador indentacion={spacing[3] + 10 + spacing[3]} />
+              <Celda titulo="Con metadata mono" subtitulo="La voz de máquina, cableada" metadataMono="17:30 · 45 MIN" />
+              <Separador indentacion={spacing[3]} />
+              <Celda densidad="compacta" titulo="Compacta (mín 48)" metadataMono="#8f3a" />
+              <Separador indentacion={spacing[3]} />
+              <Celda
+                interactiva
+                onPress={() => {}}
+                accessibilityRole="button"
+                titulo="Interactiva — mantené presionado"
+                subtitulo="El fondo resalta con bg.overlay, la fila no escala"
+              />
+              <Separador indentacion={spacing[3]} />
+              <Celda
+                titulo="Un título absurdamente largo que tiene que truncar en una sola línea sin romper nada"
+                subtitulo="Y un subtítulo igual de charlatán que puede usar hasta dos líneas completas antes de cortarse con ellipsis como corresponde en una lista real"
+                metadataMono="10:00"
+              />
+            </Tarjeta>
+          </View>
+        </Seccion>
+
+        {/* Ensamble: Agenda de hoy — la pantalla del prestador en embrión */}
+        <Seccion titulo="Ensamble — Agenda de hoy (dosis baja, componentes 100% reales)">
+          <Tarjeta elevacion="sm" relleno="ninguno">
+            <View style={{ padding: spacing[4], paddingBottom: spacing[2] }}>
+              <Text style={{ fontFamily: sans.bold, fontSize: typography.size.lg, color: theme.text.primary }}>
+                Agenda de hoy
+              </Text>
+              <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary }}>
+                mar 7 jul · 3 citas
+              </Text>
+            </View>
+            <Celda
+              interactiva
+              onPress={() => {}}
+              accessibilityRole="button"
+              titulo="Zeus"
+              subtitulo="Paseo · familia González"
+              inicio={<View style={{ width: 10, height: 10, borderRadius: radius.full, backgroundColor: theme.capa.cuidado }} />}
+              metadataMono="17:30 · 45 min"
+            />
+            <Separador indentacion={spacing[3] + 10 + spacing[3]} />
+            <Celda
+              interactiva
+              onPress={() => {}}
+              accessibilityRole="button"
+              titulo="Pati"
+              subtitulo="Grooming · baño y corte"
+              inicio={<View style={{ width: 10, height: 10, borderRadius: radius.full, backgroundColor: theme.capa.cuidado }} />}
+              metadataMono="jue · 10:00"
+            />
+            <Separador indentacion={spacing[3] + 10 + spacing[3]} />
+            <Celda
+              interactiva
+              onPress={() => {}}
+              accessibilityRole="button"
+              titulo="Rocky"
+              subtitulo="Primera visita — la familia pide que el paseador tenga experiencia con perros grandes y ansiosos"
+              inicio={<View style={{ width: 10, height: 10, borderRadius: radius.full, backgroundColor: theme.capa.cuidado }} />}
+              metadataMono="vie · 09:15"
+            />
+            <View style={{ padding: spacing[4], paddingTop: spacing[3] }}>
+              <Boton variante="primario" etiqueta="Ver toda la agenda" bloque onPress={() => {}} />
+            </View>
+          </Tarjeta>
         </Seccion>
 
         {/* Isotipo */}

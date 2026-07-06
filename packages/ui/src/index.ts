@@ -33,6 +33,8 @@ export {
   type TarjetaRelleno,
 } from './components/Tarjeta'
 export { Campo, type CampoProps } from './components/Campo'
+export { Celda, type CeldaProps, type CeldaDensidad } from './components/Celda'
+export { Separador } from './components/Separador'
 export { epetplaceFonts } from './fonts'
 export { Isotipo, type IsotipoVariant } from './brand/Isotipo'
 export { TokenGallery } from './gallery/TokenGallery'

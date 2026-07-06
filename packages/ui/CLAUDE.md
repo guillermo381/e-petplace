@@ -1,6 +1,8 @@
 # packages/ui — Design system e-PetPlace
 
-**Estado: S43-B3.3 — Boton + Tarjeta (gates cerrados) + Campo construido (pendiente gate en dispositivo).**
+**Estado: S43-B3.4 — Boton + Tarjeta + Campo (gates cerrados) + Celda/Separador construidos (pendiente gate en dispositivo).**
+
+B3.4: `src/components/Celda.tsx` — la fila de lista. Tres zonas: inicio (slot) · contenido (titulo/subtitulo como STRINGS, jerarquía protegida, ellipsis 1/2 líneas) · fin (slot) XOR metadataMono (regla de voz CABLEADA: mono + minúsculas forzadas + tracking suave). Densidades 56/48. REGLA: el pressed de fila resalta fondo (bg.overlay, receta SM) — JAMÁS escala; el scale es de botones y cards sueltas. A11y: label compuesto (titulo, subtitulo, metadata). `src/components/Separador.tsx` — hairline bg.border con indentación, para ItemSeparatorComponent. Sin margin ni divisor propios. Ensamble "Agenda de hoy" en la galería = la pantalla del prestador en embrión.
 
 B3.3: `src/components/Campo.tsx` — input del sistema. Regla emil rectora: nada se anima al tipear — sin labels flotantes, sin layout shift al enfocar/errar. Label siempre visible (accessibilityLabel forzado por TS), borde 1.5 SIEMPRE (los estados cambian color: default border / focus accent.active / error coral gráfico + mensaje dangerText con liveRegion), slot de mensaje con altura reservada, única animación = color del borde (receta SM), secure con toggle a11y, multilínea de alto fijo, passthrough tipado de TextInput. Ajuste previo del gate de Tarjeta: tint comunidad dark a paridad PERCEPTUAL (pinkAlpha09/.21 — el magenta satura más por alfa, doc en palette.ts). Gate: 115 pares (9 nuevos: mensajes 4.5 + bordes de estado como gráficos 3:1), 0 fallos.
 
