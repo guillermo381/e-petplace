@@ -14,7 +14,7 @@ import { palette, gradients } from '../tokens/palette'
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
 import { radius } from '../tokens/radius'
-import { useTheme } from '../ThemeProvider'
+import { ThemeProvider, useTheme } from '../ThemeProvider'
 import { Isotipo } from '../brand/Isotipo'
 import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
@@ -25,6 +25,7 @@ import { Insignia } from '../components/Insignia'
 import { Encabezado } from '../components/Encabezado'
 import { BarraTabs, type BarraTabsItem } from '../components/BarraTabs'
 import { Hoja, type HojaAltura } from '../components/Hoja'
+import { CitaEnVivo } from '../components/CitaEnVivo'
 import { AvisoProvider, useAviso } from '../components/Aviso'
 import { EstadoVacio } from '../components/EstadoVacio'
 import type { ThemeMode } from '../themes'
@@ -77,6 +78,45 @@ function Seccion({ titulo, children }: { titulo: string; children: React.ReactNo
 
 function Fila({ children }: { children: React.ReactNode }) {
   return <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] }}>{children}</View>
+}
+
+// ── CitaEnVivo: panel por tema (se monta bajo un ThemeProvider anidado
+// con el modo fijo — la sección muestra los 3 temas a la vez) ────────────────
+function PanelCitaEnVivo({ etiqueta }: { etiqueta: string }) {
+  const { theme } = useTheme()
+  return (
+    <View
+      style={{
+        backgroundColor: theme.bg.base,
+        borderRadius: radius.md,
+        padding: spacing[5],
+        paddingTop: spacing[6],
+        borderWidth: 1,
+        borderColor: theme.border.default,
+      }}
+    >
+      <Text
+        style={{
+          fontFamily: sans.medium,
+          fontSize: typography.size.xs,
+          color: theme.text.secondary,
+          marginBottom: spacing[4],
+        }}
+      >
+        {etiqueta}
+      </Text>
+      <CitaEnVivo capa="cuidado">
+        <Tarjeta elevacion="plana" relleno="ninguno">
+          <Celda
+            titulo="Zeus"
+            subtitulo="Paseo · familia González"
+            inicio={<Insignia capa="cuidado" soloPunto etiqueta="Capa cuidado" />}
+            metadataMono="17:30 · 45 min"
+          />
+        </Tarjeta>
+      </CitaEnVivo>
+    </View>
+  )
 }
 
 // campana de demo para la portada dueño (el slot accionDer es del consumidor)
@@ -603,6 +643,21 @@ function GaleriaInterna() {
               <Boton variante="primario" etiqueta="Ver toda la agenda" bloque onPress={() => {}} />
             </View>
           </Tarjeta>
+        </Seccion>
+
+        {/* CitaEnVivo — S44-B2.1: los 3 temas a la vez (providers anidados) */}
+        <Seccion titulo="CitaEnVivo — en vivo/en curso (UNO por pantalla, jamás decorativo)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelCitaEnVivo etiqueta='claro (default) — anillo 1.5 del hex puro + pill "● vivo"' />
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelCitaEnVivo etiqueta="dark — glow real del color de capa" />
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelCitaEnVivo etiqueta='memorial — degrada: anillo neutral, "en curso" sin punto' />
+            </ThemeProvider>
+          </View>
         </Seccion>
 
         {/* Encabezado — B3.6 */}

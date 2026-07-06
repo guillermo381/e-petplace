@@ -45,6 +45,7 @@ export {
 export { Encabezado, type EncabezadoProps } from './components/Encabezado'
 export { BarraTabs, type BarraTabsItem } from './components/BarraTabs'
 export { Hoja, type HojaProps, type HojaAltura } from './components/Hoja'
+export { CitaEnVivo, type CitaEnVivoProps, type CitaEnVivoCapa } from './components/CitaEnVivo'
 export { AvisoProvider, useAviso, type AvisoInput, type AvisoVariante } from './components/Aviso'
 export { EstadoVacio } from './components/EstadoVacio'
 export { epetplaceFonts } from './fonts'

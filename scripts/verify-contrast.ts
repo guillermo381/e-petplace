@@ -15,6 +15,9 @@
  *   · tab INACTIVO de BarraTabs (B3.7) — text.tertiary por espec firmada
  *     (convención de plataforma: el tab no seleccionado se atenúa; el icono
  *     duplica el canal y el activo sí gatea). Se imprime medición informativa.
+ *   · anillo de CitaEnVivo (S44-B2.1) — hex puro de capa, registro gráfico
+ *     REDUNDANTE: el canal semántico es el pill "● vivo", cuyo texto
+ *     (capaText / bg.card) SÍ gatea arriba. Medición informativa.
  *
  * Correr: pnpm exec tsx scripts/verify-contrast.ts
  */
@@ -183,6 +186,18 @@ for (const [n, t] of [['LIGHT', lightTheme], ['DARK', darkTheme], ['MEMORIAL', m
     `  (info) ${n} · tab inactivo (text.tertiary / bg.base) → ${contrast(t.text.tertiary, t.bg.base).toFixed(2)}:1 — exento por espec`,
   )
 }
+
+// Informativa (no gatea): anillo de CitaEnVivo — S44-B2.1. Hex puro de capa
+// (claro) / text.secondary (memorial) como refuerzo gráfico: el canal
+// semántico AA es el pill, gateado arriba (capaText / bg.card).
+for (const c of ['identidad', 'cuidado', 'comunidad', 'comunidadAmplia'] as const) {
+  console.log(
+    `  (info) LIGHT · anillo CitaEnVivo capa.${c} / bg.base → ${contrast(lightTheme.capa[c], lightTheme.bg.base).toFixed(2)}:1 — exento: el pill porta el canal AA`,
+  )
+}
+console.log(
+  `  (info) MEMORIAL · anillo CitaEnVivo (text.secondary / bg.base) → ${contrast(memorialTheme.text.secondary, memorialTheme.bg.base).toFixed(2)}:1 — exento: el pill porta el canal AA`,
+)
 
 let fallos = 0
 for (const par of todos) {
