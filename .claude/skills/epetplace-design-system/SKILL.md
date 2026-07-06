@@ -15,7 +15,7 @@ description: >-
 
 # epetplace-design-system — el sistema es exigible, no sugerido
 
-Fuente de verdad: `packages/ui` (tokens v4 + 12 componentes + 3 temas).
+Fuente de verdad: `packages/ui` (tokens v4 + 13 componentes + 3 temas).
 Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 `@epetplace/ui`, no existe en el producto.
 
@@ -63,7 +63,7 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
     (lección B3.1b: pnpm auto-instala peers y `"*"` resuelve otra versión
     → módulo nativo duplicado → build nativa rota).
 11. **Protocolo del componente faltante.** Si la UI necesita algo que los
-    12 no cubren, PROHIBIDO inline en apps. Camino: (a) proponer al
+    13 no cubren, PROHIBIDO inline en apps. Camino: (a) proponer al
     founder espec mínima (qué es, qué no es, estados), (b) nace en
     `packages/ui` con el método completo — tokens, WCAG si trae pares
     nuevos, galería, gate en dispositivo —, (c) se agrega al índice de
@@ -128,7 +128,7 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 //     stroke={theme.text.primary} strokeWidth={1.75} strokeLinecap="round" /></Svg>
 ```
 
-## 3. ÍNDICE — los 12 componentes (import de `@epetplace/ui`)
+## 3. ÍNDICE — los 13 componentes (import de `@epetplace/ui`)
 
 | Export | Cuándo |
 |---|---|
@@ -144,6 +144,7 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 | `useAviso` (+`AvisoProvider`) | Todo feedback efímero. Uno a la vez, cola |
 | `EstadoVacio` | Todo "sin datos". Voz humana, sin animación de entrada |
 | `CitaEnVivo` | Envolver LA cita en curso — UNO por pantalla, jamás decorativo (Ley 7). dark: glow de capa · claro: anillo 1.5 + pill "● vivo" · memorial: degrada. No suma accent.active |
+| `Esqueleto` (+`EsqueletoGrupo`) | Todo estado de carga. Estático por ley — sin shimmer ni pulso. Componer imitando el layout final; `EsqueletoGrupo` anuncia la carga al lector |
 
 También: `ThemeProvider`/`useTheme` (light default, memorial forzable),
 `Isotipo` (tinta/blanco/gradiente), `palette`/`gradients`/`typography`/

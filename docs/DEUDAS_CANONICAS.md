@@ -1246,6 +1246,11 @@ Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en 
 #### D-285 — Gates de S43 solo en Android — iOS sin verificar
 🟡 ALTA. Todos los gates en dispositivo de S43 corrieron en Android (teléfono del founder); iOS jamás se probó (safe areas, KeyboardAvoidingView behavior=padding, gestos de la Hoja, fuentes). Disparo: ANTES del primer TestFlight, pasada completa de la galería en iPhone (Expo Go iOS o dev build). Origen: S43-B5.
 
+### Deudas de Sesión 44 (6 Jul 2026)
+
+#### D-286 — TalkBack sobre EsqueletoGrupo sin verificar en dispositivo
+🟢 MEDIA. El gate visual de Esqueleto (S44-B2.2) cerró en Android, pero la pasada de TalkBack (anunciar "Cargando, barra de progreso" una vez y no leer formas vacías) no se corrió en el teléfono — solo se verificó el DOM en RN-web (`[role=progressbar][aria-busy=true]`). Disparo: B4, primera pantalla real con Esqueleto. Origen: S44-B2.2.
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)

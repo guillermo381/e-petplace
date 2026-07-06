@@ -26,6 +26,7 @@ import { Encabezado } from '../components/Encabezado'
 import { BarraTabs, type BarraTabsItem } from '../components/BarraTabs'
 import { Hoja, type HojaAltura } from '../components/Hoja'
 import { CitaEnVivo } from '../components/CitaEnVivo'
+import { Esqueleto, EsqueletoGrupo } from '../components/Esqueleto'
 import { AvisoProvider, useAviso } from '../components/Aviso'
 import { EstadoVacio } from '../components/EstadoVacio'
 import type { ThemeMode } from '../themes'
@@ -80,9 +81,9 @@ function Fila({ children }: { children: React.ReactNode }) {
   return <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] }}>{children}</View>
 }
 
-// ── CitaEnVivo: panel por tema (se monta bajo un ThemeProvider anidado
-// con el modo fijo — la sección muestra los 3 temas a la vez) ────────────────
-function PanelCitaEnVivo({ etiqueta }: { etiqueta: string }) {
+// ── Panel por tema: se monta bajo un ThemeProvider anidado con el modo
+// fijo — las secciones que lo usan muestran los 3 temas a la vez ─────────────
+function PanelTema({ etiqueta, children }: { etiqueta: string; children: React.ReactNode }) {
   const { theme } = useTheme()
   return (
     <View
@@ -105,17 +106,39 @@ function PanelCitaEnVivo({ etiqueta }: { etiqueta: string }) {
       >
         {etiqueta}
       </Text>
-      <CitaEnVivo capa="cuidado">
-        <Tarjeta elevacion="plana" relleno="ninguno">
-          <Celda
-            titulo="Zeus"
-            subtitulo="Paseo · familia González"
-            inicio={<Insignia capa="cuidado" soloPunto etiqueta="Capa cuidado" />}
-            metadataMono="17:30 · 45 min"
-          />
-        </Tarjeta>
-      </CitaEnVivo>
+      {children}
     </View>
+  )
+}
+
+function EjemploCitaEnVivo() {
+  return (
+    <CitaEnVivo capa="cuidado">
+      <Tarjeta elevacion="plana" relleno="ninguno">
+        <Celda
+          titulo="Zeus"
+          subtitulo="Paseo · familia González"
+          inicio={<Insignia capa="cuidado" soloPunto etiqueta="Capa cuidado" />}
+          metadataMono="17:30 · 45 min"
+        />
+      </Tarjeta>
+    </CitaEnVivo>
+  )
+}
+
+// Receta canónica de Esqueleto: la fila de agenda (círculo 40 + dos líneas).
+// Componer imitando el layout final — reemplazo directo al llegar los datos.
+function EjemploEsqueletoFila() {
+  return (
+    <EsqueletoGrupo>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+        <Esqueleto forma="circulo" alto={40} />
+        <View style={{ flex: 1, gap: spacing[2] }}>
+          <Esqueleto forma="linea" ancho="60%" />
+          <Esqueleto forma="linea" ancho="40%" />
+        </View>
+      </View>
+    </EsqueletoGrupo>
   )
 }
 
@@ -649,13 +672,48 @@ function GaleriaInterna() {
         <Seccion titulo="CitaEnVivo — en vivo/en curso (UNO por pantalla, jamás decorativo)">
           <View style={{ gap: spacing[4] }}>
             <ThemeProvider defaultMode="light">
-              <PanelCitaEnVivo etiqueta='claro (default) — anillo 1.5 del hex puro + pill "● vivo"' />
+              <PanelTema etiqueta='claro (default) — anillo 1.5 del hex puro + pill "● vivo"'>
+                <EjemploCitaEnVivo />
+              </PanelTema>
             </ThemeProvider>
             <ThemeProvider defaultMode="dark">
-              <PanelCitaEnVivo etiqueta="dark — glow real del color de capa" />
+              <PanelTema etiqueta="dark — glow real del color de capa">
+                <EjemploCitaEnVivo />
+              </PanelTema>
             </ThemeProvider>
             <ThemeProvider defaultMode="memorial">
-              <PanelCitaEnVivo etiqueta='memorial — degrada: anillo neutral, "en curso" sin punto' />
+              <PanelTema etiqueta='memorial — degrada: anillo neutral, "en curso" sin punto'>
+                <EjemploCitaEnVivo />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* Esqueleto — S44-B2.2: estático (Ley 13), sin shimmer ni pulso */}
+        <Seccion titulo="Esqueleto — carga estática (sin shimmer: componer imitando el layout final)">
+          <View style={{ gap: spacing[4] }}>
+            <View style={{ gap: spacing[3] }}>
+              <Text style={{ fontFamily: sans.medium, fontSize: typography.size.xs, color: theme.text.secondary }}>
+                Las 3 primitivas — linea (radius.sm) · circulo (full) · bloque (radius.md)
+              </Text>
+              <Esqueleto forma="linea" ancho="70%" />
+              <Esqueleto forma="circulo" />
+              <Esqueleto forma="bloque" alto={64} />
+            </View>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta='claro — receta canónica "fila de agenda" (circulo 40 + linea 60% + linea 40%)'>
+                <EjemploEsqueletoFila />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — mismo layout, bg.overlay del tema">
+                <EjemploEsqueletoFila />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — degrada solo por token, nada que animar">
+                <EjemploEsqueletoFila />
+              </PanelTema>
             </ThemeProvider>
           </View>
         </Seccion>
