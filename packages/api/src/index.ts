@@ -15,6 +15,11 @@ export {
   type CodigoErrorAtencion,
 } from './wrappers/atencion';
 export {
+  obtenerMiPrestador,
+  type MiPrestador,
+  type CodigoErrorPrestador,
+} from './wrappers/prestador';
+export {
   iniciarAtencionPaseo,
   registrarTrackPaseo,
   agregarNovedadPaseo,
