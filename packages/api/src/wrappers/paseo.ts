@@ -238,6 +238,52 @@ export async function obtenerIncidenciasPaseo(): Promise<
   return { ok: true, data: data ?? [] };
 }
 
+// ── Agenda del día (lectura; gate S44-B4.0.a) ────────────────────────────────
+// La RLS es el guard (cita_select_prestador + mascotas por acceso): no hay
+// RPC de listado y no hace falta. Si el acceso a la mascota caducó, el join
+// devuelve mascota null — el consumidor cae a la huella digna.
+
+export type MascotaAgenda = Pick<
+  Database['public']['Tables']['mascotas']['Row'],
+  'id' | 'nombre' | 'especie' | 'foto_url'
+>;
+
+export type CitaAgendaPaseo = Pick<
+  Database['public']['Tables']['evento_cita_servicio']['Row'],
+  'id' | 'fecha' | 'hora' | 'estado' | 'tipo_servicio'
+> & {
+  mascota: MascotaAgenda | null;
+  tipo: Pick<
+    Database['public']['Tables']['tipos_servicio']['Row'],
+    'nombre' | 'duracion_default_minutos'
+  >;
+};
+
+export interface InputCitasPaseoDelDia {
+  prestador_id: string;
+  /** 'YYYY-MM-DD' (fecha local del dispositivo — la resuelve la pantalla). */
+  fecha: string;
+}
+
+/** Citas de paseo del día del prestador (excluye canceladas/rechazadas), por hora. */
+export async function obtenerCitasPaseoDelDia(
+  input: InputCitasPaseoDelDia,
+): Promise<ResultadoWrapper<CitaAgendaPaseo[], CodigoErrorPaseo>> {
+  const { data, error } = await getClient()
+    .from('evento_cita_servicio')
+    .select(
+      'id, fecha, hora, estado, tipo_servicio, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos)',
+    )
+    .eq('prestador_id', input.prestador_id)
+    .eq('fecha', input.fecha)
+    .eq('tipo.categoria', 'paseo')
+    .not('estado', 'in', '(cancelada,rechazada)')
+    .order('hora', { ascending: true });
+
+  if (error) return mapeoErrorAResultado(error.message);
+  return { ok: true, data: data ?? [] };
+}
+
 // ── A · Iniciar ───────────────────────────────────────────────────────────────
 
 export interface InputIniciarPaseo {

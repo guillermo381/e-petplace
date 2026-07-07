@@ -1260,6 +1260,9 @@ Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en 
 #### D-289 — API key de Google Maps + dev build Android (EN EJECUCIÓN S44)
 🟡 ALTA (era ⚪ "nota para B5" — enmendada en S44-B2.6: está en ejecución HOY). Hallazgo del gate: **Google Maps fue REMOVIDO de Expo Go Android en SDK 53** (changelog oficial SDK 52: "Google Maps will no longer be supported in Expo Go for Android in SDK 53 ... You can use Google Maps in development builds"); la doc de map-view que decía "no additional setup in Expo Go" está desactualizada. Decisión founder+arquitecto: dev build Android por EAS cloud con key propia (`android.config.googleMaps.apiKey` vía env/secret, JAMÁS en texto plano). **B2.6 (MapaRecorrido) quedó construido y commiteado con gate de tiles PENDIENTE — disparo: primera dev build instalada** (el componente NO entra al índice de la skill hasta cerrar ese gate, Ley 11). Pendiente al cierre: restringir la key por package name + SHA-1 post-build. iOS (proveedor Apple) no necesita key. Origen: S44-B2.6.
 
+#### D-290 — Auth del prestador en apps/prestador
+🟡 ALTA. El bootstrap dev-only de sesión (signInWithPassword con credenciales demo en `.env.local`, dev only, no commiteado) es atajo asumido de B4 — no hay pantalla de login ni flujo de sesión real en el app. Disparo: antes de cualquier usuario real / soft launch. Origen: S44-B4.0.
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)
