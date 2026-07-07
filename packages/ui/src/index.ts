@@ -63,6 +63,13 @@ export {
   type EvidenciaFotoThumbnailProps,
   type EvidenciaFotoEstado,
 } from './components/EvidenciaFoto'
+export { MapaRecorrido } from './components/MapaRecorrido'
+export {
+  type MapaRecorridoProps,
+  type MapaRecorridoModo,
+  type MapaRecorridoCapa,
+  type PuntoLatLng,
+} from './components/MapaRecorrido.tipos'
 export { AvisoProvider, useAviso, type AvisoInput, type AvisoVariante } from './components/Aviso'
 export { EstadoVacio } from './components/EstadoVacio'
 export { epetplaceFonts } from './fonts'

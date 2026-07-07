@@ -30,6 +30,7 @@ import { Esqueleto, EsqueletoGrupo } from '../components/Esqueleto'
 import { AvatarMascota } from '../components/AvatarMascota'
 import { Cronometro } from '../components/Cronometro'
 import { EvidenciaFoto, type EvidenciaFotoEstado } from '../components/EvidenciaFoto'
+import { MapaRecorrido } from '../components/MapaRecorrido'
 
 // Foto local de ejemplo (generada, sin URL remota) — demuestra cover,
 // recorte circular y la desaturación memorial.
@@ -234,6 +235,44 @@ function EjemploEvidenciaFoto() {
           </Text>
         </View>
       </View>
+    </View>
+  )
+}
+
+// MapaRecorrido: track simulado realista — una vuelta a la manzana del
+// Parque La Carolina (Quito), ~40 puntos con wobble determinístico.
+const TRACK_SIMULADO: { lat: number; lng: number }[] = (() => {
+  const esquinas = [
+    { lat: -0.1826, lng: -78.4845 },
+    { lat: -0.1826, lng: -78.4787 },
+    { lat: -0.1872, lng: -78.4787 },
+    { lat: -0.1872, lng: -78.4845 },
+    { lat: -0.1826, lng: -78.4845 },
+  ]
+  const pts: { lat: number; lng: number }[] = []
+  for (let i = 0; i < esquinas.length - 1; i++) {
+    const a = esquinas[i]
+    const b = esquinas[i + 1]
+    for (let j = 0; j < 10; j++) {
+      const t = j / 10
+      pts.push({
+        lat: a.lat + (b.lat - a.lat) * t + Math.sin((i * 10 + j) * 1.7) * 0.00008,
+        lng: a.lng + (b.lng - a.lng) * t + Math.cos((i * 10 + j) * 1.3) * 0.00008,
+      })
+    }
+  }
+  pts.push(esquinas[esquinas.length - 1])
+  return pts
+})()
+
+function EjemploMapaRecorrido() {
+  return (
+    <View style={{ gap: spacing[3] }}>
+      <CaptionGaleria texto="recorrido — fitToCoordinates con aire, zoom/pan habilitados" />
+      <MapaRecorrido puntos={TRACK_SIMULADO} modo="recorrido" />
+      <CaptionGaleria texto="vivo — sigue el último punto, gestos apagados, punto de posición" />
+      <MapaRecorrido puntos={TRACK_SIMULADO.slice(0, 18)} modo="vivo" alto={180} />
+      <CaptionGaleria texto="mapa real: gate en dispositivo (en web se ve este placeholder)" />
     </View>
   )
 }
@@ -888,6 +927,27 @@ function GaleriaInterna() {
             <ThemeProvider defaultMode="memorial">
               <PanelTema etiqueta="memorial — overlay y acciones neutrales; la captura funciona igual">
                 <EjemploEvidenciaFoto />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* MapaRecorrido — S44-B2.6: track del paseo sobre mapa real */}
+        <Seccion titulo="MapaRecorrido — el track del paseo (mapa claro en F1, decisión registrada)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — trazo capaText.cuidado 4.5, punto vivo hex puro + anillo blanco">
+                <EjemploMapaRecorrido />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — cartografía clara igual (es una foto del mundo)">
+                <EjemploMapaRecorrido />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — ídem; el mapa no es superficie del sistema">
+                <EjemploMapaRecorrido />
               </PanelTema>
             </ThemeProvider>
           </View>
