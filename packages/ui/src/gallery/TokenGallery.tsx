@@ -754,6 +754,13 @@ function GaleriaInterna() {
               <Separador indentacion={spacing[3] + 10 + spacing[3]} />
               <Celda titulo="Con metadata mono" subtitulo="La voz de máquina, cableada" metadataMono="17:30 · 45 MIN" />
               <Separador indentacion={spacing[3]} />
+              <Celda
+                titulo="Metadata + fin apilados (S44-B4.1)"
+                subtitulo="Hora arriba, estado abajo — la fila de la agenda"
+                metadataMono="17:30 · 30 min"
+                fin={<Insignia estado="info" etiqueta="Confirmada" tamaño="sm" />}
+              />
+              <Separador indentacion={spacing[3]} />
               <Celda densidad="compacta" titulo="Compacta (mín 48)" metadataMono="#8f3a" />
               <Separador indentacion={spacing[3]} />
               <Celda

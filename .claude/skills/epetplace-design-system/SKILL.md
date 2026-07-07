@@ -135,7 +135,7 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 | `Boton` | Toda acción. primario=default producto · marca=gated dosis alta · secundario tonal · ghost terciaria · destructivo tonal (nunca coral sólido) |
 | `Tarjeta` | Toda superficie contenedora. Tintes por capa/status; `interactiva` escala 0.99; sin margin propio |
 | `Campo` | Todo input de texto. Label siempre visible; nada se anima al tipear |
-| `Celda` | Toda fila de lista. Pressed resalta (jamás escala); `metadataMono` para voz de máquina |
+| `Celda` | Toda fila de lista. Pressed resalta (jamás escala); `metadataMono` para voz de máquina — desde S44-B4.1 convive con `fin` (apilados: mono arriba, nodo abajo) |
 | `Separador` | Divisor hairline entre Celdas (`ItemSeparatorComponent`) |
 | `Insignia` | Todo chip de estado/capa. JAMÁS interactivo; `soloPunto` para celdas densas |
 | `Encabezado` | Techo de pantalla. `navegacion` (interna) / `portada` (raíz de tab, con la voz) |

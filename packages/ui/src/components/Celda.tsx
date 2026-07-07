@@ -33,9 +33,10 @@ const ALTURA_MIN: Record<CeldaDensidad, number> = {
   compacta: 48,
 }
 
-type ZonaFin =
-  | { fin?: ReactNode; metadataMono?: never }
-  | { fin?: never; metadataMono?: string }
+// S44-B4.1 (enmienda de arquitecto): metadataMono y fin CONVIVEN —
+// apilados en la zona fin (mono arriba, nodo abajo, alineados al borde).
+// El caso real: hora de la cita + Insignia de estado en la agenda.
+type ZonaFin = { fin?: ReactNode; metadataMono?: string }
 
 type Comun = ZonaFin & {
   titulo: string
@@ -88,20 +89,23 @@ export function Celda(props: CeldaProps) {
         ) : null}
       </View>
 
-      {metadataMono ? (
-        // Regla de voz cableada: mono, MINÚSCULAS forzadas, tracking suave
-        <Text
-          style={{
-            fontFamily: typography.family.mono.regular,
-            fontSize: typography.size.sm,
-            letterSpacing: typography.tracking.mono,
-            color: theme.text.secondary,
-          }}
-        >
-          {metadataMono.toLowerCase()}
-        </Text>
-      ) : fin ? (
-        <View>{fin}</View>
+      {metadataMono || fin ? (
+        <View style={{ alignItems: 'flex-end', gap: spacing[1] }}>
+          {metadataMono ? (
+            // Regla de voz cableada: mono, MINÚSCULAS forzadas, tracking suave
+            <Text
+              style={{
+                fontFamily: typography.family.mono.regular,
+                fontSize: typography.size.sm,
+                letterSpacing: typography.tracking.mono,
+                color: theme.text.secondary,
+              }}
+            >
+              {metadataMono.toLowerCase()}
+            </Text>
+          ) : null}
+          {fin ? <View>{fin}</View> : null}
+        </View>
       ) : null}
     </>
   )

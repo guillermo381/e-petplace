@@ -58,33 +58,6 @@ function esEspecie(v: string | null): v is AvatarMascotaEspecie {
   return v !== null;
 }
 
-// Zona fin compuesta: hora en la voz de máquina (mismos tokens que
-// metadataMono de Celda) + Insignia de estado apilada. FLAG B4.1: Celda
-// fuerza fin XOR metadataMono y la espec pide ambos — propuesta de
-// enmienda a Celda pendiente de gate (ver reporte).
-function FinCita({ hora, dur, insignia }: {
-  hora: string;
-  dur: number | null;
-  insignia?: { estado: InsigniaEstado; etiqueta: string };
-}) {
-  const { theme } = useTheme();
-  return (
-    <View style={{ alignItems: 'flex-end', gap: spacing[1] }}>
-      <Text
-        style={{
-          fontFamily: typography.family.mono.regular,
-          fontSize: typography.size.sm,
-          letterSpacing: typography.tracking.mono,
-          color: theme.text.secondary,
-        }}
-      >
-        {`${hora}${dur ? ` · ${dur} min` : ''}`.toLowerCase()}
-      </Text>
-      {insignia ? <Insignia estado={insignia.estado} etiqueta={insignia.etiqueta} tamaño="sm" /> : null}
-    </View>
-  );
-}
-
 function FilaCita({ cita, enVivo }: { cita: CitaAgendaPaseo; enVivo: boolean }) {
   const router = useRouter();
   const hora = cita.hora ? cita.hora.slice(0, 5) : '—';
@@ -106,7 +79,8 @@ function FilaCita({ cita, enVivo }: { cita: CitaAgendaPaseo; enVivo: boolean }) 
           tamano="sm"
         />
       }
-      fin={<FinCita hora={hora} dur={dur} insignia={insignia} />}
+      metadataMono={`${hora}${dur ? ` · ${dur} min` : ''}`}
+      fin={insignia ? <Insignia estado={insignia.estado} etiqueta={insignia.etiqueta} tamaño="sm" /> : undefined}
     />
   );
 }

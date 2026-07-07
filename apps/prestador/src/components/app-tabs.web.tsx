@@ -22,10 +22,7 @@ export default function AppTabs() {
       <TabList asChild>
         <CustomTabList>
           <TabTrigger name="home" href="/" asChild>
-            <TabButton>Home</TabButton>
-          </TabTrigger>
-          <TabTrigger name="explore" href="/explore" asChild>
-            <TabButton>Explore</TabButton>
+            <TabButton>Agenda</TabButton>
           </TabTrigger>
           {/* S43-B2: galería de verificación de tokens — se retira en B3 */}
           <TabTrigger name="gallery" href="/gallery" asChild>
