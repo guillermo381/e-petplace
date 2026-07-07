@@ -44,7 +44,8 @@ Reglas de uso:
 
 - **Expo Go del Play Store NO sirve** (quedó atrás de SDK 57). Instalar el APK oficial por SDK: **https://expo.dev/go** → SDK 57 → Android (sirve `Expo-Go-57.0.2.apk` desde los releases de GitHub de Expo). Se instala por fuera del Play Store (permitir "orígenes desconocidos").
 - Conexión: `npx expo start --tunnel` en el app a revisar → abrir la URL `exp://<id>.exp.direct` en Expo Go (misma mecánica que una dev build: la dev build también se conecta al Metro por túnel con la misma URL exp://).
-- Si algún módulo futuro exige development build (BLE del wearable, GPS background), la vía es EAS cloud: `eas login` (cuenta del founder, jamás credenciales en el repo) + profile `development` en eas.json + `eas build -p android --profile development`.
+- **Expo Go cubre todo SALVO mapas** (hallazgo S44-B2.6): Google Maps fue REMOVIDO de Expo Go Android en SDK 53 — changelog oficial SDK 52: *"Google Maps will no longer be supported in Expo Go for Android in SDK 53 … You can use Google Maps in development builds"* (https://expo.dev/changelog/2024-11-12-sdk-52). La doc de map-view que dice "no additional setup in Expo Go" está desactualizada. Síntoma: contenedor sin tiles + "Authorization failure" en logcat.
+- Módulos que exigen development build: **mapas (react-native-maps/expo-maps, vigente HOY)** + los ya conocidos (BLE del wearable, GPS background). La vía es EAS cloud: `eas login` (cuenta del founder, jamás credenciales en el repo) + profile `development` en eas.json + `eas build -p android --profile development`. La dev build convive con Expo Go en el teléfono: el resto del sistema sigue gateando por túnel.
 
 ## Referencia al repo viejo (congelado)
 
