@@ -1266,6 +1266,9 @@ Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en 
 #### D-291 — Detalle del paseo sin notas de familia ni raza/edad
 🟢 MEDIA. Fuentes identificadas (`evento_cita_servicio.notas`/`metadata`, `mascotas.raza`/`fecha_nacimiento`); ampliar el contrato de lectura cuando el Detalle lo pida en serio. Incluye la limitación del deep-link a citas de otro día (la cita se resuelve contra la lista de HOY — mismo contrato, se resuelven juntas) y los THUMBNAILS de fotos en Durante/Cierre (no hay contrato de lectura de evento_archivo_adjunto — hoy solo conteo del resumen; ampliado en S44-B4.4). Disparo: feedback de prestador real o diseño del Detalle v2. Origen: S44-B4.2.
 
+#### D-292 — B5: GPS background del Durante
+🟡 ALTA. GPS background (la dev build ya existe; expo-location + TaskManager) — el Durante real con pantalla apagada. Hoy el track es FOREGROUND (documentado en use-track-gps.ts): con el teléfono en el bolsillo la captura se corta. Único bloque de S44 no ejecutado; el defer registrado que el arranque previó. Disparo: antes de un paseador real en producción; requiere permiso "always" + servicio + textos de permiso nuevos + rebuild (L-134). Origen: S44 cierre.
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)

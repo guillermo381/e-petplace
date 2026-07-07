@@ -223,7 +223,7 @@ Stack real: Ionic React + Vite + Capacitor (no RN). Veredicto de Code, firmado: 
 2. **Verificación DB de v2** (pregunta de Sección 10 a Code). Bloquea decisiones de herencia.
 3. **Scaffold del monorepo:** pnpm + Turborepo + los dos apps Expo vacíos + `packages/api` con tipos generados de la DB real + skills instaladas (Sección 11) + `epetplace-db` skill creada. Prompt para Code desde Claude web.
 4. **S43 — Design system móvil** (`packages/ui`): tokens (fondo claro, identidad e-PetPlace), componentes base con el salto visual (movimiento, curvas, nivel MoeGo). Al cierre: skill `epetplace-design-system`. **Criterio de disparo para tocar cualquier pantalla: el design system existe.**
-5. **S44+ — Primer flujo end-to-end sobre el design system:** paseo (el confirmado, el más simple, el que exige GPS nativo). Después grooming rediseñado. La app dueño arranca su onboarding + mascotas en paralelo apenas el design system esté.
+5. **S44+ — Primer flujo end-to-end sobre el design system:** paseo (el confirmado, el más simple, el que exige GPS nativo). **✓ PARCIAL — S44 (7 Jul 2026): paseo E2E del PRESTADOR cerrado y verificado en dispositivo (dos paseos completos con GPS real).** Restan: GPS background (D-292/B5), grooming rediseñado, y la app dueño (onboarding + mascotas).
 6. **Enmiendas documentales de la Sección 12** — pueden ir en paralelo con 3-4, pero antes de S44.
 7. **Validación S2a cuando haya timeline navegable:** mostrar el expediente poblado (Zeus) a 10-15 pet parents. Antes del soft launch.
 
