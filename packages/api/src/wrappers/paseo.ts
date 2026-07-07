@@ -257,6 +257,12 @@ export type CitaAgendaPaseo = Pick<
     Database['public']['Tables']['tipos_servicio']['Row'],
     'nombre' | 'duracion_default_minutos'
   >;
+  /**
+   * Estado de la atención por el UNIQUE(cita_id, mascota_id) — B4.1-fix.
+   * null = la cita aún no tiene atención (sin_iniciar). La agenda decide
+   * el tratamiento visual con esto, no con cita.estado.
+   */
+  atencion: Pick<Database['public']['Tables']['evento_atencion']['Row'], 'estado' | 'iniciada_en'> | null;
 };
 
 export interface InputCitasPaseoDelDia {
@@ -272,7 +278,7 @@ export async function obtenerCitasPaseoDelDia(
   const { data, error } = await getClient()
     .from('evento_cita_servicio')
     .select(
-      'id, fecha, hora, estado, tipo_servicio, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos)',
+      'id, fecha, hora, estado, tipo_servicio, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
     )
     .eq('prestador_id', input.prestador_id)
     .eq('fecha', input.fecha)
@@ -281,7 +287,18 @@ export async function obtenerCitasPaseoDelDia(
     .order('hora', { ascending: true });
 
   if (error) return mapeoErrorAResultado(error.message);
-  return { ok: true, data: data ?? [] };
+  // PostgREST embebe `atencion` como array (la FK cita→atención es to-many).
+  // El UNIQUE(cita_id, mascota_id) + una mascota por cita → 0 o 1 fila; si
+  // hubiera más, nos quedamos con la de iniciada_en más reciente (Ley 7).
+  const citas: CitaAgendaPaseo[] = (data ?? []).map((c) => {
+    const atenciones = (c.atencion ?? []) as { estado: string; iniciada_en: string }[];
+    const atencion =
+      atenciones.length === 0
+        ? null
+        : atenciones.reduce((a, b) => (b.iniciada_en > a.iniciada_en ? b : a));
+    return { ...c, atencion };
+  });
+  return { ok: true, data: citas };
 }
 
 // ── A · Iniciar ───────────────────────────────────────────────────────────────

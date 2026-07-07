@@ -40,6 +40,12 @@
           "cameraPermission": "La app usa la cámara para registrar la evidencia de cada atención (fotos del servicio).",
           "photosPermission": "La app accede a tus fotos solo cuando elegís una imagen como evidencia de una atención."
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "La app usa tu ubicación durante el paseo para registrar el recorrido que ve la familia."
+        }
       ]
     ],
     "experiments": {

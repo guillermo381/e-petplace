@@ -47,12 +47,24 @@ function fechaHumana(): string {
 }
 
 // Estado de cita → Insignia (en_curso no lleva: CitaEnVivo porta el canal).
+// El tratamiento visual sale del estado de la ATENCIÓN si existe
+// (B4.1-fix), y si no, del estado de la cita.
 const INSIGNIA_POR_ESTADO: Record<string, { estado: InsigniaEstado; etiqueta: string }> = {
+  // atención
+  terminada:            { estado: 'proximo', etiqueta: 'Por cerrar' },
+  cerrada_con_calidad:  { estado: 'alDia',   etiqueta: 'Cerrado' },
+  // cita
   pendiente:  { estado: 'proximo', etiqueta: 'Por confirmar' },
   confirmada: { estado: 'info',    etiqueta: 'Confirmada' },
   completada: { estado: 'alDia',   etiqueta: 'Completada' },
   no_show:    { estado: 'atencion', etiqueta: 'No show' },
 };
+
+// El "estado efectivo" de la fila: prioridad a la atención (en_curso lo
+// maneja aparte con CitaEnVivo; el resto va a Insignia).
+function estadoEfectivo(cita: CitaAgendaPaseo): string | null {
+  return cita.atencion?.estado ?? cita.estado;
+}
 
 function esEspecie(v: string | null): v is AvatarMascotaEspecie {
   return v !== null;
@@ -62,7 +74,17 @@ function FilaCita({ cita, enVivo }: { cita: CitaAgendaPaseo; enVivo: boolean }) 
   const router = useRouter();
   const hora = cita.hora ? cita.hora.slice(0, 5) : '—';
   const dur = cita.tipo.duracion_default_minutos;
-  const insignia = !enVivo && cita.estado ? INSIGNIA_POR_ESTADO[cita.estado] : undefined;
+  // enVivo = esta fila es LA destacada con CitaEnVivo (no lleva Insignia).
+  // Una atención en_curso que NO es la destacada lleva "En curso" (Ley 7:
+  // un solo glow). El resto, su estado efectivo.
+  const ef = estadoEfectivo(cita);
+  const insignia = enVivo
+    ? undefined
+    : ef === 'en_curso'
+      ? ({ estado: 'info', etiqueta: 'En curso' } as const)
+      : ef
+        ? INSIGNIA_POR_ESTADO[ef]
+        : undefined;
 
   return (
     <Celda
@@ -120,8 +142,14 @@ export default function Agenda() {
     setRefrescando(false);
   }
 
-  const enVivo = pantalla.estado === 'listo' ? pantalla.citas.find((c) => c.estado === 'en_curso') : undefined;
-  const resto = pantalla.estado === 'listo' ? pantalla.citas.filter((c) => c.estado !== 'en_curso') : [];
+  // CitaEnVivo destaca UNA (Ley 7): la atención en_curso de iniciada_en
+  // más reciente. Las demás en_curso caen al resto con Insignia "En curso".
+  const citas = pantalla.estado === 'listo' ? pantalla.citas : [];
+  const enCurso = citas.filter((c) => c.atencion?.estado === 'en_curso');
+  const enVivo = enCurso.length
+    ? enCurso.reduce((a, b) => ((b.atencion?.iniciada_en ?? '') > (a.atencion?.iniciada_en ?? '') ? b : a))
+    : undefined;
+  const resto = citas.filter((c) => c.id !== enVivo?.id);
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
