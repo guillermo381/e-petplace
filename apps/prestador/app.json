@@ -32,6 +32,13 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "La app usa la cámara para registrar la evidencia de cada atención (fotos del servicio).",
+          "photosPermission": "La app accede a tus fotos solo cuando elegís una imagen como evidencia de una atención."
+        }
       ]
     ],
     "experiments": {

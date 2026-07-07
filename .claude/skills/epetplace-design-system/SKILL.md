@@ -15,7 +15,7 @@ description: >-
 
 # epetplace-design-system — el sistema es exigible, no sugerido
 
-Fuente de verdad: `packages/ui` (tokens v4 + 15 componentes + 3 temas).
+Fuente de verdad: `packages/ui` (tokens v4 + 16 componentes + 3 temas).
 Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 `@epetplace/ui`, no existe en el producto.
 
@@ -63,7 +63,7 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
     (lección B3.1b: pnpm auto-instala peers y `"*"` resuelve otra versión
     → módulo nativo duplicado → build nativa rota).
 11. **Protocolo del componente faltante.** Si la UI necesita algo que los
-    15 no cubren, PROHIBIDO inline en apps. Camino: (a) proponer al
+    16 no cubren, PROHIBIDO inline en apps. Camino: (a) proponer al
     founder espec mínima (qué es, qué no es, estados), (b) nace en
     `packages/ui` con el método completo — tokens, WCAG si trae pares
     nuevos, galería, gate en dispositivo —, (c) se agrega al índice de
@@ -128,7 +128,7 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 //     stroke={theme.text.primary} strokeWidth={1.75} strokeLinecap="round" /></Svg>
 ```
 
-## 3. ÍNDICE — los 15 componentes (import de `@epetplace/ui`)
+## 3. ÍNDICE — los 16 componentes (import de `@epetplace/ui`)
 
 | Export | Cuándo |
 |---|---|
@@ -147,6 +147,7 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 | `Esqueleto` (+`EsqueletoGrupo`) | Todo estado de carga. Estático por ley — sin shimmer ni pulso. Componer imitando el layout final; `EsqueletoGrupo` anuncia la carga al lector |
 | `AvatarMascota` | La cara de la mascota. fotoUrl → huella digna; no porta estado ni interacción; `especie` reservada para el set ilustrado D-288 |
 | `Cronometro` | Tiempo transcurrido de la atención. Voz de máquina (mono, tabular-nums); corre por DIFERENCIA contra inicioTs del server; `pausadoEnMs` congela quieto. Tamaño display provisional (se ratifica en B4) |
+| `EvidenciaFoto` (`.Capturar`/`.Thumbnail`) | Captura y thumbnail de evidencia. Capturar abre cámara directo, galería secundaria en Hoja; Thumbnail porta estado subiendo/subida/error — la foto JAMÁS desaparece por error; no sube nada: la cola es de la pantalla |
 
 También: `ThemeProvider`/`useTheme` (light default, memorial forzable),
 `Isotipo` (tinta/blanco/gradiente), `palette`/`gradients`/`typography`/

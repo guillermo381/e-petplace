@@ -55,6 +55,14 @@ export {
   type AvatarMascotaEspecie,
 } from './components/AvatarMascota'
 export { Cronometro, type CronometroProps } from './components/Cronometro'
+export {
+  EvidenciaFoto,
+  EvidenciaFotoCapturar,
+  EvidenciaFotoThumbnail,
+  type EvidenciaFotoCapturarProps,
+  type EvidenciaFotoThumbnailProps,
+  type EvidenciaFotoEstado,
+} from './components/EvidenciaFoto'
 export { AvisoProvider, useAviso, type AvisoInput, type AvisoVariante } from './components/Aviso'
 export { EstadoVacio } from './components/EstadoVacio'
 export { epetplaceFonts } from './fonts'

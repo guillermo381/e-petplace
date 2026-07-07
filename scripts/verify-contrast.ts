@@ -23,6 +23,7 @@
  */
 
 import { lightTheme, darkTheme, memorialTheme, type Theme } from '../packages/ui/src/themes'
+import { palette } from '../packages/ui/src/tokens/palette'
 
 type RGBA = { r: number; g: number; b: number; a: number }
 
@@ -190,6 +191,17 @@ const todos: Pair[] = [
   ...paresDe(lightTheme, 'LIGHT'),
   ...paresDe(darkTheme, 'DARK'),
   ...paresDe(memorialTheme, 'MEMORIAL'),
+  // EvidenciaFoto (S44-B2.5): sobre fotografía no hay par medible — el
+  // scrim del token garantiza el piso. Se gatea el PEOR caso construible:
+  // spinner/ícono blanco sobre scrim compositado sobre foto blanca (3:1
+  // gráfico). Independiente del tema (scrim e blanco son de palette).
+  {
+    nombre: 'GLOBAL · EvidenciaFoto spinner/ícono blanco / scrim⊕foto blanca (peor caso)',
+    fg: palette.white,
+    bg: palette.scrim,
+    surface: '#FFFFFF',
+    large: true,
+  },
 ]
 
 // Informativa (no gatea): tab inactivo de BarraTabs — decisión B3.7

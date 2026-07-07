@@ -29,6 +29,7 @@ import { CitaEnVivo } from '../components/CitaEnVivo'
 import { Esqueleto, EsqueletoGrupo } from '../components/Esqueleto'
 import { AvatarMascota } from '../components/AvatarMascota'
 import { Cronometro } from '../components/Cronometro'
+import { EvidenciaFoto, type EvidenciaFotoEstado } from '../components/EvidenciaFoto'
 
 // Foto local de ejemplo (generada, sin URL remota) — demuestra cover,
 // recorte circular y la desaturación memorial.
@@ -179,6 +180,59 @@ function EjemploCronometro() {
       <View style={{ gap: spacing[1] }}>
         <CaptionGaleria texto="≥1h — formato h:mm:ss, corriendo" />
         <Cronometro inicioTs={inicioLargo} />
+      </View>
+    </View>
+  )
+}
+
+// EvidenciaFoto: los 3 estados del thumbnail fijos + un demo cuyo estado
+// se cicla con un Boton (gate funcional del punto 7) + captura real
+// cableada: la foto tomada entra como thumbnail "subiendo" y pasa a
+// "subida" a los 2s (simulación de cola — la subida real vive en B3).
+function EjemploEvidenciaFoto() {
+  const { theme } = useTheme()
+  const [estadoDemo, setEstadoDemo] = useState<EvidenciaFotoEstado>('subiendo')
+  const [capturas, setCapturas] = useState<{ uri: string; estado: EvidenciaFotoEstado }[]>([])
+
+  function ciclarEstado() {
+    setEstadoDemo((e) => (e === 'subiendo' ? 'subida' : e === 'subida' ? 'error' : 'subiendo'))
+  }
+
+  function onFoto(uri: string) {
+    setCapturas((c) => [...c, { uri, estado: 'subiendo' }])
+    setTimeout(() => {
+      setCapturas((c) => c.map((x) => (x.uri === uri ? { ...x, estado: 'subida' } : x)))
+    }, 2000)
+  }
+
+  return (
+    <View style={{ gap: spacing[4] }}>
+      <View style={{ flexDirection: 'row', gap: spacing[3], flexWrap: 'wrap' }}>
+        <EvidenciaFoto.Capturar onFoto={onFoto} />
+        <EvidenciaFoto.Capturar onFoto={() => {}} deshabilitado />
+        {capturas.map((c) => (
+          <EvidenciaFoto.Thumbnail key={c.uri} uri={c.uri} estado={c.estado} />
+        ))}
+      </View>
+      <CaptionGaleria texto="captura: gate en dispositivo (la cámara no corre en la galería web)" />
+      <View style={{ flexDirection: 'row', gap: spacing[3], flexWrap: 'wrap' }}>
+        <EvidenciaFoto.Thumbnail uri={FOTO_MASCOTA_EJEMPLO} estado="subiendo" />
+        <EvidenciaFoto.Thumbnail uri={FOTO_MASCOTA_EJEMPLO} estado="subida" />
+        <EvidenciaFoto.Thumbnail
+          uri={FOTO_MASCOTA_EJEMPLO}
+          estado="error"
+          onReintentar={() => {}}
+        />
+      </View>
+      <CaptionGaleria texto="subiendo (spinner post-150ms) · subida (limpia) · error (la foto queda + reintento)" />
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3], flexWrap: 'wrap' }}>
+        <EvidenciaFoto.Thumbnail uri={FOTO_MASCOTA_EJEMPLO} estado={estadoDemo} onReintentar={ciclarEstado} />
+        <View style={{ gap: spacing[1] }}>
+          <Boton variante="secundario" tamaño="sm" etiqueta={`estado: ${estadoDemo} → ciclar`} onPress={ciclarEstado} />
+          <Text style={{ fontFamily: sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+            demo del punto 7 — ciclá y mirá los 3 estados
+          </Text>
+        </View>
       </View>
     </View>
   )
@@ -813,6 +867,27 @@ function GaleriaInterna() {
             <ThemeProvider defaultMode="memorial">
               <PanelTema etiqueta="memorial — hereda por token (si corre acá, lo decide la pantalla)">
                 <EjemploCronometro />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* EvidenciaFoto — S44-B2.5: captura + estados del thumbnail */}
+        <Seccion titulo="EvidenciaFoto — captura y estado (la subida vive en la pantalla)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — Capturar (tap cámara / long-press galería) + thumbnails">
+                <EjemploEvidenciaFoto />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — scrim del token, mismos estados">
+                <EjemploEvidenciaFoto />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — overlay y acciones neutrales; la captura funciona igual">
+                <EjemploEvidenciaFoto />
               </PanelTema>
             </ThemeProvider>
           </View>
