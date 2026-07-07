@@ -1273,5 +1273,6 @@ Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en 
 - **L-131** — La verificación de accesibilidad es programática o no existe: v3.1 shippeó memorial con texto cream sobre fondo cream (1.00:1) sin que nadie lo viera — los temas de baja frecuencia jamás se auditan a ojo. Origen: S43-B2.
 - **L-132** — El gate físico audita también los reportes: "cableado" no es "funciona" — el back de Android de la Hoja estaba correctamente cableado según el código y muerto en el dispositivo (predictive back). Origen: S43-B3.8/B4.
 - **L-133** — El acceso prestador→mascota se otorga por trigger AFTER UPDATE OF estado — solo en la TRANSICIÓN a confirmada. INSERTs que nacen confirmada NO otorgan acceso (walk-in futuro, seeds, imports). Detectado en B4.0 por test RLS como authenticated. Si un flujo directo-confirmada llega a existir, el trigger necesita su par AFTER INSERT. Origen: S44-B4.0.
+- **L-134** — Módulo nativo nuevo = dev build nueva. El túnel actualiza JS; lo nativo viaja en el APK. Checklist antes de cada gate en dev build: ¿se instaló algún paquete nativo después de la última build? Detectado en S44: build lanzada en B3, expo-location entró en B4.3 ("Cannot find native module ExpoLocation"). Origen: S44-B4.3.
 
 ---
