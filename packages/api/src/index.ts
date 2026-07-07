@@ -4,4 +4,39 @@
 export type { Database, Json } from './database.types';
 export { initApi, getClient, type EpetplaceClient } from './client';
 export type { ResultadoWrapper } from './resultado';
-export { agregarNotaAtencion, type InputAgregarNota, type CodigoErrorAtencion } from './wrappers/atencion';
+export {
+  agregarNotaAtencion,
+  agregarIncidenciaAtencion,
+  registrarArchivoAtencion,
+  type InputAgregarNota,
+  type InputAgregarIncidencia,
+  type InputRegistrarArchivo,
+  type ResultadoRegistrarArchivo,
+  type CodigoErrorAtencion,
+} from './wrappers/atencion';
+export {
+  iniciarAtencionPaseo,
+  registrarTrackPaseo,
+  agregarNovedadPaseo,
+  terminarAtencionPaseo,
+  cerrarPaseoConCalidad,
+  obtenerPaseoPorCita,
+  obtenerResumenCierrePaseo,
+  type CodigoErrorPaseo,
+  type EstadoAtencionPaseo,
+  type GpsEstadoPaseo,
+  type PuntoGpsPaseo,
+  type PaseoPorCita,
+  type InputIniciarPaseo,
+  type InputRegistrarTrack,
+  type InputAgregarNovedad,
+  type InputTerminarPaseo,
+  type InputCerrarPaseo,
+  type ResultadoIniciarPaseo,
+  type ResultadoTrackPaseo,
+  type ResultadoNovedadPaseo,
+  type ResultadoTerminarPaseo,
+  type ResultadoCerrarPaseo,
+  type NovedadRegistradaPaseo,
+  type ResumenCierrePaseo,
+} from './wrappers/paseo';
