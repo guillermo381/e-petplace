@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
-import { ThemeProvider as EpetThemeProvider, epetplaceFonts } from '@epetplace/ui';
+import { AvisoProvider, ThemeProvider as EpetThemeProvider, epetplaceFonts } from '@epetplace/ui';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 // Bootstrap de la puerta única (initApi) — efecto de módulo, S44-B4.
@@ -17,10 +17,12 @@ export default function RootLayout() {
 
   return (
     <EpetThemeProvider>
-      <AnimatedSplashOverlay />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-      </Stack>
+      <AvisoProvider>
+        <AnimatedSplashOverlay />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+        </Stack>
+      </AvisoProvider>
     </EpetThemeProvider>
   );
 }
