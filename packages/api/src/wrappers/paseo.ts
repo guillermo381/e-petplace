@@ -9,6 +9,7 @@
 
 import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
+import type { Database } from '../database.types';
 
 // ── Códigos de error (verificados contra los RAISE de cada body) ────────────
 
@@ -193,6 +194,48 @@ export interface ResumenCierrePaseo {
     pausas: number;
     fotos: number;
   };
+}
+
+// ── Catálogos (lectura; .from() DENTRO de la puerta única — gate S44-B3) ─────
+// Tipos derivados de los Rows generados (regla 34). Solo activos, en el
+// orden del catálogo (orden_display).
+
+export type NovedadCatalogoPaseo = Pick<
+  Database['public']['Tables']['cat_novedades_paseo']['Row'],
+  'codigo' | 'nombre' | 'descripcion' | 'grupo'
+>;
+
+export type IncidenciaCatalogoPaseo = Pick<
+  Database['public']['Tables']['cat_incidencias_paseo']['Row'],
+  'codigo' | 'nombre' | 'descripcion' | 'severidad_sugerida'
+>;
+
+/** Catálogo del parte del perro (cat_novedades_paseo, solo activas). */
+export async function obtenerNovedadesPaseo(): Promise<
+  ResultadoWrapper<NovedadCatalogoPaseo[], CodigoErrorPaseo>
+> {
+  const { data, error } = await getClient()
+    .from('cat_novedades_paseo')
+    .select('codigo, nombre, descripcion, grupo')
+    .eq('activo', true)
+    .order('orden_display', { ascending: true });
+
+  if (error) return mapeoErrorAResultado(error.message);
+  return { ok: true, data: data ?? [] };
+}
+
+/** Catálogo de incidencias de paseo (cat_incidencias_paseo, solo activas). */
+export async function obtenerIncidenciasPaseo(): Promise<
+  ResultadoWrapper<IncidenciaCatalogoPaseo[], CodigoErrorPaseo>
+> {
+  const { data, error } = await getClient()
+    .from('cat_incidencias_paseo')
+    .select('codigo, nombre, descripcion, severidad_sugerida')
+    .eq('activo', true)
+    .order('orden_display', { ascending: true });
+
+  if (error) return mapeoErrorAResultado(error.message);
+  return { ok: true, data: data ?? [] };
 }
 
 // ── A · Iniciar ───────────────────────────────────────────────────────────────
