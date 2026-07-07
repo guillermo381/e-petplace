@@ -12,10 +12,10 @@
 // de otro día cae en "ya no disponible" (limitación F1 reportada).
 // ─────────────────────────────────────────────────────────────────────
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   AvatarMascota,
   Boton,
@@ -77,8 +77,8 @@ export default function DetalleCita() {
   const [iniciando, setIniciando] = useState(false);
   const iniciandoRef = useRef(false);
 
-  const cargar = useCallback(async () => {
-    setPantalla({ estado: 'cargando' });
+  const cargar = useCallback(async (silencioso = false) => {
+    if (!silencioso) setPantalla({ estado: 'cargando' });
     const sesion = await asegurarSesionDev();
     if (!sesion.ok) {
       setPantalla({ estado: 'error', mensaje: sesion.mensaje });
@@ -120,9 +120,12 @@ export default function DetalleCita() {
     setPantalla({ estado: 'listo', cita });
   }, [citaId, router]);
 
-  useEffect(() => {
-    void cargar();
-  }, [cargar]);
+  // Focus-back re-consulta (7.5 también al volver, no solo al montar).
+  useFocusEffect(
+    useCallback(() => {
+      void cargar(true);
+    }, [cargar]),
+  );
 
   async function iniciar() {
     if (iniciandoRef.current) return;

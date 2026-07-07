@@ -1264,7 +1264,7 @@ Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en 
 🟡 ALTA. El bootstrap dev-only de sesión (signInWithPassword con credenciales demo en `.env.local`, dev only, no commiteado) es atajo asumido de B4 — no hay pantalla de login ni flujo de sesión real en el app. Disparo: antes de cualquier usuario real / soft launch. Origen: S44-B4.0.
 
 #### D-291 — Detalle del paseo sin notas de familia ni raza/edad
-🟢 MEDIA. Fuentes identificadas (`evento_cita_servicio.notas`/`metadata`, `mascotas.raza`/`fecha_nacimiento`); ampliar el contrato de lectura cuando el Detalle lo pida en serio. Incluye la limitación del deep-link a citas de otro día (la cita se resuelve contra la lista de HOY — mismo contrato, se resuelven juntas). Disparo: feedback de prestador real o diseño del Detalle v2. Origen: S44-B4.2.
+🟢 MEDIA. Fuentes identificadas (`evento_cita_servicio.notas`/`metadata`, `mascotas.raza`/`fecha_nacimiento`); ampliar el contrato de lectura cuando el Detalle lo pida en serio. Incluye la limitación del deep-link a citas de otro día (la cita se resuelve contra la lista de HOY — mismo contrato, se resuelven juntas) y los THUMBNAILS de fotos en Durante/Cierre (no hay contrato de lectura de evento_archivo_adjunto — hoy solo conteo del resumen; ampliado en S44-B4.4). Disparo: feedback de prestador real o diseño del Detalle v2. Origen: S44-B4.2.
 
 ---
 

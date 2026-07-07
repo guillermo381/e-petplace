@@ -5,10 +5,10 @@
 // La cita en_curso va envuelta en CitaEnVivo — UNA por pantalla (Ley 7).
 // ─────────────────────────────────────────────────────────────────────
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import {
   AvatarMascota,
   Boton,
@@ -132,9 +132,14 @@ export default function Agenda() {
     setPantalla({ estado: 'listo', citas: r.data });
   }, []);
 
-  useEffect(() => {
-    void cargar();
-  }, [cargar]);
+  // Refetch en focus (fix gate B4.4): al volver del Cierre la lista se
+  // actualiza sola. Silencioso = reemplazo directo (Ley 13) — el primer
+  // focus es el montaje y pantalla ya nace 'cargando' (esqueleto solo ahí).
+  useFocusEffect(
+    useCallback(() => {
+      void cargar(true);
+    }, [cargar]),
+  );
 
   async function refrescar() {
     setRefrescando(true);

@@ -301,6 +301,37 @@ export async function obtenerCitasPaseoDelDia(
   return { ok: true, data: citas };
 }
 
+// ── Track para el mapa del Cierre (lectura; decisión técnica B4.4:
+// el resumen server-side trae solo el conteo — los puntos viven en
+// eventos_mascota_paseo.track_gps y la RLS por mascota es el guard) ─────────
+
+export async function obtenerTrackPaseo(
+  eventoAtencionId: string,
+): Promise<ResultadoWrapper<PuntoGpsPaseo[], CodigoErrorPaseo>> {
+  const { data, error } = await getClient()
+    .from('eventos_mascota_paseo')
+    .select('track_gps')
+    .eq('evento_atencion_id', eventoAtencionId)
+    .maybeSingle();
+
+  if (error) return mapeoErrorAResultado(error.message);
+  if (data === null) return { ok: false, codigo: 'atencion_sin_oficio_paseo', mensaje: MENSAJES_ERROR_PASEO.atencion_sin_oficio_paseo };
+
+  const crudo = data.track_gps;
+  if (crudo === null) return { ok: true, data: [] };
+  if (!Array.isArray(crudo)) return mapeoErrorAResultado('datos_inconsistentes');
+  const puntos: PuntoGpsPaseo[] = [];
+  for (const item of crudo) {
+    if (typeof item !== 'object' || item === null) return mapeoErrorAResultado('datos_inconsistentes');
+    const o = item as Record<string, unknown>;
+    if (typeof o.lat !== 'number' || typeof o.lng !== 'number' || typeof o.t !== 'string') {
+      return mapeoErrorAResultado('datos_inconsistentes');
+    }
+    puntos.push({ lat: o.lat, lng: o.lng, t: o.t });
+  }
+  return { ok: true, data: puntos };
+}
+
 // ── A · Iniciar ───────────────────────────────────────────────────────────────
 
 export interface InputIniciarPaseo {

@@ -30,6 +30,7 @@ export {
   obtenerNovedadesPaseo,
   obtenerIncidenciasPaseo,
   obtenerCitasPaseoDelDia,
+  obtenerTrackPaseo,
   type NovedadCatalogoPaseo,
   type IncidenciaCatalogoPaseo,
   type CitaAgendaPaseo,

@@ -10,10 +10,10 @@
 // pantalla al frente — ver use-track-gps.ts.
 // ─────────────────────────────────────────────────────────────────────
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Boton,
   Campo,
@@ -462,8 +462,8 @@ export default function Durante() {
   const { citaId = '' } = useLocalSearchParams<{ citaId: string }>();
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
 
-  const cargar = useCallback(async () => {
-    setPantalla({ estado: 'cargando' });
+  const cargar = useCallback(async (silencioso = false) => {
+    if (!silencioso) setPantalla({ estado: 'cargando' });
     const sesion = await asegurarSesionDev();
     if (!sesion.ok) {
       setPantalla({ estado: 'error', mensaje: sesion.mensaje });
@@ -508,9 +508,12 @@ export default function Durante() {
     });
   }, [citaId, router]);
 
-  useEffect(() => {
-    void cargar();
-  }, [cargar]);
+  // Focus-back re-consulta (7.5 también al volver, no solo al montar).
+  useFocusEffect(
+    useCallback(() => {
+      void cargar(true);
+    }, [cargar]),
+  );
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
