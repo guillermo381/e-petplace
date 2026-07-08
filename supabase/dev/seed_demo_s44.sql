@@ -44,6 +44,13 @@ begin
   insert into familia (id, created_by_user_id) values (v_fam, v_uid)
     on conflict (id) do nothing;
 
+  -- S45-B5.3: el dueño demo como titular VIGENTE de la familia de Zeus.
+  -- El seed original era pre-onboarding; sin esta fila el routing del
+  -- app del dueño manda al demo al onboarding y el Home no ve a Zeus.
+  insert into familia_miembro (id, familia_id, user_id, rol, motivo_alta)
+    values ('de300000-0000-4000-8000-000000000fa1', v_fam, v_uid, 'adulto_titular', '[DEMO S44] titular demo (S45-B5.3)')
+    on conflict (id) do nothing;
+
   insert into mascotas (id, nombre, especie, origen, familia_id, user_id)
     values (v_masc, 'Zeus', 'perro', 'nacido_en_casa', v_fam, v_uid)
     on conflict (id) do nothing;

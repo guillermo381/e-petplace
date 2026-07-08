@@ -1,27 +1,38 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import { useEffect } from 'react';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
 import { useFonts } from 'expo-font';
-import { ThemeProvider as EpetThemeProvider, epetplaceFonts } from '@epetplace/ui';
+import { AvisoProvider, ThemeProvider as EpetThemeProvider, epetplaceFonts } from '@epetplace/ui';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+// Bootstrap de la puerta única (initApi + persistencia de sesión) —
+// efecto de módulo, patrón S44-B4 de prestador. Auth REAL, sin atajo dev.
+import '@/lib/api';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function RootLayout() {
   // Infraestructura S43-B2: DM Sans + JetBrains Mono cargadas antes de
   // renderizar (los nombres coinciden con typography.family de @epetplace/ui)
-  const [fontsLoaded] = useFonts(epetplaceFonts);
-  if (!fontsLoaded) return null;
+  const [fontsLoaded, fontsError] = useFonts(epetplaceFonts);
+
+  // BUG S45: preventAutoHideAsync sin hideAsync = splash infinito en
+  // nativo (el template lo escondía en AnimatedSplashOverlay, que este
+  // layout ya no usa). Se esconde apenas hay algo para dibujar — y
+  // también si las fuentes FALLAN: una app con fuente de sistema es
+  // mejor que un splash eterno (regla 36).
+  useEffect(() => {
+    if (fontsLoaded || fontsError) {
+      void SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontsError]);
+
+  if (!fontsLoaded && !fontsError) return null;
 
   return (
     <EpetThemeProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <AnimatedSplashOverlay />
-        <AppTabs />
-      </ThemeProvider>
+      <AvisoProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </AvisoProvider>
     </EpetThemeProvider>
   );
 }

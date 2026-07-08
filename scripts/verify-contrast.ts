@@ -140,6 +140,16 @@ function paresDe(t: Theme, nombre: string): Pair[] {
   // Fallback neutral del avatar (los 3 temas): text.secondary sobre bg.overlay.
   add('Avatar iniciales text.secondary / bg.overlay⊕card', t.text.secondary, t.bg.overlay, t.bg.card)
 
+  // SelectorEspecie (S45-B3.1): el nombre (text.primary) sobre el fondo de la
+  // ficha seleccionada (capaBg.identidad compositado sobre base). El borde 1.5
+  // hex puro es refuerzo gráfico exento como el anillo de CitaEnVivo: el canal
+  // semántico es accessibilityState.checked + este tint, gateado acá.
+  // Memorial no tinta (Ley 8): su ficha queda en pares text.primary/bg de arriba.
+  if ('capaBg' in t) {
+    add('SelectorEspecie nombre text.primary / capaBg.identidad⊕base', t.text.primary, t.capaBg.identidad, t.bg.base)
+    add('SelectorEspecie nombre text.primary / capaBg.identidad⊕card', t.text.primary, t.capaBg.identidad, t.bg.card)
+  }
+
   // Campo (B3.3): mensaje de error sobre las superficies donde vive el form,
   // y los bordes de ESTADO como gráficos funcionales a 3:1 (WCAG 1.4.11 —
   // usan el flag `large`). El borde default queda fuera del gate: el campo
@@ -221,6 +231,16 @@ for (const c of ['identidad', 'cuidado', 'comunidad', 'comunidadAmplia'] as cons
 }
 console.log(
   `  (info) MEMORIAL · anillo CitaEnVivo (text.secondary / bg.base) → ${contrast(memorialTheme.text.secondary, memorialTheme.bg.base).toFixed(2)}:1 — exento: el pill porta el canal AA`,
+)
+
+// Informativa (no gatea): borde seleccionado de SelectorEspecie — S45-B3.1.
+// Hex puro de capa identidad como refuerzo gráfico; el canal semántico es
+// accessibilityState.checked + el tint capaBg (gateado arriba).
+console.log(
+  `  (info) LIGHT · borde SelectorEspecie capa.identidad / bg.base → ${contrast(lightTheme.capa.identidad, lightTheme.bg.base).toFixed(2)}:1 — exento: checked + tint portan el canal semántico`,
+)
+console.log(
+  `  (info) MEMORIAL · borde SelectorEspecie (text.secondary / bg.base) → ${contrast(memorialTheme.text.secondary, memorialTheme.bg.base).toFixed(2)}:1 — exento: checked porta el canal semántico`,
 )
 
 let fallos = 0

@@ -8767,6 +8767,7 @@ export type Database = {
           familia_id: string
           fecha_alta: string
           fecha_nacimiento: string | null
+          fecha_nacimiento_precision: string | null
           foto_url: string | null
           id: string
           microchip: string | null
@@ -8789,6 +8790,7 @@ export type Database = {
           familia_id: string
           fecha_alta?: string
           fecha_nacimiento?: string | null
+          fecha_nacimiento_precision?: string | null
           foto_url?: string | null
           id?: string
           microchip?: string | null
@@ -8811,6 +8813,7 @@ export type Database = {
           familia_id?: string
           fecha_alta?: string
           fecha_nacimiento?: string | null
+          fecha_nacimiento_precision?: string | null
           foto_url?: string | null
           id?: string
           microchip?: string | null
@@ -14538,6 +14541,18 @@ export type Database = {
         }
         Returns: string
       }
+      crear_familia_con_primera_mascota: {
+        Args: {
+          p_especie: string
+          p_fecha_nacimiento?: string
+          p_foto_url?: string
+          p_nombre_familia: string
+          p_nombre_mascota: string
+          p_precision_fecha?: string
+          p_sexo?: string
+        }
+        Returns: Json
+      }
       crear_mascota_walkin: {
         Args: {
           p_country_code?: string
@@ -14709,6 +14724,7 @@ export type Database = {
           prestador_tipo: string
         }[]
       }
+      get_estado_onboarding_dueno: { Args: never; Returns: Json }
       get_pais_detalle: {
         Args: { p_codigo_iso2: string }
         Returns: {

@@ -11,6 +11,7 @@
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "com.epetplace.cliente",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -36,14 +37,21 @@
       [
         "expo-image-picker",
         {
-          "cameraPermission": "La app usa la cámara para registrar la evidencia de cada atención (fotos del servicio).",
-          "photosPermission": "La app accede a tus fotos solo cuando elegís una imagen como evidencia de una atención."
+          "cameraPermission": "La app usa la cámara para la foto de tu mascota.",
+          "photosPermission": "La app accede a tus fotos solo cuando elegís una imagen para tu mascota."
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7f357bfa-43c2-4c8c-983b-0bcfff40ce7d"
+      }
+    },
+    "owner": "guillo381"
   }
 }

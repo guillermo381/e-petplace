@@ -33,6 +33,12 @@ export {
   type TarjetaRelleno,
 } from './components/Tarjeta'
 export { Campo, type CampoProps } from './components/Campo'
+export {
+  CampoFecha,
+  type CampoFechaProps,
+  type CampoFechaValor,
+  type CampoFechaPrecision,
+} from './components/CampoFecha'
 export { Celda, type CeldaProps, type CeldaDensidad } from './components/Celda'
 export { Separador } from './components/Separador'
 export {
@@ -43,8 +49,9 @@ export {
   type InsigniaTamaño,
 } from './components/Insignia'
 export { Encabezado, type EncabezadoProps } from './components/Encabezado'
+export { HeroMarca, type HeroMarcaProps, type HeroMarcaVariante } from './components/HeroMarca'
 export { BarraTabs, type BarraTabsItem } from './components/BarraTabs'
-export { Hoja, type HojaProps, type HojaAltura } from './components/Hoja'
+export { Hoja, HojaScroll, type HojaProps, type HojaAltura, type HojaScrollProps } from './components/Hoja'
 export { CitaEnVivo, type CitaEnVivoProps, type CitaEnVivoCapa } from './components/CitaEnVivo'
 export { Esqueleto, EsqueletoGrupo, type EsqueletoProps, type EsqueletoForma } from './components/Esqueleto'
 export {
@@ -54,6 +61,36 @@ export {
   type AvatarMascotaCapa,
   type AvatarMascotaEspecie,
 } from './components/AvatarMascota'
+export {
+  SelectorEspecie,
+  type SelectorEspecieProps,
+  type SelectorEspecieOpcion,
+} from './components/SelectorEspecie'
+export {
+  SelectorAvatar,
+  type SelectorAvatarProps,
+  type SelectorAvatarFoto,
+} from './components/SelectorAvatar'
+export {
+  SelectorOpcion,
+  type SelectorOpcionProps,
+  type SelectorOpcionItem,
+} from './components/SelectorOpcion'
+export { VisorFoto, type VisorFotoProps } from './components/VisorFoto'
+export {
+  LineaDeVida,
+  LineaDeVidaNodo,
+  type LineaDeVidaProps,
+  type LineaDeVidaItem,
+  type LineaDeVidaEstadoPie,
+} from './components/LineaDeVida'
+export {
+  capturarConCamara,
+  capturarDeGaleria,
+  type FotoCapturada,
+  type ResultadoCaptura,
+  type OpcionesCaptura,
+} from './components/capturaFoto'
 export { Cronometro, type CronometroProps } from './components/Cronometro'
 export {
   EvidenciaFoto,

@@ -34,8 +34,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Linking, Pressable, Text, View } from 'react-native'
 import { Image, type ImageSource } from 'expo-image'
-import * as ImagePicker from 'expo-image-picker'
 import Svg, { Path } from 'react-native-svg'
+
+import { capturarConCamara, capturarDeGaleria } from './capturaFoto'
 
 import { palette } from '../tokens/palette'
 import { typography } from '../tokens/typography'
@@ -103,19 +104,19 @@ export function EvidenciaFotoCapturar({ onFoto, deshabilitado = false }: Evidenc
   // dos cámaras (el state no propaga entre taps consecutivos).
   const lanzandoRef = useRef(false)
 
+  // Captura vía la infraestructura compartida (capturaFoto, S45-B3.3) —
+  // evidencia: sin recorte, calidad 0.7 (default del helper).
   async function tomarFoto() {
     if (lanzandoRef.current || deshabilitado) return
     lanzandoRef.current = true
     try {
-      const permiso = await ImagePicker.requestCameraPermissionsAsync()
-      if (!permiso.granted) {
+      const r = await capturarConCamara({ calidad: CALIDAD })
+      if (r.tipo === 'permiso_denegado') {
         setPermisoDenegado(true)
         return
       }
       setPermisoDenegado(false)
-      const r = await ImagePicker.launchCameraAsync({ quality: CALIDAD })
-      const uri = r.canceled ? null : (r.assets?.[0]?.uri ?? null)
-      if (uri !== null) onFoto(uri)
+      if (r.tipo === 'foto') onFoto(r.foto.uri)
     } finally {
       lanzandoRef.current = false
     }
@@ -126,13 +127,8 @@ export function EvidenciaFotoCapturar({ onFoto, deshabilitado = false }: Evidenc
     lanzandoRef.current = true
     setHojaAbierta(false)
     try {
-      // El picker moderno (Android Photo Picker / PHPicker) no exige permiso.
-      const r = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        quality: CALIDAD,
-      })
-      const uri = r.canceled ? null : (r.assets?.[0]?.uri ?? null)
-      if (uri !== null) onFoto(uri)
+      const r = await capturarDeGaleria({ calidad: CALIDAD })
+      if (r.tipo === 'foto') onFoto(r.foto.uri)
     } finally {
       lanzandoRef.current = false
     }

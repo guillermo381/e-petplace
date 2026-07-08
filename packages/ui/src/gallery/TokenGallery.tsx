@@ -28,6 +28,13 @@ import { Hoja, type HojaAltura } from '../components/Hoja'
 import { CitaEnVivo } from '../components/CitaEnVivo'
 import { Esqueleto, EsqueletoGrupo } from '../components/Esqueleto'
 import { AvatarMascota } from '../components/AvatarMascota'
+import { SelectorEspecie, type SelectorEspecieOpcion } from '../components/SelectorEspecie'
+import { CampoFecha, type CampoFechaValor } from '../components/CampoFecha'
+import { SelectorAvatar, type SelectorAvatarFoto } from '../components/SelectorAvatar'
+import { SelectorOpcion } from '../components/SelectorOpcion'
+import { HeroMarca } from '../components/HeroMarca'
+import { LineaDeVida, type LineaDeVidaItem } from '../components/LineaDeVida'
+import { VisorFoto } from '../components/VisorFoto'
 import { Cronometro } from '../components/Cronometro'
 import { EvidenciaFoto, type EvidenciaFotoEstado } from '../components/EvidenciaFoto'
 import { MapaRecorrido } from '../components/MapaRecorrido'
@@ -131,6 +138,165 @@ function EjemploCitaEnVivo() {
         />
       </Tarjeta>
     </CitaEnVivo>
+  )
+}
+
+// Las 6 familias F1 reales de cat_especies post-D-287 (orden_display).
+const ESPECIES_F1: SelectorEspecieOpcion[] = [
+  { codigo: 'perro', nombre: 'Perro' },
+  { codigo: 'gato', nombre: 'Gato' },
+  { codigo: 'conejo', nombre: 'Conejo' },
+  { codigo: 'ave', nombre: 'Ave' },
+  { codigo: 'roedor', nombre: 'Roedor' },
+  { codigo: 'pez', nombre: 'Pez' },
+]
+
+function EjemploSelectorEspecie() {
+  const [especie, setEspecie] = useState<string | undefined>('conejo')
+  return (
+    <SelectorEspecie
+      opciones={ESPECIES_F1}
+      seleccionada={especie}
+      onSelect={setEspecie}
+      etiqueta="¿Qué especie es tu mascota?"
+    />
+  )
+}
+
+function EjemploHeroMarca() {
+  const { theme } = useTheme()
+  const esMemorial = theme.mode === 'memorial'
+  return (
+    <View style={{ gap: spacing[4], borderRadius: radius.md, overflow: 'hidden' }}>
+      <HeroMarca titulo="Bienvenido a la familia" variante="alto">
+        <Text
+          style={{
+            fontFamily: sans.regular,
+            fontSize: typography.size.base,
+            color: esMemorial ? theme.text.secondary : theme.text.onGradient,
+            marginTop: spacing[2],
+          }}
+        >
+          Contanos de tu mascota y armamos su expediente.
+        </Text>
+      </HeroMarca>
+      <HeroMarca titulo="Su primera foto" variante="compacto" />
+    </View>
+  )
+}
+
+// Mock con el shape REAL del wrapper leerTimelineMascota (S45-B5.1):
+// los 2 paseos de Zeus + un tipo desconocido para ver la degradación.
+function itemsLineaDeVida(): LineaDeVidaItem[] {
+  const hoy = new Date()
+  const iso = (h: number, m: number, diasAtras = 0) =>
+    new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - diasAtras, h, m).toISOString()
+  return [
+    {
+      evento_id: 'mock-1',
+      tipo: 'atencion_paseo_registrada',
+      eje_jtbd: 'salud',
+      fecha_evento: iso(9, 54),
+      titulo_fuente: '[DEMO S44] Paseos Andres',
+      duracion_min: 20,
+      fotos_count: 1,
+      fotos: [FOTO_MASCOTA_EJEMPLO],
+    },
+    {
+      evento_id: 'mock-2',
+      tipo: 'atencion_paseo_registrada',
+      eje_jtbd: 'salud',
+      fecha_evento: iso(4, 13),
+      titulo_fuente: '[DEMO S44] Paseos Andres',
+      duracion_min: 54,
+      fotos_count: 3,
+      fotos: [FOTO_MASCOTA_EJEMPLO, FOTO_MASCOTA_EJEMPLO],
+    },
+    {
+      // tipo que el diccionario NO conoce → nodo genérico digno por eje
+      evento_id: 'mock-3',
+      tipo: 'vacuna_aplicada_v9',
+      eje_jtbd: 'salud',
+      fecha_evento: iso(16, 30, 1),
+      titulo_fuente: null,
+      duracion_min: null,
+      fotos_count: 0,
+    },
+  ]
+}
+
+function EjemploVisorFoto() {
+  const [abierto, setAbierto] = useState(false)
+  return (
+    <>
+      <Boton variante="secundario" etiqueta="Abrir visor (2 fotos)" onPress={() => setAbierto(true)} />
+      <VisorFoto
+        visible={abierto}
+        onCerrar={() => setAbierto(false)}
+        fotos={[FOTO_MASCOTA_EJEMPLO, FOTO_MASCOTA_EJEMPLO]}
+        etiqueta="Fotos del paseo"
+      />
+    </>
+  )
+}
+
+function EjemploLineaDeVida() {
+  return (
+    <LineaDeVida
+      items={itemsLineaDeVida()}
+      estadoPie="mas"
+      onCargarMas={() => {}}
+      onPressNodo={() => {}}
+    />
+  )
+}
+
+function EjemploSelectorOpcion() {
+  const [sexo, setSexo] = useState<string | undefined>('desconocido')
+  return (
+    <SelectorOpcion
+      opciones={[
+        { codigo: 'macho', etiqueta: 'Macho' },
+        { codigo: 'hembra', etiqueta: 'Hembra' },
+        { codigo: 'desconocido', etiqueta: 'No sé' },
+      ]}
+      seleccionada={sexo}
+      onSelect={setSexo}
+      etiqueta="¿Es macho o hembra?"
+    />
+  )
+}
+
+function EjemploSelectorAvatar() {
+  // Vacío (huella digna + invitación) y con foto (preview + Cambiar/Quitar).
+  const [sinFoto, setSinFoto] = useState<SelectorAvatarFoto | null>(null)
+  const [conFoto, setConFoto] = useState<SelectorAvatarFoto | null>({
+    uri: FOTO_MASCOTA_EJEMPLO,
+    width: 800,
+    height: 800,
+  })
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[8], justifyContent: 'center' }}>
+      <SelectorAvatar nombre="Zeus" especie="perro" foto={sinFoto} onCambiar={setSinFoto} />
+      <SelectorAvatar nombre="Zeus" especie="perro" foto={conFoto} onCambiar={setConFoto} />
+    </View>
+  )
+}
+
+function EjemploCampoFecha() {
+  // Los 3 estados de precisión (espejo del CHECK de la DB) + vacío + error.
+  const [exacta, setExacta] = useState<CampoFechaValor | undefined>({ fecha: '2024-03-12', precision: 'exacta' })
+  const [aprox, setAprox] = useState<CampoFechaValor | undefined>({ fecha: '2024-03-01', precision: 'aproximada' })
+  const [estimada, setEstimada] = useState<CampoFechaValor | undefined>({ fecha: '2021-01-01', precision: 'estimada' })
+  const [vacia, setVacia] = useState<CampoFechaValor | undefined>(undefined)
+  return (
+    <View>
+      <CampoFecha label="Exacta (día completo)" valor={exacta} onChange={setExacta} />
+      <CampoFecha label="Aproximada (mes y año)" valor={aprox} onChange={setAprox} />
+      <CampoFecha label="Estimada (por etapa — tocá y probá «No sé la fecha»)" valor={estimada} onChange={setEstimada} />
+      <CampoFecha label="Vacío" valor={vacia} onChange={setVacia} ayuda="Tocá para abrir el selector" />
+      <CampoFecha label="Con error" valor={vacia} onChange={setVacia} error="Necesitamos una fecha para cuidarlo mejor" />
+    </View>
   )
 }
 
@@ -892,6 +1058,153 @@ function GaleriaInterna() {
             <ThemeProvider defaultMode="memorial">
               <PanelTema etiqueta="memorial — foto desaturada leve, fallback neutral sin capa">
                 <EjemploAvatarMascota />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* SelectorEspecie — S45-B3.1: las 6 familias F1, selección única */}
+        <Seccion titulo="SelectorEspecie — grid 3×2, selección única (tocá una ficha)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — seleccionada: borde 1.5 capa.identidad + tint capaBg (no consume accent.active)">
+                <EjemploSelectorEspecie />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — mismos registros, tints del tema">
+                <EjemploSelectorEspecie />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — degrada solo: sin tinte, selección con borde text.secondary">
+                <EjemploSelectorEspecie />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* CampoFecha — S45-B3.2: fecha con precisión honesta, Hoja JS pura */}
+        <Seccion titulo="CampoFecha — fecha de nacimiento con precisión (abre Hoja, selector JS puro)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — exacta · aproximada · estimada · vacío · error (patrón Campo)">
+                <EjemploCampoFecha />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — mismos estados, superficies del tema">
+                <EjemploCampoFecha />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — la Hoja degrada sola (slide+fade, nada rebota)">
+                <EjemploCampoFecha />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* HeroMarca — S45-B3.4: gradiente firma en contexto cerrado */}
+        <Seccion titulo="HeroMarca — cabecera de marca (alto · compacto; CTAs siempre afuera)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — gradiente firma v2 + isotipo blanco (el UNO de la pantalla) + voz humana">
+                <EjemploHeroMarca />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — mismo gradiente del tema">
+                <EjemploHeroMarca />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — sin gradiente: bg.card plano, la marca habla bajito">
+                <EjemploHeroMarca />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* VisorFoto — S45-B5.3: lightbox solo-fades */}
+        <Seccion titulo="VisorFoto — una foto a la vez (solo fades; letterbox digno; swipe si hay varias)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — el visor es siempre fondo pleno oscurecido (tinta + scrim), X/back/tap-fondo cierran">
+                <EjemploVisorFoto />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — mismo visor (no depende del tema)">
+                <EjemploVisorFoto />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — solo fades: no hay nada que degradar">
+                <EjemploVisorFoto />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* LineaDeVida — S45-B5.2: EL componente de la sesión */}
+        <Seccion titulo="LineaDeVida — el timeline del dueño (mock de los paseos de Zeus + tipo desconocido)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta='claro — punto hex puro por capa, fecha en voz humana, mono solo en hora/duración; el 3° nodo es un tipo desconocido degradando digno'>
+                <EjemploLineaDeVida />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — mismos registros">
+                <EjemploLineaDeVida />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — el punto degrada a text.secondary, nada rebota">
+                <EjemploLineaDeVida />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* SelectorOpcion — S45-B4.1: chips de selección única */}
+        <Seccion titulo="SelectorOpcion — 2-4 opciones cortas, selección única (tocá un chip)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — seleccionado: borde 1.5 capa.identidad + tint capaBg (no consume accent.active)">
+                <EjemploSelectorOpcion />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — mismos registros">
+                <EjemploSelectorOpcion />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — degrada: sin tinte, selección con borde text.secondary">
+                <EjemploSelectorOpcion />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* SelectorAvatar — S45-B3.3: identidad, no evidencia */}
+        <Seccion titulo="SelectorAvatar — la foto de identidad (tocá: cámara y galería son pares)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta='claro — vacío (huella digna + invitación) · con foto (Cambiar/Quitar) · "Por ahora no" primera clase'>
+                <EjemploSelectorAvatar />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — mismos estados">
+                <EjemploSelectorAvatar />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — huella neutral, foto desaturada por AvatarMascota, Hoja degrada sola">
+                <EjemploSelectorAvatar />
               </PanelTema>
             </ThemeProvider>
           </View>

@@ -25,7 +25,15 @@
  * Al abrir: accessibilityViewIsModal + anuncio del título.
  */
 
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  forwardRef,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react'
 import {
   AccessibilityInfo,
   BackHandler,
@@ -63,6 +71,11 @@ import { useTheme } from '../ThemeProvider'
 
 const AnimatedGHScrollView = Animated.createAnimatedComponent(GHScrollView)
 
+// El pan del swipe-to-close, expuesto a los descendientes para que un
+// scrollable interno pueda bloquearlo en su área (ver HojaScroll).
+type PanDeHoja = ReturnType<typeof Gesture.Pan>
+const HojaPanContext = createContext<PanDeHoja | null>(null)
+
 export type HojaAltura = 'contenido' | 'media' | 'completa'
 
 export interface HojaProps {
@@ -76,6 +89,50 @@ export interface HojaProps {
   /** Botón X (target 44). El swipe/backdrop/back existen siempre. */
   conCerrar?: boolean
 }
+
+export interface HojaScrollProps {
+  children: ReactNode
+  style?: object
+  contentContainerStyle?: object
+}
+
+/**
+ * HojaScroll — scrollable interno que GANA dentro del área de la Hoja
+ * (S45-B3.2, gate en dispositivo: el pan del swipe-to-close capturaba
+ * el arrastre de listas anidadas en Android — L-132: web no lo delata).
+ *
+ * Patrón SM (gesture-composition · block): cada scrollable lleva SU
+ * PROPIA Gesture.Native() (prohibido reusar instancias entre detectores)
+ * con .blocksExternalGesture(pan de la Hoja) — el pan no puede activarse
+ * mientras el toque nace acá; el swipe-to-close sigue vivo en el agarre,
+ * header y todo lo que no sea este scroll. Fuera de una Hoja degrada a
+ * ScrollView normal.
+ */
+export const HojaScroll = forwardRef<GHScrollView, HojaScrollProps>(function HojaScroll(
+  { children, style, contentContainerStyle },
+  ref,
+) {
+  const pan = useContext(HojaPanContext)
+  const nativo = useMemo(() => {
+    const g = Gesture.Native()
+    if (pan) g.blocksExternalGesture(pan)
+    return g
+  }, [pan])
+
+  const scroll = (
+    <GHScrollView
+      ref={ref}
+      nestedScrollEnabled
+      style={style}
+      contentContainerStyle={contentContainerStyle}
+    >
+      {children}
+    </GHScrollView>
+  )
+
+  if (!pan) return scroll
+  return <GestureDetector gesture={nativo}>{scroll}</GestureDetector>
+})
 
 export function Hoja({
   visible,
@@ -257,7 +314,7 @@ export function Hoja({
                   contentContainerStyle={{ paddingHorizontal: spacing[4], paddingTop: spacing[1] }}
                   keyboardShouldPersistTaps="handled"
                 >
-                  {children}
+                  <HojaPanContext.Provider value={pan}>{children}</HojaPanContext.Provider>
                 </AnimatedGHScrollView>
               </GestureDetector>
             </Animated.View>

@@ -641,6 +641,7 @@ Origen: S16 Sub-bloque 2 H12-H13. Prioridad: 🟡 ALTA. Disparo: Fase I del plan
 
 #### D-152 — Granularidad `cat_especies` para roedor
 Hoy "roedor" es categoría única. MODELO_PRODUCTO discrimina hámster/ratón/jerbo/cobaya como especies separadas. Cobaya ya se agregó en S16 (es Nivel B). Resto pueden agregarse si emerge demanda real de discriminar.
+**Enmienda S45 (D-287 ampliada):** en F1 cobaya se REGISTRA como roedor (decisión founder S45 — `cobaya.activo=false`, `acepta_nuevos_registros=false`); la fila y el perfil de cobaya QUEDAN en el catálogo (sus mascotas existentes y la granularidad futura los usan). S16 y S45 no se contradicen: S16 modeló la granularidad, S45 decidió qué expone el registro F1. Si esta deuda se ejecuta, la reactivación de cobaya (y nuevas especies de roedor) pasa por el mismo gate de catálogo.
 Origen: S16 Sub-bloque 2 H8. Prioridad: ⚪ BAJA. Disparo: cuando emerja demanda real.
 
 #### D-153 — Sub-sesión específica de POLITICAS_EPETPLACE.md con equipo legal
@@ -1251,14 +1252,14 @@ Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en 
 #### D-286 — TalkBack sobre EsqueletoGrupo sin verificar en dispositivo
 🟢 MEDIA. El gate visual de Esqueleto (S44-B2.2) cerró en Android, pero la pasada de TalkBack (anunciar "Cargando, barra de progreso" una vez y no leer formas vacías) no se corrió en el teléfono — solo se verificó el DOM en RN-web (`[role=progressbar][aria-busy=true]`). Disparo: B4, primera pantalla real con Esqueleto. Origen: S44-B2.2.
 
-#### D-287 — Activar en cat_especies las familias F1 faltantes
-🟡 ALTA. Activar en `cat_especies` las familias F1 faltantes: conejo, ave, pez, roedor (`activo=true`, `acepta_nuevos_registros=true`). Decisión founder S44 — la DB refleja niveles de soporte de S16 (D15.x) que quedaron viejos; al ejecutar, revisar ese contexto y los `motivo_estado` para que la activación sea consciente. Es migración sobre catálogo con FK viva (`mascotas_especie_fk` RESTRICT) → gate del founder (regla 73). Disparo: antes del onboarding de mascotas de la app dueño (bloquea registrar 4 de las 6 familias F1). Origen: S44-B2.3 (verificación regla 21-22 del fallback por especie de AvatarMascota).
+#### D-287 — Activar en cat_especies las familias F1 faltantes ✅
+✅ CERRADA (S45, migración `20260707120000_d287_especies_f1` con gate founder). Ampliada por decisión founder S45: el registro sale con EXACTAMENTE 6 familias (perro, gato, conejo, ave, pez, roedor); **hurón y cobaya quedaron desactivados** (`activo=false`, `acepta_nuevos_registros=false`, motivo por especie — cobaya se subsume en roedor para nuevos registros, P4 protege a las existentes: había 0). Perfiles de `cat_especies_perfil` creados para roedor y pez. Verificación imperativa: trigger de visibilidad con perfil nuevo ✓, alta asistida rechaza hurón ✓. Implicancia regla 69 anotada: el ModalAltaAsistida del repo viejo (D-215) ofrece cobaya/hurón que el guard ahora rechaza. Origen: S44-B2.3.
 
 #### D-288 — Set de avatares ilustrados por especie (6 F1) — dirección de arte
 🟢 MEDIA. Assets con licencia comercial verificada (LICENCIA.txt en el repo), curaduría founder/Ana María, estilo único, SVG fondo transparente, legibles a 40px. Integración: solo assets + mapeo, la API de AvatarMascota ya recibe `especie` (códigos reales de cat_especies). Evolución posterior: por raza (perro/gato) — requiere dato raza confiable + set ampliado. Disparo: founder entrega la carpeta, o a más tardar onboarding de mascotas de la app dueño. Origen: S44-B2.3 (enmienda final — las siluetas outline propias se descartaron; queda huella genérica).
 
-#### D-289 — API key de Google Maps + dev build Android (EN EJECUCIÓN S44)
-🟡 ALTA (era ⚪ "nota para B5" — enmendada en S44-B2.6: está en ejecución HOY). Hallazgo del gate: **Google Maps fue REMOVIDO de Expo Go Android en SDK 53** (changelog oficial SDK 52: "Google Maps will no longer be supported in Expo Go for Android in SDK 53 ... You can use Google Maps in development builds"); la doc de map-view que decía "no additional setup in Expo Go" está desactualizada. Decisión founder+arquitecto: dev build Android por EAS cloud con key propia (`android.config.googleMaps.apiKey` vía env/secret, JAMÁS en texto plano). **B2.6 (MapaRecorrido) quedó construido y commiteado con gate de tiles PENDIENTE — disparo: primera dev build instalada** (el componente NO entra al índice de la skill hasta cerrar ese gate, Ley 11). Pendiente al cierre: restringir la key por package name + SHA-1 post-build. iOS (proveedor Apple) no necesita key. Origen: S44-B2.6.
+#### D-289 — API key de Google Maps + dev build Android (SIGUE ABIERTA — solo falta borrar la key vieja)
+🟡 ALTA (era ⚪ "nota para B5" — enmendada en S44-B2.6; re-enmendada S45: la key S44 expuesta fue ROTADA en S45-B0 pero la vieja NO se borró de Google Cloud — borrarla es el remanente; NO borrar el VALOR nuevo de la rotación hasta que prestador tenga rebuild con la key nueva. Ver nota de arranque S46-B0 en CLAUDE.md). Hallazgo del gate: **Google Maps fue REMOVIDO de Expo Go Android en SDK 53** (changelog oficial SDK 52: "Google Maps will no longer be supported in Expo Go for Android in SDK 53 ... You can use Google Maps in development builds"); la doc de map-view que decía "no additional setup in Expo Go" está desactualizada. Decisión founder+arquitecto: dev build Android por EAS cloud con key propia (`android.config.googleMaps.apiKey` vía env/secret, JAMÁS en texto plano). **B2.6 (MapaRecorrido) quedó construido y commiteado con gate de tiles PENDIENTE — disparo: primera dev build instalada** (el componente NO entra al índice de la skill hasta cerrar ese gate, Ley 11). Pendiente al cierre: restringir la key por package name + SHA-1 post-build. iOS (proveedor Apple) no necesita key. Origen: S44-B2.6.
 
 #### D-290 — Auth del prestador en apps/prestador
 🟡 ALTA. El bootstrap dev-only de sesión (signInWithPassword con credenciales demo en `.env.local`, dev only, no commiteado) es atajo asumido de B4 — no hay pantalla de login ni flujo de sesión real en el app. Disparo: antes de cualquier usuario real / soft launch. Origen: S44-B4.0.
@@ -1269,6 +1270,44 @@ Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en 
 #### D-292 — B5: GPS background del Durante
 🟡 ALTA. GPS background (la dev build ya existe; expo-location + TaskManager) — el Durante real con pantalla apagada. Hoy el track es FOREGROUND (documentado en use-track-gps.ts): con el teléfono en el bolsillo la captura se corta. Único bloque de S44 no ejecutado; el defer registrado que el arranque previó. Disparo: antes de un paseador real en producción; requiere permiso "always" + servicio + textos de permiso nuevos + rebuild (L-134). Origen: S44 cierre.
 
+### Deudas de Sesión 45 (7 Jul 2026)
+
+#### D-293 — Key de Places v2: verificar uso real y borrar
+🟢 MEDIA. En la higiene de keys de S45-B0 quedó identificada una key de Places heredada de v2 cuyo uso real no se verificó. Verificar en Google Cloud si algo vivo la consume (el repo viejo está congelado); si nada la usa, borrarla — una key ociosa es superficie de riesgo gratis. Disparo: S46-B0 (obligatorio, junto al borrado de la key S44 de D-289). Origen: S45-B0.
+
+#### D-294 — Rama co-dueño en `user_tiene_acceso_a_mascota`
+🟡 ALTA. La función que gobierna TODO el timeline (las 4 tablas + la policy de storage S45-B5.1 la heredan) NO tiene rama `mascota_codueño`/`familia_miembro`: un co-dueño puro puede ver, editar y hasta BORRAR la mascota (policies de `mascotas` sí tienen rama codueño) pero no puede leer un solo evento de su historia. Hoy no muerde porque el flujo de alta hace al que reclama también `mascotas.user_id` — muerde con el SEGUNDO co-dueño. Al cerrar esta brecha, storage y las 4 tablas la heredan gratis (misma puerta). Disparo: antes de habilitar co-dueños reales (bloquea D-295). Origen: S45 relevamiento dueño.
+
+#### D-295 — Flujo de invitación de co-dueños
+🟡 ALTA. No existe RPC ni flujo: el titular puede INSERT directo en `mascota_codueño` por RLS solo si el otro user YA existe; no hay invitación para no-registrados (el único análogo, `cliente_pendiente_registro`, es prestador-céntrico). Necesita: invitación + aceptación + D-294 resuelta. Disparo: F1 post-onboarding, cuando la familia deje de ser unipersonal. Origen: S45 relevamiento dueño.
+
+#### D-296 — El dueño no puede leer su propia `mascota_visibilidad_config`
+🟢 MEDIA. Verificado en S45-B4: el trigger crea la config al nacer la mascota, pero el dueño no la VE por RLS (`cfg_como_postgres=1 | cfg_como_authenticated_rls=0`, literal). Hoy no muerde (ninguna pantalla la lee); muerde cuando el dueño gestione visibilidad. Disparo: pantalla de visibilidad/privacidad del dueño. Origen: S45-B4 verificación imperativa.
+
+#### D-297 — `gen:types` del package api llama `supabase` pelado
+⚪ BAJA. `packages/api/package.json` → `gen:types` invoca `supabase` sin npx y falla con ENOENT (el CLI no está en PATH del script); en S45 se corrió a mano con `npx supabase gen types…`. Fix trivial: `npx supabase …` en el script. Disparo: próxima regeneración de tipos. Origen: S45-B4.
+
+#### D-298 — Endurecer persistencia de sesión (LargeSecureStore)
+🟡 ALTA. La sesión del dueño persiste en AsyncStorage (patrón oficial supabase RN — la skill de stack pide SecureStore, pero su límite de 2048 bytes no banca el JSON de sesión). El endurecimiento canónico es LargeSecureStore (AES por streaming: key en SecureStore, blob cifrado en AsyncStorage — exige lib de AES, decisión founder por "cero librerías nuevas"). Disparo: pre-soft-launch. Origen: S45-B4.
+
+#### D-299 — Confirmación de email desactivada en el proyecto Supabase
+🟡 ALTA. Verificado en S45-B4 (literal: `sesion_activa tras signUp = true`): cualquier email inventado crea cuenta con sesión inmediata. Comodísimo para los gates de hoy, inaceptable con usuarios reales (spam, cuentas basura, emails ajenos). El wrapper ya contempla el flujo con confirmación (`email_no_confirmado`, aviso "Te mandamos un correo…"). Disparo: pre-soft-launch (activar en el dashboard + gate E2E del flujo confirmación). Origen: S45-B4 asserts de auth.
+
+#### D-300 — Voz del dueño en `cat_novedades_paseo`
+🟢 MEDIA. Los `nombre` del catálogo son voz de picker del prestador y dos chirrían mostrados al dueño: "Baño anormal (diarrea, sangre, no hizo)" (clínico) y "Otra novedad (detallar)" (jerga de formulario — S45-B5.3 la parchea en pantalla mostrando "Otra novedad"). Decidir voz para dueño VÍA CATÁLOGO (regla 21: columna nueva `nombre_familia` o revisión de `nombre`), no con parches por pantalla. Disparo: revisión de voz del founder pre-ensayo S2a. Origen: S45-B5.3 (diccionario visible reportado).
+
+#### D-301 — Huérfanos en bucket `mascotas` + falta vía DELETE gateada
+🟢 MEDIA. Quedaron 6 objetos huérfanos del diagnóstico S45-bugs (bytes sintéticos, sin PII; paths en el reporte de esa sesión). Borrarlos exige Storage API con service role o dashboard: `storage.objects` tiene trigger `protect_delete` anti-SQL y el `storage rm` del CLI devolvió `deleted:[]` sin borrar; el bucket además no tiene NINGUNA policy DELETE para dueños (un dueño no puede borrar su propio avatar viejo — cada "Cambiar" acumula). Diseñar la vía de limpieza (policy DELETE por carpeta del dueño, con gate) + barrer los 6. Disparo: S46-B0 (barrido) + antes de dueños reales (policy). Origen: S45-bugs.
+
+#### D-302 — Salida "Lo hago después" del onboarding dueño
+⚪ BAJA (decisión founder S45: prioridad baja, no se construyó). El flujo de onboarding no tiene salida lateral: quien no quiere terminar de registrar a su mascota no tiene camino digno al Home "vacío". Disparo: pre-ensayo S2a. Origen: S45-B4 espec.
+
+#### D-303 — Foto huérfana si la RPC falla post-upload
+🟢 MEDIA. El cierre del onboarding sube la foto ANTES de `crear_familia_con_primera_mascota`; si la RPC falla y el user abandona (o sigue "sin foto"), el objeto queda huérfano en el bucket sin fila que lo vincule. Mismo problema de fondo que D-301 (estrategia de limpieza del bucket); mitigable invirtiendo el orden (RPC primero, foto después) cuando exista UPDATE de foto para el dueño. Disparo: junto a D-301. Origen: S45-B4.1.
+
+#### D-304 — Concurrencia del guard `familia_ya_existe`
+🟢 MEDIA. El guard de `crear_familia_con_primera_mascota` es check-then-insert sin lock: dos requests simultáneos del mismo user (doble tap + red lenta) pueden crear dos familias estandar. Hoy mitigado por UX (cerrojo del cierre + redirect en `familia_ya_existe`), no por la DB. Endurecer con advisory lock por user o unique parcial (miembro vigente × familia estandar). Disparo: antes de tráfico real de registro. Origen: S45-B4.
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)
@@ -1277,5 +1316,8 @@ Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en 
 - **L-132** — El gate físico audita también los reportes: "cableado" no es "funciona" — el back de Android de la Hoja estaba correctamente cableado según el código y muerto en el dispositivo (predictive back). Origen: S43-B3.8/B4.
 - **L-133** — El acceso prestador→mascota se otorga por trigger AFTER UPDATE OF estado — solo en la TRANSICIÓN a confirmada. INSERTs que nacen confirmada NO otorgan acceso (walk-in futuro, seeds, imports). Detectado en B4.0 por test RLS como authenticated. Si un flujo directo-confirmada llega a existir, el trigger necesita su par AFTER INSERT. Origen: S44-B4.0.
 - **L-134** — Módulo nativo nuevo = dev build nueva. El túnel actualiza JS; lo nativo viaja en el APK. Checklist antes de cada gate en dev build: ¿se instaló algún paquete nativo después de la última build? Detectado en S44: build lanzada en B3, expo-location entró en B4.3 ("Cannot find native module ExpoLocation"). Origen: S44-B4.3.
+- **L-135** — La verificación va en batch SEPARADO del write: un `RAISE EXCEPTION` de verificación en el mismo batch del CLI rollbackea también el INSERT que quería verificar (todo el string es una transacción). El patch del seed S45 se "aplicó" dos veces sin persistir hasta separar write y verificación en llamadas distintas. Corolario del espíritu L-063: la verificación posterior ES el test — y tiene que sobrevivir al test. Origen: S45-B5.3 (patch seed).
+- **L-136** — Preservar los logs ANTES de limpiar buffers: `logcat -c` para "empezar limpio" barrió la evidencia literal de la repro del founder (BUG 1 de S45) y obligó a reconstruir la causa por forense de DB + re-reproducción sintética. Antes de cualquier `-c`/clear/restart sobre un buffer compartido: volcar (`logcat -d > archivo`) lo que haya. Origen: S45-bugs.
+- **L-130 (enmienda S45)** — Distinguir keys de SERVER de keys de CLIENTE Android al aplicar L-130 ("secretos jamás por chat/repo"): la key de Google Maps viaja INEVITABLEMENTE dentro del APK — su protección real no es el secreto sino las RESTRICCIONES (package name + SHA-1 por app en Google Cloud; por eso dos proyectos EAS = dos entries de restricción, prestador y cliente). El manejo por env secret de EAS sigue siendo correcto (higiene de repo), pero rotar una key de cliente sin actualizar restricciones y rebuild no protege nada. Origen: S45-B0/B5.4.
 
 ---

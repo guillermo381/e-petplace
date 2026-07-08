@@ -2,7 +2,35 @@
 // Regla: ningún app hace supabase.from()/rpc() directo — siempre a través de wrappers de este paquete.
 
 export type { Database, Json } from './database.types';
-export { initApi, getClient, type EpetplaceClient } from './client';
+export { initApi, getClient, type EpetplaceClient, type OpcionesApi, type StorageSesion } from './client';
+export {
+  registrarse,
+  iniciarSesion,
+  cerrarSesion,
+  obtenerSesion,
+  type SesionDueno,
+  type InputRegistrarse,
+  type InputIniciarSesion,
+  type CodigoErrorAuth,
+} from './wrappers/auth';
+export {
+  obtenerEspeciesActivas,
+  obtenerCatalogoNovedadesPaseo,
+  type EspecieCatalogo,
+  type NovedadPaseoCatalogo,
+} from './wrappers/catalogos';
+export {
+  leerTimelineMascota,
+  obtenerFotosDeEvento,
+  leerDetalleAtencion,
+  type ItemTimeline,
+  type PaginaTimeline,
+  type FotoDeEvento,
+  type NovedadDeAtencion,
+  type DetalleAtencion,
+  type PuntoTrack,
+  type CodigoErrorTimeline,
+} from './wrappers/timeline';
 export type { ResultadoWrapper } from './resultado';
 export {
   agregarNotaAtencion,
@@ -19,6 +47,17 @@ export {
   type MiPrestador,
   type CodigoErrorPrestador,
 } from './wrappers/prestador';
+export {
+  crearFamiliaConPrimeraMascota,
+  getEstadoOnboardingDueno,
+  obtenerMascotasDeFamilia,
+  type InputCrearFamiliaConPrimeraMascota,
+  type FamiliaCreada,
+  type EstadoOnboardingDueno,
+  type MascotaResumen,
+  type PrecisionFechaNacimiento,
+  type CodigoErrorOnboarding,
+} from './wrappers/onboarding';
 export {
   iniciarAtencionPaseo,
   registrarTrackPaseo,
