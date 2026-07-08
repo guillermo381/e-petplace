@@ -16,6 +16,20 @@ import { Platform } from 'react-native';
 import { File } from 'expo-file-system';
 import { getClient } from '@epetplace/api';
 
+/**
+ * BUG S45 (dos literales del dispositivo): en Expo Go el directorio del
+ * proyecto se llama LITERALMENTE `%40guillo381%2Fcliente` (slug del
+ * monorepo) y picker/manipulator devuelven ese path crudo como uri.
+ * TODA API de FS (File nueva Y legacy) decodifica %XX → resuelve un path
+ * inexistente → "Missing 'READ' permission" / "isn't readable".
+ * Cura: re-encodear los '%' (→ %25) para que la decodificación devuelva
+ * el literal. Probado en este equipo: la forma %2540…%252F… se lee OK.
+ * En dev build el path no tiene '%' y esto es un no-op.
+ */
+function uriLegible(uri: string): string {
+  return uri.replace(/%/g, '%25');
+}
+
 const BUCKET = 'mascotas';
 
 export type ResultadoSubidaAvatar =
@@ -27,7 +41,7 @@ async function leerBytes(uri: string): Promise<ArrayBuffer> {
     const r = await fetch(uri);
     return await r.arrayBuffer();
   }
-  const bytes = await new File(uri).bytes();
+  const bytes = await new File(uriLegible(uri)).bytes();
   return bytes.buffer as ArrayBuffer;
 }
 
@@ -41,8 +55,13 @@ export async function subirAvatar(input: {
     const { error } = await getClient()
       .storage.from(BUCKET)
       .upload(path, bytes, { contentType: 'image/jpeg', upsert: false });
-    if (error) return { ok: false, mensaje: error.message };
+    if (error) {
+      // el literal SIEMPRE al log — un catch mudo escondió este bug (S45)
+      console.error('[subir-avatar] storage error=', error.message);
+      return { ok: false, mensaje: error.message };
+    }
   } catch (e) {
+    console.error('[subir-avatar] EXCEPCION=', e instanceof Error ? `${e.name}: ${e.message}` : String(e));
     return { ok: false, mensaje: e instanceof Error ? e.message : 'No se pudo leer la foto.' };
   }
 

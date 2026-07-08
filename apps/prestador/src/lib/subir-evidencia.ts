@@ -11,6 +11,13 @@ import { Platform } from 'react-native';
 import { File } from 'expo-file-system';
 import { getClient, registrarArchivoAtencion } from '@epetplace/api';
 
+// S45, misma cura que cliente/subir-avatar: en Expo Go el path del
+// proyecto contiene '%40…%2F…' LITERALES y las FS APIs decodifican %XX →
+// path inexistente. Re-encodear '%' (→%25) lo repara; en dev build es no-op.
+function uriLegible(uri: string): string {
+  return uri.replace(/%/g, '%25');
+}
+
 const BUCKET = 'cita-archivos';
 
 export interface ResultadoSubida {
@@ -25,7 +32,7 @@ async function leerBytes(uri: string): Promise<ArrayBuffer> {
     const r = await fetch(uri);
     return await r.arrayBuffer();
   }
-  const bytes = await new File(uri).bytes();
+  const bytes = await new File(uriLegible(uri)).bytes();
   return bytes.buffer as ArrayBuffer;
 }
 

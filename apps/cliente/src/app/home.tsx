@@ -6,7 +6,8 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
+import Svg, { Circle, Path } from 'react-native-svg';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -15,6 +16,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  Hoja,
   LineaDeVida,
   spacing,
   typography,
@@ -22,12 +24,33 @@ import {
   type LineaDeVidaEstadoPie,
 } from '@epetplace/ui';
 import {
+  cerrarSesion,
   getEstadoOnboardingDueno,
   leerTimelineMascota,
   obtenerMascotasDeFamilia,
   type ItemTimeline,
   type MascotaResumen,
 } from '@epetplace/api';
+
+// Engranaje — Ley 12: outline 1.75, remates redondeados, UN color.
+function IconoAjustes({ color }: { color: string }) {
+  const stroke = {
+    stroke: color,
+    strokeWidth: 1.75,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+    fill: 'none' as const,
+  };
+  return (
+    <Svg width={22} height={22} viewBox="0 0 24 24">
+      <Circle cx={12} cy={12} r={3.2} {...stroke} />
+      <Path
+        d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01A1.7 1.7 0 0 0 10.05 3V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01c.26.63.87 1.04 1.56 1.04H21a2 2 0 1 1 0 4h-.09c-.69 0-1.3.41-1.51 1.04Z"
+        {...stroke}
+      />
+    </Svg>
+  );
+}
 
 import { esEspecieUi } from '@/lib/params';
 
@@ -37,6 +60,8 @@ export default function Home() {
   const insets = useSafeAreaInsets();
 
   const [mascota, setMascota] = useState<MascotaResumen | null | 'cargando'>('cargando');
+  const [ajustesAbiertos, setAjustesAbiertos] = useState(false);
+  const [cerrando, setCerrando] = useState(false);
   // 'error' es un estado PROPIO: un timeline que falló JAMÁS se muestra
   // como vacío ("la historia empieza acá" sería mentira) — Ley 13:
   // vacío solo CONFIRMADO.
@@ -139,6 +164,25 @@ export default function Home() {
       style={{ flex: 1, backgroundColor: theme.bg.base }}
       contentContainerStyle={{ padding: spacing[5], paddingTop: insets.top + spacing[8], paddingBottom: insets.bottom + spacing[6] }}
     >
+      {/* engranaje — S45: sin logout no hay ensayo S2a */}
+      <Pressable
+        onPress={() => setAjustesAbiertos(true)}
+        accessibilityRole="button"
+        accessibilityLabel="Ajustes"
+        hitSlop={10}
+        style={{
+          position: 'absolute',
+          top: insets.top + spacing[3],
+          right: spacing[4],
+          width: 44,
+          height: 44,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <IconoAjustes color={theme.text.secondary} />
+      </Pressable>
+
       <View style={{ alignItems: 'center', gap: spacing[3], marginBottom: spacing[8] }}>
         <AvatarMascota
           nombre={mascota.nombre}
@@ -192,6 +236,37 @@ export default function Home() {
           onCargarMas={() => void cargarMas()}
         />
       )}
+
+      <Hoja visible={ajustesAbiertos} onCerrar={() => setAjustesAbiertos(false)} titulo="Ajustes">
+        <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
+          <Text
+            style={{
+              fontFamily: typography.family.sans.regular,
+              fontSize: typography.size.base,
+              color: theme.text.secondary,
+            }}
+          >
+            ¿Cerrás tu sesión? Tus datos quedan guardados.
+          </Text>
+          <Boton
+            variante="destructivo"
+            etiqueta="Cerrar sesión"
+            bloque
+            cargando={cerrando}
+            onPress={() => {
+              if (cerrando) return;
+              setCerrando(true);
+              void (async () => {
+                await cerrarSesion();
+                setCerrando(false);
+                setAjustesAbiertos(false);
+                router.replace('/bienvenida');
+              })();
+            }}
+          />
+          <Boton variante="ghost" etiqueta="Cancelar" bloque onPress={() => setAjustesAbiertos(false)} />
+        </View>
+      </Hoja>
     </ScrollView>
   );
 }

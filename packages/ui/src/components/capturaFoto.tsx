@@ -54,8 +54,16 @@ async function redimensionar(foto: FotoCapturada, ladoMax: number, calidad: numb
       { compress: calidad, format: manipulator.SaveFormat.JPEG },
     )
     return { uri: r.uri, width: r.width, height: r.height }
-  } catch {
-    // build sin el módulo nativo: la foto original sigue siendo válida
+  } catch (e) {
+    // build sin el módulo nativo: la foto original sigue siendo válida.
+    // El fallo se LOGGEA siempre (diagnóstico S45: un catch mudo acá
+    // escondió la causa de un gate fallado).
+    console.error(
+      '[capturaFoto] resize falló, sigue la ORIGINAL',
+      `${foto.width}x${foto.height}`,
+      foto.uri.slice(0, 60),
+      e instanceof Error ? `${e.name}: ${e.message}` : String(e),
+    )
     return foto
   }
 }
