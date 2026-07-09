@@ -27,6 +27,13 @@
 // el manuscrito ANTES de convertir. Dos stickers de una misma dosis
 // (vacuna + diluyente/fracción, p.ej. bacterina + Recombitek) = UNA fila.
 //
+// v22 (S48-B7.1): regla de fecha-NO-compartida (ensayada y REVERTIDA en
+// el timebox): el residuo de v21 era una fila sin año heredando la
+// fecha de la vecina en 1/3 corridas. La regla explícita EMPEORÓ:
+// 1 corrida truncada + 1 corrida con la fecha de KC corrida de fila y
+// compartida entre dos vecinas. El prompt vigente es el de v21 (la
+// revisión pre-guardado es la red del residuo — decisión founder B7).
+//
 // Contrato:
 //   POST { imageBase64: string, mediaType?: string }   (verify_jwt: true)
 //   200 → { vacunas: [{ nombre, fecha_aplicada, fecha_proxima,
