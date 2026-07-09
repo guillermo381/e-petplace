@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useColorScheme } from 'react-native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
@@ -17,6 +18,12 @@ SplashScreen.preventAutoHideAsync();
 console.log('[bundle] cliente S48');
 
 export default function RootLayout() {
+  // D-305 (S48): el tema lo decide el SISTEMA — el app lo resuelve acá
+  // y lo pasa controlado al provider (packages/ui no importa Appearance).
+  // useColorScheme re-renderiza al cambiar el tema con la app abierta.
+  // El override memorial queda ENCIMA (subtree <ThemeProvider memorial>).
+  const colorScheme = useColorScheme();
+
   // Infraestructura S43-B2: DM Sans + JetBrains Mono cargadas antes de
   // renderizar (los nombres coinciden con typography.family de @epetplace/ui)
   const [fontsLoaded, fontsError] = useFonts(epetplaceFonts);
@@ -35,7 +42,7 @@ export default function RootLayout() {
   if (!fontsLoaded && !fontsError) return null;
 
   return (
-    <EpetThemeProvider>
+    <EpetThemeProvider mode={colorScheme === 'dark' ? 'dark' : 'light'}>
       <AvisoProvider>
         <Stack screenOptions={{ headerShown: false }} />
       </AvisoProvider>

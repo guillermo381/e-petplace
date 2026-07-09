@@ -565,10 +565,17 @@ const ICONOS_TABS: BarraTabsItem[] = [
 
 // ── galería ───────────────────────────────────────────────────────────────────
 export function TokenGallery() {
+  // Provider PROPIO (S48/D-305): el provider raíz del app está controlado
+  // por el tema del sistema, y el selector manual de esta galería
+  // (herramienta de verificación) necesita setMode vivo. Se siembra del
+  // modo vigente del app y de ahí en más manda el toggle.
+  const { mode } = useTheme()
   return (
-    <AvisoProvider>
-      <GaleriaInterna />
-    </AvisoProvider>
+    <ThemeProvider defaultMode={mode}>
+      <AvisoProvider>
+        <GaleriaInterna />
+      </AvisoProvider>
+    </ThemeProvider>
   )
 }
 
