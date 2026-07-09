@@ -101,6 +101,10 @@ const VOZ_SUBIDA: Record<string, { mensaje: string; reintentable: boolean }> = {
 // páginas parece no caber. Regla 26.
 const VOZ_CAPTURA = {
   multiPagina: '¿El carnet tiene varias páginas? Escanealas de a una — cada tanda se suma a su historia.',
+  // S48-B8.3 (hallazgo founder: "se siente lento"): espera honesta con
+  // expectativa real. PROHIBIDO progreso falso — no sabemos cuánto falta
+  // y no mentimos (L-139 aplica a la UI también).
+  espera: 'Estamos leyendo el carnet. Esto puede tardar un minuto — cada vacuna que encontremos se suma a su historia.',
 };
 
 // Voz de la revisión (regla 26). El texto del tipo baja la expectativa
@@ -340,8 +344,8 @@ export default function CarnetDeVacunas() {
             <Image source={{ uri: foto.uri }} contentFit="cover" transition={0} style={{ width: 160, height: 160, borderRadius: radius.lg }} />
           )}
           {spinnerVisible && <ActivityIndicator color={theme.text.secondary} />}
-          <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.base, color: theme.text.secondary }}>
-            Leyendo el carnet…
+          <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.base, lineHeight: typography.size.base * 1.4, color: theme.text.secondary, textAlign: 'center' }}>
+            {VOZ_CAPTURA.espera}
           </Text>
         </View>
       )}
