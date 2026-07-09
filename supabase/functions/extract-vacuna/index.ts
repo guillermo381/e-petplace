@@ -1,8 +1,16 @@
-// extract-vacuna (S46-B1.1) — extracción de vacunas desde la foto de un
-// carnet físico. Re-target del monorepo: REEMPLAZA a la heredada de v2
-// al desplegar (mismo slug; decisión regla 74 — el caller de v2 escribe
-// contra la tabla `vacunas`, que ya no existe: nada vivo depende del
-// contrato viejo). La versión v2 queda intacta en disco como referencia.
+// extract-vacuna (S46-B1.1; v17 S48-A4) — extracción de vacunas desde la
+// foto de un carnet físico. Re-target del monorepo: REEMPLAZA a la
+// heredada de v2 al desplegar (mismo slug; decisión regla 74 — el caller
+// de v2 escribe contra la tabla `vacunas`, que ya no existe: nada vivo
+// depende del contrato viejo). La versión v2 queda intacta en disco.
+//
+// v17 (decisión founder+arquitecto S48): tipo_vacuna se INFIERE desde el
+// nombre comercial reconocible, contra un vocabulario CERRADO que vive
+// en el prompt (PROTO-CATÁLOGO — enmienda D-008: cuando cat_vacunas
+// exista, esta function lo lee de DB, no del prompt). Sin base
+// suficiente → null, igual que siempre. JAMÁS inferir desde fecha,
+// orden en el carnet ni frecuencia estadística. El shape del contrato
+// NO cambia (tipo_vacuna ya era nullable).
 //
 // Contrato:
 //   POST { imageBase64: string, mediaType?: string }   (verify_jwt: true)
@@ -100,7 +108,10 @@ Reglas ESTRICTAS por campo:
 - nombre: nombre comercial o denominación de la vacuna tal como está escrita (ej: Rabisin, Nobivac DHPPi). Si el nombre de una fila es ilegible, OMITE esa fila completa — no la incluyas.
 - fecha_aplicada / fecha_proxima: en el carnet vienen como DD/MM/YY o DD/ENE/YY (meses abreviados en español: ENE=01, FEB=02, MAR=03, ABR=04, MAY=05, JUN=06, JUL=07, AGO=08, SEP=09, OCT=10, NOV=11, DIC=12). Convierte a YYYY-MM-DD. La próxima suele estar anotada ~1 año después de la aplicada, pero SOLO si está escrita: no la calcules tú.
 - veterinario_nombre_externo: veterinario o clínica de la cabecera de la sección (ej: CPA TEUSAQUILLO).
-- tipo_vacuna: el tipo si el carnet lo distingue del nombre comercial (ej: antirrábica, séxtuple, polivalente, KC).
+- tipo_vacuna: SOLO uno de estos valores exactos (vocabulario cerrado), o null:
+  "antirrábica" · "múltiple" · "tos de las perreras" · "leptospirosis" · "giardia" · "triple felina" · "leucemia felina".
+  Asígnalo únicamente si tienes base real: el carnet rotula el tipo (séxtuple/quíntuple/DHPP/polivalente cuentan como "múltiple") o el nombre comercial es una marca que reconoces con certeza. Ejemplos: Nobivac DHPPi → "múltiple"; Defensor o Rabisin → "antirrábica"; Bronchi-Shield o KC → "tos de las perreras"; Felocell → "triple felina".
+  Sin base suficiente (nombre ilegible, marca que no reconoces) → null. PROHIBIDO deducir el tipo desde la fecha, la posición de la fila en el carnet o qué vacuna es estadísticamente más común.
 - lote: número de lote si aparece junto al nombre o en su columna.
 - Todo dato ilegible o ausente = null. JAMÁS inventes, completes ni uses cadena vacía.
 - Si el carnet no tiene ninguna fila legible, responde {"vacunas":[]}.`

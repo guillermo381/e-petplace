@@ -74,6 +74,7 @@ Origen: S10. Criterio de disparo: antes del primer prestador real registrado en 
 #### D-008 — Vacunación: catálogo de vacunas alimenta el servicio
 Lo que se cobra son las vacunas, no la vacunación. Necesario para veterinarios. Si primer prestador es grooming u hotel, no bloquea.
 Origen: S10. Prioridad: 🟡.
+**Enmienda S48-A4:** el vocabulario cerrado del prompt de `extract-vacuna` v17 (antirrábica · múltiple · tos de las perreras · leptospirosis · giardia · triple felina · leucemia felina) es PROTO-CATÁLOGO — la primera encarnación viva de esta deuda. Cuando `cat_vacunas` exista, la function lee el vocabulario de DB, no del prompt (regla 21: el prompt hoy es el hardcode consciente, con esta deuda como criterio de salida).
 
 #### D-009 — Catálogo categorías/especialidades por tipo de prestador
 Origen: Planning 8 mayo. Prioridad: 🟡.
@@ -1318,6 +1319,7 @@ Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en 
 
 #### D-306 — `propaga_a_perfil=true` de vacuna_aplicada es promesa sin mecanismo NI destino
 🟢 MEDIA. `cat_tipos_evento.vacuna_aplicada` declara `propaga_a_perfil=true`, pero no existe trigger `_trg_vacuna_propagar_perfil` (los 7 `_trg_*_propagar_perfil` cubren otras tipadas: alergia, condición, intervención, medicación, microchip, peso, temperamento) NI columna de vacunas en `mascota_perfil_vigente` (21 columnas relevadas, cero `%vacun%`). Hoy no muerde: nada lee vacunas del perfil vigente. Alternativa barata: flag a `false` si el modelo decide que vacunas no propaga. Disparo: cuando el perfil vigente quiera mostrar "vacunas al día". Origen: S46-B1.1 C1.
+**Nota S48-A4:** la inferencia de tipo de v17 (vocabulario cerrado desde nombre comercial) habilita el backfill retroactivo de filas históricas sin tipo cuando el badge "vacunas al día" dispare: re-pasar los nombres guardados por la misma clasificación, sin re-leer carnets.
 
 #### D-307 — Dueño sin corrección self-service de vacunas
 🟡 ALTA. RLS relevada literal (S46-B1.0): `vacuna_update` es solo-prestador y `vacuna_delete_admin` solo-admin. Una vacuna mal cargada por el dueño (vía carnet o manual) no tiene camino de corrección ni borrado para él. Con extracción por IA, equivocarse es esperable; la pantalla de revisión pre-guardado mitiga, no resuelve. Disparo: antes de exponer el flujo de carnet a dueños reales. Origen: S46-B1.0/B1.1.
