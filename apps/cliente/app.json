@@ -52,6 +52,12 @@
         "projectId": "7f357bfa-43c2-4c8c-983b-0bcfff40ce7d"
       }
     },
-    "owner": "guillo381"
+    "owner": "guillo381",
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/7f357bfa-43c2-4c8c-983b-0bcfff40ce7d"
+    }
   }
 }
