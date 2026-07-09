@@ -200,6 +200,8 @@ function itemsLineaDeVida(): LineaDeVidaItem[] {
       fecha_evento: iso(11, 30),
       titulo_fuente: null,
       vacuna_nombre: 'Rabisin',
+      // S48-B6.3: la vacuna es fecha-sola — día en partes UTC, sin hora
+      fecha_sola: true,
     },
     {
       evento_id: 'mock-1',

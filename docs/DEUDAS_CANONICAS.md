@@ -1341,6 +1341,9 @@ Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en 
 #### D-311 — FichaVacuna en RN-web anida `<button>` en `<button>`
 ⚪ BAJA. El Boton "Esta no es" vive dentro de la Tarjeta interactiva (tap = onEditar): en RN-web ambos Pressables renderizan `<button>` anidados → hydration warning en consola, sin efecto visible. En nativo no existe. Fix conocido: la Tarjeta interactiva delega el rol de botón cuando contiene acciones propias. Disparo: antes de servir vistas web del cliente a usuarios reales. Origen: S47, detectada S48-A2 (verificación de galería RN-web).
 
+#### D-312 — "Evento de fecha sola" es un concepto del modelo, hoy resuelto por tipo en la puerta única
+🟢 MEDIA. `eventos_mascota.fecha_evento` es timestamptz para TODO evento; los eventos cuya fuente de verdad es un `date` sin hora (vacuna del carnet) se anclan en la medianoche UTC vía `_trg_vacuna_crear_evento` (`fecha_aplicada::timestamptz`), lo que en UTC-5 se mostraba como "un día antes · 19:00". El fix S48-B6.3 es de INTERPRETACIÓN: el wrapper de timeline marca `fecha_sola: tipo === 'vacuna_aplicada'` y LineaDeVida muestra el día en partes UTC y sin hora — el trigger no cambió (la medianoche UTC queda como ancla de orden). La derivación por tipo vive en UN solo lugar (la puerta única, regla 35-friendly), pero es conocimiento del modelo puesto en el wrapper. Disparo: cuando nazca el SEGUNDO tipo de evento fecha-sola (desparasitación histórica, peso importado, etc.) — ahí la precisión pasa a `eventos_mascota` (columna `precision` o equivalente, patrón `fecha_nacimiento_precision` de S45) con migración y contrato regla 69. Origen: S48-B6.3 (gate 4 con carnet físico real).
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)

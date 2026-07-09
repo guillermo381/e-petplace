@@ -45,6 +45,12 @@ export interface ItemTimeline {
    *  escribe el trigger _trg_vacuna_crear_evento) — insumo de la voz
    *  "Recibió la vacuna {nombre}" de LineaDeVida (S47-B1.2 C). */
   vacuna_nombre: string | null;
+  /** Evento de FECHA sola (S48-B6.3): su fuente de verdad es un date
+   *  sin hora (vacuna del carnet) y el trigger ancla fecha_evento en la
+   *  medianoche UTC de ese día SOLO para ordenar. El display muestra el
+   *  día calendario (partes UTC) y JAMÁS una hora — sin esto, UTC-5 lo
+   *  corre a "un día antes · 19:00". */
+  fecha_sola: boolean;
 }
 
 export interface PaginaTimeline {
@@ -129,6 +135,10 @@ export async function leerTimelineMascota(
       atencion_id: at?.id ?? null,
       fotos_count: fotosPorEvento.get(e.id) ?? 0,
       vacuna_nombre: vacuna,
+      // La vacuna es fecha-sola POR TIPO (el carnet registra días, no
+      // momentos). Si nace otro tipo fecha-sola, la precisión pasa al
+      // modelo (eventos_mascota) — D-312.
+      fecha_sola: e.tipo === 'vacuna_aplicada',
     };
   });
 

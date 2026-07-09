@@ -89,14 +89,31 @@ function claveDia(d: Date): string {
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
 }
 
-function fechaHumana(iso: string): string {
+// Evento de FECHA sola (S48-B6.3): fecha_evento ancla la medianoche UTC
+// del día calendario, así que sus partes se leen en UTC — leerlas en
+// hora local corre el día ("25 oct" → "24 de octubre" en UTC-5). Un
+// evento con hora real sigue leyéndose en hora local del dispositivo.
+function partesDia(iso: string, fechaSola: boolean): { a: number; m: number; d: number } {
   const f = new Date(iso)
+  return fechaSola
+    ? { a: f.getUTCFullYear(), m: f.getUTCMonth(), d: f.getUTCDate() }
+    : { a: f.getFullYear(), m: f.getMonth(), d: f.getDate() }
+}
+
+function claveDiaItem(item: LineaDeVidaItem): string {
+  const p = partesDia(item.fecha_evento, item.fecha_sola ?? false)
+  return `${p.a}-${p.m}-${p.d}`
+}
+
+function fechaHumana(iso: string, fechaSola = false): string {
+  const p = partesDia(iso, fechaSola)
+  const clave = `${p.a}-${p.m}-${p.d}`
   const hoy = new Date()
   const ayer = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 1)
-  if (claveDia(f) === claveDia(hoy)) return 'Hoy'
-  if (claveDia(f) === claveDia(ayer)) return 'Ayer'
-  const base = `${f.getDate()} de ${MESES[f.getMonth()]}`
-  return f.getFullYear() === hoy.getFullYear() ? base : `${base} de ${f.getFullYear()}`
+  if (clave === claveDia(hoy)) return 'Hoy'
+  if (clave === claveDia(ayer)) return 'Ayer'
+  const base = `${p.d} de ${MESES[p.m]}`
+  return p.a === hoy.getFullYear() ? base : `${base} de ${p.a}`
 }
 
 function horaMono(iso: string, duracionMin?: number | null): string {
@@ -125,6 +142,10 @@ export interface LineaDeVidaItem {
   fotos?: Array<string | number | ImageSource>
   /** Solo tipo=vacuna_aplicada: el nombre para "Recibió la vacuna {nombre}". */
   vacuna_nombre?: string | null
+  /** Evento de FECHA sola (S48-B6.3): fecha_evento ancla la medianoche
+   *  UTC del día — se muestra el día calendario (partes UTC) y SIN hora.
+   *  Una hora inventada + corrimiento de zona es mentirle al dueño. */
+  fecha_sola?: boolean
 }
 
 export type LineaDeVidaEstadoPie = 'nada' | 'mas' | 'cargando' | 'error'
@@ -195,7 +216,7 @@ function Nodo({
 }) {
   const { theme } = useTheme()
   const voz = vozDe(item)
-  const fecha = fechaHumana(item.fecha_evento)
+  const fecha = fechaHumana(item.fecha_evento, item.fecha_sola ?? false)
   // Memorial no tiene registro de capa: el punto degrada a text.secondary.
   const colorPunto = theme.mode === 'memorial' ? theme.text.secondary : theme.capa[voz.capa]
 
@@ -209,18 +230,21 @@ function Nodo({
           con {item.titulo_fuente}
         </Text>
       ) : null}
-      <Text
-        style={{
-          // voz de máquina: mono, minúsculas, tracking suave (regla de voz)
-          fontFamily: typography.family.mono.regular,
-          fontSize: typography.size.xs,
-          letterSpacing: typography.tracking.mono,
-          color: theme.text.secondary,
-          marginTop: spacing[1],
-        }}
-      >
-        {horaMono(item.fecha_evento, item.duracion_min)}
-      </Text>
+      {/* fecha-sola NO tiene hora: mostrarla sería inventarla (B6.3) */}
+      {!item.fecha_sola && (
+        <Text
+          style={{
+            // voz de máquina: mono, minúsculas, tracking suave (regla de voz)
+            fontFamily: typography.family.mono.regular,
+            fontSize: typography.size.xs,
+            letterSpacing: typography.tracking.mono,
+            color: theme.text.secondary,
+            marginTop: spacing[1],
+          }}
+        >
+          {horaMono(item.fecha_evento, item.duracion_min)}
+        </Text>
+      )}
       <Miniaturas fotos={item.fotos ?? []} total={item.fotos_count ?? item.fotos?.length ?? 0} />
     </>
   )
@@ -326,7 +350,7 @@ export function LineaDeVida({
           item={item}
           conAgrupador={
             i === 0 ||
-            claveDia(new Date(items[i - 1].fecha_evento)) !== claveDia(new Date(item.fecha_evento))
+            claveDiaItem(items[i - 1]) !== claveDiaItem(item)
           }
           esUltimo={i === items.length - 1 && estadoPie === 'nada'}
           onPress={onPressNodo}
