@@ -12,6 +12,21 @@
 // orden en el carnet ni frecuencia estadística. El shape del contrato
 // NO cambia (tipo_vacuna ya era nullable).
 //
+// v18 (S48-B6, gate 4 con carnet físico real): ATRIBUCIÓN DE COLUMNA de
+// fecha_aplicada — el gate encontró que el modelo tomaba las fechas
+// IMPRESAS de los stickers del producto (lote/vencimiento de fábrica:
+// "FEB 25", "11-2023") en vez de la columna FECHA manuscrita. La única
+// fuente válida es la columna FECHA; incompleta (sin año) → null, jamás
+// completar desde posición, vecinas o vencimientos. Fila con nombre
+// legible SE INCLUYE aunque su fecha quede null.
+//
+// v19 (S48-B6.2, segunda iteración): la regla sola de v18 no movió el
+// output (idéntico a v17 en 3 corridas). El prompt pasa a describir la
+// ANATOMÍA del carnet (sticker impreso a un lado / campo FECHA
+// manuscrito con firma al otro) + procedimiento por fila: transcribir
+// el manuscrito ANTES de convertir. Dos stickers de una misma dosis
+// (vacuna + diluyente/fracción, p.ej. bacterina + Recombitek) = UNA fila.
+//
 // Contrato:
 //   POST { imageBase64: string, mediaType?: string }   (verify_jwt: true)
 //   200 → { vacunas: [{ nombre, fecha_aplicada, fecha_proxima,
@@ -98,15 +113,19 @@ function esVacunaExtraida(v: unknown): v is VacunaExtraida {
 }
 
 const PROMPT = `Eres un experto en carnets de vacunación veterinaria latinoamericanos.
-La imagen muestra un carnet de vacunas (formato típico: columnas FECHA, TIPO-LOTE, FIRMA; secciones con cabecera de clínica/veterinario).
-Extrae TODAS las filas de vacunas que puedas leer.
+La imagen muestra un carnet de vacunas. Cada aplicación (fila) tiene DOS registros que NO debes mezclar:
+(a) el STICKER del producto, pegado e IMPRESO de fábrica: trae el nombre comercial, el número de lote y fechas impresas de elaboración/vencimiento (p.ej. "05-2022", "10-2023", "FEB 25"). Esas fechas son del FRASCO, no de la aplicación.
+(b) el campo FECHA del carnet (rotulado FECHA, usualmente al costado del sticker, junto a la FIRMA del veterinario): la fecha de APLICACIÓN, escrita A MANO o con sello fechador.
+Una misma dosis puede tener DOS stickers pegados juntos (vacuna + diluyente/fracción liofilizada): es UNA sola fila.
+Recorre el carnet COMPLETO, de arriba a abajo, incluidas las filas de la parte superior y las de secciones separadas. Extrae TODAS las filas cuyo nombre puedas leer.
 
 Responde SOLO con este JSON, sin texto adicional ni backticks:
 {"vacunas":[{"nombre":"","fecha_aplicada":null,"fecha_proxima":null,"veterinario_nombre_externo":null,"tipo_vacuna":null,"lote":null}]}
 
 Reglas ESTRICTAS por campo:
 - nombre: nombre comercial o denominación de la vacuna tal como está escrita (ej: Rabisin, Nobivac DHPPi). Si el nombre de una fila es ilegible, OMITE esa fila completa — no la incluyas.
-- fecha_aplicada / fecha_proxima: en el carnet vienen como DD/MM/YY o DD/ENE/YY (meses abreviados en español: ENE=01, FEB=02, MAR=03, ABR=04, MAY=05, JUN=06, JUL=07, AGO=08, SEP=09, OCT=10, NOV=11, DIC=12). Convierte a YYYY-MM-DD. La próxima suele estar anotada ~1 año después de la aplicada, pero SOLO si está escrita: no la calcules tú.
+- fecha_aplicada / fecha_proxima: la ÚNICA fuente es el campo FECHA manuscrito (registro b). Procedimiento OBLIGATORIO por fila: 1) ubica el campo FECHA de ESA fila; 2) transcribe EXACTAMENTE lo que está escrito a mano (p.ej. "02-4-23", "26 JUN", "3 Ago 2023"); 3) solo si la transcripción tiene día, mes Y año, conviértela a YYYY-MM-DD (meses en español: ENE=01, FEB=02, MAR=03, ABR=04, MAY=05, JUN=06, JUL=07, AGO=08, SEP=09, OCT=10, NOV=11, DIC=12). Si el manuscrito es ilegible o está incompleto (p.ej. "26 JUN" — día y mes SIN año) → null. PROHIBIDO usar las fechas impresas del sticker como fecha de aplicación, y PROHIBIDO completar el año desde la posición de la fila, las filas vecinas o los vencimientos. La próxima SOLO si está escrita: no la calcules tú.
+- Una fila con nombre legible SE INCLUYE aunque su fecha quede null — la fila solo se omite cuando el NOMBRE es ilegible.
 - veterinario_nombre_externo: veterinario o clínica de la cabecera de la sección (ej: CPA TEUSAQUILLO).
 - tipo_vacuna: SOLO uno de estos valores exactos (vocabulario cerrado), o null:
   "antirrábica" · "múltiple" · "tos de las perreras" · "leptospirosis" · "giardia" · "triple felina" · "leucemia felina".
@@ -157,9 +176,21 @@ Deno.serve(async (req) => {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 2000,
-        temperature: 0,
+        // v20 (S48-B6.2): Haiku 4.5 topeó en la atribución espacial
+        // sticker↔campo FECHA (v18/v19 lo demostraron empíricamente:
+        // fechas de sticker, años fabricados, filas corridas). Delta de
+        // costo ≈ USD 0.01 por escaneo — decisión arquitecto regla 74,
+        // análisis de costo regla 61.
+        // Contrato de request para Sonnet 5 (skill claude-api, S48):
+        // - temperature FUERA: Sonnet 5 rechaza sampling params no-default
+        //   con 400 (el "temperature 0 queda" del arranque asumía Haiku).
+        // - thinking omitido = adaptive por DEFAULT en Sonnet 5, y piensa
+        //   ANTES de responder — exactamente lo que esta atribución
+        //   espacial necesita. El thinking consume max_tokens: 8000 da
+        //   aire (el JSON sale en ~500) y el guard de stop_reason
+        //   'max_tokens' ya corta truncados (regla 36).
+        model: 'claude-sonnet-5',
+        max_tokens: 8000,
         messages: [{
           role: 'user',
           content: [
