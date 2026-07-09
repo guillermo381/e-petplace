@@ -193,11 +193,13 @@ Deno.serve(async (req) => {
         //   con 400 (el "temperature 0 queda" del arranque asumía Haiku).
         // - thinking omitido = adaptive por DEFAULT en Sonnet 5, y piensa
         //   ANTES de responder — exactamente lo que esta atribución
-        //   espacial necesita. El thinking consume max_tokens: 8000 da
-        //   aire (el JSON sale en ~500) y el guard de stop_reason
-        //   'max_tokens' ya corta truncados (regla 36).
+        //   espacial necesita. El thinking consume max_tokens: 16000
+        //   (S48-B8.2: con 8000 el gate founder truncó honesto en el 1er
+        //   intento sobre carnet real denso — el retry curó pero no puede
+        //   ser peaje; el JSON sale en ~500, el resto es aire de thinking)
+        //   y el guard de stop_reason 'max_tokens' queda como red (regla 36).
         model: 'claude-sonnet-5',
-        max_tokens: 8000,
+        max_tokens: 16000,
         messages: [{
           role: 'user',
           content: [
