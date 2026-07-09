@@ -14,7 +14,7 @@ SplashScreen.preventAutoHideAsync();
 // EMPIEZA confirmando que Metro imprime la línea de la sesión vigente —
 // sin ella, el teléfono corre un bundle fantasma y no se gatea.
 // ACTUALIZAR el texto al arrancar cada sesión de trabajo.
-console.log('[bundle] cliente S47');
+console.log('[bundle] cliente S48');
 
 export default function RootLayout() {
   // Infraestructura S43-B2: DM Sans + JetBrains Mono cargadas antes de
