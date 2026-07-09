@@ -96,6 +96,13 @@ const VOZ_SUBIDA: Record<string, { mensaje: string; reintentable: boolean }> = {
   red_o_desconocido:    { mensaje: 'La foto no se pudo subir. Revisá tu conexión y probá de nuevo.', reintentable: true },
 };
 
+// Guía multi-página (S48-B7.3, D-313 pata a): el flujo es una-foto-por-
+// pasada repetible y la UI lo CUENTA — sin esto, un carnet de varias
+// páginas parece no caber. Regla 26.
+const VOZ_CAPTURA = {
+  multiPagina: '¿El carnet tiene varias páginas? Escanealas de a una — cada tanda se suma a su historia.',
+};
+
 // Voz de la revisión (regla 26). El texto del tipo baja la expectativa
 // con voz humana — base aprobada por founder en el arranque de S48.
 const VOZ_REVISION = {
@@ -312,6 +319,9 @@ export default function CarnetDeVacunas() {
           </Text>
           <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.base, lineHeight: typography.size.base * 1.4, color: theme.text.secondary }}>
             Con buena luz y el carnet bien plano, mejor. Después vas a poder revisar y corregir todo antes de guardar.
+          </Text>
+          <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
+            {VOZ_CAPTURA.multiPagina}
           </Text>
           {permisoDenegado && (
             <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.sm, color: theme.status.dangerText }}>
