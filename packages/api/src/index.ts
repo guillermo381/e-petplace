@@ -62,13 +62,17 @@ export { resolverUrlFoto, resolverUrlsFotos } from './wrappers/fotos';
 export {
   extraerVacunasDeCarnet,
   registrarVacunasDeCarnet,
+  obtenerVacunaPorEvento,
   type VacunaExtraida,
   type InputExtraerVacunas,
   type CodigoErrorExtraccion,
   type VacunaCarnetInput,
   type InputRegistrarVacunas,
   type ResultadoRegistrarVacunas,
+  type ResultadoRegistroVacunas,
+  type ErrorRegistrarVacunas,
   type CodigoErrorRegistroVacunas,
+  type VacunaDeEvento,
 } from './wrappers/vacunas';
 export {
   iniciarAtencionPaseo,

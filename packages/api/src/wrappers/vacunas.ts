@@ -151,12 +151,17 @@ export type VacunaCarnetInput = {
 export interface InputRegistrarVacunas {
   mascota_id: string;
   vacunas: VacunaCarnetInput[];
+  /** PATH del carnet en el bucket mascotas (carpeta del dueño) — el
+   *  MISMO respalda las N filas del lote (D-308, S47-B1.2). Nullable:
+   *  la carga sin foto es primera clase. */
+  archivo_url?: string | null;
 }
 
 export interface ResultadoRegistrarVacunas {
   mascota_id: string;
   insertadas: number;
   ids: string[];
+  archivo_url: string | null;
 }
 
 const CODIGOS_ERROR_REGISTRO = [
@@ -164,9 +169,24 @@ const CODIGOS_ERROR_REGISTRO = [
   'sin_acceso_mascota',
   'vacunas_vacias',
   'item_invalido',
+  'archivo_invalido',
 ] as const;
 
 export type CodigoErrorRegistroVacunas = (typeof CODIGOS_ERROR_REGISTRO)[number];
+
+/** Error del registro: union espejo de los RAISE + `indice_item`
+ *  (1-based) cuando la RPC señaló QUÉ ítem del lote es el inválido —
+ *  la pantalla de revisión marca ESA ficha como rechazada (B4). */
+export type ErrorRegistrarVacunas = {
+  ok: false;
+  codigo: CodigoErrorRegistroVacunas | 'error_desconocido' | 'datos_inconsistentes';
+  mensaje: string;
+  indice_item?: number;
+};
+
+export type ResultadoRegistroVacunas =
+  | { ok: true; data: ResultadoRegistrarVacunas }
+  | ErrorRegistrarVacunas;
 
 const MENSAJES_REGISTRO: Record<
   CodigoErrorRegistroVacunas | 'error_desconocido' | 'datos_inconsistentes',
@@ -176,6 +196,7 @@ const MENSAJES_REGISTRO: Record<
   sin_acceso_mascota:   'No tenés acceso a esta mascota.',
   vacunas_vacias:       'No hay vacunas para registrar.',
   item_invalido:        'Una de las vacunas del carnet no es válida. Revisá los datos e intentá de nuevo.',
+  archivo_invalido:     'La foto del carnet no se pudo vincular. Probá de nuevo.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:    'Ocurrió un error inesperado. Probá de nuevo.',
 };
@@ -189,30 +210,44 @@ function normalizarCodigoRegistro(raw: string): CodigoErrorRegistroVacunas | 'er
   return 'error_desconocido';
 }
 
+/** 'item_invalido: <n>: <motivo>' → n (1-based); undefined si no vino. */
+function indiceDeItemInvalido(raw: string): number | undefined {
+  const m = raw.match(/^item_invalido: (\d+):/);
+  return m ? Number(m[1]) : undefined;
+}
+
 /** Registra en bloque las vacunas de un carnet. ATÓMICA: una fila mala
- *  = cero filas escritas (asserts S46-B1.1). El trigger de la tabla
- *  crea los eventos padre — el timeline las ve solo. */
+ *  = cero filas escritas (asserts S46-B1.1/S47-B1.2). El trigger de la
+ *  tabla crea los eventos padre — el timeline las ve solo. */
 export async function registrarVacunasDeCarnet(
   input: InputRegistrarVacunas,
-): Promise<ResultadoWrapper<ResultadoRegistrarVacunas, CodigoErrorRegistroVacunas>> {
+): Promise<ResultadoRegistroVacunas> {
   const { data, error } = await getClient().rpc('registrar_vacunas_de_carnet', {
-    p_mascota_id: input.mascota_id,
-    p_vacunas:    input.vacunas,
+    p_mascota_id:  input.mascota_id,
+    p_vacunas:     input.vacunas,
+    p_archivo_url: input.archivo_url ?? undefined,
   });
 
   if (error) {
     const codigo = normalizarCodigoRegistro(error.message);
-    return { ok: false, codigo, mensaje: MENSAJES_REGISTRO[codigo] };
+    const indice = codigo === 'item_invalido' ? indiceDeItemInvalido(error.message) : undefined;
+    return {
+      ok: false,
+      codigo,
+      mensaje: MENSAJES_REGISTRO[codigo],
+      ...(indice !== undefined ? { indice_item: indice } : null),
+    };
   }
 
-  // Shape del retorno REAL (pg_get_functiondef S46-B1.1):
-  // { ok: true, mascota_id, insertadas, ids }.
+  // Shape del retorno REAL (pg_get_functiondef S47-B1.2):
+  // { ok: true, mascota_id, insertadas, ids, archivo_url }.
   if (
     !esObj(data) ||
     data.ok !== true ||
     typeof data.mascota_id !== 'string' ||
     typeof data.insertadas !== 'number' ||
-    !Array.isArray(data.ids)
+    !Array.isArray(data.ids) ||
+    (data.archivo_url !== null && typeof data.archivo_url !== 'string')
   ) {
     return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES_REGISTRO.datos_inconsistentes };
   }
@@ -225,6 +260,57 @@ export async function registrarVacunasDeCarnet(
   }
   return {
     ok: true,
-    data: { mascota_id: data.mascota_id, insertadas: data.insertadas, ids },
+    data: {
+      mascota_id: data.mascota_id,
+      insertadas: data.insertadas,
+      ids,
+      archivo_url: data.archivo_url as string | null,
+    },
+  };
+}
+
+// ── Lectura: la vacuna detrás de un nodo del timeline (S47-B1.2 C) ───────────
+
+export interface VacunaDeEvento {
+  id: string;
+  nombre_vacuna: string;
+  tipo_vacuna: string | null;
+  fecha_aplicada: string | null;
+  fecha_proxima: string | null;
+  veterinario_nombre_externo: string | null;
+  lote: string | null;
+  /** PATH del carnet en el bucket mascotas, o null (carga sin foto). */
+  archivo_url: string | null;
+}
+
+const MENSAJE_VACUNA_EVENTO = 'No pudimos cargar la vacuna. Probá de nuevo.';
+
+/** La fila tipada detrás de un evento vacuna_aplicada del timeline.
+ *  RLS vacuna_select (user_tiene_acceso_a_mascota) es el guard. */
+export async function obtenerVacunaPorEvento(
+  eventoId: string,
+): Promise<ResultadoWrapper<VacunaDeEvento, 'vacuna_no_encontrada'>> {
+  const { data, error } = await getClient()
+    .from('evento_vacuna_aplicada')
+    .select('id, nombre_vacuna, tipo_vacuna, fecha_aplicada, fecha_proxima, veterinario_nombre_externo, lote, archivo_url')
+    .eq('evento_id', eventoId)
+    .maybeSingle();
+
+  if (error) return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJE_VACUNA_EVENTO };
+  if (data === null) {
+    return { ok: false, codigo: 'vacuna_no_encontrada', mensaje: 'Esta vacuna ya no está disponible.' };
+  }
+  return {
+    ok: true,
+    data: {
+      id: data.id,
+      nombre_vacuna: data.nombre_vacuna,
+      tipo_vacuna: data.tipo_vacuna ?? null,
+      fecha_aplicada: data.fecha_aplicada ?? null,
+      fecha_proxima: data.fecha_proxima ?? null,
+      veterinario_nombre_externo: data.veterinario_nombre_externo ?? null,
+      lote: data.lote ?? null,
+      archivo_url: data.archivo_url ?? null,
+    },
   };
 }

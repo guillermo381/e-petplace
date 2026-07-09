@@ -9,9 +9,13 @@
  * es CERRADO y vive adentro. El dueño JAMÁS ve un código del modelo.
  * Tipo desconocido → nodo genérico digno por eje, jamás el código.
  *
- * DICCIONARIO (revisión de voz: reporte S45-B5.2):
+ * DICCIONARIO (revisión de voz: reporte S45-B5.2; vacunas S47-B1.2):
  *   atencion_paseo_registrada            → "Paseo" · capa cuidado
  *   alta_asistida_completada_por_cliente → "Se sumó a la familia" · capa identidad
+ *   vacuna_aplicada                      → "Recibió la vacuna {nombre}"
+ *     · capa cuidado — {nombre} llega en item.vacuna_nombre (tal cual
+ *     quedó en la revisión del carnet); sin nombre degrada a
+ *     "Recibió una vacuna". Ley 3: cero vocabulario del modelo.
  *   cita_servicio                        → NO SE MUESTRA: el momento
  *     significativo del dueño es la atención, no su cita administrativa.
  *     El filtrado es del wrapper (leerTimelineMascota) / pantalla;
@@ -64,6 +68,14 @@ const POR_EJE: Record<string, { titulo: string; capa: CapaNodo }> = {
 const GENERICO = { titulo: 'Momento guardado', capa: 'identidad' as CapaNodo }
 
 function vozDe(item: LineaDeVidaItem): { titulo: string; capa: CapaNodo } {
+  // vacuna_aplicada lleva el nombre ADENTRO de la voz (S47-B1.2 C) —
+  // el nombre lo escribió un humano en la revisión del carnet.
+  if (item.tipo === 'vacuna_aplicada') {
+    return {
+      titulo: item.vacuna_nombre ? `Recibió la vacuna ${item.vacuna_nombre}` : 'Recibió una vacuna',
+      capa: 'cuidado',
+    }
+  }
   return DICCIONARIO[item.tipo] ?? POR_EJE[item.eje_jtbd ?? ''] ?? GENERICO
 }
 
@@ -111,6 +123,8 @@ export interface LineaDeVidaItem {
   fotos_count?: number
   /** Thumbnails ya resueltos (signed URLs / assets); se muestran hasta 2. */
   fotos?: Array<string | number | ImageSource>
+  /** Solo tipo=vacuna_aplicada: el nombre para "Recibió la vacuna {nombre}". */
+  vacuna_nombre?: string | null
 }
 
 export type LineaDeVidaEstadoPie = 'nada' | 'mas' | 'cargando' | 'error'

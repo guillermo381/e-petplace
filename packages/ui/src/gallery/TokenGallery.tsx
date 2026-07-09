@@ -194,6 +194,14 @@ function itemsLineaDeVida(): LineaDeVidaItem[] {
     new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - diasAtras, h, m).toISOString()
   return [
     {
+      evento_id: 'mock-0',
+      tipo: 'vacuna_aplicada',
+      eje_jtbd: 'salud',
+      fecha_evento: iso(11, 30),
+      titulo_fuente: null,
+      vacuna_nombre: 'Rabisin',
+    },
+    {
       evento_id: 'mock-1',
       tipo: 'atencion_paseo_registrada',
       eje_jtbd: 'salud',

@@ -18,8 +18,11 @@ import {
   EstadoVacio,
   Hoja,
   LineaDeVida,
+  Tarjeta,
+  VisorFoto,
   spacing,
   typography,
+  useAviso,
   useTheme,
   type LineaDeVidaEstadoPie,
 } from '@epetplace/ui';
@@ -28,9 +31,11 @@ import {
   getEstadoOnboardingDueno,
   leerTimelineMascota,
   obtenerMascotasDeFamilia,
+  obtenerVacunaPorEvento,
   resolverUrlFoto,
   type ItemTimeline,
   type MascotaResumen,
+  type VacunaDeEvento,
 } from '@epetplace/api';
 
 // Engranaje — Ley 12: outline 1.75, remates redondeados, UN color.
@@ -55,6 +60,14 @@ function IconoAjustes({ color }: { color: string }) {
 
 import { esEspecieUi } from '@/lib/params';
 
+// Fecha ISO → voz de máquina "01 may 2026" (mismo formato que FichaVacuna).
+const MESES_MONO = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+function fechaMonoVacuna(iso: string): string {
+  const [a, m, d] = iso.split('-').map(Number);
+  if (!a || !m || m < 1 || m > 12 || !d) return iso.toLowerCase();
+  return `${String(d).padStart(2, '0')} ${MESES_MONO[m - 1]} ${a}`;
+}
+
 export default function Home() {
   const router = useRouter();
   const { theme } = useTheme();
@@ -73,6 +86,11 @@ export default function Home() {
   const [cursor, setCursor] = useState<string | null>(null);
   const [estadoPie, setEstadoPie] = useState<LineaDeVidaEstadoPie>('nada');
   const cargandoMasRef = useRef(false);
+  const { mostrar } = useAviso();
+  // Hoja de detalle de vacuna (S47-B1.2 C) + su carnet firmado
+  const [vacunaAbierta, setVacunaAbierta] = useState(false);
+  const [vacuna, setVacuna] = useState<VacunaDeEvento | 'cargando' | 'error'>('cargando');
+  const [carnetFirmado, setCarnetFirmado] = useState<string | null>(null);
 
   const cargarPrimeraPagina = useCallback(async (mascotaId: string) => {
     const r = await leerTimelineMascota(mascotaId);
@@ -138,11 +156,29 @@ export default function Home() {
     }, []),
   );
 
-  const alTocarNodo = (item: { atencion_id?: string | null; evento_id: string }) => {
+  const alTocarNodo = (item: { atencion_id?: string | null; evento_id: string; tipo?: string }) => {
+    if (item.tipo === 'vacuna_aplicada') {
+      // detalle de vacuna = HOJA, no pantalla (decisión arquitecto S47-B1.2 C)
+      setVacunaAbierta(true);
+      setVacuna('cargando');
+      void obtenerVacunaPorEvento(item.evento_id).then((r) => {
+        setVacuna(r.ok ? r.data : 'error');
+      });
+      return;
+    }
     if (item.atencion_id) {
       router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: item.atencion_id } });
     }
   };
+
+  async function verCarnet(path: string) {
+    const url = await resolverUrlFoto(path);
+    if (url === null) {
+      mostrar({ texto: 'No pudimos abrir el carnet. Probá de nuevo.', variante: 'error' });
+      return;
+    }
+    setCarnetFirmado(url);
+  }
 
   if (mascota === 'cargando') {
     return (
@@ -215,6 +251,28 @@ export default function Home() {
         </Text>
       </View>
 
+      {/* Carnet de vacunas — acción del timeline (S47-B1.2 B1; v1 SIN
+          barra de progreso: la completitud llega con loyalty, no de
+          contrabando) */}
+      <View style={{ marginBottom: spacing[5] }}>
+        <Tarjeta
+          interactiva
+          onPress={() => router.push({ pathname: '/carnet', params: { mascotaId: mascota.id, nombre: mascota.nombre } })}
+          accessibilityRole="button"
+          etiqueta={`Carnet de vacunas de ${mascota.nombre}: sacale una foto y nosotros leemos las vacunas`}
+          relleno="amplio"
+        >
+          <View style={{ gap: spacing[1] }}>
+            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
+              Carnet de vacunas
+            </Text>
+            <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
+              Sacale una foto al carnet — nosotros leemos las vacunas y las guardamos en su historia.
+            </Text>
+          </View>
+        </Tarjeta>
+      </View>
+
       {items === null ? (
         <LineaDeVida items={[]} cargando />
       ) : items === 'error' ? (
@@ -245,6 +303,64 @@ export default function Home() {
           onPressNodo={alTocarNodo}
           estadoPie={estadoPie}
           onCargarMas={() => void cargarMas()}
+        />
+      )}
+
+      {/* Detalle de vacuna: Hoja + "Ver carnet" → VisorFoto firmado.
+          Sin archivo_url NO hay botón — jamás un botón muerto. */}
+      <Hoja visible={vacunaAbierta} onCerrar={() => { setVacunaAbierta(false); setCarnetFirmado(null); }} titulo="Vacuna" conCerrar>
+        {vacuna === 'cargando' ? (
+          <View style={{ padding: spacing[4] }}>
+            <EsqueletoGrupo etiqueta="Cargando la vacuna">
+              <View style={{ gap: spacing[2] }}>
+                <Esqueleto forma="linea" ancho="60%" />
+                <Esqueleto forma="linea" ancho="40%" />
+              </View>
+            </EsqueletoGrupo>
+          </View>
+        ) : vacuna === 'error' ? (
+          <View style={{ padding: spacing[4] }}>
+            <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.base, color: theme.status.dangerText }}>
+              No pudimos cargar la vacuna. Cerrá y probá de nuevo.
+            </Text>
+          </View>
+        ) : (
+          <View style={{ gap: spacing[3], padding: spacing[4] }}>
+            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}>
+              {vacuna.nombre_vacuna}
+            </Text>
+            {(vacuna.tipo_vacuna || vacuna.veterinario_nombre_externo) && (
+              <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                {[vacuna.tipo_vacuna, vacuna.veterinario_nombre_externo].filter(Boolean).join(' · ')}
+              </Text>
+            )}
+            {(vacuna.fecha_aplicada || vacuna.fecha_proxima || vacuna.lote) && (
+              <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.secondary }}>
+                {[
+                  vacuna.fecha_aplicada ? `aplicada ${fechaMonoVacuna(vacuna.fecha_aplicada)}` : null,
+                  vacuna.fecha_proxima ? `próxima ${fechaMonoVacuna(vacuna.fecha_proxima)}` : null,
+                  vacuna.lote ? `lote ${vacuna.lote.toLowerCase()}` : null,
+                ].filter(Boolean).join(' · ')}
+              </Text>
+            )}
+            {vacuna.archivo_url !== null && (
+              <Boton
+                variante="secundario"
+                bloque
+                etiqueta="Ver carnet"
+                onPress={() => { if (vacuna.archivo_url !== null) void verCarnet(vacuna.archivo_url); }}
+              />
+            )}
+          </View>
+        )}
+      </Hoja>
+
+      {carnetFirmado !== null && (
+        <VisorFoto
+          visible
+          onCerrar={() => setCarnetFirmado(null)}
+          fotos={[carnetFirmado]}
+          etiqueta={`Carnet de ${mascota.nombre}`}
         />
       )}
 

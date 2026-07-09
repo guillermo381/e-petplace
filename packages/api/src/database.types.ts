@@ -14958,7 +14958,7 @@ export type Database = {
         Returns: Json
       }
       registrar_vacunas_de_carnet: {
-        Args: { p_mascota_id: string; p_vacunas: Json }
+        Args: { p_archivo_url?: string; p_mascota_id: string; p_vacunas: Json }
         Returns: Json
       }
       resolver_fee_aplicable: {

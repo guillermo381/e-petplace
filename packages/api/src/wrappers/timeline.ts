@@ -41,6 +41,10 @@ export interface ItemTimeline {
   duracion_min: number | null;
   atencion_id: string | null;
   fotos_count: number;
+  /** Solo tipo=vacuna_aplicada: eventos_mascota.datos->>'vacuna' (lo
+   *  escribe el trigger _trg_vacuna_crear_evento) — insumo de la voz
+   *  "Recibió la vacuna {nombre}" de LineaDeVida (S47-B1.2 C). */
+  vacuna_nombre: string | null;
 }
 
 export interface PaginaTimeline {
@@ -63,7 +67,7 @@ export async function leerTimelineMascota(
 
   let q = getClient()
     .from('eventos_mascota')
-    .select('id, tipo, eje_jtbd, fecha_evento, prestador_id')
+    .select('id, tipo, eje_jtbd, fecha_evento, prestador_id, datos')
     .eq('mascota_id', mascotaId)
     .eq('soft_delete', false)
     .neq('tipo', 'cita_servicio')
@@ -113,6 +117,8 @@ export async function leerTimelineMascota(
         (new Date(at.terminada_en).getTime() - new Date(at.iniciada_en).getTime()) / 60000,
       );
     }
+    const datos = e.datos as Record<string, unknown> | null;
+    const vacuna = e.tipo === 'vacuna_aplicada' && datos && typeof datos.vacuna === 'string' ? datos.vacuna : null;
     return {
       evento_id: e.id,
       tipo: e.tipo,
@@ -122,6 +128,7 @@ export async function leerTimelineMascota(
       duracion_min: duracion,
       atencion_id: at?.id ?? null,
       fotos_count: fotosPorEvento.get(e.id) ?? 0,
+      vacuna_nombre: vacuna,
     };
   });
 
