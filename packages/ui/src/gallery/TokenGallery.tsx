@@ -35,6 +35,7 @@ import { SelectorOpcion } from '../components/SelectorOpcion'
 import { HeroMarca } from '../components/HeroMarca'
 import { LineaDeVida, type LineaDeVidaItem } from '../components/LineaDeVida'
 import { VisorFoto } from '../components/VisorFoto'
+import { FichaVacuna } from '../components/FichaVacuna'
 import { Cronometro } from '../components/Cronometro'
 import { EvidenciaFoto, type EvidenciaFotoEstado } from '../components/EvidenciaFoto'
 import { MapaRecorrido } from '../components/MapaRecorrido'
@@ -237,6 +238,39 @@ function EjemploVisorFoto() {
         etiqueta="Fotos del paseo"
       />
     </>
+  )
+}
+
+function EjemploFichaVacuna() {
+  // Los 3 estados de datos (pressed es vivo: tocá una ficha — 0.99 de Tarjeta).
+  return (
+    <View style={{ gap: spacing[3] }}>
+      <FichaVacuna
+        nombre="Rabisin"
+        tipoVacuna="antirrábica"
+        fechaAplicada="2026-05-01"
+        fechaProxima="2027-05-01"
+        veterinario="CPA Teusaquillo"
+        lote="L-777"
+        onEditar={() => {}}
+        onDescartar={() => {}}
+      />
+      <FichaVacuna
+        nombre="Nobivac DHPPi"
+        tipoVacuna="séxtuple"
+        fechaAplicada={null}
+        onEditar={() => {}}
+        onDescartar={() => {}}
+      />
+      <FichaVacuna
+        nombre="KC"
+        tipoVacuna={null}
+        fechaAplicada="2026-06-15"
+        rechazada
+        onEditar={() => {}}
+        onDescartar={() => {}}
+      />
+    </View>
   )
 }
 
@@ -1142,6 +1176,27 @@ function GaleriaInterna() {
             <ThemeProvider defaultMode="memorial">
               <PanelTema etiqueta="memorial — solo fades: no hay nada que degradar">
                 <EjemploVisorFoto />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* FichaVacuna — S47-B1.1: revisión del carnet, DE A UNO */}
+        <Seccion titulo="FichaVacuna — revisión del carnet: completa · dudosa · rechazada (tocá una: pressed 0.99)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta='claro — completa neutra · dudosa con tinte cuidado ("pide sin gritar") · rechazada danger'>
+                <EjemploFichaVacuna />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — mismos registros, tints del tema; fechas y lote en mono minúsculas">
+                <EjemploFichaVacuna />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — degrada solo: sin tinte, borde neutro; la voz de rechazo conserva dangerText">
+                <EjemploFichaVacuna />
               </PanelTema>
             </ThemeProvider>
           </View>

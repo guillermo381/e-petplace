@@ -37,6 +37,7 @@ import {
   obtenerCitasPaseoDelDia,
   obtenerMiPrestador,
   obtenerPaseoPorCita,
+  resolverUrlFoto,
   type CitaAgendaPaseo,
 } from '@epetplace/api';
 
@@ -74,6 +75,9 @@ export default function DetalleCita() {
   const { citaId = '' } = useLocalSearchParams<{ citaId: string }>();
 
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
+  // foto_url guarda PATH (S47-B0.2): la firma se resuelve acá; sin
+  // firma posible → huella digna.
+  const [fotoFirmada, setFotoFirmada] = useState<string | undefined>(undefined);
   const [iniciando, setIniciando] = useState(false);
   const iniciandoRef = useRef(false);
 
@@ -116,6 +120,12 @@ export default function DetalleCita() {
     if (!cita) {
       setPantalla({ estado: 'no_existe' });
       return;
+    }
+    if (cita.mascota?.foto_url) {
+      const url = await resolverUrlFoto(cita.mascota.foto_url);
+      setFotoFirmada(url ?? undefined);
+    } else {
+      setFotoFirmada(undefined);
     }
     setPantalla({ estado: 'listo', cita });
   }, [citaId, router]);
@@ -206,7 +216,7 @@ export default function DetalleCita() {
             <View style={{ alignItems: 'center', gap: spacing[3], paddingVertical: spacing[4] }}>
               <AvatarMascota
                 nombre={nombre}
-                fotoUrl={cita.mascota?.foto_url ?? undefined}
+                fotoUrl={fotoFirmada}
                 especie={cita.mascota && esEspecie(cita.mascota.especie) ? cita.mascota.especie : undefined}
                 tamano="lg"
               />

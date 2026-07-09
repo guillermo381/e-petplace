@@ -10,6 +10,12 @@ import '@/lib/api';
 
 SplashScreen.preventAutoHideAsync();
 
+// MARCADOR DE BUNDLE (L-138, práctica permanente): el gate en dispositivo
+// EMPIEZA confirmando que Metro imprime la línea de la sesión vigente —
+// sin ella, el teléfono corre un bundle fantasma y no se gatea.
+// ACTUALIZAR el texto al arrancar cada sesión de trabajo.
+console.log('[bundle] cliente S47');
+
 export default function RootLayout() {
   // Infraestructura S43-B2: DM Sans + JetBrains Mono cargadas antes de
   // renderizar (los nombres coinciden con typography.family de @epetplace/ui)

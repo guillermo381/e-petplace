@@ -58,6 +58,18 @@ export {
   type PrecisionFechaNacimiento,
   type CodigoErrorOnboarding,
 } from './wrappers/onboarding';
+export { resolverUrlFoto, resolverUrlsFotos } from './wrappers/fotos';
+export {
+  extraerVacunasDeCarnet,
+  registrarVacunasDeCarnet,
+  type VacunaExtraida,
+  type InputExtraerVacunas,
+  type CodigoErrorExtraccion,
+  type VacunaCarnetInput,
+  type InputRegistrarVacunas,
+  type ResultadoRegistrarVacunas,
+  type CodigoErrorRegistroVacunas,
+} from './wrappers/vacunas';
 export {
   iniciarAtencionPaseo,
   registrarTrackPaseo,

@@ -77,6 +77,7 @@ export {
   type SelectorOpcionItem,
 } from './components/SelectorOpcion'
 export { VisorFoto, type VisorFotoProps } from './components/VisorFoto'
+export { FichaVacuna, type FichaVacunaProps } from './components/FichaVacuna'
 export {
   LineaDeVida,
   LineaDeVidaNodo,

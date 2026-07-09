@@ -1308,6 +1308,7 @@ export type Database = {
           es_seed_preliminar: boolean
           grupo: string
           nombre: string
+          nombre_familia: string
           orden_display: number
           pais_codigo: string | null
           updated_at: string
@@ -1320,6 +1321,7 @@ export type Database = {
           es_seed_preliminar?: boolean
           grupo: string
           nombre: string
+          nombre_familia: string
           orden_display?: number
           pais_codigo?: string | null
           updated_at?: string
@@ -1332,6 +1334,7 @@ export type Database = {
           es_seed_preliminar?: boolean
           grupo?: string
           nombre?: string
+          nombre_familia?: string
           orden_display?: number
           pais_codigo?: string | null
           updated_at?: string
@@ -14952,6 +14955,10 @@ export type Database = {
       }
       registrar_track_paseo: {
         Args: { p_append?: boolean; p_atencion_id: string; p_puntos: Json }
+        Returns: Json
+      }
+      registrar_vacunas_de_carnet: {
+        Args: { p_mascota_id: string; p_vacunas: Json }
         Returns: Json
       }
       resolver_fee_aplicable: {

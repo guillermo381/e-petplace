@@ -28,6 +28,7 @@ import {
   getEstadoOnboardingDueno,
   leerTimelineMascota,
   obtenerMascotasDeFamilia,
+  resolverUrlFoto,
   type ItemTimeline,
   type MascotaResumen,
 } from '@epetplace/api';
@@ -60,6 +61,9 @@ export default function Home() {
   const insets = useSafeAreaInsets();
 
   const [mascota, setMascota] = useState<MascotaResumen | null | 'cargando'>('cargando');
+  // foto_url guarda PATH (S47-B0.2): la URL firmada se resuelve acá;
+  // sin firma posible → undefined → huella digna de AvatarMascota.
+  const [fotoFirmada, setFotoFirmada] = useState<string | undefined>(undefined);
   const [ajustesAbiertos, setAjustesAbiertos] = useState(false);
   const [cerrando, setCerrando] = useState(false);
   // 'error' es un estado PROPIO: un timeline que falló JAMÁS se muestra
@@ -118,6 +122,13 @@ export default function Home() {
         if (!vigente) return;
         const m = mascotas.ok && mascotas.data.length > 0 ? mascotas.data[0] : null;
         setMascota(m);
+        if (m?.foto_url) {
+          void resolverUrlFoto(m.foto_url).then((url) => {
+            if (vigente) setFotoFirmada(url ?? undefined);
+          });
+        } else {
+          setFotoFirmada(undefined);
+        }
         if (m !== null) await cargarPrimeraPagina(m.id);
       })();
       return () => {
@@ -186,7 +197,7 @@ export default function Home() {
       <View style={{ alignItems: 'center', gap: spacing[3], marginBottom: spacing[8] }}>
         <AvatarMascota
           nombre={mascota.nombre}
-          fotoUrl={mascota.foto_url ?? undefined}
+          fotoUrl={fotoFirmada}
           especie={esEspecieUi(mascota.especie) ? mascota.especie : undefined}
           tamano="lg"
           capa="vida"

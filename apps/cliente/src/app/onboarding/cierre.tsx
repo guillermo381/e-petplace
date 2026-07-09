@@ -49,7 +49,7 @@ export default function Cierre() {
       // Foto primero (S45-B4.1): sube a mascotas/{uid}/ y el vínculo entra
       // por la RPC. Si falla, se frena con error visible — jamás se pierde
       // la foto en silencio (regla 36).
-      let fotoUrl: string | undefined;
+      let fotoPath: string | undefined;
       if (params.fotoUri && !sinFoto && sesion.ok && sesion.data !== null) {
         const subida = await subirAvatar({ uri: params.fotoUri, userId: sesion.data.user_id });
         if (!subida.ok) {
@@ -58,7 +58,7 @@ export default function Cierre() {
           setError('La foto no se pudo subir. Podés probar de nuevo o seguir sin ella por ahora.');
           return;
         }
-        fotoUrl = subida.fotoUrl;
+        fotoPath = subida.path;
       }
 
       const r = await crearFamiliaConPrimeraMascota({
@@ -72,7 +72,7 @@ export default function Cierre() {
             }
           : null),
         ...(esSexo(params.sexo) ? { sexo: params.sexo } : null),
-        ...(fotoUrl !== undefined ? { foto_url: fotoUrl } : null),
+        ...(fotoPath !== undefined ? { foto_url: fotoPath } : null),
       });
 
       corriendoRef.current = false;

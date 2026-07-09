@@ -1,7 +1,7 @@
 /**
  * Subida del avatar de la mascota (S45-B4.1; medida en dispositivo en
- * S45-bugs). Bucket PÚBLICO 'mascotas' (policy: primer segmento del
- * path = auth.uid()).
+ * S45-bugs). Bucket PRIVADO 'mascotas' desde S47-B0.2 (policy INSERT:
+ * primer segmento del path = auth.uid()).
  *
  * VÍA: bytes → ArrayBuffer → storage.upload. Medido en dispositivo
  * real: 12B=0.4s · 5MB=44s. Con el resize a ~800px de SelectorAvatar
@@ -9,7 +9,8 @@
  * storage-js lo rechaza con "Unsupported FormDataPart implementation"
  * (probado en dispositivo, S45). La resiliencia vive en el cierre:
  * reintento + "Continuar sin foto".
- * Devuelve la URL pública para la RPC del cierre (p_foto_url).
+ * Devuelve el PATH para la RPC del cierre (p_foto_url guarda path;
+ * la lectura firma con resolverUrlFoto — S47-B0.2).
  */
 
 import { Platform } from 'react-native';
@@ -33,7 +34,7 @@ function uriLegible(uri: string): string {
 const BUCKET = 'mascotas';
 
 export type ResultadoSubidaAvatar =
-  | { ok: true; fotoUrl: string }
+  | { ok: true; path: string }
   | { ok: false; mensaje: string };
 
 async function leerBytes(uri: string): Promise<ArrayBuffer> {
@@ -65,6 +66,5 @@ export async function subirAvatar(input: {
     return { ok: false, mensaje: e instanceof Error ? e.message : 'No se pudo leer la foto.' };
   }
 
-  const { data } = getClient().storage.from(BUCKET).getPublicUrl(path);
-  return { ok: true, fotoUrl: data.publicUrl };
+  return { ok: true, path };
 }

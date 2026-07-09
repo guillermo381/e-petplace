@@ -140,9 +140,9 @@ export default function DetallePaseo() {
     );
   }
 
-  // voz humana: nombre del catálogo; 'otro' habla con el detalle del paseador.
+  // voz de la familia: nombre_familia del catálogo (D-300), vía wrapper.
   const nombreNovedad = (codigo: string) =>
-    codigo === 'otro' ? 'Otra novedad' : nombresNovedades.get(codigo) ?? 'Novedad del paseo';
+    nombresNovedades.get(codigo) ?? 'Novedad del paseo';
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>

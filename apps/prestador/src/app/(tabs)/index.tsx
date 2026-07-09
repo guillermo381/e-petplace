@@ -27,7 +27,7 @@ import {
   type AvatarMascotaEspecie,
   type InsigniaEstado,
 } from '@epetplace/ui';
-import { obtenerCitasPaseoDelDia, obtenerMiPrestador, type CitaAgendaPaseo } from '@epetplace/api';
+import { obtenerCitasPaseoDelDia, obtenerMiPrestador, resolverUrlsFotos, type CitaAgendaPaseo } from '@epetplace/api';
 
 import { asegurarSesionDev } from '@/lib/api';
 
@@ -70,7 +70,7 @@ function esEspecie(v: string | null): v is AvatarMascotaEspecie {
   return v !== null;
 }
 
-function FilaCita({ cita, enVivo }: { cita: CitaAgendaPaseo; enVivo: boolean }) {
+function FilaCita({ cita, enVivo, fotoUrl }: { cita: CitaAgendaPaseo; enVivo: boolean; fotoUrl?: string }) {
   const router = useRouter();
   const hora = cita.hora ? cita.hora.slice(0, 5) : '—';
   const dur = cita.tipo.duracion_default_minutos;
@@ -96,7 +96,7 @@ function FilaCita({ cita, enVivo }: { cita: CitaAgendaPaseo; enVivo: boolean }) 
       inicio={
         <AvatarMascota
           nombre={cita.mascota?.nombre ?? 'Mascota'}
-          fotoUrl={cita.mascota?.foto_url ?? undefined}
+          fotoUrl={fotoUrl}
           especie={cita.mascota && esEspecie(cita.mascota.especie) ? cita.mascota.especie : undefined}
           tamano="sm"
         />
@@ -111,6 +111,9 @@ export default function Agenda() {
   const { theme } = useTheme();
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [refrescando, setRefrescando] = useState(false);
+  // foto_url guarda PATH (S47-B0.2): firma en batch (1 round-trip por
+  // Agenda); un path no firmable cae a la huella digna.
+  const [urlsFotos, setUrlsFotos] = useState<Map<string, string>>(new Map());
 
   const cargar = useCallback(async (esRefresh = false) => {
     if (!esRefresh) setPantalla({ estado: 'cargando' });
@@ -129,6 +132,10 @@ export default function Agenda() {
       setPantalla({ estado: 'error', mensaje: r.mensaje });
       return;
     }
+    const paths = r.data
+      .map((c) => c.mascota?.foto_url)
+      .filter((p): p is string => typeof p === 'string' && p.length > 0);
+    if (paths.length > 0) setUrlsFotos(await resolverUrlsFotos(paths));
     setPantalla({ estado: 'listo', citas: r.data });
   }, []);
 
@@ -212,7 +219,7 @@ export default function Agenda() {
         {pantalla.estado === 'listo' && enVivo && (
           <CitaEnVivo capa="cuidado">
             <Tarjeta elevacion="plana" relleno="ninguno">
-              <FilaCita cita={enVivo} enVivo />
+              <FilaCita cita={enVivo} enVivo fotoUrl={enVivo.mascota?.foto_url ? urlsFotos.get(enVivo.mascota.foto_url) : undefined} />
             </Tarjeta>
           </CitaEnVivo>
         )}
@@ -222,7 +229,7 @@ export default function Agenda() {
             {resto.map((c, i) => (
               <View key={c.id}>
                 {i > 0 && <Separador indentacion={spacing[3] + 40 + spacing[3]} />}
-                <FilaCita cita={c} enVivo={false} />
+                <FilaCita cita={c} enVivo={false} fotoUrl={c.mascota?.foto_url ? urlsFotos.get(c.mascota.foto_url) : undefined} />
               </View>
             ))}
           </Tarjeta>

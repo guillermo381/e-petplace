@@ -15,7 +15,7 @@ description: >-
 
 # epetplace-design-system — el sistema es exigible, no sugerido
 
-Fuente de verdad: `packages/ui` (tokens v4 + 17 componentes + 3 temas).
+Fuente de verdad: `packages/ui` (tokens v4 + 25 componentes + 3 temas).
 Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 `@epetplace/ui`, no existe en el producto.
 
@@ -63,7 +63,7 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
     (lección B3.1b: pnpm auto-instala peers y `"*"` resuelve otra versión
     → módulo nativo duplicado → build nativa rota).
 11. **Protocolo del componente faltante.** Si la UI necesita algo que los
-    17 no cubren, PROHIBIDO inline en apps. Camino: (a) proponer al
+    25 no cubren, PROHIBIDO inline en apps. Camino: (a) proponer al
     founder espec mínima (qué es, qué no es, estados), (b) nace en
     `packages/ui` con el método completo — tokens, WCAG si trae pares
     nuevos, galería, gate en dispositivo —, (c) se agrega al índice de
@@ -128,7 +128,7 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 //     stroke={theme.text.primary} strokeWidth={1.75} strokeLinecap="round" /></Svg>
 ```
 
-## 3. ÍNDICE — los 17 componentes (import de `@epetplace/ui`)
+## 3. ÍNDICE — los 25 componentes (import de `@epetplace/ui`)
 
 | Export | Cuándo |
 |---|---|
@@ -157,6 +157,7 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 | `SelectorOpcion` | Chips de selección ÚNICA para 2-4 opciones cortas (S45). Radiogroup; seleccionado = borde 1.5 capa.identidad + tint capaBg (mismo tratamiento que SelectorEspecie, sin accent.active); memorial degrada. NO es multi-select ni porta estado de datos (eso es Insignia) |
 | `LineaDeVida` | El timeline del dueño (S45-B5.2). Diccionario CERRADO tipo→voz humana/capa ADENTRO (Ley 3: el dueño jamás ve un código; desconocido degrada digno por eje). Punto hex puro de capa + conector hairline + Tarjeta; mono solo hora/duración. Carga = esqueleto 3 nodos; el vacío es de la pantalla; pie con "Cargar más"/error. cita_servicio NO se muestra (filtra el wrapper) |
 | `VisorFoto` | Lightbox una-foto-a-la-vez (S45-B5.3). SOLO fades (Ley 6/8 gratis); letterbox digno sin recortar; fondo pleno (tinta+scrim, no depende del tema); cierra por X/back(doble vía)/tap-fondo; swipe horizontal = reemplazo directo; contador "n de m" en mono |
+| `FichaVacuna` | La ficha de UNA vacuna en la revisión del carnet (S47-B1.1). Presentacional pura: tap → `onEditar` (la edición es una Hoja de LA PANTALLA), "Esta no es" → `onDescartar`. Estados derivados de los datos: completa neutra · dudosa con tinte cuidado y voz humana ("No pudimos leer la fecha") · `rechazada` (prop, del item_invalido de la RPC) danger — nada se pierde. Nombre en DM Sans (lo escribió un humano); fechas y lote en mono minúsculas. Memorial degrada: sin tinte, borde neutro |
 
 También: `ThemeProvider`/`useTheme` (light default, memorial forzable),
 `Isotipo` (tinta/blanco/gradiente), `palette`/`gradients`/`typography`/
@@ -164,7 +165,7 @@ También: `ThemeProvider`/`useTheme` (light default, memorial forzable),
 
 **Dónde vive qué:** tokens `packages/ui/src/tokens/` · temas
 `packages/ui/src/themes/` · gate WCAG `scripts/verify-contrast.ts`
-(correr: `pnpm verify:contrast` — 115 pares, tiene que dar 0 fallos) ·
+(correr: `pnpm verify:contrast` — 139 pares, tiene que dar 0 fallos) ·
 galería `packages/ui/src/gallery/TokenGallery.tsx` (verificación browser:
 `node scripts/verify-gallery.mjs` con los dev servers arriba) · gate en
 dispositivo: CLAUDE.md raíz.
