@@ -227,6 +227,8 @@ Stack real: Ionic React + Vite + Capacitor (no RN). Veredicto de Code, firmado: 
 6. **Enmiendas documentales de la Sección 12** — pueden ir en paralelo con 3-4, pero antes de S44.
 7. **Validación S2a cuando haya timeline navegable:** mostrar el expediente poblado (Zeus) a 10-15 pet parents. Antes del soft launch.
 
+> **Nota S48:** los "primeros pasos" de esta sección se cumplieron (S43-S48). La continuación vive en **`docs/RUTA_F1.md`** — la ruta E1-E6 de la Fase 1 validada por el founder al cierre de S48 (ruta, no backlog; `MODELO_PRODUCTO.md` manda sobre la forma de cada pieza — mandato EL NORTE en CLAUDE.md raíz).
+
 ---
 
 ## Historial de versiones
