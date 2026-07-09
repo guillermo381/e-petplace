@@ -250,7 +250,8 @@ function EjemploVisorFoto() {
 }
 
 function EjemploFichaVacuna() {
-  // Los 3 estados de datos (pressed es vivo: tocá una ficha — 0.99 de Tarjeta).
+  // Los 4 casos de datos (pressed es vivo: tocá una ficha — 0.99 de Tarjeta).
+  // S48: "sin tipo" es completa NEUTRA (tipo null no tiñe); dudosa = solo sin fecha.
   return (
     <View style={{ gap: spacing[3] }}>
       <FichaVacuna
@@ -264,6 +265,13 @@ function EjemploFichaVacuna() {
         onDescartar={() => {}}
       />
       <FichaVacuna
+        nombre="KC"
+        tipoVacuna={null}
+        fechaAplicada="2026-06-15"
+        onEditar={() => {}}
+        onDescartar={() => {}}
+      />
+      <FichaVacuna
         nombre="Nobivac DHPPi"
         tipoVacuna="séxtuple"
         fechaAplicada={null}
@@ -271,7 +279,7 @@ function EjemploFichaVacuna() {
         onDescartar={() => {}}
       />
       <FichaVacuna
-        nombre="KC"
+        nombre="Peeknrb"
         tipoVacuna={null}
         fechaAplicada="2026-06-15"
         rechazada
@@ -1189,11 +1197,11 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
-        {/* FichaVacuna — S47-B1.1: revisión del carnet, DE A UNO */}
-        <Seccion titulo="FichaVacuna — revisión del carnet: completa · dudosa · rechazada (tocá una: pressed 0.99)">
+        {/* FichaVacuna — S47-B1.1 (derivación S48: tipo null no tiñe) */}
+        <Seccion titulo="FichaVacuna — revisión del carnet: completa · sin tipo (neutra, S48) · dudosa (sin fecha) · rechazada (tocá una: pressed 0.99)">
           <View style={{ gap: spacing[4] }}>
             <ThemeProvider defaultMode="light">
-              <PanelTema etiqueta='claro — completa neutra · dudosa con tinte cuidado ("pide sin gritar") · rechazada danger'>
+              <PanelTema etiqueta='claro — completa y sin-tipo neutras · dudosa (sin fecha) tinte cuidado ("pide sin gritar") · rechazada danger'>
                 <EjemploFichaVacuna />
               </PanelTema>
             </ThemeProvider>

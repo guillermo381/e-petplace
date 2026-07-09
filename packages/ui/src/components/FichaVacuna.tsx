@@ -10,9 +10,11 @@
  * ═══════════════════════════════════════════════════════════════════
  *
  * ESTADOS (derivados de los datos + prop):
- *   completa  — tipo y fecha presentes. Superficie neutra: "está bien"
- *               no pide atención.
- *   dudosa    — algún obligatorio en null honesto de la extracción.
+ *   completa  — nombre y fecha presentes. Superficie neutra: "está bien"
+ *               no pide atención. El tipo NO tiñe la ficha (decisión
+ *               founder S48): los carnets reales no lo rotulan — tipo
+ *               null es honesto y editable, no dudoso.
+ *   dudosa    — SOLO fecha faltante (null honesto de la extracción).
  *               Tinte de capa cuidado (eje salud): PIDE completarse sin
  *               gritar, con voz humana ("No pudimos leer la fecha").
  *   rechazada — la RPC devolvió item_invalido con el índice de este
@@ -40,7 +42,8 @@ import { Boton } from './Boton'
 export interface FichaVacunaProps {
   /** Nombre de la vacuna tal como está en el carnet — voz humana. */
   nombre: string
-  /** null honesto de la extracción = "No pudimos leer el tipo". */
+  /** null honesto de la extracción — NO tiñe la ficha (S48): se muestra
+   *  si vino, y si no, la guía de la pantalla baja la expectativa. */
   tipoVacuna?: string | null
   /** YYYY-MM-DD; null honesto = "No pudimos leer la fecha". */
   fechaAplicada?: string | null
@@ -91,9 +94,9 @@ export function FichaVacuna({
   const { theme } = useTheme()
   const esMemorial = theme.mode === 'memorial'
 
-  const faltaTipo = !tipoVacuna
+  // dudosa = SOLO fecha faltante (S48): tipo null = completa neutra.
   const faltaFecha = !fechaAplicada
-  const dudosa = !rechazada && (faltaTipo || faltaFecha)
+  const dudosa = !rechazada && faltaFecha
 
   // Memorial degrada solo: sin tinte, borde neutro (Tarjeta 'ninguno').
   const tinte: TarjetaTinte = esMemorial ? 'ninguno' : rechazada ? 'danger' : dudosa ? 'cuidado' : 'ninguno'
@@ -101,13 +104,9 @@ export function FichaVacuna({
   // Voz humana del estado (la ficha lo DICE, no lo insinúa con color solo).
   const vozEstado = rechazada
     ? 'Esta no se pudo guardar. Tocala para revisarla.'
-    : faltaTipo && faltaFecha
-      ? 'No pudimos leer el tipo ni la fecha'
-      : faltaFecha
-        ? 'No pudimos leer la fecha'
-        : faltaTipo
-          ? 'No pudimos leer el tipo'
-          : null
+    : faltaFecha
+      ? 'No pudimos leer la fecha'
+      : null
 
   // Texto AA sobre el tinte (regla de dos registros; memorial sin capaText).
   const colorVozEstado = rechazada

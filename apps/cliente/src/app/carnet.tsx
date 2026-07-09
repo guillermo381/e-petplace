@@ -16,11 +16,13 @@
  *   vacunas, el objeto subido SE BORRA (DELETE por carpeta, S47-B0.2)
  *   — cada reintento re-sube; la foto local JAMÁS desaparece por error.
  * B4 revisión — LA red (D-307): el carnet preside (tap → VisorFoto);
- *   FichaVacuna por ítem (null honesto = dudosa); tap → Hoja de
- *   edición (Campo + CampoFecha, HojaScroll por L-132); tipo y fecha
- *   obligatorios; "Esta no es" descarta. CTA con conteo vivo,
- *   deshabilitado con dudosas o N=0. item_invalido con índice → la
- *   ficha ofensora rechazada + scroll a ella, nada se pierde.
+ *   FichaVacuna por ítem (dudosa = SOLO fecha faltante, S48: el tipo
+ *   null es honesto y NO bloquea — los carnets reales no lo rotulan);
+ *   tap → Hoja de edición (Campo + CampoFecha, HojaScroll por L-132);
+ *   nombre y fecha obligatorios, tipo opcional; "Esta no es" descarta.
+ *   CTA con conteo vivo, deshabilitado con dudosas o N=0. item_invalido
+ *   con índice → la ficha ofensora rechazada + scroll a ella, nada se
+ *   pierde.
  * B5 sellado: Aviso de éxito y vuelta al Home (refetch en focus).
  */
 
@@ -94,7 +96,15 @@ const VOZ_SUBIDA: Record<string, { mensaje: string; reintentable: boolean }> = {
   red_o_desconocido:    { mensaje: 'La foto no se pudo subir. Revisá tu conexión y probá de nuevo.', reintentable: true },
 };
 
-const esDudosa = (i: ItemRevision) => !i.tipo_vacuna || !i.fecha_aplicada;
+// Voz de la revisión (regla 26). El texto del tipo baja la expectativa
+// con voz humana — base aprobada por founder en el arranque de S48.
+const VOZ_REVISION = {
+  guia: 'Esto es lo que leímos. Tocá una vacuna para corregirla — la fecha es necesaria para guardar.',
+  tipoOpcional: 'Si tu carnet no trae el tipo de vacuna, no pasa nada. Podés agregarlo después.',
+};
+
+// dudosa = SOLO fecha faltante (S48): tipo null se guarda tal cual.
+const esDudosa = (i: ItemRevision) => !i.fecha_aplicada;
 
 function hoyIso(): string {
   const d = new Date();
@@ -222,12 +232,13 @@ export default function CarnetDeVacunas() {
   }
 
   const fechaFutura = bFecha !== undefined && bFecha.fecha > hoyIso();
-  const edicionValida = bNombre.trim().length > 0 && bTipo.trim().length > 0 && bFecha !== undefined && !fechaFutura;
+  // El tipo es OPCIONAL (S48): vacío = null honesto, editable después.
+  const edicionValida = bNombre.trim().length > 0 && bFecha !== undefined && !fechaFutura;
 
   function confirmarEdicion() {
     if (editando === null || !edicionValida || bFecha === undefined) return;
     setItems((prev) => prev.map((i) => i.key === editando
-      ? { ...i, nombre: bNombre.trim(), tipo_vacuna: bTipo.trim(), fecha_aplicada: bFecha.fecha, rechazada: false }
+      ? { ...i, nombre: bNombre.trim(), tipo_vacuna: bTipo.trim() || null, fecha_aplicada: bFecha.fecha, rechazada: false }
       : i,
     ));
     setEditando(null);
@@ -362,7 +373,7 @@ export default function CarnetDeVacunas() {
           </Pressable>
 
           <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
-            Esto es lo que leímos. Tocá una vacuna para corregirla — el tipo y la fecha son necesarios para guardar.
+            {VOZ_REVISION.guia} {VOZ_REVISION.tipoOpcional}
           </Text>
 
           {activas.map((i) => (
@@ -416,7 +427,7 @@ export default function CarnetDeVacunas() {
       <Hoja visible={editando !== null} onCerrar={() => setEditando(null)} titulo="Revisá esta vacuna" altura="completa" conCerrar>
         <HojaScroll contentContainerStyle={{ padding: spacing[4], gap: spacing[4] }}>
           <Campo label="Nombre de la vacuna" value={bNombre} onChangeText={setBNombre} />
-          <Campo label="Tipo" value={bTipo} onChangeText={setBTipo} ayuda="Ej: antirrábica, séxtuple, polivalente" />
+          <Campo label="Tipo" value={bTipo} onChangeText={setBTipo} ayuda="Opcional. Ej: antirrábica, séxtuple, polivalente" />
           <CampoFecha
             label="Cuándo se aplicó"
             valor={bFecha}
