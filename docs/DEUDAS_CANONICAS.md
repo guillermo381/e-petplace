@@ -1336,6 +1336,11 @@ Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en 
 
 **Nota S46 (no es deuda aparte — es parte de la UI pendiente del carnet):** LineaDeVida necesita entrada de voz para `vacuna_aplicada` (hoy degrada digno a "Momento de cuidado" por eje salud) — va junto con la decisión de flujo del founder. El CORS `'*'` de extract-vacuna queda documentado en el código: restringir cuando exista dominio web del dueño.
 
+### Deudas de Sesión 48 (9 Jul 2026)
+
+#### D-311 — FichaVacuna en RN-web anida `<button>` en `<button>`
+⚪ BAJA. El Boton "Esta no es" vive dentro de la Tarjeta interactiva (tap = onEditar): en RN-web ambos Pressables renderizan `<button>` anidados → hydration warning en consola, sin efecto visible. En nativo no existe. Fix conocido: la Tarjeta interactiva delega el rol de botón cuando contiene acciones propias. Disparo: antes de servir vistas web del cliente a usuarios reales. Origen: S47, detectada S48-A2 (verificación de galería RN-web).
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)
