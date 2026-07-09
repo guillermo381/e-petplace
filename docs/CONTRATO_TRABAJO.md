@@ -1,7 +1,7 @@
 # Contrato de trabajo — Guillermo (founder e-PetPlace) ↔ Claude
 
-> **Versión:** v1.7 (con enmiendas S14 + S15 + S16 + S19 + S21 + S42)
-> **Última actualización:** 5 Jul 2026 — Sesión 42. Enmienda con reglas 73 (Code crea y ejecuta migraciones con acceso a DB) y 74 (Claude como arquitecto de e-PetPlace).
+> **Versión:** v1.8 (con enmiendas S14 + S15 + S16 + S19 + S21 + S42 + S48)
+> **Última actualización:** 9 Jul 2026 — Sesión 48. Enmienda con regla 75 (pedidos al founder autocontenidos: QUÉ/DÓNDE/CÓMO).
 > **Audiencia:** Claude (web y code) en toda sesión futura. Cualquier dev que se sume al proyecto.
 
 ---
@@ -367,6 +367,22 @@ Las decisiones de arquitectura técnica (estructura de repos, elección de stack
 
 ---
 
+### Enmienda Sesión 48 — Pedidos al founder autocontenidos (regla 75)
+
+**Regla 75 — Todo pedido al founder es autocontenido: QUÉ, DÓNDE y CÓMO.**
+
+Cuando Claude (web o Code) le pide algo al founder — correr un gate, verificar en dispositivo, copiar un output, ejecutar un paso manual — el pedido trae las tres patas:
+
+- **QUÉ** hay que hacer, en una acción concreta.
+- **DÓNDE** se hace: app, pantalla, comando exacto, URL o archivo.
+- **CÓMO** se reconoce el éxito (qué se tiene que ver si salió bien).
+
+Sin jerga sin traducir: todo término interno (IDs de capa, códigos D-NNN/L-NNN, nombres de funciones o triggers) va acompañado de su significado operativo la primera vez que aparece en el pedido. **Un pedido sin DÓNDE se devuelve y se reformula antes de ejecutarse** — el costo de reformular es minutos; el costo de un gate corrido en el lugar equivocado es una sesión.
+
+Origen: S48, dictada por el arquitecto en sesión.
+
+---
+
 ## Reglas de oro
 
 - **Si tengo dudas, paro.** No avanzo asumiendo.
@@ -390,3 +406,4 @@ Las decisiones de arquitectura técnica (estructura de repos, elección de stack
 - **v1.5 (15 May 2026 — S19)**: enmienda con regla 71 nueva (sesgo a fragmentar bajo sospecha: distinguir prudencia genuina vs ansiedad disfrazada; si los datos respaldan avanzar, avanzar sin fragmentar es la opción correcta).
 - **v1.6 (18 May 2026 — S21)**: enmienda con regla 72 nueva (el cierre de sesión lo dictan las señales humanas, no el alcance planeado: alcance al inicio es expectativa, no contrato de cierre; saturación se detecta en operación, no en planning).
 - **v1.7 (5 Jul 2026 — S42):** enmienda con reglas 73 (Code crea y ejecuta migraciones con acceso a DB; reemplaza pata operativa de reglas 16-17; founder conserva gates de aprobación y revisión visual) y 74 (Claude como arquitecto de e-PetPlace; amplía regla 3). Contexto completo en `ESTRATEGIA_2026H2.md`.
+- **v1.8 (9 Jul 2026 — S48):** enmienda con regla 75 (pedidos al founder autocontenidos: QUÉ/DÓNDE/CÓMO, sin jerga sin traducir; pedido sin DÓNDE se devuelve y se reformula).
