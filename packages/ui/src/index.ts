@@ -113,3 +113,7 @@ export { EstadoVacio } from './components/EstadoVacio'
 export { epetplaceFonts } from './fonts'
 export { Isotipo, type IsotipoVariant } from './brand/Isotipo'
 export { TokenGallery } from './gallery/TokenGallery'
+
+// Namespace i18n del design system (S51-B1a): la voz de los componentes
+// nace bilingüe ACÁ; las apps registran recursosUi al inicializar el riel.
+export { recursosUi, useTraduccionUi } from './i18n'

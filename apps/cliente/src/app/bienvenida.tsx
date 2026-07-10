@@ -9,9 +9,14 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Boton, HeroMarca, spacing, typography, useTheme } from '@epetplace/ui';
 
+// Riel i18n (S51-B1a). El titular/subtítulo del hero son voz emocional:
+// quedan en español hasta el gate del founder (decisión 7 de S51).
+import { useTraduccion } from '@/i18n';
+
 export default function Bienvenida() {
   const router = useRouter();
   const { theme } = useTheme();
+  const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
   const esMemorial = theme.mode === 'memorial';
 
@@ -34,8 +39,8 @@ export default function Bienvenida() {
       </View>
 
       <View style={{ flex: 1, justifyContent: 'flex-end', padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[2] }}>
-        <Boton etiqueta="Crear cuenta" bloque onPress={() => router.push('/registro')} />
-        <Boton variante="ghost" etiqueta="Ya tengo cuenta" bloque onPress={() => router.push('/login')} />
+        <Boton etiqueta={t('bienvenida.crearCuenta')} bloque onPress={() => router.push('/registro')} />
+        <Boton variante="ghost" etiqueta={t('bienvenida.yaTengoCuenta')} bloque onPress={() => router.push('/login')} />
       </View>
     </View>
   );

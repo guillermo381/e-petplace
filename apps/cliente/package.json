@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@epetplace/api": "workspace:*",
+    "@epetplace/i18n": "workspace:*",
     "@epetplace/ui": "workspace:*",
     "@expo/ui": "~57.0.4",
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -17,6 +18,7 @@
     "expo-image-picker": "~57.0.2",
     "expo-linear-gradient": "~57.0.0",
     "expo-linking": "~57.0.2",
+    "expo-localization": "~57.0.0",
     "expo-router": "~57.0.4",
     "expo-splash-screen": "~57.0.2",
     "expo-status-bar": "~57.0.0",
@@ -38,6 +40,8 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
+    "eslint": "^9.39.4",
+    "eslint-config-expo": "~57.0.0",
     "typescript": "~6.0.3"
   },
   "scripts": {

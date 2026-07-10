@@ -30,6 +30,8 @@ import {
 import { obtenerCitasPaseoDelDia, obtenerMiPrestador, resolverUrlsFotos, type CitaAgendaPaseo } from '@epetplace/api';
 
 import { asegurarSesionDev } from '@/lib/api';
+// Riel i18n (S51-B1a): hook tipado del namespace prestador.
+import { useTraduccion } from '@/i18n';
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -109,6 +111,7 @@ function FilaCita({ cita, enVivo, fotoUrl }: { cita: CitaAgendaPaseo; enVivo: bo
 
 export default function Agenda() {
   const { theme } = useTheme();
+  const { t } = useTraduccion();
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [refrescando, setRefrescando] = useState(false);
   // foto_url guarda PATH (S47-B0.2): firma en batch (1 round-trip por
@@ -169,7 +172,7 @@ export default function Agenda() {
         contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[4] }}
         refreshControl={<RefreshControl refreshing={refrescando} onRefresh={() => void refrescar()} />}
       >
-        <Encabezado variante="portada" saludo="Tus paseos de hoy" subtitulo={fechaHumana()} />
+        <Encabezado variante="portada" saludo={t('agenda.saludo')} subtitulo={fechaHumana()} />
 
         {pantalla.estado === 'cargando' && (
           <Tarjeta elevacion="plana">

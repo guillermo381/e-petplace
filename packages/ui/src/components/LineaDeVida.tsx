@@ -47,6 +47,7 @@ import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
 import { radius } from '../tokens/radius'
 import { useTheme } from '../ThemeProvider'
+import { useTraduccionUi } from '../i18n'
 import { Boton } from './Boton'
 import { Tarjeta } from './Tarjeta'
 import { Esqueleto, EsqueletoGrupo } from './Esqueleto'
@@ -331,10 +332,14 @@ export function LineaDeVida({
   onCargarMas,
 }: LineaDeVidaProps) {
   const { theme } = useTheme()
+  // Namespace `ui` (S51-B1a): la voz del pie migrada al riel. El
+  // DICCIONARIO de arriba es voz emocional: migra con gate del founder
+  // (deuda de extracción), no acá.
+  const { t } = useTraduccionUi()
 
   if (cargando) {
     return (
-      <EsqueletoGrupo etiqueta="Cargando la línea de vida">
+      <EsqueletoGrupo etiqueta={t('lineaDeVida.cargando')}>
         <EsqueletoNodo />
         <EsqueletoNodo />
         <EsqueletoNodo />
@@ -362,15 +367,15 @@ export function LineaDeVida({
           {estadoPie === 'error' ? (
             <View style={{ gap: spacing[2] }}>
               <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-                No pudimos cargar más momentos.
+                {t('lineaDeVida.errorCargarMas')}
               </Text>
-              <Boton variante="secundario" tamaño="sm" etiqueta="Reintentar" onPress={onCargarMas} />
+              <Boton variante="secundario" tamaño="sm" etiqueta={t('lineaDeVida.reintentar')} onPress={onCargarMas} />
             </View>
           ) : (
             <Boton
               variante="ghost"
               tamaño="sm"
-              etiqueta="Cargar más"
+              etiqueta={t('lineaDeVida.cargarMas')}
               cargando={estadoPie === 'cargando'}
               onPress={onCargarMas}
             />

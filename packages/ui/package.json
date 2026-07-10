@@ -9,21 +9,22 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "react": "*",
-    "react-native": "*",
-    "react-native-svg": "^15.15.4",
     "expo-image": "~57.0.0",
     "expo-image-manipulator": "~57.0.2",
     "expo-image-picker": "~57.0.2",
-    "react-native-maps": "1.27.2",
     "expo-linear-gradient": "~57.0.0",
+    "react": "*",
+    "react-native": "*",
+    "react-native-maps": "1.27.2",
     "react-native-reanimated": "~4.5.0",
-    "react-native-safe-area-context": "~5.7.0"
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-svg": "^15.15.4"
   },
   "devDependencies": {
     "typescript": "~5.9.0"
   },
   "dependencies": {
+    "@epetplace/i18n": "workspace:*",
     "@expo-google-fonts/dm-sans": "^0.4.1",
     "@expo-google-fonts/jetbrains-mono": "^0.4.1"
   }

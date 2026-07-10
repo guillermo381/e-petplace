@@ -1,0 +1,24 @@
+{
+  "name": "@epetplace/i18n",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Riel i18n del ecosistema (nace en S51-B1a): instancia única, detección de locale, persistencia de preferencia en dispositivo y keys tipadas exigibles",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "i18next": "^25.10.10",
+    "react-i18next": "^16.6.6"
+  },
+  "peerDependencies": {
+    "@react-native-async-storage/async-storage": "^2.2.0",
+    "expo-localization": "~57.0.0",
+    "react": "*"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "typescript": "~5.9.0"
+  }
+}

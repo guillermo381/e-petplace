@@ -1354,6 +1354,16 @@ Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en 
 #### D-314 — Cerrar el motor de puntos (seguridad del loyalty)
 🔴 BLOQUEANTE (del loyalty). (1) `otorgar_puntos` es SECURITY DEFINER **sin gate de autorización, sin `SET search_path`, con EXECUTE otorgado a `anon`/`authenticated`/PUBLIC** — cualquiera con la anon key acuña puntos (el DEFINER bypasea la policy solo-admin del ledger `transacciones_puntos`). Cura: gate en el body + `SET search_path` + REVOKE a anon/PUBLIC. (2) Policy `pu_own` ALL en `puntos_usuario` deja al propio user editar sus totales. Cura: reducir a SELECT propio; escritura solo del motor. Origen: S50-B0c (relevamiento de gamificación). Criterio de disparo: la PRIMERA migración que toque loyalty (antes si la anon key queda expuesta a un cliente público). Referencia: `MODELO_LOYALTY.md` §10.
 
+### Deudas de Sesión 51 (10 Jul 2026)
+
+#### D-315 — Extracción de strings existentes al riel i18n
+🟡 ALTA. El riel existe (S51-B1a: `packages/i18n`, namespaces por dueño, keys tipadas exigibles) pero las pantallas construidas ANTES del riel siguen con voz hardcodeada en español — varias en voseo, pre-decisión tuteo neutro. Pendiente de extraer: cliente (onboarding ×6, login/registro, home parcial — solo la Hoja Ajustes migró —, carnet, paseo), prestador (agenda parcial — solo el saludo migró —, cita/*, `INSIGNIA_POR_ESTADO`, `fechaHumana` con locale fijo `es-EC`), y los strings internos restantes de `packages/ui` (solo el pie de LineaDeVida migró; quedan su DICCIONARIO de voz, FichaVacuna, CampoFecha, EvidenciaFoto, VisorFoto, EsqueletoGrupo, etc.). Reglas de la extracción: al tocarse se transpone voseo→tuteo (regla 27 ampliada S51); la voz FUNCIONAL se traduce directo; la voz EMOCIONAL (tres voces del estado, mensajes de familia, memorial, heros de marca) exige lote es/en con gate del founder (decisión 7 de S51, patrón D-300) — hasta ese gate queda hardcodeada en español (mezcla es/en visible en modo inglés: honesta y transitoria). Criterio de disparo: **antes de declarar cerrada A1**; las pantallas que S51+ toque migran AL TOCARSE. Origen: S51-B1a (decisión founder 6).
+
+#### D-316 — Preferencia de idioma: sincronización a DB (cola del ciclo B1)
+🟢 MEDIA. Hoy la preferencia vive SOLO en dispositivo (AsyncStorage `epetplace.idioma`; default = locale del dispositivo, decisión founder S51). Falta la pata server: persistir la preferencia en el perfil del usuario, sync al iniciar sesión (consistencia multi-dispositivo) y que todo texto generado del lado server (notificaciones B4, emails) hable el idioma del usuario. Scope del ciclo B1 completo (rieles de cuenta), explícitamente FUERA de B1a. Criterio de disparo: B1 (riel de cuenta) — a más tardar antes de notificaciones server-side (B4). Origen: S51-B1a (decisión founder 5).
+
+> **Nota operativa S51 (L-134 aplica):** `expo-localization` es módulo nativo — las APKs preview vigentes (cliente y prestador `aa5914cd`) NO lo contienen, y con runtimeVersion por policy `appVersion` (ambas 1.0.0) un `eas update` del canal preview con el JS del riel les llegaría y las rompería ("Cannot find native module"). ANTES del próximo update de cualquiera de los dos canales: subir `version` en app.json + build preview nueva + reinstalar.
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)

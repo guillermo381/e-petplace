@@ -59,6 +59,8 @@ function IconoAjustes({ color }: { color: string }) {
 }
 
 import { esEspecieUi } from '@/lib/params';
+// Riel i18n (S51-B1a): hook tipado del namespace cliente.
+import { useTraduccion } from '@/i18n';
 
 // Fecha ISO → voz de máquina "01 may 2026" (mismo formato que FichaVacuna).
 const MESES_MONO = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
@@ -71,6 +73,7 @@ function fechaMonoVacuna(iso: string): string {
 export default function Home() {
   const router = useRouter();
   const { theme } = useTheme();
+  const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
 
   const [mascota, setMascota] = useState<MascotaResumen | null | 'cargando'>('cargando');
@@ -364,7 +367,7 @@ export default function Home() {
         />
       )}
 
-      <Hoja visible={ajustesAbiertos} onCerrar={() => setAjustesAbiertos(false)} titulo="Ajustes">
+      <Hoja visible={ajustesAbiertos} onCerrar={() => setAjustesAbiertos(false)} titulo={t('ajustes.titulo')}>
         <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
           <Text
             style={{
@@ -373,11 +376,11 @@ export default function Home() {
               color: theme.text.secondary,
             }}
           >
-            ¿Cerrás tu sesión? Tus datos quedan guardados.
+            {t('ajustes.confirmacionCierre')}
           </Text>
           <Boton
             variante="destructivo"
-            etiqueta="Cerrar sesión"
+            etiqueta={t('ajustes.cerrarSesion')}
             bloque
             cargando={cerrando}
             onPress={() => {
@@ -391,7 +394,7 @@ export default function Home() {
               })();
             }}
           />
-          <Boton variante="ghost" etiqueta="Cancelar" bloque onPress={() => setAjustesAbiertos(false)} />
+          <Boton variante="ghost" etiqueta={t('ajustes.cancelar')} bloque onPress={() => setAjustesAbiertos(false)} />
         </View>
       </Hoja>
     </ScrollView>
