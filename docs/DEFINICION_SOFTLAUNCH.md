@@ -44,12 +44,52 @@ e-PetPlace es el n°1 del mundo mascota solo si es excelente para dueños
 
 `PORTAL_PRESTADOR.md` manda el alma; la vara de facilidad es la de S42.
 
+## 3.5 El soft launch de la OPERACIÓN (enmienda S49)
+
+La v1 de esta definición describía la experiencia y asumía en silencio
+que la operación existía. **Lección S49 (detección del founder):** un
+soft launch sin operación definida no es un destino — es una demo con
+fecha. El destino incluye:
+
+- **Cobro in-app desde el día 1** (decisión founder S49): el dueño
+  paga los servicios dentro de la app. Pasarela: Kushki Fase 1 (la que
+  el ecosistema ya opera). Con su camino triste digno: rechazo,
+  reintento y reembolso con voz honesta. **El contrato del dinero es
+  `MODELO_FINANCIERO.md`** — toda feature que toque plata lo lee antes.
+- **Prime preparado, apagado** (decisión founder S49): la infra de
+  suscripciones queda lista y el soft launch nace sin ella — se
+  enciende sin refactor cuando haya evangelistas.
+- **Multi-país y bilingüe de nacimiento** (decisión founder S49):
+  español + inglés desde el inicio; `country_config` como fuente de
+  verdad de moneda, formato y servicios activos por país. F1 = Ecuador
+  con rieles listos para el siguiente país.
+- **Ciclo de cuenta completo:** configuración de cuenta, edición de
+  perfil, preferencias de notificaciones y **eliminación de cuenta**
+  (requisito de tiendas, no opcional).
+- **La operación existente CONECTADA, no reinventada:** el admin ya
+  opera sobre el mismo proyecto (pedidos+Kushki, cupones/campañas,
+  gamificación, Prime multi-país, liquidaciones, logística,
+  notificaciones, roles, beta users). El soft launch los conecta a la
+  experiencia del dueño y del prestador.
+- **Liquidación al prestador:** el que trabaja, cobra — el motor de
+  liquidaciones se extiende de sellers a prestadores.
+- **Post-venta de servicios:** cancelación/reagendamiento self-service,
+  reembolsos, calificaciones, canal de ayuda digno.
+- **Compuerta de salida:** cumplimiento de tiendas + beta gate
+  (`beta_users`) para un launch controlado.
+
+**Test de la operación (gemelo del test de toda feature):** *"¿puede
+un dueño real pagar, quejarse, cancelar, cambiar de idioma y borrar su
+cuenta sin que ninguna de esas acciones pase por el WhatsApp del
+founder?"* Mientras la respuesta sea no, no hay soft launch — hay
+piloto asistido.
+
 ## 4. Decisiones abiertas (founder, arranque S49)
 
-- (a) **Tienda v1**: catálogo propio curado vs VTEX ya — voto arquitecto:
-  **catálogo propio**.
-- (b) **Reuniones con vets**: agendar YA en paralelo (co-diseño F0) —
-  voto arquitecto: **sí**.
+- (a) **Tienda v1** — ✅ **CERRADA (founder S49): VTEX, post cierre del
+  portal prestadores.**
+- (b) **Reuniones con vets** — 🔄 **EN CURSO: reuniones F0 agendándose**
+  (co-diseño F0 en paralelo).
 - (c) **El ORDEN de construcción** (matriz JTBD × Momento × Actor) se
   traza en sesión S49, founder + arquitecto.
 
