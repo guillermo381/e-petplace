@@ -12,13 +12,28 @@
 import { useCallback, useState } from 'react';
 import { View } from 'react-native';
 import { Tabs, useFocusEffect } from 'expo-router';
-import { BarraTabs, Boton, EstadoVacio, spacing, useTheme, type BarraTabsItem } from '@epetplace/ui';
+import {
+  BarraTabs,
+  Boton,
+  Esqueleto,
+  EsqueletoGrupo,
+  EstadoVacio,
+  spacing,
+  useTheme,
+  type BarraTabsItem,
+} from '@epetplace/ui';
 
 import { asegurarSesionDev } from '@/lib/api';
 import { IconoHoy, IconoMascotas, IconoNegocio } from '@/components/iconos-tabs';
 import { useTraduccion } from '@/i18n';
 
-type EstadoSesionRaiz = 'verificando' | 'ok' | 'sin_sesion';
+// TRES estados (cura S51 post-gate): cargando (Esqueleto ESTÁTICO,
+// Ley 13 — jamás el vacío como estado de carga) → sesión → sin-sesión
+// SOLO confirmado (el bootstrap dev de asegurarSesionDev ya corrió y
+// dijo que no). `detalle` conserva el mensaje específico del bootstrap
+// (regla 36: "faltan credenciales en .env.local" no es lo mismo que
+// "no hay sesión" — cero causas tragadas).
+type EstadoSesionRaiz = 'verificando' | 'ok' | { sin_sesion: true; detalle: string };
 
 export default function TabsLayout() {
   const { theme } = useTheme();
@@ -30,7 +45,10 @@ export default function TabsLayout() {
     useCallback(() => {
       let vigente = true;
       void asegurarSesionDev().then((r) => {
-        if (vigente) setSesion(r.ok ? 'ok' : 'sin_sesion');
+        // Forense L-138: el resultado del guard raíz queda LITERAL en
+        // el log de Metro/logcat — el gate empieza confirmándolo.
+        console.log(`[sesion] raíz prestador: ${r.ok ? 'ok' : `sin sesión — ${r.mensaje}`}`);
+        if (vigente) setSesion(r.ok ? 'ok' : { sin_sesion: true, detalle: r.mensaje });
       });
       return () => {
         vigente = false;
@@ -39,16 +57,31 @@ export default function TabsLayout() {
   );
 
   if (sesion === 'verificando') {
-    // decisión en curso: superficie quieta (Ley 13 — nada parpadea)
-    return <View style={{ flex: 1, backgroundColor: theme.bg.base }} />;
+    // Esqueleto estático de la jornada (Ley 13): la verificación firma
+    // sesión dev en frío — puede tardar; el vacío jamás es carga.
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.bg.base, padding: spacing[5], paddingTop: spacing[10] }}>
+        <EsqueletoGrupo>
+          <View style={{ gap: spacing[4] }}>
+            <Esqueleto forma="linea" ancho="55%" />
+            <Esqueleto forma="bloque" ancho="100%" alto={88} />
+            <Esqueleto forma="bloque" ancho="100%" alto={220} />
+          </View>
+        </EsqueletoGrupo>
+      </View>
+    );
   }
 
-  if (sesion === 'sin_sesion') {
+  if (sesion !== 'ok') {
+    // sin-sesión CONFIRMADO — el estado digno de la preview, intacto.
+    // El detalle específico solo se muestra si difiere del genérico
+    // (en preview es "No hay sesión activa." y el título ya lo dice).
+    const detalleEspecifico = sesion.detalle !== 'No hay sesión activa.' ? sesion.detalle : t('sesion.sinSesionDetalle');
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base, justifyContent: 'center', padding: spacing[5] }}>
         <EstadoVacio
           titulo={t('sesion.sinSesion')}
-          descripcion={t('sesion.sinSesionDetalle')}
+          descripcion={detalleEspecifico}
           accion={
             <Boton
               variante="secundario"
