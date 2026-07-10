@@ -612,7 +612,7 @@ function GaleriaInterna() {
             <Isotipo size={32} variant={esDark || esMemorial ? 'blanco' : 'tinta'} />
             <View>
               <Text style={{ fontFamily: sans.bold, fontSize: typography.size.lg, color: theme.text.primary }}>
-                Design Tokens v4
+                Design Tokens v4 · s49
               </Text>
               <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.secondary }}>
                 s43-b2 · galería de verificación
