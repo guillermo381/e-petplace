@@ -1,6 +1,6 @@
 # DISEÑO_EXPERIENCIA — La arquitectura de la experiencia del dueño
 
-> **Versión: v1.0 — S50 (10 Jul 2026), Etapa A0 de RUTA_F1 v2.2.**
+> **Versión: v1.1 — S50 (10 Jul 2026), Etapa A0 de RUTA_F1 v2.2.**
 > Escrito por el arquitecto/director de diseño, decisiones de producto
 > cerradas por el founder en sesión. **Contrastes obligatorios:**
 > `MODELO_PRODUCTO.md` (EL NORTE — en especial §6.4 revelación
@@ -10,11 +10,18 @@
 > doc define QUÉ se ve y POR QUÉ; los ladrillos ya existen.
 >
 > **Qué es este doc:** las decisiones de arquitectura de experiencia
-> que moldean TODA la UI del dueño de acá al soft launch. Un Home que
+> que moldean TODA la UI del ecosistema móvil de acá al soft launch:
+> **Parte I — el dueño; Parte II — el prestador.** La ley del
+> ecosistema exige que las dos experiencias se diseñen mirándose —
+> un solo documento las obliga a rimar. Para el prestador,
+> `PORTAL_PRESTADOR.md` sigue siendo el alma profunda (canon
+> intacto); esta Parte II es su arquitectura móvil. Un Home que
 > liste servicios está mal leído (mandato EL NORTE). Toda pantalla
 > nueva de A1+ se contrasta contra este documento.
 
 ---
+
+# PARTE I — El dueño
 
 ## 1. La tesis del Home
 
@@ -299,6 +306,118 @@ Orden fino a trazar al abrir A1; alcance derivado:
    infraestructura con el motor de alertas — hoy NO existe en DB,
    es construcción nueva).
 
+# PARTE II — El prestador
+
+## 12. La asimetría que ordena todo
+
+El símil no es un espejo. El dueño abre la app para **saber** ("¿cómo
+está mi hogar?"); el prestador la abre para **trabajar** ("¿qué toca
+ahora?"). Verbos distintos, tesis distintas:
+
+- **Dueño:** el Home es el estado del hogar. Benchmark: Nubank.
+- **Prestador:** el Home es **la jornada**. Benchmark: MoeGo — la
+  herramienta en la que un profesional vive su día sin que se le
+  interponga.
+
+**La simetría profunda que hace que ambas apps sean el mismo
+producto:** las dos abren con ESTADO, no con catálogo; las dos
+aplican revelación progresiva (para el prestador ya legislada en
+`PORTAL_PRESTADOR.md` §2.6: *"portal vacío es portal en preparación,
+no portal fracasado"*); y las dos depositan el expediente como
+SEDIMENTO de una experiencia excelente — jamás como formulario. El
+design system codifica la diferencia de temperamento: dueño = dosis
+alta; prestador = dosis baja, UN acento, sobriedad sin frialdad (la
+filosofía luxury de §1.3 del portal hecha tokens).
+
+Invariantes que esta Parte II hereda del alma (`PORTAL_PRESTADOR.md`)
+sin re-decidir: lo aspiracional (§1.4), la coreografía del Día 1 y la
+mascota demo (§2 — Zeus, que además es real), los hitos de
+trayectoria — jamás de tarea, jamás ranking (§2.7), el home único
+compuesto por familias de servicio habilitadas (§5.9, decisión
+cerrada S20), y el doble vínculo con la familia humana (§5.10).
+
+## 13. La tesis del Home prestador: HOY, y lo siguiente preside
+
+De arriba hacia abajo:
+
+- **Zona 1 — Ahora / Lo siguiente.** La atención en curso
+  (`CitaEnVivo`) o la próxima, presidiendo con su "Antes" a un tap
+  (quién es la mascota, sus alertas: caso activo, alergia, ansiedad,
+  primera vez). El paseador de 4 paseos diarios no navega: abre y
+  arranca.
+- **Zona 2 — El día.** La agenda de hoy compacta: mascota grande,
+  familia secundaria, estado, indicadores de condición. Toggle a
+  semana para planificar (la vista anticipada de §6.4.2 del portal:
+  primera-vez vs recurrente, lo que requiere preparación).
+- **Zona 3 — Novedades que piden algo.** Cancelaciones y
+  reagendamientos del dueño (B5), mensajes de familia. Sin novedades,
+  la zona NO existe — el mismo silencio digno de la Parte I.
+- **Zona 4 — Tu trabajo, con dignidad.** Solo lo que tiene algo digno
+  que mostrar, cuando lo tiene: "lo que vas a cobrar" con desglose
+  (vista de liquidaciones, B2.4 — el que trabaja ve lo que va a
+  cobrar) e hitos de trayectoria cuando ocurren.
+
+### La agenda solo contiene verdad firme
+
+Decisión de diseño derivada de la regla del cobro (founder S49): el
+bloqueo temporal del dueño es INVISIBLE para el prestador; la cita
+aparece cuando el pago la confirma. Cero ruido tentativo, cero citas
+fantasma que se evaporan. La agenda es un espacio de confianza
+absoluta — extensión estructural de L-139: la agenda jamás muestra
+verosímil-no-firme.
+
+## 14. La navegación del prestador
+
+**Decisión founder S50: tres tabs (opción (b)).**
+
+```
+BarraTabs
+├── HOY (raíz, la jornada — §13, toggle día/semana)
+├── MASCOTAS (las vidas que cuidás)
+│   ├── Historial de mascotas atendidas
+│   ├── Detalle de mascota — "la pantalla icónica" (§6.4.4 del
+│   │   portal): vista prestador del expediente, diferenciada por
+│   │   familia de servicio
+│   └── La familia humana de cada mascota
+└── NEGOCIO (la administración)
+    ├── Servicios, precios, horarios, equipo
+    ├── Cuenta comercial (wizard B2.3 — precondición de cobrar)
+    ├── Liquidaciones (revelada con la primera plata)
+    └── Perfil y cuenta (ciclo B1)
+```
+
+**Por qué (b):** simetría filosófica exacta con el dueño (estado ·
+relaciones · administración) y anti-CRM estructural — la tab Mascotas
+dice "tu trabajo son vidas que cuidás, no slots de agenda". El
+multi-rol cae natural: el empleado ve SU jornada; el dueño de cuenta
+ve la operación completa y Negocio entero. La composición por
+familias (§5.9) se preserva: las cards de HOY se componen según lo
+habilitado — paseo hoy, grooming al portarse del portal congelado,
+clínica cuando las reuniones F0 la descongelen.
+
+## 15. Los tests de toda pantalla nueva del prestador
+
+Los 6 tests de §10 aplican íntegros, más dos propios:
+
+7. **Dosis baja:** UN acento de capa, CTA en tinta, cero gradiente UI
+   (Ley 4).
+8. **Verdad firme:** ¿todo lo que la pantalla muestra como cita/plata
+   está confirmado? Lo tentativo no existe para el prestador.
+
+## 16. Backlog derivado del lado prestador (para cuando la ruta lo
+llame)
+
+No es mandato de A1 (que es del dueño) — es el derivado que B1/B2 y
+el portado de grooming consumen:
+
+1. **HOY v1** sobre la Agenda existente de S44 (re-jerarquizada a las
+   4 zonas; la atención E2E de paseo ya vive).
+2. **Tab Mascotas v1** — historial + detalle icónico vista prestador.
+3. **NEGOCIO v1** — wizard de cuenta comercial (B2.3) + vista de
+   liquidaciones (B2.4) + auth real (D-290, riel B1).
+4. **BarraTabs prestador a 3 tabs** (hoy shell Stack+(tabs)).
+5. Composición por familia al portar grooming (segunda familia viva).
+
 ## Decisiones firmadas en S50
 
 - Home = estado del hogar; servicios en contexto (founder, sesión).
@@ -310,6 +429,11 @@ Orden fino a trazar al abrir A1; alcance derivado:
   mérito, jamás diagnostica, jamás sponsoreada.
 - Perfil modular con M-WEAR reservado (mandato wearable del founder).
 - Loyalty (a′) — ver `MODELO_LOYALTY.md`.
+- Prestador: Home = la jornada (HOY, 4 zonas); navegación (b)
+  Hoy·Mascotas·Negocio; la agenda solo contiene verdad firme
+  (bloqueo temporal invisible al prestador).
+- Dos prototipos separados (cliente y prestador), dos links: S2a con
+  Kary usa el del cliente; las reuniones F0 usan el del prestador.
 
 ## Abiertas (no bloquean)
 
@@ -321,6 +445,11 @@ Orden fino a trazar al abrir A1; alcance derivado:
 
 ## Historial
 
+- **v1.1 (S50, 10 Jul 2026):** Parte II — el prestador. Asimetría
+  dueño/prestador, tesis HOY con 4 zonas, principio "la agenda solo
+  contiene verdad firme", navegación (b) Hoy·Mascotas·Negocio, tests
+  7-8, backlog derivado del lado prestador. Decisión: dos prototipos
+  separados. `PORTAL_PRESTADOR.md` queda como alma profunda intacta.
 - **v1.0 (S50, 10 Jul 2026):** redacción inicial. Tesis del Home,
   navegación de 3 tabs con ciclo del trono, perfil modular,
   descubrimiento §6.4, IA como voz, Despensa, tests de pantalla,
