@@ -117,3 +117,10 @@ export { TokenGallery } from './gallery/TokenGallery'
 // Namespace i18n del design system (S51-B1a): la voz de los componentes
 // nace bilingüe ACÁ; las apps registran recursosUi al inicializar el riel.
 export { recursosUi, useTraduccionUi } from './i18n'
+
+// FichaMascotaHogar — S51-B2.2 (Ley 11, espec gateada por founder)
+export {
+  FichaMascotaHogar,
+  type FichaMascotaHogarProps,
+  type FichaMascotaHogarVoz,
+} from './components/FichaMascotaHogar'

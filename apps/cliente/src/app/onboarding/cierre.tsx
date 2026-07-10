@@ -79,13 +79,13 @@ export default function Cierre() {
       if (!r.ok) {
         if (r.codigo === 'familia_ya_existe') {
           // Idempotencia de UX: si ya existe (doble tap, reintento), al Home.
-          router.replace('/home');
+          router.replace('/hogar');
           return;
         }
         setError(r.mensaje);
         return;
       }
-      router.replace('/home');
+      router.replace('/hogar');
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [intento]);

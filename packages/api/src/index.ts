@@ -109,3 +109,24 @@ export {
   type NovedadRegistradaPaseo,
   type ResumenCierrePaseo,
 } from './wrappers/paseo';
+
+// Estado del hogar — S51-B2.2 (señales de las tres voces + Zona 2)
+export {
+  obtenerEstadoHogar,
+  type AtencionEnCursoHogar,
+  type EstadoHogar,
+  type ProximaCitaHogar,
+  type SenalesHogarMascota,
+} from './wrappers/hogar';
+
+// Perfil de mascota — S51-B2.3 (pila de módulos)
+export {
+  obtenerPerfilMascota,
+  type PerfilMascota,
+  type UmbralesEspecie,
+  type VacunaDeMascota,
+} from './wrappers/perfilMascota';
+export type { IdentidadMascota } from './wrappers/perfilMascota';
+
+// Config del país — S51-B2.4 (Explorar por country_config)
+export { obtenerServiciosPais, type ServiciosPais } from './wrappers/paisConfig';

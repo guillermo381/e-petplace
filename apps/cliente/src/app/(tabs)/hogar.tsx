@@ -1,0 +1,503 @@
+/**
+ * HOGAR — la tesis del producto hecha pantalla (S51-B2.2, sobre
+ * DISEÑO_EXPERIENCIA §1-§2): el estado del hogar, no una grilla.
+ *
+ * Las 4 zonas, de arriba hacia abajo:
+ *   Zona 1 — el hogar: las mascotas con UNA línea de estado cada una
+ *     (FichaMascotaHogar; voz calculada por calcularVozHogar de
+ *     @epetplace/domain sobre el expediente REAL — L-139: "al día" se
+ *     gana, jamás se asume). Tap → perfil.
+ *   Zona 2 — hoy: atención en curso (CitaEnVivo, Ley 7) o próxima
+ *     cita. SIN nada urgente LA ZONA NO EXISTE (silencio digno).
+ *   Zona 3 — en contexto: el motor de revelaciones es B4 — hueco
+ *     estructural (ver ZONA 3 abajo), null honesto.
+ *   Zona 4 — la vida: LineaDeVida del HOGAR (merge multi-mascota por
+ *     fecha_evento) + la acción de aporte (cargar carnet, flujo S47).
+ *
+ * Herencias vivas de la pantalla S45-S48 que esta reemplaza: Hoja de
+ * detalle de vacuna (tap en nodo) y VisorFoto del carnet. La Hoja de
+ * Ajustes/sesión MIGRÓ a Cuenta (B2.5).
+ */
+
+import { useCallback, useRef, useState } from 'react';
+import { ScrollView, Text, View } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  Boton,
+  Celda,
+  CitaEnVivo,
+  Encabezado,
+  Esqueleto,
+  EsqueletoGrupo,
+  EstadoVacio,
+  FichaMascotaHogar,
+  Hoja,
+  HojaScroll,
+  LineaDeVida,
+  Separador,
+  Tarjeta,
+  VisorFoto,
+  spacing,
+  typography,
+  useAviso,
+  useTheme,
+  type FichaMascotaHogarVoz,
+  type LineaDeVidaEstadoPie,
+} from '@epetplace/ui';
+import {
+  getEstadoOnboardingDueno,
+  leerTimelineMascota,
+  obtenerEstadoHogar,
+  obtenerMascotasDeFamilia,
+  obtenerVacunaPorEvento,
+  resolverUrlFoto,
+  resolverUrlsFotos,
+  type EstadoHogar,
+  type ItemTimeline,
+  type MascotaResumen,
+  type VacunaDeEvento,
+} from '@epetplace/api';
+import { calcularVozHogar, type VozEstadoHogar } from '@epetplace/domain';
+
+import { useTraduccion } from '@/i18n';
+
+// Fecha ISO → voz de máquina "01 may 2026" (mismo formato que FichaVacuna).
+const MESES_MONO = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+function fechaMonoVacuna(iso: string): string {
+  const [a, m, d] = iso.split('-').map(Number);
+  if (!a || !m || m < 1 || m > 12 || !d) return iso.toLowerCase();
+  return `${String(d).padStart(2, '0')} ${MESES_MONO[m - 1]} ${a}`;
+}
+
+type TraductorHogar = ReturnType<typeof useTraduccion>['t'];
+
+// Código de voz (Ley 3: jamás visible) → texto del riel + semántica.
+function vozATexto(voz: VozEstadoHogar, nombre: string, t: TraductorHogar): { texto: string; semantica: FichaMascotaHogarVoz } {
+  switch (voz.voz) {
+    case 'alDia':
+      return { texto: t('hogar.vozAlDia', { nombre }), semantica: 'alDia' };
+    case 'pideAtencion': {
+      if (voz.causa === 'emergencia') {
+        return { texto: t('hogar.vozEmergencia', { nombre }), semantica: 'pideAtencion' };
+      }
+      const { vacuna, dias } = voz;
+      if (voz.causa === 'vacunaVence') {
+        const texto =
+          dias === 0
+            ? t('hogar.vozVacunaVenceHoy', { nombre, vacuna })
+            : dias === 1
+              ? t('hogar.vozVacunaVenceUnDia', { nombre, vacuna })
+              : t('hogar.vozVacunaVence', { nombre, vacuna, dias });
+        return { texto, semantica: 'pideAtencion' };
+      }
+      const texto =
+        dias === 1
+          ? t('hogar.vozVacunaVencidaUnDia', { nombre, vacuna })
+          : t('hogar.vozVacunaVencida', { nombre, vacuna, dias });
+      return { texto, semantica: 'pideAtencion' };
+    }
+    case 'conociendolo':
+      return {
+        texto: voz.causa === 'expedienteRalo' ? t('hogar.vozConociendolo', { nombre }) : t('hogar.vozQuieto', { nombre }),
+        semantica: 'conociendolo',
+      };
+  }
+}
+
+// ═══════════ ZONA 3 — EN CONTEXTO (hueco estructural) ═══════════
+// El motor de revelaciones NO existe (nace en B4 junto al de alertas —
+// trenza A0⇄B4). Cuando exista, entregará a esta pantalla un valor de
+// este tipo y la zona se renderizará entre Zona 2 y Zona 4. Hasta
+// entonces: null honesto ESTRUCTURAL — cero card vacía, cero relleno.
+type RevelacionZona3 = { titulo: string; narrativa: string; accion: () => void } | null;
+const revelacionZona3: RevelacionZona3 = null;
+// ═════════════════════════════════════════════════════════════════
+
+type EstadoMascotas = MascotaResumen[] | 'cargando' | 'error';
+
+export default function Hogar() {
+  const router = useRouter();
+  const { theme } = useTheme();
+  const { t } = useTraduccion();
+  const insets = useSafeAreaInsets();
+  const { mostrar } = useAviso();
+
+  const [mascotas, setMascotas] = useState<EstadoMascotas>('cargando');
+  const [fotos, setFotos] = useState<Record<string, string>>({});
+  const [estadoHogar, setEstadoHogar] = useState<EstadoHogar | null>(null);
+
+  // Zona 4 — timeline del hogar: merge multi-mascota con cursor por mascota.
+  const [items, setItems] = useState<ItemTimeline[] | null | 'error'>(null);
+  const cursoresRef = useRef<Record<string, string | null>>({});
+  const [estadoPie, setEstadoPie] = useState<LineaDeVidaEstadoPie>('nada');
+  const cargandoMasRef = useRef(false);
+
+  const [carnetSelectorAbierto, setCarnetSelectorAbierto] = useState(false);
+  const [vacunaAbierta, setVacunaAbierta] = useState(false);
+  const [vacuna, setVacuna] = useState<VacunaDeEvento | 'cargando' | 'error'>('cargando');
+  const [carnetFirmado, setCarnetFirmado] = useState<string | null>(null);
+
+  const ordenarPorFecha = (a: ItemTimeline, b: ItemTimeline) => (a.fecha_evento < b.fecha_evento ? 1 : -1);
+
+  const cargarTimelineHogar = useCallback(async (lista: MascotaResumen[]) => {
+    const paginas = await Promise.all(lista.map((m) => leerTimelineMascota(m.id)));
+    if (paginas.some((p) => !p.ok)) {
+      setItems('error');
+      setEstadoPie('nada');
+      return;
+    }
+    const todos: ItemTimeline[] = [];
+    const cursores: Record<string, string | null> = {};
+    paginas.forEach((p, i) => {
+      if (p.ok) {
+        todos.push(...p.data.items);
+        cursores[lista[i].id] = p.data.siguiente_cursor;
+      }
+    });
+    cursoresRef.current = cursores;
+    todos.sort(ordenarPorFecha);
+    setItems(todos);
+    setEstadoPie(Object.values(cursores).some((c) => c !== null) ? 'mas' : 'nada');
+  }, []);
+
+  const cargarMas = useCallback(async () => {
+    if (cargandoMasRef.current || !Array.isArray(mascotas)) return;
+    const pendientes = Object.entries(cursoresRef.current).filter(([, c]) => c !== null);
+    if (pendientes.length === 0) {
+      // reintento sin cursores: recargar el timeline del hogar
+      setEstadoPie('cargando');
+      await cargarTimelineHogar(mascotas);
+      return;
+    }
+    cargandoMasRef.current = true;
+    setEstadoPie('cargando');
+    const resultados = await Promise.all(
+      pendientes.map(([id, cursor]) => leerTimelineMascota(id, { cursor: cursor as string })),
+    );
+    cargandoMasRef.current = false;
+    if (resultados.some((r) => !r.ok)) {
+      setEstadoPie('error');
+      return;
+    }
+    const nuevos: ItemTimeline[] = [];
+    resultados.forEach((r, i) => {
+      if (r.ok) {
+        nuevos.push(...r.data.items);
+        cursoresRef.current[pendientes[i][0]] = r.data.siguiente_cursor;
+      }
+    });
+    setItems((prev) => {
+      const base = Array.isArray(prev) ? prev : [];
+      return [...base, ...nuevos].sort(ordenarPorFecha);
+    });
+    setEstadoPie(Object.values(cursoresRef.current).some((c) => c !== null) ? 'mas' : 'nada');
+  }, [mascotas, cargarTimelineHogar]);
+
+  useFocusEffect(
+    useCallback(() => {
+      let vigente = true;
+      void (async () => {
+        const estado = await getEstadoOnboardingDueno();
+        if (!vigente) return;
+        if (!estado.ok || !estado.data.tiene_familia || estado.data.familia_id === null) {
+          router.replace('/');
+          return;
+        }
+        const r = await obtenerMascotasDeFamilia(estado.data.familia_id);
+        if (!vigente) return;
+        if (!r.ok) {
+          setMascotas('error');
+          return;
+        }
+        const lista = r.data;
+        setMascotas(lista);
+
+        // señales + fotos + timeline en paralelo — reemplazo directo (Ley 13)
+        void obtenerEstadoHogar(lista.map((m) => m.id)).then((eh) => {
+          if (vigente && eh.ok) setEstadoHogar(eh.data);
+        });
+        const paths = lista.map((m) => m.foto_url).filter((p): p is string => typeof p === 'string' && p.length > 0);
+        if (paths.length > 0) {
+          void resolverUrlsFotos(paths).then((urls) => {
+            if (!vigente) return;
+            const porMascota: Record<string, string> = {};
+            lista.forEach((m) => {
+              const url = m.foto_url ? urls.get(m.foto_url) : undefined;
+              if (url) porMascota[m.id] = url;
+            });
+            setFotos(porMascota);
+          });
+        }
+        void cargarTimelineHogar(lista);
+      })();
+      return () => {
+        vigente = false;
+      };
+    }, [router, cargarTimelineHogar]),
+  );
+
+  const alTocarNodo = (item: { atencion_id?: string | null; evento_id: string; tipo?: string }) => {
+    if (item.tipo === 'vacuna_aplicada') {
+      setVacunaAbierta(true);
+      setVacuna('cargando');
+      void obtenerVacunaPorEvento(item.evento_id).then((r) => {
+        setVacuna(r.ok ? r.data : 'error');
+      });
+      return;
+    }
+    if (item.atencion_id) {
+      router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: item.atencion_id } });
+    }
+  };
+
+  async function verCarnet(path: string) {
+    const url = await resolverUrlFoto(path);
+    if (url === null) {
+      mostrar({ texto: t('vacunaHoja.errorAbrirCarnet'), variante: 'error' });
+      return;
+    }
+    setCarnetFirmado(url);
+  }
+
+  function irACargarCarnet(m: MascotaResumen) {
+    setCarnetSelectorAbierto(false);
+    router.push({ pathname: '/carnet', params: { mascotaId: m.id, nombre: m.nombre } });
+  }
+
+  if (mascotas === 'cargando') {
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.bg.base, padding: spacing[5], paddingTop: insets.top + spacing[8] }}>
+        <EsqueletoGrupo etiqueta={t('hogar.cargando')}>
+          <View style={{ gap: spacing[4] }}>
+            <Esqueleto forma="linea" ancho="50%" />
+            <Esqueleto forma="bloque" ancho="100%" alto={72} />
+            <Esqueleto forma="bloque" ancho="100%" alto={72} />
+            <View style={{ height: spacing[4] }} />
+            <Esqueleto forma="bloque" ancho="100%" alto={120} />
+          </View>
+        </EsqueletoGrupo>
+      </View>
+    );
+  }
+
+  if (mascotas === 'error') {
+    // el error JAMÁS se disfraza de vacío (Ley 13)
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.bg.base, justifyContent: 'center', padding: spacing[5] }}>
+        <EstadoVacio
+          titulo={t('hogar.errorHistoria')}
+          descripcion={t('hogar.errorHistoriaDetalle')}
+          accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setMascotas('cargando')} />}
+        />
+      </View>
+    );
+  }
+
+  if (mascotas.length === 0) {
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.bg.base, justifyContent: 'center', padding: spacing[5] }}>
+        <EstadoVacio titulo={t('hogar.sinMascotas')} descripcion={t('hogar.sinMascotasDetalle')} />
+      </View>
+    );
+  }
+
+  const hoy = new Date();
+  const senalesPorMascota = new Map(estadoHogar?.senales.map((s) => [s.mascota_id, s]) ?? []);
+  const enCurso = estadoHogar?.atencion_en_curso ?? null;
+  const proximaCita = enCurso === null ? (estadoHogar?.proxima_cita ?? null) : null;
+  const nombreDe = (id: string) => (Array.isArray(mascotas) ? (mascotas.find((m) => m.id === id)?.nombre ?? '') : '');
+
+  return (
+    <ScrollView
+      style={{ flex: 1, backgroundColor: theme.bg.base }}
+      contentContainerStyle={{ paddingTop: insets.top, paddingBottom: spacing[6] }}
+    >
+      {/* ── Zona 1 — el hogar ─────────────────────────────────── */}
+      <Encabezado variante="portada" saludo={t('hogar.titulo')} />
+
+      <View style={{ paddingHorizontal: spacing[2], gap: spacing[1] }}>
+        {mascotas.map((m) => {
+          const senales = senalesPorMascota.get(m.id);
+          // Sin señales todavía (estado del hogar cargando): la ficha
+          // muestra solo el nombre — jamás una voz inventada (L-139).
+          const voz = senales
+            ? vozATexto(
+                calcularVozHogar(
+                  {
+                    tieneEmergenciaActiva: senales.tiene_emergencia_activa,
+                    vacunasTotal: senales.vacunas_total,
+                    ultimaVacunaAplicada: senales.ultima_vacuna_aplicada,
+                    proximaVacuna: senales.proxima_vacuna,
+                    ultimaAtencionCerrada: senales.ultima_atencion_cerrada,
+                  },
+                  hoy,
+                ),
+                m.nombre,
+                t,
+              )
+            : null;
+          return (
+            <FichaMascotaHogar
+              key={m.id}
+              nombre={m.nombre}
+              fotoUrl={fotos[m.id]}
+              voz={voz?.semantica ?? 'conociendolo'}
+              textoEstado={voz?.texto ?? ''}
+              onPress={() => router.push({ pathname: '/mascota/[mascotaId]', params: { mascotaId: m.id } })}
+            />
+          );
+        })}
+      </View>
+
+      {/* ── Zona 2 — hoy (sin nada urgente, NO existe) ─────────── */}
+      {enCurso !== null ? (
+        <View style={{ paddingHorizontal: spacing[4], marginTop: spacing[5] }}>
+          <CitaEnVivo capa="cuidado">
+            <Celda
+              interactiva
+              accessibilityRole="button"
+              onPress={() => router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: enCurso.atencion_id } })}
+              titulo={nombreDe(enCurso.mascota_id)}
+              subtitulo={t('hogar.paseoEnCurso')}
+              fin={
+                <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.accent.primary }}>
+                  {t('hogar.verEnVivo')}
+                </Text>
+              }
+            />
+          </CitaEnVivo>
+        </View>
+      ) : proximaCita !== null ? (
+        <View style={{ paddingHorizontal: spacing[4], marginTop: spacing[5] }}>
+          <Tarjeta>
+            <Celda
+              titulo={nombreDe(proximaCita.mascota_id)}
+              subtitulo={`${t('hogar.proximaCita')}${proximaCita.tipo_servicio ? ` · ${proximaCita.tipo_servicio}` : ''}`}
+              metadataMono={`${fechaMonoVacuna(proximaCita.fecha)}${proximaCita.hora ? ` · ${proximaCita.hora}` : ''}`}
+            />
+          </Tarjeta>
+        </View>
+      ) : null}
+
+      {/* ── Zona 3 — en contexto: hueco estructural (ver arriba) ── */}
+      {revelacionZona3 !== null ? null : null}
+
+      {/* ── Zona 4 — la vida ──────────────────────────────────── */}
+      <View style={{ paddingHorizontal: spacing[4], marginTop: spacing[6], gap: spacing[4] }}>
+        <Tarjeta
+          interactiva
+          onPress={() => {
+            if (mascotas.length === 1) irACargarCarnet(mascotas[0]);
+            else setCarnetSelectorAbierto(true);
+          }}
+          accessibilityRole="button"
+          etiqueta={t('hogar.cargarCarnet')}
+          relleno="amplio"
+        >
+          <View style={{ gap: spacing[1] }}>
+            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
+              {t('hogar.cargarCarnet')}
+            </Text>
+            <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
+              {t('hogar.cargarCarnetDetalle')}
+            </Text>
+          </View>
+        </Tarjeta>
+
+        {items === null ? (
+          <LineaDeVida items={[]} cargando />
+        ) : items === 'error' ? (
+          <EstadoVacio
+            titulo={t('hogar.errorHistoria')}
+            descripcion={t('hogar.errorHistoriaDetalle')}
+            accion={
+              <Boton
+                variante="secundario"
+                etiqueta={t('hogar.reintentar')}
+                onPress={() => {
+                  setItems(null);
+                  if (Array.isArray(mascotas)) void cargarTimelineHogar(mascotas);
+                }}
+              />
+            }
+          />
+        ) : items.length === 0 ? (
+          <EstadoVacio titulo={t('hogar.historiaEmpieza')} descripcion={t('hogar.historiaEmpiezaDetalle')} />
+        ) : (
+          <LineaDeVida items={items} onPressNodo={alTocarNodo} estadoPie={estadoPie} onCargarMas={() => void cargarMas()} />
+        )}
+      </View>
+
+      {/* ¿De quién es el carnet? — selector multi-mascota */}
+      <Hoja visible={carnetSelectorAbierto} onCerrar={() => setCarnetSelectorAbierto(false)} titulo={t('hogar.carnetDeQuien')} conCerrar>
+        <HojaScroll>
+          {mascotas.map((m, i) => (
+            <View key={m.id}>
+              {i > 0 ? <Separador /> : null}
+              <Celda interactiva accessibilityRole="button" onPress={() => irACargarCarnet(m)} titulo={m.nombre} />
+            </View>
+          ))}
+        </HojaScroll>
+      </Hoja>
+
+      {/* Detalle de vacuna (tap en nodo) — Hoja + Ver carnet firmado */}
+      <Hoja visible={vacunaAbierta} onCerrar={() => { setVacunaAbierta(false); setCarnetFirmado(null); }} titulo={t('vacunaHoja.titulo')} conCerrar>
+        {vacuna === 'cargando' ? (
+          <View style={{ padding: spacing[4] }}>
+            <EsqueletoGrupo etiqueta={t('vacunaHoja.cargando')}>
+              <View style={{ gap: spacing[2] }}>
+                <Esqueleto forma="linea" ancho="60%" />
+                <Esqueleto forma="linea" ancho="40%" />
+              </View>
+            </EsqueletoGrupo>
+          </View>
+        ) : vacuna === 'error' ? (
+          <View style={{ padding: spacing[4] }}>
+            <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.base, color: theme.status.dangerText }}>
+              {t('vacunaHoja.error')}
+            </Text>
+          </View>
+        ) : (
+          <View style={{ gap: spacing[3], padding: spacing[4] }}>
+            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}>
+              {vacuna.nombre_vacuna}
+            </Text>
+            {(vacuna.tipo_vacuna || vacuna.veterinario_nombre_externo) && (
+              <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                {[vacuna.tipo_vacuna, vacuna.veterinario_nombre_externo].filter(Boolean).join(' · ')}
+              </Text>
+            )}
+            {(vacuna.fecha_aplicada || vacuna.fecha_proxima || vacuna.lote) && (
+              <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.secondary }}>
+                {[
+                  vacuna.fecha_aplicada ? `${t('vacunaHoja.aplicada')} ${fechaMonoVacuna(vacuna.fecha_aplicada)}` : null,
+                  vacuna.fecha_proxima ? `${t('vacunaHoja.proxima')} ${fechaMonoVacuna(vacuna.fecha_proxima)}` : null,
+                  vacuna.lote ? `${t('vacunaHoja.lote')} ${vacuna.lote.toLowerCase()}` : null,
+                ].filter(Boolean).join(' · ')}
+              </Text>
+            )}
+            {vacuna.archivo_url !== null && (
+              <Boton
+                variante="secundario"
+                bloque
+                etiqueta={t('vacunaHoja.verCarnet')}
+                onPress={() => { if (vacuna.archivo_url !== null) void verCarnet(vacuna.archivo_url); }}
+              />
+            )}
+          </View>
+        )}
+      </Hoja>
+
+      {carnetFirmado !== null && (
+        <VisorFoto
+          visible
+          onCerrar={() => setCarnetFirmado(null)}
+          fotos={[carnetFirmado]}
+          etiqueta={t('vacunaHoja.titulo')}
+        />
+      )}
+
+    </ScrollView>
+  );
+}

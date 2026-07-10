@@ -45,7 +45,7 @@ export default function Entrada() {
         setColgado(true);
         return;
       }
-      router.replace(estado.data.tiene_familia ? '/home' : '/onboarding/mascota');
+      router.replace(estado.data.tiene_familia ? '/hogar' : '/onboarding/mascota');
     })();
 
     return () => {

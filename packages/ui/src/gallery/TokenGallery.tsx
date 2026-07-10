@@ -36,6 +36,7 @@ import { HeroMarca } from '../components/HeroMarca'
 import { LineaDeVida, type LineaDeVidaItem } from '../components/LineaDeVida'
 import { VisorFoto } from '../components/VisorFoto'
 import { FichaVacuna } from '../components/FichaVacuna'
+import { FichaMascotaHogar } from '../components/FichaMascotaHogar'
 import { Cronometro } from '../components/Cronometro'
 import { EvidenciaFoto, type EvidenciaFotoEstado } from '../components/EvidenciaFoto'
 import { MapaRecorrido } from '../components/MapaRecorrido'
@@ -287,6 +288,33 @@ function EjemploFichaVacuna() {
         rechazada
         onEditar={() => {}}
         onDescartar={() => {}}
+      />
+    </View>
+  )
+}
+
+function EjemploFichaMascotaHogar() {
+  // Las tres voces del estado del hogar (los textos acá son mock de
+  // galería; en producto nacen del riel i18n del app).
+  return (
+    <View style={{ gap: spacing[1] }}>
+      <FichaMascotaHogar
+        nombre="Thor"
+        voz="alDia"
+        textoEstado="Thor está al día."
+        onPress={() => {}}
+      />
+      <FichaMascotaHogar
+        nombre="Zeus"
+        voz="pideAtencion"
+        textoEstado="A Zeus le vence la antirrábica en 12 días."
+        onPress={() => {}}
+      />
+      <FichaMascotaHogar
+        nombre="Luna"
+        voz="conociendolo"
+        textoEstado="Aún estamos conociendo a Luna — carga su carnet y te ayudamos a cuidarla mejor."
+        onPress={() => {}}
       />
     </View>
   )
@@ -1222,6 +1250,27 @@ function GaleriaInterna() {
             <ThemeProvider defaultMode="memorial">
               <PanelTema etiqueta="memorial — degrada solo: sin tinte, borde neutro; la voz de rechazo conserva dangerText">
                 <EjemploFichaVacuna />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* FichaMascotaHogar — S51-B2.2: Zona 1 del Hogar (Ley 11 gateada) */}
+        <Seccion titulo="FichaMascotaHogar — Zona 1 del Hogar: las tres voces del estado (tocá una: pressed resalta, jamás escala)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — alDia punto verdeVital · pideAtencion punto ochre + voz warningText (pide sin gritar) · conociendolo neutral que invita">
+                <EjemploFichaMascotaHogar />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — mismos registros, tokens del tema">
+                <EjemploFichaMascotaHogar />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — degrada solo: sin punto, voz neutra">
+                <EjemploFichaMascotaHogar />
               </PanelTema>
             </ThemeProvider>
           </View>

@@ -4,6 +4,7 @@ packages:
 
 allowBuilds:
   esbuild: true
+  unrs-resolver: set this to true or false
 
 # Expo/React Native + pnpm: node_modules hoisted (recomendación oficial Expo para monorepos pnpm)
 nodeLinker: hoisted
