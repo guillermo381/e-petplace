@@ -445,6 +445,13 @@ el portado de grooming consumen:
 
 ## Historial
 
+- **v1.2 (S51, 10 Jul 2026):** enmienda menor de VOZ — el registro
+  canónico del español del producto es **TUTEO NEUTRO** (decisión
+  founder S51, que extiende la regla 27 del contrato a ambas apps
+  móviles); los ejemplos de este documento escritos en voseo
+  ("cargá su carnet…") son ILUSTRATIVOS y se transponen a tuteo al
+  implementarse por el riel i18n. Implementación de referencia: los
+  diccionarios de S51 (`apps/*/src/i18n/`).
 - **v1.1 (S50, 10 Jul 2026):** Parte II — el prestador. Asimetría
   dueño/prestador, tesis HOY con 4 zonas, principio "la agenda solo
   contiene verdad firme", navegación (b) Hoy·Mascotas·Negocio, tests
