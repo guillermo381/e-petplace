@@ -249,7 +249,10 @@ pero se prepara con tiempo porque las reviews de tienda tardan.
 - **B1 precede a toda UI nueva de A1+:** desde que el riel i18n
   existe, cero strings crudos (las pantallas de A1 nacen bilingües).
 - **B4 después de B2** (cupones se aplican al pagar) y **después de
-  A0** (implementa el loyalty diseñado).
+  A0** (implementa el loyalty diseñado). (hallazgo B0c: el motor
+  compartido promos⇄loyalty hoy NO existe en DB — cero FKs cruzadas;
+  B4 lo CONSTRUYE sobre el diseño de MODELO_LOYALTY.md, no lo
+  conecta)
 - **A6 se monta sobre la cadena B0-relevada** (pedidos/Kushki/envíos).
 - **B6 al final, preparado temprano** (tiendas tardan).
 
@@ -269,6 +272,10 @@ arcos (se decide sesión a sesión con las trenzas como ley).
 
 ## Historial
 
+- **v2.3 (S50, 10 Jul 2026):** única enmienda — nota honesta en la
+  trenza A0⇄B0/B4: el motor compartido promos⇄loyalty hoy NO existe
+  en DB (hallazgo B0c, cero FKs cruzadas); B4 lo construye sobre el
+  diseño de `MODELO_LOYALTY.md`, no lo conecta.
 - **v2.2 (S49, 9 Jul 2026):** cerrada la decisión del momento del
   cobro: bloqueo temporal de agenda al agendar, el pago confirma la
   cita (visible/firme para el prestador recién pagada). Ratifica
