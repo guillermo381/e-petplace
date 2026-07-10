@@ -4,8 +4,7 @@
  *
  * Las pantallas existentes migran su voz acá AL TOCARSE (D-315);
  * toda pantalla NUEVA nace con sus textos acá — cero strings crudos
- * (regla 26 bilingüe). Voz emocional: GATE PENDIENTE del founder
- * (decisión 7 S51) antes de darse por buena.
+ * (regla 26 bilingüe). Voz emocional: lote S51 aprobado por founder.
  */
 
 export const prestadorEs = {
@@ -45,7 +44,7 @@ export const prestadorEs = {
   },
   mascotas: {
     titulo: 'Mascotas',
-    // GATE PENDIENTE (§2.6: vacío = en preparación, jamás fracasado):
+    // §2.6: vacío = en preparación, jamás fracasado (voz aprobada S51):
     vacio: 'Las vidas que cuides van a vivir acá',
     vacioDetalle: 'Con tu primera atención cerrada, la mascota entra a tu historial con su expediente.',
     unaAtencion: '1 atención',

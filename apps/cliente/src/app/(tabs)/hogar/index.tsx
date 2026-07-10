@@ -344,7 +344,7 @@ export default function Hogar() {
               fotoUrl={fotos[m.id]}
               voz={voz?.semantica ?? 'conociendolo'}
               textoEstado={voz?.texto ?? ''}
-              onPress={() => router.push({ pathname: '/mascota/[mascotaId]', params: { mascotaId: m.id } })}
+              onPress={() => router.push({ pathname: '/hogar/mascota/[mascotaId]', params: { mascotaId: m.id } })}
             />
           );
         })}

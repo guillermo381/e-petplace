@@ -15,13 +15,14 @@ export const clienteEn = {
     cuenta: 'Account',
   },
   bienvenida: {
+    heroTitulo: "Your pet's life, all in one place.",
+    heroSubtitulo: 'Every walk, every vet visit, every moment — saved and close at hand.',
     crearCuenta: 'Create account',
     yaTengoCuenta: 'I already have an account',
   },
   hogar: {
     titulo: 'Your home',
     cargando: 'Loading your home',
-    // Voces del estado — PROPUESTAS, gate founder pendiente (lote S51):
     vozAlDia: '{{nombre}} is up to date.',
     vozEmergencia: '{{nombre}} needs your attention now.',
     vozVacunaVence: "{{nombre}}'s {{vacuna}} is due in {{dias}} days.",
@@ -29,7 +30,7 @@ export const clienteEn = {
     vozVacunaVenceHoy: "{{nombre}}'s {{vacuna}} is due today.",
     vozVacunaVencida: "{{nombre}}'s {{vacuna}} was due {{dias}} days ago.",
     vozVacunaVencidaUnDia: "{{nombre}}'s {{vacuna}} was due yesterday.",
-    vozConociendolo: "We're still getting to know {{nombre}} — add the vaccine card and we'll care better.",
+    vozConociendolo: "We're still getting to know {{nombre}} — add the vaccine card and we'll take better care of them.",
     vozQuieto: "{{nombre}}'s record has been quiet — anything new in their care?",
     paseoEnCurso: 'Walk in progress',
     verEnVivo: 'See how it goes',

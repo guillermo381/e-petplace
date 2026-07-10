@@ -14,9 +14,8 @@ export const clienteEs = {
     cuenta: 'Cuenta',
   },
   bienvenida: {
-    // El titular y el subtítulo del hero son VOZ EMOCIONAL: siguen
-    // hardcodeados en la pantalla hasta el gate del founder (decisión
-    // 7 de S51) — migran acá cuando el lote es/en esté aprobado.
+    heroTitulo: 'La vida de tu mascota, en un solo lugar.',
+    heroSubtitulo: 'Cada paseo, cada visita al vet, cada momento — guardado y a mano.',
     crearCuenta: 'Crear cuenta',
     yaTengoCuenta: 'Ya tengo cuenta',
   },
@@ -24,8 +23,7 @@ export const clienteEs = {
     titulo: 'Tu hogar',
     cargando: 'Cargando tu hogar',
     // ── Las tres voces del estado (DISEÑO_EXPERIENCIA §2) ──
-    // VOZ EMOCIONAL — GATE PENDIENTE (lote S51): el founder aprueba
-    // es/en antes de darse por buenas (decisión 7).
+    // Voz emocional APROBADA por founder (gate del lote S51).
     vozAlDia: '{{nombre}} está al día.',
     vozEmergencia: '{{nombre}} necesita tu atención ahora.',
     vozVacunaVence: 'A {{nombre}} le vence {{vacuna}} en {{dias}} días.',
@@ -41,10 +39,8 @@ export const clienteEs = {
     proximaCita: 'Próxima cita',
     // ── Zona 4 (la vida) — funcional + aporte ──
     cargarCarnet: 'Carnet de vacunas',
-    // GATE PENDIENTE (voz de marca en la instrucción):
     cargarCarnetDetalle: 'Sácale una foto al carnet — nosotros leemos las vacunas y las guardamos en su historia.',
     carnetDeQuien: '¿De quién es el carnet?',
-    // GATE PENDIENTE (emocional, heredada de S45 en es):
     historiaEmpieza: 'La historia empieza acá.',
     historiaEmpiezaDetalle: 'Cada paseo, cada visita al vet, va a quedar guardada.',
     sinMascotas: 'Todavía no hay nadie por acá',
@@ -55,8 +51,7 @@ export const clienteEs = {
   },
   perfil: {
     // ── momento vital (Ley 3: la VOZ, jamás M1..M7) ──
-    // VOZ EMOCIONAL — GATE PENDIENTE (lote S51): propuestas neutras
-    // por especie; el founder bautiza.
+    // Bautizo APROBADO por founder (gate del lote S51).
     momentoM1: 'Primeros meses',
     momentoM2: 'Creciendo',
     momentoM3: 'Adulto',
@@ -89,7 +84,6 @@ export const clienteEs = {
     nacimiento: 'Nacimiento',
     peso: 'Peso',
     microchip: 'Microchip',
-    // GATE PENDIENTE (emocional):
     identidadInvitacion: 'Su identidad se completa de a poco — cada dato nos ayuda a cuidarlo mejor.',
     error: 'No pudimos cargar el perfil',
   },

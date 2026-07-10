@@ -1,7 +1,6 @@
 /**
  * Diccionario inglés del prestador — espejo exigible del español.
- * Voz emocional: propuestas pendientes de gate founder (decisión 7
- * S51); lo funcional se traduce directo.
+ * Voz emocional: lote S51 aprobado por founder.
  */
 
 import type { Espejo } from '@epetplace/i18n';

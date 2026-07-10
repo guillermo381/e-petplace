@@ -9,8 +9,8 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Boton, HeroMarca, spacing, typography, useTheme } from '@epetplace/ui';
 
-// Riel i18n (S51-B1a). El titular/subtítulo del hero son voz emocional:
-// quedan en español hasta el gate del founder (decisión 7 de S51).
+// Riel i18n (S51-B1a; hero migrado al riel con el lote aprobado en el
+// gate del cierre S51).
 import { useTraduccion } from '@/i18n';
 
 export default function Bienvenida() {
@@ -23,7 +23,7 @@ export default function Bienvenida() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <View style={{ paddingTop: insets.top, backgroundColor: esMemorial ? theme.bg.card : undefined }}>
-        <HeroMarca titulo="La vida de tu mascota, en un solo lugar." variante="alto">
+        <HeroMarca titulo={t('bienvenida.heroTitulo')} variante="alto">
           <Text
             style={{
               fontFamily: typography.family.sans.regular,
@@ -33,7 +33,7 @@ export default function Bienvenida() {
               marginTop: spacing[2],
             }}
           >
-            Cada paseo, cada visita al vet, cada momento — guardado y a mano.
+            {t('bienvenida.heroSubtitulo')}
           </Text>
         </HeroMarca>
       </View>
