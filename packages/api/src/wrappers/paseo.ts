@@ -283,7 +283,14 @@ export async function obtenerCitasPaseoDelDia(
     .eq('prestador_id', input.prestador_id)
     .eq('fecha', input.fecha)
     .eq('tipo.categoria', 'paseo')
-    .not('estado', 'in', '(cancelada,rechazada)')
+    // ═══ VERDAD FIRME (S51-B3.2, DISEÑO_EXPERIENCIA §13 / test 8) ═══
+    // La agenda del prestador SOLO contiene citas firmes: lista POSITIVA
+    // explícita. 'pendiente' es tentativa y NO se pinta — cuando B2 cree
+    // el bloqueo temporal pre-pago vivirá en ese estado y jamás será
+    // visible acá (la cita aparece cuando el pago la confirma).
+    // Relevado S51: estados del CHECK = pendiente · confirmada · en_curso
+    // · completada · cancelada · no_show · rechazada.
+    .in('estado', ['confirmada', 'en_curso', 'completada', 'no_show'])
     .order('hora', { ascending: true });
 
   if (error) return mapeoErrorAResultado(error.message);

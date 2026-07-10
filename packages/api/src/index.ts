@@ -130,3 +130,11 @@ export type { IdentidadMascota } from './wrappers/perfilMascota';
 
 // Config del país — S51-B2.4 (Explorar por country_config)
 export { obtenerServiciosPais, type ServiciosPais } from './wrappers/paisConfig';
+
+// Mascotas del prestador — S51-B3.3 (historial + detalle icónico v1)
+export {
+  obtenerDetalleMascotaPrestador,
+  obtenerMascotasAtendidas,
+  type DetalleMascotaPrestador,
+  type MascotaAtendida,
+} from './wrappers/mascotasPrestador';

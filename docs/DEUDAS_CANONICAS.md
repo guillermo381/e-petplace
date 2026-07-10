@@ -1362,6 +1362,9 @@ Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en 
 #### D-316 — Preferencia de idioma: sincronización a DB (cola del ciclo B1)
 🟢 MEDIA. Hoy la preferencia vive SOLO en dispositivo (AsyncStorage `epetplace.idioma`; default = locale del dispositivo, decisión founder S51). Falta la pata server: persistir la preferencia en el perfil del usuario, sync al iniciar sesión (consistencia multi-dispositivo) y que todo texto generado del lado server (notificaciones B4, emails) hable el idioma del usuario. Scope del ciclo B1 completo (rieles de cuenta), explícitamente FUERA de B1a. Criterio de disparo: B1 (riel de cuenta) — a más tardar antes de notificaciones server-side (B4). Origen: S51-B1a (decisión founder 5).
 
+#### D-317 — Vista semanal de la agenda del prestador (toggle día/semana)
+🟢 MEDIA. HOY (§13 de DISEÑO_EXPERIENCIA) pide toggle día/semana para planificar (la vista anticipada §6.4.2 del portal: primera-vez vs recurrente, lo que requiere preparación). En S51-B3.2 el HOY quedó re-jerarquizado a las 4 zonas con solo la vista día — el toggle NO se inventó (lugar hecho en el layout de Zona 2). Criterio de disparo: cuando el prestador real tenga más de un día con citas firmes (a más tardar, el portado de grooming — segunda familia viva exige planificación). Origen: S51-B3.2.
+
 > **Nota operativa S51 (L-134 aplica):** `expo-localization` es módulo nativo — las APKs preview vigentes (cliente y prestador `aa5914cd`) NO lo contienen, y con runtimeVersion por policy `appVersion` (ambas 1.0.0) un `eas update` del canal preview con el JS del riel les llegaría y las rompería ("Cannot find native module"). ANTES del próximo update de cualquiera de los dos canales: subir `version` en app.json + build preview nueva + reinstalar.
 
 ---
