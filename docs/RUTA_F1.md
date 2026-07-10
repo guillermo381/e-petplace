@@ -180,9 +180,14 @@ doc declara no resuelto (§12):**
    precondición de la liquidación, no un nice-to-have.
 4. **Vista de liquidaciones del prestador** (sprint 3.1.D): el que
    trabaja ve lo que va a cobrar, con desglose.
-**Decisión abierta al arrancar B2 (founder):** el MOMENTO del cobro al
-dueño — ver preguntas de S49. El devengo ya está fijado por el modelo
-(cita completada y pagada); lo abierto es cuándo se cobra.
+**Momento del cobro — CERRADO (founder S49, ratifica regla previa del
+ecosistema):** agendar crea un **bloqueo temporal de agenda** (como la
+reserva de un viaje: hold con expiración); el **pago confirma la cita**
+y recién ahí es firme y visible como cita para el prestador. Sin pago,
+el bloqueo expira y la agenda se libera. El devengo de la comisión
+sigue siendo el del modelo (cita completada y pagada). Tarea B0:
+localizar el texto canónico previo de esta regla (probable
+PORTAL_PRESTADOR.md o docs del repo congelado) y citarlo.
 **Por qué:** decisión founder — el pago es parte del wow y el dato que
 alimenta todo el financiero; posponerlo crea hábito de pago-por-fuera.
 
@@ -264,6 +269,10 @@ arcos (se decide sesión a sesión con las trenzas como ley).
 
 ## Historial
 
+- **v2.2 (S49, 9 Jul 2026):** cerrada la decisión del momento del
+  cobro: bloqueo temporal de agenda al agendar, el pago confirma la
+  cita (visible/firme para el prestador recién pagada). Ratifica
+  regla previa del ecosistema; B0 localiza el texto canónico.
 - **v2.1 (S49, 9 Jul 2026):** incorporado `MODELO_FINANCIERO.md` como
   contraste obligatorio del Arco B. B2/B3 corregidas: el motor
   financiero está implementado (schema, fees seedeados, funciones
