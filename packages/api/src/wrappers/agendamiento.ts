@@ -69,6 +69,7 @@ function normalizarCodigo(raw: string): CodigoErrorAgendamiento | 'error_descono
     return 'acceso_denegado';
   }
   if (raw.startsWith('cita_no_existe')) return 'cita_no_encontrada';
+  if (raw.startsWith('ventana_invalida')) return 'slot_invalido';
   // Errores del lado prestador/motor: para el dueño son un solo hecho
   // honesto — este prestador aún no puede cobrar por la app.
   if (
@@ -118,52 +119,108 @@ export interface OfertaPaseo {
 
 /**
  * Paseadores REALES con oferta de paseo activa y su precio real.
- * Derivada: prestador_servicios (activo, RLS ps_public) × tipos_servicio
- * (categoria 'paseo') × prestadores (activo, embed por FK). Un tipo del
- * catálogo maestro solo aparece si algún prestador lo oferta.
+ * S54-B3.2: pasa a RPC DEFINER (obtener_oferta_paseo) — la regla founder
+ * "no se oferta quien no puede cobrar" exige filtrar por cuenta comercial
+ * ACTIVA, y la RLS de cuentas_comerciales es solo-owner: el criterio
+ * vive server-side. También alimenta el selector de duración del paso
+ * CUÁNDO (solo duraciones que existen de verdad).
  */
 export async function obtenerOfertaPaseo(): Promise<
   ResultadoWrapper<OfertaPaseo[], CodigoErrorAgendamiento>
 > {
-  // 1. Códigos de paseo del catálogo maestro (lectura pública).
-  const tipos = await getClient()
-    .from('tipos_servicio')
-    .select('codigo, nombre')
-    .eq('categoria', 'paseo')
-    .eq('activo', true);
-  if (tipos.error) return mapeoErrorAResultado(tipos.error.message);
-  const nombrePorCodigo = new Map((tipos.data ?? []).map((t) => [t.codigo, t.nombre]));
-  if (nombrePorCodigo.size === 0) return { ok: true, data: [] };
+  const { data, error } = await getClient().rpc('obtener_oferta_paseo');
 
-  // 2. Ofertas activas de prestadores activos (sin FK a tipos_servicio:
-  //    filtro .in() por los códigos del paso 1 — patrón dos queries + Map).
-  const ofertas = await getClient()
-    .from('prestador_servicios')
-    .select(
-      'id, prestador_id, tipo_servicio, nombre_custom, descripcion, duracion_minutos, precio, especies_compatibles, prestador:prestadores!inner(id, nombre_comercial, estado)',
-    )
-    .eq('activo', true)
-    .eq('prestador.estado', 'activo')
-    .in('tipo_servicio', [...nombrePorCodigo.keys()]);
-  if (ofertas.error) return mapeoErrorAResultado(ofertas.error.message);
-
-  const data: OfertaPaseo[] = (ofertas.data ?? []).map((o) => {
-    const especies = Array.isArray(o.especies_compatibles)
-      ? o.especies_compatibles.filter((e): e is string => typeof e === 'string')
-      : [];
-    return {
-      prestador_servicio_id: o.id,
+  if (error) return mapeoErrorAResultado(error.message);
+  if (!Array.isArray(data)) return mapeoErrorAResultado('datos_inconsistentes');
+  const ofertas: OfertaPaseo[] = [];
+  for (const o of data) {
+    if (
+      !esObj(o) ||
+      typeof o.prestador_servicio_id !== 'string' ||
+      typeof o.prestador_id !== 'string' ||
+      typeof o.prestador_nombre !== 'string' ||
+      typeof o.servicio_nombre !== 'string' ||
+      !(o.descripcion === null || typeof o.descripcion === 'string') ||
+      typeof o.duracion_minutos !== 'number' ||
+      typeof o.precio !== 'number'
+    ) {
+      return mapeoErrorAResultado('datos_inconsistentes');
+    }
+    ofertas.push({
+      prestador_servicio_id: o.prestador_servicio_id,
       prestador_id: o.prestador_id,
-      prestador_nombre: o.prestador.nombre_comercial,
-      servicio_nombre: o.nombre_custom ?? nombrePorCodigo.get(o.tipo_servicio) ?? o.tipo_servicio,
+      prestador_nombre: o.prestador_nombre,
+      servicio_nombre: o.servicio_nombre,
       descripcion: o.descripcion,
-      duracion_minutos: o.duracion_minutos ?? 30,
+      duracion_minutos: o.duracion_minutos,
       precio: o.precio,
-      especies_compatibles: especies,
-    };
+      especies_compatibles: Array.isArray(o.especies_compatibles)
+        ? o.especies_compatibles.filter((e): e is string => typeof e === 'string')
+        : [],
+    });
+  }
+  return { ok: true, data: ofertas };
+}
+
+// ── A2 · El QUIÉN para una ventana (momento-primero, S54-B3.2) ──────────────
+
+export interface PaseadorDisponible {
+  prestador_id: string;
+  prestador_servicio_id: string;
+  prestador_nombre: string;
+  servicio_nombre: string;
+  precio: number;
+  duracion_minutos: number;
+}
+
+export interface InputPaseadoresDisponibles {
+  /** 'YYYY-MM-DD'. */
+  fecha: string;
+  /** 'HH:MM' alineada a la grilla (30 min). */
+  hora: string;
+  duracion_minutos: number;
+}
+
+/**
+ * Paseadores que PUEDEN en la ventana [hora, hora+duración]: oferta
+ * activa con esa duración exacta + cuenta que puede cobrar + franja que
+ * contiene la ventana + sin colisión (firmes ni holds vigentes).
+ * Ventana en el pasado devuelve [] (la UI filtra las horas de hoy).
+ */
+export async function obtenerPaseadoresDisponibles(
+  input: InputPaseadoresDisponibles,
+): Promise<ResultadoWrapper<PaseadorDisponible[], CodigoErrorAgendamiento>> {
+  const { data, error } = await getClient().rpc('obtener_paseadores_disponibles', {
+    p_fecha:            input.fecha,
+    p_hora:             input.hora,
+    p_duracion_minutos: input.duracion_minutos,
   });
-  data.sort((a, b) => a.prestador_nombre.localeCompare(b.prestador_nombre));
-  return { ok: true, data };
+
+  if (error) return mapeoErrorAResultado(error.message);
+  if (!Array.isArray(data)) return mapeoErrorAResultado('datos_inconsistentes');
+  const disponibles: PaseadorDisponible[] = [];
+  for (const p of data) {
+    if (
+      !esObj(p) ||
+      typeof p.prestador_id !== 'string' ||
+      typeof p.prestador_servicio_id !== 'string' ||
+      typeof p.prestador_nombre !== 'string' ||
+      typeof p.servicio_nombre !== 'string' ||
+      typeof p.precio !== 'number' ||
+      typeof p.duracion_minutos !== 'number'
+    ) {
+      return mapeoErrorAResultado('datos_inconsistentes');
+    }
+    disponibles.push({
+      prestador_id: p.prestador_id,
+      prestador_servicio_id: p.prestador_servicio_id,
+      prestador_nombre: p.prestador_nombre,
+      servicio_nombre: p.servicio_nombre,
+      precio: p.precio,
+      duracion_minutos: p.duracion_minutos,
+    });
+  }
+  return { ok: true, data: disponibles };
 }
 
 // ── B · Slots disponibles (derivados: horarios − firmes − holds vigentes) ────

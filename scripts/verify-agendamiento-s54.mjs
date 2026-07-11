@@ -9,6 +9,7 @@ import {
   initApi,
   iniciarSesion,
   obtenerOfertaPaseo,
+  obtenerPaseadoresDisponibles,
   obtenerSlotsDisponibles,
   crearBloqueoAgenda,
   confirmarCitaPagada,
@@ -59,6 +60,11 @@ check(slots.ok, 'T2 obtenerSlotsDisponibles responde');
 const slot1730 = slots.ok ? slots.data.find((s) => s.hora === '17:30:00') : null;
 check(!!slot1730, `T2b slot ${FECHA} 17:30 disponible`, slots.ok ? `${slots.data.length} slots` : '');
 
+// T2c — momento-primero (S54-B3.2): el QUIÉN para la ventana
+const antes = await obtenerPaseadoresDisponibles({ fecha: FECHA, hora: HORA, duracion_minutos: 30 });
+check(antes.ok && antes.data.some((p) => p.prestador_servicio_id === SRV), 'T2c paseadores disponibles 17:30×30 incluye al demo', antes.ok ? `${antes.data.length}` : antes.codigo);
+check(antes.ok && antes.data.every((p) => p.precio > 0), 'T2d precios reales en disponibles');
+
 // T3 — hold: nace con snapshot de precio y expiración ~15 min
 const hold = await crearBloqueoAgenda({ prestador_id: PREST, prestador_servicio_id: SRV, mascota_id: MASC, fecha: FECHA, hora: HORA });
 check(hold.ok, 'T3 crearBloqueoAgenda ok', hold.ok ? hold.data.cita_id : `${hold.codigo}: ${hold.mensaje}`);
@@ -71,6 +77,10 @@ if (hold.ok) {
 // T4 — el hold OCUPA: el slot desaparece de la derivación
 const slots2 = await obtenerSlotsDisponibles({ prestador_id: PREST, prestador_servicio_id: SRV, desde: FECHA, hasta: FECHA });
 check(slots2.ok && !slots2.data.some((s) => s.hora === '17:30:00'), 'T4 el hold ocupa el slot (17:30 desaparece)');
+
+// T4b — el hold también excluye en la consulta invertida
+const despues = await obtenerPaseadoresDisponibles({ fecha: FECHA, hora: HORA, duracion_minutos: 30 });
+check(despues.ok && !despues.data.some((p) => p.prestador_servicio_id === SRV), 'T4b el hold excluye al demo del QUIÉN');
 
 // T5 — doble reserva rebota tipada
 const doble = await crearBloqueoAgenda({ prestador_id: PREST, prestador_servicio_id: SRV, mascota_id: MASC, fecha: FECHA, hora: HORA });

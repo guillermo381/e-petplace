@@ -14264,6 +14264,15 @@ export type Database = {
       }
     }
     Functions: {
+      _agenda_ocupacion: {
+        Args: {
+          p_duracion_minutos: number
+          p_fecha: string
+          p_hora: string
+          p_prestador_id: string
+        }
+        Returns: number
+      }
       _atencion_en_estados: {
         Args: { p_atencion_id: string; p_estados: string[] }
         Returns: Record<string, unknown>
@@ -14842,6 +14851,30 @@ export type Database = {
       obtener_mis_atenciones_grooming: {
         Args: { p_desde?: string; p_hasta?: string }
         Returns: Json
+      }
+      obtener_oferta_paseo: {
+        Args: never
+        Returns: {
+          descripcion: string
+          duracion_minutos: number
+          especies_compatibles: Json
+          precio: number
+          prestador_id: string
+          prestador_nombre: string
+          prestador_servicio_id: string
+          servicio_nombre: string
+        }[]
+      }
+      obtener_paseadores_disponibles: {
+        Args: { p_duracion_minutos: number; p_fecha: string; p_hora: string }
+        Returns: {
+          duracion_minutos: number
+          precio: number
+          prestador_id: string
+          prestador_nombre: string
+          prestador_servicio_id: string
+          servicio_nombre: string
+        }[]
       }
       obtener_paseo_por_cita: { Args: { p_cita_id: string }; Returns: Json }
       obtener_resumen_actividad_prestador: {

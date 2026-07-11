@@ -113,10 +113,13 @@ export {
 // Agendamiento del dueño — S54-B2 (hold 15 min + cobro simulado)
 export {
   obtenerOfertaPaseo,
+  obtenerPaseadoresDisponibles,
   obtenerSlotsDisponibles,
   crearBloqueoAgenda,
   confirmarCitaPagada,
   type CodigoErrorAgendamiento,
+  type PaseadorDisponible,
+  type InputPaseadoresDisponibles,
   type OfertaPaseo,
   type SlotDisponible,
   type InputSlotsDisponibles,
