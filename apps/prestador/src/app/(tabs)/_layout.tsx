@@ -1,17 +1,22 @@
 /**
  * Navegación raíz del prestador (S51-B3.1) — decisión founder S50:
- * TRES tabs, Hoy·Mascotas·Negocio (§14). Migrada de las NativeTabs
- * del template a la BarraTabs del design system (deuda anotada en B2).
+ * TRES tabs, Hoy·Mascotas·Negocio (§14).
  *
- * SIN-SESIÓN DIGNO EN EL RAÍZ (hallazgo del blanco-100% de S51): en
- * una build sin Metro y sin sesión, la app lo DICE apenas abre — el
- * error jamás se disfraza (Ley 13) ni depende de que Agenda lo ataje.
- * El login real es D-290/B1; hoy la sesión es la dev/demo (S44-B4).
+ * AUTH REAL EN EL RAÍZ (S54-B, D-290 — el bootstrap dev de S44 murió):
+ * la misma máquina de estados dignos de S51, con dos estados nuevos.
+ * Routing por estado REAL:
+ *   verificando → Esqueleto ESTÁTICO (Ley 13)
+ *   sin sesión  → invitación a entrar (el login vive en /login)
+ *   con sesión SIN negocio de prestador → estado honesto + salida
+ *     (la verdad operativa es la fila de `prestadores`, no user_roles
+ *     — decisión S54-B: es lo que toda pantalla necesita para operar)
+ *   con negocio → las tabs (HOY preside)
+ *   error de red/config → detalle específico + reintentar (regla 36)
  */
 
 import { useCallback, useState } from 'react';
 import { View } from 'react-native';
-import { Tabs, useFocusEffect } from 'expo-router';
+import { Tabs, useFocusEffect, useRouter } from 'expo-router';
 import {
   BarraTabs,
   Boton,
@@ -22,33 +27,51 @@ import {
   useTheme,
   type BarraTabsItem,
 } from '@epetplace/ui';
+import { cerrarSesion, obtenerMiPrestador, obtenerSesion } from '@epetplace/api';
 
-import { asegurarSesionDev } from '@/lib/api';
+import { apiLista } from '@/lib/api';
 import { IconoHoy, IconoMascotas, IconoNegocio } from '@/components/iconos-tabs';
 import { useTraduccion } from '@/i18n';
 
-// TRES estados (cura S51 post-gate): cargando (Esqueleto ESTÁTICO,
-// Ley 13 — jamás el vacío como estado de carga) → sesión → sin-sesión
-// SOLO confirmado (el bootstrap dev de asegurarSesionDev ya corrió y
-// dijo que no). `detalle` conserva el mensaje específico del bootstrap
-// (regla 36: "faltan credenciales en .env.local" no es lo mismo que
-// "no hay sesión" — cero causas tragadas).
-type EstadoSesionRaiz = 'verificando' | 'ok' | { sin_sesion: true; detalle: string };
+type EstadoSesionRaiz =
+  | 'verificando'
+  | 'ok'
+  | { sin_sesion: true }
+  | { sin_rol: true; email: string }
+  | { error: true; detalle: string };
 
 export default function TabsLayout() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
+  const router = useRouter();
   const [sesion, setSesion] = useState<EstadoSesionRaiz>('verificando');
   const [intento, setIntento] = useState(0);
+  const [saliendo, setSaliendo] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
-      void asegurarSesionDev().then((r) => {
+      void (async (): Promise<EstadoSesionRaiz> => {
+        if (!apiLista) {
+          return { error: true, detalle: 'Faltan EXPO_PUBLIC_SUPABASE_URL / ANON_KEY en .env.local.' };
+        }
+        const s = await obtenerSesion();
+        if (!s.ok) return { error: true, detalle: s.mensaje };
+        if (s.data === null) return { sin_sesion: true };
+        const p = await obtenerMiPrestador();
+        if (p.ok) return 'ok';
+        if (p.codigo === 'sin_prestador') return { sin_rol: true, email: s.data.email ?? '' };
+        return { error: true, detalle: p.mensaje };
+      })().then((r) => {
         // Forense L-138: el resultado del guard raíz queda LITERAL en
         // el log de Metro/logcat — el gate empieza confirmándolo.
-        console.log(`[sesion] raíz prestador: ${r.ok ? 'ok' : `sin sesión — ${r.mensaje}`}`);
-        if (vigente) setSesion(r.ok ? 'ok' : { sin_sesion: true, detalle: r.mensaje });
+        const voz =
+          r === 'ok' ? 'ok'
+            : typeof r === 'object' && 'sin_sesion' in r ? 'sin sesión'
+              : typeof r === 'object' && 'sin_rol' in r ? `sin rol prestador — ${r.email}`
+                : `error — ${(r as { detalle: string }).detalle}`;
+        console.log(`[sesion] raíz prestador: ${voz}`);
+        if (vigente) setSesion(r);
       });
       return () => {
         vigente = false;
@@ -57,8 +80,7 @@ export default function TabsLayout() {
   );
 
   if (sesion === 'verificando') {
-    // Esqueleto estático de la jornada (Ley 13): la verificación firma
-    // sesión dev en frío — puede tardar; el vacío jamás es carga.
+    // Esqueleto estático de la jornada (Ley 13): el vacío jamás es carga.
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base, padding: spacing[5], paddingTop: spacing[10] }}>
         <EsqueletoGrupo>
@@ -72,16 +94,60 @@ export default function TabsLayout() {
     );
   }
 
-  if (sesion !== 'ok') {
-    // sin-sesión CONFIRMADO — el estado digno de la preview, intacto.
-    // El detalle específico solo se muestra si difiere del genérico
-    // (en preview es "No hay sesión activa." y el título ya lo dice).
-    const detalleEspecifico = sesion.detalle !== 'No hay sesión activa.' ? sesion.detalle : t('sesion.sinSesionDetalle');
+  if (sesion !== 'ok' && 'sin_sesion' in sesion) {
+    // sin sesión CONFIRMADO → la invitación digna; el login se enchufa acá
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base, justifyContent: 'center', padding: spacing[5] }}>
         <EstadoVacio
           titulo={t('sesion.sinSesion')}
-          descripcion={detalleEspecifico}
+          descripcion={t('sesion.sinSesionDetalle')}
+          accion={
+            <Boton
+              variante="primario"
+              etiqueta={t('sesion.iniciarSesion')}
+              onPress={() => router.push('/login')}
+            />
+          }
+        />
+      </View>
+    );
+  }
+
+  if (sesion !== 'ok' && 'sin_rol' in sesion) {
+    // sesión válida pero SIN negocio: honesto, con salida — jamás trampa
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.bg.base, justifyContent: 'center', padding: spacing[5], gap: spacing[4] }}>
+        <EstadoVacio
+          titulo={t('sesion.sinRol')}
+          descripcion={t('sesion.sinRolDetalle', { email: sesion.email })}
+          accion={
+            <Boton
+              variante="secundario"
+              etiqueta={t('sesion.cerrarSesion')}
+              cargando={saliendo}
+              onPress={() => {
+                if (saliendo) return;
+                setSaliendo(true);
+                void cerrarSesion().then(() => {
+                  setSaliendo(false);
+                  setSesion('verificando');
+                  setIntento((n) => n + 1);
+                });
+              }}
+            />
+          }
+        />
+      </View>
+    );
+  }
+
+  if (sesion !== 'ok') {
+    // error de config/red — el detalle específico jamás se traga (regla 36)
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.bg.base, justifyContent: 'center', padding: spacing[5] }}>
+        <EstadoVacio
+          titulo={t('sesion.sinSesion')}
+          descripcion={sesion.detalle}
           accion={
             <Boton
               variante="secundario"

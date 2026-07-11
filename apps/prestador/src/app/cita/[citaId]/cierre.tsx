@@ -42,7 +42,8 @@ import {
   type ResumenCierrePaseo,
 } from '@epetplace/api';
 
-import { asegurarSesionDev } from '@/lib/api';
+import { verificarSesion } from '@/lib/api';
+import { useTraduccion } from '@/i18n';
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -72,6 +73,7 @@ export default function Cierre() {
   const { theme } = useTheme();
   const router = useRouter();
   const { mostrar } = useAviso();
+  const { t } = useTraduccion();
   const { citaId = '' } = useLocalSearchParams<{ citaId: string }>();
 
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
@@ -87,7 +89,7 @@ export default function Cierre() {
   const cargar = useCallback(
     async (silencioso = false) => {
       if (!silencioso) setPantalla({ estado: 'cargando' });
-      const sesion = await asegurarSesionDev();
+      const sesion = await verificarSesion();
       if (!sesion.ok) return setPantalla({ estado: 'error', mensaje: sesion.mensaje });
 
       const paseo = await obtenerPaseoPorCita(citaId);
@@ -154,7 +156,7 @@ export default function Cierre() {
       mostrar({ variante: 'error', texto: r.mensaje });
       return;
     }
-    mostrar({ variante: 'exito', texto: 'Parte registrado' });
+    mostrar({ variante: 'exito', texto: t('cita.parteRegistrado') });
     void cargar(true);
   }
 
@@ -169,7 +171,7 @@ export default function Cierre() {
     });
     if (r.ok || r.codigo === 'atencion_estado_invalido') {
       // Ya cerrada por otra vía = mismo destino (patrón S38-fix7).
-      mostrar({ variante: 'exito', texto: 'Parte enviado' });
+      mostrar({ variante: 'exito', texto: t('cita.parteEnviado') });
       router.dismissTo('/');
       return;
     }
@@ -192,7 +194,7 @@ export default function Cierre() {
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[4] }}>
-        <Encabezado variante="navegacion" titulo="Parte del paseo" atras onAtras={() => router.back()} />
+        <Encabezado variante="navegacion" titulo={t('cita.cierreTitulo')} atras onAtras={() => router.back()} />
 
         {pantalla.estado === 'cargando' && (
           <EsqueletoGrupo>
@@ -207,9 +209,9 @@ export default function Cierre() {
 
         {pantalla.estado === 'no_existe' && (
           <EstadoVacio
-            titulo="Esta cita ya no está disponible"
-            descripcion="Volvé a la agenda para ver tus paseos de hoy."
-            accion={<Boton variante="secundario" etiqueta="Volver a la agenda" onPress={() => router.back()} />}
+            titulo={t('cita.noDisponible')}
+            descripcion={t('cita.noDisponibleDetalleCorto')}
+            accion={<Boton variante="secundario" etiqueta={t('cita.volverAgenda')} onPress={() => router.back()} />}
           />
         )}
 
@@ -227,7 +229,7 @@ export default function Cierre() {
                 {pantalla.mensaje}
               </Text>
               <View style={{ alignSelf: 'flex-start' }}>
-                <Boton variante="secundario" tamaño="sm" etiqueta="Reintentar" onPress={() => void cargar()} />
+                <Boton variante="secundario" tamaño="sm" etiqueta={t('agenda.reintentar')} onPress={() => void cargar()} />
               </View>
             </View>
           </Tarjeta>
@@ -256,7 +258,7 @@ export default function Cierre() {
                     color: theme.text.secondary,
                   }}
                 >
-                  {`${resumen.gps.puntos} puntos gps · ${resumen.conteos.fotos} fotos · ${resumen.conteos.notas} notas`}
+                  {t('cita.resumenConteos', { puntos: resumen.gps.puntos, fotos: resumen.conteos.fotos, notas: resumen.conteos.notas })}
                 </Text>
               </View>
             </Tarjeta>
@@ -274,7 +276,7 @@ export default function Cierre() {
                     color: theme.text.secondary,
                   }}
                 >
-                  {`Sin ruta GPS: ${resumen.gps.motivo_fallo}`}
+                  {t('cita.sinRutaGps', { motivo: resumen.gps.motivo_fallo })}
                 </Text>
               </Tarjeta>
             ) : null}
@@ -288,7 +290,7 @@ export default function Cierre() {
                   color: theme.text.secondary,
                 }}
               >
-                {`Parte del perro${resumen.conteos.novedades > 0 ? ` · ${resumen.conteos.novedades}` : ''}`}
+                {`${t('cita.parteDelPerro')}${resumen.conteos.novedades > 0 ? ` · ${resumen.conteos.novedades}` : ''}`}
               </Text>
               {resumen.novedades.length > 0 ? (
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[1.5] }}>
@@ -305,7 +307,7 @@ export default function Cierre() {
                     color: theme.text.secondary,
                   }}
                 >
-                  Registrá al menos una novedad del paseo para enviar el parte.
+                  {t('cita.faltaNovedad')}
                 </Text>
               )}
               {edicion && (
@@ -313,7 +315,7 @@ export default function Cierre() {
                   <Boton
                     variante={sinParte ? 'secundario' : 'ghost'}
                     tamaño="sm"
-                    etiqueta="Registrar novedad"
+                    etiqueta={t('cita.registrarNovedad')}
                     onPress={() => void abrirParte()}
                   />
                 </View>
@@ -323,11 +325,13 @@ export default function Cierre() {
             {/* Mensaje a la familia */}
             {edicion ? (
               <Campo
-                label="Mensaje a la familia"
-                ayuda="Opcional — va con el parte."
+                label={t('cita.mensajeFamilia')}
+                ayuda={t('cita.mensajeFamiliaAyuda')}
                 value={mensaje}
                 onChangeText={setMensaje}
                 multilinea={3}
+                // VOZ EMOCIONAL — patrón D-300: hardcodeada es hasta el
+                // lote de gate del founder (mezcla honesta en modo en).
                 placeholder="Contale a la familia cómo la pasó en el paseo…"
               />
             ) : resumen.mensaje_familia ? (
@@ -340,7 +344,7 @@ export default function Cierre() {
                       color: theme.text.secondary,
                     }}
                   >
-                    Mensaje a la familia
+                    {t('cita.mensajeFamilia')}
                   </Text>
                   <Text
                     style={{
@@ -360,7 +364,7 @@ export default function Cierre() {
               <Boton
                 variante="primario"
                 bloque
-                etiqueta="Enviar parte y cerrar"
+                etiqueta={t('cita.enviarParte')}
                 cargando={cerrando}
                 deshabilitado={sinParte}
                 onPress={() => void cerrar()}
@@ -375,7 +379,7 @@ export default function Cierre() {
                   textAlign: 'center',
                 }}
               >
-                {`parte enviado · ${hhmm(resumen.cerrada_en)}`}
+                {`${t('cita.parteEnviadoMono')} · ${hhmm(resumen.cerrada_en)}`}
               </Text>
             )}
           </>
@@ -383,7 +387,7 @@ export default function Cierre() {
       </ScrollView>
 
       {/* Hoja: registrar el parte desde el cierre (mismo patrón del Durante) */}
-      <Hoja visible={hojaParte} onCerrar={() => setHojaParte(false)} titulo="Parte del perro">
+      <Hoja visible={hojaParte} onCerrar={() => setHojaParte(false)} titulo={t('cita.parteDelPerro')}>
         <View style={{ padding: spacing[4], gap: spacing[2] }}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
             {catalogo.map((n) => (

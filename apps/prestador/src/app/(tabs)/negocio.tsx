@@ -217,8 +217,10 @@ export default function Negocio() {
                 await cerrarSesion();
                 setCerrando(false);
                 setSalirAbierta(false);
-                // sin ruta de login (D-290): el raíz muestra el estado
-                // honesto de sin-sesión — el mismo del arranque.
+                // D-290 (S54-B): auth real — la salida aterriza en el
+                // login; el replace desmonta las tabs y el guard del
+                // raíz re-decide fresco al volver a entrar.
+                router.replace('/login');
               })();
             }}
           />

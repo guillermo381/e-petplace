@@ -47,9 +47,10 @@ import {
   type NovedadCatalogoPaseo,
 } from '@epetplace/api';
 
-import { asegurarSesionDev } from '@/lib/api';
+import { verificarSesion } from '@/lib/api';
 import { useTrackGps, type EstadoGps } from '@/lib/use-track-gps';
 import { subirEvidencia } from '@/lib/subir-evidencia';
+import { useTraduccion } from '@/i18n';
 
 type DatosListos = {
   eventoAtencionId: string;
@@ -69,18 +70,24 @@ type Pantalla =
 
 type FotoCola = { uri: string; estado: EvidenciaFotoEstado; storagePath?: string };
 
-const CHIP_GPS: Record<EstadoGps, { estado: InsigniaEstado; etiqueta: string }> = {
-  iniciando:     { estado: 'info',     etiqueta: 'GPS iniciando' },
-  activo:        { estado: 'alDia',    etiqueta: 'GPS activo' },
-  inactivo:      { estado: 'proximo',  etiqueta: 'GPS detenido' },
-  sin_permiso:   { estado: 'atencion', etiqueta: 'Sin permiso de ubicación' },
-  no_disponible: { estado: 'atencion', etiqueta: 'GPS no disponible' },
-  error:         { estado: 'atencion', etiqueta: 'GPS con error' },
+// Los labels del chip GPS viven en el riel (D-315p); la Insignia por
+// estado se resuelve adentro del componente con t().
+const CHIP_GPS_ESTADO: Record<EstadoGps, InsigniaEstado> = {
+  iniciando:     'info',
+  activo:        'alDia',
+  inactivo:      'proximo',
+  sin_permiso:   'atencion',
+  no_disponible: 'atencion',
+  error:         'atencion',
 };
 
 // Motivos de un toque para terminar sin track. El CHECK real de DB NO
 // cataloga motivos (solo exige coherencia NULL↔fallido): texto libre,
 // voz humana definida acá (decisión B4.3 reportada).
+// D-315p: QUEDAN HARDCODEADOS ES a propósito — este texto VIAJA A LA
+// DB (gps_motivo_fallo) y lo lee la familia en su idioma, no en el del
+// paseador; traducirlos en UI cambiaría el dato guardado. Hallazgo al
+// reporte S54-B (la salida limpia es catalogarlos, enmienda a D-008).
 const MOTIVOS_GPS = [
   'El celular se quedó sin batería durante el paseo.',
   'No hubo señal de GPS en el recorrido.',
@@ -109,7 +116,17 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
   const { theme } = useTheme();
   const router = useRouter();
   const { mostrar } = useAviso();
+  const { t } = useTraduccion();
   const gps = useTrackGps(datos.eventoAtencionId, datos.puntosIniciales);
+
+  const ETIQUETA_GPS: Record<EstadoGps, string> = {
+    iniciando:     t('cita.gpsIniciando'),
+    activo:        t('cita.gpsActivo'),
+    inactivo:      t('cita.gpsDetenido'),
+    sin_permiso:   t('cita.gpsSinPermiso'),
+    no_disponible: t('cita.gpsNoDisponible'),
+    error:         t('cita.gpsError'),
+  };
 
   const [registradas, setRegistradas] = useState<string[]>(datos.novedadesRegistradas);
   const [novedadEnviando, setNovedadEnviando] = useState<string | null>(null);
@@ -129,7 +146,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
   const [terminando, setTerminando] = useState(false);
   const terminandoRef = useRef(false);
 
-  const chipGps = CHIP_GPS[gps.estado];
+  const chipGps = { estado: CHIP_GPS_ESTADO[gps.estado], etiqueta: ETIQUETA_GPS[gps.estado] };
 
   async function tocarNovedad(n: NovedadCatalogoPaseo) {
     if (novedadEnviando) return;
@@ -141,7 +158,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
       return;
     }
     setRegistradas((v) => [...v, n.nombre]);
-    mostrar({ variante: 'exito', texto: 'Parte registrado' });
+    mostrar({ variante: 'exito', texto: t('cita.parteRegistrado') });
   }
 
   async function procesarFoto(uri: string, storagePath: string | undefined) {
@@ -154,7 +171,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
     setFotos((f) =>
       f.map((x) => (x.uri === uri ? { uri, estado: r.ok ? 'subida' : 'error', storagePath: r.storagePath } : x)),
     );
-    if (!r.ok) mostrar({ variante: 'error', texto: 'La foto no se subió. Tocala para reintentar.' });
+    if (!r.ok) mostrar({ variante: 'error', texto: t('cita.fotoNoSubio') });
   }
 
   function onFoto(uri: string) {
@@ -168,10 +185,10 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
   }
 
   async function enviarNota() {
-    const t = texto.trim();
-    if (t.length === 0 || enviandoNota) return;
+    const cuerpo = texto.trim();
+    if (cuerpo.length === 0 || enviandoNota) return;
     if (esIncidencia && incidenciaCodigo === null) {
-      mostrar({ variante: 'error', texto: 'Elegí qué pasó del catálogo.' });
+      mostrar({ variante: 'error', texto: t('cita.elegirIncidencia') });
       return;
     }
     setEnviandoNota(true);
@@ -179,10 +196,10 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
       ? await agregarIncidenciaAtencion({
           evento_atencion_id: datos.eventoAtencionId,
           incidencia_codigo: incidenciaCodigo as string,
-          descripcion: t,
+          descripcion: cuerpo,
           severidad,
         })
-      : await agregarNotaAtencion({ evento_atencion_id: datos.eventoAtencionId, texto: t });
+      : await agregarNotaAtencion({ evento_atencion_id: datos.eventoAtencionId, texto: cuerpo });
     setEnviandoNota(false);
     if (!r.ok) {
       mostrar({ variante: 'error', texto: r.mensaje });
@@ -193,7 +210,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
     setTexto('');
     setEsIncidencia(false);
     setIncidenciaCodigo(null);
-    mostrar({ variante: 'exito', texto: fueIncidencia ? 'Incidencia registrada' : 'Nota registrada' });
+    mostrar({ variante: 'exito', texto: fueIncidencia ? t('cita.incidenciaRegistrada') : t('cita.notaRegistrada') });
   }
 
   async function terminar(motivo?: string) {
@@ -246,7 +263,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
             color: theme.text.secondary,
           }}
         >
-          {`${gps.puntosTotal} ${gps.puntosTotal === 1 ? 'punto' : 'puntos'}`}
+          {gps.puntosTotal === 1 ? t('cita.unPunto') : t('cita.puntos', { n: gps.puntosTotal })}
         </Text>
       </View>
 
@@ -261,11 +278,10 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
                 color: theme.text.primary,
               }}
             >
-              Necesitamos tu ubicación para registrar el recorrido que ve la familia. El paseo puede
-              seguir igual — sin ruta, al terminar te pedimos contar qué pasó.
+              {t('cita.sinGpsExplicacion')}
             </Text>
             <View style={{ alignSelf: 'flex-start' }}>
-              <Boton variante="secundario" tamaño="sm" etiqueta="Probar de nuevo" onPress={gps.reintentarPermiso} />
+              <Boton variante="secundario" tamaño="sm" etiqueta={t('cita.probarDeNuevo')} onPress={gps.reintentarPermiso} />
             </View>
           </View>
         </Tarjeta>
@@ -280,7 +296,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
 
       {/* Parte del perro — chips de un toque, orden del catálogo (sin
           encabezados de grupo: 12 chips, el orden ya agrupa — dosis baja) */}
-      <Seccion titulo={`Parte del perro${registradas.length > 0 ? ` · ${registradas.length}` : ''}`}>
+      <Seccion titulo={`${t('cita.parteDelPerro')}${registradas.length > 0 ? ` · ${registradas.length}` : ''}`}>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
           {datos.novedadesCatalogo.map((n) => (
             <Boton
@@ -304,9 +320,9 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
 
       {/* Evidencia */}
       <Seccion
-        titulo={`Evidencia${
+        titulo={`${t('cita.evidencia')}${
           datos.fotosPrevias + fotos.filter((f) => f.estado === 'subida').length > 0
-            ? ` · ${datos.fotosPrevias + fotos.filter((f) => f.estado === 'subida').length} fotos`
+            ? ` · ${t('cita.fotosSufijo', { n: datos.fotosPrevias + fotos.filter((f) => f.estado === 'subida').length })}`
             : ''
         }`}
       >
@@ -324,25 +340,25 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
       </Seccion>
 
       <View style={{ alignSelf: 'flex-start' }}>
-        <Boton variante="ghost" etiqueta="Agregar nota o incidencia" onPress={() => setHojaNota(true)} />
+        <Boton variante="ghost" etiqueta={t('cita.agregarNotaIncidencia')} onPress={() => setHojaNota(true)} />
       </View>
 
-      <Boton variante="primario" bloque etiqueta="Terminar paseo" onPress={() => setHojaTerminar(true)} />
+      <Boton variante="primario" bloque etiqueta={t('cita.terminarPaseo')} onPress={() => setHojaTerminar(true)} />
 
       {/* Hoja: nota / incidencia */}
-      <Hoja visible={hojaNota} onCerrar={() => setHojaNota(false)} titulo="Nota o incidencia">
+      <Hoja visible={hojaNota} onCerrar={() => setHojaNota(false)} titulo={t('cita.notaOIncidencia')}>
         <View style={{ padding: spacing[4], gap: spacing[4] }}>
           <View style={{ flexDirection: 'row', gap: spacing[2] }}>
             <Boton
               variante={esIncidencia ? 'ghost' : 'secundario'}
               tamaño="sm"
-              etiqueta="Nota"
+              etiqueta={t('cita.nota')}
               onPress={() => setEsIncidencia(false)}
             />
             <Boton
               variante={esIncidencia ? 'secundario' : 'ghost'}
               tamaño="sm"
-              etiqueta="Incidencia"
+              etiqueta={t('cita.incidencia')}
               onPress={() => setEsIncidencia(true)}
             />
           </View>
@@ -366,7 +382,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
                     key={s}
                     variante={severidad === s ? 'secundario' : 'ghost'}
                     tamaño="sm"
-                    etiqueta={s === 'media' ? 'Severidad media' : 'Severidad alta'}
+                    etiqueta={s === 'media' ? t('cita.severidadMedia') : t('cita.severidadAlta')}
                     onPress={() => setSeveridad(s)}
                   />
                 ))}
@@ -375,16 +391,16 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
           )}
 
           <Campo
-            label={esIncidencia ? 'Qué pasó' : 'Nota'}
+            label={esIncidencia ? t('cita.quePaso') : t('cita.nota')}
             value={texto}
             onChangeText={setTexto}
             multilinea={3}
-            placeholder={esIncidencia ? 'Contá qué pasó con calma.' : 'Algo que quieras dejar anotado.'}
+            placeholder={esIncidencia ? t('cita.incidenciaPlaceholder') : t('cita.notaPlaceholder')}
           />
           <Boton
             variante="primario"
             bloque
-            etiqueta={esIncidencia ? 'Registrar incidencia' : 'Guardar nota'}
+            etiqueta={esIncidencia ? t('cita.registrarIncidencia') : t('cita.guardarNota')}
             cargando={enviandoNota}
             deshabilitado={texto.trim().length === 0}
             onPress={() => void enviarNota()}
@@ -401,7 +417,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
             setPideMotivo(false);
           }
         }}
-        titulo="Terminar el paseo"
+        titulo={t('cita.terminarTitulo')}
       >
         <View style={{ padding: spacing[4], gap: spacing[3] }}>
           {!pideMotivo ? (
@@ -414,17 +430,16 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
                   color: theme.text.secondary,
                 }}
               >
-                El recorrido y el tiempo quedan registrados. Después vas a poder completar el parte y
-                mandarle un mensaje a la familia.
+                {t('cita.terminarExplicacion')}
               </Text>
               <Boton
                 variante="primario"
                 bloque
-                etiqueta="Terminar paseo"
+                etiqueta={t('cita.terminarPaseo')}
                 cargando={terminando}
                 onPress={() => void terminar()}
               />
-              <Boton variante="ghost" bloque etiqueta="Seguir paseando" onPress={() => setHojaTerminar(false)} />
+              <Boton variante="ghost" bloque etiqueta={t('cita.seguirPaseando')} onPress={() => setHojaTerminar(false)} />
             </>
           ) : (
             <>
@@ -436,7 +451,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
                   color: theme.text.secondary,
                 }}
               >
-                No registramos ruta GPS en este paseo. Contale a la familia qué pasó:
+                {t('cita.sinRutaMotivo')}
               </Text>
               {MOTIVOS_GPS.map((m) => (
                 <Boton
@@ -459,12 +474,13 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
 export default function Durante() {
   const { theme } = useTheme();
   const router = useRouter();
+  const { t } = useTraduccion();
   const { citaId = '' } = useLocalSearchParams<{ citaId: string }>();
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
 
   const cargar = useCallback(async (silencioso = false) => {
     if (!silencioso) setPantalla({ estado: 'cargando' });
-    const sesion = await asegurarSesionDev();
+    const sesion = await verificarSesion();
     if (!sesion.ok) {
       setPantalla({ estado: 'error', mensaje: sesion.mensaje });
       return;
@@ -518,7 +534,7 @@ export default function Durante() {
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <View style={{ paddingHorizontal: spacing[4], paddingTop: spacing[2] }}>
-        <Encabezado variante="navegacion" titulo="Paseo en curso" atras onAtras={() => router.back()} />
+        <Encabezado variante="navegacion" titulo={t('cita.enCursoTitulo')} atras onAtras={() => router.back()} />
       </View>
 
       {pantalla.estado === 'cargando' && (
@@ -552,7 +568,7 @@ export default function Durante() {
                 {pantalla.mensaje}
               </Text>
               <View style={{ alignSelf: 'flex-start' }}>
-                <Boton variante="secundario" tamaño="sm" etiqueta="Reintentar" onPress={() => void cargar()} />
+                <Boton variante="secundario" tamaño="sm" etiqueta={t('agenda.reintentar')} onPress={() => void cargar()} />
               </View>
             </View>
           </Tarjeta>

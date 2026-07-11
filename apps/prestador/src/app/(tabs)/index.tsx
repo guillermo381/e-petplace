@@ -52,7 +52,7 @@ import {
   type CitaAgendaPaseo,
 } from '@epetplace/api';
 
-import { asegurarSesionDev } from '@/lib/api';
+import { verificarSesion } from '@/lib/api';
 import { useTraduccion } from '@/i18n';
 
 type Pantalla =
@@ -74,6 +74,10 @@ function hoyLocal(): string {
   return new Intl.DateTimeFormat('en-CA').format(new Date());
 }
 
+// D-315p (hallazgo, S54-B): locale FIJO es-EC — el formato largo humano
+// (weekday + día + mes) no existe en el riel (solo fechaCortaMono) y
+// packages/i18n no se toca en esta tanda. En modo en la fecha queda en
+// español hasta que el riel gane su función larga por idioma.
 function fechaHumana(): string {
   const s = new Intl.DateTimeFormat('es-EC', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -120,11 +124,11 @@ function FilaCita({ cita, enVivo, fotoUrl }: { cita: CitaAgendaPaseo; enVivo: bo
       interactiva
       onPress={() => router.push({ pathname: '/cita/[citaId]', params: { citaId: cita.id } })}
       accessibilityRole="button"
-      titulo={cita.mascota?.nombre ?? 'Mascota'}
+      titulo={cita.mascota?.nombre ?? t('agenda.mascotaFallback')}
       subtitulo={cita.tipo.nombre}
       inicio={
         <AvatarMascota
-          nombre={cita.mascota?.nombre ?? 'Mascota'}
+          nombre={cita.mascota?.nombre ?? t('agenda.mascotaFallback')}
           fotoUrl={fotoUrl}
           especie={cita.mascota && esEspecie(cita.mascota.especie) ? cita.mascota.especie : undefined}
           tamano="sm"
@@ -148,7 +152,7 @@ export default function Hoy() {
 
   const cargar = useCallback(async (esRefresh = false) => {
     if (!esRefresh) setPantalla({ estado: 'cargando' });
-    const sesion = await asegurarSesionDev();
+    const sesion = await verificarSesion();
     if (!sesion.ok) {
       setPantalla({ estado: 'error', mensaje: sesion.mensaje });
       return;

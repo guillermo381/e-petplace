@@ -41,7 +41,8 @@ import {
   type CitaAgendaPaseo,
 } from '@epetplace/api';
 
-import { asegurarSesionDev } from '@/lib/api';
+import { verificarSesion } from '@/lib/api';
+import { useTraduccion } from '@/i18n';
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -52,13 +53,6 @@ type Pantalla =
 function hoyLocal(): string {
   return new Intl.DateTimeFormat('en-CA').format(new Date());
 }
-
-const INSIGNIA_POR_ESTADO: Record<string, { estado: InsigniaEstado; etiqueta: string }> = {
-  pendiente:  { estado: 'proximo', etiqueta: 'Por confirmar' },
-  confirmada: { estado: 'info',    etiqueta: 'Confirmada' },
-  completada: { estado: 'alDia',   etiqueta: 'Completada' },
-  no_show:    { estado: 'atencion', etiqueta: 'No show' },
-};
 
 function esEspecie(v: string | null): v is AvatarMascotaEspecie {
   return v !== null;
@@ -72,7 +66,17 @@ export default function DetalleCita() {
   const { theme } = useTheme();
   const router = useRouter();
   const { mostrar } = useAviso();
+  const { t } = useTraduccion();
   const { citaId = '' } = useLocalSearchParams<{ citaId: string }>();
+
+  // Estado de cita → Insignia. Voz de oficio por el riel (D-315p);
+  // 'pendiente' queda por si un deep-link la trae — verdad firme igual.
+  const INSIGNIA_POR_ESTADO: Record<string, { estado: InsigniaEstado; etiqueta: string }> = {
+    pendiente:  { estado: 'proximo',  etiqueta: t('cita.estadoPorConfirmar') },
+    confirmada: { estado: 'info',     etiqueta: t('agenda.estadoConfirmada') },
+    completada: { estado: 'alDia',    etiqueta: t('agenda.estadoCompletada') },
+    no_show:    { estado: 'atencion', etiqueta: t('agenda.estadoNoShow') },
+  };
 
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   // foto_url guarda PATH (S47-B0.2): la firma se resuelve acá; sin
@@ -83,7 +87,7 @@ export default function DetalleCita() {
 
   const cargar = useCallback(async (silencioso = false) => {
     if (!silencioso) setPantalla({ estado: 'cargando' });
-    const sesion = await asegurarSesionDev();
+    const sesion = await verificarSesion();
     if (!sesion.ok) {
       setPantalla({ estado: 'error', mensaje: sesion.mensaje });
       return;
@@ -153,7 +157,7 @@ export default function DetalleCita() {
   }
 
   const cita = pantalla.estado === 'listo' ? pantalla.cita : null;
-  const nombre = cita?.mascota?.nombre ?? 'Mascota';
+  const nombre = cita?.mascota?.nombre ?? t('agenda.mascotaFallback');
   const insignia = cita?.estado ? INSIGNIA_POR_ESTADO[cita.estado] : undefined;
   const hora = cita?.hora ? cita.hora.slice(0, 5) : '—';
   const dur = cita?.tipo.duracion_default_minutos;
@@ -164,7 +168,7 @@ export default function DetalleCita() {
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[4] }}>
         <Encabezado
           variante="navegacion"
-          titulo={cita ? `Paseo de ${nombre}` : 'Paseo'}
+          titulo={cita ? t('cita.tituloPaseoDe', { nombre }) : t('cita.tituloPaseo')}
           atras
           onAtras={() => router.back()}
         />
@@ -184,9 +188,9 @@ export default function DetalleCita() {
 
         {pantalla.estado === 'no_existe' && (
           <EstadoVacio
-            titulo="Esta cita ya no está disponible"
-            descripcion="Puede haberse movido o cancelado. Volvé a la agenda para ver tus paseos de hoy."
-            accion={<Boton variante="secundario" etiqueta="Volver a la agenda" onPress={() => router.back()} />}
+            titulo={t('cita.noDisponible')}
+            descripcion={t('cita.noDisponibleDetalle')}
+            accion={<Boton variante="secundario" etiqueta={t('cita.volverAgenda')} onPress={() => router.back()} />}
           />
         )}
 
@@ -204,7 +208,7 @@ export default function DetalleCita() {
                 {pantalla.mensaje}
               </Text>
               <View style={{ alignSelf: 'flex-start' }}>
-                <Boton variante="secundario" tamaño="sm" etiqueta="Reintentar" onPress={() => void cargar()} />
+                <Boton variante="secundario" tamaño="sm" etiqueta={t('agenda.reintentar')} onPress={() => void cargar()} />
               </View>
             </View>
           </Tarjeta>
@@ -267,7 +271,7 @@ export default function DetalleCita() {
                     color: theme.text.secondary,
                   }}
                 >
-                  {`hoy · ${hora}${dur ? ` · ${dur} min` : ''}`}
+                  {`${t('cita.hoy')} · ${hora}${dur ? ` · ${dur} min` : ''}`}
                 </Text>
               </View>
             </Tarjeta>
@@ -276,7 +280,7 @@ export default function DetalleCita() {
             {conCta && (
               <Boton
                 variante="primario"
-                etiqueta="Iniciar paseo"
+                etiqueta={t('cita.iniciarPaseo')}
                 bloque
                 cargando={iniciando}
                 onPress={() => void iniciar()}

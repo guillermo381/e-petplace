@@ -14,15 +14,28 @@ export const prestadorEs = {
     negocio: 'Negocio',
   },
   sesion: {
-    // El estado honesto del raíz (hallazgo pantalla-en-blanco S51):
-    // sin sesión la app lo DICE apenas abre — el login real es B1/D-290.
+    // El estado honesto del raíz (S51; auth real desde S54/D-290):
+    // sin sesión la app lo DICE apenas abre y ofrece entrar.
     sinSesion: 'No hay una sesión activa',
-    sinSesionDetalle: 'El ingreso con tu cuenta llega con el próximo ciclo. Por ahora esta app se usa con la sesión de prueba del equipo.',
+    sinSesionDetalle: 'Inicia sesión para ver tu jornada.',
+    iniciarSesion: 'Iniciar sesión',
+    // con sesión pero SIN negocio de prestador (D-290): jamás crash
+    sinRol: 'Tu cuenta no tiene un negocio asociado',
+    sinRolDetalle: 'Entraste como {{email}}. Esta app es para quienes ofrecen servicios en e-PetPlace — si es tu caso y no ves tu negocio, escríbenos.',
     reintentar: 'Probar de nuevo',
     cerrarSesion: 'Cerrar sesión',
     confirmacionCierre: '¿Cierras tu sesión? Tu trabajo queda guardado.',
     cancelar: 'Cancelar',
     titulo: 'Sesión',
+  },
+  // Login del prestador (S54-B, D-290) — email+contraseña por los
+  // wrappers de auth existentes; el registro del prestador es otro ciclo.
+  login: {
+    titulo: 'Iniciar sesión',
+    email: 'Email',
+    emailPlaceholder: 'ej: ana@correo.com',
+    password: 'Contraseña',
+    entrar: 'Entrar',
   },
   agenda: {
     saludo: 'Tus paseos de hoy',
@@ -41,6 +54,73 @@ export const prestadorEs = {
     estadoConfirmada: 'Confirmada',
     estadoCompletada: 'Completada',
     estadoNoShow: 'No show',
+    // fallback cuando la cita llega sin mascota asociada (D-315p)
+    mascotaFallback: 'Mascota',
+  },
+  // El flujo de atención E2E (S44, migrado en D-315 pata prestador).
+  // VOZ EMOCIONAL PENDIENTE DE GATE (patrón D-300, hardcodeada es en
+  // pantalla hasta el lote): placeholder del mensaje a la familia y
+  // MOTIVOS_GPS (además viajan a DB — ver reporte S54-B).
+  cita: {
+    // detalle / preparar
+    tituloPaseoDe: 'Paseo de {{nombre}}',
+    tituloPaseo: 'Paseo',
+    noDisponible: 'Esta cita ya no está disponible',
+    noDisponibleDetalle: 'Puede haberse movido o cancelado. Vuelve a la agenda para ver tus paseos de hoy.',
+    noDisponibleDetalleCorto: 'Vuelve a la agenda para ver tus paseos de hoy.',
+    volverAgenda: 'Volver a la agenda',
+    estadoPorConfirmar: 'Por confirmar',
+    hoy: 'hoy',
+    iniciarPaseo: 'Iniciar paseo',
+    // durante
+    enCursoTitulo: 'Paseo en curso',
+    gpsIniciando: 'GPS iniciando',
+    gpsActivo: 'GPS activo',
+    gpsDetenido: 'GPS detenido',
+    gpsSinPermiso: 'Sin permiso de ubicación',
+    gpsNoDisponible: 'GPS no disponible',
+    gpsError: 'GPS con error',
+    unPunto: '1 punto',
+    puntos: '{{n}} puntos',
+    sinGpsExplicacion:
+      'Necesitamos tu ubicación para registrar el recorrido que ve la familia. El paseo puede seguir igual — sin ruta, al terminar te pedimos contar qué pasó.',
+    probarDeNuevo: 'Probar de nuevo',
+    parteDelPerro: 'Parte del perro',
+    evidencia: 'Evidencia',
+    fotosSufijo: '{{n}} fotos',
+    parteRegistrado: 'Parte registrado',
+    fotoNoSubio: 'La foto no se subió. Tócala para reintentar.',
+    agregarNotaIncidencia: 'Agregar nota o incidencia',
+    terminarPaseo: 'Terminar paseo',
+    notaOIncidencia: 'Nota o incidencia',
+    nota: 'Nota',
+    incidencia: 'Incidencia',
+    elegirIncidencia: 'Elige qué pasó del catálogo.',
+    severidadMedia: 'Severidad media',
+    severidadAlta: 'Severidad alta',
+    quePaso: 'Qué pasó',
+    notaPlaceholder: 'Algo que quieras dejar anotado.',
+    incidenciaPlaceholder: 'Cuenta qué pasó con calma.',
+    registrarIncidencia: 'Registrar incidencia',
+    guardarNota: 'Guardar nota',
+    incidenciaRegistrada: 'Incidencia registrada',
+    notaRegistrada: 'Nota registrada',
+    terminarTitulo: 'Terminar el paseo',
+    terminarExplicacion:
+      'El recorrido y el tiempo quedan registrados. Después vas a poder completar el parte y mandarle un mensaje a la familia.',
+    seguirPaseando: 'Seguir paseando',
+    sinRutaMotivo: 'No registramos ruta GPS en este paseo. Cuéntale a la familia qué pasó:',
+    // cierre
+    cierreTitulo: 'Parte del paseo',
+    resumenConteos: '{{puntos}} puntos gps · {{fotos}} fotos · {{notas}} notas',
+    sinRutaGps: 'Sin ruta GPS: {{motivo}}',
+    faltaNovedad: 'Registra al menos una novedad del paseo para enviar el parte.',
+    registrarNovedad: 'Registrar novedad',
+    mensajeFamilia: 'Mensaje a la familia',
+    mensajeFamiliaAyuda: 'Opcional — va con el parte.',
+    enviarParte: 'Enviar parte y cerrar',
+    parteEnviado: 'Parte enviado',
+    parteEnviadoMono: 'parte enviado',
   },
   mascotas: {
     titulo: 'Mascotas',
