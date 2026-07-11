@@ -1,8 +1,9 @@
 # MODELO_FINANCIERO.md — e-PetPlace
 
 > Documento maestro del motor financiero del ecosistema e-PetPlace.
-> Última actualización: 9 Mayo 2026 v2.3 — Wizard v2 implementado, datos_bancarios refactor a 7 keys, asignación de rol vía UPSERT en user_roles.
+> Última actualización: 11 Jul 2026 v2.4 — Devengo de cita IMPLEMENTADO (variante (b), pago simulado declarado), regla de cuenta activa para cobrar/ofertarse, endurecimiento de seguridad (L-140, security_invoker).
 > Versiones anteriores:
+>   - v2.3 (9 Mayo 2026 — wizard v2 implementado, datos_bancarios refactor a 7 keys, asignación de rol vía UPSERT en user_roles).
 >   - v2.3 (9 Mayo 2026 — wizard v2 implementado, datos_bancarios extendido, MIG-L aplicada).
 >   - v2.2 (8 Mayo 2026 — esquema oficial de datos_bancarios + CHECK constraint).
 >   - v2.1 (8 Mayo 2026 — cleanup post-cierre: prestadores sin datos fiscales redundantes, multi-sede, donaciones con FK).
@@ -10,6 +11,22 @@
 >   - v1.0 (7 Mayo 2026 — modelo de un rol por cuenta).
 > Autor: Guillermo + Claude (Anthropic).
 > Estado: schema implementado y consolidado en Supabase. Wiring a flujos transaccionales pendiente.
+
+---
+
+## Cambio importante respecto a v2.3 (S54 — 11 Jul 2026)
+
+La v2.4 captura la PRIMERA circulación real por el motor: el ciclo de cita del app móvil quedó cableado de punta a punta, con pago SIMULADO y declarado. Cuatro cambios:
+
+1. **Devengo de cita IMPLEMENTADO — variante (b), founder+arquitecto S54.** El evento económico NO nace al pagar: nace en `cerrar_paseo_con_calidad` (el cierre con calidad ES la condición de liquidación, DM-S34.2/S40.1), SOLO si `evento_cita_servicio.estado_reserva = 'pagada'`. `fecha_devengo` = el cierre; `fecha_cobro_kushki` = el pago (guardado en `metadata.pagado_en` de la cita hasta que Kushki real traiga su columna/charge_id). `confirmar_cita_pagada` PRE-VALIDA el motor (cuenta activa + rol activo + fee resolvible) SIN escribir el ledger — un pago que el motor va a rechazar al cierre es un pago que promete mentira. Coherente con §2.2 ("cita completada y pagada") y §3 (tres timestamps).
+
+2. **Regla de plata nueva (founder S54): rol activo NO basta para cobrar.** La pre-validación exige `cuentas_comerciales.estado = 'activa'` (error tipado `cuenta_no_activa`), y **ningún listado del producto oferta prestadores cuya cuenta no esté activa** (no se oferta quien no puede cobrar). Ver Decisión Q y regla 7.13.
+
+3. **Pago simulado declarado (fase de pruebas):** los eventos nacen con `metadata.pago_simulado = true` y `monto_kushki_fee = 0` (no se inventa fee de Kushki). El sprint 3.1.B.3 queda EJECUTADO en esta modalidad; Kushki real pendiente con el mismo contrato de estados.
+
+4. **Endurecimiento de seguridad (S54, L-140):** ver la nota en §4.5.
+
+Si trabajaste con la v2.3, tu código sigue válido. Lo nuevo: jamás crear el evento de cita al pagar (nace al cerrar), y toda superficie que liste prestadores cobrables filtra por cuenta activa.
 
 ---
 
@@ -449,6 +466,39 @@ Función motor. 18 parámetros. Lógica:
 8. Snapshotea `fee_calculo_detalle` con `tipo_actor_resuelto`.
 9. INSERT en `eventos_economicos` con `estado='pendiente_liquidar'`.
 
+#### Devengo de cita — IMPLEMENTADO (S54, variante (b))
+
+El primer `origen_tipo` con circulación real. El ciclo completo en DB
+(migraciones S54, aplicadas y versionadas en el monorepo):
+
+- **`crear_bloqueo_agenda`** crea el HOLD: la cita nace `estado='pendiente'`
+  + `estado_reserva='pendiente_pago'` + `expira_en = now()+15min`, con
+  SNAPSHOT del precio de la oferta (`cita.precio` — el checkout jamás
+  re-resuelve). Invisible al prestador (verdad firme). Expiración
+  PEREZOSA: toda lectura/escritura trata un hold vencido como
+  inexistente; el cron `expirar-citas-pendientes` es higiene, no
+  correctitud. Invariante del catálogo: `estado_reserva='pagada'` ⟺ la
+  cita pasó por `confirmar_cita_pagada` (único escritor de ese valor;
+  NULL = ciclo de pago no aplica, legacy/walk-in).
+- **`confirmar_cita_pagada`** (el pago — hoy simulado): PRE-VALIDA el
+  motor SIN insertar (cuenta existe, **`estado='activa'`** → error
+  `cuenta_no_activa`, rol `prestador_servicios` activo en
+  `cuenta_roles`, `resolver_fee_aplicable` devuelve config) y
+  transiciona `pendiente→confirmada` + `pendiente_pago→pagada` en el
+  MISMO UPDATE, guardando el timestamp del pago en
+  `metadata.pagado_en` (hasta Kushki real).
+- **`cerrar_paseo_con_calidad`** (y toda RPC de cierre futura de
+  familias con cita): tras completar el turno, si
+  `estado_reserva='pagada'` crea el evento económico vía
+  `crear_evento_economico` con `tipo_evento='cita_pagada'`,
+  `fecha_devengo = now()` (el cierre), `fecha_cobro_kushki =
+  metadata.pagado_en` (el pago), `monto_kushki_fee = 0` +
+  `metadata.pago_simulado = true` mientras el pago sea simulado, y
+  guard anti-duplicado por (origen_tipo, origen_id, tipo_evento).
+  Cita legacy (reserva NULL) → cero evento, cero error. Si el motor
+  rebota, el cierre entero vuelve atrás — jamás atención cerrada sin
+  su devengo ni ledger a medias.
+
 #### `generar_liquidacion(...)` — SECURITY DEFINER
 
 Consolida eventos pendientes de una cuenta + país + período. Anti-solapamiento integrado. Aplica saldo_arrastre.
@@ -477,6 +527,17 @@ Para devengos diferidos (seguros, futuro). Sin scheduler activo.
 Todas las tablas con RLS activo. Owner ve lo suyo, admin ve todo. Funciones del módulo con grants restrictivos (sin anon, sin PUBLIC).
 
 `refugios` además tiene policy de lectura pública para refugios aprobados (catálogo).
+
+**Nota de seguridad (S54):** las funciones core de escritura
+(`crear_evento_economico`, `generar_liquidacion`, `aplicar_reembolso`)
+quedaron **sin EXECUTE de `authenticated`** — invocables SOLO vía
+puertas SECURITY DEFINER gateadas (hoy: el ciclo de cita) o
+service_role. Las 4 vistas helper corren con **`security_invoker`**
+(la RLS subyacente es la puerta: el owner ve lo suyo, admin todo) y sin
+grants de anon. **L-140 rige toda función futura**: los default
+privileges del proyecto ya no otorgan EXECUTE a anon ni a PUBLIC en el
+CREATE; toda migración que cree una función declara su REVOKE/GRANT
+explícito y la verificación incluye `pg_proc.proacl`.
 
 ### MIG-L — Refactor datos_bancarios + UPSERT user_roles + catálogos (9 Mayo 2026)
 
@@ -577,6 +638,12 @@ La función `wizard_crear_cuenta_y_rol` ahora hace UPSERT en `user_roles` con `O
 - Reactiva: si el rol existe pero está inactivo, lo reactiva.
 
 Esta decisión NO depende de admin (a diferencia de la activación de la cuenta_comercial que sí requiere validación admin). El user recién registrado puede entrar al portal-prestadores inmediatamente después del wizard, aunque verá `/onboarding-espera` hasta que admin active la cuenta.
+
+### Decisión Q (NUEVA v2.4, founder S54) — Rol activo NO basta para cobrar: cuenta ACTIVA
+Para cobrar por la plataforma no alcanza el rol activo en `cuenta_roles`: la cuenta comercial debe estar en `estado='activa'` (validación admin cumplida, §7.11). La pre-validación del pago rebota `cuenta_no_activa`, y **ningún listado del producto oferta prestadores cuya cuenta no esté activa** — ofertar a quien no puede cobrar es prometer un pago que va a rebotar. Implementación: `confirmar_cita_pagada` + `obtener_paseadores_disponibles` + `obtener_oferta_paseo` (server-side: la RLS de `cuentas_comerciales` es solo-owner y el filtro no puede vivir en el cliente).
+
+### Decisión R (NUEVA v2.4) — Devengo de cita en variante (b)
+El evento económico de una cita nace al CERRAR CON CALIDAD (condición de liquidación), no al pagar: `fecha_devengo` = cierre, `fecha_cobro_kushki` = pago. El pago pre-valida y registra (`estado_reserva='pagada'` + `metadata.pagado_en`); el cierre devenga. Detalle operativo en §4.3.
 
 ### Decisiones adicionales (sin cambios)
 - White-label marketplace de fachada.
@@ -679,6 +746,9 @@ Esto debe hacerlo admin después de validar documentación. Si los datos bancari
 
 ### 7.12 Esquema de `datos_bancarios` (NUEVO v2.2)
 El jsonb `datos_bancarios` tiene estructura uniforme entre países (decisión M). Cualquier código que escriba ese campo debe respetar las 5 claves obligatorias (banco, tipo_cuenta, numero_cuenta, titular_nombre, titular_documento) cuando la cuenta esté en `activa` o `suspendida`. Estructura específica por país va en `metadata` opcional.
+
+### 7.13 Cobrar y ofertarse exigen cuenta ACTIVA (NUEVO v2.4 — Decisión Q)
+Toda puerta de pago pre-valida `cuentas_comerciales.estado='activa'` (error `cuenta_no_activa`) ADEMÁS del rol activo, y todo listado de prestadores cobrables filtra por cuenta activa, server-side. El devengo de cita sigue la variante (b): el evento nace al cerrar con calidad, jamás al pagar (Decisión R, §4.3).
 
 ---
 
@@ -823,7 +893,7 @@ Todas las tablas operativas en 0 filas. fee_configs_historial preserva 12 entrad
 | 3.1.A | UI admin + wizards de portales para registro multi-rol y multi-sede con esquema oficial de datos_bancarios | Wizards detectan cuenta existente, agregan roles, gestionan sedes, guardan progreso parcial |
 | 3.1.B.1 | Wiring de pedidos pagados → crear_evento_economico | Trigger en pedidos genera evento automático |
 | 3.1.B.2 | Wiring de revenue puro plataforma | Triggers correspondientes activos |
-| 3.1.B.3 | Wiring de citas pagadas | Cuando flujo de cobro de cita exista en app v2 |
+| 3.1.B.3 | Wiring de citas pagadas — **✅ EJECUTADO (S54, variante (b))**: el flujo de cobro vive en el app móvil con pago SIMULADO declarado (`metadata.pago_simulado=true`, kushki_fee=0); el evento nace al cerrar con calidad. Kushki REAL pendiente sobre el mismo contrato de estados | ~~Cuando flujo de cobro de cita exista en app v2~~ Ejecutado 11 Jul 2026 |
 | 3.1.B.4 | Wiring de donaciones a refugios | Cuando módulo de donaciones se construya |
 | 3.1.C | UI admin de liquidaciones consolidadas con desglose por rol y sede | Liquidaciones muestran detalle correcto |
 | 3.1.D | Portal-prestadores: vista de Liquidaciones con desglose | Prestador ve liquidaciones reales |
@@ -842,7 +912,7 @@ Todas las tablas operativas en 0 filas. fee_configs_historial preserva 12 entrad
 - Política de holdback por tipo_actor.
 - Matriz fiscal completa EC y CO (depende de contador).
 - Pricing exacto de productos comerciales.
-- UX del flujo de cobro de cita en app.
+- ~~UX del flujo de cobro de cita en app.~~ **Resuelta v1-SIMULADA (S54):** momento-primero (CUÁNDO→QUIÉN) + hold 15 min + checkout mono-ítem con pago simulado declarado y camino triste digno. Lo que sigue sin resolver acá es el cobro REAL (Kushki) sobre ese mismo flujo.
 - Diseño de la integración VTEX con MediaLab (ver documento separado).
 - UI de gestión de sedes en portal-prestadores.
 
@@ -881,6 +951,26 @@ Este documento es el contrato técnico-conceptual del motor financiero. Cambiarl
 ---
 
 ## 15. Cambios entre versiones
+
+### v2.4 (11 Jul 2026 — S54, post v2.3)
+
+**Implementado (primera circulación real del motor):**
+- Devengo de cita en **variante (b)** — el evento nace en `cerrar_paseo_con_calidad` si `estado_reserva='pagada'`; `fecha_devengo`=cierre, `fecha_cobro_kushki`=pago (`metadata.pagado_en` hasta Kushki real); `confirmar_cita_pagada` PRE-valida sin escribir el ledger. Nueva subsección en §4.3.
+- Hold de agenda 15 min (esqueleto v2 formalizado: `estado` = ciclo de cita, `estado_reserva` = ciclo de pago con CHECK e invariante; expiración perezosa + cron de higiene).
+- Sprint 3.1.B.3 EJECUTADO en modalidad simulada declarada (`metadata.pago_simulado=true`, `monto_kushki_fee=0`).
+
+**Decisiones nuevas:**
+- Decisión Q — rol activo NO basta: cobrar y ofertarse exigen cuenta ACTIVA (`cuenta_no_activa`; listados filtran server-side).
+- Decisión R — devengo de cita en variante (b).
+
+**Reglas nuevas (sección 7):**
+- 7.13 — cuenta activa para cobrar/ofertarse.
+
+**Seguridad (nota nueva en §4.5):**
+- Funciones core de escritura sin EXECUTE de `authenticated` (solo puertas DEFINER gateadas / service_role); vistas helper con `security_invoker`; L-140 (default privileges sin anon/PUBLIC) rige toda función futura.
+
+**Documentación:**
+- §12: "UX del flujo de cobro de cita" pasa a resuelta-v1-simulada (queda el cobro REAL).
 
 ### v2.3 (9 Mayo 2026, post v2.2)
 
