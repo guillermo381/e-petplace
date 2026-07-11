@@ -144,3 +144,32 @@ export { obtenerMiPerfil, type MiPerfil } from './wrappers/miPerfil';
 
 // Vitales — S53-B2c (paseos con track real)
 export { obtenerPaseosConTrack, type PaseoConTrack } from './wrappers/vitales';
+
+// Cuenta comercial — S54-B (wizard B2.3, §6.5) — archivo NUEVO de esta sesión
+export {
+  obtenerMiCuentaComercial,
+  obtenerPaisesParaRegistro,
+  obtenerBancosDePais,
+  obtenerTiposDocumentoTitular,
+  verificarIdentificacionDisponible,
+  crearCuentaComercialInicial,
+  actualizarDatosBancarios,
+  type MiCuentaComercial,
+  type DatosBancariosResumen,
+  type EstadoCuentaComercial,
+  type TipoFiscal,
+  type PaisRegistro,
+  type BancoCatalogo,
+  type TipoDocumentoTitular,
+  type DisponibilidadIdentificacion,
+  type InputCrearCuentaComercial,
+  type InputDatosBancarios,
+  type CodigoErrorCuentaComercial,
+} from './wrappers/cuentaComercial';
+
+// Ledger propio, solo lectura — S54-B (peldaño de liquidaciones en Negocio)
+export {
+  obtenerResumenPendienteLiquidar,
+  type ResumenPendienteLiquidar,
+  type CodigoErrorEventosEconomicos,
+} from './wrappers/eventosEconomicos';
