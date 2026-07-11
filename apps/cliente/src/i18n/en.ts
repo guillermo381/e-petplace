@@ -50,7 +50,7 @@ export const clienteEn = {
     reintentar: 'Try again',
   },
   coach: {
-    // Propuestas — GATE PENDIENTE (voz del Coach):
+    // Voz del Coach APROBADA por founder (cierre S53):
     abrir: 'Open the Coach',
     preguntaSobre: 'Ask about {{nombre}}',
     pEdad: 'How old are they?',

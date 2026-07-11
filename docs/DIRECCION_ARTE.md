@@ -105,6 +105,15 @@ el tinte suave de su capa, con el motivo en trazo encima. Reglas:
    la voz honesta debajo ("puede tardar un minuto"). Es la única
    animación de espera legal, y es de marca, no shimmer.
 
+## 5b. La nariz considerada — por qué la huella (nota S53)
+
+El isotipo de la marca nace de la NARIZ: es QUIÉN SOMOS. La huella de
+los íconos dice otra cosa: QUIÉN ESTÁ — la mascota presente en el
+concepto. Dos símbolos, dos preguntas; por eso el acento del set b′ es
+la huella y no la nariz. **Disparo de reconsideración:** si el ensayo
+con usuarios muestra que la huella NO se lee como mascota, esta
+decisión se reabre.
+
 ## 6. Gobernanza del set
 
 - El set nace en `packages/ui` (`Icono` con nombre tipado — cero strings

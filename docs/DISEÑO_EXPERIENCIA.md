@@ -175,6 +175,25 @@ header de identidad (AvatarMascota + la voz + momento vital):
 
 A1 construye el perfil con este hueco hecho.
 
+## 4b. LA LEY DE LA ESCALERA (enmienda v1.4 — firmada founder S53)
+
+Todo componente o módulo que muestre datos del expediente declara sus
+TRES peldaños:
+
+- **Peldaño 0 — invitación:** sin datos, el módulo EDUCA y termina en
+  una acción de aporte al expediente. Jamás ceros, jamás simula.
+- **Peldaño 1 — primeros datos:** honestidad de densidad — lo poco se
+  muestra como poco (prohibido estirar poco dato para que parezca
+  mucho).
+- **Peldaño 2 — expediente rico:** la densidad y la profundidad llegan
+  por DATOS, no por versión nueva: el peldaño 2 se diseña desde el
+  día 1 para que subir sea una prop, no un refactor.
+
+Canon de referencia: los índices de Vitales (peldaño 0 — guijarro +
+"se construye con su expediente" + Hoja educativa), la tira 1/7 de
+Zeus (peldaño 1 — una barra llena, seis en base, la verdad tal cual),
+y el hueco M-WEAR (peldaño 2 dibujado esperando su dato).
+
 ## 5. El modelo de descubrimiento — §6.4 aplicado
 
 La app se revela progresivamente; la superapp jamás se presenta
@@ -448,6 +467,11 @@ el portado de grooming consumen:
 
 ## Historial
 
+- **v1.4 (S53, 10 Jul 2026):** LA LEY DE LA ESCALERA (§4b) — firmada
+  founder: tres peldaños declarados por todo módulo de expediente
+  (0 invitación que educa · 1 honestidad de densidad · 2 riqueza por
+  datos, no por versión). El protocolo Ley 11 de la skill exige la
+  escalera en toda espec nueva.
 - **v1.3 (S53, 10 Jul 2026):** enmienda del ORDEN de la pila del
   perfil (§4): header → Vitales → Salud → Línea de Vida → Identidad —
   el estado antes que el log; el perfil rima con el Home. El módulo

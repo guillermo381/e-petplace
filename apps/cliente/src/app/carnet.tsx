@@ -27,11 +27,12 @@
  */
 
 import { useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  EsperaDeMarca,
   Boton,
   Campo,
   CampoFecha,
@@ -343,7 +344,10 @@ export default function CarnetDeVacunas() {
           {foto && (
             <Image source={{ uri: foto.uri }} contentFit="cover" transition={0} style={{ width: 160, height: 160, borderRadius: radius.lg }} />
           )}
-          {spinnerVisible && <ActivityIndicator color={theme.text.secondary} />}
+          {/* S53-B2d: la espera de marca (§5.3) — la huella respirando
+              reemplaza al spinner; la voz honesta de abajo se conserva
+              VERBATIM. Mismo umbral de visibilidad (Ley 13). */}
+          {spinnerVisible && <EsperaDeMarca tamano={64} />}
           <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.base, lineHeight: typography.size.base * 1.4, color: theme.text.secondary, textAlign: 'center' }}>
             {VOZ_CAPTURA.espera}
           </Text>

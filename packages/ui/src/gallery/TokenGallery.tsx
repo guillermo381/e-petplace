@@ -38,6 +38,8 @@ import { VisorFoto } from '../components/VisorFoto'
 import { FichaVacuna } from '../components/FichaVacuna'
 import { FichaMascotaHogar } from '../components/FichaMascotaHogar'
 import { Icono, type IconoNombre } from '../components/Icono'
+import { EsperaDeMarca } from '../brand/EsperaDeMarca'
+import { Guijarro } from '../brand/Guijarro'
 import { Cronometro } from '../components/Cronometro'
 import { EvidenciaFoto, type EvidenciaFotoEstado } from '../components/EvidenciaFoto'
 import { MapaRecorrido } from '../components/MapaRecorrido'
@@ -1296,6 +1298,29 @@ function GaleriaInterna() {
             <ThemeProvider defaultMode="memorial">
               <PanelTema etiqueta="memorial — la huella a tinta secundaria, el trazo se conserva; el destello NO destella (§2.8)">
                 <EjemploSetBPrima />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* Marca S53: guijarros (§4) + espera de marca (§5.3) */}
+        <Seccion titulo="Marca S53 — Guijarro (ilustración §4, cada uno rotado distinto) y EsperaDeMarca (la única animación de espera legal; memorial quieta)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — guijarros identidad/cuidado + la huella respirando (~1.9s, sereno)">
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[6] }}>
+                  <Guijarro capa="identidad" tamano={56} rotacion={9} />
+                  <Guijarro capa="cuidado" tamano={56} rotacion={-16} />
+                  <EsperaDeMarca tamano={56} />
+                </View>
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — guijarro a bg.overlay; la espera QUIETA en tinta">
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[6] }}>
+                  <Guijarro capa="identidad" tamano={56} rotacion={9} />
+                  <EsperaDeMarca tamano={56} />
+                </View>
               </PanelTema>
             </ThemeProvider>
           </View>

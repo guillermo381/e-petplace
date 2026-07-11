@@ -68,13 +68,17 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 10. **Peers nativos de `packages/ui` con el rango del app, jamás `"*"`**
     (lección B3.1b: pnpm auto-instala peers y `"*"` resuelve otra versión
     → módulo nativo duplicado → build nativa rota).
-11. **Protocolo del componente faltante.** Si la UI necesita algo que los
-    25 no cubren, PROHIBIDO inline en apps. Camino: (a) proponer al
-    founder espec mínima (qué es, qué no es, estados), (b) nace en
-    `packages/ui` con el método completo — tokens, WCAG si trae pares
-    nuevos, galería, gate en dispositivo —, (c) se agrega al índice de
-    esta skill. Sin excepción "por esta vez": la deuda visual no se paga
-    nunca.
+11. **Protocolo del componente faltante (ENMENDADO S53).** Si la UI
+    necesita algo que el set no cubre, PROHIBIDO inline en apps.
+    Camino: (a) proponer al founder espec mínima (qué es, qué no es,
+    estados) que DECLARA SU ESCALERA (DISEÑO_EXPERIENCIA §4b: qué
+    muestra en los peldaños 0/1/2 y qué dato dispara cada subida —
+    sin escalera declarada, la espec está INCOMPLETA; si el
+    componente no muestra datos del expediente, lo dice explícito),
+    (b) nace en `packages/ui` con el método completo — tokens, WCAG
+    si trae pares nuevos, galería, gate en dispositivo —, (c) se
+    agrega al índice de esta skill. Sin excepción "por esta vez": la
+    deuda visual no se paga nunca.
 12. **Iconografía (ENMENDADA S53 por `docs/DIRECCION_ARTE.md` §3).**
     Lenguaje b′: objeto del oficio en trazo 1.9 de tinta + UNA Huella
     RELLENA en el hex puro de su capa (la primitiva `Huella` de
@@ -176,7 +180,9 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 | `FichaMascotaHogar` | v2 (S52-P3, espec gateada): la mascota PRESIDE — AvatarMascota 64 (foto primero, huella fallback) sobre superficie Tarjeta, nombre en DM Sans light xl y UNA voz SIN sujeto (ficha.* del riel; las variantes con {{nombre}} se conservan para contextos sin sujeto visible). Semántica intacta: alDia punto verdeVital · pideAtencion punto ochre + warningText · conociendolo neutral. Tap → perfil (pressed 0.99 de Tarjeta); sin badges ni CTA. Diseñada para 1-3 apiladas. Memorial degrada. Cero tokens nuevos |
 
 También: `ThemeProvider`/`useTheme` (light default, memorial forzable),
-`Isotipo` (tinta/blanco/gradiente), `palette`/`gradients`/`typography`/
+`Isotipo` (tinta/blanco/gradiente), y las PRIMITIVAS DE MARCA S53:
+`Huella` (el path canónico b′), `Guijarro` (ilustración §4),
+`EsperaDeMarca` (la única animación de espera legal: la huella respirando ~1.9s easeInOut para procesos >2s, SIEMPRE con voz honesta debajo; memorial quieta; no muestra datos — escalera no aplica), `palette`/`gradients`/`typography`/
 `spacing`/`radius`/`shadows`/`motion`/`opacity`/`dosis`, temas y tipos.
 
 **Dónde vive qué:** tokens `packages/ui/src/tokens/` · temas

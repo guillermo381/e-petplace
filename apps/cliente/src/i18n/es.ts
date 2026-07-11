@@ -54,7 +54,7 @@ export const clienteEs = {
     reintentar: 'Reintentar',
   },
   coach: {
-    // ── El Coach v0 (S53-B2b) — VOZ EMOCIONAL, GATE PENDIENTE.
+    // ── El Coach v0 (S53-B2b) — voz APROBADA por founder (cierre S53).
     // v0 = plantillas sobre DATOS REALES del expediente (L-139: cero
     // generación, cero diagnóstico); el cerebro de verdad es A5.
     abrir: 'Abrir el Coach',
@@ -122,12 +122,12 @@ export const clienteEs = {
     vitalesMetaVarias: '{{n}} salidas · última {{fecha}}',
     vitalesMetaUna: '1 salida · última {{fecha}}',
     vitalesBarrasA11y: '{{n}} de 7 días con salida',
-    // comparativa — SOLO con respaldo de datos (L-139); GATE PENDIENTE:
+    // comparativa — SOLO con respaldo de datos (L-139); APROBADA S53:
     vitalesComparativa: 'Esta semana caminó más que la pasada.',
     bienestarVacio: 'Su actividad va a aparecer acá',
     bienestarVacioDetalle: 'Cada paseo con su recorrido queda guardado en su historia.',
     // ── índices educativos (§6.4: visibles, honestos-vacíos) ──
-    // GATE PENDIENTE (voz educativa):
+    // Voz educativa APROBADA por founder (cierre S53):
     indiceSalud: 'Índice de salud',
     indiceDescanso: 'Descanso y actividad',
     indiceSeConstruye: 'Se construye con su expediente',
