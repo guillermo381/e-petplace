@@ -191,6 +191,36 @@ PORTAL_PRESTADOR.md o docs del repo congelado) y citarlo.
 **Por qué:** decisión founder — el pago es parte del wow y el dato que
 alimenta todo el financiero; posponerlo crea hábito de pago-por-fuera.
 
+**ENMIENDA S54 (founder) — principio de secuencia:** un servicio que se
+abre se deja **COMPLETO — pagos incluidos — antes de abrir el
+siguiente**. Corolario inmediato: el **paquete mensual de paseo**
+(bono/serie sobre el mecanismo existente `bono_id`/
+`suscripcion_servicio_id`, T9/enmienda) es el SIGUIENTE bloque del arco
+paseo — no una etapa aparte del final de la ruta.
+
+**ESTADO S54 — B2 SUSTANCIALMENTE EJECUTADA (motor + UX):** hold de 15
+minutos sobre el esqueleto v2 formalizado (dos ciclos: `estado` = cita,
+`estado_reserva` = pago con CHECK e invariante "'pagada' ⟺ pasó por
+confirmar_cita_pagada"; expiración PEREZOSA como correctitud + cron de
+higiene) · flujo MOMENTO-PRIMERO (decisión founder S54: el dueño dice
+CUÁNDO y recién ahí ve QUIÉNES pueden — con la regla "no se oferta
+quien no puede cobrar": cuenta comercial activa) · checkout mono-ítem
+con forma de carrito y **cobro SIMULADO declarado en superficie** ·
+devengo VARIANTE (b): el evento económico nace al CERRAR con calidad
+(`fecha_devengo` = cierre, `fecha_cobro_kushki` = pago) por la puerta
+única · wizard de cuenta comercial + Cobros del prestador (S54-B) ·
+gate doble de verdad firme probado (el hold es invisible al prestador;
+el pago la vuelve visible — sin tocar el wrapper de agenda).
+**PENDIENTE de B2:** Kushki REAL (el simulador es el placeholder
+honesto — mismo contrato de estados) y la vista de liquidaciones con
+desglose (3.1.D). Tarea B0 del texto canónico: RESUELTA en S54-B2.0-T7
+(el precedente literal vive en e-petplace-v2, no en PORTAL_PRESTADOR).
+
+**HUECO HONESTO (b) — captura de demanda:** "Nadie puede a esa hora"
+hoy NO registra la demanda insatisfecha (qué ventanas pidió la gente
+que nadie cubrió). Ese dato vale oro para reclutar paseadores donde
+hace falta. Disparo: primeros dueños reales usando el CUÁNDO.
+
 ## B3 — Modelo financiero operativo
 
 **Las comisiones YA están firmadas en datos** (fee_configs seedeadas

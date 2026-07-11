@@ -1264,8 +1264,9 @@ Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en 
 #### D-289 — API key de Google Maps + dev build Android ✅
 ✅ CERRADA (S46): la key S44 expuesta fue borrada de Google Cloud por el founder; la key de Maps vigente quedó re-creada y verificada VIVA (tiles funcionando en la dev build de cliente). **Remanente menor anotado (no reabre la deuda):** confirmar que la key vigente tenga entries de restricción package name + SHA-1 de AMBAS apps (prestador y cliente — L-130 enmendada: en keys de cliente Android la protección real son las restricciones) — disparo: próxima visita del founder a Google Cloud. Historial: hallazgo S44 — Google Maps REMOVIDO de Expo Go Android en SDK 53 → dev build por EAS con key por env secret, jamás en el repo; key expuesta en S44, ROTADA en S45-B0 (la vieja quedó sin borrar hasta S46); gate de tiles de MapaRecorrido cerrado en S45-B5.4. Origen: S44-B2.6.
 
-#### D-290 — Auth del prestador en apps/prestador
-🟡 ALTA. El bootstrap dev-only de sesión (signInWithPassword con credenciales demo en `.env.local`, dev only, no commiteado) es atajo asumido de B4 — no hay pantalla de login ni flujo de sesión real en el app. Disparo: antes de cualquier usuario real / soft launch. Origen: S44-B4.0.
+#### D-290 — Auth del prestador en apps/prestador ✅
+~~🟡 ALTA. El bootstrap dev-only de sesión (signInWithPassword con credenciales demo en `.env.local`, dev only, no commiteado) es atajo asumido de B4 — no hay pantalla de login ni flujo de sesión real en el app. Disparo: antes de cualquier usuario real / soft launch.~~
+CERRADA en S54-B (11 Jul 2026): login real por los wrappers de auth S45, routing por estado real (sin sesión → invitación · sin negocio → honesto con salida · con negocio → HOY), sesión persistida en nativo, MUERTE del bootstrap dev. Verificación runtime bajo auth real: 10 checks (persistencia y logout). Origen: S44-B4.0.
 
 #### D-291 — Detalle del paseo sin notas de familia ni raza/edad
 🟢 MEDIA. Fuentes identificadas (`evento_cita_servicio.notas`/`metadata`, `mascotas.raza`/`fecha_nacimiento`); ampliar el contrato de lectura cuando el Detalle lo pida en serio. Incluye la limitación del deep-link a citas de otro día (la cita se resuelve contra la lista de HOY — mismo contrato, se resuelven juntas) y los THUMBNAILS de fotos en Durante/Cierre (no hay contrato de lectura de evento_archivo_adjunto — hoy solo conteo del resumen; ampliado en S44-B4.4). Disparo: feedback de prestador real o diseño del Detalle v2. Origen: S44-B4.2.
@@ -1371,6 +1372,36 @@ Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en 
 > **Herramientas con disparo (S53, decisión founder):** **HyperFrames** — video de tiendas (B6) y piezas de marketing del soft launch; el `frame.md` se deriva de DIRECCION_ARTE cuando dispare. **GStack `/plan-ceo-review`** — ejercicio de estrategia PRE-soft-launch (una corrida puntual); JAMÁS integrado al flujo de sesiones.
 >
 > **Nota operativa S51 (L-134 aplica):** `expo-localization` es módulo nativo — las APKs preview vigentes (cliente y prestador `aa5914cd`) NO lo contienen, y con runtimeVersion por policy `appVersion` (ambas 1.0.0) un `eas update` del canal preview con el JS del riel les llegaría y las rompería ("Cannot find native module"). ANTES del próximo update de cualquiera de los dos canales: subir `version` en app.json + build preview nueva + reinstalar.
+
+#### D-319 — Zona 2 del Hogar muestra holds ('pendiente') como próxima cita
+🟡 ALTA. `hogar.ts` (proxima_cita) filtra `estado IN ('pendiente','confirmada')`: un hold vivo del propio dueño — o uno VENCIDO cuyo `estado` nadie barre (el cron solo toca `estado_reserva`) — aparece como "próxima cita" del hogar. Ajustar a firmes + hold VIGENTE propio con voz distinta ("reservando…"), o solo firmes. Disparo: antes del Gate de Oro / primer dueño real. Origen: S54-A B3.
+
+#### D-320 — Zona horaria hardcodeada en las RPCs de agenda
+🟢 MEDIA. `obtener_slots_disponibles`, `crear_bloqueo_agenda` y `obtener_paseadores_disponibles` usan `America/Guayaquil` para "el pasado" (convención del seed S44, comentada en el SQL). Derivar de `country_config` cuando el bloque multi-país abra. Disparo: apertura de Colombia. Origen: S54-A B1.
+
+#### D-321 — Rango horario del CUÁNDO fijo en la pantalla
+🟢 MEDIA. `/explorar/paseo` ofrece horas 06:00–20:00 hardcodeadas (constantes comentadas); deberían derivarse de las franjas reales de la oferta del país. Disparo: primer prestador con franjas fuera de ese rango. Origen: S54-A B3.2.
+
+#### D-322 — Helper de cleanup dev para el árbol de citas
+⚪ BAJA. El patrón L-065 (DISABLE/ENABLE de `trg_atencion_log_no_update` alrededor del borrado del hito) se ejecutó A MANO tres veces en S54 para limpiar citas de test. Extraer a script/función dev con el orden de FKs adentro. Disparo: la cuarta limpieza manual. Origen: S54-A.
+
+#### D-323 — H1: fechaLargaHumana en el riel i18n
+🟢 MEDIA. El riel solo tiene `fechaCortaMono`; las pantallas que necesitan fecha larga humana (día de la semana + fecha, voz humana por idioma) la arman artesanal (Intl inline en `/explorar/paseo`). Nace en `packages/i18n` como la corta. Disparo: la próxima pantalla que la necesite (o al tocar el CUÁNDO). Origen: S54-B (H1) + S54-A B3.2.
+
+#### D-324 — H2: MOTIVOS_GPS catalogables
+🟢 MEDIA. El vocabulario de motivos de fallo GPS del flujo de paseo es es-only y vive en código; catalogarlo (cat_* o riel) para i18n y consistencia. **Decisión de producto pendiente asociada (registrada, no resuelta).** Disparo: primer paseador operando en inglés. Origen: S54-B (H2).
+
+#### D-325 — H3: `t` imperativa (no-React) para libs
+🟢 MEDIA. El riel expone `useTraduccion` (hook): el código fuera de componentes (packages, wrappers, helpers) no puede traducir. Exponer una `t` imperativa del mismo diccionario tipado. Disparo: primer string traducible en una lib. Origen: S54-B (H3).
+
+#### D-326 — Divergencia user_roles ↔ prestadores
+🟡 ALTA. Hay DOS fuentes de "es prestador": `user_roles.role='prestador'` (acceso a portales) y `prestadores.user_id` (operativa) — pueden divergir (S54 relevó users con rol sin fila y viceversa). Definir la fuente de verdad y reconciliar. Disparo: al tocar el modelo de roles o el portal admin. Origen: S54-B.
+
+#### D-327 — Voz financiera del server es-only
+🟢 MEDIA. Las RPCs §6.5 de cuenta comercial devuelven `mensaje` humano SOLO en español (contrato TABLE(success, mensaje)); con el idioma en vivo, un user en inglés recibe rechazos en español. Pariente de D-315 (la voz del server también es voz del producto). Disparo: Gate de Oro en inglés / primer actor operando en en. Origen: S54-B.
+
+#### D-328 — Wizard multi-actor §6.5 (segundo rol sobre cuenta existente)
+🟢 MEDIA. El wizard S54-B cubre el ALTA del prestador; falta el camino §6.5/§8.14 completo: detectar cuenta comercial existente por (identificación fiscal, país) y agregar un SEGUNDO rol (seller/refugio/criadero) sin re-pedir fiscales ni bancarios. Disparo: primer actor no-prestador (refugio piloto o seller). Origen: S54-B.
 
 ---
 
