@@ -413,6 +413,24 @@ export default function Hogar() {
             />
           );
         })}
+        {/* S55-A A2 — el hogar que crece: invitación SERENA (patrón P2d,
+            menos peso que las fichas) al alta de mascota adicional. */}
+        <Tarjeta
+          interactiva
+          onPress={() => router.push('/hogar/agregar')}
+          accessibilityRole="button"
+          etiqueta={t('agregarMascota.entradaTitulo')}
+          elevacion="plana"
+        >
+          <View style={{ gap: 2 }}>
+            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.primary }}>
+              {t('agregarMascota.entradaTitulo')}
+            </Text>
+            <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
+              {t('agregarMascota.entradaDetalle')}
+            </Text>
+          </View>
+        </Tarjeta>
       </Animated.View>
 
       {/* ── Zona 2 — hoy (sin nada urgente, NO existe) ─────────── */}

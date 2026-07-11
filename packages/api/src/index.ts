@@ -49,10 +49,13 @@ export {
 } from './wrappers/prestador';
 export {
   crearFamiliaConPrimeraMascota,
+  agregarMascotaAFamilia,
   getEstadoOnboardingDueno,
   obtenerMascotasDeFamilia,
   type InputCrearFamiliaConPrimeraMascota,
+  type InputAgregarMascotaAFamilia,
   type FamiliaCreada,
+  type MascotaAgregada,
   type EstadoOnboardingDueno,
   type MascotaResumen,
   type PrecisionFechaNacimiento,

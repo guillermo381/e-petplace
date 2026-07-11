@@ -14393,6 +14393,17 @@ export type Database = {
         }
         Returns: Json
       }
+      agregar_mascota_a_familia: {
+        Args: {
+          p_especie: string
+          p_fecha_nacimiento?: string
+          p_foto_url?: string
+          p_nombre_mascota: string
+          p_precision_fecha?: string
+          p_sexo?: string
+        }
+        Returns: Json
+      }
       agregar_nota_atencion: {
         Args: {
           p_atencion_id: string

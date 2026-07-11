@@ -13,6 +13,7 @@ const CODIGOS_ERROR_ONBOARDING = [
   'nombre_familia_requerido',
   'nombre_mascota_requerido',
   'familia_ya_existe',
+  'sin_familia_activa',
   'especie_invalida_o_inactiva',
   'sexo_invalido',
   'precision_fecha_invalida',
@@ -29,6 +30,7 @@ const MENSAJES_ERROR_ONBOARDING: Record<
   nombre_familia_requerido:    'Contanos cómo se llama tu familia.',
   nombre_mascota_requerido:    'Contanos cómo se llama tu mascota.',
   familia_ya_existe:           'Ya tenés una familia creada.',
+  sin_familia_activa:          'Tu familia todavía no existe — el primer paso es el onboarding.',
   especie_invalida_o_inactiva: 'Esa especie no está disponible por ahora.',
   sexo_invalido:               'El sexo elegido no es válido.',
   precision_fecha_invalida:    'La precisión de la fecha no es válida.',
@@ -108,6 +110,63 @@ export async function crearFamiliaConPrimeraMascota(
     data: {
       familia_id: o.familia_id,
       familia_miembro_id: o.familia_miembro_id,
+      mascota_id: o.mascota_id,
+      pet_hash: o.pet_hash,
+    },
+  };
+}
+
+// ── S55-A A2: el alta ADICIONAL — el hogar que crece ──────────────────
+
+export interface InputAgregarMascotaAFamilia {
+  nombre_mascota: string;
+  /** Código de cat_especies (las 6 familias F1 post-D-287). */
+  especie: string;
+  /** ISO 'YYYY-MM-DD'. */
+  fecha_nacimiento?: string;
+  precision_fecha?: PrecisionFechaNacimiento;
+  sexo?: 'macho' | 'hembra' | 'desconocido';
+  /** Path del avatar ya subido a mascotas/{uid}/… (S47: jamás URL). */
+  foto_url?: string;
+}
+
+export interface MascotaAgregada {
+  familia_id: string;
+  mascota_id: string;
+  pet_hash: string;
+}
+
+/** Alta de mascota adicional sobre la familia VIGENTE del caller (la
+ *  RPC la deriva server-side — jamás por parámetro). Espejo del
+ *  onboarding S45; los triggers de DB completan visibilidad/perfil. */
+export async function agregarMascotaAFamilia(
+  input: InputAgregarMascotaAFamilia,
+): Promise<ResultadoWrapper<MascotaAgregada, CodigoErrorOnboarding>> {
+  const { data, error } = await getClient().rpc('agregar_mascota_a_familia', {
+    p_nombre_mascota:   input.nombre_mascota,
+    p_especie:          input.especie,
+    p_fecha_nacimiento: input.fecha_nacimiento ?? undefined,
+    p_precision_fecha:  input.precision_fecha ?? undefined,
+    p_sexo:             input.sexo ?? undefined,
+    p_foto_url:         input.foto_url ?? undefined,
+  });
+
+  if (error) return mapeoErrorAResultado(error.message);
+
+  const o = data as Record<string, unknown>;
+  if (
+    typeof o !== 'object' || o === null ||
+    typeof o.familia_id !== 'string' ||
+    typeof o.mascota_id !== 'string' ||
+    typeof o.pet_hash !== 'string'
+  ) {
+    return mapeoErrorAResultado('datos_inconsistentes');
+  }
+
+  return {
+    ok: true,
+    data: {
+      familia_id: o.familia_id,
       mascota_id: o.mascota_id,
       pet_hash: o.pet_hash,
     },
