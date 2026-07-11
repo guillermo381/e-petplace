@@ -436,9 +436,12 @@ export default function Hogar() {
       ) : proximaCita !== null ? (
         <Animated.View entering={entradaZona(1)} style={{ paddingHorizontal: spacing[4], marginTop: spacing[7] }}>
           <Tarjeta>
+            {/* D-319: el hold vigente (bloqueo 15 min) habla con voz
+                propia — rima con checkout.holdVoz; la firme conserva
+                "Próxima cita". El hold vencido no llega (wrapper). */}
             <Celda
               titulo={nombreDe(proximaCita.mascota_id)}
-              subtitulo={`${t('hogar.proximaCita')}${proximaCita.tipo_servicio ? ` · ${proximaCita.tipo_servicio}` : ''}`}
+              subtitulo={`${t(proximaCita.reserva === 'hold' ? 'hogar.reservandoHorario' : 'hogar.proximaCita')}${proximaCita.tipo_servicio ? ` · ${proximaCita.tipo_servicio}` : ''}`}
               metadataMono={`${fechaCortaMono(proximaCita.fecha, idioma)}${proximaCita.hora ? ` · ${proximaCita.hora}` : ''}`}
             />
           </Tarjeta>

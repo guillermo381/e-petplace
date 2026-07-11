@@ -41,6 +41,8 @@ export const clienteEs = {
     paseoEnCurso: 'Paseo en curso',
     verEnVivo: 'Ver cómo va',
     proximaCita: 'Próxima cita',
+    // D-319: el hold vigente del bloqueo 15 min — rima con checkout.holdVoz
+    reservandoHorario: 'Reservando este horario',
     // ── Zona 4 (la vida) — funcional + aporte ──
     cargarCarnet: 'Carnet de vacunas',
     cargarCarnetDetalle: 'Sácale una foto al carnet — nosotros leemos las vacunas y las guardamos en su historia.',

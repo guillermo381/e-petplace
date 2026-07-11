@@ -37,6 +37,10 @@ export interface ProximaCitaHogar {
   /** HH:MM o null. */
   hora: string | null;
   tipo_servicio: string | null;
+  /** 'hold' = bloqueo de agenda VIGENTE (pendiente_pago, dentro de los
+   *  15 min); 'firme' = confirmada (pagada, o NULL = ciclo de pago no
+   *  aplica — legacy/walk-in). La Zona 2 les da voz distinta (D-319). */
+  reserva: 'hold' | 'firme';
 }
 
 export interface EstadoHogar {
@@ -44,7 +48,10 @@ export interface EstadoHogar {
   senales: SenalesHogarMascota[];
   /** La atención en_curso más reciente del hogar, o null. */
   atencion_en_curso: AtencionEnCursoHogar | null;
-  /** La cita futura (pendiente/confirmada) más próxima del hogar, o null. */
+  /** La cita futura más próxima del hogar — firme (confirmada) o hold
+   *  VIGENTE del propio hogar —, o null. El hold vencido no existe
+   *  (D-319: su `estado` queda 'pendiente' para siempre; acá se filtra
+   *  por `estado_reserva` + `expira_en`). */
   proxima_cita: ProximaCitaHogar | null;
 }
 
@@ -77,13 +84,13 @@ export async function obtenerEstadoHogar(
       .in('estado', ['en_curso', 'cerrada_con_calidad']),
     cliente
       .from('evento_cita_servicio')
-      .select('id, mascota_id, fecha, hora, tipo_servicio')
+      .select('id, mascota_id, fecha, hora, tipo_servicio, estado, estado_reserva, expira_en')
       .in('mascota_id', mascotaIds)
       .in('estado', ['pendiente', 'confirmada'])
       .gte('fecha', hoyLocal())
       .order('fecha', { ascending: true })
       .order('hora', { ascending: true, nullsFirst: false })
-      .limit(1),
+      .limit(10),
   ]);
 
   if (vacunas.error || perfiles.error || atenciones.error || citas.error) {
@@ -131,10 +138,26 @@ export async function obtenerEstadoHogar(
     }
   }
 
+  // Cura D-319: 'pendiente' solo entra como hold VIGENTE del bloqueo
+  // de 15 min (estado_reserva='pendiente_pago' y expira_en futuro) —
+  // el hold vencido queda 'pendiente' para siempre (el cron solo barre
+  // estado_reserva) y con limit(1) TAPABA a la cita pagada de más
+  // tarde. Expiración perezosa (S54): un hold vencido se trata como
+  // inexistente; el reloj del dispositivo solo decide DISPLAY — la
+  // correctitud la gatea el server. limit(10): sobran para un hogar;
+  // si los 10 fueran holds muertos (irreal), la zona calla — jamás
+  // pinta verosímil-falso (L-139).
+  const ahora = Date.now();
+  const esHoldVigente = (c: { estado: string | null; estado_reserva: string | null; expira_en: string | null }) =>
+    c.estado === 'pendiente' &&
+    c.estado_reserva === 'pendiente_pago' &&
+    c.expira_en !== null &&
+    Date.parse(c.expira_en) > ahora;
+
   // Guard de shape (L-124): el filtro garantiza mascota_id/fecha no
   // nulos, pero el tipo generado no lo sabe — se angosta verificando,
   // jamás con cast (regla 34).
-  const cita = citas.data[0];
+  const cita = citas.data.find((c) => c.estado === 'confirmada' || esHoldVigente(c));
   const proximaCita: ProximaCitaHogar | null =
     cita !== undefined && cita.mascota_id !== null && cita.fecha !== null
       ? {
@@ -143,6 +166,7 @@ export async function obtenerEstadoHogar(
           fecha: cita.fecha,
           hora: cita.hora !== null ? cita.hora.slice(0, 5) : null,
           tipo_servicio: cita.tipo_servicio,
+          reserva: cita.estado === 'confirmada' ? 'firme' : 'hold',
         }
       : null;
 

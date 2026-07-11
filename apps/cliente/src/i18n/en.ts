@@ -38,6 +38,8 @@ export const clienteEn = {
     paseoEnCurso: 'Walk in progress',
     verEnVivo: 'See how it goes',
     proximaCita: 'Next appointment',
+    // D-319: live 15-min hold — rhymes with checkout.holdVoz
+    reservandoHorario: 'Holding this time for you',
     cargarCarnet: 'Vaccine card',
     cargarCarnetDetalle: 'Take a photo of the card — we read the vaccines and save them to their story.',
     carnetDeQuien: 'Whose card is it?',
