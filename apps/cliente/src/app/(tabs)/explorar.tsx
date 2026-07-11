@@ -20,6 +20,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  Icono,
   Separador,
   Tarjeta,
   spacing,
@@ -29,12 +30,9 @@ import {
 import type { ReactNode } from 'react';
 import { obtenerServiciosPais, type ServiciosPais } from '@epetplace/api';
 
-import {
-  IconoServicioAdiestramiento,
-  IconoServicioGrooming,
-  IconoServicioPaseo,
-  IconoServicioVet,
-} from '@/components/iconos-servicios';
+// S53: paseo/grooming/vet migraron al set b′ (Icono de @epetplace/ui);
+// adiestramiento espera su ícono del lote 2 (D-318 — migra al tocarse).
+import { IconoServicioAdiestramiento } from '@/components/iconos-servicios';
 import { useTraduccion } from '@/i18n';
 
 // El soft launch es Ecuador (DEFINICION_SOFTLAUNCH); el país del
@@ -78,14 +76,13 @@ export default function Explorar() {
   // vertical activa → su ficha (ícono en el hex puro de su capa —
   // registro gráfico, Ley 12 — + nombre + voz); las inactivas van a
   // "próximamente" — la config es la verdad, el layout solo la lee.
-  const colorServicio = theme.capa.cuidado;
   const fichasActivas: Array<{ clave: string; titulo: string; detalle: string; icono: ReactNode }> = [];
   const proximamente: string[] = [];
   if (servicios !== 'cargando' && servicios !== 'error') {
-    if (servicios.walking) fichasActivas.push({ clave: 'paseo', titulo: t('explorar.servicioPaseo'), detalle: t('explorar.servicioPaseoDetalle'), icono: <IconoServicioPaseo color={colorServicio} /> });
-    if (servicios.grooming) fichasActivas.push({ clave: 'grooming', titulo: t('explorar.servicioGrooming'), detalle: t('explorar.servicioGroomingDetalle'), icono: <IconoServicioGrooming color={colorServicio} /> });
-    if (servicios.veterinary) fichasActivas.push({ clave: 'vet', titulo: t('explorar.servicioVet'), detalle: t('explorar.servicioVetDetalle'), icono: <IconoServicioVet color={colorServicio} /> });
-    if (servicios.training) fichasActivas.push({ clave: 'adiestramiento', titulo: t('explorar.servicioAdiestramiento'), detalle: t('explorar.servicioAdiestramientoDetalle'), icono: <IconoServicioAdiestramiento color={colorServicio} /> });
+    if (servicios.walking) fichasActivas.push({ clave: 'paseo', titulo: t('explorar.servicioPaseo'), detalle: t('explorar.servicioPaseoDetalle'), icono: <Icono nombre="paseo" tamano={28} /> });
+    if (servicios.grooming) fichasActivas.push({ clave: 'grooming', titulo: t('explorar.servicioGrooming'), detalle: t('explorar.servicioGroomingDetalle'), icono: <Icono nombre="grooming" tamano={28} /> });
+    if (servicios.veterinary) fichasActivas.push({ clave: 'vet', titulo: t('explorar.servicioVet'), detalle: t('explorar.servicioVetDetalle'), icono: <Icono nombre="veterinaria" tamano={28} /> });
+    if (servicios.training) fichasActivas.push({ clave: 'adiestramiento', titulo: t('explorar.servicioAdiestramiento'), detalle: t('explorar.servicioAdiestramientoDetalle'), icono: <IconoServicioAdiestramiento color={theme.capa.cuidado} /> });
     if (!servicios.hotel) proximamente.push(t('explorar.proxHotel'), t('explorar.proxGuarderia'));
     if (!servicios.insurance) proximamente.push(t('explorar.proxSeguros'));
     if (!servicios.telemedicine) proximamente.push(t('explorar.proxTelemedicina'));
@@ -141,7 +138,12 @@ export default function Explorar() {
           {/* ── Refugios / adopción (M0) — vacío SERENO (P5b) ── */}
           <View style={{ gap: spacing[3] }}>
             <TituloBloque texto={t('explorar.refugios')} />
-            <EstadoVacio registro="seccion" titulo={t('explorar.refugiosVacio')} descripcion={t('explorar.refugiosVacioDetalle')} />
+            <EstadoVacio
+              registro="seccion"
+              icono={<Icono nombre="refugio" tamano={48} />}
+              titulo={t('explorar.refugiosVacio')}
+              descripcion={t('explorar.refugiosVacioDetalle')}
+            />
           </View>
 
           {/* ── Próximamente honesto — UNA sección, filas serenas en

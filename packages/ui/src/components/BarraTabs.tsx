@@ -59,8 +59,9 @@ export type BarraTabsItem = {
   /** = nombre de ruta de expo-router. */
   key: string
   etiqueta: string
-  /** Icono outline 1.75px — recibe el color del estado (primary/tertiary). */
-  icono: (estado: { color: string }) => ReactNode
+  /** Icono outline — recibe color del estado y `activa` (S53 §2.6:
+   *  en el lenguaje b′ la tab activa se marca porque su huella APARECE). */
+  icono: (estado: { color: string; activa: boolean; colorHuella: string }) => ReactNode
   /** Contador entero — "3 pendientes" del prestador. */
   badge?: number
 }
@@ -69,11 +70,17 @@ export function BarraTabs({
   items,
   activo,
   onCambiar,
+  estadoPorHuella = false,
 }: {
   /** 3 a 5 tabs. */
   items: BarraTabsItem[]
   activo: string
   onCambiar: (key: string) => void
+  /** S53 (DIRECCION_ARTE §2.6): con el set b′ la HUELLA es el sistema
+   *  de estado — aparece en la tab activa y el pill NO se renderiza
+   *  (sin recuadros, sin pills). La huella activa hereda el rol de
+   *  accent.active: sigue siendo EL elemento activo de la vista. */
+  estadoPorHuella?: boolean
 }) {
   const { theme } = useTheme()
   const insets = useSafeAreaInsets()
@@ -92,6 +99,9 @@ export function BarraTabs({
       {items.map((item) => {
         const esActivo = item.key === activo
         const color = esActivo ? theme.text.primary : theme.text.tertiary
+        // §2.6+§2.8: la huella activa hereda accent.active; memorial
+        // degrada a tinta secundaria (jamás color en memorial).
+        const colorHuella = theme.mode === 'memorial' ? theme.text.secondary : accentActive
         return (
           <Pressable
             key={item.key}
@@ -110,27 +120,30 @@ export function BarraTabs({
             }}
           >
             <View>
-              {item.icono({ color })}
+              {item.icono({ color, activa: esActivo, colorHuella })}
               {item.badge ? (
                 <View style={{ position: 'absolute', top: -6, right: -14 }}>
                   <Insignia estado="atencion" etiqueta={String(item.badge)} tamaño="sm" />
                 </View>
               ) : null}
             </View>
-            {/* el subrayado: opacity, jamás slide */}
-            <Animated.View
-              style={{
-                width: 18,
-                height: 3,
-                borderRadius: radius.full,
-                backgroundColor: accentActive,
-                opacity: esActivo ? 1 : 0,
-                transitionProperty: 'opacity',
-                transitionDuration: motion.duration.fast,
-                transitionTimingFunction: cubicBezier(...motion.easing.easeOut.bezier),
-                marginTop: -spacing[0.5],
-              }}
-            />
+            {/* el subrayado: opacity, jamás slide. Con estadoPorHuella
+                el pill muere — la huella del ícono ES el estado (§2.6). */}
+            {estadoPorHuella ? null : (
+              <Animated.View
+                style={{
+                  width: 18,
+                  height: 3,
+                  borderRadius: radius.full,
+                  backgroundColor: accentActive,
+                  opacity: esActivo ? 1 : 0,
+                  transitionProperty: 'opacity',
+                  transitionDuration: motion.duration.fast,
+                  transitionTimingFunction: cubicBezier(...motion.easing.easeOut.bezier),
+                  marginTop: -spacing[0.5],
+                }}
+              />
+            )}
             <Text
               style={{
                 fontFamily: typography.family.sans.medium,

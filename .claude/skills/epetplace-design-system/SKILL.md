@@ -15,7 +15,7 @@ description: >-
 
 # epetplace-design-system — el sistema es exigible, no sugerido
 
-Fuente de verdad: `packages/ui` (tokens v4 + 26 componentes + 3 temas).
+Fuente de verdad: `packages/ui` (tokens v4 + 27 componentes + 3 temas).
 Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 `@epetplace/ui`, no existe en el producto.
 
@@ -70,16 +70,23 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
     nuevos, galería, gate en dispositivo —, (c) se agrega al índice de
     esta skill. Sin excepción "por esta vez": la deuda visual no se paga
     nunca.
-12. **Iconografía.** Outline ~1.75px, remates redondeados (`strokeLinecap
-    ="round"`), UN color por ícono (el de su capa o el text del contexto),
-    cero emojis en UI de producto, cero librerías de íconos nuevas sin
-    decisión del founder.
-13. **Carga de datos.** Listas y pantallas esperan con skeleton ESTÁTICO
-    (formas en `bg.overlay`/hover, SIN shimmer — el shimmer es animación
-    de espera y está prohibido); spinner solo pasado el umbral de 150ms
-    (el patrón del `Boton`, generalizado); cuando llegan los datos,
-    reemplazo directo — JAMÁS layout shift animado. `EstadoVacio` solo
-    cuando se CONFIRMÓ el vacío, nunca como estado de carga.
+12. **Iconografía (ENMENDADA S53 por `docs/DIRECCION_ARTE.md` §3).**
+    Lenguaje b′: objeto del oficio en trazo 1.9 de tinta + UNA Huella
+    RELLENA en el hex puro de su capa (la primitiva `Huella` de
+    packages/ui — nadie la redibuja). Remates redondeados, cero emojis,
+    cero librerías de íconos externas. Los íconos pre-b′ migran al
+    tocarse su pantalla (D-318). Todo ícono se gatea a 21px además de
+    su tamaño de diseño (§2.9). En tabs, la huella ES el estado activo
+    (§2.6 — sin pills con `estadoPorHuella`). DIRECCION_ARTE manda en
+    todo lo iconográfico/ilustrativo/motion de marca.
+13. **Carga de datos (ENMENDADA S53, DIRECCION_ARTE §5.3).** Listas y
+    pantallas esperan con skeleton ESTÁTICO (formas en `bg.overlay`,
+    SIN shimmer); spinner solo pasado el umbral de 150ms; cuando llegan
+    los datos, reemplazo directo — JAMÁS layout shift animado.
+    `EstadoVacio` solo cuando se CONFIRMÓ el vacío. EXCEPCIÓN única:
+    para esperas de PROCESO >2s (lectura de carnet, pagos) vive la
+    ESPERA DE MARCA (huella/isotipo trazándose en loop sereno) SIEMPRE
+    con la voz honesta debajo — es de marca, no shimmer.
 
 ## 2. CORRECTO / INCORRECTO (casos reales de S43)
 
@@ -129,7 +136,7 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 //     stroke={theme.text.primary} strokeWidth={1.75} strokeLinecap="round" /></Svg>
 ```
 
-## 3. ÍNDICE — los 26 componentes (import de `@epetplace/ui`)
+## 3. ÍNDICE — los 27 componentes (import de `@epetplace/ui`)
 
 | Export | Cuándo |
 |---|---|
@@ -159,6 +166,7 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 | `LineaDeVida` | El timeline del dueño (S45-B5.2). Diccionario CERRADO tipo→voz humana/capa ADENTRO (Ley 3: el dueño jamás ve un código; desconocido degrada digno por eje). Punto hex puro de capa + conector hairline + Tarjeta; mono solo hora/duración. Carga = esqueleto 3 nodos; el vacío es de la pantalla; pie con "Cargar más"/error. cita_servicio NO se muestra (filtra el wrapper) |
 | `VisorFoto` | Lightbox una-foto-a-la-vez (S45-B5.3). SOLO fades (Ley 6/8 gratis); letterbox digno sin recortar; fondo pleno (tinta+scrim, no depende del tema); cierra por X/back(doble vía)/tap-fondo; swipe horizontal = reemplazo directo; contador "n de m" en mono |
 | `FichaVacuna` | La ficha de UNA vacuna en la revisión del carnet (S47-B1.1; derivación S48). Presentacional pura: tap → `onEditar` (la edición es una Hoja de LA PANTALLA), "Esta no es" → `onDescartar`. Estados derivados de los datos: completa neutra (nombre+fecha; **tipo null NO tiñe** — decisión founder S48, los carnets reales no lo rotulan) · dudosa = SOLO fecha faltante, tinte cuidado y voz humana ("No pudimos leer la fecha") · `rechazada` (prop, del item_invalido de la RPC) danger — nada se pierde. Nombre en DM Sans (lo escribió un humano); fechas y lote en mono minúsculas. Memorial degrada: sin tinte, borde neutro |
+| `Icono` (+primitiva `Huella`) | El set b′ de DIRECCION_ARTE (S53): nombre TIPADO (paseo·veterinaria·grooming·refugio·despensa·coach), objeto en trazo 1.9 + Huella rellena en el hex de su capa; `registro` capa/aa/tinta (dosis §2.7); memorial adentro (huella a text.secondary, el destello no destella). `Huella` es LA primitiva canónica — nadie la redibuja. Todo ícono nuevo = entrada del registry + galería + gate founder por ícono; gate a 21px obligatorio (§2.9) |
 | `FichaMascotaHogar` | v2 (S52-P3, espec gateada): la mascota PRESIDE — AvatarMascota 64 (foto primero, huella fallback) sobre superficie Tarjeta, nombre en DM Sans light xl y UNA voz SIN sujeto (ficha.* del riel; las variantes con {{nombre}} se conservan para contextos sin sujeto visible). Semántica intacta: alDia punto verdeVital · pideAtencion punto ochre + warningText · conociendolo neutral. Tap → perfil (pressed 0.99 de Tarjeta); sin badges ni CTA. Diseñada para 1-3 apiladas. Memorial degrada. Cero tokens nuevos |
 
 También: `ThemeProvider`/`useTheme` (light default, memorial forzable),

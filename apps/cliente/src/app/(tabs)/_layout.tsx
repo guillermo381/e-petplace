@@ -29,6 +29,9 @@ export default function TabsLayout() {
           items={items}
           activo={state.routes[state.index].name}
           onCambiar={(key) => navigation.navigate(key)}
+          // S53 (§2.6): el set b′ marca la tab activa con la HUELLA —
+          // el pill muere; la huella hereda el rol de accent.active.
+          estadoPorHuella
         />
       )}
     >

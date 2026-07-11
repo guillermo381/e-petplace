@@ -1,0 +1,129 @@
+# DIRECCION_ARTE — El lenguaje visual propio de e-PetPlace
+
+> **Versión: v1.0 — S53 (10 Jul 2026).** Escrito por el arquitecto/director
+> de arte; dirección FIRMADA por el founder en sesión tras tres rondas de
+> propuestas (lenguajes a/b/c → crítica founder con vara Banco Pichincha →
+> evolución b′). **Contrastes obligatorios:** la skill
+> `epetplace-design-system` (este doc la ENMIENDA donde se indica; en todo
+> lo demás, la skill manda), `DISEÑO_EXPERIENCIA.md` v1.2 (dosis por lado).
+> **Qué es este doc:** la dirección de arte exigible — iconografía,
+> ilustración y motion de marca. Ningún ícono, ilustración o gesto de
+> marca nace fuera de este lenguaje (patrón Ley 11: lo que falta se
+> propone, se gatea, y nace acá).
+
+---
+
+## 1. La regla madre (la firma del founder, S53)
+
+**"En cada ícono, la mascota está presente."**
+
+Todo ícono de producto se construye como: **objeto del oficio en trazo de
+tinta + UNA huella rellena** (almohadilla + tres dedos) en el hex puro de
+su capa, colocada donde la mascota está en el concepto:
+
+- Paseo: la correa cae hasta la huella — la mascota tirando.
+- Veterinaria: el estetoscopio ESCUCHA a la huella.
+- Refugio/adopción: la huella vive dentro del corazón.
+- Despensa: la bolsa lleva su huella — lo de adentro es para ellos.
+- Grooming: las tijeras trabajan; la huella espera al costado.
+
+La huella es la versión evolucionada de la "almohadilla" de la propuesta
+(b) original, tras la crítica del founder ("tres rayas y una bola no son
+elegantes") y la lección destilada del benchmark Banco Pichincha: **el
+acento relleno es el corazón semántico del ícono, prominente — jamás un
+punto decorativo.**
+
+## 2. Las leyes del ícono (exigibles)
+
+1. **Construcción:** grilla 24×24, geometría de círculos y rectas, trazo
+   **1.9** en tinta (`text.primary` del tema), remates redondeados
+   (`strokeLinecap/Linejoin="round"`).
+2. **La huella:** UNA por ícono, RELLENA, en el **hex PURO de la capa**
+   del concepto (teal paseo, verde vital salud/protección, magenta
+   marca/afecto, ocre cuidado/consumo). Forma canónica: elipse
+   (almohadilla) + tres dedos — el path canónico vive en `packages/ui`
+   como primitiva `Huella` y NADIE lo redibuja a mano.
+3. **Escala de la huella:** prominente y legible — entre 0.7 y 1.1 de su
+   escala base según el aire del ícono; jamás tan chica que se lea como
+   punto.
+4. **Cero figuras humanas.** Los oficios se dicen con sus objetos. Si un
+   concepto exige presencia humana, se dice con una MANO — y una mano
+   entra al set solo con craft que pase el gate del founder.
+5. **Cero emojis, cero librerías de íconos externas** (hereda Ley 12).
+6. **Estado activo en tabs:** la tab activa se marca porque su huella
+   APARECE (en reposo, el ícono de tab va solo en trazo). La huella es el
+   sistema de estado — sin recuadros, sin pills.
+7. **Dosis del prestador:** el mismo lenguaje, con la huella en el color
+   funcional AA de su capa (no hex puro) o en tinta cuando la vista ya
+   porta su único acento — la sobriedad es aplicación, no otro idioma.
+8. **Memorial degrada:** la huella pasa a tinta (`text.secondary`), el
+   trazo se conserva. Jamás color en memorial.
+9. **Legibilidad mínima:** todo ícono se gatea a 21px (tamaño tab)
+   además de su tamaño de diseño. Si a 21px la huella no se lee, el
+   ícono se simplifica — no se encoge la huella.
+
+## 3. ENMIENDA a la Ley 12 de `epetplace-design-system`
+
+La Ley 12 decía "UN color por ícono". Queda: **"UN color de trazo (tinta
+del contexto) + UNA huella rellena en el hex puro de su capa (lenguaje
+b′, DIRECCION_ARTE §2). El resto de la Ley 12 (outline 1.75→1.9 en el
+set nuevo, remates redondeados, cero emojis, cero librerías nuevas)
+queda vigente."** Los íconos pre-b′ (campana S46, tabs S51, servicios
+S52) migran al lenguaje cuando su pantalla se toque — deuda de
+extracción visual, misma mecánica que D-315.
+
+## 4. El lenguaje de ILUSTRACIÓN: los guijarros (de la propuesta c)
+
+Para momentos ilustrativos — estados vacíos, onboarding, momentos de
+marca, educación del despliegue progresivo — vive el **guijarro**: forma
+orgánica irregular (jamás círculo perfecto, cada una rotada distinto) en
+el tinte suave de su capa, con el motivo en trazo encima. Reglas:
+
+- Solo en superficies GRANDES (EstadoVacio, heros, Hojas educativas).
+  Jamás en celdas densas, tabs ni chips.
+- El set ilustrado de especies (D-288) nace bajo este lenguaje cuando
+  dispare.
+- Puede convivir con la huella (un guijarro puede contener la huella).
+
+## 5. El motion de marca
+
+1. **El destello de la IA** (adoptado de Kaxo, decisión founder): trío de
+   chispas cóncavas de 4 puntas a tres escalas (paths canónicos minados
+   del SVG de Kaxo, S53). RE-TOKENIZADO: magenta puro #FF00AF (jamás el
+   mostaza de Kaxo). Es LA marca del Coach: vive en el Encabezado del
+   Hogar (con punto de novedad cuando corresponda) y en toda entrada
+   contextual de la IA. En memorial NO destella (degrada a tinta,
+   quieto).
+2. **La apertura del Coach:** Hoja (componente existente) con la física
+   minada del prototipo: `translateY` con curva `cubic-bezier(.32,.72,0,1)`,
+   ~340ms, scrim a .4. En nativo se implementa con el equivalente
+   Software Mansion (la skill pone el código; esta curva es el criterio).
+3. **La espera de marca (ENMIENDA a la Ley 13 de la skill, founder S52→53):**
+   skeleton estático para carga de contenido queda INTACTO; para esperas
+   de PROCESO >2s (lectura de carnet, pagos futuros) vive una animación
+   de marca — la huella/isotipo trazándose en loop sereno — SIEMPRE con
+   la voz honesta debajo ("puede tardar un minuto"). Es la única
+   animación de espera legal, y es de marca, no shimmer.
+
+## 6. Gobernanza del set
+
+- El set nace en `packages/ui` (`Icono` con nombre tipado — cero strings
+  mágicos), galería propia en los 3 temas, gate founder POR ÍCONO.
+- Primer lote firmado en dirección (S53): paseo (correa+huella), vet,
+  grooming, refugio, despensa, coach (destello). El lote 2 sale del
+  relevamiento de íconos existentes en las apps.
+- **Cláusula del ilustrador (salvedad founder):** si el primer lote
+  construido no alcanza la vara del founder, se contrata un ilustrador
+  externo para FIRMAR el pulso del trazo; el set continúa bajo esa firma
+  y este documento sigue siendo la ley del lenguaje.
+- Este doc se enmienda con historial, como todo canónico.
+
+## Historial
+
+- **v1.0 (S53, 10 Jul 2026):** dirección firmada. Camino: propuestas
+  a/b/c → founder elige (b) "la huella escondida" + guijarros (c) para
+  ilustración → crítica founder sobre paseo (figura humana de palitos;
+  vara Banco Pichincha: acento = corazón semántico relleno, humanos =
+  manos u objetos) → evolución (b′) "la huella presente" FIRMADA.
+  Destello Kaxo adoptado re-tokenizado; física de apertura del Coach
+  minada del prototipo; enmienda de la espera de marca.

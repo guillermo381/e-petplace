@@ -1365,6 +1365,9 @@ Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en 
 #### D-317 — Vista semanal de la agenda del prestador (toggle día/semana)
 🟢 MEDIA. HOY (§13 de DISEÑO_EXPERIENCIA) pide toggle día/semana para planificar (la vista anticipada §6.4.2 del portal: primera-vez vs recurrente, lo que requiere preparación). En S51-B3.2 el HOY quedó re-jerarquizado a las 4 zonas con solo la vista día — el toggle NO se inventó (lugar hecho en el layout de Zona 2). Criterio de disparo: cuando el prestador real tenga más de un día con citas firmes (a más tardar, el portado de grooming — segunda familia viva exige planificación). Origen: S51-B3.2.
 
+#### D-318 — Migración visual de los íconos pre-b′ al lenguaje de DIRECCION_ARTE
+🟢 MEDIA. El set b′ nació en S53 (`Icono` en packages/ui: paseo, veterinaria, grooming, refugio, despensa, coach) pero los íconos anteriores siguen en el idioma viejo: campana (S46, galería), tabs del PRESTADOR (S51 — espera el gate del lote por dosis §2.7), adiestramiento de Explorar (S52), engranaje/íconos sueltos de pantallas, y el ícono de flechita/chevrons NO migra (es navegación, no concepto). Mecánica D-315: cada ícono migra AL TOCARSE su pantalla, dibujado como entrada nueva del registry de `Icono` + fila de galería + gate founder (DIRECCION_ARTE §6 — el lote 2 sale de este relevamiento). Criterio de disparo: al tocar cada pantalla; el prestador completo, tras el gate del lote 1. Origen: S53-B2a.
+
 > **Nota operativa S51 (L-134 aplica):** `expo-localization` es módulo nativo — las APKs preview vigentes (cliente y prestador `aa5914cd`) NO lo contienen, y con runtimeVersion por policy `appVersion` (ambas 1.0.0) un `eas update` del canal preview con el JS del riel les llegaría y las rompería ("Cannot find native module"). ANTES del próximo update de cualquiera de los dos canales: subir `version` en app.json + build preview nueva + reinstalar.
 
 ---

@@ -37,6 +37,7 @@ import { LineaDeVida, type LineaDeVidaItem } from '../components/LineaDeVida'
 import { VisorFoto } from '../components/VisorFoto'
 import { FichaVacuna } from '../components/FichaVacuna'
 import { FichaMascotaHogar } from '../components/FichaMascotaHogar'
+import { Icono, type IconoNombre } from '../components/Icono'
 import { Cronometro } from '../components/Cronometro'
 import { EvidenciaFoto, type EvidenciaFotoEstado } from '../components/EvidenciaFoto'
 import { MapaRecorrido } from '../components/MapaRecorrido'
@@ -289,6 +290,35 @@ function EjemploFichaVacuna() {
         onEditar={() => {}}
         onDescartar={() => {}}
       />
+    </View>
+  )
+}
+
+
+function EjemploSetBPrima() {
+  // El lote 1 firmado (DIRECCION_ARTE §6) — cada ícono a su tamaño de
+  // diseño (28) Y la fila de 21px (§2.9: el gate del founder corre acá;
+  // si a 21 la huella no se lee, se simplifica el ícono).
+  const LOTE: IconoNombre[] = ['paseo', 'veterinaria', 'grooming', 'refugio', 'despensa', 'coach']
+  return (
+    <View style={{ gap: spacing[4] }}>
+      <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center', flexWrap: 'wrap' }}>
+        {LOTE.map((n) => (
+          <View key={n} style={{ alignItems: 'center', gap: spacing[1] }}>
+            <Icono nombre={n} tamano={28} />
+          </View>
+        ))}
+      </View>
+      <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center', flexWrap: 'wrap' }}>
+        {LOTE.map((n) => (
+          <Icono key={n} nombre={n} tamano={21} />
+        ))}
+      </View>
+      <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center', flexWrap: 'wrap' }}>
+        {LOTE.map((n) => (
+          <Icono key={n} nombre={n} tamano={28} registro="aa" />
+        ))}
+      </View>
     </View>
   )
 }
@@ -1245,6 +1275,27 @@ function GaleriaInterna() {
             <ThemeProvider defaultMode="memorial">
               <PanelTema etiqueta="memorial — degrada solo: sin tinte, borde neutro; la voz de rechazo conserva dangerText">
                 <EjemploFichaVacuna />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* Set b′ — DIRECCION_ARTE v1.0 (S53): la mascota presente */}
+        <Seccion titulo="Iconografía b′ (S53) — objeto en trazo 1.9 + UNA huella rellena en el hex de su capa · filas: 28px diseño / 21px gate §2.9 / registro AA (dosis prestador)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — paseo(teal) · vet(verde vital) · grooming/despensa(ocre) · refugio/coach(magenta); el coach es el destello Kaxo re-tokenizado">
+                <EjemploSetBPrima />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — mismo lenguaje, tinta del tema">
+                <EjemploSetBPrima />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — la huella a tinta secundaria, el trazo se conserva; el destello NO destella (§2.8)">
+                <EjemploSetBPrima />
               </PanelTema>
             </ThemeProvider>
           </View>

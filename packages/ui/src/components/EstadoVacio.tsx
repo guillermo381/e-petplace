@@ -43,31 +43,34 @@ export function EstadoVacio({
   if (registro === 'seccion') {
     return (
       <View style={{ gap: spacing[3], paddingVertical: spacing[2] }}>
-        <View style={{ gap: spacing[1] }}>
-          <Text
-            accessibilityRole="header"
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.base,
-              lineHeight: typography.size.base * typography.leading.snug,
-              color: theme.text.primary,
-            }}
-          >
-            {titulo}
-          </Text>
-          {descripcion ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
+          {icono ? <View>{icono}</View> : null}
+          <View style={{ flex: 1, gap: spacing[1] }}>
             <Text
-              numberOfLines={3}
+              accessibilityRole="header"
               style={{
                 fontFamily: typography.family.sans.regular,
-                fontSize: typography.size.sm,
-                lineHeight: typography.size.sm * typography.leading.normal,
-                color: theme.text.secondary,
+                fontSize: typography.size.base,
+                lineHeight: typography.size.base * typography.leading.snug,
+                color: theme.text.primary,
               }}
             >
-              {descripcion}
+              {titulo}
             </Text>
-          ) : null}
+            {descripcion ? (
+              <Text
+                numberOfLines={3}
+                style={{
+                  fontFamily: typography.family.sans.regular,
+                  fontSize: typography.size.sm,
+                  lineHeight: typography.size.sm * typography.leading.normal,
+                  color: theme.text.secondary,
+                }}
+              >
+                {descripcion}
+              </Text>
+            ) : null}
+          </View>
         </View>
         {accion ? <View style={{ alignSelf: 'flex-start' }}>{accion}</View> : null}
       </View>
