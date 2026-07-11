@@ -30,6 +30,7 @@ const CODIGOS_ERROR_PASEO = [
   'falta_novedad_paseo',
   'novedad_codigo_invalido',
   'novedad_codigo_inactivo',
+  'cita_no_promovible',
 ] as const;
 
 export type CodigoErrorPaseo = (typeof CODIGOS_ERROR_PASEO)[number];
@@ -54,6 +55,7 @@ const MENSAJES_ERROR_PASEO: Record<
   falta_novedad_paseo:               'Registrá el parte del perro para poder cerrar.',
   novedad_codigo_invalido:           'La novedad elegida no existe en el catálogo.',
   novedad_codigo_inactivo:           'La novedad elegida ya no está disponible.',
+  cita_no_promovible:                'La cita de esta atención quedó en un estado que no permite completarla — avisá al equipo.',
   datos_inconsistentes:              'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:                 'Ocurrió un error inesperado. Probá de nuevo.',
 };
@@ -160,6 +162,12 @@ export interface ResultadoCerrarPaseo {
   paseo_id: string;
   estado: 'cerrada_con_calidad';
   cerrada_en: string;
+  /**
+   * S54 (variante b): el evento económico nace en ESTE cierre si la cita
+   * fue pagada por la app (estado_reserva='pagada'); null para citas
+   * legacy sin ciclo de pago. Clave SIEMPRE presente en el retorno (L-124).
+   */
+  evento_economico_id: string | null;
 }
 
 export interface NovedadRegistradaPaseo {
@@ -499,11 +507,20 @@ export async function cerrarPaseoConCalidad(
     o.ok !== true ||
     typeof o.paseo_id !== 'string' ||
     o.estado !== 'cerrada_con_calidad' ||
-    typeof o.cerrada_en !== 'string'
+    typeof o.cerrada_en !== 'string' ||
+    !(o.evento_economico_id === null || typeof o.evento_economico_id === 'string')
   ) {
     return mapeoErrorAResultado('datos_inconsistentes');
   }
-  return { ok: true, data: { paseo_id: o.paseo_id, estado: 'cerrada_con_calidad', cerrada_en: o.cerrada_en } };
+  return {
+    ok: true,
+    data: {
+      paseo_id: o.paseo_id,
+      estado: 'cerrada_con_calidad',
+      cerrada_en: o.cerrada_en,
+      evento_economico_id: o.evento_economico_id,
+    },
+  };
 }
 
 // ── F · Lookup por cita (la columna de estado de las 4 pantallas de B4) ─────

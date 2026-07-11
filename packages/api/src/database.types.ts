@@ -14466,6 +14466,7 @@ export type Database = {
         Args: { input_data: Json }
         Returns: string
       }
+      confirmar_cita_pagada: { Args: { p_cita_id: string }; Returns: Json }
       confirmar_cita_servicio: {
         Args: { p_cita_id: string; p_empleado_id_actual?: string }
         Returns: Json
@@ -14500,6 +14501,16 @@ export type Database = {
           p_raza?: string
           p_sexo?: string
           p_telefono: string
+        }
+        Returns: Json
+      }
+      crear_bloqueo_agenda: {
+        Args: {
+          p_fecha: string
+          p_hora: string
+          p_mascota_id: string
+          p_prestador_id: string
+          p_servicio_id: string
         }
         Returns: Json
       }
@@ -14853,6 +14864,20 @@ export type Database = {
       obtener_resumen_dia_grooming: {
         Args: { p_fecha: string; p_prestador_id: string }
         Returns: Json
+      }
+      obtener_slots_disponibles: {
+        Args: {
+          p_desde: string
+          p_hasta: string
+          p_prestador_id: string
+          p_servicio_id: string
+        }
+        Returns: {
+          cupos_restantes: number
+          duracion_minutos: number
+          fecha: string
+          hora: string
+        }[]
       }
       obtener_ultima_atencion_grooming: {
         Args: { p_mascota_id: string }

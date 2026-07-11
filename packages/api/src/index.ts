@@ -110,6 +110,22 @@ export {
   type ResumenCierrePaseo,
 } from './wrappers/paseo';
 
+// Agendamiento del dueño — S54-B2 (hold 15 min + cobro simulado)
+export {
+  obtenerOfertaPaseo,
+  obtenerSlotsDisponibles,
+  crearBloqueoAgenda,
+  confirmarCitaPagada,
+  type CodigoErrorAgendamiento,
+  type OfertaPaseo,
+  type SlotDisponible,
+  type InputSlotsDisponibles,
+  type HoldAgenda,
+  type InputCrearBloqueo,
+  type CitaPagada,
+  type InputConfirmarCita,
+} from './wrappers/agendamiento';
+
 // Estado del hogar — S51-B2.2 (señales de las tres voces + Zona 2)
 export {
   obtenerEstadoHogar,
