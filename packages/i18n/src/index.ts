@@ -13,3 +13,4 @@ export { idiomaDelDispositivo } from './deteccion';
 export { ProveedorI18n } from './ProveedorI18n';
 export { crearUseTraduccion, type TraductorTipado } from './useTraduccion';
 export type { ClaveDe, Diccionario, Espejo, RecursosPorIdioma } from './tipos';
+export { fechaCortaMono } from './fechas';

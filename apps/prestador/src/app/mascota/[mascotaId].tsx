@@ -39,18 +39,14 @@ import {
   type DetalleMascotaPrestador,
 } from '@epetplace/api';
 
+import { fechaCortaMono } from '@epetplace/i18n';
+
 import { useTraduccion } from '@/i18n';
 
 function esEspecie(v: string | null): v is AvatarMascotaEspecie {
   return v !== null;
 }
 
-const MESES_MONO = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-function fechaMono(iso: string): string {
-  const [a, m, d] = iso.slice(0, 10).split('-').map(Number);
-  if (!a || !m || m < 1 || m > 12 || !d) return iso.slice(0, 10);
-  return `${String(d).padStart(2, '0')} ${MESES_MONO[m - 1]} ${a}`;
-}
 
 // S52-P4b sistémico: títulos humanizados — sentence case, sin eyebrow.
 function TituloModulo({ texto }: { texto: string }) {
@@ -72,7 +68,7 @@ function TituloModulo({ texto }: { texto: string }) {
 export default function DetalleMascota() {
   const router = useRouter();
   const { theme } = useTheme();
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
   const { mascotaId } = useLocalSearchParams<{ mascotaId: string }>();
 
   const [detalle, setDetalle] = useState<DetalleMascotaPrestador | 'cargando' | 'error'>('cargando');
@@ -159,7 +155,7 @@ export default function DetalleMascota() {
       valor: mascota.sexo === 'macho' ? t('detalleMascota.sexoMacho') : t('detalleMascota.sexoHembra'),
     });
   }
-  if (mascota.fecha_nacimiento !== null) datosIdentidad.push({ etiqueta: t('detalleMascota.nacimiento'), valor: fechaMono(mascota.fecha_nacimiento) });
+  if (mascota.fecha_nacimiento !== null) datosIdentidad.push({ etiqueta: t('detalleMascota.nacimiento'), valor: fechaCortaMono((mascota.fecha_nacimiento).slice(0, 10), idioma) });
   if (detalle.peso_clinico_kg !== null) datosIdentidad.push({ etiqueta: t('detalleMascota.peso'), valor: `${detalle.peso_clinico_kg} kg` });
   if (mascota.microchip !== null && mascota.microchip.length > 0) datosIdentidad.push({ etiqueta: t('detalleMascota.microchip'), valor: mascota.microchip });
 
@@ -217,7 +213,7 @@ export default function DetalleMascota() {
                 {i > 0 ? <Separador /> : null}
                 <Celda
                   titulo={a.estado === 'en_curso' ? t('detalleMascota.atencionEnCurso') : t('detalleMascota.atencionCerrada')}
-                  metadataMono={a.cerrada_en !== null ? fechaMono(a.cerrada_en) : a.iniciada_en !== null ? fechaMono(a.iniciada_en) : undefined}
+                  metadataMono={a.cerrada_en !== null ? fechaCortaMono((a.cerrada_en).slice(0, 10), idioma) : a.iniciada_en !== null ? fechaCortaMono((a.iniciada_en).slice(0, 10), idioma) : undefined}
                 />
               </View>
             ))}

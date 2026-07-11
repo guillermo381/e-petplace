@@ -157,10 +157,13 @@ cero refactor.
 founder):** el perfil nace como pila de módulos apilables bajo un
 header de identidad (AvatarMascota + la voz + momento vital):
 
-1. **Línea de Vida** — su timeline (componente existente).
+1. **VITALES (Bienestar y actividad, M-WEAR)** — el ESTADO primero
+   (enmienda v1.3, founder S53: el perfil rima con el Home — el
+   estado antes que el log): hoy, lo que el ecosistema deposita
+   (paseos con track, distancia — vivo desde S44) + los índices
+   educativos en despliegue progresivo.
 2. **Salud** — carnet de vacunas, casos, condiciones.
-3. **Bienestar y actividad (M-WEAR)** — hoy: lo que el ecosistema
-   deposita (paseos con track, distancia — vivo desde S44). **El día
+3. **Línea de Vida** — su timeline (componente existente). **El día
    que la mascota tenga wearable, este módulo se expande al dashboard
    estilo Garmin** (actividad, descanso, tendencias) **vía revelación
    progresiva** — conectar el dispositivo ES el disparador contextual
@@ -445,6 +448,10 @@ el portado de grooming consumen:
 
 ## Historial
 
+- **v1.3 (S53, 10 Jul 2026):** enmienda del ORDEN de la pila del
+  perfil (§4): header → Vitales → Salud → Línea de Vida → Identidad —
+  el estado antes que el log; el perfil rima con el Home. El módulo
+  Bienestar queda elevado a dashboard Vitales (S53-B2c/2c.1).
 - **v1.2 (S51, 10 Jul 2026):** enmienda menor de VOZ — el registro
   canónico del español del producto es **TUTEO NEUTRO** (decisión
   founder S51, que extiende la regla 27 del contrato a ambas apps

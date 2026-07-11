@@ -15,7 +15,7 @@ description: >-
 
 # epetplace-design-system — el sistema es exigible, no sugerido
 
-Fuente de verdad: `packages/ui` (tokens v4 + 27 componentes + 3 temas).
+Fuente de verdad: `packages/ui` (tokens v4 + 28 componentes + 3 temas).
 Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 `@epetplace/ui`, no existe en el producto.
 
@@ -30,11 +30,16 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
    PROGRAMÁTICO: si tocás `palette.ts` o `themes/`, corré
    `pnpm verify:contrast` y pegá el output en el reporte. Gate en rojo =
    no se mergea.
-3. **Regla de voz.** JetBrains Mono SOLO para datos que generó una máquina
-   (IDs, horas, montos) — minúsculas, tracking suave, sin transform
-   (`Celda.metadataMono` ya lo fuerza). Todo lo vivo/humano va en DM Sans;
-   voz humana = DM Sans 300 en lg+. El vocabulario interno del modelo
-   (M1..M7, IDs de capa) JAMÁS visible al usuario.
+3. **Regla de voz (MATIZ S53).** JetBrains Mono para metadata CHICA de
+   máquina (fechas, horas, IDs inline — minúsculas, tracking suave;
+   `Celda.metadataMono` lo fuerza). A ESCALA DISPLAY (números grandes
+   de dashboard) el dato viste DM Sans light/regular con
+   `fontVariant: tabular-nums` — el dato sigue siendo de máquina; el
+   traje cambia con la escala (founder S53, fila hero de Vitales).
+   Todo lo vivo/humano va en DM Sans; voz humana = DM Sans 300 en lg+.
+   El vocabulario interno del modelo (M1..M7) JAMÁS visible. Las
+   FECHAS se formatean con `fechaCortaMono` del riel (una función por
+   idioma para todos los módulos — cero formateos artesanales).
 4. **Dosis.** Prestador = baja: UN acento de capa por vista, CTA en tinta
    (`Boton primario`), sin gradiente UI. Dueño = alta: capas visibles,
    gradiente firma solo en contextos cerrados (hero onboarding, CTA
@@ -136,7 +141,7 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 //     stroke={theme.text.primary} strokeWidth={1.75} strokeLinecap="round" /></Svg>
 ```
 
-## 3. ÍNDICE — los 27 componentes (import de `@epetplace/ui`)
+## 3. ÍNDICE — los 28 componentes (import de `@epetplace/ui`)
 
 | Export | Cuándo |
 |---|---|
@@ -167,6 +172,7 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 | `VisorFoto` | Lightbox una-foto-a-la-vez (S45-B5.3). SOLO fades (Ley 6/8 gratis); letterbox digno sin recortar; fondo pleno (tinta+scrim, no depende del tema); cierra por X/back(doble vía)/tap-fondo; swipe horizontal = reemplazo directo; contador "n de m" en mono |
 | `FichaVacuna` | La ficha de UNA vacuna en la revisión del carnet (S47-B1.1; derivación S48). Presentacional pura: tap → `onEditar` (la edición es una Hoja de LA PANTALLA), "Esta no es" → `onDescartar`. Estados derivados de los datos: completa neutra (nombre+fecha; **tipo null NO tiñe** — decisión founder S48, los carnets reales no lo rotulan) · dudosa = SOLO fecha faltante, tinte cuidado y voz humana ("No pudimos leer la fecha") · `rechazada` (prop, del item_invalido de la RPC) danger — nada se pierde. Nombre en DM Sans (lo escribió un humano); fechas y lote en mono minúsculas. Memorial degrada: sin tinte, borde neutro |
 | `Icono` (+primitiva `Huella`) | El set b′ de DIRECCION_ARTE (S53): nombre TIPADO (paseo·veterinaria·grooming·refugio·despensa·coach), objeto en trazo 1.9 + Huella rellena en el hex de su capa; `registro` capa/aa/tinta (dosis §2.7); memorial adentro (huella a text.secondary, el destello no destella). `Huella` es LA primitiva canónica — nadie la redibuja. Todo ícono nuevo = entrada del registry + galería + gate founder por ícono; gate a 21px obligatorio (§2.9) |
+| `BarrasSemana` | La tira de 7 días de los Vitales (S53-B2c.1, espec firmada en brief). 7 barras proporcionales al valor REAL del día; día sin dato = barra base en bg.overlay (la verdad tal cual, L-139). Presentacional puro, ESTÁTICA (Ley 6), color hex puro de su capa; memorial degrada llenas a text.secondary. Sin ejes ni tooltips — no es un chart genérico |
 | `FichaMascotaHogar` | v2 (S52-P3, espec gateada): la mascota PRESIDE — AvatarMascota 64 (foto primero, huella fallback) sobre superficie Tarjeta, nombre en DM Sans light xl y UNA voz SIN sujeto (ficha.* del riel; las variantes con {{nombre}} se conservan para contextos sin sujeto visible). Semántica intacta: alDia punto verdeVital · pideAtencion punto ochre + warningText · conociendolo neutral. Tap → perfil (pressed 0.99 de Tarjeta); sin badges ni CTA. Diseñada para 1-3 apiladas. Memorial degrada. Cero tokens nuevos |
 
 También: `ThemeProvider`/`useTheme` (light default, memorial forzable),

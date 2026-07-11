@@ -23,4 +23,10 @@ export const uiEn = {
     hoy: 'Today',
     ayer: 'Yesterday',
   },
+  fichaVacuna: {
+    aplicada: 'given',
+    proxima: 'next',
+    vacunaDelCarnet: 'vaccine from the card',
+    tocaParaEditar: 'tap to edit',
+  },
 } as const satisfies Espejo<typeof uiEs>;

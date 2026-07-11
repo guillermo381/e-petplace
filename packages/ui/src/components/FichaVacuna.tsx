@@ -36,6 +36,8 @@ import Svg, { Circle, Path } from 'react-native-svg'
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
+import { useTraduccionUi } from '../i18n'
+import { fechaCortaMono } from '@epetplace/i18n'
 import { Tarjeta, type TarjetaTinte } from './Tarjeta'
 import { Boton } from './Boton'
 
@@ -60,13 +62,8 @@ export interface FichaVacunaProps {
   onDescartar: () => void
 }
 
-// Fecha ISO → voz de máquina: "01 may 2026" (mono, minúsculas SIEMPRE).
-const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
-function fechaMono(iso: string): string {
-  const [a, m, d] = iso.split('-').map(Number)
-  if (!a || !m || m < 1 || m > 12 || !d) return iso.toLowerCase()
-  return `${String(d).padStart(2, '0')} ${MESES[m - 1]} ${a}`
-}
+// Fecha en voz de máquina: fechaCortaMono del riel (S53-B2c.1 —
+// una sola función por idioma para TODOS los módulos).
 
 // Ley 12: outline 1.75, remates redondeados, UN color por ícono.
 function IconoAtencion({ color }: { color: string }) {
@@ -92,6 +89,7 @@ export function FichaVacuna({
   onDescartar,
 }: FichaVacunaProps) {
   const { theme } = useTheme()
+  const { t, idioma } = useTraduccionUi()
   const esMemorial = theme.mode === 'memorial'
 
   // dudosa = SOLO fecha faltante (S48): tipo null = completa neutra.
@@ -119,18 +117,18 @@ export function FichaVacuna({
   const puntoCapa = theme.capa.cuidado
 
   const fechas = [
-    fechaAplicada ? `aplicada ${fechaMono(fechaAplicada)}` : null,
-    fechaProxima ? `próxima ${fechaMono(fechaProxima)}` : null,
+    fechaAplicada ? `${t('fichaVacuna.aplicada')} ${fechaCortaMono(fechaAplicada, idioma)}` : null,
+    fechaProxima ? `${t('fichaVacuna.proxima')} ${fechaCortaMono(fechaProxima, idioma)}` : null,
   ]
     .filter(Boolean)
     .join(' · ')
 
   const a11y = [
-    `${nombre}, vacuna del carnet`,
+    `${nombre}, ${t('fichaVacuna.vacunaDelCarnet')}`,
     tipoVacuna ?? null,
-    fechaAplicada ? `aplicada ${fechaMono(fechaAplicada)}` : null,
+    fechaAplicada ? `${t('fichaVacuna.aplicada')} ${fechaCortaMono(fechaAplicada, idioma)}` : null,
     vozEstado,
-    'tocá para editar',
+    t('fichaVacuna.tocaParaEditar'),
   ]
     .filter(Boolean)
     .join(', ')

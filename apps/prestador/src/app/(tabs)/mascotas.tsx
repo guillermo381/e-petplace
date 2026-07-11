@@ -27,6 +27,8 @@ import {
 } from '@epetplace/ui';
 import { obtenerMascotasAtendidas, obtenerMiPrestador, resolverUrlsFotos, type MascotaAtendida } from '@epetplace/api';
 
+import { fechaCortaMono } from '@epetplace/i18n';
+
 import { useTraduccion } from '@/i18n';
 
 type Pantalla =
@@ -38,18 +40,11 @@ function esEspecie(v: string | null): v is AvatarMascotaEspecie {
   return v !== null;
 }
 
-// timestamptz → día en voz de máquina "07 jul 2026".
-const MESES_MONO = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-function fechaMono(isoTs: string): string {
-  const [a, m, d] = isoTs.slice(0, 10).split('-').map(Number);
-  if (!a || !m || m < 1 || m > 12 || !d) return isoTs.slice(0, 10);
-  return `${String(d).padStart(2, '0')} ${MESES_MONO[m - 1]} ${a}`;
-}
 
 export default function Mascotas() {
   const router = useRouter();
   const { theme } = useTheme();
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [urlsFotos, setUrlsFotos] = useState<Map<string, string>>(new Map());
 
@@ -134,7 +129,7 @@ export default function Mascotas() {
                       tamano="sm"
                     />
                   }
-                  metadataMono={m.ultima_atencion !== null ? fechaMono(m.ultima_atencion) : undefined}
+                  metadataMono={m.ultima_atencion !== null ? fechaCortaMono((m.ultima_atencion).slice(0, 10), idioma) : undefined}
                 />
               </View>
             ))}

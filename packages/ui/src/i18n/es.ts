@@ -29,4 +29,10 @@ export const uiEs = {
     hoy: 'Hoy',
     ayer: 'Ayer',
   },
+  fichaVacuna: {
+    aplicada: 'aplicada',
+    proxima: 'próxima',
+    vacunaDelCarnet: 'vacuna del carnet',
+    tocaParaEditar: 'toca para editar',
+  },
 } as const;

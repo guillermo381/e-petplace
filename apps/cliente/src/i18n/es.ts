@@ -119,9 +119,9 @@ export const clienteEs = {
     vitalesUltimos7: 'Últimos 7 días',
     vitalesKm: 'recorridos',
     vitalesMin: 'de paseo',
-    vitalesSalidas: 'Salidas',
-    vitalesUnaSalida: '1 salida',
-    vitalesUltimaSalida: 'Última salida',
+    vitalesMetaVarias: '{{n}} salidas · última {{fecha}}',
+    vitalesMetaUna: '1 salida · última {{fecha}}',
+    vitalesBarrasA11y: '{{n}} de 7 días con salida',
     // comparativa — SOLO con respaldo de datos (L-139); GATE PENDIENTE:
     vitalesComparativa: 'Esta semana caminó más que la pasada.',
     bienestarVacio: 'Su actividad va a aparecer acá',

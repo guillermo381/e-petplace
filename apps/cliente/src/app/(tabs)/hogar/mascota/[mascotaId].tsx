@@ -22,6 +22,7 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import Svg, { Path } from 'react-native-svg';
 import {
   AvatarMascota,
+  BarrasSemana,
   Boton,
   Celda,
   Encabezado,
@@ -54,18 +55,13 @@ import {
   type VitalesPaseos,
 } from '@epetplace/domain';
 
+import { fechaCortaMono } from '@epetplace/i18n';
+
 import { esEspecieUi } from '@/lib/params';
 import { useTraduccion } from '@/i18n';
 
 type TraductorPerfil = ReturnType<typeof useTraduccion>['t'];
 
-// Fecha ISO → voz de máquina "01 may 2026" (formato de la casa).
-const MESES_MONO = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-function fechaMono(iso: string): string {
-  const [a, m, d] = iso.split('-').map(Number);
-  if (!a || !m || m < 1 || m > 12 || !d) return iso.toLowerCase();
-  return `${String(d).padStart(2, '0')} ${MESES_MONO[m - 1]} ${a}`;
-}
 
 function vozMomento(momento: MomentoVital, t: TraductorPerfil): string | null {
   switch (momento) {
@@ -133,7 +129,7 @@ function TituloModulo({ texto }: { texto: string }) {
 export default function PerfilDeMascota() {
   const router = useRouter();
   const { theme } = useTheme();
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
   const { mascotaId } = useLocalSearchParams<{ mascotaId: string }>();
 
   const [perfil, setPerfil] = useState<PerfilMascota | 'cargando' | 'error'>('cargando');
@@ -274,7 +270,7 @@ export default function PerfilDeMascota() {
     });
   }
   if (mascota.fecha_nacimiento !== null) {
-    datosIdentidad.push({ etiqueta: t('perfil.nacimiento'), valor: fechaMono(mascota.fecha_nacimiento), mono: true });
+    datosIdentidad.push({ etiqueta: t('perfil.nacimiento'), valor: fechaCortaMono(mascota.fecha_nacimiento, idioma), mono: true });
   }
   if (peso_clinico_kg !== null) {
     datosIdentidad.push({ etiqueta: t('perfil.peso'), valor: `${peso_clinico_kg} kg`, mono: true });
@@ -311,65 +307,7 @@ export default function PerfilDeMascota() {
           ) : null}
         </View>
 
-        {/* ── 1 · Su vida ── */}
-        <View style={{ gap: spacing[3] }}>
-          <TituloModulo texto={t('perfil.vida')} />
-          {items === null ? (
-            <LineaDeVida items={[]} cargando />
-          ) : items === 'error' ? (
-            <EstadoVacio
-              titulo={t('hogar.errorHistoria')}
-              descripcion={t('hogar.errorHistoriaDetalle')}
-              accion={
-                <Boton
-                  variante="secundario"
-                  etiqueta={t('hogar.reintentar')}
-                  onPress={() => {
-                    setItems(null);
-                    if (typeof mascotaId === 'string') void cargarPrimeraPagina(mascotaId);
-                  }}
-                />
-              }
-            />
-          ) : items.length === 0 ? (
-            <EstadoVacio titulo={t('hogar.historiaEmpieza')} descripcion={t('hogar.historiaEmpiezaDetalle')} />
-          ) : (
-            <LineaDeVida items={items} onPressNodo={alTocarNodo} estadoPie={estadoPie} onCargarMas={() => void cargarMas()} />
-          )}
-        </View>
-
-        {/* ── 2 · Salud (el carnet vivo) ── */}
-        <View style={{ gap: spacing[3] }}>
-          <TituloModulo texto={t('perfil.salud')} />
-          {vacunas.length === 0 ? (
-            <EstadoVacio
-              titulo={t('perfil.carnetVacio')}
-              descripcion={t('perfil.carnetVacioDetalle')}
-              accion={
-                <Boton
-                  variante="secundario"
-                  etiqueta={t('perfil.cargarCarnet')}
-                  onPress={() => router.push({ pathname: '/carnet', params: { mascotaId: mascota.id, nombre: mascota.nombre } })}
-                />
-              }
-            />
-          ) : (
-            <Tarjeta relleno="ninguno">
-              {vacunas.map((v, i) => (
-                <View key={`${v.nombre_vacuna}-${i}`}>
-                  {i > 0 ? <Separador /> : null}
-                  <Celda
-                    titulo={v.nombre_vacuna}
-                    subtitulo={v.tipo_vacuna ?? undefined}
-                    metadataMono={v.fecha_aplicada !== null ? fechaMono(v.fecha_aplicada) : undefined}
-                  />
-                </View>
-              ))}
-            </Tarjeta>
-          )}
-        </View>
-
-        {/* ── 3 · VITALES (S53-B2c: Bienestar elevado a dashboard) ──
+        {/* ── 1 · VITALES (S53-B2c.1: el estado antes que el log — §4 v1.3) ──
             ═══ HUECO M-WEAR: el día que la mascota tenga collar
             conectado, los ÍNDICES de abajo se llenan y el dashboard
             se expande (actividad/descanso/tendencias) — revelación
@@ -391,45 +329,46 @@ export default function PerfilDeMascota() {
             />
           ) : (
             <Tarjeta relleno="amplio">
-              <View style={{ gap: spacing[3] }}>
+              <View style={{ gap: spacing[4] }}>
                 <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
                   {t('perfil.vitalesUltimos7')}
                 </Text>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: spacing[4] }}>
-                  <View style={{ width: '50%', gap: 2 }}>
-                    <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.xl, letterSpacing: typography.tracking.mono, color: theme.text.primary }}>
-                      {vitales.km7d.toFixed(1)} km
+                {/* fila hero — MATIZ LEY 3 (S53): a escala display el
+                    número viste DM Sans; el mono queda para metadata */}
+                <View style={{ flexDirection: 'row', gap: spacing[6] }}>
+                  <View style={{ gap: 2 }}>
+                    <Text style={{ fontFamily: typography.family.sans.light, fontSize: typography.size['3xl'] ?? 34, fontVariant: ['tabular-nums'], color: theme.text.primary }}>
+                      {vitales.km7d.toFixed(1)}
+                      <Text style={{ fontSize: typography.size.md }}> km</Text>
                     </Text>
                     <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
                       {t('perfil.vitalesKm')}
                     </Text>
                   </View>
-                  <View style={{ width: '50%', gap: 2 }}>
-                    <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.xl, letterSpacing: typography.tracking.mono, color: theme.text.primary }}>
-                      {vitales.min7d} min
+                  <View style={{ gap: 2 }}>
+                    <Text style={{ fontFamily: typography.family.sans.light, fontSize: typography.size['3xl'] ?? 34, fontVariant: ['tabular-nums'], color: theme.text.primary }}>
+                      {vitales.min7d}
+                      <Text style={{ fontSize: typography.size.md }}> min</Text>
                     </Text>
                     <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
                       {t('perfil.vitalesMin')}
                     </Text>
                   </View>
-                  <View style={{ width: '50%', gap: 2 }}>
-                    <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.xl, letterSpacing: typography.tracking.mono, color: theme.text.primary }}>
-                      {vitales.salidas7d}
-                    </Text>
-                    <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-                      {t('perfil.vitalesSalidas')}
-                    </Text>
-                  </View>
-                  <View style={{ width: '50%', gap: 2 }}>
-                    <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.xl, letterSpacing: typography.tracking.mono, color: theme.text.primary }}>
-                      {vitales.ultimaSalida !== null ? fechaMono(vitales.ultimaSalida.slice(0, 10)) : '—'}
-                    </Text>
-                    <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-                      {t('perfil.vitalesUltimaSalida')}
-                    </Text>
-                  </View>
                 </View>
-                {/* la lectura en voz humana — SOLO si el dato la respalda */}
+                {/* la tira de 7 días — SOLO datos reales: llenas las
+                    salidas, base los días quietos (L-139 tal cual) */}
+                <BarrasSemana
+                  valores={vitales.kmPorDia}
+                  capa="cuidado"
+                  etiqueta={t('perfil.vitalesBarrasA11y', { n: vitales.kmPorDia.filter((v) => v > 0).length })}
+                />
+                {/* meta en mono chico — la voz de máquina en su escala */}
+                <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.secondary }}>
+                  {(vitales.salidas7d === 1
+                    ? t('perfil.vitalesMetaUna', { fecha: vitales.ultimaSalida !== null ? fechaCortaMono(vitales.ultimaSalida, idioma) : '—' })
+                    : t('perfil.vitalesMetaVarias', { n: vitales.salidas7d, fecha: vitales.ultimaSalida !== null ? fechaCortaMono(vitales.ultimaSalida, idioma) : '—' })
+                  ).toLowerCase()}
+                </Text>
                 {vitales.caminoMasQueAnterior ? (
                   <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
                     {t('perfil.vitalesComparativa')}
@@ -474,6 +413,64 @@ export default function PerfilDeMascota() {
               </Tarjeta>
             </View>
           </View>
+        </View>
+
+        {/* ── 2 · Salud (el carnet vivo) ── */}
+        <View style={{ gap: spacing[3] }}>
+          <TituloModulo texto={t('perfil.salud')} />
+          {vacunas.length === 0 ? (
+            <EstadoVacio
+              titulo={t('perfil.carnetVacio')}
+              descripcion={t('perfil.carnetVacioDetalle')}
+              accion={
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('perfil.cargarCarnet')}
+                  onPress={() => router.push({ pathname: '/carnet', params: { mascotaId: mascota.id, nombre: mascota.nombre } })}
+                />
+              }
+            />
+          ) : (
+            <Tarjeta relleno="ninguno">
+              {vacunas.map((v, i) => (
+                <View key={`${v.nombre_vacuna}-${i}`}>
+                  {i > 0 ? <Separador /> : null}
+                  <Celda
+                    titulo={v.nombre_vacuna}
+                    subtitulo={v.tipo_vacuna ?? undefined}
+                    metadataMono={v.fecha_aplicada !== null ? fechaCortaMono(v.fecha_aplicada, idioma) : undefined}
+                  />
+                </View>
+              ))}
+            </Tarjeta>
+          )}
+        </View>
+
+        {/* ── 3 · Su vida ── */}
+        <View style={{ gap: spacing[3] }}>
+          <TituloModulo texto={t('perfil.vida')} />
+          {items === null ? (
+            <LineaDeVida items={[]} cargando />
+          ) : items === 'error' ? (
+            <EstadoVacio
+              titulo={t('hogar.errorHistoria')}
+              descripcion={t('hogar.errorHistoriaDetalle')}
+              accion={
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('hogar.reintentar')}
+                  onPress={() => {
+                    setItems(null);
+                    if (typeof mascotaId === 'string') void cargarPrimeraPagina(mascotaId);
+                  }}
+                />
+              }
+            />
+          ) : items.length === 0 ? (
+            <EstadoVacio titulo={t('hogar.historiaEmpieza')} descripcion={t('hogar.historiaEmpiezaDetalle')} />
+          ) : (
+            <LineaDeVida items={items} onPressNodo={alTocarNodo} estadoPie={estadoPie} onCargarMas={() => void cargarMas()} />
+          )}
         </View>
 
         {/* ── 4 · Identidad (progresiva) ── */}

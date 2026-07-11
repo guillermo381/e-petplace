@@ -29,8 +29,12 @@ check(v.caminoMasQueAnterior === true, 'comparativa true con respaldo (2 tramos 
 const soloActual = calcularVitales([p('2026-07-09T10:00:00Z', 20, tramo)], hoy);
 check(soloActual.caminoMasQueAnterior === false, 'comparativa false sin ventana anterior (L-139)');
 
+// serie diaria (S53-B2c.1): 2 días con dato en la ventana, 5 en cero
+check(v.kmPorDia.length === 7 && v.kmPorDia.filter((x) => x > 0).length === 2, `kmPorDia: 2/7 con dato (dio ${v.kmPorDia.filter((x) => x > 0).length})`);
+check(vacio.kmPorDia.every((x) => x === 0), 'kmPorDia vacío = todo ceros');
+
 // track de un punto o vacío: 0 km, sin NaN
 check(distanciaTrackKm([]) === 0 && distanciaTrackKm([{ lat: 1, lng: 1 }]) === 0, 'tracks degenerados = 0km');
 
-console.log(fallos === 0 ? '\nVITALES DOMAIN: 7/7' : `\nFALLOS: ${fallos}`);
+console.log(fallos === 0 ? '\nVITALES DOMAIN: 9/9' : `\nFALLOS: ${fallos}`);
 process.exit(fallos === 0 ? 0 : 1);

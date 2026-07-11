@@ -113,6 +113,11 @@ export function MapaRecorrido({
         rotateEnabled={false}
         pitchEnabled={false}
         toolbarEnabled={false}
+        // S53-B2c.1: los botones de zoom NATIVOS de Google Maps flotan
+        // por default en Android sobre la card — no son diseño nuestro
+        // (candidato de los "engranajes" del gate founder). El pinch
+        // sigue vivo donde zoomEnabled lo permite.
+        zoomControlEnabled={false}
         showsCompass={false}
         showsMyLocationButton={false}
       >

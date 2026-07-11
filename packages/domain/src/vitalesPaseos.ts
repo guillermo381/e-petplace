@@ -26,6 +26,9 @@ export type VitalesPaseos = {
   km7dAnteriores: number;
   /** true SOLO con respaldo: ambas ventanas con salidas y actual > anterior. */
   caminoMasQueAnterior: boolean;
+  /** km por día de la ventana actual — índice 0 = hace 6 días, 6 = hoy.
+   *  Días sin salida = 0 (la barra base los dice tal cual, L-139). */
+  kmPorDia: number[];
 };
 
 const R_TIERRA_KM = 6371;
@@ -57,6 +60,7 @@ export function calcularVitales(paseos: PaseoVital[], hoy: Date): VitalesPaseos 
   let min7d = 0;
   let salidas7dAnteriores = 0;
   let km7dAnteriores = 0;
+  const kmPorDia = [0, 0, 0, 0, 0, 0, 0];
 
   for (const p of paseos) {
     const ts = new Date(p.fecha).getTime();
@@ -67,6 +71,8 @@ export function calcularVitales(paseos: PaseoVital[], hoy: Date): VitalesPaseos 
       salidas7d += 1;
       km7d += km;
       min7d += p.duracionMin ?? 0;
+      const diasAtras = Math.min(6, Math.max(0, Math.floor((ahora - ts) / DIA)));
+      kmPorDia[6 - diasAtras] += km;
     } else if (ts >= corte14d) {
       salidas7dAnteriores += 1;
       km7dAnteriores += km;
@@ -82,5 +88,6 @@ export function calcularVitales(paseos: PaseoVital[], hoy: Date): VitalesPaseos 
     salidas7dAnteriores,
     km7dAnteriores,
     caminoMasQueAnterior: salidas7d > 0 && salidas7dAnteriores > 0 && km7d > km7dAnteriores,
+    kmPorDia,
   };
 }

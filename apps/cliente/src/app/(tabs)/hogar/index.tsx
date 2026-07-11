@@ -64,16 +64,11 @@ import {
 } from '@epetplace/api';
 import { calcularVozHogar, type VozEstadoHogar } from '@epetplace/domain';
 
+import { fechaCortaMono } from '@epetplace/i18n';
+
 import { CoachHoja } from '@/components/coach';
 import { useTraduccion } from '@/i18n';
 
-// Fecha ISO → voz de máquina "01 may 2026" (mismo formato que FichaVacuna).
-const MESES_MONO = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-function fechaMonoVacuna(iso: string): string {
-  const [a, m, d] = iso.split('-').map(Number);
-  if (!a || !m || m < 1 || m > 12 || !d) return iso.toLowerCase();
-  return `${String(d).padStart(2, '0')} ${MESES_MONO[m - 1]} ${a}`;
-}
 
 type TraductorHogar = ReturnType<typeof useTraduccion>['t'];
 
@@ -141,7 +136,7 @@ type EstadoMascotas = MascotaResumen[] | 'cargando' | 'error';
 export default function Hogar() {
   const router = useRouter();
   const { theme } = useTheme();
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
   const insets = useSafeAreaInsets();
   const { mostrar } = useAviso();
 
@@ -444,7 +439,7 @@ export default function Hogar() {
             <Celda
               titulo={nombreDe(proximaCita.mascota_id)}
               subtitulo={`${t('hogar.proximaCita')}${proximaCita.tipo_servicio ? ` · ${proximaCita.tipo_servicio}` : ''}`}
-              metadataMono={`${fechaMonoVacuna(proximaCita.fecha)}${proximaCita.hora ? ` · ${proximaCita.hora}` : ''}`}
+              metadataMono={`${fechaCortaMono(proximaCita.fecha, idioma)}${proximaCita.hora ? ` · ${proximaCita.hora}` : ''}`}
             />
           </Tarjeta>
         </Animated.View>
@@ -547,8 +542,8 @@ export default function Hogar() {
             {(vacuna.fecha_aplicada || vacuna.fecha_proxima || vacuna.lote) && (
               <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.secondary }}>
                 {[
-                  vacuna.fecha_aplicada ? `${t('vacunaHoja.aplicada')} ${fechaMonoVacuna(vacuna.fecha_aplicada)}` : null,
-                  vacuna.fecha_proxima ? `${t('vacunaHoja.proxima')} ${fechaMonoVacuna(vacuna.fecha_proxima)}` : null,
+                  vacuna.fecha_aplicada ? `${t('vacunaHoja.aplicada')} ${fechaCortaMono(vacuna.fecha_aplicada, idioma)}` : null,
+                  vacuna.fecha_proxima ? `${t('vacunaHoja.proxima')} ${fechaCortaMono(vacuna.fecha_proxima, idioma)}` : null,
                   vacuna.lote ? `${t('vacunaHoja.lote')} ${vacuna.lote.toLowerCase()}` : null,
                 ].filter(Boolean).join(' · ')}
               </Text>

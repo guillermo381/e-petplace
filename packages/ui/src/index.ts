@@ -129,3 +129,4 @@ export {
 export { Huella, HUELLA_BOX } from './brand/Huella'
 export { Icono, type IconoNombre, type IconoRegistro } from './components/Icono'
 export { Guijarro, type GuijarroCapa } from './brand/Guijarro'
+export { BarrasSemana, type BarrasSemanaCapa } from './components/BarrasSemana'

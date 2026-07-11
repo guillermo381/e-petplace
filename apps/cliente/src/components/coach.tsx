@@ -31,17 +31,13 @@ import {
 import { obtenerPerfilMascota, type MascotaResumen, type PerfilMascota } from '@epetplace/api';
 import { calcularMomentoVital, edadEnMeses, type MomentoVital } from '@epetplace/domain';
 
+import { fechaCortaMono, type IdiomaSoportado } from '@epetplace/i18n';
+
 import { useTraduccion } from '@/i18n';
 
 type Traductor = ReturnType<typeof useTraduccion>['t'];
 type Pregunta = 'edad' | 'carnet' | 'actividad';
 
-const MESES_MONO = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-function fechaMono(iso: string): string {
-  const [a, m, d] = iso.slice(0, 10).split('-').map(Number);
-  if (!a || !m || m < 1 || m > 12 || !d) return iso.slice(0, 10);
-  return `${String(d).padStart(2, '0')} ${MESES_MONO[m - 1]} ${a}`;
-}
 
 function vozEdad(meses: number, t: Traductor): string {
   if (meses < 12) return meses === 1 ? t('perfil.edadUnMes') : t('perfil.edadMeses', { meses });
@@ -62,7 +58,7 @@ function vozMomento(momento: MomentoVital, t: Traductor): string | null {
 
 // Cada respuesta del v0 sale de DATOS VERIFICABLES del perfil (test 5
 // del §10) — los null se dicen honestos, jamás se rellenan.
-function responder(pregunta: Pregunta, perfil: PerfilMascota, t: Traductor): string {
+function responder(pregunta: Pregunta, perfil: PerfilMascota, t: Traductor, idioma: IdiomaSoportado): string {
   const { mascota, vacunas, paseos_total, ultimo_paseo_fecha, tiene_condicion_cronica, umbrales } = perfil;
   if (pregunta === 'edad') {
     const meses = mascota.fecha_nacimiento !== null ? edadEnMeses(mascota.fecha_nacimiento, new Date()) : null;
@@ -89,7 +85,7 @@ function responder(pregunta: Pregunta, perfil: PerfilMascota, t: Traductor): str
       : t('coach.rCarnet', { n: vacunas.length, vacuna: ultima });
   }
   if (paseos_total === 0) return t('coach.rActividadVacia');
-  const fecha = ultimo_paseo_fecha !== null ? fechaMono(ultimo_paseo_fecha) : '';
+  const fecha = ultimo_paseo_fecha !== null ? fechaCortaMono(ultimo_paseo_fecha, idioma) : '';
   return paseos_total === 1
     ? t('coach.rActividadUno', { fecha })
     : t('coach.rActividad', { n: paseos_total, fecha });
@@ -105,7 +101,7 @@ export function CoachHoja({
   mascotas: MascotaResumen[];
 }) {
   const { theme } = useTheme();
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
 
   const [mascotaId, setMascotaId] = useState<string | null>(mascotas[0]?.id ?? null);
   const [perfil, setPerfil] = useState<PerfilMascota | 'cargando' | 'error'>('cargando');
@@ -167,7 +163,7 @@ export function CoachHoja({
               bloque
               deshabilitado={perfil === 'cargando' || perfil === 'error'}
               onPress={() => {
-                if (perfil !== 'cargando' && perfil !== 'error') setRespuesta(responder(p.clave, perfil, t));
+                if (perfil !== 'cargando' && perfil !== 'error') setRespuesta(responder(p.clave, perfil, t, idioma));
               }}
             />
           ))}
