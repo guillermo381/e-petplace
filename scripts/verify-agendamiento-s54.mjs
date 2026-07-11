@@ -13,6 +13,7 @@ import {
   obtenerSlotsDisponibles,
   crearBloqueoAgenda,
   confirmarCitaPagada,
+  obtenerCitasPaseoDelDia,
 } from '../packages/api/src/index.ts';
 
 const env = Object.fromEntries(
@@ -91,9 +92,24 @@ const domingo = new Date(sabado); domingo.setDate(sabado.getDate() + 1);
 const fdh = await crearBloqueoAgenda({ prestador_id: PREST, prestador_servicio_id: SRV, mascota_id: MASC, fecha: domingo.toISOString().slice(0, 10), hora: HORA });
 check(!fdh.ok && fdh.codigo === 'fuera_de_horario', 'T6 domingo → fuera_de_horario', fdh.ok ? 'PUDO' : fdh.codigo);
 
+// T6b — GATE DOBLE (verdad firme, test 8): ANTES de pagar, la agenda del
+// prestador NO muestra el hold (el user demo también ES el prestador demo)
+const agendaAntes = await obtenerCitasPaseoDelDia({ prestador_id: PREST, fecha: FECHA });
+check(
+  agendaAntes.ok && !agendaAntes.data.some((c) => c.id === (hold.ok ? hold.data.cita_id : '')),
+  'T6b ANTES de pagar: el hold es INVISIBLE en la agenda del prestador',
+);
+
 // T7 — el pago simulado confirma
 const pago = hold.ok ? await confirmarCitaPagada({ cita_id: hold.data.cita_id }) : { ok: false, codigo: 'skip', mensaje: '' };
 check(pago.ok && pago.data.estado === 'confirmada' && pago.data.estado_reserva === 'pagada', 'T7 confirmarCitaPagada → firme y pagada', pago.ok ? pago.data.pagado_en : `${pago.codigo}: ${pago.mensaje}`);
+
+// T7b — GATE DOBLE: DESPUÉS de pagar, la cita SÍ aparece firme en la agenda
+const agendaDespues = await obtenerCitasPaseoDelDia({ prestador_id: PREST, fecha: FECHA });
+check(
+  agendaDespues.ok && agendaDespues.data.some((c) => c.id === (hold.ok ? hold.data.cita_id : '') && c.estado === 'confirmada'),
+  'T7b DESPUÉS de pagar: la cita es VISIBLE y confirmada en la agenda del prestador',
+);
 
 // T8 — re-pagar rebota tipada
 const repago = hold.ok ? await confirmarCitaPagada({ cita_id: hold.data.cita_id }) : { ok: false, codigo: 'skip' };
