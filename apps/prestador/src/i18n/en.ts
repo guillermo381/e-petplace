@@ -221,4 +221,36 @@ export const prestadorEn = {
     crear: 'Create account',
     nuevaCreada: 'Your account is registered and under review.',
   },
+  // Payouts view v1 — S55-B (B1, RUTA 3.1.D). Firm truth: honest states,
+  // zero date promises the engine doesn't make.
+  cobros: {
+    titulo: 'Payouts',
+    error: "We couldn't load your earnings.",
+    errorDetalle: 'Try again in a moment.',
+    reintentar: 'Retry',
+    // step 0 — an invitation that educates (NEVER $0)
+    vacioTitulo: "This is where you'll see what you earn",
+    // ≤3 lines at 420px: EstadoVacio (screen register) truncates on the 3rd
+    vacioCuerpo:
+      'Every service paid through the app is recorded here. Your earnings are grouped into payouts: one transfer with the total.',
+    vacioSinCuentaActiva:
+      'The first step is your business account: it lets the team validate who gets paid.',
+    vacioCta: 'My business account',
+    // step 1 — the breakdown awaiting payout
+    esperandoTitulo: 'Awaiting payout',
+    esperandoUno: '1 paid service',
+    esperandoVarios: '{{cantidad}} paid services',
+    esperandoEducacion:
+      'Your earnings are grouped into payouts: you receive a single transfer with the total.',
+    pagoSimulado: 'Simulated payment',
+    servicioPaseo: 'Walk',
+    servicioGenerico: 'Service',
+    // step 2 — issued payouts (the voice of each real state)
+    liquidacionesTitulo: 'Your payouts',
+    estadoEnPreparacion: 'In preparation',
+    estadoAprobada: 'Approved',
+    estadoPagada: 'Paid',
+    estadoEnRevision: 'Under review',
+    estadoAnulada: 'Voided',
+  },
 } as const satisfies Espejo<typeof prestadorEs>;

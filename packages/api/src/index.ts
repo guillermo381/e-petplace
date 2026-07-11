@@ -187,8 +187,19 @@ export {
 } from './wrappers/cuentaComercial';
 
 // Ledger propio, solo lectura — S54-B (peldaño de liquidaciones en Negocio)
+// + S55-B (B1): el desglose para la vista de Liquidaciones v1
 export {
   obtenerResumenPendienteLiquidar,
+  obtenerDesglosePendienteLiquidar,
   type ResumenPendienteLiquidar,
+  type EventoPendienteLiquidar,
   type CodigoErrorEventosEconomicos,
 } from './wrappers/eventosEconomicos';
+
+// Liquidaciones propias, solo lectura — S55-B (B1, RUTA 3.1.D) — archivo NUEVO de esta sesión
+export {
+  obtenerMisLiquidaciones,
+  type LiquidacionPropia,
+  type EstadoLiquidacion,
+  type CodigoErrorLiquidaciones,
+} from './wrappers/liquidaciones';

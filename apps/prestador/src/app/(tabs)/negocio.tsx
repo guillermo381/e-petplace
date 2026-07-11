@@ -12,7 +12,8 @@
  *     invitación por hito; con eventos propios pendiente_liquidar, la
  *     verdad tal cual ("tienes N servicios cobrados esperando
  *     liquidación") leída del ledger por RLS. Verdad firme (test 8):
- *     solo estado pendiente_liquidar. La vista completa es B2.4.
+ *     solo estado pendiente_liquidar. La vista completa (B2.4) vive en
+ *     /liquidaciones desde S55-B — la Celda navega.
  *
  * UNA función viva más: el selector de idioma es/en del riel B1a
  * (mismo patrón que Cuenta del cliente). Y la salida de sesión.
@@ -160,7 +161,15 @@ export default function Negocio() {
                 onPress={() => router.push('/cuenta-comercial')}
               />
               <Separador />
-              <Celda titulo={t('negocio.liquidaciones')} subtitulo={detalleLiquidaciones} />
+              {/* S55-B (B1): la vista completa existe — la Celda navega;
+                  el peldaño 0 de la pantalla educa cuando el ledger está vacío */}
+              <Celda
+                interactiva
+                accessibilityRole="button"
+                titulo={t('negocio.liquidaciones')}
+                subtitulo={detalleLiquidaciones}
+                onPress={() => router.push('/liquidaciones')}
+              />
             </Tarjeta>
           </View>
 

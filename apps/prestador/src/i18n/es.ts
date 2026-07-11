@@ -246,4 +246,36 @@ export const prestadorEs = {
     crear: 'Crear cuenta',
     nuevaCreada: 'Tu cuenta quedó registrada y en revisión.',
   },
+  // Vista de Liquidaciones v1 — S55-B (B1, RUTA 3.1.D). Verdad firme:
+  // estados honestos, cero promesas de fecha que el motor no da.
+  cobros: {
+    titulo: 'Liquidaciones',
+    error: 'No pudimos cargar tus cobros.',
+    errorDetalle: 'Prueba de nuevo en un momento.',
+    reintentar: 'Reintentar',
+    // peldaño 0 — invitación que educa (JAMÁS $0)
+    vacioTitulo: 'Acá vas a ver lo que cobras',
+    // ≤3 líneas a 420px: EstadoVacio (registro pantalla) trunca en la 3ª
+    vacioCuerpo:
+      'Cada servicio pagado por la app queda registrado acá. Tus cobros se agrupan en liquidaciones: una transferencia con el total.',
+    vacioSinCuentaActiva:
+      'El primer paso es tu cuenta comercial: con ella el equipo valida quién cobra.',
+    vacioCta: 'Mi cuenta comercial',
+    // peldaño 1 — el desglose esperando liquidación
+    esperandoTitulo: 'Esperando liquidación',
+    esperandoUno: '1 servicio cobrado',
+    esperandoVarios: '{{cantidad}} servicios cobrados',
+    esperandoEducacion:
+      'Tus cobros se agrupan en liquidaciones: recibes una sola transferencia con el total.',
+    pagoSimulado: 'Pago simulado',
+    servicioPaseo: 'Paseo',
+    servicioGenerico: 'Servicio',
+    // peldaño 2 — las liquidaciones emitidas (la voz de cada estado real)
+    liquidacionesTitulo: 'Tus liquidaciones',
+    estadoEnPreparacion: 'En preparación',
+    estadoAprobada: 'Aprobada',
+    estadoPagada: 'Pagada',
+    estadoEnRevision: 'En revisión',
+    estadoAnulada: 'Anulada',
+  },
 } as const;
