@@ -31,6 +31,15 @@ export const motion = {
     slow:   120,
   },
 
+  // Motion de MARCA (S53, DIRECCION_ARTE §5.2): la física de la
+  // apertura del Coach, minada del prototipo. El scrim es EFECTIVO
+  // (0.4 en pantalla; la Hoja lo traduce sobre palette.scrim).
+  marca: {
+    aperturaMs: 340,
+    aperturaBezier: [0.32, 0.72, 0, 1] as const,
+    scrimEfectivo: 0.4,
+  },
+
   // React Native — useNativeDriver: true cuando sea posible (v3.1)
   rn: {
     springConfig: { tension: 180, friction: 12, useNativeDriver: true },

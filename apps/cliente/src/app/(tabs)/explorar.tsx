@@ -79,9 +79,9 @@ export default function Explorar() {
   const fichasActivas: Array<{ clave: string; titulo: string; detalle: string; icono: ReactNode }> = [];
   const proximamente: string[] = [];
   if (servicios !== 'cargando' && servicios !== 'error') {
-    if (servicios.walking) fichasActivas.push({ clave: 'paseo', titulo: t('explorar.servicioPaseo'), detalle: t('explorar.servicioPaseoDetalle'), icono: <Icono nombre="paseo" tamano={28} /> });
-    if (servicios.grooming) fichasActivas.push({ clave: 'grooming', titulo: t('explorar.servicioGrooming'), detalle: t('explorar.servicioGroomingDetalle'), icono: <Icono nombre="grooming" tamano={28} /> });
-    if (servicios.veterinary) fichasActivas.push({ clave: 'vet', titulo: t('explorar.servicioVet'), detalle: t('explorar.servicioVetDetalle'), icono: <Icono nombre="veterinaria" tamano={28} /> });
+    if (servicios.walking) fichasActivas.push({ clave: 'paseo', titulo: t('explorar.servicioPaseo'), detalle: t('explorar.servicioPaseoDetalle'), icono: <Icono nombre="paseo" tamano={34} /> });
+    if (servicios.grooming) fichasActivas.push({ clave: 'grooming', titulo: t('explorar.servicioGrooming'), detalle: t('explorar.servicioGroomingDetalle'), icono: <Icono nombre="grooming" tamano={34} /> });
+    if (servicios.veterinary) fichasActivas.push({ clave: 'vet', titulo: t('explorar.servicioVet'), detalle: t('explorar.servicioVetDetalle'), icono: <Icono nombre="veterinaria" tamano={34} /> });
     if (servicios.training) fichasActivas.push({ clave: 'adiestramiento', titulo: t('explorar.servicioAdiestramiento'), detalle: t('explorar.servicioAdiestramientoDetalle'), icono: <IconoServicioAdiestramiento color={theme.capa.cuidado} /> });
     if (!servicios.hotel) proximamente.push(t('explorar.proxHotel'), t('explorar.proxGuarderia'));
     if (!servicios.insurance) proximamente.push(t('explorar.proxSeguros'));
@@ -113,21 +113,30 @@ export default function Explorar() {
               />
             ) : (
               <View style={{ gap: spacing[3] }}>
-                {fichasActivas.map((f) => (
-                  <Tarjeta key={f.clave}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-                      {f.icono}
-                      <View style={{ flex: 1, gap: 2 }}>
-                        <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
-                          {f.titulo}
-                        </Text>
-                        <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
-                          {f.detalle}
-                        </Text>
-                      </View>
+                {/* QW2 (S53, decisión founder): grilla de 2 columnas,
+                    cards cuadradas con el Icono b′ PRESIDIENDO. */}
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] }}>
+                  {fichasActivas.map((f) => (
+                    <View key={f.clave} style={{ flexBasis: '47%', flexGrow: 1 }}>
+                      <Tarjeta relleno="amplio">
+                        <View style={{ aspectRatio: 1.05, justifyContent: 'space-between' }}>
+                          <View style={{ paddingTop: spacing[1] }}>{f.icono}</View>
+                          <View style={{ gap: 2 }}>
+                            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
+                              {f.titulo}
+                            </Text>
+                            <Text
+                              numberOfLines={3}
+                              style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.xs, lineHeight: typography.size.xs * 1.45, color: theme.text.secondary }}
+                            >
+                              {f.detalle}
+                            </Text>
+                          </View>
+                        </View>
+                      </Tarjeta>
                     </View>
-                  </Tarjeta>
-                ))}
+                  ))}
+                </View>
                 <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.tertiary }}>
                   {t('explorar.agendarLlega')}
                 </Text>

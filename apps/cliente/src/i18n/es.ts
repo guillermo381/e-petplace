@@ -53,6 +53,29 @@ export const clienteEs = {
     errorHistoriaDetalle: 'Revisa tu conexión y prueba de nuevo.',
     reintentar: 'Reintentar',
   },
+  coach: {
+    // ── El Coach v0 (S53-B2b) — VOZ EMOCIONAL, GATE PENDIENTE.
+    // v0 = plantillas sobre DATOS REALES del expediente (L-139: cero
+    // generación, cero diagnóstico); el cerebro de verdad es A5.
+    abrir: 'Abrir el Coach',
+    preguntaSobre: 'Pregunta sobre {{nombre}}',
+    // las tres preguntas sugeridas
+    pEdad: '¿Qué edad tiene?',
+    pCarnet: '¿Cómo va su carnet?',
+    pActividad: '¿Qué actividad tiene?',
+    // respuestas-plantilla (datos verificables adentro)
+    rEdad: '{{nombre}} tiene {{edad}} — su etapa es {{momento}}.',
+    rEdadSinMomento: '{{nombre}} tiene {{edad}}.',
+    rEdadSinFecha: 'Todavía no tengo su fecha de nacimiento — puedes cargarla en su perfil y te la cuento.',
+    rCarnet: 'Tiene {{n}} vacunas registradas. La última que guardamos es {{vacuna}}.',
+    rCarnetUna: 'Tiene 1 vacuna registrada: {{vacuna}}.',
+    rCarnetVacio: 'Su carnet todavía está vacío — cárgalo con una foto y lo leo por ti.',
+    rActividad: 'Tiene {{n}} paseos guardados en su historia; el último fue el {{fecha}}.',
+    rActividadUno: 'Tiene 1 paseo guardado en su historia, el {{fecha}}.',
+    rActividadVacia: 'Todavía no hay paseos registrados — cuando salga a pasear con la app, quedan guardados acá.',
+    // la honestidad del v0
+    pie: 'Pronto vas a poder preguntarme lo que quieras.',
+  },
   ficha: {
     // ── Voces de la FichaMascotaHogar v2 (S52-P3) — SIN sujeto: el
     // nombre PRESIDE la card y la voz no lo repite. VERSIONADAS EN

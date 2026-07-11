@@ -138,3 +138,6 @@ export {
   type DetalleMascotaPrestador,
   type MascotaAtendida,
 } from './wrappers/mascotasPrestador';
+
+// Perfil propio — S53-B2b (saludo con nombre)
+export { obtenerMiPerfil, type MiPerfil } from './wrappers/miPerfil';

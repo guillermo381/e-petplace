@@ -49,6 +49,24 @@ export const clienteEn = {
     errorHistoriaDetalle: 'Check your connection and try again.',
     reintentar: 'Try again',
   },
+  coach: {
+    // Propuestas — GATE PENDIENTE (voz del Coach):
+    abrir: 'Open the Coach',
+    preguntaSobre: 'Ask about {{nombre}}',
+    pEdad: 'How old are they?',
+    pCarnet: "How's the vaccine card?",
+    pActividad: 'Any activity on record?',
+    rEdad: '{{nombre}} is {{edad}} — in their {{momento}} stage.',
+    rEdadSinMomento: '{{nombre}} is {{edad}}.',
+    rEdadSinFecha: "I don't have their birth date yet — add it to the profile and I'll tell you.",
+    rCarnet: 'There are {{n}} vaccines on record. The latest we saved is {{vacuna}}.',
+    rCarnetUna: 'There is 1 vaccine on record: {{vacuna}}.',
+    rCarnetVacio: 'The vaccine card is still empty — add it with a photo and I read it for you.',
+    rActividad: 'There are {{n}} walks saved in their story; the last one was on {{fecha}}.',
+    rActividadUno: 'There is 1 walk saved in their story, on {{fecha}}.',
+    rActividadVacia: 'No walks on record yet — when they go out with the app, they get saved here.',
+    pie: "Soon you'll be able to ask me anything.",
+  },
   ficha: {
     // Propuestas — GATE PENDIENTE (tanda S52):
     vozAlDia: 'All caught up.',

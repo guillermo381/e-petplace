@@ -88,6 +88,10 @@ export interface HojaProps {
   altura?: HojaAltura
   /** Botón X (target 44). El swipe/backdrop/back existen siempre. */
   conCerrar?: boolean
+  /** S53 (DIRECCION_ARTE §5.2): 'marca' = la física del Coach —
+   *  translateY con la curva del prototipo (.32,.72,0,1), ~340ms,
+   *  scrim efectivo .4. Memorial la ignora (fades suaves siempre). */
+  apertura?: 'default' | 'marca'
 }
 
 export interface HojaScrollProps {
@@ -141,6 +145,7 @@ export function Hoja({
   titulo,
   altura = 'contenido',
   conCerrar = false,
+  apertura = 'default',
 }: HojaProps) {
   const { theme } = useTheme()
   const { height: altoVentana } = useWindowDimensions()
@@ -158,13 +163,23 @@ export function Hoja({
 
   // entrada: spring normal(250) — memorial: slide+fade easeOut, nada rebota
   const animarEntrada = () => {
-    backdrop.value = withTiming(1, { duration: motion.duration.normal })
+    // scrim efectivo: palette.scrim ya trae .52 de alpha — el preset
+    // marca apunta a .4 en pantalla (§5.2), el default queda como estaba.
+    const esMarca = apertura === 'marca' && !esMemorial
+    backdrop.value = withTiming(esMarca ? motion.marca.scrimEfectivo / 0.52 : 1, {
+      duration: esMarca ? motion.marca.aperturaMs : motion.duration.normal,
+    })
     translateY.value = esMemorial
       ? withTiming(0, {
           duration: motion.duration.normal,
           easing: Easing.bezier(...motion.easing.easeOut.bezier),
         })
-      : withSpring(0, { duration: motion.duration.normal, dampingRatio: 0.85 })
+      : esMarca
+        ? withTiming(0, {
+            duration: motion.marca.aperturaMs,
+            easing: Easing.bezier(...motion.marca.aperturaBezier),
+          })
+        : withSpring(0, { duration: motion.duration.normal, dampingRatio: 0.85 })
   }
 
   const cerrarAnimado = () => {

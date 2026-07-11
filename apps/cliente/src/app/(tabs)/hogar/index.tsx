@@ -20,7 +20,7 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -34,6 +34,7 @@ import {
   FichaMascotaHogar,
   HeroMarca,
   Hoja,
+  Icono,
   HojaScroll,
   LineaDeVida,
   Separador,
@@ -49,6 +50,7 @@ import {
 } from '@epetplace/ui';
 import {
   getEstadoOnboardingDueno,
+  obtenerMiPerfil,
   leerTimelineMascota,
   obtenerEstadoHogar,
   obtenerMascotasDeFamilia,
@@ -62,6 +64,7 @@ import {
 } from '@epetplace/api';
 import { calcularVozHogar, type VozEstadoHogar } from '@epetplace/domain';
 
+import { CoachHoja } from '@/components/coach';
 import { useTraduccion } from '@/i18n';
 
 // Fecha ISO → voz de máquina "01 may 2026" (mismo formato que FichaVacuna).
@@ -153,6 +156,9 @@ export default function Hogar() {
   const cargandoMasRef = useRef(false);
 
   const [carnetSelectorAbierto, setCarnetSelectorAbierto] = useState(false);
+  const [coachAbierto, setCoachAbierto] = useState(false);
+  // QW1 (S53): el saludo lleva el nombre del miembro (profiles.nombre).
+  const [nombrePerfil, setNombrePerfil] = useState<string | null>(null);
   const [vacunaAbierta, setVacunaAbierta] = useState(false);
   const [vacuna, setVacuna] = useState<VacunaDeEvento | 'cargando' | 'error'>('cargando');
   const [carnetFirmado, setCarnetFirmado] = useState<string | null>(null);
@@ -235,6 +241,10 @@ export default function Hogar() {
         // señales + fotos + timeline en paralelo — reemplazo directo (Ley 13)
         void obtenerEstadoHogar(lista.map((m) => m.id)).then((eh) => {
           if (vigente && eh.ok) setEstadoHogar(eh.data);
+        });
+        void obtenerMiPerfil().then((p) => {
+          // sin nombre: el saludo va solo — jamás un nombre inventado
+          if (vigente && p.ok) setNombrePerfil(p.data.nombre);
         });
         const paths = lista.map((m) => m.foto_url).filter((p): p is string => typeof p === 'string' && p.length > 0);
         if (paths.length > 0) {
@@ -343,7 +353,35 @@ export default function Hogar() {
           lógica. El isotipo blanco de adentro es el UNO por pantalla.
           Memorial degrada solo (bg.card plano). */}
       <View style={{ paddingTop: insets.top, backgroundColor: esMemorial ? theme.bg.card : undefined }}>
-        <HeroMarca titulo={saludoPorFranja(hoy.getHours(), t)} variante="compacto" />
+        <HeroMarca
+          titulo={`${saludoPorFranja(hoy.getHours(), t)}${nombrePerfil ? `, ${nombrePerfil.trim().split(' ')[0]}` : ''}`}
+          variante="compacto"
+        />
+        {/* LA ENTRADA DEL COACH (S53-B2b, §6 + DIRECCION_ARTE §5.1):
+            el destello vive en el techo del Hogar, discreto. Blanco
+            sobre el gradiente (misma familia que el isotipo — marca,
+            no CTA); memorial degrada solo por el registry del Icono.
+            El PUNTO DE NOVEDAD se enciende solo cuando el motor de
+            revelaciones (B4) tenga algo nuevo que decir — jamás badge
+            permanente; su lugar queda hecho abajo. */}
+        <Pressable
+          onPress={() => setCoachAbierto(true)}
+          accessibilityRole="button"
+          accessibilityLabel={t('coach.abrir')}
+          hitSlop={10}
+          style={{
+            position: 'absolute',
+            top: insets.top + spacing[3],
+            right: spacing[3],
+            width: 44,
+            height: 44,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Icono nombre="coach" tamano={24} registro="tinta" tinta={esMemorial ? theme.text.secondary : theme.text.onGradient} />
+          {/* punto de novedad — motor B4: {hayNovedadCoach ? <View .../> : null} */}
+        </Pressable>
       </View>
 
       <Animated.View
@@ -526,6 +564,8 @@ export default function Hogar() {
           </View>
         )}
       </Hoja>
+
+      <CoachHoja visible={coachAbierto} onCerrar={() => setCoachAbierto(false)} mascotas={mascotas} />
 
       {carnetFirmado !== null && (
         <VisorFoto
