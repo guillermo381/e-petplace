@@ -53,6 +53,22 @@ export const clienteEs = {
     errorHistoriaDetalle: 'Revisa tu conexión y prueba de nuevo.',
     reintentar: 'Reintentar',
   },
+  ficha: {
+    // ── Voces de la FichaMascotaHogar v2 (S52-P3) — SIN sujeto: el
+    // nombre PRESIDE la card y la voz no lo repite. VERSIONADAS EN
+    // PARES con hogar.voz* (con {{nombre}}, que se CONSERVAN para
+    // contextos sin sujeto visible: notificaciones, Coach, alertas).
+    // VOZ EMOCIONAL — GATE PENDIENTE (tanda S52 al lote del founder).
+    vozAlDia: 'Está al día.',
+    vozEmergencia: 'Necesita tu atención ahora.',
+    vozVacunaVence: 'Le vence {{vacuna}} en {{dias}} días.',
+    vozVacunaVenceUnDia: 'Le vence {{vacuna}} mañana.',
+    vozVacunaVenceHoy: 'Le vence {{vacuna}} hoy.',
+    vozVacunaVencida: 'Se le venció {{vacuna}} hace {{dias}} días.',
+    vozVacunaVencidaUnDia: 'Se le venció {{vacuna}} ayer.',
+    vozConociendolo: 'Aún nos estamos conociendo — carga su carnet.',
+    vozQuieto: 'Su expediente quedó quieto — ¿hay novedades?',
+  },
   perfil: {
     // ── momento vital (Ley 3: la VOZ, jamás M1..M7) ──
     // Bautizo APROBADO por founder (gate del lote S51).

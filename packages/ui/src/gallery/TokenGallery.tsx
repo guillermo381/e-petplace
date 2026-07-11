@@ -294,26 +294,21 @@ function EjemploFichaVacuna() {
 }
 
 function EjemploFichaMascotaHogar() {
-  // Las tres voces del estado del hogar (los textos acá son mock de
-  // galería; en producto nacen del riel i18n del app).
+  // v2 (S52-P3): el nombre PRESIDE — las voces van SIN sujeto (mock
+  // de galería; en producto nacen del riel i18n del app, ficha.*).
   return (
-    <View style={{ gap: spacing[1] }}>
-      <FichaMascotaHogar
-        nombre="Thor"
-        voz="alDia"
-        textoEstado="Thor está al día."
-        onPress={() => {}}
-      />
+    <View style={{ gap: spacing[3] }}>
+      <FichaMascotaHogar nombre="Thor" voz="alDia" textoEstado="Está al día." onPress={() => {}} />
       <FichaMascotaHogar
         nombre="Zeus"
         voz="pideAtencion"
-        textoEstado="A Zeus le vence la antirrábica en 12 días."
+        textoEstado="Le vence la antirrábica en 12 días."
         onPress={() => {}}
       />
       <FichaMascotaHogar
         nombre="Luna"
         voz="conociendolo"
-        textoEstado="Aún estamos conociendo a Luna — carga su carnet y te ayudamos a cuidarla mejor."
+        textoEstado="Aún nos estamos conociendo — carga su carnet."
         onPress={() => {}}
       />
     </View>
@@ -1256,7 +1251,7 @@ function GaleriaInterna() {
         </Seccion>
 
         {/* FichaMascotaHogar — S51-B2.2: Zona 1 del Hogar (Ley 11 gateada) */}
-        <Seccion titulo="FichaMascotaHogar — Zona 1 del Hogar: las tres voces del estado (tocá una: pressed resalta, jamás escala)">
+        <Seccion titulo="FichaMascotaHogar v2 (S52) — la mascota preside: avatar 64 + nombre grande + voz SIN sujeto sobre Tarjeta (tocá una: pressed 0.99)">
           <View style={{ gap: spacing[4] }}>
             <ThemeProvider defaultMode="light">
               <PanelTema etiqueta="claro — alDia punto verdeVital · pideAtencion punto ochre + voz warningText (pide sin gritar) · conociendolo neutral que invita">

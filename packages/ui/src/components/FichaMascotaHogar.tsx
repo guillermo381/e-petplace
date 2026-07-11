@@ -1,41 +1,38 @@
 /**
- * FichaMascotaHogar — la ficha de una mascota en la Zona 1 del Hogar
- * (S51-B2.2, Ley 11 con espec gateada por founder).
+ * FichaMascotaHogar v2 — la mascota PRESIDIENDO la Zona 1 del Hogar
+ * (S51 Ley 11 → re-espec S52-P3 gateada por founder).
  *
- * QUÉ ES: AvatarMascota + nombre (voz viva, DM Sans) + UNA línea de
- * estado en voz humana con su semántica visual. Interactiva: tap →
- * perfil de la mascota. El TEXTO de la voz lo pasa la pantalla (nace
- * del riel i18n del app); este componente es presentacional puro y
- * solo porta la SEMÁNTICA (Ley 3: acá no entra ningún código del
- * modelo — la pantalla ya tradujo voz → texto).
+ * QUÉ ES: la foto primero (AvatarMascota 64 — la foto real es el
+ * gesto; la huella digna es el fallback), sobre superficie Tarjeta,
+ * con el NOMBRE presidiendo (DM Sans light xl) y UNA línea de estado
+ * que NO repite el nombre (las voces sin sujeto viven en el
+ * diccionario del app — ficha.*; las variantes con nombre se
+ * conservan para contextos sin sujeto visible). Presentacional puro:
+ * la pantalla pasa el texto ya traducido; acá solo vive la SEMÁNTICA
+ * (Ley 3).
  *
- * QUÉ NO ES: no porta badges ni contadores; no es Celda genérica (sin
- * metadataMono — el estado del hogar es voz humana, no de máquina);
- * no lleva CTA embebida (el tap ES la acción: ir al perfil).
+ * QUÉ NO ES: sin badges, sin contadores, sin CTA embebida (el tap ES
+ * la acción: ir al perfil), sin metadataMono.
  *
- * SEMÁNTICA POR VOZ (tres voces de DISEÑO_EXPERIENCIA §2):
- *   alDia        → punto verdeVital (registro gráfico status.success),
- *                  voz en text.secondary — verde vital, sin ruido.
- *   pideAtencion → punto ochre + voz en status.warningText (registro
- *                  AA) — pide, no grita (danger queda para emergencia
- *                  DENTRO del perfil, no en la ficha).
- *   conociendolo → sin punto, voz en text.secondary — neutral, invita.
+ * SEMÁNTICA POR VOZ (intacta de v1):
+ *   alDia        → punto verdeVital (status.success gráfico), voz secondary
+ *   pideAtencion → punto ochre + voz warningText (pide, no grita)
+ *   conociendolo → sin punto, voz secondary — neutral que invita
  *
- * Pressed: resalta bg.overlay, JAMÁS escala (regla de filas, Celda).
- * Memorial: degrada solo — sin punto ni tinte, voz en text.secondary.
- * A11y: botón "{nombre}, {texto del estado}".
+ * Superficie: Tarjeta interactiva (pressed 0.99 — ya no es fila).
+ * Diseñada para 1-3 apiladas (la pantalla pone el gap). Memorial
+ * degrada: sin punto, voz neutra (la Tarjeta ya degrada sola).
+ * A11y: botón "{nombre}, {texto del estado}" — completo al lector.
  */
 
-import { useState } from 'react'
-import { Pressable, Text, View } from 'react-native'
-import Animated, { cubicBezier } from 'react-native-reanimated'
+import { Text, View } from 'react-native'
 
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
 import { radius } from '../tokens/radius'
-import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
 import { AvatarMascota } from './AvatarMascota'
+import { Tarjeta } from './Tarjeta'
 
 export type FichaMascotaHogarVoz = 'alDia' | 'pideAtencion' | 'conociendolo'
 
@@ -43,7 +40,7 @@ export type FichaMascotaHogarProps = {
   nombre: string
   /** URL firmada (la pantalla resuelve el path — patrón S47). */
   fotoUrl?: string
-  /** La voz decide punto y color; el texto ya viene traducido. */
+  /** La voz decide punto y color; el texto ya viene traducido y SIN nombre. */
   voz: FichaMascotaHogarVoz
   textoEstado: string
   onPress: () => void
@@ -51,10 +48,8 @@ export type FichaMascotaHogarProps = {
 
 export function FichaMascotaHogar({ nombre, fotoUrl, voz, textoEstado, onPress }: FichaMascotaHogarProps) {
   const { theme } = useTheme()
-  const [presionada, setPresionada] = useState(false)
   const esMemorial = theme.mode === 'memorial'
 
-  // Memorial degrada: sin punto, voz neutra (el momento se respeta).
   const punto = esMemorial
     ? null
     : voz === 'alDia'
@@ -67,36 +62,23 @@ export function FichaMascotaHogar({ nombre, fotoUrl, voz, textoEstado, onPress }
     !esMemorial && voz === 'pideAtencion' ? theme.status.warningText : theme.text.secondary
 
   return (
-    <Pressable
+    <Tarjeta
+      interactiva
       onPress={onPress}
-      onPressIn={() => setPresionada(true)}
-      onPressOut={() => setPresionada(false)}
       accessibilityRole="button"
-      accessibilityLabel={`${nombre}, ${textoEstado}`}
+      etiqueta={`${nombre}, ${textoEstado}`}
     >
-      <Animated.View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing[3],
-          paddingHorizontal: spacing[3],
-          paddingVertical: spacing[3],
-          borderRadius: radius.lg,
-          backgroundColor: presionada ? theme.bg.overlay : 'transparent',
-          transitionProperty: 'backgroundColor',
-          transitionDuration: motion.duration.fast,
-          transitionTimingFunction: cubicBezier(...motion.easing.easeOut.bezier),
-        }}
-      >
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
         <AvatarMascota nombre={nombre} fotoUrl={fotoUrl} tamano="md" />
 
-        <View style={{ flex: 1, gap: 2 }}>
+        <View style={{ flex: 1, gap: spacing[1] }}>
           <Text
             numberOfLines={1}
             ellipsizeMode="tail"
             style={{
-              fontFamily: typography.family.sans.medium,
-              fontSize: typography.size.lg,
+              // el nombre PRESIDE — voz humana grande (ser vivo)
+              fontFamily: typography.family.sans.light,
+              fontSize: typography.size.xl,
               color: theme.text.primary,
             }}
           >
@@ -129,7 +111,7 @@ export function FichaMascotaHogar({ nombre, fotoUrl, voz, textoEstado, onPress }
             </Text>
           </View>
         </View>
-      </Animated.View>
-    </Pressable>
+      </View>
+    </Tarjeta>
   )
 }

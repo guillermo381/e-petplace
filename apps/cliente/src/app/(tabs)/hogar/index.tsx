@@ -88,33 +88,37 @@ const entradaZona = (orden: number) =>
   FadeInDown.duration(motion.duration.normal).delay(orden * motion.stagger.fast);
 
 // Código de voz (Ley 3: jamás visible) → texto del riel + semántica.
-function vozATexto(voz: VozEstadoHogar, nombre: string, t: TraductorHogar): { texto: string; semantica: FichaMascotaHogarVoz } {
+// S52-P3: la ficha usa las voces SIN sujeto (ficha.*) — el nombre
+// preside la card y no se repite. Las variantes con {{nombre}}
+// (hogar.voz*) se CONSERVAN para contextos sin sujeto visible
+// (notificaciones, Coach, alertas — decisión founder S52).
+function vozATexto(voz: VozEstadoHogar, t: TraductorHogar): { texto: string; semantica: FichaMascotaHogarVoz } {
   switch (voz.voz) {
     case 'alDia':
-      return { texto: t('hogar.vozAlDia', { nombre }), semantica: 'alDia' };
+      return { texto: t('ficha.vozAlDia'), semantica: 'alDia' };
     case 'pideAtencion': {
       if (voz.causa === 'emergencia') {
-        return { texto: t('hogar.vozEmergencia', { nombre }), semantica: 'pideAtencion' };
+        return { texto: t('ficha.vozEmergencia'), semantica: 'pideAtencion' };
       }
       const { vacuna, dias } = voz;
       if (voz.causa === 'vacunaVence') {
         const texto =
           dias === 0
-            ? t('hogar.vozVacunaVenceHoy', { nombre, vacuna })
+            ? t('ficha.vozVacunaVenceHoy', { vacuna })
             : dias === 1
-              ? t('hogar.vozVacunaVenceUnDia', { nombre, vacuna })
-              : t('hogar.vozVacunaVence', { nombre, vacuna, dias });
+              ? t('ficha.vozVacunaVenceUnDia', { vacuna })
+              : t('ficha.vozVacunaVence', { vacuna, dias });
         return { texto, semantica: 'pideAtencion' };
       }
       const texto =
         dias === 1
-          ? t('hogar.vozVacunaVencidaUnDia', { nombre, vacuna })
-          : t('hogar.vozVacunaVencida', { nombre, vacuna, dias });
+          ? t('ficha.vozVacunaVencidaUnDia', { vacuna })
+          : t('ficha.vozVacunaVencida', { vacuna, dias });
       return { texto, semantica: 'pideAtencion' };
     }
     case 'conociendolo':
       return {
-        texto: voz.causa === 'expedienteRalo' ? t('hogar.vozConociendolo', { nombre }) : t('hogar.vozQuieto', { nombre }),
+        texto: voz.causa === 'expedienteRalo' ? t('ficha.vozConociendolo') : t('ficha.vozQuieto'),
         semantica: 'conociendolo',
       };
   }
@@ -331,16 +335,20 @@ export default function Hogar() {
       contentContainerStyle={{ paddingBottom: spacing[8] }}
     >
       {/* ── Zona 1 — el hogar ───────────────────────────────────
-          Techo: HeroMarca compacto (enmienda Ley 4 S52: contexto
-          cerrado nuevo). El isotipo blanco de adentro es el UNO por
-          pantalla. Memorial degrada solo (bg.card plano). */}
+          Techo: HeroMarca compacto (enmienda Ley 4 S52, SELLADA
+          condicionada al gate visual del founder). PUNTO DE REVERSIÓN
+          BARATA: si el gate lo baja, reemplazar este bloque por
+          <Encabezado variante="portada" saludo={saludoPorFranja(...)}/>
+          — el lockup en tinta de P1; un cambio de componente, cero
+          lógica. El isotipo blanco de adentro es el UNO por pantalla.
+          Memorial degrada solo (bg.card plano). */}
       <View style={{ paddingTop: insets.top, backgroundColor: esMemorial ? theme.bg.card : undefined }}>
         <HeroMarca titulo={saludoPorFranja(hoy.getHours(), t)} variante="compacto" />
       </View>
 
       <Animated.View
         entering={entradaZona(0)}
-        style={{ paddingHorizontal: spacing[4], paddingTop: spacing[5], gap: spacing[2] }}
+        style={{ paddingHorizontal: spacing[4], paddingTop: spacing[5], gap: spacing[3] }}
       >
         {mascotas.map((m) => {
           const senales = senalesPorMascota.get(m.id);
@@ -358,7 +366,6 @@ export default function Hogar() {
                   },
                   hoy,
                 ),
-                m.nombre,
                 t,
               )
             : null;

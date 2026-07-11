@@ -49,6 +49,18 @@ export const clienteEn = {
     errorHistoriaDetalle: 'Check your connection and try again.',
     reintentar: 'Try again',
   },
+  ficha: {
+    // Propuestas — GATE PENDIENTE (tanda S52):
+    vozAlDia: 'All caught up.',
+    vozEmergencia: 'Needs your attention now.',
+    vozVacunaVence: '{{vacuna}} is due in {{dias}} days.',
+    vozVacunaVenceUnDia: '{{vacuna}} is due tomorrow.',
+    vozVacunaVenceHoy: '{{vacuna}} is due today.',
+    vozVacunaVencida: '{{vacuna}} was due {{dias}} days ago.',
+    vozVacunaVencidaUnDia: '{{vacuna}} was due yesterday.',
+    vozConociendolo: "We're still getting to know each other — add the vaccine card.",
+    vozQuieto: 'The record has been quiet — anything new?',
+  },
   perfil: {
     momentoM1: 'First months',
     momentoM2: 'Growing up',
