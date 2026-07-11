@@ -16,3 +16,11 @@ export {
   type MomentoVital,
   type UmbralesMomentoVital,
 } from './momentoVital';
+
+export {
+  calcularVitales,
+  distanciaTrackKm,
+  type PaseoVital,
+  type PuntoTrack,
+  type VitalesPaseos,
+} from './vitalesPaseos';

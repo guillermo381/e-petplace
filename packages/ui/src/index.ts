@@ -128,3 +128,4 @@ export {
 // Lenguaje b′ — DIRECCION_ARTE v1.0 (S53): la mascota presente en cada ícono
 export { Huella, HUELLA_BOX } from './brand/Huella'
 export { Icono, type IconoNombre, type IconoRegistro } from './components/Icono'
+export { Guijarro, type GuijarroCapa } from './brand/Guijarro'

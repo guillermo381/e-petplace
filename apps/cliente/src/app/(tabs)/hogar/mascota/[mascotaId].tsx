@@ -5,11 +5,11 @@
  * pila:
  *   1. Su vida — LineaDeVida propia (paginada).
  *   2. Salud — el carnet vivo (vacunas reales de S47-48).
- *   3. Bienestar y actividad — lo que el ecosistema deposita (paseos).
- *      ═══ HUECO M-WEAR ═══ el día del wearable este módulo se expande
- *      al dashboard (actividad, descanso, tendencias) por revelación
- *      progresiva — inserción en una pila que ya existe, cero refactor
- *      (mandato founder S50). Hoy: cero UI de wearable.
+ *   3. VITALES (S53-B2c) — lo REAL de sus paseos (km/min/salidas de
+ *      los tracks) + los índices EDUCATIVOS en despliegue progresivo
+ *      (guijarros §4; honestos-vacíos, la Hoja educa y termina en una
+ *      acción que alimenta el expediente). ═══ HUECO M-WEAR ═══ el día
+ *      del collar, los índices se llenan — cero refactor (founder S50).
  *   4. Identidad — progresiva: SOLO lo cargado; lo que falta es una
  *      invitación digna, jamás un formulario ni datos fake.
  *
@@ -19,6 +19,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import Svg, { Path } from 'react-native-svg';
 import {
   AvatarMascota,
   Boton,
@@ -27,6 +28,8 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  Guijarro,
+  Hoja,
   LineaDeVida,
   Separador,
   Tarjeta,
@@ -37,12 +40,19 @@ import {
 } from '@epetplace/ui';
 import {
   leerTimelineMascota,
+  obtenerPaseosConTrack,
   obtenerPerfilMascota,
   resolverUrlFoto,
   type ItemTimeline,
   type PerfilMascota,
 } from '@epetplace/api';
-import { calcularMomentoVital, edadEnMeses, type MomentoVital } from '@epetplace/domain';
+import {
+  calcularMomentoVital,
+  calcularVitales,
+  edadEnMeses,
+  type MomentoVital,
+  type VitalesPaseos,
+} from '@epetplace/domain';
 
 import { esEspecieUi } from '@/lib/params';
 import { useTraduccion } from '@/i18n';
@@ -74,6 +84,34 @@ function vozEdad(meses: number, t: TraductorPerfil): string {
   return anios === 1 ? t('perfil.edadUnAnio') : t('perfil.edadAnios', { anios });
 }
 
+// Motivos en trazo de los guijarros (§4: el motivo va ENCIMA del tinte).
+const trazoMotivo = (color: string) => ({
+  stroke: color,
+  strokeWidth: 1.9,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+  fill: 'none' as const,
+});
+
+function MotivoCorazon({ color }: { color: string }) {
+  return (
+    <Svg width={26} height={26} viewBox="0 0 24 24">
+      <Path
+        d="M12 19.4C8 16.2 5 13.3 5 10.2c0-2.3 1.9-4 4-4 1.2 0 2.3.5 3 1.5.7-1 1.8-1.5 3-1.5 2.1 0 4 1.7 4 4 0 3.1-3 6-7 9.2Z"
+        {...trazoMotivo(color)}
+      />
+    </Svg>
+  );
+}
+
+function MotivoLuna({ color }: { color: string }) {
+  return (
+    <Svg width={26} height={26} viewBox="0 0 24 24">
+      <Path d="M14.8 4.6a7.6 7.6 0 1 0 4.6 12.9 8.8 8.8 0 0 1-4.6-12.9Z" {...trazoMotivo(color)} />
+    </Svg>
+  );
+}
+
 // S52-P4b: título de módulo HUMANIZADO — DM Sans medium en sentence
 // case (el eyebrow uppercase trackeado murió: leía como formulario).
 function TituloModulo({ texto }: { texto: string }) {
@@ -99,6 +137,9 @@ export default function PerfilDeMascota() {
   const { mascotaId } = useLocalSearchParams<{ mascotaId: string }>();
 
   const [perfil, setPerfil] = useState<PerfilMascota | 'cargando' | 'error'>('cargando');
+  // Vitales (S53-B2c): paseos con track REAL → cálculo puro en domain.
+  const [vitales, setVitales] = useState<VitalesPaseos | 'cargando' | 'error'>('cargando');
+  const [indiceAbierto, setIndiceAbierto] = useState<'salud' | 'descanso' | null>(null);
   const [fotoFirmada, setFotoFirmada] = useState<string | undefined>(undefined);
   const [items, setItems] = useState<ItemTimeline[] | null | 'error'>(null);
   const [cursor, setCursor] = useState<string | null>(null);
@@ -152,6 +193,9 @@ export default function PerfilDeMascota() {
           return;
         }
         setPerfil(r.data);
+        void obtenerPaseosConTrack(mascotaId).then((pv) => {
+          if (vigente) setVitales(pv.ok ? calcularVitales(pv.data, new Date()) : 'error');
+        });
         if (r.data.mascota.foto_url) {
           void resolverUrlFoto(r.data.mascota.foto_url).then((url) => {
             if (vigente) setFotoFirmada(url ?? undefined);
@@ -204,7 +248,7 @@ export default function PerfilDeMascota() {
     );
   }
 
-  const { mascota, vacunas, paseos_total, ultimo_paseo_fecha, peso_clinico_kg, tiene_condicion_cronica, umbrales } = perfil;
+  const { mascota, vacunas, peso_clinico_kg, tiene_condicion_cronica, umbrales } = perfil;
   const hoy = new Date();
   const meses = mascota.fecha_nacimiento !== null ? edadEnMeses(mascota.fecha_nacimiento, hoy) : null;
   const momento =
@@ -325,22 +369,111 @@ export default function PerfilDeMascota() {
           )}
         </View>
 
-        {/* ── 3 · Bienestar y actividad ──
-            ═══ HUECO M-WEAR: acá se inserta el dashboard del wearable
-            (actividad/descanso/tendencias) cuando el collar exista —
-            revelación progresiva, cero refactor (§4). ═══ */}
+        {/* ── 3 · VITALES (S53-B2c: Bienestar elevado a dashboard) ──
+            ═══ HUECO M-WEAR: el día que la mascota tenga collar
+            conectado, los ÍNDICES de abajo se llenan y el dashboard
+            se expande (actividad/descanso/tendencias) — revelación
+            progresiva, cero refactor (DISEÑO_EXPERIENCIA §4). ═══ */}
         <View style={{ gap: spacing[3] }}>
-          <TituloModulo texto={t('perfil.bienestar')} />
-          {paseos_total === 0 ? (
-            <EstadoVacio titulo={t('perfil.bienestarVacio')} descripcion={t('perfil.bienestarVacioDetalle')} />
+          <TituloModulo texto={t('perfil.vitales')} />
+
+          {/* (a) LO REAL — los paseos de ESTA mascota, de sus tracks */}
+          {vitales === 'cargando' ? (
+            <EsqueletoGrupo>
+              <Esqueleto forma="bloque" ancho="100%" alto={96} />
+            </EsqueletoGrupo>
+          ) : vitales === 'error' || vitales.totalSalidas === 0 ? (
+            // sin paseos: invitación serena — JAMÁS ceros (L-139)
+            <EstadoVacio
+              registro="seccion"
+              titulo={t('perfil.bienestarVacio')}
+              descripcion={t('perfil.bienestarVacioDetalle')}
+            />
           ) : (
-            <Tarjeta>
-              <Celda
-                titulo={paseos_total === 1 ? t('perfil.unPaseoGuardado') : t('perfil.paseosGuardados', { n: paseos_total })}
-                metadataMono={ultimo_paseo_fecha !== null ? fechaMono(ultimo_paseo_fecha.slice(0, 10)) : undefined}
-              />
+            <Tarjeta relleno="amplio">
+              <View style={{ gap: spacing[3] }}>
+                <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+                  {t('perfil.vitalesUltimos7')}
+                </Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: spacing[4] }}>
+                  <View style={{ width: '50%', gap: 2 }}>
+                    <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.xl, letterSpacing: typography.tracking.mono, color: theme.text.primary }}>
+                      {vitales.km7d.toFixed(1)} km
+                    </Text>
+                    <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                      {t('perfil.vitalesKm')}
+                    </Text>
+                  </View>
+                  <View style={{ width: '50%', gap: 2 }}>
+                    <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.xl, letterSpacing: typography.tracking.mono, color: theme.text.primary }}>
+                      {vitales.min7d} min
+                    </Text>
+                    <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                      {t('perfil.vitalesMin')}
+                    </Text>
+                  </View>
+                  <View style={{ width: '50%', gap: 2 }}>
+                    <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.xl, letterSpacing: typography.tracking.mono, color: theme.text.primary }}>
+                      {vitales.salidas7d}
+                    </Text>
+                    <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                      {t('perfil.vitalesSalidas')}
+                    </Text>
+                  </View>
+                  <View style={{ width: '50%', gap: 2 }}>
+                    <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.xl, letterSpacing: typography.tracking.mono, color: theme.text.primary }}>
+                      {vitales.ultimaSalida !== null ? fechaMono(vitales.ultimaSalida.slice(0, 10)) : '—'}
+                    </Text>
+                    <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                      {t('perfil.vitalesUltimaSalida')}
+                    </Text>
+                  </View>
+                </View>
+                {/* la lectura en voz humana — SOLO si el dato la respalda */}
+                {vitales.caminoMasQueAnterior ? (
+                  <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                    {t('perfil.vitalesComparativa')}
+                  </Text>
+                ) : null}
+              </View>
             </Tarjeta>
           )}
+
+          {/* (b) LO EDUCATIVO — índices visibles, honestos-vacíos:
+              guijarros (§4, PRIMER uso del lenguaje de ilustración;
+              cada uno rotado distinto) + Hoja que educa al tap. */}
+          <View style={{ flexDirection: 'row', gap: spacing[3] }}>
+            <View style={{ flex: 1 }}>
+              <Tarjeta interactiva onPress={() => setIndiceAbierto('salud')} accessibilityRole="button" etiqueta={t('perfil.indiceSalud')}>
+                <View style={{ gap: spacing[2], alignItems: 'flex-start' }}>
+                  <Guijarro capa="identidad" tamano={56} rotacion={9}>
+                    <MotivoCorazon color={theme.text.primary} />
+                  </Guijarro>
+                  <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.primary }}>
+                    {t('perfil.indiceSalud')}
+                  </Text>
+                  <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+                    {t('perfil.indiceSeConstruye')}
+                  </Text>
+                </View>
+              </Tarjeta>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Tarjeta interactiva onPress={() => setIndiceAbierto('descanso')} accessibilityRole="button" etiqueta={t('perfil.indiceDescanso')}>
+                <View style={{ gap: spacing[2], alignItems: 'flex-start' }}>
+                  <Guijarro capa="cuidado" tamano={56} rotacion={-16}>
+                    <MotivoLuna color={theme.text.primary} />
+                  </Guijarro>
+                  <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.primary }}>
+                    {t('perfil.indiceDescanso')}
+                  </Text>
+                  <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+                    {t('perfil.indiceSeConstruye')}
+                  </Text>
+                </View>
+              </Tarjeta>
+            </View>
+          </View>
         </View>
 
         {/* ── 4 · Identidad (progresiva) ── */}
@@ -377,6 +510,39 @@ export default function PerfilDeMascota() {
           </Text>
         </View>
       </ScrollView>
+
+      {/* Hoja EDUCATIVA de los índices (§6.4 educando): QUÉ es, DE QUÉ
+          se alimenta, y UNA acción real que alimenta el expediente —
+          la ley del ecosistema hablando. Apertura normal (la física de
+          marca es del Coach; acá sobriedad). */}
+      <Hoja
+        visible={indiceAbierto !== null}
+        onCerrar={() => setIndiceAbierto(null)}
+        titulo={indiceAbierto === 'salud' ? t('perfil.indiceSalud') : t('perfil.indiceDescanso')}
+        conCerrar
+      >
+        <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[2], gap: spacing[4] }}>
+          <View style={{ alignItems: 'center' }}>
+            <Guijarro capa={indiceAbierto === 'salud' ? 'identidad' : 'cuidado'} tamano={72} rotacion={indiceAbierto === 'salud' ? 9 : -16}>
+              {indiceAbierto === 'salud' ? <MotivoCorazon color={theme.text.primary} /> : <MotivoLuna color={theme.text.primary} />}
+            </Guijarro>
+          </View>
+          <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.base, lineHeight: typography.size.base * typography.leading.normal, color: theme.text.primary }}>
+            {indiceAbierto === 'salud' ? t('perfil.eduSaludQue') : t('perfil.eduDescansoQue')}
+          </Text>
+          <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * typography.leading.normal, color: theme.text.secondary }}>
+            {indiceAbierto === 'salud' ? t('perfil.eduSaludDeQue') : t('perfil.eduDescansoDeQue')}
+          </Text>
+          <Boton
+            etiqueta={t('perfil.eduAccion')}
+            bloque
+            onPress={() => {
+              setIndiceAbierto(null);
+              router.push({ pathname: '/carnet', params: { mascotaId: mascota.id, nombre: mascota.nombre } });
+            }}
+          />
+        </View>
+      </Hoja>
     </View>
   );
 }

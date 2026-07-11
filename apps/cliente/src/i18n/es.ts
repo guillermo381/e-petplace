@@ -108,17 +108,34 @@ export const clienteEs = {
     // ── secciones de la pila ──
     vida: 'Su vida',
     salud: 'Salud',
-    bienestar: 'Bienestar y actividad',
     identidad: 'Identidad',
     // ── salud ──
     carnetVacio: 'Su carnet todavía está vacío',
     carnetVacioDetalle: 'Cárgalo con una foto y guardamos sus vacunas.',
     cargarCarnet: 'Cargar carnet',
-    // ── bienestar (el hueco M-WEAR queda HECHO en el layout) ──
-    paseosGuardados: '{{n}} paseos guardados',
-    unPaseoGuardado: '1 paseo guardado',
+    // ── VITALES (S53-B2c: el módulo Bienestar elevado a dashboard;
+    // el hueco M-WEAR queda HECHO — los índices se llenan ese día) ──
+    vitales: 'Vitales',
+    vitalesUltimos7: 'Últimos 7 días',
+    vitalesKm: 'recorridos',
+    vitalesMin: 'de paseo',
+    vitalesSalidas: 'Salidas',
+    vitalesUnaSalida: '1 salida',
+    vitalesUltimaSalida: 'Última salida',
+    // comparativa — SOLO con respaldo de datos (L-139); GATE PENDIENTE:
+    vitalesComparativa: 'Esta semana caminó más que la pasada.',
     bienestarVacio: 'Su actividad va a aparecer acá',
     bienestarVacioDetalle: 'Cada paseo con su recorrido queda guardado en su historia.',
+    // ── índices educativos (§6.4: visibles, honestos-vacíos) ──
+    // GATE PENDIENTE (voz educativa):
+    indiceSalud: 'Índice de salud',
+    indiceDescanso: 'Descanso y actividad',
+    indiceSeConstruye: 'Se construye con su expediente',
+    eduSaludQue: 'Una lectura general de cómo está su salud, en una sola mirada.',
+    eduSaludDeQue: 'Se alimenta de su carnet de vacunas, sus chequeos y su actividad. Mientras más completo su expediente, más fiel la lectura.',
+    eduDescansoQue: 'Cómo se mueve y descansa a lo largo del tiempo.',
+    eduDescansoDeQue: 'Hoy se construye con sus paseos. El día que tenga un collar conectado, va a contar también su descanso.',
+    eduAccion: 'Cargar su carnet',
     // ── identidad progresiva ──
     raza: 'Raza',
     sexo: 'Sexo',

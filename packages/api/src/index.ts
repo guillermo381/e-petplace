@@ -141,3 +141,6 @@ export {
 
 // Perfil propio — S53-B2b (saludo con nombre)
 export { obtenerMiPerfil, type MiPerfil } from './wrappers/miPerfil';
+
+// Vitales — S53-B2c (paseos con track real)
+export { obtenerPaseosConTrack, type PaseoConTrack } from './wrappers/vitales';
