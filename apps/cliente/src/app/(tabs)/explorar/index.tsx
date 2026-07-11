@@ -13,7 +13,7 @@
 import { useCallback, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import {
   Boton,
   Encabezado,
@@ -76,10 +76,18 @@ export default function Explorar() {
   // vertical activa → su ficha (ícono en el hex puro de su capa —
   // registro gráfico, Ley 12 — + nombre + voz); las inactivas van a
   // "próximamente" — la config es la verdad, el layout solo la lee.
-  const fichasActivas: Array<{ clave: string; titulo: string; detalle: string; icono: ReactNode }> = [];
+  const fichasActivas: Array<{
+    clave: string;
+    titulo: string;
+    detalle: string;
+    icono: ReactNode;
+    // S54-B3.1: la vertical con agendamiento VIVO navega; el resto sigue
+    // informativo (cero CTA muerta — la card gana el tap con su flujo).
+    onPress?: () => void;
+  }> = [];
   const proximamente: string[] = [];
   if (servicios !== 'cargando' && servicios !== 'error') {
-    if (servicios.walking) fichasActivas.push({ clave: 'paseo', titulo: t('explorar.servicioPaseo'), detalle: t('explorar.servicioPaseoDetalle'), icono: <Icono nombre="paseo" tamano={34} /> });
+    if (servicios.walking) fichasActivas.push({ clave: 'paseo', titulo: t('explorar.servicioPaseo'), detalle: t('explorar.servicioPaseoDetalle'), icono: <Icono nombre="paseo" tamano={34} />, onPress: () => router.push('/explorar/paseadores') });
     if (servicios.grooming) fichasActivas.push({ clave: 'grooming', titulo: t('explorar.servicioGrooming'), detalle: t('explorar.servicioGroomingDetalle'), icono: <Icono nombre="grooming" tamano={34} /> });
     if (servicios.veterinary) fichasActivas.push({ clave: 'vet', titulo: t('explorar.servicioVet'), detalle: t('explorar.servicioVetDetalle'), icono: <Icono nombre="veterinaria" tamano={34} /> });
     if (servicios.training) fichasActivas.push({ clave: 'adiestramiento', titulo: t('explorar.servicioAdiestramiento'), detalle: t('explorar.servicioAdiestramientoDetalle'), icono: <IconoServicioAdiestramiento color={theme.capa.cuidado} /> });
@@ -116,29 +124,43 @@ export default function Explorar() {
                 {/* QW2 (S53, decisión founder): grilla de 2 columnas,
                     cards cuadradas con el Icono b′ PRESIDIENDO. */}
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] }}>
-                  {fichasActivas.map((f) => (
-                    <View key={f.clave} style={{ flexBasis: '47%', flexGrow: 1 }}>
-                      <Tarjeta relleno="amplio">
-                        <View style={{ aspectRatio: 1.05, justifyContent: 'space-between' }}>
-                          <View style={{ paddingTop: spacing[1] }}>{f.icono}</View>
-                          <View style={{ gap: 2 }}>
-                            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
-                              {f.titulo}
+                  {fichasActivas.map((f) => {
+                    const contenido = (
+                      <View style={{ aspectRatio: 1.05, justifyContent: 'space-between' }}>
+                        <View style={{ paddingTop: spacing[1] }}>{f.icono}</View>
+                        <View style={{ gap: 2 }}>
+                          <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
+                            {f.titulo}
+                          </Text>
+                          <Text
+                            numberOfLines={3}
+                            style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.xs, lineHeight: typography.size.xs * 1.45, color: theme.text.secondary }}
+                          >
+                            {f.detalle}
+                          </Text>
+                          {f.onPress ? (
+                            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.xs, color: theme.text.primary, marginTop: 2 }}>
+                              {t('explorar.paseoAgendable')}
                             </Text>
-                            <Text
-                              numberOfLines={3}
-                              style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.xs, lineHeight: typography.size.xs * 1.45, color: theme.text.secondary }}
-                            >
-                              {f.detalle}
-                            </Text>
-                          </View>
+                          ) : null}
                         </View>
-                      </Tarjeta>
-                    </View>
-                  ))}
+                      </View>
+                    );
+                    return (
+                      <View key={f.clave} style={{ flexBasis: '47%', flexGrow: 1 }}>
+                        {f.onPress ? (
+                          <Tarjeta relleno="amplio" interactiva onPress={f.onPress} accessibilityRole="button" etiqueta={`${f.titulo} — ${t('explorar.paseoAgendable')}`}>
+                            {contenido}
+                          </Tarjeta>
+                        ) : (
+                          <Tarjeta relleno="amplio">{contenido}</Tarjeta>
+                        )}
+                      </View>
+                    );
+                  })}
                 </View>
                 <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.tertiary }}>
-                  {t('explorar.agendarLlega')}
+                  {t('explorar.agendarLlegaOtros')}
                 </Text>
               </View>
             )}

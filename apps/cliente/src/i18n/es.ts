@@ -172,6 +172,14 @@ export const clienteEs = {
     servicioAdiestramiento: 'Adiestramiento',
     servicioAdiestramientoDetalle: 'Educación y conducta con profesionales.',
     agendarLlega: 'Agendar desde la app llega pronto.',
+    // S54-B3.1 — el paseo ya se agenda; el resto sigue honesto
+    agendarLlegaOtros: 'Agendar grooming y veterinaria llega pronto.',
+    paseoAgendable: 'Toca para agendar',
+    paseadoresTitulo: 'Paseadores',
+    paseadoresError: 'No pudimos cargar los paseadores',
+    paseadoresVacio: 'Todavía no hay paseadores ofreciendo',
+    paseadoresVacioDetalle: 'Un paseador acá cuida y documenta cada salida. Cuando uno active su agenda real, lo verás con su precio y horarios de verdad.',
+    paseadoresNota: 'Precios y horarios reales de cada paseador. Elegir horario y pagar desde acá llega pronto.',
     // refugios / M0
     refugios: 'Refugios y adopción',
     refugiosVacio: 'Todavía no hay refugios publicados',
