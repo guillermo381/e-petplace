@@ -262,20 +262,21 @@ export default function Hoy() {
         )}
 
         {pantalla.estado === 'listo' && citas.length === 0 && (
-          <EstadoVacio titulo={t('agenda.vacio')} descripcion={t('agenda.vacioDetalle')} />
+          // S52-P7b: registro sereno — el día vacío se dice en el
+          // flujo, sin display que grite (dosis baja).
+          <EstadoVacio registro="seccion" titulo={t('agenda.vacio')} descripcion={t('agenda.vacioDetalle')} />
         )}
 
         {/* ── Zona 1 — ahora / lo siguiente (preside) ── */}
         {pantalla.estado === 'listo' && destacada && (
           <View style={{ gap: spacing[2] }}>
+            {/* S52-P7: etiqueta humanizada — sentence case, sin eyebrow */}
             <Text
               accessibilityRole="header"
               style={{
                 fontFamily: typography.family.sans.medium,
-                fontSize: typography.size.sm,
-                letterSpacing: 0.4,
-                textTransform: 'uppercase',
-                color: theme.text.tertiary,
+                fontSize: typography.size.md,
+                color: theme.text.primary,
               }}
             >
               {enVivo ? t('agenda.ahora') : t('agenda.loSiguiente')}

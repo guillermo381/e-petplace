@@ -22,6 +22,9 @@ export const clienteEn = {
   },
   hogar: {
     titulo: 'Your home',
+    saludoManana: 'Good morning',
+    saludoTarde: 'Good afternoon',
+    saludoNoche: 'Good evening',
     cargando: 'Loading your home',
     vozAlDia: '{{nombre}} is up to date.',
     vozEmergencia: '{{nombre}} needs your attention now.',

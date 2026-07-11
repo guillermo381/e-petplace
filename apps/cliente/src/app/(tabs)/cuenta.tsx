@@ -14,10 +14,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import {
   Boton,
-  Celda,
   Encabezado,
   Hoja,
-  Insignia,
   SelectorOpcion,
   Separador,
   Tarjeta,
@@ -31,6 +29,7 @@ import { cerrarSesion } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 
+// S52-P4b sistémico: títulos humanizados — sentence case, sin eyebrow.
 function TituloBloque({ texto }: { texto: string }) {
   const { theme } = useTheme();
   return (
@@ -38,10 +37,8 @@ function TituloBloque({ texto }: { texto: string }) {
       accessibilityRole="header"
       style={{
         fontFamily: typography.family.sans.medium,
-        fontSize: typography.size.sm,
-        letterSpacing: 0.4,
-        textTransform: 'uppercase',
-        color: theme.text.tertiary,
+        fontSize: typography.size.md,
+        color: theme.text.primary,
       }}
     >
       {texto}
@@ -98,13 +95,20 @@ export default function Cuenta() {
             />
           </Tarjeta>
 
-          {/* ── El ciclo B1: lugares honestos, cero formularios muertos ── */}
+          {/* ── El ciclo B1: lugares honestos, cero formularios muertos.
+              S52-P6b: filas serenas en texto secundario bajo UNA
+              sección (el muro de Insignias murió, patrón P5c) ── */}
           <View style={{ gap: spacing[3] }}>
+            <TituloBloque texto={t('cuenta.enPreparacion')} />
             <Tarjeta relleno="ninguno">
               {lugaresB1.map((lugar, i) => (
                 <View key={lugar}>
                   {i > 0 ? <Separador /> : null}
-                  <Celda titulo={lugar} fin={<Insignia estado="proximo" etiqueta={t('cuenta.enPreparacion')} />} />
+                  <View style={{ paddingHorizontal: spacing[3], paddingVertical: spacing[3] }}>
+                    <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.base, color: theme.text.secondary }}>
+                      {lugar}
+                    </Text>
+                  </View>
                 </View>
               ))}
             </Tarjeta>

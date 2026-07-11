@@ -21,6 +21,10 @@ export const clienteEs = {
   },
   hogar: {
     titulo: 'Tu hogar',
+    // saludo por franja horaria (S52-P2a — voz del lote gateado)
+    saludoManana: 'Buenos días',
+    saludoTarde: 'Buenas tardes',
+    saludoNoche: 'Buenas noches',
     cargando: 'Cargando tu hogar',
     // ── Las tres voces del estado (DISEÑO_EXPERIENCIA §2) ──
     // Voz emocional APROBADA por founder (gate del lote S51).

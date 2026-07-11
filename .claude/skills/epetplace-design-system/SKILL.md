@@ -38,7 +38,8 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 4. **Dosis.** Prestador = baja: UN acento de capa por vista, CTA en tinta
    (`Boton primario`), sin gradiente UI. Dueño = alta: capas visibles,
    gradiente firma solo en contextos cerrados (hero onboarding, CTA
-   principal dueño, momento adopción). El isotipo es IDENTIDAD: va en
+   principal dueño, momento adopción, y desde S52 el TECHO COMPACTO
+   del Hogar — HeroMarca compacto con el saludo por franja). El isotipo es IDENTIDAD: va en
    gradiente oficial por default, fuera de la contabilidad de dosis —
    pero UNO por pantalla.
 5. **accent.active: UN elemento activo por vista.** En la raíz ya lo usa
@@ -138,11 +139,11 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 | `Celda` | Toda fila de lista. Pressed resalta (jamás escala); `metadataMono` para voz de máquina — desde S44-B4.1 convive con `fin` (apilados: mono arriba, nodo abajo) |
 | `Separador` | Divisor hairline entre Celdas (`ItemSeparatorComponent`) |
 | `Insignia` | Todo chip de estado/capa. JAMÁS interactivo; `soloPunto` para celdas densas |
-| `Encabezado` | Techo de pantalla. `navegacion` (interna) / `portada` (raíz de tab, con la voz) |
+| `Encabezado` | Techo de pantalla. `navegacion` (interna) / `portada` (raíz de tab, con la voz). S52: la portada es LOCKUP — isotipo+voz una composición horizontal, acción en línea |
 | `BarraTabs` | Navegación raíz — JSDoc trae el wiring de expo-router listo |
 | `Hoja` | Todo modal: bottom sheet siempre. Cierra por swipe/backdrop/X/back |
 | `useAviso` (+`AvisoProvider`) | Todo feedback efímero. Uno a la vez, cola |
-| `EstadoVacio` | Todo "sin datos". Voz humana, sin animación de entrada |
+| `EstadoVacio` | Todo "sin datos". Voz humana, sin animación de entrada. S52: `registro='pantalla'` (default, display centrado) · `'seccion'` (sereno, dentro de una pantalla con contenido — jamás display) |
 | `CitaEnVivo` | Envolver LA cita en curso — UNO por pantalla, jamás decorativo (Ley 7). dark: glow de capa · claro: anillo 1.5 + pill "● vivo" · memorial: degrada. No suma accent.active |
 | `Esqueleto` (+`EsqueletoGrupo`) | Todo estado de carga. Estático por ley — sin shimmer ni pulso. Componer imitando el layout final; `EsqueletoGrupo` anuncia la carga al lector |
 | `AvatarMascota` | La cara de la mascota. fotoUrl → huella digna; no porta estado ni interacción; `especie` reservada para el set ilustrado D-288 |
@@ -153,7 +154,7 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 | `CampoFecha` | Fecha de nacimiento con precisión honesta (S45). Se ve como Campo; abre Hoja con selector JS puro (mes/año + día opcional + "No sé la fecha"→etapa). Valor {fecha, precision exacta/aproximada/estimada} = espejo del CHECK de DB. La pantalla es dueña del valor |
 | `HojaScroll` | Scrollable interno que GANA dentro de la Hoja (patrón SM block — fix S45-B3.2). OBLIGATORIO para toda lista desplazable dentro de una Hoja: el ScrollView plano pierde contra el swipe-to-close en Android y web no lo delata (L-132) |
 | `SelectorAvatar` | La foto de identidad de la mascota (S45). Vacío = AvatarMascota + invitación (la huella es cara válida); Hoja con cámara/galería PARES + "Por ahora no" primera clase; con foto: Cambiar/Quitar. Entrega {uri,width,height}; el upload es de la pantalla. Captura por `capturaFoto` (infra compartida con EvidenciaFoto — no duplicar) |
-| `HeroMarca` | Cabecera con el gradiente firma (S45, contexto cerrado dosis alta). alto=bienvenida · compacto=techo de paso. Isotipo blanco adentro = el UNO por pantalla; CTAs JAMÁS adentro (marca sobre marca). Memorial: bg.card plano, text.primary — degrada solo |
+| `HeroMarca` | Cabecera con el gradiente firma (S45, contexto cerrado dosis alta). alto=bienvenida · compacto=techo de paso Y techo del Hogar (enmienda Ley 4, S52). Isotipo blanco adentro = el UNO por pantalla; CTAs JAMÁS adentro (marca sobre marca). Memorial: bg.card plano, text.primary — degrada solo |
 | `SelectorOpcion` | Chips de selección ÚNICA para 2-4 opciones cortas (S45). Radiogroup; seleccionado = borde 1.5 capa.identidad + tint capaBg (mismo tratamiento que SelectorEspecie, sin accent.active); memorial degrada. NO es multi-select ni porta estado de datos (eso es Insignia) |
 | `LineaDeVida` | El timeline del dueño (S45-B5.2). Diccionario CERRADO tipo→voz humana/capa ADENTRO (Ley 3: el dueño jamás ve un código; desconocido degrada digno por eje). Punto hex puro de capa + conector hairline + Tarjeta; mono solo hora/duración. Carga = esqueleto 3 nodos; el vacío es de la pantalla; pie con "Cargar más"/error. cita_servicio NO se muestra (filtra el wrapper) |
 | `VisorFoto` | Lightbox una-foto-a-la-vez (S45-B5.3). SOLO fades (Ley 6/8 gratis); letterbox digno sin recortar; fondo pleno (tinta+scrim, no depende del tema); cierra por X/back(doble vía)/tap-fondo; swipe horizontal = reemplazo directo; contador "n de m" en mono |

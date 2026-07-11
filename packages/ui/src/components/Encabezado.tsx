@@ -151,52 +151,53 @@ export function Encabezado(props: EncabezadoProps) {
   // (sigue siendo UNO por pantalla). 'tinta' queda para contextos especiales.
   // En memorial degrada automáticamente (patrón Boton marca): la marca habla
   // bajito — y sobre bosque nocturno la tinta se traduce a blanco.
+  //
+  // S52-P1: LOCKUP — isotipo + voz son UNA composición horizontal (antes:
+  // dos pisos con vacío muerto a la derecha del isotipo). La acción vive
+  // en línea con la voz; la portada sigue respirando por padding, no por
+  // huecos.
   const { saludo, subtitulo, isotipo = 'gradiente', accionDer } = props
   const varianteIsotipo =
     theme.mode === 'memorial' ? 'blanco' : isotipo === 'tinta' && theme.mode === 'dark' ? 'blanco' : isotipo
   return (
     <View
       style={{
-        paddingTop: insets.top + spacing[4],
-        paddingBottom: spacing[6],       // la portada respira, no comprime
+        paddingTop: insets.top + spacing[5],
+        paddingBottom: spacing[5],       // la portada respira, no comprime
         paddingHorizontal: spacing[4],
         backgroundColor: theme.bg.base,
-        gap: spacing[4],
       }}
     >
-      {isotipo !== 'ninguno' || accionDer ? (
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 28 }}>
-          {isotipo !== 'ninguno' && varianteIsotipo !== 'ninguno' ? (
-            <Isotipo size={28} variant={varianteIsotipo} />
-          ) : (
-            <View />
-          )}
-          {accionDer ?? null}
-        </View>
-      ) : null}
-      <View style={{ gap: spacing[1] }}>
-        <Text
-          accessibilityRole="header"
-          style={{
-            fontFamily: typography.family.sans.light,
-            fontSize: typography.size['2xl'],
-            lineHeight: typography.size['2xl'] * typography.leading.snug,
-            color: theme.text.primary,
-          }}
-        >
-          {saludo}
-        </Text>
-        {subtitulo ? (
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+        {isotipo !== 'ninguno' && varianteIsotipo !== 'ninguno' ? (
+          <Isotipo size={32} variant={varianteIsotipo} />
+        ) : null}
+        <View style={{ flex: 1, gap: 2 }}>
           <Text
+            accessibilityRole="header"
+            numberOfLines={2}
             style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.sm,
-              color: theme.text.secondary,
+              fontFamily: typography.family.sans.light,
+              fontSize: typography.size['2xl'],
+              lineHeight: typography.size['2xl'] * typography.leading.snug,
+              color: theme.text.primary,
             }}
           >
-            {subtitulo}
+            {saludo}
           </Text>
-        ) : null}
+          {subtitulo ? (
+            <Text
+              style={{
+                fontFamily: typography.family.sans.regular,
+                fontSize: typography.size.sm,
+                color: theme.text.secondary,
+              }}
+            >
+              {subtitulo}
+            </Text>
+          ) : null}
+        </View>
+        {accionDer ?? null}
       </View>
     </View>
   )

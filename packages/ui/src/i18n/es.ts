@@ -16,5 +16,17 @@ export const uiEs = {
     cargarMas: 'Cargar más',
     reintentar: 'Reintentar',
     errorCargarMas: 'No pudimos cargar más momentos.',
+    // Diccionario de voz tipo→texto (S52-P4c: migrado del componente
+    // al riel — lote es/en aprobado por founder en S51/S52; la CAPA
+    // sigue cerrada en el componente, Ley 3):
+    vozPaseo: 'Paseo',
+    vozAlta: 'Se sumó a la familia',
+    vozVacuna: 'Recibió la vacuna {{nombre}}',
+    vozVacunaSinNombre: 'Recibió una vacuna',
+    vozMomentoCuidado: 'Momento de cuidado',
+    vozNovedadExpediente: 'Novedad del expediente',
+    vozMomentoGuardado: 'Momento guardado',
+    hoy: 'Hoy',
+    ayer: 'Ayer',
   },
 } as const;

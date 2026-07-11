@@ -21,23 +21,25 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
   Celda,
   CitaEnVivo,
-  Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
   FichaMascotaHogar,
+  HeroMarca,
   Hoja,
   HojaScroll,
   LineaDeVida,
   Separador,
   Tarjeta,
   VisorFoto,
+  motion,
   spacing,
   typography,
   useAviso,
@@ -71,6 +73,19 @@ function fechaMonoVacuna(iso: string): string {
 }
 
 type TraductorHogar = ReturnType<typeof useTraduccion>['t'];
+
+// Saludo por franja horaria (S52-P2a, voz del lote): la app saluda
+// como una persona — mañana/tarde/noche del reloj del dispositivo.
+function saludoPorFranja(hora: number, t: TraductorHogar): string {
+  if (hora >= 5 && hora < 12) return t('hogar.saludoManana');
+  if (hora >= 12 && hora < 19) return t('hogar.saludoTarde');
+  return t('hogar.saludoNoche');
+}
+
+// Entrada escalonada de zonas (S52-P2f): fade+translate sutil, tokens
+// de la casa (<300ms, Ley 6); solo al montar — jamás en re-fetch.
+const entradaZona = (orden: number) =>
+  FadeInDown.duration(motion.duration.normal).delay(orden * motion.stagger.fast);
 
 // Código de voz (Ley 3: jamás visible) → texto del riel + semántica.
 function vozATexto(voz: VozEstadoHogar, nombre: string, t: TraductorHogar): { texto: string; semantica: FichaMascotaHogarVoz } {
@@ -308,15 +323,25 @@ export default function Hogar() {
   const proximaCita = enCurso === null ? (estadoHogar?.proxima_cita ?? null) : null;
   const nombreDe = (id: string) => (Array.isArray(mascotas) ? (mascotas.find((m) => m.id === id)?.nombre ?? '') : '');
 
+  const esMemorial = theme.mode === 'memorial';
+
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: theme.bg.base }}
-      contentContainerStyle={{ paddingTop: insets.top, paddingBottom: spacing[6] }}
+      contentContainerStyle={{ paddingBottom: spacing[8] }}
     >
-      {/* ── Zona 1 — el hogar ─────────────────────────────────── */}
-      <Encabezado variante="portada" saludo={t('hogar.titulo')} />
+      {/* ── Zona 1 — el hogar ───────────────────────────────────
+          Techo: HeroMarca compacto (enmienda Ley 4 S52: contexto
+          cerrado nuevo). El isotipo blanco de adentro es el UNO por
+          pantalla. Memorial degrada solo (bg.card plano). */}
+      <View style={{ paddingTop: insets.top, backgroundColor: esMemorial ? theme.bg.card : undefined }}>
+        <HeroMarca titulo={saludoPorFranja(hoy.getHours(), t)} variante="compacto" />
+      </View>
 
-      <View style={{ paddingHorizontal: spacing[2], gap: spacing[1] }}>
+      <Animated.View
+        entering={entradaZona(0)}
+        style={{ paddingHorizontal: spacing[4], paddingTop: spacing[5], gap: spacing[2] }}
+      >
         {mascotas.map((m) => {
           const senales = senalesPorMascota.get(m.id);
           // Sin señales todavía (estado del hogar cargando): la ficha
@@ -348,11 +373,11 @@ export default function Hogar() {
             />
           );
         })}
-      </View>
+      </Animated.View>
 
       {/* ── Zona 2 — hoy (sin nada urgente, NO existe) ─────────── */}
       {enCurso !== null ? (
-        <View style={{ paddingHorizontal: spacing[4], marginTop: spacing[5] }}>
+        <Animated.View entering={entradaZona(1)} style={{ paddingHorizontal: spacing[4], marginTop: spacing[7] }}>
           <CitaEnVivo capa="cuidado">
             <Celda
               interactiva
@@ -367,9 +392,9 @@ export default function Hogar() {
               }
             />
           </CitaEnVivo>
-        </View>
+        </Animated.View>
       ) : proximaCita !== null ? (
-        <View style={{ paddingHorizontal: spacing[4], marginTop: spacing[5] }}>
+        <Animated.View entering={entradaZona(1)} style={{ paddingHorizontal: spacing[4], marginTop: spacing[7] }}>
           <Tarjeta>
             <Celda
               titulo={nombreDe(proximaCita.mascota_id)}
@@ -377,14 +402,20 @@ export default function Hogar() {
               metadataMono={`${fechaMonoVacuna(proximaCita.fecha)}${proximaCita.hora ? ` · ${proximaCita.hora}` : ''}`}
             />
           </Tarjeta>
-        </View>
+        </Animated.View>
       ) : null}
 
       {/* ── Zona 3 — en contexto: hueco estructural (ver arriba) ── */}
       {revelacionZona3 !== null ? null : null}
 
-      {/* ── Zona 4 — la vida ──────────────────────────────────── */}
-      <View style={{ paddingHorizontal: spacing[4], marginTop: spacing[6], gap: spacing[4] }}>
+      {/* ── Zona 4 — la vida ─────────────────────────────────────
+          Ritmo S52-P2c: entre zonas spacing[7]; adentro spacing[4]. */}
+      <Animated.View
+        entering={entradaZona(2)}
+        style={{ paddingHorizontal: spacing[4], marginTop: spacing[7], gap: spacing[4] }}
+      >
+        {/* invitación SERENA (P2d): menos peso que el hogar — plana,
+            voz compacta; la instrucción completa vive en la captura */}
         <Tarjeta
           interactiva
           onPress={() => {
@@ -393,10 +424,10 @@ export default function Hogar() {
           }}
           accessibilityRole="button"
           etiqueta={t('hogar.cargarCarnet')}
-          relleno="amplio"
+          elevacion="plana"
         >
-          <View style={{ gap: spacing[1] }}>
-            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
+          <View style={{ gap: 2 }}>
+            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.primary }}>
               {t('hogar.cargarCarnet')}
             </Text>
             <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
@@ -427,7 +458,7 @@ export default function Hogar() {
         ) : (
           <LineaDeVida items={items} onPressNodo={alTocarNodo} estadoPie={estadoPie} onCargarMas={() => void cargarMas()} />
         )}
-      </View>
+      </Animated.View>
 
       {/* ¿De quién es el carnet? — selector multi-mascota */}
       <Hoja visible={carnetSelectorAbierto} onCerrar={() => setCarnetSelectorAbierto(false)} titulo={t('hogar.carnetDeQuien')} conCerrar>

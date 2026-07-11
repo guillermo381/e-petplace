@@ -14,11 +14,14 @@ import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
 
+export type EstadoVacioRegistro = 'pantalla' | 'seccion'
+
 export function EstadoVacio({
   icono,
   titulo,
   descripcion,
   accion,
+  registro = 'pantalla',
 }: {
   /** 48-64px; ilustración monolinea cuando exista — por ahora íconos outline. */
   icono?: ReactNode
@@ -28,8 +31,48 @@ export function EstadoVacio({
   descripcion?: string
   /** Un Boton (primario o secundario — el consumidor decide). */
   accion?: ReactNode
+  /**
+   * S52-P5b: `pantalla` (default) = el vacío ES la pantalla — display
+   * centrado con aire. `seccion` = vacío DENTRO de una pantalla con
+   * contenido — voz serena alineada al flujo, jamás display.
+   */
+  registro?: EstadoVacioRegistro
 }) {
   const { theme } = useTheme()
+
+  if (registro === 'seccion') {
+    return (
+      <View style={{ gap: spacing[3], paddingVertical: spacing[2] }}>
+        <View style={{ gap: spacing[1] }}>
+          <Text
+            accessibilityRole="header"
+            style={{
+              fontFamily: typography.family.sans.regular,
+              fontSize: typography.size.base,
+              lineHeight: typography.size.base * typography.leading.snug,
+              color: theme.text.primary,
+            }}
+          >
+            {titulo}
+          </Text>
+          {descripcion ? (
+            <Text
+              numberOfLines={3}
+              style={{
+                fontFamily: typography.family.sans.regular,
+                fontSize: typography.size.sm,
+                lineHeight: typography.size.sm * typography.leading.normal,
+                color: theme.text.secondary,
+              }}
+            >
+              {descripcion}
+            </Text>
+          ) : null}
+        </View>
+        {accion ? <View style={{ alignSelf: 'flex-start' }}>{accion}</View> : null}
+      </View>
+    )
+  }
 
   return (
     <View

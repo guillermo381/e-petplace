@@ -48,6 +48,8 @@ import { spacing } from '../tokens/spacing'
 import { radius } from '../tokens/radius'
 import { useTheme } from '../ThemeProvider'
 import { useTraduccionUi } from '../i18n'
+import type { uiEs } from '../i18n/es'
+import type { ClaveDe } from '@epetplace/i18n'
 import { Boton } from './Boton'
 import { Tarjeta } from './Tarjeta'
 import { Esqueleto, EsqueletoGrupo } from './Esqueleto'
@@ -55,37 +57,48 @@ import { Esqueleto, EsqueletoGrupo } from './Esqueleto'
 type CapaNodo = 'identidad' | 'cuidado' | 'comunidad' | 'comunidadAmplia'
 
 // ── Diccionario cerrado (Ley 3) ──────────────────────────────────────────────
-const DICCIONARIO: Record<string, { titulo: string; capa: CapaNodo }> = {
-  atencion_paseo_registrada: { titulo: 'Paseo', capa: 'cuidado' },
-  alta_asistida_completada_por_cliente: { titulo: 'Se sumó a la familia', capa: 'identidad' },
+// S52-P4c: el TEXTO de cada voz vive en el riel (namespace ui, lote
+// es/en aprobado); la ESTRUCTURA tipo→{clave,capa} sigue cerrada acá.
+// S52-P2e (capas ejercitadas): la vacuna es PROTECCIÓN DE VIDA →
+// capa identidad (mismo criterio que services.insurance/wearable en
+// los temas) — el timeline deja de ser todo cyan con semántica real.
+type VozTimeline = ClaveDe<typeof uiEs>
+type TraductorUi = (clave: VozTimeline, valores?: Record<string, string | number>) => string
+
+const DICCIONARIO: Record<string, { clave: VozTimeline; capa: CapaNodo }> = {
+  atencion_paseo_registrada: { clave: 'lineaDeVida.vozPaseo', capa: 'cuidado' },
+  alta_asistida_completada_por_cliente: { clave: 'lineaDeVida.vozAlta', capa: 'identidad' },
   // cita_servicio: intencionalmente AUSENTE — no se muestra (ver header).
 }
 
-const POR_EJE: Record<string, { titulo: string; capa: CapaNodo }> = {
-  salud: { titulo: 'Momento de cuidado', capa: 'cuidado' },
-  administrativo: { titulo: 'Novedad del expediente', capa: 'identidad' },
+const POR_EJE: Record<string, { clave: VozTimeline; capa: CapaNodo }> = {
+  salud: { clave: 'lineaDeVida.vozMomentoCuidado', capa: 'cuidado' },
+  administrativo: { clave: 'lineaDeVida.vozNovedadExpediente', capa: 'identidad' },
 }
 
-const GENERICO = { titulo: 'Momento guardado', capa: 'identidad' as CapaNodo }
+const GENERICO: { clave: VozTimeline; capa: CapaNodo } = {
+  clave: 'lineaDeVida.vozMomentoGuardado',
+  capa: 'identidad',
+}
 
-function vozDe(item: LineaDeVidaItem): { titulo: string; capa: CapaNodo } {
+function vozDe(item: LineaDeVidaItem, t: TraductorUi): { titulo: string; capa: CapaNodo } {
   // vacuna_aplicada lleva el nombre ADENTRO de la voz (S47-B1.2 C) —
   // el nombre lo escribió un humano en la revisión del carnet.
   if (item.tipo === 'vacuna_aplicada') {
     return {
-      titulo: item.vacuna_nombre ? `Recibió la vacuna ${item.vacuna_nombre}` : 'Recibió una vacuna',
-      capa: 'cuidado',
+      titulo: item.vacuna_nombre
+        ? t('lineaDeVida.vozVacuna', { nombre: item.vacuna_nombre })
+        : t('lineaDeVida.vozVacunaSinNombre'),
+      capa: 'identidad',
     }
   }
-  return DICCIONARIO[item.tipo] ?? POR_EJE[item.eje_jtbd ?? ''] ?? GENERICO
+  const voz = DICCIONARIO[item.tipo] ?? POR_EJE[item.eje_jtbd ?? ''] ?? GENERICO
+  return { titulo: t(voz.clave), capa: voz.capa }
 }
 
 // ── Fechas en voz humana ─────────────────────────────────────────────────────
-const MESES = [
-  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
-]
-
+// S52-P4c: el mes sale de Intl con el idioma del riel — "6 de julio"
+// en es, "July 6" en en (antes: array de meses hardcodeado español).
 function claveDia(d: Date): string {
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
 }
@@ -106,15 +119,21 @@ function claveDiaItem(item: LineaDeVidaItem): string {
   return `${p.a}-${p.m}-${p.d}`
 }
 
-function fechaHumana(iso: string, fechaSola = false): string {
+function fechaHumana(iso: string, fechaSola: boolean, t: TraductorUi, idioma: string): string {
   const p = partesDia(iso, fechaSola)
   const clave = `${p.a}-${p.m}-${p.d}`
   const hoy = new Date()
   const ayer = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - 1)
-  if (clave === claveDia(hoy)) return 'Hoy'
-  if (clave === claveDia(ayer)) return 'Ayer'
-  const base = `${p.d} de ${MESES[p.m]}`
-  return p.a === hoy.getFullYear() ? base : `${base} de ${p.a}`
+  if (clave === claveDia(hoy)) return t('lineaDeVida.hoy')
+  if (clave === claveDia(ayer)) return t('lineaDeVida.ayer')
+  const locale = idioma === 'en' ? 'en-US' : 'es-EC'
+  const fecha = new Date(p.a, p.m, p.d)
+  const conAnio = p.a !== hoy.getFullYear()
+  return new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'long',
+    ...(conAnio ? { year: 'numeric' } : null),
+  }).format(fecha)
 }
 
 function horaMono(iso: string, duracionMin?: number | null): string {
@@ -216,8 +235,9 @@ function Nodo({
   onPress?: (item: LineaDeVidaItem) => void
 }) {
   const { theme } = useTheme()
-  const voz = vozDe(item)
-  const fecha = fechaHumana(item.fecha_evento, item.fecha_sola ?? false)
+  const { t, idioma } = useTraduccionUi()
+  const voz = vozDe(item, t)
+  const fecha = fechaHumana(item.fecha_evento, item.fecha_sola ?? false, t, idioma)
   // Memorial no tiene registro de capa: el punto degrada a text.secondary.
   const colorPunto = theme.mode === 'memorial' ? theme.text.secondary : theme.capa[voz.capa]
 

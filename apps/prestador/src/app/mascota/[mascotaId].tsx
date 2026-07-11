@@ -52,6 +52,7 @@ function fechaMono(iso: string): string {
   return `${String(d).padStart(2, '0')} ${MESES_MONO[m - 1]} ${a}`;
 }
 
+// S52-P4b sistémico: títulos humanizados — sentence case, sin eyebrow.
 function TituloModulo({ texto }: { texto: string }) {
   const { theme } = useTheme();
   return (
@@ -59,10 +60,8 @@ function TituloModulo({ texto }: { texto: string }) {
       accessibilityRole="header"
       style={{
         fontFamily: typography.family.sans.medium,
-        fontSize: typography.size.sm,
-        letterSpacing: 0.4,
-        textTransform: 'uppercase',
-        color: theme.text.tertiary,
+        fontSize: typography.size.md,
+        color: theme.text.primary,
       }}
     >
       {texto}

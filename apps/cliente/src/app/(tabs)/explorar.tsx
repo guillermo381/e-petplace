@@ -16,26 +16,32 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import {
   Boton,
-  Celda,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
-  Insignia,
   Separador,
   Tarjeta,
   spacing,
   typography,
   useTheme,
 } from '@epetplace/ui';
+import type { ReactNode } from 'react';
 import { obtenerServiciosPais, type ServiciosPais } from '@epetplace/api';
 
+import {
+  IconoServicioAdiestramiento,
+  IconoServicioGrooming,
+  IconoServicioPaseo,
+  IconoServicioVet,
+} from '@/components/iconos-servicios';
 import { useTraduccion } from '@/i18n';
 
 // El soft launch es Ecuador (DEFINICION_SOFTLAUNCH); el país del
 // usuario llega con el riel de país del ciclo B1.
 const PAIS_SOFT_LAUNCH = 'EC';
 
+// S52-P4b sistémico: títulos humanizados — sentence case, sin eyebrow.
 function TituloBloque({ texto }: { texto: string }) {
   const { theme } = useTheme();
   return (
@@ -43,10 +49,8 @@ function TituloBloque({ texto }: { texto: string }) {
       accessibilityRole="header"
       style={{
         fontFamily: typography.family.sans.medium,
-        fontSize: typography.size.sm,
-        letterSpacing: 0.4,
-        textTransform: 'uppercase',
-        color: theme.text.tertiary,
+        fontSize: typography.size.md,
+        color: theme.text.primary,
       }}
     >
       {texto}
@@ -71,15 +75,17 @@ export default function Explorar() {
     }, []),
   );
 
-  // vertical activa → su ficha (nombre + voz); las inactivas van a
+  // vertical activa → su ficha (ícono en el hex puro de su capa —
+  // registro gráfico, Ley 12 — + nombre + voz); las inactivas van a
   // "próximamente" — la config es la verdad, el layout solo la lee.
-  const fichasActivas: Array<{ clave: string; titulo: string; detalle: string }> = [];
+  const colorServicio = theme.capa.cuidado;
+  const fichasActivas: Array<{ clave: string; titulo: string; detalle: string; icono: ReactNode }> = [];
   const proximamente: string[] = [];
   if (servicios !== 'cargando' && servicios !== 'error') {
-    if (servicios.walking) fichasActivas.push({ clave: 'paseo', titulo: t('explorar.servicioPaseo'), detalle: t('explorar.servicioPaseoDetalle') });
-    if (servicios.grooming) fichasActivas.push({ clave: 'grooming', titulo: t('explorar.servicioGrooming'), detalle: t('explorar.servicioGroomingDetalle') });
-    if (servicios.veterinary) fichasActivas.push({ clave: 'vet', titulo: t('explorar.servicioVet'), detalle: t('explorar.servicioVetDetalle') });
-    if (servicios.training) fichasActivas.push({ clave: 'adiestramiento', titulo: t('explorar.servicioAdiestramiento'), detalle: t('explorar.servicioAdiestramientoDetalle') });
+    if (servicios.walking) fichasActivas.push({ clave: 'paseo', titulo: t('explorar.servicioPaseo'), detalle: t('explorar.servicioPaseoDetalle'), icono: <IconoServicioPaseo color={colorServicio} /> });
+    if (servicios.grooming) fichasActivas.push({ clave: 'grooming', titulo: t('explorar.servicioGrooming'), detalle: t('explorar.servicioGroomingDetalle'), icono: <IconoServicioGrooming color={colorServicio} /> });
+    if (servicios.veterinary) fichasActivas.push({ clave: 'vet', titulo: t('explorar.servicioVet'), detalle: t('explorar.servicioVetDetalle'), icono: <IconoServicioVet color={colorServicio} /> });
+    if (servicios.training) fichasActivas.push({ clave: 'adiestramiento', titulo: t('explorar.servicioAdiestramiento'), detalle: t('explorar.servicioAdiestramientoDetalle'), icono: <IconoServicioAdiestramiento color={colorServicio} /> });
     if (!servicios.hotel) proximamente.push(t('explorar.proxHotel'), t('explorar.proxGuarderia'));
     if (!servicios.insurance) proximamente.push(t('explorar.proxSeguros'));
     if (!servicios.telemedicine) proximamente.push(t('explorar.proxTelemedicina'));
@@ -112,13 +118,16 @@ export default function Explorar() {
               <View style={{ gap: spacing[3] }}>
                 {fichasActivas.map((f) => (
                   <Tarjeta key={f.clave}>
-                    <View style={{ gap: spacing[1] }}>
-                      <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
-                        {f.titulo}
-                      </Text>
-                      <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
-                        {f.detalle}
-                      </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+                      {f.icono}
+                      <View style={{ flex: 1, gap: 2 }}>
+                        <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
+                          {f.titulo}
+                        </Text>
+                        <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
+                          {f.detalle}
+                        </Text>
+                      </View>
                     </View>
                   </Tarjeta>
                 ))}
@@ -129,13 +138,15 @@ export default function Explorar() {
             )}
           </View>
 
-          {/* ── Refugios / adopción (M0) ── */}
+          {/* ── Refugios / adopción (M0) — vacío SERENO (P5b) ── */}
           <View style={{ gap: spacing[3] }}>
             <TituloBloque texto={t('explorar.refugios')} />
-            <EstadoVacio titulo={t('explorar.refugiosVacio')} descripcion={t('explorar.refugiosVacioDetalle')} />
+            <EstadoVacio registro="seccion" titulo={t('explorar.refugiosVacio')} descripcion={t('explorar.refugiosVacioDetalle')} />
           </View>
 
-          {/* ── Próximamente honesto (sin fechas) ── */}
+          {/* ── Próximamente honesto — UNA sección, filas serenas en
+              texto secundario (P5c: el muro de Insignias ochre murió;
+              el título de la sección ya dice todo) ── */}
           {proximamente.length > 0 ? (
             <View style={{ gap: spacing[3] }}>
               <TituloBloque texto={t('explorar.proximamente')} />
@@ -143,7 +154,11 @@ export default function Explorar() {
                 {proximamente.map((nombre, i) => (
                   <View key={nombre}>
                     {i > 0 ? <Separador /> : null}
-                    <Celda titulo={nombre} fin={<Insignia estado="proximo" etiqueta={t('explorar.proximamente')} />} />
+                    <View style={{ paddingHorizontal: spacing[3], paddingVertical: spacing[3] }}>
+                      <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.base, color: theme.text.secondary }}>
+                        {nombre}
+                      </Text>
+                    </View>
                   </View>
                 ))}
               </Tarjeta>

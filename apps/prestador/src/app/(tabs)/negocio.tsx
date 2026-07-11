@@ -15,10 +15,8 @@ import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Boton,
-  Celda,
   Encabezado,
   Hoja,
-  Insignia,
   SelectorOpcion,
   Separador,
   Tarjeta,
@@ -31,6 +29,23 @@ import { cambiarIdioma, type IdiomaSoportado } from '@epetplace/i18n';
 import { cerrarSesion } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+
+// S52-P4b sistémico: títulos humanizados — sentence case, sin eyebrow.
+function TituloBloque({ texto }: { texto: string }) {
+  const { theme } = useTheme();
+  return (
+    <Text
+      accessibilityRole="header"
+      style={{
+        fontFamily: typography.family.sans.medium,
+        fontSize: typography.size.md,
+        color: theme.text.primary,
+      }}
+    >
+      {texto}
+    </Text>
+  );
+}
 
 export default function Negocio() {
   const { theme } = useTheme();
@@ -53,6 +68,8 @@ export default function Negocio() {
   }
 
   // los lugares del negocio: qué los despierta, en hitos (§2.6)
+  // S52-P6b: filas serenas — el estado "en preparación" lo dice la
+  // sección UNA vez, no una Insignia por fila.
   const lugares: Array<{ titulo: string; detalle?: string }> = [
     { titulo: t('negocio.servicios') },
     { titulo: t('negocio.horarios') },
@@ -68,15 +85,21 @@ export default function Negocio() {
 
         <View style={{ paddingHorizontal: spacing[4], gap: spacing[6], marginTop: spacing[2] }}>
           <View style={{ gap: spacing[3] }}>
+            <TituloBloque texto={t('negocio.enPreparacion')} />
             <Tarjeta relleno="ninguno">
               {lugares.map((lugar, i) => (
                 <View key={lugar.titulo}>
                   {i > 0 ? <Separador /> : null}
-                  <Celda
-                    titulo={lugar.titulo}
-                    subtitulo={lugar.detalle}
-                    fin={<Insignia estado="proximo" etiqueta={t('negocio.enPreparacion')} tamaño="sm" />}
-                  />
+                  <View style={{ paddingHorizontal: spacing[3], paddingVertical: spacing[3], gap: 2 }}>
+                    <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.base, color: theme.text.secondary }}>
+                      {lugar.titulo}
+                    </Text>
+                    {lugar.detalle ? (
+                      <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.tertiary }}>
+                        {lugar.detalle}
+                      </Text>
+                    ) : null}
+                  </View>
                 </View>
               ))}
             </Tarjeta>
@@ -96,18 +119,7 @@ export default function Negocio() {
           </Tarjeta>
 
           <View style={{ gap: spacing[3] }}>
-            <Text
-              accessibilityRole="header"
-              style={{
-                fontFamily: typography.family.sans.medium,
-                fontSize: typography.size.sm,
-                letterSpacing: 0.4,
-                textTransform: 'uppercase',
-                color: theme.text.tertiary,
-              }}
-            >
-              {t('sesion.titulo')}
-            </Text>
+            <TituloBloque texto={t('sesion.titulo')} />
             <Boton variante="secundario" etiqueta={t('sesion.cerrarSesion')} bloque onPress={() => setSalirAbierta(true)} />
           </View>
         </View>

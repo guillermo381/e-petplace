@@ -27,7 +27,6 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
-  Insignia,
   LineaDeVida,
   Separador,
   Tarjeta,
@@ -75,6 +74,8 @@ function vozEdad(meses: number, t: TraductorPerfil): string {
   return anios === 1 ? t('perfil.edadUnAnio') : t('perfil.edadAnios', { anios });
 }
 
+// S52-P4b: título de módulo HUMANIZADO — DM Sans medium en sentence
+// case (el eyebrow uppercase trackeado murió: leía como formulario).
 function TituloModulo({ texto }: { texto: string }) {
   const { theme } = useTheme();
   return (
@@ -82,10 +83,8 @@ function TituloModulo({ texto }: { texto: string }) {
       accessibilityRole="header"
       style={{
         fontFamily: typography.family.sans.medium,
-        fontSize: typography.size.sm,
-        letterSpacing: 0.4,
-        textTransform: 'uppercase',
-        color: theme.text.tertiary,
+        fontSize: typography.size.md,
+        color: theme.text.primary,
       }}
     >
       {texto}
@@ -259,14 +258,13 @@ export default function PerfilDeMascota() {
           >
             {mascota.nombre}
           </Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
-            {chipMomento !== null ? <Insignia estado="info" etiqueta={chipMomento} /> : null}
-            {meses !== null ? (
-              <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-                {vozEdad(meses, t)}
-              </Text>
-            ) : null}
-          </View>
+          {/* S52-P4a: el momento vital es VOZ bajo el nombre, no chip
+              de estado — habla como una persona que lo conoce. */}
+          {chipMomento !== null || meses !== null ? (
+            <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.base, color: theme.text.secondary }}>
+              {[chipMomento, meses !== null ? vozEdad(meses, t) : null].filter(Boolean).join(' · ')}
+            </Text>
+          ) : null}
         </View>
 
         {/* ── 1 · Su vida ── */}
