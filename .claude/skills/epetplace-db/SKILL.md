@@ -27,7 +27,8 @@ Las migraciones las **escribe y ejecuta Claude Code** con el schema completo a l
 
 ## SECURITY DEFINER y tests
 
-- Patrón canónico de RPC: `SECURITY DEFINER` + `SET search_path TO 'public', 'pg_temp'` + gate de auth + helper de acceso + `REVOKE FROM PUBLIC` + `GRANT EXECUTE TO authenticated`.
+- Patrón canónico de RPC: `SECURITY DEFINER` + `SET search_path TO 'public', 'pg_temp'` + gate de auth + helper de acceso + `REVOKE EXECUTE FROM PUBLIC, anon` + `GRANT EXECUTE TO authenticated`.
+- **Toda función nueva nace con EXECUTE para `anon` — los default privileges de Supabase lo otorgan en el CREATE, y `REVOKE FROM PUBLIC` NO lo quita** (es un grant explícito en `proacl`, L-140). Ley en dos partes, sin excepción: (1) toda migración que cree una función cierra con `REVOKE EXECUTE ON FUNCTION <firma> FROM PUBLIC, anon;` + el GRANT mínimo que la función necesita; (2) la verificación post-migración incluye `SELECT proacl FROM pg_proc` de CADA función nueva — si aparece `anon=X` sin decisión explícita, la migración está incompleta. Una función legítimamente pública pre-login lleva su `GRANT EXECUTE TO anon` escrito y justificado en la migración, jamás heredado en silencio.
 - El SQL Editor / conexión postgres es superuser sin JWT: `auth.uid()` es NULL y **bypassea RLS**. Test válido exige, en el MISMO RUN y con transacción explícita (L-052/L-061):
   ```sql
   BEGIN;

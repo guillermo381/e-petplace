@@ -70,10 +70,24 @@ begin
     on conflict (id) do update set
       fecha  = excluded.fecha,
       hora   = excluded.hora,
-      estado = 'pendiente';
+      estado = 'pendiente'
+    -- GUARD S54 (9a): jamás re-anclar una cita cuya atención ya cerró con
+    -- calidad — la re-corrida del seed pisaba 'completada' → 'confirmada'
+    -- (artefacto que confundió al relevamiento S51; probado en B2.0-T4).
+    -- El guard congela la fila entera (estado Y fecha/hora): re-fechar una
+    -- cita vivida también sería mentirle al expediente.
+    where not exists (
+      select 1 from evento_atencion a
+      where a.cita_id = evento_cita_servicio.id
+        and a.estado = 'cerrada_con_calidad'
+    );
 
   -- transición REAL a confirmada (dispara el trigger de acceso) — c3 queda pendiente
-  update evento_cita_servicio set estado = 'confirmada' where id in (v_c1, v_c2);
+  -- (solo las recién re-ancladas a 'pendiente': una cita vivida no vuelve a confirmada)
+  update evento_cita_servicio
+  set estado = 'confirmada'
+  where id in (v_c1, v_c2)
+    and estado = 'pendiente';
 
   raise notice 'seed demo S44 OK: prestador %, mascota %, citas % % %', v_prest, v_masc, v_c1, v_c2, v_c3;
 end
