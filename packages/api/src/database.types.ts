@@ -4328,6 +4328,7 @@ export type Database = {
           calificacion_en: string | null
           country_code: string
           created_at: string | null
+          direccion_snapshot: Json | null
           duracion_minutos: number
           empleado_id: string | null
           estado: string | null
@@ -4357,6 +4358,7 @@ export type Database = {
           calificacion_en?: string | null
           country_code?: string
           created_at?: string | null
+          direccion_snapshot?: Json | null
           duracion_minutos?: number
           empleado_id?: string | null
           estado?: string | null
@@ -4386,6 +4388,7 @@ export type Database = {
           calificacion_en?: string | null
           country_code?: string
           created_at?: string | null
+          direccion_snapshot?: Json | null
           duracion_minutos?: number
           empleado_id?: string | null
           estado?: string | null
@@ -14342,6 +14345,7 @@ export type Database = {
         Args: { p_prestador_id: string; p_tipo_evento: string }
         Returns: boolean
       }
+      _direccion_hogar_snapshot: { Args: { p_user_id: string }; Returns: Json }
       _familia_tiene_miembros_vigentes: {
         Args: { p_familia_id: string }
         Returns: boolean
@@ -14846,6 +14850,16 @@ export type Database = {
         }[]
       }
       get_user_features: { Args: { p_user_id: string }; Returns: Json }
+      guardar_direccion_hogar: {
+        Args: {
+          p_ciudad: string
+          p_direccion: string
+          p_referencias?: string
+          p_sector?: string
+          p_telefono?: string
+        }
+        Returns: Json
+      }
       iniciar_atencion_cita: { Args: { p_cita_id: string }; Returns: Json }
       iniciar_atencion_grooming: {
         Args: { p_cita_id: string; p_empleado_id?: string }
