@@ -1,8 +1,9 @@
 # MODELO_FINANCIERO.md — e-PetPlace
 
 > Documento maestro del motor financiero del ecosistema e-PetPlace.
-> Última actualización: 12 Jul 2026 v2.6 — Decisión T: el PAQUETE de salidas — un pago, N devengos FIFO a precio de origen, el no-show devenga, las vencidas son breakage DECLARADO; regla 7.15 + comisión visible desde `fee_configs`.
+> Última actualización: 12 Jul 2026 v2.7 — P18 (el paseo SUELTO cancelado): el reembolso de un pago SIN devengo se DECLARA sobre el pago (patrón 7.14 enmendada); el no-show del suelto usa el cierre de Decisión T; el saldo e-PetPlace queda DECLARADO Y APAGADO (disparo: Kushki real). Regla 7.16.
 > Versiones anteriores:
+>   - v2.6 (12 Jul 2026 — Decisión T: el PAQUETE de salidas — un pago, N devengos FIFO a precio de origen, el no-show devenga, las vencidas son breakage DECLARADO; regla 7.15 + comisión visible desde `fee_configs`).
 >   - v2.5 (11 Jul 2026 — Decisión S: el PLAN de paseo cobra por período mensual, un pago, N devengos — variante (b) intacta).
 >   - v2.4 (11 Jul 2026 — devengo de cita implementado variante (b), cuenta activa para cobrar/ofertarse, L-140/security_invoker).
 >   - v2.3 (9 Mayo 2026 — wizard v2 implementado, datos_bancarios refactor a 7 keys, asignación de rol vía UPSERT en user_roles).
@@ -13,6 +14,18 @@
 >   - v1.0 (7 Mayo 2026 — modelo de un rol por cuenta).
 > Autor: Guillermo + Claude (Anthropic).
 > Estado: schema implementado y consolidado en Supabase. Wiring a flujos transaccionales pendiente.
+
+---
+
+## Cambio importante respecto a v2.6 (S57 — 12 Jul 2026)
+
+La v2.7 acompaña la firma de P18 (`POLITICAS_EPETPLACE.md` v1.5 — cancelación y reagenda del paseo SUELTO; la UX del servicio en `MODELO_PASEO.md` v1.3 §3bis). NO hay decisión de motor nueva: es la aplicación de las reglas existentes al suelto no ejecutado, más una evolución declarada y apagada. Tres puntos:
+
+1. **El reembolso de un pago SIN devengo se DECLARA sobre el pago** (regla 7.16, patrón de la enmienda 7.14): un suelto pagado y no ejecutado jamás tocó el ledger (variante (b) — el evento nace al cierre), así que no hay nada que reversar. La cancelación se registra en estado/metadata de la cita; `aplicar_reembolso()` NO se toca — sigue reservada a reversar devengos de citas EJECUTADAS.
+2. **El no-show del suelto usa el cierre de Decisión T** (`cierre_no_show`, el mismo del paquete — no hay tercera vía): el paseador devenga al precio snapshoteado de la cita.
+3. **El saldo e-PetPlace es una evolución DECLARADA Y APAGADA:** un pasivo del ledger (plata que le debemos al dueño) cuyo contrato contable (tabla, acreditación, consumo, expiración) NO se diseña hoy. Disparo: Kushki fase 1 — su letra financiera propia nace ANTES del primer crédito real. Hasta entonces, sin lugar en UI y sin diseño técnico.
+
+Si trabajaste con la v2.6, tu código sigue válido. Lo nuevo: la cancelación del suelto en ventana declara sobre el pago (jamás fabrica eventos ni llama `aplicar_reembolso()`), y el cierre `no_show` deja de ser exclusivo del paquete.
 
 ---
 
@@ -808,6 +821,10 @@ Ninguna implementación del paquete crea eventos económicos al comprar, al rese
 
 **Comisión visible al configurar precio (regla transversal, founder S56):** toda superficie donde el prestador ponga precio muestra el NETO que recibirá descontando la comisión vigente — que se LEE de `fee_configs` (paseo F1: 15%), jamás se hardcodea. El día que el fee cambie, la pantalla dice la verdad sola.
 
+### 7.16 El suelto cancelado declara sobre el pago; el no-show del suelto ES el cierre de Decisión T (NUEVO v2.7 — P18)
+
+Ninguna implementación de la cancelación del paseo suelto crea eventos económicos ni llama `aplicar_reembolso()`: un pago sin devengo no tiene nada que reversar en el ledger. La cancelación en ventana (P18(a), ≥24 h) se **DECLARA sobre el pago** — estado/metadata de la cita, patrón de la enmienda 7.14 — y mientras el pago sea simulado, el reembolso es simulado y la superficie LO DICE. La reagenda (≥2 h) mueve la cita sin tocar la plata. El no-show (<2 h o ausencia) usa `cierre_no_show` (Decisión T): el paseador devenga al precio snapshoteado de la cita, evento al cierre como siempre. La elección de destino del reembolso (medio de pago original / saldo e-PetPlace) y el saldo e-PetPlace como pasivo del ledger quedan **declarados y apagados** — disparo: Kushki fase 1; su letra propia nace antes del primer crédito real.
+
 ---
 
 ## 8. Casos especiales — cómo el modelo los resuelve
@@ -1009,6 +1026,15 @@ Este documento es el contrato técnico-conceptual del motor financiero. Cambiarl
 ---
 
 ## 15. Cambios entre versiones
+
+### v2.7 (12 Jul 2026 — S57, post v2.6)
+
+**Reglas nuevas (sección 7):**
+- 7.16 — el suelto cancelado declara sobre el pago (patrón 7.14 enmendada; cero eventos, `aplicar_reembolso()` intacta); el no-show del suelto usa `cierre_no_show` (Decisión T, precio snapshoteado); la elección de destino del reembolso y el saldo e-PetPlace (pasivo del ledger) quedan declarados y APAGADOS con disparo Kushki fase 1.
+
+**Documentos gemelos de P18 (firmados juntos, founder S57):**
+- `POLITICAS_EPETPLACE.md` v1.5 — P18 (las tres ventanas del suelto; P17 reservada a la Cuenta del prestador).
+- `MODELO_PASEO.md` v1.3 (§3bis — las ventanas en el contrato del servicio).
 
 ### v2.6 (12 Jul 2026 — S56, post v2.5)
 

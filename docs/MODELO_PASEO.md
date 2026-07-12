@@ -1,13 +1,14 @@
 # MODELO_PASEO — El contrato del servicio de paseo
 
-> **Versión: v1.2 — S56 (11-12 Jul 2026).** Decisiones de producto cerradas
+> **Versión: v1.3 — S57 (12 Jul 2026).** Decisiones de producto cerradas
 > por el founder en sesión; escrito por el arquitecto (escritor único de
 > docs, regla 76). **Contrastes obligatorios:** `MODELO_FINANCIERO.md`
-> v2.6 (el camino de la plata — Decisiones Q/R/S/T y reglas 7.13/7.14/7.15
-> rigen acá sin excepción), `POLITICAS_EPETPLACE.md` P14 (la política del
-> plan) y P16 (la política del paquete), `DISEÑO_EXPERIENCIA.md`
-> (momento-primero, verdad firme), `RUTA_F1.md` (principio de secuencia
-> S54: el paseo se deja COMPLETO antes del siguiente servicio).
+> v2.7 (el camino de la plata — Decisiones Q/R/S/T y reglas
+> 7.13/7.14/7.15/7.16 rigen acá sin excepción), `POLITICAS_EPETPLACE.md`
+> P14 (la política del plan), P16 (la política del paquete) y P18 (la
+> política del suelto), `DISEÑO_EXPERIENCIA.md` (momento-primero, verdad
+> firme), `RUTA_F1.md` (principio de secuencia S54: el paseo se deja
+> COMPLETO antes del siguiente servicio).
 >
 > **Qué es este doc:** el modelo del PASEO como servicio — duraciones,
 > precio, capacidad y agenda. Lo que está cerrado, cerrado está; los
@@ -65,6 +66,35 @@ grilla de 30' bloquea sus 4 slots. Implementación (migración
 - **Intactos:** expiración perezosa del hold (15 min), invariante
   `'pagada' ⟺ confirmar_cita_pagada`, verdad firme del prestador (el
   hold es invisible hasta el pago).
+
+## 3bis. Cancelación y reagenda del paseo SUELTO — las tres ventanas (FIRMADA, founder S57)
+
+> La política completa es `POLITICAS_EPETPLACE.md` P18; el dinero,
+> `MODELO_FINANCIERO.md` v2.7 (nota 7.16). Acá vive el contrato del
+> SERVICIO: qué le pasa a la cita y a la agenda. Cubre el paseo
+> INDIVIDUAL pagado (el plan tiene P14; el paquete, P16).
+
+1. **≥24 h antes de la recogida — reagendar o cancelar.**
+   - *Reagendar:* la cita se mueve a otra franja REAL del **mismo
+     paseador** — inicios del motor de ventana de siempre, re-snapshot de
+     fecha/hora; la franja vieja se libera y se re-oferta. El pago viaja
+     con la cita.
+   - *Cancelar definitivo:* el dueño elige el destino de su plata (medio
+     de pago original o saldo e-PetPlace — P18(a)). Hoy, con pago
+     simulado, el reembolso se declara sobre el pago y la pantalla de
+     elección de destino NO se muestra (espera Kushki fase 1).
+2. **Entre 24 y 2 h — solo reagendar.** La franja es difícil de revender
+   a esa altura, pero el servicio puede seguir vivo en otro horario. La
+   plata no se mueve.
+3. **<2 h o no presentarse — el paseo se pierde.** Cierre administrativo
+   `no_show` (Decisión T, el MISMO cierre del paquete): el paseador
+   devenga al precio snapshoteado de la cita — su agenda se bloqueó de
+   verdad.
+4. **Falla del prestador:** devolución o saldo a elección del dueño, sin
+   discusión (P18(d)).
+5. **La agenda dice la verdad:** toda franja liberada por cancelación o
+   reagenda vuelve a ofertarse sola (motor de ventana §3, sin caminos
+   laterales); el prestador ve el movimiento con honestidad en su agenda.
 
 ## 4. Capacidad simultánea
 
@@ -232,6 +262,16 @@ honesta + captura de demanda.
 
 ## Historial
 
+- **v1.3 (S57, 12 Jul 2026 — founder S57, P18 firmada en sesión):** §3bis
+  NUEVO — cancelación y reagenda del paseo SUELTO: las tres ventanas
+  (≥24 h reagendar o cancelar con destino a elección · 24-2 h solo
+  reagendar · <2 h/no-show = cierre `no_show` de Decisión T al precio
+  snapshoteado), falla del prestador a elección del dueño, y la regla de
+  agenda (toda franja liberada se re-oferta sola por el motor). La
+  pantalla de elección de destino y el saldo e-PetPlace quedan
+  DECLARADOS Y APAGADOS (disparo: Kushki fase 1). Gemelos:
+  `POLITICAS_EPETPLACE.md` v1.5 (P18) y `MODELO_FINANCIERO.md` v2.7
+  (nota 7.16).
 - **v1.2 (S56, 11-12 Jul 2026 — founder S56, paquete de letra FIRMADO en
   sesión con el arquitecto):** (1) §6.1 ENMENDADO — la continuidad del
   plan pasa de "mismo paseador todo el plan" a **continuidad POR DÍA DE

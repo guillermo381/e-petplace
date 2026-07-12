@@ -1,7 +1,7 @@
 # POLITICAS_EPETPLACE — Políticas operativas del producto
 
-> Versión: v1.4
-> Última actualización: 12 Jul 2026 — Sesión 56. P16 FIRMADA (el paquete de salidas: reservas, no-show, rollover y vencimiento).
+> Versión: v1.5
+> Última actualización: 12 Jul 2026 — Sesión 57. P18 FIRMADA (cancelación y reagenda del paseo SUELTO: las tres ventanas). P17 queda RESERVADA para la Cuenta del prestador (sin letra todavía).
 > Audiencia: Claude (web y code), devs futuros, equipo de soporte, equipo legal.
 > Análogo a: `CONTRATO_TRABAJO.md` (cómo trabajamos) pero del producto (cómo se comporta).
 
@@ -361,6 +361,101 @@ en la superficie de compra.
 
 ---
 
+## P17 — RESERVADA: la Cuenta del prestador (sin letra)
+
+> Número reservado por decisión de numeración (S57): la política de la
+> Cuenta del prestador se redacta cuando esa mesa abra (dossier servido
+> en S56 — voto del arquitecto: stack en Negocio, jamás 4º tab). Hasta
+> entonces, P17 no rige nada.
+
+---
+
+## P18 — Cancelación y reagenda del paseo SUELTO (FIRMADA — founder S57)
+
+> **Qué cubre:** el paseo INDIVIDUAL pagado (ni plan ni paquete — esos ya
+> tienen P14 y P16). Hasta S57 el suelto pagado no tenía salida: ni
+> reagendar ni cancelar existían. Gemelos: `MODELO_PASEO.md` §3bis (las
+> ventanas en el modelo del servicio) y `MODELO_FINANCIERO.md` v2.7
+> (nota 7.16: el camino de la plata del suelto no ejecutado).
+
+### Las tres ventanas
+
+**(a) Con ≥24 horas antes de la hora de recogida — reagendar o cancelar.**
+
+- **Reagendar:** mover la cita a otra franja REAL del mismo paseador
+  (contra su agenda viva, motor de ventana de siempre). El pago viaja con
+  la cita; la franja vieja se libera y se re-oferta.
+- **Cancelar definitivamente:** el dueño ELIGE el destino de su plata:
+  1. **Vuelta al medio de pago original.** La superficie lo dice honesto:
+     *"La devolución depende de tu banco y tarda en promedio 15 días
+     hábiles."*
+  2. **Saldo en e-PetPlace.** Disponible para usar en segundos.
+  La elección es del dueño, sin default oscuro: las dos opciones se
+  presentan parejas, con sus tiempos declarados — la rapidez del saldo se
+  INFORMA, jamás se usa para esconder la opción del banco (cero dark
+  patterns, coherencia LOYALTY §7).
+
+**(b) Entre 24 y 2 horas antes — solo reagendar.**
+Mover la cita a otra franja real del mismo paseador. Cancelar con
+devolución ya no: la franja es difícil de revender a esa altura, pero el
+servicio puede seguir vivo en otro horario. La plata no se mueve.
+
+**(c) Con <2 horas, o no presentarse — el paseo se pierde.**
+El paseador COBRA (cierre administrativo `no_show`, Decisión T del
+financiero: su agenda se bloqueó de verdad). Sin excepciones automáticas —
+los casos humanos extremos son soporte, no regla (patrón P14(c)/P16(b)).
+
+**(d) Falla del prestador.**
+Si el paseador no ejecuta, el dueño elige — **devolución al medio de pago
+o saldo e-PetPlace, a su elección, sin discusión** (espejo P14(b)/P16(d)).
+La plataforma no litiga la falla del lado que cobró.
+
+### El camino de la plata (contraste financiero, regla de piedra)
+
+- Un suelto pagado y NO ejecutado no tiene devengo que reversar (el evento
+  económico solo nace al cierre — variante (b) intacta): la cancelación se
+  **DECLARA sobre el pago** (estado/metadata de la cita), patrón de la
+  enmienda 7.14. `aplicar_reembolso()` no se toca — sigue reservada a
+  reversar devengos de citas ejecutadas.
+- El `no_show` del suelto usa el MISMO cierre que el del paquete (Decisión
+  T, no hay tercera vía): el paseador devenga al precio snapshoteado de la
+  cita.
+- **El saldo e-PetPlace es un pasivo del ledger** (plata que le debemos al
+  dueño). Su contrato contable (tabla, acreditación, consumo, expiración
+  si la hay) NO se diseña acá: es letra propia del financiero cuando
+  dispare.
+
+### Qué se construye HOY y qué espera su disparo
+
+**HOY (v1, pagos simulados):**
+- Reagendar en ventana (a)/(b): funcional entero, contra agenda real.
+- Cancelar en ventana (a): funcional con **reembolso simulado y
+  DECLARADO** — la superficie dice que el pago era simulado y la
+  devolución también (mismo contrato de estados que el pago S54). La
+  pantalla de elección de destino NO se muestra todavía: mostrar dos vías
+  que no existen sería promesa vacía.
+- Ventana (c): el cierre `no_show` ya existe (Decisión T) — se conecta.
+- El prestador VE la cancelación/reagenda con honestidad en su agenda
+  (lado Sesión B): la franja liberada vuelve a ofertarse sola.
+
+**CON PASARELA REAL (disparo: Kushki fase 1):**
+- La elección de destino se enciende con las dos vías reales y sus
+  tiempos honestos.
+- El saldo e-PetPlace nace con su letra financiera propia ANTES del
+  primer crédito real. Evolución declarada, apagada hasta entonces —
+  sin lugar en UI, como manda la casa.
+
+### Nota de ventanas (coherencia del ecosistema)
+
+El suelto usa **2 h para "se pierde"** (como el paquete: reserva a
+demanda) y **24 h para "devolución"** (como el plan: la plata solo vuelve
+con antelación real). No es accidente: reagendar protege el servicio,
+cancelar protege al dueño, y las 2 horas protegen al paseador. Si el
+ensayo con paseadores reales muestra que estas ventanas dañan la reventa
+de franjas, se enmienda con firma (patrón P16).
+
+---
+
 ## Historial de versiones
 
 - **v1.0 (13 May 2026 — S16)**: Primera redacción. 12 políticas iniciales derivadas del refactor de modelo de S16.
@@ -368,3 +463,4 @@ en la superficie de compra.
 - **v1.2 (11 Jul 2026 — S55)**: P15 agregada como CANDIDATA (eliminación de cuenta del dueño — espec de la letra (a) de Cuenta v1; rige recién con la firma del founder). P14 reservada para paquetes de paseo (`MODELO_PASEO.md` §6, financiero v2.5).
 - **v1.3 (11 Jul 2026 — S55-B5)**: P14 FIRMADA (founder, OK completo al paquete del plan): (a) salto con ≥24 h reagenda en el período con el mismo paseador, sobrantes al cierre = crédito si renueva / reembolso proporcional si no · (b) falla del prestador = crédito o reembolso a elección del dueño · (c) <24 h = la cita se pierde · (d) pausa = no renovar, el período corriente se rige por (a)/(b). Gemelos: `MODELO_PASEO.md` v1.1 y `MODELO_FINANCIERO.md` v2.5 (Decisión S).
 - **v1.4 (12 Jul 2026 — S56)**: P16 FIRMADA (founder S56, paquete de letra del PAQUETE DE SALIDAS): (a) comprar no es reservar — vigencia mensual declarada al comprar · (b) cancelar con ≥2 h devuelve la salida al saldo y libera la franja · (c) no-show = salida consumida, el paseador cobra (cierre `no_show`) · (d) falla del prestador = saldo o reembolso proporcional a elección del dueño · (e) rollover al renovar antes del vencimiento; sin renovación vencen (breakage declarado); recordatorio UNO y sereno, jamás countdown. Nota de ventanas: 24 h del plan vs 2 h del paquete es DECISIÓN. Gemelos: `MODELO_PASEO.md` v1.2 (§6bis/§6ter) y `MODELO_FINANCIERO.md` v2.6 (Decisión T + 7.15).
+- **v1.5 (12 Jul 2026 — S57)**: P18 FIRMADA (founder S57, redacción del arquitecto sobre decisión en sesión — cancelación y reagenda del paseo SUELTO): (a) ≥24 h = reagendar o cancelar con destino a elección del dueño (medio de pago original con sus 15 días hábiles declarados, o saldo e-PetPlace) · (b) entre 24 y 2 h = solo reagendar, la plata no se mueve · (c) <2 h o no presentarse = el paseo se pierde y el paseador cobra (cierre `no_show`, Decisión T) · (d) falla del prestador = devolución o saldo a elección, sin discusión. Camino de la plata: la cancelación se DECLARA sobre el pago (patrón 7.14 enmendada; `aplicar_reembolso()` intacta). Construcción diferida: la pantalla de elección de destino y el saldo e-PetPlace esperan Kushki fase 1 — hoy el reembolso es simulado y declarado, sin pantalla de destino. **P17 queda RESERVADA** para la Cuenta del prestador (sin letra). Gemelos: `MODELO_PASEO.md` v1.3 (§3bis) y `MODELO_FINANCIERO.md` v2.7 (nota 7.16).
