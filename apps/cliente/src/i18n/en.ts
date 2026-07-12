@@ -44,8 +44,8 @@ export const clienteEn = {
     crearMiCuenta: 'Create my account',
     correoConfirmacion: 'We sent you an email to confirm your account.',
   },
-  // S55-A A3 (D-315): S45 onboarding on the rail. The pet-step title is
-  // brand voice — goes to the founder's approval batch (D-300 pattern).
+  // S55-A A3 (D-315): S45 onboarding on the rail. Brand voice APPROVED
+  // by founder (S55 batch).
   onboarding: {
     titulo: 'Who lives with you?',
     nombreLabel: 'Their name',
@@ -121,7 +121,7 @@ export const clienteEn = {
     pie: "Soon you'll be able to ask me anything.",
   },
   ficha: {
-    // Propuestas — GATE PENDIENTE (tanda S52):
+    // APROBADAS por founder (lote S55):
     vozAlDia: 'All caught up.',
     vozEmergencia: 'Needs your attention now.',
     vozVacunaVence: '{{vacuna}} is due in {{dias}} days.',
@@ -176,8 +176,8 @@ export const clienteEn = {
     identidadInvitacion: 'Their identity fills in little by little — every detail helps us care better.',
     error: "We couldn't load the profile",
   },
-  // S55-A A3 (D-315): vaccine-card flow on the rail. New EN renderings
-  // of emotional voices go to the founder's approval batch.
+  // S55-A A3 (D-315): vaccine-card flow on the rail. EN renderings
+  // APPROVED by founder (S55 batch).
   carnet: {
     titulo: 'Vaccine card',
     capturaTitulo: "Take a photo of {{nombre}}'s vaccine card — we read the vaccines",
@@ -344,8 +344,7 @@ export const clienteEn = {
     probarDeNuevo: 'Try again',
     continuarSinFoto: 'Continue without a photo',
   },
-  // S55-A B3 — Account v1. New EN renderings of voiced strings go to
-  // the founder's approval batch.
+  // S55-A B3 — Account v1. Voiced strings APPROVED by founder (S55 batch).
   cuenta: {
     titulo: 'Your account',
     idioma: 'Language',

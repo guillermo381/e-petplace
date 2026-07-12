@@ -43,8 +43,8 @@ export const clienteEs = {
     crearMiCuenta: 'Crear mi cuenta',
     correoConfirmacion: 'Te mandamos un correo para confirmar tu cuenta.',
   },
-  // S55-A A3 (D-315): onboarding S45 al riel. El título del paso mascota
-  // es voz de marca — VA AL LOTE de gate del founder (patrón D-300).
+  // S55-A A3 (D-315): onboarding S45 al riel. Voz de marca APROBADA
+  // por founder (lote S55, es y en).
   onboarding: {
     titulo: '¿Quién vive contigo?',
     nombreLabel: 'Su nombre',
@@ -135,7 +135,7 @@ export const clienteEs = {
     // nombre PRESIDE la card y la voz no lo repite. VERSIONADAS EN
     // PARES con hogar.voz* (con {{nombre}}, que se CONSERVAN para
     // contextos sin sujeto visible: notificaciones, Coach, alertas).
-    // VOZ EMOCIONAL — GATE PENDIENTE (tanda S52 al lote del founder).
+    // VOZ EMOCIONAL — APROBADA por founder (lote S55, es y en).
     vozAlDia: 'Está al día.',
     vozEmergencia: 'Necesita tu atención ahora.',
     vozVacunaVence: 'Le vence {{vacuna}} en {{dias}} días.',
@@ -202,8 +202,8 @@ export const clienteEs = {
     error: 'No pudimos cargar el perfil',
   },
   // S55-A A3 (D-315): flujo carnet al riel (voseo→tuteo). La voz de
-  // espera es la aprobada S48 VERBATIM; las traducciones EN nuevas de
-  // las voces emocionales van AL LOTE de gate del founder.
+  // espera es la aprobada S48 VERBATIM; las traducciones EN quedaron
+  // APROBADAS por founder (lote S55).
   carnet: {
     titulo: 'Carnet de vacunas',
     capturaTitulo: 'Sácale una foto al carnet de {{nombre}} — nosotros leemos las vacunas',
@@ -375,8 +375,8 @@ export const clienteEs = {
     probarDeNuevo: 'Probar de nuevo',
     continuarSinFoto: 'Continuar sin foto',
   },
-  // S55-A B3 — Cuenta v1 (ciclo §3.5 adelantado). Voz funcional directa;
-  // las voces con alma (eliminarVoz, pagosVacio) van AL LOTE del founder.
+  // S55-A B3 — Cuenta v1 (ciclo §3.5 adelantado). Voz completa
+  // APROBADA por founder (lote S55, es y en).
   cuenta: {
     titulo: 'Tu cuenta',
     idioma: 'Idioma',

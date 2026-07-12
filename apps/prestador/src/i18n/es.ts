@@ -58,9 +58,9 @@ export const prestadorEs = {
     mascotaFallback: 'Mascota',
   },
   // El flujo de atención E2E (S44, migrado en D-315 pata prestador).
-  // VOZ EMOCIONAL PENDIENTE DE GATE (patrón D-300, hardcodeada es en
-  // pantalla hasta el lote): placeholder del mensaje a la familia y
-  // MOTIVOS_GPS (además viajan a DB — ver reporte S54-B).
+  // VOZ EMOCIONAL APROBADA por founder (lote S55, es y en) — hunk de
+  // comentario editado por la Sesión A por orden explícita del founder.
+  // MOTIVOS_GPS siguen es-only en DB (D-324, deuda aparte).
   cita: {
     // detalle / preparar
     tituloPaseoDe: 'Paseo de {{nombre}}',
