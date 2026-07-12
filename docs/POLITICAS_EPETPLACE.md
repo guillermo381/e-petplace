@@ -243,7 +243,48 @@ Ver `BIO_EXPEDIENTE.md` (S19) para schema y RPCs (`buscar_cliente_por_email`, `c
 
 ---
 
+## P15 — Eliminación de cuenta del dueño (CANDIDATA — S55, pendiente de firma del founder)
+
+> **Estado: CANDIDATA.** Redactada como espec (S55-B3, letra (a) de Cuenta v1);
+> NO rige hasta la firma. La UI de Cuenta muestra "Eliminar cuenta" con voz
+> honesta y NO ejecuta nada. El disparo de implementación es la compuerta de
+> tiendas (B6: la eliminación de cuenta es requisito de Play/App Store).
+> Nota de numeración: P14 está reservada (paquetes de paseo, financiero v2.5).
+
+**El principio:** una vida documentada no se borra a la ligera. Eliminar la
+CUENTA de un humano no puede destruir por arrastre el expediente de una
+mascota que otros humanos también cuidan, ni los hitos sellados de un
+prestador (P6), ni registros con obligación legal/fiscal.
+
+**Lo que la espec tiene que resolver ANTES de que el botón ejecute:**
+
+1. **Destino de las mascotas.** Si el user es el ÚNICO adulto de la familia:
+   ¿el expediente se elimina, se anonimiza o se ofrece exportar? Propuesta
+   base: ofrecer exportación + eliminación real de datos personales;
+   el expediente clínico anonimizado puede requerir retención (consulta
+   legal pendiente). Si HAY co-dueños (P1): la mascota y su expediente
+   QUEDAN con la familia; solo sale el miembro.
+2. **Co-dueños y familia.** El titular que se va con más miembros vigentes:
+   transferencia de titularidad explícita ANTES de eliminar (jamás una
+   familia acéfala).
+3. **Hitos del prestador (P6).** Los hitos sellados y el log anónimo
+   (`prestador_atencion_log`, ya anonimizado por diseño con pet_hash) NO se
+   borran: no contienen datos personales del dueño.
+4. **La plata.** Eventos económicos, liquidaciones y pagos NO se borran
+   (regla 7.8 del financiero: en producción no se borra — estados). La
+   eliminación de cuenta anonimiza la referencia personal, no el ledger.
+5. **Auth y storage.** auth.users + objetos del bucket en su carpeta
+   ({uid}/…) se eliminan de verdad; los paths huérfanos se barren.
+6. **Ventana de arrepentimiento.** Propuesta: soft-delete con 30 días de
+   gracia comunicados, luego borrado duro programado.
+
+**Implementación:** deuda D-337 (disparo: pre-compuerta B6, DESPUÉS de la
+firma de esta política).
+
+---
+
 ## Historial de versiones
 
 - **v1.0 (13 May 2026 — S16)**: Primera redacción. 12 políticas iniciales derivadas del refactor de modelo de S16.
 - **v1.1 (15 May 2026 — S19)**: Política P13 agregada (alta asistida por prestador). Cubre el flow de consentimiento cuando un prestador necesita registrar a un cliente no registrado durante atención presencial.
+- **v1.2 (11 Jul 2026 — S55)**: P15 agregada como CANDIDATA (eliminación de cuenta del dueño — espec de la letra (a) de Cuenta v1; rige recién con la firma del founder). P14 reservada para paquetes de paseo (`MODELO_PASEO.md` §6, financiero v2.5).

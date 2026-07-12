@@ -1422,6 +1422,20 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 #### D-333 — Continuidad y sustitución de paseador en paquetes
 ⏸ DIFERIDA (post-MVP, candado del paquete). Decisiones founder S55 registradas: el paquete aspira al MISMO paseador (continuidad como valor) y toda sustitución se COMUNICA al pet parent — jamás reemplazo silencioso. Se implementa con la capa de paquetes, que NO se vende sin `MODELO_FINANCIERO.md` v2.5 + P14 firmados (`MODELO_PASEO.md` §6). Origen: S55 (founder).
 
+> **Estado S55-B3 de deudas previas:** **D-316 ✅ CERRADA** (commits `ac52aa5`/`2dc558b`): la preferencia de idioma persiste en `user_preferencias` (DB = verdad multi-dispositivo, AsyncStorage = cache local) y se sincroniza al abrir la app; la voz server-side de B4 ya tiene dónde leer el idioma del user.
+
+#### D-334 — Catálogo de tipos de notificación
+🟢 MEDIA. `notificaciones.tipo` es text libre (8 tipos vivos relevados: cita_recordatorio, cita_confirmada, cita_completada, vacuna_vencida, promocion, pedido_estado, documento_aprobado, prestador_aprobado) y `user_notificacion_prefs.tipo` lo referencia sin FK. Catalogar (cat_* con canal/es-en/rol) cuando B4 construya el envío — el contrato "fila ausente = habilitada" no cambia. Disparo: B4 (motor de notificaciones al teléfono). Origen: S55-B3.
+
+#### D-335 — Invitar co-dueño a la familia (material P1)
+🟡 ALTA. "Tu familia" muestra miembros en LECTURA y el hueco "Invitar" con Pronto; no existe el canal de invitación (email/link, aceptación, rol elegido) ni la visibilidad de nombres entre miembros (profiles es solo-propio — un co-dueño real se listaría sin nombre). El diseño toca P1 (co-titularidad). Disparo: primer hogar real con dos adultos (a más tardar, Gate de Oro con Kary si comparte hogar). Origen: S55-B3.
+
+#### D-336 — Textos legales definitivos (términos + privacidad)
+🟡 ALTA. "Ayuda y legales" muestra PLACEHOLDER DECLARADO ("los textos definitivos están en preparación… fase de pruebas"). Los textos reales (es/en) requieren revisión legal. Disparo: pre-compuerta B6 — las reviews de tienda los exigen; sin ellos no hay submit. Origen: S55-B3.
+
+#### D-337 — Eliminación de cuenta funcional (ejecuta la P15)
+🟡 ALTA. La UI existe con voz honesta (letra (a) founder S55) y NO ejecuta; la espec vive como **P15 CANDIDATA** en `POLITICAS_EPETPLACE.md` (destino de mascotas/expediente, co-dueños, hitos P6, ledger intocable 7.8, ventana de gracia). Implementar EXIGE la firma de P15. Disparo: pre-compuerta B6 (requisito de tiendas). Origen: S55-B3.
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)
