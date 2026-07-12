@@ -3,6 +3,7 @@
 // (pila), Explorar (country_config EC), Cuenta (idioma VIVO + persistencia).
 import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
+import { dbQuery } from './lib-db.mjs';
 
 // credenciales demo: .env.local del prestador (D-290) — jamás en el repo
 const env = Object.fromEntries(
@@ -46,9 +47,29 @@ for (let i = 0; i < 20 && !t.includes('Tu hogar'); i++) {
 }
 check(t.includes('Tu hogar'), 'Hogar: portada "Tu hogar"');
 check(t.includes('Zeus'), 'Hogar: ficha de Zeus (Zona 1)');
-// Zeus demo GANÓ el "al día": atención cerrada_con_calidad 2026-07-07
-// (verificado en DB) < 12 meses — el criterio (b) del gate founder.
-check(t.includes('está al día'), 'Hogar: VOZ REAL "al día" GANADA (atención cerrada hace 3 días)');
+// D-352: la voz esperada de Zeus se deriva de la DB (criterio (b) del
+// gate founder: "al día" SE GANA con actividad de cuidado ≤12 meses) —
+// antes el assert asumía la atención del 2026-07-07 fresca para siempre.
+const [{ ultima }] = dbQuery(
+  `WITH zeus AS (
+     SELECT m.id FROM mascotas m
+       JOIN familia_miembro fm ON fm.familia_id = m.familia_id
+       JOIN auth.users u ON u.id = fm.user_id
+      WHERE m.nombre='Zeus' AND u.email='${EMAIL}'
+      LIMIT 1)
+   SELECT greatest(
+     (SELECT max(a.cerrada_en)::date FROM evento_atencion a
+       WHERE a.mascota_id=(SELECT id FROM zeus) AND a.estado='cerrada_con_calidad'),
+     (SELECT max(v.fecha_aplicada) FROM evento_vacuna_aplicada v
+       WHERE v.mascota_id=(SELECT id FROM zeus))
+   )::text AS ultima`,
+);
+const alDiaEsperado = ultima != null && Date.now() - new Date(`${ultima}T12:00:00`).getTime() < 365 * 24 * 3600 * 1000;
+if (alDiaEsperado) {
+  check(t.includes('está al día'), `Hogar: VOZ REAL "al día" GANADA (última actividad ${ultima}, leída de DB)`);
+} else {
+  check(!t.includes('está al día'), `Hogar: "al día" NO se regala (última actividad ${ultima ?? 'ninguna'} >12 meses, leída de DB)`);
+}
 check(t.includes('Carnet de vacunas'), 'Hogar: acción de aporte (Zona 4)');
 await page.screenshot({ path: `${S}/esq-hogar.png` });
 

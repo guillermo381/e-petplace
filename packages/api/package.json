@@ -7,7 +7,7 @@
   "types": "./src/index.ts",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "gen:types": "supabase gen types typescript --project-id zyltipqscdsdsxnjclhp --schema public > src/database.types.ts"
+    "gen:types": "npx supabase gen types typescript --project-id zyltipqscdsdsxnjclhp --schema public > src/database.types.ts.tmp && mv src/database.types.ts.tmp src/database.types.ts || (rm -f src/database.types.ts.tmp && exit 1)"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.104.0"

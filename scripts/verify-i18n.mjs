@@ -1,7 +1,12 @@
 // Verificación runtime del riel i18n (S51-B1a) — regla 13.
 // Tres escenarios por app: locale es → español · locale en → inglés ·
 // locale es + override persistido 'en' → inglés (el override gana).
+import { tmpdir } from 'node:os';
 import { chromium } from 'playwright-core';
+
+// D-351: sin SCRATCH las capturas iban a la carpeta literal `undefined/`
+// en la raíz del repo — el default es el scratch del sistema.
+const S = process.env.SCRATCH ?? tmpdir();
 
 const OBJETIVOS = [
   {
@@ -64,7 +69,7 @@ for (const t of OBJETIVOS) {
       if (mal) console.log(`  [${esc.nombre}] ✗ NO DEBÍA aparecer "${s}"`);
     }
     await page.screenshot({
-      path: `${process.env.SCRATCH}/i18n-${t.app}-${esc.locale}${esc.override ? '-override' : ''}.png`,
+      path: `${S}/i18n-${t.app}-${esc.locale}${esc.override ? '-override' : ''}.png`,
     });
     await ctx.close();
   }

@@ -53,7 +53,6 @@ await page.getByText('Marcar mis primeros días', { exact: true }).click();
 t = await esperar('Cuánto tiempo', 15);
 check(t.includes('Desde') && t.includes('Cuánto tiempo'), 'T3 Hoja: Desde + duración de un toque');
 // elegir el primer día ofrecido (hoy) y 1 semana → el dato "Hasta el…"
-const hoyIso = new Intl.DateTimeFormat('en-CA').format(new Date());
 const chipHoy = await page.getByText(/^\d{2} \w{3} \d{4}$/).first();
 await chipHoy.click();
 await page.getByText('1 semana', { exact: true }).click();

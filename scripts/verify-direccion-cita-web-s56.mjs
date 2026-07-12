@@ -1,13 +1,31 @@
 // Verificación runtime web S56-B (TAREA 3): el detalle de la cita muestra
 // "A dónde ir" leyendo el snapshot D-339 de la FILA — camino NULL HONESTO
-// contra la cita demo viva de HOY (cfce1d43, snapshot null: nació pre-D-339).
+// contra la cita demo viva (cfce1d43, snapshot null: nació pre-D-339).
 // ESTRICTAMENTE SOLO LECTURA: jamás se toca "Iniciar paseo" — esa cita es
 // el wow del founder (pagada → cierre → ledger) y debe quedar INTACTA.
 // Dev server prestador :8081.
+// D-352: el detalle del prestador solo carga citas de HOY (index.tsx usa
+// obtenerCitasPaseoDelDia(hoy)) — la fecha de la cita se LEE de la DB y
+// si no es hoy el smoke lo dice honesto (exit 2 = precondición, no fallo).
 import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
+import { dbQuery, hoyLocal } from './lib-db.mjs';
 
 const CITA_VIVA = 'cfce1d43-06f3-4081-9643-059c526e68ca';
+
+const filas = dbQuery(`SELECT fecha::text AS fecha FROM evento_cita_servicio WHERE id='${CITA_VIVA}'`);
+if (filas.length === 0) {
+  console.log(`✗ PRECONDICIÓN: la cita viva ${CITA_VIVA} no existe en DB — el smoke no aplica.`);
+  process.exit(2);
+}
+if (filas[0].fecha !== hoyLocal()) {
+  console.log(
+    `✗ PRECONDICIÓN (D-352): la cita viva es del ${filas[0].fecha} y hoy es ${hoyLocal()} — ` +
+      `el detalle del prestador solo carga citas del día. NO es un fallo del producto: ` +
+      `re-anclar la cita demo (o correr el día correcto) y volver a correr.`,
+  );
+  process.exit(2);
+}
 
 const env = Object.fromEntries(
   readFileSync('apps/prestador/.env.local', 'utf8')

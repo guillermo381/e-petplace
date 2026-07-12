@@ -1,9 +1,30 @@
 // Verificación runtime S51-B3 (regla 13 + test 8): esqueleto prestador
 // — tabs, HOY 4 zonas con verdad firme, Mascotas con datos reales,
 // detalle icónico, Negocio con idioma vivo. Sesión dev demo (D-290).
+import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
+import { dbQuery, hoyLocal } from './lib-db.mjs';
 
 const S = process.env.SCRATCH ?? '/tmp';
+
+// D-352: la verdad de HOY se LEE de la DB (antes asumía "las citas del
+// demo son del 2026-07-07, hoy no hay" — verdadero solo ese día).
+const env = Object.fromEntries(
+  readFileSync('apps/prestador/.env.local', 'utf8')
+    .split('\n')
+    .filter((l) => l.includes('='))
+    .map((l) => [l.slice(0, l.indexOf('=')).trim(), l.slice(l.indexOf('=') + 1).trim()]),
+);
+const [conteo] = dbQuery(
+  `SELECT count(*)::int AS firmes
+     FROM evento_cita_servicio c
+     JOIN prestadores p ON p.id = c.prestador_id
+     JOIN auth.users u ON u.id = p.user_id
+    WHERE u.email='${env.EXPO_PUBLIC_DEMO_EMAIL}' AND c.tipo_servicio='paseo'
+      AND c.fecha='${hoyLocal()}'
+      AND c.estado IN ('confirmada','en_curso','completada','no_show')`,
+);
+const hayFirmesHoy = conteo.firmes > 0;
 let fallos = 0;
 const check = (cond, nombre) => {
   console.log(`${cond ? '✓' : '✗ FALTA'} ${nombre}`);
@@ -24,10 +45,14 @@ for (let i = 0; i < 30 && !t.includes('Tus paseos de hoy'); i++) {
 }
 check(t.includes('Tus paseos de hoy'), 'HOY: portada');
 check(t.includes('Hoy') && t.includes('Mascotas') && t.includes('Negocio'), 'BarraTabs: 3 tabs');
-// las citas del demo son del 2026-07-07: HOY (sin citas) el estado
-// correcto es el vacío digno — la verdad firme del wrapper se prueba
-// aparte contra ese día (scripts/verify-verdad-firme.mjs: 3 en DB → 2).
-check(t.includes('Hoy no tienes paseos'), 'HOY: vacío digno (0 citas hoy — verdad)');
+// La verdad de HOY viene de la DB (D-352): con 0 firmes el estado
+// correcto es el vacío digno; con firmes, el vacío sería mentira. La
+// verdad firme del wrapper se prueba aparte (verify-verdad-firme.mjs).
+if (hayFirmesHoy) {
+  check(!t.includes('Hoy no tienes paseos'), `HOY: ${conteo.firmes} firme(s) en DB — el vacío NO se pinta`);
+} else {
+  check(t.includes('Hoy no tienes paseos'), 'HOY: vacío digno (0 citas hoy — verdad, leída de DB)');
+}
 check(!t.includes('Por confirmar'), 'HOY: nada tentativo pintado');
 await page.screenshot({ path: `${S}/prest-hoy.png`, fullPage: true });
 
