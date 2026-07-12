@@ -505,9 +505,13 @@ El primer `origen_tipo` con circulación real. El ciclo completo en DB
   re-resuelve). Invisible al prestador (verdad firme). Expiración
   PEREZOSA: toda lectura/escritura trata un hold vencido como
   inexistente; el cron `expirar-citas-pendientes` es higiene, no
-  correctitud. Invariante del catálogo: `estado_reserva='pagada'` ⟺ la
-  cita pasó por `confirmar_cita_pagada` (único escritor de ese valor;
-  NULL = ciclo de pago no aplica, legacy/walk-in).
+  correctitud. Invariante del catálogo (AMPLIADO S56, founder+arquitecto):
+  `estado_reserva='pagada'` ⟺ la cita está CUBIERTA POR UN PAGO — pasó
+  por `confirmar_cita_pagada` (cita suelta), o nació de un PLAN cuyo
+  período se cobró (`contratar_plan_paseo`/renovación: la cita lleva
+  `suscripcion_servicio_id` + `metadata.origen='plan'` y su precio ES el
+  unitario efectivo del período). Esos son los DOS únicos escritores del
+  valor; NULL = ciclo de pago no aplica (legacy/walk-in).
 - **`confirmar_cita_pagada`** (el pago — hoy simulado): PRE-VALIDA el
   motor SIN insertar (cuenta existe, **`estado='activa'`** → error
   `cuenta_no_activa`, rol `prestador_servicios` activo en
@@ -793,8 +797,10 @@ El jsonb `datos_bancarios` tiene estructura uniforme entre países (decisión M)
 ### 7.13 Cobrar y ofertarse exigen cuenta ACTIVA (NUEVO v2.4 — Decisión Q)
 Toda puerta de pago pre-valida `cuentas_comerciales.estado='activa'` (error `cuenta_no_activa`) ADEMÁS del rol activo, y todo listado de prestadores cobrables filtra por cuenta activa, server-side. El devengo de cita sigue la variante (b): el evento nace al cerrar con calidad, jamás al pagar (Decisión R, §4.3).
 
-### 7.14 El plan cobra por período; el devengo sigue siendo por cita (NUEVO v2.5 — Decisión S)
-Ninguna implementación del plan cobra multi-período junto ni crea eventos económicos al cobrar el período. El cobro mensual del plan se registra como PAGO (estado/metadata, patrón de la cita suelta); cada cita del plan devenga sola al cerrar con calidad, con el precio unitario efectivo del período como `monto_bruto`. Saltos, fallas, créditos y reembolsos proporcionales se rigen por `POLITICAS_EPETPLACE.md` P14 — el reembolso proporcional usa `aplicar_reembolso()` sobre lo COBRADO, jamás toca devengos inexistentes.
+### 7.14 El plan cobra por período; el devengo sigue siendo por cita (NUEVO v2.5 — Decisión S; letra ENMENDADA S56)
+Ninguna implementación del plan cobra multi-período junto ni crea eventos económicos al cobrar el período. El cobro mensual del plan se registra como PAGO (estado/metadata, patrón de la cita suelta); cada cita del plan devenga sola al cerrar con calidad, con el precio unitario efectivo del período como `monto_bruto`. Saltos, fallas, créditos y reembolsos proporcionales se rigen por `POLITICAS_EPETPLACE.md` P14.
+
+**Enmienda S56 (founder+arquitecto — espíritu intacto, letra corregida):** el reembolso proporcional del PERÍODO se **DECLARA en la suscripción** (`estado_pago='reembolsado'` + monto/motivo en `pago_metadata.reembolsos[]` — la implementación de S56 es la ley); `aplicar_reembolso()` queda reservada a **reversar devengos de citas EJECUTADAS** (eventos económicos existentes). Un pago de período que jamás tocó el ledger no tiene nada que reversar ahí — "jamás toca devengos inexistentes" era y sigue siendo la regla.
 
 ### 7.15 El paquete paga al comprar, devenga al cerrar, y el no-show ES un cierre (NUEVO v2.6 — Decisión T)
 
@@ -1015,6 +1021,11 @@ Este documento es el contrato técnico-conceptual del motor financiero. Cambiarl
 **Documentos gemelos del paquete (firmados juntos, founder S56):**
 - `MODELO_PASEO.md` v1.2 (§6.1 continuidad por día de semana; §6bis el paquete; §6ter escenarios de disponibilidad).
 - `POLITICAS_EPETPLACE.md` v1.4 — P16 (reservas, no-show, rollover y vencimiento del paquete).
+
+**Enmiendas de cierre S56 (founder+arquitecto, post-construcción de D-338):**
+- 7.14 letra corregida: el reembolso proporcional del período se DECLARA en la suscripción; `aplicar_reembolso()` reversa devengos de citas EJECUTADAS.
+- Invariante del hold AMPLIADO (§4.3): `'pagada'` ⟺ cubierta por un pago — `confirmar_cita_pagada` O cita nacida de un plan con período cobrado (`origen='plan'`).
+- `prestador_servicios.precio_plan` (columna nueva, contrato B/arquitecto): el descuento por volumen de Decisión S como precio POR SALIDA dentro del plan; NULL = sin descuento; sin CHECK relacional; `contratar`/renovación usan `COALESCE(precio_plan, precio)` y el aviso 72 h DECLARA el precio del período nuevo.
 
 ### v2.5 (11 Jul 2026 — S55-B5, post v2.4)
 

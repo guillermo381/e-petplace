@@ -25,6 +25,9 @@ const CODIGOS_ERROR_PLAN = [
   'fuera_de_horario',
   'slot_ocupado',
   'pago_no_disponible',
+  // D-341 (S56): bloqueos/vacaciones del paseador — lo levantan
+  // contratar_plan_paseo (fecha del período bloqueada) y saltar_cita_plan.
+  'prestador_no_disponible',
   'plan_no_encontrado',
   'plan_no_activo',
   'cita_no_encontrada',
@@ -53,6 +56,7 @@ const MENSAJES_ERROR_PLAN: Record<
   fuera_de_horario:     'El paseador no atiende en ese horario.',
   slot_ocupado:         'Ese horario acaba de ocuparse — elegí otro.',
   pago_no_disponible:   'Este paseador todavía no puede recibir pagos por la app.',
+  prestador_no_disponible: 'El paseador no está disponible en esas fechas — elegí otro horario.',
   plan_no_encontrado:   'El plan no existe o ya no es accesible.',
   plan_no_activo:       'Este plan ya no está activo.',
   cita_no_encontrada:   'La salida no existe o ya no es accesible.',

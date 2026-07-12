@@ -10515,6 +10515,7 @@ export type Database = {
           nombre_custom: string | null
           precio: number
           precio_emergencia: number | null
+          precio_plan: number | null
           prestador_id: string
           tipo_servicio: string
         }
@@ -10529,6 +10530,7 @@ export type Database = {
           nombre_custom?: string | null
           precio?: number
           precio_emergencia?: number | null
+          precio_plan?: number | null
           prestador_id: string
           tipo_servicio: string
         }
@@ -10543,6 +10545,7 @@ export type Database = {
           nombre_custom?: string | null
           precio?: number
           precio_emergencia?: number | null
+          precio_plan?: number | null
           prestador_id?: string
           tipo_servicio?: string
         }
@@ -14409,6 +14412,10 @@ export type Database = {
           p_url_accion: string
         }
         Returns: string
+      }
+      _prestador_bloqueado: {
+        Args: { p_fecha: string; p_prestador_id: string }
+        Returns: boolean
       }
       _resolver_fee_aplicable: {
         Args: {
