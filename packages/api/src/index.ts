@@ -234,6 +234,14 @@ export {
   type CodigoErrorLiquidaciones,
 } from './wrappers/liquidaciones';
 
+// Comisión vigente visible al prestador — S56-B (TAREA 4, financiero v2.6
+// regla 7.15) — archivo NUEVO de esta sesión
+export {
+  obtenerComisionVigenteCita,
+  type ComisionVigenteCita,
+  type CodigoErrorFees,
+} from './wrappers/fees';
+
 // Configuración del servicio de paseo — S55-B (B2) — archivo NUEVO de esta sesión
 export {
   BLOQUES_PASEO,
@@ -253,3 +261,12 @@ export {
   type InputActualizarFranja,
   type CodigoErrorConfiguracionPaseo,
 } from './wrappers/configuracionPaseo';
+
+// ── Dirección del hogar (S56-A, D-339 — hunk Sesión A) ──────────────────────
+export {
+  obtenerDireccionHogar,
+  guardarDireccionHogar,
+  type DireccionHogar,
+  type GuardarDireccionHogarInput,
+  type CodigoErrorDireccion,
+} from './wrappers/direcciones';
