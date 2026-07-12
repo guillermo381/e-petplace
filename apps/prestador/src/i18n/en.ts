@@ -60,6 +60,11 @@ export const prestadorEn = {
     estadoPorConfirmar: 'To confirm',
     hoy: 'today',
     iniciarPaseo: 'Start walk',
+    // A dónde ir — D-339 (S56-B TAREA 3) · LOTE S56, GATE PENDIENTE · Espejo de es.ts
+    direccionTitulo: 'Where to go',
+    direccionAbrirMapa: 'Open in maps',
+    direccionSinDato: "This appointment doesn't have a saved address.",
+    direccionMapaError: "We couldn't open the map.",
     enCursoTitulo: 'Walk in progress',
     gpsIniciando: 'GPS starting',
     gpsActivo: 'GPS active',

@@ -9,7 +9,7 @@
 
 import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
-import type { Database } from '../database.types';
+import type { Database, Json } from '../database.types';
 
 // ── Códigos de error (verificados contra los RAISE de cada body) ────────────
 
@@ -271,7 +271,41 @@ export type CitaAgendaPaseo = Pick<
    * el tratamiento visual con esto, no con cita.estado.
    */
   atencion: Pick<Database['public']['Tables']['evento_atencion']['Row'], 'estado' | 'iniciada_en'> | null;
+  /**
+   * A dónde ir — D-339 (S56): el snapshot de dirección que la fila de la
+   * cita trae (congelado al pagar). null honesto: citas históricas o
+   * hogar sin dirección al momento del hold.
+   */
+  direccion: DireccionCitaPaseo | null;
 };
+
+/** El shape del snapshot D-339 (claves fijas de la migración 20260712090000). */
+export interface DireccionCitaPaseo {
+  direccion: string;
+  ciudad: string | null;
+  sector: string | null;
+  referencias: string | null;
+  lat: number | null;
+  lon: number | null;
+}
+
+// Reader L-124: siempre las mismas claves, null sin dato. Snapshot ausente
+// o sin una dirección legible → null honesto (la pantalla lo declara).
+function parseDireccionSnapshot(v: Json | null): DireccionCitaPaseo | null {
+  if (typeof v !== 'object' || v === null || Array.isArray(v)) return null;
+  const direccion = v['direccion'];
+  if (typeof direccion !== 'string' || direccion.length === 0) return null;
+  const s = (x: Json | undefined) => (typeof x === 'string' && x.length > 0 ? x : null);
+  const n = (x: Json | undefined) => (typeof x === 'number' && Number.isFinite(x) ? x : null);
+  return {
+    direccion,
+    ciudad: s(v['ciudad']),
+    sector: s(v['sector']),
+    referencias: s(v['referencias']),
+    lat: n(v['lat']),
+    lon: n(v['lon']),
+  };
+}
 
 export interface InputCitasPaseoDelDia {
   prestador_id: string;
@@ -286,7 +320,7 @@ export async function obtenerCitasPaseoDelDia(
   const { data, error } = await getClient()
     .from('evento_cita_servicio')
     .select(
-      'id, fecha, hora, estado, tipo_servicio, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
+      'id, fecha, hora, estado, tipo_servicio, direccion_snapshot, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
     )
     .eq('prestador_id', input.prestador_id)
     .eq('fecha', input.fecha)
@@ -311,7 +345,8 @@ export async function obtenerCitasPaseoDelDia(
       atenciones.length === 0
         ? null
         : atenciones.reduce((a, b) => (b.iniciada_en > a.iniciada_en ? b : a));
-    return { ...c, atencion };
+    const { direccion_snapshot, ...resto } = c;
+    return { ...resto, atencion, direccion: parseDireccionSnapshot(direccion_snapshot) };
   });
   return { ok: true, data: citas };
 }

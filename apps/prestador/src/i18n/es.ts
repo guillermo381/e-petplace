@@ -72,6 +72,11 @@ export const prestadorEs = {
     estadoPorConfirmar: 'Por confirmar',
     hoy: 'hoy',
     iniciarPaseo: 'Iniciar paseo',
+    // A dónde ir — D-339 (S56-B TAREA 3) · LOTE S56, GATE PENDIENTE
+    direccionTitulo: 'A dónde ir',
+    direccionAbrirMapa: 'Abrir en el mapa',
+    direccionSinDato: 'Esta cita no tiene una dirección registrada.',
+    direccionMapaError: 'No pudimos abrir el mapa.',
     // durante
     enCursoTitulo: 'Paseo en curso',
     gpsIniciando: 'GPS iniciando',

@@ -92,6 +92,7 @@ export {
   type NovedadCatalogoPaseo,
   type IncidenciaCatalogoPaseo,
   type CitaAgendaPaseo,
+  type DireccionCitaPaseo,
   type MascotaAgenda,
   type InputCitasPaseoDelDia,
   type CodigoErrorPaseo,
