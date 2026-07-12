@@ -1,7 +1,7 @@
 # POLITICAS_EPETPLACE — Políticas operativas del producto
 
-> Versión: v1.1
-> Última actualización: 15 Mayo 2026 — Sesión 19. Política P13 agregada (alta asistida por prestador).
+> Versión: v1.4
+> Última actualización: 12 Jul 2026 — Sesión 56. P16 FIRMADA (el paquete de salidas: reservas, no-show, rollover y vencimiento).
 > Audiencia: Claude (web y code), devs futuros, equipo de soporte, equipo legal.
 > Análogo a: `CONTRATO_TRABAJO.md` (cómo trabajamos) pero del producto (cómo se comporta).
 
@@ -319,9 +319,52 @@ firma de esta política).
 
 ---
 
+## P16 — El paquete de salidas: reservas, no-show, rollover y vencimiento (FIRMADA — founder S56)
+
+> Parte del paquete de letra del PAQUETE DE SALIDAS (S56): `MODELO_PASEO.md`
+> §6bis (la UX del bono anclado al prestador) y `MODELO_FINANCIERO.md` v2.6
+> Decisión T + regla 7.15 (el dinero). Esta política rige cada salida del
+> paquete desde que el paquete exista en producción.
+
+**(a) Comprar no es reservar.** El paquete acredita salidas con vigencia
+mensual declarada al comprar. Cada salida se reserva después, contra la
+agenda real del prestador anclado.
+
+**(b) Cancelar una reserva.** Con **≥2 horas antes de la hora de
+recogida**, la salida vuelve al saldo del paquete y la franja se libera.
+Sin excepciones automáticas (los casos humanos extremos son soporte, no
+regla — patrón P14(c)).
+
+**(c) No-show.** Reserva no cumplida sin cancelación en ventana = salida
+consumida. El paseador cobra (cierre `no_show`, Decisión T): bloqueó su
+agenda de verdad.
+
+**(d) Falla del prestador.** La salida vuelve al saldo, o el dueño elige
+reembolso proporcional de esa salida — **a su elección, sin discusión**
+(espejo P14(b)).
+
+**(e) Rollover.** Renovar antes del vencimiento suma las salidas sin usar
+al paquete nuevo. Sin renovación, vencen (Decisión T: breakage declarado).
+El recordatorio de vencimiento es UNO y sereno — jamás countdown ni
+urgencia (coherencia LOYALTY §6-7).
+
+**Por qué:** el paquete compra flexibilidad (el plan compra ritmo). La
+plata sigue a lo ejecutado o a lo COMPROMETIDO (el no-show comprometió una
+agenda real); lo nunca comprometido que el dueño dejó vencer se declara
+como lo que es — ingreso de plataforma por flexibilidad no usada, avisado
+en la superficie de compra.
+
+> Nota de ventanas: P14 (plan) usa 24 h; P16 (paquete) usa 2 h. Es
+> DECISIÓN, no accidente: el plan genera citas automáticas con antelación;
+> el paquete se reserva a demanda. Si el ensayo con paseadores reales
+> muestra que las 2 h dañan la reventa de franjas, se enmienda con firma.
+
+---
+
 ## Historial de versiones
 
 - **v1.0 (13 May 2026 — S16)**: Primera redacción. 12 políticas iniciales derivadas del refactor de modelo de S16.
 - **v1.1 (15 May 2026 — S19)**: Política P13 agregada (alta asistida por prestador). Cubre el flow de consentimiento cuando un prestador necesita registrar a un cliente no registrado durante atención presencial.
 - **v1.2 (11 Jul 2026 — S55)**: P15 agregada como CANDIDATA (eliminación de cuenta del dueño — espec de la letra (a) de Cuenta v1; rige recién con la firma del founder). P14 reservada para paquetes de paseo (`MODELO_PASEO.md` §6, financiero v2.5).
 - **v1.3 (11 Jul 2026 — S55-B5)**: P14 FIRMADA (founder, OK completo al paquete del plan): (a) salto con ≥24 h reagenda en el período con el mismo paseador, sobrantes al cierre = crédito si renueva / reembolso proporcional si no · (b) falla del prestador = crédito o reembolso a elección del dueño · (c) <24 h = la cita se pierde · (d) pausa = no renovar, el período corriente se rige por (a)/(b). Gemelos: `MODELO_PASEO.md` v1.1 y `MODELO_FINANCIERO.md` v2.5 (Decisión S).
+- **v1.4 (12 Jul 2026 — S56)**: P16 FIRMADA (founder S56, paquete de letra del PAQUETE DE SALIDAS): (a) comprar no es reservar — vigencia mensual declarada al comprar · (b) cancelar con ≥2 h devuelve la salida al saldo y libera la franja · (c) no-show = salida consumida, el paseador cobra (cierre `no_show`) · (d) falla del prestador = saldo o reembolso proporcional a elección del dueño · (e) rollover al renovar antes del vencimiento; sin renovación vencen (breakage declarado); recordatorio UNO y sereno, jamás countdown. Nota de ventanas: 24 h del plan vs 2 h del paquete es DECISIÓN. Gemelos: `MODELO_PASEO.md` v1.2 (§6bis/§6ter) y `MODELO_FINANCIERO.md` v2.6 (Decisión T + 7.15).

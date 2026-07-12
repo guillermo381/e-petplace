@@ -1,13 +1,13 @@
 # MODELO_PASEO — El contrato del servicio de paseo
 
-> **Versión: v1.1 — S55 (11 Jul 2026).** Decisiones de producto cerradas
+> **Versión: v1.2 — S56 (11-12 Jul 2026).** Decisiones de producto cerradas
 > por el founder en sesión; escrito por el arquitecto (escritor único de
 > docs, regla 76). **Contrastes obligatorios:** `MODELO_FINANCIERO.md`
-> v2.5 (el camino de la plata — Decisiones Q/R/S y regla 7.13 rigen acá
-> sin excepción), `POLITICAS_EPETPLACE.md` P14 (la política del plan),
-> `DISEÑO_EXPERIENCIA.md` (momento-primero, verdad firme), `RUTA_F1.md`
-> (principio de secuencia S54: el paseo se deja COMPLETO antes del
-> siguiente servicio).
+> v2.6 (el camino de la plata — Decisiones Q/R/S/T y reglas 7.13/7.14/7.15
+> rigen acá sin excepción), `POLITICAS_EPETPLACE.md` P14 (la política del
+> plan) y P16 (la política del paquete), `DISEÑO_EXPERIENCIA.md`
+> (momento-primero, verdad firme), `RUTA_F1.md` (principio de secuencia
+> S54: el paseo se deja COMPLETO antes del siguiente servicio).
 >
 > **Qué es este doc:** el modelo del PASEO como servicio — duraciones,
 > precio, capacidad y agenda. Lo que está cerrado, cerrado está; los
@@ -120,10 +120,22 @@ Se monta sobre el mecanismo existente (`bono_id` /
     mes.
   - **Auto-renovación DECLARADA** en la superficie al contratar (con su
     aviso previo de 72 h y pausa de un toque — Decisión S).
-- **Mismo paseador todo el plan** — la continuidad está FIRMADA (el
-  vínculo es parte del valor). La sustitución automática con mensaje al
-  pet parent sigue siendo post-MVP (D-333 intacta): en el MVP del plan,
-  si el paseador no puede, rige P14(b).
+- **La continuidad es POR DÍA DE SEMANA (enmienda v1.2, founder S56):**
+  todas las citas del plan que caen el mismo día de la semana las
+  ejecuta el MISMO paseador (todos los martes, el paseador del martes).
+  Días distintos pueden tener paseadores distintos cuando la cobertura
+  lo exija — el vínculo se preserva por ritual, no por monopolio. La
+  sustitución automática con mensaje al pet parent sigue post-MVP
+  (D-333 intacta): si el paseador de un día falla, rige P14(b).
+  **Porqué (founder S56):** el escenario real "nadie cubre martes Y
+  jueves" no puede matar el plan; la promesa emocional ("Zeus conoce a
+  su paseador del martes") sobrevive entera.
+  - **Alcance v1 de la construcción (decisión arquitecto+founder S56):**
+    el plan NACE con el paseador elegido en el flujo suelto; los días
+    que ESE paseador no cubre se muestran honestos y no seleccionables
+    ("Andrés no pasea los jueves"). El reparto multi-paseador que esta
+    continuidad por día legaliza es el peldaño SIGUIENTE — declarado
+    acá, no construido en D-338.
 - **Hub "Mis paseos" = el DOBLE CLIC del servicio** — JAMÁS una tab (la
   navegación de 3 tabs S50 queda intacta). Se entra por la tarjeta del
   Hogar y por Explorar→Paseo. Tres segmentos:
@@ -136,7 +148,7 @@ Se monta sobre el mecanismo existente (`bono_id` /
 UN pago por PERÍODO MENSUAL (al contratar y en cada renovación);
 descuento por volumen lo configura el prestador; **un pago, N
 devengos**: cada cita del plan devenga sola al cerrar con calidad
-(variante (b) intacta). `MODELO_FINANCIERO.md` v2.5 §Decisión S.
+(variante (b) intacta). `MODELO_FINANCIERO.md` v2.6 §Decisión S.
 
 ### 6.3 Evolución opcional (apagada)
 
@@ -144,16 +156,101 @@ devengos**: cada cita del plan devenga sola al cerrar con calidad
 (período anual con cobro mensual). NO se diseña ni se construye hasta
 decisión explícita del founder — apagado, sin lugar en UI.
 
+## 6bis. El PAQUETE DE SALIDAS (bono) — espec FIRMADA (founder S56), construcción D-343
+
+> El paquete es el SEGUNDO producto de recurrencia, hermano del plan (§6)
+> sobre el mismo chasis (`bono_id` — ya existente en DB). **Comprar no es
+> reservar**: el paquete acredita salidas; la reserva es un acto posterior,
+> salida por salida, sobre el flujo suelto de siempre. La plata del
+> paquete vive en `MODELO_FINANCIERO.md` v2.6 (Decisión T + regla 7.15);
+> su política en `POLITICAS_EPETPLACE.md` P16. **La construcción es
+> D-343 — disparo: cierre de D-338** (el plan se construye PRIMERO).
+
+1. **Qué es.** N salidas (presets 5 · 10 · 15) de UNA duración del menú
+   canónico, compradas a UN prestador concreto (**anclado**: el dueño lo
+   elige como en el flujo suelto; el precio es la tarifa de ESE prestador
+   con su descuento por volumen — él lo configura, patrón Decisión S).
+2. **Vigencia MENSUAL.** El paquete vence al cierre de su mes de vigencia.
+   La vigencia se declara en la superficie de compra — la honestidad vive
+   ahí, no en letra chica.
+3. **Reservar.** Cada salida se reserva contra la agenda real del
+   prestador anclado (motor de ventana S55-B2, sin cambios). Reservar
+   descuenta del saldo del paquete al confirmarse la cita (sin pago:
+   el pago fue el del paquete).
+4. **Cancelación de una reserva:** con **≥2 horas antes de la hora de
+   recogida**, la salida VUELVE al saldo y la franja del prestador se
+   libera y se re-oferta. Con menos de 2 h, rige el no-show (§6bis.5).
+5. **No-show (reservó y no cumplió):** la salida se da por CONSUMIDA y el
+   paseador DEVENGA (cierre administrativo `no_show` — Decisión T): su
+   agenda se bloqueó de verdad; la plata sigue a lo comprometido.
+6. **Rollover condicionado:** al comprar otro paquete ANTES del
+   vencimiento (renovar), las salidas sin usar SE SUMAN al nuevo. Sin
+   renovación, VENCEN (destino de la plata: Decisión T — breakage
+   declarado). El consumo es FIFO: las salidas más viejas se gastan
+   primero, y cada una devenga al precio unitario de su paquete de ORIGEN.
+7. **Cero dark patterns:** sin countdowns de vencimiento, sin urgencia
+   artificial (coherencia MODELO_LOYALTY §6-7). Un recordatorio sereno
+   cerca del cierre del período es voz honesta, no FOMO — una (1) noticia,
+   jamás una cuenta regresiva.
+8. **Evolución declarada (APAGADA): el paquete FLEX / tarifa de
+   plataforma.** Modelo dispatch (precio de plataforma + asignación por
+   disponibilidad/zona/calidad, con preferencia por el paseador anterior;
+   el paseador del pool acepta la tarifa de plataforma — jamás arbitraje
+   de spread contra el que cobra menos; el precio mostrado al comprar es
+   EL precio — cero dynamic pricing en vivo delante del usuario).
+   **Tres disparos, los tres:** D-331 cerrada (zonas) · masa crítica de
+   paseadores por zona · volumen de demanda C/D (D-344) suficiente para
+   calibrar tarifa. Hasta entonces: sin lugar en UI, sin diseño técnico.
+   Doc propio cuando dispare.
+
+## 6ter. Los cuatro escenarios de disponibilidad (founder S56)
+
+Al buscar cobertura (suelto, plan o paquete):
+
+- **A — cobertura perfecta:** flujo actual.
+- **B — cobertura repartida:** posible bajo la continuidad por día (§6.1
+  v1.2); la UI lo dice con honestidad ("martes con Andrés, jueves con
+  Carla").
+- **C — cobertura PARCIAL:** verdad firme + promesa honesta: *"Hoy podemos
+  cubrir X. El equipo de e-PetPlace ya conoce tu necesidad y está buscando
+  cómo cubrirla."* La necesidad SE PERSISTE (D-344).
+- **D — sin cobertura:** mismo patrón, cero callejones: *"No tenemos
+  disponibilidad para esto todavía — ya lo sabemos y estamos buscando."*
+  La necesidad SE PERSISTE (D-344).
+
+**Regla:** cero disponibilidad JAMÁS es un final mudo; siempre es promesa
+honesta + captura de demanda.
+
 ## 7. Los tests de toda feature de paseo
 
 1. ¿Respeta el menú canónico (ni un bloque fuera del CHECK)?
 2. ¿La ventana completa manda (cero doble-booking parcial)?
 3. ¿Verdad firme intacta (nada tentativo visible al prestador)?
-4. ¿El camino de la plata intacto (Q, R, S, 7.13 — cero eventos al pagar; en el plan: un pago, N devengos)?
+4. ¿El camino de la plata intacto (Q, R, S, T, 7.13 — cero eventos al pagar; en el plan: un pago, N devengos; en el paquete: 7.15, solo los dos cierres devengan)?
 5. ¿Los huecos §5 siguen declarados o su disparo ya sonó?
+6. ¿Toda búsqueda sin cobertura completa responde con los escenarios §6ter (promesa honesta + captura de demanda — jamás final mudo)?
 
 ## Historial
 
+- **v1.2 (S56, 11-12 Jul 2026 — founder S56, paquete de letra FIRMADO en
+  sesión con el arquitecto):** (1) §6.1 ENMENDADO — la continuidad del
+  plan pasa de "mismo paseador todo el plan" a **continuidad POR DÍA DE
+  SEMANA** (el paseador del martes ejecuta todos los martes; días
+  distintos pueden repartirse cuando la cobertura lo exija; D-333 sigue
+  post-MVP), con el alcance v1 de la construcción declarado (el plan
+  nace con el paseador elegido; días no cubiertos honestos y no
+  seleccionables; el reparto multi-paseador es el peldaño siguiente).
+  (2) §6bis NUEVO — el PAQUETE DE SALIDAS (bono anclado al prestador):
+  presets 5/10/15 de una duración, vigencia mensual declarada, comprar
+  ≠ reservar, cancelación ≥2 h devuelve al saldo, no-show consume y
+  devenga, rollover condicionado con FIFO a precio de origen, cero dark
+  patterns, y la evolución FLEX/dispatch declarada APAGADA con sus tres
+  disparos (D-331 + masa crítica por zona + demanda D-344). Gemelos:
+  financiero v2.6 (Decisión T + 7.15) y POLITICAS v1.4 (P16).
+  Construcción = D-343, disparo: cierre de D-338. (3) §6ter NUEVO — los
+  cuatro escenarios de disponibilidad A/B/C/D: cero disponibilidad
+  jamás es final mudo (promesa honesta + captura de demanda D-344).
+  (4) Test 4 ampliado (Decisión T/7.15) y test 6 nuevo (§6ter).
 - **v1.1 (S55-B5, 11 Jul 2026):** §6 reescrito con la espec FIRMADA del
   plan (OK completo del founder al paquete): chip "Hacerlo frecuente" +
   Hoja de 7 chips L-D con multi-selección y frecuencia de un toque +

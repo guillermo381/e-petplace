@@ -1453,6 +1453,25 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 #### D-342 — Higiene: policies duplicadas y doble CHECK en tablas de agenda
 ⚪ BAJA. Relevamiento B: policies duplicadas `ps_own`/`ph_own`/`pb_own` (conviven con las nuevas por-comando en `prestador_servicios`/`prestador_horarios`/`prestador_bloqueos`) y `dia_semana` con DOS CHECKs equivalentes. Cero riesgo funcional hoy (OR de policies permisivas del mismo dueño); es ruido que confunde relevamientos. Disparo: la primera tanda de DB que toque esas tablas (candidato natural: el paquete motor S56 / D-341). Origen: S55-B relevamiento.
 
+### Deudas de Sesión 56 (11-12 Jul 2026)
+
+> **Cierres de decisión S56 (registro):** **D-339 DECIDIDA por el founder** — dirección-en-cita v1 = dirección del HOGAR sobre `direcciones_guardadas` + SNAPSHOT en la cita (el voto del arquitecto, ratificado; la construcción es la Tarea 1 de S56; zonas de cobertura siguen en D-331). **Voz del 30' CERRADA: "Salida corta"** (es/en en el lote de strings S56). El paquete de letra del PAQUETE DE SALIDAS quedó FIRMADO (founder S56, en sesión con el arquitecto): `MODELO_PASEO.md` v1.2 (§6.1 continuidad POR DÍA DE SEMANA + §6bis paquete + §6ter escenarios A/B/C/D), `MODELO_FINANCIERO.md` v2.6 (Decisión T + 7.15 + comisión visible desde `fee_configs`), `POLITICAS_EPETPLACE.md` v1.4 (P16). En S56 se CONSTRUYE D-338 (el plan); D-343/D-344/D-345 solo se documentan — cero código de paquetes.
+
+#### D-343 — Construcción del PAQUETE DE SALIDAS (bono anclado)
+🟡 ALTA (espec completa: el paquete de letra S56 firmado — `MODELO_PASEO.md` §6bis, financiero v2.6 Decisión T/7.15, P16). Alcance: DB sobre `bono_id` existente (saldo, vigencia, rollover FIFO, cierre `no_show`, breakage al vencimiento — L-140 en todo), UI dueño (compra del paquete en el flujo del prestador elegido + saldo visible + reserva contra saldo), UI prestador (configurar precio de presets 5/10/15 con neto visible), lado B la vista de su agenda. **Disparo: cierre de D-338** (el plan mensual se construye PRIMERO tal cual firmado; el paquete entra después sin refactor — mismo chasis). Origen: S56 founder.
+
+#### D-344 — Captura de demanda no cubierta (escenarios C/D)
+🟡 ALTA. Cierra el hueco "captura de demanda" (RUTA_F1, enmienda S54). Toda búsqueda con cobertura parcial o nula PERSISTE la necesidad (qué servicio, duración, día/hora pretendida, zona cuando D-331 exista, timestamp; user_id — dato personal: retención/anonimización se define con la letra de P15) y responde con la voz honesta de `MODELO_PASEO.md` §6ter. Es además el insumo del pricing del paquete flex (§6bis.8). Disparo: primer flujo de búsqueda que pueda devolver vacío en producción de verdad — se construye con o inmediatamente después de D-338. Origen: S56 founder.
+
+#### D-345 — Portal admin: alertas de demanda no cubierta
+🟢 MEDIA. El admin VE la demanda capturada por D-344 (agregada por servicio/zona/franja) con alerta cuando un patrón se repite — es inteligencia de reclutamiento de prestadores. Disparo: D-344 con datos reales acumulándose. Origen: S56 founder.
+
+#### D-346 — Pre-llenado EDITABLE de bloques largos desde precio/hora en /servicios
+🟢 MEDIA. UX de `/servicios` del prestador: al configurar la oferta, los precios de los bloques largos se PRE-LLENAN como derivación editable del precio/hora — el prestador ajusta, jamás se le impone. **El modelo `MODELO_PASEO.md` §2 (precio POR BLOQUE) queda INTACTO:** lo que se persiste sigue siendo el precio por bloque que el prestador confirma; el pre-llenado es azúcar de captura, no prorrateo del motor. Convive con la regla de comisión visible (financiero 7.15: neto desde `fee_configs`). Disparo: la próxima vez que `/servicios` se toque. Origen: S56 founder.
+
+#### D-347 — Sesión de ELEVACIÓN DE CRAFT visual (pre-Gate de Oro)
+🟡 ALTA. Sesión dedicada de elevación de craft de las pantallas clave del arco de paseo: composición, jerarquía y elemento firma por pantalla — vara MoeGo+ (la fluidez no alcanza; la pantalla tiene que tener FIRMA). No es deuda de componentes (el sistema existe): es la pasada de dirección de arte sobre las pantallas ya construidas, con gate founder por pantalla. **Disparo: cierre del arco de paseo, ANTES del Gate de Oro con Kary.** Origen: S56 founder.
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)

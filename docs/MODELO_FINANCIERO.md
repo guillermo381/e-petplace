@@ -1,8 +1,9 @@
 # MODELO_FINANCIERO.md — e-PetPlace
 
 > Documento maestro del motor financiero del ecosistema e-PetPlace.
-> Última actualización: 11 Jul 2026 v2.5 — Decisión S: el PLAN de paseo cobra por PERÍODO MENSUAL (un pago, N devengos — variante (b) intacta).
+> Última actualización: 12 Jul 2026 v2.6 — Decisión T: el PAQUETE de salidas — un pago, N devengos FIFO a precio de origen, el no-show devenga, las vencidas son breakage DECLARADO; regla 7.15 + comisión visible desde `fee_configs`.
 > Versiones anteriores:
+>   - v2.5 (11 Jul 2026 — Decisión S: el PLAN de paseo cobra por período mensual, un pago, N devengos — variante (b) intacta).
 >   - v2.4 (11 Jul 2026 — devengo de cita implementado variante (b), cuenta activa para cobrar/ofertarse, L-140/security_invoker).
 >   - v2.3 (9 Mayo 2026 — wizard v2 implementado, datos_bancarios refactor a 7 keys, asignación de rol vía UPSERT en user_roles).
 >   - v2.3 (9 Mayo 2026 — wizard v2 implementado, datos_bancarios extendido, MIG-L aplicada).
@@ -12,6 +13,19 @@
 >   - v1.0 (7 Mayo 2026 — modelo de un rol por cuenta).
 > Autor: Guillermo + Claude (Anthropic).
 > Estado: schema implementado y consolidado en Supabase. Wiring a flujos transaccionales pendiente.
+
+---
+
+## Cambio importante respecto a v2.5 (S56 — 12 Jul 2026)
+
+La v2.6 firma la plata del PAQUETE DE SALIDAS (el bono anclado al prestador — su UX vive en `MODELO_PASEO.md` §6bis y su política en `POLITICAS_EPETPLACE.md` P16; acá vive el contrato del dinero):
+
+1. **Decisión T — el paquete cobra UN pago al comprarse** (simulado y declarado hasta Kushki real). El pago JAMÁS toca el ledger (variante (b) intacta): cada salida devenga sola al cerrar, al **precio unitario efectivo** (total pagado ÷ N salidas) de su paquete de ORIGEN (FIFO).
+2. **Dos cierres legales devengan:** `cierre_con_calidad` (Decisión R) y `cierre_no_show` (NUEVO — reserva confirmada no cumplida sin cancelación ≥2 h: el paseador devenga igual, su franja se bloqueó de verdad). No hay tercera vía.
+3. **Salidas vencidas = breakage DECLARADO:** revenue de plataforma con `tipo_evento` propio, sin payout. El rollover (renovar antes del vencimiento) es transferencia de saldo, sin evento económico.
+4. **Regla transversal de comisión visible:** toda superficie donde el prestador ponga precio muestra el NETO descontando la comisión vigente, LEÍDA de `fee_configs` — jamás hardcodeada.
+
+Si trabajaste con la v2.5, tu código sigue válido. Lo nuevo: el paquete solo devenga por sus dos cierres (7.15), el vencimiento genera breakage vía `crear_evento_economico()`, y ningún neto mostrado al prestador se calcula con un fee hardcodeado.
 
 ---
 
@@ -662,6 +676,18 @@ El evento económico de una cita nace al CERRAR CON CALIDAD (condición de liqui
 ### Decisión S (NUEVA v2.5, founder S55) — El plan de paseo cobra por período mensual: un pago, N devengos
 El PLAN (recurrencia de paseo, `MODELO_PASEO.md` §6) cobra **UN pago por PERÍODO MENSUAL**: al contratar y en cada renovación. Contratar 3 meses = 3 cobros mensuales, JAMÁS un cobro junto. El **descuento por volumen lo configura el prestador** (precio del plan vs. precio del bloque suelto). El **precio unitario efectivo** — total del período ÷ N citas del período — es la **base del devengo de cada cita**: la variante (b) queda INTACTA (un pago, N devengos; cada evento económico nace cita por cita al cerrar con calidad; el pago del período jamás toca el ledger). **Auto-renovación** con aviso previo de 72 h y pausa de un toque; un período no renovado no deja nada que reversar (el devengo solo existe por cierre); lo pagado sin ejecutar se rige por P14. Mientras Kushki real no exista, el cobro del período es **simulado y declarado** — mismo contrato de estados.
 
+### Decisión T (NUEVA v2.6, founder S56) — El paquete de salidas: un pago, N devengos FIFO, no-show devenga, breakage declarado
+
+- El paquete (`MODELO_PASEO.md` §6bis — bono anclado al prestador) cobra **UN pago al comprarse** (simulado y declarado hasta Kushki real — mismo contrato de estados que la cita suelta y el plan). El pago del paquete **JAMÁS toca el ledger** (variante (b) intacta).
+- **Precio unitario efectivo del paquete** = total pagado ÷ N salidas. Es la base del devengo de cada salida.
+- **Devengo por salida, dos cierres legales:**
+  - `cierre_con_calidad` (el de siempre, Decisión R), o
+  - `cierre_no_show` (NUEVO): reserva confirmada no cumplida por el dueño sin cancelación ≥2 h — devenga al paseador igual que un cierre normal (su franja se bloqueó de verdad). El evento nace al cierre, como siempre: no hay tercera vía.
+- **FIFO con precio de origen:** con rollover, cada salida consumida devenga al precio unitario del paquete en que NACIÓ (las viejas primero). Implementación: decisión técnica de Code con doble check.
+- **Salidas VENCIDAS (nunca reservadas, paquete no renovado):** **revenue de plataforma, DECLARADO** — breakage explícito, línea propia en el modelo (`tipo_evento` propio, sin payout). El paseador no cobra lo que nunca trabajó ni reservó; el dueño conoció la vigencia al comprar.
+- **Rollover:** comprar un paquete nuevo antes del vencimiento suma el saldo anterior. No es reversa ni reembolso: es transferencia de saldo (movimiento interno del bono, sin evento económico).
+- **Reembolsos/fallas del prestador:** P16 rige; el reembolso proporcional usa `aplicar_reembolso()` sobre lo COBRADO (patrón 7.14), jamás toca devengos inexistentes.
+
 ### Decisiones adicionales (sin cambios)
 - White-label marketplace de fachada.
 - Off-platform no se cobra.
@@ -769,6 +795,12 @@ Toda puerta de pago pre-valida `cuentas_comerciales.estado='activa'` (error `cue
 
 ### 7.14 El plan cobra por período; el devengo sigue siendo por cita (NUEVO v2.5 — Decisión S)
 Ninguna implementación del plan cobra multi-período junto ni crea eventos económicos al cobrar el período. El cobro mensual del plan se registra como PAGO (estado/metadata, patrón de la cita suelta); cada cita del plan devenga sola al cerrar con calidad, con el precio unitario efectivo del período como `monto_bruto`. Saltos, fallas, créditos y reembolsos proporcionales se rigen por `POLITICAS_EPETPLACE.md` P14 — el reembolso proporcional usa `aplicar_reembolso()` sobre lo COBRADO, jamás toca devengos inexistentes.
+
+### 7.15 El paquete paga al comprar, devenga al cerrar, y el no-show ES un cierre (NUEVO v2.6 — Decisión T)
+
+Ninguna implementación del paquete crea eventos económicos al comprar, al reservar ni al cancelar en ventana. Solo los dos cierres devengan (`cierre_con_calidad` / `cierre_no_show`), cada uno con el precio unitario FIFO de origen como `monto_bruto`. El vencimiento genera el evento de breakage (plataforma, sin payout) al cierre del período — vía `crear_evento_economico()`, como todo.
+
+**Comisión visible al configurar precio (regla transversal, founder S56):** toda superficie donde el prestador ponga precio muestra el NETO que recibirá descontando la comisión vigente — que se LEE de `fee_configs` (paseo F1: 15%), jamás se hardcodea. El día que el fee cambie, la pantalla dice la verdad sola.
 
 ---
 
@@ -971,6 +1003,18 @@ Este documento es el contrato técnico-conceptual del motor financiero. Cambiarl
 ---
 
 ## 15. Cambios entre versiones
+
+### v2.6 (12 Jul 2026 — S56, post v2.5)
+
+**Decisiones nuevas:**
+- Decisión T — el paquete de salidas (bono anclado, `MODELO_PASEO.md` §6bis): un pago al comprarse que jamás toca el ledger; precio unitario efectivo (total ÷ N salidas) como base del devengo; dos cierres legales (`cierre_con_calidad` / `cierre_no_show` — el no-show devenga porque la franja se bloqueó de verdad); FIFO con precio de origen en rollover; salidas vencidas = breakage declarado (revenue de plataforma, `tipo_evento` propio, sin payout); rollover = transferencia de saldo sin evento económico; P16 rige reembolsos/fallas vía `aplicar_reembolso()` sobre lo cobrado.
+
+**Reglas nuevas (sección 7):**
+- 7.15 — el paquete paga al comprar, devenga al cerrar, el no-show ES un cierre; el breakage nace vía `crear_evento_economico()`; y la regla transversal de **comisión visible**: todo neto mostrado al prestador se calcula con el fee LEÍDO de `fee_configs`, jamás hardcodeado.
+
+**Documentos gemelos del paquete (firmados juntos, founder S56):**
+- `MODELO_PASEO.md` v1.2 (§6.1 continuidad por día de semana; §6bis el paquete; §6ter escenarios de disponibilidad).
+- `POLITICAS_EPETPLACE.md` v1.4 — P16 (reservas, no-show, rollover y vencimiento del paquete).
 
 ### v2.5 (11 Jul 2026 — S55-B5, post v2.4)
 
