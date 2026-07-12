@@ -8,7 +8,7 @@
  */
 
 export { IDIOMAS_SOPORTADOS, IDIOMA_FALLBACK, esIdiomaSoportado, type IdiomaSoportado } from './idiomas';
-export { cambiarIdioma, inicializarI18n } from './instancia';
+export { cambiarIdioma, inicializarI18n, obtenerIdiomaActual } from './instancia';
 export { idiomaDelDispositivo } from './deteccion';
 export { ProveedorI18n } from './ProveedorI18n';
 export { crearUseTraduccion, type TraductorTipado } from './useTraduccion';

@@ -42,3 +42,10 @@ export async function cambiarIdioma(idioma: IdiomaSoportado): Promise<void> {
   await instancia.changeLanguage(idioma);
   await guardarPreferenciaIdioma(idioma);
 }
+
+/** El idioma vivo de la instancia (S55-B3: la sync D-316 compara contra
+ *  esto antes de pisar el cache local con la preferencia de DB). */
+export function obtenerIdiomaActual(): IdiomaSoportado {
+  const vivo = instancia?.language;
+  return vivo === 'en' ? 'en' : IDIOMA_FALLBACK;
+}

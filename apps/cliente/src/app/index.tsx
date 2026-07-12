@@ -13,9 +13,21 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Boton, EstadoVacio, spacing, useTheme } from '@epetplace/ui';
-import { getEstadoOnboardingDueno, obtenerSesion } from '@epetplace/api';
+import { getEstadoOnboardingDueno, obtenerPreferencias, obtenerSesion } from '@epetplace/api';
+import { cambiarIdioma, obtenerIdiomaActual } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+
+// D-316 (S55-B3): al entrar con sesión, la preferencia de idioma de DB
+// (verdad multi-dispositivo) pisa el cache local si difieren. Fire and
+// forget: el routing no espera al riel.
+function sincronizarIdiomaDesdeDB(): void {
+  void obtenerPreferencias().then((r) => {
+    if (r.ok && r.data.idioma !== null && r.data.idioma !== obtenerIdiomaActual()) {
+      void cambiarIdioma(r.data.idioma);
+    }
+  });
+}
 
 const UMBRAL_COLGADO_MS = 8000;
 
@@ -40,6 +52,7 @@ export default function Entrada() {
         router.replace('/bienvenida');
         return;
       }
+      sincronizarIdiomaDesdeDB();
       const estado = await getEstadoOnboardingDueno();
       if (!vigente) return;
       clearTimeout(timer);
