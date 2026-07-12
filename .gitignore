@@ -11,3 +11,6 @@ web-build/
 # Supabase CLI local
 supabase/.temp/
 supabase/.branches/
+
+# capturas de verify-i18n sin SCRATCH seteado (S56 — el default entra con D-351)
+undefined/
