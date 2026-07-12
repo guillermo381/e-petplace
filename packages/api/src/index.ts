@@ -271,3 +271,17 @@ export {
   type GuardarDireccionHogarInput,
   type CodigoErrorDireccion,
 } from './wrappers/direcciones';
+
+// ── El PLAN de paseo, D-338 (S56-A — hunk Sesión A) ─────────────────────────
+export {
+  contratarPlanPaseo,
+  obtenerMisPlanesPaseo,
+  obtenerCitasDePlan,
+  configurarRenovacionPlan,
+  saltarCitaPlan,
+  type ContratarPlanInput,
+  type PlanContratado,
+  type PlanPaseo,
+  type CitaDePlan,
+  type CodigoErrorPlan,
+} from './wrappers/planes';

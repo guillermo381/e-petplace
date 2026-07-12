@@ -12768,20 +12768,27 @@ export type Database = {
           cancelado_en: string | null
           country_code: string
           created_at: string
+          dias_semana: number[] | null
+          duracion_minutos: number | null
           empleado_id: string | null
           estado: string
           estado_pago: string
+          frecuencia: string | null
+          hora: string | null
           id: string
           kushki_subscription_id: string | null
           mascota_id: string
           motivo_cancelacion: string | null
           notas_prestador: string | null
           observaciones_cliente: string | null
+          pago_metadata: Json
           periodo_fin: string
           periodo_inicio: string
           precio_mensual: number
           precio_pagado: number
+          precio_unitario_efectivo: number | null
           prestador_id: string
+          prestador_servicio_id: string | null
           proximo_cobro_en: string | null
           tipo_servicio: string
           ultima_actividad_en: string | null
@@ -12794,20 +12801,27 @@ export type Database = {
           cancelado_en?: string | null
           country_code?: string
           created_at?: string
+          dias_semana?: number[] | null
+          duracion_minutos?: number | null
           empleado_id?: string | null
           estado?: string
           estado_pago?: string
+          frecuencia?: string | null
+          hora?: string | null
           id?: string
           kushki_subscription_id?: string | null
           mascota_id: string
           motivo_cancelacion?: string | null
           notas_prestador?: string | null
           observaciones_cliente?: string | null
+          pago_metadata?: Json
           periodo_fin: string
           periodo_inicio: string
           precio_mensual: number
           precio_pagado: number
+          precio_unitario_efectivo?: number | null
           prestador_id: string
+          prestador_servicio_id?: string | null
           proximo_cobro_en?: string | null
           tipo_servicio: string
           ultima_actividad_en?: string | null
@@ -12820,20 +12834,27 @@ export type Database = {
           cancelado_en?: string | null
           country_code?: string
           created_at?: string
+          dias_semana?: number[] | null
+          duracion_minutos?: number | null
           empleado_id?: string | null
           estado?: string
           estado_pago?: string
+          frecuencia?: string | null
+          hora?: string | null
           id?: string
           kushki_subscription_id?: string | null
           mascota_id?: string
           motivo_cancelacion?: string | null
           notas_prestador?: string | null
           observaciones_cliente?: string | null
+          pago_metadata?: Json
           periodo_fin?: string
           periodo_inicio?: string
           precio_mensual?: number
           precio_pagado?: number
+          precio_unitario_efectivo?: number | null
           prestador_id?: string
+          prestador_servicio_id?: string | null
           proximo_cobro_en?: string | null
           tipo_servicio?: string
           ultima_actividad_en?: string | null
@@ -12867,6 +12888,13 @@ export type Database = {
             columns: ["prestador_id"]
             isOneToOne: false
             referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suscripciones_servicio_prestador_servicio_id_fkey"
+            columns: ["prestador_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "prestador_servicios"
             referencedColumns: ["id"]
           },
         ]
@@ -14350,6 +14378,23 @@ export type Database = {
         Args: { p_familia_id: string }
         Returns: boolean
       }
+      _fechas_periodo_plan: {
+        Args: {
+          p_dias: number[]
+          p_frecuencia: string
+          p_periodo_inicio: string
+        }
+        Returns: string[]
+      }
+      _generar_citas_plan: {
+        Args: {
+          p_pagado_en: string
+          p_periodo_fin: string
+          p_periodo_inicio: string
+          p_suscripcion_id: string
+        }
+        Returns: number
+      }
       _grooming_atencion_terminada: {
         Args: { p_grooming_id: string }
         Returns: Record<string, unknown>
@@ -14364,6 +14409,24 @@ export type Database = {
           p_url_accion: string
         }
         Returns: string
+      }
+      _resolver_fee_aplicable: {
+        Args: {
+          p_categoria_origen?: string
+          p_country_code: string
+          p_cuenta_comercial_id: string
+          p_fecha_referencia?: string
+          p_revenue_stream: Database["public"]["Enums"]["revenue_stream_enum"]
+          p_tipo_actor: Database["public"]["Enums"]["tipo_actor_enum"]
+          p_tipo_origen: string
+        }
+        Returns: {
+          absorbe_descuento_default: Database["public"]["Enums"]["quien_absorbe_descuento_enum"]
+          es_default: boolean
+          fee_config_id: string
+          parametros: Json
+          tipo_calculo: Database["public"]["Enums"]["tipo_calculo_fee_enum"]
+        }[]
       }
       _tipo_documento_legible: { Args: { p_tipo: string }; Returns: string }
       _user_clinica_consultor_del_caso: {
@@ -14513,6 +14576,7 @@ export type Database = {
         Args: { p_atencion_id: string; p_mensaje_familia?: string }
         Returns: Json
       }
+      cerrar_y_renovar_planes: { Args: never; Returns: Json }
       cleanup_pendientes_vencidos: {
         Args: never
         Returns: {
@@ -14532,9 +14596,26 @@ export type Database = {
         Args: { input_data: Json }
         Returns: string
       }
+      configurar_renovacion_plan: {
+        Args: { p_auto_renovar: boolean; p_suscripcion_id: string }
+        Returns: Json
+      }
       confirmar_cita_pagada: { Args: { p_cita_id: string }; Returns: Json }
       confirmar_cita_servicio: {
         Args: { p_cita_id: string; p_empleado_id_actual?: string }
+        Returns: Json
+      }
+      contratar_plan_paseo: {
+        Args: {
+          p_auto_renovar?: boolean
+          p_dias: number[]
+          p_fecha_inicio?: string
+          p_frecuencia: string
+          p_hora: string
+          p_mascota_id: string
+          p_prestador_id: string
+          p_servicio_id: string
+        }
         Returns: Json
       }
       crear_alta_asistida_existente: {
@@ -15109,6 +15190,10 @@ export type Database = {
           parametros: Json
           tipo_calculo: Database["public"]["Enums"]["tipo_calculo_fee_enum"]
         }[]
+      }
+      saltar_cita_plan: {
+        Args: { p_cita_id: string; p_nueva_fecha: string; p_nueva_hora: string }
+        Returns: Json
       }
       service_active_in: {
         Args: { p_country_code?: string; p_service: string }
