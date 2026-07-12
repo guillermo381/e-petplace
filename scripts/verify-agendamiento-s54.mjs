@@ -40,11 +40,12 @@ const PREST = 'de300000-0000-4000-8000-0000000000e5';
 const SRV   = 'de300000-0000-4000-8000-00000000a5e0';
 const MASC  = 'de300000-0000-4000-8000-000000000a5c';
 
-// próximo sábado (siempre futuro)
+// próximo sábado (siempre futuro) — fecha LOCAL (S55: toISOString es UTC
+// y después de las 19:00 en UTC-5 corría el sábado un día — falso rojo)
 const hoy = new Date();
 const sabado = new Date(hoy);
 sabado.setDate(hoy.getDate() + ((6 - hoy.getDay() + 7) % 7 || 7));
-const FECHA = sabado.toISOString().slice(0, 10);
+const FECHA = new Intl.DateTimeFormat('en-CA').format(sabado);
 const HORA = '17:30';
 
 // T1 — oferta derivada: el paseador demo aparece con su precio real
@@ -89,7 +90,7 @@ check(!doble.ok && doble.codigo === 'slot_ocupado', 'T5 doble reserva → slot_o
 
 // T6 — fuera de horario rebota tipada (domingo)
 const domingo = new Date(sabado); domingo.setDate(sabado.getDate() + 1);
-const fdh = await crearBloqueoAgenda({ prestador_id: PREST, prestador_servicio_id: SRV, mascota_id: MASC, fecha: domingo.toISOString().slice(0, 10), hora: HORA });
+const fdh = await crearBloqueoAgenda({ prestador_id: PREST, prestador_servicio_id: SRV, mascota_id: MASC, fecha: new Intl.DateTimeFormat('en-CA').format(domingo), hora: HORA });
 check(!fdh.ok && fdh.codigo === 'fuera_de_horario', 'T6 domingo → fuera_de_horario', fdh.ok ? 'PUDO' : fdh.codigo);
 
 // T6b — GATE DOBLE (verdad firme, test 8): ANTES de pagar, la agenda del

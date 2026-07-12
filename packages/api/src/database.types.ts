@@ -4328,6 +4328,7 @@ export type Database = {
           calificacion_en: string | null
           country_code: string
           created_at: string | null
+          duracion_minutos: number
           empleado_id: string | null
           estado: string | null
           estado_reserva: string | null
@@ -4356,6 +4357,7 @@ export type Database = {
           calificacion_en?: string | null
           country_code?: string
           created_at?: string | null
+          duracion_minutos?: number
           empleado_id?: string | null
           estado?: string | null
           estado_reserva?: string | null
@@ -4384,6 +4386,7 @@ export type Database = {
           calificacion_en?: string | null
           country_code?: string
           created_at?: string | null
+          duracion_minutos?: number
           empleado_id?: string | null
           estado?: string | null
           estado_reserva?: string | null

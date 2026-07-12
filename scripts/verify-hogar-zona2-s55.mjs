@@ -53,11 +53,12 @@ const PREST = 'de300000-0000-4000-8000-0000000000e5';
 const SRV   = 'de300000-0000-4000-8000-00000000a5e0';
 const MASC  = 'de300000-0000-4000-8000-000000000a5c';
 
-// próximo sábado (siempre futuro)
+// próximo sábado (siempre futuro) — fecha LOCAL (toISOString es UTC y
+// después de las 19:00 en UTC-5 corre el día — mismo fix que el S54)
 const hoy = new Date();
 const sabado = new Date(hoy);
 sabado.setDate(hoy.getDate() + ((6 - hoy.getDay() + 7) % 7 || 7));
-const FECHA = sabado.toISOString().slice(0, 10);
+const FECHA = new Intl.DateTimeFormat('en-CA').format(sabado);
 
 const slots = await obtenerSlotsDisponibles({ prestador_id: PREST, prestador_servicio_id: SRV, desde: FECHA, hasta: FECHA });
 if (!slots.ok || slots.data.length < 2) {

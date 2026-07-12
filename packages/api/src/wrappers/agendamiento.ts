@@ -283,6 +283,8 @@ export interface HoldAgenda {
   expira_en: string;
   /** SNAPSHOT del precio de la oferta al momento del hold. */
   precio: number;
+  /** SNAPSHOT de la duración de la oferta (S55-B2, motor por ventana). */
+  duracion_minutos: number;
   fecha: string;
   hora: string;
 }
@@ -317,6 +319,7 @@ export async function crearBloqueoAgenda(
     typeof o.cita_id !== 'string' ||
     typeof o.expira_en !== 'string' ||
     typeof o.precio !== 'number' ||
+    typeof o.duracion_minutos !== 'number' ||
     typeof o.fecha !== 'string' ||
     typeof o.hora !== 'string'
   ) {
@@ -328,6 +331,7 @@ export async function crearBloqueoAgenda(
       cita_id: o.cita_id,
       expira_en: o.expira_en,
       precio: o.precio,
+      duracion_minutos: o.duracion_minutos,
       fecha: o.fecha,
       hora: o.hora,
     },
