@@ -50,6 +50,13 @@ export const prestadorEn = {
     mascotaFallback: 'Pet',
     // marca "parte del plan" (D-338, S56-B T7) · LOTE S56 · Espejo de es.ts
     parteDelPlan: 'Part of the plan',
+    // la semana (D-317, S57-B1) · LOTE S57, GATE PENDIENTE · Espejo de es.ts
+    vistaEtiqueta: 'Agenda',
+    vistaHoy: 'Today',
+    vistaSemana: 'Week',
+    diaHoy: 'Today',
+    diaLibre: 'Free',
+    diaBloqueado: 'On vacation',
   },
   // The E2E walk flow (S44, migrated in D-315 provider leg).
   cita: {

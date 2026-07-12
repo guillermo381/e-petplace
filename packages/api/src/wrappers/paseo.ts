@@ -261,7 +261,10 @@ export type CitaAgendaPaseo = Pick<
   // suscripcion_servicio_id: la marca "parte del plan" (D-338, S56-B T7).
   // Hoy siempre NULL (0 suscripciones); el día que el motor del plan
   // nazca, la voz del prestador ya habla sin tocar una línea.
-  'id' | 'fecha' | 'hora' | 'estado' | 'tipo_servicio' | 'suscripcion_servicio_id'
+  // duracion_minutos (S57-B1): el SNAPSHOT de la cita (S55-B2, NOT NULL) —
+  // la duración REAL vendida, no el default del catálogo (una de 120'
+  // se pintaba como 30' con duracion_default_minutos).
+  'id' | 'fecha' | 'hora' | 'estado' | 'tipo_servicio' | 'suscripcion_servicio_id' | 'duracion_minutos'
 > & {
   mascota: MascotaAgenda | null;
   tipo: Pick<
@@ -314,19 +317,26 @@ export interface InputCitasPaseoDelDia {
   prestador_id: string;
   /** 'YYYY-MM-DD' (fecha local del dispositivo — la resuelve la pantalla). */
   fecha: string;
+  /**
+   * S57-B1 (enmienda aditiva, D-317): fin del rango INCLUSIVE. Ausente =
+   * solo `fecha` (comportamiento original intacto). El mismo filtro
+   * positivo de verdad firme rige el rango entero.
+   */
+  fecha_hasta?: string;
 }
 
-/** Citas de paseo del día del prestador (excluye canceladas/rechazadas), por hora. */
+/** Citas de paseo del prestador — un día o un rango inclusivo (excluye canceladas/rechazadas), por fecha y hora. */
 export async function obtenerCitasPaseoDelDia(
   input: InputCitasPaseoDelDia,
 ): Promise<ResultadoWrapper<CitaAgendaPaseo[], CodigoErrorPaseo>> {
   const { data, error } = await getClient()
     .from('evento_cita_servicio')
     .select(
-      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, direccion_snapshot, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
+      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, direccion_snapshot, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
     )
     .eq('prestador_id', input.prestador_id)
-    .eq('fecha', input.fecha)
+    .gte('fecha', input.fecha)
+    .lte('fecha', input.fecha_hasta ?? input.fecha)
     .eq('tipo.categoria', 'paseo')
     // ═══ VERDAD FIRME (S51-B3.2, DISEÑO_EXPERIENCIA §13 / test 8) ═══
     // La agenda del prestador SOLO contiene citas firmes: lista POSITIVA
@@ -336,6 +346,7 @@ export async function obtenerCitasPaseoDelDia(
     // Relevado S51: estados del CHECK = pendiente · confirmada · en_curso
     // · completada · cancelada · no_show · rechazada.
     .in('estado', ['confirmada', 'en_curso', 'completada', 'no_show'])
+    .order('fecha', { ascending: true })
     .order('hora', { ascending: true });
 
   if (error) return mapeoErrorAResultado(error.message);

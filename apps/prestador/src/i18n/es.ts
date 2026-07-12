@@ -58,6 +58,13 @@ export const prestadorEs = {
     mascotaFallback: 'Mascota',
     // marca "parte del plan" (D-338, S56-B T7) · LOTE S56, GATE PENDIENTE
     parteDelPlan: 'Parte del plan',
+    // la semana (D-317, S57-B1) · LOTE S57, GATE PENDIENTE
+    vistaEtiqueta: 'Agenda',
+    vistaHoy: 'Hoy',
+    vistaSemana: 'Semana',
+    diaHoy: 'Hoy',
+    diaLibre: 'Libre',
+    diaBloqueado: 'De vacaciones',
   },
   // El flujo de atención E2E (S44, migrado en D-315 pata prestador).
   // VOZ EMOCIONAL APROBADA por founder (lote S55, es y en) — hunk de

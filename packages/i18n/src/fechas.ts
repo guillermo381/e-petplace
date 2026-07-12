@@ -26,6 +26,20 @@ export function fechaLargaHumana(iso: string, idioma: IdiomaSoportado): string {
   return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(new Date(a, m - 1, d));
 }
 
+/** Fecha con DÍA DE SEMANA en voz humana por idioma — "Lunes, 13 de julio" /
+ *  "Monday, July 13" (S57-B1: headers de día de la agenda semanal; cura
+ *  también el es-EC fijo del header de HOY — hallazgo D-315p). Fecha-sola
+ *  por partes literales (jamás Date(iso) — D-312); sin año: voz de título. */
+export function fechaDiaSemanaHumana(iso: string, idioma: IdiomaSoportado): string {
+  const locale = idioma === 'en' ? 'en-US' : 'es-EC';
+  const [a, m, d] = iso.slice(0, 10).split('-').map(Number);
+  if (!a || !m || m < 1 || m > 12 || !d) return iso.slice(0, 10);
+  const s = new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long' }).format(
+    new Date(a, m - 1, d),
+  );
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 /** dd mon yyyy en mono-voz (minúsculas), para metadata chica. */
 export function fechaCortaMono(iso: string, idioma: IdiomaSoportado): string {
   const [a, m, d] = iso.slice(0, 10).split('-').map(Number);
