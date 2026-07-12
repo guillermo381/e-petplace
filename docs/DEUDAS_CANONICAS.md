@@ -1403,6 +1403,25 @@ CERRADA en S54-B (11 Jul 2026): login real por los wrappers de auth S45, routing
 #### D-328 — Wizard multi-actor §6.5 (segundo rol sobre cuenta existente)
 🟢 MEDIA. El wizard S54-B cubre el ALTA del prestador; falta el camino §6.5/§8.14 completo: detectar cuenta comercial existente por (identificación fiscal, país) y agregar un SEGUNDO rol (seller/refugio/criadero) sin re-pedir fiscales ni bancarios. Disparo: primer actor no-prestador (refugio piloto o seller). Origen: S54-B.
 
+### Deudas de Sesión 55 (11 Jul 2026)
+
+> **Estado S55-A de deudas previas:** D-319 CURADA en código (commit `b1b4c29`: el wrapper del Hogar filtra a firmes + hold VIGENTE con voz propia; el hold vencido —cuyo `estado` nadie barre— ya no tapa a la pagada) — cierra con el gate founder en dispositivo. **D-322 ✅ CERRADA** (disparo cumplido: 4ª/5ª limpieza manual en S55 → helper `supabase/dev/cleanup_citas_test.sql` con FKs, triggers append-only y recómputo de `ultimo_evento_*` adentro). **D-323 ✅ CERRADA** (`fechaLargaHumana` nació en `packages/i18n` al tocarse el detalle del paseo; día local para timestamps, partes literales para fecha-sola — D-312 respetada). **D-315 enmendada:** la pata CLIENTE + packages/ui se ejecutó en S55-A A3 (raíz, auth, onboarding, carnet, paseo + voz interna de ui con Espejo es↔en); quedan la voz del server (D-327) y el lote emocional EN en gate founder.
+
+#### D-329 — ✅ CERRADA (S55-B2). El CTA "Ir al Hogar" del checkout no navegaba
+Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el stack ACTUAL (Explorar) y `/hogar` vive en otro tab → no-op silencioso. Cura (commit `7c7e438`): vaciar el stack (`canDismiss` + `dismissAll`) y cambiar de tab con `navigate`. Verificado E2E con hold real + pago simulado + aterrizaje en `/hogar` (script `verify-d329-checkout-cta.mjs`).
+
+#### D-330 — Guard de paseo grupal sobre `nervioso_otros_perros`
+🟡 ALTA. El motor de ocupación permite cupo >1 (capacidad simultánea) sin mirar la señal conductual `nervioso_otros_perros` (D-300): una mascota que evita a otros perros podría caer en un paseo grupal sin decisión de su familia. El diseño del guard (bloquear / avisar / consentimiento) es decisión de producto pendiente. **Disparo: el primer prestador que oferte cupo >1** — antes de publicar ese horario. Origen: S55-B2, `MODELO_PASEO.md` §4.1.
+
+#### D-331 — Cobertura por zonas del paseador
+🟢 MEDIA. El paseador se oferta sin geografía: cualquier dueño del país lo ve, camine donde camine. El modelo de zonas (radio/polígono/barrios) está en relevamiento de la Sesión B (en curso); entra por enmienda a `MODELO_PASEO.md` §5. Disparo: cierre del relevamiento B o el primer paseador real con zona limitada — lo que llegue primero. Origen: S55 (founder).
+
+#### D-332 — Excepciones de calendario del prestador
+🟢 MEDIA. La agenda son franjas SEMANALES (`prestador_horarios`): no existen feriados, vacaciones ni bloqueos puntuales — un prestador de viaje sigue ofertándose. Relevamiento B en curso (junto a D-331). Disparo: primer prestador real operando (a más tardar, el primer feriado ecuatoriano con citas reales). Origen: S55, `MODELO_PASEO.md` §5.
+
+#### D-333 — Continuidad y sustitución de paseador en paquetes
+⏸ DIFERIDA (post-MVP, candado del paquete). Decisiones founder S55 registradas: el paquete aspira al MISMO paseador (continuidad como valor) y toda sustitución se COMUNICA al pet parent — jamás reemplazo silencioso. Se implementa con la capa de paquetes, que NO se vende sin `MODELO_FINANCIERO.md` v2.5 + P14 firmados (`MODELO_PASEO.md` §6). Origen: S55 (founder).
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)
