@@ -243,13 +243,49 @@ Ver `BIO_EXPEDIENTE.md` (S19) para schema y RPCs (`buscar_cliente_por_email`, `c
 
 ---
 
+## P14 — El plan de paseo: saltos, fallas, pausa y plata (FIRMADA — founder S55)
+
+> Parte del paquete del PLAN (S55-B5): `MODELO_PASEO.md` §6 (la UX) y
+> `MODELO_FINANCIERO.md` v2.5 Decisión S (el dinero: un pago por
+> período mensual, N devengos al cierre). Esta política rige cada cita
+> del plan desde que el plan exista en producción.
+
+**(a) El dueño salta una cita — con aviso.** Con **≥24 h de aviso**, el
+dueño salta UNA cita y la **reagenda dentro del mismo período con el
+mismo paseador** (la continuidad es parte del plan). Las citas pagadas
+que queden sin ejecutar al CIERRE del período: **crédito al período
+siguiente si renueva; reembolso proporcional si no renueva** (al precio
+unitario efectivo — Decisión S).
+
+**(b) Falla del prestador.** Si el paseador no ejecuta una cita del
+plan, el dueño elige — **crédito o reembolso proporcional, A SU
+ELECCIÓN, sin discusión**. La plataforma no litiga la falla del lado
+que cobró.
+
+**(c) El dueño avisa tarde.** Con **<24 h de aviso**, la cita se
+pierde: la franja del paseador ya no se puede revender y su agenda se
+protege. Sin excepciones automáticas (los casos humanos extremos son
+soporte, no regla).
+
+**(d) Pausa del plan.** Pausar = **no renovar** (un toque, Decisión S).
+El período corriente YA pagado se termina de regir por (a)/(b) — la
+pausa jamás confisca lo pagado ni fabrica reembolsos de lo ejecutado.
+
+**Por qué:** el plan es un contrato de confianza entre tres — el dueño
+compra continuidad, el paseador compra previsibilidad de agenda, la
+plataforma garantiza que la plata siga a lo EJECUTADO (el devengo solo
+existe por cierre con calidad; lo no ejecutado vuelve o se acredita,
+nunca queda en un limbo).
+
+---
+
 ## P15 — Eliminación de cuenta del dueño (CANDIDATA — S55, pendiente de firma del founder)
 
 > **Estado: CANDIDATA.** Redactada como espec (S55-B3, letra (a) de Cuenta v1);
 > NO rige hasta la firma. La UI de Cuenta muestra "Eliminar cuenta" con voz
 > honesta y NO ejecuta nada. El disparo de implementación es la compuerta de
 > tiendas (B6: la eliminación de cuenta es requisito de Play/App Store).
-> Nota de numeración: P14 está reservada (paquetes de paseo, financiero v2.5).
+> Nota de numeración: P14 = el plan de paseo (FIRMADA S55-B5).
 
 **El principio:** una vida documentada no se borra a la ligera. Eliminar la
 CUENTA de un humano no puede destruir por arrastre el expediente de una
@@ -288,3 +324,4 @@ firma de esta política).
 - **v1.0 (13 May 2026 — S16)**: Primera redacción. 12 políticas iniciales derivadas del refactor de modelo de S16.
 - **v1.1 (15 May 2026 — S19)**: Política P13 agregada (alta asistida por prestador). Cubre el flow de consentimiento cuando un prestador necesita registrar a un cliente no registrado durante atención presencial.
 - **v1.2 (11 Jul 2026 — S55)**: P15 agregada como CANDIDATA (eliminación de cuenta del dueño — espec de la letra (a) de Cuenta v1; rige recién con la firma del founder). P14 reservada para paquetes de paseo (`MODELO_PASEO.md` §6, financiero v2.5).
+- **v1.3 (11 Jul 2026 — S55-B5)**: P14 FIRMADA (founder, OK completo al paquete del plan): (a) salto con ≥24 h reagenda en el período con el mismo paseador, sobrantes al cierre = crédito si renueva / reembolso proporcional si no · (b) falla del prestador = crédito o reembolso a elección del dueño · (c) <24 h = la cita se pierde · (d) pausa = no renovar, el período corriente se rige por (a)/(b). Gemelos: `MODELO_PASEO.md` v1.1 y `MODELO_FINANCIERO.md` v2.5 (Decisión S).

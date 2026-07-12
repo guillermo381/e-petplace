@@ -1,8 +1,9 @@
 # MODELO_FINANCIERO.md — e-PetPlace
 
 > Documento maestro del motor financiero del ecosistema e-PetPlace.
-> Última actualización: 11 Jul 2026 v2.4 — Devengo de cita IMPLEMENTADO (variante (b), pago simulado declarado), regla de cuenta activa para cobrar/ofertarse, endurecimiento de seguridad (L-140, security_invoker).
+> Última actualización: 11 Jul 2026 v2.5 — Decisión S: el PLAN de paseo cobra por PERÍODO MENSUAL (un pago, N devengos — variante (b) intacta).
 > Versiones anteriores:
+>   - v2.4 (11 Jul 2026 — devengo de cita implementado variante (b), cuenta activa para cobrar/ofertarse, L-140/security_invoker).
 >   - v2.3 (9 Mayo 2026 — wizard v2 implementado, datos_bancarios refactor a 7 keys, asignación de rol vía UPSERT en user_roles).
 >   - v2.3 (9 Mayo 2026 — wizard v2 implementado, datos_bancarios extendido, MIG-L aplicada).
 >   - v2.2 (8 Mayo 2026 — esquema oficial de datos_bancarios + CHECK constraint).
@@ -11,6 +12,19 @@
 >   - v1.0 (7 Mayo 2026 — modelo de un rol por cuenta).
 > Autor: Guillermo + Claude (Anthropic).
 > Estado: schema implementado y consolidado en Supabase. Wiring a flujos transaccionales pendiente.
+
+---
+
+## Cambio importante respecto a v2.4 (S55-B5 — 11 Jul 2026)
+
+La v2.5 firma la plata del PLAN de paseo (la recurrencia — su UX y su política viven en `MODELO_PASEO.md` §6 y `POLITICAS_EPETPLACE.md` P14; acá vive el contrato del dinero):
+
+1. **Decisión S — el plan cobra por PERÍODO MENSUAL.** UN pago al contratar y UN pago en cada renovación. Contratar 3 meses = 3 cobros mensuales — JAMÁS un cobro junto por adelantado de varios períodos.
+2. **Un pago, N devengos — la variante (b) NO se toca.** El pago del período NO genera ningún evento económico: cada cita del plan devenga SOLA al cerrar con calidad, con el **precio unitario efectivo** (total del período ÷ N citas del período) como base del devengo. El descuento por volumen lo configura el prestador en el precio del plan.
+3. **Renovación y reversas:** auto-renovación con aviso previo de 72 h y pausa de un toque. Un período NO renovado no deja nada que reversar — el devengo solo existe por cierre; lo pagado sin ejecutar se rige por P14 (crédito al período siguiente si renueva, reembolso proporcional si no).
+4. **Simulado declarado:** mientras Kushki real no exista, el cobro del período es simulado y la superficie LO DICE — mismo contrato de estados que la cita suelta.
+
+Si trabajaste con la v2.4, tu código sigue válido. Lo nuevo: el plan jamás cobra multi-período junto, y el devengo por cita usa el precio unitario efectivo del período.
 
 ---
 
@@ -645,6 +659,9 @@ Para cobrar por la plataforma no alcanza el rol activo en `cuenta_roles`: la cue
 ### Decisión R (NUEVA v2.4) — Devengo de cita en variante (b)
 El evento económico de una cita nace al CERRAR CON CALIDAD (condición de liquidación), no al pagar: `fecha_devengo` = cierre, `fecha_cobro_kushki` = pago. El pago pre-valida y registra (`estado_reserva='pagada'` + `metadata.pagado_en`); el cierre devenga. Detalle operativo en §4.3.
 
+### Decisión S (NUEVA v2.5, founder S55) — El plan de paseo cobra por período mensual: un pago, N devengos
+El PLAN (recurrencia de paseo, `MODELO_PASEO.md` §6) cobra **UN pago por PERÍODO MENSUAL**: al contratar y en cada renovación. Contratar 3 meses = 3 cobros mensuales, JAMÁS un cobro junto. El **descuento por volumen lo configura el prestador** (precio del plan vs. precio del bloque suelto). El **precio unitario efectivo** — total del período ÷ N citas del período — es la **base del devengo de cada cita**: la variante (b) queda INTACTA (un pago, N devengos; cada evento económico nace cita por cita al cerrar con calidad; el pago del período jamás toca el ledger). **Auto-renovación** con aviso previo de 72 h y pausa de un toque; un período no renovado no deja nada que reversar (el devengo solo existe por cierre); lo pagado sin ejecutar se rige por P14. Mientras Kushki real no exista, el cobro del período es **simulado y declarado** — mismo contrato de estados.
+
 ### Decisiones adicionales (sin cambios)
 - White-label marketplace de fachada.
 - Off-platform no se cobra.
@@ -749,6 +766,9 @@ El jsonb `datos_bancarios` tiene estructura uniforme entre países (decisión M)
 
 ### 7.13 Cobrar y ofertarse exigen cuenta ACTIVA (NUEVO v2.4 — Decisión Q)
 Toda puerta de pago pre-valida `cuentas_comerciales.estado='activa'` (error `cuenta_no_activa`) ADEMÁS del rol activo, y todo listado de prestadores cobrables filtra por cuenta activa, server-side. El devengo de cita sigue la variante (b): el evento nace al cerrar con calidad, jamás al pagar (Decisión R, §4.3).
+
+### 7.14 El plan cobra por período; el devengo sigue siendo por cita (NUEVO v2.5 — Decisión S)
+Ninguna implementación del plan cobra multi-período junto ni crea eventos económicos al cobrar el período. El cobro mensual del plan se registra como PAGO (estado/metadata, patrón de la cita suelta); cada cita del plan devenga sola al cerrar con calidad, con el precio unitario efectivo del período como `monto_bruto`. Saltos, fallas, créditos y reembolsos proporcionales se rigen por `POLITICAS_EPETPLACE.md` P14 — el reembolso proporcional usa `aplicar_reembolso()` sobre lo COBRADO, jamás toca devengos inexistentes.
 
 ---
 
@@ -951,6 +971,18 @@ Este documento es el contrato técnico-conceptual del motor financiero. Cambiarl
 ---
 
 ## 15. Cambios entre versiones
+
+### v2.5 (11 Jul 2026 — S55-B5, post v2.4)
+
+**Decisiones nuevas:**
+- Decisión S — el plan de paseo cobra por período mensual: un pago al contratar y en cada renovación (jamás multi-período junto); descuento por volumen del prestador; precio unitario efectivo (total período ÷ N citas) = base del devengo; variante (b) intacta (un pago, N devengos, cada evento al cerrar con calidad); auto-renovación con aviso 72 h y pausa de un toque; período no renovado = nada que reversar; simulado declarado hasta Kushki real.
+
+**Reglas nuevas (sección 7):**
+- 7.14 — el plan cobra por período, el devengo sigue por cita; P14 rige créditos/reembolsos proporcionales sobre lo cobrado.
+
+**Documentos gemelos del paquete (firmados juntos, S55-B5):**
+- `MODELO_PASEO.md` v1.1 (UX del plan: chip "Hacerlo frecuente", Hoja L-D, hub "Mis paseos"; continuidad de paseador firmada).
+- `POLITICAS_EPETPLACE.md` v1.3 — P14 (saltos, fallas, pausa y plata del plan).
 
 ### v2.4 (11 Jul 2026 — S54, post v2.3)
 

@@ -1438,6 +1438,9 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 #### D-337 — Eliminación de cuenta funcional (ejecuta la P15)
 🟡 ALTA. La UI existe con voz honesta (letra (a) founder S55) y NO ejecuta; la espec vive como **P15 CANDIDATA** en `POLITICAS_EPETPLACE.md` (destino de mascotas/expediente, co-dueños, hitos P6, ledger intocable 7.8, ventana de gracia). Implementar EXIGE la firma de P15. Disparo: pre-compuerta B6 (requisito de tiendas). Origen: S55-B3.
 
+#### D-338 — Construcción del PLAN de paseo (la recurrencia) — CANDADO ABIERTO
+🟡 ALTA (bloque propio, espec completa firmada). El paquete de espec quedó FIRMADO en S55-B5 (`MODELO_PASEO.md` v1.1 §6 — chip "Hacerlo frecuente", Hoja L-D multi-selección, frecuencia de un toque, auto-renovación declarada, mismo paseador, hub "Mis paseos" con Próximos/Agenda/Historial · `MODELO_FINANCIERO.md` v2.5 Decisión S + regla 7.14 — un pago por período mensual, N devengos al cierre, precio unitario efectivo · `POLITICAS_EPETPLACE.md` P14 — saltos/fallas/pausa/plata). Alcance de construcción: DB sobre el mecanismo existente (`suscripcion_servicio_id`/`bono_id`, generación de citas del período con el motor de ventana S55-B2, cobro de período simulado declarado, crédito/reembolso proporcional P14 vía `aplicar_reembolso`), UI dueño (chip + Hoja + hub) y lado prestador (Sesión B). D-333 (sustitución+mensaje) sigue post-MVP aparte. **Disparo: gate E2E founder del Bloque 4 + pantallas de la Sesión B cerrado.** Origen: S55-B5 (OK completo del founder al paquete).
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)

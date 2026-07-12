@@ -1,12 +1,13 @@
 # MODELO_PASEO — El contrato del servicio de paseo
 
-> **Versión: v1.0 — S55 (11 Jul 2026).** Decisiones de producto cerradas
+> **Versión: v1.1 — S55 (11 Jul 2026).** Decisiones de producto cerradas
 > por el founder en sesión; escrito por el arquitecto (escritor único de
 > docs, regla 76). **Contrastes obligatorios:** `MODELO_FINANCIERO.md`
-> v2.4 (el camino de la plata — Decisiones Q/R y regla 7.13 rigen acá
-> sin excepción), `DISEÑO_EXPERIENCIA.md` (momento-primero, verdad
-> firme), `RUTA_F1.md` (principio de secuencia S54: el paseo se deja
-> COMPLETO antes del siguiente servicio).
+> v2.5 (el camino de la plata — Decisiones Q/R/S y regla 7.13 rigen acá
+> sin excepción), `POLITICAS_EPETPLACE.md` P14 (la política del plan),
+> `DISEÑO_EXPERIENCIA.md` (momento-primero, verdad firme), `RUTA_F1.md`
+> (principio de secuencia S54: el paseo se deja COMPLETO antes del
+> siguiente servicio).
 >
 > **Qué es este doc:** el modelo del PASEO como servicio — duraciones,
 > precio, capacidad y agenda. Lo que está cerrado, cerrado está; los
@@ -96,36 +97,71 @@ consentimiento: decisión de producto pendiente). Deuda D-330.
   (`prestador_horarios`); no existen feriados, vacaciones ni bloqueos
   puntuales del prestador. Ídem: relevamiento B en curso. Deuda D-332.
 
-## 6. Paquetes y recurrencia — CAPA POSTERIOR (candado)
+## 6. El PLAN (recurrencia) — espec FIRMADA, construcción con bloque propio
 
-El paquete mensual / la recurrencia se montan sobre el mecanismo
-existente (`bono_id` / `suscripcion_servicio_id`) como manda la
-enmienda S54 de RUTA_F1 (principio de secuencia). PERO:
+> **El candado v1.0 quedó ABIERTO en S55-B5:** los tres docs del
+> paquete están firmados (este §6 v1.1 + `MODELO_FINANCIERO.md` v2.5
+> Decisión S + `POLITICAS_EPETPLACE.md` P14). Lo que sigue cerrado es
+> la CONSTRUCCIÓN: bloque propio con disparo (deuda D-338 — gate E2E
+> founder del Bloque 4 + pantallas de la Sesión B cerrado). Hasta ese
+> bloque, la UI muestra la frecuencia APAGADA con "Pronto".
 
-> **REGLA DURA (founder S55): el paquete NO se vende sin
-> `MODELO_FINANCIERO.md` v2.5 + P14 firmados.** El devengo de un bono
-> multi-paseo (¿cuándo se gana la comisión de un paquete pagado por
-> adelantado?) es contrato financiero, no feature de UI.
+Se monta sobre el mecanismo existente (`bono_id` /
+`suscripcion_servicio_id`, enmienda S54 de RUTA_F1).
 
-Decisiones de producto YA tomadas para esa capa (registradas, no
-implementadas):
+### 6.1 La UX firmada (founder S55)
 
-- **Continuidad de paseador (post-MVP):** el paquete aspira al MISMO
-  paseador (el vínculo es parte del valor).
-- **Sustitución con mensaje al pet parent (post-MVP, decisión founder
-  S55):** si el paseador titular no puede, la sustitución se COMUNICA
-  al dueño — jamás un reemplazo silencioso. Deuda D-333.
+- **Entrada:** el flujo del paseo SUELTO no cambia; al final del CUÁNDO
+  vive el chip **"Hacerlo frecuente"**. Tocándolo se abre una Hoja:
+  - **7 chips redondos L·M·X·J·V·S·D** — el día elegido en el CUÁNDO
+    llega PRESELECCIONADO; multi-selección (martes y jueves = 2 citas
+    por semana del plan).
+  - **Frecuencia de un toque:** cada semana / cada dos semanas / cada
+    mes.
+  - **Auto-renovación DECLARADA** en la superficie al contratar (con su
+    aviso previo de 72 h y pausa de un toque — Decisión S).
+- **Mismo paseador todo el plan** — la continuidad está FIRMADA (el
+  vínculo es parte del valor). La sustitución automática con mensaje al
+  pet parent sigue siendo post-MVP (D-333 intacta): en el MVP del plan,
+  si el paseador no puede, rige P14(b).
+- **Hub "Mis paseos" = el DOBLE CLIC del servicio** — JAMÁS una tab (la
+  navegación de 3 tabs S50 queda intacta). Se entra por la tarjeta del
+  Hogar y por Explorar→Paseo. Tres segmentos:
+  1. **Próximos** — lo que viene + el estado del plan.
+  2. **Agenda** — las citas del período: modificar / saltar (P14).
+  3. **Historial** — lo caminado (sedimento, peldaño por datos).
+
+### 6.2 La plata del plan (espejo de Decisión S — el detalle manda allá)
+
+UN pago por PERÍODO MENSUAL (al contratar y en cada renovación);
+descuento por volumen lo configura el prestador; **un pago, N
+devengos**: cada cita del plan devenga sola al cerrar con calidad
+(variante (b) intacta). `MODELO_FINANCIERO.md` v2.5 §Decisión S.
+
+### 6.3 Evolución opcional (apagada)
+
+**Plan anual:** registrado como evolución posible del mismo chasis
+(período anual con cobro mensual). NO se diseña ni se construye hasta
+decisión explícita del founder — apagado, sin lugar en UI.
 
 ## 7. Los tests de toda feature de paseo
 
 1. ¿Respeta el menú canónico (ni un bloque fuera del CHECK)?
 2. ¿La ventana completa manda (cero doble-booking parcial)?
 3. ¿Verdad firme intacta (nada tentativo visible al prestador)?
-4. ¿El camino de la plata intacto (Q, R, 7.13 — cero eventos al pagar)?
+4. ¿El camino de la plata intacto (Q, R, S, 7.13 — cero eventos al pagar; en el plan: un pago, N devengos)?
 5. ¿Los huecos §5 siguen declarados o su disparo ya sonó?
 
 ## Historial
 
+- **v1.1 (S55-B5, 11 Jul 2026):** §6 reescrito con la espec FIRMADA del
+  plan (OK completo del founder al paquete): chip "Hacerlo frecuente" +
+  Hoja de 7 chips L-D con multi-selección y frecuencia de un toque +
+  auto-renovación declarada; continuidad de paseador firmada
+  (sustitución+mensaje sigue post-MVP, D-333); hub "Mis paseos" como
+  doble clic del servicio con Próximos/Agenda/Historial; plan anual
+  como evolución apagada. El candado se ABRE (financiero v2.5 Decisión
+  S + P14 firmados); la construcción es D-338.
 - **v1.0 (S55, 11 Jul 2026):** redacción inicial con el modelo cerrado
   del founder (menú canónico con techo 300, precio por bloque,
   capacidad por cupo) + el motor de ocupación por ventana implementado
