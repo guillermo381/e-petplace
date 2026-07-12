@@ -25,7 +25,7 @@
  */
 
 import { useState } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { Pressable, ScrollView, Text, View } from 'react-native'
 import Animated, { cubicBezier } from 'react-native-reanimated'
 
 import { typography } from '../tokens/typography'
@@ -45,12 +45,18 @@ export interface SelectorOpcionItem {
 }
 
 export interface SelectorOpcionProps {
-  /** 2–4 opciones cortas. */
+  /** 2–4 opciones cortas en 'fila'; conjuntos más grandes van en 'tira' o 'grilla'. */
   opciones: SelectorOpcionItem[]
   seleccionada?: string
   onSelect: (codigo: string) => void
   /** Label visible del grupo Y accessibilityLabel del radiogroup. */
   etiqueta: string
+  /** ENMIENDA S55-B4 (precedente Celda S44): 'fila' (default, 2–4 chips
+   *  que llenan el ancho) · 'tira' (scroll horizontal — la tira de días
+   *  del CUÁNDO) · 'grilla' (chips envueltos para conjuntos grandes —
+   *  los inicios disponibles). Mismo tratamiento de selección en las
+   *  tres; el radiogroup y el anuncio por chip no cambian. */
+  disposicion?: 'fila' | 'tira' | 'grilla'
 }
 
 function Chip({
@@ -59,12 +65,14 @@ function Chip({
   total,
   seleccionada,
   onSelect,
+  crecer,
 }: {
   opcion: SelectorOpcionItem
   indice: number
   total: number
   seleccionada: boolean
   onSelect: (codigo: string) => void
+  crecer: boolean
 }) {
   const { theme } = useTheme()
   const [presionada, setPresionada] = useState(false)
@@ -87,7 +95,7 @@ function Chip({
       accessibilityRole="radio"
       accessibilityState={{ checked: seleccionada }}
       accessibilityLabel={`${opcion.etiqueta}, opción ${indice + 1} de ${total}`}
-      style={{ flexGrow: 1 }}
+      style={{ flexGrow: crecer ? 1 : 0 }}
     >
       <Animated.View
         style={{
@@ -121,8 +129,26 @@ function Chip({
   )
 }
 
-export function SelectorOpcion({ opciones, seleccionada, onSelect, etiqueta }: SelectorOpcionProps) {
+export function SelectorOpcion({
+  opciones,
+  seleccionada,
+  onSelect,
+  etiqueta,
+  disposicion = 'fila',
+}: SelectorOpcionProps) {
   const { theme } = useTheme()
+
+  const chips = opciones.map((opcion, i) => (
+    <Chip
+      key={opcion.codigo}
+      opcion={opcion}
+      indice={i}
+      total={opciones.length}
+      seleccionada={opcion.codigo === seleccionada}
+      onSelect={onSelect}
+      crecer={disposicion === 'fila'}
+    />
+  ))
 
   return (
     <View accessibilityRole="radiogroup" accessibilityLabel={etiqueta}>
@@ -136,18 +162,15 @@ export function SelectorOpcion({ opciones, seleccionada, onSelect, etiqueta }: S
       >
         {etiqueta}
       </Text>
-      <View style={{ flexDirection: 'row', gap: spacing[2] }}>
-        {opciones.map((opcion, i) => (
-          <Chip
-            key={opcion.codigo}
-            opcion={opcion}
-            indice={i}
-            total={opciones.length}
-            seleccionada={opcion.codigo === seleccionada}
-            onSelect={onSelect}
-          />
-        ))}
-      </View>
+      {disposicion === 'tira' ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: 'row', gap: spacing[2] }}>
+          {chips}
+        </ScrollView>
+      ) : (
+        <View style={{ flexDirection: 'row', flexWrap: disposicion === 'grilla' ? 'wrap' : 'nowrap', gap: spacing[2] }}>
+          {chips}
+        </View>
+      )}
     </View>
   )
 }

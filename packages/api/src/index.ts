@@ -118,6 +118,8 @@ export {
   obtenerOfertaPaseo,
   obtenerPaseadoresDisponibles,
   obtenerSlotsDisponibles,
+  obtenerIniciosPaseo,
+  type InputIniciosPaseo,
   crearBloqueoAgenda,
   confirmarCitaPagada,
   type CodigoErrorAgendamiento,
@@ -231,3 +233,24 @@ export {
   type EstadoLiquidacion,
   type CodigoErrorLiquidaciones,
 } from './wrappers/liquidaciones';
+
+// Configuración del servicio de paseo — S55-B (B2) — archivo NUEVO de esta sesión
+export {
+  BLOQUES_PASEO,
+  BLOQUE_MAX_OFERTABLE,
+  obtenerOfertasPaseoPropias,
+  crearOfertaPaseo,
+  actualizarOfertaPaseo,
+  obtenerFranjasHorario,
+  crearFranjaHorario,
+  actualizarFranjaHorario,
+  eliminarFranjaHorario,
+  type BloquePaseo,
+  type OfertaPaseoPropia,
+  type FranjaHorario,
+  type InputCrearOfertaPaseo,
+  type InputActualizarOfertaPaseo,
+  type InputCrearFranja,
+  type InputActualizarFranja,
+  type CodigoErrorConfiguracionPaseo,
+} from './wrappers/configuracionPaseo';

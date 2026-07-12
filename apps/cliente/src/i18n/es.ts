@@ -302,6 +302,13 @@ export const clienteEs = {
     cuandoHoy: 'Hoy',
     cuandoManana: 'Mañana',
     verQuienPuede: 'Ver quién puede',
+    // S55-B4 — el CUÁNDO tipo Teams: duración → día → grilla de inicios
+    cuandoSalidaBano: 'La salida al baño.',
+    cuandoDesde: 'desde ${{precio}}',
+    cuandoPrecio: '${{precio}}',
+    cuandoSinInicios: 'Ese día no hay horarios libres para este bloque. Prueba con otro día.',
+    cuandoFrecuencia: '¿Todas las semanas?',
+    cuandoFrecuenciaPronto: 'Pronto',
     quienTitulo: 'Paseadores disponibles',
     nadiePuede: 'Nadie puede a esa hora',
     nadiePuedeDetalle: 'Prueba con otro horario u otro día.',

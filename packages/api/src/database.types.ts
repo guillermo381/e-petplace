@@ -14901,6 +14901,12 @@ export type Database = {
         Returns: Json
       }
       obtener_grooming_por_cita: { Args: { p_cita_id: string }; Returns: Json }
+      obtener_inicios_paseo_disponibles: {
+        Args: { p_duracion_minutos: number; p_fecha: string }
+        Returns: {
+          hora: string
+        }[]
+      }
       obtener_mis_atenciones_grooming: {
         Args: { p_desde?: string; p_hasta?: string }
         Returns: Json

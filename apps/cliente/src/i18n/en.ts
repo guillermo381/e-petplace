@@ -274,6 +274,13 @@ export const clienteEn = {
     cuandoHoy: 'Today',
     cuandoManana: 'Tomorrow',
     verQuienPuede: 'See who can',
+    // S55-B4 — Teams-style WHEN: duration → day → start grid
+    cuandoSalidaBano: 'The bathroom break.',
+    cuandoDesde: 'from ${{precio}}',
+    cuandoPrecio: '${{precio}}',
+    cuandoSinInicios: 'No free times that day for this block. Try another day.',
+    cuandoFrecuencia: 'Every week?',
+    cuandoFrecuenciaPronto: 'Soon',
     quienTitulo: 'Available walkers',
     nadiePuede: 'No one can at that time',
     nadiePuedeDetalle: 'Try another time or another day.',

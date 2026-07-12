@@ -1,25 +1,29 @@
 /**
- * PASEO — EL CUÁNDO (S54-B3.2, decisión founder: momento-primero).
- * El dueño primero dice CUÁNDO (día + hora de inicio + duración) y
- * recién ahí ve QUIÉNES pueden (→ /explorar/paseo/disponibles).
+ * PASEO — EL CUÁNDO tipo Teams (S55-B4, founder; reescribe el S54-B3.2).
+ * Tres movimientos: DURACIÓN primero (bloques del menú canónico
+ * realmente ofertados, server-side vía obtener_oferta_paseo — no se
+ * oferta quien no puede cobrar, 7.13) → DÍA (tira horizontal hoy+13)
+ * → GRILLA de inicios reales (obtener_inicios_paseo_disponibles: la
+ * ventana entera cabe con cupo para ALGÚN paseador — motor S55-B2).
+ * Slot sin cupo NO se pinta (silencio digno); día sin inicios = voz
+ * honesta corta. El QUIÉN y el checkout quedan intactos (S54); el
+ * camino de la plata NO se toca. Frecuencia dibujada APAGADA (el
+ * paquete tiene candado: financiero v2.5 + P14, MODELO_PASEO §6).
+ * CIERRA D-321: murió el rango horario hardcodeado.
  *
- * Piezas 100% del sistema (Ley 11 sin nacimientos): Celdas que abren
- * Hojas de selección (patrón de interacción de CampoFecha compuesto de
- * Celda + Hoja + HojaScroll) y SelectorOpcion para la duración.
+ * Piezas del sistema: SelectorOpcion en sus tres disposiciones
+ * (enmienda S55-B4 — fila/tira/grilla), Celda para la frecuencia.
  *
  * ESCALERA (§4b, declarada):
- *  · Peldaño 0 — sin oferta activa de paseo: EstadoVacio honesto que
- *    educa (jamás selectores contra un catálogo vacío).
- *  · Peldaño 1 — selectores sobre lo REAL: duraciones derivadas de las
- *    ofertas activas (hoy una sola: 30 min, preseleccionada — jamás
- *    opciones fantasma); 14 días; horas alineadas a 30 min (las de hoy
- *    filtran lo que ya pasó).
- *  · Peldaño 2 — datos del expediente: HOY NO MUESTRA ninguno
- *    (explícito). Cuando el expediente sepa rutinas (B4+), el CUÁNDO
- *    podrá sugerir "su hora habitual" — por dato, no por versión.
+ *  · Peldaño 0 — sin oferta activa: EstadoVacio honesto que educa.
+ *  · Peldaño 1 — todo lo que se pinta es REAL: bloques de ofertas
+ *    vivas con su precio, inicios de franjas reales menos ocupación.
+ *  · Peldaño 2 — datos del expediente: HOY NINGUNO (explícito).
+ *    Cuando el expediente sepa rutinas (B4+), la grilla podrá sugerir
+ *    "su hora habitual" — por dato, no por versión.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
@@ -30,34 +34,43 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
-  Hoja,
-  HojaScroll,
   Icono,
   SelectorOpcion,
-  Separador,
   Tarjeta,
   spacing,
   typography,
   useTheme,
 } from '@epetplace/ui';
-import { obtenerOfertaPaseo, type OfertaPaseo } from '@epetplace/api';
+import { obtenerIniciosPaseo, obtenerOfertaPaseo, type OfertaPaseo } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
-
-const HORA_MIN = 6; // 06:00 — primera hora ofrecible del día
-const HORA_MAX = 20; // 20:00 — última hora de inicio
 
 function fechaLocalISO(d: Date): string {
   return new Intl.DateTimeFormat('en-CA').format(d);
 }
 
+// '30 min' · '1 h' · '2 h' — el menú habla en tiempo humano corto.
+function etiquetaBloque(min: number): string {
+  return min < 60 ? `${min} min` : `${min / 60} h`;
+}
+
+interface Bloque {
+  duracion: number;
+  /** Precio mínimo entre prestadores que lo ofertan. */
+  desde: number;
+  /** true si hay más de un precio distinto (la voz dice "desde"). */
+  varia: boolean;
+}
+
 export default function PaseoCuando() {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
+
   const [oferta, setOferta] = useState<OfertaPaseo[] | 'cargando' | 'error'>('cargando');
-  const [dia, setDia] = useState<string | null>(null);
-  const [hora, setHora] = useState<string | null>(null);
   const [duracion, setDuracion] = useState<number | null>(null);
-  const [hojaAbierta, setHojaAbierta] = useState<'dia' | 'hora' | null>(null);
+  const [dia, setDia] = useState<string>(fechaLocalISO(new Date()));
+  const [inicios, setInicios] = useState<string[] | 'cargando' | 'error'>('cargando');
+  const [hora, setHora] = useState<string | null>(null);
+  const [reintento, setReintento] = useState(0);
 
   useFocusEffect(
     useCallback(() => {
@@ -65,9 +78,10 @@ export default function PaseoCuando() {
       void obtenerOfertaPaseo().then((r) => {
         if (!vigente) return;
         setOferta(r.ok ? r.data : 'error');
-        if (r.ok) {
-          const unicas = [...new Set(r.data.map((o) => o.duracion_minutos))];
-          if (unicas.length === 1) setDuracion(unicas[0]);
+        if (r.ok && r.data.length > 0) {
+          // DURACIÓN PRIMERO: el bloque más corto ofertado arranca elegido
+          const menor = Math.min(...r.data.map((o) => o.duracion_minutos));
+          setDuracion((d) => d ?? menor);
         }
       });
       return () => {
@@ -76,61 +90,70 @@ export default function PaseoCuando() {
     }, []),
   );
 
-  // Duraciones REALES de la oferta activa (jamás opciones fantasma).
-  const duraciones = useMemo(
-    () => (Array.isArray(oferta) ? [...new Set(oferta.map((o) => o.duracion_minutos))].sort((a, b) => a - b) : []),
-    [oferta],
-  );
-
-  // Horas alineadas a 30 min; para HOY se filtran las que ya pasaron.
-  const horasDe = useCallback((fechaISO: string): string[] => {
-    const ahora = new Date();
-    const esHoy = fechaISO === fechaLocalISO(ahora);
-    const todas: string[] = [];
-    for (let h = HORA_MIN; h <= HORA_MAX; h++) {
-      for (const m of [0, 30]) {
-        if (h === HORA_MAX && m > 0) continue;
-        if (esHoy && (h < ahora.getHours() || (h === ahora.getHours() && m <= ahora.getMinutes()))) continue;
-        todas.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
-      }
+  // Bloques del menú REALMENTE ofertados, con su precio mínimo.
+  const bloques = useMemo<Bloque[]>(() => {
+    if (!Array.isArray(oferta)) return [];
+    const porDuracion = new Map<number, number[]>();
+    for (const o of oferta) {
+      const lista = porDuracion.get(o.duracion_minutos) ?? [];
+      lista.push(o.precio);
+      porDuracion.set(o.duracion_minutos, lista);
     }
-    return todas;
-  }, []);
+    return [...porDuracion.entries()]
+      .map(([d, precios]) => ({
+        duracion: d,
+        desde: Math.min(...precios),
+        varia: new Set(precios).size > 1,
+      }))
+      .sort((a, b) => a.duracion - b.duracion);
+  }, [oferta]);
 
-  // Próximos 14 días — hoy incluido solo si le quedan horas.
+  // Próximos 14 días (hoy+13) — la tira.
   const dias = useMemo(() => {
-    const lista: Array<{ iso: string; etiqueta: string }> = [];
     const fmt = new Intl.DateTimeFormat(idioma === 'es' ? 'es' : 'en', {
       weekday: 'short',
       day: 'numeric',
-      month: 'short',
     });
+    const lista: Array<{ iso: string; etiqueta: string }> = [];
     for (let i = 0; i < 14; i++) {
       const d = new Date();
       d.setDate(d.getDate() + i);
       const iso = fechaLocalISO(d);
-      if (i === 0 && horasDe(iso).length === 0) continue;
-      const relativo = i === 0 ? t('explorar.cuandoHoy') : i === 1 ? t('explorar.cuandoManana') : null;
-      const corta = fmt.format(d).toLowerCase();
-      lista.push({ iso, etiqueta: relativo ? `${relativo} · ${corta}` : corta });
+      const etiqueta =
+        i === 0 ? t('explorar.cuandoHoy') : i === 1 ? t('explorar.cuandoManana') : fmt.format(d).toLowerCase();
+      lista.push({ iso, etiqueta });
     }
     return lista;
-  }, [idioma, t, horasDe]);
+  }, [idioma, t]);
 
-  const etiquetaDia = dias.find((d) => d.iso === dia)?.etiqueta ?? null;
-  const horas = dia ? horasDe(dia) : [];
-  const ternaCompleta = dia !== null && hora !== null && duracion !== null;
+  // La grilla recalcula VIVA con cada cambio de día o duración.
+  useEffect(() => {
+    if (duracion === null || !Array.isArray(oferta) || oferta.length === 0) return;
+    let vigente = true;
+    setInicios('cargando');
+    void obtenerIniciosPaseo({ fecha: dia, duracion_minutos: duracion }).then((r) => {
+      if (!vigente) return;
+      setInicios(r.ok ? r.data : 'error');
+      if (r.ok) setHora((h) => (h !== null && r.data.includes(h) ? h : null));
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [dia, duracion, oferta, reintento]);
+
+  const bloqueElegido = bloques.find((b) => b.duracion === duracion) ?? null;
+  const listo = duracion !== null && hora !== null;
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('explorar.paseoTitulo')} atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[4] }}>
+      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
         {oferta === 'cargando' ? (
           <EsqueletoGrupo>
             <View style={{ gap: spacing[3] }}>
               <Esqueleto forma="bloque" ancho="100%" alto={56} />
               <Esqueleto forma="bloque" ancho="100%" alto={56} />
-              <Esqueleto forma="bloque" ancho="100%" alto={56} />
+              <Esqueleto forma="bloque" ancho="100%" alto={120} />
             </View>
           </EsqueletoGrupo>
         ) : oferta === 'error' ? (
@@ -148,89 +171,87 @@ export default function PaseoCuando() {
           />
         ) : (
           <>
-            <Tarjeta relleno="ninguno">
-              <Celda
-                titulo={t('explorar.cuandoDia')}
-                subtitulo={etiquetaDia ?? t('explorar.cuandoElegir')}
-                interactiva
-                onPress={() => setHojaAbierta('dia')}
-                accessibilityRole="button"
+            {/* 1 · DURACIÓN PRIMERO — solo bloques ofertados de verdad */}
+            <View style={{ gap: spacing[2] }}>
+              <SelectorOpcion
+                etiqueta={t('explorar.cuandoDuracion')}
+                disposicion="grilla"
+                opciones={bloques.map((b) => ({ codigo: String(b.duracion), etiqueta: etiquetaBloque(b.duracion) }))}
+                seleccionada={duracion !== null ? String(duracion) : undefined}
+                onSelect={(codigo) => setDuracion(Number(codigo))}
               />
-              <Separador />
-              <Celda
-                titulo={t('explorar.cuandoHora')}
-                subtitulo={hora ?? t('explorar.cuandoElegir')}
-                interactiva
-                onPress={() => {
-                  if (dia) setHojaAbierta('hora');
-                  else setHojaAbierta('dia');
-                }}
-                accessibilityRole="button"
-              />
-            </Tarjeta>
+              {bloqueElegido !== null ? (
+                <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                  {bloqueElegido.varia
+                    ? t('explorar.cuandoDesde', { precio: bloqueElegido.desde.toFixed(2) })
+                    : t('explorar.cuandoPrecio', { precio: bloqueElegido.desde.toFixed(2) })}
+                  {bloqueElegido.duracion === 30 ? ` · ${t('explorar.cuandoSalidaBano')}` : ''}
+                </Text>
+              ) : null}
+            </View>
 
+            {/* 2 · DÍA — la tira horizontal (hoy+13) */}
             <SelectorOpcion
-              etiqueta={t('explorar.cuandoDuracion')}
-              opciones={duraciones.map((d) => ({ codigo: String(d), etiqueta: `${d} min` }))}
-              seleccionada={duracion !== null ? String(duracion) : undefined}
-              onSelect={(codigo) => setDuracion(Number(codigo))}
+              etiqueta={t('explorar.cuandoDia')}
+              disposicion="tira"
+              opciones={dias.map((d) => ({ codigo: d.iso, etiqueta: d.etiqueta }))}
+              seleccionada={dia}
+              onSelect={setDia}
             />
+
+            {/* 2b · GRILLA de inicios reales para ESA duración */}
+            {inicios === 'cargando' ? (
+              <EsqueletoGrupo>
+                <Esqueleto forma="bloque" ancho="100%" alto={100} />
+              </EsqueletoGrupo>
+            ) : inicios === 'error' ? (
+              <EstadoVacio
+                registro="seccion"
+                titulo={t('explorar.paseadoresError')}
+                accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setReintento((n) => n + 1)} />}
+              />
+            ) : inicios.length === 0 ? (
+              // día sin inicios: voz honesta corta, jamás pantalla de error
+              <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
+                {t('explorar.cuandoSinInicios')}
+              </Text>
+            ) : (
+              <SelectorOpcion
+                etiqueta={t('explorar.cuandoHora')}
+                disposicion="grilla"
+                opciones={inicios.map((h) => ({ codigo: h, etiqueta: h }))}
+                seleccionada={hora ?? undefined}
+                onSelect={setHora}
+              />
+            )}
 
             <Boton
               variante="primario"
               etiqueta={t('explorar.verQuienPuede')}
-              deshabilitado={!ternaCompleta}
+              deshabilitado={!listo}
               onPress={() => {
-                if (!ternaCompleta) return;
+                if (!listo) return;
                 router.push({
                   pathname: '/explorar/paseo/disponibles',
                   params: { fecha: dia, hora, duracion: String(duracion) },
                 });
               }}
             />
+
+            {/* 4 · FRECUENCIA dibujada, APAGADA (candado del paquete) */}
+            <Tarjeta relleno="ninguno">
+              <Celda
+                titulo={t('explorar.cuandoFrecuencia')}
+                fin={
+                  <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                    {t('explorar.cuandoFrecuenciaPronto')}
+                  </Text>
+                }
+              />
+            </Tarjeta>
           </>
         )}
       </ScrollView>
-
-      <Hoja visible={hojaAbierta === 'dia'} titulo={t('explorar.cuandoDia')} onCerrar={() => setHojaAbierta(null)}>
-        <HojaScroll>
-          {dias.map((d, i) => (
-            <View key={d.iso}>
-              {i > 0 ? <Separador /> : null}
-              <Celda
-                titulo={d.etiqueta}
-                interactiva
-                accessibilityRole="button"
-                onPress={() => {
-                  setDia(d.iso);
-                  // si la hora elegida ya no existe en el día nuevo, se limpia
-                  setHora((h) => (h && horasDe(d.iso).includes(h) ? h : null));
-                  setHojaAbierta(null);
-                }}
-              />
-            </View>
-          ))}
-        </HojaScroll>
-      </Hoja>
-
-      <Hoja visible={hojaAbierta === 'hora'} titulo={t('explorar.cuandoHora')} onCerrar={() => setHojaAbierta(null)}>
-        <HojaScroll>
-          {horas.map((h, i) => (
-            <View key={h}>
-              {i > 0 ? <Separador /> : null}
-              <Celda
-                titulo={h}
-                interactiva
-                accessibilityRole="button"
-                onPress={() => {
-                  setHora(h);
-                  setHojaAbierta(null);
-                }}
-              />
-            </View>
-          ))}
-        </HojaScroll>
-      </Hoja>
     </SafeAreaView>
   );
 }

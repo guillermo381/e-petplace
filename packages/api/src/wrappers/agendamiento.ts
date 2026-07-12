@@ -275,6 +275,38 @@ export async function obtenerSlotsDisponibles(
   return { ok: true, data: slots };
 }
 
+// ── B2 · Inicios disponibles para la grilla del CUÁNDO (S55-B4) ─────────────
+// Server-side por 7.13: unión de inicios con ventana+cupo entre TODOS los
+// prestadores cobrables que ofertan ese bloque. Cierra D-321.
+
+export interface InputIniciosPaseo {
+  /** 'YYYY-MM-DD'. */
+  fecha: string;
+  /** Bloque del menú canónico (30/60/120/180/240/300). */
+  duracion_minutos: number;
+}
+
+/** Horas de inicio 'HH:MM' donde ALGÚN paseador puede la ventana entera. */
+export async function obtenerIniciosPaseo(
+  input: InputIniciosPaseo,
+): Promise<ResultadoWrapper<string[], CodigoErrorAgendamiento>> {
+  const { data, error } = await getClient().rpc('obtener_inicios_paseo_disponibles', {
+    p_fecha: input.fecha,
+    p_duracion_minutos: input.duracion_minutos,
+  });
+
+  if (error) return mapeoErrorAResultado(error.message);
+  if (!Array.isArray(data)) return mapeoErrorAResultado('datos_inconsistentes');
+  const horas: string[] = [];
+  for (const fila of data) {
+    if (!esObj(fila) || typeof fila.hora !== 'string') {
+      return mapeoErrorAResultado('datos_inconsistentes');
+    }
+    horas.push(fila.hora.slice(0, 5));
+  }
+  return { ok: true, data: horas };
+}
+
 // ── C · Crear el hold (la cita nace pendiente + pendiente_pago, 15 min) ─────
 
 export interface HoldAgenda {
