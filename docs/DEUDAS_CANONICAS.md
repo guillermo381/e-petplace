@@ -1462,6 +1462,9 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 #### D-349 — Edge del auto-solape en saltar_cita_plan
 ⚪ BAJA. Mover una salida del plan a un horario que SOLAPA la ventana vieja de la MISMA salida puede rebotar `slot_ocupado` con cupo 1: `_agenda_ocupacion` cuenta a la propia cita que se está moviendo (el helper no sabe de exclusiones). Raro en uso real (mover a un horario pegado al propio); la cura es un parámetro de exclusión en el conteo o restar la propia cita en `saltar_cita_plan`. Disparo: primer reporte real de un dueño que no pueda mover una salida por esto. Origen: S56-A (auto-declarada en construcción).
 
+#### D-350 — EL WOW del ledger: el primer evento económico ante los ojos del founder
+🟡 ALTA (deuda de cierre de S56, decisión founder regla 72 — el Bloque 0 (c) se DIFIRIÓ a propósito). Alcance: cierre con calidad de la cita viva `cfce1d43` (el paseo pagado de Thor) → PRIMER evento económico real del ledger (variante (b): `fecha_devengo`=cierre, `fecha_cobro_kushki`=pago simulado) → el gate en dispositivo de **Liquidaciones v1 de la B** (que espera exactamente ese primer evento desde S55) + la validación en vivo del devengo. El ledger sigue en CERO eventos: correcto y declarado — nada se fabrica antes del momento. **Disparo: APERTURA del Gate de Oro con Kary** (el wow abre esa sesión). Origen: veredicto founder del Bloque 0, S56.
+
 #### D-343 — Construcción del PAQUETE DE SALIDAS (bono anclado)
 🟡 ALTA (espec completa: el paquete de letra S56 firmado — `MODELO_PASEO.md` §6bis, financiero v2.6 Decisión T/7.15, P16). Alcance: DB sobre `bono_id` existente (saldo, vigencia, rollover FIFO, cierre `no_show`, breakage al vencimiento — L-140 en todo), UI dueño (compra del paquete en el flujo del prestador elegido + saldo visible + reserva contra saldo), UI prestador (configurar precio de presets 5/10/15 con neto visible), lado B la vista de su agenda. **Disparo: cierre de D-338** (el plan mensual se construye PRIMERO tal cual firmado; el paquete entra después sin refactor — mismo chasis). Origen: S56 founder.
 
@@ -1479,6 +1482,7 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 
 #### D-347 — Sesión de ELEVACIÓN DE CRAFT visual (pre-Gate de Oro)
 🟡 ALTA. Sesión dedicada de elevación de craft de las pantallas clave del arco de paseo: composición, jerarquía y elemento firma por pantalla — vara MoeGo+ (la fluidez no alcanza; la pantalla tiene que tener FIRMA). No es deuda de componentes (el sistema existe): es la pasada de dirección de arte sobre las pantallas ya construidas, con gate founder por pantalla. **Disparo: cierre del arco de paseo, ANTES del Gate de Oro con Kary.** Origen: S56 founder.
+**Insumo del veredicto Bloque 0 (founder, S56): llegar al hub "Mis paseos" CUESTA** — el doble clic del servicio no se encuentra solo (las dos entradas existen pero no llaman). La descubribilidad del hub entra al alcance de esta sesión de craft; no se parcha hoy.
 
 ---
 
