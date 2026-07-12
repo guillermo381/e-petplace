@@ -34,6 +34,7 @@ import { spacing } from '../tokens/spacing'
 import { motion } from '../tokens/motion'
 import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
+import { useTraduccionUi } from '../i18n'
 
 const BORDE = 1.5
 const ALTO = 48                                  // md — target táctil
@@ -78,6 +79,7 @@ export function Campo({
   ...inputProps
 }: CampoProps) {
   const { theme } = useTheme()
+  const { t } = useTraduccionUi()
   const [enfocado, setEnfocado] = useState(false)
   const [oculto, setOculto] = useState(true)
 
@@ -159,11 +161,11 @@ export function Campo({
           <Pressable
             onPress={() => setOculto((x) => !x)}
             accessibilityRole="button"
-            accessibilityLabel={oculto ? 'Mostrar contraseña' : 'Ocultar contraseña'}
+            accessibilityLabel={oculto ? t('campo.mostrarContrasena') : t('campo.ocultarContrasena')}
             hitSlop={8}
           >
             <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.secondary }}>
-              {oculto ? 'Ver' : 'Ocultar'}
+              {oculto ? t('campo.ver') : t('campo.ocultar')}
             </Text>
           </Pressable>
         ) : iconoDer ? (

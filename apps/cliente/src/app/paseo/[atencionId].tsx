@@ -37,17 +37,9 @@ import {
   obtenerCatalogoNovedadesPaseo,
   type DetalleAtencion,
 } from '@epetplace/api';
+import { fechaLargaHumana } from '@epetplace/i18n';
 
-const MESES = [
-  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
-];
-
-function fechaHumana(iso: string | null): string {
-  if (iso === null) return '';
-  const f = new Date(iso);
-  return `${f.getDate()} de ${MESES[f.getMonth()]}`;
-}
+import { useTraduccion } from '@/i18n';
 
 function horaMono(iso: string | null): string {
   if (iso === null) return '--:--';
@@ -60,6 +52,7 @@ const LADO_THUMB = 96;
 export default function DetallePaseo() {
   const router = useRouter();
   const { theme } = useTheme();
+  const { t, idioma } = useTraduccion();
   const insets = useSafeAreaInsets();
   const { atencionId } = useLocalSearchParams<{ atencionId: string }>();
 
@@ -97,9 +90,9 @@ export default function DetallePaseo() {
   if (detalle === 'cargando') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo="Paseo" atras onAtras={() => router.back()} />
+        <Encabezado variante="navegacion" titulo={t('paseo.titulo')} atras onAtras={() => router.back()} />
         <View style={{ padding: spacing[5] }}>
-          <EsqueletoGrupo etiqueta="Cargando el paseo">
+          <EsqueletoGrupo etiqueta={t('paseo.cargando')}>
             <View style={{ gap: spacing[3] }}>
               <Esqueleto forma="bloque" ancho="100%" alto={180} />
               <Esqueleto forma="linea" ancho="50%" />
@@ -115,23 +108,23 @@ export default function DetallePaseo() {
     const esError = detalle === 'error';
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo="Paseo" atras onAtras={() => router.back()} />
+        <Encabezado variante="navegacion" titulo={t('paseo.titulo')} atras onAtras={() => router.back()} />
         <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
           <EstadoVacio
-            titulo={esError ? 'No pudimos cargar este paseo' : 'No encontramos este paseo'}
-            descripcion={esError ? 'Revisá tu conexión y probá de nuevo.' : 'Puede que ya no esté disponible.'}
+            titulo={esError ? t('paseo.errorTitulo') : t('paseo.noEncontradoTitulo')}
+            descripcion={esError ? t('paseo.errorDetalle') : t('paseo.noEncontradoDetalle')}
             accion={
               esError ? (
                 <Boton
                   variante="secundario"
-                  etiqueta="Reintentar"
+                  etiqueta={t('paseo.reintentar')}
                   onPress={() => {
                     setDetalle('cargando');
                     setIntento((n) => n + 1);
                   }}
                 />
               ) : (
-                <Boton variante="secundario" etiqueta="Volver" onPress={() => router.back()} />
+                <Boton variante="secundario" etiqueta={t('paseo.volver')} onPress={() => router.back()} />
               )
             }
           />
@@ -142,13 +135,17 @@ export default function DetallePaseo() {
 
   // voz de la familia: nombre_familia del catálogo (D-300), vía wrapper.
   const nombreNovedad = (codigo: string) =>
-    nombresNovedades.get(codigo) ?? 'Novedad del paseo';
+    nombresNovedades.get(codigo) ?? t('paseo.novedadFallback');
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado
         variante="navegacion"
-        titulo={`Paseo · ${fechaHumana(detalle.iniciada_en)}`}
+        titulo={
+          detalle.iniciada_en !== null
+            ? t('paseo.tituloConFecha', { fecha: fechaLargaHumana(detalle.iniciada_en, idioma) })
+            : t('paseo.titulo')
+        }
         atras
         onAtras={() => router.back()}
       />
@@ -211,7 +208,7 @@ export default function DetallePaseo() {
                   setVisorAbierto(true);
                 }}
                 accessibilityRole="button"
-                accessibilityLabel={`Ver foto ${i + 1} de ${detalle.fotos.length}`}
+                accessibilityLabel={t('paseo.verFoto', { i: i + 1, total: detalle.fotos.length })}
               >
                 <Image
                   source={{ uri: f.url }}
@@ -238,7 +235,7 @@ export default function DetallePaseo() {
                     marginBottom: spacing[2],
                   }}
                 >
-                  De {detalle.titulo_fuente}:
+                  {t('paseo.deFuente', { fuente: detalle.titulo_fuente })}
                 </Text>
               ) : null}
               <Text
@@ -262,7 +259,7 @@ export default function DetallePaseo() {
         onCerrar={() => setVisorAbierto(false)}
         fotos={detalle.fotos.map((f) => f.url)}
         indiceInicial={fotoInicial}
-        etiqueta="Fotos del paseo"
+        etiqueta={t('paseo.fotosDelPaseo')}
       />
     </View>
   );

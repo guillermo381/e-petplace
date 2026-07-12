@@ -24,10 +24,12 @@ import {
 import { obtenerEspeciesActivas } from '@epetplace/api';
 
 import { esEspecieUi } from '@/lib/params';
+import { useTraduccion } from '@/i18n';
 
 export default function PasoMascota() {
   const router = useRouter();
   const { theme } = useTheme();
+  const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
 
   const [nombre, setNombre] = useState('');
@@ -59,16 +61,16 @@ export default function PasoMascota() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="portada" saludo="¿Quién vive con vos?" isotipo="ninguno" />
+      <Encabezado variante="portada" saludo={t('onboarding.titulo')} isotipo="ninguno" />
       <ScrollView
         contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[4] }}
         keyboardShouldPersistTaps="handled"
       >
-        <Campo label="Su nombre" placeholder="ej: Zeus" value={nombre} onChangeText={setNombre} autoCapitalize="words" />
+        <Campo label={t('onboarding.nombreLabel')} placeholder={t('onboarding.nombrePlaceholder')} value={nombre} onChangeText={setNombre} autoCapitalize="words" />
 
         {opciones === null && errorCatalogo === undefined ? (
           // Ley 13: esqueleto ESTÁTICO imitando el grid 3×2 del selector
-          <EsqueletoGrupo etiqueta="Cargando especies">
+          <EsqueletoGrupo etiqueta={t('onboarding.cargandoEspecies')}>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] }}>
               {Array.from({ length: 6 }, (_, i) => (
                 <View key={i} style={{ flexBasis: '30%', flexGrow: 1 }}>
@@ -84,16 +86,16 @@ export default function PasoMascota() {
             opciones={opciones}
             seleccionada={especie}
             onSelect={setEspecie}
-            etiqueta="¿Qué especie es?"
+            etiqueta={t('onboarding.especieEtiqueta')}
           />
         ) : null}
 
         {errorCatalogo !== undefined ? (
-          <Boton variante="secundario" etiqueta="Reintentar" onPress={() => router.replace('/onboarding/mascota')} />
+          <Boton variante="secundario" etiqueta={t('onboarding.reintentar')} onPress={() => router.replace('/onboarding/mascota')} />
         ) : null}
 
         <Boton
-          etiqueta="Continuar"
+          etiqueta={t('onboarding.continuar')}
           bloque
           deshabilitado={!puedeContinuar}
           onPress={() => {

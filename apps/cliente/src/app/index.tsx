@@ -15,11 +15,14 @@ import { useRouter } from 'expo-router';
 import { Boton, EstadoVacio, spacing, useTheme } from '@epetplace/ui';
 import { getEstadoOnboardingDueno, obtenerSesion } from '@epetplace/api';
 
+import { useTraduccion } from '@/i18n';
+
 const UMBRAL_COLGADO_MS = 8000;
 
 export default function Entrada() {
   const router = useRouter();
   const { theme } = useTheme();
+  const { t } = useTraduccion();
   const [colgado, setColgado] = useState(false);
   const [intento, setIntento] = useState(0);
 
@@ -59,11 +62,11 @@ export default function Entrada() {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base, justifyContent: 'center', padding: spacing[5] }}>
         <EstadoVacio
-          titulo="Esto está tardando más de lo normal"
-          descripcion="Revisá tu conexión y probá de nuevo."
+          titulo={t('raiz.tardando')}
+          descripcion={t('raiz.tardandoDetalle')}
           accion={
             <Boton
-              etiqueta="Probar de nuevo"
+              etiqueta={t('raiz.probarDeNuevo')}
               onPress={() => {
                 setColgado(false);
                 setIntento((n) => n + 1);

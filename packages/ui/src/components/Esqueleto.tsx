@@ -26,6 +26,7 @@ import { View, type DimensionValue } from 'react-native'
 
 import { radius } from '../tokens/radius'
 import { useTheme } from '../ThemeProvider'
+import { useTraduccionUi } from '../i18n'
 
 export type EsqueletoForma = 'linea' | 'circulo' | 'bloque'
 
@@ -75,11 +76,13 @@ export function Esqueleto({ forma = 'linea', ancho, alto }: EsqueletoProps) {
  */
 export function EsqueletoGrupo({
   children,
-  etiqueta = 'Cargando',
+  etiqueta,
 }: {
   children: ReactNode
   etiqueta?: string
 }) {
+  const { t } = useTraduccionUi()
+  etiqueta = etiqueta ?? t('esqueleto.cargando')
   return (
     <View
       accessible

@@ -20,10 +20,12 @@ import { crearFamiliaConPrimeraMascota, obtenerSesion } from '@epetplace/api';
 
 import { esPrecision, esSexo } from '@/lib/params';
 import { subirAvatar } from '@/lib/subir-avatar';
+import { useTraduccion } from '@/i18n';
 
 export default function Cierre() {
   const router = useRouter();
   const { theme } = useTheme();
+  const { t } = useTraduccion();
   const params = useLocalSearchParams<{
     nombre: string;
     especie: string;
@@ -55,14 +57,15 @@ export default function Cierre() {
         if (!subida.ok) {
           corriendoRef.current = false;
           setErrorDeFoto(true);
-          setError('La foto no se pudo subir. Podés probar de nuevo o seguir sin ella por ahora.');
+          setError(t('onboarding.errorFoto'));
           return;
         }
         fotoPath = subida.path;
       }
 
       const r = await crearFamiliaConPrimeraMascota({
-        nombre_familia: nombreDueno !== null ? `Familia de ${nombreDueno}` : 'Mi familia',
+        // dato PERSISTIDO: se traduce al crearse (idioma vigente del dueño)
+        nombre_familia: nombreDueno !== null ? t('onboarding.nombreFamilia', { nombre: nombreDueno }) : t('onboarding.nombreFamiliaFallback'),
         nombre_mascota: params.nombre ?? '',
         especie: params.especie ?? '',
         ...(params.fecha
@@ -94,12 +97,12 @@ export default function Cierre() {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base, justifyContent: 'center', padding: spacing[5] }}>
         <EstadoVacio
-          titulo="No pudimos guardar todavía"
+          titulo={t('onboarding.errorTitulo')}
           descripcion={error}
           accion={
             <View style={{ gap: spacing[2] }}>
               <Boton
-                etiqueta="Probar de nuevo"
+                etiqueta={t('onboarding.probarDeNuevo')}
                 onPress={() => {
                   setError(undefined);
                   setErrorDeFoto(false);
@@ -109,7 +112,7 @@ export default function Cierre() {
               {errorDeFoto ? (
                 <Boton
                   variante="ghost"
-                  etiqueta="Continuar sin foto"
+                  etiqueta={t('onboarding.continuarSinFoto')}
                   onPress={() => {
                     setError(undefined);
                     setErrorDeFoto(false);
@@ -128,7 +131,7 @@ export default function Cierre() {
   // Ley 13: esqueleto estático que imita el Home que viene (avatar + nombre + timeline)
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base, padding: spacing[5], paddingTop: spacing[12] }}>
-      <EsqueletoGrupo etiqueta="Guardando">
+      <EsqueletoGrupo etiqueta={t('onboarding.guardando')}>
         <View style={{ alignItems: 'center', gap: spacing[3] }}>
           <Esqueleto forma="circulo" alto={96} />
           <Esqueleto forma="linea" ancho="40%" />

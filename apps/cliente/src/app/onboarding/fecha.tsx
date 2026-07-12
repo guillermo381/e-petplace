@@ -19,9 +19,12 @@ import {
   type CampoFechaValor,
 } from '@epetplace/ui';
 
+import { useTraduccion } from '@/i18n';
+
 export default function PasoFecha() {
   const router = useRouter();
   const { theme } = useTheme();
+  const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
   const { nombre, especie } = useLocalSearchParams<{ nombre: string; especie: string }>();
 
@@ -32,30 +35,30 @@ export default function PasoFecha() {
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado
         variante="navegacion"
-        titulo={`Sobre ${nombre ?? 'tu mascota'}`}
+        titulo={t('onboarding.tituloSobre', { nombre: nombre ?? t('onboarding.tuMascota') })}
         atras
         onAtras={() => router.back()}
       />
       <ScrollView contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[2] }}>
         <CampoFecha
-          label="¿Cuándo nació?"
+          label={t('onboarding.fechaLabel')}
           valor={valor}
           onChange={setValor}
-          ayuda="Si no sabés el día exacto, no pasa nada."
+          ayuda={t('onboarding.fechaAyuda')}
         />
         <SelectorOpcion
-          etiqueta="¿Es macho o hembra?"
+          etiqueta={t('onboarding.sexoEtiqueta')}
           opciones={[
-            { codigo: 'macho', etiqueta: 'Macho' },
-            { codigo: 'hembra', etiqueta: 'Hembra' },
-            { codigo: 'desconocido', etiqueta: 'No sé' },
+            { codigo: 'macho', etiqueta: t('onboarding.sexoMacho') },
+            { codigo: 'hembra', etiqueta: t('onboarding.sexoHembra') },
+            { codigo: 'desconocido', etiqueta: t('onboarding.sexoNoSe') },
           ]}
           seleccionada={sexo}
           onSelect={setSexo}
         />
         <View style={{ height: spacing[2] }} />
         <Boton
-          etiqueta="Continuar"
+          etiqueta={t('onboarding.continuar')}
           bloque
           onPress={() =>
             router.push({

@@ -24,10 +24,12 @@ import {
 } from '@epetplace/ui';
 
 import { esEspecieUi } from '@/lib/params';
+import { useTraduccion } from '@/i18n';
 
 export default function PasoFoto() {
   const router = useRouter();
   const { theme } = useTheme();
+  const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{
     nombre: string;
@@ -43,19 +45,19 @@ export default function PasoFoto() {
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado
         variante="navegacion"
-        titulo={`La cara de ${params.nombre ?? 'tu mascota'}`}
+        titulo={t('onboarding.tituloFoto', { nombre: params.nombre ?? t('onboarding.tuMascota') })}
         atras
         onAtras={() => router.back()}
       />
       <ScrollView contentContainerStyle={{ padding: spacing[5], paddingTop: spacing[8], paddingBottom: insets.bottom + spacing[6], gap: spacing[8] }}>
         <SelectorAvatar
-          nombre={params.nombre ?? 'tu mascota'}
+          nombre={params.nombre ?? t('onboarding.tuMascota')}
           especie={esEspecieUi(params.especie) ? params.especie : undefined}
           foto={foto}
           onCambiar={setFoto}
         />
         <Boton
-          etiqueta="Continuar"
+          etiqueta={t('onboarding.continuar')}
           bloque
           onPress={() =>
             router.push({

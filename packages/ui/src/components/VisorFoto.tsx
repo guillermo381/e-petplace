@@ -31,6 +31,7 @@ import { palette } from '../tokens/palette'
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
 import { motion } from '../tokens/motion'
+import { useTraduccionUi } from '../i18n'
 
 const UMBRAL_SWIPE = 48
 
@@ -49,8 +50,10 @@ export function VisorFoto({
   onCerrar,
   fotos,
   indiceInicial = 0,
-  etiqueta = 'Fotos',
+  etiqueta,
 }: VisorFotoProps) {
+  const { t } = useTraduccionUi()
+  etiqueta = etiqueta ?? t('visorFoto.fotos')
   const [indice, setIndice] = useState(indiceInicial)
   const opacidad = useSharedValue(0)
 
@@ -117,7 +120,7 @@ export function VisorFoto({
         >
           <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, backgroundColor: palette.scrim }} />
           {/* tap en el fondo cierra */}
-          <Pressable accessibilityLabel="Cerrar" style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} onPress={cerrarConFade} />
+          <Pressable accessibilityLabel={t('visorFoto.cerrar')} style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} onPress={cerrarConFade} />
 
           <GestureDetector gesture={swipe}>
             <View style={{ flex: 1, justifyContent: 'center' }} pointerEvents="box-none">
@@ -126,7 +129,7 @@ export function VisorFoto({
                 contentFit="contain"
                 transition={0}
                 style={{ width: '100%', height: '80%' }}
-                accessibilityLabel={`Foto ${indice + 1} de ${fotos.length}`}
+                accessibilityLabel={t('visorFoto.fotoNdeM', { i: indice + 1, total: fotos.length })}
               />
             </View>
           </GestureDetector>
@@ -135,7 +138,7 @@ export function VisorFoto({
           <Pressable
             onPress={cerrarConFade}
             accessibilityRole="button"
-            accessibilityLabel="Cerrar"
+            accessibilityLabel={t('visorFoto.cerrar')}
             hitSlop={10}
             style={{
               position: 'absolute',
@@ -166,7 +169,7 @@ export function VisorFoto({
                 color: palette.white,
               }}
             >
-              {indice + 1} de {fotos.length}
+              {t('visorFoto.conteo', { i: indice + 1, total: fotos.length })}
             </Text>
           ) : null}
         </Animated.View>

@@ -10,9 +10,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Boton, Campo, Encabezado, spacing, useAviso, useTheme } from '@epetplace/ui';
 import { iniciarSesion } from '@epetplace/api';
 
+import { useTraduccion } from '@/i18n';
+
 export default function Login() {
   const router = useRouter();
   const { theme } = useTheme();
+  const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
   const aviso = useAviso();
 
@@ -43,14 +46,14 @@ export default function Login() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo="Iniciar sesión" atras onAtras={() => router.back()} />
+      <Encabezado variante="navegacion" titulo={t('login.titulo')} atras onAtras={() => router.back()} />
       <ScrollView
         contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[2] }}
         keyboardShouldPersistTaps="handled"
       >
         <Campo
-          label="Email"
-          placeholder="ej: ana@correo.com"
+          label={t('login.emailLabel')}
+          placeholder={t('login.emailPlaceholder')}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -58,7 +61,7 @@ export default function Login() {
           autoComplete="email"
         />
         <Campo
-          label="Contraseña"
+          label={t('login.passwordLabel')}
           value={password}
           onChangeText={setPassword}
           error={error}
@@ -66,7 +69,7 @@ export default function Login() {
           autoCapitalize="none"
         />
         <Boton
-          etiqueta="Entrar"
+          etiqueta={t('login.entrar')}
           bloque
           cargando={cargando}
           deshabilitado={!puedeEnviar}

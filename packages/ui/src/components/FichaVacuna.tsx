@@ -101,9 +101,9 @@ export function FichaVacuna({
 
   // Voz humana del estado (la ficha lo DICE, no lo insinúa con color solo).
   const vozEstado = rechazada
-    ? 'Esta no se pudo guardar. Tocala para revisarla.'
+    ? t('fichaVacuna.rechazadaVoz')
     : faltaFecha
-      ? 'No pudimos leer la fecha'
+      ? t('fichaVacuna.sinFechaVoz')
       : null
 
   // Texto AA sobre el tinte (regla de dos registros; memorial sin capaText).

@@ -39,6 +39,7 @@ import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
+import { useTraduccionUi } from '../i18n'
 import { AvatarMascota, type AvatarMascotaEspecie } from './AvatarMascota'
 import { Boton } from './Boton'
 import { Celda } from './Celda'
@@ -73,10 +74,12 @@ export function SelectorAvatar({
   especie,
   foto = null,
   onCambiar,
-  invitacion = 'Agregale una foto',
+  invitacion,
   deshabilitado = false,
 }: SelectorAvatarProps) {
   const { theme } = useTheme()
+  const { t } = useTraduccionUi()
+  invitacion = invitacion ?? t('selectorAvatar.invitacion')
   const [hojaAbierta, setHojaAbierta] = useState(false)
   const [permisoDenegado, setPermisoDenegado] = useState(false)
   // Cerrojo sincrónico (patrón EvidenciaFoto): dos taps antes del próximo
@@ -126,9 +129,9 @@ export function SelectorAvatar({
         }}
         disabled={deshabilitado}
         accessibilityRole="button"
-        accessibilityLabel={`Foto de ${nombre}`}
-        accessibilityValue={{ text: conFoto ? 'Foto elegida' : 'Sin foto' }}
-        accessibilityHint="Abre las opciones para tomar o elegir una foto"
+        accessibilityLabel={t('selectorAvatar.fotoDe', { nombre })}
+        accessibilityValue={{ text: conFoto ? t('selectorAvatar.fotoElegida') : t('selectorAvatar.sinFoto') }}
+        accessibilityHint={t('selectorAvatar.abrirOpcionesHint')}
         style={{ alignItems: 'center', gap: spacing[2] }}
       >
         {conFoto ? (
@@ -165,8 +168,8 @@ export function SelectorAvatar({
 
       {conFoto ? (
         <View style={{ flexDirection: 'row', gap: spacing[2] }}>
-          <Boton variante="ghost" tamaño="sm" etiqueta="Cambiar" onPress={() => setHojaAbierta(true)} />
-          <Boton variante="ghost" tamaño="sm" etiqueta="Quitar" onPress={() => onCambiar(null)} />
+          <Boton variante="ghost" tamaño="sm" etiqueta={t('selectorAvatar.cambiar')} onPress={() => setHojaAbierta(true)} />
+          <Boton variante="ghost" tamaño="sm" etiqueta={t('selectorAvatar.quitar')} onPress={() => onCambiar(null)} />
         </View>
       ) : null}
 
@@ -190,37 +193,36 @@ export function SelectorAvatar({
               color: theme.text.primary,
             }}
           >
-            Necesitamos la cámara para la foto de {nombre}. Podés habilitarla desde los ajustes del
-            teléfono, o elegir una foto de la galería.
+            {t('selectorAvatar.permisoCamara', { nombre })}
           </Text>
           <View style={{ flexDirection: 'row', gap: spacing[2], flexWrap: 'wrap' }}>
             <Boton
               variante="secundario"
               tamaño="sm"
-              etiqueta="Abrir ajustes"
+              etiqueta={t('selectorAvatar.abrirAjustes')}
               onPress={() => {
                 void Linking.openSettings()
               }}
             />
-            <Boton variante="ghost" tamaño="sm" etiqueta="Elegir de la galería" onPress={() => void elegirDeGaleria()} />
+            <Boton variante="ghost" tamaño="sm" etiqueta={t('selectorAvatar.elegirGaleria')} onPress={() => void elegirDeGaleria()} />
           </View>
         </View>
       ) : null}
 
-      <Hoja visible={hojaAbierta} onCerrar={() => setHojaAbierta(false)} titulo={`Foto de ${nombre}`}>
+      <Hoja visible={hojaAbierta} onCerrar={() => setHojaAbierta(false)} titulo={t('selectorAvatar.fotoDe', { nombre })}>
         {/* Identidad: cámara y galería PARES; "Por ahora no" primera clase. */}
-        <Celda interactiva onPress={() => void tomarFoto()} accessibilityRole="button" titulo="Tomar foto" />
+        <Celda interactiva onPress={() => void tomarFoto()} accessibilityRole="button" titulo={t('selectorAvatar.tomarFoto')} />
         <Celda
           interactiva
           onPress={() => void elegirDeGaleria()}
           accessibilityRole="button"
-          titulo="Elegir de la galería"
+          titulo={t('selectorAvatar.elegirGaleria')}
         />
         <Celda
           interactiva
           onPress={() => setHojaAbierta(false)}
           accessibilityRole="button"
-          titulo="Por ahora no"
+          titulo={t('selectorAvatar.porAhoraNo')}
         />
       </Hoja>
     </View>

@@ -43,6 +43,7 @@ import { spacing } from '../tokens/spacing'
 import { motion } from '../tokens/motion'
 import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
+import { useTraduccionUi } from '../i18n'
 import { Hoja, HojaScroll } from './Hoja'
 import { Boton } from './Boton'
 
@@ -76,28 +77,39 @@ export interface CampoFechaProps {
   tituloHoja?: string
 }
 
-const MESES = [
-  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
-]
+// S55-A A3 (D-315): los meses salen de Intl con el idioma del riel
+// (patrón LineaDeVida S52-P4c) — el array es-only murió.
+function nombreMes(indice: number, idioma: string): string {
+  const locale = idioma === 'en' ? 'en-US' : 'es-EC'
+  return new Intl.DateTimeFormat(locale, { month: 'long' }).format(new Date(2000, indice, 1))
+}
 
-// Etapas en voz humana (Ley 3) → años estimados hacia atrás.
+// Etapas en voz humana (Ley 3) → años estimados hacia atrás. La voz
+// vive en el riel (namespace ui); acá quedan claves + aritmética.
 const ETAPAS = [
-  { clave: 'cachorro', etiqueta: 'Cachorro', detalle: 'menos de 1 año', aniosAtras: 0 },
-  { clave: 'joven', etiqueta: 'Joven', detalle: 'entre 1 y 3 años', aniosAtras: 2 },
-  { clave: 'adulto', etiqueta: 'Adulto', detalle: 'entre 3 y 7 años', aniosAtras: 5 },
-  { clave: 'mayor', etiqueta: 'Mayor', detalle: 'más de 7 años', aniosAtras: 9 },
+  { clave: 'cachorro', etiquetaKey: 'campoFecha.etapaCachorro', detalleKey: 'campoFecha.etapaCachorroDetalle', aniosAtras: 0 },
+  { clave: 'joven', etiquetaKey: 'campoFecha.etapaJoven', detalleKey: 'campoFecha.etapaJovenDetalle', aniosAtras: 2 },
+  { clave: 'adulto', etiquetaKey: 'campoFecha.etapaAdulto', detalleKey: 'campoFecha.etapaAdultoDetalle', aniosAtras: 5 },
+  { clave: 'mayor', etiquetaKey: 'campoFecha.etapaMayor', detalleKey: 'campoFecha.etapaMayorDetalle', aniosAtras: 9 },
 ] as const
 
 const capitalizar = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
 const diasDelMes = (mes: number, anio: number) => new Date(anio, mes + 1, 0).getDate()
 
-function formatear(valor: CampoFechaValor): string {
+function formatear(
+  valor: CampoFechaValor,
+  idioma: string,
+  sufijos: { aproximada: string; estimada: string },
+): string {
   const [a, m, d] = valor.fecha.split('-').map(Number)
-  if (valor.precision === 'exacta') return `${d} de ${MESES[m - 1]} de ${a}`
-  if (valor.precision === 'aproximada') return `${capitalizar(MESES[m - 1])} ${a} · aproximada`
-  return `${a} · estimada`
+  const locale = idioma === 'en' ? 'en-US' : 'es-EC'
+  if (valor.precision === 'exacta') {
+    // partes literales, jamás Date(iso) — la medianoche UTC corre el día (D-312)
+    return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(a, m - 1, d))
+  }
+  if (valor.precision === 'aproximada') return `${capitalizar(nombreMes(m - 1, idioma))} ${a} · ${sufijos.aproximada}`
+  return `${a} · ${sufijos.estimada}`
 }
 
 // ── Lista desplazable propia (JS puro): columna radiogroup.
@@ -189,13 +201,16 @@ export function CampoFecha({
   label,
   valor,
   onChange,
-  placeholder = '¿Cuándo nació?',
+  placeholder,
   ayuda,
   error,
   deshabilitado = false,
-  tituloHoja = 'Fecha de nacimiento',
+  tituloHoja,
 }: CampoFechaProps) {
   const { theme } = useTheme()
+  const { t, idioma } = useTraduccionUi()
+  placeholder = placeholder ?? t('campoFecha.placeholder')
+  tituloHoja = tituloHoja ?? t('campoFecha.tituloHoja')
   const [abierta, setAbierta] = useState(false)
   const [modoEtapa, setModoEtapa] = useState(false)
 
@@ -241,7 +256,9 @@ export function CampoFecha({
 
   const accentActive = 'active' in theme.accent ? theme.accent.active : theme.accent.primary
   const colorBorde = error ? theme.status.danger : abierta ? accentActive : theme.bg.border
-  const texto = valor ? formatear(valor) : placeholder
+  const texto = valor
+    ? formatear(valor, idioma, { aproximada: t('campoFecha.aproximada'), estimada: t('campoFecha.estimada') })
+    : placeholder
   const mensaje = error ?? ayuda
 
   const anios = Array.from({ length: 61 }, (_, i) => anioActual - i) // longevas (ave: 40-60 años)
@@ -320,7 +337,7 @@ export function CampoFecha({
 
       <Hoja visible={abierta} onCerrar={() => setAbierta(false)} titulo={tituloHoja} altura="completa">
         {modoEtapa ? (
-          <View accessibilityRole="radiogroup" accessibilityLabel="Etapa de vida" style={{ gap: spacing[2] }}>
+          <View accessibilityRole="radiogroup" accessibilityLabel={t('campoFecha.etapaDeVida')} style={{ gap: spacing[2] }}>
             <Text
               style={{
                 fontFamily: typography.family.sans.regular,
@@ -329,7 +346,7 @@ export function CampoFecha({
                 marginBottom: spacing[2],
               }}
             >
-              Elegí la etapa que mejor lo describe y estimamos el año.
+              {t('campoFecha.elegirEtapaGuia')}
             </Text>
             {ETAPAS.map((etapa) => (
               <Pressable
@@ -337,7 +354,7 @@ export function CampoFecha({
                 onPress={() => elegirEtapa(etapa.aniosAtras)}
                 accessibilityRole="radio"
                 accessibilityState={{ checked: false }}
-                accessibilityLabel={`${etapa.etiqueta}, ${etapa.detalle}`}
+                accessibilityLabel={`${t(etapa.etiquetaKey)}, ${t(etapa.detalleKey)}`}
                 style={{
                   minHeight: ALTO,
                   justifyContent: 'center',
@@ -354,7 +371,7 @@ export function CampoFecha({
                     color: theme.text.primary,
                   }}
                 >
-                  {etapa.etiqueta}
+                  {t(etapa.etiquetaKey)}
                   <Text
                     style={{
                       fontFamily: typography.family.sans.regular,
@@ -362,34 +379,34 @@ export function CampoFecha({
                       color: theme.text.secondary,
                     }}
                   >
-                    {'  ·  '}{etapa.detalle}
+                    {'  ·  '}{t(etapa.detalleKey)}
                   </Text>
                 </Text>
               </Pressable>
             ))}
             <View style={{ marginTop: spacing[2] }}>
-              <Boton variante="ghost" etiqueta="Volver a la fecha" onPress={() => setModoEtapa(false)} />
+              <Boton variante="ghost" etiqueta={t('campoFecha.volverALaFecha')} onPress={() => setModoEtapa(false)} />
             </View>
           </View>
         ) : (
           <View>
             <View style={{ flexDirection: 'row', gap: spacing[3] }}>
               <Lista
-                titulo="Mes"
-                items={MESES.map((_, i) => i)}
-                etiquetaDe={(i) => capitalizar(MESES[i])}
+                titulo={t('campoFecha.mes')}
+                items={Array.from({ length: 12 }, (_, i) => i)}
+                etiquetaDe={(i) => capitalizar(nombreMes(i, idioma))}
                 seleccionado={mes}
                 onSelect={setMes}
               />
               <Lista
-                titulo="Año"
+                titulo={t('campoFecha.anio')}
                 items={anios}
                 etiquetaDe={(a) => String(a)}
                 seleccionado={anio}
                 onSelect={setAnio}
               />
               <Lista
-                titulo="Día · opcional"
+                titulo={t('campoFecha.diaOpcional')}
                 items={dias}
                 etiquetaDe={(d) => String(d)}
                 seleccionado={dia}
@@ -398,12 +415,12 @@ export function CampoFecha({
             </View>
             <View style={{ marginTop: spacing[4], gap: spacing[2] }}>
               <Boton
-                etiqueta="Listo"
+                etiqueta={t('campoFecha.listo')}
                 bloque
                 deshabilitado={mes === undefined || anio === undefined}
                 onPress={confirmar}
               />
-              <Boton variante="ghost" bloque etiqueta="No sé la fecha" onPress={() => setModoEtapa(true)} />
+              <Boton variante="ghost" bloque etiqueta={t('campoFecha.noSeLaFecha')} onPress={() => setModoEtapa(true)} />
             </View>
           </View>
         )}

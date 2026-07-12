@@ -45,6 +45,7 @@ import { spacing } from '../tokens/spacing'
 import { motion } from '../tokens/motion'
 import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
+import { useTraduccionUi } from '../i18n'
 import { Boton } from './Boton'
 import { Celda } from './Celda'
 import { Hoja } from './Hoja'
@@ -98,6 +99,7 @@ const CALIDAD = 0.7
 
 export function EvidenciaFotoCapturar({ onFoto, deshabilitado = false }: EvidenciaFotoCapturarProps) {
   const { theme } = useTheme()
+  const { t } = useTraduccionUi()
   const [permisoDenegado, setPermisoDenegado] = useState(false)
   const [hojaAbierta, setHojaAbierta] = useState(false)
   // Cerrojo sincrónico: dos taps antes del próximo render no lanzan
@@ -159,19 +161,18 @@ export function EvidenciaFotoCapturar({ onFoto, deshabilitado = false }: Evidenc
             color: theme.text.primary,
           }}
         >
-          Necesitamos la cámara para registrar la evidencia de la atención. Podés habilitarla desde
-          los ajustes del teléfono.
+          {t('evidenciaFoto.permisoCamara')}
         </Text>
         <View style={{ flexDirection: 'row', gap: spacing[2], flexWrap: 'wrap' }}>
           <Boton
             variante="secundario"
             tamaño="sm"
-            etiqueta="Abrir ajustes"
+            etiqueta={t('evidenciaFoto.abrirAjustes')}
             onPress={() => {
               void Linking.openSettings()
             }}
           />
-          <Boton variante="ghost" tamaño="sm" etiqueta="Probar de nuevo" onPress={() => void probarDeNuevo()} />
+          <Boton variante="ghost" tamaño="sm" etiqueta={t('evidenciaFoto.probarDeNuevo')} onPress={() => void probarDeNuevo()} />
         </View>
       </View>
     )
@@ -209,11 +210,11 @@ export function EvidenciaFotoCapturar({ onFoto, deshabilitado = false }: Evidenc
             color: theme.text.secondary,
           }}
         >
-          Foto
+          {t('evidenciaFoto.foto')}
         </Text>
       </Pressable>
 
-      <Hoja visible={hojaAbierta} onCerrar={() => setHojaAbierta(false)} titulo="Agregar evidencia">
+      <Hoja visible={hojaAbierta} onCerrar={() => setHojaAbierta(false)} titulo={t('evidenciaFoto.agregarEvidencia')}>
         <Celda
           interactiva
           onPress={() => {
@@ -221,13 +222,13 @@ export function EvidenciaFotoCapturar({ onFoto, deshabilitado = false }: Evidenc
             void tomarFoto()
           }}
           accessibilityRole="button"
-          titulo="Tomar foto"
+          titulo={t('evidenciaFoto.tomarFoto')}
         />
         <Celda
           interactiva
           onPress={() => void elegirDeGaleria()}
           accessibilityRole="button"
-          titulo="Elegir de la galería"
+          titulo={t('evidenciaFoto.elegirGaleria')}
         />
       </Hoja>
     </>
@@ -263,6 +264,7 @@ export function EvidenciaFotoThumbnail({
   onReintentar,
   tamano = LADO,
 }: EvidenciaFotoThumbnailProps) {
+  const { t } = useTraduccionUi()
   const conReintento = estado === 'error' && onReintentar !== undefined
 
   const contenido = (
@@ -333,7 +335,7 @@ export function EvidenciaFotoThumbnail({
     <View
       accessible
       accessibilityRole="image"
-      accessibilityLabel={estado === 'subiendo' ? 'Evidencia, subiendo' : 'Evidencia'}
+      accessibilityLabel={estado === 'subiendo' ? t('evidenciaFoto.evidenciaSubiendo') : t('evidenciaFoto.evidencia')}
       style={marco}
     >
       {contenido}

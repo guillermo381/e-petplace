@@ -60,6 +60,7 @@ import {
 } from '@epetplace/api';
 
 import { borrarFotoMascota, leerBase64, subirFotoMascota } from '@/lib/subir-avatar';
+import { useTraduccion } from '@/i18n';
 
 // 1600px: el texto del carnet tiene que seguir siendo legible para el
 // modelo (800 de avatar lo destruye); a calidad 0.7 queda en ~300-500KB.
@@ -87,33 +88,16 @@ type Fase =
   | { t: 'sin_vacunas' }
   | { t: 'revision' };
 
-// Voz por causa de subida (S47-B1.2, gate B3): "revisá tu conexión"
-// RESERVADO a red_o_desconocido — regla 36.
-const VOZ_SUBIDA: Record<string, { mensaje: string; reintentable: boolean }> = {
-  lectura_local:        { mensaje: 'No pudimos leer la foto del teléfono. Probá sacarla de nuevo.', reintentable: false },
-  archivo_grande:       { mensaje: 'La foto pesa demasiado. Probá sacarla de nuevo.', reintentable: false },
-  mime_no_soportado:    { mensaje: 'Ese formato de imagen no está soportado. Probá con una foto nueva.', reintentable: false },
-  rechazado_por_policy: { mensaje: 'No pudimos guardar la foto en tu espacio. Cerrá sesión, volvé a entrar y probá de nuevo.', reintentable: false },
-  red_o_desconocido:    { mensaje: 'La foto no se pudo subir. Revisá tu conexión y probá de nuevo.', reintentable: true },
-};
-
-// Guía multi-página (S48-B7.3, D-313 pata a): el flujo es una-foto-por-
-// pasada repetible y la UI lo CUENTA — sin esto, un carnet de varias
-// páginas parece no caber. Regla 26.
-const VOZ_CAPTURA = {
-  multiPagina: '¿El carnet tiene varias páginas? Escanealas de a una — cada tanda se suma a su historia.',
-  // S48-B8.3 (hallazgo founder: "se siente lento"): espera honesta con
-  // expectativa real. PROHIBIDO progreso falso — no sabemos cuánto falta
-  // y no mentimos (L-139 aplica a la UI también).
-  espera: 'Estamos leyendo el carnet. Esto puede tardar un minuto — cada vacuna que encontremos se suma a su historia.',
-};
-
-// Voz de la revisión (regla 26). El texto del tipo baja la expectativa
-// con voz humana — base aprobada por founder en el arranque de S48.
-const VOZ_REVISION = {
-  guia: 'Esto es lo que leímos. Tocá una vacuna para corregirla — la fecha es necesaria para guardar.',
-  tipoOpcional: 'Si tu carnet no trae el tipo de vacuna, no pasa nada. Podés agregarlo después.',
-};
+// Voz por causa de subida (S47-B1.2, gate B3): "revisa tu conexión"
+// RESERVADO a red_o_desconocido — regla 36. Las voces viven en el riel
+// (S55-A3, D-315); acá queda el MAPA código→key + reintentable.
+const VOZ_SUBIDA = {
+  lectura_local:        { key: 'carnet.subidaLecturaLocal', reintentable: false },
+  archivo_grande:       { key: 'carnet.subidaArchivoGrande', reintentable: false },
+  mime_no_soportado:    { key: 'carnet.subidaMime', reintentable: false },
+  rechazado_por_policy: { key: 'carnet.subidaPolicy', reintentable: false },
+  red_o_desconocido:    { key: 'carnet.subidaRed', reintentable: true },
+} as const;
 
 // dudosa = SOLO fecha faltante (S48): tipo null se guarda tal cual.
 const esDudosa = (i: ItemRevision) => !i.fecha_aplicada;
@@ -126,11 +110,12 @@ function hoyIso(): string {
 export default function CarnetDeVacunas() {
   const router = useRouter();
   const { theme } = useTheme();
+  const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
   const { mostrar } = useAviso();
   const params = useLocalSearchParams<{ mascotaId?: string; nombre?: string }>();
   const mascotaId = params.mascotaId ?? '';
-  const nombre = params.nombre ?? 'tu mascota';
+  const nombre = params.nombre ?? t('onboarding.tuMascota');
 
   const [fase, setFase] = useState<Fase>({ t: 'captura' });
   const [foto, setFoto] = useState<FotoCapturada | null>(null);
@@ -179,14 +164,14 @@ export default function CarnetDeVacunas() {
     try {
       const sesion = await obtenerSesion();
       if (!sesion.ok || sesion.data === null) {
-        setFase({ t: 'fallo_lectura', mensaje: 'Tu sesión no está activa. Volvé a entrar e intentá de nuevo.', reintentable: false });
+        setFase({ t: 'fallo_lectura', mensaje: t('carnet.sesionInactiva'), reintentable: false });
         return;
       }
 
       const subida = await subirFotoMascota({ uri: f.uri, userId: sesion.data.user_id, prefijo: 'carnet' });
       if (!subida.ok) {
-        const voz = VOZ_SUBIDA[subida.codigo] ?? VOZ_SUBIDA.red_o_desconocido;
-        setFase({ t: 'fallo_lectura', ...voz });
+        const voz = subida.codigo in VOZ_SUBIDA ? VOZ_SUBIDA[subida.codigo as keyof typeof VOZ_SUBIDA] : VOZ_SUBIDA.red_o_desconocido;
+        setFase({ t: 'fallo_lectura', mensaje: t(voz.key), reintentable: voz.reintentable });
         return;
       }
 
@@ -196,7 +181,7 @@ export default function CarnetDeVacunas() {
       } catch (e) {
         console.error('[carnet] leerBase64 EXCEPCION=', e instanceof Error ? `${e.name}: ${e.message}` : String(e));
         await borrarFotoMascota(subida.path);
-        setFase({ t: 'fallo_lectura', mensaje: 'No pudimos leer la foto del teléfono. Probá sacarla de nuevo.', reintentable: false });
+        setFase({ t: 'fallo_lectura', mensaje: t('carnet.subidaLecturaLocal'), reintentable: false });
         return;
       }
 
@@ -299,7 +284,10 @@ export default function CarnetDeVacunas() {
     }
 
     mostrar({
-      texto: `Guardamos ${r.data.insertadas} ${r.data.insertadas === 1 ? 'vacuna' : 'vacunas'} en la historia de ${nombre}`,
+      texto:
+        r.data.insertadas === 1
+          ? t('carnet.exitoUna', { nombre })
+          : t('carnet.exitoN', { n: r.data.insertadas, nombre }),
       variante: 'exito',
     });
     router.back();
@@ -314,27 +302,27 @@ export default function CarnetDeVacunas() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base, paddingTop: insets.top }}>
-      <Encabezado variante="navegacion" titulo="Carnet de vacunas" atras onAtras={() => router.back()} />
+      <Encabezado variante="navegacion" titulo={t('carnet.titulo')} atras onAtras={() => router.back()} />
 
       {/* B2 · captura */}
       {fase.t === 'captura' && (
         <View style={{ flex: 1, padding: spacing[5], gap: spacing[4], justifyContent: 'center' }}>
           <Text style={{ fontFamily: voz.titulo, fontSize: typography.size.xl, lineHeight: typography.size.xl * 1.25, color: theme.text.primary }}>
-            Sacale una foto al carnet de {nombre} — nosotros leemos las vacunas
+            {t('carnet.capturaTitulo', { nombre })}
           </Text>
           <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.base, lineHeight: typography.size.base * 1.4, color: theme.text.secondary }}>
-            Con buena luz y el carnet bien plano, mejor. Después vas a poder revisar y corregir todo antes de guardar.
+            {t('carnet.capturaDetalle')}
           </Text>
           <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
-            {VOZ_CAPTURA.multiPagina}
+            {t('carnet.multiPagina')}
           </Text>
           {permisoDenegado && (
             <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.sm, color: theme.status.dangerText }}>
-              Necesitamos permiso para usar la cámara. Podés habilitarlo en los ajustes del teléfono, o elegir una foto de la galería.
+              {t('carnet.permisoCamara')}
             </Text>
           )}
-          <Boton variante="primario" bloque etiqueta="Sacarle una foto" onPress={() => void capturar('camara')} />
-          <Boton variante="ghost" bloque etiqueta="Más opciones" onPress={() => setHojaGaleria(true)} />
+          <Boton variante="primario" bloque etiqueta={t('carnet.sacarFoto')} onPress={() => void capturar('camara')} />
+          <Boton variante="ghost" bloque etiqueta={t('carnet.masOpciones')} onPress={() => setHojaGaleria(true)} />
         </View>
       )}
 
@@ -349,7 +337,7 @@ export default function CarnetDeVacunas() {
               VERBATIM. Mismo umbral de visibilidad (Ley 13). */}
           {spinnerVisible && <EsperaDeMarca tamano={64} />}
           <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.base, lineHeight: typography.size.base * 1.4, color: theme.text.secondary, textAlign: 'center' }}>
-            {VOZ_CAPTURA.espera}
+            {t('carnet.espera')}
           </Text>
         </View>
       )}
@@ -361,15 +349,13 @@ export default function CarnetDeVacunas() {
             <Image source={{ uri: foto.uri }} contentFit="cover" transition={0} style={{ width: 120, height: 120, borderRadius: radius.lg, alignSelf: 'center' }} />
           )}
           <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.base, lineHeight: typography.size.base * 1.4, color: theme.text.primary, textAlign: 'center' }}>
-            {fase.t === 'sin_vacunas'
-              ? 'No encontramos vacunas legibles en esta foto. Podés probar con otra, o volver a intentarlo en otro momento.'
-              : fase.mensaje}
+            {fase.t === 'sin_vacunas' ? t('carnet.sinVacunas') : fase.mensaje}
           </Text>
           {fase.t === 'fallo_lectura' && fase.reintentable && foto && (
-            <Boton variante="primario" bloque etiqueta="Probar de nuevo" onPress={() => void leerCarnet(foto)} />
+            <Boton variante="primario" bloque etiqueta={t('carnet.probarDeNuevo')} onPress={() => void leerCarnet(foto)} />
           )}
-          <Boton variante="secundario" bloque etiqueta="Sacar otra foto" onPress={() => { setFoto(null); setFase({ t: 'captura' }); }} />
-          <Boton variante="ghost" bloque etiqueta="Volver" onPress={() => router.back()} />
+          <Boton variante="secundario" bloque etiqueta={t('carnet.sacarOtraFoto')} onPress={() => { setFoto(null); setFase({ t: 'captura' }); }} />
+          <Boton variante="ghost" bloque etiqueta={t('carnet.volver')} onPress={() => router.back()} />
         </View>
       )}
 
@@ -383,7 +369,7 @@ export default function CarnetDeVacunas() {
           <Pressable
             onPress={() => setVisorAbierto(true)}
             accessibilityRole="imagebutton"
-            accessibilityLabel="Ver el carnet completo"
+            accessibilityLabel={t('carnet.verCarnetCompleto')}
           >
             <Tarjeta relleno="ninguno">
               <Image source={{ uri: foto.uri }} contentFit="cover" transition={0} style={{ width: '100%', height: 180 }} />
@@ -391,7 +377,7 @@ export default function CarnetDeVacunas() {
           </Pressable>
 
           <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
-            {VOZ_REVISION.guia} {VOZ_REVISION.tipoOpcional}
+            {t('carnet.revisionGuia')} {t('carnet.tipoOpcional')}
           </Text>
 
           {activas.map((i) => (
@@ -420,13 +406,13 @@ export default function CarnetDeVacunas() {
           )}
           {dudosas > 0 && (
             <Text style={{ fontFamily: voz.cuerpo, fontSize: typography.size.sm, color: theme.text.secondary }}>
-              {dudosas === 1 ? 'Hay 1 vacuna por completar' : `Hay ${dudosas} vacunas por completar`} antes de guardar.
+              {dudosas === 1 ? t('carnet.porCompletarUna') : t('carnet.porCompletar', { n: dudosas })}
             </Text>
           )}
           <Boton
             variante="primario"
             bloque
-            etiqueta={n === 1 ? 'Guardar 1 vacuna' : `Guardar ${n} vacunas`}
+            etiqueta={n === 1 ? t('carnet.guardarUna') : t('carnet.guardarN', { n })}
             deshabilitado={n === 0 || dudosas > 0}
             cargando={guardando}
             onPress={() => void guardar()}
@@ -435,29 +421,29 @@ export default function CarnetDeVacunas() {
       )}
 
       {/* galería secundaria en Hoja (patrón SelectorAvatar) */}
-      <Hoja visible={hojaGaleria} onCerrar={() => setHojaGaleria(false)} titulo="Otra forma de cargar el carnet" conCerrar>
+      <Hoja visible={hojaGaleria} onCerrar={() => setHojaGaleria(false)} titulo={t('carnet.hojaGaleriaTitulo')} conCerrar>
         <View style={{ gap: spacing[3], padding: spacing[4] }}>
-          <Boton variante="secundario" bloque etiqueta="Elegir de la galería" onPress={() => void capturar('galeria')} />
+          <Boton variante="secundario" bloque etiqueta={t('carnet.elegirGaleria')} onPress={() => void capturar('galeria')} />
         </View>
       </Hoja>
 
       {/* Hoja de edición — Campo + CampoFecha (HojaScroll, L-132) */}
-      <Hoja visible={editando !== null} onCerrar={() => setEditando(null)} titulo="Revisá esta vacuna" altura="completa" conCerrar>
+      <Hoja visible={editando !== null} onCerrar={() => setEditando(null)} titulo={t('carnet.edicionTitulo')} altura="completa" conCerrar>
         <HojaScroll contentContainerStyle={{ padding: spacing[4], gap: spacing[4] }}>
-          <Campo label="Nombre de la vacuna" value={bNombre} onChangeText={setBNombre} />
-          <Campo label="Tipo" value={bTipo} onChangeText={setBTipo} ayuda="Opcional. Ej: antirrábica, séxtuple, polivalente" />
+          <Campo label={t('carnet.nombreVacunaLabel')} value={bNombre} onChangeText={setBNombre} />
+          <Campo label={t('carnet.tipoLabel')} value={bTipo} onChangeText={setBTipo} ayuda={t('carnet.tipoAyuda')} />
           <CampoFecha
-            label="Cuándo se aplicó"
+            label={t('carnet.fechaAplicoLabel')}
             valor={bFecha}
             onChange={setBFecha}
-            placeholder="Elegí la fecha"
-            tituloHoja="Cuándo se aplicó"
-            error={fechaFutura ? 'La fecha no puede ser futura.' : undefined}
+            placeholder={t('carnet.fechaPlaceholder')}
+            tituloHoja={t('carnet.fechaAplicoLabel')}
+            error={fechaFutura ? t('carnet.fechaFutura') : undefined}
           />
           <Boton
             variante="primario"
             bloque
-            etiqueta="Guardar cambios"
+            etiqueta={t('carnet.guardarCambios')}
             deshabilitado={!edicionValida}
             onPress={confirmarEdicion}
           />
@@ -470,7 +456,7 @@ export default function CarnetDeVacunas() {
           visible={visorAbierto}
           onCerrar={() => setVisorAbierto(false)}
           fotos={[foto.uri]}
-          etiqueta={`Carnet de ${nombre}`}
+          etiqueta={t('carnet.carnetDe', { nombre })}
         />
       )}
     </View>

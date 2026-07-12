@@ -11,10 +11,12 @@ const OBJETIVOS = [
     en: ['Create account', 'I already have an account'],
   },
   {
+    // S55-A: post-D-290 (auth real) el raíz sin sesión muestra el
+    // sin-sesión digno — el saludo de HOY ya no es alcanzable sin login.
     app: 'prestador',
     url: 'http://localhost:8081/',
-    es: ['Tus paseos de hoy'],
-    en: ['Your walks for today'],
+    es: ['No hay una sesión activa', 'Inicia sesión para ver tu jornada.'],
+    en: ['No active session', 'Sign in to see your day.'],
   },
 ];
 

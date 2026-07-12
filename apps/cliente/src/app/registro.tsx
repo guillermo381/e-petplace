@@ -10,9 +10,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Boton, Campo, Encabezado, spacing, useAviso, useTheme } from '@epetplace/ui';
 import { registrarse, type CodigoErrorAuth } from '@epetplace/api';
 
+import { useTraduccion } from '@/i18n';
+
 export default function Registro() {
   const router = useRouter();
   const { theme } = useTheme();
+  const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
   const aviso = useAviso();
 
@@ -44,7 +47,7 @@ export default function Registro() {
     }
 
     if (!r.data.sesion_activa) {
-      aviso.mostrar({ variante: 'neutro', texto: 'Te mandamos un correo para confirmar tu cuenta.' });
+      aviso.mostrar({ variante: 'neutro', texto: t('registro.correoConfirmacion') });
       router.replace('/login');
       return;
     }
@@ -53,21 +56,21 @@ export default function Registro() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo="Crear cuenta" atras onAtras={() => router.back()} />
+      <Encabezado variante="navegacion" titulo={t('registro.titulo')} atras onAtras={() => router.back()} />
       <ScrollView
         contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[2] }}
         keyboardShouldPersistTaps="handled"
       >
         <Campo
-          label="Tu nombre"
-          placeholder="ej: Ana"
+          label={t('registro.nombreLabel')}
+          placeholder={t('registro.nombrePlaceholder')}
           value={nombre}
           onChangeText={setNombre}
           autoCapitalize="words"
         />
         <Campo
-          label="Email"
-          placeholder="ej: ana@correo.com"
+          label={t('registro.emailLabel')}
+          placeholder={t('registro.emailPlaceholder')}
           value={email}
           onChangeText={setEmail}
           error={errores.email}
@@ -76,8 +79,8 @@ export default function Registro() {
           autoComplete="email"
         />
         <Campo
-          label="Contraseña"
-          ayuda="Al menos 6 caracteres"
+          label={t('registro.passwordLabel')}
+          ayuda={t('registro.passwordAyuda')}
           value={password}
           onChangeText={setPassword}
           error={errores.password}
@@ -85,7 +88,7 @@ export default function Registro() {
           autoCapitalize="none"
         />
         <Boton
-          etiqueta="Crear mi cuenta"
+          etiqueta={t('registro.crearMiCuenta')}
           bloque
           cargando={cargando}
           deshabilitado={!puedeEnviar}

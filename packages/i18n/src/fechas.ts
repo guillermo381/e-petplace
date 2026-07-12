@@ -7,6 +7,25 @@
 
 import type { IdiomaSoportado } from './idiomas';
 
+/** Fecha larga en voz HUMANA por idioma — "7 de julio" / "July 7"
+ *  (S55-A A3, cierra D-323/H1: nace acá al tocarse la primera pantalla
+ *  que la necesitaba — el detalle del paseo la armaba artesanal). Sin
+ *  año: es voz de título/contexto, no metadata (esa es la corta). */
+export function fechaLargaHumana(iso: string, idioma: IdiomaSoportado): string {
+  const locale = idioma === 'en' ? 'en-US' : 'es-EC';
+  // Timestamp con hora → día LOCAL del dispositivo (un paseo de la noche
+  // en UTC-5 no puede saltar de día). Fecha-sola → partes literales
+  // (jamás por Date(iso): la medianoche UTC corre el día — D-312).
+  if (iso.length > 10) {
+    const f = new Date(iso);
+    if (Number.isNaN(f.getTime())) return iso.slice(0, 10);
+    return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(f);
+  }
+  const [a, m, d] = iso.split('-').map(Number);
+  if (!a || !m || m < 1 || m > 12 || !d) return iso;
+  return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(new Date(a, m - 1, d));
+}
+
 /** dd mon yyyy en mono-voz (minúsculas), para metadata chica. */
 export function fechaCortaMono(iso: string, idioma: IdiomaSoportado): string {
   const [a, m, d] = iso.slice(0, 10).split('-').map(Number);
