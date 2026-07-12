@@ -47,7 +47,7 @@ function falla(codigo: CodigoErrorConfiguracionPaseo): Falla {
   return { ok: false, codigo, mensaje: MENSAJES[codigo] };
 }
 
-/** El menú canónico de bloques (decisión founder S55). El 30 es la "salida al baño". */
+/** El menú canónico de bloques (decisión founder S55). El 30 es la "Salida corta" (voz firmada S56). */
 export const BLOQUES_PASEO = [30, 60, 120, 180, 240, 300] as const;
 export type BloquePaseo = (typeof BLOQUES_PASEO)[number];
 

@@ -278,7 +278,7 @@ export const prestadorEn = {
       'You can set things up now. Your walks are offered to clients once the team activates your business account.',
     bloquesTitulo: 'Your walks',
     agregarBloque: 'Offer another duration',
-    bloque30: 'Short outing · 30 min',
+    bloque30: 'Quick walk out · 30 min',
     bloque60: 'Walk · 1 hour',
     bloque120: 'Long walk · 2 hours',
     bloque180: '3-hour walk',
