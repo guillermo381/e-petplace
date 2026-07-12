@@ -115,9 +115,8 @@ export default function Negocio() {
   // los lugares que aún duermen: qué los despierta, en hitos (§2.6)
   // S52-P6b: filas serenas — el estado "en preparación" lo dice la
   // sección UNA vez, no una Insignia por fila.
+  // S55-B (B2): Servicios y Horarios DESPERTARON — viven en "Tu oferta".
   const lugares: Array<{ titulo: string }> = [
-    { titulo: t('negocio.servicios') },
-    { titulo: t('negocio.horarios') },
     { titulo: t('negocio.equipo') },
   ];
 
@@ -149,6 +148,28 @@ export default function Negocio() {
         <Encabezado variante="portada" saludo={t('negocio.titulo')} />
 
         <View style={{ paddingHorizontal: spacing[4], gap: spacing[6], marginTop: spacing[2] }}>
+          {/* tu oferta — S55-B (B2): el prestador gobierna su servicio */}
+          <View style={{ gap: spacing[3] }}>
+            <TituloBloque texto={t('negocio.oferta')} />
+            <Tarjeta relleno="ninguno">
+              <Celda
+                interactiva
+                accessibilityRole="button"
+                titulo={t('negocio.servicios')}
+                subtitulo={t('negocio.serviciosDetalle')}
+                onPress={() => router.push('/servicios')}
+              />
+              <Separador />
+              <Celda
+                interactiva
+                accessibilityRole="button"
+                titulo={t('negocio.horarios')}
+                subtitulo={t('negocio.horariosDetalle')}
+                onPress={() => router.push('/horarios')}
+              />
+            </Tarjeta>
+          </View>
+
           {/* cobros — los módulos vivos de S54 */}
           <View style={{ gap: spacing[3] }}>
             <TituloBloque texto={t('negocio.cobros')} />

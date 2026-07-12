@@ -160,8 +160,11 @@ export const prestadorEs = {
   negocio: {
     titulo: 'Tu negocio',
     enPreparacion: 'En preparación',
+    oferta: 'Tu oferta',
     servicios: 'Servicios y precios',
+    serviciosDetalle: 'Qué paseos ofreces y sus precios.',
     horarios: 'Horarios',
+    horariosDetalle: 'Tus días y franjas de paseo.',
     equipo: 'Equipo',
     cobros: 'Cobros',
     cuentaComercial: 'Cuenta comercial',
@@ -277,5 +280,103 @@ export const prestadorEs = {
     estadoPagada: 'Pagada',
     estadoEnRevision: 'En revisión',
     estadoAnulada: 'Anulada',
+  },
+  // Configuración del servicio de paseo — S55-B (B2, modelo cerrado del
+  // founder: menú canónico de bloques + precio por bloque)
+  servicios: {
+    titulo: 'Servicios y precios',
+    error: 'No pudimos cargar tus servicios.',
+    errorDetalle: 'Prueba de nuevo en un momento.',
+    reintentar: 'Reintentar',
+    // peldaño 0 — invitación que educa
+    vacioTitulo: 'Tu servicio de paseo',
+    vacioCuerpo:
+      'Elige qué paseos ofreces y cuánto cuesta cada uno. Tus clientes solo ven lo que tú actives.',
+    vacioCta: 'Ofrecer mi primer paseo',
+    // la voz honesta con la cuenta comercial no activa (jamás activar desde acá)
+    cuentaNoActiva:
+      'Puedes configurar ahora. Tus paseos se ofrecen a los clientes cuando el equipo active tu cuenta comercial.',
+    // peldaño 1 — la lista de bloques
+    bloquesTitulo: 'Tus paseos',
+    agregarBloque: 'Ofrecer otra duración',
+    // los bloques del menú canónico (voz funcional; nombre_custom la pisa)
+    bloque30: 'Salida corta · 30 min',
+    bloque60: 'Paseo · 1 hora',
+    bloque120: 'Paseo largo · 2 horas',
+    bloque180: 'Paseo de 3 horas',
+    bloque240: 'Paseo de 4 horas',
+    bloque300: 'Paseo de 5 horas',
+    pausada: 'Pausado',
+    // guarda de honestidad: >30' configurado pero el motor aún no lo oferta
+    pendienteMotor: 'Se activará para tus clientes muy pronto.',
+    // edición
+    editarTitulo: 'Editar paseo',
+    nuevoTitulo: 'Ofrecer un paseo',
+    duracion: 'Duración',
+    precio: 'Precio',
+    precioAyuda: 'En dólares. Rige para reservas nuevas.',
+    nombre: 'Nombre (opcional)',
+    nombreAyuda: 'Como lo van a ver tus clientes.',
+    descripcion: 'Descripción (opcional)',
+    guardar: 'Guardar',
+    crear: 'Ofrecer este paseo',
+    pausar: 'Pausar',
+    reactivar: 'Reactivar',
+    guardado: 'Guardado.',
+    creado: 'Tu paseo quedó configurado.',
+    // errores con voz (espejo de los códigos del wrapper)
+    precioInvalido: 'El precio tiene que ser mayor a cero.',
+    bloqueDuplicado: 'Ya ofreces un paseo de esa duración.',
+    bloquePendienteMotor: 'Este bloque todavía no puede activarse para tus clientes.',
+    // peldaño 2 — hueco declarado
+    paquetesHueco: 'Paquetes y paseos recurrentes llegan más adelante.',
+  },
+  horarios: {
+    titulo: 'Horarios',
+    error: 'No pudimos cargar tus horarios.',
+    errorDetalle: 'Prueba de nuevo en un momento.',
+    reintentar: 'Reintentar',
+    // peldaño 0 — invitación que educa
+    vacioTitulo: 'Tus horarios de paseo',
+    vacioCuerpo:
+      'Di qué días y en qué franjas sales a pasear. Tus clientes solo pueden reservar dentro de ellas.',
+    vacioCta: 'Agregar mi primera franja',
+    agregarFranja: 'Agregar franja',
+    // regla 32: 0=Domingo … 6=Sábado (la key ES el índice de DB)
+    dia0: 'Domingo',
+    dia1: 'Lunes',
+    dia2: 'Martes',
+    dia3: 'Miércoles',
+    dia4: 'Jueves',
+    dia5: 'Viernes',
+    dia6: 'Sábado',
+    // la fila de franja: el cupo es la voz humana, la hora es de máquina
+    cupoUno: '1 paseo a la vez',
+    cupoVarios: '{{cantidad}} paseos a la vez',
+    pausada: 'Pausada',
+    // formulario
+    nuevaTitulo: 'Nueva franja',
+    editarTitulo: 'Editar franja',
+    dia: 'Día',
+    diaElegir: 'Elige el día',
+    desde: 'Desde',
+    hasta: 'Hasta',
+    horaElegir: 'Elige la hora',
+    cupo: 'Paseos simultáneos',
+    cupoAyuda: 'Cuántos paseos puedes atender a la vez en esta franja.',
+    crear: 'Agregar franja',
+    guardar: 'Guardar',
+    pausar: 'Pausar',
+    reactivar: 'Reactivar',
+    quitar: 'Quitar franja',
+    quitarConfirmacion: 'Tus clientes ya no van a poder reservar en esta franja.',
+    quitarConfirmar: 'Sí, quitar',
+    cancelar: 'Cancelar',
+    creada: 'Franja agregada.',
+    guardado: 'Guardado.',
+    quitada: 'Franja quitada.',
+    // errores con voz
+    rangoInvalido: 'La hora de fin tiene que ser después de la de inicio.',
+    solape: 'Esa franja se cruza con una que ya tienes ese día.',
   },
 } as const;
