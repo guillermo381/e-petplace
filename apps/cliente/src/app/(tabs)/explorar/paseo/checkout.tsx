@@ -130,7 +130,21 @@ export default function PaseoCheckout() {
             icono={<Icono nombre="paseo" tamano={48} />}
             titulo={t('checkout.exitoTitulo')}
             descripcion={t('checkout.exitoDetalle')}
-            accion={<Boton variante="primario" etiqueta={t('checkout.volverHogar')} onPress={() => router.dismissTo('/hogar')} />}
+            accion={
+              <Boton
+                variante="primario"
+                etiqueta={t('checkout.volverHogar')}
+                onPress={() => {
+                  // D-329: dismissTo solo busca en el stack ACTUAL
+                  // (Explorar) — /hogar vive en otro tab y el CTA no
+                  // navegaba. Se vacía el stack de Explorar (si hay
+                  // algo que vaciar — deep link entra directo) y recién
+                  // ahí se cambia de tab.
+                  if (router.canDismiss()) router.dismissAll();
+                  router.navigate('/hogar');
+                }}
+              />
+            }
           />
         </View>
       </SafeAreaView>
