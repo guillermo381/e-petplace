@@ -42,6 +42,11 @@ export interface SelectorOpcionItem {
   codigo: string
   /** VOZ HUMANA — ej: "No sé" (jamás el vocabulario interno del modelo). */
   etiqueta: string
+  /** ENMIENDA S56 (Hoja del plan): opción visible pero NO elegible —
+   *  la honestidad de cobertura ("Andrés no pasea los jueves") se dice
+   *  MOSTRANDO el día apagado, jamás escondiéndolo. La VOZ del porqué
+   *  es de la pantalla (una línea bajo el selector). */
+  deshabilitada?: boolean
 }
 
 export interface SelectorOpcionProps {
@@ -57,6 +62,14 @@ export interface SelectorOpcionProps {
    *  los inicios disponibles). Mismo tratamiento de selección en las
    *  tres; el radiogroup y el anuncio por chip no cambian. */
   disposicion?: 'fila' | 'tira' | 'grilla'
+  /** ENMIENDA S56 (Hoja del plan, D-338): selección MÚLTIPLE — los 7
+   *  chips L·M·X·J·V·S·D. Cambia la semántica a checkbox-group
+   *  (accessibilityRole checkbox + checked por chip); `seleccionadas`
+   *  manda y onSelect entrega el código TOCADO (la pantalla es dueña
+   *  del set — presentacional puro intacto). Sin `multiple`, el
+   *  contrato original de selección única no cambia en nada. */
+  multiple?: boolean
+  seleccionadas?: string[]
 }
 
 function Chip({
@@ -66,6 +79,7 @@ function Chip({
   seleccionada,
   onSelect,
   crecer,
+  modo,
 }: {
   opcion: SelectorOpcionItem
   indice: number
@@ -73,10 +87,12 @@ function Chip({
   seleccionada: boolean
   onSelect: (codigo: string) => void
   crecer: boolean
+  modo: 'radio' | 'checkbox'
 }) {
   const { theme } = useTheme()
   const [presionada, setPresionada] = useState(false)
 
+  const deshabilitada = opcion.deshabilitada === true
   const fondoReposo = theme.mode === 'dark' ? theme.bg.elevated : theme.bg.card
   // Patrón `'capaBg' in theme` de AvatarMascota/SelectorEspecie (memorial no tinta).
   const conCapa = seleccionada && 'capaBg' in theme
@@ -89,11 +105,15 @@ function Chip({
 
   return (
     <Pressable
-      onPress={() => onSelect(opcion.codigo)}
-      onPressIn={() => setPresionada(true)}
+      onPress={() => {
+        if (!deshabilitada) onSelect(opcion.codigo)
+      }}
+      onPressIn={() => {
+        if (!deshabilitada) setPresionada(true)
+      }}
       onPressOut={() => setPresionada(false)}
-      accessibilityRole="radio"
-      accessibilityState={{ checked: seleccionada }}
+      accessibilityRole={modo}
+      accessibilityState={{ checked: seleccionada, disabled: deshabilitada }}
       accessibilityLabel={`${opcion.etiqueta}, opción ${indice + 1} de ${total}`}
       style={{ flexGrow: crecer ? 1 : 0 }}
     >
@@ -119,7 +139,8 @@ function Chip({
           style={{
             fontFamily: typography.family.sans.medium,
             fontSize: typography.size.sm,
-            color: theme.text.primary,
+            // apagada = voz terciaria; el estado NO mueve el layout
+            color: deshabilitada ? theme.text.tertiary : theme.text.primary,
           }}
         >
           {opcion.etiqueta}
@@ -135,6 +156,8 @@ export function SelectorOpcion({
   onSelect,
   etiqueta,
   disposicion = 'fila',
+  multiple = false,
+  seleccionadas,
 }: SelectorOpcionProps) {
   const { theme } = useTheme()
 
@@ -144,14 +167,15 @@ export function SelectorOpcion({
       opcion={opcion}
       indice={i}
       total={opciones.length}
-      seleccionada={opcion.codigo === seleccionada}
+      seleccionada={multiple ? (seleccionadas ?? []).includes(opcion.codigo) : opcion.codigo === seleccionada}
       onSelect={onSelect}
       crecer={disposicion === 'fila'}
+      modo={multiple ? 'checkbox' : 'radio'}
     />
   ))
 
   return (
-    <View accessibilityRole="radiogroup" accessibilityLabel={etiqueta}>
+    <View accessibilityRole={multiple ? undefined : 'radiogroup'} accessibilityLabel={etiqueta}>
       <Text
         style={{
           fontFamily: typography.family.sans.medium,

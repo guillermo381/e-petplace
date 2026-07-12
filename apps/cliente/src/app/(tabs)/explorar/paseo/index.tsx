@@ -41,7 +41,7 @@ import {
   typography,
   useTheme,
 } from '@epetplace/ui';
-import { obtenerIniciosPaseo, obtenerOfertaPaseo, type OfertaPaseo } from '@epetplace/api';
+import { obtenerIniciosPaseo, obtenerMisPlanesPaseo, obtenerOfertaPaseo, type OfertaPaseo } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
 
 function fechaLocalISO(d: Date): string {
@@ -71,6 +71,9 @@ export default function PaseoCuando() {
   const [inicios, setInicios] = useState<string[] | 'cargando' | 'error'>('cargando');
   const [hora, setHora] = useState<string | null>(null);
   const [reintento, setReintento] = useState(0);
+  // D-338: la entrada al hub "Mis paseos" vive acá SOLO si hay planes
+  // (silencio digno sin ellos — el hub jamás es tab).
+  const [hayPlanes, setHayPlanes] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -83,6 +86,9 @@ export default function PaseoCuando() {
           const menor = Math.min(...r.data.map((o) => o.duracion_minutos));
           setDuracion((d) => d ?? menor);
         }
+      });
+      void obtenerMisPlanesPaseo().then((r) => {
+        if (vigente && r.ok) setHayPlanes(r.data.length > 0);
       });
       return () => {
         vigente = false;
@@ -148,6 +154,20 @@ export default function PaseoCuando() {
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('explorar.paseoTitulo')} atras onAtras={() => router.back()} />
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
+        {/* D-338: Explorar→Paseo es una de las DOS entradas al hub */}
+        {hayPlanes ? (
+          <Tarjeta relleno="ninguno">
+            <Celda
+              interactiva
+              accessibilityRole="button"
+              titulo={t('plan.hubTitulo')}
+              onPress={() => {
+                if (router.canDismiss()) router.dismissAll();
+                router.navigate('/hogar/paseos');
+              }}
+            />
+          </Tarjeta>
+        ) : null}
         {oferta === 'cargando' ? (
           <EsqueletoGrupo>
             <View style={{ gap: spacing[3] }}>
@@ -238,16 +258,26 @@ export default function PaseoCuando() {
               }}
             />
 
-            {/* 4 · FRECUENCIA dibujada, APAGADA (candado del paquete) */}
+            {/* 4 · "Hacerlo frecuente" — el candado del plan MURIÓ (D-338,
+                S56): el chip enciende el modo plan; la Hoja nace en el
+                QUIÉN, con el paseador ELEGIDO (alcance v1 §6.1 v1.2). */}
             <Tarjeta relleno="ninguno">
-              <Celda
-                titulo={t('explorar.cuandoFrecuencia')}
-                fin={
-                  <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-                    {t('explorar.cuandoFrecuenciaPronto')}
-                  </Text>
-                }
-              />
+              {listo ? (
+                <Celda
+                  interactiva
+                  accessibilityRole="button"
+                  titulo={t('plan.chip')}
+                  subtitulo={t('plan.chipDetalle')}
+                  onPress={() => {
+                    router.push({
+                      pathname: '/explorar/paseo/disponibles',
+                      params: { fecha: dia, hora, duracion: String(duracion), plan: '1' },
+                    });
+                  }}
+                />
+              ) : (
+                <Celda titulo={t('plan.chip')} subtitulo={t('plan.chipElegiPrimero')} />
+              )}
             </Tarjeta>
           </>
         )}

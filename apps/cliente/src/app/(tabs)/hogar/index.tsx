@@ -54,6 +54,7 @@ import {
   leerTimelineMascota,
   obtenerEstadoHogar,
   obtenerMascotasDeFamilia,
+  obtenerMisPlanesPaseo,
   obtenerVacunaPorEvento,
   resolverUrlFoto,
   resolverUrlsFotos,
@@ -152,6 +153,9 @@ export default function Hogar() {
 
   const [carnetSelectorAbierto, setCarnetSelectorAbierto] = useState(false);
   const [coachAbierto, setCoachAbierto] = useState(false);
+  // D-338: la tarjeta del Hogar es una de las DOS entradas al hub "Mis
+  // paseos" — visible SOLO con planes (silencio digno).
+  const [hayPlanes, setHayPlanes] = useState(false);
   // QW1 (S53): el saludo lleva el nombre del miembro (profiles.nombre).
   const [nombrePerfil, setNombrePerfil] = useState<string | null>(null);
   const [vacunaAbierta, setVacunaAbierta] = useState(false);
@@ -236,6 +240,9 @@ export default function Hogar() {
         // señales + fotos + timeline en paralelo — reemplazo directo (Ley 13)
         void obtenerEstadoHogar(lista.map((m) => m.id)).then((eh) => {
           if (vigente && eh.ok) setEstadoHogar(eh.data);
+        });
+        void obtenerMisPlanesPaseo().then((pl) => {
+          if (vigente && pl.ok) setHayPlanes(pl.data.length > 0);
         });
         void obtenerMiPerfil().then((p) => {
           // sin nombre: el saludo va solo — jamás un nombre inventado
@@ -461,6 +468,21 @@ export default function Hogar() {
               titulo={nombreDe(proximaCita.mascota_id)}
               subtitulo={`${t(proximaCita.reserva === 'hold' ? 'hogar.reservandoHorario' : 'hogar.proximaCita')}${proximaCita.tipo_servicio ? ` · ${proximaCita.tipo_servicio}` : ''}`}
               metadataMono={`${fechaCortaMono(proximaCita.fecha, idioma)}${proximaCita.hora ? ` · ${proximaCita.hora}` : ''}`}
+            />
+          </Tarjeta>
+        </Animated.View>
+      ) : null}
+
+      {/* D-338: entrada al hub "Mis paseos" (doble clic del servicio,
+          jamás tab) — serena, solo cuando el plan existe */}
+      {hayPlanes ? (
+        <Animated.View entering={entradaZona(1)} style={{ paddingHorizontal: spacing[4], marginTop: spacing[7] }}>
+          <Tarjeta relleno="ninguno">
+            <Celda
+              interactiva
+              accessibilityRole="button"
+              titulo={t('plan.hubTitulo')}
+              onPress={() => router.push('/hogar/paseos')}
             />
           </Tarjeta>
         </Animated.View>

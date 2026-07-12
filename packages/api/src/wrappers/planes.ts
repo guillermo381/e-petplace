@@ -169,6 +169,8 @@ export interface PlanPaseo {
   id: string;
   mascota_id: string;
   prestador_id: string;
+  /** La oferta del bloque (prestador_servicios.id) — null si el prestador la borró. */
+  prestador_servicio_id: string | null;
   estado: string;
   estado_pago: string;
   periodo_inicio: string;
@@ -187,7 +189,7 @@ export async function obtenerMisPlanesPaseo(): Promise<ResultadoWrapper<PlanPase
   const supabase = getClient();
   const { data, error } = await supabase
     .from('suscripciones_servicio')
-    .select('id, mascota_id, prestador_id, estado, estado_pago, periodo_inicio, periodo_fin, precio_mensual, precio_unitario_efectivo, dias_semana, hora, duracion_minutos, frecuencia, auto_renovar')
+    .select('id, mascota_id, prestador_id, prestador_servicio_id, estado, estado_pago, periodo_inicio, periodo_fin, precio_mensual, precio_unitario_efectivo, dias_semana, hora, duracion_minutos, frecuencia, auto_renovar')
     .eq('tipo_servicio', 'paseo_mensual')
     .order('created_at', { ascending: false });
   if (error) return mapeoErrorAResultado(error.message);
@@ -201,6 +203,7 @@ export async function obtenerMisPlanesPaseo(): Promise<ResultadoWrapper<PlanPase
       id: fila.id,
       mascota_id: fila.mascota_id,
       prestador_id: fila.prestador_id,
+      prestador_servicio_id: fila.prestador_servicio_id ?? null,
       estado: fila.estado,
       estado_pago: fila.estado_pago,
       periodo_inicio: fila.periodo_inicio,

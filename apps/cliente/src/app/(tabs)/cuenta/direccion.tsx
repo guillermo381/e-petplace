@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -83,22 +83,29 @@ export default function DireccionCuenta() {
           />
         </View>
       ) : (
-        <ScrollView
-          contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[4] }}
-          keyboardShouldPersistTaps="handled"
+        // Cura S56 (orden founder): el campo enfocado SIEMPRE visible —
+        // el teclado empuja el scroll, no lo tapa (Android e iOS).
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <Text
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.base,
-              lineHeight: typography.size.base * 1.4,
-              color: theme.text.secondary,
-            }}
+          <ScrollView
+            contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[4] }}
+            keyboardShouldPersistTaps="handled"
           >
-            {t('direccion.voz')}
-          </Text>
-          <DireccionHogarForm inicial={direccion} onGuardada={() => router.back()} />
-        </ScrollView>
+            <Text
+              style={{
+                fontFamily: typography.family.sans.regular,
+                fontSize: typography.size.base,
+                lineHeight: typography.size.base * 1.4,
+                color: theme.text.secondary,
+              }}
+            >
+              {t('direccion.voz')}
+            </Text>
+            <DireccionHogarForm inicial={direccion} onGuardada={() => router.back()} />
+          </ScrollView>
+        </KeyboardAvoidingView>
       )}
     </View>
   );

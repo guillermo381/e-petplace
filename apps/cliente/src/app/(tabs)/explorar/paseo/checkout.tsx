@@ -18,7 +18,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
@@ -305,6 +305,8 @@ export default function PaseoCheckout() {
       {/* D-339: la captura de la dirección — el MISMO formulario de
           Cuenta·Tu dirección, en Hoja (una vez, jamás en cada reserva) */}
       <Hoja visible={hojaDireccion} onCerrar={() => setHojaDireccion(false)} titulo={t('direccion.titulo')} conCerrar>
+        {/* Cura S56 (orden founder): el teclado no tapa el campo activo */}
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <HojaScroll>
           <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
             <Text
@@ -326,6 +328,7 @@ export default function PaseoCheckout() {
             />
           </View>
         </HojaScroll>
+        </KeyboardAvoidingView>
       </Hoja>
     </SafeAreaView>
   );

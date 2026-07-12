@@ -46,22 +46,26 @@ import {
   type MascotaResumen,
   type PaseadorDisponible,
 } from '@epetplace/api';
+import { PlanHoja } from '@/components/plan-hoja';
 import { useTraduccion } from '@/i18n';
 
 export default function PaseoDisponibles() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
-  const params = useLocalSearchParams<{ fecha: string; hora: string; duracion: string }>();
+  const params = useLocalSearchParams<{ fecha: string; hora: string; duracion: string; plan?: string }>();
   const fecha = typeof params.fecha === 'string' ? params.fecha : '';
   const hora = typeof params.hora === 'string' ? params.hora : '';
   const duracion = Number(params.duracion ?? 0);
+  // D-338: modo PLAN — el paseador elegido acá ancla el plan (§6.1 v1.2).
+  const modoPlan = params.plan === '1';
 
   const [disponibles, setDisponibles] = useState<PaseadorDisponible[] | 'cargando' | 'error'>('cargando');
   const [mascotas, setMascotas] = useState<MascotaResumen[]>([]);
   const [fotos, setFotos] = useState<Record<string, string>>({});
   const [eligiendoMascota, setEligiendoMascota] = useState<PaseadorDisponible | null>(null);
   const [creandoHold, setCreandoHold] = useState(false);
+  const [plan, setPlan] = useState<{ paseador: PaseadorDisponible; mascotaId: string } | null>(null);
 
   const cargar = useCallback(() => {
     setDisponibles('cargando');
@@ -134,15 +138,26 @@ export default function PaseoDisponibles() {
     [creandoHold, fecha, hora, cargar, mostrar],
   );
 
+  const alElegirMascota = useCallback(
+    (p: PaseadorDisponible, mascotaId: string) => {
+      if (modoPlan) {
+        setPlan({ paseador: p, mascotaId });
+      } else {
+        void crearHold(p, mascotaId);
+      }
+    },
+    [modoPlan, crearHold],
+  );
+
   const alElegir = useCallback(
     (p: PaseadorDisponible) => {
       if (mascotas.length === 1) {
-        void crearHold(p, mascotas[0].id);
+        alElegirMascota(p, mascotas[0].id);
       } else {
         setEligiendoMascota(p);
       }
     },
-    [mascotas, crearHold],
+    [mascotas, alElegirMascota],
   );
 
   return (
@@ -209,12 +224,40 @@ export default function PaseoDisponibles() {
                 interactiva
                 accessibilityRole="button"
                 onPress={() => {
-                  if (eligiendoMascota) void crearHold(eligiendoMascota, m.id);
+                  if (eligiendoMascota) {
+                    setEligiendoMascota(null);
+                    alElegirMascota(eligiendoMascota, m.id);
+                  }
                 }}
               />
             </View>
           ))}
         </HojaScroll>
+      </Hoja>
+
+      {/* D-338: la Hoja del plan — nace con el paseador ELEGIDO */}
+      <Hoja
+        visible={plan !== null}
+        titulo={t('plan.hojaTitulo')}
+        onCerrar={() => setPlan(null)}
+        conCerrar
+      >
+        {plan !== null ? (
+          <PlanHoja
+            paseador={plan.paseador}
+            mascotaId={plan.mascotaId}
+            fecha={fecha}
+            hora={hora}
+            onContratado={(contratado) => {
+              setPlan(null);
+              mostrar({ texto: t('plan.exito', { n: contratado.citas_generadas }), variante: 'exito' });
+              // D-329: el hub vive en el stack del Hogar (otro tab) —
+              // se vacía el stack de Explorar y recién ahí se navega.
+              if (router.canDismiss()) router.dismissAll();
+              router.navigate('/hogar/paseos');
+            }}
+          />
+        ) : null}
       </Hoja>
     </SafeAreaView>
   );

@@ -360,17 +360,39 @@ function EjemploLineaDeVida() {
 
 function EjemploSelectorOpcion() {
   const [sexo, setSexo] = useState<string | undefined>('desconocido')
+  // Enmienda S56 (Hoja del plan D-338): multi-selección + día apagado.
+  const [dias, setDias] = useState<string[]>(['2'])
   return (
-    <SelectorOpcion
-      opciones={[
-        { codigo: 'macho', etiqueta: 'Macho' },
-        { codigo: 'hembra', etiqueta: 'Hembra' },
-        { codigo: 'desconocido', etiqueta: 'No sé' },
-      ]}
-      seleccionada={sexo}
-      onSelect={setSexo}
-      etiqueta="¿Es macho o hembra?"
-    />
+    <View style={{ gap: spacing[4] }}>
+      <SelectorOpcion
+        opciones={[
+          { codigo: 'macho', etiqueta: 'Macho' },
+          { codigo: 'hembra', etiqueta: 'Hembra' },
+          { codigo: 'desconocido', etiqueta: 'No sé' },
+        ]}
+        seleccionada={sexo}
+        onSelect={setSexo}
+        etiqueta="¿Es macho o hembra?"
+      />
+      <SelectorOpcion
+        multiple
+        disposicion="tira"
+        opciones={[
+          { codigo: '1', etiqueta: 'L' },
+          { codigo: '2', etiqueta: 'M' },
+          { codigo: '3', etiqueta: 'X' },
+          { codigo: '4', etiqueta: 'J', deshabilitada: true },
+          { codigo: '5', etiqueta: 'V' },
+          { codigo: '6', etiqueta: 'S' },
+          { codigo: '0', etiqueta: 'D', deshabilitada: true },
+        ]}
+        seleccionadas={dias}
+        onSelect={(codigo) =>
+          setDias((prev) => (prev.includes(codigo) ? prev.filter((d) => d !== codigo) : [...prev, codigo]))
+        }
+        etiqueta="Multi + apagados (S56): ¿qué días? (J y D no cubiertos)"
+      />
+    </View>
   )
 }
 
