@@ -313,6 +313,9 @@ export const clienteEs = {
     nadiePuede: 'Nadie puede a esa hora',
     nadiePuedeDetalle: 'Prueba con otro horario u otro día.',
     probarOtroHorario: 'Probar otro horario',
+    // S56 D-341 — GATE PENDIENTE founder (lote S56): la voz de cliente
+    // para prestador_no_disponible (bloqueos/vacaciones del paseador).
+    prestadorNoDisponible: 'El paseador no está disponible en esas fechas — prueba otro horario.',
     elegirMascota: '¿Para quién es el paseo?',
     // refugios / M0
     refugios: 'Refugios y adopción',

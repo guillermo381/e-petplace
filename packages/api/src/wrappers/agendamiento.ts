@@ -35,6 +35,10 @@ const CODIGOS_ERROR_AGENDAMIENTO = [
   'cita_estado_invalido',
   'hold_expirado',
   'pago_no_disponible',
+  // D-341 (S56): lo levanta el motor cuando prestador_bloqueos cubre la
+  // ventana pedida (vacaciones/bloqueos puntuales) — tipado ANTES de que
+  // la integración dispare (addendum arquitecto S56).
+  'prestador_no_disponible',
 ] as const;
 
 export type CodigoErrorAgendamiento = (typeof CODIGOS_ERROR_AGENDAMIENTO)[number];
@@ -56,6 +60,7 @@ const MENSAJES_ERROR_AGENDAMIENTO: Record<
   cita_estado_invalido:   'La reserva no está en un estado que permita pagarla.',
   hold_expirado:          'Este horario se liberó — elegí otro.',
   pago_no_disponible:     'Este prestador todavía no puede recibir pagos por la app.',
+  prestador_no_disponible: 'El paseador no está disponible en esas fechas — elegí otro horario.',
   datos_inconsistentes:   'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:      'Ocurrió un error inesperado. Probá de nuevo.',
 };

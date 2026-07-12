@@ -33,6 +33,11 @@ BEGIN
   v_sab := current_date + (((6 - EXTRACT(DOW FROM current_date)::int) % 7 + 7) % 7);
   IF v_sab <= current_date THEN v_sab := v_sab + 7; END IF;
 
+  -- Estado autónomo: si el demo ya tiene dirección (la deja el E2E de
+  -- wrappers a propósito), se borra DENTRO de la transacción — el
+  -- ROLLBACK final la restaura tal cual estaba.
+  DELETE FROM direcciones_guardadas WHERE user_id = c_demo;
+
   -- T1: hold de paseo SIN dirección del hogar → snapshot NULL honesto.
   r := crear_bloqueo_agenda(c_prest, c_srv30, c_masc, v_sab, '08:00');
   v_hold1 := (r->>'cita_id')::uuid;

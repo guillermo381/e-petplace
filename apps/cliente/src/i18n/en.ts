@@ -285,6 +285,9 @@ export const clienteEn = {
     nadiePuede: 'No one can at that time',
     nadiePuedeDetalle: 'Try another time or another day.',
     probarOtroHorario: 'Try another time',
+    // S56 D-341 — GATE PENDIENTE founder (lote S56): client voice for
+    // prestador_no_disponible (walker time off / blocked dates).
+    prestadorNoDisponible: "The walker isn't available on those dates — try another time.",
     elegirMascota: 'Who is the walk for?',
     refugios: 'Shelters & adoption',
     refugiosVacio: 'No shelters published yet',
