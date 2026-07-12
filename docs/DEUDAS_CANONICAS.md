@@ -1422,6 +1422,8 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 #### D-333 — Continuidad y sustitución de paseador en paquetes
 ⏸ DIFERIDA (post-MVP, candado del paquete). Decisiones founder S55 registradas: el paquete aspira al MISMO paseador (continuidad como valor) y toda sustitución se COMUNICA al pet parent — jamás reemplazo silencioso. Se implementa con la capa de paquetes, que NO se vende sin `MODELO_FINANCIERO.md` v2.5 + P14 firmados (`MODELO_PASEO.md` §6). Origen: S55 (founder).
 
+> **Estado S55-B4:** **D-321 ✅ CERRADA** (commit `4b1f4e2`): el rango horario del CUÁNDO dejó de estar hardcodeado — la grilla de inicios sale de las franjas reales vía `obtener_inicios_paseo_disponibles` (server-side, 7.13, motor por ventana S55-B2).
+>
 > **Estado S55-B3 de deudas previas:** **D-316 ✅ CERRADA** (commits `ac52aa5`/`2dc558b`): la preferencia de idioma persiste en `user_preferencias` (DB = verdad multi-dispositivo, AsyncStorage = cache local) y se sincroniza al abrir la app; la voz server-side de B4 ya tiene dónde leer el idioma del user.
 
 #### D-334 — Catálogo de tipos de notificación
