@@ -6,15 +6,13 @@
 // recurrencia/paquete mensual es capa posterior (MODELO_FINANCIERO v2.5
 // + política P14 + motor — NO vive acá).
 //
-// GUARDA DE HONESTIDAD TEMPORAL (hallazgo de motor S55-B): la cita no
-// guarda duración y crear_bloqueo_agenda valida cupo solo sobre el slot
-// de la grilla → un bloque >30' OFERTADO hoy miente en la agenda
-// (doble-booking parcial). Mientras el motor de ocupación por ventana
-// (Sesión A) no esté en producción, los bloques >30' se CONFIGURAN pero
-// jamás nacen ni pasan a activo=true — y como las RPCs del dueño
-// (obtener_oferta_paseo / obtener_paseadores_disponibles) filtran
-// ps.activo, el cliente NUNCA los ve. Cuando el motor aterrice, ESTE
-// límite se levanta en el mismo PR (buscar BLOQUE_MAX_OFERTABLE).
+// MOTOR DE OCUPACIÓN POR VENTANA: el hallazgo S55-B (la cita no guardaba
+// duración; crear_bloqueo validaba cupo solo sobre el slot → doble-booking
+// parcial en bloques >30') lo curó la Sesión A en S55-A B2 — verificado
+// LITERAL contra DB viva antes de levantar la guarda temporal de esta
+// tanda: la cita guarda duracion_minutos, la ventana completa se valida
+// contra la franja y _agenda_ocupacion cuenta el máximo solape. Todos
+// los bloques del menú nacen ofertables.
 //
 // Camino de escritura relevado y PROBADO S55-B (sonda con ROLLBACK):
 // el owner escribe directo por RLS (prestador_servicios_own /
@@ -33,7 +31,6 @@ const MENSAJES = {
   bloque_invalido:        'Esa duración no está en el menú de paseos.',
   precio_invalido:        'El precio tiene que ser mayor a cero.',
   bloque_duplicado:       'Ya ofreces un paseo de esa duración.',
-  bloque_pendiente_motor: 'Este bloque todavía no puede activarse para tus clientes.',
   rango_horario_invalido: 'La hora de fin tiene que ser después de la de inicio.',
   franja_solapada:        'Esa franja se cruza con una que ya tienes ese día.',
   cupo_invalido:          'El cupo tiene que ser entre 1 y 4.',
@@ -54,12 +51,6 @@ function falla(codigo: CodigoErrorConfiguracionPaseo): Falla {
 export const BLOQUES_PASEO = [30, 60, 120, 180, 240, 300] as const;
 export type BloquePaseo = (typeof BLOQUES_PASEO)[number];
 
-/**
- * Techo OFERTABLE mientras el motor no ocupe la ventana completa.
- * Se levanta en el MISMO PR que traiga el motor de la Sesión A.
- */
-export const BLOQUE_MAX_OFERTABLE = 30;
-
 export interface OfertaPaseoPropia {
   id: string;
   duracionMinutos: number;
@@ -67,8 +58,6 @@ export interface OfertaPaseoPropia {
   nombre: string | null;
   descripcion: string | null;
   activo: boolean;
-  /** true = configurada pero el motor aún no permite ofertarla (>30'). */
-  pendienteMotor: boolean;
 }
 
 export interface FranjaHorario {
@@ -95,15 +84,13 @@ function mapearOferta(fila: {
   descripcion: string | null;
   activo: boolean;
 }): OfertaPaseoPropia {
-  const duracion = fila.duracion_minutos ?? 30;
   return {
     id: fila.id,
-    duracionMinutos: duracion,
+    duracionMinutos: fila.duracion_minutos ?? 30,
     precio: fila.precio,
     nombre: fila.nombre_custom,
     descripcion: fila.descripcion,
     activo: fila.activo,
-    pendienteMotor: duracion > BLOQUE_MAX_OFERTABLE,
   };
 }
 
@@ -135,10 +122,7 @@ export interface InputCrearOfertaPaseo {
   descripcion?: string;
 }
 
-/**
- * Crea un bloque del menú canónico. Los bloques >30' nacen con
- * activo=false (guarda de honestidad — el cliente no los ve).
- */
+/** Crea un bloque del menú canónico. Nace activo (ofertable al cliente). */
 export async function crearOfertaPaseo(
   input: InputCrearOfertaPaseo,
 ): Promise<ResultadoWrapper<OfertaPaseoPropia, CodigoErrorConfiguracionPaseo>> {
@@ -169,7 +153,7 @@ export async function crearOfertaPaseo(
       precio: input.precio,
       nombre_custom: input.nombre?.trim() || null,
       descripcion: input.descripcion?.trim() || null,
-      activo: input.duracionMinutos <= BLOQUE_MAX_OFERTABLE,
+      activo: true,
       especies_compatibles: ['perro'],
     })
     .select(SELECT_OFERTA)
@@ -191,7 +175,6 @@ export interface InputActualizarOfertaPaseo {
  * Edita precio/nombre/descripción o pausa/reactiva. El precio nuevo rige
  * SOLO holds futuros: el snapshot de crear_bloqueo_agenda protege lo ya
  * creado (MODELO_FINANCIERO §3.2 — garantizado server-side, relevado S55).
- * activo=true sobre un bloque >30' rebota: bloque_pendiente_motor.
  */
 export async function actualizarOfertaPaseo(
   input: InputActualizarOfertaPaseo,
@@ -201,17 +184,6 @@ export async function actualizarOfertaPaseo(
 
   if (input.precio !== undefined && (!Number.isFinite(input.precio) || input.precio <= 0)) {
     return falla('precio_invalido');
-  }
-
-  if (input.activo === true) {
-    const { data: actual, error: errActual } = await getClient()
-      .from('prestador_servicios')
-      .select('duracion_minutos')
-      .eq('id', input.id)
-      .maybeSingle();
-    if (errActual) return falla('error_desconocido');
-    if (actual === null) return falla('no_encontrada');
-    if ((actual.duracion_minutos ?? 30) > BLOQUE_MAX_OFERTABLE) return falla('bloque_pendiente_motor');
   }
 
   const cambios: UpdateOferta = {};

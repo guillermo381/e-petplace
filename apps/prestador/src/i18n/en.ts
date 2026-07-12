@@ -278,7 +278,6 @@ export const prestadorEn = {
     bloque240: '4-hour walk',
     bloque300: '5-hour walk',
     pausada: 'Paused',
-    pendienteMotor: 'It will go live for your clients very soon.',
     editarTitulo: 'Edit walk',
     nuevoTitulo: 'Offer a walk',
     duracion: 'Duration',
@@ -295,7 +294,6 @@ export const prestadorEn = {
     creado: 'Your walk is set up.',
     precioInvalido: 'The price has to be greater than zero.',
     bloqueDuplicado: 'You already offer a walk of that duration.',
-    bloquePendienteMotor: "This block can't go live for your clients yet.",
     paquetesHueco: 'Packages and recurring walks arrive later on.',
   },
   horarios: {

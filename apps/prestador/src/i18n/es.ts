@@ -307,8 +307,6 @@ export const prestadorEs = {
     bloque240: 'Paseo de 4 horas',
     bloque300: 'Paseo de 5 horas',
     pausada: 'Pausado',
-    // guarda de honestidad: >30' configurado pero el motor aún no lo oferta
-    pendienteMotor: 'Se activará para tus clientes muy pronto.',
     // edición
     editarTitulo: 'Editar paseo',
     nuevoTitulo: 'Ofrecer un paseo',
@@ -327,7 +325,6 @@ export const prestadorEs = {
     // errores con voz (espejo de los códigos del wrapper)
     precioInvalido: 'El precio tiene que ser mayor a cero.',
     bloqueDuplicado: 'Ya ofreces un paseo de esa duración.',
-    bloquePendienteMotor: 'Este bloque todavía no puede activarse para tus clientes.',
     // peldaño 2 — hueco declarado
     paquetesHueco: 'Paquetes y paseos recurrentes llegan más adelante.',
   },

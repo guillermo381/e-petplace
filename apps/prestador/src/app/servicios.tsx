@@ -12,10 +12,9 @@
  *   peldaño 2 — paquetes y recurrencia: hueco DECLARADO en voz, llega
  *     con MODELO_FINANCIERO v2.5 + política P14 + motor.
  *
- * GUARDA DE HONESTIDAD TEMPORAL: los bloques >30' se configuran pero NO
- * se ofertan (el wrapper los mantiene activo=false; las RPCs del dueño
- * filtran por activo) — la UI lo dice con voz honesta. Se levanta en el
- * mismo PR que el motor de ocupación por ventana de la Sesión A.
+ * El motor de ocupación por ventana (S55-A B2) está vivo — verificado
+ * literal contra DB antes de ofertar bloques >30': todos los bloques
+ * del menú son ofertables; pausar/reactivar es la única compuerta.
  *
  * Cuenta comercial NO activa = voz honesta (configurás ahora, te
  * ofertás cuando el equipo la active) — JAMÁS se activa desde acá
@@ -45,7 +44,6 @@ import {
 } from '@epetplace/ui';
 import {
   BLOQUES_PASEO,
-  BLOQUE_MAX_OFERTABLE,
   actualizarOfertaPaseo,
   crearOfertaPaseo,
   obtenerMiCuentaComercial,
@@ -196,10 +194,7 @@ export default function Servicios() {
     );
     setGuardando(false);
     if (!r.ok) {
-      mostrar({
-        texto: r.codigo === 'bloque_pendiente_motor' ? t('servicios.bloquePendienteMotor') : r.mensaje,
-        variante: 'error',
-      });
+      mostrar({ texto: r.mensaje, variante: 'error' });
       return;
     }
     mostrar({ texto: t('servicios.guardado'), variante: 'exito' });
@@ -307,13 +302,7 @@ export default function Servicios() {
                   accessibilityRole="button"
                   onPress={() => abrirEdicion(o)}
                   titulo={o.nombre ?? etiquetaBloque(o.duracionMinutos)}
-                  subtitulo={
-                    o.pendienteMotor
-                      ? t('servicios.pendienteMotor')
-                      : o.activo
-                        ? undefined
-                        : t('servicios.pausada')
-                  }
+                  subtitulo={o.activo ? undefined : t('servicios.pausada')}
                   metadataMono={monto(o.precio)}
                 />
               </View>
@@ -377,26 +366,12 @@ export default function Servicios() {
               cargando={guardando}
               onPress={() => void guardarEdicion()}
             />
-            {editando.pendienteMotor ? (
-              // guarda de honestidad: no hay toggle que mienta — la voz dice la verdad
-              <Text
-                style={{
-                  textAlign: 'center',
-                  fontFamily: typography.family.sans.regular,
-                  fontSize: typography.size.sm,
-                  color: theme.text.secondary,
-                }}
-              >
-                {t('servicios.pendienteMotor')}
-              </Text>
-            ) : (
-              <Boton
-                variante="ghost"
-                etiqueta={editando.activo ? t('servicios.pausar') : t('servicios.reactivar')}
-                bloque
-                onPress={() => void guardarEdicion(!editando.activo)}
-              />
-            )}
+            <Boton
+              variante="ghost"
+              etiqueta={editando.activo ? t('servicios.pausar') : t('servicios.reactivar')}
+              bloque
+              onPress={() => void guardarEdicion(!editando.activo)}
+            />
           </View>
         )}
       </Hoja>
@@ -412,7 +387,6 @@ export default function Servicios() {
                   interactiva
                   accessibilityRole="button"
                   titulo={etiquetaBloque(b)}
-                  subtitulo={b > BLOQUE_MAX_OFERTABLE ? t('servicios.pendienteMotor') : undefined}
                   onPress={() => setBloqueNuevo(b)}
                 />
               </View>
@@ -446,17 +420,6 @@ export default function Servicios() {
               ayuda={t('servicios.nombreAyuda')}
               deshabilitado={guardando}
             />
-            {bloqueNuevo > BLOQUE_MAX_OFERTABLE && (
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.regular,
-                  fontSize: typography.size.sm,
-                  color: theme.text.secondary,
-                }}
-              >
-                {t('servicios.pendienteMotor')}
-              </Text>
-            )}
             <Boton
               variante="primario"
               etiqueta={t('servicios.crear')}

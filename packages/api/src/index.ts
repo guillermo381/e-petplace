@@ -237,7 +237,6 @@ export {
 // Configuración del servicio de paseo — S55-B (B2) — archivo NUEVO de esta sesión
 export {
   BLOQUES_PASEO,
-  BLOQUE_MAX_OFERTABLE,
   obtenerOfertasPaseoPropias,
   crearOfertaPaseo,
   actualizarOfertaPaseo,

@@ -48,7 +48,7 @@ const prestadorId = prestador.data.id;
 const o1 = await obtenerOfertasPaseoPropias(prestadorId);
 check(o1.ok, 'T2 ofertas propias responde', o1.ok ? `${o1.data.length} oferta(s)` : o1.mensaje);
 const seed30 = o1.ok ? o1.data.find((o) => o.duracionMinutos === 30) : undefined;
-check(seed30 !== undefined && seed30.pendienteMotor === false, 'T2b la oferta 30 existe y NO es pendiente de motor');
+check(seed30 !== undefined, 'T2b la oferta 30 del seed existe');
 
 // T3 — duplicado del bloque 30 → rechazo tipado sin escritura
 const dup = await crearOfertaPaseo({ prestadorId, duracionMinutos: 30, precio: 9 });
@@ -60,7 +60,7 @@ check(!fuera.ok && fuera.codigo === 'bloque_invalido', 'T4 duración 45 → bloq
 const precioMalo = await crearOfertaPaseo({ prestadorId, duracionMinutos: 60, precio: 0 });
 check(!precioMalo.ok && precioMalo.codigo === 'precio_invalido', 'T4b precio 0 → precio_invalido');
 
-// T5 — GUARDA DE HONESTIDAD: el bloque 60 nace configurado pero NO activo
+// T5 — POST-MOTOR (S55-A B2 verificado literal): el bloque 60 nace OFERTABLE
 const b60 = await crearOfertaPaseo({
   prestadorId,
   duracionMinutos: 60,
@@ -68,23 +68,28 @@ const b60 = await crearOfertaPaseo({
   nombre: '[TEST S55] Paseo 1 hora',
 });
 check(b60.ok, 'T5 crear bloque 60 responde ok', b60.ok ? b60.data.id : b60.mensaje);
-check(b60.ok && b60.data.activo === false && b60.data.pendienteMotor === true, 'T5b nace activo=false + pendienteMotor');
+check(b60.ok && b60.data.activo === true, 'T5b nace activo=true (el motor ocupa por ventana)');
 const oferta60Id = b60.ok ? b60.data.id : null;
 
-// T6 — el DUEÑO no lo ve: la RPC de oferta global filtra por activo
+// T6 — el DUEÑO lo ve mientras está activo (obtener_oferta_paseo)
 const ofertaGlobal = await obtenerOfertaPaseo();
 check(ofertaGlobal.ok, 'T6 obtener_oferta_paseo (dueño) responde');
 if (ofertaGlobal.ok) {
   check(
-    !ofertaGlobal.data.some((o) => o.duracion_minutos === 60),
-    'T6b el bloque 60 NO se oferta al cliente (guarda server-visible)',
+    ofertaGlobal.data.some((o) => o.duracion_minutos === 60),
+    'T6b el bloque 60 activo SÍ se oferta al cliente',
   );
 }
 
-// T7 — intentar activarlo → bloque_pendiente_motor
 if (oferta60Id) {
-  const act = await actualizarOfertaPaseo({ id: oferta60Id, activo: true });
-  check(!act.ok && act.codigo === 'bloque_pendiente_motor', 'T7 activar 60 → bloque_pendiente_motor');
+  // T7 — pausar es la compuerta: desaparece de la oferta al dueño
+  const pau = await actualizarOfertaPaseo({ id: oferta60Id, activo: false });
+  check(pau.ok && pau.data.activo === false, 'T7 pausado');
+  const ofertaGlobal2 = await obtenerOfertaPaseo();
+  check(
+    ofertaGlobal2.ok && !ofertaGlobal2.data.some((o) => o.duracion_minutos === 60),
+    'T7b pausado → fuera de la oferta al cliente',
+  );
 
   // T8 — el precio SÍ se edita (rige holds futuros; snapshot protege lo creado)
   const pre = await actualizarOfertaPaseo({ id: oferta60Id, precio: 19.5 });
