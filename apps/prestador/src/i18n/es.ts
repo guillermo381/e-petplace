@@ -174,6 +174,9 @@ export const prestadorEs = {
     serviciosDetalle: 'Qué paseos ofreces y sus precios.',
     horarios: 'Horarios',
     horariosDetalle: 'Tus días y franjas de paseo.',
+    // S56-B TAREA 2 (D-341) · LOTE S56, GATE PENDIENTE
+    vacaciones: 'Vacaciones',
+    vacacionesDetalle: 'Marca los días en que no paseas.',
     equipo: 'Equipo',
     cobros: 'Cobros',
     cuentaComercial: 'Cuenta comercial',
@@ -344,6 +347,47 @@ export const prestadorEs = {
     comisionRetiene: 'e-PetPlace retiene {{pct}}%',
     comisionNeto: 'e-PetPlace retiene {{pct}}% · vas a recibir {{neto}}',
     comisionNoDisponible: 'No pudimos leer la comisión vigente.',
+    // precio del plan (S56-B ACTO 2, D-338 — ayuda aprobada por el arquitecto)
+    precioPlan: 'Precio por salida en plan mensual (opcional)',
+    precioPlanAyuda: 'Rige desde la próxima renovación. Los períodos en curso no cambian.',
+    planVacio: 'Sin plan en este bloque: tus clientes no ven la opción de hacerlo frecuente.',
+    planComparacion: 'Suelto {{suelto}} · plan {{plan}} por salida',
+    precioPlanInvalido: 'El precio del plan tiene que ser mayor a cero. Déjalo vacío si no ofreces plan.',
+  },
+  // Vacaciones / bloqueos — S56-B TAREA 2 (D-341) · LOTE S56, GATE PENDIENTE
+  vacaciones: {
+    titulo: 'Vacaciones',
+    error: 'No pudimos cargar tus días libres.',
+    errorDetalle: 'Prueba de nuevo en un momento.',
+    reintentar: 'Reintentar',
+    // peldaño 0 — invitación que educa
+    vacioTitulo: 'Tus días libres',
+    vacioCuerpo:
+      'Cuando te tomes unos días, márcalos acá. Mientras dure un bloqueo no apareces en las búsquedas ni recibes reservas nuevas — tus citas ya confirmadas siguen en pie.',
+    vacioCta: 'Marcar mis primeros días',
+    // la promesa — la cumple el motor (D-341, seis puertas)
+    promesa:
+      'Mientras dure un bloqueo no apareces en las búsquedas ni recibes reservas nuevas. Tus citas ya confirmadas siguen en pie.',
+    sinMotivo: 'Días bloqueados',
+    vigente: 'En curso — no apareces en las búsquedas.',
+    quitar: 'Quitar',
+    agregar: 'Marcar más días',
+    // formulario
+    nuevoTitulo: 'Marcar días libres',
+    desde: 'Desde',
+    duracion: 'Cuánto tiempo',
+    unDia: '1 día',
+    dias: '{{n}} días',
+    unaSemana: '1 semana',
+    dosSemanas: '2 semanas',
+    tresSemanas: '3 semanas',
+    unMes: '1 mes',
+    hastaInclusive: 'Hasta el {{fecha}}, inclusive.',
+    motivo: 'Motivo (opcional)',
+    motivoAyuda: 'Para acordarte de qué era.',
+    crear: 'Bloquear estos días',
+    creado: 'Listo. Esos días no recibes reservas.',
+    quitado: 'Bloqueo quitado.',
   },
   // LOTE S56 — GATE PENDIENTE del founder (junto con servicios.*).
   horarios: {

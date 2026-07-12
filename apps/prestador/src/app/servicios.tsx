@@ -74,6 +74,35 @@ function monto(valor: number): string {
 }
 
 /**
+ * S56-B ACTO 2 — la voz del PRECIO DEL PLAN (D-338, contrato ratificado:
+ * columna precio_plan, sin CHECK relacional). Vacío = sin plan en el
+ * bloque (voz honesta); con valor = neto visible (mismo dato de fees.ts)
+ * + comparación con el suelto SIN juzgar (dato, no CHECK).
+ */
+function VozPlan({ pct, planTexto, suelto }: { pct: number | null; planTexto: string; suelto: number | null }) {
+  const { theme } = useTheme();
+  const { t } = useTraduccion();
+  const estilo = {
+    fontFamily: typography.family.sans.regular,
+    fontSize: typography.size.sm,
+    lineHeight: typography.size.sm * typography.leading.normal,
+    color: theme.text.secondary,
+  };
+  if (planTexto.trim() === '') return <Text style={estilo}>{t('servicios.planVacio')}</Text>;
+  const v = Number.parseFloat(planTexto.replace(',', '.'));
+  if (!Number.isFinite(v) || v <= 0) return null;
+  const plan = Math.round(v * 100) / 100;
+  return (
+    <View style={{ gap: spacing[1] }}>
+      <VozComision pct={pct} precio={plan} />
+      {suelto !== null ? (
+        <Text style={estilo}>{t('servicios.planComparacion', { suelto: monto(suelto), plan: monto(plan) })}</Text>
+      ) : null}
+    </View>
+  );
+}
+
+/**
  * S56-B TAREA 4 — la comisión visible donde se pone el precio (financiero
  * v2.6, regla 7.15): el % viene del dato leído de fee_configs, jamás
  * hardcodeado. Sin dato = voz honesta, jamás un número inventado.
@@ -131,9 +160,11 @@ export default function Servicios() {
   const [creando, setCreando] = useState(false);
   const [bloqueNuevo, setBloqueNuevo] = useState<BloquePaseo | null>(null);
   const [precioTexto, setPrecioTexto] = useState('');
+  const [planTexto, setPlanTexto] = useState('');
   const [nombreTexto, setNombreTexto] = useState('');
   const [descripcionTexto, setDescripcionTexto] = useState('');
   const [errorPrecio, setErrorPrecio] = useState<string | undefined>(undefined);
+  const [errorPlan, setErrorPlan] = useState<string | undefined>(undefined);
   const [guardando, setGuardando] = useState(false);
 
   useFocusEffect(
@@ -190,21 +221,34 @@ export default function Servicios() {
     return Math.round(v * 100) / 100;
   };
 
+  // El plan distingue tres estados: vacío = SIN plan (null honesto),
+  // número válido, o inválido (bloquea el guardado con voz).
+  const leerPrecioPlan = (): number | null | 'invalido' => {
+    if (planTexto.trim() === '') return null;
+    const v = Number.parseFloat(planTexto.replace(',', '.'));
+    if (!Number.isFinite(v) || v <= 0) return 'invalido';
+    return Math.round(v * 100) / 100;
+  };
+
   function abrirEdicion(oferta: OfertaPaseoPropia) {
     setEditando(oferta);
     setPrecioTexto(oferta.precio.toFixed(2));
+    setPlanTexto(oferta.precioPlan !== null ? oferta.precioPlan.toFixed(2) : '');
     setNombreTexto(oferta.nombre ?? '');
     setDescripcionTexto(oferta.descripcion ?? '');
     setErrorPrecio(undefined);
+    setErrorPlan(undefined);
   }
 
   function abrirCreacion() {
     setCreando(true);
     setBloqueNuevo(null);
     setPrecioTexto('');
+    setPlanTexto('');
     setNombreTexto('');
     setDescripcionTexto('');
     setErrorPrecio(undefined);
+    setErrorPlan(undefined);
   }
 
   function cerrarHojas() {
@@ -216,14 +260,25 @@ export default function Servicios() {
   async function guardarEdicion(cambioActivo?: boolean) {
     if (guardando || editando === null) return;
     const precio = leerPrecio();
+    const precioPlan = leerPrecioPlan();
     if (cambioActivo === undefined && precio === null) {
       setErrorPrecio(t('servicios.precioInvalido'));
+      return;
+    }
+    if (cambioActivo === undefined && precioPlan === 'invalido') {
+      setErrorPlan(t('servicios.precioPlanInvalido'));
       return;
     }
     setGuardando(true);
     const r = await actualizarOfertaPaseo(
       cambioActivo === undefined
-        ? { id: editando.id, precio: precio ?? undefined, nombre: nombreTexto, descripcion: descripcionTexto }
+        ? {
+            id: editando.id,
+            precio: precio ?? undefined,
+            precioPlan: precioPlan === 'invalido' ? undefined : precioPlan,
+            nombre: nombreTexto,
+            descripcion: descripcionTexto,
+          }
         : { id: editando.id, activo: cambioActivo },
     );
     setGuardando(false);
@@ -239,8 +294,13 @@ export default function Servicios() {
   async function crearBloque() {
     if (guardando || pantalla.estado !== 'listo' || bloqueNuevo === null) return;
     const precio = leerPrecio();
+    const precioPlan = leerPrecioPlan();
     if (precio === null) {
       setErrorPrecio(t('servicios.precioInvalido'));
+      return;
+    }
+    if (precioPlan === 'invalido') {
+      setErrorPlan(t('servicios.precioPlanInvalido'));
       return;
     }
     setGuardando(true);
@@ -248,6 +308,7 @@ export default function Servicios() {
       prestadorId: pantalla.prestadorId,
       duracionMinutos: bloqueNuevo,
       precio,
+      precioPlan,
       nombre: nombreTexto || undefined,
       descripcion: descripcionTexto || undefined,
     });
@@ -385,6 +446,23 @@ export default function Servicios() {
               precio={leerPrecio()}
             />
             <Campo
+              label={t('servicios.precioPlan')}
+              value={planTexto}
+              onChangeText={(v) => {
+                setPlanTexto(v);
+                setErrorPlan(undefined);
+              }}
+              keyboardType="decimal-pad"
+              ayuda={t('servicios.precioPlanAyuda')}
+              error={errorPlan}
+              deshabilitado={guardando}
+            />
+            <VozPlan
+              pct={pantalla.estado === 'listo' ? pantalla.comisionPct : null}
+              planTexto={planTexto}
+              suelto={leerPrecio()}
+            />
+            <Campo
               label={t('servicios.nombre')}
               value={nombreTexto}
               onChangeText={setNombreTexto}
@@ -454,6 +532,23 @@ export default function Servicios() {
             <VozComision
               pct={pantalla.estado === 'listo' ? pantalla.comisionPct : null}
               precio={leerPrecio()}
+            />
+            <Campo
+              label={t('servicios.precioPlan')}
+              value={planTexto}
+              onChangeText={(v) => {
+                setPlanTexto(v);
+                setErrorPlan(undefined);
+              }}
+              keyboardType="decimal-pad"
+              ayuda={t('servicios.precioPlanAyuda')}
+              error={errorPlan}
+              deshabilitado={guardando}
+            />
+            <VozPlan
+              pct={pantalla.estado === 'listo' ? pantalla.comisionPct : null}
+              planTexto={planTexto}
+              suelto={leerPrecio()}
             />
             <Campo
               label={t('servicios.nombre')}

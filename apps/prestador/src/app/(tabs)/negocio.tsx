@@ -167,6 +167,15 @@ export default function Negocio() {
                 subtitulo={t('negocio.horariosDetalle')}
                 onPress={() => router.push('/horarios')}
               />
+              <Separador />
+              {/* S56-B TAREA 2 (D-341): los días apartados — el motor los honra */}
+              <Celda
+                interactiva
+                accessibilityRole="button"
+                titulo={t('negocio.vacaciones')}
+                subtitulo={t('negocio.vacacionesDetalle')}
+                onPress={() => router.push('/vacaciones')}
+              />
             </Tarjeta>
           </View>
 
