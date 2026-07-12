@@ -162,7 +162,32 @@ export {
 } from './wrappers/mascotasPrestador';
 
 // Perfil propio — S53-B2b (saludo con nombre)
-export { obtenerMiPerfil, type MiPerfil } from './wrappers/miPerfil';
+export {
+  obtenerMiPerfil,
+  actualizarMiPerfil,
+  type MiPerfil,
+  type InputActualizarMiPerfil,
+} from './wrappers/miPerfil';
+// ── S55-A B3: Cuenta v1 ──
+export {
+  obtenerMiFamilia,
+  renombrarFamilia,
+  type MiFamilia,
+  type MiembroFamilia,
+  type CodigoErrorFamilia,
+} from './wrappers/familia';
+export {
+  obtenerPreferencias,
+  guardarIdiomaPreferido,
+  guardarPreferenciaNotificacion,
+  type Preferencias,
+  type CodigoErrorPreferencias,
+} from './wrappers/preferencias';
+export {
+  obtenerMisPagos,
+  type PagoDelDueno,
+  type CodigoErrorPagos,
+} from './wrappers/pagos';
 
 // Vitales — S53-B2c (paseos con track real)
 export { obtenerPaseosConTrack, type PaseoConTrack } from './wrappers/vitales';

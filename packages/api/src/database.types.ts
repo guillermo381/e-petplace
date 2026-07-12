@@ -13217,6 +13217,45 @@ export type Database = {
           },
         ]
       }
+      user_notificacion_prefs: {
+        Row: {
+          habilitada: boolean
+          tipo: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          habilitada?: boolean
+          tipo: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          habilitada?: boolean
+          tipo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_preferencias: {
+        Row: {
+          idioma: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          idioma?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          idioma?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           approved_at: string | null
