@@ -348,6 +348,25 @@ export const clienteEs = {
     holdVencido: 'Este horario se liberó',
     holdVencidoDetalle: 'Pasaron los 15 minutos del apartado. Elige otro horario.',
     elegirOtro: 'Elegir otro horario',
+    // S56-A D-339 — GATE PENDIENTE founder (lote S56)
+    direccionTitulo: '¿A qué puerta llegamos?',
+    direccionVoz: 'Para que el paseador sepa dónde buscar a tu mascota.',
+    direccionAgregar: 'Cuéntanos tu dirección',
+    direccionCambiar: 'Cambiar',
+    direccionLista: 'El paseo llega a esta puerta.',
+  },
+  // S56-A D-339 — la dirección del hogar. GATE PENDIENTE founder (lote S56).
+  direccion: {
+    titulo: 'Tu dirección',
+    voz: 'La puerta de tu hogar — donde el paseador busca y devuelve a tu mascota.',
+    direccionLabel: 'Dirección',
+    direccionPlaceholder: 'ej: Av. González Suárez N32-14, depto 5B',
+    ciudadLabel: 'Ciudad',
+    sectorLabel: 'Sector o barrio (opcional)',
+    referenciasLabel: 'Referencias para llegar (opcional)',
+    referenciasAyuda: 'ej: portón azul, timbre 2',
+    guardar: 'Guardar dirección',
+    guardada: 'Listo — tu dirección quedó guardada.',
   },
   // S55-A A2 — alta de mascota adicional (el hogar que crece).
   // Voz funcional de formulario; nace bilingüe (riel B1, tuteo neutro).

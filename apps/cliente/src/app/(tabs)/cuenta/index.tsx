@@ -48,6 +48,9 @@ export default function Cuenta() {
 
   const lugares = [
     { etiqueta: t('cuenta.perfil'), ruta: '/cuenta/perfil' as const },
+    // S56-A D-339: la dirección es del HOGAR (no del perfil personal) —
+    // celda propia; el checkout reusa el mismo formulario.
+    { etiqueta: t('direccion.titulo'), ruta: '/cuenta/direccion' as const },
     { etiqueta: t('cuenta.familia'), ruta: '/cuenta/familia' as const },
     { etiqueta: t('cuenta.preferencias'), ruta: '/cuenta/preferencias' as const },
     { etiqueta: t('cuenta.pagos'), ruta: '/cuenta/pagos' as const },

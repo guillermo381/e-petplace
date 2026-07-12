@@ -318,6 +318,25 @@ export const clienteEn = {
     holdVencido: 'This time was released',
     holdVencidoDetalle: 'The 15-minute hold ran out. Pick another time.',
     elegirOtro: 'Pick another time',
+    // S56-A D-339 — GATE PENDIENTE founder (lote S56)
+    direccionTitulo: 'Where do we pick up?',
+    direccionVoz: 'So the walker knows where to find your pet.',
+    direccionAgregar: 'Tell us your address',
+    direccionCambiar: 'Change',
+    direccionLista: 'The walk starts at this door.',
+  },
+  // S56-A D-339 — the home address. GATE PENDIENTE founder (lote S56).
+  direccion: {
+    titulo: 'Your address',
+    voz: "Your home's door — where the walker picks up and brings back your pet.",
+    direccionLabel: 'Address',
+    direccionPlaceholder: 'e.g. 123 Main St, apt 5B',
+    ciudadLabel: 'City',
+    sectorLabel: 'Neighborhood (optional)',
+    referenciasLabel: 'Directions to find it (optional)',
+    referenciasAyuda: 'e.g. blue gate, ring twice',
+    guardar: 'Save address',
+    guardada: 'Done — your address is saved.',
   },
   // S55-A A2 — additional pet flow (the home that grows).
   agregarMascota: {

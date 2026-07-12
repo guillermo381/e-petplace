@@ -27,6 +27,8 @@ import {
   Encabezado,
   EsperaDeMarca,
   EstadoVacio,
+  Hoja,
+  HojaScroll,
   Icono,
   Insignia,
   SelectorOpcion,
@@ -36,7 +38,8 @@ import {
   typography,
   useTheme,
 } from '@epetplace/ui';
-import { confirmarCitaPagada } from '@epetplace/api';
+import { confirmarCitaPagada, obtenerDireccionHogar, type DireccionHogar } from '@epetplace/api';
+import { DireccionHogarForm } from '@/components/direccion-hogar-form';
 import { useTraduccion } from '@/i18n';
 
 type Fase = 'resumen' | 'procesando' | 'exito' | 'rechazado' | 'timeout' | 'holdVencido';
@@ -65,6 +68,28 @@ export default function PaseoCheckout() {
   );
   // Toggle DEV del simulador de pago (solo __DEV__; default éxito).
   const [modoSim, setModoSim] = useState<ModoSimulador>('exito');
+
+  // D-339: la puerta del paseo. Si el hogar aún no tiene dirección, se
+  // captura ACÁ una sola vez (jamás en cada reserva); el PAGO la congela
+  // en la cita server-side. 'cargando' evita un flash de "sin dirección".
+  const [direccion, setDireccion] = useState<DireccionHogar | null>(null);
+  const [direccionEstado, setDireccionEstado] = useState<'cargando' | 'lista'>('cargando');
+  const [hojaDireccion, setHojaDireccion] = useState(false);
+
+  useEffect(() => {
+    let vigente = true;
+    void (async () => {
+      const r = await obtenerDireccionHogar();
+      if (!vigente) return;
+      if (r.ok) setDireccion(r.data);
+      // error de red: se queda sin dirección visible — el CTA de agregar
+      // reintenta por la misma Hoja (guardar re-escribe la principal).
+      setDireccionEstado('lista');
+    })();
+    return () => {
+      vigente = false;
+    };
+  }, []);
 
   // El contador del hold — voz honesta; al llegar a 0 el horario se
   // liberó (el server lo garantiza perezoso; esto es la verdad visible).
@@ -217,12 +242,48 @@ export default function PaseoCheckout() {
           </Text>
         </View>
 
+        {/* D-339 — la puerta del paseo: se muestra si existe; si no, se
+            captura UNA vez acá. El pago la congela en la cita (server). */}
+        <View style={{ gap: spacing[2] }}>
+          <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.secondary }}>
+            {t('checkout.direccionTitulo')}
+          </Text>
+          {direccionEstado === 'cargando' ? null : direccion !== null ? (
+            <Tarjeta relleno="ninguno">
+              <Celda
+                titulo={direccion.direccion}
+                subtitulo={[direccion.sector, direccion.ciudad].filter(Boolean).join(' · ')}
+                fin={
+                  <Boton
+                    variante="ghost"
+                    tamaño="sm"
+                    etiqueta={t('checkout.direccionCambiar')}
+                    onPress={() => setHojaDireccion(true)}
+                  />
+                }
+              />
+            </Tarjeta>
+          ) : (
+            <View style={{ gap: spacing[2] }}>
+              <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.tertiary }}>
+                {t('checkout.direccionVoz')}
+              </Text>
+              <Boton variante="secundario" etiqueta={t('checkout.direccionAgregar')} bloque onPress={() => setHojaDireccion(true)} />
+            </View>
+          )}
+        </View>
+
         {/* la superficie DICE que el pago es simulado */}
         <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.tertiary }}>
           {t('checkout.simuladoAviso')}
         </Text>
 
-        <Boton variante="primario" etiqueta={t('checkout.pagar')} onPress={() => void pagar()} />
+        <Boton
+          variante="primario"
+          etiqueta={t('checkout.pagar')}
+          deshabilitado={direccionEstado === 'cargando' || direccion === null}
+          onPress={() => void pagar()}
+        />
 
         {__DEV__ ? (
           <View style={{ marginTop: spacing[4] }}>
@@ -240,6 +301,32 @@ export default function PaseoCheckout() {
           </View>
         ) : null}
       </ScrollView>
+
+      {/* D-339: la captura de la dirección — el MISMO formulario de
+          Cuenta·Tu dirección, en Hoja (una vez, jamás en cada reserva) */}
+      <Hoja visible={hojaDireccion} onCerrar={() => setHojaDireccion(false)} titulo={t('direccion.titulo')} conCerrar>
+        <HojaScroll>
+          <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
+            <Text
+              style={{
+                fontFamily: typography.family.sans.regular,
+                fontSize: typography.size.sm,
+                lineHeight: typography.size.sm * 1.4,
+                color: theme.text.secondary,
+              }}
+            >
+              {t('direccion.voz')}
+            </Text>
+            <DireccionHogarForm
+              inicial={direccion}
+              onGuardada={(d) => {
+                setDireccion(d);
+                setHojaDireccion(false);
+              }}
+            />
+          </View>
+        </HojaScroll>
+      </Hoja>
     </SafeAreaView>
   );
 }
