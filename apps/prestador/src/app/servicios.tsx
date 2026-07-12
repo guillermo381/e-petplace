@@ -46,6 +46,7 @@ import {
   BLOQUES_PASEO,
   actualizarOfertaPaseo,
   crearOfertaPaseo,
+  obtenerComisionVigenteCita,
   obtenerMiCuentaComercial,
   obtenerMiPrestador,
   obtenerOfertasPaseoPropias,
@@ -63,10 +64,41 @@ type Pantalla =
       prestadorId: string;
       ofertas: OfertaPaseoPropia[];
       cuentaActiva: boolean | null; // null = no se pudo leer, no se afirma nada
+      // S56-B TAREA 4 (financiero v2.6, regla 7.15): % que retiene e-PetPlace,
+      // LEÍDO de fee_configs vía resolver. null = no se pudo leer → voz honesta.
+      comisionPct: number | null;
     };
 
 function monto(valor: number): string {
   return `$${valor.toFixed(2)}`;
+}
+
+/**
+ * S56-B TAREA 4 — la comisión visible donde se pone el precio (financiero
+ * v2.6, regla 7.15): el % viene del dato leído de fee_configs, jamás
+ * hardcodeado. Sin dato = voz honesta, jamás un número inventado.
+ */
+function VozComision({ pct, precio }: { pct: number | null; precio: number | null }) {
+  const { theme } = useTheme();
+  const { t } = useTraduccion();
+  const texto =
+    pct === null
+      ? t('servicios.comisionNoDisponible')
+      : precio === null
+        ? t('servicios.comisionRetiene', { pct })
+        : t('servicios.comisionNeto', { pct, neto: monto(precio * (1 - pct / 100)) });
+  return (
+    <Text
+      style={{
+        fontFamily: typography.family.sans.regular,
+        fontSize: typography.size.sm,
+        lineHeight: typography.size.sm * typography.leading.normal,
+        color: theme.text.secondary,
+      }}
+    >
+      {texto}
+    </Text>
+  );
 }
 
 function TituloBloque({ texto }: { texto: string }) {
@@ -114,9 +146,10 @@ export default function Servicios() {
           setPantalla({ estado: 'error' });
           return;
         }
-        const [rOfertas, rCuenta] = await Promise.all([
+        const [rOfertas, rCuenta, rComision] = await Promise.all([
           obtenerOfertasPaseoPropias(prestador.data.id),
           obtenerMiCuentaComercial(),
+          obtenerComisionVigenteCita(),
         ]);
         if (!vigente) return;
         if (!rOfertas.ok) {
@@ -128,6 +161,7 @@ export default function Servicios() {
           prestadorId: prestador.data.id,
           ofertas: rOfertas.data,
           cuentaActiva: rCuenta.ok ? rCuenta.data?.estado === 'activa' : null,
+          comisionPct: rComision.ok ? rComision.data.porcentaje : null,
         });
       })();
       return () => {
@@ -346,6 +380,10 @@ export default function Servicios() {
               error={errorPrecio}
               deshabilitado={guardando}
             />
+            <VozComision
+              pct={pantalla.estado === 'listo' ? pantalla.comisionPct : null}
+              precio={leerPrecio()}
+            />
             <Campo
               label={t('servicios.nombre')}
               value={nombreTexto}
@@ -412,6 +450,10 @@ export default function Servicios() {
               ayuda={t('servicios.precioAyuda')}
               error={errorPrecio}
               deshabilitado={guardando}
+            />
+            <VozComision
+              pct={pantalla.estado === 'listo' ? pantalla.comisionPct : null}
+              precio={leerPrecio()}
             />
             <Campo
               label={t('servicios.nombre')}

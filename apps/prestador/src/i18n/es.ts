@@ -283,6 +283,9 @@ export const prestadorEs = {
   },
   // Configuración del servicio de paseo — S55-B (B2, modelo cerrado del
   // founder: menú canónico de bloques + precio por bloque)
+  // LOTE S56 — GATE PENDIENTE del founder: servicios.* + horarios.* completos
+  // (nacieron post-lectura S55; la aprobación S55 NO los cubre) + las keys
+  // de comisión visible (S56-B TAREA 4).
   servicios: {
     titulo: 'Servicios y precios',
     error: 'No pudimos cargar tus servicios.',
@@ -327,7 +330,13 @@ export const prestadorEs = {
     bloqueDuplicado: 'Ya ofreces un paseo de esa duración.',
     // peldaño 2 — hueco declarado
     paquetesHueco: 'Paquetes y paseos recurrentes llegan más adelante.',
+    // comisión visible donde se pone precio (S56-B TAREA 4, financiero v2.6
+    // regla 7.15 — el % viene del dato, jamás hardcodeado)
+    comisionRetiene: 'e-PetPlace retiene {{pct}}%',
+    comisionNeto: 'e-PetPlace retiene {{pct}}% · vas a recibir {{neto}}',
+    comisionNoDisponible: 'No pudimos leer la comisión vigente.',
   },
+  // LOTE S56 — GATE PENDIENTE del founder (junto con servicios.*).
   horarios: {
     titulo: 'Horarios',
     error: 'No pudimos cargar tus horarios.',

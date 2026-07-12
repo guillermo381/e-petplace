@@ -258,6 +258,8 @@ export const prestadorEn = {
   },
   // Walk service configuration — S55-B (B2, founder's closed model:
   // canonical block menu + price per block)
+  // LOTE S56 — GATE PENDIENTE del founder: servicios.* + horarios.* completos
+  // + keys de comisión visible (S56-B TAREA 4). Espejo de es.ts.
   servicios: {
     titulo: 'Services & pricing',
     error: "We couldn't load your services.",
@@ -295,7 +297,12 @@ export const prestadorEn = {
     precioInvalido: 'The price has to be greater than zero.',
     bloqueDuplicado: 'You already offer a walk of that duration.',
     paquetesHueco: 'Packages and recurring walks arrive later on.',
+    // comisión visible (S56-B TAREA 4) — Espejo de es.ts
+    comisionRetiene: 'e-PetPlace keeps {{pct}}%',
+    comisionNeto: "e-PetPlace keeps {{pct}}% · you'll receive {{neto}}",
+    comisionNoDisponible: "We couldn't read the current fee.",
   },
+  // LOTE S56 — GATE PENDIENTE del founder (junto con servicios.*).
   horarios: {
     titulo: 'Hours',
     error: "We couldn't load your hours.",
