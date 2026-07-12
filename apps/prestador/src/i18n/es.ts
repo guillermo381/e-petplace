@@ -56,6 +56,8 @@ export const prestadorEs = {
     estadoNoShow: 'No show',
     // fallback cuando la cita llega sin mascota asociada (D-315p)
     mascotaFallback: 'Mascota',
+    // marca "parte del plan" (D-338, S56-B T7) · LOTE S56, GATE PENDIENTE
+    parteDelPlan: 'Parte del plan',
   },
   // El flujo de atención E2E (S44, migrado en D-315 pata prestador).
   // VOZ EMOCIONAL APROBADA por founder (lote S55, es y en) — hunk de
@@ -74,6 +76,8 @@ export const prestadorEs = {
     iniciarPaseo: 'Iniciar paseo',
     // A dónde ir — D-339 (S56-B TAREA 3) · LOTE S56, GATE PENDIENTE
     direccionTitulo: 'A dónde ir',
+    // marca "parte del plan" (D-338, S56-B T7) · LOTE S56, GATE PENDIENTE
+    parteDelPlan: 'Parte del plan de {{nombre}}',
     direccionAbrirMapa: 'Abrir en el mapa',
     direccionSinDato: 'Esta cita no tiene una dirección registrada.',
     direccionMapaError: 'No pudimos abrir el mapa.',

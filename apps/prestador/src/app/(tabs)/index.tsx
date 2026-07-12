@@ -125,7 +125,15 @@ function FilaCita({ cita, enVivo, fotoUrl }: { cita: CitaAgendaPaseo; enVivo: bo
       onPress={() => router.push({ pathname: '/cita/[citaId]', params: { citaId: cita.id } })}
       accessibilityRole="button"
       titulo={cita.mascota?.nombre ?? t('agenda.mascotaFallback')}
-      subtitulo={cita.tipo.nombre}
+      // La marca "parte del plan" (D-338, S56-B T7) — escalera: peldaño 0 =
+      // sin planes, invisible (hoy) · peldaño 1 = este sufijo cuando la fila
+      // trae suscripcion_servicio_id · peldaño 2 = detalle del plan visible
+      // al prestador (hueco declarado en el pedido D-338 (c), RLS futura).
+      subtitulo={
+        cita.suscripcion_servicio_id !== null
+          ? `${cita.tipo.nombre} · ${t('agenda.parteDelPlan')}`
+          : cita.tipo.nombre
+      }
       inicio={
         <AvatarMascota
           nombre={cita.mascota?.nombre ?? t('agenda.mascotaFallback')}

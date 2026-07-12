@@ -258,7 +258,10 @@ export type MascotaAgenda = Pick<
 
 export type CitaAgendaPaseo = Pick<
   Database['public']['Tables']['evento_cita_servicio']['Row'],
-  'id' | 'fecha' | 'hora' | 'estado' | 'tipo_servicio'
+  // suscripcion_servicio_id: la marca "parte del plan" (D-338, S56-B T7).
+  // Hoy siempre NULL (0 suscripciones); el día que el motor del plan
+  // nazca, la voz del prestador ya habla sin tocar una línea.
+  'id' | 'fecha' | 'hora' | 'estado' | 'tipo_servicio' | 'suscripcion_servicio_id'
 > & {
   mascota: MascotaAgenda | null;
   tipo: Pick<
@@ -320,7 +323,7 @@ export async function obtenerCitasPaseoDelDia(
   const { data, error } = await getClient()
     .from('evento_cita_servicio')
     .select(
-      'id, fecha, hora, estado, tipo_servicio, direccion_snapshot, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
+      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, direccion_snapshot, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
     )
     .eq('prestador_id', input.prestador_id)
     .eq('fecha', input.fecha)

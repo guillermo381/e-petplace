@@ -356,6 +356,20 @@ export default function DetalleCita() {
                 >
                   {`${t('cita.hoy')} · ${hora}${dur ? ` · ${dur} min` : ''}`}
                 </Text>
+                {/* La marca "parte del plan" (D-338, S56-B T7): habla solo si
+                    la fila trae suscripcion_servicio_id — hoy siempre null
+                    (0 suscripciones), ni un hueco reservado mientras tanto. */}
+                {cita.suscripcion_servicio_id !== null ? (
+                  <Text
+                    style={{
+                      fontFamily: typography.family.sans.regular,
+                      fontSize: typography.size.sm,
+                      color: theme.text.secondary,
+                    }}
+                  >
+                    {t('cita.parteDelPlan', { nombre })}
+                  </Text>
+                ) : null}
               </View>
             </Tarjeta>
 

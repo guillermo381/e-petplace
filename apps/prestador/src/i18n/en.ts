@@ -48,6 +48,8 @@ export const prestadorEn = {
     estadoCompletada: 'Completed',
     estadoNoShow: 'No show',
     mascotaFallback: 'Pet',
+    // marca "parte del plan" (D-338, S56-B T7) · LOTE S56 · Espejo de es.ts
+    parteDelPlan: 'Part of the plan',
   },
   // The E2E walk flow (S44, migrated in D-315 provider leg).
   cita: {
@@ -62,6 +64,7 @@ export const prestadorEn = {
     iniciarPaseo: 'Start walk',
     // A dónde ir — D-339 (S56-B TAREA 3) · LOTE S56, GATE PENDIENTE · Espejo de es.ts
     direccionTitulo: 'Where to go',
+    parteDelPlan: "Part of {{nombre}}'s plan",
     direccionAbrirMapa: 'Open in maps',
     direccionSinDato: "This appointment doesn't have a saved address.",
     direccionMapaError: "We couldn't open the map.",
