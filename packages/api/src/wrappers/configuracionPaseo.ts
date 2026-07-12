@@ -31,6 +31,7 @@ const MENSAJES = {
   bloque_invalido:        'Esa duración no está en el menú de paseos.',
   precio_invalido:        'El precio tiene que ser mayor a cero.',
   bloque_duplicado:       'Ya ofreces un paseo de esa duración.',
+  precio_plan_invalido:   'El precio del plan tiene que ser mayor a cero. Déjalo vacío si no ofreces plan.',
   rango_horario_invalido: 'La hora de fin tiene que ser después de la de inicio.',
   franja_solapada:        'Esa franja se cruza con una que ya tienes ese día.',
   cupo_invalido:          'El cupo tiene que ser entre 1 y 4.',
@@ -55,6 +56,13 @@ export interface OfertaPaseoPropia {
   id: string;
   duracionMinutos: number;
   precio: number;
+  /**
+   * Precio POR SALIDA cuando el bloque es parte de un plan mensual
+   * (D-338, contrato S56 ratificado: columna en prestador_servicios,
+   * SIN CHECK relacional contra precio — el plan puede valer más).
+   * null = el prestador NO ofrece plan en este bloque (oferta honesta).
+   */
+  precioPlan: number | null;
   nombre: string | null;
   descripcion: string | null;
   activo: boolean;
@@ -80,6 +88,7 @@ function mapearOferta(fila: {
   id: string;
   duracion_minutos: number | null;
   precio: number;
+  precio_plan: number | null;
   nombre_custom: string | null;
   descripcion: string | null;
   activo: boolean;
@@ -88,13 +97,14 @@ function mapearOferta(fila: {
     id: fila.id,
     duracionMinutos: fila.duracion_minutos ?? 30,
     precio: fila.precio,
+    precioPlan: fila.precio_plan,
     nombre: fila.nombre_custom,
     descripcion: fila.descripcion,
     activo: fila.activo,
   };
 }
 
-const SELECT_OFERTA = 'id, duracion_minutos, precio, nombre_custom, descripcion, activo';
+const SELECT_OFERTA = 'id, duracion_minutos, precio, precio_plan, nombre_custom, descripcion, activo';
 
 /** Los bloques de paseo del prestador propio, del más corto al más largo. */
 export async function obtenerOfertasPaseoPropias(
@@ -118,6 +128,8 @@ export interface InputCrearOfertaPaseo {
   prestadorId: string;
   duracionMinutos: number;
   precio: number;
+  /** Precio por salida en plan mensual; ausente/null = sin plan en este bloque. */
+  precioPlan?: number | null;
   nombre?: string;
   descripcion?: string;
 }
@@ -131,6 +143,13 @@ export async function crearOfertaPaseo(
 
   if (!BLOQUES_PASEO.includes(input.duracionMinutos as BloquePaseo)) return falla('bloque_invalido');
   if (!Number.isFinite(input.precio) || input.precio <= 0) return falla('precio_invalido');
+  if (
+    input.precioPlan !== undefined &&
+    input.precioPlan !== null &&
+    (!Number.isFinite(input.precioPlan) || input.precioPlan <= 0)
+  ) {
+    return falla('precio_plan_invalido');
+  }
 
   // un bloque por duración: el schema no tiene UNIQUE (relevado S55) —
   // la unicidad se cuida acá y el gate del founder la ratifica en UI
@@ -151,6 +170,7 @@ export async function crearOfertaPaseo(
       tipo_servicio: 'paseo',
       duracion_minutos: input.duracionMinutos,
       precio: input.precio,
+      precio_plan: input.precioPlan ?? null,
       nombre_custom: input.nombre?.trim() || null,
       descripcion: input.descripcion?.trim() || null,
       activo: true,
@@ -166,6 +186,8 @@ export async function crearOfertaPaseo(
 export interface InputActualizarOfertaPaseo {
   id: string;
   precio?: number;
+  /** number = precio por salida del plan · null = quitar el plan del bloque · ausente = no tocar. */
+  precioPlan?: number | null;
   nombre?: string | null;
   descripcion?: string | null;
   activo?: boolean;
@@ -185,9 +207,17 @@ export async function actualizarOfertaPaseo(
   if (input.precio !== undefined && (!Number.isFinite(input.precio) || input.precio <= 0)) {
     return falla('precio_invalido');
   }
+  if (
+    input.precioPlan !== undefined &&
+    input.precioPlan !== null &&
+    (!Number.isFinite(input.precioPlan) || input.precioPlan <= 0)
+  ) {
+    return falla('precio_plan_invalido');
+  }
 
   const cambios: UpdateOferta = {};
   if (input.precio !== undefined) cambios.precio = input.precio;
+  if (input.precioPlan !== undefined) cambios.precio_plan = input.precioPlan;
   if (input.nombre !== undefined) cambios.nombre_custom = input.nombre?.trim() || null;
   if (input.descripcion !== undefined) cambios.descripcion = input.descripcion?.trim() || null;
   if (input.activo !== undefined) cambios.activo = input.activo;

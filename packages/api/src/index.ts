@@ -235,6 +235,17 @@ export {
   type CodigoErrorLiquidaciones,
 } from './wrappers/liquidaciones';
 
+// Vacaciones / bloqueos del prestador — S56-B (TAREA 2, D-341) — archivo
+// NUEVO de esta sesión
+export {
+  obtenerBloqueosPrestador,
+  crearBloqueoPrestador,
+  eliminarBloqueoPrestador,
+  type BloqueoPrestador,
+  type InputCrearBloqueoPrestador,
+  type CodigoErrorBloqueos,
+} from './wrappers/bloqueos';
+
 // Comisión vigente visible al prestador — S56-B (TAREA 4, financiero v2.6
 // regla 7.15) — archivo NUEVO de esta sesión
 export {
