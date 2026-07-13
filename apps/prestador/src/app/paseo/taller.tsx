@@ -402,6 +402,10 @@ export default function TallerPaseo() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [drafts === null]);
   const etiquetasPasos = useMemo(() => pasos.map(monto), [pasos]);
+  // el PLAN se muestra EN MENSUAL (corrección founder S58): mes típico de
+  // 4 salidas → mismo riel, etiquetas ×4 (paso visible $1). El CONTRATO
+  // sigue POR SALIDA (7.14): se guarda pasos[i], jamás el mensual.
+  const etiquetasMes = useMemo(() => pasos.map((p) => monto(p * 4)), [pasos]);
   const indicePrecio = (texto: string): number => {
     const v = leerPrecio(texto);
     if (v === null) return Math.round(5 / PASO_PRECIO) - 1;
@@ -784,21 +788,21 @@ export default function TallerPaseo() {
                                     color: theme.text.primary,
                                   }}
                                 >
-                                  {etiquetasPasos[indicePrecio(d.plan)]}
+                                  {etiquetasMes[indicePrecio(d.plan)]}
                                 </Text>
                               </View>
                               <SliderPrecio
                                 etiqueta={t('taller.planRotulo')}
-                                pasos={etiquetasPasos}
+                                pasos={etiquetasMes}
                                 indice={indicePrecio(d.plan)}
                                 onCambio={(i) => actualizarDraft(b, { plan: pasos[i].toFixed(2) })}
                                 registro="aa"
                               />
-                              <VozComision pct={pct} precio={leerPrecio(d.plan)} />
-                              {/* la línea VIVA: el plan sigue siendo POR SALIDA;
-                                  el mes típico es traducción, no contrato */}
+                              <VozComision pct={pct} precio={(leerPrecio(d.plan) ?? 0) * 4} />
+                              {/* la línea VIVA invertida: el contrato sigue POR
+                                  SALIDA (7.14) — acá se declara la equivalencia */}
                               <VozSecundaria
-                                texto={t('taller.planTipico', { total: monto((leerPrecio(d.plan) ?? 0) * 4) })}
+                                texto={t('taller.planEquivale', { salida: monto(leerPrecio(d.plan) ?? 0) })}
                               />
                             </>
                           )}

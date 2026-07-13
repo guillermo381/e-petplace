@@ -381,8 +381,10 @@ export const prestadorEs = {
     agregarDuracion: 'Ofrecer otra duración',
     // v3.2: plan y paquete por interruptor (el contrato POR SALIDA intacto)
     planInterruptor: 'Ofrecer plan mensual',
-    planRotulo: 'Precio por salida para clientes con plan mensual',
-    planTipico: 'Un plan típico de 4 salidas: {{total}}/mes',
+    // corrección founder S58: el plan se dice EN MENSUAL; el contrato
+    // sigue por salida (7.14) — la equivalencia se declara abajo
+    planRotulo: 'Lo que tu cliente paga al mes',
+    planEquivale: 'Mes típico de 4 salidas · {{salida}} por salida',
     paqueteInterruptor: 'Ofrecer paquete de salidas',
     paqueteRotulo: 'Precio de cada salida al comprar paquete',
     // el wizard (v3): progreso sereno
