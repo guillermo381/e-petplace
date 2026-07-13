@@ -316,3 +316,26 @@ export async function obtenerSaldoPaquete(input: {
   if (saldo <= 0) return { ok: true, data: null };
   return { ok: true, data: { saldo, vence_el: vence, duracion_minutos: duracion } };
 }
+
+/**
+ * El precio por salida del PAQUETE de una oferta concreta (lectura por
+ * la policy pública ps_public — oferta activa de prestador activo).
+ * null honesto = el prestador no ofrece paquete en ese bloque: la
+ * superficie de compra NO aparece (contrato precio_paquete, D-343).
+ */
+export async function obtenerPrecioPaqueteDeOferta(
+  prestadorServicioId: string,
+): Promise<ResultadoWrapper<{ precio_paquete: number | null }, CodigoErrorPaquete>> {
+  const supabase = getClient();
+  const { data, error } = await supabase
+    .from('prestador_servicios')
+    .select('precio_paquete')
+    .eq('id', prestadorServicioId)
+    .maybeSingle();
+  if (error) return mapeoError(error.message);
+  if (data === null) return { ok: true, data: { precio_paquete: null } };
+  return {
+    ok: true,
+    data: { precio_paquete: data.precio_paquete === null ? null : Number(data.precio_paquete) },
+  };
+}

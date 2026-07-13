@@ -305,6 +305,7 @@ export {
   cancelarReservaPaquete,
   obtenerMisPaquetesSalidas,
   obtenerSaldoPaquete,
+  obtenerPrecioPaqueteDeOferta,
   type PresetPaquete,
   type ComprarPaqueteInput,
   type PaqueteComprado,
@@ -319,5 +320,8 @@ export {
 export {
   reagendarCitaSuelta,
   cancelarCitaSuelta,
+  obtenerMisCitasPaseo,
+  resolverOfertaDeCita,
+  type CitaPaseoDueno,
   type CodigoErrorCitaSuelta,
 } from './wrappers/citaSuelta';

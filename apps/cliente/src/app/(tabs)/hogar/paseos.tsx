@@ -37,12 +37,20 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  cancelarCitaSuelta,
+  cancelarReservaPaquete,
   configurarRenovacionPlan,
   obtenerCitasDePlan,
+  obtenerMisCitasPaseo,
+  obtenerMisPaquetesSalidas,
   obtenerMisPlanesPaseo,
   obtenerSlotsDisponibles,
+  reagendarCitaSuelta,
+  resolverOfertaDeCita,
   saltarCitaPlan,
   type CitaDePlan,
+  type CitaPaseoDueno,
+  type PaqueteSalidas,
   type PlanPaseo,
 } from '@epetplace/api';
 import { fechaCortaMono, obtenerIdiomaActual } from '@epetplace/i18n';
@@ -63,17 +71,31 @@ export default function MisPaseos() {
   const [segmento, setSegmento] = useState<Segmento>('proximos');
   const [planes, setPlanes] = useState<PlanPaseo[] | 'cargando' | 'error'>('cargando');
   const [citas, setCitas] = useState<Record<string, CitaDePlan[]>>({});
+  // D-343 + P18: los paquetes del dueño y sus paseos fuera del plan
+  const [paquetes, setPaquetes] = useState<PaqueteSalidas[]>([]);
+  const [citasLibres, setCitasLibres] = useState<CitaPaseoDueno[]>([]);
   const [pausando, setPausando] = useState(false);
   // Mover (P14a): la salida elegida + su plan
   const [moviendo, setMoviendo] = useState<{ cita: CitaDePlan; plan: PlanPaseo } | null>(null);
   const [fechaNueva, setFechaNueva] = useState<string | null>(null);
   const [horasNuevas, setHorasNuevas] = useState<string[] | 'cargando' | null>(null);
   const [guardandoMovida, setGuardandoMovida] = useState(false);
+  // P18/P16b: el DETALLE de la cita (suelta o de paquete) con sus acciones
+  const [detalle, setDetalle] = useState<CitaPaseoDueno | null>(null);
+  const [accionando, setAccionando] = useState(false);
+  // Reagendar el suelto (P18 a/b): oferta resuelta + día + horas reales
+  const [reagendando, setReagendando] = useState<{ cita: CitaPaseoDueno; ofertaId: string } | 'resolviendo' | null>(null);
 
   const cargar = useCallback(() => {
     setPlanes('cargando');
     void (async () => {
-      const r = await obtenerMisPlanesPaseo();
+      const [r, pq, cl] = await Promise.all([
+        obtenerMisPlanesPaseo(),
+        obtenerMisPaquetesSalidas(),
+        obtenerMisCitasPaseo(),
+      ]);
+      if (pq.ok) setPaquetes(pq.data);
+      if (cl.ok) setCitasLibres(cl.data);
       if (!r.ok) {
         setPlanes('error');
         return;
@@ -141,9 +163,112 @@ export default function MisPaseos() {
     cargar();
   }
 
+  // ── P18(a): cancelar el suelto — reembolso simulado DECLARADO ──
+  async function cancelarSuelto(cita: CitaPaseoDueno) {
+    if (accionando) return;
+    setAccionando(true);
+    const r = await cancelarCitaSuelta(cita.id);
+    setAccionando(false);
+    if (!r.ok) {
+      mostrar({ texto: r.mensaje, variante: 'error' });
+      return;
+    }
+    setDetalle(null);
+    mostrar({ texto: t('suelto.cancelado', { monto: r.data.reembolso_monto.toFixed(2) }), variante: 'exito' });
+    cargar();
+  }
+
+  // ── P16(b): cancelar la reserva del paquete — vuelve al saldo ──
+  async function cancelarDePaquete(cita: CitaPaseoDueno) {
+    if (accionando) return;
+    setAccionando(true);
+    const r = await cancelarReservaPaquete(cita.id);
+    setAccionando(false);
+    if (!r.ok) {
+      mostrar({ texto: r.mensaje, variante: 'error' });
+      return;
+    }
+    setDetalle(null);
+    mostrar({ texto: t('paquete.cancelada', { n: r.data.saldo }), variante: 'exito' });
+    cargar();
+  }
+
+  // ── P18(a)/(b): reagendar el suelto — la oferta se RESUELVE primero ──
+  async function abrirReagenda(cita: CitaPaseoDueno) {
+    if (cita.prestador_id === null || cita.tipo_servicio === null) return;
+    setReagendando('resolviendo');
+    setFechaNueva(null);
+    setHorasNuevas(null);
+    const r = await resolverOfertaDeCita({
+      prestador_id: cita.prestador_id,
+      tipo_servicio: cita.tipo_servicio,
+      duracion_minutos: cita.duracion_minutos,
+    });
+    if (!r.ok || r.data === null) {
+      setReagendando(null);
+      // el paseador ya no oferta este bloque: la reagenda no se ofrece
+      mostrar({ texto: t('suelto.sinOferta'), variante: 'error' });
+      return;
+    }
+    setDetalle(null);
+    setReagendando({ cita, ofertaId: r.data.prestador_servicio_id });
+  }
+
+  async function elegirFechaReagenda(fecha: string) {
+    if (reagendando === null || reagendando === 'resolviendo') return;
+    setFechaNueva(fecha);
+    setHorasNuevas('cargando');
+    const cita = reagendando.cita;
+    if (cita.prestador_id === null) {
+      setHorasNuevas([]);
+      return;
+    }
+    const r = await obtenerSlotsDisponibles({
+      prestador_id: cita.prestador_id,
+      prestador_servicio_id: reagendando.ofertaId,
+      desde: fecha,
+      hasta: fecha,
+    });
+    setHorasNuevas(r.ok ? r.data.map((s) => s.hora.slice(0, 5)) : []);
+  }
+
+  async function confirmarReagenda(hora: string) {
+    if (reagendando === null || reagendando === 'resolviendo' || fechaNueva === null || guardandoMovida) return;
+    setGuardandoMovida(true);
+    const r = await reagendarCitaSuelta({ cita_id: reagendando.cita.id, nueva_fecha: fechaNueva, nueva_hora: hora });
+    setGuardandoMovida(false);
+    if (!r.ok) {
+      mostrar({ texto: r.mensaje, variante: 'error' });
+      return;
+    }
+    setReagendando(null);
+    setFechaNueva(null);
+    setHorasNuevas(null);
+    mostrar({ texto: t('suelto.reagendado'), variante: 'exito' });
+    cargar();
+  }
+
+  /** Próximos 14 días desde mañana — la tira de la reagenda del suelto. */
+  function fechasProximas(): string[] {
+    const fechas: string[] = [];
+    for (let i = 1; i <= 14; i += 1) {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      fechas.push(new Intl.DateTimeFormat('en-CA').format(d));
+    }
+    return fechas;
+  }
+
   const hoy = hoyLocal();
   const listaPlanes = Array.isArray(planes) ? planes : [];
   const activos = listaPlanes.filter((p) => p.estado === 'activa');
+  // D-343: los paquetes con saldo vigente (el vencido/agotado va al historial implícito)
+  const paquetesVigentes = paquetes.filter(
+    (p) => p.estado === 'activo' && p.saldo > 0 && (p.fecha_vencimiento === null || p.fecha_vencimiento >= hoy),
+  );
+  const librasProximas = citasLibres.filter((c) => c.estado === 'confirmada' && c.fecha >= hoy);
+  const librasPasadas = citasLibres.filter((c) => c.estado !== 'confirmada' || c.fecha < hoy);
+  const hayAlgo = listaPlanes.length > 0 || paquetesVigentes.length > 0 || citasLibres.length > 0;
 
   function vozEstado(p: PlanPaseo): { etiqueta: string; estado: 'alDia' | 'info' } {
     if (p.estado === 'activa' && p.auto_renovar) return { etiqueta: t('plan.estadoActiva'), estado: 'alDia' };
@@ -186,7 +311,7 @@ export default function MisPaseos() {
             accion={<Boton variante="secundario" etiqueta={t('cuenta.reintentar')} onPress={cargar} />}
           />
         </View>
-      ) : listaPlanes.length === 0 ? (
+      ) : !hayAlgo ? (
         <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
           <EstadoVacio
             icono={<Icono nombre="paseo" tamano={48} />}
@@ -210,6 +335,39 @@ export default function MisPaseos() {
 
           {segmento === 'proximos' ? (
             <View style={{ gap: spacing[4] }}>
+              {/* D-343: el SALDO del paquete, donde el dueño lo busca. La
+                  vigencia en voz llana — sin countdown (P16e). */}
+              {paquetesVigentes.map((pq) => (
+                <Tarjeta key={pq.id} relleno="ninguno">
+                  <Celda
+                    titulo={t('paquete.tarjetaTitulo', { min: pq.duracion_minutos ?? 30 })}
+                    subtitulo={
+                      pq.fecha_vencimiento !== null
+                        ? t('paquete.venceEl', { fecha: fechaCortaMono(pq.fecha_vencimiento, idioma) })
+                        : undefined
+                    }
+                    fin={<Insignia estado="alDia" etiqueta={t('paquete.saldoInsignia', { n: pq.saldo })} />}
+                  />
+                </Tarjeta>
+              ))}
+              {/* P18: los paseos sueltos y de paquete que vienen */}
+              {librasProximas.length > 0 ? (
+                <Tarjeta relleno="ninguno">
+                  {librasProximas.map((c, i) => (
+                    <View key={c.id}>
+                      {i > 0 ? <Separador /> : null}
+                      <Celda
+                        interactiva
+                        accessibilityRole="button"
+                        titulo={fechaCortaMono(c.fecha, idioma)}
+                        subtitulo={t(c.origen === 'paquete' ? 'paquete.citaDePaquete' : 'suelto.citaSuelta')}
+                        metadataMono={`${c.hora.slice(0, 5)} · ${c.duracion_minutos} min`}
+                        onPress={() => setDetalle(c)}
+                      />
+                    </View>
+                  ))}
+                </Tarjeta>
+              ) : null}
               {listaPlanes.map((p) => {
                 const estado = vozEstado(p);
                 const proximas = (citas[p.id] ?? []).filter((c) => c.estado === 'confirmada' && c.fecha >= hoy).slice(0, 3);
@@ -248,7 +406,30 @@ export default function MisPaseos() {
             </View>
           ) : segmento === 'agenda' ? (
             <View style={{ gap: spacing[4] }}>
-              {activos.length === 0 ? (
+              {/* P18: las acciones del suelto/paquete viven en el DETALLE */}
+              {librasProximas.length > 0 ? (
+                <Tarjeta relleno="ninguno">
+                  {librasProximas.map((c, i) => (
+                    <View key={c.id}>
+                      {i > 0 ? <Separador /> : null}
+                      <Celda
+                        titulo={fechaCortaMono(c.fecha, idioma)}
+                        subtitulo={t(c.origen === 'paquete' ? 'paquete.citaDePaquete' : 'suelto.citaSuelta')}
+                        metadataMono={`${c.hora.slice(0, 5)} · ${c.duracion_minutos} min`}
+                        fin={
+                          <Boton
+                            variante="ghost"
+                            tamaño="sm"
+                            etiqueta={t('suelto.modificar')}
+                            onPress={() => setDetalle(c)}
+                          />
+                        }
+                      />
+                    </View>
+                  ))}
+                </Tarjeta>
+              ) : null}
+              {activos.length === 0 && librasProximas.length === 0 ? (
                 <EstadoVacio registro="seccion" titulo={t('plan.vacioSegmento')} />
               ) : (
                 activos.map((p) => {
@@ -287,7 +468,35 @@ export default function MisPaseos() {
             </View>
           ) : (
             <View style={{ gap: spacing[4] }}>
-              {listaPlanes.every((p) => (citas[p.id] ?? []).every((c) => c.estado === 'confirmada' && c.fecha >= hoy)) ? (
+              {/* lo caminado fuera del plan también es sedimento */}
+              {librasPasadas.length > 0 ? (
+                <Tarjeta relleno="ninguno">
+                  {librasPasadas.map((c, i) => (
+                    <View key={c.id}>
+                      {i > 0 ? <Separador /> : null}
+                      <Celda
+                        titulo={fechaCortaMono(c.fecha, idioma)}
+                        subtitulo={t(c.origen === 'paquete' ? 'paquete.citaDePaquete' : 'suelto.citaSuelta')}
+                        metadataMono={`${c.hora.slice(0, 5)} · ${c.duracion_minutos} min`}
+                        fin={
+                          <Insignia
+                            estado={c.estado === 'completada' ? 'alDia' : 'info'}
+                            etiqueta={t(
+                              c.estado === 'completada'
+                                ? 'plan.salidaCompletada'
+                                : c.estado === 'no_show'
+                                  ? 'suelto.salidaPerdida'
+                                  : 'plan.salidaCancelada',
+                            )}
+                          />
+                        }
+                      />
+                    </View>
+                  ))}
+                </Tarjeta>
+              ) : null}
+              {librasPasadas.length === 0 &&
+              listaPlanes.every((p) => (citas[p.id] ?? []).every((c) => c.estado === 'confirmada' && c.fecha >= hoy)) ? (
                 <EstadoVacio registro="seccion" titulo={t('plan.vacioSegmento')} />
               ) : (
                 listaPlanes.map((p) => {
@@ -359,6 +568,101 @@ export default function MisPaseos() {
                   opciones={horasNuevas.map((h) => ({ codigo: h, etiqueta: h }))}
                   seleccionada={undefined}
                   onSelect={(h) => void moverSalida(h)}
+                />
+              ) : null}
+            </View>
+          ) : null}
+        </HojaScroll>
+      </Hoja>
+
+      {/* P18/P16: el DETALLE de la cita — las acciones viven acá, con
+          las ventanas dichas en voz honesta. La pantalla de elección de
+          destino del reembolso NO existe en v1 (decisión founder S57). */}
+      <Hoja
+        visible={detalle !== null}
+        titulo={t('suelto.detalleTitulo')}
+        onCerrar={() => setDetalle(null)}
+        conCerrar
+      >
+        {detalle !== null ? (
+          <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
+            <Celda
+              titulo={fechaCortaMono(detalle.fecha, idioma)}
+              subtitulo={t(detalle.origen === 'paquete' ? 'paquete.citaDePaquete' : 'suelto.citaSuelta')}
+              metadataMono={`${detalle.hora.slice(0, 5)} · ${detalle.duracion_minutos} min${detalle.precio !== null ? ` · $${detalle.precio.toFixed(2)}` : ''}`}
+            />
+            <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
+              {t(detalle.origen === 'paquete' ? 'paquete.ventanasVoz' : 'suelto.ventanasVoz')}
+            </Text>
+            {detalle.origen === 'suelta' ? (
+              <>
+                <Boton
+                  variante="primario"
+                  bloque
+                  etiqueta={t('suelto.reagendar')}
+                  deshabilitado={accionando || reagendando === 'resolviendo'}
+                  onPress={() => void abrirReagenda(detalle)}
+                />
+                <Boton
+                  variante="destructivo"
+                  bloque
+                  etiqueta={t('suelto.cancelar')}
+                  cargando={accionando}
+                  onPress={() => void cancelarSuelto(detalle)}
+                />
+              </>
+            ) : (
+              <Boton
+                variante="destructivo"
+                bloque
+                etiqueta={t('paquete.cancelarReserva')}
+                cargando={accionando}
+                onPress={() => void cancelarDePaquete(detalle)}
+              />
+            )}
+          </View>
+        ) : null}
+      </Hoja>
+
+      {/* P18(a)/(b): reagendar el suelto — franja REAL del MISMO paseador */}
+      <Hoja
+        visible={reagendando !== null && reagendando !== 'resolviendo'}
+        titulo={t('suelto.reagendarTitulo')}
+        onCerrar={() => {
+          setReagendando(null);
+          setFechaNueva(null);
+          setHorasNuevas(null);
+        }}
+        conCerrar
+      >
+        <HojaScroll>
+          {reagendando !== null && reagendando !== 'resolviendo' ? (
+            <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
+              <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
+                {t('suelto.reagendarVoz')}
+              </Text>
+              <SelectorOpcion
+                disposicion="tira"
+                etiqueta={t('plan.moverDia')}
+                opciones={fechasProximas().map((f) => ({ codigo: f, etiqueta: fechaCortaMono(f, idioma) }))}
+                seleccionada={fechaNueva ?? undefined}
+                onSelect={(f) => void elegirFechaReagenda(f)}
+              />
+              {horasNuevas === 'cargando' ? (
+                <EsqueletoGrupo>
+                  <Esqueleto forma="bloque" ancho="100%" alto={44} />
+                </EsqueletoGrupo>
+              ) : horasNuevas !== null && horasNuevas.length === 0 ? (
+                <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                  {t('plan.moverSinHoras')}
+                </Text>
+              ) : horasNuevas !== null ? (
+                <SelectorOpcion
+                  disposicion="grilla"
+                  etiqueta={t('plan.moverHora')}
+                  opciones={horasNuevas.map((h) => ({ codigo: h, etiqueta: h }))}
+                  seleccionada={undefined}
+                  onSelect={(h) => void confirmarReagenda(h)}
                 />
               ) : null}
             </View>

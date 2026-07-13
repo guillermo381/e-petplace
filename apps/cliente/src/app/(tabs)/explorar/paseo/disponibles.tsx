@@ -42,10 +42,13 @@ import {
   getEstadoOnboardingDueno,
   obtenerMascotasDeFamilia,
   obtenerPaseadoresDisponibles,
+  obtenerSaldoPaquete,
+  reservarSalidaPaquete,
   resolverUrlFoto,
   type MascotaResumen,
   type PaseadorDisponible,
 } from '@epetplace/api';
+import { PaqueteHoja } from '@/components/paquete-hoja';
 import { PlanHoja } from '@/components/plan-hoja';
 import { useTraduccion } from '@/i18n';
 
@@ -53,12 +56,14 @@ export default function PaseoDisponibles() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
-  const params = useLocalSearchParams<{ fecha: string; hora: string; duracion: string; plan?: string }>();
+  const params = useLocalSearchParams<{ fecha: string; hora: string; duracion: string; plan?: string; paquete?: string }>();
   const fecha = typeof params.fecha === 'string' ? params.fecha : '';
   const hora = typeof params.hora === 'string' ? params.hora : '';
   const duracion = Number(params.duracion ?? 0);
   // D-338: modo PLAN — el paseador elegido acá ancla el plan (§6.1 v1.2).
   const modoPlan = params.plan === '1';
+  // D-343: modo PAQUETE — el paseador elegido acá ancla el paquete (§6bis.1).
+  const modoPaquete = params.paquete === '1';
 
   const [disponibles, setDisponibles] = useState<PaseadorDisponible[] | 'cargando' | 'error'>('cargando');
   const [mascotas, setMascotas] = useState<MascotaResumen[]>([]);
@@ -66,6 +71,11 @@ export default function PaseoDisponibles() {
   const [eligiendoMascota, setEligiendoMascota] = useState<PaseadorDisponible | null>(null);
   const [creandoHold, setCreandoHold] = useState(false);
   const [plan, setPlan] = useState<{ paseador: PaseadorDisponible; mascotaId: string } | null>(null);
+  const [paquete, setPaquete] = useState<{ paseador: PaseadorDisponible; mascotaId: string } | null>(null);
+  // §6bis.3: con saldo del ancla, el dueño ELIGE — reservar contra el
+  // paquete o pagar suelto. Opciones PAREJAS, cero dark patterns.
+  const [conSaldo, setConSaldo] = useState<{ paseador: PaseadorDisponible; mascotaId: string; saldo: number } | null>(null);
+  const [reservando, setReservando] = useState(false);
 
   const cargar = useCallback(() => {
     setDisponibles('cargando');
@@ -138,15 +148,58 @@ export default function PaseoDisponibles() {
     [creandoHold, fecha, hora, cargar, mostrar],
   );
 
+  // Reservar CONTRA SALDO: la cita nace firme sin pago (el pago fue el
+  // del paquete — invariante ampliado S57). Éxito → el hub, donde vive.
+  const reservarConSaldo = useCallback(
+    async (p: PaseadorDisponible, mascotaId: string) => {
+      if (reservando) return;
+      setReservando(true);
+      const r = await reservarSalidaPaquete({
+        prestador_id: p.prestador_id,
+        prestador_servicio_id: p.prestador_servicio_id,
+        mascota_id: mascotaId,
+        fecha,
+        hora,
+      });
+      setReservando(false);
+      setConSaldo(null);
+      if (!r.ok) {
+        mostrar({ texto: r.mensaje, variante: 'error' });
+        if (r.codigo === 'slot_ocupado' || r.codigo === 'slot_en_pasado') cargar();
+        return;
+      }
+      mostrar({ texto: t('paquete.reservada', { n: r.data.saldo_restante }), variante: 'exito' });
+      if (router.canDismiss()) router.dismissAll();
+      router.navigate('/hogar/paseos');
+    },
+    [reservando, fecha, hora, cargar, mostrar, t],
+  );
+
   const alElegirMascota = useCallback(
     (p: PaseadorDisponible, mascotaId: string) => {
       if (modoPlan) {
         setPlan({ paseador: p, mascotaId });
-      } else {
-        void crearHold(p, mascotaId);
+        return;
       }
+      if (modoPaquete) {
+        setPaquete({ paseador: p, mascotaId });
+        return;
+      }
+      // ¿hay saldo de paquete con ESTE ancla? El dueño elige (§6bis.3).
+      void (async () => {
+        const saldo = await obtenerSaldoPaquete({
+          prestador_id: p.prestador_id,
+          prestador_servicio_id: p.prestador_servicio_id,
+          mascota_id: mascotaId,
+        });
+        if (saldo.ok && saldo.data !== null && saldo.data.saldo > 0) {
+          setConSaldo({ paseador: p, mascotaId, saldo: saldo.data.saldo });
+        } else {
+          void crearHold(p, mascotaId);
+        }
+      })();
     },
-    [modoPlan, crearHold],
+    [modoPlan, modoPaquete, crearHold],
   );
 
   const alElegir = useCallback(
@@ -257,6 +310,62 @@ export default function PaseoDisponibles() {
               router.navigate('/hogar/paseos');
             }}
           />
+        ) : null}
+      </Hoja>
+
+      {/* D-343: la Hoja del paquete — nace con el paseador ELEGIDO */}
+      <Hoja
+        visible={paquete !== null}
+        titulo={t('paquete.hojaTitulo')}
+        onCerrar={() => setPaquete(null)}
+        conCerrar
+      >
+        {paquete !== null ? (
+          <PaqueteHoja
+            paseador={paquete.paseador}
+            mascotaId={paquete.mascotaId}
+            onComprado={(comprado) => {
+              setPaquete(null);
+              mostrar({ texto: t('paquete.exito', { n: comprado.saldo_total }), variante: 'exito' });
+              if (router.canDismiss()) router.dismissAll();
+              router.navigate('/hogar/paseos');
+            }}
+          />
+        ) : null}
+      </Hoja>
+
+      {/* §6bis.3: hay saldo con este paseador — el dueño ELIGE, parejo */}
+      <Hoja
+        visible={conSaldo !== null}
+        titulo={t('paquete.eleccionTitulo')}
+        onCerrar={() => setConSaldo(null)}
+        conCerrar
+      >
+        {conSaldo !== null ? (
+          <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
+            <Celda
+              titulo={t('paquete.eleccionVoz', { n: conSaldo.saldo })}
+              metadataMono={`${fecha} · ${hora} · ${duracion} min`}
+            />
+            <Boton
+              variante="primario"
+              bloque
+              etiqueta={t('paquete.reservarConPaquete')}
+              cargando={reservando}
+              onPress={() => void reservarConSaldo(conSaldo.paseador, conSaldo.mascotaId)}
+            />
+            <Boton
+              variante="secundario"
+              bloque
+              etiqueta={t('paquete.pagarSuelto')}
+              deshabilitado={reservando}
+              onPress={() => {
+                const elegido = conSaldo;
+                setConSaldo(null);
+                void crearHold(elegido.paseador, elegido.mascotaId);
+              }}
+            />
+          </View>
         ) : null}
       </Hoja>
     </SafeAreaView>

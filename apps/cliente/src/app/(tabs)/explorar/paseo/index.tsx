@@ -36,12 +36,20 @@ import {
   EstadoVacio,
   Icono,
   SelectorOpcion,
+  Separador,
   Tarjeta,
   spacing,
   typography,
   useTheme,
 } from '@epetplace/ui';
-import { obtenerIniciosPaseo, obtenerMisPlanesPaseo, obtenerOfertaPaseo, type OfertaPaseo } from '@epetplace/api';
+import {
+  obtenerIniciosPaseo,
+  obtenerMisCitasPaseo,
+  obtenerMisPaquetesSalidas,
+  obtenerMisPlanesPaseo,
+  obtenerOfertaPaseo,
+  type OfertaPaseo,
+} from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
 
 function fechaLocalISO(d: Date): string {
@@ -71,9 +79,9 @@ export default function PaseoCuando() {
   const [inicios, setInicios] = useState<string[] | 'cargando' | 'error'>('cargando');
   const [hora, setHora] = useState<string | null>(null);
   const [reintento, setReintento] = useState(0);
-  // D-338: la entrada al hub "Mis paseos" vive acá SOLO si hay planes
-  // (silencio digno sin ellos — el hub jamás es tab).
-  const [hayPlanes, setHayPlanes] = useState(false);
+  // D-338/D-343: la entrada al hub "Mis paseos" vive acá SOLO si hay
+  // actividad (planes, paquetes o paseos) — silencio digno sin ella.
+  const [hayActividad, setHayActividad] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -87,9 +95,16 @@ export default function PaseoCuando() {
           setDuracion((d) => d ?? menor);
         }
       });
-      void obtenerMisPlanesPaseo().then((r) => {
-        if (vigente && r.ok) setHayPlanes(r.data.length > 0);
-      });
+      void Promise.all([obtenerMisPlanesPaseo(), obtenerMisPaquetesSalidas(), obtenerMisCitasPaseo()]).then(
+        ([planes, paquetes, citas]) => {
+          if (!vigente) return;
+          setHayActividad(
+            (planes.ok && planes.data.length > 0) ||
+              (paquetes.ok && paquetes.data.length > 0) ||
+              (citas.ok && citas.data.length > 0),
+          );
+        },
+      );
       return () => {
         vigente = false;
       };
@@ -155,7 +170,7 @@ export default function PaseoCuando() {
       <Encabezado variante="navegacion" titulo={t('explorar.paseoTitulo')} atras onAtras={() => router.back()} />
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
         {/* D-338: Explorar→Paseo es una de las DOS entradas al hub */}
-        {hayPlanes ? (
+        {hayActividad ? (
           <Tarjeta relleno="ninguno">
             <Celda
               interactiva
@@ -277,6 +292,25 @@ export default function PaseoCuando() {
                 />
               ) : (
                 <Celda titulo={t('plan.chip')} subtitulo={t('plan.chipElegiPrimero')} />
+              )}
+              <Separador />
+              {/* 5 · el PAQUETE (D-343, §6bis): anclado al paseador que se
+                  elige en el QUIÉN — comprar NO es reservar. */}
+              {listo ? (
+                <Celda
+                  interactiva
+                  accessibilityRole="button"
+                  titulo={t('paquete.chip')}
+                  subtitulo={t('paquete.chipDetalle')}
+                  onPress={() => {
+                    router.push({
+                      pathname: '/explorar/paseo/disponibles',
+                      params: { fecha: dia, hora, duracion: String(duracion), paquete: '1' },
+                    });
+                  }}
+                />
+              ) : (
+                <Celda titulo={t('paquete.chip')} subtitulo={t('plan.chipElegiPrimero')} />
               )}
             </Tarjeta>
           </>

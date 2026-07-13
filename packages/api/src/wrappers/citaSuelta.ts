@@ -94,6 +94,89 @@ export async function reagendarCitaSuelta(input: {
   return { ok: true, data: { fecha: o.fecha, hora: String(o.hora) } };
 }
 
+// ── Las citas del dueño fuera del plan (sueltas y de paquete) ────────────────
+
+export interface CitaPaseoDueno {
+  id: string;
+  fecha: string;
+  hora: string;
+  estado: string;
+  duracion_minutos: number;
+  precio: number | null;
+  prestador_id: string | null;
+  tipo_servicio: string | null;
+  /** Discrimina la familia: 'paquete' (bono_id) o 'suelta'. El plan vive en obtenerCitasDePlan. */
+  origen: 'suelta' | 'paquete';
+  bono_id: string | null;
+}
+
+/**
+ * Las citas de paseo del dueño que NO son de plan (RLS solo-dueño):
+ * sueltas pagadas y reservas de paquete — el hub "Mis paseos" las lista
+ * junto a los planes. Todos los estados; la superficie decide qué pinta.
+ */
+export async function obtenerMisCitasPaseo(): Promise<
+  ResultadoWrapper<CitaPaseoDueno[], CodigoErrorCitaSuelta>
+> {
+  const supabase = getClient();
+  const { data, error } = await supabase
+    .from('evento_cita_servicio')
+    .select('id, fecha, hora, estado, duracion_minutos, precio, prestador_id, tipo_servicio, bono_id, estado_reserva')
+    .is('suscripcion_servicio_id', null)
+    .in('estado', ['confirmada', 'en_curso', 'completada', 'cancelada', 'no_show'])
+    .order('fecha', { ascending: true })
+    .order('hora', { ascending: true });
+  if (error) return mapeoError(error.message);
+
+  const citas: CitaPaseoDueno[] = [];
+  for (const fila of data ?? []) {
+    if (typeof fila.id !== 'string' || typeof fila.estado !== 'string') {
+      return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES_ERROR_SUELTO.datos_inconsistentes };
+    }
+    // Solo el ciclo de pago vivo: los holds nunca pagados no son "paseos".
+    if (fila.estado_reserva !== 'pagada' && fila.estado_reserva !== 'cancelada') continue;
+    citas.push({
+      id: fila.id,
+      fecha: String(fila.fecha),
+      hora: String(fila.hora),
+      estado: fila.estado,
+      duracion_minutos: Number(fila.duracion_minutos),
+      precio: fila.precio === null ? null : Number(fila.precio),
+      prestador_id: fila.prestador_id ?? null,
+      tipo_servicio: fila.tipo_servicio ?? null,
+      origen: fila.bono_id !== null ? 'paquete' : 'suelta',
+      bono_id: fila.bono_id ?? null,
+    });
+  }
+  return { ok: true, data: citas };
+}
+
+/**
+ * Resuelve la OFERTA de una cita (prestador + tipo + duración) por la
+ * policy pública ps_public — el reagendado necesita el id de la oferta
+ * para pedir inicios reales (obtenerSlotsDisponibles). null honesto si
+ * el prestador ya no oferta ese bloque (la reagenda no se ofrece).
+ */
+export async function resolverOfertaDeCita(input: {
+  prestador_id: string;
+  tipo_servicio: string;
+  duracion_minutos: number;
+}): Promise<ResultadoWrapper<{ prestador_servicio_id: string } | null, CodigoErrorCitaSuelta>> {
+  const supabase = getClient();
+  const { data, error } = await supabase
+    .from('prestador_servicios')
+    .select('id')
+    .eq('prestador_id', input.prestador_id)
+    .eq('tipo_servicio', input.tipo_servicio)
+    .eq('duracion_minutos', input.duracion_minutos)
+    .eq('activo', true)
+    .limit(1)
+    .maybeSingle();
+  if (error) return mapeoError(error.message);
+  if (data === null) return { ok: true, data: null };
+  return { ok: true, data: { prestador_servicio_id: data.id } };
+}
+
 /**
  * P18(a) — con ≥24 h: cancela definitivo con reembolso SIMULADO Y
  * DECLARADO sobre el pago (regla 7.16 — la superficie dice que el pago
