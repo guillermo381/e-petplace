@@ -534,8 +534,6 @@ export const clienteEn = {
     notifCuidado: 'Care and health',
     notifCuidadoDetalle: 'Record alerts, like vaccines coming due',
     notifNovedades: 'News and promotions',
-    notifActivadas: 'On',
-    notifSilenciadas: 'Muted',
     pagosVacioTitulo: 'No payments yet',
     pagosVacio: 'When you pay for your first service, it will live here.',
     pagoSimulado: 'Simulated payment',

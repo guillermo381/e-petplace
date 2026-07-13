@@ -35,6 +35,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, { cubicBezier } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 
+import { palette } from '../tokens/palette'
 import { radius } from '../tokens/radius'
 import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
@@ -158,7 +159,8 @@ export function SliderPrecio({ pasos, indice, onCambio, onStep, etiqueta, regist
               width: THUMB,
               height: THUMB,
               borderRadius: radius.full,
-              backgroundColor: theme.bg.card,
+              // Ley 22 (SÓLIDO): el thumb es blanco/papel, constante
+              backgroundColor: palette.white,
               boxShadow: theme.elevacion.reposo,
               transform: [{ translateX: x }],
             },

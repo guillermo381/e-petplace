@@ -105,6 +105,17 @@ function Chip({
   const fondoReposo = theme.mode === 'dark' ? theme.bg.elevated : theme.bg.card
   // Patrón `'capaBg' in theme` de AvatarMascota/SelectorEspecie (memorial no tinta).
   const conCapa = seleccionada && 'capaBg' in theme
+  // LEY 22 (S58): la selección entre pares es TONAL — borde en el
+  // acento + tinte claro + TEXTO en el acento (capturado acá: el
+  // narrowing de `in` no sobrevive closures). Memorial degrada igual.
+  const textoTonal =
+    'capaText' in theme
+      ? acento === 'control' && 'control' in theme.accent
+        ? theme.accent.control
+        : acento === 'oficio'
+          ? theme.accent.primary
+          : theme.capaText.identidad
+      : theme.text.primary
   // S58 (firma founder): el ACENTO de la selección — 'control' (cliente:
   // accent.control, tint de la capa marca/afecto) · 'oficio' (prestador:
   // accent.primary/tealDark, §15b) · 'capa' (verdeVital — MUERE como
@@ -165,8 +176,9 @@ function Chip({
           style={{
             fontFamily: typography.family.sans.medium,
             fontSize: typography.size.sm,
-            // apagada = voz terciaria; el estado NO mueve el layout
-            color: deshabilitada ? theme.text.tertiary : theme.text.primary,
+            // apagada = voz terciaria; el estado NO mueve el layout.
+            // Ley 22: seleccionada = texto EN el acento (tonal)
+            color: deshabilitada ? theme.text.tertiary : conCapa ? textoTonal : theme.text.primary,
           }}
         >
           {opcion.etiqueta}

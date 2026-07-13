@@ -572,8 +572,6 @@ export const clienteEs = {
     notifCuidado: 'Cuidado y salud',
     notifCuidadoDetalle: 'Alertas del expediente, como vacunas por vencer',
     notifNovedades: 'Novedades y promociones',
-    notifActivadas: 'Activadas',
-    notifSilenciadas: 'Silenciadas',
     // Pagos
     pagosVacioTitulo: 'Sin pagos todavía',
     pagosVacio: 'Cuando pagues tu primer servicio, va a vivir acá.',

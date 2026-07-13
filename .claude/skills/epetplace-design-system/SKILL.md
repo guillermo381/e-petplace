@@ -16,13 +16,13 @@ description: >-
 
 # epetplace-design-system — el sistema es exigible, no sugerido
 
-Fuente de verdad: `packages/ui` (tokens v4 + 31 componentes + 3 temas).
+Fuente de verdad: `packages/ui` (tokens v4 + 32 componentes + 3 temas).
 Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 `@epetplace/ui`, no existe en el producto.
 
 Desde S57 esta skill es EL EQUIPO DE DISEÑO completo, no un manual de
 materiales: las Leyes 1–13 dicen CON QUÉ se construye; la capa de craft
-(§1b, Leyes 14–21) dice CÓMO se decide que una pantalla está BIEN; y el
+(§1b, Leyes 14–22) dice CÓMO se decide que una pantalla está BIEN; y el
 protocolo del diseñador (§1c) dice CÓMO SE PIENSA antes de tocar código.
 El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
 
@@ -104,7 +104,7 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
     ESPERA DE MARCA (huella/isotipo trazándose en loop sereno) SIEMPRE
     con la voz honesta debajo — es de marca, no shimmer.
 
-## 1b. LA CAPA DE CRAFT (Leyes 14–20 S57 + Ley 21 S58 — FIRMADAS por el founder)
+## 1b. LA CAPA DE CRAFT (Leyes 14–20 S57 + Leyes 21–22 S58 — FIRMADAS por el founder)
 
 > **Qué es:** los principios de dirección minados de `frontend-design`,
 > traducidos a nuestra casa. Las Leyes 1–13 dicen CON QUÉ se construye
@@ -278,6 +278,18 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
     construidas migran AL PASO); el oficio del prestador sigue en
     tealDark (§15b).
 
+22. **La ley de intensidad del acento (S58, firma founder).** El acento
+    tiene DOS intensidades por FUNCIÓN — **TONAL** (borde 1.5 en el
+    acento + tinte claro del acento + TEXTO en el acento) para
+    SELECCIÓN entre pares (SelectorOpcion: días, duraciones, idioma) ·
+    **SÓLIDO** (fill del acento, contenido en blanco/papel) para
+    estados BINARIOS y singulares (Interruptor encendido, fill+thumb
+    del slider). Rige en AMBAS apps con su registro (control =
+    magentaDark/violetText/tinta · oficio = tealDark). Un binario
+    disfrazado de chips es un bug de rol: se desenmascara a
+    Interruptor. Apagado JAMÁS dice error — apagado es estado, no
+    falla.
+
 ### Las pantallas patrón (cómo se firma lo visual)
 
 **Ninguna ley de composición se firma en prosa: se firma sobre
@@ -403,7 +415,7 @@ comprar es lo último, y lo que compra combina con TODO.*
 //     stroke={theme.text.primary} strokeWidth={1.75} strokeLinecap="round" /></Svg>
 ```
 
-## 3. ÍNDICE — los 31 componentes (import de `@epetplace/ui`)
+## 3. ÍNDICE — los 32 componentes (import de `@epetplace/ui`)
 
 | Export | Cuándo |
 |---|---|
@@ -413,6 +425,7 @@ comprar es lo último, y lo que compra combina con TODO.*
 | `Celda` | Toda fila de lista. Pressed resalta (jamás escala); `metadataMono` para voz de máquina — desde S44-B4.1 convive con `fin` (apilados: mono arriba, nodo abajo). Entrar a una sección NO es su trabajo (eso es `CeldaNavegacion`) |
 | `CeldaNavegacion` | Entrar a una sección (Ley 19.1, S58): ícono b′ TIPADO a la izquierda + título + detalle opcional + chevron de entrada; pressed 0.99. `registro` capa (dueño) / aa·tinta (prestador) — la dosis modula color, no gramática. Sin metadataMono/fin (eso es Celda). Memorial degrada adentro de Icono |
 | `SliderPrecio` | Pasos DISCRETOS para precio (S58, depósito prestador): riel hundido con puntos + tramo recorrido en acento POR REGISTRO (§2.7) + thumb apoyado con `elevacion.reposo` (Chanel: sombra, jamás borde). `onStep` = hook de háptica futura, v1 VACÍO (sin expo-haptics — L-134, decisión founder pendiente). No porta el display del valor; memorial degrada adentro y no desliza. A11y adjustable con increment/decrement |
+| `Interruptor` | El estado BINARIO (S58, Ley 22): SÓLIDO en el acento por registro (control/oficio) al encender, riel apagado en bg.overlay — apagado JAMÁS dice error; thumb blanco con elevacion.reposo que se desliza (memorial: tinta y reemplazo directo); a11y switch. Un binario disfrazado de chips se desenmascara acá (primer caso: Preferencias On/Muted) |
 | `SelectorSegmentado` | Cambiar de vista dentro de una pantalla (Ley 19.3, S58 — los chips PROHIBIDOS como segmentos): riel hundido bg.overlay + 2-3 segmentos; el ACTIVO es superficie apoyada con `elevacion.reposo` (Chanel: sombra, jamás borde). Texto solo v1; se desliza la SUPERFICIE (fast/easeOut), la sombra viaja con ella; memorial = reemplazo directo. Mismo componente sin variante en dosis/memorial |
 | `Separador` | Divisor hairline entre Celdas (`ItemSeparatorComponent`) |
 | `Insignia` | Todo chip de estado/capa. JAMÁS interactivo; `soloPunto` para celdas densas |
@@ -449,7 +462,7 @@ Ley 20)/`motion`/`opacity`/`dosis`, temas y tipos.
 
 **Dónde vive qué:** tokens `packages/ui/src/tokens/` · temas
 `packages/ui/src/themes/` · gate WCAG `scripts/verify-contrast.ts`
-(correr: `pnpm verify:contrast` — 148 pares desde S58, tiene que dar 0 fallos) ·
+(correr: `pnpm verify:contrast` — 154 pares desde S58, tiene que dar 0 fallos) ·
 galería `packages/ui/src/gallery/TokenGallery.tsx` (verificación browser:
 `node scripts/verify-gallery.mjs` con los dev servers arriba) · gate en
 dispositivo: CLAUDE.md raíz · dirección de arte e iconografía:

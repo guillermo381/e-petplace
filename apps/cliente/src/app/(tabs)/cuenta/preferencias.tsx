@@ -17,6 +17,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  Interruptor,
   SelectorOpcion,
   Tarjeta,
   spacing,
@@ -155,22 +156,27 @@ export default function PreferenciasCuenta() {
           ) : (
             GRUPOS.map((g) => (
               <Tarjeta key={g.key}>
+                {/* Ley 22 (S58): era un BINARIO disfrazado de chips — se
+                    desenmascara a Interruptor (sólido); apagado es
+                    estado sereno, jamás error */}
                 <View style={{ gap: spacing[2] }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
+                    <Text
+                      style={{ flex: 1, fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: theme.text.primary }}
+                    >
+                      {t(g.tituloKey)}
+                    </Text>
+                    <Interruptor
+                      encendido={grupoHabilitado(g.tipos)}
+                      onCambio={(encendido) => void alCambiarGrupo(g.tipos, encendido)}
+                      etiqueta={t(g.tituloKey)}
+                    />
+                  </View>
                   {g.detalleKey !== null ? (
                     <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
                       {t(g.detalleKey)}
                     </Text>
                   ) : null}
-                  <SelectorOpcion
-                    acento="control"
-                    etiqueta={t(g.tituloKey)}
-                    opciones={[
-                      { codigo: 'on', etiqueta: t('cuenta.notifActivadas') },
-                      { codigo: 'off', etiqueta: t('cuenta.notifSilenciadas') },
-                    ]}
-                    seleccionada={grupoHabilitado(g.tipos) ? 'on' : 'off'}
-                    onSelect={(codigo) => void alCambiarGrupo(g.tipos, codigo === 'on')}
-                  />
                 </View>
               </Tarjeta>
             ))

@@ -195,6 +195,16 @@ function paresDe(t: Theme, nombre: string): Pair[] {
     add('SelectorOpcion control: text.primary / capaBg.comunidad⊕card', t.text.primary, t.capaBg.comunidad, t.bg.card)
   }
 
+  // LEY 22 (S58) — TONAL: el TEXTO del acento sobre SU tinte, sobre la
+  // superficie real del chip (card en claro, elevated en dark). Los
+  // tres registros de SelectorOpcion: control · oficio · capa (moribundo).
+  const superficieChip = t.mode === 'light' ? t.bg.card : t.bg.elevated
+  if ('capaBg' in t && 'control' in t.accent) {
+    add('Ley22 tonal control: accent.control / capaBg.comunidad⊕chip', t.accent.control, t.capaBg.comunidad, superficieChip)
+    add('Ley22 tonal oficio: accent.primary / accent.primaryBg⊕chip', t.accent.primary, t.accent.primaryBg, superficieChip)
+    add('Ley22 tonal capa: capaText.identidad / capaBg.identidad⊕chip', capaTexto.identidad, t.capaBg.identidad, superficieChip)
+  }
+
   // bg.tinta (S58, techo del prestador — constante en los 3 temas): el
   // texto papel sobre la tinta. El par tealDark/tinta pedido en S58 CAE
   // (~2.85:1) — medición informativa abajo, reportado ANTES de curar.

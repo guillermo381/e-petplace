@@ -34,6 +34,7 @@ import { SelectorAvatar, type SelectorAvatarFoto } from '../components/SelectorA
 import { SelectorOpcion } from '../components/SelectorOpcion'
 import { SelectorSegmentado } from '../components/SelectorSegmentado'
 import { SliderPrecio } from '../components/SliderPrecio'
+import { Interruptor } from '../components/Interruptor'
 import { CeldaNavegacion } from '../components/CeldaNavegacion'
 import { HeroMarca } from '../components/HeroMarca'
 import { LineaDeVida, type LineaDeVidaItem } from '../components/LineaDeVida'
@@ -701,8 +702,11 @@ function EjemploAcentoControl() {
   const [dia, setDia] = useState('mar')
   const pasos = ['$5.00', '$7.50', '$10.00']
   const [i, setI] = useState(1)
+  const [avisos, setAvisos] = useState(true)
+  const [ofrece, setOfrece] = useState(true)
   return (
     <View style={{ gap: spacing[4] }}>
+      {/* TONAL — selección entre pares (Ley 22) */}
       <SelectorOpcion
         acento="control"
         etiqueta="Día de la semana"
@@ -714,9 +718,22 @@ function EjemploAcentoControl() {
         seleccionada={dia}
         onSelect={setDia}
       />
+      {/* SÓLIDO — binarios y singulares (Ley 22) */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+        <Interruptor encendido={avisos} onCambio={setAvisos} etiqueta="Recordatorios" />
+        <Text style={{ fontFamily: sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+          interruptor · control (sólido)
+        </Text>
+      </View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+        <Interruptor encendido={ofrece} onCambio={setOfrece} etiqueta="Ofrecer esta duración" registro="oficio" />
+        <Text style={{ fontFamily: sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+          interruptor · oficio (la B: “Ofrecer esta duración”)
+        </Text>
+      </View>
       <SliderPrecio pasos={pasos} indice={i} onCambio={setI} etiqueta="Precio" registro="control" />
       <Text style={{ fontFamily: sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
-        La elección es rectángulo suave (radius 10); la acción sigue en tinta; el hex puro conserva su reserva.
+        Tonal para elegir entre pares · sólido para binarios; la acción sigue en tinta; apagado jamás dice error.
       </Text>
     </View>
   )
@@ -1092,7 +1109,7 @@ function GaleriaInterna() {
         </Seccion>
 
         {/* Acento del cliente — S58 (firma founder): accent.control */}
-        <Seccion titulo="Acento de controles del cliente — magentaDark (la elección; la acción sigue en tinta)">
+        <Seccion titulo="Acento — tonal y sólido (Ley 22): la elección viste tinte, el binario viste fill">
           <View style={{ gap: spacing[4] }}>
             <ThemeProvider defaultMode="light">
               <PanelTema etiqueta="claro — magentaDark #8E1F68 (registro trabajador del magenta; el puro conserva su reserva)">
