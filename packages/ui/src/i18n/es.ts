@@ -90,6 +90,13 @@ export const uiEs = {
     porAhoraNo: 'Por ahora no',
     abrirOpcionesHint: 'Abre las opciones para tomar o elegir una foto',
   },
+  // ── S59 §7.1 — LA VOZ ÚNICA del estado en vivo (GATE DE STRINGS
+  // PENDIENTE, lote S59): una sola palabra para el estado en TODA
+  // superficie de ambas apps; memorial conserva su voz serena.
+  citaEnVivo: {
+    estado: 'En vivo',
+    estadoMemorial: 'En curso',
+  },
   evidenciaFoto: {
     foto: 'Foto',
     agregarEvidencia: 'Agregar evidencia',

@@ -90,7 +90,9 @@ export const clienteEs = {
     vozConociendolo: 'Aún estamos conociendo a {{nombre}} — carga su carnet y te cuidamos mejor.',
     vozQuieto: 'El expediente de {{nombre}} quedó quieto — ¿hay novedades de su cuidado?',
     // ── Zona 2 (hoy) — funcional ──
-    paseoEnCurso: 'Paseo en curso',
+    // S59 §7.1 LA VOZ ÚNICA ("en curso" murió del cliente) — GATE DE
+    // STRINGS PENDIENTE (lote S59)
+    paseoEnCurso: 'Paseo en vivo',
     verEnVivo: 'Ver cómo va',
     proximaCita: 'Próxima cita',
     // D-319: el hold vigente del bloqueo 15 min — rima con checkout.holdVoz

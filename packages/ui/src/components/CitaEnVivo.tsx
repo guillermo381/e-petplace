@@ -12,14 +12,19 @@
  *   dark     → glow real del color de capa (theme.shadow.glow).
  *   claro    → anillo nítido 1.5px del hex PURO (registro gráfico,
  *              fuera del gate AA por espec firmada de B2) + pill
- *              "● vivo" (punto ESTÁTICO — Ley 6 prohíbe animar
+ *              "● En vivo" (punto ESTÁTICO — Ley 6 prohíbe animar
  *              sombras y pulsos; nada acá se anima, nunca).
  *   memorial → degrada (Ley 8): anillo en text.secondary, pill
- *              "en curso" sin punto. Sin glow, sin color de capa.
+ *              "En curso" sin punto. Sin glow, sin color de capa.
+ *
+ * LA VOZ ÚNICA (S59, MODELO_PASEO §7.1): el texto del pill sale del
+ * namespace ui (`citaEnVivo.estado` = "En vivo"/"Live"; memorial =
+ * `citaEnVivo.estadoMemorial`, su degradación serena) — el literal
+ * hardcodeado murió; accessibilityLabel habla la misma voz.
  *
  * Accesibilidad: el pill porta el canal textual en claro/memorial.
  * En dark el glow NO es canal accesible — la pantalla consumidora
- * comunica "en curso" también por texto (Celda/Insignia).
+ * comunica el estado también por texto (Celda/Insignia).
  *
  * El pill sobresale ~11px por encima del borde superior: el layout
  * padre deja ese aire (la galería muestra el patrón).
@@ -32,6 +37,7 @@ import { typography } from '../tokens/typography'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
+import { useTraduccionUi } from '../i18n'
 
 export type CitaEnVivoCapa = 'vida' | 'cuidado' | 'comunidad' | 'comunidadAmplia'
 
@@ -63,6 +69,7 @@ const PILL_ALTO = 22 // = Insignia sm: coherente, pero NO es Insignia
 
 export function CitaEnVivo({ capa, children }: CitaEnVivoProps) {
   const { theme } = useTheme()
+  const { t } = useTraduccionUi()
   const k = CAPA_A_KEY[capa]
 
   if (theme.mode === 'dark') {
@@ -84,6 +91,8 @@ export function CitaEnVivo({ capa, children }: CitaEnVivoProps) {
 
   const esMemorial = theme.mode === 'memorial'
   const capaTexto = 'capaText' in theme ? theme.capaText : theme.capa
+  // §7.1 la voz única — memorial conserva su degradación serena
+  const vozEstado = esMemorial ? t('citaEnVivo.estadoMemorial') : t('citaEnVivo.estado')
 
   return (
     <View
@@ -97,7 +106,7 @@ export function CitaEnVivo({ capa, children }: CitaEnVivoProps) {
       {children}
       <View
         accessibilityRole="text"
-        accessibilityLabel="Cita en curso"
+        accessibilityLabel={vozEstado}
         style={{
           position: 'absolute',
           top: -(PILL_ALTO / 2),
@@ -131,7 +140,7 @@ export function CitaEnVivo({ capa, children }: CitaEnVivoProps) {
             color: esMemorial ? theme.text.secondary : capaTexto[k],
           }}
         >
-          {esMemorial ? 'en curso' : 'vivo'}
+          {vozEstado}
         </Text>
       </View>
     </View>

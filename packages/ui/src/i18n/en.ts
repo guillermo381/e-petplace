@@ -83,6 +83,11 @@ export const uiEn = {
     porAhoraNo: 'Not right now',
     abrirOpcionesHint: 'Opens the options to take or pick a photo',
   },
+  // S59 §7.1 — la voz única del estado en vivo (GATE PENDIENTE, lote S59)
+  citaEnVivo: {
+    estado: 'Live',
+    estadoMemorial: 'In progress',
+  },
   evidenciaFoto: {
     foto: 'Photo',
     agregarEvidencia: 'Add evidence',

@@ -86,7 +86,8 @@ export const clienteEn = {
     vozVacunaVencidaUnDia: "{{nombre}}'s {{vacuna}} was due yesterday.",
     vozConociendolo: "We're still getting to know {{nombre}} — add the vaccine card and we'll take better care of them.",
     vozQuieto: "{{nombre}}'s record has been quiet — anything new in their care?",
-    paseoEnCurso: 'Walk in progress',
+    // S59 §7.1 la voz única — GATE PENDIENTE (lote S59)
+    paseoEnCurso: 'Live walk',
     verEnVivo: 'See how it goes',
     proximaCita: 'Next appointment',
     // D-319: live 15-min hold — rhymes with checkout.holdVoz
