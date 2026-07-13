@@ -33,8 +33,6 @@ import { useState } from 'react'
 import { View } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, { cubicBezier } from 'react-native-reanimated'
-import { scheduleOnRN } from 'react-native-worklets'
-
 import { palette } from '../tokens/palette'
 import { radius } from '../tokens/radius'
 import { motion } from '../tokens/motion'
@@ -103,13 +101,21 @@ export function SliderPrecio({ pasos, indice, onCambio, onStep, etiqueta, regist
   // Índice desde la posición del toque (centro del thumb = x - THUMB/2)
   const indiceDesdeX = (px: number) => (paso > 0 ? Math.round((px - THUMB / 2) / paso) : 0)
 
+  // CURA S58 (bug de gate del founder: arrastrar el slider CRASHEABA la
+  // app en nativo y Expo recargaba): los callbacks del Pan se workletizan
+  // y corrían en el hilo UI llamando indiceDesdeX — función JS común =
+  // fatal ("synchronously call a non-worklet function"); la web corre los
+  // gestos en JS y jamás lo delató (Ley 9). runOnJS(true) es el contrato
+  // honesto del componente: el thumb se mueve por ESTADO (indice→render),
+  // no hay animación de UI-thread que justifique worklets.
   const pan = Gesture.Pan()
     .minDistance(0)
+    .runOnJS(true)
     .onBegin((e) => {
-      scheduleOnRN(irA, indiceDesdeX(e.x))
+      irA(indiceDesdeX(e.x))
     })
     .onUpdate((e) => {
-      scheduleOnRN(irA, indiceDesdeX(e.x))
+      irA(indiceDesdeX(e.x))
     })
 
   return (
