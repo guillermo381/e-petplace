@@ -1054,6 +1054,38 @@ export type Database = {
         }
         Relationships: []
       }
+      cat_ciudades: {
+        Row: {
+          activo: boolean
+          country_code: string
+          created_at: string
+          id: string
+          nombre: string
+        }
+        Insert: {
+          activo?: boolean
+          country_code: string
+          created_at?: string
+          id?: string
+          nombre: string
+        }
+        Update: {
+          activo?: boolean
+          country_code?: string
+          created_at?: string
+          id?: string
+          nombre?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cat_ciudades_country_code_fkey"
+            columns: ["country_code"]
+            isOneToOne: false
+            referencedRelation: "country_config"
+            referencedColumns: ["country_code"]
+          },
+        ]
+      }
       cat_ejes_jtbd: {
         Row: {
           activo: boolean
@@ -10585,6 +10617,49 @@ export type Database = {
           },
           {
             foreignKeyName: "prestador_servicios_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prestador_zonas: {
+        Row: {
+          ciudad_id: string
+          created_at: string
+          id: string
+          prestador_id: string
+        }
+        Insert: {
+          ciudad_id: string
+          created_at?: string
+          id?: string
+          prestador_id: string
+        }
+        Update: {
+          ciudad_id?: string
+          created_at?: string
+          id?: string
+          prestador_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prestador_zonas_ciudad_id_fkey"
+            columns: ["ciudad_id"]
+            isOneToOne: false
+            referencedRelation: "cat_ciudades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestador_zonas_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestador_zonas_prestador_id_fkey"
             columns: ["prestador_id"]
             isOneToOne: false
             referencedRelation: "v_prestadores_publicos"

@@ -276,6 +276,17 @@ export {
   type CodigoErrorConfiguracionPaseo,
 } from './wrappers/configuracionPaseo';
 
+// ── Zonas de cobertura del prestador (S58-A, D-331 — v1 DECLARATIVA) ────────
+export {
+  obtenerCatalogoCiudades,
+  obtenerZonasDePrestador,
+  agregarZonaCobertura,
+  quitarZonaCobertura,
+  type CiudadCatalogo,
+  type ZonaCobertura,
+  type CodigoErrorZonas,
+} from './wrappers/zonas';
+
 // ── Dirección del hogar (S56-A, D-339 — hunk Sesión A) ──────────────────────
 export {
   obtenerDireccionHogar,
