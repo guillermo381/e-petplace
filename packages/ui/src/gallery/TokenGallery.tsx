@@ -693,6 +693,35 @@ function EjemploSliderPrecio({ registro }: { registro?: 'capa' | 'aa' | 'tinta' 
   )
 }
 
+// ── Acento de controles del cliente (S58): magentaDark claro /
+// violetText dark / tinta memorial. La ELECCIÓN en rectángulo suave
+// (Ley de geometría); la acción sigue en tinta. ──
+function EjemploAcentoControl() {
+  const { theme } = useTheme()
+  const [dia, setDia] = useState('mar')
+  const pasos = ['$5.00', '$7.50', '$10.00']
+  const [i, setI] = useState(1)
+  return (
+    <View style={{ gap: spacing[4] }}>
+      <SelectorOpcion
+        acento="control"
+        etiqueta="Día de la semana"
+        opciones={[
+          { codigo: 'lun', etiqueta: 'Lun' },
+          { codigo: 'mar', etiqueta: 'Mar' },
+          { codigo: 'mie', etiqueta: 'Mié' },
+        ]}
+        seleccionada={dia}
+        onSelect={setDia}
+      />
+      <SliderPrecio pasos={pasos} indice={i} onCambio={setI} etiqueta="Precio" registro="control" />
+      <Text style={{ fontFamily: sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+        La elección es rectángulo suave (radius 10); la acción sigue en tinta; el hex puro conserva su reserva.
+      </Text>
+    </View>
+  )
+}
+
 // ── CeldaNavegacion (Ley 19.1 · S58): entrar a una sección — el ícono
 // b′ dice a dónde va; chevron de entrada; pressed 0.99. ──
 function EjemploCeldaNavegacion({ registro }: { registro?: 'capa' | 'aa' | 'tinta' }) {
@@ -1057,6 +1086,27 @@ function GaleriaInterna() {
             <ThemeProvider defaultMode="memorial">
               <PanelTema etiqueta="memorial — degrada adentro (acento a text.secondary) y el thumb no se desliza: reemplazo directo">
                 <EjemploSliderPrecio />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* Acento del cliente — S58 (firma founder): accent.control */}
+        <Seccion titulo="Acento de controles del cliente — magentaDark (la elección; la acción sigue en tinta)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — magentaDark #8E1F68 (registro trabajador del magenta; el puro conserva su reserva)">
+                <EjemploAcentoControl />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — violetText #AE59FF (gateado S44, cero pares nuevos)">
+                <EjemploAcentoControl />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — el control es tinta: la marca no celebra ahí">
+                <EjemploAcentoControl />
               </PanelTema>
             </ThemeProvider>
           </View>

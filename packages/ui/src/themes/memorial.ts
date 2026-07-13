@@ -53,6 +53,9 @@ export const memorialTheme = {
     warmBg:        palette.creamAlpha06,
     warmBorder:    'rgba(250,246,232,.18)',
 
+    // S58 — en memorial el control es TINTA (la marca no celebra ahí)
+    control:       palette.textMemorialDark,
+
     gradient:       gradients.transparent,   // B1: en memorial, transparent
     gradientSubtle: gradients.transparent,
   },

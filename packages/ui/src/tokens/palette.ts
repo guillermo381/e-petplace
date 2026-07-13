@@ -41,6 +41,12 @@ export const palette = {
   pinkDark:  '#C4008A',  // variante AA para light — rgb(196,0,138)
   pinkVivo:  '#DF00A1',  // B3.1c — el magenta más vivo que pasa 4.5:1 con blanco
                          // (4.514:1; #E000A2 falla). SOLO stop 0 del gradiente firma dark. rgb(223,0,161)
+  magentaDark: '#8E1F68', // S58 (firma founder) — el registro FUNCIONAL de la capa
+                          // marca/afecto: acento de CONTROLES del cliente en claro
+                          // (selección, toggles, slider, píldoras de día). El puro
+                          // #FF00AF conserva su reserva INTACTA (destello, huella de
+                          // tab, techo) — este es su registro trabajador, jamás su
+                          // reemplazo. Blanco encima gatea AA. rgb(142,31,104)
   teal:      '#28E8DA',  // Capa 2 · cuidado (B1 lo llama "cyan") — rgb(40,232,218)
   tealDark:  '#0A7268',  // variante AA para light — rgb(10,114,104)
   verde:     '#90FF8B',  // menta de marca — SOLO marca/logo/gradientLogo, no funcional

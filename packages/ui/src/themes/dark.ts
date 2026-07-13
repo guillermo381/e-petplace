@@ -46,6 +46,10 @@ export const darkTheme = {
     // actual). Registro gráfico: pink puro. Un solo elemento activo por vista lo usa.
     active:        palette.pink,
 
+    // S58 — acento de controles del cliente en dark: violetText (gateado
+    // S44 — cero pares nuevos por firma).
+    control:       palette.violetText,
+
     gradient:       gradients.firmaUIDark,  // contextos cerrados (ver palette.ts)
     gradientSubtle: {
       colors: [palette.pinkAlpha15, palette.tealAlpha15],

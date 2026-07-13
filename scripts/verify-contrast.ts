@@ -182,6 +182,19 @@ function paresDe(t: Theme, nombre: string): Pair[] {
   // CTA "tinta" (dosis prestador): texto inverso sobre text.primary como fondo
   add('text.inverse / text.primary(CTA tinta)', t.text.inverse, t.text.primary)
 
+  // accent.control (S58, firma founder — acento de controles del
+  // cliente): en claro es magentaDark y porta contenido BLANCO (~8.2:1
+  // por firma, verificado acá); en dark es violetText (gateado S44 —
+  // cero pares nuevos por firma); en memorial es tinta (pares de
+  // text.primary ya gateados). El tint de selección 'control' de
+  // SelectorOpcion es capaBg.comunidad con text.primary encima.
+  if (t.mode === 'light' && 'control' in t.accent) {
+    add('accent.control (magentaDark) porta blanco', palette.white, t.accent.control)
+  }
+  if ('capaBg' in t) {
+    add('SelectorOpcion control: text.primary / capaBg.comunidad⊕card', t.text.primary, t.capaBg.comunidad, t.bg.card)
+  }
+
   // bg.tinta (S58, techo del prestador — constante en los 3 temas): el
   // texto papel sobre la tinta. El par tealDark/tinta pedido en S58 CAE
   // (~2.85:1) — medición informativa abajo, reportado ANTES de curar.

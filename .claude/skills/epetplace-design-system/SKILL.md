@@ -22,7 +22,7 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 
 Desde S57 esta skill es EL EQUIPO DE DISEÑO completo, no un manual de
 materiales: las Leyes 1–13 dicen CON QUÉ se construye; la capa de craft
-(§1b, Leyes 14–20) dice CÓMO se decide que una pantalla está BIEN; y el
+(§1b, Leyes 14–21) dice CÓMO se decide que una pantalla está BIEN; y el
 protocolo del diseñador (§1c) dice CÓMO SE PIENSA antes de tocar código.
 El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
 
@@ -104,7 +104,7 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
     ESPERA DE MARCA (huella/isotipo trazándose en loop sereno) SIEMPRE
     con la voz honesta debajo — es de marca, no shimmer.
 
-## 1b. LA CAPA DE CRAFT (Leyes 14–20 — ENMIENDA S57 FIRMADA por el founder)
+## 1b. LA CAPA DE CRAFT (Leyes 14–20 S57 + Ley 21 S58 — FIRMADAS por el founder)
 
 > **Qué es:** los principios de dirección minados de `frontend-design`,
 > traducidos a nuestra casa. Las Leyes 1–13 dicen CON QUÉ se construye
@@ -263,6 +263,20 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
     > `shadows` v4 sigue vivo SOLO para glow semántico (Ley 7) y Aviso.
     > Ley 6 intacta: las sombras JAMÁS se animan. La calibración fina
     > se sella en la pantalla patrón del Hogar (D-358).
+
+21. **La ley de geometría (S58, firma founder).** Lo que se ELIGE es
+    rectángulo suave (`radius.suave` 10 a 12 — SelectorOpcion vive en
+    10); lo que INFORMA es píldora (`radius.full` — Insignia y pills
+    de estado INTACTAS). Y el acento que marca la elección es del
+    tema: **`accent.control`** (claro = magentaDark #8E1F68, el
+    registro TRABAJADOR del magenta — el hex puro #FF00AF conserva su
+    reserva: destello, huella de tab, techo · dark = violetText ·
+    memorial = tinta). Los CTA primarios siguen en TINTA en ambas
+    apps: el control marca ELECCIÓN y estado, la tinta marca la
+    ACCIÓN — un solo acento lleno por vista. El tinte verdeVital
+    MUERE como color de control en ambas apps (las pantallas
+    construidas migran AL PASO); el oficio del prestador sigue en
+    tealDark (§15b).
 
 ### Las pantallas patrón (cómo se firma lo visual)
 
@@ -435,7 +449,7 @@ Ley 20)/`motion`/`opacity`/`dosis`, temas y tipos.
 
 **Dónde vive qué:** tokens `packages/ui/src/tokens/` · temas
 `packages/ui/src/themes/` · gate WCAG `scripts/verify-contrast.ts`
-(correr: `pnpm verify:contrast` — 145 pares desde S58, tiene que dar 0 fallos) ·
+(correr: `pnpm verify:contrast` — 148 pares desde S58, tiene que dar 0 fallos) ·
 galería `packages/ui/src/gallery/TokenGallery.tsx` (verificación browser:
 `node scripts/verify-gallery.mjs` con los dev servers arriba) · gate en
 dispositivo: CLAUDE.md raíz · dirección de arte e iconografía:

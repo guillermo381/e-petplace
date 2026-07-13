@@ -7,6 +7,9 @@ export const radius = {
   none:  0,
   xs:    4,
   sm:    8,
+  // LEY DE GEOMETRÍA (S58, firma founder): lo que se ELIGE es rectángulo
+  // suave (10-12); lo que INFORMA es píldora (full). Insignia intacta.
+  suave: 10,
   md:    12,
   lg:    16,
   xl:    20,

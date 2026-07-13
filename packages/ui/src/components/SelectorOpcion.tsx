@@ -70,6 +70,13 @@ export interface SelectorOpcionProps {
    *  contrato original de selección única no cambia en nada. */
   multiple?: boolean
   seleccionadas?: string[]
+  /** ENMIENDA S58 (firma founder — acento del cliente): el color de la
+   *  selección. 'control' = cliente (accent.control: magentaDark claro /
+   *  violetText dark / tinta memorial) · 'oficio' = prestador (tealDark,
+   *  §15b) · 'capa' (default, verdeVital) MUERE como color de control —
+   *  las pantallas construidas migran AL PASO de la pasada, no como
+   *  tanda; el default se retira cuando la última migre. */
+  acento?: 'capa' | 'control' | 'oficio'
 }
 
 function Chip({
@@ -80,6 +87,7 @@ function Chip({
   onSelect,
   crecer,
   modo,
+  acento,
 }: {
   opcion: SelectorOpcionItem
   indice: number
@@ -88,6 +96,7 @@ function Chip({
   onSelect: (codigo: string) => void
   crecer: boolean
   modo: 'radio' | 'checkbox'
+  acento: 'capa' | 'control' | 'oficio'
 }) {
   const { theme } = useTheme()
   const [presionada, setPresionada] = useState(false)
@@ -96,9 +105,24 @@ function Chip({
   const fondoReposo = theme.mode === 'dark' ? theme.bg.elevated : theme.bg.card
   // Patrón `'capaBg' in theme` de AvatarMascota/SelectorEspecie (memorial no tinta).
   const conCapa = seleccionada && 'capaBg' in theme
-  const fondo = conCapa ? theme.capaBg.identidad : fondoReposo
+  // S58 (firma founder): el ACENTO de la selección — 'control' (cliente:
+  // accent.control, tint de la capa marca/afecto) · 'oficio' (prestador:
+  // accent.primary/tealDark, §15b) · 'capa' (verdeVital — MUERE como
+  // color de control; las pantallas migran AL PASO de la pasada).
+  // Memorial degrada igual en los tres: sin tinte, borde text.secondary.
+  const fondo = !conCapa
+    ? fondoReposo
+    : acento === 'control'
+      ? theme.capaBg.comunidad
+      : acento === 'oficio'
+        ? theme.accent.primaryBg
+        : theme.capaBg.identidad
   const borde = conCapa
-    ? theme.capa.identidad
+    ? acento === 'control' && 'control' in theme.accent
+      ? theme.accent.control
+      : acento === 'oficio'
+        ? theme.accent.primary
+        : theme.capa.identidad
     : seleccionada
       ? theme.text.secondary
       : theme.border.subtle
@@ -123,7 +147,9 @@ function Chip({
           justifyContent: 'center',
           height: ALTO,
           paddingHorizontal: spacing[4],
-          borderRadius: radius.full,
+          // LEY DE GEOMETRÍA (S58): lo que se ELIGE es rectángulo suave —
+          // la píldora quedó para lo que INFORMA (Insignia intacta)
+          borderRadius: radius.suave,
           backgroundColor: fondo,
           borderWidth: BORDE,
           borderColor: borde,
@@ -158,6 +184,7 @@ export function SelectorOpcion({
   disposicion = 'fila',
   multiple = false,
   seleccionadas,
+  acento = 'capa',
 }: SelectorOpcionProps) {
   const { theme } = useTheme()
 
@@ -171,6 +198,7 @@ export function SelectorOpcion({
       onSelect={onSelect}
       crecer={disposicion === 'fila'}
       modo={multiple ? 'checkbox' : 'radio'}
+      acento={acento}
     />
   ))
 

@@ -44,6 +44,12 @@ export const lightTheme = {
     // actual). Registro gráfico: pink puro. Un solo elemento activo por vista lo usa.
     active:        palette.pink,
 
+    // S58 (firma founder) — acento de CONTROLES del cliente (selección,
+    // toggles, slider, píldoras de día). Marca ELECCIÓN y estado; la
+    // ACCIÓN sigue en tinta (CTA primario intacto). El prestador no lo
+    // usa: su oficio es tealDark (§15b).
+    control:       palette.magentaDark,
+
     warm:          palette.terracottaDark,
     warmBg:        palette.terracottaAlphaL,
     warmBorder:    palette.terracottaBorderL,

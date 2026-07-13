@@ -57,8 +57,9 @@ export interface SliderPrecioProps {
   /** accessibilityLabel del control (el label visible es de la pantalla). */
   etiqueta: string
   /** Acento del tramo recorrido (§2.7): 'capa' (default dueño) ·
-   *  'aa' · 'tinta' (la vista ya porta su acento). */
-  registro?: IconoRegistro
+   *  'aa' · 'tinta' (la vista ya porta su acento) · 'control' (S58,
+   *  acento de controles del cliente — accent.control). */
+  registro?: IconoRegistro | 'control'
 }
 
 export function SliderPrecio({ pasos, indice, onCambio, onStep, etiqueta, registro = 'capa' }: SliderPrecioProps) {
@@ -78,11 +79,13 @@ export function SliderPrecio({ pasos, indice, onCambio, onStep, etiqueta, regist
   const capaAA = 'capaText' in theme ? theme.capaText.cuidado : theme.capa.cuidado
   const acento = esMemorial
     ? theme.text.secondary
-    : registro === 'tinta'
-      ? theme.text.primary
-      : registro === 'aa'
-        ? capaAA
-        : theme.capa.cuidado
+    : registro === 'control'
+      ? theme.accent.control
+      : registro === 'tinta'
+        ? theme.text.primary
+        : registro === 'aa'
+          ? capaAA
+          : theme.capa.cuidado
 
   const util = Math.max(ancho - THUMB, 0)
   const paso = n > 1 ? util / (n - 1) : 0
