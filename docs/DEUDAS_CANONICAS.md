@@ -1591,6 +1591,24 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 #### D-378 — Higiene: policies con rol `{public}` en tablas del paseo
 ⚪ BAJA. `eventos_mascota_paseo` y `evento_paseo_novedades` tienen sus policies colgadas del rol `{public}` mientras el resto de la familia del durante (`evento_atencion`, `evento_archivo_adjunto`, `evento_grooming_notas/incidencias`) usa `{authenticated}`. SIN efecto práctico hoy (RLS activa + las funciones gatean auth), pero es asimetría que confunde relevamientos. Homogeneizar a `{authenticated}` la próxima vez que esas policies se toquen. Origen: relevamiento S59-A1.
 
+#### D-379 — Catálogo de razas por especie con características
+🟡 ALTA. Catálogo de razas por especie con características (talla y pelaje DEFAULT → pre-llenan el perfil; más adelante, insumo del Coach y del producto-que-sabe). Reglas de la letra (founder S59, `MODELO_GROOMING.md` §3): **"Mestizo / No sé" es respuesta LEGÍTIMA** de primera clase; **el catálogo SUGIERE, el dueño CONFIRMA** — jamás pisa lo declarado. Grooming v1 NO lo espera (pregunta talla/pelaje directo). **Disparo: antes del soft launch.** Origen: S59 (letra del grooming).
+
+#### D-380 — Grooming a DOMICILIO (segunda tanda de F1)
+🟡 ALTA. El groomer declara local/domicilio/ambos; v1 construye SOLO local (camino feliz). La tanda domicilio hereda dirección-en-cita (D-339, snapshot existente) + recargo opcional del groomer. Sin lugar en UI hasta la tanda — la oferta domicilio no se dibuja apagada. **Disparo: cierre del grooming local (A4) funcional.** Origen: S59, `MODELO_GROOMING.md` §4.
+
+#### D-381 — Uñas como servicio COMPRABLE suelto
+🟢 MEDIA. Hoy `corte_unas` es solo REGISTRABLE (vocabulario del Durante). Los groomers reales suelen vender uñas suelto (ticket chico, alta frecuencia). Al abrir: entra como tercer comprable del menú de dos capas SIN romper la regla madre (comprable ≠ registrable), con su matriz talla propia. **Disparo: el primer groomer real que lo pida.** Origen: S59, `MODELO_GROOMING.md` §1.
+
+#### D-382 — Catálogos ricos del canon S26 (pelaje/productos/plantillas)
+🟢 MEDIA. El Durante v1 usa selector simple + nota libre. Los catálogos ricos del canon S26 (estados de pelaje finos, productos con marcas, plantillas de nota del groomer) y las sugerencias grooming-1 esperan uso real. **Disparo: la conversación con el groomer real (la misma de §10.3).** Origen: S59, `MODELO_GROOMING.md` §8.
+
+#### D-383 — Restricciones automáticas grooming-2 (señal clínica cruzada)
+🟢 MEDIA. El cruce clínico automático (p.ej. dermatitis registrada por el vet → aviso al groomer de shampoo medicado / restricción) es grooming-2. v1: el Antes muestra la vista filtrada y el criterio es humano. **Disparo: el primer evento clínico cruzado real en el expediente de una mascota con cita de grooming.** Origen: S59, `MODELO_GROOMING.md` §8.
+
+#### D-384 — Ancla híbrida de las tablas hijas del grooming
+⚪ BAJA. Relevado S59: `evento_grooming_notas/incidencias/pausas` ya portan `evento_atencion_id` (capa atención), pero `evento_grooming_archivos`, `evento_grooming_estados_pelaje`, `evento_grooming_productos_consumidos`, `evento_grooming_servicios_aplicados` y `evento_grooming_zonas_trabajadas` siguen ancladas SOLO en `grooming_id`. Sin efecto funcional hoy (el puente `eventos_mascota_grooming.evento_atencion_id` existe); es deuda de coherencia del modelo de capas. **Migrar a la capa atención AL TOCARLAS** — jamás migración big-bang. Origen: relevamiento S59-A3.
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)

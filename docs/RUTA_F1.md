@@ -114,11 +114,22 @@ actor que más sedimento clínico deposita, pero el flujo más delicado —
 las reuniones F0 son su insumo. **Test:** el expediente se alimenta
 porque al vet LE SIRVE.
 
-## A4 — Grooming lado dueño
+## A4 — Grooming lado dueño — EN CURSO (S59)
 
 JTBD-3 agendable, con señal clínica cruzada (§3.2.6). **Precondición
 honesta:** relevamiento de qué falta portar del portal web congelado
 (en el monorepo móvil lo vivo es paseo). Cobra con la infra de B2.
+
+> **EN CURSO desde S59:** la letra vive en `docs/MODELO_GROOMING.md`
+> v1.0 (FIRMADA founder S59) — ese doc es EL CONTRATO de esta etapa:
+> menú de dos capas, precio servicio × talla + extra pelaje, chasis de
+> reserva/cobro del paseo entero, Antes/Durante/Después v1, local
+> primero (domicilio D-380), recurrencia v2. Fundación DB = migración
+> S59-A3 (L-140 grooming + devengo al cierre + especies perro/gato +
+> estructura de oferta y perfil). La señal clínica cruzada automática
+> es D-383 (grooming-2). La conversación con el groomer real sigue
+> BLOQUEANTE para abrir a prestadores reales, no para construir (§10.3
+> del modelo).
 
 ## A5 — Producto-que-sabe, después el coach
 
