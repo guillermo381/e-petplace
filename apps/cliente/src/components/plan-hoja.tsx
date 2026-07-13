@@ -99,8 +99,12 @@ export function PlanHoja({
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
 
+  // §6.1 v1.5 (S59, regla DURA): EL PLAN ES DE LUNES A VIERNES — S/D
+  // quedan apagados con voz honesta con camino; el guard de DB manda
+  // (plan_dia_no_laborable). Si el CUÁNDO era finde, no se preselecciona.
+  const esFinde = (dow: number) => dow === 0 || dow === 6;
   const dowInicial = new Date(`${fecha}T12:00:00`).getDay();
-  const [dias, setDias] = useState<number[]>([dowInicial]);
+  const [dias, setDias] = useState<number[]>(esFinde(dowInicial) ? [] : [dowInicial]);
   const [frecuencia, setFrecuencia] = useState<Frecuencia>('semanal');
   const [renueva, setRenueva] = useState(true);
   const [cubiertos, setCubiertos] = useState<number[] | 'cargando'>('cargando');
@@ -139,12 +143,18 @@ export function PlanHoja({
     return orden.map((dow) => ({
       codigo: String(dow),
       etiqueta: t(`plan.dia${dow}` as 'plan.dia0'),
-      deshabilitada: cubiertos !== 'cargando' && !cubiertos.includes(dow),
+      // el finde apaga SIEMPRE (§6.1 regla dura), la cobertura apaga el resto
+      deshabilitada: esFinde(dow) || (cubiertos !== 'cargando' && !cubiertos.includes(dow)),
     }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cubiertos, t]);
 
+  // D-375 (S59): el precio por salida del PLAN — espejo exacto del
+  // server de cobro (COALESCE(precio_plan, precio)); murió el
+  // verosímil-falso que estimaba con el precio del suelto.
+  const precioSalida = paseador.precio_plan ?? paseador.precio;
   const estimado = estimarSalidas(dias, frecuencia);
-  const totalEstimado = estimado * paseador.precio;
+  const totalEstimado = estimado * precioSalida;
 
   async function contratar() {
     if (contratando || dias.length === 0) return;
@@ -186,11 +196,15 @@ export function PlanHoja({
               setDias((prev) => (prev.includes(dow) ? prev.filter((d) => d !== dow) : [...prev, dow].sort()));
             }}
           />
+          {/* §6.1 — la voz honesta CON CAMINO del finde apagado, siempre visible */}
+          <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+            {t('plan.findeVoz')}
+          </Text>
           {cubiertos === 'cargando' ? (
             <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
               {t('plan.cargandoDias')}
             </Text>
-          ) : cubiertos.length < 7 ? (
+          ) : cubiertos.filter((d) => !esFinde(d)).length < 5 ? (
             <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
               {t('plan.diasNoCubre', { nombre: paseador.prestador_nombre })}
             </Text>
@@ -237,7 +251,7 @@ export function PlanHoja({
               {t('plan.precioPorSalida')}
             </Text>
             <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.sm, color: theme.text.primary, fontVariant: ['tabular-nums'] }}>
-              ${paseador.precio.toFixed(2)} · {paseador.duracion_minutos} min
+              ${precioSalida.toFixed(2)} · {paseador.duracion_minutos} min
             </Text>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>

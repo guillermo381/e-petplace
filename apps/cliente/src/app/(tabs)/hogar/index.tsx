@@ -387,8 +387,10 @@ export default function Hogar() {
 
   const hoy = new Date();
   const senalesPorMascota = new Map(estadoHogar?.senales.map((s) => [s.mascota_id, s]) ?? []);
-  const enCurso = estadoHogar?.atencion_en_curso ?? null;
-  const proximaCita = enCurso === null ? (estadoHogar?.proxima_cita ?? null) : null;
+  // S59 §7.5 — multi-mascota primera clase: N paseos vivos = N celdas
+  // vivas, cada una a SU en vivo (antes solo viajaba la más reciente).
+  const enCurso = estadoHogar?.atenciones_en_curso ?? [];
+  const proximaCita = enCurso.length === 0 ? (estadoHogar?.proxima_cita ?? null) : null;
   const nombreDe = (id: string) => (Array.isArray(mascotas) ? (mascotas.find((m) => m.id === id)?.nombre ?? '') : '');
 
   return (
@@ -444,22 +446,28 @@ export default function Hogar() {
           En curso gana el lugar (Ley 7); si no, el próximo paseo en
           tarjeta de DOS PISOS: servicio+estado relativo en capa teal /
           dirección con pin y chevron (entra al hub). Sin nada: silencio. */}
-      {enCurso !== null ? (
-        <Animated.View entering={entradaZona(0)} style={{ paddingHorizontal: spacing[4], paddingTop: spacing[5] }}>
-          <CitaEnVivo capa="cuidado">
-            <Celda
-              interactiva
-              accessibilityRole="button"
-              onPress={() => router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: enCurso.atencion_id } })}
-              titulo={nombreDe(enCurso.mascota_id)}
-              subtitulo={t('hogar.paseoEnCurso')}
-              fin={
-                <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.accent.primary }}>
-                  {t('hogar.verEnVivo')}
-                </Text>
-              }
-            />
-          </CitaEnVivo>
+      {enCurso.length > 0 ? (
+        // §7.5: una celda VIVA por atención en curso — cada CitaEnVivo
+        // envuelve una cita REAL ejecutándose ahora (el espíritu de la
+        // Ley 7 intacto: nada decorativo; la letra firmada §7.5 manda
+        // en el multi-paseo simultáneo).
+        <Animated.View entering={entradaZona(0)} style={{ paddingHorizontal: spacing[4], paddingTop: spacing[5], gap: spacing[4] }}>
+          {enCurso.map((a) => (
+            <CitaEnVivo key={a.atencion_id} capa="cuidado">
+              <Celda
+                interactiva
+                accessibilityRole="button"
+                onPress={() => router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: a.atencion_id } })}
+                titulo={nombreDe(a.mascota_id)}
+                subtitulo={t('hogar.paseoEnCurso')}
+                fin={
+                  <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.accent.primary }}>
+                    {t('hogar.verEnVivo')}
+                  </Text>
+                }
+              />
+            </CitaEnVivo>
+          ))}
         </Animated.View>
       ) : proximaCita !== null ? (
         <Animated.View entering={entradaZona(0)} style={{ paddingHorizontal: spacing[4], paddingTop: spacing[5] }}>

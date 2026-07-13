@@ -57,8 +57,11 @@ export interface ProximaCitaMascota {
 export interface EstadoHogar {
   /** Una entrada por mascota pedida (aunque no tenga datos: señales en cero). */
   senales: SenalesHogarMascota[];
-  /** La atención en_curso más reciente del hogar, o null. */
-  atencion_en_curso: AtencionEnCursoHogar | null;
+  /** TODAS las atenciones en_curso del hogar, la más reciente primero
+   *  (S59 §7.5 — multi-mascota primera clase: dos paseos simultáneos
+   *  jamás se pisan; antes solo viajaba la más reciente). Vacía = nada
+   *  en vivo. */
+  atenciones_en_curso: AtencionEnCursoHogar[];
   /** La cita futura más próxima del hogar — firme (confirmada) o hold
    *  VIGENTE del propio hogar —, o null. El hold vencido no existe
    *  (D-319: su `estado` queda 'pendiente' para siempre; acá se filtra
@@ -77,7 +80,7 @@ export async function obtenerEstadoHogar(
   mascotaIds: string[],
 ): Promise<ResultadoWrapper<EstadoHogar, 'error_estado_hogar'>> {
   if (mascotaIds.length === 0) {
-    return { ok: true, data: { senales: [], atencion_en_curso: null, proxima_cita: null, proxima_cita_por_mascota: {} } };
+    return { ok: true, data: { senales: [], atenciones_en_curso: [], proxima_cita: null, proxima_cita_por_mascota: {} } };
   }
 
   const cliente = getClient();
@@ -142,14 +145,12 @@ export async function obtenerEstadoHogar(
     };
   });
 
-  // La atención en_curso más reciente del hogar (Ley 7: UNA en vivo).
-  let enCurso: AtencionEnCursoHogar | null = null;
-  for (const a of atenciones.data) {
-    if (a.estado !== 'en_curso') continue;
-    if (enCurso === null || (a.iniciada_en ?? '') > (enCurso.iniciada_en ?? '')) {
-      enCurso = { atencion_id: a.id, mascota_id: a.mascota_id, iniciada_en: a.iniciada_en };
-    }
-  }
+  // S59 §7.5 — TODAS las en_curso, la más reciente primero (antes se
+  // quedaba solo la última y dos paseos simultáneos se pisaban).
+  const enCurso: AtencionEnCursoHogar[] = atenciones.data
+    .filter((a) => a.estado === 'en_curso')
+    .sort((a, b) => ((a.iniciada_en ?? '') > (b.iniciada_en ?? '') ? -1 : 1))
+    .map((a) => ({ atencion_id: a.id, mascota_id: a.mascota_id, iniciada_en: a.iniciada_en }));
 
   // Cura D-319: 'pendiente' solo entra como hold VIGENTE del bloqueo
   // de 15 min (estado_reserva='pendiente_pago' y expira_en futuro) —
@@ -207,7 +208,7 @@ export async function obtenerEstadoHogar(
     ok: true,
     data: {
       senales,
-      atencion_en_curso: enCurso,
+      atenciones_en_curso: enCurso,
       proxima_cita: proximaCita,
       proxima_cita_por_mascota: porMascota,
     },

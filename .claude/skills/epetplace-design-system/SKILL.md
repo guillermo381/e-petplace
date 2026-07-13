@@ -63,7 +63,8 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
    v2 de 3 stops con violeta central y texto BLANCO — 2 stops está
    prohibido (el cyan se dispara a verde en OLED).
 7. **Glow es semántico**, no decorativo: reservado a "en vivo/en curso",
-   dark only; en claro se traduce a anillo nítido 1.5px + pill "● vivo".
+   dark only; en claro se traduce a anillo nítido 1.5px + pill "● En vivo"
+   (S59 §7.1: la voz única del estado vive en ui.citaEnVivo — jamás literal).
    Un solo elemento vivo por pantalla.
 8. **Memorial degrada solo.** Todo componente de marca nuevo trae su
    degradación automática (patrón `Boton marca`→primario,
@@ -393,7 +394,7 @@ comprar es lo último, y lo que compra combina con TODO.*
 **Glow**
 ```tsx
 // ✗ theme.shadow.glow.teal en una card cualquiera en claro (decorativo + claro = prohibido)
-// ✓ glow SOLO dark y SOLO "en curso"; en claro: borde 1.5 del hex puro + pill "● vivo" (S44)
+// ✓ glow SOLO dark y SOLO estado real; en claro: borde 1.5 del hex puro + pill "● En vivo" (S44; voz única S59)
 ```
 
 **Gradiente UI**
@@ -441,7 +442,7 @@ comprar es lo último, y lo que compra combina con TODO.*
 | `Hoja` | Todo modal: bottom sheet siempre. Cierra por swipe/backdrop/X/back |
 | `useAviso` (+`AvisoProvider`) | Todo feedback efímero. Uno a la vez, cola |
 | `EstadoVacio` | Todo "sin datos". Voz humana, sin animación de entrada. S52: `registro='pantalla'` (default, display centrado) · `'seccion'` (sereno, dentro de una pantalla con contenido — jamás display) |
-| `CitaEnVivo` | Envolver LA cita en curso — UNO por pantalla, jamás decorativo (Ley 7). dark: glow de capa · claro: anillo 1.5 + pill "● vivo" · memorial: degrada. No suma accent.active |
+| `CitaEnVivo` | Envolver LA cita en curso — UNO por pantalla, jamás decorativo (Ley 7). dark: glow de capa · claro: anillo 1.5 + pill "● En vivo" (voz única S59, key ui.citaEnVivo.estado — a11y incluida) · memorial: degrada con su voz serena ("En curso"). No suma accent.active. §7.5: N citas vivas REALES simultáneas = N celdas (multi-paseo del Hogar) |
 | `Esqueleto` (+`EsqueletoGrupo`) | Todo estado de carga. Estático por ley — sin shimmer ni pulso. Componer imitando el layout final; `EsqueletoGrupo` anuncia la carga al lector |
 | `AvatarMascota` | La cara de la mascota. fotoUrl → huella digna; no porta estado ni interacción; `especie` reservada para el set ilustrado D-288 |
 | `Cronometro` | Tiempo transcurrido de la atención. Voz de máquina (mono, tabular-nums); corre por DIFERENCIA contra inicioTs del server; `pausadoEnMs` congela quieto. Tamaño display provisional (se ratifica en B4) |

@@ -268,6 +268,12 @@ export const clienteEs = {
     reintentar: 'Reintentar',
     volver: 'Volver',
     novedadFallback: 'Novedad del paseo',
+    // ── S59 §7.3/§7.4 — la cara EN VIVO. GATE DE STRINGS PENDIENTE
+    // (lote S59) ──
+    vivoEmpezo: 'Empezó a las {{hora}}',
+    vivoSinGps: 'Aún no recibimos la ubicación del paseador. El mapa se enciende solo cuando llega su señal.',
+    actualizadoRecien: 'Actualizado recién',
+    actualizadoHace: 'Actualizado hace {{min}} min',
     verFoto: 'Ver foto {{i}} de {{total}}',
     deFuente: 'De {{fuente}}:',
     fotosDelPaseo: 'Fotos del paseo',
@@ -385,6 +391,8 @@ export const clienteEs = {
     dia5: 'V',
     dia6: 'S',
     diasNoCubre: '{{nombre}} no pasea los días apagados.',
+    // S59 §6.1 — plan L-V, voz con camino. GATE PENDIENTE (lote S59)
+    findeVoz: 'Los fines de semana se reservan sueltos o con tu paquete.',
     cargandoDias: 'Mirando la agenda del paseador',
     frecuenciaEtiqueta: '¿Cada cuánto?',
     frecuenciaSemanal: 'Cada semana',

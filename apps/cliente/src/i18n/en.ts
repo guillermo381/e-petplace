@@ -239,6 +239,11 @@ export const clienteEn = {
     reintentar: 'Try again',
     volver: 'Go back',
     novedadFallback: 'Walk update',
+    // S59 §7.3/§7.4 — la cara EN VIVO. GATE PENDIENTE (lote S59)
+    vivoEmpezo: 'Started at {{hora}}',
+    vivoSinGps: "We haven't received the walker's location yet. The map lights up as soon as their signal arrives.",
+    actualizadoRecien: 'Updated just now',
+    actualizadoHace: 'Updated {{min}} min ago',
     verFoto: 'See photo {{i}} of {{total}}',
     deFuente: 'From {{fuente}}:',
     fotosDelPaseo: 'Walk photos',
@@ -351,6 +356,8 @@ export const clienteEn = {
     dia5: 'F',
     dia6: 'S',
     diasNoCubre: "{{nombre}} doesn't walk on the dimmed days.",
+    // S59 §6.1 — plan L-V. GATE PENDIENTE (lote S59)
+    findeVoz: 'Weekends are booked as single walks or with your package.',
     cargandoDias: "Checking your walker's schedule",
     frecuenciaEtiqueta: 'How often?',
     frecuenciaSemanal: 'Every week',
