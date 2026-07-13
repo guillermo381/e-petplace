@@ -658,9 +658,18 @@ export default function TallerPaseo() {
           {seccionVisible === 'duraciones' && (
             <View style={{ gap: spacing[4] }}>
               <TituloBloque texto={t('taller.duracionesTitulo')} />
-              {/* v3.2 punto 3: la voz del paquete BAJÓ a su interruptor —
-                  la sección abre en silencio (Chanel) */}
-              {bloquesConCard.length === 0 && <VozSecundaria texto={t('taller.sinDuraciones')} />}
+              {/* S59-B1 cura de copy (founder): la sección abre con SU letra
+                  — duracionesIntro (el copy del paquete que vivía acá en
+                  S58.3/.4 ya había bajado a su interruptor en v3.2). Con
+                  chips visibles la intro ES la etiqueta del grupo
+                  (SelectorOpcion exige label visible): el heading
+                  "Duraciones y precios" queda UNO — el título de sección. */}
+              {bloquesConCard.length === 0 && (
+                <>
+                  <VozSecundaria texto={t('taller.duracionesIntro')} />
+                  <VozSecundaria texto={t('taller.sinDuraciones')} />
+                </>
+              )}
               {/* v3.1 (boceto firmado founder): EL CHIP GOBIERNA EL BLOQUE —
                   chips tonales de las duraciones ofrecidas + UN bloque con
                   TODA la config de la elegida (las tarjetas apiladas
@@ -668,7 +677,7 @@ export default function TallerPaseo() {
                   de chip conserva el borrador de cada duración. */}
               {bloquesConCard.length > 0 && (
                 <SelectorOpcion
-                  etiqueta={t('taller.duracionesTitulo')}
+                  etiqueta={t('taller.duracionesIntro')}
                   disposicion="grilla"
                   acento="oficio"
                   opciones={bloquesConCard.map((b) => ({ codigo: String(b), etiqueta: etiquetaCorta(b) }))}

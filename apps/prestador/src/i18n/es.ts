@@ -368,6 +368,8 @@ export const prestadorEs = {
     errorDetalle: 'Prueba de nuevo en un momento.',
     reintentar: 'Reintentar',
     duracionesTitulo: 'Duraciones y precios',
+    // S59-B1 cura de copy (texto EXACTO del founder) · LOTE S59, GATE PENDIENTE
+    duracionesIntro: 'Elige las duraciones que ofreces y ponles precio por salida.',
     // etiquetas cortas del menú canónico (la voz larga sigue en servicios.bloque*)
     d30: '30 min',
     d60: '1 hora',

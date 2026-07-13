@@ -329,6 +329,8 @@ export const prestadorEn = {
     errorDetalle: 'Try again in a moment.',
     reintentar: 'Retry',
     duracionesTitulo: 'Durations and prices',
+    // S59-B1 copy cure (founder's EXACT text) · LOTE S59, GATE PENDIENTE
+    duracionesIntro: 'Choose the durations you offer and set a price per outing.',
     d30: '30 min',
     d60: '1 hour',
     d120: '2 hours',
