@@ -312,6 +312,12 @@ function EjemploSetBPrima() {
   // diseño (28) Y la fila de 21px (§2.9: el gate del founder corre acá;
   // si a 21 la huella no se lee, se simplifica el ícono).
   const LOTE: IconoNombre[] = ['paseo', 'veterinaria', 'grooming', 'refugio', 'despensa', 'coach']
+  // LOTE 3 (S58, D-361 — gate founder POR ÍCONO en la fila de 21px):
+  const LOTE3: IconoNombre[] = [
+    'hogar', 'explorar', 'cuenta', 'hoy', 'negocio', 'carnet', 'familia',
+    'preferencias', 'pagos', 'ayuda', 'ubicacion', 'training', 'hotel',
+    'guarderia', 'seguros', 'telemedicina', 'vacaciones', 'equipo',
+  ]
   return (
     <View style={{ gap: spacing[4] }}>
       <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center', flexWrap: 'wrap' }}>
@@ -328,6 +334,22 @@ function EjemploSetBPrima() {
       </View>
       <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center', flexWrap: 'wrap' }}>
         {LOTE.map((n) => (
+          <Icono key={n} nombre={n} tamano={28} registro="aa" />
+        ))}
+      </View>
+      {/* LOTE 3 (S58, D-361): 28 de diseño + la fila del gate a 21px */}
+      <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center', flexWrap: 'wrap' }}>
+        {LOTE3.map((n) => (
+          <Icono key={n} nombre={n} tamano={28} />
+        ))}
+      </View>
+      <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center', flexWrap: 'wrap' }}>
+        {LOTE3.map((n) => (
+          <Icono key={n} nombre={n} tamano={21} />
+        ))}
+      </View>
+      <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center', flexWrap: 'wrap' }}>
+        {LOTE3.map((n) => (
           <Icono key={n} nombre={n} tamano={28} registro="aa" />
         ))}
       </View>

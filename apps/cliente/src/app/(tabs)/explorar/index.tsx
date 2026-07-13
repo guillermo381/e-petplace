@@ -30,9 +30,8 @@ import {
 import type { ReactNode } from 'react';
 import { obtenerServiciosPais, type ServiciosPais } from '@epetplace/api';
 
-// S53: paseo/grooming/vet migraron al set b′ (Icono de @epetplace/ui);
-// adiestramiento espera su ícono del lote 2 (D-318 — migra al tocarse).
-import { IconoServicioAdiestramiento } from '@/components/iconos-servicios';
+// S58 (D-361): adiestramiento migró al set b′ — la estrella murió
+// (violaba el set); el silbato canónico vive en el registry.
 import { useTraduccion } from '@/i18n';
 
 // El soft launch es Ecuador (DEFINICION_SOFTLAUNCH); el país del
@@ -90,7 +89,7 @@ export default function Explorar() {
     if (servicios.walking) fichasActivas.push({ clave: 'paseo', titulo: t('explorar.servicioPaseo'), detalle: t('explorar.servicioPaseoDetalle'), icono: <Icono nombre="paseo" tamano={34} />, onPress: () => router.push('/explorar/paseo') });
     if (servicios.grooming) fichasActivas.push({ clave: 'grooming', titulo: t('explorar.servicioGrooming'), detalle: t('explorar.servicioGroomingDetalle'), icono: <Icono nombre="grooming" tamano={34} /> });
     if (servicios.veterinary) fichasActivas.push({ clave: 'vet', titulo: t('explorar.servicioVet'), detalle: t('explorar.servicioVetDetalle'), icono: <Icono nombre="veterinaria" tamano={34} /> });
-    if (servicios.training) fichasActivas.push({ clave: 'adiestramiento', titulo: t('explorar.servicioAdiestramiento'), detalle: t('explorar.servicioAdiestramientoDetalle'), icono: <IconoServicioAdiestramiento color={theme.capa.cuidado} /> });
+    if (servicios.training) fichasActivas.push({ clave: 'adiestramiento', titulo: t('explorar.servicioAdiestramiento'), detalle: t('explorar.servicioAdiestramientoDetalle'), icono: <Icono nombre="training" tamano={26} /> });
     if (!servicios.hotel) proximamente.push(t('explorar.proxHotel'), t('explorar.proxGuarderia'));
     if (!servicios.insurance) proximamente.push(t('explorar.proxSeguros'));
     if (!servicios.telemedicine) proximamente.push(t('explorar.proxTelemedicina'));

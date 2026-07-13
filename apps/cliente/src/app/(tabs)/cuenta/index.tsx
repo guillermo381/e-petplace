@@ -13,6 +13,7 @@ import { useRouter } from 'expo-router';
 import {
   Boton,
   Celda,
+  CeldaNavegacion,
   Encabezado,
   Hoja,
   Separador,
@@ -46,15 +47,16 @@ export default function Cuenta() {
   const [cerrando, setCerrando] = useState(false);
   const [eliminarAbierta, setEliminarAbierta] = useState(false);
 
+  // S58 (D-361): el freno del grupo se LEVANTA — el lote 3 trae los
+  // íconos y las entradas hablan la Ley 19.1 (perfil usa la chapita
+  // 'cuenta'; la dirección usa el pin 'ubicacion').
   const lugares = [
-    { etiqueta: t('cuenta.perfil'), ruta: '/cuenta/perfil' as const },
-    // S56-A D-339: la dirección es del HOGAR (no del perfil personal) —
-    // celda propia; el checkout reusa el mismo formulario.
-    { etiqueta: t('direccion.titulo'), ruta: '/cuenta/direccion' as const },
-    { etiqueta: t('cuenta.familia'), ruta: '/cuenta/familia' as const },
-    { etiqueta: t('cuenta.preferencias'), ruta: '/cuenta/preferencias' as const },
-    { etiqueta: t('cuenta.pagos'), ruta: '/cuenta/pagos' as const },
-    { etiqueta: t('cuenta.ayuda'), ruta: '/cuenta/ayuda' as const },
+    { etiqueta: t('cuenta.perfil'), ruta: '/cuenta/perfil' as const, icono: 'cuenta' as const },
+    { etiqueta: t('direccion.titulo'), ruta: '/cuenta/direccion' as const, icono: 'ubicacion' as const },
+    { etiqueta: t('cuenta.familia'), ruta: '/cuenta/familia' as const, icono: 'familia' as const },
+    { etiqueta: t('cuenta.preferencias'), ruta: '/cuenta/preferencias' as const, icono: 'preferencias' as const },
+    { etiqueta: t('cuenta.pagos'), ruta: '/cuenta/pagos' as const, icono: 'pagos' as const },
+    { etiqueta: t('cuenta.ayuda'), ruta: '/cuenta/ayuda' as const, icono: 'ayuda' as const },
   ];
 
   return (
@@ -67,11 +69,10 @@ export default function Cuenta() {
             {lugares.map((lugar, i) => (
               <View key={lugar.ruta}>
                 {i > 0 ? <Separador /> : null}
-                <Celda
-                  interactiva
-                  accessibilityRole="button"
-                  onPress={() => router.push(lugar.ruta)}
+                <CeldaNavegacion
+                  icono={lugar.icono}
                   titulo={lugar.etiqueta}
+                  onPress={() => router.push(lugar.ruta)}
                 />
               </View>
             ))}

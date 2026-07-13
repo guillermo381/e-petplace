@@ -25,7 +25,13 @@ import Svg, { Circle, G, Path } from 'react-native-svg'
 import { useTheme } from '../ThemeProvider'
 import { Huella } from '../brand/Huella'
 
-export type IconoNombre = 'paseo' | 'veterinaria' | 'grooming' | 'refugio' | 'despensa' | 'coach'
+export type IconoNombre =
+  | 'paseo' | 'veterinaria' | 'grooming' | 'refugio' | 'despensa' | 'coach'
+  // ── LOTE 3 (S58, D-361 — gate founder POR ÍCONO pendiente) ──
+  | 'hogar' | 'explorar' | 'cuenta' | 'hoy' | 'negocio'
+  | 'carnet' | 'familia' | 'preferencias' | 'pagos' | 'ayuda' | 'ubicacion'
+  | 'training' | 'hotel' | 'guarderia' | 'seguros' | 'telemedicina'
+  | 'vacaciones' | 'equipo'
 export type IconoRegistro = 'capa' | 'aa' | 'tinta'
 
 const TRAZO = 1.9
@@ -116,6 +122,149 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       </G>
     </>
   ),
+
+  // ══ LOTE 3 (S58, D-361) — cada firma del founder poda o suma ══
+  // La casa que abriga — la huella vive adentro (tab Hogar, comunidad).
+  hogar: ({ tinta, huella }) => (
+    <>
+      <Path d="M4.2 11.3 12 4.6l7.8 6.7V19a1.4 1.4 0 0 1-1.4 1.4H5.6A1.4 1.4 0 0 1 4.2 19Z" {...trazo(tinta)} />
+      <Huella color={huella} x={8} y={10.6} escala={0.42} />
+    </>
+  ),
+  // La brújula señala; la huella es el sur que importa (tab Explorar).
+  explorar: ({ tinta, huella }) => (
+    <>
+      <Circle cx={12} cy={12} r={8.4} {...trazo(tinta)} />
+      <Path d="M15.2 8.8 13 13l-4.2 2.2L11 11Z" {...trazo(tinta)} />
+      <Huella color={huella} x={9.2} y={12.6} escala={0.3} />
+    </>
+  ),
+  // La chapita de collar — la identidad colgada (tab Cuenta y perfil;
+  // la figura humana del boceto S57 quedó PROHIBIDA §2.4).
+  cuenta: ({ tinta, huella }) => (
+    <>
+      <Circle cx={12} cy={5.6} r={1.9} {...trazo(tinta)} />
+      <Circle cx={12} cy={13.6} r={6.6} {...trazo(tinta)} />
+      <Huella color={huella} x={8.9} y={10.6} escala={0.38} />
+    </>
+  ),
+  // El sol del oficio — el día de trabajo con la mascota adentro.
+  hoy: ({ tinta, huella }) => (
+    <>
+      <Circle cx={12} cy={12} r={4.6} {...trazo(tinta)} />
+      <Path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6" {...trazo(tinta)} />
+      <Huella color={huella} x={9.3} y={9.5} escala={0.32} />
+    </>
+  ),
+  // El maletín del oficio lleva su huella (tab Negocio).
+  negocio: ({ tinta, huella }) => (
+    <>
+      <Path d="M4.4 8.6h15.2V18a1.5 1.5 0 0 1-1.5 1.5H5.9A1.5 1.5 0 0 1 4.4 18Z" {...trazo(tinta)} />
+      <Path d="M9.4 8.6V6.9a1.9 1.9 0 0 1 1.9-1.9h1.4a1.9 1.9 0 0 1 1.9 1.9v1.7" {...trazo(tinta)} />
+      <Huella color={huella} x={8.7} y={10.7} escala={0.4} />
+    </>
+  ),
+  // La jeringa protege; la huella verde es la vida cuidada (carnet).
+  carnet: ({ tinta, huella }) => (
+    <>
+      <Path d="M18.2 2.8l3 3M16.4 7.6l1.7-1.7" {...trazo(tinta)} />
+      <Path d="M14 5.2l4.8 4.8-7.4 7.4H6.6v-4.8Z" {...trazo(tinta)} />
+      <Huella color={huella} x={3.4} y={14.6} escala={0.36} />
+    </>
+  ),
+  // Dos huellas, una chica — la familia camina junta. La grande es de
+  // TINTA (hace de objeto); la chica porta la capa (UNA huella de capa).
+  familia: ({ tinta, huella }) => (
+    <>
+      <Huella color={tinta} x={3.6} y={4.6} escala={0.58} />
+      <Huella color={huella} x={14.2} y={12.6} escala={0.38} />
+    </>
+  ),
+  // El engranaje con la huella en el centro — se ajusta para ellos.
+  preferencias: ({ tinta, huella }) => (
+    <>
+      <Circle cx={12} cy={12} r={4.4} {...trazo(tinta)} />
+      <Path d="M12 3.4v2.4M12 18.2v2.4M3.4 12h2.4M18.2 12h2.4M5.9 5.9l1.7 1.7M16.4 16.4l1.7 1.7M18.1 5.9l-1.7 1.7M7.6 16.4l-1.7 1.7" {...trazo(tinta)} />
+      <Huella color={huella} x={9.4} y={9.6} escala={0.3} />
+    </>
+  ),
+  // El billete con huella ocre — la plata del cuidado (pagos y
+  // liquidaciones comparten dibujo).
+  pagos: ({ tinta, huella }) => (
+    <>
+      <Path d="M3.4 7.4h17.2a0 0 0 0 1 0 0v9.2a0 0 0 0 1 0 0H3.4a0 0 0 0 1 0 0V7.4a0 0 0 0 1 0 0Z" {...trazo(tinta)} />
+      <Path d="M6.4 10.2v3.6M17.6 10.2v3.6" {...trazo(tinta)} />
+      <Huella color={huella} x={8.9} y={9.2} escala={0.38} />
+    </>
+  ),
+  // El salvavidas — ayuda que flota, con la huella a salvo adentro.
+  ayuda: ({ tinta, huella }) => (
+    <>
+      <Circle cx={12} cy={12} r={8.4} {...trazo(tinta)} />
+      <Path d="M12 3.6v3M12 17.4v3M3.6 12h3M17.4 12h3" {...trazo(tinta)} />
+      <Huella color={huella} x={9.3} y={9.5} escala={0.3} />
+    </>
+  ),
+  // El pin del hero — la huella vive en la gota (deja de ser placeholder).
+  ubicacion: ({ tinta, huella }) => (
+    <>
+      <Path d="M12 21s-7-5.3-7-11a7 7 0 1 1 14 0c0 5.7-7 11-7 11Z" {...trazo(tinta)} />
+      <Huella color={huella} x={8.9} y={6.6} escala={0.36} />
+    </>
+  ),
+  // El silbato del adiestrador — MATA la estrella (violaba el set).
+  training: ({ tinta, huella }) => (
+    <>
+      <Circle cx={9} cy={14.2} r={4.6} {...trazo(tinta)} />
+      <Path d="M9.6 9.6h9.2a1.2 1.2 0 0 1 1.2 1.2v2l-5.6 1.6" {...trazo(tinta)} />
+      <Huella color={huella} x={6.5} y={11.6} escala={0.32} />
+    </>
+  ),
+  // La cama del hospedaje — la mascota apoyada arriba.
+  hotel: ({ tinta, huella }) => (
+    <>
+      <Path d="M3.6 6.4v12.2M3.6 13.6h16.8v5M3.6 16.4h16.8" {...trazo(tinta)} />
+      <Huella color={huella} x={12.8} y={5.8} escala={0.4} />
+    </>
+  ),
+  // La casita de guardería — la huella espera en el techo.
+  guarderia: ({ tinta, huella }) => (
+    <>
+      <Path d="M4.6 19.4v-7.6L12 5.2l7.4 6.6v7.6Z" {...trazo(tinta)} />
+      <Path d="M9.6 19.4v-3.8a2.4 2.4 0 0 1 4.8 0v3.8" {...trazo(tinta)} />
+      <Huella color={huella} x={9.5} y={7.4} escala={0.3} />
+    </>
+  ),
+  // El escudo — la vida protegida (verde vital, como insurance).
+  seguros: ({ tinta, huella }) => (
+    <>
+      <Path d="M12 3.4 19 6v5.4c0 4.5-2.9 8-7 9.6-4.1-1.6-7-5.1-7-9.6V6Z" {...trazo(tinta)} />
+      <Huella color={huella} x={8.8} y={7.2} escala={0.4} />
+    </>
+  ),
+  // La pantalla que atiende — salud a distancia, la huella presente.
+  telemedicina: ({ tinta, huella }) => (
+    <>
+      <Path d="M8 3.6h8a1.4 1.4 0 0 1 1.4 1.4v14A1.4 1.4 0 0 1 16 20.4H8A1.4 1.4 0 0 1 6.6 19V5A1.4 1.4 0 0 1 8 3.6Z" {...trazo(tinta)} />
+      <Path d="M12 6.8v3.4M10.3 8.5h3.4" {...trazo(tinta)} />
+      <Huella color={huella} x={9.5} y={12.8} escala={0.32} />
+    </>
+  ),
+  // El calendario con la pausa serena — vacaciones jamás dicen error.
+  vacaciones: ({ tinta, huella }) => (
+    <>
+      <Path d="M4.6 6.6h14.8v12.8H4.6ZM4.6 10.4h14.8M8.4 4.4v3M15.6 4.4v3" {...trazo(tinta)} />
+      <Path d="M7.6 17.2l3.2-4" {...trazo(tinta)} />
+      <Huella color={huella} x={12.6} y={12.2} escala={0.32} />
+    </>
+  ),
+  // Dos correas que se cruzan — el equipo del oficio.
+  equipo: ({ tinta, huella }) => (
+    <>
+      <Path d="M6.2 4.4c3.6 1.5 4.2 5.4 1.2 8.8M17.8 4.4c-3.6 1.5-4.2 5.4-1.2 8.8" {...trazo(tinta)} />
+      <Huella color={huella} x={8.8} y={14.4} escala={0.4} />
+    </>
+  ),
 }
 
 export function Icono({
@@ -140,6 +289,11 @@ export function Icono({
   // (verde vital) · refugio/coach=comunidad(magenta) · grooming/
   // despensa=ocre (cuidado/consumo — status.warning es el ocre puro).
   const esCapa = 'capa' in theme
+  const cuidado = { pura: esCapa ? theme.capa.cuidado : colorTinta, aa: 'capaText' in theme ? theme.capaText.cuidado : colorTinta }
+  const identidad = { pura: esCapa ? theme.capa.identidad : colorTinta, aa: 'capaText' in theme ? theme.capaText.identidad : colorTinta }
+  const comunidad = { pura: esCapa ? theme.capa.comunidad : colorTinta, aa: 'capaText' in theme ? theme.capaText.comunidad : colorTinta }
+  const comunidadAmplia = { pura: esCapa ? theme.capa.comunidadAmplia : colorTinta, aa: 'capaText' in theme ? theme.capaText.comunidadAmplia : colorTinta }
+  const ocre = { pura: theme.status.warning, aa: theme.status.warningText }
   const porConcepto: Record<IconoNombre, { pura: string; aa: string }> = {
     paseo: { pura: esCapa ? theme.capa.cuidado : colorTinta, aa: 'capaText' in theme ? theme.capaText.cuidado : colorTinta },
     veterinaria: { pura: esCapa ? theme.capa.identidad : colorTinta, aa: 'capaText' in theme ? theme.capaText.identidad : colorTinta },
@@ -147,6 +301,13 @@ export function Icono({
     refugio: { pura: esCapa ? theme.capa.comunidad : colorTinta, aa: 'capaText' in theme ? theme.capaText.comunidad : colorTinta },
     despensa: { pura: theme.status.warning, aa: theme.status.warningText },
     coach: { pura: esCapa ? theme.capa.comunidad : colorTinta, aa: 'capaText' in theme ? theme.capaText.comunidad : colorTinta },
+    // ── LOTE 3 (S58, D-361): capas por concepto — el founder poda/ajusta en gate ──
+    hogar: comunidad, familia: comunidad, equipo: comunidad,
+    explorar: comunidadAmplia,
+    cuenta: identidad, carnet: identidad, seguros: identidad, telemedicina: identidad,
+    hoy: cuidado, preferencias: cuidado, ayuda: cuidado, ubicacion: cuidado,
+    training: cuidado, hotel: cuidado, guarderia: cuidado, vacaciones: cuidado,
+    negocio: ocre, pagos: ocre,
   }
 
   // §2.8 memorial: la huella a tinta secundaria, el trazo se conserva.

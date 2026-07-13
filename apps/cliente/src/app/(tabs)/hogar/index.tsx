@@ -115,22 +115,6 @@ function nombreDia(d: number, idioma: string): string {
   return new Intl.DateTimeFormat(idioma === 'en' ? 'en' : 'es', { weekday: 'long', timeZone: 'UTC' }).format(fecha);
 }
 
-// Pin del piso 2 del hero — PLACEHOLDER DECLARADO (D-361: el lote b′
-// lo reemplaza al paso). Trazo 1.9 en tinta, remates redondeados.
-function PinDireccion({ color }: { color: string }) {
-  return (
-    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" aria-hidden>
-      <Path
-        d="M12 21s-7-5.3-7-11a7 7 0 1 1 14 0c0 5.7-7 11-7 11Z"
-        stroke={color}
-        strokeWidth={1.9}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Path d="M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" stroke={color} strokeWidth={1.9} />
-    </Svg>
-  );
-}
 
 // Código de voz (Ley 3: jamás visible) → texto del riel + semántica.
 // S52-P3: la ficha usa las voces SIN sujeto (ficha.*) — el nombre
@@ -491,7 +475,7 @@ export default function Hogar() {
                   accessibilityRole="button"
                   onPress={() => router.push('/hogar/paseos')}
                   titulo={proximaCita.direccion}
-                  inicio={<PinDireccion color={theme.text.secondary} />}
+                  inicio={<Icono nombre="ubicacion" tamano={20} />}
                   fin={
                     <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" aria-hidden>
                       <Path d="M9 18l6-6-6-6" stroke={theme.text.tertiary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
