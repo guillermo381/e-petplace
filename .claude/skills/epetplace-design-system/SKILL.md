@@ -8,7 +8,8 @@ description: >-
   Trigger en: "pantalla", "componente", "estilo", "color", "UI", "diseño",
   "tema", "dark", "animación", "layout", "botón", "card", "input", "lista",
   "modal", "sheet", "toast", "tab", "header", "StyleSheet", "fontFamily",
-  "backgroundColor". Autoridad: obliga tokens y componentes de @epetplace/ui,
+  "backgroundColor", "craft", "tesis", "firma", "elevación", "pantalla patrón",
+  "segmento", "toggle". Autoridad: obliga tokens y componentes de @epetplace/ui,
   prohíbe inventar. Conflictos de stack (Expo/RN/Reanimated) los ganan
   expo/skills y Software Mansion; en SQL manda epetplace-db por encima de todo.
 ---
@@ -19,7 +20,13 @@ Fuente de verdad: `packages/ui` (tokens v4 + 28 componentes + 3 temas).
 Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 `@epetplace/ui`, no existe en el producto.
 
-## 1. LAS LEYES (violarlas = PR rechazado)
+Desde S57 esta skill es EL EQUIPO DE DISEÑO completo, no un manual de
+materiales: las Leyes 1–13 dicen CON QUÉ se construye; la capa de craft
+(§1b, Leyes 14–20) dice CÓMO se decide que una pantalla está BIEN; y el
+protocolo del diseñador (§1c) dice CÓMO SE PIENSA antes de tocar código.
+El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
+
+## 1. LAS LEYES DE MATERIALES (1–13 — violarlas = PR rechazado)
 
 1. **Cero hex/valores crudos en apps.** Todo color, tamaño, radio, sombra
    o duración sale de `@epetplace/ui` (tokens o componentes). Cero Views a
@@ -97,6 +104,231 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
     ESPERA DE MARCA (huella/isotipo trazándose en loop sereno) SIEMPRE
     con la voz honesta debajo — es de marca, no shimmer.
 
+## 1b. LA CAPA DE CRAFT (Leyes 14–20 — ENMIENDA S57 FIRMADA por el founder)
+
+> **Qué es:** los principios de dirección minados de `frontend-design`,
+> traducidos a nuestra casa. Las Leyes 1–13 dicen CON QUÉ se construye
+> (tokens, componentes, dosis); esta capa dice CÓMO se decide que una
+> pantalla está BIEN — la vara MoeGo+ de `DEFINICION_SOFTLAUNCH.md`.
+> **Qué no es:** no enmienda tokens, componentes ni DIRECCION_ARTE — donde
+> esta capa calle, mandan ellos. No es licencia para inventar: la firma de
+> una pantalla se elige del lenguaje de la casa, jamás se importa.
+
+14. **La TESIS de la pantalla.** Toda pantalla que se toque declara su
+    tesis ANTES de tocarse: UNA frase que dice lo UNO que la pantalla
+    comunica. No lo que muestra — lo que comunica. "El CUÁNDO comunica
+    que la agenda del paseador es real y tiene lugar para vos."
+    "Liquidaciones comunica que el que trabaja, cobra."
+    - La tesis se escribe en el reporte del sub-bloque, primera línea.
+    - Todo elemento de la pantalla se contrasta contra ella: lo que no
+      la sirve ni la soporta es candidato a la Ley 16.
+    - El gate en dispositivo EMPIEZA leyendo la tesis: el founder mira
+      la pantalla y responde si la comunica. Si hay que explicarla, no
+      la comunica (el wow es cero explicación — EL NORTE).
+    - Una pantalla sin tesis declarada no entra a gate. Sin excepción.
+15. **UN elemento firma por pantalla.** El coraje se gasta en UN lugar.
+    Cada pantalla tiene UN elemento por el que se la recuerda — la
+    firma — y todo lo demás se mantiene callado y disciplinado para que
+    la firma respire.
+    - La firma se ELIGE del lenguaje de la casa: la huella que aparece
+      (DIRECCION_ARTE §2.6), un momento de motion de marca (§5), una voz
+      humana en el lugar exacto, una manipulación directa con
+      consecuencia visible (patrón Kaxo, lado prestador), una
+      composición que preside (la mascota, el dato hero). Jamás un
+      recurso importado ni un componente nuevo por esta vía (Ley 11
+      intacta).
+    - La firma NO suma acentos: se monta sobre la contabilidad
+      existente (Ley 4 de dosis, Ley 5 de accent.active). Elevar uno
+      que ya está, no agregar otro.
+    - Lado prestador: la firma vive DENTRO de la dosis baja — la
+      sobriedad es aplicación, no ausencia de firma (DIRECCION_ARTE
+      §2.7). Una firma del lado prestador suele ser de COMPORTAMIENTO
+      (la vista previa viva, la consecuencia visible), no de color.
+    - **El test anti-genérico:** antes del gate, preguntarse "¿esta
+      pantalla podría ser de cualquier app de servicios?". Si la
+      respuesta es sí, no tiene firma — no está lista, aunque funcione
+      y cumpla las Leyes 1–13.
+16. **La regla Chanel.** Antes de entregar, quitá un accesorio. Toda
+    pantalla que entra a gate pasa primero por una pasada de REMOCIÓN:
+    se busca activamente qué sobra — un divisor, un chip, una
+    repetición de dato, un texto que explica lo que ya se ve — y se
+    quita.
+    - El reporte del sub-bloque declara QUÉ se quitó en esa pasada. Si
+      la conclusión honesta es "nada sobraba", se declara con su porqué
+      — pero la pasada se hace siempre; "no la hice" no es un resultado
+      válido.
+    - La remoción respeta la Ley 37 del contrato: lo que se quita de la
+      UI y deja código muerto, se elimina del código también.
+17. **El copy es material de diseño.** Las palabras están en la pantalla
+    para una sola cosa: hacerla más fácil de entender y de usar. Se
+    diseñan con la misma intención que el espaciado y el color. Reglas
+    exigibles:
+    1. **Voz activa, verbos llanos.** El control dice exactamente lo que
+       pasa al tocarlo: "Guardar cambios", jamás "Enviar". Tuteo neutro
+       (regla 27).
+    2. **Nombres del lado del usuario, jamás del sistema.** El dueño
+       maneja "recordatorios", no "notificaciones push"; el prestador
+       configura "tu oferta", no "prestador_servicios". El vocabulario
+       del motor es del motor (Ley 3, extendida al copy entero).
+    3. **Una acción, un nombre, todo el flujo.** El botón que dice
+       "Reservar" produce una confirmación que dice "Reservado" — la
+       cohesión es cómo la gente aprende a moverse. Renombrar a mitad de
+       flujo = bug de copy.
+    4. **Los errores dirigen, no se lamentan.** Qué pasó + qué hacer, en
+       la voz de la interfaz, sin disculpas vagas y sin misterio
+       ("revisá tu conexión" queda RESERVADO a errores de red —
+       precedente S47). El error jamás se disfraza de vacío (Ley 13
+       intacta).
+    5. **El vacío invita a actuar.** Todo `EstadoVacio` termina en un
+       camino, no en un estado de ánimo — coherente con §6ter del paseo
+       (MODELO_PASEO): cero finales mudos, en ninguna superficie.
+    6. **Cada elemento hace UN trabajo.** Un label rotula, un ejemplo
+       demuestra; nada hace doble turno en silencio. Ser específico gana
+       siempre a ser ingenioso.
+18. **La estructura informa, no decora.** Todo recurso estructural —
+    numeración, eyebrows, divisores, secciones — codifica una verdad del
+    contenido o se corta. Una numeración solo vive si el contenido ES
+    una secuencia real; un divisor solo vive si separa cosas realmente
+    distintas; un header de sección solo vive si la sección existe como
+    concepto para el usuario.
+    - El eyebrow uppercase trackeado sigue muerto (prohibición S52) —
+      esta ley generaliza el porqué: era estructura decorativa.
+    - Ante la duda, la jerarquía se dice con tipografía y aire (tokens
+      de spacing), no con más cajas.
+19. **El diccionario de patrones (cada trabajo, UN componente).** Toda
+    interacción recurrente tiene UN componente canónico. Usar otro es
+    ilegal aunque los tokens estén bien — la consistencia de materiales
+    no absuelve la confusión de roles. El diccionario (nace de las notas
+    literales del founder, S57):
+    1. **Entrar a una sección** (navegar hacia adentro: "Mis paseos",
+       "Agregar carnet", "Mascotas"): **celda de navegación** — ícono
+       del set b′ a la izquierda + título + (subtítulo opcional) +
+       chevron. JAMÁS un botón blanco de solo texto: la celda dice A
+       DÓNDE va con su ícono; el botón mudo no dice nada.
+    2. **Acción primaria de la pantalla** (crear, confirmar, pagar):
+       botón con jerarquía real (el acento de la capa) — UNO por
+       pantalla (Ley 5 intacta). Las acciones secundarias, en jerarquía
+       menor visible.
+    3. **Cambiar de vista dentro de una pantalla** (segmentos: Próximos
+       / Agenda / Historial; Hoy / Semana; secciones de Cuenta):
+       **selector segmentado (toggle)** — el control de vistas
+       exclusivas. **Los chips QUEDAN PROHIBIDOS como tabs/segmentos**
+       (decisión founder S57): chips son para filtros y multi-selección
+       (los 7 días del plan), donde elegir varios o ninguno es legal.
+    4. **Estado/dato pasivo** (De vacaciones, Parte del plan): chip
+       informativo, sin pretender ser botón.
+    5. **Elemento hero de una posición consolidada** (la próxima cita,
+       el dato que manda): tarjeta con jerarquía propia — jamás la misma
+       celda que todo lo demás, más ancha porque "tiene más texto". El
+       ancho no es jerarquía; la jerarquía se diseña.
+
+    Si un trabajo de interacción no está en el diccionario, se propone
+    su patrón, se gatea y ENTRA al diccionario (patrón Ley 11) — jamás
+    se improvisa con el ladrillo genérico. El diccionario aplica a LAS
+    DOS apps: la dosis del prestador modula color y acento, no la
+    gramática.
+    > NOTA de construcción: el **selector segmentado** canónico del
+    > punto 3 AÚN NO existe en `packages/ui` — es construcción pendiente
+    > (territorio de la A, pedido autocontenido cuando dispare, patrón
+    > Ley 11). Hasta que exista, las pantallas vivas con chips-como-
+    > segmento migran en su pasada de craft — la skill declara el
+    > material, no lo fabrica.
+20. **La elevación (el 3D sutil, por sistema).** Nacen los tokens de
+    elevación — hoy el sistema es plano y por eso las pantallas no
+    despegan (diagnóstico del founder S57, vara Airbnb: sombras
+    pequeñas, efecto sutil, jamás dramáticas). Dos niveles, y solo dos:
+    1. **Reposo** (`elevacion.reposo`): la superficie que vive sobre el
+       fondo — tarjetas, celdas. Sombra doble suave (contacto + difusa),
+       apenas perceptible.
+    2. **Elevado** (`elevacion.elevada`): lo que flota — Hojas, menús.
+       Un paso más, sigue siendo sutil.
+
+    Los valores exactos nacen en `packages/ui` como tokens (una sola
+    definición, jamás sombras artesanales por pantalla) y se calibran en
+    el primer lote de pantallas patrón con gate del founder. Reglas: la
+    elevación acompaña a la jerarquía (el hero puede llevarla; el fondo
+    jamás); en dosis prestador se conserva (la elevación no es color);
+    en memorial se conserva (no es celebración). El fondo de la casa
+    deja de ser blanco puro: **papel cálido** (el tono exacto se firma
+    con el marco — nota abierta S57), para que las superficies blancas
+    con sombra respiren.
+    > NOTA de construcción: los tokens de elevación son construcción
+    > PENDIENTE en `packages/ui` (territorio de la A, pedido
+    > autocontenido cuando dispare) — la skill declara el material, no
+    > lo fabrica. Hasta entonces siguen rigiendo `shadows` v4 y la Ley 6
+    > (las sombras JAMÁS se animan).
+
+### Las pantallas patrón (cómo se firma lo visual)
+
+**Ninguna ley de composición se firma en prosa: se firma sobre
+píxeles.** El mecanismo (inaugurado S57 con el boceto del Hogar,
+aprobado en esencia por el founder en primera ronda):
+
+1. El arquitecto boceta la pantalla aplicando las leyes → crítica del
+   founder → iteración → **firma sobre el boceto**.
+2. La pantalla firmada entra a la skill como **pantalla patrón**: la
+   referencia visual de sus patrones (así se ve un hero, una celda de
+   navegación, un toggle). Las sesiones de Code construyen COPIANDO
+   NIVEL de la pantalla patrón, no interpretando prosa.
+3. El gate en dispositivo compara contra la pantalla patrón — la vara
+   deja de ser adjetivo ("espectáculo") y pasa a ser comparación.
+4. Primera pantalla patrón: el Hogar del cliente (boceto S57, dos notas
+   abiertas: íconos del set b′ cuando el lote exista; fondo/marco por
+   firmar).
+
+### El protocolo del gate de craft (por pantalla, exigible)
+
+Toda pantalla que entre a la pasada de craft (D-347 y sucesoras) llega
+al gate en dispositivo con esta declaración de CUATRO líneas en el
+reporte:
+
+1. **TESIS:** la frase (Ley 14).
+2. **FIRMA:** cuál es el elemento y por qué ese (Ley 15).
+3. **CHANEL:** qué se quitó (Ley 16).
+4. **TESTS:** pasa los 6 tests de `DISEÑO_EXPERIENCIA` §10 (dueño) o los
+   del §15 (prestador) — se declara, no se asume.
+
+El gate del founder es POR PANTALLA, en dispositivo (APK con doble
+reinicio, L-138), con la vara MoeGo+: la fluidez no alcanza; la pantalla
+tiene que tener firma. **Dosis baja SIEMPRE en la ejecución: el patrón
+viaja, el maquillaje no** — si una pantalla mejora, la mejora tiene que
+ser reproducible por sistema (tokens, componentes, leyes), no un retoque
+artesanal que la siguiente pantalla no hereda.
+
+## 1c. CÓMO PIENSA EL DISEÑADOR (protocolo obligatorio, founder S57)
+
+Antes de crear, agregar o modificar CUALQUIER componente visual, la
+sesión razona como un **diseñador de interiores QUE CONOCE TODA LA
+CASA** — jamás como un carpintero que fabrica un mueble suelto. Las
+preguntas son OBLIGATORIAS, en este orden, y se responden en el reporte
+ANTES de tocar código:
+
+1. **¿Qué TRABAJO hace este elemento?** (entrar a una sección, acción
+   primaria, cambiar de vista, estado pasivo, hero) → buscalo en el
+   diccionario (Ley 19). Si el trabajo tiene patrón, se USA el patrón.
+   Punto.
+2. **¿Ya existe en la casa?** Relevá `packages/ui` Y las pantallas
+   vecinas Y la otra app ANTES de crear: reusar > adaptar > crear
+   (crear es el último recurso y entra por Ley 11: propuesta + gate +
+   nace en `packages/ui`, jamás inline).
+3. **¿Recorriste la casa?** Mirá las pantallas que el usuario ve ANTES
+   y DESPUÉS de esta: ¿el elemento habla el mismo idioma que sus
+   vecinas (mismos patrones, misma jerarquía, mismos nombres de
+   acciones — Ley 17.3)? Un elemento correcto pero incoherente con sus
+   vecinas está MAL.
+4. **¿Cuál es la tesis de la pantalla (Ley 14)** y este elemento la
+   sirve — o le roba atención a la firma (Ley 15)?
+5. **¿Qué capa de color le toca** (paseo/salud/marca/cuidado) **y qué
+   dosis** (lado dueño / lado prestador / memorial)?
+6. **¿Cómo se ve en los 3 temas y en es/en?** ¿Y sus estados: vacío,
+   cargando, error, deshabilitado? (Un componente sin sus estados no
+   está terminado.)
+7. **La pasada Chanel (Ley 16):** ¿qué le quitaste antes de entregarlo?
+
+**La regla madre:** *el diseñador de interiores no compra un mueble
+nuevo sin caminar la casa: primero reusa, luego mueve, luego restaura —
+comprar es lo último, y lo que compra combina con TODO.*
+
 ## 2. CORRECTO / INCORRECTO (casos reales de S43)
 
 **Chip artesanal → Insignia**
@@ -171,7 +403,7 @@ Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 | `HojaScroll` | Scrollable interno que GANA dentro de la Hoja (patrón SM block — fix S45-B3.2). OBLIGATORIO para toda lista desplazable dentro de una Hoja: el ScrollView plano pierde contra el swipe-to-close en Android y web no lo delata (L-132) |
 | `SelectorAvatar` | La foto de identidad de la mascota (S45). Vacío = AvatarMascota + invitación (la huella es cara válida); Hoja con cámara/galería PARES + "Por ahora no" primera clase; con foto: Cambiar/Quitar. Entrega {uri,width,height}; el upload es de la pantalla. Captura por `capturaFoto` (infra compartida con EvidenciaFoto — no duplicar) |
 | `HeroMarca` | Cabecera con el gradiente firma (S45, contexto cerrado dosis alta). alto=bienvenida · compacto=techo de paso Y techo del Hogar (enmienda Ley 4, S52). Isotipo blanco adentro = el UNO por pantalla; CTAs JAMÁS adentro (marca sobre marca). Memorial: bg.card plano, text.primary — degrada solo |
-| `SelectorOpcion` | Chips de selección ÚNICA (S45; ENMENDADO S55-B4). Radiogroup; seleccionado = borde 1.5 capa.identidad + tint capaBg (mismo tratamiento que SelectorEspecie, sin accent.active); memorial degrada. `disposicion`: 'fila' (default, 2-4 chips que llenan el ancho) · 'tira' (scroll horizontal — la tira de días del CUÁNDO) · 'grilla' (chips envueltos para conjuntos grandes — inicios/menú de bloques). NO es multi-select ni porta estado de datos (eso es Insignia) |
+| `SelectorOpcion` | Chips de selección de VALOR (S45; ENMENDADO S55-B4 y S56). Radiogroup (o checkbox-group con `multiple` — los 7 días del plan); seleccionado = borde 1.5 capa.identidad + tint capaBg (mismo tratamiento que SelectorEspecie, sin accent.active); memorial degrada. `disposicion`: 'fila' (default, 2-4 chips que llenan el ancho) · 'tira' (scroll horizontal — la tira de días del CUÁNDO) · 'grilla' (chips envueltos para conjuntos grandes — inicios/menú de bloques). NO porta estado de datos (eso es Insignia). **OJO Ley 19.3 (S57): PROHIBIDO como tabs/segmento de vistas** — ese trabajo es del selector segmentado (pendiente en packages/ui); las pantallas vivas con chips-como-segmento migran en su pasada de craft |
 | `LineaDeVida` | El timeline del dueño (S45-B5.2). Diccionario CERRADO tipo→voz humana/capa ADENTRO (Ley 3: el dueño jamás ve un código; desconocido degrada digno por eje). Punto hex puro de capa + conector hairline + Tarjeta; mono solo hora/duración. Carga = esqueleto 3 nodos; el vacío es de la pantalla; pie con "Cargar más"/error. cita_servicio NO se muestra (filtra el wrapper) |
 | `VisorFoto` | Lightbox una-foto-a-la-vez (S45-B5.3). SOLO fades (Ley 6/8 gratis); letterbox digno sin recortar; fondo pleno (tinta+scrim, no depende del tema); cierra por X/back(doble vía)/tap-fondo; swipe horizontal = reemplazo directo; contador "n de m" en mono |
 | `FichaVacuna` | La ficha de UNA vacuna en la revisión del carnet (S47-B1.1; derivación S48). Presentacional pura: tap → `onEditar` (la edición es una Hoja de LA PANTALLA), "Esta no es" → `onDescartar`. Estados derivados de los datos: completa neutra (nombre+fecha; **tipo null NO tiñe** — decisión founder S48, los carnets reales no lo rotulan) · dudosa = SOLO fecha faltante, tinte cuidado y voz humana ("No pudimos leer la fecha") · `rechazada` (prop, del item_invalido de la RPC) danger — nada se pierde. Nombre en DM Sans (lo escribió un humano); fechas y lote en mono minúsculas. Memorial degrada: sin tinte, borde neutro |
@@ -190,4 +422,27 @@ También: `ThemeProvider`/`useTheme` (light default, memorial forzable),
 (correr: `pnpm verify:contrast` — 139 pares, tiene que dar 0 fallos) ·
 galería `packages/ui/src/gallery/TokenGallery.tsx` (verificación browser:
 `node scripts/verify-gallery.mjs` con los dev servers arriba) · gate en
-dispositivo: CLAUDE.md raíz.
+dispositivo: CLAUDE.md raíz · dirección de arte e iconografía:
+`docs/DIRECCION_ARTE.md` · tests de pantalla y escalera §4b:
+`docs/DISEÑO_EXPERIENCIA.md`.
+
+## Historial de la skill
+
+- **S57 (12 Jul 2026) — LA SKILL SE VUELVE EL EQUIPO DE DISEÑO (enmienda
+  de craft FIRMADA por el founder):** entra la sección 1b (Leyes 14–20:
+  tesis · firma única · regla Chanel · copy como material · estructura
+  que informa · diccionario de patrones · elevación) + el mecanismo de
+  pantallas patrón (lo visual se firma sobre píxeles, primera: el Hogar
+  del cliente) + el protocolo del gate de craft (TESIS/FIRMA/CHANEL/
+  TESTS) + la sección 1c "Cómo piensa el diseñador" (protocolo de 7
+  preguntas obligatorias, pedido literal del founder). Fuente minada:
+  skill `frontend-design`, traducida al lenguaje de la casa. El porqué,
+  del founder: *"la casa con la mejor estructura no puede tener acabados
+  que no estén a la altura."* Pendientes declarados: tokens de elevación
+  y selector segmentado (nacen en packages/ui, territorio de la A);
+  papel cálido del fondo (el tono se firma con el marco). Integrada por
+  la Sesión B con autorización territorial puntual del founder.
+- **S43–S56:** nacimiento (13 leyes, B4/B5 S43) y enmiendas por sesión
+  (S52: eyebrow muerto · S53: Leyes 11/12/13 enmendadas por
+  DIRECCION_ARTE, matiz Ley 3 · S55-S56: SelectorOpcion
+  disposicion/multiple) — el detalle vive en el CLAUDE.md raíz.
