@@ -92,6 +92,19 @@ NO cierra sin B2 (pago del servicio). **Contraste:** §3.2.3 (paseador
 ●●● M3) + §3.2.0. **Test:** agendar y pagar en tres toques; el
 expediente se alimenta solo.
 
+> **HITO S57 (12-13 Jul 2026): el paseo quedó FUNCIONALMENTE COMPLETO**
+> — suelto (con cancelación/reagenda P18), plan mensual, paquete de
+> salidas del hogar (v1.4, especie por servicio), agenda futura del
+> prestador y vacaciones. Gates felices del founder: PERFECTOS.
+> **EL ORDEN DEL CIERRE (corrección founder S57, EN PIEDRA — enmienda
+> al principio de secuencia S54):** un servicio se declara CERRADO solo
+> funcional Y VISUALMENTE. Secuencia obligada: 1º gates de ESPERA +
+> curas (D-365) → 2º PASADA DE ACABADOS (capa de craft firmada, Leyes
+> 14-20 + diccionario + pantallas patrón; insumos: notas literales del
+> founder S57 + notas de Kary cuando existan) → 3º CORRIDA E2E como
+> JUEZ FINAL (guion en poder del founder, enmendado a letra v1.4) →
+> 4º recién ahí se abre el siguiente servicio (A3).
+
 ## A3 — El vet: agenda, adopción de caso, telemedicina
 
 JTBD-1/2 + adopción de caso clínico (§3.2.4, EL diferenciador) +
@@ -302,6 +315,14 @@ arcos (se decide sesión a sesión con las trenzas como ley).
 
 ## Historial
 
+- **v2.4 (S57, 13 Jul 2026):** hito registrado en A2 — el paseo
+  FUNCIONALMENTE COMPLETO (suelto+P18, plan, paquete v1.4 del hogar,
+  agenda futura, vacaciones) — y **el orden del cierre corregido por el
+  founder, en piedra**: funcional no basta; el servicio cierra con
+  gates de espera → pasada de acabados (capa de craft) → corrida E2E
+  como juez final → recién entonces el siguiente servicio. La frase que
+  lo gobierna: *"no podemos crear la casa con la mejor estructura y
+  albañilería, con unos acabados que no estén a la altura."*
 - **v2.3 (S50, 10 Jul 2026):** única enmienda — nota honesta en la
   trenza A0⇄B0/B4: el motor compartido promos⇄loyalty hoy NO existe
   en DB (hallazgo B0c, cero FKs cruzadas); B4 lo construye sobre el
