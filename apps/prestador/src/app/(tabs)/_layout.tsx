@@ -1,10 +1,8 @@
 /**
- * Navegación raíz del prestador (S51-B3.1; ENMENDADA S57-B por la letra
- * P17 firmada): TRES tabs, Hoy·Negocio·Cuenta — espejo de la gramática
- * del cliente. Mascotas CEDE su lugar de la barra a Cuenta (ciclo del
- * trono): la ruta /mascotas sigue VIVA fuera de la barra (patrón
- * gallery) con entrada desde Hoy; su descubribilidad queda como insumo
- * de la pasada de craft.
+ * Navegación raíz del prestador (S51-B3.1; letra P17 v1.1, S57-B):
+ * CUATRO tabs, Hoy·Mascotas·Negocio·Cuenta. La v1.0 sacaba Mascotas de
+ * la barra — era letra mal redactada, no decisión (veredicto founder en
+ * el gate): la decisión real de S57 es UNA, separar Cuenta de Negocio.
  *
  * AUTH REAL EN EL RAÍZ (S54-B, D-290 — el bootstrap dev de S44 murió):
  * la misma máquina de estados dignos de S51, con dos estados nuevos.
@@ -34,7 +32,7 @@ import {
 import { cerrarSesion, obtenerMiPrestador, obtenerSesion } from '@epetplace/api';
 
 import { apiLista } from '@/lib/api';
-import { IconoCuenta, IconoHoy, IconoNegocio } from '@/components/iconos-tabs';
+import { IconoCuenta, IconoHoy, IconoMascotas, IconoNegocio } from '@/components/iconos-tabs';
 import { useTraduccion } from '@/i18n';
 
 type EstadoSesionRaiz =
@@ -169,6 +167,7 @@ export default function TabsLayout() {
 
   const items: BarraTabsItem[] = [
     { key: 'index', etiqueta: t('tabs.hoy'), icono: IconoHoy },
+    { key: 'mascotas', etiqueta: t('tabs.mascotas'), icono: IconoMascotas },
     { key: 'negocio', etiqueta: t('tabs.negocio'), icono: IconoNegocio },
     { key: 'cuenta', etiqueta: t('tabs.cuenta'), icono: IconoCuenta },
   ];
@@ -185,11 +184,9 @@ export default function TabsLayout() {
       )}
     >
       <Tabs.Screen name="index" />
+      <Tabs.Screen name="mascotas" />
       <Tabs.Screen name="negocio" />
       <Tabs.Screen name="cuenta" />
-      {/* mascotas cedió la barra a Cuenta (P17, S57-B): fuera de la
-          barra, viva por entrada desde Hoy y por URL (/mascotas) */}
-      <Tabs.Screen name="mascotas" />
       {/* galería de tokens: fuera de la barra, viva por URL (/gallery) */}
       <Tabs.Screen name="gallery" />
     </Tabs>

@@ -1,9 +1,10 @@
-// Verificación runtime web S57-B (ventana): la MUDANZA de la tab Cuenta
-// (letra P17) — barra Hoy·Negocio·Cuenta, las pantallas mudadas abren
-// desde Cuenta, NADA de lo mudado sigue en Negocio (puro oficio),
-// mascotas vive como doble clic desde Hoy, eliminar cuenta dice su
-// verdad. SOLO LECTURA (no se guarda perfil ni se cambia idioma).
-// Dev server :8081.
+// Verificación runtime web S57-B: la tab Cuenta (letra P17 v1.1) —
+// barra de CUATRO tabs Hoy·Mascotas·Negocio·Cuenta en el orden firmado
+// (la v1.0 que sacaba Mascotas era letra mal redactada — veredicto
+// founder), las pantallas mudadas abren desde Cuenta, NADA de lo mudado
+// sigue en Negocio (puro oficio), Hoy SIN la celda de entrada a
+// Mascotas, eliminar cuenta dice su verdad. SOLO LECTURA (no se guarda
+// perfil ni se cambia idioma). Dev server :8081.
 import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
 
@@ -40,22 +41,23 @@ await page.getByRole('textbox', { name: 'Contraseña' }).fill(env.EXPO_PUBLIC_DE
 await page.getByText('Entrar', { exact: true }).click();
 await esperar('Tus paseos de hoy', 60);
 
-// ── T1: la barra es Hoy·Negocio·Cuenta (3 tabs, Mascotas fuera) ──
+// ── T1: la barra es Hoy·Mascotas·Negocio·Cuenta (4 tabs, en orden) ──
 const tabs = await page.getByRole('tab').allInnerTexts();
-check(tabs.length === 3, `T1 tres tabs en la barra (${tabs.length})`);
+check(tabs.length === 4, `T1 cuatro tabs en la barra (${tabs.length})`);
+const orden = tabs.map((x) => x.trim());
 check(
-  tabs.join('|').includes('Hoy') && tabs.join('|').includes('Negocio') && tabs.join('|').includes('Cuenta'),
-  'T1b la barra dice Hoy · Negocio · Cuenta',
+  orden[0] === 'Hoy' && orden[1] === 'Mascotas' && orden[2] === 'Negocio' && orden[3] === 'Cuenta',
+  `T1b el orden firmado Hoy·Mascotas·Negocio·Cuenta (${orden.join(' · ')})`,
 );
-check(!tabs.join('|').includes('Mascotas'), 'T1c Mascotas ya no está en la barra');
 
-// ── T2: mascotas vive como doble clic desde Hoy ──
-// (la Celda entra con pantalla 'listo' — se espera, no se lee en frío)
-let t = await esperar('Las mascotas que cuidas y su historial.', 20);
-check(t.includes('Las mascotas que cuidas y su historial.'), 'T2 la entrada a Mascotas vive en Hoy');
-await page.getByText('Las mascotas que cuidas y su historial.', { exact: true }).click();
+// ── T2: Mascotas abre desde SU tab; Hoy sin la celda duplicada ──
+// (se espera la pantalla 'listo' antes de leer — el segmento Hoy/Semana
+// de B1 solo se pinta con la pantalla lista, y la celda vieja entraba ahí)
+let t = await esperar('Semana', 20);
+check(!t.includes('Las mascotas que cuidas y su historial.'), 'T2 Hoy SIN la celda de entrada a Mascotas');
+await page.getByRole('tab', { name: /Mascotas/ }).click();
 t = await esperar('Mascotas', 15);
-check(t.includes('Mascotas'), 'T2b /mascotas abre (la ruta sigue viva)');
+check(t.includes('Mascotas'), 'T2b la tab Mascotas abre su lista de siempre');
 
 // ── T3: la tab Cuenta con su anatomía ──
 await page.getByRole('tab', { name: /Cuenta/ }).click();

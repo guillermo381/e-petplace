@@ -67,8 +67,6 @@ export const prestadorEs = {
     diaHoy: 'Hoy',
     diaLibre: 'Libre',
     diaBloqueado: 'De vacaciones',
-    // entrada a Mascotas (cedió la barra a Cuenta, P17) · LOTE S57, GATE PENDIENTE
-    mascotasEntradaDetalle: 'Las mascotas que cuidas y su historial.',
   },
   // La tab Cuenta del prestador (letra P17, S57-B) · LOTE S57, GATE PENDIENTE.
   // Voces calcadas de la Cuenta v1 del cliente (aprobadas S55/S56);

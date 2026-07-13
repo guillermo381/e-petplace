@@ -457,21 +457,6 @@ export default function Hoy() {
           </View>
         )}
 
-        {/* ── Mascotas cedió la barra a Cuenta (P17, S57-B): la lista
-            sigue viva como doble clic desde acá; descubribilidad =
-            insumo de la pasada de craft. ── */}
-        {pantalla.estado === 'listo' && (
-          <Tarjeta relleno="ninguno">
-            <Celda
-              interactiva
-              accessibilityRole="button"
-              titulo={t('tabs.mascotas')}
-              subtitulo={t('agenda.mascotasEntradaDetalle')}
-              onPress={() => router.push('/mascotas')}
-            />
-          </Tarjeta>
-        )}
-
         {/* ── Zona 3 — novedades: hueco estructural (ver arriba) ── */}
         {novedadesZona3 !== null ? null : null}
 

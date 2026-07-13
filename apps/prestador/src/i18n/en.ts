@@ -59,8 +59,6 @@ export const prestadorEn = {
     diaHoy: 'Today',
     diaLibre: 'Free',
     diaBloqueado: 'On vacation',
-    // entrada a Mascotas (cedió la barra a Cuenta, P17) · LOTE S57, GATE PENDIENTE · Espejo de es.ts
-    mascotasEntradaDetalle: 'The pets you care for and their history.',
   },
   // La tab Cuenta del prestador (letra P17, S57-B) · LOTE S57, GATE PENDIENTE · Espejo de es.ts
   miCuenta: {
