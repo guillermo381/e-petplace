@@ -355,19 +355,11 @@ export const prestadorEs = {
     comisionRetiene: 'e-PetPlace retiene {{pct}}%',
     comisionNeto: 'e-PetPlace retiene {{pct}}% · vas a recibir {{neto}}',
     comisionNoDisponible: 'No pudimos leer la comisión vigente.',
-    // precio del plan (S56-B ACTO 2, D-338 — ayuda aprobada por el arquitecto)
-    precioPlan: 'Precio por salida en plan mensual (opcional)',
+    // v3.2: plan y paquete son INTERRUPTOR+slider — las voces de campos
+    // de texto murieron (Ley 37); las ayudas de vigencia sobreviven
     precioPlanAyuda: 'Rige desde la próxima renovación. Los períodos en curso no cambian.',
-    planVacio: 'Sin plan en este bloque: tus clientes no ven la opción de hacerlo frecuente.',
-    planComparacion: 'Suelto {{suelto}} · plan {{plan}} por salida',
-    precioPlanInvalido: 'El precio del plan tiene que ser mayor a cero. Déjalo vacío si no ofreces plan.',
-    // el PAQUETE de salidas (D-343/D-354: presets 5/10/15 EN LETRA) · LOTE S57, GATE PENDIENTE
     paqueteExplica: 'Tus clientes compran 5, 10 o 15 salidas de este bloque por adelantado. Tú pones un solo precio por salida.',
-    precioPaquete: 'Precio por salida en paquete (opcional)',
     precioPaqueteAyuda: 'Rige para los paquetes que se compren desde ahora. Los ya comprados no cambian.',
-    paqueteVacio: 'Sin paquete en este bloque: tus clientes no ven la opción de comprarlo.',
-    paqueteComparacion: 'Suelto {{suelto}} · paquete {{paquete}} por salida',
-    precioPaqueteInvalido: 'El precio por salida del paquete tiene que ser mayor a cero. Déjalo vacío si no ofreces paquete.',
   },
   // EL ARTE DEL PASEO — el taller (S58-B B1b, adenda founder) · LOTE S58, GATE PENDIENTE
   taller: {
@@ -387,6 +379,12 @@ export const prestadorEs = {
     ofrecer: 'Ofrecer esta duración',
     sinDuraciones: 'Aún no ofreces ninguna duración.',
     agregarDuracion: 'Ofrecer otra duración',
+    // v3.2: plan y paquete por interruptor (el contrato POR SALIDA intacto)
+    planInterruptor: 'Ofrecer plan mensual',
+    planRotulo: 'Precio por salida para clientes con plan mensual',
+    planTipico: 'Un plan típico de 4 salidas: {{total}}/mes',
+    paqueteInterruptor: 'Ofrecer paquete de salidas',
+    paqueteRotulo: 'Precio de cada salida al comprar paquete',
     // el wizard (v3): progreso sereno
     paso: 'Paso {{n}} de 3',
     continuar: 'Continuar',
@@ -440,11 +438,14 @@ export const prestadorEs = {
     duracionesDetalle: '{{n}} duraciones · desde {{precio}}',
     duracionesDetalleUna: '1 duración · desde {{precio}}',
     duracionesPausadas: 'Todas pausadas',
-    planPaquete: 'Plan y paquete',
+    // el espejo usa las voces largas; el subtítulo vivo de Duraciones,
+    // los sufijos (v3.2 — la fila Plan y paquete MURIÓ)
     conPlanYPaquete: 'Con plan mensual y paquete de salidas',
     conPlan: 'Con plan mensual',
     conPaquete: 'Con paquete de salidas',
-    sinPlanNiPaquete: 'Sin plan ni paquete',
+    sufijoConPlanYPaquete: 'con plan y paquete',
+    sufijoConPlan: 'con plan',
+    sufijoConPaquete: 'con paquete',
     horarios: 'Días y horarios',
     diaUno: '1 día',
     dias: '{{n}} días',

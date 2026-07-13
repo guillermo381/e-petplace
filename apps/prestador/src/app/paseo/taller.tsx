@@ -150,6 +150,15 @@ function monto(valor: number): string {
   return `$${valor.toFixed(2)}`;
 }
 
+// el SUGERIDO al encender plan (90%) o paquete (85%): del precio suelto
+// de ESA duración, redondeado al paso del riel — jamás un campo vacío
+function sugerido(precioTexto: string, factor: number): string {
+  const p = Number.parseFloat(precioTexto.replace(',', '.'));
+  const base = Number.isFinite(p) && p > 0 ? p : 5;
+  const v = Math.max(PASO_PRECIO, Math.round((base * factor) / PASO_PRECIO) * PASO_PRECIO);
+  return v.toFixed(2);
+}
+
 function leerPrecio(texto: string): number | null {
   const v = Number.parseFloat(texto.replace(',', '.'));
   if (!Number.isFinite(v) || v <= 0) return null;
@@ -255,31 +264,6 @@ function VozComision({ pct, precio }: { pct: number | null; precio: number | nul
   return <VozSecundaria texto={texto} />;
 }
 
-// la voz de un PRECIO POR SALIDA (plan/paquete, heredada S56/S57)
-function VozPorSalida({
-  pct,
-  texto,
-  suelto,
-  vozVacia,
-  comparar,
-}: {
-  pct: number | null;
-  texto: string;
-  suelto: number | null;
-  vozVacia: string;
-  comparar: (suelto: string, valor: string) => string;
-}) {
-  if (texto.trim() === '') return <VozSecundaria texto={vozVacia} />;
-  const v = leerPorSalida(texto);
-  if (v === null || v === 'invalido') return null;
-  return (
-    <View style={{ gap: spacing[1] }}>
-      <VozComision pct={pct} precio={v} />
-      {suelto !== null ? <VozSecundaria texto={comparar(monto(suelto), monto(v))} /> : null}
-    </View>
-  );
-}
-
 export default function TallerPaseo() {
   const router = useRouter();
   const { theme } = useTheme();
@@ -304,9 +288,6 @@ export default function TallerPaseo() {
   const [zonas, setZonas] = useState<DraftZona[] | null>(null);
   const [ciudades, setCiudades] = useState<CiudadCatalogo[]>([]);
   const [paises, setPaises] = useState<PaisActivo[]>([]);
-
-  const [erroresPlan, setErroresPlan] = useState<Partial<Record<BloquePaseo, string>>>({});
-  const [erroresPaquete, setErroresPaquete] = useState<Partial<Record<BloquePaseo, string>>>({});
 
   // Hojas
   const [hojaAgregarDuracion, setHojaAgregarDuracion] = useState(false);
@@ -495,20 +476,8 @@ export default function TallerPaseo() {
   async function guardarTodo() {
     if (guardando || drafts === null || franjas === null || zonas === null || pantalla.estado !== 'listo') return;
 
-    for (const b of BLOQUES_PASEO) {
-      const d = drafts[b];
-      if (!ofertaDirty(d)) continue;
-      if (leerPorSalida(d.plan) === 'invalido' || leerPorSalida(d.paquete) === 'invalido') {
-        setErroresPlan((e) => ({ ...e, [b]: leerPorSalida(d.plan) === 'invalido' ? t('servicios.precioPlanInvalido') : undefined }));
-        setErroresPaquete((e) => ({ ...e, [b]: leerPorSalida(d.paquete) === 'invalido' ? t('servicios.precioPaqueteInvalido') : undefined }));
-        if (modoWizard) setPaso(0);
-        else setSeccionForzada('duraciones');
-        setDuracionSel(b); // el chip con el error toma el gobierno
-        scrollRef.current?.scrollTo({ y: 0, animated: true });
-        return;
-      }
-    }
-
+    // v3.2: plan y paquete son sliders — el inválido es imposible por
+    // diseño (la validación por texto MURIÓ con los campos)
     setGuardando(true);
     for (const b of BLOQUES_PASEO) {
       const d = drafts[b];
@@ -685,8 +654,8 @@ export default function TallerPaseo() {
           {seccionVisible === 'duraciones' && (
             <View style={{ gap: spacing[4] }}>
               <TituloBloque texto={t('taller.duracionesTitulo')} />
-              {/* presets del paquete EN LETRA (D-354) — una vez, para todo el paso */}
-              <VozSecundaria texto={t('servicios.paqueteExplica')} />
+              {/* v3.2 punto 3: la voz del paquete BAJÓ a su interruptor —
+                  la sección abre en silencio (Chanel) */}
               {bloquesConCard.length === 0 && <VozSecundaria texto={t('taller.sinDuraciones')} />}
               {/* v3.1 (boceto firmado founder): EL CHIP GOBIERNA EL BLOQUE —
                   chips tonales de las duraciones ofrecidas + UN bloque con
@@ -770,44 +739,133 @@ export default function TallerPaseo() {
                             registro="aa"
                           />
                           <VozComision pct={pct} precio={leerPrecio(d.precio)} />
-                          <Campo
-                            label={t('servicios.precioPlan')}
-                            value={d.plan}
-                            onChangeText={(v) => {
-                              actualizarDraft(b, { plan: v });
-                              setErroresPlan((e) => ({ ...e, [b]: undefined }));
-                            }}
-                            keyboardType="decimal-pad"
-                            ayuda={t('servicios.precioPlanAyuda')}
-                            error={erroresPlan[b]}
-                            deshabilitado={guardando}
-                          />
-                          <VozPorSalida
-                            pct={pct}
-                            texto={d.plan}
-                            suelto={leerPrecio(d.precio)}
-                            vozVacia={t('servicios.planVacio')}
-                            comparar={(s, v) => t('servicios.planComparacion', { suelto: s, plan: v })}
-                          />
-                          <Campo
-                            label={t('servicios.precioPaquete')}
-                            value={d.paquete}
-                            onChangeText={(v) => {
-                              actualizarDraft(b, { paquete: v });
-                              setErroresPaquete((e) => ({ ...e, [b]: undefined }));
-                            }}
-                            keyboardType="decimal-pad"
-                            ayuda={t('servicios.precioPaqueteAyuda')}
-                            error={erroresPaquete[b]}
-                            deshabilitado={guardando}
-                          />
-                          <VozPorSalida
-                            pct={pct}
-                            texto={d.paquete}
-                            suelto={leerPrecio(d.precio)}
-                            vozVacia={t('servicios.paqueteVacio')}
-                            comparar={(s, v) => t('servicios.paqueteComparacion', { suelto: s, paquete: v })}
-                          />
+
+                          {/* ── PLAN por interruptor (v3.2: la regla del
+                              teclado los alcanzó al fin; el contrato POR
+                              SALIDA de 7.14 NO cambia — cambia la ropa).
+                              El booleano ES el interruptor: el precio
+                              existe solo encendido; el sugerido (90% del
+                              suelto al paso $0.25) jamás es campo vacío ── */}
+                          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
+                            <Text
+                              style={{
+                                fontFamily: typography.family.sans.regular,
+                                fontSize: typography.size.base,
+                                color: theme.text.primary,
+                              }}
+                            >
+                              {t('taller.planInterruptor')}
+                            </Text>
+                            <Interruptor
+                              etiqueta={t('taller.planInterruptor')}
+                              registro="oficio"
+                              encendido={d.plan !== ''}
+                              onCambio={(v) => actualizarDraft(b, { plan: v ? sugerido(d.precio, 0.9) : '' })}
+                            />
+                          </View>
+                          {d.plan !== '' && (
+                            <>
+                              <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: spacing[3] }}>
+                                <Text
+                                  style={{
+                                    flex: 1,
+                                    fontFamily: typography.family.sans.regular,
+                                    fontSize: typography.size.sm,
+                                    color: theme.text.secondary,
+                                  }}
+                                >
+                                  {t('taller.planRotulo')}
+                                </Text>
+                                <Text
+                                  style={{
+                                    fontFamily: typography.family.mono.regular,
+                                    fontSize: typography.size.lg,
+                                    fontVariant: ['tabular-nums'],
+                                    color: theme.text.primary,
+                                  }}
+                                >
+                                  {etiquetasPasos[indicePrecio(d.plan)]}
+                                </Text>
+                              </View>
+                              <SliderPrecio
+                                etiqueta={t('taller.planRotulo')}
+                                pasos={etiquetasPasos}
+                                indice={indicePrecio(d.plan)}
+                                onCambio={(i) => actualizarDraft(b, { plan: pasos[i].toFixed(2) })}
+                                registro="aa"
+                              />
+                              <VozComision pct={pct} precio={leerPrecio(d.plan)} />
+                              {/* la línea VIVA: el plan sigue siendo POR SALIDA;
+                                  el mes típico es traducción, no contrato */}
+                              <VozSecundaria
+                                texto={t('taller.planTipico', { total: monto((leerPrecio(d.plan) ?? 0) * 4) })}
+                              />
+                            </>
+                          )}
+                          {d.base?.precioPlan != null && (
+                            // editar o quitar un plan GUARDADO: la voz de
+                            // renovación de siempre
+                            <VozSecundaria texto={t('servicios.precioPlanAyuda')} />
+                          )}
+
+                          {/* ── PAQUETE por interruptor — sugerido 85%;
+                              los presets 5/10/15 EN LETRA viven ACÁ (la
+                              intro de sección murió, punto 3) ── */}
+                          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
+                            <Text
+                              style={{
+                                fontFamily: typography.family.sans.regular,
+                                fontSize: typography.size.base,
+                                color: theme.text.primary,
+                              }}
+                            >
+                              {t('taller.paqueteInterruptor')}
+                            </Text>
+                            <Interruptor
+                              etiqueta={t('taller.paqueteInterruptor')}
+                              registro="oficio"
+                              encendido={d.paquete !== ''}
+                              onCambio={(v) => actualizarDraft(b, { paquete: v ? sugerido(d.precio, 0.85) : '' })}
+                            />
+                          </View>
+                          {d.paquete !== '' && (
+                            <>
+                              <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: spacing[3] }}>
+                                <Text
+                                  style={{
+                                    flex: 1,
+                                    fontFamily: typography.family.sans.regular,
+                                    fontSize: typography.size.sm,
+                                    color: theme.text.secondary,
+                                  }}
+                                >
+                                  {t('taller.paqueteRotulo')}
+                                </Text>
+                                <Text
+                                  style={{
+                                    fontFamily: typography.family.mono.regular,
+                                    fontSize: typography.size.lg,
+                                    fontVariant: ['tabular-nums'],
+                                    color: theme.text.primary,
+                                  }}
+                                >
+                                  {etiquetasPasos[indicePrecio(d.paquete)]}
+                                </Text>
+                              </View>
+                              <SliderPrecio
+                                etiqueta={t('taller.paqueteRotulo')}
+                                pasos={etiquetasPasos}
+                                indice={indicePrecio(d.paquete)}
+                                onCambio={(i) => actualizarDraft(b, { paquete: pasos[i].toFixed(2) })}
+                                registro="aa"
+                              />
+                              <VozComision pct={pct} precio={leerPrecio(d.paquete)} />
+                              <VozSecundaria texto={t('servicios.paqueteExplica')} />
+                            </>
+                          )}
+                          {d.base?.precioPaquete != null && (
+                            <VozSecundaria texto={t('servicios.precioPaqueteAyuda')} />
+                          )}
                         </>
                       )}
                     </View>

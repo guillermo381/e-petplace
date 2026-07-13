@@ -21,7 +21,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   Boton,
-  Celda,
+  CeldaNavegacion,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
@@ -212,23 +212,25 @@ export default function OfertaPaseo() {
         const diasActivos = ORDEN_DISPLAY.filter((d) => franjasActivas.some((f) => f.diaSemana === d));
         const hayBloqueoVigente = bloqueos.some((b) => b.fechaFin >= hoyISO());
 
+        const conPlan = activas.some((o) => o.precioPlan !== null);
+        const conPaquete = activas.some((o) => o.precioPaquete !== null);
+        // v3.2: la fila "Plan y paquete" MURIÓ (Chanel, mismo destino que
+        // Duraciones) — su verdad vive en ESTE subtítulo vivo
+        const sufijoPlanPaquete =
+          conPlan && conPaquete
+            ? ` · ${t('ofertaPaseo.sufijoConPlanYPaquete')}`
+            : conPlan
+              ? ` · ${t('ofertaPaseo.sufijoConPlan')}`
+              : conPaquete
+                ? ` · ${t('ofertaPaseo.sufijoConPaquete')}`
+                : '';
         const detalleDuraciones =
           activas.length === 0
             ? t('ofertaPaseo.duracionesPausadas')
-            : activas.length === 1
-              ? t('ofertaPaseo.duracionesDetalleUna', { precio: monto(desde as number) })
-              : t('ofertaPaseo.duracionesDetalle', { n: activas.length, precio: monto(desde as number) });
-
-        const conPlan = activas.some((o) => o.precioPlan !== null);
-        const conPaquete = activas.some((o) => o.precioPaquete !== null);
-        const detallePlanPaquete =
-          conPlan && conPaquete
-            ? t('ofertaPaseo.conPlanYPaquete')
-            : conPlan
-              ? t('ofertaPaseo.conPlan')
-              : conPaquete
-                ? t('ofertaPaseo.conPaquete')
-                : t('ofertaPaseo.sinPlanNiPaquete');
+            : (activas.length === 1
+                ? t('ofertaPaseo.duracionesDetalleUna', { precio: monto(desde as number) })
+                : t('ofertaPaseo.duracionesDetalle', { n: activas.length, precio: monto(desde as number) })) +
+              sufijoPlanPaquete;
 
         const detalleHorarios =
           franjasActivas.length === 0
@@ -283,47 +285,40 @@ export default function OfertaPaseo() {
                 primario en tinta, ARRIBA — patrón del hub v2 */}
             <Boton variante="primario" etiqueta={t('ofertaPaseo.editarOferta')} bloque onPress={() => irAlTaller()} />
 
-            {/* una fila por sección — el lápiz vuelve al taller ANCLADO */}
+            {/* v3.2: CUATRO filas vestidas — CeldaNavegacion con su ícono
+                del registry (letra 19.1, como sus hermanas de Cuenta).
+                'hoy' hace de calendario para horarios: el glifo
+                calendario no existe en el registry — pedido a la A. */}
             <Tarjeta relleno="ninguno">
-              <Celda
-                interactiva
-                accessibilityRole="button"
+              <CeldaNavegacion
+                icono="paseo"
+                registro="aa"
                 titulo={t('ofertaPaseo.duraciones')}
-                subtitulo={detalleDuraciones}
+                detalle={detalleDuraciones}
                 onPress={() => irAlTaller('duraciones')}
               />
               <Separador />
-              <Celda
-                interactiva
-                accessibilityRole="button"
-                titulo={t('ofertaPaseo.planPaquete')}
-                subtitulo={detallePlanPaquete}
-                onPress={() => irAlTaller('planes')}
-              />
-              <Separador />
-              <Celda
-                interactiva
-                accessibilityRole="button"
+              <CeldaNavegacion
+                icono="hoy"
+                registro="aa"
                 titulo={t('ofertaPaseo.horarios')}
-                subtitulo={detalleHorarios}
+                detalle={detalleHorarios}
                 onPress={() => irAlTaller('horarios')}
               />
               <Separador />
-              <Celda
-                interactiva
-                accessibilityRole="button"
+              <CeldaNavegacion
+                icono="ubicacion"
+                registro="aa"
                 titulo={t('taller.zonasTitulo')}
-                subtitulo={
-                  zonas.length > 0 ? zonas.map((z) => z.ciudad.nombre).join(' · ') : t('ofertaPaseo.zonasSin')
-                }
+                detalle={zonas.length > 0 ? zonas.map((z) => z.ciudad.nombre).join(' · ') : t('ofertaPaseo.zonasSin')}
                 onPress={() => irAlTaller('zonas')}
               />
               <Separador />
-              <Celda
-                interactiva
-                accessibilityRole="button"
+              <CeldaNavegacion
+                icono="vacaciones"
+                registro="aa"
                 titulo={t('negocio.vacaciones')}
-                subtitulo={hayBloqueoVigente ? t('ofertaPaseo.vacacionesCon') : t('ofertaPaseo.vacacionesSin')}
+                detalle={hayBloqueoVigente ? t('ofertaPaseo.vacacionesCon') : t('ofertaPaseo.vacacionesSin')}
                 onPress={() => router.push('/vacaciones')}
               />
             </Tarjeta>

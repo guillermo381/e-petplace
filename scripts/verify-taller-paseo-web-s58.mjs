@@ -59,6 +59,7 @@ t = await esperar('Así lo ve el dueño', 25);
 check(t.includes('Visible para las familias') || t.includes('Todavía no visible'), 'T2b el estado dice su verdad');
 check(t.includes('Editar tu oferta'), 'T2c el CTA primario arriba');
 check(t.includes('Duraciones y precios') && t.includes('Días y horarios') && t.includes('Zonas de cobertura'), 'T2d las filas-lápiz por sección');
+check(!t.includes('Plan y paquete'), 'T2d2 la fila Plan y paquete MURIÓ (v3.2 — vive en el subtítulo)');
 check(t.includes('Así lo ve el dueño'), 'T2e el espejo al pie');
 
 // ── T3: sección DURACIONES (tarjetas apiladas, v3) ──
@@ -70,11 +71,11 @@ check(t.includes('Duraciones y precios'), 'T3 la sección duraciones abre suelta
 const radios = await page.getByRole('radio').count();
 const switches = await page.getByRole('switch').count();
 check(radios >= 2, `T3a chips de duraciones arriba (${radios})`);
-check(switches === 1, `T3b UN bloque gobernado con su Interruptor (${switches})`);
-check(t.includes('plan mensual'), 'T3c plan por salida EN la tarjeta');
-check(t.includes('paquete') || t.includes('Paquete'), 'T3d paquete por salida EN la tarjeta');
-check(t.includes('5, 10 o 15'), 'T3e presets del paquete EN LETRA (D-354)');
-check(!t.includes('Nombre (opcional)'), 'T3f nombre/descripción MURIERON de la UI (L-144)');
+check(switches === 3, `T3b UN bloque gobernado: ofrecer + plan + paquete por Interruptor (${switches})`);
+check(t.includes('Ofrecer plan mensual'), 'T3c el plan es interruptor (v3.2)');
+check(t.includes('Ofrecer paquete de salidas'), 'T3d el paquete es interruptor (v3.2)');
+check(!t.includes('(opcional)'), 'T3e los campos de texto de plan/paquete MURIERON (regla del teclado)');
+check(!t.includes('Nombre (opcional)'), 'T3f nombre/descripción siguen muertos (L-144)');
 check(t.includes('e-PetPlace retiene'), 'T3g neto vivo de fee_configs');
 check(t.includes('Así lo ve el dueño'), 'T3h el espejo en la sección');
 check(t.includes('Guardar tu oferta'), 'T3i el guardado único');
