@@ -518,13 +518,18 @@ El primer `origen_tipo` con circulación real. El ciclo completo en DB
   re-resuelve). Invisible al prestador (verdad firme). Expiración
   PEREZOSA: toda lectura/escritura trata un hold vencido como
   inexistente; el cron `expirar-citas-pendientes` es higiene, no
-  correctitud. Invariante del catálogo (AMPLIADO S56, founder+arquitecto):
-  `estado_reserva='pagada'` ⟺ la cita está CUBIERTA POR UN PAGO — pasó
-  por `confirmar_cita_pagada` (cita suelta), o nació de un PLAN cuyo
-  período se cobró (`contratar_plan_paseo`/renovación: la cita lleva
-  `suscripcion_servicio_id` + `metadata.origen='plan'` y su precio ES el
-  unitario efectivo del período). Esos son los DOS únicos escritores del
-  valor; NULL = ciclo de pago no aplica (legacy/walk-in).
+  correctitud. Invariante del catálogo (AMPLIADO S56 y S57-D343,
+  founder+arquitecto): `estado_reserva='pagada'` ⟺ la cita está CUBIERTA
+  POR UN PAGO — pasó por `confirmar_cita_pagada` (cita suelta), o nació
+  de un PLAN cuyo período se cobró (`contratar_plan_paseo`/renovación:
+  la cita lleva `suscripcion_servicio_id` + `metadata.origen='plan'` y
+  su precio ES el unitario efectivo del período), o nació RESERVADA
+  CONTRA SALDO DE PAQUETE ya pagado (`reservar_salida_paquete`: la cita
+  lleva `bono_id` + `metadata.origen='paquete'` y su precio ES el precio
+  de ORIGEN FIFO del bono — Decisión T). Esos son los TRES únicos
+  escritores del valor; NULL = ciclo de pago no aplica (legacy/walk-in).
+  La enmienda S57 vive también como COMMENT de la columna (migración
+  `20260712180000`).
 - **`confirmar_cita_pagada`** (el pago — hoy simulado): PRE-VALIDA el
   motor SIN insertar (cuenta existe, **`estado='activa'`** → error
   `cuenta_no_activa`, rol `prestador_servicios` activo en
