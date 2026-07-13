@@ -20,6 +20,7 @@ import { router, useFocusEffect } from 'expo-router';
 import {
   Boton,
   Celda,
+  CeldaNavegacion,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
@@ -323,6 +324,14 @@ export default function MisPaseos() {
         </View>
       ) : (
         <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[4] }}>
+          {/* Hub v2 (S58, D-347): la ACCIÓN preside — jamás es un
+              segmento (Ley 19/22); los tres segmentos son solo VISTAS. */}
+          <Boton
+            variante="primario"
+            bloque
+            etiqueta={t('plan.agendarPaseo')}
+            onPress={() => router.navigate('/explorar/paseo')}
+          />
           {/* D-357 (S58): PRIMERA migración chips→toggle — el trabajo de
               vistas exclusivas es del SelectorSegmentado (Ley 19.3);
               SelectorOpcion queda en esta pantalla solo para VALORES
@@ -340,10 +349,19 @@ export default function MisPaseos() {
 
           {segmento === 'proximos' ? (
             <View style={{ gap: spacing[4] }}>
+              {/* cero finales mudos (§6ter): Próximos vacío OFRECE el
+                  camino — la CTA de agendar ya preside la pantalla */}
+              {paquetesVigentes.length === 0 && librasProximas.length === 0 && listaPlanes.length === 0 ? (
+                <EstadoVacio
+                  registro="seccion"
+                  titulo={t('plan.vacioSegmento')}
+                  descripcion={t('plan.sinPlanesDetalle')}
+                />
+              ) : null}
               {/* D-343: el SALDO del paquete, donde el dueño lo busca. La
                   vigencia en voz llana — sin countdown (P16e). */}
               {paquetesVigentes.map((pq) => (
-                <Tarjeta key={pq.id} relleno="ninguno">
+                <Tarjeta key={pq.id} relleno="ninguno" elevacion="reposo">
                   <Celda
                     titulo={t('paquete.tarjetaTitulo', { min: pq.duracion_minutos ?? 30 })}
                     subtitulo={
@@ -351,26 +369,25 @@ export default function MisPaseos() {
                         ? t('paquete.venceEl', { fecha: fechaCortaMono(pq.fecha_vencimiento, idioma) })
                         : undefined
                     }
-                    fin={<Insignia estado="alDia" etiqueta={t('paquete.saldoInsignia', { n: pq.saldo })} />}
                   />
-                  {/* v1.4 §6bis.2bis: la compra/renovación tiene entrada
-                      clara desde el hub — llega filtrada a SU ancla */}
+                  {/* Hub v2 (S58): la compra es CeldaNavegacion (Ley 19.1)
+                      con SUBTÍTULO VIVO del saldo real del bono — la
+                      Insignia de saldo murió (decía lo mismo dos veces,
+                      Chanel). Ícono despensa = capa consumo (ocre). */}
                   {pq.prestador_servicio_id !== null ? (
                     <>
                       <Separador />
-                      <View style={{ padding: spacing[3] }}>
-                        <Boton
-                          variante="ghost"
-                          tamaño="sm"
-                          etiqueta={t('paquete.comprarMas')}
-                          onPress={() =>
-                            router.navigate({
-                              pathname: '/explorar/paseo/paquete',
-                              params: { servicio: pq.prestador_servicio_id },
-                            })
-                          }
-                        />
-                      </View>
+                      <CeldaNavegacion
+                        icono="despensa"
+                        titulo={t('paquete.comprarMas')}
+                        detalle={pq.saldo === 1 ? t('paquete.teQuedaUna') : t('paquete.teQuedan', { n: pq.saldo })}
+                        onPress={() =>
+                          router.navigate({
+                            pathname: '/explorar/paseo/paquete',
+                            params: { servicio: pq.prestador_servicio_id },
+                          })
+                        }
+                      />
                     </>
                   ) : null}
                 </Tarjeta>

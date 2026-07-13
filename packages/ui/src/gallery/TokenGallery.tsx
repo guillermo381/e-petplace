@@ -35,6 +35,7 @@ import { SelectorOpcion } from '../components/SelectorOpcion'
 import { SelectorSegmentado } from '../components/SelectorSegmentado'
 import { SliderPrecio } from '../components/SliderPrecio'
 import { Interruptor } from '../components/Interruptor'
+import { StepperCantidad } from '../components/StepperCantidad'
 import { CeldaNavegacion } from '../components/CeldaNavegacion'
 import { HeroMarca } from '../components/HeroMarca'
 import { LineaDeVida, type LineaDeVidaItem } from '../components/LineaDeVida'
@@ -732,8 +733,24 @@ function EjemploAcentoControl() {
         </Text>
       </View>
       <SliderPrecio pasos={pasos} indice={i} onCambio={setI} etiqueta="Precio" registro="control" />
+      <EjemploStepper />
       <Text style={{ fontFamily: sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
-        Tonal para elegir entre pares · sólido para binarios; la acción sigue en tinta; apagado jamás dice error.
+        Tonal para elegir entre pares · sólido para binarios · stepper para cantidades acotadas; la acción sigue en tinta; apagado y tope jamás dicen error.
+      </Text>
+    </View>
+  )
+}
+
+// ── StepperCantidad (S58, comp. 33): cantidad acotada — el caso de la
+// B: cupo "a la vez" por franja (1..4). En los topes se apaga sereno. ──
+function EjemploStepper() {
+  const { theme } = useTheme()
+  const [n, setN] = useState(2)
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+      <StepperCantidad valor={n} min={1} max={4} onCambio={setN} etiqueta="Paseos a la vez" registro="oficio" />
+      <Text style={{ fontFamily: sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+        stepper · oficio ("a la vez", 1–4)
       </Text>
     </View>
   )

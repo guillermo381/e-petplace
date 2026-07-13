@@ -170,12 +170,12 @@ export default function PaseoCuando() {
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('explorar.paseoTitulo')} atras onAtras={() => router.back()} />
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
-        {/* D-338: Explorar→Paseo es una de las DOS entradas al hub */}
+        {/* D-338: Explorar→Paseo es una de las DOS entradas al hub.
+            S58 (Ley 19.1): la celda dice a dónde va — murió el botón mudo. */}
         {hayActividad ? (
-          <Tarjeta relleno="ninguno">
-            <Celda
-              interactiva
-              accessibilityRole="button"
+          <Tarjeta relleno="ninguno" elevacion="reposo">
+            <CeldaNavegacion
+              icono="paseo"
               titulo={t('plan.hubTitulo')}
               onPress={() => {
                 if (router.canDismiss()) router.dismissAll();
@@ -210,6 +210,7 @@ export default function PaseoCuando() {
             {/* 1 · DURACIÓN PRIMERO — solo bloques ofertados de verdad */}
             <View style={{ gap: spacing[2] }}>
               <SelectorOpcion
+              acento="control"
                 etiqueta={t('explorar.cuandoDuracion')}
                 disposicion="grilla"
                 opciones={bloques.map((b) => ({ codigo: String(b.duracion), etiqueta: etiquetaBloque(b.duracion) }))}
@@ -228,6 +229,7 @@ export default function PaseoCuando() {
 
             {/* 2 · DÍA — la tira horizontal (hoy+13) */}
             <SelectorOpcion
+              acento="control"
               etiqueta={t('explorar.cuandoDia')}
               disposicion="tira"
               opciones={dias.map((d) => ({ codigo: d.iso, etiqueta: d.etiqueta }))}
@@ -253,6 +255,7 @@ export default function PaseoCuando() {
               </Text>
             ) : (
               <SelectorOpcion
+              acento="control"
                 etiqueta={t('explorar.cuandoHora')}
                 disposicion="grilla"
                 opciones={inicios.map((h) => ({ codigo: h, etiqueta: h }))}

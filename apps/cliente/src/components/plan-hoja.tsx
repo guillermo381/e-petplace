@@ -24,6 +24,7 @@ import { Text, View } from 'react-native';
 import {
   Boton,
   HojaScroll,
+  Interruptor,
   SelectorOpcion,
   Separador,
   spacing,
@@ -206,17 +207,16 @@ export function PlanHoja({
           onSelect={(codigo) => setFrecuencia(codigo as Frecuencia)}
         />
 
-        {/* Auto-renovación DECLARADA en superficie (Decisión S / P14d) */}
+        {/* Auto-renovación DECLARADA en superficie (Decisión S / P14d).
+            Ley 22 (S58): era un BINARIO disfrazado de chips — Interruptor
+            sólido; apagado es estado sereno, jamás error. */}
         <View style={{ gap: spacing[2] }}>
-          <SelectorOpcion
-            etiqueta={t('plan.renovacionEtiqueta')}
-            opciones={[
-              { codigo: 'auto', etiqueta: t('plan.renovacionAuto') },
-              { codigo: 'solo', etiqueta: t('plan.renovacionSolo') },
-            ]}
-            seleccionada={renueva ? 'auto' : 'solo'}
-            onSelect={(codigo) => setRenueva(codigo === 'auto')}
-          />
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
+            <Text style={{ flex: 1, fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
+              {t('plan.renovacionEtiqueta')}
+            </Text>
+            <Interruptor encendido={renueva} onCambio={setRenueva} etiqueta={t('plan.renovacionEtiqueta')} />
+          </View>
           <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.xs, lineHeight: typography.size.xs * 1.4, color: theme.text.tertiary }}>
             {t('plan.renovacionVoz')}
           </Text>
