@@ -12,12 +12,13 @@
  *   multi sobre el techo perro/gato, enmienda 3) · Baño y Baño+corte
  *   por Interruptor (el booleano ES el interruptor, patrón v3.2) · EL
  *   CHIP DE TALLA GOBIERNA el bloque (S/M/L, borradores conservados) ·
- *   SliderPrecio $5–$120 paso $0.25 SIN sugeridos (enmienda 4: arranca
- *   en el piso, jamás campo vacío) + neto 7.15 vivo · DURACIÓN por
+ *   SliderPrecio $5–$60 paso $0.25 SIN sugeridos (arranca en el piso,
+ *   jamás campo vacío; rieles recalibrados en gate S59-B6) + neto 7.15
+ *   vivo · DURACIÓN por
  *   combinación (30–240 en pasos de 15', CHECK de DB) por Celda-selector
  *   con Hoja — StepperCantidad no porta paso (±1, pedido a la A) · UN
  *   extra por pelaje largo GLOBAL (enmienda 2): Interruptor + slider
- *   $0.25–$30 (el $0 del riel ES el interruptor apagado).
+ *   $0.25–$15 (el $0 del riel ES el interruptor apagado).
  * Paso 2 — DÍAS Y HORARIOS: la sección COMPARTIDA con el paseo
  *   (seccion-horarios): las franjas GENERALES del prestador — el motor
  *   las lee para TODO servicio (una agenda, dos lápices).
@@ -108,13 +109,13 @@ interface DraftServicio {
   tallas: Record<TallaGrooming, DraftTalla>;
 }
 
-// rieles de UI firmados por el arquitecto (enmienda 4; L-146: se
-// recalibran en gate de dispositivo si el pulgar los desmiente)
+// rieles de UI: nacieron $5-$120/$0-$30 (enmienda 4) y el GATE EN
+// DISPOSITIVO los recalibró (S59-B6, L-146 cumplida: el pulgar mandó)
 const PASO_PRECIO = 0.25;
 const PISO_SERVICIO = 5;
-const TECHO_SERVICIO = 120;
+const TECHO_SERVICIO = 60;
 const PISO_EXTRA = 0.25; // el $0 del riel ES el interruptor apagado
-const TECHO_EXTRA = 30;
+const TECHO_EXTRA = 15;
 
 // duración por combinación: letra dura de DB (30–240, pasos de 15')
 const DURACIONES: number[] = [];
@@ -682,6 +683,7 @@ export default function TallerGrooming() {
             <SeccionHorarios
               franjas={franjas}
               onCambio={setFranjas}
+              oficio="grooming"
               titulo={<TituloBloque texto={t('taller.horariosTitulo')} />}
             />
           )}

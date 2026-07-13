@@ -154,10 +154,14 @@ function VozSecundaria({ texto }: { texto: string }) {
 export function SeccionHorarios({
   franjas,
   onCambio,
+  oficio,
   titulo,
 }: {
   franjas: DraftFranja[];
   onCambio: (franjas: DraftFranja[]) => void;
+  /** S59-B6 cura 2: la voz del CUPO es DEL OFICIO — 'Paseos simultáneos'
+   *  era voz genérica prestada; cada mundo dice la suya. */
+  oficio: 'paseo' | 'grooming';
   /** El TituloBloque lo pinta el taller (estilo propio de sección). */
   titulo: React.ReactNode;
 }) {
@@ -179,8 +183,18 @@ export function SeccionHorarios({
 
   const vozDia = (dia: number): string => t(`horarios.dia${dia as 0 | 1 | 2 | 3 | 4 | 5 | 6}` as const);
   const letraDia = (dia: number): string => t(`taller.diaCorto${dia as 0 | 1 | 2 | 3 | 4 | 5 | 6}` as const);
+  // la voz del cupo POR OFICIO (S59-B6 cura 2)
+  const esGrooming = oficio === 'grooming';
+  const vozCupoTitulo = esGrooming ? t('tallerGrooming.cupo') : t('horarios.cupo');
+  const vozCupoAyuda = esGrooming ? t('tallerGrooming.cupoAyuda') : t('horarios.cupoAyuda');
   const vozCupo = (cupo: number): string =>
-    cupo === 1 ? t('horarios.cupoUno') : t('horarios.cupoVarios', { cantidad: cupo });
+    cupo === 1
+      ? esGrooming
+        ? t('tallerGrooming.cupoUno')
+        : t('horarios.cupoUno')
+      : esGrooming
+        ? t('tallerGrooming.cupoVarios', { cantidad: cupo })
+        : t('horarios.cupoVarios', { cantidad: cupo });
 
   const actualizarFranjas = (keys: string[], cambios: Partial<DraftFranja>) => {
     onCambio(franjas.map((f) => (keys.includes(f.key) ? { ...f, ...cambios } : f)));
@@ -238,6 +252,10 @@ export function SeccionHorarios({
   return (
     <View style={{ gap: spacing[3] }}>
       {titulo}
+      {/* S59-B6 cura 3(a), elección founder pendiente de ratificar en
+          gate: la sección DECLARA la agenda única al abrir — la verdad
+          del motor (franjas generales, todo servicio las consume). */}
+      <VozSecundaria texto={t('taller.agendaUnica')} />
       <VozSecundaria texto={t('taller.horariosExplica')} />
       <SelectorOpcion
         etiqueta={t('taller.dias')}
@@ -332,10 +350,10 @@ export function SeccionHorarios({
                       color: theme.text.primary,
                     }}
                   >
-                    {t('horarios.cupo')}
+                    {vozCupoTitulo}
                   </Text>
                   <StepperCantidad
-                    etiqueta={t('horarios.cupo')}
+                    etiqueta={vozCupoTitulo}
                     registro="oficio"
                     valor={cupoSel}
                     min={1}
@@ -343,7 +361,7 @@ export function SeccionHorarios({
                     onCambio={setCupoSel}
                   />
                 </View>
-                <VozSecundaria texto={t('horarios.cupoAyuda')} />
+                <VozSecundaria texto={vozCupoAyuda} />
                 <Boton
                   variante="primario"
                   etiqueta={t('taller.listo')}
@@ -437,10 +455,10 @@ export function SeccionHorarios({
                   color: theme.text.primary,
                 }}
               >
-                {t('horarios.cupo')}
+                {vozCupoTitulo}
               </Text>
               <StepperCantidad
-                etiqueta={t('horarios.cupo')}
+                etiqueta={vozCupoTitulo}
                 registro="oficio"
                 valor={cupoSel}
                 min={1}
@@ -448,7 +466,7 @@ export function SeccionHorarios({
                 onCambio={setCupoSel}
               />
             </View>
-            <VozSecundaria texto={t('horarios.cupoAyuda')} />
+            <VozSecundaria texto={vozCupoAyuda} />
             <Boton
               variante="primario"
               etiqueta={t('taller.agregarFranjaListo')}

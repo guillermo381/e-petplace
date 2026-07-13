@@ -778,6 +778,7 @@ export default function TallerPaseo() {
             <SeccionHorarios
               franjas={franjas}
               onCambio={setFranjas}
+              oficio="paseo"
               titulo={<TituloBloque texto={t('taller.horariosTitulo')} />}
             />
           )}

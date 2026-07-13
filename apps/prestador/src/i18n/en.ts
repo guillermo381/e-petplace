@@ -372,6 +372,8 @@ export const prestadorEn = {
     otraCiudad: 'Another city',
     ciudadFaltante: "If your city isn't listed, write to us: the team maintains the catalog.",
     listo: 'Done',
+    // S59-B6 cure 3(a) · LOTE S59, GATE PENDIENTE
+    agendaUnica: 'Your schedule is one and the same for all your services.',
     guardar: 'Save your offer',
     guardado: 'Your offer was saved.',
   },
@@ -401,6 +403,11 @@ export const prestadorEn = {
     extraInterruptor: 'Charge extra for long coats',
     extraRotulo: 'The extra added to the price',
     extraAyuda: 'Added once per appointment. The base price does not change.',
+    // S59-B6 cure 2 · LOTE S59, GATE PENDIENTE
+    cupo: 'Pets at a time',
+    cupoAyuda: 'How many pets you can handle at once in this window.',
+    cupoUno: '1 pet at a time',
+    cupoVarios: '{{cantidad}} pets at a time',
   },
   // TU OFERTA DE GROOMING (S59-B5) · LOTE S59, GATE PENDIENTE · Espejo de es.ts
   ofertaGrooming: {
@@ -419,8 +426,10 @@ export const prestadorEn = {
     serviciosDetalle: '{{lista}} · from {{precio}}',
     serviciosPausados: 'All paused',
     sufijoExtra: 'with long-coat extra',
-    especiesFila: 'Who you groom',
-    especiesAmbas: 'Dogs and cats',
+    // S59-B6 cure 4 · LOTE S59, GATE PENDIENTE
+    sufijoEspeciesAmbas: 'dogs and cats',
+    sufijoEspeciesPerro: 'dogs only',
+    sufijoEspeciesGato: 'cats only',
     dondeFila: 'Where you groom',
     dondeLocal: 'At your shop',
     dondeDomicilio: 'Home grooming is coming soon.',

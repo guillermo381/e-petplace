@@ -10,10 +10,11 @@
  * Filas-lápiz ancladas al taller + EL DÓNDE como FILA INFORMATIVA
  * (enmienda 1 del gate del mapa: local v1 en solo lectura + la puerta
  * honesta del domicilio "llega pronto", SIN control muerto — asciende a
- * sección cuando D-380 dispare). Íconos: grooming · familia (STAND-IN
- * declarado para especies — no hay glifo mascota-de-celda en el
- * registry, pedido a la A, precedente L-141) · hoy (stand-in vigente) ·
- * vacaciones. Dosis baja: puntos de estado semánticos, cero acento.
+ * sección cuando D-380 dispare). S59-B6 cura 4: la fila 'A quién
+ * atiendes' MURIÓ fusionada — su verdad vive en el subtítulo VIVO de
+ * Servicios y precios (v3.2, mismo destino que Plan y paquete; el
+ * stand-in 'familia' murió con ella). Íconos: grooming · hoy (stand-in
+ * vigente) · vacaciones. Dosis baja: estados semánticos, cero acento.
  */
 
 import { useCallback, useState } from 'react';
@@ -194,6 +195,16 @@ export default function OfertaGrooming() {
         const precios = activas.flatMap((o) => TALLAS_GROOMING.map((tl) => o.tallas[tl]?.precio).filter((p): p is number => p !== undefined));
         const desde = precios.length > 0 ? Math.min(...precios) : null;
         const extra = prestador.grooming_extra_pelaje_largo;
+        // S59-B6 cura 4: la fila 'A quién atiendes' MURIÓ fusionada — las
+        // especies viven en ESTE subtítulo vivo (v3.2, mismo destino que
+        // la fila Plan y paquete del paseo)
+        const especies = [...new Set(activas.flatMap((o) => o.especies))];
+        const sufijoEspecies =
+          especies.includes('perro') && especies.includes('gato')
+            ? t('ofertaGrooming.sufijoEspeciesAmbas')
+            : especies.includes('gato')
+              ? t('ofertaGrooming.sufijoEspeciesGato')
+              : t('ofertaGrooming.sufijoEspeciesPerro');
         const detalleServicios =
           activas.length === 0 || desde === null
             ? t('ofertaGrooming.serviciosPausados')
@@ -202,15 +213,9 @@ export default function OfertaGrooming() {
                   .map(vozServicio)
                   .join(' · '),
                 precio: monto(desde),
-              }) + (extra !== null ? ` · ${t('ofertaGrooming.sufijoExtra')}` : '');
-
-        const especies = [...new Set(activas.flatMap((o) => o.especies))];
-        const detalleEspecies =
-          especies.includes('perro') && especies.includes('gato')
-            ? t('ofertaGrooming.especiesAmbas')
-            : especies.includes('gato')
-              ? t('tallerGrooming.especieGato')
-              : t('tallerGrooming.especiePerro');
+              }) +
+              ` · ${sufijoEspecies}` +
+              (extra !== null ? ` · ${t('ofertaGrooming.sufijoExtra')}` : '');
 
         const diasActivos = ORDEN_DISPLAY.filter((d) => franjasActivas.some((f) => f.diaSemana === d));
         const detalleHorarios =
@@ -279,14 +284,6 @@ export default function OfertaGrooming() {
                 registro="aa"
                 titulo={t('ofertaGrooming.servicios')}
                 detalle={detalleServicios}
-                onPress={() => irAlTaller('servicios')}
-              />
-              <Separador />
-              <CeldaNavegacion
-                icono="familia"
-                registro="aa"
-                titulo={t('ofertaGrooming.especiesFila')}
-                detalle={detalleEspecies}
                 onPress={() => irAlTaller('servicios')}
               />
               <Separador />

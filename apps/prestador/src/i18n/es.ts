@@ -424,6 +424,9 @@ export const prestadorEs = {
     otraCiudad: 'Otra ciudad',
     ciudadFaltante: 'Si tu ciudad no está, escríbenos: el catálogo lo carga el equipo.',
     listo: 'Listo',
+    // S59-B6 cura 3(a): la sección de horarios DECLARA la agenda única
+    // (la verdad del motor) · LOTE S59, GATE PENDIENTE
+    agendaUnica: 'Tu agenda es una sola para todos tus servicios.',
     guardar: 'Guardar tu oferta',
     guardado: 'Tu oferta quedó guardada.',
   },
@@ -454,6 +457,12 @@ export const prestadorEs = {
     extraInterruptor: 'Cobrar extra por pelaje largo',
     extraRotulo: 'El extra que se suma al precio',
     extraAyuda: 'Se suma una vez por cita. El precio base no cambia.',
+    // S59-B6 cura 2 (gate founder): la voz del cupo ES del oficio —
+    // 'Paseos simultáneos' era voz prestada · LOTE S59, GATE PENDIENTE
+    cupo: 'Mascotas a la vez',
+    cupoAyuda: 'Cuántas mascotas puedes atender a la vez en esta franja.',
+    cupoUno: '1 mascota a la vez',
+    cupoVarios: '{{cantidad}} mascotas a la vez',
   },
   // TU OFERTA DE GROOMING — el resumen, la portada del mundo (S59-B5) · LOTE S59, GATE PENDIENTE
   ofertaGrooming: {
@@ -472,8 +481,12 @@ export const prestadorEs = {
     serviciosDetalle: '{{lista}} · desde {{precio}}',
     serviciosPausados: 'Todos pausados',
     sufijoExtra: 'con extra por pelaje largo',
-    especiesFila: 'A quién atiendes',
-    especiesAmbas: 'Perros y gatos',
+    // S59-B6 cura 4: la fila 'A quién atiendes' MURIÓ fusionada (v3.2,
+    // mismo destino que Plan y paquete) — su verdad vive en el subtítulo
+    // VIVO de Servicios y precios · LOTE S59, GATE PENDIENTE
+    sufijoEspeciesAmbas: 'perros y gatos',
+    sufijoEspeciesPerro: 'solo perros',
+    sufijoEspeciesGato: 'solo gatos',
     // el DÓNDE v1 es fila informativa (gate del mapa, enmienda 1):
     // local declarado + la puerta honesta de SU servicio
     dondeFila: 'Dónde atiendes',

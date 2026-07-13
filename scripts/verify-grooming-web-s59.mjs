@@ -47,16 +47,23 @@ let t = await esperar('Tu oferta', 20);
 check(t.includes('Grooming'), 'T1 la tarjeta-mundo Grooming vive');
 check(!t.includes('Se abre cuando el servicio llegue'), 'T1b el coming-soon MURIÓ');
 
-// ── T2: la PORTADA del mundo — el demo está en PELDAÑO 0 (sin oferta
-// grooming): la invitación que educa; la portada con datos la gatea el
-// founder en dispositivo tras su primer guardado ──
+// ── T2: la PORTADA del mundo — robusta al ESTADO del demo (peldaño 0
+// o con datos: el founder guardó una oferta real en su gate S59.3) ──
 await page.getByRole('button', { name: /Grooming/ }).first().click();
 t = await esperar('Tu oferta de grooming', 30);
 check(t.includes('Tu oferta de grooming'), 'T2 la portada del mundo');
-t = await esperar('Tu servicio de grooming', 25);
-check(t.includes('Tu servicio de grooming'), 'T2b peldaño 0: la invitación');
-check(t.includes('En dos pasos eliges servicios'), 'T2c peldaño 0: educa (DOS pasos, enmienda 1)');
-check(t.includes('Configurar tu oficio'), 'T2d peldaño 0: el CTA al wizard');
+t = await esperar('tu oficio', 25).then(() => texto());
+t = await texto();
+const peldano0 = t.includes('Configurar tu oficio');
+check(peldano0 || t.includes('Editar tu oferta'), 'T2b peldaño 0 honesto O portada con datos');
+if (!peldano0) {
+  check(t.includes('Visible para las familias') || t.includes('Todavía no visible'), 'T2c el estado dice su verdad');
+  check(!t.includes('A quién atiendes'), 'T2d cura 4: la fila especies MURIÓ fusionada');
+  check(/perros y gatos|solo perros|solo gatos/.test(t) || t.includes('Todos pausados'), 'T2e las especies viven en el subtítulo vivo');
+  check(t.includes('Dónde atiendes') && t.includes('En tu local'), 'T2f el Dónde informativo');
+} else {
+  check(t.includes('En dos pasos eliges servicios'), 'T2c peldaño 0: educa (DOS pasos)');
+}
 
 // ── T3: la sección servicios suelta ──
 await page.goto(`http://localhost:${PORT}/grooming/taller?seccion=servicios`, { waitUntil: 'networkidle' });
@@ -68,27 +75,34 @@ check(t.includes('Baño') && t.includes('Baño y corte'), 'T3d los dos servicios
 const switches = await page.getByRole('switch').count();
 check(switches === 3, `T3e tres interruptores: 2 servicios + extra (${switches})`);
 check(t.includes('Cobrar extra por pelaje largo'), 'T3f el extra global (enmienda 2)');
-// BORRADOR (nada persiste sin Guardar): encender Baño → el bloque
-// gobernado aparece y el espejo responde EN VIVO (la firma)
-await page.getByRole('switch', { name: /Ofrecer este servicio · Baño$/ }).click();
+// BORRADOR (nada persiste sin Guardar), robusto al estado guardado:
+// asegurar Baño ENCENDIDO — el Interruptor web no expone aria-checked,
+// el estado se lee por su EFECTO (el bloque gobernado visible)
+if (!(await texto()).includes('Pequeña')) {
+  await page.getByRole('switch', { name: /Ofrecer este servicio · Baño$/ }).click();
+}
 t = await esperar('Pequeña', 15);
 check(t.includes('Pequeña') && t.includes('Mediana') && t.includes('Grande'), 'T3g el chip de talla gobierna (draft)');
-check(t.includes('Duración') && t.includes('60 min'), 'T3h duración por combinación (default 60 del Baño)');
-check(t.includes('$5.00'), 'T3h2 SIN sugeridos: el slider arranca en el piso del riel (enmienda 4)');
-check(/Baño · P \$5\.00 · M \$5\.00 · G \$5\.00/.test(t), 'T3i el espejo dice los 3 precios EN VIVO');
-check(t.includes('60 · 60 · 60 min según talla'), 'T3i2 el espejo dice las duraciones');
-// el extra en borrador
-await page.getByRole('switch', { name: 'Cobrar extra por pelaje largo' }).click();
+check(t.includes('Duración') && / min/.test(t), 'T3h duración por combinación visible');
+check(/Baño · P \$\d/.test(t), 'T3i el espejo dice los precios EN VIVO');
+check(/\d+ · \d+ · \d+ min según talla/.test(t), 'T3i2 el espejo dice las duraciones');
+// el extra en borrador: asegurar ENCENDIDO (estado por efecto visible)
+if (!(await texto()).includes('El extra que se suma al precio')) {
+  await page.getByRole('switch', { name: 'Cobrar extra por pelaje largo' }).click();
+}
 t = await esperar('El extra que se suma al precio', 10);
 check(t.includes('El extra que se suma al precio'), 'T3j el extra enciende con su slider');
-check(t.includes('Pelaje largo: +$0.25'), 'T3j2 el espejo dice el extra (piso del riel)');
+check(/Pelaje largo: \+\$\d/.test(t), 'T3j2 el espejo dice el extra');
 check(t.includes('Guardar tu oferta'), 'T3k el guardado único (JAMÁS se toca)');
+// S59-B6 curas 1-3 en el taller: rieles y voces
+check(!t.includes('Paseos simultáneos'), 'T3l cura 2: la voz genérica no vive en grooming');
 
 // ── T4: la sección horarios suelta (la COMPARTIDA) ──
 await page.goto(`http://localhost:${PORT}/grooming/taller?seccion=horarios`, { waitUntil: 'networkidle' });
 t = await esperar('Días y horarios', 40);
 check(t.includes('Marca los días y agrega la franja'), 'T4 la sección compartida de horarios');
 check(t.includes('Vacaciones'), 'T4b la celda-puente a vacaciones');
+check(t.includes('Tu agenda es una sola para todos tus servicios.'), 'T4c cura 3(a): la agenda única declarada');
 
 // ── T5: el WIZARD de DOS pasos por URL ──
 await page.goto(`http://localhost:${PORT}/grooming/taller?modo=wizard`, { waitUntil: 'networkidle' });
