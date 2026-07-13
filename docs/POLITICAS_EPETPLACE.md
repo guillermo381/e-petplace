@@ -1,7 +1,7 @@
 # POLITICAS_EPETPLACE — Políticas operativas del producto
 
-> Versión: v1.5
-> Última actualización: 12 Jul 2026 — Sesión 57. P18 FIRMADA (cancelación y reagenda del paseo SUELTO: las tres ventanas). P17 queda RESERVADA para la Cuenta del prestador (sin letra todavía).
+> Versión: v1.6
+> Última actualización: 12 Jul 2026 — Sesión 57. P17 FIRMADA e integrada (la Cuenta del prestador, letra v1.1 — cierra la reserva de numeración de la v1.5). P18 FIRMADA (cancelación y reagenda del paseo SUELTO: las tres ventanas).
 > Audiencia: Claude (web y code), devs futuros, equipo de soporte, equipo legal.
 > Análogo a: `CONTRATO_TRABAJO.md` (cómo trabajamos) pero del producto (cómo se comporta).
 
@@ -361,12 +361,50 @@ en la superficie de compra.
 
 ---
 
-## P17 — RESERVADA: la Cuenta del prestador (sin letra)
+## P17 — La Cuenta del prestador (FIRMADA — founder S57, letra v1.1)
 
-> Número reservado por decisión de numeración (S57): la política de la
-> Cuenta del prestador se redacta cuando esa mesa abra (dossier servido
-> en S56 — voto del arquitecto: stack en Negocio, jamás 4º tab). Hasta
-> entonces, P17 no rige nada.
+> Decisión FIRMADA por el founder en S57 (conversación con el
+> arquitecto; la letra la integró la Sesión A — escritora única de docs,
+> regla 76). Construcción estructural: S57, Sesión B (commits `09f7d73`
+> + `4676158`). Pulido: pasada de acabados.
+
+**(1) La estructura (firmada — v1.1).** La app del prestador tiene
+CUATRO tabs: **Hoy · Mascotas · Negocio · Cuenta**. La decisión de S57
+fue UNA sola: separar Cuenta de Negocio — Mascotas conserva el lugar
+que ya tenía (la v1.0 de esta letra la sacó de la barra por error de
+redacción del arquitecto, no por decisión; corregido con firma del
+founder en la misma sesión). Ninguna tab es eterna: si un día llega una
+función de más valor diario, la barra se rediscute con firma (decisión
+reversible declarada).
+
+**(2) La mudanza (qué vive dónde).**
+- **Cuenta:** perfil del prestador, preferencias, idioma,
+  notificaciones, y eliminación de cuenta (requisito de tiendas — ver
+  (4)).
+- **Negocio queda puro oficio:** la oferta (servicios, horarios,
+  vacaciones) y la plata (cobros, liquidaciones). Nada más.
+
+**(3) La vara.** El mismo pulido que la Cuenta del cliente (v1 S56):
+pantalla por pantalla, gate del founder en dispositivo, strings es/en.
+El pulido NO es parte de la mudanza estructural — es la pasada de
+acabados, con la capa de craft firmada.
+
+**(4) Eliminación de cuenta del prestador (declarada, construcción
+aparte).** Es requisito de tiendas también de este lado. Toca base de
+datos y reglas propias (¿qué pasa con citas futuras pagadas, planes
+vivos, saldo por liquidar?) — esas reglas se escriben como enmienda de
+esta letra ANTES de construirla, con la Sesión A como escritora. En la
+mudanza estructural la entrada existe y dice su verdad ("Pronto") —
+jamás un botón que finge borrar.
+
+**Historial de la letra:**
+- v1.1 (S57, misma sesión): (1) corregido con firma del founder —
+  CUATRO tabs (Hoy · Mascotas · Negocio · Cuenta): Mascotas conserva su
+  lugar; la v1.0 la había desplazado por error de redacción del
+  arquitecto.
+- v1.0 (S57, 12 Jul 2026): decisión firmada (tab Cuenta; Negocio puro
+  oficio; pulido a la vara del cliente en acabados; eliminación
+  declarada con enmienda previa a construcción).
 
 ---
 
@@ -463,4 +501,5 @@ de franjas, se enmienda con firma (patrón P16).
 - **v1.2 (11 Jul 2026 — S55)**: P15 agregada como CANDIDATA (eliminación de cuenta del dueño — espec de la letra (a) de Cuenta v1; rige recién con la firma del founder). P14 reservada para paquetes de paseo (`MODELO_PASEO.md` §6, financiero v2.5).
 - **v1.3 (11 Jul 2026 — S55-B5)**: P14 FIRMADA (founder, OK completo al paquete del plan): (a) salto con ≥24 h reagenda en el período con el mismo paseador, sobrantes al cierre = crédito si renueva / reembolso proporcional si no · (b) falla del prestador = crédito o reembolso a elección del dueño · (c) <24 h = la cita se pierde · (d) pausa = no renovar, el período corriente se rige por (a)/(b). Gemelos: `MODELO_PASEO.md` v1.1 y `MODELO_FINANCIERO.md` v2.5 (Decisión S).
 - **v1.4 (12 Jul 2026 — S56)**: P16 FIRMADA (founder S56, paquete de letra del PAQUETE DE SALIDAS): (a) comprar no es reservar — vigencia mensual declarada al comprar · (b) cancelar con ≥2 h devuelve la salida al saldo y libera la franja · (c) no-show = salida consumida, el paseador cobra (cierre `no_show`) · (d) falla del prestador = saldo o reembolso proporcional a elección del dueño · (e) rollover al renovar antes del vencimiento; sin renovación vencen (breakage declarado); recordatorio UNO y sereno, jamás countdown. Nota de ventanas: 24 h del plan vs 2 h del paquete es DECISIÓN. Gemelos: `MODELO_PASEO.md` v1.2 (§6bis/§6ter) y `MODELO_FINANCIERO.md` v2.6 (Decisión T + 7.15).
+- **v1.6 (12 Jul 2026 — S57)**: P17 FIRMADA e integrada (letra v1.1 del arquitecto, firmada por el founder en sesión): la Cuenta del prestador — CUATRO tabs Hoy·Mascotas·Negocio·Cuenta (la única decisión fue separar Cuenta de Negocio; la v1.0 desplazaba Mascotas por error de redacción, corregido con firma en la misma sesión) · Negocio puro oficio · pulido a la vara de la Cuenta del cliente en la pasada de acabados · eliminación de cuenta DECLARADA con enmienda de letra previa a construcción (la entrada dice "Pronto", jamás finge borrar). Cierra la reserva de numeración de la v1.5. Nota de proceso: la integración llegó UNA respuesta tarde — el primer envío anunció el literal sin adjuntarlo y la A frenó por regla 76b (freno ratificado por el arquitecto).
 - **v1.5 (12 Jul 2026 — S57)**: P18 FIRMADA (founder S57, redacción del arquitecto sobre decisión en sesión — cancelación y reagenda del paseo SUELTO): (a) ≥24 h = reagendar o cancelar con destino a elección del dueño (medio de pago original con sus 15 días hábiles declarados, o saldo e-PetPlace) · (b) entre 24 y 2 h = solo reagendar, la plata no se mueve · (c) <2 h o no presentarse = el paseo se pierde y el paseador cobra (cierre `no_show`, Decisión T) · (d) falla del prestador = devolución o saldo a elección, sin discusión. Camino de la plata: la cancelación se DECLARA sobre el pago (patrón 7.14 enmendada; `aplicar_reembolso()` intacta). Construcción diferida: la pantalla de elección de destino y el saldo e-PetPlace esperan Kushki fase 1 — hoy el reembolso es simulado y declarado, sin pantalla de destino. **P17 queda RESERVADA** para la Cuenta del prestador (sin letra). Gemelos: `MODELO_PASEO.md` v1.3 (§3bis) y `MODELO_FINANCIERO.md` v2.7 (nota 7.16).
