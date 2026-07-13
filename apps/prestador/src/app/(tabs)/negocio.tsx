@@ -35,9 +35,11 @@ import {
 import {
   obtenerMiCuentaComercial,
   obtenerMiPrestador,
+  obtenerOfertasGroomingPropias,
   obtenerOfertasPaseoPropias,
   obtenerResumenPendienteLiquidar,
   type MiCuentaComercial,
+  type OfertaGroomingPropia,
   type OfertaPaseoPropia,
   type ResumenPendienteLiquidar,
 } from '@epetplace/api';
@@ -83,6 +85,8 @@ export default function Negocio() {
   // B1a: el resumen VIVO del mundo Paseo — null mientras carga/falla:
   // la tarjeta degrada a su invitación, jamás inventa
   const [ofertas, setOfertas] = useState<OfertaPaseoPropia[] | null>(null);
+  // S59-B5: el resumen VIVO del mundo Grooming — misma degradación
+  const [ofertasGrooming, setOfertasGrooming] = useState<OfertaGroomingPropia[] | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -100,8 +104,12 @@ export default function Negocio() {
         }
         if (rPendientes.ok) setPendientes(rPendientes.data);
         if (rPrestador.ok) {
-          const rOfertas = await obtenerOfertasPaseoPropias(rPrestador.data.id);
+          const [rOfertas, rGrooming] = await Promise.all([
+            obtenerOfertasPaseoPropias(rPrestador.data.id),
+            obtenerOfertasGroomingPropias(rPrestador.data.id),
+          ]);
           if (vigente && rOfertas.ok) setOfertas(rOfertas.data);
+          if (vigente && rGrooming.ok) setOfertasGrooming(rGrooming.data);
         }
       })();
       return () => {
@@ -143,6 +151,21 @@ export default function Negocio() {
   // B1a: el detalle vivo del mundo Paseo — verdad de DB o invitación
   const activas = ofertas?.filter((o) => o.activo) ?? [];
   const desde = activas.length > 0 ? Math.min(...activas.map((o) => o.precio)) : null;
+  // S59-B5: detalle vivo del mundo Grooming — verdad de DB o invitación
+  const activasGrooming = ofertasGrooming?.filter((o) => o.activo) ?? [];
+  const preciosGrooming = activasGrooming.flatMap((o) =>
+    (['S', 'M', 'L'] as const).map((tl) => o.tallas[tl]?.precio).filter((v): v is number => v !== undefined),
+  );
+  const detalleMundoGrooming =
+    ofertasGrooming === null || activasGrooming.length === 0 || preciosGrooming.length === 0
+      ? t('negocio.mundoGroomingVacio')
+      : t('ofertaGrooming.serviciosDetalle', {
+          lista: activasGrooming
+            .map((o) => (o.tipoServicio === 'grooming' ? t('tallerGrooming.servicioBano') : t('tallerGrooming.servicioBanoCorte')))
+            .join(' · '),
+          precio: `$${Math.min(...preciosGrooming).toFixed(2)}`,
+        });
+
   const detalleMundoPaseo =
     ofertas === null || activas.length === 0
       ? t('negocio.mundoPaseoVacio')
@@ -201,16 +224,16 @@ export default function Negocio() {
                 </View>
               </View>
             </Tarjeta>
-            {/* la puerta honesta del mundo que aún no vive en la app.
-                PUNTO DE ENCHUFE S59-B5 (FASE 2, con la estructura de la A):
-                esta Tarjeta plana se vuelve la GEMELA de la de Paseo de
-                arriba — Tarjeta interactiva elevacion="reposo" +
-                onPress={() => router.push('/grooming')} + texto primario +
-                detalle VIVO (servicios activos · "desde $X" / invitación
-                al taller si la oferta está vacía); mueren las keys
-                mundoGroomingDetalle del coming-soon (Ley 37). Hasta que
-                FASE 2 abra, la puerta dice la verdad de SU servicio. */}
-            <Tarjeta elevacion="plana">
+            {/* S59-B5 FASE 2: el mundo Grooming ABRIÓ — la gemela
+                interactiva de la de Paseo (el enchufe de FASE 1(b);
+                el coming-soon y su key MURIERON, Ley 37). */}
+            <Tarjeta
+              interactiva
+              elevacion="reposo"
+              accessibilityRole="button"
+              etiqueta={t('negocio.mundoGrooming')}
+              onPress={() => router.push('/grooming')}
+            >
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
                 <Icono nombre="grooming" registro="aa" tamano={28} />
                 <View style={{ flex: 1, gap: 2 }}>
@@ -218,7 +241,7 @@ export default function Negocio() {
                     style={{
                       fontFamily: typography.family.sans.medium,
                       fontSize: typography.size.md,
-                      color: theme.text.secondary,
+                      color: theme.text.primary,
                     }}
                   >
                     {t('negocio.mundoGrooming')}
@@ -230,7 +253,7 @@ export default function Negocio() {
                       color: theme.text.secondary,
                     }}
                   >
-                    {t('negocio.mundoGroomingDetalle')}
+                    {detalleMundoGrooming}
                   </Text>
                 </View>
               </View>

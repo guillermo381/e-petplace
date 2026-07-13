@@ -210,7 +210,9 @@ export const prestadorEs = {
     paseo: 'Paseo',
     mundoPaseoVacio: 'Ábrelo y arma tu oferta en el taller.',
     mundoGrooming: 'Grooming',
-    mundoGroomingDetalle: 'Se abre cuando el servicio llegue a la app.',
+    // S59-B5: el mundo ABRIÓ — el coming-soon murió (Ley 37); el vacío
+    // invita al taller (mismo patrón que el mundo Paseo) · LOTE S59
+    mundoGroomingVacio: 'Ábrelo y arma tu oferta en el taller.',
     // S56-B TAREA 2 (D-341) · LOTE S56, GATE PENDIENTE
     vacaciones: 'Vacaciones',
     vacacionesDetalle: 'Marca los días en que no paseas.',
@@ -424,6 +426,63 @@ export const prestadorEs = {
     listo: 'Listo',
     guardar: 'Guardar tu oferta',
     guardado: 'Tu oferta quedó guardada.',
+  },
+  // EL ARTE DEL GROOMING — el taller del mundo (S59-B5, MODELO_GROOMING v1.0) · LOTE S59, GATE PENDIENTE
+  tallerGrooming: {
+    titulo: 'El arte del grooming',
+    paso: 'Paso {{n}} de 2',
+    serviciosTitulo: 'Servicios y precios',
+    serviciosIntro: 'Enciende los servicios que ofreces y ponles precio por talla.',
+    especies: '¿A quién atiendes?',
+    especiePerro: 'Perros',
+    especieGato: 'Gatos',
+    especiesMinima: 'Elige al menos una especie.',
+    servicioBano: 'Baño',
+    servicioBanoCorte: 'Baño y corte',
+    ofrecerServicio: 'Ofrecer este servicio',
+    talla: 'Talla',
+    tallaS: 'Pequeña',
+    tallaM: 'Mediana',
+    tallaL: 'Grande',
+    // la voz corta del espejo (S/M/L de DB se DICE P·M·G en español)
+    tallaCortaS: 'P',
+    tallaCortaM: 'M',
+    tallaCortaL: 'G',
+    duracion: 'Duración',
+    duracionAyuda: 'Cuánto ocupa tu agenda esa combinación.',
+    minutos: '{{n}} min',
+    extraInterruptor: 'Cobrar extra por pelaje largo',
+    extraRotulo: 'El extra que se suma al precio',
+    extraAyuda: 'Se suma una vez por cita. El precio base no cambia.',
+  },
+  // TU OFERTA DE GROOMING — el resumen, la portada del mundo (S59-B5) · LOTE S59, GATE PENDIENTE
+  ofertaGrooming: {
+    titulo: 'Tu oferta de grooming',
+    vacioTitulo: 'Tu servicio de grooming',
+    vacioCuerpo: 'En dos pasos eliges servicios, precios por talla y horarios. Tus clientes solo ven lo que tú actives.',
+    vacioCta: 'Configurar tu oficio',
+    visibleTitulo: 'Visible para las familias',
+    visibleVoz: 'Las familias te encuentran y pueden reservar.',
+    noVisibleTitulo: 'Todavía no visible',
+    noVisibleCuenta: 'Falta que el equipo active tu cuenta comercial.',
+    noVisibleServicios: 'Activa al menos un servicio en el taller.',
+    noVisibleHorarios: 'Agrega tus días y horarios en el taller.',
+    editarOferta: 'Editar tu oferta',
+    servicios: 'Servicios y precios',
+    serviciosDetalle: '{{lista}} · desde {{precio}}',
+    serviciosPausados: 'Todos pausados',
+    sufijoExtra: 'con extra por pelaje largo',
+    especiesFila: 'A quién atiendes',
+    especiesAmbas: 'Perros y gatos',
+    // el DÓNDE v1 es fila informativa (gate del mapa, enmienda 1):
+    // local declarado + la puerta honesta de SU servicio
+    dondeFila: 'Dónde atiendes',
+    dondeLocal: 'En tu local',
+    dondeDomicilio: 'El grooming a domicilio llega pronto.',
+    // el espejo dice los 6 precios + extra + duraciones
+    espejoServicio: '{{nombre}} · {{tallas}}',
+    espejoDuraciones: '{{lista}} min según talla',
+    espejoExtra: 'Pelaje largo: +{{monto}}',
   },
   // TU OFERTA DE PASEO — el resumen, la portada del mundo (S58-B B1b) · LOTE S58, GATE PENDIENTE
   ofertaPaseo: {

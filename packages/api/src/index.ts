@@ -360,3 +360,18 @@ export {
   type RespuestaPaseoSocial,
   type CodigoErrorPaseoSocial,
 } from './wrappers/paseo-social';
+
+// ── La oferta de grooming (S59-B5, fundación S59-A3 — hunk Sesión B) ────────
+export {
+  SERVICIOS_GROOMING,
+  TALLAS_GROOMING,
+  actualizarExtraPelajeLargo,
+  guardarServicioGrooming,
+  obtenerOfertasGroomingPropias,
+  type CodigoErrorGrooming,
+  type GuardarServicioGroomingInput,
+  type OfertaGroomingPropia,
+  type ServicioGrooming,
+  type TallaGrooming,
+  type TallaOfertaGrooming,
+} from './wrappers/grooming';
