@@ -1411,7 +1411,8 @@ CERRADA en S54-B (11 Jul 2026): login real por los wrappers de auth S45, routing
 #### D-329 — ✅ CERRADA (S55-B2). El CTA "Ir al Hogar" del checkout no navegaba
 Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el stack ACTUAL (Explorar) y `/hogar` vive en otro tab → no-op silencioso. Cura (commit `7c7e438`): vaciar el stack (`canDismiss` + `dismissAll`) y cambiar de tab con `navigate`. Verificado E2E con hold real + pago simulado + aterrizaje en `/hogar` (script `verify-d329-checkout-cta.mjs`).
 
-#### D-330 — Guard de paseo grupal sobre `nervioso_otros_perros`
+#### D-330 — Guard de paseo grupal sobre `nervioso_otros_perros` ✅ CERRADA (S59 — P19 firmada)
+~~🟡 ALTA~~ **CERRADA en S59** con la firma de **P19** (`POLITICAS_EPETPLACE.md` v1.7): el paseo es GRUPAL POR NORMA — declarado en condiciones y en el flujo de reserva; consentimiento = pregunta única en la primera reserva por mascota ("¿{nombre} se lleva bien paseando con otros perros?"); SÍ agenda sin re-preguntar, NO bloquea con voz honesta con camino Y SE REGISTRA (mascota, familia, fecha — insumo de paseo personalizado vs derivación a entrenador); respuesta EDITABLE en el perfil. La resolución fue por NORMA de producto, no por guard sobre la señal conductual: `nervioso_otros_perros` sigue como señal rica del expediente, sin participar de la reserva. Estructura DB = migración S59-A2. Letra original:
 🟡 ALTA. El motor de ocupación permite cupo >1 (capacidad simultánea) sin mirar la señal conductual `nervioso_otros_perros` (D-300): una mascota que evita a otros perros podría caer en un paseo grupal sin decisión de su familia. El diseño del guard (bloquear / avisar / consentimiento) es decisión de producto pendiente. **Disparo: el primer prestador que oferte cupo >1** — antes de publicar ese horario. Origen: S55-B2, `MODELO_PASEO.md` §4.1.
 
 #### D-331 — Cobertura por zonas del paseador
@@ -1538,13 +1539,15 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 #### D-373 — Tira horizontal: forense L-132 abierto en el CLIENTE
 🟡 La tira (ScrollView horizontal) dentro de Hojas puede perder contra el swipe-to-close en Android como L-132 — web no lo delata. Verificar EN DISPOSITIVO las tiras de plan-hoja/paquete-hoja; si pierde, patrón HojaScroll horizontal. Disparo: gate de la Hoja del plan.
 
-#### D-374 — Háptica del slider/interruptor (expo-haptics)
+#### D-374 — Háptica del slider/interruptor (expo-haptics) ✅ CERRADA (S59 — decisión founder: SIN háptica v1)
+~~⏸ DIFERIDA~~ **CERRADA en S59** por decisión del founder: v1 SIN háptica. `onStep` queda como hook vacío (cero deuda de refactor si reabre). **Se reabre SOLO si el ensayo la pide.** Letra original:
 ⏸ DIFERIDA a decisión founder. `onStep` ya es el hook (cero refactor); expo-haptics = dep NATIVA → L-134: version bump + builds nuevas. Disparo: firma founder.
 
 #### D-375 — El precio del plan del lado dueño (enmienda de RPC propuesta, sin firma)
 🟡 `obtener_paseadores_disponibles` no devuelve `precio_plan` y la PlanHoja muestra el precio del SUELTO cuando el server cobra COALESCE(precio_plan, precio) — verosímil-falso de plata. Propuesta S58: agregar precio_plan al RETURNS + PlanHoja lo pinta. **Disparo: firma founder (gate de migración).**
 
-#### D-376 — Regla 76(f) propuesta: staging por RUTA en el árbol compartido (firma pendiente)
+#### D-376 — Regla 76(f): staging por RUTA en el árbol compartido ✅ CERRADA (S59 — FIRMADA al contrato)
+~~🟡~~ **CERRADA en S59**: la enmienda **76(f)** quedó FIRMADA en `CONTRATO_TRABAJO.md` v1.10 — staging SIEMPRE explícito por ruta (git add -A/. prohibidos) + `git status` pre-commit verificando territorio propio; archivo ajeno modificado se deja intacto y se declara. Letra original:
 🟡 El incidente S58 (`3691b1a`→`98c7e5e`): un `git add -A` de la A barrió WIP incompleto de la B y dejó main rojo; cura sin reescribir historia. Letra propuesta: staging SIEMPRE explícito por ruta + `git status` pre-commit verificando territorio propio. **Disparo: firma founder en la letra del contrato.**
 
 #### D-367 — FILTRO por zona de cobertura en slots/oferta (la v1 declara, no filtra)
@@ -1575,6 +1578,16 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 #### D-347 — Sesión de ELEVACIÓN DE CRAFT visual (pre-Gate de Oro)
 🟡 ALTA. Sesión dedicada de elevación de craft de las pantallas clave del arco de paseo: composición, jerarquía y elemento firma por pantalla — vara MoeGo+ (la fluidez no alcanza; la pantalla tiene que tener FIRMA). No es deuda de componentes (el sistema existe): es la pasada de dirección de arte sobre las pantallas ya construidas, con gate founder por pantalla. **Disparo: cierre del arco de paseo, ANTES del Gate de Oro con Kary.** Origen: S56 founder.
 **Insumo del veredicto Bloque 0 (founder, S56): llegar al hub "Mis paseos" CUESTA** — el doble clic del servicio no se encuentra solo (las dos entradas existen pero no llaman). La descubribilidad del hub entra al alcance de esta sesión de craft; no se parcha hoy.
+
+### Deudas de Sesión 59 (13 Jul 2026)
+
+> **Registro S59-A2 (escritora única):** cerradas **D-330** (P19 firmada — el paseo es grupal por norma), **D-374** (decisión founder: sin háptica v1; reabre solo si el ensayo la pide), **D-376** (regla 76(f) firmada al contrato v1.10). **D-375 se cura en la migración única de esta sesión** (ver su entrada al cierre). Letra nueva: `MODELO_PASEO.md` v1.5 (§6.1 plan L-V · §6.4 sugeridos 80/60 · §7 EL DURANTE) + `POLITICAS` v1.7 (P19).
+
+#### D-377 — Realtime del DURANTE (suscripción push al track/novedades)
+🟢 MEDIA. La frescura v1 del EN VIVO del dueño es HONESTA por diseño (§7.4 del paseo): sondeo ~30 s con pantalla en foco + pull-to-refresh + "Actualizado hace X" — coherente con un GPS que escribe ~cada 60 s foreground-only (D-292). La suscripción realtime (canal supabase sobre `eventos_mascota_paseo`/`evento_paseo_novedades`) se construye cuando la frescura del insumo la justifique. **Disparo: GPS de fondo (B5/D-292) construido, o el ensayo pidiendo más frescura.** Origen: S59 (§7 del paseo, letra firmada).
+
+#### D-378 — Higiene: policies con rol `{public}` en tablas del paseo
+⚪ BAJA. `eventos_mascota_paseo` y `evento_paseo_novedades` tienen sus policies colgadas del rol `{public}` mientras el resto de la familia del durante (`evento_atencion`, `evento_archivo_adjunto`, `evento_grooming_notas/incidencias`) usa `{authenticated}`. SIN efecto práctico hoy (RLS activa + las funciones gatean auth), pero es asimetría que confunde relevamientos. Homogeneizar a `{authenticated}` la próxima vez que esas policies se toquen. Origen: relevamiento S59-A1.
 
 ---
 

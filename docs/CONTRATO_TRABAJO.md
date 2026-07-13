@@ -1,7 +1,7 @@
 # Contrato de trabajo — Guillermo (founder e-PetPlace) ↔ Claude
 
-> **Versión:** v1.9 (con enmiendas S14 + S15 + S16 + S19 + S21 + S42 + S48 + S54)
-> **Última actualización:** 11 Jul 2026 — Sesión 54. Enmienda con regla 76 (coordinación entre sesiones paralelas: escritor único, pedidos autocontenidos, hunks aditivos, territorios por defecto).
+> **Versión:** v1.10 (con enmiendas S14 + S15 + S16 + S19 + S21 + S42 + S48 + S54 + S59)
+> **Última actualización:** 13 Jul 2026 — Sesión 59. Enmienda 76(f) FIRMADA: staging siempre explícito por ruta + `git status` pre-commit verificando territorio propio (origen: incidente S58).
 > **Audiencia:** Claude (web y code) en toda sesión futura. Cualquier dev que se sume al proyecto.
 
 ---
@@ -389,8 +389,9 @@ Origen: S48, dictada por el arquitecto en sesión.
 - **(b) Pedidos autocontenidos.** Toda orden o pedido SQL entre sesiones viaja como TEXTO COMPLETO en el mensaje que el founder pega — SQL literal, firmas, verificación esperada. "Aplicá el pedido N de la otra sesión" no existe como orden válida; la sesión que la recibe sin literal FRENA y pide el texto.
 - **(c) Archivos compartidos por hunks aditivos.** En archivos que ambas tocan (index.ts, diccionarios), cada sesión agrega bloques propios sin reordenar los ajenos, y deja el archivo compilando solo; los commits declaran qué bloque es de quién.
 - **(d) Territorios por defecto.** Salvo designación distinta al arrancar la tanda: la Sesión A trabaja `apps/cliente` y es el escritor único de DB y docs maestros; la Sesión B trabaja `apps/prestador`. `packages/api` se comparte por archivos nuevos + hunks aditivos (cláusula c); `packages/ui` es territorio de UNA sola sesión por tanda, designada explícita.
+- **(f) Staging por RUTA en el árbol compartido (FIRMADA S59; origen: incidente S58).** En toda tanda regla 76, el staging es SIEMPRE explícito por ruta de archivo — `git add -A`, `git add .` y todo staging por comodín quedan PROHIBIDOS. Antes de cada commit: `git status` verificando que lo stageado sea SOLO territorio propio; todo archivo ajeno que aparezca modificado se deja en el árbol sin tocar y se declara en el reporte. Precedente: en S58 un `git add -A` de la A barrió WIP incompleto de la B dentro de `3691b1a` y dejó main rojo — curado en caliente sin reescribir historia (`98c7e5e`). (La letra (e) queda reservada: la cura barata de los exports compartidos anotada en S55 —"los commitea la sesión DUEÑA antes de que la otra toque el archivo"— sigue anotada SIN firma.)
 
-Origen: S54 (el freno de la Sesión A ante el backfill-por-referencia y el patch parcial de la B en index.ts son los precedentes que la regla canoniza; cláusula (d) del founder al aprobarla).
+Origen: S54 (el freno de la Sesión A ante el backfill-por-referencia y el patch parcial de la B en index.ts son los precedentes que la regla canoniza; cláusula (d) del founder al aprobarla); cláusula (f) firmada en S59 sobre el incidente S58.
 
 ---
 
@@ -419,3 +420,4 @@ Origen: S54 (el freno de la Sesión A ante el backfill-por-referencia y el patch
 - **v1.7 (5 Jul 2026 — S42):** enmienda con reglas 73 (Code crea y ejecuta migraciones con acceso a DB; reemplaza pata operativa de reglas 16-17; founder conserva gates de aprobación y revisión visual) y 74 (Claude como arquitecto de e-PetPlace; amplía regla 3). Contexto completo en `ESTRATEGIA_2026H2.md`.
 - **v1.8 (9 Jul 2026 — S48):** enmienda con regla 75 (pedidos al founder autocontenidos: QUÉ/DÓNDE/CÓMO, sin jerga sin traducir; pedido sin DÓNDE se devuelve y se reformula).
 - **v1.9 (11 Jul 2026 — S54):** enmienda con regla 76 (coordinación entre sesiones paralelas: (a) escritor único de DB y docs · (b) pedidos SQL autocontenidos que viajan completos · (c) archivos compartidos por hunks aditivos · (d) territorios por defecto — A=cliente+DB+docs, B=prestador, packages/api por (c), packages/ui una sola sesión designada). Estrenada en vivo en S54.
+- **v1.10 (13 Jul 2026 — S59):** enmienda 76(f) FIRMADA — staging SIEMPRE explícito por ruta en tandas paralelas (git add -A/. prohibidos) + `git status` pre-commit verificando territorio propio; archivo ajeno modificado se deja intacto y se declara. Origen: incidente S58 (`3691b1a`→`98c7e5e`). Cierra D-376.

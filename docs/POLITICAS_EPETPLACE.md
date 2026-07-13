@@ -1,6 +1,6 @@
 # POLITICAS_EPETPLACE — Políticas operativas del producto
 
-> Versión: v1.6
+> Versión: v1.7
 > Última actualización: 12 Jul 2026 — Sesión 57. P17 FIRMADA e integrada (la Cuenta del prestador, letra v1.1 — cierra la reserva de numeración de la v1.5). P18 FIRMADA (cancelación y reagenda del paseo SUELTO: las tres ventanas).
 > Audiencia: Claude (web y code), devs futuros, equipo de soporte, equipo legal.
 > Análogo a: `CONTRATO_TRABAJO.md` (cómo trabajamos) pero del producto (cómo se comporta).
@@ -494,6 +494,44 @@ de franjas, se enmienda con firma (patrón P16).
 
 ---
 
+## P19 — El paseo es GRUPAL por norma (FIRMADA — founder S59)
+
+> Cierra D-330 con esta letra. Gemelo: `MODELO_PASEO.md` §4.1 (el hueco
+> del guard queda cubierto por esta política).
+
+**La norma.** El paseo estándar de e-PetPlace puede incluir **más de un
+perro a la vez**. No es excepción ni letra chica: se declara en las
+condiciones del servicio Y visible en el flujo de reserva — la voz de la
+superficie: *"Los paseos suelen ser con más de un perro a la vez."*
+
+**La pregunta única (primera reserva por mascota).** En la PRIMERA
+reserva de paseo de cada mascota, la familia responde UNA vez:
+*"¿{nombre} se lleva bien paseando con otros perros?"*
+
+- **SÍ** → se agenda con normalidad y **no se re-pregunta** en las
+  reservas siguientes.
+- **NO** → **no se permite agendar** el paseo grupal. Voz honesta SIN
+  final mudo (patrón §6ter del paseo): *"Por ahora los paseos son en
+  grupo. Estamos armando algo para {nombre}."* El NO **se REGISTRA en
+  DB** (mascota, familia, fecha).
+
+**Para qué se registra el NO.** El registro de NOs es el insumo de la
+decisión de producto siguiente: si se acumulan, decide si nace la
+**oferta de paseo personalizado** (individual, otro precio) o la
+**derivación a entrenador** (la señal conductual es información de
+cuidado, no un rechazo). Ninguna de las dos existe hoy — se declaran,
+no se construyen.
+
+**Dónde vive la respuesta.** En el perfil de la mascota, como dato de
+socialización **EDITABLE** por la familia (un perro socializa, una
+familia cambia de opinión) — editarla a SÍ habilita agendar; editarla a
+NO vuelve a bloquear con la misma voz. La fila conductual
+`nervioso_otros_perros` (D-300) sigue siendo la señal RICA del
+expediente; la respuesta de P19 es el CONSENTIMIENTO operativo de
+reserva — conviven, no se pisan.
+
+---
+
 ## Historial de versiones
 
 - **v1.0 (13 May 2026 — S16)**: Primera redacción. 12 políticas iniciales derivadas del refactor de modelo de S16.
@@ -502,4 +540,5 @@ de franjas, se enmienda con firma (patrón P16).
 - **v1.3 (11 Jul 2026 — S55-B5)**: P14 FIRMADA (founder, OK completo al paquete del plan): (a) salto con ≥24 h reagenda en el período con el mismo paseador, sobrantes al cierre = crédito si renueva / reembolso proporcional si no · (b) falla del prestador = crédito o reembolso a elección del dueño · (c) <24 h = la cita se pierde · (d) pausa = no renovar, el período corriente se rige por (a)/(b). Gemelos: `MODELO_PASEO.md` v1.1 y `MODELO_FINANCIERO.md` v2.5 (Decisión S).
 - **v1.4 (12 Jul 2026 — S56)**: P16 FIRMADA (founder S56, paquete de letra del PAQUETE DE SALIDAS): (a) comprar no es reservar — vigencia mensual declarada al comprar · (b) cancelar con ≥2 h devuelve la salida al saldo y libera la franja · (c) no-show = salida consumida, el paseador cobra (cierre `no_show`) · (d) falla del prestador = saldo o reembolso proporcional a elección del dueño · (e) rollover al renovar antes del vencimiento; sin renovación vencen (breakage declarado); recordatorio UNO y sereno, jamás countdown. Nota de ventanas: 24 h del plan vs 2 h del paquete es DECISIÓN. Gemelos: `MODELO_PASEO.md` v1.2 (§6bis/§6ter) y `MODELO_FINANCIERO.md` v2.6 (Decisión T + 7.15).
 - **v1.6 (12 Jul 2026 — S57)**: P17 FIRMADA e integrada (letra v1.1 del arquitecto, firmada por el founder en sesión): la Cuenta del prestador — CUATRO tabs Hoy·Mascotas·Negocio·Cuenta (la única decisión fue separar Cuenta de Negocio; la v1.0 desplazaba Mascotas por error de redacción, corregido con firma en la misma sesión) · Negocio puro oficio · pulido a la vara de la Cuenta del cliente en la pasada de acabados · eliminación de cuenta DECLARADA con enmienda de letra previa a construcción (la entrada dice "Pronto", jamás finge borrar). Cierra la reserva de numeración de la v1.5. Nota de proceso: la integración llegó UNA respuesta tarde — el primer envío anunció el literal sin adjuntarlo y la A frenó por regla 76b (freno ratificado por el arquitecto).
+- **v1.7 (13 Jul 2026 — S59)**: P19 FIRMADA (founder S59 — el paseo es GRUPAL por norma): la norma se declara en condiciones Y en el flujo de reserva ("Los paseos suelen ser con más de un perro a la vez.") · pregunta única en la primera reserva por mascota ("¿{nombre} se lleva bien paseando con otros perros?") · SÍ = se agenda y no se re-pregunta · NO = no se agenda, voz honesta con camino ("Por ahora los paseos son en grupo. Estamos armando algo para {nombre}.") y el NO se REGISTRA (mascota, familia, fecha) como insumo de la decisión paseo personalizado vs derivación a entrenador · la respuesta vive en el perfil de la mascota y es EDITABLE. **Cierra D-330.** Gemelo: `MODELO_PASEO.md` §4.1.
 - **v1.5 (12 Jul 2026 — S57)**: P18 FIRMADA (founder S57, redacción del arquitecto sobre decisión en sesión — cancelación y reagenda del paseo SUELTO): (a) ≥24 h = reagendar o cancelar con destino a elección del dueño (medio de pago original con sus 15 días hábiles declarados, o saldo e-PetPlace) · (b) entre 24 y 2 h = solo reagendar, la plata no se mueve · (c) <2 h o no presentarse = el paseo se pierde y el paseador cobra (cierre `no_show`, Decisión T) · (d) falla del prestador = devolución o saldo a elección, sin discusión. Camino de la plata: la cancelación se DECLARA sobre el pago (patrón 7.14 enmendada; `aplicar_reembolso()` intacta). Construcción diferida: la pantalla de elección de destino y el saldo e-PetPlace esperan Kushki fase 1 — hoy el reembolso es simulado y declarado, sin pantalla de destino. **P17 queda RESERVADA** para la Cuenta del prestador (sin letra). Gemelos: `MODELO_PASEO.md` v1.3 (§3bis) y `MODELO_FINANCIERO.md` v2.7 (nota 7.16).

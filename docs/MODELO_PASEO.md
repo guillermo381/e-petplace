@@ -1,6 +1,6 @@
 # MODELO_PASEO — El contrato del servicio de paseo
 
-> **Versión: v1.4 — S57 (12 Jul 2026, enmienda del gate del paquete).**
+> **Versión: v1.5 — S59 (13 Jul 2026, plan L-V + sugeridos del wizard + §7 EL DURANTE + P19).**
 > Decisiones de producto cerradas
 > por el founder en sesión; escrito por el arquitecto (escritor único de
 > docs, regla 76). **Contrastes obligatorios:** `MODELO_FINANCIERO.md`
@@ -120,13 +120,16 @@ las ofertas reales operan con cupo 1 (paseo individual).
 
 ### 4.1 HUECO — paseo grupal y la señal `nervioso_otros_perros`
 
-La fila conductual `nervioso_otros_perros` (D-300, S46) existe EXACTA
-para esto: una mascota que evita a otros perros **no entra a un paseo
-grupal** sin decisión explícita de su familia. Hoy NO hay guard: el
-motor permite cupo >1 sin mirar la señal.
-**Disparo:** el primer prestador que OFERTE cupo >1 — antes de que ese
-horario se publique, el guard se diseña (bloquear, avisar o pedir
-consentimiento: decisión de producto pendiente). Deuda D-330.
+**RESUELTO por P19 (founder S59 — cierra D-330):** el paseo es GRUPAL
+POR NORMA (`POLITICAS_EPETPLACE.md` P19). El consentimiento operativo
+es la pregunta única de la primera reserva por mascota ("¿{nombre} se
+lleva bien paseando con otros perros?"): SÍ agenda y no se re-pregunta;
+NO bloquea la reserva con voz honesta con camino y SE REGISTRA
+(mascota, familia, fecha) como insumo de la decisión paseo
+personalizado vs derivación a entrenador. La respuesta vive EDITABLE en
+el perfil de la mascota. La fila conductual `nervioso_otros_perros`
+(D-300, S46) sigue siendo la señal RICA del expediente — conviven: una
+es información de cuidado, la otra es consentimiento de reserva.
 
 ## 5. HUECOS declarados (con disparo, no vergüenza)
 
@@ -161,6 +164,15 @@ Se monta sobre el mecanismo existente (`bono_id` /
     mes.
   - **Auto-renovación DECLARADA** en la superficie al contratar (con su
     aviso previo de 72 h y pausa de un toque — Decisión S).
+- **EL PLAN MENSUAL ES DE LUNES A VIERNES (enmienda v1.5, founder S59 —
+  regla DURA):** los fines de semana se pasean SUELTO o por PAQUETE,
+  jamás dentro del plan. Los chips sábado/domingo de "Hacerlo
+  frecuente" quedan APAGADOS con voz honesta CON CAMINO: *"Los fines de
+  semana se reservan sueltos o con tu paquete."* La regla vive también
+  en DB (guard en la contratación/renovación del plan — la UI filtra,
+  la DB manda, patrón §1bis). **Punto de reversión declarado:** si el
+  founder pasa la regla a default-con-excepción, el guard de DB se
+  relaja a default — un cambio de validación, no de chasis.
 - **La continuidad es POR DÍA DE SEMANA (enmienda v1.2, founder S56):**
   todas las citas del plan que caen el mismo día de la semana las
   ejecuta el MISMO paseador (todos los martes, el paseador del martes).
@@ -196,6 +208,21 @@ devengos**: cada cita del plan devenga sola al cerrar con calidad
 **Plan anual:** registrado como evolución posible del mismo chasis
 (período anual con cobro mensual). NO se diseña ni se construye hasta
 decisión explícita del founder — apagado, sin lugar en UI.
+
+### 6.4 Precios SUGERIDOS del wizard (founder S59 — incentivo a recurrencia)
+
+Al configurar su oferta, el wizard del prestador PRE-LLENA (editable,
+patrón D-346 — azúcar de captura, jamás imposición) los precios de
+recurrencia como derivación del precio SUELTO del mismo bloque:
+
+- **Paquete: 80%** del precio suelto por salida.
+- **Plan: 60%** del precio suelto por salida.
+
+Lo que se persiste sigue siendo el precio que el prestador CONFIRMA
+(`precio_paquete` / `precio_plan` — §2 intacto: precio por bloque, cero
+prorrateo del motor). **Nota de calibración declarada:** si los
+prestadores suben sistemáticamente el sugerido del plan en el ensayo,
+el 60% se recalibra — el sugerido es hipótesis de incentivo, no ley.
 
 ## 6bis. El PAQUETE DE SALIDAS (bono) — espec FIRMADA (founder S56), construcción D-343
 
@@ -272,7 +299,47 @@ Al buscar cobertura (suelto, plan o paquete):
 **Regla:** cero disponibilidad JAMÁS es un final mudo; siempre es promesa
 honesta + captura de demanda.
 
-## 7. Los tests de toda feature de paseo
+## 7. EL DURANTE (FIRMADA — founder S59)
+
+> La letra del paseo mientras OCURRE: qué ve el dueño, con qué voz y
+> con qué honestidad. Construida sobre el relevamiento S59-A1 (el lado
+> escritor del durante existe entero — track, novedades, fotos, RLS
+> que ya deja leer al dueño; lo que faltaba era el canal lector).
+
+1. **UNA VOZ.** El estado se llama **"En vivo"** (es) / **"Live"** (en)
+   en TODA superficie de AMBAS apps — pill, subtítulos, títulos,
+   accesibilidad. La key vive en el **namespace `ui`** del riel i18n
+   (la voz del design system nace bilingüe en su paquete); ningún
+   literal hardcodeado, ninguna key paralela por app. Memorial degrada
+   sereno (la degradación visual de CitaEnVivo se conserva; la palabra
+   es la misma).
+2. **DOS CARAS, UNA RUTA.** La pantalla del paseo
+   (`/paseo/[atencionId]`) pinta **EN VIVO** mientras
+   `estado='en_curso'` y **RECORRIDO** al cerrar. MUERE el detalle
+   histórico rendereando nulls como si fueran contenido ("09:14 –
+   --:--" era la cara del vivo pintada con la plantilla del pasado).
+3. **EL EN VIVO DEL DUEÑO.** La cara del vivo muestra: **mapa vivo**
+   con el tramo acumulado del track · **inicio + tiempo transcurrido**
+   · **novedades con voz de familia** (`cat_novedades_paseo.
+   nombre_familia` — jamás el código de oficio) · **fotos al llegar** ·
+   **GPS honesto**: si el track está vacío, pausado o falló, la voz lo
+   dice — JAMÁS un mapa muerto sin explicación (Ley 13: el error no se
+   disfraza de vacío).
+4. **FRESCURA HONESTA v1.** Sondeo **~30 s con la pantalla en foco** +
+   **pull-to-refresh** + **"Actualizado hace X"** visible. JAMÁS
+   prometemos "tiempo real": el GPS del paseador escribe ~cada 60 s y
+   solo en foreground (D-292) — prometer más sería verosímil-falso.
+   El realtime (suscripción push) queda como deuda declarada con
+   disparo (D-377).
+5. **MULTI-MASCOTA PRIMERA CLASE.** N paseos vivos simultáneos = N
+   celdas vivas en el Hogar, cada una navegando a SU EN VIVO. El
+   wrapper del estado del hogar devuelve la LISTA de atenciones en
+   curso — dos paseos a la vez jamás se pisan.
+6. **SIN CHAT en v1.** El canal dueño⇄paseador durante el paseo es B5
+   (canal interno del ecosistema) — el EN VIVO informa, no conversa.
+   Declarado, sin lugar en UI.
+
+## 8. Los tests de toda feature de paseo
 
 1. ¿Respeta el menú canónico (ni un bloque fuera del CHECK)?
 2. ¿La ventana completa manda (cero doble-booking parcial)?
@@ -280,9 +347,27 @@ honesta + captura de demanda.
 4. ¿El camino de la plata intacto (Q, R, S, T, 7.13 — cero eventos al pagar; en el plan: un pago, N devengos; en el paquete: 7.15, solo los dos cierres devengan)?
 5. ¿Los huecos §5 siguen declarados o su disparo ya sonó?
 6. ¿Toda búsqueda sin cobertura completa responde con los escenarios §6ter (promesa honesta + captura de demanda — jamás final mudo)?
+7. ¿El durante respeta §7 (una voz, dos caras, frescura honesta — cero promesas de tiempo real)?
 
 ## Historial
 
+- **v1.5 (S59, 13 Jul 2026 — founder S59):** (1) §6.1 ENMENDADO — EL
+  PLAN MENSUAL ES DE LUNES A VIERNES, regla DURA (fines de semana =
+  suelto o paquete; chips S/D apagados con voz honesta con camino;
+  guard en DB con punto de reversión declarado: si el founder pasa a
+  default-con-excepción, el guard se relaja a default). (2) §6.4
+  NUEVO — precios sugeridos del wizard: paquete 80% · plan 60% del
+  precio suelto (editables, patrón D-346; nota de calibración: si los
+  prestadores suben sistemáticamente el sugerido del plan, se
+  recalibra). (3) §7 NUEVO — EL DURANTE (una voz "En vivo"/"Live" en
+  namespace ui · dos caras una ruta EN VIVO/RECORRIDO · el en vivo del
+  dueño con mapa/tiempo/novedades en voz de familia/fotos/GPS honesto ·
+  frescura honesta v1: sondeo ~30 s en foco + pull-to-refresh +
+  "Actualizado hace X", jamás "tiempo real" · multi-mascota primera
+  clase · sin chat en v1); los tests pasan a §8 y ganan el test 7. (4)
+  §4.1 RESUELTO por P19 (el paseo es grupal por norma; pregunta única
+  de socialización por mascota, editable; el NO se registra — cierra
+  D-330). Gemelo: `POLITICAS_EPETPLACE.md` v1.7 (P19).
 - **v1.4 (S57, 12 Jul 2026 — enmienda FIRMADA del gate del paquete,
   founder S57):** (1) §6bis.2bis NUEVO — comprar no es reservar TAMBIÉN
   en la UI: la compra se habilita con paseador + duración, jamás exige
