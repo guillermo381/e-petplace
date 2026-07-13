@@ -12,6 +12,8 @@ export const prestadorEs = {
     hoy: 'Hoy',
     mascotas: 'Mascotas',
     negocio: 'Negocio',
+    // la tab Cuenta (letra P17, S57-B) · LOTE S57, GATE PENDIENTE
+    cuenta: 'Cuenta',
   },
   sesion: {
     // El estado honesto del raíz (S51; auth real desde S54/D-290):
@@ -65,6 +67,30 @@ export const prestadorEs = {
     diaHoy: 'Hoy',
     diaLibre: 'Libre',
     diaBloqueado: 'De vacaciones',
+    // entrada a Mascotas (cedió la barra a Cuenta, P17) · LOTE S57, GATE PENDIENTE
+    mascotasEntradaDetalle: 'Las mascotas que cuidas y su historial.',
+  },
+  // La tab Cuenta del prestador (letra P17, S57-B) · LOTE S57, GATE PENDIENTE.
+  // Voces calcadas de la Cuenta v1 del cliente (aprobadas S55/S56);
+  // eliminarVoz con la verdad P17 §4 del lado del negocio.
+  miCuenta: {
+    titulo: 'Tu cuenta',
+    perfil: 'Tu perfil',
+    preferencias: 'Preferencias',
+    errorCargar: 'No pudimos cargar esto. Prueba de nuevo.',
+    guardar: 'Guardar cambios',
+    nombreLabel: 'Tu nombre',
+    telefonoLabel: 'Teléfono',
+    telefonoAyuda: 'Con código de país, solo números. ej: 593991234567',
+    emailLabel: 'Email',
+    emailAyuda: 'El email no se cambia desde acá todavía.',
+    perfilGuardado: 'Listo — tu perfil quedó al día.',
+    notificaciones: 'Notificaciones',
+    notifPronto: 'Pronto — cuando las notificaciones del negocio lleguen al teléfono, acá vas a decidir cuáles.',
+    eliminarCuenta: 'Eliminar cuenta',
+    eliminarVoz:
+      'Va a estar acá, con todas las de la ley. Antes tenemos que resolver bien qué pasa con tus citas ya pagadas, tus planes vivos y tu saldo por liquidar — un negocio con compromisos no se borra a la ligera.',
+    entendido: 'Entendido',
   },
   // El flujo de atención E2E (S44, migrado en D-315 pata prestador).
   // VOZ EMOCIONAL APROBADA por founder (lote S55, es y en) — hunk de

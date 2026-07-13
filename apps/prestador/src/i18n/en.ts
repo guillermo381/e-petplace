@@ -12,6 +12,8 @@ export const prestadorEn = {
     hoy: 'Today',
     mascotas: 'Pets',
     negocio: 'Business',
+    // la tab Cuenta (letra P17, S57-B) · LOTE S57, GATE PENDIENTE · Espejo de es.ts
+    cuenta: 'Account',
   },
   sesion: {
     sinSesion: 'No active session',
@@ -57,6 +59,28 @@ export const prestadorEn = {
     diaHoy: 'Today',
     diaLibre: 'Free',
     diaBloqueado: 'On vacation',
+    // entrada a Mascotas (cedió la barra a Cuenta, P17) · LOTE S57, GATE PENDIENTE · Espejo de es.ts
+    mascotasEntradaDetalle: 'The pets you care for and their history.',
+  },
+  // La tab Cuenta del prestador (letra P17, S57-B) · LOTE S57, GATE PENDIENTE · Espejo de es.ts
+  miCuenta: {
+    titulo: 'Your account',
+    perfil: 'Your profile',
+    preferencias: 'Preferences',
+    errorCargar: "We couldn't load this. Try again.",
+    guardar: 'Save changes',
+    nombreLabel: 'Your name',
+    telefonoLabel: 'Phone',
+    telefonoAyuda: 'With country code, digits only. e.g. 593991234567',
+    emailLabel: 'Email',
+    emailAyuda: "Email can't be changed from here yet.",
+    perfilGuardado: 'Done — your profile is up to date.',
+    notificaciones: 'Notifications',
+    notifPronto: "Soon — when business notifications reach your phone, you'll decide which ones here.",
+    eliminarCuenta: 'Delete account',
+    eliminarVoz:
+      "It will live here, done right. First we need to properly resolve what happens to your paid appointments, your active plans and your pending payouts — a business with commitments isn't deleted lightly.",
+    entendido: 'Got it',
   },
   // The E2E walk flow (S44, migrated in D-315 provider leg).
   cita: {

@@ -15,8 +15,9 @@
  *     solo estado pendiente_liquidar. La vista completa (B2.4) vive en
  *     /liquidaciones desde S55-B — la Celda navega.
  *
- * UNA función viva más: el selector de idioma es/en del riel B1a
- * (mismo patrón que Cuenta del cliente). Y la salida de sesión.
+ * S57-B (letra P17): NEGOCIO QUEDA PURO OFICIO — la oferta y la plata.
+ * El idioma y la salida de sesión se MUDARON a la tab Cuenta (mover =
+ * mover, Ley 37: acá no queda ni el código).
  */
 
 import { useCallback, useState } from 'react';
@@ -24,21 +25,15 @@ import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
-  Boton,
   Celda,
   Encabezado,
-  Hoja,
-  SelectorOpcion,
   Separador,
   Tarjeta,
   spacing,
   typography,
-  useAviso,
   useTheme,
 } from '@epetplace/ui';
-import { cambiarIdioma, type IdiomaSoportado } from '@epetplace/i18n';
 import {
-  cerrarSesion,
   obtenerMiCuentaComercial,
   obtenerResumenPendienteLiquidar,
   type MiCuentaComercial,
@@ -67,12 +62,7 @@ function TituloBloque({ texto }: { texto: string }) {
 export default function Negocio() {
   const router = useRouter();
   const { theme } = useTheme();
-  const { t, idioma } = useTraduccion();
-  const { mostrar } = useAviso();
-
-  const [cambiando, setCambiando] = useState(false);
-  const [salirAbierta, setSalirAbierta] = useState(false);
-  const [cerrando, setCerrando] = useState(false);
+  const { t } = useTraduccion();
 
   // el estado real de los cobros — null mientras carga o si falla la
   // lectura: la fila degrada a su detalle por hito, jamás inventa
@@ -100,17 +90,6 @@ export default function Negocio() {
       };
     }, []),
   );
-
-  async function alElegirIdioma(codigo: string) {
-    if (cambiando || codigo === idioma || (codigo !== 'es' && codigo !== 'en')) return;
-    setCambiando(true);
-    try {
-      await cambiarIdioma(codigo as IdiomaSoportado);
-    } catch {
-      mostrar({ texto: t('negocio.idiomaError'), variante: 'error' });
-    }
-    setCambiando(false);
-  }
 
   // los lugares que aún duermen: qué los despierta, en hitos (§2.6)
   // S52-P6b: filas serenas — el estado "en preparación" lo dice la
@@ -219,53 +198,8 @@ export default function Negocio() {
             </Tarjeta>
           </View>
 
-          {/* idioma: la función viva del riel B1a */}
-          <Tarjeta>
-            <SelectorOpcion
-              etiqueta={t('negocio.idioma')}
-              opciones={[
-                { codigo: 'es', etiqueta: t('negocio.idiomaEs') },
-                { codigo: 'en', etiqueta: t('negocio.idiomaEn') },
-              ]}
-              seleccionada={idioma}
-              onSelect={(codigo) => void alElegirIdioma(codigo)}
-            />
-          </Tarjeta>
-
-          <View style={{ gap: spacing[3] }}>
-            <TituloBloque texto={t('sesion.titulo')} />
-            <Boton variante="secundario" etiqueta={t('sesion.cerrarSesion')} bloque onPress={() => setSalirAbierta(true)} />
-          </View>
         </View>
       </ScrollView>
-
-      <Hoja visible={salirAbierta} onCerrar={() => setSalirAbierta(false)} titulo={t('sesion.titulo')}>
-        <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
-          <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.base, color: theme.text.secondary }}>
-            {t('sesion.confirmacionCierre')}
-          </Text>
-          <Boton
-            variante="destructivo"
-            etiqueta={t('sesion.cerrarSesion')}
-            bloque
-            cargando={cerrando}
-            onPress={() => {
-              if (cerrando) return;
-              setCerrando(true);
-              void (async () => {
-                await cerrarSesion();
-                setCerrando(false);
-                setSalirAbierta(false);
-                // D-290 (S54-B): auth real — la salida aterriza en el
-                // login; el replace desmonta las tabs y el guard del
-                // raíz re-decide fresco al volver a entrar.
-                router.replace('/login');
-              })();
-            }}
-          />
-          <Boton variante="ghost" etiqueta={t('sesion.cancelar')} bloque onPress={() => setSalirAbierta(false)} />
-        </View>
-      </Hoja>
     </SafeAreaView>
   );
 }

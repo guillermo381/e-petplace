@@ -1,9 +1,16 @@
 /**
  * Íconos de la BarraTabs del prestador (S51-B3.1) — Ley 12: outline
  * 1.75px, remates redondeados, UN color (lo entrega BarraTabs).
+ *
+ * S57-B (ventana): IconoCuenta llega en lenguaje b′ COPIADO LITERAL del
+ * set FIRMADO del cliente (S53 — la placa del collar, cero figuras
+ * humanas §2.4; activa = la huella grabada). Hoy/Negocio siguen pre-b′:
+ * son rezagados DECLARADOS de D-318 (migran con su propio gate del
+ * founder, no en esta mudanza estructural).
  */
 
 import Svg, { Circle, Path } from 'react-native-svg';
+import { Huella } from '@epetplace/ui';
 
 const stroke = (color: string) => ({
   stroke: color,
@@ -38,6 +45,33 @@ export function IconoMascotas({ color }: { color: string }) {
       <Circle cx={9.5} cy={6.3} r={1.7} {...stroke(color)} />
       <Circle cx={14.5} cy={6.3} r={1.7} {...stroke(color)} />
       <Circle cx={18.5} cy={9.5} r={1.7} {...stroke(color)} />
+    </Svg>
+  );
+}
+
+const trazoB = (color: string) => ({
+  stroke: color,
+  strokeWidth: 1.9,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+  fill: 'none' as const,
+});
+
+/** Cuenta — la placa del collar (b′ FIRMADO del cliente, §2.4); activa: la huella grabada. */
+export function IconoCuenta({
+  color,
+  activa,
+  colorHuella,
+}: {
+  color: string;
+  activa: boolean;
+  colorHuella: string;
+}) {
+  return (
+    <Svg width={24} height={24} viewBox="0 0 24 24">
+      <Circle cx={12} cy={5.1} r={1.9} {...trazoB(color)} />
+      <Circle cx={12} cy={13.8} r={6.9} {...trazoB(color)} />
+      {activa ? <Huella color={colorHuella} x={7.9} y={9.7} escala={0.34} /> : null}
     </Svg>
   );
 }
