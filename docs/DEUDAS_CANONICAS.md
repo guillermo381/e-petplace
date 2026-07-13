@@ -1518,6 +1518,35 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 #### D-366 — Sesión de USABILIDAD/navegación del cliente (segunda pasada, founder S58)
 🟡 ALTA (deuda de sesión, registrada por pedido literal de la adenda S58). La pasada de acabados S58 pule pantalla por pantalla contra el patrón; la SEGUNDA pasada mira los RECORRIDOS: navegación entre pantallas, descubribilidad, nombres de acciones a lo largo del flujo (Ley 17.3). Hallazgos ya anotados como insumo: (1) la tríada del hub "Mis paseos" es/en (Próximos·Agenda·Historial / Upcoming·Schedule·History) es léxicamente paralela, pero **Próximos y Agenda se solapan en contenido** (ambos muestran salidas futuras — el usuario no sabe cuál abrir; candidato a renombrar o fusionar); (2) la entrada al hub es doble (Hogar + Explorar→Paseo) y su descubribilidad se re-mide con la celda con ícono del grupo S58 (D-347); (3) el precio del plan del lado dueño (enmienda de RPC propuesta en el reporte S58) cambia lo que el CUÁNDO puede prometer. **Disparo: post-E2E juez final; insumo rey = las notas de Kary.** Origen: decisión founder S58 (adenda, punto 4).
 
+> **CIERRE S58 (registro final, escritora única):** cerradas **D-347** (hub v2: descubribilidad — portada del mundo + celda con saldo vivo), **D-357** (primera migración chips→SelectorSegmentado en el hub), **D-358/D-359/D-360** (materiales: elevación+papel+segmentado, `862dcf2`), **D-361** (lote 3 construido `ea7e8e4` — el CIERRE REAL espera el gate founder por ícono; cláusula del ilustrador vigente). **D-330 SIGUE ABIERTA** (sin firma del founder al push). **LECCIONES:** **L-145** — L-9 CONFIRMADA en móvil: el smoke web mintió el crash (la verificación browser no cierra gates de dispositivo); **L-146** — la letra del arquitecto TAMBIÉN se gatea sobre píxeles (las tarjetas apiladas del boceto no sobrevivieron al teléfono); **L-147** — toda entrada-por-estado exige su camino de validación (`__DEV__` toggle o seed): un estado inalcanzable en dev es un estado sin gate.
+
+#### D-368 — Jerarquía ciudad → BARRIOS de las zonas de cobertura
+🟢 Registrada S58. El contrato D-331 v1 es nivel CIUDAD; el barrio/sector (Cumbayá ≠ Quito centro) exige tabla hija de cat_ciudades + UI de la B. Disparo: primer prestador real que lo pida, o D-367.
+
+#### D-369 — RPC atómica `guardar_oferta_paseo` (el wizard guarda por partes)
+🟡 ALTA. El arte del paseo guarda sección por sección (N wrappers); una caída a mitad deja oferta INCONSISTENTE visible. Nace la RPC atómica (todo-o-nada, patrón contratar). **Disparo: antes del primer prestador real.**
+
+#### D-370 — Edición de nombre/descripción de la oferta renace en el perfil del prestador
+🟢 Registrada S58 (Chanel del wizard la sacó del arte). Disparo: sesión del perfil público del prestador.
+
+#### D-371 — Promoción de TechoTinta a packages/ui
+🟢 El techo de tinta vive hoy en apps/prestador (B); cuando un segundo consumidor aparezca, sube a packages/ui por Ley 11. Disparo: segundo consumidor.
+
+#### D-372 — Glifos de tabs centralizados en el registry
+🟢 Los tabs de ambas apps arman sus Svg localmente con estadoPorHuella; con el lote 3 vivo, migrar los glifos al registry (una fuente). Disparo: pasada de tabs post-gate del lote.
+
+#### D-373 — Tira horizontal: forense L-132 abierto en el CLIENTE
+🟡 La tira (ScrollView horizontal) dentro de Hojas puede perder contra el swipe-to-close en Android como L-132 — web no lo delata. Verificar EN DISPOSITIVO las tiras de plan-hoja/paquete-hoja; si pierde, patrón HojaScroll horizontal. Disparo: gate de la Hoja del plan.
+
+#### D-374 — Háptica del slider/interruptor (expo-haptics)
+⏸ DIFERIDA a decisión founder. `onStep` ya es el hook (cero refactor); expo-haptics = dep NATIVA → L-134: version bump + builds nuevas. Disparo: firma founder.
+
+#### D-375 — El precio del plan del lado dueño (enmienda de RPC propuesta, sin firma)
+🟡 `obtener_paseadores_disponibles` no devuelve `precio_plan` y la PlanHoja muestra el precio del SUELTO cuando el server cobra COALESCE(precio_plan, precio) — verosímil-falso de plata. Propuesta S58: agregar precio_plan al RETURNS + PlanHoja lo pinta. **Disparo: firma founder (gate de migración).**
+
+#### D-376 — Regla 76(f) propuesta: staging por RUTA en el árbol compartido (firma pendiente)
+🟡 El incidente S58 (`3691b1a`→`98c7e5e`): un `git add -A` de la A barrió WIP incompleto de la B y dejó main rojo; cura sin reescribir historia. Letra propuesta: staging SIEMPRE explícito por ruta + `git status` pre-commit verificando territorio propio. **Disparo: firma founder en la letra del contrato.**
+
 #### D-367 — FILTRO por zona de cobertura en slots/oferta (la v1 declara, no filtra)
 🟡 ALTA (nace CON la construcción de D-331 v1, S58 — registrada por pedido literal). El contrato v1 de zonas es DECLARATIVO: `prestador_zonas` dice "cubre Quito y Bogotá" y la ficha lo muestra, pero `obtener_paseadores_disponibles`, `obtener_slots_disponibles` y el motor de ocupación NO consultan la cobertura — un dueño en Cuenca puede reservar a un paseador que solo declaró Quito. La v1 no miente (declara, no filtra) y lo declara acá. El filtro exigirá además resolver QUÉ ciudad porta la reserva (la dirección del hogar tiene `ciudad` en texto libre — el puente a `cat_ciudades` es parte de esta deuda). **Disparo: primer dueño real fuera de zona, o decisión founder.** Origen: decisión founder S58 (D-331 v1 declarativa).
 

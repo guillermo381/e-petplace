@@ -1,6 +1,6 @@
 # DISEÑO_EXPERIENCIA — La arquitectura de la experiencia del dueño
 
-> **Versión: v1.5 — S58 (12 Jul 2026), Etapa A0 de RUTA_F1 v2.2.**
+> **Versión: v1.6 — S58 (13 Jul 2026), Etapa A0 de RUTA_F1 v2.2.**
 > (La banda v1.1→v1.4 se curó en S58 — decía v1.1 con contenido v1.4,
 > relevamiento B; v1.5 = §15b LA DOSIS DEL PRESTADOR, firma founder.)
 > Escrito por el arquitecto/director de diseño, decisiones de producto
@@ -490,6 +490,16 @@ Pantallas patrón de esta dosis (assets en pantallas-patron/): agenda
 Hoy/Semana · techo de tinta · el arte del paseo · resumen de la
 oferta — firmadas S58.
 
+**Enmiendas de gate (founder en dispositivo, S58 — v1.6):**
+1. El techo de tinta lleva Isotipo + saludo + "Negocio" (v2 firmada
+   sobre píxeles).
+2. El arte se navega como WIZARD DE SECCIONES — ese wizard es EL
+   ESTÁNDAR de todo "El arte de…" (v3).
+3. Plan y paquete se ofrecen por INTERRUPTOR con precio SUGERIDO
+   derivado del precio base (v3.2).
+4. La puerta honesta de un mundo no ofrecido dice la verdad DE SU
+   SERVICIO ("Activalo cuando ofrezcas grooming"), jamás genérica.
+
 ## 16. Backlog derivado del lado prestador (para cuando la ruta lo
 llame)
 
@@ -531,6 +541,12 @@ el portado de grooming consumen:
 
 ## Historial
 
+- **v1.6 (S58, 13 Jul 2026):** enmiendas de GATE sobre §15b (founder en
+  dispositivo): techo de tinta con Isotipo+saludo+Negocio (v2) · el
+  wizard de secciones como estándar de todo "El arte de…" (v3) ·
+  plan/paquete por Interruptor con sugerido derivado (v3.2) · la puerta
+  honesta dice la verdad de SU servicio. Los PNG del wizard quedan
+  PENDIENTES DE RE-FIRMA (mandato S59).
 - **v1.5 (S58, 12 Jul 2026):** §15b LA DOSIS DEL PRESTADOR — firmada
   founder, texto VERBATIM depositado por la A (norma del corchete; la
   primera emisión llegó con el corchete vacío y se frenó por 76b).
