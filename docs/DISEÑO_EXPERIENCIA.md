@@ -1,8 +1,8 @@
 # DISEÑO_EXPERIENCIA — La arquitectura de la experiencia del dueño
 
-> **Versión: v1.4 — S53 (10 Jul 2026), Etapa A0 de RUTA_F1 v2.2.**
-> (header curado S58; el contenido no cambia — la banda decía v1.1 y
-> el contenido/historial ya era v1.4, relevamiento B.)
+> **Versión: v1.5 — S58 (12 Jul 2026), Etapa A0 de RUTA_F1 v2.2.**
+> (La banda v1.1→v1.4 se curó en S58 — decía v1.1 con contenido v1.4,
+> relevamiento B; v1.5 = §15b LA DOSIS DEL PRESTADOR, firma founder.)
 > Escrito por el arquitecto/director de diseño, decisiones de producto
 > cerradas por el founder en sesión. **Contrastes obligatorios:**
 > `MODELO_PRODUCTO.md` (EL NORTE — en especial §6.4 revelación
@@ -428,6 +428,68 @@ Los 6 tests de §10 aplican íntegros, más dos propios:
 8. **Verdad firme:** ¿todo lo que la pantalla muestra como cita/plata
    está confirmado? Lo tentativo no existe para el prestador.
 
+## 15b. LA DOSIS DEL PRESTADOR (firmada founder S58)
+
+La app del prestador no tiene otro design system — tiene otra dosis.
+Misma familia en los huesos: papel algodón #FAF9F7, tokens de
+elevación, componentes de packages/ui, íconos b′, huella-como-estado,
+voz honesta, mono para dato de máquina. Otra firma en la ropa:
+
+1. UN acento de oficio: tealDark #0A7268 (el AA vigente de la capa
+   paseo) para TODO estado y control funcional sobre superficies
+   claras. El arcoíris de capas es del dueño. El magenta vive SOLO en
+   la marca. Muere el tinte verdeVital como color de control (era
+   semántica de éxito prestada) y muere la barra magenta de tab activa
+   (la huella en el acento la reemplaza, §2.6/2.7).
+2. El techo de tinta: header en bg.tinta (#221E19, token constante en
+   los 3 temas), la MISMA curva orgánica del techo vivo del cliente
+   (44/26, calibración en gate), texto en papel (palette.light0).
+   SOBRE TINTA el registro AA del acento es el teal PURO #28E8DA
+   (regla de dos registros: sobre superficie oscura manda el hex puro
+   — par 10.76:1; el tealDark NO pasa sobre tinta, 2.86:1, par caído
+   y reportado). Subtítulo con DATO de trabajo. Cero gradiente en toda
+   la app del prestador. El buscador inteligente montado sobre la
+   costura con elevacion.elevada = slot futuro (Ley 13: no se
+   construye hasta que el search exista; el techo v1 cierra en su
+   curva).
+3. Densidad de herramienta: agenda agrupada por día, hora·duración en
+   mono tabular alineado a la derecha, metadatos ("Parte del plan") en
+   la línea secundaria, filas compactas. El cliente celebra; el
+   prestador trabaja.
+4. LA REGLA DEL TECLADO (rige en AMBAS apps, nace acá): el teclado es
+   el último recurso — todo lo que se puede elegir, deslizar o
+   encender, no se digita. Campos de texto solo donde digitar es la
+   única verdad (nombres, descripciones), y detrás de una celda de
+   edición, jamás abiertos en pantalla.
+5. NEGOCIO COMO MUNDOS, y cada mundo con dos caras:
+   a) EL ARTE (título canónico: "El arte del paseo"; los servicios
+      futuros heredan la fórmula "El arte de…") — UNA pantalla con
+      scroll donde se configura TODO el oficio con controles:
+      duraciones por SelectorOpcion contra el menú canónico (el "+"
+      abre el menú completo; el CHECK de DB manda) · precio por
+      SliderPrecio (pasos $0.25, valor en mono, NETO EN VIVO desde
+      fee_configs — jamás hardcode) · plan y paquete (toggle + precio
+      por salida) · días y horarios (7 píldoras de día + franjas con
+      hora en mono y CUPO POR FRANJA con stepper "a la vez" — el
+      motor _agenda_ocupacion es la verdad, jamás cupo global) ·
+      zonas de cobertura con jerarquía CIUDAD → ZONAS (contrato
+      D-331 v1: declara, no filtra — D-367; catálogo solo-admin,
+      ciudad faltante = pedido, jamás texto libre) · Vacaciones como
+      celda-puente a /vacaciones (motor D-341 intacto) · CTA único
+      "Guardar tu oferta" en tinta.
+   b) EL RESUMEN ("Tu oferta de paseo") — la portada del mundo tras
+      guardar: estado real ("Visible para las familias", verdad de
+      DB), una fila por sección con lápiz que vuelve al arte ANCLADO
+      a esa sección.
+   El ESPEJO DEL ARTESANO ("Así lo ve el dueño") vive en ambas caras,
+   respondiendo a cada ajuste. Los mundos no ofrecidos son puertas
+   honestas ("Activalo cuando lo ofrezcas"), jamás decoración muerta.
+   /servicios y /horarios sueltos MUEREN absorbidos por el mundo.
+
+Pantallas patrón de esta dosis (assets en pantallas-patron/): agenda
+Hoy/Semana · techo de tinta · el arte del paseo · resumen de la
+oferta — firmadas S58.
+
 ## 16. Backlog derivado del lado prestador (para cuando la ruta lo
 llame)
 
@@ -469,6 +531,18 @@ el portado de grooming consumen:
 
 ## Historial
 
+- **v1.5 (S58, 12 Jul 2026):** §15b LA DOSIS DEL PRESTADOR — firmada
+  founder, texto VERBATIM depositado por la A (norma del corchete; la
+  primera emisión llegó con el corchete vacío y se frenó por 76b).
+  Un acento de oficio tealDark · techo de tinta con curva 44/26 (sobre
+  tinta el AA es teal PURO — par caído tealDark/tinta reportado y
+  resuelto por firma) · densidad de herramienta · LA REGLA DEL TECLADO
+  (rige en ambas apps) · Negocio como MUNDOS con dos caras (el arte /
+  el resumen + espejo del artesano); /servicios y /horarios sueltos
+  mueren absorbidos. Pantallas patrón de la dosis: 4 PNG firmados S58
+  (depósito en pantallas-patron/ al recibirlos). La banda de versión
+  v1.1→v1.4 se curó en esta misma sesión (header desfasado,
+  relevamiento B).
 - **v1.4 (S53, 10 Jul 2026):** LA LEY DE LA ESCALERA (§4b) — firmada
   founder: tres peldaños declarados por todo módulo de expediente
   (0 invitación que educa · 1 honestidad de densidad · 2 riqueza por
