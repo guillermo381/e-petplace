@@ -150,8 +150,9 @@ function monto(valor: number): string {
   return `$${valor.toFixed(2)}`;
 }
 
-// el SUGERIDO al encender plan (90%) o paquete (85%): del precio suelto
+// el SUGERIDO al encender plan (60%) o paquete (80%): del precio suelto
 // de ESA duración, redondeado al paso del riel — jamás un campo vacío
+// (factores founder S59; corrían 90/85 desde v3.2)
 function sugerido(precioTexto: string, factor: number): string {
   const p = Number.parseFloat(precioTexto.replace(',', '.'));
   const base = Number.isFinite(p) && p > 0 ? p : 5;
@@ -757,7 +758,7 @@ export default function TallerPaseo() {
                               teclado los alcanzó al fin; el contrato POR
                               SALIDA de 7.14 NO cambia — cambia la ropa).
                               El booleano ES el interruptor: el precio
-                              existe solo encendido; el sugerido (90% del
+                              existe solo encendido; el sugerido (60% del
                               suelto al paso $0.25) jamás es campo vacío ── */}
                           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
                             <Text
@@ -773,7 +774,7 @@ export default function TallerPaseo() {
                               etiqueta={t('taller.planInterruptor')}
                               registro="oficio"
                               encendido={d.plan !== ''}
-                              onCambio={(v) => actualizarDraft(b, { plan: v ? sugerido(d.precio, 0.9) : '' })}
+                              onCambio={(v) => actualizarDraft(b, { plan: v ? sugerido(d.precio, 0.6) : '' })}
                             />
                           </View>
                           {d.plan !== '' && (
@@ -821,7 +822,7 @@ export default function TallerPaseo() {
                             <VozSecundaria texto={t('servicios.precioPlanAyuda')} />
                           )}
 
-                          {/* ── PAQUETE por interruptor — sugerido 85%;
+                          {/* ── PAQUETE por interruptor — sugerido 80%;
                               los presets 5/10/15 EN LETRA viven ACÁ (la
                               intro de sección murió, punto 3) ── */}
                           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
@@ -838,7 +839,7 @@ export default function TallerPaseo() {
                               etiqueta={t('taller.paqueteInterruptor')}
                               registro="oficio"
                               encendido={d.paquete !== ''}
-                              onCambio={(v) => actualizarDraft(b, { paquete: v ? sugerido(d.precio, 0.85) : '' })}
+                              onCambio={(v) => actualizarDraft(b, { paquete: v ? sugerido(d.precio, 0.8) : '' })}
                             />
                           </View>
                           {d.paquete !== '' && (

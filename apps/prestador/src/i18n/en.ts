@@ -39,7 +39,8 @@ export const prestadorEn = {
     vacio: 'No walks today',
     vacioDetalle: 'When a family books a walk, it will show up here.',
     reintentar: 'Try again',
-    enCurso: 'In progress',
+    // S59-B3 single state voice (MODELO_PASEO §7) · LOTE S59, GATE PENDIENTE
+    enCurso: 'Live',
     ahora: 'Now',
     loSiguiente: 'Up next',
     primeraVez: 'First time',
@@ -97,7 +98,8 @@ export const prestadorEn = {
     direccionAbrirMapa: 'Open in maps',
     direccionSinDato: "This appointment doesn't have a saved address.",
     direccionMapaError: "We couldn't open the map.",
-    enCursoTitulo: 'Walk in progress',
+    // S59-B3 single state voice "Live" (§7) · LOTE S59, GATE PENDIENTE
+    enCursoTitulo: 'Live walk',
     gpsIniciando: 'GPS starting',
     gpsActivo: 'GPS active',
     gpsDetenido: 'GPS stopped',
@@ -165,7 +167,8 @@ export const prestadorEn = {
     carnetVacio: 'No vaccines on record yet.',
     historial: 'Your history with {{nombre}}',
     atencionCerrada: 'Walk closed',
-    atencionEnCurso: 'Walk in progress',
+    // S59-B3 single state voice "Live" (§7) · LOTE S59, GATE PENDIENTE
+    atencionEnCurso: 'Live walk',
     identidad: 'Identity',
     raza: 'Breed',
     sexo: 'Sex',

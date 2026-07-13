@@ -44,7 +44,9 @@ export const prestadorEs = {
     vacio: 'Hoy no tienes paseos',
     vacioDetalle: 'Cuando una familia agende un paseo, va a aparecer acá.',
     reintentar: 'Reintentar',
-    enCurso: 'En curso',
+    // S59-B3 voz única del estado (MODELO_PASEO §7, misma palabra en toda
+    // superficie — el pill de ui ya la porta) · LOTE S59, GATE PENDIENTE
+    enCurso: 'En vivo',
     // Zona 1 — lo siguiente preside
     ahora: 'Ahora',
     loSiguiente: 'Lo siguiente',
@@ -113,7 +115,9 @@ export const prestadorEs = {
     direccionSinDato: 'Esta cita no tiene una dirección registrada.',
     direccionMapaError: 'No pudimos abrir el mapa.',
     // durante
-    enCursoTitulo: 'Paseo en curso',
+    // S59-B3 voz única "En vivo" (§7): el título conserva el sustantivo,
+    // la palabra del estado migra · LOTE S59, GATE PENDIENTE
+    enCursoTitulo: 'Paseo en vivo',
     gpsIniciando: 'GPS iniciando',
     gpsActivo: 'GPS activo',
     gpsDetenido: 'GPS detenido',
@@ -184,7 +188,8 @@ export const prestadorEs = {
     carnetVacio: 'Sin vacunas registradas todavía.',
     historial: 'Tu historial con {{nombre}}',
     atencionCerrada: 'Paseo cerrado',
-    atencionEnCurso: 'Paseo en curso',
+    // S59-B3 voz única "En vivo" (§7) · LOTE S59, GATE PENDIENTE
+    atencionEnCurso: 'Paseo en vivo',
     // la familia humana NO es visible por RLS (relevado S51) — cuando
     // el canal interno exista (B5), su lugar nace acá.
     identidad: 'Identidad',

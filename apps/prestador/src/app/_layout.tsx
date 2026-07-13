@@ -23,7 +23,7 @@ SplashScreen.preventAutoHideAsync();
 // MARCADOR DE BUNDLE (L-138, práctica permanente — llega al prestador en
 // S51): el gate en dispositivo EMPIEZA confirmando que Metro imprime la
 // línea de la sesión vigente. ACTUALIZAR al arrancar cada sesión.
-console.log('[bundle] prestador S59.1');
+console.log('[bundle] prestador S59.2');
 
 export default function RootLayout() {
   // D-305 (S48): el tema lo decide el SISTEMA — el app lo resuelve acá
