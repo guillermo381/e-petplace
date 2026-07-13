@@ -39,6 +39,10 @@ const CODIGOS_ERROR_AGENDAMIENTO = [
   // ventana pedida (vacaciones/bloqueos puntuales) — tipado ANTES de que
   // la integración dispare (addendum arquitecto S56).
   'prestador_no_disponible',
+  // P19 (S59): el paseo es grupal por norma — el NO registrado bloquea
+  // las tres puertas de reserva (hold/plan/paquete). La UI pinta la voz
+  // honesta CON CAMINO y con {nombre}; este mensaje es el fallback.
+  'paseo_social_no',
 ] as const;
 
 export type CodigoErrorAgendamiento = (typeof CODIGOS_ERROR_AGENDAMIENTO)[number];
@@ -61,6 +65,7 @@ const MENSAJES_ERROR_AGENDAMIENTO: Record<
   hold_expirado:          'Este horario se liberó — elegí otro.',
   pago_no_disponible:     'Este prestador todavía no puede recibir pagos por la app.',
   prestador_no_disponible: 'El paseador no está disponible en esas fechas — elegí otro horario.',
+  paseo_social_no:        'Por ahora los paseos son en grupo. Estamos armando algo para tu mascota.',
   datos_inconsistentes:   'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:      'Ocurrió un error inesperado. Probá de nuevo.',
 };

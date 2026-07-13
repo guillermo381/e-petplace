@@ -36,6 +36,8 @@ export interface IdentidadMascota {
   microchip: string | null;
   foto_url: string | null;
   estado_vida: string | null;
+  /** P19 (S59): socialización del paseo grupal — null = sin responder. */
+  paseo_social_ok: boolean | null;
 }
 
 export interface PerfilMascota {
@@ -71,7 +73,7 @@ export async function obtenerPerfilMascota(
   // sin acceso la fila no existe para este user — error honesto.
   const mascota = await cliente
     .from('mascotas')
-    .select('id, nombre, especie, raza, sexo, fecha_nacimiento, fecha_nacimiento_precision, microchip, foto_url, estado_vida')
+    .select('id, nombre, especie, raza, sexo, fecha_nacimiento, fecha_nacimiento_precision, microchip, foto_url, estado_vida, paseo_social_ok')
     .eq('id', mascotaId)
     .maybeSingle();
   if (mascota.error) return { ok: false, codigo: 'error_perfil', mensaje: MENSAJE_ERROR };
@@ -125,6 +127,7 @@ export async function obtenerPerfilMascota(
         microchip: mascota.data.microchip,
         foto_url: mascota.data.foto_url,
         estado_vida: mascota.data.estado_vida,
+        paseo_social_ok: mascota.data.paseo_social_ok ?? null,
       },
       vacunas: vacunas.data.map((v) => ({
         evento_id: v.evento_id,

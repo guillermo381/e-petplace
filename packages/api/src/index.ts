@@ -353,3 +353,10 @@ export {
   type CodigoErrorNoShow,
   type ResultadoNoShow,
 } from './wrappers/noShow';
+
+// ── P19: socialización del paseo grupal (S59-A4 — hunk Sesión A) ────────────
+export {
+  responderSocializacionPaseo,
+  type RespuestaPaseoSocial,
+  type CodigoErrorPaseoSocial,
+} from './wrappers/paseo-social';

@@ -19,6 +19,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { PaseoSocialHoja } from '@/components/paseo-social-hoja';
 import Svg, { Path } from 'react-native-svg';
 import {
   AvatarMascota,
@@ -133,6 +134,8 @@ export default function PerfilDeMascota() {
   const { mascotaId } = useLocalSearchParams<{ mascotaId: string }>();
 
   const [perfil, setPerfil] = useState<PerfilMascota | 'cargando' | 'error'>('cargando');
+  // P19 (S59-A4): la respuesta de socialización es EDITABLE desde acá.
+  const [socialHojaAbierta, setSocialHojaAbierta] = useState(false);
   // Vitales (S53-B2c): paseos con track REAL → cálculo puro en domain.
   const [vitales, setVitales] = useState<VitalesPaseos | 'cargando' | 'error'>('cargando');
   const [indiceAbierto, setIndiceAbierto] = useState<'salud' | 'descanso' | null>(null);
@@ -494,6 +497,27 @@ export default function PerfilDeMascota() {
               ))}
             </Tarjeta>
           ) : null}
+          {/* P19 (S59-A4): la socialización del paseo — celda simple,
+              editable siempre; el NO re-registrado también cuenta (RPC). */}
+          {mascota.especie === 'perro' ? (
+            <Tarjeta relleno="ninguno">
+              <Celda
+                titulo={t('paseoSocial.celdaTitulo')}
+                interactiva
+                accessibilityRole="button"
+                onPress={() => setSocialHojaAbierta(true)}
+                fin={
+                  <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                    {mascota.paseo_social_ok === null
+                      ? t('paseoSocial.estadoSinResponder')
+                      : mascota.paseo_social_ok
+                        ? t('paseoSocial.estadoSi')
+                        : t('paseoSocial.estadoNo')}
+                  </Text>
+                }
+              />
+            </Tarjeta>
+          ) : null}
           {/* la invitación digna: texto, jamás formulario muerto */}
           <Text
             style={{
@@ -507,6 +531,18 @@ export default function PerfilDeMascota() {
           </Text>
         </View>
       </ScrollView>
+
+      <PaseoSocialHoja
+        visible={socialHojaAbierta}
+        mascota={{ id: mascota.id, nombre: mascota.nombre }}
+        onCerrar={() => setSocialHojaAbierta(false)}
+        onRespondida={(ok) => {
+          setSocialHojaAbierta(false);
+          setPerfil((prev) =>
+            typeof prev === 'object' ? { ...prev, mascota: { ...prev.mascota, paseo_social_ok: ok } } : prev,
+          );
+        }}
+      />
 
       {/* Hoja EDUCATIVA de los índices (§6.4 educando): QUÉ es, DE QUÉ
           se alimenta, y UNA acción real que alimenta el expediente —

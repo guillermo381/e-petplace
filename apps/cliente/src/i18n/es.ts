@@ -376,6 +376,21 @@ export const clienteEs = {
     direccionLista: 'El paseo llega a esta puerta.',
   },
   // S56-A D-338 — el plan de paseo. GATE PENDIENTE founder (lote S56).
+  // ── P19 (S59-A4) — la socialización del paseo grupal. GATE DE
+  // STRINGS PENDIENTE (lote S59) ──
+  paseoSocial: {
+    declaracion: 'Los paseos suelen ser con más de un perro a la vez.',
+    celdaTitulo: 'Paseos en grupo',
+    pregunta: '¿{{nombre}} se lleva bien paseando con otros perros?',
+    si: 'Sí, se lleva bien',
+    no: 'No, prefiere pasear solo',
+    noVoz: 'Por ahora los paseos son en grupo. Estamos armando algo para {{nombre}}.',
+    noVozCamino: 'Tu respuesta queda guardada y la puedes cambiar cuando quieras desde su perfil.',
+    entendido: 'Entendido',
+    estadoSi: 'Se lleva bien con otros perros',
+    estadoNo: 'Prefiere pasear solo',
+    estadoSinResponder: 'Sin responder',
+  },
   plan: {
     chip: 'Hacerlo frecuente',
     chipDetalle: 'Un plan mensual con tu paseador — elige quién pasea y lo armamos.',

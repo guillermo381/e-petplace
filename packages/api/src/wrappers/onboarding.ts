@@ -178,6 +178,9 @@ export interface MascotaResumen {
   nombre: string;
   especie: string;
   foto_url: string | null;
+  /** P19 (S59): ¿se lleva bien paseando con otros perros? null = aún
+   *  sin responder — la pregunta única salta en la primera reserva. */
+  paseo_social_ok: boolean | null;
 }
 
 /** Mascotas de una familia (Home del dueño). Reader: mismas claves
@@ -187,7 +190,7 @@ export async function obtenerMascotasDeFamilia(
 ): Promise<ResultadoWrapper<MascotaResumen[], CodigoErrorOnboarding>> {
   const { data, error } = await getClient()
     .from('mascotas')
-    .select('id, nombre, especie, foto_url')
+    .select('id, nombre, especie, foto_url, paseo_social_ok')
     .eq('familia_id', familiaId)
     .order('fecha_alta', { ascending: true });
 
@@ -200,6 +203,7 @@ export async function obtenerMascotasDeFamilia(
       nombre: m.nombre,
       especie: m.especie,
       foto_url: m.foto_url ?? null,
+      paseo_social_ok: m.paseo_social_ok ?? null,
     })),
   };
 }

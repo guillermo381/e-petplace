@@ -14661,6 +14661,10 @@ export type Database = {
         Args: { p_grooming_id: string }
         Returns: Record<string, unknown>
       }
+      _mascota_apta_paseo_grupal: {
+        Args: { p_mascota_id: string }
+        Returns: boolean
+      }
       _mascota_elegible_servicio: {
         Args: { p_mascota_id: string; p_tipo_servicio: string }
         Returns: boolean

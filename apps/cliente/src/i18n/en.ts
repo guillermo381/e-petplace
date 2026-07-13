@@ -341,6 +341,20 @@ export const clienteEn = {
     direccionLista: 'The walk starts at this door.',
   },
   // S56-A D-338 — the walk plan. GATE PENDIENTE founder (lote S56).
+  // P19 (S59-A4) — GATE PENDIENTE (lote S59)
+  paseoSocial: {
+    declaracion: 'Walks are usually shared with more than one dog at a time.',
+    celdaTitulo: 'Group walks',
+    pregunta: 'Does {{nombre}} get along walking with other dogs?',
+    si: 'Yes, they get along',
+    no: 'No, they prefer walking alone',
+    noVoz: "For now, walks are in groups. We're working on something for {{nombre}}.",
+    noVozCamino: 'Your answer is saved and you can change it anytime from their profile.',
+    entendido: 'Got it',
+    estadoSi: 'Gets along with other dogs',
+    estadoNo: 'Prefers walking alone',
+    estadoSinResponder: 'Not answered yet',
+  },
   plan: {
     chip: 'Make it a routine',
     chipDetalle: 'A monthly plan with your walker — pick who walks and we set it up.',

@@ -17,7 +17,7 @@
  */
 
 import { useCallback, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
@@ -34,6 +34,7 @@ import {
   Separador,
   Tarjeta,
   spacing,
+  typography,
   useAviso,
   useTheme,
 } from '@epetplace/ui';
@@ -50,6 +51,7 @@ import {
   type PaseadorDisponible,
 } from '@epetplace/api';
 import { PlanHoja } from '@/components/plan-hoja';
+import { PaseoSocialHoja } from '@/components/paseo-social-hoja';
 import { useTraduccion } from '@/i18n';
 
 export default function PaseoDisponibles() {
@@ -77,6 +79,11 @@ export default function PaseoDisponibles() {
   // paquete o pagar suelto. Opciones PAREJAS, cero dark patterns.
   const [conSaldo, setConSaldo] = useState<{ paseador: PaseadorDisponible; mascotaId: string; saldo: number } | null>(null);
   const [reservando, setReservando] = useState(false);
+  // P19 (S59-A4): la pregunta única salta ANTES del checkout cuando la
+  // mascota aún no respondió (null); el NO frena con voz honesta con
+  // camino — el guard server (paseo_social_no) es el cinturón.
+  const [preguntaSocial, setPreguntaSocial] = useState<{ paseador: PaseadorDisponible; mascota: MascotaResumen } | null>(null);
+  const [socialNo, setSocialNo] = useState<string | null>(null);
 
   const elegibles =
     especies === null ? mascotas : mascotas.filter((m) => especies.includes(m.especie));
@@ -182,7 +189,8 @@ export default function PaseoDisponibles() {
     [reservando, fecha, hora, cargar, mostrar, t],
   );
 
-  const alElegirMascota = useCallback(
+  // La continuación real (plan / saldo / hold) — P19 ya resuelta.
+  const continuarConMascota = useCallback(
     (p: PaseadorDisponible, mascotaId: string) => {
       if (modoPlan) {
         setPlan({ paseador: p, mascotaId });
@@ -202,6 +210,24 @@ export default function PaseoDisponibles() {
       })();
     },
     [modoPlan, crearHold],
+  );
+
+  // P19 — la puerta: sin responder = pregunta única; NO = voz honesta
+  // con camino y la reserva NO avanza (el guard server es el cinturón).
+  const alElegirMascota = useCallback(
+    (p: PaseadorDisponible, mascotaId: string) => {
+      const m = mascotas.find((x) => x.id === mascotaId);
+      if (m !== undefined && m.paseo_social_ok === null) {
+        setPreguntaSocial({ paseador: p, mascota: m });
+        return;
+      }
+      if (m !== undefined && m.paseo_social_ok === false) {
+        setSocialNo(m.nombre);
+        return;
+      }
+      continuarConMascota(p, mascotaId);
+    },
+    [mascotas, continuarConMascota],
   );
 
   const alElegir = useCallback(
@@ -227,6 +253,18 @@ export default function PaseoDisponibles() {
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[3] }}>
         {/* la ventana elegida, en voz de máquina */}
         <Celda titulo={t('explorar.paseoTitulo')} metadataMono={`${fecha} · ${hora} · ${duracion} min`} />
+        {/* P19: la norma DECLARADA en el flujo de reserva — serena, no
+            letra chica (la misma voz vive en la pregunta única) */}
+        <Text
+          style={{
+            fontFamily: typography.family.sans.regular,
+            fontSize: typography.size.sm,
+            lineHeight: Math.round(typography.size.sm * typography.leading.normal),
+            color: theme.text.secondary,
+          }}
+        >
+          {t('paseoSocial.declaracion')}
+        </Text>
         <Separador />
 
         {disponibles === 'cargando' ? (
@@ -341,6 +379,59 @@ export default function PaseoDisponibles() {
             }}
           />
         </View>
+      </Hoja>
+
+      {/* P19: la pregunta única — SÍ sigue al flujo; NO frena con la voz */}
+      <PaseoSocialHoja
+        visible={preguntaSocial !== null}
+        mascota={preguntaSocial?.mascota ?? null}
+        onCerrar={() => setPreguntaSocial(null)}
+        onRespondida={(ok) => {
+          if (preguntaSocial === null) return;
+          const { paseador, mascota } = preguntaSocial;
+          setMascotas((prev) => prev.map((m) => (m.id === mascota.id ? { ...m, paseo_social_ok: ok } : m)));
+          setPreguntaSocial(null);
+          if (ok) {
+            continuarConMascota(paseador, mascota.id);
+          } else {
+            setSocialNo(mascota.nombre);
+          }
+        }}
+      />
+
+      {/* P19: el NO — voz honesta CON CAMINO, jamás final mudo. La
+          respuesta queda registrada y es editable desde el perfil. */}
+      <Hoja
+        visible={socialNo !== null}
+        titulo={t('paseoSocial.celdaTitulo')}
+        onCerrar={() => setSocialNo(null)}
+        conCerrar
+      >
+        {socialNo !== null ? (
+          <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
+            <Text
+              style={{
+                fontFamily: typography.family.sans.light,
+                fontSize: typography.size.lg,
+                lineHeight: Math.round(typography.size.lg * typography.leading.snug),
+                color: theme.text.primary,
+              }}
+            >
+              {t('paseoSocial.noVoz', { nombre: socialNo })}
+            </Text>
+            <Text
+              style={{
+                fontFamily: typography.family.sans.regular,
+                fontSize: typography.size.sm,
+                lineHeight: Math.round(typography.size.sm * typography.leading.normal),
+                color: theme.text.secondary,
+              }}
+            >
+              {t('paseoSocial.noVozCamino')}
+            </Text>
+            <Boton variante="primario" bloque etiqueta={t('paseoSocial.entendido')} onPress={() => setSocialNo(null)} />
+          </View>
+        ) : null}
       </Hoja>
 
       {/* §6bis.3: hay saldo con este paseador — el dueño ELIGE, parejo */}
