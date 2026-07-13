@@ -114,7 +114,10 @@ export default function PreferenciasCuenta() {
 
       <ScrollView contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[5] }}>
         <Tarjeta>
+          {/* S58 (Ley 21): primer consumidor real del acento del cliente —
+              la elección viste accent.control, el verde de control murió acá */}
           <SelectorOpcion
+            acento="control"
             etiqueta={t('cuenta.idioma')}
             opciones={[
               { codigo: 'es', etiqueta: t('cuenta.idiomaEs') },
@@ -159,6 +162,7 @@ export default function PreferenciasCuenta() {
                     </Text>
                   ) : null}
                   <SelectorOpcion
+                    acento="control"
                     etiqueta={t(g.tituloKey)}
                     opciones={[
                       { codigo: 'on', etiqueta: t('cuenta.notifActivadas') },
