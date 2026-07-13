@@ -8837,6 +8837,7 @@ export type Database = {
           microchip: string | null
           nombre: string
           origen: string
+          paseo_social_ok: boolean | null
           pet_hash: string
           raza: string | null
           refugio_id: string | null
@@ -8860,6 +8861,7 @@ export type Database = {
           microchip?: string | null
           nombre: string
           origen: string
+          paseo_social_ok?: boolean | null
           pet_hash?: string
           raza?: string | null
           refugio_id?: string | null
@@ -8883,6 +8885,7 @@ export type Database = {
           microchip?: string | null
           nombre?: string
           origen?: string
+          paseo_social_ok?: boolean | null
           pet_hash?: string
           raza?: string | null
           refugio_id?: string | null
@@ -9342,6 +9345,45 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_daas_eligible_users"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      paseo_social_negativas: {
+        Row: {
+          country_code: string
+          created_at: string
+          familia_id: string
+          id: string
+          mascota_id: string
+        }
+        Insert: {
+          country_code?: string
+          created_at?: string
+          familia_id: string
+          id?: string
+          mascota_id: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          familia_id?: string
+          id?: string
+          mascota_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paseo_social_negativas_familia_id_fkey"
+            columns: ["familia_id"]
+            isOneToOne: false
+            referencedRelation: "familia"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paseo_social_negativas_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -15162,6 +15204,7 @@ export type Database = {
         Returns: {
           duracion_minutos: number
           precio: number
+          precio_plan: number
           prestador_id: string
           prestador_nombre: string
           prestador_servicio_id: string
@@ -15342,6 +15385,10 @@ export type Database = {
           parametros: Json
           tipo_calculo: Database["public"]["Enums"]["tipo_calculo_fee_enum"]
         }[]
+      }
+      responder_socializacion_paseo: {
+        Args: { p_mascota_id: string; p_ok: boolean }
+        Returns: Json
       }
       saltar_cita_plan: {
         Args: { p_cita_id: string; p_nueva_fecha: string; p_nueva_hora: string }

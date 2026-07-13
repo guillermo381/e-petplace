@@ -1483,7 +1483,8 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 
 > **CIERRE S57 (registro final, escritora única):** cerradas D-317 (`33c4940`), D-343 (todas las patas), D-349, D-351, D-352 (ver sus entradas). **D-315p** (fechas del prestador al riel: `fechaDiaSemanaHumana`) quedó curada dentro de `33c4940`; la **pata prestador de la persistencia de idioma** (espíritu D-316, cerrada S55 para el cliente) quedó cubierta en `09f7d73` — ninguna reabre número. **D-330 sigue ABIERTA** esperando decisión del founder (voto arquitecto registrado: (c) consentir + micro-consentimiento). **D-347** se alimenta del registro de notas literales del founder S57 (+ notas de Kary cuando existan). D-353/D-354 registradas en esta sesión, vigentes. **Gates felices del founder: PERFECTOS**; los de ESPERA = D-365.
 
-#### D-355 — Guard de especie del PLAN entró por transformación anclada
+#### D-355 — Guard de especie del PLAN entró por transformación anclada ✅ CERRADA (S59-A2, migración `20260713170000`)
+~~🟢 MEDIA~~ **CERRADA en S59-A2**: el disparo sonó (el guard L-V tocó `contratar_plan_paseo`) y la RPC quedó reescrita NATIVA completa — body entero versionado con el guard de especie Y el guard L-V adentro; la transformación anclada de `20260713010000` quedó absorbida. Letra original:
 🟢 MEDIA. En `20260713010000` el guard `mascota_no_elegible` de `contratar_plan_paseo` se inyectó por transformación anclada del body vigente (replace con verificación de anclaje — el DO aborta si el texto no matchea). Funciona y está probado, pero las transformaciones NO se apilan: el próximo toque de esa RPC la reescribe NATIVA (body completo versionado con el guard adentro). Disparo: próxima migración que toque `contratar_plan_paseo`. Origen: S57-A (auto-declarada).
 
 #### D-356 — especies_compatibles por oferta existe SIN guard
@@ -1543,7 +1544,8 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 ~~⏸ DIFERIDA~~ **CERRADA en S59** por decisión del founder: v1 SIN háptica. `onStep` queda como hook vacío (cero deuda de refactor si reabre). **Se reabre SOLO si el ensayo la pide.** Letra original:
 ⏸ DIFERIDA a decisión founder. `onStep` ya es el hook (cero refactor); expo-haptics = dep NATIVA → L-134: version bump + builds nuevas. Disparo: firma founder.
 
-#### D-375 — El precio del plan del lado dueño (enmienda de RPC propuesta, sin firma)
+#### D-375 — El precio del plan del lado dueño ✅ CERRADA (S59-A2, migración `20260713170000`)
+~~🟡~~ **CERRADA en S59-A2**: `obtener_paseadores_disponibles` ganó `precio_plan` en el RETURNS (DROP+CREATE por L-119, cero callers en DB relevados, L-140 re-afirmado — proacl sin anon) + wrapper `obtenerPaseadoresDisponibles` con `precio_plan: number | null` (null honesto = sin descuento) + runtime E2E solo-lectura verde (1 paseador demo, precio=8, precio_plan=null). La PlanHoja lo pinta en la Tarea 3 de la misma sesión. Letra original:
 🟡 `obtener_paseadores_disponibles` no devuelve `precio_plan` y la PlanHoja muestra el precio del SUELTO cuando el server cobra COALESCE(precio_plan, precio) — verosímil-falso de plata. Propuesta S58: agregar precio_plan al RETURNS + PlanHoja lo pinta. **Disparo: firma founder (gate de migración).**
 
 #### D-376 — Regla 76(f): staging por RUTA en el árbol compartido ✅ CERRADA (S59 — FIRMADA al contrato)

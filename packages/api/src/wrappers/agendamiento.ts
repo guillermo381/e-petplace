@@ -175,6 +175,10 @@ export interface PaseadorDisponible {
   prestador_nombre: string;
   servicio_nombre: string;
   precio: number;
+  /** D-375 (S59): precio POR SALIDA dentro del plan — espejo del server
+   *  de cobro (COALESCE(precio_plan, precio) en contratar_plan_paseo).
+   *  null honesto = sin descuento de plan, rige `precio`. */
+  precio_plan: number | null;
   duracion_minutos: number;
 }
 
@@ -212,6 +216,7 @@ export async function obtenerPaseadoresDisponibles(
       typeof p.prestador_nombre !== 'string' ||
       typeof p.servicio_nombre !== 'string' ||
       typeof p.precio !== 'number' ||
+      (p.precio_plan !== null && typeof p.precio_plan !== 'number') ||
       typeof p.duracion_minutos !== 'number'
     ) {
       return mapeoErrorAResultado('datos_inconsistentes');
@@ -222,6 +227,7 @@ export async function obtenerPaseadoresDisponibles(
       prestador_nombre: p.prestador_nombre,
       servicio_nombre: p.servicio_nombre,
       precio: p.precio,
+      precio_plan: p.precio_plan,
       duracion_minutos: p.duracion_minutos,
     });
   }
