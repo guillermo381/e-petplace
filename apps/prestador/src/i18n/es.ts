@@ -455,6 +455,8 @@ export const prestadorEs = {
     vacacionesSin: 'Sin días bloqueados',
     vacacionesCon: 'Tienes días bloqueados',
     editarOferta: 'Editar tu oferta',
+    // solo __DEV__ — jamás viaja a preview/producción
+    devWizard: 'Recorrer el wizard (dev)',
     // el espejo — la misma composición en taller (borrador) y resumen (DB)
     espejoTitulo: 'Así lo ve el dueño',
     espejoNada: 'Todavía no apareces en las búsquedas.',

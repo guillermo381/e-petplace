@@ -319,6 +319,9 @@ export default function TallerPaseo() {
   const [cupoSel, setCupoSel] = useState(1);
   const [hojaOtraCiudad, setHojaOtraCiudad] = useState(false);
 
+  // Paso 1 (v3.1, boceto founder): el CHIP gobierna el bloque — la
+  // duración elegida; cambiar de chip CONSERVA el borrador de cada una
+  const [duracionSel, setDuracionSel] = useState<BloquePaseo | null>(null);
   // Paso 2: los días marcados para la PRÓXIMA franja (multi-selección)
   const [diasSel, setDiasSel] = useState<number[]>([]);
 
@@ -355,6 +358,8 @@ export default function TallerPaseo() {
         iniciales[b] = draftDesdeBase(rOfertas.data.find((o) => o.duracionMinutos === b) ?? null);
       }
       setDrafts(iniciales);
+      const primeraOfrecida = BLOQUES_PASEO.find((b) => iniciales[b].ofrecida || iniciales[b].base !== null);
+      setDuracionSel(primeraOfrecida ?? null);
       setFranjas(rFranjas.data.map(draftDesdeFranja));
       setZonas(rZonas.data.map((z) => ({ key: z.id, id: z.id, ciudad: z.ciudad, quitar: false })));
       setCiudades(rCiudades.ok ? rCiudades.data : []);
@@ -498,6 +503,7 @@ export default function TallerPaseo() {
         setErroresPaquete((e) => ({ ...e, [b]: leerPorSalida(d.paquete) === 'invalido' ? t('servicios.precioPaqueteInvalido') : undefined }));
         if (modoWizard) setPaso(0);
         else setSeccionForzada('duraciones');
+        setDuracionSel(b); // el chip con el error toma el gobierno
         scrollRef.current?.scrollTo({ y: 0, animated: true });
         return;
       }
@@ -682,10 +688,26 @@ export default function TallerPaseo() {
               {/* presets del paquete EN LETRA (D-354) — una vez, para todo el paso */}
               <VozSecundaria texto={t('servicios.paqueteExplica')} />
               {bloquesConCard.length === 0 && <VozSecundaria texto={t('taller.sinDuraciones')} />}
-              {bloquesConCard.map((b) => {
+              {/* v3.1 (boceto firmado founder): EL CHIP GOBIERNA EL BLOQUE —
+                  chips tonales de las duraciones ofrecidas + UN bloque con
+                  TODA la config de la elegida (las tarjetas apiladas
+                  MURIERON — eran letra del arquitecto, corregida). Cambiar
+                  de chip conserva el borrador de cada duración. */}
+              {bloquesConCard.length > 0 && (
+                <SelectorOpcion
+                  etiqueta={t('taller.duracionesTitulo')}
+                  disposicion="grilla"
+                  acento="oficio"
+                  opciones={bloquesConCard.map((b) => ({ codigo: String(b), etiqueta: etiquetaCorta(b) }))}
+                  seleccionada={duracionSel !== null ? String(duracionSel) : undefined}
+                  onSelect={(codigo) => setDuracionSel(Number.parseInt(codigo, 10) as BloquePaseo)}
+                />
+              )}
+              {duracionSel !== null && bloquesConCard.includes(duracionSel) && (() => {
+                const b = duracionSel;
                 const d = drafts[b];
                 return (
-                  <Tarjeta key={b} elevacion="reposo">
+                  <Tarjeta elevacion="reposo">
                     <View style={{ gap: spacing[4] }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
                         <Text
@@ -703,8 +725,11 @@ export default function TallerPaseo() {
                           encendido={d.ofrecida}
                           onCambio={(v) => {
                             if (!v && d.base === null) {
-                              // una tarjeta que jamás se guardó se despide sola
+                              // un bloque que jamás se guardó se despide solo;
+                              // el chip pasa al primero que quede
                               actualizarDraft(b, { ofrecida: false, precio: '', plan: '', paquete: '' });
+                              const restantes = bloquesConCard.filter((x) => x !== b);
+                              setDuracionSel(restantes.length > 0 ? restantes[0] : null);
                               return;
                             }
                             actualizarDraft(b, { ofrecida: v, precio: v && d.precio === '' ? '5.00' : d.precio });
@@ -788,7 +813,7 @@ export default function TallerPaseo() {
                     </View>
                   </Tarjeta>
                 );
-              })}
+              })()}
               {bloquesDisponibles.length > 0 && (
                 <Boton
                   variante="secundario"
@@ -965,6 +990,7 @@ export default function TallerPaseo() {
                 titulo={etiquetaBloque(b)}
                 onPress={() => {
                   actualizarDraft(b, { ofrecida: true, precio: '5.00' });
+                  setDuracionSel(b); // el chip nuevo toma el gobierno
                   setHojaAgregarDuracion(false);
                 }}
               />

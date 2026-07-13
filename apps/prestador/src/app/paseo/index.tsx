@@ -328,6 +328,18 @@ export default function OfertaPaseo() {
               />
             </Tarjeta>
 
+            {/* v3.1 cura 2(b): re-gatear la SECUENCIA del wizard sin
+                fabricar prestadores cada vez — SOLO dev (__DEV__ no viaja
+                a preview/producción, precedente S54 camino triste) */}
+            {__DEV__ && (
+              <Boton
+                variante="ghost"
+                etiqueta={t('ofertaPaseo.devWizard')}
+                bloque
+                onPress={() => router.push({ pathname: '/paseo/taller', params: { modo: 'wizard' } })}
+              />
+            )}
+
             {/* así lo ve el dueño — la MISMA composición que el taller,
                 acá sobre la verdad de DB */}
             <EspejoOferta

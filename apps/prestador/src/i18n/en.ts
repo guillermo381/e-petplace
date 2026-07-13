@@ -406,6 +406,7 @@ export const prestadorEn = {
     vacacionesSin: 'No blocked days',
     vacacionesCon: 'You have blocked days',
     editarOferta: 'Edit your offer',
+    devWizard: 'Walk through the wizard (dev)',
     espejoTitulo: 'How pet parents see it',
     espejoNada: "You don't appear in searches yet.",
     espejoDuraciones: 'Walks of {{lista}} · from {{precio}}',

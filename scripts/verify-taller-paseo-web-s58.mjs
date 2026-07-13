@@ -66,8 +66,11 @@ await page.getByText('Editar tu oferta', { exact: true }).click();
 t = await esperar('El arte del paseo', 30);
 t = await esperar('Duraciones y precios', 20);
 check(t.includes('Duraciones y precios'), 'T3 la sección duraciones abre suelta');
+// v3.1: EL CHIP GOBIERNA — chips de duraciones ofrecidas + UN solo bloque
+const radios = await page.getByRole('radio').count();
 const switches = await page.getByRole('switch').count();
-check(switches >= 1, `T3b tarjetas apiladas con Interruptor por duración (${switches})`);
+check(radios >= 2, `T3a chips de duraciones arriba (${radios})`);
+check(switches === 1, `T3b UN bloque gobernado con su Interruptor (${switches})`);
 check(t.includes('plan mensual'), 'T3c plan por salida EN la tarjeta');
 check(t.includes('paquete') || t.includes('Paquete'), 'T3d paquete por salida EN la tarjeta');
 check(t.includes('5, 10 o 15'), 'T3e presets del paquete EN LETRA (D-354)');
