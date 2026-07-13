@@ -7653,6 +7653,68 @@ export type Database = {
           },
         ]
       }
+      grooming_talla_discrepancias: {
+        Row: {
+          cita_id: string
+          country_code: string
+          created_at: string
+          id: string
+          mascota_id: string
+          prestador_id: string | null
+          talla_declarada: string | null
+          talla_observada: string
+        }
+        Insert: {
+          cita_id: string
+          country_code?: string
+          created_at?: string
+          id?: string
+          mascota_id: string
+          prestador_id?: string | null
+          talla_declarada?: string | null
+          talla_observada: string
+        }
+        Update: {
+          cita_id?: string
+          country_code?: string
+          created_at?: string
+          id?: string
+          mascota_id?: string
+          prestador_id?: string | null
+          talla_declarada?: string | null
+          talla_observada?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grooming_talla_discrepancias_cita_id_fkey"
+            columns: ["cita_id"]
+            isOneToOne: false
+            referencedRelation: "evento_cita_servicio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grooming_talla_discrepancias_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grooming_talla_discrepancias_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grooming_talla_discrepancias_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       historial_pagos_prime: {
         Row: {
           created_at: string
@@ -8838,10 +8900,12 @@ export type Database = {
           nombre: string
           origen: string
           paseo_social_ok: boolean | null
+          pelaje: string | null
           pet_hash: string
           raza: string | null
           refugio_id: string | null
           sexo: string | null
+          talla: string | null
           updated_at: string
           user_id: string | null
         }
@@ -8862,10 +8926,12 @@ export type Database = {
           nombre: string
           origen: string
           paseo_social_ok?: boolean | null
+          pelaje?: string | null
           pet_hash?: string
           raza?: string | null
           refugio_id?: string | null
           sexo?: string | null
+          talla?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -8886,10 +8952,12 @@ export type Database = {
           nombre?: string
           origen?: string
           paseo_social_ok?: boolean | null
+          pelaje?: string | null
           pet_hash?: string
           raza?: string | null
           refugio_id?: string | null
           sexo?: string | null
+          talla?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -10600,6 +10668,47 @@ export type Database = {
           },
         ]
       }
+      prestador_servicio_tallas: {
+        Row: {
+          created_at: string
+          duracion_minutos: number
+          id: string
+          metadata: Json
+          precio: number
+          prestador_servicio_id: string
+          talla: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          duracion_minutos: number
+          id?: string
+          metadata?: Json
+          precio: number
+          prestador_servicio_id: string
+          talla: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          duracion_minutos?: number
+          id?: string
+          metadata?: Json
+          precio?: number
+          prestador_servicio_id?: string
+          talla?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prestador_servicio_tallas_prestador_servicio_id_fkey"
+            columns: ["prestador_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "prestador_servicios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prestador_servicios: {
         Row: {
           activo: boolean
@@ -10726,6 +10835,7 @@ export type Database = {
           estado: string
           foto_url: string | null
           fotos_galeria: Json | null
+          grooming_extra_pelaje_largo: number | null
           id: string
           lat: number | null
           lon: number | null
@@ -10760,6 +10870,7 @@ export type Database = {
           estado?: string
           foto_url?: string | null
           fotos_galeria?: Json | null
+          grooming_extra_pelaje_largo?: number | null
           id?: string
           lat?: number | null
           lon?: number | null
@@ -10794,6 +10905,7 @@ export type Database = {
           estado?: string
           foto_url?: string | null
           fotos_galeria?: Json | null
+          grooming_extra_pelaje_largo?: number | null
           id?: string
           lat?: number | null
           lon?: number | null
@@ -15310,6 +15422,10 @@ export type Database = {
         }
         Returns: Json
       }
+      registrar_discrepancia_talla_grooming: {
+        Args: { p_cita_id: string; p_talla_observada: string }
+        Returns: Json
+      }
       registrar_estado_pelaje_en_cierre: {
         Args: {
           p_estado_codigo: string
@@ -15489,6 +15605,10 @@ export type Database = {
       use_beta_invite: {
         Args: { p_beta_id: string; p_user_id: string }
         Returns: undefined
+      }
+      user_es_familiar_adulto_de_mascota: {
+        Args: { p_mascota_id: string }
+        Returns: boolean
       }
       user_has_feature: {
         Args: { p_feature: string; p_user_id: string }
