@@ -14,7 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import {
   Boton,
-  Celda,
+  CeldaNavegacion,
   Encabezado,
   Hoja,
   Separador,
@@ -48,9 +48,11 @@ export default function Cuenta() {
   const [cerrando, setCerrando] = useState(false);
   const [eliminarAbierta, setEliminarAbierta] = useState(false);
 
+  // S58 (D-361 levantado): cada entrada con su ícono b′ del registry —
+  // el perfil comparte la chapita 'cuenta' (decisión del lote ea7e8e4)
   const lugares = [
-    { etiqueta: t('miCuenta.perfil'), ruta: '/cuenta/perfil' as const },
-    { etiqueta: t('miCuenta.preferencias'), ruta: '/cuenta/preferencias' as const },
+    { etiqueta: t('miCuenta.perfil'), ruta: '/cuenta/perfil' as const, icono: 'cuenta' as const },
+    { etiqueta: t('miCuenta.preferencias'), ruta: '/cuenta/preferencias' as const, icono: 'preferencias' as const },
   ];
 
   return (
@@ -66,11 +68,11 @@ export default function Cuenta() {
             {lugares.map((lugar, i) => (
               <View key={lugar.ruta}>
                 {i > 0 ? <Separador /> : null}
-                <Celda
-                  interactiva
-                  accessibilityRole="button"
-                  onPress={() => router.push(lugar.ruta)}
+                <CeldaNavegacion
+                  icono={lugar.icono}
+                  registro="aa"
                   titulo={lugar.etiqueta}
+                  onPress={() => router.push(lugar.ruta)}
                 />
               </View>
             ))}

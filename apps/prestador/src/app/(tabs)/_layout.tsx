@@ -180,6 +180,9 @@ export default function TabsLayout() {
           items={items}
           activo={state.routes[state.index].name}
           onCambiar={(key) => navigation.navigate(key)}
+          // S58 (§2.6 + §15b.1): las 4 tabs ya hablan b′ — el pill muere,
+          // la tab activa se marca porque su huella APARECE
+          estadoPorHuella
         />
       )}
     >

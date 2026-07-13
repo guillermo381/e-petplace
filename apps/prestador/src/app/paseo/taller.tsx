@@ -55,6 +55,7 @@ import {
   SelectorOpcion,
   Separador,
   SliderPrecio,
+  StepperCantidad,
   Tarjeta,
   spacing,
   typography,
@@ -1023,18 +1024,27 @@ export default function TallerPaseo() {
           <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
             {!confirmandoQuitar ? (
               <>
-                <SelectorOpcion
-                  etiqueta={t('horarios.cupo')}
-                  acento="oficio"
-                  opciones={[
-                    { codigo: '1', etiqueta: '1' },
-                    { codigo: '2', etiqueta: '2' },
-                    { codigo: '3', etiqueta: '3' },
-                    { codigo: '4', etiqueta: '4' },
-                  ]}
-                  seleccionada={cupoSel}
-                  onSelect={setCupoSel}
-                />
+                {/* el cupo "a la vez" — StepperCantidad (comp. 33): el
+                    provisional de chips MURIÓ (micro-pedido founder S58) */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
+                  <Text
+                    style={{
+                      fontFamily: typography.family.sans.regular,
+                      fontSize: typography.size.base,
+                      color: theme.text.primary,
+                    }}
+                  >
+                    {t('horarios.cupo')}
+                  </Text>
+                  <StepperCantidad
+                    etiqueta={t('horarios.cupo')}
+                    registro="oficio"
+                    valor={Number.parseInt(cupoSel, 10)}
+                    min={1}
+                    max={4}
+                    onCambio={(v) => setCupoSel(String(v))}
+                  />
+                </View>
                 <VozSecundaria texto={t('horarios.cupoAyuda')} />
                 <Boton
                   variante="primario"
@@ -1118,18 +1128,25 @@ export default function TallerPaseo() {
                 onPress={() => setVistaNueva('hasta')}
               />
             </Tarjeta>
-            <SelectorOpcion
-              etiqueta={t('horarios.cupo')}
-              acento="oficio"
-              opciones={[
-                { codigo: '1', etiqueta: '1' },
-                { codigo: '2', etiqueta: '2' },
-                { codigo: '3', etiqueta: '3' },
-                { codigo: '4', etiqueta: '4' },
-              ]}
-              seleccionada={cupoSel}
-              onSelect={setCupoSel}
-            />
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
+              <Text
+                style={{
+                  fontFamily: typography.family.sans.regular,
+                  fontSize: typography.size.base,
+                  color: theme.text.primary,
+                }}
+              >
+                {t('horarios.cupo')}
+              </Text>
+              <StepperCantidad
+                etiqueta={t('horarios.cupo')}
+                registro="oficio"
+                valor={Number.parseInt(cupoSel, 10)}
+                min={1}
+                max={4}
+                onCambio={(v) => setCupoSel(String(v))}
+              />
+            </View>
             <VozSecundaria texto={t('horarios.cupoAyuda')} />
             <Boton
               variante="primario"

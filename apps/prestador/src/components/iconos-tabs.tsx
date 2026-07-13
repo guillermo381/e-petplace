@@ -1,55 +1,18 @@
 /**
- * Íconos de la BarraTabs del prestador (S51-B3.1) — Ley 12: outline
- * 1.75px, remates redondeados, UN color (lo entrega BarraTabs).
- *
- * S57-B (ventana): IconoCuenta llega en lenguaje b′ COPIADO LITERAL del
- * set FIRMADO del cliente (S53 — la placa del collar, cero figuras
- * humanas §2.4; activa = la huella grabada). Hoy/Negocio siguen pre-b′:
- * son rezagados DECLARADOS de D-318 (migran con su propio gate del
- * founder, no en esta mudanza estructural).
+ * Íconos de la BarraTabs del prestador — LENGUAJE b′ COMPLETO (S58,
+ * micro-pedido founder: cableado al lote D-361 del registry, ea7e8e4).
+ * Geometría COPIADA LITERAL del set FIRMADO en packages/ui/Icono.tsx
+ * (precedente S57: IconoCuenta viajó igual desde el cliente) — en tabs
+ * el estado lo entrega BarraTabs (§2.6): en reposo SOLO trazo; la tab
+ * activa se marca porque su HUELLA APARECE en colorHuella. El rezago
+ * pre-b′ de Hoy/Negocio (D-318) MUERE acá; Mascotas ya cumplía (ES la
+ * primitiva Huella — revisado contra ley en ea7e8e4).
  */
 
 import Svg, { Circle, Path } from 'react-native-svg';
 import { Huella } from '@epetplace/ui';
 
-const stroke = (color: string) => ({
-  stroke: color,
-  strokeWidth: 1.75,
-  strokeLinecap: 'round' as const,
-  strokeLinejoin: 'round' as const,
-  fill: 'none' as const,
-});
-
-/** Hoy — el sol de la jornada. */
-export function IconoHoy({ color }: { color: string }) {
-  return (
-    <Svg width={24} height={24} viewBox="0 0 24 24">
-      <Circle cx={12} cy={12} r={4.2} {...stroke(color)} />
-      <Path
-        d="M12 2.5v2.2M12 19.3v2.2M21.5 12h-2.2M4.7 12H2.5M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6M18.7 18.7l-1.6-1.6M6.9 6.9 5.3 5.3"
-        {...stroke(color)}
-      />
-    </Svg>
-  );
-}
-
-/** Mascotas — la huella. */
-export function IconoMascotas({ color }: { color: string }) {
-  return (
-    <Svg width={24} height={24} viewBox="0 0 24 24">
-      <Path
-        d="M12 11.5c2.6 0 4.8 1.9 5.4 4.4.3 1.4-.8 2.6-2.2 2.6-1.1 0-2.1-.5-3.2-.5s-2.1.5-3.2.5c-1.4 0-2.5-1.2-2.2-2.6.6-2.5 2.8-4.4 5.4-4.4Z"
-        {...stroke(color)}
-      />
-      <Circle cx={5.5} cy={9.5} r={1.7} {...stroke(color)} />
-      <Circle cx={9.5} cy={6.3} r={1.7} {...stroke(color)} />
-      <Circle cx={14.5} cy={6.3} r={1.7} {...stroke(color)} />
-      <Circle cx={18.5} cy={9.5} r={1.7} {...stroke(color)} />
-    </Svg>
-  );
-}
-
-const trazoB = (color: string) => ({
+const trazo = (color: string) => ({
   stroke: color,
   strokeWidth: 1.9,
   strokeLinecap: 'round' as const,
@@ -57,31 +20,49 @@ const trazoB = (color: string) => ({
   fill: 'none' as const,
 });
 
-/** Cuenta — la placa del collar (b′ FIRMADO del cliente, §2.4); activa: la huella grabada. */
-export function IconoCuenta({
-  color,
-  activa,
-  colorHuella,
-}: {
-  color: string;
-  activa: boolean;
-  colorHuella: string;
-}) {
+type EstadoTab = { color: string; activa: boolean; colorHuella: string };
+
+/** Hoy — el sol del oficio (registry b′); activa: el día lleva su huella. */
+export function IconoHoy({ color, activa, colorHuella }: EstadoTab) {
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24">
-      <Circle cx={12} cy={5.1} r={1.9} {...trazoB(color)} />
-      <Circle cx={12} cy={13.8} r={6.9} {...trazoB(color)} />
-      {activa ? <Huella color={colorHuella} x={7.9} y={9.7} escala={0.34} /> : null}
+      <Circle cx={12} cy={12} r={4.6} {...trazo(color)} />
+      <Path
+        d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"
+        {...trazo(color)}
+      />
+      {activa ? <Huella color={colorHuella} x={9.3} y={9.5} escala={0.32} /> : null}
     </Svg>
   );
 }
 
-/** Negocio — el maletín. */
-export function IconoNegocio({ color }: { color: string }) {
+/** Mascotas — LA huella (la primitiva ES el ícono; activa hereda el acento). */
+export function IconoMascotas({ color, activa, colorHuella }: EstadoTab) {
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24">
-      <Path d="M4.5 8.5h15a1 1 0 0 1 1 1V19a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1V9.5a1 1 0 0 1 1-1Z" {...stroke(color)} />
-      <Path d="M9 8.5V6a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 6v2.5M3.5 13h17" {...stroke(color)} />
+      <Huella color={activa ? colorHuella : color} x={2} y={2} escala={0.84} />
+    </Svg>
+  );
+}
+
+/** Negocio — el maletín del oficio (registry b′); activa: con su huella. */
+export function IconoNegocio({ color, activa, colorHuella }: EstadoTab) {
+  return (
+    <Svg width={24} height={24} viewBox="0 0 24 24">
+      <Path d="M4.4 8.6h15.2V18a1.5 1.5 0 0 1-1.5 1.5H5.9A1.5 1.5 0 0 1 4.4 18Z" {...trazo(color)} />
+      <Path d="M9.4 8.6V6.9a1.9 1.9 0 0 1 1.9-1.9h1.4a1.9 1.9 0 0 1 1.9 1.9v1.7" {...trazo(color)} />
+      {activa ? <Huella color={colorHuella} x={8.7} y={10.7} escala={0.4} /> : null}
+    </Svg>
+  );
+}
+
+/** Cuenta — la chapita del collar (registry b′, cero figuras humanas §2.4). */
+export function IconoCuenta({ color, activa, colorHuella }: EstadoTab) {
+  return (
+    <Svg width={24} height={24} viewBox="0 0 24 24">
+      <Circle cx={12} cy={5.6} r={1.9} {...trazo(color)} />
+      <Circle cx={12} cy={13.6} r={6.6} {...trazo(color)} />
+      {activa ? <Huella color={colorHuella} x={8.9} y={10.6} escala={0.38} /> : null}
     </Svg>
   );
 }
