@@ -24,7 +24,7 @@ import { useCallback, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
-  Celda,
+  CeldaNavegacion,
   Icono,
   Separador,
   Tarjeta,
@@ -44,7 +44,7 @@ import {
 import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
-import { TechoTinta } from '@/components/techo-tinta';
+import { TechoTinta, VeloBarraEstadoTinta } from '@/components/techo-tinta';
 
 // hoy en ISO LOCAL (hallazgo harness S55: toISOString corre el día)
 function hoyLocalISO(): string {
@@ -233,21 +233,26 @@ export default function Negocio() {
           <View style={{ gap: spacing[3] }}>
             <TituloBloque texto={t('negocio.cobros')} />
             <Tarjeta relleno="ninguno">
-              <Celda
-                interactiva
-                accessibilityRole="button"
+              {/* S59-B2 (Ley 19.1): entrar a una sección viste
+                  CeldaNavegacion — la Celda plana navegaba sin chevron.
+                  Ícono 'negocio' para la cuenta comercial = STAND-IN
+                  declarado (no hay glifo propio en el registry — pedido
+                  a la A, precedente L-141 del 'hoy'-como-calendario). */}
+              <CeldaNavegacion
+                icono="negocio"
+                registro="aa"
                 titulo={t('negocio.cuentaComercial')}
-                subtitulo={detalleCuenta}
+                detalle={detalleCuenta}
                 onPress={() => router.push('/cuenta-comercial')}
               />
               <Separador />
-              {/* S55-B (B1): la vista completa existe — la Celda navega;
+              {/* S55-B (B1): la vista completa existe — la celda navega;
                   el peldaño 0 de la pantalla educa cuando el ledger está vacío */}
-              <Celda
-                interactiva
-                accessibilityRole="button"
+              <CeldaNavegacion
+                icono="pagos"
+                registro="aa"
                 titulo={t('negocio.liquidaciones')}
-                subtitulo={detalleLiquidaciones}
+                detalle={detalleLiquidaciones}
                 onPress={() => router.push('/liquidaciones')}
               />
             </Tarjeta>
@@ -271,6 +276,9 @@ export default function Negocio() {
 
         </View>
       </ScrollView>
+      {/* S59-B1: el velo de tinta — la zona de la barra de estado JAMÁS
+          queda blanca, ni cuando el techo scrollea (regla del pedido). */}
+      <VeloBarraEstadoTinta />
     </View>
   );
 }

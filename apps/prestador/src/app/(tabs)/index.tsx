@@ -32,6 +32,7 @@ import {
   AvatarMascota,
   Boton,
   Celda,
+  CeldaNavegacion,
   CitaEnVivo,
   Esqueleto,
   EsqueletoGrupo,
@@ -58,7 +59,7 @@ import {
 import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { verificarSesion } from '@/lib/api';
-import { TechoTinta } from '@/components/techo-tinta';
+import { TechoTinta, VeloBarraEstadoTinta } from '@/components/techo-tinta';
 import { useTraduccion } from '@/i18n';
 
 type Pantalla =
@@ -364,34 +365,42 @@ export default function Hoy() {
             >
               {enVivo ? t('agenda.ahora') : t('agenda.loSiguiente')}
             </Text>
-            {enVivo ? (
-              <CitaEnVivo capa="cuidado">
-                <Tarjeta elevacion="plana" relleno="ninguno">
-                  <FilaCita cita={enVivo} enVivo fotoUrl={enVivo.mascota?.foto_url ? urlsFotos.get(enVivo.mascota.foto_url) : undefined} />
+            {/* S59-B2 (Ley 19.1): el "Antes" a un tap es NAVEGACIÓN al
+                expediente — viste CeldaNavegacion DENTRO de la tarjeta del
+                hero (el botón ghost de solo texto murió: no decía que se
+                toca ni a dónde va). Ícono 'carnet' = el expediente; la
+                señal "Primera vez" (solo si es REAL) vive en el detalle. */}
+            {(() => {
+              const mascota = destacada.mascota;
+              const conocer =
+                mascota != null ? (
+                  <>
+                    <Separador />
+                    <CeldaNavegacion
+                      icono="carnet"
+                      registro="aa"
+                      titulo={t('agenda.conocerMascota', { nombre: mascota.nombre })}
+                      detalle={esPrimeraVez ? t('agenda.primeraVez') : undefined}
+                      onPress={() =>
+                        router.push({ pathname: '/mascota/[mascotaId]', params: { mascotaId: mascota.id } })
+                      }
+                    />
+                  </>
+                ) : null;
+              return enVivo ? (
+                <CitaEnVivo capa="cuidado">
+                  <Tarjeta elevacion="plana" relleno="ninguno">
+                    <FilaCita cita={enVivo} enVivo fotoUrl={enVivo.mascota?.foto_url ? urlsFotos.get(enVivo.mascota.foto_url) : undefined} />
+                    {conocer}
+                  </Tarjeta>
+                </CitaEnVivo>
+              ) : (
+                <Tarjeta elevacion="sm" relleno="ninguno">
+                  <FilaCita cita={destacada} enVivo={false} fotoUrl={destacada.mascota?.foto_url ? urlsFotos.get(destacada.mascota.foto_url) : undefined} />
+                  {conocer}
                 </Tarjeta>
-              </CitaEnVivo>
-            ) : (
-              <Tarjeta elevacion="sm" relleno="ninguno">
-                <FilaCita cita={destacada} enVivo={false} fotoUrl={destacada.mascota?.foto_url ? urlsFotos.get(destacada.mascota.foto_url) : undefined} />
-              </Tarjeta>
-            )}
-            {/* el "Antes" a un tap: quién es + sus señales (vista
-                prestador del expediente); "Primera vez" solo si es REAL */}
-            {destacada.mascota != null && (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-                <Boton
-                  variante="ghost"
-                  tamaño="sm"
-                  etiqueta={t('agenda.conocerMascota', { nombre: destacada.mascota.nombre })}
-                  onPress={() => {
-                    if (destacada.mascota) {
-                      router.push({ pathname: '/mascota/[mascotaId]', params: { mascotaId: destacada.mascota.id } });
-                    }
-                  }}
-                />
-                {esPrimeraVez ? <Insignia estado="info" etiqueta={t('agenda.primeraVez')} tamaño="sm" /> : null}
-              </View>
-            )}
+              );
+            })()}
           </View>
         )}
 
@@ -462,6 +471,9 @@ export default function Hoy() {
             NO existe hoy. JAMÁS métricas en cero. ── */}
         </View>
       </ScrollView>
+      {/* S59-B1: el velo de tinta — la zona de la barra de estado JAMÁS
+          queda blanca, ni cuando el techo scrollea (regla del pedido). */}
+      <VeloBarraEstadoTinta />
     </View>
   );
 }
