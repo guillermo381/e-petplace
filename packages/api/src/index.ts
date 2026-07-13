@@ -325,3 +325,10 @@ export {
   type CitaPaseoDueno,
   type CodigoErrorCitaSuelta,
 } from './wrappers/citaSuelta';
+
+// ── No-show del prestador, Decisión T (S57-B3 — hunk Sesión B) ──────────────
+export {
+  marcarNoShowCita,
+  type CodigoErrorNoShow,
+  type ResultadoNoShow,
+} from './wrappers/noShow';
