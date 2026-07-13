@@ -108,11 +108,11 @@ expediente se alimenta solo.
 > **ESTADO AL CIERRE S59 (13-14 Jul 2026):** pasos 1º y 2º CUMPLIDOS —
 > gates de espera VERDES (D-365 ✅) y la pasada de acabados ejecutada
 > (S58) + el AFINADO y EL DURANTE construidos (S59, MODELO_PASEO v1.5
-> §7). **El paso 3º — la CORRIDA E2E como juez — queda PENDIENTE: S60
-> abre con ella como PRIMER BLOQUE, en piedra.** *(Corchete del founder
-> sin resolver al cierre S59 — rama conservadora por L-142; si la
-> corrida ya fue VERDE, una línea del founder enmienda esto y el paseo
-> se declara CERRADO.)* Nota de secuencia declarada: A4 (grooming) abrió
+> §7). **El paso 3º — la CORRIDA E2E como juez — dio VERDE: veredicto
+> founder S60-arranque. EL PASEO SE DECLARA CERRADO. Toda falla futura
+> entra como tanda de curas anotadas, no reabre el servicio.**
+> *(Enmienda S60 sobre la rama conservadora L-142 asentada al cierre
+> S59.)* Nota de secuencia declarada: A4 (grooming) abrió
 > su FUNDACIÓN en S59 por letra firmada del founder — la excepción a la
 > secuencia es del dueño de la secuencia.
 

@@ -1,7 +1,7 @@
 # POLITICAS_EPETPLACE — Políticas operativas del producto
 
 > Versión: v1.7
-> Última actualización: 12 Jul 2026 — Sesión 57. P17 FIRMADA e integrada (la Cuenta del prestador, letra v1.1 — cierra la reserva de numeración de la v1.5). P18 FIRMADA (cancelación y reagenda del paseo SUELTO: las tres ventanas).
+> Última actualización: 13 Jul 2026 — Sesión 59. P19 FIRMADA (el paseo es GRUPAL por norma).
 > Audiencia: Claude (web y code), devs futuros, equipo de soporte, equipo legal.
 > Análogo a: `CONTRATO_TRABAJO.md` (cómo trabajamos) pero del producto (cómo se comporta).
 
