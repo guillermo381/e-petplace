@@ -9,8 +9,11 @@
  *     ven lo que tú actives") + CTA a la primera.
  *   peldaño 1 — la lista de bloques ofrecidos: editar precio/nombre/
  *     descripción, pausar/reactivar (jamás DELETE, regla 7.8).
- *   peldaño 2 — paquetes y recurrencia: hueco DECLARADO en voz, llega
- *     con MODELO_FINANCIERO v2.5 + política P14 + motor.
+ *   peldaño 2 — VIVO: plan (S56, precio_plan) y PAQUETE de salidas
+ *     (S57-B2, precio_paquete — contrato commiteado de la A, D-343/
+ *     D-354: precio ÚNICO por salida, presets 5/10/15 en letra §6bis;
+ *     sección PROPIA visible, mandato founder: no repetir el pozo del
+ *     plan enterrado). El hueco declarado en voz MURIÓ con esto.
  *
  * El motor de ocupación por ventana (S55-A B2) está vivo — verificado
  * literal contra DB antes de ofertar bloques >30': todos los bloques
@@ -74,30 +77,40 @@ function monto(valor: number): string {
 }
 
 /**
- * S56-B ACTO 2 — la voz del PRECIO DEL PLAN (D-338, contrato ratificado:
- * columna precio_plan, sin CHECK relacional). Vacío = sin plan en el
- * bloque (voz honesta); con valor = neto visible (mismo dato de fees.ts)
- * + comparación con el suelto SIN juzgar (dato, no CHECK).
+ * S56-B ACTO 2, GENERALIZADA en S57-B2 (reusar > adaptar > crear, §1c):
+ * la voz de un PRECIO POR SALIDA (plan o paquete — mismo contrato de
+ * columna nullable sin CHECK relacional). Vacío = voz honesta del null;
+ * con valor = neto visible (mismo dato de fees.ts, 7.15) + comparación
+ * con el suelto SIN juzgar (dato, no CHECK).
  */
-function VozPlan({ pct, planTexto, suelto }: { pct: number | null; planTexto: string; suelto: number | null }) {
+function VozPorSalida({
+  pct,
+  texto,
+  suelto,
+  vozVacia,
+  comparar,
+}: {
+  pct: number | null;
+  texto: string;
+  suelto: number | null;
+  vozVacia: string;
+  comparar: (suelto: string, valor: string) => string;
+}) {
   const { theme } = useTheme();
-  const { t } = useTraduccion();
   const estilo = {
     fontFamily: typography.family.sans.regular,
     fontSize: typography.size.sm,
     lineHeight: typography.size.sm * typography.leading.normal,
     color: theme.text.secondary,
   };
-  if (planTexto.trim() === '') return <Text style={estilo}>{t('servicios.planVacio')}</Text>;
-  const v = Number.parseFloat(planTexto.replace(',', '.'));
+  if (texto.trim() === '') return <Text style={estilo}>{vozVacia}</Text>;
+  const v = Number.parseFloat(texto.replace(',', '.'));
   if (!Number.isFinite(v) || v <= 0) return null;
-  const plan = Math.round(v * 100) / 100;
+  const valor = Math.round(v * 100) / 100;
   return (
     <View style={{ gap: spacing[1] }}>
-      <VozComision pct={pct} precio={plan} />
-      {suelto !== null ? (
-        <Text style={estilo}>{t('servicios.planComparacion', { suelto: monto(suelto), plan: monto(plan) })}</Text>
-      ) : null}
+      <VozComision pct={pct} precio={valor} />
+      {suelto !== null ? <Text style={estilo}>{comparar(monto(suelto), monto(valor))}</Text> : null}
     </View>
   );
 }
@@ -127,6 +140,72 @@ function VozComision({ pct, precio }: { pct: number | null; precio: number | nul
     >
       {texto}
     </Text>
+  );
+}
+
+/**
+ * S57-B2 — la SECCIÓN PROPIA del paquete de salidas (D-343 superficie
+ * prestador; mandato founder: visible sin excavar — jamás un campo más
+ * al fondo del formulario). Header real (Ley 18: el paquete existe como
+ * concepto para el usuario) + explicación de UNA línea (presets 5/10/15
+ * en letra, precio ÚNICO por salida — D-354) + campo + neto 7.15.
+ */
+function SeccionPaquete({
+  pct,
+  texto,
+  onTexto,
+  error,
+  suelto,
+  deshabilitado,
+}: {
+  pct: number | null;
+  texto: string;
+  onTexto: (v: string) => void;
+  error: string | undefined;
+  suelto: number | null;
+  deshabilitado: boolean;
+}) {
+  const { theme } = useTheme();
+  const { t } = useTraduccion();
+  return (
+    <View style={{ gap: spacing[3], marginTop: spacing[2] }}>
+      <Text
+        accessibilityRole="header"
+        style={{
+          fontFamily: typography.family.sans.medium,
+          fontSize: typography.size.md,
+          color: theme.text.primary,
+        }}
+      >
+        {t('servicios.paqueteTitulo')}
+      </Text>
+      <Text
+        style={{
+          fontFamily: typography.family.sans.regular,
+          fontSize: typography.size.sm,
+          lineHeight: typography.size.sm * typography.leading.normal,
+          color: theme.text.secondary,
+        }}
+      >
+        {t('servicios.paqueteExplica')}
+      </Text>
+      <Campo
+        label={t('servicios.precioPaquete')}
+        value={texto}
+        onChangeText={onTexto}
+        keyboardType="decimal-pad"
+        ayuda={t('servicios.precioPaqueteAyuda')}
+        error={error}
+        deshabilitado={deshabilitado}
+      />
+      <VozPorSalida
+        pct={pct}
+        texto={texto}
+        suelto={suelto}
+        vozVacia={t('servicios.paqueteVacio')}
+        comparar={(s, v) => t('servicios.paqueteComparacion', { suelto: s, paquete: v })}
+      />
+    </View>
   );
 }
 
@@ -161,10 +240,12 @@ export default function Servicios() {
   const [bloqueNuevo, setBloqueNuevo] = useState<BloquePaseo | null>(null);
   const [precioTexto, setPrecioTexto] = useState('');
   const [planTexto, setPlanTexto] = useState('');
+  const [paqueteTexto, setPaqueteTexto] = useState('');
   const [nombreTexto, setNombreTexto] = useState('');
   const [descripcionTexto, setDescripcionTexto] = useState('');
   const [errorPrecio, setErrorPrecio] = useState<string | undefined>(undefined);
   const [errorPlan, setErrorPlan] = useState<string | undefined>(undefined);
+  const [errorPaquete, setErrorPaquete] = useState<string | undefined>(undefined);
   const [guardando, setGuardando] = useState(false);
 
   useFocusEffect(
@@ -221,23 +302,27 @@ export default function Servicios() {
     return Math.round(v * 100) / 100;
   };
 
-  // El plan distingue tres estados: vacío = SIN plan (null honesto),
-  // número válido, o inválido (bloquea el guardado con voz).
-  const leerPrecioPlan = (): number | null | 'invalido' => {
-    if (planTexto.trim() === '') return null;
-    const v = Number.parseFloat(planTexto.replace(',', '.'));
+  // Plan y paquete distinguen tres estados: vacío = SIN oferta (null
+  // honesto), número válido, o inválido (bloquea el guardado con voz).
+  const leerPorSalida = (texto: string): number | null | 'invalido' => {
+    if (texto.trim() === '') return null;
+    const v = Number.parseFloat(texto.replace(',', '.'));
     if (!Number.isFinite(v) || v <= 0) return 'invalido';
     return Math.round(v * 100) / 100;
   };
+  const leerPrecioPlan = () => leerPorSalida(planTexto);
+  const leerPrecioPaquete = () => leerPorSalida(paqueteTexto);
 
   function abrirEdicion(oferta: OfertaPaseoPropia) {
     setEditando(oferta);
     setPrecioTexto(oferta.precio.toFixed(2));
     setPlanTexto(oferta.precioPlan !== null ? oferta.precioPlan.toFixed(2) : '');
+    setPaqueteTexto(oferta.precioPaquete !== null ? oferta.precioPaquete.toFixed(2) : '');
     setNombreTexto(oferta.nombre ?? '');
     setDescripcionTexto(oferta.descripcion ?? '');
     setErrorPrecio(undefined);
     setErrorPlan(undefined);
+    setErrorPaquete(undefined);
   }
 
   function abrirCreacion() {
@@ -245,10 +330,12 @@ export default function Servicios() {
     setBloqueNuevo(null);
     setPrecioTexto('');
     setPlanTexto('');
+    setPaqueteTexto('');
     setNombreTexto('');
     setDescripcionTexto('');
     setErrorPrecio(undefined);
     setErrorPlan(undefined);
+    setErrorPaquete(undefined);
   }
 
   function cerrarHojas() {
@@ -261,12 +348,17 @@ export default function Servicios() {
     if (guardando || editando === null) return;
     const precio = leerPrecio();
     const precioPlan = leerPrecioPlan();
+    const precioPaquete = leerPrecioPaquete();
     if (cambioActivo === undefined && precio === null) {
       setErrorPrecio(t('servicios.precioInvalido'));
       return;
     }
     if (cambioActivo === undefined && precioPlan === 'invalido') {
       setErrorPlan(t('servicios.precioPlanInvalido'));
+      return;
+    }
+    if (cambioActivo === undefined && precioPaquete === 'invalido') {
+      setErrorPaquete(t('servicios.precioPaqueteInvalido'));
       return;
     }
     setGuardando(true);
@@ -276,6 +368,7 @@ export default function Servicios() {
             id: editando.id,
             precio: precio ?? undefined,
             precioPlan: precioPlan === 'invalido' ? undefined : precioPlan,
+            precioPaquete: precioPaquete === 'invalido' ? undefined : precioPaquete,
             nombre: nombreTexto,
             descripcion: descripcionTexto,
           }
@@ -295,6 +388,7 @@ export default function Servicios() {
     if (guardando || pantalla.estado !== 'listo' || bloqueNuevo === null) return;
     const precio = leerPrecio();
     const precioPlan = leerPrecioPlan();
+    const precioPaquete = leerPrecioPaquete();
     if (precio === null) {
       setErrorPrecio(t('servicios.precioInvalido'));
       return;
@@ -303,12 +397,17 @@ export default function Servicios() {
       setErrorPlan(t('servicios.precioPlanInvalido'));
       return;
     }
+    if (precioPaquete === 'invalido') {
+      setErrorPaquete(t('servicios.precioPaqueteInvalido'));
+      return;
+    }
     setGuardando(true);
     const r = await crearOfertaPaseo({
       prestadorId: pantalla.prestadorId,
       duracionMinutos: bloqueNuevo,
       precio,
       precioPlan,
+      precioPaquete,
       nombre: nombreTexto || undefined,
       descripcion: descripcionTexto || undefined,
     });
@@ -408,16 +507,9 @@ export default function Servicios() {
             <Boton variante="secundario" etiqueta={t('servicios.agregarBloque')} bloque onPress={abrirCreacion} />
           )}
 
-          {/* peldaño 2 — el hueco declarado, en voz serena */}
-          <Text
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.xs,
-              color: theme.text.tertiary,
-            }}
-          >
-            {t('servicios.paquetesHueco')}
-          </Text>
+          {/* S57-B2 pasada Chanel: el hueco declarado en voz MURIÓ — el
+              plan (S56) y el paquete (S57) ya viven en la Hoja del bloque;
+              dejar la promesa era mentir. */}
         </ScrollView>
       )}
 
@@ -457,10 +549,23 @@ export default function Servicios() {
               error={errorPlan}
               deshabilitado={guardando}
             />
-            <VozPlan
+            <VozPorSalida
               pct={pantalla.estado === 'listo' ? pantalla.comisionPct : null}
-              planTexto={planTexto}
+              texto={planTexto}
               suelto={leerPrecio()}
+              vozVacia={t('servicios.planVacio')}
+              comparar={(s, v) => t('servicios.planComparacion', { suelto: s, plan: v })}
+            />
+            <SeccionPaquete
+              pct={pantalla.estado === 'listo' ? pantalla.comisionPct : null}
+              texto={paqueteTexto}
+              onTexto={(v) => {
+                setPaqueteTexto(v);
+                setErrorPaquete(undefined);
+              }}
+              error={errorPaquete}
+              suelto={leerPrecio()}
+              deshabilitado={guardando}
             />
             <Campo
               label={t('servicios.nombre')}
@@ -545,10 +650,23 @@ export default function Servicios() {
               error={errorPlan}
               deshabilitado={guardando}
             />
-            <VozPlan
+            <VozPorSalida
               pct={pantalla.estado === 'listo' ? pantalla.comisionPct : null}
-              planTexto={planTexto}
+              texto={planTexto}
               suelto={leerPrecio()}
+              vozVacia={t('servicios.planVacio')}
+              comparar={(s, v) => t('servicios.planComparacion', { suelto: s, plan: v })}
+            />
+            <SeccionPaquete
+              pct={pantalla.estado === 'listo' ? pantalla.comisionPct : null}
+              texto={paqueteTexto}
+              onTexto={(v) => {
+                setPaqueteTexto(v);
+                setErrorPaquete(undefined);
+              }}
+              error={errorPaquete}
+              suelto={leerPrecio()}
+              deshabilitado={guardando}
             />
             <Campo
               label={t('servicios.nombre')}

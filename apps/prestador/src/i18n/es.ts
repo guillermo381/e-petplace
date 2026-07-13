@@ -372,7 +372,7 @@ export const prestadorEs = {
     precioInvalido: 'El precio tiene que ser mayor a cero.',
     bloqueDuplicado: 'Ya ofreces un paseo de esa duración.',
     // peldaño 2 — hueco declarado
-    paquetesHueco: 'Paquetes y paseos recurrentes llegan más adelante.',
+    // paquetesHueco MURIÓ en S57-B2 (pasada Chanel): el paquete ya vive.
     // comisión visible donde se pone precio (S56-B TAREA 4, financiero v2.6
     // regla 7.15 — el % viene del dato, jamás hardcodeado)
     comisionRetiene: 'e-PetPlace retiene {{pct}}%',
@@ -384,6 +384,14 @@ export const prestadorEs = {
     planVacio: 'Sin plan en este bloque: tus clientes no ven la opción de hacerlo frecuente.',
     planComparacion: 'Suelto {{suelto}} · plan {{plan}} por salida',
     precioPlanInvalido: 'El precio del plan tiene que ser mayor a cero. Déjalo vacío si no ofreces plan.',
+    // el PAQUETE de salidas (D-343 superficie prestador, S57-B2) · LOTE S57, GATE PENDIENTE
+    paqueteTitulo: 'Paquete de salidas',
+    paqueteExplica: 'Tus clientes compran 5, 10 o 15 salidas de este bloque por adelantado. Tú pones un solo precio por salida.',
+    precioPaquete: 'Precio por salida en paquete (opcional)',
+    precioPaqueteAyuda: 'Rige para los paquetes que se compren desde ahora. Los ya comprados no cambian.',
+    paqueteVacio: 'Sin paquete en este bloque: tus clientes no ven la opción de comprarlo.',
+    paqueteComparacion: 'Suelto {{suelto}} · paquete {{paquete}} por salida',
+    precioPaqueteInvalido: 'El precio por salida del paquete tiene que ser mayor a cero. Déjalo vacío si no ofreces paquete.',
   },
   // Vacaciones / bloqueos — S56-B TAREA 2 (D-341) · LOTE S56, GATE PENDIENTE
   vacaciones: {

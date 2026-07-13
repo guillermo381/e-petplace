@@ -336,7 +336,7 @@ export const prestadorEn = {
     creado: 'Your walk is set up.',
     precioInvalido: 'The price has to be greater than zero.',
     bloqueDuplicado: 'You already offer a walk of that duration.',
-    paquetesHueco: 'Packages and recurring walks arrive later on.',
+    // paquetesHueco MURIÓ en S57-B2 (pasada Chanel) · Espejo de es.ts
     // comisión visible (S56-B TAREA 4) — Espejo de es.ts
     comisionRetiene: 'e-PetPlace keeps {{pct}}%',
     comisionNeto: "e-PetPlace keeps {{pct}}% · you'll receive {{neto}}",
@@ -347,6 +347,14 @@ export const prestadorEn = {
     planVacio: "No plan for this block: your clients won't see the make-it-recurring option.",
     planComparacion: 'One-off {{suelto}} · plan {{plan}} per outing',
     precioPlanInvalido: "The plan price has to be greater than zero. Leave it empty if you don't offer a plan.",
+    // el PAQUETE de salidas (D-343 superficie prestador, S57-B2) · LOTE S57, GATE PENDIENTE · Espejo de es.ts
+    paqueteTitulo: 'Outing package',
+    paqueteExplica: 'Your clients buy 5, 10 or 15 outings of this block upfront. You set a single price per outing.',
+    precioPaquete: 'Price per outing in a package (optional)',
+    precioPaqueteAyuda: "Applies to packages bought from now on. Already-bought ones don't change.",
+    paqueteVacio: "No package for this block: your clients won't see the option to buy one.",
+    paqueteComparacion: 'One-off {{suelto}} · package {{paquete}} per outing',
+    precioPaqueteInvalido: "The package price per outing has to be greater than zero. Leave it empty if you don't offer a package.",
   },
   // Vacaciones / bloqueos — S56-B TAREA 2 (D-341) · LOTE S56 · Espejo de es.ts
   vacaciones: {
