@@ -150,6 +150,20 @@ function paresDe(t: Theme, nombre: string): Pair[] {
     add('SelectorEspecie nombre text.primary / capaBg.identidad⊕card', t.text.primary, t.capaBg.identidad, t.bg.card)
   }
 
+  // SelectorSegmentado (S58, Ley 19.3/D-359): texto activo (text.primary)
+  // sobre la superficie apoyada del segmento activo — claro: bg.card;
+  // dark/memorial: border.default como relleno (paso de luminancia sobre el
+  // riel, precedente del agarre de la Hoja), compositado sobre bg.overlay.
+  // El texto INACTIVO (text.secondary / bg.overlay) ya está gateado por el
+  // par del fallback de Avatar de arriba — mismo par exacto.
+  const superficieSegmentoActivo = t.mode === 'light' ? t.bg.card : t.border.default
+  add(
+    'SelectorSegmentado activo text.primary / superficie activa⊕overlay',
+    t.text.primary,
+    superficieSegmentoActivo,
+    t.bg.overlay,
+  )
+
   // Campo (B3.3): mensaje de error sobre las superficies donde vive el form,
   // y los bordes de ESTADO como gráficos funcionales a 3:1 (WCAG 1.4.11 —
   // usan el flag `large`). El borde default queda fuera del gate: el campo

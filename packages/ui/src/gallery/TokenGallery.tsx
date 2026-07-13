@@ -32,6 +32,8 @@ import { SelectorEspecie, type SelectorEspecieOpcion } from '../components/Selec
 import { CampoFecha, type CampoFechaValor } from '../components/CampoFecha'
 import { SelectorAvatar, type SelectorAvatarFoto } from '../components/SelectorAvatar'
 import { SelectorOpcion } from '../components/SelectorOpcion'
+import { SelectorSegmentado } from '../components/SelectorSegmentado'
+import { CeldaNavegacion } from '../components/CeldaNavegacion'
 import { HeroMarca } from '../components/HeroMarca'
 import { LineaDeVida, type LineaDeVidaItem } from '../components/LineaDeVida'
 import { VisorFoto } from '../components/VisorFoto'
@@ -589,6 +591,100 @@ function EjemploEsqueletoFila() {
 }
 
 // campana de demo para la portada dueño (el slot accionDer es del consumidor)
+// ── Elevación (Ley 20 · D-358 + D-360, S58): fondo + Tarjeta reposo +
+// superficie de Hoja elevada, lado a lado. La Hoja real es un Modal y no
+// se monta inline: acá se muestra SU superficie con SU token (elevada). ──
+function EjemploElevacion() {
+  const { theme } = useTheme()
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[4], alignItems: 'stretch' }}>
+      <View style={{ flex: 1, minWidth: 160 }}>
+        <Tarjeta elevacion="reposo">
+          <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.secondary }}>
+            tarjeta · reposo
+          </Text>
+          <Text style={{ fontFamily: sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
+            Apoyada sobre el fondo
+          </Text>
+          <Text style={{ fontFamily: sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+            Sin hairline — regla Chanel del marco
+          </Text>
+        </Tarjeta>
+      </View>
+      <View
+        style={{
+          flex: 1,
+          minWidth: 160,
+          backgroundColor: theme.mode === 'light' ? theme.bg.card : theme.bg.elevated,
+          boxShadow: theme.elevacion.elevada,
+          borderTopLeftRadius: radius['2xl'],
+          borderTopRightRadius: radius['2xl'],
+          padding: spacing[4],
+          alignItems: 'center',
+          gap: spacing[2],
+        }}
+      >
+        <View style={{ width: 36, height: 4, borderRadius: radius.full, backgroundColor: theme.bg.border }} />
+        <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.secondary }}>
+          hoja · elevada
+        </Text>
+        <Text style={{ fontFamily: sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
+          Lo que flota
+        </Text>
+      </View>
+    </View>
+  )
+}
+
+// ── SelectorSegmentado (Ley 19.3 · D-359, S58): los dos casos del
+// diccionario — 2 segmentos (Hoy/Semana del prestador) y 3 (el hub
+// "Mis paseos" del cliente). Estado propio por panel. ──
+function EjemploSelectorSegmentado() {
+  const { theme } = useTheme()
+  const [vista2, setVista2] = useState('hoy')
+  const [vista3, setVista3] = useState('proximos')
+  return (
+    <View style={{ gap: spacing[3] }}>
+      <SelectorSegmentado
+        etiqueta="Vista de la agenda"
+        segmentos={[
+          { codigo: 'hoy', etiqueta: 'Hoy' },
+          { codigo: 'semana', etiqueta: 'Semana' },
+        ]}
+        activo={vista2}
+        onCambio={setVista2}
+      />
+      <SelectorSegmentado
+        etiqueta="Vista de tus paseos"
+        segmentos={[
+          { codigo: 'proximos', etiqueta: 'Próximos' },
+          { codigo: 'agenda', etiqueta: 'Agenda' },
+          { codigo: 'historial', etiqueta: 'Historial' },
+        ]}
+        activo={vista3}
+        onCambio={setVista3}
+      />
+      <Text style={{ fontFamily: sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+        La vista activa está apoyada sobre el riel (elevacion.reposo) — tocá de verdad: se desliza la superficie, la sombra viaja con ella.
+      </Text>
+    </View>
+  )
+}
+
+// ── CeldaNavegacion (Ley 19.1 · S58): entrar a una sección — el ícono
+// b′ dice a dónde va; chevron de entrada; pressed 0.99. ──
+function EjemploCeldaNavegacion({ registro }: { registro?: 'capa' | 'aa' | 'tinta' }) {
+  return (
+    <View>
+      <CeldaNavegacion icono="paseo" titulo="Mis paseos" detalle="Próximos, agenda e historial" registro={registro} onPress={() => {}} />
+      <Separador />
+      <CeldaNavegacion icono="veterinaria" titulo="Agregar carnet" registro={registro} onPress={() => {}} />
+      <Separador />
+      <CeldaNavegacion icono="refugio" titulo="Mascotas" registro={registro} onPress={() => {}} />
+    </View>
+  )
+}
+
 function CampanaDemo() {
   const { theme } = useTheme()
   return (
@@ -848,6 +944,69 @@ function GaleriaInterna() {
           </Fila>
         </Seccion>
 
+        {/* Elevación — Ley 20 (D-358 + D-360, S58): el material papel */}
+        <Seccion titulo="Elevación + fondo papel — dos niveles y solo dos (Ley 20)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — papel algodón #FAF9F7 + sombra de TINTA CÁLIDA (contacto + difusa); reposo pierde el hairline">
+                <EjemploElevacion />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — INTACTO: la elevación la dice el paso de luminancia de bg.card; contacto mínimo, el fondo jamás se calienta">
+                <EjemploElevacion />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — CONSERVA la elevación (la calidez es dignidad, no celebración); resuelve como superficie oscura">
+                <EjemploElevacion />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* SelectorSegmentado — Ley 19.3 (D-359, S58): vistas exclusivas */}
+        <Seccion titulo="SelectorSegmentado — vistas exclusivas (los chips quedaron prohibidos como segmentos)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — riel hundido bg.overlay; el activo es superficie blanca con elevacion.reposo, sin borde (Chanel)">
+                <EjemploSelectorSegmentado />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — mismo componente sin variante; el paso de luminancia da el activo + contacto mínimo">
+                <EjemploSelectorSegmentado />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — sin variante y sin deslizamiento: reemplazo directo (en memorial nada se desliza)">
+                <EjemploSelectorSegmentado />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* CeldaNavegacion — Ley 19.1 (S58): entrar a una sección */}
+        <Seccion titulo="CeldaNavegacion — entrar a una sección (la celda dice a dónde va)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro (dosis dueño, registro capa) — ícono b′ + título + detalle opcional + chevron; pressed 0.99">
+                <EjemploCeldaNavegacion />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark (registro aa — dosis prestador: la dosis modula color, no gramática)">
+                <EjemploCeldaNavegacion registro="aa" />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — degrada solo adentro de Icono (§2.8): huella a text.secondary">
+                <EjemploCeldaNavegacion />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
         {/* Status — Insignia estado (B3.5) */}
         <Seccion titulo="Status — Insignia · familia estado">
           <Fila>
@@ -959,7 +1118,7 @@ function GaleriaInterna() {
         <Seccion titulo="Tarjeta — superficie contenedora">
           <View style={{ gap: spacing[4] }}>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[4] }}>
-              {(['plana', 'sm', 'md'] as const).map((e) => (
+              {(['plana', 'reposo', 'elevada'] as const).map((e) => (
                 <Tarjeta key={e} elevacion={e}>
                   <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.secondary }}>
                     elevacion {e}
@@ -1032,7 +1191,7 @@ function GaleriaInterna() {
             <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary, marginBottom: spacing[2] }}>
               ensamble · registrar mascota
             </Text>
-            <Tarjeta elevacion="sm" relleno="amplio">
+            <Tarjeta elevacion="reposo" relleno="amplio">
               <Text style={{ fontFamily: sans.bold, fontSize: typography.size.lg, color: theme.text.primary, marginBottom: spacing[4] }}>
                 Registrá a tu mascota
               </Text>
@@ -1084,7 +1243,7 @@ function GaleriaInterna() {
 
         {/* Ensamble: Agenda de hoy — la pantalla del prestador en embrión */}
         <Seccion titulo="Ensamble — Agenda de hoy (dosis baja, componentes 100% reales)">
-          <Tarjeta elevacion="sm" relleno="ninguno">
+          <Tarjeta elevacion="reposo" relleno="ninguno">
             <View style={{ padding: spacing[4], paddingBottom: spacing[2] }}>
               <Text style={{ fontFamily: sans.bold, fontSize: typography.size.lg, color: theme.text.primary }}>
                 Agenda de hoy
@@ -1631,7 +1790,7 @@ function GaleriaInterna() {
         {/* EstadoVacio — B3.9 */}
         <Seccion titulo="Estado vacío — dignidad, no hueco">
           <View style={{ gap: spacing[4] }}>
-            <Tarjeta elevacion="sm">
+            <Tarjeta elevacion="reposo">
               <View style={{ minHeight: 320 }}>
                 <EstadoVacio
                   icono={
@@ -1645,7 +1804,7 @@ function GaleriaInterna() {
                 />
               </View>
             </Tarjeta>
-            <Tarjeta elevacion="sm">
+            <Tarjeta elevacion="reposo">
               <View style={{ minHeight: 240 }}>
                 <EstadoVacio
                   icono={
@@ -1670,7 +1829,7 @@ function GaleriaInterna() {
               subtitulo="Dos atenciones hoy."
             />
             <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[6], gap: spacing[4] }}>
-              <Tarjeta elevacion="sm" relleno="ninguno">
+              <Tarjeta elevacion="reposo" relleno="ninguno">
                 <View style={{ padding: spacing[4], paddingBottom: spacing[2] }}>
                   <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary }}>
                     hoy · 2 citas
@@ -1728,7 +1887,7 @@ function GaleriaInterna() {
         <Seccion titulo="Dosificación asimétrica — una marca, dos dosis">
           <View style={{ gap: spacing[5] }}>
             {/* Prestador — dosis baja: primer ensamble Tarjeta+Boton del sistema */}
-            <Tarjeta elevacion="sm" relleno="amplio">
+            <Tarjeta elevacion="reposo" relleno="amplio">
               <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary, marginBottom: spacing[2] }}>
                 prestador · dosis baja
               </Text>
@@ -1746,7 +1905,7 @@ function GaleriaInterna() {
             </Tarjeta>
 
             {/* Dueño — dosis alta: tintes reales en las mini-cards */}
-            <Tarjeta elevacion="sm" relleno="amplio">
+            <Tarjeta elevacion="reposo" relleno="amplio">
               <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary, marginBottom: spacing[2] }}>
                 dueño · dosis alta
               </Text>

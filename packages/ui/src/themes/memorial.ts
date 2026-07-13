@@ -14,6 +14,7 @@
 
 import { palette, gradients } from '../tokens/palette'
 import { shadows } from '../tokens/shadows'
+import { elevacion } from '../tokens/elevacion'
 
 export const memorialTheme = {
   mode: 'memorial' as const,
@@ -96,6 +97,10 @@ export const memorialTheme = {
   },
 
   shadow: shadows.memorial,
+
+  // Ley 20 (D-358 S58): memorial CONSERVA la elevación — la calidez es
+  // dignidad, no celebración. Superficies oscuras → resuelve como dark.
+  elevacion: elevacion.memorial,
 
   border: {
     width:   1,

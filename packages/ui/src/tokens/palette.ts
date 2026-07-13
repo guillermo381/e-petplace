@@ -16,7 +16,8 @@
  *   · yellow #FFE600 → ELIMINADO — amarillo #FFF645 existe SOLO como
  *     color de marca/logo. JAMÁS rol funcional (status, capa, acento).
  *   · Extensiones v3.1 conservadas con los mismos hex.
- *   · Fondos light re-derivados (§7.3 B1): base #F5F4FA, nunca blanco puro.
+ *   · Fondos light re-derivados (§7.3 B1): base nunca blanco puro
+ *     (S58/D-360: el base es papel algodón #FAF9F7 — ver light0).
  *
  * ALPHAS PRECOMPUTADAS (lección Kaxo):
  *   Nada de interpolar hex+opacidad en runtime. Toda transparencia vive
@@ -83,7 +84,9 @@ export const palette = {
   dark4: '#222230',   // bordes visibles / separadores
 
   // ── Fondos light (§7.3 B1 — DEFAULT del producto) ──
-  light0: '#F5F4FA',  // fondo base — lavanda muy sutil (nunca blanco puro)
+  light0: '#FAF9F7',  // fondo base — PAPEL ALGODÓN (D-360 firmado S58; era lavanda #F5F4FA).
+                      // La otra mitad del efecto papel es la sombra de tinta cálida
+                      // de tokens/elevacion.ts. Nunca blanco puro.
   light1: '#FFFFFF',  // cards
   light2: '#F8F7FC',  // elevated / secciones
   light3: '#EDEBF5',  // hover states

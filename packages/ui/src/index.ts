@@ -7,6 +7,7 @@ export { typography, type TypeSizeKey } from './tokens/typography'
 export { spacing, type SpacingKey } from './tokens/spacing'
 export { radius, type RadiusKey } from './tokens/radius'
 export { shadows, type ShadowToken } from './tokens/shadows'
+export { elevacion, type ElevacionNivel, type ElevacionTokens } from './tokens/elevacion'
 export { motion } from './tokens/motion'
 export { dosis, type DosisKey, type DosisNivel } from './tokens/dosis'
 
@@ -40,6 +41,7 @@ export {
   type CampoFechaPrecision,
 } from './components/CampoFecha'
 export { Celda, type CeldaProps, type CeldaDensidad } from './components/Celda'
+export { CeldaNavegacion, type CeldaNavegacionProps } from './components/CeldaNavegacion'
 export { Separador } from './components/Separador'
 export {
   Insignia,
@@ -76,6 +78,11 @@ export {
   type SelectorOpcionProps,
   type SelectorOpcionItem,
 } from './components/SelectorOpcion'
+export {
+  SelectorSegmentado,
+  type SelectorSegmentadoProps,
+  type SelectorSegmentadoItem,
+} from './components/SelectorSegmentado'
 export { VisorFoto, type VisorFotoProps } from './components/VisorFoto'
 export { FichaVacuna, type FichaVacunaProps } from './components/FichaVacuna'
 export {

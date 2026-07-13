@@ -16,7 +16,7 @@ description: >-
 
 # epetplace-design-system — el sistema es exigible, no sugerido
 
-Fuente de verdad: `packages/ui` (tokens v4 + 28 componentes + 3 temas).
+Fuente de verdad: `packages/ui` (tokens v4 + 30 componentes + 3 temas).
 Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 `@epetplace/ui`, no existe en el producto.
 
@@ -227,12 +227,12 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
     se improvisa con el ladrillo genérico. El diccionario aplica a LAS
     DOS apps: la dosis del prestador modula color y acento, no la
     gramática.
-    > NOTA de construcción: el **selector segmentado** canónico del
-    > punto 3 AÚN NO existe en `packages/ui` — es construcción pendiente
-    > (territorio de la A, pedido autocontenido cuando dispare, patrón
-    > Ley 11). Hasta que exista, las pantallas vivas con chips-como-
-    > segmento migran en su pasada de craft — la skill declara el
-    > material, no lo fabrica.
+    > CONSTRUIDO (S58, D-359): el selector segmentado canónico del
+    > punto 3 es **`SelectorSegmentado`** en `packages/ui` (ver índice).
+    > La celda de navegación del punto 1 es **`CeldaNavegacion`** (S58,
+    > relevamiento L-144: la Celda de lista NO cumplía la letra — sin
+    > chevron, slot de ícono libre, pressed que resalta). Las pantallas
+    > vivas con chips-como-segmento migran en su pasada de craft.
 20. **La elevación (el 3D sutil, por sistema).** Nacen los tokens de
     elevación — hoy el sistema es plano y por eso las pantallas no
     despegan (diagnóstico del founder S57, vara Airbnb: sombras
@@ -249,14 +249,20 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
     elevación acompaña a la jerarquía (el hero puede llevarla; el fondo
     jamás); en dosis prestador se conserva (la elevación no es color);
     en memorial se conserva (no es celebración). El fondo de la casa
-    deja de ser blanco puro: **papel cálido** (el tono exacto se firma
-    con el marco — nota abierta S57), para que las superficies blancas
-    con sombra respiren.
-    > NOTA de construcción: los tokens de elevación son construcción
-    > PENDIENTE en `packages/ui` (territorio de la A, pedido
-    > autocontenido cuando dispare) — la skill declara el material, no
-    > lo fabrica. Hasta entonces siguen rigiendo `shadows` v4 y la Ley 6
-    > (las sombras JAMÁS se animan).
+    deja de ser blanco puro: **papel algodón #FAF9F7** (D-360, firmado
+    S58), para que las superficies blancas con sombra respiren.
+    > CONSTRUIDO (S58, D-358 + D-360): `theme.elevacion.reposo` /
+    > `theme.elevacion.elevada` (`tokens/elevacion.ts`, boxShadow de
+    > DOS capas — contacto + difusa — en TINTA CÁLIDA rgb(31,27,22),
+    > jamás negro puro; dark/memorial resuelven a contacto mínimo).
+    > REGLA CHANEL DEL MARCO cableada en Tarjeta: la superficie que
+    > gana elevación PIERDE el hairline (el borde de tinte, semántico,
+    > se conserva). Tarjeta habla `plana | reposo | elevada` ('sm'/'md'
+    > = alias DEPRECADOS, no usar en código nuevo); la Hoja porta
+    > `elevada`. Sombras artesanales: PROHIBIDAS (grep en el gate).
+    > `shadows` v4 sigue vivo SOLO para glow semántico (Ley 7) y Aviso.
+    > Ley 6 intacta: las sombras JAMÁS se animan. La calibración fina
+    > se sella en la pantalla patrón del Hogar (D-358).
 
 ### Las pantallas patrón (cómo se firma lo visual)
 
@@ -377,14 +383,16 @@ comprar es lo último, y lo que compra combina con TODO.*
 //     stroke={theme.text.primary} strokeWidth={1.75} strokeLinecap="round" /></Svg>
 ```
 
-## 3. ÍNDICE — los 28 componentes (import de `@epetplace/ui`)
+## 3. ÍNDICE — los 30 componentes (import de `@epetplace/ui`)
 
 | Export | Cuándo |
 |---|---|
 | `Boton` | Toda acción. primario=default producto · marca=gated dosis alta · secundario tonal · ghost terciaria · destructivo tonal (nunca coral sólido) |
 | `Tarjeta` | Toda superficie contenedora. Tintes por capa/status; `interactiva` escala 0.99; sin margin propio |
 | `Campo` | Todo input de texto. Label siempre visible; nada se anima al tipear |
-| `Celda` | Toda fila de lista. Pressed resalta (jamás escala); `metadataMono` para voz de máquina — desde S44-B4.1 convive con `fin` (apilados: mono arriba, nodo abajo) |
+| `Celda` | Toda fila de lista. Pressed resalta (jamás escala); `metadataMono` para voz de máquina — desde S44-B4.1 convive con `fin` (apilados: mono arriba, nodo abajo). Entrar a una sección NO es su trabajo (eso es `CeldaNavegacion`) |
+| `CeldaNavegacion` | Entrar a una sección (Ley 19.1, S58): ícono b′ TIPADO a la izquierda + título + detalle opcional + chevron de entrada; pressed 0.99. `registro` capa (dueño) / aa·tinta (prestador) — la dosis modula color, no gramática. Sin metadataMono/fin (eso es Celda). Memorial degrada adentro de Icono |
+| `SelectorSegmentado` | Cambiar de vista dentro de una pantalla (Ley 19.3, S58 — los chips PROHIBIDOS como segmentos): riel hundido bg.overlay + 2-3 segmentos; el ACTIVO es superficie apoyada con `elevacion.reposo` (Chanel: sombra, jamás borde). Texto solo v1; se desliza la SUPERFICIE (fast/easeOut), la sombra viaja con ella; memorial = reemplazo directo. Mismo componente sin variante en dosis/memorial |
 | `Separador` | Divisor hairline entre Celdas (`ItemSeparatorComponent`) |
 | `Insignia` | Todo chip de estado/capa. JAMÁS interactivo; `soloPunto` para celdas densas |
 | `Encabezado` | Techo de pantalla. `navegacion` (interna) / `portada` (raíz de tab, con la voz). S52: la portada es LOCKUP — isotipo+voz una composición horizontal, acción en línea |
@@ -403,7 +411,7 @@ comprar es lo último, y lo que compra combina con TODO.*
 | `HojaScroll` | Scrollable interno que GANA dentro de la Hoja (patrón SM block — fix S45-B3.2). OBLIGATORIO para toda lista desplazable dentro de una Hoja: el ScrollView plano pierde contra el swipe-to-close en Android y web no lo delata (L-132) |
 | `SelectorAvatar` | La foto de identidad de la mascota (S45). Vacío = AvatarMascota + invitación (la huella es cara válida); Hoja con cámara/galería PARES + "Por ahora no" primera clase; con foto: Cambiar/Quitar. Entrega {uri,width,height}; el upload es de la pantalla. Captura por `capturaFoto` (infra compartida con EvidenciaFoto — no duplicar) |
 | `HeroMarca` | Cabecera con el gradiente firma (S45, contexto cerrado dosis alta). alto=bienvenida · compacto=techo de paso Y techo del Hogar (enmienda Ley 4, S52). Isotipo blanco adentro = el UNO por pantalla; CTAs JAMÁS adentro (marca sobre marca). Memorial: bg.card plano, text.primary — degrada solo |
-| `SelectorOpcion` | Chips de selección de VALOR (S45; ENMENDADO S55-B4 y S56). Radiogroup (o checkbox-group con `multiple` — los 7 días del plan); seleccionado = borde 1.5 capa.identidad + tint capaBg (mismo tratamiento que SelectorEspecie, sin accent.active); memorial degrada. `disposicion`: 'fila' (default, 2-4 chips que llenan el ancho) · 'tira' (scroll horizontal — la tira de días del CUÁNDO) · 'grilla' (chips envueltos para conjuntos grandes — inicios/menú de bloques). NO porta estado de datos (eso es Insignia). **OJO Ley 19.3 (S57): PROHIBIDO como tabs/segmento de vistas** — ese trabajo es del selector segmentado (pendiente en packages/ui); las pantallas vivas con chips-como-segmento migran en su pasada de craft |
+| `SelectorOpcion` | Chips de selección de VALOR (S45; ENMENDADO S55-B4 y S56). Radiogroup (o checkbox-group con `multiple` — los 7 días del plan); seleccionado = borde 1.5 capa.identidad + tint capaBg (mismo tratamiento que SelectorEspecie, sin accent.active); memorial degrada. `disposicion`: 'fila' (default, 2-4 chips que llenan el ancho) · 'tira' (scroll horizontal — la tira de días del CUÁNDO) · 'grilla' (chips envueltos para conjuntos grandes — inicios/menú de bloques). NO porta estado de datos (eso es Insignia). **OJO Ley 19.3 (S57): PROHIBIDO como tabs/segmento de vistas** — ese trabajo es de `SelectorSegmentado` (vivo desde S58); las pantallas vivas con chips-como-segmento migran en su pasada de craft |
 | `LineaDeVida` | El timeline del dueño (S45-B5.2). Diccionario CERRADO tipo→voz humana/capa ADENTRO (Ley 3: el dueño jamás ve un código; desconocido degrada digno por eje). Punto hex puro de capa + conector hairline + Tarjeta; mono solo hora/duración. Carga = esqueleto 3 nodos; el vacío es de la pantalla; pie con "Cargar más"/error. cita_servicio NO se muestra (filtra el wrapper) |
 | `VisorFoto` | Lightbox una-foto-a-la-vez (S45-B5.3). SOLO fades (Ley 6/8 gratis); letterbox digno sin recortar; fondo pleno (tinta+scrim, no depende del tema); cierra por X/back(doble vía)/tap-fondo; swipe horizontal = reemplazo directo; contador "n de m" en mono |
 | `FichaVacuna` | La ficha de UNA vacuna en la revisión del carnet (S47-B1.1; derivación S48). Presentacional pura: tap → `onEditar` (la edición es una Hoja de LA PANTALLA), "Esta no es" → `onDescartar`. Estados derivados de los datos: completa neutra (nombre+fecha; **tipo null NO tiñe** — decisión founder S48, los carnets reales no lo rotulan) · dudosa = SOLO fecha faltante, tinte cuidado y voz humana ("No pudimos leer la fecha") · `rechazada` (prop, del item_invalido de la RPC) danger — nada se pierde. Nombre en DM Sans (lo escribió un humano); fechas y lote en mono minúsculas. Memorial degrada: sin tinte, borde neutro |
@@ -415,11 +423,12 @@ También: `ThemeProvider`/`useTheme` (light default, memorial forzable),
 `Isotipo` (tinta/blanco/gradiente), y las PRIMITIVAS DE MARCA S53:
 `Huella` (el path canónico b′), `Guijarro` (ilustración §4),
 `EsperaDeMarca` (la única animación de espera legal: la huella respirando ~1.9s easeInOut para procesos >2s, SIEMPRE con voz honesta debajo; memorial quieta; no muestra datos — escalera no aplica), `palette`/`gradients`/`typography`/
-`spacing`/`radius`/`shadows`/`motion`/`opacity`/`dosis`, temas y tipos.
+`spacing`/`radius`/`shadows`/`elevacion` (S58: reposo/elevada por tema —
+Ley 20)/`motion`/`opacity`/`dosis`, temas y tipos.
 
 **Dónde vive qué:** tokens `packages/ui/src/tokens/` · temas
 `packages/ui/src/themes/` · gate WCAG `scripts/verify-contrast.ts`
-(correr: `pnpm verify:contrast` — 139 pares, tiene que dar 0 fallos) ·
+(correr: `pnpm verify:contrast` — 142 pares desde S58, tiene que dar 0 fallos) ·
 galería `packages/ui/src/gallery/TokenGallery.tsx` (verificación browser:
 `node scripts/verify-gallery.mjs` con los dev servers arriba) · gate en
 dispositivo: CLAUDE.md raíz · dirección de arte e iconografía:
@@ -428,6 +437,20 @@ dispositivo: CLAUDE.md raíz · dirección de arte e iconografía:
 
 ## Historial de la skill
 
+- **S58 (12 Jul 2026) — LOS MATERIALES DE LOS ACABADOS NACEN (D-358 +
+  D-359 + D-360, firmas founder S58-0.5(a); construcción Sesión A,
+  territorio packages/ui):** el fondo claro pasa a PAPEL ALGODÓN
+  #FAF9F7 (dark INTACTO; memorial intacto — su calidez ya es dignidad)
+  + tokens `elevacion.reposo/elevada` (tinta cálida 31,27,22, boxShadow
+  dos capas; regla Chanel del marco cableada en Tarjeta; Hoja porta
+  elevada; 'sm'/'md' de Tarjeta = alias deprecados) + **SelectorSegmentado**
+  (componente 29 — Ley 19.3 deja de ser pendiente) + **CeldaNavegacion**
+  (componente 30 — relevamiento L-144: la Celda de lista NO cumplía la
+  letra 19.1; la regla S43 "las filas resaltan" queda INTACTA para
+  Celda; la tensión pressed-0.99 vs S43 se declaró al gate). WCAG
+  139→142 pares / 0 fallos. Gates founder en dispositivo sobre la
+  galería: PENDIENTES al escribir esto; la calibración fina de sombras
+  se sella en la pantalla patrón del Hogar.
 - **S57 (12 Jul 2026) — LA SKILL SE VUELVE EL EQUIPO DE DISEÑO (enmienda
   de craft FIRMADA por el founder):** entra la sección 1b (Leyes 14–20:
   tesis · firma única · regla Chanel · copy como material · estructura

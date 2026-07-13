@@ -7,12 +7,13 @@
 
 import { palette, gradients } from '../tokens/palette'
 import { shadows } from '../tokens/shadows'
+import { elevacion } from '../tokens/elevacion'
 
 export const lightTheme = {
   mode: 'light' as const,
 
   bg: {
-    base:     palette.light0,   // #F5F4FA — nunca blanco puro
+    base:     palette.light0,   // #FAF9F7 — papel algodón (D-360 S58), nunca blanco puro
     card:     palette.light1,   // #FFFFFF
     elevated: palette.light2,   // #F8F7FC
     overlay:  palette.light3,   // #EDEBF5 — hover
@@ -120,6 +121,9 @@ export const lightTheme = {
   },
 
   shadow: shadows.light,
+
+  // Ley 20 (D-358 S58): dos niveles, tinta cálida, regla Chanel del marco.
+  elevacion: elevacion.light,
 
   border: {
     width:   1,

@@ -283,6 +283,9 @@ export function Hoja({
               style={[
                 {
                   backgroundColor: theme.mode === 'light' ? theme.bg.card : theme.bg.elevated,
+                  // Ley 20 (D-358): la Hoja FLOTA → elevacion.elevada. La sombra
+                  // no se anima (Ley 6): viaja con la superficie en el translateY.
+                  boxShadow: theme.elevacion.elevada,
                   borderTopLeftRadius: radius['2xl'],  // sheets 24 (B1)
                   borderTopRightRadius: radius['2xl'],
                   height: altoHoja,

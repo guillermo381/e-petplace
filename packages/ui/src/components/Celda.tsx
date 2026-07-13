@@ -15,6 +15,9 @@
  *
  * Sin margin propio, sin divisor propio: el divisor es <Separador />
  * (pensado para ItemSeparatorComponent de FlatList).
+ *
+ * ENTRAR A UNA SECCIÓN no es este trabajo (Ley 19.1, S58): eso es
+ * CeldaNavegacion — ícono b′ tipado + chevron + pressed 0.99.
  */
 
 import { useState, type ReactNode } from 'react'

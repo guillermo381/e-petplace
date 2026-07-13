@@ -36,7 +36,13 @@ export type TarjetaTinte =
   | 'cuidado'
   | 'comunidad'
 
-export type TarjetaElevacion = 'plana' | 'sm' | 'md'
+/**
+ * Niveles de elevación (Ley 20, D-358 S58): plana (hairline, sin sombra) ·
+ * reposo (apoyada sobre el fondo) · elevada (flota). 'sm'/'md' quedan como
+ * ALIAS DEPRECADOS (sm→reposo, md→elevada) hasta que las pantallas vivas
+ * migren en su pasada de craft — no usar en código nuevo.
+ */
+export type TarjetaElevacion = 'plana' | 'reposo' | 'elevada' | 'sm' | 'md'
 export type TarjetaRelleno = 'normal' | 'amplio' | 'ninguno'
 
 type Comun = {
@@ -81,16 +87,26 @@ export function Tarjeta(props: TarjetaProps) {
   }
   const tt = tintes[tinte]
 
+  // Alias deprecados de shadows v4 → niveles de la Ley 20
+  const nivel =
+    elevacion === 'plana' ? null
+    : elevacion === 'sm' ? 'reposo'
+    : elevacion === 'md' ? 'elevada'
+    : elevacion
+
   const superficie: ViewStyle = {
     backgroundColor: tt.fondo,
     borderRadius: radius.lg,  // 16 fijo — decisión B1: cards 16
     padding: RELLENO[relleno],
     overflow: relleno === 'ninguno' ? 'hidden' : undefined,  // la imagen respeta el radius
-    // plana lleva borde; con sombra (sm/md) el tinte conserva su borde, ninguno lo suelta
-    ...(elevacion === 'plana' || tinte !== 'ninguno'
+    // REGLA CHANEL DEL MARCO (D-358): la superficie que gana elevación
+    // PIERDE el hairline — borde + sombra = decir lo mismo dos veces.
+    // El borde de TINTE no es hairline (es semántico de capa/status): se conserva.
+    ...(nivel === null || tinte !== 'ninguno'
       ? { borderWidth: theme.border.width, borderColor: tt.borde }
       : null),
-    ...(elevacion !== 'plana' ? theme.shadow[elevacion] : null),
+    // Ley 6 intacta: la sombra JAMÁS se anima
+    ...(nivel !== null ? { boxShadow: theme.elevacion[nivel] } : null),
   }
 
   if (!props.interactiva) {

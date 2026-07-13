@@ -5,6 +5,7 @@
 
 import { palette, gradients } from '../tokens/palette'
 import { shadows } from '../tokens/shadows'
+import { elevacion } from '../tokens/elevacion'
 
 export const darkTheme = {
   mode: 'dark' as const,
@@ -111,6 +112,10 @@ export const darkTheme = {
   },
 
   shadow: shadows.dark,
+
+  // Ley 20 (D-358 S58): en dark la elevación la dice el paso de luminancia
+  // de bg.card — estos tokens resuelven a contacto mínimo, jamás calentar el fondo.
+  elevacion: elevacion.dark,
 
   border: {
     width:   1,
