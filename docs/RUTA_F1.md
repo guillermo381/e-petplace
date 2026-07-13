@@ -104,6 +104,17 @@ expediente se alimenta solo.
 > founder S57 + notas de Kary cuando existan) → 3º CORRIDA E2E como
 > JUEZ FINAL (guion en poder del founder, enmendado a letra v1.4) →
 > 4º recién ahí se abre el siguiente servicio (A3).
+>
+> **ESTADO AL CIERRE S59 (13-14 Jul 2026):** pasos 1º y 2º CUMPLIDOS —
+> gates de espera VERDES (D-365 ✅) y la pasada de acabados ejecutada
+> (S58) + el AFINADO y EL DURANTE construidos (S59, MODELO_PASEO v1.5
+> §7). **El paso 3º — la CORRIDA E2E como juez — queda PENDIENTE: S60
+> abre con ella como PRIMER BLOQUE, en piedra.** *(Corchete del founder
+> sin resolver al cierre S59 — rama conservadora por L-142; si la
+> corrida ya fue VERDE, una línea del founder enmienda esto y el paseo
+> se declara CERRADO.)* Nota de secuencia declarada: A4 (grooming) abrió
+> su FUNDACIÓN en S59 por letra firmada del founder — la excepción a la
+> secuencia es del dueño de la secuencia.
 
 ## A3 — El vet: agenda, adopción de caso, telemedicina
 
@@ -130,6 +141,16 @@ honesta:** relevamiento de qué falta portar del portal web congelado
 > es D-383 (grooming-2). La conversación con el groomer real sigue
 > BLOQUEANTE para abrir a prestadores reales, no para construir (§10.3
 > del modelo).
+>
+> **ESTADO AL CIERRE S59:** el LADO PRESTADOR está VIVO — wizard de 2
+> pasos (tallas/precios/extra + horarios, sección COMPARTIDA con el
+> paseo), el mundo Grooming abierto en Negocio, y el COBRO ya resuelve
+> por talla del perfil + extra con snapshot congelado (migración
+> `20260714000000`, asserts 6/6). **FALTA la reserva del DUEÑO**
+> (momento-primero adaptado: servicio→hora, la duración es
+> consecuencia; talla del perfil con pregunta si NULL; checkout del
+> chasis) — Bloque 1 del arranque S60. Curas B6 del gate del founder
+> en cola de la B.
 
 ## A5 — Producto-que-sabe, después el coach
 

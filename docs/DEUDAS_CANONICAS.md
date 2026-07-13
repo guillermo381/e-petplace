@@ -1514,7 +1514,8 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 #### D-364 — Pantalla de elección de destino del reembolso (banco vs saldo e-PetPlace)
 ⏸ DIFERIDA (ya declarada en P18 — esta entrada es el puntero de deuda). La elección del destino (medio de pago original con sus ~15 días hábiles declarados / saldo e-PetPlace en segundos) se construye con las DOS vías reales; el saldo e-PetPlace nace con su letra financiera propia ANTES del primer crédito (financiero v2.7 §7.16). Disparo: Kushki fase 1. Origen: P18 (founder S57).
 
-#### D-365 — Gates de ESPERA del founder (hold que expira, paquete que vence)
+#### D-365 — Gates de ESPERA del founder (hold que expira, paquete que vence) ✅ CERRADA (S59 — gates corridos VERDES)
+~~🟡 ALTA~~ **CERRADA en S59**: el founder corrió los dos escenarios de espera en la tanda de gates S59 y salieron VERDES — sin curas. Letra original:
 🟡 ALTA (deuda de cierre de S57 — los corre el FOUNDER; curas si fallan). Los dos escenarios que los gates felices no cubren porque exigen tiempo real: (1) el hold de 15 min que expira sin pagar (la franja debe re-ofertarse sola y el checkout decirlo honesto); (2) el vencimiento del paquete (el aviso sereno UNO ≤3 días antes vía `vencer_paquetes_salidas` + el breakage declarado — la corrida hoy es manual/cron pendiente, nota 6.6 del financiero). Disparo: el founder los corre a su ritmo; toda falla vuelve como tanda de curas. Origen: veredicto del gate S57.
 
 #### D-366 — Sesión de USABILIDAD/navegación del cliente (segunda pasada, founder S58; ENMENDADA S59)
@@ -1538,7 +1539,8 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 #### D-372 — Glifos de tabs centralizados en el registry
 🟢 Los tabs de ambas apps arman sus Svg localmente con estadoPorHuella; con el lote 3 vivo, migrar los glifos al registry (una fuente). Disparo: pasada de tabs post-gate del lote.
 
-#### D-373 — Tira horizontal: forense L-132 abierto en el CLIENTE
+#### D-373 — Tira horizontal: forense L-132 abierto en el CLIENTE ✅ CERRADA (S59 — gate en dispositivo VERDE)
+~~🟡~~ **CERRADA en S59**: el gate en dispositivo de la Hoja del plan salió VERDE — la tira NO pierde contra el swipe-to-close; el forense L-132 del cliente se cierra sin cura. Letra original:
 🟡 La tira (ScrollView horizontal) dentro de Hojas puede perder contra el swipe-to-close en Android como L-132 — web no lo delata. Verificar EN DISPOSITIVO las tiras de plan-hoja/paquete-hoja; si pierde, patrón HojaScroll horizontal. Disparo: gate de la Hoja del plan.
 
 #### D-374 — Háptica del slider/interruptor (expo-haptics) ✅ CERRADA (S59 — decisión founder: SIN háptica v1)
@@ -1586,11 +1588,19 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 
 > **Registro S59-A2 (escritora única):** cerradas **D-330** (P19 firmada — el paseo es grupal por norma), **D-374** (decisión founder: sin háptica v1; reabre solo si el ensayo la pide), **D-376** (regla 76(f) firmada al contrato v1.10). **D-375 se cura en la migración única de esta sesión** (ver su entrada al cierre). Letra nueva: `MODELO_PASEO.md` v1.5 (§6.1 plan L-V · §6.4 sugeridos 80/60 · §7 EL DURANTE) + `POLITICAS` v1.7 (P19).
 
+> **CIERRE S59 (registro final, escritora única):** cerradas **D-330** (P19 completa: norma + DB + guard en tres puertas + UI), **D-355** (contratar_plan_paseo reescrita nativa al entrar el guard L-V), **D-365** (gates de espera VERDES), **D-373** (la tira no pierde — gate verde), **D-374** (sin háptica v1), **D-375** (precio_plan verdadero, migración `20260713170000`), **D-376** (76(f) al contrato v1.10, estrenada 2× en la propia tanda). Nuevas **D-377→D-386** (realtime del durante · policies {public} · razas · domicilio · uñas · catálogos S26 · restricciones grooming-2 · ancla híbrida · salida grupal del HOY · franjas por servicio). **Sin lecciones numeradas nuevas** — el hallazgo estructural de la tanda (el modelo de familia no podía editar `mascotas`; el helper legacy `mascota_codueño` no conocía a `familia_miembro`) quedó curado y documentado en `20260713213000`. **E2E juez: PENDIENTE — S60 abre con la corrida como primer bloque (corchete del founder sin resolver al cierre; rama conservadora asentada por L-142).**
+
 #### D-377 — Realtime del DURANTE (suscripción push al track/novedades)
 🟢 MEDIA. La frescura v1 del EN VIVO del dueño es HONESTA por diseño (§7.4 del paseo): sondeo ~30 s con pantalla en foco + pull-to-refresh + "Actualizado hace X" — coherente con un GPS que escribe ~cada 60 s foreground-only (D-292). La suscripción realtime (canal supabase sobre `eventos_mascota_paseo`/`evento_paseo_novedades`) se construye cuando la frescura del insumo la justifique. **Disparo: GPS de fondo (B5/D-292) construido, o el ensayo pidiendo más frescura.** Origen: S59 (§7 del paseo, letra firmada).
 
 #### D-378 — Higiene: policies con rol `{public}` en tablas del paseo
 ⚪ BAJA. `eventos_mascota_paseo` y `evento_paseo_novedades` tienen sus policies colgadas del rol `{public}` mientras el resto de la familia del durante (`evento_atencion`, `evento_archivo_adjunto`, `evento_grooming_notas/incidencias`) usa `{authenticated}`. SIN efecto práctico hoy (RLS activa + las funciones gatean auth), pero es asimetría que confunde relevamientos. Homogeneizar a `{authenticated}` la próxima vez que esas policies se toquen. Origen: relevamiento S59-A1.
+
+#### D-385 — La salida GRUPAL en el HOY del prestador (hallazgo de gate S59)
+🟢 MEDIA. Con cupo >1 (que P19 legaliza como norma), N citas vivas del MISMO bloque horario se pintan como N filas separadas en el HOY — deberían ser UNA salida con N mascotas (la unidad de trabajo del paseador es la SALIDA, no la cita). Toca la vista del prestador (agrupar por prestador+ventana) y quizá el EN VIVO del dueño (su cita sigue siendo suya — la agrupación es del lado oficio). **Disparo: la sesión D-366, o el pulgar del founder antes.** Origen: hallazgo del gate founder S59.
+
+#### D-386 — Franjas de horario POR SERVICIO (el prestador con dos oficios)
+🟢 MEDIA. `prestador_horarios` admite `servicio_id` (NULL = franja para todo), pero el wizard de cada oficio (paseo S58, grooming S59 — sección horarios COMPARTIDA) escribe franjas generales: un prestador con DOS oficios no puede declarar "paseo por la mañana, grooming por la tarde". La estructura ya lo soporta — falta la UI y la letra fina (¿la franja general convive con la específica?). **Disparo: el primer prestador con dos oficios que pida horarios distintos.** Origen: relevamiento S59 (wizard grooming de la B sobre la sección compartida).
 
 #### D-379 — Catálogo de razas por especie con características
 🟡 ALTA. Catálogo de razas por especie con características (talla y pelaje DEFAULT → pre-llenan el perfil; más adelante, insumo del Coach y del producto-que-sabe). Reglas de la letra (founder S59, `MODELO_GROOMING.md` §3): **"Mestizo / No sé" es respuesta LEGÍTIMA** de primera clase; **el catálogo SUGIERE, el dueño CONFIRMA** — jamás pisa lo declarado. Grooming v1 NO lo espera (pregunta talla/pelaje directo). **Disparo: antes del soft launch.** Origen: S59 (letra del grooming).
