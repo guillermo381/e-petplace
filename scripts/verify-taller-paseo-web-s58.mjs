@@ -1,10 +1,8 @@
-// Verificación runtime web S58-B B1b: EL ARTE DEL PASEO + RESUMEN.
-// El mundo Paseo reemplaza a /servicios y /horarios en Negocio; el
-// resumen es la portada (estado + filas por sección + espejo); el
-// taller abre con sus secciones (duraciones con slider, plan/paquete,
-// días/horarios, zonas D-331, vacaciones puente) y el CTA único.
-// SOLO LECTURA: jamás se toca "Guardar tu oferta". Dev server: PORT
-// (default 8086) — servidor propio, no se pisa un Metro ajeno (S57).
+// Verificación runtime web S58-B — EL ARTE v3 (wizard de secciones).
+// Negocio como mundos → resumen-portada → secciones SUELTAS desde los
+// lápices (duraciones apiladas / horarios multi-día / zonas por país)
+// + el WIZARD por URL directa (Paso 1→2→3, solo lectura: Guardar JAMÁS
+// se toca). Dev server: PORT (default 8086), sesión demo.
 import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
 
@@ -42,78 +40,73 @@ await page.getByRole('textbox', { name: 'Contraseña' }).fill(env.EXPO_PUBLIC_DE
 await page.getByText('Entrar', { exact: true }).click();
 await esperar('Tus paseos de hoy', 60);
 
-// ── T0 (B4+B2 en Hoy): segmentado + techo de tinta montados ──
-// (el techo pinta al instante; el segmento espera la pantalla 'listo')
+// ── T0 (B4+B2 en Hoy): segmentado + techo montados ──
 let t = await esperar('Semana', 20);
 check(t.includes('Semana'), 'T0 el segmento Hoy/Semana vive (SelectorSegmentado)');
 
-// ── T1: NEGOCIO COMO MUNDOS (B1a); las entradas viejas murieron ──
+// ── T1: NEGOCIO COMO MUNDOS ──
 await page.getByRole('tab', { name: /Negocio/ }).click();
 t = await esperar('Tu oferta', 20);
-check(t.includes('Paseo'), 'T1 la tarjeta-mundo Paseo vive en Tu oferta');
-check(!t.includes('Servicios y precios'), 'T1b "Servicios y precios" murió de Negocio');
-check(t.includes('Grooming'), 'T1c la puerta honesta del mundo Grooming');
-check(!t.includes('Marca los días en que no paseas'), 'T1d la celda Vacaciones de Negocio murió (vive en el mundo)');
+check(t.includes('Paseo'), 'T1 la tarjeta-mundo Paseo');
+check(!t.includes('Servicios y precios'), 'T1b las entradas viejas siguen muertas');
+check(t.includes('Grooming'), 'T1c la puerta honesta Grooming');
 
-// ── T2: el RESUMEN es la portada del mundo ──
+// ── T2: el RESUMEN-PORTADA ──
 await page.getByRole('button', { name: 'Paseo' }).first().click();
 t = await esperar('Tu oferta de paseo', 30);
-const enResumen = t.includes('Tu oferta de paseo');
-check(enResumen, 'T2 entrar a Paseo aterriza en el resumen');
-// el título pinta antes que los datos (esqueleto): esperar el PIE de la
-// pantalla lista (espejo en peldaño 1 · invitación en peldaño 0)
+check(t.includes('Tu oferta de paseo'), 'T2 la portada del mundo');
 t = await esperar('Así lo ve el dueño', 25);
-if (!t.includes('Así lo ve el dueño')) t = await esperar('Tu servicio de paseo', 10);
-if (enResumen && !t.includes('Tu servicio de paseo')) {
-  // peldaño 1+: el estado + las filas + el espejo
-  check(t.includes('Visible para las familias') || t.includes('Todavía no visible'), 'T2b el estado dice su verdad');
-  check(t.includes('Duraciones y precios'), 'T2c fila Duraciones y precios');
-  check(t.includes('Plan y paquete'), 'T2d fila Plan y paquete');
-  check(t.includes('Días y horarios'), 'T2e fila Días y horarios');
-  check(t.includes('Zonas de cobertura'), 'T2f fila Zonas de cobertura (D-331 viva)');
-  check(t.includes('Así lo ve el dueño'), 'T2g el espejo al pie');
-  check(t.includes('Editar tu oferta'), 'T2h el CTA primario ARRIBA (cura de gate)');
-  await page.getByText('Editar tu oferta', { exact: true }).click();
-} else {
-  // peldaño 0 — la invitación educa y el CTA abre el taller
-  check(t.includes('Abrir el taller'), 'T2b peldaño 0 con camino al taller');
-  await page.getByText('Abrir el taller', { exact: true }).click();
-}
+check(t.includes('Visible para las familias') || t.includes('Todavía no visible'), 'T2b el estado dice su verdad');
+check(t.includes('Editar tu oferta'), 'T2c el CTA primario arriba');
+check(t.includes('Duraciones y precios') && t.includes('Días y horarios') && t.includes('Zonas de cobertura'), 'T2d las filas-lápiz por sección');
+check(t.includes('Así lo ve el dueño'), 'T2e el espejo al pie');
 
-// ── T3: EL ARTE DEL PASEO — una pantalla, todo el oficio ──
+// ── T3: sección DURACIONES (tarjetas apiladas, v3) ──
+await page.getByText('Editar tu oferta', { exact: true }).click();
 t = await esperar('El arte del paseo', 30);
-check(t.includes('El arte del paseo'), 'T3 el taller abre con su título canónico');
 t = await esperar('Duraciones y precios', 20);
-check(t.includes('Duraciones y precios'), 'T3b sección duraciones');
-check(t.includes('30 min') && t.includes('5 horas'), 'T3c el menú canónico entero a la vista (30…300)');
-check(t.includes('Plan y paquete'), 'T3d sección plan y paquete');
-check(t.includes('Días y horarios'), 'T3e sección días y horarios');
-check(t.includes('Lunes'), 'T3f la tira de días (lunes primero)');
-check(t.includes('Zonas de cobertura'), 'T3g sección zonas (contrato D-331)');
-check(t.includes('Quito'), 'T3g2 las ciudades del PAÍS como chips (Ley 22 + filtro país)');
-check(!t.includes('Bogotá') || t.includes('Otra ciudad'), 'T3g3 lo de otro país entra por su puerta');
-check(t.includes('Otra ciudad'), 'T3g4 la puerta "Otra ciudad" existe (cura de gate)');
-check(t.includes('Vacaciones'), 'T3h la celda-puente a vacaciones');
-check(t.includes('Así lo ve el dueño'), 'T3i el espejo del artesano al pie');
-check(t.includes('Guardar tu oferta'), 'T3j el CTA único en tinta');
-// el precio se DESLIZA: el control adjustable existe (regla del teclado)
-const sliders = await page.locator('[role="adjustable"], [aria-valuenow]').count();
-check(sliders >= 1 || t.includes('e-PetPlace retiene'), 'T3k slider de precio + neto de fee_configs presentes');
-// Ley 22: el binario es un Interruptor (switch), no un botón
+check(t.includes('Duraciones y precios'), 'T3 la sección duraciones abre suelta');
 const switches = await page.getByRole('switch').count();
-check(switches >= 1, `T3l "Ofrecer esta duración" es Interruptor (switches: ${switches})`);
+check(switches >= 1, `T3b tarjetas apiladas con Interruptor por duración (${switches})`);
+check(t.includes('plan mensual'), 'T3c plan por salida EN la tarjeta');
+check(t.includes('paquete') || t.includes('Paquete'), 'T3d paquete por salida EN la tarjeta');
+check(t.includes('5, 10 o 15'), 'T3e presets del paquete EN LETRA (D-354)');
+check(!t.includes('Nombre (opcional)'), 'T3f nombre/descripción MURIERON de la UI (L-144)');
+check(t.includes('e-PetPlace retiene'), 'T3g neto vivo de fee_configs');
+check(t.includes('Así lo ve el dueño'), 'T3h el espejo en la sección');
+check(t.includes('Guardar tu oferta'), 'T3i el guardado único');
 
-// ── T4: la Hoja de plan/paquete dice los presets EN LETRA (D-354) ──
-const filaPlan = page.getByText(/Sin plan ni paquete|Plan \$|Paquete \$/).first();
-if (await filaPlan.isVisible().catch(() => false)) {
-  await filaPlan.click();
-  t = await esperar('por adelantado', 10);
-  check(t.includes('5, 10 o 15'), 'T4 presets 5/10/15 en letra en la Hoja');
-  check(t.includes('plan mensual'), 'T4b campo del plan presente');
-} else {
-  check(t.includes('Primero ofrece una duración'), 'T4 sin duraciones: voz honesta con camino');
-}
+// ── T4: sección HORARIOS (multi-día, letra sola) ──
+await page.goBack();
+await esperar('Tu oferta de paseo', 20);
+await page.getByText('Días y horarios').first().click();
+t = await esperar('Días y horarios', 20);
+check(t.includes('aplica a todos los marcados'), 'T4 la voz del multi-día');
+check(t.includes('Toda la semana'), 'T4b el atajo toda la semana');
+check(t.includes('Agregar franja'), 'T4c agregar franja para los días marcados');
+check(t.includes('Vacaciones'), 'T4d la celda-puente a vacaciones vive acá');
+
+// ── T5: sección ZONAS ──
+await page.goBack();
+await esperar('Tu oferta de paseo', 20);
+await page.getByText('Zonas de cobertura').first().click();
+t = await esperar('Zonas de cobertura', 20);
+check(t.includes('Quito'), 'T5 las ciudades del país como chips');
+check(t.includes('Otra ciudad'), 'T5b la puerta Otra ciudad');
+
+// ── T6: el WIZARD (URL directa; solo lectura — Guardar jamás se toca) ──
+await page.goto(`http://localhost:${PORT}/paseo/taller?modo=wizard`, { waitUntil: 'networkidle' });
+t = await esperar('Paso 1 de 3', 30);
+check(t.includes('Paso 1 de 3') && t.includes('Duraciones y precios'), 'T6 wizard paso 1');
+check(t.includes('Continuar'), 'T6b el CTA Continuar');
+await page.getByText('Continuar', { exact: true }).click();
+t = await esperar('Paso 2 de 3', 15);
+check(t.includes('Paso 2 de 3') && t.includes('Días y horarios'), 'T6c wizard paso 2');
+await page.getByText('Continuar', { exact: true }).click();
+t = await esperar('Paso 3 de 3', 15);
+check(t.includes('Paso 3 de 3') && t.includes('Zonas de cobertura'), 'T6d wizard paso 3');
+check(t.includes('Guardar tu oferta'), 'T6e el guardado único cierra el wizard');
 
 await browser.close();
-console.log(fallos === 0 ? `\nSMOKE S58 TALLER: TODO VERDE` : `\nSMOKE S58 TALLER: ${fallos} fallos`);
+console.log(fallos === 0 ? `\nSMOKE S58 v3: TODO VERDE` : `\nSMOKE S58 v3: ${fallos} fallos`);
 process.exit(fallos === 0 ? 0 : 1);

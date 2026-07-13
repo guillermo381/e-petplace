@@ -184,7 +184,14 @@ export default function OfertaPaseo() {
           <EstadoVacio
             titulo={t('ofertaPaseo.vacioTitulo')}
             descripcion={t('ofertaPaseo.vacioCuerpo')}
-            accion={<Boton variante="primario" etiqueta={t('ofertaPaseo.vacioCta')} onPress={() => irAlTaller()} />}
+            accion={
+              // entrada por estado (v3): sin oferta = el WIZARD guía los 3 pasos
+              <Boton
+                variante="primario"
+                etiqueta={t('ofertaPaseo.vacioCta')}
+                onPress={() => router.push({ pathname: '/paseo/taller', params: { modo: 'wizard' } })}
+              />
+            }
           />
         </View>
       )}

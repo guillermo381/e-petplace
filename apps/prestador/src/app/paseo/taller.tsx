@@ -1,41 +1,35 @@
 /**
- * EL ARTE DEL PASEO — el taller (S58-B B1b, adenda FIRMADA del founder).
- * UNA pantalla con scroll, todo el oficio: duraciones/precios · plan y
- * paquete · días y horarios (cupo POR FRANJA — el motor _agenda_ocupacion
- * es la verdad, jamás un cupo global) · celda-puente a Vacaciones · CTA
- * único "Guardar tu oferta" en tinta. Absorbe /servicios y /horarios
- * (S55-B B2), que MUEREN con esta pantalla.
+ * EL ARTE DEL PASEO v3 — WIZARD DE SECCIONES (S58-B, firma founder).
+ * TRES pasos + resumen la primera vez (entrada: "Configurar tu oficio");
+ * las MISMAS pantallas como secciones sueltas desde los lápices de la
+ * portada (paso = sección = editor). El BORRADOR y el GUARDADO ÚNICO
+ * quedan intactos: nada persiste hasta "Guardar tu oferta"; el guardado
+ * aplica el diff en secuencia por la puerta única y cada éxito
+ * actualiza su base (fallo parcial deja el resto dirty y reintentable —
+ * RPC atómica de oferta = pedido a la A anotado).
  *
  * TESIS: "Todo tu oficio de paseo se gobierna en un solo lugar — lo
- * ajustas y lo guardas UNA vez."
- * FIRMA (comportamiento, dosis prestador): el espejo "Así lo ve el dueño"
- * al pie responde EN VIVO a cada ajuste del borrador — consecuencia
- * visible antes de guardar (patrón Kaxo).
+ * ajustas y lo guardas UNA vez." FIRMA: el espejo del artesano responde
+ * EN VIVO al borrador en cada paso/sección.
  *
- * MODELO DE BORRADOR: nada persiste hasta el CTA. El guardado aplica el
- * diff en secuencia por la puerta única; cada operación que entra
- * actualiza su base en el borrador — un fallo parcial deja el resto
- * DIRTY y el CTA vivo (nada se pierde, se reintenta lo que falta).
- * Sin RPC atómica de oferta completa (pedido a la A anotado), la
- * honestidad es esa: lo guardado quedó, lo fallido se dice.
+ * Paso 1 — DURACIONES: cada duración ofrecida es una TARJETA APILADA
+ *   visible (Interruptor + SliderPrecio + neto + plan y paquete por
+ *   salida). El gating por chip MURIÓ. El "+" agrega del menú canónico.
+ *   Nombre/descripción: FUERA de la UI (relevamiento L-144: el motor
+ *   los sirve al dueño vía COALESCE(nombre_custom, ts.nombre) — la
+ *   columna QUEDA; su edición muda al perfil del prestador = deuda
+ *   declarada en el reporte).
+ * Paso 2 — HORARIOS: 7 días con LETRA SOLA en MULTI-selección (contrato
+ *   `multiple` de SelectorOpcion, S56 — cero invento); la franja nueva
+ *   (horas + cupo StepperCantidad) aplica a los días marcados; atajo
+ *   "Toda la semana". La lista agrupa franjas idénticas y la edición
+ *   DICE a qué días pertenece.
+ * Paso 3 — ZONAS: país propio como chips + puerta "Otra ciudad" (v2.1).
  *
- * MATERIALES: SliderPrecio VIVO (comp. 31, registro 'aa' — §15b.1, la
- * háptica llega por su hook onStep cuando expo-haptics entre con build
- * L-134) · ZONAS DE COBERTURA VIVA (contrato D-331 v1 declarativa de la
- * A: cat_ciudades solo-admin + prestador_zonas; declara, no filtra).
- * PENDIENTES DECLARADOS (armado en estructura, L-143 — el COPIAR NIVEL
- * fino llega con el PNG patrón):
- *   · stepper del cupo → hoy SelectorOpcion 1-4 (patrón aprobado).
- *   · interruptor (toggle) → hoy Boton ghost Ofrecer/Pausar.
- *   · el acento tealDark en SelectorOpcion/controles de packages/ui es
- *     territorio A (los componentes no exponen registro) — anotado.
- *
- * Letra leída (regla de piedra): DISEÑO_EXPERIENCIA §15b v1.5 (la dosis)
- * · MODELO_FINANCIERO v2.7 §7.13/§7.15 (neto SIEMPRE de fee_configs vía
- * fees.ts) · MODELO_PASEO v1.4 §2 (menú canónico en CHECK de DB —
- * BLOQUES_PASEO es su espejo).
- * Regla 32: 0=Domingo viaja a DB sin transformaciones.
- * Dosis baja (test 7): cero acento de capa, CTA en tinta, sin gradiente.
+ * Letra: DISEÑO_EXPERIENCIA §15b v1.5 · FINANCIERO v2.7 7.13/7.15 (neto
+ * SIEMPRE de fee_configs) · PASEO v1.4 §2 (menú canónico en CHECK) ·
+ * D-354 (presets del paquete EN LETRA). Regla 32: 0=Domingo a DB sin
+ * transformaciones. Dosis baja: acento de oficio, CTA en tinta.
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -100,14 +94,15 @@ type Pantalla =
       comisionPct: number | null;
     };
 
+type Seccion = 'duraciones' | 'horarios' | 'zonas';
+const PASOS: readonly Seccion[] = ['duraciones', 'horarios', 'zonas'];
+
 interface DraftOferta {
   base: OfertaPaseoPropia | null;
   ofrecida: boolean;
   precio: string;
   plan: string;
   paquete: string;
-  nombre: string;
-  descripcion: string;
 }
 
 interface DraftFranja {
@@ -123,11 +118,10 @@ interface DraftFranja {
   baseActivo: boolean | null;
 }
 
-// zonas v1 DECLARATIVA (contrato D-331 de la A: declara, no filtra;
-// catálogo solo-admin — ciudad faltante = pedido, jamás texto libre)
+// zonas v1 DECLARATIVA (contrato D-331: declara, no filtra)
 interface DraftZona {
   key: string;
-  id: string | null; // null = nace al guardar
+  id: string | null;
   ciudad: CiudadCatalogo;
   quitar: boolean;
 }
@@ -141,9 +135,7 @@ for (let m = 5 * 60; m <= 22 * 60; m += 30) {
   HORAS.push(`${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`);
 }
 
-// el riel del precio: pasos de $0.25 (letra §15b.5a). Piso $0.25; techo
-// $40 que se estira si una oferta real ya lo supera (decisión de rango
-// declarada al gate — la letra fija el PASO, no el techo).
+// el riel del precio: pasos de $0.25 (§15b.5a); techo $40 estirable
 const PASO_PRECIO = 0.25;
 function pasosPrecio(techo: number): number[] {
   const max = Math.max(40, Math.ceil(techo));
@@ -164,8 +156,7 @@ function leerPrecio(texto: string): number | null {
   return Math.round(v * 100) / 100;
 }
 
-// Plan y paquete distinguen tres estados: vacío = SIN oferta (null
-// honesto), número válido, o inválido (bloquea el guardado con voz).
+// Plan y paquete: vacío = SIN oferta (null honesto) · número · inválido
 function leerPorSalida(texto: string): number | null | 'invalido' {
   if (texto.trim() === '') return null;
   const v = Number.parseFloat(texto.replace(',', '.'));
@@ -181,10 +172,8 @@ function draftDesdeBase(o: OfertaPaseoPropia | null): DraftOferta {
         precio: o.precio.toFixed(2),
         plan: o.precioPlan !== null ? o.precioPlan.toFixed(2) : '',
         paquete: o.precioPaquete !== null ? o.precioPaquete.toFixed(2) : '',
-        nombre: o.nombre ?? '',
-        descripcion: o.descripcion ?? '',
       }
-    : { base: null, ofrecida: false, precio: '', plan: '', paquete: '', nombre: '', descripcion: '' };
+    : { base: null, ofrecida: false, precio: '', plan: '', paquete: '' };
 }
 
 function draftDesdeFranja(f: FranjaHorario): DraftFranja {
@@ -202,6 +191,8 @@ function draftDesdeFranja(f: FranjaHorario): DraftFranja {
   };
 }
 
+// nombre/descripción quedaron FUERA del diff (edición mudada al perfil
+// del prestador — deuda declarada; el guardado no las toca)
 function ofertaDirty(d: DraftOferta): boolean {
   if (d.base === null) return d.ofrecida;
   const precio = leerPrecio(d.precio);
@@ -211,9 +202,7 @@ function ofertaDirty(d: DraftOferta): boolean {
     d.ofrecida !== d.base.activo ||
     (precio !== null && precio !== d.base.precio) ||
     (plan !== 'invalido' && plan !== d.base.precioPlan) ||
-    (paquete !== 'invalido' && paquete !== d.base.precioPaquete) ||
-    d.nombre !== (d.base.nombre ?? '') ||
-    d.descripcion !== (d.base.descripcion ?? '')
+    (paquete !== 'invalido' && paquete !== d.base.precioPaquete)
   );
 }
 
@@ -254,8 +243,7 @@ function VozSecundaria({ texto }: { texto: string }) {
   );
 }
 
-// la comisión visible donde se pone el precio (financiero 7.15: el % viene
-// del dato leído de fee_configs, jamás hardcodeado; sin dato = voz honesta)
+// comisión visible donde se pone el precio (7.15: el % es DATO leído)
 function VozComision({ pct, precio }: { pct: number | null; precio: number | null }) {
   const { t } = useTraduccion();
   const texto =
@@ -267,8 +255,7 @@ function VozComision({ pct, precio }: { pct: number | null; precio: number | nul
   return <VozSecundaria texto={texto} />;
 }
 
-// la voz de un PRECIO POR SALIDA (plan o paquete — S56/S57, heredada):
-// vacío = voz honesta del null; con valor = neto 7.15 + comparación sin juzgar
+// la voz de un PRECIO POR SALIDA (plan/paquete, heredada S56/S57)
 function VozPorSalida({
   pct,
   texto,
@@ -298,45 +285,48 @@ export default function TallerPaseo() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
-  const { seccion } = useLocalSearchParams<{ seccion?: string }>();
+  const { seccion, modo } = useLocalSearchParams<{ seccion?: string; modo?: string }>();
+
+  const modoWizard = modo === 'wizard';
+  const seccionParam: Seccion =
+    seccion === 'horarios' ? 'horarios' : seccion === 'zonas' ? 'zonas' : 'duraciones'; // 'planes' = alias
 
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [intento, setIntento] = useState(0);
+  const [paso, setPaso] = useState(0);
+  // la validación puede forzar la sección con el error (modo edición)
+  const [seccionForzada, setSeccionForzada] = useState<Seccion | null>(null);
+  const seccionVisible: Seccion = modoWizard ? PASOS[paso] : (seccionForzada ?? seccionParam);
 
-  // EL BORRADOR — null hasta la primera carga; sobrevive a los reintentos
-  // de guardado (solo un guardado COMPLETO o un reintento de carga lo re-arma)
+  // EL BORRADOR — sobrevive a reintentos de guardado (guardado único)
   const [drafts, setDrafts] = useState<Record<BloquePaseo, DraftOferta> | null>(null);
   const [franjas, setFranjas] = useState<DraftFranja[] | null>(null);
   const [zonas, setZonas] = useState<DraftZona[] | null>(null);
   const [ciudades, setCiudades] = useState<CiudadCatalogo[]>([]);
   const [paises, setPaises] = useState<PaisActivo[]>([]);
-  const [hojaOtraCiudad, setHojaOtraCiudad] = useState(false);
 
-  const [duracionSel, setDuracionSel] = useState<BloquePaseo>(30);
-  const [diaSel, setDiaSel] = useState<number>(1);
-  const [errorPlan, setErrorPlan] = useState<string | undefined>(undefined);
-  const [errorPaquete, setErrorPaquete] = useState<string | undefined>(undefined);
+  const [erroresPlan, setErroresPlan] = useState<Partial<Record<BloquePaseo, string>>>({});
+  const [erroresPaquete, setErroresPaquete] = useState<Partial<Record<BloquePaseo, string>>>({});
 
   // Hojas
-  const [hojaNombre, setHojaNombre] = useState(false);
-  const [hojaPlanPaquete, setHojaPlanPaquete] = useState<BloquePaseo | null>(null);
-  const [hojaFranja, setHojaFranja] = useState<string | null>(null);
+  const [hojaAgregarDuracion, setHojaAgregarDuracion] = useState(false);
+  const [hojaGrupo, setHojaGrupo] = useState<string[] | null>(null); // keys del grupo de franjas
   const [confirmandoQuitar, setConfirmandoQuitar] = useState(false);
   const [creandoFranja, setCreandoFranja] = useState(false);
   const [vistaNueva, setVistaNueva] = useState<'form' | 'desde' | 'hasta'>('form');
   const [desdeSel, setDesdeSel] = useState<string | null>(null);
   const [hastaSel, setHastaSel] = useState<string | null>(null);
-  const [cupoSel, setCupoSel] = useState('1');
+  const [cupoSel, setCupoSel] = useState(1);
+  const [hojaOtraCiudad, setHojaOtraCiudad] = useState(false);
+
+  // Paso 2: los días marcados para la PRÓXIMA franja (multi-selección)
+  const [diasSel, setDiasSel] = useState<number[]>([]);
 
   const [guardando, setGuardando] = useState(false);
-
   const scrollRef = useRef<ScrollView>(null);
-  const anclas = useRef<Record<string, number>>({});
-  const anclado = useRef(false);
   const contadorNuevas = useRef(0);
 
-  // carga ÚNICA (editor de borrador: el refetch-en-focus clobbearía el
-  // draft al volver de /vacaciones — decisión declarada)
+  // carga ÚNICA (editor de borrador — el refetch-en-focus clobbearía)
   useEffect(() => {
     let vigente = true;
     void (async () => {
@@ -369,10 +359,6 @@ export default function TallerPaseo() {
       setZonas(rZonas.data.map((z) => ({ key: z.id, id: z.id, ciudad: z.ciudad, quitar: false })));
       setCiudades(rCiudades.ok ? rCiudades.data : []);
       setPaises(rPaises.ok ? rPaises.data : []);
-      const primeraOfrecida = BLOQUES_PASEO.find((b) => iniciales[b].ofrecida);
-      if (primeraOfrecida !== undefined) setDuracionSel(primeraOfrecida);
-      const primerDia = ORDEN_DISPLAY.find((d) => rFranjas.data.some((f) => f.diaSemana === d));
-      if (primerDia !== undefined) setDiaSel(primerDia);
       setPantalla({
         estado: 'listo',
         prestadorId: prestador.data.id,
@@ -385,18 +371,6 @@ export default function TallerPaseo() {
       vigente = false;
     };
   }, [intento]);
-
-  // ancla ?seccion= — un solo scroll, cuando la sección ya midió
-  useEffect(() => {
-    if (pantalla.estado !== 'listo' || anclado.current || !seccion) return;
-    // 'planes' quedó como alias: el plan/paquete vive en el bloque de
-    // la duración (cura de gate) — la fila de la portada sigue anclando
-    const y = anclas.current[seccion === 'planes' ? 'duraciones' : seccion];
-    if (y !== undefined) {
-      anclado.current = true;
-      scrollRef.current?.scrollTo({ y, animated: false });
-    }
-  });
 
   const listo = pantalla.estado === 'listo' && drafts !== null && franjas !== null && zonas !== null;
   const pct = pantalla.estado === 'listo' ? pantalla.comisionPct : null;
@@ -414,18 +388,18 @@ export default function TallerPaseo() {
     }
   };
   const vozDia = (dia: number): string => t(`horarios.dia${dia as 0 | 1 | 2 | 3 | 4 | 5 | 6}` as const);
+  const letraDia = (dia: number): string => t(`taller.diaCorto${dia as 0 | 1 | 2 | 3 | 4 | 5 | 6}` as const);
   const vozCupo = (cupo: number): string =>
     cupo === 1 ? t('horarios.cupoUno') : t('horarios.cupoVarios', { cantidad: cupo });
 
   const actualizarDraft = (b: BloquePaseo, cambios: Partial<DraftOferta>) => {
     setDrafts((prev) => (prev === null ? prev : { ...prev, [b]: { ...prev[b], ...cambios } }));
   };
-  const actualizarFranjaDraft = (key: string, cambios: Partial<DraftFranja>) => {
-    setFranjas((prev) => (prev === null ? prev : prev.map((f) => (f.key === key ? { ...f, ...cambios } : f))));
+  const actualizarFranjas = (keys: string[], cambios: Partial<DraftFranja>) => {
+    setFranjas((prev) => (prev === null ? prev : prev.map((f) => (keys.includes(f.key) ? { ...f, ...cambios } : f))));
   };
 
   const zonaDirty = (z: DraftZona): boolean => (z.id === null ? !z.quitar : z.quitar);
-
   const hayCambios = useMemo(() => {
     if (drafts === null || franjas === null || zonas === null) return false;
     return (
@@ -435,7 +409,20 @@ export default function TallerPaseo() {
     );
   }, [drafts, franjas, zonas]);
 
-  // el espejo VIVO: deriva del borrador — la firma de la pantalla
+  // el riel del precio — techo estable desde las ofertas GUARDADAS
+  const pasos = useMemo(() => {
+    const techoBase = drafts === null ? 0 : Math.max(0, ...BLOQUES_PASEO.map((b) => drafts[b].base?.precio ?? 0));
+    return pasosPrecio(techoBase);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drafts === null]);
+  const etiquetasPasos = useMemo(() => pasos.map(monto), [pasos]);
+  const indicePrecio = (texto: string): number => {
+    const v = leerPrecio(texto);
+    if (v === null) return Math.round(5 / PASO_PRECIO) - 1;
+    return Math.min(Math.max(Math.round(v / PASO_PRECIO) - 1, 0), pasos.length - 1);
+  };
+
+  // el espejo VIVO — la firma: deriva del borrador entero en cada paso
   const datosEspejo = useMemo(() => {
     const ofrecidas = drafts === null ? [] : BLOQUES_PASEO.filter((b) => drafts[b].ofrecida && leerPrecio(drafts[b].precio) !== null);
     const precios = drafts === null ? [] : ofrecidas.map((b) => leerPrecio(drafts[b].precio) as number);
@@ -443,68 +430,80 @@ export default function TallerPaseo() {
     return {
       duraciones: ofrecidas.map(etiquetaCorta),
       desde: precios.length > 0 ? Math.min(...precios) : null,
-      conPlan: drafts !== null && ofrecidas.some((b) => leerPorSalida(drafts[b].plan) !== null && leerPorSalida(drafts[b].plan) !== 'invalido'),
-      conPaquete: drafts !== null && ofrecidas.some((b) => leerPorSalida(drafts[b].paquete) !== null && leerPorSalida(drafts[b].paquete) !== 'invalido'),
+      conPlan: drafts !== null && ofrecidas.some((b) => typeof leerPorSalida(drafts[b].plan) === 'number'),
+      conPaquete: drafts !== null && ofrecidas.some((b) => typeof leerPorSalida(drafts[b].paquete) === 'number'),
       dias: diasActivos.map(vozDia),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [drafts, franjas, t]);
 
-  function agregarFranjaDraft() {
-    if (franjas === null || desdeSel === null || hastaSel === null) return;
-    // solape local contra el borrador del día (el wrapper re-valida al guardar)
-    const solapa = franjas.some(
-      (f) => f.diaSemana === diaSel && !f.quitar && desdeSel < f.horaFin && f.horaInicio < hastaSel,
-    );
-    if (solapa) {
-      mostrar({ texto: t('horarios.solape'), variante: 'error' });
-      return;
+  // grupos de franjas: idénticas en horas+cupo+estado se muestran como UNA
+  // (la edición dice a qué días pertenece — mandato v3)
+  const grupos = useMemo(() => {
+    const vivas = (franjas ?? []).filter((f) => !f.quitar);
+    const porClave = new Map<string, DraftFranja[]>();
+    for (const f of vivas) {
+      const clave = `${f.horaInicio}|${f.horaFin}|${f.cupo}|${f.activo}`;
+      porClave.set(clave, [...(porClave.get(clave) ?? []), f]);
     }
-    contadorNuevas.current += 1;
-    setFranjas([
-      ...franjas,
-      {
+    return [...porClave.values()].sort((a, b) => a[0].horaInicio.localeCompare(b[0].horaInicio));
+  }, [franjas]);
+
+  const diasDeGrupo = (miembros: DraftFranja[]): string =>
+    ORDEN_DISPLAY.filter((d) => miembros.some((f) => f.diaSemana === d))
+      .map(letraDia)
+      .join(' · ');
+
+  function agregarFranjasDraft() {
+    if (franjas === null || desdeSel === null || hastaSel === null || diasSel.length === 0) return;
+    // solape local por CADA día marcado (el wrapper re-valida al guardar);
+    // se chequea TODO antes de agregar — jamás un alta parcial
+    for (const dia of diasSel) {
+      const solapa = franjas.some(
+        (f) => f.diaSemana === dia && !f.quitar && desdeSel < f.horaFin && f.horaInicio < hastaSel,
+      );
+      if (solapa) {
+        mostrar({ texto: `${vozDia(dia)}: ${t('horarios.solape')}`, variante: 'error' });
+        return;
+      }
+    }
+    const nuevas: DraftFranja[] = diasSel.map((dia) => {
+      contadorNuevas.current += 1;
+      return {
         key: `nueva-${contadorNuevas.current}`,
         id: null,
-        diaSemana: diaSel,
+        diaSemana: dia,
         horaInicio: desdeSel,
         horaFin: hastaSel,
-        cupo: Number.parseInt(cupoSel, 10),
+        cupo: cupoSel,
         activo: true,
         quitar: false,
         baseCupo: null,
         baseActivo: null,
-      },
-    ]);
+      };
+    });
+    setFranjas([...franjas, ...nuevas]);
     setCreandoFranja(false);
   }
 
-  // EL GUARDADO — el diff entero en secuencia; cada éxito actualiza su
-  // base (un fallo parcial deja el resto dirty y reintentabile)
+  // EL GUARDADO ÚNICO — el diff entero en secuencia (intacto de v2)
   async function guardarTodo() {
     if (guardando || drafts === null || franjas === null || zonas === null || pantalla.estado !== 'listo') return;
 
-    // validación previa con voz por duración (el precio suelto no puede
-    // ser inválido: el slider solo produce pasos del riel)
     for (const b of BLOQUES_PASEO) {
       const d = drafts[b];
       if (!ofertaDirty(d)) continue;
-      if (d.ofrecida && leerPrecio(d.precio) === null) {
-        // red imposible-por-diseño: si pasa, se apunta la duración
-        setDuracionSel(b);
-        scrollRef.current?.scrollTo({ y: anclas.current.duraciones ?? 0, animated: true });
-        return;
-      }
       if (leerPorSalida(d.plan) === 'invalido' || leerPorSalida(d.paquete) === 'invalido') {
-        setHojaPlanPaquete(b);
-        setErrorPlan(leerPorSalida(d.plan) === 'invalido' ? t('servicios.precioPlanInvalido') : undefined);
-        setErrorPaquete(leerPorSalida(d.paquete) === 'invalido' ? t('servicios.precioPaqueteInvalido') : undefined);
+        setErroresPlan((e) => ({ ...e, [b]: leerPorSalida(d.plan) === 'invalido' ? t('servicios.precioPlanInvalido') : undefined }));
+        setErroresPaquete((e) => ({ ...e, [b]: leerPorSalida(d.paquete) === 'invalido' ? t('servicios.precioPaqueteInvalido') : undefined }));
+        if (modoWizard) setPaso(0);
+        else setSeccionForzada('duraciones');
+        scrollRef.current?.scrollTo({ y: 0, animated: true });
         return;
       }
     }
 
     setGuardando(true);
-    // ofertas por duración
     for (const b of BLOQUES_PASEO) {
       const d = drafts[b];
       if (!ofertaDirty(d)) continue;
@@ -519,8 +518,6 @@ export default function TallerPaseo() {
           precio,
           precioPlan: plan === 'invalido' ? null : plan,
           precioPaquete: paquete === 'invalido' ? null : paquete,
-          nombre: d.nombre || undefined,
-          descripcion: d.descripcion || undefined,
         });
         if (!r.ok) {
           setGuardando(false);
@@ -537,8 +534,6 @@ export default function TallerPaseo() {
           precio: precio ?? undefined,
           precioPlan: plan === 'invalido' ? undefined : plan,
           precioPaquete: paquete === 'invalido' ? undefined : paquete,
-          nombre: d.nombre,
-          descripcion: d.descripcion,
           activo: d.ofrecida,
         });
         if (!r.ok) {
@@ -550,7 +545,6 @@ export default function TallerPaseo() {
       }
     }
 
-    // franjas: quitar → actualizar → crear
     for (const f of franjas) {
       if (!franjaDirty(f)) continue;
       if (f.id !== null && f.quitar) {
@@ -568,7 +562,7 @@ export default function TallerPaseo() {
           mostrar({ texto: r.mensaje, variante: 'error' });
           return;
         }
-        actualizarFranjaDraft(f.key, { baseCupo: f.cupo, baseActivo: f.activo });
+        actualizarFranjas([f.key], { baseCupo: f.cupo, baseActivo: f.activo });
       } else if (!f.quitar) {
         const r = await crearFranjaHorario({
           prestadorId: pantalla.prestadorId,
@@ -580,16 +574,15 @@ export default function TallerPaseo() {
         if (!r.ok) {
           setGuardando(false);
           mostrar({
-            texto: r.codigo === 'franja_solapada' ? t('horarios.solape') : r.mensaje,
+            texto: r.codigo === 'franja_solapada' ? `${vozDia(f.diaSemana)}: ${t('horarios.solape')}` : r.mensaje,
             variante: 'error',
           });
           return;
         }
-        actualizarFranjaDraft(f.key, { id: r.data.id, baseCupo: r.data.maxCitasPorSlot, baseActivo: r.data.activo });
+        actualizarFranjas([f.key], { id: r.data.id, baseCupo: r.data.maxCitasPorSlot, baseActivo: r.data.activo });
       }
     }
 
-    // zonas: quitar → agregar (v1 declarativa, contrato D-331)
     for (const z of zonas) {
       if (!zonaDirty(z)) continue;
       if (z.id !== null && z.quitar) {
@@ -617,41 +610,24 @@ export default function TallerPaseo() {
     else router.replace('/paseo');
   }
 
-  const d = drafts?.[duracionSel] ?? null;
-  const franjaEnHoja = franjas?.find((f) => f.key === hojaFranja) ?? null;
-  // el riel del precio — techo estable desde las ofertas GUARDADAS (el
-  // borrador no estira el riel mientras se arrastra)
-  const pasos = useMemo(() => {
-    const techoBase = drafts === null ? 0 : Math.max(0, ...BLOQUES_PASEO.map((b) => drafts[b].base?.precio ?? 0));
-    return pasosPrecio(techoBase);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [drafts === null]);
-  const etiquetasPasos = useMemo(() => pasos.map(monto), [pasos]);
-  const indicePrecio = (texto: string): number => {
-    const v = leerPrecio(texto);
-    if (v === null) return Math.round(5 / PASO_PRECIO) - 1;
-    return Math.min(Math.max(Math.round(v / PASO_PRECIO) - 1, 0), pasos.length - 1);
-  };
-  const franjasDelDia = franjas === null ? [] : franjas.filter((f) => f.diaSemana === diaSel && !f.quitar);
+  const bloquesConCard = drafts === null ? [] : BLOQUES_PASEO.filter((b) => drafts[b].ofrecida || drafts[b].base !== null);
+  const bloquesDisponibles = drafts === null ? [] : BLOQUES_PASEO.filter((b) => !bloquesConCard.includes(b));
+  const grupoEnHoja = hojaGrupo === null ? null : (franjas ?? []).filter((f) => hojaGrupo.includes(f.key));
 
-  const resumenPlanPaquete = (b: BloquePaseo): string => {
-    if (drafts === null) return '';
-    const plan = leerPorSalida(drafts[b].plan);
-    const paquete = leerPorSalida(drafts[b].paquete);
-    const partes: string[] = [];
-    if (typeof plan === 'number') partes.push(t('taller.planResumen', { precio: monto(plan) }));
-    if (typeof paquete === 'number') partes.push(t('taller.paqueteResumen', { precio: monto(paquete) }));
-    return partes.length > 0 ? partes.join(' · ') : t('taller.sinPlanNiPaquete');
+  const alAtras = () => {
+    if (modoWizard && paso > 0) {
+      // atrás conserva el borrador: solo retrocede el paso
+      setPaso(paso - 1);
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
+      return;
+    }
+    if (router.canGoBack()) router.back();
+    else router.replace('/paseo');
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
-        titulo={t('taller.titulo')}
-        atras
-        onAtras={() => (router.canGoBack() ? router.back() : router.replace('/paseo'))}
-      />
+      <Encabezado variante="navegacion" titulo={t('taller.titulo')} atras onAtras={alAtras} />
 
       {pantalla.estado === 'cargando' && (
         <View style={{ padding: spacing[5], gap: spacing[4] }}>
@@ -678,6 +654,7 @@ export default function TallerPaseo() {
                   setPantalla({ estado: 'cargando' });
                   setDrafts(null);
                   setFranjas(null);
+                  setZonas(null);
                   setIntento((n) => n + 1);
                 }}
               />
@@ -686,358 +663,331 @@ export default function TallerPaseo() {
         </View>
       )}
 
-      {listo && d !== null && (
+      {listo && drafts !== null && (
         <ScrollView
           ref={scrollRef}
-          contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[6] }}
+          contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[5] }}
         >
-          {pantalla.estado === 'listo' && pantalla.cuentaActiva === false && (
+          {/* progreso del wizard — visible y sereno */}
+          {modoWizard && <VozSecundaria texto={t('taller.paso', { n: paso + 1 })} />}
+
+          {pantalla.estado === 'listo' && pantalla.cuentaActiva === false && seccionVisible === 'duraciones' && (
             <VozSecundaria texto={t('servicios.cuentaNoActiva')} />
           )}
 
-          {/* ── duraciones y precios ─────────────────────────────── */}
-          <View
-            style={{ gap: spacing[3] }}
-            onLayout={(e) => {
-              anclas.current.duraciones = e.nativeEvent.layout.y;
-            }}
-          >
-            <TituloBloque texto={t('taller.duracionesTitulo')} />
-            <SelectorOpcion
-              etiqueta={t('taller.duracionesTitulo')}
-              disposicion="grilla"
-              acento="oficio"
-              opciones={BLOQUES_PASEO.map((b) => ({ codigo: String(b), etiqueta: etiquetaCorta(b) }))}
-              seleccionada={String(duracionSel)}
-              onSelect={(codigo) => setDuracionSel(Number.parseInt(codigo, 10) as BloquePaseo)}
-            />
-            <Tarjeta>
-              <View style={{ gap: spacing[4] }}>
-                {/* Ley 22: el binario dice su nombre — Interruptor SÓLIDO
-                    oficio (el botón Ofrecer/Pausar/Reactivar MURIÓ) */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.base,
-                      color: theme.text.primary,
-                    }}
-                  >
-                    {t('taller.ofrecer')}
-                  </Text>
-                  <Interruptor
-                    etiqueta={t('taller.ofrecer')}
-                    registro="oficio"
-                    encendido={d.ofrecida}
-                    onCambio={(v) =>
-                      actualizarDraft(duracionSel, {
-                        ofrecida: v,
-                        // el slider necesita un valor en el riel; nace visible
-                        // y ajustable, jamás oculto
-                        precio: v && d.precio === '' ? '5.00' : d.precio,
-                      })
-                    }
-                  />
-                </View>
-                {!d.ofrecida && d.base === null ? (
-                  <VozSecundaria texto={t('taller.noOfrecida')} />
-                ) : (
-                  <>
-                    {!d.ofrecida && <VozSecundaria texto={t('servicios.pausada')} />}
-                    {d.ofrecida && d.base === null && <VozSecundaria texto={t('taller.seOfreceAlGuardar')} />}
-                    {/* el precio se DESLIZA (regla del teclado §15b.4):
-                        label de pantalla + valor en mono + SliderPrecio 'aa' */}
-                    <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' }}>
-                      <Text
-                        style={{
-                          fontFamily: typography.family.sans.regular,
-                          fontSize: typography.size.sm,
-                          color: theme.text.secondary,
-                        }}
-                      >
-                        {t('servicios.precio')}
-                      </Text>
-                      <Text
-                        style={{
-                          fontFamily: typography.family.mono.regular,
-                          fontSize: typography.size.lg,
-                          fontVariant: ['tabular-nums'],
-                          color: theme.text.primary,
-                        }}
-                      >
-                        {etiquetasPasos[indicePrecio(d.precio)]}
-                      </Text>
+          {/* ══ PASO/SECCIÓN 1 — duraciones y precios (tarjetas apiladas) ══ */}
+          {seccionVisible === 'duraciones' && (
+            <View style={{ gap: spacing[4] }}>
+              <TituloBloque texto={t('taller.duracionesTitulo')} />
+              {/* presets del paquete EN LETRA (D-354) — una vez, para todo el paso */}
+              <VozSecundaria texto={t('servicios.paqueteExplica')} />
+              {bloquesConCard.length === 0 && <VozSecundaria texto={t('taller.sinDuraciones')} />}
+              {bloquesConCard.map((b) => {
+                const d = drafts[b];
+                return (
+                  <Tarjeta key={b} elevacion="reposo">
+                    <View style={{ gap: spacing[4] }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
+                        <Text
+                          style={{
+                            fontFamily: typography.family.sans.medium,
+                            fontSize: typography.size.md,
+                            color: theme.text.primary,
+                          }}
+                        >
+                          {etiquetaBloque(b)}
+                        </Text>
+                        <Interruptor
+                          etiqueta={`${t('taller.ofrecer')} · ${etiquetaCorta(b)}`}
+                          registro="oficio"
+                          encendido={d.ofrecida}
+                          onCambio={(v) => {
+                            if (!v && d.base === null) {
+                              // una tarjeta que jamás se guardó se despide sola
+                              actualizarDraft(b, { ofrecida: false, precio: '', plan: '', paquete: '' });
+                              return;
+                            }
+                            actualizarDraft(b, { ofrecida: v, precio: v && d.precio === '' ? '5.00' : d.precio });
+                          }}
+                        />
+                      </View>
+                      {!d.ofrecida ? (
+                        <VozSecundaria texto={t('servicios.pausada')} />
+                      ) : (
+                        <>
+                          {d.base === null && <VozSecundaria texto={t('taller.seOfreceAlGuardar')} />}
+                          <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' }}>
+                            <Text
+                              style={{
+                                fontFamily: typography.family.sans.regular,
+                                fontSize: typography.size.sm,
+                                color: theme.text.secondary,
+                              }}
+                            >
+                              {t('servicios.precio')}
+                            </Text>
+                            <Text
+                              style={{
+                                fontFamily: typography.family.mono.regular,
+                                fontSize: typography.size.lg,
+                                fontVariant: ['tabular-nums'],
+                                color: theme.text.primary,
+                              }}
+                            >
+                              {etiquetasPasos[indicePrecio(d.precio)]}
+                            </Text>
+                          </View>
+                          <SliderPrecio
+                            etiqueta={`${t('servicios.precio')} · ${etiquetaCorta(b)}`}
+                            pasos={etiquetasPasos}
+                            indice={indicePrecio(d.precio)}
+                            onCambio={(i) => actualizarDraft(b, { precio: pasos[i].toFixed(2) })}
+                            registro="aa"
+                          />
+                          <VozComision pct={pct} precio={leerPrecio(d.precio)} />
+                          <Campo
+                            label={t('servicios.precioPlan')}
+                            value={d.plan}
+                            onChangeText={(v) => {
+                              actualizarDraft(b, { plan: v });
+                              setErroresPlan((e) => ({ ...e, [b]: undefined }));
+                            }}
+                            keyboardType="decimal-pad"
+                            ayuda={t('servicios.precioPlanAyuda')}
+                            error={erroresPlan[b]}
+                            deshabilitado={guardando}
+                          />
+                          <VozPorSalida
+                            pct={pct}
+                            texto={d.plan}
+                            suelto={leerPrecio(d.precio)}
+                            vozVacia={t('servicios.planVacio')}
+                            comparar={(s, v) => t('servicios.planComparacion', { suelto: s, plan: v })}
+                          />
+                          <Campo
+                            label={t('servicios.precioPaquete')}
+                            value={d.paquete}
+                            onChangeText={(v) => {
+                              actualizarDraft(b, { paquete: v });
+                              setErroresPaquete((e) => ({ ...e, [b]: undefined }));
+                            }}
+                            keyboardType="decimal-pad"
+                            ayuda={t('servicios.precioPaqueteAyuda')}
+                            error={erroresPaquete[b]}
+                            deshabilitado={guardando}
+                          />
+                          <VozPorSalida
+                            pct={pct}
+                            texto={d.paquete}
+                            suelto={leerPrecio(d.precio)}
+                            vozVacia={t('servicios.paqueteVacio')}
+                            comparar={(s, v) => t('servicios.paqueteComparacion', { suelto: s, paquete: v })}
+                          />
+                        </>
+                      )}
                     </View>
-                    <SliderPrecio
-                      etiqueta={t('servicios.precio')}
-                      pasos={etiquetasPasos}
-                      indice={indicePrecio(d.precio)}
-                      onCambio={(i) => actualizarDraft(duracionSel, { precio: pasos[i].toFixed(2) })}
-                      registro="aa"
-                    />
-                    <VozComision pct={pct} precio={leerPrecio(d.precio)} />
-                    {/* nombre/descripción DETRÁS de celda (regla del teclado) */}
-                    {/* CURA DE GATE (boceto firmado): la duración
-                        seleccionada GOBIERNA su bloque — plan y paquete
-                        viven ACÁ, de ESTA duración (la sección global
-                        murió; su resumen vive en la portada) */}
-                    <Celda
-                      interactiva
-                      accessibilityRole="button"
-                      titulo={t('taller.planPaqueteTitulo')}
-                      subtitulo={resumenPlanPaquete(duracionSel)}
-                      onPress={() => {
-                        setHojaPlanPaquete(duracionSel);
-                        setErrorPlan(undefined);
-                        setErrorPaquete(undefined);
-                      }}
-                    />
-                    <Celda
-                      interactiva
-                      accessibilityRole="button"
-                      titulo={t('taller.nombreDescripcion')}
-                      subtitulo={d.nombre || t('taller.nombreDescripcionVacio')}
-                      onPress={() => setHojaNombre(true)}
-                    />
-                  </>
-                )}
-              </View>
-            </Tarjeta>
-          </View>
+                  </Tarjeta>
+                );
+              })}
+              {bloquesDisponibles.length > 0 && (
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('taller.agregarDuracion')}
+                  bloque
+                  onPress={() => setHojaAgregarDuracion(true)}
+                />
+              )}
+            </View>
+          )}
 
-          {/* la sección global "Plan y paquete" MURIÓ (cura de gate):
-              vive en el bloque de cada duración; su resumen, en la portada */}
-
-          {/* ── días y horarios (cupo POR FRANJA — la verdad del motor) ── */}
-          <View
-            style={{ gap: spacing[3] }}
-            onLayout={(e) => {
-              anclas.current.horarios = e.nativeEvent.layout.y;
-            }}
-          >
-            <TituloBloque texto={t('taller.horariosTitulo')} />
-            <SelectorOpcion
-              etiqueta={t('taller.horariosTitulo')}
-              disposicion="tira"
-              acento="oficio"
-              opciones={ORDEN_DISPLAY.map((dia) => ({ codigo: String(dia), etiqueta: vozDia(dia) }))}
-              seleccionada={String(diaSel)}
-              onSelect={(codigo) => setDiaSel(Number.parseInt(codigo, 10))}
-            />
-            {franjasDelDia.length === 0 ? (
-              <VozSecundaria texto={t('taller.sinFranjasDia')} />
-            ) : (
+          {/* ══ PASO/SECCIÓN 2 — días y horarios (multi-selección) ══ */}
+          {seccionVisible === 'horarios' && (
+            <View style={{ gap: spacing[3] }}>
+              <TituloBloque texto={t('taller.horariosTitulo')} />
+              <VozSecundaria texto={t('taller.horariosExplica')} />
+              <SelectorOpcion
+                etiqueta={t('taller.dias')}
+                disposicion="fila"
+                acento="oficio"
+                multiple
+                opciones={ORDEN_DISPLAY.map((dia) => ({ codigo: String(dia), etiqueta: letraDia(dia) }))}
+                seleccionadas={diasSel.map(String)}
+                onSelect={(codigo) => {
+                  const dia = Number.parseInt(codigo, 10);
+                  setDiasSel((prev) => (prev.includes(dia) ? prev.filter((x) => x !== dia) : [...prev, dia]));
+                }}
+              />
+              <Boton
+                variante="ghost"
+                etiqueta={t('taller.todaLaSemana')}
+                onPress={() => setDiasSel([...ORDEN_DISPLAY])}
+              />
+              <Boton
+                variante="secundario"
+                etiqueta={t('horarios.agregarFranja')}
+                bloque
+                deshabilitado={diasSel.length === 0}
+                onPress={() => {
+                  setCreandoFranja(true);
+                  setVistaNueva('form');
+                  setDesdeSel(null);
+                  setHastaSel(null);
+                  setCupoSel(1);
+                }}
+              />
+              {grupos.length === 0 ? (
+                <VozSecundaria texto={t('taller.sinFranjas')} />
+              ) : (
+                <Tarjeta relleno="ninguno">
+                  {grupos.map((miembros, i) => {
+                    const f = miembros[0];
+                    const partes = [diasDeGrupo(miembros)];
+                    if (!f.activo) partes.push(t('horarios.pausada'));
+                    if (miembros.some((x) => x.id === null)) partes.push(t('taller.franjaNueva'));
+                    return (
+                      <View key={f.key}>
+                        {i > 0 && <Separador />}
+                        <Celda
+                          interactiva
+                          accessibilityRole="button"
+                          titulo={vozCupo(f.cupo)}
+                          subtitulo={partes.join(' · ')}
+                          metadataMono={`${f.horaInicio} – ${f.horaFin}`}
+                          onPress={() => {
+                            setHojaGrupo(miembros.map((x) => x.key));
+                            setCupoSel(f.cupo);
+                            setConfirmandoQuitar(false);
+                          }}
+                        />
+                      </View>
+                    );
+                  })}
+                </Tarjeta>
+              )}
+              {/* vacaciones — la celda-puente vive con los horarios (§15b.5a) */}
               <Tarjeta relleno="ninguno">
-                {franjasDelDia.map((f, i) => (
-                  <View key={f.key}>
-                    {i > 0 && <Separador />}
-                    <Celda
-                      interactiva
-                      accessibilityRole="button"
-                      titulo={vozCupo(f.cupo)}
-                      subtitulo={
-                        f.id === null ? t('taller.franjaNueva') : !f.activo ? t('horarios.pausada') : undefined
-                      }
-                      metadataMono={`${f.horaInicio} – ${f.horaFin}`}
-                      onPress={() => {
-                        setHojaFranja(f.key);
-                        setCupoSel(String(f.cupo));
-                        setConfirmandoQuitar(false);
-                      }}
-                    />
-                  </View>
-                ))}
+                <Celda
+                  interactiva
+                  accessibilityRole="button"
+                  titulo={t('negocio.vacaciones')}
+                  subtitulo={t('negocio.vacacionesDetalle')}
+                  onPress={() => router.push('/vacaciones')}
+                />
               </Tarjeta>
-            )}
-            <Boton
-              variante="secundario"
-              etiqueta={t('horarios.agregarFranja')}
-              bloque
-              onPress={() => {
-                setCreandoFranja(true);
-                setVistaNueva('form');
-                setDesdeSel(null);
-                setHastaSel(null);
-                setCupoSel('1');
-              }}
-            />
-          </View>
+            </View>
+          )}
 
-          {/* ── zonas de cobertura (contrato D-331 v1: declara, no filtra;
-              ciudad faltante = pedido al equipo, jamás texto libre) ── */}
-          <View
-            style={{ gap: spacing[3] }}
-            onLayout={(e) => {
-              anclas.current.zonas = e.nativeEvent.layout.y;
-            }}
-          >
-            <TituloBloque texto={t('taller.zonasTitulo')} />
-            <VozSecundaria texto={t('taller.zonasExplica')} />
-            {/* Ley 22: chips TONALES multi-selección. CURA DE GATE: los
-                chips son las ciudades DEL PAÍS del prestador (+ toda
-                zona ya declarada afuera — jamás se esconde lo declarado);
-                el resto del catálogo entra por la puerta "Otra ciudad" */}
-            <SelectorOpcion
-              etiqueta={t('taller.zonasTitulo')}
-              disposicion="grilla"
-              acento="oficio"
-              multiple
-              opciones={ciudades
-                .filter(
-                  (c) =>
-                    (pantalla.estado === 'listo' && c.country_code === pantalla.countryCode) ||
-                    (zonas ?? []).some((z) => !z.quitar && z.ciudad.id === c.id),
-                )
-                .map((c) => ({ codigo: c.id, etiqueta: c.nombre }))}
-              seleccionadas={(zonas ?? []).filter((z) => !z.quitar).map((z) => z.ciudad.id)}
-              onSelect={(ciudadId) => {
-                if (zonas === null) return;
-                const vigente = zonas.find((z) => z.ciudad.id === ciudadId && !z.quitar);
-                if (vigente) {
-                  // apagar: la nueva se va del borrador; la guardada se marca
-                  setZonas(
-                    vigente.id === null
-                      ? zonas.filter((z) => z.key !== vigente.key)
-                      : zonas.map((z) => (z.key === vigente.key ? { ...z, quitar: true } : z)),
-                  );
-                  return;
-                }
-                const marcada = zonas.find((z) => z.ciudad.id === ciudadId && z.quitar);
-                if (marcada) {
-                  setZonas(zonas.map((z) => (z.key === marcada.key ? { ...z, quitar: false } : z)));
-                  return;
-                }
-                const ciudad = ciudades.find((c) => c.id === ciudadId);
-                if (!ciudad) return;
-                contadorNuevas.current += 1;
-                setZonas([...zonas, { key: `zona-${contadorNuevas.current}`, id: null, ciudad, quitar: false }]);
-              }}
-            />
-            <Boton
-              variante="ghost"
-              etiqueta={t('taller.otraCiudad')}
-              bloque
-              onPress={() => setHojaOtraCiudad(true)}
-            />
-            <VozSecundaria texto={t('taller.ciudadFaltante')} />
-          </View>
+          {/* ══ PASO/SECCIÓN 3 — zonas de cobertura ══ */}
+          {seccionVisible === 'zonas' && (
+            <View style={{ gap: spacing[3] }}>
+              <TituloBloque texto={t('taller.zonasTitulo')} />
+              <VozSecundaria texto={t('taller.zonasExplica')} />
+              <SelectorOpcion
+                etiqueta={t('taller.zonasTitulo')}
+                disposicion="grilla"
+                acento="oficio"
+                multiple
+                opciones={ciudades
+                  .filter(
+                    (c) =>
+                      (pantalla.estado === 'listo' && c.country_code === pantalla.countryCode) ||
+                      (zonas ?? []).some((z) => !z.quitar && z.ciudad.id === c.id),
+                  )
+                  .map((c) => ({ codigo: c.id, etiqueta: c.nombre }))}
+                seleccionadas={(zonas ?? []).filter((z) => !z.quitar).map((z) => z.ciudad.id)}
+                onSelect={(ciudadId) => {
+                  if (zonas === null) return;
+                  const vigente = zonas.find((z) => z.ciudad.id === ciudadId && !z.quitar);
+                  if (vigente) {
+                    setZonas(
+                      vigente.id === null
+                        ? zonas.filter((z) => z.key !== vigente.key)
+                        : zonas.map((z) => (z.key === vigente.key ? { ...z, quitar: true } : z)),
+                    );
+                    return;
+                  }
+                  const marcada = zonas.find((z) => z.ciudad.id === ciudadId && z.quitar);
+                  if (marcada) {
+                    setZonas(zonas.map((z) => (z.key === marcada.key ? { ...z, quitar: false } : z)));
+                    return;
+                  }
+                  const ciudad = ciudades.find((c) => c.id === ciudadId);
+                  if (!ciudad) return;
+                  contadorNuevas.current += 1;
+                  setZonas([...zonas, { key: `zona-${contadorNuevas.current}`, id: null, ciudad, quitar: false }]);
+                }}
+              />
+              <Boton variante="ghost" etiqueta={t('taller.otraCiudad')} bloque onPress={() => setHojaOtraCiudad(true)} />
+              <VozSecundaria texto={t('taller.ciudadFaltante')} />
+            </View>
+          )}
 
-          {/* ── vacaciones (celda-puente; el motor D-341 intacto) ── */}
-          <Tarjeta relleno="ninguno">
-            <Celda
-              interactiva
-              accessibilityRole="button"
-              titulo={t('negocio.vacaciones')}
-              subtitulo={t('negocio.vacacionesDetalle')}
-              onPress={() => router.push('/vacaciones')}
-            />
-          </Tarjeta>
-
-          {/* ── el espejo del artesano — LA FIRMA: responde al borrador ── */}
+          {/* el espejo del artesano — LA FIRMA, en cada paso y sección */}
           <EspejoOferta datos={datosEspejo} />
 
-          <Boton
-            variante="primario"
-            etiqueta={t('taller.guardar')}
-            bloque
-            cargando={guardando}
-            deshabilitado={!hayCambios}
-            onPress={() => void guardarTodo()}
-          />
+          {modoWizard && paso < PASOS.length - 1 ? (
+            <Boton
+              variante="primario"
+              etiqueta={t('taller.continuar')}
+              bloque
+              onPress={() => {
+                setPaso(paso + 1);
+                scrollRef.current?.scrollTo({ y: 0, animated: false });
+              }}
+            />
+          ) : (
+            <Boton
+              variante="primario"
+              etiqueta={t('taller.guardar')}
+              bloque
+              cargando={guardando}
+              deshabilitado={!hayCambios}
+              onPress={() => void guardarTodo()}
+            />
+          )}
         </ScrollView>
       )}
 
-      {/* Hoja: nombre y descripción del bloque (edita el borrador) */}
+      {/* Hoja: ofrecer otra duración — el menú canónico restante */}
       <Hoja
-        visible={hojaNombre}
-        onCerrar={() => setHojaNombre(false)}
-        titulo={etiquetaBloque(duracionSel)}
+        visible={hojaAgregarDuracion}
+        onCerrar={() => setHojaAgregarDuracion(false)}
+        titulo={t('taller.agregarDuracion')}
+        altura="media"
       >
-        {d !== null && (
-          <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
-            <Campo
-              label={t('servicios.nombre')}
-              value={d.nombre}
-              onChangeText={(v) => actualizarDraft(duracionSel, { nombre: v })}
-              ayuda={t('servicios.nombreAyuda')}
-            />
-            <Campo
-              label={t('servicios.descripcion')}
-              value={d.descripcion}
-              onChangeText={(v) => actualizarDraft(duracionSel, { descripcion: v })}
-            />
-            <Boton variante="primario" etiqueta={t('taller.listo')} bloque onPress={() => setHojaNombre(false)} />
-          </View>
-        )}
+        <HojaScroll>
+          {bloquesDisponibles.map((b, i) => (
+            <View key={b}>
+              {i > 0 && <Separador />}
+              <Celda
+                interactiva
+                accessibilityRole="button"
+                titulo={etiquetaBloque(b)}
+                onPress={() => {
+                  actualizarDraft(b, { ofrecida: true, precio: '5.00' });
+                  setHojaAgregarDuracion(false);
+                }}
+              />
+            </View>
+          ))}
+        </HojaScroll>
       </Hoja>
 
-      {/* Hoja: plan y paquete de un bloque (edita el borrador) */}
+      {/* Hoja: grupo de franjas — DICE a qué días pertenece (v3) */}
       <Hoja
-        visible={hojaPlanPaquete !== null}
-        onCerrar={() => setHojaPlanPaquete(null)}
-        titulo={hojaPlanPaquete !== null ? etiquetaBloque(hojaPlanPaquete) : ''}
-      >
-        {hojaPlanPaquete !== null && drafts !== null && (
-          <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
-            <Campo
-              label={t('servicios.precioPlan')}
-              value={drafts[hojaPlanPaquete].plan}
-              onChangeText={(v) => {
-                actualizarDraft(hojaPlanPaquete, { plan: v });
-                setErrorPlan(undefined);
-              }}
-              keyboardType="decimal-pad"
-              ayuda={t('servicios.precioPlanAyuda')}
-              error={errorPlan}
-            />
-            <VozPorSalida
-              pct={pct}
-              texto={drafts[hojaPlanPaquete].plan}
-              suelto={leerPrecio(drafts[hojaPlanPaquete].precio)}
-              vozVacia={t('servicios.planVacio')}
-              comparar={(s, v) => t('servicios.planComparacion', { suelto: s, plan: v })}
-            />
-            {/* presets 5/10/15 EN LETRA en la superficie de config (D-354) */}
-            <VozSecundaria texto={t('servicios.paqueteExplica')} />
-            <Campo
-              label={t('servicios.precioPaquete')}
-              value={drafts[hojaPlanPaquete].paquete}
-              onChangeText={(v) => {
-                actualizarDraft(hojaPlanPaquete, { paquete: v });
-                setErrorPaquete(undefined);
-              }}
-              keyboardType="decimal-pad"
-              ayuda={t('servicios.precioPaqueteAyuda')}
-              error={errorPaquete}
-            />
-            <VozPorSalida
-              pct={pct}
-              texto={drafts[hojaPlanPaquete].paquete}
-              suelto={leerPrecio(drafts[hojaPlanPaquete].precio)}
-              vozVacia={t('servicios.paqueteVacio')}
-              comparar={(s, v) => t('servicios.paqueteComparacion', { suelto: s, paquete: v })}
-            />
-            <Boton variante="primario" etiqueta={t('taller.listo')} bloque onPress={() => setHojaPlanPaquete(null)} />
-          </View>
-        )}
-      </Hoja>
-
-      {/* Hoja: editar franja del borrador — cupo (stepper pendiente), pausar, quitar */}
-      <Hoja
-        visible={franjaEnHoja !== null}
-        onCerrar={() => setHojaFranja(null)}
+        visible={grupoEnHoja !== null && grupoEnHoja.length > 0}
+        onCerrar={() => setHojaGrupo(null)}
         titulo={
-          franjaEnHoja !== null
-            ? `${vozDia(franjaEnHoja.diaSemana)} · ${franjaEnHoja.horaInicio} – ${franjaEnHoja.horaFin}`
+          grupoEnHoja !== null && grupoEnHoja.length > 0
+            ? `${grupoEnHoja[0].horaInicio} – ${grupoEnHoja[0].horaFin}`
             : ''
         }
       >
-        {franjaEnHoja !== null && (
+        {grupoEnHoja !== null && grupoEnHoja.length > 0 && (
           <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
+            <VozSecundaria texto={t('taller.diasAplica', { dias: diasDeGrupo(grupoEnHoja) })} />
             {!confirmandoQuitar ? (
               <>
-                {/* el cupo "a la vez" — StepperCantidad (comp. 33): el
-                    provisional de chips MURIÓ (micro-pedido founder S58) */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
                   <Text
                     style={{
@@ -1051,10 +1001,10 @@ export default function TallerPaseo() {
                   <StepperCantidad
                     etiqueta={t('horarios.cupo')}
                     registro="oficio"
-                    valor={Number.parseInt(cupoSel, 10)}
+                    valor={cupoSel}
                     min={1}
                     max={4}
-                    onCambio={(v) => setCupoSel(String(v))}
+                    onCambio={setCupoSel}
                   />
                 </View>
                 <VozSecundaria texto={t('horarios.cupoAyuda')} />
@@ -1063,17 +1013,17 @@ export default function TallerPaseo() {
                   etiqueta={t('taller.listo')}
                   bloque
                   onPress={() => {
-                    actualizarFranjaDraft(franjaEnHoja.key, { cupo: Number.parseInt(cupoSel, 10) });
-                    setHojaFranja(null);
+                    actualizarFranjas(grupoEnHoja.map((f) => f.key), { cupo: cupoSel });
+                    setHojaGrupo(null);
                   }}
                 />
                 <Boton
                   variante="ghost"
-                  etiqueta={franjaEnHoja.activo ? t('horarios.pausar') : t('horarios.reactivar')}
+                  etiqueta={grupoEnHoja[0].activo ? t('horarios.pausar') : t('horarios.reactivar')}
                   bloque
                   onPress={() => {
-                    actualizarFranjaDraft(franjaEnHoja.key, { activo: !franjaEnHoja.activo });
-                    setHojaFranja(null);
+                    actualizarFranjas(grupoEnHoja.map((f) => f.key), { activo: !grupoEnHoja[0].activo });
+                    setHojaGrupo(null);
                   }}
                 />
                 <Boton variante="destructivo" etiqueta={t('horarios.quitar')} bloque onPress={() => setConfirmandoQuitar(true)} />
@@ -1095,12 +1045,15 @@ export default function TallerPaseo() {
                   etiqueta={t('horarios.quitarConfirmar')}
                   bloque
                   onPress={() => {
-                    if (franjaEnHoja.id === null) {
-                      setFranjas((prev) => (prev === null ? prev : prev.filter((x) => x.key !== franjaEnHoja.key)));
-                    } else {
-                      actualizarFranjaDraft(franjaEnHoja.key, { quitar: true });
-                    }
-                    setHojaFranja(null);
+                    const keys = grupoEnHoja.map((f) => f.key);
+                    setFranjas((prev) =>
+                      prev === null
+                        ? prev
+                        : prev
+                            .filter((f) => !(keys.includes(f.key) && f.id === null))
+                            .map((f) => (keys.includes(f.key) ? { ...f, quitar: true } : f)),
+                    );
+                    setHojaGrupo(null);
                     setConfirmandoQuitar(false);
                   }}
                 />
@@ -1111,10 +1064,7 @@ export default function TallerPaseo() {
         )}
       </Hoja>
 
-      {/* Hoja: OTRA CIUDAD — el catálogo entero agrupado por PAÍS con
-          su nombre humano (jamás el código del motor, Ley 3); tocar
-          una la declara en el borrador (el ejemplo del founder:
-          cobertura que cruza país) */}
+      {/* Hoja: OTRA CIUDAD — catálogo agrupado por país con nombre humano */}
       <Hoja visible={hojaOtraCiudad} onCerrar={() => setHojaOtraCiudad(false)} titulo={t('taller.otraCiudad')} altura="media">
         <HojaScroll>
           {paises.map((pais) => {
@@ -1152,16 +1102,18 @@ export default function TallerPaseo() {
         </HojaScroll>
       </Hoja>
 
-      {/* Hoja: nueva franja — el día lo eligió la píldora (Chanel: el
-          sub-selector de día de /horarios MURIÓ con la tira a la vista) */}
+      {/* Hoja: nueva franja — aplica a los DÍAS MARCADOS (v3) */}
       <Hoja
         visible={creandoFranja}
         onCerrar={() => setCreandoFranja(false)}
-        titulo={vistaNueva === 'form' ? `${t('horarios.nuevaTitulo')} · ${vozDia(diaSel)}` : t('horarios.horaElegir')}
+        titulo={vistaNueva === 'form' ? t('horarios.nuevaTitulo') : t('horarios.horaElegir')}
         altura="media"
       >
         {vistaNueva === 'form' ? (
           <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
+            <VozSecundaria
+              texto={t('taller.diasAplica', { dias: ORDEN_DISPLAY.filter((d) => diasSel.includes(d)).map(letraDia).join(' · ') })}
+            />
             <Tarjeta relleno="ninguno">
               <Celda
                 interactiva
@@ -1194,10 +1146,10 @@ export default function TallerPaseo() {
               <StepperCantidad
                 etiqueta={t('horarios.cupo')}
                 registro="oficio"
-                valor={Number.parseInt(cupoSel, 10)}
+                valor={cupoSel}
                 min={1}
                 max={4}
-                onCambio={(v) => setCupoSel(String(v))}
+                onCambio={setCupoSel}
               />
             </View>
             <VozSecundaria texto={t('horarios.cupoAyuda')} />
@@ -1205,8 +1157,8 @@ export default function TallerPaseo() {
               variante="primario"
               etiqueta={t('taller.agregarFranjaListo')}
               bloque
-              deshabilitado={desdeSel === null || hastaSel === null}
-              onPress={agregarFranjaDraft}
+              deshabilitado={desdeSel === null || hastaSel === null || diasSel.length === 0}
+              onPress={agregarFranjasDraft}
             />
           </View>
         ) : (

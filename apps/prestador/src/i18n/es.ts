@@ -347,9 +347,8 @@ export const prestadorEs = {
     pausada: 'Pausado',
     precio: 'Precio',
     precioAyuda: 'En dólares. Rige para reservas nuevas.',
-    nombre: 'Nombre (opcional)',
-    nombreAyuda: 'Como lo van a ver tus clientes.',
-    descripcion: 'Descripción (opcional)',
+    // nombre/descripcion MURIERON de la UI (v3, L-144: el motor los sirve
+    // por COALESCE; su edición muda al perfil del prestador — deuda)
     precioInvalido: 'El precio tiene que ser mayor a cero.',
     // comisión visible donde se pone precio (S56-B TAREA 4, financiero v2.6
     // regla 7.15 — el % viene del dato, jamás hardcodeado)
@@ -377,26 +376,36 @@ export const prestadorEs = {
     errorDetalle: 'Prueba de nuevo en un momento.',
     reintentar: 'Reintentar',
     duracionesTitulo: 'Duraciones y precios',
-    // etiquetas cortas del menú canónico (la grilla; la voz larga sigue en servicios.bloque*)
+    // etiquetas cortas del menú canónico (la voz larga sigue en servicios.bloque*)
     d30: '30 min',
     d60: '1 hora',
     d120: '2 horas',
     d180: '3 horas',
     d240: '4 horas',
     d300: '5 horas',
-    noOfrecida: 'No ofreces esta duración.',
     seOfreceAlGuardar: 'Se ofrece cuando guardes.',
     ofrecer: 'Ofrecer esta duración',
-    nombreDescripcion: 'Nombre y descripción',
-    nombreDescripcionVacio: 'Opcional — como lo ven tus clientes.',
-    planPaqueteTitulo: 'Plan y paquete',
-    planResumen: 'Plan {{precio}}',
-    paqueteResumen: 'Paquete {{precio}}',
-    sinPlanNiPaquete: 'Sin plan ni paquete',
+    sinDuraciones: 'Aún no ofreces ninguna duración.',
+    agregarDuracion: 'Ofrecer otra duración',
+    // el wizard (v3): progreso sereno
+    paso: 'Paso {{n}} de 3',
+    continuar: 'Continuar',
     horariosTitulo: 'Días y horarios',
-    // cura de gate ('agregá' del mandato viajó a tuteo neutro, regla 27
-    // — desvío declarado, precedente S57): el día vacío tiene CAMINO
-    sinFranjasDia: 'Sin franjas todavía: agrega una.',
+    horariosExplica: 'Marca los días y agrega la franja: aplica a todos los marcados.',
+    dias: 'Días',
+    // regla 32: la key ES el índice de DB (0=Domingo)
+    diaCorto0: 'D',
+    diaCorto1: 'L',
+    diaCorto2: 'M',
+    diaCorto3: 'X',
+    diaCorto4: 'J',
+    diaCorto5: 'V',
+    diaCorto6: 'S',
+    todaLaSemana: 'Toda la semana',
+    diasAplica: 'Se aplica a: {{dias}}',
+    // ('agregá' del mandato viajó a tuteo neutro, regla 27 — desvío
+    // declarado, precedente S57): el vacío tiene CAMINO
+    sinFranjas: 'Sin franjas todavía: agrega una.',
     franjaNueva: 'Se agrega cuando guardes.',
     agregarFranjaListo: 'Agregar franja',
     // zonas de cobertura (contrato D-331 v1: declara, no filtra;
@@ -417,8 +426,8 @@ export const prestadorEs = {
     reintentar: 'Reintentar',
     // peldaño 0 — la invitación que educa: el taller es el camino
     vacioTitulo: 'Tu servicio de paseo',
-    vacioCuerpo: 'En el taller eliges duraciones, precios y horarios. Tus clientes solo ven lo que tú actives.',
-    vacioCta: 'Abrir el taller',
+    vacioCuerpo: 'En tres pasos eliges duraciones, precios, horarios y zonas. Tus clientes solo ven lo que tú actives.',
+    vacioCta: 'Configurar tu oficio',
     // el estado — la verdad del motor (7.13), con camino cuando falta algo
     visibleTitulo: 'Visible para las familias',
     visibleVoz: 'Las familias te encuentran y pueden reservar.',
