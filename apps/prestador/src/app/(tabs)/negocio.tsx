@@ -22,11 +22,10 @@
 
 import { useCallback, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   Celda,
-  Encabezado,
+  Icono,
   Separador,
   Tarjeta,
   spacing,
@@ -35,12 +34,24 @@ import {
 } from '@epetplace/ui';
 import {
   obtenerMiCuentaComercial,
+  obtenerMiPrestador,
+  obtenerOfertasPaseoPropias,
   obtenerResumenPendienteLiquidar,
   type MiCuentaComercial,
+  type OfertaPaseoPropia,
   type ResumenPendienteLiquidar,
 } from '@epetplace/api';
+import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+import { TechoTinta } from '@/components/techo-tinta';
+
+// hoy en ISO LOCAL (hallazgo harness S55: toISOString corre el día)
+function hoyLocalISO(): string {
+  const hoy = new Date();
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${hoy.getFullYear()}-${p(hoy.getMonth() + 1)}-${p(hoy.getDate())}`;
+}
 
 // S52-P4b sistémico: títulos humanizados — sentence case, sin eyebrow.
 function TituloBloque({ texto }: { texto: string }) {
@@ -62,21 +73,25 @@ function TituloBloque({ texto }: { texto: string }) {
 export default function Negocio() {
   const router = useRouter();
   const { theme } = useTheme();
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
 
   // el estado real de los cobros — null mientras carga o si falla la
   // lectura: la fila degrada a su detalle por hito, jamás inventa
   const [cuenta, setCuenta] = useState<MiCuentaComercial | null>(null);
   const [cuentaCargada, setCuentaCargada] = useState(false);
   const [pendientes, setPendientes] = useState<ResumenPendienteLiquidar | null>(null);
+  // B1a: el resumen VIVO del mundo Paseo — null mientras carga/falla:
+  // la tarjeta degrada a su invitación, jamás inventa
+  const [ofertas, setOfertas] = useState<OfertaPaseoPropia[] | null>(null);
 
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
       void (async () => {
-        const [rCuenta, rPendientes] = await Promise.all([
+        const [rCuenta, rPendientes, rPrestador] = await Promise.all([
           obtenerMiCuentaComercial(),
           obtenerResumenPendienteLiquidar(),
+          obtenerMiPrestador(),
         ]);
         if (!vigente) return;
         if (rCuenta.ok) {
@@ -84,6 +99,10 @@ export default function Negocio() {
           setCuentaCargada(true);
         }
         if (rPendientes.ok) setPendientes(rPendientes.data);
+        if (rPrestador.ok) {
+          const rOfertas = await obtenerOfertasPaseoPropias(rPrestador.data.id);
+          if (vigente && rOfertas.ok) setOfertas(rOfertas.data);
+        }
       })();
       return () => {
         vigente = false;
@@ -121,36 +140,92 @@ export default function Negocio() {
         : t('negocio.liquidacionesPendientes', { cantidad: pendientes.cantidad })
       : t('negocio.liquidacionesDetalle');
 
-  return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing[8] }}>
-        <Encabezado variante="portada" saludo={t('negocio.titulo')} />
+  // B1a: el detalle vivo del mundo Paseo — verdad de DB o invitación
+  const activas = ofertas?.filter((o) => o.activo) ?? [];
+  const desde = activas.length > 0 ? Math.min(...activas.map((o) => o.precio)) : null;
+  const detalleMundoPaseo =
+    ofertas === null || activas.length === 0
+      ? t('negocio.mundoPaseoVacio')
+      : activas.length === 1
+        ? t('ofertaPaseo.duracionesDetalleUna', { precio: `$${(desde as number).toFixed(2)}` })
+        : t('ofertaPaseo.duracionesDetalle', { n: activas.length, precio: `$${(desde as number).toFixed(2)}` });
 
-        <View style={{ paddingHorizontal: spacing[4], gap: spacing[6], marginTop: spacing[2] }}>
-          {/* tu oferta — S55-B (B2): el prestador gobierna su servicio */}
+  return (
+    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: spacing[8] }}>
+        {/* B2 §15b.2: el techo de tinta — el dato de trabajo es la plata
+            real esperando liquidación; sin eventos, la fecha del día */}
+        <TechoTinta
+          titulo={t('negocio.titulo')}
+          dato={
+            pendientes !== null && pendientes.cantidad > 0
+              ? detalleLiquidaciones
+              : fechaDiaSemanaHumana(hoyLocalISO(), idioma as IdiomaSoportado)
+          }
+        />
+
+        <View style={{ paddingHorizontal: spacing[4], gap: spacing[6], marginTop: spacing[4] }}>
+          {/* B1a — NEGOCIO COMO MUNDOS (§15b.5): cada mundo con sus dos
+              caras; el que no está en la app es puerta honesta por hito,
+              jamás decoración muerta */}
           <View style={{ gap: spacing[3] }}>
             <TituloBloque texto={t('negocio.oferta')} />
-            <Tarjeta relleno="ninguno">
-              {/* S58-B B1b (adenda founder): /servicios y /horarios MURIERON
-                  absorbidos por el taller — la entrada al mundo es el RESUMEN
-                  (/paseo). La tarjeta-mundo con resumen vivo llega en B1a
-                  contra su PNG patrón. */}
-              <Celda
-                interactiva
-                accessibilityRole="button"
-                titulo={t('negocio.paseo')}
-                subtitulo={t('negocio.paseoDetalle')}
-                onPress={() => router.push('/paseo')}
-              />
-              <Separador />
-              {/* S56-B TAREA 2 (D-341): los días apartados — el motor los honra */}
-              <Celda
-                interactiva
-                accessibilityRole="button"
-                titulo={t('negocio.vacaciones')}
-                subtitulo={t('negocio.vacacionesDetalle')}
-                onPress={() => router.push('/vacaciones')}
-              />
+            <Tarjeta
+              interactiva
+              elevacion="reposo"
+              accessibilityRole="button"
+              etiqueta={t('negocio.paseo')}
+              onPress={() => router.push('/paseo')}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+                <Icono nombre="paseo" registro="aa" tamano={28} />
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text
+                    style={{
+                      fontFamily: typography.family.sans.medium,
+                      fontSize: typography.size.md,
+                      color: theme.text.primary,
+                    }}
+                  >
+                    {t('negocio.paseo')}
+                  </Text>
+                  <Text
+                    style={{
+                      fontFamily: typography.family.sans.regular,
+                      fontSize: typography.size.sm,
+                      color: theme.text.secondary,
+                    }}
+                  >
+                    {detalleMundoPaseo}
+                  </Text>
+                </View>
+              </View>
+            </Tarjeta>
+            {/* la puerta honesta del mundo que aún no vive en la app */}
+            <Tarjeta elevacion="plana">
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+                <Icono nombre="grooming" registro="aa" tamano={28} />
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text
+                    style={{
+                      fontFamily: typography.family.sans.medium,
+                      fontSize: typography.size.md,
+                      color: theme.text.secondary,
+                    }}
+                  >
+                    {t('negocio.mundoGrooming')}
+                  </Text>
+                  <Text
+                    style={{
+                      fontFamily: typography.family.sans.regular,
+                      fontSize: typography.size.sm,
+                      color: theme.text.secondary,
+                    }}
+                  >
+                    {t('negocio.mundoGroomingDetalle')}
+                  </Text>
+                </View>
+              </View>
             </Tarjeta>
           </View>
 
@@ -196,6 +271,6 @@ export default function Negocio() {
 
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

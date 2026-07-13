@@ -1,4 +1,10 @@
 import { useColorScheme } from 'react-native';
+// CURA S58 (causa raíz del crash del taller en NATIVO): SliderPrecio fue
+// el PRIMER GestureDetector en el CUERPO de una pantalla — Hoja/VisorFoto
+// traen su GestureHandlerRootView ADENTRO del Modal (por eso nunca dolió)
+// y el raíz no tenía ninguno: gesture-handler TIRA en Android/iOS y la
+// web no lo exige (el smoke fue verde — Ley 9 confirmada por el camino).
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
@@ -30,15 +36,17 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <ProveedorI18n recursos={recursos}>
-      <EpetThemeProvider mode={colorScheme === 'dark' ? 'dark' : 'light'}>
-        <AvisoProvider>
-          <AnimatedSplashOverlay />
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
-          </Stack>
-        </AvisoProvider>
-      </EpetThemeProvider>
-    </ProveedorI18n>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ProveedorI18n recursos={recursos}>
+        <EpetThemeProvider mode={colorScheme === 'dark' ? 'dark' : 'light'}>
+          <AvisoProvider>
+            <AnimatedSplashOverlay />
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(tabs)" />
+            </Stack>
+          </AvisoProvider>
+        </EpetThemeProvider>
+      </ProveedorI18n>
+    </GestureHandlerRootView>
   );
 }

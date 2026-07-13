@@ -59,7 +59,10 @@ export default function Cuenta() {
         <Encabezado variante="portada" saludo={t('miCuenta.titulo')} />
 
         <View style={{ paddingHorizontal: spacing[4], gap: spacing[6], marginTop: spacing[2] }}>
-          <Tarjeta relleno="ninguno">
+          {/* B3 (S58): papel+sombra — los tokens de elevación cruzaron
+              (D-358); las celdas con ícono b′ esperan el lote D-361 y el
+              COPIAR NIVEL fino, su PNG patrón. */}
+          <Tarjeta relleno="ninguno" elevacion="reposo">
             {lugares.map((lugar, i) => (
               <View key={lugar.ruta}>
                 {i > 0 ? <Separador /> : null}

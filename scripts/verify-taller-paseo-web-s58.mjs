@@ -42,15 +42,21 @@ await page.getByRole('textbox', { name: 'Contraseña' }).fill(env.EXPO_PUBLIC_DE
 await page.getByText('Entrar', { exact: true }).click();
 await esperar('Tus paseos de hoy', 60);
 
-// ── T1: Negocio tiene UNA entrada al mundo; las viejas murieron ──
+// ── T0 (B4+B2 en Hoy): segmentado + techo de tinta montados ──
+// (el techo pinta al instante; el segmento espera la pantalla 'listo')
+let t = await esperar('Semana', 20);
+check(t.includes('Semana'), 'T0 el segmento Hoy/Semana vive (SelectorSegmentado)');
+
+// ── T1: NEGOCIO COMO MUNDOS (B1a); las entradas viejas murieron ──
 await page.getByRole('tab', { name: /Negocio/ }).click();
-let t = await esperar('Tu oferta', 20);
-check(t.includes('Paseo'), 'T1 la celda Paseo vive en Tu oferta');
+t = await esperar('Tu oferta', 20);
+check(t.includes('Paseo'), 'T1 la tarjeta-mundo Paseo vive en Tu oferta');
 check(!t.includes('Servicios y precios'), 'T1b "Servicios y precios" murió de Negocio');
-check(t.includes('Vacaciones'), 'T1c Vacaciones sigue en Negocio (B1a la reubica)');
+check(t.includes('Grooming'), 'T1c la puerta honesta del mundo Grooming');
+check(!t.includes('Marca los días en que no paseas'), 'T1d la celda Vacaciones de Negocio murió (vive en el mundo)');
 
 // ── T2: el RESUMEN es la portada del mundo ──
-await page.getByText('Tu oferta completa: duraciones, precios y horarios.').click();
+await page.getByRole('button', { name: 'Paseo' }).first().click();
 t = await esperar('Tu oferta de paseo', 30);
 const enResumen = t.includes('Tu oferta de paseo');
 check(enResumen, 'T2 entrar a Paseo aterriza en el resumen');
@@ -85,12 +91,16 @@ check(t.includes('Plan y paquete'), 'T3d sección plan y paquete');
 check(t.includes('Días y horarios'), 'T3e sección días y horarios');
 check(t.includes('Lunes'), 'T3f la tira de días (lunes primero)');
 check(t.includes('Zonas de cobertura'), 'T3g sección zonas (contrato D-331)');
+check(t.includes('Quito'), 'T3g2 el catálogo de ciudades como chips (Ley 22)');
 check(t.includes('Vacaciones'), 'T3h la celda-puente a vacaciones');
 check(t.includes('Así lo ve el dueño'), 'T3i el espejo del artesano al pie');
 check(t.includes('Guardar tu oferta'), 'T3j el CTA único en tinta');
 // el precio se DESLIZA: el control adjustable existe (regla del teclado)
 const sliders = await page.locator('[role="adjustable"], [aria-valuenow]').count();
 check(sliders >= 1 || t.includes('e-PetPlace retiene'), 'T3k slider de precio + neto de fee_configs presentes');
+// Ley 22: el binario es un Interruptor (switch), no un botón
+const switches = await page.getByRole('switch').count();
+check(switches >= 1, `T3l "Ofrecer esta duración" es Interruptor (switches: ${switches})`);
 
 // ── T4: la Hoja de plan/paquete dice los presets EN LETRA (D-354) ──
 const filaPlan = page.getByText(/Sin plan ni paquete|Plan \$|Paquete \$/).first();

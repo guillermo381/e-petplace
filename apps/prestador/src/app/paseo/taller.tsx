@@ -51,6 +51,7 @@ import {
   EstadoVacio,
   Hoja,
   HojaScroll,
+  Interruptor,
   SelectorOpcion,
   Separador,
   SliderPrecio,
@@ -310,8 +311,6 @@ export default function TallerPaseo() {
   const [hojaPlanPaquete, setHojaPlanPaquete] = useState<BloquePaseo | null>(null);
   const [hojaFranja, setHojaFranja] = useState<string | null>(null);
   const [confirmandoQuitar, setConfirmandoQuitar] = useState(false);
-  const [hojaCiudades, setHojaCiudades] = useState(false);
-  const [hojaZona, setHojaZona] = useState<string | null>(null);
   const [creandoFranja, setCreandoFranja] = useState(false);
   const [vistaNueva, setVistaNueva] = useState<'form' | 'desde' | 'hasta'>('form');
   const [desdeSel, setDesdeSel] = useState<string | null>(null);
@@ -604,11 +603,6 @@ export default function TallerPaseo() {
 
   const d = drafts?.[duracionSel] ?? null;
   const franjaEnHoja = franjas?.find((f) => f.key === hojaFranja) ?? null;
-  const zonaEnHoja = zonas?.find((z) => z.key === hojaZona) ?? null;
-  const ciudadesDisponibles = ciudades.filter(
-    (c) => !(zonas ?? []).some((z) => !z.quitar && z.ciudad.id === c.id),
-  );
-
   // el riel del precio — techo estable desde las ofertas GUARDADAS (el
   // borrador no estira el riel mientras se arrastra)
   const pasos = useMemo(() => {
@@ -697,33 +691,45 @@ export default function TallerPaseo() {
             <SelectorOpcion
               etiqueta={t('taller.duracionesTitulo')}
               disposicion="grilla"
+              acento="oficio"
               opciones={BLOQUES_PASEO.map((b) => ({ codigo: String(b), etiqueta: etiquetaCorta(b) }))}
               seleccionada={String(duracionSel)}
               onSelect={(codigo) => setDuracionSel(Number.parseInt(codigo, 10) as BloquePaseo)}
             />
             <Tarjeta>
               <View style={{ gap: spacing[4] }}>
+                {/* Ley 22: el binario dice su nombre — Interruptor SÓLIDO
+                    oficio (el botón Ofrecer/Pausar/Reactivar MURIÓ) */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
+                  <Text
+                    style={{
+                      fontFamily: typography.family.sans.regular,
+                      fontSize: typography.size.base,
+                      color: theme.text.primary,
+                    }}
+                  >
+                    {t('taller.ofrecer')}
+                  </Text>
+                  <Interruptor
+                    etiqueta={t('taller.ofrecer')}
+                    registro="oficio"
+                    encendido={d.ofrecida}
+                    onCambio={(v) =>
+                      actualizarDraft(duracionSel, {
+                        ofrecida: v,
+                        // el slider necesita un valor en el riel; nace visible
+                        // y ajustable, jamás oculto
+                        precio: v && d.precio === '' ? '5.00' : d.precio,
+                      })
+                    }
+                  />
+                </View>
                 {!d.ofrecida && d.base === null ? (
-                  <>
-                    <VozSecundaria texto={t('taller.noOfrecida')} />
-                    <Boton
-                      variante="secundario"
-                      etiqueta={t('taller.ofrecer')}
-                      bloque
-                      onPress={() =>
-                        actualizarDraft(duracionSel, {
-                          ofrecida: true,
-                          // el slider necesita un valor en el riel; nace visible
-                          // y ajustable, jamás oculto
-                          precio: d.precio === '' ? '5.00' : d.precio,
-                        })
-                      }
-                    />
-                  </>
+                  <VozSecundaria texto={t('taller.noOfrecida')} />
                 ) : (
                   <>
                     {!d.ofrecida && <VozSecundaria texto={t('servicios.pausada')} />}
-                    {d.base === null && <VozSecundaria texto={t('taller.seOfreceAlGuardar')} />}
+                    {d.ofrecida && d.base === null && <VozSecundaria texto={t('taller.seOfreceAlGuardar')} />}
                     {/* el precio se DESLIZA (regla del teclado §15b.4):
                         label de pantalla + valor en mono + SliderPrecio 'aa' */}
                     <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' }}>
@@ -762,12 +768,6 @@ export default function TallerPaseo() {
                       titulo={t('taller.nombreDescripcion')}
                       subtitulo={d.nombre || t('taller.nombreDescripcionVacio')}
                       onPress={() => setHojaNombre(true)}
-                    />
-                    <Boton
-                      variante="ghost"
-                      etiqueta={d.ofrecida ? t('taller.pausarDuracion') : t('taller.reactivarDuracion')}
-                      bloque
-                      onPress={() => actualizarDraft(duracionSel, { ofrecida: !d.ofrecida })}
                     />
                   </>
                 )}
@@ -819,6 +819,7 @@ export default function TallerPaseo() {
             <SelectorOpcion
               etiqueta={t('taller.horariosTitulo')}
               disposicion="tira"
+              acento="oficio"
               opciones={ORDEN_DISPLAY.map((dia) => ({ codigo: String(dia), etiqueta: vozDia(dia) }))}
               seleccionada={String(diaSel)}
               onSelect={(codigo) => setDiaSel(Number.parseInt(codigo, 10))}
@@ -872,32 +873,40 @@ export default function TallerPaseo() {
           >
             <TituloBloque texto={t('taller.zonasTitulo')} />
             <VozSecundaria texto={t('taller.zonasExplica')} />
-            {zonas !== null && zonas.filter((z) => !z.quitar).length === 0 ? (
-              <VozSecundaria texto={t('taller.sinZonas')} />
-            ) : (
-              <Tarjeta relleno="ninguno">
-                {(zonas ?? [])
-                  .filter((z) => !z.quitar)
-                  .map((z, i) => (
-                    <View key={z.key}>
-                      {i > 0 && <Separador />}
-                      <Celda
-                        interactiva
-                        accessibilityRole="button"
-                        titulo={z.ciudad.nombre}
-                        subtitulo={z.id === null ? t('taller.zonaNueva') : undefined}
-                        onPress={() => setHojaZona(z.key)}
-                      />
-                    </View>
-                  ))}
-              </Tarjeta>
-            )}
-            <Boton
-              variante="secundario"
-              etiqueta={t('taller.agregarCiudad')}
-              bloque
-              onPress={() => setHojaCiudades(true)}
+            {/* Ley 22 (adenda founder): las ciudades del catálogo como
+                chips TONALES multi-selección — elegir varias o ninguna es
+                legal (19.3); las Hojas de agregar/quitar MURIERON (Chanel) */}
+            <SelectorOpcion
+              etiqueta={t('taller.zonasTitulo')}
+              disposicion="grilla"
+              acento="oficio"
+              multiple
+              opciones={ciudades.map((c) => ({ codigo: c.id, etiqueta: c.nombre }))}
+              seleccionadas={(zonas ?? []).filter((z) => !z.quitar).map((z) => z.ciudad.id)}
+              onSelect={(ciudadId) => {
+                if (zonas === null) return;
+                const vigente = zonas.find((z) => z.ciudad.id === ciudadId && !z.quitar);
+                if (vigente) {
+                  // apagar: la nueva se va del borrador; la guardada se marca
+                  setZonas(
+                    vigente.id === null
+                      ? zonas.filter((z) => z.key !== vigente.key)
+                      : zonas.map((z) => (z.key === vigente.key ? { ...z, quitar: true } : z)),
+                  );
+                  return;
+                }
+                const marcada = zonas.find((z) => z.ciudad.id === ciudadId && z.quitar);
+                if (marcada) {
+                  setZonas(zonas.map((z) => (z.key === marcada.key ? { ...z, quitar: false } : z)));
+                  return;
+                }
+                const ciudad = ciudades.find((c) => c.id === ciudadId);
+                if (!ciudad) return;
+                contadorNuevas.current += 1;
+                setZonas([...zonas, { key: `zona-${contadorNuevas.current}`, id: null, ciudad, quitar: false }]);
+              }}
             />
+            <VozSecundaria texto={t('taller.ciudadFaltante')} />
           </View>
 
           {/* ── vacaciones (celda-puente; el motor D-341 intacto) ── */}
@@ -1016,6 +1025,7 @@ export default function TallerPaseo() {
               <>
                 <SelectorOpcion
                   etiqueta={t('horarios.cupo')}
+                  acento="oficio"
                   opciones={[
                     { codigo: '1', etiqueta: '1' },
                     { codigo: '2', etiqueta: '2' },
@@ -1079,66 +1089,6 @@ export default function TallerPaseo() {
         )}
       </Hoja>
 
-      {/* Hoja: agregar ciudad — SOLO del catálogo (ciudad faltante =
-          pedido al equipo, jamás texto libre) */}
-      <Hoja visible={hojaCiudades} onCerrar={() => setHojaCiudades(false)} titulo={t('taller.agregarCiudad')} altura="media">
-        <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
-          {ciudadesDisponibles.length > 0 && (
-            <HojaScroll>
-              {ciudadesDisponibles.map((c, i) => (
-                <View key={c.id}>
-                  {i > 0 && <Separador />}
-                  <Celda
-                    interactiva
-                    accessibilityRole="button"
-                    titulo={c.nombre}
-                    onPress={() => {
-                      contadorNuevas.current += 1;
-                      setZonas((prev) =>
-                        prev === null
-                          ? prev
-                          : [...prev, { key: `zona-${contadorNuevas.current}`, id: null, ciudad: c, quitar: false }],
-                      );
-                      setHojaCiudades(false);
-                    }}
-                  />
-                </View>
-              ))}
-            </HojaScroll>
-          )}
-          <VozSecundaria texto={t('taller.ciudadFaltante')} />
-        </View>
-      </Hoja>
-
-      {/* Hoja: quitar ciudad del borrador */}
-      <Hoja
-        visible={zonaEnHoja !== null}
-        onCerrar={() => setHojaZona(null)}
-        titulo={zonaEnHoja?.ciudad.nombre ?? ''}
-      >
-        {zonaEnHoja !== null && (
-          <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
-            <VozSecundaria texto={t('taller.quitarCiudad', { ciudad: zonaEnHoja.ciudad.nombre })} />
-            <Boton
-              variante="destructivo"
-              etiqueta={t('taller.quitarCiudadConfirmar')}
-              bloque
-              onPress={() => {
-                if (zonaEnHoja.id === null) {
-                  setZonas((prev) => (prev === null ? prev : prev.filter((x) => x.key !== zonaEnHoja.key)));
-                } else {
-                  setZonas((prev) =>
-                    prev === null ? prev : prev.map((x) => (x.key === zonaEnHoja.key ? { ...x, quitar: true } : x)),
-                  );
-                }
-                setHojaZona(null);
-              }}
-            />
-            <Boton variante="ghost" etiqueta={t('horarios.cancelar')} bloque onPress={() => setHojaZona(null)} />
-          </View>
-        )}
-      </Hoja>
-
       {/* Hoja: nueva franja — el día lo eligió la píldora (Chanel: el
           sub-selector de día de /horarios MURIÓ con la tira a la vista) */}
       <Hoja
@@ -1170,6 +1120,7 @@ export default function TallerPaseo() {
             </Tarjeta>
             <SelectorOpcion
               etiqueta={t('horarios.cupo')}
+              acento="oficio"
               opciones={[
                 { codigo: '1', etiqueta: '1' },
                 { codigo: '2', etiqueta: '2' },

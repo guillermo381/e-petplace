@@ -27,19 +27,17 @@
 
 import { useCallback, useState } from 'react';
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   AvatarMascota,
   Boton,
   Celda,
   CitaEnVivo,
-  Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
   Insignia,
-  SelectorOpcion,
+  SelectorSegmentado,
   Separador,
   Tarjeta,
   spacing,
@@ -60,6 +58,7 @@ import {
 import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { verificarSesion } from '@/lib/api';
+import { TechoTinta } from '@/components/techo-tinta';
 import { useTraduccion } from '@/i18n';
 
 type Pantalla =
@@ -283,29 +282,27 @@ export default function Hoy() {
     !pantalla.atendidas.has(destacada.mascota.id);
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
+    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <ScrollView
-        contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[4] }}
+        contentContainerStyle={{ paddingBottom: spacing[10] }}
         refreshControl={<RefreshControl refreshing={refrescando} onRefresh={() => void refrescar()} />}
       >
-        {/* D-315p curado (S57-B1): la fecha larga humana ahora vive en el
-            riel y habla el idioma del dispositivo. */}
-        <Encabezado
-          variante="portada"
-          saludo={t('agenda.saludo')}
-          subtitulo={fechaDiaSemanaHumana(hoyLocal(), idioma as IdiomaSoportado)}
-        />
+        {/* B2 §15b.2: EL TECHO DE TINTA — texto papel, huella teal pura,
+            dato real de trabajo (la fecha humana del riel, D-315p). */}
+        <TechoTinta titulo={t('agenda.saludo')} dato={fechaDiaSemanaHumana(hoyLocal(), idioma as IdiomaSoportado)} />
 
-        {/* D-317: el segmento Hoy/Semana (el lugar hecho, ocupado en S57-B1) */}
+        <View style={{ padding: spacing[4], gap: spacing[4] }}>
+        {/* B4 (D-357): Hoy/Semana en el SEGMENTADO canónico — los chips
+            quedaron prohibidos como segmentos (Ley 19.3). */}
         {pantalla.estado === 'listo' && (
-          <SelectorOpcion
+          <SelectorSegmentado
             etiqueta={t('agenda.vistaEtiqueta')}
-            opciones={[
+            segmentos={[
               { codigo: 'hoy', etiqueta: t('agenda.vistaHoy') },
               { codigo: 'semana', etiqueta: t('agenda.vistaSemana') },
             ]}
-            seleccionada={vista}
-            onSelect={(codigo) => setVista(codigo === 'semana' ? 'semana' : 'hoy')}
+            activo={vista}
+            onCambio={(codigo) => setVista(codigo === 'semana' ? 'semana' : 'hoy')}
           />
         )}
 
@@ -463,7 +460,8 @@ export default function Hoy() {
         {/* ── Zona 4 — tu trabajo con dignidad: liquidaciones son B2 y
             el motor de hitos de trayectoria (§2.7) no existe → la zona
             NO existe hoy. JAMÁS métricas en cero. ── */}
+        </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

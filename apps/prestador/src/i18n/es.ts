@@ -201,10 +201,11 @@ export const prestadorEs = {
     titulo: 'Tu negocio',
     enPreparacion: 'En preparación',
     oferta: 'Tu oferta',
-    // S58-B B1b (adenda founder): /servicios y /horarios murieron
-    // absorbidos por el taller — UNA entrada al mundo · LOTE S58, GATE PENDIENTE
+    // S58-B B1a (§15b.5): NEGOCIO COMO MUNDOS · LOTE S58, GATE PENDIENTE
     paseo: 'Paseo',
-    paseoDetalle: 'Tu oferta completa: duraciones, precios y horarios.',
+    mundoPaseoVacio: 'Ábrelo y arma tu oferta en el taller.',
+    mundoGrooming: 'Grooming',
+    mundoGroomingDetalle: 'Se abre cuando el servicio llegue a la app.',
     // S56-B TAREA 2 (D-341) · LOTE S56, GATE PENDIENTE
     vacaciones: 'Vacaciones',
     vacacionesDetalle: 'Marca los días en que no paseas.',
@@ -386,8 +387,6 @@ export const prestadorEs = {
     noOfrecida: 'No ofreces esta duración.',
     seOfreceAlGuardar: 'Se ofrece cuando guardes.',
     ofrecer: 'Ofrecer esta duración',
-    pausarDuracion: 'Pausar esta duración',
-    reactivarDuracion: 'Reactivar esta duración',
     nombreDescripcion: 'Nombre y descripción',
     nombreDescripcionVacio: 'Opcional — como lo ven tus clientes.',
     planPaqueteTitulo: 'Plan y paquete',
@@ -400,15 +399,11 @@ export const prestadorEs = {
     sinFranjasDia: 'Sin franjas este día.',
     franjaNueva: 'Se agrega cuando guardes.',
     agregarFranjaListo: 'Agregar franja',
-    // zonas de cobertura (contrato D-331 v1: declara, no filtra)
+    // zonas de cobertura (contrato D-331 v1: declara, no filtra;
+    // Ley 22: chips tonales multi-selección del catálogo)
     zonasTitulo: 'Zonas de cobertura',
     zonasExplica: 'Las ciudades donde trabajas. Ayudan a las familias a encontrarte.',
-    sinZonas: 'Aún no declaras ninguna ciudad.',
-    zonaNueva: 'Se agrega cuando guardes.',
-    agregarCiudad: 'Agregar ciudad',
     ciudadFaltante: 'Si tu ciudad no está, escríbenos: el catálogo lo carga el equipo.',
-    quitarCiudad: '¿Quitar {{ciudad}} de tu cobertura?',
-    quitarCiudadConfirmar: 'Sí, quitar',
     listo: 'Listo',
     guardar: 'Guardar tu oferta',
     guardado: 'Tu oferta quedó guardada.',
