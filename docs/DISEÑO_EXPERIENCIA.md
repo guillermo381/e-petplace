@@ -1,6 +1,8 @@
 # DISEÑO_EXPERIENCIA — La arquitectura de la experiencia del dueño
 
-> **Versión: v1.1 — S50 (10 Jul 2026), Etapa A0 de RUTA_F1 v2.2.**
+> **Versión: v1.4 — S53 (10 Jul 2026), Etapa A0 de RUTA_F1 v2.2.**
+> (header curado S58; el contenido no cambia — la banda decía v1.1 y
+> el contenido/historial ya era v1.4, relevamiento B.)
 > Escrito por el arquitecto/director de diseño, decisiones de producto
 > cerradas por el founder en sesión. **Contrastes obligatorios:**
 > `MODELO_PRODUCTO.md` (EL NORTE — en especial §6.4 revelación

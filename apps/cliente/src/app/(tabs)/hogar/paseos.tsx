@@ -29,6 +29,7 @@ import {
   Icono,
   Insignia,
   SelectorOpcion,
+  SelectorSegmentado,
   Separador,
   Tarjeta,
   spacing,
@@ -322,15 +323,19 @@ export default function MisPaseos() {
         </View>
       ) : (
         <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[4] }}>
-          <SelectorOpcion
+          {/* D-357 (S58): PRIMERA migración chips→toggle — el trabajo de
+              vistas exclusivas es del SelectorSegmentado (Ley 19.3);
+              SelectorOpcion queda en esta pantalla solo para VALORES
+              (días/horas de las Hojas). */}
+          <SelectorSegmentado
             etiqueta={t('plan.hubTitulo')}
-            opciones={[
+            segmentos={[
               { codigo: 'proximos', etiqueta: t('plan.segProximos') },
               { codigo: 'agenda', etiqueta: t('plan.segAgenda') },
               { codigo: 'historial', etiqueta: t('plan.segHistorial') },
             ]}
-            seleccionada={segmento}
-            onSelect={(codigo) => setSegmento(codigo as Segmento)}
+            activo={segmento}
+            onCambio={(codigo) => setSegmento(codigo as Segmento)}
           />
 
           {segmento === 'proximos' ? (

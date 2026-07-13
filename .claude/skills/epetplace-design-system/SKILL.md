@@ -278,9 +278,15 @@ aprobado en esencia por el founder en primera ronda):
    NIVEL de la pantalla patrón, no interpretando prosa.
 3. El gate en dispositivo compara contra la pantalla patrón — la vara
    deja de ser adjetivo ("espectáculo") y pasa a ser comparación.
-4. Primera pantalla patrón: el Hogar del cliente (boceto S57, dos notas
-   abiertas: íconos del set b′ cuando el lote exista; fondo/marco por
-   firmar).
+4. Primera pantalla patrón: el Hogar del cliente — **v2 "techo vivo"
+   FIRMADA (S58)**. La referencia visual vive en
+   `pantallas-patron/hogar-v2.png` (junto a esta skill; ver el README
+   de esa carpeta — el PNG lo deposita el founder/arquitecto). Claves
+   de la firma: techo con curva orgánica 44/26 · hero del próximo paseo
+   en tarjeta de DOS PISOS · fichas por mascota con próxima cita ·
+   grupo de celdas de navegación con subtítulo VIVO · capas paseo=TEAL
+   y salud=VERDE VITAL (el boceto S57 pintaba paseo en verde —
+   corregido en la firma) · fondo papel + elevación (D-358/D-360).
 
 ### El protocolo del gate de craft (por pantalla, exigible)
 

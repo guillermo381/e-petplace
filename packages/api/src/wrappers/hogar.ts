@@ -41,6 +41,17 @@ export interface ProximaCitaHogar {
    *  15 min); 'firme' = confirmada (pagada, o NULL = ciclo de pago no
    *  aplica — legacy/walk-in). La Zona 2 les da voz distinta (D-319). */
   reserva: 'hold' | 'firme';
+  /** La calle del snapshot D-339 (direccion_snapshot.direccion), o null
+   *  honesto — citas pre-D-339 no lo tienen. Patrón Hogar v2 (S58). */
+  direccion: string | null;
+}
+
+/** Próxima cita POR MASCOTA (patrón Hogar v2, S58): la ficha de cada
+ *  mascota muestra su próxima cita — derivado de las MISMAS citas ya
+ *  pedidas para proxima_cita, cero query extra. */
+export interface ProximaCitaMascota {
+  fecha: string;
+  hora: string | null;
 }
 
 export interface EstadoHogar {
@@ -53,6 +64,8 @@ export interface EstadoHogar {
    *  (D-319: su `estado` queda 'pendiente' para siempre; acá se filtra
    *  por `estado_reserva` + `expira_en`). */
   proxima_cita: ProximaCitaHogar | null;
+  /** Próxima cita firme/hold vigente POR mascota (S58, patrón v2). */
+  proxima_cita_por_mascota: Record<string, ProximaCitaMascota>;
 }
 
 // Fecha local del dispositivo YYYY-MM-DD (patrón S44: en-CA da ese formato).
@@ -64,7 +77,7 @@ export async function obtenerEstadoHogar(
   mascotaIds: string[],
 ): Promise<ResultadoWrapper<EstadoHogar, 'error_estado_hogar'>> {
   if (mascotaIds.length === 0) {
-    return { ok: true, data: { senales: [], atencion_en_curso: null, proxima_cita: null } };
+    return { ok: true, data: { senales: [], atencion_en_curso: null, proxima_cita: null, proxima_cita_por_mascota: {} } };
   }
 
   const cliente = getClient();
@@ -84,7 +97,7 @@ export async function obtenerEstadoHogar(
       .in('estado', ['en_curso', 'cerrada_con_calidad']),
     cliente
       .from('evento_cita_servicio')
-      .select('id, mascota_id, fecha, hora, tipo_servicio, estado, estado_reserva, expira_en')
+      .select('id, mascota_id, fecha, hora, tipo_servicio, estado, estado_reserva, expira_en, direccion_snapshot')
       .in('mascota_id', mascotaIds)
       .in('estado', ['pendiente', 'confirmada'])
       .gte('fecha', hoyLocal())
@@ -157,6 +170,14 @@ export async function obtenerEstadoHogar(
   // Guard de shape (L-124): el filtro garantiza mascota_id/fecha no
   // nulos, pero el tipo generado no lo sabe — se angosta verificando,
   // jamás con cast (regla 34).
+  // La calle del snapshot D-339 — solo la línea que el Hogar pinta;
+  // el shape completo vive en paseo.ts (parseDireccionSnapshot).
+  const calleDe = (v: unknown): string | null => {
+    if (typeof v !== 'object' || v === null || Array.isArray(v)) return null;
+    const d = (v as Record<string, unknown>)['direccion'];
+    return typeof d === 'string' && d.length > 0 ? d : null;
+  };
+
   const cita = citas.data.find((c) => c.estado === 'confirmada' || esHoldVigente(c));
   const proximaCita: ProximaCitaHogar | null =
     cita !== undefined && cita.mascota_id !== null && cita.fecha !== null
@@ -167,8 +188,20 @@ export async function obtenerEstadoHogar(
           hora: cita.hora !== null ? cita.hora.slice(0, 5) : null,
           tipo_servicio: cita.tipo_servicio,
           reserva: cita.estado === 'confirmada' ? 'firme' : 'hold',
+          direccion: calleDe(cita.direccion_snapshot),
         }
       : null;
+
+  // Por mascota (S58): la primera cita real de cada una — las citas ya
+  // vienen ordenadas por fecha/hora ascendente.
+  const porMascota: Record<string, ProximaCitaMascota> = {};
+  for (const c of citas.data) {
+    if (c.mascota_id === null || c.fecha === null) continue;
+    if (porMascota[c.mascota_id] !== undefined) continue;
+    if (c.estado === 'confirmada' || esHoldVigente(c)) {
+      porMascota[c.mascota_id] = { fecha: c.fecha, hora: c.hora !== null ? c.hora.slice(0, 5) : null };
+    }
+  }
 
   return {
     ok: true,
@@ -176,6 +209,7 @@ export async function obtenerEstadoHogar(
       senales,
       atencion_en_curso: enCurso,
       proxima_cita: proximaCita,
+      proxima_cita_por_mascota: porMascota,
     },
   };
 }

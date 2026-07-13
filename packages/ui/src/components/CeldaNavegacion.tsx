@@ -49,9 +49,12 @@ export interface CeldaNavegacionProps {
   onPress: () => void
   /** Dosis: 'capa' (dueño, default) · 'aa' / 'tinta' (prestador). */
   registro?: IconoRegistro
+  /** S58 (patrón Hogar v2): false = ACCIÓN dentro del grupo (ej.
+   *  "Agregar mascota") — misma anatomía, sin chevron de entrada. */
+  chevron?: boolean
 }
 
-export function CeldaNavegacion({ icono, titulo, detalle, onPress, registro = 'capa' }: CeldaNavegacionProps) {
+export function CeldaNavegacion({ icono, titulo, detalle, onPress, registro = 'capa', chevron = true }: CeldaNavegacionProps) {
   const { theme } = useTheme()
   const [presionada, setPresionada] = useState(false)
 
@@ -109,15 +112,17 @@ export function CeldaNavegacion({ icono, titulo, detalle, onPress, registro = 'c
         </View>
 
         {/* chevron de entrada — affordance decorativa (el canal semántico es el rol) */}
-        <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" aria-hidden>
-          <Path
-            d="M9 18l6-6-6-6"
-            stroke={theme.text.tertiary}
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </Svg>
+        {chevron ? (
+          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" aria-hidden>
+            <Path
+              d="M9 18l6-6-6-6"
+              stroke={theme.text.tertiary}
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </Svg>
+        ) : null}
       </Animated.View>
     </Pressable>
   )

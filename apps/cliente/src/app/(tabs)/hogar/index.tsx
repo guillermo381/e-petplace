@@ -2,17 +2,19 @@
  * HOGAR — la tesis del producto hecha pantalla (S51-B2.2, sobre
  * DISEÑO_EXPERIENCIA §1-§2): el estado del hogar, no una grilla.
  *
- * Las 4 zonas, de arriba hacia abajo:
- *   Zona 1 — el hogar: las mascotas con UNA línea de estado cada una
+ * ORDEN S58 (patrón v2 "techo vivo" FIRMADO), de arriba hacia abajo:
+ *   Techo vivo — HeroMarca techoVivo (curva 44/26) + destello Coach.
+ *   HERO de hoy — atención en curso (CitaEnVivo, Ley 7) o el próximo
+ *     paseo en tarjeta de DOS PISOS (servicio+estado relativo en capa
+ *     teal / dirección del snapshot D-339 con pin y chevron → hub).
+ *     Sin nada: NO EXISTE (silencio digno).
+ *   Tu hogar — las mascotas con su línea de estado Y su próxima cita
  *     (FichaMascotaHogar; voz calculada por calcularVozHogar de
- *     @epetplace/domain sobre el expediente REAL — L-139: "al día" se
- *     gana, jamás se asume). Tap → perfil.
- *   Zona 2 — hoy: atención en curso (CitaEnVivo, Ley 7) o próxima
- *     cita. SIN nada urgente LA ZONA NO EXISTE (silencio digno).
+ *     @epetplace/domain sobre el expediente REAL — L-139). Tap → perfil.
+ *   GRUPO de celdas (Ley 19.1) — carnet/hub/agregar con subtítulo VIVO.
  *   Zona 3 — en contexto: el motor de revelaciones es B4 — hueco
  *     estructural (ver ZONA 3 abajo), null honesto.
- *   Zona 4 — la vida: LineaDeVida del HOGAR (merge multi-mascota por
- *     fecha_evento) + la acción de aporte (cargar carnet, flujo S47).
+ *   La vida — LineaDeVida del HOGAR (merge multi-mascota por fecha).
  *
  * Herencias vivas de la pantalla S45-S48 que esta reemplaza: Hoja de
  * detalle de vacuna (tap en nodo) y VisorFoto del carnet. La Hoja de
@@ -24,9 +26,11 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Path } from 'react-native-svg';
 import {
   Boton,
   Celda,
+  CeldaNavegacion,
   CitaEnVivo,
   Esqueleto,
   EsqueletoGrupo,
@@ -61,6 +65,7 @@ import {
   type EstadoHogar,
   type ItemTimeline,
   type MascotaResumen,
+  type PlanPaseo,
   type VacunaDeEvento,
 } from '@epetplace/api';
 import { calcularVozHogar, type VozEstadoHogar } from '@epetplace/domain';
@@ -85,6 +90,47 @@ function saludoPorFranja(hora: number, t: TraductorHogar): string {
 // de la casa (<300ms, Ley 6); solo al montar — jamás en re-fetch.
 const entradaZona = (orden: number) =>
   FadeInDown.duration(motion.duration.normal).delay(orden * motion.stagger.fast);
+
+// El CUÁNDO relativo del hero (patrón v2): "En 2 h" / "En 20 min" para
+// lo cercano; lo lejano habla en mono absoluto (fechaCortaMono).
+function cuandoRelativo(
+  fecha: string,
+  hora: string | null,
+  t: TraductorHogar,
+): { relativo: string } | { mono: true } {
+  if (hora === null) return { mono: true };
+  const ts = Date.parse(`${fecha}T${hora}:00`);
+  if (!Number.isFinite(ts)) return { mono: true };
+  const min = Math.round((ts - Date.now()) / 60000);
+  if (min <= 0) return { mono: true };
+  if (min < 60) return { relativo: t('hogar.enMinutos', { n: min }) };
+  if (min < 48 * 60) return { relativo: t('hogar.enHoras', { n: Math.round(min / 60) }) };
+  return { mono: true };
+}
+
+// Día de la semana en voz del idioma — convención regla 32
+// (0=Domingo..6=Sábado; 2023-01-01 fue domingo).
+function nombreDia(d: number, idioma: string): string {
+  const fecha = new Date(Date.UTC(2023, 0, 1 + d));
+  return new Intl.DateTimeFormat(idioma === 'en' ? 'en' : 'es', { weekday: 'long', timeZone: 'UTC' }).format(fecha);
+}
+
+// Pin del piso 2 del hero — PLACEHOLDER DECLARADO (D-361: el lote b′
+// lo reemplaza al paso). Trazo 1.9 en tinta, remates redondeados.
+function PinDireccion({ color }: { color: string }) {
+  return (
+    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <Path
+        d="M12 21s-7-5.3-7-11a7 7 0 1 1 14 0c0 5.7-7 11-7 11Z"
+        stroke={color}
+        strokeWidth={1.9}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path d="M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" stroke={color} strokeWidth={1.9} />
+    </Svg>
+  );
+}
 
 // Código de voz (Ley 3: jamás visible) → texto del riel + semántica.
 // S52-P3: la ficha usa las voces SIN sujeto (ficha.*) — el nombre
@@ -153,8 +199,10 @@ export default function Hogar() {
 
   const [carnetSelectorAbierto, setCarnetSelectorAbierto] = useState(false);
   const [coachAbierto, setCoachAbierto] = useState(false);
-  // D-338: la tarjeta del Hogar es una de las DOS entradas al hub "Mis
-  // paseos" — visible SOLO con planes (silencio digno).
+  // D-338: la celda del Hogar es una de las DOS entradas al hub "Mis
+  // paseos" — visible SOLO con planes (silencio digno). S58: se guarda
+  // el primer plan ACTIVO para el subtítulo VIVO del grupo.
+  const [planActivo, setPlanActivo] = useState<PlanPaseo | null>(null);
   const [hayPlanes, setHayPlanes] = useState(false);
   // QW1 (S53): el saludo lleva el nombre del miembro (profiles.nombre).
   const [nombrePerfil, setNombrePerfil] = useState<string | null>(null);
@@ -242,7 +290,10 @@ export default function Hogar() {
           if (vigente && eh.ok) setEstadoHogar(eh.data);
         });
         void obtenerMisPlanesPaseo().then((pl) => {
-          if (vigente && pl.ok) setHayPlanes(pl.data.length > 0);
+          if (vigente && pl.ok) {
+            setHayPlanes(pl.data.length > 0);
+            setPlanActivo(pl.data.find((p) => p.estado === 'activa') ?? null);
+          }
         });
         void obtenerMiPerfil().then((p) => {
           // sin nombre: el saludo va solo — jamás un nombre inventado
@@ -355,9 +406,11 @@ export default function Hogar() {
           lógica. El isotipo blanco de adentro es el UNO por pantalla.
           Memorial degrada solo (bg.card plano). */}
       <View style={{ paddingTop: insets.top, backgroundColor: esMemorial ? theme.bg.card : undefined }}>
+        {/* S58 patrón v2: el TECHO VIVO — la base curva 44/26 (la
+            calibración final se sella en el gate en dispositivo) */}
         <HeroMarca
           titulo={`${saludoPorFranja(hoy.getHours(), t)}${nombrePerfil ? `, ${nombrePerfil.trim().split(' ')[0]}` : ''}`}
-          variante="compacto"
+          variante="techoVivo"
         />
         {/* LA ENTRADA DEL COACH (S53-B2b, §6 + DIRECCION_ARTE §5.1):
             el destello vive en el techo del Hogar, discreto. Blanco
@@ -386,8 +439,74 @@ export default function Hogar() {
         </Pressable>
       </View>
 
+      {/* ── HERO de hoy (patrón v2: arriba, es lo que viene) ────────
+          En curso gana el lugar (Ley 7); si no, el próximo paseo en
+          tarjeta de DOS PISOS: servicio+estado relativo en capa teal /
+          dirección con pin y chevron (entra al hub). Sin nada: silencio. */}
+      {enCurso !== null ? (
+        <Animated.View entering={entradaZona(0)} style={{ paddingHorizontal: spacing[4], paddingTop: spacing[5] }}>
+          <CitaEnVivo capa="cuidado">
+            <Celda
+              interactiva
+              accessibilityRole="button"
+              onPress={() => router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: enCurso.atencion_id } })}
+              titulo={nombreDe(enCurso.mascota_id)}
+              subtitulo={t('hogar.paseoEnCurso')}
+              fin={
+                <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.accent.primary }}>
+                  {t('hogar.verEnVivo')}
+                </Text>
+              }
+            />
+          </CitaEnVivo>
+        </Animated.View>
+      ) : proximaCita !== null ? (
+        <Animated.View entering={entradaZona(0)} style={{ paddingHorizontal: spacing[4], paddingTop: spacing[5] }}>
+          <Tarjeta relleno="ninguno" elevacion="reposo">
+            {(() => {
+              const cuando = cuandoRelativo(proximaCita.fecha, proximaCita.hora, t);
+              const monoAbsoluto = `${fechaCortaMono(proximaCita.fecha, idioma)}${proximaCita.hora ? ` · ${proximaCita.hora}` : ''}`;
+              return (
+                <Celda
+                  titulo={`${nombreDe(proximaCita.mascota_id)}${proximaCita.tipo_servicio ? ` · ${proximaCita.tipo_servicio}` : ''}`}
+                  subtitulo={t(proximaCita.reserva === 'hold' ? 'hogar.reservandoHorario' : 'hogar.proximaCita')}
+                  {...('relativo' in cuando
+                    ? {
+                        fin: (
+                          // el estado del hero habla en la capa del paseo (teal AA)
+                          <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: 'capaText' in theme ? theme.capaText.cuidado : theme.capa.cuidado }}>
+                            {cuando.relativo}
+                          </Text>
+                        ),
+                      }
+                    : { metadataMono: monoAbsoluto })}
+                />
+              );
+            })()}
+            {proximaCita.direccion !== null ? (
+              <>
+                <Separador />
+                <Celda
+                  interactiva
+                  accessibilityRole="button"
+                  onPress={() => router.push('/hogar/paseos')}
+                  titulo={proximaCita.direccion}
+                  inicio={<PinDireccion color={theme.text.secondary} />}
+                  fin={
+                    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" aria-hidden>
+                      <Path d="M9 18l6-6-6-6" stroke={theme.text.tertiary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                    </Svg>
+                  }
+                />
+              </>
+            ) : null}
+          </Tarjeta>
+        </Animated.View>
+      ) : null}
+
+      {/* ── Tu hogar (Zona 1): la mascota preside, su próxima cita visible ── */}
       <Animated.View
-        entering={entradaZona(0)}
+        entering={entradaZona(1)}
         style={{ paddingHorizontal: spacing[4], paddingTop: spacing[5], gap: spacing[3] }}
       >
         {mascotas.map((m) => {
@@ -409,6 +528,7 @@ export default function Hogar() {
                 t,
               )
             : null;
+          const pc = estadoHogar?.proxima_cita_por_mascota[m.id];
           return (
             <FichaMascotaHogar
               key={m.id}
@@ -416,77 +536,71 @@ export default function Hogar() {
               fotoUrl={fotos[m.id]}
               voz={voz?.semantica ?? 'conociendolo'}
               textoEstado={voz?.texto ?? ''}
+              proximaCitaMono={pc ? `${fechaCortaMono(pc.fecha, idioma)}${pc.hora ? ` · ${pc.hora}` : ''}` : undefined}
               onPress={() => router.push({ pathname: '/hogar/mascota/[mascotaId]', params: { mascotaId: m.id } })}
             />
           );
         })}
-        {/* S55-A A2 — el hogar que crece: invitación SERENA (patrón P2d,
-            menos peso que las fichas) al alta de mascota adicional. */}
-        <Tarjeta
-          interactiva
-          onPress={() => router.push('/hogar/agregar')}
-          accessibilityRole="button"
-          etiqueta={t('agregarMascota.entradaTitulo')}
-          elevacion="plana"
-        >
-          <View style={{ gap: 2 }}>
-            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.primary }}>
-              {t('agregarMascota.entradaTitulo')}
-            </Text>
-            <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
-              {t('agregarMascota.entradaDetalle')}
-            </Text>
-          </View>
-        </Tarjeta>
       </Animated.View>
 
-      {/* ── Zona 2 — hoy (sin nada urgente, NO existe) ─────────── */}
-      {enCurso !== null ? (
-        <Animated.View entering={entradaZona(1)} style={{ paddingHorizontal: spacing[4], marginTop: spacing[7] }}>
-          <CitaEnVivo capa="cuidado">
-            <Celda
-              interactiva
-              accessibilityRole="button"
-              onPress={() => router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: enCurso.atencion_id } })}
-              titulo={nombreDe(enCurso.mascota_id)}
-              subtitulo={t('hogar.paseoEnCurso')}
-              fin={
-                <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.accent.primary }}>
-                  {t('hogar.verEnVivo')}
-                </Text>
+      {/* ── El GRUPO de celdas (patrón v2, Ley 19.1): entrar a una
+          sección con subtítulo VIVO — dato real del expediente, jamás
+          descripción estática. Hairline solo interno (Chanel); la
+          superficie apoyada no lleva borde. "Agregar mascota" es
+          ACCIÓN dentro del grupo (sin chevron). ── */}
+      <Animated.View entering={entradaZona(2)} style={{ paddingHorizontal: spacing[4], marginTop: spacing[7] }}>
+        <Tarjeta relleno="ninguno" elevacion="reposo">
+          <CeldaNavegacion
+            icono="veterinaria"
+            titulo={t('hogar.cargarCarnet')}
+            detalle={(() => {
+              // vivo: el refuerzo más próximo del hogar (señal real)
+              let masProxima: { nombre: string; fecha: string } | null = null;
+              for (const s of estadoHogar?.senales ?? []) {
+                if (s.proxima_vacuna !== null && (masProxima === null || s.proxima_vacuna.fecha < masProxima.fecha)) {
+                  masProxima = { nombre: nombreDe(s.mascota_id), fecha: s.proxima_vacuna.fecha };
+                }
               }
-            />
-          </CitaEnVivo>
-        </Animated.View>
-      ) : proximaCita !== null ? (
-        <Animated.View entering={entradaZona(1)} style={{ paddingHorizontal: spacing[4], marginTop: spacing[7] }}>
-          <Tarjeta>
-            {/* D-319: el hold vigente (bloqueo 15 min) habla con voz
-                propia — rima con checkout.holdVoz; la firme conserva
-                "Próxima cita". El hold vencido no llega (wrapper). */}
-            <Celda
-              titulo={nombreDe(proximaCita.mascota_id)}
-              subtitulo={`${t(proximaCita.reserva === 'hold' ? 'hogar.reservandoHorario' : 'hogar.proximaCita')}${proximaCita.tipo_servicio ? ` · ${proximaCita.tipo_servicio}` : ''}`}
-              metadataMono={`${fechaCortaMono(proximaCita.fecha, idioma)}${proximaCita.hora ? ` · ${proximaCita.hora}` : ''}`}
-            />
-          </Tarjeta>
-        </Animated.View>
-      ) : null}
-
-      {/* D-338: entrada al hub "Mis paseos" (doble clic del servicio,
-          jamás tab) — serena, solo cuando el plan existe */}
-      {hayPlanes ? (
-        <Animated.View entering={entradaZona(1)} style={{ paddingHorizontal: spacing[4], marginTop: spacing[7] }}>
-          <Tarjeta relleno="ninguno">
-            <Celda
-              interactiva
-              accessibilityRole="button"
-              titulo={t('plan.hubTitulo')}
-              onPress={() => router.push('/hogar/paseos')}
-            />
-          </Tarjeta>
-        </Animated.View>
-      ) : null}
+              if (masProxima !== null && masProxima.nombre !== '') {
+                const dias = Math.round((Date.parse(masProxima.fecha) - Date.parse(new Intl.DateTimeFormat('en-CA').format(hoy))) / 86400000);
+                if (dias === 0) return t('hogar.refuerzoHoy', { nombre: masProxima.nombre });
+                if (dias === 1) return t('hogar.refuerzoManana', { nombre: masProxima.nombre });
+                if (dias > 1) return t('hogar.refuerzoEnDias', { nombre: masProxima.nombre, n: dias });
+              }
+              // sin señal: la invitación de siempre (voz de vacío, no dato)
+              return t('hogar.cargarCarnetDetalle');
+            })()}
+            onPress={() => {
+              if (mascotas.length === 1) irACargarCarnet(mascotas[0]);
+              else setCarnetSelectorAbierto(true);
+            }}
+          />
+          {/* D-338 intacto: el hub solo cuando el plan existe (silencio digno) */}
+          {hayPlanes ? (
+            <>
+              <Separador />
+              <CeldaNavegacion
+                icono="paseo"
+                titulo={t('plan.hubTitulo')}
+                detalle={
+                  planActivo !== null && planActivo.dias_semana.length > 0
+                    ? t('hogar.planDias', { dias: planActivo.dias_semana.map((d) => nombreDia(d, idioma)).join(', ') })
+                    : undefined
+                }
+                onPress={() => router.push('/hogar/paseos')}
+              />
+            </>
+          ) : null}
+          <Separador />
+          <CeldaNavegacion
+            icono="refugio"
+            titulo={t('hogar.agregarMascotaCelda')}
+            detalle={t('agregarMascota.entradaDetalle')}
+            chevron={false}
+            onPress={() => router.push('/hogar/agregar')}
+          />
+        </Tarjeta>
+      </Animated.View>
 
       {/* ── Zona 3 — en contexto: hueco estructural (ver arriba) ── */}
       {revelacionZona3 !== null ? null : null}
@@ -494,31 +608,10 @@ export default function Hogar() {
       {/* ── Zona 4 — la vida ─────────────────────────────────────
           Ritmo S52-P2c: entre zonas spacing[7]; adentro spacing[4]. */}
       <Animated.View
-        entering={entradaZona(2)}
+        entering={entradaZona(3)}
         style={{ paddingHorizontal: spacing[4], marginTop: spacing[7], gap: spacing[4] }}
       >
-        {/* invitación SERENA (P2d): menos peso que el hogar — plana,
-            voz compacta; la instrucción completa vive en la captura */}
-        <Tarjeta
-          interactiva
-          onPress={() => {
-            if (mascotas.length === 1) irACargarCarnet(mascotas[0]);
-            else setCarnetSelectorAbierto(true);
-          }}
-          accessibilityRole="button"
-          etiqueta={t('hogar.cargarCarnet')}
-          elevacion="plana"
-        >
-          <View style={{ gap: 2 }}>
-            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.primary }}>
-              {t('hogar.cargarCarnet')}
-            </Text>
-            <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
-              {t('hogar.cargarCarnetDetalle')}
-            </Text>
-          </View>
-        </Tarjeta>
-
+        {/* la invitación del carnet MIGRÓ al grupo de celdas (Chanel S58) */}
         {items === null ? (
           <LineaDeVida items={[]} cargando />
         ) : items === 'error' ? (

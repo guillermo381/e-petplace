@@ -106,6 +106,16 @@ export const clienteEs = {
     errorHistoria: 'No pudimos cargar su historia',
     errorHistoriaDetalle: 'Revisa tu conexión y prueba de nuevo.',
     reintentar: 'Reintentar',
+    // ── S58 patrón Hogar v2 — GATE DE STRINGS PENDIENTE (lote S58) ──
+    // hero del próximo paseo: el CUÁNDO relativo en voz corta
+    enHoras: 'En {{n}} h',
+    enMinutos: 'En {{n}} min',
+    // subtítulos VIVOS del grupo de celdas (jamás descripción estática)
+    refuerzoEnDias: '{{nombre}}: refuerzo en {{n}} días',
+    refuerzoManana: '{{nombre}}: refuerzo mañana',
+    refuerzoHoy: '{{nombre}}: refuerzo hoy',
+    planDias: 'Plan de los {{dias}} · activo',
+    agregarMascotaCelda: 'Agregar mascota',
   },
   coach: {
     // ── El Coach v0 (S53-B2b) — voz APROBADA por founder (cierre S53).

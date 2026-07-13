@@ -101,6 +101,14 @@ export const clienteEn = {
     errorHistoria: "We couldn't load the story",
     errorHistoriaDetalle: 'Check your connection and try again.',
     reintentar: 'Try again',
+    // ── S58 Home pattern v2 — STRING GATE PENDING (S58 batch) ──
+    enHoras: 'In {{n}} h',
+    enMinutos: 'In {{n}} min',
+    refuerzoEnDias: '{{nombre}}: booster in {{n}} days',
+    refuerzoManana: '{{nombre}}: booster tomorrow',
+    refuerzoHoy: '{{nombre}}: booster today',
+    planDias: '{{dias}} plan · active',
+    agregarMascotaCelda: 'Add a pet',
   },
   coach: {
     // Voz del Coach APROBADA por founder (cierre S53):

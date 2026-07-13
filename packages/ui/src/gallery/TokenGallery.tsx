@@ -188,6 +188,11 @@ function EjemploHeroMarca() {
         </Text>
       </HeroMarca>
       <HeroMarca titulo="Su primera foto" variante="compacto" />
+      {/* techoVivo (S58, patrón Hogar v2): la base curva 44/26 se ve
+          contra el fondo — sin overflow hidden del wrapper */}
+      <View>
+        <HeroMarca titulo="Buenas tardes, Guillermo" variante="techoVivo" />
+      </View>
     </View>
   )
 }
@@ -1401,7 +1406,7 @@ function GaleriaInterna() {
         </Seccion>
 
         {/* HeroMarca — S45-B3.4: gradiente firma en contexto cerrado */}
-        <Seccion titulo="HeroMarca — cabecera de marca (alto · compacto; CTAs siempre afuera)">
+        <Seccion titulo="HeroMarca — cabecera de marca (alto · compacto · techoVivo S58; CTAs siempre afuera)">
           <View style={{ gap: spacing[4] }}>
             <ThemeProvider defaultMode="light">
               <PanelTema etiqueta="claro — gradiente firma v2 + isotipo blanco (el UNO de la pantalla) + voz humana">

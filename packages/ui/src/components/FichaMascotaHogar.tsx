@@ -43,10 +43,14 @@ export type FichaMascotaHogarProps = {
   /** La voz decide punto y color; el texto ya viene traducido y SIN nombre. */
   voz: FichaMascotaHogarVoz
   textoEstado: string
+  /** S58 (patrón Hogar v2): la próxima cita de ESTA mascota, ya
+   *  formateada en voz de máquina ("mar 14 jul · 09:00" —
+   *  fechaCortaMono del riel). Ausente = silencio digno, cero línea. */
+  proximaCitaMono?: string
   onPress: () => void
 }
 
-export function FichaMascotaHogar({ nombre, fotoUrl, voz, textoEstado, onPress }: FichaMascotaHogarProps) {
+export function FichaMascotaHogar({ nombre, fotoUrl, voz, textoEstado, proximaCitaMono, onPress }: FichaMascotaHogarProps) {
   const { theme } = useTheme()
   const esMemorial = theme.mode === 'memorial'
 
@@ -66,7 +70,8 @@ export function FichaMascotaHogar({ nombre, fotoUrl, voz, textoEstado, onPress }
       interactiva
       onPress={onPress}
       accessibilityRole="button"
-      etiqueta={`${nombre}, ${textoEstado}`}
+      etiqueta={[nombre, textoEstado, proximaCitaMono].filter(Boolean).join(', ')}
+      elevacion="reposo"
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
         <AvatarMascota nombre={nombre} fotoUrl={fotoUrl} tamano="md" />
@@ -110,6 +115,21 @@ export function FichaMascotaHogar({ nombre, fotoUrl, voz, textoEstado, onPress }
               {textoEstado}
             </Text>
           </View>
+
+          {proximaCitaMono ? (
+            // voz de máquina (Ley 3): mono, minúsculas, tracking suave
+            <Text
+              numberOfLines={1}
+              style={{
+                fontFamily: typography.family.mono.regular,
+                fontSize: typography.size.xs,
+                letterSpacing: typography.tracking.mono,
+                color: theme.text.secondary,
+              }}
+            >
+              {proximaCitaMono.toLowerCase()}
+            </Text>
+          ) : null}
         </View>
       </View>
     </Tarjeta>

@@ -142,6 +142,7 @@ export {
   type AtencionEnCursoHogar,
   type EstadoHogar,
   type ProximaCitaHogar,
+  type ProximaCitaMascota,
   type SenalesHogarMascota,
 } from './wrappers/hogar';
 

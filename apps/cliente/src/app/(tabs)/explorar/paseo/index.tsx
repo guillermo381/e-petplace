@@ -30,6 +30,7 @@ import { router, useFocusEffect } from 'expo-router';
 import {
   Boton,
   Celda,
+  CeldaNavegacion,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
@@ -276,13 +277,18 @@ export default function PaseoCuando() {
             {/* 4 · "Hacerlo frecuente" — el candado del plan MURIÓ (D-338,
                 S56): el chip enciende el modo plan; la Hoja nace en el
                 QUIÉN, con el paseador ELEGIDO (alcance v1 §6.1 v1.2). */}
-            <Tarjeta relleno="ninguno">
+            {/* S58 (adenda, Ley 19.1): la ENTRADA AL PLAN y al paquete son
+                celdas de navegación CON ÍCONO — la celda dice a dónde va.
+                No listas todavía: la misma anatomía sin navegación (el
+                ícono se conserva por el slot de Celda). El PRECIO del plan
+                del lado dueño sigue enterrado en la RPC del QUIÉN —
+                enmienda propuesta al gate founder (ver reporte S58). */}
+            <Tarjeta relleno="ninguno" elevacion="reposo">
               {listo ? (
-                <Celda
-                  interactiva
-                  accessibilityRole="button"
+                <CeldaNavegacion
+                  icono="paseo"
                   titulo={t('plan.chip')}
-                  subtitulo={t('plan.chipDetalle')}
+                  detalle={t('plan.chipDetalle')}
                   onPress={() => {
                     router.push({
                       pathname: '/explorar/paseo/disponibles',
@@ -291,18 +297,17 @@ export default function PaseoCuando() {
                   }}
                 />
               ) : (
-                <Celda titulo={t('plan.chip')} subtitulo={t('plan.chipElegiPrimero')} />
+                <Celda inicio={<Icono nombre="paseo" />} titulo={t('plan.chip')} subtitulo={t('plan.chipElegiPrimero')} />
               )}
               <Separador />
               {/* 5 · el PAQUETE (v1.4 §6bis.2bis): comprar NO es reservar —
                   alcanza la DURACIÓN; el paseador se elige en su propia
                   pantalla, sin fecha ni hora. */}
               {duracion !== null ? (
-                <Celda
-                  interactiva
-                  accessibilityRole="button"
+                <CeldaNavegacion
+                  icono="despensa"
                   titulo={t('paquete.chip')}
-                  subtitulo={t('paquete.chipDetalle')}
+                  detalle={t('paquete.chipDetalle')}
                   onPress={() => {
                     router.push({
                       pathname: '/explorar/paseo/paquete',
@@ -311,7 +316,7 @@ export default function PaseoCuando() {
                   }}
                 />
               ) : (
-                <Celda titulo={t('paquete.chip')} subtitulo={t('paquete.chipElegiDuracion')} />
+                <Celda inicio={<Icono nombre="despensa" />} titulo={t('paquete.chip')} subtitulo={t('paquete.chipElegiDuracion')} />
               )}
             </Tarjeta>
           </>
