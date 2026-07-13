@@ -1,6 +1,7 @@
 # MODELO_PASEO — El contrato del servicio de paseo
 
-> **Versión: v1.3 — S57 (12 Jul 2026).** Decisiones de producto cerradas
+> **Versión: v1.4 — S57 (12 Jul 2026, enmienda del gate del paquete).**
+> Decisiones de producto cerradas
 > por el founder en sesión; escrito por el arquitecto (escritor único de
 > docs, regla 76). **Contrastes obligatorios:** `MODELO_FINANCIERO.md`
 > v2.7 (el camino de la plata — Decisiones Q/R/S/T y reglas
@@ -32,6 +33,16 @@ El paseo se vende en BLOQUES de un menú fijo:
   sobre `prestador_servicios` (`tipo_servicio='paseo'` ⇒
   `duracion_minutos ∈ {30,60,120,180,240,300}`). Un bloque nuevo en el
   menú = enmienda de este doc + migración, jamás un INSERT suelto.
+
+## 1bis. Elegibilidad por ESPECIE (FIRMADA, founder S57 — enmienda del gate)
+
+**El paseo es SOLO para perros.** El flujo solo ofrece perros del hogar;
+un hogar sin perros ve voz honesta CON CAMINO (patrón §6ter — jamás
+oferta vacía ni final mudo). Los demás servicios son multi-especie de
+nacimiento. La elegibilidad vive como **configuración por tipo de
+servicio en DB** (fuente de verdad única) — JAMÁS hardcodeada por
+pantalla: la UI filtra, la DB manda (el guard también rige en las RPCs
+de reserva: mascota no elegible rebota tipado).
 
 ## 2. Precio por bloque (CERRADO, founder S55)
 
@@ -200,13 +211,23 @@ decisión explícita del founder — apagado, sin lugar en UI.
    canónico, compradas a UN prestador concreto (**anclado**: el dueño lo
    elige como en el flujo suelto; el precio es la tarifa de ESE prestador
    con su descuento por volumen — él lo configura, patrón Decisión S).
+   **El paquete es DEL HOGAR (enmienda v1.4, founder S57):** anclado a
+   paseador + duración, NO a una mascota — la mascota se elige en cada
+   reserva, entre las elegibles por especie (§1bis).
 2. **Vigencia MENSUAL.** El paquete vence al cierre de su mes de vigencia.
    La vigencia se declara en la superficie de compra — la honestidad vive
    ahí, no en letra chica.
+2bis. **Comprar no es reservar — TAMBIÉN EN LA UI (enmienda v1.4, founder
+   S57, del gate del paquete):** la compra se habilita con paseador +
+   duración elegidos y JAMÁS exige fecha/hora; comprar no crea ninguna
+   cita; tras comprar, invitación OPCIONAL a reservar la primera salida
+   (un toque lleva al flujo de reserva con el saldo activo); la reserva
+   contra saldo tiene entrada clara desde el hub "Mis paseos".
 3. **Reservar.** Cada salida se reserva contra la agenda real del
-   prestador anclado (motor de ventana S55-B2, sin cambios). Reservar
-   descuenta del saldo del paquete al confirmarse la cita (sin pago:
-   el pago fue el del paquete).
+   prestador anclado (motor de ventana S55-B2, sin cambios), para LA
+   mascota elegida en esa reserva (§6bis.1). Reservar descuenta del
+   saldo del paquete al confirmarse la cita (sin pago: el pago fue el
+   del paquete).
 4. **Cancelación de una reserva:** con **≥2 horas antes de la hora de
    recogida**, la salida VUELVE al saldo y la franja del prestador se
    libera y se re-oferta. Con menos de 2 h, rige el no-show (§6bis.5).
@@ -262,6 +283,17 @@ honesta + captura de demanda.
 
 ## Historial
 
+- **v1.4 (S57, 12 Jul 2026 — enmienda FIRMADA del gate del paquete,
+  founder S57):** (1) §6bis.2bis NUEVO — comprar no es reservar TAMBIÉN
+  en la UI: la compra se habilita con paseador + duración, jamás exige
+  fecha/hora, jamás crea cita; invitación opcional post-compra a la
+  primera reserva; entrada de compra/renovación desde el hub. (2)
+  §6bis.1 ENMENDADO — el paquete es DEL HOGAR (anclado a paseador +
+  duración, no a una mascota; la mascota se elige en cada reserva).
+  (3) §1bis NUEVO — elegibilidad por ESPECIE como configuración por
+  tipo de servicio en DB (paseo = solo perros; hogar sin perros = voz
+  honesta con camino; el resto multi-especie; la UI filtra, la DB
+  manda).
 - **v1.3 (S57, 12 Jul 2026 — founder S57, P18 firmada en sesión):** §3bis
   NUEVO — cancelación y reagenda del paseo SUELTO: las tres ventanas
   (≥24 h reagendar o cancelar con destino a elección · 24-2 h solo
