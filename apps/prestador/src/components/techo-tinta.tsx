@@ -16,8 +16,7 @@
 
 import { Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg from 'react-native-svg';
-import { Huella, palette, spacing, typography } from '@epetplace/ui';
+import { Isotipo, palette, spacing, typography } from '@epetplace/ui';
 
 const CURVA = { izquierda: 44, derecha: 26 }; // la del techo vivo (patrón Hogar v2)
 
@@ -37,10 +36,10 @@ export function TechoTinta({ titulo, dato }: { titulo: string; dato: string }) {
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-        {/* la huella ES la presencia de la mascota en el techo (§2.2) */}
-        <Svg width={26} height={26} viewBox="0 0 24 24">
-          <Huella color={palette.teal} />
-        </Svg>
+        {/* enmienda §15b.2 FIRMADA en gate: la huella SALE, entra el
+            ISOTIPO en blanco sobre tinta (identidad, fuera de la
+            contabilidad de dosis — UNO por pantalla, Ley 4) */}
+        <Isotipo size={26} variant="blanco" />
         <View style={{ flex: 1, gap: 2 }}>
           <Text
             accessibilityRole="header"

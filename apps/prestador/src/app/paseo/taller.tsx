@@ -76,12 +76,14 @@ import {
   obtenerMiCuentaComercial,
   obtenerMiPrestador,
   obtenerOfertasPaseoPropias,
+  obtenerPaisesActivos,
   obtenerZonasDePrestador,
   quitarZonaCobertura,
   type BloquePaseo,
   type CiudadCatalogo,
   type FranjaHorario,
   type OfertaPaseoPropia,
+  type PaisActivo,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -90,7 +92,13 @@ import { EspejoOferta } from '@/components/espejo-oferta';
 type Pantalla =
   | { estado: 'cargando' }
   | { estado: 'error' }
-  | { estado: 'listo'; prestadorId: string; cuentaActiva: boolean | null; comisionPct: number | null };
+  | {
+      estado: 'listo';
+      prestadorId: string;
+      countryCode: string;
+      cuentaActiva: boolean | null;
+      comisionPct: number | null;
+    };
 
 interface DraftOferta {
   base: OfertaPaseoPropia | null;
@@ -301,6 +309,8 @@ export default function TallerPaseo() {
   const [franjas, setFranjas] = useState<DraftFranja[] | null>(null);
   const [zonas, setZonas] = useState<DraftZona[] | null>(null);
   const [ciudades, setCiudades] = useState<CiudadCatalogo[]>([]);
+  const [paises, setPaises] = useState<PaisActivo[]>([]);
+  const [hojaOtraCiudad, setHojaOtraCiudad] = useState(false);
 
   const [duracionSel, setDuracionSel] = useState<BloquePaseo>(30);
   const [diaSel, setDiaSel] = useState<number>(1);
@@ -336,11 +346,12 @@ export default function TallerPaseo() {
         setPantalla({ estado: 'error' });
         return;
       }
-      const [rOfertas, rFranjas, rZonas, rCiudades, rCuenta, rComision] = await Promise.all([
+      const [rOfertas, rFranjas, rZonas, rCiudades, rPaises, rCuenta, rComision] = await Promise.all([
         obtenerOfertasPaseoPropias(prestador.data.id),
         obtenerFranjasHorario(prestador.data.id),
         obtenerZonasDePrestador(prestador.data.id),
         obtenerCatalogoCiudades(),
+        obtenerPaisesActivos(),
         obtenerMiCuentaComercial(),
         obtenerComisionVigenteCita(),
       ]);
@@ -357,6 +368,7 @@ export default function TallerPaseo() {
       setFranjas(rFranjas.data.map(draftDesdeFranja));
       setZonas(rZonas.data.map((z) => ({ key: z.id, id: z.id, ciudad: z.ciudad, quitar: false })));
       setCiudades(rCiudades.ok ? rCiudades.data : []);
+      setPaises(rPaises.ok ? rPaises.data : []);
       const primeraOfrecida = BLOQUES_PASEO.find((b) => iniciales[b].ofrecida);
       if (primeraOfrecida !== undefined) setDuracionSel(primeraOfrecida);
       const primerDia = ORDEN_DISPLAY.find((d) => rFranjas.data.some((f) => f.diaSemana === d));
@@ -364,6 +376,7 @@ export default function TallerPaseo() {
       setPantalla({
         estado: 'listo',
         prestadorId: prestador.data.id,
+        countryCode: prestador.data.country_code,
         cuentaActiva: rCuenta.ok ? rCuenta.data?.estado === 'activa' : null,
         comisionPct: rComision.ok ? rComision.data.porcentaje : null,
       });
@@ -376,7 +389,9 @@ export default function TallerPaseo() {
   // ancla ?seccion= — un solo scroll, cuando la sección ya midió
   useEffect(() => {
     if (pantalla.estado !== 'listo' || anclado.current || !seccion) return;
-    const y = anclas.current[seccion];
+    // 'planes' quedó como alias: el plan/paquete vive en el bloque de
+    // la duración (cura de gate) — la fila de la portada sigue anclando
+    const y = anclas.current[seccion === 'planes' ? 'duraciones' : seccion];
     if (y !== undefined) {
       anclado.current = true;
       scrollRef.current?.scrollTo({ y, animated: false });
@@ -617,7 +632,6 @@ export default function TallerPaseo() {
     if (v === null) return Math.round(5 / PASO_PRECIO) - 1;
     return Math.min(Math.max(Math.round(v / PASO_PRECIO) - 1, 0), pasos.length - 1);
   };
-  const ofrecidasParaPlan = drafts === null ? [] : BLOQUES_PASEO.filter((b) => drafts[b].ofrecida || drafts[b].base !== null);
   const franjasDelDia = franjas === null ? [] : franjas.filter((f) => f.diaSemana === diaSel && !f.quitar);
 
   const resumenPlanPaquete = (b: BloquePaseo): string => {
@@ -763,6 +777,21 @@ export default function TallerPaseo() {
                     />
                     <VozComision pct={pct} precio={leerPrecio(d.precio)} />
                     {/* nombre/descripción DETRÁS de celda (regla del teclado) */}
+                    {/* CURA DE GATE (boceto firmado): la duración
+                        seleccionada GOBIERNA su bloque — plan y paquete
+                        viven ACÁ, de ESTA duración (la sección global
+                        murió; su resumen vive en la portada) */}
+                    <Celda
+                      interactiva
+                      accessibilityRole="button"
+                      titulo={t('taller.planPaqueteTitulo')}
+                      subtitulo={resumenPlanPaquete(duracionSel)}
+                      onPress={() => {
+                        setHojaPlanPaquete(duracionSel);
+                        setErrorPlan(undefined);
+                        setErrorPaquete(undefined);
+                      }}
+                    />
                     <Celda
                       interactiva
                       accessibilityRole="button"
@@ -776,38 +805,8 @@ export default function TallerPaseo() {
             </Tarjeta>
           </View>
 
-          {/* ── plan y paquete ───────────────────────────────────── */}
-          <View
-            style={{ gap: spacing[3] }}
-            onLayout={(e) => {
-              anclas.current.planes = e.nativeEvent.layout.y;
-            }}
-          >
-            <TituloBloque texto={t('taller.planPaqueteTitulo')} />
-            <VozSecundaria texto={t('taller.planPaqueteExplica')} />
-            {ofrecidasParaPlan.length === 0 ? (
-              <VozSecundaria texto={t('taller.planPaqueteSinDuraciones')} />
-            ) : (
-              <Tarjeta relleno="ninguno">
-                {ofrecidasParaPlan.map((b, i) => (
-                  <View key={b}>
-                    {i > 0 && <Separador />}
-                    <Celda
-                      interactiva
-                      accessibilityRole="button"
-                      titulo={etiquetaBloque(b)}
-                      subtitulo={resumenPlanPaquete(b)}
-                      onPress={() => {
-                        setHojaPlanPaquete(b);
-                        setErrorPlan(undefined);
-                        setErrorPaquete(undefined);
-                      }}
-                    />
-                  </View>
-                ))}
-              </Tarjeta>
-            )}
-          </View>
+          {/* la sección global "Plan y paquete" MURIÓ (cura de gate):
+              vive en el bloque de cada duración; su resumen, en la portada */}
 
           {/* ── días y horarios (cupo POR FRANJA — la verdad del motor) ── */}
           <View
@@ -874,15 +873,22 @@ export default function TallerPaseo() {
           >
             <TituloBloque texto={t('taller.zonasTitulo')} />
             <VozSecundaria texto={t('taller.zonasExplica')} />
-            {/* Ley 22 (adenda founder): las ciudades del catálogo como
-                chips TONALES multi-selección — elegir varias o ninguna es
-                legal (19.3); las Hojas de agregar/quitar MURIERON (Chanel) */}
+            {/* Ley 22: chips TONALES multi-selección. CURA DE GATE: los
+                chips son las ciudades DEL PAÍS del prestador (+ toda
+                zona ya declarada afuera — jamás se esconde lo declarado);
+                el resto del catálogo entra por la puerta "Otra ciudad" */}
             <SelectorOpcion
               etiqueta={t('taller.zonasTitulo')}
               disposicion="grilla"
               acento="oficio"
               multiple
-              opciones={ciudades.map((c) => ({ codigo: c.id, etiqueta: c.nombre }))}
+              opciones={ciudades
+                .filter(
+                  (c) =>
+                    (pantalla.estado === 'listo' && c.country_code === pantalla.countryCode) ||
+                    (zonas ?? []).some((z) => !z.quitar && z.ciudad.id === c.id),
+                )
+                .map((c) => ({ codigo: c.id, etiqueta: c.nombre }))}
               seleccionadas={(zonas ?? []).filter((z) => !z.quitar).map((z) => z.ciudad.id)}
               onSelect={(ciudadId) => {
                 if (zonas === null) return;
@@ -906,6 +912,12 @@ export default function TallerPaseo() {
                 contadorNuevas.current += 1;
                 setZonas([...zonas, { key: `zona-${contadorNuevas.current}`, id: null, ciudad, quitar: false }]);
               }}
+            />
+            <Boton
+              variante="ghost"
+              etiqueta={t('taller.otraCiudad')}
+              bloque
+              onPress={() => setHojaOtraCiudad(true)}
             />
             <VozSecundaria texto={t('taller.ciudadFaltante')} />
           </View>
@@ -1097,6 +1109,47 @@ export default function TallerPaseo() {
             )}
           </View>
         )}
+      </Hoja>
+
+      {/* Hoja: OTRA CIUDAD — el catálogo entero agrupado por PAÍS con
+          su nombre humano (jamás el código del motor, Ley 3); tocar
+          una la declara en el borrador (el ejemplo del founder:
+          cobertura que cruza país) */}
+      <Hoja visible={hojaOtraCiudad} onCerrar={() => setHojaOtraCiudad(false)} titulo={t('taller.otraCiudad')} altura="media">
+        <HojaScroll>
+          {paises.map((pais) => {
+            const delPais = ciudades.filter(
+              (c) => c.country_code === pais.codigo && !(zonas ?? []).some((z) => !z.quitar && z.ciudad.id === c.id),
+            );
+            if (delPais.length === 0) return null;
+            return (
+              <View key={pais.codigo} style={{ gap: spacing[2], paddingBottom: spacing[3] }}>
+                <TituloBloque texto={pais.nombre} />
+                <Tarjeta relleno="ninguno">
+                  {delPais.map((c, i) => (
+                    <View key={c.id}>
+                      {i > 0 && <Separador />}
+                      <Celda
+                        interactiva
+                        accessibilityRole="button"
+                        titulo={c.nombre}
+                        onPress={() => {
+                          contadorNuevas.current += 1;
+                          setZonas((prev) =>
+                            prev === null
+                              ? prev
+                              : [...prev, { key: `zona-${contadorNuevas.current}`, id: null, ciudad: c, quitar: false }],
+                          );
+                          setHojaOtraCiudad(false);
+                        }}
+                      />
+                    </View>
+                  ))}
+                </Tarjeta>
+              </View>
+            );
+          })}
+        </HojaScroll>
       </Hoja>
 
       {/* Hoja: nueva franja — el día lo eligió la píldora (Chanel: el

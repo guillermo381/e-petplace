@@ -15,9 +15,12 @@ const MENSAJES: Record<CodigoErrorPrestador | 'error_desconocido' | 'datos_incon
   error_desconocido:    'Ocurrió un error inesperado. Probá de nuevo.',
 };
 
+// S58-B (hunk aditivo): country_code entra al contrato — la fuente ya
+// era clara (fees.ts lo lee de la MISMA tabla); las zonas del taller
+// filtran el catálogo por el país del prestador.
 export type MiPrestador = Pick<
   Database['public']['Tables']['prestadores']['Row'],
-  'id' | 'nombre_comercial' | 'tipo'
+  'id' | 'nombre_comercial' | 'tipo' | 'country_code'
 >;
 
 /** El prestador del user logueado (dueño). Empleados: fuera de F1. */
@@ -30,7 +33,7 @@ export async function obtenerMiPrestador(): Promise<
 
   const { data, error } = await getClient()
     .from('prestadores')
-    .select('id, nombre_comercial, tipo')
+    .select('id, nombre_comercial, tipo, country_code')
     .eq('user_id', uid)
     .maybeSingle();
 

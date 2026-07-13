@@ -390,19 +390,20 @@ export const prestadorEs = {
     nombreDescripcion: 'Nombre y descripción',
     nombreDescripcionVacio: 'Opcional — como lo ven tus clientes.',
     planPaqueteTitulo: 'Plan y paquete',
-    planPaqueteExplica: 'Precios por salida para tus clientes frecuentes.',
-    planPaqueteSinDuraciones: 'Primero ofrece una duración: el plan y el paquete se configuran sobre ella.',
     planResumen: 'Plan {{precio}}',
     paqueteResumen: 'Paquete {{precio}}',
     sinPlanNiPaquete: 'Sin plan ni paquete',
     horariosTitulo: 'Días y horarios',
-    sinFranjasDia: 'Sin franjas este día.',
+    // cura de gate ('agregá' del mandato viajó a tuteo neutro, regla 27
+    // — desvío declarado, precedente S57): el día vacío tiene CAMINO
+    sinFranjasDia: 'Sin franjas todavía: agrega una.',
     franjaNueva: 'Se agrega cuando guardes.',
     agregarFranjaListo: 'Agregar franja',
     // zonas de cobertura (contrato D-331 v1: declara, no filtra;
     // Ley 22: chips tonales multi-selección del catálogo)
     zonasTitulo: 'Zonas de cobertura',
     zonasExplica: 'Las ciudades donde trabajas. Ayudan a las familias a encontrarte.',
+    otraCiudad: 'Otra ciudad',
     ciudadFaltante: 'Si tu ciudad no está, escríbenos: el catálogo lo carga el equipo.',
     listo: 'Listo',
     guardar: 'Guardar tu oferta',
@@ -444,7 +445,7 @@ export const prestadorEs = {
     zonasSin: 'Sin ciudades declaradas',
     vacacionesSin: 'Sin días bloqueados',
     vacacionesCon: 'Tienes días bloqueados',
-    abrirTaller: 'Abrir el taller',
+    editarOferta: 'Editar tu oferta',
     // el espejo — la misma composición en taller (borrador) y resumen (DB)
     espejoTitulo: 'Así lo ve el dueño',
     espejoNada: 'Todavía no apareces en las búsquedas.',

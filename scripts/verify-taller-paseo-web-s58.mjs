@@ -72,9 +72,8 @@ if (enResumen && !t.includes('Tu servicio de paseo')) {
   check(t.includes('Días y horarios'), 'T2e fila Días y horarios');
   check(t.includes('Zonas de cobertura'), 'T2f fila Zonas de cobertura (D-331 viva)');
   check(t.includes('Así lo ve el dueño'), 'T2g el espejo al pie');
-  // ── T3: el taller ANCLADO desde una fila ──
-  await page.getByText('El arte del paseo').isVisible().catch(() => false);
-  await page.getByText('Abrir el taller', { exact: true }).click();
+  check(t.includes('Editar tu oferta'), 'T2h el CTA primario ARRIBA (cura de gate)');
+  await page.getByText('Editar tu oferta', { exact: true }).click();
 } else {
   // peldaño 0 — la invitación educa y el CTA abre el taller
   check(t.includes('Abrir el taller'), 'T2b peldaño 0 con camino al taller');
@@ -91,7 +90,9 @@ check(t.includes('Plan y paquete'), 'T3d sección plan y paquete');
 check(t.includes('Días y horarios'), 'T3e sección días y horarios');
 check(t.includes('Lunes'), 'T3f la tira de días (lunes primero)');
 check(t.includes('Zonas de cobertura'), 'T3g sección zonas (contrato D-331)');
-check(t.includes('Quito'), 'T3g2 el catálogo de ciudades como chips (Ley 22)');
+check(t.includes('Quito'), 'T3g2 las ciudades del PAÍS como chips (Ley 22 + filtro país)');
+check(!t.includes('Bogotá') || t.includes('Otra ciudad'), 'T3g3 lo de otro país entra por su puerta');
+check(t.includes('Otra ciudad'), 'T3g4 la puerta "Otra ciudad" existe (cura de gate)');
 check(t.includes('Vacaciones'), 'T3h la celda-puente a vacaciones');
 check(t.includes('Así lo ve el dueño'), 'T3i el espejo del artesano al pie');
 check(t.includes('Guardar tu oferta'), 'T3j el CTA único en tinta');

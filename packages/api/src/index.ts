@@ -287,6 +287,13 @@ export {
   type CodigoErrorZonas,
 } from './wrappers/zonas';
 
+// ── Países activos con nombre (S58-B, curas del gate — hunk Sesión B) ───────
+export {
+  obtenerPaisesActivos,
+  type PaisActivo,
+  type CodigoErrorPaises,
+} from './wrappers/paises';
+
 // ── Dirección del hogar (S56-A, D-339 — hunk Sesión A) ──────────────────────
 export {
   obtenerDireccionHogar,

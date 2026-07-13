@@ -272,6 +272,10 @@ export default function OfertaPaseo() {
               </View>
             </Tarjeta>
 
+            {/* CURA DE GATE (founder): la entrada al taller es el CTA
+                primario en tinta, ARRIBA — patrón del hub v2 */}
+            <Boton variante="primario" etiqueta={t('ofertaPaseo.editarOferta')} bloque onPress={() => irAlTaller()} />
+
             {/* una fila por sección — el lápiz vuelve al taller ANCLADO */}
             <Tarjeta relleno="ninguno">
               <Celda
@@ -316,8 +320,6 @@ export default function OfertaPaseo() {
                 onPress={() => router.push('/vacaciones')}
               />
             </Tarjeta>
-
-            <Boton variante="secundario" etiqueta={t('ofertaPaseo.abrirTaller')} bloque onPress={() => irAlTaller()} />
 
             {/* así lo ve el dueño — la MISMA composición que el taller,
                 acá sobre la verdad de DB */}
