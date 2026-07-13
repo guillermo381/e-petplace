@@ -182,6 +182,11 @@ function paresDe(t: Theme, nombre: string): Pair[] {
   // CTA "tinta" (dosis prestador): texto inverso sobre text.primary como fondo
   add('text.inverse / text.primary(CTA tinta)', t.text.inverse, t.text.primary)
 
+  // bg.tinta (S58, techo del prestador — constante en los 3 temas): el
+  // texto papel sobre la tinta. El par tealDark/tinta pedido en S58 CAE
+  // (~2.85:1) — medición informativa abajo, reportado ANTES de curar.
+  add('texto papel (light0) / bg.tinta', palette.light0, t.bg.tinta)
+
   // Gradiente firma v2 (B3.1c) — REGLA DE PEOR PUNTO: onGradient contra cada
   // stop con location ≤ 0.7 DEBE pasar 4.5. La COLA (location 1, teal) queda
   // EXENTA por geometría verificada — no es un agujero:
@@ -255,6 +260,15 @@ console.log(
 )
 console.log(
   `  (info) MEMORIAL · borde SelectorEspecie (text.secondary / bg.base) → ${contrast(memorialTheme.text.secondary, memorialTheme.bg.base).toFixed(2)}:1 — exento: checked porta el canal semántico`,
+)
+
+// Informativa (no gatea — PAR CAÍDO REPORTADO S58, decisión founder
+// pendiente): el pedido S58 pedía tealDark sobre bg.tinta; el AA de
+// capa para superficies CLARAS no alcanza sobre la tinta. Sobre tinta
+// el registro que pasa es el teal PURO (regla de dos registros: sobre
+// superficie oscura el hex puro ES el registro AA, como en dark).
+console.log(
+  `  (info · PAR CAÍDO S58) tealDark / bg.tinta → ${contrast(palette.tealDark, lightTheme.bg.tinta).toFixed(2)}:1 (mín 4.5) — sobre tinta pasa teal puro: ${contrast(palette.teal, lightTheme.bg.tinta).toFixed(2)}:1`,
 )
 
 let fallos = 0

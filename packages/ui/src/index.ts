@@ -83,6 +83,7 @@ export {
   type SelectorSegmentadoProps,
   type SelectorSegmentadoItem,
 } from './components/SelectorSegmentado'
+export { SliderPrecio, type SliderPrecioProps } from './components/SliderPrecio'
 export { VisorFoto, type VisorFotoProps } from './components/VisorFoto'
 export { FichaVacuna, type FichaVacunaProps } from './components/FichaVacuna'
 export {

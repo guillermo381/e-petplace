@@ -92,6 +92,11 @@ export const palette = {
   light3: '#EDEBF5',  // hover states
   light4: '#E3E0EF',  // bordes visibles / separadores
 
+  // ── Tinta (S58, depósito prestador) — superficie del TECHO del
+  // prestador (dosis baja: el techo es tinta, no gradiente). Pariente
+  // de la tinta cálida de las sombras (31,27,22), un paso más arriba. ──
+  tinta: '#221E19',
+
   // ── Fondos memorial (v3.1 intactos) ──
   memorialDark0:  '#0A0E0A',   // bosque nocturno
   memorialDark1:  '#141A14',   // surface

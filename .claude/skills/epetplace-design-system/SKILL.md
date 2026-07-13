@@ -16,7 +16,7 @@ description: >-
 
 # epetplace-design-system — el sistema es exigible, no sugerido
 
-Fuente de verdad: `packages/ui` (tokens v4 + 30 componentes + 3 temas).
+Fuente de verdad: `packages/ui` (tokens v4 + 31 componentes + 3 temas).
 Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 `@epetplace/ui`, no existe en el producto.
 
@@ -389,7 +389,7 @@ comprar es lo último, y lo que compra combina con TODO.*
 //     stroke={theme.text.primary} strokeWidth={1.75} strokeLinecap="round" /></Svg>
 ```
 
-## 3. ÍNDICE — los 30 componentes (import de `@epetplace/ui`)
+## 3. ÍNDICE — los 31 componentes (import de `@epetplace/ui`)
 
 | Export | Cuándo |
 |---|---|
@@ -398,6 +398,7 @@ comprar es lo último, y lo que compra combina con TODO.*
 | `Campo` | Todo input de texto. Label siempre visible; nada se anima al tipear |
 | `Celda` | Toda fila de lista. Pressed resalta (jamás escala); `metadataMono` para voz de máquina — desde S44-B4.1 convive con `fin` (apilados: mono arriba, nodo abajo). Entrar a una sección NO es su trabajo (eso es `CeldaNavegacion`) |
 | `CeldaNavegacion` | Entrar a una sección (Ley 19.1, S58): ícono b′ TIPADO a la izquierda + título + detalle opcional + chevron de entrada; pressed 0.99. `registro` capa (dueño) / aa·tinta (prestador) — la dosis modula color, no gramática. Sin metadataMono/fin (eso es Celda). Memorial degrada adentro de Icono |
+| `SliderPrecio` | Pasos DISCRETOS para precio (S58, depósito prestador): riel hundido con puntos + tramo recorrido en acento POR REGISTRO (§2.7) + thumb apoyado con `elevacion.reposo` (Chanel: sombra, jamás borde). `onStep` = hook de háptica futura, v1 VACÍO (sin expo-haptics — L-134, decisión founder pendiente). No porta el display del valor; memorial degrada adentro y no desliza. A11y adjustable con increment/decrement |
 | `SelectorSegmentado` | Cambiar de vista dentro de una pantalla (Ley 19.3, S58 — los chips PROHIBIDOS como segmentos): riel hundido bg.overlay + 2-3 segmentos; el ACTIVO es superficie apoyada con `elevacion.reposo` (Chanel: sombra, jamás borde). Texto solo v1; se desliza la SUPERFICIE (fast/easeOut), la sombra viaja con ella; memorial = reemplazo directo. Mismo componente sin variante en dosis/memorial |
 | `Separador` | Divisor hairline entre Celdas (`ItemSeparatorComponent`) |
 | `Insignia` | Todo chip de estado/capa. JAMÁS interactivo; `soloPunto` para celdas densas |
@@ -434,7 +435,7 @@ Ley 20)/`motion`/`opacity`/`dosis`, temas y tipos.
 
 **Dónde vive qué:** tokens `packages/ui/src/tokens/` · temas
 `packages/ui/src/themes/` · gate WCAG `scripts/verify-contrast.ts`
-(correr: `pnpm verify:contrast` — 142 pares desde S58, tiene que dar 0 fallos) ·
+(correr: `pnpm verify:contrast` — 145 pares desde S58, tiene que dar 0 fallos) ·
 galería `packages/ui/src/gallery/TokenGallery.tsx` (verificación browser:
 `node scripts/verify-gallery.mjs` con los dev servers arriba) · gate en
 dispositivo: CLAUDE.md raíz · dirección de arte e iconografía:

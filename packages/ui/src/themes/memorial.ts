@@ -26,6 +26,7 @@ export const memorialTheme = {
     overlay:  palette.memorialDark1,
     border:   'rgba(143,166,142,.18)',
     warm:     palette.cream,
+    tinta:    palette.tinta,   // S58: constante — el techo del prestador no celebra ni se apaga
   },
 
   text: {

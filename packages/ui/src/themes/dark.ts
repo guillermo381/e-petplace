@@ -17,6 +17,7 @@ export const darkTheme = {
     overlay:  palette.dark3,
     border:   palette.dark4,
     warm:     palette.creamAlpha06,
+    tinta:    palette.tinta,   // S58: el techo del prestador (constante en los 3 temas)
   },
 
   text: {

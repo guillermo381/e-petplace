@@ -19,6 +19,7 @@ export const lightTheme = {
     overlay:  palette.light3,   // #EDEBF5 — hover
     border:   palette.light4,   // #E3E0EF
     warm:     palette.cream,    // narrativa cálida sólida
+    tinta:    palette.tinta,    // S58: el techo del prestador (constante en los 3 temas)
   },
 
   text: {

@@ -33,6 +33,7 @@ import { CampoFecha, type CampoFechaValor } from '../components/CampoFecha'
 import { SelectorAvatar, type SelectorAvatarFoto } from '../components/SelectorAvatar'
 import { SelectorOpcion } from '../components/SelectorOpcion'
 import { SelectorSegmentado } from '../components/SelectorSegmentado'
+import { SliderPrecio } from '../components/SliderPrecio'
 import { CeldaNavegacion } from '../components/CeldaNavegacion'
 import { HeroMarca } from '../components/HeroMarca'
 import { LineaDeVida, type LineaDeVidaItem } from '../components/LineaDeVida'
@@ -676,6 +677,22 @@ function EjemploSelectorSegmentado() {
   )
 }
 
+// ── SliderPrecio (S58, comp. 31): pasos discretos, acento por registro,
+// thumb apoyado (elevacion.reposo). Estado propio por panel. ──
+function EjemploSliderPrecio({ registro }: { registro?: 'capa' | 'aa' | 'tinta' }) {
+  const { theme } = useTheme()
+  const pasos = ['$5.00', '$7.50', '$10.00', '$12.50', '$15.00']
+  const [i, setI] = useState(2)
+  return (
+    <View style={{ gap: spacing[2] }}>
+      <Text style={{ fontFamily: sans.medium, fontSize: typography.size.base, color: theme.text.primary }}>
+        {pasos[i]}
+      </Text>
+      <SliderPrecio pasos={pasos} indice={i} onCambio={setI} etiqueta="Precio por salida" registro={registro} />
+    </View>
+  )
+}
+
 // ── CeldaNavegacion (Ley 19.1 · S58): entrar a una sección — el ícono
 // b′ dice a dónde va; chevron de entrada; pressed 0.99. ──
 function EjemploCeldaNavegacion({ registro }: { registro?: 'capa' | 'aa' | 'tinta' }) {
@@ -1007,6 +1024,39 @@ function GaleriaInterna() {
             <ThemeProvider defaultMode="memorial">
               <PanelTema etiqueta="memorial — degrada solo adentro de Icono (§2.8): huella a text.secondary">
                 <EjemploCeldaNavegacion />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* Tinta — S58: el techo del prestador (constante en los 3 temas) */}
+        <Seccion titulo="Tinta — el techo del prestador (bg.tinta, constante)">
+          <View style={{ backgroundColor: theme.bg.tinta, borderRadius: radius.md, padding: spacing[5], gap: spacing[2] }}>
+            <Text style={{ fontFamily: sans.medium, fontSize: typography.size.lg, color: palette.light0 }}>
+              Texto papel sobre tinta
+            </Text>
+            <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: palette.light0 }}>
+              #221E19 · papel/tinta gatea AA · tealDark/tinta CAE (reportado)
+            </Text>
+          </View>
+        </Seccion>
+
+        {/* SliderPrecio — S58 (comp. 31): pasos discretos por registro */}
+        <Seccion titulo="SliderPrecio — pasos discretos (el precio se elige, no se interpola)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro · registro capa (dueño) — tramo en hex puro; thumb apoyado con elevacion.reposo">
+                <EjemploSliderPrecio />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark · registro aa (dosis prestador) — el acento funcional de cuidado">
+                <EjemploSliderPrecio registro="aa" />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — degrada adentro (acento a text.secondary) y el thumb no se desliza: reemplazo directo">
+                <EjemploSliderPrecio />
               </PanelTema>
             </ThemeProvider>
           </View>
