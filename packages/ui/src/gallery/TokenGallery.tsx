@@ -317,6 +317,7 @@ function EjemploSetBPrima() {
     'hogar', 'explorar', 'cuenta', 'hoy', 'negocio', 'carnet', 'familia',
     'preferencias', 'pagos', 'ayuda', 'ubicacion', 'training', 'hotel',
     'guarderia', 'seguros', 'telemedicina', 'vacaciones', 'equipo',
+    'prime', 'primeCorona', // concepto 19: el founder ELIGE a 21px
   ]
   return (
     <View style={{ gap: spacing[4] }}>

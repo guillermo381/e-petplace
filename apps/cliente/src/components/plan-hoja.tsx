@@ -197,8 +197,12 @@ export function PlanHoja({
           ) : null}
         </View>
 
+        {/* S58 (captura founder): 'Una vez al mes' quedaba amputada en
+            fila — la frecuencia pasa a TIRA (scroll nativo; el chip
+            cortado ES la señal de continuación) */}
         <SelectorOpcion
           acento="control"
+          disposicion="tira"
           etiqueta={t('plan.frecuenciaEtiqueta')}
           opciones={[
             { codigo: 'semanal', etiqueta: t('plan.frecuenciaSemanal') },

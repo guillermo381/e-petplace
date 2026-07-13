@@ -15,6 +15,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import {
+  Celda,
   Boton,
   Encabezado,
   Esqueleto,
@@ -84,16 +85,16 @@ export default function Explorar() {
     // informativo (cero CTA muerta — la card gana el tap con su flujo).
     onPress?: () => void;
   }> = [];
-  const proximamente: string[] = [];
+  const proximamente: Array<{ nombre: string; icono: 'hotel' | 'guarderia' | 'seguros' | 'telemedicina' | 'prime' }> = [];
   if (servicios !== 'cargando' && servicios !== 'error') {
     if (servicios.walking) fichasActivas.push({ clave: 'paseo', titulo: t('explorar.servicioPaseo'), detalle: t('explorar.servicioPaseoDetalle'), icono: <Icono nombre="paseo" tamano={34} />, onPress: () => router.navigate('/hogar/paseos') });
     if (servicios.grooming) fichasActivas.push({ clave: 'grooming', titulo: t('explorar.servicioGrooming'), detalle: t('explorar.servicioGroomingDetalle'), icono: <Icono nombre="grooming" tamano={34} /> });
     if (servicios.veterinary) fichasActivas.push({ clave: 'vet', titulo: t('explorar.servicioVet'), detalle: t('explorar.servicioVetDetalle'), icono: <Icono nombre="veterinaria" tamano={34} /> });
     if (servicios.training) fichasActivas.push({ clave: 'adiestramiento', titulo: t('explorar.servicioAdiestramiento'), detalle: t('explorar.servicioAdiestramientoDetalle'), icono: <Icono nombre="training" tamano={26} /> });
-    if (!servicios.hotel) proximamente.push(t('explorar.proxHotel'), t('explorar.proxGuarderia'));
-    if (!servicios.insurance) proximamente.push(t('explorar.proxSeguros'));
-    if (!servicios.telemedicine) proximamente.push(t('explorar.proxTelemedicina'));
-    if (!servicios.prime) proximamente.push(t('explorar.proxPrime'));
+    if (!servicios.hotel) proximamente.push({ nombre: t('explorar.proxHotel'), icono: 'hotel' }, { nombre: t('explorar.proxGuarderia'), icono: 'guarderia' });
+    if (!servicios.insurance) proximamente.push({ nombre: t('explorar.proxSeguros'), icono: 'seguros' });
+    if (!servicios.telemedicine) proximamente.push({ nombre: t('explorar.proxTelemedicina'), icono: 'telemedicina' });
+    if (!servicios.prime) proximamente.push({ nombre: t('explorar.proxPrime'), icono: 'prime' });
   }
 
   return (
@@ -183,14 +184,13 @@ export default function Explorar() {
             <View style={{ gap: spacing[3] }}>
               <TituloBloque texto={t('explorar.proximamente')} />
               <Tarjeta relleno="ninguno">
-                {proximamente.map((nombre, i) => (
-                  <View key={nombre}>
+                {/* S58 (D-361): la celda VISTE, no promete — ícono del
+                    registry + fila informativa SIN chevron ni tap (un
+                    coming soon no navega: no es CeldaNavegacion, Ley 19.4) */}
+                {proximamente.map((p, i) => (
+                  <View key={p.nombre}>
                     {i > 0 ? <Separador /> : null}
-                    <View style={{ paddingHorizontal: spacing[3], paddingVertical: spacing[3] }}>
-                      <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.base, color: theme.text.secondary }}>
-                        {nombre}
-                      </Text>
-                    </View>
+                    <Celda inicio={<Icono nombre={p.icono} tamano={24} registro="aa" />} titulo={p.nombre} />
                   </View>
                 ))}
               </Tarjeta>

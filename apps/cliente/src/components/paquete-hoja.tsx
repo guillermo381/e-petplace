@@ -93,6 +93,7 @@ export function PaqueteHoja({
 
         <SelectorOpcion
           acento="control"
+          disposicion="tira"
           etiqueta={t('paquete.presetsEtiqueta')}
           opciones={PRESETS_PAQUETE.map((n) => ({ codigo: String(n), etiqueta: t('paquete.presetSalidas', { n }) }))}
           seleccionada={String(preset)}

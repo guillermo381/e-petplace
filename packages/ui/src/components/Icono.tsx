@@ -32,6 +32,8 @@ export type IconoNombre =
   | 'carnet' | 'familia' | 'preferencias' | 'pagos' | 'ayuda' | 'ubicacion'
   | 'training' | 'hotel' | 'guarderia' | 'seguros' | 'telemedicina'
   | 'vacaciones' | 'equipo'
+  // Prime (concepto 19): DOS candidatos — el founder elige a 21px; el perdedor muere
+  | 'prime' | 'primeCorona'
 export type IconoRegistro = 'capa' | 'aa' | 'tinta'
 
 const TRAZO = 1.9
@@ -258,6 +260,23 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       <Huella color={huella} x={12.6} y={12.2} escala={0.32} />
     </>
   ),
+  // PRIME candidato A: la chapita con huella en MAGENTA PURO — la
+  // membresía es de la marca (única huella magenta fuera de tabs,
+  // declarada al gate).
+  prime: ({ tinta, huella }) => (
+    <>
+      <Circle cx={12} cy={5.6} r={1.9} {...trazo(tinta)} />
+      <Circle cx={12} cy={13.6} r={6.6} {...trazo(tinta)} />
+      <Huella color={huella} x={8.9} y={10.6} escala={0.38} />
+    </>
+  ),
+  // PRIME candidato B: la corona en trazo con la huella adentro.
+  primeCorona: ({ tinta, huella }) => (
+    <>
+      <Path d="M4.6 17.6h14.8M4.6 17.6 3.8 8.4l4.7 3.2L12 5.8l3.5 5.8 4.7-3.2-.8 9.2" {...trazo(tinta)} />
+      <Huella color={huella} x={9.2} y={10.8} escala={0.3} />
+    </>
+  ),
   // Dos correas que se cruzan — el equipo del oficio.
   equipo: ({ tinta, huella }) => (
     <>
@@ -308,6 +327,7 @@ export function Icono({
     hoy: cuidado, preferencias: cuidado, ayuda: cuidado, ubicacion: cuidado,
     training: cuidado, hotel: cuidado, guarderia: cuidado, vacaciones: cuidado,
     negocio: ocre, pagos: ocre,
+    prime: comunidad, primeCorona: comunidad,
   }
 
   // §2.8 memorial: la huella a tinta secundaria, el trazo se conserva.
