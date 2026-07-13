@@ -636,9 +636,11 @@ export type Database = {
           id: string
           mascota_id: string | null
           observaciones_cliente: string | null
+          pago_metadata: Json
           precio_por_unidad: number | null
           precio_total: number
           prestador_id: string
+          prestador_servicio_id: string | null
           tipo_servicio: string
           unidades_total: number
           unidades_usadas: number
@@ -658,9 +660,11 @@ export type Database = {
           id?: string
           mascota_id?: string | null
           observaciones_cliente?: string | null
+          pago_metadata?: Json
           precio_por_unidad?: number | null
           precio_total: number
           prestador_id: string
+          prestador_servicio_id?: string | null
           tipo_servicio: string
           unidades_total: number
           unidades_usadas?: number
@@ -680,9 +684,11 @@ export type Database = {
           id?: string
           mascota_id?: string | null
           observaciones_cliente?: string | null
+          pago_metadata?: Json
           precio_por_unidad?: number | null
           precio_total?: number
           prestador_id?: string
+          prestador_servicio_id?: string | null
           tipo_servicio?: string
           unidades_total?: number
           unidades_usadas?: number
@@ -715,6 +721,13 @@ export type Database = {
             columns: ["prestador_id"]
             isOneToOne: false
             referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bonos_prestador_servicio_id_fkey"
+            columns: ["prestador_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "prestador_servicios"
             referencedColumns: ["id"]
           },
         ]
@@ -10515,6 +10528,7 @@ export type Database = {
           nombre_custom: string | null
           precio: number
           precio_emergencia: number | null
+          precio_paquete: number | null
           precio_plan: number | null
           prestador_id: string
           tipo_servicio: string
@@ -10530,6 +10544,7 @@ export type Database = {
           nombre_custom?: string | null
           precio?: number
           precio_emergencia?: number | null
+          precio_paquete?: number | null
           precio_plan?: number | null
           prestador_id: string
           tipo_servicio: string
@@ -10545,6 +10560,7 @@ export type Database = {
           nombre_custom?: string | null
           precio?: number
           precio_emergencia?: number | null
+          precio_paquete?: number | null
           precio_plan?: number | null
           prestador_id?: string
           tipo_servicio?: string
@@ -14343,6 +14359,7 @@ export type Database = {
       _agenda_ocupacion: {
         Args: {
           p_duracion_minutos: number
+          p_excluir_cita?: string
           p_fecha: string
           p_hora: string
           p_prestador_id: string
@@ -14563,6 +14580,7 @@ export type Database = {
         Args: { p_especie: string; p_fecha_nacimiento: string }
         Returns: string
       }
+      cancelar_cita_suelta: { Args: { p_cita_id: string }; Returns: Json }
       cancelar_eventos_diferidos_pendientes: {
         Args: {
           p_aplicado_por?: string
@@ -14575,6 +14593,7 @@ export type Database = {
           monto_clawback_total: number
         }[]
       }
+      cancelar_reserva_paquete: { Args: { p_cita_id: string }; Returns: Json }
       cerrar_grooming_con_calidad: {
         Args: { p_grooming_id: string; p_mensaje_familia?: string }
         Returns: Json
@@ -14602,6 +14621,15 @@ export type Database = {
       completar_historia_clinica: {
         Args: { input_data: Json }
         Returns: string
+      }
+      comprar_paquete_salidas: {
+        Args: {
+          p_mascota_id: string
+          p_prestador_id: string
+          p_servicio_id: string
+          p_unidades: number
+        }
+        Returns: Json
       }
       configurar_renovacion_plan: {
         Args: { p_auto_renovar: boolean; p_suscripcion_id: string }
@@ -15101,6 +15129,10 @@ export type Database = {
         Args: { p_grooming_id: string; p_zona_codigo: string }
         Returns: Json
       }
+      reagendar_cita_suelta: {
+        Args: { p_cita_id: string; p_nueva_fecha: string; p_nueva_hora: string }
+        Returns: Json
+      }
       reanudar_atencion: { Args: { p_atencion_id: string }; Returns: Json }
       rechazar_cita_servicio: {
         Args: { p_cita_id: string; p_motivo: string }
@@ -15178,6 +15210,16 @@ export type Database = {
       }
       registrar_vacunas_de_carnet: {
         Args: { p_archivo_url?: string; p_mascota_id: string; p_vacunas: Json }
+        Returns: Json
+      }
+      reservar_salida_paquete: {
+        Args: {
+          p_fecha: string
+          p_hora: string
+          p_mascota_id: string
+          p_prestador_id: string
+          p_servicio_id: string
+        }
         Returns: Json
       }
       resolver_fee_aplicable: {
@@ -15329,6 +15371,7 @@ export type Database = {
         Args: { p_email?: string; p_invite_code?: string }
         Returns: Json
       }
+      vencer_paquetes_salidas: { Args: never; Returns: Json }
       verificar_identificacion_disponible: {
         Args: { p_country_code: string; p_identificacion: string }
         Returns: {
@@ -15425,6 +15468,7 @@ export type Database = {
         | "reembolso"
         | "ajuste_manual"
         | "penalidad_cancelacion"
+        | "bono_breakage"
       tipo_fiscal_enum:
         | "persona_natural"
         | "persona_natural_obligada"
@@ -15618,6 +15662,7 @@ export const Constants = {
         "reembolso",
         "ajuste_manual",
         "penalidad_cancelacion",
+        "bono_breakage",
       ],
       tipo_fiscal_enum: [
         "persona_natural",

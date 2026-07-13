@@ -296,3 +296,28 @@ export {
   type CitaDePlan,
   type CodigoErrorPlan,
 } from './wrappers/planes';
+
+// ── El PAQUETE DE SALIDAS, D-343 (S57-A — hunk Sesión A) ────────────────────
+export {
+  PRESETS_PAQUETE,
+  comprarPaqueteSalidas,
+  reservarSalidaPaquete,
+  cancelarReservaPaquete,
+  obtenerMisPaquetesSalidas,
+  obtenerSaldoPaquete,
+  type PresetPaquete,
+  type ComprarPaqueteInput,
+  type PaqueteComprado,
+  type ReservarSalidaInput,
+  type SalidaReservada,
+  type PaqueteSalidas,
+  type SaldoPaquete,
+  type CodigoErrorPaquete,
+} from './wrappers/paquetes';
+
+// ── Cancelación y reagenda del SUELTO, P18 (S57-A — hunk Sesión A) ──────────
+export {
+  reagendarCitaSuelta,
+  cancelarCitaSuelta,
+  type CodigoErrorCitaSuelta,
+} from './wrappers/citaSuelta';

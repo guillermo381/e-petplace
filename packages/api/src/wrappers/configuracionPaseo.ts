@@ -32,6 +32,7 @@ const MENSAJES = {
   precio_invalido:        'El precio tiene que ser mayor a cero.',
   bloque_duplicado:       'Ya ofreces un paseo de esa duración.',
   precio_plan_invalido:   'El precio del plan tiene que ser mayor a cero. Déjalo vacío si no ofreces plan.',
+  precio_paquete_invalido: 'El precio por salida del paquete tiene que ser mayor a cero. Déjalo vacío si no ofreces paquete.',
   rango_horario_invalido: 'La hora de fin tiene que ser después de la de inicio.',
   franja_solapada:        'Esa franja se cruza con una que ya tienes ese día.',
   cupo_invalido:          'El cupo tiene que ser entre 1 y 4.',
@@ -63,6 +64,15 @@ export interface OfertaPaseoPropia {
    * null = el prestador NO ofrece plan en este bloque (oferta honesta).
    */
   precioPlan: number | null;
+  /**
+   * Precio POR SALIDA cuando el bloque se compra como PAQUETE de salidas
+   * (D-343, S57 — patrón idéntico a precioPlan: columna
+   * prestador_servicios.precio_paquete, SIN CHECK relacional).
+   * null = el prestador NO ofrece paquete en este bloque; la superficie
+   * de compra del dueño no aparece. Presets 5/10/15 fijos por letra
+   * (MODELO_PASEO §6bis) — el prestador configura SOLO este precio.
+   */
+  precioPaquete: number | null;
   nombre: string | null;
   descripcion: string | null;
   activo: boolean;
@@ -89,6 +99,7 @@ function mapearOferta(fila: {
   duracion_minutos: number | null;
   precio: number;
   precio_plan: number | null;
+  precio_paquete: number | null;
   nombre_custom: string | null;
   descripcion: string | null;
   activo: boolean;
@@ -98,13 +109,14 @@ function mapearOferta(fila: {
     duracionMinutos: fila.duracion_minutos ?? 30,
     precio: fila.precio,
     precioPlan: fila.precio_plan,
+    precioPaquete: fila.precio_paquete,
     nombre: fila.nombre_custom,
     descripcion: fila.descripcion,
     activo: fila.activo,
   };
 }
 
-const SELECT_OFERTA = 'id, duracion_minutos, precio, precio_plan, nombre_custom, descripcion, activo';
+const SELECT_OFERTA = 'id, duracion_minutos, precio, precio_plan, precio_paquete, nombre_custom, descripcion, activo';
 
 /** Los bloques de paseo del prestador propio, del más corto al más largo. */
 export async function obtenerOfertasPaseoPropias(
@@ -130,6 +142,8 @@ export interface InputCrearOfertaPaseo {
   precio: number;
   /** Precio por salida en plan mensual; ausente/null = sin plan en este bloque. */
   precioPlan?: number | null;
+  /** Precio por salida en paquete; ausente/null = sin paquete en este bloque (D-343). */
+  precioPaquete?: number | null;
   nombre?: string;
   descripcion?: string;
 }
@@ -149,6 +163,13 @@ export async function crearOfertaPaseo(
     (!Number.isFinite(input.precioPlan) || input.precioPlan <= 0)
   ) {
     return falla('precio_plan_invalido');
+  }
+  if (
+    input.precioPaquete !== undefined &&
+    input.precioPaquete !== null &&
+    (!Number.isFinite(input.precioPaquete) || input.precioPaquete <= 0)
+  ) {
+    return falla('precio_paquete_invalido');
   }
 
   // un bloque por duración: el schema no tiene UNIQUE (relevado S55) —
@@ -171,6 +192,7 @@ export async function crearOfertaPaseo(
       duracion_minutos: input.duracionMinutos,
       precio: input.precio,
       precio_plan: input.precioPlan ?? null,
+      precio_paquete: input.precioPaquete ?? null,
       nombre_custom: input.nombre?.trim() || null,
       descripcion: input.descripcion?.trim() || null,
       activo: true,
@@ -188,6 +210,8 @@ export interface InputActualizarOfertaPaseo {
   precio?: number;
   /** number = precio por salida del plan · null = quitar el plan del bloque · ausente = no tocar. */
   precioPlan?: number | null;
+  /** number = precio por salida del paquete · null = quitar el paquete del bloque · ausente = no tocar. */
+  precioPaquete?: number | null;
   nombre?: string | null;
   descripcion?: string | null;
   activo?: boolean;
@@ -214,10 +238,18 @@ export async function actualizarOfertaPaseo(
   ) {
     return falla('precio_plan_invalido');
   }
+  if (
+    input.precioPaquete !== undefined &&
+    input.precioPaquete !== null &&
+    (!Number.isFinite(input.precioPaquete) || input.precioPaquete <= 0)
+  ) {
+    return falla('precio_paquete_invalido');
+  }
 
   const cambios: UpdateOferta = {};
   if (input.precio !== undefined) cambios.precio = input.precio;
   if (input.precioPlan !== undefined) cambios.precio_plan = input.precioPlan;
+  if (input.precioPaquete !== undefined) cambios.precio_paquete = input.precioPaquete;
   if (input.nombre !== undefined) cambios.nombre_custom = input.nombre?.trim() || null;
   if (input.descripcion !== undefined) cambios.descripcion = input.descripcion?.trim() || null;
   if (input.activo !== undefined) cambios.activo = input.activo;
