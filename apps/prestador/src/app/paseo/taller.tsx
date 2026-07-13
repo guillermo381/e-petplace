@@ -49,7 +49,6 @@ import {
   SelectorOpcion,
   Separador,
   SliderPrecio,
-  StepperCantidad,
   Tarjeta,
   spacing,
   typography,
@@ -58,12 +57,9 @@ import {
 } from '@epetplace/ui';
 import {
   BLOQUES_PASEO,
-  actualizarFranjaHorario,
   actualizarOfertaPaseo,
   agregarZonaCobertura,
-  crearFranjaHorario,
   crearOfertaPaseo,
-  eliminarFranjaHorario,
   obtenerCatalogoCiudades,
   obtenerComisionVigenteCita,
   obtenerFranjasHorario,
@@ -75,13 +71,22 @@ import {
   quitarZonaCobertura,
   type BloquePaseo,
   type CiudadCatalogo,
-  type FranjaHorario,
   type OfertaPaseoPropia,
   type PaisActivo,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 import { EspejoOferta } from '@/components/espejo-oferta';
+// S59-B5: la sección de horarios se EXTRAJO a un componente compartido
+// con El arte del grooming (una sola verdad; mecánica intacta).
+import {
+  ORDEN_DISPLAY,
+  SeccionHorarios,
+  aplicarDiffFranjas,
+  draftDesdeFranja,
+  franjaDirty,
+  type DraftFranja,
+} from '@/components/seccion-horarios';
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -105,34 +110,12 @@ interface DraftOferta {
   paquete: string;
 }
 
-interface DraftFranja {
-  key: string;
-  id: string | null; // null = nace al guardar
-  diaSemana: number;
-  horaInicio: string;
-  horaFin: string;
-  cupo: number;
-  activo: boolean;
-  quitar: boolean;
-  baseCupo: number | null;
-  baseActivo: boolean | null;
-}
-
 // zonas v1 DECLARATIVA (contrato D-331: declara, no filtra)
 interface DraftZona {
   key: string;
   id: string | null;
   ciudad: CiudadCatalogo;
   quitar: boolean;
-}
-
-// display lunes-primero; el ÍNDICE que viaja a DB sigue siendo 0=Domingo
-const ORDEN_DISPLAY = [1, 2, 3, 4, 5, 6, 0] as const;
-
-// grilla v1: pasos de 30 min, 05:00–22:00 (heredada de /horarios S55-B)
-const HORAS: string[] = [];
-for (let m = 5 * 60; m <= 22 * 60; m += 30) {
-  HORAS.push(`${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`);
 }
 
 // el riel del precio: pasos de $0.25 (§15b.5a); techo $40 estirable
@@ -186,21 +169,6 @@ function draftDesdeBase(o: OfertaPaseoPropia | null): DraftOferta {
     : { base: null, ofrecida: false, precio: '', plan: '', paquete: '' };
 }
 
-function draftDesdeFranja(f: FranjaHorario): DraftFranja {
-  return {
-    key: f.id,
-    id: f.id,
-    diaSemana: f.diaSemana,
-    horaInicio: f.horaInicio,
-    horaFin: f.horaFin,
-    cupo: f.maxCitasPorSlot,
-    activo: f.activo,
-    quitar: false,
-    baseCupo: f.maxCitasPorSlot,
-    baseActivo: f.activo,
-  };
-}
-
 // nombre/descripción quedaron FUERA del diff (edición mudada al perfil
 // del prestador — deuda declarada; el guardado no las toca)
 function ofertaDirty(d: DraftOferta): boolean {
@@ -214,11 +182,6 @@ function ofertaDirty(d: DraftOferta): boolean {
     (plan !== 'invalido' && plan !== d.base.precioPlan) ||
     (paquete !== 'invalido' && paquete !== d.base.precioPaquete)
   );
-}
-
-function franjaDirty(f: DraftFranja): boolean {
-  if (f.id === null) return !f.quitar;
-  return f.quitar || f.cupo !== f.baseCupo || f.activo !== f.baseActivo;
 }
 
 function TituloBloque({ texto }: { texto: string }) {
@@ -292,20 +255,11 @@ export default function TallerPaseo() {
 
   // Hojas
   const [hojaAgregarDuracion, setHojaAgregarDuracion] = useState(false);
-  const [hojaGrupo, setHojaGrupo] = useState<string[] | null>(null); // keys del grupo de franjas
-  const [confirmandoQuitar, setConfirmandoQuitar] = useState(false);
-  const [creandoFranja, setCreandoFranja] = useState(false);
-  const [vistaNueva, setVistaNueva] = useState<'form' | 'desde' | 'hasta'>('form');
-  const [desdeSel, setDesdeSel] = useState<string | null>(null);
-  const [hastaSel, setHastaSel] = useState<string | null>(null);
-  const [cupoSel, setCupoSel] = useState(1);
   const [hojaOtraCiudad, setHojaOtraCiudad] = useState(false);
 
   // Paso 1 (v3.1, boceto founder): el CHIP gobierna el bloque — la
   // duración elegida; cambiar de chip CONSERVA el borrador de cada una
   const [duracionSel, setDuracionSel] = useState<BloquePaseo | null>(null);
-  // Paso 2: los días marcados para la PRÓXIMA franja (multi-selección)
-  const [diasSel, setDiasSel] = useState<number[]>([]);
 
   const [guardando, setGuardando] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
@@ -375,15 +329,8 @@ export default function TallerPaseo() {
     }
   };
   const vozDia = (dia: number): string => t(`horarios.dia${dia as 0 | 1 | 2 | 3 | 4 | 5 | 6}` as const);
-  const letraDia = (dia: number): string => t(`taller.diaCorto${dia as 0 | 1 | 2 | 3 | 4 | 5 | 6}` as const);
-  const vozCupo = (cupo: number): string =>
-    cupo === 1 ? t('horarios.cupoUno') : t('horarios.cupoVarios', { cantidad: cupo });
-
   const actualizarDraft = (b: BloquePaseo, cambios: Partial<DraftOferta>) => {
     setDrafts((prev) => (prev === null ? prev : { ...prev, [b]: { ...prev[b], ...cambios } }));
-  };
-  const actualizarFranjas = (keys: string[], cambios: Partial<DraftFranja>) => {
-    setFranjas((prev) => (prev === null ? prev : prev.map((f) => (keys.includes(f.key) ? { ...f, ...cambios } : f))));
   };
 
   const zonaDirty = (z: DraftZona): boolean => (z.id === null ? !z.quitar : z.quitar);
@@ -427,55 +374,6 @@ export default function TallerPaseo() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [drafts, franjas, t]);
-
-  // grupos de franjas: idénticas en horas+cupo+estado se muestran como UNA
-  // (la edición dice a qué días pertenece — mandato v3)
-  const grupos = useMemo(() => {
-    const vivas = (franjas ?? []).filter((f) => !f.quitar);
-    const porClave = new Map<string, DraftFranja[]>();
-    for (const f of vivas) {
-      const clave = `${f.horaInicio}|${f.horaFin}|${f.cupo}|${f.activo}`;
-      porClave.set(clave, [...(porClave.get(clave) ?? []), f]);
-    }
-    return [...porClave.values()].sort((a, b) => a[0].horaInicio.localeCompare(b[0].horaInicio));
-  }, [franjas]);
-
-  const diasDeGrupo = (miembros: DraftFranja[]): string =>
-    ORDEN_DISPLAY.filter((d) => miembros.some((f) => f.diaSemana === d))
-      .map(letraDia)
-      .join(' · ');
-
-  function agregarFranjasDraft() {
-    if (franjas === null || desdeSel === null || hastaSel === null || diasSel.length === 0) return;
-    // solape local por CADA día marcado (el wrapper re-valida al guardar);
-    // se chequea TODO antes de agregar — jamás un alta parcial
-    for (const dia of diasSel) {
-      const solapa = franjas.some(
-        (f) => f.diaSemana === dia && !f.quitar && desdeSel < f.horaFin && f.horaInicio < hastaSel,
-      );
-      if (solapa) {
-        mostrar({ texto: `${vozDia(dia)}: ${t('horarios.solape')}`, variante: 'error' });
-        return;
-      }
-    }
-    const nuevas: DraftFranja[] = diasSel.map((dia) => {
-      contadorNuevas.current += 1;
-      return {
-        key: `nueva-${contadorNuevas.current}`,
-        id: null,
-        diaSemana: dia,
-        horaInicio: desdeSel,
-        horaFin: hastaSel,
-        cupo: cupoSel,
-        activo: true,
-        quitar: false,
-        baseCupo: null,
-        baseActivo: null,
-      };
-    });
-    setFranjas([...franjas, ...nuevas]);
-    setCreandoFranja(false);
-  }
 
   // EL GUARDADO ÚNICO — el diff entero en secuencia (intacto de v2)
   async function guardarTodo() {
@@ -525,41 +423,20 @@ export default function TallerPaseo() {
       }
     }
 
-    for (const f of franjas) {
-      if (!franjaDirty(f)) continue;
-      if (f.id !== null && f.quitar) {
-        const r = await eliminarFranjaHorario(f.id);
-        if (!r.ok) {
-          setGuardando(false);
-          mostrar({ texto: r.mensaje, variante: 'error' });
-          return;
-        }
-        setFranjas((prev) => (prev === null ? prev : prev.filter((x) => x.key !== f.key)));
-      } else if (f.id !== null) {
-        const r = await actualizarFranjaHorario({ id: f.id, maxCitasPorSlot: f.cupo, activo: f.activo });
-        if (!r.ok) {
-          setGuardando(false);
-          mostrar({ texto: r.mensaje, variante: 'error' });
-          return;
-        }
-        actualizarFranjas([f.key], { baseCupo: f.cupo, baseActivo: f.activo });
-      } else if (!f.quitar) {
-        const r = await crearFranjaHorario({
-          prestadorId: pantalla.prestadorId,
-          diaSemana: f.diaSemana,
-          horaInicio: f.horaInicio,
-          horaFin: f.horaFin,
-          maxCitasPorSlot: f.cupo,
+    // el diff de franjas vive en la sección compartida (S59-B5)
+    {
+      const rf = await aplicarDiffFranjas(pantalla.prestadorId, franjas);
+      setFranjas(rf.franjas);
+      if (!rf.ok) {
+        setGuardando(false);
+        mostrar({
+          texto:
+            rf.error.tipo === 'solape'
+              ? `${vozDia(rf.error.diaSemana)}: ${t('horarios.solape')}`
+              : rf.error.mensaje,
+          variante: 'error',
         });
-        if (!r.ok) {
-          setGuardando(false);
-          mostrar({
-            texto: r.codigo === 'franja_solapada' ? `${vozDia(f.diaSemana)}: ${t('horarios.solape')}` : r.mensaje,
-            variante: 'error',
-          });
-          return;
-        }
-        actualizarFranjas([f.key], { id: r.data.id, baseCupo: r.data.maxCitasPorSlot, baseActivo: r.data.activo });
+        return;
       }
     }
 
@@ -592,7 +469,6 @@ export default function TallerPaseo() {
 
   const bloquesConCard = drafts === null ? [] : BLOQUES_PASEO.filter((b) => drafts[b].ofrecida || drafts[b].base !== null);
   const bloquesDisponibles = drafts === null ? [] : BLOQUES_PASEO.filter((b) => !bloquesConCard.includes(b));
-  const grupoEnHoja = hojaGrupo === null ? null : (franjas ?? []).filter((f) => hojaGrupo.includes(f.key));
 
   const alAtras = () => {
     if (modoWizard && paso > 0) {
@@ -897,81 +773,13 @@ export default function TallerPaseo() {
             </View>
           )}
 
-          {/* ══ PASO/SECCIÓN 2 — días y horarios (multi-selección) ══ */}
-          {seccionVisible === 'horarios' && (
-            <View style={{ gap: spacing[3] }}>
-              <TituloBloque texto={t('taller.horariosTitulo')} />
-              <VozSecundaria texto={t('taller.horariosExplica')} />
-              <SelectorOpcion
-                etiqueta={t('taller.dias')}
-                disposicion="fila"
-                acento="oficio"
-                multiple
-                opciones={ORDEN_DISPLAY.map((dia) => ({ codigo: String(dia), etiqueta: letraDia(dia) }))}
-                seleccionadas={diasSel.map(String)}
-                onSelect={(codigo) => {
-                  const dia = Number.parseInt(codigo, 10);
-                  setDiasSel((prev) => (prev.includes(dia) ? prev.filter((x) => x !== dia) : [...prev, dia]));
-                }}
-              />
-              <Boton
-                variante="ghost"
-                etiqueta={t('taller.todaLaSemana')}
-                onPress={() => setDiasSel([...ORDEN_DISPLAY])}
-              />
-              <Boton
-                variante="secundario"
-                etiqueta={t('horarios.agregarFranja')}
-                bloque
-                deshabilitado={diasSel.length === 0}
-                onPress={() => {
-                  setCreandoFranja(true);
-                  setVistaNueva('form');
-                  setDesdeSel(null);
-                  setHastaSel(null);
-                  setCupoSel(1);
-                }}
-              />
-              {grupos.length === 0 ? (
-                <VozSecundaria texto={t('taller.sinFranjas')} />
-              ) : (
-                <Tarjeta relleno="ninguno">
-                  {grupos.map((miembros, i) => {
-                    const f = miembros[0];
-                    const partes = [diasDeGrupo(miembros)];
-                    if (!f.activo) partes.push(t('horarios.pausada'));
-                    if (miembros.some((x) => x.id === null)) partes.push(t('taller.franjaNueva'));
-                    return (
-                      <View key={f.key}>
-                        {i > 0 && <Separador />}
-                        <Celda
-                          interactiva
-                          accessibilityRole="button"
-                          titulo={vozCupo(f.cupo)}
-                          subtitulo={partes.join(' · ')}
-                          metadataMono={`${f.horaInicio} – ${f.horaFin}`}
-                          onPress={() => {
-                            setHojaGrupo(miembros.map((x) => x.key));
-                            setCupoSel(f.cupo);
-                            setConfirmandoQuitar(false);
-                          }}
-                        />
-                      </View>
-                    );
-                  })}
-                </Tarjeta>
-              )}
-              {/* vacaciones — la celda-puente vive con los horarios (§15b.5a) */}
-              <Tarjeta relleno="ninguno">
-                <Celda
-                  interactiva
-                  accessibilityRole="button"
-                  titulo={t('negocio.vacaciones')}
-                  subtitulo={t('negocio.vacacionesDetalle')}
-                  onPress={() => router.push('/vacaciones')}
-                />
-              </Tarjeta>
-            </View>
+          {/* ══ PASO/SECCIÓN 2 — días y horarios (sección COMPARTIDA S59-B5) ══ */}
+          {seccionVisible === 'horarios' && franjas !== null && (
+            <SeccionHorarios
+              franjas={franjas}
+              onCambio={setFranjas}
+              titulo={<TituloBloque texto={t('taller.horariosTitulo')} />}
+            />
           )}
 
           {/* ══ PASO/SECCIÓN 3 — zonas de cobertura ══ */}
@@ -1071,97 +879,6 @@ export default function TallerPaseo() {
         </HojaScroll>
       </Hoja>
 
-      {/* Hoja: grupo de franjas — DICE a qué días pertenece (v3) */}
-      <Hoja
-        visible={grupoEnHoja !== null && grupoEnHoja.length > 0}
-        onCerrar={() => setHojaGrupo(null)}
-        titulo={
-          grupoEnHoja !== null && grupoEnHoja.length > 0
-            ? `${grupoEnHoja[0].horaInicio} – ${grupoEnHoja[0].horaFin}`
-            : ''
-        }
-      >
-        {grupoEnHoja !== null && grupoEnHoja.length > 0 && (
-          <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
-            <VozSecundaria texto={t('taller.diasAplica', { dias: diasDeGrupo(grupoEnHoja) })} />
-            {!confirmandoQuitar ? (
-              <>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.base,
-                      color: theme.text.primary,
-                    }}
-                  >
-                    {t('horarios.cupo')}
-                  </Text>
-                  <StepperCantidad
-                    etiqueta={t('horarios.cupo')}
-                    registro="oficio"
-                    valor={cupoSel}
-                    min={1}
-                    max={4}
-                    onCambio={setCupoSel}
-                  />
-                </View>
-                <VozSecundaria texto={t('horarios.cupoAyuda')} />
-                <Boton
-                  variante="primario"
-                  etiqueta={t('taller.listo')}
-                  bloque
-                  onPress={() => {
-                    actualizarFranjas(grupoEnHoja.map((f) => f.key), { cupo: cupoSel });
-                    setHojaGrupo(null);
-                  }}
-                />
-                <Boton
-                  variante="ghost"
-                  etiqueta={grupoEnHoja[0].activo ? t('horarios.pausar') : t('horarios.reactivar')}
-                  bloque
-                  onPress={() => {
-                    actualizarFranjas(grupoEnHoja.map((f) => f.key), { activo: !grupoEnHoja[0].activo });
-                    setHojaGrupo(null);
-                  }}
-                />
-                <Boton variante="destructivo" etiqueta={t('horarios.quitar')} bloque onPress={() => setConfirmandoQuitar(true)} />
-              </>
-            ) : (
-              <>
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.regular,
-                    fontSize: typography.size.base,
-                    lineHeight: typography.size.base * typography.leading.normal,
-                    color: theme.text.secondary,
-                  }}
-                >
-                  {t('horarios.quitarConfirmacion')}
-                </Text>
-                <Boton
-                  variante="destructivo"
-                  etiqueta={t('horarios.quitarConfirmar')}
-                  bloque
-                  onPress={() => {
-                    const keys = grupoEnHoja.map((f) => f.key);
-                    setFranjas((prev) =>
-                      prev === null
-                        ? prev
-                        : prev
-                            .filter((f) => !(keys.includes(f.key) && f.id === null))
-                            .map((f) => (keys.includes(f.key) ? { ...f, quitar: true } : f)),
-                    );
-                    setHojaGrupo(null);
-                    setConfirmandoQuitar(false);
-                  }}
-                />
-                <Boton variante="ghost" etiqueta={t('horarios.cancelar')} bloque onPress={() => setConfirmandoQuitar(false)} />
-              </>
-            )}
-          </View>
-        )}
-      </Hoja>
-
       {/* Hoja: OTRA CIUDAD — catálogo agrupado por país con nombre humano */}
       <Hoja visible={hojaOtraCiudad} onCerrar={() => setHojaOtraCiudad(false)} titulo={t('taller.otraCiudad')} altura="media">
         <HojaScroll>
@@ -1200,89 +917,6 @@ export default function TallerPaseo() {
         </HojaScroll>
       </Hoja>
 
-      {/* Hoja: nueva franja — aplica a los DÍAS MARCADOS (v3) */}
-      <Hoja
-        visible={creandoFranja}
-        onCerrar={() => setCreandoFranja(false)}
-        titulo={vistaNueva === 'form' ? t('horarios.nuevaTitulo') : t('horarios.horaElegir')}
-        altura="media"
-      >
-        {vistaNueva === 'form' ? (
-          <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
-            <VozSecundaria
-              texto={t('taller.diasAplica', { dias: ORDEN_DISPLAY.filter((d) => diasSel.includes(d)).map(letraDia).join(' · ') })}
-            />
-            <Tarjeta relleno="ninguno">
-              <Celda
-                interactiva
-                accessibilityRole="button"
-                titulo={t('horarios.desde')}
-                metadataMono={desdeSel ?? undefined}
-                subtitulo={desdeSel === null ? t('horarios.horaElegir') : undefined}
-                onPress={() => setVistaNueva('desde')}
-              />
-              <Separador />
-              <Celda
-                interactiva
-                accessibilityRole="button"
-                titulo={t('horarios.hasta')}
-                metadataMono={hastaSel ?? undefined}
-                subtitulo={hastaSel === null ? t('horarios.horaElegir') : undefined}
-                onPress={() => setVistaNueva('hasta')}
-              />
-            </Tarjeta>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.regular,
-                  fontSize: typography.size.base,
-                  color: theme.text.primary,
-                }}
-              >
-                {t('horarios.cupo')}
-              </Text>
-              <StepperCantidad
-                etiqueta={t('horarios.cupo')}
-                registro="oficio"
-                valor={cupoSel}
-                min={1}
-                max={4}
-                onCambio={setCupoSel}
-              />
-            </View>
-            <VozSecundaria texto={t('horarios.cupoAyuda')} />
-            <Boton
-              variante="primario"
-              etiqueta={t('taller.agregarFranjaListo')}
-              bloque
-              deshabilitado={desdeSel === null || hastaSel === null || diasSel.length === 0}
-              onPress={agregarFranjasDraft}
-            />
-          </View>
-        ) : (
-          <HojaScroll>
-            {HORAS.filter((h) => (vistaNueva === 'hasta' && desdeSel !== null ? h > desdeSel : true)).map((h, i) => (
-              <View key={h}>
-                {i > 0 && <Separador />}
-                <Celda
-                  interactiva
-                  accessibilityRole="button"
-                  titulo={h}
-                  onPress={() => {
-                    if (vistaNueva === 'desde') {
-                      setDesdeSel(h);
-                      if (hastaSel !== null && hastaSel <= h) setHastaSel(null);
-                    } else {
-                      setHastaSel(h);
-                    }
-                    setVistaNueva('form');
-                  }}
-                />
-              </View>
-            ))}
-          </HojaScroll>
-        )}
-      </Hoja>
     </View>
   );
 }
