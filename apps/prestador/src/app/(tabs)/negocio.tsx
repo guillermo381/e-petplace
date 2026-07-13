@@ -201,7 +201,15 @@ export default function Negocio() {
                 </View>
               </View>
             </Tarjeta>
-            {/* la puerta honesta del mundo que aún no vive en la app */}
+            {/* la puerta honesta del mundo que aún no vive en la app.
+                PUNTO DE ENCHUFE S59-B5 (FASE 2, con la estructura de la A):
+                esta Tarjeta plana se vuelve la GEMELA de la de Paseo de
+                arriba — Tarjeta interactiva elevacion="reposo" +
+                onPress={() => router.push('/grooming')} + texto primario +
+                detalle VIVO (servicios activos · "desde $X" / invitación
+                al taller si la oferta está vacía); mueren las keys
+                mundoGroomingDetalle del coming-soon (Ley 37). Hasta que
+                FASE 2 abra, la puerta dice la verdad de SU servicio. */}
             <Tarjeta elevacion="plana">
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
                 <Icono nombre="grooming" registro="aa" tamano={28} />
