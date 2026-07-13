@@ -131,20 +131,16 @@ export default function Negocio() {
           <View style={{ gap: spacing[3] }}>
             <TituloBloque texto={t('negocio.oferta')} />
             <Tarjeta relleno="ninguno">
+              {/* S58-B B1b (adenda founder): /servicios y /horarios MURIERON
+                  absorbidos por el taller — la entrada al mundo es el RESUMEN
+                  (/paseo). La tarjeta-mundo con resumen vivo llega en B1a
+                  contra su PNG patrón. */}
               <Celda
                 interactiva
                 accessibilityRole="button"
-                titulo={t('negocio.servicios')}
-                subtitulo={t('negocio.serviciosDetalle')}
-                onPress={() => router.push('/servicios')}
-              />
-              <Separador />
-              <Celda
-                interactiva
-                accessibilityRole="button"
-                titulo={t('negocio.horarios')}
-                subtitulo={t('negocio.horariosDetalle')}
-                onPress={() => router.push('/horarios')}
+                titulo={t('negocio.paseo')}
+                subtitulo={t('negocio.paseoDetalle')}
+                onPress={() => router.push('/paseo')}
               />
               <Separador />
               {/* S56-B TAREA 2 (D-341): los días apartados — el motor los honra */}

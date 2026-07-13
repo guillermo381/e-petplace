@@ -201,10 +201,10 @@ export const prestadorEs = {
     titulo: 'Tu negocio',
     enPreparacion: 'En preparación',
     oferta: 'Tu oferta',
-    servicios: 'Servicios y precios',
-    serviciosDetalle: 'Qué paseos ofreces y sus precios.',
-    horarios: 'Horarios',
-    horariosDetalle: 'Tus días y franjas de paseo.',
+    // S58-B B1b (adenda founder): /servicios y /horarios murieron
+    // absorbidos por el taller — UNA entrada al mundo · LOTE S58, GATE PENDIENTE
+    paseo: 'Paseo',
+    paseoDetalle: 'Tu oferta completa: duraciones, precios y horarios.',
     // S56-B TAREA 2 (D-341) · LOTE S56, GATE PENDIENTE
     vacaciones: 'Vacaciones',
     vacacionesDetalle: 'Marca los días en que no paseas.',
@@ -329,22 +329,13 @@ export const prestadorEs = {
   // LOTE S56 — GATE PENDIENTE del founder: servicios.* + horarios.* completos
   // (nacieron post-lectura S55; la aprobación S55 NO los cubre) + las keys
   // de comisión visible (S56-B TAREA 4).
+  // Voces del oficio que EL TALLER hereda (S58-B B1b: /servicios murió
+  // absorbida; sus keys muertas murieron con ella — Ley 37; los TEXTOS
+  // que siguen acá son los de los lotes S56/S57, sin cambios).
   servicios: {
-    titulo: 'Servicios y precios',
-    error: 'No pudimos cargar tus servicios.',
-    errorDetalle: 'Prueba de nuevo en un momento.',
-    reintentar: 'Reintentar',
-    // peldaño 0 — invitación que educa
-    vacioTitulo: 'Tu servicio de paseo',
-    vacioCuerpo:
-      'Elige qué paseos ofreces y cuánto cuesta cada uno. Tus clientes solo ven lo que tú actives.',
-    vacioCta: 'Ofrecer mi primer paseo',
     // la voz honesta con la cuenta comercial no activa (jamás activar desde acá)
     cuentaNoActiva:
       'Puedes configurar ahora. Tus paseos se ofrecen a los clientes cuando el equipo active tu cuenta comercial.',
-    // peldaño 1 — la lista de bloques
-    bloquesTitulo: 'Tus paseos',
-    agregarBloque: 'Ofrecer otra duración',
     // los bloques del menú canónico (voz funcional; nombre_custom la pisa)
     bloque30: 'Salida corta · 30 min',
     bloque60: 'Paseo · 1 hora',
@@ -353,26 +344,12 @@ export const prestadorEs = {
     bloque240: 'Paseo de 4 horas',
     bloque300: 'Paseo de 5 horas',
     pausada: 'Pausado',
-    // edición
-    editarTitulo: 'Editar paseo',
-    nuevoTitulo: 'Ofrecer un paseo',
-    duracion: 'Duración',
     precio: 'Precio',
     precioAyuda: 'En dólares. Rige para reservas nuevas.',
     nombre: 'Nombre (opcional)',
     nombreAyuda: 'Como lo van a ver tus clientes.',
     descripcion: 'Descripción (opcional)',
-    guardar: 'Guardar',
-    crear: 'Ofrecer este paseo',
-    pausar: 'Pausar',
-    reactivar: 'Reactivar',
-    guardado: 'Guardado.',
-    creado: 'Tu paseo quedó configurado.',
-    // errores con voz (espejo de los códigos del wrapper)
     precioInvalido: 'El precio tiene que ser mayor a cero.',
-    bloqueDuplicado: 'Ya ofreces un paseo de esa duración.',
-    // peldaño 2 — hueco declarado
-    // paquetesHueco MURIÓ en S57-B2 (pasada Chanel): el paquete ya vive.
     // comisión visible donde se pone precio (S56-B TAREA 4, financiero v2.6
     // regla 7.15 — el % viene del dato, jamás hardcodeado)
     comisionRetiene: 'e-PetPlace retiene {{pct}}%',
@@ -384,14 +361,102 @@ export const prestadorEs = {
     planVacio: 'Sin plan en este bloque: tus clientes no ven la opción de hacerlo frecuente.',
     planComparacion: 'Suelto {{suelto}} · plan {{plan}} por salida',
     precioPlanInvalido: 'El precio del plan tiene que ser mayor a cero. Déjalo vacío si no ofreces plan.',
-    // el PAQUETE de salidas (D-343 superficie prestador, S57-B2) · LOTE S57, GATE PENDIENTE
-    paqueteTitulo: 'Paquete de salidas',
+    // el PAQUETE de salidas (D-343/D-354: presets 5/10/15 EN LETRA) · LOTE S57, GATE PENDIENTE
     paqueteExplica: 'Tus clientes compran 5, 10 o 15 salidas de este bloque por adelantado. Tú pones un solo precio por salida.',
     precioPaquete: 'Precio por salida en paquete (opcional)',
     precioPaqueteAyuda: 'Rige para los paquetes que se compren desde ahora. Los ya comprados no cambian.',
     paqueteVacio: 'Sin paquete en este bloque: tus clientes no ven la opción de comprarlo.',
     paqueteComparacion: 'Suelto {{suelto}} · paquete {{paquete}} por salida',
     precioPaqueteInvalido: 'El precio por salida del paquete tiene que ser mayor a cero. Déjalo vacío si no ofreces paquete.',
+  },
+  // EL ARTE DEL PASEO — el taller (S58-B B1b, adenda founder) · LOTE S58, GATE PENDIENTE
+  taller: {
+    titulo: 'El arte del paseo',
+    error: 'No pudimos cargar tu oferta.',
+    errorDetalle: 'Prueba de nuevo en un momento.',
+    reintentar: 'Reintentar',
+    duracionesTitulo: 'Duraciones y precios',
+    // etiquetas cortas del menú canónico (la grilla; la voz larga sigue en servicios.bloque*)
+    d30: '30 min',
+    d60: '1 hora',
+    d120: '2 horas',
+    d180: '3 horas',
+    d240: '4 horas',
+    d300: '5 horas',
+    noOfrecida: 'No ofreces esta duración.',
+    seOfreceAlGuardar: 'Se ofrece cuando guardes.',
+    ofrecer: 'Ofrecer esta duración',
+    pausarDuracion: 'Pausar esta duración',
+    reactivarDuracion: 'Reactivar esta duración',
+    nombreDescripcion: 'Nombre y descripción',
+    nombreDescripcionVacio: 'Opcional — como lo ven tus clientes.',
+    planPaqueteTitulo: 'Plan y paquete',
+    planPaqueteExplica: 'Precios por salida para tus clientes frecuentes.',
+    planPaqueteSinDuraciones: 'Primero ofrece una duración: el plan y el paquete se configuran sobre ella.',
+    planResumen: 'Plan {{precio}}',
+    paqueteResumen: 'Paquete {{precio}}',
+    sinPlanNiPaquete: 'Sin plan ni paquete',
+    horariosTitulo: 'Días y horarios',
+    sinFranjasDia: 'Sin franjas este día.',
+    franjaNueva: 'Se agrega cuando guardes.',
+    agregarFranjaListo: 'Agregar franja',
+    // zonas de cobertura (contrato D-331 v1: declara, no filtra)
+    zonasTitulo: 'Zonas de cobertura',
+    zonasExplica: 'Las ciudades donde trabajas. Ayudan a las familias a encontrarte.',
+    sinZonas: 'Aún no declaras ninguna ciudad.',
+    zonaNueva: 'Se agrega cuando guardes.',
+    agregarCiudad: 'Agregar ciudad',
+    ciudadFaltante: 'Si tu ciudad no está, escríbenos: el catálogo lo carga el equipo.',
+    quitarCiudad: '¿Quitar {{ciudad}} de tu cobertura?',
+    quitarCiudadConfirmar: 'Sí, quitar',
+    listo: 'Listo',
+    guardar: 'Guardar tu oferta',
+    guardado: 'Tu oferta quedó guardada.',
+  },
+  // TU OFERTA DE PASEO — el resumen, la portada del mundo (S58-B B1b) · LOTE S58, GATE PENDIENTE
+  ofertaPaseo: {
+    titulo: 'Tu oferta de paseo',
+    error: 'No pudimos cargar tu oferta.',
+    errorDetalle: 'Prueba de nuevo en un momento.',
+    reintentar: 'Reintentar',
+    // peldaño 0 — la invitación que educa: el taller es el camino
+    vacioTitulo: 'Tu servicio de paseo',
+    vacioCuerpo: 'En el taller eliges duraciones, precios y horarios. Tus clientes solo ven lo que tú actives.',
+    vacioCta: 'Abrir el taller',
+    // el estado — la verdad del motor (7.13), con camino cuando falta algo
+    visibleTitulo: 'Visible para las familias',
+    visibleVoz: 'Las familias te encuentran y pueden reservar.',
+    noVisibleTitulo: 'Todavía no visible',
+    noVisibleCuenta: 'Falta que el equipo active tu cuenta comercial.',
+    noVisibleDuraciones: 'Activa al menos una duración en el taller.',
+    noVisibleHorarios: 'Agrega tus días y horarios en el taller.',
+    // una fila por sección
+    duraciones: 'Duraciones y precios',
+    duracionesDetalle: '{{n}} duraciones · desde {{precio}}',
+    duracionesDetalleUna: '1 duración · desde {{precio}}',
+    duracionesPausadas: 'Todas pausadas',
+    planPaquete: 'Plan y paquete',
+    conPlanYPaquete: 'Con plan mensual y paquete de salidas',
+    conPlan: 'Con plan mensual',
+    conPaquete: 'Con paquete de salidas',
+    sinPlanNiPaquete: 'Sin plan ni paquete',
+    horarios: 'Días y horarios',
+    diaUno: '1 día',
+    dias: '{{n}} días',
+    franjaUna: '1 franja',
+    franjas: '{{n}} franjas',
+    sinHorarios: 'Sin horarios',
+    zonasSin: 'Sin ciudades declaradas',
+    vacacionesSin: 'Sin días bloqueados',
+    vacacionesCon: 'Tienes días bloqueados',
+    abrirTaller: 'Abrir el taller',
+    // el espejo — la misma composición en taller (borrador) y resumen (DB)
+    espejoTitulo: 'Así lo ve el dueño',
+    espejoNada: 'Todavía no apareces en las búsquedas.',
+    espejoDuraciones: 'Paseos de {{lista}} · desde {{precio}}',
+    espejoDias: 'Recibes reservas: {{lista}}.',
+    espejoSinDias: 'Sin días de paseo: aún no apareces en las búsquedas.',
+    espejoY: 'y',
   },
   // Vacaciones / bloqueos — S56-B TAREA 2 (D-341) · LOTE S56, GATE PENDIENTE
   vacaciones: {
@@ -428,17 +493,9 @@ export const prestadorEs = {
     creado: 'Listo. Esos días no recibes reservas.',
     quitado: 'Bloqueo quitado.',
   },
-  // LOTE S56 — GATE PENDIENTE del founder (junto con servicios.*).
+  // Voces de las franjas que EL TALLER hereda (S58-B B1b: /horarios murió
+  // absorbida; keys muertas fuera — Ley 37; textos de los lotes S56 intactos).
   horarios: {
-    titulo: 'Horarios',
-    error: 'No pudimos cargar tus horarios.',
-    errorDetalle: 'Prueba de nuevo en un momento.',
-    reintentar: 'Reintentar',
-    // peldaño 0 — invitación que educa
-    vacioTitulo: 'Tus horarios de paseo',
-    vacioCuerpo:
-      'Di qué días y en qué franjas sales a pasear. Tus clientes solo pueden reservar dentro de ellas.',
-    vacioCta: 'Agregar mi primera franja',
     agregarFranja: 'Agregar franja',
     // regla 32: 0=Domingo … 6=Sábado (la key ES el índice de DB)
     dia0: 'Domingo',
@@ -452,29 +509,18 @@ export const prestadorEs = {
     cupoUno: '1 paseo a la vez',
     cupoVarios: '{{cantidad}} paseos a la vez',
     pausada: 'Pausada',
-    // formulario
     nuevaTitulo: 'Nueva franja',
-    editarTitulo: 'Editar franja',
-    dia: 'Día',
-    diaElegir: 'Elige el día',
     desde: 'Desde',
     hasta: 'Hasta',
     horaElegir: 'Elige la hora',
     cupo: 'Paseos simultáneos',
     cupoAyuda: 'Cuántos paseos puedes atender a la vez en esta franja.',
-    crear: 'Agregar franja',
-    guardar: 'Guardar',
     pausar: 'Pausar',
     reactivar: 'Reactivar',
     quitar: 'Quitar franja',
     quitarConfirmacion: 'Tus clientes ya no van a poder reservar en esta franja.',
     quitarConfirmar: 'Sí, quitar',
     cancelar: 'Cancelar',
-    creada: 'Franja agregada.',
-    guardado: 'Guardado.',
-    quitada: 'Franja quitada.',
-    // errores con voz
-    rangoInvalido: 'La hora de fin tiene que ser después de la de inicio.',
     solape: 'Esa franja se cruza con una que ya tienes ese día.',
   },
 } as const;
