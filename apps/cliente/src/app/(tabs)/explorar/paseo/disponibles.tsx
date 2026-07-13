@@ -40,6 +40,7 @@ import {
 import {
   crearBloqueoAgenda,
   getEstadoOnboardingDueno,
+  obtenerEspeciesElegibles,
   obtenerMascotasDeFamilia,
   obtenerPaseadoresDisponibles,
   obtenerSaldoPaquete,
@@ -48,7 +49,6 @@ import {
   type MascotaResumen,
   type PaseadorDisponible,
 } from '@epetplace/api';
-import { PaqueteHoja } from '@/components/paquete-hoja';
 import { PlanHoja } from '@/components/plan-hoja';
 import { useTraduccion } from '@/i18n';
 
@@ -56,26 +56,30 @@ export default function PaseoDisponibles() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
-  const params = useLocalSearchParams<{ fecha: string; hora: string; duracion: string; plan?: string; paquete?: string }>();
+  const params = useLocalSearchParams<{ fecha: string; hora: string; duracion: string; plan?: string }>();
   const fecha = typeof params.fecha === 'string' ? params.fecha : '';
   const hora = typeof params.hora === 'string' ? params.hora : '';
   const duracion = Number(params.duracion ?? 0);
   // D-338: modo PLAN — el paseador elegido acá ancla el plan (§6.1 v1.2).
   const modoPlan = params.plan === '1';
-  // D-343: modo PAQUETE — el paseador elegido acá ancla el paquete (§6bis.1).
-  const modoPaquete = params.paquete === '1';
 
   const [disponibles, setDisponibles] = useState<PaseadorDisponible[] | 'cargando' | 'error'>('cargando');
   const [mascotas, setMascotas] = useState<MascotaResumen[]>([]);
+  // §1bis (v1.4): las especies que PUEDEN pasear — de la DB, jamás un if
+  // por pantalla (null = todas mientras carga o sin config).
+  const [especies, setEspecies] = useState<string[] | null>(null);
   const [fotos, setFotos] = useState<Record<string, string>>({});
   const [eligiendoMascota, setEligiendoMascota] = useState<PaseadorDisponible | null>(null);
+  const [sinElegibles, setSinElegibles] = useState(false);
   const [creandoHold, setCreandoHold] = useState(false);
   const [plan, setPlan] = useState<{ paseador: PaseadorDisponible; mascotaId: string } | null>(null);
-  const [paquete, setPaquete] = useState<{ paseador: PaseadorDisponible; mascotaId: string } | null>(null);
   // §6bis.3: con saldo del ancla, el dueño ELIGE — reservar contra el
   // paquete o pagar suelto. Opciones PAREJAS, cero dark patterns.
   const [conSaldo, setConSaldo] = useState<{ paseador: PaseadorDisponible; mascotaId: string; saldo: number } | null>(null);
   const [reservando, setReservando] = useState(false);
+
+  const elegibles =
+    especies === null ? mascotas : mascotas.filter((m) => especies.includes(m.especie));
 
   const cargar = useCallback(() => {
     setDisponibles('cargando');
@@ -88,6 +92,9 @@ export default function PaseoDisponibles() {
     useCallback(() => {
       let vigente = true;
       cargar();
+      void obtenerEspeciesElegibles('paseo').then((r) => {
+        if (vigente && r.ok) setEspecies(r.data);
+      });
       void (async () => {
         const estado = await getEstadoOnboardingDueno();
         if (!vigente || !estado.ok || !estado.data.familia_id) return;
@@ -181,16 +188,11 @@ export default function PaseoDisponibles() {
         setPlan({ paseador: p, mascotaId });
         return;
       }
-      if (modoPaquete) {
-        setPaquete({ paseador: p, mascotaId });
-        return;
-      }
-      // ¿hay saldo de paquete con ESTE ancla? El dueño elige (§6bis.3).
+      // ¿hay saldo de paquete DEL HOGAR con este ancla? El dueño elige (§6bis.3).
       void (async () => {
         const saldo = await obtenerSaldoPaquete({
           prestador_id: p.prestador_id,
           prestador_servicio_id: p.prestador_servicio_id,
-          mascota_id: mascotaId,
         });
         if (saldo.ok && saldo.data !== null && saldo.data.saldo > 0) {
           setConSaldo({ paseador: p, mascotaId, saldo: saldo.data.saldo });
@@ -199,18 +201,24 @@ export default function PaseoDisponibles() {
         }
       })();
     },
-    [modoPlan, modoPaquete, crearHold],
+    [modoPlan, crearHold],
   );
 
   const alElegir = useCallback(
     (p: PaseadorDisponible) => {
-      if (mascotas.length === 1) {
-        alElegirMascota(p, mascotas[0].id);
+      // §1bis: solo mascotas ELEGIBLES para pasear; hogar sin ninguna =
+      // voz honesta con camino (jamás oferta vacía ni final mudo).
+      if (elegibles.length === 0) {
+        setSinElegibles(true);
+        return;
+      }
+      if (elegibles.length === 1) {
+        alElegirMascota(p, elegibles[0].id);
       } else {
         setEligiendoMascota(p);
       }
     },
-    [mascotas, alElegirMascota],
+    [elegibles, alElegirMascota],
   );
 
   return (
@@ -268,7 +276,7 @@ export default function PaseoDisponibles() {
         onCerrar={() => setEligiendoMascota(null)}
       >
         <HojaScroll>
-          {mascotas.map((m, i) => (
+          {elegibles.map((m, i) => (
             <View key={m.id}>
               {i > 0 ? <Separador /> : null}
               <Celda
@@ -313,25 +321,26 @@ export default function PaseoDisponibles() {
         ) : null}
       </Hoja>
 
-      {/* D-343: la Hoja del paquete — nace con el paseador ELEGIDO */}
+      {/* §1bis: hogar sin mascotas elegibles — voz honesta CON CAMINO */}
       <Hoja
-        visible={paquete !== null}
-        titulo={t('paquete.hojaTitulo')}
-        onCerrar={() => setPaquete(null)}
+        visible={sinElegibles}
+        titulo={t('paquete.sinPerrosTitulo')}
+        onCerrar={() => setSinElegibles(false)}
         conCerrar
       >
-        {paquete !== null ? (
-          <PaqueteHoja
-            paseador={paquete.paseador}
-            mascotaId={paquete.mascotaId}
-            onComprado={(comprado) => {
-              setPaquete(null);
-              mostrar({ texto: t('paquete.exito', { n: comprado.saldo_total }), variante: 'exito' });
+        <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
+          <Celda titulo={t('paquete.sinPerrosDetalle')} />
+          <Boton
+            variante="primario"
+            bloque
+            etiqueta={t('paquete.sinPerrosAccion')}
+            onPress={() => {
+              setSinElegibles(false);
               if (router.canDismiss()) router.dismissAll();
-              router.navigate('/hogar/paseos');
+              router.navigate('/hogar/agregar');
             }}
           />
-        ) : null}
+        </View>
       </Hoja>
 
       {/* §6bis.3: hay saldo con este paseador — el dueño ELIGE, parejo */}

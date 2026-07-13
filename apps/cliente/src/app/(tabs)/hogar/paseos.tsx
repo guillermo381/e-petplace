@@ -348,6 +348,26 @@ export default function MisPaseos() {
                     }
                     fin={<Insignia estado="alDia" etiqueta={t('paquete.saldoInsignia', { n: pq.saldo })} />}
                   />
+                  {/* v1.4 §6bis.2bis: la compra/renovación tiene entrada
+                      clara desde el hub — llega filtrada a SU ancla */}
+                  {pq.prestador_servicio_id !== null ? (
+                    <>
+                      <Separador />
+                      <View style={{ padding: spacing[3] }}>
+                        <Boton
+                          variante="ghost"
+                          tamaño="sm"
+                          etiqueta={t('paquete.comprarMas')}
+                          onPress={() =>
+                            router.navigate({
+                              pathname: '/explorar/paseo/paquete',
+                              params: { servicio: pq.prestador_servicio_id },
+                            })
+                          }
+                        />
+                      </View>
+                    </>
+                  ) : null}
                 </Tarjeta>
               ))}
               {/* P18: los paseos sueltos y de paquete que vienen */}

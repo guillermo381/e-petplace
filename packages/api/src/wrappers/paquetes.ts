@@ -15,6 +15,8 @@ import type { ResultadoWrapper } from '../resultado';
 
 const CODIGOS_ERROR_PAQUETE = [
   'acceso_denegado',
+  'sin_familia',
+  'mascota_no_elegible',
   'preset_invalido',
   'prestador_inactivo',
   'servicio_no_disponible',
@@ -39,6 +41,8 @@ const MENSAJES_ERROR_PAQUETE: Record<
   string
 > = {
   acceso_denegado:       'No tenés acceso para hacer esto.',
+  sin_familia:           'Tu hogar todavía no está creado — completá el registro primero.',
+  mascota_no_elegible:   'El paseo es para perros — esta mascota no puede reservarlo.',
   preset_invalido:       'Los paquetes son de 5, 10 o 15 salidas.',
   prestador_inactivo:    'Este paseador no está disponible.',
   servicio_no_disponible: 'Este servicio ya no está disponible.',
@@ -95,7 +99,6 @@ export interface ComprarPaqueteInput {
   prestador_id: string;
   /** prestador_servicios.id — la oferta del bloque elegida en el flujo. */
   prestador_servicio_id: string;
-  mascota_id: string;
   unidades: PresetPaquete;
 }
 
@@ -113,9 +116,11 @@ export interface PaqueteComprado {
 
 /**
  * Compra el paquete: UN pago simulado declarado (jamás toca el ledger —
- * Decisión T). Si hay un paquete vigente con saldo del mismo ancla, sus
- * salidas SE SUMAN (rollover server-side: FIFO a precio de origen). El
- * total y la vigencia vuelven del server — la pantalla muestra ESOS números.
+ * Decisión T). EL PAQUETE ES DEL HOGAR (v1.4 §6bis.1): sin mascota — la
+ * mascota se elige en cada reserva. COMPRAR NO ES RESERVAR (§6bis.2bis):
+ * el server jamás crea citas acá. Si hay un paquete vigente con saldo
+ * del mismo ancla, sus salidas SE SUMAN (rollover server-side, FIFO a
+ * precio de origen). El total y la vigencia vuelven del server.
  */
 export async function comprarPaqueteSalidas(
   input: ComprarPaqueteInput,
@@ -124,7 +129,6 @@ export async function comprarPaqueteSalidas(
   const { data, error } = await supabase.rpc('comprar_paquete_salidas', {
     p_prestador_id: input.prestador_id,
     p_servicio_id: input.prestador_servicio_id,
-    p_mascota_id: input.mascota_id,
     p_unidades: input.unidades,
   });
   if (error) return mapeoError(error.message);
@@ -281,14 +285,13 @@ export interface SaldoPaquete {
 }
 
 /**
- * El saldo VIGENTE del ancla (prestador + oferta + mascota) — lo que el
- * flujo de reserva mira para ofrecer "Reservar con tu paquete". Suma los
- * bonos activos con vigencia viva; null honesto si no hay ninguno.
+ * El saldo VIGENTE del ancla (prestador + oferta) — DEL HOGAR (v1.4):
+ * la RLS familiar decide qué bonos ve el usuario; la mascota ya no
+ * participa del saldo. null honesto si no hay ninguno.
  */
 export async function obtenerSaldoPaquete(input: {
   prestador_id: string;
   prestador_servicio_id: string;
-  mascota_id: string;
 }): Promise<ResultadoWrapper<SaldoPaquete | null, CodigoErrorPaquete>> {
   const supabase = getClient();
   const hoy = new Intl.DateTimeFormat('en-CA').format(new Date());
@@ -298,7 +301,6 @@ export async function obtenerSaldoPaquete(input: {
     .eq('tipo_servicio', 'paseo')
     .eq('prestador_id', input.prestador_id)
     .eq('prestador_servicio_id', input.prestador_servicio_id)
-    .eq('mascota_id', input.mascota_id)
     .eq('estado', 'activo')
     .eq('estado_pago', 'pagado')
     .gte('fecha_vencimiento', hoy);
@@ -317,25 +319,47 @@ export async function obtenerSaldoPaquete(input: {
   return { ok: true, data: { saldo, vence_el: vence, duracion_minutos: duracion } };
 }
 
-/**
- * El precio por salida del PAQUETE de una oferta concreta (lectura por
- * la policy pública ps_public — oferta activa de prestador activo).
- * null honesto = el prestador no ofrece paquete en ese bloque: la
- * superficie de compra NO aparece (contrato precio_paquete, D-343).
- */
-export async function obtenerPrecioPaqueteDeOferta(
-  prestadorServicioId: string,
-): Promise<ResultadoWrapper<{ precio_paquete: number | null }, CodigoErrorPaquete>> {
-  const supabase = getClient();
-  const { data, error } = await supabase
-    .from('prestador_servicios')
-    .select('precio_paquete')
-    .eq('id', prestadorServicioId)
-    .maybeSingle();
-  if (error) return mapeoError(error.message);
-  if (data === null) return { ok: true, data: { precio_paquete: null } };
-  return {
-    ok: true,
-    data: { precio_paquete: data.precio_paquete === null ? null : Number(data.precio_paquete) },
-  };
+export interface PaseadorConPaquete {
+  prestador_id: string;
+  prestador_servicio_id: string;
+  prestador_nombre: string;
+  servicio_nombre: string;
+  duracion_minutos: number;
+  precio: number;
+  precio_paquete: number;
 }
+
+/**
+ * Los paseadores que OFRECEN paquete para una duración — SIN ventana
+ * (v1.4 §6bis.2bis: comprar no es reservar, la compra jamás exige
+ * fecha/hora). Server-side por 7.13: no se oferta quien no puede
+ * cobrar. p_servicio_id filtra a UNA oferta (la renovación del hub).
+ */
+export async function obtenerPaseadoresConPaquete(input: {
+  duracion_minutos?: number;
+  prestador_servicio_id?: string;
+}): Promise<ResultadoWrapper<PaseadorConPaquete[], CodigoErrorPaquete>> {
+  const supabase = getClient();
+  const { data, error } = await supabase.rpc('obtener_paseadores_con_paquete', {
+    p_duracion_minutos: input.duracion_minutos,
+    p_servicio_id: input.prestador_servicio_id,
+  });
+  if (error) return mapeoError(error.message);
+  const filas: PaseadorConPaquete[] = [];
+  for (const f of (data ?? []) as Obj[]) {
+    if (typeof f.prestador_id !== 'string' || typeof f.prestador_servicio_id !== 'string') {
+      return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES_ERROR_PAQUETE.datos_inconsistentes };
+    }
+    filas.push({
+      prestador_id: f.prestador_id,
+      prestador_servicio_id: f.prestador_servicio_id,
+      prestador_nombre: String(f.prestador_nombre),
+      servicio_nombre: String(f.servicio_nombre),
+      duracion_minutos: Number(f.duracion_minutos),
+      precio: Number(f.precio),
+      precio_paquete: Number(f.precio_paquete),
+    });
+  }
+  return { ok: true, data: filas };
+}
+

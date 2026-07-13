@@ -294,9 +294,10 @@ export default function PaseoCuando() {
                 <Celda titulo={t('plan.chip')} subtitulo={t('plan.chipElegiPrimero')} />
               )}
               <Separador />
-              {/* 5 · el PAQUETE (D-343, §6bis): anclado al paseador que se
-                  elige en el QUIÉN — comprar NO es reservar. */}
-              {listo ? (
+              {/* 5 · el PAQUETE (v1.4 §6bis.2bis): comprar NO es reservar —
+                  alcanza la DURACIÓN; el paseador se elige en su propia
+                  pantalla, sin fecha ni hora. */}
+              {duracion !== null ? (
                 <Celda
                   interactiva
                   accessibilityRole="button"
@@ -304,13 +305,13 @@ export default function PaseoCuando() {
                   subtitulo={t('paquete.chipDetalle')}
                   onPress={() => {
                     router.push({
-                      pathname: '/explorar/paseo/disponibles',
-                      params: { fecha: dia, hora, duracion: String(duracion), paquete: '1' },
+                      pathname: '/explorar/paseo/paquete',
+                      params: { duracion: String(duracion) },
                     });
                   }}
                 />
               ) : (
-                <Celda titulo={t('paquete.chip')} subtitulo={t('plan.chipElegiPrimero')} />
+                <Celda titulo={t('paquete.chip')} subtitulo={t('paquete.chipElegiDuracion')} />
               )}
             </Tarjeta>
           </>

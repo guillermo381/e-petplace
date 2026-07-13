@@ -55,23 +55,26 @@ try {
   dbExec(`UPDATE prestador_servicios SET precio_paquete = 4.75 WHERE id = '${servicio}'`);
 
   // T1 sin paquete comprado, el saldo es null honesto
-  let r = await obtenerSaldoPaquete({ prestador_id: prestadorId, prestador_servicio_id: servicio, mascota_id: mascota });
+  let r = await obtenerSaldoPaquete({ prestador_id: prestadorId, prestador_servicio_id: servicio });
   check(r.ok && r.data === null, 'T1 saldo null honesto sin paquete');
 
   // T2 preset fuera de letra rebota tipado
-  r = await comprarPaqueteSalidas({ prestador_id: prestadorId, prestador_servicio_id: servicio, mascota_id: mascota, unidades: 7 });
+  r = await comprarPaqueteSalidas({ prestador_id: prestadorId, prestador_servicio_id: servicio, unidades: 7 });
   check(!r.ok && r.codigo === 'preset_invalido', 'T2 preset 7 rebota tipado', r.ok ? 'compró!' : r.codigo);
 
-  // T3 comprar 5 → pago simulado declarado, vigencia mensual dicha
-  r = await comprarPaqueteSalidas({ prestador_id: prestadorId, prestador_servicio_id: servicio, mascota_id: mascota, unidades: 5 });
+  // T3 comprar 5 SIN mascota (v1.4: el paquete es del hogar) y SIN crear citas
+  const [{ n: citas0 }] = dbQuery('SELECT count(*)::int AS n FROM evento_cita_servicio');
+  r = await comprarPaqueteSalidas({ prestador_id: prestadorId, prestador_servicio_id: servicio, unidades: 5 });
   check(r.ok && r.data.total === 23.75 && r.data.saldo_total === 5 && typeof r.data.vence_el === 'string',
     'T3 compra 5×$4.75=$23.75 con vigencia declarada', r.ok ? r.data.vence_el : r.mensaje);
   const bonoId = r.ok ? r.data.bono_id : null;
   if (bonoId) residuos.bonos.push(bonoId);
+  const [{ n: citas1 }] = dbQuery('SELECT count(*)::int AS n FROM evento_cita_servicio');
+  check(citas1 === citas0, 'T3b comprar NO creó ninguna cita (v1.4 §6bis.2bis)', `${citas0}→${citas1}`);
 
   // T4 el saldo aparece donde el dueño lo busca
-  r = await obtenerSaldoPaquete({ prestador_id: prestadorId, prestador_servicio_id: servicio, mascota_id: mascota });
-  check(r.ok && r.data?.saldo === 5, 'T4 saldo vigente 5');
+  r = await obtenerSaldoPaquete({ prestador_id: prestadorId, prestador_servicio_id: servicio });
+  check(r.ok && r.data?.saldo === 5, 'T4 saldo vigente 5 (del hogar, sin mascota)');
   r = await obtenerMisPaquetesSalidas();
   check(r.ok && r.data.some((p) => p.id === bonoId && p.saldo === 5), 'T4b el paquete vive en Mis paseos');
 
@@ -146,8 +149,12 @@ begin
   update prestador_servicios set precio_paquete = null where id = '${servicio}';
 end $x$;
 commit;`);
-  const [post] = dbQuery(`SELECT (SELECT count(*) FROM bonos)::int AS bonos,
-    (SELECT count(*) FROM evento_cita_servicio WHERE fecha='${sabado}' AND hora IN ('15:00','15:30','16:00'))::int AS citas,
+  // el conteo de residuos es POR ID (en DB puede vivir el bono real del
+  // founder de su gate — no es residuo de este verify)
+  const misBonos = residuos.bonos.map((b) => `'${b}'`).join(',') || `'00000000-0000-4000-8000-000000000000'`;
+  const misCitas = residuos.citas.map((c) => `'${c}'`).join(',') || `'00000000-0000-4000-8000-000000000000'`;
+  const [post] = dbQuery(`SELECT (SELECT count(*) FROM bonos WHERE id IN (${misBonos}))::int AS bonos,
+    (SELECT count(*) FROM evento_cita_servicio WHERE id IN (${misCitas}))::int AS citas,
     (SELECT count(*) FROM eventos_economicos)::int AS ledger,
     (SELECT precio_paquete FROM prestador_servicios WHERE id='${servicio}') AS pp`);
   check(post.bonos === 0 && post.citas === 0 && post.ledger === 0 && post.pp === null,

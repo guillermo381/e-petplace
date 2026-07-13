@@ -57,3 +57,28 @@ export async function obtenerEspeciesActivas(): Promise<
   }
   return { ok: true, data: data.map((e) => ({ codigo: e.codigo, nombre: e.nombre })) };
 }
+
+/** MODELO_PASEO v1.4 §1bis — especies elegibles de una CATEGORÍA de
+ *  servicio (fuente de verdad: tipos_servicio.especies_elegibles).
+ *  null = todas las especies (multi-especie de nacimiento). La UI
+ *  FILTRA con esto; la DB manda igual (guard mascota_no_elegible).
+ *  Nota: las filas de una categoría comparten config (seed S57) — se
+ *  toma la primera no-nula. */
+export async function obtenerEspeciesElegibles(
+  categoria: string,
+): Promise<ResultadoWrapper<string[] | null, 'error_catalogo'>> {
+  const { data, error } = await getClient()
+    .from('tipos_servicio')
+    .select('especies_elegibles')
+    .eq('categoria', categoria)
+    .eq('activo', true);
+  if (error) {
+    return { ok: false, codigo: 'error_catalogo', mensaje: MENSAJE_ERROR };
+  }
+  for (const fila of data ?? []) {
+    if (Array.isArray(fila.especies_elegibles)) {
+      return { ok: true, data: fila.especies_elegibles.map(String) };
+    }
+  }
+  return { ok: true, data: null };
+}

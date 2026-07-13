@@ -16,6 +16,7 @@ export {
 export {
   obtenerEspeciesActivas,
   obtenerCatalogoNovedadesPaseo,
+  obtenerEspeciesElegibles,
   type EspecieCatalogo,
   type NovedadPaseoCatalogo,
 } from './wrappers/catalogos';
@@ -305,7 +306,7 @@ export {
   cancelarReservaPaquete,
   obtenerMisPaquetesSalidas,
   obtenerSaldoPaquete,
-  obtenerPrecioPaqueteDeOferta,
+  obtenerPaseadoresConPaquete,
   type PresetPaquete,
   type ComprarPaqueteInput,
   type PaqueteComprado,
@@ -313,6 +314,7 @@ export {
   type SalidaReservada,
   type PaqueteSalidas,
   type SaldoPaquete,
+  type PaseadorConPaquete,
   type CodigoErrorPaquete,
 } from './wrappers/paquetes';
 

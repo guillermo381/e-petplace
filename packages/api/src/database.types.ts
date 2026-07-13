@@ -631,6 +631,7 @@ export type Database = {
           empleado_id: string | null
           estado: string
           estado_pago: string
+          familia_id: string | null
           fecha_compra: string
           fecha_vencimiento: string | null
           id: string
@@ -655,6 +656,7 @@ export type Database = {
           empleado_id?: string | null
           estado?: string
           estado_pago?: string
+          familia_id?: string | null
           fecha_compra?: string
           fecha_vencimiento?: string | null
           id?: string
@@ -679,6 +681,7 @@ export type Database = {
           empleado_id?: string | null
           estado?: string
           estado_pago?: string
+          familia_id?: string | null
           fecha_compra?: string
           fecha_vencimiento?: string | null
           id?: string
@@ -700,6 +703,13 @@ export type Database = {
             columns: ["empleado_id"]
             isOneToOne: false
             referencedRelation: "prestador_empleados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bonos_familia_id_fkey"
+            columns: ["familia_id"]
+            isOneToOne: false
+            referencedRelation: "familia"
             referencedColumns: ["id"]
           },
           {
@@ -13168,6 +13178,7 @@ export type Database = {
           descripcion: string | null
           duracion_default_minutos: number | null
           es_medico: boolean | null
+          especies_elegibles: Json | null
           icono: string | null
           id: string
           nombre: string
@@ -13185,6 +13196,7 @@ export type Database = {
           descripcion?: string | null
           duracion_default_minutos?: number | null
           es_medico?: boolean | null
+          especies_elegibles?: Json | null
           icono?: string | null
           id?: string
           nombre: string
@@ -13202,6 +13214,7 @@ export type Database = {
           descripcion?: string | null
           duracion_default_minutos?: number | null
           es_medico?: boolean | null
+          especies_elegibles?: Json | null
           icono?: string | null
           id?: string
           nombre?: string
@@ -14419,6 +14432,10 @@ export type Database = {
         Args: { p_grooming_id: string }
         Returns: Record<string, unknown>
       }
+      _mascota_elegible_servicio: {
+        Args: { p_mascota_id: string; p_tipo_servicio: string }
+        Returns: boolean
+      }
       _notificar_dueño_prestador: {
         Args: {
           p_datos?: Json
@@ -14624,7 +14641,6 @@ export type Database = {
       }
       comprar_paquete_salidas: {
         Args: {
-          p_mascota_id: string
           p_prestador_id: string
           p_servicio_id: string
           p_unidades: number
@@ -15048,6 +15064,18 @@ export type Database = {
           duracion_minutos: number
           especies_compatibles: Json
           precio: number
+          prestador_id: string
+          prestador_nombre: string
+          prestador_servicio_id: string
+          servicio_nombre: string
+        }[]
+      }
+      obtener_paseadores_con_paquete: {
+        Args: { p_duracion_minutos?: number; p_servicio_id?: string }
+        Returns: {
+          duracion_minutos: number
+          precio: number
+          precio_paquete: number
           prestador_id: string
           prestador_nombre: string
           prestador_servicio_id: string

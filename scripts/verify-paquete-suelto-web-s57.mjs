@@ -50,32 +50,26 @@ check(
   'T2b apagado honesto sin selección',
 );
 
-// ── elegir duración + día (mañana) + hora real (estado cliente, cero escrituras) ──
+// ── F1 (v1.4): el chip del paquete se enciende con SOLO la duración ──
 await page.getByText(/^30 min$/).first().click();
 await page.waitForTimeout(1500);
-let horaElegida = false;
-await page.getByText(/^(Mañana|Tomorrow)$/).first().click();
-await page.waitForTimeout(2500);
-const cuerpo = await texto();
-if (/\b\d{2}:\d{2}\b/.test(cuerpo)) {
-  await page.getByText(/^\d{2}:\d{2}$/).first().click();
-  await page.waitForTimeout(600);
-  horaElegida = true;
-}
-if (horaElegida) {
-  t = await texto();
-  check(
-    alguna(t, ['Salidas por adelantado', 'Walks paid upfront']),
-    'T3 el chip del paquete se encendió con la selección',
-  );
-  await page.getByText(/^(Comprar un paquete|Buy a package)$/).click();
-  t = await esperarAlguna(['Paseadores disponibles', 'Available walkers'], 20);
-  check(alguna(t, ['Paseadores disponibles', 'Available walkers']), 'T4 el QUIÉN carga en modo paquete');
-  await page.goBack();
-  await page.waitForTimeout(1000);
-} else {
-  console.log('(sin inicios en la próxima semana — T3/T4 no ejercitados, declarado)');
-}
+t = await texto();
+check(
+  alguna(t, ['Salidas por adelantado', 'Walks paid upfront']),
+  'T3 el chip del paquete se encendió con SOLO la duración (sin fecha/hora)',
+);
+await page.getByText(/^(Comprar un paquete|Buy a package)$/).click();
+t = await esperarAlguna(['Paquetes de salidas', 'Walk packages'], 20);
+check(alguna(t, ['Paquetes de salidas', 'Walk packages']), 'T4 la pantalla de compra carga SIN ventana');
+// sin precio_paquete configurado en DB para 30': vacío honesto CON
+// CAMINO (§6ter) — espera propia (el título llega antes que el estado)
+t = await esperarAlguna(['Nadie ofrece paquetes', 'No one offers packages', 'Paseadores', 'walkers'], 15);
+check(
+  alguna(t, ['Nadie ofrece paquetes', 'No one offers packages']),
+  'T4b vacío honesto cuando nadie ofrece paquetes (cero finales mudos)',
+);
+await page.goBack();
+await page.waitForTimeout(1000);
 
 // ── el hub renderiza con las secciones nuevas cableadas ──
 await page.goto('http://localhost:8085/hogar/paseos', { waitUntil: 'networkidle', timeout: 60000 });
