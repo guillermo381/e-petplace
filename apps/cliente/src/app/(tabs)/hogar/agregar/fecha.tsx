@@ -46,6 +46,7 @@ export default function AgregarPasoFecha() {
           ayuda={t('agregarMascota.fechaAyuda')}
         />
         <SelectorOpcion
+          acento="control"
           etiqueta={t('agregarMascota.sexoEtiqueta')}
           opciones={[
             { codigo: 'macho', etiqueta: t('agregarMascota.sexoMacho') },

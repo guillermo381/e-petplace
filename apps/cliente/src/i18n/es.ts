@@ -297,7 +297,8 @@ export const clienteEs = {
     agendarLlega: 'Agendar desde la app llega pronto.',
     // S54-B3.1 — el paseo ya se agenda; el resto sigue honesto
     agendarLlegaOtros: 'Agendar grooming y veterinaria llega pronto.',
-    paseoAgendable: 'Toca para agendar',
+    // S58 ruta del mundo — GATE DE STRINGS PENDIENTE (lote S58)
+    paseoAgendable: 'Toca para entrar',
     paseadoresTitulo: 'Paseadores',
     paseadoresError: 'No pudimos cargar los paseadores',
     paseadoresVacio: 'Todavía no hay paseadores ofreciendo',

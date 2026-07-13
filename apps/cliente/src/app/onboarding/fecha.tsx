@@ -47,6 +47,7 @@ export default function PasoFecha() {
           ayuda={t('onboarding.fechaAyuda')}
         />
         <SelectorOpcion
+          acento="control"
           etiqueta={t('onboarding.sexoEtiqueta')}
           opciones={[
             { codigo: 'macho', etiqueta: t('onboarding.sexoMacho') },

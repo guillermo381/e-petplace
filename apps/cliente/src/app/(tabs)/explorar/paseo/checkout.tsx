@@ -289,6 +289,7 @@ export default function PaseoCheckout() {
           <View style={{ marginTop: spacing[4] }}>
             {/* herramienta de gate del camino triste — jamás viaja a preview */}
             <SelectorOpcion
+              acento="control"
               etiqueta="simulador dev (solo __DEV__)"
               opciones={[
                 { codigo: 'exito', etiqueta: 'éxito' },

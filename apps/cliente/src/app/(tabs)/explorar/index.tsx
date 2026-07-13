@@ -86,7 +86,7 @@ export default function Explorar() {
   }> = [];
   const proximamente: string[] = [];
   if (servicios !== 'cargando' && servicios !== 'error') {
-    if (servicios.walking) fichasActivas.push({ clave: 'paseo', titulo: t('explorar.servicioPaseo'), detalle: t('explorar.servicioPaseoDetalle'), icono: <Icono nombre="paseo" tamano={34} />, onPress: () => router.push('/explorar/paseo') });
+    if (servicios.walking) fichasActivas.push({ clave: 'paseo', titulo: t('explorar.servicioPaseo'), detalle: t('explorar.servicioPaseoDetalle'), icono: <Icono nombre="paseo" tamano={34} />, onPress: () => router.navigate('/hogar/paseos') });
     if (servicios.grooming) fichasActivas.push({ clave: 'grooming', titulo: t('explorar.servicioGrooming'), detalle: t('explorar.servicioGroomingDetalle'), icono: <Icono nombre="grooming" tamano={34} /> });
     if (servicios.veterinary) fichasActivas.push({ clave: 'vet', titulo: t('explorar.servicioVet'), detalle: t('explorar.servicioVetDetalle'), icono: <Icono nombre="veterinaria" tamano={34} /> });
     if (servicios.training) fichasActivas.push({ clave: 'adiestramiento', titulo: t('explorar.servicioAdiestramiento'), detalle: t('explorar.servicioAdiestramientoDetalle'), icono: <Icono nombre="training" tamano={26} /> });

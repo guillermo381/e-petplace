@@ -146,6 +146,7 @@ export function CoachHoja({
 
         {mascotas.length > 1 && mascotas.length <= 4 ? (
           <SelectorOpcion
+            acento="control"
             etiqueta=""
             opciones={mascotas.map((m) => ({ codigo: m.id, etiqueta: m.nombre }))}
             seleccionada={mascota.id}

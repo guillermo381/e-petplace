@@ -175,6 +175,7 @@ export function PlanHoja({
 
         <View style={{ gap: spacing[2] }}>
           <SelectorOpcion
+            acento="control"
             multiple
             disposicion="tira"
             etiqueta={t('plan.diasEtiqueta')}
@@ -197,6 +198,7 @@ export function PlanHoja({
         </View>
 
         <SelectorOpcion
+          acento="control"
           etiqueta={t('plan.frecuenciaEtiqueta')}
           opciones={[
             { codigo: 'semanal', etiqueta: t('plan.frecuenciaSemanal') },

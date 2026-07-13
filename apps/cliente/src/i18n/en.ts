@@ -267,7 +267,7 @@ export const clienteEn = {
     agendarLlega: 'Booking from the app is coming soon.',
     // S54-B3.1 — walks are bookable now; the rest stays honest
     agendarLlegaOtros: 'Booking for grooming and veterinary is coming soon.',
-    paseoAgendable: 'Tap to book',
+    paseoAgendable: 'Tap to open',
     paseadoresTitulo: 'Walkers',
     paseadoresError: "We couldn't load the walkers",
     paseadoresVacio: 'No walkers offering yet',

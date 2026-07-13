@@ -45,9 +45,6 @@ import {
 } from '@epetplace/ui';
 import {
   obtenerIniciosPaseo,
-  obtenerMisCitasPaseo,
-  obtenerMisPaquetesSalidas,
-  obtenerMisPlanesPaseo,
   obtenerOfertaPaseo,
   type OfertaPaseo,
 } from '@epetplace/api';
@@ -80,9 +77,6 @@ export default function PaseoCuando() {
   const [inicios, setInicios] = useState<string[] | 'cargando' | 'error'>('cargando');
   const [hora, setHora] = useState<string | null>(null);
   const [reintento, setReintento] = useState(0);
-  // D-338/D-343: la entrada al hub "Mis paseos" vive acá SOLO si hay
-  // actividad (planes, paquetes o paseos) — silencio digno sin ella.
-  const [hayActividad, setHayActividad] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -96,16 +90,6 @@ export default function PaseoCuando() {
           setDuracion((d) => d ?? menor);
         }
       });
-      void Promise.all([obtenerMisPlanesPaseo(), obtenerMisPaquetesSalidas(), obtenerMisCitasPaseo()]).then(
-        ([planes, paquetes, citas]) => {
-          if (!vigente) return;
-          setHayActividad(
-            (planes.ok && planes.data.length > 0) ||
-              (paquetes.ok && paquetes.data.length > 0) ||
-              (citas.ok && citas.data.length > 0),
-          );
-        },
-      );
       return () => {
         vigente = false;
       };
@@ -170,20 +154,6 @@ export default function PaseoCuando() {
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('explorar.paseoTitulo')} atras onAtras={() => router.back()} />
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
-        {/* D-338: Explorar→Paseo es una de las DOS entradas al hub.
-            S58 (Ley 19.1): la celda dice a dónde va — murió el botón mudo. */}
-        {hayActividad ? (
-          <Tarjeta relleno="ninguno" elevacion="reposo">
-            <CeldaNavegacion
-              icono="paseo"
-              titulo={t('plan.hubTitulo')}
-              onPress={() => {
-                if (router.canDismiss()) router.dismissAll();
-                router.navigate('/hogar/paseos');
-              }}
-            />
-          </Tarjeta>
-        ) : null}
         {oferta === 'cargando' ? (
           <EsqueletoGrupo>
             <View style={{ gap: spacing[3] }}>

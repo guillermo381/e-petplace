@@ -589,6 +589,7 @@ export default function MisPaseos() {
                 {t('plan.moverVoz')}
               </Text>
               <SelectorOpcion
+                acento="control"
                 disposicion="tira"
                 etiqueta={t('plan.moverDia')}
                 opciones={fechasDelPeriodo(moviendo.plan).map((f) => ({ codigo: f, etiqueta: fechaCortaMono(f, idioma) }))}
@@ -605,6 +606,7 @@ export default function MisPaseos() {
                 </Text>
               ) : horasNuevas !== null ? (
                 <SelectorOpcion
+                  acento="control"
                   disposicion="grilla"
                   etiqueta={t('plan.moverHora')}
                   opciones={horasNuevas.map((h) => ({ codigo: h, etiqueta: h }))}
@@ -684,6 +686,7 @@ export default function MisPaseos() {
                 {t('suelto.reagendarVoz')}
               </Text>
               <SelectorOpcion
+                acento="control"
                 disposicion="tira"
                 etiqueta={t('plan.moverDia')}
                 opciones={fechasProximas().map((f) => ({ codigo: f, etiqueta: fechaCortaMono(f, idioma) }))}
@@ -700,6 +703,7 @@ export default function MisPaseos() {
                 </Text>
               ) : horasNuevas !== null ? (
                 <SelectorOpcion
+                  acento="control"
                   disposicion="grilla"
                   etiqueta={t('plan.moverHora')}
                   opciones={horasNuevas.map((h) => ({ codigo: h, etiqueta: h }))}
