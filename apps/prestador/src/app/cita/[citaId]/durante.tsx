@@ -12,7 +12,6 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Boton,
@@ -532,7 +531,9 @@ export default function Durante() {
   );
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
+    // S59-B1 (safe area): el Encabezado ya absorbe y PINTA el inset superior
+    // — el SafeAreaView top lo duplicaba (doble banda de papel arriba).
+    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <View style={{ paddingHorizontal: spacing[4], paddingTop: spacing[2] }}>
         <Encabezado variante="navegacion" titulo={t('cita.enCursoTitulo')} atras onAtras={() => router.back()} />
       </View>
@@ -576,6 +577,6 @@ export default function Durante() {
       )}
 
       {pantalla.estado === 'listo' && <DuranteCargado datos={pantalla} citaId={citaId} />}
-    </SafeAreaView>
+    </View>
   );
 }

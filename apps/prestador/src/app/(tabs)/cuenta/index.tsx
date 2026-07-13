@@ -10,7 +10,6 @@
 
 import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import {
   Boton,
@@ -56,7 +55,9 @@ export default function Cuenta() {
   ];
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
+    // S59-B1 (safe area): el Encabezado ya absorbe y PINTA el inset superior
+    // — el SafeAreaView top lo duplicaba (doble banda de papel arriba).
+    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <ScrollView contentContainerStyle={{ paddingBottom: spacing[8] }}>
         <Encabezado variante="portada" saludo={t('miCuenta.titulo')} />
 
@@ -125,6 +126,6 @@ export default function Cuenta() {
           <Boton variante="secundario" etiqueta={t('miCuenta.entendido')} bloque onPress={() => setEliminarAbierta(false)} />
         </View>
       </Hoja>
-    </SafeAreaView>
+    </View>
   );
 }

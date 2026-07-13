@@ -14,14 +14,59 @@
  * anotado (HeroMarca es del dueño — la tinta es OTRO material).
  */
 
+import { useCallback } from 'react';
 import { Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from 'expo-router';
+import { setStatusBarStyle } from 'expo-status-bar';
 import { Isotipo, palette, spacing, typography } from '@epetplace/ui';
 
 const CURVA = { izquierda: 44, derecha: 26 }; // la del techo vivo (patrón Hogar v2)
 
+/**
+ * S59-B1 (safe area): sobre la TINTA los íconos de la barra de estado son
+ * CLAROS — la tinta es constante en los 3 temas. Con foco se fuerza
+ * 'light'; al perderlo vuelve 'auto' (el default del raíz: oscuros sobre
+ * papel en claro, claros en dark). Mismo patrón que la A firmó para el
+ * techo del cliente (wiring por pantalla con useFocusEffect); acá vive en
+ * TechoTinta porque el componente es LOCAL del app — no es packages/ui.
+ */
+function useBarraEstadoClara() {
+  useFocusEffect(
+    useCallback(() => {
+      setStatusBarStyle('light');
+      return () => setStatusBarStyle('auto');
+    }, []),
+  );
+}
+
+/**
+ * S59-B1: el VELO de la barra de estado — la zona del inset superior se
+ * pinta de tinta SIEMPRE, también cuando el techo (que viaja dentro del
+ * ScrollView) ya scrolleó: el contenido pasa por debajo del velo, jamás
+ * pisa los íconos. Va como ÚLTIMO hijo del contenedor raíz de la pantalla.
+ */
+export function VeloBarraEstadoTinta() {
+  const insets = useSafeAreaInsets();
+  if (insets.top === 0) return null;
+  return (
+    <View
+      pointerEvents="none"
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: insets.top,
+        backgroundColor: palette.tinta,
+      }}
+    />
+  );
+}
+
 export function TechoTinta({ titulo, dato }: { titulo: string; dato: string }) {
   const insets = useSafeAreaInsets();
+  useBarraEstadoClara();
 
   return (
     <View

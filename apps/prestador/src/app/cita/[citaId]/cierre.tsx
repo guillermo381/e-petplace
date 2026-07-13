@@ -12,7 +12,6 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Boton,
@@ -192,7 +191,9 @@ export default function Cierre() {
   const sinParte = (resumen?.conteos.novedades ?? 0) === 0;
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
+    // S59-B1 (safe area): el Encabezado ya absorbe y PINTA el inset superior
+    // — el SafeAreaView top lo duplicaba (doble banda de papel arriba).
+    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[4] }}>
         <Encabezado variante="navegacion" titulo={t('cita.cierreTitulo')} atras onAtras={() => router.back()} />
 
@@ -403,6 +404,6 @@ export default function Cierre() {
           </View>
         </View>
       </Hoja>
-    </SafeAreaView>
+    </View>
   );
 }

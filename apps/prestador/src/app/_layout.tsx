@@ -6,6 +6,7 @@ import { useColorScheme } from 'react-native';
 // web no lo exige (el smoke fue verde — Ley 9 confirmada por el camino).
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import { AvisoProvider, ThemeProvider as EpetThemeProvider, epetplaceFonts } from '@epetplace/ui';
@@ -22,7 +23,7 @@ SplashScreen.preventAutoHideAsync();
 // MARCADOR DE BUNDLE (L-138, práctica permanente — llega al prestador en
 // S51): el gate en dispositivo EMPIEZA confirmando que Metro imprime la
 // línea de la sesión vigente. ACTUALIZAR al arrancar cada sesión.
-console.log('[bundle] prestador S58.7');
+console.log('[bundle] prestador S59.1');
 
 export default function RootLayout() {
   // D-305 (S48): el tema lo decide el SISTEMA — el app lo resuelve acá
@@ -40,6 +41,11 @@ export default function RootLayout() {
       <ProveedorI18n recursos={recursos}>
         <EpetThemeProvider mode={colorScheme === 'dark' ? 'dark' : 'light'}>
           <AvisoProvider>
+            {/* S59-B1 (safe area): el DEFAULT de los íconos de la barra de
+                estado — 'auto' = oscuros sobre papel en claro, claros en
+                dark. Las pantallas con techo de tinta fuerzan 'light' con
+                foco (ver techo-tinta.tsx); nadie más lo toca. */}
+            <StatusBar style="auto" />
             <AnimatedSplashOverlay />
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(tabs)" />

@@ -9,7 +9,6 @@
 
 import { useCallback, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   AvatarMascota,
@@ -75,7 +74,9 @@ export default function Mascotas() {
   );
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
+    // S59-B1 (safe area): el Encabezado ya absorbe y PINTA el inset superior
+    // — el SafeAreaView top lo duplicaba (doble banda de papel arriba).
+    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[4] }}>
         <Encabezado variante="portada" saludo={t('mascotas.titulo')} />
 
@@ -136,6 +137,6 @@ export default function Mascotas() {
           </Tarjeta>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
