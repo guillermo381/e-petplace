@@ -82,7 +82,7 @@ export default function Cuenta() {
           <View style={{ gap: spacing[3] }}>
             <TituloBloque texto={t('cuenta.sesion')} />
             <Boton variante="secundario" etiqueta={t('ajustes.cerrarSesion')} bloque onPress={() => setSalirAbierta(true)} />
-            <Boton variante="ghost" etiqueta={t('cuenta.eliminarCuenta')} bloque onPress={() => setEliminarAbierta(true)} />
+            <Boton variante="compacto" etiqueta={t('cuenta.eliminarCuenta')} bloque onPress={() => setEliminarAbierta(true)} />
           </View>
         </View>
       </ScrollView>

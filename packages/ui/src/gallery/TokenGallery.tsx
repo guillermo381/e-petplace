@@ -1238,6 +1238,7 @@ function GaleriaInterna() {
                 ['secundario', 'Ver detalle'],
                 ['ghost', 'Cancelar'],
                 ['destructivo', 'Eliminar mascota'],
+                ['compacto', 'Mover salida'],
               ] as const satisfies ReadonlyArray<readonly [BotonVariante, string]>
             ).map(([v, etiqueta]) => (
               <View key={v} style={{ gap: spacing[2] }}>

@@ -36,7 +36,10 @@ import { motion } from '../tokens/motion'
 import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
 
-export type BotonVariante = 'primario' | 'marca' | 'secundario' | 'ghost' | 'destructivo'
+// 'compacto' (S58, Ley 22c): la ACCIÓN SECUNDARIA vestida — borde
+// hairline-strong + radius suave + texto tinta + target 44. Jamás
+// texto pelado, jamás Celda: comando con consecuencias viste de botón.
+export type BotonVariante = 'primario' | 'marca' | 'secundario' | 'ghost' | 'destructivo' | 'compacto'
 export type BotonTamaño = 'sm' | 'md' | 'lg'
 
 // md 48 = default: target táctil. sm 36 compensa con hitSlop (target efectivo 44).
@@ -103,6 +106,7 @@ export function Boton({
     secundario:  { fondo: theme.bg.overlay, texto: theme.text.primary, borde: theme.border.subtle },
     ghost:       { fondo: 'transparent', texto: theme.text.primary },
     destructivo: { fondo: theme.status.dangerBg, texto: theme.status.dangerText },
+    compacto:    { fondo: 'transparent', texto: theme.text.primary, borde: theme.border.default },
   }
   const c = colores[varianteEfectiva]
 
@@ -111,10 +115,11 @@ export function Boton({
   // marca garantiza paddingHorizontal ≥ 24 (spacing[6]) en todo tamaño.
   const padX = esMarca ? Math.max(t.padX, spacing[6]) : t.padX
 
+  const esCompacto = varianteEfectiva === 'compacto'
   const cuerpo: ViewStyle = {
-    height: t.alto,
+    height: esCompacto ? 44 : t.alto,
     paddingHorizontal: padX,
-    borderRadius: radius.md,
+    borderRadius: esCompacto ? radius.suave : radius.md,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',

@@ -433,7 +433,7 @@ export default function MisPaseos() {
                         <Separador />
                         <View style={{ padding: spacing[3] }}>
                           <Boton
-                            variante="ghost"
+                            variante="compacto"
                             tamaño="sm"
                             etiqueta={t(p.auto_renovar ? 'plan.pausar' : 'plan.reanudar')}
                             cargando={pausando}
@@ -460,7 +460,7 @@ export default function MisPaseos() {
                         metadataMono={`${c.hora.slice(0, 5)} · ${c.duracion_minutos} min`}
                         fin={
                           <Boton
-                            variante="ghost"
+                            variante="compacto"
                             tamaño="sm"
                             etiqueta={t('suelto.modificar')}
                             onPress={() => setDetalle(c)}
@@ -489,7 +489,7 @@ export default function MisPaseos() {
                               metadataMono={`${c.hora.slice(0, 5)} · ${c.duracion_minutos} min`}
                               fin={
                                 <Boton
-                                  variante="ghost"
+                                  variante="compacto"
                                   tamaño="sm"
                                   etiqueta={t('plan.mover')}
                                   onPress={() => {

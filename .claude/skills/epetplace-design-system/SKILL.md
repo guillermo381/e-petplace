@@ -290,6 +290,12 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
     Interruptor. Apagado JAMÁS dice error — apagado es estado, no
     falla.
 
+22c. **Comando con consecuencias = ACCIÓN, viste de botón (S58, firma
+    founder).** Primaria en tinta (UNA por vista); secundarias =
+    `Boton variante="compacto"` (borde hairline-strong, radius suave,
+    texto tinta, target 44) — jamás texto pelado, jamás Celda. La
+    prueba: "si al flipearlo necesitarías confirmar, era una acción".
+
 ### Las pantallas patrón (cómo se firma lo visual)
 
 **Ninguna ley de composición se firma en prosa: se firma sobre
