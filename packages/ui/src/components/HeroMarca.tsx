@@ -29,6 +29,18 @@
  * Escalera §4b: no muestra datos del expediente (el saludo es franja
  * horaria) — los peldaños no aplican, declarado explícito.
  *
+ * SAFE AREA (S59, cura en la primitiva): el techo ABSORBE el inset
+ * superior — el FONDO (gradiente, o bg.card en memorial) pinta
+ * edge-to-edge hasta el borde físico; el CONTENIDO (isotipo, saludo)
+ * baja por el inset. Mismo lockup, misma curva 44/26: solo el fondo
+ * crece hacia arriba. Las pantallas NO agregan paddingTop: insets.top
+ * por fuera (eso era la banda blanca del Hogar). `techo={false}` es
+ * SOLO para mostrarlo fuera de posición (galería).
+ * Barra de estado (wiring en la PANTALLA, patrón BarraTabs — ui no
+ * conoce el foco de navegación): sobre el gradiente van íconos CLAROS;
+ * en tabs/stacks se setea con useFocusEffect + StatusBar.setBarStyle
+ * ('light-content' al foco, restaurar al blur; memorial no lo toca).
+ *
  * Contraste: text.onGradient contra los stops ≤0.7 del gradiente ya
  * gatea en verify-contrast (regla de peor punto, S43-B3.1c); memorial
  * cae en los pares text.primary/bg.card. Sin pares nuevos.
@@ -37,6 +49,7 @@
 import { type ReactNode } from 'react'
 import { Text, View } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
@@ -52,6 +65,10 @@ export interface HeroMarcaProps {
   variante?: HeroMarcaVariante
   /** Subtítulo/contenido en voz humana. CTAs afuera, siempre. */
   children?: ReactNode
+  /** default true: es el techo real de la pantalla — el fondo absorbe
+   *  la safe area superior. false SOLO para muestras fuera de posición
+   *  (galería); jamás para "compensar" un padding de pantalla. */
+  techo?: boolean
 }
 
 const MEDIDAS: Record<HeroMarcaVariante, { isotipo: number; fontSize: number; padY: number }> = {
@@ -65,8 +82,9 @@ const MEDIDAS: Record<HeroMarcaVariante, { isotipo: number; fontSize: number; pa
 // la calibración FINAL se sella en el gate sobre dispositivo.
 const CURVA_TECHO = { izquierda: 44, derecha: 26 }
 
-export function HeroMarca({ titulo, variante = 'alto', children }: HeroMarcaProps) {
+export function HeroMarca({ titulo, variante = 'alto', children, techo = true }: HeroMarcaProps) {
   const { theme } = useTheme()
+  const insets = useSafeAreaInsets()
   const esMemorial = theme.mode === 'memorial'
   const m = MEDIDAS[variante]
 
@@ -91,7 +109,10 @@ export function HeroMarca({ titulo, variante = 'alto', children }: HeroMarcaProp
   )
 
   const relleno = {
-    paddingVertical: m.padY,
+    // el fondo crece hacia arriba por el inset; el contenido baja lo
+    // mismo — la altura ÚTIL (padY arriba y abajo) no cambia
+    paddingTop: (techo ? insets.top : 0) + m.padY,
+    paddingBottom: m.padY,
     paddingHorizontal: spacing[5],
     // techo vivo: la base deja de ser recta (memorial conserva la
     // curva — el color es lo que se apaga, no la forma)

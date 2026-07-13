@@ -4,8 +4,9 @@
  * viven AFUERA del hero (marca sobre marca prohibido).
  */
 
-import { Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useCallback } from 'react';
+import { StatusBar, Text, View } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Boton, HeroMarca, spacing, typography, useTheme } from '@epetplace/ui';
 
@@ -20,23 +21,32 @@ export default function Bienvenida() {
   const insets = useSafeAreaInsets();
   const esMemorial = theme.mode === 'memorial';
 
+  // S59 — el hero absorbe la safe area (HeroMarca): el gradiente pinta
+  // bajo la barra de estado → íconos claros mientras la pantalla tiene
+  // el foco (memorial: bg.card claro, no se toca).
+  useFocusEffect(
+    useCallback(() => {
+      if (esMemorial) return;
+      StatusBar.setBarStyle('light-content');
+      return () => StatusBar.setBarStyle(theme.mode === 'dark' ? 'light-content' : 'dark-content');
+    }, [esMemorial, theme.mode]),
+  );
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <View style={{ paddingTop: insets.top, backgroundColor: esMemorial ? theme.bg.card : undefined }}>
-        <HeroMarca titulo={t('bienvenida.heroTitulo')} variante="alto">
-          <Text
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.base,
-              lineHeight: Math.round(typography.size.base * typography.leading.normal),
-              color: esMemorial ? theme.text.secondary : theme.text.onGradient,
-              marginTop: spacing[2],
-            }}
-          >
-            {t('bienvenida.heroSubtitulo')}
-          </Text>
-        </HeroMarca>
-      </View>
+      <HeroMarca titulo={t('bienvenida.heroTitulo')} variante="alto">
+        <Text
+          style={{
+            fontFamily: typography.family.sans.regular,
+            fontSize: typography.size.base,
+            lineHeight: Math.round(typography.size.base * typography.leading.normal),
+            color: esMemorial ? theme.text.secondary : theme.text.onGradient,
+            marginTop: spacing[2],
+          }}
+        >
+          {t('bienvenida.heroSubtitulo')}
+        </Text>
+      </HeroMarca>
 
       <View style={{ flex: 1, justifyContent: 'flex-end', padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[2] }}>
         <Boton etiqueta={t('bienvenida.crearCuenta')} bloque onPress={() => router.push('/registro')} />

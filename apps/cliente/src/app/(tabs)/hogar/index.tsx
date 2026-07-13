@@ -22,7 +22,7 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, StatusBar, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -193,6 +193,23 @@ export default function Hogar() {
   const [vacunaAbierta, setVacunaAbierta] = useState(false);
   const [vacuna, setVacuna] = useState<VacunaDeEvento | 'cargando' | 'error'>('cargando');
   const [carnetFirmado, setCarnetFirmado] = useState<string | null>(null);
+
+  const esMemorial = theme.mode === 'memorial';
+
+  // S59 — barra de estado del techo vivo: el gradiente pinta bajo la
+  // barra (HeroMarca absorbe el inset), así que sobre él van íconos
+  // CLAROS. Solo cuando el techo se pinta (hay mascotas) y fuera de
+  // memorial (bg.card claro pide íconos oscuros). Al perder el foco se
+  // restaura la voz del tema — wiring en la pantalla, patrón BarraTabs:
+  // packages/ui no conoce el foco de navegación.
+  const techoPintado = Array.isArray(mascotas) && mascotas.length > 0;
+  useFocusEffect(
+    useCallback(() => {
+      if (esMemorial || !techoPintado) return;
+      StatusBar.setBarStyle('light-content');
+      return () => StatusBar.setBarStyle(theme.mode === 'dark' ? 'light-content' : 'dark-content');
+    }, [esMemorial, techoPintado, theme.mode]),
+  );
 
   const ordenarPorFecha = (a: ItemTimeline, b: ItemTimeline) => (a.fecha_evento < b.fecha_evento ? 1 : -1);
 
@@ -374,8 +391,6 @@ export default function Hogar() {
   const proximaCita = enCurso === null ? (estadoHogar?.proxima_cita ?? null) : null;
   const nombreDe = (id: string) => (Array.isArray(mascotas) ? (mascotas.find((m) => m.id === id)?.nombre ?? '') : '');
 
-  const esMemorial = theme.mode === 'memorial';
-
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: theme.bg.base }}
@@ -389,9 +404,11 @@ export default function Hogar() {
           — el lockup en tinta de P1; un cambio de componente, cero
           lógica. El isotipo blanco de adentro es el UNO por pantalla.
           Memorial degrada solo (bg.card plano). */}
-      <View style={{ paddingTop: insets.top, backgroundColor: esMemorial ? theme.bg.card : undefined }}>
+      <View>
         {/* S58 patrón v2: el TECHO VIVO — la base curva 44/26 (la
-            calibración final se sella en el gate en dispositivo) */}
+            calibración final se sella en el gate en dispositivo).
+            S59: la safe area la absorbe HeroMarca (el gradiente pinta
+            bajo la barra de estado; el padding externo murió). */}
         <HeroMarca
           titulo={`${saludoPorFranja(hoy.getHours(), t)}${nombrePerfil ? `, ${nombrePerfil.trim().split(' ')[0]}` : ''}`}
           variante="techoVivo"

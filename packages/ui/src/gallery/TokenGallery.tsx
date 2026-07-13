@@ -178,7 +178,9 @@ function EjemploHeroMarca() {
   const esMemorial = theme.mode === 'memorial'
   return (
     <View style={{ gap: spacing[4], borderRadius: radius.md, overflow: 'hidden' }}>
-      <HeroMarca titulo="Bienvenido a la familia" variante="alto">
+      {/* techo={false}: en la galería se muestra fuera de posición —
+          en pantalla real el techo absorbe la safe area solo (S59) */}
+      <HeroMarca titulo="Bienvenido a la familia" variante="alto" techo={false}>
         <Text
           style={{
             fontFamily: sans.regular,
@@ -190,11 +192,11 @@ function EjemploHeroMarca() {
           Contanos de tu mascota y armamos su expediente.
         </Text>
       </HeroMarca>
-      <HeroMarca titulo="Su primera foto" variante="compacto" />
+      <HeroMarca titulo="Su primera foto" variante="compacto" techo={false} />
       {/* techoVivo (S58, patrón Hogar v2): la base curva 44/26 se ve
           contra el fondo — sin overflow hidden del wrapper */}
       <View>
-        <HeroMarca titulo="Buenas tardes, Guillermo" variante="techoVivo" />
+        <HeroMarca titulo="Buenas tardes, Guillermo" variante="techoVivo" techo={false} />
       </View>
     </View>
   )
