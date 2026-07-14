@@ -24,7 +24,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import {
   Boton,
@@ -58,6 +58,7 @@ function fechaLocalISO(d: Date): string {
 export default function GroomingCuando() {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
+  const insets = useSafeAreaInsets();
 
   const [mascotas, setMascotas] = useState<MascotaResumen[] | 'cargando' | 'error'>('cargando');
   // §5: especies elegibles de la DB — la UI filtra, la DB manda.
@@ -210,16 +211,17 @@ export default function GroomingCuando() {
           />
         ) : (
           <>
-            {/* 0 · LA MASCOTA — el precio es SUYO (con una sola, elegida) */}
-            {elegibles.length > 1 ? (
-              <SelectorOpcion
-                acento="control"
-                etiqueta={t('grooming.paraQuien')}
-                opciones={elegibles.map((m) => ({ codigo: m.id, etiqueta: m.nombre }))}
-                seleccionada={mascotaId ?? undefined}
-                onSelect={setMascotaId}
-              />
-            ) : null}
+            {/* 0 · LA MASCOTA — el precio es SUYO (con una sola, elegida).
+                S61-A3 (rasgo 1 de la gramática canónica): el selector se
+                pinta SIEMPRE — la mascota elegida queda presente en
+                pantalla, no es un paso que se olvida. */}
+            <SelectorOpcion
+              acento="control"
+              etiqueta={t('grooming.paraQuien')}
+              opciones={elegibles.map((m) => ({ codigo: m.id, etiqueta: m.nombre }))}
+              seleccionada={mascotaId ?? undefined}
+              onSelect={setMascotaId}
+            />
 
             {mascota === null ? null : !perfilCompleto ? (
               // la Hoja está abierta; si la cerró sin declarar, la
@@ -312,23 +314,39 @@ export default function GroomingCuando() {
                   />
                 )}
 
-                <Boton
-                  variante="primario"
-                  etiqueta={t('explorar.verQuienPuede')}
-                  deshabilitado={!listo}
-                  onPress={() => {
-                    if (!listo) return;
-                    router.push({
-                      pathname: '/explorar/grooming/disponibles',
-                      params: { fecha: dia, hora, tipoServicio, mascotaId: mascota.id },
-                    });
-                  }}
-                />
               </>
             )}
           </>
         )}
       </ScrollView>
+
+      {/* S61-A3 (rasgo 2 de la gramática canónica): el CTA de reservar
+          vive ABAJO, FIJO — fuera del scroll, una sola acción primaria. */}
+      {Array.isArray(mascotas) && elegibles.length > 0 ? (
+        <View
+          style={{
+            paddingHorizontal: spacing[4],
+            paddingTop: spacing[3],
+            paddingBottom: Math.max(insets.bottom, spacing[4]),
+            backgroundColor: theme.bg.base,
+            borderTopWidth: 1,
+            borderTopColor: theme.border.subtle,
+          }}
+        >
+          <Boton
+            variante="primario"
+            etiqueta={t('explorar.verQuienPuede')}
+            deshabilitado={!listo}
+            onPress={() => {
+              if (!listo || mascota === null) return;
+              router.push({
+                pathname: '/explorar/grooming/disponibles',
+                params: { fecha: dia, hora, tipoServicio, mascotaId: mascota.id },
+              });
+            }}
+          />
+        </View>
+      ) : null}
 
       {/* §3 — la pregunta única: se declara UNA vez, queda en el PERFIL,
           editable siempre; declarar SIEMPRE continúa */}

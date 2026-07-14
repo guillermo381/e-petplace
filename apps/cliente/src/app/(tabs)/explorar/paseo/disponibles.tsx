@@ -58,12 +58,17 @@ export default function PaseoDisponibles() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
-  const params = useLocalSearchParams<{ fecha: string; hora: string; duracion: string; plan?: string }>();
+  const params = useLocalSearchParams<{ fecha: string; hora: string; duracion: string; plan?: string; mascotaId?: string }>();
   const fecha = typeof params.fecha === 'string' ? params.fecha : '';
   const hora = typeof params.hora === 'string' ? params.hora : '';
   const duracion = Number(params.duracion ?? 0);
   // D-338: modo PLAN — el paseador elegido acá ancla el plan (§6.1 v1.2).
   const modoPlan = params.plan === '1';
+  // S61-A3 (gramática canónica): la mascota YA viene elegida del paso 0
+  // del CUÁNDO. La Hoja de elección de abajo queda de CINTURÓN (deep
+  // link viejo sin param — el flujo no se rompe).
+  const mascotaIdParam =
+    typeof params.mascotaId === 'string' && params.mascotaId.length > 0 ? params.mascotaId : null;
 
   const [disponibles, setDisponibles] = useState<PaseadorDisponible[] | 'cargando' | 'error'>('cargando');
   const [mascotas, setMascotas] = useState<MascotaResumen[]>([]);
@@ -238,21 +243,40 @@ export default function PaseoDisponibles() {
         setSinElegibles(true);
         return;
       }
+      // S61-A3: la gramática canónica ya trae la mascota del paso 0.
+      if (mascotaIdParam !== null && elegibles.some((m) => m.id === mascotaIdParam)) {
+        alElegirMascota(p, mascotaIdParam);
+        return;
+      }
       if (elegibles.length === 1) {
         alElegirMascota(p, elegibles[0].id);
       } else {
         setEligiendoMascota(p);
       }
     },
-    [elegibles, alElegirMascota],
+    [elegibles, mascotaIdParam, alElegirMascota],
   );
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('explorar.quienTitulo')} atras onAtras={() => router.back()} />
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[3] }}>
-        {/* la ventana elegida, en voz de máquina */}
-        <Celda titulo={t('explorar.paseoTitulo')} metadataMono={`${fecha} · ${hora} · ${duracion} min`} />
+        {/* la ventana elegida, en voz de máquina — con el PARA QUIÉN
+            visible (S61-A3, rasgo 1): la MISMA voz del QUIÉN del
+            grooming (grooming.ventanaPara — Ley 17.3, reuso declarado) */}
+        {(() => {
+          const paraQuien = mascotas.find((m) => m.id === mascotaIdParam) ?? null;
+          return (
+            <Celda
+              titulo={
+                paraQuien !== null
+                  ? t('grooming.ventanaPara', { nombre: paraQuien.nombre })
+                  : t('explorar.paseoTitulo')
+              }
+              metadataMono={`${fecha} · ${hora} · ${duracion} min`}
+            />
+          );
+        })()}
         {/* P19: la norma DECLARADA en el flujo de reserva — serena, no
             letra chica (la misma voz vive en la pregunta única) */}
         <Text

@@ -25,7 +25,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import {
   Boton,
@@ -44,8 +44,12 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  getEstadoOnboardingDueno,
+  obtenerEspeciesElegibles,
   obtenerIniciosPaseo,
+  obtenerMascotasDeFamilia,
   obtenerOfertaPaseo,
+  type MascotaResumen,
   type OfertaPaseo,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
@@ -70,7 +74,15 @@ interface Bloque {
 export default function PaseoCuando() {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
+  const insets = useSafeAreaInsets();
 
+  // S61-A3 — LA GRAMÁTICA CANÓNICA (decisión founder): MASCOTA → QUÉ →
+  // DÍA → HORA → QUIÉN → PAGAR. El paseo migra al patrón del grooming:
+  // la mascota es el paso 0 y queda VISIBLE toda la reserva (rasgo 1);
+  // el guard perro-only (§1bis) filtra ACÁ con voz honesta con camino.
+  const [mascotas, setMascotas] = useState<MascotaResumen[] | 'cargando' | 'error'>('cargando');
+  const [especies, setEspecies] = useState<string[] | null>(null);
+  const [mascotaId, setMascotaId] = useState<string | null>(null);
   const [oferta, setOferta] = useState<OfertaPaseo[] | 'cargando' | 'error'>('cargando');
   const [duracion, setDuracion] = useState<number | null>(null);
   const [dia, setDia] = useState<string>(fechaLocalISO(new Date()));
@@ -78,14 +90,41 @@ export default function PaseoCuando() {
   const [hora, setHora] = useState<string | null>(null);
   const [reintento, setReintento] = useState(0);
 
+  const elegibles = useMemo(() => {
+    if (!Array.isArray(mascotas)) return [];
+    return especies === null ? mascotas : mascotas.filter((m) => especies.includes(m.especie));
+  }, [mascotas, especies]);
+
+  const mascota = elegibles.find((m) => m.id === mascotaId) ?? null;
+
+  // Con UNA elegible, se elige sola (cero fricción) — y el selector la
+  // muestra igual: la mascota elegida PRESENTE en pantalla (rasgo 1).
+  useEffect(() => {
+    if (mascotaId === null && elegibles.length === 1) setMascotaId(elegibles[0].id);
+  }, [elegibles, mascotaId]);
+
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
+      void obtenerEspeciesElegibles('paseo').then((r) => {
+        if (vigente && r.ok) setEspecies(r.data);
+      });
+      void (async () => {
+        const estado = await getEstadoOnboardingDueno();
+        if (!vigente) return;
+        if (!estado.ok || !estado.data.familia_id) {
+          setMascotas('error');
+          return;
+        }
+        const r = await obtenerMascotasDeFamilia(estado.data.familia_id);
+        if (!vigente) return;
+        setMascotas(r.ok ? r.data : 'error');
+      })();
       void obtenerOfertaPaseo().then((r) => {
         if (!vigente) return;
         setOferta(r.ok ? r.data : 'error');
         if (r.ok && r.data.length > 0) {
-          // DURACIÓN PRIMERO: el bloque más corto ofertado arranca elegido
+          // el bloque más corto ofertado arranca elegido
           const menor = Math.min(...r.data.map((o) => o.duracion_minutos));
           setDuracion((d) => d ?? menor);
         }
@@ -148,13 +187,13 @@ export default function PaseoCuando() {
   }, [dia, duracion, oferta, reintento]);
 
   const bloqueElegido = bloques.find((b) => b.duracion === duracion) ?? null;
-  const listo = duracion !== null && hora !== null;
+  const listo = mascota !== null && duracion !== null && hora !== null;
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('explorar.paseoTitulo')} atras onAtras={() => router.back()} />
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
-        {oferta === 'cargando' ? (
+        {oferta === 'cargando' || mascotas === 'cargando' ? (
           <EsqueletoGrupo>
             <View style={{ gap: spacing[3] }}>
               <Esqueleto forma="bloque" ancho="100%" alto={56} />
@@ -162,11 +201,38 @@ export default function PaseoCuando() {
               <Esqueleto forma="bloque" ancho="100%" alto={120} />
             </View>
           </EsqueletoGrupo>
-        ) : oferta === 'error' ? (
+        ) : oferta === 'error' || mascotas === 'error' ? (
           <EstadoVacio
             titulo={t('explorar.paseadoresError')}
             descripcion={t('hogar.errorHistoriaDetalle')}
-            accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setOferta('cargando')} />}
+            accion={
+              <Boton
+                variante="secundario"
+                etiqueta={t('hogar.reintentar')}
+                onPress={() => {
+                  setOferta('cargando');
+                  setMascotas('cargando');
+                }}
+              />
+            }
+          />
+        ) : elegibles.length === 0 ? (
+          // §1bis ACÁ (rasgo del patrón): el hogar sin perro no llega a
+          // mitad de reserva — voz honesta CON camino, paso 0.
+          <EstadoVacio
+            icono={<Icono nombre="paseo" tamano={48} />}
+            titulo={t('paquete.sinPerrosTitulo')}
+            descripcion={t('paquete.sinPerrosDetalle')}
+            accion={
+              <Boton
+                variante="primario"
+                etiqueta={t('paquete.sinPerrosAccion')}
+                onPress={() => {
+                  if (router.canDismiss()) router.dismissAll();
+                  router.navigate('/hogar/agregar');
+                }}
+              />
+            }
           />
         ) : oferta.length === 0 ? (
           // Peldaño 0 — el vacío honesto que educa.
@@ -177,7 +243,18 @@ export default function PaseoCuando() {
           />
         ) : (
           <>
-            {/* 1 · DURACIÓN PRIMERO — solo bloques ofertados de verdad */}
+            {/* 0 · LA MASCOTA — la gramática canónica (S61-A3): el
+                para-quién abre y QUEDA VISIBLE (una sola = chip elegido;
+                reuso declarado de la voz del grooming, Ley 17.3) */}
+            <SelectorOpcion
+              acento="control"
+              etiqueta={t('grooming.paraQuien')}
+              opciones={elegibles.map((m) => ({ codigo: m.id, etiqueta: m.nombre }))}
+              seleccionada={mascotaId ?? undefined}
+              onSelect={setMascotaId}
+            />
+
+            {/* 1 · DURACIÓN — solo bloques ofertados de verdad */}
             <View style={{ gap: spacing[2] }}>
               <SelectorOpcion
               acento="control"
@@ -234,19 +311,6 @@ export default function PaseoCuando() {
               />
             )}
 
-            <Boton
-              variante="primario"
-              etiqueta={t('explorar.verQuienPuede')}
-              deshabilitado={!listo}
-              onPress={() => {
-                if (!listo) return;
-                router.push({
-                  pathname: '/explorar/paseo/disponibles',
-                  params: { fecha: dia, hora, duracion: String(duracion) },
-                });
-              }}
-            />
-
             {/* 4 · "Hacerlo frecuente" — el candado del plan MURIÓ (D-338,
                 S56): el chip enciende el modo plan; la Hoja nace en el
                 QUIÉN, con el paseador ELEGIDO (alcance v1 §6.1 v1.2). */}
@@ -265,7 +329,7 @@ export default function PaseoCuando() {
                   onPress={() => {
                     router.push({
                       pathname: '/explorar/paseo/disponibles',
-                      params: { fecha: dia, hora, duracion: String(duracion), plan: '1' },
+                      params: { fecha: dia, hora, duracion: String(duracion), plan: '1', mascotaId: mascota?.id ?? '' },
                     });
                   }}
                 />
@@ -295,6 +359,34 @@ export default function PaseoCuando() {
           </>
         )}
       </ScrollView>
+
+      {/* S61-A3 (rasgo 2 del patrón): el CTA de reservar vive ABAJO,
+          FIJO — fuera del scroll, una sola acción primaria (Ley 19.2). */}
+      {Array.isArray(oferta) && oferta.length > 0 && elegibles.length > 0 ? (
+        <View
+          style={{
+            paddingHorizontal: spacing[4],
+            paddingTop: spacing[3],
+            paddingBottom: Math.max(insets.bottom, spacing[4]),
+            backgroundColor: theme.bg.base,
+            borderTopWidth: 1,
+            borderTopColor: theme.border.subtle,
+          }}
+        >
+          <Boton
+            variante="primario"
+            etiqueta={t('explorar.verQuienPuede')}
+            deshabilitado={!listo}
+            onPress={() => {
+              if (!listo) return;
+              router.push({
+                pathname: '/explorar/paseo/disponibles',
+                params: { fecha: dia, hora, duracion: String(duracion), mascotaId: mascota.id },
+              });
+            }}
+          />
+        </View>
+      ) : null}
     </SafeAreaView>
   );
 }
