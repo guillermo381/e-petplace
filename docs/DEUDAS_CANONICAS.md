@@ -1620,6 +1620,11 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 #### D-384 — Ancla híbrida de las tablas hijas del grooming
 ⚪ BAJA. Relevado S59: `evento_grooming_notas/incidencias/pausas` ya portan `evento_atencion_id` (capa atención), pero `evento_grooming_archivos`, `evento_grooming_estados_pelaje`, `evento_grooming_productos_consumidos`, `evento_grooming_servicios_aplicados` y `evento_grooming_zonas_trabajadas` siguen ancladas SOLO en `grooming_id`. Sin efecto funcional hoy (el puente `eventos_mascota_grooming.evento_atencion_id` existe); es deuda de coherencia del modelo de capas. **Migrar a la capa atención AL TOCARLAS** — jamás migración big-bang. Origen: relevamiento S59-A3.
 
+### Deudas de Sesión 60 (13-14 Jul 2026)
+
+#### D-387 — Los registrables de grooming ganan voz de familia y viajan al EN VIVO del dueño
+🟡 ALTA. Los 9 registrables de grooming (`cat_servicios_grooming`) ganan `nombre_familia` (textos gateados por el founder, patrón D-300 — el catálogo de novedades del paseo es el precedente) y el EN VIVO del dueño los pinta como novedades (MODELO_GROOMING §8: "estado y novedades"). **v1 muestra estado + fotos + mensaje — honesto por Ley 3**: el registro fino del groomer es vocabulario del oficio sin voz de familia, y volcarlo crudo al dueño violaría la regla del vocabulario interno (hallazgo 5 del cierre S60-A1: las novedades del grooming NO viajan al vivo v1, declarado y no parchado). **Disparo: antes de prestadores reales, o pulgar founder.** Origen: S60-A2 (pedido founder sobre el hallazgo del cierre A1).
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)
