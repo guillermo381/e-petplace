@@ -119,17 +119,27 @@ export async function obtenerMisCitasPaseo(): Promise<
   ResultadoWrapper<CitaPaseoDueno[], CodigoErrorCitaSuelta>
 > {
   const supabase = getClient();
-  const { data, error } = await supabase
-    .from('evento_cita_servicio')
-    .select('id, fecha, hora, estado, duracion_minutos, precio, prestador_id, tipo_servicio, bono_id, estado_reserva')
-    .is('suscripcion_servicio_id', null)
-    .in('estado', ['confirmada', 'en_curso', 'completada', 'cancelada', 'no_show'])
-    .order('fecha', { ascending: true })
-    .order('hora', { ascending: true });
-  if (error) return mapeoError(error.message);
+  // CURA S60-A4: la lectura era categoría-AGNÓSTICA y las citas de
+  // grooming se FUGABAN a "Mis paseos". El filtro sale del CATÁLOGO
+  // (regla 21 — paseo tiene varios códigos: paseo/paseo_paquete/
+  // paseo_mensual, jamás hardcode); tipo NULL se conserva (legacy
+  // pre-tipo: nunca es grooming, y era el comportamiento vigente).
+  const [tipos, { data, error }] = await Promise.all([
+    supabase.from('tipos_servicio').select('codigo').eq('categoria', 'paseo'),
+    supabase
+      .from('evento_cita_servicio')
+      .select('id, fecha, hora, estado, duracion_minutos, precio, prestador_id, tipo_servicio, bono_id, estado_reserva')
+      .is('suscripcion_servicio_id', null)
+      .in('estado', ['confirmada', 'en_curso', 'completada', 'cancelada', 'no_show'])
+      .order('fecha', { ascending: true })
+      .order('hora', { ascending: true }),
+  ]);
+  if (error || tipos.error) return mapeoError(error?.message ?? tipos.error?.message ?? 'error');
+  const codigosPaseo = new Set(tipos.data.map((t) => t.codigo));
 
   const citas: CitaPaseoDueno[] = [];
   for (const fila of data ?? []) {
+    if (fila.tipo_servicio !== null && !codigosPaseo.has(fila.tipo_servicio)) continue;
     if (typeof fila.id !== 'string' || typeof fila.estado !== 'string') {
       return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES_ERROR_SUELTO.datos_inconsistentes };
     }

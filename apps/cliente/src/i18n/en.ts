@@ -386,6 +386,13 @@ export const clienteEn = {
     vivoEstado: "{{nombre}} is in their groomer's hands.",
     vivoEstadoGenerico: "Your pet is in their groomer's hands.",
     fotosDeLaSesion: 'Session photos',
+    // S60-A4 — the owner's hub (LOTE S60)
+    hubTitulo: 'My grooming sessions',
+    agendar: 'Book a session',
+    hubProximosVacio: 'No upcoming sessions',
+    hubProximosVacioDetalle: "When you book, you'll see it here with its place and time.",
+    hubHistorialVacio: 'No closed sessions yet',
+    hubHistorialVacioDetalle: 'Every closed session leaves its report with photos in their story.',
     // CURA S60-C1 — checkout voice resolves by trade (LOTE S60)
     checkoutResumen: 'Your grooming session',
     exitoTitulo: 'Grooming booked',

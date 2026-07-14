@@ -423,6 +423,13 @@ export const clienteEs = {
     vivoEstado: '{{nombre}} está en manos de su groomer.',
     vivoEstadoGenerico: 'Tu mascota está en manos de su groomer.',
     fotosDeLaSesion: 'Fotos de la sesión',
+    // S60-A4 — el hub del dueño (LOTE S60)
+    hubTitulo: 'Mis sesiones de estética',
+    agendar: 'Agendar una sesión',
+    hubProximosVacio: 'Sin sesiones próximas',
+    hubProximosVacioDetalle: 'Cuando reserves, la verás acá con su lugar y su hora.',
+    hubHistorialVacio: 'Todavía no hay sesiones cerradas',
+    hubHistorialVacioDetalle: 'Cada sesión cerrada deja su parte con fotos en su historia.',
     // CURA S60-C1 — la voz del checkout resuelve por oficio (LOTE S60)
     checkoutResumen: 'Tu sesión de estética',
     exitoTitulo: 'Estética y baño confirmado',

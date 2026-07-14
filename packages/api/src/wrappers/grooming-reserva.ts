@@ -233,6 +233,110 @@ export async function obtenerGroomersDisponibles(
   return { ok: true, data: groomers };
 }
 
+// ── C2 · Los groomings del hogar (el hub del dueño, S60-A4) ─────────────────
+// Lectura DIRECTA por RLS (cero RPC): evento_cita_servicio (solo-dueño) +
+// tipos_servicio (ts_public) + prestadores (prestadores_public: el DÓNDE
+// ya sembrado en A2) + mascotas (familia) + evento_atencion (acceso por
+// mascota — el parte del cierre navega por atencion_id).
+
+export interface GroomingDelHogar {
+  cita_id: string;
+  /** 'YYYY-MM-DD'. */
+  fecha: string;
+  /** 'HH:MM'. */
+  hora: string;
+  /** confirmada | en_curso | completada — solo ciclo de pago vivo. */
+  estado: string;
+  tipo_servicio: string;
+  servicio_nombre: string;
+  duracion_minutos: number;
+  precio: number | null;
+  mascota_id: string | null;
+  mascota_nombre: string | null;
+  prestador_nombre: string | null;
+  /** El DÓNDE (v1 en el local) — null honesto sin dirección declarada. */
+  direccion: string | null;
+  ciudad: string | null;
+  /** SOLO si el grooming cerró con calidad: navega al parte. */
+  atencion_id: string | null;
+}
+
+/** Las citas de grooming del hogar (verdad firme: solo pagadas). La
+ *  superficie decide el corte Próximos/Historial. */
+export async function obtenerMisGroomings(): Promise<
+  ResultadoWrapper<GroomingDelHogar[], CodigoErrorGroomingReserva>
+> {
+  const cliente = getClient();
+  const [tipos, citas] = await Promise.all([
+    cliente.from('tipos_servicio').select('codigo, nombre').eq('categoria', 'grooming'),
+    cliente
+      .from('evento_cita_servicio')
+      .select('id, fecha, hora, estado, duracion_minutos, precio, prestador_id, mascota_id, tipo_servicio, estado_reserva')
+      .in('estado', ['confirmada', 'en_curso', 'completada'])
+      .order('fecha', { ascending: true })
+      .order('hora', { ascending: true }),
+  ]);
+  if (tipos.error || citas.error) return fallo('error');
+  const nombrePorCodigo = new Map(tipos.data.map((t) => [t.codigo, t.nombre]));
+
+  const filas = (citas.data ?? []).filter(
+    (c) =>
+      c.tipo_servicio !== null &&
+      nombrePorCodigo.has(c.tipo_servicio) &&
+      // verdad firme del hub: solo el ciclo de pago vivo (el hold nunca
+      // pagado no es una sesión)
+      c.estado_reserva === 'pagada',
+  );
+  if (filas.length === 0) return { ok: true, data: [] };
+
+  const prestadorIds = [...new Set(filas.map((c) => c.prestador_id).filter((v): v is string => v !== null))];
+  const mascotaIds = [...new Set(filas.map((c) => c.mascota_id).filter((v): v is string => v !== null))];
+  const citaIds = filas.map((c) => c.id);
+
+  const [prestadores, mascotas, atenciones] = await Promise.all([
+    prestadorIds.length > 0
+      ? cliente.from('prestadores').select('id, nombre_comercial, direccion, ciudad').in('id', prestadorIds)
+      : Promise.resolve({ data: [], error: null }),
+    mascotaIds.length > 0
+      ? cliente.from('mascotas').select('id, nombre').in('id', mascotaIds)
+      : Promise.resolve({ data: [], error: null }),
+    cliente
+      .from('evento_atencion')
+      .select('id, cita_id')
+      .in('cita_id', citaIds)
+      .eq('estado', 'cerrada_con_calidad'),
+  ]);
+  if (prestadores.error || mascotas.error || atenciones.error) return fallo('error');
+
+  const prestadorPorId = new Map((prestadores.data ?? []).map((p) => [p.id, p]));
+  const mascotaPorId = new Map((mascotas.data ?? []).map((m) => [m.id, m.nombre]));
+  const atencionPorCita = new Map((atenciones.data ?? []).map((a) => [a.cita_id, a.id]));
+
+  return {
+    ok: true,
+    data: filas.map((c) => {
+      const pr = c.prestador_id !== null ? prestadorPorId.get(c.prestador_id) : undefined;
+      const tipo = c.tipo_servicio ?? '';
+      return {
+        cita_id: c.id,
+        fecha: String(c.fecha),
+        hora: String(c.hora).slice(0, 5),
+        estado: c.estado ?? '',
+        tipo_servicio: tipo,
+        servicio_nombre: nombrePorCodigo.get(tipo) ?? tipo,
+        duracion_minutos: Number(c.duracion_minutos),
+        precio: c.precio === null ? null : Number(c.precio),
+        mascota_id: c.mascota_id ?? null,
+        mascota_nombre: c.mascota_id !== null ? mascotaPorId.get(c.mascota_id) ?? null : null,
+        prestador_nombre: pr?.nombre_comercial ?? null,
+        direccion: pr !== undefined && typeof pr.direccion === 'string' && pr.direccion.length > 0 ? pr.direccion : null,
+        ciudad: pr !== undefined && typeof pr.ciudad === 'string' && pr.ciudad.length > 0 ? pr.ciudad : null,
+        atencion_id: atencionPorCita.get(c.id) ?? null,
+      };
+    }),
+  };
+}
+
 // ── D · Declarar talla y pelaje (la pregunta única de §3, molde P19) ────────
 
 export interface TallaPelajeDeclarados {
