@@ -14661,6 +14661,31 @@ export type Database = {
         Args: { p_grooming_id: string }
         Returns: Record<string, unknown>
       }
+      _grooming_ofertas_cobrables: {
+        Args: { p_mascota_id: string }
+        Returns: {
+          ciudad: string
+          direccion: string
+          duracion_minutos: number
+          precio: number
+          prestador_id: string
+          prestador_nombre: string
+          prestador_servicio_id: string
+          servicio_nombre: string
+          tipo_servicio: string
+        }[]
+      }
+      _inicios_disponibles_prestador: {
+        Args: {
+          p_duracion_minutos: number
+          p_fecha: string
+          p_prestador_id: string
+          p_servicio_id: string
+        }
+        Returns: {
+          hora: string
+        }[]
+      }
       _mascota_apta_paseo_grupal: {
         Args: { p_mascota_id: string }
         Returns: boolean
@@ -15047,6 +15072,10 @@ export type Database = {
         }[]
       }
       debug_session: { Args: never; Returns: Json }
+      declarar_talla_pelaje: {
+        Args: { p_mascota_id: string; p_pelaje: string; p_talla: string }
+        Returns: Json
+      }
       desactivar_rasgo_identidad_personal: {
         Args: { p_evento_id: string; p_motivo: string }
         Returns: undefined
@@ -15279,7 +15308,31 @@ export type Database = {
         Args: { p_grooming_id: string }
         Returns: Json
       }
+      obtener_groomers_disponibles: {
+        Args: {
+          p_fecha: string
+          p_hora: string
+          p_mascota_id: string
+          p_tipo_servicio: string
+        }
+        Returns: {
+          ciudad: string
+          direccion: string
+          duracion_minutos: number
+          precio: number
+          prestador_id: string
+          prestador_nombre: string
+          prestador_servicio_id: string
+          servicio_nombre: string
+        }[]
+      }
       obtener_grooming_por_cita: { Args: { p_cita_id: string }; Returns: Json }
+      obtener_inicios_grooming_disponibles: {
+        Args: { p_fecha: string; p_mascota_id: string; p_tipo_servicio: string }
+        Returns: {
+          hora: string
+        }[]
+      }
       obtener_inicios_paseo_disponibles: {
         Args: { p_duracion_minutos: number; p_fecha: string }
         Returns: {
@@ -15289,6 +15342,15 @@ export type Database = {
       obtener_mis_atenciones_grooming: {
         Args: { p_desde?: string; p_hasta?: string }
         Returns: Json
+      }
+      obtener_oferta_grooming: {
+        Args: { p_mascota_id: string }
+        Returns: {
+          desde_precio: number
+          servicio_nombre: string
+          tipo_servicio: string
+          varia: boolean
+        }[]
       }
       obtener_oferta_paseo: {
         Args: never

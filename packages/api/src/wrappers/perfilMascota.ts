@@ -38,6 +38,11 @@ export interface IdentidadMascota {
   estado_vida: string | null;
   /** P19 (S59): socialización del paseo grupal — null = sin responder. */
   paseo_social_ok: boolean | null;
+  /** §3 grooming (S60): talla del perfil — null honesto hasta declarar.
+   *  Se declara/edita SIEMPRE por declararTallaPelaje (molde P19). */
+  talla: 'S' | 'M' | 'L' | null;
+  /** §3 grooming (S60): pelaje — null honesto hasta declarar. */
+  pelaje: 'normal' | 'largo' | null;
 }
 
 export interface PerfilMascota {
@@ -73,7 +78,7 @@ export async function obtenerPerfilMascota(
   // sin acceso la fila no existe para este user — error honesto.
   const mascota = await cliente
     .from('mascotas')
-    .select('id, nombre, especie, raza, sexo, fecha_nacimiento, fecha_nacimiento_precision, microchip, foto_url, estado_vida, paseo_social_ok')
+    .select('id, nombre, especie, raza, sexo, fecha_nacimiento, fecha_nacimiento_precision, microchip, foto_url, estado_vida, paseo_social_ok, talla, pelaje')
     .eq('id', mascotaId)
     .maybeSingle();
   if (mascota.error) return { ok: false, codigo: 'error_perfil', mensaje: MENSAJE_ERROR };
@@ -128,6 +133,17 @@ export async function obtenerPerfilMascota(
         foto_url: mascota.data.foto_url,
         estado_vida: mascota.data.estado_vida,
         paseo_social_ok: mascota.data.paseo_social_ok ?? null,
+        // Angostado verificando, jamás cast (regla 34): el CHECK de DB ya
+        // garantiza estos valores; un dato fuera del CHECK se trata como
+        // null honesto.
+        talla:
+          mascota.data.talla === 'S' || mascota.data.talla === 'M' || mascota.data.talla === 'L'
+            ? mascota.data.talla
+            : null,
+        pelaje:
+          mascota.data.pelaje === 'normal' || mascota.data.pelaje === 'largo'
+            ? mascota.data.pelaje
+            : null,
       },
       vacunas: vacunas.data.map((v) => ({
         evento_id: v.evento_id,

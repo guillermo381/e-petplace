@@ -1,0 +1,275 @@
+// La RESERVA DE GROOMING del lado DUEÑO (S60-A1, MODELO_GROOMING §2/§5/§6/§7
+// sobre el chasis del paseo). Patrón canónico del monorepo (ver
+// agendamiento.ts): códigos tipados + normalización por prefijo (L-115) +
+// guards de shape contra el RETURNS real de la migración 20260714020000
+// (L-124) + ResultadoWrapper discriminated union.
+//
+// Decisiones que este archivo implementa (visto del arquitecto S60):
+// - El PRECIO y la DURACIÓN llegan RESUELTOS del server (servicio × talla
+//   del perfil + extra si pelaje largo) — el cliente pinta, JAMÁS calcula.
+//   La duración no es menú del dueño: es consecuencia (§6).
+// - talla_no_declarada es RED, no flujo: la puerta TallaPelajeHoja declara
+//   antes de pedir precios personalizados (declararTallaPelaje, molde P19).
+// - El DÓNDE viaja en el QUIÉN (direccion/ciudad de la sede, NULL honesto —
+//   grooming v1 es EN EL LOCAL, D-380).
+// - El hold y el pago son los del chasis compartido: crearBloqueoAgenda y
+//   confirmarCitaPagada de agendamiento.ts se consumen TAL CUAL.
+
+import { getClient } from '../client';
+import type { ResultadoWrapper } from '../resultado';
+
+// ── Talla y pelaje del perfil (espejo de los CHECKs de mascotas) ────────────
+
+export const TALLAS_MASCOTA = ['S', 'M', 'L'] as const;
+export type TallaMascota = (typeof TALLAS_MASCOTA)[number];
+
+export const PELAJES_MASCOTA = ['normal', 'largo'] as const;
+export type PelajeMascota = (typeof PELAJES_MASCOTA)[number];
+
+// ── Códigos de error (verificados contra los RAISE de cada body) ────────────
+
+const CODIGOS_ERROR_GROOMING_RESERVA = [
+  'acceso_denegado',
+  // §3: la mascota aún no declaró talla — la UI pregunta, jamás adivina.
+  'talla_no_declarada',
+  // §5: techo perro+gato (o el acote del groomer); la UI filtra, la DB manda.
+  'mascota_no_elegible',
+  'servicio_invalido',
+  'slot_invalido',
+  'talla_invalida',
+  'pelaje_invalido',
+  'mascota_sin_familia',
+] as const;
+
+export type CodigoErrorGroomingReserva =
+  (typeof CODIGOS_ERROR_GROOMING_RESERVA)[number];
+
+const MENSAJES: Record<
+  CodigoErrorGroomingReserva | 'error_desconocido' | 'datos_inconsistentes',
+  string
+> = {
+  acceso_denegado:      'No tenés acceso para hacer esto.',
+  talla_no_declarada:   'Falta declarar la talla de tu mascota.',
+  mascota_no_elegible:  'El grooming todavía no está disponible para esta mascota.',
+  servicio_invalido:    'Este servicio ya no está disponible.',
+  slot_invalido:        'El horario elegido no es válido.',
+  talla_invalida:       'La talla elegida no es válida.',
+  pelaje_invalido:      'El pelaje elegido no es válido.',
+  mascota_sin_familia:  'Esta mascota todavía no tiene una familia armada.',
+  datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
+  error_desconocido:    'Ocurrió un error inesperado. Probá de nuevo.',
+};
+
+function normalizarCodigo(raw: string): CodigoErrorGroomingReserva | 'error_desconocido' {
+  if (raw === 'auth_required' || raw.startsWith('no_access_to_mascota')) {
+    return 'acceso_denegado';
+  }
+  if (raw.startsWith('ventana_invalida')) return 'slot_invalido';
+  // Códigos con sufijo ': <detalle>' — normalizar por prefijo (L-115).
+  for (const codigo of CODIGOS_ERROR_GROOMING_RESERVA) {
+    if (raw.startsWith(codigo)) return codigo;
+  }
+  return 'error_desconocido';
+}
+
+function fallo<T>(
+  mensajeOriginal: string,
+): ResultadoWrapper<T, CodigoErrorGroomingReserva> {
+  const codigo = normalizarCodigo(mensajeOriginal);
+  return { ok: false, codigo, mensaje: MENSAJES[codigo] };
+}
+
+type Obj = Record<string, unknown>;
+
+function esObj(v: unknown): v is Obj {
+  return typeof v === 'object' && v !== null;
+}
+
+// ── A · La oferta comprable para SU mascota (selector de servicio) ──────────
+
+export interface OfertaGrooming {
+  /** 'grooming' (Baño) | 'grooming_completo' (Baño y corte). */
+  tipo_servicio: string;
+  /** Voz canónica del catálogo maestro (no la custom por groomer). */
+  servicio_nombre: string;
+  /** Mínimo REAL entre groomers cobrables, YA resuelto por la talla del
+   *  perfil (+ extra si pelaje largo). El server congela al reservar. */
+  desde_precio: number;
+  /** true = hay más de un precio entre groomers → la UI dice "desde". */
+  varia: boolean;
+}
+
+/** Los comprables del menú de dos capas realmente ofertados HOY por
+ *  groomers cobrables (7.13), con el "desde" de ESTA mascota. */
+export async function obtenerOfertaGrooming(
+  mascotaId: string,
+): Promise<ResultadoWrapper<OfertaGrooming[], CodigoErrorGroomingReserva>> {
+  const { data, error } = await getClient().rpc('obtener_oferta_grooming', {
+    p_mascota_id: mascotaId,
+  });
+
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallo('datos_inconsistentes');
+  const ofertas: OfertaGrooming[] = [];
+  for (const fila of data) {
+    if (
+      !esObj(fila) ||
+      typeof fila.tipo_servicio !== 'string' ||
+      typeof fila.servicio_nombre !== 'string' ||
+      typeof fila.desde_precio !== 'number' ||
+      typeof fila.varia !== 'boolean'
+    ) {
+      return fallo('datos_inconsistentes');
+    }
+    ofertas.push({
+      tipo_servicio: fila.tipo_servicio,
+      servicio_nombre: fila.servicio_nombre,
+      desde_precio: fila.desde_precio,
+      varia: fila.varia,
+    });
+  }
+  return { ok: true, data: ofertas };
+}
+
+// ── B · Inicios disponibles para la grilla del CUÁNDO ───────────────────────
+// La duración NO viaja: cada groomer aporta inicios con SU duración de la
+// combinación servicio × talla (motor de ventana intacto, §6).
+
+export interface InputIniciosGrooming {
+  /** 'YYYY-MM-DD'. */
+  fecha: string;
+  tipo_servicio: string;
+  mascota_id: string;
+}
+
+/** Horas de inicio 'HH:MM' donde ALGÚN groomer puede la ventana entera. */
+export async function obtenerIniciosGrooming(
+  input: InputIniciosGrooming,
+): Promise<ResultadoWrapper<string[], CodigoErrorGroomingReserva>> {
+  const { data, error } = await getClient().rpc('obtener_inicios_grooming_disponibles', {
+    p_fecha: input.fecha,
+    p_tipo_servicio: input.tipo_servicio,
+    p_mascota_id: input.mascota_id,
+  });
+
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallo('datos_inconsistentes');
+  const horas: string[] = [];
+  for (const fila of data) {
+    if (!esObj(fila) || typeof fila.hora !== 'string') {
+      return fallo('datos_inconsistentes');
+    }
+    horas.push(fila.hora.slice(0, 5));
+  }
+  return { ok: true, data: horas };
+}
+
+// ── C · El QUIÉN con el precio resuelto (condición 2 del visto) ─────────────
+
+export interface GroomerDisponible {
+  prestador_id: string;
+  /** prestador_servicios.id — el identificador de la OFERTA para el hold. */
+  prestador_servicio_id: string;
+  prestador_nombre: string;
+  servicio_nombre: string;
+  /** RESUELTO server-side: matriz servicio × talla + extra pelaje largo.
+   *  El checkout muestra el snapshot del hold; este número es el espejo. */
+  precio: number;
+  /** La duración de la combinación — consecuencia, jamás menú (§6). */
+  duracion_minutos: number;
+  /** El DÓNDE (grooming v1 = en el local): dirección de la sede, o null
+   *  honesto si el groomer aún no la declaró. */
+  direccion: string | null;
+  ciudad: string | null;
+}
+
+export interface InputGroomersDisponibles {
+  /** 'YYYY-MM-DD'. */
+  fecha: string;
+  /** 'HH:MM' — un inicio de la grilla. */
+  hora: string;
+  tipo_servicio: string;
+  mascota_id: string;
+}
+
+/** Groomers cobrables que pueden la ventana entera en ese inicio, con
+ *  precio/duración de ESTA mascota y el dónde de su local. */
+export async function obtenerGroomersDisponibles(
+  input: InputGroomersDisponibles,
+): Promise<ResultadoWrapper<GroomerDisponible[], CodigoErrorGroomingReserva>> {
+  const { data, error } = await getClient().rpc('obtener_groomers_disponibles', {
+    p_fecha: input.fecha,
+    p_hora: input.hora,
+    p_tipo_servicio: input.tipo_servicio,
+    p_mascota_id: input.mascota_id,
+  });
+
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallo('datos_inconsistentes');
+  const groomers: GroomerDisponible[] = [];
+  for (const fila of data) {
+    if (
+      !esObj(fila) ||
+      typeof fila.prestador_id !== 'string' ||
+      typeof fila.prestador_servicio_id !== 'string' ||
+      typeof fila.prestador_nombre !== 'string' ||
+      typeof fila.servicio_nombre !== 'string' ||
+      typeof fila.precio !== 'number' ||
+      typeof fila.duracion_minutos !== 'number'
+    ) {
+      return fallo('datos_inconsistentes');
+    }
+    groomers.push({
+      prestador_id: fila.prestador_id,
+      prestador_servicio_id: fila.prestador_servicio_id,
+      prestador_nombre: fila.prestador_nombre,
+      servicio_nombre: fila.servicio_nombre,
+      precio: fila.precio,
+      duracion_minutos: fila.duracion_minutos,
+      direccion: typeof fila.direccion === 'string' && fila.direccion.length > 0 ? fila.direccion : null,
+      ciudad: typeof fila.ciudad === 'string' && fila.ciudad.length > 0 ? fila.ciudad : null,
+    });
+  }
+  return { ok: true, data: groomers };
+}
+
+// ── D · Declarar talla y pelaje (la pregunta única de §3, molde P19) ────────
+
+export interface TallaPelajeDeclarados {
+  mascota_id: string;
+  talla: TallaMascota;
+  pelaje: PelajeMascota;
+}
+
+/** Declara (o EDITA — §3: "editables siempre") talla y pelaje en el PERFIL.
+ *  Sirve las dos superficies: la Hoja de la reserva y la edición desde el
+ *  perfil de la mascota. A diferencia de la social (P19), acá no hay rama
+ *  que frene: declarar SIEMPRE continúa. */
+export async function declararTallaPelaje(
+  mascotaId: string,
+  talla: TallaMascota,
+  pelaje: PelajeMascota,
+): Promise<ResultadoWrapper<TallaPelajeDeclarados, CodigoErrorGroomingReserva>> {
+  const { data, error } = await getClient().rpc('declarar_talla_pelaje', {
+    p_mascota_id: mascotaId,
+    p_talla: talla,
+    p_pelaje: pelaje,
+  });
+
+  if (error) return fallo(error.message);
+  const o = data as Record<string, unknown> | null;
+  if (
+    o === null ||
+    typeof o !== 'object' ||
+    o.ok !== true ||
+    typeof o.mascota_id !== 'string' ||
+    (o.talla !== 'S' && o.talla !== 'M' && o.talla !== 'L') ||
+    (o.pelaje !== 'normal' && o.pelaje !== 'largo')
+  ) {
+    return fallo('datos_inconsistentes');
+  }
+  return {
+    ok: true,
+    data: { mascota_id: o.mascota_id, talla: o.talla, pelaje: o.pelaje },
+  };
+}

@@ -375,3 +375,21 @@ export {
   type TallaGrooming,
   type TallaOfertaGrooming,
 } from './wrappers/grooming';
+
+// ── La reserva de grooming del DUEÑO (S60-A1 — hunk Sesión A) ───────────────
+export {
+  TALLAS_MASCOTA,
+  PELAJES_MASCOTA,
+  obtenerOfertaGrooming,
+  obtenerIniciosGrooming,
+  obtenerGroomersDisponibles,
+  declararTallaPelaje,
+  type CodigoErrorGroomingReserva,
+  type GroomerDisponible,
+  type InputGroomersDisponibles,
+  type InputIniciosGrooming,
+  type OfertaGrooming,
+  type PelajeMascota,
+  type TallaMascota,
+  type TallaPelajeDeclarados,
+} from './wrappers/grooming-reserva';

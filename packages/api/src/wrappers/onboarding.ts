@@ -181,6 +181,10 @@ export interface MascotaResumen {
   /** P19 (S59): ¿se lleva bien paseando con otros perros? null = aún
    *  sin responder — la pregunta única salta en la primera reserva. */
   paseo_social_ok: boolean | null;
+  /** §3 grooming (S60): talla/pelaje del perfil — null honesto hasta
+   *  declarar; la pregunta única salta al entrar al QUIÉN del grooming. */
+  talla: 'S' | 'M' | 'L' | null;
+  pelaje: 'normal' | 'largo' | null;
 }
 
 /** Mascotas de una familia (Home del dueño). Reader: mismas claves
@@ -190,7 +194,7 @@ export async function obtenerMascotasDeFamilia(
 ): Promise<ResultadoWrapper<MascotaResumen[], CodigoErrorOnboarding>> {
   const { data, error } = await getClient()
     .from('mascotas')
-    .select('id, nombre, especie, foto_url, paseo_social_ok')
+    .select('id, nombre, especie, foto_url, paseo_social_ok, talla, pelaje')
     .eq('familia_id', familiaId)
     .order('fecha_alta', { ascending: true });
 
@@ -204,6 +208,9 @@ export async function obtenerMascotasDeFamilia(
       especie: m.especie,
       foto_url: m.foto_url ?? null,
       paseo_social_ok: m.paseo_social_ok ?? null,
+      // Angostado verificando (regla 34): fuera del CHECK = null honesto.
+      talla: m.talla === 'S' || m.talla === 'M' || m.talla === 'L' ? m.talla : null,
+      pelaje: m.pelaje === 'normal' || m.pelaje === 'largo' ? m.pelaje : null,
     })),
   };
 }
