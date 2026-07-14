@@ -1,8 +1,9 @@
 # DISEÑO_EXPERIENCIA — La arquitectura de la experiencia del dueño
 
-> **Versión: v1.6 — S58 (13 Jul 2026), Etapa A0 de RUTA_F1 v2.2.**
+> **Versión: v1.7 — S60 (14 Jul 2026), Etapa A0 de RUTA_F1 v2.2.**
 > (La banda v1.1→v1.4 se curó en S58 — decía v1.1 con contenido v1.4,
-> relevamiento B; v1.5 = §15b LA DOSIS DEL PRESTADOR, firma founder.)
+> relevamiento B; v1.5 = §15b LA DOSIS DEL PRESTADOR, firma founder;
+> v1.7 = la zona TUS SERVICIOS del Hogar + el hub sin Agenda, S60-A6.)
 > Escrito por el arquitecto/director de diseño, decisiones de producto
 > cerradas por el founder en sesión. **Contrastes obligatorios:**
 > `MODELO_PRODUCTO.md` (EL NORTE — en especial §6.4 revelación
@@ -541,6 +542,30 @@ el portado de grooming consumen:
 
 ## Historial
 
+- **v1.7 (S60, 14 Jul 2026):** el Hogar es ESTADO Y ANTICIPACIÓN
+  (S60-A6, D-366 parcial; el primer literal de Kary — "vista rápida
+  desde la posición consolidada" — hecho zona). **Pieza 1, la zona TUS
+  SERVICIOS:** cada servicio con actividad gana su celda de acceso
+  rápido al hub, con la voz de familia y UN dato (prioridad aprobada:
+  próxima cita > saldo > plan > historial); posición ratificada entre
+  las fichas y el grupo del carnet — "MIS PASEOS" migró del grupo a la
+  zona y la Zona 2 queda expediente PURO (D-338 honrada). Regla de
+  existencia: paseo vive con próximas ∨ saldo vigente ∨ plan; estética
+  con próximas ∨ cerrada en ≤60 días (ventana ratificada, se recalibra
+  con dato). Cero actividad = cero celda: Explorar descubre, el Hogar
+  anticipa. Lo VIVO manda (hero intacto); la tensión del eco ratificada
+  como convivencia, con marcador de reversión declarado. **Pieza 2, el
+  hub del servicio queda Próximos · Historial:** el tap Agenda MURIÓ
+  fusionado (el solape estaba anotado en D-366 — sueltas/paquete
+  duplicadas al 100% entre taps; enmienda DECLARADA, no reapertura del
+  servicio cerrado). Arriba la POSICIÓN intacta (paquete con saldo +
+  plan como producto puro con Pausar; sus 3 próximas inline migraron a
+  la lista); abajo UNA lista cronológica de TODAS las citas futuras con
+  el ORIGEN marcado ("Paseo suelto" / "De tu paquete" / "De tu plan") y
+  el tap abre SUS acciones — el Mover del plan migró al detalle P14, no
+  se perdió. Longitud: ventana de 10 + "Cargar más" incremental (patrón
+  del pie de LineaDeVida; por N y no por días, jamás lista infinita).
+  El hub del paseo queda simétrico al de estética.
 - **v1.6 (S58, 13 Jul 2026):** enmiendas de GATE sobre §15b (founder en
   dispositivo): techo de tinta con Isotipo+saludo+Negocio (v2) · el
   wizard de secciones como estándar de todo "El arte de…" (v3) ·

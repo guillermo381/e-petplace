@@ -1634,6 +1634,9 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 #### D-390 — Higiene: policies duplicadas de escritura propia en `prestadores`
 ⚪ BAJA. `prestador_own_profile` [ALL] y `prestadores_own` [UPDATE] se superponen (familia D-342 de higiene de policies). **Morir la redundante al curar D-389** — misma migración, jamás suelta. Origen: S60 (mismo relevamiento que D-389).
 
+#### D-391 — EDITAR una franja de horario en su lugar
+🟡 ALTA. Hoy el flujo es eliminar + crear (pulgar founder S60): la franja no se edita en su lugar — cambiar el rango horario obliga a matarla y nacer otra (`actualizarFranjaHorario` solo toca activo/cupo). **Disparo: Bloque 2 de S61 — la cirugía de horarios la absorbe.** Origen: S60 (pulgar founder), registrada en el cierre documental S61-A0.
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)
