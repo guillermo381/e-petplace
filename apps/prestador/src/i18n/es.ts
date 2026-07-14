@@ -40,9 +40,11 @@ export const prestadorEs = {
     entrar: 'Entrar',
   },
   agenda: {
-    saludo: 'Tus paseos de hoy',
-    vacio: 'Hoy no tienes paseos',
-    vacioDetalle: 'Cuando una familia agende un paseo, va a aparecer acá.',
+    // S60-C2.2: la jornada ya no es solo paseos (grooming vivo) — la
+    // voz genérica de la jornada, propuesta al gate · LOTE S60
+    saludo: 'Tu jornada de hoy',
+    vacio: 'Hoy no tienes citas',
+    vacioDetalle: 'Cuando una familia agende contigo, va a aparecer acá.',
     reintentar: 'Reintentar',
     // S59-B3 voz única del estado (MODELO_PASEO §7, misma palabra en toda
     // superficie — el pill de ui ya la porta) · LOTE S59, GATE PENDIENTE
@@ -128,6 +130,8 @@ export const prestadorEs = {
     estadoPorConfirmar: 'Por confirmar',
     hoy: 'hoy',
     iniciarPaseo: 'Iniciar paseo',
+    // S60-C2.1 ampliada: el porqué del CTA ausente en cita futura
+    empiezaElDia: 'El paseo se empieza el día de la cita.',
     // A dónde ir — D-339 (S56-B TAREA 3) · LOTE S56, GATE PENDIENTE
     direccionTitulo: 'A dónde ir',
     // marca "parte del plan" (D-338, S56-B T7) · LOTE S56, GATE PENDIENTE
@@ -533,6 +537,9 @@ export const prestadorEs = {
     pelajeNormal: 'Normal',
     pelajeLargo: 'Largo',
     // señales: REUSO detalleMascota.* (misma voz en toda la casa, Ley 17.3)
+    // S60-C2.1: la cita de otro día se prepara, no se empieza — el
+    // porqué del CTA ausente (apagado jamás es mudo)
+    empiezaElDia: 'La sesión se empieza el día de la cita.',
     // discrepancia de talla (§2, patrón P19)
     tallaCorregir: 'La talla no coincide',
     tallaCorregirTitulo: 'La talla real',

@@ -57,15 +57,15 @@ await page.screenshot({ path: `${S}/d290-login-error.png` });
 // ── 3. login REAL (user demo, prestador vivo) → HOY ──
 await page.getByRole('textbox', { name: 'Contraseña' }).fill(env.EXPO_PUBLIC_DEMO_PASSWORD);
 await page.getByText('Entrar', { exact: true }).click();
-t = await esperar('Tus paseos de hoy');
-check(t.includes('Tus paseos de hoy'), '3 · login real → HOY vivo (routing por estado real)');
+t = await esperar('Tu jornada de hoy');
+check(t.includes('Tu jornada de hoy'), '3 · login real → HOY vivo (routing por estado real)');
 check(t.includes('Hoy') && t.includes('Mascotas') && t.includes('Negocio'), '3b · tabs presentes');
 await page.screenshot({ path: `${S}/d290-hoy.png` });
 
 // ── 4. la sesión PERSISTE tras reload ──
 await page.reload({ waitUntil: 'networkidle' });
-t = await esperar('Tus paseos de hoy');
-check(t.includes('Tus paseos de hoy'), '4 · reload: sesión persistida (sin re-login)');
+t = await esperar('Tu jornada de hoy');
+check(t.includes('Tu jornada de hoy'), '4 · reload: sesión persistida (sin re-login)');
 
 // ── 5. logout desde Negocio → login → raíz sin sesión ──
 await page.goto('http://localhost:8081/negocio', { waitUntil: 'networkidle', timeout: 60000 });

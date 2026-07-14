@@ -39,15 +39,16 @@ import {
 } from '@epetplace/ui';
 import {
   iniciarAtencionGrooming,
-  obtenerCitasGroomingDelDia,
+  obtenerCitaGroomingPorId,
   obtenerFichaAntesGrooming,
   obtenerGroomingPorCita,
-  obtenerMiPrestador,
   registrarDiscrepanciaTallaGrooming,
   resolverUrlFoto,
   type CitaAgendaPaseo,
   type FichaAntesGrooming,
 } from '@epetplace/api';
+
+import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { verificarSesion } from '@/lib/api';
 import { useTraduccion } from '@/i18n';
@@ -73,7 +74,7 @@ export default function AntesGrooming() {
   const { theme } = useTheme();
   const router = useRouter();
   const { mostrar } = useAviso();
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
   const { citaId = '' } = useLocalSearchParams<{ citaId: string }>();
 
   const INSIGNIA_POR_ESTADO: Record<string, { estado: InsigniaEstado; etiqueta: string }> = {
@@ -124,22 +125,16 @@ export default function AntesGrooming() {
         }
       }
 
-      // 2. sin_iniciar: la cita desde la lista del día + la ficha filtrada.
-      const prestador = await obtenerMiPrestador();
-      if (!prestador.ok) {
-        setPantalla({ estado: 'error', mensaje: prestador.mensaje });
+      // 2. sin_iniciar: la cita POR SU ID (cura S60-C2.1 — la lista del
+      // día dejaba fuera toda cita de otro día, y la SEMANA del HOY las
+      // hace tapeables; la RLS es el guard, verdad firme intacta).
+      const rCita = await obtenerCitaGroomingPorId(citaId);
+      if (!rCita.ok) {
+        if (rCita.codigo === 'cita_no_encontrada') setPantalla({ estado: 'no_existe' });
+        else setPantalla({ estado: 'error', mensaje: rCita.mensaje });
         return;
       }
-      const dia = await obtenerCitasGroomingDelDia({ prestador_id: prestador.data.id, fecha: hoyLocal() });
-      if (!dia.ok) {
-        setPantalla({ estado: 'error', mensaje: dia.mensaje });
-        return;
-      }
-      const cita = dia.data.find((c) => c.id === citaId);
-      if (!cita) {
-        setPantalla({ estado: 'no_existe' });
-        return;
-      }
+      const cita = rCita.data;
       // La ficha de 30 segundos — si la lectura del perfil falla, la cita
       // igual se muestra (la ficha degrada, jamás bloquea el trabajo).
       let ficha: FichaAntesGrooming | null = null;
@@ -207,7 +202,13 @@ export default function AntesGrooming() {
   const insignia = cita?.estado ? INSIGNIA_POR_ESTADO[cita.estado] : undefined;
   const hora = cita?.hora ? cita.hora.slice(0, 5) : '—';
   const dur = cita?.duracion_minutos;
-  const conCta = cita?.estado === 'confirmada';
+  // La cita de otro día se PREPARA (la ficha es el "Antes" de la
+  // semana, §13 Zona 2) pero no se EMPIEZA: el CTA vive solo el día de
+  // la cita — sin este guard, iniciar hoy la sesión de mañana abriría
+  // el devengo anticipado al cerrarla (el gate temporal del motor es
+  // pedido a la A, declarado S60-C2.1).
+  const esDeHoy = cita?.fecha === hoyLocal();
+  const conCta = cita?.estado === 'confirmada' && esDeHoy;
 
   const vozSecundaria = {
     fontFamily: typography.family.sans.regular,
@@ -299,7 +300,11 @@ export default function AntesGrooming() {
                     color: theme.text.secondary,
                   }}
                 >
-                  {`${hora}${dur ? ` · ${dur} min` : ''} · ${cita.tipo.nombre.toLowerCase()}`}
+                  {`${
+                    esDeHoy || cita.fecha === null
+                      ? ''
+                      : `${fechaDiaSemanaHumana(cita.fecha, idioma as IdiomaSoportado)} · `
+                  }${hora}${dur ? ` · ${dur} min` : ''} · ${cita.tipo.nombre.toLowerCase()}`}
                 </Text>
                 {insignia && <Insignia estado={insignia.estado} etiqueta={insignia.etiqueta} tamaño="sm" />}
               </View>
@@ -372,6 +377,11 @@ export default function AntesGrooming() {
                 cargando={iniciando}
                 onPress={() => void iniciar()}
               />
+            )}
+            {cita.estado === 'confirmada' && !esDeHoy && (
+              <Text style={{ ...vozSecundaria, textAlign: 'center' }}>
+                {t('citaGrooming.empiezaElDia')}
+              </Text>
             )}
           </>
         )}

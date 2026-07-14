@@ -39,7 +39,7 @@ await esperar('Contraseña', 60);
 await page.getByRole('textbox', { name: 'Email' }).fill(env.EXPO_PUBLIC_DEMO_EMAIL);
 await page.getByRole('textbox', { name: 'Contraseña' }).fill(env.EXPO_PUBLIC_DEMO_PASSWORD);
 await page.getByText('Entrar', { exact: true }).click();
-await esperar('Tus paseos de hoy', 60);
+await esperar('Tu jornada de hoy', 60);
 
 // ── T1: NEGOCIO — la tarjeta-mundo Grooming VIVA ──
 await page.getByRole('tab', { name: /Negocio/ }).click();

@@ -66,7 +66,7 @@ await page.goto('http://localhost:8081/', { waitUntil: 'networkidle', timeout: 1
 for (let i = 0; i < 30; i++) {
   await page.waitForTimeout(1000);
   t = await texto();
-  if (t.includes('Tus paseos de hoy')) break;
+  if (t.includes('Tu jornada de hoy')) break;
 }
 check(t.includes('Hoy no tienes paseos'), 'HOY: vacío sereno presente');
 await page.screenshot({ path: `${S}/s52-hoy.png`, fullPage: true });

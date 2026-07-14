@@ -39,7 +39,7 @@ await esperar('Contraseña', 60);
 await page.getByRole('textbox', { name: 'Email' }).fill(env.EXPO_PUBLIC_DEMO_EMAIL);
 await page.getByRole('textbox', { name: 'Contraseña' }).fill(env.EXPO_PUBLIC_DEMO_PASSWORD);
 await page.getByText('Entrar', { exact: true }).click();
-await esperar('Tus paseos de hoy', 60);
+await esperar('Tu jornada de hoy', 60);
 
 // ── T1: la barra es Hoy·Mascotas·Negocio·Cuenta (4 tabs, en orden) ──
 const tabs = await page.getByRole('tab').allInnerTexts();
@@ -113,8 +113,8 @@ check(!t.includes('Idioma') && !t.includes('Cerrar sesión'), 'T7b idioma y sesi
 await page.getByRole('tab', { name: /Cuenta/ }).click();
 await esperar('Tu cuenta', 10);
 await page.getByRole('tab', { name: /Hoy/ }).click();
-t = await esperar('Tus paseos de hoy', 10);
-check(t.includes('Tus paseos de hoy'), 'T8 vuelta a Hoy intacta');
+t = await esperar('Tu jornada de hoy', 10);
+check(t.includes('Tu jornada de hoy'), 'T8 vuelta a Hoy intacta');
 
 await browser.close();
 console.log(fallos === 0 ? '\nSMOKE WEB VERDE (14/14)' : `\n${fallos} FALTA(N)`);

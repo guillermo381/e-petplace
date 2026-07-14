@@ -41,7 +41,7 @@ await esperar('Contraseña');
 await page.getByRole('textbox', { name: 'Email' }).fill(env.EXPO_PUBLIC_DEMO_EMAIL);
 await page.getByRole('textbox', { name: 'Contraseña' }).fill(env.EXPO_PUBLIC_DEMO_PASSWORD);
 await page.getByText('Entrar', { exact: true }).click();
-await esperar('Tus paseos de hoy');
+await esperar('Tu jornada de hoy');
 
 // ── ES: cierre en modo lectura con datos reales ──
 await page.goto(`http://localhost:8081/cita/${CITA_CERRADA}/cierre`, { waitUntil: 'networkidle', timeout: 180000 });
@@ -90,8 +90,8 @@ await esperar('Language');
 await page.getByText('Español', { exact: true }).first().click();
 await page.waitForTimeout(1500);
 await page.goto('http://localhost:8081/', { waitUntil: 'networkidle', timeout: 60000 });
-t = await esperar('Tus paseos de hoy');
-check(t.includes('Tus paseos de hoy'), 'es · vuelta a español verificada');
+t = await esperar('Tu jornada de hoy');
+check(t.includes('Tu jornada de hoy'), 'es · vuelta a español verificada');
 
 await browser.close();
 console.log(fallos === 0 ? '\nRUNTIME D-315p OK' : `\n${fallos} CHECK(S) FALLARON`);

@@ -39,7 +39,7 @@ await page.getByText('Entrar', { exact: true }).click();
 
 // ── el tab Hoy: el segmento vive bajo el encabezado ──
 let t = await esperar('Agenda', 60);
-check(t.includes('Tus paseos de hoy'), 'T1 portada del tab Hoy intacta');
+check(t.includes('Tu jornada de hoy'), 'T1 portada del tab Hoy intacta');
 check(t.includes('Agenda') && t.includes('Semana'), 'T2 segmento Hoy/Semana presente (D-317 ocupado)');
 
 // la fecha del header ahora habla por el riel (weekday + día + mes)
@@ -68,8 +68,8 @@ check(/\d{2}:\d{2} · \d+ min/.test(t), 'T7 hora · duración en voz de máquina
 
 // ── de vuelta a Hoy: el contrato original intacto ──
 await page.getByText('Hoy', { exact: true }).first().click();
-t = await esperar('Tus paseos de hoy', 10);
-check(t.includes('Tus paseos de hoy'), 'T8 volver a Hoy no rompe nada');
+t = await esperar('Tu jornada de hoy', 10);
+check(t.includes('Tu jornada de hoy'), 'T8 volver a Hoy no rompe nada');
 
 await browser.close();
 console.log(fallos === 0 ? '\nSMOKE WEB VERDE (9/9)' : `\n${fallos} FALTA(N)`);

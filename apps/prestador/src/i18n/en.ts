@@ -35,9 +35,10 @@ export const prestadorEn = {
     entrar: 'Sign in',
   },
   agenda: {
-    saludo: 'Your walks for today',
-    vacio: 'No walks today',
-    vacioDetalle: 'When a family books a walk, it will show up here.',
+    // S60-C2.2 — Espejo de es.ts · LOTE S60
+    saludo: 'Your day today',
+    vacio: 'No appointments today',
+    vacioDetalle: 'When a family books with you, it will show up here.',
     reintentar: 'Try again',
     // S59-B3 single state voice (MODELO_PASEO §7) · LOTE S59, GATE PENDIENTE
     enCurso: 'Live',
@@ -110,6 +111,7 @@ export const prestadorEn = {
     estadoPorConfirmar: 'To confirm',
     hoy: 'today',
     iniciarPaseo: 'Start walk',
+    empiezaElDia: 'The walk starts on the day of the appointment.',
     // A dónde ir — D-339 (S56-B TAREA 3) · LOTE S56, GATE PENDIENTE · Espejo de es.ts
     direccionTitulo: 'Where to go',
     parteDelPlan: "Part of {{nombre}}'s plan",
@@ -466,6 +468,7 @@ export const prestadorEn = {
     pelaje: 'Coat',
     pelajeNormal: 'Regular',
     pelajeLargo: 'Long',
+    empiezaElDia: 'The session starts on the day of the appointment.',
     tallaCorregir: "The size doesn't match",
     tallaCorregirTitulo: 'The real size',
     tallaCorregirExplicacion:

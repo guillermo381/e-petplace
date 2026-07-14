@@ -39,11 +39,11 @@ const texto = async () => await page.evaluate(() => document.body.innerText);
 // ── HOY (la sesión dev se firma sola) ──
 await page.goto('http://localhost:8081/', { waitUntil: 'networkidle', timeout: 180000 });
 let t = await texto();
-for (let i = 0; i < 30 && !t.includes('Tus paseos de hoy'); i++) {
+for (let i = 0; i < 30 && !t.includes('Tu jornada de hoy'); i++) {
   await page.waitForTimeout(1000);
   t = await texto();
 }
-check(t.includes('Tus paseos de hoy'), 'HOY: portada');
+check(t.includes('Tu jornada de hoy'), 'HOY: portada');
 check(t.includes('Hoy') && t.includes('Mascotas') && t.includes('Negocio'), 'BarraTabs: 3 tabs');
 // La verdad de HOY viene de la DB (D-352): con 0 firmes el estado
 // correcto es el vacío digno; con firmes, el vacío sería mentira. La

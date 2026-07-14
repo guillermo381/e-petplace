@@ -44,7 +44,7 @@ await page.getByText('Entrar', { exact: true }).click();
 
 // ── T1: el HOY carga con la jornada FUSIONADA (el doble fetch no
 // rompe el día del paseo — regresión de la Zona 1/2 intacta) ──
-await esperar('Tus paseos de hoy', 60);
+await esperar('Tu jornada de hoy', 60);
 // El segmentado Hoy/Semana solo existe cuando la pantalla llegó a
 // 'listo': si el fetch grooming fallara, la pantalla sería el error de
 // Ley 13 y 'Semana' jamás aparecería.
@@ -72,6 +72,58 @@ await page.goto(
 t = await esperar('disponible', 40);
 check(t.includes('Esta cita ya no está disponible'), 'T3 la cita inexistente cae bien parada');
 check(t.includes('Volver a tu día'), 'T3b el vacío termina en un camino');
+
+// ── T5 (cura S60-C2.1): la cita de OTRO día abre desde la SEMANA —
+// el camino exacto del founder. Robusto al estado: si la semana no
+// tiene citas de grooming (Baño/Baño y corte), se declara y no falla.
+await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
+await esperar('Semana', 45);
+await page.getByText('Semana', { exact: true }).click();
+await page.waitForTimeout(2500);
+t = await texto();
+// El subtítulo de la fila pinta tipos_servicio.nombre TAL CUAL — hoy
+// los seeds dicen "Grooming Básico/Completo" (§10.3 preliminares; el
+// rename a "Baño / Baño y corte" de la letra §1 es pedido a la A).
+const filaGrooming = page.getByText(/^Grooming (Básico|Completo)$/).first();
+if ((await filaGrooming.count()) > 0) {
+  await filaGrooming.click();
+  t = await esperar('Grooming de', 40);
+  check(t.includes('Grooming de'), 'T5 la cita de otro día ABRE su ficha (cura C2.1)');
+  check(!t.includes('Esta cita ya no está disponible'), 'T5b el "ya no disponible" MURIÓ para citas reales');
+  if (!t.includes('Empezar grooming')) {
+    check(t.includes('La sesión se empieza el día de la cita.'), 'T5c la futura dice su porqué (jamás mudo)');
+  } else {
+    console.log('  (T5c cita de HOY: CTA presente, la voz futura no aplica)');
+  }
+} else {
+  console.log('  (T5 sin citas de grooming en la semana del demo — camino declarado, no ejercitado)');
+}
+
+// ── T6 (cura C2.1 ampliada): el GEMELO del paseo — la cita de paseo de
+// otro día también abre, y su CTA ausente habla. Robusto al estado.
+await page.goto(`http://localhost:${PORT}/`, { waitUntil: 'networkidle' });
+await esperar('Semana', 45);
+await page.getByText('Semana', { exact: true }).click();
+await page.waitForTimeout(2500);
+// subtítulo = tipos_servicio.nombre del paseo ("Paseo de Mascotas",
+// "Paseo 30/60 minutos"…). LAST: los días futuros renderizan abajo —
+// la primera fila suele ser la de HOY ya cerrada (7.5 → cierre).
+const filasPaseo = page.getByText(/^Paseo (de Mascotas|30 minutos|60 minutos|Mensual)/).last();
+if ((await filasPaseo.count()) > 0) {
+  await filasPaseo.click();
+  t = await esperar('Iniciar paseo', 8);
+  t = await texto();
+  check(t.includes('Paseo de') && !t.includes('Parte del paseo'), 'T6 la cita de paseo de otro día ABRE su detalle');
+  check(!t.includes('Esta cita ya no está disponible'), 'T6b sin "ya no disponible" en cita real');
+  if (!t.includes('Iniciar paseo')) {
+    const conVoz = t.includes('El paseo se empieza el día de la cita.') || !t.includes('Confirmada');
+    check(conVoz, 'T6c sin CTA = con voz (futura) o estado no-confirmada con insignia');
+  } else {
+    console.log('  (T6c cita de HOY confirmada: CTA presente, correcto)');
+  }
+} else {
+  console.log('  (T6 sin filas de paseo en la semana — camino declarado, no ejercitado)');
+}
 
 // ── T4: es/en — la vista del día habla inglés con override ──
 await page.evaluate(() => localStorage.setItem('epetplace.idioma', 'en'));

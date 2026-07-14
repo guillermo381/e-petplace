@@ -33,7 +33,7 @@ for (let i = 0; i < 30 && !t.includes('Contraseña'); i++) {
 await page.getByRole('textbox', { name: 'Email' }).fill(env.EXPO_PUBLIC_DEMO_EMAIL);
 await page.getByRole('textbox', { name: 'Contraseña' }).fill(env.EXPO_PUBLIC_DEMO_PASSWORD);
 await page.getByText('Entrar', { exact: true }).click();
-for (let i = 0; i < 30 && !t.includes('Tus paseos de hoy'); i++) {
+for (let i = 0; i < 30 && !t.includes('Tu jornada de hoy'); i++) {
   await page.waitForTimeout(1000);
   t = await texto();
 }

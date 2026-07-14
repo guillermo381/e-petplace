@@ -202,6 +202,36 @@ export async function obtenerCitasGroomingDelDia(
   return { ok: true, data: citas };
 }
 
+/**
+ * UNA cita de grooming por su id (S60-C2.1). La cura de raíz del
+ * "ya no disponible": el Antes resolvía la cita contra la lista del
+ * DÍA local — una cita de mañana (tapeable desde la SEMANA del HOY)
+ * jamás aparecía. La RLS (cita_select_prestador) es el guard; misma
+ * verdad firme y mismo shape que la lista.
+ */
+export async function obtenerCitaGroomingPorId(
+  citaId: string,
+): Promise<ResultadoWrapper<CitaAgendaPaseo, CodigoErrorGroomingAtencion>> {
+  const { data, error } = await getClient()
+    .from('evento_cita_servicio')
+    .select(
+      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
+    )
+    .eq('id', citaId)
+    .eq('tipo.categoria', 'grooming')
+    .in('estado', ['confirmada', 'en_curso', 'completada', 'no_show'])
+    .maybeSingle();
+
+  if (error) return fallo(error.message);
+  if (data === null) return fallo('cita_no_encontrada');
+  const atenciones = (data.atencion ?? []) as { estado: string; iniciada_en: string }[];
+  const atencion =
+    atenciones.length === 0
+      ? null
+      : atenciones.reduce((a, b) => (b.iniciada_en > a.iniciada_en ? b : a));
+  return { ok: true, data: { ...data, atencion, direccion: null } };
+}
+
 // ── 7.5: la verdad del estado por cita ──────────────────────────────────────
 
 export interface GroomingDeCita {

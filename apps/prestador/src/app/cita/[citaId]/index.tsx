@@ -33,8 +33,7 @@ import {
 } from '@epetplace/ui';
 import {
   iniciarAtencionPaseo,
-  obtenerCitasPaseoDelDia,
-  obtenerMiPrestador,
+  obtenerCitaPaseoPorId,
   obtenerPaseoPorCita,
   resolverUrlFoto,
   type CitaAgendaPaseo,
@@ -191,22 +190,16 @@ export default function DetalleCita() {
       return;
     }
 
-    // 2. sin_iniciar: datos de la cita desde la lista de HOY.
-    const prestador = await obtenerMiPrestador();
-    if (!prestador.ok) {
-      setPantalla({ estado: 'error', mensaje: prestador.mensaje });
+    // 2. sin_iniciar: la cita POR SU ID (cura S60-C2.1 ampliada — la
+    // lista del día dejaba fuera toda cita de otro día, y la SEMANA
+    // del HOY las hace tapeables; la RLS es el guard).
+    const rCita = await obtenerCitaPaseoPorId(citaId);
+    if (!rCita.ok) {
+      if (rCita.codigo === 'cita_no_encontrada') setPantalla({ estado: 'no_existe' });
+      else setPantalla({ estado: 'error', mensaje: rCita.mensaje });
       return;
     }
-    const dia = await obtenerCitasPaseoDelDia({ prestador_id: prestador.data.id, fecha: hoyLocal() });
-    if (!dia.ok) {
-      setPantalla({ estado: 'error', mensaje: dia.mensaje });
-      return;
-    }
-    const cita = dia.data.find((c) => c.id === citaId);
-    if (!cita) {
-      setPantalla({ estado: 'no_existe' });
-      return;
-    }
+    const cita = rCita.data;
     if (cita.mascota?.foto_url) {
       const url = await resolverUrlFoto(cita.mascota.foto_url);
       setFotoFirmada(url ?? undefined);
@@ -243,7 +236,13 @@ export default function DetalleCita() {
   const insignia = cita?.estado ? INSIGNIA_POR_ESTADO[cita.estado] : undefined;
   const hora = cita?.hora ? cita.hora.slice(0, 5) : '—';
   const dur = cita?.tipo.duracion_default_minutos;
-  const conCta = cita?.estado === 'confirmada';
+  // La cita de otro día se PREPARA pero no se EMPIEZA (S60-C2.1
+  // ampliada): iniciar hoy el paseo de mañana abriría el devengo
+  // anticipado al cerrarlo — el gate temporal del motor es pedido a la
+  // A; este es el guard de producto, CON su voz (jamás mudo).
+  const esDeHoy = cita?.fecha === hoyLocal();
+  const conCta = cita?.estado === 'confirmada' && esDeHoy;
+  const esFutura = cita?.estado === 'confirmada' && !esDeHoy;
 
   return (
     // S59-B1 (safe area): el Encabezado ya absorbe y PINTA el inset superior
@@ -377,7 +376,8 @@ export default function DetalleCita() {
             {/* A dónde ir — D-339: lo que la fila trae, null honesto */}
             <SeccionDireccion direccion={cita.direccion} />
 
-            {/* CTA único — solo confirmada y sin iniciar (dosis baja: tinta) */}
+            {/* CTA único — solo confirmada Y del día (dosis baja: tinta).
+                La futura dice su porqué — apagado jamás es mudo. */}
             {conCta && (
               <Boton
                 variante="primario"
@@ -386,6 +386,19 @@ export default function DetalleCita() {
                 cargando={iniciando}
                 onPress={() => void iniciar()}
               />
+            )}
+            {esFutura && (
+              <Text
+                style={{
+                  fontFamily: typography.family.sans.regular,
+                  fontSize: typography.size.sm,
+                  lineHeight: typography.size.sm * 1.4,
+                  color: theme.text.secondary,
+                  textAlign: 'center',
+                }}
+              >
+                {t('cita.empiezaElDia')}
+              </Text>
             )}
           </>
         )}

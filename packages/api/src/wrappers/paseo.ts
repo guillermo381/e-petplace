@@ -365,6 +365,38 @@ export async function obtenerCitasPaseoDelDia(
   return { ok: true, data: citas };
 }
 
+/**
+ * UNA cita de paseo por su id (S60-C2.1 ampliada — hunk aditivo B).
+ * La cura del gemelo del grooming: el detalle resolvía la cita contra
+ * la lista del DÍA local, y toda cita de otro día (tapeable desde la
+ * SEMANA del HOY, S57-B1) rebotaba "ya no disponible". La RLS
+ * (cita_select_prestador) es el guard; misma verdad firme y mismo
+ * shape que la lista — el snapshot de dirección viaja igual.
+ */
+export async function obtenerCitaPaseoPorId(
+  citaId: string,
+): Promise<ResultadoWrapper<CitaAgendaPaseo, CodigoErrorPaseo>> {
+  const { data, error } = await getClient()
+    .from('evento_cita_servicio')
+    .select(
+      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, direccion_snapshot, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
+    )
+    .eq('id', citaId)
+    .eq('tipo.categoria', 'paseo')
+    .in('estado', ['confirmada', 'en_curso', 'completada', 'no_show'])
+    .maybeSingle();
+
+  if (error) return mapeoErrorAResultado(error.message);
+  if (data === null) return mapeoErrorAResultado('cita_no_encontrada');
+  const atenciones = (data.atencion ?? []) as { estado: string; iniciada_en: string }[];
+  const atencion =
+    atenciones.length === 0
+      ? null
+      : atenciones.reduce((a, b) => (b.iniciada_en > a.iniciada_en ? b : a));
+  const { direccion_snapshot, ...resto } = data;
+  return { ok: true, data: { ...resto, atencion, direccion: parseDireccionSnapshot(direccion_snapshot) } };
+}
+
 // ── Track para el mapa del Cierre (lectura; decisión técnica B4.4:
 // el resumen server-side trae solo el conteo — los puntos viven en
 // eventos_mascota_paseo.track_gps y la RLS por mascota es el guard) ─────────

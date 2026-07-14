@@ -38,7 +38,7 @@ await esperar('Contraseña', 30);
 await page.getByRole('textbox', { name: 'Email' }).fill(env.EXPO_PUBLIC_DEMO_EMAIL);
 await page.getByRole('textbox', { name: 'Contraseña' }).fill(env.EXPO_PUBLIC_DEMO_PASSWORD);
 await page.getByText('Entrar', { exact: true }).click();
-await esperar('Tus paseos de hoy', 30);
+await esperar('Tu jornada de hoy', 30);
 
 // ── NEGOCIO: la sección "Tu oferta" despertó ──
 await page.goto('http://localhost:8081/negocio', { waitUntil: 'networkidle', timeout: 60000 });
