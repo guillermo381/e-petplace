@@ -411,6 +411,7 @@ export {
 // ── La atención de grooming (S60-B1 — hunk Sesión B) ────────────────────────
 export {
   agregarServicioGrooming,
+  agregarServicioGroomingEnCierre,
   cerrarGroomingConCalidad,
   iniciarAtencionGrooming,
   obtenerCitaGroomingPorId,

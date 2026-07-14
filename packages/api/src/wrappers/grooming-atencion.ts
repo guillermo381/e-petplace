@@ -526,6 +526,30 @@ export async function registrarEstadoPelajeGrooming(input: {
 }
 
 /**
+ * El servicio que faltó registrar, agregado EN EL CIERRE (S60-A3 pieza
+ * 2 — vía de reparación sobre el patrón de registrar_estado_pelaje_
+ * en_cierre): el groomer que terminó sin marcar servicios ya no queda
+ * bloqueado del cierre con calidad. Solo AGREGAR — quitar sigue siendo
+ * del Durante.
+ */
+export async function agregarServicioGroomingEnCierre(input: {
+  grooming_id: string;
+  servicio_codigo: string;
+  nota?: string;
+}): Promise<ResultadoWrapper<{ id: string }, CodigoErrorGroomingAtencion>> {
+  const { data, error } = await getClient().rpc('agregar_servicio_grooming_en_cierre', {
+    p_grooming_id: input.grooming_id,
+    p_servicio_codigo: input.servicio_codigo,
+    p_nota: input.nota ?? undefined,
+  });
+  if (error) return fallo(error.message);
+  if (!esObj(data) || data.ok !== true || typeof data.id !== 'string') {
+    return fallo('datos_inconsistentes');
+  }
+  return { ok: true, data: { id: data.id } };
+}
+
+/**
  * El estado de pelaje que faltó, registrado EN EL CIERRE (atención ya
  * 'terminada' — la única escritura que el motor permite post-terminar;
  * repara el piso §8 sin reabrir la sesión).
@@ -601,14 +625,20 @@ export async function terminarAtencionGrooming(
   return { ok: true, data: null };
 }
 
-/** Cierra con calidad: guards del piso §8 + devengo variante (b). */
+/**
+ * Cierra con calidad: guards del piso §8 + devengo variante (b).
+ * `proxima_sesion` (S60-A3 pieza 1): la fecha SUGERIDA §8 — jamás cita,
+ * no toca la agenda; viaja con el cierre (ISO YYYY-MM-DD).
+ */
 export async function cerrarGroomingConCalidad(input: {
   grooming_id: string;
   mensaje_familia?: string;
+  proxima_sesion?: string;
 }): Promise<ResultadoWrapper<null, CodigoErrorGroomingAtencion>> {
   const { data, error } = await getClient().rpc('cerrar_grooming_con_calidad', {
     p_grooming_id: input.grooming_id,
     p_mensaje_familia: input.mensaje_familia ?? undefined,
+    p_proxima_sesion: input.proxima_sesion ?? undefined,
   });
   if (error) return fallo(error.message);
   if (!esObj(data) || data.ok !== true) return fallo('datos_inconsistentes');
@@ -637,6 +667,8 @@ export interface ResumenCierreGrooming {
   incidencias: { id: string; codigo: string; nombre: string; descripcion: string | null; severidad: string | null }[];
   fotos_por_tipo: Record<string, FotoResumenGrooming[]>;
   fotos_total: number;
+  /** S60-A3 pieza 1: la fecha sugerida §8 (eco de la RPC) — NULL honesto. */
+  proxima_sesion_sugerida: string | null;
 }
 
 function leerTexto(v: unknown): string | null {
@@ -736,6 +768,7 @@ export async function obtenerResumenCierreGrooming(
       incidencias,
       fotos_por_tipo: fotosPorTipo,
       fotos_total: fotosTotal,
+      proxima_sesion_sugerida: leerTexto(data.proxima_sesion_sugerida),
     },
   };
 }

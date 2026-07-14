@@ -501,6 +501,13 @@ export const prestadorEn = {
     fotosSufijo: '{{n}} photos',
     cerradoMono: 'report sent',
     verTuDia: 'See your day',
+    // S61-B3.0 — las piezas S60-A3 cableadas · LOTE S61, GATE PENDIENTE
+    servicioAgregar: 'Add a service',
+    proximaSesion: 'Next session',
+    proximaSesionAyuda: 'A suggested date for the family — it does not touch your schedule.',
+    proximaSesionSugerir: 'Suggest a date',
+    proximaSesionEnSemanas: 'In {{n}} weeks',
+    proximaSesionQuitar: 'No suggestion',
     diaTitulo: 'Your grooming day',
     diaSesiones: 'Sessions',
     diaCerradas: 'Closed with report',

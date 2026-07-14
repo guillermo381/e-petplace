@@ -11,8 +11,15 @@
 //
 // 7.5: terminada → modo edición · cerrada_con_calidad → modo lectura ·
 // otros estados redirigen. Datos server-side (obtener_resumen_cierre).
-// Próxima sesión SUGERIDA (§8): SIN slot en DB hoy — pedido SQL a la A
-// emitido en el reporte S60-B1; nada se dibuja apagado.
+//
+// S61-B3.0 — las DOS piezas de S60-A3 cableadas:
+//   · PRÓXIMA SESIÓN SUGERIDA (§8: fecha, JAMÁS cita — no toca la
+//     agenda): Hoja con selector simple de horizontes (el groomer
+//     piensa en semanas); viaja con el cierre (p_proxima_sesion) y en
+//     lectura se muestra el eco de la RPC.
+//   · REPARACIÓN DE SERVICIOS post-terminar: agregar el servicio que
+//     faltó (agregar_servicio_grooming_en_cierre) — el guard de UI del
+//     Durante queda de cinturón; quitar sigue siendo del Durante.
 // ─────────────────────────────────────────────────────────────────────
 
 import { useCallback, useRef, useState } from 'react';
@@ -35,14 +42,18 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  agregarServicioGroomingEnCierre,
   cerrarGroomingConCalidad,
   obtenerEstadosPelajeCatalogo,
   obtenerGroomingPorCita,
   obtenerResumenCierreGrooming,
+  obtenerServiciosGroomingCatalogo,
   registrarEstadoPelajeEnCierre,
   type EstadoPelajeCatalogo,
   type ResumenCierreGrooming,
+  type ServicioGroomingCatalogo,
 } from '@epetplace/api';
+import { fechaCortaMono, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { verificarSesion } from '@/lib/api';
 import { useTraduccion } from '@/i18n';
@@ -58,13 +69,27 @@ type Pantalla =
       groomingId: string;
       resumen: ResumenCierreGrooming;
       estadosCatalogo: EstadoPelajeCatalogo[];
+      serviciosCatalogo: ServicioGroomingCatalogo[];
     };
+
+// Los horizontes del selector simple (§8, "v1 usa selector simple"):
+// el groomer piensa en semanas; el resultado es una FECHA.
+const HORIZONTES_SEMANAS = [2, 4, 6, 8] as const;
+
+// Fecha local + n días, por partes literales (jamás toISOString — el
+// hallazgo S55/D-312: corre el día en UTC-5).
+function fechaLocalEnDias(dias: number): string {
+  const hoy = new Date();
+  return new Intl.DateTimeFormat('en-CA').format(
+    new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + dias),
+  );
+}
 
 export default function CierreGrooming() {
   const { theme } = useTheme();
   const router = useRouter();
   const { mostrar } = useAviso();
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
   const { citaId = '' } = useLocalSearchParams<{ citaId: string }>();
 
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
@@ -75,6 +100,14 @@ export default function CierreGrooming() {
   const [hojaMomento, setHojaMomento] = useState<Momento | null>(null);
   const [estadoSel, setEstadoSel] = useState<string | null>(null);
   const [guardandoEstado, setGuardandoEstado] = useState(false);
+  // reparar el servicio que faltó (S60-A3 pieza 2)
+  const [hojaServicio, setHojaServicio] = useState(false);
+  const [servicioSel, setServicioSel] = useState<string | null>(null);
+  const [agregandoServicio, setAgregandoServicio] = useState(false);
+  // la fecha sugerida §8 (S60-A3 pieza 1) — viaja con el cierre
+  const [hojaFecha, setHojaFecha] = useState(false);
+  const [fechaSel, setFechaSel] = useState<string | null>(null);
+  const [fechaBorrador, setFechaBorrador] = useState<string | null>(null);
 
   const cargar = useCallback(
     async (silencioso = false) => {
@@ -97,9 +130,10 @@ export default function CierreGrooming() {
         router.replace({ pathname: '/grooming/cita/[citaId]/durante', params: { citaId } });
         return;
       }
-      const [resumen, estados] = await Promise.all([
+      const [resumen, estados, servicios] = await Promise.all([
         obtenerResumenCierreGrooming(g.data.grooming_id),
         obtenerEstadosPelajeCatalogo(),
+        obtenerServiciosGroomingCatalogo(),
       ]);
       if (!resumen.ok) {
         setPantalla({ estado: 'error', mensaje: resumen.mensaje });
@@ -109,6 +143,10 @@ export default function CierreGrooming() {
         setPantalla({ estado: 'error', mensaje: estados.mensaje });
         return;
       }
+      if (!servicios.ok) {
+        setPantalla({ estado: 'error', mensaje: servicios.mensaje });
+        return;
+      }
       if (resumen.data.mensaje_familia !== null) setMensaje(resumen.data.mensaje_familia);
       setPantalla({
         estado: 'listo',
@@ -116,6 +154,7 @@ export default function CierreGrooming() {
         groomingId: g.data.grooming_id,
         resumen: resumen.data,
         estadosCatalogo: estados.data,
+        serviciosCatalogo: servicios.data,
       });
     },
     [citaId, router],
@@ -135,6 +174,7 @@ export default function CierreGrooming() {
     const r = await cerrarGroomingConCalidad({
       grooming_id: pantalla.groomingId,
       mensaje_familia: cuerpo.length > 0 ? cuerpo : undefined,
+      proxima_sesion: fechaSel ?? undefined,
     });
     setCerrando(false);
     cerrandoRef.current = false;
@@ -145,6 +185,23 @@ export default function CierreGrooming() {
       return;
     }
     mostrar({ variante: 'exito', texto: t('cita.parteEnviado') });
+    void cargar(true);
+  }
+
+  async function agregarServicio() {
+    if (servicioSel === null || agregandoServicio || pantalla.estado !== 'listo') return;
+    setAgregandoServicio(true);
+    const r = await agregarServicioGroomingEnCierre({
+      grooming_id: pantalla.groomingId,
+      servicio_codigo: servicioSel,
+    });
+    setAgregandoServicio(false);
+    if (!r.ok) {
+      mostrar({ variante: 'error', texto: r.mensaje });
+      return;
+    }
+    setHojaServicio(false);
+    setServicioSel(null);
     void cargar(true);
   }
 
@@ -291,10 +348,59 @@ export default function CierreGrooming() {
                       <Insignia key={s.codigo} estado="alDia" etiqueta={s.nombre} tamaño="sm" />
                     ))}
                   </View>
+                  {/* la reparación (S60-A3 pieza 2): el servicio que faltó
+                      se agrega ACÁ — sin volver al Durante ni reabrir */}
+                  {listo.modo === 'edicion' && (
+                    <View style={{ alignSelf: 'flex-start' }}>
+                      <Boton
+                        variante="ghost"
+                        tamaño="sm"
+                        etiqueta={t('citaGrooming.servicioAgregar')}
+                        onPress={() => {
+                          setServicioSel(null);
+                          setHojaServicio(true);
+                        }}
+                      />
+                    </View>
+                  )}
                 </View>
                 {resumen.fotos_total > 0 && (
                   <Text style={mono}>{t('citaGrooming.fotosSufijo', { n: resumen.fotos_total })}</Text>
                 )}
+                {/* la fecha sugerida §8 (S60-A3 pieza 1): fecha, jamás
+                    cita — en edición se elige (Hoja), en lectura es dato */}
+                {listo.modo === 'edicion' ? (
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      gap: spacing[3],
+                    }}
+                  >
+                    <Text style={vozSecundaria}>{t('citaGrooming.proximaSesion')}</Text>
+                    <Boton
+                      variante="ghost"
+                      tamaño="sm"
+                      etiqueta={
+                        fechaSel !== null
+                          ? fechaCortaMono(fechaSel, idioma as IdiomaSoportado)
+                          : t('citaGrooming.proximaSesionSugerir')
+                      }
+                      onPress={() => {
+                        setFechaBorrador(fechaSel);
+                        setHojaFecha(true);
+                      }}
+                    />
+                  </View>
+                ) : resumen.proxima_sesion_sugerida !== null ? (
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: spacing[3] }}>
+                    <Text style={vozSecundaria}>{t('citaGrooming.proximaSesion')}</Text>
+                    <Text style={{ ...mono, color: theme.text.primary }}>
+                      {fechaCortaMono(resumen.proxima_sesion_sugerida, idioma as IdiomaSoportado)}
+                    </Text>
+                  </View>
+                ) : null}
               </View>
             </Tarjeta>
 
@@ -401,6 +507,86 @@ export default function CierreGrooming() {
             cargando={guardandoEstado}
             onPress={() => void repararEstado()}
           />
+        </View>
+      </Hoja>
+
+      {/* Hoja: agregar el servicio que faltó (S60-A3 pieza 2 — solo los
+          NO aplicados; el motor rebota el duplicado de todas formas) */}
+      <Hoja
+        visible={hojaServicio}
+        onCerrar={() => {
+          if (!agregandoServicio) {
+            setHojaServicio(false);
+            setServicioSel(null);
+          }
+        }}
+        titulo={t('citaGrooming.servicioAgregar')}
+      >
+        <View style={{ padding: spacing[4], gap: spacing[4] }}>
+          <SelectorOpcion
+            etiqueta={t('citaGrooming.serviciosAplicados')}
+            disposicion="grilla"
+            opciones={
+              listo === null
+                ? []
+                : listo.serviciosCatalogo
+                    .filter((s) => !listo.resumen.servicios_aplicados.some((a) => a.codigo === s.codigo))
+                    .map((s) => ({ codigo: s.codigo, etiqueta: s.nombre }))
+            }
+            seleccionada={servicioSel ?? undefined}
+            onSelect={(codigo) => setServicioSel(codigo)}
+          />
+          <Boton
+            variante="primario"
+            bloque
+            etiqueta={t('citaGrooming.servicioAgregar')}
+            deshabilitado={servicioSel === null}
+            cargando={agregandoServicio}
+            onPress={() => void agregarServicio()}
+          />
+        </View>
+      </Hoja>
+
+      {/* Hoja: la fecha sugerida §8 — selector simple de horizontes; el
+          resultado es una FECHA que viaja con el cierre, jamás una cita */}
+      <Hoja visible={hojaFecha} onCerrar={() => setHojaFecha(false)} titulo={t('citaGrooming.proximaSesion')}>
+        <View style={{ padding: spacing[4], gap: spacing[4] }}>
+          <Text style={vozSecundaria}>{t('citaGrooming.proximaSesionAyuda')}</Text>
+          <SelectorOpcion
+            etiqueta={t('citaGrooming.proximaSesionSugerir')}
+            disposicion="grilla"
+            opciones={HORIZONTES_SEMANAS.map((n) => {
+              const iso = fechaLocalEnDias(n * 7);
+              return {
+                codigo: iso,
+                etiqueta: `${t('citaGrooming.proximaSesionEnSemanas', { n })} · ${fechaCortaMono(iso, idioma as IdiomaSoportado)}`,
+              };
+            })}
+            seleccionada={fechaBorrador ?? undefined}
+            onSelect={(codigo) => setFechaBorrador(codigo)}
+          />
+          <Boton
+            variante="primario"
+            bloque
+            etiqueta={t('citaGrooming.proximaSesionSugerir')}
+            deshabilitado={fechaBorrador === null}
+            onPress={() => {
+              setFechaSel(fechaBorrador);
+              setHojaFecha(false);
+            }}
+          />
+          {fechaSel !== null && (
+            <Boton
+              variante="ghost"
+              bloque
+              etiqueta={t('citaGrooming.proximaSesionQuitar')}
+              onPress={() => {
+                setFechaSel(null);
+                setFechaBorrador(null);
+                setHojaFecha(false);
+              }}
+            />
+          )}
         </View>
       </Hoja>
     </View>
