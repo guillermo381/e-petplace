@@ -58,7 +58,9 @@ import {
 import { fechaCortaMono, obtenerIdiomaActual } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 
-type Segmento = 'proximos' | 'agenda' | 'historial';
+// S60-A6 pieza 2 (D-366): el tap Agenda MURIÓ fusionado en Próximos —
+// enmienda DECLARADA de D-366, no reapertura del servicio cerrado.
+type Segmento = 'proximos' | 'historial';
 
 function hoyLocal(): string {
   return new Intl.DateTimeFormat('en-CA').format(new Date());
@@ -84,6 +86,9 @@ export default function MisPaseos() {
   const [guardandoMovida, setGuardandoMovida] = useState(false);
   // P18/P16b: el DETALLE de la cita (suelta o de paquete) con sus acciones
   const [detalle, setDetalle] = useState<CitaPaseoDueno | null>(null);
+  // S60-A6: ventana de la lista fusionada (10 + "Cargar más" — patrón
+  // del pie de LineaDeVida; jamás lista infinita sin paginar)
+  const [ventana, setVentana] = useState(10);
   const [accionando, setAccionando] = useState(false);
   // Reagendar el suelto (P18 a/b): oferta resuelta + día + horas reales
   const [reagendando, setReagendando] = useState<{ cita: CitaPaseoDueno; ofertaId: string } | 'resolviendo' | null>(null);
@@ -263,7 +268,6 @@ export default function MisPaseos() {
 
   const hoy = hoyLocal();
   const listaPlanes = Array.isArray(planes) ? planes : [];
-  const activos = listaPlanes.filter((p) => p.estado === 'activa');
   // D-343: los paquetes con saldo vigente (el vencido/agotado va al historial implícito)
   const paquetesVigentes = paquetes.filter(
     (p) => p.estado === 'activo' && p.saldo > 0 && (p.fecha_vencimiento === null || p.fecha_vencimiento >= hoy),
@@ -271,6 +275,24 @@ export default function MisPaseos() {
   const librasProximas = citasLibres.filter((c) => c.estado === 'confirmada' && c.fecha >= hoy);
   const librasPasadas = citasLibres.filter((c) => c.estado !== 'confirmada' || c.fecha < hoy);
   const hayAlgo = listaPlanes.length > 0 || paquetesVigentes.length > 0 || citasLibres.length > 0;
+
+  // S60-A6 pieza 2 — LA LISTA FUSIONADA (enmienda declarada de D-366):
+  // TODAS las citas futuras (suelta / paquete / plan) en UNA cronología
+  // con el origen marcado; el tap abre SUS acciones (P18 el detalle del
+  // suelto/paquete; P14 el Mover del plan — la acción exclusiva del tap
+  // Agenda migró acá, no se perdió). Los PRODUCTOS (saldo del paquete,
+  // tarjeta del plan) conservan su lugar arriba: no son citas.
+  type CitaFusionada =
+    | { clase: 'libre'; cita: CitaPaseoDueno }
+    | { clase: 'plan'; cita: CitaDePlan; plan: PlanPaseo };
+  const futurasFusionadas: CitaFusionada[] = [
+    ...librasProximas.map((c) => ({ clase: 'libre' as const, cita: c })),
+    ...listaPlanes.flatMap((p) =>
+      (citas[p.id] ?? [])
+        .filter((c) => c.estado === 'confirmada' && c.fecha >= hoy)
+        .map((c) => ({ clase: 'plan' as const, cita: c, plan: p })),
+    ),
+  ].sort((a, b) => (`${a.cita.fecha}T${a.cita.hora}` < `${b.cita.fecha}T${b.cita.hora}` ? -1 : 1));
 
   function vozEstado(p: PlanPaseo): { etiqueta: string; estado: 'alDia' | 'info' } {
     if (p.estado === 'activa' && p.auto_renovar) return { etiqueta: t('plan.estadoActiva'), estado: 'alDia' };
@@ -340,11 +362,12 @@ export default function MisPaseos() {
             etiqueta={t('plan.hubTitulo')}
             segmentos={[
               { codigo: 'proximos', etiqueta: t('plan.segProximos') },
-              { codigo: 'agenda', etiqueta: t('plan.segAgenda') },
               { codigo: 'historial', etiqueta: t('plan.segHistorial') },
             ]}
             activo={segmento}
-            onCambio={(codigo) => setSegmento(codigo as Segmento)}
+            onCambio={(codigo) => {
+              if (codigo === 'proximos' || codigo === 'historial') setSegmento(codigo);
+            }}
           />
 
           {segmento === 'proximos' ? (
@@ -392,29 +415,13 @@ export default function MisPaseos() {
                   ) : null}
                 </Tarjeta>
               ))}
-              {/* P18: los paseos sueltos y de paquete que vienen */}
-              {librasProximas.length > 0 ? (
-                <Tarjeta relleno="ninguno">
-                  {librasProximas.map((c, i) => (
-                    <View key={c.id}>
-                      {i > 0 ? <Separador /> : null}
-                      <Celda
-                        interactiva
-                        accessibilityRole="button"
-                        titulo={fechaCortaMono(c.fecha, idioma)}
-                        subtitulo={t(c.origen === 'paquete' ? 'paquete.citaDePaquete' : 'suelto.citaSuelta')}
-                        metadataMono={`${c.hora.slice(0, 5)} · ${c.duracion_minutos} min`}
-                        onPress={() => setDetalle(c)}
-                      />
-                    </View>
-                  ))}
-                </Tarjeta>
-              ) : null}
               {listaPlanes.map((p) => {
                 const estado = vozEstado(p);
-                const proximas = (citas[p.id] ?? []).filter((c) => c.estado === 'confirmada' && c.fecha >= hoy).slice(0, 3);
                 return (
                   <Tarjeta key={p.id} relleno="ninguno">
+                    {/* S60-A6: las próximas del plan MIGRARON a la lista
+                        fusionada de abajo — la tarjeta queda PRODUCTO
+                        puro (estado, renovación, pausa; D-343 intacto). */}
                     <Celda
                       titulo={`${t('explorar.paseoTitulo')} · ${p.duracion_minutos} min`}
                       subtitulo={t(p.auto_renovar && p.estado === 'activa' ? 'plan.renuevaEl' : 'plan.terminaEl', {
@@ -422,12 +429,6 @@ export default function MisPaseos() {
                       })}
                       fin={<Insignia estado={estado.estado} etiqueta={estado.etiqueta} />}
                     />
-                    {proximas.map((c) => (
-                      <View key={c.id}>
-                        <Separador />
-                        <Celda titulo={fechaCortaMono(c.fecha, idioma)} metadataMono={`${c.hora.slice(0, 5)} · ${c.duracion_minutos} min`} />
-                      </View>
-                    ))}
                     {p.estado === 'activa' ? (
                       <>
                         <Separador />
@@ -445,68 +446,55 @@ export default function MisPaseos() {
                   </Tarjeta>
                 );
               })}
-            </View>
-          ) : segmento === 'agenda' ? (
-            <View style={{ gap: spacing[4] }}>
-              {/* P18: las acciones del suelto/paquete viven en el DETALLE */}
-              {librasProximas.length > 0 ? (
+
+              {/* S60-A6 — LA LISTA FUSIONADA: toda cita futura, UNA
+                  cronología con el origen marcado; el tap abre SUS
+                  acciones (detalle P18 / Mover P14). Ventana de 10 con
+                  "Cargar más" — jamás lista infinita sin paginar. */}
+              {futurasFusionadas.length > 0 ? (
                 <Tarjeta relleno="ninguno">
-                  {librasProximas.map((c, i) => (
-                    <View key={c.id}>
+                  {futurasFusionadas.slice(0, ventana).map((f, i) => (
+                    <View key={f.cita.id}>
                       {i > 0 ? <Separador /> : null}
                       <Celda
-                        titulo={fechaCortaMono(c.fecha, idioma)}
-                        subtitulo={t(c.origen === 'paquete' ? 'paquete.citaDePaquete' : 'suelto.citaSuelta')}
-                        metadataMono={`${c.hora.slice(0, 5)} · ${c.duracion_minutos} min`}
-                        fin={
-                          <Boton
-                            variante="compacto"
-                            tamaño="sm"
-                            etiqueta={t('suelto.modificar')}
-                            onPress={() => setDetalle(c)}
-                          />
-                        }
+                        interactiva
+                        accessibilityRole="button"
+                        titulo={fechaCortaMono(f.cita.fecha, idioma)}
+                        subtitulo={t(
+                          f.clase === 'plan'
+                            ? 'plan.citaDePlan'
+                            : f.cita.origen === 'paquete'
+                              ? 'paquete.citaDePaquete'
+                              : 'suelto.citaSuelta',
+                        )}
+                        metadataMono={`${f.cita.hora.slice(0, 5)} · ${f.cita.duracion_minutos} min`}
+                        onPress={() => {
+                          if (f.clase === 'plan') {
+                            setMoviendo({ cita: f.cita, plan: f.plan });
+                            setFechaNueva(null);
+                            setHorasNuevas(null);
+                          } else {
+                            setDetalle(f.cita);
+                          }
+                        }}
                       />
                     </View>
                   ))}
+                  {futurasFusionadas.length > ventana ? (
+                    <>
+                      <Separador />
+                      <View style={{ padding: spacing[3] }}>
+                        <Boton
+                          variante="compacto"
+                          tamaño="sm"
+                          etiqueta={t('plan.cargarMas')}
+                          onPress={() => setVentana((v) => v + 10)}
+                        />
+                      </View>
+                    </>
+                  ) : null}
                 </Tarjeta>
               ) : null}
-              {activos.length === 0 && librasProximas.length === 0 ? (
-                <EstadoVacio registro="seccion" titulo={t('plan.vacioSegmento')} />
-              ) : (
-                activos.map((p) => {
-                  const delPeriodo = (citas[p.id] ?? []).filter((c) => c.estado === 'confirmada' && c.fecha >= hoy);
-                  return (
-                    <Tarjeta key={p.id} relleno="ninguno">
-                      {delPeriodo.length === 0 ? (
-                        <Celda titulo={t('plan.vacioSegmento')} />
-                      ) : (
-                        delPeriodo.map((c, i) => (
-                          <View key={c.id}>
-                            {i > 0 ? <Separador /> : null}
-                            <Celda
-                              titulo={fechaCortaMono(c.fecha, idioma)}
-                              metadataMono={`${c.hora.slice(0, 5)} · ${c.duracion_minutos} min`}
-                              fin={
-                                <Boton
-                                  variante="compacto"
-                                  tamaño="sm"
-                                  etiqueta={t('plan.mover')}
-                                  onPress={() => {
-                                    setMoviendo({ cita: c, plan: p });
-                                    setFechaNueva(null);
-                                    setHorasNuevas(null);
-                                  }}
-                                />
-                              }
-                            />
-                          </View>
-                        ))
-                      )}
-                    </Tarjeta>
-                  );
-                })
-              )}
             </View>
           ) : (
             <View style={{ gap: spacing[4] }}>

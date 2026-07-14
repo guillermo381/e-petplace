@@ -498,8 +498,10 @@ export const clienteEs = {
     exito: 'Plan contratado — {{n}} salidas quedaron agendadas.',
     hubTitulo: 'Mis paseos',
     segProximos: 'Próximos',
-    segAgenda: 'Agenda',
     segHistorial: 'Historial',
+    // S60-A6 pieza 2 — la lista fusionada (LOTE S60): Agenda murió
+    citaDePlan: 'De tu plan',
+    cargarMas: 'Cargar más',
     estadoActiva: 'Activo',
     estadoPausada: 'Renovación pausada',
     estadoVencida: 'Terminado',
@@ -569,7 +571,6 @@ export const clienteEs = {
   // S57-A P18 — cancelación y reagenda del paseo suelto. GATE PENDIENTE founder (lote S57).
   suelto: {
     citaSuelta: 'Paseo suelto',
-    modificar: 'Modificar',
     detalleTitulo: 'Este paseo',
     ventanasVoz: 'Puedes cancelar hasta un día antes; después, solo reagendarlo. Con menos de 2 horas, el paseo se pierde.',
     reagendar: 'Reagendar',

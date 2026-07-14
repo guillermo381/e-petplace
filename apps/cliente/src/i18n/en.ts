@@ -462,8 +462,10 @@ export const clienteEn = {
     exito: 'Plan started — {{n}} walks are booked.',
     hubTitulo: 'My walks',
     segProximos: 'Upcoming',
-    segAgenda: 'Schedule',
     segHistorial: 'History',
+    // S60-A6 piece 2 — the fused list (LOTE S60): Schedule tab died
+    citaDePlan: 'From your plan',
+    cargarMas: 'Load more',
     estadoActiva: 'Active',
     estadoPausada: 'Renewal paused',
     estadoVencida: 'Ended',
@@ -531,7 +533,6 @@ export const clienteEn = {
   // S57-A P18 — single walk cancellation and rescheduling. GATE PENDIENTE founder (lote S57).
   suelto: {
     citaSuelta: 'Single walk',
-    modificar: 'Modify',
     detalleTitulo: 'This walk',
     ventanasVoz: 'You can cancel up to a day before; after that, you can only reschedule. With less than 2 hours, the walk is lost.',
     reagendar: 'Reschedule',
