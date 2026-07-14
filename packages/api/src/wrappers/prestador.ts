@@ -24,6 +24,8 @@ const MENSAJES: Record<CodigoErrorPrestador | 'error_desconocido' | 'datos_incon
 // S60-B2 (hunk aditivo): la sección ENTIDAD de Cuenta·Tu perfil (P17
 // v1.1, visto del arquitecto): descripcion + contacto (editables) y
 // estado (solo lectura; el admin lo gobierna).
+// S61 domicilio v1 (hunk aditivo): grooming_recargo_domicilio — el
+// espejo del extra de pelaje (numeric NULL honesto, CHECK >= 0).
 export type MiPrestador = Pick<
   Database['public']['Tables']['prestadores']['Row'],
   | 'id'
@@ -33,6 +35,7 @@ export type MiPrestador = Pick<
   | 'direccion'
   | 'ciudad'
   | 'grooming_extra_pelaje_largo'
+  | 'grooming_recargo_domicilio'
   | 'descripcion'
   | 'telefono'
   | 'whatsapp'
@@ -52,7 +55,7 @@ export async function obtenerMiPrestador(): Promise<
   const { data, error } = await getClient()
     .from('prestadores')
     .select(
-      'id, nombre_comercial, tipo, country_code, direccion, ciudad, grooming_extra_pelaje_largo, descripcion, telefono, whatsapp, email_contacto, sitio_web, estado',
+      'id, nombre_comercial, tipo, country_code, direccion, ciudad, grooming_extra_pelaje_largo, grooming_recargo_domicilio, descripcion, telefono, whatsapp, email_contacto, sitio_web, estado',
     )
     .eq('user_id', uid)
     .maybeSingle();

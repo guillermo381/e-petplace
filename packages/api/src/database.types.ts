@@ -1536,6 +1536,8 @@ export type Database = {
           descripcion: string | null
           es_seed_preliminar: boolean
           nombre: string
+          nombre_familia: string
+          nombre_familia_en: string
           orden_display: number
           pais_codigo: string | null
           updated_at: string
@@ -1547,6 +1549,8 @@ export type Database = {
           descripcion?: string | null
           es_seed_preliminar?: boolean
           nombre: string
+          nombre_familia: string
+          nombre_familia_en: string
           orden_display?: number
           pais_codigo?: string | null
           updated_at?: string
@@ -1558,6 +1562,8 @@ export type Database = {
           descripcion?: string | null
           es_seed_preliminar?: boolean
           nombre?: string
+          nombre_familia?: string
+          nombre_familia_en?: string
           orden_display?: number
           pais_codigo?: string | null
           updated_at?: string
@@ -7117,6 +7123,7 @@ export type Database = {
           id: string
           mascota_id: string
           prestador_id: string
+          proxima_sesion_sugerida: string | null
           tipo_pelaje_observado: string | null
           updated_at: string
         }
@@ -7128,6 +7135,7 @@ export type Database = {
           id?: string
           mascota_id: string
           prestador_id: string
+          proxima_sesion_sugerida?: string | null
           tipo_pelaje_observado?: string | null
           updated_at?: string
         }
@@ -7139,6 +7147,7 @@ export type Database = {
           id?: string
           mascota_id?: string
           prestador_id?: string
+          proxima_sesion_sugerida?: string | null
           tipo_pelaje_observado?: string | null
           updated_at?: string
         }
@@ -10712,6 +10721,8 @@ export type Database = {
       prestador_servicios: {
         Row: {
           activo: boolean
+          atiende_domicilio: boolean
+          atiende_local: boolean
           config: Json
           created_at: string
           descripcion: string | null
@@ -10728,6 +10739,8 @@ export type Database = {
         }
         Insert: {
           activo?: boolean
+          atiende_domicilio?: boolean
+          atiende_local?: boolean
           config?: Json
           created_at?: string
           descripcion?: string | null
@@ -10744,6 +10757,8 @@ export type Database = {
         }
         Update: {
           activo?: boolean
+          atiende_domicilio?: boolean
+          atiende_local?: boolean
           config?: Json
           created_at?: string
           descripcion?: string | null
@@ -10836,6 +10851,7 @@ export type Database = {
           foto_url: string | null
           fotos_galeria: Json | null
           grooming_extra_pelaje_largo: number | null
+          grooming_recargo_domicilio: number | null
           id: string
           lat: number | null
           lon: number | null
@@ -10871,6 +10887,7 @@ export type Database = {
           foto_url?: string | null
           fotos_galeria?: Json | null
           grooming_extra_pelaje_largo?: number | null
+          grooming_recargo_domicilio?: number | null
           id?: string
           lat?: number | null
           lon?: number | null
@@ -10906,6 +10923,7 @@ export type Database = {
           foto_url?: string | null
           fotos_galeria?: Json | null
           grooming_extra_pelaje_largo?: number | null
+          grooming_recargo_domicilio?: number | null
           id?: string
           lat?: number | null
           lon?: number | null
@@ -14837,6 +14855,14 @@ export type Database = {
         }
         Returns: Json
       }
+      agregar_servicio_grooming_en_cierre: {
+        Args: {
+          p_grooming_id: string
+          p_nota?: string
+          p_servicio_codigo: string
+        }
+        Returns: Json
+      }
       agregar_zona_grooming: {
         Args: { p_grooming_id: string; p_nota?: string; p_zona_codigo: string }
         Returns: Json
@@ -14870,7 +14896,11 @@ export type Database = {
       }
       cancelar_reserva_paquete: { Args: { p_cita_id: string }; Returns: Json }
       cerrar_grooming_con_calidad: {
-        Args: { p_grooming_id: string; p_mensaje_familia?: string }
+        Args: {
+          p_grooming_id: string
+          p_mensaje_familia?: string
+          p_proxima_sesion?: string
+        }
         Returns: Json
       }
       cerrar_paseo_con_calidad: {

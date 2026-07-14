@@ -1637,6 +1637,9 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 #### D-391 — EDITAR una franja de horario en su lugar
 🟡 ALTA. Hoy el flujo es eliminar + crear (pulgar founder S60): la franja no se edita en su lugar — cambiar el rango horario obliga a matarla y nacer otra (`actualizarFranjaHorario` solo toca activo/cupo). **Disparo: Bloque 2 de S61 — la cirugía de horarios la absorbe.** Origen: S60 (pulgar founder), registrada en el cierre documental S61-A0.
 
+#### D-392 — Domicilio v1: el motor no filtra por modalidad ni cobra el recargo
+🟡 ALTA. Las columnas del DÓNDE existen (S61: `prestador_servicios.atiende_local/atiende_domicilio` + `prestadores.grooming_recargo_domicilio`, espejo del extra de pelaje) y el wizard del groomer las escribe, pero **el motor sigue ciego a la modalidad**: `obtener_groomers_disponibles` oferta igual (todo es local hoy) y el snapshot de precio del hold NO suma el recargo. Ambas patas entran JUNTAS con la mitad del dueño — el selector de modalidad en la reserva + la letra del checkout (base + recargo DECLARADO, jamás sumado en silencio). **Disparo: la construcción de la mitad del dueño de domicilio.** Origen: S61 (pedido SQL v2 del arquitecto, motor declarado-no-tocado a propósito).
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)

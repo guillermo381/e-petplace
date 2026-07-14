@@ -30,6 +30,7 @@ export {
   type NovedadDeAtencion,
   type DetalleAtencion,
   type PuntoTrack,
+  type ServicioAplicadoFamilia,
   type CodigoErrorTimeline,
 } from './wrappers/timeline';
 export type { ResultadoWrapper } from './resultado';
@@ -369,6 +370,7 @@ export {
   SERVICIOS_GROOMING,
   TALLAS_GROOMING,
   actualizarExtraPelajeLargo,
+  actualizarRecargoDomicilio,
   guardarServicioGrooming,
   obtenerOfertasGroomingPropias,
   type CodigoErrorGrooming,

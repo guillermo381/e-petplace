@@ -402,6 +402,9 @@ export const clienteEn = {
     vivoEstado: "{{nombre}} is in their groomer's hands.",
     vivoEstadoGenerico: "Your pet is in their groomer's hands.",
     fotosDeLaSesion: 'Session photos',
+    // S61-A2 — the full report card (LOTE S61, GATE PENDIENTE founder)
+    parteCuidados: "The session's care",
+    proximaSugerida: 'Suggested next session: {{fecha}}',
     // S60-A4 — the owner's hub (LOTE S60)
     hubTitulo: 'My grooming sessions',
     agendar: 'Book a session',

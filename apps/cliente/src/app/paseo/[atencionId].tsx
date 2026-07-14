@@ -414,6 +414,29 @@ export default function DetallePaseo() {
           </View>
         ) : null}
 
+        {/* S61-A2 (D-387): los cuidados de la sesión en VOZ DE FAMILIA —
+            chips del catálogo (nombre_familia es/en), jamás el código.
+            Pinta también EN VIVO (mismo wrapper — el dueño ve lo que ya
+            se hizo mientras la sesión corre, §8 estado y novedades). */}
+        {detalle.servicios_aplicados.length > 0 ? (
+          <View style={{ gap: spacing[2] }}>
+            <Text
+              style={{
+                fontFamily: typography.family.sans.medium,
+                fontSize: typography.size.sm,
+                color: theme.text.secondary,
+              }}
+            >
+              {t('grooming.parteCuidados')}
+            </Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
+              {detalle.servicios_aplicados.map((s) => (
+                <Insignia key={s.codigo} estado="info" etiqueta={idioma === 'en' ? s.voz_en : s.voz} />
+              ))}
+            </View>
+          </View>
+        ) : null}
+
         {/* cierre emocional: la palabra del paseador, VERBATIM */}
         {detalle.mensaje_familia !== null ? (
           <>
@@ -444,6 +467,22 @@ export default function DetallePaseo() {
               </Text>
             </Tarjeta>
           </>
+        ) : null}
+
+        {/* S61-A2: la próxima sesión sugerida (§8 — FECHA, jamás cita)
+            en voz humana; null honesto = la línea no existe. */}
+        {detalle.proxima_sesion_sugerida !== null ? (
+          <Text
+            style={{
+              fontFamily: typography.family.sans.regular,
+              fontSize: typography.size.sm,
+              color: theme.text.secondary,
+            }}
+          >
+            {t('grooming.proximaSugerida', {
+              fecha: fechaLargaHumana(detalle.proxima_sesion_sugerida, idioma),
+            })}
+          </Text>
         ) : null}
       </ScrollView>
 

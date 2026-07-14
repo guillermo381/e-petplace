@@ -201,6 +201,14 @@ export interface PuntoTrack {
   ts?: string;
 }
 
+/** S61-A2 (D-387): un registrable aplicado, ya con su voz de familia
+ *  bilingüe del catálogo (fallback: la voz de oficio `nombre`). */
+export interface ServicioAplicadoFamilia {
+  codigo: string;
+  voz: string;
+  voz_en: string;
+}
+
 export interface DetalleAtencion {
   atencion_id: string;
   evento_id: string | null;
@@ -214,6 +222,12 @@ export interface DetalleAtencion {
   track_gps: PuntoTrack[];
   novedades: NovedadDeAtencion[];
   fotos: FotoDeEvento[];
+  /** S61-A2: los cuidados de la sesión de grooming en voz de familia
+   *  (D-387) — vacío en paseo o sin registros. */
+  servicios_aplicados: ServicioAplicadoFamilia[];
+  /** S61-A2: la fecha sugerida por el groomer (§8 — FECHA, jamás cita);
+   *  null honesto en paseo o sin sugerencia. */
+  proxima_sesion_sugerida: string | null;
   /** S60 (hunk aditivo A): la mascota de la atención — el vivo del
    *  grooming la hace presidir (avatar + estado). */
   mascota_id: string | null;
@@ -254,14 +268,76 @@ export async function leerDetalleAtencion(
   // paseo ya se pidió; grooming solo se consulta si paseo no existe
   // (una atención tiene UNA fila de oficio). RLS: grooming_select por
   // user_tiene_acceso_a_mascota — el dueño lee.
+  // S61-A2: la rama grooming trae EL PARTE ENTERO — sugerida (§8),
+  // cuidados con voz de familia (D-387) y las fotos de SU bucket
+  // (grooming-archivos; la policy de acceso-por-mascota nació en la
+  // migración 20260714060000 — sin ella el dueño no firmaba la URL).
   let oficio: 'paseo' | 'grooming' | null = paseo.data !== null ? 'paseo' : null;
+  let proximaSugerida: string | null = null;
+  let serviciosAplicados: ServicioAplicadoFamilia[] = [];
+  const fotosGrooming: FotoDeEvento[] = [];
   if (oficio === null) {
     const g = await getClient()
       .from('eventos_mascota_grooming')
-      .select('id')
+      .select('id, proxima_sesion_sugerida')
       .eq('evento_atencion_id', atencionId)
       .maybeSingle();
-    if (!g.error && g.data !== null) oficio = 'grooming';
+    if (!g.error && g.data !== null) {
+      oficio = 'grooming';
+      proximaSugerida = g.data.proxima_sesion_sugerida ?? null;
+
+      const [aplicados, archivos] = await Promise.all([
+        getClient()
+          .from('evento_grooming_servicios_aplicados')
+          .select('servicio_codigo, orden')
+          .eq('grooming_id', g.data.id)
+          .order('orden', { ascending: true }),
+        getClient()
+          .from('evento_grooming_archivos')
+          .select('id, storage_path, tipo, orden')
+          .eq('grooming_id', g.data.id)
+          .order('orden', { ascending: true }),
+      ]);
+
+      if (!aplicados.error && (aplicados.data ?? []).length > 0) {
+        const catalogo = await getClient()
+          .from('cat_servicios_grooming')
+          .select('codigo, nombre, nombre_familia, nombre_familia_en');
+        const vozPorCodigo = new Map(
+          (catalogo.data ?? []).map((c) => [
+            c.codigo,
+            { voz: c.nombre_familia ?? c.nombre, voz_en: c.nombre_familia_en ?? c.nombre },
+          ]),
+        );
+        serviciosAplicados = (aplicados.data ?? []).map((s) => {
+          const voz = vozPorCodigo.get(s.servicio_codigo);
+          return {
+            codigo: s.servicio_codigo,
+            voz: voz?.voz ?? s.servicio_codigo,
+            voz_en: voz?.voz_en ?? s.servicio_codigo,
+          };
+        });
+      }
+
+      // Fallback de bucket DECLARADO (hallazgo S61-A2): el uploader del
+      // prestador sube hoy a 'cita-archivos' (pedido a la B: moverlo a
+      // 'grooming-archivos'); las policies de acceso-por-mascota cubren
+      // AMBOS. Se intenta el bucket propio primero — cuando la B mude
+      // el uploader, esto ya firma bien sin tocarse.
+      for (const a of archivos.data ?? []) {
+        let url = await getClient()
+          .storage.from('grooming-archivos')
+          .createSignedUrl(a.storage_path, 3600)
+          .then((r) => r.data?.signedUrl ?? null);
+        if (url === null) {
+          url = await getClient()
+            .storage.from('cita-archivos')
+            .createSignedUrl(a.storage_path, 3600)
+            .then((r) => r.data?.signedUrl ?? null);
+        }
+        if (url !== null) fotosGrooming.push({ id: a.id, nombre_archivo: null, url });
+      }
+    }
   }
 
   let novedades: NovedadDeAtencion[] = [];
@@ -308,7 +384,9 @@ export async function leerDetalleAtencion(
       gps_estado: paseo.data?.gps_estado ?? null,
       track_gps: track,
       novedades,
-      fotos: fotos.ok ? fotos.data : [],
+      fotos: oficio === 'grooming' ? fotosGrooming : fotos.ok ? fotos.data : [],
+      servicios_aplicados: serviciosAplicados,
+      proxima_sesion_sugerida: proximaSugerida,
       mascota_id: at.mascota_id ?? null,
       oficio,
     },

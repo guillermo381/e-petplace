@@ -43,6 +43,12 @@ export interface OfertaGroomingPropia {
   especies: string[];
   /** Las 3 tallas si existen (una oferta jamás guardada puede tener 0). */
   tallas: Partial<Record<TallaGrooming, TallaOfertaGrooming>>;
+  /** Domicilio v1 (S61): las modalidades de la oferta. El motor v1 aún
+   *  no filtra por modalidad (declarado — entra con la mitad del dueño).
+   *  El RECARGO vive en prestadores.grooming_recargo_domicilio (v2 del
+   *  pedido — espejo del extra de pelaje), no acá. */
+  atiendeLocal: boolean;
+  atiendeDomicilio: boolean;
 }
 
 const CODIGOS = ['sin_sesion', 'tallas_incompletas'] as const;
@@ -76,6 +82,8 @@ function normalizarOferta(fila: {
   activo: boolean;
   especies_compatibles: unknown;
   tallas: FilaTallaCruda[];
+  atiende_local: boolean;
+  atiende_domicilio: boolean;
 }): OfertaGroomingPropia | null {
   if (!esServicioGrooming(fila.tipo_servicio)) return null;
   const tallas: Partial<Record<TallaGrooming, TallaOfertaGrooming>> = {};
@@ -86,11 +94,19 @@ function normalizarOferta(fila: {
   const especies = Array.isArray(fila.especies_compatibles)
     ? fila.especies_compatibles.filter((e): e is string => typeof e === 'string')
     : [];
-  return { id: fila.id, tipoServicio: fila.tipo_servicio, activo: fila.activo, especies, tallas };
+  return {
+    id: fila.id,
+    tipoServicio: fila.tipo_servicio,
+    activo: fila.activo,
+    especies,
+    tallas,
+    atiendeLocal: fila.atiende_local,
+    atiendeDomicilio: fila.atiende_domicilio,
+  };
 }
 
 const SELECT_OFERTA =
-  'id, tipo_servicio, activo, especies_compatibles, tallas:prestador_servicio_tallas(id, talla, precio, duracion_minutos)';
+  'id, tipo_servicio, activo, especies_compatibles, atiende_local, atiende_domicilio, tallas:prestador_servicio_tallas(id, talla, precio, duracion_minutos)';
 
 /** Las ofertas grooming PROPIAS (0, 1 o 2 filas — Baño / Baño+corte). */
 export async function obtenerOfertasGroomingPropias(
@@ -115,6 +131,12 @@ export interface GuardarServicioGroomingInput {
   activo: boolean;
   especies: string[];
   tallas: Record<TallaGrooming, { precio: number; duracionMinutos: number }>;
+  /** Domicilio v1 (S61, hunk aditivo): las modalidades. Opcionales —
+   *  si el caller no las manda, la fila conserva lo suyo (los defaults
+   *  de DB en la fila nueva: local sí, domicilio no). El CHECK de DB
+   *  exige al menos una encendida. */
+  atiendeLocal?: boolean;
+  atiendeDomicilio?: boolean;
 }
 
 /**
@@ -149,6 +171,8 @@ export async function guardarServicioGrooming(
         precio: m.precio,
         duracion_minutos: m.duracionMinutos,
         especies_compatibles: input.especies,
+        ...(input.atiendeLocal !== undefined ? { atiende_local: input.atiendeLocal } : null),
+        ...(input.atiendeDomicilio !== undefined ? { atiende_domicilio: input.atiendeDomicilio } : null),
       })
       .select('id')
       .single();
@@ -180,6 +204,8 @@ export async function guardarServicioGrooming(
       especies_compatibles: input.especies,
       precio: m.precio,
       duracion_minutos: m.duracionMinutos,
+      ...(input.atiendeLocal !== undefined ? { atiende_local: input.atiendeLocal } : null),
+      ...(input.atiendeDomicilio !== undefined ? { atiende_domicilio: input.atiendeDomicilio } : null),
     })
     .eq('id', ofertaId)
     .select(SELECT_OFERTA)
@@ -216,4 +242,23 @@ export async function actualizarExtraPelajeLargo(
     return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
   }
   return { ok: true, data: { valor: data.grooming_extra_pelaje_largo } };
+}
+
+/** Domicilio v1 (S61): el recargo por ir a domicilio — clon del extra
+ *  de pelaje (mismo NULL honesto = sin recargo; el CHECK >= 0 es de DB).
+ *  El motor NO lo suma al snapshot todavía (entra con la mitad del dueño). */
+export async function actualizarRecargoDomicilio(
+  prestadorId: string,
+  valor: number | null,
+): Promise<ResultadoWrapper<{ valor: number | null }, CodigoErrorGrooming>> {
+  const { data, error } = await getClient()
+    .from('prestadores')
+    .update({ grooming_recargo_domicilio: valor })
+    .eq('id', prestadorId)
+    .select('grooming_recargo_domicilio')
+    .single();
+  if (error || data === null) {
+    return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
+  }
+  return { ok: true, data: { valor: data.grooming_recargo_domicilio } };
 }
