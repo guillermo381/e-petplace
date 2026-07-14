@@ -164,12 +164,14 @@ export default function DetallePaseo() {
     }, [atencionId, intento, recargar]),
   );
 
+  // CURA S60-C1: las caras PRE-CARGA no conocen el oficio todavía (el
+  // detalle no llegó) — voz NEUTRA de atención, jamás "paseo" a ciegas.
   if (detalle === 'cargando') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo={t('paseo.titulo')} atras onAtras={() => router.back()} />
+        <Encabezado variante="navegacion" titulo={t('atencion.titulo')} atras onAtras={() => router.back()} />
         <View style={{ padding: spacing[5] }}>
-          <EsqueletoGrupo etiqueta={t('paseo.cargando')}>
+          <EsqueletoGrupo etiqueta={t('atencion.cargando')}>
             <View style={{ gap: spacing[3] }}>
               <Esqueleto forma="bloque" ancho="100%" alto={180} />
               <Esqueleto forma="linea" ancho="50%" />
@@ -185,10 +187,10 @@ export default function DetallePaseo() {
     const esError = detalle === 'error';
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-        <Encabezado variante="navegacion" titulo={t('paseo.titulo')} atras onAtras={() => router.back()} />
+        <Encabezado variante="navegacion" titulo={t('atencion.titulo')} atras onAtras={() => router.back()} />
         <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
           <EstadoVacio
-            titulo={esError ? t('paseo.errorTitulo') : t('paseo.noEncontradoTitulo')}
+            titulo={esError ? t('atencion.errorTitulo') : t('atencion.noEncontradoTitulo')}
             descripcion={esError ? t('paseo.errorDetalle') : t('paseo.noEncontradoDetalle')}
             accion={
               esError ? (

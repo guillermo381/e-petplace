@@ -423,6 +423,18 @@ export const clienteEs = {
     vivoEstado: '{{nombre}} está en manos de su groomer.',
     vivoEstadoGenerico: 'Tu mascota está en manos de su groomer.',
     fotosDeLaSesion: 'Fotos de la sesión',
+    // CURA S60-C1 — la voz del checkout resuelve por oficio (LOTE S60)
+    checkoutResumen: 'Tu sesión de estética',
+    exitoTitulo: 'Estética y baño confirmado',
+    exitoDetalle: 'Ya está en la agenda de su groomer. Lo verás en tu Hogar.',
+  },
+  // CURA S60-C1 — voz NEUTRA de las caras pre-carga de la atención
+  // (el oficio aún no se conoce; jamás "paseo" a ciegas) (LOTE S60)
+  atencion: {
+    titulo: 'Atención',
+    cargando: 'Cargando la atención',
+    errorTitulo: 'No pudimos cargar esta atención',
+    noEncontradoTitulo: 'No encontramos esta atención',
   },
   paseoSocial: {
     declaracion: 'Los paseos suelen ser con más de un perro a la vez.',

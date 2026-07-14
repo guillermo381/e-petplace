@@ -386,6 +386,18 @@ export const clienteEn = {
     vivoEstado: "{{nombre}} is in their groomer's hands.",
     vivoEstadoGenerico: "Your pet is in their groomer's hands.",
     fotosDeLaSesion: 'Session photos',
+    // CURA S60-C1 — checkout voice resolves by trade (LOTE S60)
+    checkoutResumen: 'Your grooming session',
+    exitoTitulo: 'Grooming booked',
+    exitoDetalle: "It's on their groomer's schedule. You'll see it in your Home.",
+  },
+  // CURA S60-C1 — neutral voice for the pre-load faces of the care view
+  // (the trade is unknown until data arrives; never "walk" blindly) (LOTE S60)
+  atencion: {
+    titulo: 'Care',
+    cargando: 'Loading the visit',
+    errorTitulo: "We couldn't load this visit",
+    noEncontradoTitulo: "We couldn't find this visit",
   },
   // P19 (S59-A4) — GATE PENDIENTE (lote S59)
   paseoSocial: {

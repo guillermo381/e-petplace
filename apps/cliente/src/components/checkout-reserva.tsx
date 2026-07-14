@@ -51,6 +51,9 @@ export function CheckoutReserva({
   hora,
   duracion,
   exitoIcono,
+  resumenEtiqueta,
+  exitoTitulo,
+  exitoDetalle,
   puedePagar,
   seccionExtra,
   fueraDeScroll,
@@ -65,6 +68,12 @@ export function CheckoutReserva({
   duracion: string;
   /** El ícono b′ del éxito — el oficio firma su cierre. */
   exitoIcono: 'paseo' | 'grooming';
+  /** CURA S60-C1: la VOZ resuelve por el OFICIO — la máquina no conoce
+   *  keys de ningún servicio; cada consumidor trae las suyas ya
+   *  traducidas (Ley 17.3: una acción, un nombre, todo el flujo). */
+  resumenEtiqueta: string;
+  exitoTitulo: string;
+  exitoDetalle: string;
   /** Gate externo del CTA (paseo: la dirección del hogar D-339). */
   puedePagar: boolean;
   /** La sección propia del servicio, entre el hold y el aviso simulado. */
@@ -144,8 +153,8 @@ export function CheckoutReserva({
         <View style={{ flex: 1, justifyContent: 'center', padding: spacing[4] }}>
           <EstadoVacio
             icono={<Icono nombre={exitoIcono} tamano={48} />}
-            titulo={t('checkout.exitoTitulo')}
-            descripcion={t('checkout.exitoDetalle')}
+            titulo={exitoTitulo}
+            descripcion={exitoDetalle}
             accion={
               <Boton
                 variante="primario"
@@ -207,7 +216,7 @@ export function CheckoutReserva({
         {/* el ítem (forma de carrito: hoy UNO) */}
         <View style={{ gap: spacing[2] }}>
           <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.secondary }}>
-            {t('checkout.resumen')}
+            {resumenEtiqueta}
           </Text>
           <Tarjeta relleno="ninguno">
             <Celda

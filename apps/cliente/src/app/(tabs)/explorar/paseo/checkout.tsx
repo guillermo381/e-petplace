@@ -72,6 +72,9 @@ export default function PaseoCheckout() {
       hora={typeof params.hora === 'string' ? params.hora : ''}
       duracion={typeof params.duracion === 'string' ? params.duracion : ''}
       exitoIcono="paseo"
+      resumenEtiqueta={t('checkout.resumen')}
+      exitoTitulo={t('checkout.exitoTitulo')}
+      exitoDetalle={t('checkout.exitoDetalle')}
       puedePagar={direccionEstado !== 'cargando' && direccion !== null}
       seccionExtra={
         <View style={{ gap: spacing[2] }}>

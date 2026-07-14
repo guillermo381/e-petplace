@@ -47,6 +47,9 @@ export default function GroomingCheckout() {
       hora={typeof params.hora === 'string' ? params.hora : ''}
       duracion={typeof params.duracion === 'string' ? params.duracion : ''}
       exitoIcono="grooming"
+      resumenEtiqueta={t('grooming.checkoutResumen')}
+      exitoTitulo={t('grooming.exitoTitulo')}
+      exitoDetalle={t('grooming.exitoDetalle')}
       puedePagar
       seccionExtra={
         /* EL DÓNDE — el dueño tiene que saber a dónde llevar a su
