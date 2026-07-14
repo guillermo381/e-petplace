@@ -18,7 +18,7 @@ SplashScreen.preventAutoHideAsync();
 // EMPIEZA confirmando que Metro imprime la línea de la sesión vigente —
 // sin ella, el teléfono corre un bundle fantasma y no se gatea.
 // ACTUALIZAR el texto al arrancar cada sesión de trabajo.
-console.log('[bundle] cliente S60.4');
+console.log('[bundle] cliente S61');
 
 export default function RootLayout() {
   // D-305 (S48): el tema lo decide el SISTEMA — el app lo resuelve acá

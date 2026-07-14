@@ -48,6 +48,7 @@ import {
 } from '@epetplace/api';
 import { TallaPelajeHoja } from '@/components/talla-pelaje-hoja';
 import { useTraduccion } from '@/i18n';
+import { vozServicio } from '@/lib/voz-servicio';
 
 export default function GroomingDisponibles() {
   const { theme } = useTheme();
@@ -117,7 +118,7 @@ export default function GroomingDisponibles() {
           expiraEn: r.data.expira_en,
           precio: String(r.data.precio),
           prestadorNombre: g.prestador_nombre,
-          servicioNombre: g.servicio_nombre,
+          servicioNombre: vozServicio(t, tipoServicio, g.servicio_nombre) ?? g.servicio_nombre,
           fecha: r.data.fecha,
           hora: r.data.hora,
           duracion: String(r.data.duracion_minutos),
@@ -126,7 +127,7 @@ export default function GroomingDisponibles() {
         },
       });
     },
-    [creandoHold, fecha, hora, mascotaId, cargarGroomers, mostrar],
+    [creandoHold, fecha, hora, mascotaId, tipoServicio, t, cargarGroomers, mostrar],
   );
 
   const mascota = typeof perfil === 'object' ? perfil.mascota : null;

@@ -37,6 +37,7 @@ import {
 import { obtenerMisGroomings, type GroomingDelHogar } from '@epetplace/api';
 import { fechaCortaMono } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
+import { vozServicio } from '@/lib/voz-servicio';
 
 type Tap = 'proximos' | 'historial';
 
@@ -126,7 +127,7 @@ export default function HubGrooming() {
                 <View key={f.cita_id}>
                   {i > 0 ? <Separador /> : null}
                   <Celda
-                    titulo={f.servicio_nombre}
+                    titulo={vozServicio(t, f.tipo_servicio, f.servicio_nombre) ?? f.servicio_nombre}
                     subtitulo={subtituloDe(f, true)}
                     metadataMono={`${fechaCortaMono(f.fecha, idioma)} · ${f.hora}`}
                   />
@@ -146,7 +147,7 @@ export default function HubGrooming() {
               <View key={f.cita_id}>
                 {i > 0 ? <Separador /> : null}
                 <Celda
-                  titulo={f.servicio_nombre}
+                  titulo={vozServicio(t, f.tipo_servicio, f.servicio_nombre) ?? f.servicio_nombre}
                   subtitulo={subtituloDe(f, false)}
                   metadataMono={`${fechaCortaMono(f.fecha, idioma)} · ${f.hora}`}
                   interactiva

@@ -391,6 +391,12 @@ export const clienteEs = {
   // S56-A D-338 — el plan de paseo. GATE PENDIENTE founder (lote S56).
   // ── P19 (S59-A4) — la socialización del paseo grupal. GATE DE
   // STRINGS PENDIENTE (lote S59) ──
+  // S61-A1 (FALLA-J1) — la voz del comprable en el riel, por código
+  // (LOTE S61, GATE PENDIENTE founder). El paseo reusa explorar.paseoTitulo.
+  servicioVoz: {
+    grooming: 'Baño',
+    groomingCompleto: 'Baño y corte',
+  },
   // S60-A1 — la reserva de grooming del dueño (LOTE S60, gate founder)
   grooming: {
     titulo: 'Estética y baño',

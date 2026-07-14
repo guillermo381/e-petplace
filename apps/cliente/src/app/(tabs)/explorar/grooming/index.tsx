@@ -49,6 +49,7 @@ import {
 } from '@epetplace/api';
 import { TallaPelajeHoja } from '@/components/talla-pelaje-hoja';
 import { useTraduccion } from '@/i18n';
+import { vozServicio } from '@/lib/voz-servicio';
 
 function fechaLocalISO(d: Date): string {
   return new Intl.DateTimeFormat('en-CA').format(d);
@@ -258,7 +259,10 @@ export default function GroomingCuando() {
                   <SelectorOpcion
                     acento="control"
                     etiqueta={t('grooming.servicioEtiqueta')}
-                    opciones={oferta.map((o) => ({ codigo: o.tipo_servicio, etiqueta: o.servicio_nombre }))}
+                    opciones={oferta.map((o) => ({
+                      codigo: o.tipo_servicio,
+                      etiqueta: vozServicio(t, o.tipo_servicio, o.servicio_nombre) ?? o.servicio_nombre,
+                    }))}
                     seleccionada={tipoServicio ?? undefined}
                     onSelect={setTipoServicio}
                   />

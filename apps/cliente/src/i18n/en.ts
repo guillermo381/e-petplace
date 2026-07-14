@@ -354,6 +354,12 @@ export const clienteEn = {
     direccionLista: 'The walk starts at this door.',
   },
   // S56-A D-338 — the walk plan. GATE PENDIENTE founder (lote S56).
+  // S61-A1 (FALLA-J1) — the sellable's voice lives in the rail, by code
+  // (LOTE S61, GATE PENDIENTE founder). Walk reuses explorar.paseoTitulo.
+  servicioVoz: {
+    grooming: 'Bath',
+    groomingCompleto: 'Bath & cut',
+  },
   // S60-A1 — grooming booking, owner side (LOTE S60, founder gate)
   grooming: {
     titulo: 'Grooming',

@@ -76,6 +76,7 @@ import { fechaCortaMono } from '@epetplace/i18n';
 
 import { CoachHoja } from '@/components/coach';
 import { useTraduccion } from '@/i18n';
+import { vozServicio } from '@/lib/voz-servicio';
 
 
 type TraductorHogar = ReturnType<typeof useTraduccion>['t'];
@@ -491,9 +492,12 @@ export default function Hogar() {
             {(() => {
               const cuando = cuandoRelativo(proximaCita.fecha, proximaCita.hora, t);
               const monoAbsoluto = `${fechaCortaMono(proximaCita.fecha, idioma)}${proximaCita.hora ? ` · ${proximaCita.hora}` : ''}`;
+              // S61-A1: la voz del comprable del riel — el código del
+              // motor jamás se pinta; sin voz conocida, el sufijo se omite.
+              const vozOficio = vozServicio(t, proximaCita.tipo_servicio);
               return (
                 <Celda
-                  titulo={`${nombreDe(proximaCita.mascota_id)}${proximaCita.tipo_servicio ? ` · ${proximaCita.tipo_servicio}` : ''}`}
+                  titulo={`${nombreDe(proximaCita.mascota_id)}${vozOficio !== null ? ` · ${vozOficio}` : ''}`}
                   subtitulo={t(proximaCita.reserva === 'hold' ? 'hogar.reservandoHorario' : 'hogar.proximaCita')}
                   {...('relativo' in cuando
                     ? {
