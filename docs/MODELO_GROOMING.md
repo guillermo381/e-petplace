@@ -1,7 +1,8 @@
 # MODELO_GROOMING — El contrato del servicio de grooming
 
-> **Versión: v1.0 — S59 (13 Jul 2026).** Letra FIRMADA por el founder
-> (S59), dictada por el arquitecto (escritor único de docs, regla 76).
+> **Versión: v1.1 — S60 (14 Jul 2026).** Letra FIRMADA por el founder
+> (S59; enmienda §8 firmada S60), dictada por el arquitecto (escritor
+> único de docs, regla 76).
 > **Contrastes obligatorios:** `MODELO_FINANCIERO.md` v2.7 (el camino de
 > la plata rige acá sin excepción — Decisiones Q/R y regla 7.13),
 > `MODELO_PASEO.md` v1.5 (el chasis de reserva/cobro que este servicio
@@ -111,6 +112,12 @@ grooming lo hereda.
   **servicios aplicados** (los 9 registrables) + el estado
   **recibir/entregar** del pelaje. La captura JAMÁS se exige en caliente
   — el groomer trabaja, no documenta.
+  - **EXCEPCIÓN DECLARADA (founder S60): la foto de ENTREGA es la única
+    captura exigida en caliente** — es el corazón del parte que recibe
+    la familia y se toma con la mascota presente, irrecuperable después.
+    El resto de la captura sigue sin exigirse jamás durante el trabajo.
+    (El guard `falta_foto_entregar` de `terminar_atencion_grooming`,
+    D-270, ES esta letra — el motor ya la cumplía.)
 - **DESPUÉS — cierre rápido con piso de calidad:** ≥1 servicio aplicado
   + estado recibir Y entregar + ≥1 nota o foto (los guards ya viven en
   `cerrar_grooming_con_calidad`) + **mensaje a la familia** + **próxima
@@ -162,6 +169,13 @@ hasta entonces**. Nada se dibuja apagado.
 
 ## Historial
 
+- **v1.1 (S60, 14 Jul 2026):** enmienda §8 FIRMADA por el founder
+  (pieza 3 del pedido S60-A3, rama (b)): la foto de ENTREGA es la única
+  captura exigida en caliente — corazón del parte de la familia, se toma
+  con la mascota presente y es irrecuperable después; el guard
+  `falta_foto_entregar` de `terminar_atencion_grooming` (D-270) QUEDA.
+  El resto de la captura sigue sin exigirse jamás durante el trabajo.
+  Cero migración: el motor ya era la letra.
 - **v1.0 (S59, 13 Jul 2026):** redacción inicial con la letra FIRMADA
   del founder (S59): menú de dos capas (comprable ≠ registrable) ·
   precio servicio × talla + UN extra por pelaje largo con congelamiento
