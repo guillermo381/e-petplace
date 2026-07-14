@@ -497,6 +497,70 @@ export const prestadorEs = {
     espejoDuraciones: '{{lista}} min según talla',
     espejoExtra: 'Pelaje largo: +{{monto}}',
   },
+  // LA ATENCIÓN DE GROOMING — Antes/Durante/Después (S60-B1, §8 del
+  // modelo) · LOTE S60, GATE PENDIENTE. Reusos declarados: cita.nota/
+  // incidencia/mensajeFamilia/enviarParte (voz genérica de atención,
+  // Ley 17.3) + agenda.conocerMascota + tallerGrooming.talla*.
+  citaGrooming: {
+    // el Antes — la ficha de 30 segundos
+    tituloDe: 'Grooming de {{nombre}}',
+    titulo: 'Grooming',
+    empezar: 'Empezar grooming',
+    talla: 'Talla',
+    tallaSinDeclarar: 'Sin declarar',
+    pelaje: 'Pelaje',
+    pelajeNormal: 'Normal',
+    pelajeLargo: 'Largo',
+    // señales: REUSO detalleMascota.* (misma voz en toda la casa, Ley 17.3)
+    // discrepancia de talla (§2, patrón P19)
+    tallaCorregir: 'La talla no coincide',
+    tallaCorregirTitulo: 'La talla real',
+    tallaCorregirExplicacion:
+      'Si la talla declarada no es la real, regístralo: el perfil queda corregido para las próximas reservas. Esta cita no cambia de precio.',
+    tallaCorregirCta: 'Corregir el perfil',
+    tallaCorregida: 'Perfil corregido para las próximas.',
+    // el Durante
+    enCursoTitulo: 'Grooming en vivo',
+    alRecibir: 'Al recibir',
+    alEntregar: 'Al entregar',
+    estadoPelajeElegir: 'Registrar estado del pelaje',
+    fotoRecibir: 'Foto al recibir',
+    fotoEntregar: 'Foto de entrega',
+    fotoEntregarAyuda: 'Se toma con la mascota presente — la necesitas para terminar.',
+    serviciosAplicados: 'Servicios aplicados',
+    fotosSesion: 'Fotos de la sesión',
+    quitar: 'Quitar',
+    terminar: 'Terminar sesión',
+    terminarTitulo: 'Terminar la sesión',
+    terminarExplicacion:
+      'El tiempo queda registrado. Después completas el cierre y el mensaje a la familia.',
+    // guard de UI: el motor no permite registrar servicios después de
+    // terminar — sin esto, el cierre queda en un callejón (§8)
+    terminarFaltaServicio: 'Marca al menos un servicio aplicado antes de terminar — el cierre lo necesita.',
+    seguirTrabajando: 'Seguir trabajando',
+    // el Después — cierre con piso de calidad
+    cierreTitulo: 'Cierre del grooming',
+    tiempoTrabajo: 'Tiempo de trabajo',
+    minutosSufijo: '{{n}} min',
+    recibiste: 'Recibiste',
+    entregaste: 'Entregaste',
+    notasTitulo: 'Notas',
+    incidenciasTitulo: 'Incidencias',
+    fotosSufijo: '{{n}} fotos',
+    cerradoMono: 'parte enviado',
+    verTuDia: 'Ver tu día',
+    // la vista del día (RPC del oficio)
+    diaTitulo: 'Tu día de grooming',
+    diaSesiones: 'Sesiones',
+    diaCerradas: 'Cerradas con parte',
+    diaPorCerrar: 'Por cerrar',
+    diaTiempo: 'Tiempo de trabajo',
+    diaVacio: 'Todavía no terminaste sesiones hoy.',
+    // errores con camino (la voz fina del motor vive en el wrapper)
+    noDisponible: 'Esta cita ya no está disponible',
+    noDisponibleDetalle: 'Puede haberse movido o cancelado. Vuelve a tu día para ver tus citas.',
+    volverHoy: 'Volver a tu día',
+  },
   // TU OFERTA DE PASEO — el resumen, la portada del mundo (S58-B B1b) · LOTE S58, GATE PENDIENTE
   ofertaPaseo: {
     titulo: 'Tu oferta de paseo',

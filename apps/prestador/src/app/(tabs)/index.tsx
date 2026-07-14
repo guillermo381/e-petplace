@@ -49,6 +49,7 @@ import {
 } from '@epetplace/ui';
 import {
   obtenerBloqueosPrestador,
+  obtenerCitasGroomingDelDia,
   obtenerCitasPaseoDelDia,
   obtenerMascotasAtendidas,
   obtenerMiPrestador,
@@ -71,6 +72,8 @@ type Pantalla =
       desde: string;
       /** El rango completo hoy..hoy+6 (la vista Hoy filtra por `desde`). */
       citas: CitaAgendaPaseo[];
+      /** ids de las citas de GROOMING (S60-B1) — deciden la RUTA del tap. */
+      groomingIds: Set<string>;
       bloqueos: BloqueoPrestador[];
       atendidas: Set<string>;
     };
@@ -112,7 +115,18 @@ function esEspecie(v: string | null): v is AvatarMascotaEspecie {
   return v !== null;
 }
 
-function FilaCita({ cita, enVivo, fotoUrl }: { cita: CitaAgendaPaseo; enVivo: boolean; fotoUrl?: string }) {
+function FilaCita({
+  cita,
+  enVivo,
+  fotoUrl,
+  esGrooming = false,
+}: {
+  cita: CitaAgendaPaseo;
+  enVivo: boolean;
+  fotoUrl?: string;
+  /** S60-B1: la fila de grooming navega a SU flujo (Antes/Durante/Cierre). */
+  esGrooming?: boolean;
+}) {
   const router = useRouter();
   const { t } = useTraduccion();
   const hora = cita.hora ? cita.hora.slice(0, 5) : '—';
@@ -143,7 +157,13 @@ function FilaCita({ cita, enVivo, fotoUrl }: { cita: CitaAgendaPaseo; enVivo: bo
   return (
     <Celda
       interactiva
-      onPress={() => router.push({ pathname: '/cita/[citaId]', params: { citaId: cita.id } })}
+      onPress={() =>
+        router.push(
+          esGrooming
+            ? { pathname: '/grooming/cita/[citaId]', params: { citaId: cita.id } }
+            : { pathname: '/cita/[citaId]', params: { citaId: cita.id } },
+        )
+      }
       accessibilityRole="button"
       titulo={cita.mascota?.nombre ?? t('agenda.mascotaFallback')}
       // La marca "parte del plan" (D-338, S56-B T7) — escalera: peldaño 0 =
@@ -196,8 +216,11 @@ export default function Hoy() {
     // UN fetch cubre las dos vistas (S57-B1): rango hoy..hoy+6 — la vista
     // Hoy filtra por `desde`; la Semana agrupa el rango entero.
     const desde = hoyLocal();
-    const [r, bloqueos, atendidas] = await Promise.all([
+    const [r, rg, bloqueos, atendidas] = await Promise.all([
       obtenerCitasPaseoDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: sumarDias(desde, 6) }),
+      // S60-B1: la jornada es UNA — las citas de grooming entran a la
+      // misma lista con su tipo (el subtítulo ya lo dice) y su ruta.
+      obtenerCitasGroomingDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: sumarDias(desde, 6) }),
       // vacaciones (solo lectura): los días bloqueados se pintan como tales
       obtenerBloqueosPrestador(prestador.data.id),
       // la señal "Primera vez" de la Zona 1 (solo lo REAL): mascota
@@ -208,20 +231,33 @@ export default function Hoy() {
       setPantalla({ estado: 'error', mensaje: r.mensaje });
       return;
     }
+    // El grooming es promesa de la MISMA jornada — su error tampoco se
+    // disfraza de "sin citas" (Ley 13).
+    if (!rg.ok) {
+      setPantalla({ estado: 'error', mensaje: rg.mensaje });
+      return;
+    }
     // La marca de bloqueo es PROMESA de la vista semana (jamás se cae en
     // silencio — Ley 13: un error no se disfraza de "sin vacaciones").
     if (!bloqueos.ok) {
       setPantalla({ estado: 'error', mensaje: bloqueos.mensaje });
       return;
     }
-    const paths = r.data
+    // Merge por fecha+hora: una sola línea de tiempo de trabajo.
+    const citas = [...r.data, ...rg.data].sort((a, b) => {
+      const fa = a.fecha ?? '';
+      const fb = b.fecha ?? '';
+      return fa === fb ? (a.hora ?? '').localeCompare(b.hora ?? '') : fa.localeCompare(fb);
+    });
+    const paths = citas
       .map((c) => c.mascota?.foto_url)
       .filter((p): p is string => typeof p === 'string' && p.length > 0);
     if (paths.length > 0) setUrlsFotos(await resolverUrlsFotos(paths));
     setPantalla({
       estado: 'listo',
       desde,
-      citas: r.data,
+      citas,
+      groomingIds: new Set(rg.data.map((c) => c.id)),
       bloqueos: bloqueos.data,
       atendidas: new Set(atendidas.ok ? atendidas.data.map((m) => m.mascota_id) : []),
     });
@@ -245,6 +281,7 @@ export default function Hoy() {
   const citas = pantalla.estado === 'listo' ? pantalla.citas : [];
   const desde = pantalla.estado === 'listo' ? pantalla.desde : null;
   const citasHoy = desde === null ? [] : citas.filter((c) => c.fecha === desde);
+  const groomingIds = pantalla.estado === 'listo' ? pantalla.groomingIds : new Set<string>();
 
   // ── Zona 1: la destacada — en_curso (Ley 7: UNA con CitaEnVivo) o,
   // si no hay nada corriendo, la PRÓXIMA cita aún no cerrada del día.
@@ -390,13 +427,13 @@ export default function Hoy() {
               return enVivo ? (
                 <CitaEnVivo capa="cuidado">
                   <Tarjeta elevacion="plana" relleno="ninguno">
-                    <FilaCita cita={enVivo} enVivo fotoUrl={enVivo.mascota?.foto_url ? urlsFotos.get(enVivo.mascota.foto_url) : undefined} />
+                    <FilaCita cita={enVivo} enVivo esGrooming={groomingIds.has(enVivo.id)} fotoUrl={enVivo.mascota?.foto_url ? urlsFotos.get(enVivo.mascota.foto_url) : undefined} />
                     {conocer}
                   </Tarjeta>
                 </CitaEnVivo>
               ) : (
                 <Tarjeta elevacion="sm" relleno="ninguno">
-                  <FilaCita cita={destacada} enVivo={false} fotoUrl={destacada.mascota?.foto_url ? urlsFotos.get(destacada.mascota.foto_url) : undefined} />
+                  <FilaCita cita={destacada} enVivo={false} esGrooming={groomingIds.has(destacada.id)} fotoUrl={destacada.mascota?.foto_url ? urlsFotos.get(destacada.mascota.foto_url) : undefined} />
                   {conocer}
                 </Tarjeta>
               );
@@ -410,7 +447,7 @@ export default function Hoy() {
             {resto.map((c, i) => (
               <View key={c.id}>
                 {i > 0 && <Separador indentacion={spacing[3] + 40 + spacing[3]} />}
-                <FilaCita cita={c} enVivo={false} fotoUrl={c.mascota?.foto_url ? urlsFotos.get(c.mascota.foto_url) : undefined} />
+                <FilaCita cita={c} enVivo={false} esGrooming={groomingIds.has(c.id)} fotoUrl={c.mascota?.foto_url ? urlsFotos.get(c.mascota.foto_url) : undefined} />
               </View>
             ))}
           </Tarjeta>
@@ -443,7 +480,7 @@ export default function Hoy() {
                     {dia.citas.map((c, i) => (
                       <View key={c.id}>
                         {i > 0 && <Separador indentacion={spacing[3] + 40 + spacing[3]} />}
-                        <FilaCita cita={c} enVivo={false} fotoUrl={c.mascota?.foto_url ? urlsFotos.get(c.mascota.foto_url) : undefined} />
+                        <FilaCita cita={c} enVivo={false} esGrooming={groomingIds.has(c.id)} fotoUrl={c.mascota?.foto_url ? urlsFotos.get(c.mascota.foto_url) : undefined} />
                       </View>
                     ))}
                   </Tarjeta>
