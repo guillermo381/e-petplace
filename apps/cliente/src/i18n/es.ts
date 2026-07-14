@@ -93,6 +93,9 @@ export const clienteEs = {
     // S59 §7.1 LA VOZ ÚNICA ("en curso" murió del cliente) — GATE DE
     // STRINGS PENDIENTE (lote S59)
     paseoEnCurso: 'Paseo en vivo',
+    // S60 — la celda viva dice la verdad del oficio (LOTE S60)
+    groomingEnCurso: 'Estética en vivo',
+    atencionEnCurso: 'Atención en vivo',
     verEnVivo: 'Ver cómo va',
     proximaCita: 'Próxima cita',
     // D-319: el hold vigente del bloqueo 15 min — rima con checkout.holdVoz
@@ -303,8 +306,8 @@ export const clienteEs = {
     servicioAdiestramiento: 'Adiestramiento',
     servicioAdiestramientoDetalle: 'Educación y conducta con profesionales.',
     agendarLlega: 'Agendar desde la app llega pronto.',
-    // S54-B3.1 — el paseo ya se agenda; el resto sigue honesto
-    agendarLlegaOtros: 'Agendar grooming y veterinaria llega pronto.',
+    // S54-B3.1; S60: el grooming abrió — la voz nombra SOLO lo que falta
+    agendarLlegaOtros: 'Agendar veterinaria llega pronto.',
     // S58 ruta del mundo — GATE DE STRINGS PENDIENTE (lote S58)
     paseoAgendable: 'Toca para entrar',
     paseadoresTitulo: 'Paseadores',
@@ -378,6 +381,49 @@ export const clienteEs = {
   // S56-A D-338 — el plan de paseo. GATE PENDIENTE founder (lote S56).
   // ── P19 (S59-A4) — la socialización del paseo grupal. GATE DE
   // STRINGS PENDIENTE (lote S59) ──
+  // S60-A1 — la reserva de grooming del dueño (LOTE S60, gate founder)
+  grooming: {
+    titulo: 'Estética y baño',
+    quienTitulo: 'Groomers disponibles',
+    errorTitulo: 'No pudimos cargar el grooming',
+    sinElegiblesTitulo: 'Todavía no hay a quién bañar',
+    sinElegiblesDetalle: 'El grooming es para perros y gatos. Suma a tu mascota y reserva su primer baño.',
+    paraQuien: '¿Para quién es?',
+    // §3 — la pregunta única de talla y pelaje (patrón P19)
+    tallaFaltaTitulo: 'Nos falta su talla',
+    tallaFaltaDetalle: 'Para darte el precio justo de {{nombre}}, declara su talla y pelaje una vez. Queda en su perfil y lo puedes editar siempre.',
+    tallaDeclarar: 'Declarar talla y pelaje',
+    tallaHojaTitulo: 'Talla y pelaje',
+    tallaHojaVoz: 'Se declara una vez y queda en el perfil de {{nombre}} — el precio del grooming es por talla, con extra si el pelaje es largo. Lo puedes editar cuando quieras.',
+    tallaEtiqueta: 'Talla',
+    tallaS: 'Pequeño',
+    tallaM: 'Mediano',
+    tallaL: 'Grande',
+    pelajeLargo: 'Pelaje largo',
+    pelajeLargoDetalle: 'El pelaje largo suma un extra del groomer.',
+    tallaGuardar: 'Guardar en su perfil',
+    tallaCeldaTitulo: 'Talla y pelaje',
+    tallaEstadoSinDeclarar: 'Sin declarar',
+    pelajeLargoCorto: 'pelaje largo',
+    // el CUÁNDO adaptado: servicio → hora (la duración es consecuencia)
+    vacioTitulo: 'Todavía no hay groomers ofreciendo',
+    vacioDetalle: 'Un groomer acá baña, corta y documenta cada sesión en su historia. Cuando uno active su oferta real, lo verás con precios de verdad.',
+    servicioEtiqueta: 'Servicio',
+    precioDesde: 'Para {{nombre}}: desde ${{precio}}',
+    precioExacto: 'Para {{nombre}}: ${{precio}}',
+    sinInicios: 'Ese día no hay horarios libres. Prueba con otro día.',
+    // el QUIÉN con el precio resuelto + el DÓNDE (v1 en el local)
+    ventanaPara: 'Grooming para {{nombre}}',
+    enSuLocal: 'En el local del groomer',
+    precioDeSuPerfil: 'El precio ya es el de {{nombre}}: su talla y pelaje viven en su perfil.',
+    dondeTitulo: 'A dónde ir',
+    // el EN VIVO del dueño — sin mapa: la mascota preside (§8)
+    vivoTitulo: 'Estética y baño',
+    vivoTituloConFecha: 'Estética del {{fecha}}',
+    vivoEstado: '{{nombre}} está en manos de su groomer.',
+    vivoEstadoGenerico: 'Tu mascota está en manos de su groomer.',
+    fotosDeLaSesion: 'Fotos de la sesión',
+  },
   paseoSocial: {
     declaracion: 'Los paseos suelen ser con más de un perro a la vez.',
     celdaTitulo: 'Paseos en grupo',

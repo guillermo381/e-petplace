@@ -88,6 +88,9 @@ export const clienteEn = {
     vozQuieto: "{{nombre}}'s record has been quiet — anything new in their care?",
     // S59 §7.1 la voz única — GATE PENDIENTE (lote S59)
     paseoEnCurso: 'Live walk',
+    // S60 — the live cell tells the truth of the trade (LOTE S60)
+    groomingEnCurso: 'Live grooming',
+    atencionEnCurso: 'Live care',
     verEnVivo: 'See how it goes',
     proximaCita: 'Next appointment',
     // D-319: live 15-min hold — rhymes with checkout.holdVoz
@@ -272,7 +275,7 @@ export const clienteEn = {
     servicioAdiestramientoDetalle: 'Education and behavior with professionals.',
     agendarLlega: 'Booking from the app is coming soon.',
     // S54-B3.1 — walks are bookable now; the rest stays honest
-    agendarLlegaOtros: 'Booking for grooming and veterinary is coming soon.',
+    agendarLlegaOtros: 'Booking veterinary visits is coming soon.',
     paseoAgendable: 'Tap to open',
     paseadoresTitulo: 'Walkers',
     paseadoresError: "We couldn't load the walkers",
@@ -341,6 +344,49 @@ export const clienteEn = {
     direccionLista: 'The walk starts at this door.',
   },
   // S56-A D-338 — the walk plan. GATE PENDIENTE founder (lote S56).
+  // S60-A1 — grooming booking, owner side (LOTE S60, founder gate)
+  grooming: {
+    titulo: 'Grooming',
+    quienTitulo: 'Available groomers',
+    errorTitulo: "We couldn't load grooming",
+    sinElegiblesTitulo: 'No one to bathe yet',
+    sinElegiblesDetalle: 'Grooming is for dogs and cats. Add your pet and book their first bath.',
+    paraQuien: 'Who is it for?',
+    // §3 — the single size-and-coat question (P19 pattern)
+    tallaFaltaTitulo: 'We need their size',
+    tallaFaltaDetalle: "To give you {{nombre}}'s fair price, declare their size and coat once. It stays in their profile and you can edit it anytime.",
+    tallaDeclarar: 'Declare size and coat',
+    tallaHojaTitulo: 'Size and coat',
+    tallaHojaVoz: "Declared once, it stays in {{nombre}}'s profile — grooming is priced by size, with an extra for long coats. You can edit it anytime.",
+    tallaEtiqueta: 'Size',
+    tallaS: 'Small',
+    tallaM: 'Medium',
+    tallaL: 'Large',
+    pelajeLargo: 'Long coat',
+    pelajeLargoDetalle: "A long coat adds the groomer's extra.",
+    tallaGuardar: 'Save to their profile',
+    tallaCeldaTitulo: 'Size and coat',
+    tallaEstadoSinDeclarar: 'Not declared yet',
+    pelajeLargoCorto: 'long coat',
+    // the adapted WHEN: service → time (duration is a consequence)
+    vacioTitulo: 'No groomers offering yet',
+    vacioDetalle: 'A groomer here bathes, trims and documents every session into their story. When one activates a real offer, you will see true prices.',
+    servicioEtiqueta: 'Service',
+    precioDesde: 'For {{nombre}}: from ${{precio}}',
+    precioExacto: 'For {{nombre}}: ${{precio}}',
+    sinInicios: 'No free times that day. Try another day.',
+    // the WHO with the resolved price + the WHERE (v1 at the shop)
+    ventanaPara: 'Grooming for {{nombre}}',
+    enSuLocal: "At the groomer's shop",
+    precioDeSuPerfil: "The price is already {{nombre}}'s: their size and coat live in their profile.",
+    dondeTitulo: 'Where to go',
+    // the owner's LIVE view — no map: the pet presides (§8)
+    vivoTitulo: 'Grooming',
+    vivoTituloConFecha: 'Grooming on {{fecha}}',
+    vivoEstado: "{{nombre}} is in their groomer's hands.",
+    vivoEstadoGenerico: "Your pet is in their groomer's hands.",
+    fotosDeLaSesion: 'Session photos',
+  },
   // P19 (S59-A4) — GATE PENDIENTE (lote S59)
   paseoSocial: {
     declaracion: 'Walks are usually shared with more than one dog at a time.',

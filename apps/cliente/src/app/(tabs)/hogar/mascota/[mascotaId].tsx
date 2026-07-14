@@ -20,6 +20,7 @@ import { useCallback, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { PaseoSocialHoja } from '@/components/paseo-social-hoja';
+import { TallaPelajeHoja } from '@/components/talla-pelaje-hoja';
 import Svg, { Path } from 'react-native-svg';
 import {
   AvatarMascota,
@@ -136,6 +137,9 @@ export default function PerfilDeMascota() {
   const [perfil, setPerfil] = useState<PerfilMascota | 'cargando' | 'error'>('cargando');
   // P19 (S59-A4): la respuesta de socialización es EDITABLE desde acá.
   const [socialHojaAbierta, setSocialHojaAbierta] = useState(false);
+  // §3 grooming (S60): talla y pelaje — declarados una vez, EDITABLES
+  // siempre desde acá (la otra mitad del patrón P19).
+  const [tallaHojaAbierta, setTallaHojaAbierta] = useState(false);
   // Vitales (S53-B2c): paseos con track REAL → cálculo puro en domain.
   const [vitales, setVitales] = useState<VitalesPaseos | 'cargando' | 'error'>('cargando');
   const [indiceAbierto, setIndiceAbierto] = useState<'salud' | 'descanso' | null>(null);
@@ -518,6 +522,26 @@ export default function PerfilDeMascota() {
               />
             </Tarjeta>
           ) : null}
+          {/* §3 grooming (S60): talla y pelaje del perfil — la voz dice
+              el estado real; NULL honesto invita a declarar. Perro y
+              gato (el techo de especies del grooming, §5). */}
+          {mascota.especie === 'perro' || mascota.especie === 'gato' ? (
+            <Tarjeta relleno="ninguno">
+              <Celda
+                titulo={t('grooming.tallaCeldaTitulo')}
+                interactiva
+                accessibilityRole="button"
+                onPress={() => setTallaHojaAbierta(true)}
+                fin={
+                  <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                    {mascota.talla === null || mascota.pelaje === null
+                      ? t('grooming.tallaEstadoSinDeclarar')
+                      : `${t(mascota.talla === 'S' ? 'grooming.tallaS' : mascota.talla === 'M' ? 'grooming.tallaM' : 'grooming.tallaL')}${mascota.pelaje === 'largo' ? ` · ${t('grooming.pelajeLargoCorto')}` : ''}`}
+                  </Text>
+                }
+              />
+            </Tarjeta>
+          ) : null}
           {/* la invitación digna: texto, jamás formulario muerto */}
           <Text
             style={{
@@ -540,6 +564,19 @@ export default function PerfilDeMascota() {
           setSocialHojaAbierta(false);
           setPerfil((prev) =>
             typeof prev === 'object' ? { ...prev, mascota: { ...prev.mascota, paseo_social_ok: ok } } : prev,
+          );
+        }}
+      />
+
+      {/* §3 grooming (S60): la MISMA Hoja de la reserva — editable siempre */}
+      <TallaPelajeHoja
+        visible={tallaHojaAbierta}
+        mascota={{ id: mascota.id, nombre: mascota.nombre, talla: mascota.talla, pelaje: mascota.pelaje }}
+        onCerrar={() => setTallaHojaAbierta(false)}
+        onDeclarada={(talla, pelaje) => {
+          setTallaHojaAbierta(false);
+          setPerfil((prev) =>
+            typeof prev === 'object' ? { ...prev, mascota: { ...prev.mascota, talla, pelaje } } : prev,
           );
         }}
       />

@@ -459,7 +459,13 @@ export default function Hogar() {
                 accessibilityRole="button"
                 onPress={() => router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: a.atencion_id } })}
                 titulo={nombreDe(a.mascota_id)}
-                subtitulo={t('hogar.paseoEnCurso')}
+                subtitulo={t(
+                  a.oficio === 'grooming'
+                    ? 'hogar.groomingEnCurso'
+                    : a.oficio === 'paseo'
+                      ? 'hogar.paseoEnCurso'
+                      : 'hogar.atencionEnCurso',
+                )}
                 fin={
                   <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.accent.primary }}>
                     {t('hogar.verEnVivo')}

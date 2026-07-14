@@ -72,7 +72,9 @@ await page.goto('http://localhost:8082/login', { waitUntil: 'networkidle', timeo
 await page.getByPlaceholder('ej: ana@correo.com').fill(env.EXPO_PUBLIC_DEMO_EMAIL);
 await page.locator('input[type="password"]').fill(env.EXPO_PUBLIC_DEMO_PASSWORD);
 await page.getByText('Entrar', { exact: true }).click();
-await page.waitForURL(/hogar|onboarding/, { timeout: 60000 });
+// S60: el login pasó a router.replace('/') (raíz decide por estado de
+// sesión) — el matcher acepta la raíz además de los destinos viejos.
+await page.waitForURL(/hogar|onboarding|localhost:8082\/(\?|$)/, { timeout: 60000 });
 
 // deep link al checkout con el hold vivo
 await page.goto(`http://localhost:8082/explorar/paseo/checkout?${qs}`, { waitUntil: 'networkidle', timeout: 120000 });

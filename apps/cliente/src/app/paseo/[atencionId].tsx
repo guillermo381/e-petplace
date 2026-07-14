@@ -28,6 +28,7 @@ import { Image } from 'expo-image';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  AvatarMascota,
   Boton,
   CitaEnVivo,
   Cronometro,
@@ -48,6 +49,8 @@ import {
 import {
   leerDetalleAtencion,
   obtenerCatalogoNovedadesPaseo,
+  obtenerPerfilMascota,
+  resolverUrlFoto,
   type DetalleAtencion,
 } from '@epetplace/api';
 import { fechaLargaHumana } from '@epetplace/i18n';
@@ -89,6 +92,10 @@ export default function DetallePaseo() {
   // el sondeo consulta este ref para NO seguir pegando cuando el paseo
   // cerró en caliente (la cara ya cambió a RECORRIDO)
   const enVivoRef = useRef(false);
+  // S60 (condición 5): en grooming la MASCOTA preside el hero vivo —
+  // avatar + estado en voz de familia (no hay track en una silla de
+  // grooming; el hueco del mapa NO deja cicatriz).
+  const [mascota, setMascota] = useState<{ nombre: string; fotoUrl?: string } | null>(null);
 
   // Recarga silenciosa (§7.4): reemplazo directo, jamás re-esqueleto
   // (Ley 13/6 — el sondeo no puede hacer parpadear la pantalla). El
@@ -137,6 +144,15 @@ export default function DetallePaseo() {
         if (d.ok && d.data.estado === 'en_curso') {
           sondeo = setInterval(() => void recargar('silencioso'), SONDEO_MS);
           tick = setInterval(() => setTick((n) => n + 1), TICK_ETIQUETA_MS);
+        }
+        // S60: el hero del grooming necesita a la mascota (avatar +
+        // nombre) — se pide UNA vez; si falla, la voz genérica cubre.
+        if (d.ok && d.data.oficio === 'grooming' && d.data.mascota_id !== null) {
+          const p = await obtenerPerfilMascota(d.data.mascota_id);
+          if (!vigente || !p.ok) return;
+          const url = p.data.mascota.foto_url !== null ? await resolverUrlFoto(p.data.mascota.foto_url) : null;
+          if (!vigente) return;
+          setMascota({ nombre: p.data.mascota.nombre, ...(url !== null ? { fotoUrl: url } : null) });
         }
       })();
       return () => {
@@ -201,6 +217,9 @@ export default function DetallePaseo() {
   // §7.2 — DOS CARAS, UNA RUTA: en_curso pinta EN VIVO; todo lo demás
   // (terminada / cerrada_con_calidad / no_show) pinta RECORRIDO.
   const enVivo = detalle.estado === 'en_curso';
+  // S60: el oficio bifurca el HERO (paseo = mapa/GPS honesto; grooming =
+  // la mascota preside — sin mapa, sin cicatriz) y la voz del título.
+  const esGrooming = detalle.oficio === 'grooming';
 
   // §7.4 — la etiqueta de frescura dice la verdad (envejece si el
   // sondeo falla; se renueva con cada carga buena).
@@ -217,8 +236,10 @@ export default function DetallePaseo() {
         variante="navegacion"
         titulo={
           detalle.iniciada_en !== null
-            ? t('paseo.tituloConFecha', { fecha: fechaLargaHumana(detalle.iniciada_en, idioma) })
-            : t('paseo.titulo')
+            ? t(esGrooming ? 'grooming.vivoTituloConFecha' : 'paseo.tituloConFecha', {
+                fecha: fechaLargaHumana(detalle.iniciada_en, idioma),
+              })
+            : t(esGrooming ? 'grooming.vivoTitulo' : 'paseo.titulo')
         }
         atras
         onAtras={() => router.back()}
@@ -240,7 +261,27 @@ export default function DetallePaseo() {
             <View style={{ marginTop: spacing[3] }}>
               <CitaEnVivo capa="cuidado">
                 <Tarjeta relleno="ninguno">
-                  {detalle.track_gps.length > 0 ? (
+                  {esGrooming ? (
+                    /* S60 (condición 5): la MASCOTA preside — avatar +
+                       estado en voz de familia. Nada de contenedor vacío
+                       donde iba el track. */
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3], padding: spacing[4], paddingBottom: 0 }}>
+                      <AvatarMascota nombre={mascota?.nombre ?? ''} fotoUrl={mascota?.fotoUrl} tamano="md" />
+                      <Text
+                        style={{
+                          flex: 1,
+                          fontFamily: typography.family.sans.light,
+                          fontSize: typography.size.lg,
+                          lineHeight: Math.round(typography.size.lg * typography.leading.snug),
+                          color: theme.text.primary,
+                        }}
+                      >
+                        {mascota !== null
+                          ? t('grooming.vivoEstado', { nombre: mascota.nombre })
+                          : t('grooming.vivoEstadoGenerico')}
+                      </Text>
+                    </View>
+                  ) : detalle.track_gps.length > 0 ? (
                     <View style={{ borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, overflow: 'hidden' }}>
                       <MapaRecorrido modo="vivo" puntos={detalle.track_gps} capa="cuidado" alto={200} />
                     </View>
@@ -409,7 +450,7 @@ export default function DetallePaseo() {
         onCerrar={() => setVisorAbierto(false)}
         fotos={detalle.fotos.map((f) => f.url)}
         indiceInicial={fotoInicial}
-        etiqueta={t('paseo.fotosDelPaseo')}
+        etiqueta={t(esGrooming ? 'grooming.fotosDeLaSesion' : 'paseo.fotosDelPaseo')}
       />
     </View>
   );

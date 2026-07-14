@@ -214,6 +214,14 @@ export interface DetalleAtencion {
   track_gps: PuntoTrack[];
   novedades: NovedadDeAtencion[];
   fotos: FotoDeEvento[];
+  /** S60 (hunk aditivo A): la mascota de la atención — el vivo del
+   *  grooming la hace presidir (avatar + estado). */
+  mascota_id: string | null;
+  /** S60 (hunk aditivo A): el oficio de la atención, derivado de su fila
+   *  hija (eventos_mascota_paseo / eventos_mascota_grooming). null =
+   *  atención sin fila de oficio (legacy). El vivo bifurca su hero con
+   *  esto: paseo = mapa/GPS honesto; grooming = SIN mapa, sin cicatriz. */
+  oficio: 'paseo' | 'grooming' | null;
 }
 
 export async function leerDetalleAtencion(
@@ -221,7 +229,7 @@ export async function leerDetalleAtencion(
 ): Promise<ResultadoWrapper<DetalleAtencion, CodigoErrorTimeline>> {
   const { data: at, error } = await getClient()
     .from('evento_atencion')
-    .select('id, evento_id, estado, iniciada_en, terminada_en, cerrada_en, mensaje_familia, prestador_id')
+    .select('id, evento_id, estado, iniciada_en, terminada_en, cerrada_en, mensaje_familia, prestador_id, mascota_id')
     .eq('id', atencionId)
     .maybeSingle();
   if (error) return fallo('error_desconocido');
@@ -241,6 +249,20 @@ export async function leerDetalleAtencion(
       : Promise.resolve({ ok: true as const, data: [] as FotoDeEvento[] }),
   ]);
   if (paseo.error) return fallo('error_desconocido');
+
+  // S60 (hunk aditivo A): el OFICIO se deriva de la fila hija — la de
+  // paseo ya se pidió; grooming solo se consulta si paseo no existe
+  // (una atención tiene UNA fila de oficio). RLS: grooming_select por
+  // user_tiene_acceso_a_mascota — el dueño lee.
+  let oficio: 'paseo' | 'grooming' | null = paseo.data !== null ? 'paseo' : null;
+  if (oficio === null) {
+    const g = await getClient()
+      .from('eventos_mascota_grooming')
+      .select('id')
+      .eq('evento_atencion_id', atencionId)
+      .maybeSingle();
+    if (!g.error && g.data !== null) oficio = 'grooming';
+  }
 
   let novedades: NovedadDeAtencion[] = [];
   if (paseo.data !== null) {
@@ -287,6 +309,8 @@ export async function leerDetalleAtencion(
       track_gps: track,
       novedades,
       fotos: fotos.ok ? fotos.data : [],
+      mascota_id: at.mascota_id ?? null,
+      oficio,
     },
   };
 }

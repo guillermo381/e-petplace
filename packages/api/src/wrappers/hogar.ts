@@ -27,6 +27,10 @@ export interface AtencionEnCursoHogar {
   atencion_id: string;
   mascota_id: string;
   iniciada_en: string | null;
+  /** S60 (hunk aditivo A): el oficio de la atención — la celda viva del
+   *  Hogar dice la verdad ("Paseo en curso" / "Estética en curso");
+   *  null = sin evento raíz legible (voz genérica). */
+  oficio: 'paseo' | 'grooming' | null;
 }
 
 export interface ProximaCitaHogar {
@@ -95,7 +99,7 @@ export async function obtenerEstadoHogar(
       .in('mascota_id', mascotaIds),
     cliente
       .from('evento_atencion')
-      .select('id, mascota_id, estado, iniciada_en, cerrada_en')
+      .select('id, mascota_id, estado, iniciada_en, cerrada_en, evento_id')
       .in('mascota_id', mascotaIds)
       .in('estado', ['en_curso', 'cerrada_con_calidad']),
     cliente
@@ -147,10 +151,35 @@ export async function obtenerEstadoHogar(
 
   // S59 §7.5 — TODAS las en_curso, la más reciente primero (antes se
   // quedaba solo la última y dos paseos simultáneos se pisaban).
-  const enCurso: AtencionEnCursoHogar[] = atenciones.data
+  const vivas = atenciones.data
     .filter((a) => a.estado === 'en_curso')
-    .sort((a, b) => ((a.iniciada_en ?? '') > (b.iniciada_en ?? '') ? -1 : 1))
-    .map((a) => ({ atencion_id: a.id, mascota_id: a.mascota_id, iniciada_en: a.iniciada_en }));
+    .sort((a, b) => ((a.iniciada_en ?? '') > (b.iniciada_en ?? '') ? -1 : 1));
+
+  // S60 (hunk aditivo A): el OFICIO por atención viva — del tipo del
+  // evento raíz ('atencion_paseo_registrada' / 'atencion_grooming_
+  // registrada'). Solo se consulta si hay algo vivo (cero costo en el
+  // hogar quieto); un fallo deja oficio null y la celda usa voz genérica.
+  const tipoPorEvento = new Map<string, string>();
+  const eventoIds = vivas.map((a) => a.evento_id).filter((id): id is string => id !== null);
+  if (eventoIds.length > 0) {
+    const tipos = await cliente.from('eventos_mascota').select('id, tipo').in('id', eventoIds);
+    if (!tipos.error) {
+      for (const e of tipos.data) tipoPorEvento.set(e.id, e.tipo);
+    }
+  }
+  const oficioDe = (eventoId: string | null): 'paseo' | 'grooming' | null => {
+    const tipo = eventoId !== null ? tipoPorEvento.get(eventoId) : undefined;
+    if (tipo === 'atencion_paseo_registrada') return 'paseo';
+    if (tipo === 'atencion_grooming_registrada') return 'grooming';
+    return null;
+  };
+
+  const enCurso: AtencionEnCursoHogar[] = vivas.map((a) => ({
+    atencion_id: a.id,
+    mascota_id: a.mascota_id,
+    iniciada_en: a.iniciada_en,
+    oficio: oficioDe(a.evento_id),
+  }));
 
   // Cura D-319: 'pendiente' solo entra como hold VIGENTE del bloqueo
   // de 15 min (estado_reserva='pendiente_pago' y expira_en futuro) —
