@@ -45,6 +45,8 @@ export {
 } from './wrappers/atencion';
 export {
   obtenerMiPrestador,
+  actualizarPerfilPrestador,
+  type InputActualizarPerfilPrestador,
   type MiPrestador,
   type CodigoErrorPrestador,
 } from './wrappers/prestador';

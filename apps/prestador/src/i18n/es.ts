@@ -91,6 +91,27 @@ export const prestadorEs = {
     eliminarVoz:
       'Va a estar acá, con todas las de la ley. Antes tenemos que resolver bien qué pasa con tus citas ya pagadas, tus planes vivos y tu saldo por liquidar — un negocio con compromisos no se borra a la ligera.',
     entendido: 'Entendido',
+    // S60-B2 — la sección de la ENTIDAD en Tu perfil (P17 v1.1, visto
+    // del arquitecto) · LOTE S60, GATE PENDIENTE. Reuso declarado:
+    // ofertaPaseo.visibleTitulo/noVisibleTitulo (la voz 7.13 de las
+    // portadas, misma key).
+    negocioTitulo: 'Tu negocio',
+    nombreComercialLabel: 'Nombre público',
+    nombreComercialAyuda: 'Tu nombre público cambia junto con tu perfil público — llega pronto.',
+    tipoLabel: 'Oficio',
+    tipoPaseador: 'Paseador',
+    tipoClinica: 'Clínica veterinaria',
+    tipoGrooming: 'Grooming',
+    sedeLabel: 'Tu sede',
+    sedeAyuda: 'La sede operativa se cambia con el equipo de e-PetPlace.',
+    sinCargar: 'Sin cargar',
+    descripcionLabel: 'Descripción',
+    descripcionAyuda: 'Lo que las familias leen de tu negocio.',
+    contactoTitulo: 'Contacto del negocio',
+    whatsappLabel: 'WhatsApp',
+    emailContactoLabel: 'Email de contacto',
+    sitioWebLabel: 'Sitio web',
+    negocioGuardado: 'Listo — tu negocio quedó al día.',
   },
   // El flujo de atención E2E (S44, migrado en D-315 pata prestador).
   // VOZ EMOCIONAL APROBADA por founder (lote S55, es y en) — hunk de

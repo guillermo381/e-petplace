@@ -80,6 +80,24 @@ export const prestadorEn = {
     eliminarVoz:
       "It will live here, done right. First we need to properly resolve what happens to your paid appointments, your active plans and your pending payouts — a business with commitments isn't deleted lightly.",
     entendido: 'Got it',
+    // S60-B2 — Espejo de es.ts · LOTE S60, GATE PENDIENTE
+    negocioTitulo: 'Your business',
+    nombreComercialLabel: 'Public name',
+    nombreComercialAyuda: 'Your public name changes along with your public profile — coming soon.',
+    tipoLabel: 'Craft',
+    tipoPaseador: 'Dog walker',
+    tipoClinica: 'Veterinary clinic',
+    tipoGrooming: 'Grooming',
+    sedeLabel: 'Your location',
+    sedeAyuda: 'Your business location is changed with the e-PetPlace team.',
+    sinCargar: 'Not set',
+    descripcionLabel: 'Description',
+    descripcionAyuda: 'What families read about your business.',
+    contactoTitulo: 'Business contact',
+    whatsappLabel: 'WhatsApp',
+    emailContactoLabel: 'Contact email',
+    sitioWebLabel: 'Website',
+    negocioGuardado: 'Done — your business is up to date.',
   },
   // The E2E walk flow (S44, migrated in D-315 provider leg).
   cita: {
