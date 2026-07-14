@@ -59,6 +59,8 @@ import {
   obtenerEstadoHogar,
   obtenerMascotasDeFamilia,
   obtenerMisPlanesPaseo,
+  obtenerResumenServiciosHogar,
+  type ResumenServiciosHogar,
   obtenerVacunaPorEvento,
   resolverUrlFoto,
   resolverUrlsFotos,
@@ -188,6 +190,10 @@ export default function Hogar() {
   // el primer plan ACTIVO para el subtítulo VIVO del grupo.
   const [planActivo, setPlanActivo] = useState<PlanPaseo | null>(null);
   const [hayPlanes, setHayPlanes] = useState(false);
+  // S60-A6 (D-366, insumo de Kary): la posición por servicio para la
+  // zona de SERVICIOS VIVOS — null mientras carga o si la lectura falló
+  // (la zona calla, jamás pinta verosímil-falso — L-139).
+  const [resumenServicios, setResumenServicios] = useState<ResumenServiciosHogar | null>(null);
   // QW1 (S53): el saludo lleva el nombre del miembro (profiles.nombre).
   const [nombrePerfil, setNombrePerfil] = useState<string | null>(null);
   const [vacunaAbierta, setVacunaAbierta] = useState(false);
@@ -295,6 +301,10 @@ export default function Hogar() {
             setHayPlanes(pl.data.length > 0);
             setPlanActivo(pl.data.find((p) => p.estado === 'activa') ?? null);
           }
+        });
+        // S60-A6: la posición por servicio (fallo = zona callada, L-139)
+        void obtenerResumenServiciosHogar().then((rs) => {
+          if (vigente && rs.ok) setResumenServicios(rs.data);
         });
         void obtenerMiPerfil().then((p) => {
           // sin nombre: el saludo va solo — jamás un nombre inventado
@@ -558,12 +568,83 @@ export default function Hogar() {
         })}
       </Animated.View>
 
+      {/* ── TUS SERVICIOS (S60-A6, D-366 — el insumo rey de Kary): la
+          posición por servicio, sin buscarla. Regla de existencia: la
+          celda vive SOLO con actividad (próximos, saldo, plan, o
+          historial ≤60 días) — cero actividad = cero celda (Explorar
+          descubre, el Hogar anticipa). Lo VIVO manda sobre lo próximo
+          (el hero queda arriba, intacto); UN dato por celda, jamás
+          dos. "Mis paseos" MIGRÓ acá desde el grupo del carnet. ── */}
+      {(() => {
+        const rp = resumenServicios?.paseo;
+        const re = resumenServicios?.estetica;
+        const vozCuando = (fecha: string, hora: string): string => {
+          const c = cuandoRelativo(fecha, hora, t);
+          return 'relativo' in c ? c.relativo : `${fechaCortaMono(fecha, idioma)} · ${hora}`;
+        };
+        // paseo: próxima > saldo > plan (un dato, jamás dos)
+        const hayPaseo = (rp !== undefined && (rp.proxima !== null || rp.salidas_saldo > 0)) || hayPlanes;
+        const detallePaseo =
+          rp?.proxima != null
+            ? rp.proxima.mascota_nombre !== null
+              ? t('hogar.proximoPaseoDe', { nombre: rp.proxima.mascota_nombre, cuando: vozCuando(rp.proxima.fecha, rp.proxima.hora) })
+              : t('hogar.proximoPaseo', { cuando: vozCuando(rp.proxima.fecha, rp.proxima.hora) })
+            : rp !== undefined && rp.salidas_saldo > 0
+              ? rp.salidas_saldo === 1
+                ? t('hogar.saldoUnaSalida')
+                : t('hogar.saldoSalidas', { n: rp.salidas_saldo })
+              : planActivo !== null && planActivo.dias_semana.length > 0
+                ? t('hogar.planDias', { dias: planActivo.dias_semana.map((d) => nombreDia(d, idioma)).join(', ') })
+                : undefined;
+        // estética: próxima > historial reciente (ventana 60 días, ratificada)
+        const cerradaReciente =
+          re?.ultima_cerrada != null &&
+          (Date.parse(new Intl.DateTimeFormat('en-CA').format(hoy)) - Date.parse(re.ultima_cerrada)) / 86400000 <= 60;
+        const hayEstetica = re !== undefined && (re.proxima !== null || cerradaReciente);
+        const detalleEstetica =
+          re?.proxima != null
+            ? re.proxima.mascota_nombre !== null
+              ? t('hogar.proximaSesionDe', { nombre: re.proxima.mascota_nombre, cuando: vozCuando(re.proxima.fecha, re.proxima.hora) })
+              : t('hogar.proximaSesion', { cuando: vozCuando(re.proxima.fecha, re.proxima.hora) })
+            : re?.ultima_cerrada != null
+              ? t('hogar.ultimaSesion', { fecha: fechaCortaMono(re.ultima_cerrada, idioma) })
+              : undefined;
+        if (!hayPaseo && !hayEstetica) return null;
+        return (
+          <Animated.View entering={entradaZona(2)} style={{ paddingHorizontal: spacing[4], marginTop: spacing[7], gap: spacing[3] }}>
+            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.secondary }}>
+              {t('hogar.serviciosTitulo')}
+            </Text>
+            <Tarjeta relleno="ninguno" elevacion="reposo">
+              {hayPaseo ? (
+                <CeldaNavegacion
+                  icono="paseo"
+                  titulo={t('plan.hubTitulo')}
+                  detalle={detallePaseo}
+                  onPress={() => router.push('/hogar/paseos')}
+                />
+              ) : null}
+              {hayPaseo && hayEstetica ? <Separador /> : null}
+              {hayEstetica ? (
+                <CeldaNavegacion
+                  icono="grooming"
+                  titulo={t('grooming.hubTitulo')}
+                  detalle={detalleEstetica}
+                  onPress={() => router.push('/hogar/grooming')}
+                />
+              ) : null}
+            </Tarjeta>
+          </Animated.View>
+        );
+      })()}
+
       {/* ── El GRUPO de celdas (patrón v2, Ley 19.1): entrar a una
           sección con subtítulo VIVO — dato real del expediente, jamás
           descripción estática. Hairline solo interno (Chanel); la
           superficie apoyada no lleva borde. "Agregar mascota" es
-          ACCIÓN dentro del grupo (sin chevron). ── */}
-      <Animated.View entering={entradaZona(2)} style={{ paddingHorizontal: spacing[4], marginTop: spacing[7] }}>
+          ACCIÓN dentro del grupo (sin chevron). S60-A6: expediente
+          PURO — "Mis paseos" migró a la zona de servicios. ── */}
+      <Animated.View entering={entradaZona(3)} style={{ paddingHorizontal: spacing[4], marginTop: spacing[7] }}>
         <Tarjeta relleno="ninguno" elevacion="reposo">
           <CeldaNavegacion
             icono="veterinaria"
@@ -590,22 +671,9 @@ export default function Hogar() {
               else setCarnetSelectorAbierto(true);
             }}
           />
-          {/* D-338 intacto: el hub solo cuando el plan existe (silencio digno) */}
-          {hayPlanes ? (
-            <>
-              <Separador />
-              <CeldaNavegacion
-                icono="paseo"
-                titulo={t('plan.hubTitulo')}
-                detalle={
-                  planActivo !== null && planActivo.dias_semana.length > 0
-                    ? t('hogar.planDias', { dias: planActivo.dias_semana.map((d) => nombreDia(d, idioma)).join(', ') })
-                    : undefined
-                }
-                onPress={() => router.push('/hogar/paseos')}
-              />
-            </>
-          ) : null}
+          {/* S60-A6: la celda del hub migró a TUS SERVICIOS (arriba) —
+              este grupo queda expediente puro (D-338 sigue honrada: la
+              regla de existencia de la zona incluye hayPlanes). */}
           <Separador />
           <CeldaNavegacion
             icono="refugio"
@@ -623,7 +691,7 @@ export default function Hogar() {
       {/* ── Zona 4 — la vida ─────────────────────────────────────
           Ritmo S52-P2c: entre zonas spacing[7]; adentro spacing[4]. */}
       <Animated.View
-        entering={entradaZona(3)}
+        entering={entradaZona(4)}
         style={{ paddingHorizontal: spacing[4], marginTop: spacing[7], gap: spacing[4] }}
       >
         {/* la invitación del carnet MIGRÓ al grupo de celdas (Chanel S58) */}

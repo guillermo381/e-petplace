@@ -96,6 +96,16 @@ export const clienteEs = {
     // S60 — la celda viva dice la verdad del oficio (LOTE S60)
     groomingEnCurso: 'Estética en vivo',
     atencionEnCurso: 'Atención en vivo',
+    // S60-A6 — TUS SERVICIOS: la posición por servicio (LOTE S60; el
+    // título de la zona es PROPUESTA al pulgar del founder)
+    serviciosTitulo: 'Tus servicios',
+    proximoPaseoDe: 'Próximo paseo de {{nombre}}: {{cuando}}',
+    proximoPaseo: 'Próximo paseo: {{cuando}}',
+    proximaSesionDe: 'Próxima sesión de {{nombre}}: {{cuando}}',
+    proximaSesion: 'Próxima sesión: {{cuando}}',
+    saldoSalidas: 'Te quedan {{n}} salidas del paquete',
+    saldoUnaSalida: 'Te queda 1 salida del paquete',
+    ultimaSesion: 'Última sesión: {{fecha}}',
     verEnVivo: 'Ver cómo va',
     proximaCita: 'Próxima cita',
     // D-319: el hold vigente del bloqueo 15 min — rima con checkout.holdVoz

@@ -104,6 +104,8 @@ export interface CitaPaseoDueno {
   duracion_minutos: number;
   precio: number | null;
   prestador_id: string | null;
+  /** S60-A6 (aditivo): la zona de servicios del Hogar habla con nombre. */
+  mascota_id: string | null;
   tipo_servicio: string | null;
   /** Discrimina la familia: 'paquete' (bono_id) o 'suelta'. El plan vive en obtenerCitasDePlan. */
   origen: 'suelta' | 'paquete';
@@ -128,7 +130,7 @@ export async function obtenerMisCitasPaseo(): Promise<
     supabase.from('tipos_servicio').select('codigo').eq('categoria', 'paseo'),
     supabase
       .from('evento_cita_servicio')
-      .select('id, fecha, hora, estado, duracion_minutos, precio, prestador_id, tipo_servicio, bono_id, estado_reserva')
+      .select('id, fecha, hora, estado, duracion_minutos, precio, prestador_id, mascota_id, tipo_servicio, bono_id, estado_reserva')
       .is('suscripcion_servicio_id', null)
       .in('estado', ['confirmada', 'en_curso', 'completada', 'cancelada', 'no_show'])
       .order('fecha', { ascending: true })
@@ -153,6 +155,7 @@ export async function obtenerMisCitasPaseo(): Promise<
       duracion_minutos: Number(fila.duracion_minutos),
       precio: fila.precio === null ? null : Number(fila.precio),
       prestador_id: fila.prestador_id ?? null,
+      mascota_id: fila.mascota_id ?? null,
       tipo_servicio: fila.tipo_servicio ?? null,
       origen: fila.bono_id !== null ? 'paquete' : 'suelta',
       bono_id: fila.bono_id ?? null,

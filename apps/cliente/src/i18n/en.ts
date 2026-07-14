@@ -91,6 +91,16 @@ export const clienteEn = {
     // S60 — the live cell tells the truth of the trade (LOTE S60)
     groomingEnCurso: 'Live grooming',
     atencionEnCurso: 'Live care',
+    // S60-A6 — YOUR SERVICES: the per-service position (LOTE S60; the
+    // zone title is a PROPOSAL for the founder's thumb)
+    serviciosTitulo: 'Your services',
+    proximoPaseoDe: 'Next walk for {{nombre}}: {{cuando}}',
+    proximoPaseo: 'Next walk: {{cuando}}',
+    proximaSesionDe: 'Next session for {{nombre}}: {{cuando}}',
+    proximaSesion: 'Next session: {{cuando}}',
+    saldoSalidas: 'You have {{n}} walks left in your pack',
+    saldoUnaSalida: 'You have 1 walk left in your pack',
+    ultimaSesion: 'Last session: {{fecha}}',
     verEnVivo: 'See how it goes',
     proximaCita: 'Next appointment',
     // D-319: live 15-min hold — rhymes with checkout.holdVoz

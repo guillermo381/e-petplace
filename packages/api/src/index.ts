@@ -399,6 +399,13 @@ export {
   type TallaPelajeDeclarados,
 } from './wrappers/grooming-reserva';
 
+// ── La zona de servicios vivos del Hogar (S60-A6, D-366 — hunk Sesión A) ────
+export {
+  obtenerResumenServiciosHogar,
+  type ProximaDeServicio,
+  type ResumenServiciosHogar,
+} from './wrappers/serviciosHogar';
+
 // ── La atención de grooming (S60-B1 — hunk Sesión B) ────────────────────────
 export {
   agregarServicioGrooming,
