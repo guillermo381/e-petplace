@@ -1623,7 +1623,16 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 ### Deudas de Sesión 60 (13-14 Jul 2026)
 
 #### D-387 — Los registrables de grooming ganan voz de familia y viajan al EN VIVO del dueño
-🟡 ALTA. Los 9 registrables de grooming (`cat_servicios_grooming`) ganan `nombre_familia` (textos gateados por el founder, patrón D-300 — el catálogo de novedades del paseo es el precedente) y el EN VIVO del dueño los pinta como novedades (MODELO_GROOMING §8: "estado y novedades"). **v1 muestra estado + fotos + mensaje — honesto por Ley 3**: el registro fino del groomer es vocabulario del oficio sin voz de familia, y volcarlo crudo al dueño violaría la regla del vocabulario interno (hallazgo 5 del cierre S60-A1: las novedades del grooming NO viajan al vivo v1, declarado y no parchado). **Disparo: antes de prestadores reales, o pulgar founder.** Origen: S60-A2 (pedido founder sobre el hallazgo del cierre A1).
+🟡 ALTA. Los 9 registrables de grooming (`cat_servicios_grooming`) ganan `nombre_familia` (textos gateados por el founder, patrón D-300 — el catálogo de novedades del paseo es el precedente) y el EN VIVO del dueño los pinta como novedades (MODELO_GROOMING §8: "estado y novedades"). **v1 muestra estado + fotos + mensaje — honesto por Ley 3**: el registro fino del groomer es vocabulario del oficio sin voz de familia, y volcarlo crudo al dueño violaría la regla del vocabulario interno (hallazgo 5 del cierre S60-A1: las novedades del grooming NO viajan al vivo v1, declarado y no parchado). **Disparo: antes de prestadores reales, o pulgar founder.** Origen: S60-A2 (pedido founder sobre el hallazgo del cierre A1). Emparentada con D-388 (misma tabla, dos columnas de voz).
+
+#### D-388 — Voz es-only de los catálogos de grooming (familia D-324)
+🟢 MEDIA. Los 6 códigos de `cat_incidencias_grooming` y los 9 registrables de `cat_servicios_grooming` hablan SOLO español (`nombre` sin pata en) — el mismo patrón que los MOTIVOS_GPS del paseo (D-324). Emparentada con D-387: misma tabla, dos columnas de voz (`nombre_familia` de D-387 nace bilingüe o hereda esta deuda). **Disparo: el riel de catálogos bilingües, o el primer usuario en.** Origen: S60-A3 (pedido founder).
+
+#### D-389 — La policy `prestador_own_profile` deja al prestador escribirse TODA la fila
+🔴 BLOQUEANTE (de prestadores reales). `prestador_own_profile` [ALL] permite al prestador hacer UPDATE directo de TODA su fila de `prestadores` con sesión propia — incluyendo `estado`, `aprobado_*`, `calificacion_promedio`, `total_*`. Riesgo real: **auto-aprobación (bypass de 7.13 — "no se oferta quien no puede cobrar" deja de ser verdad firme) y métricas falsificadas.** Cura: protección de columnas en el motor (trigger de rechazo o privilegio por columna) + asserts en AMBOS sentidos (editar `descripcion` PASA; editar `estado`/`calificacion_promedio` REBOTA). Familia D-314. **Disparo: la próxima migración que toque `prestadores`, o antes de prestadores reales — lo que llegue primero.** Origen: S60 (hallazgo de relevamiento).
+
+#### D-390 — Higiene: policies duplicadas de escritura propia en `prestadores`
+⚪ BAJA. `prestador_own_profile` [ALL] y `prestadores_own` [UPDATE] se superponen (familia D-342 de higiene de policies). **Morir la redundante al curar D-389** — misma migración, jamás suelta. Origen: S60 (mismo relevamiento que D-389).
 
 ---
 
