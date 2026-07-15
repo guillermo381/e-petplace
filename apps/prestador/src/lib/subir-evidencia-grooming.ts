@@ -1,12 +1,16 @@
 /**
- * Subida de evidencia del GROOMING (S60-B1) — espejo del patrón del
- * paseo (subir-evidencia.ts, S44-B4.3): mismo bucket privado
- * 'cita-archivos' (policies por prestador en el primer segmento del
- * path), dos pasos con huérfano recuperable. La diferencia es el
- * REGISTRO: evento_grooming_archivos vía registrar_archivo_grooming,
- * que porta el TIPO (foto_recibir / foto_durante / foto_entregar /
+ * Subida de evidencia del GROOMING (S60-B1; bucket propio S61-B4) —
+ * espejo del patrón del paseo (subir-evidencia.ts, S44-B4.3): bucket
+ * privado 'grooming-archivos' DEL OFICIO (hallazgo A2/T8: subir al
+ * bucket del paseo dejaba la foto infirmable para el dueño; policies
+ * por prestador en el primer segmento del path — mismo scheme), dos
+ * pasos con huérfano recuperable. La diferencia es el REGISTRO:
+ * evento_grooming_archivos vía registrar_archivo_grooming, que porta
+ * el TIPO (foto_recibir / foto_durante / foto_entregar /
  * foto_incidencia / otro — CHECK de DB) del que cuelgan los guards del
- * cierre (§8) y del terminar (foto_entregar, D-270).
+ * cierre (§8) y del terminar (foto_entregar, D-270). Los objetos
+ * viejos en cita-archivos NO se migran: los cubre la policy puente
+ * (20260714090000) y el wrapper del dueño firma con fallback.
  */
 
 import { Platform } from 'react-native';
@@ -19,7 +23,7 @@ function uriLegible(uri: string): string {
   return uri.replace(/%/g, '%25');
 }
 
-const BUCKET = 'cita-archivos';
+const BUCKET = 'grooming-archivos';
 
 export interface ResultadoSubidaGrooming {
   ok: boolean;
