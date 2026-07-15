@@ -87,7 +87,10 @@ function esObj(v: unknown): v is Obj {
 // ── Tipos del dominio (derivados del DDL real, no calcados) ──────────────────
 
 export type EstadoAtencionPaseo = 'en_curso' | 'terminada' | 'cerrada_con_calidad';
-export type GpsEstadoPaseo = 'registrado' | 'fallido';
+// S62 (cura del verosímil-falso): 'registrado' exige ≥2 puntos;
+// 'incompleto' = el track se cortó a mitad (1 punto, con motivo);
+// 'fallido' = cero puntos, con motivo.
+export type GpsEstadoPaseo = 'registrado' | 'incompleto' | 'fallido';
 
 /** type (no interface): la index signature implícita lo hace asignable a Json. */
 export type PuntoGpsPaseo = {
@@ -153,7 +156,8 @@ export interface ResultadoTerminarPaseo {
   paseo_id: string;
   estado: 'terminada';
   terminada_en: string;
-  /** Siempre resuelto por la RPC: registrado (hay track) o fallido (motivo). */
+  /** Siempre resuelto por la RPC: registrado (≥2 puntos) · incompleto
+   *  (1 punto, con motivo) · fallido (0 puntos, con motivo). */
   gps_estado: GpsEstadoPaseo;
   pausa_abierta_cerrada_automaticamente: boolean;
 }
@@ -550,7 +554,7 @@ export async function terminarAtencionPaseo(
     typeof o.paseo_id !== 'string' ||
     o.estado !== 'terminada' ||
     typeof o.terminada_en !== 'string' ||
-    (o.gps_estado !== 'registrado' && o.gps_estado !== 'fallido') ||
+    !esGpsEstado(o.gps_estado) ||
     typeof o.pausa_abierta_cerrada_automaticamente !== 'boolean'
   ) {
     return mapeoErrorAResultado('datos_inconsistentes');
@@ -613,7 +617,7 @@ function esEstadoAtencion(v: unknown): v is EstadoAtencionPaseo {
 }
 
 function esGpsEstado(v: unknown): v is GpsEstadoPaseo {
-  return v === 'registrado' || v === 'fallido';
+  return v === 'registrado' || v === 'incompleto' || v === 'fallido';
 }
 
 export async function obtenerPaseoPorCita(
