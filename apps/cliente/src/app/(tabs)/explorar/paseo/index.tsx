@@ -170,23 +170,31 @@ export default function PaseoCuando() {
       .sort((a, b) => a.duracion - b.duracion);
   }, [oferta]);
 
-  // Próximos 14 días (hoy+13) — la tira.
+  // Próximos 14 días (hoy+13) — la tira. `corta` = fecha corta SIEMPRE
+  // (S61-A5 cura 1: el botón del día sin lugar dice la fecha real —
+  // "Probar mié 15" — jamás un "Mañana" con mayúscula colada).
   const dias = useMemo(() => {
     const fmt = new Intl.DateTimeFormat(idioma === 'es' ? 'es' : 'en', {
       weekday: 'short',
       day: 'numeric',
     });
-    const lista: Array<{ iso: string; etiqueta: string }> = [];
+    const lista: Array<{ iso: string; etiqueta: string; corta: string }> = [];
     for (let i = 0; i < 14; i++) {
       const d = new Date();
       d.setDate(d.getDate() + i);
       const iso = fechaLocalISO(d);
-      const etiqueta =
-        i === 0 ? t('explorar.cuandoHoy') : i === 1 ? t('explorar.cuandoManana') : fmt.format(d).toLowerCase();
-      lista.push({ iso, etiqueta });
+      const corta = fmt.format(d).toLowerCase();
+      const etiqueta = i === 0 ? t('explorar.cuandoHoy') : i === 1 ? t('explorar.cuandoManana') : corta;
+      lista.push({ iso, etiqueta, corta });
     }
     return lista;
   }, [idioma, t]);
+
+  // S61-A5 cura 1 (§6ter): el día siguiente en la tira, o null en el último.
+  const diaSiguiente = useMemo(() => {
+    const idx = dias.findIndex((d) => d.iso === dia);
+    return idx >= 0 && idx + 1 < dias.length ? dias[idx + 1] : null;
+  }, [dias, dia]);
 
   // La grilla recalcula VIVA con cada cambio de día o duración.
   useEffect(() => {
@@ -319,10 +327,24 @@ export default function PaseoCuando() {
                 accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setReintento((n) => n + 1)} />}
               />
             ) : inicios.length === 0 ? (
-              // día sin inicios: voz honesta corta, jamás pantalla de error
-              <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
-                {t('explorar.cuandoSinInicios')}
-              </Text>
+              // §6ter (S61-A5 cura 1): el día sin lugar gana CAMINO
+              // TOCABLE — avanza la tira al día siguiente. Decisión (b)
+              // declarada: el motor es por-día (el "próximo día con
+              // lugar" real costaría hasta 13 llamadas); el motor NO se
+              // toca. En el último día de la tira, sin botón (honesto).
+              <EstadoVacio
+                registro="seccion"
+                titulo={t('explorar.cuandoSinInicios')}
+                accion={
+                  diaSiguiente !== null ? (
+                    <Boton
+                      variante="compacto"
+                      etiqueta={t('explorar.sinIniciosProbarDia', { dia: diaSiguiente.corta })}
+                      onPress={() => setDia(diaSiguiente.iso)}
+                    />
+                  ) : undefined
+                }
+              />
             ) : (
               <SelectorOpcion
               acento="control"

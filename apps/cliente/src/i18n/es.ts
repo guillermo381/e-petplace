@@ -339,6 +339,8 @@ export const clienteEs = {
     cuandoDesde: 'desde ${{precio}}',
     cuandoPrecio: '${{precio}}',
     cuandoSinInicios: 'Ese día no hay horarios libres para este bloque. Prueba con otro día.',
+    // S61-A5 cura 1 — §6ter: el camino tocable del día sin lugar (LOTE S61)
+    sinIniciosProbarDia: 'Probar {{dia}}',
     quienTitulo: 'Paseadores disponibles',
     nadiePuede: 'Nadie puede a esa hora',
     nadiePuedeDetalle: 'Prueba con otro horario u otro día.',

@@ -306,6 +306,8 @@ export const clienteEn = {
     cuandoDesde: 'from ${{precio}}',
     cuandoPrecio: '${{precio}}',
     cuandoSinInicios: 'No free times that day for this block. Try another day.',
+    // S61-A5 cure 1 — §6ter: the tappable path out of an empty day (LOTE S61)
+    sinIniciosProbarDia: 'Try {{dia}}',
     quienTitulo: 'Available walkers',
     nadiePuede: 'No one can at that time',
     nadiePuedeDetalle: 'Try another time or another day.',
