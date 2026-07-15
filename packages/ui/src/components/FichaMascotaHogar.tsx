@@ -26,6 +26,7 @@
  */
 
 import { Pressable, Text, View } from 'react-native'
+import Animated from 'react-native-reanimated'
 import Svg, { Path } from 'react-native-svg'
 
 import { typography } from '../tokens/typography'
@@ -35,6 +36,7 @@ import { useTheme } from '../ThemeProvider'
 import { useTraduccionUi } from '../i18n'
 import { AvatarMascota } from './AvatarMascota'
 import { Tarjeta } from './Tarjeta'
+import { usePresionado } from './usePresionado'
 
 export type FichaMascotaHogarVoz = 'alDia' | 'pideAtencion' | 'conociendolo'
 
@@ -75,6 +77,8 @@ function AccionFicha({ accion }: { accion: FichaMascotaHogarAccion }) {
   const { theme } = useTheme()
   const { t } = useTraduccionUi()
   const esMemorial = theme.mode === 'memorial'
+  // D-401: la acción es un control — responde al dedo (0.97)
+  const { handlers, estiloPresionado } = usePresionado(0.97)
 
   if (accion.tipo === 'vivo') {
     // el pill de la voz única §7.1 (mismas keys que CitaEnVivo; el
@@ -85,15 +89,18 @@ function AccionFicha({ accion }: { accion: FichaMascotaHogarAccion }) {
     return (
       <Pressable
         onPress={accion.onPress}
+        {...handlers}
         accessibilityRole="button"
         accessibilityLabel={voz}
         hitSlop={8}
-        style={{ marginTop: spacing[2], alignSelf: 'flex-end', flexDirection: 'row', alignItems: 'center', gap: spacing[1.5] }}
+        style={{ marginTop: spacing[2], alignSelf: 'flex-end' }}
       >
-        <View style={{ width: 8, height: 8, borderRadius: radius.full, backgroundColor: colorPunto }} />
-        <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: colorTexto }}>
-          {voz}
-        </Text>
+        <Animated.View style={[estiloPresionado, { flexDirection: 'row', alignItems: 'center', gap: spacing[1.5] }]}>
+          <View style={{ width: 8, height: 8, borderRadius: radius.full, backgroundColor: colorPunto }} />
+          <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: colorTexto }}>
+            {voz}
+          </Text>
+        </Animated.View>
       </Pressable>
     )
   }
@@ -108,17 +115,20 @@ function AccionFicha({ accion }: { accion: FichaMascotaHogarAccion }) {
     return (
       <Pressable
         onPress={accion.onPress}
+        {...handlers}
         accessibilityRole="button"
         accessibilityLabel={accion.etiqueta}
         hitSlop={8}
-        style={{ marginTop: spacing[2], alignSelf: 'flex-end', flexDirection: 'row', alignItems: 'center', gap: spacing[1] }}
+        style={{ marginTop: spacing[2], alignSelf: 'flex-end' }}
       >
-        <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color }}>
-          {accion.etiqueta}
-        </Text>
-        <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" aria-hidden>
-          <Path d="M9 18l6-6-6-6" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-        </Svg>
+        <Animated.View style={[estiloPresionado, { flexDirection: 'row', alignItems: 'center', gap: spacing[1] }]}>
+          <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color }}>
+            {accion.etiqueta}
+          </Text>
+          <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" aria-hidden>
+            <Path d="M9 18l6-6-6-6" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        </Animated.View>
       </Pressable>
     )
   }
@@ -130,24 +140,30 @@ function AccionFicha({ accion }: { accion: FichaMascotaHogarAccion }) {
   return (
     <Pressable
       onPress={accion.onPress}
+      {...handlers}
       accessibilityRole="button"
       accessibilityLabel={accion.etiqueta}
-      style={{
-        marginTop: spacing[2],
-        alignSelf: 'stretch',
-        minHeight: 44,
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: spacing[4],
-        borderRadius: radius.suave,
-        borderWidth: 1,
-        borderColor: theme.border.subtle,
-        backgroundColor: fondoTonal,
-      }}
+      style={{ marginTop: spacing[2], alignSelf: 'stretch' }}
     >
-      <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: textoTonal }}>
-        {accion.etiqueta}
-      </Text>
+      <Animated.View
+        style={[
+          estiloPresionado,
+          {
+            minHeight: 44,
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingHorizontal: spacing[4],
+            borderRadius: radius.suave,
+            borderWidth: 1,
+            borderColor: theme.border.subtle,
+            backgroundColor: fondoTonal,
+          },
+        ]}
+      >
+        <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: textoTonal }}>
+          {accion.etiqueta}
+        </Text>
+      </Animated.View>
     </Pressable>
   )
 }

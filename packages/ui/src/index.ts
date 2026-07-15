@@ -105,6 +105,7 @@ export {
 // S61-B10 (L-137 3ª enmienda): la frontera dual-forma de lectura de
 // archivos locales — de TODAS las apps, jamás cura local por-caller
 export { leerBytes, leerBase64, uriLegible } from './components/leer-archivo'
+export { usePresionado } from './components/usePresionado'
 export { Cronometro, type CronometroProps } from './components/Cronometro'
 export {
   EvidenciaFoto,

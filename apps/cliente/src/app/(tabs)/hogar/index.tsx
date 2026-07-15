@@ -51,6 +51,7 @@ import {
   spacing,
   typography,
   useAviso,
+  usePresionado,
   useTheme,
   type FichaMascotaHogarAccion,
   type FichaMascotaHogarVoz,
@@ -263,6 +264,8 @@ export default function Hogar() {
   const { t, idioma } = useTraduccion();
   const insets = useSafeAreaInsets();
   const { mostrar } = useAviso();
+  // D-401: pressed del destello del Coach (el único tocable artesanal del Hogar)
+  const pressedCoach = usePresionado(0.97);
 
   const [mascotas, setMascotas] = useState<EstadoMascotas>('cargando');
   const [fotos, setFotos] = useState<Record<string, string>>({});
@@ -530,6 +533,7 @@ export default function Hogar() {
             permanente; su lugar queda hecho abajo. */}
         <Pressable
           onPress={() => setCoachAbierto(true)}
+          {...pressedCoach.handlers}
           accessibilityRole="button"
           accessibilityLabel={t('coach.abrir')}
           hitSlop={10}
@@ -543,7 +547,10 @@ export default function Hogar() {
             justifyContent: 'center',
           }}
         >
-          <Icono nombre="coach" tamano={24} registro="tinta" tinta={esMemorial ? theme.text.secondary : theme.text.onGradient} />
+          {/* D-401: el destello confirma el dedo (0.97, receta única) */}
+          <Animated.View style={pressedCoach.estiloPresionado}>
+            <Icono nombre="coach" tamano={24} registro="tinta" tinta={esMemorial ? theme.text.secondary : theme.text.onGradient} />
+          </Animated.View>
           {/* punto de novedad — motor B4: {hayNovedadCoach ? <View .../> : null} */}
         </Pressable>
       </View>
