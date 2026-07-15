@@ -22,7 +22,7 @@
  *    gobiernan el precio (declarados una vez, editables siempre).
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
@@ -45,9 +45,11 @@ import {
   obtenerIniciosGrooming,
   obtenerMascotasDeFamilia,
   obtenerOfertaGrooming,
+  obtenerOfertaGroomingPublica,
   resolverUrlFoto,
   type MascotaResumen,
   type OfertaGrooming,
+  type OfertaGroomingPublica,
 } from '@epetplace/api';
 import { TallaPelajeHoja } from '@/components/talla-pelaje-hoja';
 import { useTraduccion } from '@/i18n';
@@ -67,6 +69,10 @@ export default function GroomingCuando() {
   const [especies, setEspecies] = useState<string[] | null>(null);
   // S61-A4: la CARA del para-quién — URLs firmadas (patrón del QUIÉN).
   const [fotos, setFotos] = useState<Record<string, string>>({});
+  // S61-A5 cura 3 (letra founder): la oferta PÚBLICA del peldaño 0 —
+  // los comprables con su "desde" real, visibles SIN mascota.
+  const [ofertaPublica, setOfertaPublica] = useState<OfertaGroomingPublica[] | 'cargando' | 'error'>('cargando');
+  const scrollRef = useRef<ScrollView>(null);
   const [mascotaId, setMascotaId] = useState<string | null>(null);
   const [tallaHoja, setTallaHoja] = useState(false);
   const [oferta, setOferta] = useState<OfertaGrooming[] | 'cargando' | 'error' | null>(null);
@@ -90,6 +96,9 @@ export default function GroomingCuando() {
       let vigente = true;
       void obtenerEspeciesElegibles('grooming').then((r) => {
         if (vigente && r.ok) setEspecies(r.data);
+      });
+      void obtenerOfertaGroomingPublica().then((r) => {
+        if (vigente) setOfertaPublica(r.ok ? r.data : 'error');
       });
       void (async () => {
         const estado = await getEstadoOnboardingDueno();
@@ -201,7 +210,7 @@ export default function GroomingCuando() {
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('grooming.titulo')} atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
+      <ScrollView ref={scrollRef} contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
         {mascotas === 'cargando' ? (
           <EsqueletoGrupo>
             <View style={{ gap: spacing[3] }}>
@@ -253,7 +262,63 @@ export default function GroomingCuando() {
               onSelect={setMascotaId}
             />
 
-            {mascota === null ? null : !perfilCompleto ? (
+            {mascota === null ? (
+              // S61-A5 cura 3 (letra founder): SIN mascota, la oferta se
+              // VE igual — comprables con su "desde" real (peldaño 0 de
+              // la misma verdad: la tesis "el precio de SU talla" no se
+              // contradice, se escalona) + la tira de días; los horarios
+              // dicen su porqué CON CAMINO (tap → el paso 0, arriba).
+              <>
+                {ofertaPublica === 'cargando' ? (
+                  <EsqueletoGrupo>
+                    <Esqueleto forma="bloque" ancho="100%" alto={56} />
+                  </EsqueletoGrupo>
+                ) : Array.isArray(ofertaPublica) && ofertaPublica.length > 0 ? (
+                  <View style={{ gap: spacing[2] }}>
+                    <SelectorOpcion
+                      acento="control"
+                      etiqueta={t('grooming.servicioEtiqueta')}
+                      opciones={ofertaPublica.map((o) => ({
+                        codigo: o.tipo_servicio,
+                        etiqueta: vozServicio(t, o.tipo_servicio) ?? o.tipo_servicio,
+                      }))}
+                      seleccionada={tipoServicio ?? undefined}
+                      onSelect={setTipoServicio}
+                    />
+                    {(() => {
+                      const elegida = ofertaPublica.find((o) => o.tipo_servicio === tipoServicio) ?? null;
+                      return elegida !== null ? (
+                        <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                          {t('grooming.precioDesdePublico', { precio: elegida.desde_precio.toFixed(2) })}
+                        </Text>
+                      ) : null;
+                    })()}
+                  </View>
+                ) : null}
+
+                <SelectorOpcion
+                  acento="control"
+                  etiqueta={t('explorar.cuandoDia')}
+                  disposicion="tira"
+                  opciones={dias.map((d) => ({ codigo: d.iso, etiqueta: d.etiqueta }))}
+                  seleccionada={dia}
+                  onSelect={setDia}
+                />
+
+                <EstadoVacio
+                  registro="seccion"
+                  titulo={t('grooming.horariosSinMascotaTitulo')}
+                  descripcion={t('grooming.horariosSinMascotaDetalle')}
+                  accion={
+                    <Boton
+                      variante="compacto"
+                      etiqueta={t('grooming.paraQuien')}
+                      onPress={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
+                    />
+                  }
+                />
+              </>
+            ) : !perfilCompleto ? (
               // la Hoja está abierta; si la cerró sin declarar, la
               // invitación honesta queda con su camino (jamás precio
               // adivinado, jamás final mudo)

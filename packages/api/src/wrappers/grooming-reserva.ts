@@ -131,6 +131,59 @@ export async function obtenerOfertaGrooming(
   return { ok: true, data: ofertas };
 }
 
+// ── A2 · La oferta PÚBLICA — el peldaño 0, sin mascota (S61-A5 cura 3,
+// letra founder: los comprables se ven SIEMPRE con su "desde") ──────────────
+
+export interface OfertaGroomingPublica {
+  /** 'grooming' | 'grooming_completo' — la voz la pone el riel (vozServicio). */
+  tipo_servicio: string;
+  /** El mínimo REAL entre TODAS las tallas de las ofertas visibles —
+   *  filas reales de prestador_servicio_tallas, jamás cálculo de precio
+   *  (el min es selección sobre precios del server, precedente del
+   *  "desde" del paseo en el CUÁNDO). */
+  desde_precio: number;
+  varia: boolean;
+}
+
+/**
+ * VARIANTE DE LECTURA (la RPC obtener_oferta_grooming EXIGE mascota y
+ * talla — relevado): lee por la RLS pública ps_public/pst_public
+ * (oferta ACTIVA de prestador ACTIVO). CAVEAT DECLARADO: el gate 7.13
+ * completo (cuenta comercial cobrable) vive en el MOTOR y esta lectura
+ * no lo replica — un prestador activo sin cuenta cobrable pintaría su
+ * "desde" en el peldaño 0 (hoy: cero casos, seeds relevados); al elegir
+ * mascota, la verdad firme del motor manda como siempre.
+ */
+export async function obtenerOfertaGroomingPublica(): Promise<
+  ResultadoWrapper<OfertaGroomingPublica[], CodigoErrorGroomingReserva>
+> {
+  const { data, error } = await getClient()
+    .from('prestador_servicio_tallas')
+    .select('precio, prestador_servicios!inner(tipo_servicio)')
+    .in('prestador_servicios.tipo_servicio', ['grooming', 'grooming_completo']);
+
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallo('datos_inconsistentes');
+
+  const porTipo = new Map<string, number[]>();
+  for (const fila of data) {
+    if (!esObj(fila) || typeof fila.precio !== 'number' || !esObj(fila.prestador_servicios)) continue;
+    const tipo = fila.prestador_servicios.tipo_servicio;
+    if (typeof tipo !== 'string') continue;
+    const lista = porTipo.get(tipo) ?? [];
+    lista.push(fila.precio);
+    porTipo.set(tipo, lista);
+  }
+  const ofertas: OfertaGroomingPublica[] = [...porTipo.entries()]
+    .map(([tipo, precios]) => ({
+      tipo_servicio: tipo,
+      desde_precio: Math.min(...precios),
+      varia: new Set(precios).size > 1,
+    }))
+    .sort((a, b) => a.desde_precio - b.desde_precio);
+  return { ok: true, data: ofertas };
+}
+
 // ── B · Inicios disponibles para la grilla del CUÁNDO ───────────────────────
 // La duración NO viaja: cada groomer aporta inicios con SU duración de la
 // combinación servicio × talla (motor de ventana intacto, §6).

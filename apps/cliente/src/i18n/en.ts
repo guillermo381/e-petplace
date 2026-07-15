@@ -387,6 +387,10 @@ export const clienteEn = {
     tallaEstadoSinDeclarar: 'Not declared yet',
     pelajeLargoCorto: 'long coat',
     // the adapted WHEN: service → time (duration is a consequence)
+    // S61-A5 cure 3 — step 0 without a pet chosen (LOTE S61, GATE PENDIENTE)
+    precioDesdePublico: 'From ${{precio}} — final price depends on their size',
+    horariosSinMascotaTitulo: "Tell us who it's for",
+    horariosSinMascotaDetalle: "Pick them above and we'll show times with their price.",
     vacioTitulo: 'No groomers offering yet',
     vacioDetalle: 'A groomer here bathes, trims and documents every session into their story. When one activates a real offer, you will see true prices.',
     servicioEtiqueta: 'Service',

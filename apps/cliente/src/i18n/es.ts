@@ -423,6 +423,11 @@ export const clienteEs = {
     tallaCeldaTitulo: 'Talla y pelaje',
     tallaEstadoSinDeclarar: 'Sin declarar',
     pelajeLargoCorto: 'pelaje largo',
+    // S61-A5 cura 3 — el peldaño 0 sin mascota (LOTE S61, GATE PENDIENTE;
+    // la letra del pedido decía "Contanos" — transpuesta a tuteo, regla 27)
+    precioDesdePublico: 'Desde ${{precio}} — el precio final es por su talla',
+    horariosSinMascotaTitulo: 'Cuéntanos para quién es',
+    horariosSinMascotaDetalle: 'Elígela arriba y te mostramos los horarios con su precio.',
     // el CUÁNDO adaptado: servicio → hora (la duración es consecuencia)
     vacioTitulo: 'Todavía no hay groomers ofreciendo',
     vacioDetalle: 'Un groomer acá baña, corta y documenta cada sesión en su historia. Cuando uno active su oferta real, lo verás con precios de verdad.',

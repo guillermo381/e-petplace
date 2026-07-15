@@ -386,6 +386,8 @@ export {
   TALLAS_MASCOTA,
   PELAJES_MASCOTA,
   obtenerOfertaGrooming,
+  obtenerOfertaGroomingPublica,
+  type OfertaGroomingPublica,
   obtenerIniciosGrooming,
   obtenerGroomersDisponibles,
   obtenerMisGroomings,
