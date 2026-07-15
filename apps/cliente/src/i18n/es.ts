@@ -309,6 +309,10 @@ export const clienteEs = {
     verFoto: 'Ver foto {{i}} de {{total}}',
     deFuente: 'De {{fuente}}:',
     fotosDelPaseo: 'Fotos del paseo',
+    // ── S62 — el umbral <2 del recorrido (letra founder, espejo del
+    // motor 20260715150000). LOTE S62 (enmienda al lote aprobado) ──
+    recorridoNoRegistrado: 'El recorrido de este paseo no alcanzó a registrarse.',
+    recorridoNoRegistradoPorque: 'La señal de ubicación no estuvo disponible durante el recorrido. El resto del paseo quedó registrado con normalidad.',
   },
   vacunaHoja: {
     titulo: 'Vacuna',

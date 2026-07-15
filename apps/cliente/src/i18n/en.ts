@@ -279,6 +279,9 @@ export const clienteEn = {
     verFoto: 'See photo {{i}} of {{total}}',
     deFuente: 'From {{fuente}}:',
     fotosDelPaseo: 'Walk photos',
+    // S62 — el umbral <2 del recorrido (espejo del motor). LOTE S62
+    recorridoNoRegistrado: "This walk's route couldn't be recorded.",
+    recorridoNoRegistradoPorque: "The location signal wasn't available during the walk. Everything else was recorded as usual.",
   },
   vacunaHoja: {
     titulo: 'Vaccine',

@@ -341,12 +341,40 @@ export default function DetallePaseo() {
         ) : (
           <>
             {/* ══ CARA RECORRIDO — lo caminado, con sus dos extremos
-                reales (acá los nulls ya no se pintan como contenido) */}
-            {detalle.track_gps.length > 0 ? (
+                reales (acá los nulls ya no se pintan como contenido).
+                S62 (letra founder, espejo del motor 20260715150000):
+                el umbral es <2 — un punto suelto no es un recorrido
+                (track incompleto/fallido) y el mapa cede su lugar a
+                la voz honesta. Cubre también los tracks históricos
+                'registrado' con 1 punto (el verosímil-falso pre-cura). */}
+            {detalle.track_gps.length >= 2 ? (
               <View style={{ borderRadius: radius.lg, overflow: 'hidden' }}>
                 <MapaRecorrido modo="recorrido" puntos={detalle.track_gps} capa="cuidado" alto={200} />
               </View>
-            ) : null}
+            ) : (
+              <View style={{ gap: spacing[1] }}>
+                <Text
+                  style={{
+                    fontFamily: typography.family.sans.regular,
+                    fontSize: typography.size.sm,
+                    lineHeight: Math.round(typography.size.sm * typography.leading.normal),
+                    color: theme.text.primary,
+                  }}
+                >
+                  {t('paseo.recorridoNoRegistrado')}
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: typography.family.sans.regular,
+                    fontSize: typography.size.sm,
+                    lineHeight: Math.round(typography.size.sm * typography.leading.normal),
+                    color: theme.text.secondary,
+                  }}
+                >
+                  {t('paseo.recorridoNoRegistradoPorque')}
+                </Text>
+              </View>
+            )}
 
             {/* horarios y duración — voz de máquina */}
             <Text
