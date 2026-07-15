@@ -37,8 +37,8 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  Icono,
   Insignia,
-  SelectorSegmentado,
   Separador,
   Tarjeta,
   spacing,
@@ -62,7 +62,8 @@ import {
 import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { verificarSesion } from '@/lib/api';
-import { TechoTinta, VeloBarraEstadoTinta } from '@/components/techo-tinta';
+import { TechoOficio, ToggleTecho, VeloBarraEstadoOficio } from '@/components/techo-oficio';
+import { FiltroOficio, type FiltroOficioValor } from '@/components/filtro-oficio';
 import { useTraduccion } from '@/i18n';
 
 type Pantalla =
@@ -191,7 +192,15 @@ function FilaCita({
         />
       }
       metadataMono={`${hora}${dur ? ` · ${dur} min` : ''}`}
-      fin={insignia ? <Insignia estado={insignia.estado} etiqueta={insignia.etiqueta} tamaño="sm" /> : undefined}
+      // S61-B12 (pulgar del mock B7): LA MARCA DE OFICIO por fila — el
+      // ícono b′ en registro aa (tealDark paseo / ámbar AA estética),
+      // junto a la Insignia de estado. Color funcional, jamás hex puro.
+      fin={
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1.5] }}>
+          <Icono nombre={esGrooming ? 'grooming' : 'paseo'} registro="aa" tamano={21} />
+          {insignia && <Insignia estado={insignia.estado} etiqueta={insignia.etiqueta} tamaño="sm" />}
+        </View>
+      }
     />
   );
 }
@@ -205,7 +214,7 @@ export default function Hoy() {
   // D-317: el segmento Hoy/Semana. 'semana' = los próximos 7 días.
   const [vista, setVista] = useState<'hoy' | 'semana'>('hoy');
   // S61-B5: el filtro por oficio — vista del día, JAMÁS persiste.
-  const [filtroOficio, setFiltroOficio] = useState<'todos' | 'paseo' | 'grooming'>('todos');
+  const [filtroOficio, setFiltroOficio] = useState<FiltroOficioValor>('todos');
   // foto_url guarda PATH (S47-B0.2): firma en batch (1 round-trip);
   // un path no firmable cae a la huella digna.
   const [urlsFotos, setUrlsFotos] = useState<Map<string, string>>(new Map());
@@ -306,20 +315,23 @@ export default function Hoy() {
       ? citas
       : citas.filter((c) => groomingIds.has(c.id) === (filtroOficio === 'grooming'));
   const citasHoy = desde === null ? [] : citasVisibles.filter((c) => c.fecha === desde);
+  // S61-B12: el día SIN filtrar — la Zona 1 es INMUNE al filtro por
+  // GUARD ESTRUCTURAL (se computa de acá, jamás de la lista filtrada)
+  const citasHoySin = desde === null ? [] : citas.filter((c) => c.fecha === desde);
   // el vacío FILTRADO se dice distinto: hay jornada, no de este servicio
   const hoyVacioPorFiltro =
-    citasHoy.length === 0 && dosOficios && filtroOficio !== 'todos' && desde !== null &&
-    citas.some((c) => c.fecha === desde);
+    citasHoy.length === 0 && dosOficios && filtroOficio !== 'todos' && citasHoySin.length > 0;
 
   // ── Zona 1: la destacada — en_curso (Ley 7: UNA con CitaEnVivo) o,
   // si no hay nada corriendo, la PRÓXIMA cita aún no cerrada del día.
-  const enCurso = citasHoy.filter((c) => c.atencion?.estado === 'en_curso');
+  // S61-B12: sobre el día SIN FILTRAR — el vivo preside SIEMPRE.
+  const enCurso = citasHoySin.filter((c) => c.atencion?.estado === 'en_curso');
   const enVivo = enCurso.length
     ? enCurso.reduce((a, b) => ((b.atencion?.iniciada_en ?? '') > (a.atencion?.iniciada_en ?? '') ? b : a))
     : undefined;
   const proxima =
     enVivo === undefined
-      ? citasHoy.find((c) => {
+      ? citasHoySin.find((c) => {
           const ef = estadoEfectivo(c);
           return ef === 'confirmada' || ef === 'terminada';
         })
@@ -353,41 +365,28 @@ export default function Hoy() {
         contentContainerStyle={{ paddingBottom: spacing[10] }}
         refreshControl={<RefreshControl refreshing={refrescando} onRefresh={() => void refrescar()} />}
       >
-        {/* B2 §15b.2: EL TECHO DE TINTA — texto papel, huella teal pura,
-            dato real de trabajo (la fecha humana del riel, D-315p). */}
-        <TechoTinta titulo={t('agenda.saludo')} dato={fechaDiaSemanaHumana(hoyLocal(), idioma as IdiomaSoportado)} />
+        {/* §15b.2 S61 (re-firma B11/B12): EL TECHO DEL OFICIO — muro
+            tealDark, texto papel pleno, y el toggle Hoy/Semana COMPACTO
+            integrado (el segmentado gemelo apilado MURIÓ). */}
+        <TechoOficio
+          titulo={t('agenda.saludo')}
+          dato={fechaDiaSemanaHumana(hoyLocal(), idioma as IdiomaSoportado)}
+          pie={
+            pantalla.estado === 'listo' ? (
+              <ToggleTecho
+                etiqueta={t('agenda.vistaEtiqueta')}
+                opciones={[
+                  { codigo: 'hoy' as const, etiqueta: t('agenda.vistaHoy') },
+                  { codigo: 'semana' as const, etiqueta: t('agenda.vistaSemana') },
+                ]}
+                activo={vista}
+                onCambio={setVista}
+              />
+            ) : undefined
+          }
+        />
 
         <View style={{ padding: spacing[4], gap: spacing[4] }}>
-        {/* B4 (D-357): Hoy/Semana en el SEGMENTADO canónico — los chips
-            quedaron prohibidos como segmentos (Ley 19.3). */}
-        {pantalla.estado === 'listo' && (
-          <SelectorSegmentado
-            etiqueta={t('agenda.vistaEtiqueta')}
-            segmentos={[
-              { codigo: 'hoy', etiqueta: t('agenda.vistaHoy') },
-              { codigo: 'semana', etiqueta: t('agenda.vistaSemana') },
-            ]}
-            activo={vista}
-            onCambio={(codigo) => setVista(codigo === 'semana' ? 'semana' : 'hoy')}
-          />
-        )}
-
-        {/* S61-B5: el filtro por oficio — SOLO con dos oficios activos
-            (Ley 19.3: vistas exclusivas de la MISMA jornada) */}
-        {dosOficios && (
-          <SelectorSegmentado
-            etiqueta={t('agenda.filtroEtiqueta')}
-            segmentos={[
-              { codigo: 'todos', etiqueta: t('agenda.filtroTodos') },
-              { codigo: 'paseo', etiqueta: t('agenda.filtroPaseos') },
-              { codigo: 'grooming', etiqueta: t('agenda.filtroEstetica') },
-            ]}
-            activo={filtroOficio}
-            onCambio={(codigo) =>
-              setFiltroOficio(codigo === 'paseo' ? 'paseo' : codigo === 'grooming' ? 'grooming' : 'todos')
-            }
-          />
-        )}
 
         {pantalla.estado === 'cargando' && (
           <Tarjeta elevacion="plana">
@@ -427,18 +426,8 @@ export default function Hoy() {
           </Tarjeta>
         )}
 
-        {pantalla.estado === 'listo' && vista === 'hoy' && citasHoy.length === 0 && (
-          // S52-P7b: registro sereno — el día vacío se dice en el
-          // flujo, sin display que grite (dosis baja). S61-B5: el vacío
-          // POR FILTRO dice su verdad (hay jornada, no de este servicio).
-          hoyVacioPorFiltro ? (
-            <EstadoVacio registro="seccion" titulo={t('agenda.filtroVacio')} />
-          ) : (
-            <EstadoVacio registro="seccion" titulo={t('agenda.vacio')} descripcion={t('agenda.vacioDetalle')} />
-          )
-        )}
-
-        {/* ── Zona 1 — ahora / lo siguiente (preside) ── */}
+        {/* ── Zona 1 — ahora / lo siguiente (PRESIDE: encima de todo
+            control e INMUNE al filtro — guard estructural S61-B12) ── */}
         {pantalla.estado === 'listo' && vista === 'hoy' && destacada && (
           <View style={{ gap: spacing[2] }}>
             {/* S52-P7: etiqueta humanizada — sentence case, sin eyebrow */}
@@ -489,6 +478,23 @@ export default function Hoy() {
               );
             })()}
           </View>
+        )}
+
+        {/* S61-B12: el filtro por oficio RE-VESTIDO (íconos b′, huella
+            AA en el activo) — DEBAJO de la Zona 1, solo con 2 oficios */}
+        {pantalla.estado === 'listo' && dosOficios && (
+          <FiltroOficio activo={filtroOficio} onCambio={setFiltroOficio} />
+        )}
+
+        {pantalla.estado === 'listo' && vista === 'hoy' && citasHoy.length === 0 && (
+          // S52-P7b: registro sereno — el día vacío se dice en el
+          // flujo, sin display que grite (dosis baja). S61-B5: el vacío
+          // POR FILTRO dice su verdad (hay jornada, no de este servicio).
+          hoyVacioPorFiltro ? (
+            <EstadoVacio registro="seccion" titulo={t('agenda.filtroVacio')} />
+          ) : citasHoySin.length === 0 ? (
+            <EstadoVacio registro="seccion" titulo={t('agenda.vacio')} descripcion={t('agenda.vacioDetalle')} />
+          ) : null
         )}
 
         {/* ── Zona 2 — el día (compacta) ── */}
@@ -560,7 +566,7 @@ export default function Hoy() {
       </ScrollView>
       {/* S59-B1: el velo de tinta — la zona de la barra de estado JAMÁS
           queda blanca, ni cuando el techo scrollea (regla del pedido). */}
-      <VeloBarraEstadoTinta />
+      <VeloBarraEstadoOficio />
     </View>
   );
 }

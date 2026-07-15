@@ -46,7 +46,7 @@ import {
 import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
-import { TechoTinta, VeloBarraEstadoTinta } from '@/components/techo-tinta';
+import { TechoOficio, VeloBarraEstadoOficio } from '@/components/techo-oficio';
 
 // hoy en ISO LOCAL (hallazgo harness S55: toISOString corre el día)
 function hoyLocalISO(): string {
@@ -178,7 +178,7 @@ export default function Negocio() {
       <ScrollView contentContainerStyle={{ paddingBottom: spacing[8] }}>
         {/* B2 §15b.2: el techo de tinta — el dato de trabajo es la plata
             real esperando liquidación; sin eventos, la fecha del día */}
-        <TechoTinta
+        <TechoOficio
           titulo={t('negocio.titulo')}
           dato={
             pendientes !== null && pendientes.cantidad > 0
@@ -309,7 +309,7 @@ export default function Negocio() {
       </ScrollView>
       {/* S59-B1: el velo de tinta — la zona de la barra de estado JAMÁS
           queda blanca, ni cuando el techo scrollea (regla del pedido). */}
-      <VeloBarraEstadoTinta />
+      <VeloBarraEstadoOficio />
     </View>
   );
 }

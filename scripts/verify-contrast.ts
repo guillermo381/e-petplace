@@ -210,6 +210,14 @@ function paresDe(t: Theme, nombre: string): Pair[] {
   // (~2.85:1) — medición informativa abajo, reportado ANTES de curar.
   add('texto papel (light0) / bg.tinta', palette.light0, t.bg.tinta)
 
+  // §15b.2 S61 (re-firma founder B11/B12): EL MURO DEL OFICIO tealDark.
+  // Reglas de la enmienda: sobre el muro el acento funcional es PAPEL
+  // (el teal puro cae a 3.77 — PROHIBIDO ahí) · texto papel PLENO (la
+  // opacidad .78 caía a 4.01) · el vidrio es OSCURO (el claro caía 4.15).
+  add('muro oficio: texto papel / tealDark', palette.light0, palette.tealDark)
+  add('muro oficio: papel / vidrio oscuro⊕muro', palette.light0, 'rgba(0,0,0,0.18)', palette.tealDark)
+  add('muro oficio: toggle activo tealDark / papel', palette.tealDark, palette.light0)
+
   // Gradiente firma v2 (B3.1c) — REGLA DE PEOR PUNTO: onGradient contra cada
   // stop con location ≤ 0.7 DEBE pasar 4.5. La COLA (location 1, teal) queda
   // EXENTA por geometría verificada — no es un agujero:

@@ -44,7 +44,7 @@ export default function RootLayout() {
             {/* S59-B1 (safe area): el DEFAULT de los íconos de la barra de
                 estado — 'auto' = oscuros sobre papel en claro, claros en
                 dark. Las pantallas con techo de tinta fuerzan 'light' con
-                foco (ver techo-tinta.tsx); nadie más lo toca. */}
+                foco (ver techo-oficio.tsx); nadie más lo toca. */}
             <StatusBar style="auto" />
             <AnimatedSplashOverlay />
             <Stack screenOptions={{ headerShown: false }}>
