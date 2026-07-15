@@ -320,6 +320,23 @@ export interface FichaAntesGrooming {
   tiene_alergias: boolean;
   tiene_condicion_cronica: boolean;
   tiene_emergencia_activa: boolean;
+  /** S61-B7: los insumos del MOMENTO VITAL como señal del oficio —
+   *  la pantalla calcula con @epetplace/domain (el tipo de umbrales
+   *  viaja por shape, paquetes independientes — patrón perfilMascota). */
+  fecha_nacimiento: string | null;
+  es_memorial: boolean;
+  umbrales: { m2InicioMeses: number; m3InicioMeses: number; m5InicioMeses: number } | null;
+}
+
+// Guard de shape del jsonb del catálogo (L-124, espejo de perfilMascota).
+function parsearUmbralesFicha(jsonb: unknown): FichaAntesGrooming['umbrales'] {
+  if (typeof jsonb !== 'object' || jsonb === null) return null;
+  const o = jsonb as Record<string, unknown>;
+  const m2 = o['M2_inicio_meses'];
+  const m3 = o['M3_inicio_meses'];
+  const m5 = o['M5_inicio_meses'];
+  if (typeof m2 !== 'number' || typeof m3 !== 'number' || typeof m5 !== 'number') return null;
+  return { m2InicioMeses: m2, m3InicioMeses: m3, m5InicioMeses: m5 };
 }
 
 function esTallaPerfil(v: unknown): v is 'S' | 'M' | 'L' {
@@ -336,18 +353,29 @@ export async function obtenerFichaAntesGrooming(
   const cliente = getClient();
   const mascota = await cliente
     .from('mascotas')
-    .select('id, nombre, especie, raza, foto_url, talla, pelaje')
+    .select('id, nombre, especie, raza, foto_url, talla, pelaje, fecha_nacimiento, estado_vida')
     .eq('id', mascotaId)
     .maybeSingle();
   if (mascota.error) return fallo(mascota.error.message);
   // RLS: sin acceso vigente la fila no existe para este user.
   if (mascota.data === null) return fallo('no_access_to_mascota');
 
-  const perfil = await cliente
-    .from('mascota_perfil_vigente')
-    .select('alergias, condiciones_cronicas, tiene_emergencia_activa')
-    .eq('mascota_id', mascotaId)
-    .maybeSingle();
+  const [perfil, catalogo] = await Promise.all([
+    cliente
+      .from('mascota_perfil_vigente')
+      .select('alergias, condiciones_cronicas, tiene_emergencia_activa')
+      .eq('mascota_id', mascotaId)
+      .maybeSingle(),
+    // umbrales del momento vital (regla 21: catálogo manda) — su fallo
+    // NO tumba la ficha: umbrales null = la señal calla (L-139)
+    mascota.data.especie !== null
+      ? cliente
+          .from('cat_especies_perfil')
+          .select('momentos_vitales_jsonb')
+          .eq('especie_codigo', mascota.data.especie)
+          .maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+  ]);
   if (perfil.error) return fallo(perfil.error.message);
 
   const alergias = perfil.data?.alergias;
@@ -365,6 +393,9 @@ export async function obtenerFichaAntesGrooming(
       tiene_alergias: Array.isArray(alergias) && alergias.length > 0,
       tiene_condicion_cronica: Array.isArray(condiciones) && condiciones.length > 0,
       tiene_emergencia_activa: perfil.data?.tiene_emergencia_activa ?? false,
+      fecha_nacimiento: mascota.data.fecha_nacimiento,
+      es_memorial: mascota.data.estado_vida !== null && mascota.data.estado_vida !== 'activa',
+      umbrales: catalogo.error ? null : parsearUmbralesFicha(catalogo.data?.momentos_vitales_jsonb),
     },
   };
 }

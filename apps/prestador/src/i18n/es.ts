@@ -555,6 +555,10 @@ export const prestadorEs = {
     pelajeNormal: 'Normal',
     pelajeLargo: 'Largo',
     // señales: REUSO detalleMascota.* (misma voz en toda la casa, Ley 17.3)
+    // S61-B7: el momento vital como señal DEL OFICIO · LOTE S61, GATE PENDIENTE
+    momentoCachorro: 'Cachorro',
+    momentoGatito: 'Gatito',
+    momentoSenior: 'Senior',
     // S60-C2.1: la cita de otro día se prepara, no se empieza — el
     // porqué del CTA ausente (apagado jamás es mudo)
     empiezaElDia: 'La sesión se empieza el día de la cita.',

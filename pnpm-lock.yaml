@@ -141,6 +141,9 @@ importers:
       '@epetplace/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@epetplace/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       '@epetplace/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n

@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@epetplace/api": "workspace:*",
+    "@epetplace/domain": "workspace:*",
     "@epetplace/i18n": "workspace:*",
     "@epetplace/ui": "workspace:*",
     "@expo/ui": "~57.0.4",

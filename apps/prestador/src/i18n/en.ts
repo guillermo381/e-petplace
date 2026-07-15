@@ -484,6 +484,10 @@ export const prestadorEn = {
     pelaje: 'Coat',
     pelajeNormal: 'Regular',
     pelajeLargo: 'Long',
+    // S61-B7: el momento vital como señal DEL OFICIO · LOTE S61, GATE PENDIENTE
+    momentoCachorro: 'Puppy',
+    momentoGatito: 'Kitten',
+    momentoSenior: 'Senior',
     empiezaElDia: 'The session starts on the day of the appointment.',
     tallaCorregir: "The size doesn't match",
     tallaCorregirTitulo: 'The real size',

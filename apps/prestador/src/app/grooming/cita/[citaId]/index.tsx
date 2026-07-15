@@ -48,6 +48,7 @@ import {
   type FichaAntesGrooming,
 } from '@epetplace/api';
 
+import { calcularMomentoVital, edadEnMeses } from '@epetplace/domain';
 import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { verificarSesion } from '@/lib/api';
@@ -226,10 +227,32 @@ export default function AntesGrooming() {
 
   // Las señales REALES del expediente — misma voz y mismo trato que el
   // detalle de mascota (Ley 17.3); sin ninguna, la voz honesta única.
-  const senales: string[] = [];
-  if (ficha?.tiene_emergencia_activa) senales.push(t('detalleMascota.emergenciaActiva'));
-  if (ficha?.tiene_condicion_cronica) senales.push(t('detalleMascota.condicionCronica'));
-  if (ficha?.tiene_alergias) senales.push(t('detalleMascota.alergias'));
+  const senales: { voz: string; insignia: InsigniaEstado }[] = [];
+  if (ficha?.tiene_emergencia_activa) senales.push({ voz: t('detalleMascota.emergenciaActiva'), insignia: 'atencion' });
+  if (ficha?.tiene_condicion_cronica) senales.push({ voz: t('detalleMascota.condicionCronica'), insignia: 'atencion' });
+  if (ficha?.tiene_alergias) senales.push({ voz: t('detalleMascota.alergias'), insignia: 'atencion' });
+  // S61-B7: el MOMENTO VITAL como señal DEL OFICIO (voz de oficio, no de
+  // familia) — SOLO cuando ajusta el manejo en la silla: cachorro/gatito
+  // (M1) y senior (M5). M4 ya lo dice la condición crónica (cero chip
+  // doble); adulto no es señal (ruido); memorial no agenda. Cálculo puro
+  // de @epetplace/domain sobre umbrales del catálogo (null = calla).
+  const momento =
+    ficha != null && ficha.umbrales !== null
+      ? calcularMomentoVital({
+          edadMeses: ficha.fecha_nacimiento !== null ? edadEnMeses(ficha.fecha_nacimiento, new Date()) : null,
+          tieneCondicionCronica: ficha.tiene_condicion_cronica,
+          esMemorial: ficha.es_memorial,
+          umbrales: ficha.umbrales,
+        })
+      : null;
+  if (momento === 'M1') {
+    senales.push({
+      voz: ficha?.especie === 'gato' ? t('citaGrooming.momentoGatito') : t('citaGrooming.momentoCachorro'),
+      insignia: 'info',
+    });
+  } else if (momento === 'M5') {
+    senales.push({ voz: t('citaGrooming.momentoSenior'), insignia: 'info' });
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -335,7 +358,7 @@ export default function AntesGrooming() {
                 {senales.length > 0 ? (
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[1.5] }}>
                     {senales.map((s) => (
-                      <Insignia key={s} estado="atencion" etiqueta={s} tamaño="sm" />
+                      <Insignia key={s.voz} estado={s.insignia} etiqueta={s.voz} tamaño="sm" />
                     ))}
                   </View>
                 ) : (
