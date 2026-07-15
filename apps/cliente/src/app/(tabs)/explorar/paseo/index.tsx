@@ -28,6 +28,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import {
+  AvatarMascota,
   Boton,
   Celda,
   CeldaNavegacion,
@@ -49,6 +50,7 @@ import {
   obtenerIniciosPaseo,
   obtenerMascotasDeFamilia,
   obtenerOfertaPaseo,
+  resolverUrlFoto,
   type MascotaResumen,
   type OfertaPaseo,
 } from '@epetplace/api';
@@ -83,6 +85,8 @@ export default function PaseoCuando() {
   const [mascotas, setMascotas] = useState<MascotaResumen[] | 'cargando' | 'error'>('cargando');
   const [especies, setEspecies] = useState<string[] | null>(null);
   const [mascotaId, setMascotaId] = useState<string | null>(null);
+  // S61-A4: la CARA del para-quién — URLs firmadas (patrón del QUIÉN).
+  const [fotos, setFotos] = useState<Record<string, string>>({});
   const [oferta, setOferta] = useState<OfertaPaseo[] | 'cargando' | 'error'>('cargando');
   const [duracion, setDuracion] = useState<number | null>(null);
   const [dia, setDia] = useState<string>(fechaLocalISO(new Date()));
@@ -119,6 +123,19 @@ export default function PaseoCuando() {
         const r = await obtenerMascotasDeFamilia(estado.data.familia_id);
         if (!vigente) return;
         setMascotas(r.ok ? r.data : 'error');
+        if (r.ok) {
+          const conFoto = r.data.filter((m): m is MascotaResumen & { foto_url: string } => m.foto_url !== null);
+          if (conFoto.length > 0) {
+            const urls = await Promise.all(conFoto.map((m) => resolverUrlFoto(m.foto_url)));
+            if (!vigente) return;
+            const mapa: Record<string, string> = {};
+            conFoto.forEach((m, idx) => {
+              const u = urls[idx];
+              if (u !== null) mapa[m.id] = u;
+            });
+            setFotos(mapa);
+          }
+        }
       })();
       void obtenerOfertaPaseo().then((r) => {
         if (!vigente) return;
@@ -249,7 +266,13 @@ export default function PaseoCuando() {
             <SelectorOpcion
               acento="control"
               etiqueta={t('grooming.paraQuien')}
-              opciones={elegibles.map((m) => ({ codigo: m.id, etiqueta: m.nombre }))}
+              opciones={elegibles.map((m) => ({
+                codigo: m.id,
+                etiqueta: m.nombre,
+                // S61-A4: la cara — foto real primero, huella digna de
+                // fallback (AvatarMascota lo resuelve; memorial adentro).
+                adorno: <AvatarMascota nombre={m.nombre} fotoUrl={fotos[m.id]} tamano="xs" />,
+              }))}
               seleccionada={mascotaId ?? undefined}
               onSelect={setMascotaId}
             />

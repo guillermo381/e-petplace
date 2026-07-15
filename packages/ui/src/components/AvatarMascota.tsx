@@ -33,7 +33,7 @@ import Svg, { Circle, Path } from 'react-native-svg'
 import { radius } from '../tokens/radius'
 import { useTheme } from '../ThemeProvider'
 
-export type AvatarMascotaTamano = 'sm' | 'md' | 'lg'
+export type AvatarMascotaTamano = 'xs' | 'sm' | 'md' | 'lg'
 export type AvatarMascotaCapa = 'vida' | 'cuidado' | 'comunidad' | 'comunidadAmplia'
 
 /** Códigos reales de cat_especies (relevados contra DB, S44-B2.3). */
@@ -64,6 +64,9 @@ export interface AvatarMascotaProps {
 }
 
 const DIAMETRO: Record<AvatarMascotaTamano, number> = {
+  // xs (S61-A4): la cara DENTRO de un chip de 44 (adorno de
+  // SelectorOpcion, el para-quién de la reserva) — sm revienta el alto.
+  xs: 24,
   sm: 40,
   md: 64,
   lg: 96,
@@ -71,6 +74,7 @@ const DIAMETRO: Record<AvatarMascotaTamano, number> = {
 
 // Tamaño óptico de la huella dentro del círculo (~55% del diámetro).
 const HUELLA: Record<AvatarMascotaTamano, number> = {
+  xs: 13,
   sm: 22,
   md: 36,
   lg: 54,

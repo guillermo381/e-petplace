@@ -397,6 +397,9 @@ function EjemploSelectorOpcion() {
   const [sexo, setSexo] = useState<string | undefined>('desconocido')
   // Enmienda S56 (Hoja del plan D-338): multi-selección + día apagado.
   const [dias, setDias] = useState<string[]>(['2'])
+  // Enmienda S61-A4: el para-quién con CARA — adorno por opción
+  // (AvatarMascota xs: con foto real y con huella digna de fallback).
+  const [quien, setQuien] = useState<string | undefined>('thor')
   return (
     <View style={{ gap: spacing[4] }}>
       <SelectorOpcion
@@ -408,6 +411,33 @@ function EjemploSelectorOpcion() {
         seleccionada={sexo}
         onSelect={setSexo}
         etiqueta="¿Es macho o hembra?"
+      />
+      <SelectorOpcion
+        acento="control"
+        opciones={[
+          {
+            codigo: 'thor',
+            etiqueta: 'Thor',
+            // data-URI (galería autocontenida — la web headless no sale
+            // a la red): un pixel plano que LLENA el círculo = "con foto".
+            adorno: (
+              <AvatarMascota
+                nombre="Thor"
+                fotoUrl="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNs6POsBwAFCAICLIC/vQAAAABJRU5ErkJggg=="
+                tamano="xs"
+              />
+            ),
+          },
+          {
+            codigo: 'zeus',
+            etiqueta: 'Zeus',
+            // sin foto: la huella digna de fallback
+            adorno: <AvatarMascota nombre="Zeus" tamano="xs" />,
+          },
+        ]}
+        seleccionada={quien}
+        onSelect={setQuien}
+        etiqueta="¿Para quién es? (adorno S61 — con foto y con huella)"
       />
       <SelectorOpcion
         multiple

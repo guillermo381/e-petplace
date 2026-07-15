@@ -24,7 +24,7 @@
  * anuncio "Etiqueta, opción N de M".
  */
 
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import Animated, { cubicBezier } from 'react-native-reanimated'
 
@@ -47,6 +47,12 @@ export interface SelectorOpcionItem {
    *  MOSTRANDO el día apagado, jamás escondiéndolo. La VOZ del porqué
    *  es de la pantalla (una línea bajo el selector). */
   deshabilitada?: boolean
+  /** ENMIENDA S61-A4 (el para-quién con cara, pedido founder): nodo
+   *  CHICO a la izquierda del label — el caller lo compone (el paso 0
+   *  de la reserva pasa AvatarMascota xs; el componente no conoce
+   *  mascotas). NO cambia la mecánica de selección ni el tratamiento
+   *  tonal; sin adorno, el chip queda IDÉNTICO al de siempre. */
+  adorno?: ReactNode
 }
 
 export interface SelectorOpcionProps {
@@ -154,8 +160,10 @@ function Chip({
     >
       <Animated.View
         style={{
+          flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'center',
+          gap: spacing[2],
           height: ALTO,
           paddingHorizontal: spacing[4],
           // LEY DE GEOMETRÍA (S58): lo que se ELIGE es rectángulo suave —
@@ -171,6 +179,7 @@ function Chip({
           transitionTimingFunction: cubicBezier(...motion.easing.spring.bezier),
         }}
       >
+        {opcion.adorno ?? null}
         <Text
           numberOfLines={1}
           style={{
