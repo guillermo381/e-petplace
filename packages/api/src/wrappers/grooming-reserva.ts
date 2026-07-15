@@ -93,19 +93,32 @@ export interface OfertaGrooming {
   /** Voz canónica del catálogo maestro (no la custom por groomer). */
   servicio_nombre: string;
   /** Mínimo REAL entre groomers cobrables, YA resuelto por la talla del
-   *  perfil (+ extra si pelaje largo). El server congela al reservar. */
+   *  perfil (+ extra si pelaje largo; + recargo si modalidad domicilio).
+   *  El server congela al reservar. */
   desde_precio: number;
   /** true = hay más de un precio entre groomers → la UI dice "desde". */
   varia: boolean;
+  /** S61 D-392: las modalidades del AGREGADO (sin filtrar por la
+   *  elegida) — el selector del QUÉ pregunta SOLO si existen ambas. */
+  atiende_local: boolean;
+  atiende_domicilio: boolean;
+  /** MIN del recargo entre groomers con domicilio (server-side);
+   *  null = ninguno atiende domicilio. */
+  recargo_domicilio_desde: number | null;
 }
+
+/** S61 D-392: la modalidad de la reserva grooming. */
+export type ModalidadGrooming = 'local' | 'domicilio';
 
 /** Los comprables del menú de dos capas realmente ofertados HOY por
  *  groomers cobrables (7.13), con el "desde" de ESTA mascota. */
 export async function obtenerOfertaGrooming(
   mascotaId: string,
+  modalidad: ModalidadGrooming = 'local',
 ): Promise<ResultadoWrapper<OfertaGrooming[], CodigoErrorGroomingReserva>> {
   const { data, error } = await getClient().rpc('obtener_oferta_grooming', {
     p_mascota_id: mascotaId,
+    p_modalidad: modalidad,
   });
 
   if (error) return fallo(error.message);
@@ -117,7 +130,9 @@ export async function obtenerOfertaGrooming(
       typeof fila.tipo_servicio !== 'string' ||
       typeof fila.servicio_nombre !== 'string' ||
       typeof fila.desde_precio !== 'number' ||
-      typeof fila.varia !== 'boolean'
+      typeof fila.varia !== 'boolean' ||
+      typeof fila.atiende_local !== 'boolean' ||
+      typeof fila.atiende_domicilio !== 'boolean'
     ) {
       return fallo('datos_inconsistentes');
     }
@@ -126,6 +141,10 @@ export async function obtenerOfertaGrooming(
       servicio_nombre: fila.servicio_nombre,
       desde_precio: fila.desde_precio,
       varia: fila.varia,
+      atiende_local: fila.atiende_local,
+      atiende_domicilio: fila.atiende_domicilio,
+      recargo_domicilio_desde:
+        typeof fila.recargo_domicilio_desde === 'number' ? fila.recargo_domicilio_desde : null,
     });
   }
   return { ok: true, data: ofertas };
@@ -193,6 +212,8 @@ export interface InputIniciosGrooming {
   fecha: string;
   tipo_servicio: string;
   mascota_id: string;
+  /** S61 D-392: default 'local' (comportamiento de siempre). */
+  modalidad?: ModalidadGrooming;
 }
 
 /** Horas de inicio 'HH:MM' donde ALGÚN groomer puede la ventana entera. */
@@ -203,6 +224,7 @@ export async function obtenerIniciosGrooming(
     p_fecha: input.fecha,
     p_tipo_servicio: input.tipo_servicio,
     p_mascota_id: input.mascota_id,
+    p_modalidad: input.modalidad ?? 'local',
   });
 
   if (error) return fallo(error.message);
@@ -234,6 +256,11 @@ export interface GroomerDisponible {
    *  honesto si el groomer aún no la declaró. */
   direccion: string | null;
   ciudad: string | null;
+  /** S61 D-392: EL DESGLOSE server-side — el checkout lo DECLARA, jamás
+   *  lo calcula: precio == precio_base + extra_pelaje + recargo_domicilio. */
+  precio_base: number;
+  extra_pelaje: number;
+  recargo_domicilio: number;
 }
 
 export interface InputGroomersDisponibles {
@@ -243,6 +270,8 @@ export interface InputGroomersDisponibles {
   hora: string;
   tipo_servicio: string;
   mascota_id: string;
+  /** S61 D-392: default 'local' (comportamiento de siempre). */
+  modalidad?: ModalidadGrooming;
 }
 
 /** Groomers cobrables que pueden la ventana entera en ese inicio, con
@@ -255,6 +284,7 @@ export async function obtenerGroomersDisponibles(
     p_hora: input.hora,
     p_tipo_servicio: input.tipo_servicio,
     p_mascota_id: input.mascota_id,
+    p_modalidad: input.modalidad ?? 'local',
   });
 
   if (error) return fallo(error.message);
@@ -281,6 +311,9 @@ export async function obtenerGroomersDisponibles(
       duracion_minutos: fila.duracion_minutos,
       direccion: typeof fila.direccion === 'string' && fila.direccion.length > 0 ? fila.direccion : null,
       ciudad: typeof fila.ciudad === 'string' && fila.ciudad.length > 0 ? fila.ciudad : null,
+      precio_base: typeof fila.precio_base === 'number' ? fila.precio_base : fila.precio,
+      extra_pelaje: typeof fila.extra_pelaje === 'number' ? fila.extra_pelaje : 0,
+      recargo_domicilio: typeof fila.recargo_domicilio === 'number' ? fila.recargo_domicilio : 0,
     });
   }
   return { ok: true, data: groomers };

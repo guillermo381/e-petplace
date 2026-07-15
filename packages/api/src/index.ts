@@ -388,6 +388,7 @@ export {
   obtenerOfertaGrooming,
   obtenerOfertaGroomingPublica,
   type OfertaGroomingPublica,
+  type ModalidadGrooming,
   obtenerIniciosGrooming,
   obtenerGroomersDisponibles,
   obtenerMisGroomings,

@@ -387,6 +387,16 @@ export const clienteEn = {
     tallaEstadoSinDeclarar: 'Not declared yet',
     pelajeLargoCorto: 'long coat',
     // the adapted WHEN: service → time (duration is a consequence)
+    // S61-A6 — D-392 at-home grooming, owner side (LOTE S61, GATE PENDIENTE)
+    dondeEtiqueta: 'Where?',
+    modalidadLocal: 'At their shop',
+    modalidadDomicilio: 'At your home',
+    modalidadDomicilioRecargo: 'At your home · +${{recargo}}',
+    dondeDomicilioTitulo: 'Where we go',
+    direccionDomicilioVoz: 'To come to your home we need your address. Saved once, editable anytime.',
+    desgloseServicio: 'service',
+    desgloseExtraPelaje: 'long coat',
+    desgloseDomicilio: 'home visit',
     // S61-A5 cure 3 — step 0 without a pet chosen (LOTE S61, GATE PENDIENTE)
     precioDesdePublico: 'From ${{precio}} — final price depends on their size',
     horariosSinMascotaTitulo: "Tell us who it's for",

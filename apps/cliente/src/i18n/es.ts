@@ -423,6 +423,16 @@ export const clienteEs = {
     tallaCeldaTitulo: 'Talla y pelaje',
     tallaEstadoSinDeclarar: 'Sin declarar',
     pelajeLargoCorto: 'pelaje largo',
+    // S61-A6 — D-392 domicilio del dueño (LOTE S61, GATE PENDIENTE)
+    dondeEtiqueta: '¿Dónde?',
+    modalidadLocal: 'En el local',
+    modalidadDomicilio: 'A domicilio',
+    modalidadDomicilioRecargo: 'A domicilio · +${{recargo}}',
+    dondeDomicilioTitulo: 'A dónde vamos',
+    direccionDomicilioVoz: 'Para ir a tu casa necesitamos tu dirección. Se guarda una vez y la puedes editar siempre.',
+    desgloseServicio: 'servicio',
+    desgloseExtraPelaje: 'pelaje largo',
+    desgloseDomicilio: 'domicilio',
     // S61-A5 cura 3 — el peldaño 0 sin mascota (LOTE S61, GATE PENDIENTE;
     // la letra del pedido decía "Contanos" — transpuesta a tuteo, regla 27)
     precioDesdePublico: 'Desde ${{precio}} — el precio final es por su talla',

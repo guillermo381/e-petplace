@@ -345,6 +345,9 @@ export interface InputCrearBloqueo {
   fecha: string;
   /** 'HH:MM' alineada a la grilla del prestador. */
   hora: string;
+  /** S61 D-392 (grooming): 'local' | 'domicilio'. Ausente = el motor
+   *  resuelve como siempre (paseo intacto; grooming default 'local'). */
+  modalidad?: 'local' | 'domicilio';
 }
 
 /** El hold es INVISIBLE al prestador (verdad firme): nace 'pendiente'. */
@@ -357,6 +360,7 @@ export async function crearBloqueoAgenda(
     p_mascota_id:   input.mascota_id,
     p_fecha:        input.fecha,
     p_hora:         input.hora,
+    ...(input.modalidad !== undefined ? { p_modalidad: input.modalidad } : null),
   });
 
   if (error) return mapeoErrorAResultado(error.message);

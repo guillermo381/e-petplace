@@ -54,11 +54,13 @@ export default function GroomingDisponibles() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
-  const params = useLocalSearchParams<{ fecha: string; hora: string; tipoServicio: string; mascotaId: string }>();
+  const params = useLocalSearchParams<{ fecha: string; hora: string; tipoServicio: string; mascotaId: string; modalidad?: string }>();
   const fecha = typeof params.fecha === 'string' ? params.fecha : '';
   const hora = typeof params.hora === 'string' ? params.hora : '';
   const tipoServicio = typeof params.tipoServicio === 'string' ? params.tipoServicio : '';
   const mascotaId = typeof params.mascotaId === 'string' ? params.mascotaId : '';
+  // S61-A6 (D-392): la modalidad viaja del QUÉ; ausente = local.
+  const modalidad: 'local' | 'domicilio' = params.modalidad === 'domicilio' ? 'domicilio' : 'local';
 
   const [perfil, setPerfil] = useState<PerfilMascota | 'cargando' | 'error'>('cargando');
   const [disponibles, setDisponibles] = useState<GroomerDisponible[] | 'cargando' | 'error'>('cargando');
@@ -67,10 +69,10 @@ export default function GroomingDisponibles() {
 
   const cargarGroomers = useCallback(() => {
     setDisponibles('cargando');
-    void obtenerGroomersDisponibles({ fecha, hora, tipo_servicio: tipoServicio, mascota_id: mascotaId }).then((r) => {
+    void obtenerGroomersDisponibles({ fecha, hora, tipo_servicio: tipoServicio, mascota_id: mascotaId, modalidad }).then((r) => {
       setDisponibles(r.ok ? r.data : 'error');
     });
-  }, [fecha, hora, tipoServicio, mascotaId]);
+  }, [fecha, hora, tipoServicio, mascotaId, modalidad]);
 
   useFocusEffect(
     useCallback(() => {
@@ -104,6 +106,7 @@ export default function GroomingDisponibles() {
         mascota_id: mascotaId,
         fecha,
         hora,
+        modalidad,
       });
       setCreandoHold(false);
       if (!r.ok) {
@@ -124,10 +127,16 @@ export default function GroomingDisponibles() {
           duracion: String(r.data.duracion_minutos),
           direccion: g.direccion ?? '',
           ciudad: g.ciudad ?? '',
+          // S61-A6: la modalidad y EL DESGLOSE server-side viajan al
+          // checkout — se declaran, jamás se calculan allá.
+          modalidad,
+          precioBase: String(g.precio_base),
+          extraPelaje: String(g.extra_pelaje),
+          recargoDomicilio: String(g.recargo_domicilio),
         },
       });
     },
-    [creandoHold, fecha, hora, mascotaId, tipoServicio, t, cargarGroomers, mostrar],
+    [creandoHold, fecha, hora, mascotaId, tipoServicio, modalidad, t, cargarGroomers, mostrar],
   );
 
   const mascota = typeof perfil === 'object' ? perfil.mascota : null;

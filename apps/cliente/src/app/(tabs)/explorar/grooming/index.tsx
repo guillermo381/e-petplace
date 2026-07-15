@@ -48,6 +48,7 @@ import {
   obtenerOfertaGroomingPublica,
   resolverUrlFoto,
   type MascotaResumen,
+  type ModalidadGrooming,
   type OfertaGrooming,
   type OfertaGroomingPublica,
 } from '@epetplace/api';
@@ -73,6 +74,8 @@ export default function GroomingCuando() {
   // los comprables con su "desde" real, visibles SIN mascota.
   const [ofertaPublica, setOfertaPublica] = useState<OfertaGroomingPublica[] | 'cargando' | 'error'>('cargando');
   const scrollRef = useRef<ScrollView>(null);
+  // S61-A6 (D-392): la modalidad se elige en el QUÉ — default local.
+  const [modalidad, setModalidad] = useState<ModalidadGrooming>('local');
   const [mascotaId, setMascotaId] = useState<string | null>(null);
   const [tallaHoja, setTallaHoja] = useState(false);
   const [oferta, setOferta] = useState<OfertaGrooming[] | 'cargando' | 'error' | null>(null);
@@ -151,7 +154,7 @@ export default function GroomingCuando() {
     }
     let vigente = true;
     setOferta('cargando');
-    void obtenerOfertaGrooming(mascota.id).then((r) => {
+    void obtenerOfertaGrooming(mascota.id, modalidad).then((r) => {
       if (!vigente) return;
       setOferta(r.ok ? r.data : 'error');
       if (r.ok && r.data.length > 0) {
@@ -161,7 +164,15 @@ export default function GroomingCuando() {
     return () => {
       vigente = false;
     };
-  }, [mascota, perfilCompleto, reintento]);
+  }, [mascota, perfilCompleto, modalidad, reintento]);
+
+  // S61-A6: honestidad de modalidad — si la oferta agregada dejó de
+  // atender domicilio (dato vivo), la elección vuelve a local.
+  useEffect(() => {
+    if (modalidad === 'domicilio' && Array.isArray(oferta) && !oferta.some((o) => o.atiende_domicilio)) {
+      setModalidad('local');
+    }
+  }, [oferta, modalidad]);
 
   // Próximos 14 días (hoy+13) — la tira del paseo, tal cual. `corta` =
   // fecha corta SIEMPRE (S61-A5 cura 1: el botón del día sin lugar).
@@ -194,7 +205,7 @@ export default function GroomingCuando() {
     if (mascota === null || !perfilCompleto || tipoServicio === null || !Array.isArray(oferta) || oferta.length === 0) return;
     let vigente = true;
     setInicios('cargando');
-    void obtenerIniciosGrooming({ fecha: dia, tipo_servicio: tipoServicio, mascota_id: mascota.id }).then((r) => {
+    void obtenerIniciosGrooming({ fecha: dia, tipo_servicio: tipoServicio, mascota_id: mascota.id, modalidad }).then((r) => {
       if (!vigente) return;
       setInicios(r.ok ? r.data : 'error');
       if (r.ok) setHora((h) => (h !== null && r.data.includes(h) ? h : null));
@@ -202,7 +213,7 @@ export default function GroomingCuando() {
     return () => {
       vigente = false;
     };
-  }, [dia, tipoServicio, mascota, perfilCompleto, oferta, reintento]);
+  }, [dia, tipoServicio, mascota, perfilCompleto, oferta, modalidad, reintento]);
 
   const servicioElegido = Array.isArray(oferta) ? oferta.find((o) => o.tipo_servicio === tipoServicio) ?? null : null;
   const listo = mascota !== null && tipoServicio !== null && hora !== null;
@@ -372,6 +383,33 @@ export default function GroomingCuando() {
                   ) : null}
                 </View>
 
+                {/* 1b · EL DÓNDE (S61-A6, D-392): la modalidad se elige
+                    junto al servicio — SOLO si la oferta agregada tiene
+                    AMBAS (groomer con una sola = no se pregunta y la
+                    cita la porta igual). El recargo se DECLARA en el
+                    chip (el mínimo real entre groomers con domicilio). */}
+                {oferta.some((o) => o.atiende_domicilio) && oferta.some((o) => o.atiende_local) ? (
+                  <SelectorOpcion
+                    acento="control"
+                    etiqueta={t('grooming.dondeEtiqueta')}
+                    opciones={[
+                      { codigo: 'local', etiqueta: t('grooming.modalidadLocal') },
+                      {
+                        codigo: 'domicilio',
+                        etiqueta: (() => {
+                          const recargo =
+                            (servicioElegido ?? oferta[0])?.recargo_domicilio_desde ?? null;
+                          return recargo !== null && recargo > 0
+                            ? t('grooming.modalidadDomicilioRecargo', { recargo: recargo.toFixed(2) })
+                            : t('grooming.modalidadDomicilio');
+                        })(),
+                      },
+                    ]}
+                    seleccionada={modalidad}
+                    onSelect={(codigo) => setModalidad(codigo === 'domicilio' ? 'domicilio' : 'local')}
+                  />
+                ) : null}
+
                 {/* 2 · DÍA — la tira horizontal (hoy+13) */}
                 <SelectorOpcion
                   acento="control"
@@ -447,7 +485,7 @@ export default function GroomingCuando() {
               if (!listo || mascota === null) return;
               router.push({
                 pathname: '/explorar/grooming/disponibles',
-                params: { fecha: dia, hora, tipoServicio, mascotaId: mascota.id },
+                params: { fecha: dia, hora, tipoServicio, mascotaId: mascota.id, modalidad },
               });
             }}
           />

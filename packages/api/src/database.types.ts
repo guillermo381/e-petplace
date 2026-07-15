@@ -14680,7 +14680,7 @@ export type Database = {
         Returns: Record<string, unknown>
       }
       _grooming_ofertas_cobrables: {
-        Args: { p_mascota_id: string }
+        Args: { p_mascota_id: string; p_modalidad?: string }
         Returns: {
           ciudad: string
           direccion: string
@@ -14995,6 +14995,7 @@ export type Database = {
           p_fecha: string
           p_hora: string
           p_mascota_id: string
+          p_modalidad?: string
           p_prestador_id: string
           p_servicio_id: string
         }
@@ -15343,22 +15344,31 @@ export type Database = {
           p_fecha: string
           p_hora: string
           p_mascota_id: string
+          p_modalidad?: string
           p_tipo_servicio: string
         }
         Returns: {
           ciudad: string
           direccion: string
           duracion_minutos: number
+          extra_pelaje: number
           precio: number
+          precio_base: number
           prestador_id: string
           prestador_nombre: string
           prestador_servicio_id: string
+          recargo_domicilio: number
           servicio_nombre: string
         }[]
       }
       obtener_grooming_por_cita: { Args: { p_cita_id: string }; Returns: Json }
       obtener_inicios_grooming_disponibles: {
-        Args: { p_fecha: string; p_mascota_id: string; p_tipo_servicio: string }
+        Args: {
+          p_fecha: string
+          p_mascota_id: string
+          p_modalidad?: string
+          p_tipo_servicio: string
+        }
         Returns: {
           hora: string
         }[]
@@ -15374,9 +15384,12 @@ export type Database = {
         Returns: Json
       }
       obtener_oferta_grooming: {
-        Args: { p_mascota_id: string }
+        Args: { p_mascota_id: string; p_modalidad?: string }
         Returns: {
+          atiende_domicilio: boolean
+          atiende_local: boolean
           desde_precio: number
+          recargo_domicilio_desde: number
           servicio_nombre: string
           tipo_servicio: string
           varia: boolean
