@@ -1,9 +1,10 @@
 # DISEÑO_EXPERIENCIA — La arquitectura de la experiencia del dueño
 
-> **Versión: v1.7 — S60 (14 Jul 2026), Etapa A0 de RUTA_F1 v2.2.**
+> **Versión: v1.8 — S61 (14 Jul 2026), Etapa A0 de RUTA_F1 v2.2.**
 > (La banda v1.1→v1.4 se curó en S58 — decía v1.1 con contenido v1.4,
 > relevamiento B; v1.5 = §15b LA DOSIS DEL PRESTADOR, firma founder;
-> v1.7 = la zona TUS SERVICIOS del Hogar + el hub sin Agenda, S60-A6.)
+> v1.7 = la zona TUS SERVICIOS del Hogar + el hub sin Agenda, S60-A6;
+> v1.8 = LA GRAMÁTICA CANÓNICA DE RESERVA, firma founder S61.)
 > Escrito por el arquitecto/director de diseño, decisiones de producto
 > cerradas por el founder en sesión. **Contrastes obligatorios:**
 > `MODELO_PRODUCTO.md` (EL NORTE — en especial §6.4 revelación
@@ -542,6 +543,25 @@ el portado de grooming consumen:
 
 ## Historial
 
+- **v1.8 (S61, 14 Jul 2026):** LA GRAMÁTICA CANÓNICA DE RESERVA
+  (decisión founder S61, en piedra): **todo servicio se reserva con UNA
+  gramática — MASCOTA → QUÉ (duración en paseo / servicio en grooming;
+  el grooming suma acá el DÓNDE local/domicilio, D-392) → DÍA → HORA →
+  QUIÉN → PAGAR.** Dos rasgos de patrón firmados sobre el mockup:
+  (1) **el PARA QUIÉN queda VISIBLE mientras se reserva** — el selector
+  de mascota se pinta SIEMPRE (una sola elegible = chip pre-elegido
+  presente, jamás un paso que se olvida) y desde S61-A4 con la CARA
+  (AvatarMascota xs como adorno del chip; foto real → huella digna);
+  el QUIÉN repite el para-quién en su resumen ("para {nombre}").
+  (2) **el CTA de reservar vive ABAJO, FIJO** — fuera del scroll, una
+  sola acción primaria por pantalla (Ley 19.2). El paseo MIGRÓ a la
+  gramática en S61-A3 (la mascota dejó de elegirse al final en una
+  Hoja del QUIÉN; el guard de especie §1bis subió al paso 0 con voz
+  honesta CON camino); el grooming ya la hablaba y sumó los rasgos.
+  Peldaño 0 de la gramática (cura S61-A5): el QUÉ se muestra AUN SIN
+  mascota elegida — comprables con su "desde" real y la tira de días;
+  los horarios dicen su porqué con camino al paso 0. La identidad es
+  ley: el patrón viaja entre servicios, el maquillaje no.
 - **v1.7 (S60, 14 Jul 2026):** el Hogar es ESTADO Y ANTICIPACIÓN
   (S60-A6, D-366 parcial; el primer literal de Kary — "vista rápida
   desde la posición consolidada" — hecho zona). **Pieza 1, la zona TUS
