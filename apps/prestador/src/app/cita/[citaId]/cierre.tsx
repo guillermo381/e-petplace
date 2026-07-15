@@ -264,10 +264,12 @@ export default function Cierre() {
               </View>
             </Tarjeta>
 
-            {/* Recorrido real, o el motivo si el GPS falló */}
+            {/* Recorrido real, o la verdad si no lo hay — S62 (cura 2):
+                el hueco del mapa JAMÁS calla (Ley 13): con motivo lo
+                dice; con 1 punto lo dice; con 0 sin motivo lo dice. */}
             {listo.track.length > 1 ? (
               <MapaRecorrido puntos={listo.track} modo="recorrido" capa="cuidado" alto={200} />
-            ) : resumen.gps.motivo_fallo ? (
+            ) : (
               <Tarjeta relleno="amplio">
                 <Text
                   style={{
@@ -277,10 +279,14 @@ export default function Cierre() {
                     color: theme.text.secondary,
                   }}
                 >
-                  {t('cita.sinRutaGps', { motivo: resumen.gps.motivo_fallo })}
+                  {resumen.gps.motivo_fallo
+                    ? t('cita.sinRutaGps', { motivo: resumen.gps.motivo_fallo })
+                    : listo.track.length === 1
+                      ? t('cita.sinRutaSoloPartida')
+                      : t('cita.sinRutaNoRegistrada')}
                 </Text>
               </Tarjeta>
-            ) : null}
+            )}
 
             {/* Lo registrado */}
             <View style={{ gap: spacing[2] }}>

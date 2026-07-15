@@ -1,19 +1,33 @@
 /**
- * useTrackGps — captura FOREGROUND del recorrido (S44-B4.3).
+ * useTrackGps — captura FOREGROUND del recorrido (S44-B4.3; lote de
+ * curas del track S62 — pedido founder post-bifurcación).
  *
- * GPS en background es B5 (dev build + permisos always + servicio):
- * acá el track vive mientras la pantalla del Durante está al frente —
- * limitación asumida de F1, documentada.
+ * GPS en background sigue siendo D-292 (dev build + permisos always +
+ * servicio): acá el track vive mientras la pantalla del Durante está
+ * al frente — limitación asumida de F1, documentada.
  *
  * Patrón heredado del relevamiento B0 (repo viejo, useTrackGps):
  *   · punto aceptado cada ≥5s
  *   · flush a DB al juntar 12 puntos o cada 60s (registrarTrackPaseo append)
  *   · error de red → lote reinyectado al buffer
  *   · atencion_no_en_curso → hard-stop silencioso (el server mandó)
- *   · flushFinal() para Terminar (devuelve el total real del server)
+ *   · flushFinal() para Terminar — S62: devuelve TAMBIÉN los puntos
+ *     que NO se pudieron guardar (pendientes>0 = la red falló; la
+ *     pantalla lo declara, jamás cierra con el total viejo en silencio)
  *
- * Chip de 6 estados heredado: inactivo · iniciando · activo ·
- * sin_permiso · no_disponible · error.
+ * CURAS S62 (todas OTA):
+ *   · el cleanup FLUSHEA el buffer antes de soltar (los hasta-11
+ *     puntos ya no se pierden al salir de la pantalla)
+ *   · timeout del primer punto (30s) → 'sin_senal' honesto (muere el
+ *     "iniciando" eterno; el watcher sigue vivo — si el punto llega,
+ *     el estado se cura solo)
+ *   · denegado SIN re-pregunta (canAskAgain=false) → 'sin_permiso_ajustes'
+ *     (la pantalla abre los Ajustes del sistema)
+ *   · permiso APROXIMADO (Android coarse / iOS reduced) → 'aproximado'
+ *     PERSISTENTE mientras captura (la app no finge track fino)
+ *
+ * Chip de estados: inactivo · iniciando · activo · aproximado ·
+ * sin_permiso · sin_permiso_ajustes · sin_senal · no_disponible · error.
  *
  * DEV: EXPO_PUBLIC_GPS_FAKE=1 simula una caminata (browser/emulador).
  */
@@ -22,22 +36,42 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import * as Location from 'expo-location';
 import { registrarTrackPaseo, type PuntoGpsPaseo } from '@epetplace/api';
 
-export type EstadoGps = 'inactivo' | 'iniciando' | 'activo' | 'sin_permiso' | 'no_disponible' | 'error';
+export type EstadoGps =
+  | 'inactivo'
+  | 'iniciando'
+  | 'activo'
+  | 'aproximado'
+  | 'sin_permiso'
+  | 'sin_permiso_ajustes'
+  | 'sin_senal'
+  | 'no_disponible'
+  | 'error';
 
 const INTERVALO_MS = 5_000;
 const MAX_BUFFER = 12;
 const FLUSH_PERIOD_MS = 60_000;
+/** S62: si el GPS no entrega el PRIMER punto en este plazo, el chip
+ *  pasa a 'sin_senal' (voz honesta) — la captura no se detiene. */
+const TIMEOUT_PRIMER_PUNTO_MS = 30_000;
 const FAKE = __DEV__ && process.env.EXPO_PUBLIC_GPS_FAKE === '1';
 const FAKE_PERIOD_MS = 3_000;
+
+export interface ResultadoFlushFinal {
+  /** Total REAL confirmado por el server. */
+  total: number;
+  /** Puntos capturados que NO llegaron a DB (red caída): si >0, la
+   *  pantalla lo declara y NO cierra con el total viejo. */
+  pendientes: number;
+}
 
 export interface UseTrackGps {
   estado: EstadoGps;
   puntosTotal: number;
   ultimoPunto: { lat: number; lng: number } | null;
   puntosSesion: { lat: number; lng: number }[];
-  /** Vacía el buffer y devuelve el total real del server. */
-  flushFinal: () => Promise<number>;
-  /** Re-pide el permiso (card de permiso denegado). */
+  /** Vacía el buffer y devuelve el total real del server + pendientes. */
+  flushFinal: () => Promise<ResultadoFlushFinal>;
+  /** Re-pide el permiso / re-arranca el watcher (cards de estado). */
   reintentarPermiso: () => void;
 }
 
@@ -51,16 +85,22 @@ export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): 
   const lastTRef = useRef(0);
   const subRef = useRef<Location.LocationSubscription | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fakeRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const flushingRef = useRef(false);
   const detenidoRef = useRef(false);
   const totalRef = useRef(puntosIniciales);
+  /** S62: con permiso aproximado el estado NO asciende a 'activo' —
+   *  la app dice la verdad del fix mientras captura. */
+  const aproximadoRef = useRef(false);
 
   const detener = useCallback(() => {
     subRef.current?.remove();
     subRef.current = null;
     if (intervalRef.current !== null) clearInterval(intervalRef.current);
     intervalRef.current = null;
+    if (timeoutRef.current !== null) clearTimeout(timeoutRef.current);
+    timeoutRef.current = null;
     if (fakeRef.current !== null) clearInterval(fakeRef.current);
     fakeRef.current = null;
   }, []);
@@ -71,7 +111,7 @@ export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): 
     lastTRef.current = ahora;
     bufferRef.current.push({ lat, lng, t: new Date(ahora).toISOString() });
     setPuntosSesion((p) => [...p, { lat, lng }]);
-    setEstado('activo');
+    setEstado(aproximadoRef.current ? 'aproximado' : 'activo');
     if (bufferRef.current.length >= MAX_BUFFER) void flush();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -101,9 +141,11 @@ export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): 
     }
   }, [eventoAtencionId, detener]);
 
-  const flushFinal = useCallback(async () => {
+  const flushFinal = useCallback(async (): Promise<ResultadoFlushFinal> => {
     await flush();
-    return totalRef.current;
+    // S62: lo que quedó en el buffer tras el intento NO llegó a DB —
+    // el caller lo declara (jamás cierre silencioso con total viejo).
+    return { total: totalRef.current, pendientes: bufferRef.current.length };
   }, [flush]);
 
   useEffect(() => {
@@ -127,9 +169,15 @@ export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): 
       const permiso = await Location.requestForegroundPermissionsAsync();
       if (cancelado) return;
       if (!permiso.granted) {
-        setEstado('sin_permiso');
+        // S62: tras el doble "No permitir", Android devuelve denegado
+        // SIN re-mostrar el diálogo — el camino honesto son los Ajustes.
+        setEstado(permiso.canAskAgain === false ? 'sin_permiso_ajustes' : 'sin_permiso');
         return;
       }
+      // S62: fix grueso declarado (Android 12+ "aproximada" / iOS reduced).
+      aproximadoRef.current =
+        permiso.android?.accuracy === 'coarse' || permiso.ios?.accuracy === 'reduced';
+
       const activado = await Location.hasServicesEnabledAsync().catch(() => false);
       if (cancelado) return;
       if (!activado) {
@@ -142,6 +190,12 @@ export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): 
           (pos) => aceptarPunto(pos.coords.latitude, pos.coords.longitude),
         );
         intervalRef.current = setInterval(() => void flush(), FLUSH_PERIOD_MS);
+        if (aproximadoRef.current) setEstado('aproximado');
+        // S62: el "iniciando" eterno muere — sin primer punto en 30s,
+        // voz honesta (el watcher sigue: un punto tardío cura el chip).
+        timeoutRef.current = setTimeout(() => {
+          setEstado((e) => (e === 'iniciando' ? 'sin_senal' : e));
+        }, TIMEOUT_PRIMER_PUNTO_MS);
       } catch {
         setEstado('error');
       }
@@ -151,6 +205,13 @@ export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): 
     return () => {
       cancelado = true;
       detener();
+      // S62: el buffer se flushea al soltar la pantalla — los hasta-11
+      // puntos del lote a medio juntar ya no se pierden. Fire-and-forget:
+      // el RPC sobrevive al unmount; si además hay un flush EN VUELO,
+      // este intento sale vacío y el lote en vuelo sigue su camino
+      // (micro-hueco declarado: puntos aceptados DURANTE ese vuelo
+      // esperan al próximo montaje o al flush final).
+      void flush();
     };
   }, [intento, aceptarPunto, flush, detener]);
 

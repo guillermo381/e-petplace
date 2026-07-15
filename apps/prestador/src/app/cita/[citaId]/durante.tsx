@@ -11,7 +11,7 @@
 // ─────────────────────────────────────────────────────────────────────
 
 import { useCallback, useRef, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Linking, ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Boton,
@@ -42,6 +42,7 @@ import {
   obtenerNovedadesPaseo,
   obtenerPaseoPorCita,
   obtenerResumenCierrePaseo,
+  obtenerTrackPaseo,
   terminarAtencionPaseo,
   type IncidenciaCatalogoPaseo,
   type NovedadCatalogoPaseo,
@@ -57,6 +58,10 @@ type DatosListos = {
   iniciadaEn: string;
   prestadorId: string;
   puntosIniciales: number;
+  /** S62 (cura 1): el track YA en DB — la polilínea se SIEMBRA desde
+   *  acá y el buffer local de la sesión suma encima (salir y volver a
+   *  mitad de paseo ya no muestra mapa vacío con contador >0). */
+  trackPrevio: { lat: number; lng: number }[];
   novedadesCatalogo: NovedadCatalogoPaseo[];
   incidenciasCatalogo: IncidenciaCatalogoPaseo[];
   novedadesRegistradas: string[];
@@ -73,12 +78,15 @@ type FotoCola = { uri: string; estado: EvidenciaFotoEstado; storagePath?: string
 // Los labels del chip GPS viven en el riel (D-315p); la Insignia por
 // estado se resuelve adentro del componente con t().
 const CHIP_GPS_ESTADO: Record<EstadoGps, InsigniaEstado> = {
-  iniciando:     'info',
-  activo:        'alDia',
-  inactivo:      'proximo',
-  sin_permiso:   'atencion',
-  no_disponible: 'atencion',
-  error:         'atencion',
+  iniciando:           'info',
+  activo:              'alDia',
+  aproximado:          'atencion',
+  inactivo:            'proximo',
+  sin_permiso:         'atencion',
+  sin_permiso_ajustes: 'atencion',
+  sin_senal:           'atencion',
+  no_disponible:       'atencion',
+  error:               'atencion',
 };
 
 // Motivos de un toque para terminar sin track. El CHECK real de DB NO
@@ -120,13 +128,52 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
   const gps = useTrackGps(datos.eventoAtencionId, datos.puntosIniciales);
 
   const ETIQUETA_GPS: Record<EstadoGps, string> = {
-    iniciando:     t('cita.gpsIniciando'),
-    activo:        t('cita.gpsActivo'),
-    inactivo:      t('cita.gpsDetenido'),
-    sin_permiso:   t('cita.gpsSinPermiso'),
-    no_disponible: t('cita.gpsNoDisponible'),
-    error:         t('cita.gpsError'),
+    iniciando:           t('cita.gpsIniciando'),
+    activo:              t('cita.gpsActivo'),
+    aproximado:          t('cita.gpsAproximado'),
+    inactivo:            t('cita.gpsDetenido'),
+    sin_permiso:         t('cita.gpsSinPermiso'),
+    sin_permiso_ajustes: t('cita.gpsSinPermisoAjustes'),
+    sin_senal:           t('cita.gpsSinSenal'),
+    no_disponible:       t('cita.gpsNoDisponible'),
+    error:               t('cita.gpsError'),
   };
+
+  // S62 (curas 5/6/7): la card de estado degradado — cada estado con su
+  // verdad y SU camino (Ley 13/17.4: el error dirige, jamás se lamenta).
+  const CARD_GPS: Partial<Record<EstadoGps, { texto: string; accion: string; onAccion: () => void }>> = {
+    sin_permiso: {
+      texto: t('cita.sinGpsExplicacion'),
+      accion: t('cita.probarDeNuevo'),
+      onAccion: gps.reintentarPermiso,
+    },
+    sin_permiso_ajustes: {
+      texto: t('cita.sinGpsAjustesExplicacion'),
+      accion: t('cita.abrirAjustes'),
+      onAccion: () => void Linking.openSettings(),
+    },
+    no_disponible: {
+      texto: t('cita.sinGpsExplicacion'),
+      accion: t('cita.probarDeNuevo'),
+      onAccion: gps.reintentarPermiso,
+    },
+    aproximado: {
+      texto: t('cita.gpsAproximadoExplicacion'),
+      accion: t('cita.pedirPrecision'),
+      onAccion: gps.reintentarPermiso,
+    },
+    sin_senal: {
+      texto: t('cita.gpsSinSenalExplicacion'),
+      accion: t('cita.probarDeNuevo'),
+      onAccion: gps.reintentarPermiso,
+    },
+    error: {
+      texto: t('cita.sinGpsExplicacion'),
+      accion: t('cita.probarDeNuevo'),
+      onAccion: gps.reintentarPermiso,
+    },
+  };
+  const cardGps = CARD_GPS[gps.estado];
 
   const [registradas, setRegistradas] = useState<string[]>(datos.novedadesRegistradas);
   const [novedadEnviando, setNovedadEnviando] = useState<string | null>(null);
@@ -228,7 +275,23 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
     terminandoRef.current = true;
     setTerminando(true);
 
-    const total = await gps.flushFinal();
+    const fin = await gps.flushFinal();
+    // S62 (cura 4): el flush final ya no falla en silencio — con puntos
+    // capturados que NO llegaron a DB, se declara y se reintenta (el
+    // cierre jamás sigue con el total viejo callando la pérdida).
+    if (fin.pendientes > 0) {
+      mostrar({ variante: 'error', texto: t('cita.trackPendienteRed') });
+      setTerminando(false);
+      terminandoRef.current = false;
+      return;
+    }
+    const total = fin.total;
+    // NOTA S62 (verificación del guard, pedido founder): este guard es
+    // BINARIO — el motivo se pide SOLO con total 0 (el CHECK de DB exige
+    // coherencia NULL↔fallido). Un track INCOMPLETO con ≥1 punto en DB
+    // no dispara motivo por diseño: no hay canal para "se cortó a mitad"
+    // (por eso el paseo real de hoy no lo pidió — bifurcación fina con
+    // el reporte de DB de la A).
     if (total === 0 && !motivo) {
       setPideMotivo(true);
       setTerminando(false);
@@ -258,8 +321,6 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
     terminandoRef.current = false;
   }
 
-  const sinGps = gps.estado === 'sin_permiso' || gps.estado === 'no_disponible';
-
   return (
     <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[5] }}>
       {/* Estado GPS + puntos */}
@@ -277,7 +338,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
         </Text>
       </View>
 
-      {sinGps && (
+      {cardGps && (
         <Tarjeta relleno="amplio">
           <View style={{ gap: spacing[3] }}>
             <Text
@@ -288,10 +349,10 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
                 color: theme.text.primary,
               }}
             >
-              {t('cita.sinGpsExplicacion')}
+              {cardGps.texto}
             </Text>
             <View style={{ alignSelf: 'flex-start' }}>
-              <Boton variante="secundario" tamaño="sm" etiqueta={t('cita.probarDeNuevo')} onPress={gps.reintentarPermiso} />
+              <Boton variante="secundario" tamaño="sm" etiqueta={cardGps.accion} onPress={cardGps.onAccion} />
             </View>
           </View>
         </Tarjeta>
@@ -302,7 +363,11 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
         <Cronometro inicioTs={datos.iniciadaEn} />
       </View>
 
-      <MapaRecorrido puntos={gps.puntosSesion} modo="vivo" capa="cuidado" alto={220} />
+      {/* S62 (cura 1): la polilínea = track de DB + la sesión encima —
+          la reconstrucción 7.5 ya no pierde el dibujo (los puntos que
+          esta sesión flusheó pueden repetirse en ambas mitades tras un
+          refetch en foco: el trazo es idéntico, inofensivo). */}
+      <MapaRecorrido puntos={[...datos.trackPrevio, ...gps.puntosSesion]} modo="vivo" capa="cuidado" alto={220} />
 
       {/* Parte del perro — chips de un toque, orden del catálogo (sin
           encabezados de grupo: 12 chips, el orden ya agrupa — dosis baja) */}
@@ -504,16 +569,19 @@ export default function Durante() {
       return;
     }
 
-    const [prestador, resumen, novedades, incidencias] = await Promise.all([
+    const [prestador, resumen, novedades, incidencias, track] = await Promise.all([
       obtenerMiPrestador(),
       obtenerResumenCierrePaseo(paseo.data.evento_atencion_id),
       obtenerNovedadesPaseo(),
       obtenerIncidenciasPaseo(),
+      // S62 (cura 1): el track ya persistido siembra la polilínea.
+      obtenerTrackPaseo(paseo.data.evento_atencion_id),
     ]);
     if (!prestador.ok) return setPantalla({ estado: 'error', mensaje: prestador.mensaje });
     if (!resumen.ok) return setPantalla({ estado: 'error', mensaje: resumen.mensaje });
     if (!novedades.ok) return setPantalla({ estado: 'error', mensaje: novedades.mensaje });
     if (!incidencias.ok) return setPantalla({ estado: 'error', mensaje: incidencias.mensaje });
+    if (!track.ok) return setPantalla({ estado: 'error', mensaje: track.mensaje });
 
     setPantalla({
       estado: 'listo',
@@ -521,6 +589,7 @@ export default function Durante() {
       iniciadaEn: paseo.data.iniciada_en,
       prestadorId: prestador.data.id,
       puntosIniciales: resumen.data.gps.puntos,
+      trackPrevio: track.data.map((p) => ({ lat: p.lat, lng: p.lng })),
       novedadesCatalogo: novedades.data,
       incidenciasCatalogo: incidencias.data,
       novedadesRegistradas: resumen.data.novedades.map((n) => n.nombre),

@@ -188,10 +188,24 @@ export const prestadorEs = {
     gpsSinPermiso: 'Sin permiso de ubicación',
     gpsNoDisponible: 'GPS no disponible',
     gpsError: 'GPS con error',
+    // LOTE S62 (curas del track): los estados honestos nuevos
+    gpsSinPermisoAjustes: 'Permiso de ubicación bloqueado',
+    gpsAproximado: 'Ubicación aproximada',
+    gpsSinSenal: 'GPS sin señal',
     unPunto: '1 punto',
     puntos: '{{n}} puntos',
     sinGpsExplicacion:
       'Necesitamos tu ubicación para registrar el recorrido que ve la familia. El paseo puede seguir igual — sin ruta, al terminar te pedimos contar qué pasó.',
+    sinGpsAjustesExplicacion:
+      'La app no tiene permiso de ubicación y el sistema ya no vuelve a preguntar. Actívalo en los ajustes del teléfono para registrar el recorrido.',
+    gpsAproximadoExplicacion:
+      'Tu teléfono está compartiendo la ubicación aproximada. El recorrido se registra, pero impreciso — para la ruta real, permite la ubicación precisa.',
+    gpsSinSenalExplicacion:
+      'El GPS todavía no entrega tu posición. Si estás bajo techo, suele llegar al salir al aire libre.',
+    abrirAjustes: 'Abrir ajustes',
+    pedirPrecision: 'Permitir precisa',
+    trackPendienteRed:
+      'Los últimos puntos del recorrido no se guardaron. Revisa tu conexión y toca Terminar de nuevo.',
     probarDeNuevo: 'Probar de nuevo',
     parteDelPerro: 'Parte del perro',
     evidencia: 'Evidencia',
@@ -231,6 +245,9 @@ export const prestadorEs = {
     cierreTitulo: 'Parte del paseo',
     resumenConteos: '{{puntos}} puntos gps · {{fotos}} fotos · {{notas}} notas',
     sinRutaGps: 'Sin ruta GPS: {{motivo}}',
+    // LOTE S62 (curas del track): el hueco del mapa deja de callar
+    sinRutaNoRegistrada: 'El recorrido no se registró en este paseo.',
+    sinRutaSoloPartida: 'Solo se registró el punto de partida — el recorrido no alcanzó a dibujarse.',
     faltaNovedad: 'Registra al menos una novedad del paseo para enviar el parte.',
     registrarNovedad: 'Registrar novedad',
     mensajeFamilia: 'Mensaje a la familia',

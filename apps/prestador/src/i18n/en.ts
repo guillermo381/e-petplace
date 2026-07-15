@@ -164,10 +164,24 @@ export const prestadorEn = {
     gpsSinPermiso: 'No location permission',
     gpsNoDisponible: 'GPS unavailable',
     gpsError: 'GPS error',
+    // LOTE S62 (curas del track): los estados honestos nuevos
+    gpsSinPermisoAjustes: 'Location permission blocked',
+    gpsAproximado: 'Approximate location',
+    gpsSinSenal: 'No GPS signal',
     unPunto: '1 point',
     puntos: '{{n}} points',
     sinGpsExplicacion:
       "We need your location to record the route the family sees. The walk can go on just the same — without a route, we'll ask you to tell what happened when you finish.",
+    sinGpsAjustesExplicacion:
+      "The app doesn't have location permission and the system won't ask again. Turn it on in your phone settings to record the route.",
+    gpsAproximadoExplicacion:
+      'Your phone is sharing your approximate location. The route gets recorded, but imprecise — for the real route, allow precise location.',
+    gpsSinSenalExplicacion:
+      "GPS hasn't delivered your position yet. If you're indoors, it usually arrives once you step outside.",
+    abrirAjustes: 'Open settings',
+    pedirPrecision: 'Allow precise',
+    trackPendienteRed:
+      "The last route points didn't get saved. Check your connection and tap Finish again.",
     probarDeNuevo: 'Try again',
     parteDelPerro: "Dog's report",
     evidencia: 'Evidence',
@@ -205,6 +219,9 @@ export const prestadorEn = {
     cierreTitulo: 'Walk report',
     resumenConteos: '{{puntos}} gps points · {{fotos}} photos · {{notas}} notes',
     sinRutaGps: 'No GPS route: {{motivo}}',
+    // LOTE S62 (curas del track): el hueco del mapa deja de callar
+    sinRutaNoRegistrada: "The route wasn't recorded on this walk.",
+    sinRutaSoloPartida: "Only the starting point was recorded — the route didn't get drawn.",
     faltaNovedad: 'Log at least one walk update to send the report.',
     registrarNovedad: 'Log update',
     mensajeFamilia: 'Message to the family',
