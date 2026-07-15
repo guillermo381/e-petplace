@@ -24,9 +24,12 @@
 
 import { getClient } from '@epetplace/api';
 
-import { leerBytes } from '@/lib/leer-archivo';
+// S61-B10 (L-137 3ª enmienda): la frontera dual-forma vive en
+// packages/ui — de TODAS las apps; el forense y el comportamiento
+// son los mismos de siempre.
+import { leerBytes } from '@epetplace/ui';
 
-export { leerBase64 } from '@/lib/leer-archivo';
+export { leerBase64 } from '@epetplace/ui';
 
 const BUCKET = 'mascotas';
 // Espejo del file_size_limit del bucket (relevado S47-B0.2): el

@@ -193,7 +193,17 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
         x.uri === item.uri ? { ...x, estado: r.ok ? 'subida' : 'error', storagePath: r.storagePath } : x,
       ),
     );
-    if (!r.ok) mostrar({ variante: 'error', texto: t('cita.fotoNoSubio') });
+    if (!r.ok) {
+      // S61-B10: la voz ya no traga la causa — título + detalle (Ley
+      // 17.4; 'revisa tu conexión' RESERVADO a errores de red)
+      const detalle =
+        r.causa === 'red'
+          ? t('cita.fotoNoSubioRed')
+          : r.causa === 'lectura'
+            ? t('cita.fotoNoSubioLectura')
+            : r.mensaje;
+      mostrar({ variante: 'error', texto: detalle ? `${t('cita.fotoNoSubio')} ${detalle}` : t('cita.fotoNoSubio') });
+    }
   }
 
   function onFoto(uri: string, tipo: TipoArchivoGrooming) {

@@ -155,6 +155,9 @@ export const prestadorEn = {
     fotosSufijo: '{{n}} photos',
     parteRegistrado: 'Report entry saved',
     fotoNoSubio: "The photo didn't upload. Tap it to retry.",
+    // S61-B10: la CAUSA en detalle (Ley 17.4) · LOTE S61, GATE PENDIENTE
+    fotoNoSubioRed: 'Check your connection and try again.',
+    fotoNoSubioLectura: "The photo couldn't be read from the device.",
     agregarNotaIncidencia: 'Add note or incident',
     terminarPaseo: 'Finish walk',
     notaOIncidencia: 'Note or incident',

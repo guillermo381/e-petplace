@@ -3,6 +3,13 @@
  * (S47-B1.2, gate B3 fallido). Ningún caller vuelve a tocar `new File()`
  * directo: la cura L-137 vive ACÁ y no se puede saltear.
  *
+ * S61-B10 (L-137 TERCERA enmienda): EXTRAÍDA de apps/cliente a
+ * packages/ui — la frontera es de TODAS las apps (el prestador corrió
+ * dos sesiones con la cura naive por-caller y la galería rompía);
+ * vive junto a capturaFoto (la infra compartida del pipeline de foto,
+ * mismo precedente: no cuenta como componente). Contenido VERBATIM,
+ * forense intacto.
+ *
  * L-137 + hipótesis (d) del gate B3: en Expo Go el directorio del
  * proyecto contiene % LITERALES (`%40scope%2Fapp`) y TODA API de FS
  * decodifica %XX → la cura clásica re-codifica (`%`→`%25`). PERO la

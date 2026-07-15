@@ -179,6 +179,10 @@ export const prestadorEs = {
     fotosSufijo: '{{n}} fotos',
     parteRegistrado: 'Parte registrado',
     fotoNoSubio: 'La foto no se subió. Tócala para reintentar.',
+    // S61-B10: la CAUSA en detalle (los errores dirigen, Ley 17.4;
+    // 'revisa tu conexión' RESERVADO a red) · LOTE S61, GATE PENDIENTE
+    fotoNoSubioRed: 'Revisa tu conexión e inténtalo de nuevo.',
+    fotoNoSubioLectura: 'No se pudo leer la foto del dispositivo.',
     agregarNotaIncidencia: 'Agregar nota o incidencia',
     terminarPaseo: 'Terminar paseo',
     notaOIncidencia: 'Nota o incidencia',
