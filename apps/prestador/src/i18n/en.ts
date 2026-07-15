@@ -178,9 +178,14 @@ export const prestadorEn = {
     notaOIncidencia: 'Note or incident',
     nota: 'Note',
     incidencia: 'Incident',
+    // LOTE S62 (migración clase-4 §15b.2): labels de grupo de la Hoja;
+    // los chips de severidad pasan a voz corta (el label ya dice qué son)
+    queRegistras: "What you're logging",
+    incidenciaTipo: 'Incident type',
+    severidad: 'Severity',
     elegirIncidencia: 'Choose what happened from the catalog.',
-    severidadMedia: 'Medium severity',
-    severidadAlta: 'High severity',
+    severidadMedia: 'Medium',
+    severidadAlta: 'High',
     quePaso: 'What happened',
     notaPlaceholder: 'Anything you want to leave noted.',
     incidenciaPlaceholder: 'Tell what happened, calmly.',

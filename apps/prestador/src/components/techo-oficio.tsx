@@ -21,12 +21,13 @@
  * promoción a packages/ui sigue anotada como pedido a la A.
  */
 
-import { useCallback, type ReactNode } from 'react';
+import { useCallback, useState, type ReactNode } from 'react';
 import { Pressable, Text, View } from 'react-native';
+import Animated, { cubicBezier } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { setStatusBarStyle } from 'expo-status-bar';
-import { Isotipo, palette, radius, spacing, typography } from '@epetplace/ui';
+import { Isotipo, motion, palette, radius, spacing, typography } from '@epetplace/ui';
 
 /** La curva orgánica del techo (patrón Hogar v2) — una sola verdad. */
 export const CURVA_OFICIO = { izquierda: 44, derecha: 26 };
@@ -74,6 +75,52 @@ export function VeloBarraEstadoOficio() {
   );
 }
 
+// D-401 (S62): el segmento del toggle responde al dedo — la receta de
+// la casa (SelectorOpcion/Boton: scale 0.99, transición spring fast).
+function SegmentoTecho({
+  esActivo,
+  etiqueta,
+  onPress,
+}: {
+  esActivo: boolean;
+  etiqueta: string;
+  onPress: () => void;
+}) {
+  const [presionado, setPresionado] = useState(false);
+  return (
+    <Pressable
+      accessibilityRole="tab"
+      accessibilityState={{ selected: esActivo }}
+      onPress={onPress}
+      onPressIn={() => setPresionado(true)}
+      onPressOut={() => setPresionado(false)}
+    >
+      <Animated.View
+        style={{
+          paddingVertical: spacing[1.5],
+          paddingHorizontal: spacing[4],
+          borderRadius: radius.suave - 3,
+          backgroundColor: esActivo ? palette.light0 : 'transparent',
+          transform: [{ scale: presionado ? 0.99 : 1 }],
+          transitionProperty: 'transform',
+          transitionDuration: motion.duration.fast,
+          transitionTimingFunction: cubicBezier(...motion.easing.spring.bezier),
+        }}
+      >
+        <Text
+          style={{
+            fontFamily: typography.family.sans.medium,
+            fontSize: typography.size.sm,
+            color: esActivo ? MURO_OFICIO : palette.light0,
+          }}
+        >
+          {etiqueta}
+        </Text>
+      </Animated.View>
+    </Pressable>
+  );
+}
+
 /** El toggle compacto SOBRE el muro (S61-B12): activo = superficie
  *  PAPEL apoyada con texto del muro; riel = vidrio oscuro. */
 export function ToggleTecho<C extends string>({
@@ -102,28 +149,12 @@ export function ToggleTecho<C extends string>({
       {opciones.map((o) => {
         const esActivo = o.codigo === activo;
         return (
-          <Pressable
+          <SegmentoTecho
             key={o.codigo}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: esActivo }}
+            esActivo={esActivo}
+            etiqueta={o.etiqueta}
             onPress={() => onCambio(o.codigo)}
-            style={{
-              paddingVertical: spacing[1.5],
-              paddingHorizontal: spacing[4],
-              borderRadius: radius.suave - 3,
-              backgroundColor: esActivo ? palette.light0 : 'transparent',
-            }}
-          >
-            <Text
-              style={{
-                fontFamily: typography.family.sans.medium,
-                fontSize: typography.size.sm,
-                color: esActivo ? MURO_OFICIO : palette.light0,
-              }}
-            >
-              {o.etiqueta}
-            </Text>
-          </Pressable>
+          />
         );
       })}
     </View>

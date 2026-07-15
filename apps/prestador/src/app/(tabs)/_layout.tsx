@@ -167,7 +167,23 @@ export default function TabsLayout() {
         <BarraTabs
           items={items}
           activo={state.routes[state.index].name}
-          onCambiar={(key) => navigation.navigate(key)}
+          // D-402 (S62): tocar una tab lleva SIEMPRE a su raíz. Re-tocar
+          // la activa con stack anidado profundo = POP_TO_TOP dirigido al
+          // stack hijo (objeto plano de acción — StackActions.popToTop()
+          // es exactamente { type: 'POP_TO_TOP' }); cambiar de tab lo
+          // resuelve popToTopOnBlur (abajo). En el prestador el único
+          // tab con stack anidado es Cuenta (relevamiento S62-B).
+          onCambiar={(key) => {
+            const activa = state.routes[state.index];
+            if (activa.name === key) {
+              const hijo = activa.state;
+              if (hijo?.type === 'stack' && (hijo.index ?? 0) > 0 && hijo.key) {
+                navigation.dispatch({ type: 'POP_TO_TOP', target: hijo.key });
+              }
+              return;
+            }
+            navigation.navigate(key);
+          }}
           // S58 (§2.6 + §15b.1): las 4 tabs ya hablan b′ — el pill muere,
           // la tab activa se marca porque su huella APARECE
           estadoPorHuella
@@ -177,7 +193,9 @@ export default function TabsLayout() {
       <Tabs.Screen name="index" />
       <Tabs.Screen name="mascotas" />
       <Tabs.Screen name="negocio" />
-      <Tabs.Screen name="cuenta" />
+      {/* D-402: al salir del tab, su stack vuelve a la raíz — la próxima
+          entrada jamás encuentra pegada una pantalla interna. */}
+      <Tabs.Screen name="cuenta" options={{ popToTopOnBlur: true }} />
       {/* galería de tokens: fuera de la barra, viva por URL (/gallery) */}
       <Tabs.Screen name="gallery" />
     </Tabs>

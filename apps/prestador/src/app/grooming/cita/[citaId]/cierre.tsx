@@ -487,6 +487,7 @@ export default function CierreGrooming() {
       >
         <View style={{ padding: spacing[4], gap: spacing[4] }}>
           <SelectorOpcion
+            acento="oficio"
             etiqueta={t('citaGrooming.estadoPelajeElegir')}
             opciones={
               listo === null || hojaMomento === null
@@ -524,6 +525,7 @@ export default function CierreGrooming() {
       >
         <View style={{ padding: spacing[4], gap: spacing[4] }}>
           <SelectorOpcion
+            acento="oficio"
             etiqueta={t('citaGrooming.serviciosAplicados')}
             disposicion="grilla"
             opciones={
@@ -553,6 +555,7 @@ export default function CierreGrooming() {
         <View style={{ padding: spacing[4], gap: spacing[4] }}>
           <Text style={vozSecundaria}>{t('citaGrooming.proximaSesionAyuda')}</Text>
           <SelectorOpcion
+            acento="oficio"
             etiqueta={t('citaGrooming.proximaSesionSugerir')}
             disposicion="grilla"
             opciones={HORIZONTES_SEMANAS.map((n) => {

@@ -203,9 +203,14 @@ export const prestadorEs = {
     notaOIncidencia: 'Nota o incidencia',
     nota: 'Nota',
     incidencia: 'Incidencia',
+    // LOTE S62 (migración clase-4 §15b.2): labels de grupo de la Hoja;
+    // los chips de severidad pasan a voz corta (el label ya dice qué son)
+    queRegistras: 'Qué registras',
+    incidenciaTipo: 'Tipo de incidencia',
+    severidad: 'Severidad',
     elegirIncidencia: 'Elige qué pasó del catálogo.',
-    severidadMedia: 'Severidad media',
-    severidadAlta: 'Severidad alta',
+    severidadMedia: 'Media',
+    severidadAlta: 'Alta',
     quePaso: 'Qué pasó',
     notaPlaceholder: 'Algo que quieras dejar anotado.',
     incidenciaPlaceholder: 'Cuenta qué pasó con calma.',

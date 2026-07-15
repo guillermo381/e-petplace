@@ -430,6 +430,7 @@ export default function AntesGrooming() {
         <View style={{ gap: spacing[4] }}>
           <Text style={vozPrimaria}>{t('citaGrooming.tallaCorregirExplicacion')}</Text>
           <SelectorOpcion
+            acento="oficio"
             etiqueta={t('citaGrooming.talla')}
             opciones={TALLAS.filter((v) => v !== ficha?.talla).map((v) => ({
               codigo: v,

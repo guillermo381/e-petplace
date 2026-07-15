@@ -9,12 +9,61 @@
  * pedido a la A si el patrón se repite.
  */
 
+import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { Icono, radius, spacing, typography, useTheme } from '@epetplace/ui';
+import Animated, { cubicBezier } from 'react-native-reanimated';
+import { Icono, motion, radius, spacing, typography, useTheme } from '@epetplace/ui';
 
 import { useTraduccion } from '@/i18n';
 
 export type FiltroOficioValor = 'todos' | 'paseo' | 'grooming';
+
+// D-401 (S62): el segmento responde al dedo — la MISMA receta de la
+// casa (SelectorOpcion/Boton: scale 0.99, transición spring fast).
+function Segmento({
+  esActivo,
+  onPress,
+  accessibilityLabel,
+  children,
+}: {
+  esActivo: boolean;
+  onPress: () => void;
+  accessibilityLabel: string;
+  children: React.ReactNode;
+}) {
+  const { theme } = useTheme();
+  const [presionado, setPresionado] = useState(false);
+  return (
+    <Pressable
+      accessibilityRole="tab"
+      accessibilityState={{ selected: esActivo }}
+      accessibilityLabel={accessibilityLabel}
+      onPress={onPress}
+      onPressIn={() => setPresionado(true)}
+      onPressOut={() => setPresionado(false)}
+      style={{ flex: 1 }}
+    >
+      <Animated.View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: spacing[1.5],
+          paddingVertical: spacing[2],
+          borderRadius: radius.suave - 3,
+          backgroundColor: esActivo ? theme.bg.card : 'transparent',
+          boxShadow: esActivo ? theme.elevacion.reposo : undefined,
+          transform: [{ scale: presionado ? 0.99 : 1 }],
+          transitionProperty: 'transform',
+          transitionDuration: motion.duration.fast,
+          transitionTimingFunction: cubicBezier(...motion.easing.spring.bezier),
+        }}
+      >
+        {children}
+      </Animated.View>
+    </Pressable>
+  );
+}
 
 export function FiltroOficio({
   activo,
@@ -45,22 +94,11 @@ export function FiltroOficio({
       {segmentos.map((s) => {
         const esActivo = s.codigo === activo;
         return (
-          <Pressable
+          <Segmento
             key={s.codigo}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: esActivo }}
+            esActivo={esActivo}
             onPress={() => onCambio(s.codigo)}
-            style={{
-              flex: 1,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: spacing[1.5],
-              paddingVertical: spacing[2],
-              borderRadius: radius.suave - 3,
-              backgroundColor: esActivo ? theme.bg.card : 'transparent',
-              boxShadow: esActivo ? theme.elevacion.reposo : undefined,
-            }}
+            accessibilityLabel={s.etiqueta}
           >
             {s.icono && <Icono nombre={s.icono} registro={esActivo ? 'aa' : 'tinta'} tamano={18} />}
             <Text
@@ -72,7 +110,7 @@ export function FiltroOficio({
             >
               {s.etiqueta}
             </Text>
-          </Pressable>
+          </Segmento>
         );
       })}
     </View>

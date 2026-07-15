@@ -56,6 +56,7 @@ export default function PreferenciasCuenta() {
       <ScrollView contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[5] }}>
         <Tarjeta>
           <SelectorOpcion
+            acento="oficio"
             etiqueta={t('negocio.idioma')}
             opciones={[
               { codigo: 'es', etiqueta: t('negocio.idiomaEs') },

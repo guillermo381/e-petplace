@@ -175,14 +175,18 @@ export default function Cuenta() {
               accessibilityRole="button"
               accessibilityLabel={t('miCuenta.preferencias')}
               onPress={() => router.push('/cuenta/preferencias')}
-              style={{
+              // D-401 (S62): el engranaje responde al dedo — receta de la
+              // casa (scale 0.97 de Boton: es un botón circular, no una
+              // superficie); el vidrio no cambia de color al tocarse.
+              style={({ pressed }) => ({
                 width: 40,
                 height: 40,
                 borderRadius: radius.full,
                 backgroundColor: VIDRIO_OFICIO,
                 alignItems: 'center',
                 justifyContent: 'center',
-              }}
+                transform: [{ scale: pressed ? 0.97 : 1 }],
+              })}
             >
               <Icono nombre="preferencias" registro="tinta" tinta={palette.light0} tamano={21} />
             </Pressable>

@@ -382,6 +382,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
       >
         <View style={{ padding: spacing[4], gap: spacing[4] }}>
           <SelectorOpcion
+            acento="oficio"
             etiqueta={t('citaGrooming.estadoPelajeElegir')}
             opciones={opcionesMomento}
             seleccionada={estadoSel ?? undefined}
@@ -402,45 +403,39 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
       {/* Hoja: nota / incidencia (voz genérica de atención, reuso cita.*) */}
       <Hoja visible={hojaNota} onCerrar={() => setHojaNota(false)} titulo={t('cita.notaOIncidencia')}>
         <View style={{ padding: spacing[4], gap: spacing[4] }}>
-          <View style={{ flexDirection: 'row', gap: spacing[2] }}>
-            <Boton
-              variante={esIncidencia ? 'ghost' : 'secundario'}
-              tamaño="sm"
-              etiqueta={t('cita.nota')}
-              onPress={() => setEsIncidencia(false)}
-            />
-            <Boton
-              variante={esIncidencia ? 'secundario' : 'ghost'}
-              tamaño="sm"
-              etiqueta={t('cita.incidencia')}
-              onPress={() => setEsIncidencia(true)}
-            />
-          </View>
+          {/* S62 (§15b.2 clase-4): la SELECCIÓN dejó de vestir de botón —
+              SelectorOpcion con el acento del oficio (Ley 19/21/22) */}
+          <SelectorOpcion
+            acento="oficio"
+            etiqueta={t('cita.queRegistras')}
+            opciones={[
+              { codigo: 'nota', etiqueta: t('cita.nota') },
+              { codigo: 'incidencia', etiqueta: t('cita.incidencia') },
+            ]}
+            seleccionada={esIncidencia ? 'incidencia' : 'nota'}
+            onSelect={(codigo) => setEsIncidencia(codigo === 'incidencia')}
+          />
 
           {esIncidencia && (
             <>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
-                {datos.incidenciasCatalogo.map((i) => (
-                  <Boton
-                    key={i.codigo}
-                    variante={incidenciaCodigo === i.codigo ? 'secundario' : 'ghost'}
-                    tamaño="sm"
-                    etiqueta={i.nombre}
-                    onPress={() => setIncidenciaCodigo(i.codigo)}
-                  />
-                ))}
-              </View>
-              <View style={{ flexDirection: 'row', gap: spacing[2] }}>
-                {(['media', 'alta'] as const).map((s) => (
-                  <Boton
-                    key={s}
-                    variante={severidad === s ? 'secundario' : 'ghost'}
-                    tamaño="sm"
-                    etiqueta={s === 'media' ? t('cita.severidadMedia') : t('cita.severidadAlta')}
-                    onPress={() => setSeveridad(s)}
-                  />
-                ))}
-              </View>
+              <SelectorOpcion
+                acento="oficio"
+                etiqueta={t('cita.incidenciaTipo')}
+                disposicion="grilla"
+                opciones={datos.incidenciasCatalogo.map((i) => ({ codigo: i.codigo, etiqueta: i.nombre }))}
+                seleccionada={incidenciaCodigo ?? undefined}
+                onSelect={setIncidenciaCodigo}
+              />
+              <SelectorOpcion
+                acento="oficio"
+                etiqueta={t('cita.severidad')}
+                opciones={[
+                  { codigo: 'media', etiqueta: t('cita.severidadMedia') },
+                  { codigo: 'alta', etiqueta: t('cita.severidadAlta') },
+                ]}
+                seleccionada={severidad}
+                onSelect={(codigo) => setSeveridad(codigo === 'alta' ? 'alta' : 'media')}
+              />
             </>
           )}
 

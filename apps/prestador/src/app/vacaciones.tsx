@@ -270,6 +270,7 @@ export default function Vacaciones() {
         <HojaScroll>
           <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
             <SelectorOpcion
+              acento="oficio"
               etiqueta={t('vacaciones.desde')}
               disposicion="grilla"
               opciones={diasParaElegir}
@@ -277,6 +278,7 @@ export default function Vacaciones() {
               onSelect={(codigo) => setInicio(codigo)}
             />
             <SelectorOpcion
+              acento="oficio"
               etiqueta={t('vacaciones.duracion')}
               opciones={DURACIONES.map((d) => ({
                 codigo: String(d),
