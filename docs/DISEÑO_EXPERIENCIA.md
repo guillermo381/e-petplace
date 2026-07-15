@@ -1,10 +1,11 @@
 # DISEÑO_EXPERIENCIA — La arquitectura de la experiencia del dueño
 
-> **Versión: v1.8 — S61 (14 Jul 2026), Etapa A0 de RUTA_F1 v2.2.**
+> **Versión: v1.9 — S61 (14 Jul 2026), Etapa A0 de RUTA_F1 v2.2.**
 > (La banda v1.1→v1.4 se curó en S58 — decía v1.1 con contenido v1.4,
 > relevamiento B; v1.5 = §15b LA DOSIS DEL PRESTADOR, firma founder;
 > v1.7 = la zona TUS SERVICIOS del Hogar + el hub sin Agenda, S60-A6;
-> v1.8 = LA GRAMÁTICA CANÓNICA DE RESERVA, firma founder S61.)
+> v1.8 = LA GRAMÁTICA CANÓNICA DE RESERVA, firma founder S61;
+> v1.9 = §15b.2 RE-FIRMADA — el muro del oficio tealDark, S61-B12.)
 > Escrito por el arquitecto/director de diseño, decisiones de producto
 > cerradas por el founder en sesión. **Contrastes obligatorios:**
 > `MODELO_PRODUCTO.md` (EL NORTE — en especial §6.4 revelación
@@ -542,6 +543,19 @@ el portado de grooming consumen:
   tenga fecha).
 
 ## Historial
+
+- **v1.9 (S61, 14 Jul 2026):** §15b.2 REABIERTA Y RE-FIRMADA (founder,
+  sobre tres variantes en píxeles — S61-B12): **el muro del prestador
+  pasa a tealDark #0A7268** (TechoTinta→TechoOficio; una sola verdad
+  MURO_OFICIO + VIDRIO_OFICIO + CURVA_OFICIO). Las TRES reglas de
+  registro MEDIDAS por la B, exigibles: (1) **sobre el muro el acento
+  funcional es PAPEL** — el teal puro cae a 3.77 y queda PROHIBIDO
+  ahí; (2) **texto papel PLENO** — la opacidad .78 caía a 4.01: la
+  jerarquía sobre el muro se dice por tamaño, no por velo; (3) **el
+  vidrio es OSCURO** (negro .18 — papel 7.37; el vidrio claro caía a
+  4.15). Gate WCAG re-corrido completo: **163 pares / 0 fallos**
+  (154→163). Consumidores barridos: HOY, Negocio y el perfil de
+  Cuenta (header CD) heredan el muro.
 
 - **v1.8 (S61, 14 Jul 2026):** LA GRAMÁTICA CANÓNICA DE RESERVA
   (decisión founder S61, en piedra): **todo servicio se reserva con UNA
