@@ -14,11 +14,15 @@ export const clienteEn = {
     explorar: 'Explore',
     cuenta: 'Account',
   },
+  // S61-A8 — the welcome, rewritten (founder letter; LOTE S61, GATE
+  // PENDIENTE). heroTitulo/heroSubtitulo died with the hero (Ley 37).
   bienvenida: {
-    heroTitulo: "Your pet's life, all in one place.",
-    heroSubtitulo: 'Every walk, every vet visit, every moment — saved and close at hand.',
+    ecosistema: 'the pet world ecosystem',
+    titular: "Your pet doesn't have a record. It has",
+    titularAcento: 'a life.',
     crearCuenta: 'Create account',
     yaTengoCuenta: 'I already have an account',
+    legales: 'By creating your account you accept our Terms and our Privacy Policy.',
   },
   // S55-A A3 (D-315): root + auth on the rail
   raiz: {

@@ -1,17 +1,26 @@
 /**
- * Bienvenida (S45-B4, flujo firmado B1) — el ÚNICO lugar del gradiente
- * en el onboarding (dosis alta con cabeza): HeroMarca alto. Los CTAs
- * viven AFUERA del hero (marca sobre marca prohibido).
+ * Bienvenida (S45-B4 → REESCRITA S61-A8, letra firmada founder sobre
+ * propuesta Claude Design — TRADUCIDA a la casa, no verbatim):
+ * composición vertical serena — isotipo en gradiente oficial (el UNO
+ * por pantalla; el isotipo va FUERA de la contabilidad de dosis, Ley 4)
+ * · "el ecosistema del mundo mascota" en mono minúsculas · lockup
+ * e.petplace · el titular EL NORTE en DM Sans light display (Playfair
+ * PROHIBIDA; el acento en "una vida" es GRÁFICA — palette.pink, la
+ * reserva del destello) · Boton marca (gradiente = la dosis del
+ * contexto cerrado) · secundario · legales HONESTOS sin link muerto
+ * (D-336: los textos definitivos no existen — la línea declara, no
+ * finge navegar). El movimiento de marca = D-395 (v1 estática digna).
+ *
+ * TESIS: "acá vive la vida de tu mascota — entrá". FIRMA: el titular
+ * de EL NORTE con su destello en "una vida". Memorial N/A (pre-sesión);
+ * Boton marca degrada solo si algún día aplica.
  */
 
-import { useCallback } from 'react';
-import { StatusBar, Text, View } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { View, Text } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, HeroMarca, spacing, typography, useTheme } from '@epetplace/ui';
+import { Boton, Isotipo, palette, spacing, typography, useTheme } from '@epetplace/ui';
 
-// Riel i18n (S51-B1a; hero migrado al riel con el lote aprobado en el
-// gate del cierre S51).
 import { useTraduccion } from '@/i18n';
 
 export default function Bienvenida() {
@@ -19,38 +28,74 @@ export default function Bienvenida() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
-  const esMemorial = theme.mode === 'memorial';
-
-  // S59 — el hero absorbe la safe area (HeroMarca): el gradiente pinta
-  // bajo la barra de estado → íconos claros mientras la pantalla tiene
-  // el foco (memorial: bg.card claro, no se toca).
-  useFocusEffect(
-    useCallback(() => {
-      if (esMemorial) return;
-      StatusBar.setBarStyle('light-content');
-      return () => StatusBar.setBarStyle(theme.mode === 'dark' ? 'light-content' : 'dark-content');
-    }, [esMemorial, theme.mode]),
-  );
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <HeroMarca titulo={t('bienvenida.heroTitulo')} variante="alto">
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: theme.bg.base,
+        paddingTop: insets.top + spacing[8],
+        paddingBottom: insets.bottom + spacing[6],
+        paddingHorizontal: spacing[5],
+      }}
+    >
+      {/* La identidad — el isotipo preside, la voz de máquina lo rotula */}
+      <View style={{ alignItems: 'center', gap: spacing[3] }}>
+        <Isotipo size={72} variant="gradiente" />
+        <Text
+          style={{
+            fontFamily: typography.family.mono.regular,
+            fontSize: typography.size.xs,
+            letterSpacing: typography.tracking.mono,
+            color: theme.text.secondary,
+          }}
+        >
+          {t('bienvenida.ecosistema')}
+        </Text>
+        {/* el lockup — nombre de marca, identidad (no es string de voz) */}
+        <Text
+          style={{
+            fontFamily: typography.family.sans.medium,
+            fontSize: typography.size.lg,
+            color: theme.text.primary,
+          }}
+        >
+          e.petplace
+        </Text>
+      </View>
+
+      {/* EL NORTE — el titular respira en el centro */}
+      <View style={{ flex: 1, justifyContent: 'center' }}>
+        <Text
+          style={{
+            fontFamily: typography.family.sans.light,
+            fontSize: typography.size['3xl'],
+            lineHeight: Math.round(typography.size['3xl'] * typography.leading.snug),
+            letterSpacing: typography.tracking.tight,
+            color: theme.text.primary,
+          }}
+        >
+          {t('bienvenida.titular')}{' '}
+          <Text style={{ color: palette.pink }}>{t('bienvenida.titularAcento')}</Text>
+        </Text>
+      </View>
+
+      {/* Los caminos + los legales honestos */}
+      <View style={{ gap: spacing[2] }}>
+        <Boton variante="marca" etiqueta={t('bienvenida.crearCuenta')} bloque onPress={() => router.push('/registro')} />
+        <Boton variante="secundario" etiqueta={t('bienvenida.yaTengoCuenta')} bloque onPress={() => router.push('/login')} />
         <Text
           style={{
             fontFamily: typography.family.sans.regular,
-            fontSize: typography.size.base,
-            lineHeight: Math.round(typography.size.base * typography.leading.normal),
-            color: esMemorial ? theme.text.secondary : theme.text.onGradient,
+            fontSize: typography.size.xs,
+            lineHeight: Math.round(typography.size.xs * typography.leading.normal),
+            color: theme.text.tertiary,
+            textAlign: 'center',
             marginTop: spacing[2],
           }}
         >
-          {t('bienvenida.heroSubtitulo')}
+          {t('bienvenida.legales')}
         </Text>
-      </HeroMarca>
-
-      <View style={{ flex: 1, justifyContent: 'flex-end', padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[2] }}>
-        <Boton etiqueta={t('bienvenida.crearCuenta')} bloque onPress={() => router.push('/registro')} />
-        <Boton variante="ghost" etiqueta={t('bienvenida.yaTengoCuenta')} bloque onPress={() => router.push('/login')} />
       </View>
     </View>
   );

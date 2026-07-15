@@ -13,11 +13,15 @@ export const clienteEs = {
     explorar: 'Explorar',
     cuenta: 'Cuenta',
   },
+  // S61-A8 — la bienvenida reescrita (letra founder; LOTE S61, GATE
+  // PENDIENTE). heroTitulo/heroSubtitulo murieron con el hero (Ley 37).
   bienvenida: {
-    heroTitulo: 'La vida de tu mascota, en un solo lugar.',
-    heroSubtitulo: 'Cada paseo, cada visita al vet, cada momento — guardado y a mano.',
+    ecosistema: 'el ecosistema del mundo mascota',
+    titular: 'Tu mascota no tiene un expediente. Tiene',
+    titularAcento: 'una vida.',
     crearCuenta: 'Crear cuenta',
     yaTengoCuenta: 'Ya tengo cuenta',
+    legales: 'Al crear tu cuenta aceptas nuestros Términos y nuestra Política de privacidad.',
   },
   // S55-A A3 (D-315): raíz + auth extraídos al riel (voseo→tuteo al tocarse)
   raiz: {
