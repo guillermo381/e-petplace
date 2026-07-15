@@ -1666,6 +1666,12 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 #### D-400 — GATE DIFERIDO de la escalera del precio con >1 prestador REAL
 🟢 MEDIA. La variante 'desde +$X' del chip de domicilio y los agregados que varían quedaron probados por assert (T2 in-txn, `8445eb8`) pero NO vistos por el founder en dispositivo — con un solo prestador todo pinta exacto. **Disparo: el segundo prestador real con oferta activa (o el segundo seed persistido si el founder quiere verlo antes).** El gate: chip 'desde', cards del QUIÉN con precios distintos, checkout exacto del elegido. Origen: S61 (founder, literal — A14).
 
+#### D-401 — MICRO-INTERACCIONES de toque (el pressed parejo)
+🟡 ALTA. El efecto de clic/pressed en botones, links y donde merezca — hoy varios tocables no responden al dedo: el pressed físico existe en Boton (0.97) y Tarjeta (0.99) pero NO es parejo en toda la casa (Pressables artesanales de pantalla, celdas, chips de acción). Sesión propia con la skill de motion en la mano (Ley 6: <300ms, spring SOLO como confirmación física; el CRITERIO de emil-design-eng + el CÓDIGO de Software Mansion). **Disparo: S62 o la sesión de marca — lo que llegue primero.** Origen: founder S61 (A14 addendum).
+
+#### D-402 — LOS TABS RESETEAN A SU RAÍZ
+🟡 ALTA. Tocar un tab del menú lleva SIEMPRE al directorio raíz de ese tab — hoy, estando en una cita, tocar Home puede dejar pegada una pantalla interna del stack (p.ej. ver mascota). Es config de expo-router sobre BarraTabs (popToTop al re-tocar/cambiar de tab) — **relevamiento primero: catalogar en qué tabs pasa, en AMBAS apps.** **Disparo: S62, temprano — toca la confianza de navegación diaria.** Origen: founder S61 (bug de navegación percibido; A14 addendum).
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)
