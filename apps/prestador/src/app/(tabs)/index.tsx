@@ -123,6 +123,59 @@ function esEspecie(v: string | null): v is AvatarMascotaEspecie {
   return v !== null;
 }
 
+// Estado de cita → Insignia (compartido por FilaCita y FilaSalida —
+// en_curso viste 'info'; CitaEnVivo porta el canal del vivo destacado;
+// verdad firme: solo estados que la puerta única deja pasar).
+function useInsigniasEstado(): Record<string, { estado: InsigniaEstado; etiqueta: string }> {
+  const { t } = useTraduccion();
+  return {
+    en_curso: { estado: 'info', etiqueta: t('agenda.enCurso') },
+    terminada: { estado: 'proximo', etiqueta: t('agenda.estadoPorCerrar') },
+    cerrada_con_calidad: { estado: 'alDia', etiqueta: t('agenda.estadoCerrado') },
+    confirmada: { estado: 'info', etiqueta: t('agenda.estadoConfirmada') },
+    completada: { estado: 'alDia', etiqueta: t('agenda.estadoCompletada') },
+    no_show: { estado: 'atencion', etiqueta: t('agenda.estadoNoShow') },
+  };
+}
+
+// ═══════════ D-385 — LA SALIDA GRUPAL (S62) ═══════════
+// La unidad de trabajo del paseador es la SALIDA, no la cita: N citas
+// de paseo del MISMO bloque (fecha + hora + duración) se pintan como
+// UNA fila con N mascotas, expandible a sus citas (acordeón inline,
+// precedente Hogar S61-A11). El grooming JAMÁS agrupa (una silla, una
+// mascota) y el EN VIVO del dueño no se toca — la agrupación es del
+// lado oficio, solo vista.
+type ItemJornada =
+  | { tipo: 'cita'; cita: CitaAgendaPaseo }
+  | { tipo: 'salida'; clave: string; citas: CitaAgendaPaseo[] };
+
+function claveBloque(c: CitaAgendaPaseo): string | null {
+  if (!c.fecha || !c.hora) return null;
+  return `${c.fecha}|${c.hora}|${c.duracion_minutos ?? ''}`;
+}
+
+function agruparSalidas(citas: CitaAgendaPaseo[], groomingIds: Set<string>): ItemJornada[] {
+  const items: ItemJornada[] = [];
+  const porClave = new Map<string, { tipo: 'salida'; clave: string; citas: CitaAgendaPaseo[] }>();
+  for (const c of citas) {
+    const clave = groomingIds.has(c.id) ? null : claveBloque(c);
+    if (clave === null) {
+      items.push({ tipo: 'cita', cita: c });
+      continue;
+    }
+    const grupo = porClave.get(clave);
+    if (grupo) {
+      grupo.citas.push(c);
+    } else {
+      const nuevo = { tipo: 'salida' as const, clave, citas: [c] };
+      porClave.set(clave, nuevo);
+      items.push(nuevo);
+    }
+  }
+  // Un bloque de UNA cita no es salida: vuelve a fila simple.
+  return items.map((i) => (i.tipo === 'salida' && i.citas.length === 1 ? { tipo: 'cita', cita: i.citas[0]! } : i));
+}
+
 function FilaCita({
   cita,
   enVivo,
@@ -137,30 +190,14 @@ function FilaCita({
 }) {
   const router = useRouter();
   const { t } = useTraduccion();
+  const insignias = useInsigniasEstado();
   const hora = cita.hora ? cita.hora.slice(0, 5) : '—';
   // S57-B1: la duración REAL de la cita (snapshot S55-B2), no el default
   // del catálogo — una de 120' se pintaba como 30'.
   const dur = cita.duracion_minutos;
 
-  // Estado de cita → Insignia (en_curso no lleva: CitaEnVivo porta el
-  // canal). Voz de oficio por el riel — verdad firme: solo estados
-  // que el filtro de la puerta única deja pasar.
-  const INSIGNIA_POR_ESTADO: Record<string, { estado: InsigniaEstado; etiqueta: string }> = {
-    terminada: { estado: 'proximo', etiqueta: t('agenda.estadoPorCerrar') },
-    cerrada_con_calidad: { estado: 'alDia', etiqueta: t('agenda.estadoCerrado') },
-    confirmada: { estado: 'info', etiqueta: t('agenda.estadoConfirmada') },
-    completada: { estado: 'alDia', etiqueta: t('agenda.estadoCompletada') },
-    no_show: { estado: 'atencion', etiqueta: t('agenda.estadoNoShow') },
-  };
-
   const ef = estadoEfectivo(cita);
-  const insignia = enVivo
-    ? undefined
-    : ef === 'en_curso'
-      ? ({ estado: 'info', etiqueta: t('agenda.enCurso') } as const)
-      : ef
-        ? INSIGNIA_POR_ESTADO[ef]
-        : undefined;
+  const insignia = enVivo ? undefined : ef ? insignias[ef] : undefined;
 
   return (
     <Celda
@@ -205,6 +242,84 @@ function FilaCita({
   );
 }
 
+// D-385: la fila de UNA salida — pila de caras + nombres + estado
+// agregado; tap = expandir a sus citas (la pantalla es dueña del set
+// de abiertas). Composición local con la casa: Celda + AvatarMascota.
+function FilaSalida({
+  citas,
+  abierta,
+  onToggle,
+  urlsFotos,
+}: {
+  citas: CitaAgendaPaseo[];
+  abierta: boolean;
+  onToggle: () => void;
+  urlsFotos: Map<string, string>;
+}) {
+  const { t } = useTraduccion();
+  const insignias = useInsigniasEstado();
+  const primera = citas[0]!;
+  const hora = primera.hora ? primera.hora.slice(0, 5) : '—';
+  const dur = primera.duracion_minutos;
+
+  const nombres = citas.map((c) => c.mascota?.nombre ?? t('agenda.mascotaFallback'));
+  const titulo =
+    citas.length === 2
+      ? t('agenda.salidaNombresDos', { a: nombres[0], b: nombres[1] })
+      : t('agenda.salidaNombresVarios', { a: nombres[0], b: nombres[1], n: citas.length - 2 });
+
+  // Estado agregado: si TODAS las citas coinciden, la salida lo dice;
+  // estados mixtos se leen expandiendo (la fila no promedia — Ley 13).
+  const efs = new Set(citas.map((c) => estadoEfectivo(c) ?? ''));
+  const efComun = efs.size === 1 ? [...efs][0]! : null;
+  const insignia = efComun ? insignias[efComun] : undefined;
+
+  return (
+    <View>
+      <Celda
+        interactiva
+        onPress={onToggle}
+        accessibilityRole="button"
+        titulo={titulo}
+        subtitulo={`${primera.tipo.nombre} · ${t('agenda.salidaDe', { n: citas.length })}`}
+        inicio={
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {citas.slice(0, 3).map((c, i) => (
+              <View key={c.id} style={{ marginLeft: i === 0 ? 0 : -spacing[2] }}>
+                <AvatarMascota
+                  nombre={c.mascota?.nombre ?? t('agenda.mascotaFallback')}
+                  fotoUrl={c.mascota?.foto_url ? urlsFotos.get(c.mascota.foto_url) : undefined}
+                  especie={c.mascota && esEspecie(c.mascota.especie) ? c.mascota.especie : undefined}
+                  tamano="xs"
+                />
+              </View>
+            ))}
+          </View>
+        }
+        metadataMono={`${hora}${dur ? ` · ${dur} min` : ''}`}
+        fin={
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1.5] }}>
+            <Icono nombre="paseo" registro="aa" tamano={21} />
+            {insignia && <Insignia estado={insignia.estado} etiqueta={insignia.etiqueta} tamaño="sm" />}
+          </View>
+        }
+      />
+      {abierta &&
+        citas.map((c) => (
+          <View key={c.id}>
+            <Separador indentacion={spacing[3] + 40 + spacing[3]} />
+            <FilaCita
+              cita={c}
+              enVivo={false}
+              esGrooming={false}
+              fotoUrl={c.mascota?.foto_url ? urlsFotos.get(c.mascota.foto_url) : undefined}
+            />
+          </View>
+        ))}
+    </View>
+  );
+}
+
 export default function Hoy() {
   const router = useRouter();
   const { theme } = useTheme();
@@ -215,6 +330,15 @@ export default function Hoy() {
   const [vista, setVista] = useState<'hoy' | 'semana'>('hoy');
   // S61-B5: el filtro por oficio — vista del día, JAMÁS persiste.
   const [filtroOficio, setFiltroOficio] = useState<FiltroOficioValor>('todos');
+  // D-385: salidas expandidas (por clave de bloque) — vista, jamás persiste.
+  const [salidasAbiertas, setSalidasAbiertas] = useState<Set<string>>(new Set());
+  const toggleSalida = (clave: string) =>
+    setSalidasAbiertas((s) => {
+      const n = new Set(s);
+      if (n.has(clave)) n.delete(clave);
+      else n.add(clave);
+      return n;
+    });
   // foto_url guarda PATH (S47-B0.2): firma en batch (1 round-trip);
   // un path no firmable cae a la huella digna.
   const [urlsFotos, setUrlsFotos] = useState<Map<string, string>>(new Map());
@@ -337,7 +461,27 @@ export default function Hoy() {
         })
       : undefined;
   const destacada = enVivo ?? proxima;
-  const resto = citasHoy.filter((c) => c.id !== destacada?.id);
+  // D-385: la SALIDA de la destacada preside ENTERA — las compañeras de
+  // bloque (paseo, misma fecha+hora+duración) suben con ella a la Zona 1
+  // (sobre el día SIN filtrar: el guard estructural cubre a la salida).
+  const claveDestacada =
+    destacada && !groomingIds.has(destacada.id) ? claveBloque(destacada) : null;
+  const salidaDestacada =
+    destacada === undefined
+      ? []
+      : claveDestacada === null
+        ? [destacada]
+        : [
+            destacada,
+            ...citasHoySin.filter(
+              (c) => c.id !== destacada.id && !groomingIds.has(c.id) && claveBloque(c) === claveDestacada,
+            ),
+          ];
+  const idsDestacados = new Set(salidaDestacada.map((c) => c.id));
+  const resto = citasHoy.filter((c) => !idsDestacados.has(c.id));
+  // D-385: el resto de la jornada se agrupa por salida (solo paseo; el
+  // grooming es una silla, una mascota — jamás agrupa).
+  const restoItems = agruparSalidas(resto, groomingIds);
 
   // ── La semana: 7 días desde hoy — citas firmes por día + estado del
   // día (bloqueado por vacaciones / libre). Cero métricas, solo verdad.
@@ -354,10 +498,8 @@ export default function Hoy() {
           };
         });
 
-  const esPrimeraVez =
-    destacada?.mascota != null &&
-    pantalla.estado === 'listo' &&
-    !pantalla.atendidas.has(destacada.mascota.id);
+  const esPrimera = (mascotaId: string) =>
+    pantalla.estado === 'listo' && !pantalla.atendidas.has(mascotaId);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -447,35 +589,49 @@ export default function Hoy() {
                 toca ni a dónde va). Ícono 'carnet' = el expediente; la
                 señal "Primera vez" (solo si es REAL) vive en el detalle. */}
             {(() => {
-              const mascota = destacada.mascota;
-              const conocer =
-                mascota != null ? (
-                  <>
-                    <Separador />
-                    <CeldaNavegacion
-                      icono="carnet"
-                      registro="aa"
-                      titulo={t('agenda.conocerMascota', { nombre: mascota.nombre })}
-                      detalle={esPrimeraVez ? t('agenda.primeraVez') : undefined}
-                      onPress={() =>
-                        router.push({ pathname: '/mascota/[mascotaId]', params: { mascotaId: mascota.id } })
-                      }
-                    />
-                  </>
-                ) : null;
-              return enVivo ? (
-                <CitaEnVivo capa="cuidado">
-                  <Tarjeta elevacion="plana" relleno="ninguno">
-                    <FilaCita cita={enVivo} enVivo esGrooming={groomingIds.has(enVivo.id)} fotoUrl={enVivo.mascota?.foto_url ? urlsFotos.get(enVivo.mascota.foto_url) : undefined} />
-                    {conocer}
-                  </Tarjeta>
-                </CitaEnVivo>
-              ) : (
-                <Tarjeta elevacion="sm" relleno="ninguno">
-                  <FilaCita cita={destacada} enVivo={false} esGrooming={groomingIds.has(destacada.id)} fotoUrl={destacada.mascota?.foto_url ? urlsFotos.get(destacada.mascota.foto_url) : undefined} />
+              // D-385: la SALIDA entera preside — cada cita su fila (el
+              // vivo real marca la suya), y el "Antes" POR MASCOTA (el
+              // paseador va a salir con TODAS: cada expediente a un tap).
+              const filas = salidaDestacada.map((c, i) => (
+                <View key={c.id}>
+                  {i > 0 && <Separador indentacion={spacing[3] + 40 + spacing[3]} />}
+                  <FilaCita
+                    cita={c}
+                    enVivo={enVivo?.id === c.id}
+                    esGrooming={groomingIds.has(c.id)}
+                    fotoUrl={c.mascota?.foto_url ? urlsFotos.get(c.mascota.foto_url) : undefined}
+                  />
+                </View>
+              ));
+              const mascotas = [
+                ...new Map(
+                  salidaDestacada
+                    .map((c) => c.mascota)
+                    .filter((m): m is NonNullable<typeof m> => m != null)
+                    .map((m) => [m.id, m] as const),
+                ).values(),
+              ];
+              const conocer = mascotas.map((mascota) => (
+                <View key={mascota.id}>
+                  <Separador />
+                  <CeldaNavegacion
+                    icono="carnet"
+                    registro="aa"
+                    titulo={t('agenda.conocerMascota', { nombre: mascota.nombre })}
+                    detalle={esPrimera(mascota.id) ? t('agenda.primeraVez') : undefined}
+                    onPress={() =>
+                      router.push({ pathname: '/mascota/[mascotaId]', params: { mascotaId: mascota.id } })
+                    }
+                  />
+                </View>
+              ));
+              const cuerpo = (
+                <Tarjeta elevacion={enVivo ? 'plana' : 'sm'} relleno="ninguno">
+                  {filas}
                   {conocer}
                 </Tarjeta>
               );
+              return enVivo ? <CitaEnVivo capa="cuidado">{cuerpo}</CitaEnVivo> : cuerpo;
             })()}
           </View>
         )}
@@ -497,13 +653,22 @@ export default function Hoy() {
           ) : null
         )}
 
-        {/* ── Zona 2 — el día (compacta) ── */}
-        {pantalla.estado === 'listo' && vista === 'hoy' && resto.length > 0 && (
+        {/* ── Zona 2 — el día (compacta; D-385: agrupada por salida) ── */}
+        {pantalla.estado === 'listo' && vista === 'hoy' && restoItems.length > 0 && (
           <Tarjeta elevacion="sm" relleno="ninguno">
-            {resto.map((c, i) => (
-              <View key={c.id}>
+            {restoItems.map((item, i) => (
+              <View key={item.tipo === 'cita' ? item.cita.id : item.clave}>
                 {i > 0 && <Separador indentacion={spacing[3] + 40 + spacing[3]} />}
-                <FilaCita cita={c} enVivo={false} esGrooming={groomingIds.has(c.id)} fotoUrl={c.mascota?.foto_url ? urlsFotos.get(c.mascota.foto_url) : undefined} />
+                {item.tipo === 'cita' ? (
+                  <FilaCita cita={item.cita} enVivo={false} esGrooming={groomingIds.has(item.cita.id)} fotoUrl={item.cita.mascota?.foto_url ? urlsFotos.get(item.cita.mascota.foto_url) : undefined} />
+                ) : (
+                  <FilaSalida
+                    citas={item.citas}
+                    abierta={salidasAbiertas.has(item.clave)}
+                    onToggle={() => toggleSalida(item.clave)}
+                    urlsFotos={urlsFotos}
+                  />
+                )}
               </View>
             ))}
           </Tarjeta>
@@ -533,10 +698,19 @@ export default function Hoy() {
                 </View>
                 {dia.citas.length > 0 ? (
                   <Tarjeta elevacion="sm" relleno="ninguno">
-                    {dia.citas.map((c, i) => (
-                      <View key={c.id}>
+                    {agruparSalidas(dia.citas, groomingIds).map((item, i) => (
+                      <View key={item.tipo === 'cita' ? item.cita.id : item.clave}>
                         {i > 0 && <Separador indentacion={spacing[3] + 40 + spacing[3]} />}
-                        <FilaCita cita={c} enVivo={false} esGrooming={groomingIds.has(c.id)} fotoUrl={c.mascota?.foto_url ? urlsFotos.get(c.mascota.foto_url) : undefined} />
+                        {item.tipo === 'cita' ? (
+                          <FilaCita cita={item.cita} enVivo={false} esGrooming={groomingIds.has(item.cita.id)} fotoUrl={item.cita.mascota?.foto_url ? urlsFotos.get(item.cita.mascota.foto_url) : undefined} />
+                        ) : (
+                          <FilaSalida
+                            citas={item.citas}
+                            abierta={salidasAbiertas.has(item.clave)}
+                            onToggle={() => toggleSalida(item.clave)}
+                            urlsFotos={urlsFotos}
+                          />
+                        )}
                       </View>
                     ))}
                   </Tarjeta>

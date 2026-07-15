@@ -84,6 +84,10 @@ export const prestadorEn = {
     filtroPaseos: 'Walks',
     filtroEstetica: 'Grooming',
     filtroVacio: 'No appointments for this service today.',
+    // LOTE S62 (D-385): la salida grupal — una fila, N mascotas
+    salidaNombresDos: '{{a}} and {{b}}',
+    salidaNombresVarios: '{{a}}, {{b}} and {{n}} more',
+    salidaDe: 'group of {{n}}',
     diaHoy: 'Today',
     diaLibre: 'Free',
     diaBloqueado: 'On vacation',
