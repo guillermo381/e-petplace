@@ -282,6 +282,20 @@ export {
   type CodigoErrorConfiguracionPaseo,
 } from './wrappers/configuracionPaseo';
 
+// D-386 — la elección de modo de horarios (S62-B sobre el motor S62-A
+// 20260715130000) — archivo NUEVO de esta sesión
+export {
+  obtenerModoHorarios,
+  elegirModoHorarios,
+  eliminarFranjasPrestador,
+  obtenerFranjasDeServicios,
+  crearFranjaServicio,
+  type ModoHorarios,
+  type FranjaHorarioServicio,
+  type InputCrearFranjaServicio,
+  type CodigoErrorModoHorarios,
+} from './wrappers/horarios-modo';
+
 // ── Zonas de cobertura del prestador (S58-A, D-331 — v1 DECLARATIVA) ────────
 export {
   obtenerCatalogoCiudades,

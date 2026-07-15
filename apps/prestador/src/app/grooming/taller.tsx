@@ -69,10 +69,13 @@ import {
   actualizarRecargoDomicilio,
   guardarServicioGrooming,
   obtenerComisionVigenteCita,
+  obtenerFranjasDeServicios,
   obtenerFranjasHorario,
   obtenerMiCuentaComercial,
   obtenerMiPrestador,
+  obtenerModoHorarios,
   obtenerOfertasGroomingPropias,
+  type ModoHorarios,
   type OfertaGroomingPropia,
   type ServicioGrooming,
   type TallaGrooming,
@@ -87,6 +90,7 @@ import {
   draftDesdeFranja,
   franjaDirty,
   type DraftFranja,
+  type OfertaParaHorarios,
 } from '@/components/seccion-horarios';
 
 type Pantalla =
@@ -230,6 +234,9 @@ export default function TallerGrooming() {
   const [extraMonto, setExtraMonto] = useState('');
   const [extraBase, setExtraBase] = useState<number | null>(null);
   const [franjas, setFranjas] = useState<DraftFranja[] | null>(null);
+  // D-386: la elección vigente + las ofertas del oficio para la réplica
+  const [modoHorarios, setModoHorarios] = useState<ModoHorarios>('universal');
+  const [ofertasHorarios, setOfertasHorarios] = useState<OfertaParaHorarios[]>([]);
   // EL DÓNDE (S61-B2, letra founder): GLOBAL en la UI (precedente
   // especies, enmienda 3) y escrito POR SERVICIO al contrato de la A
   // (atiende_* en cada fila de prestador_servicios). El recargo es UNO
@@ -261,14 +268,16 @@ export default function TallerGrooming() {
         setPantalla({ estado: 'error' });
         return;
       }
-      const [rOfertas, rFranjas, rCuenta, rComision] = await Promise.all([
+      const [rOfertas, rFranjas, rCuenta, rComision, rModo] = await Promise.all([
         obtenerOfertasGroomingPropias(prestador.data.id),
         obtenerFranjasHorario(prestador.data.id),
         obtenerMiCuentaComercial(),
         obtenerComisionVigenteCita(),
+        // D-386: la elección vigente decide QUÉ franjas se cargan
+        obtenerModoHorarios(prestador.data.id),
       ]);
       if (!vigente) return;
-      if (!rOfertas.ok || !rFranjas.ok) {
+      if (!rOfertas.ok || !rFranjas.ok || !rModo.ok) {
         setPantalla({ estado: 'error' });
         return;
       }
@@ -300,7 +309,31 @@ export default function TallerGrooming() {
       setRecargoBase(recargo);
       setRecargoActivo(recargo !== null);
       setRecargoMonto(recargo !== null ? recargo.toFixed(2) : '');
-      setFranjas(rFranjas.data.map(draftDesdeFranja));
+      // D-386: en por_servicio las franjas viven en las OFERTAS del
+      // oficio; en universal, las generales de siempre. La voz de la
+      // oferta es la del servicio (jamás el slug del motor — Ley 3).
+      setModoHorarios(rModo.data);
+      setOfertasHorarios(
+        rOfertas.data.map((o) => ({
+          id: o.id,
+          etiqueta:
+            o.tipoServicio === 'grooming' ? t('tallerGrooming.servicioBano') : t('tallerGrooming.servicioBanoCorte'),
+        })),
+      );
+      if (rModo.data === 'por_servicio') {
+        const rEsp = await obtenerFranjasDeServicios(
+          prestador.data.id,
+          rOfertas.data.map((o) => o.id),
+        );
+        if (!vigente) return;
+        if (!rEsp.ok) {
+          setPantalla({ estado: 'error' });
+          return;
+        }
+        setFranjas(rEsp.data.map((f) => draftDesdeFranja(f, f.servicioId)));
+      } else {
+        setFranjas(rFranjas.data.map((f) => draftDesdeFranja(f)));
+      }
       setPantalla({
         estado: 'listo',
         prestadorId: prestador.data.id,
@@ -863,12 +896,18 @@ export default function TallerGrooming() {
           )}
 
           {/* ══ PASO/SECCIÓN 2 — días y horarios (sección COMPARTIDA) ══ */}
-          {seccionVisible === 'horarios' && franjas !== null && (
+          {seccionVisible === 'horarios' && franjas !== null && pantalla.estado === 'listo' && (
             <SeccionHorarios
               franjas={franjas}
               onCambio={setFranjas}
               oficio="grooming"
               titulo={<TituloBloque texto={t('taller.horariosTitulo')} />}
+              prestadorId={pantalla.prestadorId}
+              modo={modoHorarios}
+              ofertas={ofertasHorarios}
+              // el modo cambió en el server: recarga entera del taller
+              // (la Hoja ya avisó que se empieza de nuevo)
+              onModoCambiado={() => setIntento((n) => n + 1)}
             />
           )}
 

@@ -62,15 +62,18 @@ import {
   crearOfertaPaseo,
   obtenerCatalogoCiudades,
   obtenerComisionVigenteCita,
+  obtenerFranjasDeServicios,
   obtenerFranjasHorario,
   obtenerMiCuentaComercial,
   obtenerMiPrestador,
+  obtenerModoHorarios,
   obtenerOfertasPaseoPropias,
   obtenerPaisesActivos,
   obtenerZonasDePrestador,
   quitarZonaCobertura,
   type BloquePaseo,
   type CiudadCatalogo,
+  type ModoHorarios,
   type OfertaPaseoPropia,
   type PaisActivo,
 } from '@epetplace/api';
@@ -86,6 +89,7 @@ import {
   draftDesdeFranja,
   franjaDirty,
   type DraftFranja,
+  type OfertaParaHorarios,
 } from '@/components/seccion-horarios';
 
 type Pantalla =
@@ -249,6 +253,9 @@ export default function TallerPaseo() {
   // EL BORRADOR — sobrevive a reintentos de guardado (guardado único)
   const [drafts, setDrafts] = useState<Record<BloquePaseo, DraftOferta> | null>(null);
   const [franjas, setFranjas] = useState<DraftFranja[] | null>(null);
+  // D-386: la elección vigente + las ofertas del oficio para la réplica
+  const [modoHorarios, setModoHorarios] = useState<ModoHorarios>('universal');
+  const [ofertasHorarios, setOfertasHorarios] = useState<OfertaParaHorarios[]>([]);
   const [zonas, setZonas] = useState<DraftZona[] | null>(null);
   const [ciudades, setCiudades] = useState<CiudadCatalogo[]>([]);
   const [paises, setPaises] = useState<PaisActivo[]>([]);
@@ -275,7 +282,7 @@ export default function TallerPaseo() {
         setPantalla({ estado: 'error' });
         return;
       }
-      const [rOfertas, rFranjas, rZonas, rCiudades, rPaises, rCuenta, rComision] = await Promise.all([
+      const [rOfertas, rFranjas, rZonas, rCiudades, rPaises, rCuenta, rComision, rModo] = await Promise.all([
         obtenerOfertasPaseoPropias(prestador.data.id),
         obtenerFranjasHorario(prestador.data.id),
         obtenerZonasDePrestador(prestador.data.id),
@@ -283,9 +290,11 @@ export default function TallerPaseo() {
         obtenerPaisesActivos(),
         obtenerMiCuentaComercial(),
         obtenerComisionVigenteCita(),
+        // D-386: la elección vigente decide QUÉ franjas se cargan
+        obtenerModoHorarios(prestador.data.id),
       ]);
       if (!vigente) return;
-      if (!rOfertas.ok || !rFranjas.ok || !rZonas.ok) {
+      if (!rOfertas.ok || !rFranjas.ok || !rZonas.ok || !rModo.ok) {
         setPantalla({ estado: 'error' });
         return;
       }
@@ -296,7 +305,24 @@ export default function TallerPaseo() {
       setDrafts(iniciales);
       const primeraOfrecida = BLOQUES_PASEO.find((b) => iniciales[b].ofrecida || iniciales[b].base !== null);
       setDuracionSel(primeraOfrecida ?? null);
-      setFranjas(rFranjas.data.map(draftDesdeFranja));
+      // D-386: en por_servicio las franjas viven en las OFERTAS — se
+      // cargan de ahí; en universal, las generales de siempre.
+      setModoHorarios(rModo.data);
+      setOfertasHorarios(rOfertas.data.map((o) => ({ id: o.id, etiqueta: `${o.duracionMinutos} min` })));
+      if (rModo.data === 'por_servicio') {
+        const rEsp = await obtenerFranjasDeServicios(
+          prestador.data.id,
+          rOfertas.data.map((o) => o.id),
+        );
+        if (!vigente) return;
+        if (!rEsp.ok) {
+          setPantalla({ estado: 'error' });
+          return;
+        }
+        setFranjas(rEsp.data.map((f) => draftDesdeFranja(f, f.servicioId)));
+      } else {
+        setFranjas(rFranjas.data.map((f) => draftDesdeFranja(f)));
+      }
       setZonas(rZonas.data.map((z) => ({ key: z.id, id: z.id, ciudad: z.ciudad, quitar: false })));
       setCiudades(rCiudades.ok ? rCiudades.data : []);
       setPaises(rPaises.ok ? rPaises.data : []);
@@ -774,12 +800,18 @@ export default function TallerPaseo() {
           )}
 
           {/* ══ PASO/SECCIÓN 2 — días y horarios (sección COMPARTIDA S59-B5) ══ */}
-          {seccionVisible === 'horarios' && franjas !== null && (
+          {seccionVisible === 'horarios' && franjas !== null && pantalla.estado === 'listo' && (
             <SeccionHorarios
               franjas={franjas}
               onCambio={setFranjas}
               oficio="paseo"
               titulo={<TituloBloque texto={t('taller.horariosTitulo')} />}
+              prestadorId={pantalla.prestadorId}
+              modo={modoHorarios}
+              ofertas={ofertasHorarios}
+              // el modo cambió en el server: recarga entera del taller
+              // (la Hoja ya avisó que se empieza de nuevo)
+              onModoCambiado={() => setIntento((n) => n + 1)}
             />
           )}
 

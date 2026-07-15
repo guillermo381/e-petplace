@@ -286,13 +286,11 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
       return;
     }
     const total = fin.total;
-    // NOTA S62 (verificación del guard, pedido founder): este guard es
-    // BINARIO — el motivo se pide SOLO con total 0 (el CHECK de DB exige
-    // coherencia NULL↔fallido). Un track INCOMPLETO con ≥1 punto en DB
-    // no dispara motivo por diseño: no hay canal para "se cortó a mitad"
-    // (por eso el paseo real de hoy no lo pidió — bifurcación fina con
-    // el reporte de DB de la A).
-    if (total === 0 && !motivo) {
+    // S62 (motor 20260715150000 de la A): el canal "se cortó a mitad"
+    // EXISTE — terminar_atencion_paseo pide motivo con total <2
+    // (0 = fallido · 1 = incompleto). El guard local ESPEJA ese umbral
+    // para que la Hoja del motivo dispare acá y no en el rebote.
+    if (total < 2 && !motivo) {
       setPideMotivo(true);
       setTerminando(false);
       terminandoRef.current = false;
@@ -301,7 +299,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
 
     const r = await terminarAtencionPaseo({
       evento_atencion_id: datos.eventoAtencionId,
-      gps_motivo_fallo: total === 0 ? motivo : undefined,
+      gps_motivo_fallo: total < 2 ? motivo : undefined,
     });
 
     if (r.ok || r.codigo === 'atencion_no_en_curso' || r.codigo === 'atencion_estado_invalido') {
@@ -337,6 +335,21 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
           {gps.puntosTotal === 1 ? t('cita.unPunto') : t('cita.puntos', { n: gps.puntosTotal })}
         </Text>
       </View>
+
+      {/* LETRA FIRMADA founder S62 — mientras D-292 no exista, el
+          Durante DECLARA la limitación del motor (L-141): voz
+          secundaria, visible siempre, dosis baja. */}
+      <Text
+        style={{
+          fontFamily: typography.family.sans.regular,
+          fontSize: typography.size.sm,
+          lineHeight: typography.size.sm * 1.4,
+          color: theme.text.secondary,
+          marginTop: -spacing[3],
+        }}
+      >
+        {t('cita.trackPantallaEncendida')}
+      </Text>
 
       {cardGps && (
         <Tarjeta relleno="amplio">

@@ -35,9 +35,13 @@ import {
 import {
   actualizarFranjaHorario,
   crearFranjaHorario,
+  crearFranjaServicio,
   editarFranjaHorario,
+  elegirModoHorarios,
   eliminarFranjaHorario,
+  eliminarFranjasPrestador,
   type FranjaHorario,
+  type ModoHorarios,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -45,6 +49,9 @@ import { useTraduccion } from '@/i18n';
 export interface DraftFranja {
   key: string;
   id: string | null; // null = nace al guardar
+  /** D-386 (S62): la OFERTA dueña — null = franja GENERAL (modo
+   *  universal). En modo por_servicio toda franja porta su oferta. */
+  servicioId: string | null;
   diaSemana: number;
   horaInicio: string;
   horaFin: string;
@@ -59,6 +66,12 @@ export interface DraftFranja {
   baseHoraFin: string | null;
 }
 
+/** La oferta del oficio, con su voz — para la réplica D-386 (b). */
+export interface OfertaParaHorarios {
+  id: string;
+  etiqueta: string;
+}
+
 // display lunes-primero; el ÍNDICE que viaja a DB sigue siendo 0=Domingo
 export const ORDEN_DISPLAY = [1, 2, 3, 4, 5, 6, 0] as const;
 
@@ -68,10 +81,11 @@ for (let m = 5 * 60; m <= 22 * 60; m += 30) {
   HORAS.push(`${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`);
 }
 
-export function draftDesdeFranja(f: FranjaHorario): DraftFranja {
+export function draftDesdeFranja(f: FranjaHorario, servicioId: string | null = null): DraftFranja {
   return {
     key: f.id,
     id: f.id,
+    servicioId,
     diaSemana: f.diaSemana,
     horaInicio: f.horaInicio,
     horaFin: f.horaFin,
@@ -156,13 +170,25 @@ export async function aplicarDiffFranjas(
         pisar(f.key, { baseCupo: f.cupo, baseActivo: f.activo });
       }
     } else if (!f.quitar) {
-      const r = await crearFranjaHorario({
-        prestadorId,
-        diaSemana: f.diaSemana,
-        horaInicio: f.horaInicio,
-        horaFin: f.horaFin,
-        maxCitasPorSlot: f.cupo,
-      });
+      // D-386: la franja nace GENERAL (universal) o DE SU OFERTA
+      // (por_servicio) — el guard de modo en DB respalda al borrador.
+      const r =
+        f.servicioId !== null
+          ? await crearFranjaServicio({
+              prestadorId,
+              servicioId: f.servicioId,
+              diaSemana: f.diaSemana,
+              horaInicio: f.horaInicio,
+              horaFin: f.horaFin,
+              maxCitasPorSlot: f.cupo,
+            })
+          : await crearFranjaHorario({
+              prestadorId,
+              diaSemana: f.diaSemana,
+              horaInicio: f.horaInicio,
+              horaFin: f.horaFin,
+              maxCitasPorSlot: f.cupo,
+            });
       if (!r.ok) {
         return {
           ok: false,
@@ -215,6 +241,10 @@ export function SeccionHorarios({
   onCambio,
   oficio,
   titulo,
+  prestadorId,
+  modo,
+  ofertas,
+  onModoCambiado,
 }: {
   franjas: DraftFranja[];
   onCambio: (franjas: DraftFranja[]) => void;
@@ -223,6 +253,16 @@ export function SeccionHorarios({
   oficio: 'paseo' | 'grooming';
   /** El TituloBloque lo pinta el taller (estilo propio de sección). */
   titulo: React.ReactNode;
+  /** D-386 (S62): la elección universal/por-servicio vive acá. */
+  prestadorId: string;
+  modo: ModoHorarios;
+  /** Las ofertas del OFICIO con su voz — la franja por_servicio se
+   *  REPLICA a las marcadas (decisión founder (b): la elección se
+   *  presenta a nivel del oficio, la oferta individual no se expone
+   *  como concepto — Ley 3). */
+  ofertas: OfertaParaHorarios[];
+  /** El modo cambió en el server: el taller RECARGA sus franjas. */
+  onModoCambiado: () => void;
 }) {
   const router = useRouter();
   const { theme } = useTheme();
@@ -231,6 +271,11 @@ export function SeccionHorarios({
 
   // estado puramente LOCAL de la sección (días marcados + hojas)
   const [diasSel, setDiasSel] = useState<number[]>([]);
+  // D-386: el cambio de modo (RPC) y su confirmación si hay franjas
+  const [modoPendiente, setModoPendiente] = useState<ModoHorarios | null>(null);
+  const [modoOcupado, setModoOcupado] = useState(false);
+  // D-386: las ofertas marcadas para la franja nueva (por_servicio)
+  const [ofertasSel, setOfertasSel] = useState<string[]>([]);
   const [hojaGrupo, setHojaGrupo] = useState<string[] | null>(null);
   const [confirmandoQuitar, setConfirmandoQuitar] = useState(false);
   // S61-B5 (D-391): la edición de HORAS del grupo, en su lugar
@@ -278,38 +323,108 @@ export function SeccionHorarios({
       .map(letraDia)
       .join(' · ');
 
+  // D-386: en por_servicio el grupo DICE a qué ofertas pertenece
+  const serviciosDeGrupo = (miembros: DraftFranja[]): string =>
+    ofertas
+      .filter((o) => miembros.some((f) => f.servicioId === o.id))
+      .map((o) => o.etiqueta)
+      .join(' · ');
+
   const grupoEnHoja = hojaGrupo === null ? null : franjas.filter((f) => hojaGrupo.includes(f.key));
+
+  // D-386: el cambio de elección — la RPC es EL camino; con franjas del
+  // modo viejo, la Hoja ofrece eliminarlas y reintentar (jamás mezcla).
+  async function tocarModo(nuevo: ModoHorarios) {
+    if (nuevo === modo || modoOcupado) return;
+    setModoOcupado(true);
+    const r = await elegirModoHorarios(nuevo);
+    setModoOcupado(false);
+    if (r.ok) {
+      mostrar({ variante: 'exito', texto: t('horarios.modoCambiado') });
+      onModoCambiado();
+      return;
+    }
+    if (r.codigo === 'franjas_del_otro_modo_existen') {
+      setModoPendiente(nuevo);
+      return;
+    }
+    mostrar({ variante: 'error', texto: r.mensaje });
+  }
+
+  async function confirmarCambioModo() {
+    if (modoPendiente === null || modoOcupado) return;
+    setModoOcupado(true);
+    const del = await eliminarFranjasPrestador(prestadorId);
+    if (!del.ok) {
+      setModoOcupado(false);
+      mostrar({ variante: 'error', texto: del.mensaje });
+      return;
+    }
+    const r = await elegirModoHorarios(modoPendiente);
+    setModoOcupado(false);
+    setModoPendiente(null);
+    if (!r.ok) {
+      mostrar({ variante: 'error', texto: r.mensaje });
+      return;
+    }
+    mostrar({ variante: 'exito', texto: t('horarios.modoCambiado') });
+    onModoCambiado();
+  }
+
+  // D-386: el solape se compara SOLO dentro de la misma agenda — la
+  // general contra generales; la de una oferta contra las de ESA oferta
+  // (dos ofertas a la misma hora es legal: la ocupación del motor sigue
+  // global y protege el cuerpo del prestador).
+  const chocaCon = (dia: number, servicioId: string | null, desde: string, hasta: string, exceptoKeys: string[] = []) =>
+    franjas.some(
+      (f) =>
+        !exceptoKeys.includes(f.key) &&
+        !f.quitar &&
+        f.diaSemana === dia &&
+        f.servicioId === servicioId &&
+        desde < f.horaFin &&
+        f.horaInicio < hasta,
+    );
 
   function agregarFranjasDraft() {
     if (desdeSel === null || hastaSel === null || diasSel.length === 0) return;
-    // solape local por CADA día marcado (el wrapper re-valida al guardar);
+    const porServicio = modo === 'por_servicio';
+    if (porServicio && ofertasSel.length === 0) {
+      mostrar({ texto: t('horarios.ofertasNinguna'), variante: 'error' });
+      return;
+    }
+    // la réplica D-386 (b): día × oferta marcada; en universal, día × [null]
+    const servicios: (string | null)[] = porServicio ? ofertasSel : [null];
+    // solape local por CADA combinación (el wrapper re-valida al guardar);
     // se chequea TODO antes de agregar — jamás un alta parcial
     for (const dia of diasSel) {
-      const solapa = franjas.some(
-        (f) => f.diaSemana === dia && !f.quitar && desdeSel < f.horaFin && f.horaInicio < hastaSel,
-      );
-      if (solapa) {
-        mostrar({ texto: `${vozDia(dia)}: ${t('horarios.solape')}`, variante: 'error' });
-        return;
+      for (const sid of servicios) {
+        if (chocaCon(dia, sid, desdeSel, hastaSel)) {
+          mostrar({ texto: `${vozDia(dia)}: ${t('horarios.solape')}`, variante: 'error' });
+          return;
+        }
       }
     }
-    const nuevas: DraftFranja[] = diasSel.map((dia) => {
-      contadorNuevas.current += 1;
-      return {
-        key: `nueva-${contadorNuevas.current}`,
-        id: null,
-        diaSemana: dia,
-        horaInicio: desdeSel,
-        horaFin: hastaSel,
-        cupo: cupoSel,
-        activo: true,
-        quitar: false,
-        baseCupo: null,
-        baseActivo: null,
-        baseHoraInicio: null,
-        baseHoraFin: null,
-      };
-    });
+    const nuevas: DraftFranja[] = diasSel.flatMap((dia) =>
+      servicios.map((sid) => {
+        contadorNuevas.current += 1;
+        return {
+          key: `nueva-${contadorNuevas.current}`,
+          id: null,
+          servicioId: sid,
+          diaSemana: dia,
+          horaInicio: desdeSel,
+          horaFin: hastaSel,
+          cupo: cupoSel,
+          activo: true,
+          quitar: false,
+          baseCupo: null,
+          baseActivo: null,
+          baseHoraInicio: null,
+          baseHoraFin: null,
+        };
+      }),
+    );
     onCambio([...franjas, ...nuevas]);
     setCreandoFranja(false);
   }
@@ -317,10 +432,22 @@ export function SeccionHorarios({
   return (
     <View style={{ gap: spacing[3] }}>
       {titulo}
-      {/* S59-B6 cura 3(a), elección founder pendiente de ratificar en
-          gate: la sección DECLARA la agenda única al abrir — la verdad
-          del motor (franjas generales, todo servicio las consume). */}
-      <VozSecundaria texto={t('taller.agendaUnica')} />
+      {/* D-386 (S62): LA ELECCIÓN — universal o por servicio, jamás
+          mezcla (letra founder S60; el guard de DB la respalda). La
+          explica dice la verdad del modo vigente. */}
+      <SelectorOpcion
+        etiqueta={t('horarios.modoEtiqueta')}
+        acento="oficio"
+        opciones={[
+          { codigo: 'universal', etiqueta: t('horarios.modoUniversal') },
+          { codigo: 'por_servicio', etiqueta: t('horarios.modoPorServicio') },
+        ]}
+        seleccionada={modo}
+        onSelect={(codigo) => void tocarModo(codigo === 'por_servicio' ? 'por_servicio' : 'universal')}
+      />
+      <VozSecundaria
+        texto={modo === 'universal' ? t('horarios.modoExplicaUniversal') : t('horarios.modoExplicaPorServicio')}
+      />
       <VozSecundaria texto={t('taller.horariosExplica')} />
       <SelectorOpcion
         etiqueta={t('taller.dias')}
@@ -350,6 +477,9 @@ export function SeccionHorarios({
           setDesdeSel(null);
           setHastaSel(null);
           setCupoSel(1);
+          // D-386: la réplica arranca con TODAS las ofertas marcadas —
+          // desmarcar es el gesto raro, no el común
+          setOfertasSel(ofertas.map((o) => o.id));
         }}
       />
       {grupos.length === 0 ? (
@@ -359,6 +489,11 @@ export function SeccionHorarios({
           {grupos.map((miembros, i) => {
             const f = miembros[0];
             const partes = [diasDeGrupo(miembros)];
+            // D-386: en por_servicio el grupo dice sus ofertas
+            if (modo === 'por_servicio') {
+              const voz = serviciosDeGrupo(miembros);
+              if (voz.length > 0) partes.push(voz);
+            }
             if (!f.activo) partes.push(t('horarios.pausada'));
             if (miembros.some((x) => x.id === null)) partes.push(t('taller.franjaNueva'));
             return (
@@ -476,15 +611,8 @@ export function SeccionHorarios({
                     // al guardar con exclusión de la propia)
                     const keys = grupoEnHoja.map((f) => f.key);
                     for (const m of grupoEnHoja) {
-                      const choca = franjas.some(
-                        (f) =>
-                          !keys.includes(f.key) &&
-                          !f.quitar &&
-                          f.diaSemana === m.diaSemana &&
-                          desdeEdit < f.horaFin &&
-                          f.horaInicio < hastaEdit,
-                      );
-                      if (choca) {
+                      // D-386: el solape es POR AGENDA (general o de su oferta)
+                      if (chocaCon(m.diaSemana, m.servicioId, desdeEdit, hastaEdit, keys)) {
                         mostrar({ texto: `${vozDia(m.diaSemana)}: ${t('horarios.solape')}`, variante: 'error' });
                         return;
                       }
@@ -550,6 +678,23 @@ export function SeccionHorarios({
             <VozSecundaria
               texto={t('taller.diasAplica', { dias: ORDEN_DISPLAY.filter((d) => diasSel.includes(d)).map(letraDia).join(' · ') })}
             />
+            {/* D-386 (b): en por_servicio la franja se REPLICA a las
+                ofertas marcadas (todas por default) */}
+            {modo === 'por_servicio' && ofertas.length > 0 && (
+              <SelectorOpcion
+                etiqueta={t('horarios.ofertasAplica')}
+                acento="oficio"
+                multiple
+                disposicion={ofertas.length > 4 ? 'grilla' : 'fila'}
+                opciones={ofertas.map((o) => ({ codigo: o.id, etiqueta: o.etiqueta }))}
+                seleccionadas={ofertasSel}
+                onSelect={(codigo) =>
+                  setOfertasSel((prev) =>
+                    prev.includes(codigo) ? prev.filter((x) => x !== codigo) : [...prev, codigo],
+                  )
+                }
+              />
+            )}
             <Tarjeta relleno="ninguno">
               <Celda
                 interactiva
@@ -620,6 +765,44 @@ export function SeccionHorarios({
             ))}
           </HojaScroll>
         )}
+      </Hoja>
+
+      {/* Hoja D-386: cambiar de modo CON franjas guardadas — la verdad
+          entera antes de tocar nada: se eliminan y se empieza de nuevo */}
+      <Hoja
+        visible={modoPendiente !== null}
+        onCerrar={() => {
+          if (!modoOcupado) setModoPendiente(null);
+        }}
+        titulo={t('horarios.modoCambiarTitulo')}
+      >
+        <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
+          <Text
+            style={{
+              fontFamily: typography.family.sans.regular,
+              fontSize: typography.size.base,
+              lineHeight: typography.size.base * typography.leading.normal,
+              color: theme.text.secondary,
+            }}
+          >
+            {t('horarios.modoCambiarConFranjas', { n: vivasSinQuitar.length })}
+          </Text>
+          <Boton
+            variante="destructivo"
+            etiqueta={t('horarios.modoCambiarConfirmar')}
+            bloque
+            cargando={modoOcupado}
+            onPress={() => void confirmarCambioModo()}
+          />
+          <Boton
+            variante="ghost"
+            etiqueta={t('horarios.cancelar')}
+            bloque
+            onPress={() => {
+              if (!modoOcupado) setModoPendiente(null);
+            }}
+          />
+        </View>
       </Hoja>
     </View>
   );

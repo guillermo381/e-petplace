@@ -182,6 +182,8 @@ export const prestadorEn = {
     pedirPrecision: 'Allow precise',
     trackPendienteRed:
       "The last route points didn't get saved. Check your connection and tap Finish again.",
+    // LETRA FIRMADA founder S62 (voz honesta D-292: el motor es foreground)
+    trackPantallaEncendida: 'The route is only recorded while the screen is on.',
     probarDeNuevo: 'Try again',
     parteDelPerro: "Dog's report",
     evidencia: 'Evidence',
@@ -456,7 +458,6 @@ export const prestadorEn = {
     ciudadFaltante: "If your city isn't listed, write to us: the team maintains the catalog.",
     listo: 'Done',
     // S59-B6 cure 3(a) · LOTE S59, GATE PENDIENTE
-    agendaUnica: 'Your schedule is one and the same for all your services.',
     guardar: 'Save your offer',
     guardado: 'Your offer was saved.',
   },
@@ -672,6 +673,19 @@ export const prestadorEn = {
   },
   // Voces de las franjas que EL TALLER hereda (S58-B B1b) · Espejo de es.ts
   horarios: {
+    // LOTE S62 (D-386): la elección de organización de la agenda
+    modoEtiqueta: 'How you organize your schedule',
+    modoUniversal: 'One schedule for everything',
+    modoPorServicio: 'Per service',
+    modoExplicaUniversal: 'Your time slots apply to all your services.',
+    modoExplicaPorServicio: 'Each service has its own time slots.',
+    modoCambiarTitulo: 'Change how it works',
+    modoCambiarConFranjas:
+      'You have {{n}} time slots saved under the current setup. To switch, they get deleted and you start fresh.',
+    modoCambiarConfirmar: 'Delete slots and switch',
+    modoCambiado: 'Your schedule setup changed.',
+    ofertasAplica: 'For which services',
+    ofertasNinguna: 'Mark at least one service for this slot.',
     agregarFranja: 'Add window',
     dia0: 'Sunday',
     dia1: 'Monday',

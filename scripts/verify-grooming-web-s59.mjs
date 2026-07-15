@@ -120,7 +120,17 @@ await page.goto(`http://localhost:${PORT}/grooming/taller?seccion=horarios`, { w
 t = await esperar('Días y horarios', 40);
 check(t.includes('Marca los días y agrega la franja'), 'T4 la sección compartida de horarios');
 check(t.includes('Vacaciones'), 'T4b la celda-puente a vacaciones');
-check(t.includes('Tu agenda es una sola para todos tus servicios.'), 'T4c cura 3(a): la agenda única declarada');
+// ENMIENDA S62 (D-386): la declaración fija de agenda única MURIÓ —
+// ahora la sección porta LA ELECCIÓN (universal/por servicio) y la
+// explica dice la verdad del modo vigente (universal por default).
+check(
+  t.includes('Cómo organizas tu agenda') &&
+    t.includes('Una agenda para todo') &&
+    t.includes('Por servicio') &&
+    (t.includes('Tus franjas valen para todos tus servicios.') ||
+      t.includes('Cada servicio tiene sus propias franjas.')),
+  'T4c D-386: la elección de modo declarada con su explica',
+);
 // S61-B5 (D-391): la franja se edita EN SU LUGAR — la Hoja del grupo
 // ofrece Desde/Hasta pre-cargados (solo lectura: Listo no se toca)
 const grupoFranja = page.getByRole('button', { name: /\d{2}:\d{2} – \d{2}:\d{2}/ }).first();

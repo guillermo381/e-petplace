@@ -323,23 +323,26 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
         <FotosDeTipo tipo="foto_recibir" />
       </Seccion>
 
-      {/* ── Momento 2: la sesión — servicios aplicados + registro libre ── */}
-      <Seccion
-        titulo={`${t('citaGrooming.serviciosAplicados')}${aplicados.length > 0 ? ` · ${aplicados.length}` : ''}`}
-      >
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
-          {datos.serviciosCatalogo.map((s) => (
-            <Boton
-              key={s.codigo}
-              variante={aplicados.includes(s.codigo) ? 'secundario' : 'ghost'}
-              tamaño="sm"
-              etiqueta={s.nombre}
-              cargando={servicioEnviando === s.codigo}
-              onPress={() => void toggleServicio(s)}
-            />
-          ))}
-        </View>
-      </Seccion>
+      {/* ── Momento 2: la sesión — servicios aplicados + registro libre.
+          S62 (§15b.2 clase-4, enmienda a9ab4dd de la A): el toggle real
+          con roundtrip viste SelectorOpcion multiple con `cargando` POR
+          CHIP — murió el último Boton-disfrazado del inventario. ── */}
+      <SelectorOpcion
+        acento="oficio"
+        etiqueta={`${t('citaGrooming.serviciosAplicados')}${aplicados.length > 0 ? ` · ${aplicados.length}` : ''}`}
+        multiple
+        disposicion="grilla"
+        opciones={datos.serviciosCatalogo.map((s) => ({
+          codigo: s.codigo,
+          etiqueta: s.nombre,
+          cargando: servicioEnviando === s.codigo,
+        }))}
+        seleccionadas={aplicados}
+        onSelect={(codigo) => {
+          const s = datos.serviciosCatalogo.find((x) => x.codigo === codigo);
+          if (s) void toggleServicio(s);
+        }}
+      />
 
       <Seccion titulo={t('citaGrooming.fotosSesion')}>
         <FotosDeTipo tipo="foto_durante" />

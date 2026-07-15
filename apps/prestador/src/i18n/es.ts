@@ -206,6 +206,8 @@ export const prestadorEs = {
     pedirPrecision: 'Permitir precisa',
     trackPendienteRed:
       'Los últimos puntos del recorrido no se guardaron. Revisa tu conexión y toca Terminar de nuevo.',
+    // LETRA FIRMADA founder S62 (voz honesta D-292: el motor es foreground)
+    trackPantallaEncendida: 'El recorrido se registra solo con la pantalla encendida.',
     probarDeNuevo: 'Probar de nuevo',
     parteDelPerro: 'Parte del perro',
     evidencia: 'Evidencia',
@@ -516,7 +518,6 @@ export const prestadorEs = {
     listo: 'Listo',
     // S59-B6 cura 3(a): la sección de horarios DECLARA la agenda única
     // (la verdad del motor) · LOTE S59, GATE PENDIENTE
-    agendaUnica: 'Tu agenda es una sola para todos tus servicios.',
     guardar: 'Guardar tu oferta',
     guardado: 'Tu oferta quedó guardada.',
   },
@@ -767,6 +768,19 @@ export const prestadorEs = {
   // Voces de las franjas que EL TALLER hereda (S58-B B1b: /horarios murió
   // absorbida; keys muertas fuera — Ley 37; textos de los lotes S56 intactos).
   horarios: {
+    // LOTE S62 (D-386): la elección de organización de la agenda
+    modoEtiqueta: 'Cómo organizas tu agenda',
+    modoUniversal: 'Una agenda para todo',
+    modoPorServicio: 'Por servicio',
+    modoExplicaUniversal: 'Tus franjas valen para todos tus servicios.',
+    modoExplicaPorServicio: 'Cada servicio tiene sus propias franjas.',
+    modoCambiarTitulo: 'Cambiar la organización',
+    modoCambiarConFranjas:
+      'Tienes {{n}} franjas guardadas con la organización actual. Para cambiar, se eliminan y empiezas de nuevo.',
+    modoCambiarConfirmar: 'Eliminar franjas y cambiar',
+    modoCambiado: 'Tu agenda cambió de organización.',
+    ofertasAplica: 'Para qué servicios',
+    ofertasNinguna: 'Marca al menos un servicio para la franja.',
     agregarFranja: 'Agregar franja',
     // regla 32: 0=Domingo … 6=Sábado (la key ES el índice de DB)
     dia0: 'Domingo',
