@@ -25,7 +25,7 @@
  */
 
 import { useState, type ReactNode } from 'react'
-import { Pressable, ScrollView, Text, View } from 'react-native'
+import { Platform, Pressable, ScrollView, Text, View, type ViewStyle } from 'react-native'
 import Animated, { cubicBezier } from 'react-native-reanimated'
 
 import { typography } from '../tokens/typography'
@@ -106,6 +106,11 @@ function Chip({
 }) {
   const { theme } = useTheme()
   const [presionada, setPresionada] = useState(false)
+  // S61-A5 cura 2: el anillo AZUL de la captura del founder era el
+  // focus-visible DEFAULT de Chrome (rgb(0,95,204), solo web — no
+  // viaja a dispositivo). Espejo del patrón de Boton: focus propio en
+  // el acento de la casa (a11y intacta, el UA default muere).
+  const [enfocada, setEnfocada] = useState(false)
 
   const deshabilitada = opcion.deshabilitada === true
   const fondoReposo = theme.mode === 'dark' ? theme.bg.elevated : theme.bg.card
@@ -153,10 +158,29 @@ function Chip({
         if (!deshabilitada) setPresionada(true)
       }}
       onPressOut={() => setPresionada(false)}
+      onFocus={() => setEnfocada(true)}
+      onBlur={() => setEnfocada(false)}
       accessibilityRole={modo}
       accessibilityState={{ checked: seleccionada, disabled: deshabilitada }}
       accessibilityLabel={`${opcion.etiqueta}, opción ${indice + 1} de ${total}`}
-      style={{ flexGrow: crecer ? 1 : 0 }}
+      style={[
+        { flexGrow: crecer ? 1 : 0 },
+        // Focus visible en web, en la voz de la casa (patrón Boton):
+        // reemplaza el anillo azul del UA. `outlineStyle:none` en
+        // reposo mata el default; enfocada = outline en el acento.
+        Platform.OS === 'web'
+          ? ({
+              outlineWidth: enfocada ? 2 : 0,
+              outlineColor: enfocada
+                ? acento === 'control' && 'control' in theme.accent
+                  ? theme.accent.control
+                  : theme.accent.primary
+                : 'transparent',
+              outlineStyle: enfocada ? 'solid' : 'none',
+              outlineOffset: 2,
+            } as unknown as ViewStyle)
+          : null,
+      ]}
     >
       <Animated.View
         style={{
