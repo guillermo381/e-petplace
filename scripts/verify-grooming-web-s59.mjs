@@ -60,7 +60,9 @@ if (!peldano0) {
   check(t.includes('Visible para las familias') || t.includes('Todavía no visible'), 'T2c el estado dice su verdad');
   check(!t.includes('A quién atiendes'), 'T2d cura 4: la fila especies MURIÓ fusionada');
   check(/perros y gatos|solo perros|solo gatos/.test(t) || t.includes('Todos pausados'), 'T2e las especies viven en el subtítulo vivo');
-  check(t.includes('Dónde atiendes') && t.includes('En tu local'), 'T2f el Dónde informativo');
+  // S61-B2: el Dónde ASCENDIÓ a fila-lápiz (la voz 'llega pronto' murió)
+  check(t.includes('Dónde atiendes') && t.includes('En tu local'), 'T2f el Dónde como fila-lápiz');
+  check(!t.includes('llega pronto'), 'T2f2 la puerta "llega pronto" MURIÓ (S61-B2)');
 } else {
   check(t.includes('En dos pasos eliges servicios'), 'T2c peldaño 0: educa (DOS pasos)');
 }
@@ -73,8 +75,11 @@ check(t.includes('Enciende los servicios que ofreces y ponles precio por talla.'
 check(t.includes('¿A quién atiendes?') && t.includes('Perros') && t.includes('Gatos'), 'T3c especies sobre el techo (enmienda 3)');
 check(t.includes('Baño') && t.includes('Baño y corte'), 'T3d los dos servicios');
 const switches = await page.getByRole('switch').count();
-check(switches === 3, `T3e tres interruptores: 2 servicios + extra (${switches})`);
+// S61-B2: el Dónde sumó 2 interruptores (local/domicilio) — 5 con
+// domicilio apagado, 6 con domicilio encendido (aparece el recargo).
+check(switches === 5 || switches === 6, `T3e interruptores: 2 servicios + extra + el Dónde (${switches})`);
 check(t.includes('Cobrar extra por pelaje largo'), 'T3f el extra global (enmienda 2)');
+check(t.includes('Dónde atiendes') && t.includes('Atiendes en tu local'), 'T3f2 la sección del Dónde (S61-B2)');
 // BORRADOR (nada persiste sin Guardar), robusto al estado guardado:
 // asegurar Baño ENCENDIDO — el Interruptor web no expone aria-checked,
 // el estado se lee por su EFECTO (el bloque gobernado visible)
@@ -96,6 +101,19 @@ check(/Pelaje largo: \+\$\d/.test(t), 'T3j2 el espejo dice el extra');
 check(t.includes('Guardar tu oferta'), 'T3k el guardado único (JAMÁS se toca)');
 // S59-B6 curas 1-3 en el taller: rieles y voces
 check(!t.includes('Paseos simultáneos'), 'T3l cura 2: la voz genérica no vive en grooming');
+// S61-B2 — el Dónde en borrador: domicilio ENCENDIDO por efecto visible
+// (recargo + zonas aparecen); nada persiste sin Guardar
+if (!(await texto()).includes('Cobrar recargo por domicilio')) {
+  await page.getByRole('switch', { name: 'Atiendes a domicilio' }).click();
+}
+t = await esperar('Cobrar recargo por domicilio', 10);
+check(t.includes('Cobrar recargo por domicilio'), 'T3m domicilio enciende su recargo (S61-B2)');
+check(t.includes('Zonas de cobertura') && t.includes('Compartidas con todos tus servicios.'), 'T3m2 la celda de zonas referenciada');
+if (!(await texto()).includes('El recargo que se suma al precio')) {
+  await page.getByRole('switch', { name: 'Cobrar recargo por domicilio' }).click();
+}
+t = await esperar('El recargo que se suma al precio', 10);
+check(t.includes('El recargo que se suma al precio'), 'T3m3 el recargo con su slider (regla del teclado)');
 
 // ── T4: la sección horarios suelta (la COMPARTIDA) ──
 await page.goto(`http://localhost:${PORT}/grooming/taller?seccion=horarios`, { waitUntil: 'networkidle' });

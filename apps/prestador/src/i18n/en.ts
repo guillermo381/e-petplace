@@ -423,6 +423,14 @@ export const prestadorEn = {
     extraInterruptor: 'Charge extra for long coats',
     extraRotulo: 'The extra added to the price',
     extraAyuda: 'Added once per appointment. The base price does not change.',
+    // S61-B2 — DOMICILIO: la config del Dónde (letra founder S61) · LOTE S61, GATE PENDIENTE
+    atiendesLocal: 'You groom at your shop',
+    atiendesDomicilio: 'You do home visits',
+    dondeMinimo: 'Turn on at least one: your shop or home visits.',
+    dondeZonasDetalle: 'Shared across all your services.',
+    recargoInterruptor: 'Charge a home visit surcharge',
+    recargoRotulo: 'The surcharge added to the price',
+    recargoAyuda: 'Added once per home visit. Base price and duration do not change; travel is not billed separately.',
     // S59-B6 cure 2 · LOTE S59, GATE PENDIENTE
     cupo: 'Pets at a time',
     cupoAyuda: 'How many pets you can handle at once in this window.',
@@ -452,7 +460,7 @@ export const prestadorEn = {
     sufijoEspeciesGato: 'cats only',
     dondeFila: 'Where you groom',
     dondeLocal: 'At your shop',
-    dondeDomicilio: 'Home grooming is coming soon.',
+    dondeDomicilioVivo: 'Home visits',
     espejoServicio: '{{nombre}} · {{tallas}}',
     espejoDuraciones: '{{lista}} min by size',
     espejoExtra: 'Long coat: +{{monto}}',

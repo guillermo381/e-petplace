@@ -482,6 +482,14 @@ export const prestadorEs = {
     extraInterruptor: 'Cobrar extra por pelaje largo',
     extraRotulo: 'El extra que se suma al precio',
     extraAyuda: 'Se suma una vez por cita. El precio base no cambia.',
+    // S61-B2 — DOMICILIO: la config del Dónde (letra founder S61) · LOTE S61, GATE PENDIENTE
+    atiendesLocal: 'Atiendes en tu local',
+    atiendesDomicilio: 'Atiendes a domicilio',
+    dondeMinimo: 'Enciende al menos una: tu local o a domicilio.',
+    dondeZonasDetalle: 'Compartidas con todos tus servicios.',
+    recargoInterruptor: 'Cobrar recargo por domicilio',
+    recargoRotulo: 'El recargo que se suma al precio',
+    recargoAyuda: 'Se suma una vez por cita a domicilio. La base y la duración no cambian; el traslado no se cobra aparte.',
     // S59-B6 cura 2 (gate founder): la voz del cupo ES del oficio —
     // 'Paseos simultáneos' era voz prestada · LOTE S59, GATE PENDIENTE
     cupo: 'Mascotas a la vez',
@@ -514,9 +522,11 @@ export const prestadorEs = {
     sufijoEspeciesGato: 'solo gatos',
     // el DÓNDE v1 es fila informativa (gate del mapa, enmienda 1):
     // local declarado + la puerta honesta de SU servicio
+    // S61-B2: la fila informativa ASCENDIÓ a fila-lápiz (domicilio vivo);
+    // murió 'llega pronto' (Ley 37) · dondeDomicilioVivo al LOTE S61
     dondeFila: 'Dónde atiendes',
     dondeLocal: 'En tu local',
-    dondeDomicilio: 'El grooming a domicilio llega pronto.',
+    dondeDomicilioVivo: 'A domicilio',
     // el espejo dice los 6 precios + extra + duraciones
     espejoServicio: '{{nombre}} · {{tallas}}',
     espejoDuraciones: '{{lista}} min según talla',

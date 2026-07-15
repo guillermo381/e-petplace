@@ -18,7 +18,13 @@
  *   combinación (30–240 en pasos de 15', CHECK de DB) por Celda-selector
  *   con Hoja — StepperCantidad no porta paso (±1, pedido a la A) · UN
  *   extra por pelaje largo GLOBAL (enmienda 2): Interruptor + slider
- *   $0.25–$15 (el $0 del riel ES el interruptor apagado).
+ *   $0.25–$15 (el $0 del riel ES el interruptor apagado) · EL DÓNDE
+ *   (S61-B2, letra founder): dos BINARIOS Interruptor local/domicilio
+ *   (Ley 22, jamás chips) globales en la UI y escritos POR SERVICIO
+ *   (atiende_* de cada fila) + recargo por domicilio patrón-extra
+ *   (prestadores.grooming_recargo_domicilio) SOLO visible con
+ *   domicilio encendido + la celda de zonas REFERENCIADA (el editor
+ *   vive en el taller del paseo — D-331, zonas del prestador).
  * Paso 2 — DÍAS Y HORARIOS: la sección COMPARTIDA con el paseo
  *   (seccion-horarios): las franjas GENERALES del prestador — el motor
  *   las lee para TODO servicio (una agenda, dos lápices).
@@ -39,6 +45,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Boton,
   Celda,
+  CeldaNavegacion,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
@@ -59,6 +66,7 @@ import {
   SERVICIOS_GROOMING,
   TALLAS_GROOMING,
   actualizarExtraPelajeLargo,
+  actualizarRecargoDomicilio,
   guardarServicioGrooming,
   obtenerComisionVigenteCita,
   obtenerFranjasHorario,
@@ -222,6 +230,16 @@ export default function TallerGrooming() {
   const [extraMonto, setExtraMonto] = useState('');
   const [extraBase, setExtraBase] = useState<number | null>(null);
   const [franjas, setFranjas] = useState<DraftFranja[] | null>(null);
+  // EL DÓNDE (S61-B2, letra founder): GLOBAL en la UI (precedente
+  // especies, enmienda 3) y escrito POR SERVICIO al contrato de la A
+  // (atiende_* en cada fila de prestador_servicios). El recargo es UNO
+  // del prestador (patrón extra pelaje largo).
+  const [atiendeLocal, setAtiendeLocal] = useState(true);
+  const [atiendeDomicilio, setAtiendeDomicilio] = useState(false);
+  const [dondeBase, setDondeBase] = useState<{ local: boolean; domicilio: boolean } | null>(null);
+  const [recargoActivo, setRecargoActivo] = useState(false);
+  const [recargoMonto, setRecargoMonto] = useState('');
+  const [recargoBase, setRecargoBase] = useState<number | null>(null);
 
   // el chip de TALLA gobierna el bloque de cada servicio (patrón v3.1)
   const [tallaSel, setTallaSel] = useState<Record<ServicioGrooming, TallaGrooming>>({
@@ -271,6 +289,17 @@ export default function TallerGrooming() {
       setExtraBase(extra);
       setExtraActivo(extra !== null);
       setExtraMonto(extra !== null ? extra.toFixed(2) : '');
+      // el Dónde: la unión de lo guardado (OR); sin filas, los defaults
+      // de DB (local sí, domicilio no)
+      const local = rOfertas.data.length > 0 ? rOfertas.data.some((o) => o.atiendeLocal) : true;
+      const domicilio = rOfertas.data.length > 0 ? rOfertas.data.some((o) => o.atiendeDomicilio) : false;
+      setAtiendeLocal(local);
+      setAtiendeDomicilio(domicilio);
+      setDondeBase({ local, domicilio });
+      const recargo = prestador.data.grooming_recargo_domicilio;
+      setRecargoBase(recargo);
+      setRecargoActivo(recargo !== null);
+      setRecargoMonto(recargo !== null ? recargo.toFixed(2) : '');
       setFranjas(rFranjas.data.map(draftDesdeFranja));
       setPantalla({
         estado: 'listo',
@@ -340,16 +369,25 @@ export default function TallerGrooming() {
   const extraDraft = (): number | null => (extraActivo ? (leerPrecio(extraMonto) ?? PISO_EXTRA) : null);
   const extraDirty = extraDraft() !== extraBase;
 
+  const dondeDirty =
+    dondeBase !== null && (atiendeLocal !== dondeBase.local || atiendeDomicilio !== dondeBase.domicilio);
+  // el recargo solo es editable con domicilio encendido (apagado, la DB
+  // conserva lo suyo — reversible, y el motor aún no lo lee: D-392)
+  const recargoDraft = (): number | null => (recargoActivo ? (leerPrecio(recargoMonto) ?? PISO_EXTRA) : null);
+  const recargoDirty = atiendeDomicilio && recargoDraft() !== recargoBase;
+
   const hayCambios = useMemo(() => {
     if (drafts === null || franjas === null || especies === null) return false;
     return (
       SERVICIOS_GROOMING.some((s) => servicioDirty(drafts[s])) ||
       extraDirty ||
+      dondeDirty ||
+      recargoDirty ||
       franjas.some(franjaDirty) ||
       !mismasEspecies(especies, especiesBase)
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [drafts, franjas, especies, especiesBase, extraActivo, extraMonto, extraBase]);
+  }, [drafts, franjas, especies, especiesBase, extraActivo, extraMonto, extraBase, atiendeLocal, atiendeDomicilio, dondeBase, recargoActivo, recargoMonto, recargoBase]);
 
   // el espejo VIVO — la firma: los 6 precios + extra + duraciones
   const datosEspejo = useMemo(() => {
@@ -387,11 +425,19 @@ export default function TallerGrooming() {
       mostrar({ texto: t('tallerGrooming.especiesMinima'), variante: 'error' });
       return;
     }
+    // el CHECK alguna-modalidad de DB rebotaría 23514 con la voz
+    // equivocada (el wrapper la mapea a tallas) — la UI lo dice ANTES
+    if (!atiendeLocal && !atiendeDomicilio) {
+      if (!modoWizard) setSeccionForzada('servicios');
+      else setPaso(0);
+      mostrar({ texto: t('tallerGrooming.dondeMinimo'), variante: 'error' });
+      return;
+    }
 
     setGuardando(true);
     for (const s of SERVICIOS_GROOMING) {
       const d = drafts[s];
-      if (!servicioDirty(d) && (d.base === null || mismasEspecies(especies, d.base.especies))) continue;
+      if (!servicioDirty(d) && !dondeDirty && (d.base === null || mismasEspecies(especies, d.base.especies))) continue;
       if (d.base === null && !d.ofrecido) continue;
       const r = await guardarServicioGrooming({
         prestadorId: pantalla.prestadorId,
@@ -399,6 +445,8 @@ export default function TallerGrooming() {
         ofertaId: d.base?.id ?? null,
         activo: d.ofrecido,
         especies,
+        atiendeLocal,
+        atiendeDomicilio,
         tallas: {
           S: { precio: precioDe(d.tallas.S), duracionMinutos: d.tallas.S.duracion },
           M: { precio: precioDe(d.tallas.M), duracionMinutos: d.tallas.M.duracion },
@@ -413,6 +461,10 @@ export default function TallerGrooming() {
       actualizarServicio(s, draftServicioDesdeBase(r.data, s));
     }
     setEspeciesBase(especies);
+    // la base del Dónde solo avanza si hay filas donde persistió
+    if (SERVICIOS_GROOMING.some((s) => drafts[s].base !== null || drafts[s].ofrecido)) {
+      setDondeBase({ local: atiendeLocal, domicilio: atiendeDomicilio });
+    }
 
     if (extraDirty) {
       const r = await actualizarExtraPelajeLargo(pantalla.prestadorId, extraDraft());
@@ -422,6 +474,16 @@ export default function TallerGrooming() {
         return;
       }
       setExtraBase(r.data.valor);
+    }
+
+    if (recargoDirty) {
+      const r = await actualizarRecargoDomicilio(pantalla.prestadorId, recargoDraft());
+      if (!r.ok) {
+        setGuardando(false);
+        mostrar({ texto: r.mensaje, variante: 'error' });
+        return;
+      }
+      setRecargoBase(r.data.valor);
     }
 
     const rf = await aplicarDiffFranjas(pantalla.prestadorId, franjas);
@@ -675,6 +737,123 @@ export default function TallerGrooming() {
                   )}
                 </View>
               </Tarjeta>
+
+              {/* EL DÓNDE (S61-B2, letra founder): local/domicilio/ambos
+                  son DOS BINARIOS — visten Interruptor (Ley 22, jamás
+                  chips). El recargo = patrón extra pelaje largo, SOLO
+                  visible con domicilio encendido. */}
+              <TituloBloque texto={t('ofertaGrooming.dondeFila')} />
+              <Tarjeta elevacion="reposo">
+                <View style={{ gap: spacing[4] }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
+                    <Text
+                      style={{
+                        fontFamily: typography.family.sans.regular,
+                        fontSize: typography.size.base,
+                        color: theme.text.primary,
+                      }}
+                    >
+                      {t('tallerGrooming.atiendesLocal')}
+                    </Text>
+                    <Interruptor
+                      etiqueta={t('tallerGrooming.atiendesLocal')}
+                      registro="oficio"
+                      encendido={atiendeLocal}
+                      onCambio={setAtiendeLocal}
+                    />
+                  </View>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
+                    <Text
+                      style={{
+                        fontFamily: typography.family.sans.regular,
+                        fontSize: typography.size.base,
+                        color: theme.text.primary,
+                      }}
+                    >
+                      {t('tallerGrooming.atiendesDomicilio')}
+                    </Text>
+                    <Interruptor
+                      etiqueta={t('tallerGrooming.atiendesDomicilio')}
+                      registro="oficio"
+                      encendido={atiendeDomicilio}
+                      onCambio={setAtiendeDomicilio}
+                    />
+                  </View>
+                  {!atiendeLocal && !atiendeDomicilio && (
+                    <VozSecundaria texto={t('tallerGrooming.dondeMinimo')} />
+                  )}
+                  {atiendeDomicilio && (
+                    <>
+                      <Separador />
+                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
+                        <Text
+                          style={{
+                            fontFamily: typography.family.sans.regular,
+                            fontSize: typography.size.base,
+                            color: theme.text.primary,
+                          }}
+                        >
+                          {t('tallerGrooming.recargoInterruptor')}
+                        </Text>
+                        <Interruptor
+                          etiqueta={t('tallerGrooming.recargoInterruptor')}
+                          registro="oficio"
+                          encendido={recargoActivo}
+                          onCambio={setRecargoActivo}
+                        />
+                      </View>
+                      {recargoActivo && (
+                        <>
+                          <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: spacing[3] }}>
+                            <Text
+                              style={{
+                                flex: 1,
+                                fontFamily: typography.family.sans.regular,
+                                fontSize: typography.size.sm,
+                                color: theme.text.secondary,
+                              }}
+                            >
+                              {t('tallerGrooming.recargoRotulo')}
+                            </Text>
+                            <Text
+                              style={{
+                                fontFamily: typography.family.mono.regular,
+                                fontSize: typography.size.lg,
+                                fontVariant: ['tabular-nums'],
+                                color: theme.text.primary,
+                              }}
+                            >
+                              {etiquetasExtra[indiceEn(pasosExtra, recargoMonto)]}
+                            </Text>
+                          </View>
+                          <SliderPrecio
+                            etiqueta={t('tallerGrooming.recargoRotulo')}
+                            pasos={etiquetasExtra}
+                            indice={indiceEn(pasosExtra, recargoMonto)}
+                            onCambio={(i) => setRecargoMonto(pasosExtra[i].toFixed(2))}
+                            registro="aa"
+                          />
+                          <VozSecundaria texto={t('tallerGrooming.recargoAyuda')} />
+                        </>
+                      )}
+                    </>
+                  )}
+                </View>
+              </Tarjeta>
+
+              {/* las zonas se REFERENCIAN, no se duplican (D-331: son del
+                  prestador — el editor vive en el taller del paseo) */}
+              {atiendeDomicilio && (
+                <Tarjeta relleno="ninguno">
+                  <CeldaNavegacion
+                    icono="ubicacion"
+                    registro="aa"
+                    titulo={t('taller.zonasTitulo')}
+                    detalle={t('tallerGrooming.dondeZonasDetalle')}
+                    onPress={() => router.push({ pathname: '/paseo/taller', params: { seccion: 'zonas' } })}
+                  />
+                </Tarjeta>
+              )}
             </View>
           )}
 

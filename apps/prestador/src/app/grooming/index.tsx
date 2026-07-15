@@ -217,6 +217,22 @@ export default function OfertaGrooming() {
               ` · ${sufijoEspecies}` +
               (extra !== null ? ` · ${t('ofertaGrooming.sufijoExtra')}` : '');
 
+        // EL DÓNDE (S61-B2): la unión de lo declarado por servicio +
+        // el recargo del prestador — la fila informativa ASCENDIÓ a
+        // fila-lápiz (la cláusula del mapa S59-B5 se cumplió: D-380/
+        // domicilio disparó)
+        const atiendeLocalOferta = ofertas.some((o) => o.atiendeLocal);
+        const atiendeDomicilioOferta = ofertas.some((o) => o.atiendeDomicilio);
+        const recargoDomicilio = prestador.grooming_recargo_domicilio;
+        const detalleDonde = [
+          atiendeLocalOferta ? t('ofertaGrooming.dondeLocal') : null,
+          atiendeDomicilioOferta
+            ? `${t('ofertaGrooming.dondeDomicilioVivo')}${recargoDomicilio !== null ? ` +${monto(recargoDomicilio)}` : ''}`
+            : null,
+        ]
+          .filter((v): v is string => v !== null)
+          .join(' · ');
+
         const diasActivos = ORDEN_DISPLAY.filter((d) => franjasActivas.some((f) => f.diaSemana === d));
         const detalleHorarios =
           franjasActivas.length === 0
@@ -296,50 +312,20 @@ export default function OfertaGrooming() {
               />
               <Separador />
               <CeldaNavegacion
+                icono="ubicacion"
+                registro="aa"
+                titulo={t('ofertaGrooming.dondeFila')}
+                detalle={detalleDonde}
+                onPress={() => irAlTaller('servicios')}
+              />
+              <Separador />
+              <CeldaNavegacion
                 icono="vacaciones"
                 registro="aa"
                 titulo={t('negocio.vacaciones')}
                 detalle={hayBloqueoVigente ? t('ofertaPaseo.vacacionesCon') : t('ofertaPaseo.vacacionesSin')}
                 onPress={() => router.push('/vacaciones')}
               />
-            </Tarjeta>
-
-            {/* EL DÓNDE — fila INFORMATIVA (enmienda 1 del gate del mapa):
-                local en solo lectura + la puerta honesta de SU servicio */}
-            <Tarjeta>
-              <View style={{ gap: spacing[1] }}>
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.medium,
-                    fontSize: typography.size.base,
-                    color: theme.text.primary,
-                  }}
-                >
-                  {t('ofertaGrooming.dondeFila')}
-                </Text>
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.regular,
-                    fontSize: typography.size.sm,
-                    lineHeight: typography.size.sm * typography.leading.normal,
-                    color: theme.text.secondary,
-                  }}
-                >
-                  {t('ofertaGrooming.dondeLocal')}
-                  {prestador.direccion ? ` · ${prestador.direccion}` : ''}
-                  {prestador.ciudad ? ` · ${prestador.ciudad}` : ''}
-                </Text>
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.regular,
-                    fontSize: typography.size.sm,
-                    lineHeight: typography.size.sm * typography.leading.normal,
-                    color: theme.text.tertiary,
-                  }}
-                >
-                  {t('ofertaGrooming.dondeDomicilio')}
-                </Text>
-              </View>
             </Tarjeta>
 
             {/* re-gatear la SECUENCIA del wizard — SOLO dev (precedente S58) */}
