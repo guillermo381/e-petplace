@@ -24,8 +24,8 @@
  * anuncio "Etiqueta, opción N de M".
  */
 
-import { useState, type ReactNode } from 'react'
-import { Platform, Pressable, ScrollView, Text, View, type ViewStyle } from 'react-native'
+import { useEffect, useState, type ReactNode } from 'react'
+import { ActivityIndicator, Platform, Pressable, ScrollView, Text, View, type ViewStyle } from 'react-native'
 import Animated, { cubicBezier } from 'react-native-reanimated'
 
 import { typography } from '../tokens/typography'
@@ -53,6 +53,13 @@ export interface SelectorOpcionItem {
    *  mascotas). NO cambia la mecánica de selección ni el tratamiento
    *  tonal; sin adorno, el chip queda IDÉNTICO al de siempre. */
   adorno?: ReactNode
+  /** ENMIENDA S62 (decisión founder — server-toggles del grooming): el
+   *  chip INDIVIDUAL en carga. Receta de espera de Boton (Ley 13):
+   *  spinner recién pasados 150ms, el label queda montado invisible —
+   *  cero layout shift. El chip en carga NO responde a re-toques
+   *  (anti doble-disparo); el RESTO del selector sigue interactivo.
+   *  La pantalla es dueña del roundtrip (presentacional puro intacto). */
+  cargando?: boolean
 }
 
 export interface SelectorOpcionProps {
@@ -113,6 +120,18 @@ function Chip({
   const [enfocada, setEnfocada] = useState(false)
 
   const deshabilitada = opcion.deshabilitada === true
+  const cargando = opcion.cargando === true
+  // S62: regla emil calcada de Boton — el spinner recién pasados 150ms
+  // (roundtrips rápidos jamás parpadean).
+  const [mostrarSpinner, setMostrarSpinner] = useState(false)
+  useEffect(() => {
+    if (!cargando) {
+      setMostrarSpinner(false)
+      return
+    }
+    const timer = setTimeout(() => setMostrarSpinner(true), motion.duration.fast)
+    return () => clearTimeout(timer)
+  }, [cargando])
   const fondoReposo = theme.mode === 'dark' ? theme.bg.elevated : theme.bg.card
   // Patrón `'capaBg' in theme` de AvatarMascota/SelectorEspecie (memorial no tinta).
   const conCapa = seleccionada && 'capaBg' in theme
@@ -152,16 +171,17 @@ function Chip({
   return (
     <Pressable
       onPress={() => {
-        if (!deshabilitada) onSelect(opcion.codigo)
+        // S62: el chip en carga no responde — anti doble-disparo
+        if (!deshabilitada && !cargando) onSelect(opcion.codigo)
       }}
       onPressIn={() => {
-        if (!deshabilitada) setPresionada(true)
+        if (!deshabilitada && !cargando) setPresionada(true)
       }}
       onPressOut={() => setPresionada(false)}
       onFocus={() => setEnfocada(true)}
       onBlur={() => setEnfocada(false)}
       accessibilityRole={modo}
-      accessibilityState={{ checked: seleccionada, disabled: deshabilitada }}
+      accessibilityState={{ checked: seleccionada, disabled: deshabilitada, busy: cargando }}
       accessibilityLabel={`${opcion.etiqueta}, opción ${indice + 1} de ${total}`}
       style={[
         { flexGrow: crecer ? 1 : 0 },
@@ -203,7 +223,11 @@ function Chip({
           transitionTimingFunction: cubicBezier(...motion.easing.spring.bezier),
         }}
       >
-        {opcion.adorno ?? null}
+        {/* S62 (receta Boton): en carga, adorno y label quedan MONTADOS
+            invisibles — preservan el ancho exacto, cero layout shift. */}
+        {opcion.adorno ? (
+          <View style={mostrarSpinner ? { opacity: 0 } : null}>{opcion.adorno}</View>
+        ) : null}
         <Text
           numberOfLines={1}
           style={{
@@ -212,10 +236,19 @@ function Chip({
             // apagada = voz terciaria; el estado NO mueve el layout.
             // Ley 22: seleccionada = texto EN el acento (tonal)
             color: deshabilitada ? theme.text.tertiary : conCapa ? textoTonal : theme.text.primary,
+            opacity: mostrarSpinner ? 0 : 1,
           }}
         >
           {opcion.etiqueta}
         </Text>
+        {mostrarSpinner ? (
+          <View style={{ position: 'absolute', alignSelf: 'center', left: 0, right: 0, alignItems: 'center' }}>
+            <ActivityIndicator
+              size="small"
+              color={conCapa ? textoTonal : theme.text.secondary}
+            />
+          </View>
+        ) : null}
       </Animated.View>
     </Pressable>
   )

@@ -481,6 +481,22 @@ function EjemploSelectorOpcion() {
         }
         etiqueta="Multi + apagados (S56): ¿qué días? (J y D no cubiertos)"
       />
+      {/* Enmienda S62: cargando POR CHIP (server-toggles del grooming) —
+          el chip en carga muestra spinner sin layout shift y no responde
+          a re-toques; el resto sigue interactivo. Muestra FIJA en carga
+          (la galería no simula roundtrips). */}
+      <SelectorOpcion
+        multiple
+        acento="oficio"
+        opciones={[
+          { codigo: 'bano', etiqueta: 'Baño' },
+          { codigo: 'corte', etiqueta: 'Corte', cargando: true },
+          { codigo: 'unas', etiqueta: 'Uñas' },
+        ]}
+        seleccionadas={['bano', 'corte']}
+        onSelect={() => {}}
+        etiqueta="Cargando por chip (S62): 'Corte' en roundtrip, el resto vivo"
+      />
     </View>
   )
 }
