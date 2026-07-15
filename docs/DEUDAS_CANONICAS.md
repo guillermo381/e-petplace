@@ -1678,6 +1678,51 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 #### D-404 — Candidatos a promoción a packages/ui (patrones del techo del oficio)
 🟢 MEDIA. TechoOficio, ToggleTecho y FiltroOficio nacieron LOCALES en apps/prestador (S61-B12/B5 — legal: primera superficie). Cuando el patrón se repita en una segunda superficie, promueven a `packages/ui` con el método completo (Ley 11) — jamás se clonan. **Disparo: la segunda superficie que pida cualquiera de los tres.** Origen: cierre S61-B (asentado por la A).
 
+### Deudas de Sesión 62 (15 Jul 2026)
+
+#### D-405 — LA SESIÓN DE LEGALES: políticas, términos y páginas estáticas del ecosistema
+
+🔴 ALTA. El ecosistema opera sin su capa legal de cara al usuario — y
+parte de ella es requisito de tiendas (§3.5 compuerta de salida), otra
+parte es bloqueante de prestadores reales. Sesión dedicada
+founder+arquitecto (la letra de producto) + abogado ecuatoriano (el
+marco de responsabilidad). Inventario:
+
+1. **Términos y Condiciones de la plataforma** — el instrumento legal
+   real del marketplace (dueño ↔ prestador ↔ plataforma).
+2. **P20 — Custodia y responsabilidad durante el servicio**
+   (transversal): asignación de responsabilidad del prestador desde
+   entrega hasta retorno · protocolo de incidente con notificación
+   INMEDIATA a la familia (esto es producto y se construye) ·
+   autorización de emergencia veterinaria con techo de gasto ·
+   check-in/check-out con foto donde no hay track (recogida) · seguro
+   declarado y diferido. **Hueco declarado S62: rige TAMBIÉN al paseo
+   — P1-P19 no asignan responsabilidad civil de custodia.** Bloqueante
+   de abrir a prestadores reales, junto a §10.3 (la conversación con
+   el groomer/adiestrador real). Precondición §10.2 de
+   MODELO_ADIESTRAMIENTO v1.0.
+3. **Manejo de datos / política de privacidad** — requisito de tiendas
+   (URL obligatoria) + P5 menores + la bitácora de la familia como
+   dato conductual nuevo.
+4. **Aviso de uso de IA** — el Coach, extract-vacuna (Sonnet), y todo
+   agente futuro: qué hace la IA, con qué datos, y su voz honesta.
+5. **Páginas ESTÁTICAS** que sirvan todo lo anterior (web pública,
+   linkeables desde las apps y las fichas de tienda) — infra propia,
+   fuera del monorepo de apps o dentro, decisión de la sesión.
+
+**Puerta que abre (nota founder S62):** la letra de custodia + la
+evidencia que la plataforma ya genera (track GPS, EN VIVO, registro de
+incidencias, expediente, grupo curado de prestadores) es el material
+de NEGOCIACIÓN CON ASEGURADORAS — y "seguros" ya vive como
+"próximamente honesto" en DEFINICION_SOFTLAUNCH §2: la negociación
+convierte esa promesa en producto. Disparo comercial: post-P20, tarea
+del founder.
+
+**Disparo: sesión dedicada pre-soft-launch — antes de la compuerta de
+tiendas (§3.5) y antes de prestadores reales (la pata P20).** Origen:
+S62 (founder, sobre el hallazgo del hueco de custodia al escribir
+MODELO_ADIESTRAMIENTO).
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)
