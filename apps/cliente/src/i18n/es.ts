@@ -447,6 +447,7 @@ export const clienteEs = {
     modalidadLocal: 'En el local',
     modalidadDomicilio: 'A domicilio',
     modalidadDomicilioRecargo: 'A domicilio · +${{recargo}}',
+    modalidadDomicilioRecargoDesde: 'A domicilio · desde +${{recargo}}',
     dondeDomicilioTitulo: 'A dónde vamos',
     direccionDomicilioVoz: 'Para ir a tu casa necesitamos tu dirección. Se guarda una vez y la puedes editar siempre.',
     desgloseServicio: 'servicio',

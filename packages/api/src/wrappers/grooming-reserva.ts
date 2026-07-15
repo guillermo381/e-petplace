@@ -105,6 +105,9 @@ export interface OfertaGrooming {
   /** MIN del recargo entre groomers con domicilio (server-side);
    *  null = ninguno atiende domicilio. */
   recargo_domicilio_desde: number | null;
+  /** S61-A13 (escalera del precio honesto): true = el recargo VARÍA
+   *  entre groomers → la UI dice "desde", jamás un exacto que miente. */
+  recargo_domicilio_varia: boolean;
 }
 
 /** S61 D-392: la modalidad de la reserva grooming. */
@@ -145,6 +148,7 @@ export async function obtenerOfertaGrooming(
       atiende_domicilio: fila.atiende_domicilio,
       recargo_domicilio_desde:
         typeof fila.recargo_domicilio_desde === 'number' ? fila.recargo_domicilio_desde : null,
+      recargo_domicilio_varia: fila.recargo_domicilio_varia === true,
     });
   }
   return { ok: true, data: ofertas };

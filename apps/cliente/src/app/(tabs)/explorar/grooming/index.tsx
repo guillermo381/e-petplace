@@ -397,11 +397,14 @@ export default function GroomingCuando() {
                       {
                         codigo: 'domicilio',
                         etiqueta: (() => {
-                          const recargo =
-                            (servicioElegido ?? oferta[0])?.recargo_domicilio_desde ?? null;
-                          return recargo !== null && recargo > 0
-                            ? t('grooming.modalidadDomicilioRecargo', { recargo: recargo.toFixed(2) })
-                            : t('grooming.modalidadDomicilio');
+                          // S61-A13: exacto si no varía, "desde" si varía —
+                          // cero número exacto sobre un agregado que miente.
+                          const o = servicioElegido ?? oferta[0];
+                          const recargo = o?.recargo_domicilio_desde ?? null;
+                          if (recargo === null || recargo <= 0) return t('grooming.modalidadDomicilio');
+                          return o?.recargo_domicilio_varia
+                            ? t('grooming.modalidadDomicilioRecargoDesde', { recargo: recargo.toFixed(2) })
+                            : t('grooming.modalidadDomicilioRecargo', { recargo: recargo.toFixed(2) });
                         })(),
                       },
                     ]}

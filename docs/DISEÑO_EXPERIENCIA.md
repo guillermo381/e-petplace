@@ -562,6 +562,17 @@ el portado de grooming consumen:
   mascota elegida — comprables con su "desde" real y la tira de días;
   los horarios dicen su porqué con camino al paso 0. La identidad es
   ley: el patrón viaja entre servicios, el maquillaje no.
+  **Enmienda S61-A13 — LA ESCALERA DEL PRECIO HONESTO (letra firmada):**
+  todo precio pre-checkout declara su naturaleza — un AGREGADO que
+  varía entre prestadores dice **"desde $X"** (jamás un exacto que
+  miente: min + flag varia del server, patrón desde_precio); un
+  agregado que no varía dice el exacto; **las cards del QUIÉN dicen el
+  precio TOTAL exacto de ese prestador** para la selección vigente (en
+  mono — el momento donde el precio se sabe ANTES de pagar); el
+  **checkout desglosa** los componentes (base + extra + recargo,
+  server-side, solo cuando hay qué desglosar). Rige en ambos flujos y
+  en cada componente del precio (la duración del paseo, el servicio
+  del grooming, el recargo de domicilio).
 - **v1.7 (S60, 14 Jul 2026):** el Hogar es ESTADO Y ANTICIPACIÓN
   (S60-A6, D-366 parcial; el primer literal de Kary — "vista rápida
   desde la posición consolidada" — hecho zona). **Pieza 1, la zona TUS

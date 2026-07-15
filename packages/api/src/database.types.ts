@@ -15390,6 +15390,7 @@ export type Database = {
           atiende_local: boolean
           desde_precio: number
           recargo_domicilio_desde: number
+          recargo_domicilio_varia: boolean
           servicio_nombre: string
           tipo_servicio: string
           varia: boolean
