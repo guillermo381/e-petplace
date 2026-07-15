@@ -8,20 +8,26 @@ import { chromium } from 'playwright-core';
 // en la raíz del repo — el default es el scratch del sistema.
 const S = process.env.SCRATCH ?? tmpdir();
 
+// S61-B8: puertos parametrizables — los 8081/8082 pueden estar servidos
+// por terminales ajenas con bundle viejo (patrón CI=1, hallazgo S60);
+// PORT_PRESTADOR/PORT_CLIENTE apuntan al server propio de la tanda.
+const PUERTO_CLIENTE = process.env.PORT_CLIENTE ?? '8082';
+const PUERTO_PRESTADOR = process.env.PORT_PRESTADOR ?? '8081';
+
 const OBJETIVOS = [
   {
     app: 'cliente',
-    url: 'http://localhost:8082/bienvenida',
+    url: `http://localhost:${PUERTO_CLIENTE}/bienvenida`,
     es: ['Crear cuenta', 'Ya tengo cuenta'],
     en: ['Create account', 'I already have an account'],
   },
   {
-    // S55-A: post-D-290 (auth real) el raíz sin sesión muestra el
-    // sin-sesión digno — el saludo de HOY ya no es alcanzable sin login.
+    // S61-B8: el raíz sin sesión ES LA BIENVENIDA (letra founder) —
+    // el sin-sesión digno de S55 murió reemplazado por el landing.
     app: 'prestador',
-    url: 'http://localhost:8081/',
-    es: ['No hay una sesión activa', 'Inicia sesión para ver tu jornada.'],
-    en: ['No active session', 'Sign in to see your day.'],
+    url: `http://localhost:${PUERTO_PRESTADOR}/`,
+    es: ['El oficio de cuidar, con las herramientas que merece.', 'Ingresar'],
+    en: ['The craft of caring, with the tools it deserves.', 'Sign in'],
   },
 ];
 

@@ -18,7 +18,7 @@
 
 import { useCallback, useState } from 'react';
 import { View } from 'react-native';
-import { Tabs, useFocusEffect, useRouter } from 'expo-router';
+import { Tabs, useFocusEffect } from 'expo-router';
 import {
   BarraTabs,
   Boton,
@@ -32,6 +32,7 @@ import {
 import { cerrarSesion, obtenerMiPrestador, obtenerSesion } from '@epetplace/api';
 
 import { apiLista } from '@/lib/api';
+import { BienvenidaPrestador } from '@/components/bienvenida';
 import { IconoCuenta, IconoHoy, IconoMascotas, IconoNegocio } from '@/components/iconos-tabs';
 import { useTraduccion } from '@/i18n';
 
@@ -45,7 +46,6 @@ type EstadoSesionRaiz =
 export default function TabsLayout() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
-  const router = useRouter();
   const [sesion, setSesion] = useState<EstadoSesionRaiz>('verificando');
   const [intento, setIntento] = useState(0);
   const [saliendo, setSaliendo] = useState(false);
@@ -97,22 +97,10 @@ export default function TabsLayout() {
   }
 
   if (sesion !== 'ok' && 'sin_sesion' in sesion) {
-    // sin sesión CONFIRMADO → la invitación digna; el login se enchufa acá
-    return (
-      <View style={{ flex: 1, backgroundColor: theme.bg.base, justifyContent: 'center', padding: spacing[5] }}>
-        <EstadoVacio
-          titulo={t('sesion.sinSesion')}
-          descripcion={t('sesion.sinSesionDetalle')}
-          accion={
-            <Boton
-              variante="primario"
-              etiqueta={t('sesion.iniciarSesion')}
-              onPress={() => router.push('/login')}
-            />
-          }
-        />
-      </View>
-    );
+    // sin sesión CONFIRMADO → LA BIENVENIDA (S61-B8, letra founder):
+    // el landing con la voz del grupo curado; el EstadoVacio de S51
+    // murió — error y sin-rol conservan el suyo.
+    return <BienvenidaPrestador />;
   }
 
   if (sesion !== 'ok' && 'sin_rol' in sesion) {

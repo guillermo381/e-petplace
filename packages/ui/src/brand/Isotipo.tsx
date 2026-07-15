@@ -30,14 +30,19 @@ export type IsotipoVariant = 'tinta' | 'blanco' | 'gradiente'
 export function Isotipo({
   size = 32,
   variant = 'tinta',
+  color,
 }: {
   /** Alto en px; el ancho se deriva del aspect ratio del viewBox. */
   size?: number
   variant?: IsotipoVariant
+  /** S61-B8 (enmienda ADITIVA, letra founder de la bienvenida del
+   *  prestador: isotipo en tealDark): override puntual del color de
+   *  relleno — solo aplica sobre tinta/blanco, jamás sobre gradiente. */
+  color?: string
 }) {
   const width = (size * VIEWBOX_W) / VIEWBOX_H
   const fill =
-    variant === 'tinta' ? '#1D1A2E' : variant === 'blanco' ? '#FFFFFF' : 'url(#isoGrad)'
+    variant === 'gradiente' ? 'url(#isoGrad)' : (color ?? (variant === 'tinta' ? '#1D1A2E' : '#FFFFFF'))
 
   return (
     <Svg width={width} height={size} viewBox={`0 0 ${VIEWBOX_W} ${VIEWBOX_H}`}>

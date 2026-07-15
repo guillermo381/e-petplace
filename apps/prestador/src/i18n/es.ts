@@ -15,12 +15,26 @@ export const prestadorEs = {
     // la tab Cuenta (letra P17, S57-B) · LOTE S57, GATE PENDIENTE
     cuenta: 'Cuenta',
   },
+  // LA BIENVENIDA del prestador (S61-B8, letra founder) · LOTE S61, GATE PENDIENTE
+  bienvenida: {
+    paraPrestadores: 'para prestadores',
+    titular: 'El oficio de cuidar, con las herramientas que merece.',
+    subtitulo: 'Bienvenido al grupo curado de prestadores fundadores.',
+    ingresar: 'Ingresar',
+    solicitarAcceso: '¿Eres prestador nuevo? Solicitar acceso',
+    selloIdentidad: 'Identidad verificada',
+    selloPagos: 'Pagos protegidos',
+    solicitarTitulo: 'Solicitar acceso',
+    solicitarCuerpoTitulo: 'Un grupo que empieza curado.',
+    solicitarCuerpo:
+      'Los prestadores fundadores entran por invitación del equipo de e-PetPlace. Cuando abramos solicitudes, este va a ser el lugar.',
+    volver: 'Volver',
+  },
   sesion: {
     // El estado honesto del raíz (S51; auth real desde S54/D-290):
-    // sin sesión la app lo DICE apenas abre y ofrece entrar.
+    // sin sesión aterriza en LA BIENVENIDA (S61-B8) — sinSesion queda
+    // para la rama de error; el detalle y el CTA viejos murieron (Ley 37).
     sinSesion: 'No hay una sesión activa',
-    sinSesionDetalle: 'Inicia sesión para ver tu jornada.',
-    iniciarSesion: 'Iniciar sesión',
     // con sesión pero SIN negocio de prestador (D-290): jamás crash
     sinRol: 'Tu cuenta no tiene un negocio asociado',
     sinRolDetalle: 'Entraste como {{email}}. Esta app es para quienes ofrecen servicios en e-PetPlace — si es tu caso y no ves tu negocio, escríbenos.',

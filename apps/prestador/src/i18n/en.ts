@@ -15,10 +15,23 @@ export const prestadorEn = {
     // la tab Cuenta (letra P17, S57-B) · LOTE S57, GATE PENDIENTE · Espejo de es.ts
     cuenta: 'Account',
   },
+  // LA BIENVENIDA del prestador (S61-B8, letra founder) · LOTE S61, GATE PENDIENTE
+  bienvenida: {
+    paraPrestadores: 'for providers',
+    titular: 'The craft of caring, with the tools it deserves.',
+    subtitulo: 'Welcome to the curated group of founding providers.',
+    ingresar: 'Sign in',
+    solicitarAcceso: 'New provider? Request access',
+    selloIdentidad: 'Verified identity',
+    selloPagos: 'Protected payments',
+    solicitarTitulo: 'Request access',
+    solicitarCuerpoTitulo: 'A group that starts curated.',
+    solicitarCuerpo:
+      'Founding providers join by invitation from the e-PetPlace team. When we open requests, this will be the place.',
+    volver: 'Back',
+  },
   sesion: {
     sinSesion: 'No active session',
-    sinSesionDetalle: 'Sign in to see your day.',
-    iniciarSesion: 'Sign in',
     sinRol: "Your account doesn't have a business attached",
     sinRolDetalle: "You're signed in as {{email}}. This app is for those offering services on e-PetPlace — if that's you and you don't see your business, write to us.",
     reintentar: 'Try again',
