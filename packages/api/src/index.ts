@@ -269,6 +269,7 @@ export {
   obtenerFranjasHorario,
   crearFranjaHorario,
   actualizarFranjaHorario,
+  editarFranjaHorario,
   eliminarFranjaHorario,
   type BloquePaseo,
   type OfertaPaseoPropia,
@@ -277,6 +278,7 @@ export {
   type InputActualizarOfertaPaseo,
   type InputCrearFranja,
   type InputActualizarFranja,
+  type InputEditarFranja,
   type CodigoErrorConfiguracionPaseo,
 } from './wrappers/configuracionPaseo';
 

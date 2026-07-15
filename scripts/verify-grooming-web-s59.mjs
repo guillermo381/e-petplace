@@ -121,6 +121,17 @@ t = await esperar('Días y horarios', 40);
 check(t.includes('Marca los días y agrega la franja'), 'T4 la sección compartida de horarios');
 check(t.includes('Vacaciones'), 'T4b la celda-puente a vacaciones');
 check(t.includes('Tu agenda es una sola para todos tus servicios.'), 'T4c cura 3(a): la agenda única declarada');
+// S61-B5 (D-391): la franja se edita EN SU LUGAR — la Hoja del grupo
+// ofrece Desde/Hasta pre-cargados (solo lectura: Listo no se toca)
+const grupoFranja = page.getByRole('button', { name: /\d{2}:\d{2} – \d{2}:\d{2}/ }).first();
+if ((await grupoFranja.count()) > 0) {
+  await grupoFranja.click();
+  await page.waitForTimeout(800);
+  t = await texto();
+  check(t.includes('Desde') && t.includes('Hasta') && t.includes('Listo'), 'T4d la Hoja del grupo edita horas EN SU LUGAR (S61-B5)');
+} else {
+  check(false, 'T4d sin franjas para abrir la Hoja del grupo');
+}
 
 // ── T5: el WIZARD de DOS pasos por URL ──
 await page.goto(`http://localhost:${PORT}/grooming/taller?modo=wizard`, { waitUntil: 'networkidle' });

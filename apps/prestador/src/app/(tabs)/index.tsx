@@ -53,6 +53,8 @@ import {
   obtenerCitasPaseoDelDia,
   obtenerMascotasAtendidas,
   obtenerMiPrestador,
+  obtenerOfertasGroomingPropias,
+  obtenerOfertasPaseoPropias,
   resolverUrlsFotos,
   type BloqueoPrestador,
   type CitaAgendaPaseo,
@@ -76,6 +78,11 @@ type Pantalla =
       groomingIds: Set<string>;
       bloqueos: BloqueoPrestador[];
       atendidas: Set<string>;
+      /** S61-B5: oficios con oferta ACTIVA — con ≥2 nace el filtro del
+       *  día. Si el fetch de ofertas falla, el control no existe: es
+       *  azúcar de vista, jamás esconde citas (las citas tienen su
+       *  propio camino de error, Ley 13 intacta). */
+      oficios: { paseo: boolean; grooming: boolean };
     };
 
 // ═══════════ ZONA 3 — NOVEDADES (hueco estructural) ═══════════
@@ -197,6 +204,8 @@ export default function Hoy() {
   const [refrescando, setRefrescando] = useState(false);
   // D-317: el segmento Hoy/Semana. 'semana' = los próximos 7 días.
   const [vista, setVista] = useState<'hoy' | 'semana'>('hoy');
+  // S61-B5: el filtro por oficio — vista del día, JAMÁS persiste.
+  const [filtroOficio, setFiltroOficio] = useState<'todos' | 'paseo' | 'grooming'>('todos');
   // foto_url guarda PATH (S47-B0.2): firma en batch (1 round-trip);
   // un path no firmable cae a la huella digna.
   const [urlsFotos, setUrlsFotos] = useState<Map<string, string>>(new Map());
@@ -216,7 +225,7 @@ export default function Hoy() {
     // UN fetch cubre las dos vistas (S57-B1): rango hoy..hoy+6 — la vista
     // Hoy filtra por `desde`; la Semana agrupa el rango entero.
     const desde = hoyLocal();
-    const [r, rg, bloqueos, atendidas] = await Promise.all([
+    const [r, rg, bloqueos, atendidas, ofPaseo, ofGrooming] = await Promise.all([
       obtenerCitasPaseoDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: sumarDias(desde, 6) }),
       // S60-B1: la jornada es UNA — las citas de grooming entran a la
       // misma lista con su tipo (el subtítulo ya lo dice) y su ruta.
@@ -226,6 +235,10 @@ export default function Hoy() {
       // la señal "Primera vez" de la Zona 1 (solo lo REAL): mascota
       // sin ninguna atención cerrada con este prestador
       obtenerMascotasAtendidas(prestador.data.id),
+      // S61-B5: la condición del filtro por oficio — los wrappers de
+      // ofertas EXISTENTES (cero query nueva)
+      obtenerOfertasPaseoPropias(prestador.data.id),
+      obtenerOfertasGroomingPropias(prestador.data.id),
     ]);
     if (!r.ok) {
       setPantalla({ estado: 'error', mensaje: r.mensaje });
@@ -260,6 +273,10 @@ export default function Hoy() {
       groomingIds: new Set(rg.data.map((c) => c.id)),
       bloqueos: bloqueos.data,
       atendidas: new Set(atendidas.ok ? atendidas.data.map((m) => m.mascota_id) : []),
+      oficios: {
+        paseo: ofPaseo.ok && ofPaseo.data.some((o) => o.activo),
+        grooming: ofGrooming.ok && ofGrooming.data.some((o) => o.activo),
+      },
     });
   }, []);
 
@@ -280,8 +297,19 @@ export default function Hoy() {
   // El fetch trae el rango hoy..hoy+6; la vista Hoy opera sobre el día base.
   const citas = pantalla.estado === 'listo' ? pantalla.citas : [];
   const desde = pantalla.estado === 'listo' ? pantalla.desde : null;
-  const citasHoy = desde === null ? [] : citas.filter((c) => c.fecha === desde);
   const groomingIds = pantalla.estado === 'listo' ? pantalla.groomingIds : new Set<string>();
+  // S61-B5: con DOS oficios activos nace el filtro; con uno, el control
+  // no existe (cero UI muerta) y la lista es la de siempre.
+  const dosOficios = pantalla.estado === 'listo' && pantalla.oficios.paseo && pantalla.oficios.grooming;
+  const citasVisibles =
+    !dosOficios || filtroOficio === 'todos'
+      ? citas
+      : citas.filter((c) => groomingIds.has(c.id) === (filtroOficio === 'grooming'));
+  const citasHoy = desde === null ? [] : citasVisibles.filter((c) => c.fecha === desde);
+  // el vacío FILTRADO se dice distinto: hay jornada, no de este servicio
+  const hoyVacioPorFiltro =
+    citasHoy.length === 0 && dosOficios && filtroOficio !== 'todos' && desde !== null &&
+    citas.some((c) => c.fecha === desde);
 
   // ── Zona 1: la destacada — en_curso (Ley 7: UNA con CitaEnVivo) o,
   // si no hay nada corriendo, la PRÓXIMA cita aún no cerrada del día.
@@ -310,7 +338,7 @@ export default function Hoy() {
             iso,
             esHoy: i === 0,
             bloqueado: diaBloqueado(iso, pantalla.bloqueos),
-            citas: citas.filter((c) => c.fecha === iso),
+            citas: citasVisibles.filter((c) => c.fecha === iso),
           };
         });
 
@@ -341,6 +369,23 @@ export default function Hoy() {
             ]}
             activo={vista}
             onCambio={(codigo) => setVista(codigo === 'semana' ? 'semana' : 'hoy')}
+          />
+        )}
+
+        {/* S61-B5: el filtro por oficio — SOLO con dos oficios activos
+            (Ley 19.3: vistas exclusivas de la MISMA jornada) */}
+        {dosOficios && (
+          <SelectorSegmentado
+            etiqueta={t('agenda.filtroEtiqueta')}
+            segmentos={[
+              { codigo: 'todos', etiqueta: t('agenda.filtroTodos') },
+              { codigo: 'paseo', etiqueta: t('agenda.filtroPaseos') },
+              { codigo: 'grooming', etiqueta: t('agenda.filtroEstetica') },
+            ]}
+            activo={filtroOficio}
+            onCambio={(codigo) =>
+              setFiltroOficio(codigo === 'paseo' ? 'paseo' : codigo === 'grooming' ? 'grooming' : 'todos')
+            }
           />
         )}
 
@@ -384,8 +429,13 @@ export default function Hoy() {
 
         {pantalla.estado === 'listo' && vista === 'hoy' && citasHoy.length === 0 && (
           // S52-P7b: registro sereno — el día vacío se dice en el
-          // flujo, sin display que grite (dosis baja).
-          <EstadoVacio registro="seccion" titulo={t('agenda.vacio')} descripcion={t('agenda.vacioDetalle')} />
+          // flujo, sin display que grite (dosis baja). S61-B5: el vacío
+          // POR FILTRO dice su verdad (hay jornada, no de este servicio).
+          hoyVacioPorFiltro ? (
+            <EstadoVacio registro="seccion" titulo={t('agenda.filtroVacio')} />
+          ) : (
+            <EstadoVacio registro="seccion" titulo={t('agenda.vacio')} descripcion={t('agenda.vacioDetalle')} />
+          )
         )}
 
         {/* ── Zona 1 — ahora / lo siguiente (preside) ── */}

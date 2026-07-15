@@ -68,6 +68,12 @@ export const prestadorEs = {
     vistaEtiqueta: 'Agenda',
     vistaHoy: 'Hoy',
     vistaSemana: 'Semana',
+    // S61-B5: el filtro por oficio (solo con ≥2 oficios activos) · LOTE S61, GATE PENDIENTE
+    filtroEtiqueta: 'Ver por servicio',
+    filtroTodos: 'Todos',
+    filtroPaseos: 'Paseos',
+    filtroEstetica: 'Estética',
+    filtroVacio: 'Hoy no tienes citas de este servicio.',
     diaHoy: 'Hoy',
     diaLibre: 'Libre',
     diaBloqueado: 'De vacaciones',

@@ -35,6 +35,7 @@ import {
 import {
   actualizarFranjaHorario,
   crearFranjaHorario,
+  editarFranjaHorario,
   eliminarFranjaHorario,
   type FranjaHorario,
 } from '@epetplace/api';
@@ -52,6 +53,10 @@ export interface DraftFranja {
   quitar: boolean;
   baseCupo: number | null;
   baseActivo: boolean | null;
+  // S61-B5 (D-391): la edición EN SU LUGAR — las horas también son
+  // borrador con base; null = franja nueva (sin base que comparar)
+  baseHoraInicio: string | null;
+  baseHoraFin: string | null;
 }
 
 // display lunes-primero; el ÍNDICE que viaja a DB sigue siendo 0=Domingo
@@ -75,12 +80,20 @@ export function draftDesdeFranja(f: FranjaHorario): DraftFranja {
     quitar: false,
     baseCupo: f.maxCitasPorSlot,
     baseActivo: f.activo,
+    baseHoraInicio: f.horaInicio,
+    baseHoraFin: f.horaFin,
   };
 }
 
 export function franjaDirty(f: DraftFranja): boolean {
   if (f.id === null) return !f.quitar;
-  return f.quitar || f.cupo !== f.baseCupo || f.activo !== f.baseActivo;
+  return (
+    f.quitar ||
+    f.cupo !== f.baseCupo ||
+    f.activo !== f.baseActivo ||
+    f.horaInicio !== f.baseHoraInicio ||
+    f.horaFin !== f.baseHoraFin
+  );
 }
 
 /**
@@ -108,9 +121,40 @@ export async function aplicarDiffFranjas(
       if (!r.ok) return { ok: false, franjas: vivas, error: { tipo: 'otro', mensaje: r.mensaje } };
       vivas = vivas.filter((x) => x.key !== f.key);
     } else if (f.id !== null) {
-      const r = await actualizarFranjaHorario({ id: f.id, maxCitasPorSlot: f.cupo, activo: f.activo });
-      if (!r.ok) return { ok: false, franjas: vivas, error: { tipo: 'otro', mensaje: r.mensaje } };
-      pisar(f.key, { baseCupo: f.cupo, baseActivo: f.activo });
+      // S61-B5 (D-391): horas cambiadas = la vía de EDICIÓN (valida
+      // solape server-side con exclusión de la propia); solo cupo/estado
+      // = la vía liviana de siempre
+      const horasCambiaron = f.horaInicio !== f.baseHoraInicio || f.horaFin !== f.baseHoraFin;
+      if (horasCambiaron) {
+        const r = await editarFranjaHorario({
+          id: f.id,
+          prestadorId,
+          horaInicio: f.horaInicio,
+          horaFin: f.horaFin,
+          maxCitasPorSlot: f.cupo,
+          activo: f.activo,
+        });
+        if (!r.ok) {
+          return {
+            ok: false,
+            franjas: vivas,
+            error:
+              r.codigo === 'franja_solapada'
+                ? { tipo: 'solape', diaSemana: f.diaSemana }
+                : { tipo: 'otro', mensaje: r.mensaje },
+          };
+        }
+        pisar(f.key, {
+          baseCupo: f.cupo,
+          baseActivo: f.activo,
+          baseHoraInicio: f.horaInicio,
+          baseHoraFin: f.horaFin,
+        });
+      } else {
+        const r = await actualizarFranjaHorario({ id: f.id, maxCitasPorSlot: f.cupo, activo: f.activo });
+        if (!r.ok) return { ok: false, franjas: vivas, error: { tipo: 'otro', mensaje: r.mensaje } };
+        pisar(f.key, { baseCupo: f.cupo, baseActivo: f.activo });
+      }
     } else if (!f.quitar) {
       const r = await crearFranjaHorario({
         prestadorId,
@@ -133,6 +177,21 @@ export async function aplicarDiffFranjas(
     }
   }
   return { ok: true, franjas: vivas };
+}
+
+/** La grilla de horas (una sola verdad — la usan la Hoja de franja
+ *  nueva y la edición del grupo, S61-B5). */
+function ListaHoras({ minimo, onElegir }: { minimo: string | null; onElegir: (h: string) => void }) {
+  return (
+    <HojaScroll>
+      {HORAS.filter((h) => (minimo !== null ? h > minimo : true)).map((h, i) => (
+        <View key={h}>
+          {i > 0 && <Separador />}
+          <Celda interactiva accessibilityRole="button" titulo={h} onPress={() => onElegir(h)} />
+        </View>
+      ))}
+    </HojaScroll>
+  );
 }
 
 function VozSecundaria({ texto }: { texto: string }) {
@@ -174,6 +233,10 @@ export function SeccionHorarios({
   const [diasSel, setDiasSel] = useState<number[]>([]);
   const [hojaGrupo, setHojaGrupo] = useState<string[] | null>(null);
   const [confirmandoQuitar, setConfirmandoQuitar] = useState(false);
+  // S61-B5 (D-391): la edición de HORAS del grupo, en su lugar
+  const [vistaGrupo, setVistaGrupo] = useState<'form' | 'desde' | 'hasta'>('form');
+  const [desdeEdit, setDesdeEdit] = useState<string | null>(null);
+  const [hastaEdit, setHastaEdit] = useState<string | null>(null);
   const [creandoFranja, setCreandoFranja] = useState(false);
   const [vistaNueva, setVistaNueva] = useState<'form' | 'desde' | 'hasta'>('form');
   const [desdeSel, setDesdeSel] = useState<string | null>(null);
@@ -243,6 +306,8 @@ export function SeccionHorarios({
         quitar: false,
         baseCupo: null,
         baseActivo: null,
+        baseHoraInicio: null,
+        baseHoraFin: null,
       };
     });
     onCambio([...franjas, ...nuevas]);
@@ -308,6 +373,9 @@ export function SeccionHorarios({
                   onPress={() => {
                     setHojaGrupo(miembros.map((x) => x.key));
                     setCupoSel(f.cupo);
+                    setDesdeEdit(f.horaInicio);
+                    setHastaEdit(f.horaFin);
+                    setVistaGrupo('form');
                     setConfirmandoQuitar(false);
                   }}
                 />
@@ -337,11 +405,45 @@ export function SeccionHorarios({
             : ''
         }
       >
-        {grupoEnHoja !== null && grupoEnHoja.length > 0 && (
+        {grupoEnHoja !== null && grupoEnHoja.length > 0 && vistaGrupo !== 'form' ? (
+          // S61-B5: el picker de horas de la EDICIÓN — la misma grilla
+          <ListaHoras
+            minimo={vistaGrupo === 'hasta' ? desdeEdit : null}
+            onElegir={(h) => {
+              if (vistaGrupo === 'desde') {
+                setDesdeEdit(h);
+                if (hastaEdit !== null && hastaEdit <= h) setHastaEdit(null);
+              } else {
+                setHastaEdit(h);
+              }
+              setVistaGrupo('form');
+            }}
+          />
+        ) : grupoEnHoja !== null && grupoEnHoja.length > 0 ? (
           <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
             <VozSecundaria texto={t('taller.diasAplica', { dias: diasDeGrupo(grupoEnHoja) })} />
             {!confirmandoQuitar ? (
               <>
+                {/* S61-B5 (D-391): las HORAS se editan en su lugar —
+                    murió el eliminar+crear como único camino */}
+                <Tarjeta relleno="ninguno">
+                  <Celda
+                    interactiva
+                    accessibilityRole="button"
+                    titulo={t('horarios.desde')}
+                    metadataMono={desdeEdit ?? undefined}
+                    onPress={() => setVistaGrupo('desde')}
+                  />
+                  <Separador />
+                  <Celda
+                    interactiva
+                    accessibilityRole="button"
+                    titulo={t('horarios.hasta')}
+                    metadataMono={hastaEdit ?? undefined}
+                    subtitulo={hastaEdit === null ? t('horarios.horaElegir') : undefined}
+                    onPress={() => setVistaGrupo('hasta')}
+                  />
+                </Tarjeta>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
                   <Text
                     style={{
@@ -366,8 +468,28 @@ export function SeccionHorarios({
                   variante="primario"
                   etiqueta={t('taller.listo')}
                   bloque
+                  deshabilitado={desdeEdit === null || hastaEdit === null}
                   onPress={() => {
-                    actualizarFranjas(grupoEnHoja.map((f) => f.key), { cupo: cupoSel });
+                    if (desdeEdit === null || hastaEdit === null) return;
+                    // solape en BORRADOR por cada día del grupo, contra
+                    // las franjas AJENAS al grupo (el wrapper re-valida
+                    // al guardar con exclusión de la propia)
+                    const keys = grupoEnHoja.map((f) => f.key);
+                    for (const m of grupoEnHoja) {
+                      const choca = franjas.some(
+                        (f) =>
+                          !keys.includes(f.key) &&
+                          !f.quitar &&
+                          f.diaSemana === m.diaSemana &&
+                          desdeEdit < f.horaFin &&
+                          f.horaInicio < hastaEdit,
+                      );
+                      if (choca) {
+                        mostrar({ texto: `${vozDia(m.diaSemana)}: ${t('horarios.solape')}`, variante: 'error' });
+                        return;
+                      }
+                    }
+                    actualizarFranjas(keys, { cupo: cupoSel, horaInicio: desdeEdit, horaFin: hastaEdit });
                     setHojaGrupo(null);
                   }}
                 />
@@ -413,7 +535,7 @@ export function SeccionHorarios({
               </>
             )}
           </View>
-        )}
+        ) : null}
       </Hoja>
 
       {/* Hoja: nueva franja — aplica a los DÍAS MARCADOS (v3) */}

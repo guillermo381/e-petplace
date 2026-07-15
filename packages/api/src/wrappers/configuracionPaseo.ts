@@ -412,6 +412,81 @@ export async function actualizarFranjaHorario(
   return { ok: true, data: mapearFranja(data) };
 }
 
+export interface InputEditarFranja {
+  id: string;
+  prestadorId: string;
+  /** 'HH:MM' en la grilla de 30 (misma grilla del alta). */
+  horaInicio: string;
+  horaFin: string;
+  maxCitasPorSlot?: number;
+  activo?: boolean;
+}
+
+/**
+ * EDITA UNA FRANJA EN SU LUGAR (S61-B5, D-391 — muere el eliminar+crear).
+ * Función NUEVA aditiva: actualizarFranjaHorario (activo/cupo) queda
+ * intacta. Valida el SOLAPE contra las franjas del día EXCLUYENDO la
+ * propia (la misma exclusión que D-349 puso en el motor de agenda) — el
+ * chequeo y la escritura viven JUNTOS para que no diverjan. El día es
+ * de LA FILA (se lee por id): la edición no mueve la franja de día.
+ * MISMO nivel de garantía que crearFranjaHorario: el chequeo vive en la
+ * puerta única porque el UNIQUE del schema no protege con servicio_id
+ * NULL (relevado S55); el candado server-side sería cirugía de motor —
+ * pedido a la A si la mesa lo dispara.
+ */
+export async function editarFranjaHorario(
+  input: InputEditarFranja,
+): Promise<ResultadoWrapper<FranjaHorario, CodigoErrorConfiguracionPaseo>> {
+  const { data: auth } = await getClient().auth.getUser();
+  if (!auth.user?.id) return falla('sin_sesion');
+
+  if (!HORA_RE.test(input.horaInicio) || !HORA_RE.test(input.horaFin)) return falla('rango_horario_invalido');
+  if (input.horaFin <= input.horaInicio) return falla('rango_horario_invalido');
+  if (
+    input.maxCitasPorSlot !== undefined &&
+    (!Number.isInteger(input.maxCitasPorSlot) || input.maxCitasPorSlot < 1 || input.maxCitasPorSlot > 4)
+  ) {
+    return falla('cupo_invalido');
+  }
+
+  const { data: fila, error: errFila } = await getClient()
+    .from('prestador_horarios')
+    .select('id, dia_semana')
+    .eq('id', input.id)
+    .maybeSingle();
+  if (errFila) return falla('error_desconocido');
+  if (fila === null) return falla('no_encontrada');
+
+  const { data: delDia, error: errDia } = await getClient()
+    .from('prestador_horarios')
+    .select('id, hora_inicio, hora_fin')
+    .eq('prestador_id', input.prestadorId)
+    .is('servicio_id', null)
+    .is('empleado_id', null)
+    .eq('dia_semana', fila.dia_semana)
+    .neq('id', input.id);
+  if (errDia || !Array.isArray(delDia)) return falla('error_desconocido');
+  const solapa = delDia.some(
+    (f) => input.horaInicio < aHoraCorta(f.hora_fin) && input.horaFin > aHoraCorta(f.hora_inicio),
+  );
+  if (solapa) return falla('franja_solapada');
+
+  const cambios: UpdateFranja = { hora_inicio: input.horaInicio, hora_fin: input.horaFin };
+  if (input.activo !== undefined) cambios.activo = input.activo;
+  if (input.maxCitasPorSlot !== undefined) cambios.max_citas_por_slot = input.maxCitasPorSlot;
+
+  const { data, error } = await getClient()
+    .from('prestador_horarios')
+    .update(cambios)
+    .eq('id', input.id)
+    .select(SELECT_FRANJA)
+    .maybeSingle();
+
+  if (error) return falla('error_desconocido');
+  if (data === null) return falla('no_encontrada');
+  return { ok: true, data: mapearFranja(data) };
+}
+
 /**
  * Quita una franja. Las franjas son CONFIGURACIÓN de disponibilidad, no
  * historia — borrarlas es legal (la regla 7.8 protege eventos y plata);
