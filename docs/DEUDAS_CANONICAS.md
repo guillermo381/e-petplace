@@ -1723,6 +1723,9 @@ tiendas (§3.5) y antes de prestadores reales (la pata P20).** Origen:
 S62 (founder, sobre el hallazgo del hueco de custodia al escribir
 MODELO_ADIESTRAMIENTO).
 
+#### D-406 — El legacy 2052f109: franjas prestador/empleado duplicadas pintan horas dobles en la grilla
+🟢 MEDIA. Hallazgo lateral del relevamiento D-386 (S62-A, contra DB viva): el prestador legacy `2052f109-143a-41d1-b338-de8973d8fb20` tiene 5 pares de franjas al MISMO día/hora — una del prestador (`empleado_id` NULL) y una de su empleado `2e989931` (lun-vie 08:00-18:00, slot 30, cupo 1, todas activas). Son filas LEGÍTIMAS (recursos distintos — por eso el UNIQUE nuevo de D-386 lleva `empleado_id` en la clave), pero **el motor es CIEGO a empleados** (relevamiento S55): `_inicios_disponibles_prestador` genera slots desde TODAS las franjas del prestador sin distinguir ni deduplicar — cada hora de ese prestador puede salir DUPLICADA en la grilla del dueño, y el cupo efectivo se consulta igual para ambas (el techo real lo pone `_agenda_ocupacion`, global). Sin efecto en los prestadores demo del F1 (cero empleados). Cura probable: DISTINCT en el lector o la integración real de empleados al motor — se decide cuando el disparo suene. **Sin cura en S62 (letra founder: anotada, jamás parchada). Disparo: el primer prestador real con empleados, o la sesión que integre `prestador_empleados` al motor.** Origen: S62-A (relevamiento D-386).
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)
