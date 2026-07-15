@@ -10857,6 +10857,7 @@ export type Database = {
           lon: number | null
           matricula_profesional: string | null
           metadata: Json
+          modo_horarios: string
           motivo_rechazo: string | null
           nombre_comercial: string
           radio_cobertura_km: number | null
@@ -10893,6 +10894,7 @@ export type Database = {
           lon?: number | null
           matricula_profesional?: string | null
           metadata?: Json
+          modo_horarios?: string
           motivo_rechazo?: string | null
           nombre_comercial: string
           radio_cobertura_km?: number | null
@@ -10929,6 +10931,7 @@ export type Database = {
           lon?: number | null
           matricula_profesional?: string | null
           metadata?: Json
+          modo_horarios?: string
           motivo_rechazo?: string | null
           nombre_comercial?: string
           radio_cobertura_km?: number | null
@@ -15115,6 +15118,7 @@ export type Database = {
         Args: { p_tipo_servicio: string }
         Returns: string
       }
+      elegir_modo_horarios: { Args: { p_modo: string }; Returns: string }
       email_exists: { Args: { check_email: string }; Returns: boolean }
       email_status_para_invitacion: {
         Args: { p_email: string }
