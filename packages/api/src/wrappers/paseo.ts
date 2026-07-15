@@ -297,7 +297,9 @@ export interface DireccionCitaPaseo {
 
 // Reader L-124: siempre las mismas claves, null sin dato. Snapshot ausente
 // o sin una dirección legible → null honesto (la pantalla lo declara).
-function parseDireccionSnapshot(v: Json | null): DireccionCitaPaseo | null {
+// S61-B6: EXPORTADO — el grooming a domicilio lee el MISMO snapshot
+// D-339 (una sola verdad de parseo; grooming-atencion.ts lo consume).
+export function parseDireccionSnapshot(v: Json | null): DireccionCitaPaseo | null {
   if (typeof v !== 'object' || v === null || Array.isArray(v)) return null;
   const direccion = v['direccion'];
   if (typeof direccion !== 'string' || direccion.length === 0) return null;

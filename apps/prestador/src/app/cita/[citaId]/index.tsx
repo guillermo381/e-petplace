@@ -13,7 +13,7 @@
 // ─────────────────────────────────────────────────────────────────────
 
 import { useCallback, useRef, useState } from 'react';
-import { Linking, Platform, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   AvatarMascota,
@@ -37,10 +37,10 @@ import {
   obtenerPaseoPorCita,
   resolverUrlFoto,
   type CitaAgendaPaseo,
-  type DireccionCitaPaseo,
 } from '@epetplace/api';
 
 import { verificarSesion } from '@/lib/api';
+import { SeccionDireccion } from '@/components/seccion-direccion';
 import { useTraduccion } from '@/i18n';
 
 type Pantalla =
@@ -61,87 +61,8 @@ function capitalizar(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-// D-339 (S56-B TAREA 3): la URL del mapa del SISTEMA por plataforma.
-// Con lat/lon apunta exacto; sin coordenadas, búsqueda por el texto.
-function urlMapa(d: DireccionCitaPaseo): string {
-  const consulta = [d.direccion, d.sector, d.ciudad]
-    .filter((x): x is string => x !== null)
-    .join(', ');
-  const q = encodeURIComponent(consulta);
-  if (Platform.OS === 'ios') {
-    return d.lat !== null && d.lon !== null
-      ? `http://maps.apple.com/?ll=${d.lat},${d.lon}&q=${q}`
-      : `http://maps.apple.com/?q=${q}`;
-  }
-  if (Platform.OS === 'android') {
-    return d.lat !== null && d.lon !== null
-      ? `geo:${d.lat},${d.lon}?q=${d.lat},${d.lon}(${q})`
-      : `geo:0,0?q=${q}`;
-  }
-  return d.lat !== null && d.lon !== null
-    ? `https://www.google.com/maps/search/?api=1&query=${d.lat},${d.lon}`
-    : `https://www.google.com/maps/search/?api=1&query=${q}`;
-}
-
-/**
- * A dónde ir — D-339 (S56-B TAREA 3): pinta lo que la FILA de la cita trae
- * (snapshot congelado al pagar; contrato de la migración 20260712090000).
- * null honesto para citas sin dirección (históricas / hogar sin dirección
- * al reservar). Dosis baja: cero acento, acción terciaria en ghost.
- */
-function SeccionDireccion({ direccion }: { direccion: DireccionCitaPaseo | null }) {
-  const { theme } = useTheme();
-  const { t } = useTraduccion();
-  const { mostrar } = useAviso();
-  const vozSecundaria = {
-    fontFamily: typography.family.sans.regular,
-    fontSize: typography.size.sm,
-    lineHeight: typography.size.sm * 1.4,
-    color: theme.text.secondary,
-  };
-
-  return (
-    <Tarjeta elevacion="plana" relleno="amplio">
-      <View style={{ gap: spacing[2] }}>
-        <Text style={vozSecundaria}>{t('cita.direccionTitulo')}</Text>
-        {direccion === null ? (
-          <Text style={vozSecundaria}>{t('cita.direccionSinDato')}</Text>
-        ) : (
-          <>
-            <Text
-              style={{
-                fontFamily: typography.family.sans.regular,
-                fontSize: typography.size.base,
-                lineHeight: typography.size.base * 1.4,
-                color: theme.text.primary,
-              }}
-            >
-              {direccion.direccion}
-            </Text>
-            {direccion.sector !== null || direccion.ciudad !== null ? (
-              <Text style={vozSecundaria}>
-                {[direccion.sector, direccion.ciudad].filter((x): x is string => x !== null).join(' · ')}
-              </Text>
-            ) : null}
-            {direccion.referencias !== null ? <Text style={vozSecundaria}>{direccion.referencias}</Text> : null}
-            <View style={{ alignSelf: 'flex-start' }}>
-              <Boton
-                variante="ghost"
-                tamaño="sm"
-                etiqueta={t('cita.direccionAbrirMapa')}
-                onPress={() => {
-                  Linking.openURL(urlMapa(direccion)).catch(() => {
-                    mostrar({ variante: 'error', texto: t('cita.direccionMapaError') });
-                  });
-                }}
-              />
-            </View>
-          </>
-        )}
-      </View>
-    </Tarjeta>
-  );
-}
+// A dónde ir (D-339): la sección se EXTRAJO a components/seccion-direccion
+// (S61-B6 — el grooming a domicilio la comparte; una sola verdad).
 
 export default function DetalleCita() {
   const { theme } = useTheme();

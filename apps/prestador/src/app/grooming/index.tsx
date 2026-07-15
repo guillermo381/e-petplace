@@ -344,6 +344,12 @@ export default function OfertaGrooming() {
               datos={{
                 servicios: serviciosEspejo,
                 extra: serviciosEspejo.length > 0 && extra !== null ? monto(extra) : null,
+                // S61-B6: la verdad de DB — flags de la oferta + el
+                // recargo de obtenerMiPrestador (jamás calculado acá)
+                domicilio:
+                  serviciosEspejo.length > 0 && atiendeDomicilioOferta
+                    ? { recargo: recargoDomicilio !== null ? monto(recargoDomicilio) : null }
+                    : null,
                 dias: diasActivos.map(vozDia),
               }}
             />

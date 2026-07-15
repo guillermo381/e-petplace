@@ -408,10 +408,15 @@ export default function TallerGrooming() {
     return {
       servicios,
       extra: servicios.length > 0 && extraActivo ? monto(leerPrecio(extraMonto) ?? PISO_EXTRA) : null,
+      // S61-B6: el dueño YA reserva domicilio (D-392) — el espejo lo dice
+      domicilio:
+        servicios.length > 0 && atiendeDomicilio
+          ? { recargo: recargoActivo ? monto(leerPrecio(recargoMonto) ?? PISO_EXTRA) : null }
+          : null,
       dias: diasActivos.map(vozDia),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [drafts, franjas, extraActivo, extraMonto, t]);
+  }, [drafts, franjas, extraActivo, extraMonto, atiendeDomicilio, recargoActivo, recargoMonto, t]);
 
   // EL GUARDADO ÚNICO — el diff en secuencia (mecánica del paseo)
   async function guardarTodo() {

@@ -44,20 +44,21 @@ import {
   obtenerGroomingPorCita,
   registrarDiscrepanciaTallaGrooming,
   resolverUrlFoto,
-  type CitaAgendaPaseo,
+  type CitaGroomingDetalle,
   type FichaAntesGrooming,
 } from '@epetplace/api';
 
 import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { verificarSesion } from '@/lib/api';
+import { SeccionDireccion } from '@/components/seccion-direccion';
 import { useTraduccion } from '@/i18n';
 
 type Pantalla =
   | { estado: 'cargando' }
   | { estado: 'no_existe' }
   | { estado: 'error'; mensaje: string }
-  | { estado: 'listo'; cita: CitaAgendaPaseo; ficha: FichaAntesGrooming | null };
+  | { estado: 'listo'; cita: CitaGroomingDetalle; ficha: FichaAntesGrooming | null };
 
 function hoyLocal(): string {
   return new Intl.DateTimeFormat('en-CA').format(new Date());
@@ -352,6 +353,12 @@ export default function AntesGrooming() {
                 )}
               </View>
             </Tarjeta>
+
+            {/* A DÓNDE IR (S61-B6, D-392): SOLO con modalidad 'domicilio'
+                — el snapshot congelado por el motor, espejo exacto del
+                paseo (sección compartida, mapa del sistema incluido).
+                'local' y el legacy 'presencial' no pintan nada. */}
+            {cita.modalidad === 'domicilio' && <SeccionDireccion direccion={cita.direccion} />}
 
             {/* El "Antes" a un tap — la vista prestador del expediente */}
             {cita.mascota != null && (

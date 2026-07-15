@@ -470,6 +470,8 @@ export const prestadorEn = {
     espejoServicio: '{{nombre}} · {{tallas}}',
     espejoDuraciones: '{{lista}} min by size',
     espejoExtra: 'Long coat: +{{monto}}',
+    // S61-B6: el dueño YA reserva domicilio (D-392) · LOTE S61, GATE PENDIENTE
+    espejoDomicilio: 'Home visits: +{{monto}}',
   },
   // LA ATENCIÓN DE GROOMING — Antes/Durante/Después (S60-B1) · LOTE S60,
   // GATE PENDIENTE · Espejo de es.ts

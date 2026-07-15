@@ -28,6 +28,9 @@ export interface DatosEspejoGrooming {
   servicios: ServicioEspejoGrooming[];
   /** El extra por pelaje largo ya formateado ($) — null = sin extra. */
   extra: string | null;
+  /** S61-B6 (D-392 viva — el dueño YA reserva domicilio): null = solo
+   *  local; recargo null = a domicilio sin recargo. Monto formateado. */
+  domicilio: { recargo: string | null } | null;
   /** Nombres de los días con franjas activas, en orden de display. */
   dias: string[];
 }
@@ -57,6 +60,13 @@ export function EspejoGrooming({ datos }: { datos: DatosEspejoGrooming }) {
   }
   if (lineas.length > 0) {
     if (datos.extra !== null) lineas.push(t('ofertaGrooming.espejoExtra', { monto: datos.extra }));
+    if (datos.domicilio !== null) {
+      lineas.push(
+        datos.domicilio.recargo !== null
+          ? t('ofertaGrooming.espejoDomicilio', { monto: datos.domicilio.recargo })
+          : t('ofertaGrooming.dondeDomicilioVivo'),
+      );
+    }
     if (datos.dias.length > 0) {
       lineas.push(t('ofertaPaseo.espejoDias', { lista: juntar(datos.dias, t('ofertaPaseo.espejoY')) }));
     } else {

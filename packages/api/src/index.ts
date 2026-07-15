@@ -437,6 +437,7 @@ export {
   registrarEstadoPelajeGrooming,
   terminarAtencionGrooming,
   type AtencionDiaGrooming,
+  type CitaGroomingDetalle,
   type CodigoErrorGroomingAtencion,
   type EstadoDuranteGrooming,
   type EstadoPelajeCatalogo,

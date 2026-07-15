@@ -26,7 +26,7 @@
 import { getClient } from '../client';
 import type { Database } from '../database.types';
 import type { ResultadoWrapper } from '../resultado';
-import type { CitaAgendaPaseo, InputCitasPaseoDelDia } from './paseo';
+import { parseDireccionSnapshot, type CitaAgendaPaseo, type InputCitasPaseoDelDia } from './paseo';
 
 // ── Errores tipados (códigos REALES de las RPCs relevadas) ──────────────────
 
@@ -170,8 +170,8 @@ export async function obtenerIncidenciasGrooming(): Promise<
 
 // ── Agenda: las citas de grooming del día/rango (espejo del paseo) ──────────
 // Mismo shape CitaAgendaPaseo para que el HOY componga UNA lista.
-// direccion = null SIEMPRE en v1: el grooming es EN EL LOCAL (§4); el
-// snapshot D-339 entra con la tanda domicilio (D-380).
+// direccion = null en la LISTA (el HOY no la pinta); el detalle por id
+// trae modalidad + el snapshot D-339 (S61-B6 — la tanda domicilio llegó).
 
 export async function obtenerCitasGroomingDelDia(
   input: InputCitasPaseoDelDia,
@@ -202,20 +202,26 @@ export async function obtenerCitasGroomingDelDia(
   return { ok: true, data: citas };
 }
 
+/** El detalle por id suma la MODALIDAD de la cita (S61-B6, D-392): el
+ *  Antes pinta "A dónde ir" solo con 'domicilio'; 'local' y el legacy
+ *  'presencial' no cambian nada. */
+export type CitaGroomingDetalle = CitaAgendaPaseo & { modalidad: string | null };
+
 /**
  * UNA cita de grooming por su id (S60-C2.1). La cura de raíz del
  * "ya no disponible": el Antes resolvía la cita contra la lista del
  * DÍA local — una cita de mañana (tapeable desde la SEMANA del HOY)
  * jamás aparecía. La RLS (cita_select_prestador) es el guard; misma
- * verdad firme y mismo shape que la lista.
+ * verdad firme y mismo shape que la lista (+modalidad y el snapshot
+ * D-339 congelado por el motor de D-392, S61-B6).
  */
 export async function obtenerCitaGroomingPorId(
   citaId: string,
-): Promise<ResultadoWrapper<CitaAgendaPaseo, CodigoErrorGroomingAtencion>> {
+): Promise<ResultadoWrapper<CitaGroomingDetalle, CodigoErrorGroomingAtencion>> {
   const { data, error } = await getClient()
     .from('evento_cita_servicio')
     .select(
-      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
+      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, modalidad, direccion_snapshot, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
     )
     .eq('id', citaId)
     .eq('tipo.categoria', 'grooming')
@@ -229,7 +235,11 @@ export async function obtenerCitaGroomingPorId(
     atenciones.length === 0
       ? null
       : atenciones.reduce((a, b) => (b.iniciada_en > a.iniciada_en ? b : a));
-  return { ok: true, data: { ...data, atencion, direccion: null } };
+  const { direccion_snapshot, ...resto } = data;
+  return {
+    ok: true,
+    data: { ...resto, atencion, direccion: parseDireccionSnapshot(direccion_snapshot) },
+  };
 }
 
 // ── 7.5: la verdad del estado por cita ──────────────────────────────────────
