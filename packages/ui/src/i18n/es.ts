@@ -14,6 +14,9 @@ export const uiEs = {
   lineaDeVida: {
     cargando: 'Cargando la línea de vida',
     cargarMas: 'Cargar más',
+    // S61-A11 (LOTE S61, gate pendiente): colapsada + voz del grooming
+    verMas: 'Ver más',
+    vozGrooming: 'Estética y baño',
     reintentar: 'Reintentar',
     errorCargarMas: 'No pudimos cargar más momentos.',
     // Diccionario de voz tipo→texto (S52-P4c: migrado del componente

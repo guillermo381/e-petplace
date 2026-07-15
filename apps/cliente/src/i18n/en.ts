@@ -98,6 +98,20 @@ export const clienteEn = {
     // S60-A6 — YOUR SERVICES: the per-service position (LOTE S60; the
     // zone title is a PROPOSAL for the founder's thumb)
     serviciosTitulo: 'Your services',
+    // S61-A11 — Kary's Home (LOTE S61, GATE PENDIENTE founder)
+    filtroQuien: 'Whose?',
+    filtroQue: 'Which moments?',
+    filtroPaseos: 'Walks',
+    filtroEstetica: 'Grooming',
+    filtroVacunas: 'Vaccines',
+    filtroSinMomentos: 'Nothing here with those filters.',
+    acordeonCargando: 'Loading the moment',
+    acordeonError: "We couldn't load this moment.",
+    acordeonSinDetalle: "This moment didn't leave more detail.",
+    acordeonVerCompleto: 'See full',
+    fichaVerCita: 'See their booking',
+    fichaVerCarnet: 'See their card',
+    fichaCargarCarnet: 'Add their card',
     proximoPaseoDe: 'Next walk for {{nombre}}: {{cuando}}',
     proximoPaseo: 'Next walk: {{cuando}}',
     proximaSesionDe: 'Next session for {{nombre}}: {{cuando}}',

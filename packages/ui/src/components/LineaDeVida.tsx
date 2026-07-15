@@ -40,7 +40,8 @@
  * A11y: lista semántica; cada nodo anuncia "{título}, {fecha}".
  */
 
-import { Text, View } from 'react-native'
+import { useState, type ReactNode } from 'react'
+import { LayoutAnimation, Platform, Text, UIManager, View } from 'react-native'
 import { Image, type ImageSource } from 'expo-image'
 
 import { typography } from '../tokens/typography'
@@ -67,6 +68,9 @@ type TraductorUi = (clave: VozTimeline, valores?: Record<string, string | number
 
 const DICCIONARIO: Record<string, { clave: VozTimeline; capa: CapaNodo }> = {
   atencion_paseo_registrada: { clave: 'lineaDeVida.vozPaseo', capa: 'cuidado' },
+  // S61-A11 (hallazgo con cura): el grooming cerrado YA escribía
+  // atencion_grooming_registrada y degradaba a voz genérica — gana voz.
+  atencion_grooming_registrada: { clave: 'lineaDeVida.vozGrooming', capa: 'cuidado' },
   alta_asistida_completada_por_cliente: { clave: 'lineaDeVida.vozAlta', capa: 'identidad' },
   // cita_servicio: intencionalmente AUSENTE — no se muestra (ver header).
 }
@@ -162,6 +166,8 @@ export interface LineaDeVidaItem {
   fotos?: Array<string | number | ImageSource>
   /** Solo tipo=vacuna_aplicada: el nombre para "Recibió la vacuna {nombre}". */
   vacuna_nombre?: string | null
+  /** S61-A11: la atención detrás del evento (el acordeón la necesita). */
+  atencion_id?: string | null
   /** Evento de FECHA sola (S48-B6.3): fecha_evento ancla la medianoche
    *  UTC del día — se muestra el día calendario (partes UTC) y SIN hora.
    *  Una hora inventada + corrimiento de zona es mentirle al dueño. */
@@ -178,6 +184,18 @@ export interface LineaDeVidaProps {
   /** Pie de paginación (Ley 13). */
   estadoPie?: LineaDeVidaEstadoPie
   onCargarMas?: () => void
+  /** S61-A11 (nota de Kary: la vida deja de ser log): COLAPSADA —
+   *  muestra N nodos y crece por tandas con "Ver más" ANTES de pedir
+   *  páginas nuevas al pie (la paginación existente se reusa recién
+   *  cuando todo lo cargado está a la vista). Ausente = todos. */
+  visiblesIniciales?: number
+  /** Tamaño de la tanda del "Ver más" (default 7). */
+  tandaVerMas?: number
+  /** S61-A11: ACORDEÓN inline — el detalle del nodo se despliega
+   *  DEBAJO, jamás navega de una. null = este nodo no tiene acordeón
+   *  (el tap cae a onPressNodo, contrato viejo intacto). El nodo se
+   *  monta recién al expandir: el fetch perezoso es del caller. */
+  detalleDe?: (item: LineaDeVidaItem) => ReactNode | null
 }
 
 // ── Piezas ───────────────────────────────────────────────────────────────────
@@ -228,11 +246,18 @@ function Nodo({
   conAgrupador,
   esUltimo,
   onPress,
+  detalle,
+  expandido,
+  onToggle,
 }: {
   item: LineaDeVidaItem
   conAgrupador: boolean
   esUltimo: boolean
   onPress?: (item: LineaDeVidaItem) => void
+  /** S61-A11: acordeón — presente = el tap expande/contrae en lugar de navegar. */
+  detalle?: ReactNode | null
+  expandido?: boolean
+  onToggle?: () => void
 }) {
   const { theme } = useTheme()
   const { t, idioma } = useTraduccionUi()
@@ -240,6 +265,7 @@ function Nodo({
   const fecha = fechaHumana(item.fecha_evento, item.fecha_sola ?? false, t, idioma)
   // Memorial no tiene registro de capa: el punto degrada a text.secondary.
   const colorPunto = theme.mode === 'memorial' ? theme.text.secondary : theme.capa[voz.capa]
+  const conAcordeon = detalle !== null && detalle !== undefined && onToggle !== undefined
 
   const contenidoTarjeta = (
     <>
@@ -267,10 +293,21 @@ function Nodo({
         </Text>
       )}
       <Miniaturas fotos={item.fotos ?? []} total={item.fotos_count ?? item.fotos?.length ?? 0} />
+      {/* S61-A11: el detalle se despliega DEBAJO — jamás navega de una */}
+      {conAcordeon && expandido ? <View style={{ marginTop: spacing[3] }}>{detalle}</View> : null}
     </>
   )
 
-  const tarjeta = onPress ? (
+  const tarjeta = conAcordeon ? (
+    <Tarjeta
+      interactiva
+      onPress={onToggle}
+      accessibilityRole="button"
+      etiqueta={`${voz.titulo}, ${fecha}`}
+    >
+      {contenidoTarjeta}
+    </Tarjeta>
+  ) : onPress ? (
     <Tarjeta
       interactiva
       onPress={() => onPress(item)}
@@ -344,18 +381,37 @@ function EsqueletoNodo() {
   )
 }
 
+// LayoutAnimation en Android pide el flag viejo (no-op en Fabric/web).
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true)
+}
+
 export function LineaDeVida({
   items,
   cargando = false,
   onPressNodo,
   estadoPie = 'nada',
   onCargarMas,
+  visiblesIniciales,
+  tandaVerMas = 7,
+  detalleDe,
 }: LineaDeVidaProps) {
   const { theme } = useTheme()
   // Namespace `ui` (S51-B1a): la voz del pie migrada al riel. El
   // DICCIONARIO de arriba es voz emocional: migra con gate del founder
   // (deuda de extracción), no acá.
   const { t } = useTraduccionUi()
+  // S61-A11: colapsada + acordeón. Motion legal (Ley 6): expandir y
+  // "Ver más" con LayoutAnimation <300ms; memorial = reemplazo directo
+  // (nada rebota, solo fades — y esto ni fade necesita).
+  const [visibles, setVisibles] = useState(visiblesIniciales ?? Number.POSITIVE_INFINITY)
+  const [expandidoId, setExpandidoId] = useState<string | null>(null)
+  const esMemorial = theme.mode === 'memorial'
+
+  const animar = () => {
+    if (esMemorial) return
+    LayoutAnimation.configureNext(LayoutAnimation.create(250, 'easeInEaseOut', 'opacity'))
+  }
 
   if (cargando) {
     return (
@@ -367,22 +423,53 @@ export function LineaDeVida({
     )
   }
 
+  const enVista = items.slice(0, visibles)
+  const hayOcultos = items.length > enVista.length
+
   return (
     <View accessibilityRole="list">
-      {items.map((item, i) => (
-        <Nodo
-          key={item.evento_id}
-          item={item}
-          conAgrupador={
-            i === 0 ||
-            claveDiaItem(items[i - 1]) !== claveDiaItem(item)
-          }
-          esUltimo={i === items.length - 1 && estadoPie === 'nada'}
-          onPress={onPressNodo}
-        />
-      ))}
+      {enVista.map((item, i) => {
+        const detalle = detalleDe ? detalleDe(item) : null
+        return (
+          <Nodo
+            key={item.evento_id}
+            item={item}
+            conAgrupador={
+              i === 0 ||
+              claveDiaItem(enVista[i - 1]) !== claveDiaItem(item)
+            }
+            esUltimo={i === enVista.length - 1 && estadoPie === 'nada' && !hayOcultos}
+            onPress={onPressNodo}
+            detalle={detalle}
+            expandido={expandidoId === item.evento_id}
+            onToggle={
+              detalle !== null
+                ? () => {
+                    animar()
+                    setExpandidoId((id) => (id === item.evento_id ? null : item.evento_id))
+                  }
+                : undefined
+            }
+          />
+        )
+      })}
 
-      {estadoPie !== 'nada' ? (
+      {/* S61-A11: lo YA cargado se revela por tandas; el pie de páginas
+          nuevas recién aparece cuando todo lo cargado está a la vista. */}
+      {hayOcultos ? (
+        <View style={{ marginLeft: RIEL, marginTop: spacing[1] }}>
+          <Boton
+            variante="compacto"
+            etiqueta={t('lineaDeVida.verMas')}
+            onPress={() => {
+              animar()
+              setVisibles((v) => v + tandaVerMas)
+            }}
+          />
+        </View>
+      ) : null}
+
+      {!hayOcultos && estadoPie !== 'nada' ? (
         <View style={{ marginLeft: RIEL, marginTop: spacing[1] }}>
           {estadoPie === 'error' ? (
             <View style={{ gap: spacing[2] }}>

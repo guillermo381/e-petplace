@@ -56,6 +56,9 @@ export interface ProximaCitaHogar {
 export interface ProximaCitaMascota {
   fecha: string;
   hora: string | null;
+  /** S61-A11 (hunk aditivo): el oficio de la cita — la acción de la
+   *  ficha aterriza en SU hub. El SELECT ya lo traía. */
+  tipo_servicio: string | null;
 }
 
 export interface EstadoHogar {
@@ -229,7 +232,11 @@ export async function obtenerEstadoHogar(
     if (c.mascota_id === null || c.fecha === null) continue;
     if (porMascota[c.mascota_id] !== undefined) continue;
     if (c.estado === 'confirmada' || esHoldVigente(c)) {
-      porMascota[c.mascota_id] = { fecha: c.fecha, hora: c.hora !== null ? c.hora.slice(0, 5) : null };
+      porMascota[c.mascota_id] = {
+        fecha: c.fecha,
+        hora: c.hora !== null ? c.hora.slice(0, 5) : null,
+        tipo_servicio: c.tipo_servicio ?? null,
+      };
     }
   }
 

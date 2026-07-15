@@ -103,6 +103,20 @@ export const clienteEs = {
     // S60-A6 — TUS SERVICIOS: la posición por servicio (LOTE S60; el
     // título de la zona es PROPUESTA al pulgar del founder)
     serviciosTitulo: 'Tus servicios',
+    // S61-A11 — el Hogar de Kary (LOTE S61, GATE PENDIENTE founder)
+    filtroQuien: '¿De quién?',
+    filtroQue: '¿Qué momentos?',
+    filtroPaseos: 'Paseos',
+    filtroEstetica: 'Estética',
+    filtroVacunas: 'Vacunas',
+    filtroSinMomentos: 'Nada por acá con esos filtros.',
+    acordeonCargando: 'Cargando el momento',
+    acordeonError: 'No pudimos cargar este momento.',
+    acordeonSinDetalle: 'Este momento no dejó más detalle.',
+    acordeonVerCompleto: 'Ver completo',
+    fichaVerCita: 'Ver su cita',
+    fichaVerCarnet: 'Ver su carnet',
+    fichaCargarCarnet: 'Cargar su carnet',
     proximoPaseoDe: 'Próximo paseo de {{nombre}}: {{cuando}}',
     proximoPaseo: 'Próximo paseo: {{cuando}}',
     proximaSesionDe: 'Próxima sesión de {{nombre}}: {{cuando}}',

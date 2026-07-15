@@ -32,6 +32,7 @@ import { spacing } from '../tokens/spacing'
 import { radius } from '../tokens/radius'
 import { useTheme } from '../ThemeProvider'
 import { AvatarMascota } from './AvatarMascota'
+import { Boton } from './Boton'
 import { Tarjeta } from './Tarjeta'
 
 export type FichaMascotaHogarVoz = 'alDia' | 'pideAtencion' | 'conociendolo'
@@ -48,9 +49,15 @@ export type FichaMascotaHogarProps = {
    *  fechaCortaMono del riel). Ausente = silencio digno, cero línea. */
   proximaCitaMono?: string
   onPress: () => void
+  /** S61-A11 (nota de Kary: la acción vive en la FICHA): UNA acción,
+   *  la más importante por precedencia — la decide la PANTALLA (en
+   *  vivo > cita > alerta accionable > invitación de expediente >
+   *  NADA: el silencio digno es letra, cero CTA de relleno). Boton
+   *  compacto (Ley 22c); su tap NO navega al perfil (el de la ficha sí). */
+  accion?: { etiqueta: string; onPress: () => void }
 }
 
-export function FichaMascotaHogar({ nombre, fotoUrl, voz, textoEstado, proximaCitaMono, onPress }: FichaMascotaHogarProps) {
+export function FichaMascotaHogar({ nombre, fotoUrl, voz, textoEstado, proximaCitaMono, onPress, accion }: FichaMascotaHogarProps) {
   const { theme } = useTheme()
   const esMemorial = theme.mode === 'memorial'
 
@@ -129,6 +136,14 @@ export function FichaMascotaHogar({ nombre, fotoUrl, voz, textoEstado, proximaCi
             >
               {proximaCitaMono.toLowerCase()}
             </Text>
+          ) : null}
+
+          {accion ? (
+            // S61-A11: la acción de la ficha — compacto, alineado al
+            // contenido; sin accion = silencio digno (cero relleno).
+            <View style={{ marginTop: spacing[2], alignSelf: 'flex-start' }}>
+              <Boton variante="compacto" etiqueta={accion.etiqueta} onPress={accion.onPress} />
+            </View>
           ) : null}
         </View>
       </View>

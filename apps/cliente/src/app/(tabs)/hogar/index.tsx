@@ -21,13 +21,14 @@
  * Ajustes/sesión MIGRÓ a Cuenta (B2.5).
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StatusBar, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import {
+  AvatarMascota,
   Boton,
   Celda,
   CeldaNavegacion,
@@ -40,7 +41,9 @@ import {
   Hoja,
   Icono,
   HojaScroll,
+  Insignia,
   LineaDeVida,
+  SelectorOpcion,
   Separador,
   Tarjeta,
   VisorFoto,
@@ -55,6 +58,7 @@ import {
 import {
   getEstadoOnboardingDueno,
   obtenerMiPerfil,
+  leerDetalleAtencion,
   leerTimelineMascota,
   obtenerEstadoHogar,
   obtenerMascotasDeFamilia,
@@ -64,6 +68,7 @@ import {
   obtenerVacunaPorEvento,
   resolverUrlFoto,
   resolverUrlsFotos,
+  type DetalleAtencion,
   type EstadoHogar,
   type ItemTimeline,
   type MascotaResumen,
@@ -167,6 +172,90 @@ const revelacionZona3: RevelacionZona3 = null;
 
 type EstadoMascotas = MascotaResumen[] | 'cargando' | 'error';
 
+// S61-A11: el item del HOGAR = el del timeline + su mascota (el merge
+// multi-mascota etiqueta; leerTimelineMascota es por mascota).
+type ItemHogar = ItemTimeline & { mascota_id: string };
+
+// El filtro por TIPO habla en familias de servicio (Ley 3) — el código
+// del evento jamás sale de acá. 'otros' pasa solo sin filtro activo.
+const FAMILIA_DE_TIPO: Record<string, 'paseos' | 'estetica' | 'vacunas'> = {
+  atencion_paseo_registrada: 'paseos',
+  atencion_grooming_registrada: 'estetica',
+  vacuna_aplicada: 'vacunas',
+};
+
+// ── S61-A11: el acordeón de la vida — el detalle se despliega DEBAJO
+// (jamás navega de una). Se monta recién al expandir: fetch perezoso.
+// "Ver completo" SOLO para el paseo (el mapa no cabe digno acá).
+function DetalleNodoHogar({ atencionId, onVerCompleto }: { atencionId: string; onVerCompleto: () => void }) {
+  const { theme } = useTheme();
+  const { t, idioma } = useTraduccion();
+  const [detalle, setDetalle] = useState<DetalleAtencion | 'cargando' | 'error'>('cargando');
+
+  useEffect(() => {
+    let vigente = true;
+    void leerDetalleAtencion(atencionId).then((r) => {
+      if (vigente) setDetalle(r.ok ? r.data : 'error');
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [atencionId]);
+
+  if (detalle === 'cargando') {
+    return (
+      <EsqueletoGrupo etiqueta={t('hogar.acordeonCargando')}>
+        <View style={{ gap: spacing[2] }}>
+          <Esqueleto forma="linea" ancho="80%" />
+          <Esqueleto forma="linea" ancho="50%" />
+        </View>
+      </EsqueletoGrupo>
+    );
+  }
+  if (detalle === 'error') {
+    return (
+      <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.status.dangerText }}>
+        {t('hogar.acordeonError')}
+      </Text>
+    );
+  }
+  const sinNada = detalle.mensaje_familia === null && detalle.servicios_aplicados.length === 0;
+  return (
+    <View style={{ gap: spacing[2] }}>
+      {detalle.mensaje_familia !== null ? (
+        <Text
+          style={{
+            // voz humana: DM Sans 300 (regla de voz) — el cierre emocional
+            fontFamily: typography.family.sans.light,
+            fontSize: typography.size.md,
+            lineHeight: Math.round(typography.size.md * typography.leading.snug),
+            color: theme.text.primary,
+          }}
+        >
+          “{detalle.mensaje_familia}”
+        </Text>
+      ) : null}
+      {detalle.servicios_aplicados.length > 0 ? (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[1.5] }}>
+          {detalle.servicios_aplicados.map((sv) => (
+            <Insignia key={sv.codigo} estado="info" tamaño="sm" etiqueta={idioma === 'en' ? sv.voz_en : sv.voz} />
+          ))}
+        </View>
+      ) : null}
+      {sinNada ? (
+        <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+          {t('hogar.acordeonSinDetalle')}
+        </Text>
+      ) : null}
+      {detalle.oficio === 'paseo' ? (
+        <View style={{ alignSelf: 'flex-start' }}>
+          <Boton variante="compacto" etiqueta={t('hogar.acordeonVerCompleto')} onPress={onVerCompleto} />
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 export default function Hogar() {
   const router = useRouter();
   const { theme } = useTheme();
@@ -179,7 +268,11 @@ export default function Hogar() {
   const [estadoHogar, setEstadoHogar] = useState<EstadoHogar | null>(null);
 
   // Zona 4 — timeline del hogar: merge multi-mascota con cursor por mascota.
-  const [items, setItems] = useState<ItemTimeline[] | null | 'error'>(null);
+  // S61-A11: cada item porta SU mascota (el merge la etiqueta) — el
+  // filtro por mascota y el avatar del chip la necesitan.
+  const [items, setItems] = useState<ItemHogar[] | null | 'error'>(null);
+  const [filtroMascotas, setFiltroMascotas] = useState<string[]>([]);
+  const [filtroTipos, setFiltroTipos] = useState<string[]>([]);
   const cursoresRef = useRef<Record<string, string | null>>({});
   const [estadoPie, setEstadoPie] = useState<LineaDeVidaEstadoPie>('nada');
   const cargandoMasRef = useRef(false);
@@ -227,11 +320,11 @@ export default function Hogar() {
       setEstadoPie('nada');
       return;
     }
-    const todos: ItemTimeline[] = [];
+    const todos: ItemHogar[] = [];
     const cursores: Record<string, string | null> = {};
     paginas.forEach((p, i) => {
       if (p.ok) {
-        todos.push(...p.data.items);
+        todos.push(...p.data.items.map((it) => ({ ...it, mascota_id: lista[i].id })));
         cursores[lista[i].id] = p.data.siguiente_cursor;
       }
     });
@@ -260,10 +353,10 @@ export default function Hogar() {
       setEstadoPie('error');
       return;
     }
-    const nuevos: ItemTimeline[] = [];
+    const nuevos: ItemHogar[] = [];
     resultados.forEach((r, i) => {
       if (r.ok) {
-        nuevos.push(...r.data.items);
+        nuevos.push(...r.data.items.map((it) => ({ ...it, mascota_id: pendientes[i][0] })));
         cursoresRef.current[pendientes[i][0]] = r.data.siguiente_cursor;
       }
     });
@@ -401,7 +494,8 @@ export default function Hogar() {
   // S59 §7.5 — multi-mascota primera clase: N paseos vivos = N celdas
   // vivas, cada una a SU en vivo (antes solo viajaba la más reciente).
   const enCurso = estadoHogar?.atenciones_en_curso ?? [];
-  const proximaCita = enCurso.length === 0 ? (estadoHogar?.proxima_cita ?? null) : null;
+  // S61-A11: proximaCita (el hero global) MURIÓ — la acción vive en la
+  // ficha de cada mascota (proxima_cita_por_mascota); Ley 37 aplicada.
   const nombreDe = (id: string) => (Array.isArray(mascotas) ? (mascotas.find((m) => m.id === id)?.nombre ?? '') : '');
 
   return (
@@ -486,52 +580,10 @@ export default function Hogar() {
             </CitaEnVivo>
           ))}
         </Animated.View>
-      ) : proximaCita !== null ? (
-        <Animated.View entering={entradaZona(0)} style={{ paddingHorizontal: spacing[4], paddingTop: spacing[5] }}>
-          <Tarjeta relleno="ninguno" elevacion="reposo">
-            {(() => {
-              const cuando = cuandoRelativo(proximaCita.fecha, proximaCita.hora, t);
-              const monoAbsoluto = `${fechaCortaMono(proximaCita.fecha, idioma)}${proximaCita.hora ? ` · ${proximaCita.hora}` : ''}`;
-              // S61-A1: la voz del comprable del riel — el código del
-              // motor jamás se pinta; sin voz conocida, el sufijo se omite.
-              const vozOficio = vozServicio(t, proximaCita.tipo_servicio);
-              return (
-                <Celda
-                  titulo={`${nombreDe(proximaCita.mascota_id)}${vozOficio !== null ? ` · ${vozOficio}` : ''}`}
-                  subtitulo={t(proximaCita.reserva === 'hold' ? 'hogar.reservandoHorario' : 'hogar.proximaCita')}
-                  {...('relativo' in cuando
-                    ? {
-                        fin: (
-                          // el estado del hero habla en la capa del paseo (teal AA)
-                          <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: 'capaText' in theme ? theme.capaText.cuidado : theme.capa.cuidado }}>
-                            {cuando.relativo}
-                          </Text>
-                        ),
-                      }
-                    : { metadataMono: monoAbsoluto })}
-                />
-              );
-            })()}
-            {proximaCita.direccion !== null ? (
-              <>
-                <Separador />
-                <Celda
-                  interactiva
-                  accessibilityRole="button"
-                  onPress={() => router.push('/hogar/paseos')}
-                  titulo={proximaCita.direccion}
-                  inicio={<Icono nombre="ubicacion" tamano={20} />}
-                  fin={
-                    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" aria-hidden>
-                      <Path d="M9 18l6-6-6-6" stroke={theme.text.tertiary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                    </Svg>
-                  }
-                />
-              </>
-            ) : null}
-          </Tarjeta>
-        </Animated.View>
       ) : null}
+      {/* S61-A11 (nota de Kary): el hero de PRÓXIMA CITA murió — la
+          acción migró a la FICHA de cada mascota (una acción por
+          precedencia). El EN VIVO queda como único hero (Ley 7). */}
 
       {/* ── Tu hogar (Zona 1): la mascota preside, su próxima cita visible ── */}
       <Animated.View
@@ -558,6 +610,34 @@ export default function Hogar() {
               )
             : null;
           const pc = estadoHogar?.proxima_cita_por_mascota[m.id];
+          // S61-A11 (letra firmada): UNA acción por ficha, la más
+          // importante por PRECEDENCIA — en vivo > cita > alerta de
+          // cuidado accionable > invitación de expediente > NADA
+          // (Thor al día no gana CTA de relleno: silencio digno).
+          const vivoDe = estadoHogar?.atenciones_en_curso.find((a) => a.mascota_id === m.id);
+          const accion = vivoDe
+            ? {
+                etiqueta: t('hogar.verEnVivo'),
+                onPress: () =>
+                  router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: vivoDe.atencion_id } }),
+              }
+            : pc
+              ? {
+                  etiqueta: t('hogar.fichaVerCita'),
+                  onPress: () =>
+                    router.push(pc.tipo_servicio?.startsWith('grooming') ? '/hogar/grooming' : '/hogar/paseos'),
+                }
+              : voz?.semantica === 'pideAtencion'
+                ? {
+                    etiqueta: t('hogar.fichaVerCarnet'),
+                    onPress: () => router.push({ pathname: '/carnet', params: { mascotaId: m.id, nombre: m.nombre } }),
+                  }
+                : senales && senales.vacunas_total === 0
+                  ? {
+                      etiqueta: t('hogar.fichaCargarCarnet'),
+                      onPress: () => router.push({ pathname: '/carnet', params: { mascotaId: m.id, nombre: m.nombre } }),
+                    }
+                  : undefined;
           return (
             <FichaMascotaHogar
               key={m.id}
@@ -566,6 +646,7 @@ export default function Hogar() {
               voz={voz?.semantica ?? 'conociendolo'}
               textoEstado={voz?.texto ?? ''}
               proximaCitaMono={pc ? `${fechaCortaMono(pc.fecha, idioma)}${pc.hora ? ` · ${pc.hora}` : ''}` : undefined}
+              accion={accion}
               onPress={() => router.push({ pathname: '/hogar/mascota/[mascotaId]', params: { mascotaId: m.id } })}
             />
           );
@@ -719,7 +800,73 @@ export default function Hogar() {
         ) : items.length === 0 ? (
           <EstadoVacio titulo={t('hogar.historiaEmpieza')} descripcion={t('hogar.historiaEmpiezaDetalle')} />
         ) : (
-          <LineaDeVida items={items} onPressNodo={alTocarNodo} estadoPie={estadoPie} onCargarMas={() => void cargarMas()} />
+          (() => {
+            // S61-A11: filtros que NO persisten — vacío = todo pasa;
+            // 'otros' (tipos sin familia) solo pasa sin filtro activo.
+            const itemsFiltrados = items.filter(
+              (it) =>
+                (filtroMascotas.length === 0 || filtroMascotas.includes(it.mascota_id)) &&
+                (filtroTipos.length === 0 || filtroTipos.includes(FAMILIA_DE_TIPO[it.tipo] ?? '')),
+            );
+            return (
+              <View style={{ gap: spacing[3] }}>
+                {mascotas.length > 1 ? (
+                  <SelectorOpcion
+                    multiple
+                    acento="control"
+                    disposicion="tira"
+                    etiqueta={t('hogar.filtroQuien')}
+                    opciones={mascotas.map((m) => ({
+                      codigo: m.id,
+                      etiqueta: m.nombre,
+                      adorno: <AvatarMascota nombre={m.nombre} fotoUrl={fotos[m.id]} tamano="xs" />,
+                    }))}
+                    seleccionadas={filtroMascotas}
+                    onSelect={(codigo) =>
+                      setFiltroMascotas((f) => (f.includes(codigo) ? f.filter((x) => x !== codigo) : [...f, codigo]))
+                    }
+                  />
+                ) : null}
+                <SelectorOpcion
+                  multiple
+                  acento="control"
+                  disposicion="tira"
+                  etiqueta={t('hogar.filtroQue')}
+                  opciones={[
+                    { codigo: 'paseos', etiqueta: t('hogar.filtroPaseos') },
+                    { codigo: 'estetica', etiqueta: t('hogar.filtroEstetica') },
+                    { codigo: 'vacunas', etiqueta: t('hogar.filtroVacunas') },
+                  ]}
+                  seleccionadas={filtroTipos}
+                  onSelect={(codigo) =>
+                    setFiltroTipos((f) => (f.includes(codigo) ? f.filter((x) => x !== codigo) : [...f, codigo]))
+                  }
+                />
+                {itemsFiltrados.length === 0 ? (
+                  // el camino está a la vista: los chips de arriba
+                  <EstadoVacio registro="seccion" titulo={t('hogar.filtroSinMomentos')} />
+                ) : (
+                  <LineaDeVida
+                    items={itemsFiltrados}
+                    visiblesIniciales={3}
+                    detalleDe={(item) =>
+                      item.atencion_id ? (
+                        <DetalleNodoHogar
+                          atencionId={item.atencion_id}
+                          onVerCompleto={() =>
+                            router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: item.atencion_id as string } })
+                          }
+                        />
+                      ) : null
+                    }
+                    onPressNodo={alTocarNodo}
+                    estadoPie={estadoPie}
+                    onCargarMas={() => void cargarMas()}
+                  />
+                )}
+              </View>
+            );
+          })()
         )}
       </Animated.View>
 

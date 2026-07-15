@@ -11,6 +11,9 @@ export const uiEn = {
   lineaDeVida: {
     cargando: 'Loading the timeline',
     cargarMas: 'Load more',
+    // S61-A11 (LOTE S61, gate pendiente): colapsada + voz del grooming
+    verMas: 'See more',
+    vozGrooming: 'Grooming',
     reintentar: 'Try again',
     errorCargarMas: "We couldn't load more moments.",
     vozPaseo: 'Walk',
