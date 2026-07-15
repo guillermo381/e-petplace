@@ -1,22 +1,37 @@
 /**
- * SOLICITAR ACCESO (S61-B8) — el destino HONESTO del secundario de la
- * bienvenida: el flujo de solicitud NO existe (relevado — el alta de
- * prestadores es manual/admin, voto S54 vigente) y esta pantalla lo
- * dice con la verdad del grupo curado, cero link muerto. EL CONTACTO
- * es DATO del founder (hueco DECLARADO al reporte: la voz lo espera —
- * se agrega con su literal, jamás un email inventado, L-139).
+ * SOLICITAR ACCESO (S61-B8; contacto S61-B13) — el destino HONESTO del
+ * secundario de la bienvenida: el flujo de solicitud NO existe (alta
+ * manual/admin, voto S54) y esta pantalla dice la verdad del grupo
+ * curado. EL CONTACTO llegó (dato founder, D-399): WhatsApp del equipo
+ * con mensaje pre-escrito por locale — la constante vive en UNA sola
+ * parte (lib/contacto). Camino triste digno: si WhatsApp no abre, el
+ * número se muestra para copiar — jamás botón muerto.
  */
 
-import { Text, View } from 'react-native';
+import { useState } from 'react';
+import { Linking, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Boton, Encabezado, spacing, typography, useTheme } from '@epetplace/ui';
 
+import { WHATSAPP_EQUIPO_HUMANO, urlWhatsApp } from '@/lib/contacto';
 import { useTraduccion } from '@/i18n';
 
 export default function SolicitarAcceso() {
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTraduccion();
+  const [sinWhatsApp, setSinWhatsApp] = useState(false);
+
+  async function abrirWhatsApp() {
+    const url = urlWhatsApp(t('bienvenida.whatsappMensaje'));
+    try {
+      // canOpenURL puede mentir falso-negativo sin queries de intent en
+      // Android — se intenta abrir igual y el catch es la verdad.
+      await Linking.openURL(url);
+    } catch {
+      setSinWhatsApp(true);
+    }
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -49,7 +64,27 @@ export default function SolicitarAcceso() {
         >
           {t('bienvenida.solicitarCuerpo')}
         </Text>
-        <Boton variante="secundario" etiqueta={t('bienvenida.volver')} bloque onPress={() => router.back()} />
+        <Boton
+          variante="primario"
+          etiqueta={t('bienvenida.escribenosWhatsApp')}
+          bloque
+          onPress={() => void abrirWhatsApp()}
+        />
+        {sinWhatsApp && (
+          <Text
+            selectable
+            style={{
+              fontFamily: typography.family.mono.regular,
+              fontSize: typography.size.sm,
+              letterSpacing: typography.tracking.mono,
+              color: theme.text.secondary,
+              textAlign: 'center',
+            }}
+          >
+            {t('bienvenida.whatsappFallback', { numero: WHATSAPP_EQUIPO_HUMANO })}
+          </Text>
+        )}
+        <Boton variante="ghost" etiqueta={t('bienvenida.volver')} bloque onPress={() => router.back()} />
       </View>
     </View>
   );

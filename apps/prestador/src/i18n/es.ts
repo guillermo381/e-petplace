@@ -18,7 +18,8 @@ export const prestadorEs = {
   // LA BIENVENIDA del prestador (S61-B8, letra founder) · LOTE S61, GATE PENDIENTE
   bienvenida: {
     paraPrestadores: 'para prestadores',
-    titular: 'El oficio de cuidar, con las herramientas que merece.',
+    // S61-B13: 'El oficio' → 'El arte' (letra founder)
+    titular: 'El arte de cuidar, con las herramientas que merece.',
     subtitulo: 'Bienvenido al grupo curado de prestadores fundadores.',
     ingresar: 'Ingresar',
     solicitarAcceso: '¿Eres prestador nuevo? Solicitar acceso',
@@ -28,6 +29,10 @@ export const prestadorEs = {
     solicitarCuerpoTitulo: 'Un grupo que empieza curado.',
     solicitarCuerpo:
       'Los prestadores fundadores entran por invitación del equipo de e-PetPlace. Cuando abramos solicitudes, este va a ser el lugar.',
+    // S61-B13: el canal de contacto (dato founder, D-399) · LOTE S61
+    escribenosWhatsApp: 'Escríbenos por WhatsApp',
+    whatsappMensaje: 'Hola, soy prestador de servicios para mascotas y quiero unirme a e-PetPlace',
+    whatsappFallback: 'WhatsApp no se pudo abrir. Escríbenos al {{numero}}.',
     volver: 'Volver',
   },
   sesion: {

@@ -26,8 +26,8 @@ const OBJETIVOS = [
     // el sin-sesión digno de S55 murió reemplazado por el landing.
     app: 'prestador',
     url: `http://localhost:${PUERTO_PRESTADOR}/`,
-    es: ['El oficio de cuidar, con las herramientas que merece.', 'Ingresar'],
-    en: ['The craft of caring, with the tools it deserves.', 'Sign in'],
+    es: ['El arte de cuidar, con las herramientas que merece.', 'Ingresar'],
+    en: ['The art of caring, with the tools it deserves.', 'Sign in'],
   },
 ];
 
