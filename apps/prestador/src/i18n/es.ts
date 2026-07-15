@@ -31,7 +31,9 @@ export const prestadorEs = {
       'Los prestadores fundadores entran por invitación del equipo de e-PetPlace. Cuando abramos solicitudes, este va a ser el lugar.',
     // S61-B13: el canal de contacto (dato founder, D-399) · LOTE S61
     escribenosWhatsApp: 'Escríbenos por WhatsApp',
-    whatsappMensaje: 'Hola, soy prestador de servicios para mascotas y quiero unirme a e-PetPlace',
+    // S61-B14: literal founder refinado
+    whatsappMensaje:
+      'Hola, estoy interesado en prestar mis servicios de cuidado de mascotas a través de e-PetPlace. Vengo desde la app de prestadores.',
     whatsappFallback: 'WhatsApp no se pudo abrir. Escríbenos al {{numero}}.',
     volver: 'Volver',
   },
