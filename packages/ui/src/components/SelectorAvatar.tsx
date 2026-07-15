@@ -40,7 +40,7 @@ import { spacing } from '../tokens/spacing'
 import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
 import { useTraduccionUi } from '../i18n'
-import { AvatarMascota, type AvatarMascotaEspecie } from './AvatarMascota'
+import { AvatarMascota, radioSquircle, type AvatarMascotaEspecie } from './AvatarMascota'
 import { Boton } from './Boton'
 import { Celda } from './Celda'
 import { Hoja } from './Hoja'
@@ -137,9 +137,12 @@ export function SelectorAvatar({
         {conFoto ? (
           <View
             style={{
+              // S61-A10: la vista previa encuadra COMO va a vivir — el
+              // squircle de AvatarMascota, una sola definición (regla 37).
               width: DIAMETRO,
               height: DIAMETRO,
-              borderRadius: radius.full,
+              borderRadius: radioSquircle(DIAMETRO),
+              borderCurve: 'continuous',
               overflow: 'hidden',
             }}
           >

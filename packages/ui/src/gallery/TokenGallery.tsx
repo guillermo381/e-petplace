@@ -497,7 +497,9 @@ function EjemploCampoFecha() {
 function EjemploAvatarMascota() {
   return (
     <View style={{ gap: spacing[4] }}>
+      {/* S61-A10: el SQUIRCLE en TODAS las tallas — con foto y con huella */}
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing[4], flexWrap: 'wrap' }}>
+        <AvatarMascota nombre="Zeus" fotoUrl={FOTO_MASCOTA_EJEMPLO} tamano="xs" />
         <AvatarMascota nombre="Zeus" fotoUrl={FOTO_MASCOTA_EJEMPLO} tamano="sm" />
         <AvatarMascota nombre="Zeus" fotoUrl={FOTO_MASCOTA_EJEMPLO} tamano="md" />
         <AvatarMascota nombre="Zeus" fotoUrl={FOTO_MASCOTA_EJEMPLO} tamano="lg" />
@@ -509,6 +511,8 @@ function EjemploAvatarMascota() {
         <AvatarMascota nombre="Kiwi" capa="comunidadAmplia" />
         <AvatarMascota nombre="Bruno" />
         <AvatarMascota nombre="Bruno" tamano="sm" />
+        <AvatarMascota nombre="Bruno" tamano="xs" />
+        <AvatarMascota nombre="Bruno" tamano="lg" />
       </View>
     </View>
   )

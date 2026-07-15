@@ -30,7 +30,6 @@ import { View } from 'react-native'
 import { Image, type ImageSource } from 'expo-image'
 import Svg, { Circle, Path } from 'react-native-svg'
 
-import { radius } from '../tokens/radius'
 import { useTheme } from '../ThemeProvider'
 
 export type AvatarMascotaTamano = 'xs' | 'sm' | 'md' | 'lg'
@@ -61,6 +60,19 @@ export interface AvatarMascotaProps {
   especie?: AvatarMascotaEspecie
   tamano?: AvatarMascotaTamano
   capa?: AvatarMascotaCapa
+}
+
+// SQUIRCLE (S61-A10, dirección de arte firmada por el founder sobre el
+// prototipo): el círculo MURIÓ — el radio es PROPORCIONAL al lado,
+// calibrado en píxeles (L-143, variantes 32% vs 38% capturadas al
+// pulgar; ELEGIDA: 32% — la tensión de esquina se lee en todas las
+// tallas; 38% se acercaba a círculo en xs/sm y perdía la firma). borderCurve 'continuous' = curvatura
+// continua en iOS; Android/web usan el redondeo estándar (degradación
+// declarada). UNA definición: los recortes artesanales están
+// prohibidos (regla 37 del clon) — SelectorAvatar la consume.
+const RADIO_SQUIRCLE = 0.32
+export function radioSquircle(lado: number): number {
+  return Math.round(lado * RADIO_SQUIRCLE)
 }
 
 const DIAMETRO: Record<AvatarMascotaTamano, number> = {
@@ -133,7 +145,8 @@ export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa }: AvatarMa
         style={{
           width: d,
           height: d,
-          borderRadius: radius.full,
+          borderRadius: radioSquircle(d),
+          borderCurve: 'continuous',
           overflow: 'hidden',
           ...(esMemorial ? { filter: FILTRO_MEMORIAL } : null),
         }}
@@ -163,7 +176,8 @@ export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa }: AvatarMa
       style={{
         width: d,
         height: d,
-        borderRadius: radius.full,
+        borderRadius: radioSquircle(d),
+        borderCurve: 'continuous',
         backgroundColor: fondo,
         alignItems: 'center',
         justifyContent: 'center',
