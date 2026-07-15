@@ -52,6 +52,7 @@ import {
   typography,
   useAviso,
   useTheme,
+  type FichaMascotaHogarAccion,
   type FichaMascotaHogarVoz,
   type LineaDeVidaEstadoPie,
 } from '@epetplace/ui';
@@ -615,25 +616,32 @@ export default function Hogar() {
           // cuidado accionable > invitación de expediente > NADA
           // (Thor al día no gana CTA de relleno: silencio digno).
           const vivoDe = estadoHogar?.atenciones_en_curso.find((a) => a.mascota_id === m.id);
-          const accion = vivoDe
+          // S61-A12: la acción viste su NATURALEZA (gate A11) — vivo =
+          // pill §7.1 · ver cita = navegación (chevron, capa cuidado) ·
+          // carnet = ACCIÓN tonal (flujo con consecuencias, Ley 22c).
+          const accion: FichaMascotaHogarAccion | undefined = vivoDe
             ? {
-                etiqueta: t('hogar.verEnVivo'),
+                tipo: 'vivo',
                 onPress: () =>
                   router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: vivoDe.atencion_id } }),
               }
             : pc
               ? {
+                  tipo: 'navegacion',
+                  capa: 'cuidado',
                   etiqueta: t('hogar.fichaVerCita'),
                   onPress: () =>
                     router.push(pc.tipo_servicio?.startsWith('grooming') ? '/hogar/grooming' : '/hogar/paseos'),
                 }
               : voz?.semantica === 'pideAtencion'
                 ? {
+                    tipo: 'accion',
                     etiqueta: t('hogar.fichaVerCarnet'),
                     onPress: () => router.push({ pathname: '/carnet', params: { mascotaId: m.id, nombre: m.nombre } }),
                   }
                 : senales && senales.vacunas_total === 0
                   ? {
+                      tipo: 'accion',
                       etiqueta: t('hogar.fichaCargarCarnet'),
                       onPress: () => router.push({ pathname: '/carnet', params: { mascotaId: m.id, nombre: m.nombre } }),
                     }
@@ -777,8 +785,24 @@ export default function Hogar() {
           Ritmo S52-P2c: entre zonas spacing[7]; adentro spacing[4]. */}
       <Animated.View
         entering={entradaZona(4)}
-        style={{ paddingHorizontal: spacing[4], marginTop: spacing[7], gap: spacing[4] }}
+        style={{ paddingHorizontal: spacing[4], marginTop: spacing[7] }}
       >
+        {/* S61-A12 (cura 2): la vida gana su MARCO por sistema —
+            Tarjeta reposo (elevación D-358, jamás borde artesanal);
+            título y filtros ADENTRO; el acordeón expande en el marco.
+            Memorial/dark heredan de Tarjeta (cero caso especial). */}
+        <Tarjeta elevacion="reposo">
+        <View style={{ gap: spacing[4] }}>
+        <Text
+          accessibilityRole="header"
+          style={{
+            fontFamily: typography.family.sans.medium,
+            fontSize: typography.size.sm,
+            color: theme.text.secondary,
+          }}
+        >
+          {t('hogar.vidaTitulo')}
+        </Text>
         {/* la invitación del carnet MIGRÓ al grupo de celdas (Chanel S58) */}
         {items === null ? (
           <LineaDeVida items={[]} cargando />
@@ -868,6 +892,8 @@ export default function Hogar() {
             );
           })()
         )}
+        </View>
+        </Tarjeta>
       </Animated.View>
 
       {/* ¿De quién es el carnet? — selector multi-mascota */}

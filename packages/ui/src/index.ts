@@ -102,6 +102,9 @@ export {
   type ResultadoCaptura,
   type OpcionesCaptura,
 } from './components/capturaFoto'
+// S61-B10 (L-137 3ª enmienda): la frontera dual-forma de lectura de
+// archivos locales — de TODAS las apps, jamás cura local por-caller
+export { leerBytes, leerBase64, uriLegible } from './components/leer-archivo'
 export { Cronometro, type CronometroProps } from './components/Cronometro'
 export {
   EvidenciaFoto,
@@ -133,6 +136,7 @@ export {
   FichaMascotaHogar,
   type FichaMascotaHogarProps,
   type FichaMascotaHogarVoz,
+  type FichaMascotaHogarAccion,
 } from './components/FichaMascotaHogar'
 
 // Lenguaje b′ — DIRECCION_ARTE v1.0 (S53): la mascota presente en cada ícono

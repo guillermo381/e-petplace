@@ -365,6 +365,30 @@ function EjemploFichaMascotaHogar() {
   // de galería; en producto nacen del riel i18n del app, ficha.*).
   return (
     <View style={{ gap: spacing[3] }}>
+      {/* S61-A12: la acción por NATURALEZA — vivo (pill §7.1) ·
+          navegación (chevron en capa, sin caja) · acción (tonal cuidado) */}
+      <FichaMascotaHogar
+        nombre="Thor"
+        voz="alDia"
+        textoEstado="Está al día."
+        accion={{ tipo: 'vivo', onPress: () => {} }}
+        onPress={() => {}}
+      />
+      <FichaMascotaHogar
+        nombre="Thor"
+        voz="alDia"
+        textoEstado="Está al día."
+        proximaCitaMono="mar 15 jul · 09:00"
+        accion={{ tipo: 'navegacion', capa: 'cuidado', etiqueta: 'Ver su cita', onPress: () => {} }}
+        onPress={() => {}}
+      />
+      <FichaMascotaHogar
+        nombre="Zeus"
+        voz="pideAtencion"
+        textoEstado="Le vence la antirrábica en 12 días."
+        accion={{ tipo: 'accion', etiqueta: 'Ver su carnet', onPress: () => {} }}
+        onPress={() => {}}
+      />
       <FichaMascotaHogar nombre="Thor" voz="alDia" textoEstado="Está al día." onPress={() => {}} />
       <FichaMascotaHogar
         nombre="Zeus"

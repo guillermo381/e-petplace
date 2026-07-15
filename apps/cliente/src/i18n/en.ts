@@ -99,6 +99,7 @@ export const clienteEn = {
     // zone title is a PROPOSAL for the founder's thumb)
     serviciosTitulo: 'Your services',
     // S61-A11 — Kary's Home (LOTE S61, GATE PENDIENTE founder)
+    vidaTitulo: "Your home's life",
     filtroQuien: 'Whose?',
     filtroQue: 'Which moments?',
     filtroPaseos: 'Walks',

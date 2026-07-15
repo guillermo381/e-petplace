@@ -104,6 +104,7 @@ export const clienteEs = {
     // título de la zona es PROPUESTA al pulgar del founder)
     serviciosTitulo: 'Tus servicios',
     // S61-A11 — el Hogar de Kary (LOTE S61, GATE PENDIENTE founder)
+    vidaTitulo: 'La vida del hogar',
     filtroQuien: '¿De quién?',
     filtroQue: '¿Qué momentos?',
     filtroPaseos: 'Paseos',
