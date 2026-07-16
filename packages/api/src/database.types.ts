@@ -15968,6 +15968,12 @@ export type Database = {
         }[]
       }
       obtener_grooming_por_cita: { Args: { p_cita_id: string }; Returns: Json }
+      obtener_inicios_adiestramiento_disponibles: {
+        Args: { p_comprable?: string; p_fecha: string; p_mascota_id: string }
+        Returns: {
+          hora: string
+        }[]
+      }
       obtener_inicios_grooming_disponibles: {
         Args: {
           p_fecha: string

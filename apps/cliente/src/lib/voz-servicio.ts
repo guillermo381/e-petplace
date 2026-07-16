@@ -15,6 +15,7 @@
 const KEY_VOZ_SERVICIO = {
   grooming: 'servicioVoz.grooming',
   grooming_completo: 'servicioVoz.groomingCompleto',
+  adiestramiento: 'servicioVoz.adiestramiento',
   paseo: 'explorar.paseoTitulo',
   paseo_30min: 'explorar.paseoTitulo',
   paseo_60min: 'explorar.paseoTitulo',

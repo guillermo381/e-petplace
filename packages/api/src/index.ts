@@ -420,6 +420,26 @@ export {
   type TallaPelajeDeclarados,
 } from './wrappers/grooming-reserva';
 
+// ── La reserva de adiestramiento del DUEÑO (S63-A Bloque 3 — hunk Sesión A) ─
+export {
+  COMPRABLES_ADIESTRAMIENTO,
+  obtenerIniciosAdiestramiento,
+  obtenerAdiestradoresDisponibles,
+  contratarPrograma,
+  obtenerParteAdiestramiento,
+  obtenerMisAdiestramientos,
+  resolverUrlsClips,
+  type AdiestramientoDelHogar,
+  type ClipDelParte,
+  type CodigoErrorAdiestramientoReserva,
+  type ComprableAdiestramiento,
+  type ObjetivoDelParte,
+  type OfertaAdiestrador,
+  type ParteAdiestramiento,
+  type ProgramaContratado,
+  type ProgresionNarrativa,
+} from './wrappers/adiestramiento-reserva';
+
 // ── La zona de servicios vivos del Hogar (S60-A6, D-366 — hunk Sesión A) ────
 export {
   obtenerResumenServiciosHogar,
