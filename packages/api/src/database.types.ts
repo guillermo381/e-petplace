@@ -1086,6 +1086,44 @@ export type Database = {
           },
         ]
       }
+      cat_curriculum_adiestramiento: {
+        Row: {
+          activo: boolean
+          created_at: string
+          es_seed_preliminar: boolean
+          nivel: string
+          objetivo_codigo: string
+          sesion_sugerida: number
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          es_seed_preliminar?: boolean
+          nivel: string
+          objetivo_codigo: string
+          sesion_sugerida: number
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          es_seed_preliminar?: boolean
+          nivel?: string
+          objetivo_codigo?: string
+          sesion_sugerida?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cat_curriculum_adiestramiento_objetivo_codigo_fkey"
+            columns: ["objetivo_codigo"]
+            isOneToOne: false
+            referencedRelation: "cat_objetivos_adiestramiento"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
       cat_ejes_jtbd: {
         Row: {
           activo: boolean
@@ -1390,6 +1428,48 @@ export type Database = {
           grupo?: string
           nombre?: string
           nombre_familia?: string
+          orden_display?: number
+          pais_codigo?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cat_objetivos_adiestramiento: {
+        Row: {
+          activo: boolean
+          codigo: string
+          created_at: string
+          descripcion: string | null
+          es_seed_preliminar: boolean
+          nombre: string
+          nombre_familia: string
+          nombre_familia_en: string
+          orden_display: number
+          pais_codigo: string | null
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          codigo: string
+          created_at?: string
+          descripcion?: string | null
+          es_seed_preliminar?: boolean
+          nombre: string
+          nombre_familia: string
+          nombre_familia_en: string
+          orden_display?: number
+          pais_codigo?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          codigo?: string
+          created_at?: string
+          descripcion?: string | null
+          es_seed_preliminar?: boolean
+          nombre?: string
+          nombre_familia?: string
+          nombre_familia_en?: string
           orden_display?: number
           pais_codigo?: string | null
           updated_at?: string
@@ -14784,6 +14864,25 @@ export type Database = {
       }
     }
     Functions: {
+      _adiestramiento_ofertas_cobrables: {
+        Args: { p_mascota_id: string }
+        Returns: {
+          ciudad: string
+          comprable: string
+          direccion: string
+          duracion_minutos: number
+          n_sesiones: number
+          nivel: string
+          nombre: string
+          precio: number
+          prestador_id: string
+          prestador_nombre: string
+          prestador_servicio_id: string
+          programa_id: string
+          tipo_servicio: string
+          vigencia_dias: number
+        }[]
+      }
       _agenda_ocupacion: {
         Args: {
           p_duracion_minutos: number
@@ -15520,6 +15619,25 @@ export type Database = {
       }
       marcar_no_show_cita: { Args: { p_cita_id: string }; Returns: Json }
       mi_email: { Args: never; Returns: string }
+      obtener_adiestradores_disponibles: {
+        Args: { p_fecha: string; p_hora: string; p_mascota_id: string }
+        Returns: {
+          ciudad: string
+          comprable: string
+          direccion: string
+          duracion_minutos: number
+          n_sesiones: number
+          nivel: string
+          nombre: string
+          precio: number
+          prestador_id: string
+          prestador_nombre: string
+          prestador_servicio_id: string
+          programa_id: string
+          tipo_servicio: string
+          vigencia_dias: number
+        }[]
+      }
       obtener_alertas_activas_mascota_para_familia_servicio: {
         Args: { p_familia_servicio: string; p_mascota_id: string }
         Returns: Json
