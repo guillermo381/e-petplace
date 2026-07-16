@@ -92,6 +92,11 @@ export interface SelectorOpcionProps {
    *  las pantallas construidas migran AL PASO de la pasada, no como
    *  tanda; el default se retira cuando la última migre. */
   acento?: 'capa' | 'control' | 'oficio'
+  /** ENMIENDA S65 (acordeón de la bitácora): cuando una fila header ya
+   *  rotula el grupo (nombre + contador tocables), el label visible se
+   *  apaga para no duplicar — el accessibilityLabel del grupo QUEDA
+   *  (a11y intacta). Default true: nada existente cambia. */
+  etiquetaVisible?: boolean
 }
 
 function Chip({
@@ -263,6 +268,7 @@ export function SelectorOpcion({
   multiple = false,
   seleccionadas,
   acento = 'capa',
+  etiquetaVisible = true,
 }: SelectorOpcionProps) {
   const { theme } = useTheme()
 
@@ -282,16 +288,18 @@ export function SelectorOpcion({
 
   return (
     <View accessibilityRole={multiple ? undefined : 'radiogroup'} accessibilityLabel={etiqueta}>
-      <Text
-        style={{
-          fontFamily: typography.family.sans.medium,
-          fontSize: typography.size.sm,
-          color: theme.text.secondary,
-          marginBottom: spacing[3],
-        }}
-      >
-        {etiqueta}
-      </Text>
+      {etiquetaVisible ? (
+        <Text
+          style={{
+            fontFamily: typography.family.sans.medium,
+            fontSize: typography.size.sm,
+            color: theme.text.secondary,
+            marginBottom: spacing[3],
+          }}
+        >
+          {etiqueta}
+        </Text>
+      ) : null}
       {disposicion === 'tira' ? (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexDirection: 'row', gap: spacing[2] }}>
           {chips}

@@ -487,6 +487,10 @@ export const clienteEs = {
     bitacoraGrupoExperto: 'Nivel experto',
     bitacoraGrupoOtros: 'Otros avances',
     bitacoraSugerencias: '¿Es alguna de estas?',
+    // S65 — filtro rápido + acordeón de grupos (LOTE S65, gate founder)
+    bitacoraFiltroLabel: 'Busca una observación',
+    bitacoraFiltroPlaceholder: 'ej: ladró, correa, puerta',
+    bitacoraGrupoMarcadas: 'Marcaste {{n}}',
     bitacoraTextoLabel: 'Cuéntanos más (opcional)',
     bitacoraTextoPlaceholder: 'ej: hoy se sentó solo antes de comer',
     bitacoraGuardar: 'Guardar',
