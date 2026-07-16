@@ -100,6 +100,14 @@ export const uiEs = {
     estado: 'En vivo',
     estadoMemorial: 'En curso',
   },
+  // S63 — ClipSesion (el clip corto del adiestramiento; LOTE S63,
+  // gate founder pendiente)
+  clipSesion: {
+    reproducir: 'Reproducir el clip',
+    cargando: 'Cargando el clip',
+    error: 'Este clip no se pudo cargar.',
+    reintentar: 'Probar de nuevo',
+  },
   evidenciaFoto: {
     foto: 'Foto',
     agregarEvidencia: 'Agregar evidencia',

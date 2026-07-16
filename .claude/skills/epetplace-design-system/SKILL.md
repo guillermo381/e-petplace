@@ -16,7 +16,7 @@ description: >-
 
 # epetplace-design-system — el sistema es exigible, no sugerido
 
-Fuente de verdad: `packages/ui` (tokens v4 + 33 componentes + 3 temas).
+Fuente de verdad: `packages/ui` (tokens v4 + 34 componentes + 3 temas).
 Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 `@epetplace/ui`, no existe en el producto.
 
@@ -422,7 +422,7 @@ comprar es lo último, y lo que compra combina con TODO.*
 //     stroke={theme.text.primary} strokeWidth={1.75} strokeLinecap="round" /></Svg>
 ```
 
-## 3. ÍNDICE — los 33 componentes (import de `@epetplace/ui`)
+## 3. ÍNDICE — los 34 componentes (import de `@epetplace/ui`)
 
 | Export | Cuándo |
 |---|---|
@@ -459,6 +459,7 @@ comprar es lo último, y lo que compra combina con TODO.*
 | `FichaVacuna` | La ficha de UNA vacuna en la revisión del carnet (S47-B1.1; derivación S48). Presentacional pura: tap → `onEditar` (la edición es una Hoja de LA PANTALLA), "Esta no es" → `onDescartar`. Estados derivados de los datos: completa neutra (nombre+fecha; **tipo null NO tiñe** — decisión founder S48, los carnets reales no lo rotulan) · dudosa = SOLO fecha faltante, tinte cuidado y voz humana ("No pudimos leer la fecha") · `rechazada` (prop, del item_invalido de la RPC) danger — nada se pierde. Nombre en DM Sans (lo escribió un humano); fechas y lote en mono minúsculas. Memorial degrada: sin tinte, borde neutro |
 | `Icono` (+primitiva `Huella`) | El set b′ de DIRECCION_ARTE (S53): nombre TIPADO (paseo·veterinaria·grooming·refugio·despensa·coach), objeto en trazo 1.9 + Huella rellena en el hex de su capa; `registro` capa/aa/tinta (dosis §2.7); memorial adentro (huella a text.secondary, el destello no destella). `Huella` es LA primitiva canónica — nadie la redibuja. Todo ícono nuevo = entrada del registry + galería + gate founder por ícono; gate a 21px obligatorio (§2.9) |
 | `BarrasSemana` | La tira de 7 días de los Vitales (S53-B2c.1, espec firmada en brief). 7 barras proporcionales al valor REAL del día; día sin dato = barra base en bg.overlay (la verdad tal cual, L-139). Presentacional puro, ESTÁTICA (Ley 6), color hex puro de su capa; memorial degrada llenas a text.secondary. Sin ejes ni tooltips — no es un chart genérico |
+| `ClipSesion` | El clip corto de la sesión de adiestramiento (S63, componente 34 — espec aprobada por el arquitecto; MODELO_ADIESTRAMIENTO §5: el video es el medio del oficio). Poster sereno `radius.suave` + tap-para-reproducir con controles nativos (expo-video); JAMÁS autoplay — en ningún tema, en memorial menos (la reproducción es siempre un acto del usuario). Estados: cargando/error con voz honesta (namespace ui, Ley 13 — el clip jamás se disfraza de vacío). Escalera: 0 clips = NO se monta (cero estado vacío decorativo). Tokens puros — sirve a ambos temas y a la dosis del prestador sin variante. Consumidores: el parte del dueño + el Durante del prestador. Peer NUEVO: expo-video ~57.0.1 (nativo — build, no OTA) |
 | `FichaMascotaHogar` | v2 (S52-P3, espec gateada): la mascota PRESIDE — AvatarMascota 64 (foto primero, huella fallback) sobre superficie Tarjeta, nombre en DM Sans light xl y UNA voz SIN sujeto (ficha.* del riel; las variantes con {{nombre}} se conservan para contextos sin sujeto visible). Semántica intacta: alDia punto verdeVital · pideAtencion punto ochre + warningText · conociendolo neutral. Tap → perfil (pressed 0.99 de Tarjeta); sin badges ni CTA. Diseñada para 1-3 apiladas. Memorial degrada. Cero tokens nuevos |
 
 También: `ThemeProvider`/`useTheme` (light default, memorial forzable),

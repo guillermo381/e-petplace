@@ -91,6 +91,13 @@ export const uiEn = {
     estado: 'Live',
     estadoMemorial: 'In progress',
   },
+  // S63 — ClipSesion (training short clip; LOTE S63, founder gate pending)
+  clipSesion: {
+    reproducir: 'Play the clip',
+    cargando: 'Loading the clip',
+    error: "This clip couldn't load.",
+    reintentar: 'Try again',
+  },
   evidenciaFoto: {
     foto: 'Photo',
     agregarEvidencia: 'Add evidence',

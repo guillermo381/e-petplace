@@ -13,10 +13,9 @@
  * hueco, sin placeholder, sin "sin datos"; el parte factual queda.
  *
  * El VIDEO es el medio del oficio (§5): clips ≤3 (techo del motor) con
- * VideoView de expo-video — primitiva de plataforma (patrón Image del
- * detalle del paseo); el componente ClipSesion de packages/ui queda
- * PROPUESTO por Ley 11 (espec al gate del founder, lo consumirá también
- * el Durante del prestador).
+ * ClipSesion de packages/ui (componente 34, espec aprobada S63 — este
+ * parte es su primer consumidor real; el Durante del prestador es el
+ * segundo).
  *
  * TESIS: "Esto fue lo que tu perro aprendió hoy — y así vas vos con él."
  * FIRMA: la frase de vínculo de la progresión (voz humana DM Sans
@@ -27,9 +26,9 @@ import { useCallback, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { VideoView, useVideoPlayer } from 'expo-video';
 import {
   Boton,
+  ClipSesion,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
@@ -37,7 +36,6 @@ import {
   Insignia,
   Separador,
   Tarjeta,
-  radius,
   spacing,
   typography,
   useTheme,
@@ -48,26 +46,6 @@ import {
   type ParteAdiestramiento,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
-
-/** Un clip del parte: la plataforma reproduce, la casa viste (bordes y
- *  aire de tokens). Presentacional; el player es de expo-video. */
-function Clip({ uri }: { uri: string }) {
-  const { theme } = useTheme();
-  const player = useVideoPlayer(uri);
-  return (
-    <VideoView
-      player={player}
-      nativeControls
-      contentFit="cover"
-      style={{
-        width: '100%',
-        aspectRatio: 16 / 9,
-        borderRadius: radius.suave,
-        backgroundColor: theme.bg.overlay,
-      }}
-    />
-  );
-}
 
 export default function ParteAdiestramientoPantalla() {
   const { theme } = useTheme();
@@ -213,7 +191,14 @@ export default function ParteAdiestramientoPantalla() {
                 </Text>
                 {parte.clips.map((c) => {
                   const url = clipUrls[c.storage_path];
-                  return url !== undefined ? <Clip key={c.storage_path} uri={url} /> : null;
+                  return url !== undefined ? (
+                    <ClipSesion
+                      key={c.storage_path}
+                      uri={url}
+                      duracionSegundos={c.duracion_segundos}
+                      descripcion={c.descripcion}
+                    />
+                  ) : null;
                 })}
               </View>
             ) : null}

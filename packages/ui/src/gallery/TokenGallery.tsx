@@ -42,6 +42,7 @@ import { LineaDeVida, type LineaDeVidaItem } from '../components/LineaDeVida'
 import { VisorFoto } from '../components/VisorFoto'
 import { FichaVacuna } from '../components/FichaVacuna'
 import { FichaMascotaHogar } from '../components/FichaMascotaHogar'
+import { ClipSesion } from '../components/ClipSesion'
 import { Icono, type IconoNombre } from '../components/Icono'
 import { EsperaDeMarca } from '../brand/EsperaDeMarca'
 import { Guijarro } from '../brand/Guijarro'
@@ -1741,6 +1742,29 @@ function GaleriaInterna() {
                   <Guijarro capa="identidad" tamano={56} rotacion={9} />
                   <EsperaDeMarca tamano={56} />
                 </View>
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* ClipSesion — S63: el clip corto de la sesión (Ley 11, espec
+            aprobada). Poster + tap-para-reproducir, JAMÁS autoplay; el
+            URI de muestra no resuelve offline — el estado error con voz
+            honesta ES parte del gate. */}
+        <Seccion titulo="ClipSesion (S63) — poster sereno + tap para reproducir (jamás autoplay, en memorial menos); cargando/error con voz honesta">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — poster con duración en mono; tap monta el video con controles nativos">
+                <ClipSesion
+                  uri="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+                  duracionSegundos={22}
+                  descripcion="El quieto de la sesión 5"
+                />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — degrada solo (tokens); la reproducción sigue siendo un acto del usuario">
+                <ClipSesion uri="https://example.invalid/clip.mp4" duracionSegundos={18} />
               </PanelTema>
             </ThemeProvider>
           </View>
