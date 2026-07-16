@@ -2,7 +2,7 @@
   "expo": {
     "name": "prestador",
     "slug": "prestador",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "prestador",
@@ -44,9 +44,22 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "La app usa tu ubicación durante el paseo para registrar el recorrido que ve la familia."
+          "locationWhenInUsePermission": "La app usa tu ubicación durante el paseo para registrar el recorrido que ve la familia.",
+          "locationAlwaysAndWhenInUsePermission": "Con el permiso \"siempre\", el recorrido se registra aunque guardes el teléfono en el bolsillo. Solo se usa mientras dura un paseo.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
         }
-      ]
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "La app usa la cámara para grabar clips cortos del progreso en las sesiones de adiestramiento.",
+          "microphonePermission": "La app usa el micrófono para que los clips de adiestramiento se escuchen (las órdenes son parte del progreso).",
+          "recordAudioAndroid": true
+        }
+      ],
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true,

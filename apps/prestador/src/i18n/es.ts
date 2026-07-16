@@ -207,7 +207,20 @@ export const prestadorEs = {
     trackPendienteRed:
       'Los últimos puntos del recorrido no se guardaron. Revisa tu conexión y toca Terminar de nuevo.',
     // LETRA FIRMADA founder S62 (voz honesta D-292: el motor es foreground)
+    // S63-B: queda SOLO para el modo fallback 'pantalla' — con el permiso
+    // "siempre" concedido la reemplaza trackEnBolsillo (D-292 vivo).
     trackPantallaEncendida: 'El recorrido se registra solo con la pantalla encendida.',
+    trackEnBolsillo: 'El recorrido se registra aunque guardes el teléfono.',
+    // D-292 (S63-B): la voz honesta ANTES del prompt nativo del "siempre" +
+    // la notificación del servicio (Android la exige; es la voz del sistema).
+    fondoHojaTitulo: 'El recorrido, con el teléfono guardado',
+    fondoHojaExplicacion:
+      'Si permites la ubicación "siempre", el recorrido se registra aunque guardes el teléfono en el bolsillo o la pantalla se apague. Se usa solo mientras dura un paseo y consume algo más de batería mientras caminas.',
+    fondoHojaComo: 'En la pantalla del sistema, elige la opción "Permitir todo el tiempo".',
+    fondoHojaPermitir: 'Permitir ubicación siempre',
+    fondoHojaAhoraNo: 'Ahora no',
+    fondoNotificacionTitulo: 'Paseo en curso',
+    fondoNotificacionCuerpo: 'e-PetPlace registra el recorrido mientras dura el paseo.',
     probarDeNuevo: 'Probar de nuevo',
     parteDelPerro: 'Parte del perro',
     evidencia: 'Evidencia',
@@ -807,5 +820,30 @@ export const prestadorEs = {
     quitarConfirmar: 'Sí, quitar',
     cancelar: 'Cancelar',
     solape: 'Esa franja se cruza con una que ya tienes ese día.',
+  },
+  // S63-B: clips de la sesión de adiestramiento (MODELO_ADIESTRAMIENTO
+  // §5/§12.3 — techo 15-30s ×3; cola local hasta el bucket de la A).
+  clips: {
+    titulo: 'Clips de la sesión',
+    explica:
+      'Graba momentos cortos del progreso — un "sentado" logrado se ve mejor en movimiento. Cada clip va de {{min}} a {{max}} segundos, hasta {{techo}} por sesión.',
+    grabarClip: 'Grabar clip',
+    empezarAGrabar: 'Empezar a grabar',
+    detener: 'Detener',
+    cancelar: 'Cancelar',
+    revisarTitulo: 'Revisar clip',
+    usarClip: 'Usar clip',
+    descartar: 'Descartar',
+    descartarYRepetir: 'Descartar y repetir',
+    repetir: 'Grabar de nuevo',
+    quitarClip: 'Quitar clip',
+    quedoCorto: 'Quedó corto: los clips van de 15 a 30 segundos. Graba uno nuevo con calma.',
+    clipN: 'Clip {{n}}',
+    techoAlcanzado: 'Ya registraste los {{techo}} clips de esta sesión.',
+    envioPendiente:
+      'Por ahora los clips quedan en este teléfono. El envío al parte de la familia llega con la próxima actualización.',
+    sinPermiso: 'Necesitamos la cámara y el micrófono para grabar el clip — las órdenes que da tu voz son parte del progreso.',
+    abrirAjustes: 'Abrir ajustes',
+    probarDeNuevo: 'Probar de nuevo',
   },
 } as const;

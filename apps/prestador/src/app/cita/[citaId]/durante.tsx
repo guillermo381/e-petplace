@@ -10,8 +10,9 @@
 // pantalla al frente — ver use-track-gps.ts.
 // ─────────────────────────────────────────────────────────────────────
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Linking, ScrollView, Text, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Boton,
@@ -193,6 +194,34 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
   const [terminando, setTerminando] = useState(false);
   const terminandoRef = useRef(false);
 
+  // D-292 (S63-B): la voz honesta ANTES del prompt nativo del "siempre".
+  // Se ofrece UNA vez; "Ahora no" se respeta entre paseos (AsyncStorage).
+  const [hojaFondo, setHojaFondo] = useState(false);
+  const [pidiendoFondo, setPidiendoFondo] = useState(false);
+  useEffect(() => {
+    if (!gps.fondoPedible) return;
+    let cancelado = false;
+    void AsyncStorage.getItem('gps-fondo-ahora-no').then((declinado) => {
+      if (!cancelado && declinado === null) setHojaFondo(true);
+    });
+    return () => {
+      cancelado = true;
+    };
+  }, [gps.fondoPedible]);
+
+  async function permitirFondo() {
+    if (pidiendoFondo) return;
+    setPidiendoFondo(true);
+    await gps.pedirFondo();
+    setPidiendoFondo(false);
+    setHojaFondo(false);
+  }
+
+  function declinarFondo() {
+    setHojaFondo(false);
+    void AsyncStorage.setItem('gps-fondo-ahora-no', '1');
+  }
+
   const chipGps = { estado: CHIP_GPS_ESTADO[gps.estado], etiqueta: ETIQUETA_GPS[gps.estado] };
 
   async function tocarNovedad(n: NovedadCatalogoPaseo) {
@@ -303,6 +332,9 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
     });
 
     if (r.ok || r.codigo === 'atencion_no_en_curso' || r.codigo === 'atencion_estado_invalido') {
+      // D-292: el paseo TERMINÓ — el servicio de fondo se apaga acá
+      // (navegar no lo apagaba a propósito; terminar sí).
+      await gps.detenerTrack();
       // Ya terminada por otra vía = mismo destino (patrón S38-fix1).
       router.replace({ pathname: '/cita/[citaId]/cierre', params: { citaId } });
       return;
@@ -336,8 +368,10 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
         </Text>
       </View>
 
-      {/* LETRA FIRMADA founder S62 — mientras D-292 no exista, el
-          Durante DECLARA la limitación del motor (L-141): voz
+      {/* D-292 (S63-B): la voz honesta dice la verdad del MODO. En
+          'fondo' la letra S62 "pantalla encendida" SE RETIRA (dejó de
+          ser verdad) y la reemplaza la del bolsillo; en el fallback
+          'pantalla' la limitación sigue declarada (L-141): voz
           secundaria, visible siempre, dosis baja. */}
       <Text
         style={{
@@ -348,7 +382,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
           marginTop: -spacing[3],
         }}
       >
-        {t('cita.trackPantallaEncendida')}
+        {gps.modo === 'fondo' ? t('cita.trackEnBolsillo') : t('cita.trackPantallaEncendida')}
       </Text>
 
       {cardGps && (
@@ -547,6 +581,47 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
               ))}
             </>
           )}
+        </View>
+      </Hoja>
+
+      {/* Hoja D-292: la voz honesta ANTES del prompt nativo — el consumo
+          de batería se declara claro, jamás letra chica. */}
+      <Hoja
+        visible={hojaFondo}
+        onCerrar={() => {
+          if (!pidiendoFondo) declinarFondo();
+        }}
+        titulo={t('cita.fondoHojaTitulo')}
+      >
+        <View style={{ padding: spacing[4], gap: spacing[3] }}>
+          <Text
+            style={{
+              fontFamily: typography.family.sans.regular,
+              fontSize: typography.size.base,
+              lineHeight: typography.size.base * 1.4,
+              color: theme.text.secondary,
+            }}
+          >
+            {t('cita.fondoHojaExplicacion')}
+          </Text>
+          <Text
+            style={{
+              fontFamily: typography.family.sans.regular,
+              fontSize: typography.size.sm,
+              lineHeight: typography.size.sm * 1.4,
+              color: theme.text.secondary,
+            }}
+          >
+            {t('cita.fondoHojaComo')}
+          </Text>
+          <Boton
+            variante="primario"
+            bloque
+            etiqueta={t('cita.fondoHojaPermitir')}
+            cargando={pidiendoFondo}
+            onPress={() => void permitirFondo()}
+          />
+          <Boton variante="ghost" bloque etiqueta={t('cita.fondoHojaAhoraNo')} onPress={declinarFondo} />
         </View>
       </Hoja>
     </ScrollView>

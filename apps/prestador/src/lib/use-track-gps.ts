@@ -1,40 +1,47 @@
 /**
- * useTrackGps — captura FOREGROUND del recorrido (S44-B4.3; lote de
- * curas del track S62 — pedido founder post-bifurcación).
+ * useTrackGps — el orquestador de la captura del recorrido (S44-B4.3;
+ * curas S62; S63-B: D-292 — GPS BACKGROUND).
  *
- * GPS en background sigue siendo D-292 (dev build + permisos always +
- * servicio): acá el track vive mientras la pantalla del Durante está
- * al frente — limitación asumida de F1, documentada.
+ * El buffer/throttle/flush viven en track-gps-fondo.ts (estado de módulo,
+ * compartido con la tarea de background). Este hook decide el MODO y
+ * traduce la sesión a estado de React para la pantalla:
  *
- * Patrón heredado del relevamiento B0 (repo viejo, useTrackGps):
- *   · punto aceptado cada ≥5s
- *   · flush a DB al juntar 12 puntos o cada 60s (registrarTrackPaseo append)
- *   · error de red → lote reinyectado al buffer
- *   · atencion_no_en_curso → hard-stop silencioso (el server mandó)
- *   · flushFinal() para Terminar — S62: devuelve TAMBIÉN los puntos
- *     que NO se pudieron guardar (pendientes>0 = la red falló; la
- *     pantalla lo declara, jamás cierra con el total viejo en silencio)
+ *   · modo 'fondo' (D-292): permiso "siempre" concedido →
+ *     startLocationUpdatesAsync + servicio con notificación honesta.
+ *     El track sigue con el teléfono en el bolsillo y AL NAVEGAR fuera
+ *     del Durante (el cleanup NO apaga el servicio — lo apaga Terminar
+ *     o el hard-stop del server).
+ *   · modo 'pantalla' (fallback S44/S62): solo permiso "mientras se usa"
+ *     → watchPositionAsync foreground, la limitación se declara con la
+ *     voz honesta de S62 (que en modo fondo SE RETIRA).
  *
- * CURAS S62 (todas OTA):
- *   · el cleanup FLUSHEA el buffer antes de soltar (los hasta-11
- *     puntos ya no se pierden al salir de la pantalla)
- *   · timeout del primer punto (30s) → 'sin_senal' honesto (muere el
- *     "iniciando" eterno; el watcher sigue vivo — si el punto llega,
- *     el estado se cura solo)
- *   · denegado SIN re-pregunta (canAskAgain=false) → 'sin_permiso_ajustes'
- *     (la pantalla abre los Ajustes del sistema)
- *   · permiso APROXIMADO (Android coarse / iOS reduced) → 'aproximado'
- *     PERSISTENTE mientras captura (la app no finge track fino)
+ * El permiso "siempre" JAMÁS se pide a ciegas: el hook expone
+ * `fondoPedible` y la PANTALLA muestra primero la voz honesta (batería
+ * declarada) — recién con el sí del paseador se dispara el prompt
+ * nativo vía `pedirFondo()`.
  *
- * Chip de estados: inactivo · iniciando · activo · aproximado ·
- * sin_permiso · sin_permiso_ajustes · sin_senal · no_disponible · error.
+ * Contrato S62 intacto: estados del chip, timeout del primer punto,
+ * denegado-sin-re-pregunta → Ajustes, aproximado persistente, flush
+ * final que declara pendientes.
  *
  * DEV: EXPO_PUBLIC_GPS_FAKE=1 simula una caminata (browser/emulador).
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as Location from 'expo-location';
-import { registrarTrackPaseo, type PuntoGpsPaseo } from '@epetplace/api';
+
+import {
+  aceptarPunto,
+  detenerCapturaFondo,
+  flushFinalTrack,
+  flushTrack,
+  iniciarCapturaFondo,
+  iniciarSesionTrack,
+  puntosSesionActual,
+  sesionDetenidaPorServer,
+  suscribirTrack,
+} from './track-gps-fondo';
+import { useTraduccion } from '@/i18n';
 
 export type EstadoGps =
   | 'inactivo'
@@ -47,8 +54,9 @@ export type EstadoGps =
   | 'no_disponible'
   | 'error';
 
+export type ModoTrack = 'fondo' | 'pantalla';
+
 const INTERVALO_MS = 5_000;
-const MAX_BUFFER = 12;
 const FLUSH_PERIOD_MS = 60_000;
 /** S62: si el GPS no entrega el PRIMER punto en este plazo, el chip
  *  pasa a 'sin_senal' (voz honesta) — la captura no se detiene. */
@@ -69,32 +77,48 @@ export interface UseTrackGps {
   puntosTotal: number;
   ultimoPunto: { lat: number; lng: number } | null;
   puntosSesion: { lat: number; lng: number }[];
+  /** 'fondo' = D-292 vivo (el bolsillo registra) · 'pantalla' = fallback
+   *  foreground: la voz honesta "pantalla encendida" sigue vigente. */
+  modo: ModoTrack;
+  /** true = hay permiso foreground pero el "siempre" está pedible: la
+   *  pantalla muestra la voz honesta ANTES del prompt nativo. */
+  fondoPedible: boolean;
+  /** Dispara el prompt nativo del permiso "siempre" (tras la voz honesta
+   *  de la pantalla). true = concedido y el modo ya subió a 'fondo'. */
+  pedirFondo: () => Promise<boolean>;
   /** Vacía el buffer y devuelve el total real del server + pendientes. */
   flushFinal: () => Promise<ResultadoFlushFinal>;
+  /** Apaga TODA la captura (watcher + servicio de fondo). Lo llama la
+   *  pantalla cuando el paseo TERMINÓ — navegar no apaga el fondo. */
+  detenerTrack: () => Promise<void>;
   /** Re-pide el permiso / re-arranca el watcher (cards de estado). */
   reintentarPermiso: () => void;
 }
 
 export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): UseTrackGps {
+  const { t } = useTraduccion();
   const [estado, setEstado] = useState<EstadoGps>('iniciando');
   const [puntosTotal, setPuntosTotal] = useState(puntosIniciales);
   const [puntosSesion, setPuntosSesion] = useState<{ lat: number; lng: number }[]>([]);
+  const [modo, setModo] = useState<ModoTrack>('pantalla');
+  const [fondoPedible, setFondoPedible] = useState(false);
   const [intento, setIntento] = useState(0);
 
-  const bufferRef = useRef<PuntoGpsPaseo[]>([]);
-  const lastTRef = useRef(0);
   const subRef = useRef<Location.LocationSubscription | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fakeRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const flushingRef = useRef(false);
-  const detenidoRef = useRef(false);
-  const totalRef = useRef(puntosIniciales);
   /** S62: con permiso aproximado el estado NO asciende a 'activo' —
    *  la app dice la verdad del fix mientras captura. */
   const aproximadoRef = useRef(false);
+  const tRef = useRef(t);
+  tRef.current = t;
+  /** Solo siembra la sesión al montar — el refetch en foco trae un objeto
+   *  datos nuevo y NO debe reiniciar el watcher (comportamiento S62). */
+  const puntosInicialesRef = useRef(puntosIniciales);
+  puntosInicialesRef.current = puntosIniciales;
 
-  const detener = useCallback(() => {
+  const detenerLocal = useCallback(() => {
     subRef.current?.remove();
     subRef.current = null;
     if (intervalRef.current !== null) clearInterval(intervalRef.current);
@@ -105,52 +129,60 @@ export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): 
     fakeRef.current = null;
   }, []);
 
-  const aceptarPunto = useCallback((lat: number, lng: number) => {
-    const ahora = Date.now();
-    if (ahora - lastTRef.current < INTERVALO_MS) return;
-    lastTRef.current = ahora;
-    bufferRef.current.push({ lat, lng, t: new Date(ahora).toISOString() });
-    setPuntosSesion((p) => [...p, { lat, lng }]);
-    setEstado(aproximadoRef.current ? 'aproximado' : 'activo');
-    if (bufferRef.current.length >= MAX_BUFFER) void flush();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  const flushFinal = useCallback(async (): Promise<ResultadoFlushFinal> => flushFinalTrack(), []);
+
+  const detenerTrack = useCallback(async () => {
+    detenerLocal();
+    await detenerCapturaFondo();
+    setEstado('inactivo');
+  }, [detenerLocal]);
+
+  const arrancarFondo = useCallback(async () => {
+    await iniciarCapturaFondo({
+      titulo: tRef.current('cita.fondoNotificacionTitulo'),
+      cuerpo: tRef.current('cita.fondoNotificacionCuerpo'),
+    });
+    setModo('fondo');
+    setFondoPedible(false);
   }, []);
 
-  const flush = useCallback(async () => {
-    if (flushingRef.current || bufferRef.current.length === 0) return;
-    flushingRef.current = true;
-    const lote = bufferRef.current.slice();
-    bufferRef.current = [];
-    try {
-      const r = await registrarTrackPaseo({ evento_atencion_id: eventoAtencionId, puntos: lote, append: true });
-      if (r.ok) {
-        totalRef.current = r.data.puntos_total;
-        setPuntosTotal(r.data.puntos_total);
-        return;
-      }
-      if (r.codigo === 'atencion_no_en_curso' || r.codigo === 'atencion_estado_invalido') {
-        detenidoRef.current = true;
-        detener();
-        setEstado('inactivo');
-        return;
-      }
-      // Transitorio: reinyectar para el próximo flush.
-      bufferRef.current = [...lote, ...bufferRef.current];
-    } finally {
-      flushingRef.current = false;
-    }
-  }, [eventoAtencionId, detener]);
-
-  const flushFinal = useCallback(async (): Promise<ResultadoFlushFinal> => {
-    await flush();
-    // S62: lo que quedó en el buffer tras el intento NO llegó a DB —
-    // el caller lo declara (jamás cierre silencioso con total viejo).
-    return { total: totalRef.current, pendientes: bufferRef.current.length };
-  }, [flush]);
+  const pedirFondo = useCallback(async (): Promise<boolean> => {
+    const permiso = await Location.requestBackgroundPermissionsAsync().catch(() => null);
+    setFondoPedible(false);
+    if (!permiso?.granted) return false;
+    // Re-arranca el pipeline entero: con el "siempre" ya concedido,
+    // arrancar() toma el camino del fondo — y si el servicio fallara,
+    // cae solo al watcher foreground (mismo fallback de siempre).
+    setIntento((i) => i + 1);
+    return true;
+  }, []);
 
   useEffect(() => {
-    if (detenidoRef.current) return;
+    iniciarSesionTrack(eventoAtencionId, puntosInicialesRef.current);
+    if (sesionDetenidaPorServer()) {
+      setEstado('inactivo');
+      return;
+    }
+    // Remontaje a mitad de paseo: los puntos de la sesión viva siembran
+    // el estado local (el mapa no arranca vacío con el fondo corriendo).
+    setPuntosSesion(puntosSesionActual());
+
     let cancelado = false;
+    const desuscribir = suscribirTrack({
+      onPunto: (p) => {
+        if (cancelado) return;
+        setPuntosSesion((prev) => [...prev, p]);
+        setEstado(aproximadoRef.current ? 'aproximado' : 'activo');
+      },
+      onTotal: (total) => {
+        if (!cancelado) setPuntosTotal(total);
+      },
+      onServerDetuvo: () => {
+        if (cancelado) return;
+        detenerLocal();
+        setEstado('inactivo');
+      },
+    });
 
     async function arrancar() {
       setEstado('iniciando');
@@ -162,7 +194,7 @@ export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): 
           paso += 1;
           aceptarPunto(-0.185 + Math.sin(paso / 8) * 0.0012, -78.481 + paso * 0.00012);
         }, FAKE_PERIOD_MS);
-        intervalRef.current = setInterval(() => void flush(), FLUSH_PERIOD_MS);
+        intervalRef.current = setInterval(() => void flushTrack(), FLUSH_PERIOD_MS);
         return;
       }
 
@@ -184,18 +216,38 @@ export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): 
         setEstado('no_disponible');
         return;
       }
+
+      // S62: el "iniciando" eterno muere — sin primer punto en 30s,
+      // voz honesta (la captura sigue: un punto tardío cura el chip).
+      timeoutRef.current = setTimeout(() => {
+        setEstado((e) => (e === 'iniciando' ? 'sin_senal' : e));
+      }, TIMEOUT_PRIMER_PUNTO_MS);
+
+      // D-292: con el "siempre" ya concedido, el fondo arranca derecho.
+      const fondo = await Location.getBackgroundPermissionsAsync().catch(() => null);
+      if (cancelado) return;
+      if (fondo?.granted) {
+        try {
+          await arrancarFondo();
+          return;
+        } catch {
+          // El servicio no arrancó: cae al watcher foreground (honesto).
+        }
+      } else {
+        // fondo === null = la plataforma no sabe de background (web):
+        // ahí no hay nada pedible — la voz honesta de pantalla rige.
+        setFondoPedible(fondo !== null && fondo.canAskAgain !== false);
+      }
+
+      // Fallback foreground (S44/S62): pantalla al frente.
       try {
         subRef.current = await Location.watchPositionAsync(
           { accuracy: Location.Accuracy.High, timeInterval: INTERVALO_MS, distanceInterval: 0 },
           (pos) => aceptarPunto(pos.coords.latitude, pos.coords.longitude),
         );
-        intervalRef.current = setInterval(() => void flush(), FLUSH_PERIOD_MS);
+        intervalRef.current = setInterval(() => void flushTrack(), FLUSH_PERIOD_MS);
+        setModo('pantalla');
         if (aproximadoRef.current) setEstado('aproximado');
-        // S62: el "iniciando" eterno muere — sin primer punto en 30s,
-        // voz honesta (el watcher sigue: un punto tardío cura el chip).
-        timeoutRef.current = setTimeout(() => {
-          setEstado((e) => (e === 'iniciando' ? 'sin_senal' : e));
-        }, TIMEOUT_PRIMER_PUNTO_MS);
       } catch {
         setEstado('error');
       }
@@ -204,16 +256,15 @@ export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): 
     void arrancar();
     return () => {
       cancelado = true;
-      detener();
-      // S62: el buffer se flushea al soltar la pantalla — los hasta-11
-      // puntos del lote a medio juntar ya no se pierden. Fire-and-forget:
-      // el RPC sobrevive al unmount; si además hay un flush EN VUELO,
-      // este intento sale vacío y el lote en vuelo sigue su camino
-      // (micro-hueco declarado: puntos aceptados DURANTE ese vuelo
-      // esperan al próximo montaje o al flush final).
-      void flush();
+      desuscribir();
+      detenerLocal();
+      // S62: el buffer se flushea al soltar la pantalla (fire-and-forget;
+      // micro-hueco del vuelo declarado en S62). D-292: el servicio de
+      // FONDO NO se apaga acá — navegar no termina el paseo; lo apagan
+      // Terminar (detenerTrack) o el hard-stop del server.
+      void flushTrack();
     };
-  }, [intento, aceptarPunto, flush, detener]);
+  }, [eventoAtencionId, intento, arrancarFondo, detenerLocal]);
 
   const ultimoPunto = puntosSesion.length > 0 ? puntosSesion[puntosSesion.length - 1] : null;
 
@@ -222,7 +273,11 @@ export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): 
     puntosTotal,
     ultimoPunto,
     puntosSesion,
+    modo,
+    fondoPedible,
+    pedirFondo,
     flushFinal,
+    detenerTrack,
     reintentarPermiso: () => setIntento((i) => i + 1),
   };
 }

@@ -183,7 +183,17 @@ export const prestadorEn = {
     trackPendienteRed:
       "The last route points didn't get saved. Check your connection and tap Finish again.",
     // LETRA FIRMADA founder S62 (voz honesta D-292: el motor es foreground)
+    // S63-B: queda SOLO para el modo fallback 'pantalla' (espejo de es.ts).
     trackPantallaEncendida: 'The route is only recorded while the screen is on.',
+    trackEnBolsillo: 'The route keeps recording even with your phone put away.',
+    fondoHojaTitulo: 'The route, with your phone put away',
+    fondoHojaExplicacion:
+      'If you allow location "always", the route keeps recording even with your phone in your pocket or the screen off. It is only used while a walk is in progress, and it uses somewhat more battery while you walk.',
+    fondoHojaComo: 'On the system screen, choose "Allow all the time".',
+    fondoHojaPermitir: 'Allow location always',
+    fondoHojaAhoraNo: 'Not now',
+    fondoNotificacionTitulo: 'Walk in progress',
+    fondoNotificacionCuerpo: 'e-PetPlace records the route while the walk lasts.',
     probarDeNuevo: 'Try again',
     parteDelPerro: "Dog's report",
     evidencia: 'Evidence',
@@ -710,5 +720,29 @@ export const prestadorEn = {
     quitarConfirmar: 'Yes, remove',
     cancelar: 'Cancel',
     solape: 'That window overlaps one you already have that day.',
+  },
+  // S63-B: training session clips (mirror of es.ts).
+  clips: {
+    titulo: 'Session clips',
+    explica:
+      'Record short moments of progress — a "sit" well done shows better in motion. Each clip runs {{min}} to {{max}} seconds, up to {{techo}} per session.',
+    grabarClip: 'Record clip',
+    empezarAGrabar: 'Start recording',
+    detener: 'Stop',
+    cancelar: 'Cancel',
+    revisarTitulo: 'Review clip',
+    usarClip: 'Use clip',
+    descartar: 'Discard',
+    descartarYRepetir: 'Discard and retry',
+    repetir: 'Record again',
+    quitarClip: 'Remove clip',
+    quedoCorto: 'It came out short: clips run 15 to 30 seconds. Record a new one, no rush.',
+    clipN: 'Clip {{n}}',
+    techoAlcanzado: "You already recorded this session's {{techo}} clips.",
+    envioPendiente:
+      "For now the clips stay on this phone. Sending them to the family's report arrives with the next update.",
+    sinPermiso: 'We need the camera and microphone to record the clip — your voice commands are part of the progress.',
+    abrirAjustes: 'Open settings',
+    probarDeNuevo: 'Try again',
   },
 } as const satisfies Espejo<typeof prestadorEs>;

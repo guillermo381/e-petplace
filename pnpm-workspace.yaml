@@ -6,5 +6,11 @@ allowBuilds:
   esbuild: true
   unrs-resolver: set this to true or false
 
+minimumReleaseAgeExclude:
+  - expo-camera@57.0.2
+  - expo-task-manager@57.0.4
+  - expo-video@57.0.1
+  - unimodules-app-loader@57.0.1
+
 # Expo/React Native + pnpm: node_modules hoisted (recomendación oficial Expo para monorepos pnpm)
 nodeLinker: hoisted

@@ -15,6 +15,10 @@ import { ProveedorI18n } from '@epetplace/i18n';
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 // Bootstrap de la puerta única (initApi) — efecto de módulo, S44-B4.
 import '@/lib/api';
+// D-292 (S63-B): la tarea de track background tiene que estar DEFINIDA
+// en global scope en todo arranque del proceso — incluido el
+// relanzamiento headless del servicio de ubicación.
+import '@/lib/track-gps-fondo';
 // Riel i18n (S51-B1a): namespaces prestador + ui, keys tipadas exigibles.
 import { recursos } from '@/i18n';
 
@@ -23,7 +27,7 @@ SplashScreen.preventAutoHideAsync();
 // MARCADOR DE BUNDLE (L-138, práctica permanente — llega al prestador en
 // S51): el gate en dispositivo EMPIEZA confirmando que Metro imprime la
 // línea de la sesión vigente. ACTUALIZAR al arrancar cada sesión.
-console.log('[bundle] prestador S62');
+console.log('[bundle] prestador S63');
 
 export default function RootLayout() {
   // D-305 (S48): el tema lo decide el SISTEMA — el app lo resuelve acá
