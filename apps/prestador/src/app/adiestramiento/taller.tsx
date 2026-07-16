@@ -505,8 +505,12 @@ export default function TallerAdiestramiento() {
                       registro="aa"
                     />
                   </View>
+                  {/* S65 cura chica (captura founder): 5 chips no entran
+                      en 'fila' — el 90 min quedaba inalcanzable. 'tira'
+                      es el scroll horizontal de la casa (S55-B4). */}
                   <SelectorOpcion
                     acento="oficio"
+                    disposicion="tira"
                     etiqueta={t('tallerAdiestramiento.duracionSesion')}
                     opciones={DURACIONES_SESION.map((d) => ({ codigo: String(d), etiqueta: `${d} min` }))}
                     seleccionada={String(duracion)}
@@ -826,8 +830,11 @@ export default function TallerAdiestramiento() {
             </View>
             <Text style={vozSecundaria}>{t('tallerAdiestramiento.vigenciaExplica')}</Text>
 
+            {/* misma cura S65 que la sesión suelta: la fila de 5 chips
+                desborda — 'tira' (scroll horizontal de la casa) */}
             <SelectorOpcion
               acento="oficio"
+              disposicion="tira"
               etiqueta={t('tallerAdiestramiento.duracionSesion')}
               opciones={DURACIONES_SESION.map((d) => ({ codigo: String(d), etiqueta: `${d} min` }))}
               seleccionada={String(draft.duracionMinutos)}
