@@ -441,7 +441,14 @@ export const clienteEn = {
     bitacoraVacioTitulo: 'The log is waiting',
     bitacoraVacioDetalle: 'What you notice about your dog between sessions lives here — and their trainer reads it before each session.',
     bitacoraHojaTitulo: 'What did you notice?',
-    bitacoraChipsEtiqueta: 'Pick what you saw',
+    // S65 §7 — vocabulary groups (live DB convention: behaviors catalog
+    // + curriculum level) + autocomplete (LOTE S65)
+    bitacoraGrupoCasa: 'At home',
+    bitacoraGrupoBasico: 'Basic commands',
+    bitacoraGrupoMedio: 'Intermediate level',
+    bitacoraGrupoExperto: 'Expert level',
+    bitacoraGrupoOtros: 'Other progress',
+    bitacoraSugerencias: 'Is it one of these?',
     bitacoraTextoLabel: 'Tell us more (optional)',
     bitacoraTextoPlaceholder: 'e.g. today they sat on their own before eating',
     bitacoraGuardar: 'Save',

@@ -62,14 +62,28 @@ export interface ChipVocabulario {
   nombre_familia_en: string;
 }
 
+export type NivelCurriculum = 'basico' | 'medio' | 'experto';
+
+const NIVELES_CURRICULUM: readonly NivelCurriculum[] = ['basico', 'medio', 'experto'];
+
+/** El vocabulario CON su grupo de navegación (S65 §7): la agrupación no
+ *  se inventa — sale de la convención VIVA de DB. Conductas = su propio
+ *  catálogo (tipo). Objetivos = el `nivel` que el currículum
+ *  (cat_curriculum_adiestramiento) ya les asigna; objetivo fuera del
+ *  currículum o de nivel desconocido → null (la UI lo agrupa aparte,
+ *  jamás pinta el código crudo — Ley 3). */
+export interface ChipVocabularioAgrupado extends ChipVocabulario {
+  nivel: NivelCurriculum | null;
+}
+
 /** Los chips disponibles para registrar: conductas observadas del hogar
  *  primero (el vocabulario propio de la familia), objetivos del
- *  currículum después ("ya lo hace en casa"). */
+ *  currículum después ("ya lo hace en casa"), cada uno con su grupo. */
 export async function obtenerVocabularioBitacora(): Promise<
-  ResultadoWrapper<ChipVocabulario[], CodigoErrorBitacora>
+  ResultadoWrapper<ChipVocabularioAgrupado[], CodigoErrorBitacora>
 > {
   const cliente = getClient();
-  const [conductas, objetivos] = await Promise.all([
+  const [conductas, objetivos, curriculum] = await Promise.all([
     cliente
       .from('cat_conductas_bitacora')
       .select('codigo, nombre_familia, nombre_familia_en')
@@ -80,13 +94,28 @@ export async function obtenerVocabularioBitacora(): Promise<
       .select('codigo, nombre_familia, nombre_familia_en')
       .eq('activo', true)
       .order('orden_display', { ascending: true }),
+    cliente
+      .from('cat_curriculum_adiestramiento')
+      .select('objetivo_codigo, nivel')
+      .eq('activo', true),
   ]);
-  if (conductas.error || objetivos.error) return fallo('error');
+  if (conductas.error || objetivos.error || curriculum.error) return fallo('error');
+
+  const nivelPorObjetivo = new Map<string, NivelCurriculum>();
+  for (const fila of curriculum.data ?? []) {
+    const nivel = NIVELES_CURRICULUM.find((n) => n === fila.nivel);
+    if (nivel !== undefined) nivelPorObjetivo.set(fila.objetivo_codigo, nivel);
+  }
+
   return {
     ok: true,
     data: [
-      ...(conductas.data ?? []).map((c) => ({ tipo: 'conducta' as const, ...c })),
-      ...(objetivos.data ?? []).map((o) => ({ tipo: 'objetivo' as const, ...o })),
+      ...(conductas.data ?? []).map((c) => ({ tipo: 'conducta' as const, nivel: null, ...c })),
+      ...(objetivos.data ?? []).map((o) => ({
+        tipo: 'objetivo' as const,
+        nivel: nivelPorObjetivo.get(o.codigo) ?? null,
+        ...o,
+      })),
     ],
   };
 }

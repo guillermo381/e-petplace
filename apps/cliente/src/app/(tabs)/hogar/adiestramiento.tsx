@@ -52,7 +52,7 @@ import {
   obtenerVocabularioBitacora,
   registrarBitacoraFamilia,
   type AdiestramientoDelHogar,
-  type ChipVocabulario,
+  type ChipVocabularioAgrupado,
   type EntradaBitacora,
   type MascotaResumen,
 } from '@epetplace/api';
@@ -87,7 +87,7 @@ export default function HubAdiestramiento() {
   // §7 — la bitácora
   const [entradas, setEntradas] = useState<EntradaBitacora[] | 'cargando' | 'error'>('cargando');
   const [mascotas, setMascotas] = useState<MascotaResumen[]>([]);
-  const [vocabulario, setVocabulario] = useState<ChipVocabulario[]>([]);
+  const [vocabulario, setVocabulario] = useState<ChipVocabularioAgrupado[]>([]);
   const [hojaAbierta, setHojaAbierta] = useState(false);
   const [mascotaId, setMascotaId] = useState<string | null>(null);
   const [chips, setChips] = useState<string[]>([]);
@@ -134,6 +134,54 @@ export default function HubAdiestramiento() {
     [mascotas],
   );
 
+  // §7 (S65) — los chips se agrupan por la convención VIVA de DB: las
+  // conductas son su propio catálogo; los objetivos, el nivel que el
+  // currículum ya les asigna. Grupo vacío no se monta (Ley 18: la
+  // sección existe solo si existe para el usuario).
+  const gruposVocabulario = useMemo(() => {
+    const definiciones: Array<{ clave: string; etiqueta: string; pertenece: (v: ChipVocabularioAgrupado) => boolean }> = [
+      { clave: 'casa', etiqueta: t('adiestramiento.bitacoraGrupoCasa'), pertenece: (v) => v.tipo === 'conducta' },
+      { clave: 'basico', etiqueta: t('adiestramiento.bitacoraGrupoBasico'), pertenece: (v) => v.tipo === 'objetivo' && v.nivel === 'basico' },
+      { clave: 'medio', etiqueta: t('adiestramiento.bitacoraGrupoMedio'), pertenece: (v) => v.tipo === 'objetivo' && v.nivel === 'medio' },
+      { clave: 'experto', etiqueta: t('adiestramiento.bitacoraGrupoExperto'), pertenece: (v) => v.tipo === 'objetivo' && v.nivel === 'experto' },
+      { clave: 'otros', etiqueta: t('adiestramiento.bitacoraGrupoOtros'), pertenece: (v) => v.tipo === 'objetivo' && v.nivel === null },
+    ];
+    return definiciones
+      .map((d) => ({ clave: d.clave, etiqueta: d.etiqueta, items: vocabulario.filter(d.pertenece) }))
+      .filter((g) => g.items.length > 0);
+  }, [vocabulario, t]);
+
+  // §7 (S65) — el texto libre autocompleta sobre el vocabulario VIGENTE
+  // (jamás propone vocabulario nuevo): las palabras escritas se comparan
+  // sin acentos contra la voz de familia del idioma activo.
+  const sugerencias = useMemo(() => {
+    const normalizar = (s: string) =>
+      s
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+    // palabras de ≥4 letras del texto entero: "cuando salimos lloró"
+    // sugiere "Lloró cuando salimos" aunque la frase no coincida literal
+    const palabras = normalizar(texto)
+      .split(/[^a-z0-9]+/)
+      .filter((p) => p.length >= 4);
+    if (palabras.length === 0) return [];
+    // ranking por palabras coincidentes: una palabra común ("cuando")
+    // no desplaza a la coincidencia específica dentro del tope de 4
+    return vocabulario
+      .map((v) => {
+        const voz = normalizar(idioma === 'en' ? v.nombre_familia_en : v.nombre_familia);
+        return { v, puntaje: palabras.filter((p) => voz.includes(p)).length };
+      })
+      .filter((s) => s.puntaje > 0)
+      .sort((a, b) => b.puntaje - a.puntaje)
+      .slice(0, 4)
+      .map((s) => s.v);
+  }, [texto, vocabulario, idioma]);
+
+  const alternarChip = (codigo: string) =>
+    setChips((prev) => (prev.includes(codigo) ? prev.filter((c) => c !== codigo) : [...prev, codigo]));
+
   const guardar = async () => {
     if (guardando || mascotaId === null) return;
     setGuardando(true);
@@ -171,6 +219,7 @@ export default function HubAdiestramiento() {
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[4] }}>
         <Boton
           variante="primario"
+          bloque
           etiqueta={t('adiestramiento.agendar')}
           onPress={() => router.push('/explorar/adiestramiento')}
         />
@@ -351,20 +400,21 @@ export default function HubAdiestramiento() {
                 onSelect={setMascotaId}
               />
             ) : null}
-            <SelectorOpcion
-              acento="control"
-              etiqueta={t('adiestramiento.bitacoraChipsEtiqueta')}
-              disposicion="grilla"
-              multiple
-              opciones={vocabulario.map((v) => ({
-                codigo: v.codigo,
-                etiqueta: idioma === 'en' ? v.nombre_familia_en : v.nombre_familia,
-              }))}
-              seleccionadas={chips}
-              onSelect={(codigo) =>
-                setChips((prev) => (prev.includes(codigo) ? prev.filter((c) => c !== codigo) : [...prev, codigo]))
-              }
-            />
+            {gruposVocabulario.map((g) => (
+              <SelectorOpcion
+                key={g.clave}
+                acento="control"
+                etiqueta={g.etiqueta}
+                disposicion="grilla"
+                multiple
+                opciones={g.items.map((v) => ({
+                  codigo: v.codigo,
+                  etiqueta: idioma === 'en' ? v.nombre_familia_en : v.nombre_familia,
+                }))}
+                seleccionadas={chips}
+                onSelect={alternarChip}
+              />
+            ))}
             <Campo
               label={t('adiestramiento.bitacoraTextoLabel')}
               placeholder={t('adiestramiento.bitacoraTextoPlaceholder')}
@@ -372,6 +422,22 @@ export default function HubAdiestramiento() {
               onChangeText={setTexto}
               multilinea={3}
             />
+            {sugerencias.length > 0 ? (
+              // el autocompletado: mismo gesto de selección que los
+              // grupos (marcar/desmarcar el chip del catálogo)
+              <SelectorOpcion
+                acento="control"
+                etiqueta={t('adiestramiento.bitacoraSugerencias')}
+                disposicion="grilla"
+                multiple
+                opciones={sugerencias.map((v) => ({
+                  codigo: v.codigo,
+                  etiqueta: idioma === 'en' ? v.nombre_familia_en : v.nombre_familia,
+                }))}
+                seleccionadas={chips}
+                onSelect={alternarChip}
+              />
+            ) : null}
             <Boton
               variante="primario"
               etiqueta={t('adiestramiento.bitacoraGuardar')}

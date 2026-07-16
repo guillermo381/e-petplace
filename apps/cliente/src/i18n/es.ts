@@ -479,7 +479,14 @@ export const clienteEs = {
     bitacoraVacioTitulo: 'La bitácora está esperando',
     bitacoraVacioDetalle: 'Lo que observes de tu perro entre sesiones vive acá — y su adiestrador lo lee antes de cada sesión.',
     bitacoraHojaTitulo: '¿Qué observaste?',
-    bitacoraChipsEtiqueta: 'Elige lo que viste',
+    // S65 §7 — grupos del vocabulario (convención viva de DB: catálogo
+    // de conductas + nivel del currículum) + autocompletado (LOTE S65)
+    bitacoraGrupoCasa: 'En casa',
+    bitacoraGrupoBasico: 'Comandos básicos',
+    bitacoraGrupoMedio: 'Nivel medio',
+    bitacoraGrupoExperto: 'Nivel experto',
+    bitacoraGrupoOtros: 'Otros avances',
+    bitacoraSugerencias: '¿Es alguna de estas?',
     bitacoraTextoLabel: 'Cuéntanos más (opcional)',
     bitacoraTextoPlaceholder: 'ej: hoy se sentó solo antes de comer',
     bitacoraGuardar: 'Guardar',

@@ -448,8 +448,10 @@ export {
   type BitacoraRegistrada,
   type ChipBitacoraTipo,
   type ChipVocabulario,
+  type ChipVocabularioAgrupado,
   type CodigoErrorBitacora,
   type EntradaBitacora,
+  type NivelCurriculum,
 } from './wrappers/adiestramiento-bitacora';
 
 // ── La zona de servicios vivos del Hogar (S60-A6, D-366 — hunk Sesión A) ────
