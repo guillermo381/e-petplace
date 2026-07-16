@@ -43,7 +43,10 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ProveedorI18n recursos={recursos}>
-        <EpetThemeProvider mode={colorScheme === 'dark' ? 'dark' : 'light'}>
+        {/* S63 arte — enmienda Ley 21 FIRMADA: el CTA del prestador ancla
+            al oficio (accent.cta = tealDark en light Y dark; memorial
+            SIEMPRE tinta, resuelto en getTheme — imposible de saltear). */}
+        <EpetThemeProvider mode={colorScheme === 'dark' ? 'dark' : 'light'} cta="oficio">
           <AvisoProvider>
             {/* S59-B1 (safe area): el DEFAULT de los íconos de la barra de
                 estado — 'auto' = oscuros sobre papel en claro, claros en

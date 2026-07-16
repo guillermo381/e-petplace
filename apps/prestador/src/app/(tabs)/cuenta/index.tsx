@@ -44,10 +44,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   CURVA_OFICIO,
-  MURO_OFICIO,
   VIDRIO_OFICIO,
   VeloBarraEstadoOficio,
   useBarraEstadoClara,
+  useMuroOficio,
 } from '@/components/techo-oficio';
 import { useTraduccion } from '@/i18n';
 
@@ -80,6 +80,7 @@ export default function Cuenta() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
+  const muro = useMuroOficio();
   useBarraEstadoClara();
 
   const [salirAbierta, setSalirAbierta] = useState(false);
@@ -150,7 +151,7 @@ export default function Cuenta() {
             (papel 7.37 ✓; el vidrio claro caía a 4.15). */}
         <View
           style={{
-            backgroundColor: MURO_OFICIO,
+            backgroundColor: muro,
             paddingTop: insets.top + spacing[3],
             paddingBottom: spacing[5],
             paddingHorizontal: spacing[5],

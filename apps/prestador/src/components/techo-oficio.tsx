@@ -27,15 +27,25 @@ import Animated, { cubicBezier } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { setStatusBarStyle } from 'expo-status-bar';
-import { Isotipo, motion, palette, radius, spacing, typography } from '@epetplace/ui';
+import { Isotipo, motion, palette, radius, spacing, typography, useTheme } from '@epetplace/ui';
 
 /** La curva orgánica del techo (patrón Hogar v2) — una sola verdad. */
 export const CURVA_OFICIO = { izquierda: 44, derecha: 26 };
 const CURVA = CURVA_OFICIO;
 
-/** El muro del oficio (§15b.2 S61) — una sola verdad para techo y velo. */
-export const MURO_OFICIO = palette.tealDark;
-/** El vidrio OSCURO sobre el muro (AA verificado: papel 7.37). */
+/**
+ * El muro del oficio (§15b.2 S61) — una sola verdad para techo y velo.
+ * S63 (D-407 pagada): el muro gana su PAR OSCURO — en dark resuelve a
+ * tealDarkNoche #0A4A44 (papel 9.61 · textDark0 8.81 · teal puro 6.57,
+ * mediciones S63-B); light y memorial siguen en tealDark #0A7268. La
+ * const de módulo murió (Ley 37): el muro ahora escucha el tema.
+ */
+export function useMuroOficio(): string {
+  const { mode } = useTheme();
+  return mode === 'dark' ? palette.tealDarkNoche : palette.tealDark;
+}
+/** El vidrio OSCURO sobre el muro (AA verificado: papel 7.37 — sobre
+ *  el par noche el contraste solo SUBE). */
 export const VIDRIO_OFICIO = 'rgba(0,0,0,0.18)';
 
 /**
@@ -59,6 +69,7 @@ export function useBarraEstadoClara() {
  */
 export function VeloBarraEstadoOficio() {
   const insets = useSafeAreaInsets();
+  const muro = useMuroOficio();
   if (insets.top === 0) return null;
   return (
     <View
@@ -69,7 +80,7 @@ export function VeloBarraEstadoOficio() {
         left: 0,
         right: 0,
         height: insets.top,
-        backgroundColor: MURO_OFICIO,
+        backgroundColor: muro,
       }}
     />
   );
@@ -86,6 +97,7 @@ function SegmentoTecho({
   etiqueta: string;
   onPress: () => void;
 }) {
+  const muro = useMuroOficio();
   const [presionado, setPresionado] = useState(false);
   return (
     <Pressable
@@ -111,7 +123,7 @@ function SegmentoTecho({
           style={{
             fontFamily: typography.family.sans.medium,
             fontSize: typography.size.sm,
-            color: esActivo ? MURO_OFICIO : palette.light0,
+            color: esActivo ? muro : palette.light0,
           }}
         >
           {etiqueta}
@@ -163,12 +175,13 @@ export function ToggleTecho<C extends string>({
 
 export function TechoOficio({ titulo, dato, pie }: { titulo: string; dato: string; pie?: ReactNode }) {
   const insets = useSafeAreaInsets();
+  const muro = useMuroOficio();
   useBarraEstadoClara();
 
   return (
     <View
       style={{
-        backgroundColor: MURO_OFICIO,
+        backgroundColor: muro,
         paddingTop: insets.top + spacing[4],
         paddingBottom: spacing[5],
         paddingHorizontal: spacing[5],
