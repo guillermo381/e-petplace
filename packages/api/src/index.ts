@@ -523,3 +523,27 @@ export {
   type OfertaAdiestramientoPropia,
   type ProgramaAdiestramientoPropio,
 } from './wrappers/adiestramiento-oferta';
+
+// S63-B (Bloque 3 experiencia): la atención de adiestramiento —
+// hunk aditivo regla 76(c).
+export {
+  cerrarAtencionAdiestramiento,
+  iniciarAtencionAdiestramiento,
+  obtenerAdiestramientoPorCita,
+  obtenerCitaAdiestramientoPorId,
+  obtenerCitasAdiestramientoDelDia,
+  obtenerCurriculumNivel,
+  obtenerEstadoDuranteAdiestramiento,
+  obtenerObjetivosAdiestramiento,
+  quitarObjetivoAdiestramiento,
+  registrarNotaAdiestramiento,
+  registrarObjetivoAdiestramiento,
+  terminarAtencionAdiestramiento,
+  type AdiestramientoDeCita,
+  type CitaAdiestramientoDetalle,
+  type CodigoErrorAdiestramientoAtencion,
+  type EstadoDuranteAdiestramiento,
+  type ObjetivoAdiestramientoCatalogo,
+  type ObjetivoRegistrado,
+  type ResultadoIniciarAdiestramiento,
+} from './wrappers/adiestramiento-atencion';

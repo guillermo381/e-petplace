@@ -16,7 +16,7 @@ import { Icono, motion, radius, spacing, typography, useTheme } from '@epetplace
 
 import { useTraduccion } from '@/i18n';
 
-export type FiltroOficioValor = 'todos' | 'paseo' | 'grooming';
+export type FiltroOficioValor = 'todos' | 'paseo' | 'grooming' | 'adiestramiento';
 
 // D-401 (S62): el segmento responde al dedo — la MISMA receta de la
 // casa (SelectorOpcion/Boton: scale 0.99, transición spring fast).
@@ -68,17 +68,28 @@ function Segmento({
 export function FiltroOficio({
   activo,
   onCambio,
+  oficios,
 }: {
   activo: FiltroOficioValor;
   onCambio: (v: FiltroOficioValor) => void;
+  /** S63-B: solo los oficios con oferta ACTIVA ganan segmento. */
+  oficios: { paseo: boolean; grooming: boolean; adiestramiento: boolean };
 }) {
   const { theme } = useTheme();
   const { t } = useTraduccion();
-  const segmentos: { codigo: FiltroOficioValor; etiqueta: string; icono: 'paseo' | 'grooming' | null }[] = [
+  const segmentos: { codigo: FiltroOficioValor; etiqueta: string; icono: 'paseo' | 'grooming' | 'training' | null }[] = [
     { codigo: 'todos', etiqueta: t('agenda.filtroTodos'), icono: null },
-    { codigo: 'paseo', etiqueta: t('agenda.filtroPaseos'), icono: 'paseo' },
-    { codigo: 'grooming', etiqueta: t('agenda.filtroEstetica'), icono: 'grooming' },
+    ...(oficios.paseo ? [{ codigo: 'paseo' as const, etiqueta: t('agenda.filtroPaseos'), icono: 'paseo' as const }] : []),
+    ...(oficios.grooming
+      ? [{ codigo: 'grooming' as const, etiqueta: t('agenda.filtroEstetica'), icono: 'grooming' as const }]
+      : []),
+    ...(oficios.adiestramiento
+      ? [{ codigo: 'adiestramiento' as const, etiqueta: t('agenda.filtroAdiestramiento'), icono: 'training' as const }]
+      : []),
   ];
+  // Con 4 segmentos el ancho no da para 4 labels: los oficios hablan por
+  // su ícono b′ (el a11y label queda entero); 'Todos' conserva su voz.
+  const soloIcono = segmentos.length >= 4;
 
   return (
     <View
@@ -101,15 +112,17 @@ export function FiltroOficio({
             accessibilityLabel={s.etiqueta}
           >
             {s.icono && <Icono nombre={s.icono} registro={esActivo ? 'aa' : 'tinta'} tamano={18} />}
-            <Text
-              style={{
-                fontFamily: typography.family.sans.medium,
-                fontSize: typography.size.sm,
-                color: esActivo ? theme.text.primary : theme.text.secondary,
-              }}
-            >
-              {s.etiqueta}
-            </Text>
+            {(!soloIcono || s.icono === null) && (
+              <Text
+                style={{
+                  fontFamily: typography.family.sans.medium,
+                  fontSize: typography.size.sm,
+                  color: esActivo ? theme.text.primary : theme.text.secondary,
+                }}
+              >
+                {s.etiqueta}
+              </Text>
+            )}
           </Segmento>
         );
       })}

@@ -49,10 +49,12 @@ import {
 } from '@epetplace/ui';
 import {
   obtenerBloqueosPrestador,
+  obtenerCitasAdiestramientoDelDia,
   obtenerCitasGroomingDelDia,
   obtenerCitasPaseoDelDia,
   obtenerMascotasAtendidas,
   obtenerMiPrestador,
+  obtenerOfertaAdiestramientoPropia,
   obtenerOfertasGroomingPropias,
   obtenerOfertasPaseoPropias,
   resolverUrlsFotos,
@@ -77,14 +79,19 @@ type Pantalla =
       citas: CitaAgendaPaseo[];
       /** ids de las citas de GROOMING (S60-B1) — deciden la RUTA del tap. */
       groomingIds: Set<string>;
+      /** S63-B: ids de las citas de ADIESTRAMIENTO — misma mecánica. */
+      adiestramientoIds: Set<string>;
       bloqueos: BloqueoPrestador[];
       atendidas: Set<string>;
       /** S61-B5: oficios con oferta ACTIVA — con ≥2 nace el filtro del
        *  día. Si el fetch de ofertas falla, el control no existe: es
        *  azúcar de vista, jamás esconde citas (las citas tienen su
        *  propio camino de error, Ley 13 intacta). */
-      oficios: { paseo: boolean; grooming: boolean };
+      oficios: { paseo: boolean; grooming: boolean; adiestramiento: boolean };
     };
+
+/** El oficio de una fila — decide ruta, ícono y filtro. */
+type OficioCita = 'paseo' | 'grooming' | 'adiestramiento';
 
 // ═══════════ ZONA 3 — NOVEDADES (hueco estructural) ═══════════
 // Cancelaciones/reagendas del dueño llegan con B5; los mensajes de
@@ -154,11 +161,13 @@ function claveBloque(c: CitaAgendaPaseo): string | null {
   return `${c.fecha}|${c.hora}|${c.duracion_minutos ?? ''}`;
 }
 
-function agruparSalidas(citas: CitaAgendaPaseo[], groomingIds: Set<string>): ItemJornada[] {
+// S63-B: reciben el set de citas que JAMÁS agrupan (grooming = una
+// silla · adiestramiento = una sesión); solo el paseo hace salidas.
+function agruparSalidas(citas: CitaAgendaPaseo[], sinAgrupar: Set<string>): ItemJornada[] {
   const items: ItemJornada[] = [];
   const porClave = new Map<string, { tipo: 'salida'; clave: string; citas: CitaAgendaPaseo[] }>();
   for (const c of citas) {
-    const clave = groomingIds.has(c.id) ? null : claveBloque(c);
+    const clave = sinAgrupar.has(c.id) ? null : claveBloque(c);
     if (clave === null) {
       items.push({ tipo: 'cita', cita: c });
       continue;
@@ -180,13 +189,13 @@ function FilaCita({
   cita,
   enVivo,
   fotoUrl,
-  esGrooming = false,
+  oficio = 'paseo',
 }: {
   cita: CitaAgendaPaseo;
   enVivo: boolean;
   fotoUrl?: string;
-  /** S60-B1: la fila de grooming navega a SU flujo (Antes/Durante/Cierre). */
-  esGrooming?: boolean;
+  /** S60-B1/S63-B: cada oficio navega a SU flujo (Antes/Durante/Cierre). */
+  oficio?: OficioCita;
 }) {
   const router = useRouter();
   const { t } = useTraduccion();
@@ -204,9 +213,11 @@ function FilaCita({
       interactiva
       onPress={() =>
         router.push(
-          esGrooming
+          oficio === 'grooming'
             ? { pathname: '/grooming/cita/[citaId]', params: { citaId: cita.id } }
-            : { pathname: '/cita/[citaId]', params: { citaId: cita.id } },
+            : oficio === 'adiestramiento'
+              ? { pathname: '/adiestramiento/cita/[citaId]', params: { citaId: cita.id } }
+              : { pathname: '/cita/[citaId]', params: { citaId: cita.id } },
         )
       }
       accessibilityRole="button"
@@ -234,7 +245,11 @@ function FilaCita({
       // junto a la Insignia de estado. Color funcional, jamás hex puro.
       fin={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1.5] }}>
-          <Icono nombre={esGrooming ? 'grooming' : 'paseo'} registro="aa" tamano={21} />
+          <Icono
+            nombre={oficio === 'grooming' ? 'grooming' : oficio === 'adiestramiento' ? 'training' : 'paseo'}
+            registro="aa"
+            tamano={21}
+          />
           {insignia && <Insignia estado={insignia.estado} etiqueta={insignia.etiqueta} tamaño="sm" />}
         </View>
       }
@@ -311,7 +326,7 @@ function FilaSalida({
             <FilaCita
               cita={c}
               enVivo={false}
-              esGrooming={false}
+              oficio="paseo"
               fotoUrl={c.mascota?.foto_url ? urlsFotos.get(c.mascota.foto_url) : undefined}
             />
           </View>
@@ -358,11 +373,13 @@ export default function Hoy() {
     // UN fetch cubre las dos vistas (S57-B1): rango hoy..hoy+6 — la vista
     // Hoy filtra por `desde`; la Semana agrupa el rango entero.
     const desde = hoyLocal();
-    const [r, rg, bloqueos, atendidas, ofPaseo, ofGrooming] = await Promise.all([
+    const [r, rg, ra, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento] = await Promise.all([
       obtenerCitasPaseoDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: sumarDias(desde, 6) }),
       // S60-B1: la jornada es UNA — las citas de grooming entran a la
       // misma lista con su tipo (el subtítulo ya lo dice) y su ruta.
       obtenerCitasGroomingDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: sumarDias(desde, 6) }),
+      // S63-B: las sesiones de adiestramiento — tercera pata de la MISMA jornada.
+      obtenerCitasAdiestramientoDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: sumarDias(desde, 6) }),
       // vacaciones (solo lectura): los días bloqueados se pintan como tales
       obtenerBloqueosPrestador(prestador.data.id),
       // la señal "Primera vez" de la Zona 1 (solo lo REAL): mascota
@@ -372,6 +389,7 @@ export default function Hoy() {
       // ofertas EXISTENTES (cero query nueva)
       obtenerOfertasPaseoPropias(prestador.data.id),
       obtenerOfertasGroomingPropias(prestador.data.id),
+      obtenerOfertaAdiestramientoPropia(prestador.data.id),
     ]);
     if (!r.ok) {
       setPantalla({ estado: 'error', mensaje: r.mensaje });
@@ -383,6 +401,11 @@ export default function Hoy() {
       setPantalla({ estado: 'error', mensaje: rg.mensaje });
       return;
     }
+    // El adiestramiento también es la MISMA jornada (Ley 13).
+    if (!ra.ok) {
+      setPantalla({ estado: 'error', mensaje: ra.mensaje });
+      return;
+    }
     // La marca de bloqueo es PROMESA de la vista semana (jamás se cae en
     // silencio — Ley 13: un error no se disfraza de "sin vacaciones").
     if (!bloqueos.ok) {
@@ -390,7 +413,7 @@ export default function Hoy() {
       return;
     }
     // Merge por fecha+hora: una sola línea de tiempo de trabajo.
-    const citas = [...r.data, ...rg.data].sort((a, b) => {
+    const citas = [...r.data, ...rg.data, ...ra.data].sort((a, b) => {
       const fa = a.fecha ?? '';
       const fb = b.fecha ?? '';
       return fa === fb ? (a.hora ?? '').localeCompare(b.hora ?? '') : fa.localeCompare(fb);
@@ -404,11 +427,14 @@ export default function Hoy() {
       desde,
       citas,
       groomingIds: new Set(rg.data.map((c) => c.id)),
+      adiestramientoIds: new Set(ra.data.map((c) => c.id)),
       bloqueos: bloqueos.data,
       atendidas: new Set(atendidas.ok ? atendidas.data.map((m) => m.mascota_id) : []),
       oficios: {
         paseo: ofPaseo.ok && ofPaseo.data.some((o) => o.activo),
         grooming: ofGrooming.ok && ofGrooming.data.some((o) => o.activo),
+        adiestramiento:
+          ofAdiestramiento.ok && (ofAdiestramiento.data.oferta?.activo ?? false),
       },
     });
   }, []);
@@ -431,20 +457,26 @@ export default function Hoy() {
   const citas = pantalla.estado === 'listo' ? pantalla.citas : [];
   const desde = pantalla.estado === 'listo' ? pantalla.desde : null;
   const groomingIds = pantalla.estado === 'listo' ? pantalla.groomingIds : new Set<string>();
-  // S61-B5: con DOS oficios activos nace el filtro; con uno, el control
-  // no existe (cero UI muerta) y la lista es la de siempre.
-  const dosOficios = pantalla.estado === 'listo' && pantalla.oficios.paseo && pantalla.oficios.grooming;
+  const adiestramientoIds = pantalla.estado === 'listo' ? pantalla.adiestramientoIds : new Set<string>();
+  /** Las citas que jamás agrupan en salida (grooming + adiestramiento). */
+  const sinAgruparIds = new Set([...groomingIds, ...adiestramientoIds]);
+  const oficioDe = (c: CitaAgendaPaseo): OficioCita =>
+    groomingIds.has(c.id) ? 'grooming' : adiestramientoIds.has(c.id) ? 'adiestramiento' : 'paseo';
+  // S61-B5 (S63-B: tercer oficio): con ≥2 oficios activos nace el
+  // filtro; con uno, el control no existe (cero UI muerta).
+  const oficiosActivos = pantalla.estado === 'listo' ? pantalla.oficios : null;
+  const conFiltro =
+    oficiosActivos !== null &&
+    [oficiosActivos.paseo, oficiosActivos.grooming, oficiosActivos.adiestramiento].filter(Boolean).length >= 2;
   const citasVisibles =
-    !dosOficios || filtroOficio === 'todos'
-      ? citas
-      : citas.filter((c) => groomingIds.has(c.id) === (filtroOficio === 'grooming'));
+    !conFiltro || filtroOficio === 'todos' ? citas : citas.filter((c) => oficioDe(c) === filtroOficio);
   const citasHoy = desde === null ? [] : citasVisibles.filter((c) => c.fecha === desde);
   // S61-B12: el día SIN filtrar — la Zona 1 es INMUNE al filtro por
   // GUARD ESTRUCTURAL (se computa de acá, jamás de la lista filtrada)
   const citasHoySin = desde === null ? [] : citas.filter((c) => c.fecha === desde);
   // el vacío FILTRADO se dice distinto: hay jornada, no de este servicio
   const hoyVacioPorFiltro =
-    citasHoy.length === 0 && dosOficios && filtroOficio !== 'todos' && citasHoySin.length > 0;
+    citasHoy.length === 0 && conFiltro && filtroOficio !== 'todos' && citasHoySin.length > 0;
 
   // ── Zona 1: la destacada — en_curso (Ley 7: UNA con CitaEnVivo) o,
   // si no hay nada corriendo, la PRÓXIMA cita aún no cerrada del día.
@@ -465,7 +497,7 @@ export default function Hoy() {
   // bloque (paseo, misma fecha+hora+duración) suben con ella a la Zona 1
   // (sobre el día SIN filtrar: el guard estructural cubre a la salida).
   const claveDestacada =
-    destacada && !groomingIds.has(destacada.id) ? claveBloque(destacada) : null;
+    destacada && !sinAgruparIds.has(destacada.id) ? claveBloque(destacada) : null;
   const salidaDestacada =
     destacada === undefined
       ? []
@@ -474,14 +506,14 @@ export default function Hoy() {
         : [
             destacada,
             ...citasHoySin.filter(
-              (c) => c.id !== destacada.id && !groomingIds.has(c.id) && claveBloque(c) === claveDestacada,
+              (c) => c.id !== destacada.id && !sinAgruparIds.has(c.id) && claveBloque(c) === claveDestacada,
             ),
           ];
   const idsDestacados = new Set(salidaDestacada.map((c) => c.id));
   const resto = citasHoy.filter((c) => !idsDestacados.has(c.id));
   // D-385: el resto de la jornada se agrupa por salida (solo paseo; el
   // grooming es una silla, una mascota — jamás agrupa).
-  const restoItems = agruparSalidas(resto, groomingIds);
+  const restoItems = agruparSalidas(resto, sinAgruparIds);
 
   // ── La semana: 7 días desde hoy — citas firmes por día + estado del
   // día (bloqueado por vacaciones / libre). Cero métricas, solo verdad.
@@ -598,7 +630,7 @@ export default function Hoy() {
                   <FilaCita
                     cita={c}
                     enVivo={enVivo?.id === c.id}
-                    esGrooming={groomingIds.has(c.id)}
+                    oficio={oficioDe(c)}
                     fotoUrl={c.mascota?.foto_url ? urlsFotos.get(c.mascota.foto_url) : undefined}
                   />
                 </View>
@@ -638,8 +670,8 @@ export default function Hoy() {
 
         {/* S61-B12: el filtro por oficio RE-VESTIDO (íconos b′, huella
             AA en el activo) — DEBAJO de la Zona 1, solo con 2 oficios */}
-        {pantalla.estado === 'listo' && dosOficios && (
-          <FiltroOficio activo={filtroOficio} onCambio={setFiltroOficio} />
+        {pantalla.estado === 'listo' && conFiltro && oficiosActivos !== null && (
+          <FiltroOficio activo={filtroOficio} onCambio={setFiltroOficio} oficios={oficiosActivos} />
         )}
 
         {pantalla.estado === 'listo' && vista === 'hoy' && citasHoy.length === 0 && (
@@ -660,7 +692,7 @@ export default function Hoy() {
               <View key={item.tipo === 'cita' ? item.cita.id : item.clave}>
                 {i > 0 && <Separador indentacion={spacing[3] + 40 + spacing[3]} />}
                 {item.tipo === 'cita' ? (
-                  <FilaCita cita={item.cita} enVivo={false} esGrooming={groomingIds.has(item.cita.id)} fotoUrl={item.cita.mascota?.foto_url ? urlsFotos.get(item.cita.mascota.foto_url) : undefined} />
+                  <FilaCita cita={item.cita} enVivo={false} oficio={oficioDe(item.cita)} fotoUrl={item.cita.mascota?.foto_url ? urlsFotos.get(item.cita.mascota.foto_url) : undefined} />
                 ) : (
                   <FilaSalida
                     citas={item.citas}
@@ -698,11 +730,11 @@ export default function Hoy() {
                 </View>
                 {dia.citas.length > 0 ? (
                   <Tarjeta elevacion="sm" relleno="ninguno">
-                    {agruparSalidas(dia.citas, groomingIds).map((item, i) => (
+                    {agruparSalidas(dia.citas, sinAgruparIds).map((item, i) => (
                       <View key={item.tipo === 'cita' ? item.cita.id : item.clave}>
                         {i > 0 && <Separador indentacion={spacing[3] + 40 + spacing[3]} />}
                         {item.tipo === 'cita' ? (
-                          <FilaCita cita={item.cita} enVivo={false} esGrooming={groomingIds.has(item.cita.id)} fotoUrl={item.cita.mascota?.foto_url ? urlsFotos.get(item.cita.mascota.foto_url) : undefined} />
+                          <FilaCita cita={item.cita} enVivo={false} oficio={oficioDe(item.cita)} fotoUrl={item.cita.mascota?.foto_url ? urlsFotos.get(item.cita.mascota.foto_url) : undefined} />
                         ) : (
                           <FilaSalida
                             citas={item.citas}
