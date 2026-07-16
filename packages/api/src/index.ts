@@ -536,6 +536,7 @@ export {
   obtenerEstadoDuranteAdiestramiento,
   obtenerObjetivosAdiestramiento,
   quitarObjetivoAdiestramiento,
+  registrarClipAdiestramiento,
   registrarNotaAdiestramiento,
   registrarObjetivoAdiestramiento,
   terminarAtencionAdiestramiento,

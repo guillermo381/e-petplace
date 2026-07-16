@@ -845,8 +845,14 @@ export const prestadorEs = {
     quedoCorto: 'Quedó corto: los clips van de 15 a 30 segundos. Graba uno nuevo con calma.',
     clipN: 'Clip {{n}}',
     techoAlcanzado: 'Ya registraste los {{techo}} clips de esta sesión.',
-    envioPendiente:
-      'Por ahora los clips quedan en este teléfono. El envío al parte de la familia llega con la próxima actualización.',
+    // Tanda corta S63-B (cola conectada): la voz habla SOLO por los
+    // clips sin registrar — el stub murió.
+    envioPendiente: 'Los clips sin enviar quedan solo en este teléfono — no llegan al parte de la familia.',
+    enviando: 'Enviando…',
+    enElParte: 'En el parte de la familia',
+    noSeEnvio: 'No se envió. Tócalo para reintentar.',
+    enEsteTelefono: 'En este teléfono',
+    reintentarEnvio: 'Reintentar envío',
     sinPermiso: 'Necesitamos la cámara y el micrófono para grabar el clip — las órdenes que da tu voz son parte del progreso.',
     abrirAjustes: 'Abrir ajustes',
     probarDeNuevo: 'Probar de nuevo',
@@ -864,8 +870,7 @@ export const prestadorEs = {
     programasVacio: 'Todavía no hizo programas contigo.',
     programaSesiones: '{{n}} sesiones',
     bitacoraTitulo: 'La bitácora de la familia',
-    bitacoraPronto:
-      'Acá vas a ver lo que la familia practica entre sesiones. Esta parte del expediente todavía se está construyendo.',
+    bitacoraVacia: 'La familia todavía no escribió en la bitácora. Lo que practiquen entre sesiones aparece acá.',
   },
   // S63-B (Bloque 3 experiencia): la atención de adiestramiento.
   citaAdiestramiento: {
@@ -898,7 +903,7 @@ export const prestadorEs = {
     notaGuardada: 'Nota guardada',
     clipsCelda: 'Clips de la sesión',
     clipsDetalle: 'El progreso se ve mejor en movimiento',
-    clipsDetalleN: '{{n}} de 3 en este teléfono',
+    clipsDetalleN: '{{n}} de 3',
     terminar: 'Terminar sesión',
     terminarTitulo: '¿Terminar la sesión?',
     terminarExplicacion: 'Después de terminar armas el parte para la familia.',
@@ -907,8 +912,7 @@ export const prestadorEs = {
     pisoTitulo: 'Antes de terminar, al parte le falta:',
     pisoFaltaObjetivo: 'Al menos un objetivo trabajado.',
     pisoFaltaNotaClip: 'Al menos una nota conductual o un clip.',
-    pisoClipsLocales:
-      'Los clips de este teléfono todavía no se envían — mientras tanto, una nota conductual completa el parte.',
+    pisoClipsLocales: 'Hay clips sin enviar — un clip enviado o una nota conductual completan el parte.',
     resumenTitulo: 'Lo que registraste',
     yaCerrada: 'Esta sesión ya está cerrada. El parte quedó con la familia.',
     mensajeFamilia: 'Mensaje a la familia',

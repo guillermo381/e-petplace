@@ -6,12 +6,12 @@
  * por sesión. La compresión es EN CAPTURA (CameraView 720p + bitrate
  * acotado) — jamás post-proceso server.
  *
- * PUNTO DE SUBIDA = STUB DECLARADO (pedido S63-B, dependencia declarada):
- * el bucket propio de video (límite de tamaño, MIME declarado) es un
- * PEDIDO SQL A LA SESIÓN A — hasta que exista, los clips viven en esta
- * cola local (estado 'en_dispositivo') y la pantalla LO DECLARA con voz
- * honesta. Cuando el bucket llegue, la subida se conecta en una tanda
- * corta calcando subir-evidencia.ts (dos pasos, huérfano recuperable).
+ * COLA CONECTADA (tanda corta S63-B): el stub murió — "Usar clip" en
+ * una sesión REAL sube al bucket adiestramiento-clips y registra
+ * (subir-clip.ts, dos pasos). Los estados dicen la verdad de cada
+ * clip: 'registrado' ya está en el parte del dueño; 'en_dispositivo' /
+ * 'error' siguen SOLO en este teléfono y la voz honesta lo declara
+ * (retiro condicional, patrón "pantalla encendida").
  *
  * Estado de módulo (no React): sobrevive a navegar dentro del proceso;
  * muere con la app — coherente con "captura jamás exigida al cierre"
@@ -22,11 +22,14 @@ export const CLIP_MIN_S = 15;
 export const CLIP_MAX_S = 30;
 export const CLIPS_MAX = 3;
 
+export type EstadoClip = 'en_dispositivo' | 'subiendo' | 'registrado' | 'error';
+
 export interface ClipLocal {
   uri: string;
   duracionS: number;
-  /** El envío espera el bucket de la A — único estado v1. */
-  estado: 'en_dispositivo';
+  estado: EstadoClip;
+  /** Subida hecha, registro pendiente: el reintento salta al paso 2. */
+  storagePath?: string;
 }
 
 const colas = new Map<string, ClipLocal[]>();
@@ -48,5 +51,13 @@ export function quitarClip(sesionId: string, uri: string): void {
   colas.set(
     sesionId,
     cola.filter((c) => c.uri !== uri),
+  );
+}
+
+export function actualizarClip(sesionId: string, uri: string, cambios: Partial<ClipLocal>): void {
+  const cola = colas.get(sesionId) ?? [];
+  colas.set(
+    sesionId,
+    cola.map((c) => (c.uri === uri ? { ...c, ...cambios } : c)),
   );
 }

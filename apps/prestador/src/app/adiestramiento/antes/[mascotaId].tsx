@@ -13,10 +13,11 @@
 // real (el Hoy / el flujo de sesión) se conecta cuando el resto del
 // arco exista — hoy vive por URL, como la galería.
 //
-// PLACEHOLDER HONESTO: la bitácora de la familia (§7) todavía no es
-// pieza — el espacio queda declarado y se conecta cuando nazca.
-// Historial de programas: por RLS el prestador ve SOLO los propios
-// (pc_prestador_own) — la voz lo dice ("contigo").
+// LA BITÁCORA §7 ES REAL (tanda corta S63-B sobre el motor cd12903 de
+// la A): el placeholder murió — el adiestrador lee lo que la familia
+// practica antes de cada sesión (el circuito cierra en ambas
+// direcciones). Historial de programas: por RLS el prestador ve SOLO
+// los propios (pc_prestador_own) — la voz lo dice ("contigo").
 // ─────────────────────────────────────────────────────────────────────
 
 import { useCallback, useState } from 'react';
@@ -39,8 +40,10 @@ import {
   type InsigniaEstado,
 } from '@epetplace/ui';
 import {
+  obtenerBitacora,
   obtenerFichaAntesAdiestramiento,
   resolverUrlFoto,
+  type EntradaBitacora,
   type FichaAntesAdiestramiento,
 } from '@epetplace/api';
 import { calcularMomentoVital, edadEnMeses } from '@epetplace/domain';
@@ -52,7 +55,7 @@ import { useTraduccion } from '@/i18n';
 type Pantalla =
   | { estado: 'cargando' }
   | { estado: 'error'; mensaje: string }
-  | { estado: 'listo'; ficha: FichaAntesAdiestramiento };
+  | { estado: 'listo'; ficha: FichaAntesAdiestramiento; bitacora: EntradaBitacora[] };
 
 function esEspecie(v: string | null): v is AvatarMascotaEspecie {
   return v !== null;
@@ -93,12 +96,19 @@ export default function AntesAdiestramiento() {
         setPantalla({ estado: 'error', mensaje: sesion.mensaje });
         return;
       }
-      const r = await obtenerFichaAntesAdiestramiento(mascotaId);
+      // S63-B tanda corta: la bitácora §7 dejó de ser placeholder — el
+      // dato es real (motor cd12903 de la A; misma puerta RLS).
+      const [r, rBitacora] = await Promise.all([
+        obtenerFichaAntesAdiestramiento(mascotaId),
+        obtenerBitacora(mascotaId, 10),
+      ]);
       if (!r.ok) {
         setPantalla({ estado: 'error', mensaje: r.mensaje });
         return;
       }
-      setPantalla({ estado: 'listo', ficha: r.data });
+      // La bitácora que falla NO tumba la ficha (L-139): vacío + la
+      // ficha entera vale más que un error total; el vacío legal habla.
+      setPantalla({ estado: 'listo', ficha: r.data, bitacora: rBitacora.ok ? rBitacora.data : [] });
       if (r.data.foto_url !== null) {
         const firmada = await resolverUrlFoto(r.data.foto_url);
         setFotoFirmada(firmada ?? undefined);
@@ -121,6 +131,7 @@ export default function AntesAdiestramiento() {
   } as const;
 
   const ficha = pantalla.estado === 'listo' ? pantalla.ficha : null;
+  const bitacora = pantalla.estado === 'listo' ? pantalla.bitacora : [];
 
   // Las señales del expediente como FLAGS (misma altitud que la hermana
   // de grooming — el detalle fino vive en "Conocer a {mascota}").
@@ -276,9 +287,59 @@ export default function AntesAdiestramiento() {
               )}
             </Seccion>
 
-            {/* PLACEHOLDER HONESTO §7: la bitácora aún no es pieza */}
+            {/* LA BITÁCORA DE LA FAMILIA (§7 — dato REAL desde cd12903):
+                el circuito cierra en ambas direcciones — la familia
+                escribe en su hub, el adiestrador lee antes de la sesión.
+                Chips en voz de familia POR IDIOMA (jamás el código);
+                texto verbatim; aportado_por_menor NO es voz de UI. */}
             <Seccion titulo={t('adiestramiento.bitacoraTitulo')}>
-              <Text style={vozSecundaria}>{t('adiestramiento.bitacoraPronto')}</Text>
+              {bitacora.length === 0 ? (
+                <Text style={vozSecundaria}>{t('adiestramiento.bitacoraVacia')}</Text>
+              ) : (
+                <Tarjeta>
+                  {bitacora.map((e, i) => (
+                    <View key={e.bitacora_id}>
+                      {i > 0 && <Separador />}
+                      <View style={{ paddingHorizontal: spacing[4], paddingVertical: spacing[3], gap: spacing[2] }}>
+                        <Text
+                          style={{
+                            fontFamily: typography.family.mono.regular,
+                            fontSize: typography.size.xs,
+                            letterSpacing: typography.tracking.mono,
+                            color: theme.text.secondary,
+                          }}
+                        >
+                          {fechaCortaMono(e.created_at, idioma as IdiomaSoportado)}
+                        </Text>
+                        {e.chips.length > 0 && (
+                          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[1.5] }}>
+                            {e.chips.map((c) => (
+                              <Insignia
+                                key={`${e.bitacora_id}-${c.codigo}`}
+                                estado="info"
+                                etiqueta={idioma === 'en' ? c.nombre_familia_en : c.nombre_familia}
+                                tamaño="sm"
+                              />
+                            ))}
+                          </View>
+                        )}
+                        {e.texto !== null && (
+                          <Text
+                            style={{
+                              fontFamily: typography.family.sans.regular,
+                              fontSize: typography.size.base,
+                              lineHeight: typography.size.base * 1.4,
+                              color: theme.text.primary,
+                            }}
+                          >
+                            {e.texto}
+                          </Text>
+                        )}
+                      </View>
+                    </View>
+                  ))}
+                </Tarjeta>
+              )}
             </Seccion>
           </>
         )}

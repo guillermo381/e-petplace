@@ -366,6 +366,31 @@ export async function registrarNotaAdiestramiento(input: {
   return { ok: true, data: null };
 }
 
+/** El paso 2 de la cola de clips (tanda corta S63-B): registra el clip
+ *  YA SUBIDO al bucket adiestramiento-clips. Un clip subido pero NO
+ *  registrado es invisible para el dueño (la policy de lectura de
+ *  familia pasa por este registro) — si esto falla tras una subida
+ *  exitosa, se reintenta SOLO el registro, jamás re-subir. */
+export async function registrarClipAdiestramiento(input: {
+  adiestramiento_id: string;
+  storage_path: string;
+  /** 1..3 — tope DURO del motor (§12.3). */
+  orden: number;
+  duracion_segundos?: number;
+  descripcion?: string;
+}): Promise<ResultadoWrapper<{ orden: number }, CodigoErrorAdiestramientoAtencion>> {
+  const { data, error } = await getClient().rpc('registrar_clip_adiestramiento', {
+    p_adiestramiento_id: input.adiestramiento_id,
+    p_storage_path: input.storage_path,
+    p_orden: input.orden,
+    p_duracion_segundos: input.duracion_segundos,
+    p_descripcion: input.descripcion,
+  });
+  if (error) return fallo(error.message);
+  if (!esObj(data) || data.ok !== true || typeof data.orden !== 'number') return fallo('datos_inconsistentes');
+  return { ok: true, data: { orden: data.orden } };
+}
+
 export async function terminarAtencionAdiestramiento(
   adiestramientoId: string,
 ): Promise<ResultadoWrapper<null, CodigoErrorAdiestramientoAtencion>> {

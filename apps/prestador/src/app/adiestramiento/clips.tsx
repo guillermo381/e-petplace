@@ -10,37 +10,44 @@
 // CAPTURA: CameraView 720p + bitrate acotado — un clip de 30s pesa
 // ~9 MB, jamás el 4K del sensor.
 //
-// El motor de la sesión (Bloque 2, Sesión A) todavía no existe: la
-// pantalla recibe `sesionId` opcional (default 'gate' para el gate en
-// dispositivo) y los clips viven en la COLA LOCAL declarada
-// (clips-sesion.ts) hasta que el bucket de video de la A exista.
+// COLA CONECTADA (tanda corta S63-B): con `sesionId` REAL (el
+// adiestramiento_id que pasa el Durante), "Usar clip" SUBE al bucket
+// adiestramiento-clips y REGISTRA (dos pasos, subir-clip.ts) — el clip
+// registrado ya está en el parte del dueño. El default 'gate' (sin
+// sesión real) sigue siendo cola local pura para el gate de captura.
+// La voz del stub se retira SOLO donde dejó de ser verdad (patrón del
+// retiro condicional de "pantalla encendida").
 // ─────────────────────────────────────────────────────────────────────
 
 import { useEffect, useRef, useState } from 'react';
 import { Linking, ScrollView, Text, View } from 'react-native';
 import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo-camera';
-import { VideoView, useVideoPlayer } from 'expo-video';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Boton,
   Celda,
+  ClipSesion,
   Encabezado,
   Separador,
   Tarjeta,
   spacing,
   typography,
+  useAviso,
   useTheme,
 } from '@epetplace/ui';
+import { obtenerEstadoDuranteAdiestramiento, obtenerMiPrestador } from '@epetplace/api';
 
 import {
   CLIPS_MAX,
   CLIP_MAX_S,
   CLIP_MIN_S,
+  actualizarClip,
   agregarClip,
   clipsDeSesion,
   quitarClip,
   type ClipLocal,
 } from '@/lib/clips-sesion';
+import { subirClip } from '@/lib/subir-clip';
 import { useTraduccion } from '@/i18n';
 
 /** Voz de máquina: 0:07, 0:22 (mono en la UI). */
@@ -54,25 +61,12 @@ type Vista =
   | { v: 'revision'; uri: string; duracionS: number }
   | { v: 'ver'; clip: ClipLocal };
 
-/** Revisión/re-visión del clip: player nativo (scrubbing del sistema). */
-function PlayerClip({ uri }: { uri: string }) {
-  const player = useVideoPlayer(uri, (p) => {
-    p.loop = true;
-    p.play();
-  });
-  return (
-    <VideoView
-      player={player}
-      style={{ width: '100%', aspectRatio: 9 / 16, maxHeight: 420, alignSelf: 'center' }}
-      contentFit="contain"
-    />
-  );
-}
-
-export default function ClipsSesion() {
+export default function ClipsSesionPantalla() {
   const { theme } = useTheme();
   const router = useRouter();
+  const { mostrar } = useAviso();
   const { t } = useTraduccion();
+  const mostrarError = (texto: string) => mostrar({ variante: 'error', texto });
   const { sesionId = 'gate' } = useLocalSearchParams<{ sesionId?: string }>();
 
   const [vista, setVista] = useState<Vista>({ v: 'lista' });
@@ -80,6 +74,57 @@ export default function ClipsSesion() {
   const [permisoCamara, pedirCamara] = useCameraPermissions();
   const [permisoMic, pedirMic] = useMicrophonePermissions();
   const [sinPermiso, setSinPermiso] = useState<'pedible' | 'ajustes' | null>(null);
+  // Cola conectada: con sesión REAL, "Usar clip" sube y registra.
+  const sesionReal = sesionId !== 'gate';
+  const [prestadorId, setPrestadorId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!sesionReal) return;
+    let vigente = true;
+    void obtenerMiPrestador().then((r) => {
+      if (vigente && r.ok) setPrestadorId(r.data.id);
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [sesionReal]);
+
+  /** Dos pasos (subir-clip.ts). Con storagePath previo, reintenta SOLO
+   *  el registro — jamás re-subir (el huérfano se recupera). */
+  async function procesarClip(clip: ClipLocal) {
+    if (prestadorId === null) return;
+    actualizarClip(sesionId, clip.uri, { estado: 'subiendo' });
+    setClips(clipsDeSesion(sesionId));
+    // El orden 1..3 sale del conteo REAL del server (UNIQUE lo defiende).
+    const estado = await obtenerEstadoDuranteAdiestramiento(sesionId);
+    if (!estado.ok) {
+      actualizarClip(sesionId, clip.uri, { estado: 'error' });
+      setClips(clipsDeSesion(sesionId));
+      mostrarError(estado.mensaje);
+      return;
+    }
+    if (estado.data.clips_total >= CLIPS_MAX) {
+      // El techo REAL del server manda (otro teléfono pudo registrar).
+      actualizarClip(sesionId, clip.uri, { estado: 'error' });
+      setClips(clipsDeSesion(sesionId));
+      mostrarError(t('clips.techoAlcanzado', { techo: CLIPS_MAX }));
+      return;
+    }
+    const r = await subirClip({
+      uri: clip.uri,
+      prestadorId,
+      adiestramientoId: sesionId,
+      orden: estado.data.clips_total + 1,
+      duracionS: clip.duracionS,
+      storagePath: clip.storagePath,
+    });
+    actualizarClip(sesionId, clip.uri, {
+      estado: r.ok ? 'registrado' : 'error',
+      storagePath: r.storagePath,
+    });
+    setClips(clipsDeSesion(sesionId));
+    if (!r.ok && r.mensaje) mostrarError(t('clips.noSeEnvio'));
+  }
 
   // Cámara
   const camRef = useRef<CameraView>(null);
@@ -141,8 +186,11 @@ export default function ClipsSesion() {
 
   function usarClip(uri: string, duracionS: number) {
     agregarClip(sesionId, { uri, duracionS });
-    setClips(clipsDeSesion(sesionId));
+    const nuevos = clipsDeSesion(sesionId);
+    setClips(nuevos);
     setVista({ v: 'lista' });
+    const clip = nuevos.find((c) => c.uri === uri);
+    if (sesionReal && clip) void procesarClip(clip);
   }
 
   function quitar(clip: ClipLocal) {
@@ -217,18 +265,8 @@ export default function ClipsSesion() {
           />
         </View>
         <ScrollView contentContainerStyle={{ padding: spacing[4], gap: spacing[4] }}>
-          <PlayerClip key={uri} uri={uri} />
-          <Text
-            style={{
-              fontFamily: typography.family.mono.regular,
-              fontSize: typography.size.sm,
-              letterSpacing: typography.tracking.mono,
-              color: theme.text.secondary,
-              textAlign: 'center',
-            }}
-          >
-            {mmss(duracionS)}
-          </Text>
+          {/* Componente 34 (Ley 11): jamás VideoView inline. */}
+          <ClipSesion key={uri} uri={uri} duracionSegundos={duracionS} />
           {vista.v === 'revision' ? (
             corto ? (
               <>
@@ -258,7 +296,33 @@ export default function ClipsSesion() {
               </>
             )
           ) : (
-            <Boton variante="destructivo" bloque etiqueta={t('clips.quitarClip')} onPress={() => quitar(vista.clip)} />
+            <>
+              {vista.clip.estado === 'error' && (
+                <>
+                  <Text style={vozSecundaria}>{t('clips.noSeEnvio')}</Text>
+                  <Boton
+                    variante="primario"
+                    bloque
+                    etiqueta={t('clips.reintentarEnvio')}
+                    onPress={() => {
+                      setVista({ v: 'lista' });
+                      void procesarClip(vista.clip);
+                    }}
+                  />
+                </>
+              )}
+              {vista.clip.estado === 'registrado' ? (
+                // Ya está en el parte del dueño: quitarlo acá mentiría.
+                <Text style={vozSecundaria}>{t('clips.enElParte')}</Text>
+              ) : (
+                <Boton
+                  variante="destructivo"
+                  bloque
+                  etiqueta={t('clips.quitarClip')}
+                  onPress={() => quitar(vista.clip)}
+                />
+              )}
+            </>
           )}
         </ScrollView>
       </View>
@@ -310,6 +374,17 @@ export default function ClipsSesion() {
                 {i > 0 && <Separador />}
                 <Celda
                   titulo={t('clips.clipN', { n: i + 1 })}
+                  subtitulo={
+                    sesionReal
+                      ? c.estado === 'registrado'
+                        ? t('clips.enElParte')
+                        : c.estado === 'subiendo'
+                          ? t('clips.enviando')
+                          : c.estado === 'error'
+                            ? t('clips.noSeEnvio')
+                            : t('clips.enEsteTelefono')
+                      : undefined
+                  }
                   metadataMono={mmss(c.duracionS)}
                   interactiva
                   accessibilityRole="button"
@@ -326,9 +401,11 @@ export default function ClipsSesion() {
           <Boton variante="primario" bloque etiqueta={t('clips.grabarClip')} onPress={() => void abrirCamara()} />
         )}
 
-        {/* STUB DECLARADO (S63-B): el bucket de video es pedido a la A —
-            hasta entonces la cola es local y la voz lo dice. */}
-        {clips.length > 0 && <Text style={vozSecundaria}>{t('clips.envioPendiente')}</Text>}
+        {/* LA VOZ HONESTA, retirada donde dejó de ser verdad (tanda
+            corta): habla SOLO por los clips que siguen sin registrar. */}
+        {clips.some((c) => c.estado !== 'registrado') && (
+          <Text style={vozSecundaria}>{t('clips.envioPendiente')}</Text>
+        )}
       </ScrollView>
     </View>
   );

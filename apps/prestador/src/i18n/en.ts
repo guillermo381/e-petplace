@@ -744,8 +744,12 @@ export const prestadorEn = {
     quedoCorto: 'It came out short: clips run 15 to 30 seconds. Record a new one, no rush.',
     clipN: 'Clip {{n}}',
     techoAlcanzado: "You already recorded this session's {{techo}} clips.",
-    envioPendiente:
-      "For now the clips stay on this phone. Sending them to the family's report arrives with the next update.",
+    envioPendiente: "Unsent clips stay only on this phone — they don't reach the family's report.",
+    enviando: 'Sending…',
+    enElParte: "In the family's report",
+    noSeEnvio: "It didn't send. Tap it to retry.",
+    enEsteTelefono: 'On this phone',
+    reintentarEnvio: 'Retry sending',
     sinPermiso: 'We need the camera and microphone to record the clip — your voice commands are part of the progress.',
     abrirAjustes: 'Open settings',
     probarDeNuevo: 'Try again',
@@ -763,8 +767,7 @@ export const prestadorEn = {
     programasVacio: "They haven't done programs with you yet.",
     programaSesiones: '{{n}} sessions',
     bitacoraTitulo: "The family's log",
-    bitacoraPronto:
-      "Here you'll see what the family practices between sessions. This part of the record is still being built.",
+    bitacoraVacia: "The family hasn't written in the log yet. What they practice between sessions shows up here.",
   },
   // S63-B (Bloque 3 experiencia): the training session flow (mirror of es.ts).
   citaAdiestramiento: {
@@ -797,7 +800,7 @@ export const prestadorEn = {
     notaGuardada: 'Note saved',
     clipsCelda: 'Session clips',
     clipsDetalle: 'Progress shows better in motion',
-    clipsDetalleN: '{{n}} of 3 on this phone',
+    clipsDetalleN: '{{n}} of 3',
     terminar: 'Finish session',
     terminarTitulo: 'Finish the session?',
     terminarExplicacion: "After finishing you put together the family's report.",
@@ -806,8 +809,7 @@ export const prestadorEn = {
     pisoTitulo: 'Before finishing, the report is missing:',
     pisoFaltaObjetivo: 'At least one goal worked on.',
     pisoFaltaNotaClip: 'At least one behavior note or clip.',
-    pisoClipsLocales:
-      "This phone's clips don't send yet — meanwhile, a behavior note completes the report.",
+    pisoClipsLocales: 'There are unsent clips — a sent clip or a behavior note completes the report.',
     resumenTitulo: 'What you recorded',
     yaCerrada: 'This session is already closed. The family got the report.',
     mensajeFamilia: 'Message to the family',
