@@ -100,6 +100,16 @@ export const uiEs = {
     estado: 'En vivo',
     estadoMemorial: 'En curso',
   },
+  // S63 — la voz del ESTADO DEL PROGRAMA (Ley 3, FIRMADA por el
+  // founder): "vencido" JAMÁS llega a UI — la familia no lee su
+  // programa como falla ni deuda; "Finalizó" dice el hecho sin
+  // reproche. Namespace compartido: la pintan ambas apps.
+  programaEstado: {
+    activo: 'En marcha',
+    completado: 'Completado',
+    vencido: 'Finalizó',
+    cancelado: 'Cancelado',
+  },
   // S63 — ClipSesion (el clip corto del adiestramiento; LOTE S63,
   // gate founder pendiente)
   clipSesion: {

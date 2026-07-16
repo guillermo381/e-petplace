@@ -354,6 +354,10 @@ export interface AdiestramientoDelHogar {
   /** Identidad del programa (§1): null = sesión suelta. */
   sesion_numero: number | null;
   programa_contratado_id: string | null;
+  /** Estado de la MATRÍCULA (activo|completado|vencido|cancelado) —
+   *  null = sesión suelta. La voz de familia vive en ui.programaEstado
+   *  (Ley 3, firmada S63: 'vencido' JAMÁS se pinta crudo). */
+  programa_estado: string | null;
   /** true = la sesión cerró con calidad: el parte existe. */
   tiene_parte: boolean;
 }
@@ -389,9 +393,12 @@ export async function obtenerMisAdiestramientos(): Promise<
 
   const prestadorIds = [...new Set(filas.map((c) => c.prestador_id).filter((v): v is string => v !== null))];
   const mascotaIds = [...new Set(filas.map((c) => c.mascota_id).filter((v): v is string => v !== null))];
+  const programaIds = [
+    ...new Set(filas.map((c) => c.programa_contratado_id).filter((v): v is string => v !== null)),
+  ];
   const citaIds = filas.map((c) => c.id);
 
-  const [prestadores, mascotas, atenciones] = await Promise.all([
+  const [prestadores, mascotas, atenciones, programas] = await Promise.all([
     prestadorIds.length > 0
       ? cliente.from('prestadores').select('id, nombre_comercial').in('id', prestadorIds)
       : Promise.resolve({ data: [], error: null }),
@@ -403,12 +410,16 @@ export async function obtenerMisAdiestramientos(): Promise<
       .select('cita_id')
       .in('cita_id', citaIds)
       .eq('estado', 'cerrada_con_calidad'),
+    programaIds.length > 0
+      ? cliente.from('programas_contratados').select('id, estado').in('id', programaIds)
+      : Promise.resolve({ data: [], error: null }),
   ]);
-  if (prestadores.error || mascotas.error || atenciones.error) return fallo('error');
+  if (prestadores.error || mascotas.error || atenciones.error || programas.error) return fallo('error');
 
   const prestadorPorId = new Map((prestadores.data ?? []).map((p) => [p.id, p.nombre_comercial]));
   const mascotaPorId = new Map((mascotas.data ?? []).map((m) => [m.id, m.nombre]));
   const citasConParte = new Set((atenciones.data ?? []).map((a) => a.cita_id));
+  const estadoPorPrograma = new Map((programas.data ?? []).map((p) => [p.id, p.estado]));
 
   return {
     ok: true,
@@ -425,6 +436,10 @@ export async function obtenerMisAdiestramientos(): Promise<
       prestador_nombre: c.prestador_id !== null ? prestadorPorId.get(c.prestador_id) ?? null : null,
       sesion_numero: typeof c.sesion_numero === 'number' ? c.sesion_numero : null,
       programa_contratado_id: c.programa_contratado_id ?? null,
+      programa_estado:
+        c.programa_contratado_id !== null
+          ? estadoPorPrograma.get(c.programa_contratado_id) ?? null
+          : null,
       tiene_parte: citasConParte.has(c.id),
     })),
   };

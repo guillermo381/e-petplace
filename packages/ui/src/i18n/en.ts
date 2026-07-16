@@ -91,6 +91,14 @@ export const uiEn = {
     estado: 'Live',
     estadoMemorial: 'In progress',
   },
+  // S63 — program STATE voice (Ley 3, founder-signed): the motor word
+  // 'vencido' never reaches UI — "Ended" states the fact, no reproach.
+  programaEstado: {
+    activo: 'In progress',
+    completado: 'Completed',
+    vencido: 'Ended',
+    cancelado: 'Cancelled',
+  },
   // S63 — ClipSesion (training short clip; LOTE S63, founder gate pending)
   clipSesion: {
     reproducir: 'Play the clip',

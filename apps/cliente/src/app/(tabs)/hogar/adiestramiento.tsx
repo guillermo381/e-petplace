@@ -42,6 +42,7 @@ import {
   typography,
   useAviso,
   useTheme,
+  useTraduccionUi,
 } from '@epetplace/ui';
 import {
   getEstadoOnboardingDueno,
@@ -61,7 +62,26 @@ import { useTraduccion } from '@/i18n';
 export default function HubAdiestramiento() {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
+  const { t: tUi } = useTraduccionUi();
   const { mostrar } = useAviso();
+
+  // Ley 3 (voz FIRMADA S63, ui.programaEstado): mapa CERRADO estado→voz —
+  // 'vencido' jamás se pinta crudo; desconocido = se omite, jamás el
+  // código del motor.
+  const vozEstadoPrograma = (estado: string | null): string | null => {
+    switch (estado) {
+      case 'activo':
+        return tUi('programaEstado.activo');
+      case 'completado':
+        return tUi('programaEstado.completado');
+      case 'vencido':
+        return tUi('programaEstado.vencido');
+      case 'cancelado':
+        return tUi('programaEstado.cancelado');
+      default:
+        return null;
+    }
+  };
   const [vista, setVista] = useState<'proximos' | 'historial' | 'bitacora'>('proximos');
   const [citas, setCitas] = useState<AdiestramientoDelHogar[] | 'cargando' | 'error'>('cargando');
   // §7 — la bitácora
@@ -264,10 +284,20 @@ export default function HubAdiestramiento() {
           <Tarjeta relleno="ninguno">
             {visibles.map((c, i) => {
               // la identidad k del programa (§1) — estado pasivo,
-              // jamás botón (Ley 19.4)
+              // jamás botón (Ley 19.4). Mientras la matrícula está EN
+              // MARCHA el chip dice la sesión (el estado no agrega —
+              // Chanel); cuando el programa terminó, el chip dice su
+              // destino con la voz firmada (ui.programaEstado).
+              const vozFinal =
+                c.programa_estado !== null && c.programa_estado !== 'activo'
+                  ? vozEstadoPrograma(c.programa_estado)
+                  : null;
               const fin =
                 c.sesion_numero !== null ? (
-                  <Insignia estado="info" etiqueta={t('adiestramiento.sesionK', { k: String(c.sesion_numero) })} />
+                  <Insignia
+                    estado="info"
+                    etiqueta={vozFinal ?? t('adiestramiento.sesionK', { k: String(c.sesion_numero) })}
+                  />
                 ) : undefined;
               const titulo = c.mascota_nombre ?? t('adiestramiento.titulo');
               const subtitulo = c.prestador_nombre ?? undefined;
