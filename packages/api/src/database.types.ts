@@ -1086,6 +1086,48 @@ export type Database = {
           },
         ]
       }
+      cat_conductas_bitacora: {
+        Row: {
+          activo: boolean
+          codigo: string
+          created_at: string
+          descripcion: string | null
+          es_seed_preliminar: boolean
+          nombre: string
+          nombre_familia: string
+          nombre_familia_en: string
+          orden_display: number
+          pais_codigo: string | null
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          codigo: string
+          created_at?: string
+          descripcion?: string | null
+          es_seed_preliminar?: boolean
+          nombre: string
+          nombre_familia: string
+          nombre_familia_en: string
+          orden_display?: number
+          pais_codigo?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          codigo?: string
+          created_at?: string
+          descripcion?: string | null
+          es_seed_preliminar?: boolean
+          nombre?: string
+          nombre_familia?: string
+          nombre_familia_en?: string
+          orden_display?: number
+          pais_codigo?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cat_curriculum_adiestramiento: {
         Row: {
           activo: boolean
@@ -4488,6 +4530,90 @@ export type Database = {
             columns: ["prestador_id"]
             isOneToOne: false
             referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evento_bitacora_chips: {
+        Row: {
+          bitacora_id: string
+          chip_tipo: string
+          codigo: string
+        }
+        Insert: {
+          bitacora_id: string
+          chip_tipo: string
+          codigo: string
+        }
+        Update: {
+          bitacora_id?: string
+          chip_tipo?: string
+          codigo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evento_bitacora_chips_bitacora_id_fkey"
+            columns: ["bitacora_id"]
+            isOneToOne: false
+            referencedRelation: "evento_bitacora_familia"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evento_bitacora_familia: {
+        Row: {
+          aportado_por_menor: boolean
+          country_code: string
+          created_at: string
+          evento_id: string
+          id: string
+          mascota_id: string
+          programa_contratado_id: string | null
+          texto: string | null
+          user_id: string
+        }
+        Insert: {
+          aportado_por_menor?: boolean
+          country_code?: string
+          created_at?: string
+          evento_id: string
+          id?: string
+          mascota_id: string
+          programa_contratado_id?: string | null
+          texto?: string | null
+          user_id: string
+        }
+        Update: {
+          aportado_por_menor?: boolean
+          country_code?: string
+          created_at?: string
+          evento_id?: string
+          id?: string
+          mascota_id?: string
+          programa_contratado_id?: string | null
+          texto?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evento_bitacora_familia_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "eventos_mascota"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_bitacora_familia_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_bitacora_familia_programa_contratado_id_fkey"
+            columns: ["programa_contratado_id"]
+            isOneToOne: false
+            referencedRelation: "programas_contratados"
             referencedColumns: ["id"]
           },
         ]
@@ -16154,6 +16280,10 @@ export type Database = {
           p_storage_path: string
           p_tipo: string
         }
+        Returns: Json
+      }
+      registrar_bitacora_familia: {
+        Args: { p_chips?: Json; p_mascota_id: string; p_texto?: string }
         Returns: Json
       }
       registrar_clip_adiestramiento: {

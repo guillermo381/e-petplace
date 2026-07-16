@@ -440,6 +440,18 @@ export {
   type ProgresionNarrativa,
 } from './wrappers/adiestramiento-reserva';
 
+// ── La bitácora de la familia (S63-A, §7 — hunk Sesión A) ───────────────────
+export {
+  obtenerVocabularioBitacora,
+  registrarBitacoraFamilia,
+  obtenerBitacora,
+  type BitacoraRegistrada,
+  type ChipBitacoraTipo,
+  type ChipVocabulario,
+  type CodigoErrorBitacora,
+  type EntradaBitacora,
+} from './wrappers/adiestramiento-bitacora';
+
 // ── La zona de servicios vivos del Hogar (S60-A6, D-366 — hunk Sesión A) ────
 export {
   obtenerResumenServiciosHogar,
