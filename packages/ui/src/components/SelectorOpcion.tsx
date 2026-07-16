@@ -26,7 +26,9 @@
 
 import { useEffect, useState, type ReactNode } from 'react'
 import { ActivityIndicator, Platform, Pressable, ScrollView, Text, View, type ViewStyle } from 'react-native'
-import Animated, { cubicBezier } from 'react-native-reanimated'
+import Animated from 'react-native-reanimated'
+
+import { usePresionado } from './usePresionado'
 
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
@@ -112,7 +114,8 @@ function Chip({
   acento: 'capa' | 'control' | 'oficio'
 }) {
   const { theme } = useTheme()
-  const [presionada, setPresionada] = useState(false)
+  // S63 (D-401): el clon muere — la física vive en LA primitiva
+  const { handlers, estiloPresionado } = usePresionado(0.99)
   // S61-A5 cura 2: el anillo AZUL de la captura del founder era el
   // focus-visible DEFAULT de Chrome (rgb(0,95,204), solo web — no
   // viaja a dispositivo). Espejo del patrón de Boton: focus propio en
@@ -175,9 +178,9 @@ function Chip({
         if (!deshabilitada && !cargando) onSelect(opcion.codigo)
       }}
       onPressIn={() => {
-        if (!deshabilitada && !cargando) setPresionada(true)
+        if (!deshabilitada && !cargando) handlers.onPressIn()
       }}
-      onPressOut={() => setPresionada(false)}
+      onPressOut={handlers.onPressOut}
       onFocus={() => setEnfocada(true)}
       onBlur={() => setEnfocada(false)}
       accessibilityRole={modo}
@@ -216,11 +219,8 @@ function Chip({
           backgroundColor: fondo,
           borderWidth: BORDE,
           borderColor: borde,
-          // misma receta que Boton/Tarjeta (SM: CSS transition + estado)
-          transform: [{ scale: presionada ? 0.99 : 1 }],
-          transitionProperty: 'transform',
-          transitionDuration: motion.duration.fast,
-          transitionTimingFunction: cubicBezier(...motion.easing.spring.bezier),
+          // misma receta que Boton/Tarjeta — LA primitiva (S63)
+          ...estiloPresionado,
         }}
       >
         {/* S62 (receta Boton): en carga, adorno y label quedan MONTADOS

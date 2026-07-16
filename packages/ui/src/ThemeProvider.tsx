@@ -16,7 +16,7 @@
  */
 
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
-import { getTheme, type Theme, type ThemeMode } from './themes'
+import { getTheme, type CtaAncla, type Theme, type ThemeMode } from './themes'
 
 type ThemeContextValue = {
   theme: Theme
@@ -31,6 +31,7 @@ export function ThemeProvider({
   mode: modeControlado,
   defaultMode = 'light',
   memorial = false,
+  cta = 'tinta',
 }: {
   children: ReactNode
   /** Modo CONTROLADO: si viene, el provider lo sigue reactivo (cambio
@@ -38,14 +39,20 @@ export function ThemeProvider({
   mode?: ThemeMode
   defaultMode?: ThemeMode
   memorial?: boolean
+  /** S63 — enmienda Ley 21 FIRMADA: el ANCLA del CTA primario.
+   *  'tinta' (default) = el de siempre (cliente). 'oficio' = tealDark
+   *  en light Y dark (raíz del PRESTADOR — lo cablea la B).
+   *  MEMORIAL SIEMPRE tinta, gane quien gane esta prop: memorial no
+   *  se celebra. */
+  cta?: CtaAncla
 }) {
   const [modeInterno, setMode] = useState<ThemeMode>(defaultMode)
   const mode = modeControlado ?? modeInterno
   const effectiveMode: ThemeMode = memorial ? 'memorial' : mode
 
   const value = useMemo<ThemeContextValue>(
-    () => ({ theme: getTheme(effectiveMode), mode: effectiveMode, setMode }),
-    [effectiveMode],
+    () => ({ theme: getTheme(effectiveMode, cta), mode: effectiveMode, setMode }),
+    [effectiveMode, cta],
   )
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>

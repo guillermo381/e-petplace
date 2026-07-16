@@ -47,8 +47,9 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
    El vocabulario interno del modelo (M1..M7) JAMÁS visible. Las
    FECHAS se formatean con `fechaCortaMono` del riel (una función por
    idioma para todos los módulos — cero formateos artesanales).
-4. **Dosis.** Prestador = baja: UN acento de capa por vista, CTA en tinta
-   (`Boton primario`), sin gradiente UI. Dueño = alta: capas visibles,
+4. **Dosis.** Prestador = baja: UN acento de capa por vista, CTA primario
+   anclado al OFICIO (tealDark vía `accent.cta` — enmienda Ley 21 S63;
+   memorial siempre tinta), sin gradiente UI. Dueño = alta: capas visibles,
    gradiente firma solo en contextos cerrados (hero onboarding, CTA
    principal dueño, momento adopción, y desde S52 el TECHO COMPACTO
    del Hogar — HeroMarca compacto con el saludo por franja). El isotipo es IDENTIDAD: va en
@@ -272,12 +273,21 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
     tema: **`accent.control`** (claro = magentaDark #8E1F68, el
     registro TRABAJADOR del magenta — el hex puro #FF00AF conserva su
     reserva: destello, huella de tab, techo · dark = violetText ·
-    memorial = tinta). Los CTA primarios siguen en TINTA en ambas
-    apps: el control marca ELECCIÓN y estado, la tinta marca la
-    ACCIÓN — un solo acento lleno por vista. El tinte verdeVital
-    MUERE como color de control en ambas apps (las pantallas
-    construidas migran AL PASO); el oficio del prestador sigue en
-    tealDark (§15b).
+    memorial = tinta). **ENMIENDA S63 (FIRMADA por el founder): el CTA
+    primario del CLIENTE sigue en tinta; el CTA primario del PRESTADOR
+    ancla al acento del oficio (tealDark), en light Y dark. Memorial
+    SIEMPRE tinta — memorial no se celebra. La cláusula "no se reabre"
+    del anexo D-395 queda REEMPLAZADA por esta enmienda firmada.**
+    Mecánica: el slot `accent.cta`/`accent.ctaTexto` del tema, resuelto
+    por `ThemeProvider cta="tinta"|"oficio"` (default tinta; el raíz
+    del prestador pasa "oficio") — Boton primario consume el slot,
+    nadie re-resuelve por pantalla. Pares medidos en el gate:
+    papel/tealDark 5.51 (light) · textDark0/tealDark 5.05 (dark). El
+    control sigue marcando ELECCIÓN y estado — un solo acento lleno
+    por vista. El tinte verdeVital MUERE como color de control en
+    ambas apps (las pantallas construidas migran AL PASO); el oficio
+    del prestador sigue en tealDark (§15b; su par oscuro del MURO es
+    tealDarkNoche #0A4A44, D-407 pagada S63).
 
 22. **La ley de intensidad del acento (S58, firma founder).** El acento
     tiene DOS intensidades por FUNCIÓN — **TONAL** (borde 1.5 en el

@@ -26,9 +26,15 @@ import { useState } from 'react'
 import { cubicBezier } from 'react-native-reanimated'
 
 import { motion } from '../tokens/motion'
+import { useTheme } from '../ThemeProvider'
 
 export function usePresionado(escala: 0.97 | 0.99 = 0.97) {
   const [presionado, setPresionado] = useState(false)
+  const { theme } = useTheme()
+  // S63 (letra existente, enmienda de la fuente): en MEMORIAL la física
+  // no celebra — el estado pressed se VE (feedback funcional, escala
+  // mínima) pero el cambio es REEMPLAZO DIRECTO, sin transición.
+  const esMemorial = theme.mode === 'memorial'
 
   return {
     presionado,
@@ -38,9 +44,13 @@ export function usePresionado(escala: 0.97 | 0.99 = 0.97) {
     },
     estiloPresionado: {
       transform: [{ scale: presionado ? escala : 1 }],
-      transitionProperty: 'transform' as const,
-      transitionDuration: motion.duration.fast,
-      transitionTimingFunction: cubicBezier(...motion.easing.spring.bezier),
+      ...(esMemorial
+        ? null
+        : {
+            transitionProperty: 'transform' as const,
+            transitionDuration: motion.duration.fast,
+            transitionTimingFunction: cubicBezier(...motion.easing.spring.bezier),
+          }),
     },
   }
 }

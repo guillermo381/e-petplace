@@ -18,13 +18,14 @@
  * layout padre (regla anti-slop: las cards no se auto-separan).
  */
 
-import { useState, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { Pressable, View, type AccessibilityRole, type ViewStyle } from 'react-native'
-import Animated, { cubicBezier } from 'react-native-reanimated'
+import Animated from 'react-native-reanimated'
+
+import { usePresionado } from './usePresionado'
 
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
-import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
 
 export type TarjetaTinte =
@@ -73,7 +74,8 @@ const RELLENO: Record<TarjetaRelleno, number> = {
 export function Tarjeta(props: TarjetaProps) {
   const { children, tinte = 'ninguno', elevacion = 'plana', relleno = 'normal' } = props
   const { theme } = useTheme()
-  const [presionada, setPresionada] = useState(false)
+  // S63 (D-401): el clon muere — la física vive en LA primitiva
+  const { handlers, estiloPresionado } = usePresionado(0.99)
 
   const tintes: Record<TarjetaTinte, { fondo: string; borde: string }> = {
     // claro: card blanca + border · dark: bg.elevated · memorial: sus superficies
@@ -117,21 +119,15 @@ export function Tarjeta(props: TarjetaProps) {
   return (
     <Pressable
       onPress={props.onPress}
-      onPressIn={() => setPresionada(true)}
-      onPressOut={() => setPresionada(false)}
+      onPressIn={handlers.onPressIn}
+      onPressOut={handlers.onPressOut}
       accessibilityRole={props.accessibilityRole}
       accessibilityLabel={props.etiqueta}
     >
       <Animated.View
         style={[
           superficie,
-          {
-            // misma receta que Boton (SM: CSS transition + estado, sin worklets)
-            transform: [{ scale: presionada ? 0.99 : 1 }],
-            transitionProperty: 'transform',
-            transitionDuration: motion.duration.fast,
-            transitionTimingFunction: cubicBezier(...motion.easing.spring.bezier),
-          },
+          estiloPresionado,
         ]}
       >
         {children}

@@ -218,6 +218,17 @@ function paresDe(t: Theme, nombre: string): Pair[] {
   add('muro oficio: papel / vidrio oscuro⊕muro', palette.light0, 'rgba(0,0,0,0.18)', palette.tealDark)
   add('muro oficio: toggle activo tealDark / papel', palette.tealDark, palette.light0)
 
+  // S63 — enmienda Ley 21 FIRMADA: el CTA del prestador ancla a tealDark
+  // en light Y dark (slot accent.cta, ThemeProvider cta="oficio").
+  add('CTA oficio (light): papel / tealDark', palette.light0, palette.tealDark)
+  add('CTA oficio (dark): textDark0 / tealDark', palette.textDark0, palette.tealDark)
+
+  // S63 — D-407 PAGADA: tealDarkNoche, EL par oscuro del muro del oficio
+  // (candidato a firmado; el gate visual del founder puede ajustar el hex).
+  add('muro oficio NOCHE: texto papel / tealDarkNoche', palette.light0, palette.tealDarkNoche)
+  add('muro oficio NOCHE: textDark0 / tealDarkNoche', palette.textDark0, palette.tealDarkNoche)
+  add('muro oficio NOCHE: teal puro / tealDarkNoche', palette.teal, palette.tealDarkNoche, undefined, 3)
+
   // Gradiente firma v2 (B3.1c) — REGLA DE PEOR PUNTO: onGradient contra cada
   // stop con location ≤ 0.7 DEBE pasar 4.5. La COLA (location 1, teal) queda
   // EXENTA por geometría verificada — no es un agujero:

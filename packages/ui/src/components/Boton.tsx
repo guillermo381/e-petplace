@@ -26,7 +26,9 @@ import {
   View,
   type ViewStyle,
 } from 'react-native'
-import Animated, { cubicBezier } from 'react-native-reanimated'
+import Animated from 'react-native-reanimated'
+
+import { usePresionado } from './usePresionado'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import { typography } from '../tokens/typography'
@@ -74,7 +76,9 @@ export function Boton({
   iconoIzq,
 }: BotonProps) {
   const { theme } = useTheme()
-  const [presionado, setPresionado] = useState(false)
+  // S63 (D-401, cura en la fuente): el hundimiento vive en LA primitiva
+  // usePresionado — la física del mock firmado, memorial-aware adentro.
+  const { handlers, estiloPresionado } = usePresionado(0.97)
   const [enfocado, setEnfocado] = useState(false)
 
   const t = TAMAÑOS[tamaño]
@@ -101,7 +105,11 @@ export function Boton({
     variante === 'marca' && !esMarca ? 'primario' : variante
 
   const colores: Record<BotonVariante, { fondo: string; texto: string; borde?: string }> = {
-    primario:    { fondo: theme.text.primary, texto: theme.bg.base },
+    // S63 — enmienda Ley 21 FIRMADA: el primario ancla al SLOT accent.cta
+    // (default tinta = idéntico al de siempre; el raíz del prestador lo
+    // resuelve a tealDark con ThemeProvider cta="oficio"; memorial
+    // SIEMPRE tinta — el slot lo garantiza en la fuente).
+    primario:    { fondo: theme.accent.cta, texto: theme.accent.ctaTexto },
     marca:       { fondo: 'transparent', texto: theme.text.onGradient },
     secundario:  { fondo: theme.bg.overlay, texto: theme.text.primary, borde: theme.border.subtle },
     ghost:       { fondo: 'transparent', texto: theme.text.primary },
@@ -156,8 +164,8 @@ export function Boton({
   return (
     <Pressable
       onPress={inactivo ? undefined : onPress}
-      onPressIn={() => setPresionado(true)}
-      onPressOut={() => setPresionado(false)}
+      onPressIn={handlers.onPressIn}
+      onPressOut={handlers.onPressOut}
       onFocus={() => setEnfocado(true)}
       onBlur={() => setEnfocado(false)}
       disabled={inactivo}
@@ -169,12 +177,8 @@ export function Boton({
     >
       <Animated.View
         style={[
+          estiloPresionado,
           {
-            // pressed: 0.97 con el spring de confirmación física (motion.ts)
-            transform: [{ scale: presionado && !inactivo ? 0.97 : 1 }],
-            transitionProperty: 'transform',
-            transitionDuration: motion.duration.fast,
-            transitionTimingFunction: cubicBezier(...motion.easing.spring.bezier),
             opacity: deshabilitado ? opacity.disabled : 1,
             borderRadius: radius.md,
             ...(bloque ? { alignSelf: 'stretch' as const } : null),

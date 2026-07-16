@@ -32,6 +32,11 @@ export const lightTheme = {
   },
 
   accent: {
+    // S63 — enmienda Ley 21 FIRMADA: el CTA primario resuelve por SLOT.
+    // Default 'tinta' (este valor); ThemeProvider cta='oficio' lo ancla a
+    // tealDark en light Y dark. Memorial SIEMPRE tinta (no se celebra).
+    cta:           palette.textLight0 as string,
+    ctaTexto:      palette.light0 as string,
     primary:       palette.tealDark,
     primaryBg:     palette.tealAlpha16,     // B2.1: tint sobre el hex puro
     primaryBorder: palette.tealBorderL,

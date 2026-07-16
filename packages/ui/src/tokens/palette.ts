@@ -49,6 +49,7 @@ export const palette = {
                           // reemplazo. Blanco encima gatea AA. rgb(142,31,104)
   teal:      '#28E8DA',  // Capa 2 · cuidado (B1 lo llama "cyan") — rgb(40,232,218)
   tealDark:  '#0A7268',  // variante AA para light — rgb(10,114,104)
+  tealDarkNoche: '#0A4A44',  // S63 D-407: EL par oscuro del muro del oficio (papel 9.61 · textDark0 8.81 · teal puro 6.57 — mediciones B, candidato a firmado; el gate visual puede ajustar)
   verde:     '#90FF8B',  // menta de marca — SOLO marca/logo/gradientLogo, no funcional
                          // (acotado en B2.1: la capa vida usa verdeVital) — rgb(144,255,139)
                          // verdeDark #2E7A28 eliminado en B3.1 (huérfano — decisión founder)

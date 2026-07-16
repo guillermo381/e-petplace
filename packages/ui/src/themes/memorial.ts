@@ -41,6 +41,11 @@ export const memorialTheme = {
   },
 
   accent: {
+    // S63 — enmienda Ley 21 FIRMADA: el CTA primario resuelve por SLOT.
+    // Default 'tinta' (este valor); ThemeProvider cta='oficio' lo ancla a
+    // tealDark en light Y dark. Memorial SIEMPRE tinta (no se celebra).
+    cta:           palette.textMemorialDark as string,
+    ctaTexto:      palette.memorialDark0 as string,
     primary:       palette.sage,
     primaryBg:     palette.sageAlpha14,
     primaryBorder: 'rgba(143,166,142,.28)',
