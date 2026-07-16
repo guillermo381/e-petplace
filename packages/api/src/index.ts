@@ -466,3 +466,28 @@ export {
   type ServicioGroomingCatalogo,
   type TipoArchivoGrooming,
 } from './wrappers/grooming-atencion';
+
+// S63-B (Bloque 3 parcial): la ficha del Antes de adiestramiento —
+// hunk aditivo regla 76(c).
+export {
+  obtenerFichaAntesAdiestramiento,
+  type CodigoErrorAntesAdiestramiento,
+  type FichaAntesAdiestramiento,
+  type ProgramaPrevioAdiestramiento,
+  type SenalConductualPaseo,
+} from './wrappers/adiestramiento-antes';
+
+// S63-B: la oferta del adiestrador (taller) — hunk aditivo regla 76(c).
+export {
+  NIVELES_PROGRAMA,
+  RANGO_SUGERIDO_POR_NIVEL,
+  TIPO_ADIESTRAMIENTO,
+  guardarOfertaAdiestramiento,
+  guardarProgramaAdiestramiento,
+  obtenerOfertaAdiestramientoPropia,
+  type CodigoErrorOfertaAdiestramiento,
+  type MundoAdiestramientoPropio,
+  type NivelPrograma,
+  type OfertaAdiestramientoPropia,
+  type ProgramaAdiestramientoPropio,
+} from './wrappers/adiestramiento-oferta';

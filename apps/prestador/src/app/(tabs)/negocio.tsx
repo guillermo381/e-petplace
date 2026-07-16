@@ -35,10 +35,12 @@ import {
 import {
   obtenerMiCuentaComercial,
   obtenerMiPrestador,
+  obtenerOfertaAdiestramientoPropia,
   obtenerOfertasGroomingPropias,
   obtenerOfertasPaseoPropias,
   obtenerResumenPendienteLiquidar,
   type MiCuentaComercial,
+  type MundoAdiestramientoPropio,
   type OfertaGroomingPropia,
   type OfertaPaseoPropia,
   type ResumenPendienteLiquidar,
@@ -87,6 +89,8 @@ export default function Negocio() {
   const [ofertas, setOfertas] = useState<OfertaPaseoPropia[] | null>(null);
   // S59-B5: el resumen VIVO del mundo Grooming — misma degradación
   const [ofertasGrooming, setOfertasGrooming] = useState<OfertaGroomingPropia[] | null>(null);
+  // S63-B: el resumen VIVO del mundo Adiestramiento — misma degradación
+  const [mundoAdiestramiento, setMundoAdiestramiento] = useState<MundoAdiestramientoPropio | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -104,12 +108,14 @@ export default function Negocio() {
         }
         if (rPendientes.ok) setPendientes(rPendientes.data);
         if (rPrestador.ok) {
-          const [rOfertas, rGrooming] = await Promise.all([
+          const [rOfertas, rGrooming, rAdiestramiento] = await Promise.all([
             obtenerOfertasPaseoPropias(rPrestador.data.id),
             obtenerOfertasGroomingPropias(rPrestador.data.id),
+            obtenerOfertaAdiestramientoPropia(rPrestador.data.id),
           ]);
           if (vigente && rOfertas.ok) setOfertas(rOfertas.data);
           if (vigente && rGrooming.ok) setOfertasGrooming(rGrooming.data);
+          if (vigente && rAdiestramiento.ok) setMundoAdiestramiento(rAdiestramiento.data);
         }
       })();
       return () => {
@@ -172,6 +178,17 @@ export default function Negocio() {
       : activas.length === 1
         ? t('ofertaPaseo.duracionesDetalleUna', { precio: `$${(desde as number).toFixed(2)}` })
         : t('ofertaPaseo.duracionesDetalle', { n: activas.length, precio: `$${(desde as number).toFixed(2)}` });
+
+  // S63-B: detalle vivo del mundo Adiestramiento — verdad de DB o invitación
+  const ofertaAdiestramiento = mundoAdiestramiento?.oferta ?? null;
+  const programasActivos = mundoAdiestramiento?.programas.filter((p) => p.activo).length ?? 0;
+  const detalleMundoAdiestramiento =
+    ofertaAdiestramiento === null || !ofertaAdiestramiento.activo || ofertaAdiestramiento.precio === null
+      ? t('negocio.mundoAdiestramientoVacio')
+      : t('negocio.mundoAdiestramientoDetalle', {
+          precio: `$${ofertaAdiestramiento.precio.toFixed(2)}`,
+          n: programasActivos,
+        });
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -254,6 +271,40 @@ export default function Negocio() {
                     }}
                   >
                     {detalleMundoGrooming}
+                  </Text>
+                </View>
+              </View>
+            </Tarjeta>
+            {/* S63-B: el mundo Adiestramiento ABRIÓ — gemela de las dos
+                de arriba; entra directo al taller (el hub del mundo
+                llega con el resto del arco). */}
+            <Tarjeta
+              interactiva
+              elevacion="reposo"
+              accessibilityRole="button"
+              etiqueta={t('negocio.mundoAdiestramiento')}
+              onPress={() => router.push('/adiestramiento/taller')}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+                <Icono nombre="training" registro="aa" tamano={28} />
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text
+                    style={{
+                      fontFamily: typography.family.sans.medium,
+                      fontSize: typography.size.md,
+                      color: theme.text.primary,
+                    }}
+                  >
+                    {t('negocio.mundoAdiestramiento')}
+                  </Text>
+                  <Text
+                    style={{
+                      fontFamily: typography.family.sans.regular,
+                      fontSize: typography.size.sm,
+                      color: theme.text.secondary,
+                    }}
+                  >
+                    {detalleMundoAdiestramiento}
                   </Text>
                 </View>
               </View>
