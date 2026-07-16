@@ -4407,6 +4407,8 @@ export type Database = {
           notas_prestador: string | null
           precio: number | null
           prestador_id: string | null
+          programa_contratado_id: string | null
+          sesion_numero: number | null
           suscripcion_servicio_id: string | null
           tipo_servicio: string | null
           updated_at: string
@@ -4437,6 +4439,8 @@ export type Database = {
           notas_prestador?: string | null
           precio?: number | null
           prestador_id?: string | null
+          programa_contratado_id?: string | null
+          sesion_numero?: number | null
           suscripcion_servicio_id?: string | null
           tipo_servicio?: string | null
           updated_at?: string
@@ -4467,6 +4471,8 @@ export type Database = {
           notas_prestador?: string | null
           precio?: number | null
           prestador_id?: string | null
+          programa_contratado_id?: string | null
+          sesion_numero?: number | null
           suscripcion_servicio_id?: string | null
           tipo_servicio?: string | null
           updated_at?: string
@@ -4513,6 +4519,13 @@ export type Database = {
             columns: ["prestador_id"]
             isOneToOne: false
             referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_cita_servicio_programa_contratado_id_fkey"
+            columns: ["programa_contratado_id"]
+            isOneToOne: false
+            referencedRelation: "programas_contratados"
             referencedColumns: ["id"]
           },
           {
@@ -10521,6 +10534,59 @@ export type Database = {
           },
         ]
       }
+      prestador_programas: {
+        Row: {
+          activo: boolean
+          created_at: string
+          descripcion: string | null
+          duracion_minutos_sesion: number
+          id: string
+          n_sesiones: number
+          nivel: string
+          nombre: string
+          precio_programa: number
+          prestador_servicio_id: string
+          updated_at: string
+          vigencia_dias: number
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          descripcion?: string | null
+          duracion_minutos_sesion?: number
+          id?: string
+          n_sesiones: number
+          nivel: string
+          nombre: string
+          precio_programa: number
+          prestador_servicio_id: string
+          updated_at?: string
+          vigencia_dias: number
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          descripcion?: string | null
+          duracion_minutos_sesion?: number
+          id?: string
+          n_sesiones?: number
+          nivel?: string
+          nombre?: string
+          precio_programa?: number
+          prestador_servicio_id?: string
+          updated_at?: string
+          vigencia_dias?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prestador_programas_prestador_servicio_id_fkey"
+            columns: ["prestador_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "prestador_servicios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prestador_recetas_frecuentes: {
         Row: {
           activa: boolean
@@ -11271,6 +11337,105 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_daas_eligible_users"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      programas_contratados: {
+        Row: {
+          country_code: string
+          created_at: string
+          duracion_minutos: number
+          estado: string
+          estado_pago: string
+          id: string
+          mascota_id: string
+          motivo_vencimiento: string | null
+          n_sesiones: number
+          pago_metadata: Json
+          precio_total: number
+          precio_unitario_efectivo: number
+          prestador_id: string
+          prestador_servicio_id: string | null
+          programa_id: string
+          updated_at: string
+          user_id: string
+          vigencia_hasta: string
+        }
+        Insert: {
+          country_code?: string
+          created_at?: string
+          duracion_minutos: number
+          estado?: string
+          estado_pago?: string
+          id?: string
+          mascota_id: string
+          motivo_vencimiento?: string | null
+          n_sesiones: number
+          pago_metadata?: Json
+          precio_total: number
+          precio_unitario_efectivo: number
+          prestador_id: string
+          prestador_servicio_id?: string | null
+          programa_id: string
+          updated_at?: string
+          user_id: string
+          vigencia_hasta: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          duracion_minutos?: number
+          estado?: string
+          estado_pago?: string
+          id?: string
+          mascota_id?: string
+          motivo_vencimiento?: string | null
+          n_sesiones?: number
+          pago_metadata?: Json
+          precio_total?: number
+          precio_unitario_efectivo?: number
+          prestador_id?: string
+          prestador_servicio_id?: string | null
+          programa_id?: string
+          updated_at?: string
+          user_id?: string
+          vigencia_hasta?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "programas_contratados_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programas_contratados_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programas_contratados_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programas_contratados_prestador_servicio_id_fkey"
+            columns: ["prestador_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "prestador_servicios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "programas_contratados_programa_id_fkey"
+            columns: ["programa_id"]
+            isOneToOne: false
+            referencedRelation: "prestador_programas"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -14678,6 +14843,15 @@ export type Database = {
         }
         Returns: number
       }
+      _generar_citas_programa: {
+        Args: {
+          p_fecha_inicio: string
+          p_hora: string
+          p_pagado_en: string
+          p_programa_contratado_id: string
+        }
+        Returns: number
+      }
       _grooming_atencion_terminada: {
         Args: { p_grooming_id: string }
         Returns: Record<string, unknown>
@@ -14956,6 +15130,17 @@ export type Database = {
           p_hora: string
           p_mascota_id: string
           p_prestador_id: string
+          p_servicio_id: string
+        }
+        Returns: Json
+      }
+      contratar_programa: {
+        Args: {
+          p_fecha_inicio: string
+          p_hora: string
+          p_mascota_id: string
+          p_prestador_id: string
+          p_programa_id: string
           p_servicio_id: string
         }
         Returns: Json
@@ -15505,6 +15690,10 @@ export type Database = {
         Args: { p_cita_id: string; p_nueva_fecha: string; p_nueva_hora: string }
         Returns: Json
       }
+      reagendar_sesion_programa: {
+        Args: { p_cita_id: string; p_nueva_fecha: string; p_nueva_hora: string }
+        Returns: Json
+      }
       reanudar_atencion: { Args: { p_atencion_id: string }; Returns: Json }
       rechazar_cita_servicio: {
         Args: { p_cita_id: string; p_motivo: string }
@@ -15756,6 +15945,7 @@ export type Database = {
         Returns: Json
       }
       vencer_paquetes_salidas: { Args: never; Returns: Json }
+      vencer_programas_adiestramiento: { Args: never; Returns: Json }
       verificar_identificacion_disponible: {
         Args: { p_country_code: string; p_identificacion: string }
         Returns: {

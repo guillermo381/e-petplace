@@ -1,8 +1,9 @@
 # MODELO_FINANCIERO.md — e-PetPlace
 
 > Documento maestro del motor financiero del ecosistema e-PetPlace.
-> Última actualización: 12 Jul 2026 v2.7 — P18 (el paseo SUELTO cancelado): el reembolso de un pago SIN devengo se DECLARA sobre el pago (patrón 7.14 enmendada); el no-show del suelto usa el cierre de Decisión T; el saldo e-PetPlace queda DECLARADO Y APAGADO (disparo: Kushki real). Regla 7.16.
+> Última actualización: 15 Jul 2026 v2.8 — Decisión U FIRMADA (S63, la construcción del programa disparó la candidata de MODELO_ADIESTRAMIENTO v1.0): el PROGRAMA de adiestramiento — un pago, N devengos SECUENCIALES jamás FIFO; el invariante 'pagada' gana su CUARTO escritor (`contratar_programa`); vigencia vencida = reembolso proporcional DECLARADO (patrón P14a/7.14) + motivo capturado sin triage v1.
 > Versiones anteriores:
+>   - v2.7 (12 Jul 2026 — P18 el paseo SUELTO cancelado: el reembolso de un pago SIN devengo se DECLARA sobre el pago — patrón 7.14 enmendada; el no-show del suelto usa el cierre de Decisión T; el saldo e-PetPlace DECLARADO Y APAGADO. Regla 7.16).
 >   - v2.6 (12 Jul 2026 — Decisión T: el PAQUETE de salidas — un pago, N devengos FIFO a precio de origen, el no-show devenga, las vencidas son breakage DECLARADO; regla 7.15 + comisión visible desde `fee_configs`).
 >   - v2.5 (11 Jul 2026 — Decisión S: el PLAN de paseo cobra por período mensual, un pago, N devengos — variante (b) intacta).
 >   - v2.4 (11 Jul 2026 — devengo de cita implementado variante (b), cuenta activa para cobrar/ofertarse, L-140/security_invoker).
@@ -14,6 +15,18 @@
 >   - v1.0 (7 Mayo 2026 — modelo de un rol por cuenta).
 > Autor: Guillermo + Claude (Anthropic).
 > Estado: schema implementado y consolidado en Supabase. Wiring a flujos transaccionales pendiente.
+
+---
+
+## Cambio importante respecto a v2.7 (S63 — 15 Jul 2026)
+
+La v2.8 firma la **Decisión U** (candidata declarada en `MODELO_ADIESTRAMIENTO.md` v1.0 §1; su construcción disparó en S63). El programa de adiestramiento hereda el chasis financiero entero — un pago simulado declarado, variante (b) intacta — con TRES rasgos propios:
+
+1. **Consumo SECUENCIAL, jamás FIFO:** las N sesiones nacen agendadas al comprar (§12.2 del modelo), cada una con su `sesion_numero` k y su precio snapshoteado = **unitario efectivo** (precio del programa ÷ N; la ÚLTIMA sesión absorbe el residuo de redondeo para que la suma == lo cobrado). El cierre de cada sesión devenga EXACTO por el camino existente — N devengos secuenciales, cero cambios al motor del ledger. El orden lo protegen el guard de reagenda y un trigger EN LA FUENTE en el cierre (`sesion_anterior_abierta`).
+2. **El invariante 'pagada' gana su CUARTO escritor** (§4.3): la cita nacida de un PROGRAMA pagado entero al comprar (`contratar_programa`: la cita lleva `programa_contratado_id` + `metadata.origen='programa'`).
+3. **Vigencia vencida con sesiones sin ejecutar = reembolso proporcional DECLARADO** (patrón P14a/regla 7.14: esas sesiones jamás devengaron — no hay nada que reversar en el ledger; el reembolso simulado se declara en `programas_contratados.pago_metadata`), con **motivo capturado** (`motivo_vencimiento`, catálogo chico; v1 registra `sin_uso` sin triage — el triage de causa es diferido v2 del modelo).
+
+Si trabajaste con la v2.7, tu código sigue válido: nada del paseo/grooming/paquete se tocó.
 
 ---
 
@@ -518,18 +531,23 @@ El primer `origen_tipo` con circulación real. El ciclo completo en DB
   re-resuelve). Invisible al prestador (verdad firme). Expiración
   PEREZOSA: toda lectura/escritura trata un hold vencido como
   inexistente; el cron `expirar-citas-pendientes` es higiene, no
-  correctitud. Invariante del catálogo (AMPLIADO S56 y S57-D343,
-  founder+arquitecto): `estado_reserva='pagada'` ⟺ la cita está CUBIERTA
+  correctitud. Invariante del catálogo (AMPLIADO S56, S57-D343 y
+  S63-programa, founder+arquitecto): `estado_reserva='pagada'` ⟺ la cita está CUBIERTA
   POR UN PAGO — pasó por `confirmar_cita_pagada` (cita suelta), o nació
   de un PLAN cuyo período se cobró (`contratar_plan_paseo`/renovación:
   la cita lleva `suscripcion_servicio_id` + `metadata.origen='plan'` y
   su precio ES el unitario efectivo del período), o nació RESERVADA
   CONTRA SALDO DE PAQUETE ya pagado (`reservar_salida_paquete`: la cita
   lleva `bono_id` + `metadata.origen='paquete'` y su precio ES el precio
-  de ORIGEN FIFO del bono — Decisión T). Esos son los TRES únicos
+  de ORIGEN FIFO del bono — Decisión T), o nació de un PROGRAMA DE
+  ADIESTRAMIENTO pagado entero al comprar (`contratar_programa`: la cita
+  lleva `programa_contratado_id` + `sesion_numero` k +
+  `metadata.origen='programa'` y su precio ES el unitario efectivo del
+  programa, la última sesión con el residuo de redondeo — Decisión U,
+  consumo SECUENCIAL jamás FIFO). Esos son los CUATRO únicos
   escritores del valor; NULL = ciclo de pago no aplica (legacy/walk-in).
-  La enmienda S57 vive también como COMMENT de la columna (migración
-  `20260712180000`).
+  Las enmiendas viven también como COMMENT de la columna (migraciones
+  `20260712180000` y `20260715180000`).
 - **`confirmar_cita_pagada`** (el pago — hoy simulado): PRE-VALIDA el
   motor SIN insertar (cuenta existe, **`estado='activa'`** → error
   `cuenta_no_activa`, rol `prestador_servicios` activo en

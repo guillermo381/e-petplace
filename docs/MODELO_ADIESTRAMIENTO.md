@@ -1,6 +1,11 @@
 # MODELO_ADIESTRAMIENTO — El contrato del servicio de adiestramiento
 
-> **Versión: v1.0 — S62 (15 Jul 2026). Letra FIRMADA por el founder**
+> **Versión: v1.1 — S63 (15 Jul 2026).** La construcción del programa
+> disparó (migración `20260715180000`): Decisión U FIRMADA en
+> `MODELO_FINANCIERO.md` v2.8 · guard duro de cierre en orden (§8) ·
+> vigencia vencida = reembolso proporcional declarado + motivo
+> capturado sin triage (§8) · triage de causa como diferido v2 (§9).
+> **Versión anterior: v1.0 — S62 (15 Jul 2026). Letra FIRMADA por el founder**
 > (decisiones 1-7 resueltas en sesión founder+arquitecto S62; los seis
 > corchetes de §12 CERRADOS por aprobación integral del founder
 > adoptando las propuestas del arquitecto — interpretación DECLARADA:
@@ -39,8 +44,8 @@ Se compran **dos formas** del mismo oficio:
   intercambiable con la 7. **El programa NO es el paquete de salidas**
   (Decisión T): hereda su chasis financiero (un pago, N devengos al
   cierre de cada sesión) pero el consumo es **SECUENCIAL, jamás FIFO**
-  — enmienda al financiero (Decisión U candidata) al disparar la
-  construcción.
+  — **Decisión U FIRMADA en S63** al disparar la construcción
+  (`MODELO_FINANCIERO.md` v2.8).
 
 **El catálogo de programas: tres niveles + especialidades (founder
 S62):**
@@ -192,6 +197,30 @@ firmado (la constancia es parte del método; el calendario completo la
 protege), con reagendamiento por sesión bajo letra P14. La alternativa
 rolling queda registrada como variante descartada v1.
 
+**El ORDEN del programa es letra dura (S63, founder):**
+
+- **La reagenda respeta a las vecinas:** la fecha nueva de la sesión k
+  queda ESTRICTAMENTE entre la fecha vigente de la k−1 y la de la k+1
+  (error `orden_programa_violado`), y dentro de la vigencia.
+- **Guard duro de cierre fuera de orden:** ninguna función de cierre —
+  presente o futura — cierra la sesión k con la k−1 sin cerrar
+  (`sesion_anterior_abierta`, trigger EN LA FUENTE, patrón D-386). El
+  guard de reagenda protege el orden de FECHAS; este es el cierre
+  defensivo.
+
+**La VIGENCIA del programa (S63, founder):** el adiestrador declara
+`vigencia_dias` en su catálogo; la matrícula la congela como fecha
+límite a la compra. **Al vencer con sesiones sin ejecutar:** las
+sesiones restantes se cancelan (la agenda se libera), el dueño recibe
+**reembolso proporcional AUTOMÁTICO** — la suma de los precios
+snapshoteados de las sesiones canceladas, SIMULADO Y DECLARADO en la
+matrícula (patrón P14a; jamás toca el ledger: esas sesiones no
+devengaron, regla 7.14) — y el **motivo queda capturado** en
+`motivo_vencimiento` (catálogo chico: sin_uso / conflicto_horario /
+problema_adiestrador / fuerza_mayor / otro). **v1 SOLO registra el
+motivo (`sin_uso` por defecto) — SIN triage y SIN acción sobre él**
+(diferido §9). El aviso previo es UNO y sereno (patrón P16e).
+
 ## 9. DIFERIDOS con disparo
 
 - **Tarea estructurada con seguimiento** (v2): la instrucción del
@@ -205,6 +234,10 @@ rolling queda registrada como variante descartada v1.
 - **Video más allá del techo v1** (clips más largos, más clips, video
   en vivo): disparo: evidencia de uso del techo + costos medidos.
 - **Bitácora universal** (fuera de programa): §7.
+- **Triage de causa pre-reembolso al vencer vigencia** (fuerza mayor /
+  conflicto de horario / falla del adiestrador) antes de soltar el
+  reembolso — disparo: primer caso real con reclamo. v1 ya captura el
+  motivo declarado al vencer, sin actuar sobre él.
 
 ## 10. PRECONDICIONES (bloqueantes de apertura, no de construcción)
 
@@ -260,6 +293,16 @@ ANTES de que su construcción dispare.*
 
 ## Historial
 
+- **v1.1 (S63, 15 Jul 2026):** la construcción del programa disparó
+  (migración `20260715180000`: `prestador_programas` +
+  `programas_contratados` + k/N en la cita + RPCs + cron de vigencia;
+  asserts 14/14 ROLLBACK residuos 0): **Decisión U FIRMADA**
+  (`MODELO_FINANCIERO.md` v2.8 — cuarto escritor del invariante
+  'pagada') · **guard duro de cierre en orden** (§8, trigger en la
+  fuente) · **vigencia vencida = reembolso proporcional declarado +
+  motivo capturado sin triage** (§8) · triage de causa como diferido
+  v2 con disparo (§9) · `especies_elegibles` de adiestramiento pasa de
+  NULL a `["perro"]` (§2 aterrizado en DB).
 - **v1.0 (S62, 15 Jul 2026):** letra FIRMADA founder+arquitecto: menú
   sesión+programa con consumo secuencial (Decisión U candidata) · solo
   perros · domicilio con-la-familia / recogida (custodia P20 como
