@@ -3962,6 +3962,217 @@ export type Database = {
           },
         ]
       }
+      evento_adiestramiento_clips: {
+        Row: {
+          adiestramiento_id: string
+          country_code: string
+          created_at: string
+          descripcion: string | null
+          duracion_segundos: number | null
+          id: string
+          mascota_id: string
+          orden: number
+          prestador_id: string
+          storage_path: string
+        }
+        Insert: {
+          adiestramiento_id: string
+          country_code: string
+          created_at?: string
+          descripcion?: string | null
+          duracion_segundos?: number | null
+          id?: string
+          mascota_id: string
+          orden: number
+          prestador_id: string
+          storage_path: string
+        }
+        Update: {
+          adiestramiento_id?: string
+          country_code?: string
+          created_at?: string
+          descripcion?: string | null
+          duracion_segundos?: number | null
+          id?: string
+          mascota_id?: string
+          orden?: number
+          prestador_id?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evento_adiestramiento_clips_adiestramiento_id_fkey"
+            columns: ["adiestramiento_id"]
+            isOneToOne: false
+            referencedRelation: "eventos_mascota_adiestramiento"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_adiestramiento_clips_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_adiestramiento_clips_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_adiestramiento_clips_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evento_adiestramiento_notas: {
+        Row: {
+          adiestramiento_id: string
+          categoria: string | null
+          country_code: string
+          created_at: string
+          id: string
+          mascota_id: string
+          orden: number
+          prestador_id: string
+          texto: string
+          via: string
+        }
+        Insert: {
+          adiestramiento_id: string
+          categoria?: string | null
+          country_code: string
+          created_at?: string
+          id?: string
+          mascota_id: string
+          orden?: number
+          prestador_id: string
+          texto: string
+          via?: string
+        }
+        Update: {
+          adiestramiento_id?: string
+          categoria?: string | null
+          country_code?: string
+          created_at?: string
+          id?: string
+          mascota_id?: string
+          orden?: number
+          prestador_id?: string
+          texto?: string
+          via?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evento_adiestramiento_notas_adiestramiento_id_fkey"
+            columns: ["adiestramiento_id"]
+            isOneToOne: false
+            referencedRelation: "eventos_mascota_adiestramiento"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_adiestramiento_notas_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_adiestramiento_notas_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_adiestramiento_notas_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evento_adiestramiento_objetivos: {
+        Row: {
+          adiestramiento_id: string
+          alcanzado: boolean
+          country_code: string
+          created_at: string
+          id: string
+          mascota_id: string
+          nota: string | null
+          objetivo_codigo: string
+          orden: number
+          prestador_id: string
+        }
+        Insert: {
+          adiestramiento_id: string
+          alcanzado?: boolean
+          country_code: string
+          created_at?: string
+          id?: string
+          mascota_id: string
+          nota?: string | null
+          objetivo_codigo: string
+          orden?: number
+          prestador_id: string
+        }
+        Update: {
+          adiestramiento_id?: string
+          alcanzado?: boolean
+          country_code?: string
+          created_at?: string
+          id?: string
+          mascota_id?: string
+          nota?: string | null
+          objetivo_codigo?: string
+          orden?: number
+          prestador_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evento_adiestramiento_objetivos_adiestramiento_id_fkey"
+            columns: ["adiestramiento_id"]
+            isOneToOne: false
+            referencedRelation: "eventos_mascota_adiestramiento"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_adiestramiento_objetivos_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_adiestramiento_objetivos_objetivo_codigo_fkey"
+            columns: ["objetivo_codigo"]
+            isOneToOne: false
+            referencedRelation: "cat_objetivos_adiestramiento"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "evento_adiestramiento_objetivos_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_adiestramiento_objetivos_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       evento_alergia_diagnosticada: {
         Row: {
           alergeno: string
@@ -7204,6 +7415,78 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "cat_tipos_evento"
             referencedColumns: ["codigo"]
+          },
+        ]
+      }
+      eventos_mascota_adiestramiento: {
+        Row: {
+          country_code: string
+          created_at: string
+          empleado_id: string | null
+          evento_atencion_id: string
+          id: string
+          instrucciones_familia: string | null
+          mascota_id: string
+          prestador_id: string
+          updated_at: string
+        }
+        Insert: {
+          country_code: string
+          created_at?: string
+          empleado_id?: string | null
+          evento_atencion_id: string
+          id?: string
+          instrucciones_familia?: string | null
+          mascota_id: string
+          prestador_id: string
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          empleado_id?: string | null
+          evento_atencion_id?: string
+          id?: string
+          instrucciones_familia?: string | null
+          mascota_id?: string
+          prestador_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eventos_mascota_adiestramiento_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "prestador_empleados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eventos_mascota_adiestramiento_evento_atencion_id_fkey"
+            columns: ["evento_atencion_id"]
+            isOneToOne: false
+            referencedRelation: "evento_atencion"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eventos_mascota_adiestramiento_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eventos_mascota_adiestramiento_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eventos_mascota_adiestramiento_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -14864,6 +15147,10 @@ export type Database = {
       }
     }
     Functions: {
+      _adiestramiento_atencion_terminada: {
+        Args: { p_adiestramiento_id: string }
+        Returns: Record<string, unknown>
+      }
       _adiestramiento_ofertas_cobrables: {
         Args: { p_mascota_id: string }
         Returns: {
@@ -15171,6 +15458,14 @@ export type Database = {
         }[]
       }
       cancelar_reserva_paquete: { Args: { p_cita_id: string }; Returns: Json }
+      cerrar_atencion_adiestramiento: {
+        Args: {
+          p_adiestramiento_id: string
+          p_instrucciones_familia?: string
+          p_mensaje_familia?: string
+        }
+        Returns: Json
+      }
       cerrar_grooming_con_calidad: {
         Args: {
           p_grooming_id: string
@@ -15573,6 +15868,10 @@ export type Database = {
         }
         Returns: Json
       }
+      iniciar_atencion_adiestramiento: {
+        Args: { p_cita_id: string; p_empleado_id?: string }
+        Returns: Json
+      }
       iniciar_atencion_cita: { Args: { p_cita_id: string }; Returns: Json }
       iniciar_atencion_grooming: {
         Args: { p_cita_id: string; p_empleado_id?: string }
@@ -15716,6 +16015,10 @@ export type Database = {
           servicio_nombre: string
         }[]
       }
+      obtener_parte_adiestramiento: {
+        Args: { p_cita_id: string }
+        Returns: Json
+      }
       obtener_paseadores_con_paquete: {
         Args: { p_duracion_minutos?: number; p_servicio_id?: string }
         Returns: {
@@ -15796,6 +16099,10 @@ export type Database = {
         Args: { p_grooming_id: string; p_momento: string }
         Returns: Json
       }
+      quitar_objetivo_adiestramiento: {
+        Args: { p_adiestramiento_id: string; p_objetivo_codigo: string }
+        Returns: Json
+      }
       quitar_servicio_grooming: {
         Args: { p_grooming_id: string; p_servicio_codigo: string }
         Returns: Json
@@ -15843,6 +16150,16 @@ export type Database = {
         }
         Returns: Json
       }
+      registrar_clip_adiestramiento: {
+        Args: {
+          p_adiestramiento_id: string
+          p_descripcion?: string
+          p_duracion_segundos?: number
+          p_orden: number
+          p_storage_path: string
+        }
+        Returns: Json
+      }
       registrar_discrepancia_talla_grooming: {
         Args: { p_cita_id: string; p_talla_observada: string }
         Returns: Json
@@ -15862,6 +16179,23 @@ export type Database = {
           p_grooming_id: string
           p_momento: string
           p_nota?: string
+        }
+        Returns: Json
+      }
+      registrar_nota_adiestramiento: {
+        Args: {
+          p_adiestramiento_id: string
+          p_categoria?: string
+          p_texto: string
+        }
+        Returns: Json
+      }
+      registrar_objetivo_adiestramiento: {
+        Args: {
+          p_adiestramiento_id: string
+          p_alcanzado?: boolean
+          p_nota?: string
+          p_objetivo_codigo: string
         }
         Returns: Json
       }
@@ -15991,6 +16325,10 @@ export type Database = {
           p_empleado_id?: string
           p_session_id?: string
         }
+        Returns: Json
+      }
+      terminar_atencion_adiestramiento: {
+        Args: { p_adiestramiento_id: string }
         Returns: Json
       }
       terminar_atencion_grooming: {
