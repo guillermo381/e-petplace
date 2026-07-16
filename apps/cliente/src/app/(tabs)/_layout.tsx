@@ -24,24 +24,32 @@ export default function TabsLayout() {
 
   return (
     <Tabs
-      // D-402: tocar un tab lleva SIEMPRE a la raíz de ese tab —
-      // popToTopOnBlur vacía el stack interno al salir del tab, así
-      // volver a él jamás encuentra una pantalla pegada.
-      screenOptions={{ headerShown: false, popToTopOnBlur: true }}
+      // D-402 (ENMENDADA S63, hallazgo founder): el reset a raíz se
+      // dispara SOLO en el PRESS explícito del tab (abajo, en
+      // onCambiar). El popToTopOnBlur anterior era el desvío: el blur
+      // también dispara cuando una ruta de nivel raíz (el parte, el
+      // detalle) se monta encima de los tabs o cuando un flujo cruza
+      // de tab — vaciaba el stack A MITAD del flujo y la flecha de
+      // atrás (goBack correcto) aterrizaba en la raíz del mundo
+      // porque los pasos previos ya no existían.
+      screenOptions={{ headerShown: false }}
       tabBar={({ state, navigation }) => (
         <BarraTabs
           items={items}
           activo={state.routes[state.index].name}
           onCambiar={(key) => {
             const activa = state.routes[state.index];
+            // D-402: el PRESS del tab lleva SIEMPRE a la raíz de ese
+            // mundo — sea re-toque del activo o entrada a otro tab
+            // con un flujo pendiente. Primero el pop (por target key,
+            // funciona sin foco), después el navigate: se aterriza en
+            // la raíz sin flash del stack viejo.
+            const destino = state.routes.find((r) => r.name === key) ?? activa;
+            if (destino.state?.type === 'stack' && destino.state.key && (destino.state.index ?? 0) > 0) {
+              navigation.dispatch({ ...StackActions.popToTop(), target: destino.state.key });
+            }
             if (key !== activa.name) {
               navigation.navigate(key);
-              return;
-            }
-            // D-402, la otra mitad: re-tocar el tab activo también
-            // vuelve a la raíz (popToTopOnBlur solo actúa al salir).
-            if (activa.state?.type === 'stack' && activa.state.key && (activa.state.index ?? 0) > 0) {
-              navigation.dispatch({ ...StackActions.popToTop(), target: activa.state.key });
             }
           }}
           // S53 (§2.6): el set b′ marca la tab activa con la HUELLA —
