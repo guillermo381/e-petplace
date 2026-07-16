@@ -822,6 +822,29 @@ export const prestadorEn = {
     cerrado: 'Session closed. The family got the report.',
   },
   // S63-B: the trainer's offer workshop (mirror of es.ts).
+  // LA PORTADA DEL MUNDO ADIESTRAMIENTO (S65-B2 P1) · Espejo de es.ts ·
+  // LOTE S65, GATE PENDIENTE
+  ofertaAdiestramiento: {
+    titulo: 'Your training offer',
+    vacioTitulo: 'Your training service',
+    vacioCuerpo:
+      'You sell two things: the single session and your multi-session programs with their own price. Your clients only see what you turn on.',
+    vacioCta: 'Set up your craft',
+    visibleTitulo: 'Visible to families',
+    visibleVoz: 'Families can find you and book.',
+    noVisibleTitulo: 'Not visible yet',
+    noVisibleCuenta: 'The team still needs to activate your business account.',
+    noVisibleOferta: 'Turn on your single session in the workshop.',
+    noVisibleEspecies: 'Declare who you work with in the workshop.',
+    noVisibleHorarios: "You haven't declared service days and hours yet.",
+    editarOferta: 'Edit your offer',
+    sesionFila: 'The single session',
+    sesionPausada: 'Paused',
+    programasFila: 'Your programs',
+    programasUno: '1 active program',
+    programasN: '{{n}} active programs',
+    programasSin: 'No programs yet',
+  },
   tallerAdiestramiento: {
     titulo: 'Training',
     especiesTitulo: 'Who you work with',
@@ -839,10 +862,9 @@ export const prestadorEn = {
     programasTitulo: 'Your programs',
     programasExplica: 'A program is a series of sessions with progressive content and its own price.',
     programasEsperanOferta: 'Save your offer to be able to add programs.',
-    agregarPrograma: 'Add program',
-    programaTituloNuevo: 'New program',
+    // S65-B2 P2 · Espejo de es.ts (murieron agregarPrograma/
+    // programaTituloNuevo/nivel — regla 37)
     programaTituloEditar: 'Edit program',
-    nivel: 'Level',
     nivelBasico: 'Basic',
     nivelMedio: 'Intermediate',
     nivelExperto: 'Expert',
@@ -860,5 +882,16 @@ export const prestadorEn = {
     programaOculto: 'Hidden',
     guardarPrograma: 'Save program',
     programaGuardado: 'Program saved',
+    nombreBasico: 'Basic program',
+    nombreMedio: 'Intermediate program',
+    nombreExperto: 'Expert program',
+    descripcionPrograma: "What's included",
+    descripcionPlaceholder: 'Sit, stay, come when called…',
+    condiciones: '{{semanas}}-week validity · {{min}}-min sessions',
+    personalizadoTitulo: 'Custom',
+    personalizadoExplica:
+      'A program of your own — a specialty: anxiety, leash work, tricks. You name it and shape its content.',
+    personalizadoCrear: 'Create custom program',
+    personalizadoNuevo: 'Custom program',
   },
 } as const satisfies Espejo<typeof prestadorEs>;

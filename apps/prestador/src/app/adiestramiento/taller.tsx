@@ -20,11 +20,24 @@
 // CHECKs espejados en el form (2-30 sesiones, vigencia >= (N-1) semanas,
 // duración en pasos de 15'); el rango por nivel es AYUDA (§12.4), no
 // límite. Modalidades: diferido a S64-B0 (default único del chasis).
+//
+// S65-B2 P2 (hallazgo founder del recorrido, letra §1/§4/§12.4): la
+// escalera troncal son TRES TARJETAS FIJAS (Básico/Medio/Experto) con
+// toggle de activación — activa = se editan N (default sugerido del
+// nivel, sin guard duro), precio propio (jamás N×sesión) y descripción.
+// "Personalizado" = la puerta a las ESPECIALIDADES (§1, catálogo
+// paralelo — SUPUESTO DECLARADO al founder): reusa la Hoja existente
+// con nivel 'especialidad' preseteado. Vigencia/duración de las
+// tarjetas: derivadas y DICHAS en la tarjeta (vigencia N+2 semanas al
+// nacer, se conserva al editar con piso (N-1); duración = la de la
+// sesión suelta al nacer). Safe-area (requisito duro S65): scroll y
+// Hoja suman insets.bottom — ningún botón bajo la barra del sistema.
 // ─────────────────────────────────────────────────────────────────────
 
 import { useCallback, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
   Campo,
@@ -81,6 +94,49 @@ const DURACIONES_SESION = [30, 45, 60, 75, 90] as const;
 // §12.5: default 60'.
 const DURACION_DEFAULT = 60;
 
+// la escalera troncal (§1) — las tarjetas fijas de S65-B2
+const NIVELES_TRONCALES = ['basico', 'medio', 'experto'] as const;
+type NivelTroncal = (typeof NIVELES_TRONCALES)[number];
+// default sugerido del nivel = punto medio del rango §12.4
+const N_SUGERIDO: Record<NivelTroncal, number> = { basico: 7, medio: 9, experto: 11 };
+
+function esTroncal(n: NivelPrograma): n is NivelTroncal {
+  return (NIVELES_TRONCALES as readonly string[]).includes(n);
+}
+
+// UNA tarjeta por nivel troncal: el PRIMER programa de cada nivel es su
+// fila; el resto (especialidades + duplicados legacy) vive con
+// Personalizado — nada queda inalcanzable.
+function separarProgramas(programas: ProgramaAdiestramientoPropio[]): {
+  troncal: Partial<Record<NivelTroncal, ProgramaAdiestramientoPropio>>;
+  otros: ProgramaAdiestramientoPropio[];
+} {
+  const troncal: Partial<Record<NivelTroncal, ProgramaAdiestramientoPropio>> = {};
+  const otros: ProgramaAdiestramientoPropio[] = [];
+  for (const p of programas) {
+    if (esTroncal(p.nivel) && troncal[p.nivel] === undefined) troncal[p.nivel] = p;
+    else otros.push(p);
+  }
+  return { troncal, otros };
+}
+
+interface DraftNivel {
+  nSesiones: number;
+  precioIndice: number;
+  descripcion: string;
+  /** Sin fila guardada: el toggle abre el editor (nada se guarda solo). */
+  abierto: boolean;
+}
+
+function draftNivelBase(nivel: NivelTroncal): DraftNivel {
+  return {
+    nSesiones: N_SUGERIDO[nivel],
+    precioIndice: indiceEn(PASOS_PROGRAMA, 200),
+    descripcion: '',
+    abierto: false,
+  };
+}
+
 type Pantalla =
   | { estado: 'cargando' }
   | { estado: 'error'; mensaje: string }
@@ -88,8 +144,11 @@ type Pantalla =
 
 interface DraftPrograma {
   programaId: string | null;
-  nivel: NivelPrograma | null;
+  // S65-B2: el nivel viene del punto de entrada — Personalizado crea
+  // ESPECIALIDAD (§1); una fila existente conserva el suyo.
+  nivel: NivelPrograma;
   nombre: string;
+  descripcion: string;
   nSesiones: number;
   precioIndice: number;
   vigenciaSemanas: number;
@@ -100,8 +159,9 @@ interface DraftPrograma {
 function draftNuevo(): DraftPrograma {
   return {
     programaId: null,
-    nivel: null,
+    nivel: 'especialidad',
     nombre: '',
+    descripcion: '',
     nSesiones: 8,
     precioIndice: indiceEn(PASOS_PROGRAMA, 200),
     vigenciaSemanas: 10,
@@ -115,6 +175,7 @@ function draftDe(p: ProgramaAdiestramientoPropio): DraftPrograma {
     programaId: p.id,
     nivel: p.nivel,
     nombre: p.nombre,
+    descripcion: p.descripcion ?? '',
     nSesiones: p.nSesiones,
     precioIndice: indiceEn(PASOS_PROGRAMA, p.precioPrograma),
     vigenciaSemanas: Math.max(1, Math.round(p.vigenciaDias / 7)),
@@ -128,6 +189,7 @@ export default function TallerAdiestramiento() {
   const router = useRouter();
   const { mostrar } = useAviso();
   const { t } = useTraduccion();
+  const insets = useSafeAreaInsets();
 
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   // draft de la oferta (la pantalla es dueña del valor)
@@ -138,7 +200,15 @@ export default function TallerAdiestramiento() {
   // jamás default silencioso.
   const [especies, setEspecies] = useState<string[]>([]);
   const [guardando, setGuardando] = useState(false);
-  // Hoja del programa
+  // las tarjetas fijas de la escalera troncal (S65-B2 P2)
+  const [niveles, setNiveles] = useState<Record<NivelTroncal, DraftNivel>>({
+    basico: draftNivelBase('basico'),
+    medio: draftNivelBase('medio'),
+    experto: draftNivelBase('experto'),
+  });
+  const [guardandoNivel, setGuardandoNivel] = useState<NivelTroncal | null>(null);
+  const [alternandoNivel, setAlternandoNivel] = useState<NivelTroncal | null>(null);
+  // Hoja del programa (Personalizado / especialidades + legacy)
   const [hojaPrograma, setHojaPrograma] = useState(false);
   const [draft, setDraft] = useState<DraftPrograma>(draftNuevo());
   const [guardandoPrograma, setGuardandoPrograma] = useState(false);
@@ -158,6 +228,24 @@ export default function TallerAdiestramiento() {
       if (r.data.oferta.duracionMinutos !== null) setDuracion(r.data.oferta.duracionMinutos);
       setEspecies(r.data.oferta.especies);
     }
+    // las tarjetas re-sincronizan con la verdad de DB (misma vida que
+    // el draft de la oferta: cada focus/recarga)
+    const { troncal } = separarProgramas(r.data.programas);
+    setNiveles((prev) => {
+      const sig = { ...prev };
+      for (const nivel of NIVELES_TRONCALES) {
+        const fila = troncal[nivel];
+        sig[nivel] = fila
+          ? {
+              nSesiones: fila.nSesiones,
+              precioIndice: indiceEn(PASOS_PROGRAMA, fila.precioPrograma),
+              descripcion: fila.descripcion ?? '',
+              abierto: false,
+            }
+          : { ...draftNivelBase(nivel), abierto: prev[nivel].abierto };
+      }
+      return sig;
+    });
   }, []);
 
   useFocusEffect(
@@ -187,13 +275,14 @@ export default function TallerAdiestramiento() {
   }
 
   async function guardarPrograma() {
-    if (listo?.oferta == null || guardandoPrograma || draft.nivel === null || draft.nombre.trim() === '') return;
+    if (listo?.oferta == null || guardandoPrograma || draft.nombre.trim() === '') return;
     setGuardandoPrograma(true);
     const r = await guardarProgramaAdiestramiento({
       ofertaId: listo.oferta.id,
       programaId: draft.programaId,
       nivel: draft.nivel,
       nombre: draft.nombre,
+      descripcion: draft.descripcion.trim() === '' ? undefined : draft.descripcion,
       nSesiones: draft.nSesiones,
       precioPrograma: PASOS_PROGRAMA[draft.precioIndice],
       vigenciaDias: draft.vigenciaSemanas * 7,
@@ -203,6 +292,62 @@ export default function TallerAdiestramiento() {
     setGuardandoPrograma(false);
     if (!r.ok) return mostrar({ variante: 'error', texto: r.mensaje });
     setHojaPrograma(false);
+    mostrar({ variante: 'exito', texto: t('tallerAdiestramiento.programaGuardado') });
+    void cargar(true);
+  }
+
+  // ── las tarjetas fijas (S65-B2 P2) ──
+  // Toggle sin fila: abre/cierra el editor (nada se guarda solo).
+  // Toggle con fila: publica/oculta DE UN TOQUE (precedente P14 pausa).
+  async function alternarNivel(nivel: NivelTroncal) {
+    if (listo?.oferta == null || alternandoNivel !== null) return;
+    const fila = separarProgramas(listo.programas).troncal[nivel];
+    if (fila === undefined) {
+      setNiveles((prev) => ({ ...prev, [nivel]: { ...prev[nivel], abierto: !prev[nivel].abierto } }));
+      return;
+    }
+    setAlternandoNivel(nivel);
+    const r = await guardarProgramaAdiestramiento({
+      ofertaId: listo.oferta.id,
+      programaId: fila.id,
+      nivel,
+      nombre: fila.nombre,
+      descripcion: fila.descripcion ?? undefined,
+      nSesiones: fila.nSesiones,
+      precioPrograma: fila.precioPrograma,
+      vigenciaDias: fila.vigenciaDias,
+      duracionMinutosSesion: fila.duracionMinutosSesion,
+      activo: !fila.activo,
+    });
+    setAlternandoNivel(null);
+    if (!r.ok) return mostrar({ variante: 'error', texto: r.mensaje });
+    mostrar({ variante: 'exito', texto: t('tallerAdiestramiento.programaGuardado') });
+    void cargar(true);
+  }
+
+  async function guardarNivel(nivel: NivelTroncal) {
+    if (listo?.oferta == null || guardandoNivel !== null) return;
+    const fila = separarProgramas(listo.programas).troncal[nivel];
+    const d = niveles[nivel];
+    setGuardandoNivel(nivel);
+    const r = await guardarProgramaAdiestramiento({
+      ofertaId: listo.oferta.id,
+      programaId: fila?.id ?? null,
+      nivel,
+      // la tarjeta es fija: el nombre nace del nivel; una fila con
+      // nombre propio (legacy de la Hoja) lo conserva
+      nombre: fila?.nombre ?? NOMBRE_NIVEL[nivel],
+      descripcion: d.descripcion.trim() === '' ? undefined : d.descripcion,
+      nSesiones: d.nSesiones,
+      precioPrograma: PASOS_PROGRAMA[d.precioIndice],
+      // derivadas y dichas en la tarjeta: al nacer N+2 semanas; al
+      // editar se conserva la vigencia con piso (N-1) del CHECK
+      vigenciaDias: fila !== undefined ? Math.max(fila.vigenciaDias, Math.max(1, d.nSesiones - 1) * 7) : (d.nSesiones + 2) * 7,
+      duracionMinutosSesion: fila?.duracionMinutosSesion ?? listo.oferta.duracionMinutos ?? DURACION_DEFAULT,
+      activo: true,
+    });
+    setGuardandoNivel(null);
+    if (!r.ok) return mostrar({ variante: 'error', texto: r.mensaje });
     mostrar({ variante: 'exito', texto: t('tallerAdiestramiento.programaGuardado') });
     void cargar(true);
   }
@@ -221,10 +366,18 @@ export default function TallerAdiestramiento() {
     especialidad: t('tallerAdiestramiento.nivelEspecialidad'),
   };
 
+  // el nombre con que nace el programa de una tarjeta fija (lo que ve
+  // la familia en el QUIÉN) — una fila renombrada lo conserva
+  const NOMBRE_NIVEL: Record<NivelTroncal, string> = {
+    basico: t('tallerAdiestramiento.nombreBasico'),
+    medio: t('tallerAdiestramiento.nombreMedio'),
+    experto: t('tallerAdiestramiento.nombreExperto'),
+  };
+
   // CHECK de DB espejado: vigencia >= (N-1) semanas — el stepper no
   // deja elegir una config que el motor va a rebotar.
   const minSemanas = Math.max(1, draft.nSesiones - 1);
-  const rango = draft.nivel !== null ? RANGO_SUGERIDO_POR_NIVEL[draft.nivel] : undefined;
+  const rango = RANGO_SUGERIDO_POR_NIVEL[draft.nivel];
 
   function Titulo({ texto }: { texto: string }) {
     return (
@@ -251,7 +404,15 @@ export default function TallerAdiestramiento() {
           onAtras={() => router.back()}
         />
       </View>
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[5] }}>
+      {/* safe-area (requisito duro S65): el último botón del scroll
+          jamás queda bajo la barra de navegación del sistema */}
+      <ScrollView
+        contentContainerStyle={{
+          padding: spacing[4],
+          paddingBottom: spacing[10] + insets.bottom,
+          gap: spacing[5],
+        }}
+      >
         {pantalla.estado === 'cargando' && (
           <EsqueletoGrupo>
             <View style={{ gap: spacing[4] }}>
@@ -367,57 +528,213 @@ export default function TallerAdiestramiento() {
               onPress={() => void guardarOferta()}
             />
 
-            {/* ── TUS PROGRAMAS (satélites de la oferta) ── */}
+            {/* ── TUS PROGRAMAS — la escalera troncal en TARJETAS FIJAS
+                (S65-B2 P2, letra §1/§4/§12.4) + Personalizado = la
+                puerta a las especialidades (supuesto declarado) ── */}
             <View style={{ gap: spacing[3] }}>
               <Titulo texto={t('tallerAdiestramiento.programasTitulo')} />
               <Text style={vozSecundaria}>{t('tallerAdiestramiento.programasExplica')}</Text>
               {listo.oferta === null ? (
                 <Text style={vozSecundaria}>{t('tallerAdiestramiento.programasEsperanOferta')}</Text>
-              ) : (
-                <>
-                  {listo.programas.length > 0 && (
-                    <Tarjeta>
-                      {listo.programas.map((p, i) => (
-                        <View key={p.id}>
-                          {i > 0 && <Separador />}
-                          <Celda
-                            titulo={p.nombre}
-                            subtitulo={`${VOZ_NIVEL[p.nivel]} · ${t('tallerAdiestramiento.sesionesN', { n: p.nSesiones })}`}
-                            metadataMono={`$${p.precioPrograma.toFixed(2)}`}
-                            fin={
-                              p.activo ? undefined : (
-                                <Insignia estado="proximo" etiqueta={t('tallerAdiestramiento.programaOculto')} tamaño="sm" />
-                              )
-                            }
-                            interactiva
-                            accessibilityRole="button"
+              ) : (() => {
+                const { troncal, otros } = separarProgramas(listo.programas);
+                return (
+                  <>
+                    {NIVELES_TRONCALES.map((nivel) => {
+                      const fila = troncal[nivel];
+                      const d = niveles[nivel];
+                      const encendido = fila !== undefined ? fila.activo : d.abierto;
+                      const rango = RANGO_SUGERIDO_POR_NIVEL[nivel];
+                      const dirty =
+                        fila === undefined ||
+                        d.nSesiones !== fila.nSesiones ||
+                        PASOS_PROGRAMA[d.precioIndice] !== fila.precioPrograma ||
+                        d.descripcion.trim() !== (fila.descripcion ?? '');
+                      // lo que se va a guardar, DICHO en la tarjeta
+                      const semanasVigencia =
+                        fila !== undefined
+                          ? Math.max(Math.round(fila.vigenciaDias / 7), Math.max(1, d.nSesiones - 1))
+                          : d.nSesiones + 2;
+                      const minutosSesion =
+                        fila?.duracionMinutosSesion ?? listo.oferta?.duracionMinutos ?? DURACION_DEFAULT;
+                      return (
+                        <Tarjeta key={nivel} relleno="amplio">
+                          <View style={{ gap: spacing[4] }}>
+                            <View
+                              style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: spacing[3],
+                              }}
+                            >
+                              <View style={{ flex: 1, gap: spacing[1] }}>
+                                <Text
+                                  style={{
+                                    fontFamily: typography.family.sans.medium,
+                                    fontSize: typography.size.base,
+                                    color: theme.text.primary,
+                                  }}
+                                >
+                                  {VOZ_NIVEL[nivel]}
+                                </Text>
+                                {rango !== undefined && (
+                                  <Text style={vozSecundaria}>
+                                    {t('tallerAdiestramiento.rangoSugerido', { min: rango.min, max: rango.max })}
+                                  </Text>
+                                )}
+                              </View>
+                              {/* anti doble-disparo: el guard vive en
+                                  alternarNivel (alternandoNivel) — el
+                                  Interruptor no porta deshabilitado */}
+                              <Interruptor
+                                encendido={encendido}
+                                onCambio={() => void alternarNivel(nivel)}
+                                etiqueta={VOZ_NIVEL[nivel]}
+                                registro="oficio"
+                              />
+                            </View>
+
+                            {encendido && (
+                              <>
+                                <View
+                                  style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                  }}
+                                >
+                                  <Text style={vozSecundaria}>{t('tallerAdiestramiento.sesiones')}</Text>
+                                  <StepperCantidad
+                                    valor={d.nSesiones}
+                                    min={2}
+                                    max={30}
+                                    onCambio={(v) =>
+                                      setNiveles((prev) => ({ ...prev, [nivel]: { ...prev[nivel], nSesiones: v } }))
+                                    }
+                                    etiqueta={t('tallerAdiestramiento.sesiones')}
+                                    registro="oficio"
+                                  />
+                                </View>
+
+                                <View style={{ gap: spacing[2] }}>
+                                  <Text style={vozSecundaria}>{t('tallerAdiestramiento.precioPrograma')}</Text>
+                                  <Text
+                                    style={{
+                                      fontFamily: typography.family.mono.regular,
+                                      fontSize: typography.size.lg,
+                                      letterSpacing: typography.tracking.mono,
+                                      color: theme.text.primary,
+                                      fontVariant: ['tabular-nums'],
+                                    }}
+                                  >
+                                    {`$${PASOS_PROGRAMA[d.precioIndice].toFixed(2)}`}
+                                  </Text>
+                                  <SliderPrecio
+                                    etiqueta={t('tallerAdiestramiento.precioPrograma')}
+                                    pasos={PASOS_PROGRAMA.map((p) => `$${p.toFixed(2)}`)}
+                                    indice={d.precioIndice}
+                                    onCambio={(i) =>
+                                      setNiveles((prev) => ({ ...prev, [nivel]: { ...prev[nivel], precioIndice: i } }))
+                                    }
+                                    registro="aa"
+                                  />
+                                </View>
+
+                                <Campo
+                                  label={t('tallerAdiestramiento.descripcionPrograma')}
+                                  value={d.descripcion}
+                                  onChangeText={(v) =>
+                                    setNiveles((prev) => ({ ...prev, [nivel]: { ...prev[nivel], descripcion: v } }))
+                                  }
+                                  placeholder={t('tallerAdiestramiento.descripcionPlaceholder')}
+                                  multilinea={3}
+                                />
+
+                                <Text style={vozSecundaria}>
+                                  {t('tallerAdiestramiento.condiciones', { semanas: semanasVigencia, min: minutosSesion })}
+                                </Text>
+
+                                {dirty && (
+                                  <Boton
+                                    variante="secundario"
+                                    bloque
+                                    etiqueta={t('tallerAdiestramiento.guardarPrograma')}
+                                    cargando={guardandoNivel === nivel}
+                                    onPress={() => void guardarNivel(nivel)}
+                                  />
+                                )}
+                              </>
+                            )}
+                          </View>
+                        </Tarjeta>
+                      );
+                    })}
+
+                    {/* Personalizado — la puerta a las especialidades (§1) */}
+                    <Tarjeta relleno="amplio">
+                      <View style={{ gap: spacing[3] }}>
+                        <Text
+                          style={{
+                            fontFamily: typography.family.sans.medium,
+                            fontSize: typography.size.base,
+                            color: theme.text.primary,
+                          }}
+                        >
+                          {t('tallerAdiestramiento.personalizadoTitulo')}
+                        </Text>
+                        <Text style={vozSecundaria}>{t('tallerAdiestramiento.personalizadoExplica')}</Text>
+                        <View style={{ alignSelf: 'flex-start' }}>
+                          <Boton
+                            variante="compacto"
+                            etiqueta={t('tallerAdiestramiento.personalizadoCrear')}
                             onPress={() => {
-                              setDraft(draftDe(p));
+                              setDraft(draftNuevo());
                               setHojaPrograma(true);
                             }}
                           />
                         </View>
-                      ))}
+                      </View>
                     </Tarjeta>
-                  )}
-                  <View style={{ alignSelf: 'flex-start' }}>
-                    <Boton
-                      variante="compacto"
-                      etiqueta={t('tallerAdiestramiento.agregarPrograma')}
-                      onPress={() => {
-                        setDraft(draftNuevo());
-                        setHojaPrograma(true);
-                      }}
-                    />
-                  </View>
-                </>
-              )}
+
+                    {/* especialidades existentes + duplicados legacy de
+                        nivel — nada queda inalcanzable (editan en la Hoja) */}
+                    {otros.length > 0 && (
+                      <Tarjeta>
+                        {otros.map((p, i) => (
+                          <View key={p.id}>
+                            {i > 0 && <Separador />}
+                            <Celda
+                              titulo={p.nombre}
+                              subtitulo={`${VOZ_NIVEL[p.nivel]} · ${t('tallerAdiestramiento.sesionesN', { n: p.nSesiones })}`}
+                              metadataMono={`$${p.precioPrograma.toFixed(2)}`}
+                              fin={
+                                p.activo ? undefined : (
+                                  <Insignia estado="proximo" etiqueta={t('tallerAdiestramiento.programaOculto')} tamaño="sm" />
+                                )
+                              }
+                              interactiva
+                              accessibilityRole="button"
+                              onPress={() => {
+                                setDraft(draftDe(p));
+                                setHojaPrograma(true);
+                              }}
+                            />
+                          </View>
+                        ))}
+                      </Tarjeta>
+                    )}
+                  </>
+                );
+              })()}
             </View>
           </>
         )}
       </ScrollView>
 
-      {/* Hoja del programa */}
+      {/* Hoja del programa personalizado (S65-B2: el nivel viene del
+          punto de entrada — nueva = especialidad; una fila existente
+          conserva el suyo y el rango sugerido sigue como ayuda) */}
       <Hoja
         visible={hojaPrograma}
         onCerrar={() => {
@@ -425,23 +742,12 @@ export default function TallerAdiestramiento() {
         }}
         titulo={
           draft.programaId === null
-            ? t('tallerAdiestramiento.programaTituloNuevo')
+            ? t('tallerAdiestramiento.personalizadoNuevo')
             : t('tallerAdiestramiento.programaTituloEditar')
         }
       >
         <HojaScroll>
-          <View style={{ padding: spacing[4], gap: spacing[4] }}>
-            <SelectorOpcion
-              acento="oficio"
-              etiqueta={t('tallerAdiestramiento.nivel')}
-              disposicion="grilla"
-              opciones={(Object.keys(VOZ_NIVEL) as NivelPrograma[]).map((n) => ({
-                codigo: n,
-                etiqueta: VOZ_NIVEL[n],
-              }))}
-              seleccionada={draft.nivel ?? undefined}
-              onSelect={(codigo) => setDraft((d) => ({ ...d, nivel: codigo as NivelPrograma }))}
-            />
+          <View style={{ padding: spacing[4], paddingBottom: spacing[4] + insets.bottom, gap: spacing[4] }}>
             {rango !== undefined && (
               <Text style={vozSecundaria}>
                 {t('tallerAdiestramiento.rangoSugerido', { min: rango.min, max: rango.max })}
@@ -453,6 +759,14 @@ export default function TallerAdiestramiento() {
               value={draft.nombre}
               onChangeText={(v) => setDraft((d) => ({ ...d, nombre: v }))}
               placeholder={t('tallerAdiestramiento.nombrePlaceholder')}
+            />
+
+            <Campo
+              label={t('tallerAdiestramiento.descripcionPrograma')}
+              value={draft.descripcion}
+              onChangeText={(v) => setDraft((d) => ({ ...d, descripcion: v }))}
+              placeholder={t('tallerAdiestramiento.descripcionPlaceholder')}
+              multilinea={3}
             />
 
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -545,7 +859,7 @@ export default function TallerAdiestramiento() {
               bloque
               etiqueta={t('tallerAdiestramiento.guardarPrograma')}
               cargando={guardandoPrograma}
-              deshabilitado={draft.nivel === null || draft.nombre.trim() === ''}
+              deshabilitado={draft.nombre.trim() === ''}
               onPress={() => void guardarPrograma()}
             />
           </View>

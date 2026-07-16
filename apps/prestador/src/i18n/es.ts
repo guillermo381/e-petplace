@@ -925,6 +925,33 @@ export const prestadorEs = {
     cerrado: 'Sesión cerrada. El parte quedó con la familia.',
   },
   // S63-B: el taller del adiestrador (especies bloqueante + programas).
+  // LA PORTADA DEL MUNDO ADIESTRAMIENTO — /adiestramiento (S65-B2 P1,
+  // hallazgo founder: el oficio entraba directo al taller). Espejo del
+  // patrón paseo/grooming; reusos declarados (Ley 17.3):
+  // ofertaPaseo.error/errorDetalle/reintentar/vacacionesCon/vacacionesSin
+  // + negocio.vacaciones · LOTE S65, GATE PENDIENTE
+  ofertaAdiestramiento: {
+    titulo: 'Tu oferta de adiestramiento',
+    // peldaño 0 — la invitación que educa: qué se vende (§1 del modelo)
+    vacioTitulo: 'Tu servicio de adiestramiento',
+    vacioCuerpo:
+      'Vendes dos cosas: la sesión suelta y tus programas de varias sesiones con precio propio. Tus clientes solo ven lo que tú actives.',
+    vacioCta: 'Configurar tu oficio',
+    visibleTitulo: 'Visible para las familias',
+    visibleVoz: 'Las familias te encuentran y pueden reservar.',
+    noVisibleTitulo: 'Todavía no visible',
+    noVisibleCuenta: 'Falta que el equipo active tu cuenta comercial.',
+    noVisibleOferta: 'Activa tu sesión suelta en el taller.',
+    noVisibleEspecies: 'Declara con quién trabajas en el taller.',
+    noVisibleHorarios: 'Aún no tienes días y horarios de atención declarados.',
+    editarOferta: 'Editar tu oferta',
+    sesionFila: 'La sesión suelta',
+    sesionPausada: 'Pausada',
+    programasFila: 'Tus programas',
+    programasUno: '1 programa activo',
+    programasN: '{{n}} programas activos',
+    programasSin: 'Todavía sin programas',
+  },
   tallerAdiestramiento: {
     titulo: 'Adiestramiento',
     especiesTitulo: 'Con quién trabajas',
@@ -942,10 +969,11 @@ export const prestadorEs = {
     programasTitulo: 'Tus programas',
     programasExplica: 'Un programa es una serie de sesiones con contenido progresivo y precio propio.',
     programasEsperanOferta: 'Guarda tu oferta para poder agregar programas.',
-    agregarPrograma: 'Agregar programa',
-    programaTituloNuevo: 'Nuevo programa',
+    // S65-B2 P2: las tarjetas fijas de la escalera troncal (§1/§4/§12.4)
+    // + Personalizado = la puerta a las especialidades (supuesto
+    // declarado al founder) · LOTE S65, GATE PENDIENTE. Murieron
+    // agregarPrograma/programaTituloNuevo/nivel (regla 37).
     programaTituloEditar: 'Editar programa',
-    nivel: 'Nivel',
     nivelBasico: 'Básico',
     nivelMedio: 'Medio',
     nivelExperto: 'Experto',
@@ -963,5 +991,18 @@ export const prestadorEs = {
     programaOculto: 'Oculto',
     guardarPrograma: 'Guardar programa',
     programaGuardado: 'Programa guardado',
+    // los nombres con que nacen los programas de las tarjetas fijas
+    // (lo que ve la familia en el QUIÉN)
+    nombreBasico: 'Programa básico',
+    nombreMedio: 'Programa medio',
+    nombreExperto: 'Programa experto',
+    descripcionPrograma: 'Qué incluye',
+    descripcionPlaceholder: 'Sentado, quieto, venir al llamado…',
+    condiciones: 'Vigencia de {{semanas}} semanas · sesiones de {{min}} min',
+    personalizadoTitulo: 'Personalizado',
+    personalizadoExplica:
+      'Un programa a tu medida — una especialidad: ansiedad, correa, trucos. Tú pones el nombre y el contenido.',
+    personalizadoCrear: 'Crear programa personalizado',
+    personalizadoNuevo: 'Programa personalizado',
   },
 } as const;

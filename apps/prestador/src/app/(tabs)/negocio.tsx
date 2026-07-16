@@ -276,14 +276,14 @@ export default function Negocio() {
               </View>
             </Tarjeta>
             {/* S63-B: el mundo Adiestramiento ABRIÓ — gemela de las dos
-                de arriba; entra directo al taller (el hub del mundo
-                llega con el resto del arco). */}
+                de arriba. S65-B2 P1: entra por su PORTADA (hallazgo
+                founder — el oficio entraba directo al taller). */}
             <Tarjeta
               interactiva
               elevacion="reposo"
               accessibilityRole="button"
               etiqueta={t('negocio.mundoAdiestramiento')}
-              onPress={() => router.push('/adiestramiento/taller')}
+              onPress={() => router.push('/adiestramiento')}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
                 <Icono nombre="training" registro="aa" tamano={28} />
