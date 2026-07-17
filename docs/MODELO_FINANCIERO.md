@@ -119,7 +119,7 @@ La v2.0 dejó tres inconsistencias pequeñas que se cerraron el mismo día con M
 
 1. **`prestadores` tenía `ruc` y `razon_social`** que duplicaban datos de `cuentas_comerciales`. Removidas en MIG-I.A.
 2. **`donaciones` tenía `refugio` como text suelto** en lugar de FK a `refugios`. Reemplazada por `refugio_id` FK en MIG-I.B.
-3. **`prestadores` tenía `UNIQUE(user_id)`** que bloqueaba que un mismo humano gestionara múltiples sedes. Removido en MIG-J. Ahora un humano puede tener N prestadores (multi-sede). Guardrail: `UNIQUE(cuenta_comercial_id, nombre_comercial)`.
+3. **`prestadores` tenía `UNIQUE(user_id)`** que bloqueaba que un mismo humano gestionara múltiples sedes. Removido en MIG-J. Ahora un humano puede tener N prestadores (multi-sede). Guardrail: `UNIQUE(cuenta_comercial_id, nombre_comercial)`. *(Nota histórica: describe la arquitectura pre-S66; la vigente es §2.7 — `uq_prestadores_user_id` existe en DB viva y GANA.)*
 
 ---
 
@@ -466,7 +466,7 @@ Una cuenta puede tener N prestadores (N sedes). Cada sede:
 
 Constraints relevantes:
 - `cuenta_comercial_id` FK NOT NULL → cuentas_comerciales (RESTRICT).
-- `user_id` NOT UNIQUE (un humano = N filas posibles).
+- `user_id` UNIQUE (`uq_prestadores_user_id`) — humano→prestador 1:1; la multiplicidad de sedes es de la CUENTA (§2.7 S66).
 - `UNIQUE(cuenta_comercial_id, nombre_comercial)` — una cuenta no puede tener dos sedes con el mismo nombre.
 - Sin columnas fiscales (RUC, razón social viven en cuentas_comerciales).
 
@@ -834,7 +834,7 @@ UPDATE en `cuenta_roles` con `estado='suspendido'`. La cuenta sigue activa, los 
 Las tablas operativas NUNCA replican RUC, razón social, datos bancarios, identificación fiscal. JOIN cuando se necesite mostrar.
 
 ### 7.10 Multi-sede para prestadores
-Un mismo `user_id` puede tener N filas en `prestadores`. Liquidación por `cuenta_comercial_id`, no por `user_id`.
+La multiplicidad vive en cuenta→sedes: una `cuenta_comercial` puede tener N filas en `prestadores` (una por sede). `prestadores.user_id` ES UNIQUE — humano→prestador 1:1 (§2.7 S66). Liquidación por `cuenta_comercial_id`, no por sede.
 
 ### 7.11 Activación de cuenta comercial (NUEVO v2.2)
 NO se puede crear directamente una cuenta en `estado='activa'` desde un wizard. La activación requiere UPDATE simultáneo de `estado` y `activado_en`:
@@ -923,7 +923,7 @@ VTEX webhook desglosa por vendor. e-PetPlace genera N eventos económicos. Liqui
 ONG con RUC único, cuenta con rol `refugio` activo + agrega rol `seller_productos` para vender merchandising. Una liquidación mensual única consolidando todo.
 
 ### 8.12 Multi-sede para prestador
-Don Pepe con sedes en Quito y Guayaquil bajo la misma cuenta_comercial: dos filas en `prestadores`, mismo `user_id`, mismo `cuenta_comercial_id`, distinto `nombre_comercial`. Una sola liquidación consolidada.
+Don Pepe con sedes en Quito y Guayaquil bajo la misma cuenta_comercial: dos filas en `prestadores`, misma cuenta comercial, dos sedes con distinto `nombre_comercial` (la multiplicidad es cuenta→sedes; `user_id` es UNIQUE — cada fila con su persona responsable, §2.7 S66). Una sola liquidación consolidada.
 
 ### 8.13 Wizard guarda progreso parcial de datos bancarios (NUEVO v2.2)
 Usuario está completando el wizard de prestador. Llenó RUC y razón social pero todavía no tiene a mano los datos del banco.
@@ -1050,7 +1050,7 @@ Todas las tablas operativas en 0 filas. fee_configs_historial preserva 12 entrad
 - **Cuenta comercial multi-rol**: una `cuenta_comercial` con N roles activos en `cuenta_roles`.
 - **tipo_actor_resuelto**: rol bajo el cual se cobró un evento específico, snapshotted en `fee_calculo_detalle`.
 - **Liquidación consolidada**: liquidación única que agrupa eventos de múltiples roles y/o sedes del mismo actor.
-- **Multi-sede**: un `user_id` puede tener N filas en `prestadores`, una por cada sede operativa.
+- **Multi-sede**: una `cuenta_comercial` puede tener N filas en `prestadores`, una por cada sede operativa (la multiplicidad es cuenta→sedes; `user_id` es UNIQUE — §2.7 S66).
 
 ---
 
@@ -1075,6 +1075,7 @@ Este documento es el contrato técnico-conceptual del motor financiero. Cambiarl
 **Enmiendas disparadas por `MODELO_VETERINARIA.md` v1.0 §15.1 (letra firmada founder S66):**
 - **(a) §2.7 REESCRITO — "Multi-sede y multi-persona (modelo de actor)".** El choque relevado en el Bloque 0 S66: la letra decía "`prestadores.user_id` NO es UNIQUE (un humano = N filas en prestadores posibles)" y la DB viva tiene `uq_prestadores_user_id`. Decisión founder S66: **el índice GANA** — humano→prestador queda 1:1; la multiplicidad vive en cuenta→sedes y cuenta→personas (modelo de actor, `MODELO_VETERINARIA.md` PARTE I). La liquidación sigue por `cuenta_comercial`, consolidada con desglose (sin cambio).
 - **(b) §2.8 NUEVO — gratis+comisión como patrón de plataforma.** Lo transaccional (agenda, registros del oficio, recordatorios, reporte básico) es GRATIS para todo prestador — el candado de §2.1/§2.5; premium candidato SOLO para lo que va más allá de la transacción; v1 no dibuja nada premium.
+- **(c) Barrido de coherencia post-§2.7 (cura S66):** las referencias vivas a la arquitectura vieja ("user_id no UNIQUE" en el schema de `prestadores`, regla 7.10, ejemplo 8.12 Don Pepe, glosario Multi-sede) reescritas coherentes con §2.7 — la multiplicidad es cuenta→sedes; la nota histórica MIG-J (§"Cambio importante respecto a v1") se conserva anotada como pre-S66.
 
 ### v2.7 (12 Jul 2026 — S57, post v2.6)
 
