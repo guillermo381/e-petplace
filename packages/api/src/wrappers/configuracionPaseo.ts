@@ -22,6 +22,7 @@
 import { getClient } from '../client';
 import type { Database } from '../database.types';
 import type { ResultadoWrapper } from '../resultado';
+import { obtenerTitularId } from './titular';
 
 type UpdateOferta = Database['public']['Tables']['prestador_servicios']['Update'];
 type UpdateFranja = Database['public']['Tables']['prestador_horarios']['Update'];
@@ -299,12 +300,17 @@ export async function obtenerFranjasHorario(
   const { data: auth } = await getClient().auth.getUser();
   if (!auth.user?.id) return falla('sin_sesion');
 
+  // V0 (S67): las franjas propias son las del TITULAR (empleado_id
+  // NOT NULL desde la fundación); contrato hacia pantallas IDÉNTICO.
+  const titularId = await obtenerTitularId(prestadorId);
+  if (titularId === null) return falla('error_desconocido');
+
   const { data, error } = await getClient()
     .from('prestador_horarios')
     .select(SELECT_FRANJA)
     .eq('prestador_id', prestadorId)
     .is('servicio_id', null)
-    .is('empleado_id', null)
+    .eq('empleado_id', titularId)
     .order('dia_semana', { ascending: true })
     .order('hora_inicio', { ascending: true });
 
@@ -345,12 +351,17 @@ export async function crearFranjaHorario(
     return falla('cupo_invalido');
   }
 
+  // V0 (S67): la franja nace de la persona TITULAR (empleado_id es
+  // NOT NULL desde la fundación).
+  const titularId = await obtenerTitularId(input.prestadorId);
+  if (titularId === null) return falla('error_desconocido');
+
   const { data: delDia, error: errDia } = await getClient()
     .from('prestador_horarios')
     .select('id, hora_inicio, hora_fin')
     .eq('prestador_id', input.prestadorId)
     .is('servicio_id', null)
-    .is('empleado_id', null)
+    .eq('empleado_id', titularId)
     .eq('dia_semana', input.diaSemana);
   if (errDia || !Array.isArray(delDia)) return falla('error_desconocido');
   const solapa = delDia.some(
@@ -362,6 +373,7 @@ export async function crearFranjaHorario(
     .from('prestador_horarios')
     .insert({
       prestador_id: input.prestadorId,
+      empleado_id: titularId,
       dia_semana: input.diaSemana,
       hora_inicio: input.horaInicio,
       hora_fin: input.horaFin,
@@ -457,12 +469,16 @@ export async function editarFranjaHorario(
   if (errFila) return falla('error_desconocido');
   if (fila === null) return falla('no_encontrada');
 
+  // V0 (S67): el solape se valida contra las franjas del TITULAR.
+  const titularId = await obtenerTitularId(input.prestadorId);
+  if (titularId === null) return falla('error_desconocido');
+
   const { data: delDia, error: errDia } = await getClient()
     .from('prestador_horarios')
     .select('id, hora_inicio, hora_fin')
     .eq('prestador_id', input.prestadorId)
     .is('servicio_id', null)
-    .is('empleado_id', null)
+    .eq('empleado_id', titularId)
     .eq('dia_semana', fila.dia_semana)
     .neq('id', input.id);
   if (errDia || !Array.isArray(delDia)) return falla('error_desconocido');

@@ -22,6 +22,7 @@
 
 import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
+import { obtenerTitularId } from './titular';
 
 const MENSAJES = {
   sin_sesion:                    'No hay sesión activa.',
@@ -121,11 +122,17 @@ export async function eliminarFranjasPrestador(
   const { data: auth } = await getClient().auth.getUser();
   if (!auth.user?.id) return falla('sin_sesion');
 
+  // V0 (S67): las franjas "propias del prestador" son las del TITULAR
+  // (empleado_id NOT NULL desde la fundación); las de otras personas
+  // NO se tocan — el contrato de este wrapper no cambia.
+  const titularId = await obtenerTitularId(prestadorId);
+  if (titularId === null) return falla('error_desconocido');
+
   const { data, error } = await getClient()
     .from('prestador_horarios')
     .delete()
     .eq('prestador_id', prestadorId)
-    .is('empleado_id', null)
+    .eq('empleado_id', titularId)
     .select('id');
 
   if (error) return normalizarError(error.message);
@@ -184,12 +191,16 @@ export async function obtenerFranjasDeServicios(
   if (!auth.user?.id) return falla('sin_sesion');
   if (servicioIds.length === 0) return { ok: true, data: [] };
 
+  // V0 (S67): las franjas por servicio propias son las del TITULAR.
+  const titularId = await obtenerTitularId(prestadorId);
+  if (titularId === null) return falla('error_desconocido');
+
   const { data, error } = await getClient()
     .from('prestador_horarios')
     .select(SELECT_FRANJA_SERVICIO)
     .eq('prestador_id', prestadorId)
     .in('servicio_id', servicioIds)
-    .is('empleado_id', null)
+    .eq('empleado_id', titularId)
     .order('dia_semana', { ascending: true })
     .order('hora_inicio', { ascending: true });
 
@@ -235,12 +246,16 @@ export async function crearFranjaServicio(
     return falla('cupo_invalido');
   }
 
+  // V0 (S67): la franja por servicio nace de la persona TITULAR.
+  const titularId = await obtenerTitularId(input.prestadorId);
+  if (titularId === null) return falla('error_desconocido');
+
   const { data: delDia, error: errDia } = await getClient()
     .from('prestador_horarios')
     .select('id, hora_inicio, hora_fin')
     .eq('prestador_id', input.prestadorId)
     .eq('servicio_id', input.servicioId)
-    .is('empleado_id', null)
+    .eq('empleado_id', titularId)
     .eq('dia_semana', input.diaSemana);
   if (errDia || !Array.isArray(delDia)) return falla('error_desconocido');
   const solapa = delDia.some(
@@ -252,6 +267,7 @@ export async function crearFranjaServicio(
     .from('prestador_horarios')
     .insert({
       prestador_id: input.prestadorId,
+      empleado_id: titularId,
       servicio_id: input.servicioId,
       dia_semana: input.diaSemana,
       hora_inicio: input.horaInicio,

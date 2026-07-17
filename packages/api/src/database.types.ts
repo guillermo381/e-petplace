@@ -1746,6 +1746,7 @@ export type Database = {
           deprecado_motivo: string | null
           descripcion: string
           eje_jtbd: string
+          es_clinico: boolean
           es_mvp: boolean
           icono: string | null
           nombre: string
@@ -1767,6 +1768,7 @@ export type Database = {
           deprecado_motivo?: string | null
           descripcion: string
           eje_jtbd: string
+          es_clinico?: boolean
           es_mvp?: boolean
           icono?: string | null
           nombre: string
@@ -1788,6 +1790,7 @@ export type Database = {
           deprecado_motivo?: string | null
           descripcion?: string
           eje_jtbd?: string
+          es_clinico?: boolean
           es_mvp?: boolean
           icono?: string | null
           nombre?: string
@@ -1850,6 +1853,36 @@ export type Database = {
           orden_display?: number
           pais_codigo?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      cat_vacunas: {
+        Row: {
+          activo: boolean
+          codigo: string
+          country_codes: Json
+          created_at: string
+          es_seed_preliminar: boolean
+          especies: Json
+          nombre: string
+        }
+        Insert: {
+          activo?: boolean
+          codigo: string
+          country_codes?: Json
+          created_at?: string
+          es_seed_preliminar?: boolean
+          especies: Json
+          nombre: string
+        }
+        Update: {
+          activo?: boolean
+          codigo?: string
+          country_codes?: Json
+          created_at?: string
+          es_seed_preliminar?: boolean
+          especies?: Json
+          nombre?: string
         }
         Relationships: []
       }
@@ -4443,7 +4476,7 @@ export type Database = {
           cita_id: string
           country_code: string
           created_at: string
-          empleado_id: string | null
+          empleado_id: string
           estado: string
           evento_id: string
           familia: string
@@ -4460,7 +4493,7 @@ export type Database = {
           cita_id: string
           country_code: string
           created_at?: string
-          empleado_id?: string | null
+          empleado_id: string
           estado?: string
           evento_id: string
           familia: string
@@ -4477,7 +4510,7 @@ export type Database = {
           cita_id?: string
           country_code?: string
           created_at?: string
-          empleado_id?: string | null
+          empleado_id?: string
           estado?: string
           evento_id?: string
           familia?: string
@@ -4686,6 +4719,260 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_daas_eligible_users"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      evento_caso_clinico_abierto: {
+        Row: {
+          caso_id: string
+          condicion: string | null
+          country_code: string
+          created_at: string
+          cuenta_comercial_id: string
+          empleado_id: string | null
+          evento_id: string
+          id: string
+          mascota_id: string
+        }
+        Insert: {
+          caso_id: string
+          condicion?: string | null
+          country_code?: string
+          created_at?: string
+          cuenta_comercial_id: string
+          empleado_id?: string | null
+          evento_id: string
+          id?: string
+          mascota_id: string
+        }
+        Update: {
+          caso_id?: string
+          condicion?: string | null
+          country_code?: string
+          created_at?: string
+          cuenta_comercial_id?: string
+          empleado_id?: string | null
+          evento_id?: string
+          id?: string
+          mascota_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evento_caso_clinico_abierto_caso_id_fkey"
+            columns: ["caso_id"]
+            isOneToOne: false
+            referencedRelation: "caso_clinico"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_abierto_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_comerciales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_abierto_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_resumen_cuenta"
+            referencedColumns: ["cuenta_comercial_id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_abierto_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "prestador_empleados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_abierto_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "eventos_mascota"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_abierto_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evento_caso_clinico_cerrado: {
+        Row: {
+          caso_id: string
+          country_code: string
+          created_at: string
+          cuenta_comercial_id: string
+          empleado_id: string | null
+          evento_id: string
+          id: string
+          mascota_id: string
+          motivo_cierre: string | null
+        }
+        Insert: {
+          caso_id: string
+          country_code?: string
+          created_at?: string
+          cuenta_comercial_id: string
+          empleado_id?: string | null
+          evento_id: string
+          id?: string
+          mascota_id: string
+          motivo_cierre?: string | null
+        }
+        Update: {
+          caso_id?: string
+          country_code?: string
+          created_at?: string
+          cuenta_comercial_id?: string
+          empleado_id?: string | null
+          evento_id?: string
+          id?: string
+          mascota_id?: string
+          motivo_cierre?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evento_caso_clinico_cerrado_caso_id_fkey"
+            columns: ["caso_id"]
+            isOneToOne: false
+            referencedRelation: "caso_clinico"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_cerrado_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_comerciales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_cerrado_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_resumen_cuenta"
+            referencedColumns: ["cuenta_comercial_id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_cerrado_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "prestador_empleados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_cerrado_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "eventos_mascota"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_cerrado_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evento_caso_clinico_transferido: {
+        Row: {
+          caso_id: string
+          country_code: string
+          created_at: string
+          cuenta_comercial_destino_id: string
+          cuenta_comercial_origen_id: string
+          empleado_destino_id: string | null
+          evento_id: string
+          id: string
+          mascota_id: string
+          motivo: string | null
+        }
+        Insert: {
+          caso_id: string
+          country_code?: string
+          created_at?: string
+          cuenta_comercial_destino_id: string
+          cuenta_comercial_origen_id: string
+          empleado_destino_id?: string | null
+          evento_id: string
+          id?: string
+          mascota_id: string
+          motivo?: string | null
+        }
+        Update: {
+          caso_id?: string
+          country_code?: string
+          created_at?: string
+          cuenta_comercial_destino_id?: string
+          cuenta_comercial_origen_id?: string
+          empleado_destino_id?: string | null
+          evento_id?: string
+          id?: string
+          mascota_id?: string
+          motivo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evento_caso_clinico_transferid_cuenta_comercial_destino_id_fkey"
+            columns: ["cuenta_comercial_destino_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_comerciales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_transferid_cuenta_comercial_destino_id_fkey"
+            columns: ["cuenta_comercial_destino_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_resumen_cuenta"
+            referencedColumns: ["cuenta_comercial_id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_transferido_caso_id_fkey"
+            columns: ["caso_id"]
+            isOneToOne: false
+            referencedRelation: "caso_clinico"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_transferido_cuenta_comercial_origen_id_fkey"
+            columns: ["cuenta_comercial_origen_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_comerciales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_transferido_cuenta_comercial_origen_id_fkey"
+            columns: ["cuenta_comercial_origen_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_resumen_cuenta"
+            referencedColumns: ["cuenta_comercial_id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_transferido_empleado_destino_id_fkey"
+            columns: ["empleado_destino_id"]
+            isOneToOne: false
+            referencedRelation: "prestador_empleados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_transferido_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "eventos_mascota"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_caso_clinico_transferido_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -7398,6 +7685,7 @@ export type Database = {
           id: string
           mascota_id: string
           prestador_id: string | null
+          procedencia: string | null
           soft_delete: boolean
           soft_delete_en: string | null
           soft_delete_motivo: string | null
@@ -7420,6 +7708,7 @@ export type Database = {
           id?: string
           mascota_id: string
           prestador_id?: string | null
+          procedencia?: string | null
           soft_delete?: boolean
           soft_delete_en?: string | null
           soft_delete_motivo?: string | null
@@ -7442,6 +7731,7 @@ export type Database = {
           id?: string
           mascota_id?: string
           prestador_id?: string | null
+          procedencia?: string | null
           soft_delete?: boolean
           soft_delete_en?: string | null
           soft_delete_motivo?: string | null
@@ -10960,7 +11250,7 @@ export type Database = {
           activo: boolean
           dia_semana: number
           duracion_slot_minutos: number
-          empleado_id: string | null
+          empleado_id: string
           hora_fin: string
           hora_inicio: string
           id: string
@@ -10972,7 +11262,7 @@ export type Database = {
           activo?: boolean
           dia_semana: number
           duracion_slot_minutos?: number
-          empleado_id?: string | null
+          empleado_id: string
           hora_fin: string
           hora_inicio: string
           id?: string
@@ -10984,7 +11274,7 @@ export type Database = {
           activo?: boolean
           dia_semana?: number
           duracion_slot_minutos?: number
-          empleado_id?: string | null
+          empleado_id?: string
           hora_fin?: string
           hora_inicio?: string
           id?: string
@@ -11163,6 +11453,7 @@ export type Database = {
           cita_id: string | null
           comentario: string | null
           created_at: string
+          empleado_id: string | null
           es_visible: boolean
           id: string
           prestador_id: string
@@ -11175,6 +11466,7 @@ export type Database = {
           cita_id?: string | null
           comentario?: string | null
           created_at?: string
+          empleado_id?: string | null
           es_visible?: boolean
           id?: string
           prestador_id: string
@@ -11187,6 +11479,7 @@ export type Database = {
           cita_id?: string | null
           comentario?: string | null
           created_at?: string
+          empleado_id?: string | null
           es_visible?: boolean
           id?: string
           prestador_id?: string
@@ -11200,6 +11493,13 @@ export type Database = {
             columns: ["cita_id"]
             isOneToOne: false
             referencedRelation: "evento_cita_servicio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestador_resenas_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "prestador_empleados"
             referencedColumns: ["id"]
           },
           {
@@ -14077,8 +14377,10 @@ export type Database = {
           activo: boolean
           categoria: string
           codigo: string
+          concurrencia: string
           country_codes: Json | null
           created_at: string
+          cupo_techo: number | null
           descripcion: string | null
           duracion_default_minutos: number | null
           es_medico: boolean | null
@@ -14095,8 +14397,10 @@ export type Database = {
           activo?: boolean
           categoria: string
           codigo: string
+          concurrencia?: string
           country_codes?: Json | null
           created_at?: string
+          cupo_techo?: number | null
           descripcion?: string | null
           duracion_default_minutos?: number | null
           es_medico?: boolean | null
@@ -14113,8 +14417,10 @@ export type Database = {
           activo?: boolean
           categoria?: string
           codigo?: string
+          concurrencia?: string
           country_codes?: Json | null
           created_at?: string
+          cupo_techo?: number | null
           descripcion?: string | null
           duracion_default_minutos?: number | null
           es_medico?: boolean | null
@@ -15299,10 +15605,11 @@ export type Database = {
       _agenda_ocupacion: {
         Args: {
           p_duracion_minutos: number
+          p_empleado_id: string
           p_excluir_cita?: string
           p_fecha: string
           p_hora: string
-          p_prestador_id: string
+          p_tipo_servicio?: string
         }
         Returns: number
       }
@@ -16538,6 +16845,14 @@ export type Database = {
       }
       vencer_paquetes_salidas: { Args: never; Returns: Json }
       vencer_programas_adiestramiento: { Args: never; Returns: Json }
+      verificar_coherencia_tablas_tipadas: {
+        Args: never
+        Returns: {
+          codigo: string
+          problema: string
+          tabla_tipada: string
+        }[]
+      }
       verificar_identificacion_disponible: {
         Args: { p_country_code: string; p_identificacion: string }
         Returns: {
