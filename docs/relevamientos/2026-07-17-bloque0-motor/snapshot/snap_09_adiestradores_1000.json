@@ -1,0 +1,50 @@
+[
+ {
+  "ciudad": "Quito",
+  "comprable": "programa",
+  "direccion": "[DEMO S44] Av. República del Salvador y Suecia, local 3",
+  "duracion_minutos": 60,
+  "n_sesiones": 6,
+  "nivel": "medio",
+  "nombre": "Obediencia desde cero (gate S63)",
+  "precio": "90.00",
+  "prestador_id": "de300000-0000-4000-8000-0000000000e5",
+  "prestador_nombre": "[DEMO S44] Paseos Andres",
+  "prestador_servicio_id": "8fc664dd-04ee-41f4-8c47-a0606cc42680",
+  "programa_id": "3eace25f-d99d-4733-86e2-67dd29b82dd2",
+  "tipo_servicio": "adiestramiento",
+  "vigencia_dias": 35
+ },
+ {
+  "ciudad": "Quito",
+  "comprable": "programa",
+  "direccion": "[DEMO S44] Av. República del Salvador y Suecia, local 3",
+  "duracion_minutos": 60,
+  "n_sesiones": 6,
+  "nivel": "basico",
+  "nombre": "Programa básico",
+  "precio": "160.00",
+  "prestador_id": "de300000-0000-4000-8000-0000000000e5",
+  "prestador_nombre": "[DEMO S44] Paseos Andres",
+  "prestador_servicio_id": "8fc664dd-04ee-41f4-8c47-a0606cc42680",
+  "programa_id": "5e4747c2-7aa6-464f-8f63-27e64eb9c2f9",
+  "tipo_servicio": "adiestramiento",
+  "vigencia_dias": 56
+ },
+ {
+  "ciudad": "Quito",
+  "comprable": "sesion",
+  "direccion": "[DEMO S44] Av. República del Salvador y Suecia, local 3",
+  "duracion_minutos": 60,
+  "n_sesiones": null,
+  "nivel": null,
+  "nombre": "Adiestramiento",
+  "precio": "25.00",
+  "prestador_id": "de300000-0000-4000-8000-0000000000e5",
+  "prestador_nombre": "[DEMO S44] Paseos Andres",
+  "prestador_servicio_id": "8fc664dd-04ee-41f4-8c47-a0606cc42680",
+  "programa_id": null,
+  "tipo_servicio": "adiestramiento",
+  "vigencia_dias": null
+ }
+]

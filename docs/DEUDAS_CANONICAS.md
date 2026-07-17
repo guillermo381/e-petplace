@@ -1753,10 +1753,12 @@ MODELO_ADIESTRAMIENTO).
 
 ### S66 — el vet y el modelo de actor (16 Jul 2026, `MODELO_VETERINARIA.md` v1.0 §16)
 
-#### D-414 — Policy `caso_clinico_insert_vet` no valida relación cuenta↔mascota
+#### D-414 — Policy `caso_clinico_insert_vet` no valida relación cuenta↔mascota ✅ CERRADA (S67, migración `20260717170000`)
+~~🔴 ALTA~~ **CERRADA en la fundación V0**: la policy se recreó con el `with_check` original (pertenencia usuario↔cuenta) **más** la validación cuenta↔mascota — `EXISTS` sobre `mascota_acceso_prestador` con vigencia (`revocado_en IS NULL` y `expira_en` no vencida): el vet solo abre caso sobre mascota a la que su cuenta tiene acceso vigente, la misma puerta que el resto del sistema. `pg_policies` literal en el reporte S67. Letra original:
 🔴 ALTA. Hallazgo del relevamiento Bloque 0 S66 (1c/1g): el `with_check` de la policy valida SOLO la pertenencia del usuario a la `cuenta_comercial_tratante_id` — ninguna condición sobre `mascota_id`. Cura ANTES de cualquier UI de caso (patrón D-314). **Disparo: fundación V0 (§17 del modelo la lista entre sus curas) — y en todo caso antes de cualquier UI de caso clínico.** Origen: S66 `MODELO_VETERINARIA.md` §16 (D-VET-1).
 
-#### D-415 — Guard de coherencia `tabla_tipada` ↔ schema real en `cat_tipos_evento`
+#### D-415 — Guard de coherencia `tabla_tipada` ↔ schema real en `cat_tipos_evento` ✅ CERRADA (S67, migración `20260717170000`)
+**CERRADA en la fundación V0 (decisión ratificada: cura por NULL honesto)**: (1) los 8 códigos fantasma (`certificado_revocado`, `incidente_hotel`, `incidente_paseo`, `inicio_vida`, `nota_dueno`, `nota_prestador`, `producto_asignacion`, `wearable_alerta`) pasaron a `tabla_tipada = NULL` — dejaron de mentir; (2) nacieron SOLO las 3 tablas de caso que la migración sí escribe (`evento_caso_clinico_abierto/cerrado/transferido`, doble referencia §10: cuenta + persona) con sus `tabla_tipada` reales; (3) nace `verificar_coherencia_tablas_tipadas()` (ancla legal: `evento_id` O `evento_atencion_id` — el chasis de tres capas ancla en la capa) y corrió como assert DENTRO de la misma migración: 0 incoherencias. El copy-paste murió para siempre. Letra original:
 Tercera aparición del copy-paste en relevamientos (S65 corrigió una en caliente; el Bloque 0 S66 encontró 6 `tabla_tipada` declaradas sin tabla real y la desalineación inversa en `medicacion_administrada`); un test/CHECK lo mata para siempre. **Disparo: sin disparo declarado en §16 — candidata natural: la próxima migración que toque `cat_tipos_evento` (la fundación V0 crea las tablas tipadas de caso).** Origen: S66 `MODELO_VETERINARIA.md` §16 (D-VET-2).
 
 #### D-416 — Tabla `facturas` sin origen en migraciones: documentar o jubilar
@@ -1765,7 +1767,8 @@ Objeto huérfano de historial = drift esperando morder (relevamiento 3b: la tabl
 #### D-417 — Cuenta comercial sin rol en `cuenta_roles`
 Anomalía de datos relevada (Bloque 0 S66, 2a: 4 cuentas, 3 roles); explicar o curar. **Disparo: sin disparo declarado en §16.** Origen: S66 `MODELO_VETERINARIA.md` §16 (D-VET-4).
 
-#### D-418 — `requiere_resultado=true` en los 11 tipos médicos SIN mecanismo
+#### D-418 — `requiere_resultado=true` en los 11 tipos médicos SIN mecanismo ✅ CERRADA (S67, migración `20260717170000`)
+**CERRADA en la fundación V0**: `requiere_resultado=false` en los 11 tipos `es_medico` (assert previo verificado en la migración: el único `false` preexistente era `registro_evento`). Se re-enciende cuando la letra de "resultado clínico" exista (candidata: el registro del Durante con procedencia verificada alcanza). Letra original:
 Se APAGA honesto en la fundación (L-139); se re-enciende cuando la letra de "resultado clínico" exista (candidata: el registro del Durante con procedencia verificada alcanza). **Disparo: fundación V0.** Origen: S66 `MODELO_VETERINARIA.md` §16 (D-VET-5).
 
 #### D-419 — SRI integrado en la agenda (emisión de comprobante desde el cobro)
@@ -1781,9 +1784,11 @@ Vista certificable del subconjunto VERIFICADO del expediente (no un sistema nuev
 v1 = PDF/foto adjunto honesto al expediente (evento con archivo, procedencia declarada — §14.4 del modelo); la importación estructurada rica es esta deuda. **Disparo: sin disparo declarado en §16 — la precondición §14.4 (camino honesto) es de apertura; esto es su evolución.** Origen: S66 `MODELO_VETERINARIA.md` §16 (D-VET-9).
 
 #### D-423 — Ocupación por capacidad de lugar (estadía) y recursos físicos como entidad de agenda
+**Nota S67 (fundación V0): NO la toca — declarado.** V0 modeló exclusiva/cupo (`tipos_servicio.concurrencia` + `cupo_techo`); la tercera semántica (capacidad de LUGAR) y los recursos físicos siguen diferidos con su disparo intacto.
 Tercera semántica de concurrencia NO modelada (caniles: capacidad del lugar, no manos) + recursos físicos (quirófano, rayos, tina) fuera del motor v1 (§3 del modelo, huecos declarados). **Disparo: estadía → el primer servicio de estadía que abra (hotel vive en "próximamente honesto"); recursos físicos → la primera clínica real que choque.** Origen: S66 `MODELO_VETERINARIA.md` §16 (D-VET-10).
 
-#### D-424 — `especies_elegibles` NULL en los 11 tipos médicos
+#### D-424 — `especies_elegibles` NULL en los 11 tipos médicos ✅ CERRADA (S67, migración `20260717170000`)
+**CERRADA en la fundación V0**: los 11 tipos médicos portan `especies_elegibles` = las **11** especies del catálogo completo (decisión firmada: el techo es TODO `cat_especies`, no solo las 6 activas); assert en la migración: 11 tipos × 11 especies. Letra original:
 Muere en la fundación. **Techo del vet = TODAS las especies de `cat_especies`** (D7 firmada — el vet es la puerta de los niveles B/C del multi-especie); cada negocio acota con `especies_compatibles`. **Disparo: fundación V0.** Origen: S66 `MODELO_VETERINARIA.md` §16 (D-VET-11).
 
 #### D-425 — Reactivación de cartera ("hace 8 meses que Max no viene")
@@ -1792,6 +1797,7 @@ El motor de recordatorios apuntando al NEGOCIO (no a la familia); candidata bara
 ### S66 — rescate S65 (registro diferido de las tres deudas del cierre S65)
 
 #### D-426 — Horarios propios del oficio (adiestramiento)
+**Nota S67 (fundación V0): INTACTA — decisión firmada de NO absorberla** (lo que falta es mayormente wizard/configuración = UI, y V0 fue cero UI). La fundación dejó la puerta abierta: `prestador_horarios` es por PERSONA (`empleado_id` NOT NULL) y ya soporta persona×servicio vía `servicio_id`; el wizard sigue siendo la deuda.
 🟢 MEDIA. El adiestramiento hereda la sección de horarios COMPARTIDA con el paseo (patrón del wizard S59); el oficio necesita declarar horarios propios, separados de la disponibilidad de paseo — un adiestrador puede pasear a la mañana y entrenar a la tarde, y hoy la configuración no lo distingue. **Disparo: al tocar el wizard de horarios del adiestrador (natural en la fundación V0, que generaliza la ocupación — evaluar absorberla ahí).** Origen: S65, registro diferido S66 — renumeradas: sus números originales (D-414/415/416) fueron asignados a deudas vet.
 
 #### D-427 — Espejo del dueño (vista del prestador)

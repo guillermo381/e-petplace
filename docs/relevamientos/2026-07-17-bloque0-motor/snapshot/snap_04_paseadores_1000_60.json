@@ -1,0 +1,11 @@
+[
+ {
+  "duracion_minutos": 60,
+  "precio": "8.00",
+  "precio_plan": null,
+  "prestador_id": "de300000-0000-4000-8000-0000000000e5",
+  "prestador_nombre": "[DEMO S44] Paseos Andres",
+  "prestador_servicio_id": "b6e053dd-a3b7-4947-b5c2-6e4c5eaf8fcc",
+  "servicio_nombre": "Paseo de 1 Hora"
+ }
+]

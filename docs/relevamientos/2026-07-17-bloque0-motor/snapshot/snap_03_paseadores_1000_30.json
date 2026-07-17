@@ -1,0 +1,11 @@
+[
+ {
+  "duracion_minutos": 30,
+  "precio": "6.00",
+  "precio_plan": null,
+  "prestador_id": "de300000-0000-4000-8000-0000000000e5",
+  "prestador_nombre": "[DEMO S44] Paseos Andres",
+  "prestador_servicio_id": "de300000-0000-4000-8000-00000000a5e0",
+  "servicio_nombre": "[DEMO S44] Paseo 30 min"
+ }
+]

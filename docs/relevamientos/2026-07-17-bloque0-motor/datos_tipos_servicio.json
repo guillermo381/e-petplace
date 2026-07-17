@@ -1,0 +1,280 @@
+[
+ {
+  "activo": true,
+  "categoria": "adiestramiento",
+  "codigo": "adiestramiento",
+  "duracion_default_minutos": 60,
+  "es_medico": false,
+  "especies_elegibles": [
+   "perro"
+  ],
+  "nombre": "Adiestramiento",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "emergencia",
+  "codigo": "emergencia",
+  "duracion_default_minutos": 60,
+  "es_medico": true,
+  "especies_elegibles": null,
+  "nombre": "Atención de Emergencia",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "grooming",
+  "codigo": "grooming",
+  "duracion_default_minutos": 60,
+  "es_medico": false,
+  "especies_elegibles": [
+   "perro",
+   "gato"
+  ],
+  "nombre": "Baño",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "grooming",
+  "codigo": "grooming_completo",
+  "duracion_default_minutos": 90,
+  "es_medico": false,
+  "especies_elegibles": [
+   "perro",
+   "gato"
+  ],
+  "nombre": "Baño y corte",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "hospedaje",
+  "codigo": "guarderia_dia",
+  "duracion_default_minutos": null,
+  "es_medico": false,
+  "especies_elegibles": null,
+  "nombre": "Guardería por Día",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "hospedaje",
+  "codigo": "guarderia_mensual",
+  "duracion_default_minutos": null,
+  "es_medico": false,
+  "especies_elegibles": null,
+  "nombre": "Guardería Mensual",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "hospedaje",
+  "codigo": "hotel",
+  "duracion_default_minutos": null,
+  "es_medico": false,
+  "especies_elegibles": null,
+  "nombre": "Hotel Canino/Felino",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "hospedaje",
+  "codigo": "hotel_dia",
+  "duracion_default_minutos": 480,
+  "es_medico": false,
+  "especies_elegibles": null,
+  "nombre": "Hotel Día",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "hospedaje",
+  "codigo": "hotel_noche",
+  "duracion_default_minutos": 720,
+  "es_medico": false,
+  "especies_elegibles": null,
+  "nombre": "Hotel Noche",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "otro",
+  "codigo": "registro_evento",
+  "duracion_default_minutos": 0,
+  "es_medico": false,
+  "especies_elegibles": null,
+  "nombre": "Inscripción a Evento",
+  "requiere_resultado": false
+ },
+ {
+  "activo": true,
+  "categoria": "otro",
+  "codigo": "servicio_exequial",
+  "duracion_default_minutos": 60,
+  "es_medico": false,
+  "especies_elegibles": null,
+  "nombre": "Servicio Exequial",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "paseo",
+  "codigo": "paseo",
+  "duracion_default_minutos": 30,
+  "es_medico": false,
+  "especies_elegibles": [
+   "perro"
+  ],
+  "nombre": "Paseo de Mascotas",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "paseo",
+  "codigo": "paseo_30min",
+  "duracion_default_minutos": 30,
+  "es_medico": false,
+  "especies_elegibles": [
+   "perro"
+  ],
+  "nombre": "Paseo 30 minutos",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "paseo",
+  "codigo": "paseo_60min",
+  "duracion_default_minutos": 60,
+  "es_medico": false,
+  "especies_elegibles": [
+   "perro"
+  ],
+  "nombre": "Paseo 60 minutos",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "paseo",
+  "codigo": "paseo_mensual",
+  "duracion_default_minutos": null,
+  "es_medico": false,
+  "especies_elegibles": [
+   "perro"
+  ],
+  "nombre": "Paseo Mensual",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "paseo",
+  "codigo": "paseo_paquete",
+  "duracion_default_minutos": null,
+  "es_medico": false,
+  "especies_elegibles": [
+   "perro"
+  ],
+  "nombre": "Paquete de Paseos",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "telemedicina",
+  "codigo": "telemedicina",
+  "duracion_default_minutos": 20,
+  "es_medico": true,
+  "especies_elegibles": null,
+  "nombre": "Teleconsulta",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "veterinario",
+  "codigo": "certificado_apoyo",
+  "duracion_default_minutos": 45,
+  "es_medico": true,
+  "especies_elegibles": null,
+  "nombre": "Certificado Apoyo Emocional",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "veterinario",
+  "codigo": "certificado_viaje",
+  "duracion_default_minutos": 30,
+  "es_medico": true,
+  "especies_elegibles": null,
+  "nombre": "Certificado de Viaje",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "veterinario",
+  "codigo": "cirugia",
+  "duracion_default_minutos": 120,
+  "es_medico": true,
+  "especies_elegibles": null,
+  "nombre": "Cirugía",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "veterinario",
+  "codigo": "consulta_general",
+  "duracion_default_minutos": 30,
+  "es_medico": true,
+  "especies_elegibles": null,
+  "nombre": "Consulta General",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "veterinario",
+  "codigo": "ecografia",
+  "duracion_default_minutos": 45,
+  "es_medico": true,
+  "especies_elegibles": null,
+  "nombre": "Ecografía",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "veterinario",
+  "codigo": "laboratorio",
+  "duracion_default_minutos": 30,
+  "es_medico": true,
+  "especies_elegibles": null,
+  "nombre": "Laboratorio",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "veterinario",
+  "codigo": "radiografia",
+  "duracion_default_minutos": 30,
+  "es_medico": true,
+  "especies_elegibles": null,
+  "nombre": "Radiografía",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "veterinario",
+  "codigo": "vacunacion",
+  "duracion_default_minutos": 20,
+  "es_medico": true,
+  "especies_elegibles": null,
+  "nombre": "Vacunación",
+  "requiere_resultado": true
+ },
+ {
+  "activo": true,
+  "categoria": "veterinario",
+  "codigo": "vacunacion_internacional",
+  "duracion_default_minutos": 30,
+  "es_medico": true,
+  "especies_elegibles": null,
+  "nombre": "Vacunación Internacional",
+  "requiere_resultado": true
+ }
+]

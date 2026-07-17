@@ -1,0 +1,15 @@
+[
+ {
+  "ciudad": "Quito",
+  "direccion": "[DEMO S44] Av. República del Salvador y Suecia, local 3",
+  "duracion_minutos": 90,
+  "extra_pelaje": "0",
+  "precio": "48.75",
+  "precio_base": "48.75",
+  "prestador_id": "de300000-0000-4000-8000-0000000000e5",
+  "prestador_nombre": "[DEMO S44] Paseos Andres",
+  "prestador_servicio_id": "2f64ccdb-9b08-4dec-a9b7-eeefa69b749e",
+  "recargo_domicilio": "0",
+  "servicio_nombre": "Baño y corte"
+ }
+]
