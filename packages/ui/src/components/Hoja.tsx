@@ -60,6 +60,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Svg, { Path } from 'react-native-svg'
 
 import { palette } from '../tokens/palette'
@@ -149,6 +150,7 @@ export function Hoja({
 }: HojaProps) {
   const { theme } = useTheme()
   const { height: altoVentana } = useWindowDimensions()
+  const insets = useSafeAreaInsets()
   const [montada, setMontada] = useState(visible)
 
   const esMemorial = theme.mode === 'memorial'
@@ -290,7 +292,14 @@ export function Hoja({
                   borderTopRightRadius: radius['2xl'],
                   height: altoHoja,
                   maxHeight: altoMax,
-                  paddingBottom: spacing[6],
+                  // S65 (hallazgo founder, ambas apps): la Hoja es una
+                  // superficie ANCLADA AL FONDO — sin el inset, su última
+                  // fila (el Guardar/Continuar de turno) queda bajo la
+                  // barra de navegación del sistema en Android edge-to-
+                  // edge. Patrón de la casa (barras de CTA fijas):
+                  // Math.max — donde el inset ya cabía en el respiro,
+                  // nada cambia.
+                  paddingBottom: Math.max(insets.bottom, spacing[6]),
                 },
                 estiloHoja,
               ]}
