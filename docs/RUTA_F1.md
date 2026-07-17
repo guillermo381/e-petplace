@@ -118,12 +118,33 @@ expediente se alimenta solo.
 
 ## A3 — El vet: agenda, adopción de caso, telemedicina
 
-JTBD-1/2 + adopción de caso clínico (§3.2.4, EL diferenciador) +
-telemedicina. **Precondición:** sesión de preparación F0 (guión de
-discovery + prototipo de A0 frente a los vets). **Por qué acá:** el
-actor que más sedimento clínico deposita, pero el flujo más delicado —
-las reuniones F0 son su insumo. **Test:** el expediente se alimenta
-porque al vet LE SIRVE.
+JTBD-1/2 + adopción de caso clínico (§3.2.4, EL diferenciador).
+Telemedicina: en el destino, tanda posterior (nota S66 en
+SOFTLAUNCH §2).
+
+**EN CURSO desde S66:** la letra vive en `docs/MODELO_VETERINARIA.md`
+v1.0 (FIRMADA founder S66) — ese doc es EL CONTRATO de esta etapa Y
+porta el MODELO DE ACTOR de plataforma (PARTE I: negocio contenedor,
+ocupación por persona, concurrencia por servicio) cuya fundación V0
+es la tanda más transversal de la etapa (toca el motor de los 4
+oficios vivos).
+
+**Precondición F0: CUMPLIDA (enmienda S66)** — base de discovery
+declarada: conversaciones directas del founder con vets, SIN
+transcripción literal (la síntesis del founder es la fuente
+primaria; hallazgos: no quieren otra HC con recordatorios; los
+mejores gestionan el negocio). La red de seguridad es la
+precondición de APERTURA del modelo (§14.3): conversación con
+vet/clínica real BLOQUEANTE para desmarcar seeds.
+
+Esqueleto de tandas: V0 fundación (modelo de actor en motor +
+procedencia + curas) · V1 oferta del negocio · V2 reserva del dueño
+· V3 mostrador walk-in · V4 Durante clínico (nota IA + caso +
+presupuesto) · V5 parte y sedimento · V6 SRI (D-419 prioridad,
+founder S66). Orden fino al arrancar cada tanda.
+
+**Test:** el expediente se alimenta porque al vet LE SIRVE — y el
+negocio cobra adentro porque es MÁS FÁCIL que afuera.
 
 ## A4 — Grooming lado dueño — EN CURSO (S59)
 
@@ -347,6 +368,19 @@ arcos (se decide sesión a sesión con las trenzas como ley).
 
 ## Historial
 
+- **v2.5 (S66, 16 Jul 2026):** enmienda de A3 (disparada por
+  `MODELO_VETERINARIA.md` v1.0 §15.4, letra firmada founder S66):
+  **precondición F0 declarada CUMPLIDA** con base de discovery
+  declarada (síntesis del founder de conversaciones directas con
+  vets, sin transcripción literal; la red de seguridad es §14.3 del
+  modelo — conversación con vet/clínica real BLOQUEANTE de apertura)
+  · **A3 pasa a EN CURSO** con `MODELO_VETERINARIA.md` como EL
+  CONTRATO de la etapa, portando además el MODELO DE ACTOR de
+  plataforma (PARTE I) cuya fundación V0 es la tanda más transversal
+  (toca los 4 oficios vivos) · **esqueleto de tandas V0-V6** asentado
+  en el cuerpo de A3 · **SRI reclasificado a PRIORIDAD post-apertura**
+  (D-419, founder S66) · telemedicina: en el destino, tanda posterior
+  (nota S66 en SOFTLAUNCH §2 — decisión S48 intacta).
 - **v2.4 (S57, 13 Jul 2026):** hito registrado en A2 — el paseo
   FUNCIONALMENTE COMPLETO (suelto+P18, plan, paquete v1.4 del hogar,
   agenda futura, vacaciones) — y **el orden del cierre corregido por el

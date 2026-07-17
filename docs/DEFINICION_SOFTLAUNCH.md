@@ -25,7 +25,10 @@ e-PetPlace es el n°1 del mundo mascota solo si es excelente para dueños
 - **Bio-Expediente vista dueño** — Línea de Vida + perfil por dimensiones.
 - **Coach de IA que conoce a SUS mascotas** — semilla del Pet Expert;
   pieza nueva junto con telemedicina (decisión founder S48).
-- **JTBD-1/2** — vet agendable + telemedicina.
+- **JTBD-1/2** — vet agendable + telemedicina. *(Nota S66:
+  telemedicina sigue en el destino — decisión S48 intacta. Queda FUERA
+  de `MODELO_VETERINARIA.md` v1 y entra como tanda propia posterior:
+  el destino no se toca, el orden sí. Founder S66.)*
 - **JTBD-3** — grooming.
 - **JTBD-4** — paseo.
 - **JTBD-5** — tienda de productos/juguetes integrada al expediente
