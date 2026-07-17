@@ -1789,6 +1789,17 @@ Muere en la fundación. **Techo del vet = TODAS las especies de `cat_especies`**
 #### D-425 — Reactivación de cartera ("hace 8 meses que Max no viene")
 El motor de recordatorios apuntando al NEGOCIO (no a la familia); candidata barata post-v1 — pieza de la escalera gratis→comisión (§9: herramienta que hace que la transacción pase por adentro). **Disparo: post-v1 del oficio vet, cuando el founder la dispare.** Origen: S66 `MODELO_VETERINARIA.md` §16 (D-VET-12).
 
+### S66 — rescate S65 (registro diferido de las tres deudas del cierre S65)
+
+#### D-426 — Horarios propios del oficio (adiestramiento)
+🟢 MEDIA. El adiestramiento hereda la sección de horarios COMPARTIDA con el paseo (patrón del wizard S59); el oficio necesita declarar horarios propios, separados de la disponibilidad de paseo — un adiestrador puede pasear a la mañana y entrenar a la tarde, y hoy la configuración no lo distingue. **Disparo: al tocar el wizard de horarios del adiestrador (natural en la fundación V0, que generaliza la ocupación — evaluar absorberla ahí).** Origen: S65, registro diferido S66 — renumeradas: sus números originales (D-414/415/416) fueron asignados a deudas vet.
+
+#### D-427 — Espejo del dueño (vista del prestador)
+🟢 MEDIA. El prestador no tiene forma de ver lo que la familia ve de su trabajo (el parte, el clip, la bitácora en voz de familia); la vista espejo le permite verificar cómo llega su trabajo del otro lado. **Disparo: sin disparo declarado — a la mesa cuando el lado prestador de un oficio se pula.** Origen: S65, registro diferido S66 — renumeradas: sus números originales (D-414/415/416) fueron asignados a deudas vet.
+
+#### D-428 — Glifo del PROGRAMA (lenguaje b′)
+🟢 MEDIA. El PROGRAMA de adiestramiento no tiene ícono propio en el lenguaje b′ (DIRECCION_ARTE §2 — trazo + huella); hoy se representa con recursos genéricos. Nace como entrada nueva del registry de `Icono` con gate founder por ícono (§6). **Disparo: al tocar las pantallas del programa (mecánica D-315/D-390).** Origen: S65, registro diferido S66 — renumeradas: sus números originales (D-414/415/416) fueron asignados a deudas vet.
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)
