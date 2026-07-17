@@ -20,6 +20,7 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Boton,
   Campo,
+  ClipSesion,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
@@ -35,8 +36,11 @@ import {
   cerrarAtencionAdiestramiento,
   obtenerAdiestramientoPorCita,
   obtenerCitaAdiestramientoPorId,
+  obtenerClipsAdiestramiento,
   obtenerEstadoDuranteAdiestramiento,
   obtenerObjetivosAdiestramiento,
+  resolverUrlsClips,
+  type ClipAdiestramientoRegistrado,
   type EstadoDuranteAdiestramiento,
   type ObjetivoAdiestramientoCatalogo,
 } from '@epetplace/api';
@@ -51,6 +55,11 @@ type DatosListos = {
   registro: EstadoDuranteAdiestramiento;
   vocabulario: ObjetivoAdiestramientoCatalogo[];
   sesionKN: { k: number; n: number } | null;
+  /** S65 (hallazgo founder): los clips REGISTRADOS con su URL firmada —
+   *  "1 clip" dejó de ser texto muerto: ClipSesion los reproduce acá
+   *  (segundo consumidor del componente 34, como lo declaró su espec). */
+  clips: ClipAdiestramientoRegistrado[];
+  clipUrls: Record<string, string>;
 };
 
 type Pantalla =
@@ -97,6 +106,19 @@ export default function CierreAdiestramiento() {
       if (!registro.ok) return setPantalla({ estado: 'error', mensaje: registro.mensaje });
       if (!vocabulario.ok) return setPantalla({ estado: 'error', mensaje: vocabulario.mensaje });
 
+      // Los clips registrados, con URL firmada (bucket privado). Un
+      // fallo acá no rompe el parte: el conteo del registro sigue
+      // hablando y la UI muestra los que puede (patrón del dueño).
+      let clips: ClipAdiestramientoRegistrado[] = [];
+      let clipUrls: Record<string, string> = {};
+      if (registro.data.clips_total > 0) {
+        const rClips = await obtenerClipsAdiestramiento(atencion.data.adiestramiento_id);
+        if (rClips.ok && rClips.data.length > 0) {
+          clips = rClips.data;
+          clipUrls = await resolverUrlsClips(rClips.data.map((c) => c.storage_path));
+        }
+      }
+
       setPantalla({
         estado: 'listo',
         adiestramientoId: atencion.data.adiestramiento_id,
@@ -107,6 +129,8 @@ export default function CierreAdiestramiento() {
           cita.ok && cita.data.programa !== null && cita.data.sesion_numero !== null
             ? { k: cita.data.sesion_numero, n: cita.data.programa.n_sesiones }
             : null,
+        clips,
+        clipUrls,
       });
     },
     [citaId, router],
@@ -263,6 +287,26 @@ export default function CierreAdiestramiento() {
               </Text>
               {clipsLocales > 0 && datos.registro.clips_total === 0 && (
                 <Text style={vozSecundaria}>{t('clips.envioPendiente')}</Text>
+              )}
+
+              {/* S65 (hallazgo founder): el clip se VE donde el conteo
+                  lo nombra — ClipSesion (34), su segundo consumidor
+                  declarado. Escalera: 0 clips = no se monta; un path
+                  que no firmó se omite sin romper el parte. */}
+              {datos.clips.length > 0 && (
+                <View style={{ gap: spacing[3] }}>
+                  {datos.clips.map((c) => {
+                    const url = datos.clipUrls[c.storage_path];
+                    return url !== undefined ? (
+                      <ClipSesion
+                        key={c.id}
+                        uri={url}
+                        duracionSegundos={c.duracion_segundos}
+                        descripcion={c.descripcion}
+                      />
+                    ) : null;
+                  })}
+                </View>
               )}
             </View>
 

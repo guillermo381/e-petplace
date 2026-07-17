@@ -294,6 +294,28 @@ export async function obtenerEstadoDuranteAdiestramiento(
   };
 }
 
+/** Un clip REGISTRADO de la sesión (S65: el parte del prestador los
+ *  reproduce con ClipSesion — hasta acá el cierre solo decía "1 clip").
+ *  Las URLs se firman aparte con resolverUrlsClips (bucket privado). */
+export interface ClipAdiestramientoRegistrado {
+  id: string;
+  storage_path: string;
+  duracion_segundos: number | null;
+  descripcion: string | null;
+}
+
+export async function obtenerClipsAdiestramiento(
+  adiestramientoId: string,
+): Promise<ResultadoWrapper<ClipAdiestramientoRegistrado[], CodigoErrorAdiestramientoAtencion>> {
+  const { data, error } = await getClient()
+    .from('evento_adiestramiento_clips')
+    .select('id, storage_path, duracion_segundos, descripcion')
+    .eq('adiestramiento_id', adiestramientoId)
+    .order('orden', { ascending: true });
+  if (error) return fallo(error.message);
+  return { ok: true, data };
+}
+
 // ── Las RPCs del ciclo ──────────────────────────────────────────────────────
 
 export interface ResultadoIniciarAdiestramiento {
