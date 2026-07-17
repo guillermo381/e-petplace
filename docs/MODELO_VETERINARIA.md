@@ -408,22 +408,22 @@ construye** — deuda con disparo §16.
 5. **`BIO_EXPEDIENTE.md`**: nota de procedencia (§13) en E1/E2 cuando
    su construcción dispare — el campo nace en la fundación V0.
 
-## 16. DEUDAS NUEVAS (numeración A ASIGNAR contra DEUDAS_CANONICAS vivo)
+## 16. DEUDAS NUEVAS (D-414..D-425, registradas en DEUDAS_CANONICAS S66)
 
-- **D-VET-1 🔴** — Policy `caso_clinico_insert_vet` no valida relación
+- **D-414 🔴** — Policy `caso_clinico_insert_vet` no valida relación
   cuenta↔mascota. Cura ANTES de cualquier UI de caso (patrón D-314).
-- **D-VET-2** — Guard de coherencia `tabla_tipada` ↔ schema real en
+- **D-415** — Guard de coherencia `tabla_tipada` ↔ schema real en
   `cat_tipos_evento` (tercera aparición del copy-paste en
   relevamientos; un test/CHECK lo mata para siempre).
-- **D-VET-3** — Tabla `facturas` sin origen en migraciones: documentar
+- **D-416** — Tabla `facturas` sin origen en migraciones: documentar
   o jubilar (objeto huérfano de historial = drift esperando morder).
-- **D-VET-4** — Cuenta comercial sin rol en `cuenta_roles` (anomalía
+- **D-417** — Cuenta comercial sin rol en `cuenta_roles` (anomalía
   de datos relevada; explicar o curar).
-- **D-VET-5** — `requiere_resultado=true` en los 11 tipos médicos SIN
+- **D-418** — `requiere_resultado=true` en los 11 tipos médicos SIN
   mecanismo: se APAGA honesto en la fundación (L-139); se re-enciende
   cuando la letra de "resultado clínico" exista (candidata: el
   registro del Durante con procedencia verificada alcanza).
-- **D-VET-6 🟠 PRIORIDAD (founder S66)** — SRI integrado en la agenda
+- **D-419 🟠 PRIORIDAD (founder S66)** — SRI integrado en la agenda
   (emisión de comprobante desde el cobro): diferido de v1 pero PRIMERA
   tanda post-apertura — el país entero ya factura electrónico
   (transmisión inmediata desde ene-2026), hay proveedores maduros de
@@ -431,21 +431,21 @@ construye** — deuda con disparo §16.
   invención. Hasta entonces: el vet factura por fuera bajo su RUC
   (obligación legal que YA tiene); e-PetPlace factura solo su comisión
   (espejo white-label §2.3).
-- **D-VET-7** — Catálogos clínicos curados con validación veterinaria
+- **D-420** — Catálogos clínicos curados con validación veterinaria
   (disparo: Coach/alertas cruzadas los necesiten).
-- **D-VET-8** — Identidad digital verificable de la mascota (vista
+- **D-421** — Identidad digital verificable de la mascota (vista
   certificable del subconjunto verificado; primer caso: certificado de
   viaje). Destino declarado §13.
-- **D-VET-9** — Importación rica de historias previas (v1 = PDF
+- **D-422** — Importación rica de historias previas (v1 = PDF
   adjunto honesto, §14.4).
-- **D-VET-10** — Ocupación por capacidad de lugar (estadía) y recursos
+- **D-423** — Ocupación por capacidad de lugar (estadía) y recursos
   físicos como entidad de agenda (§3, huecos con disparo).
-- **D-VET-11** — `especies_elegibles` NULL en los 11 tipos médicos:
+- **D-424** — `especies_elegibles` NULL en los 11 tipos médicos:
   muere en la fundación. **Techo del vet = TODAS las especies de
   `cat_especies`** (D7 firmada — el vet es la puerta de los niveles
   B/C del multi-especie); cada negocio acota con
   `especies_compatibles`.
-- **D-VET-12** — Reactivación de cartera ("hace 8 meses que Max no
+- **D-425** — Reactivación de cartera ("hace 8 meses que Max no
   viene") — el motor de recordatorios apuntando al negocio; candidata
   barata post-v1.
 - **Fuera de scope declarado:** comisiones internas del staff (cómo la
@@ -460,7 +460,7 @@ construye** — deuda con disparo §16.
 - **V0 — FUNDACIÓN DB:** modelo de actor en el motor (ocupación por
   persona + semántica de concurrencia; deshacer la conspiración de
   NULLs de `empleado_id` en wrappers) · procedencia en eventos
-  clínicos · `empleado_id` en reseñas · curas D-VET-1/5/11 · catálogo
+  clínicos · `empleado_id` en reseñas · curas D-414/D-418/D-424 · catálogo
   mínimo de vacunas EC · tablas tipadas de caso. Todo L-140 de
   nacimiento. **Es la tanda más pesada y la más transversal — toca a
   los 4 oficios vivos; regla 76 estricta.**
@@ -474,7 +474,7 @@ construye** — deuda con disparo §16.
   clínico v1 + presupuesto (§8/§10/§11).
 - **V5 — EL PARTE Y EL SEDIMENTO:** timeline del dueño, voz humana,
   reputación dos capas.
-- **V6 — SRI (D-VET-6, prioridad post-apertura).**
+- **V6 — SRI (D-419, prioridad post-apertura).**
 
 Las trenzas finas y el interleaving con el resto de RUTA_F1 se deciden
 sesión a sesión, como manda la ruta.
@@ -516,7 +516,7 @@ sesión a sesión, como manda la ruta.
   sobre D-136) · Antes/Durante/Después con la nota IA como killer
   feature · vocabulario libre con excepción vacunas · PROCEDENCIA de
   eventos + identidad digital como destino · piso fiscal espejo
-  white-label con SRI en prioridad (D-VET-6) · precondiciones
+  white-label con SRI en prioridad (D-419) · precondiciones
   (verificación del vet, conversación real, importación honesta,
   muerte digna con diseño obligado) · 5 enmiendas disparadas · 12
   deudas nuevas · esqueleto de tandas V0-V6. Base de discovery

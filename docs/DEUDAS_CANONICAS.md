@@ -1751,6 +1751,44 @@ MODELO_ADIESTRAMIENTO).
 #### D-413 — Calibración de los rieles de precio del taller del adiestrador
 ⚪ BAJA. Los rangos del SliderPrecio/steppers del taller del adiestrador (sesión y programa) nacieron con valores razonables sin calibración founder — misma familia que los sugeridos del wizard S59 (§6.4, "con nota de calibración"). **Disparo: el gate founder del taller en dispositivo (lote S63), o la conversación con el adiestrador real (§10.3 — la misma que valida vocabulario y rangos de N).** Origen: declarado S63-B.
 
+### S66 — el vet y el modelo de actor (16 Jul 2026, `MODELO_VETERINARIA.md` v1.0 §16)
+
+#### D-414 — Policy `caso_clinico_insert_vet` no valida relación cuenta↔mascota
+🔴 ALTA. Hallazgo del relevamiento Bloque 0 S66 (1c/1g): el `with_check` de la policy valida SOLO la pertenencia del usuario a la `cuenta_comercial_tratante_id` — ninguna condición sobre `mascota_id`. Cura ANTES de cualquier UI de caso (patrón D-314). **Disparo: fundación V0 (§17 del modelo la lista entre sus curas) — y en todo caso antes de cualquier UI de caso clínico.** Origen: S66 `MODELO_VETERINARIA.md` §16 (D-VET-1).
+
+#### D-415 — Guard de coherencia `tabla_tipada` ↔ schema real en `cat_tipos_evento`
+Tercera aparición del copy-paste en relevamientos (S65 corrigió una en caliente; el Bloque 0 S66 encontró 6 `tabla_tipada` declaradas sin tabla real y la desalineación inversa en `medicacion_administrada`); un test/CHECK lo mata para siempre. **Disparo: sin disparo declarado en §16 — candidata natural: la próxima migración que toque `cat_tipos_evento` (la fundación V0 crea las tablas tipadas de caso).** Origen: S66 `MODELO_VETERINARIA.md` §16 (D-VET-2).
+
+#### D-416 — Tabla `facturas` sin origen en migraciones: documentar o jubilar
+Objeto huérfano de historial = drift esperando morder (relevamiento 3b: la tabla existe en DB con shape SRI y 0 filas, y no aparece en ninguna migración del repo). **Disparo: sin disparo declarado en §16; su resolución natural acompaña a D-419 (SRI).** Origen: S66 `MODELO_VETERINARIA.md` §16 (D-VET-3).
+
+#### D-417 — Cuenta comercial sin rol en `cuenta_roles`
+Anomalía de datos relevada (Bloque 0 S66, 2a: 4 cuentas, 3 roles); explicar o curar. **Disparo: sin disparo declarado en §16.** Origen: S66 `MODELO_VETERINARIA.md` §16 (D-VET-4).
+
+#### D-418 — `requiere_resultado=true` en los 11 tipos médicos SIN mecanismo
+Se APAGA honesto en la fundación (L-139); se re-enciende cuando la letra de "resultado clínico" exista (candidata: el registro del Durante con procedencia verificada alcanza). **Disparo: fundación V0.** Origen: S66 `MODELO_VETERINARIA.md` §16 (D-VET-5).
+
+#### D-419 — SRI integrado en la agenda (emisión de comprobante desde el cobro)
+🟠 ALTA. **PRIORIDAD founder S66 — primera tanda post-apertura vet.** Diferido de v1 pero PRIMERA tanda post-apertura — el país entero ya factura electrónico (transmisión inmediata desde ene-2026), hay proveedores maduros de firma/RIDE, y los competidores locales lo tienen. Es integración, no invención. Hasta entonces: el vet factura por fuera bajo su RUC (obligación legal que YA tiene); e-PetPlace factura solo su comisión (espejo white-label §2.3). **Disparo: la apertura del oficio vet (V6 del esqueleto §17).** Origen: S66 `MODELO_VETERINARIA.md` §16 (D-VET-6).
+
+#### D-420 — Catálogos clínicos curados con validación veterinaria
+Vademécum/diagnósticos/exámenes curados con validación veterinaria profesional — hoy no existe ningún `cat_*` clínico (relevamiento 1b) y v1 opera con texto libre + excepción vacunas EC (§12 del modelo). **Disparo: que el Coach o las alertas cruzadas los necesiten para razonar.** Origen: S66 `MODELO_VETERINARIA.md` §16 (D-VET-7).
+
+#### D-421 — Identidad digital verificable de la mascota
+Vista certificable del subconjunto VERIFICADO del expediente (no un sistema nuevo); primer caso de uso real: el certificado de viaje. Destino declarado en §13 del modelo — se declara, no se construye. **Disparo: el primer certificado emitible sobre procedencia verificada (post-verificación del vet, §14.2).** Origen: S66 `MODELO_VETERINARIA.md` §16 (D-VET-8).
+
+#### D-422 — Importación rica de historias previas
+v1 = PDF/foto adjunto honesto al expediente (evento con archivo, procedencia declarada — §14.4 del modelo); la importación estructurada rica es esta deuda. **Disparo: sin disparo declarado en §16 — la precondición §14.4 (camino honesto) es de apertura; esto es su evolución.** Origen: S66 `MODELO_VETERINARIA.md` §16 (D-VET-9).
+
+#### D-423 — Ocupación por capacidad de lugar (estadía) y recursos físicos como entidad de agenda
+Tercera semántica de concurrencia NO modelada (caniles: capacidad del lugar, no manos) + recursos físicos (quirófano, rayos, tina) fuera del motor v1 (§3 del modelo, huecos declarados). **Disparo: estadía → el primer servicio de estadía que abra (hotel vive en "próximamente honesto"); recursos físicos → la primera clínica real que choque.** Origen: S66 `MODELO_VETERINARIA.md` §16 (D-VET-10).
+
+#### D-424 — `especies_elegibles` NULL en los 11 tipos médicos
+Muere en la fundación. **Techo del vet = TODAS las especies de `cat_especies`** (D7 firmada — el vet es la puerta de los niveles B/C del multi-especie); cada negocio acota con `especies_compatibles`. **Disparo: fundación V0.** Origen: S66 `MODELO_VETERINARIA.md` §16 (D-VET-11).
+
+#### D-425 — Reactivación de cartera ("hace 8 meses que Max no viene")
+El motor de recordatorios apuntando al NEGOCIO (no a la familia); candidata barata post-v1 — pieza de la escalera gratis→comisión (§9: herramienta que hace que la transacción pase por adentro). **Disparo: post-v1 del oficio vet, cuando el founder la dispare.** Origen: S66 `MODELO_VETERINARIA.md` §16 (D-VET-12).
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)
