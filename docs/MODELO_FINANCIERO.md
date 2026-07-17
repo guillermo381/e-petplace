@@ -1,8 +1,9 @@
 # MODELO_FINANCIERO.md — e-PetPlace
 
 > Documento maestro del motor financiero del ecosistema e-PetPlace.
-> Última actualización: 15 Jul 2026 v2.8 — Decisión U FIRMADA (S63, la construcción del programa disparó la candidata de MODELO_ADIESTRAMIENTO v1.0): el PROGRAMA de adiestramiento — un pago, N devengos SECUENCIALES jamás FIFO; el invariante 'pagada' gana su CUARTO escritor (`contratar_programa`); vigencia vencida = reembolso proporcional DECLARADO (patrón P14a/7.14) + motivo capturado sin triage v1.
+> Última actualización: 16 Jul 2026 v2.9 — Enmiendas S66 disparadas por `MODELO_VETERINARIA.md` v1.0 (§15.1): §2.7 REESCRITO (el choque letra-vs-DB relevado en el Bloque 0 S66 se resuelve — `uq_prestadores_user_id` GANA: humano→prestador queda 1:1; la multiplicidad vive en cuenta→sedes y cuenta→personas) + §2.8 NUEVO (gratis+comisión como patrón de plataforma para todo prestador, con la línea premium declarada sin dibujar).
 > Versiones anteriores:
+>   - v2.8 (15 Jul 2026 — Decisión U FIRMADA (S63): el PROGRAMA de adiestramiento — un pago, N devengos SECUENCIALES jamás FIFO; el invariante 'pagada' gana su CUARTO escritor (`contratar_programa`); vigencia vencida = reembolso proporcional DECLARADO (patrón P14a/7.14) + motivo capturado sin triage v1).
 >   - v2.7 (12 Jul 2026 — P18 el paseo SUELTO cancelado: el reembolso de un pago SIN devengo se DECLARA sobre el pago — patrón 7.14 enmendada; el no-show del suelto usa el cierre de Decisión T; el saldo e-PetPlace DECLARADO Y APAGADO. Regla 7.16).
 >   - v2.6 (12 Jul 2026 — Decisión T: el PAQUETE de salidas — un pago, N devengos FIFO a precio de origen, el no-show devenga, las vencidas son breakage DECLARADO; regla 7.15 + comisión visible desde `fee_configs`).
 >   - v2.5 (11 Jul 2026 — Decisión S: el PLAN de paseo cobra por período mensual, un pago, N devengos — variante (b) intacta).
@@ -202,13 +203,32 @@ Implicancia técnica: `tipo_actor` NO es columna en `cuentas_comerciales`. Vive 
 
 **Coherencia entre las 4 tablas operativas:** todas las tablas operativas (`prestadores`, `seller_perfil`, `criaderos`, `refugios`) son consistentes en NO tener datos fiscales propios. RUC, razón social, datos bancarios viven SOLO en `cuentas_comerciales`. Cualquier query que necesite mostrar esos datos en contexto operativo lo hace via JOIN. NUNCA duplicar.
 
-### 2.7 Multi-sede para prestadores
+### 2.7 Multi-sede y multi-persona (reescrito S66 — modelo de actor)
 
-Un mismo dueño humano puede operar N sedes (clínicas, locales) bajo la misma cuenta comercial. Cada sede es una fila independiente en `prestadores`, con su propio nombre operativo, dirección, agenda, servicios y empleados.
+Un mismo negocio (cuenta comercial) puede operar N sedes y emplear N
+personas. **La multiplicidad vive en cuenta→sedes y cuenta→personas,
+NO en humano→filas de prestador**: `prestadores.user_id` ES UNIQUE
+(`uq_prestadores_user_id` — la DB tenía razón; la letra anterior
+describía una arquitectura que el modelo de actor de
+`MODELO_VETERINARIA.md` PARTE I reemplaza). La persona natural con
+negocio propio es el caso degenerado de negocio con staff = 1.
+La liquidación sigue siendo por `cuenta_comercial`, consolidada con
+desglose (sin cambio). El contrato del modelo de actor —
+vitrina/ocupación, concurrencia por servicio, reputación dos capas —
+vive en `MODELO_VETERINARIA.md` PARTE I.
 
-Implicancia técnica: `prestadores.user_id` NO es UNIQUE (un humano = N filas en prestadores posibles). El guardrail es `UNIQUE(cuenta_comercial_id, nombre_comercial)`: una cuenta no puede tener dos sedes con el mismo nombre operativo.
+### 2.8 Gratis + comisión como patrón de plataforma (founder S66)
 
-Implicancia para liquidaciones: la liquidación es por `cuenta_comercial`, no por sede. Si Don Pepe tiene Quito y Guayaquil bajo la misma cuenta, recibe UNA sola liquidación consolidando lo cobrado en ambas sedes.
+Las herramientas que hacen que la transacción pase por la plataforma
+(agenda, registros del oficio, recordatorios, reporte de
+rentabilidad básico) son GRATIS para todo prestador — jamás se
+cobran: son el candado que sostiene §2.1 y §2.5. Los cuatro oficios
+ya operaban así de hecho; el vet lo hizo visible (primer oficio con
+competencia de herramienta). Funcionalidad PREMIUM con fee es
+candidata SOLO para lo que va más allá de la transacción (analítica
+avanzada, marketing a cartera, multi-sede avanzado) — la infra
+existe (`revenue_stream`, suscripciones preparadas); v1 no dibuja
+nada premium. La letra fina del premium se dicta cuando dispare.
 
 ---
 
@@ -1049,6 +1069,12 @@ Este documento es el contrato técnico-conceptual del motor financiero. Cambiarl
 ---
 
 ## 15. Cambios entre versiones
+
+### v2.9 (16 Jul 2026 — S66, post v2.8)
+
+**Enmiendas disparadas por `MODELO_VETERINARIA.md` v1.0 §15.1 (letra firmada founder S66):**
+- **(a) §2.7 REESCRITO — "Multi-sede y multi-persona (modelo de actor)".** El choque relevado en el Bloque 0 S66: la letra decía "`prestadores.user_id` NO es UNIQUE (un humano = N filas en prestadores posibles)" y la DB viva tiene `uq_prestadores_user_id`. Decisión founder S66: **el índice GANA** — humano→prestador queda 1:1; la multiplicidad vive en cuenta→sedes y cuenta→personas (modelo de actor, `MODELO_VETERINARIA.md` PARTE I). La liquidación sigue por `cuenta_comercial`, consolidada con desglose (sin cambio).
+- **(b) §2.8 NUEVO — gratis+comisión como patrón de plataforma.** Lo transaccional (agenda, registros del oficio, recordatorios, reporte básico) es GRATIS para todo prestador — el candado de §2.1/§2.5; premium candidato SOLO para lo que va más allá de la transacción; v1 no dibuja nada premium.
 
 ### v2.7 (12 Jul 2026 — S57, post v2.6)
 
