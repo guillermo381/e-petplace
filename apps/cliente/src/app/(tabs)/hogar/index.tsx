@@ -24,7 +24,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StatusBar, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { router, useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import {
@@ -180,9 +180,12 @@ type ItemHogar = ItemTimeline & { mascota_id: string };
 
 // El filtro por TIPO habla en familias de servicio (Ley 3) — el código
 // del evento jamás sale de acá. 'otros' pasa solo sin filtro activo.
-const FAMILIA_DE_TIPO: Record<string, 'paseos' | 'estetica' | 'vacunas'> = {
+const FAMILIA_DE_TIPO: Record<string, 'paseos' | 'estetica' | 'adiestramiento' | 'vacunas'> = {
   atencion_paseo_registrada: 'paseos',
   atencion_grooming_registrada: 'estetica',
+  // S65 (hallazgo founder): la sesión cerrada no tenía familia — sin
+  // chip en "¿Qué momentos?" y con filtro activo desaparecía.
+  atencion_adiestramiento_registrada: 'adiestramiento',
   vacuna_aplicada: 'vacunas',
 };
 
@@ -252,6 +255,18 @@ function DetalleNodoHogar({ atencionId, onVerCompleto }: { atencionId: string; o
       {detalle.oficio === 'paseo' ? (
         <View style={{ alignSelf: 'flex-start' }}>
           <Boton variante="compacto" etiqueta={t('hogar.acordeonVerCompleto')} onPress={onVerCompleto} />
+        </View>
+      ) : detalle.oficio === 'adiestramiento' && detalle.cita_id !== null ? (
+        // S65: la sesión tiene SU parte — el acordeón invita a verlo
+        // entero (progresión, clips, instrucciones), como el paseo.
+        <View style={{ alignSelf: 'flex-start' }}>
+          <Boton
+            variante="compacto"
+            etiqueta={t('hogar.acordeonVerCompleto')}
+            onPress={() =>
+              router.push({ pathname: '/adiestramiento/[citaId]', params: { citaId: detalle.cita_id as string } })
+            }
+          />
         </View>
       ) : null}
     </View>
@@ -866,6 +881,7 @@ export default function Hogar() {
                   opciones={[
                     { codigo: 'paseos', etiqueta: t('hogar.filtroPaseos') },
                     { codigo: 'estetica', etiqueta: t('hogar.filtroEstetica') },
+                    { codigo: 'adiestramiento', etiqueta: t('hogar.filtroAdiestramiento') },
                     { codigo: 'vacunas', etiqueta: t('hogar.filtroVacunas') },
                   ]}
                   seleccionadas={filtroTipos}

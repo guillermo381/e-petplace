@@ -71,6 +71,9 @@ const DICCIONARIO: Record<string, { clave: VozTimeline; capa: CapaNodo }> = {
   // S61-A11 (hallazgo con cura): el grooming cerrado YA escribía
   // atencion_grooming_registrada y degradaba a voz genérica — gana voz.
   atencion_grooming_registrada: { clave: 'lineaDeVida.vozGrooming', capa: 'cuidado' },
+  // S65 (hallazgo founder, mismo patrón que el grooming S61): la sesión
+  // de adiestramiento degradaba a "Momento guardado" — gana voz.
+  atencion_adiestramiento_registrada: { clave: 'lineaDeVida.vozAdiestramiento', capa: 'cuidado' },
   alta_asistida_completada_por_cliente: { clave: 'lineaDeVida.vozAlta', capa: 'identidad' },
   // cita_servicio: intencionalmente AUSENTE — no se muestra (ver header).
 }

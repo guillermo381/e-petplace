@@ -23,6 +23,9 @@ export const uiEs = {
     // al riel — lote es/en aprobado por founder en S51/S52; la CAPA
     // sigue cerrada en el componente, Ley 3):
     vozPaseo: 'Paseo',
+    // S65 (hallazgo founder): la sesión cerrada renderizaba el
+    // genérico "Momento guardado" — gana voz, como el grooming en S61.
+    vozAdiestramiento: 'Sesión de adiestramiento',
     vozAlta: 'Se sumó a la familia',
     vozVacuna: 'Recibió la vacuna {{nombre}}',
     vozVacunaSinNombre: 'Recibió una vacuna',

@@ -232,10 +232,15 @@ export interface DetalleAtencion {
    *  grooming la hace presidir (avatar + estado). */
   mascota_id: string | null;
   /** S60 (hunk aditivo A): el oficio de la atención, derivado de su fila
-   *  hija (eventos_mascota_paseo / eventos_mascota_grooming). null =
-   *  atención sin fila de oficio (legacy). El vivo bifurca su hero con
-   *  esto: paseo = mapa/GPS honesto; grooming = SIN mapa, sin cicatriz. */
-  oficio: 'paseo' | 'grooming' | null;
+   *  hija (eventos_mascota_paseo / eventos_mascota_grooming /
+   *  eventos_mascota_adiestramiento — S65). null = atención sin fila de
+   *  oficio (legacy). El vivo bifurca su hero con esto: paseo = mapa/GPS
+   *  honesto; grooming = SIN mapa, sin cicatriz. */
+  oficio: 'paseo' | 'grooming' | 'adiestramiento' | null;
+  /** S65 (hallazgo founder): la cita de la atención — el acordeón del
+   *  adiestramiento navega con ella a SU parte (/adiestramiento/[citaId]).
+   *  null = atención sin cita (legacy). */
+  cita_id: string | null;
 }
 
 export async function leerDetalleAtencion(
@@ -243,7 +248,7 @@ export async function leerDetalleAtencion(
 ): Promise<ResultadoWrapper<DetalleAtencion, CodigoErrorTimeline>> {
   const { data: at, error } = await getClient()
     .from('evento_atencion')
-    .select('id, evento_id, estado, iniciada_en, terminada_en, cerrada_en, mensaje_familia, prestador_id, mascota_id')
+    .select('id, evento_id, estado, iniciada_en, terminada_en, cerrada_en, mensaje_familia, prestador_id, mascota_id, cita_id')
     .eq('id', atencionId)
     .maybeSingle();
   if (error) return fallo('error_desconocido');
@@ -272,7 +277,7 @@ export async function leerDetalleAtencion(
   // cuidados con voz de familia (D-387) y las fotos de SU bucket
   // (grooming-archivos; la policy de acceso-por-mascota nació en la
   // migración 20260714060000 — sin ella el dueño no firmaba la URL).
-  let oficio: 'paseo' | 'grooming' | null = paseo.data !== null ? 'paseo' : null;
+  let oficio: 'paseo' | 'grooming' | 'adiestramiento' | null = paseo.data !== null ? 'paseo' : null;
   let proximaSugerida: string | null = null;
   let serviciosAplicados: ServicioAplicadoFamilia[] = [];
   const fotosGrooming: FotoDeEvento[] = [];
@@ -340,6 +345,46 @@ export async function leerDetalleAtencion(
     }
   }
 
+  // S65 (hallazgo founder): la TERCERA hija — la sesión de adiestramiento.
+  // Mismo trato que el grooming: los objetivos trabajados viajan en voz
+  // de familia por el MISMO slot (servicios_aplicados) — el acordeón de
+  // la vida los pinta sin UI nueva. RLS: las hijas leen por
+  // user_tiene_acceso_a_mascota (relevado S65) — el dueño lee directo.
+  if (oficio === null) {
+    const d = await getClient()
+      .from('eventos_mascota_adiestramiento')
+      .select('id')
+      .eq('evento_atencion_id', atencionId)
+      .maybeSingle();
+    if (!d.error && d.data !== null) {
+      oficio = 'adiestramiento';
+      const objetivos = await getClient()
+        .from('evento_adiestramiento_objetivos')
+        .select('objetivo_codigo, alcanzado')
+        .eq('adiestramiento_id', d.data.id)
+        .order('objetivo_codigo', { ascending: true });
+      if (!objetivos.error && (objetivos.data ?? []).length > 0) {
+        const catalogo = await getClient()
+          .from('cat_objetivos_adiestramiento')
+          .select('codigo, nombre, nombre_familia, nombre_familia_en');
+        const vozPorCodigo = new Map(
+          (catalogo.data ?? []).map((c) => [
+            c.codigo,
+            { voz: c.nombre_familia ?? c.nombre, voz_en: c.nombre_familia_en ?? c.nombre },
+          ]),
+        );
+        serviciosAplicados = (objetivos.data ?? []).map((o) => {
+          const voz = vozPorCodigo.get(o.objetivo_codigo);
+          return {
+            codigo: o.objetivo_codigo,
+            voz: voz?.voz ?? o.objetivo_codigo,
+            voz_en: voz?.voz_en ?? o.objetivo_codigo,
+          };
+        });
+      }
+    }
+  }
+
   let novedades: NovedadDeAtencion[] = [];
   if (paseo.data !== null) {
     const r = await getClient()
@@ -389,6 +434,7 @@ export async function leerDetalleAtencion(
       proxima_sesion_sugerida: proximaSugerida,
       mascota_id: at.mascota_id ?? null,
       oficio,
+      cita_id: at.cita_id ?? null,
     },
   };
 }

@@ -17,6 +17,9 @@ export const uiEn = {
     reintentar: 'Try again',
     errorCargarMas: "We couldn't load more moments.",
     vozPaseo: 'Walk',
+    // S65 (founder finding): the closed session rendered the generic
+    // "Saved moment" — gains its voice, like grooming did in S61.
+    vozAdiestramiento: 'Training session',
     vozAlta: 'Joined the family',
     vozVacuna: 'Got the {{nombre}} vaccine',
     vozVacunaSinNombre: 'Got a vaccine',

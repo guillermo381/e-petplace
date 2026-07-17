@@ -108,6 +108,7 @@ export const clienteEs = {
     filtroQuien: '¿De quién?',
     filtroQue: '¿Qué momentos?',
     filtroPaseos: 'Paseos',
+    filtroAdiestramiento: 'Adiestramiento',
     filtroEstetica: 'Estética',
     filtroVacunas: 'Vacunas',
     filtroSinMomentos: 'Nada por acá con esos filtros.',
