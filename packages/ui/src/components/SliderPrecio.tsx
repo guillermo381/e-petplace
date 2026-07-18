@@ -7,8 +7,19 @@
  * ═══════════════════════════════════════════════════════════════════
  * QUÉ NO ES: no es un slider continuo (los pasos son DISCRETOS — el
  * precio del oficio se elige entre valores reales, jamás interpolado),
- * no porta el display del valor (voz de la pantalla), no valida rangos
- * (el server es el juez). Presentacional puro.
+ * no valida rangos (el server es el juez). Presentacional puro.
+ *
+ * ENMIENDA S68-B7 (firma founder del gate, hallazgo Bloque I): el
+ * componente GANA el display del valor con TAP → edición numérica con
+ * teclado (prop `edicionNumerica`, default true). La entrada se clampa
+ * al riel y se REDONDEA al paso más cercano al confirmar — jamás un
+ * valor ilegal. Es la excepción FIRMADA a la regla del teclado §15b
+ * ("lo que se ajusta no se digita"): el pulgar elige, el teclado afina.
+ * Los valores numéricos se derivan de las etiquetas de `pasos` (todas
+ * los consumidores hablan "$X.XX"); si alguna etiqueta no parsea, la
+ * edición se apaga sola y el valor queda como display (jamás roto).
+ * Los displays de valor DUPLICADOS de las pantallas murieron con esta
+ * enmienda (Chanel) — el valor vive acá, UNA vez.
  * ═══════════════════════════════════════════════════════════════════
  *
  * Anatomía: riel hundido (bg.overlay) con puntos por paso + tramo
@@ -29,14 +40,17 @@
  * peldaños no aplican (declarado explícito).
  */
 
-import { useState } from 'react'
-import { View } from 'react-native'
+import { useMemo, useState } from 'react'
+import { Pressable, Text, TextInput, View } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, { cubicBezier } from 'react-native-reanimated'
 import { palette } from '../tokens/palette'
 import { radius } from '../tokens/radius'
 import { motion } from '../tokens/motion'
+import { typography } from '../tokens/typography'
+import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
+import { useTraduccionUi } from '../i18n'
 import type { IconoRegistro } from './Icono'
 
 const ALTO_RIEL = 4
@@ -59,11 +73,34 @@ export interface SliderPrecioProps {
    *  'aa' · 'tinta' (la vista ya porta su acento) · 'control' (S58,
    *  acento de controles del cliente — accent.control). */
   registro?: IconoRegistro | 'control'
+  /** S68-B7 (firma founder): el valor mono integrado con TAP → edición
+   *  numérica clampeada al riel y redondeada al paso. Default true;
+   *  false = sin display de valor (la pantalla porta el suyo). */
+  edicionNumerica?: boolean
 }
 
-export function SliderPrecio({ pasos, indice, onCambio, onStep, etiqueta, registro = 'capa' }: SliderPrecioProps) {
+// los valores numéricos derivados de las etiquetas ("$25.00" → 25) —
+// si alguna no parsea, la edición se apaga sola (jamás valor ilegal)
+function numeroDeEtiqueta(etiqueta: string): number {
+  return Number.parseFloat(etiqueta.replace(/[^0-9.,-]/g, '').replace(',', '.'))
+}
+
+export function SliderPrecio({
+  pasos,
+  indice,
+  onCambio,
+  onStep,
+  etiqueta,
+  registro = 'capa',
+  edicionNumerica = true,
+}: SliderPrecioProps) {
   const { theme } = useTheme()
+  const { t } = useTraduccionUi()
   const [ancho, setAncho] = useState(0)
+  // S68-B7: la edición numérica — estado interno; la pantalla sigue
+  // siendo dueña del VALOR (solo recibe onCambio con un índice legal)
+  const [editando, setEditando] = useState(false)
+  const [texto, setTexto] = useState('')
 
   if (__DEV__ && pasos.length < 2) {
     console.warn(`SliderPrecio: ${pasos.length} paso(s) — un slider de menos de 2 pasos no es un slider.`)
@@ -118,8 +155,78 @@ export function SliderPrecio({ pasos, indice, onCambio, onStep, etiqueta, regist
       irA(indiceDesdeX(e.x))
     })
 
+  // S68-B7: los números del riel — memoizados de las etiquetas; NaN en
+  // cualquiera apaga la edición (degradación honesta, jamás rota)
+  const numeros = useMemo(() => pasos.map(numeroDeEtiqueta), [pasos])
+  const editable = edicionNumerica && numeros.every((v) => Number.isFinite(v))
+
+  const confirmarEdicion = () => {
+    setEditando(false)
+    const v = Number.parseFloat(texto.replace(',', '.'))
+    if (!Number.isFinite(v)) return // entrada vacía/ilegal = se cancela sereno
+    // clamp al riel + redondeo al paso MÁS CERCANO — jamás valor ilegal
+    let mejor = 0
+    for (let i = 1; i < numeros.length; i++) {
+      if (Math.abs(numeros[i] - v) < Math.abs(numeros[mejor] - v)) mejor = i
+    }
+    irA(mejor)
+  }
+
+  const filaValor = edicionNumerica ? (
+    <View style={{ alignItems: 'flex-end', marginBottom: spacing[1] }}>
+      {editando ? (
+        <TextInput
+          value={texto}
+          onChangeText={setTexto}
+          keyboardType="decimal-pad"
+          autoFocus
+          selectTextOnFocus
+          onBlur={confirmarEdicion}
+          onSubmitEditing={confirmarEdicion}
+          accessibilityLabel={etiqueta}
+          style={{
+            fontFamily: typography.family.mono.regular,
+            fontSize: typography.size.lg,
+            fontVariant: ['tabular-nums'],
+            color: theme.text.primary,
+            borderBottomWidth: 1.5,
+            borderBottomColor: acento,
+            paddingVertical: 2,
+            minWidth: 72,
+            textAlign: 'right',
+          }}
+        />
+      ) : (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={etiqueta}
+          accessibilityHint={editable ? t('sliderPrecio.editarHint') : undefined}
+          disabled={!editable}
+          onPress={() => {
+            setTexto(Number.isFinite(numeros[idx]) ? String(numeros[idx]) : '')
+            setEditando(true)
+          }}
+          style={{ paddingVertical: 2 }}
+        >
+          <Text
+            style={{
+              fontFamily: typography.family.mono.regular,
+              fontSize: typography.size.lg,
+              fontVariant: ['tabular-nums'],
+              color: theme.text.primary,
+            }}
+          >
+            {pasos[idx] ?? ''}
+          </Text>
+        </Pressable>
+      )}
+    </View>
+  ) : null
+
   return (
-    <GestureDetector gesture={pan}>
+    <View>
+      {filaValor}
+      <GestureDetector gesture={pan}>
       <View
         accessible
         accessibilityRole="adjustable"
@@ -179,7 +286,8 @@ export function SliderPrecio({ pasos, indice, onCambio, onStep, etiqueta, regist
                 },
           ]}
         />
-      </View>
-    </GestureDetector>
+        </View>
+      </GestureDetector>
+    </View>
   )
 }

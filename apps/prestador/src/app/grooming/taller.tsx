@@ -659,27 +659,16 @@ export default function TallerGrooming() {
                             seleccionada={talla}
                             onSelect={(codigo) => setTallaSel((prev) => ({ ...prev, [s]: codigo as TallaGrooming }))}
                           />
-                          <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' }}>
-                            <Text
-                              style={{
-                                fontFamily: typography.family.sans.regular,
-                                fontSize: typography.size.sm,
-                                color: theme.text.secondary,
-                              }}
-                            >
-                              {t('servicios.precio')}
-                            </Text>
-                            <Text
-                              style={{
-                                fontFamily: typography.family.mono.regular,
-                                fontSize: typography.size.lg,
-                                fontVariant: ['tabular-nums'],
-                                color: theme.text.primary,
-                              }}
-                            >
-                              {etiquetasServicio[indiceEn(pasosServicio, dt.precio)]}
-                            </Text>
-                          </View>
+                          {/* S68-B7: el valor vive dentro del slider (Chanel) */}
+                          <Text
+                            style={{
+                              fontFamily: typography.family.sans.regular,
+                              fontSize: typography.size.sm,
+                              color: theme.text.secondary,
+                            }}
+                          >
+                            {t('servicios.precio')}
+                          </Text>
                           <SliderPrecio
                             etiqueta={`${t('servicios.precio')} · ${vozServicio(s)} · ${vozTalla(talla)}`}
                             pasos={etiquetasServicio}
@@ -730,28 +719,16 @@ export default function TallerGrooming() {
                   </View>
                   {extraActivo && (
                     <>
-                      <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: spacing[3] }}>
-                        <Text
-                          style={{
-                            flex: 1,
-                            fontFamily: typography.family.sans.regular,
-                            fontSize: typography.size.sm,
-                            color: theme.text.secondary,
-                          }}
-                        >
-                          {t('tallerGrooming.extraRotulo')}
-                        </Text>
-                        <Text
-                          style={{
-                            fontFamily: typography.family.mono.regular,
-                            fontSize: typography.size.lg,
-                            fontVariant: ['tabular-nums'],
-                            color: theme.text.primary,
-                          }}
-                        >
-                          {etiquetasExtra[indiceEn(pasosExtra, extraMonto)]}
-                        </Text>
-                      </View>
+                      {/* S68-B7: el valor vive dentro del slider (Chanel) */}
+                      <Text
+                        style={{
+                          fontFamily: typography.family.sans.regular,
+                          fontSize: typography.size.sm,
+                          color: theme.text.secondary,
+                        }}
+                      >
+                        {t('tallerGrooming.extraRotulo')}
+                      </Text>
                       <SliderPrecio
                         etiqueta={t('tallerGrooming.extraRotulo')}
                         pasos={etiquetasExtra}
@@ -831,28 +808,16 @@ export default function TallerGrooming() {
                       </View>
                       {recargoActivo && (
                         <>
-                          <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: spacing[3] }}>
-                            <Text
-                              style={{
-                                flex: 1,
-                                fontFamily: typography.family.sans.regular,
-                                fontSize: typography.size.sm,
-                                color: theme.text.secondary,
-                              }}
-                            >
-                              {t('tallerGrooming.recargoRotulo')}
-                            </Text>
-                            <Text
-                              style={{
-                                fontFamily: typography.family.mono.regular,
-                                fontSize: typography.size.lg,
-                                fontVariant: ['tabular-nums'],
-                                color: theme.text.primary,
-                              }}
-                            >
-                              {etiquetasExtra[indiceEn(pasosExtra, recargoMonto)]}
-                            </Text>
-                          </View>
+                          {/* S68-B7: el valor vive dentro del slider (Chanel) */}
+                          <Text
+                            style={{
+                              fontFamily: typography.family.sans.regular,
+                              fontSize: typography.size.sm,
+                              color: theme.text.secondary,
+                            }}
+                          >
+                            {t('tallerGrooming.recargoRotulo')}
+                          </Text>
                           <SliderPrecio
                             etiqueta={t('tallerGrooming.recargoRotulo')}
                             pasos={etiquetasExtra}

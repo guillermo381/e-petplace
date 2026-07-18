@@ -14,8 +14,8 @@
  * (packages/ui) y subida por lib/subir-documento (patrón S61-B10).
  */
 
-import { useCallback, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { Image, ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -31,6 +31,7 @@ import {
   Tarjeta,
   capturarConCamara,
   capturarDeGaleria,
+  radius,
   spacing,
   typography,
   useAviso,
@@ -40,6 +41,7 @@ import {
   TIPOS_DOCUMENTO_VERIFICACION,
   obtenerDocumentosVerificacion,
   obtenerMiPrestador,
+  resolverUrlDocumento,
   type DocumentoVerificacion,
   type TipoDocumentoVerificacion,
 } from '@epetplace/api';
@@ -52,6 +54,13 @@ type Pantalla =
   | { estado: 'error' }
   | { estado: 'listo'; prestadorId: string; documentos: DocumentoVerificacion[] };
 
+// S68-B7 (hallazgo founder: "en revisión" sin mostrar NADA de lo
+// subido): miniatura por URL firmada del bucket privado. Un archivo que
+// no es imagen (PDF) cae al placeholder digno — jamás miniatura rota.
+const esImagen = (path: string): boolean => /\.(jpe?g|png|webp|heic)$/i.test(path);
+const nombreArchivo = (path: string): string => path.split('/').pop() ?? path;
+const extension = (path: string): string => (path.includes('.') ? path.split('.').pop() ?? '' : '').toUpperCase();
+
 export default function VerificacionVeterinaria() {
   const router = useRouter();
   const { theme } = useTheme();
@@ -63,6 +72,8 @@ export default function VerificacionVeterinaria() {
   const [intento, setIntento] = useState(0);
   const [hojaTipo, setHojaTipo] = useState<TipoDocumentoVerificacion | null>(null);
   const [subiendo, setSubiendo] = useState<TipoDocumentoVerificacion | null>(null);
+  // las miniaturas firmadas, por path (null = no firmable → placeholder)
+  const [previews, setPreviews] = useState<Record<string, string | null>>({});
 
   useFocusEffect(
     useCallback(() => {
@@ -87,6 +98,27 @@ export default function VerificacionVeterinaria() {
       };
     }, [intento]),
   );
+
+  // firmar las miniaturas de los documentos VIGENTES (imagen solamente)
+  useEffect(() => {
+    if (pantalla.estado !== 'listo') return;
+    let vigente = true;
+    const paths = TIPOS_DOCUMENTO_VERIFICACION.map(
+      (tipo) => pantalla.documentos.find((d) => d.tipo === tipo)?.archivoPath ?? null,
+    ).filter((p): p is string => p !== null && esImagen(p));
+    void (async () => {
+      for (const path of paths) {
+        if (previews[path] !== undefined) continue;
+        const url = await resolverUrlDocumento(path);
+        if (!vigente) return;
+        setPreviews((prev) => ({ ...prev, [path]: url }));
+      }
+    })();
+    return () => {
+      vigente = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pantalla]);
 
   const vozTipo = (tipo: TipoDocumentoVerificacion): string =>
     tipo === 'titulo_profesional' ? t('verificacionVet.tituloProfesional') : t('verificacionVet.registroSenescyt');
@@ -251,6 +283,58 @@ export default function VerificacionVeterinaria() {
                   >
                     {vozEstado(doc)}
                   </Text>
+                  {/* S68-B7: lo SUBIDO se ve — miniatura firmada del
+                      bucket privado; no-imagen (PDF) = placeholder
+                      digno con nombre y tipo, jamás miniatura rota */}
+                  {doc !== null && (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+                      {esImagen(doc.archivoPath) && previews[doc.archivoPath] != null ? (
+                        <Image
+                          source={{ uri: previews[doc.archivoPath] as string }}
+                          accessibilityLabel={vozTipo(tipo)}
+                          style={{
+                            width: 72,
+                            height: 72,
+                            borderRadius: radius.suave,
+                            backgroundColor: theme.bg.overlay,
+                          }}
+                          resizeMode="cover"
+                        />
+                      ) : (
+                        <View
+                          style={{
+                            width: 72,
+                            height: 72,
+                            borderRadius: radius.suave,
+                            backgroundColor: theme.bg.overlay,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <Text
+                            style={{
+                              fontFamily: typography.family.mono.regular,
+                              fontSize: typography.size.sm,
+                              color: theme.text.secondary,
+                            }}
+                          >
+                            {extension(doc.archivoPath) || '—'}
+                          </Text>
+                        </View>
+                      )}
+                      <Text
+                        numberOfLines={2}
+                        style={{
+                          flex: 1,
+                          fontFamily: typography.family.mono.regular,
+                          fontSize: typography.size.sm,
+                          color: theme.text.secondary,
+                        }}
+                      >
+                        {nombreArchivo(doc.archivoPath).toLowerCase()}
+                      </Text>
+                    </View>
+                  )}
                   {/* aprobado no re-sube (nada que reparar); el resto sí */}
                   {!aprobado && (
                     <View style={{ alignSelf: 'flex-start' }}>

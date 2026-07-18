@@ -1051,6 +1051,9 @@ export const prestadorEs = {
     otraPlaceholder: 'Etología clínica',
     otraAgregar: 'Agregar',
     pendienteCatalogo: 'Deja lista tu configuración — se activa cuando el catálogo del oficio quede listo.',
+    // S68-B7: con ?item= las demás tarjetas nacen plegadas — este es su
+    // camino de un toque
+    desplegar: 'Ajustar',
   },
   veterinaria: {
     titulo: 'Veterinaria',

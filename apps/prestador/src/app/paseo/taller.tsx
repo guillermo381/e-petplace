@@ -615,27 +615,16 @@ export default function TallerPaseo() {
                       ) : (
                         <>
                           {d.base === null && <VozSecundaria texto={t('taller.seOfreceAlGuardar')} />}
-                          <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' }}>
-                            <Text
-                              style={{
-                                fontFamily: typography.family.sans.regular,
-                                fontSize: typography.size.sm,
-                                color: theme.text.secondary,
-                              }}
-                            >
-                              {t('servicios.precio')}
-                            </Text>
-                            <Text
-                              style={{
-                                fontFamily: typography.family.mono.regular,
-                                fontSize: typography.size.lg,
-                                fontVariant: ['tabular-nums'],
-                                color: theme.text.primary,
-                              }}
-                            >
-                              {etiquetasPasos[indicePrecio(d.precio)]}
-                            </Text>
-                          </View>
+                          {/* S68-B7: el valor vive dentro del slider (Chanel) */}
+                          <Text
+                            style={{
+                              fontFamily: typography.family.sans.regular,
+                              fontSize: typography.size.sm,
+                              color: theme.text.secondary,
+                            }}
+                          >
+                            {t('servicios.precio')}
+                          </Text>
                           <SliderPrecio
                             etiqueta={`${t('servicios.precio')} · ${etiquetaCorta(b)}`}
                             pasos={etiquetasPasos}
@@ -670,28 +659,16 @@ export default function TallerPaseo() {
                           </View>
                           {d.plan !== '' && (
                             <>
-                              <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: spacing[3] }}>
-                                <Text
-                                  style={{
-                                    flex: 1,
-                                    fontFamily: typography.family.sans.regular,
-                                    fontSize: typography.size.sm,
-                                    color: theme.text.secondary,
-                                  }}
-                                >
-                                  {t('taller.planRotulo')}
-                                </Text>
-                                <Text
-                                  style={{
-                                    fontFamily: typography.family.mono.regular,
-                                    fontSize: typography.size.lg,
-                                    fontVariant: ['tabular-nums'],
-                                    color: theme.text.primary,
-                                  }}
-                                >
-                                  {etiquetasMes[indicePrecio(d.plan)]}
-                                </Text>
-                              </View>
+                              {/* S68-B7: el valor vive dentro del slider (Chanel) */}
+                              <Text
+                                style={{
+                                  fontFamily: typography.family.sans.regular,
+                                  fontSize: typography.size.sm,
+                                  color: theme.text.secondary,
+                                }}
+                              >
+                                {t('taller.planRotulo')}
+                              </Text>
                               <SliderPrecio
                                 etiqueta={t('taller.planRotulo')}
                                 pasos={etiquetasMes}
@@ -735,28 +712,16 @@ export default function TallerPaseo() {
                           </View>
                           {d.paquete !== '' && (
                             <>
-                              <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: spacing[3] }}>
-                                <Text
-                                  style={{
-                                    flex: 1,
-                                    fontFamily: typography.family.sans.regular,
-                                    fontSize: typography.size.sm,
-                                    color: theme.text.secondary,
-                                  }}
-                                >
-                                  {t('taller.paqueteRotulo')}
-                                </Text>
-                                <Text
-                                  style={{
-                                    fontFamily: typography.family.mono.regular,
-                                    fontSize: typography.size.lg,
-                                    fontVariant: ['tabular-nums'],
-                                    color: theme.text.primary,
-                                  }}
-                                >
-                                  {etiquetasPasos[indicePrecio(d.paquete)]}
-                                </Text>
-                              </View>
+                              {/* S68-B7: el valor vive dentro del slider (Chanel) */}
+                              <Text
+                                style={{
+                                  fontFamily: typography.family.sans.regular,
+                                  fontSize: typography.size.sm,
+                                  color: theme.text.secondary,
+                                }}
+                              >
+                                {t('taller.paqueteRotulo')}
+                              </Text>
                               <SliderPrecio
                                 etiqueta={t('taller.paqueteRotulo')}
                                 pasos={etiquetasPasos}

@@ -935,6 +935,7 @@ export const prestadorEn = {
     otraPlaceholder: 'Clinical ethology',
     otraAgregar: 'Add',
     pendienteCatalogo: "Leave your setup ready — it activates once the catalog for this trade is ready.",
+    desplegar: 'Adjust',
   },
   veterinaria: {
     titulo: 'Veterinary',

@@ -129,6 +129,11 @@ export default function ProcedimientosVeterinaria() {
     setHoja(true);
   };
 
+  // S68-B7 (hallazgo founder: "Ecografía abdominal" creada DOS veces
+  // porque la lista no se refrescaba sola): tras alta/edición/baja la
+  // lista se actualiza DIRECTO con la fila que el wrapper devuelve —
+  // determinista, sin depender del ciclo de foco; el refetch-en-focus
+  // sigue cubriendo el "volver" desde otra pantalla.
   async function guardar() {
     if (pantalla.estado !== 'listo' || draft === null || guardando || draft.nombre.trim() === '') return;
     setGuardando(true);
@@ -141,20 +146,32 @@ export default function ProcedimientosVeterinaria() {
     });
     setGuardando(false);
     if (!r.ok) return mostrar({ variante: 'error', texto: r.mensaje });
+    setPantalla((prev) => {
+      if (prev.estado !== 'listo') return prev;
+      const existe = prev.procedimientos.some((p) => p.id === r.data.id);
+      return {
+        ...prev,
+        procedimientos: existe
+          ? prev.procedimientos.map((p) => (p.id === r.data.id ? r.data : p))
+          : [...prev.procedimientos, r.data],
+      };
+    });
     setHoja(false);
     mostrar({ variante: 'exito', texto: t('procedimientosVet.guardado') });
-    setIntento((n) => n + 1);
   }
 
   async function quitar() {
     if (draft?.procedimientoId == null || guardando) return;
+    const id = draft.procedimientoId;
     setGuardando(true);
-    const r = await eliminarProcedimientoVeterinaria(draft.procedimientoId);
+    const r = await eliminarProcedimientoVeterinaria(id);
     setGuardando(false);
     if (!r.ok) return mostrar({ variante: 'error', texto: r.mensaje });
+    setPantalla((prev) =>
+      prev.estado !== 'listo' ? prev : { ...prev, procedimientos: prev.procedimientos.filter((p) => p.id !== id) },
+    );
     setHoja(false);
     mostrar({ variante: 'exito', texto: t('procedimientosVet.quitado') });
-    setIntento((n) => n + 1);
   }
 
   return (
@@ -269,6 +286,7 @@ export default function ProcedimientosVeterinaria() {
             />
 
             <View style={{ gap: spacing[2] }}>
+              {/* S68-B7: el valor vive dentro del slider (Chanel) */}
               <Text
                 style={{
                   fontFamily: typography.family.sans.regular,
@@ -277,16 +295,6 @@ export default function ProcedimientosVeterinaria() {
                 }}
               >
                 {t('procedimientosVet.precioReferencia')}
-              </Text>
-              <Text
-                style={{
-                  fontFamily: typography.family.mono.regular,
-                  fontSize: typography.size.lg,
-                  fontVariant: ['tabular-nums'],
-                  color: theme.text.primary,
-                }}
-              >
-                {etiquetas[draft.precioIndice]}
               </Text>
               <SliderPrecio
                 etiqueta={t('procedimientosVet.precioReferencia')}

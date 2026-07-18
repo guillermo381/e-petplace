@@ -171,6 +171,22 @@ check(
 );
 check(t.includes('Agregar procedimiento'), 'T13 el alta de procedimiento presente');
 
+// ── B7 punto 1 — el espejo del smoke manual del founder: alta →
+// APARECE SOLA → baja → desaparece (escritura NETA CERO en demo) ──
+await page.getByText('Agregar procedimiento', { exact: true }).click();
+await esperar('Nuevo procedimiento', 15);
+await page.getByRole('textbox', { name: 'Nombre' }).fill('Smoke S68-B7');
+await page.getByText('Guardar', { exact: true }).click();
+t = await esperar('Smoke S68-B7', 15);
+check(t.includes('Smoke S68-B7'), 'T22a el procedimiento creado aparece SOLO (sin refrescar a mano)');
+await page.getByText('Smoke S68-B7', { exact: true }).click();
+await esperar('Editar procedimiento', 15);
+await page.getByText('Quitar procedimiento', { exact: true }).click();
+await page.getByText('Quitar definitivamente', { exact: true }).click();
+await page.waitForTimeout(1500);
+t = await texto();
+check(!t.includes('Smoke S68-B7'), 'T22b la baja lo quita de la lista al instante (residuo cero)');
+
 // ── B3 — VERIFICACIÓN PROFESIONAL ──
 await page.goto(`http://localhost:${PUERTO}/veterinaria/verificacion`, { waitUntil: 'networkidle' });
 t = await esperar('Verificación profesional', 30);
@@ -180,6 +196,17 @@ check(
   t.includes('la verificación se necesita para abrir, no para construir'),
   'T15 la voz "bloquea abrir, jamás construir"',
 );
+
+// ── B7 puntos 3+5 — ?item= ancla/pliega + riel de vacunación desde $2 ──
+await page.goto(`http://localhost:${PUERTO}/veterinaria/taller?item=vacunacion`, { waitUntil: 'networkidle' });
+t = await esperar('Servicios y precios', 30);
+const switchVac = page.locator('[role="switch"][aria-label="Ofrecer · Vacunación"]');
+if ((await switchVac.getAttribute('aria-checked')) !== 'true') {
+  await switchVac.click();
+  await page.waitForTimeout(500);
+}
+t = await texto();
+check(t.includes('$2.00'), 'T23 el riel de vacunación arranca en $2 (decisión founder del gate)');
 
 // ── B2 — EL ADIESTRAMIENTO GANA LA SECCIÓN (D-426 muere) + D-412 ──
 await page.goto(`http://localhost:${PUERTO}/adiestramiento/taller`, { waitUntil: 'networkidle' });

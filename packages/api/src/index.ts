@@ -600,6 +600,7 @@ export {
   TIPOS_DOCUMENTO_VERIFICACION,
   obtenerDocumentosVerificacion,
   registrarDocumentoVerificacion,
+  resolverUrlDocumento,
   type CodigoErrorDocumentos,
   type DocumentoVerificacion,
   type EstadoDocumento,

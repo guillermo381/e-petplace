@@ -227,6 +227,17 @@ export default function TallerVeterinaria() {
   const scrollRef = useRef<ScrollView>(null);
   // el ancla del lápiz del resumen: y de cada tarjeta del menú
   const posiciones = useRef<Partial<Record<ItemMenuVeterinaria, number>>>({});
+  // S68-B7 (hallazgo founder: "quiero vacunación y me abren todos"):
+  // con ?item= la tarjeta destino nace desplegada y las demás PLEGADAS;
+  // sin ?item=, null = comportamiento de siempre (todas según su toggle)
+  const [desplegadas, setDesplegadas] = useState<ItemMenuVeterinaria[] | null>(() =>
+    typeof item === 'string' && (MENU_VETERINARIA as readonly string[]).includes(item)
+      ? [item as ItemMenuVeterinaria]
+      : null,
+  );
+  const estaDesplegada = (i: ItemMenuVeterinaria): boolean => desplegadas === null || desplegadas.includes(i);
+  const desplegar = (i: ItemMenuVeterinaria) =>
+    setDesplegadas((prev) => (prev === null || prev.includes(i) ? prev : [...prev, i]));
 
   const vozItem = (i: ItemMenuVeterinaria): string =>
     ({
@@ -338,30 +349,41 @@ export default function TallerVeterinaria() {
     }
   }, [listo, item]);
 
-  const pasosPrecio = useMemo(() => {
+  // S68-B7 (decisión founder del gate, asentada): el riel de VACUNACIÓN
+  // arranca en $2 — muchas veterinarias no cobran la aplicación, solo
+  // la vacuna. SOLO ese riel; el resto espera la calibración D-413.
+  const pisoDe = (i: ItemMenuVeterinaria): number => (i === 'vacunacion' ? 2 : PISO_PRECIO);
+  const rielDesde = (piso: number): number[] => {
     const pasos: number[] = [];
-    for (let v = PISO_PRECIO; v <= TECHO_PRECIO + 1e-9; v += PASO_PRECIO) pasos.push(Math.round(v * 100) / 100);
+    for (let v = piso; v <= TECHO_PRECIO + 1e-9; v += PASO_PRECIO) pasos.push(Math.round(v * 100) / 100);
     return pasos;
-  }, []);
+  };
+  const pasosPrecio = useMemo(() => rielDesde(PISO_PRECIO), []);
+  const pasosVacunacion = useMemo(() => rielDesde(2), []);
+  const pasosDe = (i: ItemMenuVeterinaria): number[] => (i === 'vacunacion' ? pasosVacunacion : pasosPrecio);
   const etiquetasPrecio = useMemo(() => pasosPrecio.map(monto), [pasosPrecio]);
-  const indicePrecio = (texto: string): number => {
+  const etiquetasVacunacion = useMemo(() => pasosVacunacion.map(monto), [pasosVacunacion]);
+  const etiquetasDe = (i: ItemMenuVeterinaria): string[] =>
+    i === 'vacunacion' ? etiquetasVacunacion : etiquetasPrecio;
+  const indicePrecio = (i: ItemMenuVeterinaria, texto: string): number => {
+    const pasos = pasosDe(i);
     const v = leerPrecio(texto);
     if (v === null) return 0; // sin sugeridos: el piso del riel, visible
-    const i = pasosPrecio.findIndex((p) => Math.abs(p - v) < 1e-9);
-    if (i >= 0) return i;
-    return Math.min(Math.max(Math.round((v - PISO_PRECIO) / PASO_PRECIO), 0), pasosPrecio.length - 1);
+    const exacto = pasos.findIndex((p) => Math.abs(p - v) < 1e-9);
+    if (exacto >= 0) return exacto;
+    return Math.min(Math.max(Math.round((v - pisoDe(i)) / PASO_PRECIO), 0), pasos.length - 1);
   };
-  const precioDe = (d: DraftItem): number => leerPrecio(d.precio) ?? PISO_PRECIO;
+  const precioDe = (i: ItemMenuVeterinaria, d: DraftItem): number => leerPrecio(d.precio) ?? pisoDe(i);
 
   const actualizarItem = (i: ItemMenuVeterinaria, cambios: Partial<DraftItem>) => {
     setDrafts((prev) => (prev === null ? prev : { ...prev, [i]: { ...prev[i], ...cambios } }));
   };
 
-  const itemDirty = (d: DraftItem): boolean => {
+  const itemDirty = (i: ItemMenuVeterinaria, d: DraftItem): boolean => {
     if (d.base === null) return d.ofrecido;
     return (
       d.ofrecido !== d.base.activo ||
-      precioDe(d) !== d.base.precio ||
+      precioDe(i, d) !== d.base.precio ||
       d.duracion !== (d.base.duracionMinutos ?? DURACION_FALLBACK)
     );
   };
@@ -378,7 +400,7 @@ export default function TallerVeterinaria() {
   const hayCambios = useMemo(() => {
     if (drafts === null || franjas === null) return false;
     return (
-      MENU_VETERINARIA.some((i) => tipoDisponible(i) && itemDirty(drafts[i])) ||
+      MENU_VETERINARIA.some((i) => tipoDisponible(i) && itemDirty(i, drafts[i])) ||
       espDirty ||
       franjas.some(franjaDirty)
     );
@@ -398,7 +420,7 @@ export default function TallerVeterinaria() {
     for (const i of MENU_VETERINARIA) {
       if (!tipoDisponible(i)) continue;
       const d = drafts[i];
-      if (!itemDirty(d)) continue;
+      if (!itemDirty(i, d)) continue;
       if (d.base === null && !d.ofrecido) continue;
       const tipo = TIPO_POR_ITEM[i];
       const cat = catalogo.find((c) => c.codigo === tipo);
@@ -407,7 +429,7 @@ export default function TallerVeterinaria() {
         ofertaId: d.base?.id ?? null,
         tipoServicio: tipo,
         activo: d.ofrecido,
-        precio: precioDe(d),
+        precio: precioDe(i, d),
         duracionMinutos: d.duracion,
         ...modalidadDeItem(i),
         // el techo de especies lo declara el catálogo del tipo
@@ -572,7 +594,12 @@ export default function TallerVeterinaria() {
                             etiqueta={`${t('tallerVeterinaria.ofrecerServicio')} · ${vozItem(i)}`}
                             registro="oficio"
                             encendido={d.ofrecido}
-                            onCambio={(v) => actualizarItem(i, { ofrecido: v })}
+                            onCambio={(v) => {
+                              actualizarItem(i, { ofrecido: v });
+                              // prender un servicio plegado lo despliega
+                              // (la config recién prendida tiene que verse)
+                              if (v) desplegar(i);
+                            }}
                           />
                         </View>
 
@@ -583,6 +610,17 @@ export default function TallerVeterinaria() {
 
                         {!d.ofrecido ? (
                           d.base !== null && <VozSecundaria texto={t('servicios.pausada')} />
+                        ) : !estaDesplegada(i) ? (
+                          // plegada por ?item= — se abre con su porqué a
+                          // un toque, nada se pierde (los borradores
+                          // conservan su estado)
+                          <View style={{ alignSelf: 'flex-start' }}>
+                            <Boton
+                              variante="compacto"
+                              etiqueta={t('tallerVeterinaria.desplegar')}
+                              onPress={() => desplegar(i)}
+                            />
+                          </View>
                         ) : (
                           <>
                             {d.base === null && tipoDisponible(i) && (
@@ -635,36 +673,27 @@ export default function TallerVeterinaria() {
                               <VozSecundaria texto={t('tallerVeterinaria.pendienteCatalogo')} />
                             )}
 
-                            {/* precio — riel discreto + neto en vivo (7.15) */}
-                            <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' }}>
-                              <Text
-                                style={{
-                                  fontFamily: typography.family.sans.regular,
-                                  fontSize: typography.size.sm,
-                                  color: theme.text.secondary,
-                                }}
-                              >
-                                {t('servicios.precio')}
-                              </Text>
-                              <Text
-                                style={{
-                                  fontFamily: typography.family.mono.regular,
-                                  fontSize: typography.size.lg,
-                                  fontVariant: ['tabular-nums'],
-                                  color: theme.text.primary,
-                                }}
-                              >
-                                {etiquetasPrecio[indicePrecio(d.precio)]}
-                              </Text>
-                            </View>
+                            {/* precio — riel discreto + neto en vivo (7.15).
+                                S68-B7: el valor vive DENTRO del slider
+                                (tap → edición numérica) — el display
+                                duplicado murió (Chanel) */}
+                            <Text
+                              style={{
+                                fontFamily: typography.family.sans.regular,
+                                fontSize: typography.size.sm,
+                                color: theme.text.secondary,
+                              }}
+                            >
+                              {t('servicios.precio')}
+                            </Text>
                             <SliderPrecio
                               etiqueta={`${t('servicios.precio')} · ${vozItem(i)}`}
-                              pasos={etiquetasPrecio}
-                              indice={indicePrecio(d.precio)}
-                              onCambio={(idx) => actualizarItem(i, { precio: pasosPrecio[idx].toFixed(2) })}
+                              pasos={etiquetasDe(i)}
+                              indice={indicePrecio(i, d.precio)}
+                              onCambio={(idx) => actualizarItem(i, { precio: pasosDe(i)[idx].toFixed(2) })}
                               registro="aa"
                             />
-                            <VozComision pct={pct} precio={precioDe(d)} />
+                            <VozComision pct={pct} precio={precioDe(i, d)} />
 
                             {/* duración — pasos de 15', default del catálogo */}
                             <Separador />

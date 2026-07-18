@@ -1205,11 +1205,12 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
-        {/* SliderPrecio — S58 (comp. 31): pasos discretos por registro */}
-        <Seccion titulo="SliderPrecio — pasos discretos (el precio se elige, no se interpola)">
+        {/* SliderPrecio — S58 (comp. 31): pasos discretos por registro.
+            S68-B7: edición numérica integrada (firma founder) */}
+        <Seccion titulo="SliderPrecio — pasos discretos + edición numérica (S68-B7: TAP en el valor → teclado, clampeado al riel y redondeado al paso)">
           <View style={{ gap: spacing[4] }}>
             <ThemeProvider defaultMode="light">
-              <PanelTema etiqueta="claro · registro capa (dueño) — tramo en hex puro; thumb apoyado con elevacion.reposo">
+              <PanelTema etiqueta="claro · registro capa (dueño) — tramo en hex puro; el valor mono es TAP → edición numérica (pruébalo: escribe 23.7 y confirma — redondea al paso más cercano)">
                 <EjemploSliderPrecio />
               </PanelTema>
             </ThemeProvider>

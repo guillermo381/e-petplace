@@ -556,18 +556,8 @@ export default function TallerAdiestramiento() {
                     />
                   </View>
                   <View style={{ gap: spacing[2] }}>
+                    {/* S68-B7: el valor vive dentro del slider (Chanel) */}
                     <Text style={vozSecundaria}>{t('tallerAdiestramiento.precioSesion')}</Text>
-                    <Text
-                      style={{
-                        fontFamily: typography.family.mono.regular,
-                        fontSize: typography.size.lg,
-                        letterSpacing: typography.tracking.mono,
-                        color: theme.text.primary,
-                        fontVariant: ['tabular-nums'],
-                      }}
-                    >
-                      {`$${PASOS_SESION[precioIndice].toFixed(2)}`}
-                    </Text>
                     <SliderPrecio
                       etiqueta={t('tallerAdiestramiento.precioSesion')}
                       pasos={PASOS_SESION.map((p) => `$${p.toFixed(2)}`)}
@@ -696,18 +686,8 @@ export default function TallerAdiestramiento() {
                                 </View>
 
                                 <View style={{ gap: spacing[2] }}>
+                                  {/* S68-B7: el valor vive dentro del slider (Chanel) */}
                                   <Text style={vozSecundaria}>{t('tallerAdiestramiento.precioPrograma')}</Text>
-                                  <Text
-                                    style={{
-                                      fontFamily: typography.family.mono.regular,
-                                      fontSize: typography.size.lg,
-                                      letterSpacing: typography.tracking.mono,
-                                      color: theme.text.primary,
-                                      fontVariant: ['tabular-nums'],
-                                    }}
-                                  >
-                                    {`$${PASOS_PROGRAMA[d.precioIndice].toFixed(2)}`}
-                                  </Text>
                                   <SliderPrecio
                                     etiqueta={t('tallerAdiestramiento.precioPrograma')}
                                     pasos={PASOS_PROGRAMA.map((p) => `$${p.toFixed(2)}`)}
@@ -899,18 +879,8 @@ export default function TallerAdiestramiento() {
             </View>
 
             <View style={{ gap: spacing[2] }}>
+              {/* S68-B7: el valor vive dentro del slider (Chanel) */}
               <Text style={vozSecundaria}>{t('tallerAdiestramiento.precioPrograma')}</Text>
-              <Text
-                style={{
-                  fontFamily: typography.family.mono.regular,
-                  fontSize: typography.size.lg,
-                  letterSpacing: typography.tracking.mono,
-                  color: theme.text.primary,
-                  fontVariant: ['tabular-nums'],
-                }}
-              >
-                {`$${PASOS_PROGRAMA[draft.precioIndice].toFixed(2)}`}
-              </Text>
               <SliderPrecio
                 etiqueta={t('tallerAdiestramiento.precioPrograma')}
                 pasos={PASOS_PROGRAMA.map((p) => `$${p.toFixed(2)}`)}

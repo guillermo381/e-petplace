@@ -84,6 +84,34 @@ export async function obtenerDocumentosVerificacion(
   return { ok: true, data: docs };
 }
 
+// ── S68-B7: la URL FIRMADA del documento (preview en la pantalla) ──
+// Clon del patrón fotos.ts (S47): bucket privado, la firma es efímera
+// (jamás se persiste), cache en memoria con TTL y margen. Un path que
+// no firma devuelve null con su literal al log — el consumidor cae al
+// placeholder digno (degradación diseñada, regla 36).
+
+const BUCKET_DOCUMENTOS = 'prestador-documentos';
+const TTL_SEGUNDOS = 3600;
+const MARGEN_MS = 5 * 60 * 1000;
+const cacheFirmas = new Map<string, { url: string; venceEn: number }>();
+
+export async function resolverUrlDocumento(path: string): Promise<string | null> {
+  const hit = cacheFirmas.get(path);
+  if (hit && hit.venceEn > Date.now()) return hit.url;
+  if (hit) cacheFirmas.delete(path);
+
+  const { data, error } = await getClient()
+    .storage.from(BUCKET_DOCUMENTOS)
+    .createSignedUrl(path, TTL_SEGUNDOS);
+
+  if (error || !data?.signedUrl) {
+    console.error('[prestador-documentos] no se pudo firmar', path, '=', error?.message ?? 'sin signedUrl');
+    return null;
+  }
+  cacheFirmas.set(path, { url: data.signedUrl, venceEn: Date.now() + TTL_SEGUNDOS * 1000 - MARGEN_MS });
+  return data.signedUrl;
+}
+
 export interface RegistrarDocumentoInput {
   prestadorId: string;
   tipo: TipoDocumentoVerificacion;
