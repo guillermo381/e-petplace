@@ -168,7 +168,9 @@ export default function PaseoDisponibles() {
   );
 
   // Reservar CONTRA SALDO: la cita nace firme sin pago (el pago fue el
-  // del paquete — invariante ampliado S57). Éxito → el hub, donde vive.
+  // del paquete — invariante ampliado S57). Éxito → Go home (D-430: la
+  // salida de reserva aterriza en el Hogar como el suelto, NO en el hub;
+  // la regla de §3 queda sin excepciones). El toast dice el saldo.
   const reservarConSaldo = useCallback(
     async (p: PaseadorDisponible, mascotaId: string) => {
       if (reservando) return;
@@ -189,7 +191,7 @@ export default function PaseoDisponibles() {
       }
       mostrar({ texto: t('paquete.reservada', { n: r.data.saldo_restante }), variante: 'exito' });
       if (router.canDismiss()) router.dismissAll();
-      router.navigate('/hogar/paseos');
+      router.navigate('/hogar');
     },
     [reservando, fecha, hora, cargar, mostrar, t],
   );
