@@ -86,7 +86,13 @@ const TIPOS_SERVICIO_VET = [
   'urgencia_domicilio',
 ] as const;
 
-const CODIGOS = ['sin_datos', 'no_encontrada', 'verificacion_profesional_pendiente', 'especialidad_invalida'] as const;
+const CODIGOS = [
+  'sin_datos',
+  'no_encontrada',
+  'verificacion_profesional_pendiente',
+  'especialidad_invalida',
+  'duracion_invalida',
+] as const;
 export type CodigoErrorVeterinaria = (typeof CODIGOS)[number];
 
 const MENSAJES: Record<CodigoErrorVeterinaria | 'error_desconocido' | 'datos_inconsistentes', string> = {
@@ -95,6 +101,9 @@ const MENSAJES: Record<CodigoErrorVeterinaria | 'error_desconocido' | 'datos_inc
   verificacion_profesional_pendiente:
     'Tu verificación profesional todavía no está aprobada — el servicio queda guardado y podrás publicarlo al aprobarse.',
   especialidad_invalida: 'Una especialidad lleva su fila del catálogo o un nombre propio — nunca ambos ni ninguno.',
+  // guard A10 (trg_ps_duracion_vet): la UI clampa a 5'/10-240 y no
+  // debería alcanzarlo — el mapeo es cinturón, jamás silencio
+  duracion_invalida: 'La duración tiene que ir de 10 a 240 minutos, en pasos de 5.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido: 'Ocurrió un error inesperado. Prueba de nuevo.',
 };
@@ -107,6 +116,9 @@ function normalizarErrorEscritura(error: { code?: string; message: string }): {
 } {
   if (error.code === '23514' && error.message.includes('verificacion_profesional_pendiente')) {
     return { codigo: 'verificacion_profesional_pendiente', mensaje: MENSAJES.verificacion_profesional_pendiente };
+  }
+  if (error.code === '23514' && error.message.includes('duracion_invalida')) {
+    return { codigo: 'duracion_invalida', mensaje: MENSAJES.duracion_invalida };
   }
   return { codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
 }
