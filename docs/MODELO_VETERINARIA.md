@@ -1,5 +1,10 @@
 # MODELO_VETERINARIA — El contrato del oficio veterinario y del modelo de actor
 
+> **Versión: v1.2 — S68 (17 Jul 2026).** Enmiendas S68 (dictado del
+> arquitecto, depósito Sesión A): §6 gana URGENCIA local/domicilio
+> (urgencia ≠ emergencia, solo-HOY) y el camino (c) de telemedicina
+> (configurable, reservable=false de plataforma); §17 nota V1‖V2 en
+> paralelo A/B. Base previa:
 > **Versión: v1.0 — S66 (16 Jul 2026).** Letra FIRMADA por el founder
 > (decisiones D1-D8 + adiciones de mesa resueltas en sesión
 > founder+arquitecto S66), dictada por el arquitecto (escritor único de
@@ -164,6 +169,14 @@ no se mueven.
 - **Consulta** (`consulta_general`) — la unidad madre. El "control" es
   narrativa de la consulta, no comprable aparte.
 - **Vacunación** (`vacunacion`).
+- **Urgencia** (`urgencia_local` 30' / `urgencia_domicilio` 45' —
+  S68-A1, enmienda v1.2): **urgencia ≠ emergencia: solo se reserva
+  para HOY, dentro del horario declarado, con recargo opcional del
+  negocio; emergencia 24/7 sigue en próximamente honesto.** El
+  mecanismo es declarativo (`tipos_servicio.reserva_solo_hoy`) y el
+  guard vive en las puertas del motor (`urgencia_solo_hoy` en
+  hold/reserva/reagenda), jamás en UI sola. La urgencia a domicilio
+  hereda D-339 VERBATIM (dirección al snapshot + guard del pago).
 
 **Comprables desde la CONSULTA, no desde la vitrina:**
 
@@ -180,8 +193,15 @@ no se mueven.
 **Fuera de v1, honesto:**
 
 - **Emergencia:** promete disponibilidad que no podemos garantizar —
-  "próximamente honesto".
-- **Telemedicina:** fuera de ESTE modelo, DENTRO del destino (§15.3).
+  "próximamente honesto". S68: nace `reservable=false` en el catálogo
+  (la fila existe, el motor no la vitrinea ni acepta hold —
+  `servicio_no_reservable` tipado).
+- **Telemedicina — camino (c), enmienda v1.2 (S68):** **configurable
+  desde v1, `reservable=false` a nivel plataforma, con voz honesta
+  obligatoria en el wizard; se enciende en la tanda del Durante**
+  (proveedor de videollamada = D-432). Sigue DENTRO del destino
+  (§15.3) — el switch es de plataforma (`tipos_servicio.reservable`),
+  no del negocio.
 
 **Registrables (vocabulario del Durante — jamás se venden sueltos):**
 diagnóstico, medicación prescrita, examen, vacuna aplicada — los tipos
@@ -473,6 +493,12 @@ construye** — deuda con disparo §16.
   persona, qué expone).
 - **V2 — LA RESERVA DEL DUEÑO:** chasis heredado + el "quién" de dos
   niveles (§2).
+  > **Nota S68 (enmienda v1.2): V1 ‖ V2 corren en PARALELO A/B** —
+  > la B construye el wizard (V1) sobre la capa declarativa de la
+  > migración S68-A1; la A construye la reserva (V2) sobre los
+  > lectores de la misma migración. El "quién" v1 = persona directa
+  > (N=1 colapsa solo; la unión de ventanas del negocio espera a que
+  > exista un negocio con N>1).
 - **V3 — EL MOSTRADOR:** walk-in con alta mínima de familia (§7).
 - **V4 — EL DURANTE CLÍNICO:** nota IA + registrables Eje 3 + caso
   clínico v1 + presupuesto (§8/§10/§11).

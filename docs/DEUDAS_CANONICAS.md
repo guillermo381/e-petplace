@@ -1735,6 +1735,7 @@ MODELO_ADIESTRAMIENTO).
 ⚪ BAJA. Micro-hueco declarado por la B al cerrar su tanda del track (S62): si el Durante se desmonta con un flush de puntos GPS en vuelo, esa tanda puede perderse (ventana de segundos). Con la cura del motor (`20260715150000`: <2 puntos = 'incompleto' con motivo) el hueco ya no puede fabricar un 'registrado' falso — solo acortar un track real. **Disparo: la build D-292 (el rediseño background absorbe o redefine el ciclo de flush).** Origen: declarado S62-B.
 
 #### D-409 — La sección de horarios post-D-386: dos restos declarados
+**Nota S68 (origen: reporte S68-B): declarada INTACTA con su disparo — el camino de la tanda de horarios S68-B2 no la cruzó.**
 🟢 MEDIA. Declarados por la B al cerrar la UI de la elección (S62): (1) `editarFranjaHorario` valida solape solo contra franjas GENERALES — en modo por_servicio la pre-validación del borrador de sección no cruza contra las específicas de otras ofertas (la integridad no peligra — la ocupación del motor es global y el UNIQUE muerde el duplicado exacto — pero la UX puede dejar declarar franjas solapadas sin aviso); (2) el cambio de modo recarga el taller y PIERDE los borradores de precio sin guardar — la Hoja avisa de las franjas; la voz más ancha (precios) entra si el gate la pide. **Disparo: la confirmación de gates del arranque S63 sobre la sección de horarios, o el primer prestador multi-oficio real.** Origen: declarado S62-B.
 
 ### S63 — el arco del adiestramiento (Bloques 2 y 3)
@@ -1745,10 +1746,12 @@ MODELO_ADIESTRAMIENTO).
 #### D-411 — Propuesta 76(f2): el manejo del INDEX compartido entre sesiones paralelas
 🟡 ALTA (de proceso, no de producto). DOS incidentes en S63, ida y vuelta: (1) el commit de la tanda 2 de la A arrastró archivos de la B que estaban STAGED en el index compartido (la tanda del Durante del prestador entera); (2) el precedente inverso ya había ocurrido en la sesión. Ambos curados con el precedente C2-S60 (`reset --soft` + unstage por ruta + hunk propio por `git apply --cached`), CERO pérdida de contenido — pero el staging state de la otra sesión se pierde al curar (la B tuvo que re-stagear). La regla 76(f) cubre el staging por ruta del COMMIT; no dice nada del INDEX como recurso compartido entre commits. Propuesta a la mesa S64 (letra del contrato, no quizás): (a) el index se considera EFÍMERO — ninguna sesión deja trabajo staged entre tandas; se stagea y commitea en el mismo movimiento; (b) antes de todo commit, `git status` y verificación de que lo staged es EXCLUSIVAMENTE propio (espejo del checklist L-138 pero del árbol). **Disparo: la mesa de arranque S64.** Origen: S63 (dos incidentes curados).
 
-#### D-412 — La voz del NETO/comisión en el taller del adiestrador
+#### D-412 — La voz del NETO/comisión en el taller del adiestrador ✅ PAGADA (S68-B)
+~~🟢 MEDIA~~ **PAGADA (origen: reporte S68-B): disparo literal honrado — neto visible en sesión, tarjetas de nivel y Hoja de programa** (la primera tanda que re-tocó el taller del adiestrador lo pagó, como mandaba el disparo). Letra original:
 🟢 MEDIA. Declarada por la B al cerrar el taller de la oferta (S63): el taller del adiestrador muestra precios (sesión y programa) sin la línea de neto visible que /servicios del paseo ya tiene (comisión desde `fee_configs`, regla 7.15 del financiero — jamás hardcode). Cura: clonar el patrón del neto visible del paseo al taller del oficio. **Disparo: la primera tanda que re-toque el taller del adiestrador, o el gate founder que lo pida.** Origen: declarado S63-B.
 
 #### D-413 — Calibración de los rieles de precio del taller del adiestrador
+**Enmienda S68 (origen: reporte S68-B): los rieles del taller VET nacieron con valores PROVISIONALES declarados — servicios vet $5–$150 paso $0.50 · procedimientos $5–$500 paso $5; la calibración de TODOS los rieles (adiestrador + vet) espera los hallazgos del Bloque 0 del founder.**
 ⚪ BAJA. Los rangos del SliderPrecio/steppers del taller del adiestrador (sesión y programa) nacieron con valores razonables sin calibración founder — misma familia que los sugeridos del wizard S59 (§6.4, "con nota de calibración"). **Disparo: el gate founder del taller en dispositivo (lote S63), o la conversación con el adiestrador real (§10.3 — la misma que valida vocabulario y rangos de N).** Origen: declarado S63-B.
 
 ### S66 — el vet y el modelo de actor (16 Jul 2026, `MODELO_VETERINARIA.md` v1.0 §16)
@@ -1796,7 +1799,8 @@ El motor de recordatorios apuntando al NEGOCIO (no a la familia); candidata bara
 
 ### S66 — rescate S65 (registro diferido de las tres deudas del cierre S65)
 
-#### D-426 — Horarios propios del oficio (adiestramiento)
+#### D-426 — Horarios propios del oficio (adiestramiento) ✅ CERRADA (S68-B2)
+~~🟢 MEDIA~~ **CERRADA (origen: reporte S68-B): `SeccionHorarios` ganó `oficio='veterinaria' | 'adiestramiento'` y el taller del adiestrador GANÓ su sección de horarios propia — guardado por bloque sin clobbear el borrador.** Letra original y nota S67:
 **Nota S67 (fundación V0): INTACTA — decisión firmada de NO absorberla** (lo que falta es mayormente wizard/configuración = UI, y V0 fue cero UI). La fundación dejó la puerta abierta: `prestador_horarios` es por PERSONA (`empleado_id` NOT NULL) y ya soporta persona×servicio vía `servicio_id`; el wizard sigue siendo la deuda.
 🟢 MEDIA. El adiestramiento hereda la sección de horarios COMPARTIDA con el paseo (patrón del wizard S59); el oficio necesita declarar horarios propios, separados de la disponibilidad de paseo — un adiestrador puede pasear a la mañana y entrenar a la tarde, y hoy la configuración no lo distingue. **Disparo: al tocar el wizard de horarios del adiestrador (natural en la fundación V0, que generaliza la ocupación — evaluar absorberla ahí).** Origen: S65, registro diferido S66 — renumeradas: sus números originales (D-414/415/416) fueron asignados a deudas vet.
 
@@ -1813,6 +1817,19 @@ El motor de recordatorios apuntando al NEGOCIO (no a la familia); candidata bara
 
 #### D-430 — CTA contextual de cita → hub ✅ NACIDA Y PAGADA EN LA MISMA SESIÓN (S67, `e6d684e`+`8545ed6`+`4abed91`+`da0c754`)
 ~~🟡 ALTA~~ **Hallazgo de campo del founder en el gate S67 (patrón S65: fila o cura EN EL MOMENTO), espec firmada y curada en caliente**: el CTA "ver su cita" de la ficha de mascota iba SIEMPRE a "Mis paseos" (invisible mono-oficio; el multi-oficio lo destapó). Cura: pantalla `/citas/[mascotaId]` (próxima cita activa con servicio en voz de familia + ícono b′ del oficio — paseo/grooming lote 1 + `'training'` estrenado por pedido founder —, día/hora, prestador sin chevron hasta D-370, estado honesto con "En vivo" §7.1 conectando a la pantalla de dos caras, "Ver más" acordeón para N activas — Thor: 23 —, Back jamás callejón) + lector `obtenerCitasActivasMascota` (solo lectura, RLS existente, `limit(50)` por dato real, E2E 8/8). **REGLA DE PLATAFORMA firmada (DISEÑO_EXPERIENCIA §3):** el hub es el destino del doble-clic del servicio — NINGÚN CTA contextual lo usa; barrido completo clasificado en el reporte D-430 (5 legales · 1 GRIS declarado a la mesa: la salida de paquete reservada aún aterriza en el hub — cura de una línea esperando decisión). Strings `citasMascota.*` (12 keys es/en) en LOTE S67, aprobación founder pendiente.
+
+### Deudas de Sesión 68 (17 Jul 2026)
+
+#### D-431 — Precio/duración por ESPECIALIDAD del vet
+🟢 MEDIA. La oferta vet v1 lleva UN precio y UNA duración por tipo de servicio; las especialidades declaradas (`prestador_especialidades`, S68-A1) son vitrina/ficha, sin precio ni duración propios — una consulta de cardiología puede valer y durar distinto que la general. **Disparo: el primer vet real que lo pida.** Origen: S68 (dictado del arquitecto).
+
+#### D-432 — Proveedor de videollamada para telemedicina
+🟢 MEDIA. La telemedicina es configurable desde v1 con `reservable=false` a nivel plataforma (camino (c), `MODELO_VETERINARIA` §6); encenderla exige el proveedor de videollamada y el Durante virtual. **Candidatos anotados: Jitsi / Daily / 100ms** (evaluación en su tanda — costo, grabación, SDK RN). **Disparo: la tanda del Durante de telemedicina.** Origen: S68 (dictado del arquitecto).
+
+#### D-433 — Glifos de URGENCIA y TELEMEDICINA (lenguaje b′)
+🟢 MEDIA. Los tipos `urgencia_local`/`urgencia_domicilio` y la telemedicina no tienen ícono propio en el lenguaje b′ (DIRECCION_ARTE §2 — trazo + huella); hoy el flujo vet usa el glifo del oficio (`'veterinaria'`, lote 1 S53). Nacen como entradas nuevas del registry de `Icono` con gate founder POR ÍCONO (§6), a 21px además de su tamaño de diseño. **Disparo: al tocar las pantallas que los pidan (mecánica D-315/D-390).** Origen: S68 (dictado del arquitecto).
+
+**Nota de strings S68:** el lote `veterinaria.*` + `servicioVoz.consultaGeneral/vacunacion/urgenciaLocal/urgenciaDomicilio` (es/en, S68-A2) entra a la MISMA lectura del founder que el lote `citasMascota.*` de S67 (mecánica D-315).
 
 ---
 

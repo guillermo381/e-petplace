@@ -1,6 +1,6 @@
 # DISEÑO_EXPERIENCIA — La arquitectura de la experiencia del dueño
 
-> **Versión: v1.9 — S61 (14 Jul 2026), Etapa A0 de RUTA_F1 v2.2.**
+> **Versión: v2.1 — S68 (17 Jul 2026), Etapa A0 de RUTA_F1 v2.2.**
 > (La banda v1.1→v1.4 se curó en S58 — decía v1.1 con contenido v1.4,
 > relevamiento B; v1.5 = §15b LA DOSIS DEL PRESTADOR, firma founder;
 > v1.7 = la zona TUS SERVICIOS del Hogar + el hub sin Agenda, S60-A6;
@@ -490,8 +490,11 @@ voz honesta, mono para dato de máquina. Otra firma en la ropa:
       "Guardar tu oferta" en tinta.
    b) EL RESUMEN ("Tu oferta de paseo") — la portada del mundo tras
       guardar: estado real ("Visible para las familias", verdad de
-      DB), una fila por sección con lápiz que vuelve al arte ANCLADO
-      a esa sección.
+      DB). **ENMENDADA S68 (dictado del arquitecto): el resumen es
+      UNA FILA POR SERVICIO ACTIVADO (glifo + nombre + resumen breve
+      + lápiz anclado) — regla de plataforma, los cuatro oficios.**
+      (Letra previa: una fila por sección con lápiz que vuelve al
+      arte ANCLADO a esa sección — la fila por servicio la absorbe.)
    El ESPEJO DEL ARTESANO ("Así lo ve el dueño") vive en ambas caras,
    respondiendo a cada ajuste. Los mundos no ofrecidos son puertas
    honestas ("Activalo cuando lo ofrezcas"), jamás decoración muerta.
@@ -552,6 +555,12 @@ el portado de grooming consumen:
 
 ## Historial
 
+- **v2.1 (S68, 17 Jul 2026):** §15b.5(b) ENMENDADA (dictado del
+  arquitecto): el resumen del mundo es UNA FILA POR SERVICIO ACTIVADO
+  (glifo + nombre + resumen breve + lápiz anclado) — regla de
+  plataforma, los cuatro oficios. (De paso, hallazgo declarado: el
+  encabezado decía v1.9 con historial v2.0 — re-sincronizado, espejo
+  del precedente S58/S60.)
 - **v2.0 (S67, 17 Jul 2026):** §3 gana la REGLA DE PLATAFORMA de
   D-430 (founder S67): hub = destino del doble-clic del servicio;
   ningún CTA contextual lo usa — contexto de mascota lleva al detalle
