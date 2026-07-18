@@ -36,6 +36,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  Icono,
   Insignia,
   Separador,
   Tarjeta,
@@ -53,6 +54,18 @@ function iconoDe(tipo: string | null): 'paseo' | 'grooming' | 'training' {
   if (tipo?.startsWith('grooming')) return 'grooming';
   if (tipo === 'adiestramiento') return 'training';
   return 'paseo';
+}
+
+/** El ícono del OFICIO para el encabezado del detalle (remate D-430):
+ *  solo glifos gateados del set b′ (paseo/grooming, lote 1 S53) — el
+ *  adiestramiento va SIN ícono, honesto (letra founder S67; 'training'
+ *  existe en el set con gate por ícono pendiente, cuando se gatee esta
+ *  función gana su rama). Cero genéricos (Ley 12). */
+function iconoOficio(tipo: string | null): 'paseo' | 'grooming' | null {
+  if (tipo?.startsWith('grooming')) return 'grooming';
+  if (tipo === 'adiestramiento') return null;
+  if (tipo?.startsWith('paseo')) return 'paseo';
+  return null;
 }
 
 export default function CitasDeMascota() {
@@ -98,20 +111,24 @@ export default function CitasDeMascota() {
 
   const detalleHero = (c: CitaActivaMascota) => {
     const servicio = vozServicio(t, c.tipo_servicio) ?? null;
+    const icono = iconoOficio(c.tipo_servicio);
     const cuando = `${fechaLargaHumana(c.fecha, idioma)}${c.hora !== null ? ` · ${c.hora}` : ''}`;
     const tarjeta = (
       <Tarjeta elevacion="reposo">
         <View style={{ gap: spacing[3] }}>
           {servicio !== null ? (
-            <Text
-              style={{
-                fontFamily: typography.family.sans.light,
-                fontSize: typography.size.xl,
-                color: theme.text.primary,
-              }}
-            >
-              {servicio}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+              {icono !== null ? <Icono nombre={icono} tamano={28} /> : null}
+              <Text
+                style={{
+                  fontFamily: typography.family.sans.light,
+                  fontSize: typography.size.xl,
+                  color: theme.text.primary,
+                }}
+              >
+                {servicio}
+              </Text>
+            </View>
           ) : null}
           <Text
             style={{
