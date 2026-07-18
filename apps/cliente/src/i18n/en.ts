@@ -385,14 +385,14 @@ export const clienteEn = {
     grooming: 'Bath',
     groomingCompleto: 'Bath & cut',
     adiestramiento: 'Training',
-    // S68-A2 — the vet world (LOTE S68, founder gate pending)
+    // S68-A2 — the vet world (LOTE S68 APPROVED by founder, Jul 18 2026)
     consultaGeneral: 'Check-up',
     vacunacion: 'Vaccination',
     urgenciaLocal: 'Urgent care at the clinic',
     urgenciaDomicilio: 'Urgent care at home',
   },
   // S68-A2 — vet booking, owner side (V2: pet→what→day→time→who→pay on
-  // the shared chassis). LOTE S68, founder gate pending.
+  // the shared chassis). LOTE S68 APPROVED by founder (Jul 18 2026).
   veterinaria: {
     titulo: 'Vet care',
     paraQuien: 'Who is it for?',
@@ -822,7 +822,7 @@ export const clienteEn = {
     cerrarSesion: 'Sign out',
     cancelar: 'Cancel',
   },
-  // ── D-430 (S67): contextual appointment detail (LOTE S67, founder gate PENDING) ──
+  // ── D-430 (S67): contextual appointment detail (LOTE S67 APPROVED by founder, Jul 18 2026) ──
   citasMascota: {
     titulo: "{{nombre}}'s appointment",
     tituloSinNombre: 'Their appointment',

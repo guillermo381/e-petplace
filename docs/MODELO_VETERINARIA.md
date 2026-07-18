@@ -1,5 +1,9 @@
 # MODELO_VETERINARIA — El contrato del oficio veterinario y del modelo de actor
 
+> **Versión: v1.3 — S68 cierre (18 Jul 2026).** Enmienda v1.3: §6 gana
+> la DURACIÓN de los comprables médicos (menú curado + «Otra» visible,
+> letra founder del choque 2 — commit B9 `665b1b1`; guard
+> `duracion_invalida` en DB, S68-A10). Base previa:
 > **Versión: v1.2 — S68 (17 Jul 2026).** Enmiendas S68 (dictado del
 > arquitecto, depósito Sesión A): §6 gana URGENCIA local/domicilio
 > (urgencia ≠ emergencia, solo-HOY) y el camino (c) de telemedicina
@@ -177,6 +181,14 @@ no se mueven.
   guard vive en las puertas del motor (`urgencia_solo_hoy` en
   hold/reserva/reagenda), jamás en UI sola. La urgencia a domicilio
   hereda D-339 VERBATIM (dirección al snapshot + guard del pago).
+- **Duración de los comprables médicos (enmienda v1.3, S68 — letra
+  founder del choque 2, commit `665b1b1`):** menú CURADO
+  10·15·20·30·45·60·90·120 + fila «Otra duración» con campo numérico
+  VISIBLE (jamás oculto tras tap), clampeado a pasos de 5' entre 10' y
+  240' con redondeo al paso más cercano — jamás valor ilegal. La UI
+  clampa (B9); la DB manda: guard `duracion_invalida` (trigger
+  `trg_ps_duracion_vet`, S68-A10 — %5=0 y 10–240 para todo tipo
+  `es_medico`; NULL también rebota).
 
 **Comprables desde la CONSULTA, no desde la vitrina:**
 

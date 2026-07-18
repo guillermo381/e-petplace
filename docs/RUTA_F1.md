@@ -138,11 +138,16 @@ precondición de APERTURA del modelo (§14.3): conversación con
 vet/clínica real BLOQUEANTE para desmarcar seeds.
 
 Esqueleto de tandas: **V0 fundación ✅ CUMPLIDA (S67, migración
-`20260717170000`, gate founder verde)** · **V1 oferta del negocio —
-EN CURSO (S68)** · V2 reserva del dueño
-· V3 mostrador walk-in · V4 Durante clínico (nota IA + caso +
-presupuesto) · V5 parte y sedimento · V6 SRI (D-419 prioridad,
-founder S66). Orden fino al arrancar cada tanda.
+`20260717170000`, gate founder verde)** · **V1 oferta del negocio ✅
+CUMPLIDA (S68-B, en paralelo A‖B)** · **V2 reserva del dueño ✅
+CUMPLIDA — camino feliz (S68-A: consulta/vacunación/urgencia/
+especializada; telemedicina configurable y muda, camino (c)).** Restos
+de V2 con disparo: hub del oficio vet (tanda del Durante) · badges de
+especialidad en vitrina · especializada en la reserva del dueño con
+chips. Quedan declaradas: **V3 mostrador walk-in · V4 Durante clínico
+(nota IA + caso + presupuesto + encendido de telemedicina, D-432) ·
+V5 parte y sedimento · V6 SRI post-apertura (D-419 prioridad,
+founder S66)**. Orden fino al arrancar cada tanda.
 
 **Test:** el expediente se alimenta porque al vet LE SIRVE — y el
 negocio cobra adentro porque es MÁS FÁCIL que afuera.
@@ -369,6 +374,11 @@ arcos (se decide sesión a sesión con las trenzas como ley).
 
 ## Historial
 
+- **v2.7 (S68, 18 Jul 2026):** §A3 — V1 (oferta del negocio, S68-B) y
+  V2 (reserva del dueño, camino feliz, S68-A) CUMPLIDAS en paralelo
+  A‖B sobre la fundación V0; restos de V2 con disparo declarados (hub
+  vet · badges de especialidad · especializada con chips); V3-V6
+  declaradas con el encendido de telemedicina anclado a V4 (D-432).
 - **v2.6 (S67, 17 Jul 2026):** §A3 — V0 fundación CUMPLIDA (modelo de
   actor en el motor, migración `20260717170000`, juez verde + gate
   founder en dispositivo); V1 (la oferta del negocio) pasa a EN

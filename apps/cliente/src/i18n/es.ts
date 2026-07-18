@@ -423,14 +423,14 @@ export const clienteEs = {
     grooming: 'Baño',
     groomingCompleto: 'Baño y corte',
     adiestramiento: 'Adiestramiento',
-    // S68-A2 — el mundo vet (LOTE S68, gate founder pendiente)
+    // S68-A2 — el mundo vet (LOTE S68 APROBADO founder, 18 Jul 2026)
     consultaGeneral: 'Consulta',
     vacunacion: 'Vacunación',
     urgenciaLocal: 'Urgencia en clínica',
     urgenciaDomicilio: 'Urgencia a domicilio',
   },
   // S68-A2 — la reserva vet del dueño (V2: mascota→qué→día→hora→quién→
-  // pagar sobre el chasis compartido). LOTE S68, gate founder pendiente.
+  // pagar sobre el chasis compartido). LOTE S68 APROBADO founder (18 Jul 2026).
   veterinaria: {
     titulo: 'Veterinaria',
     paraQuien: '¿Para quién es?',
@@ -873,8 +873,8 @@ export const clienteEs = {
     cancelar: 'Cancelar',
   },
   // ── D-430 (S67): el detalle contextual de la cita de la mascota —
-  // el CTA de la ficha aterriza acá, jamás en un hub (LOTE S67,
-  // GATE PENDIENTE founder) ──
+  // el CTA de la ficha aterriza acá, jamás en un hub (LOTE S67
+  // APROBADO founder, 18 Jul 2026) ──
   citasMascota: {
     titulo: 'La cita de {{nombre}}',
     tituloSinNombre: 'Su cita',
