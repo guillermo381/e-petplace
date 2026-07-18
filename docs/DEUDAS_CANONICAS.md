@@ -1532,7 +1532,7 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 🟡 ALTA. El arte del paseo guarda sección por sección (N wrappers); una caída a mitad deja oferta INCONSISTENTE visible. Nace la RPC atómica (todo-o-nada, patrón contratar). **Disparo: antes del primer prestador real.**
 
 #### D-370 — Edición de nombre/descripción de la oferta renace en el perfil del prestador
-🟢 Registrada S58 (Chanel del wizard la sacó del arte). Disparo: sesión del perfil público del prestador.
+🟢 Registrada S58 (Chanel del wizard la sacó del arte). Disparo: sesión del perfil público del prestador. **Nota S67 (D-430):** la fila del prestador en `/citas/[mascotaId]` viaja SIN chevron — gana su navegación al nacer el perfil público de esta deuda.
 
 #### D-371 — Promoción de TechoTinta a packages/ui
 🟢 El techo de tinta vive hoy en apps/prestador (B); cuando un segundo consumidor aparezca, sube a packages/ui por Ley 11. Disparo: segundo consumidor.
@@ -1804,7 +1804,15 @@ El motor de recordatorios apuntando al NEGOCIO (no a la familia); candidata bara
 🟢 MEDIA. El prestador no tiene forma de ver lo que la familia ve de su trabajo (el parte, el clip, la bitácora en voz de familia); la vista espejo le permite verificar cómo llega su trabajo del otro lado. **Disparo: sin disparo declarado — a la mesa cuando el lado prestador de un oficio se pula.** Origen: S65, registro diferido S66 — renumeradas: sus números originales (D-414/415/416) fueron asignados a deudas vet.
 
 #### D-428 — Glifo del PROGRAMA (lenguaje b′)
-🟢 MEDIA. El PROGRAMA de adiestramiento no tiene ícono propio en el lenguaje b′ (DIRECCION_ARTE §2 — trazo + huella); hoy se representa con recursos genéricos. Nace como entrada nueva del registry de `Icono` con gate founder por ícono (§6). **Disparo: al tocar las pantallas del programa (mecánica D-315/D-390).** Origen: S65, registro diferido S66 — renumeradas: sus números originales (D-414/415/416) fueron asignados a deudas vet.
+🟢 MEDIA. El PROGRAMA de adiestramiento no tiene ícono propio en el lenguaje b′ (DIRECCION_ARTE §2 — trazo + huella); hoy se representa con recursos genéricos. Nace como entrada nueva del registry de `Icono` con gate founder por ícono (§6). **Disparo: al tocar las pantallas del programa (mecánica D-315/D-390).** Origen: S65, registro diferido S66 — renumeradas: sus números originales (D-414/415/416) fueron asignados a deudas vet. **Nota S67:** en el gate de D-430 el founder estrenó el glifo del OFICIO (`'training'`, lote 3 S58, gate por ícono cumplido en dispositivo — `da0c754`); esta deuda sigue siendo la del PROGRAMA, intacta con su disparo.
+
+### Deudas de Sesión 67 (17 Jul 2026)
+
+#### D-429 — NOT NULL duro en `evento_cita_servicio.empleado_id`
+🟢 MEDIA. Todos los escritores del monorepo estampan persona desde V0 y la historia quedó backfilleada; el candado duro espera relevar escritores fuera del monorepo (admin). **Disparo: el relevamiento de escritores del admin (natural en su B0), o ANTES si aparece un empleado NULL post-V0.** Origen: S67, decisión en vuelo 3 (reporte V0).
+
+#### D-430 — CTA contextual de cita → hub ✅ NACIDA Y PAGADA EN LA MISMA SESIÓN (S67, `e6d684e`+`8545ed6`+`4abed91`+`da0c754`)
+~~🟡 ALTA~~ **Hallazgo de campo del founder en el gate S67 (patrón S65: fila o cura EN EL MOMENTO), espec firmada y curada en caliente**: el CTA "ver su cita" de la ficha de mascota iba SIEMPRE a "Mis paseos" (invisible mono-oficio; el multi-oficio lo destapó). Cura: pantalla `/citas/[mascotaId]` (próxima cita activa con servicio en voz de familia + ícono b′ del oficio — paseo/grooming lote 1 + `'training'` estrenado por pedido founder —, día/hora, prestador sin chevron hasta D-370, estado honesto con "En vivo" §7.1 conectando a la pantalla de dos caras, "Ver más" acordeón para N activas — Thor: 23 —, Back jamás callejón) + lector `obtenerCitasActivasMascota` (solo lectura, RLS existente, `limit(50)` por dato real, E2E 8/8). **REGLA DE PLATAFORMA firmada (DISEÑO_EXPERIENCIA §3):** el hub es el destino del doble-clic del servicio — NINGÚN CTA contextual lo usa; barrido completo clasificado en el reporte D-430 (5 legales · 1 GRIS declarado a la mesa: la salida de paquete reservada aún aterriza en el hub — cura de una línea esperando decisión). Strings `citasMascota.*` (12 keys es/en) en LOTE S67, aprobación founder pendiente.
 
 ---
 
