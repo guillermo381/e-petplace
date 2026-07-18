@@ -2398,6 +2398,47 @@ export type Database = {
           },
         ]
       }
+      cobro_presencial_registrado: {
+        Row: {
+          country_code: string
+          created_at: string
+          evento_cita_servicio_id: string
+          id: string
+          medio: string
+          monto: number
+          registrado_por_user_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          country_code?: string
+          created_at?: string
+          evento_cita_servicio_id: string
+          id?: string
+          medio: string
+          monto: number
+          registrado_por_user_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          evento_cita_servicio_id?: string
+          id?: string
+          medio?: string
+          monto?: number
+          registrado_por_user_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cobro_presencial_registrado_evento_cita_servicio_id_fkey"
+            columns: ["evento_cita_servicio_id"]
+            isOneToOne: true
+            referencedRelation: "evento_cita_servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consentimientos: {
         Row: {
           aceptado: boolean | null
@@ -16970,6 +17011,19 @@ export type Database = {
         }
         Returns: Json
       }
+      registrar_atencion_mostrador: {
+        Args: {
+          p_country_code?: string
+          p_empleado_id?: string
+          p_fecha?: string
+          p_hora?: string
+          p_mascota_id: string
+          p_precio: number
+          p_prestador_id: string
+          p_tipo_servicio_codigo: string
+        }
+        Returns: string
+      }
       registrar_bitacora_familia: {
         Args: { p_chips?: Json; p_mascota_id: string; p_texto?: string }
         Returns: Json
@@ -16983,6 +17037,10 @@ export type Database = {
           p_storage_path: string
         }
         Returns: Json
+      }
+      registrar_cobro_presencial: {
+        Args: { p_cita_id: string; p_medio: string; p_monto: number }
+        Returns: string
       }
       registrar_discrepancia_talla_grooming: {
         Args: { p_cita_id: string; p_talla_observada: string }
