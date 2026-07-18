@@ -149,6 +149,17 @@ chips. Quedan declaradas: **V3 mostrador walk-in · V4 Durante clínico
 V5 parte y sedimento · V6 SRI post-apertura (D-419 prioridad,
 founder S66)**. Orden fino al arrancar cada tanda.
 
+> **T2 EN CURSO (S69, 18 Jul 2026) — el motor V3+presupuesto:** la
+> fundación DB parió el **presupuesto clínico** (máquina de estados,
+> cita firme con precio congelado, puente caso⇄cita, 3er nivel de
+> procedencia), el **motor del MOSTRADOR** (cita firme walk-in + cobro
+> presencial como dato, cero fee) y las **curas del chasis Fase G**
+> (L-140, goteo terminal, par L-133, normalizador + reclamo dual). La
+> cara del dueño del presupuesto (aprobar/rechazar + Zona 3) también.
+> Lo declarado abierto: la **coordinación del procedimiento aprobado**
+> (D-439, bloqueante de apertura, candidata V4/V5) · el registrable de
+> vacunación con `cat_vacunas` (D-434) · el Durante rico sigue en V4.
+
 **Test:** el expediente se alimenta porque al vet LE SIRVE — y el
 negocio cobra adentro porque es MÁS FÁCIL que afuera.
 

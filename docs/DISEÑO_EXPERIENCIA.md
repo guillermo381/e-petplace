@@ -1,5 +1,9 @@
 # DISEÑO_EXPERIENCIA — La arquitectura de la experiencia del dueño
 
+> **Versión: v2.2 — S69/T2 (18 Jul 2026).** §2 Zona 3 estrena su PRIMER
+> habitante (el aviso de presupuesto pendiente). §3: el GRIS de D-430
+> MUERTO (la salida de reserva-contra-saldo aterriza en Go home) — la
+> regla de plataforma del hub queda SIN excepciones. Base previa:
 > **Versión: v2.1 — S68 (17 Jul 2026), Etapa A0 de RUTA_F1 v2.2.**
 > (La banda v1.1→v1.4 se curó en S58 — decía v1.1 con contenido v1.4,
 > relevamiento B; v1.5 = §15b LA DOSIS DEL PRESTADOR, firma founder;
@@ -88,6 +92,12 @@ De arriba hacia abajo, en la voz de la casa:
   existe.** Prohibido el relleno.
 - **Zona 3 — En contexto.** UNA revelación u oferta por visita,
   anclada a estado real (§5). El anti-spam del §6.4 hecho layout.
+  **PRIMER HABITANTE (S69): el aviso de presupuesto pendiente** — si la
+  familia tiene un presupuesto clínico para aprobar, la Zona 3 lo
+  muestra (el más próximo a vencer manda, UNO — §15b) y navega a
+  `/citas/[mascotaId]`. Memorial calla (apagado estructural). El motor
+  de revelaciones rico sigue siendo B4; este es su primer inquilino
+  concreto, cableado directo por el lector `obtenerPresupuestosFamilia`.
 - **Zona 4 — La vida.** La `LineaDeVida` del hogar (el sedimento que
   hace que volver siempre muestre algo verdadero) + las acciones de
   aporte (cargar carnet, registrar hito).
@@ -118,6 +128,11 @@ es el destino del DOBLE-CLIC del servicio (letra `MODELO_PASEO.md`) —
 y NINGÚN CTA contextual lo usa de destino. Contexto de mascota ⇒ el
 detalle de SU cita (`/citas/[mascotaId]`: próxima activa + "Ver más"
 acordeón, Back siempre).
+
+> **La regla queda SIN excepciones (S69-A0):** el único gris declarado
+> del barrido S67 — la salida de reserva-contra-saldo de paquete, que
+> aún aterrizaba en el hub — se curó a Go home (`/hogar`). Ya no hay
+> ningún CTA contextual que use el hub de destino. **D-430 CERRADA.**
 
 **Decisión founder S50: tres tabs** (opción (b), cerrada en sesión).
 La agenda NO es tab: las citas son estado del hogar, no sección
@@ -561,6 +576,10 @@ el portado de grooming consumen:
   plataforma, los cuatro oficios. (De paso, hallazgo declarado: el
   encabezado decía v1.9 con historial v2.0 — re-sincronizado, espejo
   del precedente S58/S60.)
+- **v2.2 (S69/T2, 18 Jul 2026):** §2 Zona 3 estrena su primer habitante
+  (aviso de presupuesto pendiente, memorial calla). §3: GRIS de D-430
+  muerto — la salida de reserva-contra-saldo va a Go home; la regla del
+  hub queda sin excepciones (D-430 CERRADA).
 - **v2.0 (S67, 17 Jul 2026):** §3 gana la REGLA DE PLATAFORMA de
   D-430 (founder S67): hub = destino del doble-clic del servicio;
   ningún CTA contextual lo usa — contexto de mascota lleva al detalle

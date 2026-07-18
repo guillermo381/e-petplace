@@ -908,6 +908,7 @@ Origen: Fase 3 auditoría S22 (Bloque D.3). Prioridad: 🟢 MEDIA. Disparo: Fase
 #### D-219 — RPC `crear_mascota_walkin` huérfana en DB sin wrapper TS
 Tras la eliminación de `lib/walkin.ts` en S19, la RPC `crear_mascota_walkin` quedó en DB sin wrapper TS canónico. Accesible vía `supabase.rpc()` directo pero no abstraída.
 Origen: Fase 3 auditoría S22 (Bloque D + E). Prioridad: 🟢 MEDIA. Disparo: cuando MascotaDetalle (D-110 UI) o un nuevo flow de walkin necesite crear mascotas desde el prestador. Resolución: crear wrapper en `lib/mascotas.ts` o `lib/walkin.ts` cuando se necesite.
+**Nota S69 — EN PAGO por la B:** la B envuelve `crear_mascota_walkin` (+ Fase G) en `packages/api` para el mostrador V3, contra firma viva (`pg_get_functiondef`, regla 40). La A verificó en A2 que su cura L-140 NO cambió la firma (assert de identity-args idéntica). **La fila la cierra la B con su reporte de cierre — no la cierra la A.**
 
 #### D-234 — Asistente de oficio (feature de producto con IA)
 Feature donde el prestador consulta conversacionalmente con un asistente IA que tiene contexto del bio-expediente de la mascota en atención. No es dictado por voz (eso es la decisión técnica F.1 de S26, ya resuelta con Web Speech API). Es un asistente con contexto que ayuda al prestador a pensar sobre el caso específico (ej: "¿Tobi tiene alergia registrada al shampoo medicado?", "¿la piel está más roja que en sesiones previas?"). Planteado y evaluado en S26. Decisión: construir, pero diferido. Es un producto en sí, no extensión de F.1. Su diseño correcto depende de saber qué consultas hacen los prestadores reales — información que no existe todavía. Requiere sesión propia de planning de producto, decisiones de costo recurrente (estimado 1-5 centavos USD por consulta), y guardrails de honestidad robustos (alucinación en contexto sanitario es catastrófica).
@@ -1833,6 +1834,29 @@ El motor de recordatorios apuntando al NEGOCIO (no a la familia); candidata bara
 🟢 MEDIA. Los tipos `urgencia_local`/`urgencia_domicilio` y la telemedicina no tienen ícono propio en el lenguaje b′ (DIRECCION_ARTE §2 — trazo + huella); hoy el flujo vet usa el glifo del oficio (`'veterinaria'`, lote 1 S53). Nacen como entradas nuevas del registry de `Icono` con gate founder POR ÍCONO (§6), a 21px además de su tamaño de diseño. **Disparo: al tocar las pantallas que los pidan (mecánica D-315/D-390).** Origen: S68 (dictado del arquitecto).
 
 **Nota de strings S68 — GATE CERRADO (18 Jul 2026):** los lotes S68 COMPLETOS (`tallerVeterinaria` · `veterinaria` · `procedimientosVet` · `verificacionVet` · `ui.vozComision` · `ui.sliderPrecio` · voces de conversión B8 · duración B9) y el lote `citasMascota.*` de S67 fueron **LEÍDOS Y APROBADOS por el founder** en una sola lectura (mecánica D-315). La aprobación RATIFICA el tuteo de B5/B8/B9 como voz de producto — sin retoques (L-148).
+
+### Deudas de Sesión 69 (T2 — 18 Jul 2026)
+
+#### D-430 — CTA contextual de cita → hub · ✅ GRIS MUERTO (S69-A0)
+🟢 CERRADA. El último gris del barrido S67 (la salida de reserva-contra-saldo aterrizaba en el hub `/hogar/paseos`) se curó a `router.navigate('/hogar')` (Go home, literal del suelto). El toast `paquete.reservada` con saldo QUEDA. **La regla de plataforma DISEÑO_EXPERIENCIA §3 queda SIN excepciones.** Commit A0 `6c72f32`.
+
+#### D-434 — Vacunación elige de `cat_vacunas` (7 seeds EC + «Otra» texto libre)
+🟡 MEDIA. El registrable de vacunación debe ofrecer el catálogo `cat_vacunas` (7 seeds EC, sembrado V0-S67) con «Otra» de texto libre (el texto libre sigue legal). Hoy el nombre de la vacuna es texto libre puro. **Disparo: SUENA en esta tanda — la B la paga en el registrable del mostrador (M-vacunación).** La puerta ya existe (`evento_vacuna_aplicada` + productor de procedencia `declarado_por_prestador`, S69-A1bis). Origen: S69.
+
+#### D-435 — Vuelta a modo universal con N>1 personas borra sólo franjas del titular
+🟡 MEDIA. Cuando un negocio con N>1 personas vuelve de modo `por_servicio` a `universal`, la conversión debe borrar SÓLO las franjas del titular (no las de los empleados). Letra del arranque S69. Complementa `convertir_horarios_a_por_servicio` (S68, la ida). **Disparo: la sesión de horarios multi-persona.** Territorio prestador (B). Origen: S69.
+
+#### D-436 — Alertas por WhatsApp habilitables por el usuario (opt-in)
+🟢 MEDIA. Cliente y prestador podrán optar por recibir alertas por WhatsApp (opt-in en preferencias de notificaciones; `prestadores.whatsapp` ya es NOT NULL, el cliente aportaría su teléfono). Requiere evaluación de proveedor y **costo por conversación al MODELO_FINANCIERO** cuando dispare. **Disparo: la tanda de notificaciones.** Origen: S69 (decisión de mesa).
+
+#### D-437 — Acote de especies por negocio en el alta de mostrador
+🟢 BAJA. `registrar_atencion_mostrador`/`crear_mascota_walkin` validan la especie contra `cat_especies` (`especie_invalida_o_inactiva`), catálogo COMPLETO. El refinamiento: acotar a la UNIÓN de `especies_compatibles` sobre los servicios activos del negocio (un negocio que no atiende exóticos no debería poder darlos de alta en su mostrador). **Disparo: M4 o el wizard vet.** Origen: S69 (addendum de la B).
+
+#### D-438 — Variante `on-cta` del registry `Icono`
+🟢 BAJA. El registry `Icono` tiene registros `capa`/`aa`/`tinta`; falta un glifo **monocromo legal sobre relleno CTA** (un b′ multicolor sobre teal violaría la ley del acento — DIRECCION_ARTE §15b). Nace como registro nuevo con gate founder POR ÍCONO cuando dispare. **Disparo: el primer CTA que pida glifo.** Origen: S69 (addendum de la B).
+
+#### D-439 — Coordinación del procedimiento aprobado (lector "por coordinar" + fijación de fecha)
+🔴 ALTA — **BLOQUEANTE DE APERTURA del oficio, candidata V4/V5.** El presupuesto aprobado agenda una cita firme SIN fecha (v1: la clínica coordina, voz honesta firmada). Falta: (1) un lector **"por coordinar"** del lado prestador que liste esas citas fecha-NULL; (2) la **fijación de fecha** contra el motor de ventana (la cita pasa de fecha-NULL a fecha real). **Letra de la B (regla 40):** una cita de procedimiento cuyo presupuesto era **todo-libre** nace `tipo_servicio=NULL` — el lector del día (INNER JOIN `es_medico`) NO la ve; el lector "por coordinar" debe resolverlas (LEFT JOIN u origen en `metadata`). Hoy NO muerde (esas citas tampoco tienen fecha, no entran a la agenda). **Disparo: la construcción del Durante clínico (V4).** Origen: S69 (nota de mesa + hallazgo de la B).
 
 ---
 

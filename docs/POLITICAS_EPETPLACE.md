@@ -1,6 +1,6 @@
 # POLITICAS_EPETPLACE — Políticas operativas del producto
 
-> Versión: v1.7
+> Versión: v1.8
 > Última actualización: 13 Jul 2026 — Sesión 59. P19 FIRMADA (el paseo es GRUPAL por norma).
 > Audiencia: Claude (web y code), devs futuros, equipo de soporte, equipo legal.
 > Análogo a: `CONTRATO_TRABAJO.md` (cómo trabajamos) pero del producto (cómo se comporta).
@@ -222,9 +222,24 @@ Un prestador puede registrar a un cliente y su mascota durante una atención pre
 
 - NO se crea un user en `auth.users` sin consentimiento explícito del cliente.
 - Se crea un **alta asistida pendiente** + familia placeholder + mascota.
-- e-PetPlace invita al cliente a completar su registro (email, link, QR).
-- Si completa en 30 días, las mascotas se transfieren a su familia real automáticamente (trigger).
-- Si no completa en 30 días, el pendiente y la familia placeholder se eliminan vía cleanup automático.
+- e-PetPlace invita al cliente a completar su registro con **email O
+  teléfono** (contacto-flexible, enmienda S69: al menos uno). El reclamo
+  matchea por email O teléfono normalizado (`normalizar_telefono`, un
+  único normalizador; el trigger se dispara también cuando el cliente
+  agrega su teléfono más tarde).
+- Si completa (por cualquiera de los dos contactos), las mascotas se
+  transfieren a su familia real automáticamente (trigger).
+- **La invitación expira a 30 días; el DATO CLÍNICO JAMÁS (enmienda
+  S69, decisión founder — letra = realidad).** El relevamiento Bloque 0
+  S69 probó que el cleanup **NUNCA borró** (la letra v1.0 decía "se
+  eliminan" pero la función sólo notificaba). Se firma como PRINCIPIO:
+  la INVITACIÓN expira (deja de estar activa a los 30 días), pero el
+  expediente de la mascota **no se borra** — queda bajo el acceso
+  operativo del prestador que lo produjo, esperando reclamo **sin fecha
+  de muerte**. Un dato clínico que expira es un expediente que miente.
+- Soporte recibe **UNA notificación terminal** por pendiente vencido
+  (`notificado_soporte_en`, enmienda S69 — el goteo nocturno que
+  re-avisaba cada noche murió).
 - El cliente puede pedir a soporte resolución manual en cualquier momento.
 
 **Por qué:**
@@ -239,7 +254,7 @@ Mientras el cliente está pendiente, no se pueden generar estadías, suscripcion
 
 **Implementación:**
 
-Ver `BIO_EXPEDIENTE.md` (S19) para schema y RPCs (`buscar_cliente_por_email`, `crear_alta_asistida_pendiente`, `crear_alta_asistida_existente`, trigger `_trg_completar_pendiente_registro`, cleanup `cleanup_pendientes_vencidos`).
+Ver `BIO_EXPEDIENTE.md` (S19) para schema y RPCs (`buscar_cliente_por_email`, `crear_alta_asistida_pendiente`, `crear_alta_asistida_existente`, trigger `_trg_completar_pendiente_registro`, cleanup `cleanup_pendientes_vencidos`). **Enmiendas S69 (migración `20260718173000`):** las 6 funciones ganaron L-140 (REVOKE anon/PUBLIC); `crear_alta_asistida_pendiente` acepta email O teléfono; nace `normalizar_telefono` + hermana `buscar_cliente_por_telefono`; el match del trigger es dual (email O teléfono normalizado, AFTER INSERT OR UPDATE); `cleanup_pendientes_vencidos` marca `notificado_soporte_en` (UNA notificación) y **jamás borra**.
 
 ---
 
@@ -540,5 +555,6 @@ reserva — conviven, no se pisan.
 - **v1.3 (11 Jul 2026 — S55-B5)**: P14 FIRMADA (founder, OK completo al paquete del plan): (a) salto con ≥24 h reagenda en el período con el mismo paseador, sobrantes al cierre = crédito si renueva / reembolso proporcional si no · (b) falla del prestador = crédito o reembolso a elección del dueño · (c) <24 h = la cita se pierde · (d) pausa = no renovar, el período corriente se rige por (a)/(b). Gemelos: `MODELO_PASEO.md` v1.1 y `MODELO_FINANCIERO.md` v2.5 (Decisión S).
 - **v1.4 (12 Jul 2026 — S56)**: P16 FIRMADA (founder S56, paquete de letra del PAQUETE DE SALIDAS): (a) comprar no es reservar — vigencia mensual declarada al comprar · (b) cancelar con ≥2 h devuelve la salida al saldo y libera la franja · (c) no-show = salida consumida, el paseador cobra (cierre `no_show`) · (d) falla del prestador = saldo o reembolso proporcional a elección del dueño · (e) rollover al renovar antes del vencimiento; sin renovación vencen (breakage declarado); recordatorio UNO y sereno, jamás countdown. Nota de ventanas: 24 h del plan vs 2 h del paquete es DECISIÓN. Gemelos: `MODELO_PASEO.md` v1.2 (§6bis/§6ter) y `MODELO_FINANCIERO.md` v2.6 (Decisión T + 7.15).
 - **v1.6 (12 Jul 2026 — S57)**: P17 FIRMADA e integrada (letra v1.1 del arquitecto, firmada por el founder en sesión): la Cuenta del prestador — CUATRO tabs Hoy·Mascotas·Negocio·Cuenta (la única decisión fue separar Cuenta de Negocio; la v1.0 desplazaba Mascotas por error de redacción, corregido con firma en la misma sesión) · Negocio puro oficio · pulido a la vara de la Cuenta del cliente en la pasada de acabados · eliminación de cuenta DECLARADA con enmienda de letra previa a construcción (la entrada dice "Pronto", jamás finge borrar). Cierra la reserva de numeración de la v1.5. Nota de proceso: la integración llegó UNA respuesta tarde — el primer envío anunció el literal sin adjuntarlo y la A frenó por regla 76b (freno ratificado por el arquitecto).
+- **v1.8 (18 Jul 2026 — S69/T2)**: P13 enmendada (letra = realidad, decisión founder): la invitación de alta asistida expira a 30 días, el **dato clínico JAMÁS** (el Bloque 0 S69 probó que el cleanup nunca borró; se firma como principio — el expediente queda bajo el acceso operativo del prestador que lo produjo, esperando reclamo sin fecha de muerte). Contacto-flexible (email O teléfono) + reclamo dual por teléfono normalizado + una notificación terminal a soporte. Migración `20260718173000` (S69-A2).
 - **v1.7 (13 Jul 2026 — S59)**: P19 FIRMADA (founder S59 — el paseo es GRUPAL por norma): la norma se declara en condiciones Y en el flujo de reserva ("Los paseos suelen ser con más de un perro a la vez.") · pregunta única en la primera reserva por mascota ("¿{nombre} se lleva bien paseando con otros perros?") · SÍ = se agenda y no se re-pregunta · NO = no se agenda, voz honesta con camino ("Por ahora los paseos son en grupo. Estamos armando algo para {nombre}.") y el NO se REGISTRA (mascota, familia, fecha) como insumo de la decisión paseo personalizado vs derivación a entrenador · la respuesta vive en el perfil de la mascota y es EDITABLE. **Cierra D-330.** Gemelo: `MODELO_PASEO.md` §4.1.
 - **v1.5 (12 Jul 2026 — S57)**: P18 FIRMADA (founder S57, redacción del arquitecto sobre decisión en sesión — cancelación y reagenda del paseo SUELTO): (a) ≥24 h = reagendar o cancelar con destino a elección del dueño (medio de pago original con sus 15 días hábiles declarados, o saldo e-PetPlace) · (b) entre 24 y 2 h = solo reagendar, la plata no se mueve · (c) <2 h o no presentarse = el paseo se pierde y el paseador cobra (cierre `no_show`, Decisión T) · (d) falla del prestador = devolución o saldo a elección, sin discusión. Camino de la plata: la cancelación se DECLARA sobre el pago (patrón 7.14 enmendada; `aplicar_reembolso()` intacta). Construcción diferida: la pantalla de elección de destino y el saldo e-PetPlace esperan Kushki fase 1 — hoy el reembolso es simulado y declarado, sin pantalla de destino. **P17 queda RESERVADA** para la Cuenta del prestador (sin letra). Gemelos: `MODELO_PASEO.md` v1.3 (§3bis) y `MODELO_FINANCIERO.md` v2.7 (nota 7.16).

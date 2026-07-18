@@ -1,5 +1,15 @@
 # MODELO_VETERINARIA — El contrato del oficio veterinario y del modelo de actor
 
+> **Versión: v1.4 — S69/T2 (18 Jul 2026).** Enmiendas v1.4 (depósito
+> Sesión A): §6 gana la NOTA CANÓNICA del día clínico (se compone por
+> `tipos_servicio.es_medico=true`, JAMÁS por categoría — hallazgo
+> S69-B, regla 59); §7 el MOSTRADOR v1 REGISTRA el cobro presencial
+> como DATO (cero fee/devengo sobre lo no transaccionado, coherencia
+> FINANCIERO §2.5); §8 el presupuesto NACIÓ (migración `20260718170000`,
+> máquina de estados chica, cita firme con precio congelado, v1 sin
+> fecha fija — la clínica coordina, voz honesta firmada; la coordinación
+> del día = D-439, bloqueante de apertura); §13 nace el TERCER nivel de
+> procedencia `declarado_por_prestador`. Base previa:
 > **Versión: v1.3 — S68 cierre (18 Jul 2026).** Enmienda v1.3: §6 gana
 > la DURACIÓN de los comprables médicos (menú curado + «Otra» visible,
 > letra founder del choque 2 — commit B9 `665b1b1`; guard
@@ -168,6 +178,17 @@ no se mueven.
 
 ## 6. El menú v1 (comprable ≠ registrable, aplicado a medicina)
 
+> **NOTA CANÓNICA — el día clínico se compone por `es_medico` (S69-B,
+> regla 59, dictado de mesa):** el día clínico del prestador se compone
+> por `tipos_servicio.es_medico = true` — **JAMÁS por categoría**. Los
+> tipos vet no comparten una sola `categoria` (telemedicina y emergencia
+> tienen categoría propia); filtrar por `categoria = 'veterinaria'`
+> pierde telemedicina y urgencias en silencio. `es_medico` deja los
+> cuatro oficios DISJUNTOS (paseo/grooming/adiestramiento son
+> `es_medico=false`) y los procedimientos (`'otro'`, `es_medico=false`)
+> entran al día SÓLO por presupuesto aprobado (§8). La convención costó
+> un relevamiento (L-144); se deposita para no re-descubrirse.
+
 **Comprables desde la vitrina (v1):**
 
 - **Consulta** (`consulta_general`) — la unidad madre. El "control" es
@@ -233,14 +254,29 @@ queda incompleto — y un reporte incompleto no es gancho, es juguete.
 La tesis Fresha/Toast se sostiene solo si el flujo ENTERO pasa por
 adentro.
 
-**El flujo de mostrador:** el negocio registra y cobra una atención
-walk-in EN EL MOMENTO — cita nacida FIRME desde el mostrador (sin
-hold, sin momento-primero), con persona asignada, mismo devengo
-variante (b), misma comisión, mismo sedimento al Eje 3. Es un camino
-de CREACIÓN nuevo sobre el chasis existente, no un chasis nuevo. Si la
-mascota/familia no existe aún en la plataforma, el mostrador la da de
-alta mínima (la clínica como puerta de entrada de familias — el
+**El flujo de mostrador:** el negocio registra una atención walk-in EN
+EL MOMENTO — cita nacida FIRME desde el mostrador (sin hold, sin
+momento-primero), con persona asignada, mismo sedimento al Eje 3. Es un
+camino de CREACIÓN nuevo sobre el chasis existente, no un chasis nuevo.
+Si la mascota/familia no existe aún en la plataforma, el mostrador la
+da de alta mínima (la clínica como puerta de entrada de familias — el
 ecosistema alimentando al ecosistema).
+
+**El cobro presencial es DATO, no transacción de plataforma (enmienda
+v1.4, decisión founder S69):** el cobro del walk-in NO pasa por Kushki
+— se cobró en el mostrador. Coherencia con FINANCIERO §2.5 (*si no pasa
+por la plataforma, no se cobra*): el mostrador v1 **REGISTRA el cobro
+como dato** (tabla `cobro_presencial_registrado`: monto + medio
+efectivo/tarjeta/transferencia, UNIQUE por cita — un cobro por cita, la
+corrección es soporte), **cero fee, cero devengo, cero evento
+económico**. La cita nace `estado='confirmada'`, `estado_reserva=
+'pendiente_pago'` honesto (nunca `'pagada'` — la invariante 'pagada' es
+para el pago in-app). El reporte de rentabilidad distingue honesto
+"cobrado en la app" vs "registrado en mostrador" (dato de primera
+clase, SQL — jamás en metadata). El devengo/comisión variante (b) sólo
+existe cuando el cobro pase por la plataforma (línea futura, con Kushki).
+Migración S69-A1bis (`20260718174500`): `registrar_atencion_mostrador`
++ `registrar_cobro_presencial`, L-140 de nacimiento.
 
 ## 8. EL PRESUPUESTO CLÍNICO (primitiva nueva)
 
@@ -369,13 +405,28 @@ una vacuna "declarada por foto".
 **La solución — NIVEL DE PROCEDENCIA en el evento (se modela YA,
 barato hoy, carísimo de retrofitear):**
 
-- `declarado_por_familia` (carnet, nota del dueño) vs
+- `declarado_por_familia` (carnet, nota del dueño) ·
+  **`declarado_por_prestador`** (registrado por un prestador, aún sin
+  verificación de identidad profesional — TERCER nivel, S69) ·
   `verificado_por_prestador` (aplicación/registro directo de un
-  prestador validado).
-- Voz honesta en superficie: "registrada del carnet" vs "aplicada por
-  Clínica X". Jamás se degrada lo declarado — se distingue.
-- **Precondición de la procedencia verificada: la VERIFICACIÓN DEL
-  VET** (§14.2). Sin vet validado, "verificado" no vale nada.
+  prestador validado §14.2).
+- Voz honesta en superficie: "registrada del carnet" (familia) ·
+  **"registrada por {negocio}"** (declarado_por_prestador) · "aplicada
+  por Clínica X" (verificado). Jamás se degrada lo declarado — se
+  distingue.
+- **El TERCER nivel (enmienda v1.4, decisión founder S69, dec. 5):**
+  `declarado_por_prestador` es el punto medio honesto — un vet registró
+  el evento (más peso que el carnet del dueño) pero la cuenta aún no
+  pasó §14.2. Su PRIMER productor: el trigger de vacunación
+  (`_trg_vacuna_crear_evento`, S69-A1bis) estampa `declarado_por_prestador`
+  cuando hay `prestador_id`; el carnet del dueño (sin prestador) sigue
+  `declarado_por_familia`. La puerta única `_crear_evento_padre_auto`
+  ganó `p_procedencia` (DEFAULT `declarado_por_familia` — cero cambio
+  para los escritores vivos).
+- **Precondición de la procedencia VERIFICADA (el tope): la VERIFICACIÓN
+  DEL VET** (§14.2). Sin vet validado, "verificado" no vale nada —
+  `verificado_por_prestador` sigue SIN productor hasta que §14.2
+  produzca el gate.
 
 **La identidad digital de la mascota (destino declarado, founder
 S66):** ES, en gran parte, el subconjunto VERIFICADO del expediente —
@@ -546,6 +597,15 @@ sesión a sesión, como manda la ruta.
 
 ## Historial
 
+- **v1.4 (S69/T2, 18 Jul 2026):** §6 nota canónica del día clínico por
+  `es_medico` (regla 59, L-144) · §7 el mostrador REGISTRA el cobro
+  presencial como dato (cero fee/devengo, FINANCIERO §2.5;
+  `cobro_presencial_registrado`) · §8 el presupuesto NACIÓ (máquina de
+  estados chica, cita firme precio congelado, v1 sin fecha fija — la
+  clínica coordina, D-439 para la fijación) · §13 tercer nivel
+  `declarado_por_prestador` con su voz "registrada por {negocio}" y su
+  primer productor (trigger de vacunación). Migraciones `20260718170000`
+  (A1) · `20260718173000` (A2) · `20260718174500` (A1bis).
 - **v1.1 (S67, 17 Jul 2026):** §17 — V0 marcada CUMPLIDA (migración
   `20260717170000`, juez verde, gate founder en dispositivo) con la
   nota del freno: la prueba reina evolucionó a
