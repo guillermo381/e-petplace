@@ -2308,15 +2308,17 @@ export type Database = {
           creado_por_prestador_id: string
           creado_por_user_id: string
           created_at: string
-          email: string
+          email: string | null
           expira_en: string
           familia_id_placeholder: string
           id: string
           nombre: string
           notificaciones_enviadas: number
           notificado_en: string | null
+          notificado_soporte_en: string | null
           soporte_resuelto_en: string | null
           telefono: string | null
+          telefono_normalizado: string | null
         }
         Insert: {
           completado_en?: string | null
@@ -2326,15 +2328,17 @@ export type Database = {
           creado_por_prestador_id: string
           creado_por_user_id: string
           created_at?: string
-          email: string
+          email?: string | null
           expira_en?: string
           familia_id_placeholder: string
           id?: string
           nombre: string
           notificaciones_enviadas?: number
           notificado_en?: string | null
+          notificado_soporte_en?: string | null
           soporte_resuelto_en?: string | null
           telefono?: string | null
+          telefono_normalizado?: string | null
         }
         Update: {
           completado_en?: string | null
@@ -2344,15 +2348,17 @@ export type Database = {
           creado_por_prestador_id?: string
           creado_por_user_id?: string
           created_at?: string
-          email?: string
+          email?: string | null
           expira_en?: string
           familia_id_placeholder?: string
           id?: string
           nombre?: string
           notificaciones_enviadas?: number
           notificado_en?: string | null
+          notificado_soporte_en?: string | null
           soporte_resuelto_en?: string | null
           telefono?: string | null
+          telefono_normalizado?: string | null
         }
         Relationships: [
           {
@@ -16179,6 +16185,10 @@ export type Database = {
         Returns: Json
       }
       buscar_cliente_por_email: { Args: { p_email: string }; Returns: Json }
+      buscar_cliente_por_telefono: {
+        Args: { p_country_code?: string; p_telefono: string }
+        Returns: Json
+      }
       calcular_etapa_vida: {
         Args: { p_especie: string; p_fecha_nacimiento: string }
         Returns: string
@@ -16676,6 +16686,10 @@ export type Database = {
       }
       marcar_no_show_cita: { Args: { p_cita_id: string }; Returns: Json }
       mi_email: { Args: never; Returns: string }
+      normalizar_telefono: {
+        Args: { p_country_code: string; p_texto: string }
+        Returns: string
+      }
       obtener_adiestradores_disponibles: {
         Args: { p_fecha: string; p_hora: string; p_mascota_id: string }
         Returns: {
