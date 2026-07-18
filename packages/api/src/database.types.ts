@@ -5130,6 +5130,7 @@ export type Database = {
           calificacion: number | null
           calificacion_comentario: string | null
           calificacion_en: string | null
+          caso_clinico_id: string | null
           country_code: string
           created_at: string | null
           direccion_snapshot: Json | null
@@ -5150,6 +5151,7 @@ export type Database = {
           notas_prestador: string | null
           precio: number | null
           prestador_id: string | null
+          presupuesto_id: string | null
           programa_contratado_id: string | null
           sesion_numero: number | null
           suscripcion_servicio_id: string | null
@@ -5162,6 +5164,7 @@ export type Database = {
           calificacion?: number | null
           calificacion_comentario?: string | null
           calificacion_en?: string | null
+          caso_clinico_id?: string | null
           country_code?: string
           created_at?: string | null
           direccion_snapshot?: Json | null
@@ -5182,6 +5185,7 @@ export type Database = {
           notas_prestador?: string | null
           precio?: number | null
           prestador_id?: string | null
+          presupuesto_id?: string | null
           programa_contratado_id?: string | null
           sesion_numero?: number | null
           suscripcion_servicio_id?: string | null
@@ -5194,6 +5198,7 @@ export type Database = {
           calificacion?: number | null
           calificacion_comentario?: string | null
           calificacion_en?: string | null
+          caso_clinico_id?: string | null
           country_code?: string
           created_at?: string | null
           direccion_snapshot?: Json | null
@@ -5214,6 +5219,7 @@ export type Database = {
           notas_prestador?: string | null
           precio?: number | null
           prestador_id?: string | null
+          presupuesto_id?: string | null
           programa_contratado_id?: string | null
           sesion_numero?: number | null
           suscripcion_servicio_id?: string | null
@@ -5227,6 +5233,13 @@ export type Database = {
             columns: ["bono_id"]
             isOneToOne: false
             referencedRelation: "bonos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_cita_servicio_caso_clinico_id_fkey"
+            columns: ["caso_clinico_id"]
+            isOneToOne: false
+            referencedRelation: "caso_clinico"
             referencedColumns: ["id"]
           },
           {
@@ -5262,6 +5275,13 @@ export type Database = {
             columns: ["prestador_id"]
             isOneToOne: false
             referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_cita_servicio_presupuesto_id_fkey"
+            columns: ["presupuesto_id"]
+            isOneToOne: false
+            referencedRelation: "presupuesto"
             referencedColumns: ["id"]
           },
           {
@@ -11933,6 +11953,171 @@ export type Database = {
           },
         ]
       }
+      presupuesto: {
+        Row: {
+          aprobado_en: string | null
+          aprobado_por_user_id: string | null
+          aprobado_via: string | null
+          caso_clinico_id: string | null
+          country_code: string
+          created_at: string
+          cuenta_comercial_id: string
+          empleado_id: string | null
+          estado: string
+          evento_atencion_id: string | null
+          evento_cita_servicio_id: string | null
+          familia_id: string | null
+          id: string
+          mascota_id: string
+          motivo_rechazo: string | null
+          total: number
+          updated_at: string
+          vence_en: string | null
+        }
+        Insert: {
+          aprobado_en?: string | null
+          aprobado_por_user_id?: string | null
+          aprobado_via?: string | null
+          caso_clinico_id?: string | null
+          country_code?: string
+          created_at?: string
+          cuenta_comercial_id: string
+          empleado_id?: string | null
+          estado?: string
+          evento_atencion_id?: string | null
+          evento_cita_servicio_id?: string | null
+          familia_id?: string | null
+          id?: string
+          mascota_id: string
+          motivo_rechazo?: string | null
+          total?: number
+          updated_at?: string
+          vence_en?: string | null
+        }
+        Update: {
+          aprobado_en?: string | null
+          aprobado_por_user_id?: string | null
+          aprobado_via?: string | null
+          caso_clinico_id?: string | null
+          country_code?: string
+          created_at?: string
+          cuenta_comercial_id?: string
+          empleado_id?: string | null
+          estado?: string
+          evento_atencion_id?: string | null
+          evento_cita_servicio_id?: string | null
+          familia_id?: string | null
+          id?: string
+          mascota_id?: string
+          motivo_rechazo?: string | null
+          total?: number
+          updated_at?: string
+          vence_en?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "presupuesto_caso_clinico_id_fkey"
+            columns: ["caso_clinico_id"]
+            isOneToOne: false
+            referencedRelation: "caso_clinico"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presupuesto_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_comerciales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presupuesto_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_resumen_cuenta"
+            referencedColumns: ["cuenta_comercial_id"]
+          },
+          {
+            foreignKeyName: "presupuesto_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "prestador_empleados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presupuesto_evento_atencion_id_fkey"
+            columns: ["evento_atencion_id"]
+            isOneToOne: false
+            referencedRelation: "evento_atencion"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presupuesto_evento_cita_servicio_id_fkey"
+            columns: ["evento_cita_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "evento_cita_servicio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presupuesto_familia_id_fkey"
+            columns: ["familia_id"]
+            isOneToOne: false
+            referencedRelation: "familia"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presupuesto_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      presupuesto_item: {
+        Row: {
+          cantidad: number
+          created_at: string
+          descripcion_libre: string | null
+          id: string
+          precio: number
+          presupuesto_id: string
+          tipo_servicio_codigo: string | null
+        }
+        Insert: {
+          cantidad?: number
+          created_at?: string
+          descripcion_libre?: string | null
+          id?: string
+          precio: number
+          presupuesto_id: string
+          tipo_servicio_codigo?: string | null
+        }
+        Update: {
+          cantidad?: number
+          created_at?: string
+          descripcion_libre?: string | null
+          id?: string
+          precio?: number
+          presupuesto_id?: string
+          tipo_servicio_codigo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "presupuesto_item_presupuesto_id_fkey"
+            columns: ["presupuesto_id"]
+            isOneToOne: false
+            referencedRelation: "presupuesto"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presupuesto_item_tipo_servicio_codigo_fkey"
+            columns: ["tipo_servicio_codigo"]
+            isOneToOne: false
+            referencedRelation: "tipos_servicio"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
       productos: {
         Row: {
           categoria: string
@@ -15707,6 +15892,10 @@ export type Database = {
         }
         Returns: number
       }
+      _agendar_cita_desde_presupuesto: {
+        Args: { p_presupuesto_id: string }
+        Returns: string
+      }
       _atencion_en_estados: {
         Args: { p_atencion_id: string; p_estados: string[] }
         Returns: Record<string, unknown>
@@ -15726,6 +15915,7 @@ export type Database = {
           p_fecha_evento: string
           p_mascota_id: string
           p_prestador_id: string
+          p_procedencia?: string
           p_tipo: string
         }
         Returns: string
@@ -15860,6 +16050,10 @@ export type Database = {
         Args: { p_familia_id: string; p_user_id: string }
         Returns: boolean
       }
+      _user_opera_cuenta_comercial: {
+        Args: { p_cuenta_id: string; p_uid: string }
+        Returns: boolean
+      }
       _validar_ownership_cuenta_comercial: {
         Args: { p_cuenta_comercial_id: string }
         Returns: {
@@ -15979,6 +16173,10 @@ export type Database = {
           p_motivo: string
         }
         Returns: string
+      }
+      aprobar_presupuesto_familia: {
+        Args: { p_presupuesto_id: string }
+        Returns: Json
       }
       buscar_cliente_por_email: { Args: { p_email: string }; Returns: Json }
       calcular_etapa_vida: {
@@ -16219,6 +16417,20 @@ export type Database = {
           success: boolean
         }[]
       }
+      crear_presupuesto_borrador: {
+        Args: {
+          p_caso_clinico_id?: string
+          p_country_code?: string
+          p_cuenta_comercial_id: string
+          p_empleado_id?: string
+          p_evento_atencion_id?: string
+          p_evento_cita_servicio_id?: string
+          p_familia_id?: string
+          p_items: Json
+          p_mascota_id: string
+        }
+        Returns: string
+      }
       debug_estado_user: {
         Args: { p_email: string }
         Returns: {
@@ -16260,6 +16472,10 @@ export type Database = {
           prestador_id: string
           telefono: string
         }[]
+      }
+      enviar_presupuesto: {
+        Args: { p_presupuesto_id: string; p_vence_en: string }
+        Returns: undefined
       }
       escenario_d167_setup: { Args: never; Returns: Json }
       escenario_grooming_confirmado_persistente: { Args: never; Returns: Json }
@@ -16708,6 +16924,14 @@ export type Database = {
       }
       rechazar_invitacion_pendiente_login: {
         Args: { p_empleado_id: string }
+        Returns: Json
+      }
+      rechazar_presupuesto: {
+        Args: { p_motivo?: string; p_presupuesto_id: string }
+        Returns: undefined
+      }
+      registrar_aprobacion_presencial: {
+        Args: { p_presupuesto_id: string }
         Returns: Json
       }
       registrar_archivo_atencion: {
