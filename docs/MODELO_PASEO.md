@@ -113,6 +113,15 @@ grilla de 30' bloquea sus 4 slots. Implementación (migración
 son legales en la franja (cupo N ⇒ N mascotas a la vez). Hoy el seed y
 las ofertas reales operan con cupo 1 (paseo individual).
 
+**Fundación V0 (S67):** La semántica de concurrencia vive en
+`tipos_servicio.concurrencia` (paseo=cupo, techo 4 de plataforma;
+founder S67). La capacidad efectiva de una franja es
+`LEAST(COALESCE(max_citas_por_slot,1), COALESCE(cupo_techo,1))` — para
+el paseo colapsa a `LEAST(franja, 4)` porque el techo nunca es NULL
+ahí. La ocupación es por PERSONA (fundación V0); §4.1 y el
+multiplicador por empleado quedan gobernados por el modelo de actor
+(`MODELO_VETERINARIA.md` PARTE I).
+
 - **Empleados como multiplicador (futuro):** cuando el prestador tenga
   equipo, la capacidad real es paseadores disponibles × su cupo — hoy
   el cupo es un número plano por franja; el multiplicador por empleado
@@ -351,6 +360,12 @@ honesta + captura de demanda.
 
 ## Historial
 
+- **v1.6 (S67, 17 Jul 2026):** §4 gana la letra de la fundación V0
+  (dictado arquitecto, gate founder VERDE): concurrencia declarada en
+  `tipos_servicio` (paseo=cupo techo 4), capacidad efectiva
+  LEAST(franja, techo), ocupación por PERSONA — el multiplicador por
+  empleado de §4 y el hueco §4.1 pasan a gobernarse por el modelo de
+  actor (migración `20260717170000`).
 - **v1.5 (S59, 13 Jul 2026 — founder S59):** (1) §6.1 ENMENDADO — EL
   PLAN MENSUAL ES DE LUNES A VIERNES, regla DURA (fines de semana =
   suelto o paquete; chips S/D apagados con voz honesta con camino;

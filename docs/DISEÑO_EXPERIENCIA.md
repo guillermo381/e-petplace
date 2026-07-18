@@ -111,6 +111,14 @@ día. El "al día" se GANA con datos, nunca se asume.
 
 ## 3. El mapa de navegación
 
+**REGLA DE PLATAFORMA (founder S67, D-430 — vale para TODOS los
+oficios presentes y futuros):** el hub de un servicio ("Mis paseos"
+hoy; sus equivalentes de grooming/adiestramiento/vet cuando nazcan)
+es el destino del DOBLE-CLIC del servicio (letra `MODELO_PASEO.md`) —
+y NINGÚN CTA contextual lo usa de destino. Contexto de mascota ⇒ el
+detalle de SU cita (`/citas/[mascotaId]`: próxima activa + "Ver más"
+acordeón, Back siempre).
+
 **Decisión founder S50: tres tabs** (opción (b), cerrada en sesión).
 La agenda NO es tab: las citas son estado del hogar, no sección
 administrativa (lectura transaccional que EL NORTE rechaza).
@@ -544,6 +552,10 @@ el portado de grooming consumen:
 
 ## Historial
 
+- **v2.0 (S67, 17 Jul 2026):** §3 gana la REGLA DE PLATAFORMA de
+  D-430 (founder S67): hub = destino del doble-clic del servicio;
+  ningún CTA contextual lo usa — contexto de mascota lleva al detalle
+  de SU cita (pantalla `/citas/[mascotaId]`, nacida y gateada en S67).
 - **v1.9 (S61, 14 Jul 2026):** §15b.2 REABIERTA Y RE-FIRMADA (founder,
   sobre tres variantes en píxeles — S61-B12): **el muro del prestador
   pasa a tealDark #0A7268** (TechoTinta→TechoOficio; una sola verdad

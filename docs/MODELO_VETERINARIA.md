@@ -457,13 +457,17 @@ construye** — deuda con disparo §16.
 
 ## 17. ESQUELETO DE TANDAS (Bloque 2 — orden fino al arrancar cada una)
 
-- **V0 — FUNDACIÓN DB:** modelo de actor en el motor (ocupación por
+- **V0 — FUNDACIÓN DB: ✅ CUMPLIDA (S67, migración
+  `20260717170000`).** Modelo de actor en el motor (ocupación por
   persona + semántica de concurrencia; deshacer la conspiración de
   NULLs de `empleado_id` en wrappers) · procedencia en eventos
   clínicos · `empleado_id` en reseñas · curas D-414/D-418/D-424 · catálogo
   mínimo de vacunas EC · tablas tipadas de caso. Todo L-140 de
-  nacimiento. **Es la tanda más pesada y la más transversal — toca a
-  los 4 oficios vivos; regla 76 estricta.**
+  nacimiento. Era la tanda más pesada y la más transversal — tocó a
+  los 4 oficios vivos bajo regla 76 estricta. **Nota (S67): la prueba
+  reina evolucionó a identidad-módulo-ilegalidades con whitelist
+  computada — precedente de diseño para toda tanda transversal
+  futura.**
 - **V1 — LA OFERTA DEL NEGOCIO:** wizard vet (personas, servicios del
   menú, catálogo libre de procedimientos, precios, horarios por
   persona, qué expone).
@@ -504,6 +508,10 @@ sesión a sesión, como manda la ruta.
 
 ## Historial
 
+- **v1.1 (S67, 17 Jul 2026):** §17 — V0 marcada CUMPLIDA (migración
+  `20260717170000`, juez verde, gate founder en dispositivo) con la
+  nota del freno: la prueba reina evolucionó a
+  identidad-módulo-ilegalidades con whitelist computada.
 - **v1.0 (S66, 16 Jul 2026):** redacción inicial con la letra FIRMADA
   del founder (S66): PARTE I — modelo de actor (negocio contenedor,
   persona = negocio de 1; vitrina/ocupación; concurrencia por

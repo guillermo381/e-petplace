@@ -137,8 +137,9 @@ mejores gestionan el negocio). La red de seguridad es la
 precondición de APERTURA del modelo (§14.3): conversación con
 vet/clínica real BLOQUEANTE para desmarcar seeds.
 
-Esqueleto de tandas: V0 fundación (modelo de actor en motor +
-procedencia + curas) · V1 oferta del negocio · V2 reserva del dueño
+Esqueleto de tandas: **V0 fundación ✅ CUMPLIDA (S67, migración
+`20260717170000`, gate founder verde)** · **V1 oferta del negocio —
+EN CURSO (S68)** · V2 reserva del dueño
 · V3 mostrador walk-in · V4 Durante clínico (nota IA + caso +
 presupuesto) · V5 parte y sedimento · V6 SRI (D-419 prioridad,
 founder S66). Orden fino al arrancar cada tanda.
@@ -368,6 +369,10 @@ arcos (se decide sesión a sesión con las trenzas como ley).
 
 ## Historial
 
+- **v2.6 (S67, 17 Jul 2026):** §A3 — V0 fundación CUMPLIDA (modelo de
+  actor en el motor, migración `20260717170000`, juez verde + gate
+  founder en dispositivo); V1 (la oferta del negocio) pasa a EN
+  CURSO — S68.
 - **v2.5 (S66, 16 Jul 2026):** enmienda de A3 (disparada por
   `MODELO_VETERINARIA.md` v1.0 §15.4, letra firmada founder S66):
   **precondición F0 declarada CUMPLIDA** con base de discovery
