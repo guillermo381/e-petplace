@@ -795,8 +795,18 @@ export const prestadorEs = {
     modoExplicaUniversal: 'Tus franjas valen para todos tus servicios.',
     modoExplicaPorServicio: 'Cada servicio tiene sus propias franjas.',
     modoCambiarTitulo: 'Cambiar la organización',
-    modoCambiarConFranjas:
-      'Tienes {{n}} franjas guardadas con la organización actual. Para cambiar, se eliminan y empiezas de nuevo.',
+    // S68-B8 (firma founder sobre el hallazgo del gate): la IDA es
+    // CONVERSIÓN con voz (nada se borra); la VUELTA es destructiva y lo
+    // dice entero. modoCambiarConFranjas murió (Ley 37) · LOTE S68
+    convertirTitulo: 'Convertir tu agenda',
+    convertirVoz:
+      'Tus franjas generales pasarán a vivir en cada servicio — no se borra nada. Desde ahí ajustas cada servicio por separado.',
+    convertirCta: 'Convertir',
+    volverVoz:
+      'Volver al horario general borrará las franjas específicas de cada servicio. Tendrás que declarar tu horario de nuevo.',
+    modoBorradorAviso: 'Tienes cambios sin guardar en este taller — guárdalos antes o se perderán.',
+    ofertasAplicaUniversal:
+      'Con algunos servicios desmarcados, la franja pasa a ser específica — tu agenda se convierte a "por servicio".',
     modoCambiarConfirmar: 'Eliminar franjas y cambiar',
     modoCambiado: 'Tu agenda cambió de organización.',
     ofertasAplica: 'Para qué servicios',

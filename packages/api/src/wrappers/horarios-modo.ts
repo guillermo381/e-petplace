@@ -38,6 +38,9 @@ const MENSAJES = {
   rango_horario_invalido:        'La hora de fin tiene que ser después de la de inicio.',
   dia_invalido:                  'El día no es válido.',
   cupo_invalido:                 'El cupo tiene que ser entre 1 y 4.',
+  // S68-B8: la IDA de la conversión espera la migración A9 — voz
+  // honesta mientras tanto (jamás borrar como fallback, regla 36)
+  conversion_no_disponible:      'La conversión de horarios llega con la próxima actualización — tus franjas generales quedan como están.',
   datos_inconsistentes:          'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:             'Ocurrió un error inesperado. Prueba de nuevo.',
 } as const;
@@ -108,6 +111,28 @@ export async function elegirModoHorarios(
   if (error) return normalizarError(error.message);
   if (data !== 'universal' && data !== 'por_servicio') return falla('datos_inconsistentes');
   return { ok: true, data };
+}
+
+/**
+ * LA IDA DE LA CONVERSIÓN (S68-B8, firma founder sobre el hallazgo del
+ * gate): las franjas generales pasan a vivir en CADA servicio — no se
+ * borra nada; desde ahí cada servicio se ajusta por separado.
+ *
+ * CONECTAR-A9: la RPC `convertir_horarios_a_por_servicio()` llega con
+ * la migración A9. Hasta la confirmación literal "A9 aplicada" este
+ * wrapper responde honesto que la conversión no está disponible — JAMÁS
+ * degrada a borrar (la vuelta destructiva es OTRO camino, con su Hoja
+ * roja). Cuerpo final al conectar (tipos regenerados):
+ *   const { data, error } = await getClient().rpc('convertir_horarios_a_por_servicio');
+ *   if (error) return normalizarError(error.message);
+ *   → normalizar la forma que declare el contrato A9 y devolver ok.
+ */
+export async function convertirHorariosAPorServicio(): Promise<
+  ResultadoWrapper<{ modo: ModoHorarios }, CodigoErrorModoHorarios>
+> {
+  const { data: auth } = await getClient().auth.getUser();
+  if (!auth.user?.id) return falla('sin_sesion');
+  return falla('conversion_no_disponible');
 }
 
 /**

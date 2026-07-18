@@ -897,6 +897,8 @@ export default function TallerGrooming() {
               // el modo cambió en el server: recarga entera del taller
               // (la Hoja ya avisó que se empieza de nuevo)
               onModoCambiado={() => setIntento((n) => n + 1)}
+              // S68-B8 (mitad UI D-409): la Hoja avisa si hay borrador vivo
+              hayBorradorExterno={hayCambios}
             />
           )}
 

@@ -289,6 +289,7 @@ export {
 // 20260715130000) — archivo NUEVO de esta sesión
 export {
   obtenerModoHorarios,
+  convertirHorariosAPorServicio,
   elegirModoHorarios,
   eliminarFranjasPrestador,
   obtenerFranjasDeServicios,

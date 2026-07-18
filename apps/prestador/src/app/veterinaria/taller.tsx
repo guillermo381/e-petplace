@@ -717,6 +717,8 @@ export default function TallerVeterinaria() {
               modo={modoHorarios}
               ofertas={ofertasHorarios}
               onModoCambiado={() => setIntento((n) => n + 1)}
+              // S68-B8 (mitad UI D-409): la Hoja avisa si hay borrador vivo
+              hayBorradorExterno={hayCambios}
             />
           )}
 

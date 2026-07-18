@@ -132,6 +132,36 @@ t = await esperar('Cómo organizas tu agenda', 30);
 check(t.includes('Cómo organizas tu agenda'), 'T10 la elección de modo D-386 vive en el taller vet');
 check(t.includes('Una agenda para todo') && t.includes('Por servicio'), 'T11 las dos opciones del modo presentes');
 
+// ── B8 — LA CONVERSIÓN CON VOZ (interacción local; sin escribir) ──
+const enUniversal = t.includes('Tus franjas valen para todos tus servicios');
+if (enUniversal) {
+  // T21: la IDA abre la Hoja de CONVERSIÓN (solo si hay franjas — sin
+  // franjas el modo cambiaría de verdad y el smoke no escribe)
+  if (!t.includes('Sin franjas todavía')) {
+    await page.getByText('Por servicio', { exact: true }).click();
+    t = await esperar('Convertir tu agenda', 15);
+    check(
+      t.includes('no se borra nada') && t.includes('Convertir'),
+      'T21 la Hoja de conversión con la voz firmada (nada se borra)',
+    );
+    await page.getByText('Cancelar', { exact: true }).click();
+    await page.waitForTimeout(500);
+  } else {
+    console.log('· T21 saltado: el demo no tiene franjas generales (el click cambiaría el modo de verdad)');
+  }
+  // T20: el gesto — el selector de servicios vive TAMBIÉN en universal.
+  // Se prueba en el taller del PASEO (el demo tiene ofertas guardadas
+  // ahí; en vet sin ofertas guardadas el selector no se monta — correcto)
+  await page.goto(`http://localhost:${PUERTO}/paseo/taller?seccion=horarios`, { waitUntil: 'networkidle' });
+  t = await esperar('Cómo organizas tu agenda', 30);
+  await page.getByText('Toda la semana', { exact: true }).click();
+  await page.getByText('Agregar franja', { exact: true }).click();
+  t = await esperar('Nueva franja', 15);
+  check(t.includes('Para qué servicios'), 'T20 el selector de servicios en la Hoja de franja EN UNIVERSAL (el gesto B8)');
+} else {
+  console.log('· T20/T21 saltados: el demo no está en modo universal');
+}
+
 // ── B3 — PROCEDIMIENTOS ──
 await page.goto(`http://localhost:${PUERTO}/veterinaria/procedimientos`, { waitUntil: 'networkidle' });
 t = await esperar('Tus procedimientos', 30);

@@ -697,8 +697,16 @@ export const prestadorEn = {
     modoExplicaUniversal: 'Your time slots apply to all your services.',
     modoExplicaPorServicio: 'Each service has its own time slots.',
     modoCambiarTitulo: 'Change how it works',
-    modoCambiarConFranjas:
-      'You have {{n}} time slots saved under the current setup. To switch, they get deleted and you start fresh.',
+    // S68-B8 · LOTE S68
+    convertirTitulo: 'Convert your schedule',
+    convertirVoz:
+      "Your general slots will move into each service — nothing gets deleted. From there you adjust each service separately.",
+    convertirCta: 'Convert',
+    volverVoz:
+      "Going back to general hours will delete each service's specific slots. You'll have to declare your hours again.",
+    modoBorradorAviso: "You have unsaved changes in this workshop — save them first or they'll be lost.",
+    ofertasAplicaUniversal:
+      'With some services unchecked, the slot becomes specific — your schedule converts to "per service".',
     modoCambiarConfirmar: 'Delete slots and switch',
     modoCambiado: 'Your schedule setup changed.',
     ofertasAplica: 'For which services',
