@@ -150,6 +150,9 @@ export {
   type SenalesHogarMascota,
 } from './wrappers/hogar';
 
+// Citas activas por mascota — D-430 (S67): el detalle contextual
+export { obtenerCitasActivasMascota, type CitaActivaMascota } from './wrappers/citasMascota';
+
 // Perfil de mascota — S51-B2.3 (pila de módulos)
 export {
   obtenerPerfilMascota,
