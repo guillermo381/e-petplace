@@ -838,4 +838,20 @@ export const clienteEs = {
     cerrarSesion: 'Cerrar sesión',
     cancelar: 'Cancelar',
   },
+  // ── D-430 (S67): el detalle contextual de la cita de la mascota —
+  // el CTA de la ficha aterriza acá, jamás en un hub (LOTE S67,
+  // GATE PENDIENTE founder) ──
+  citasMascota: {
+    titulo: 'La cita de {{nombre}}',
+    tituloSinNombre: 'Su cita',
+    estadoConfirmada: 'Confirmada',
+    quienAtiende: 'Quien la atiende',
+    verMas: 'Ver más',
+    otrasActivas: 'Sus otras citas',
+    vacio: 'Sin citas por venir',
+    vacioDetalle: 'Cuando reserves una cita, la vas a ver acá.',
+    error: 'No pudimos cargar las citas.',
+    errorDetalle: 'Prueba de nuevo en un momento.',
+    reintentar: 'Probar de nuevo',
+  },
 } as const;

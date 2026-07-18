@@ -788,4 +788,18 @@ export const clienteEn = {
     cerrarSesion: 'Sign out',
     cancelar: 'Cancel',
   },
+  // ── D-430 (S67): contextual appointment detail (LOTE S67, founder gate PENDING) ──
+  citasMascota: {
+    titulo: "{{nombre}}'s appointment",
+    tituloSinNombre: 'Their appointment',
+    estadoConfirmada: 'Confirmed',
+    quienAtiende: 'Provider',
+    verMas: 'See more',
+    otrasActivas: 'Their other appointments',
+    vacio: 'No upcoming appointments',
+    vacioDetalle: "When you book an appointment, you'll see it here.",
+    error: "We couldn't load the appointments.",
+    errorDetalle: 'Please try again in a moment.',
+    reintentar: 'Try again',
+  },
 } as const satisfies Espejo<typeof clienteEs>;

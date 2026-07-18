@@ -652,8 +652,11 @@ export default function Hogar() {
                   tipo: 'navegacion',
                   capa: 'cuidado',
                   etiqueta: t('hogar.fichaVerCita'),
+                  // D-430 (S67, regla de plataforma founder): contexto de
+                  // mascota ⇒ el detalle de SU cita — jamás un hub (el
+                  // multi-oficio destapó que TODO caía en "Mis paseos").
                   onPress: () =>
-                    router.push(pc.tipo_servicio?.startsWith('grooming') ? '/hogar/grooming' : '/hogar/paseos'),
+                    router.push({ pathname: '/citas/[mascotaId]', params: { mascotaId: m.id, nombre: m.nombre } }),
                 }
               : voz?.semantica === 'pideAtencion'
                 ? {
