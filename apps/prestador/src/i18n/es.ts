@@ -802,6 +802,7 @@ export const prestadorEs = {
     convertirVoz:
       'Tus franjas generales pasarán a vivir en cada servicio — no se borra nada. Desde ahí ajustas cada servicio por separado.',
     convertirCta: 'Convertir',
+    convertido: 'Listo: tus franjas ahora viven en cada servicio.',
     volverVoz:
       'Volver al horario general borrará las franjas específicas de cada servicio. Tendrás que declarar tu horario de nuevo.',
     modoBorradorAviso: 'Tienes cambios sin guardar en este taller — guárdalos antes o se perderán.',

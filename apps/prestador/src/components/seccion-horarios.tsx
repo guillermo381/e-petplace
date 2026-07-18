@@ -432,7 +432,9 @@ export function SeccionHorarios({
     setModoOcupado(false);
     setModoPendiente(null);
     setFranjaPendiente(null);
-    mostrar({ variante: 'exito', texto: t('horarios.modoCambiado') });
+    // cohesión Ley 17.3: el CTA dijo "Convertir" — la confirmación
+    // habla el mismo idioma
+    mostrar({ variante: 'exito', texto: t('horarios.convertido') });
     onModoCambiado();
   }
 

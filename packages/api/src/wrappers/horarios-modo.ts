@@ -38,9 +38,9 @@ const MENSAJES = {
   rango_horario_invalido:        'La hora de fin tiene que ser después de la de inicio.',
   dia_invalido:                  'El día no es válido.',
   cupo_invalido:                 'El cupo tiene que ser entre 1 y 4.',
-  // S68-B8: la IDA de la conversión espera la migración A9 — voz
-  // honesta mientras tanto (jamás borrar como fallback, regla 36)
-  conversion_no_disponible:      'La conversión de horarios llega con la próxima actualización — tus franjas generales quedan como están.',
+  // S68-B8: los errores tipados de la conversión (RPC A9) con voz propia
+  sin_franjas_generales:         'No tienes franjas generales para convertir.',
+  sin_servicios_activos:         'Activa al menos un servicio con agenda antes de convertir.',
   datos_inconsistentes:          'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:             'Ocurrió un error inesperado. Prueba de nuevo.',
 } as const;
@@ -64,6 +64,9 @@ const CODIGOS_SERVIDOR: [prefijo: string, codigo: CodigoErrorModoHorarios][] = [
   ['franjas_del_otro_modo_existen', 'franjas_del_otro_modo_existen'],
   ['franja_especifica_en_modo_universal', 'franja_especifica_en_modo_universal'],
   ['franja_universal_en_modo_por_servicio', 'franja_universal_en_modo_por_servicio'],
+  // S68-B8 (RPC A9): la conversión dice su porqué tipado
+  ['sin_franjas_generales', 'sin_franjas_generales'],
+  ['sin_servicios_activos', 'sin_servicios_activos'],
 ];
 
 function normalizarError(mensaje: string): Falla {
@@ -115,24 +118,37 @@ export async function elegirModoHorarios(
 
 /**
  * LA IDA DE LA CONVERSIÓN (S68-B8, firma founder sobre el hallazgo del
- * gate): las franjas generales pasan a vivir en CADA servicio — no se
- * borra nada; desde ahí cada servicio se ajusta por separado.
- *
- * CONECTAR-A9: la RPC `convertir_horarios_a_por_servicio()` llega con
- * la migración A9. Hasta la confirmación literal "A9 aplicada" este
- * wrapper responde honesto que la conversión no está disponible — JAMÁS
- * degrada a borrar (la vuelta destructiva es OTRO camino, con su Hoja
- * roja). Cuerpo final al conectar (tipos regenerados):
- *   const { data, error } = await getClient().rpc('convertir_horarios_a_por_servicio');
- *   if (error) return normalizarError(error.message);
- *   → normalizar la forma que declare el contrato A9 y devolver ok.
+ * gate — CONECTADA tras verificar A9 aplicada contra DB viva,
+ * migración 20260718003000): las franjas generales pasan a vivir en
+ * CADA servicio — no se borra nada; desde ahí cada servicio se ajusta
+ * por separado. UNA transacción del lado del motor: snapshot → mueren
+ * las generales → elegir_modo_horarios (su ÚNICO escritor, D-386
+ * intacta) → réplica día × oferta cobrable activa (activa Y
+ * reservable), conservando persona/horas/cupo/estado.
+ * Guard verificado en el functiondef: sin generales no hay qué
+ * convertir (cubre la idempotencia — la segunda llamada rebota tipada).
  */
 export async function convertirHorariosAPorServicio(): Promise<
-  ResultadoWrapper<{ modo: ModoHorarios }, CodigoErrorModoHorarios>
+  ResultadoWrapper<{ franjasConvertidas: number; servicios: number }, CodigoErrorModoHorarios>
 > {
   const { data: auth } = await getClient().auth.getUser();
   if (!auth.user?.id) return falla('sin_sesion');
-  return falla('conversion_no_disponible');
+
+  const { data, error } = await getClient().rpc('convertir_horarios_a_por_servicio');
+
+  if (error) return normalizarError(error.message);
+  // guard de shape contra el retorno REAL (jsonb del functiondef, L-124)
+  if (
+    typeof data !== 'object' ||
+    data === null ||
+    Array.isArray(data) ||
+    typeof (data as Record<string, unknown>).franjas_convertidas !== 'number' ||
+    typeof (data as Record<string, unknown>).servicios !== 'number'
+  ) {
+    return falla('datos_inconsistentes');
+  }
+  const forma = data as { franjas_convertidas: number; servicios: number };
+  return { ok: true, data: { franjasConvertidas: forma.franjas_convertidas, servicios: forma.servicios } };
 }
 
 /**

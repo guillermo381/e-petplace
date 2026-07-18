@@ -702,6 +702,7 @@ export const prestadorEn = {
     convertirVoz:
       "Your general slots will move into each service — nothing gets deleted. From there you adjust each service separately.",
     convertirCta: 'Convert',
+    convertido: 'Done: your slots now live in each service.',
     volverVoz:
       "Going back to general hours will delete each service's specific slots. You'll have to declare your hours again.",
     modoBorradorAviso: "You have unsaved changes in this workshop — save them first or they'll be lost.",
