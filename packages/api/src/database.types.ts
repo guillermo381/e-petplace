@@ -1193,6 +1193,45 @@ export type Database = {
         }
         Relationships: []
       }
+      cat_especialidades_vet: {
+        Row: {
+          activo: boolean
+          codigo: string
+          created_at: string
+          es_seed_preliminar: boolean
+          id: string
+          nombre: string
+          nombre_en: string
+          orden_display: number
+          pais_codigo: string | null
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          codigo: string
+          created_at?: string
+          es_seed_preliminar?: boolean
+          id?: string
+          nombre: string
+          nombre_en: string
+          orden_display?: number
+          pais_codigo?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          codigo?: string
+          created_at?: string
+          es_seed_preliminar?: boolean
+          id?: string
+          nombre?: string
+          nombre_en?: string
+          orden_display?: number
+          pais_codigo?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cat_especies: {
         Row: {
           acepta_nuevos_registros: boolean
@@ -11245,6 +11284,52 @@ export type Database = {
           },
         ]
       }
+      prestador_especialidades: {
+        Row: {
+          created_at: string
+          especialidad_id: string | null
+          id: string
+          nombre_libre: string | null
+          prestador_id: string
+        }
+        Insert: {
+          created_at?: string
+          especialidad_id?: string | null
+          id?: string
+          nombre_libre?: string | null
+          prestador_id: string
+        }
+        Update: {
+          created_at?: string
+          especialidad_id?: string | null
+          id?: string
+          nombre_libre?: string | null
+          prestador_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prestador_especialidades_especialidad_id_fkey"
+            columns: ["especialidad_id"]
+            isOneToOne: false
+            referencedRelation: "cat_especialidades_vet"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestador_especialidades_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestador_especialidades_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prestador_horarios: {
         Row: {
           activo: boolean
@@ -11590,6 +11675,7 @@ export type Database = {
           precio_paquete: number | null
           precio_plan: number | null
           prestador_id: string
+          reservable: boolean
           tipo_servicio: string
         }
         Insert: {
@@ -11608,6 +11694,7 @@ export type Database = {
           precio_paquete?: number | null
           precio_plan?: number | null
           prestador_id: string
+          reservable?: boolean
           tipo_servicio: string
         }
         Update: {
@@ -11626,6 +11713,7 @@ export type Database = {
           precio_paquete?: number | null
           precio_plan?: number | null
           prestador_id?: string
+          reservable?: boolean
           tipo_servicio?: string
         }
         Relationships: [
@@ -14392,6 +14480,8 @@ export type Database = {
           requiere_historia_clinica: boolean | null
           requiere_resultado: boolean | null
           requiere_validacion_admin: boolean
+          reserva_solo_hoy: boolean
+          reservable: boolean
         }
         Insert: {
           activo?: boolean
@@ -14412,6 +14502,8 @@ export type Database = {
           requiere_historia_clinica?: boolean | null
           requiere_resultado?: boolean | null
           requiere_validacion_admin?: boolean
+          reserva_solo_hoy?: boolean
+          reservable?: boolean
         }
         Update: {
           activo?: boolean
@@ -14432,6 +14524,8 @@ export type Database = {
           requiere_historia_clinica?: boolean | null
           requiere_resultado?: boolean | null
           requiere_validacion_admin?: boolean
+          reserva_solo_hoy?: boolean
+          reservable?: boolean
         }
         Relationships: []
       }
@@ -15774,6 +15868,20 @@ export type Database = {
           valido: boolean
         }[]
       }
+      _vet_ofertas_cobrables: {
+        Args: { p_mascota_id: string }
+        Returns: {
+          ciudad: string
+          direccion: string
+          duracion_minutos: number
+          precio: number
+          prestador_id: string
+          prestador_nombre: string
+          prestador_servicio_id: string
+          servicio_nombre: string
+          tipo_servicio: string
+        }[]
+      }
       aceptar_invitacion_pendiente_login: {
         Args: { p_empleado_id: string }
         Returns: Json
@@ -16424,6 +16532,12 @@ export type Database = {
           hora: string
         }[]
       }
+      obtener_inicios_vet_disponibles: {
+        Args: { p_fecha: string; p_mascota_id: string; p_tipo_servicio: string }
+        Returns: {
+          hora: string
+        }[]
+      }
       obtener_mis_atenciones_grooming: {
         Args: { p_desde?: string; p_hasta?: string }
         Returns: Json
@@ -16452,6 +16566,16 @@ export type Database = {
           prestador_nombre: string
           prestador_servicio_id: string
           servicio_nombre: string
+        }[]
+      }
+      obtener_oferta_vet: {
+        Args: { p_mascota_id: string }
+        Returns: {
+          desde_precio: number
+          reserva_solo_hoy: boolean
+          servicio_nombre: string
+          tipo_servicio: string
+          varia: boolean
         }[]
       }
       obtener_parte_adiestramiento: {
@@ -16521,6 +16645,24 @@ export type Database = {
       obtener_ultima_atencion_grooming: {
         Args: { p_mascota_id: string }
         Returns: Json
+      }
+      obtener_veterinarios_disponibles: {
+        Args: {
+          p_fecha: string
+          p_hora: string
+          p_mascota_id: string
+          p_tipo_servicio: string
+        }
+        Returns: {
+          ciudad: string
+          direccion: string
+          duracion_minutos: number
+          precio: number
+          prestador_id: string
+          prestador_nombre: string
+          prestador_servicio_id: string
+          servicio_nombre: string
+        }[]
       }
       otorgar_puntos: {
         Args: {
