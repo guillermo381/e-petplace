@@ -16085,6 +16085,10 @@ export type Database = {
         Args: { p_mascota_id: string; p_user_id: string }
         Returns: boolean
       }
+      _user_es_familia_de_mascota: {
+        Args: { p_mascota_id: string; p_user_id: string }
+        Returns: boolean
+      }
       _user_es_familiar_autorizado_mascota: {
         Args: { p_mascota_id: string; p_user_id: string }
         Returns: boolean
