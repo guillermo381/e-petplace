@@ -16080,6 +16080,7 @@ export type Database = {
         }
         Returns: Json
       }
+      convertir_horarios_a_por_servicio: { Args: never; Returns: Json }
       crear_alta_asistida_existente: {
         Args: {
           p_country_code: string
