@@ -16,6 +16,11 @@ const KEY_VOZ_SERVICIO = {
   grooming: 'servicioVoz.grooming',
   grooming_completo: 'servicioVoz.groomingCompleto',
   adiestramiento: 'servicioVoz.adiestramiento',
+  // S68-A2: los comprables del mundo vet (V2 + urgencia same-day).
+  consulta_general: 'servicioVoz.consultaGeneral',
+  vacunacion: 'servicioVoz.vacunacion',
+  urgencia_local: 'servicioVoz.urgenciaLocal',
+  urgencia_domicilio: 'servicioVoz.urgenciaDomicilio',
   paseo: 'explorar.paseoTitulo',
   paseo_30min: 'explorar.paseoTitulo',
   paseo_60min: 'explorar.paseoTitulo',

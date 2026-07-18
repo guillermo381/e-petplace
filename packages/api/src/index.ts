@@ -423,6 +423,18 @@ export {
   type TallaPelajeDeclarados,
 } from './wrappers/grooming-reserva';
 
+// ── La reserva vet del DUEÑO (S68-A2, V2 — hunk Sesión A) ───────────────────
+export {
+  obtenerOfertaVet,
+  obtenerIniciosVet,
+  obtenerVeterinariosDisponibles,
+  type CodigoErrorVetReserva,
+  type InputIniciosVet,
+  type InputVeterinariosDisponibles,
+  type OfertaVet,
+  type VeterinarioDisponible,
+} from './wrappers/veterinaria-reserva';
+
 // ── La reserva de adiestramiento del DUEÑO (S63-A Bloque 3 — hunk Sesión A) ─
 export {
   COMPRABLES_ADIESTRAMIENTO,

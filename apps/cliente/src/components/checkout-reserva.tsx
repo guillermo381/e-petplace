@@ -67,7 +67,7 @@ export function CheckoutReserva({
   hora: string;
   duracion: string;
   /** El ícono b′ del éxito — el oficio firma su cierre. */
-  exitoIcono: 'paseo' | 'grooming' | 'training';
+  exitoIcono: 'paseo' | 'grooming' | 'training' | 'veterinaria';
   /** CURA S60-C1: la VOZ resuelve por el OFICIO — la máquina no conoce
    *  keys de ningún servicio; cada consumidor trae las suyas ya
    *  traducidas (Ley 17.3: una acción, un nombre, todo el flujo). */

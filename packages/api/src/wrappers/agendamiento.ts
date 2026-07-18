@@ -43,6 +43,12 @@ const CODIGOS_ERROR_AGENDAMIENTO = [
   // las tres puertas de reserva (hold/plan/paquete). La UI pinta la voz
   // honesta CON CAMINO y con {nombre}; este mensaje es el fallback.
   'paseo_social_no',
+  // S68: reservable en dos niveles — el tipo (telemedicina/emergencia)
+  // o la oferta del prestador existen pero NO se reservan por la app.
+  'servicio_no_reservable',
+  // S68: urgencia ≠ emergencia — los tipos urgencia_* solo aceptan
+  // hold/cita/reagenda con fecha = HOY (guard del motor, tz Guayaquil).
+  'urgencia_solo_hoy',
 ] as const;
 
 export type CodigoErrorAgendamiento = (typeof CODIGOS_ERROR_AGENDAMIENTO)[number];
@@ -66,6 +72,8 @@ const MENSAJES_ERROR_AGENDAMIENTO: Record<
   pago_no_disponible:     'Este prestador todavía no puede recibir pagos por la app.',
   prestador_no_disponible: 'El paseador no está disponible en esas fechas — elegí otro horario.',
   paseo_social_no:        'Por ahora los paseos son en grupo. Estamos armando algo para tu mascota.',
+  servicio_no_reservable: 'Este servicio todavía no se puede reservar por la app.',
+  urgencia_solo_hoy:      'Las urgencias se reservan solo para hoy.',
   datos_inconsistentes:   'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:      'Ocurrió un error inesperado. Probá de nuevo.',
 };
