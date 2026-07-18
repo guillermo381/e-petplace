@@ -888,4 +888,23 @@ export const clienteEs = {
     errorDetalle: 'Prueba de nuevo en un momento.',
     reintentar: 'Probar de nuevo',
   },
+  // LOTE S69 (presupuesto clínico) — nace SIN aprobación founder (mecánica D-315).
+  // Voz honesta v1-sin-fecha FIRMADA por la mesa: la cita nace sin día fijo,
+  // la clínica coordina; jamás se promete un {fecha} que no existe.
+  presupuesto: {
+    tituloPendiente: 'Tenés un presupuesto para aprobar',
+    recibido: 'Te llegó el {{fecha}}',
+    vence: 'Vale hasta el {{fecha}}',
+    total: 'Total',
+    verItems: 'Ver el detalle',
+    ocultarItems: 'Ocultar el detalle',
+    queSigue: 'Si lo aprobás, la clínica coordina con vos el día del procedimiento — el precio queda congelado.',
+    aprobar: 'Aprobar',
+    rechazar: 'Rechazar',
+    aprobadoOk: 'Aprobaste el presupuesto — la clínica coordina el día del procedimiento con este precio.',
+    rechazadoOk: 'Rechazaste el presupuesto.',
+    errorAccion: 'No pudimos completar la acción. Probá de nuevo.',
+    zonaNarrativa: '{{mascota}} tiene un presupuesto para aprobar. Vence el {{fecha}}.',
+    zonaAccion: 'Verlo',
+  },
 } as const;

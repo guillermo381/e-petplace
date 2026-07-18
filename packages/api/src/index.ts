@@ -607,3 +607,12 @@ export {
   type RegistrarDocumentoInput,
   type TipoDocumentoVerificacion,
 } from './wrappers/prestador-documentos';
+// S69-A3 (cara del dueño): lector read-only de presupuestos de la familia.
+// Hunk aditivo de la A — la escritura (aprobar/rechazar) vive en veterinaria-presupuesto (B).
+export {
+  obtenerPresupuestosFamilia,
+  type PresupuestoFamilia,
+  type PresupuestoItemLeido,
+  type EstadoEfectivoPresupuesto,
+  type CodigoErrorPresupuestosLeidos,
+} from './wrappers/presupuestos-familia';

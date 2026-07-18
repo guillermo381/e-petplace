@@ -65,6 +65,8 @@ import {
   obtenerEstadoHogar,
   obtenerMascotasDeFamilia,
   obtenerMisPlanesPaseo,
+  obtenerPresupuestosFamilia,
+  type PresupuestoFamilia,
   obtenerResumenServiciosHogar,
   type ResumenServiciosHogar,
   obtenerVacunaPorEvento,
@@ -79,7 +81,7 @@ import {
 } from '@epetplace/api';
 import { calcularVozHogar, type VozEstadoHogar } from '@epetplace/domain';
 
-import { fechaCortaMono } from '@epetplace/i18n';
+import { fechaCortaMono, fechaLargaHumana } from '@epetplace/i18n';
 
 import { CoachHoja } from '@/components/coach';
 import { useTraduccion } from '@/i18n';
@@ -169,7 +171,6 @@ function vozATexto(voz: VozEstadoHogar, t: TraductorHogar): { texto: string; sem
 // este tipo y la zona se renderizará entre Zona 2 y Zona 4. Hasta
 // entonces: null honesto ESTRUCTURAL — cero card vacía, cero relleno.
 type RevelacionZona3 = { titulo: string; narrativa: string; accion: () => void } | null;
-const revelacionZona3: RevelacionZona3 = null;
 // ═════════════════════════════════════════════════════════════════
 
 type EstadoMascotas = MascotaResumen[] | 'cargando' | 'error';
@@ -309,6 +310,9 @@ export default function Hogar() {
   const [resumenServicios, setResumenServicios] = useState<ResumenServiciosHogar | null>(null);
   // QW1 (S53): el saludo lleva el nombre del miembro (profiles.nombre).
   const [nombrePerfil, setNombrePerfil] = useState<string | null>(null);
+  // Zona 3 estrena habitante (S69): el presupuesto pendiente más próximo a vencer
+  // manda (UNO, contextual — §15b). Memorial calla (apagado estructural).
+  const [presupuestoZona, setPresupuestoZona] = useState<PresupuestoFamilia | null>(null);
   const [vacunaAbierta, setVacunaAbierta] = useState(false);
   const [vacuna, setVacuna] = useState<VacunaDeEvento | 'cargando' | 'error'>('cargando');
   const [carnetFirmado, setCarnetFirmado] = useState<string | null>(null);
@@ -422,6 +426,11 @@ export default function Hogar() {
         void obtenerMiPerfil().then((p) => {
           // sin nombre: el saludo va solo — jamás un nombre inventado
           if (vigente && p.ok) setNombrePerfil(p.data.nombre);
+        });
+        // Zona 3: el presupuesto vigente más próximo a vencer (lector ya ordenado).
+        void obtenerPresupuestosFamilia().then((pr) => {
+          if (!vigente) return;
+          setPresupuestoZona(pr.ok ? (pr.data.find((x) => x.estadoEfectivo === 'enviado') ?? null) : null);
         });
         const paths = lista.map((m) => m.foto_url).filter((p): p is string => typeof p === 'string' && p.length > 0);
         if (paths.length > 0) {
@@ -803,8 +812,44 @@ export default function Hogar() {
         </Tarjeta>
       </Animated.View>
 
-      {/* ── Zona 3 — en contexto: hueco estructural (ver arriba) ── */}
-      {revelacionZona3 !== null ? null : null}
+      {/* ── Zona 3 — en contexto: PRIMER habitante (S69). El presupuesto
+           pendiente más próximo a vencer, UNO y contextual (§15b).
+           Memorial calla (apagado estructural). ── */}
+      {presupuestoZona !== null && !esMemorial ? (
+        <Animated.View
+          entering={entradaZona(3)}
+          style={{ paddingHorizontal: spacing[4], marginTop: spacing[7], gap: spacing[3] }}
+        >
+          <Text
+            style={{
+              fontFamily: typography.family.sans.medium,
+              fontSize: typography.size.lg,
+              color: theme.text.primary,
+            }}
+          >
+            {t('presupuesto.tituloPendiente')}
+          </Text>
+          <Tarjeta relleno="ninguno" elevacion="reposo">
+            <CeldaNavegacion
+              icono="veterinaria"
+              titulo={t('presupuesto.zonaNarrativa', {
+                mascota: presupuestoZona.mascotaNombre ?? '',
+                fecha: fechaLargaHumana(presupuestoZona.venceEn.slice(0, 10), idioma),
+              })}
+              detalle={t('presupuesto.zonaAccion')}
+              onPress={() =>
+                router.push({
+                  pathname: '/citas/[mascotaId]',
+                  params: {
+                    mascotaId: presupuestoZona.mascotaId,
+                    nombre: presupuestoZona.mascotaNombre ?? '',
+                  },
+                })
+              }
+            />
+          </Tarjeta>
+        </Animated.View>
+      ) : null}
 
       {/* ── Zona 4 — la vida ─────────────────────────────────────
           Ritmo S52-P2c: entre zonas spacing[7]; adentro spacing[4]. */}

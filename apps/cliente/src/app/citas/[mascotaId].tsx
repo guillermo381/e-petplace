@@ -42,9 +42,17 @@ import {
   Tarjeta,
   spacing,
   typography,
+  useAviso,
   useTheme,
 } from '@epetplace/ui';
-import { obtenerCitasActivasMascota, type CitaActivaMascota } from '@epetplace/api';
+import {
+  aprobarPresupuestoFamilia,
+  obtenerCitasActivasMascota,
+  obtenerPresupuestosFamilia,
+  rechazarPresupuesto,
+  type CitaActivaMascota,
+  type PresupuestoFamilia,
+} from '@epetplace/api';
 import { fechaCortaMono, fechaLargaHumana } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
@@ -71,6 +79,7 @@ function iconoOficio(tipo: string | null): 'paseo' | 'grooming' | 'training' | n
 export default function CitasDeMascota() {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
+  const { mostrar } = useAviso();
   const { mascotaId, nombre, citaId } = useLocalSearchParams<{
     mascotaId: string;
     nombre?: string;
@@ -81,19 +90,61 @@ export default function CitasDeMascota() {
   const [desplegado, setDesplegado] = useState(false);
   const [intento, setIntento] = useState(0);
 
+  // Presupuestos pendientes de ESTA mascota (vigentes; el vencido perezoso se
+  // resuelve en el lector y no se muestra — expira sereno).
+  const [presupuestos, setPresupuestos] = useState<PresupuestoFamilia[]>([]);
+  const [itemsAbiertos, setItemsAbiertos] = useState<Record<string, boolean>>({});
+  const [procesando, setProcesando] = useState<string | null>(null);
+
   useFocusEffect(
     useCallback(() => {
       let vivo = true;
       void (async () => {
         if (typeof mascotaId !== 'string' || mascotaId.length === 0) return;
-        const r = await obtenerCitasActivasMascota(mascotaId);
+        const [rc, rp] = await Promise.all([obtenerCitasActivasMascota(mascotaId), obtenerPresupuestosFamilia()]);
         if (!vivo) return;
-        setEstado(r.ok ? r.data : 'error');
+        setEstado(rc.ok ? rc.data : 'error');
+        setPresupuestos(
+          rp.ok ? rp.data.filter((p) => p.mascotaId === mascotaId && p.estadoEfectivo === 'enviado') : [],
+        );
       })();
       return () => {
         vivo = false;
       };
     }, [mascotaId, intento]),
+  );
+
+  const recargar = useCallback(() => setIntento((n) => n + 1), []);
+
+  const onAprobar = useCallback(
+    async (id: string) => {
+      setProcesando(id);
+      const r = await aprobarPresupuestoFamilia(id);
+      setProcesando(null);
+      if (r.ok) {
+        mostrar({ texto: t('presupuesto.aprobadoOk'), variante: 'exito' });
+        recargar();
+      } else {
+        mostrar({ texto: r.mensaje, variante: 'error' });
+        if (r.codigo === 'presupuesto_vencido' || r.codigo === 'presupuesto_no_enviado') recargar();
+      }
+    },
+    [mostrar, t, recargar],
+  );
+
+  const onRechazar = useCallback(
+    async (id: string) => {
+      setProcesando(id);
+      const r = await rechazarPresupuesto(id);
+      setProcesando(null);
+      if (r.ok) {
+        mostrar({ texto: t('presupuesto.rechazadoOk'), variante: 'neutro' });
+        recargar();
+      } else {
+        mostrar({ texto: r.mensaje, variante: 'error' });
+      }
+    },
+    [mostrar, t, recargar],
   );
 
   const titulo =
@@ -183,6 +234,136 @@ export default function CitasDeMascota() {
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top']}>
       <Encabezado variante="navegacion" titulo={titulo} atras onAtras={() => router.back()} />
       <ScrollView contentContainerStyle={{ padding: spacing[4], gap: spacing[4] }}>
+        {/* Presupuestos pendientes — ARRIBA del detalle de la cita. Aparecen
+            aunque no haya cita activa (el presupuesto vive por su cuenta). */}
+        {presupuestos.map((p) => {
+          const abierto = itemsAbiertos[p.id] === true;
+          const ocupado = procesando === p.id;
+          return (
+            <Tarjeta key={p.id} elevacion="reposo">
+              <View style={{ gap: spacing[3] }}>
+                <Text
+                  style={{
+                    fontFamily: typography.family.sans.medium,
+                    fontSize: typography.size.lg,
+                    color: theme.text.primary,
+                  }}
+                >
+                  {t('presupuesto.tituloPendiente')}
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: typography.family.sans.regular,
+                    fontSize: typography.size.sm,
+                    color: theme.text.secondary,
+                  }}
+                >
+                  {t('presupuesto.recibido', { fecha: fechaLargaHumana(p.recibidoEn.slice(0, 10), idioma) })}
+                  {'  ·  '}
+                  {t('presupuesto.vence', { fecha: fechaLargaHumana(p.venceEn.slice(0, 10), idioma) })}
+                </Text>
+
+                <Separador />
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <Text
+                    style={{
+                      fontFamily: typography.family.sans.regular,
+                      fontSize: typography.size.md,
+                      color: theme.text.secondary,
+                    }}
+                  >
+                    {t('presupuesto.total')}
+                  </Text>
+                  <Text
+                    style={{
+                      fontFamily: typography.family.mono.regular,
+                      fontSize: typography.size.xl,
+                      color: theme.text.primary,
+                    }}
+                  >
+                    {`$ ${p.total}`}
+                  </Text>
+                </View>
+
+                {p.items.length > 0 ? (
+                  <>
+                    <Pressable
+                      accessibilityRole="button"
+                      onPress={() => setItemsAbiertos((s) => ({ ...s, [p.id]: !abierto }))}
+                    >
+                      <Text
+                        style={{
+                          fontFamily: typography.family.sans.medium,
+                          fontSize: typography.size.sm,
+                          color: theme.text.secondary,
+                        }}
+                      >
+                        {abierto ? t('presupuesto.ocultarItems') : t('presupuesto.verItems')}
+                      </Text>
+                    </Pressable>
+                    {abierto ? (
+                      <View style={{ gap: spacing[2] }}>
+                        {p.items.map((it) => (
+                          <View
+                            key={it.id}
+                            style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}
+                          >
+                            <Text
+                              style={{
+                                flex: 1,
+                                fontFamily: typography.family.sans.regular,
+                                fontSize: typography.size.sm,
+                                color: theme.text.primary,
+                              }}
+                            >
+                              {it.cantidad > 1 ? `${it.nombre} ×${it.cantidad}` : it.nombre}
+                            </Text>
+                            <Text
+                              style={{
+                                fontFamily: typography.family.mono.regular,
+                                fontSize: typography.size.sm,
+                                color: theme.text.secondary,
+                              }}
+                            >
+                              {`$ ${it.precio * it.cantidad}`}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    ) : null}
+                  </>
+                ) : null}
+
+                <Text
+                  style={{
+                    fontFamily: typography.family.sans.regular,
+                    fontSize: typography.size.sm,
+                    color: theme.text.secondary,
+                  }}
+                >
+                  {t('presupuesto.queSigue')}
+                </Text>
+
+                <View style={{ gap: spacing[2] }}>
+                  <Boton
+                    variante="primario"
+                    bloque
+                    etiqueta={t('presupuesto.aprobar')}
+                    cargando={ocupado}
+                    onPress={() => void onAprobar(p.id)}
+                  />
+                  <Boton
+                    variante="ghost"
+                    bloque
+                    etiqueta={t('presupuesto.rechazar')}
+                    onPress={() => void onRechazar(p.id)}
+                  />
+                </View>
+              </View>
+            </Tarjeta>
+          );
+        })}
+
         {estado === 'cargando' ? (
           <EsqueletoGrupo>
             <Esqueleto forma="bloque" ancho="100%" alto={140} />

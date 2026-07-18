@@ -836,4 +836,21 @@ export const clienteEn = {
     errorDetalle: 'Please try again in a moment.',
     reintentar: 'Try again',
   },
+  // S69 batch (clinical estimate) — born WITHOUT founder sign-off (D-315 mechanic).
+  presupuesto: {
+    tituloPendiente: 'You have an estimate to approve',
+    recibido: 'Received on {{fecha}}',
+    vence: 'Valid until {{fecha}}',
+    total: 'Total',
+    verItems: 'See the breakdown',
+    ocultarItems: 'Hide the breakdown',
+    queSigue: 'If you approve it, the clinic coordinates the procedure day with you — the price stays locked.',
+    aprobar: 'Approve',
+    rechazar: 'Decline',
+    aprobadoOk: 'You approved the estimate — the clinic will coordinate the procedure day at this price.',
+    rechazadoOk: 'You declined the estimate.',
+    errorAccion: "We couldn't complete the action. Please try again.",
+    zonaNarrativa: '{{mascota}} has an estimate to approve. It expires on {{fecha}}.',
+    zonaAccion: 'View it',
+  },
 } as const satisfies Espejo<typeof clienteEs>;
