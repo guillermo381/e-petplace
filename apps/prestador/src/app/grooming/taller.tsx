@@ -57,6 +57,7 @@ import {
   Separador,
   SliderPrecio,
   Tarjeta,
+  VozComision,
   spacing,
   typography,
   useAviso,
@@ -196,18 +197,6 @@ function VozSecundaria({ texto }: { texto: string }) {
       {texto}
     </Text>
   );
-}
-
-// comisión visible donde se pone el precio (7.15: el % es DATO leído)
-function VozComision({ pct, precio }: { pct: number | null; precio: number | null }) {
-  const { t } = useTraduccion();
-  const texto =
-    pct === null
-      ? t('servicios.comisionNoDisponible')
-      : precio === null
-        ? t('servicios.comisionRetiene', { pct })
-        : t('servicios.comisionNeto', { pct, neto: monto(precio * (1 - pct / 100)) });
-  return <VozSecundaria texto={texto} />;
 }
 
 export default function TallerGrooming() {

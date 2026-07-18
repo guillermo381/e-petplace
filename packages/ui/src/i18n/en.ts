@@ -109,6 +109,12 @@ export const uiEn = {
     error: "This clip couldn't load.",
     reintentar: 'Try again',
   },
+  // S68-B — VozComision (texts inherited VERBATIM from the provider app)
+  vozComision: {
+    noDisponible: "We couldn't read the current fee.",
+    retiene: 'e-PetPlace keeps {{pct}}%',
+    neto: "e-PetPlace keeps {{pct}}% · you'll receive {{neto}}",
+  },
   evidenciaFoto: {
     foto: 'Photo',
     agregarEvidencia: 'Add evidence',

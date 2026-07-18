@@ -149,4 +149,9 @@ export { BarrasSemana, type BarrasSemanaCapa } from './components/BarrasSemana'
 // corto de la sesión de adiestramiento; poster + tap-para-reproducir,
 // JAMÁS autoplay (en memorial menos)
 export { ClipSesion, type ClipSesionProps } from './components/ClipSesion'
+// VozComision — S68-B (enmienda aditiva declarada): la comisión visible
+// donde se pone el precio (7.15) — subió desde sus dos copias
+// byte-idénticas de los talleres de paseo y grooming; tercera copia
+// prohibida.
+export { VozComision, type VozComisionProps } from './components/VozComision'
 export { EsperaDeMarca } from './brand/EsperaDeMarca'

@@ -1,0 +1,161 @@
+// Smoke web S68-B — el mundo VETERINARIA del prestador:
+// B1 tarjeta en Negocio + portada + taller con el menú de toggles en el
+// orden firmado (voz honesta de telemedicina, neto en vivo, especialidades)
+// · B2 horarios (default sereno + elección de modo D-386; la sección
+// compartida TAMBIÉN en el taller del adiestramiento — D-426 muerta)
+// · B3 procedimientos + verificación profesional · B4 resumen.
+// SOLO LECTURA + interacción local (los toggles no guardan nada).
+import { readFileSync } from 'node:fs';
+import { chromium } from 'playwright-core';
+
+const PUERTO = process.env.PORT_PRESTADOR ?? '8085';
+const env = Object.fromEntries(
+  readFileSync('apps/prestador/.env.local', 'utf8')
+    .split('\n')
+    .filter((l) => l.includes('='))
+    .map((l) => [l.slice(0, l.indexOf('=')).trim(), l.slice(l.indexOf('=') + 1).trim()]),
+);
+let fallos = 0;
+const check = (cond, nombre) => {
+  console.log(`${cond ? '✓' : '✗ FALTA'} ${nombre}`);
+  if (!cond) fallos++;
+};
+
+const browser = await chromium.launch({ channel: 'chrome', headless: true });
+const ctx = await browser.newContext({ locale: 'es-EC', viewport: { width: 420, height: 1600 } });
+const page = await ctx.newPage();
+const texto = async () => await page.evaluate(() => document.body.innerText);
+const esperar = async (frase, veces) => {
+  let t = await texto();
+  for (let i = 0; i < veces && !t.includes(frase); i++) {
+    await page.waitForTimeout(1000);
+    t = await texto();
+  }
+  return t;
+};
+
+// login demo (patrón S60)
+await page.goto(`http://localhost:${PUERTO}/login`, { waitUntil: 'networkidle', timeout: 180000 });
+await esperar('Contraseña', 60);
+await page.getByRole('textbox', { name: 'Email' }).fill(env.EXPO_PUBLIC_DEMO_EMAIL);
+await page.getByRole('textbox', { name: 'Contraseña' }).fill(env.EXPO_PUBLIC_DEMO_PASSWORD);
+await page.getByText('Entrar', { exact: true }).click();
+await esperar('Tu jornada de hoy', 60);
+
+// ── B1 — LA TARJETA EN NEGOCIO ──
+await page.goto(`http://localhost:${PUERTO}/negocio`, { waitUntil: 'networkidle' });
+let t = await esperar('Tu negocio', 30);
+check(t.includes('Veterinaria'), 'T1 la tarjeta Veterinaria vive en Negocio');
+
+// ── B4 — LA PORTADA/RESUMEN ──
+await page.goto(`http://localhost:${PUERTO}/veterinaria`, { waitUntil: 'networkidle' });
+t = await esperar('Veterinaria', 30);
+const peldano0 = t.includes('Abre tu consultorio');
+check(
+  peldano0 || t.includes('Tus servicios'),
+  'T2 la portada: peldaño 0 (invitación) o el resumen por servicio',
+);
+check(t.includes('Verificación profesional') || t.includes('Perfil verificado'), 'T3 la verificación como estado/celda en la portada');
+
+// ── B1 — EL TALLER: menú en el orden firmado ──
+await page.goto(`http://localhost:${PUERTO}/veterinaria/taller`, { waitUntil: 'networkidle' });
+t = await esperar('Servicios y precios', 30);
+const orden = [
+  'Cita regular',
+  'Vacunación',
+  'Cita especializada',
+  'Urgencia en local',
+  'Urgencia a domicilio',
+  'Telemedicina',
+];
+const posiciones = orden.map((s) => t.indexOf(s));
+check(posiciones.every((p) => p >= 0), 'T4 los 6 ítems del menú presentes');
+check(
+  posiciones.every((p, i) => i === 0 || p > posiciones[i - 1]),
+  'T5 el orden del menú es el FIRMADO',
+);
+check(
+  t.includes('Configúrala ahora — las familias la verán cuando la videollamada esté lista'),
+  'T6 la voz honesta de telemedicina (obligatoria, con tilde S68-B5)',
+);
+
+// T7: prender Cita regular despliega inline precio + duración + horario
+const switchRegular = page.locator('[role="switch"][aria-label="Ofrecer · Cita regular"]');
+const encendido = (await switchRegular.getAttribute('aria-checked')) === 'true';
+if (!encendido) {
+  await switchRegular.click();
+  await page.waitForTimeout(500);
+}
+t = await texto();
+check(t.includes('Precio'), 'T7a el precio inline del toggle prendido');
+check(t.includes('Duración') && t.includes('min'), 'T7b la duración inline (defaults de DB, pasos de 15)');
+check(
+  t.includes('e-PetPlace retiene') || t.includes('No pudimos leer la comisión vigente'),
+  'T7c el neto en vivo (VozComision compartida, 7.15)',
+);
+check(t.includes('Horario'), 'T8a la fila Horario del toggle');
+check(t.includes('Usa tu horario general'), 'T8b el default sereno "usa tu horario general"');
+
+// T9: la especializada suma chips (6 del catálogo + Otra)
+const switchEsp = page.locator('[role="switch"][aria-label="Ofrecer · Cita especializada"]');
+if ((await switchEsp.getAttribute('aria-checked')) !== 'true') {
+  await switchEsp.click();
+  await page.waitForTimeout(500);
+}
+t = await texto();
+const chips = ['Dermatología', 'Traumatología y ortopedia', 'Cardiología', 'Oftalmología', 'Odontología', 'Medicina interna'];
+check(chips.every((c) => t.includes(c)), 'T9a los 6 chips del catálogo VIVO de especialidades');
+check(t.includes('Otra'), 'T9b el chip "Otra" presente');
+check(t.includes('Tus especialidades se guardan ya'), 'T9c la voz honesta de la especializada CONECTADA (B5)');
+
+// ── B5 — urgencias VIVAS (el gate por catálogo se encendió solo) ──
+const switchUrg = page.locator('[role="switch"][aria-label="Ofrecer · Urgencia en local"]');
+if ((await switchUrg.getAttribute('aria-checked')) !== 'true') {
+  await switchUrg.click();
+  await page.waitForTimeout(500);
+}
+t = await texto();
+check(
+  !t.includes('se activa cuando el catálogo del oficio quede listo'),
+  'T18a urgencias vivas: la voz de catálogo-pendiente MURIÓ del taller',
+);
+check(t.includes('Se ofrece cuando guardes.'), 'T18b la urgencia prendida se ofrece al guardar (persistencia viva)');
+
+// ── B2 — HORARIOS: la sección compartida con la elección D-386 ──
+await page.goto(`http://localhost:${PUERTO}/veterinaria/taller?seccion=horarios`, { waitUntil: 'networkidle' });
+t = await esperar('Cómo organizas tu agenda', 30);
+check(t.includes('Cómo organizas tu agenda'), 'T10 la elección de modo D-386 vive en el taller vet');
+check(t.includes('Una agenda para todo') && t.includes('Por servicio'), 'T11 las dos opciones del modo presentes');
+
+// ── B3 — PROCEDIMIENTOS ──
+await page.goto(`http://localhost:${PUERTO}/veterinaria/procedimientos`, { waitUntil: 'networkidle' });
+t = await esperar('Tus procedimientos', 30);
+check(
+  t.includes('Se cotizan por presupuesto — no se reservan.'),
+  'T12 la voz firmada de los procedimientos',
+);
+check(t.includes('Agregar procedimiento'), 'T13 el alta de procedimiento presente');
+
+// ── B3 — VERIFICACIÓN PROFESIONAL ──
+await page.goto(`http://localhost:${PUERTO}/veterinaria/verificacion`, { waitUntil: 'networkidle' });
+t = await esperar('Verificación profesional', 30);
+check(t.includes('Título profesional'), 'T14a el slot del título profesional');
+check(t.includes('Registro SENESCYT'), 'T14b el slot del registro');
+check(
+  t.includes('la verificación se necesita para abrir, no para construir'),
+  'T15 la voz "bloquea abrir, jamás construir"',
+);
+
+// ── B2 — EL ADIESTRAMIENTO GANA LA SECCIÓN (D-426 muere) + D-412 ──
+await page.goto(`http://localhost:${PUERTO}/adiestramiento/taller`, { waitUntil: 'networkidle' });
+t = await esperar('Con quién trabajas', 30);
+t = await esperar('Cómo organizas tu agenda', 30);
+check(t.includes('Cómo organizas tu agenda'), 'T16 SeccionHorarios en el taller del adiestramiento (D-426 muerta)');
+check(
+  t.includes('e-PetPlace retiene') || t.includes('No pudimos leer la comisión vigente'),
+  'T17 el neto visible en el taller del adiestrador (D-412 pagada)',
+);
+
+await browser.close();
+console.log(fallos === 0 ? 'SMOKE VETERINARIA S68-B: 0 fallos' : `SMOKE S68-B: ${fallos} fallos`);
+process.exit(fallos === 0 ? 0 : 1);

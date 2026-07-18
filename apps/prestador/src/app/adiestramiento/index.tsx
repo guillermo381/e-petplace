@@ -10,11 +10,10 @@
  * con precio · especies declaradas · y la grilla vive de las franjas).
  *
  * Las filas dicen QUÉ SE VENDE (§1 del modelo: la sesión suelta y el
- * programa) y anclan al taller. Restos declarados en el reporte S65-B2:
+ * programa) y anclan al taller. Resto declarado en el reporte S65-B2:
  * sin espejo "así lo ve el dueño" (el componente espejo del oficio no
- * existe) y sin fila de horarios (el taller de adiestramiento no porta
- * la sección compartida — el prestador multi-oficio hereda las franjas
- * universales; la voz del estado lo dice honesto).
+ * existe). El resto de horarios MURIÓ en S68-B: el taller porta la
+ * sección compartida (D-426 cerrada).
  * Safe-area (requisito duro S65): el cierre del scroll suma
  * insets.bottom — el CTA jamás queda bajo la barra de navegación.
  */

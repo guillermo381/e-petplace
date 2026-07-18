@@ -249,8 +249,11 @@ export function SeccionHorarios({
   franjas: DraftFranja[];
   onCambio: (franjas: DraftFranja[]) => void;
   /** S59-B6 cura 2: la voz del CUPO es DEL OFICIO — 'Paseos simultáneos'
-   *  era voz genérica prestada; cada mundo dice la suya. */
-  oficio: 'paseo' | 'grooming';
+   *  era voz genérica prestada; cada mundo dice la suya. S68-B: entran
+   *  veterinaria y adiestramiento — hablan la voz "mascotas a la vez"
+   *  (las keys viven en tallerGrooming.* por herencia, el texto es
+   *  neutro de mascotas). */
+  oficio: 'paseo' | 'grooming' | 'veterinaria' | 'adiestramiento';
   /** El TituloBloque lo pinta el taller (estilo propio de sección). */
   titulo: React.ReactNode;
   /** D-386 (S62): la elección universal/por-servicio vive acá. */
@@ -291,16 +294,17 @@ export function SeccionHorarios({
 
   const vozDia = (dia: number): string => t(`horarios.dia${dia as 0 | 1 | 2 | 3 | 4 | 5 | 6}` as const);
   const letraDia = (dia: number): string => t(`taller.diaCorto${dia as 0 | 1 | 2 | 3 | 4 | 5 | 6}` as const);
-  // la voz del cupo POR OFICIO (S59-B6 cura 2)
-  const esGrooming = oficio === 'grooming';
-  const vozCupoTitulo = esGrooming ? t('tallerGrooming.cupo') : t('horarios.cupo');
-  const vozCupoAyuda = esGrooming ? t('tallerGrooming.cupoAyuda') : t('horarios.cupoAyuda');
+  // la voz del cupo POR OFICIO (S59-B6 cura 2; S68-B: solo el paseo
+  // dice "paseos" — el resto de los oficios habla de mascotas)
+  const vozMascotas = oficio !== 'paseo';
+  const vozCupoTitulo = vozMascotas ? t('tallerGrooming.cupo') : t('horarios.cupo');
+  const vozCupoAyuda = vozMascotas ? t('tallerGrooming.cupoAyuda') : t('horarios.cupoAyuda');
   const vozCupo = (cupo: number): string =>
     cupo === 1
-      ? esGrooming
+      ? vozMascotas
         ? t('tallerGrooming.cupoUno')
         : t('horarios.cupoUno')
-      : esGrooming
+      : vozMascotas
         ? t('tallerGrooming.cupoVarios', { cantidad: cupo })
         : t('horarios.cupoVarios', { cantidad: cupo });
 

@@ -35,12 +35,14 @@ import {
 import {
   obtenerMiCuentaComercial,
   obtenerMiPrestador,
+  obtenerMundoVeterinariaPropio,
   obtenerOfertaAdiestramientoPropia,
   obtenerOfertasGroomingPropias,
   obtenerOfertasPaseoPropias,
   obtenerResumenPendienteLiquidar,
   type MiCuentaComercial,
   type MundoAdiestramientoPropio,
+  type MundoVeterinariaPropio,
   type OfertaGroomingPropia,
   type OfertaPaseoPropia,
   type ResumenPendienteLiquidar,
@@ -91,6 +93,8 @@ export default function Negocio() {
   const [ofertasGrooming, setOfertasGrooming] = useState<OfertaGroomingPropia[] | null>(null);
   // S63-B: el resumen VIVO del mundo Adiestramiento — misma degradación
   const [mundoAdiestramiento, setMundoAdiestramiento] = useState<MundoAdiestramientoPropio | null>(null);
+  // S68-B: el resumen VIVO del mundo Veterinaria — misma degradación
+  const [mundoVeterinaria, setMundoVeterinaria] = useState<MundoVeterinariaPropio | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -108,14 +112,16 @@ export default function Negocio() {
         }
         if (rPendientes.ok) setPendientes(rPendientes.data);
         if (rPrestador.ok) {
-          const [rOfertas, rGrooming, rAdiestramiento] = await Promise.all([
+          const [rOfertas, rGrooming, rAdiestramiento, rVeterinaria] = await Promise.all([
             obtenerOfertasPaseoPropias(rPrestador.data.id),
             obtenerOfertasGroomingPropias(rPrestador.data.id),
             obtenerOfertaAdiestramientoPropia(rPrestador.data.id),
+            obtenerMundoVeterinariaPropio(rPrestador.data.id),
           ]);
           if (vigente && rOfertas.ok) setOfertas(rOfertas.data);
           if (vigente && rGrooming.ok) setOfertasGrooming(rGrooming.data);
           if (vigente && rAdiestramiento.ok) setMundoAdiestramiento(rAdiestramiento.data);
+          if (vigente && rVeterinaria.ok) setMundoVeterinaria(rVeterinaria.data);
         }
       })();
       return () => {
@@ -189,6 +195,20 @@ export default function Negocio() {
           precio: `$${ofertaAdiestramiento.precio.toFixed(2)}`,
           n: programasActivos,
         });
+
+  // S68-B: detalle vivo del mundo Veterinaria — verdad de DB o invitación
+  const serviciosVet = mundoVeterinaria?.servicios.filter((s) => s.activo) ?? [];
+  const detalleMundoVeterinaria =
+    mundoVeterinaria === null || serviciosVet.length === 0
+      ? t('negocio.mundoVeterinariaVacio')
+      : serviciosVet.length === 1
+        ? t('negocio.mundoVeterinariaDetalleUno', {
+            precio: `$${Math.min(...serviciosVet.map((s) => s.precio)).toFixed(2)}`,
+          })
+        : t('negocio.mundoVeterinariaDetalle', {
+            n: serviciosVet.length,
+            precio: `$${Math.min(...serviciosVet.map((s) => s.precio)).toFixed(2)}`,
+          });
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -305,6 +325,40 @@ export default function Negocio() {
                     }}
                   >
                     {detalleMundoAdiestramiento}
+                  </Text>
+                </View>
+              </View>
+            </Tarjeta>
+            {/* S68-B: el mundo Veterinaria ABRE — cuarta gemela; entra
+                por su portada (precedente S65-B2 P1). Glifo 'veterinaria'
+                del lote S53 (gate por ícono ya cumplido en dirección). */}
+            <Tarjeta
+              interactiva
+              elevacion="reposo"
+              accessibilityRole="button"
+              etiqueta={t('negocio.mundoVeterinaria')}
+              onPress={() => router.push('/veterinaria')}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+                <Icono nombre="veterinaria" registro="aa" tamano={28} />
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text
+                    style={{
+                      fontFamily: typography.family.sans.medium,
+                      fontSize: typography.size.md,
+                      color: theme.text.primary,
+                    }}
+                  >
+                    {t('negocio.mundoVeterinaria')}
+                  </Text>
+                  <Text
+                    style={{
+                      fontFamily: typography.family.sans.regular,
+                      fontSize: typography.size.sm,
+                      color: theme.text.secondary,
+                    }}
+                  >
+                    {detalleMundoVeterinaria}
                   </Text>
                 </View>
               </View>

@@ -567,3 +567,41 @@ export {
   type ObjetivoRegistrado,
   type ResultadoIniciarAdiestramiento,
 } from './wrappers/adiestramiento-atencion';
+
+// S68-B (P0-P3): el mundo VETERINARIA del prestador + la verificación
+// profesional — hunk aditivo regla 76(c)/(f).
+export {
+  MENU_VETERINARIA,
+  TIPO_POR_ITEM,
+  TIPO_PROCEDIMIENTO,
+  eliminarProcedimientoVeterinaria,
+  guardarEspecialidadesVeterinaria,
+  guardarProcedimientoVeterinaria,
+  guardarServicioVeterinaria,
+  obtenerCatalogoEspecialidadesVet,
+  obtenerCatalogoVeterinaria,
+  obtenerEspecialidadesPrestador,
+  obtenerMundoVeterinariaPropio,
+  type CodigoErrorVeterinaria,
+  type EspecialidadCatalogo,
+  type EspecialidadDeclarada,
+  type GuardarEspecialidadesInput,
+  type GuardarProcedimientoInput,
+  type GuardarServicioVeterinariaInput,
+  type ItemMenuVeterinaria,
+  type MundoVeterinariaPropio,
+  type OfertaVeterinariaPropia,
+  type ProcedimientoVeterinaria,
+  type TipoVeterinariaCatalogo,
+} from './wrappers/veterinaria-oferta';
+export {
+  ESTADOS_DOCUMENTO,
+  TIPOS_DOCUMENTO_VERIFICACION,
+  obtenerDocumentosVerificacion,
+  registrarDocumentoVerificacion,
+  type CodigoErrorDocumentos,
+  type DocumentoVerificacion,
+  type EstadoDocumento,
+  type RegistrarDocumentoInput,
+  type TipoDocumentoVerificacion,
+} from './wrappers/prestador-documentos';

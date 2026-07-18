@@ -54,6 +54,7 @@ import {
   SliderPrecio,
   StepperCantidad,
   Tarjeta,
+  VozComision,
   spacing,
   typography,
   useAviso,
@@ -63,8 +64,13 @@ import {
   RANGO_SUGERIDO_POR_NIVEL,
   guardarOfertaAdiestramiento,
   guardarProgramaAdiestramiento,
+  obtenerComisionVigenteCita,
+  obtenerFranjasDeServicios,
+  obtenerFranjasHorario,
   obtenerMiPrestador,
+  obtenerModoHorarios,
   obtenerOfertaAdiestramientoPropia,
+  type ModoHorarios,
   type MundoAdiestramientoPropio,
   type NivelPrograma,
   type ProgramaAdiestramientoPropio,
@@ -72,6 +78,18 @@ import {
 
 import { verificarSesion } from '@/lib/api';
 import { useTraduccion } from '@/i18n';
+// S68-B (D-426 muere): la sección de horarios COMPARTIDA entra al
+// taller del adiestramiento — el oficio declara horarios propios con la
+// misma pieza que paseo/grooming/veterinaria (elección de modo D-386
+// incluida).
+import {
+  SeccionHorarios,
+  aplicarDiffFranjas,
+  draftDesdeFranja,
+  franjaDirty,
+  type DraftFranja,
+  type OfertaParaHorarios,
+} from '@/components/seccion-horarios';
 
 // pasos discretos del slider (patrón taller grooming S59-B6; la
 // calibración fina de los rieles es materia del gate founder)
@@ -212,6 +230,15 @@ export default function TallerAdiestramiento() {
   const [hojaPrograma, setHojaPrograma] = useState(false);
   const [draft, setDraft] = useState<DraftPrograma>(draftNuevo());
   const [guardandoPrograma, setGuardandoPrograma] = useState(false);
+  // S68-B: horarios del oficio (D-426) — el borrador NO se clobbea en
+  // el refetch-en-focus: solo la primera carga (o el reset explícito
+  // post-cambio-de-modo) lo puebla.
+  const [franjas, setFranjas] = useState<DraftFranja[] | null>(null);
+  const [modoHorarios, setModoHorarios] = useState<ModoHorarios>('universal');
+  const [ofertasHorarios, setOfertasHorarios] = useState<OfertaParaHorarios[]>([]);
+  const [guardandoHorarios, setGuardandoHorarios] = useState(false);
+  // S68-B (D-412): el neto visible — el % es DATO leído (7.15)
+  const [comisionPct, setComisionPct] = useState<number | null>(null);
 
   const cargar = useCallback(async (silencioso = false) => {
     if (!silencioso) setPantalla({ estado: 'cargando' });
@@ -221,6 +248,28 @@ export default function TallerAdiestramiento() {
     if (!prestador.ok) return setPantalla({ estado: 'error', mensaje: prestador.mensaje });
     const r = await obtenerOfertaAdiestramientoPropia(prestador.data.id);
     if (!r.ok) return setPantalla({ estado: 'error', mensaje: r.mensaje });
+    // S68-B: horarios (D-426) + comisión (D-412) — la comisión y el modo
+    // refrescan siempre; el BORRADOR de franjas solo se puebla si está
+    // vacío (el refetch-en-focus no pisa trabajo sin guardar)
+    const [rComision, rModo, rFranjas] = await Promise.all([
+      obtenerComisionVigenteCita(),
+      obtenerModoHorarios(prestador.data.id),
+      obtenerFranjasHorario(prestador.data.id),
+    ]);
+    if (rComision.ok) setComisionPct(rComision.data.porcentaje);
+    if (rModo.ok && rFranjas.ok) {
+      setModoHorarios(rModo.data);
+      const ofertaId = r.data.oferta?.id ?? null;
+      setOfertasHorarios(ofertaId === null ? [] : [{ id: ofertaId, etiqueta: t('tallerAdiestramiento.horariosOferta') }]);
+      if (rModo.data === 'por_servicio' && ofertaId !== null) {
+        const rEsp = await obtenerFranjasDeServicios(prestador.data.id, [ofertaId]);
+        if (rEsp.ok) {
+          setFranjas((prev) => (prev === null ? rEsp.data.map((f) => draftDesdeFranja(f, f.servicioId)) : prev));
+        }
+      } else {
+        setFranjas((prev) => (prev === null ? rFranjas.data.map((f) => draftDesdeFranja(f)) : prev));
+      }
+    }
     setPantalla({ estado: 'listo', prestadorId: prestador.data.id, ...r.data });
     if (r.data.oferta !== null) {
       setActivo(r.data.oferta.activo);
@@ -246,6 +295,7 @@ export default function TallerAdiestramiento() {
       }
       return sig;
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useFocusEffect(
@@ -350,6 +400,27 @@ export default function TallerAdiestramiento() {
     if (!r.ok) return mostrar({ variante: 'error', texto: r.mensaje });
     mostrar({ variante: 'exito', texto: t('tallerAdiestramiento.programaGuardado') });
     void cargar(true);
+  }
+
+  // S68-B (D-426): el guardado de horarios — bloque propio, coherente
+  // con la mecánica por-bloque de este taller (no hay guardado único)
+  async function guardarHorarios() {
+    if (listo === null || franjas === null || guardandoHorarios) return;
+    setGuardandoHorarios(true);
+    const rf = await aplicarDiffFranjas(listo.prestadorId, franjas);
+    setFranjas(rf.franjas);
+    setGuardandoHorarios(false);
+    if (!rf.ok) {
+      mostrar({
+        variante: 'error',
+        texto:
+          rf.error.tipo === 'solape'
+            ? `${t(`horarios.dia${rf.error.diaSemana as 0 | 1 | 2 | 3 | 4 | 5 | 6}` as const)}: ${t('horarios.solape')}`
+            : rf.error.mensaje,
+      });
+      return;
+    }
+    mostrar({ variante: 'exito', texto: t('taller.guardado') });
   }
 
   const vozSecundaria = {
@@ -504,6 +575,9 @@ export default function TallerAdiestramiento() {
                       onCambio={setPrecioIndice}
                       registro="aa"
                     />
+                    {/* D-412 pagada (S68-B): el neto visible junto al
+                        precio — la compartida de packages/ui */}
+                    <VozComision pct={comisionPct} precio={PASOS_SESION[precioIndice]} />
                   </View>
                   {/* S65 cura chica (captura founder): 5 chips no entran
                       en 'fila' — el 90 min quedaba inalcanzable. 'tira'
@@ -643,6 +717,8 @@ export default function TallerAdiestramiento() {
                                     }
                                     registro="aa"
                                   />
+                                  {/* D-412 pagada (S68-B) */}
+                                  <VozComision pct={comisionPct} precio={PASOS_PROGRAMA[d.precioIndice]} />
                                 </View>
 
                                 <Campo
@@ -732,6 +808,37 @@ export default function TallerAdiestramiento() {
                 );
               })()}
             </View>
+
+            {/* ── HORARIOS DEL OFICIO (S68-B: D-426 muere) — la sección
+                COMPARTIDA con paseo/grooming/veterinaria, elección de
+                modo D-386 incluida. Guardado por bloque, coherente con
+                la mecánica de este taller. ── */}
+            {franjas !== null && (
+              <View style={{ gap: spacing[3] }}>
+                <SeccionHorarios
+                  franjas={franjas}
+                  onCambio={setFranjas}
+                  oficio="adiestramiento"
+                  titulo={<Titulo texto={t('taller.horariosTitulo')} />}
+                  prestadorId={listo.prestadorId}
+                  modo={modoHorarios}
+                  ofertas={ofertasHorarios}
+                  onModoCambiado={() => {
+                    setFranjas(null);
+                    void cargar(true);
+                  }}
+                />
+                {franjas.some(franjaDirty) && (
+                  <Boton
+                    variante="secundario"
+                    bloque
+                    etiqueta={t('tallerAdiestramiento.guardarHorarios')}
+                    cargando={guardandoHorarios}
+                    onPress={() => void guardarHorarios()}
+                  />
+                )}
+              </View>
+            )}
           </>
         )}
       </ScrollView>
@@ -811,6 +918,8 @@ export default function TallerAdiestramiento() {
                 onCambio={(i) => setDraft((d) => ({ ...d, precioIndice: i }))}
                 registro="aa"
               />
+              {/* D-412 pagada (S68-B) */}
+              <VozComision pct={comisionPct} precio={PASOS_PROGRAMA[draft.precioIndice]} />
             </View>
 
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>

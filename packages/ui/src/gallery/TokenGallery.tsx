@@ -34,6 +34,7 @@ import { SelectorAvatar, type SelectorAvatarFoto } from '../components/SelectorA
 import { SelectorOpcion } from '../components/SelectorOpcion'
 import { SelectorSegmentado } from '../components/SelectorSegmentado'
 import { SliderPrecio } from '../components/SliderPrecio'
+import { VozComision } from '../components/VozComision'
 import { Interruptor } from '../components/Interruptor'
 import { StepperCantidad } from '../components/StepperCantidad'
 import { CeldaNavegacion } from '../components/CeldaNavegacion'
@@ -1220,6 +1221,28 @@ function GaleriaInterna() {
             <ThemeProvider defaultMode="memorial">
               <PanelTema etiqueta="memorial — degrada adentro (acento a text.secondary) y el thumb no se desliza: reemplazo directo">
                 <EjemploSliderPrecio />
+              </PanelTema>
+            </ThemeProvider>
+          </View>
+        </Seccion>
+
+        {/* VozComision — S68-B (comp. 35): la comisión visible junto al
+            precio (7.15) — subió de sus dos copias de los talleres */}
+        <Seccion titulo="VozComision — el neto en vivo donde se pone el precio (7.15)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — % + neto exacto en vivo (el % es DATO leído de fee_configs, jamás hardcode)">
+                <VozComision pct={12} precio={25} />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="dark — texto secundario, cero pares nuevos">
+                <VozComision pct={12} precio={25} />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="sin dato — la voz honesta (Ley 13: el % que falta se dice, jamás un 0% inventado)">
+                <VozComision pct={null} precio={25} />
               </PanelTema>
             </ThemeProvider>
           </View>
