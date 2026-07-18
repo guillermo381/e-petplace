@@ -17107,6 +17107,15 @@ export type Database = {
         Args: { p_append?: boolean; p_atencion_id: string; p_puntos: Json }
         Returns: Json
       }
+      registrar_vacuna_mostrador: {
+        Args: {
+          p_cita_id: string
+          p_fecha_aplicacion?: string
+          p_nombre_libre?: string
+          p_vacuna_codigo?: string
+        }
+        Returns: string
+      }
       registrar_vacunas_de_carnet: {
         Args: { p_archivo_url?: string; p_mascota_id: string; p_vacunas: Json }
         Returns: Json
