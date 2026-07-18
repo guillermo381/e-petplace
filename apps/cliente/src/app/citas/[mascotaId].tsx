@@ -57,13 +57,13 @@ function iconoDe(tipo: string | null): 'paseo' | 'grooming' | 'training' {
 }
 
 /** El ícono del OFICIO para el encabezado del detalle (remate D-430):
- *  solo glifos gateados del set b′ (paseo/grooming, lote 1 S53) — el
- *  adiestramiento va SIN ícono, honesto (letra founder S67; 'training'
- *  existe en el set con gate por ícono pendiente, cuando se gatee esta
- *  función gana su rama). Cero genéricos (Ley 12). */
-function iconoOficio(tipo: string | null): 'paseo' | 'grooming' | null {
+ *  glifos existentes del set b′ — paseo/grooming (lote 1 S53) y
+ *  'training' (lote 3 S58; ESTRENO acá por pedido founder S67 — este
+ *  re-gate en dispositivo es su gate por ícono, DIRECCION_ARTE §6).
+ *  Un oficio futuro sin glifo va sin ícono: cero genéricos (Ley 12). */
+function iconoOficio(tipo: string | null): 'paseo' | 'grooming' | 'training' | null {
   if (tipo?.startsWith('grooming')) return 'grooming';
-  if (tipo === 'adiestramiento') return null;
+  if (tipo === 'adiestramiento') return 'training';
   if (tipo?.startsWith('paseo')) return 'paseo';
   return null;
 }
