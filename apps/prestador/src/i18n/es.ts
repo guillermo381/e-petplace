@@ -1054,6 +1054,10 @@ export const prestadorEs = {
     // S68-B7: con ?item= las demás tarjetas nacen plegadas — este es su
     // camino de un toque
     desplegar: 'Ajustar',
+    // S68-B9 (firma founder del choque 2): menú curado + Otra duración
+    otraDuracion: 'Otra duración',
+    otraDuracionAyuda: 'En pasos de 5 minutos — de 10 a 240.',
+    otraDuracionUsar: 'Usar esta duración',
   },
   veterinaria: {
     titulo: 'Veterinaria',

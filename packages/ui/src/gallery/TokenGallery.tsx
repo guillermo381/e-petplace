@@ -1210,7 +1210,7 @@ function GaleriaInterna() {
         <Seccion titulo="SliderPrecio — pasos discretos + edición numérica (S68-B7: TAP en el valor → teclado, clampeado al riel y redondeado al paso)">
           <View style={{ gap: spacing[4] }}>
             <ThemeProvider defaultMode="light">
-              <PanelTema etiqueta="claro · registro capa (dueño) — tramo en hex puro; el valor mono es TAP → edición numérica (pruébalo: escribe 23.7 y confirma — redondea al paso más cercano)">
+              <PanelTema etiqueta="claro · registro capa (dueño) — tramo en hex puro; el valor mono con SUBRAYADO PUNTEADO + hint visible (B9) es TAP → edición numérica (pruébalo: escribe 23.7 y confirma — redondea al paso más cercano)">
                 <EjemploSliderPrecio />
               </PanelTema>
             </ThemeProvider>

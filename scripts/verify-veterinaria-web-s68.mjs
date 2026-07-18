@@ -88,7 +88,7 @@ if (!encendido) {
 }
 t = await texto();
 check(t.includes('Precio'), 'T7a el precio inline del toggle prendido');
-check(t.includes('Duración') && t.includes('min'), 'T7b la duración inline (defaults de DB, pasos de 15)');
+check(t.includes('Duración') && t.includes('min'), 'T7b la duración inline (defaults de DB; menú curado B9)');
 check(
   t.includes('e-PetPlace retiene') || t.includes('No pudimos leer la comisión vigente'),
   'T7c el neto en vivo (VozComision compartida, 7.15)',
@@ -207,6 +207,21 @@ if ((await switchVac.getAttribute('aria-checked')) !== 'true') {
 }
 t = await texto();
 check(t.includes('$2.00'), 'T23 el riel de vacunación arranca en $2 (decisión founder del gate)');
+
+// ── B9 — duración vet: menú curado + "Otra duración" clampeando ──
+check(t.includes('Toca el valor para escribirlo'), 'T25 la affordance VISIBLE del precio editable (hint + punteado)');
+await page.getByText('Duración', { exact: true }).first().click();
+t = await esperar('Otra duración', 15);
+check((await page.getByText('20 min', { exact: true }).count()) > 0, 'T24a el 20 min (default de DB) es ELEGIBLE en el menú curado');
+check((await page.getByText('90 min', { exact: true }).count()) > 0, 'T24b el menú curado llega a 90/120');
+check(t.includes('Otra duración'), 'T24c el campo "Otra duración" VISIBLE en la Hoja');
+await page.getByRole('textbox', { name: 'Otra duración' }).fill('23');
+await page.getByText('Usar esta duración', { exact: true }).click();
+await page.waitForTimeout(500);
+check(
+  (await page.getByText('25 min', { exact: true }).count()) > 0,
+  'T24d el ilegal 23 se clampea a 25 (paso de 5, jamás valor ilegal)',
+);
 
 // ── B2 — EL ADIESTRAMIENTO GANA LA SECCIÓN (D-426 muere) + D-412 ──
 await page.goto(`http://localhost:${PUERTO}/adiestramiento/taller`, { waitUntil: 'networkidle' });

@@ -104,10 +104,18 @@ const PASO_PRECIO = 0.5;
 const PISO_PRECIO = 5;
 const TECHO_PRECIO = 150;
 
-// duración en pasos de 15' (letra del pedido); el default por servicio
-// es DATO del catálogo (tipos_servicio.duracion_default_minutos)
-const DURACIONES: number[] = [];
-for (let d = 15; d <= 240; d += 15) DURACIONES.push(d);
+// S68-B9 (firma founder del choque 2, letra corregida): MENÚ CURADO de
+// duraciones + "Otra duración" con campo numérico VISIBLE, clampeado a
+// pasos de 5' entre 10' y 240' (redondeo al paso más cercano — jamás
+// valor ilegal). Relevado ANTES de tocar UI: cero CHECK/trigger de
+// pasos sobre los tipos vet (el único de duración es el del paseo).
+// Los defaults de DB (20'/30'/45') caen en el menú. SOLO el oficio vet.
+const MENU_DURACION = [10, 15, 20, 30, 45, 60, 90, 120] as const;
+const PASO_DURACION = 5;
+const MIN_DURACION = 10;
+const MAX_DURACION = 240;
+const clampDuracion = (v: number): number =>
+  Math.min(MAX_DURACION, Math.max(MIN_DURACION, Math.round(v / PASO_DURACION) * PASO_DURACION));
 const DURACION_FALLBACK = 60;
 
 interface DraftItem {
@@ -223,6 +231,8 @@ export default function TallerVeterinaria() {
   const [modoHorarios, setModoHorarios] = useState<ModoHorarios>('universal');
   const [ofertasHorarios, setOfertasHorarios] = useState<OfertaParaHorarios[]>([]);
   const [hojaDuracion, setHojaDuracion] = useState<ItemMenuVeterinaria | null>(null);
+  // "Otra duración" (B9): el campo visible de la Hoja — se limpia al abrir
+  const [otraDuracion, setOtraDuracion] = useState('');
   const [guardando, setGuardando] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   // el ancla del lápiz del resumen: y de cada tarjeta del menú
@@ -703,7 +713,10 @@ export default function TallerVeterinaria() {
                               titulo={t('tallerVeterinaria.duracion')}
                               subtitulo={t('tallerVeterinaria.duracionAyuda')}
                               metadataMono={t('tallerVeterinaria.minutos', { n: d.duracion })}
-                              onPress={() => setHojaDuracion(i)}
+                              onPress={() => {
+                                setOtraDuracion('');
+                                setHojaDuracion(i);
+                              }}
                             />
 
                             {/* horario — default sereno: el general; el
@@ -774,7 +787,8 @@ export default function TallerVeterinaria() {
         </ScrollView>
       )}
 
-      {/* Hoja: duración del servicio — pasos de 15' */}
+      {/* Hoja: duración del servicio — MENÚ CURADO + "Otra duración"
+          con campo VISIBLE (B9, firma founder: jamás oculto tras tap) */}
       <Hoja
         visible={hojaDuracion !== null}
         onCerrar={() => setHojaDuracion(null)}
@@ -782,7 +796,7 @@ export default function TallerVeterinaria() {
         altura="media"
       >
         <HojaScroll>
-          {DURACIONES.map((dur, idx) => (
+          {MENU_DURACION.map((dur, idx) => (
             <View key={dur}>
               {idx > 0 && <Separador />}
               <Celda
@@ -796,6 +810,30 @@ export default function TallerVeterinaria() {
               />
             </View>
           ))}
+          <Separador />
+          <View style={{ padding: spacing[4], paddingBottom: spacing[4] + insets.bottom, gap: spacing[3] }}>
+            <Campo
+              label={t('tallerVeterinaria.otraDuracion')}
+              value={otraDuracion}
+              onChangeText={setOtraDuracion}
+              keyboardType="number-pad"
+              placeholder="25"
+            />
+            <VozSecundaria texto={t('tallerVeterinaria.otraDuracionAyuda')} />
+            <Boton
+              variante="primario"
+              bloque
+              etiqueta={t('tallerVeterinaria.otraDuracionUsar')}
+              deshabilitado={!Number.isFinite(Number.parseInt(otraDuracion, 10))}
+              onPress={() => {
+                const v = Number.parseInt(otraDuracion, 10);
+                if (!Number.isFinite(v) || hojaDuracion === null) return;
+                // clamp a pasos de 5' entre 10 y 240 — jamás valor ilegal
+                actualizarItem(hojaDuracion, { duracion: clampDuracion(v) });
+                setHojaDuracion(null);
+              }}
+            />
+          </View>
         </HojaScroll>
       </Hoja>
 

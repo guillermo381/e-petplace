@@ -206,18 +206,46 @@ export function SliderPrecio({
             setTexto(Number.isFinite(numeros[idx]) ? String(numeros[idx]) : '')
             setEditando(true)
           }}
-          style={{ paddingVertical: 2 }}
+          style={{ paddingVertical: 2, alignItems: 'flex-end' }}
         >
-          <Text
-            style={{
-              fontFamily: typography.family.mono.regular,
-              fontSize: typography.size.lg,
-              fontVariant: ['tabular-nums'],
-              color: theme.text.primary,
-            }}
+          {/* S68-B9 (hallazgo founder sobre B7): la affordance VISIBLE —
+              subrayado punteado del valor + el hint en secundaria, no
+              solo accesible. Sin glifo nuevo. */}
+          <View
+            style={
+              editable
+                ? {
+                    borderBottomWidth: 1.5,
+                    borderStyle: 'dotted',
+                    borderBottomColor: theme.text.secondary,
+                    paddingBottom: 1,
+                  }
+                : null
+            }
           >
-            {pasos[idx] ?? ''}
-          </Text>
+            <Text
+              style={{
+                fontFamily: typography.family.mono.regular,
+                fontSize: typography.size.lg,
+                fontVariant: ['tabular-nums'],
+                color: theme.text.primary,
+              }}
+            >
+              {pasos[idx] ?? ''}
+            </Text>
+          </View>
+          {editable && (
+            <Text
+              style={{
+                fontFamily: typography.family.sans.regular,
+                fontSize: typography.size.xs,
+                color: theme.text.secondary,
+                marginTop: 2,
+              }}
+            >
+              {t('sliderPrecio.editarHint')}
+            </Text>
+          )}
         </Pressable>
       )}
     </View>

@@ -121,9 +121,10 @@ export const uiEs = {
     error: 'Este clip no se pudo cargar.',
     reintentar: 'Probar de nuevo',
   },
-  // S68-B7 — SliderPrecio: la edición numérica (firma founder del gate)
+  // S68-B7/B9 — SliderPrecio: la edición numérica con affordance VISIBLE
+  // (letra founder B9, voseo ajustado a tuteo — precedente B5/B8)
   sliderPrecio: {
-    editarHint: 'Toca para escribir el valor exacto',
+    editarHint: 'Toca el valor para escribirlo',
   },
   // S68-B — VozComision (7.15: el % es DATO leído; textos heredados
   // VERBATIM de servicios.comision* del prestador, aprobados en su lote)

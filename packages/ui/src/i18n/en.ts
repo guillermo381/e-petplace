@@ -109,9 +109,9 @@ export const uiEn = {
     error: "This clip couldn't load.",
     reintentar: 'Try again',
   },
-  // S68-B7 — SliderPrecio numeric editing
+  // S68-B7/B9 — SliderPrecio numeric editing with visible affordance
   sliderPrecio: {
-    editarHint: 'Tap to type the exact value',
+    editarHint: 'Tap the value to type it',
   },
   // S68-B — VozComision (texts inherited VERBATIM from the provider app)
   vozComision: {

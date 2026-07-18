@@ -936,6 +936,9 @@ export const prestadorEn = {
     otraAgregar: 'Add',
     pendienteCatalogo: "Leave your setup ready — it activates once the catalog for this trade is ready.",
     desplegar: 'Adjust',
+    otraDuracion: 'Other duration',
+    otraDuracionAyuda: 'In 5-minute steps — from 10 to 240.',
+    otraDuracionUsar: 'Use this duration',
   },
   veterinaria: {
     titulo: 'Veterinary',
