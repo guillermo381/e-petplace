@@ -26,15 +26,17 @@
 //                             switch de plataforma reservable=false lo
 //                             gobierna la A: se configura hoy, se
 //                             vitrinea cuando la videollamada esté lista)
-//       cita_especializada  → chips a `prestador_especialidades`
-//                             (catálogo cat_especialidades_vet de 6 +
-//                             nombre_libre para "Otra") — CONECTADO en
-//                             S68-B5 tras la confirmación "migración
-//                             aplicada" (tipos regenerados por la A en
-//                             f89fe22). XOR del puente respetado acá:
-//                             una fila lleva especialidad_id O
-//                             nombre_libre, jamás ambos ni ninguno
-//                             (error tipado especialidad_invalida).
+//       cita_especializada  → tipo 'consulta_especializada' (S68-A6,
+//                             45' default, migración 20260717230000 —
+//                             una fila de catálogo no cambia los tipos
+//                             generados: el código viaja como string
+//                             del CHECK, declarado por la A). Los CHIPS
+//                             van aparte a `prestador_especialidades`
+//                             (catálogo de 6 + nombre_libre para
+//                             "Otra", conectado S68-B5) con el XOR del
+//                             puente respetado acá: una fila lleva
+//                             especialidad_id O nombre_libre, jamás
+//                             ambos ni ninguno (especialidad_invalida).
 //   · Los tipos urgencia_* se detectan por presencia EN EL CATÁLOGO —
 //     con la migración aplicada los dos toggles se encienden solos.
 //   · PROCEDIMIENTOS (P2): filas tipo_servicio='otro' con nombre_custom
@@ -62,12 +64,12 @@ export const MENU_VETERINARIA = [
 ] as const;
 export type ItemMenuVeterinaria = (typeof MENU_VETERINARIA)[number];
 
-// tipos por ítem del menú (contrato S68-A1; los urgencia_* existen
-// recién con la migración aplicada — la UI gatea por presencia en
-// el catálogo)
-export const TIPO_POR_ITEM: Record<Exclude<ItemMenuVeterinaria, 'cita_especializada'>, string> = {
+// tipos por ítem del menú (contratos S68-A1 + A6) — la UI gatea cada
+// ítem por presencia de su tipo en el catálogo vivo
+export const TIPO_POR_ITEM: Record<ItemMenuVeterinaria, string> = {
   cita_regular: 'consulta_general',
   vacunacion: 'vacunacion',
+  cita_especializada: 'consulta_especializada',
   urgencia_local: 'urgencia_local',
   urgencia_domicilio: 'urgencia_domicilio',
   telemedicina: 'telemedicina',
@@ -78,6 +80,7 @@ export const TIPO_PROCEDIMIENTO = 'otro';
 const TIPOS_SERVICIO_VET = [
   'consulta_general',
   'vacunacion',
+  'consulta_especializada',
   'telemedicina',
   'urgencia_local',
   'urgencia_domicilio',

@@ -926,9 +926,6 @@ export const prestadorEn = {
     otraPlaceholder: 'Clinical ethology',
     otraAgregar: 'Add',
     pendienteCatalogo: "Leave your setup ready — it activates once the catalog for this trade is ready.",
-    // S68-B5: chips persist already; the bookable specialized visit waits
-    especializadaPrecioPendiente:
-      'Your specialties are saved now — the price and schedule of the specialized visit activate with the next update of this trade.',
   },
   veterinaria: {
     titulo: 'Veterinary',

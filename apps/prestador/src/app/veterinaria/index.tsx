@@ -57,8 +57,8 @@ type Pantalla =
       documentos: DocumentoVerificacion[];
     };
 
-// espejo de baseDeItem del taller (las urgencias se distinguen por
-// modalidad; la especializada aún no persiste — CONECTAR-A)
+// espejo de baseDeItem del taller — cada ítem del menú tiene su tipo
+// propio (contratos S68-A1 + A6)
 function baseDeItem(item: ItemMenuVeterinaria, servicios: OfertaVeterinariaPropia[]): OfertaVeterinariaPropia | null {
   switch (item) {
     case 'cita_regular':
@@ -72,7 +72,8 @@ function baseDeItem(item: ItemMenuVeterinaria, servicios: OfertaVeterinariaPropi
     case 'urgencia_domicilio':
       return servicios.find((s) => s.tipoServicio === 'urgencia_domicilio') ?? null;
     case 'cita_especializada':
-      return null;
+      // S68-B6: el comprable propio (A6)
+      return servicios.find((s) => s.tipoServicio === 'consulta_especializada') ?? null;
   }
 }
 

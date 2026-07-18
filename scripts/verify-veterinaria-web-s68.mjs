@@ -106,7 +106,12 @@ t = await texto();
 const chips = ['Dermatología', 'Traumatología y ortopedia', 'Cardiología', 'Oftalmología', 'Odontología', 'Medicina interna'];
 check(chips.every((c) => t.includes(c)), 'T9a los 6 chips del catálogo VIVO de especialidades');
 check(t.includes('Otra'), 'T9b el chip "Otra" presente');
-check(t.includes('Tus especialidades se guardan ya'), 'T9c la voz honesta de la especializada CONECTADA (B5)');
+// S68-B6: la especializada COBRA — la voz de espera murió (Ley 37) y el
+// bloque precio/duración persiste como cualquier toggle
+check(
+  !t.includes('Tus especialidades se guardan ya'),
+  'T9c la voz de espera de la especializada MURIÓ (B6: el comprable existe)',
+);
 
 // ── B5 — urgencias VIVAS (el gate por catálogo se encendió solo) ──
 const switchUrg = page.locator('[role="switch"][aria-label="Ofrecer · Urgencia en local"]');

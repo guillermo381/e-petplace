@@ -142,15 +142,14 @@ function baseDeItem(item: ItemMenuVeterinaria, servicios: OfertaVeterinariaPropi
     case 'urgencia_domicilio':
       return servicios.find((s) => s.tipoServicio === 'urgencia_domicilio') ?? null;
     case 'cita_especializada':
-      // CONECTAR-A: los chips persisten a prestador_especialidades
-      // (tabla de la migración A) al regenerar tipos
-      return null;
+      // S68-B6: el comprable propio (A6); los chips van aparte al puente
+      return servicios.find((s) => s.tipoServicio === 'consulta_especializada') ?? null;
   }
 }
 
 // la modalidad que se ESCRIBE por ítem (el CHECK exige una por fila);
 // telemedicina lleva local=true SOLO por el CHECK — es virtual
-function modalidadDeItem(item: Exclude<ItemMenuVeterinaria, 'cita_especializada'>): {
+function modalidadDeItem(item: ItemMenuVeterinaria): {
   atiendeLocal: boolean;
   atiendeDomicilio: boolean;
 } {
@@ -239,11 +238,8 @@ export default function TallerVeterinaria() {
       telemedicina: t('tallerVeterinaria.itemTelemedicina'),
     })[i];
 
-  const duracionDefault = (i: ItemMenuVeterinaria, cat: TipoVeterinariaCatalogo[]): number => {
-    if (i === 'cita_especializada') return DURACION_FALLBACK;
-    const tipo = TIPO_POR_ITEM[i];
-    return cat.find((c) => c.codigo === tipo)?.duracionDefaultMinutos ?? DURACION_FALLBACK;
-  };
+  const duracionDefault = (i: ItemMenuVeterinaria, cat: TipoVeterinariaCatalogo[]): number =>
+    cat.find((c) => c.codigo === TIPO_POR_ITEM[i])?.duracionDefaultMinutos ?? DURACION_FALLBACK;
 
   // carga ÚNICA (editor de borrador — el refetch-en-focus clobbearía)
   useEffect(() => {
@@ -283,8 +279,9 @@ export default function TallerVeterinaria() {
       const iniciales = {} as Record<ItemMenuVeterinaria, DraftItem>;
       for (const i of MENU_VETERINARIA) {
         const base = baseDeItem(i, rMundo.data.servicios);
-        // la especializada no tiene fila comprable propia: su toggle
-        // abre con especialidades declaradas (la verdad del puente)
+        // la especializada sin fila guardada todavía: su tarjeta abre
+        // con especialidades declaradas (la verdad del puente); con
+        // fila (S68-B6), manda base.activo como en todo toggle
         const abierta = i === 'cita_especializada' && rEspPropias.data.length > 0;
         iniciales[i] = base
           ? { base, ofrecido: base.activo, precio: base.precio.toFixed(2), duracion: base.duracionMinutos ?? duracionDefault(i, rCat.data) }
@@ -369,11 +366,10 @@ export default function TallerVeterinaria() {
     );
   };
 
-  // un ítem PERSISTE solo si su tipo ya vive en el catálogo (los
-  // urgencia_* llegan con la migración de la A — hasta entonces el
-  // borrador queda dicho sereno, jamás un código rebotado a ciegas)
+  // un ítem PERSISTE solo si su tipo ya vive en el catálogo — jamás un
+  // código rebotado a ciegas (S68-B6: los 6 ítems del menú, completos)
   const tipoDisponible = (i: ItemMenuVeterinaria): boolean =>
-    i !== 'cita_especializada' && (catalogo?.some((c) => c.codigo === TIPO_POR_ITEM[i]) ?? false);
+    catalogo?.some((c) => c.codigo === TIPO_POR_ITEM[i]) ?? false;
 
   // el diff de las especialidades contra la base guardada del puente
   const mismoSet = (a: string[], b: string[]): boolean => a.length === b.length && a.every((x) => b.includes(x));
@@ -400,7 +396,7 @@ export default function TallerVeterinaria() {
     if (guardando || !listo || drafts === null || catalogo === null || franjas === null || pantalla.estado !== 'listo') return;
     setGuardando(true);
     for (const i of MENU_VETERINARIA) {
-      if (i === 'cita_especializada' || !tipoDisponible(i)) continue; // CONECTAR-A
+      if (!tipoDisponible(i)) continue;
       const d = drafts[i];
       if (!itemDirty(d)) continue;
       if (d.base === null && !d.ofrecido) continue;
@@ -629,11 +625,6 @@ export default function TallerVeterinaria() {
                                     );
                                   }}
                                 />
-                                {/* honesto: los chips YA se guardan; lo
-                                    que espera es la cita especializada
-                                    como COMPRABLE (sin tipo propio en el
-                                    contrato A — declarado a la mesa) */}
-                                <VozSecundaria texto={t('tallerVeterinaria.especializadaPrecioPendiente')} />
                               </>
                             )}
 

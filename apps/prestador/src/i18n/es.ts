@@ -1040,10 +1040,6 @@ export const prestadorEs = {
     otraPlaceholder: 'Etología clínica',
     otraAgregar: 'Agregar',
     pendienteCatalogo: 'Deja lista tu configuración — se activa cuando el catálogo del oficio quede listo.',
-    // S68-B5: los chips YA persisten; lo que espera es la cita
-    // especializada como comprable (sin tipo propio en el contrato A)
-    especializadaPrecioPendiente:
-      'Tus especialidades se guardan ya — el precio y la agenda de la cita especializada se activan con la próxima actualización del oficio.',
   },
   veterinaria: {
     titulo: 'Veterinaria',
