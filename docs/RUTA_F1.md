@@ -149,16 +149,22 @@ chips. Quedan declaradas: **V3 mostrador walk-in · V4 Durante clínico
 V5 parte y sedimento · V6 SRI post-apertura (D-419 prioridad,
 founder S66)**. Orden fino al arrancar cada tanda.
 
-> **T2 EN CURSO (S69, 18 Jul 2026) — el motor V3+presupuesto:** la
-> fundación DB parió el **presupuesto clínico** (máquina de estados,
-> cita firme con precio congelado, puente caso⇄cita, 3er nivel de
-> procedencia), el **motor del MOSTRADOR** (cita firme walk-in + cobro
-> presencial como dato, cero fee) y las **curas del chasis Fase G**
-> (L-140, goteo terminal, par L-133, normalizador + reclamo dual). La
-> cara del dueño del presupuesto (aprobar/rechazar + Zona 3) también.
-> Lo declarado abierto: la **coordinación del procedimiento aprobado**
-> (D-439, bloqueante de apertura, candidata V4/V5) · el registrable de
-> vacunación con `cat_vacunas` (D-434) · el Durante rico sigue en V4.
+> **T2 CUMPLIDA (S69, 18 Jul 2026, A‖B) — LA CLÍNICA SE VOLVIÓ PUERTA:**
+> **V3 (mostrador walk-in) ✅ CUMPLIDA** — la jornada VE al vet
+> (día clínico por `es_medico`), búsqueda de tres llaves, alta fantasma
+> (P13), cita firme HOY, cobro presencial como dato (cero fee),
+> vacunación `cat_vacunas`+«Otra». **El PRESUPUESTO CLÍNICO ✅ FUNDADO
+> de motor a dos caras** (§8 del modelo: motor + armado del prestador +
+> aprobación in-app y presencial + relectura; cara del dueño en /citas
+> + Zona 3 estrenando habitante). El **3er nivel de procedencia**
+> (`declarado_por_prestador`) nació con productor. Las **curas del
+> chasis Fase G** (L-140, goteo terminal, par L-133, normalizador +
+> reclamo dual) y la **cadena de gate con data real** (A6/A7). Gate
+> founder VERDE en dispositivo, ambas caras. Lo que sigue: la
+> **coordinación de la fecha del procedimiento** (D-439 🔴 bloqueante de
+> apertura) · el **Durante clínico** (V4: nota IA, caso desde el
+> Durante, telemedicina anclada) · la **tanda de acabados UI** del
+> mostrador+presupuesto (arrastre S70, hallazgos founder del gate).
 
 **Test:** el expediente se alimenta porque al vet LE SIRVE — y el
 negocio cobra adentro porque es MÁS FÁCIL que afuera.
@@ -385,6 +391,7 @@ arcos (se decide sesión a sesión con las trenzas como ley).
 
 ## Historial
 
+- **v2.8 (S69, 18 Jul 2026):** §A3 — **V3 (mostrador walk-in) CUMPLIDA** (A‖B) + el **presupuesto clínico FUNDADO de motor a dos caras** (§8 del modelo: motor + armado + aprobación in-app/presencial + relectura). La coordinación de fecha del procedimiento = D-439 🔴 bloqueante de apertura. V4 (Durante clínico, nota IA, telemedicina anclada) sigue. Arrastre S70: tanda de acabados UI del mostrador+presupuesto (hallazgos founder del gate).
 - **v2.7 (S68, 18 Jul 2026):** §A3 — V1 (oferta del negocio, S68-B) y
   V2 (reserva del dueño, camino feliz, S68-A) CUMPLIDAS en paralelo
   A‖B sobre la fundación V0; restos de V2 con disparo declarados (hub

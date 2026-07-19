@@ -888,7 +888,7 @@ export const clienteEs = {
     errorDetalle: 'Prueba de nuevo en un momento.',
     reintentar: 'Probar de nuevo',
   },
-  // LOTE S69 (presupuesto clínico) — nace SIN aprobación founder (mecánica D-315).
+  // LOTE S69 · APROBADO founder 18-jul (lectura de cierre — mecánica D-315).
   // Voz honesta v1-sin-fecha FIRMADA por la mesa: la cita nace sin día fijo,
   // la clínica coordina; jamás se promete un {fecha} que no existe.
   presupuesto: {

@@ -836,7 +836,7 @@ export const clienteEn = {
     errorDetalle: 'Please try again in a moment.',
     reintentar: 'Try again',
   },
-  // S69 batch (clinical estimate) — born WITHOUT founder sign-off (D-315 mechanic).
+  // S69 batch (clinical estimate) — APPROVED by founder 18-jul (D-315 mechanic).
   presupuesto: {
     tituloPendiente: 'You have an estimate to approve',
     recibido: 'Received on {{fecha}}',

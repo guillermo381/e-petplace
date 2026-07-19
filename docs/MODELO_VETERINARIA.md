@@ -606,6 +606,16 @@ sesión a sesión, como manda la ruta.
   `declarado_por_prestador` con su voz "registrada por {negocio}" y su
   primer productor (trigger de vacunación). Migraciones `20260718170000`
   (A1) · `20260718173000` (A2) · `20260718174500` (A1bis).
+  **Nota de ejecución S69 (gate founder VERDE en dispositivo, ambas
+  caras — sin tocar letra firmada):** §7 EJECUTADO — el mostrador vivo
+  como recepcionista de la clínica (jornada→detalle→registrar atención→
+  búsqueda de tres llaves→alta fantasma→cobro dato) · §8 EJECUTADO de
+  motor a dos caras (armado y envío del prestador + aprobación/rechazo
+  REALES del titular sobre data viva, tras la cadena de curas A5/A6/A7)
+  + vacunación `cat_vacunas`+«Otra» (A5, D-434 cerrada). Acta completa
+  en el CLAUDE.md (EL NORTE, S69). Pendiente declarado: el reclamo E2E
+  del fantasma no se recorrió en dispositivo (cubierto por asserts A2;
+  gate vivo S70).
 - **v1.1 (S67, 17 Jul 2026):** §17 — V0 marcada CUMPLIDA (migración
   `20260717170000`, juez verde, gate founder en dispositivo) con la
   nota del freno: la prueba reina evolucionó a
