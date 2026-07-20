@@ -98,6 +98,20 @@ export const clienteEn = {
     // S60-A6 — YOUR SERVICES: the per-service position (LOTE S60; the
     // zone title is a PROPOSAL for the founder's thumb)
     serviciosTitulo: 'Your services',
+    // S71-A3 — mirror of es.ts (Espejo enforces parity).
+    ponteAlDia: 'Catch up',
+    verYDecidir: 'Review and decide',
+    verlo: 'See it',
+    verLaCita: 'See the visit',
+    venceEnMin: 'Expires in {{n}} min',
+    presupuestoDe: 'Estimate from {{negocio}}',
+    presupuestoPara: 'Estimate for {{mascota}}',
+    presupuestoDetalle: '${{total}} for {{mascota}} · expires {{fecha}}',
+    porCoordinarTitulo: "{{mascota}}'s visit is waiting for a date",
+    railPaseos: 'Walks',
+    railEstetica: 'Grooming',
+    railSaldoUna: '1 walk left',
+    railSaldo: '{{n}} walks left',
     // S61-A11 — Kary's Home (LOTE S61, GATE PENDIENTE founder)
     vidaTitulo: "Your home's life",
     filtroQuien: 'Whose?',

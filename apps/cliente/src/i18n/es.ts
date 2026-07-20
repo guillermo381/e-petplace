@@ -103,6 +103,21 @@ export const clienteEs = {
     // S60-A6 — TUS SERVICIOS: la posición por servicio (LOTE S60; el
     // título de la zona es PROPUESTA al pulgar del founder)
     serviciosTitulo: 'Tus servicios',
+    // S71-A3 — PONTE AL DÍA (F2, letra founder) + el rail de servicios (F1).
+    // LOTE PENDIENTE DE GATE FOUNDER. Tuteo neutro.
+    ponteAlDia: 'Ponte al día',
+    verYDecidir: 'Ver y decidir',
+    verlo: 'Verlo',
+    verLaCita: 'Ver la cita',
+    venceEnMin: 'Vence en {{n}} min',
+    presupuestoDe: 'Presupuesto de {{negocio}}',
+    presupuestoPara: 'Presupuesto para {{mascota}}',
+    presupuestoDetalle: '${{total}} por {{mascota}} · vence el {{fecha}}',
+    porCoordinarTitulo: 'La cita de {{mascota}} espera fecha',
+    railPaseos: 'Paseos',
+    railEstetica: 'Estética',
+    railSaldoUna: '1 salida',
+    railSaldo: '{{n}} salidas',
     // S61-A11 — el Hogar de Kary (LOTE S61, GATE PENDIENTE founder)
     vidaTitulo: 'La vida del hogar',
     filtroQuien: '¿De quién?',
