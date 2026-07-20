@@ -173,7 +173,37 @@ export function ToggleTecho<C extends string>({
   );
 }
 
-export function TechoOficio({ titulo, dato, pie }: { titulo: string; dato: string; pie?: ReactNode }) {
+/**
+ * S71-B1 — LA LÍNEA DE LA JORNADA (`jornada`, enmienda ADITIVA).
+ *
+ * El techo dejó de rotular para ORIENTAR: `titulo` es la persona,
+ * `dato` el negocio, y `jornada` la forma del día — el dato que cuenta
+ * hacia atrás ("Te quedan 2 · terminas 18:30" → "Jornada completa.").
+ * Ausente ⇒ el techo se comporta EXACTAMENTE como antes: `negocio.tsx`
+ * no se toca.
+ *
+ * E8 de la vara cruzada — RÉGIMEN DEL TECHO, declarado: la línea va
+ * ENTERA en DM Sans (`md` medium, papel PLENO). La hora inline NO va en
+ * mono: `18:30` dentro de una frase humana es prosa, no metadata de
+ * fila, y partir la fuente a mitad de oración viola Ley 17.6. Por la
+ * misma frontera, `Texto` (S71-A1) NO aplica acá: sin prop `style` no
+ * puede dar papel pleno sobre el muro — `theme.text.*` resuelve a la
+ * escala del tema, no a la del muro.
+ *
+ * E5 — `numberOfLines={1}` en persona Y negocio: `nombre_comercial` es
+ * texto libre y largo ("Clínica Veterinaria Aurora del Valle Sur").
+ */
+export function TechoOficio({
+  titulo,
+  dato,
+  jornada,
+  pie,
+}: {
+  titulo: string;
+  dato: string;
+  jornada?: string;
+  pie?: ReactNode;
+}) {
   const insets = useSafeAreaInsets();
   const muro = useMuroOficio();
   useBarraEstadoClara();
@@ -198,6 +228,7 @@ export function TechoOficio({ titulo, dato, pie }: { titulo: string; dato: strin
         <View style={{ flex: 1, gap: 2 }}>
           <Text
             accessibilityRole="header"
+            numberOfLines={1}
             style={{
               fontFamily: typography.family.sans.medium,
               fontSize: typography.size.xl,
@@ -208,6 +239,7 @@ export function TechoOficio({ titulo, dato, pie }: { titulo: string; dato: strin
           </Text>
           {/* papel PLENO (regla S61): sobre el muro la opacidad muere */}
           <Text
+            numberOfLines={1}
             style={{
               fontFamily: typography.family.sans.regular,
               fontSize: typography.size.sm,
@@ -218,6 +250,18 @@ export function TechoOficio({ titulo, dato, pie }: { titulo: string; dato: strin
           </Text>
         </View>
       </View>
+      {/* La forma del día — su propio aire, papel pleno, DM Sans entera. */}
+      {jornada !== undefined && (
+        <Text
+          style={{
+            fontFamily: typography.family.sans.medium,
+            fontSize: typography.size.md,
+            color: palette.light0,
+          }}
+        >
+          {jornada}
+        </Text>
+      )}
       {pie}
     </View>
   );

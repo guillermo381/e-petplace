@@ -63,7 +63,22 @@ export const prestadorEs = {
   agenda: {
     // S60-C2.2: la jornada ya no es solo paseos (grooming vivo) — la
     // voz genérica de la jornada, propuesta al gate · LOTE S60
-    saludo: 'Tu jornada de hoy',
+    // S71-B1 — EL TECHO DE LA JORNADA. `saludo` ('Tu jornada de hoy')
+    // MURIÓ con el literal genérico del hallazgo 2 (Ley 37). Voz: TUTEO
+    // NEUTRO — 'terminas', jamás 'terminás' (el voseo es el desvío).
+    saludoNombre: 'Hola, {{nombre}}',
+    saludoSinNombre: 'Hola',
+    datoQuedan: 'Te quedan {{n}} · terminas {{hora}}',
+    datoQueda1: 'Te queda 1 · terminas {{hora}}',
+    datoQuedanSinHora: 'Te quedan {{n}}',
+    datoQueda1SinHora: 'Te queda 1',
+    datoCompleta: 'Jornada completa.',
+    datoPorCoordinar: 'Día atendido · {{n}} por coordinar',
+    datoLibreConSemana: 'Hoy libre · {{n}} esta semana',
+    datoSemana: '{{n}} citas esta semana',
+    // El pie de revelar (candidato a diccionario 19.6): el número EN la
+    // etiqueta — jamás un 'Ver más' mudo. Compartida por las dos secciones.
+    verLasN: 'Ver las {{n}}',
     vacio: 'Hoy no tienes citas',
     vacioDetalle: 'Cuando una familia agende contigo, va a aparecer acá.',
     reintentar: 'Reintentar',
@@ -93,9 +108,7 @@ export const prestadorEs = {
     porCoordinarTitulo: 'Por coordinar',
     porCoordinarCta: 'Fijar fecha',
     porCoordinarLibre: 'Procedimiento',
-    porCoordinarVerTodas: 'Ver todas ({{n}})',
     yaAtendidas: 'Ya atendidas ({{n}})',
-    acordeonVer: 'Ver',
     acordeonOcultar: 'Ocultar',
     // la semana (D-317, S57-B1) · LOTE S57, GATE PENDIENTE
     vistaEtiqueta: 'Agenda',

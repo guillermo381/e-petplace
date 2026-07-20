@@ -27,6 +27,7 @@
 
 import { useCallback, useState } from 'react';
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   AvatarMascota,
@@ -56,6 +57,7 @@ import {
   obtenerCitasPorCoordinar,
   obtenerMascotasAtendidas,
   obtenerMiCuentaComercial,
+  obtenerMiPerfil,
   obtenerMiPrestador,
   obtenerMundoVeterinariaPropio,
   obtenerOfertaAdiestramientoPropia,
@@ -98,6 +100,11 @@ type Pantalla =
       /** S70-B2-v2: la bandeja "Por coordinar" — citas de presupuesto
        *  aprobado sin fecha (D-439). Vacía para negocios no-vet. */
       porCoordinar: CitaPorCoordinar[];
+      /** S71-B1: la persona y el negocio del techo. `nombre` es null
+       *  honesto si el perfil no lo trae — el saludo va SOLO, jamás
+       *  inventado (E5). */
+      nombre: string | null;
+      nombreComercial: string;
     };
 
 /** El oficio de una fila — decide ruta, ícono y filtro. */
@@ -135,6 +142,96 @@ function diaBloqueado(iso: string, bloqueos: BloqueoPrestador[]): boolean {
 function estadoEfectivo(cita: CitaAgendaPaseo): string | null {
   return cita.atencion?.estado ?? cita.estado;
 }
+
+// ═══════════ S71-B1 — LA FORMA DEL DÍA (la firma del techo) ═══════════
+// El dato que CUENTA HACIA ATRÁS: se descuenta solo a medida que la
+// jornada avanza. Firma de COMPORTAMIENTO (Ley 15, lado prestador):
+// cero acento nuevo, cero componente nuevo, cero color.
+//
+// Se computa de `citasHoySin` — el día SIN filtrar (guard estructural
+// S61-B12): el filtro por oficio JAMÁS miente el conteo del techo.
+//
+// Descriptor puro → la pantalla lo traduce. Así los 10 estados se leen
+// de un vistazo y el copy vive entero en el riel i18n.
+type FormaDelDia =
+  | { clave: 'omitida' }
+  | { clave: 'quedan'; n: number; hora: string }
+  | { clave: 'queda1'; hora: string }
+  | { clave: 'quedanSinHora'; n: number }
+  | { clave: 'queda1SinHora' }
+  | { clave: 'completa' }
+  | { clave: 'porCoordinar'; n: number }
+  | { clave: 'libreConSemana'; n: number }
+  | { clave: 'semana'; n: number };
+
+/**
+ * La hora de cierre — E1/E2/E3 de la vara cruzada.
+ *
+ * E1: sale de la última cita PENDIENTE (jamás la última del día: el
+ *     prestador que termina 16:00 no puede leer "terminas 18:30" — L-139),
+ *     por MÁXIMO EXPLÍCITO sobre `hora` (jamás `.at(-1)`: el orden de la
+ *     lista no está garantizado por contrato). Las citas con `hora` null
+ *     se excluyen de ESTE cómputo (siguen contando en la cantidad).
+ * E3: la duración es LA DE ESA última pendiente — si esa no la trae, se
+ *     omite la hora aunque las demás sí la tengan (no all-or-nothing).
+ * E2: si hora+duración cruza las 24:00, se omite — jamás una hora que miente.
+ */
+function horaDeCierre(pendientes: CitaAgendaPaseo[]): string | null {
+  const conHora = pendientes.filter((c) => c.hora !== null && c.hora !== '');
+  if (conHora.length === 0) return null;
+  const ultima = conHora.reduce((a, b) => ((b.hora ?? '') > (a.hora ?? '') ? b : a));
+  const dur = ultima.duracion_minutos;
+  if (!dur) return null;
+  const [h, m] = ultima.hora!.slice(0, 5).split(':').map(Number);
+  const total = (h ?? 0) * 60 + (m ?? 0) + dur;
+  if (total >= 24 * 60) return null;
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+}
+
+function formaDelDia(args: {
+  vista: 'hoy' | 'semana';
+  /** El día SIN filtrar (guard S61-B12). */
+  citasHoySin: CitaAgendaPaseo[];
+  /** Todo el rango hoy..hoy+6, sin filtrar. */
+  citasRango: CitaAgendaPaseo[];
+  esAtendida: (c: CitaAgendaPaseo) => boolean;
+  /** D-439 — ya en memoria; "Jornada completa." lo exige en cero (E4). */
+  porCoordinar: number;
+}): FormaDelDia {
+  const { vista, citasHoySin, citasRango, esAtendida, porCoordinar } = args;
+
+  // La vista manda: un techo que dice "Te quedan 2" mientras mirás los
+  // 7 días sería mentira de contexto.
+  if (vista === 'semana') {
+    return citasRango.length > 0 ? { clave: 'semana', n: citasRango.length } : { clave: 'omitida' };
+  }
+
+  // E6(b), declarado: `en_curso` NO está en `esAtendida` — la cita que
+  // corre SUMA a "Te quedan". No terminó.
+  const pendientes = citasHoySin.filter((c) => !esAtendida(c));
+
+  if (pendientes.length > 0) {
+    const hora = horaDeCierre(pendientes);
+    if (hora === null) {
+      return pendientes.length === 1 ? { clave: 'queda1SinHora' } : { clave: 'quedanSinHora', n: pendientes.length };
+    }
+    return pendientes.length === 1 ? { clave: 'queda1', hora } : { clave: 'quedan', n: pendientes.length, hora };
+  }
+
+  // Sin pendientes, pero HUBO jornada: el día se cerró.
+  if (citasHoySin.length > 0) {
+    // E4: "Jornada completa." solo si NO queda nada por coordinar.
+    return porCoordinar > 0 ? { clave: 'porCoordinar', n: porCoordinar } : { clave: 'completa' };
+  }
+
+  // Día sin citas: vacío ≠ negocio muerto (§15b) — si la semana tiene, se dice.
+  const semana = citasRango.length;
+  if (semana > 0) return { clave: 'libreConSemana', n: semana };
+
+  // 0 en todo el rango → la línea se omite. JAMÁS "0 citas" (métrica en cero).
+  return { clave: 'omitida' };
+}
+// ═══════════════════════════════════════════════════════════════════════
 
 function esEspecie(v: string | null): v is AvatarMascotaEspecie {
   return v !== null;
@@ -365,6 +462,7 @@ export default function Hoy() {
   const router = useRouter();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
+  const insets = useSafeAreaInsets();
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [refrescando, setRefrescando] = useState(false);
   // D-317: el segmento Hoy/Semana. 'semana' = los próximos 7 días.
@@ -404,7 +502,7 @@ export default function Hoy() {
     // UN fetch cubre las dos vistas (S57-B1): rango hoy..hoy+6 — la vista
     // Hoy filtra por `desde`; la Semana agrupa el rango entero.
     const desde = hoyLocal();
-    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, cuentaR] = await Promise.all([
+    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, cuentaR, perfilR] = await Promise.all([
       obtenerCitasPaseoDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: sumarDias(desde, 6) }),
       // S60-B1: la jornada es UNA — las citas de grooming entran a la
       // misma lista con su tipo (el subtítulo ya lo dice) y su ruta.
@@ -428,6 +526,11 @@ export default function Hoy() {
       obtenerMundoVeterinariaPropio(prestador.data.id),
       // S70-B2-v2: la cuenta — para la bandeja "Por coordinar" (D-439).
       obtenerMiCuentaComercial(),
+      // S71-B1: la persona del techo. ÚNICA query nueva del piloto — y
+      // es un wrapper existente. Su error NO rompe la jornada: el saludo
+      // degrada a ir solo (el techo orienta, no bloquea — Ley 13 aplica
+      // al CUERPO, que tiene su propio camino de error).
+      obtenerMiPerfil(),
     ]);
     if (!r.ok) {
       setPantalla({ estado: 'error', mensaje: r.mensaje });
@@ -477,6 +580,8 @@ export default function Hoy() {
       desde,
       citas,
       porCoordinar,
+      nombre: perfilR.ok ? perfilR.data.nombre : null,
+      nombreComercial: prestador.data.nombre_comercial,
       groomingIds: new Set(rg.data.map((c) => c.id)),
       adiestramientoIds: new Set(ra.data.map((c) => c.id)),
       vetIds: new Set(rv.data.map((c) => c.id)),
@@ -585,6 +690,42 @@ export default function Hoy() {
   // S70-B2-v2: la bandeja "Por coordinar" (D-439) del negocio (vista Hoy).
   const porCoordinar = pantalla.estado === 'listo' ? pantalla.porCoordinar : [];
 
+  // ── S71-B1: LA FORMA DEL DÍA — la firma del techo ──
+  // Se computa del día SIN filtrar; la línea se OMITE mientras no hay
+  // verdad (cargando/error): el techo no espera con esqueleto, aparece
+  // cuando tiene algo cierto que decir.
+  const forma: FormaDelDia =
+    pantalla.estado === 'listo'
+      ? formaDelDia({ vista, citasHoySin, citasRango: citas, esAtendida, porCoordinar: porCoordinar.length })
+      : { clave: 'omitida' };
+
+  const textoJornada: string | undefined =
+    forma.clave === 'omitida'
+      ? undefined
+      : forma.clave === 'quedan'
+        ? t('agenda.datoQuedan', { n: forma.n, hora: forma.hora })
+        : forma.clave === 'queda1'
+          ? t('agenda.datoQueda1', { hora: forma.hora })
+          : forma.clave === 'quedanSinHora'
+            ? t('agenda.datoQuedanSinHora', { n: forma.n })
+            : forma.clave === 'queda1SinHora'
+              ? t('agenda.datoQueda1SinHora')
+              : forma.clave === 'completa'
+                ? t('agenda.datoCompleta')
+                : forma.clave === 'porCoordinar'
+                  ? t('agenda.datoPorCoordinar', { n: forma.n })
+                  : forma.clave === 'libreConSemana'
+                    ? t('agenda.datoLibreConSemana', { n: forma.n })
+                    : t('agenda.datoSemana', { n: forma.n });
+
+  // E5 — la mecánica del Hogar del cliente, VERBATIM: primer nombre; sin
+  // nombre, el saludo va SOLO (jamás inventado).
+  const nombrePerfil = pantalla.estado === 'listo' ? pantalla.nombre : null;
+  const saludo = nombrePerfil
+    ? t('agenda.saludoNombre', { nombre: nombrePerfil.trim().split(' ')[0] })
+    : t('agenda.saludoSinNombre');
+  const negocio = pantalla.estado === 'listo' ? pantalla.nombreComercial : '';
+
   // ── La semana: 7 días desde hoy — citas firmes por día + estado del
   // día (bloqueado por vacaciones / libre). Cero métricas, solo verdad.
   const dias =
@@ -606,15 +747,28 @@ export default function Hoy() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: spacing[10] }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}
         refreshControl={<RefreshControl refreshing={refrescando} onRefresh={() => void refrescar()} />}
       >
         {/* §15b.2 S61 (re-firma B11/B12): EL TECHO DEL OFICIO — muro
             tealDark, texto papel pleno, y el toggle Hoy/Semana COMPACTO
-            integrado (el segmentado gemelo apilado MURIÓ). */}
+            integrado (el segmentado gemelo apilado MURIÓ).
+
+            S71-B1 — EL TECHO ORIENTA LA JORNADA (hallazgo 2 del gate
+            founder S70: el rótulo genérico "Tu jornada de hoy" reprobaba
+            el test anti-genérico de Ley 15). Ahora: la persona · el
+            negocio · la forma del día. El COLOR no se toca (§15b.2 v1.9
+            re-firmada sobre píxeles) — el desvío era composición y copy.
+
+            CHANEL (Ley 16): MURIÓ la fecha del techo. El sistema
+            operativo ya la muestra, y ocupaba el único renglón de dato
+            con algo que no ayuda a trabajar; su lugar lo toma la forma
+            del día. La vista Semana rotula cada día por su nombre — no
+            se pierde orientación en ningún lado. */}
         <TechoOficio
-          titulo={t('agenda.saludo')}
-          dato={fechaDiaSemanaHumana(hoyLocal(), idioma as IdiomaSoportado)}
+          titulo={saludo}
+          dato={negocio}
+          jornada={textoJornada}
           pie={
             pantalla.estado === 'listo' ? (
               <ToggleTecho
@@ -849,10 +1003,14 @@ export default function Hoy() {
                 );
               })}
             </Tarjeta>
+            {/* S71-B1 (E7) — el PIE de revelar: `Boton compacto` con el
+                NÚMERO en la etiqueta. Mismo control que "Ya atendidas":
+                un solo gesto, una sola voz, dos secciones que se leen
+                igual (el ghost mudo murió). Candidato a diccionario 19.6. */}
             {porCoordinar.length > 3 && !verTodasCoord && (
               <Boton
-                variante="ghost"
-                etiqueta={t('agenda.porCoordinarVerTodas', { n: porCoordinar.length })}
+                variante="compacto"
+                etiqueta={t('agenda.verLasN', { n: porCoordinar.length })}
                 onPress={() => setVerTodasCoord(true)}
               />
             )}
@@ -863,17 +1021,17 @@ export default function Hoy() {
             default (acordeón). Lo que sigue vive arriba. ── */}
         {pantalla.estado === 'listo' && vista === 'hoy' && atendidasItems.length > 0 && (
           <View style={{ gap: spacing[2] }}>
-            <Celda
-              interactiva
-              onPress={() => setAtendidasAbierto((v) => !v)}
-              accessibilityRole="button"
-              titulo={t('agenda.yaAtendidas', { n: resto.filter(esAtendida).length })}
-              fin={
-                <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-                  {atendidasAbierto ? t('agenda.acordeonOcultar') : t('agenda.acordeonVer')}
-                </Text>
-              }
-            />
+            {/* S71-B1 (E7) — MURIÓ la Celda-como-encabezado: una celda
+                promete navegar a algún lado, y esto pliega en su lugar.
+                El header pasa a `Text` como en "Por coordinar" y en la
+                Zona 1 (Ley 18: la estructura informa), y el control de
+                revelar baja al PIE, igual que su hermana. */}
+            <Text
+              accessibilityRole="header"
+              style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}
+            >
+              {t('agenda.yaAtendidas', { n: resto.filter(esAtendida).length })}
+            </Text>
             {atendidasAbierto && (
               <Tarjeta elevacion="sm" relleno="ninguno">
                 {atendidasItems.map((item, i) => (
@@ -888,6 +1046,15 @@ export default function Hoy() {
                 ))}
               </Tarjeta>
             )}
+            <Boton
+              variante="compacto"
+              etiqueta={
+                atendidasAbierto
+                  ? t('agenda.acordeonOcultar')
+                  : t('agenda.verLasN', { n: resto.filter(esAtendida).length })
+              }
+              onPress={() => setAtendidasAbierto((v) => !v)}
+            />
           </View>
         )}
 

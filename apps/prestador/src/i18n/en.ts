@@ -56,7 +56,19 @@ export const prestadorEn = {
   },
   agenda: {
     // S60-C2.2 — Espejo de es.ts · LOTE S60
-    saludo: 'Your day today',
+    // S71-B1 — the day header. `saludo` ('Your day today') died with the
+    // generic label of finding 2 (Ley 37).
+    saludoNombre: 'Hi, {{nombre}}',
+    saludoSinNombre: 'Hi',
+    datoQuedan: '{{n}} to go · you finish at {{hora}}',
+    datoQueda1: '1 to go · you finish at {{hora}}',
+    datoQuedanSinHora: '{{n}} to go',
+    datoQueda1SinHora: '1 to go',
+    datoCompleta: 'Day complete.',
+    datoPorCoordinar: 'Day done · {{n}} to schedule',
+    datoLibreConSemana: 'Free today · {{n}} this week',
+    datoSemana: '{{n}} appointments this week',
+    verLasN: 'See all {{n}}',
     vacio: 'No appointments today',
     vacioDetalle: 'When a family books with you, it will show up here.',
     reintentar: 'Try again',
@@ -81,9 +93,7 @@ export const prestadorEn = {
     porCoordinarTitulo: 'To schedule',
     porCoordinarCta: 'Set date',
     porCoordinarLibre: 'Procedure',
-    porCoordinarVerTodas: 'See all ({{n}})',
     yaAtendidas: 'Already seen ({{n}})',
-    acordeonVer: 'Show',
     acordeonOcultar: 'Hide',
     // la semana (D-317, S57-B1) · LOTE S57, GATE PENDIENTE · Espejo de es.ts
     vistaEtiqueta: 'Agenda',
