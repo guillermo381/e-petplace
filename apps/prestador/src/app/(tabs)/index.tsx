@@ -28,6 +28,7 @@
 import { useCallback, useState } from 'react';
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Path } from 'react-native-svg';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   AvatarMascota,
@@ -977,26 +978,51 @@ export default function Hoy() {
                 return (
                 <View key={pc.citaId}>
                   {i > 0 && <Separador />}
+                  {/* S71 (ley founder del gate): el contorno MUERE como
+                      acción de fila — "Fijar fecha" NAVEGA, así que baja a
+                      label + chevron y la FILA ENTERA tapea (la vara:
+                      cita/[citaId] con CeldaNavegacion). El chevron es el
+                      canónico de la casa (path de CeldaNavegacion; ya
+                      copiado en cliente/adiestramiento:92 — la primitiva
+                      exportada queda como nota a la mesa). */}
                   <Celda
+                    interactiva
+                    accessibilityRole="button"
+                    onPress={() =>
+                      router.push({
+                        pathname: '/veterinaria/coordinar/[citaId]',
+                        params: {
+                          citaId: pc.citaId,
+                          mascotaNombre: pc.mascotaNombre,
+                          servicioNombre: pc.servicioNombre ?? '',
+                          total: String(pc.totalCongelado),
+                        },
+                      })
+                    }
                     titulo={pc.mascotaNombre}
                     subtitulo={etiqueta}
                     metadataMono={`$${pc.totalCongelado.toFixed(2)}`}
                     fin={
-                      <Boton
-                        variante="compacto"
-                        etiqueta={t('agenda.porCoordinarCta')}
-                        onPress={() =>
-                          router.push({
-                            pathname: '/veterinaria/coordinar/[citaId]',
-                            params: {
-                              citaId: pc.citaId,
-                              mascotaNombre: pc.mascotaNombre,
-                              servicioNombre: pc.servicioNombre ?? '',
-                              total: String(pc.totalCongelado),
-                            },
-                          })
-                        }
-                      />
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1] }}>
+                        <Text
+                          style={{
+                            fontFamily: typography.family.sans.medium,
+                            fontSize: typography.size.sm,
+                            color: theme.text.secondary,
+                          }}
+                        >
+                          {t('agenda.porCoordinarCta')}
+                        </Text>
+                        <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" aria-hidden>
+                          <Path
+                            d="M9 18l6-6-6-6"
+                            stroke={theme.text.tertiary}
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </Svg>
+                      </View>
                     }
                   />
                 </View>
