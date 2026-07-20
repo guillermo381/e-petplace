@@ -223,6 +223,26 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
        el dato que manda): tarjeta con jerarquía propia — jamás la misma
        celda que todo lo demás, más ancha porque "tiene más texto". El
        ancho no es jerarquía; la jerarquía se diseña.
+    6. **Revelar el resto de una sección** (lo truncado por techo visual,
+       lo plegado por default): **control al PIE de la sección, `Boton`
+       variante `compacto`, con el NÚMERO en la etiqueta** — "Ver las 5",
+       jamás un "Ver más" mudo. El número es lo que deja decidir si vale
+       el toque. **No aplica** a paginación (cargar la tanda siguiente de
+       una lista larga) ni a abrir un compuesto en sus partes (una salida
+       grupal ES una unidad: expandirla es entrar a sus miembros, otro
+       trabajo — `FilaSalida` se queda como está).
+       > FIRMADA en el gate founder S71 (piloto B1). Origen: la jornada
+       > del prestador tenía **tres** soluciones para el mismo trabajo —
+       > un `Boton ghost` "Ver todas (n)", una `Celda` con texto
+       > "Ver"/"Ocultar" haciendo de encabezado, y el tap de `FilaSalida`.
+       > Las dos primeras eran el MISMO trabajo con distinto estado
+       > inicial y ahora comparten control; la tercera era otro trabajo y
+       > quedó declarada. La Celda-como-encabezado murió: una celda
+       > promete NAVEGAR (19.1), y plegar no es navegar.
+       > **El wrapper `PieRevelar` NO existe todavía** — dos llamadas no
+       > son un componente. Nace en `packages/ui` con el TERCER consumidor
+       > real (D-454, disparo declarado); hasta entonces se escribe
+       > directo, jamás como helper local copiado.
 
     Si un trabajo de interacción no está en el diccionario, se propone
     su patrón, se gatea y ENTRA al diccionario (patrón Ley 11) — jamás
