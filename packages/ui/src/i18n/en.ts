@@ -96,6 +96,11 @@ export const uiEn = {
     estado: 'Live',
     estadoMemorial: 'In progress',
   },
+  // S71-A3 — PieRevelar (component 60) — mirror of es.ts.
+  pieRevelar: {
+    ver: 'See {{n}} more',
+    ocultar: 'Hide',
+  },
   // S63 — program STATE voice (Ley 3, founder-signed): the motor word
   // 'vencido' never reaches UI — "Ended" states the fact, no reproach.
   programaEstado: {

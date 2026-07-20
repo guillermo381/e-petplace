@@ -40,6 +40,7 @@ import { StepperCantidad } from '../components/StepperCantidad'
 import { CeldaNavegacion } from '../components/CeldaNavegacion'
 import { Texto } from '../components/Texto'
 import { FilaDato } from '../components/FilaDato'
+import { PieRevelar } from '../components/PieRevelar'
 import { HeroMarca } from '../components/HeroMarca'
 import { LineaDeVida, type LineaDeVidaItem } from '../components/LineaDeVida'
 import { VisorFoto } from '../components/VisorFoto'
@@ -83,6 +84,31 @@ function Swatch({ name, hex, border }: { name: string; hex: string; border?: boo
       <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.secondary }}>
         {hex.toLowerCase()}
       </Text>
+    </View>
+  )
+}
+
+// S71-A3: muestra viva de PieRevelar — 3 ítems visibles, 2 plegados; el
+// toggle revela y vuelve a plegar (el mismo control, el mismo lugar).
+function MuestraPieRevelar() {
+  const [revelado, setRevelado] = useState(false)
+  const items = ['Thor · gastroenteritis', 'Zeus · profilaxis', 'Kary · control', 'Luna · vacuna', 'Rocco · herida']
+  const visibles = revelado ? items : items.slice(0, 3)
+  return (
+    <View style={{ gap: spacing[3] }}>
+      <Tarjeta elevacion="reposo" relleno="ninguno">
+        {visibles.map((it, i) => (
+          <View key={it}>
+            {i > 0 ? <Separador /> : null}
+            <Celda titulo={it} />
+          </View>
+        ))}
+      </Tarjeta>
+      <PieRevelar n={items.length - 3} revelado={revelado} onPress={() => setRevelado((v) => !v)} />
+      <Texto variante="apoyo">
+        La etiqueta dice el número — jamás un "Ver más" mudo. Con n=0 y sin revelar, no se dibuja.
+        No es paginación (eso es el pie de LineaDeVida): solo muestra lo que ya está en memoria.
+      </Texto>
     </View>
   )
 }
@@ -1091,6 +1117,10 @@ function GaleriaInterna() {
             nada, es FilaDato. Un valor ausente NO se dibuja vacío — la pantalla omite la fila o pasa
             su voz honesta (Ley 13).
           </Texto>
+        </Seccion>
+
+        <Seccion titulo="PieRevelar (60) — revelar el resto de una sección (19.6)">
+          <MuestraPieRevelar />
         </Seccion>
 
         {/* Tipografía */}

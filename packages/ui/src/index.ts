@@ -45,6 +45,7 @@ export { CeldaNavegacion, type CeldaNavegacionProps } from './components/CeldaNa
 export { Separador } from './components/Separador'
 export { Texto, type TextoProps, type TextoVariante, type TextoColor } from './components/Texto'
 export { FilaDato, type FilaDatoProps } from './components/FilaDato'
+export { PieRevelar, type PieRevelarProps } from './components/PieRevelar'
 export {
   Insignia,
   type InsigniaProps,

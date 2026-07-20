@@ -110,6 +110,13 @@ export const uiEs = {
     estado: 'En vivo',
     estadoMemorial: 'En curso',
   },
+  // S71-A3 — PieRevelar (componente 60, entrada 19.6). Forma NEUTRA a
+  // propósito: "Ver las 5 / Ver los 4" obligaría a un género por
+  // consumidor. LOTE PENDIENTE DE GATE FOUNDER.
+  pieRevelar: {
+    ver: 'Ver {{n}} más',
+    ocultar: 'Ocultar',
+  },
   // S63 — la voz del ESTADO DEL PROGRAMA (Ley 3, FIRMADA por el
   // founder): "vencido" JAMÁS llega a UI — la familia no lee su
   // programa como falla ni deuda; "Finalizó" dice el hecho sin
