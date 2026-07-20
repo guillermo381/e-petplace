@@ -130,7 +130,7 @@ export async function obtenerMisCitasPaseo(): Promise<
     supabase.from('tipos_servicio').select('codigo').eq('categoria', 'paseo'),
     supabase
       .from('evento_cita_servicio')
-      .select('id, fecha, hora, estado, duracion_minutos, precio, prestador_id, mascota_id, tipo_servicio, bono_id, estado_reserva')
+      .select('id, fecha, hora, estado, duracion_minutos, precio, prestador_id, mascota_id, tipo_servicio, bono_id, estado_reserva, presupuesto_id')
       .is('suscripcion_servicio_id', null)
       .in('estado', ['confirmada', 'en_curso', 'completada', 'cancelada', 'no_show'])
       .order('fecha', { ascending: true })
@@ -141,12 +141,29 @@ export async function obtenerMisCitasPaseo(): Promise<
 
   const citas: CitaPaseoDueno[] = [];
   for (const fila of data ?? []) {
-    if (fila.tipo_servicio !== null && !codigosPaseo.has(fila.tipo_servicio)) continue;
+    // S72-A (fuga inversa L-157): `tipo_servicio` NULL ya NO significa solo
+    // "legacy pre-tipo" — desde D-439 una cita de presupuesto todo-libre es
+    // legal SIN tipo, y ES VETERINARIA (el presupuesto es primitiva vet, §8).
+    // El comentario histórico ("tipo NULL nunca es grooming") quedó falso:
+    // una todo-libre de presupuesto se colaba en "Mis paseos". Discriminación:
+    //   tipo en catálogo paseo        → paseo real, entra
+    //   tipo NULL + presupuesto NULL  → legacy pre-tipo, entra (comportamiento vigente)
+    //   tipo NULL + presupuesto NOT   → procedimiento vet todo-libre, FUERA
+    //   tipo fuera del catálogo paseo → otro oficio, FUERA
+    if (fila.tipo_servicio === null) {
+      if (fila.presupuesto_id !== null) continue;
+    } else if (!codigosPaseo.has(fila.tipo_servicio)) {
+      continue;
+    }
     if (typeof fila.id !== 'string' || typeof fila.estado !== 'string') {
       return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJES_ERROR_SUELTO.datos_inconsistentes };
     }
     // Solo el ciclo de pago vivo: los holds nunca pagados no son "paseos".
     if (fila.estado_reserva !== 'pagada' && fila.estado_reserva !== 'cancelada') continue;
+    // Un paseo pagado tiene fecha firme; una fila sin fecha acá es data rota,
+    // no un "paseo" — se descarta antes de que String(null) escupa "null"
+    // literal a la UI (S72-A). No hay cita de paseo legal SIN fecha.
+    if (fila.fecha === null) continue;
     citas.push({
       id: fila.id,
       fecha: String(fila.fecha),

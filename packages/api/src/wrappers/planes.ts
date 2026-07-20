@@ -247,7 +247,9 @@ export async function obtenerCitasDePlan(
   if (error) return mapeoErrorAResultado(error.message);
   return {
     ok: true,
-    data: (data ?? []).map((c) => ({
+    // S72-A: una cita de plan tiene fecha firme; una fila sin fecha es data
+    // rota — fuera antes de que String(null) escupa "null" literal a la UI.
+    data: (data ?? []).filter((c) => c.fecha !== null).map((c) => ({
       id: String(c.id),
       fecha: String(c.fecha),
       hora: String(c.hora),

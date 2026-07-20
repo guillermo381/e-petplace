@@ -375,7 +375,10 @@ export async function obtenerMisGroomings(): Promise<
       nombrePorCodigo.has(c.tipo_servicio) &&
       // verdad firme del hub: solo el ciclo de pago vivo (el hold nunca
       // pagado no es una sesión)
-      c.estado_reserva === 'pagada',
+      c.estado_reserva === 'pagada' &&
+      // S72-A: una sesión de grooming pagada tiene fecha firme; una fila
+      // sin fecha es data rota, no una sesión — fuera antes de String(null).
+      c.fecha !== null,
   );
   if (filas.length === 0) return { ok: true, data: [] };
 

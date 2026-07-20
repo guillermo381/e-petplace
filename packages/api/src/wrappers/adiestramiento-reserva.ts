@@ -387,7 +387,10 @@ export async function obtenerMisAdiestramientos(): Promise<
       c.tipo_servicio !== null &&
       codigos.has(c.tipo_servicio) &&
       // verdad firme del hub: solo el ciclo de pago vivo
-      c.estado_reserva === 'pagada',
+      c.estado_reserva === 'pagada' &&
+      // S72-A: una sesión de adiestramiento pagada tiene fecha firme; una
+      // fila sin fecha es data rota — fuera antes de String(null).
+      c.fecha !== null,
   );
   if (filas.length === 0) return { ok: true, data: [] };
 
