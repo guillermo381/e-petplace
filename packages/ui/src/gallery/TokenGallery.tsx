@@ -38,6 +38,8 @@ import { VozComision } from '../components/VozComision'
 import { Interruptor } from '../components/Interruptor'
 import { StepperCantidad } from '../components/StepperCantidad'
 import { CeldaNavegacion } from '../components/CeldaNavegacion'
+import { Texto } from '../components/Texto'
+import { FilaDato } from '../components/FilaDato'
 import { HeroMarca } from '../components/HeroMarca'
 import { LineaDeVida, type LineaDeVidaItem } from '../components/LineaDeVida'
 import { VisorFoto } from '../components/VisorFoto'
@@ -1027,6 +1029,68 @@ function GaleriaInterna() {
             <Swatch name="sage" hex={palette.sage} />
             <Swatch name="rose" hex={palette.rose} />
           </Fila>
+        </Seccion>
+
+        {/* Texto + FilaDato (S71-A2, componentes 58 y 59) */}
+        <Seccion titulo="Texto (58) — las 5 variantes de la regla de voz">
+          <View style={{ gap: spacing[4] }}>
+            <View style={{ gap: spacing[1] }}>
+              <Texto variante="titulo">Zeus</Texto>
+              <Texto variante="apoyo">titulo — DM Sans 300 · lo humano a escala de voz</Texto>
+            </View>
+            <View style={{ gap: spacing[1] }}>
+              <Texto variante="seccion">Fórmula</Texto>
+              <Texto variante="apoyo">
+                seccion — DM Sans 500 · rótulo de bloque; trae accessibilityRole="header" de fábrica
+              </Texto>
+            </View>
+            <View style={{ gap: spacing[1] }}>
+              <Texto variante="cuerpo">Enzimax, 1 tableta cada 12 horas.</Texto>
+              <Texto variante="apoyo">cuerpo — DM Sans 400 · la prosa por default</Texto>
+            </View>
+            <View style={{ gap: spacing[1] }}>
+              <Texto variante="apoyo">
+                Dáselo con comida. Esta línea es larga a propósito: así se ve el lineHeight que la
+                variante adoptó de las cuatro VozSecundaria (enmienda 2 del congelamiento).
+              </Texto>
+              <Texto variante="apoyo">apoyo — DM Sans 400 · secundario, con interlineado de prosa</Texto>
+            </View>
+            <View style={{ gap: spacing[1] }}>
+              <Texto variante="dato">19 jul 2026 · 18:30</Texto>
+              <Texto variante="apoyo">dato — JetBrains Mono · tabular-nums, los dígitos no bailan</Texto>
+            </View>
+            {/* El color es semántico y se puede forzar; la variante trae el suyo. */}
+            <View style={{ gap: spacing[1] }}>
+              <Texto variante="cuerpo" color="tertiary">
+                Mismo cuerpo, color terciario
+              </Texto>
+              <Texto variante="apoyo">color — primary · secondary · tertiary (los 3 temas salen gratis)</Texto>
+            </View>
+          </View>
+        </Seccion>
+
+        <Seccion titulo="FilaDato (59) — etiqueta sobre valor, sin interacción">
+          <Tarjeta elevacion="reposo">
+            <View style={{ gap: spacing[4] }}>
+              <FilaDato etiqueta="Diagnóstico" valor="Gastroenteritis aguda" />
+              <Separador />
+              {/* mono es del VALOR, jamás del rótulo (Ley 3) */}
+              <FilaDato etiqueta="Total del presupuesto" valor="$45,00" mono />
+              <Separador />
+              <FilaDato etiqueta="Fecha de la consulta" valor="19 jul 2026" mono />
+              <Separador />
+              <FilaDato
+                etiqueta="Indicaciones"
+                valor="Dáselo con comida y mantené el agua siempre disponible."
+              />
+            </View>
+          </Tarjeta>
+          <View style={{ height: spacing[3] }} />
+          <Texto variante="apoyo">
+            No es Celda (fila de lista, tapeable) ni Campo (se edita). La prueba: si tocarlo no hace
+            nada, es FilaDato. Un valor ausente NO se dibuja vacío — la pantalla omite la fila o pasa
+            su voz honesta (Ley 13).
+          </Texto>
         </Seccion>
 
         {/* Tipografía */}
