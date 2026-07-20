@@ -388,10 +388,17 @@ export default function CitasDeMascota() {
                     cargando={ocupado}
                     onPress={() => void onAprobar(p.id)}
                   />
+                  {/* S71-A — "Rechazar" no tenía guard: se podía disparar dos
+                      veces, o encima de un "Aprobar" en vuelo. La segunda
+                      llamada rebota con un error que al dueño le suena a
+                      absurdo ("todavía no fue enviado") sobre algo que acaba
+                      de decidir. Ningún CTA de decisión se dispara dos veces
+                      ni encima del otro: mismo `ocupado` que Aprobar. */}
                   <Boton
                     variante="ghost"
                     bloque
                     etiqueta={t('presupuesto.rechazar')}
+                    deshabilitado={ocupado}
                     onPress={() => void onRechazar(p.id)}
                   />
                 </View>
