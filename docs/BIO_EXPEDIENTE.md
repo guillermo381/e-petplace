@@ -121,7 +121,7 @@ Ejemplos (a refinar en futuras sesiones) — **nota histórica, superada por A3*
 
 > **Letra de mesa S72 (20 Jul 2026), founder + arquitecto.** Paga el `Pendiente PE2` (declarado en S12) y reemplaza el eje de `A2`/`AC5` (`tipo_prestador`, muerto en S66) por la ley madre **acto/rol**.
 >
-> **Estado de firma:** A3.1–A3.8 y A3.10 **FIRMADAS por el founder en mesa S72**. **A3.9 (memorial) PENDIENTE DE FIRMA** — voto del arquitecto registrado, no ejecutado.
+> **Estado de firma:** **A3.0–A3.10 FIRMADAS por el founder en mesa S72**, la sección entera. A3.9 (memorial) se firmó en el cierre de la misma sesión sobre el camino (b) del voto del arquitecto.
 
 #### A3.0 — Por qué esta letra existe ahora, y qué corrige
 
@@ -204,7 +204,7 @@ enmienda:
 |---|---|
 | **COMPLETO** | El eje entero, evento por evento, con su procedencia. |
 | **DESTILADO** | El estado vigente y lo que cambió, en resumen — jamás la fila cruda. *"Trabajando reactividad con correa desde mayo"*, no la sesión entera. |
-| **SEGURIDAD** | Solo lo que protege a la mascota y al que la tiene enfrente: alergias, medicación vigente, condiciones que limitan el acto, alertas de manejo. Sin diagnósticos, sin historia. |
+| **SEGURIDAD** | Solo lo que protege a la mascota y al que la tiene enfrente: alergias, medicación vigente, condiciones que limitan el acto, alertas de manejo. Sin diagnósticos, sin historia. **🚧 GATEADO — ver nota abajo.** |
 | **NO** | No se muestra. |
 
 **La matriz (firmada S72):**
@@ -233,6 +233,8 @@ enmienda:
 3. **Cada oficio ve su propio eje COMPLETO** — es lo que él alimenta.
 4. **El eje 8 es del dueño.** Pólizas, documentos legales y constancias no
    son del prestador. La excepción es lo que él mismo generó (`AC6`).
+
+> **🚧 NOTA DE GATE — el nivel SEGURIDAD está FIRMADO COMO DESTINO y GATEADO EN CONSTRUCCIÓN.** Su precondición es **el modelo de alerta de manejo, que hoy NO EXISTE en el schema** (relevamiento S72-B) — ver **D-469**. **Hasta que ese modelo exista, la franja de seguridad NO se construye:** con lo que hay hoy diría *"tiene alergias"* **sin decir cuál**, que es exactamente el verosímil-inútil que prohíbe la Ley 17.6 del design system (*cada elemento hace UN trabajo; ser específico gana siempre a ser ingenioso*) y la ley de la casa contra el dato plausible-vacío (L-139). Una franja de seguridad que no dice **qué** alergia ni **qué** manejo no protege a nadie: da la sensación de haber mirado. **El nivel se firma; la franja espera a D-469.**
 
 #### A3.4 — EL ROL DENTRO DEL NEGOCIO (firmado S72)
 
@@ -318,28 +320,24 @@ porque ninguno tiene a los otros actores adentro.
   ahora, porque **cambia cómo se diseña la pantalla del vet hoy**: el acceso
   es un acto observable, no un permiso silencioso.
 
-#### A3.9 — MEMORIAL 🟠 PENDIENTE DE FIRMA FOUNDER
+#### A3.9 — MEMORIAL (firmada S72)
 
 **El caso:** la mascota murió. ¿El prestador sigue leyendo su expediente, y
-hasta cuándo? Hay letra parcial (`AC6` log inmutable para retención legal;
+hasta cuándo? Había letra parcial (`AC6` log inmutable para retención legal;
 `MODELO_LOYALTY` §7 apaga el motor entero en memorial; `MODELO_PRODUCTO`
-§8.5 *memorial respeta el duelo*), pero **nadie escribió qué ve un
+§8.5 *memorial respeta el duelo*), pero **nadie había escrito qué ve un
 prestador**.
 
-| Camino | Qué implica |
-|---|---|
-| **(a)** El acceso muere con la mascota. | Queda solo el log `AC6`. Corte limpio. |
-| **(b)** El acceso sobrevive una ventana y cae *(la misma caducidad de `cita_automatica`)*. | Ventana clínica y humana, con final. |
-| **(c)** El acceso sobrevive indefinido, degradado. | Acumulación sin propósito. |
+> **FIRMADO POR EL FOUNDER (S72): el acceso SOBREVIVE UNA VENTANA Y CAE** — la misma caducidad de `cita_automatica`.
 
-**VOTO DEL ARQUITECTO: (b), con degradación.** Dos razones: **clínica** — el
-vet que la trató necesita mirar atrás poco después (cierre de caso, informe
-a la familia, su propia responsabilidad profesional); y **humana** — cortar
-de golpe el día de la muerte convierte un duelo en un error de sistema.
-Indefinido, en cambio, es acumulación sin propósito.
+**Los dos porqués de la firma:** **clínico** — el vet que la trató necesita
+mirar atrás poco después (cierre de caso, informe a la familia, su propia
+responsabilidad profesional); y **humano** — cortar de golpe el día de la
+muerte convierte un duelo en un error de sistema. El acceso indefinido
+quedó descartado por lo contrario: es acumulación sin propósito.
 
-**Con dos reglas que van con el voto:**
-1. **En memorial el expediente se lee, no se escribe** (salvo el evento de
+**Las dos reglas que van con la firma:**
+1. **En memorial el expediente se lee, NO se escribe** (salvo el evento de
    fin de vida y lo que la ley obliga).
 2. **Degrada visualmente** — `DIRECCION_ARTE` Ley 8: la huella pasa a tinta,
    jamás color. Y §8.5: **cero push, cero comercial, cero recordatorio.**
@@ -349,8 +347,14 @@ Indefinido, en cambio, es acumulación sin propósito.
 Con esta letra firmada, **P3 puede entrar a M1 (boceto)** con mecanismo
 M1–M5 completo. Y queda dicho lo que el relevamiento S72-B0 destapó: **D-459
 no es un caso aislado** — hay nueve lectores construidos en `packages/api`
-con cero importaciones en el prestador. **El motor clínico se construyó
-entero y su cara quedó a medias**; esta letra es la que dice qué cara.
+con cero importaciones en el prestador.
+
+> **CORRECCIÓN DE PRECISIÓN (S72, error de la mesa enmendado con el relevamiento de B).** La frase *"construidos y desconectados"* era **imprecisa y habría mandado a construir mal**. La verdad relevada, de los nueve:
+> - **CINCO sirven tal cual** — es cablear.
+> - **`leerDetalleAtencion` es CIEGO AL OFICIO VET**: devuelve `oficio: null` y payload vacío para una atención clínica (su shape solo resuelve `'paseo' | 'grooming' | 'adiestramiento'`). No es cablear: es extender el lector.
+> - **`obtenerParteConsulta` está CORRECTAMENTE CERRADO al prestador** y no debe abrirse. Su guard es de familia (`_user_es_familia_de_mascota`) y eso es **diseño, no hueco**: el parte es **voz de familia** (Ley 3 — el dueño jamás ve el código del motor), y el vet **no necesita el parte: necesita el ORIGINAL CLÍNICO**, que es un **lector A CONSTRUIR**, no a cablear. Abrirle el parte al vet sería darle la traducción en lugar de la fuente.
+>
+> **Consecuencia para D-459: es MITAD CABLEAR, MITAD CONSTRUIR** — y la mitad de construir no se ve en el conteo de importaciones, que es precisamente por qué el número solo no alcanza (L-158 enmendada).
 
 **Deudas depositadas** *(numeradas contra el ledger vivo — la cola cerró en D-462)*:
 
@@ -1236,5 +1240,5 @@ Si tomás una sesión nueva sobre Bio-Expediente:
 - **v0.5 (14 May 2026 — S17)**: Fases B/C/D/E del Bloque 9 ejecutadas en DB. 8 tablas nuevas (familia, familia_miembro, mascota_codueño, mascota_familiar_autorizado, mascota_visibilidad_config, accion_destructiva_pendiente, caso_clinico, caso_clinico_consultor). ALTERs a mascotas (familia_id, estado_vida, estado_vida_desde + backfill). 6 ALTERs a tablas tipadas clínicas (caso_clinico_id). 9 funciones nuevas (`user_puede_ver_dimension` + 7 helpers SECURITY DEFINER de Fases B/E + función de propagación de estado_vida). ~50 RLS policies. 4 triggers nuevos. 19 tests pasados. D-133, D-136, D-142, D-143, D-150 cerradas. D-156 detectada (🔴 BLOQUEANTE triggers SECURITY INVOKER). Bloque 9: 5 de 11 fases ejecutadas.
 - **v0.6 (15 May 2026 — S18)**: D-156 cerrada (3 triggers de `eventos_mascota` a SECURITY DEFINER + search_path acotado). D-160 detectada y cerrada en misma sesión (policy `eventos_mascota_insert` ampliada con coherencia `prestador_id`/`empleado_id`/authenticated). D-157 cerrada con arquitectura limpia: RPC `crear_mascota_walkin` SECURITY DEFINER como puerta única, drop de policy laxa, ALTER CHECK de `mascota_acceso_prestador` para agregar `'walkin_origen'`. **Fase F ejecutada**: tabla `evento_identidad_personal` (5 subtipos, FK a `familia_miembro`, soft-delete coherente), ALTER `mascota_perfil_vigente` con columna `identidad_personal jsonb`, policy SELECT única, 2 RPCs SECURITY DEFINER (`registrar_rasgo_identidad_personal`, `desactivar_rasgo_identidad_personal`). Materialización inline en RPCs (sin trigger). D-162 cerrada técnicamente (trigger mascotas a DEFINER, runtime test pendiente). D-159 cerrada (auditoría triggers vs columnas, 0 drifts). Patrón arquitectónico establecido: **RPCs SECURITY DEFINER como puerta única de entrada** para tablas con RLS sin policies INSERT/UPDATE/DELETE. 9 tests runtime pasados con SET LOCAL ROLE authenticated. 3 deudas nuevas detectadas (D-161, D-165, D-166). 5 lecciones nuevas (L-078 a L-082). Drift documental corregido: `nota_dueño` → `nota_dueno`. Migración consolidada: `migrations/2026-05-15-S18.sql`. Bloque 9: 6 de 11 fases ejecutadas.
 - **v0.7 (15 May 2026 — S19)**: **Fase G ejecutada** (alta asistida cliente+mascota). Tabla `cliente_pendiente_registro` + 3 RPCs SECURITY DEFINER (`buscar_cliente_por_email`, `crear_alta_asistida_pendiente`, `crear_alta_asistida_existente`) + trigger `_trg_completar_pendiente_registro` sobre `profiles` + cleanup `cleanup_pendientes_vencidos` via pg_cron diario. ALTERs a CHECK constraints de `familia.tipo`, `mascotas.origen`, `mascota_acceso_prestador.metodo_otorgamiento`, `notificaciones.tipo` + 3 tipos nuevos en `cat_tipos_evento`. D-166 mitigada con REVOKE INSERT/UPDATE/DELETE de `mascota_perfil_vigente` desde authenticated (defense-in-depth). D-128 Fase H verificada cerrada (16 triggers usando códigos válidos del catálogo). Política P13 agregada a `POLITICAS_EPETPLACE.md` (alta asistida por prestador). Migración consolidada: `migrations/2026-05-15-S19.sql`. Bloque 9: 7 de 11 fases ejecutadas.
-- **v0.9 (20 Jul 2026 — S72)**: **Nace `A3 — Modulación del expediente por actor`** (letra de mesa founder + arquitecto), depositada después de A2. **Paga `Pendiente PE2`**, declarado pendiente desde S12, y **reemplaza el eje de `A2`/`AC5`** (`tipo_prestador`, muerto en S66 con el modelo de actor) por la **ley madre acto/rol**: el ACTO decide qué se MUESTRA (producto/UI), el ROL decide qué se PUEDE mostrar (RLS). Firmadas: la matriz `oficio × eje` con cuatro niveles de dosis (COMPLETO/DESTILADO/SEGURIDAD/NO), la dosis del vet (eje 3 COMPLETO + resto DESTILADO), lo que ve la recepción (identidad completa + alerta de seguridad, todo lo demás NO), el colapso del negocio unipersonal, el otorgamiento con oficio (`mascota_acceso_prestador.oficio`, N por cuenta, revocación por oficio, legadas `NULL` sin adivinar — L-139), la procedencia siempre visible con *"origen no registrado"* para los 83 legados, los treinta segundos como briefing, y contribuir ≠ leer. **`A3.9` (memorial) queda 🟠 PENDIENTE DE FIRMA FOUNDER** con voto del arquitecto (b) registrado y no ejecutado. A2 pasa a nota histórica marcada (los ejemplos se conservan); AC5 reescrita sobre la ley madre; A1 anotada. Deudas nuevas: **D-463** (`oficio` en el otorgamiento) · **D-464** (gate de rol en RLS — hueco de privacidad vivo) · **D-465** (la cara de la revocación, `AC2`/`AC3` sin UI) · **D-466** (resumen IA del expediente largo).
+- **v0.9 (20 Jul 2026 — S72)**: **Nace `A3 — Modulación del expediente por actor`** (letra de mesa founder + arquitecto), depositada después de A2. **Paga `Pendiente PE2`**, declarado pendiente desde S12, y **reemplaza el eje de `A2`/`AC5`** (`tipo_prestador`, muerto en S66 con el modelo de actor) por la **ley madre acto/rol**: el ACTO decide qué se MUESTRA (producto/UI), el ROL decide qué se PUEDE mostrar (RLS). Firmadas: la matriz `oficio × eje` con cuatro niveles de dosis (COMPLETO/DESTILADO/SEGURIDAD/NO), la dosis del vet (eje 3 COMPLETO + resto DESTILADO), lo que ve la recepción (identidad completa + alerta de seguridad, todo lo demás NO), el colapso del negocio unipersonal, el otorgamiento con oficio (`mascota_acceso_prestador.oficio`, N por cuenta, revocación por oficio, legadas `NULL` sin adivinar — L-139), la procedencia siempre visible con *"origen no registrado"* para los 83 legados, los treinta segundos como briefing, y contribuir ≠ leer. **`A3.9` (memorial) FIRMADA en el cierre de la misma sesión: camino (b)** — el acceso del prestador sobrevive una ventana y cae (caducidad de `cita_automatica`), en memorial el expediente se lee y no se escribe, y degrada visualmente sin push ni comercial. **`A3.0` depositada** (el diagnóstico del hueco vivo) con su nota de rótulo (P3 gobierna quién CREA, A3 quién LEE). **`A3.3` nivel SEGURIDAD firmado como destino pero GATEADO** por el modelo de alerta de manejo (**D-469**), que no existe en schema. **`A3.10` corregida con el relevamiento de B:** de los nueve lectores, cinco sirven tal cual, `leerDetalleAtencion` es ciego al oficio vet y `obtenerParteConsulta` está correctamente cerrado al prestador — D-459 es mitad cablear, mitad construir. A2 pasa a nota histórica marcada (los ejemplos se conservan); AC5 reescrita sobre la ley madre; A1 anotada. Deudas nuevas: **D-463** (`oficio` en el otorgamiento) · **D-464** (gate de rol en RLS — hueco de privacidad vivo) · **D-465** (la cara de la revocación, `AC2`/`AC3` sin UI) · **D-466** (resumen IA del expediente largo).
 - **v0.8 (17 Jul 2026 — S67)**: Nota de PROCEDENCIA en E1: la fundación V0 (migración `20260717170000`) creó `eventos_mascota.procedencia` con backfill del carnet a `declarado_por_familia` y gate en puerta única para los tipos clínicos (`cat_tipos_evento.es_clinico`); `verificado_por_prestador` queda tipado SIN productor hasta la verificación del vet (MODELO_VETERINARIA §14.2). E1/E2 heredan el campo al construirse.
