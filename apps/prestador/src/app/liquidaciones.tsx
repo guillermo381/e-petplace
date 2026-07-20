@@ -55,6 +55,20 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTraduccion } from '@/i18n';
 
+/**
+ * Los códigos médicos del catálogo vivo (`tipos_servicio.es_medico = true`,
+ * relevados contra DB en S72-B — no de memoria, L-084). Cerrado a propósito:
+ * un código nuevo cae al genérico hasta que alguien decida su voz, jamás se
+ * infiere (regla 36). Si esta lista crece seguido, la señal es que `categoria`
+ * debería viajar en el lector — nota a la mesa, no cura de acá.
+ */
+const CODIGOS_MEDICOS = new Set([
+  'certificado_apoyo', 'certificado_viaje', 'cirugia', 'consulta_especializada',
+  'consulta_general', 'ecografia', 'emergencia', 'laboratorio', 'radiografia',
+  'telemedicina', 'urgencia_domicilio', 'urgencia_local', 'vacunacion',
+  'vacunacion_internacional',
+]);
+
 type Pantalla =
   | { estado: 'cargando' }
   | { estado: 'error' }
@@ -124,8 +138,20 @@ export default function Liquidaciones() {
     }, [intento]),
   );
 
-  const vozServicio = (e: EventoPendienteLiquidar): string =>
-    e.tipoServicio?.startsWith('paseo') ? t('cobros.servicioPaseo') : t('cobros.servicioGenerico');
+  // S72-B (17.2 — el vet no reconocía su propio trabajo): la cola de cobro
+  // colapsaba TODO lo no-paseo en "Servicio". Mapa CERRADO por oficio,
+  // patrón del riel del cliente (lib/voz-servicio.ts, regla 36): lo conocido
+  // habla, lo desconocido degrada al genérico — jamás el código crudo (Ley 3).
+  // Los 14 códigos médicos salen del catálogo vivo (es_medico=true), no de
+  // memoria; un código nuevo cae al genérico hasta que se lo nombre.
+  const vozServicio = (e: EventoPendienteLiquidar): string => {
+    const codigo = e.tipoServicio ?? '';
+    if (codigo.startsWith('paseo')) return t('cobros.servicioPaseo');
+    if (codigo.startsWith('grooming')) return t('cobros.servicioGrooming');
+    if (codigo === 'adiestramiento') return t('cobros.servicioAdiestramiento');
+    if (CODIGOS_MEDICOS.has(codigo)) return t('cobros.servicioVeterinaria');
+    return t('cobros.servicioGenerico');
+  };
 
   const vozEstadoLiquidacion = (estado: EstadoLiquidacion): string => {
     switch (estado) {

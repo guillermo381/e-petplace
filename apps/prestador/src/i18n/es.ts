@@ -470,6 +470,10 @@ export const prestadorEs = {
       'Tus cobros se agrupan en liquidaciones: recibes una sola transferencia con el total.',
     pagoSimulado: 'Pago simulado',
     servicioPaseo: 'Paseo',
+    // S72-B: la cola de cobro nombra el oficio — el vet reconoce su trabajo.
+    servicioGrooming: 'Grooming',
+    servicioAdiestramiento: 'Adiestramiento',
+    servicioVeterinaria: 'Veterinaria',
     servicioGenerico: 'Servicio',
     // peldaño 2 — las liquidaciones emitidas (la voz de cada estado real)
     liquidacionesTitulo: 'Tus liquidaciones',
@@ -1316,13 +1320,16 @@ export const prestadorEs = {
       vencido: 'Vencido',
     },
     iniciar: 'Empezar la consulta',
-    dictadoTitulo: 'Dictá la consulta de {{mascota}}',
-    dictadoAyuda: 'Hablá o escribí libremente. Después vas a revisar todo campo por campo antes de guardar.',
+    dictadoTitulo: 'Dicta la consulta de {{mascota}}',
+    // D-456 (S72-B): la decisión founder — "el mic es el del teclado del SO" —
+    // vivía SOLO en un comentario de código. La ayuda prometía hablar y nunca
+    // decía cómo. Ahora lo dice. Tuteo por L-148 + censo del diccionario.
+    dictadoAyuda: 'Habla o escribe libremente — para dictar, toca el micrófono de tu teclado. Después revisas todo campo por campo antes de guardar.',
     dictadoLabel: 'Nota de la consulta',
     dictadoPlaceholder: 'Motivo, hallazgos, diagnóstico, plan, medicación…',
     estructurar: 'Estructurar la nota',
     estructurando: 'Estamos ordenando tu dictado. Puede tardar un momento.',
-    confirmacionAyuda: 'Revisá y corregí antes de guardar. Lo que la IA no leyó queda vacío — completalo vos.',
+    confirmacionAyuda: 'Revisa y corrige antes de guardar. Lo que la IA no leyó queda vacío — complétalo tú.',
     motivoLabel: 'Motivo de consulta',
     motivoPlaceholder: '¿Por qué vino?',
     diagnosticoLabel: 'Diagnóstico',

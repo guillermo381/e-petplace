@@ -425,6 +425,10 @@ export const prestadorEn = {
       'Your earnings are grouped into payouts: you receive a single transfer with the total.',
     pagoSimulado: 'Simulated payment',
     servicioPaseo: 'Walk',
+    // S72-B: the payout queue names the trade — the vet recognizes their work.
+    servicioGrooming: 'Grooming',
+    servicioAdiestramiento: 'Training',
+    servicioVeterinaria: 'Veterinary',
     servicioGenerico: 'Service',
     // step 2 — issued payouts (the voice of each real state)
     liquidacionesTitulo: 'Your payouts',
@@ -1194,7 +1198,9 @@ export const prestadorEn = {
     },
     iniciar: 'Start the consultation',
     dictadoTitulo: "Dictate {{mascota}}'s consultation",
-    dictadoAyuda: "Speak or type freely. You'll review everything field by field before saving.",
+    // D-456 (S72-B): the "how" was missing — the help promised speaking and
+    // never said how. The mic is the OS keyboard's (founder decision, S70).
+    dictadoAyuda: "Speak or type freely — to dictate, tap the microphone on your keyboard. You'll review everything field by field before saving.",
     dictadoLabel: 'Consultation note',
     dictadoPlaceholder: 'Reason, findings, diagnosis, plan, medication…',
     estructurar: 'Structure the note',
