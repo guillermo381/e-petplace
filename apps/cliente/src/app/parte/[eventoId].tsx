@@ -38,6 +38,38 @@ import { fechaLargaHumana } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
 
+/**
+ * S71-A CURA-2(c) 🔴 — el estado del estudio se LEÍA del wrapper y se
+ * DESCARTABA: la fila pintaba `t('parte.examenPedido')` fijo, así que un
+ * examen `cancelado` o con `resultado_disponible` le decía "Pedido" al
+ * dueño. Verosímil y falso (L-139) sobre un dato clínico.
+ *
+ * El dominio sale del CHECK vivo de `evento_examen_diagnostico` (leído en
+ * DB, no de memoria): solicitado · en_proceso · resultado_disponible ·
+ * revisado_por_vet · cancelado. Diccionario CERRADO, voz de familia:
+ * un estado fuera del dominio degrada digno (sin insignia), jamás
+ * inventa etiqueta.
+ */
+const VOZ_EXAMEN: Record<
+  string,
+  | {
+      clave:
+        | 'parte.examenPedido'
+        | 'parte.examenEnProceso'
+        | 'parte.examenResultado'
+        | 'parte.examenRevisado'
+        | 'parte.examenCancelado';
+      insignia: 'proximo' | 'alDia' | 'info';
+    }
+  | undefined
+> = {
+  solicitado: { clave: 'parte.examenPedido', insignia: 'proximo' },
+  en_proceso: { clave: 'parte.examenEnProceso', insignia: 'proximo' },
+  resultado_disponible: { clave: 'parte.examenResultado', insignia: 'alDia' },
+  revisado_por_vet: { clave: 'parte.examenRevisado', insignia: 'alDia' },
+  cancelado: { clave: 'parte.examenCancelado', insignia: 'info' },
+};
+
 export default function ParteConsultaScreen() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
@@ -178,6 +210,22 @@ export default function ParteConsultaScreen() {
                       >
                         {m.nombre}
                       </Text>
+                      {/* S71-A CURA-2(b) 🔴 — `principioActivo` viajaba en el
+                          wrapper y JAMÁS se renderizaba. Va bajo el nombre
+                          comercial, que es donde el dueño lo busca (es como
+                          está rotulada la caja). Verbatim del vet: cero
+                          etiqueta inventada (muro §8.3). */}
+                      {m.principioActivo !== null ? (
+                        <Text
+                          style={{
+                            fontFamily: typography.family.sans.regular,
+                            fontSize: typography.size.sm,
+                            color: theme.text.secondary,
+                          }}
+                        >
+                          {m.principioActivo}
+                        </Text>
+                      ) : null}
                       {m.presentacion !== null || m.cantidad !== null ? (
                         <Text
                           style={{
@@ -191,7 +239,12 @@ export default function ParteConsultaScreen() {
                             .join(' · ')}
                         </Text>
                       ) : null}
-                      {m.dosis !== null && m.frecuencia !== null ? (
+                      {/* S71-A CURA-2(a) 🔴 — la línea exigía dosis Y frecuencia:
+                          una fórmula con dosis y sin frecuencia ("1 tableta",
+                          frecuencia null porque el vet no la dictó — L-139) NO
+                          MOSTRABA LA DOSIS. El dueño veía el remedio sin saber
+                          cuánto darle. Cada campo se muestra si existe. */}
+                      {m.dosis !== null || m.frecuencia !== null ? (
                         <Text
                           style={{
                             fontFamily: typography.family.sans.regular,
@@ -199,7 +252,9 @@ export default function ParteConsultaScreen() {
                             color: theme.text.primary,
                           }}
                         >
-                          {t('parte.dosisLinea', { dosis: m.dosis, frecuencia: m.frecuencia })}
+                          {m.dosis !== null && m.frecuencia !== null
+                            ? t('parte.dosisLinea', { dosis: m.dosis, frecuencia: m.frecuencia })
+                            : (m.dosis ?? m.frecuencia)}
                         </Text>
                       ) : null}
                       {m.duracionDias !== null ? (
@@ -222,6 +277,25 @@ export default function ParteConsultaScreen() {
                           }}
                         >
                           {t('parte.via', { via: m.via })}
+                        </Text>
+                      ) : null}
+                      {/* S71-A CURA-2(b) 🔴 — `indicaciones` POR MEDICAMENTO
+                          viajaba y jamás se renderizaba: "dáselo con comida"
+                          moría en el wrapper. Es el campo MÁS accionable del
+                          parte — la única instrucción que la familia ejecuta.
+                          Va último y en texto primario. (OJO: la
+                          `consulta.indicaciones` de la nota entera SÍ se
+                          renderiza, pero dentro de "Ver completo" — son
+                          campos distintos con el mismo nombre.) */}
+                      {m.indicaciones !== null ? (
+                        <Text
+                          style={{
+                            fontFamily: typography.family.sans.regular,
+                            fontSize: typography.size.md,
+                            color: theme.text.primary,
+                          }}
+                        >
+                          {m.indicaciones}
                         </Text>
                       ) : null}
                     </View>
@@ -249,7 +323,14 @@ export default function ParteConsultaScreen() {
                     {i > 0 ? <Separador /> : null}
                     <Celda
                       titulo={e.tipoExamen}
-                      fin={<Insignia estado="proximo" etiqueta={t('parte.examenPedido')} tamaño="sm" />}
+                      fin={(() => {
+                        const v = VOZ_EXAMEN[e.estado];
+                        // desconocido degrada DIGNO: sin insignia, jamás una
+                        // etiqueta inventada (precedente LineaDeVida, Ley 3).
+                        return v === undefined ? undefined : (
+                          <Insignia estado={v.insignia} etiqueta={t(v.clave)} tamaño="sm" />
+                        );
+                      })()}
                     />
                   </View>
                 ))}

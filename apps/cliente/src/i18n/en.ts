@@ -868,6 +868,11 @@ export const clienteEn = {
     via: 'By {{via}}',
     examenesTitulo: 'Tests requested',
     examenPedido: 'Requested',
+    // S71-A CURA-2(c) — mirror of es.ts (Espejo enforces parity).
+    examenEnProceso: 'In progress',
+    examenResultado: 'Result ready',
+    examenRevisado: 'Reviewed by the vet',
+    examenCancelado: 'Cancelled',
     proximoControl: 'Next check-up',
     proximoControlFecha: 'On {{fecha}}',
     verCompleto: "See the vet's full note",

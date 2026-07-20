@@ -922,6 +922,12 @@ export const clienteEs = {
     via: 'Por vía {{via}}',
     examenesTitulo: 'Estudios pedidos',
     examenPedido: 'Pedido',
+    // S71-A CURA-2(c): el estado real del estudio (dominio del CHECK vivo).
+    // Voz de familia, tuteo neutro — LOTE PENDIENTE DE GATE FOUNDER.
+    examenEnProceso: 'En proceso',
+    examenResultado: 'Resultado listo',
+    examenRevisado: 'Revisado por el vet',
+    examenCancelado: 'Cancelado',
     proximoControl: 'Próximo control',
     proximoControlFecha: 'El {{fecha}}',
     verCompleto: 'Ver la nota completa del veterinario',
