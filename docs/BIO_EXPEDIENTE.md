@@ -76,7 +76,9 @@ Los actores se identifican por la pareja **(cuenta_comercial_id, rol_activo)** o
 
 > **Nota S72 — cómo se lee la columna "Lee expediente":** se lee contra la **matriz de A3.3** (`oficio × eje`) y el gate de rol de A3.4, **no contra el tipo de cuenta**. Los `tipo=vet` / `tipo=paseador` / `tipo=grooming` de la columna "Tipo cuenta" son nomenclatura ANTERIOR al modelo de actor (S66): hoy una misma `cuenta_comercial` ejerce varios oficios, y lo que modula la lectura es el **oficio del otorgamiento** (A3.2), no un tipo de la cuenta. Un "✅ vista filtrada" de esta tabla significa hoy: *la columna de su oficio en A3.3, acotada por su rol en A3.4*.
 
-| Actor | Tipo cuenta | Contribuye eventos | Lee expediente |
+> **La columna "Tipo cuenta" es nomenclatura ANTERIOR al modelo de actor (S66)** — se conserva sin reescribir. Los `tipo=vet` / `tipo=paseador` / `tipo=hotel` / `tipo=criadero` no existen como eje: hay un negocio contenedor con personas ejerciendo oficios. Ver **A3**. Reescritura de esta tabla bajo el modelo de actor: **D-467**.
+
+| Actor | Tipo cuenta *(histórico, ver A3)* | Contribuye eventos | Lee expediente |
 |---|---|---|---|
 | Veterinario dueño | prestador (tipo=vet) | ✅ | ✅ con permisos |
 | Veterinario empleado | empleado de prestador vet | ✅ (atribuido al empleado_id) | ✅ vía cuenta |
@@ -120,6 +122,26 @@ Ejemplos (a refinar en futuras sesiones) — **nota histórica, superada por A3*
 > **Letra de mesa S72 (20 Jul 2026), founder + arquitecto.** Paga el `Pendiente PE2` (declarado en S12) y reemplaza el eje de `A2`/`AC5` (`tipo_prestador`, muerto en S66) por la ley madre **acto/rol**.
 >
 > **Estado de firma:** A3.1–A3.8 y A3.10 **FIRMADAS por el founder en mesa S72**. **A3.9 (memorial) PENDIENTE DE FIRMA** — voto del arquitecto registrado, no ejecutado.
+
+#### A3.0 — Por qué esta letra existe ahora, y qué corrige
+
+El hallazgo que la disparó: **`A2` y `AC5` modulan por `tipo_prestador`, y
+ese eje MURIÓ en S66.** El modelo de actor firmó que no hay tipos de
+prestador — hay **un negocio contenedor con personas ejerciendo oficios**.
+Una clínica que además hace grooming es UNA `cuenta_comercial`.
+
+Junto con `AC4` (el acceso se otorga a la CUENTA, no al empleado — "los
+empleados son manos de la cuenta"), eso produce un agujero real y vivo hoy:
+
+> **Una clínica a la que solo le pasean el perro lee la historia clínica
+> completa, con solo tener un veterinario en nómina.** Y la recepcionista
+> del mostrador — que opera en HOY, la puerta multi-actor — lee el
+> expediente clínico de todos los pacientes.
+
+La letra vieja no era mala: era **anterior al modelo de actor**. Esta
+sección la reemplaza.
+
+> **Nota de rótulo:** esta sección NO contradice el principio P3 (modelo evento-céntrico). P3 gobierna quién puede CREAR qué tipo de evento; A3 gobierna quién puede LEER qué. Tipado y visibilidad son ejes distintos. La letra se cita **A3**.
 
 #### A3.1 — LA LEY MADRE (firmada S72)
 
@@ -639,6 +661,8 @@ Razones:
 - Consistente con modelo de roles de portal-prestadores (S5/S10/S11).
 - Simplifica revocación (revocás 1 fila, no N empleados).
 - Empleados son "manos" de la cuenta — la cuenta es responsable.
+
+> **Puntero S72:** el acceso **sigue siendo a nivel cuenta comercial** y los empleados **siguen siendo manos de la cuenta** — esta sección no se reabre. Lo que cambia desde S72 es que **esa cuenta ya no es una sola puerta**: puede portar **N otorgamientos, uno por oficio** (A3.2), y la revocación es por oficio. Una clínica que pasea y atiende tiene dos relaciones con la mascota, no una.
 
 ### AC5 — Visibilidad parcial por acto y por rol
 
