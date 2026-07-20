@@ -1,6 +1,12 @@
 # DISEÑO_EXPERIENCIA — La arquitectura de la experiencia del dueño
 
-> **Versión: v2.2 — S69/T2 (18 Jul 2026).** §2 Zona 3 estrena su PRIMER
+> **Versión: v2.3 — S70/T3 (19 Jul 2026).** Nace **§15b.0 LA CASA DEL
+> PRESTADOR** — la ley de la distribución, firmada founder sobre los
+> bocetos v2: HOY acciona / NEGOCIO gestiona · lo que sigue preside, lo
+> pasado se pliega · el chip es para la excepción (Mostrador) · vacío ≠
+> negocio muerto. Es la vara de auditoría de toda pantalla del prestador
+> (y el insumo del deep research de diseño que abre S71). Base previa:
+> **v2.2 — S69/T2 (18 Jul 2026).** §2 Zona 3 estrena su PRIMER
 > habitante (el aviso de presupuesto pendiente). §3: el GRIS de D-430
 > MUERTO (la salida de reserva-contra-saldo aterriza en Go home) — la
 > regla de plataforma del hub queda SIN excepciones. Base previa:
@@ -454,6 +460,45 @@ Los 6 tests de §10 aplican íntegros, más dos propios:
 8. **Verdad firme:** ¿todo lo que la pantalla muestra como cita/plata
    está confirmado? Lo tentativo no existe para el prestador.
 
+## 15b.0 LA CASA DEL PRESTADOR — la ley de la distribución (firmada founder S70)
+
+La dosis (§15b) dice **cómo se viste** la app del prestador. Esta ley dice
+**dónde vive cada cosa**, y es la vara con la que se audita toda pantalla
+nueva del prestador. Firmada por el founder en el cierre S70, sobre los
+bocetos v2 (también firmados).
+
+1. **HOY acciona · NEGOCIO gestiona.** Son dos verbos distintos y no se
+   mezclan. En **HOY** el prestador **hace**: lo que está pasando y lo que
+   sigue, con la acción al alcance del pulgar. En **NEGOCIO** el prestador
+   **administra**: configura, revisa, cambia reglas. Una pantalla que pide
+   "gestionar" desde el HOY está mal ubicada; una acción del día enterrada
+   en NEGOCIO, también.
+2. **Lo que sigue PRESIDE; lo pasado se PLIEGA.** La jerarquía de la
+   jornada es temporal: lo próximo ocupa la parte alta y el cuerpo grande;
+   lo ya ocurrido se colapsa (acordeón, "ver más", lista corta). El
+   historial no compite con el presente por el pulgar.
+3. **El chip es para la EXCEPCIÓN, no para el catálogo.** Los chips/filtros
+   no se usan para enumerar lo que el negocio hace — se usan para marcar lo
+   que **se sale de la norma**. Caso canónico vigente: **el Mostrador**
+   (la atención que entró por la puerta, no por la agenda). Un chip por
+   cada cosa es ruido, y mata la señal del que importa.
+4. **Vacío ≠ negocio muerto.** Un día sin citas es un día libre, no un
+   error ni una pantalla rota. El vacío se dibuja **digno y con camino**
+   (qué puede hacer ahora: registrar una atención, revisar su oferta),
+   jamás como un hueco mudo ni como métrica en cero (Ley 13, §15b.4).
+
+**Alcance:** rige toda pantalla del prestador, existente o nueva. Toda
+pantalla nueva del prestador nace **contra un boceto** (L-143) y se audita
+contra estos cuatro puntos — y la vara **la firma el founder sobre píxeles
+publicados, jamás la sesión que construyó** (L-153).
+
+**Ver también — horarios:** la letra de solape/merge de franjas vive en la
+deuda **D-409** (`DEUDAS_CANONICAS.md`), firmada en S70: el solape entre
+servicios distintos es **legal por persona** (la ocupación protege el
+cuerpo) y el mismo alcance resuelve por **MERGE server-side atómico con
+retorno hablado + `GIST EXCLUDE` como piso**. No existe doc dedicado de
+horarios: esa deuda ES su letra.
+
 ## 15b. LA DOSIS DEL PRESTADOR (firmada founder S58)
 
 La app del prestador no tiene otro design system — tiene otra dosis.
@@ -570,6 +615,16 @@ el portado de grooming consumen:
 
 ## Historial
 
+- **v2.3 (S70, 19 Jul 2026):** nace **§15b.0 LA CASA DEL PRESTADOR**
+  (firma founder del cierre S70, sobre bocetos v2 firmados): los cuatro
+  puntos de la distribución — HOY acciona / NEGOCIO gestiona · lo que
+  sigue preside y lo pasado se pliega · el chip para la EXCEPCIÓN
+  (Mostrador) · vacío ≠ negocio muerto. Rige toda pantalla del prestador,
+  existente o nueva, y la vara la firma el founder sobre píxeles
+  publicados (L-153). Referencia cruzada a la letra de horarios D-409
+  (firmada S70; no existe doc dedicado de horarios — la deuda es su
+  letra). Disparada por el gate founder S70 (hallazgo 2: la jornada
+  construida no respetaba el boceto firmado).
 - **v2.1 (S68, 17 Jul 2026):** §15b.5(b) ENMENDADA (dictado del
   arquitecto): el resumen del mundo es UNA FILA POR SERVICIO ACTIVADO
   (glifo + nombre + resumen breve + lápiz anclado) — regla de

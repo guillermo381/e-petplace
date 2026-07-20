@@ -351,6 +351,27 @@ aprobado en esencia por el founder en primera ronda):
    y salud=VERDE VITAL (el boceto S57 pintaba paseo en verde —
    corregido en la firma) · fondo papel + elevación (D-358/D-360).
 
+### LA LEY CHICA DE LA COLA DE SCROLL (S70-B5, exigible)
+
+**Toda pantalla nueva nace con `insets.bottom` en la cola de su scroll —
+jamás un `paddingBottom` hardcodeado.**
+
+```tsx
+const insets = useSafeAreaInsets()
+<ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}>
+```
+
+El número mágico (`paddingBottom: 96`) miente en cuanto cambia el
+dispositivo: en teléfonos con barra de gestos el último elemento queda
+tapado, y en los que no la tienen sobra aire. Es el patrón scroll-cola que
+venía como nota a la mesa desde S65 y se pagó en S70-B5 sobre **38
+pantallas**. Aplica igual a `HojaScroll` y a cualquier contenedor
+desplazable con contenido o botón al final.
+
+**Corolario:** si una pantalla tiene un CTA fijo al pie, el `paddingBottom`
+suma **además** la altura de ese CTA — el contenido tiene que poder
+scrollear por encima de él, no debajo.
+
 ### El protocolo del gate de craft (por pantalla, exigible)
 
 Toda pantalla que entre a la pasada de craft (D-347 y sucesoras) llega

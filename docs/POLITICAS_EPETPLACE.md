@@ -1,7 +1,7 @@
 # POLITICAS_EPETPLACE — Políticas operativas del producto
 
-> Versión: v1.8
-> Última actualización: 13 Jul 2026 — Sesión 59. P19 FIRMADA (el paseo es GRUPAL por norma).
+> Versión: v1.9
+> Última actualización: 19 Jul 2026 — Sesión 70. **P21 FIRMADA (LA LETRA UBER: la cuenta es global, el país es contexto de operación).**
 > Audiencia: Claude (web y code), devs futuros, equipo de soporte, equipo legal.
 > Análogo a: `CONTRATO_TRABAJO.md` (cómo trabajamos) pero del producto (cómo se comporta).
 
@@ -547,6 +547,47 @@ reserva — conviven, no se pisan.
 
 ---
 
+---
+
+## P21 — LA LETRA UBER: la cuenta es GLOBAL, el país es contexto de OPERACIÓN (FIRMADA — founder S70, 19 Jul 2026)
+
+**El principio.** Una cuenta de e-PetPlace es **global**. El país **no es
+un atributo de identidad** del usuario: es el **contexto en el que ocurre
+una operación**. La persona se muda, viaja, opera en dos países, o vive en
+uno con la línea telefónica de otro — y **sigue siendo la misma cuenta,
+con el mismo expediente**. El modelo de Uber: te bajás en otra ciudad y la
+app es la misma; lo que cambia es el contexto de lo que hacés ahí.
+
+**La regla dura que se desprende (y el caso que la forzó):**
+
+1. **El teléfono NO implica país.** El **caso canónico** es el propio
+   founder: **opera en Ecuador con una línea de Colombia**. Un número con
+   prefijo `+57` en un perfil de contexto EC no es un error de datos: es
+   la realidad.
+2. **PROHIBIDO derivar el prefijo telefónico del `country_code` del
+   perfil.** Es exactamente la inferencia que este principio niega, y
+   fabrica basura (`593` pegado a un número colombiano). El prefijo lo
+   **declara el usuario**: escribiéndolo con `+`, o eligiéndolo en un
+   selector de país **de la línea** — nunca heredado del contexto de
+   operación. Forma canónica y estado de la reconciliación: **D-442**.
+3. **Fiscalidad, liquidación y catálogo SIGUEN siendo por país de
+   operación.** Esta letra no toca el camino de la plata: la cuenta
+   comercial, la retención, el catálogo de servicios y los precios viven
+   en el país donde la operación ocurre (`MODELO_FINANCIERO`). Lo que se
+   prohíbe es usar ese contexto para **inferir identidad** del usuario.
+
+**Test de la política:** si una pantalla, un guard o una normalización
+**deduce** algo del usuario a partir del país de su perfil —su idioma, su
+prefijo, su moneda personal, su documento—, está violando P21. El país
+responde *"¿dónde está pasando esto?"*, jamás *"¿quién es esta persona?"*.
+
+**Nota de numeración:** **P20 está RESERVADA** a la letra de **CUSTODIA**
+(`MODELO_ADIESTRAMIENTO` §10.2, sesión de legales D-405) — verificado en
+el cierre S70; por eso esta política toma **P21**.
+
+**Gemelos:** `DEFINICION_SOFTLAUNCH.md` §3.5 (nota de operación) ·
+`DEUDAS_CANONICAS.md` **D-442** (forma canónica del teléfono).
+
 ## Historial de versiones
 
 - **v1.0 (13 May 2026 — S16)**: Primera redacción. 12 políticas iniciales derivadas del refactor de modelo de S16.
@@ -558,3 +599,4 @@ reserva — conviven, no se pisan.
 - **v1.8 (18 Jul 2026 — S69/T2)**: P13 enmendada (letra = realidad, decisión founder): la invitación de alta asistida expira a 30 días, el **dato clínico JAMÁS** (el Bloque 0 S69 probó que el cleanup nunca borró; se firma como principio — el expediente queda bajo el acceso operativo del prestador que lo produjo, esperando reclamo sin fecha de muerte). Contacto-flexible (email O teléfono) + reclamo dual por teléfono normalizado + una notificación terminal a soporte. Migración `20260718173000` (S69-A2).
 - **v1.7 (13 Jul 2026 — S59)**: P19 FIRMADA (founder S59 — el paseo es GRUPAL por norma): la norma se declara en condiciones Y en el flujo de reserva ("Los paseos suelen ser con más de un perro a la vez.") · pregunta única en la primera reserva por mascota ("¿{nombre} se lleva bien paseando con otros perros?") · SÍ = se agenda y no se re-pregunta · NO = no se agenda, voz honesta con camino ("Por ahora los paseos son en grupo. Estamos armando algo para {nombre}.") y el NO se REGISTRA (mascota, familia, fecha) como insumo de la decisión paseo personalizado vs derivación a entrenador · la respuesta vive en el perfil de la mascota y es EDITABLE. **Cierra D-330.** Gemelo: `MODELO_PASEO.md` §4.1.
 - **v1.5 (12 Jul 2026 — S57)**: P18 FIRMADA (founder S57, redacción del arquitecto sobre decisión en sesión — cancelación y reagenda del paseo SUELTO): (a) ≥24 h = reagendar o cancelar con destino a elección del dueño (medio de pago original con sus 15 días hábiles declarados, o saldo e-PetPlace) · (b) entre 24 y 2 h = solo reagendar, la plata no se mueve · (c) <2 h o no presentarse = el paseo se pierde y el paseador cobra (cierre `no_show`, Decisión T) · (d) falla del prestador = devolución o saldo a elección, sin discusión. Camino de la plata: la cancelación se DECLARA sobre el pago (patrón 7.14 enmendada; `aplicar_reembolso()` intacta). Construcción diferida: la pantalla de elección de destino y el saldo e-PetPlace esperan Kushki fase 1 — hoy el reembolso es simulado y declarado, sin pantalla de destino. **P17 queda RESERVADA** para la Cuenta del prestador (sin letra). Gemelos: `MODELO_PASEO.md` v1.3 (§3bis) y `MODELO_FINANCIERO.md` v2.7 (nota 7.16).
+- **v1.9 (19 Jul 2026 — S70/T3)**: **P21 FIRMADA (LA LETRA UBER)** — la cuenta es GLOBAL y el país es contexto de OPERACIÓN, jamás de identidad; el teléfono NO implica país (caso canónico: el founder en EC con línea CO); PROHIBIDO derivar el prefijo del `country_code` del perfil (el prefijo lo declara el usuario, con `+` o selector de país de la línea); fiscalidad y liquidación siguen por país de operación. **P20 queda RESERVADA a la custodia (D-405)** — verificado en el cierre. Gemelos: `DEFINICION_SOFTLAUNCH.md` §3.5 y **D-442** (forma canónica del teléfono, reescrita bajo esta letra).

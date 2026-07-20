@@ -1,6 +1,16 @@
 # MODELO_VETERINARIA — El contrato del oficio veterinario y del modelo de actor
 
-> **Versión: v1.4 — S69/T2 (18 Jul 2026).** Enmiendas v1.4 (depósito
+> **Versión: v1.5 — S70/T3 (19 Jul 2026).** Enmiendas v1.5 (cierre S70):
+> nace **§7bis EL HANDSHAKE DEL MOSTRADOR** (letra founder — la búsqueda
+> revela SOLO nombre+avatar, UNA autorización dirigida por mascota, la
+> historia se abre AL AUTORIZAR, tipo `alta_mascota` que nace en la
+> familia REAL, expiración 10' perezosa, fallback fantasma intacto);
+> §11 gana **el muro §8.3 aplicado al dictado** (la IA asigna las
+> palabras del vet incl. su diagnóstico, jamás agrega; posología
+> parseada-o-vacía; vitales sólo con número) y **el shape de la fórmula
+> con el espécimen OkVet como fuente** (un evento por medicamento +
+> columna `cantidad`). Base previa:
+> **v1.4 — S69/T2 (18 Jul 2026).** Enmiendas v1.4 (depósito
 > Sesión A): §6 gana la NOTA CANÓNICA del día clínico (se compone por
 > `tipos_servicio.es_medico=true`, JAMÁS por categoría — hallazgo
 > S69-B, regla 59); §7 el MOSTRADOR v1 REGISTRA el cobro presencial
@@ -278,6 +288,53 @@ existe cuando el cobro pase por la plataforma (línea futura, con Kushki).
 Migración S69-A1bis (`20260718174500`): `registrar_atencion_mostrador`
 + `registrar_cobro_presencial`, L-140 de nacimiento.
 
+## 7bis. EL HANDSHAKE DEL MOSTRADOR (letra founder, S70)
+
+El mostrador §7 resuelve al cliente que **no existe** (alta fantasma).
+Este §7bis resuelve al cliente que **SÍ existe y está registrado**: la
+clínica lo encuentra, pero **no puede tocar su expediente sin permiso**.
+La letra, firmada por el founder en S70:
+
+1. **La búsqueda revela lo MÍNIMO.** Con la familia registrada hallada
+   (por teléfono o por email — las dos llaves, una verdad), la búsqueda
+   devuelve **SOLO el nombre y el avatar de sus mascotas activas**. Muere
+   la letra vieja de `familias[]` con conteos: para una cuenta registrada,
+   el negocio no ve estructura familiar, ni especie, ni edad, ni cuántas
+   mascotas hay en cada familia. Lo mínimo para **reconocer y elegir**.
+2. **UNA autorización, DIRIGIDA, POR MASCOTA.** No hay permiso "a la
+   familia" ni permiso ambiente: el negocio pide autorización **para
+   atender a esta mascota**, y la familia responde **a esa mascota**. Un
+   toque: Autorizar o Rechazar.
+3. **La historia se abre AL AUTORIZAR, jamás antes.** Hasta que la familia
+   dice que sí, la clínica no ve expediente. El acceso nace en el momento
+   del sí (`mascota_acceso_prestador`, método
+   `solicitud_mostrador_autorizada`) y no un segundo antes.
+4. **Tipo `alta_mascota`: la mascota NACE EN LA FAMILIA REAL, jamás
+   fantasma.** Si el cliente está registrado pero la mascota no existe
+   todavía, el negocio propone el alta con los campos mínimos y **la
+   familia la autoriza**: en **una sola transacción** nace la mascota **en
+   su familia real** y nace el acceso de atención. Nunca se fabrica una
+   familia placeholder para un cliente que ya tiene la suya. La familia
+   destino se **deriva server-side** del titular que autoriza; si tuviera
+   más de una familia estándar, **rebote tipado `familia_ambigua`** (v1
+   honesto: si algún día suena, se diseña).
+5. **Expiración de 10 minutos, PEREZOSA.** La solicitud vive 10 minutos —
+   el tiempo del mostrador, no el del trámite. Patrón del hold: **cero
+   cron**, la expiración se evalúa en lectura y en el gate de duplicados.
+6. **El fallback fantasma queda INTACTO.** Si la familia rechaza, o la
+   solicitud expira, o el cliente no está registrado, el mostrador cae al
+   **camino fantasma existente** (§7) sin residuo: cero acceso, cero
+   mascota, nada más que el estado de la solicitud.
+
+**Construido en S70** (migración `20260719160000` + reconciliación
+`20260719200000`): primitiva `solicitud_autorizacion_mostrador`
+(`tipo` `atencion`|`alta_mascota` + `payload_alta`), RPCs
+`crear_solicitud_autorizacion` / `responder_solicitud_autorizacion`
+(guard: **solo la familia**, helper `_user_es_familia_de_mascota`, L-150),
+y las dos búsquedas enmendadas. La cara del dueño es la **Hoja de un
+toque** (`autorizacion/[solicitudId]`) más el **badge del Hogar**.
+**Pendiente: el gate de campo con actor real — D-446.**
+
 ## 8. EL PRESUPUESTO CLÍNICO (primitiva nueva)
 
 El flujo médico real: consulta → diagnóstico → "hay que operar, cuesta
@@ -366,6 +423,28 @@ se construye el negocio, no la tabla):
   texto libre sin catálogo curado. La captura jamás se exige en
   caliente (regla heredada). El registro alimenta Eje 3 vía puerta
   única; si hay caso, se asocia.
+
+  > **EL MURO §8.3 APLICADO AL DICTADO (precisión firmada S70).** La IA
+  > **asigna las palabras DEL VET a campos — incluido su diagnóstico —, y
+  > JAMÁS agrega contenido clínico no dictado.** No es el clínico: es su
+  > secretario. Campo no dictado = **null** (L-139 literal del prompt del
+  > carnet: *"JAMÁS inventes, completes ni uses cadena vacía"*).
+  > **Posología: se parsea o se deja vacía** — si dosis o frecuencia no se
+  > pueden leer con certeza, van en null y **el vet las completa en la
+  > confirmación**. **Vitales: sólo con NÚMERO dictado** — el "todo bien" o
+  > "estable" del habla **jamás** se traduce a mediciones (la cadena de
+  > "ok" del espécimen quedó fotografiada como caso L-139). El muro vive
+  > **en el prompt Y en el validador de shape** de la Edge Function.
+  >
+  > **EL SHAPE DE LA FÓRMULA — el espécimen manda (S70).** La lectura en
+  > mesa de la HC OkVet de Thor fijó dos cosas: (a) **un evento por
+  > medicamento** — la constelación **no agrupa** la fórmula en una fila;
+  > (b) la receta real trae **cantidad dispensada** además de la posología
+  > ("Enzimax, tabletas, **Cantidad: 10**"), así que
+  > `evento_medicacion_prescrita` gana la columna **`cantidad`** (numeric,
+  > **NULL honesto** — no siempre se dicta). El ítem de fórmula queda:
+  > `nombre · presentación · cantidad · dosis · frecuencia · duración ·
+  > vía · indicaciones`.
 - **DESPUÉS — cierre con piso de calidad:** ≥1 registro clínico + el
   parte a la familia en VOZ HUMANA (jamás jerga cruda — Ley 3:
   "le pusimos la vacuna X; volvé en 3 semanas") + presupuesto si
@@ -597,6 +676,15 @@ sesión a sesión, como manda la ruta.
 
 ## Historial
 
+- **v1.5 (S70/T3, 19 Jul 2026):** nace **§7bis EL HANDSHAKE DEL
+  MOSTRADOR** (letra founder del cierre S70; construido en las
+  migraciones `20260719160000` + `20260719200000`, gate de campo
+  pendiente en D-446) · **§11** gana el **muro §8.3 aplicado al dictado**
+  y **el shape de la fórmula** fijado por el espécimen OkVet de Thor leído
+  en mesa (un evento POR medicamento + la columna `cantidad`, decisión
+  founder). Disparadores: T3 abierta y el motor del Durante construido
+  (constelación `sedimentar_nota_clinica`, Edge Function
+  `estructurar-nota-clinica`).
 - **v1.4 (S69/T2, 18 Jul 2026):** §6 nota canónica del día clínico por
   `es_medico` (regla 59, L-144) · §7 el mostrador REGISTRA el cobro
   presencial como dato (cero fee/devengo, FINANCIERO §2.5;

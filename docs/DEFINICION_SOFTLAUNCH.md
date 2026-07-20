@@ -54,6 +54,20 @@ que la operación existía. **Lección S49 (detección del founder):** un
 soft launch sin operación definida no es un destino — es una demo con
 fecha. El destino incluye:
 
+> **NOTA DE OPERACIÓN — LA LETRA UBER (founder S70, 19 Jul 2026;
+> letra completa en `POLITICAS_EPETPLACE.md` P21).** Todo lo que sigue
+> en esta sección es **operación**, y la operación **sí** es por país:
+> pasarela, fiscalidad, liquidación, catálogo y precios viven en el país
+> donde el servicio ocurre. Lo que **no** es por país es **la cuenta**:
+> **la cuenta es GLOBAL y el país es contexto de OPERACIÓN, jamás de
+> identidad.** El usuario se muda, viaja u opera en dos países con **el
+> mismo expediente**. Corolario duro para toda construcción: **el
+> teléfono NO implica país** (caso canónico: el founder opera en EC con
+> línea CO) y **está prohibido derivar el prefijo telefónico del
+> `country_code` del perfil** — lo declara el usuario (ver **D-442**).
+> El soft launch arranca en **un** país de operación; eso es una
+> decisión de alcance, no un límite del modelo de identidad.
+
 - **Cobro in-app desde el día 1** (decisión founder S49): el dueño
   paga los servicios dentro de la app. Pasarela: Kushki Fase 1 (la que
   el ecosistema ya opera). Con su camino triste digno: rechazo,
