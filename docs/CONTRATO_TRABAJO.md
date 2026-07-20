@@ -1,7 +1,7 @@
 # Contrato de trabajo — Guillermo (founder e-PetPlace) ↔ Claude
 
-> **Versión:** v1.11 (con enmiendas S14 + S15 + S16 + S19 + S21 + S42 + S48 + S54 + S59 + S68)
-> **Última actualización:** 17 Jul 2026 — Sesión 68. Enmienda 76(g) FIRMADA: declaración de VEDA en tandas motor-abierto — toda migración declara si computa anclas sobre datos vivos; si ancla (DDL o verificación), la ventana se declara y el founder no escribe datos vivos hasta el juez (origen: precedente `fbb4d6c8` S67).
+> **Versión:** v1.12 (con enmiendas S14 + S15 + S16 + S19 + S21 + S42 + S48 + S54 + S59 + S68 + S71)
+> **Última actualización:** 20 Jul 2026 — Sesión 71. Enmienda 76(f2) FIRMADA: cada sesión commitea únicamente sus propias rutas (`git commit --only <rutas>`); prohibido commitear con staged ajeno en el índice (origen: tres incidentes documentados — S63, S71 ×2).
 > **Audiencia:** Claude (web y code) en toda sesión futura. Cualquier dev que se sume al proyecto.
 
 ---
@@ -424,3 +424,4 @@ Origen: S54 (el freno de la Sesión A ante el backfill-por-referencia y el patch
 - **v1.9 (11 Jul 2026 — S54):** enmienda con regla 76 (coordinación entre sesiones paralelas: (a) escritor único de DB y docs · (b) pedidos SQL autocontenidos que viajan completos · (c) archivos compartidos por hunks aditivos · (d) territorios por defecto — A=cliente+DB+docs, B=prestador, packages/api por (c), packages/ui una sola sesión designada). Estrenada en vivo en S54.
 - **v1.11 (17 Jul 2026 — S68):** enmienda 76(g) FIRMADA — declaración de VEDA en tandas motor-abierto: toda migración declara ANTES de escribirse si computa anclas sobre datos vivos (DDL, backfill o verificación por snapshots); si ancla, la ventana se declara con apertura y cierre reportados y el founder no escribe datos vivos hasta el juez verde. Declaración obligatoria aun cuando la conclusión sea "no rige". Estreno: S68-A0/A1 (veda mínima en la ventana de verificación byte-idéntica; juez verde). Origen: precedente `fbb4d6c8` (V0, S67).
 - **v1.10 (13 Jul 2026 — S59):** enmienda 76(f) FIRMADA — staging SIEMPRE explícito por ruta en tandas paralelas (git add -A/. prohibidos) + `git status` pre-commit verificando territorio propio; archivo ajeno modificado se deja intacto y se declara. Origen: incidente S58 (`3691b1a`→`98c7e5e`). Cierra D-376.
+- **v1.12 (20 Jul 2026 — S71):** enmienda 76(f2) FIRMADA — cada sesión commitea únicamente sus propias rutas (`git commit --only <rutas>`). Prohibido commitear con staged ajeno en el índice: si el status muestra cambios que no son tuyos, freno y aviso a la mesa antes de commitear. Origen: tres incidentes documentados (S63, S71 ×2). La 76(f) queda como piso (staging por ruta); la f2 cierra el hueco que quedaba — `git add` acotado no acota el commit: `git commit` sin `--only` publica el índice ENTERO, staged ajeno incluido (el mecanismo exacto del incidente `31688f4` S71). Cierra D-411.

@@ -121,10 +121,15 @@ decisión se reabre.
 - Primer lote firmado en dirección (S53): paseo (correa+huella), vet,
   grooming, refugio, despensa, coach (destello). El lote 2 sale del
   relevamiento de íconos existentes en las apps.
-- **Cláusula del ilustrador (salvedad founder):** si el primer lote
+- **Cláusula del ilustrador — ENMENDADA (decisión founder, S71):** los
+  glifos b′ los AUTORA LA SESIÓN en SVG, con gate founder POR ÍCONO a
+  21px (precedente S58); **no hay ilustrador externo**. La salvedad
+  original (contratar afuera si el primer lote no alcanzaba la vara)
+  quedó superada por los hechos: los lotes construidos pasaron sus
+  gates. Este documento sigue siendo la ley del lenguaje; el gate por
+  ícono sigue siendo la vara. *(Letra original: si el primer lote
   construido no alcanza la vara del founder, se contrata un ilustrador
-  externo para FIRMAR el pulso del trazo; el set continúa bajo esa firma
-  y este documento sigue siendo la ley del lenguaje.
+  externo para FIRMAR el pulso del trazo.)*
 - Este doc se enmienda con historial, como todo canónico.
 
 ## Historial
