@@ -236,8 +236,10 @@ export default function CitasDeMascota() {
                 color: theme.text.secondary,
               }}
             >
-              {c.prestador_nombre !== null
-                ? t('citasMascota.coordinaraNegocio', { negocio: c.prestador_nombre })
+              {/* D-455 cerrada (S71-A motor): el nombre del negocio llega por
+                  la RPC angosta — la forma pobre queda de fallback real. */}
+              {(c.prestador_nombre ?? c.negocio_nombre) !== null
+                ? t('citasMascota.coordinaraNegocio', { negocio: c.prestador_nombre ?? c.negocio_nombre ?? '' })
                 : t('citasMascota.coordinaranSinNombre')}
             </Text>
           ) : null}

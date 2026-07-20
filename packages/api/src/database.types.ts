@@ -17001,6 +17001,13 @@ export type Database = {
         Args: { p_desde?: string; p_hasta?: string }
         Returns: Json
       }
+      obtener_nombres_negocio_por_presupuesto: {
+        Args: { p_presupuesto_ids: string[] }
+        Returns: {
+          nombre_comercial: string
+          presupuesto_id: string
+        }[]
+      }
       obtener_oferta_grooming: {
         Args: { p_mascota_id: string; p_modalidad?: string }
         Returns: {

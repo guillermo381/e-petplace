@@ -32,6 +32,15 @@ export interface CitaActivaMascota {
   prestador_id: string | null;
   /** nombre_comercial del prestador, o null honesto (fila no visible). */
   prestador_nombre: string | null;
+  /**
+   * D-455 (S71-A): nombre del NEGOCIO emisor del presupuesto, para la cita
+   * `por_coordinar` cuyo prestador_id es NULL (D-439 retiró la heurística).
+   * Sale de la RPC angosta `obtener_nombres_negocio_por_presupuesto`; null
+   * honesto en todo otro estado o si la RPC falla. Campo SEPARADO de
+   * prestador_nombre a propósito: son entidades distintas y mezclarlas en
+   * un slot sería mentir el contrato.
+   */
+  negocio_nombre: string | null;
   /** Solo con estado='en_vivo': la atención para la pantalla de dos caras. */
   atencion_id: string | null;
 }
@@ -114,8 +123,31 @@ export async function obtenerCitasActivasMascota(
     }
   }
 
-  // Guard de shape (L-124): el filtro ya garantizó fecha no nula — se
-  // angosta verificando, jamás con cast (regla 34).
+  // D-455 (S71-A): el nombre del negocio para las por_coordinar (batch
+  // único; un fallo deja null y la lista NO se cae — Ley 13).
+  const nombresNegocio = new Map<string, string>();
+  const presupuestoIds = activas
+    .filter((c) => c.fecha === null && c.presupuesto_id !== null)
+    .map((c) => c.presupuesto_id)
+    .filter((id): id is string => id !== null);
+  if (presupuestoIds.length > 0) {
+    const rn = await cliente.rpc('obtener_nombres_negocio_por_presupuesto', {
+      p_presupuesto_ids: presupuestoIds,
+    });
+    if (!rn.error && Array.isArray(rn.data)) {
+      for (const fila of rn.data) {
+        if (
+          typeof fila === 'object' &&
+          fila !== null &&
+          typeof fila.presupuesto_id === 'string' &&
+          typeof fila.nombre_comercial === 'string'
+        ) {
+          nombresNegocio.set(fila.presupuesto_id, fila.nombre_comercial);
+        }
+      }
+    }
+  }
+
   const data: CitaActivaMascota[] = [];
   for (const c of activas) {
     data.push({
@@ -133,6 +165,10 @@ export async function obtenerCitasActivasMascota(
               : 'hold',
       prestador_id: c.prestador_id,
       prestador_nombre: c.prestadores?.nombre_comercial ?? null,
+      negocio_nombre:
+        c.fecha === null && c.presupuesto_id !== null
+          ? (nombresNegocio.get(c.presupuesto_id) ?? null)
+          : null,
       atencion_id: atencionPorCita.get(c.id) ?? null,
     });
   }

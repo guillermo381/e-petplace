@@ -22,6 +22,14 @@ export interface PresupuestoFamilia {
   id: string;
   mascotaId: string;
   mascotaNombre: string | null;
+  /**
+   * Nombre comercial del negocio que envió el presupuesto (D-455, S71-A).
+   * Viene de la RPC angosta `obtener_nombres_negocio_por_presupuesto`
+   * (la RLS de cuentas_comerciales es solo-owner y el dueño no puede leer
+   * la tabla). null honesto si la RPC falla — la pantalla omite, jamás
+   * inventa quién.
+   */
+  negocioNombre: string | null;
   total: number;
   /** ISO. La cara del dueño lo muestra siempre. */
   venceEn: string;
@@ -43,7 +51,7 @@ function esObj(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null;
 }
 
-function mapFila(f: Record<string, unknown>): PresupuestoFamilia {
+function mapFila(f: Record<string, unknown>, nombres: Map<string, string>): PresupuestoFamilia {
   const venceEn = String(f['vence_en'] ?? '');
   const estadoEfectivo: EstadoEfectivoPresupuesto =
     venceEn !== '' && new Date(venceEn).getTime() < Date.now() ? 'vencido' : 'enviado';
@@ -64,6 +72,7 @@ function mapFila(f: Record<string, unknown>): PresupuestoFamilia {
     id: String(f['id']),
     mascotaId: String(f['mascota_id']),
     mascotaNombre: mascota && typeof mascota['nombre'] === 'string' ? (mascota['nombre'] as string) : null,
+    negocioNombre: nombres.get(String(f['id'])) ?? null,
     total: Number(f['total'] ?? 0),
     venceEn,
     recibidoEn: String(f['created_at'] ?? ''),
@@ -93,5 +102,24 @@ export async function obtenerPresupuestosFamilia(): Promise<
 
   if (error) return { ok: false, codigo: 'error_lectura', mensaje: MSG.error_lectura };
   const filas = Array.isArray(data) ? data : [];
-  return { ok: true, data: filas.filter(esObj).map(mapFila) };
+
+  // D-455 (S71-A): el nombre del negocio, por la RPC angosta (batch único).
+  // Si la RPC falla, negocioNombre queda null en todas — la lectura principal
+  // NO se cae por el adorno (Ley 13: el error del nombre no rompe la lista).
+  const nombres = new Map<string, string>();
+  const ids = filas.filter(esObj).map((f) => String(f['id']));
+  if (ids.length > 0) {
+    const rn = await getClient().rpc('obtener_nombres_negocio_por_presupuesto', {
+      p_presupuesto_ids: ids,
+    });
+    if (!rn.error && Array.isArray(rn.data)) {
+      for (const fila of rn.data) {
+        if (esObj(fila) && typeof fila['presupuesto_id'] === 'string' && typeof fila['nombre_comercial'] === 'string') {
+          nombres.set(fila['presupuesto_id'], fila['nombre_comercial']);
+        }
+      }
+    }
+  }
+
+  return { ok: true, data: filas.filter(esObj).map((f) => mapFila(f, nombres)) };
 }
