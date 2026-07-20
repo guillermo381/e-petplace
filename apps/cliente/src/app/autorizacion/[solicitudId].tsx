@@ -14,7 +14,7 @@ import { useCallback, useState } from 'react';
 import { Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { Boton, Hoja, spacing, typography, useAviso, useTheme } from '@epetplace/ui';
+import { Boton, Esqueleto, EsqueletoGrupo, Hoja, spacing, typography, useAviso, useTheme } from '@epetplace/ui';
 import {
   obtenerSolicitudesPendientesDueno,
   responderSolicitudAutorizacion,
@@ -97,7 +97,18 @@ export default function AutorizacionScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={[]}>
       <Hoja visible onCerrar={cerrar} titulo={estado === 'no_disponible' ? t('autorizacion.noExiste') : titulo} conCerrar>
         <View style={{ padding: spacing[4], gap: spacing[4] }}>
-          {estado === 'no_disponible' ? (
+          {/* S71-A CURA-1 🔴 — el ternario distinguía SOLO 'no_disponible':
+              en 'cargando' los CTAs se renderizaban vivos y tocables sobre
+              una Hoja que aún no sabía QUÉ se autoriza. Un toque temprano
+              autorizaba a ciegas (riesgo de consentimiento, no cosmético).
+              La rama de carga es ahora explícita y NO tiene acciones:
+              esqueleto estático (Ley 13), sin spinner ni CTA apagado. */}
+          {estado === 'cargando' ? (
+            <EsqueletoGrupo etiqueta={t('autorizacion.cargando')}>
+              <Esqueleto forma="linea" ancho="90%" />
+              <Esqueleto forma="linea" ancho="70%" />
+            </EsqueletoGrupo>
+          ) : estado === 'no_disponible' ? (
             <Boton variante="secundario" bloque etiqueta={t('autorizacion.cerrar')} onPress={cerrar} />
           ) : (
             <>
