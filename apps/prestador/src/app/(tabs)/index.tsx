@@ -952,8 +952,17 @@ export default function Hoy() {
 
         {/* ── S70-B2-v2: POR COORDINAR — citas de presupuesto aprobado SIN
             fecha (D-439). NO desaparece con el día vacío (boceto v2b). Techo
-            visual 3 + "Ver todas". Solo negocio con vet activo. ── */}
-        {pantalla.estado === 'listo' && vista === 'hoy' && oficiosActivos?.vet && porCoordinar.length > 0 && (
+            visual 3 + "Ver todas".
+
+            S72-B (cura): el gate era `oficiosActivos?.vet && …`, y `oficios.vet`
+            se computa de `servicios` — que EXCLUYE las filas 'otro'
+            (veterinaria-oferta: los procedimientos salen por su propia clave).
+            Un negocio que SOLO cotiza procedimientos por presupuesto tenía la
+            bandeja entera invisible CON CITAS ADENTRO, y es el único camino a
+            coordinar la fecha. El gate correcto no es el oficio: es que HAYA
+            citas por coordinar — el propio lector ya devuelve vacío cuando no
+            corresponde (corre con cuenta comercial, sin mirar oficio). ── */}
+        {pantalla.estado === 'listo' && vista === 'hoy' && porCoordinar.length > 0 && (
           <View style={{ gap: spacing[2] }}>
             <Text
               accessibilityRole="header"
