@@ -70,6 +70,7 @@ import {
   obtenerResumenServiciosHogar,
   type ResumenServiciosHogar,
   obtenerVacunaPorEvento,
+  obtenerSolicitudesPendientesDueno,
   resolverUrlFoto,
   resolverUrlsFotos,
   type DetalleAtencion,
@@ -77,6 +78,7 @@ import {
   type ItemTimeline,
   type MascotaResumen,
   type PlanPaseo,
+  type SolicitudPendiente,
   type VacunaDeEvento,
 } from '@epetplace/api';
 import { calcularVozHogar, type VozEstadoHogar } from '@epetplace/domain';
@@ -316,6 +318,9 @@ export default function Hogar() {
   const [vacunaAbierta, setVacunaAbierta] = useState(false);
   const [vacuna, setVacuna] = useState<VacunaDeEvento | 'cargando' | 'error'>('cargando');
   const [carnetFirmado, setCarnetFirmado] = useState<string | null>(null);
+  // S70-A5: solicitudes de autorización del mostrador pendientes (poll en foco;
+  // el badge abre la Hoja SIN depender del push).
+  const [solicitudesPend, setSolicitudesPend] = useState<SolicitudPendiente[]>([]);
 
   const esMemorial = theme.mode === 'memorial';
 
@@ -427,6 +432,10 @@ export default function Hogar() {
           // sin nombre: el saludo va solo — jamás un nombre inventado
           if (vigente && p.ok) setNombrePerfil(p.data.nombre);
         });
+        // S70-A5: solicitudes pendientes del mostrador (poll; badge sin push)
+        void obtenerSolicitudesPendientesDueno().then((s) => {
+          if (vigente) setSolicitudesPend(s.ok ? s.data : []);
+        });
         // Zona 3: el presupuesto vigente más próximo a vencer (lector ya ordenado).
         void obtenerPresupuestosFamilia().then((pr) => {
           if (!vigente) return;
@@ -453,6 +462,11 @@ export default function Hogar() {
   );
 
   const alTocarNodo = (item: { atencion_id?: string | null; evento_id: string; tipo?: string }) => {
+    // S70-A4: el nodo de consulta clínica lleva al PARTE del dueño.
+    if (item.tipo === 'historia_clinica_registrada') {
+      router.push({ pathname: '/parte/[eventoId]', params: { eventoId: item.evento_id } });
+      return;
+    }
     if (item.tipo === 'vacuna_aplicada') {
       setVacunaAbierta(true);
       setVacuna('cargando');
@@ -529,7 +543,7 @@ export default function Hogar() {
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: theme.bg.base }}
-      contentContainerStyle={{ paddingBottom: spacing[8] }}
+      contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}
     >
       {/* ── Zona 1 — el hogar ───────────────────────────────────
           Techo: HeroMarca compacto (enmienda Ley 4 S52, SELLADA
@@ -811,6 +825,39 @@ export default function Hogar() {
           />
         </Tarjeta>
       </Animated.View>
+
+      {/* ── S70-A5: solicitud de autorización del mostrador (UNO, contextual;
+           abre la Hoja sin depender del push). Memorial calla. ── */}
+      {solicitudesPend.length > 0 && !esMemorial ? (
+        <Animated.View
+          entering={entradaZona(3)}
+          style={{ paddingHorizontal: spacing[4], marginTop: spacing[7], gap: spacing[3] }}
+        >
+          <Tarjeta relleno="ninguno" elevacion="reposo">
+            <CeldaNavegacion
+              icono="veterinaria"
+              titulo={
+                solicitudesPend[0].tipo === 'alta_mascota'
+                  ? t('autorizacion.tituloAlta', {
+                      negocio: solicitudesPend[0].negocioNombre ?? '',
+                      mascota: solicitudesPend[0].mascotaNombre ?? '',
+                    })
+                  : t('autorizacion.tituloAtencion', {
+                      negocio: solicitudesPend[0].negocioNombre ?? '',
+                      mascota: solicitudesPend[0].mascotaNombre ?? '',
+                    })
+              }
+              detalle={t('autorizacion.revisar')}
+              onPress={() =>
+                router.push({
+                  pathname: '/autorizacion/[solicitudId]',
+                  params: { solicitudId: solicitudesPend[0].solicitudId },
+                })
+              }
+            />
+          </Tarjeta>
+        </Animated.View>
+      ) : null}
 
       {/* ── Zona 3 — en contexto: PRIMER habitante (S69). El presupuesto
            pendiente más próximo a vencer, UNO y contextual (§15b).

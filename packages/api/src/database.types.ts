@@ -6882,6 +6882,7 @@ export type Database = {
       }
       evento_medicacion_prescrita: {
         Row: {
+          cantidad: number | null
           caso_clinico_id: string | null
           cita_id: string | null
           concentracion: string | null
@@ -6906,6 +6907,7 @@ export type Database = {
           via_administracion: string | null
         }
         Insert: {
+          cantidad?: number | null
           caso_clinico_id?: string | null
           cita_id?: string | null
           concentracion?: string | null
@@ -6930,6 +6932,7 @@ export type Database = {
           via_administracion?: string | null
         }
         Update: {
+          cantidad?: number | null
           caso_clinico_id?: string | null
           cita_id?: string | null
           concentracion?: string | null
@@ -14014,6 +14017,99 @@ export type Database = {
           },
         ]
       }
+      solicitud_autorizacion_mostrador: {
+        Row: {
+          country_code: string
+          created_at: string
+          cuenta_comercial_id: string
+          destino_user_id: string | null
+          estado: string
+          expira_en: string
+          familia_id: string | null
+          id: string
+          mascota_creada_id: string | null
+          mascota_id: string | null
+          payload_alta: Json | null
+          respondida_en: string | null
+          respondida_por_user_id: string | null
+          solicitada_por_user_id: string
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          country_code?: string
+          created_at?: string
+          cuenta_comercial_id: string
+          destino_user_id?: string | null
+          estado?: string
+          expira_en?: string
+          familia_id?: string | null
+          id?: string
+          mascota_creada_id?: string | null
+          mascota_id?: string | null
+          payload_alta?: Json | null
+          respondida_en?: string | null
+          respondida_por_user_id?: string | null
+          solicitada_por_user_id: string
+          tipo: string
+          updated_at?: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          cuenta_comercial_id?: string
+          destino_user_id?: string | null
+          estado?: string
+          expira_en?: string
+          familia_id?: string | null
+          id?: string
+          mascota_creada_id?: string | null
+          mascota_id?: string | null
+          payload_alta?: Json | null
+          respondida_en?: string | null
+          respondida_por_user_id?: string | null
+          solicitada_por_user_id?: string
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitud_autorizacion_mostrador_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas_comerciales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitud_autorizacion_mostrador_cuenta_comercial_id_fkey"
+            columns: ["cuenta_comercial_id"]
+            isOneToOne: false
+            referencedRelation: "v_eventos_resumen_cuenta"
+            referencedColumns: ["cuenta_comercial_id"]
+          },
+          {
+            foreignKeyName: "solicitud_autorizacion_mostrador_familia_id_fkey"
+            columns: ["familia_id"]
+            isOneToOne: false
+            referencedRelation: "familia"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitud_autorizacion_mostrador_mascota_creada_id_fkey"
+            columns: ["mascota_creada_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitud_autorizacion_mostrador_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       solicitudes_adopcion: {
         Row: {
           aprobado_en: string | null
@@ -15967,6 +16063,19 @@ export type Database = {
         }
         Returns: string
       }
+      _crear_padre_constelacion: {
+        Args: {
+          p_cita_evento: string
+          p_country: string
+          p_datos: Json
+          p_empleado: string
+          p_mascota: string
+          p_prestador: string
+          p_tipo: string
+          p_uid: string
+        }
+        Returns: string
+      }
       _debe_logear_atencion: {
         Args: { p_prestador_id: string; p_tipo_evento: string }
         Returns: boolean
@@ -16127,6 +16236,18 @@ export type Database = {
           tipo_servicio: string
         }[]
       }
+      abrir_caso_clinico: {
+        Args: {
+          p_condicion: string
+          p_country_code?: string
+          p_cuenta_comercial_id: string
+          p_empleado_id?: string
+          p_evento_origen?: string
+          p_horizonte?: string
+          p_mascota_id: string
+        }
+        Returns: string
+      }
       aceptar_invitacion_pendiente_login: {
         Args: { p_empleado_id: string }
         Returns: Json
@@ -16227,6 +16348,10 @@ export type Database = {
       }
       aprobar_presupuesto_familia: {
         Args: { p_presupuesto_id: string }
+        Returns: Json
+      }
+      asociar_a_caso: {
+        Args: { p_caso_id: string; p_cita_id: string }
         Returns: Json
       }
       buscar_cliente_por_email: { Args: { p_email: string }; Returns: Json }
@@ -16486,6 +16611,17 @@ export type Database = {
         }
         Returns: string
       }
+      crear_solicitud_autorizacion: {
+        Args: {
+          p_country_code?: string
+          p_cuenta_comercial_id: string
+          p_destino_user_id?: string
+          p_mascota_id?: string
+          p_payload_alta?: Json
+          p_tipo: string
+        }
+        Returns: string
+      }
       debug_estado_user: {
         Args: { p_email: string }
         Returns: {
@@ -16541,6 +16677,15 @@ export type Database = {
         Returns: boolean
       }
       expirar_citas_pendientes: { Args: never; Returns: undefined }
+      fijar_fecha_procedimiento: {
+        Args: {
+          p_cita: string
+          p_empleado: string
+          p_fecha: string
+          p_hora: string
+        }
+        Returns: Json
+      }
       generar_eventos_diferidos: {
         Args: { p_fecha_corte?: string }
         Returns: {
@@ -16758,9 +16903,47 @@ export type Database = {
         Args: { p_familia_servicio: string; p_mascota_id: string }
         Returns: Json
       }
+      obtener_casos_activos_mascota: {
+        Args: { p_cuenta_comercial_id: string; p_mascota_id: string }
+        Returns: {
+          caso_id: string
+          condicion: string
+          empleado_tratante_id: string
+          es_tratante: boolean
+          fecha_apertura: string
+          horizonte_proximo_evento: string
+        }[]
+      }
       obtener_cita_de_grooming: {
         Args: { p_grooming_id: string }
         Returns: Json
+      }
+      obtener_citas_por_coordinar: {
+        Args: { p_cuenta: string }
+        Returns: {
+          caso_clinico_id: string
+          caso_condicion: string
+          cita_id: string
+          creada_en: string
+          duracion_minutos: number
+          empleado_id: string
+          items: Json
+          mascota_especie: string
+          mascota_id: string
+          mascota_nombre: string
+          presupuesto_id: string
+          servicio_nombre: string
+          tipo_servicio: string
+          total_congelado: number
+        }[]
+      }
+      obtener_empleados_cuenta: {
+        Args: { p_cuenta_comercial_id: string }
+        Returns: {
+          activo: boolean
+          empleado_id: string
+          nombre: string
+        }[]
       }
       obtener_groomers_disponibles: {
         Args: {
@@ -16858,6 +17041,7 @@ export type Database = {
         Args: { p_cita_id: string }
         Returns: Json
       }
+      obtener_parte_consulta: { Args: { p_evento_id: string }; Returns: Json }
       obtener_paseadores_con_paquete: {
         Args: { p_duracion_minutos?: number; p_servicio_id?: string }
         Returns: {
@@ -16916,6 +17100,17 @@ export type Database = {
           duracion_minutos: number
           fecha: string
           hora: string
+        }[]
+      }
+      obtener_solicitudes_pendientes_dueno: {
+        Args: never
+        Returns: {
+          expira_en: string
+          mascota_id: string
+          mascota_nombre: string
+          negocio_nombre: string
+          solicitud_id: string
+          tipo: string
         }[]
       }
       obtener_ultima_atencion_grooming: {
@@ -17156,8 +17351,24 @@ export type Database = {
         Args: { p_mascota_id: string; p_ok: boolean }
         Returns: Json
       }
+      responder_solicitud_autorizacion: {
+        Args: { p_accion: string; p_solicitud_id: string }
+        Returns: Json
+      }
       saltar_cita_plan: {
         Args: { p_cita_id: string; p_nueva_fecha: string; p_nueva_hora: string }
+        Returns: Json
+      }
+      sedimentar_nota_clinica: {
+        Args: {
+          p_caso?: Json
+          p_cita_id: string
+          p_country_code?: string
+          p_cuenta_comercial_id: string
+          p_empleado_id: string
+          p_mascota_id: string
+          p_nota: Json
+        }
         Returns: Json
       }
       service_active_in: {

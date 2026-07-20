@@ -595,6 +595,107 @@ export {
   type ProcedimientoVeterinaria,
   type TipoVeterinariaCatalogo,
 } from './wrappers/veterinaria-oferta';
+// S69-B (M0): la jornada VE al vet — el cuarto gemelo de los lectores del
+// día (SOLO LECTURA; el motor de la atención clínica es V4). Hunk aditivo.
+export {
+  obtenerCitasVetDelDia,
+  obtenerCitaVetPorId,
+  type CodigoErrorVetAtencion,
+} from './wrappers/veterinaria-atencion';
+// S69-B (M2): el buscador del MOSTRADOR — mascotas accesibles (RLS) +
+// alta asistida por email (Fase G). Solo lectura, hunk aditivo.
+export {
+  buscarMascotasAccesibles,
+  buscarClienteAltaAsistida,
+  buscarClientePorTelefono,
+  crearAltaAsistidaMostrador,
+  registrarAtencionMostrador,
+  registrarCobroPresencial,
+  obtenerCatalogoVacunas,
+  registrarVacunaMostrador,
+  consultarSolicitudAutorizacion,
+  MEDIOS_COBRO,
+  type EstadoSolicitud,
+  type EstadoSolicitudMostrador,
+  type MascotaMostrador,
+  // S70-B2-v2 (Durante): el empleadoId del vet tratante (v1 = titular)
+  // se resuelve con obtenerTitularId (exportado abajo).
+  type ResultadoBusquedaCliente,
+  type MascotaDeClienteRegistrado,
+  type CodigoBusquedaCliente,
+  type AltaAsistidaMostradorInput,
+  type AltaAsistidaMostradorResultado,
+  type CodigoAltaMostrador,
+  type AtencionMostradorInput,
+  type CodigoAtencionMostrador,
+  type MedioCobro,
+  type CodigoCobroPresencial,
+  type VacunaCatalogo,
+  type VacunaMostradorInput,
+  type CodigoVacunaMostrador,
+} from './wrappers/veterinaria-mostrador';
+export { obtenerTitularId } from './wrappers/titular';
+// S69-B (B3): el presupuesto clínico — 5 RPCs del contrato A1 (lane cedida
+// por la A). Hunk aditivo.
+export {
+  crearPresupuestoBorrador,
+  enviarPresupuesto,
+  aprobarPresupuestoFamilia,
+  registrarAprobacionPresencial,
+  rechazarPresupuesto,
+  obtenerPresupuestosPrestador,
+  obtenerCitasPorCoordinar,
+  fijarFechaProcedimiento,
+  type PresupuestoItemInput,
+  type CrearPresupuestoInput,
+  type AprobacionPresupuesto,
+  type CodigoErrorPresupuesto,
+  type PresupuestoPrestador,
+  type PresupuestoPrestadorItem,
+  type EstadoPresupuesto,
+  type CitaPorCoordinar,
+  type CitaPorCoordinarItem,
+  type FijarFechaInput,
+  type FechaFijada,
+  obtenerEmpleadosCuenta,
+  type EmpleadoCuenta,
+} from './wrappers/veterinaria-presupuesto';
+// S70-A2: la constelación de la nota clínica + caso v1.
+export {
+  estructurarNotaClinica,
+  sedimentarNotaClinica,
+  abrirCasoClinico,
+  asociarACaso,
+  type NotaEstructurada,
+  type ItemFormula,
+  type VitalesMedidos,
+  type NotaConfirmada,
+  type CasoRef,
+  type SedimentarInput,
+  type ResultadoSedimento,
+  type AbrirCasoInput,
+  type CodigoErrorSedimento,
+  type EstructurarInput,
+  obtenerParteConsulta,
+  obtenerCasosActivosMascota,
+  type ParteConsulta,
+  type ItemFormulaParte,
+  type CasoActivo,
+  type CodigoErrorCasos,
+} from './wrappers/veterinaria-nota-clinica';
+// S70-A3/A3bis: handshake del mostrador.
+export {
+  crearSolicitudAutorizacion,
+  responderSolicitudAutorizacion,
+  type TipoSolicitud,
+  type AccionSolicitud,
+  type PayloadAlta,
+  type CrearSolicitudInput,
+  type RespuestaSolicitud,
+  type CodigoErrorSolicitud,
+  obtenerSolicitudesPendientesDueno,
+  type SolicitudPendiente,
+} from './wrappers/handshake-mostrador';
 export {
   ESTADOS_DOCUMENTO,
   TIPOS_DOCUMENTO_VERIFICACION,
