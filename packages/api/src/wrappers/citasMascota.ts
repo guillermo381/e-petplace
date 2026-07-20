@@ -14,15 +14,21 @@ const MENSAJE_ERROR = 'No pudimos leer las citas. Prueba de nuevo.';
 
 export interface CitaActivaMascota {
   cita_id: string;
-  /** ISO date. */
-  fecha: string;
+  /**
+   * ISO date, o NULL cuando la cita todavía no tiene fecha coordinada
+   * (S71-A: la cita que nace de un presupuesto aprobado — D-439 la hizo
+   * legal SIN fecha; la coordina el prestador después).
+   */
+  fecha: string | null;
   /** HH:MM o null. */
   hora: string | null;
   tipo_servicio: string | null;
   /** 'firme' = confirmada (pagada o legacy) · 'en_vivo' = la atención
    *  está ocurriendo (conecta con /paseo/[atencionId], §7.1) · 'hold' =
-   *  bloqueo de agenda VIGENTE (D-319: el vencido no existe). */
-  estado: 'firme' | 'en_vivo' | 'hold';
+   *  bloqueo de agenda VIGENTE (D-319: el vencido no existe) ·
+   *  'por_coordinar' = firme y aprobada, esperando que el negocio fije
+   *  la fecha (S71-A, costura de D-439). */
+  estado: 'firme' | 'en_vivo' | 'hold' | 'por_coordinar';
   prestador_id: string | null;
   /** nombre_comercial del prestador, o null honesto (fila no visible). */
   prestador_nombre: string | null;
@@ -49,12 +55,19 @@ export async function obtenerCitasActivasMascota(
   const citas = await cliente
     .from('evento_cita_servicio')
     .select(
-      'id, fecha, hora, tipo_servicio, estado, estado_reserva, expira_en, prestador_id, prestadores ( nombre_comercial )',
+      'id, fecha, hora, tipo_servicio, estado, estado_reserva, expira_en, prestador_id, presupuesto_id, prestadores ( nombre_comercial )',
     )
     .eq('mascota_id', mascotaId)
     .in('estado', ['pendiente', 'confirmada', 'en_curso'])
-    .gte('fecha', hoyLocal())
-    .order('fecha', { ascending: true })
+    // S71-A (costura de D-439) — el `.gte('fecha', hoy)` solo escondía:
+    // la cita que nace de un presupuesto APROBADO es legal SIN fecha, y
+    // `NULL >= hoy` no es verdadero, así que el dueño aprobaba y su
+    // procedimiento desaparecía de todas sus superficies. Entra también
+    // la sin-fecha CON presupuesto (jamás una sin fecha huérfana).
+    .or(`fecha.gte.${hoyLocal()},and(fecha.is.null,presupuesto_id.not.is.null)`)
+    // nullsFirst: las sin fecha PRESIDEN — son las que esperan acción
+    // (ley de la casa del prestador, aplicada a la casa del dueño).
+    .order('fecha', { ascending: true, nullsFirst: true })
     .order('hora', { ascending: true, nullsFirst: false })
     // 50: un plan L-V genera ~22 citas/mes — 10 era un tope silencioso
     // para el "Ver más" (relevado vivo: Thor con 23 activas).
@@ -71,7 +84,10 @@ export async function obtenerCitasActivasMascota(
   const ahora = Date.now();
   const activas = citas.data.filter(
     (c) =>
-      c.fecha !== null &&
+      // S71-A: la sin-fecha entra SOLO si viene de presupuesto aprobado —
+      // el resto sigue exigiendo fecha (una cita sin fecha ni presupuesto
+      // es data rota, no un estado del producto).
+      (c.fecha !== null || c.presupuesto_id !== null) &&
       (c.estado === 'confirmada' ||
         c.estado === 'en_curso' ||
         (c.estado === 'pendiente' &&
@@ -102,13 +118,19 @@ export async function obtenerCitasActivasMascota(
   // angosta verificando, jamás con cast (regla 34).
   const data: CitaActivaMascota[] = [];
   for (const c of activas) {
-    if (c.fecha === null) continue;
     data.push({
       cita_id: c.id,
       fecha: c.fecha,
       hora: c.hora !== null ? c.hora.slice(0, 5) : null,
       tipo_servicio: c.tipo_servicio,
-      estado: c.estado === 'en_curso' ? 'en_vivo' : c.estado === 'confirmada' ? 'firme' : 'hold',
+      estado:
+        c.estado === 'en_curso'
+          ? 'en_vivo'
+          : c.fecha === null
+            ? 'por_coordinar'
+            : c.estado === 'confirmada'
+              ? 'firme'
+              : 'hold',
       prestador_id: c.prestador_id,
       prestador_nombre: c.prestadores?.nombre_comercial ?? null,
       atencion_id: atencionPorCita.get(c.id) ?? null,
