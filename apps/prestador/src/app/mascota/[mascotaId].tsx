@@ -206,20 +206,30 @@ export default function DetalleMascota() {
           </Tarjeta>
         </View>
 
-        {/* ── tu historial con la mascota (visibilidad parcial) ── */}
+        {/* ── tu historial con la mascota (visibilidad parcial) ──
+            S71 (hallazgo founder): con 0 atenciones la tarjeta se dibujaba
+            VACÍA — una línea y nada debajo. Ley 13: el vacío habla — y acá
+            además es dato útil del Antes (rima con la señal "Primera vez"
+            de la jornada). */}
         <View style={{ gap: spacing[3] }}>
           <TituloModulo texto={t('detalleMascota.historial', { nombre: mascota.nombre })} />
-          <Tarjeta relleno="ninguno">
-            {atenciones.map((a, i) => (
-              <View key={a.atencion_id}>
-                {i > 0 ? <Separador /> : null}
-                <Celda
-                  titulo={a.estado === 'en_curso' ? t('detalleMascota.atencionEnCurso') : t('detalleMascota.atencionCerrada')}
-                  metadataMono={a.cerrada_en !== null ? fechaCortaMono((a.cerrada_en).slice(0, 10), idioma) : a.iniciada_en !== null ? fechaCortaMono((a.iniciada_en).slice(0, 10), idioma) : undefined}
-                />
-              </View>
-            ))}
-          </Tarjeta>
+          {atenciones.length === 0 ? (
+            <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+              {t('detalleMascota.historialVacio', { nombre: mascota.nombre })}
+            </Text>
+          ) : (
+            <Tarjeta relleno="ninguno">
+              {atenciones.map((a, i) => (
+                <View key={a.atencion_id}>
+                  {i > 0 ? <Separador /> : null}
+                  <Celda
+                    titulo={a.estado === 'en_curso' ? t('detalleMascota.atencionEnCurso') : t('detalleMascota.atencionCerrada')}
+                    metadataMono={a.cerrada_en !== null ? fechaCortaMono((a.cerrada_en).slice(0, 10), idioma) : a.iniciada_en !== null ? fechaCortaMono((a.iniciada_en).slice(0, 10), idioma) : undefined}
+                  />
+                </View>
+              ))}
+            </Tarjeta>
+          )}
         </View>
 
         {/* ── identidad (progresiva; las 5 dimensiones son D-110) ── */}
