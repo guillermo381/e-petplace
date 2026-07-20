@@ -827,6 +827,11 @@ export const clienteEn = {
     titulo: "{{nombre}}'s appointment",
     tituloSinNombre: 'Their appointment',
     estadoConfirmada: 'Confirmed',
+    // S71-A — mirror of es.ts (Espejo enforces parity).
+    estadoPorCoordinar: 'Approved · Date pending',
+    faltaCoordinar: 'Date pending',
+    coordinaraNegocio: '{{negocio}} will contact you to schedule',
+    coordinaranSinNombre: "You'll be contacted to schedule",
     quienAtiende: 'Provider',
     verMas: 'See more',
     otrasActivas: 'Their other appointments',

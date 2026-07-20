@@ -159,12 +159,22 @@ export default function CitasDeMascota() {
   const otras = citas.filter((c) => c !== hero);
 
   const vozEstado = (c: CitaActivaMascota): string =>
-    c.estado === 'hold' ? t('hogar.reservandoHorario') : t('citasMascota.estadoConfirmada');
+    c.estado === 'hold'
+      ? t('hogar.reservandoHorario')
+      : c.estado === 'por_coordinar'
+        ? t('citasMascota.estadoPorCoordinar')
+        : t('citasMascota.estadoConfirmada');
 
   const detalleHero = (c: CitaActivaMascota) => {
     const servicio = vozServicio(t, c.tipo_servicio) ?? null;
     const icono = iconoOficio(c.tipo_servicio);
-    const cuando = `${fechaLargaHumana(c.fecha, idioma)}${c.hora !== null ? ` · ${c.hora}` : ''}`;
+    // S71-A (costura de D-439): la cita aprobada todavía no tiene fecha —
+    // se dice con todas las letras, jamás un hueco ni un guión. La línea de
+    // agencia contesta la pregunta que sigue: "¿y ahora quién mueve esto?".
+    const cuando =
+      c.fecha === null
+        ? t('citasMascota.faltaCoordinar')
+        : `${fechaLargaHumana(c.fecha, idioma)}${c.hora !== null ? ` · ${c.hora}` : ''}`;
     const tarjeta = (
       <Tarjeta elevacion="reposo">
         <View style={{ gap: spacing[3] }}>
@@ -204,8 +214,33 @@ export default function CitasDeMascota() {
               {t('hogar.verEnVivo')}
             </Text>
           ) : (
-            <Insignia estado={c.estado === 'hold' ? 'proximo' : 'alDia'} etiqueta={vozEstado(c)} tamaño="sm" />
+            <Insignia
+              estado={c.estado === 'hold' || c.estado === 'por_coordinar' ? 'proximo' : 'alDia'}
+              etiqueta={vozEstado(c)}
+              tamaño="sm"
+            />
           )}
+          {/* S71-A — la línea de AGENCIA: quién mueve esto ahora. Sin ella
+              el dueño queda con un estado y sin saber qué esperar.
+              DOS FORMAS, porque el nombre puede no estar: la cita nacida de
+              presupuesto sin empleado emisor tiene prestador_id NULL
+              (D-439 retiró la heurística), y el NEGOCIO de la cuenta
+              comercial NO es legible por el dueño (RLS solo-owner,
+              verificado en DB). Con nombre lo decimos; sin nombre decimos
+              la verdad igual, sin inventar quién. */}
+          {c.estado === 'por_coordinar' ? (
+            <Text
+              style={{
+                fontFamily: typography.family.sans.regular,
+                fontSize: typography.size.sm,
+                color: theme.text.secondary,
+              }}
+            >
+              {c.prestador_nombre !== null
+                ? t('citasMascota.coordinaraNegocio', { negocio: c.prestador_nombre })
+                : t('citasMascota.coordinaranSinNombre')}
+            </Text>
+          ) : null}
           {c.prestador_nombre !== null ? (
             <>
               <Separador />
@@ -417,7 +452,11 @@ export default function CitasDeMascota() {
                       <CeldaNavegacion
                         icono={iconoDe(c.tipo_servicio)}
                         titulo={vozServicio(t, c.tipo_servicio) ?? vozEstado(c)}
-                        detalle={`${fechaCortaMono(c.fecha, idioma)}${c.hora !== null ? ` · ${c.hora}` : ''}`}
+                        detalle={
+                          c.fecha === null
+                            ? t('citasMascota.faltaCoordinar')
+                            : `${fechaCortaMono(c.fecha, idioma)}${c.hora !== null ? ` · ${c.hora}` : ''}`
+                        }
                         onPress={() => router.setParams({ citaId: c.cita_id })}
                       />
                     </View>

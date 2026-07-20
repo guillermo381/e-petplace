@@ -879,6 +879,13 @@ export const clienteEs = {
     titulo: 'La cita de {{nombre}}',
     tituloSinNombre: 'Su cita',
     estadoConfirmada: 'Confirmada',
+    // S71-A (costura de D-439) — la cita aprobada que espera fecha.
+    // LOTE PENDIENTE DE GATE FOUNDER. Tuteo neutro.
+    estadoPorCoordinar: 'Aprobado · Falta coordinar la fecha',
+    faltaCoordinar: 'Falta coordinar la fecha',
+    coordinaraNegocio: '{{negocio}} te va a contactar para agendar',
+    // sin nombre visible del negocio: la verdad igual, sin inventar quién
+    coordinaranSinNombre: 'Te van a contactar para agendar',
     quienAtiende: 'Quien la atiende',
     verMas: 'Ver más',
     otrasActivas: 'Sus otras citas',
