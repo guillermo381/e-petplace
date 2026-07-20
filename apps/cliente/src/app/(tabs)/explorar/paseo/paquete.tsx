@@ -22,7 +22,7 @@
 
 import { useCallback, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
@@ -51,6 +51,7 @@ export default function PaqueteComprar() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ duracion?: string; servicio?: string }>();
   const duracion = typeof params.duracion === 'string' ? Number(params.duracion) : undefined;
   const servicioId = typeof params.servicio === 'string' ? params.servicio : undefined;
@@ -76,7 +77,7 @@ export default function PaqueteComprar() {
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('paquete.pantallaTitulo')} atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[3] }}>
+      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[3] }}>
         {lista === 'cargando' ? (
           <EsqueletoGrupo>
             <View style={{ gap: spacing[3] }}>

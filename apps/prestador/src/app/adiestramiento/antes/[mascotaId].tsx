@@ -48,6 +48,7 @@ import {
 } from '@epetplace/api';
 import { calcularMomentoVital, edadEnMeses } from '@epetplace/domain';
 import { fechaCortaMono, type IdiomaSoportado } from '@epetplace/i18n';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { verificarSesion } from '@/lib/api';
 import { useTraduccion } from '@/i18n';
@@ -83,6 +84,7 @@ export default function AntesAdiestramiento() {
   const { theme } = useTheme();
   const router = useRouter();
   const { t, idioma } = useTraduccion();
+  const insets = useSafeAreaInsets();
   const { mascotaId = '' } = useLocalSearchParams<{ mascotaId: string }>();
 
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
@@ -156,7 +158,7 @@ export default function AntesAdiestramiento() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[4] }}>
+      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[4] }}>
         <Encabezado
           variante="navegacion"
           titulo={ficha ? t('adiestramiento.tituloDe', { nombre: ficha.nombre }) : t('adiestramiento.titulo')}

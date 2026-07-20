@@ -15,6 +15,7 @@
 import { useCallback, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
   Celda,
@@ -57,6 +58,7 @@ export default function DiaGrooming() {
   const { theme } = useTheme();
   const router = useRouter();
   const { t } = useTraduccion();
+  const insets = useSafeAreaInsets();
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
 
   const cargar = useCallback(async (silencioso = false) => {
@@ -111,7 +113,7 @@ export default function DiaGrooming() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[4] }}>
+      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[4] }}>
         <Encabezado
           variante="navegacion"
           titulo={t('citaGrooming.diaTitulo')}

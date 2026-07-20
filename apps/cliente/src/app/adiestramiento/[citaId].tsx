@@ -24,7 +24,7 @@
 
 import { useCallback, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
@@ -49,6 +49,7 @@ import { useTraduccion } from '@/i18n';
 
 export default function ParteAdiestramientoPantalla() {
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const { t, idioma } = useTraduccion();
   const params = useLocalSearchParams<{ citaId: string; mascotaNombre?: string }>();
   const citaId = typeof params.citaId === 'string' ? params.citaId : '';
@@ -104,7 +105,7 @@ export default function ParteAdiestramientoPantalla() {
         atras
         onAtras={() => router.back()}
       />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
+      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[5] }}>
         {parte === 'cargando' ? (
           <EsqueletoGrupo>
             <View style={{ gap: spacing[3] }}>

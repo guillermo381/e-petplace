@@ -16,6 +16,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Boton,
@@ -69,6 +70,7 @@ type Pantalla =
 
 export default function CierreAdiestramiento() {
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { mostrar } = useAviso();
   const { t } = useTraduccion();
@@ -198,7 +200,7 @@ export default function CierreAdiestramiento() {
           onAtras={() => router.back()}
         />
       </View>
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[5] }}>
+      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[5] }}>
         {pantalla.estado === 'cargando' && (
           <EsqueletoGrupo>
             <View style={{ gap: spacing[4] }}>

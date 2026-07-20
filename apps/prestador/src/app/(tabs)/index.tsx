@@ -52,14 +52,19 @@ import {
   obtenerCitasAdiestramientoDelDia,
   obtenerCitasGroomingDelDia,
   obtenerCitasPaseoDelDia,
+  obtenerCitasVetDelDia,
+  obtenerCitasPorCoordinar,
   obtenerMascotasAtendidas,
+  obtenerMiCuentaComercial,
   obtenerMiPrestador,
+  obtenerMundoVeterinariaPropio,
   obtenerOfertaAdiestramientoPropia,
   obtenerOfertasGroomingPropias,
   obtenerOfertasPaseoPropias,
   resolverUrlsFotos,
   type BloqueoPrestador,
   type CitaAgendaPaseo,
+  type CitaPorCoordinar,
 } from '@epetplace/api';
 import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
@@ -81,17 +86,22 @@ type Pantalla =
       groomingIds: Set<string>;
       /** S63-B: ids de las citas de ADIESTRAMIENTO — misma mecánica. */
       adiestramientoIds: Set<string>;
+      /** S69-B (M0): ids de las citas de VETERINARIA — cuarto oficio. */
+      vetIds: Set<string>;
       bloqueos: BloqueoPrestador[];
       atendidas: Set<string>;
       /** S61-B5: oficios con oferta ACTIVA — con ≥2 nace el filtro del
        *  día. Si el fetch de ofertas falla, el control no existe: es
        *  azúcar de vista, jamás esconde citas (las citas tienen su
        *  propio camino de error, Ley 13 intacta). */
-      oficios: { paseo: boolean; grooming: boolean; adiestramiento: boolean };
+      oficios: { paseo: boolean; grooming: boolean; adiestramiento: boolean; vet: boolean };
+      /** S70-B2-v2: la bandeja "Por coordinar" — citas de presupuesto
+       *  aprobado sin fecha (D-439). Vacía para negocios no-vet. */
+      porCoordinar: CitaPorCoordinar[];
     };
 
 /** El oficio de una fila — decide ruta, ícono y filtro. */
-type OficioCita = 'paseo' | 'grooming' | 'adiestramiento';
+type OficioCita = 'paseo' | 'grooming' | 'adiestramiento' | 'vet';
 
 // ═══════════ ZONA 3 — NOVEDADES (hueco estructural) ═══════════
 // Cancelaciones/reagendas del dueño llegan con B5; los mensajes de
@@ -217,7 +227,9 @@ function FilaCita({
             ? { pathname: '/grooming/cita/[citaId]', params: { citaId: cita.id } }
             : oficio === 'adiestramiento'
               ? { pathname: '/adiestramiento/cita/[citaId]', params: { citaId: cita.id } }
-              : { pathname: '/cita/[citaId]', params: { citaId: cita.id } },
+              : oficio === 'vet'
+                ? { pathname: '/veterinaria/cita/[citaId]', params: { citaId: cita.id } }
+                : { pathname: '/cita/[citaId]', params: { citaId: cita.id } },
         )
       }
       accessibilityRole="button"
@@ -246,10 +258,24 @@ function FilaCita({
       fin={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1.5] }}>
           <Icono
-            nombre={oficio === 'grooming' ? 'grooming' : oficio === 'adiestramiento' ? 'training' : 'paseo'}
+            nombre={
+              oficio === 'grooming'
+                ? 'grooming'
+                : oficio === 'adiestramiento'
+                  ? 'training'
+                  : oficio === 'vet'
+                    ? 'veterinaria'
+                    : 'paseo'
+            }
             registro="aa"
             tamano={21}
           />
+          {/* S70-B1: el origen releído (metadata.origen). El walk-in del
+              mostrador lo dice con un chip discreto en reposo — jamás acento;
+              la reserva in-app no marca (es el implícito). */}
+          {cita.origen === 'mostrador' && (
+            <Insignia estado="info" etiqueta={t('agenda.origenMostrador')} tamaño="sm" />
+          )}
           {insignia && <Insignia estado={insignia.estado} etiqueta={insignia.etiqueta} tamaño="sm" />}
         </View>
       }
@@ -347,6 +373,11 @@ export default function Hoy() {
   const [filtroOficio, setFiltroOficio] = useState<FiltroOficioValor>('todos');
   // D-385: salidas expandidas (por clave de bloque) — vista, jamás persiste.
   const [salidasAbiertas, setSalidasAbiertas] = useState<Set<string>>(new Set());
+  // S70-B2-v2: el acordeón "Ya atendidas" — plegado por default (lo pasado
+  // se pliega; lo que sigue vive arriba).
+  const [atendidasAbierto, setAtendidasAbierto] = useState(false);
+  // S70-B2-v2: "Por coordinar" con techo visual 3 + "Ver todas".
+  const [verTodasCoord, setVerTodasCoord] = useState(false);
   const toggleSalida = (clave: string) =>
     setSalidasAbiertas((s) => {
       const n = new Set(s);
@@ -373,13 +404,16 @@ export default function Hoy() {
     // UN fetch cubre las dos vistas (S57-B1): rango hoy..hoy+6 — la vista
     // Hoy filtra por `desde`; la Semana agrupa el rango entero.
     const desde = hoyLocal();
-    const [r, rg, ra, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento] = await Promise.all([
+    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, cuentaR] = await Promise.all([
       obtenerCitasPaseoDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: sumarDias(desde, 6) }),
       // S60-B1: la jornada es UNA — las citas de grooming entran a la
       // misma lista con su tipo (el subtítulo ya lo dice) y su ruta.
       obtenerCitasGroomingDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: sumarDias(desde, 6) }),
       // S63-B: las sesiones de adiestramiento — tercera pata de la MISMA jornada.
       obtenerCitasAdiestramientoDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: sumarDias(desde, 6) }),
+      // S69-B (M0): las citas de veterinaria — CUARTA pata de la MISMA
+      // jornada (mostrador + reserva). El discriminador es es_medico.
+      obtenerCitasVetDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: sumarDias(desde, 6) }),
       // vacaciones (solo lectura): los días bloqueados se pintan como tales
       obtenerBloqueosPrestador(prestador.data.id),
       // la señal "Primera vez" de la Zona 1 (solo lo REAL): mascota
@@ -390,6 +424,10 @@ export default function Hoy() {
       obtenerOfertasPaseoPropias(prestador.data.id),
       obtenerOfertasGroomingPropias(prestador.data.id),
       obtenerOfertaAdiestramientoPropia(prestador.data.id),
+      // S69-B: el cuarto oficio para el filtro — vet activo = ≥1 servicio prendido.
+      obtenerMundoVeterinariaPropio(prestador.data.id),
+      // S70-B2-v2: la cuenta — para la bandeja "Por coordinar" (D-439).
+      obtenerMiCuentaComercial(),
     ]);
     if (!r.ok) {
       setPantalla({ estado: 'error', mensaje: r.mensaje });
@@ -406,6 +444,12 @@ export default function Hoy() {
       setPantalla({ estado: 'error', mensaje: ra.mensaje });
       return;
     }
+    // La veterinaria es la MISMA jornada — su error tampoco se disfraza
+    // de "sin citas" (Ley 13).
+    if (!rv.ok) {
+      setPantalla({ estado: 'error', mensaje: rv.mensaje });
+      return;
+    }
     // La marca de bloqueo es PROMESA de la vista semana (jamás se cae en
     // silencio — Ley 13: un error no se disfraza de "sin vacaciones").
     if (!bloqueos.ok) {
@@ -413,7 +457,7 @@ export default function Hoy() {
       return;
     }
     // Merge por fecha+hora: una sola línea de tiempo de trabajo.
-    const citas = [...r.data, ...rg.data, ...ra.data].sort((a, b) => {
+    const citas = [...r.data, ...rg.data, ...ra.data, ...rv.data].sort((a, b) => {
       const fa = a.fecha ?? '';
       const fb = b.fecha ?? '';
       return fa === fb ? (a.hora ?? '').localeCompare(b.hora ?? '') : fa.localeCompare(fb);
@@ -422,12 +466,20 @@ export default function Hoy() {
       .map((c) => c.mascota?.foto_url)
       .filter((p): p is string => typeof p === 'string' && p.length > 0);
     if (paths.length > 0) setUrlsFotos(await resolverUrlsFotos(paths));
+    // S70-B2-v2: la bandeja "Por coordinar" (D-439) — solo con cuenta; vacía si no.
+    let porCoordinar: CitaPorCoordinar[] = [];
+    if (cuentaR.ok && cuentaR.data) {
+      const pc = await obtenerCitasPorCoordinar(cuentaR.data.id);
+      if (pc.ok) porCoordinar = pc.data;
+    }
     setPantalla({
       estado: 'listo',
       desde,
       citas,
+      porCoordinar,
       groomingIds: new Set(rg.data.map((c) => c.id)),
       adiestramientoIds: new Set(ra.data.map((c) => c.id)),
+      vetIds: new Set(rv.data.map((c) => c.id)),
       bloqueos: bloqueos.data,
       atendidas: new Set(atendidas.ok ? atendidas.data.map((m) => m.mascota_id) : []),
       oficios: {
@@ -435,6 +487,7 @@ export default function Hoy() {
         grooming: ofGrooming.ok && ofGrooming.data.some((o) => o.activo),
         adiestramiento:
           ofAdiestramiento.ok && (ofAdiestramiento.data.oferta?.activo ?? false),
+        vet: ofVet.ok && ofVet.data.servicios.some((s) => s.activo),
       },
     });
   }, []);
@@ -458,16 +511,25 @@ export default function Hoy() {
   const desde = pantalla.estado === 'listo' ? pantalla.desde : null;
   const groomingIds = pantalla.estado === 'listo' ? pantalla.groomingIds : new Set<string>();
   const adiestramientoIds = pantalla.estado === 'listo' ? pantalla.adiestramientoIds : new Set<string>();
-  /** Las citas que jamás agrupan en salida (grooming + adiestramiento). */
-  const sinAgruparIds = new Set([...groomingIds, ...adiestramientoIds]);
+  const vetIds = pantalla.estado === 'listo' ? pantalla.vetIds : new Set<string>();
+  /** Las citas que jamás agrupan en salida (grooming + adiestramiento +
+   *  veterinaria — solo el paseo hace salidas). */
+  const sinAgruparIds = new Set([...groomingIds, ...adiestramientoIds, ...vetIds]);
   const oficioDe = (c: CitaAgendaPaseo): OficioCita =>
-    groomingIds.has(c.id) ? 'grooming' : adiestramientoIds.has(c.id) ? 'adiestramiento' : 'paseo';
+    groomingIds.has(c.id)
+      ? 'grooming'
+      : adiestramientoIds.has(c.id)
+        ? 'adiestramiento'
+        : vetIds.has(c.id)
+          ? 'vet'
+          : 'paseo';
   // S61-B5 (S63-B: tercer oficio): con ≥2 oficios activos nace el
   // filtro; con uno, el control no existe (cero UI muerta).
   const oficiosActivos = pantalla.estado === 'listo' ? pantalla.oficios : null;
   const conFiltro =
     oficiosActivos !== null &&
-    [oficiosActivos.paseo, oficiosActivos.grooming, oficiosActivos.adiestramiento].filter(Boolean).length >= 2;
+    [oficiosActivos.paseo, oficiosActivos.grooming, oficiosActivos.adiestramiento, oficiosActivos.vet].filter(Boolean)
+      .length >= 2;
   const citasVisibles =
     !conFiltro || filtroOficio === 'todos' ? citas : citas.filter((c) => oficioDe(c) === filtroOficio);
   const citasHoy = desde === null ? [] : citasVisibles.filter((c) => c.fecha === desde);
@@ -511,9 +573,17 @@ export default function Hoy() {
           ];
   const idsDestacados = new Set(salidaDestacada.map((c) => c.id));
   const resto = citasHoy.filter((c) => !idsDestacados.has(c.id));
-  // D-385: el resto de la jornada se agrupa por salida (solo paseo; el
-  // grooming es una silla, una mascota — jamás agrupa).
-  const restoItems = agruparSalidas(resto, sinAgruparIds);
+  // S70-B2-v2: lo pasado se pliega — "Ya atendidas" son las cerradas del día
+  // (completada / no_show / cerrada). Lo que sigue vive arriba.
+  const esAtendida = (c: CitaAgendaPaseo): boolean => {
+    const ef = estadoEfectivo(c);
+    return ef === 'completada' || ef === 'no_show' || ef === 'cerrada_con_calidad';
+  };
+  // D-385: el resto se agrupa por salida (solo paseo; grooming/vet no agrupan).
+  const restoItems = agruparSalidas(resto.filter((c) => !esAtendida(c)), sinAgruparIds);
+  const atendidasItems = agruparSalidas(resto.filter(esAtendida), sinAgruparIds);
+  // S70-B2-v2: la bandeja "Por coordinar" (D-439) del negocio (vista Hoy).
+  const porCoordinar = pantalla.estado === 'listo' ? pantalla.porCoordinar : [];
 
   // ── La semana: 7 días desde hoy — citas firmes por día + estado del
   // día (bloqueado por vacaciones / libre). Cero métricas, solo verdad.
@@ -674,6 +744,20 @@ export default function Hoy() {
           <FiltroOficio activo={filtroOficio} onCambio={setFiltroOficio} oficios={oficiosActivos} />
         )}
 
+        {/* ── M1 (S69-B): la entrada del MOSTRADOR — solo para negocio con
+            oficio vet activo. Boton primario = accent.cta teal (cta="oficio"
+            en la raíz). El walk-in registra EN EL MOMENTO. Glifo en el CTA:
+            diferido (Icono no tiene variante on-cta; iría mal-color sobre
+            el relleno teal — declarado). ── */}
+        {pantalla.estado === 'listo' && vista === 'hoy' && oficiosActivos?.vet && (
+          <Boton
+            variante="primario"
+            bloque
+            etiqueta={t('mostrador.registrarAtencion')}
+            onPress={() => router.push('/veterinaria/mostrador')}
+          />
+        )}
+
         {pantalla.estado === 'listo' && vista === 'hoy' && citasHoy.length === 0 && (
           // S52-P7b: registro sereno — el día vacío se dice en el
           // flujo, sin display que grite (dosis baja). S61-B5: el vacío
@@ -681,7 +765,12 @@ export default function Hoy() {
           hoyVacioPorFiltro ? (
             <EstadoVacio registro="seccion" titulo={t('agenda.filtroVacio')} />
           ) : citasHoySin.length === 0 ? (
-            <EstadoVacio registro="seccion" titulo={t('agenda.vacio')} descripcion={t('agenda.vacioDetalle')} />
+            // v2b: voz honesta + camino a la semana (el mostrador vivo y "Por
+            // coordinar" siguen abajo — el día vacío no los apaga).
+            <View style={{ gap: spacing[3] }}>
+              <EstadoVacio registro="seccion" titulo={t('agenda.vacio')} descripcion={t('agenda.vacioDetalle')} />
+              <Boton variante="compacto" etiqueta={t('agenda.vacioVerSemana')} onPress={() => setVista('semana')} />
+            </View>
           ) : null
         )}
 
@@ -704,6 +793,102 @@ export default function Hoy() {
               </View>
             ))}
           </Tarjeta>
+        )}
+
+        {/* ── S70-B2-v2: POR COORDINAR — citas de presupuesto aprobado SIN
+            fecha (D-439). NO desaparece con el día vacío (boceto v2b). Techo
+            visual 3 + "Ver todas". Solo negocio con vet activo. ── */}
+        {pantalla.estado === 'listo' && vista === 'hoy' && oficiosActivos?.vet && porCoordinar.length > 0 && (
+          <View style={{ gap: spacing[2] }}>
+            <Text
+              accessibilityRole="header"
+              style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}
+            >
+              {t('agenda.porCoordinarTitulo')}
+            </Text>
+            <Tarjeta elevacion="sm" relleno="ninguno">
+              {(verTodasCoord ? porCoordinar : porCoordinar.slice(0, 3)).map((pc, i) => {
+                // S70-B2-v2 (acabado founder): la fila DICE el procedimiento —
+                // condición del caso, o el nombre del servicio, o los ítems del
+                // presupuesto; jamás el genérico repetido. Dos filas de la
+                // misma mascota se distinguen a simple vista.
+                const etiqueta =
+                  pc.casoCondicion ??
+                  pc.servicioNombre ??
+                  (pc.items
+                    .map((it) => it.descripcionLibre ?? it.tipoServicioCodigo)
+                    .filter((s): s is string => !!s)
+                    .join(' · ') ||
+                    t('agenda.porCoordinarLibre'));
+                return (
+                <View key={pc.citaId}>
+                  {i > 0 && <Separador />}
+                  <Celda
+                    titulo={pc.mascotaNombre}
+                    subtitulo={etiqueta}
+                    metadataMono={`$${pc.totalCongelado.toFixed(2)}`}
+                    fin={
+                      <Boton
+                        variante="compacto"
+                        etiqueta={t('agenda.porCoordinarCta')}
+                        onPress={() =>
+                          router.push({
+                            pathname: '/veterinaria/coordinar/[citaId]',
+                            params: {
+                              citaId: pc.citaId,
+                              mascotaNombre: pc.mascotaNombre,
+                              servicioNombre: pc.servicioNombre ?? '',
+                              total: String(pc.totalCongelado),
+                            },
+                          })
+                        }
+                      />
+                    }
+                  />
+                </View>
+                );
+              })}
+            </Tarjeta>
+            {porCoordinar.length > 3 && !verTodasCoord && (
+              <Boton
+                variante="ghost"
+                etiqueta={t('agenda.porCoordinarVerTodas', { n: porCoordinar.length })}
+                onPress={() => setVerTodasCoord(true)}
+              />
+            )}
+          </View>
+        )}
+
+        {/* ── S70-B2-v2: YA ATENDIDAS — lo pasado del día, plegado por
+            default (acordeón). Lo que sigue vive arriba. ── */}
+        {pantalla.estado === 'listo' && vista === 'hoy' && atendidasItems.length > 0 && (
+          <View style={{ gap: spacing[2] }}>
+            <Celda
+              interactiva
+              onPress={() => setAtendidasAbierto((v) => !v)}
+              accessibilityRole="button"
+              titulo={t('agenda.yaAtendidas', { n: resto.filter(esAtendida).length })}
+              fin={
+                <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                  {atendidasAbierto ? t('agenda.acordeonOcultar') : t('agenda.acordeonVer')}
+                </Text>
+              }
+            />
+            {atendidasAbierto && (
+              <Tarjeta elevacion="sm" relleno="ninguno">
+                {atendidasItems.map((item, i) => (
+                  <View key={item.tipo === 'cita' ? item.cita.id : item.clave}>
+                    {i > 0 && <Separador indentacion={spacing[3] + 40 + spacing[3]} />}
+                    {item.tipo === 'cita' ? (
+                      <FilaCita cita={item.cita} enVivo={false} oficio={oficioDe(item.cita)} fotoUrl={item.cita.mascota?.foto_url ? urlsFotos.get(item.cita.mascota.foto_url) : undefined} />
+                    ) : (
+                      <FilaSalida citas={item.citas} abierta={salidasAbiertas.has(item.clave)} onToggle={() => toggleSalida(item.clave)} urlsFotos={urlsFotos} />
+                    )}
+                  </View>
+                ))}
+              </Tarjeta>
+            )}
+          </View>
         )}
 
         {/* ── La SEMANA (D-317): día → citas firmes, dosis baja. El día

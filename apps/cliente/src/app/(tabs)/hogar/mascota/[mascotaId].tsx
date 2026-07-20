@@ -19,6 +19,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PaseoSocialHoja } from '@/components/paseo-social-hoja';
 import { TallaPelajeHoja } from '@/components/talla-pelaje-hoja';
 import Svg, { Path } from 'react-native-svg';
@@ -131,6 +132,7 @@ function TituloModulo({ texto }: { texto: string }) {
 export default function PerfilDeMascota() {
   const router = useRouter();
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const { t, idioma } = useTraduccion();
   const { mascotaId } = useLocalSearchParams<{ mascotaId: string }>();
 
@@ -289,7 +291,7 @@ export default function PerfilDeMascota() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo="" atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[5], paddingBottom: spacing[8], gap: spacing[6] }}>
+      <ScrollView contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[8], gap: spacing[6] }}>
         {/* ── Header de identidad ── */}
         <View style={{ alignItems: 'center', gap: spacing[2] }}>
           <AvatarMascota

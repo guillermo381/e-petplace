@@ -20,7 +20,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import {
   Boton,
@@ -96,6 +96,7 @@ function ChevronAcordeon({ abierto, color }: { abierto: boolean; color: string }
 
 export default function HubAdiestramiento() {
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const { t, idioma } = useTraduccion();
   const { t: tUi } = useTraduccionUi();
   const { mostrar } = useAviso();
@@ -278,7 +279,7 @@ export default function HubAdiestramiento() {
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('adiestramiento.hubTitulo')} atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[4] }}>
+      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[4] }}>
         <Boton
           variante="primario"
           bloque

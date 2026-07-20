@@ -35,6 +35,7 @@ import {
   type EstadoCuentaComercial,
   type MiCuentaComercial,
 } from '@epetplace/api';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTraduccion } from '@/i18n';
 
@@ -59,6 +60,7 @@ export default function CuentaComercial() {
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTraduccion();
+  const insets = useSafeAreaInsets();
 
   const [cuenta, setCuenta] = useState<MiCuentaComercial | null | 'cargando' | 'error'>('cargando');
 
@@ -156,7 +158,7 @@ export default function CuentaComercial() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('cuenta.titulo')} atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[5], paddingBottom: spacing[8], gap: spacing[6] }}>
+      <ScrollView contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[8], gap: spacing[6] }}>
         {/* el estado preside */}
         <View style={{ gap: spacing[3] }}>
           <View style={{ flexDirection: 'row' }}>

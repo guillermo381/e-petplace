@@ -12,6 +12,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Linking, ScrollView, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
@@ -123,6 +124,7 @@ function Seccion({ titulo, children }: { titulo: string; children: React.ReactNo
 
 function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string }) {
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { mostrar } = useAviso();
   const { t } = useTraduccion();
@@ -352,7 +354,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
   }
 
   return (
-    <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[5] }}>
+    <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[5] }}>
       {/* Estado GPS + puntos */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
         <Insignia estado={chipGps.estado} etiqueta={chipGps.etiqueta} tamaño="sm" />

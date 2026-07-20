@@ -37,6 +37,7 @@ import {
   type BancoCatalogo,
   type TipoDocumentoTitular,
 } from '@epetplace/api';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTraduccion } from '@/i18n';
 
@@ -54,6 +55,7 @@ export default function DatosBancarios() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
+  const insets = useSafeAreaInsets();
 
   const [base, setBase] = useState<BaseCargada | 'cargando' | 'error'>('cargando');
 
@@ -184,7 +186,7 @@ export default function DatosBancarios() {
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('cuenta.datosBancarios')} atras onAtras={() => router.back()} />
       <ScrollView
-        contentContainerStyle={{ padding: spacing[5], paddingBottom: spacing[8], gap: spacing[5] }}
+        contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[8], gap: spacing[5] }}
         keyboardShouldPersistTaps="handled"
       >
         {/* la educación del modelo (§4.1): una cuenta, una transferencia */}

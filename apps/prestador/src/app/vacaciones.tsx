@@ -24,6 +24,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
   Campo,
@@ -78,6 +79,7 @@ export default function Vacaciones() {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
+  const insets = useSafeAreaInsets();
 
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [intento, setIntento] = useState(0);
@@ -221,7 +223,7 @@ export default function Vacaciones() {
       )}
 
       {pantalla.estado === 'listo' && pantalla.bloqueos.length > 0 && (
-        <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[4] }}>
+        <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[4] }}>
           {/* la voz honesta de la promesa — la cumple el motor */}
           <Text
             style={{

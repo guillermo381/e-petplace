@@ -16,7 +16,7 @@ import { Icono, motion, radius, spacing, typography, useTheme } from '@epetplace
 
 import { useTraduccion } from '@/i18n';
 
-export type FiltroOficioValor = 'todos' | 'paseo' | 'grooming' | 'adiestramiento';
+export type FiltroOficioValor = 'todos' | 'paseo' | 'grooming' | 'adiestramiento' | 'vet';
 
 // D-401 (S62): el segmento responde al dedo — la MISMA receta de la
 // casa (SelectorOpcion/Boton: scale 0.99, transición spring fast).
@@ -72,12 +72,16 @@ export function FiltroOficio({
 }: {
   activo: FiltroOficioValor;
   onCambio: (v: FiltroOficioValor) => void;
-  /** S63-B: solo los oficios con oferta ACTIVA ganan segmento. */
-  oficios: { paseo: boolean; grooming: boolean; adiestramiento: boolean };
+  /** S63-B: solo los oficios con oferta ACTIVA ganan segmento. S69-B: +vet. */
+  oficios: { paseo: boolean; grooming: boolean; adiestramiento: boolean; vet: boolean };
 }) {
   const { theme } = useTheme();
   const { t } = useTraduccion();
-  const segmentos: { codigo: FiltroOficioValor; etiqueta: string; icono: 'paseo' | 'grooming' | 'training' | null }[] = [
+  const segmentos: {
+    codigo: FiltroOficioValor;
+    etiqueta: string;
+    icono: 'paseo' | 'grooming' | 'training' | 'veterinaria' | null;
+  }[] = [
     { codigo: 'todos', etiqueta: t('agenda.filtroTodos'), icono: null },
     ...(oficios.paseo ? [{ codigo: 'paseo' as const, etiqueta: t('agenda.filtroPaseos'), icono: 'paseo' as const }] : []),
     ...(oficios.grooming
@@ -85,6 +89,9 @@ export function FiltroOficio({
       : []),
     ...(oficios.adiestramiento
       ? [{ codigo: 'adiestramiento' as const, etiqueta: t('agenda.filtroAdiestramiento'), icono: 'training' as const }]
+      : []),
+    ...(oficios.vet
+      ? [{ codigo: 'vet' as const, etiqueta: t('agenda.filtroVeterinaria'), icono: 'veterinaria' as const }]
       : []),
   ];
   // Con 4 segmentos el ancho no da para 4 labels: los oficios hablan por

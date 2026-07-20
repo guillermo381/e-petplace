@@ -19,6 +19,7 @@
 import { useCallback, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
   CeldaNavegacion,
@@ -96,6 +97,7 @@ export default function OfertaPaseo() {
   const router = useRouter();
   const { theme } = useTheme();
   const { t } = useTraduccion();
+  const insets = useSafeAreaInsets();
 
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [intento, setIntento] = useState(0);
@@ -244,7 +246,7 @@ export default function OfertaPaseo() {
               }`;
 
         return (
-          <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[6] }}>
+          <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[6] }}>
             {/* el estado — la verdad del motor, con camino cuando falta algo */}
             <Tarjeta>
               <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: spacing[3] }}>

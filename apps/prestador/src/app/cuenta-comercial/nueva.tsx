@@ -39,6 +39,7 @@ import {
   type PaisRegistro,
   type TipoFiscal,
 } from '@epetplace/api';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTraduccion } from '@/i18n';
 
@@ -60,6 +61,7 @@ export default function NuevaCuentaComercial() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
+  const insets = useSafeAreaInsets();
 
   const [paises, setPaises] = useState<PaisRegistro[] | 'cargando' | 'error'>('cargando');
   const [paisCodigo, setPaisCodigo] = useState<string | null>(null);
@@ -190,7 +192,7 @@ export default function NuevaCuentaComercial() {
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('cuenta.nuevaTitulo')} atras onAtras={() => router.back()} />
       <ScrollView
-        contentContainerStyle={{ padding: spacing[5], paddingBottom: spacing[8], gap: spacing[5] }}
+        contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[8], gap: spacing[5] }}
         keyboardShouldPersistTaps="handled"
       >
         <Text

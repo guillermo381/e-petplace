@@ -8,7 +8,7 @@
 
 import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import {
   Boton,
@@ -41,6 +41,7 @@ function TituloBloque({ texto }: { texto: string }) {
 export default function Cuenta() {
   const router = useRouter();
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const { t } = useTraduccion();
 
   const [salirAbierta, setSalirAbierta] = useState(false);
@@ -61,7 +62,7 @@ export default function Cuenta() {
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing[8] }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}>
         <Encabezado variante="portada" saludo={t('cuenta.titulo')} />
 
         <View style={{ paddingHorizontal: spacing[4], gap: spacing[6], marginTop: spacing[2] }}>

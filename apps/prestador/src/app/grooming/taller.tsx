@@ -42,6 +42,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
   Celda,
@@ -204,6 +205,7 @@ export default function TallerGrooming() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
+  const insets = useSafeAreaInsets();
   const { seccion, modo } = useLocalSearchParams<{ seccion?: string; modo?: string }>();
 
   const modoWizard = modo === 'wizard';
@@ -584,7 +586,7 @@ export default function TallerGrooming() {
       {listo && drafts !== null && especies !== null && (
         <ScrollView
           ref={scrollRef}
-          contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[5] }}
+          contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[5] }}
         >
           {/* progreso del wizard — visible y sereno */}
           {modoWizard && <VozSecundaria texto={t('tallerGrooming.paso', { n: paso + 1 })} />}

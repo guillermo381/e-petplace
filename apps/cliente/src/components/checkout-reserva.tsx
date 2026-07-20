@@ -18,7 +18,7 @@
 
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import {
   Boton,
@@ -83,6 +83,7 @@ export function CheckoutReserva({
 }) {
   const { theme } = useTheme();
   const { t } = useTraduccion();
+  const insets = useSafeAreaInsets();
 
   const [fase, setFase] = useState<Fase>('resumen');
   const [restanteSeg, setRestanteSeg] = useState<number>(() =>
@@ -212,7 +213,7 @@ export function CheckoutReserva({
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('checkout.titulo')} atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[4] }}>
+      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[4] }}>
         {/* el ítem (forma de carrito: hoy UNO) */}
         <View style={{ gap: spacing[2] }}>
           <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.secondary }}>

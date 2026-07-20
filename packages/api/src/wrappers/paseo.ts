@@ -287,6 +287,13 @@ export type CitaAgendaPaseo = Pick<
    * hogar sin dirección al momento del hold.
    */
   direccion: DireccionCitaPaseo | null;
+  /**
+   * El ORIGEN de la cita (S70-B1) — `metadata.origen` releído. Hoy solo lo
+   * puebla el lector de veterinaria: 'mostrador' = walk-in registrado en el
+   * mostrador (la fila lo marca con un chip discreto). undefined en los otros
+   * oficios (no proyectan metadata) y null en la reserva in-app (sin origen).
+   */
+  origen?: string | null;
 };
 
 /** El shape del snapshot D-339 (claves fijas de la migración 20260712090000). */

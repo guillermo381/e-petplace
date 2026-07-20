@@ -17,6 +17,7 @@
 import { useCallback, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
   Celda,
@@ -68,6 +69,7 @@ function hoyLocal(): string {
 
 export default function MisPaseos() {
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
   const idioma = obtenerIdiomaActual();
@@ -345,7 +347,7 @@ export default function MisPaseos() {
           />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[4] }}>
+        <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[4] }}>
           {/* Hub v2 (S58, D-347): la ACCIÓN preside — jamás es un
               segmento (Ley 19/22); los tres segmentos son solo VISTAS. */}
           <Boton

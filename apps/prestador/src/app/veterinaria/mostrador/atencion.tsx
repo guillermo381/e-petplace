@@ -1,0 +1,291 @@
+// ─────────────────────────────────────────────────────────────────────
+// M4 + M5 — LA ATENCIÓN DEL MOSTRADOR + EL COBRO-DATO (A1bis, S69-B).
+// Desde el tap de una mascota en M2. Dos fases: (1) atención — servicio
+// del menú VIVO (solo es_medico activos; el server lo garantiza) +
+// persona (N=1 colapsa, sin picker) + precio editable → la cita nace
+// FIRME hoy. (2) cobro — monto + medio, DATO puro (cero devengo, cero
+// fee, cero checkout). Dosis §15b: densa y rápida.
+//
+// TESIS: en dos toques la clínica registra lo que pasó — y queda en la
+// agenda de hoy y en el expediente.
+// FIRMA: la cita aparece en el HOY al volver (comportamiento — el smoke
+// de M0). Confirmación de dos mitades.
+//
+// Vacunación (D-434): cuando el servicio es vacunación, el registrable de
+// la vacuna (selector cat_vacunas + "Otra") es la pieza FINAL declarada —
+// el RPC/trigger de procedencia ya está (mesa), falta el wrapper de
+// lectura cat_vacunas + confirmar el path de inserción del lado prestador.
+// ─────────────────────────────────────────────────────────────────────
+
+import { useEffect, useMemo, useState } from 'react';
+import { ScrollView, Text, View } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  Boton,
+  Campo,
+  Encabezado,
+  EstadoVacio,
+  SelectorOpcion,
+  SelectorSegmentado,
+  spacing,
+  typography,
+  useAviso,
+  useTheme,
+} from '@epetplace/ui';
+import {
+  MEDIOS_COBRO,
+  obtenerCatalogoVacunas,
+  obtenerCatalogoVeterinaria,
+  obtenerMiPrestador,
+  obtenerMundoVeterinariaPropio,
+  registrarAtencionMostrador,
+  registrarCobroPresencial,
+  registrarVacunaMostrador,
+  type MedioCobro,
+  type VacunaCatalogo,
+} from '@epetplace/api';
+
+import { verificarSesion } from '@/lib/api';
+import { useTraduccion } from '@/i18n';
+
+type ServicioActivo = { codigo: string; nombre: string; precio: number };
+
+export default function AtencionMostrador() {
+  const router = useRouter();
+  const { theme } = useTheme();
+  const { t } = useTraduccion();
+  const { mostrar } = useAviso();
+  const insets = useSafeAreaInsets();
+  const { mascotaId = '', nombre = '' } = useLocalSearchParams<{ mascotaId?: string; nombre?: string }>();
+
+  const [prestadorId, setPrestadorId] = useState<string | null>(null);
+  const [servicios, setServicios] = useState<ServicioActivo[] | null>(null);
+  const [servicioCodigo, setServicioCodigo] = useState<string | undefined>(undefined);
+  const [precio, setPrecio] = useState('');
+  const [fase, setFase] = useState<'atencion' | 'cobro'>('atencion');
+  const [citaId, setCitaId] = useState<string | null>(null);
+  const [monto, setMonto] = useState('');
+  const [medio, setMedio] = useState<MedioCobro>('efectivo');
+  const [ocupado, setOcupado] = useState(false);
+  // D-434: el registrable de vacuna (solo cuando el servicio es vacunación).
+  const [catalogoVacunas, setCatalogoVacunas] = useState<VacunaCatalogo[]>([]);
+  const [vacunaSel, setVacunaSel] = useState<string | undefined>(undefined);
+  const [vacunaLibre, setVacunaLibre] = useState('');
+  const OTRA = '__otra__';
+
+  useEffect(() => {
+    let vigente = true;
+    void (async () => {
+      const pr = await obtenerMiPrestador();
+      if (!vigente || !pr.ok) return;
+      setPrestadorId(pr.data.id);
+      const [mundo, cat, vac] = await Promise.all([
+        obtenerMundoVeterinariaPropio(pr.data.id),
+        obtenerCatalogoVeterinaria(),
+        obtenerCatalogoVacunas(),
+      ]);
+      if (!vigente) return;
+      if (vac.ok) setCatalogoVacunas(vac.data);
+      const nombres = new Map<string, string>(cat.ok ? cat.data.map((c) => [c.codigo, c.nombre]) : []);
+      const activos: ServicioActivo[] = mundo.ok
+        ? mundo.data.servicios
+            .filter((s) => s.activo)
+            .map((s) => ({ codigo: s.tipoServicio, nombre: nombres.get(s.tipoServicio) ?? s.tipoServicio, precio: s.precio }))
+        : [];
+      setServicios(activos);
+    })();
+    return () => {
+      vigente = false;
+    };
+  }, []);
+
+  function elegirServicio(codigo: string) {
+    setServicioCodigo(codigo);
+    const s = servicios?.find((x) => x.codigo === codigo);
+    if (s) setPrecio(String(s.precio));
+  }
+
+  const precioNum = Number(precio.replace(',', '.'));
+  const puedeRegistrar =
+    prestadorId !== null && servicioCodigo !== undefined && Number.isFinite(precioNum) && precioNum >= 0 && !ocupado;
+
+  async function registrar() {
+    if (!puedeRegistrar || prestadorId === null || servicioCodigo === undefined) return;
+    const sesion = await verificarSesion();
+    if (!sesion.ok) {
+      mostrar({ variante: 'error', texto: sesion.mensaje });
+      return;
+    }
+    setOcupado(true);
+    const r = await registrarAtencionMostrador({
+      prestadorId,
+      mascotaId,
+      tipoServicioCodigo: servicioCodigo,
+      precio: precioNum,
+    });
+    setOcupado(false);
+    if (!r.ok) {
+      mostrar({ variante: 'error', texto: r.mensaje });
+      return;
+    }
+    setCitaId(r.data);
+    setMonto(precio);
+    setFase('cobro');
+  }
+
+  const montoNum = Number(monto.replace(',', '.'));
+  const puedeCobrar = citaId !== null && Number.isFinite(montoNum) && montoNum > 0 && !ocupado;
+  const esVacunacion = servicioCodigo === 'vacunacion';
+  const mascota = nombre || t('agenda.mascotaFallback');
+
+  // D-434: registra la vacuna si el servicio lo es y hay una elegida.
+  // Devuelve false SOLO si el registro falló (frena el cierre).
+  async function registrarVacunaSiCorresponde(): Promise<boolean> {
+    if (!esVacunacion || citaId === null) return true;
+    const codigo = vacunaSel && vacunaSel !== OTRA ? vacunaSel : undefined;
+    const libre = vacunaSel === OTRA ? vacunaLibre.trim() : undefined;
+    if (!codigo && !libre) return true; // sin vacuna elegida — no bloquea
+    const r = await registrarVacunaMostrador(citaId, { vacunaCodigo: codigo, nombreLibre: libre });
+    if (!r.ok) {
+      mostrar({ variante: 'error', texto: r.mensaje });
+      return false;
+    }
+    mostrar({ variante: 'exito', texto: t('atencionMostrador.vacunaExito', { mascota }) });
+    return true;
+  }
+
+  async function finalizar(conCobro: boolean) {
+    if (citaId === null || ocupado) return;
+    if (conCobro && !puedeCobrar) return;
+    setOcupado(true);
+    if (!(await registrarVacunaSiCorresponde())) {
+      setOcupado(false);
+      return;
+    }
+    if (conCobro) {
+      const r = await registrarCobroPresencial(citaId, montoNum, medio);
+      if (!r.ok) {
+        setOcupado(false);
+        mostrar({ variante: 'error', texto: r.mensaje });
+        return;
+      }
+    }
+    setOcupado(false);
+    mostrar({ variante: 'exito', texto: t('atencionMostrador.exito', { mascota }) });
+    router.back();
+  }
+
+  const medioSegmentos = useMemo(
+    () =>
+      MEDIOS_COBRO.map((m) => ({
+        codigo: m,
+        etiqueta:
+          m === 'efectivo'
+            ? t('atencionMostrador.medioEfectivo')
+            : m === 'tarjeta'
+              ? t('atencionMostrador.medioTarjeta')
+              : t('atencionMostrador.medioTransferencia'),
+      })),
+    [t],
+  );
+
+  return (
+    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <Encabezado variante="navegacion" titulo={t('atencionMostrador.titulo')} atras onAtras={() => router.back()} />
+      <ScrollView
+        contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[6], gap: spacing[4] }}
+        keyboardShouldPersistTaps="handled"
+      >
+        {fase === 'atencion' ? (
+          servicios !== null && servicios.length === 0 ? (
+            <EstadoVacio registro="seccion" titulo={t('atencionMostrador.sinServicios')} />
+          ) : (
+            <>
+              {servicios !== null && (
+                <SelectorOpcion
+                  etiqueta={t('atencionMostrador.servicioLabel')}
+                  disposicion="grilla"
+                  opciones={servicios.map((s) => ({ codigo: s.codigo, etiqueta: s.nombre }))}
+                  seleccionada={servicioCodigo}
+                  onSelect={elegirServicio}
+                />
+              )}
+              <Campo
+                label={t('atencionMostrador.precioLabel')}
+                placeholder="0.00"
+                value={precio}
+                onChangeText={setPrecio}
+                keyboardType="decimal-pad"
+              />
+              <Boton
+                variante="primario"
+                bloque
+                etiqueta={t('atencionMostrador.registrarAtencion')}
+                cargando={ocupado}
+                deshabilitado={!puedeRegistrar}
+                onPress={() => void registrar()}
+              />
+            </>
+          )
+        ) : (
+          <>
+            {/* D-434: el registrable de vacuna, solo en vacunación */}
+            {esVacunacion && (
+              <View style={{ gap: spacing[2] }}>
+                <SelectorOpcion
+                  etiqueta={t('atencionMostrador.vacunaLabel')}
+                  disposicion="grilla"
+                  opciones={[
+                    ...catalogoVacunas.map((v) => ({ codigo: v.codigo, etiqueta: v.nombre })),
+                    { codigo: OTRA, etiqueta: t('atencionMostrador.vacunaOtra') },
+                  ]}
+                  seleccionada={vacunaSel}
+                  onSelect={setVacunaSel}
+                />
+                {vacunaSel === OTRA && (
+                  <Campo
+                    label={t('atencionMostrador.vacunaLibreLabel')}
+                    placeholder={t('atencionMostrador.vacunaLibrePlaceholder')}
+                    value={vacunaLibre}
+                    onChangeText={setVacunaLibre}
+                  />
+                )}
+              </View>
+            )}
+            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}>
+              {t('atencionMostrador.cobroTitulo')}
+            </Text>
+            <Campo
+              label={t('atencionMostrador.montoLabel')}
+              placeholder="0.00"
+              value={monto}
+              onChangeText={setMonto}
+              keyboardType="decimal-pad"
+            />
+            <SelectorSegmentado
+              etiqueta={t('atencionMostrador.medioLabel')}
+              segmentos={medioSegmentos}
+              activo={medio}
+              onCambio={(c) => setMedio(c as MedioCobro)}
+            />
+            <Boton
+              variante="primario"
+              bloque
+              etiqueta={t('atencionMostrador.registrarCobro')}
+              cargando={ocupado}
+              deshabilitado={!puedeCobrar}
+              onPress={() => void finalizar(true)}
+            />
+            <Boton
+              variante="compacto"
+              etiqueta={t('atencionMostrador.sinCobro')}
+              deshabilitado={ocupado}
+              onPress={() => void finalizar(false)}
+            />
+          </>
+        )}
+      </ScrollView>
+    </View>
+  );
+}

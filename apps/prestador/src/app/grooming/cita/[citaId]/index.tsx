@@ -16,6 +16,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   AvatarMascota,
@@ -74,6 +75,7 @@ type Talla = (typeof TALLAS)[number];
 
 export default function AntesGrooming() {
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { mostrar } = useAviso();
   const { t, idioma } = useTraduccion();
@@ -256,7 +258,7 @@ export default function AntesGrooming() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[4] }}>
+      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[4] }}>
         <Encabezado
           variante="navegacion"
           titulo={cita ? t('citaGrooming.tituloDe', { nombre }) : t('citaGrooming.titulo')}

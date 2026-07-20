@@ -12,7 +12,7 @@
 
 import { useCallback, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import {
   Celda,
@@ -59,6 +59,7 @@ function TituloBloque({ texto }: { texto: string }) {
 export default function Explorar() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
+  const insets = useSafeAreaInsets();
   const [servicios, setServicios] = useState<ServiciosPais | 'cargando' | 'error'>('cargando');
 
   useFocusEffect(
@@ -105,7 +106,7 @@ export default function Explorar() {
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing[8] }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}>
         <Encabezado variante="portada" saludo={t('explorar.titulo')} />
 
         <View style={{ paddingHorizontal: spacing[4], gap: spacing[6], marginTop: spacing[2] }}>

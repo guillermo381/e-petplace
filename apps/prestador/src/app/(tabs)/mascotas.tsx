@@ -27,6 +27,7 @@ import {
 import { obtenerMascotasAtendidas, obtenerMiPrestador, resolverUrlsFotos, type MascotaAtendida } from '@epetplace/api';
 
 import { fechaCortaMono } from '@epetplace/i18n';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTraduccion } from '@/i18n';
 
@@ -44,6 +45,7 @@ export default function Mascotas() {
   const router = useRouter();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
+  const insets = useSafeAreaInsets();
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [urlsFotos, setUrlsFotos] = useState<Map<string, string>>(new Map());
 
@@ -77,7 +79,7 @@ export default function Mascotas() {
     // S59-B1 (safe area): el Encabezado ya absorbe y PINTA el inset superior
     // — el SafeAreaView top lo duplicaba (doble banda de papel arriba).
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[4] }}>
+      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[4] }}>
         <Encabezado variante="portada" saludo={t('mascotas.titulo')} />
 
         {pantalla.estado === 'cargando' && (

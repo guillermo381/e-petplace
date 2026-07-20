@@ -18,7 +18,7 @@
 
 import { useCallback, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import {
   Boton,
@@ -43,6 +43,7 @@ type Tap = 'proximos' | 'historial';
 
 export default function HubGrooming() {
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const { t, idioma } = useTraduccion();
   const [tap, setTap] = useState<Tap>('proximos');
   const [filas, setFilas] = useState<GroomingDelHogar[] | 'cargando' | 'error'>('cargando');
@@ -79,7 +80,7 @@ export default function HubGrooming() {
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('grooming.hubTitulo')} atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[4] }}>
+      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[4] }}>
         {/* la acción primaria del hub — aterriza en el CUÁNDO ya construido */}
         <Boton
           variante="primario"

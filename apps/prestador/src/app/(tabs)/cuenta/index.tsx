@@ -144,7 +144,7 @@ export default function Cuenta() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing[8] }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}>
         {/* EL HEADER CD (S61-B12, D-370): la identidad sobre el MURO —
             navegación mono + engranaje en vidrio · dos columnas con el
             squircle A10 · el trío real en banda de vidrio oscuro

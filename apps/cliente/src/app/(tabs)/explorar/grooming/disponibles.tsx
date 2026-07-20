@@ -22,7 +22,7 @@
 
 import { useCallback, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
@@ -54,6 +54,7 @@ export default function GroomingDisponibles() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ fecha: string; hora: string; tipoServicio: string; mascotaId: string; modalidad?: string }>();
   const fecha = typeof params.fecha === 'string' ? params.fecha : '';
   const hora = typeof params.hora === 'string' ? params.hora : '';
@@ -144,7 +145,7 @@ export default function GroomingDisponibles() {
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('grooming.quienTitulo')} atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[3] }}>
+      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[3] }}>
         {/* la ventana elegida, en voz de máquina — la duración no viaja:
             es de cada groomer (servicio × talla) */}
         <Celda

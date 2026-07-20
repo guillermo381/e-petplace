@@ -40,6 +40,7 @@ import {
 } from '@epetplace/api';
 
 import { fechaCortaMono } from '@epetplace/i18n';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTraduccion } from '@/i18n';
 
@@ -69,6 +70,7 @@ export default function DetalleMascota() {
   const router = useRouter();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
+  const insets = useSafeAreaInsets();
   const { mascotaId } = useLocalSearchParams<{ mascotaId: string }>();
 
   const [detalle, setDetalle] = useState<DetalleMascotaPrestador | 'cargando' | 'error'>('cargando');
@@ -162,7 +164,7 @@ export default function DetalleMascota() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo="" atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[5], paddingBottom: spacing[8], gap: spacing[6] }}>
+      <ScrollView contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[8], gap: spacing[6] }}>
         {/* ── cabecera con presencia (§6.4.4) ── */}
         <View style={{ alignItems: 'center', gap: spacing[2] }}>
           <AvatarMascota

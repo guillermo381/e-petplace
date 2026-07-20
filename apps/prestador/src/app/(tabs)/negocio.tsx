@@ -391,6 +391,22 @@ export default function Negocio() {
                 detalle={detalleLiquidaciones}
                 onPress={() => router.push('/liquidaciones')}
               />
+              {/* S70-B2-v2: "El movimiento" — los presupuestos del negocio
+                  (D-440) MIGRAN a NEGOCIO (la ley "HOY acciona, NEGOCIO
+                  gestiona"). Solo con oficio vet activo (los presupuestos
+                  son clínicos). */}
+              {serviciosVet.length > 0 && (
+                <>
+                  <Separador />
+                  <CeldaNavegacion
+                    icono="pagos"
+                    registro="aa"
+                    titulo={t('negocio.movimiento')}
+                    detalle={t('negocio.movimientoDetalle')}
+                    onPress={() => router.push('/veterinaria/movimiento')}
+                  />
+                </>
+              )}
             </Tarjeta>
           </View>
 

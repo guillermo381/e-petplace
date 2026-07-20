@@ -16,6 +16,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Boton,
@@ -102,6 +103,7 @@ function Seccion({ titulo, children }: { titulo: string; children: React.ReactNo
 
 function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string }) {
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { mostrar } = useAviso();
   const { t } = useTraduccion();
@@ -300,7 +302,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
   } as const;
 
   return (
-    <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[5] }}>
+    <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[5] }}>
       {/* El tiempo de la sesión corre desde el server */}
       <View style={{ alignItems: 'center' }}>
         <Cronometro inicioTs={datos.durante.iniciada_en ?? new Date().toISOString()} />

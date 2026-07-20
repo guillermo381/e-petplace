@@ -25,7 +25,7 @@
 
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
@@ -78,6 +78,7 @@ function iconoOficio(tipo: string | null): 'paseo' | 'grooming' | 'training' | n
 
 export default function CitasDeMascota() {
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
   const { mascotaId, nombre, citaId } = useLocalSearchParams<{
@@ -233,7 +234,7 @@ export default function CitasDeMascota() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.bg.base }} edges={['top']}>
       <Encabezado variante="navegacion" titulo={titulo} atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], gap: spacing[4] }}>
+      <ScrollView contentContainerStyle={{ padding: spacing[4], gap: spacing[4], paddingBottom: insets.bottom + spacing[8] }}>
         {/* Presupuestos pendientes — ARRIBA del detalle de la cita. Aparecen
             aunque no haya cita activa (el presupuesto vive por su cuenta). */}
         {presupuestos.map((p) => {
