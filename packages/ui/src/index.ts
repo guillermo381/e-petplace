@@ -43,6 +43,8 @@ export {
 export { Celda, type CeldaProps, type CeldaDensidad } from './components/Celda'
 export { CeldaNavegacion, type CeldaNavegacionProps } from './components/CeldaNavegacion'
 export { Separador } from './components/Separador'
+export { Texto, type TextoProps, type TextoVariante, type TextoColor } from './components/Texto'
+export { FilaDato, type FilaDatoProps } from './components/FilaDato'
 export {
   Insignia,
   type InsigniaProps,
