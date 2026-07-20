@@ -22,6 +22,7 @@
 
 import { useCallback, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   CeldaNavegacion,
@@ -77,6 +78,7 @@ function TituloBloque({ texto }: { texto: string }) {
 }
 
 export default function Negocio() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
@@ -212,7 +214,7 @@ export default function Negocio() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: spacing[8] }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}>
         {/* B2 §15b.2: el techo de tinta — el dato de trabajo es la plata
             real esperando liquidación; sin eventos, la fecha del día */}
         <TechoOficio

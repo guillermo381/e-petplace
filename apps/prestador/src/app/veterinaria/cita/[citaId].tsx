@@ -17,6 +17,7 @@
 
 import { useCallback, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   AvatarMascota,
@@ -62,6 +63,7 @@ function esEspecie(v: string | null): v is AvatarMascotaEspecie {
 }
 
 export default function DetalleCitaVet() {
+  const insets = useSafeAreaInsets();
   const { theme } = useTheme();
   const router = useRouter();
   const { t, idioma } = useTraduccion();
@@ -130,7 +132,7 @@ export default function DetalleCitaVet() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('citaVet.titulo')} atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], gap: spacing[4] }}>
+      <ScrollView contentContainerStyle={{ padding: spacing[4], gap: spacing[4], paddingBottom: insets.bottom + spacing[8] }}>
         {pantalla.estado === 'cargando' && (
           <Tarjeta elevacion="plana">
             <EsqueletoGrupo>
