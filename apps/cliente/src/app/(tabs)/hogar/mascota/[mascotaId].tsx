@@ -453,6 +453,23 @@ export default function PerfilDeMascota() {
               ))}
             </Tarjeta>
           )}
+          {/* S71-A3 (F2, la mudanza del carnet): la entrada del Hogar
+              murió y ESTA es su casa. Con carnet vacío el CTA vive en el
+              EstadoVacio (arriba); con carnet lleno faltaba el camino
+              para cargar más páginas — este botón lo cierra (Ley 22c:
+              acción con consecuencias viste de botón compacto). */}
+          {vacunas.length > 0 ? (
+            <View style={{ alignItems: 'flex-start' }}>
+              <Boton
+                variante="compacto"
+                tamaño="sm"
+                etiqueta={t('perfil.cargarCarnet')}
+                onPress={() =>
+                  router.push({ pathname: '/carnet', params: { mascotaId: mascota.id, nombre: mascota.nombre } })
+                }
+              />
+            </View>
+          ) : null}
         </View>
 
         {/* ── 3 · Su vida ── */}

@@ -128,20 +128,10 @@ export const clienteEn = {
     fichaVerCita: 'See their booking',
     fichaVerCarnet: 'See their card',
     fichaCargarCarnet: 'Add their card',
-    proximoPaseoDe: 'Next walk for {{nombre}}: {{cuando}}',
-    proximoPaseo: 'Next walk: {{cuando}}',
-    proximaSesionDe: 'Next session for {{nombre}}: {{cuando}}',
-    proximaSesion: 'Next session: {{cuando}}',
-    saldoSalidas: 'You have {{n}} walks left in your pack',
-    saldoUnaSalida: 'You have 1 walk left in your pack',
-    ultimaSesion: 'Last session: {{fecha}}',
     verEnVivo: 'See how it goes',
     proximaCita: 'Next appointment',
     // D-319: live 15-min hold — rhymes with checkout.holdVoz
     reservandoHorario: 'Holding this time for you',
-    cargarCarnet: 'Vaccine card',
-    cargarCarnetDetalle: 'Take a photo of the card — we read the vaccines and save them to their story.',
-    carnetDeQuien: 'Whose card is it?',
     historiaEmpieza: 'The story starts here.',
     historiaEmpiezaDetalle: 'Every walk, every vet visit, will be saved.',
     sinMascotas: 'Nobody here yet',
@@ -150,12 +140,6 @@ export const clienteEn = {
     errorHistoriaDetalle: 'Check your connection and try again.',
     reintentar: 'Try again',
     // ── S58 Home pattern v2 — STRING GATE PENDING (S58 batch) ──
-    enHoras: 'In {{n}} h',
-    enMinutos: 'In {{n}} min',
-    refuerzoEnDias: '{{nombre}}: booster in {{n}} days',
-    refuerzoManana: '{{nombre}}: booster tomorrow',
-    refuerzoHoy: '{{nombre}}: booster today',
-    planDias: '{{dias}} plan · active',
     agregarMascotaCelda: 'Add a pet',
   },
   coach: {
@@ -869,8 +853,6 @@ export const clienteEn = {
     aprobadoOk: 'You approved the estimate — the clinic will coordinate the procedure day at this price.',
     rechazadoOk: 'You declined the estimate.',
     errorAccion: "We couldn't complete the action. Please try again.",
-    zonaNarrativa: '{{mascota}} has an estimate to approve. It expires on {{fecha}}.',
-    zonaAccion: 'View it',
   },
 
   // S70-A4 — the clinical visit report in family voice
@@ -921,7 +903,6 @@ export const clienteEn = {
     noExiste: 'This request is no longer available.',
     error: "We couldn't complete the action. Please try again.",
     cerrar: 'Close',
-    revisar: 'Tap to respond',
     cargando: 'Loading…',
   },
 } as const satisfies Espejo<typeof clienteEs>;

@@ -134,21 +134,11 @@ export const clienteEs = {
     fichaVerCita: 'Ver su cita',
     fichaVerCarnet: 'Ver su carnet',
     fichaCargarCarnet: 'Cargar su carnet',
-    proximoPaseoDe: 'Próximo paseo de {{nombre}}: {{cuando}}',
-    proximoPaseo: 'Próximo paseo: {{cuando}}',
-    proximaSesionDe: 'Próxima sesión de {{nombre}}: {{cuando}}',
-    proximaSesion: 'Próxima sesión: {{cuando}}',
-    saldoSalidas: 'Te quedan {{n}} salidas del paquete',
-    saldoUnaSalida: 'Te queda 1 salida del paquete',
-    ultimaSesion: 'Última sesión: {{fecha}}',
     verEnVivo: 'Ver cómo va',
     proximaCita: 'Próxima cita',
     // D-319: el hold vigente del bloqueo 15 min — rima con checkout.holdVoz
     reservandoHorario: 'Reservando este horario',
     // ── Zona 4 (la vida) — funcional + aporte ──
-    cargarCarnet: 'Carnet de vacunas',
-    cargarCarnetDetalle: 'Sácale una foto al carnet — nosotros leemos las vacunas y las guardamos en su historia.',
-    carnetDeQuien: '¿De quién es el carnet?',
     historiaEmpieza: 'La historia empieza acá.',
     historiaEmpiezaDetalle: 'Cada paseo, cada visita al vet, va a quedar guardada.',
     sinMascotas: 'Todavía no hay nadie por acá',
@@ -158,13 +148,7 @@ export const clienteEs = {
     reintentar: 'Reintentar',
     // ── S58 patrón Hogar v2 — GATE DE STRINGS PENDIENTE (lote S58) ──
     // hero del próximo paseo: el CUÁNDO relativo en voz corta
-    enHoras: 'En {{n}} h',
-    enMinutos: 'En {{n}} min',
     // subtítulos VIVOS del grupo de celdas (jamás descripción estática)
-    refuerzoEnDias: '{{nombre}}: refuerzo en {{n}} días',
-    refuerzoManana: '{{nombre}}: refuerzo mañana',
-    refuerzoHoy: '{{nombre}}: refuerzo hoy',
-    planDias: 'Plan de los {{dias}} · activo',
     agregarMascotaCelda: 'Agregar mascota',
   },
   coach: {
@@ -926,8 +910,6 @@ export const clienteEs = {
     aprobadoOk: 'Aprobaste el presupuesto — la clínica coordina el día del procedimiento con este precio.',
     rechazadoOk: 'Rechazaste el presupuesto.',
     errorAccion: 'No pudimos completar la acción. Probá de nuevo.',
-    zonaNarrativa: '{{mascota}} tiene un presupuesto para aprobar. Vence el {{fecha}}.',
-    zonaAccion: 'Verlo',
   },
 
   // S70-A4 — el parte de la consulta clínica en voz de familia
@@ -979,7 +961,6 @@ export const clienteEs = {
     noExiste: 'Esta solicitud ya no está disponible.',
     error: 'No pudimos completar la acción. Probá de nuevo.',
     cerrar: 'Cerrar',
-    revisar: 'Tocá para responder',
     cargando: 'Cargando…',
   },
 } as const;

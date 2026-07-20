@@ -43,9 +43,11 @@ import {
   HojaScroll,
   Insignia,
   LineaDeVida,
+  PieRevelar,
   SelectorOpcion,
   Separador,
   Tarjeta,
+  Texto,
   VisorFoto,
   motion,
   spacing,
@@ -65,6 +67,7 @@ import {
   obtenerEstadoHogar,
   obtenerMascotasDeFamilia,
   obtenerMisPlanesPaseo,
+  obtenerCitasActivasMascota,
   obtenerPresupuestosFamilia,
   type PresupuestoFamilia,
   obtenerResumenServiciosHogar,
@@ -105,29 +108,9 @@ function saludoPorFranja(hora: number, t: TraductorHogar): string {
 const entradaZona = (orden: number) =>
   FadeInDown.duration(motion.duration.normal).delay(orden * motion.stagger.fast);
 
-// El CUÁNDO relativo del hero (patrón v2): "En 2 h" / "En 20 min" para
-// lo cercano; lo lejano habla en mono absoluto (fechaCortaMono).
-function cuandoRelativo(
-  fecha: string,
-  hora: string | null,
-  t: TraductorHogar,
-): { relativo: string } | { mono: true } {
-  if (hora === null) return { mono: true };
-  const ts = Date.parse(`${fecha}T${hora}:00`);
-  if (!Number.isFinite(ts)) return { mono: true };
-  const min = Math.round((ts - Date.now()) / 60000);
-  if (min <= 0) return { mono: true };
-  if (min < 60) return { relativo: t('hogar.enMinutos', { n: min }) };
-  if (min < 48 * 60) return { relativo: t('hogar.enHoras', { n: Math.round(min / 60) }) };
-  return { mono: true };
-}
-
-// Día de la semana en voz del idioma — convención regla 32
-// (0=Domingo..6=Sábado; 2023-01-01 fue domingo).
-function nombreDia(d: number, idioma: string): string {
-  const fecha = new Date(Date.UTC(2023, 0, 1 + d));
-  return new Intl.DateTimeFormat(idioma === 'en' ? 'en' : 'es', { weekday: 'long', timeZone: 'UTC' }).format(fecha);
-}
+// S71-A3: cuandoRelativo y nombreDia MURIERON con las frases largas de
+// la zona de servicios (el rail habla en fecha corta mono — regla E4);
+// sus keys (enMinutos/enHoras/planDias…) murieron con ellos (Ley 37).
 
 
 // Código de voz (Ley 3: jamás visible) → texto del riel + semántica.
@@ -299,7 +282,6 @@ export default function Hogar() {
   const [estadoPie, setEstadoPie] = useState<LineaDeVidaEstadoPie>('nada');
   const cargandoMasRef = useRef(false);
 
-  const [carnetSelectorAbierto, setCarnetSelectorAbierto] = useState(false);
   const [coachAbierto, setCoachAbierto] = useState(false);
   // D-338: la celda del Hogar es una de las DOS entradas al hub "Mis
   // paseos" — visible SOLO con planes (silencio digno). S58: se guarda
@@ -312,9 +294,17 @@ export default function Hogar() {
   const [resumenServicios, setResumenServicios] = useState<ResumenServiciosHogar | null>(null);
   // QW1 (S53): el saludo lleva el nombre del miembro (profiles.nombre).
   const [nombrePerfil, setNombrePerfil] = useState<string | null>(null);
-  // Zona 3 estrena habitante (S69): el presupuesto pendiente más próximo a vencer
-  // manda (UNO, contextual — §15b). Memorial calla (apagado estructural).
-  const [presupuestoZona, setPresupuestoZona] = useState<PresupuestoFamilia | null>(null);
+  // S71-A3 — PONTE AL DÍA (F2): los habitantes de la sección que preside.
+  // El presupuesto deja de ser "UNO contextual de Zona 3" (S69) y las
+  // solicitudes dejan de ser un bloque suelto (S70-A5): la sección es la
+  // CASA que esos dos huérfanos nunca tuvieron (diagnóstico del boceto).
+  const [presupuestosPend, setPresupuestosPend] = useState<PresupuestoFamilia[]>([]);
+  // E3 (vara de B): v1 = N llamadas por mascota (93% de familias tienen 1);
+  // el lector family-level es deuda declarada con disparo en familias 3+.
+  const [porCoordinar, setPorCoordinar] = useState<
+    { mascotaId: string; mascotaNombre: string; citaId: string; negocio: string | null }[]
+  >([]);
+  const [ponteRevelado, setPonteRevelado] = useState(false);
   const [vacunaAbierta, setVacunaAbierta] = useState(false);
   const [vacuna, setVacuna] = useState<VacunaDeEvento | 'cargando' | 'error'>('cargando');
   const [carnetFirmado, setCarnetFirmado] = useState<string | null>(null);
@@ -436,10 +426,24 @@ export default function Hogar() {
         void obtenerSolicitudesPendientesDueno().then((s) => {
           if (vigente) setSolicitudesPend(s.ok ? s.data : []);
         });
-        // Zona 3: el presupuesto vigente más próximo a vencer (lector ya ordenado).
+        // PONTE AL DÍA: presupuestos vigentes (E7: SOLO 'enviado' — el
+        // vencido perezoso jamás pide acción; lector ya ordenado venceEn ASC).
         void obtenerPresupuestosFamilia().then((pr) => {
           if (!vigente) return;
-          setPresupuestoZona(pr.ok ? (pr.data.find((x) => x.estadoEfectivo === 'enviado') ?? null) : null);
+          setPresupuestosPend(pr.ok ? pr.data.filter((x) => x.estadoEfectivo === 'enviado') : []);
+        });
+        // PONTE AL DÍA: citas aprobadas que esperan fecha (E3: N llamadas
+        // por mascota — v1 honesto; el fallo de una no calla a las demás).
+        void Promise.all(
+          lista.map(async (m) => {
+            const rc = await obtenerCitasActivasMascota(m.id);
+            if (!rc.ok) return [];
+            return rc.data
+              .filter((c) => c.estado === 'por_coordinar')
+              .map((c) => ({ mascotaId: m.id, mascotaNombre: m.nombre, citaId: c.cita_id, negocio: c.negocio_nombre }));
+          }),
+        ).then((arr) => {
+          if (vigente) setPorCoordinar(arr.flat());
         });
         const paths = lista.map((m) => m.foto_url).filter((p): p is string => typeof p === 'string' && p.length > 0);
         if (paths.length > 0) {
@@ -487,11 +491,6 @@ export default function Hogar() {
       return;
     }
     setCarnetFirmado(url);
-  }
-
-  function irACargarCarnet(m: MascotaResumen) {
-    setCarnetSelectorAbierto(false);
-    router.push({ pathname: '/carnet', params: { mascotaId: m.id, nombre: m.nombre } });
   }
 
   if (mascotas === 'cargando') {
@@ -631,6 +630,113 @@ export default function Hogar() {
           acción migró a la FICHA de cada mascota (una acción por
           precedencia). El EN VIVO queda como único hero (Ley 7). */}
 
+      {/* ── PONTE AL DÍA (S71-A3, F2 letra founder): lo que el sistema
+          necesita de vos, PRESIDIENDO. La casa de los dos huérfanos
+          (autorización S70-A5 + presupuesto S69) más la superficie nueva
+          (cita por coordinar). Regla de existencia: hogar al día = la
+          sección NO EXISTE — esa desaparición ES la firma de la pantalla
+          (Ley 15). Memorial: no se monta (a un memorial no se le pide
+          acción). Orden: lo perecedero primero (E2 — la RPC ya ordena
+          expira_en ASC; el lector de presupuestos, venceEn ASC). Capas
+          E8: autorización=cuidado · presupuesto y cita=salud (tinte
+          'vida'). UNA acción por tarjeta (precedente CURA-1: la decisión
+          se toma en su superficie, con el contexto delante). ── */}
+      {(() => {
+        if (esMemorial) return null;
+        type Habitante = {
+          key: string;
+          tinte: 'cuidado' | 'vida';
+          titulo: string;
+          detalle: string | null;
+          cta: string;
+          onPress: () => void;
+        };
+        const ahora = Date.now();
+        const habitantes: Habitante[] = [
+          ...solicitudesPend.map((s): Habitante => {
+            const min = Math.max(1, Math.round((Date.parse(s.expiraEn) - ahora) / 60000));
+            return {
+              key: `sol-${s.solicitudId}`,
+              tinte: 'cuidado',
+              titulo:
+                s.tipo === 'alta_mascota'
+                  ? t('autorizacion.tituloAlta', { negocio: s.negocioNombre ?? '', mascota: s.mascotaNombre ?? '' })
+                  : t('autorizacion.tituloAtencion', { negocio: s.negocioNombre ?? '', mascota: s.mascotaNombre ?? '' }),
+              detalle: t('hogar.venceEnMin', { n: min }),
+              cta: t('hogar.verYDecidir'),
+              onPress: () =>
+                router.push({ pathname: '/autorizacion/[solicitudId]', params: { solicitudId: s.solicitudId } }),
+            };
+          }),
+          ...presupuestosPend.map(
+            (p): Habitante => ({
+              key: `pre-${p.id}`,
+              tinte: 'vida',
+              // D-455 (motor S71): el negocio se nombra; sin nombre, la
+              // forma honesta — jamás inventar quién.
+              titulo:
+                p.negocioNombre !== null
+                  ? t('hogar.presupuestoDe', { negocio: p.negocioNombre })
+                  : t('hogar.presupuestoPara', { mascota: p.mascotaNombre ?? '' }),
+              detalle: t('hogar.presupuestoDetalle', {
+                total: p.total,
+                mascota: p.mascotaNombre ?? '',
+                fecha: fechaLargaHumana(p.venceEn.slice(0, 10), idioma),
+              }),
+              cta: t('hogar.verlo'),
+              onPress: () =>
+                router.push({
+                  pathname: '/citas/[mascotaId]',
+                  params: { mascotaId: p.mascotaId, nombre: p.mascotaNombre ?? '' },
+                }),
+            }),
+          ),
+          ...porCoordinar.map(
+            (c): Habitante => ({
+              key: `coord-${c.citaId}`,
+              tinte: 'vida',
+              titulo: t('hogar.porCoordinarTitulo', { mascota: c.mascotaNombre }),
+              detalle:
+                c.negocio !== null
+                  ? t('citasMascota.coordinaraNegocio', { negocio: c.negocio })
+                  : t('citasMascota.coordinaranSinNombre'),
+              cta: t('hogar.verLaCita'),
+              onPress: () =>
+                router.push({
+                  pathname: '/citas/[mascotaId]',
+                  params: { mascotaId: c.mascotaId, nombre: c.mascotaNombre, citaId: c.citaId },
+                }),
+            }),
+          ),
+        ];
+        if (habitantes.length === 0) return null;
+        const visibles = ponteRevelado ? habitantes : habitantes.slice(0, 3);
+        return (
+          <Animated.View
+            entering={entradaZona(1)}
+            style={{ paddingHorizontal: spacing[4], paddingTop: spacing[5], gap: spacing[3] }}
+          >
+            <Texto variante="seccion">{t('hogar.ponteAlDia')}</Texto>
+            {visibles.map((h) => (
+              <Tarjeta key={h.key} tinte={h.tinte} elevacion="reposo">
+                <View style={{ gap: spacing[2] }}>
+                  <Texto variante="cuerpo">{h.titulo}</Texto>
+                  {h.detalle !== null ? <Texto variante="apoyo">{h.detalle}</Texto> : null}
+                  <View style={{ alignItems: 'flex-start', marginTop: spacing[1] }}>
+                    <Boton variante="compacto" tamaño="sm" etiqueta={h.cta} onPress={h.onPress} />
+                  </View>
+                </View>
+              </Tarjeta>
+            ))}
+            <PieRevelar
+              n={habitantes.length - 3}
+              revelado={ponteRevelado}
+              onPress={() => setPonteRevelado((v) => !v)}
+            />
+          </Animated.View>
+        );
+      })()}
+
       {/* ── Tu hogar (Zona 1): la mascota preside, su próxima cita visible ── */}
       <Animated.View
         entering={entradaZona(1)}
@@ -719,62 +825,79 @@ export default function Hogar() {
       {(() => {
         const rp = resumenServicios?.paseo;
         const re = resumenServicios?.estetica;
-        const vozCuando = (fecha: string, hora: string): string => {
-          const c = cuandoRelativo(fecha, hora, t);
-          return 'relativo' in c ? c.relativo : `${fechaCortaMono(fecha, idioma)} · ${hora}`;
-        };
-        // paseo: próxima > saldo > plan (un dato, jamás dos)
+        // S71-A3 (F1, letra founder): el rail de CUADRADOS CHICOS — los
+        // servicios son navegación, no acción pendiente; achicarlos y
+        // ponerlos en tira los baja de jerarquía sin esconderlos. Regla
+        // del copy corto (E4): el cuadrado dice UN número o UNA fecha —
+        // la frase entera vive en el hub al que navega; si el dato no
+        // cabe en esa forma (los días del plan), va SIN dato, jamás "…".
+        // E4: nace con LOS 2 REALES (paseo, estética — los que tienen
+        // lector); vet/adiestramiento se suman cuando el suyo exista
+        // (deuda declarada). Regla de existencia intacta.
         const hayPaseo = (rp !== undefined && (rp.proxima !== null || rp.salidas_saldo > 0)) || hayPlanes;
-        const detallePaseo =
+        const datoPaseo =
           rp?.proxima != null
-            ? rp.proxima.mascota_nombre !== null
-              ? t('hogar.proximoPaseoDe', { nombre: rp.proxima.mascota_nombre, cuando: vozCuando(rp.proxima.fecha, rp.proxima.hora) })
-              : t('hogar.proximoPaseo', { cuando: vozCuando(rp.proxima.fecha, rp.proxima.hora) })
+            ? fechaCortaMono(rp.proxima.fecha, idioma)
             : rp !== undefined && rp.salidas_saldo > 0
               ? rp.salidas_saldo === 1
-                ? t('hogar.saldoUnaSalida')
-                : t('hogar.saldoSalidas', { n: rp.salidas_saldo })
-              : planActivo !== null && planActivo.dias_semana.length > 0
-                ? t('hogar.planDias', { dias: planActivo.dias_semana.map((d) => nombreDia(d, idioma)).join(', ') })
-                : undefined;
+                ? t('hogar.railSaldoUna')
+                : t('hogar.railSaldo', { n: rp.salidas_saldo })
+              : null; // plan-solo: los días no caben en la forma — sin dato
         // estética: próxima > historial reciente (ventana 60 días, ratificada)
         const cerradaReciente =
           re?.ultima_cerrada != null &&
           (Date.parse(new Intl.DateTimeFormat('en-CA').format(hoy)) - Date.parse(re.ultima_cerrada)) / 86400000 <= 60;
         const hayEstetica = re !== undefined && (re.proxima !== null || cerradaReciente);
-        const detalleEstetica =
+        const datoEstetica =
           re?.proxima != null
-            ? re.proxima.mascota_nombre !== null
-              ? t('hogar.proximaSesionDe', { nombre: re.proxima.mascota_nombre, cuando: vozCuando(re.proxima.fecha, re.proxima.hora) })
-              : t('hogar.proximaSesion', { cuando: vozCuando(re.proxima.fecha, re.proxima.hora) })
-            : re?.ultima_cerrada != null
-              ? t('hogar.ultimaSesion', { fecha: fechaCortaMono(re.ultima_cerrada, idioma) })
-              : undefined;
+            ? fechaCortaMono(re.proxima.fecha, idioma)
+            : cerradaReciente && re?.ultima_cerrada != null
+              ? fechaCortaMono(re.ultima_cerrada, idioma)
+              : null;
         if (!hayPaseo && !hayEstetica) return null;
+        const cuadrados: { key: string; icono: 'paseo' | 'grooming'; nombre: string; dato: string | null; destino: '/hogar/paseos' | '/hogar/grooming' }[] = [
+          ...(hayPaseo
+            ? [{ key: 'paseo', icono: 'paseo' as const, nombre: t('hogar.railPaseos'), dato: datoPaseo, destino: '/hogar/paseos' as const }]
+            : []),
+          ...(hayEstetica
+            ? [{ key: 'estetica', icono: 'grooming' as const, nombre: t('hogar.railEstetica'), dato: datoEstetica, destino: '/hogar/grooming' as const }]
+            : []),
+        ];
         return (
-          <Animated.View entering={entradaZona(2)} style={{ paddingHorizontal: spacing[4], marginTop: spacing[7], gap: spacing[3] }}>
-            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.secondary }}>
+          <Animated.View entering={entradaZona(2)} style={{ marginTop: spacing[7], gap: spacing[3] }}>
+            <Text style={{ paddingHorizontal: spacing[4], fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.secondary }}>
               {t('hogar.serviciosTitulo')}
             </Text>
-            <Tarjeta relleno="ninguno" elevacion="reposo">
-              {hayPaseo ? (
-                <CeldaNavegacion
-                  icono="paseo"
-                  titulo={t('plan.hubTitulo')}
-                  detalle={detallePaseo}
-                  onPress={() => router.push('/hogar/paseos')}
-                />
-              ) : null}
-              {hayPaseo && hayEstetica ? <Separador /> : null}
-              {hayEstetica ? (
-                <CeldaNavegacion
-                  icono="grooming"
-                  titulo={t('grooming.hubTitulo')}
-                  detalle={detalleEstetica}
-                  onPress={() => router.push('/hogar/grooming')}
-                />
-              ) : null}
-            </Tarjeta>
+            {/* el rail sangra edge-to-edge; el aire de cola va en el
+                contentContainer (un rail cortado en seco parece bug) */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: spacing[4], gap: spacing[3] }}
+            >
+              {cuadrados.map((c) => (
+                <Tarjeta
+                  key={c.key}
+                  interactiva
+                  elevacion="reposo"
+                  accessibilityRole="button"
+                  etiqueta={c.nombre}
+                  onPress={() => router.push(c.destino)}
+                >
+                  <View style={{ width: 96, gap: spacing[2] }}>
+                    <Icono nombre={c.icono} tamano={24} />
+                    <Texto variante="apoyo" color="primary" numberOfLines={1}>
+                      {c.nombre}
+                    </Texto>
+                    {c.dato !== null ? (
+                      <Texto variante="dato" numberOfLines={1}>
+                        {c.dato}
+                      </Texto>
+                    ) : null}
+                  </View>
+                </Tarjeta>
+              ))}
+            </ScrollView>
           </Animated.View>
         );
       })()}
@@ -787,35 +910,15 @@ export default function Hogar() {
           PURO — "Mis paseos" migró a la zona de servicios. ── */}
       <Animated.View entering={entradaZona(3)} style={{ paddingHorizontal: spacing[4], marginTop: spacing[7] }}>
         <Tarjeta relleno="ninguno" elevacion="reposo">
-          <CeldaNavegacion
-            icono="veterinaria"
-            titulo={t('hogar.cargarCarnet')}
-            detalle={(() => {
-              // vivo: el refuerzo más próximo del hogar (señal real)
-              let masProxima: { nombre: string; fecha: string } | null = null;
-              for (const s of estadoHogar?.senales ?? []) {
-                if (s.proxima_vacuna !== null && (masProxima === null || s.proxima_vacuna.fecha < masProxima.fecha)) {
-                  masProxima = { nombre: nombreDe(s.mascota_id), fecha: s.proxima_vacuna.fecha };
-                }
-              }
-              if (masProxima !== null && masProxima.nombre !== '') {
-                const dias = Math.round((Date.parse(masProxima.fecha) - Date.parse(new Intl.DateTimeFormat('en-CA').format(hoy))) / 86400000);
-                if (dias === 0) return t('hogar.refuerzoHoy', { nombre: masProxima.nombre });
-                if (dias === 1) return t('hogar.refuerzoManana', { nombre: masProxima.nombre });
-                if (dias > 1) return t('hogar.refuerzoEnDias', { nombre: masProxima.nombre, n: dias });
-              }
-              // sin señal: la invitación de siempre (voz de vacío, no dato)
-              return t('hogar.cargarCarnetDetalle');
-            })()}
-            onPress={() => {
-              if (mascotas.length === 1) irACargarCarnet(mascotas[0]);
-              else setCarnetSelectorAbierto(true);
-            }}
-          />
-          {/* S60-A6: la celda del hub migró a TUS SERVICIOS (arriba) —
-              este grupo queda expediente puro (D-338 sigue honrada: la
-              regla de existencia de la zona incluye hayPlanes). */}
-          <Separador />
+          {/* S71-A3 (F2, letra founder): la celda del CARNET se MUDÓ
+              adentro de la vista de la mascota — el aporte del carnet es
+              por mascota, no del hogar (la sección Salud de
+              mascota/[mascotaId] ya era su casa: estado vacío con CTA +
+              entrada de agregar). El detalle VIVO del refuerzo más
+              próximo muere con la celda; su heredero natural es el
+              habitante 5 de "Ponte al día" cuando fecha_proxima tenga
+              datos (hoy 1/24 — deuda E5 declarada). La ficha con
+              pideAtencion sigue cubriendo la urgencia por mascota. */}
           <CeldaNavegacion
             icono="refugio"
             titulo={t('hogar.agregarMascotaCelda')}
@@ -826,77 +929,10 @@ export default function Hogar() {
         </Tarjeta>
       </Animated.View>
 
-      {/* ── S70-A5: solicitud de autorización del mostrador (UNO, contextual;
-           abre la Hoja sin depender del push). Memorial calla. ── */}
-      {solicitudesPend.length > 0 && !esMemorial ? (
-        <Animated.View
-          entering={entradaZona(3)}
-          style={{ paddingHorizontal: spacing[4], marginTop: spacing[7], gap: spacing[3] }}
-        >
-          <Tarjeta relleno="ninguno" elevacion="reposo">
-            <CeldaNavegacion
-              icono="veterinaria"
-              titulo={
-                solicitudesPend[0].tipo === 'alta_mascota'
-                  ? t('autorizacion.tituloAlta', {
-                      negocio: solicitudesPend[0].negocioNombre ?? '',
-                      mascota: solicitudesPend[0].mascotaNombre ?? '',
-                    })
-                  : t('autorizacion.tituloAtencion', {
-                      negocio: solicitudesPend[0].negocioNombre ?? '',
-                      mascota: solicitudesPend[0].mascotaNombre ?? '',
-                    })
-              }
-              detalle={t('autorizacion.revisar')}
-              onPress={() =>
-                router.push({
-                  pathname: '/autorizacion/[solicitudId]',
-                  params: { solicitudId: solicitudesPend[0].solicitudId },
-                })
-              }
-            />
-          </Tarjeta>
-        </Animated.View>
-      ) : null}
-
-      {/* ── Zona 3 — en contexto: PRIMER habitante (S69). El presupuesto
-           pendiente más próximo a vencer, UNO y contextual (§15b).
-           Memorial calla (apagado estructural). ── */}
-      {presupuestoZona !== null && !esMemorial ? (
-        <Animated.View
-          entering={entradaZona(3)}
-          style={{ paddingHorizontal: spacing[4], marginTop: spacing[7], gap: spacing[3] }}
-        >
-          <Text
-            style={{
-              fontFamily: typography.family.sans.medium,
-              fontSize: typography.size.lg,
-              color: theme.text.primary,
-            }}
-          >
-            {t('presupuesto.tituloPendiente')}
-          </Text>
-          <Tarjeta relleno="ninguno" elevacion="reposo">
-            <CeldaNavegacion
-              icono="veterinaria"
-              titulo={t('presupuesto.zonaNarrativa', {
-                mascota: presupuestoZona.mascotaNombre ?? '',
-                fecha: fechaLargaHumana(presupuestoZona.venceEn.slice(0, 10), idioma),
-              })}
-              detalle={t('presupuesto.zonaAccion')}
-              onPress={() =>
-                router.push({
-                  pathname: '/citas/[mascotaId]',
-                  params: {
-                    mascotaId: presupuestoZona.mascotaId,
-                    nombre: presupuestoZona.mascotaNombre ?? '',
-                  },
-                })
-              }
-            />
-          </Tarjeta>
-        </Animated.View>
-      ) : null}
+      {/* S71-A3: los dos bloques huérfanos (solicitud S70-A5 · presupuesto
+          S69) MURIERON ABSORBIDOS por PONTE AL DÍA — el diagnóstico de la
+          planitud era exactamente que exigían acción sin sección donde
+          vivir. Ley 37: el código murió con ellos. */}
 
       {/* ── Zona 4 — la vida ─────────────────────────────────────
           Ritmo S52-P2c: entre zonas spacing[7]; adentro spacing[4]. */}
@@ -1014,17 +1050,9 @@ export default function Hogar() {
         </Tarjeta>
       </Animated.View>
 
-      {/* ¿De quién es el carnet? — selector multi-mascota */}
-      <Hoja visible={carnetSelectorAbierto} onCerrar={() => setCarnetSelectorAbierto(false)} titulo={t('hogar.carnetDeQuien')} conCerrar>
-        <HojaScroll>
-          {mascotas.map((m, i) => (
-            <View key={m.id}>
-              {i > 0 ? <Separador /> : null}
-              <Celda interactiva accessibilityRole="button" onPress={() => irACargarCarnet(m)} titulo={m.nombre} />
-            </View>
-          ))}
-        </HojaScroll>
-      </Hoja>
+      {/* S71-A3: el selector "¿De quién es el carnet?" murió con la celda
+          del carnet — el flujo ahora nace DENTRO de cada mascota, donde
+          la pregunta no existe (Ley 37). */}
 
       {/* Detalle de vacuna (tap en nodo) — Hoja + Ver carnet firmado */}
       <Hoja visible={vacunaAbierta} onCerrar={() => { setVacunaAbierta(false); setCarnetFirmado(null); }} titulo={t('vacunaHoja.titulo')} conCerrar>
