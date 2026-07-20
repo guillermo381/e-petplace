@@ -590,7 +590,11 @@ export default function ConsultaVeterinaria() {
                       <Campo label={t('consulta.medDuracion')} placeholder={t('consulta.medDuracionPlaceholder')} value={m.duracionDias} onChangeText={(v) => editarMed(m.key, 'duracionDias', v)} keyboardType="number-pad" />
                       <Campo label={t('consulta.medVia')} placeholder={t('consulta.medViaPlaceholder')} value={m.via} onChangeText={(v) => editarMed(m.key, 'via', v)} />
                       <Campo label={t('consulta.medIndicaciones')} placeholder={t('consulta.medIndicacionesPlaceholder')} value={m.indicaciones} onChangeText={(v) => editarMed(m.key, 'indicaciones', v)} multilinea={2} />
-                      <Boton variante="compacto" etiqueta={t('consulta.medQuitar')} onPress={() => quitarMed(m.key)} />
+                      {/* 19.7: acción DENTRO de fila repetida (una tarjeta por
+                          medicamento) — EJECUTA, así que baja a label sin
+                          chevron. `compacto` es contorno transparente (la caja
+                          vacía del medio); `ghost` es el label. */}
+                      <Boton variante="ghost" etiqueta={t('consulta.medQuitar')} onPress={() => quitarMed(m.key)} />
                     </View>
                   </Tarjeta>
                 );

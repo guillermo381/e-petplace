@@ -625,8 +625,11 @@ export default function TallerVeterinaria() {
                           // un toque, nada se pierde (los borradores
                           // conservan su estado)
                           <View style={{ alignSelf: 'flex-start' }}>
+                            {/* 19.7: una por servicio del menú — con N filas,
+                                N contornos son un tablero donde nada preside.
+                                EJECUTA (despliega): label sin chevron. */}
                             <Boton
-                              variante="compacto"
+                              variante="ghost"
                               etiqueta={t('tallerVeterinaria.desplegar')}
                               onPress={() => desplegar(i)}
                             />

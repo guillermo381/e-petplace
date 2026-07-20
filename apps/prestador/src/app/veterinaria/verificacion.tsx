@@ -338,8 +338,10 @@ export default function VerificacionVeterinaria() {
                   {/* aprobado no re-sube (nada que reparar); el resto sí */}
                   {!aprobado && (
                     <View style={{ alignSelf: 'flex-start' }}>
+                      {/* 19.7: una por tipo de documento — EJECUTA (abre la
+                          Hoja de captura): label sin chevron. */}
                       <Boton
-                        variante="compacto"
+                        variante="ghost"
                         etiqueta={
                           doc === null ? t('verificacionVet.subir') : t('verificacionVet.subirDeNuevo')
                         }
