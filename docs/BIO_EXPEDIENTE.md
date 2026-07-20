@@ -74,6 +74,8 @@ El modelo completo en DB desde día 1. La implementación va por fases:
 
 Los actores se identifican por la pareja **(cuenta_comercial_id, rol_activo)** o **(user_id, rol_sistema)** para clientes/admin.
 
+> **Nota S72 — cómo se lee la columna "Lee expediente":** se lee contra la **matriz de A3.3** (`oficio × eje`) y el gate de rol de A3.4, **no contra el tipo de cuenta**. Los `tipo=vet` / `tipo=paseador` / `tipo=grooming` de la columna "Tipo cuenta" son nomenclatura ANTERIOR al modelo de actor (S66): hoy una misma `cuenta_comercial` ejerce varios oficios, y lo que modula la lectura es el **oficio del otorgamiento** (A3.2), no un tipo de la cuenta. Un "✅ vista filtrada" de esta tabla significa hoy: *la columna de su oficio en A3.3, acotada por su rol en A3.4*.
+
 | Actor | Tipo cuenta | Contribuye eventos | Lee expediente |
 |---|---|---|---|
 | Veterinario dueño | prestador (tipo=vet) | ✅ | ✅ con permisos |
@@ -97,17 +99,245 @@ Los actores se identifican por la pareja **(cuenta_comercial_id, rol_activo)** o
 | Adoptante secundario | hereda rol pet_parent con consentimiento | ✅ | ✅ TODO |
 | Familiar autorizado | user con permisos delegados por dueño | ✅ notas limitadas | ✅ vista limitada |
 
-### A2 — Visibilidad parcial por tipo de prestador
+### A2 — Visibilidad parcial por tipo de prestador ⚠️ HISTÓRICO
+
+> **Los ejemplos de esta sección son ANTERIORES al modelo de actor (S66). La matriz vigente vive en A3.**
+>
+> El eje `tipo_prestador` sobre el que se escribió esta sección **murió en S66**: el modelo de actor firmó que no hay tipos de prestador — hay un negocio contenedor con personas ejerciendo oficios. Se conserva como nota histórica, no como letra vigente.
 
 El sistema define qué **subconjunto del expediente** ve cada tipo de prestador, basado en lo necesario y suficiente para su rol.
 
-Ejemplos (a refinar en futuras sesiones):
+Ejemplos (a refinar en futuras sesiones) — **nota histórica, superada por A3**:
 - **Paseador** ve: alergias, miedos, condiciones de seguridad, medicación diaria. NO ve: historia clínica detallada.
 - **Hotel** ve: alergias, medicación, plan nutricional, temperamento. NO ve: detalles diagnósticos médicos.
 - **Grooming** ve: alergias dermatológicas, condiciones de piel/pelo, temperamento. NO ve: historia clínica completa.
 - **Vet** ve: todo lo relacionado a salud + alergias + condiciones + intervenciones + cuidado externo (contexto).
 
-Decisión pendiente: definir matriz exacta de `tipo_prestador × eje_expediente → visible/no_visible` en próximas sesiones.
+~~Decisión pendiente: definir matriz exacta de `tipo_prestador × eje_expediente → visible/no_visible` en próximas sesiones.~~ → **PAGADA en S72: la matriz vigente es `oficio × eje` y vive en A3.3.**
+
+### A3 — Modulación del expediente por actor
+
+> **Letra de mesa S72 (20 Jul 2026), founder + arquitecto.** Paga el `Pendiente PE2` (declarado en S12) y reemplaza el eje de `A2`/`AC5` (`tipo_prestador`, muerto en S66) por la ley madre **acto/rol**.
+>
+> **Estado de firma:** A3.1–A3.8 y A3.10 **FIRMADAS por el founder en mesa S72**. **A3.9 (memorial) PENDIENTE DE FIRMA** — voto del arquitecto registrado, no ejecutado.
+
+#### A3.1 — LA LEY MADRE (firmada S72)
+
+> **El ACTO decide qué se MUESTRA. El ROL decide qué se PUEDE mostrar.**
+
+Son dos mecanismos distintos y **confundirlos construye o un agujero o una
+ilusión de seguridad**:
+
+- **El ACTO** = el oficio de la relación que abrió el acceso. Gobierna
+  **dosis y foco**. Es decisión de **producto/UI**: al que entra por un
+  paseo se le muestra lo que sirve para pasear, aunque esté habilitado a
+  más. Mostrarle lo clínico mientras saca al perro es **ruido, no
+  seguridad**.
+- **El ROL** = qué es esa persona dentro del negocio. Gobierna **permiso**.
+  Es decisión de **motor**: vive en RLS, jamás en la pantalla. Una
+  recepcionista no tiene una vista "más chica" del expediente clínico —
+  **no lo tiene**.
+
+**Corolario de la persona multi-oficio (caso del founder, F1):** el vet que
+también pasea, entrando por la pantalla de paseo, ve la vista de paseador.
+Eso es **contexto, no permiso** — y el camino al dato clínico existe y es
+honesto: **entra por el acto veterinario**. Nunca se le esconde algo a lo
+que tiene derecho; se le ordena la mesa según lo que vino a hacer.
+
+**Corolario del negocio de una sola persona (mayoría en F1):** en la UI los
+roles **no existen** — el titular es el profesional y ve como tal. En el
+motor **existen desde el día 1**, invisibles. El modelo de actor ya firmó
+que la complejidad de dos niveles jamás se exporta al usuario; y una clínica
+de cinco personas no puede costar un refactor.
+
+#### A3.2 — EL OTORGAMIENTO CARGA EL OFICIO (motor, firmado S72)
+
+Hoy `mascota_acceso_prestador` otorga a la cuenta **sin oficio**. La
+enmienda:
+
+- **`mascota_acceso_prestador` gana `oficio`** (nullable).
+- **Una mascota puede tener N otorgamientos a la MISMA cuenta, uno por
+  oficio.** Eso es la verdad: *"esta clínica me pasea el perro"* deja de ser
+  lo mismo que *"esta clínica atiende a mi perro"*.
+- **El productor ya sabe el dato:** `trg_otorgar_acceso_por_cita_confirmada`
+  dispara sobre `evento_cita_servicio`, que porta el `tipo_servicio` de la
+  cita. El handshake del mostrador (`MODELO_VETERINARIA` §7bis) estampa el
+  oficio de la atención autorizada.
+- **La revocación es por oficio.** El dueño puede cortar una relación sin
+  matar la otra.
+- **Las filas legadas (`oficio IS NULL`) leen como hasta hoy.** No se
+  adivina el oficio de un otorgamiento viejo: **inventarlo sería fabricar un
+  dato falso** (L-139, la ley del carnet). Migran cuando su próxima cita las
+  renueve.
+
+> **Nota de costo:** hoy la columna es casi gratis (el trigger ya tiene el
+> dato en la mano). En seis meses, con volumen de otorgamientos, es cara.
+> Ese es el argumento de oportunidad, no la urgencia de la fuga.
+
+#### A3.3 — LA MATRIZ PE2 (oficio × eje) — el pago de la deuda de S12
+
+**Vocabulario de dosis (cuatro niveles, exigibles):**
+
+| Nivel | Qué significa |
+|---|---|
+| **COMPLETO** | El eje entero, evento por evento, con su procedencia. |
+| **DESTILADO** | El estado vigente y lo que cambió, en resumen — jamás la fila cruda. *"Trabajando reactividad con correa desde mayo"*, no la sesión entera. |
+| **SEGURIDAD** | Solo lo que protege a la mascota y al que la tiene enfrente: alergias, medicación vigente, condiciones que limitan el acto, alertas de manejo. Sin diagnósticos, sin historia. |
+| **NO** | No se muestra. |
+
+**La matriz (firmada S72):**
+
+| Eje | Veterinaria | Paseo | Grooming | Adiestramiento |
+|---|---|---|---|---|
+| **1 · Identidad** | COMPLETO | COMPLETO | COMPLETO | COMPLETO |
+| **2 · Etapa de vida** | COMPLETO | COMPLETO | COMPLETO | COMPLETO |
+| **3 · Salud** | **COMPLETO** | SEGURIDAD | SEGURIDAD *(foco dermatológico)* | SEGURIDAD *(foco dolor / sedación)* |
+| **4 · Cuidado externo** | DESTILADO | COMPLETO | COMPLETO | COMPLETO |
+| **5 · Alimentación** | DESTILADO | SEGURIDAD *(alergias — da premios)* | SEGURIDAD | SEGURIDAD *(la comida es su herramienta)* |
+| **6 · Comportamiento** | DESTILADO **+ SEGURIDAD** | COMPLETO | COMPLETO | COMPLETO |
+| **7 · Datos pasivos** *(cuando exista)* | DESTILADO | DESTILADO | NO | DESTILADO |
+| **8 · Administrativo** | NO *(salvo lo que el propio negocio produjo)* | NO | NO | NO |
+
+**Las lecturas que hay que hacer de esta tabla:**
+
+1. **El vet ve el eje 3 COMPLETO y todo lo demás DESTILADO.** No es
+   generosidad: es que la señal clínica **vive fuera del eje 3** — comió
+   distinto, dejó de caminar igual, el groomer le vio la piel. Un buen
+   clínico lee todo eso; lo que no necesita es la sesión de adiestramiento
+   entera.
+2. **La alerta de seguridad NUNCA se destila y NUNCA se oculta.** "Muerde"
+   se muestra a los cuatro oficios y a la recepción, siempre, aunque el eje
+   6 esté en DESTILADO o en NO. Es la única regla que atraviesa la matriz.
+3. **Cada oficio ve su propio eje COMPLETO** — es lo que él alimenta.
+4. **El eje 8 es del dueño.** Pólizas, documentos legales y constancias no
+   son del prestador. La excepción es lo que él mismo generó (`AC6`).
+
+#### A3.4 — EL ROL DENTRO DEL NEGOCIO (firmado S72)
+
+Es `DISEÑO_EXPERIENCIA` §15b aplicado al expediente: **NEGOCIO se gatea por
+rol, HOY no** — y el mostrador vive en HOY.
+
+| Rol | Qué ve |
+|---|---|
+| **Profesional del oficio** (vet, paseador, groomer, adiestrador) | La columna de su oficio en la matriz A3.3. |
+| **Recepción / mostrador** | **Identidad COMPLETA** (nombre, foto, especie, raza, dueño de contacto) · **etapa DESTILADA** · **alerta de seguridad del eje 6** · y **a qué viene** (que es la agenda, no el expediente). **Todo lo demás: NO.** |
+| **Titular de negocio unipersonal** | Colapsa al profesional de su oficio. Sin UI de roles. |
+
+**Por qué la recepción ve la alerta de seguridad (decisión founder S72):**
+porque **lo recibe en el mostrador y el riesgo es suyo**. Es decisión de
+seguridad laboral antes que de privacidad — y es argumento de venta:
+*la app también cuida al equipo*.
+
+#### A3.5 — LO QUE NADIE VE (límites duros, ningún oficio, ningún rol)
+
+Escritos en piedra, no configurables — heredan `MODELO_PRODUCTO` §8:
+
+1. **Los hitos privados del humano** (§8.6: *"nadie excepto el humano que
+   los escribió, ni co-dueño, ni admin"*). Si nace la nota privada del
+   dueño, **nace fuera de toda vista de prestador, por diseño**.
+2. **La familia humana más allá del contacto necesario** (ya lo cubre la
+   RLS; hallazgo S51 documentado).
+3. **El expediente de las otras mascotas de la familia.**
+4. **La plata del dueño** — qué pagó, a quién, su historial.
+5. **Los datos aportados por menores como tales** (§4.3 / P5).
+6. **El expediente completo cuando el acceso fue revocado o caducó** —
+   queda solo el log inmutable de `AC6` (retención legal, sin PII).
+
+#### A3.6 — LA PROCEDENCIA SE MUESTRA SIEMPRE (firmada S72)
+
+`MODELO_VETERINARIA` §13 ya tipó tres niveles. La letra que faltaba es
+**qué hace la pantalla con ellos**:
+
+- **Todo dato clínico se muestra con su procedencia, sin excepción.** Un vet
+  leyendo "antirrábica" necesita saber si salió de la foto de un carnet o si
+  la aplicó una clínica. Sin eso, **el expediente le miente sin querer y él
+  no vuelve.** La procedencia no es detalle de UI: **es lo que hace el
+  expediente confiable para un profesional.**
+- **La procedencia nombra al colega cuando fue un prestador.** No se puede
+  decir "declarado por un prestador" sin decir cuál — eso es precisamente lo
+  que lo vuelve verificable, y es ecosistema: el vet puede llamar. Precedente
+  de exposición con mínimo privilegio: la DEFINER angosta de **D-455**.
+- **Los 83 eventos con procedencia NULL** (histórico pre-modelo, contra 24
+  `declarado_por_familia` + 5 `declarado_por_prestador`, censo S72-A0) se
+  muestran como **"origen no registrado"**, con todas las letras. Es feo y
+  es verdad: **inventarles procedencia sería la L-139 del carnet, otra vez.**
+- **`verificado_por_prestador` sigue sin productor** (§14.2). Hasta que el
+  proceso de verificación exista, **lo que el vet ve es siempre
+  DECLARADO** — y la pantalla no puede sugerir lo contrario.
+
+#### A3.7 — LA FORMA: SON TREINTA SEGUNDOS, NO UN VOLCADO (firmada S72)
+
+El expediente del profesional **es un briefing, no una tabla con permisos**.
+`MODELO_VETERINARIA` §11 ya lo escribió para el Antes del vet (resumen
+destilado + casos activos + resumen IA). La letra lo generaliza:
+
+- **Preside lo que cambia la conducta del profesional en los próximos cinco
+  minutos.** Alertas de seguridad, medicación vigente, caso abierto.
+- **Lo demás se pliega** (ley de la casa del prestador, §15b).
+- **Cero explicación necesaria** — el vet no aprende a leer nuestra
+  pantalla: la entiende.
+
+**Y es la vitrina de conversión.** Lo que el vet de OkVet ve al asomarse no
+es "otro back-office": es **lo que los otros actores ya saben de este
+animal** — el paseador que anotó que cojea, el groomer que le vio la piel,
+la vacuna que aplicó otra clínica. **Ningún back-office puede mostrar eso**,
+porque ninguno tiene a los otros actores adentro.
+
+#### A3.8 — CONTRIBUIR ≠ LEER, Y EL DUEÑO VE QUIÉN VIO (firmada S72)
+
+- **Contribuir no da derecho a leer.** `A1` ya lo tenía (el seller
+  contribuye y no lee; el wearable escribe y no lee). Queda explícito como
+  ley, no como tabla.
+- **El dueño ve quién accedió a su expediente y puede revocar.** `AC2`/`AC3`
+  tienen la revocación modelada **y no tienen cara**. Es `MODELO_PRODUCTO`
+  §8.1 (*la vida documentada le pertenece*) y §8.8 (*opt-out fácil*): sin la
+  cara, el principio es decorativo.
+- **La construcción de esa cara puede quedar con disparo** — pero se declara
+  ahora, porque **cambia cómo se diseña la pantalla del vet hoy**: el acceso
+  es un acto observable, no un permiso silencioso.
+
+#### A3.9 — MEMORIAL 🟠 PENDIENTE DE FIRMA FOUNDER
+
+**El caso:** la mascota murió. ¿El prestador sigue leyendo su expediente, y
+hasta cuándo? Hay letra parcial (`AC6` log inmutable para retención legal;
+`MODELO_LOYALTY` §7 apaga el motor entero en memorial; `MODELO_PRODUCTO`
+§8.5 *memorial respeta el duelo*), pero **nadie escribió qué ve un
+prestador**.
+
+| Camino | Qué implica |
+|---|---|
+| **(a)** El acceso muere con la mascota. | Queda solo el log `AC6`. Corte limpio. |
+| **(b)** El acceso sobrevive una ventana y cae *(la misma caducidad de `cita_automatica`)*. | Ventana clínica y humana, con final. |
+| **(c)** El acceso sobrevive indefinido, degradado. | Acumulación sin propósito. |
+
+**VOTO DEL ARQUITECTO: (b), con degradación.** Dos razones: **clínica** — el
+vet que la trató necesita mirar atrás poco después (cierre de caso, informe
+a la familia, su propia responsabilidad profesional); y **humana** — cortar
+de golpe el día de la muerte convierte un duelo en un error de sistema.
+Indefinido, en cambio, es acumulación sin propósito.
+
+**Con dos reglas que van con el voto:**
+1. **En memorial el expediente se lee, no se escribe** (salvo el evento de
+   fin de vida y lo que la ley obliga).
+2. **Degrada visualmente** — `DIRECCION_ARTE` Ley 8: la huella pasa a tinta,
+   jamás color. Y §8.5: **cero push, cero comercial, cero recordatorio.**
+
+#### A3.10 — QUÉ HABILITA CONSTRUIR
+
+Con esta letra firmada, **P3 puede entrar a M1 (boceto)** con mecanismo
+M1–M5 completo. Y queda dicho lo que el relevamiento S72-B0 destapó: **D-459
+no es un caso aislado** — hay nueve lectores construidos en `packages/api`
+con cero importaciones en el prestador. **El motor clínico se construyó
+entero y su cara quedó a medias**; esta letra es la que dice qué cara.
+
+**Deudas depositadas** *(numeradas contra el ledger vivo — la cola cerró en D-462)*:
+
+| # | Deuda | Disparo |
+|---|---|---|
+| D-463 | **`mascota_acceso_prestador.oficio`** + productores (trigger y handshake) + revocación por oficio. Migración con contrato regla 69. | **La primera pantalla que module por oficio** — es decir, P3. |
+| D-464 | **Gate de rol en el expediente** (recepción vs profesional), en RLS. | Junto con lo anterior: hoy es hueco de privacidad vivo, no mejora. |
+| D-465 | **La cara de la revocación del dueño** (`AC2`/`AC3` sin UI). | Antes del soft launch — §8.8 lo exige. |
+| D-466 | **Resumen IA del expediente largo** (§11, no existe). | Cuando el expediente real tenga volumen. |
 
 ---
 
@@ -410,11 +640,17 @@ Razones:
 - Simplifica revocación (revocás 1 fila, no N empleados).
 - Empleados son "manos" de la cuenta — la cuenta es responsable.
 
-### AC5 — Visibilidad parcial por tipo
+### AC5 — Visibilidad parcial por acto y por rol
 
-Una vez otorgado acceso, el prestador NO ve todo. Ve **vista filtrada por su tipo** (ver A2).
+Una vez otorgado acceso, el prestador NO ve todo. La ley madre (A3.1):
 
-Implementación: views Postgres específicas por tipo de prestador, o RLS policies con joins a `prestadores.tipo`. Decisión técnica pendiente.
+> **El ACTO decide qué se MUESTRA. El ROL decide qué se PUEDE mostrar.**
+
+El **acto** es el oficio de la relación que abrió el acceso: gobierna dosis y foco, y es decisión de producto/UI. El **rol** es qué es esa persona dentro del negocio: gobierna permiso, vive en RLS y jamás en la pantalla. La matriz vigente `oficio × eje` vive en **A3.3**; el gate por rol, en **A3.4**.
+
+Implementación: el otorgamiento carga el oficio — ver **A3.2** (`mascota_acceso_prestador.oficio`, N otorgamientos por cuenta uno por oficio, revocación por oficio, filas legadas `oficio IS NULL` que leen como hasta hoy). El gate de rol en RLS es **D-464**.
+
+> **Nota histórica:** esta sección decía *"vista filtrada por su tipo (ver A2)"* con implementación por `prestadores.tipo`. Ese eje murió en S66 con el modelo de actor — no hay tipos de prestador, hay oficios ejercidos dentro de un negocio contenedor.
 
 ### AC6 — Cumplimiento legal del prestador post-revocación
 
@@ -551,9 +787,10 @@ Discovery está completo, pero el documento tiene secciones que requieren más d
 - `cliente_preferencias_uso_data`, `recomendaciones_log`, `socios_data_comerciales`.
 - `prestador_atencion_log` (immutable).
 
-### Pendiente PE2 — Matriz de visibilidad por tipo de prestador
-- Tabla `tipo_prestador × eje_expediente → permitido/no_permitido`.
-- Decisión técnica: views Postgres por tipo o RLS con joins.
+### ~~Pendiente PE2 — Matriz de visibilidad por tipo de prestador~~ ✅ PAGADA en S72
+- **La matriz vive en A3.3** — y el eje NO es `tipo_prestador` (muerto en S66 con el modelo de actor) sino **`oficio × eje_expediente`**, con cuatro niveles de dosis exigibles (COMPLETO / DESTILADO / SEGURIDAD / NO).
+- La decisión técnica se resolvió por la ley madre de A3.1: el ACTO modula en producto/UI, el ROL permite en RLS. El otorgamiento carga el oficio (A3.2, deuda **D-463**); el gate de rol es **D-464**.
+- Pendiente desde S12. Pagada por la letra de mesa S72 (founder + arquitecto).
 
 ### Pendiente PE3 — Triggers DB
 - Trigger sobre `eventos_mascota` → propagación a `mascota_perfil_vigente` para eventos con `propaga_a_perfil=true`.
@@ -975,4 +1212,5 @@ Si tomás una sesión nueva sobre Bio-Expediente:
 - **v0.5 (14 May 2026 — S17)**: Fases B/C/D/E del Bloque 9 ejecutadas en DB. 8 tablas nuevas (familia, familia_miembro, mascota_codueño, mascota_familiar_autorizado, mascota_visibilidad_config, accion_destructiva_pendiente, caso_clinico, caso_clinico_consultor). ALTERs a mascotas (familia_id, estado_vida, estado_vida_desde + backfill). 6 ALTERs a tablas tipadas clínicas (caso_clinico_id). 9 funciones nuevas (`user_puede_ver_dimension` + 7 helpers SECURITY DEFINER de Fases B/E + función de propagación de estado_vida). ~50 RLS policies. 4 triggers nuevos. 19 tests pasados. D-133, D-136, D-142, D-143, D-150 cerradas. D-156 detectada (🔴 BLOQUEANTE triggers SECURITY INVOKER). Bloque 9: 5 de 11 fases ejecutadas.
 - **v0.6 (15 May 2026 — S18)**: D-156 cerrada (3 triggers de `eventos_mascota` a SECURITY DEFINER + search_path acotado). D-160 detectada y cerrada en misma sesión (policy `eventos_mascota_insert` ampliada con coherencia `prestador_id`/`empleado_id`/authenticated). D-157 cerrada con arquitectura limpia: RPC `crear_mascota_walkin` SECURITY DEFINER como puerta única, drop de policy laxa, ALTER CHECK de `mascota_acceso_prestador` para agregar `'walkin_origen'`. **Fase F ejecutada**: tabla `evento_identidad_personal` (5 subtipos, FK a `familia_miembro`, soft-delete coherente), ALTER `mascota_perfil_vigente` con columna `identidad_personal jsonb`, policy SELECT única, 2 RPCs SECURITY DEFINER (`registrar_rasgo_identidad_personal`, `desactivar_rasgo_identidad_personal`). Materialización inline en RPCs (sin trigger). D-162 cerrada técnicamente (trigger mascotas a DEFINER, runtime test pendiente). D-159 cerrada (auditoría triggers vs columnas, 0 drifts). Patrón arquitectónico establecido: **RPCs SECURITY DEFINER como puerta única de entrada** para tablas con RLS sin policies INSERT/UPDATE/DELETE. 9 tests runtime pasados con SET LOCAL ROLE authenticated. 3 deudas nuevas detectadas (D-161, D-165, D-166). 5 lecciones nuevas (L-078 a L-082). Drift documental corregido: `nota_dueño` → `nota_dueno`. Migración consolidada: `migrations/2026-05-15-S18.sql`. Bloque 9: 6 de 11 fases ejecutadas.
 - **v0.7 (15 May 2026 — S19)**: **Fase G ejecutada** (alta asistida cliente+mascota). Tabla `cliente_pendiente_registro` + 3 RPCs SECURITY DEFINER (`buscar_cliente_por_email`, `crear_alta_asistida_pendiente`, `crear_alta_asistida_existente`) + trigger `_trg_completar_pendiente_registro` sobre `profiles` + cleanup `cleanup_pendientes_vencidos` via pg_cron diario. ALTERs a CHECK constraints de `familia.tipo`, `mascotas.origen`, `mascota_acceso_prestador.metodo_otorgamiento`, `notificaciones.tipo` + 3 tipos nuevos en `cat_tipos_evento`. D-166 mitigada con REVOKE INSERT/UPDATE/DELETE de `mascota_perfil_vigente` desde authenticated (defense-in-depth). D-128 Fase H verificada cerrada (16 triggers usando códigos válidos del catálogo). Política P13 agregada a `POLITICAS_EPETPLACE.md` (alta asistida por prestador). Migración consolidada: `migrations/2026-05-15-S19.sql`. Bloque 9: 7 de 11 fases ejecutadas.
+- **v0.9 (20 Jul 2026 — S72)**: **Nace `A3 — Modulación del expediente por actor`** (letra de mesa founder + arquitecto), depositada después de A2. **Paga `Pendiente PE2`**, declarado pendiente desde S12, y **reemplaza el eje de `A2`/`AC5`** (`tipo_prestador`, muerto en S66 con el modelo de actor) por la **ley madre acto/rol**: el ACTO decide qué se MUESTRA (producto/UI), el ROL decide qué se PUEDE mostrar (RLS). Firmadas: la matriz `oficio × eje` con cuatro niveles de dosis (COMPLETO/DESTILADO/SEGURIDAD/NO), la dosis del vet (eje 3 COMPLETO + resto DESTILADO), lo que ve la recepción (identidad completa + alerta de seguridad, todo lo demás NO), el colapso del negocio unipersonal, el otorgamiento con oficio (`mascota_acceso_prestador.oficio`, N por cuenta, revocación por oficio, legadas `NULL` sin adivinar — L-139), la procedencia siempre visible con *"origen no registrado"* para los 83 legados, los treinta segundos como briefing, y contribuir ≠ leer. **`A3.9` (memorial) queda 🟠 PENDIENTE DE FIRMA FOUNDER** con voto del arquitecto (b) registrado y no ejecutado. A2 pasa a nota histórica marcada (los ejemplos se conservan); AC5 reescrita sobre la ley madre; A1 anotada. Deudas nuevas: **D-463** (`oficio` en el otorgamiento) · **D-464** (gate de rol en RLS — hueco de privacidad vivo) · **D-465** (la cara de la revocación, `AC2`/`AC3` sin UI) · **D-466** (resumen IA del expediente largo).
 - **v0.8 (17 Jul 2026 — S67)**: Nota de PROCEDENCIA en E1: la fundación V0 (migración `20260717170000`) creó `eventos_mascota.procedencia` con backfill del carnet a `declarado_por_familia` y gate en puerta única para los tipos clínicos (`cat_tipos_evento.es_clinico`); `verificado_por_prestador` queda tipado SIN productor hasta la verificación del vet (MODELO_VETERINARIA §14.2). E1/E2 heredan el campo al construirse.
