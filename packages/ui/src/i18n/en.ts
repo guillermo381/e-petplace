@@ -21,6 +21,8 @@ export const uiEn = {
     // "Saved moment" — gains its voice, like grooming did in S61.
     vozAdiestramiento: 'Training session',
     vozAlta: 'Joined the family',
+    // S71-A CURA-4 — mirror of es.ts (candidata A: "Visita al veterinario").
+    vozHistoriaClinica: 'Vet visit',
     vozVacuna: 'Got the {{nombre}} vaccine',
     vozVacunaSinNombre: 'Got a vaccine',
     vozMomentoCuidado: 'A moment of care',

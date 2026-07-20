@@ -27,6 +27,13 @@ export const uiEs = {
     // genérico "Momento guardado" — gana voz, como el grooming en S61.
     vozAdiestramiento: 'Sesión de adiestramiento',
     vozAlta: 'Se sumó a la familia',
+    // S71-A CURA-4 (mismo patrón que grooming S61 y adiestramiento S65):
+    // la consulta sedimentada caía al genérico "Momento guardado" — gana
+    // voz. CANDIDATA A del reporte; el founder elige en gate entre:
+    //   A "Visita al veterinario"  ·  B "Consulta veterinaria"
+    //   C "Quedó en su historia clínica"
+    // Cambiar de voz = cambiar esta línea y su espejo en en.ts.
+    vozHistoriaClinica: 'Visita al veterinario',
     vozVacuna: 'Recibió la vacuna {{nombre}}',
     vozVacunaSinNombre: 'Recibió una vacuna',
     vozMomentoCuidado: 'Momento de cuidado',

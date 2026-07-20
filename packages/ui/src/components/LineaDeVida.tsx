@@ -75,6 +75,13 @@ const DICCIONARIO: Record<string, { clave: VozTimeline; capa: CapaNodo }> = {
   // de adiestramiento degradaba a "Momento guardado" — gana voz.
   atencion_adiestramiento_registrada: { clave: 'lineaDeVida.vozAdiestramiento', capa: 'cuidado' },
   alta_asistida_completada_por_cliente: { clave: 'lineaDeVida.vozAlta', capa: 'identidad' },
+  // S71-A CURA-4 (tercera vez el mismo patrón: grooming S61, adiestramiento
+  // S65, ahora la consulta): la nota clínica sedimentada por el motor S70
+  // escribía historia_clinica_registrada y degradaba a "Momento guardado"
+  // — el hito clínico del expediente se leía como un momento sin nombre.
+  // Capa CUIDADO: la consulta es un ACTO de cuidado; la vacuna conserva
+  // identidad porque es protección de vida (criterio S52-P2e).
+  historia_clinica_registrada: { clave: 'lineaDeVida.vozHistoriaClinica', capa: 'cuidado' },
   // cita_servicio: intencionalmente AUSENTE — no se muestra (ver header).
 }
 
