@@ -61,6 +61,12 @@ punto decorativo.**
 9. **Legibilidad mínima:** todo ícono se gatea a 21px (tamaño tab)
    además de su tamaño de diseño. Si a 21px la huella no se lee, el
    ícono se simplifica — no se encoge la huella.
+   **CRITERIO AFILADO (founder, gate S71): a 21px LA HUELLA DEBE
+   SOBREVIVIR O ES RUIDO.** No es "se lee con esfuerzo": si a 21px la
+   huella se empasta con el objeto, el ícono **no entra al set** hasta
+   simplificarse. La huella es lo que hace al glifo NUESTRO (regla
+   madre §1) — un glifo cuya huella muere a 21px es un glifo genérico
+   con decoración invisible, y ahí el ruido cuesta más que el ícono.
 
 ## 3. ENMIENDA a la Ley 12 de `epetplace-design-system`
 
@@ -132,8 +138,47 @@ decisión se reabre.
   externo para FIRMAR el pulso del trazo.)*
 - Este doc se enmienda con historial, como todo canónico.
 
+### 6b. EL ESTÁNDAR DE LA HOJA DE CONTACTO (proceso, firmado S71)
+
+Con la cláusula del ilustrador enmendada, **la sesión autora los glifos
+— así que el método deja de ser tácito y se vuelve exigible.** La vara
+es la hoja de contacto de S71-B2 (los glifos `caso` y `presupuesto`).
+Todo glifo nuevo llega al gate founder con:
+
+1. **Estudio de familia DECLARADO EN NÚMEROS**, no en adjetivos: grilla
+   **24** · trazo **1.9 round** · aire **~3.4** · densidad **2-4 trazos**
+   · escala de huella por tamaño. Si el glifo nuevo se sale de esos
+   números, el desvío se declara con su porqué — no se disimula.
+2. **Metáforas OCUPADAS mapeadas.** Antes de dibujar se lista qué
+   conceptos del registry ya usan qué objeto, para no colisionar (el
+   caso vivo: `pagos` existe y NO es "presupuesto" — cotización ≠ cobro).
+3. **2–3 variantes, con el RIESGO DECLARADO POR VARIANTE** (qué puede
+   leerse mal, con qué se puede confundir). Una sola propuesta no es un
+   estudio: es una corazonada.
+4. **Montaje a 21px Y 44px, junto a 5 glifos del registry**, en claro y
+   oscuro. El glifo se juzga EN VECINDAD — un glifo que solo funciona
+   solo, no funciona.
+5. **Gate founder POR ÍCONO** (nunca por lote): la firma es de a uno.
+
+**El criterio de muerte es el de la Ley 9 afilada:** a 21px la huella
+sobrevive o el glifo no entra. **Y la regla de economía:** un glifo que
+nadie va a montar no se pide — pedirlo es fabricar deuda (precedente
+S71-B2: de 5 conceptos faltantes se pidieron los 2 que la pantalla
+montaba; los otros 3 esperan a que su superficie tenga boceto).
+
 ## Historial
 
+- **v1.1 (S71, 20 Jul 2026):** con la cláusula del ilustrador enmendada
+  (la sesión autora, no hay externo), el método deja de ser tácito:
+  nace **§6b EL ESTÁNDAR DE LA HOJA DE CONTACTO** — estudio de familia
+  declarado en NÚMEROS, metáforas ocupadas mapeadas, 2-3 variantes con
+  riesgo por variante, montaje a 21px y 44px junto a 5 del registry en
+  claro y oscuro, gate POR ÍCONO. Vara: la hoja de contacto de S71-B2
+  (`caso` y `presupuesto`). Y la **Ley 9 se AFILA con el criterio del
+  founder: a 21px la huella SOBREVIVE O ES RUIDO** — un glifo cuya
+  huella muere a esa escala es un glifo genérico con decoración
+  invisible. Más la regla de economía: un glifo que nadie va a montar
+  no se pide (pedirlo es fabricar deuda).
 - **v1.0 (S53, 10 Jul 2026):** dirección firmada. Camino: propuestas
   a/b/c → founder elige (b) "la huella escondida" + guijarros (c) para
   ilustración → crítica founder sobre paseo (figura humana de palitos;
