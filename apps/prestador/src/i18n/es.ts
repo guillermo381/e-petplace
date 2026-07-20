@@ -318,6 +318,8 @@ export const prestadorEs = {
     carnet: 'Carnet',
     unaVacuna: '1 vacuna registrada',
     vacunas: '{{n}} vacunas registradas',
+    // S71: el historial con 0 atenciones habla (Ley 13) — rima con 'Primera vez'
+    historialVacio: 'Va a ser tu primera atención con {{nombre}}.',
     carnetVacio: 'Sin vacunas registradas todavía.',
     historial: 'Tu historial con {{nombre}}',
     atencionCerrada: 'Paseo cerrado',
@@ -1256,6 +1258,8 @@ export const prestadorEs = {
     contexto: 'Precio congelado',
     diaLabel: '¿Qué día?',
     horaLabel: '¿A qué hora?',
+    // S71 (la puerta no ofrece lo que va a rechazar): hoy sin horas restantes
+    hoySinHoras: 'Para hoy ya no quedan horarios — elige otro día.',
     personaLabel: '¿Quién atiende?',
     confirmar: 'Confirmar fecha',
     exito: 'Listo. Coordinaste la cita de {{mascota}}.',

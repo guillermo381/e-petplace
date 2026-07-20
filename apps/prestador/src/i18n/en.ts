@@ -283,6 +283,8 @@ export const prestadorEn = {
     carnet: 'Vaccine card',
     unaVacuna: '1 vaccine on record',
     vacunas: '{{n}} vaccines on record',
+    // S71 · Espejo de es.ts
+    historialVacio: "This will be your first visit with {{nombre}}.",
     carnetVacio: 'No vaccines on record yet.',
     historial: 'Your history with {{nombre}}',
     atencionCerrada: 'Walk closed',
@@ -1133,6 +1135,8 @@ export const prestadorEn = {
     contexto: 'Locked-in price',
     diaLabel: 'Which day?',
     horaLabel: 'What time?',
+    // S71 · Espejo de es.ts
+    hoySinHoras: 'No time slots left for today — pick another day.',
     personaLabel: "Who's attending?",
     confirmar: 'Confirm date',
     exito: "Done. You scheduled {{mascota}}'s appointment.",

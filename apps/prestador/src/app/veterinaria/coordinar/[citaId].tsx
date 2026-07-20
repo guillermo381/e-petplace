@@ -86,14 +86,28 @@ export default function FijarFecha() {
   }, [idioma]);
 
   // 08:00 → 18:00 a los :00 y :30 (18:00 incluido, 18:30 no).
+  // S71 (hallazgo founder en gate): LA PUERTA NO OFRECE LO QUE VA A
+  // RECHAZAR — con el día = HOY, las horas ya pasadas no se muestran
+  // (el server las rebotaba con "debe ser futura": correcto pero tarde).
   const opcionesHora = useMemo<SelectorOpcionItem[]>(() => {
     const horas: SelectorOpcionItem[] = [];
     for (let h = 8; h <= 18; h++) {
       horas.push({ codigo: `${DOS(h)}:00`, etiqueta: `${DOS(h)}:00` });
       if (h < 18) horas.push({ codigo: `${DOS(h)}:30`, etiqueta: `${DOS(h)}:30` });
     }
+    const ahora = new Date();
+    if (dia === isoLocal(ahora)) {
+      const cursor = `${DOS(ahora.getHours())}:${DOS(ahora.getMinutes())}`;
+      return horas.filter((o) => o.codigo > cursor);
+    }
     return horas;
-  }, []);
+  }, [dia]);
+
+  // Si el cambio de día dejó la hora elegida fuera de la oferta (eligió
+  // 15:00 para mañana y volvió a hoy a las 16:00), la selección se limpia
+  // — jamás viaja al server una hora que la grilla ya no muestra.
+  const horaVigente = hora !== undefined && opcionesHora.some((o) => o.codigo === hora);
+  const horaElegida = horaVigente ? hora : undefined;
 
   const cargar = useCallback(async () => {
     setEstado({ fase: 'cargando' });
@@ -120,9 +134,9 @@ export default function FijarFecha() {
   );
 
   async function confirmar() {
-    if (dia === undefined || hora === undefined || persona === undefined || enviando) return;
+    if (dia === undefined || horaElegida === undefined || persona === undefined || enviando) return;
     setEnviando(true);
-    const r = await fijarFechaProcedimiento({ citaId, fecha: dia, hora, empleadoId: persona });
+    const r = await fijarFechaProcedimiento({ citaId, fecha: dia, hora: horaElegida, empleadoId: persona });
     setEnviando(false);
     if (!r.ok) {
       mostrar({ variante: 'error', texto: r.mensaje });
@@ -133,7 +147,7 @@ export default function FijarFecha() {
   }
 
   const puedeConfirmar =
-    dia !== undefined && hora !== undefined && persona !== undefined && !enviando;
+    dia !== undefined && horaElegida !== undefined && persona !== undefined && !enviando;
 
   const empleados = estado.fase === 'listo' ? estado.empleados : [];
   const opcionesPersona: SelectorOpcionItem[] = empleados.map((e) => ({
@@ -235,14 +249,28 @@ export default function FijarFecha() {
               acento="oficio"
             />
 
-            <SelectorOpcion
-              etiqueta={t('coordinar.horaLabel')}
-              opciones={opcionesHora}
-              seleccionada={hora}
-              onSelect={setHora}
-              disposicion="grilla"
-              acento="oficio"
-            />
+            {opcionesHora.length > 0 ? (
+              <SelectorOpcion
+                etiqueta={t('coordinar.horaLabel')}
+                opciones={opcionesHora}
+                seleccionada={horaElegida}
+                onSelect={setHora}
+                disposicion="grilla"
+                acento="oficio"
+              />
+            ) : (
+              // Hoy después de las 18:00: cero final mudo (§6ter) — la voz
+              // dice el porqué y el camino es elegir otro día arriba.
+              <Text
+                style={{
+                  fontFamily: typography.family.sans.regular,
+                  fontSize: typography.size.sm,
+                  color: theme.text.secondary,
+                }}
+              >
+                {t('coordinar.hoySinHoras')}
+              </Text>
+            )}
 
             <SelectorOpcion
               etiqueta={t('coordinar.personaLabel')}
