@@ -25,6 +25,7 @@ import {
   EstadoVacio,
   Insignia,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useAviso,
@@ -231,25 +232,13 @@ export default function DetalleCita() {
                 tamano="lg"
               />
               <View style={{ alignItems: 'center', gap: spacing[1] }}>
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.light,
-                    fontSize: typography.size.xl,
-                    color: theme.text.primary,
-                  }}
-                >
+                <Texto variante="titulo">
                   {nombre}
-                </Text>
+                </Texto>
                 {cita.mascota?.especie ? (
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.sm,
-                      color: theme.text.secondary,
-                    }}
-                  >
+                  <Texto variante="apoyo">
                     {capitalizar(cita.mascota.especie)}
-                  </Text>
+                  </Texto>
                 ) : null}
               </View>
             </View>
@@ -283,15 +272,9 @@ export default function DetalleCita() {
                     la fila trae suscripcion_servicio_id — hoy siempre null
                     (0 suscripciones), ni un hueco reservado mientras tanto. */}
                 {cita.suscripcion_servicio_id !== null ? (
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.sm,
-                      color: theme.text.secondary,
-                    }}
-                  >
+                  <Texto variante="apoyo">
                     {t('cita.parteDelPlan', { nombre })}
-                  </Text>
+                  </Texto>
                 ) : null}
               </View>
             </Tarjeta>

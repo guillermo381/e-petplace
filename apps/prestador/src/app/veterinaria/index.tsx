@@ -31,6 +31,7 @@ import {
   EstadoVacio,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useTheme,
@@ -245,16 +246,9 @@ export default function PortadaVeterinaria() {
                   >
                     {verificado ? t('veterinaria.verificadoTitulo') : t('verificacionVet.titulo')}
                   </Text>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.sm,
-                      lineHeight: typography.size.sm * typography.leading.normal,
-                      color: theme.text.secondary,
-                    }}
-                  >
+                  <Texto variante="apoyo">
                     {vozVerificacion}
-                  </Text>
+                  </Texto>
                   {!verificado && (
                     <View style={{ alignSelf: 'flex-start', marginTop: spacing[2] }}>
                       <Boton
@@ -280,28 +274,14 @@ export default function PortadaVeterinaria() {
                 del taller (?item=). Glifo del OFICIO como stand-in para
                 urgencias/telemedicina hasta D-433 (declarado). */}
             <View style={{ gap: spacing[3] }}>
-              <Text
-                accessibilityRole="header"
-                style={{
-                  fontFamily: typography.family.sans.medium,
-                  fontSize: typography.size.md,
-                  color: theme.text.primary,
-                }}
-              >
+              <Texto variante="seccion">
                 {t('veterinaria.serviciosTitulo')}
-              </Text>
+              </Texto>
               {activos.length === 0 ? (
                 <Tarjeta>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.sm,
-                      lineHeight: typography.size.sm * typography.leading.normal,
-                      color: theme.text.secondary,
-                    }}
-                  >
+                  <Texto variante="apoyo">
                     {t('veterinaria.sinServicios')}
-                  </Text>
+                  </Texto>
                 </Tarjeta>
               ) : (
                 <Tarjeta relleno="ninguno">
@@ -328,16 +308,9 @@ export default function PortadaVeterinaria() {
 
             {/* procedimientos — el grupo */}
             <View style={{ gap: spacing[3] }}>
-              <Text
-                accessibilityRole="header"
-                style={{
-                  fontFamily: typography.family.sans.medium,
-                  fontSize: typography.size.md,
-                  color: theme.text.primary,
-                }}
-              >
+              <Texto variante="seccion">
                 {t('procedimientosVet.titulo')}
-              </Text>
+              </Texto>
               <Tarjeta relleno="ninguno">
                 {mundo.procedimientos.map((p) => (
                   <View key={p.id}>

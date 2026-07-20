@@ -32,6 +32,7 @@ import {
   Insignia,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useTheme,
@@ -184,15 +185,9 @@ export default function DetalleCitaVet() {
                     tamano="lg"
                   />
                   <View style={{ flex: 1, gap: spacing[1] }}>
-                    <Text
-                      style={{
-                        fontFamily: typography.family.sans.light,
-                        fontSize: typography.size.xl,
-                        color: theme.text.primary,
-                      }}
-                    >
+                    <Texto variante="titulo">
                       {nombre}
-                    </Text>
+                    </Texto>
                     {insignia && (
                       <View style={{ alignSelf: 'flex-start' }}>
                         <Insignia estado={insignia.estado} etiqueta={insignia.etiqueta} tamaño="sm" />
@@ -277,12 +272,9 @@ export default function DetalleCitaVet() {
                 destino v1 (el detalle rico es refinamiento). */}
             {presupuestos.length > 0 && (
               <View style={{ gap: spacing[2] }}>
-                <Text
-                  accessibilityRole="header"
-                  style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}
-                >
+                <Texto variante="seccion">
                   {t('presupuesto.listaTitulo', { nombre })}
-                </Text>
+                </Texto>
                 <Tarjeta elevacion="reposo" relleno="ninguno">
                   {presupuestos.map((p, i) => {
                     const ins = INSIGNIA_PRESUPUESTO[p.estado];
@@ -313,15 +305,9 @@ function Dato({ etiqueta, valor, mono = false }: { etiqueta: string; valor: stri
   const { theme } = useTheme();
   return (
     <View style={{ gap: spacing[0.5] }}>
-      <Text
-        style={{
-          fontFamily: typography.family.sans.regular,
-          fontSize: typography.size.sm,
-          color: theme.text.secondary,
-        }}
-      >
+      <Texto variante="apoyo">
         {etiqueta}
-      </Text>
+      </Texto>
       <Text
         style={{
           fontFamily: mono ? typography.family.mono.regular : typography.family.sans.regular,

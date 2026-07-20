@@ -29,6 +29,7 @@ import {
   EstadoVacio,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useTheme,
@@ -77,21 +78,6 @@ function hoyISO(): string {
   return `${hoy.getFullYear()}-${p(hoy.getMonth() + 1)}-${p(hoy.getDate())}`;
 }
 
-function TituloBloque({ texto }: { texto: string }) {
-  const { theme } = useTheme();
-  return (
-    <Text
-      accessibilityRole="header"
-      style={{
-        fontFamily: typography.family.sans.medium,
-        fontSize: typography.size.md,
-        color: theme.text.primary,
-      }}
-    >
-      {texto}
-    </Text>
-  );
-}
 
 export default function OfertaPaseo() {
   const router = useRouter();
@@ -269,16 +255,9 @@ export default function OfertaPaseo() {
                   >
                     {visible ? t('ofertaPaseo.visibleTitulo') : t('ofertaPaseo.noVisibleTitulo')}
                   </Text>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.sm,
-                      lineHeight: typography.size.sm * typography.leading.normal,
-                      color: theme.text.secondary,
-                    }}
-                  >
+                  <Texto variante="apoyo">
                     {visible ? t('ofertaPaseo.visibleVoz') : razon}
-                  </Text>
+                  </Texto>
                 </View>
               </View>
             </Tarjeta>

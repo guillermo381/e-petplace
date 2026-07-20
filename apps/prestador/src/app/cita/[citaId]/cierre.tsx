@@ -25,6 +25,7 @@ import {
   Insignia,
   MapaRecorrido,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useAviso,
@@ -273,20 +274,13 @@ export default function Cierre() {
               <MapaRecorrido puntos={listo.track} modo="recorrido" capa="cuidado" alto={200} />
             ) : (
               <Tarjeta relleno="amplio">
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.regular,
-                    fontSize: typography.size.sm,
-                    lineHeight: typography.size.sm * 1.4,
-                    color: theme.text.secondary,
-                  }}
-                >
+                <Texto variante="apoyo">
                   {resumen.gps.motivo_fallo
                     ? t('cita.sinRutaGps', { motivo: resumen.gps.motivo_fallo })
                     : listo.track.length === 1
                       ? t('cita.sinRutaSoloPartida')
                       : t('cita.sinRutaNoRegistrada')}
-                </Text>
+                </Texto>
               </Tarjeta>
             )}
 
@@ -308,16 +302,9 @@ export default function Cierre() {
                   ))}
                 </View>
               ) : (
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.regular,
-                    fontSize: typography.size.sm,
-                    lineHeight: typography.size.sm * 1.4,
-                    color: theme.text.secondary,
-                  }}
-                >
+                <Texto variante="apoyo">
                   {t('cita.faltaNovedad')}
-                </Text>
+                </Texto>
               )}
               {edicion && (
                 <View style={{ alignSelf: 'flex-start' }}>

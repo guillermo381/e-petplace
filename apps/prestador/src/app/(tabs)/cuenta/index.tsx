@@ -27,6 +27,7 @@ import {
   Icono,
   Separador,
   Tarjeta,
+  Texto,
   palette,
   radius,
   spacing,
@@ -63,17 +64,6 @@ type Identidad = {
   hitos: string[];
 };
 
-function TituloBloque({ texto }: { texto: string }) {
-  const { theme } = useTheme();
-  return (
-    <Text
-      accessibilityRole="header"
-      style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}
-    >
-      {texto}
-    </Text>
-  );
-}
 
 export default function Cuenta() {
   const router = useRouter();
@@ -284,7 +274,7 @@ export default function Cuenta() {
 
           {/* ── Sesión y cuenta (la sesión se MUDÓ desde Negocio) ── */}
           <View style={{ gap: spacing[3] }}>
-            <TituloBloque texto={t('sesion.titulo')} />
+            <Texto variante="seccion">{t('sesion.titulo')}</Texto>
             <Boton variante="secundario" etiqueta={t('sesion.cerrarSesion')} bloque onPress={() => setSalirAbierta(true)} />
             <Boton variante="ghost" etiqueta={t('miCuenta.eliminarCuenta')} bloque onPress={() => setEliminarAbierta(true)} />
           </View>

@@ -28,8 +28,8 @@ import {
   EstadoVacio,
   SelectorOpcion,
   SelectorSegmentado,
+  Texto,
   spacing,
-  typography,
   useAviso,
   useTheme,
 } from '@epetplace/ui';
@@ -253,9 +253,9 @@ export default function AtencionMostrador() {
                 )}
               </View>
             )}
-            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}>
+            <Texto variante="seccion">
               {t('atencionMostrador.cobroTitulo')}
-            </Text>
+            </Texto>
             <Campo
               label={t('atencionMostrador.montoLabel')}
               placeholder="0.00"

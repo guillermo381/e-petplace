@@ -43,6 +43,7 @@ import {
   Insignia,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useTheme,
@@ -830,16 +831,9 @@ export default function Hoy() {
         {pantalla.estado === 'listo' && vista === 'hoy' && destacada && (
           <View style={{ gap: spacing[2] }}>
             {/* S52-P7: etiqueta humanizada — sentence case, sin eyebrow */}
-            <Text
-              accessibilityRole="header"
-              style={{
-                fontFamily: typography.family.sans.medium,
-                fontSize: typography.size.md,
-                color: theme.text.primary,
-              }}
-            >
+            <Texto variante="seccion">
               {enVivo ? t('agenda.ahora') : t('agenda.loSiguiente')}
-            </Text>
+            </Texto>
             {/* S59-B2 (Ley 19.1): el "Antes" a un tap es NAVEGACIÓN al
                 expediente — viste CeldaNavegacion DENTRO de la tarjeta del
                 hero (el botón ghost de solo texto murió: no decía que se
@@ -964,12 +958,9 @@ export default function Hoy() {
             corresponde (corre con cuenta comercial, sin mirar oficio). ── */}
         {pantalla.estado === 'listo' && vista === 'hoy' && porCoordinar.length > 0 && (
           <View style={{ gap: spacing[2] }}>
-            <Text
-              accessibilityRole="header"
-              style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}
-            >
+            <Texto variante="seccion">
               {t('agenda.porCoordinarTitulo')}
-            </Text>
+            </Texto>
             <Tarjeta elevacion="sm" relleno="ninguno">
               {(verTodasCoord ? porCoordinar : porCoordinar.slice(0, 3)).map((pc, i) => {
                 // S70-B2-v2 (acabado founder): la fila DICE el procedimiento —
@@ -1061,12 +1052,9 @@ export default function Hoy() {
                 El header pasa a `Text` como en "Por coordinar" y en la
                 Zona 1 (Ley 18: la estructura informa), y el control de
                 revelar baja al PIE, igual que su hermana. */}
-            <Text
-              accessibilityRole="header"
-              style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}
-            >
+            <Texto variante="seccion">
               {t('agenda.yaAtendidas', { n: resto.filter(esAtendida).length })}
-            </Text>
+            </Texto>
             {atendidasAbierto && (
               <Tarjeta elevacion="sm" relleno="ninguno">
                 {atendidasItems.map((item, i) => (
@@ -1134,15 +1122,9 @@ export default function Hoy() {
                     ))}
                   </Tarjeta>
                 ) : dia.bloqueado ? null : (
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.sm,
-                      color: theme.text.secondary,
-                    }}
-                  >
+                  <Texto variante="apoyo">
                     {t('agenda.diaLibre')}
-                  </Text>
+                  </Texto>
                 )}
               </View>
             ))}

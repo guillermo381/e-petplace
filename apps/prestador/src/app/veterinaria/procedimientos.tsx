@@ -33,6 +33,7 @@ import {
   Separador,
   SliderPrecio,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useAviso,
@@ -221,16 +222,9 @@ export default function ProcedimientosVeterinaria() {
           }}
         >
           {/* la naturaleza del grupo — la voz firmada del pedido */}
-          <Text
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.sm,
-              lineHeight: typography.size.sm * typography.leading.normal,
-              color: theme.text.secondary,
-            }}
-          >
+          <Texto variante="apoyo">
             {t('procedimientosVet.intro')}
-          </Text>
+          </Texto>
 
           {pantalla.procedimientos.length === 0 ? (
             <EstadoVacio
@@ -287,15 +281,9 @@ export default function ProcedimientosVeterinaria() {
 
             <View style={{ gap: spacing[2] }}>
               {/* S68-B7: el valor vive dentro del slider (Chanel) */}
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.regular,
-                  fontSize: typography.size.sm,
-                  color: theme.text.secondary,
-                }}
-              >
+              <Texto variante="apoyo">
                 {t('procedimientosVet.precioReferencia')}
-              </Text>
+              </Texto>
               <SliderPrecio
                 etiqueta={t('procedimientosVet.precioReferencia')}
                 pasos={etiquetas}
@@ -303,16 +291,9 @@ export default function ProcedimientosVeterinaria() {
                 onCambio={(i) => setDraft((d) => (d === null ? d : { ...d, precioIndice: i }))}
                 registro="aa"
               />
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.regular,
-                  fontSize: typography.size.sm,
-                  lineHeight: typography.size.sm * typography.leading.normal,
-                  color: theme.text.secondary,
-                }}
-              >
+              <Texto variante="apoyo">
                 {t('procedimientosVet.precioAyuda')}
-              </Text>
+              </Texto>
             </View>
 
             {draft.procedimientoId !== null && (

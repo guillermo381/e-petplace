@@ -28,6 +28,7 @@ import {
   MapaRecorrido,
   SelectorOpcion,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useAviso,
@@ -606,16 +607,9 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
           >
             {t('cita.fondoHojaExplicacion')}
           </Text>
-          <Text
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.sm,
-              lineHeight: typography.size.sm * 1.4,
-              color: theme.text.secondary,
-            }}
-          >
+          <Texto variante="apoyo">
             {t('cita.fondoHojaComo')}
-          </Text>
+          </Texto>
           <Boton
             variante="primario"
             bloque

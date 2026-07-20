@@ -38,8 +38,8 @@ import {
   SelectorOpcion,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
-  typography,
   useAviso,
   useTheme,
 } from '@epetplace/ui';
@@ -225,16 +225,9 @@ export default function Vacaciones() {
       {pantalla.estado === 'listo' && pantalla.bloqueos.length > 0 && (
         <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[4] }}>
           {/* la voz honesta de la promesa — la cumple el motor */}
-          <Text
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.sm,
-              lineHeight: typography.size.sm * typography.leading.normal,
-              color: theme.text.secondary,
-            }}
-          >
+          <Texto variante="apoyo">
             {t('vacaciones.promesa')}
-          </Text>
+          </Texto>
 
           <Tarjeta relleno="ninguno">
             {pantalla.bloqueos.map((b, i) => {
@@ -301,15 +294,9 @@ export default function Vacaciones() {
               onSelect={(codigo) => setDuracionDias(Number(codigo))}
             />
             {fin !== null ? (
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.regular,
-                  fontSize: typography.size.sm,
-                  color: theme.text.secondary,
-                }}
-              >
+              <Texto variante="apoyo">
                 {t('vacaciones.hastaInclusive', { fecha: fechaLargaHumana(fin, idioma as IdiomaSoportado) })}
-              </Text>
+              </Texto>
             ) : null}
             <Campo
               label={t('vacaciones.motivo')}

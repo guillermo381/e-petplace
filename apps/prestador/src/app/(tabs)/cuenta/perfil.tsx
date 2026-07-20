@@ -29,6 +29,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  Texto,
   spacing,
   typography,
   useAviso,
@@ -160,21 +161,6 @@ export default function PerfilCuenta() {
       ? ''
       : [prestador.direccion, prestador.ciudad].filter((x): x is string => x !== null && x.length > 0).join(' · ');
 
-  function TituloBloque({ texto }: { texto: string }) {
-    return (
-      <Text
-        accessibilityRole="header"
-        style={{
-          fontFamily: typography.family.sans.medium,
-          fontSize: typography.size.md,
-          color: theme.text.primary,
-          marginTop: spacing[4],
-        }}
-      >
-        {texto}
-      </Text>
-    );
-  }
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -231,7 +217,7 @@ export default function PerfilCuenta() {
 
           {prestador !== null && (
             <>
-              <TituloBloque texto={t('miCuenta.negocioTitulo')} />
+              <Texto variante="seccion">{t('miCuenta.negocioTitulo')}</Texto>
 
               {/* El estado — la voz 7.13 de las portadas (misma key).
                   null honesto: si una pata no cargó, la fila no miente. */}
@@ -285,7 +271,7 @@ export default function PerfilCuenta() {
                 multilinea={3}
               />
 
-              <TituloBloque texto={t('miCuenta.contactoTitulo')} />
+              <Texto variante="seccion">{t('miCuenta.contactoTitulo')}</Texto>
               <Campo
                 label={t('miCuenta.telefonoLabel')}
                 value={telNegocio}

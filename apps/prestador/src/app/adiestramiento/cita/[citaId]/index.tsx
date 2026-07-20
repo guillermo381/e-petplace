@@ -28,6 +28,7 @@ import {
   EstadoVacio,
   Insignia,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useAviso,
@@ -218,15 +219,9 @@ export default function AntesAdiestramientoCita() {
                 tamano="lg"
               />
               <View style={{ alignItems: 'center', gap: spacing[1] }}>
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.light,
-                    fontSize: typography.size.xl,
-                    color: theme.text.primary,
-                  }}
-                >
+                <Texto variante="titulo">
                   {nombre}
-                </Text>
+                </Texto>
                 <Text
                   style={{
                     fontFamily: typography.family.mono.regular,

@@ -15,8 +15,8 @@ import {
   Encabezado,
   SelectorOpcion,
   Tarjeta,
+  Texto,
   spacing,
-  typography,
   useAviso,
   useTheme,
 } from '@epetplace/ui';
@@ -71,23 +71,13 @@ export default function PreferenciasCuenta() {
             existe; el lugar queda hecho y lo dice (jamás toggles que
             no gobiernan nada). */}
         <View style={{ gap: spacing[3] }}>
-          <Text
-            accessibilityRole="header"
-            style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}
-          >
+          <Texto variante="seccion">
             {t('miCuenta.notificaciones')}
-          </Text>
+          </Texto>
           <Tarjeta>
-            <Text
-              style={{
-                fontFamily: typography.family.sans.regular,
-                fontSize: typography.size.sm,
-                lineHeight: typography.size.sm * 1.4,
-                color: theme.text.secondary,
-              }}
-            >
+            <Texto variante="apoyo">
               {t('miCuenta.notifPronto')}
-            </Text>
+            </Texto>
           </Tarjeta>
         </View>
       </ScrollView>

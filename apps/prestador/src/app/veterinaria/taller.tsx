@@ -47,9 +47,9 @@ import {
   Separador,
   SliderPrecio,
   Tarjeta,
+  Texto,
   VozComision,
   spacing,
-  typography,
   useAviso,
   useTheme,
 } from '@epetplace/ui';
@@ -165,37 +165,7 @@ function modalidadDeItem(item: ItemMenuVeterinaria): {
   return { atiendeLocal: true, atiendeDomicilio: false };
 }
 
-function TituloBloque({ texto }: { texto: string }) {
-  const { theme } = useTheme();
-  return (
-    <Text
-      accessibilityRole="header"
-      style={{
-        fontFamily: typography.family.sans.medium,
-        fontSize: typography.size.md,
-        color: theme.text.primary,
-      }}
-    >
-      {texto}
-    </Text>
-  );
-}
 
-function VozSecundaria({ texto }: { texto: string }) {
-  const { theme } = useTheme();
-  return (
-    <Text
-      style={{
-        fontFamily: typography.family.sans.regular,
-        fontSize: typography.size.sm,
-        lineHeight: typography.size.sm * typography.leading.normal,
-        color: theme.text.secondary,
-      }}
-    >
-      {texto}
-    </Text>
-  );
-}
 
 export default function TallerVeterinaria() {
   const router = useRouter();
@@ -563,17 +533,17 @@ export default function TallerVeterinaria() {
             gap: spacing[5],
           }}
         >
-          {modoWizard && <VozSecundaria texto={t('tallerVeterinaria.paso', { n: paso + 1 })} />}
+          {modoWizard && <Texto variante="apoyo">{t('tallerVeterinaria.paso', { n: paso + 1 })}</Texto>}
 
           {pantalla.estado === 'listo' && pantalla.cuentaActiva === false && seccionVisible === 'servicios' && (
-            <VozSecundaria texto={t('servicios.cuentaNoActiva')} />
+            <Texto variante="apoyo">{t('servicios.cuentaNoActiva')}</Texto>
           )}
 
           {/* ══ PASO/SECCIÓN 1 — el menú del oficio ══ */}
           {seccionVisible === 'servicios' && (
             <View style={{ gap: spacing[4] }}>
-              <TituloBloque texto={t('tallerVeterinaria.serviciosTitulo')} />
-              <VozSecundaria texto={t('tallerVeterinaria.serviciosIntro')} />
+              <Texto variante="seccion">{t('tallerVeterinaria.serviciosTitulo')}</Texto>
+              <Texto variante="apoyo">{t('tallerVeterinaria.serviciosIntro')}</Texto>
 
               {MENU_VETERINARIA.map((i) => {
                 const d = drafts[i];
@@ -591,15 +561,9 @@ export default function TallerVeterinaria() {
                             gap: spacing[3],
                           }}
                         >
-                          <Text
-                            style={{
-                              fontFamily: typography.family.sans.medium,
-                              fontSize: typography.size.md,
-                              color: theme.text.primary,
-                            }}
-                          >
+                          <Texto variante="seccion">
                             {vozItem(i)}
-                          </Text>
+                          </Texto>
                           <Interruptor
                             etiqueta={`${t('tallerVeterinaria.ofrecerServicio')} · ${vozItem(i)}`}
                             registro="oficio"
@@ -616,10 +580,10 @@ export default function TallerVeterinaria() {
                         {/* la voz honesta de la telemedicina — OBLIGATORIA
                             (letra del pedido S68), visible con el toggle
                             en cualquier estado */}
-                        {esTele && <VozSecundaria texto={t('tallerVeterinaria.telemedicinaHonesta')} />}
+                        {esTele && <Texto variante="apoyo">{t('tallerVeterinaria.telemedicinaHonesta')}</Texto>}
 
                         {!d.ofrecido ? (
-                          d.base !== null && <VozSecundaria texto={t('servicios.pausada')} />
+                          d.base !== null && <Texto variante="apoyo">{t('servicios.pausada')}</Texto>
                         ) : !estaDesplegada(i) ? (
                           // plegada por ?item= — se abre con su porqué a
                           // un toque, nada se pierde (los borradores
@@ -637,7 +601,7 @@ export default function TallerVeterinaria() {
                         ) : (
                           <>
                             {d.base === null && tipoDisponible(i) && (
-                              <VozSecundaria texto={t('taller.seOfreceAlGuardar')} />
+                              <Texto variante="apoyo">{t('taller.seOfreceAlGuardar')}</Texto>
                             )}
 
                             {/* especialidades: los chips del catálogo
@@ -683,22 +647,16 @@ export default function TallerVeterinaria() {
                                 vive en el catálogo — se dice sereno,
                                 nada se persiste a ciegas */}
                             {!esEspecializada && !tipoDisponible(i) && (
-                              <VozSecundaria texto={t('tallerVeterinaria.pendienteCatalogo')} />
+                              <Texto variante="apoyo">{t('tallerVeterinaria.pendienteCatalogo')}</Texto>
                             )}
 
                             {/* precio — riel discreto + neto en vivo (7.15).
                                 S68-B7: el valor vive DENTRO del slider
                                 (tap → edición numérica) — el display
                                 duplicado murió (Chanel) */}
-                            <Text
-                              style={{
-                                fontFamily: typography.family.sans.regular,
-                                fontSize: typography.size.sm,
-                                color: theme.text.secondary,
-                              }}
-                            >
+                            <Texto variante="apoyo">
                               {t('servicios.precio')}
-                            </Text>
+                            </Texto>
                             <SliderPrecio
                               etiqueta={`${t('servicios.precio')} · ${vozItem(i)}`}
                               pasos={etiquetasDe(i)}
@@ -757,7 +715,7 @@ export default function TallerVeterinaria() {
               franjas={franjas}
               onCambio={setFranjas}
               oficio="veterinaria"
-              titulo={<TituloBloque texto={t('taller.horariosTitulo')} />}
+              titulo={<Texto variante="seccion">{t('taller.horariosTitulo')}</Texto>}
               prestadorId={pantalla.prestadorId}
               modo={modoHorarios}
               ofertas={ofertasHorarios}
@@ -822,7 +780,7 @@ export default function TallerVeterinaria() {
               keyboardType="number-pad"
               placeholder="25"
             />
-            <VozSecundaria texto={t('tallerVeterinaria.otraDuracionAyuda')} />
+            <Texto variante="apoyo">{t('tallerVeterinaria.otraDuracionAyuda')}</Texto>
             <Boton
               variante="primario"
               bloque

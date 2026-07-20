@@ -29,6 +29,7 @@ import {
   Insignia,
   Separador,
   Tarjeta,
+  Texto,
   capturarConCamara,
   capturarDeGaleria,
   radius,
@@ -223,16 +224,9 @@ export default function VerificacionVeterinaria() {
           }}
         >
           {/* bloquea abrir, jamás construir — la voz lo dice arriba */}
-          <Text
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.sm,
-              lineHeight: typography.size.sm * typography.leading.normal,
-              color: theme.text.secondary,
-            }}
-          >
+          <Texto variante="apoyo">
             {t('verificacionVet.intro')}
-          </Text>
+          </Texto>
 
           {TIPOS_DOCUMENTO_VERIFICACION.map((tipo) => {
             const doc = docDe(tipo);
@@ -273,16 +267,9 @@ export default function VerificacionVeterinaria() {
                       />
                     )}
                   </View>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.sm,
-                      lineHeight: typography.size.sm * typography.leading.normal,
-                      color: theme.text.secondary,
-                    }}
-                  >
+                  <Texto variante="apoyo">
                     {vozEstado(doc)}
-                  </Text>
+                  </Texto>
                   {/* S68-B7: lo SUBIDO se ve — miniatura firmada del
                       bucket privado; no-imagen (PDF) = placeholder
                       digno con nombre y tipo, jamás miniatura rota */}
@@ -311,15 +298,9 @@ export default function VerificacionVeterinaria() {
                             justifyContent: 'center',
                           }}
                         >
-                          <Text
-                            style={{
-                              fontFamily: typography.family.mono.regular,
-                              fontSize: typography.size.sm,
-                              color: theme.text.secondary,
-                            }}
-                          >
+                          <Texto variante="dato">
                             {extension(doc.archivoPath) || '—'}
-                          </Text>
+                          </Texto>
                         </View>
                       )}
                       <Text

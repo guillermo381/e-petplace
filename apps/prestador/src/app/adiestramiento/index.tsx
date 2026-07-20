@@ -31,6 +31,7 @@ import {
   EstadoVacio,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useTheme,
@@ -241,16 +242,9 @@ export default function OfertaAdiestramiento() {
                       ? t('ofertaAdiestramiento.visibleTitulo')
                       : t('ofertaAdiestramiento.noVisibleTitulo')}
                   </Text>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.sm,
-                      lineHeight: typography.size.sm * typography.leading.normal,
-                      color: theme.text.secondary,
-                    }}
-                  >
+                  <Texto variante="apoyo">
                     {visible ? t('ofertaAdiestramiento.visibleVoz') : razon}
-                  </Text>
+                  </Texto>
                 </View>
               </View>
             </Tarjeta>

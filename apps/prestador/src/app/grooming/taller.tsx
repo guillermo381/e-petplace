@@ -58,6 +58,7 @@ import {
   Separador,
   SliderPrecio,
   Tarjeta,
+  Texto,
   VozComision,
   spacing,
   typography,
@@ -168,37 +169,7 @@ function draftServicioDesdeBase(base: OfertaGroomingPropia | null, servicio: Ser
   return { base, ofrecido: base?.activo ?? false, tallas };
 }
 
-function TituloBloque({ texto }: { texto: string }) {
-  const { theme } = useTheme();
-  return (
-    <Text
-      accessibilityRole="header"
-      style={{
-        fontFamily: typography.family.sans.medium,
-        fontSize: typography.size.md,
-        color: theme.text.primary,
-      }}
-    >
-      {texto}
-    </Text>
-  );
-}
 
-function VozSecundaria({ texto }: { texto: string }) {
-  const { theme } = useTheme();
-  return (
-    <Text
-      style={{
-        fontFamily: typography.family.sans.regular,
-        fontSize: typography.size.sm,
-        lineHeight: typography.size.sm * typography.leading.normal,
-        color: theme.text.secondary,
-      }}
-    >
-      {texto}
-    </Text>
-  );
-}
 
 export default function TallerGrooming() {
   const router = useRouter();
@@ -589,17 +560,17 @@ export default function TallerGrooming() {
           contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[5] }}
         >
           {/* progreso del wizard — visible y sereno */}
-          {modoWizard && <VozSecundaria texto={t('tallerGrooming.paso', { n: paso + 1 })} />}
+          {modoWizard && <Texto variante="apoyo">{t('tallerGrooming.paso', { n: paso + 1 })}</Texto>}
 
           {pantalla.estado === 'listo' && pantalla.cuentaActiva === false && seccionVisible === 'servicios' && (
-            <VozSecundaria texto={t('servicios.cuentaNoActiva')} />
+            <Texto variante="apoyo">{t('servicios.cuentaNoActiva')}</Texto>
           )}
 
           {/* ══ PASO/SECCIÓN 1 — servicios y precios ══ */}
           {seccionVisible === 'servicios' && (
             <View style={{ gap: spacing[4] }}>
-              <TituloBloque texto={t('tallerGrooming.serviciosTitulo')} />
-              <VozSecundaria texto={t('tallerGrooming.serviciosIntro')} />
+              <Texto variante="seccion">{t('tallerGrooming.serviciosTitulo')}</Texto>
+              <Texto variante="apoyo">{t('tallerGrooming.serviciosIntro')}</Texto>
 
               {/* ESPECIES — globales de la oferta (enmienda 3), dentro
                   del techo de plataforma perro/gato (§5) */}
@@ -619,7 +590,7 @@ export default function TallerGrooming() {
                   )
                 }
               />
-              {especies.length === 0 && <VozSecundaria texto={t('tallerGrooming.especiesMinima')} />}
+              {especies.length === 0 && <Texto variante="apoyo">{t('tallerGrooming.especiesMinima')}</Texto>}
 
               {/* LOS DOS SERVICIOS — el Interruptor ES el booleano (v3.2) */}
               {SERVICIOS_GROOMING.map((s) => {
@@ -630,15 +601,9 @@ export default function TallerGrooming() {
                   <Tarjeta key={s} elevacion="reposo">
                     <View style={{ gap: spacing[4] }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
-                        <Text
-                          style={{
-                            fontFamily: typography.family.sans.medium,
-                            fontSize: typography.size.md,
-                            color: theme.text.primary,
-                          }}
-                        >
+                        <Texto variante="seccion">
                           {vozServicio(s)}
-                        </Text>
+                        </Texto>
                         <Interruptor
                           etiqueta={`${t('tallerGrooming.ofrecerServicio')} · ${vozServicio(s)}`}
                           registro="oficio"
@@ -647,10 +612,10 @@ export default function TallerGrooming() {
                         />
                       </View>
                       {!d.ofrecido ? (
-                        d.base !== null && <VozSecundaria texto={t('servicios.pausada')} />
+                        d.base !== null && <Texto variante="apoyo">{t('servicios.pausada')}</Texto>
                       ) : (
                         <>
-                          {d.base === null && <VozSecundaria texto={t('taller.seOfreceAlGuardar')} />}
+                          {d.base === null && <Texto variante="apoyo">{t('taller.seOfreceAlGuardar')}</Texto>}
                           {/* EL CHIP DE TALLA GOBIERNA (patrón v3.1): el
                               borrador de cada talla se conserva al saltar */}
                           <SelectorOpcion
@@ -662,15 +627,9 @@ export default function TallerGrooming() {
                             onSelect={(codigo) => setTallaSel((prev) => ({ ...prev, [s]: codigo as TallaGrooming }))}
                           />
                           {/* S68-B7: el valor vive dentro del slider (Chanel) */}
-                          <Text
-                            style={{
-                              fontFamily: typography.family.sans.regular,
-                              fontSize: typography.size.sm,
-                              color: theme.text.secondary,
-                            }}
-                          >
+                          <Texto variante="apoyo">
                             {t('servicios.precio')}
-                          </Text>
+                          </Texto>
                           <SliderPrecio
                             etiqueta={`${t('servicios.precio')} · ${vozServicio(s)} · ${vozTalla(talla)}`}
                             pasos={etiquetasServicio}
@@ -722,15 +681,9 @@ export default function TallerGrooming() {
                   {extraActivo && (
                     <>
                       {/* S68-B7: el valor vive dentro del slider (Chanel) */}
-                      <Text
-                        style={{
-                          fontFamily: typography.family.sans.regular,
-                          fontSize: typography.size.sm,
-                          color: theme.text.secondary,
-                        }}
-                      >
+                      <Texto variante="apoyo">
                         {t('tallerGrooming.extraRotulo')}
-                      </Text>
+                      </Texto>
                       <SliderPrecio
                         etiqueta={t('tallerGrooming.extraRotulo')}
                         pasos={etiquetasExtra}
@@ -738,7 +691,7 @@ export default function TallerGrooming() {
                         onCambio={(i) => setExtraMonto(pasosExtra[i].toFixed(2))}
                         registro="aa"
                       />
-                      <VozSecundaria texto={t('tallerGrooming.extraAyuda')} />
+                      <Texto variante="apoyo">{t('tallerGrooming.extraAyuda')}</Texto>
                     </>
                   )}
                 </View>
@@ -748,7 +701,7 @@ export default function TallerGrooming() {
                   son DOS BINARIOS — visten Interruptor (Ley 22, jamás
                   chips). El recargo = patrón extra pelaje largo, SOLO
                   visible con domicilio encendido. */}
-              <TituloBloque texto={t('ofertaGrooming.dondeFila')} />
+              <Texto variante="seccion">{t('ofertaGrooming.dondeFila')}</Texto>
               <Tarjeta elevacion="reposo">
                 <View style={{ gap: spacing[4] }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
@@ -786,7 +739,7 @@ export default function TallerGrooming() {
                     />
                   </View>
                   {!atiendeLocal && !atiendeDomicilio && (
-                    <VozSecundaria texto={t('tallerGrooming.dondeMinimo')} />
+                    <Texto variante="apoyo">{t('tallerGrooming.dondeMinimo')}</Texto>
                   )}
                   {atiendeDomicilio && (
                     <>
@@ -811,15 +764,9 @@ export default function TallerGrooming() {
                       {recargoActivo && (
                         <>
                           {/* S68-B7: el valor vive dentro del slider (Chanel) */}
-                          <Text
-                            style={{
-                              fontFamily: typography.family.sans.regular,
-                              fontSize: typography.size.sm,
-                              color: theme.text.secondary,
-                            }}
-                          >
+                          <Texto variante="apoyo">
                             {t('tallerGrooming.recargoRotulo')}
-                          </Text>
+                          </Texto>
                           <SliderPrecio
                             etiqueta={t('tallerGrooming.recargoRotulo')}
                             pasos={etiquetasExtra}
@@ -827,7 +774,7 @@ export default function TallerGrooming() {
                             onCambio={(i) => setRecargoMonto(pasosExtra[i].toFixed(2))}
                             registro="aa"
                           />
-                          <VozSecundaria texto={t('tallerGrooming.recargoAyuda')} />
+                          <Texto variante="apoyo">{t('tallerGrooming.recargoAyuda')}</Texto>
                         </>
                       )}
                     </>
@@ -857,7 +804,7 @@ export default function TallerGrooming() {
               franjas={franjas}
               onCambio={setFranjas}
               oficio="grooming"
-              titulo={<TituloBloque texto={t('taller.horariosTitulo')} />}
+              titulo={<Texto variante="seccion">{t('taller.horariosTitulo')}</Texto>}
               prestadorId={pantalla.prestadorId}
               modo={modoHorarios}
               ofertas={ofertasHorarios}

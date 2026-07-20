@@ -26,6 +26,7 @@ import {
   Insignia,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useTheme,
@@ -40,21 +41,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTraduccion } from '@/i18n';
 
 // S52-P4b sistémico: títulos humanizados — sentence case, sin eyebrow.
-function TituloModulo({ texto }: { texto: string }) {
-  const { theme } = useTheme();
-  return (
-    <Text
-      accessibilityRole="header"
-      style={{
-        fontFamily: typography.family.sans.medium,
-        fontSize: typography.size.md,
-        color: theme.text.primary,
-      }}
-    >
-      {texto}
-    </Text>
-  );
-}
 
 export default function CuentaComercial() {
   const router = useRouter();
@@ -178,7 +164,7 @@ export default function CuentaComercial() {
 
         {/* datos fiscales */}
         <View style={{ gap: spacing[3] }}>
-          <TituloModulo texto={t('cuenta.datosFiscales')} />
+          <Texto variante="seccion">{t('cuenta.datosFiscales')}</Texto>
           <Tarjeta relleno="ninguno">
             <Celda titulo={t('cuenta.razonSocial')} subtitulo={cuenta.razonSocial} />
             <Separador />
@@ -190,7 +176,7 @@ export default function CuentaComercial() {
 
         {/* datos bancarios — §8.13: parcial es legal, la invitación lo dice */}
         <View style={{ gap: spacing[3] }}>
-          <TituloModulo texto={t('cuenta.datosBancarios')} />
+          <Texto variante="seccion">{t('cuenta.datosBancarios')}</Texto>
           {bancarios === null ? (
             <Tarjeta>
               <View style={{ gap: spacing[3] }}>

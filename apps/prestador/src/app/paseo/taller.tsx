@@ -51,6 +51,7 @@ import {
   Separador,
   SliderPrecio,
   Tarjeta,
+  Texto,
   VozComision,
   spacing,
   typography,
@@ -190,37 +191,7 @@ function ofertaDirty(d: DraftOferta): boolean {
   );
 }
 
-function TituloBloque({ texto }: { texto: string }) {
-  const { theme } = useTheme();
-  return (
-    <Text
-      accessibilityRole="header"
-      style={{
-        fontFamily: typography.family.sans.medium,
-        fontSize: typography.size.md,
-        color: theme.text.primary,
-      }}
-    >
-      {texto}
-    </Text>
-  );
-}
 
-function VozSecundaria({ texto }: { texto: string }) {
-  const { theme } = useTheme();
-  return (
-    <Text
-      style={{
-        fontFamily: typography.family.sans.regular,
-        fontSize: typography.size.sm,
-        lineHeight: typography.size.sm * typography.leading.normal,
-        color: theme.text.secondary,
-      }}
-    >
-      {texto}
-    </Text>
-  );
-}
 
 export default function TallerPaseo() {
   const router = useRouter();
@@ -542,16 +513,16 @@ export default function TallerPaseo() {
           contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[5] }}
         >
           {/* progreso del wizard — visible y sereno */}
-          {modoWizard && <VozSecundaria texto={t('taller.paso', { n: paso + 1 })} />}
+          {modoWizard && <Texto variante="apoyo">{t('taller.paso', { n: paso + 1 })}</Texto>}
 
           {pantalla.estado === 'listo' && pantalla.cuentaActiva === false && seccionVisible === 'duraciones' && (
-            <VozSecundaria texto={t('servicios.cuentaNoActiva')} />
+            <Texto variante="apoyo">{t('servicios.cuentaNoActiva')}</Texto>
           )}
 
           {/* ══ PASO/SECCIÓN 1 — duraciones y precios (tarjetas apiladas) ══ */}
           {seccionVisible === 'duraciones' && (
             <View style={{ gap: spacing[4] }}>
-              <TituloBloque texto={t('taller.duracionesTitulo')} />
+              <Texto variante="seccion">{t('taller.duracionesTitulo')}</Texto>
               {/* S59-B1 cura de copy (founder): la sección abre con SU letra
                   — duracionesIntro (el copy del paquete que vivía acá en
                   S58.3/.4 ya había bajado a su interruptor en v3.2). Con
@@ -560,8 +531,8 @@ export default function TallerPaseo() {
                   "Duraciones y precios" queda UNO — el título de sección. */}
               {bloquesConCard.length === 0 && (
                 <>
-                  <VozSecundaria texto={t('taller.duracionesIntro')} />
-                  <VozSecundaria texto={t('taller.sinDuraciones')} />
+                  <Texto variante="apoyo">{t('taller.duracionesIntro')}</Texto>
+                  <Texto variante="apoyo">{t('taller.sinDuraciones')}</Texto>
                 </>
               )}
               {/* v3.1 (boceto firmado founder): EL CHIP GOBIERNA EL BLOQUE —
@@ -586,15 +557,9 @@ export default function TallerPaseo() {
                   <Tarjeta elevacion="reposo">
                     <View style={{ gap: spacing[4] }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
-                        <Text
-                          style={{
-                            fontFamily: typography.family.sans.medium,
-                            fontSize: typography.size.md,
-                            color: theme.text.primary,
-                          }}
-                        >
+                        <Texto variante="seccion">
                           {etiquetaBloque(b)}
-                        </Text>
+                        </Texto>
                         <Interruptor
                           etiqueta={`${t('taller.ofrecer')} · ${etiquetaCorta(b)}`}
                           registro="oficio"
@@ -613,20 +578,14 @@ export default function TallerPaseo() {
                         />
                       </View>
                       {!d.ofrecida ? (
-                        <VozSecundaria texto={t('servicios.pausada')} />
+                        <Texto variante="apoyo">{t('servicios.pausada')}</Texto>
                       ) : (
                         <>
-                          {d.base === null && <VozSecundaria texto={t('taller.seOfreceAlGuardar')} />}
+                          {d.base === null && <Texto variante="apoyo">{t('taller.seOfreceAlGuardar')}</Texto>}
                           {/* S68-B7: el valor vive dentro del slider (Chanel) */}
-                          <Text
-                            style={{
-                              fontFamily: typography.family.sans.regular,
-                              fontSize: typography.size.sm,
-                              color: theme.text.secondary,
-                            }}
-                          >
+                          <Texto variante="apoyo">
                             {t('servicios.precio')}
-                          </Text>
+                          </Texto>
                           <SliderPrecio
                             etiqueta={`${t('servicios.precio')} · ${etiquetaCorta(b)}`}
                             pasos={etiquetasPasos}
@@ -662,15 +621,9 @@ export default function TallerPaseo() {
                           {d.plan !== '' && (
                             <>
                               {/* S68-B7: el valor vive dentro del slider (Chanel) */}
-                              <Text
-                                style={{
-                                  fontFamily: typography.family.sans.regular,
-                                  fontSize: typography.size.sm,
-                                  color: theme.text.secondary,
-                                }}
-                              >
+                              <Texto variante="apoyo">
                                 {t('taller.planRotulo')}
-                              </Text>
+                              </Texto>
                               <SliderPrecio
                                 etiqueta={t('taller.planRotulo')}
                                 pasos={etiquetasMes}
@@ -681,15 +634,15 @@ export default function TallerPaseo() {
                               <VozComision pct={pct} precio={(leerPrecio(d.plan) ?? 0) * 4} />
                               {/* la línea VIVA invertida: el contrato sigue POR
                                   SALIDA (7.14) — acá se declara la equivalencia */}
-                              <VozSecundaria
-                                texto={t('taller.planEquivale', { salida: monto(leerPrecio(d.plan) ?? 0) })}
-                              />
+                              <Texto variante="apoyo">
+                                {t('taller.planEquivale', { salida: monto(leerPrecio(d.plan) ?? 0) })}
+                              </Texto>
                             </>
                           )}
                           {d.base?.precioPlan != null && (
                             // editar o quitar un plan GUARDADO: la voz de
                             // renovación de siempre
-                            <VozSecundaria texto={t('servicios.precioPlanAyuda')} />
+                            <Texto variante="apoyo">{t('servicios.precioPlanAyuda')}</Texto>
                           )}
 
                           {/* ── PAQUETE por interruptor — sugerido 80%;
@@ -715,15 +668,9 @@ export default function TallerPaseo() {
                           {d.paquete !== '' && (
                             <>
                               {/* S68-B7: el valor vive dentro del slider (Chanel) */}
-                              <Text
-                                style={{
-                                  fontFamily: typography.family.sans.regular,
-                                  fontSize: typography.size.sm,
-                                  color: theme.text.secondary,
-                                }}
-                              >
+                              <Texto variante="apoyo">
                                 {t('taller.paqueteRotulo')}
-                              </Text>
+                              </Texto>
                               <SliderPrecio
                                 etiqueta={t('taller.paqueteRotulo')}
                                 pasos={etiquetasPasos}
@@ -732,11 +679,11 @@ export default function TallerPaseo() {
                                 registro="aa"
                               />
                               <VozComision pct={pct} precio={leerPrecio(d.paquete)} />
-                              <VozSecundaria texto={t('servicios.paqueteExplica')} />
+                              <Texto variante="apoyo">{t('servicios.paqueteExplica')}</Texto>
                             </>
                           )}
                           {d.base?.precioPaquete != null && (
-                            <VozSecundaria texto={t('servicios.precioPaqueteAyuda')} />
+                            <Texto variante="apoyo">{t('servicios.precioPaqueteAyuda')}</Texto>
                           )}
                         </>
                       )}
@@ -761,7 +708,7 @@ export default function TallerPaseo() {
               franjas={franjas}
               onCambio={setFranjas}
               oficio="paseo"
-              titulo={<TituloBloque texto={t('taller.horariosTitulo')} />}
+              titulo={<Texto variante="seccion">{t('taller.horariosTitulo')}</Texto>}
               prestadorId={pantalla.prestadorId}
               modo={modoHorarios}
               ofertas={ofertasHorarios}
@@ -776,8 +723,8 @@ export default function TallerPaseo() {
           {/* ══ PASO/SECCIÓN 3 — zonas de cobertura ══ */}
           {seccionVisible === 'zonas' && (
             <View style={{ gap: spacing[3] }}>
-              <TituloBloque texto={t('taller.zonasTitulo')} />
-              <VozSecundaria texto={t('taller.zonasExplica')} />
+              <Texto variante="seccion">{t('taller.zonasTitulo')}</Texto>
+              <Texto variante="apoyo">{t('taller.zonasExplica')}</Texto>
               <SelectorOpcion
                 etiqueta={t('taller.zonasTitulo')}
                 disposicion="grilla"
@@ -814,7 +761,7 @@ export default function TallerPaseo() {
                 }}
               />
               <Boton variante="ghost" etiqueta={t('taller.otraCiudad')} bloque onPress={() => setHojaOtraCiudad(true)} />
-              <VozSecundaria texto={t('taller.ciudadFaltante')} />
+              <Texto variante="apoyo">{t('taller.ciudadFaltante')}</Texto>
             </View>
           )}
 
@@ -880,7 +827,7 @@ export default function TallerPaseo() {
             if (delPais.length === 0) return null;
             return (
               <View key={pais.codigo} style={{ gap: spacing[2], paddingBottom: spacing[3] }}>
-                <TituloBloque texto={pais.nombre} />
+                <Texto variante="seccion">{pais.nombre}</Texto>
                 <Tarjeta relleno="ninguno">
                   {delPais.map((c, i) => (
                     <View key={c.id}>

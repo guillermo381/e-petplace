@@ -54,6 +54,7 @@ import {
   SliderPrecio,
   StepperCantidad,
   Tarjeta,
+  Texto,
   VozComision,
   spacing,
   typography,
@@ -452,16 +453,9 @@ export default function TallerAdiestramiento() {
 
   function Titulo({ texto }: { texto: string }) {
     return (
-      <Text
-        accessibilityRole="header"
-        style={{
-          fontFamily: typography.family.sans.medium,
-          fontSize: typography.size.md,
-          color: theme.text.primary,
-        }}
-      >
+      <Texto variante="seccion">
         {texto}
-      </Text>
+      </Texto>
     );
   }
 

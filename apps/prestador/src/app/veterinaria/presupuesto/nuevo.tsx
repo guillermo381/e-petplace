@@ -25,8 +25,8 @@ import {
   Encabezado,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
-  typography,
   useAviso,
   useTheme,
 } from '@epetplace/ui';
@@ -165,9 +165,9 @@ export default function NuevoPresupuesto() {
         {/* Procedimientos del negocio (reservable=false) — quick-add */}
         {procedimientos.length > 0 && (
           <View style={{ gap: spacing[2] }}>
-            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}>
+            <Texto variante="seccion">
               {t('presupuesto.procedimientosTitulo')}
-            </Text>
+            </Texto>
             <Tarjeta elevacion="reposo" relleno="ninguno">
               {procedimientos.map((p, i) => (
                 <View key={p.id}>
@@ -187,9 +187,9 @@ export default function NuevoPresupuesto() {
 
         {/* Línea libre */}
         <View style={{ gap: spacing[2] }}>
-          <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}>
+          <Texto variante="seccion">
             {t('presupuesto.libreTitulo')}
-          </Text>
+          </Texto>
           <Campo label={t('presupuesto.libreNombre')} placeholder={t('presupuesto.libreNombrePlaceholder')} value={nombreLibre} onChangeText={setNombreLibre} />
           <Campo
             label={t('presupuesto.librePrecio')}
@@ -218,9 +218,9 @@ export default function NuevoPresupuesto() {
             <Celda titulo={t('presupuesto.total')} metadataMono={money(total)} />
           </Tarjeta>
         ) : (
-          <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+          <Texto variante="apoyo">
             {t('presupuesto.vacioAyuda')}
-          </Text>
+          </Texto>
         )}
 
         {/* Las dos salidas */}

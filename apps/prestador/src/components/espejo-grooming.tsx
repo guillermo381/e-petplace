@@ -11,7 +11,7 @@
  */
 
 import { Text, View } from 'react-native';
-import { Tarjeta, spacing, typography, useTheme } from '@epetplace/ui';
+import { Tarjeta, Texto, spacing, typography, useTheme } from '@epetplace/ui';
 
 import { useTraduccion } from '@/i18n';
 
@@ -76,16 +76,9 @@ export function EspejoGrooming({ datos }: { datos: DatosEspejoGrooming }) {
 
   return (
     <View style={{ gap: spacing[3] }}>
-      <Text
-        accessibilityRole="header"
-        style={{
-          fontFamily: typography.family.sans.medium,
-          fontSize: typography.size.md,
-          color: theme.text.primary,
-        }}
-      >
+      <Texto variante="seccion">
         {t('ofertaPaseo.espejoTitulo')}
-      </Text>
+      </Texto>
       <Tarjeta>
         {lineas.length === 0 ? (
           <Text style={estiloLinea}>{t('ofertaPaseo.espejoNada')}</Text>

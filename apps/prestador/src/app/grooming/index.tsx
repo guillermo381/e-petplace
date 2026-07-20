@@ -30,6 +30,7 @@ import {
   EstadoVacio,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useTheme,
@@ -278,16 +279,9 @@ export default function OfertaGrooming() {
                   >
                     {visible ? t('ofertaGrooming.visibleTitulo') : t('ofertaGrooming.noVisibleTitulo')}
                   </Text>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.sm,
-                      lineHeight: typography.size.sm * typography.leading.normal,
-                      color: theme.text.secondary,
-                    }}
-                  >
+                  <Texto variante="apoyo">
                     {visible ? t('ofertaGrooming.visibleVoz') : razon}
-                  </Text>
+                  </Texto>
                 </View>
               </View>
             </Tarjeta>

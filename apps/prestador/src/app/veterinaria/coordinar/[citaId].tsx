@@ -27,6 +27,7 @@ import {
   EstadoVacio,
   SelectorOpcion,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useAviso,
@@ -190,15 +191,9 @@ export default function FijarFecha() {
             {/* Contexto: la mascota preside; el precio congelado es dato de máquina. */}
             <Tarjeta elevacion="reposo">
               <View style={{ gap: spacing[2] }}>
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.light,
-                    fontSize: typography.size.xl,
-                    color: theme.text.primary,
-                  }}
-                >
+                <Texto variante="titulo">
                   {mascotaNombre}
-                </Text>
+                </Texto>
                 {servicioNombre.trim().length > 0 && (
                   <Text
                     style={{
@@ -218,15 +213,9 @@ export default function FijarFecha() {
                     marginTop: spacing[1],
                   }}
                 >
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.sm,
-                      color: theme.text.secondary,
-                    }}
-                  >
+                  <Texto variante="apoyo">
                     {t('coordinar.contexto')}
-                  </Text>
+                  </Texto>
                   <Text
                     style={{
                       fontFamily: typography.family.mono.medium,
@@ -261,15 +250,9 @@ export default function FijarFecha() {
             ) : (
               // Hoy después de las 18:00: cero final mudo (§6ter) — la voz
               // dice el porqué y el camino es elegir otro día arriba.
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.regular,
-                  fontSize: typography.size.sm,
-                  color: theme.text.secondary,
-                }}
-              >
+              <Texto variante="apoyo">
                 {t('coordinar.hoySinHoras')}
-              </Text>
+              </Texto>
             )}
 
             <SelectorOpcion

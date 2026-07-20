@@ -27,6 +27,7 @@ import {
   Insignia,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useTheme,
@@ -50,21 +51,6 @@ function esEspecie(v: string | null): v is AvatarMascotaEspecie {
 
 
 // S52-P4b sistémico: títulos humanizados — sentence case, sin eyebrow.
-function TituloModulo({ texto }: { texto: string }) {
-  const { theme } = useTheme();
-  return (
-    <Text
-      accessibilityRole="header"
-      style={{
-        fontFamily: typography.family.sans.medium,
-        fontSize: typography.size.md,
-        color: theme.text.primary,
-      }}
-    >
-      {texto}
-    </Text>
-  );
-}
 
 export default function DetalleMascota() {
   const router = useRouter();
@@ -186,23 +172,23 @@ export default function DetalleMascota() {
               ))}
             </View>
           ) : (
-            <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+            <Texto variante="apoyo">
               {t('detalleMascota.sinSenales')}
-            </Text>
+            </Texto>
           )}
         </View>
 
         {/* ── carnet (señal de cuidado del expediente) ── */}
         <View style={{ gap: spacing[3] }}>
-          <TituloModulo texto={t('detalleMascota.carnet')} />
+          <Texto variante="seccion">{t('detalleMascota.carnet')}</Texto>
           <Tarjeta>
-            <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+            <Texto variante="apoyo">
               {vacunas_total === 0
                 ? t('detalleMascota.carnetVacio')
                 : vacunas_total === 1
                   ? t('detalleMascota.unaVacuna')
                   : t('detalleMascota.vacunas', { n: vacunas_total })}
-            </Text>
+            </Texto>
           </Tarjeta>
         </View>
 
@@ -212,11 +198,11 @@ export default function DetalleMascota() {
             además es dato útil del Antes (rima con la señal "Primera vez"
             de la jornada). */}
         <View style={{ gap: spacing[3] }}>
-          <TituloModulo texto={t('detalleMascota.historial', { nombre: mascota.nombre })} />
+          <Texto variante="seccion">{t('detalleMascota.historial', { nombre: mascota.nombre })}</Texto>
           {atenciones.length === 0 ? (
-            <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+            <Texto variante="apoyo">
               {t('detalleMascota.historialVacio', { nombre: mascota.nombre })}
-            </Text>
+            </Texto>
           ) : (
             <Tarjeta relleno="ninguno">
               {atenciones.map((a, i) => (
@@ -235,7 +221,7 @@ export default function DetalleMascota() {
         {/* ── identidad (progresiva; las 5 dimensiones son D-110) ── */}
         {datosIdentidad.length > 0 ? (
           <View style={{ gap: spacing[3] }}>
-            <TituloModulo texto={t('detalleMascota.identidad')} />
+            <Texto variante="seccion">{t('detalleMascota.identidad')}</Texto>
             <Tarjeta relleno="ninguno">
               {datosIdentidad.map((d, i) => (
                 <View key={d.etiqueta}>

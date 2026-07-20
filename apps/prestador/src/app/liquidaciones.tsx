@@ -38,6 +38,7 @@ import {
   EstadoVacio,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useTheme,
@@ -85,21 +86,6 @@ function monto(valor: number): string {
   return `$${valor.toFixed(2)}`;
 }
 
-function TituloBloque({ texto }: { texto: string }) {
-  const { theme } = useTheme();
-  return (
-    <Text
-      accessibilityRole="header"
-      style={{
-        fontFamily: typography.family.sans.medium,
-        fontSize: typography.size.md,
-        color: theme.text.primary,
-      }}
-    >
-      {texto}
-    </Text>
-  );
-}
 
 export default function Liquidaciones() {
   const router = useRouter();
@@ -243,7 +229,7 @@ export default function Liquidaciones() {
           {pantalla.eventos.length > 0 && (
             // peldaño 1 — la espera, con el total en display
             <View style={{ gap: spacing[3] }}>
-              <TituloBloque texto={t('cobros.esperandoTitulo')} />
+              <Texto variante="seccion">{t('cobros.esperandoTitulo')}</Texto>
               <Tarjeta relleno="amplio">
                 <View style={{ gap: 2 }}>
                   <Text
@@ -256,17 +242,11 @@ export default function Liquidaciones() {
                   >
                     {monto(pantalla.eventos.reduce((s, e) => s + (e.montoPayout ?? 0), 0))}
                   </Text>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.sm,
-                      color: theme.text.secondary,
-                    }}
-                  >
+                  <Texto variante="apoyo">
                     {pantalla.eventos.length === 1
                       ? t('cobros.esperandoUno')
                       : t('cobros.esperandoVarios', { cantidad: pantalla.eventos.length })}
-                  </Text>
+                  </Texto>
                 </View>
               </Tarjeta>
               <Tarjeta relleno="ninguno">
@@ -314,7 +294,7 @@ export default function Liquidaciones() {
           {pantalla.liquidaciones.length > 0 && (
             // peldaño 2 — las liquidaciones tal cual su estado
             <View style={{ gap: spacing[3] }}>
-              <TituloBloque texto={t('cobros.liquidacionesTitulo')} />
+              <Texto variante="seccion">{t('cobros.liquidacionesTitulo')}</Texto>
               <Tarjeta relleno="ninguno">
                 {pantalla.liquidaciones.map((l, i) => (
                   <View key={l.id}>

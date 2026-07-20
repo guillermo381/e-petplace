@@ -33,6 +33,7 @@ import {
   Insignia,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useTheme,
@@ -210,15 +211,9 @@ export default function AntesAdiestramiento() {
                 tamano="lg"
               />
               <View style={{ alignItems: 'center', gap: spacing[1] }}>
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.light,
-                    fontSize: typography.size.xl,
-                    color: theme.text.primary,
-                  }}
-                >
+                <Texto variante="titulo">
                   {ficha.nombre}
-                </Text>
+                </Texto>
                 {ficha.raza !== null && (
                   <Text
                     style={{

@@ -27,6 +27,7 @@ import {
   Separador,
   StepperCantidad,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useAviso,
@@ -221,21 +222,6 @@ function ListaHoras({ minimo, onElegir }: { minimo: string | null; onElegir: (h:
   );
 }
 
-function VozSecundaria({ texto }: { texto: string }) {
-  const { theme } = useTheme();
-  return (
-    <Text
-      style={{
-        fontFamily: typography.family.sans.regular,
-        fontSize: typography.size.sm,
-        lineHeight: typography.size.sm * typography.leading.normal,
-        color: theme.text.secondary,
-      }}
-    >
-      {texto}
-    </Text>
-  );
-}
 
 export function SeccionHorarios({
   franjas,
@@ -527,10 +513,10 @@ export function SeccionHorarios({
         seleccionada={modo}
         onSelect={(codigo) => void tocarModo(codigo === 'por_servicio' ? 'por_servicio' : 'universal')}
       />
-      <VozSecundaria
-        texto={modo === 'universal' ? t('horarios.modoExplicaUniversal') : t('horarios.modoExplicaPorServicio')}
-      />
-      <VozSecundaria texto={t('taller.horariosExplica')} />
+      <Texto variante="apoyo">
+        {modo === 'universal' ? t('horarios.modoExplicaUniversal') : t('horarios.modoExplicaPorServicio')}
+      </Texto>
+      <Texto variante="apoyo">{t('taller.horariosExplica')}</Texto>
       <SelectorOpcion
         etiqueta={t('taller.dias')}
         disposicion="fila"
@@ -565,7 +551,7 @@ export function SeccionHorarios({
         }}
       />
       {grupos.length === 0 ? (
-        <VozSecundaria texto={t('taller.sinFranjas')} />
+        <Texto variante="apoyo">{t('taller.sinFranjas')}</Texto>
       ) : (
         <Tarjeta relleno="ninguno">
           {grupos.map((miembros, i) => {
@@ -638,7 +624,7 @@ export function SeccionHorarios({
           />
         ) : grupoEnHoja !== null && grupoEnHoja.length > 0 ? (
           <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
-            <VozSecundaria texto={t('taller.diasAplica', { dias: diasDeGrupo(grupoEnHoja) })} />
+            <Texto variante="apoyo">{t('taller.diasAplica', { dias: diasDeGrupo(grupoEnHoja) })}</Texto>
             {!confirmandoQuitar ? (
               <>
                 {/* S61-B5 (D-391): las HORAS se editan en su lugar —
@@ -680,7 +666,7 @@ export function SeccionHorarios({
                     onCambio={setCupoSel}
                   />
                 </View>
-                <VozSecundaria texto={vozCupoAyuda} />
+                <Texto variante="apoyo">{vozCupoAyuda}</Texto>
                 <Boton
                   variante="primario"
                   etiqueta={t('taller.listo')}
@@ -757,9 +743,9 @@ export function SeccionHorarios({
       >
         {vistaNueva === 'form' ? (
           <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
-            <VozSecundaria
-              texto={t('taller.diasAplica', { dias: ORDEN_DISPLAY.filter((d) => diasSel.includes(d)).map(letraDia).join(' · ') })}
-            />
+            <Texto variante="apoyo">
+              {t('taller.diasAplica', { dias: ORDEN_DISPLAY.filter((d) => diasSel.includes(d)).map(letraDia).join(' · ') })}
+            </Texto>
             {/* D-386 (b): en por_servicio la franja se REPLICA a las
                 ofertas marcadas (todas por default). S68-B8: el selector
                 vive TAMBIÉN en universal — desmarcar es el gesto que
@@ -781,7 +767,7 @@ export function SeccionHorarios({
                   }
                 />
                 {modo === 'universal' && ofertasSel.length < ofertas.length && (
-                  <VozSecundaria texto={t('horarios.ofertasAplicaUniversal')} />
+                  <Texto variante="apoyo">{t('horarios.ofertasAplicaUniversal')}</Texto>
                 )}
               </>
             )}
@@ -823,7 +809,7 @@ export function SeccionHorarios({
                 onCambio={setCupoSel}
               />
             </View>
-            <VozSecundaria texto={vozCupoAyuda} />
+            <Texto variante="apoyo">{vozCupoAyuda}</Texto>
             <Boton
               variante="primario"
               etiqueta={t('taller.agregarFranjaListo')}
@@ -887,7 +873,7 @@ export function SeccionHorarios({
           </Text>
           {/* mitad UI de D-409: los borradores vivos se avisan ANTES de
               la recarga que los perdería — jamás en silencio */}
-          {hayBorradorExterno === true && <VozSecundaria texto={t('horarios.modoBorradorAviso')} />}
+          {hayBorradorExterno === true && <Texto variante="apoyo">{t('horarios.modoBorradorAviso')}</Texto>}
           {modoPendiente === 'por_servicio' ? (
             <Boton
               variante="primario"

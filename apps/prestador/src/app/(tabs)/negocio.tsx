@@ -29,6 +29,7 @@ import {
   Icono,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useTheme,
@@ -61,21 +62,6 @@ function hoyLocalISO(): string {
 }
 
 // S52-P4b sistémico: títulos humanizados — sentence case, sin eyebrow.
-function TituloBloque({ texto }: { texto: string }) {
-  const { theme } = useTheme();
-  return (
-    <Text
-      accessibilityRole="header"
-      style={{
-        fontFamily: typography.family.sans.medium,
-        fontSize: typography.size.md,
-        color: theme.text.primary,
-      }}
-    >
-      {texto}
-    </Text>
-  );
-}
 
 export default function Negocio() {
   const insets = useSafeAreaInsets();
@@ -231,7 +217,7 @@ export default function Negocio() {
               caras; el que no está en la app es puerta honesta por hito,
               jamás decoración muerta */}
           <View style={{ gap: spacing[3] }}>
-            <TituloBloque texto={t('negocio.oferta')} />
+            <Texto variante="seccion">{t('negocio.oferta')}</Texto>
             <Tarjeta
               interactiva
               elevacion="reposo"
@@ -242,24 +228,12 @@ export default function Negocio() {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
                 <Icono nombre="paseo" registro="aa" tamano={28} />
                 <View style={{ flex: 1, gap: 2 }}>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.medium,
-                      fontSize: typography.size.md,
-                      color: theme.text.primary,
-                    }}
-                  >
+                  <Texto variante="seccion">
                     {t('negocio.paseo')}
-                  </Text>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.sm,
-                      color: theme.text.secondary,
-                    }}
-                  >
+                  </Texto>
+                  <Texto variante="apoyo">
                     {detalleMundoPaseo}
-                  </Text>
+                  </Texto>
                 </View>
               </View>
             </Tarjeta>
@@ -276,24 +250,12 @@ export default function Negocio() {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
                 <Icono nombre="grooming" registro="aa" tamano={28} />
                 <View style={{ flex: 1, gap: 2 }}>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.medium,
-                      fontSize: typography.size.md,
-                      color: theme.text.primary,
-                    }}
-                  >
+                  <Texto variante="seccion">
                     {t('negocio.mundoGrooming')}
-                  </Text>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.sm,
-                      color: theme.text.secondary,
-                    }}
-                  >
+                  </Texto>
+                  <Texto variante="apoyo">
                     {detalleMundoGrooming}
-                  </Text>
+                  </Texto>
                 </View>
               </View>
             </Tarjeta>
@@ -310,24 +272,12 @@ export default function Negocio() {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
                 <Icono nombre="training" registro="aa" tamano={28} />
                 <View style={{ flex: 1, gap: 2 }}>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.medium,
-                      fontSize: typography.size.md,
-                      color: theme.text.primary,
-                    }}
-                  >
+                  <Texto variante="seccion">
                     {t('negocio.mundoAdiestramiento')}
-                  </Text>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.sm,
-                      color: theme.text.secondary,
-                    }}
-                  >
+                  </Texto>
+                  <Texto variante="apoyo">
                     {detalleMundoAdiestramiento}
-                  </Text>
+                  </Texto>
                 </View>
               </View>
             </Tarjeta>
@@ -344,24 +294,12 @@ export default function Negocio() {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
                 <Icono nombre="veterinaria" registro="aa" tamano={28} />
                 <View style={{ flex: 1, gap: 2 }}>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.medium,
-                      fontSize: typography.size.md,
-                      color: theme.text.primary,
-                    }}
-                  >
+                  <Texto variante="seccion">
                     {t('negocio.mundoVeterinaria')}
-                  </Text>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.sm,
-                      color: theme.text.secondary,
-                    }}
-                  >
+                  </Texto>
+                  <Texto variante="apoyo">
                     {detalleMundoVeterinaria}
-                  </Text>
+                  </Texto>
                 </View>
               </View>
             </Tarjeta>
@@ -369,7 +307,7 @@ export default function Negocio() {
 
           {/* cobros — los módulos vivos de S54 */}
           <View style={{ gap: spacing[3] }}>
-            <TituloBloque texto={t('negocio.cobros')} />
+            <Texto variante="seccion">{t('negocio.cobros')}</Texto>
             <Tarjeta relleno="ninguno">
               {/* S59-B2 (Ley 19.1): entrar a una sección viste
                   CeldaNavegacion — la Celda plana navegaba sin chevron.
@@ -413,7 +351,7 @@ export default function Negocio() {
           </View>
 
           <View style={{ gap: spacing[3] }}>
-            <TituloBloque texto={t('negocio.enPreparacion')} />
+            <Texto variante="seccion">{t('negocio.enPreparacion')}</Texto>
             <Tarjeta relleno="ninguno">
               {lugares.map((lugar, i) => (
                 <View key={lugar.titulo}>
