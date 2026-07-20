@@ -1,6 +1,10 @@
 # DIRECCION_ARTE — El lenguaje visual propio de e-PetPlace
 
-> **Versión: v1.0 — S53 (10 Jul 2026).** Escrito por el arquitecto/director
+> **Versión: v1.1 — S71 (20 Jul 2026).** Enmienda v1.1: nace **§6b el
+> estándar de la hoja de contacto** (el método de autoría de glifos, ahora
+> que la sesión los autora) y la **Ley 9 se afila** con el criterio del
+> founder (*a 21px la huella sobrevive o es ruido*). Base v1.0 — S53
+> (10 Jul 2026): escrito por el arquitecto/director
 > de arte; dirección FIRMADA por el founder en sesión tras tres rondas de
 > propuestas (lenguajes a/b/c → crítica founder con vara Banco Pichincha →
 > evolución b′). **Contrastes obligatorios:** la skill
