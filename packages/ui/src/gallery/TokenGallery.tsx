@@ -350,6 +350,9 @@ function EjemploSetBPrima() {
     'preferencias', 'pagos', 'ayuda', 'ubicacion', 'training', 'hotel',
     'guarderia', 'seguros', 'telemedicina', 'vacaciones', 'equipo',
     'prime', 'primeCorona', // concepto 19: el founder ELIGE a 21px
+    // LOTE S71-B2 (firmados founder sobre hoja de contacto — carpeta del
+    // caso · documento con desglose):
+    'caso', 'presupuesto',
   ]
   return (
     <View style={{ gap: spacing[4] }}>

@@ -33,6 +33,7 @@ import {
   EsperaDeMarca,
   EstadoVacio,
   Esqueleto,
+  Icono,
   Insignia,
   SelectorOpcion,
   SelectorSegmentado,
@@ -393,7 +394,12 @@ export default function ConsultaVeterinaria() {
           <>
             {/* (a) Perfil clínico vigente */}
             <View style={{ gap: spacing[2] }}>
-              <Texto variante="seccion">{t('consulta.perfilTitulo', { mascota })}</Texto>
+              {/* S71-B2: las tres anclas del Antes (glifo aa 21 + header).
+                  El ancla vive solo con contenido que anclar (boceto §5). */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+                <Icono nombre="carnet" registro="aa" tamano={21} />
+                <Texto variante="seccion">{t('consulta.perfilTitulo', { mascota })}</Texto>
+              </View>
               <Tarjeta elevacion="reposo" relleno="ninguno">
                 <Celda
                   titulo={t('consulta.perfilEspecie')}
@@ -428,7 +434,10 @@ export default function ConsultaVeterinaria() {
 
             {/* (b) Casos activos */}
             <View style={{ gap: spacing[2] }}>
-              <Texto variante="seccion">{t('consulta.casosTitulo')}</Texto>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+                {casos.length > 0 && <Icono nombre="caso" registro="aa" tamano={21} />}
+                <Texto variante="seccion">{t('consulta.casosTitulo')}</Texto>
+              </View>
               {casos.length === 0 ? (
                 <Texto variante="apoyo">{t('consulta.casosVacio')}</Texto>
               ) : (
@@ -453,7 +462,10 @@ export default function ConsultaVeterinaria() {
 
             {/* (c) Presupuestos de la mascota */}
             <View style={{ gap: spacing[2] }}>
-              <Texto variante="seccion">{t('consulta.presupuestosTitulo')}</Texto>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+                {presupuestos.length > 0 && <Icono nombre="presupuesto" registro="aa" tamano={21} />}
+                <Texto variante="seccion">{t('consulta.presupuestosTitulo')}</Texto>
+              </View>
               {presupuestos.length === 0 ? (
                 <Texto variante="apoyo">{t('consulta.presupuestosVacio')}</Texto>
               ) : (

@@ -34,6 +34,9 @@ export type IconoNombre =
   | 'vacaciones' | 'equipo'
   // Prime (concepto 19): DOS candidatos — el founder elige a 21px; el perdedor muere
   | 'prime' | 'primeCorona'
+  // ── LOTE S71-B2 (proceso enmendado DIRECCION_ARTE: la sesión autora,
+  //    hoja de contacto de 3 variantes, firma founder POR ícono) ──
+  | 'caso' | 'presupuesto'
 export type IconoRegistro = 'capa' | 'aa' | 'tinta'
 
 const TRAZO = 1.9
@@ -284,6 +287,36 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       <Huella color={huella} x={8.8} y={14.4} escala={0.4} />
     </>
   ),
+
+  // ══ LOTE S71-B2 — firma founder sobre hoja de contacto (variante A
+  //    en ambos; el criterio nuevo del gate: a 21px la huella SOBREVIVE
+  //    o es ruido) ══
+  // La carpeta del caso — la unidad que AGRUPA consultas de una misma
+  // condición (S70); la huella es EL PACIENTE, vive adentro.
+  caso: ({ tinta, huella }) => (
+    <>
+      <Path
+        d="M3.6 18.3V6.2a1.5 1.5 0 0 1 1.5-1.5h3.7l1.9 2.2h7.7a1.5 1.5 0 0 1 1.5 1.5v9.9a1.5 1.5 0 0 1-1.5 1.5H5.1a1.5 1.5 0 0 1-1.5-1.5Z"
+        {...trazo(tinta)}
+      />
+      <Huella color={huella} x={8.9} y={10.2} escala={0.38} />
+    </>
+  ),
+  // El documento con desglose — cotización, JAMÁS cobro (cero $, cero
+  // billete: la colisión con pagos quedó vetada en la hoja). Dos ítems
+  // desiguales: el desglose ES el presupuesto. La huella dice para
+  // quién se cotiza.
+  presupuesto: ({ tinta, huella }) => (
+    <>
+      <Path
+        d="M6.2 3.6h7.6l4.6 4.6V19a1.5 1.5 0 0 1-1.5 1.5H6.2A1.5 1.5 0 0 1 4.7 19V5.1a1.5 1.5 0 0 1 1.5-1.5Z"
+        {...trazo(tinta)}
+      />
+      <Path d="M13.8 3.6v4.6h4.6" {...trazo(tinta)} />
+      <Path d="M8 12.2h5M8 15.2h3.4" {...trazo(tinta)} />
+      <Huella color={huella} x={12.4} y={13.6} escala={0.32} />
+    </>
+  ),
 }
 
 export function Icono({
@@ -328,6 +361,9 @@ export function Icono({
     training: cuidado, hotel: cuidado, guarderia: cuidado, vacaciones: cuidado,
     negocio: ocre, pagos: ocre,
     prime: comunidad, primeCorona: comunidad,
+    // LOTE S71-B2 (firma founder): caso = historia clínica (familia de
+    // carnet/vet) · presupuesto = plata del cuidado (familia pagos/negocio)
+    caso: identidad, presupuesto: ocre,
   }
 
   // §2.8 memorial: la huella a tinta secundaria, el trazo se conserva.
