@@ -110,8 +110,10 @@ export const clienteEn = {
     porCoordinarTitulo: "{{mascota}}'s visit is waiting for a date",
     railPaseos: 'Walks',
     railEstetica: 'Grooming',
-    railSaldoUna: '1 walk left',
-    railSaldo: '{{n}} walks left',
+    // "walks left" truncaba con "…" a 96px — la captura M3 lo atrapó;
+    // la regla del cuadrado manda: UN número, jamás texto cortado.
+    railSaldoUna: '1 left',
+    railSaldo: '{{n}} left',
     // S61-A11 — Kary's Home (LOTE S61, GATE PENDIENTE founder)
     vidaTitulo: "Your home's life",
     filtroQuien: 'Whose?',
