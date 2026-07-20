@@ -60,6 +60,12 @@ export default function ParteAdiestramientoPantalla() {
 
   const [parte, setParte] = useState<ParteAdiestramiento | 'cargando' | 'error'>('cargando');
   const [clipUrls, setClipUrls] = useState<Record<string, string>>({});
+  // S71-A CURA-3 🟠 — el botón de reintento hacía `setParte('cargando')` y
+  // el efecto NO dependía de `parte`: no se re-consultaba nada y la
+  // pantalla quedaba en esqueleto PERMANENTE. Con el error de red aún
+  // vivo, el reintento era un callejón sin salida. `intento` es el
+  // disparador explícito — patrón del vecino (`parte/[eventoId]`).
+  const [intento, setIntento] = useState(0);
 
   useFocusEffect(
     useCallback(() => {
@@ -81,7 +87,7 @@ export default function ParteAdiestramientoPantalla() {
       return () => {
         vigente = false;
       };
-    }, [citaId]),
+    }, [citaId, intento]),
   );
 
   // §6 — la frase de vínculo: narrativa, jamás número expuesto como score
@@ -118,7 +124,7 @@ export default function ParteAdiestramientoPantalla() {
           <EstadoVacio
             titulo={t('adiestramiento.parteError')}
             descripcion={t('hogar.errorHistoriaDetalle')}
-            accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setParte('cargando')} />}
+            accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setIntento((n) => n + 1)} />}
           />
         ) : (
           <>
