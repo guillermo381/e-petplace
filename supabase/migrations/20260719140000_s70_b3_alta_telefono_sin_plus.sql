@@ -1,4 +1,19 @@
 -- ============================================================================
+-- ⚠️  SUPERSEDED POR 20260719200000 (S70-A12) — ESTA MIGRACIÓN NO SE APLICA.
+-- ============================================================================
+-- Registrada en el historial como superseded (nunca ejecutada). Dos razones:
+--   1. Su orden sanear-'+'-ANTES-de-normalizar ES el bug: dejaba el
+--      telefono_normalizado con el prefijo retenido ('573005604012') mientras
+--      la búsqueda con '+' lo strippea ('3005604012') ⇒ pendiente INHALLABLE.
+--   2. Su assert embebido codifica la semántica PRE-A8 de normalizar_telefono
+--      (D-442) y aborta contra la función vigente.
+-- Su cuerpo funcional YA vivía aplicado en la DB (la Sesión B lo aplicó
+-- directo sin registrar la migración). A12 lo reemplaza: normaliza PRIMERO
+-- con el '+' intacto, sanea DESPUÉS solo para la columna raw.
+-- Se conserva el archivo como registro histórico de la falla anotada B3.
+-- ============================================================================
+
+-- ============================================================================
 -- S70-B3 — FALLA ANOTADA: el alta fantasma por TELÉFONO revienta con el '+'.
 -- ============================================================================
 -- Repro founder (verbatim): mostrador → "Registrar mascota nueva" → "Thogo",
