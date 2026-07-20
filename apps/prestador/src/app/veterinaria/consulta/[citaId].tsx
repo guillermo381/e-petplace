@@ -38,6 +38,7 @@ import {
   SelectorSegmentado,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useAviso,
@@ -368,16 +369,11 @@ export default function ConsultaVeterinaria() {
   }
 
   // ── Render ──────────────────────────────────────────────────────────────────
-  const tituloSeccion = (txt: string) => (
-    <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}>
-      {txt}
-    </Text>
-  );
-  const ayudaTexto = (txt: string) => (
-    <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-      {txt}
-    </Text>
-  );
+  // S71-B2 (E1 de la vara): los helpers locales tituloSeccion/ayudaTexto
+  // MURIERON — los absorbe Texto (58, congelado) en las cuatro fases.
+  // Delta declarado (E4): `apoyo` trae lineHeight explícito (sm × leading
+  // normal) que el helper no tenía, y `seccion` regala accessibilityRole
+  // "header". Higiene Ley 37, no diseño.
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -397,7 +393,7 @@ export default function ConsultaVeterinaria() {
           <>
             {/* (a) Perfil clínico vigente */}
             <View style={{ gap: spacing[2] }}>
-              {tituloSeccion(t('consulta.perfilTitulo', { mascota }))}
+              <Texto variante="seccion">{t('consulta.perfilTitulo', { mascota })}</Texto>
               <Tarjeta elevacion="reposo" relleno="ninguno">
                 <Celda
                   titulo={t('consulta.perfilEspecie')}
@@ -432,9 +428,9 @@ export default function ConsultaVeterinaria() {
 
             {/* (b) Casos activos */}
             <View style={{ gap: spacing[2] }}>
-              {tituloSeccion(t('consulta.casosTitulo'))}
+              <Texto variante="seccion">{t('consulta.casosTitulo')}</Texto>
               {casos.length === 0 ? (
-                ayudaTexto(t('consulta.casosVacio'))
+                <Texto variante="apoyo">{t('consulta.casosVacio')}</Texto>
               ) : (
                 <Tarjeta elevacion="reposo" relleno="ninguno">
                   {casos.map((c, i) => (
@@ -457,17 +453,22 @@ export default function ConsultaVeterinaria() {
 
             {/* (c) Presupuestos de la mascota */}
             <View style={{ gap: spacing[2] }}>
-              {tituloSeccion(t('consulta.presupuestosTitulo'))}
+              <Texto variante="seccion">{t('consulta.presupuestosTitulo')}</Texto>
               {presupuestos.length === 0 ? (
-                ayudaTexto(t('consulta.presupuestosVacio'))
+                <Texto variante="apoyo">{t('consulta.presupuestosVacio')}</Texto>
               ) : (
                 <Tarjeta elevacion="reposo" relleno="ninguno">
                   {presupuestos.map((p, i) => (
                     <View key={p.id}>
                       {i > 0 && <Separador />}
+                      {/* S71-B2 CHANEL: el estado se pintaba DOS VECES en
+                          la misma fila (el mismo t() en metadataMono y en
+                          la Insignia). Gana la Insignia — dice el estado
+                          CON semántica de color (19.4); el mono muere, que
+                          además vestía de máquina una palabra humana
+                          (Ley 3: 'aprobado' no es voz de máquina). */}
                       <Celda
                         titulo={money(p.total)}
-                        metadataMono={t(`consulta.estadoPresupuesto.${p.estado}`)}
                         fin={<Insignia estado={ESTADO_A_INSIGNIA[p.estado]} etiqueta={t(`consulta.estadoPresupuesto.${p.estado}`)} />}
                       />
                     </View>
@@ -480,8 +481,8 @@ export default function ConsultaVeterinaria() {
           </>
         ) : fase === 'dictado' ? (
           <>
-            {tituloSeccion(t('consulta.dictadoTitulo', { mascota }))}
-            {ayudaTexto(t('consulta.dictadoAyuda'))}
+            <Texto variante="seccion">{t('consulta.dictadoTitulo', { mascota })}</Texto>
+            <Texto variante="apoyo">{t('consulta.dictadoAyuda')}</Texto>
             <Campo
               label={t('consulta.dictadoLabel')}
               placeholder={t('consulta.dictadoPlaceholder')}
@@ -493,7 +494,7 @@ export default function ConsultaVeterinaria() {
             {estructurando ? (
               <View style={{ alignItems: 'center', gap: spacing[3], paddingVertical: spacing[6] }}>
                 <EsperaDeMarca />
-                {ayudaTexto(t('consulta.estructurando'))}
+                <Texto variante="apoyo">{t('consulta.estructurando')}</Texto>
               </View>
             ) : (
               <Boton
@@ -507,7 +508,7 @@ export default function ConsultaVeterinaria() {
           </>
         ) : fase === 'confirmacion' ? (
           <>
-            {ayudaTexto(t('consulta.confirmacionAyuda'))}
+            <Texto variante="apoyo">{t('consulta.confirmacionAyuda')}</Texto>
 
             {/* Requeridos */}
             <Campo
@@ -535,7 +536,7 @@ export default function ConsultaVeterinaria() {
             {/* Vitales — checklist de EXCEPCIONES (solo los medidos) */}
             {VITALES_META.some((m) => vitales[m.key] !== undefined) && (
               <View style={{ gap: spacing[2] }}>
-                {tituloSeccion(t('consulta.vitalesTitulo'))}
+                <Texto variante="seccion">{t('consulta.vitalesTitulo')}</Texto>
                 {VITALES_META.filter((m) => vitales[m.key] !== undefined).map((m) => (
                   <Campo
                     key={m.snake}
@@ -551,8 +552,8 @@ export default function ConsultaVeterinaria() {
 
             {/* Fórmula — medicaciones editables */}
             <View style={{ gap: spacing[2] }}>
-              {tituloSeccion(t('consulta.formulaTitulo'))}
-              {meds.length === 0 && ayudaTexto(t('consulta.formulaVacio'))}
+              <Texto variante="seccion">{t('consulta.formulaTitulo')}</Texto>
+              {meds.length === 0 && <Texto variante="apoyo">{t('consulta.formulaVacio')}</Texto>}
               {meds.map((m) => {
                 const faltaDosis = m.dosis.trim().length === 0;
                 const faltaFrec = m.frecuencia.trim().length === 0;
@@ -587,8 +588,8 @@ export default function ConsultaVeterinaria() {
 
             {/* Plan diagnóstico — exámenes pedidos */}
             <View style={{ gap: spacing[2] }}>
-              {tituloSeccion(t('consulta.examenesTitulo'))}
-              {planDiagnostico.length === 0 && ayudaTexto(t('consulta.examenesVacio'))}
+              <Texto variante="seccion">{t('consulta.examenesTitulo')}</Texto>
+              {planDiagnostico.length === 0 && <Texto variante="apoyo">{t('consulta.examenesVacio')}</Texto>}
               {planDiagnostico.map((x, i) => (
                 <View key={`ex-${i}`} style={{ flexDirection: 'row', gap: spacing[2], alignItems: 'flex-start' }}>
                   <View style={{ flex: 1 }}>
@@ -604,7 +605,7 @@ export default function ConsultaVeterinaria() {
 
             {/* Caso — nuevo / activo / ninguno */}
             <View style={{ gap: spacing[2] }}>
-              {tituloSeccion(t('consulta.casoTitulo'))}
+              <Texto variante="seccion">{t('consulta.casoTitulo')}</Texto>
               <SelectorSegmentado
                 etiqueta={t('consulta.casoModoLabel')}
                 segmentos={
@@ -656,8 +657,8 @@ export default function ConsultaVeterinaria() {
             {nota?.proximoControl ? (
               <Tarjeta elevacion="reposo">
                 <View style={{ gap: spacing[1] }}>
-                  {tituloSeccion(t('consulta.proximoTitulo'))}
-                  {ayudaTexto(t('consulta.proximoDetalle', { control: nota.proximoControl }))}
+                  <Texto variante="seccion">{t('consulta.proximoTitulo')}</Texto>
+                  <Texto variante="apoyo">{t('consulta.proximoDetalle', { control: nota.proximoControl })}</Texto>
                 </View>
               </Tarjeta>
             ) : null}
