@@ -16,7 +16,7 @@ description: >-
 
 # epetplace-design-system — el sistema es exigible, no sugerido
 
-Fuente de verdad: `packages/ui` (tokens v4 + 35 componentes + 3 temas).
+Fuente de verdad: `packages/ui` (tokens v4 + 39 componentes + 3 temas).
 Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 `@epetplace/ui`, no existe en el producto.
 
@@ -97,6 +97,23 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
     su tamaño de diseño (§2.9). En tabs, la huella ES el estado activo
     (§2.6 — sin pills con `estadoPorHuella`). DIRECCION_ARTE manda en
     todo lo iconográfico/ilustrativo/motion de marca.
+    **ENMIENDA S71 — DÓNDE VA EL GLIFO (firmada por las DOS sesiones en
+    la vara cruzada del Antes de la consulta; el refinamiento es de A):**
+    **"El glifo marca lo que VARÍA — y la variación es DENTRO DE LA
+    UNIDAD DE BARRIDO. Headers que varían entre sí → glifo. Filas del
+    mismo tipo dentro de una sección → sin glifo."**
+    Un glifo repetido en cada fila de su propia sección no informa: el
+    header ya dijo de qué son todas. Al revés, tres headers idénticos sin
+    glifo hacen que el ojo no separe secciones que significan cosas
+    distintas (identidad clínica · casos · dinero — el diagnóstico del
+    Antes). **Evidencia relevada: cuatro casos vivos la cumplen y no se
+    halló contraejemplo** — `CeldaNavegacion` (ícono por fila porque cada
+    fila va a un destino DISTINTO), la huella de `BarraTabs` (cada tab
+    distinta), el punto de capa de `LineaDeVida` (nodos de tipo distinto)
+    y los headers del Antes (S71-B2). **Corolario para el catálogo:** si
+    un set necesita el MISMO glifo repetido por fila, lo que falta es un
+    set POR TIPO — no más repeticiones del genérico (caso vivo: los
+    procedimientos del presupuesto, mandato S72-P2).
 13. **Carga de datos (ENMENDADA S53, DIRECCION_ARTE §5.3).** Listas y
     pantallas esperan con skeleton ESTÁTICO (formas en `bg.overlay`,
     SIN shimmer); spinner solo pasado el umbral de 150ms; cuando llegan
@@ -239,10 +256,41 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
        > inicial y ahora comparten control; la tercera era otro trabajo y
        > quedó declarada. La Celda-como-encabezado murió: una celda
        > promete NAVEGAR (19.1), y plegar no es navegar.
-       > **El wrapper `PieRevelar` NO existe todavía** — dos llamadas no
-       > son un componente. Nace en `packages/ui` con el TERCER consumidor
-       > real (D-454, disparo declarado); hasta entonces se escribe
-       > directo, jamás como helper local copiado.
+       > **`PieRevelar` YA EXISTE (S71-A3, packages/ui)** — el disparo de
+       > D-454 se cumplió el mismo día: el Hogar v2 fue el TERCER consumidor
+       > real y el componente nació con galería. Su etiqueta canónica es la
+       > forma NEUTRA `"Ver {{n}} más"` (namespace ui) — "Ver las 5 / Ver
+       > los 4" obligaría a un género por consumidor; el número, que es lo
+       > que la ley exige, se conserva. Los dos consumidores viejos del
+       > cliente (`citas/[mascotaId]`, `hogar/paseos`) migran por D-318 al
+       > tocarse. *(Esta nota decía "NO existe todavía" hasta S71 — se
+       > corrige en el mismo cierre que lo construyó, no se duplica la
+       > entrada.)*
+
+    7. **LA LEY DEL CONTORNO TRANSPARENTE — la acción DENTRO de una fila**
+       (dictada por el founder en el gate S71, sobre píxeles):
+       **"El contorno transparente MUERE como acción de fila. Por
+       superficie UN sólido — la acción primaria; todo lo demás baja a
+       LABEL: con chevron si NAVEGA, sin chevron si EJECUTA. Nunca la
+       caja vacía del medio."**
+       El porqué: la caja de contorno es un tercer peso que no informa —
+       ni tiene la jerarquía del sólido ni la humildad del label, y
+       repetida por fila convierte una lista en un tablero de botones
+       donde nada preside (el diagnóstico literal del gate del Hogar v2 y
+       de la jornada del prestador).
+       - **Vara existente que ya la cumplía:** `prestador/cita/[citaId]`
+         — ícono + label + chevron.
+       - **Primera aplicación:** S71 (`18e0c61`) — la fila de "Por
+         coordinar" pasó a tapear ENTERA con rol `button`, su acción de
+         contorno murió y el `fin` bajó a label + chevron (path canónico
+         de `CeldaNavegacion`).
+       - **Convive con 22c sin contradecirla:** 22c gobierna la acción
+         SUELTA de una pantalla (comando con consecuencias = botón
+         compacto); esta gobierna la acción DENTRO de una fila de lista,
+         donde la fila entera ya es el área tocable.
+       - Corolario de lectura: si una fila necesita DOS acciones, casi
+         siempre una de las dos no es de la fila — subí una al header de
+         sección o bajala al detalle.
 
     Si un trabajo de interacción no está en el diccionario, se propone
     su patrón, se gatea y ENTRA al diccionario (patrón Ley 11) — jamás
@@ -326,6 +374,29 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
     `Boton variante="compacto"` (borde hairline-strong, radius suave,
     texto tinta, target 44) — jamás texto pelado, jamás Celda. La
     prueba: "si al flipearlo necesitarías confirmar, era una acción".
+
+23. **EL PRINCIPIO DE LA PUERTA (S71, cura de la Sesión B en "Fijar
+    fecha").** **"La puerta no ofrece lo que va a rechazar."** La UI no
+    muestra opciones que el server va a rebotar: si el motor va a decir
+    que no, el control no se dibuja — y si el conjunto entero queda
+    vacío, se dice con voz honesta en vez de ofrecer una grilla muerta.
+    Caso de origen: la grilla de horas para coordinar un procedimiento
+    ofrecía horas YA PASADAS del día de hoy (el server las rebotaba con
+    `slot_en_pasado`); la cura filtra con hora local, deriva la
+    invalidación al cambiar de día, y después de las 18:00 dice
+    `coordinar.hoySinHoras` en lugar de una grilla de nada.
+    **CRITERIO DECLARADO — por qué es LEY NUEVA y no enmienda a la Ley
+    13 ni entrada del diccionario:** la Ley 13 gobierna cómo se MUESTRA
+    un estado que ya existe (cargando, vacío, error — "el error jamás se
+    disfraza de vacío"); esta gobierna qué se OFRECE **antes** de que
+    exista estado alguno. Y no es diccionario porque no nombra un
+    componente: **restringe a todos**. Su prueba: *"si el usuario lo
+    toca y el server dice que no, ¿podíamos saberlo antes de dibujarlo?
+    Si la respuesta es sí, era un bug de puerta."*
+    Corolario anti-trampa: la puerta filtra lo que YA SABE, jamás
+    adivina — un filtro que oculta algo legal es peor que ofrecerlo. El
+    server sigue siendo la autoridad (los guards NO se retiran: la
+    puerta es cortesía, no validación).
 
 ### Las pantallas patrón (cómo se firma lo visual)
 
@@ -473,7 +544,7 @@ comprar es lo último, y lo que compra combina con TODO.*
 //     stroke={theme.text.primary} strokeWidth={1.75} strokeLinecap="round" /></Svg>
 ```
 
-## 3. ÍNDICE — los 35 componentes (import de `@epetplace/ui`)
+## 3. ÍNDICE — los 39 componentes (import de `@epetplace/ui`)
 
 | Export | Cuándo |
 |---|---|
@@ -512,6 +583,9 @@ comprar es lo último, y lo que compra combina con TODO.*
 | `BarrasSemana` | La tira de 7 días de los Vitales (S53-B2c.1, espec firmada en brief). 7 barras proporcionales al valor REAL del día; día sin dato = barra base en bg.overlay (la verdad tal cual, L-139). Presentacional puro, ESTÁTICA (Ley 6), color hex puro de su capa; memorial degrada llenas a text.secondary. Sin ejes ni tooltips — no es un chart genérico |
 | `ClipSesion` | El clip corto de la sesión de adiestramiento (S63, componente 34 — espec aprobada por el arquitecto; MODELO_ADIESTRAMIENTO §5: el video es el medio del oficio). Poster sereno `radius.suave` + tap-para-reproducir con controles nativos (expo-video); JAMÁS autoplay — en ningún tema, en memorial menos (la reproducción es siempre un acto del usuario). Estados: cargando/error con voz honesta (namespace ui, Ley 13 — el clip jamás se disfraza de vacío). Escalera: 0 clips = NO se monta (cero estado vacío decorativo). Tokens puros — sirve a ambos temas y a la dosis del prestador sin variante. Consumidores: el parte del dueño + el Durante del prestador. Peer NUEVO: expo-video ~57.0.1 (nativo — build, no OTA) |
 | `VozComision` | La voz del NETO/comisión bajo un precio del taller (S68-B, componente 35 — pagó D-412): "recibís $X" con la comisión VIVA desde `fee_configs` (regla 7.15 del financiero — jamás hardcode). Extraída a `packages/ui` desde los talleres donde vivía DUPLICADA por copia (paseo/grooming inline, hallazgo S68-B0); consumidores: los rieles de precio de los talleres de oficio (paseo/grooming/adiestrador/vet). Voz de máquina para el número (mono), voz humana para la frase; presentacional pura — el fee lo resuelve el caller. Memorial degrada (sin celebración del número) |
+| `Texto` | **La pieza de texto del sistema (S71-A2).** El design system tenía 57 exports y NINGUNO era texto: la consecuencia no era hardcodeo (los tokens estaban bien puestos) sino algo peor — **la jerarquía tipográfica se re-decidía a mano en cada pantalla**, ~200 veces. Cinco variantes (Ley 3): `titulo` DM Sans 300 · **`seccion`** DM Sans 500 con `accessibilityRole="header"` DE FÁBRICA (absorbió **10 definiciones byte-idénticas de `TituloBloque`** + 3 `tituloSeccion` locales) · `cuerpo` la prosa por default · `apoyo` secundario **con `lineHeight` de prosa** (absorbió las **4 `VozSecundaria`**, que coincidían todas en ese interlineado — el censo corrigió al diseñador, no al revés) · `dato` JetBrains Mono con `tabular-nums`. **SIN prop `style`, deliberado:** la escotilla de estilo libre devolvería el gobierno de la jerarquía a la pantalla, que es el problema que existe para cerrar. Es una HOJA: no lleva margin, flex ni ancho — el layout es del padre. `montoCorto` NO nació (D-448: el formateo de plata es del RIEL por idioma, como `fechaCortaMono`) |
+| `FilaDato` | **Etiqueta sobre valor, sin interacción (S71-A2).** Su hueco estaba DECLARADO en un comentario del código desde S70 (`veterinaria/cita/[citaId]`: *"no hay componente de campo de solo lectura"*) — el comentario documentaba la deuda en vez de dispararla. **La prueba de su trabajo: si tocarlo no hace nada, es `FilaDato`** (no `Celda`, que es fila de lista tapeable; no `Campo`, que se edita). `mono` es del VALOR, jamás del rótulo (Ley 3). Hermano de `Texto`, NO variante: es layout (dos nodos apilados) — como variante habría obligado a `Texto` a devolver dos elementos. Un valor ausente NO se dibuja vacío: la pantalla omite la fila o pasa su voz honesta (Ley 13). **Candidato registrado sin construir: la disposición HORIZONTAL compacta** (rótulo izquierda / valor derecha) — el caso del perfil del Antes la pidió y se decidió NO meter una prop al pasar en un componente recién congelado |
+| `PieRevelar` | **El control canónico de la entrada 19.6 (S71-A3, D-454 pagada).** `Boton compacto` centrado al pie de una sección truncada o plegada, con **el NÚMERO en la etiqueta** (`"Ver {{n}} más"`, forma neutra del namespace ui); con `revelado`, pasa a "Ocultar" — plegar de vuelta es el mismo control en el mismo lugar. `n=0` sin revelar: **no se dibuja** (regla de existencia). **NO es paginación** (traer datos que no están: eso es el pie de `LineaDeVida` con su cursor) ni abrir un compuesto en sus partes (`FilaSalida`). Nació con su tercer consumidor real, no antes |
 | `FichaMascotaHogar` | v2 (S52-P3, espec gateada): la mascota PRESIDE — AvatarMascota 64 (foto primero, huella fallback) sobre superficie Tarjeta, nombre en DM Sans light xl y UNA voz SIN sujeto (ficha.* del riel; las variantes con {{nombre}} se conservan para contextos sin sujeto visible). Semántica intacta: alDia punto verdeVital · pideAtencion punto ochre + warningText · conociendolo neutral. Tap → perfil (pressed 0.99 de Tarjeta); sin badges ni CTA. Diseñada para 1-3 apiladas. Memorial degrada. Cero tokens nuevos |
 
 También: `ThemeProvider`/`useTheme` (light default, memorial forzable),
@@ -523,7 +597,7 @@ Ley 20)/`motion`/`opacity`/`dosis`, temas y tipos.
 
 **Dónde vive qué:** tokens `packages/ui/src/tokens/` · temas
 `packages/ui/src/themes/` · gate WCAG `scripts/verify-contrast.ts`
-(correr: `pnpm verify:contrast` — 154 pares desde S58, tiene que dar 0 fallos) ·
+(correr: `pnpm verify:contrast` — 178 pares desde S71, tiene que dar 0 fallos) ·
 galería `packages/ui/src/gallery/TokenGallery.tsx` (verificación browser:
 `node scripts/verify-gallery.mjs` con los dev servers arriba) · gate en
 dispositivo: CLAUDE.md raíz · dirección de arte e iconografía:
@@ -532,6 +606,25 @@ dispositivo: CLAUDE.md raíz · dirección de arte e iconografía:
 
 ## Historial de la skill
 
+- **S71 (20 Jul 2026) — LAS LEYES QUE SALIERON DEL PRIMER GATE DEL
+  MECANISMO.** Entran: **19.6** "revelar el resto de una sección" (la
+  depositó B en el gate del piloto B1; su nota se CORRIGE acá —
+  `PieRevelar` ya existe, nació el mismo día con su tercer consumidor) ·
+  **19.7 LA LEY DEL CONTORNO TRANSPARENTE** (dictada por el founder en
+  el gate: la caja vacía muere como acción de fila; UN sólido por
+  superficie, el resto a label con/sin chevron según navegue o ejecute)
+  · **enmienda a la Ley 12 — DÓNDE VA EL GLIFO** (firmada por las dos
+  sesiones en la vara cruzada: marca lo que VARÍA dentro de la unidad de
+  barrido; 4 casos vivos la cumplen, cero contraejemplo) · **Ley 23 EL
+  PRINCIPIO DE LA PUERTA** (no se ofrece lo que el server va a rechazar;
+  criterio de ubicación declarado: la Ley 13 muestra estados que
+  existen, esta gobierna lo que se ofrece antes de que exista estado) ·
+  y los **componentes 37-39 al índice**: `Texto` (la pieza que faltaba —
+  absorbió 10 `TituloBloque` + 4 `VozSecundaria` byte-idénticas),
+  `FilaDato` (su hueco estaba declarado en un comentario desde S70) y
+  `PieRevelar` (D-454 pagada por su disparo). **Contadores RE-MEDIDOS
+  (L-141): 35→39 componentes y 154→178 pares WCAG — ambos venían
+  desactualizados de sesiones anteriores.**
 - **S58 (12 Jul 2026) — LOS MATERIALES DE LOS ACABADOS NACEN (D-358 +
   D-359 + D-360, firmas founder S58-0.5(a); construcción Sesión A,
   territorio packages/ui):** el fondo claro pasa a PAPEL ALGODÓN
