@@ -1996,6 +1996,14 @@ El motor de recordatorios apuntando al NEGOCIO (no a la familia); candidata bara
 
 Territorio: `packages/api` (sesión A). **Nota de método:** H5 es el más barato de los cinco — cuatro de los nueve lectores ya tocan `eventos_mascota` o tienen su FK en la mano (`leerTimelineMascota` es agregar la columna a un select que ya existe); el único que exige migración es `obtener_parte_consulta`, cuya RPC **ya joinea la fila** y solo le extrae `datos`. **Disparo: la construcción de P3.** Origen: S72 (cierre de A3, sobre el reporte de B).
 
+### Deudas del cierre de la ventana S72-A (D-471 → D-472)
+
+#### D-471 — Jubilación (DROP) de las dos huérfanas del legado (§14.1)
+🟡 MEDIA. `completar_historia_clinica(jsonb)` y `completar_cita_servicio(uuid,text,uuid)` son las RPCs consulta-céntricas del portal legado que **§14.1 manda JUBILAR**. Censo S72-A: **CERO callers** en el monorepo (DB, triggers, TS — el hit de `database.types.ts` es tipo generado). **La fuga L-140 YA está cerrada:** anon/PUBLIC revocados en `20260720140000` (HC) y `20260721120000` (cita). **El DROP NO se hizo — y no se hace autónomo:** el **portal admin legado comparte esta misma DB** (`zyltipqscdsdsxnjclhp`, acta S49) y podría invocarlas vía PostgREST; el censo del monorepo **no ve el repo congelado** (`../e-petplace-prestadores`), así que un DROP rompería producción **sin stack trace en el monorepo**. Es irreversible-hacia-afuera. **Disparo: el censo de callers del portal legado (o su apagado definitivo).** Hasta entonces viven revocadas y sin uso en el motor nuevo. Origen: S72-A (cierre de ventana; §14.1 de MODELO_VETERINARIA).
+
+#### D-472 — ~18 strings crudos en los 4 wrappers del path del vet
+🟡 MEDIA. `packages/api` — los wrappers del path clínico del prestador tienen **~18 strings de mensaje crudos** (voseo contra **L-148**, y **sin inglés**): *"No tenés permiso"*, *"Poné…"*, *"Agregá…"*. **No aparecen en el happy path — viven en el CAMINO TRISTE**, que es donde más duele (el vet ve el error en su idioma equivocado justo cuando algo falló). La voz de producto es tuteo neutro + es/en por el riel (L-148 + regla 27). **Territorio: `packages/api` (sesión A).** **Disparo: el próximo wrapper de ese path que se toque.** Origen: S72-B0 (censo de B), depositado por A.
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)

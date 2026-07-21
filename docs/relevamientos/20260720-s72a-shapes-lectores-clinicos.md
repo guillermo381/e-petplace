@@ -293,6 +293,25 @@ RPC `obtener_parte_adiestramiento(p_cita_id)`.
 
 ---
 
+## Pieza 3 — la voz de la cita `procedimiento` en la agenda (REGLA FIRMADA S72-A)
+
+Al coordinar, la cita todo-libre gana `tipo_servicio = 'procedimiento'`
+(migración `20260720150000`). Pero **el vet no puede leer "Procedimiento"
+donde el presupuesto dice "Limpieza dental"** — la etiqueta del tipo es
+genérica a propósito. **Regla firmada por la mesa (aplica al lector de la
+agenda vet Y al hero del cliente, misma voz):**
+
+- **1 ítem** en el presupuesto → su `descripcion_libre`.
+- **N ítems** → la primera + `"+N"` (p. ej. *"Limpieza dental +2"*).
+- **Sin descripción** → cae a `"Procedimiento"` (la etiqueta del tipo).
+- **El TOTAL jamás se muestra en estas superficies** — HOY es multi-actor
+  y **D-457 puso la plata en NEGOCIO, gateada por rol**; la agenda (HOY) y
+  el hero del cliente no exponen montos.
+
+**Es lo único que le falta al guion para decir la verdad.** No se construyó
+en la ventana (toca el lector, va con P3/la cara del vet). El dato vive en
+`presupuesto_item.descripcion_libre` de la cita (`evento_cita_servicio.presupuesto_id`).
+
 ## Secuencia de trabajo para P3 (nota a la mesa, D-470)
 
 - **Los cuatro baratos de procedencia (H5) son TS puro y SUBEN CON P3:**
