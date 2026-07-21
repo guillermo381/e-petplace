@@ -1,6 +1,12 @@
 # DISEÑO_EXPERIENCIA — La arquitectura de la experiencia del dueño
 
-> **Versión: v2.3 — S70/T3 (19 Jul 2026).** Nace **§15b.0 LA CASA DEL
+> **Versión: v2.4 — S72-A (21 Jul 2026).** Nace **§10ter LA VOZ DE UNA CITA
+> SIN NOMBRE PROPIO** — la regla de la descripción del procedimiento, que
+> gobierna las dos apps (datos no prosa · 1 ítem→descripción · N→primera+«+N»
+> · TOTAL jamás en HOY · **la asimetría del fallback:** el vet lee
+> "Procedimiento", el dueño OMITE — `procedimiento` NO entra a
+> `KEY_VOZ_SERVICIO`). Base previa:
+> **v2.3 — S70/T3 (19 Jul 2026).** Nace **§15b.0 LA CASA DEL
 > PRESTADOR** — la ley de la distribución, firmada founder sobre los
 > bocetos v2: HOY acciona / NEGOCIO gestiona · lo que sigue preside, lo
 > pasado se pliega · el chip es para la excepción (Mostrador) · vacío ≠
@@ -341,6 +347,37 @@ viven allá y mandan acá.
    jamás verosímil-falso?
 6. **Rieles B1:** cero strings crudos (es/en) desde que el riel
    exista.
+
+## 10ter. LA VOZ DE UNA CITA SIN NOMBRE PROPIO (S72-A, firmada)
+
+Rige **las dos apps**. Una cita `procedimiento` (la que nace de un
+presupuesto todo-libre y gana su tipo al coordinarse — `MODELO_VETERINARIA`
+§8.1) tiene una etiqueta de tipo genérica **a propósito**: el nombre real
+vive en la descripción del presupuesto. La regla de qué mostrar:
+
+- **El lector trae DATOS, no prosa:** `{ primera, extras }` — `primera` es la
+  descripción del primer ítem, `extras` cuántos ítems más hay. La VOZ la arma
+  la pantalla (Ley 3): el lector nunca resuelve la etiqueta con «+N» adentro.
+- **1 ítem → su descripción · N ítems → `primera + «+N»` · `extras=0` → jamás
+  «+0».**
+- **EL TOTAL JAMÁS en una superficie de HOY** — HOY es multi-actor y la plata
+  vive en NEGOCIO, gateada por rol (§15b; D-457). El monto no viaja siquiera
+  en el shape del lector: si no está en el campo, no se filtra por accidente.
+- **LA ASIMETRÍA DEL FALLBACK (la parte fina).** Cuando no hay descripción:
+  - **el VET lee "Procedimiento"** — necesita saber que hay un acto clínico
+    agendado, aunque no sepa cuál todavía.
+  - **el DUEÑO OMITE el nombre** — "Procedimiento" es vocabulario del motor
+    asomándose (Ley 3); el dueño ve la cita por su fecha y su negocio, sin una
+    etiqueta que no significa nada para él.
+  - **Corolario exigible:** `procedimiento` **NO entra a `KEY_VOZ_SERVICIO`**
+    (el mapa de voz del comprable del cliente), y que `vozServicio` devuelva
+    `null` ahí es **correcto, no un hueco** — es el gancho exacto del que
+    cuelga la omisión del dueño.
+- **Mecánica (frontera única):** la lógica y el tipo viven en
+  `packages/api/.../_presupuesto-descripcion.ts`; los dos lectores (vet +
+  dueño) la importan. El día que nazca `presupuesto_item.orden` (D-473), el
+  orden se cura en un solo lugar. Consumidores S72-A: `veterinaria-atencion.ts`
+  (agenda vet) y `citasMascota.ts` (`/citas/[mascotaId]` del dueño).
 
 ## 11. Backlog de construcción de A1 (derivado de este diseño)
 
