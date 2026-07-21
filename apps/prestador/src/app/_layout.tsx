@@ -8,6 +8,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
+import * as Updates from 'expo-updates';
 import { useFonts } from 'expo-font';
 import { AvisoProvider, ThemeProvider as EpetThemeProvider, epetplaceFonts } from '@epetplace/ui';
 import { ProveedorI18n } from '@epetplace/i18n';
@@ -27,7 +28,19 @@ SplashScreen.preventAutoHideAsync();
 // MARCADOR DE BUNDLE (L-138, práctica permanente — llega al prestador en
 // S51): el gate en dispositivo EMPIEZA confirmando que Metro imprime la
 // línea de la sesión vigente. ACTUALIZAR al arrancar cada sesión.
+//
+// S72-B: el marcador de sesión NO discriminaba entre publicaciones (los 4
+// bundles de S72 compartían "prestador S72"). La identidad del update la
+// da el runtime — `Updates.updateId` es ÚNICO por publicación y se
+// auto-actualiza; no hay que editar nada al republicar. `isEmbeddedLaunch`
+// distingue el OTA aplicado del bundle embebido del APK (el punto exacto
+// de L-138: confirmar que NO corre el embedded viejo). Guardado: en dev/
+// Expo Go / web `updateId` es null — el marcador lo dice honesto.
 console.log('[bundle] prestador S72');
+console.log(
+  `[update] id=${Updates.updateId ?? 'ninguno (embedded/dev)'} · ` +
+    `embedded=${Updates.isEmbeddedLaunch} · canal=${Updates.channel ?? 'ninguno'}`,
+);
 
 export default function RootLayout() {
   // D-305 (S48): el tema lo decide el SISTEMA — el app lo resuelve acá
