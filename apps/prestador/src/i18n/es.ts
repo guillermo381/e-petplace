@@ -108,6 +108,10 @@ export const prestadorEs = {
     porCoordinarTitulo: 'Por coordinar',
     porCoordinarCta: 'Fijar fecha',
     porCoordinarLibre: 'Procedimiento',
+    // S72-B pieza 3: la voz del procedimiento coordinado en la agenda —
+    // «Ecografía» / «Ecografía +1» / «Procedimiento» (sin descripción).
+    procGenerico: 'Procedimiento',
+    procMasN: '{{base}} +{{n}}',
     yaAtendidas: 'Ya atendidas ({{n}})',
     acordeonOcultar: 'Ocultar',
     // la semana (D-317, S57-B1) · LOTE S57, GATE PENDIENTE

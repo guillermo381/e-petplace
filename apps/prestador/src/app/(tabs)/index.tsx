@@ -73,6 +73,7 @@ import {
 import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { verificarSesion } from '@/lib/api';
+import { vozCitaVet } from '@/lib/voz-cita-vet';
 import { TechoOficio, ToggleTecho, VeloBarraEstadoOficio } from '@/components/techo-oficio';
 import { FiltroOficio, type FiltroOficioValor } from '@/components/filtro-oficio';
 import { useTraduccion } from '@/i18n';
@@ -316,6 +317,10 @@ function FilaCita({
 
   const ef = estadoEfectivo(cita);
   const insignia = enVivo ? undefined : ef ? insignias[ef] : undefined;
+  // S72-B pieza 3: un procedimiento coordinado dice su descripción
+  // («Ecografía +1»), no el genérico "Procedimiento" de su tipo. null en
+  // los otros oficios → la etiqueta del tipo, como siempre.
+  const voz = vozCitaVet(cita.descripcionPresupuesto, cita.tipo.nombre, t);
 
   return (
     <Celda
@@ -339,8 +344,8 @@ function FilaCita({
       // al prestador (hueco declarado en el pedido D-338 (c), RLS futura).
       subtitulo={
         cita.suscripcion_servicio_id !== null
-          ? `${cita.tipo.nombre} · ${t('agenda.parteDelPlan')}`
-          : cita.tipo.nombre
+          ? `${voz} · ${t('agenda.parteDelPlan')}`
+          : voz
       }
       inicio={
         <AvatarMascota
@@ -984,7 +989,12 @@ export default function Hoy() {
                       cita/[citaId] con CeldaNavegacion). El chevron es el
                       canónico de la casa (path de CeldaNavegacion; ya
                       copiado en cliente/adiestramiento:92 — la primitiva
-                      exportada queda como nota a la mesa). */}
+                      exportada queda como nota a la mesa).
+                      S72-B: el total MUERE en esta celda de HOY — superficie
+                      multi-actor; D-457 puso la plata en NEGOCIO gateada por
+                      rol, y un total en la agenda la filtra a la recepción. El
+                      precio congelado se ve en coordinar (dedicada), a la que
+                      sigue viajando por param. */}
                   <Celda
                     interactiva
                     accessibilityRole="button"
@@ -1001,7 +1011,6 @@ export default function Hoy() {
                     }
                     titulo={pc.mascotaNombre}
                     subtitulo={etiqueta}
-                    metadataMono={`$${pc.totalCongelado.toFixed(2)}`}
                     fin={
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1] }}>
                         <Text

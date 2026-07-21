@@ -51,6 +51,7 @@ import {
 import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { verificarSesion } from '@/lib/api';
+import { vozCitaVet } from '@/lib/voz-cita-vet';
 import { useTraduccion } from '@/i18n';
 
 type Pantalla =
@@ -201,7 +202,11 @@ export default function DetalleCitaVet() {
 
                 {/* Servicio + cuándo — voz de máquina para la metadata. */}
                 <View style={{ gap: spacing[3] }}>
-                  <Dato etiqueta={t('citaVet.servicio')} valor={cita.tipo.nombre} />
+                  {/* S72-B pieza 3: la MISMA voz que la celda de agenda —
+                      un procedimiento coordinado dice su descripción, no el
+                      genérico. Una superficie que contradice a la otra en el
+                      mismo dato es peor que el genérico. */}
+                  <Dato etiqueta={t('citaVet.servicio')} valor={vozCitaVet(cita.descripcionPresupuesto, cita.tipo.nombre, t)} />
                   <Dato
                     etiqueta={t('citaVet.cuando')}
                     valor={`${fechaDiaSemanaHumana(cita.fecha ?? '', idioma as IdiomaSoportado)} · ${hora}${dur ? ` · ${dur} min` : ''}`}

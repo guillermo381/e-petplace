@@ -93,6 +93,8 @@ export const prestadorEn = {
     porCoordinarTitulo: 'To schedule',
     porCoordinarCta: 'Set date',
     porCoordinarLibre: 'Procedure',
+    procGenerico: 'Procedure',
+    procMasN: '{{base}} +{{n}}',
     yaAtendidas: 'Already seen ({{n}})',
     acordeonOcultar: 'Hide',
     // la semana (D-317, S57-B1) · LOTE S57, GATE PENDIENTE · Espejo de es.ts
