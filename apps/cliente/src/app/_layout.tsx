@@ -27,7 +27,7 @@ SplashScreen.preventAutoHideAsync();
 // republicar); `isEmbeddedLaunch` distingue el OTA aplicado del bundle
 // embebido del APK (el punto exacto de L-138). En dev/Expo Go/web
 // `updateId` es null — el marcador lo dice honesto, no miente.
-console.log('[bundle] cliente S72');
+console.log('[bundle] cliente S73');
 console.log(
   `[update] id=${Updates.updateId ?? 'ninguno (embedded/dev)'} · ` +
     `embedded=${Updates.isEmbeddedLaunch} · canal=${Updates.channel ?? 'ninguno'}`,
