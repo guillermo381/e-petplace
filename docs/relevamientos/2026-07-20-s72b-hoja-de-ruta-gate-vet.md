@@ -20,10 +20,11 @@ adb logcat -d | grep "\[bundle\]"
 # tiene que imprimir:  [bundle] prestador S72
 ```
 
-**Update group vivo en el canal `preview`:** `c88790e0-ced8-4603-9c78-b42518ead0e5`
-(runtime 1.0.2, commit `3c82be4`). Trae TODO S72-B: los 3 casos de 19.7, la
+**Update group vivo en el canal `preview`:** `0e4f1be8-58f8-418a-b166-d7a706d46e30`
+(runtime 1.0.2, commit `69b5516`). Trae TODO S72-B: los 3 casos de 19.7, la
 voz del micrófono, la bandeja "Por coordinar" con el gate corregido, `vozServicio`
-por oficio, y los 78 textos migrados a `Texto`.
+por oficio, los 78 textos migrados a `Texto`, y **la pieza 3** (la agenda vet
+dice la descripción del procedimiento; el total muere en "Por coordinar").
 
 Si el marcador dice `S71` o el group es otro: cerrá y abrí la APK **dos veces**
 (1ª descarga, 2ª aplica). Si sigue viejo, `adb install -r` el APK preview. **Sin
@@ -71,23 +72,23 @@ código.
 |---|---|
 | **QUÉ TOCÁS** | Si "Aprobar presencial" en el paso 4: la cita nace aprobada, sin fecha. Si "Enviar a la familia": la aprobación la hace el **dueño** desde la app cliente. |
 | **QUÉ TIENE QUE PASAR** | Aprobado → aparece una cita **"Por coordinar"** en HOY del prestador. |
-| **QUÉ MIRAR DE CERCA** | **LA BANDEJA "POR COORDINAR" CON EL GATE CORREGIDO (S72-B):** antes se gateaba por `oficios.vet` — y `vet` se computa de `servicios`, que **excluye** las filas `'otro'`. Un negocio que **solo** cotiza procedimientos por presupuesto tenía la bandeja invisible **con citas adentro**. Ahora gatea por `porCoordinar.length > 0`. **Probá con un negocio que solo tenga procedimientos** para ver la cura. |
+| **QUÉ MIRAR DE CERCA** | **(1)** **LA BANDEJA "POR COORDINAR" CON EL GATE CORREGIDO (S72-B):** antes se gateaba por `oficios.vet` — y `vet` se computa de `servicios`, que **excluye** las filas `'otro'`. Un negocio que **solo** cotiza procedimientos por presupuesto tenía la bandeja invisible **con citas adentro**. Ahora gatea por `porCoordinar.length > 0`. **Probá con un negocio que solo tenga procedimientos** para ver la cura. **(2)** ⭐ **EL TOTAL YA NO SE MUESTRA en la fila de "Por coordinar"** (pieza 3): la fila dice mascota + qué procedimiento + «Fijar fecha ›», sin `$`. HOY es superficie multi-actor (la recepción también mira) y D-457 puso la plata en NEGOCIO gateada por rol; el precio congelado lo ves recién en la pantalla de coordinar (paso 6). |
 | **DECLARADO ABIERTO** | La aprobación del dueño es de la app cliente (fuera del path de B). El motor de aprobación es de la A. |
 
 ### Paso 6 — Fijar la fecha ⚠️ DEPENDE DE LA VENTANA DE MOTOR DE LA A
 | | |
 |---|---|
 | **QUÉ TOCÁS** | En HOY, tap en la fila "Por coordinar" → `/veterinaria/coordinar/[id]`: elegí **día**, **hora**, **persona** → **"Confirmar"**. |
-| **QUÉ TIENE QUE PASAR** | La cita queda agendada con fecha firme; vuelve a HOY. |
-| **QUÉ MIRAR DE CERCA** | **La Ley 23 (el principio de la puerta) aplicada:** con el día = HOY, las horas **ya pasadas no se muestran** (el server las rebotaba tarde). Después de las 18:00, en vez de una grilla muerta, dice «hoy no quedan horas». La fila entera tapea (contorno transparente muerto, 19.7). |
-| **DECLARADO ABIERTO** | 🔴 **ESTE PASO DEPENDE DEL MOTOR DE LA A** (`fijar_fecha_procedimiento`, en su ventana). **Si corrés antes de que la A cierre, el "Confirmar" puede rebotar y ahí MUERE — NO es hallazgo nuevo.** Corré este paso solo con la ventana de motor cerrada. |
+| **QUÉ TIENE QUE PASAR** | La cita queda agendada con fecha firme; vuelve a HOY, **y aparece en la jornada del día que coordinaste diciendo el procedimiento** (no el genérico). |
+| **QUÉ MIRAR DE CERCA** | **(1)** **La Ley 23 (el principio de la puerta) aplicada:** con el día = HOY, las horas **ya pasadas no se muestran** (el server las rebotaba tarde). Después de las 18:00, en vez de una grilla muerta, dice «hoy no quedan horas». La fila entera tapea (contorno transparente muerto, 19.7). **(2)** ⭐ **LA PIEZA 3 — la cita coordinada en la agenda dice «Ecografia +1»**, no «Procedimiento». Las 3 citas vivas tienen 2 ítems cada una → verás «{descripción} +1». El **detalle** de esa cita (paso 7) dice **lo mismo** — mirá que no se contradigan. |
+| **DECLARADO ABIERTO** | 🔴 **ESTE PASO DEPENDE DEL MOTOR DE LA A** (`fijar_fecha_procedimiento`, en su ventana). **Si corrés antes de que la A cierre, el "Confirmar" puede rebotar y ahí MUERE — NO es hallazgo nuevo.** Corré este paso solo con la ventana de motor cerrada. · 🔵 **Cuál ítem es "la primera" es ARBITRARIO** (los ítems se guardan en batch con la misma marca de tiempo y desempatan por id) — si el «+1» muestra el procedimiento que NO esperabas como principal, **no es bug**: es deuda de `presupuesto_item.orden` (disparo P2). |
 
 ### Paso 7 — El detalle de la cita → empezar la consulta
 | | |
 |---|---|
 | **QUÉ TOCÁS** | Tap en la cita vet (desde HOY) → `/veterinaria/cita/[id]` → **"Empezar la consulta"**. |
 | **QUÉ TIENE QUE PASAR** | Abre `/veterinaria/consulta/[id]` en la fase **Antes**. |
-| **QUÉ MIRAR DE CERCA** | El detalle tiene tres celdas de navegación (consulta · expediente · presupuesto) con ícono+chevron — la gramática correcta. |
+| **QUÉ MIRAR DE CERCA** | **(1)** El detalle tiene tres celdas de navegación (consulta · expediente · presupuesto) con ícono+chevron — la gramática correcta. **(2)** ⭐ El campo **"Servicio" dice la MISMA descripción que la fila de agenda** (pieza 3) — «Ecografia +1», no «Procedimiento». Es la prueba de que las dos superficies no se contradicen en el mismo dato. |
 | **DECLARADO ABIERTO** | La lista de presupuestos de la cita no navega a un detalle (no existe la pantalla). · Si la cita no tuviera mascota, los 3 CTAs se ocultan — caso defensivo, una cita vet siempre tiene mascota. |
 
 ### Paso 8 — La consulta: el Antes
@@ -152,6 +153,10 @@ es-only** (`No tenés permiso`, `Poné hasta cuándo vale`, `Agregá al menos un
 5. **78 `<Text>` → `Texto`** + 14 wrappers locales muertos (−765/+228). La
    jerarquía tipográfica dejó de re-decidirse a mano. **Se ve idéntica** — si
    algo cambió de tamaño o color, ESO es el hallazgo.
+6. **La pieza 3** — la agenda vet y el detalle dicen la descripción del
+   procedimiento coordinado («Ecografia +1»), no el genérico; y **el total
+   murió** en la celda de "Por coordinar" (D-457, HOY es multi-actor) — pasos
+   5, 6 y 7.
 
 ## LO QUE ESTA TANDA NO TOCÓ (espera M2 / es de la A)
 
