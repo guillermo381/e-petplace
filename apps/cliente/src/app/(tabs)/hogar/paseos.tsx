@@ -30,6 +30,7 @@ import {
   HojaScroll,
   Icono,
   Insignia,
+  PieRevelar,
   SelectorOpcion,
   SelectorSegmentado,
   Separador,
@@ -482,14 +483,15 @@ export default function MisPaseos() {
                       />
                     </View>
                   ))}
+                  {/* S73: ley 19.6 — esto NO es paginación (slice sobre
+                      datos YA cargados): es revelar por tandas, y su
+                      control canónico es PieRevelar con el número. */}
                   {futurasFusionadas.length > ventana ? (
                     <>
                       <Separador />
                       <View style={{ padding: spacing[3] }}>
-                        <Boton
-                          variante="compacto"
-                          tamaño="sm"
-                          etiqueta={t('plan.cargarMas')}
+                        <PieRevelar
+                          n={futurasFusionadas.length - ventana}
                           onPress={() => setVentana((v) => v + 10)}
                         />
                       </View>

@@ -14,8 +14,8 @@ export const uiEs = {
   lineaDeVida: {
     cargando: 'Cargando la línea de vida',
     cargarMas: 'Cargar más',
-    // S61-A11 (LOTE S61, gate pendiente): colapsada + voz del grooming
-    verMas: 'Ver más',
+    // S61-A11 (LOTE S61): colapsada + voz del grooming
+    // (verMas murió en S73 — la revelación por tandas habla por PieRevelar, ley 19.6)
     vozGrooming: 'Estética y baño',
     reintentar: 'Reintentar',
     errorCargarMas: 'No pudimos cargar más momentos.',

@@ -635,7 +635,6 @@ export const clienteEn = {
     segHistorial: 'History',
     // S60-A6 piece 2 — the fused list (LOTE S60): Schedule tab died
     citaDePlan: 'From your plan',
-    cargarMas: 'Load more',
     estadoActiva: 'Active',
     estadoPausada: 'Renewal paused',
     estadoVencida: 'Ended',

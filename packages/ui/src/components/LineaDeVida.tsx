@@ -52,6 +52,7 @@ import { useTraduccionUi } from '../i18n'
 import type { uiEs } from '../i18n/es'
 import type { ClaveDe } from '@epetplace/i18n'
 import { Boton } from './Boton'
+import { PieRevelar } from './PieRevelar'
 import { Tarjeta } from './Tarjeta'
 import { Esqueleto, EsqueletoGrupo } from './Esqueleto'
 
@@ -465,12 +466,14 @@ export function LineaDeVida({
       })}
 
       {/* S61-A11: lo YA cargado se revela por tandas; el pie de páginas
-          nuevas recién aparece cuando todo lo cargado está a la vista. */}
+          nuevas recién aparece cuando todo lo cargado está a la vista.
+          S73: ley 19.6 VIGENTE — el control canónico es PieRevelar CON
+          el número; el "Ver más" mudo en compacto crudo violaba la
+          letra desde su firma (hallazgo del literal S73-A). */}
       {hayOcultos ? (
         <View style={{ marginLeft: RIEL, marginTop: spacing[1] }}>
-          <Boton
-            variante="compacto"
-            etiqueta={t('lineaDeVida.verMas')}
+          <PieRevelar
+            n={items.length - enVista.length}
             onPress={() => {
               animar()
               setVisibles((v) => v + tandaVerMas)

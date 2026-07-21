@@ -672,7 +672,6 @@ export const clienteEs = {
     segHistorial: 'Historial',
     // S60-A6 pieza 2 — la lista fusionada (LOTE S60): Agenda murió
     citaDePlan: 'De tu plan',
-    cargarMas: 'Cargar más',
     estadoActiva: 'Activo',
     estadoPausada: 'Renovación pausada',
     estadoVencida: 'Terminado',
