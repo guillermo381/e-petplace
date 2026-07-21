@@ -268,16 +268,47 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
        > entrada.)*
 
     7. **LA LEY DEL CONTORNO TRANSPARENTE — la acción DENTRO de una fila**
-       (dictada por el founder en el gate S71, sobre píxeles):
+       (dictada por el founder en el gate S71, sobre píxeles; **ENMENDADA
+       S73 — versión ANGOSTA firmada en mesa.** El porqué de la enmienda:
+       19.7 era la única entrada del diccionario SIN componente nombrado —
+       decía "baja a label" y ahí terminaba; `Boton ghost` cumplía esa
+       letra y el founder lo rechazó en el gate S72. La enmienda es de
+       FORMA, no de destino):
        **"El contorno transparente MUERE como acción de fila. Por
        superficie UN sólido — la acción primaria; todo lo demás baja a
-       LABEL: con chevron si NAVEGA, sin chevron si EJECUTA. Nunca la
-       caja vacía del medio."**
-       El porqué: la caja de contorno es un tercer peso que no informa —
-       ni tiene la jerarquía del sólido ni la humildad del label, y
-       repetida por fila convierte una lista en un tablero de botones
-       donde nada preside (el diagnóstico literal del gate del Hogar v2 y
-       de la jornada del prestador).
+       LABEL. Y la acción que baja a label TIENE FORMA NOMBRADA — no es
+       texto sin caja. Su anatomía es la del path canónico de
+       `CeldaNavegacion`:**
+       - **Glifo b′ del set** — SOLO si la acción es fila entre filas que
+         van a destinos que VARÍAN (Ley 12 enmendada S71: el glifo marca
+         lo que varía dentro de la unidad de barrido). El pie de una
+         sección NO lleva glifo: no tiene hermanos, y un glifo sin
+         vecindad es decoración (Chanel).
+       - **Texto** en la voz del diccionario (verbo llano, tuteo, L-148).
+       - **Chevron QUE GIRA** *(propuesta de mesa — se sella en el gate
+         en dispositivo con la lámina)*: `›` NAVEGA (te vas a otra
+         pantalla) · `⌄` REVELA en el lugar (se abre abajo tuyo) · `⌃`
+         PLIEGA. La dirección codifica una verdad del contenido (Ley 18);
+         el chevron conserva su rol de discriminador navega/ejecuta que
+         la letra original protegía.
+       - **Target 44** siempre; en fila, la FILA ENTERA tapea con rol
+         `button` (precedente `18e0c61`).
+       **`Boton ghost` queda PROHIBIDO como acción de fila.** En el
+       cliente el CTA es tinta (Ley 21): el label no tiene color del que
+       agarrarse — lo que lo vuelve control es ESTRUCTURAL (glifo,
+       chevron, peso, target), no cromático. La gramática es UNA para las
+       dos apps; la dosis modula color, jamás anatomía.
+       El porqué original (S71) sigue vivo: la caja de contorno es un
+       tercer peso que no informa — ni tiene la jerarquía del sólido ni
+       la humildad del label, y repetida por fila convierte una lista en
+       un tablero de botones donde nada preside (el diagnóstico literal
+       del gate del Hogar v2 y de la jornada del prestador).
+       - **ESTA ES LA ANGOSTA (S73):** `Boton compacto` sigue vigente
+         donde manda 22c (comando con consecuencias, acción suelta de
+         pantalla) y en `PieRevelar` (19.6). La ANCHA — la caja del
+         `compacto` muere en todas sus formas — es **D-483** con mecánica
+         D-318 (*migra al tocarse*, pantalla por pantalla en su pasada de
+         craft): cero barrida grande.
        - **Vara existente que ya la cumplía:** `prestador/cita/[citaId]`
          — ícono + label + chevron.
        - **Primera aplicación:** S71 (`18e0c61`) — la fila de "Por
@@ -287,7 +318,10 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
        - **Convive con 22c sin contradecirla:** 22c gobierna la acción
          SUELTA de una pantalla (comando con consecuencias = botón
          compacto); esta gobierna la acción DENTRO de una fila de lista,
-         donde la fila entera ya es el área tocable.
+         donde la fila entera ya es el área tocable. El par
+         primario+ghost de las Hojas de decisión NO es 19.7 (no es
+         acción de fila) — es entrada nueva del diccionario pendiente de
+         boceto y gate (**D-484**).
        - Corolario de lectura: si una fila necesita DOS acciones, casi
          siempre una de las dos no es de la fila — subí una al header de
          sección o bajala al detalle.
@@ -371,7 +405,7 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
 
 22c. **Comando con consecuencias = ACCIÓN, viste de botón (S58, firma
     founder).** Primaria en tinta (UNA por vista); secundarias =
-    `Boton variante="compacto"` (borde hairline-strong, radius suave,
+    `Boton variante="compacto"` (borde `border.default`, radius suave,
     texto tinta, target 44) — jamás texto pelado, jamás Celda. La
     prueba: "si al flipearlo necesitarías confirmar, era una acción".
 
@@ -606,6 +640,19 @@ dispositivo: CLAUDE.md raíz · dirección de arte e iconografía:
 
 ## Historial de la skill
 
+- **S73 (21 Jul 2026) — LA ENMIENDA 19.7, versión ANGOSTA (firmada en
+  mesa; la anatomía fina — el chevron que gira — se sella en el gate en
+  dispositivo con la lámina).** La acción que baja a label gana FORMA
+  NOMBRADA (anatomía del path canónico de `CeldaNavegacion`: glifo solo
+  si varía + texto + chevron que gira + target 44); `Boton ghost` muere
+  como acción de fila; `compacto` sobrevive en 22c/19.6. La ANCHA queda
+  como **D-483** (mecánica D-318, migra al tocarse); el par
+  primario+ghost de las Hojas de decisión es **D-484** (entrada nueva
+  del diccionario, boceto y gate propios). Corrección de prosa L-158:
+  22c decía "hairline-strong" — el token no existe, el código usa
+  `border.default`. Fundada sobre el literal de A (censo ~13 compactos +
+  ~12 ghosts en cliente; `PieRevelar.tsx:51`; `Boton.tsx:112/115/117`),
+  no sobre la prosa de la skill.
 - **S71 (20 Jul 2026) — LAS LEYES QUE SALIERON DEL PRIMER GATE DEL
   MECANISMO.** Entran: **19.6** "revelar el resto de una sección" (la
   depositó B en el gate del piloto B1; su nota se CORRIGE acá —

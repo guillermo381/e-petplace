@@ -39,8 +39,11 @@ import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
 
 // 'compacto' (S58, Ley 22c): la ACCIÓN SECUNDARIA vestida — borde
-// hairline-strong + radius suave + texto tinta + target 44. Jamás
+// border.default + radius suave + texto tinta + target 44. Jamás
 // texto pelado, jamás Celda: comando con consecuencias viste de botón.
+// S73 (enmienda 19.7 angosta): PROHIBIDO como acción DENTRO de una fila
+// (ahí baja a label con la anatomía de CeldaNavegacion); ghost ídem.
+// La caja del compacto migra al tocarse (D-483).
 export type BotonVariante = 'primario' | 'marca' | 'secundario' | 'ghost' | 'destructivo' | 'compacto'
 export type BotonTamaño = 'sm' | 'md' | 'lg'
 
