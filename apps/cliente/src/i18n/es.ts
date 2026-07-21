@@ -882,6 +882,7 @@ export const clienteEs = {
     // LOTE PENDIENTE DE GATE FOUNDER. Tuteo neutro.
     estadoPorCoordinar: 'Aprobado · Falta coordinar la fecha',
     faltaCoordinar: 'Falta coordinar la fecha',
+    procedimientoConExtras: '{{primera}} +{{n}}',
     coordinaraNegocio: '{{negocio}} te va a contactar para agendar',
     // sin nombre visible del negocio: la verdad igual, sin inventar quién
     coordinaranSinNombre: 'Te van a contactar para agendar',

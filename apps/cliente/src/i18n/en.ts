@@ -830,6 +830,7 @@ export const clienteEn = {
     // S71-A — mirror of es.ts (Espejo enforces parity).
     estadoPorCoordinar: 'Approved · Date pending',
     faltaCoordinar: 'Date pending',
+    procedimientoConExtras: '{{primera}} +{{n}}',
     coordinaraNegocio: '{{negocio}} will contact you to schedule',
     coordinaranSinNombre: "You'll be contacted to schedule",
     quienAtiende: 'Provider',

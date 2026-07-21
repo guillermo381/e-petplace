@@ -165,8 +165,24 @@ export default function CitasDeMascota() {
         ? t('citasMascota.estadoPorCoordinar')
         : t('citasMascota.estadoConfirmada');
 
+  // D-474 (S72-A): el nombre visible de la cita. La voz del comprable
+  // manda; si el código no está en el mapa (p. ej. 'procedimiento', el
+  // vocabulario del motor — Ley 3), cae a la DESCRIPCIÓN del presupuesto
+  // (Pieza 3, lado dueño): 1 ítem → su descripción · N → primera + «+N».
+  // Sin ninguna de las dos, null → la pantalla OMITE el nombre (jamás pinta
+  // "Procedimiento"; el fallback del dueño difiere del vet a propósito).
+  const nombreVisibleCita = (c: CitaActivaMascota): string | null => {
+    const voz = vozServicio(t, c.tipo_servicio);
+    if (voz !== null) return voz;
+    const d = c.descripcion_presupuesto;
+    if (d === null || d.primera === null) return null;
+    return d.extras > 0
+      ? t('citasMascota.procedimientoConExtras', { primera: d.primera, n: d.extras })
+      : d.primera;
+  };
+
   const detalleHero = (c: CitaActivaMascota) => {
-    const servicio = vozServicio(t, c.tipo_servicio) ?? null;
+    const servicio = nombreVisibleCita(c);
     const icono = iconoOficio(c.tipo_servicio);
     // S71-A (costura de D-439): la cita aprobada todavía no tiene fecha —
     // se dice con todas las letras, jamás un hueco ni un guión. La línea de
@@ -460,7 +476,7 @@ export default function CitasDeMascota() {
                       {i > 0 ? <Separador /> : null}
                       <CeldaNavegacion
                         icono={iconoDe(c.tipo_servicio)}
-                        titulo={vozServicio(t, c.tipo_servicio) ?? vozEstado(c)}
+                        titulo={nombreVisibleCita(c) ?? vozEstado(c)}
                         detalle={
                           c.fecha === null
                             ? t('citasMascota.faltaCoordinar')
