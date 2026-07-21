@@ -294,6 +294,19 @@ export type CitaAgendaPaseo = Pick<
    * oficios (no proyectan metadata) y null en la reserva in-app (sin origen).
    */
   origen?: string | null;
+  /**
+   * La DESCRIPCIÓN del presupuesto de una cita `procedimiento` (S72-A, Pieza 3).
+   * La cita todo-libre coordinada gana `tipo_servicio='procedimiento'` (etiqueta
+   * genérica a propósito): el vet no puede leer "Procedimiento" donde el
+   * presupuesto dice "Limpieza dental". DATOS, NO PROSA: `primera` es la
+   * `descripcion_libre` del primer ítem (por `created_at` — la tabla no tiene
+   * `orden`); `extras` es cuántos ítems más hay. La voz ("primera +N",
+   * "Procedimiento" si null) vive en el i18n de la app, por idioma (Ley 3).
+   * El TOTAL JAMÁS viaja acá (D-457: la plata es de NEGOCIO, por rol). Solo lo
+   * puebla el lector de veterinaria; undefined en los otros 3 oficios; null
+   * cuando la cita no tiene presupuesto o el presupuesto no tiene ítems.
+   */
+  descripcionPresupuesto?: { primera: string | null; extras: number } | null;
 };
 
 /** El shape del snapshot D-339 (claves fijas de la migración 20260712090000). */

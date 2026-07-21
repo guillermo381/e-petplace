@@ -47,7 +47,7 @@ function fallo<T>(raw: string): ResultadoWrapper<T, CodigoErrorVetAtencion> {
 }
 
 const SELECT_CITA =
-  'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, direccion_snapshot, metadata, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)';
+  'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, direccion_snapshot, metadata, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en), presupuesto:presupuesto(items:presupuesto_item(id, descripcion_libre, created_at))';
 
 /** El origen releído desde metadata (S70-B1). Hoy la fila distingue el
  *  walk-in del mostrador ('mostrador') de la reserva in-app (sin origen). */
@@ -57,6 +57,36 @@ function origenDeCita(metadata: unknown): string | null {
     return typeof o === 'string' ? o : null;
   }
   return null;
+}
+
+/** La descripción del presupuesto de una cita `procedimiento` (S72-A, Pieza 3).
+ *  DATOS, NO PROSA: `primera` = descripcion_libre del primer ítem por
+ *  `created_at` (la tabla no tiene `orden`); `extras` = cuántos ítems más.
+ *  null si la cita no tiene presupuesto o el presupuesto no trae ítems. El
+ *  embed `presupuesto` es to-one (o array de uno según PostgREST): se maneja
+ *  ambas formas. Si la RLS ocultara los ítems, cae a null (B pinta
+ *  "Procedimiento") — degradación honesta, Ley 13. */
+function descripcionDePresupuesto(presupuesto: unknown): { primera: string | null; extras: number } | null {
+  const pres = Array.isArray(presupuesto) ? presupuesto[0] : presupuesto;
+  if (pres === null || pres === undefined || typeof pres !== 'object') return null;
+  const items = (pres as { items?: unknown }).items;
+  if (!Array.isArray(items) || items.length === 0) return null;
+  // Orden: created_at, con `id` de desempate. La tabla no tiene `orden`, y
+  // los ítems de un mismo presupuesto se insertan en batch → created_at
+  // IDÉNTICO (relevado): sin el desempate por id, `primera` variaría entre
+  // renders. `id` (uuid) lo hace DETERMINISTA — arbitrario pero estable.
+  const clave = (x: unknown) =>
+    String((x as { created_at?: unknown }).created_at ?? '') + '|' + String((x as { id?: unknown }).id ?? '');
+  const ordenados = [...items].sort((a, b) => {
+    const ka = clave(a);
+    const kb = clave(b);
+    return ka < kb ? -1 : ka > kb ? 1 : 0;
+  });
+  const primeraRaw = (ordenados[0] as { descripcion_libre?: unknown }).descripcion_libre;
+  return {
+    primera: typeof primeraRaw === 'string' ? primeraRaw : null,
+    extras: ordenados.length - 1,
+  };
 }
 
 // ── Agenda: las citas de veterinaria del día/rango (espejo de los 3) ────────
@@ -87,8 +117,14 @@ export async function obtenerCitasVetDelDia(
       atenciones.length === 0
         ? null
         : atenciones.reduce((a, b) => (b.iniciada_en > a.iniciada_en ? b : a));
-    const { direccion_snapshot: _snap, metadata, ...resto } = c;
-    return { ...resto, atencion, direccion: null, origen: origenDeCita(metadata) };
+    const { direccion_snapshot: _snap, metadata, presupuesto, ...resto } = c;
+    return {
+      ...resto,
+      atencion,
+      direccion: null,
+      origen: origenDeCita(metadata),
+      descripcionPresupuesto: descripcionDePresupuesto(presupuesto),
+    };
   });
   return { ok: true, data: citas };
 }
@@ -114,6 +150,15 @@ export async function obtenerCitaVetPorId(
     atenciones.length === 0
       ? null
       : atenciones.reduce((a, b) => (b.iniciada_en > a.iniciada_en ? b : a));
-  const { direccion_snapshot, metadata, ...resto } = data;
-  return { ok: true, data: { ...resto, atencion, direccion: parseDireccionSnapshot(direccion_snapshot), origen: origenDeCita(metadata) } };
+  const { direccion_snapshot, metadata, presupuesto, ...resto } = data;
+  return {
+    ok: true,
+    data: {
+      ...resto,
+      atencion,
+      direccion: parseDireccionSnapshot(direccion_snapshot),
+      origen: origenDeCita(metadata),
+      descripcionPresupuesto: descripcionDePresupuesto(presupuesto),
+    },
+  };
 }
