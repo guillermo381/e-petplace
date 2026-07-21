@@ -105,8 +105,13 @@ piloto asistido.
 
 - (a) **Tienda v1** — ✅ **CERRADA (founder S49): VTEX, post cierre del
   portal prestadores.**
-- (b) **Reuniones con vets** — 🔄 **EN CURSO: reuniones F0 agendándose**
-  (co-diseño F0 en paralelo).
+- (b) **Reuniones con vets** — ✅ **OCURRIERON (founder, S72), SIN NOTAS.**
+  Corrección S72-A: la letra vieja decía "agendándose" y era falso — las
+  reuniones F0 se hicieron. Consecuencia: la base de `MODELO_VETERINARIA`
+  §14.3 sigue siendo *"síntesis del founder, sin transcripción"* y **NO se
+  desmarca** (sin notas no hay validación transcrita contra vets con nombre).
+  Lo que queda pendiente es la **RONDA CON PANTALLAS**, con disparo firmado:
+  **el E2E vet verde + P3 construido**.
 - (c) **El ORDEN de construcción** (matriz JTBD × Momento × Actor) se
   traza en sesión S49, founder + arquitecto.
 

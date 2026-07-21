@@ -2041,6 +2041,11 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 #### D-480 — M6 · ¿El procedimiento gana tipo catalogado? 🟢 DECISIÓN FOUNDER ABIERTA
 🟢 BAJA. Hoy el procedimiento es `prestador_servicios.nombre_custom`, texto libre — **por eso hubo dos "Ecografia"** (limpiada en la migración `20260721120000`) **y por eso los glifos por tipo no tienen de dónde colgarse** (`DIRECCION_ARTE` §6b: un glifo que nadie monta no se pide). **PRECISIÓN HONESTA: esto NO cura la invisibilidad** — eso ya lo curó el motor (`procedimiento` + estampado en `fijar_fecha`, S72-A). Se sostiene solo por: calidad de catálogo, glifos por tipo, recordatorio por tipo, y el vet viendo su plata por procedimiento. **Disparo: decisión founder, sin fecha.** Origen: S72.
 
+### Decisión firmada, ejecución post-gate (D-482)
+
+#### D-482 — `Texto.cuerpo` pasa de md/18 a base/15 🟢
+🟢 BAJA. **Decisión firmada S72-A, ejecución diferida al post-gate del founder.** La variante `cuerpo` de `Texto` (S71) nació en `size.md` (18px) y tiene **3 consumidores explícitos**; el censo de B halló **49 sitios en base/15** que NO la adoptan porque su tamaño no coincide. **El censo corrige al diseñador** (precedente exacto: los 4 clones de VozSecundaria, S71): la prosa real de la casa es base/15, no md/18 — `cuerpo` nació con el tamaño equivocado. Cura: `cuerpo` → `size.base` (15), **con los 3 consumidores actuales auditados de a uno** (no romper una jerarquía donde md/18 fuera intencional) + captura claro/oscuro para el gate. **Disparo: post-gate del founder de S72** (no entra al bundle antes de que corra el E2E — es cosmético, no bloquea el gate funcional). Origen: S72-A (censo de B + relevamiento A).
+
 ### Deuda de gobierno (D-481)
 
 #### D-481 — No hay puerta automática entre commit y merge 🟠

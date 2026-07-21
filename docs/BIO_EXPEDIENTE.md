@@ -349,6 +349,15 @@ M1–M5 completo. Y queda dicho lo que el relevamiento S72-B0 destapó: **D-459
 no es un caso aislado** — hay nueve lectores construidos en `packages/api`
 con cero importaciones en el prestador.
 
+> **EL ALCANCE DE P3 v1 (decisión de mesa S72, no escrita hasta acá).** P3 v1
+> se muestra en **NEGOCIO UNIPERSONAL** — sin recepcionista no hay agujero de
+> privacidad, así que la modulación por oficio (A3.2/A3.3) es suficiente. En
+> **negocio con empleados ESPERA D-464** (el gate de rol en RLS), que a su vez
+> espera el modelo recepción/profesional (hoy `prestador_empleados.rol` solo
+> tiene `dueño|empleado`, relevado S72-A). **P3 v1 está GATEADA por la forma
+> del negocio, NO bloqueada:** el unipersonal (la mayoría en F1) la usa ya; el
+> multi-empleado entra cuando D-464 tenga letra y motor.
+
 > **CORRECCIÓN DE PRECISIÓN (S72, error de la mesa enmendado con el relevamiento de B).** La frase *"construidos y desconectados"* era **imprecisa y habría mandado a construir mal**. La verdad relevada, de los nueve:
 > - **CINCO sirven tal cual** — es cablear.
 > - **`leerDetalleAtencion` es CIEGO AL OFICIO VET**: devuelve `oficio: null` y payload vacío para una atención clínica (su shape solo resuelve `'paseo' | 'grooming' | 'adiestramiento'`). No es cablear: es extender el lector.
