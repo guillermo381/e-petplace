@@ -6,8 +6,11 @@
 //
 // TESIS: en un campo sabés si esta mascota ya está en el sistema — y si
 // no, el alta está a un toque.
-// FIRMA: la salida natural — "Registrar mascota nueva" SIEMPRE visible,
-// jamás consuelo al pie (comportamiento).
+// FIRMA: la salida natural — "Registrar mascota nueva" visible, jamás
+// consuelo al pie (comportamiento). ENMIENDA S73 (founder, Ley 23): con
+// cuenta RECONOCIDA el botón NO se dibuja — ofrecía duplicar a quien ya
+// vive; el alta para esa familia va por el handshake ("Mascota nueva"
+// dentro de autorizar, tipo alta_mascota — nace en la familia real).
 //
 // El TAP de una MASCOTA encontrada → M4 (registrar la atención, A1bis).
 // Los resultados de CLIENTE (email/teléfono) informan quién es y el camino
@@ -203,8 +206,12 @@ export default function Mostrador() {
           </Tarjeta>
         )}
 
-        {/* LA salida natural — siempre visible, jamás consuelo al pie */}
-        <Boton variante="primario" bloque etiqueta={t('mostrador.registrarNueva')} onPress={irANueva} />
+        {/* LA salida natural — visible salvo cuenta RECONOCIDA (Ley 23,
+            S73: la puerta no ofrece lo que va a rechazar — el alta acá
+            duplicaría a quien ya vive; su camino es el handshake). */}
+        {registrado === null && (
+          <Boton variante="primario" bloque etiqueta={t('mostrador.registrarNueva')} onPress={irANueva} />
+        )}
       </ScrollView>
     </View>
   );

@@ -22,6 +22,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  AvatarMascota,
   Boton,
   Campo,
   Encabezado,
@@ -37,11 +38,13 @@ import {
   MEDIOS_COBRO,
   obtenerCatalogoVacunas,
   obtenerCatalogoVeterinaria,
+  obtenerDetalleMascotaPrestador,
   obtenerMiPrestador,
   obtenerMundoVeterinariaPropio,
   registrarAtencionMostrador,
   registrarCobroPresencial,
   registrarVacunaMostrador,
+  resolverUrlFoto,
   type MedioCobro,
   type VacunaCatalogo,
 } from '@epetplace/api';
@@ -60,6 +63,11 @@ export default function AtencionMostrador() {
   const { mascotaId = '', nombre = '' } = useLocalSearchParams<{ mascotaId?: string; nombre?: string }>();
 
   const [prestadorId, setPrestadorId] = useState<string | null>(null);
+  // S73-B ítem 10 (b): el vet tiene que VER al animal que atiende — la
+  // identidad se carga por mascotaId (puerta única, RLS; mismo patrón que
+  // mascota/[mascotaId] + resolverUrlFoto), jamás foto por params.
+  const [fotoFirmada, setFotoFirmada] = useState<string | null>(null);
+  const [nombreMascota, setNombreMascota] = useState<string | null>(null);
   const [servicios, setServicios] = useState<ServicioActivo[] | null>(null);
   const [servicioCodigo, setServicioCodigo] = useState<string | undefined>(undefined);
   const [precio, setPrecio] = useState('');
@@ -80,13 +88,24 @@ export default function AtencionMostrador() {
       const pr = await obtenerMiPrestador();
       if (!vigente || !pr.ok) return;
       setPrestadorId(pr.data.id);
-      const [mundo, cat, vac] = await Promise.all([
+      const [mundo, cat, vac, detalle] = await Promise.all([
         obtenerMundoVeterinariaPropio(pr.data.id),
         obtenerCatalogoVeterinaria(),
         obtenerCatalogoVacunas(),
+        obtenerDetalleMascotaPrestador(mascotaId, pr.data.id),
       ]);
       if (!vigente) return;
       if (vac.ok) setCatalogoVacunas(vac.data);
+      if (detalle.ok) {
+        setNombreMascota(detalle.data.mascota.nombre);
+        // La foto es PATH (S47): se firma por la frontera. Sin foto o si la
+        // firma falla, la huella digna de AvatarMascota es la cara válida.
+        if (detalle.data.mascota.foto_url !== null) {
+          void resolverUrlFoto(detalle.data.mascota.foto_url).then((url) => {
+            if (vigente) setFotoFirmada(url);
+          });
+        }
+      }
       const nombres = new Map<string, string>(cat.ok ? cat.data.map((c) => [c.codigo, c.nombre]) : []);
       const activos: ServicioActivo[] = mundo.ok
         ? mundo.data.servicios
@@ -137,7 +156,8 @@ export default function AtencionMostrador() {
   const montoNum = Number(monto.replace(',', '.'));
   const puedeCobrar = citaId !== null && Number.isFinite(montoNum) && montoNum > 0 && !ocupado;
   const esVacunacion = servicioCodigo === 'vacunacion';
-  const mascota = nombre || t('agenda.mascotaFallback');
+  // La verdad del server (RLS) preside; el param queda de puente de carga.
+  const mascota = nombreMascota ?? (nombre || t('agenda.mascotaFallback'));
 
   // D-434: registra la vacuna si el servicio lo es y hay una elegida.
   // Devuelve false SOLO si el registro falló (frena el cierre).
@@ -197,6 +217,12 @@ export default function AtencionMostrador() {
         contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[6], gap: spacing[4] }}
         keyboardShouldPersistTaps="handled"
       >
+        {/* S73-B ítem 10 (b): a quién se atiende, con su CARA — presente en
+            las dos fases (atención y cobro). Foto → huella digna fallback. */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+          <AvatarMascota nombre={mascota} fotoUrl={fotoFirmada ?? undefined} tamano="md" />
+          <Texto variante="titulo">{mascota}</Texto>
+        </View>
         {fase === 'atencion' ? (
           servicios !== null && servicios.length === 0 ? (
             <EstadoVacio registro="seccion" titulo={t('atencionMostrador.sinServicios')} />

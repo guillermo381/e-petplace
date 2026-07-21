@@ -1176,7 +1176,8 @@ export const prestadorEs = {
     origenPendiente: 'Registro pendiente',
     origenRegistrado: 'Ya en e-PetPlace',
     // S70-B2-v2: la cuenta registrada entra al handshake al tocar · LOTE S70
-    registradoTocar: 'Ya en e-PetPlace — tocá para elegir la mascota',
+    // S73-B: voseo→tuteo al tocarse (clase D-481).
+    registradoTocar: 'Ya en e-PetPlace — toca para elegir la mascota',
     pendienteTitulo: 'Ya tiene un registro pendiente',
     clienteSinNombre: 'Cliente',
     sinResultadosTitulo: 'Nadie con ese dato todavía',
