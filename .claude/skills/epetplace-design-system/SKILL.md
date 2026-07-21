@@ -431,6 +431,17 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
     adivina — un filtro que oculta algo legal es peor que ofrecerlo. El
     server sigue siendo la autoridad (los guards NO se retiran: la
     puerta es cortesía, no validación).
+    **COROLARIO S73 (firmado en mesa — la letra del selector por
+    elegibilidad, `docs/LETRA_SELECTOR_ELEGIBILIDAD_S73.md`): "LA PUERTA
+    NO PREGUNTA LO QUE YA SABE."** Prueba: *"si solo hay una respuesta
+    posible, ¿por qué la estoy preguntando?"* — si la respuesta es "por
+    costumbre del formulario", era bug de puerta. Con N=1 no se pregunta
+    pero **SE DICE** (la elegida visible con avatar+nombre — la magia
+    muda se vuelve confusión el día que acierta mal); con N=0 rige la
+    cláusula del conjunto vacío de arriba. El N lo computa el MOTOR
+    (frontera `mascotasElegibles` de packages/api: momento vital PRIMERO
+    — memorial no es elegible, apagado estructural §7.1 LOYALTY —,
+    especie por servicio después), jamás la pantalla.
 
 ### Las pantallas patrón (cómo se firma lo visual)
 
