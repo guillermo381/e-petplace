@@ -46,6 +46,7 @@ import {
 
 import { Text } from 'react-native';
 import { verificarSesion } from '@/lib/api';
+import { vozErrorVet } from '@/lib/voz-error-vet';
 import { useTraduccion } from '@/i18n';
 
 const CODIGOS_ESPECIE_UI: readonly AvatarMascotaEspecie[] = [
@@ -151,7 +152,7 @@ export default function AltaMostrador() {
     });
     setEnviando(false);
     if (!r.ok) {
-      mostrar({ variante: 'error', texto: r.mensaje });
+      mostrar({ variante: 'error', texto: vozErrorVet(t, 'alta', r) });
       return;
     }
     // La voz del después — el reclamo se adapta al canal.

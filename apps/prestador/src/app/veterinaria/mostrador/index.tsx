@@ -44,6 +44,7 @@ import {
 } from '@epetplace/api';
 
 import { Text } from 'react-native';
+import { vozErrorVet } from '@/lib/voz-error-vet';
 import { useTraduccion } from '@/i18n';
 
 // Heurística del campo único: '@' → email · dígitos (con/ sin +/prefijo,
@@ -84,22 +85,22 @@ export default function Mostrador() {
       if (RE_EMAIL_PARCIAL.test(query)) {
         const r = await buscarClienteAltaAsistida(query);
         if (!vigente) return;
-        setResultado(r.ok ? { estado: 'cliente', r: r.data } : { estado: 'error', mensaje: r.mensaje });
+        setResultado(r.ok ? { estado: 'cliente', r: r.data } : { estado: 'error', mensaje: vozErrorVet(t, 'busqueda', r) });
       } else if (RE_TELEFONO.test(query)) {
         const r = await buscarClientePorTelefono(query);
         if (!vigente) return;
-        setResultado(r.ok ? { estado: 'cliente', r: r.data } : { estado: 'error', mensaje: r.mensaje });
+        setResultado(r.ok ? { estado: 'cliente', r: r.data } : { estado: 'error', mensaje: vozErrorVet(t, 'busqueda', r) });
       } else {
         const r = await buscarMascotasAccesibles(query);
         if (!vigente) return;
-        setResultado(r.ok ? { estado: 'mascotas', lista: r.data } : { estado: 'error', mensaje: r.mensaje });
+        setResultado(r.ok ? { estado: 'mascotas', lista: r.data } : { estado: 'error', mensaje: vozErrorVet(t, 'busqueda', r) });
       }
     }, 300);
     return () => {
       vigente = false;
       clearTimeout(timer);
     };
-  }, [q]);
+  }, [q, t]);
 
   function irANueva() {
     router.push({ pathname: '/veterinaria/mostrador/nueva', params: q.trim().length > 0 ? { q: q.trim() } : {} });

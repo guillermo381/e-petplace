@@ -50,6 +50,7 @@ import {
 } from '@epetplace/api';
 
 import { verificarSesion } from '@/lib/api';
+import { vozErrorVet } from '@/lib/voz-error-vet';
 import { useTraduccion } from '@/i18n';
 
 type ServicioActivo = { codigo: string; nombre: string; precio: number };
@@ -145,7 +146,7 @@ export default function AtencionMostrador() {
     });
     setOcupado(false);
     if (!r.ok) {
-      mostrar({ variante: 'error', texto: r.mensaje });
+      mostrar({ variante: 'error', texto: vozErrorVet(t, 'atencion', r) });
       return;
     }
     setCitaId(r.data);
@@ -168,7 +169,7 @@ export default function AtencionMostrador() {
     if (!codigo && !libre) return true; // sin vacuna elegida — no bloquea
     const r = await registrarVacunaMostrador(citaId, { vacunaCodigo: codigo, nombreLibre: libre });
     if (!r.ok) {
-      mostrar({ variante: 'error', texto: r.mensaje });
+      mostrar({ variante: 'error', texto: vozErrorVet(t, 'vacuna', r) });
       return false;
     }
     mostrar({ variante: 'exito', texto: t('atencionMostrador.vacunaExito', { mascota }) });
@@ -187,7 +188,7 @@ export default function AtencionMostrador() {
       const r = await registrarCobroPresencial(citaId, montoNum, medio);
       if (!r.ok) {
         setOcupado(false);
-        mostrar({ variante: 'error', texto: r.mensaje });
+        mostrar({ variante: 'error', texto: vozErrorVet(t, 'cobro', r) });
         return;
       }
     }

@@ -1203,6 +1203,69 @@ export const prestadorEs = {
     exitoTelefono: 'Cuando alguien se registre con el {{contacto}}, el expediente de {{mascota}} lo va a estar esperando.',
   },
   // M4/M5 — la atención del mostrador + cobro-dato (S69-B, A1bis) · LOTE S69, GATE PENDIENTE
+  // D-472 (S73-B, tajada 1): la voz del camino triste del path vet sale
+  // del riel (tuteo L-148 + en). El mapa código→key vive en
+  // lib/voz-error-vet.ts; el mensaje del wrapper queda de fallback.
+  // "datos_inconsistentes" gana voz humana por acción (la del wrapper
+  // era system-speak — Ley 17.2). PENDIENTE DE GATE founder (lote S73).
+  erroresVet: {
+    busqueda: {
+      emailInvalido: 'Escribe un email válido para buscar.',
+      telefonoInvalido: 'Escribe un teléfono válido para buscar.',
+      accesoDenegado: 'No tienes permiso para buscar clientes.',
+      datosInconsistentes: 'No pudimos completar la búsqueda. Intenta de nuevo.',
+      errorBusqueda: 'No pudimos buscar. Intenta de nuevo.',
+    },
+    alta: {
+      accesoDenegado: 'No tienes permiso para registrar en este negocio.',
+      contactoRequerido: 'Pon un email o un teléfono del cliente.',
+      nombreClienteRequerido: 'Pon el nombre del cliente.',
+      nombreMascotaRequerido: 'Pon el nombre de la mascota.',
+      especieInvalida: 'Elige una especie válida.',
+      countryInvalido: 'El país no es válido.',
+      clienteYaRegistrado: 'Ese cliente ya está en e-PetPlace — búscalo por su contacto para sumarle la mascota.',
+      pendienteYaExiste: 'Ya hay un registro pendiente con ese contacto.',
+      datosInconsistentes: 'No pudimos registrar. Intenta de nuevo.',
+    },
+    atencion: {
+      accesoDenegado: 'No tienes acceso a este negocio o esta mascota.',
+      prestadorSinCuenta: 'Tu negocio todavía no está habilitado para registrar atenciones.',
+      sinAccesoMascota: 'No tienes acceso a esta mascota.',
+      tipoNoMedico: 'Ese servicio no es de veterinaria.',
+      servicioNoActivo: 'Ese servicio no está activo en tu consultorio.',
+      precioInvalido: 'El precio no es válido.',
+      countryInvalido: 'El país no es válido.',
+      datosInconsistentes: 'No pudimos registrar la atención. Intenta de nuevo.',
+    },
+    cobro: {
+      accesoDenegado: 'No tienes permiso para registrar el cobro.',
+      citaNoExiste: 'Esa atención ya no existe.',
+      noOperaCuenta: 'No operas este negocio.',
+      montoInvalido: 'El monto no es válido.',
+      medioInvalido: 'Elige un medio de cobro válido.',
+      cobroYaRegistrado: 'Esta atención ya tiene un cobro registrado.',
+      datosInconsistentes: 'No pudimos registrar el cobro. Intenta de nuevo.',
+    },
+    vacuna: {
+      accesoDenegado: 'No tienes permiso para registrar en este negocio.',
+      citaNoExiste: 'Esa atención ya no existe.',
+      sinAccesoMascota: 'No tienes acceso a esta mascota.',
+      vacunaXor: 'Elige una vacuna del catálogo o escribe una — no ambas.',
+      vacunaCodigoInvalido: 'Esa vacuna no está en el catálogo.',
+      datosInconsistentes: 'No pudimos registrar la vacuna. Intenta de nuevo.',
+    },
+    solicitud: {
+      accesoDenegado: 'Tu sesión no está activa. Inicia sesión de nuevo.',
+      noOperaCuenta: 'No operas este negocio.',
+      cuentaNoActiva: 'El negocio todavía no está activo.',
+      mascotaRequerida: 'Elige una mascota.',
+      mascotaNoExiste: 'Esa mascota ya no existe.',
+      destinoRequerido: 'Falta el cliente destinatario.',
+      payloadAltaInvalido: 'Faltan datos de la mascota (nombre y especie).',
+      solicitudDuplicada: 'Ya hay una solicitud pendiente para esta mascota.',
+      datosInvalidos: 'Revisa los datos e intenta de nuevo.',
+    },
+  },
   atencionMostrador: {
     titulo: 'Registrar atención',
     servicioLabel: '¿Qué servicio?',

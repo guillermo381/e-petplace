@@ -51,6 +51,7 @@ import {
   type MascotaDeClienteRegistrado,
 } from '@epetplace/api';
 
+import { vozErrorVet } from '@/lib/voz-error-vet';
 import { useTraduccion } from '@/i18n';
 
 // Espejo del filtro de nueva.tsx: solo los códigos que el AvatarMascota /
@@ -188,7 +189,7 @@ export default function AutorizarMostrador() {
     });
     setEnviando(false);
     if (!r.ok) {
-      mostrar({ variante: 'error', texto: r.mensaje });
+      mostrar({ variante: 'error', texto: vozErrorVet(t, 'solicitud', r) });
       return;
     }
     setEspera({ solicitudId: r.data, mascotaNombre: elegida.nombre });
@@ -207,7 +208,7 @@ export default function AutorizarMostrador() {
     });
     setEnviando(false);
     if (!r.ok) {
-      mostrar({ variante: 'error', texto: r.mensaje });
+      mostrar({ variante: 'error', texto: vozErrorVet(t, 'solicitud', r) });
       return;
     }
     setEspera({ solicitudId: r.data, mascotaNombre: nombreNueva });
