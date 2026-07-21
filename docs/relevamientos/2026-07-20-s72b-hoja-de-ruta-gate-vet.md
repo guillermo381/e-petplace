@@ -47,9 +47,26 @@ es sobre el APK preview con su OTA.)
 
 > **EL PASO 0 CONFIRMA DOS BINARIOS, NO UNO.** Si el founder aprueba el
 > presupuesto desde la **app cliente** (paso 5), esa app también tiene que
-> ser el bundle correcto. El cliente es territorio de la **A** — cuando
-> publique su bundle de S72, el mismo `[update] id=…` va acá con su group.
-> **Pendiente de la A** al escribir esto.
+> ser el bundle correcto. La A ya publicó el cliente de S72 con el mismo
+> patrón `[update]`:
+>
+> ```
+> adb logcat -d | grep -E "\[bundle\] cliente|\[update\]"
+> # [bundle] cliente S72
+> # [update] id=019f8578-daa6-7c16-9c8b-a93db75c85c2 · embedded=false · canal=preview
+> ```
+>
+> **CLIENTE — `embedded=false` + `id=` uno de estos:**
+> - **Android:** `019f8578-daa6-7c16-9c8b-a93db75c85c2`
+> - **iOS:** `019f8578-daa6-7d71-a252-36667b3ffaf1`
+>
+> **Update group del cliente:** `66e55259-197c-4d74-9f8f-9b798f8a61b0`
+> (commit `f4c5e22`).
+>
+> ⚠️ **LEER EL BLOQUE ENTERO, no el prefijo.** Los ids de las dos apps
+> difieren en **un solo carácter**: `019f857**0**…` (prestador) ·
+> `019f857**8**…` (cliente). Un vistazo rápido los confunde — comparalos
+> completos.
 
 ---
 
@@ -187,3 +204,51 @@ es-only** (`No tenés permiso`, `Poné hasta cuándo vale`, `Agregá al menos un
 - **Los 49 textos en `base`/15px**: NO migrados — `Texto.cuerpo` es `md`/18px,
   migrarlos agrandaría el cuerpo de la app. Espera la decisión de `packages/ui`.
 - **La voz de los wrappers** (§ arriba).
+
+---
+
+## EL LOTE DE STRINGS S72-B — los NUEVE, en el orden del guion
+
+Consolidado de las dos apps para firmar de una sentada. `{{…}}` son variables
+de interpolación, no texto.
+
+### A · STRINGS NUEVOS (contenido) — 7
+
+**Paso 4/5 · Liquidaciones — la cola de cobro nombra el oficio** (prestador):
+
+| key | es | en |
+|---|---|---|
+| `cobros.servicioGrooming` | Grooming | Grooming |
+| `cobros.servicioAdiestramiento` | Adiestramiento | Training |
+| `cobros.servicioVeterinaria` | Veterinaria | Veterinary |
+
+**Paso 6 · Pieza 3 — la agenda dice el procedimiento coordinado:**
+
+| key | app | es | en |
+|---|---|---|---|
+| `agenda.procGenerico` | prestador | Procedimiento | Procedure |
+| `agenda.procMasN` | prestador | {{base}} +{{n}} | {{base}} +{{n}} |
+| `citasMascota.procedimientoConExtras` | **cliente (A)** | {{primera}} +{{n}} | {{primera}} +{{n}} |
+
+> El del cliente es el espejo del `procMasN` del prestador: el hero del dueño
+> dice la misma descripción de procedimiento que la agenda del vet (misma voz,
+> D-457 — sin total en ninguna de las dos superficies).
+
+**Paso 9 · Dictado — la voz del micrófono** (prestador, D-456):
+
+| key | es | en |
+|---|---|---|
+| `consulta.dictadoAyuda` | Habla o escribe libremente — para dictar, toca el micrófono de tu teclado. Después revisas todo campo por campo antes de guardar. | Speak or type freely — to dictate, tap the microphone on your keyboard. You'll review everything field by field before saving. |
+
+### B · CAMBIOS DE VOZ (ya aprobados) — 2 · voseo→tuteo por L-148
+
+Estas dos **ya estaban firmadas**; el contenido no cambia, solo la voz (el
+bloque del dictado nació en voseo en S70, contra L-148 firmada en S68 — el
+censo lo encontró en S72). Se listan para confirmar la voz, no re-aprobar el texto.
+
+| key | antes (es) | ahora (es) | en (sin cambio) |
+|---|---|---|---|
+| `consulta.dictadoTitulo` | Dictá la consulta de {{mascota}} | **Dicta** la consulta de {{mascota}} | Dictate {{mascota}}'s consultation |
+| `consulta.confirmacionAyuda` | Revisá y corregí… completalo vos | **Revisa y corrige**… **complétalo tú** | Review and correct before saving. Anything the AI couldn't read is left empty — fill it in yourself. |
+
+**Total: 9** (7 nuevos + 2 de voz). Prestador aporta 8; el cliente (A), 1.
