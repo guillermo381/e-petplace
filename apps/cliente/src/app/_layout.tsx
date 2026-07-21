@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import * as Updates from 'expo-updates';
 import { useFonts } from 'expo-font';
 import { AvisoProvider, ThemeProvider as EpetThemeProvider, epetplaceFonts } from '@epetplace/ui';
 import { ProveedorI18n } from '@epetplace/i18n';
@@ -18,7 +19,19 @@ SplashScreen.preventAutoHideAsync();
 // EMPIEZA confirmando que Metro imprime la línea de la sesión vigente —
 // sin ella, el teléfono corre un bundle fantasma y no se gatea.
 // ACTUALIZAR el texto al arrancar cada sesión de trabajo.
+//
+// S72-A (patrón de B, `168b6aa` — L-155): el marcador de SESIÓN no
+// discrimina entre publicaciones (esta cadena decía "S71" tras una sesión
+// entera de curas). La identidad del update la da el RUNTIME — `updateId`
+// es ÚNICO por publicación y se auto-actualiza (no hay que editar nada al
+// republicar); `isEmbeddedLaunch` distingue el OTA aplicado del bundle
+// embebido del APK (el punto exacto de L-138). En dev/Expo Go/web
+// `updateId` es null — el marcador lo dice honesto, no miente.
 console.log('[bundle] cliente S72');
+console.log(
+  `[update] id=${Updates.updateId ?? 'ninguno (embedded/dev)'} · ` +
+    `embedded=${Updates.isEmbeddedLaunch} · canal=${Updates.channel ?? 'ninguno'}`,
+);
 
 export default function RootLayout() {
   // D-305 (S48): el tema lo decide el SISTEMA — el app lo resuelve acá
