@@ -50,8 +50,11 @@ function fallo<T>(raw: string): ResultadoWrapper<T, CodigoErrorVetAtencion> {
 // El embed de presupuesto va INLINE (literal) — postgrest-js infiere el tipo
 // del string literal; concatenarlo desde constante lo rompe. La LÓGICA de la
 // descripción sí se comparte (descripcionDePresupuesto).
+// S72-A cura de regresión: DOS FKs entre evento_cita_servicio y presupuesto →
+// `presupuesto:presupuesto` es AMBIGUO y PostgREST rompe el select (PGRST201);
+// se desambigua con el nombre de la FK cita→presupuesto.
 const SELECT_CITA =
-  'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, direccion_snapshot, metadata, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en), presupuesto:presupuesto(items:presupuesto_item(id, descripcion_libre, created_at))';
+  'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, direccion_snapshot, metadata, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en), presupuesto:presupuesto!evento_cita_servicio_presupuesto_id_fkey(items:presupuesto_item(id, descripcion_libre, created_at))';
 
 /** El origen releído desde metadata (S70-B1). Hoy la fila distingue el
  *  walk-in del mostrador ('mostrador') de la reserva in-app (sin origen). */

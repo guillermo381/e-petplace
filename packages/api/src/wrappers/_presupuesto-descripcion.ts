@@ -15,7 +15,11 @@
 // infiere el tipo del `.select()` del STRING LITERAL en compilación, y una
 // concatenación (`'...' + const`) colapsa el tipo a GenericStringError. Cada
 // lector lleva el embed INLINE, idéntico:
-//   presupuesto:presupuesto(items:presupuesto_item(id, descripcion_libre, created_at))
+//   presupuesto:presupuesto!evento_cita_servicio_presupuesto_id_fkey(items:presupuesto_item(id, descripcion_libre, created_at))
+// El nombre de la FK (`!evento_cita_servicio_presupuesto_id_fkey`) es
+// OBLIGATORIO: hay DOS FKs entre evento_cita_servicio y presupuesto, así que
+// `presupuesto:presupuesto` a secas rompe el select con PGRST201 (regresión
+// S72-A curada). El SQL directo NO reproduce esto — solo la API PostgREST.
 
 export type DescripcionPresupuesto = { primera: string | null; extras: number };
 

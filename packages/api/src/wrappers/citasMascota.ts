@@ -76,8 +76,13 @@ export async function obtenerCitasActivasMascota(
     // El embed de presupuesto va INLINE (literal) — la inferencia de tipos de
     // postgrest-js exige el string literal (concatenar desde constante lo
     // rompe). La lógica de la descripción sí se comparte.
+    // S72-A cura de regresión: HAY DOS FKs entre evento_cita_servicio y
+    // presupuesto (presupuesto.evento_cita_servicio_id ← y →
+    // evento_cita_servicio.presupuesto_id), así que `presupuesto:presupuesto`
+    // es AMBIGUO y PostgREST rompe el select entero (PGRST201). Se desambigua
+    // con el nombre de la FK que va cita→presupuesto.
     .select(
-      'id, fecha, hora, tipo_servicio, estado, estado_reserva, expira_en, prestador_id, presupuesto_id, prestadores ( nombre_comercial ), presupuesto:presupuesto(items:presupuesto_item(id, descripcion_libre, created_at))',
+      'id, fecha, hora, tipo_servicio, estado, estado_reserva, expira_en, prestador_id, presupuesto_id, prestadores ( nombre_comercial ), presupuesto:presupuesto!evento_cita_servicio_presupuesto_id_fkey(items:presupuesto_item(id, descripcion_libre, created_at))',
     )
     .eq('mascota_id', mascotaId)
     .in('estado', ['pendiente', 'confirmada', 'en_curso'])
