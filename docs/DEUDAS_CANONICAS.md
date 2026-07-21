@@ -2004,6 +2004,21 @@ Territorio: `packages/api` (sesión A). **Nota de método:** H5 es el más barat
 #### D-472 — ~18 strings crudos en los 4 wrappers del path del vet
 🟡 MEDIA. `packages/api` — los wrappers del path clínico del prestador tienen **~18 strings de mensaje crudos** (voseo contra **L-148**, y **sin inglés**): *"No tenés permiso"*, *"Poné…"*, *"Agregá…"*. **No aparecen en el happy path — viven en el CAMINO TRISTE**, que es donde más duele (el vet ve el error en su idioma equivocado justo cuando algo falló). La voz de producto es tuteo neutro + es/en por el riel (L-148 + regla 27). **Territorio: `packages/api` (sesión A).** **Disparo: el próximo wrapper de ese path que se toque.** Origen: S72-B0 (censo de B), depositado por A.
 
+### Deudas del relevamiento cliente S72-A (D-473 → D-474)
+
+#### D-473 — `presupuesto_item.orden` (el orden que el vet tipeó se descarta)
+🟢 BAJA. `presupuesto_item` **no tiene columna `orden`** (relevado S72-A al construir la Pieza 3): sus ítems se insertan en batch con **`created_at` idéntico**, así que no hay un discriminador de orden confiable. El lector vet (`descripcionPresupuesto`, `20260720150000`/`683d691`) desempata por `id` — **determinista pero semánticamente arbitrario**: `"Ecografia +1"` vs `"Limpieza dental +1"` es una moneda al aire. **El orden en que el vet tipeó es información real y se está descartando.** Precedente de la casa: `evento_medicacion_prescrita` **SÍ tiene `orden`** (la constelación lo estampa por índice). Cura: `presupuesto_item.orden int` + estampado en el productor + los lectores ordenan por él. **Disparo: la construcción de P2** — un carrito cuyos ítems se reordenan solos entre renders no es aceptable. Origen: S72-A (Pieza 3).
+
+#### D-474 — La descripción del `procedimiento` del lado del DUEÑO (simétrico a la Pieza 3 del vet)
+🟡 MEDIA. Relevamiento S72-A (ii): ahora que `fijar_fecha` estampa `tipo_servicio='procedimiento'`, ninguna superficie del cliente muestra "Procedimiento" crudo — **pero tampoco muestra la descripción**, así que el dueño ve una cita fechada **sin nombre de qué es**. Evidencia con path:línea:
+- **`vozServicio`** (`apps/cliente/src/lib/voz-servicio.ts`): `procedimiento` NO está en `KEY_VOZ_SERVICIO` → devuelve `null` (código fuera del mapa, sin `nombreDb`).
+- **`/citas/[mascotaId]` hero** (`:169` `servicio = vozServicio(t, c.tipo_servicio) ?? null` · `:189-191` `servicio !== null ? <Icono/> + <Text>{servicio}</Text> : null`): con `servicio=null` **omite el nombre** — muestra solo fecha + negocio.
+- **`/citas/[mascotaId]` lista** (`:463` `titulo={vozServicio(...) ?? vozEstado(c)}`): cae a `vozEstado(c)` = el ESTADO ("Confirmada"/"Por coordinar"), no el qué.
+- **Hogar, ficha por mascota** (`hogar/index.tsx:810` `proximaCitaMono`): solo fecha/hora, sin nombre (el hero global murió, S61-A11).
+- **`citasMascota.ts`** (el lector del dueño, `:67`): **NO trae la descripción del presupuesto** — su shape `CitaActivaMascota` tiene `tipo_servicio` y `presupuesto_id` pero no `descripcionPresupuesto`.
+
+Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descripción · N→primera+«+N» · sin→"Procedimiento" · **TOTAL jamás**). Construcción, no cura: `citasMascota.ts` gana `descripcionPresupuesto` (embed espejo del lector vet) + `/citas/[mascotaId]` la renderiza. **No está roto** (no miente, degrada a omisión), pero es incompleto. **Disparo: DECISIÓN DE MESA** — entra al bundle del cliente antes del gate del founder, o queda declarado abierto. Origen: S72-A (ii).
+
 ---
 
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)
