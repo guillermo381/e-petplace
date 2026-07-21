@@ -13,23 +13,43 @@
 
 ## PASO 0 — EL BINARIO (L-138: el gate arranca acá, siempre)
 
-Antes de tocar nada, confirmá que el teléfono corre **este** bundle:
+Antes de tocar nada, confirmá que el teléfono corre **este** bundle. El
+marcador de sesión (`[bundle] prestador S72`) NO alcanza: los 4 bundles de
+S72 lo comparten. La prueba real es la **identidad del update**, que el
+runtime ahora imprime:
 
 ```
-adb logcat -d | grep "\[bundle\]"
-# tiene que imprimir:  [bundle] prestador S72
+adb logcat -d | grep -E "\[bundle\]|\[update\]"
+# [bundle] prestador S72
+# [update] id=019f8570-df02-70c0-94e3-f6753a447c92 · embedded=false · canal=preview
 ```
 
-**Update group vivo en el canal `preview`:** `0e4f1be8-58f8-418a-b166-d7a706d46e30`
-(runtime 1.0.2, commit `69b5516`). Trae TODO S72-B: los 3 casos de 19.7, la
+**Las dos cosas que tienen que dar (prestador):**
+- **`embedded=false`** — estás en el OTA, NO en el bundle embebido del APK
+  (si dice `true`, cerrá y abrí la APK dos veces para que baje y aplique el
+  update; el punto exacto de L-138).
+- **`id=` uno de estos** (es el update ID por plataforma del bundle del gate):
+  - **Android:** `019f8570-df02-70c0-94e3-f6753a447c92`
+  - **iOS:** `019f8570-df02-7ea0-a331-9461eff4d384`
+
+**Update group del gate en el canal `preview`:** `0e6f77c3-93d4-4e20-8c78-ebeafdcd6d07`
+(runtime 1.0.2, commit `168b6aa`). Trae TODO S72-B: los 3 casos de 19.7, la
 voz del micrófono, la bandeja "Por coordinar" con el gate corregido, `vozServicio`
-por oficio, los 78 textos migrados a `Texto`, y **la pieza 3** (la agenda vet
-dice la descripción del procedimiento; el total muere en "Por coordinar").
+por oficio, los 78 textos migrados a `Texto`, **la pieza 3** (la agenda vet
+dice la descripción del procedimiento; el total muere en "Por coordinar") y
+**el marcador que discrimina** (este mismo `[update]`).
 
-Si el marcador dice `S71` o el group es otro: cerrá y abrí la APK **dos veces**
-(1ª descarga, 2ª aplica). Si sigue viejo, `adb install -r` el APK preview. **Sin
-el marcador confirmado, ningún hallazgo de abajo vale** — estarías juzgando otro
-código.
+Si `id=` no coincide o `embedded=true`: cerrá y abrí la APK **dos veces**
+(1ª descarga, 2ª aplica). Si sigue viejo, `adb install -r` el APK preview.
+**Sin el `id` confirmado, ningún hallazgo de abajo vale** — estarías juzgando
+otro código. (En dev/Expo Go, `id=ninguno`: ahí el gate no aplica — el gate
+es sobre el APK preview con su OTA.)
+
+> **EL PASO 0 CONFIRMA DOS BINARIOS, NO UNO.** Si el founder aprueba el
+> presupuesto desde la **app cliente** (paso 5), esa app también tiene que
+> ser el bundle correcto. El cliente es territorio de la **A** — cuando
+> publique su bundle de S72, el mismo `[update] id=…` va acá con su group.
+> **Pendiente de la A** al escribir esto.
 
 ---
 
