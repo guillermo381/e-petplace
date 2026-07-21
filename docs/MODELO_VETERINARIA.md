@@ -1,6 +1,13 @@
 # MODELO_VETERINARIA — El contrato del oficio veterinario y del modelo de actor
 
-> **Versión: v1.5 — S70/T3 (19 Jul 2026).** Enmiendas v1.5 (cierre S70):
+> **Versión: v1.6 — S72-A (21 Jul 2026).** Enmienda v1.6: **§8.1 la cita de
+> procedimiento gana un tipo consumible** (`procedimiento` + estampado en
+> `fijar_fecha`; coordinar le da tipo — la raíz de L-157 no eran los lectores) ·
+> **§14.1 actualizada** (fuga L-140 de las huérfanas cerrada, DROP en D-471) ·
+> backlog del oficio M1-M6 = D-475→D-480. La regla de la descripción vive en
+> `DISEÑO_EXPERIENCIA` §10ter.
+>
+> **v1.5 — S70/T3 (19 Jul 2026).** Enmiendas v1.5 (cierre S70):
 > nace **§7bis EL HANDSHAKE DEL MOSTRADOR** (letra founder — la búsqueda
 > revela SOLO nombre+avatar, UNA autorización dirigida por mascota, la
 > historia se abre AL AUTORIZAR, tipo `alta_mascota` que nace en la
@@ -347,6 +354,37 @@ APRUEBA en su app; la aprobación agenda la cita de procedimiento con
 **precio congelado** (snapshot — el patrón de la casa). Sin aprobación
 no hay cita. El presupuesto vencido expira sereno.
 
+**8.1 — LA CITA DE PROCEDIMIENTO GANA UN TIPO CONSUMIBLE (S72-A, firmado).**
+La cita que nace de un presupuesto todo-libre es legal SIN `tipo_servicio`
+(D-439: la aprobación agenda firme y la fecha se coordina después). Pero un
+`tipo_servicio` NULL la vuelve INVISIBLE a la agenda vet: los cuatro lectores
+de oficio discriminan por el embed `tipos_servicio`, y una fila sin tipo se
+descarta — el vet coordinaba la fecha y su procedimiento desaparecía (L-157).
+**La tesis en una línea: COORDINAR LE DA A LA CITA UN TIPO CONSUMIBLE.** La
+raíz de L-157 no eran los lectores.
+
+- Nace el código **`procedimiento`** en `tipos_servicio` (`es_medico=true` →
+  entra a la agenda vet · `categoria='veterinario'` → NO cuela en
+  paseo/grooming/adiestramiento · `reservable=false` → jamás en la vitrina,
+  nace de coordinar).
+- **`fijar_fecha_procedimiento` lo estampa con `COALESCE(tipo_servicio,
+  'procedimiento')`** — jamás pisa un tipo que la cita ya tenga; solo llena
+  el NULL de la todo-libre. La cita sale de `por_coordinar` sola (esa bandeja
+  filtra por `fecha IS NULL`).
+- **Por qué un código NUEVO y no reusar `'otro'`:** esta misma sesión pagó el
+  precio de un código con dos sentidos — `tipo_servicio` NULL pasó de "legacy
+  pre-tipo" a "presupuesto todo-libre", y de esa ambigüedad nació la fuga
+  inversa de `citaSuelta` (un procedimiento vet colándose en "Mis paseos"). Un
+  código no tiene dos significados.
+- **La descripción, no la etiqueta:** el vet (y el dueño) no leen
+  "Procedimiento" donde el presupuesto dice "Limpieza dental" — el lector trae
+  la descripción del presupuesto. La regla de voz y la asimetría del fallback
+  viven en `DISEÑO_EXPERIENCIA` §10ter.
+- **Candidato abierto (D-480):** hoy el procedimiento es
+  `prestador_servicios.nombre_custom` (texto libre); catalogarlo daría glifos
+  por tipo y plata por procedimiento — decisión founder sin fecha. NO cura la
+  invisibilidad (ya curada por el motor): es calidad de catálogo.
+
 ## 9. RESERVA Y COBRO: el chasis heredado + la escalera gratis→comisión
 
 **Chasis entero, sin mecanismos nuevos de plata:** gramática canónica
@@ -522,6 +560,14 @@ construye** — deuda con disparo §16.
    portal congelado es mina de REQUISITOS (los 11 componentes de HC),
    jamás de arquitectura (era consulta-céntrico; el diferenciador es
    caso-céntrico).
+   > **Estado S72-A:** la **fuga L-140 de ambas está CERRADA** — `anon`/PUBLIC
+   > revocados (`20260720140000` HC · `20260721120000` cita), `authenticated`
+   > intacto, sonda verde. **El DROP NO se hizo — queda en D-471 con disparo:**
+   > el portal admin legado comparte esta misma DB y podría invocarlas vía
+   > PostgREST; el censo del monorepo no ve el repo congelado, así que un DROP
+   > rompería producción sin stack trace. Censo del legado (o su apagado) =
+   > precondición del DROP. Hasta entonces viven revocadas y sin uso en el
+   > motor nuevo (cero callers en el monorepo — DB, triggers, TS).
 2. **Verificación del vet:** título/registro profesional a la cuenta,
    gate admin (`requiere_validacion_admin` existe; el PROCESO se
    construye). Sin esto no hay procedencia verificada ni certificados.
@@ -676,6 +722,15 @@ sesión a sesión, como manda la ruta.
 
 ## Historial
 
+- **v1.6 (S72-A, 20-21 Jul 2026):** nace **§8.1 LA CITA DE PROCEDIMIENTO GANA
+  UN TIPO CONSUMIBLE** — el código `procedimiento` (`es_medico`, `veterinario`,
+  `reservable=false`) + el estampado con COALESCE en `fijar_fecha_procedimiento`
+  (migración `20260720150000`); la raíz de L-157 no eran los lectores sino que
+  coordinar dejaba la cita sin tipo. La descripción del presupuesto (no la
+  etiqueta) se firma en `DISEÑO_EXPERIENCIA` §10ter. **§14.1 actualizada:** la
+  fuga L-140 de las dos huérfanas del legado CERRADA (REVOKE, `20260720140000` +
+  `20260721120000`); el DROP queda en **D-471** con disparo (censo del portal
+  legado). Backlog de mercado del oficio (M1-M6) depositado como **D-475→D-480**.
 - **v1.5 (S70/T3, 19 Jul 2026):** nace **§7bis EL HANDSHAKE DEL
   MOSTRADOR** (letra founder del cierre S70; construido en las
   migraciones `20260719160000` + `20260719200000`, gate de campo
