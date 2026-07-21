@@ -152,6 +152,7 @@ export {
 
 // Citas activas por mascota — D-430 (S67): el detalle contextual
 export { obtenerCitasActivasMascota, type CitaActivaMascota } from './wrappers/citasMascota';
+export { mascotasElegibles, type EstadoVidaMascota } from './wrappers/_mascotas-elegibles';
 
 // Perfil de mascota — S51-B2.3 (pila de módulos)
 export {

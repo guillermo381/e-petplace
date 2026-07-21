@@ -49,6 +49,7 @@ import {
   resolverUrlFoto,
   type MascotaResumen,
   type PaseadorDisponible,
+  mascotasElegibles,
 } from '@epetplace/api';
 import { PlanHoja } from '@/components/plan-hoja';
 import { PaseoSocialHoja } from '@/components/paseo-social-hoja';
@@ -91,8 +92,8 @@ export default function PaseoDisponibles() {
   const [preguntaSocial, setPreguntaSocial] = useState<{ paseador: PaseadorDisponible; mascota: MascotaResumen } | null>(null);
   const [socialNo, setSocialNo] = useState<string | null>(null);
 
-  const elegibles =
-    especies === null ? mascotas : mascotas.filter((m) => especies.includes(m.especie));
+  // S73 (letra de elegibilidad): frontera única — momento vital + especie.
+  const elegibles = mascotasElegibles(mascotas, especies);
 
   const cargar = useCallback(() => {
     setDisponibles('cargando');
@@ -268,9 +269,20 @@ export default function PaseoDisponibles() {
             visible (S61-A3, rasgo 1): la MISMA voz del QUIÉN del
             grooming (grooming.ventanaPara — Ley 17.3, reuso declarado) */}
         {(() => {
-          const paraQuien = mascotas.find((m) => m.id === mascotaIdParam) ?? null;
+          // S73 (letra de elegibilidad, N=1 "no se pregunta pero SE DICE"):
+          // sin param y con UNA sola elegible, la auto-elegida del tap
+          // (:alElegirMascota) se DICE acá — avatar y nombre visibles ANTES
+          // de tocar nada. Auto-seleccionar en silencio era magia (cura b).
+          const paraQuien =
+            mascotas.find((m) => m.id === mascotaIdParam) ??
+            (elegibles.length === 1 ? elegibles[0] : null);
           return (
             <Celda
+              inicio={
+                paraQuien !== null ? (
+                  <AvatarMascota nombre={paraQuien.nombre} fotoUrl={fotos[paraQuien.id]} tamano="sm" />
+                ) : undefined
+              }
               titulo={
                 paraQuien !== null
                   ? t('grooming.ventanaPara', { nombre: paraQuien.nombre })

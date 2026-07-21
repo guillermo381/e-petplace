@@ -51,6 +51,7 @@ import {
   type ModalidadGrooming,
   type OfertaGrooming,
   type OfertaGroomingPublica,
+  mascotasElegibles,
 } from '@epetplace/api';
 import { TallaPelajeHoja } from '@/components/talla-pelaje-hoja';
 import { useTraduccion } from '@/i18n';
@@ -85,10 +86,10 @@ export default function GroomingCuando() {
   const [hora, setHora] = useState<string | null>(null);
   const [reintento, setReintento] = useState(0);
 
-  const elegibles = useMemo(() => {
-    if (!Array.isArray(mascotas)) return [];
-    return especies === null ? mascotas : mascotas.filter((m) => especies.includes(m.especie));
-  }, [mascotas, especies]);
+  // S73 (letra de elegibilidad): la frontera UNICA del motor decide —
+  // momento vital primero (memorial/perdida NO reservan), especie después.
+  // La pantalla jamás re-computa elegibilidad (Ley 37: el filtro artesanal murió).
+  const elegibles = mascotasElegibles(Array.isArray(mascotas) ? mascotas : [], especies);
 
   const mascota = elegibles.find((m) => m.id === mascotaId) ?? null;
   // la pregunta única de §3: sin talla o pelaje no hay precio personal

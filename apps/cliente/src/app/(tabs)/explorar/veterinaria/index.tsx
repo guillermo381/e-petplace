@@ -51,6 +51,7 @@ import {
   resolverUrlFoto,
   type MascotaResumen,
   type OfertaVet,
+  mascotasElegibles,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
 import { vozServicio } from '@/lib/voz-servicio';
@@ -79,7 +80,10 @@ export default function VeterinariaCuando() {
   // El techo de especie es POR TIPO (§1bis) y lo resuelve el motor por
   // fila — acá el hogar entero elige; la oferta de cada mascota ya
   // llega acotada server-side.
-  const elegibles = useMemo(() => (Array.isArray(mascotas) ? mascotas : []), [mascotas]);
+  // S73 (letra de elegibilidad): la vet pasa TODAS las especies POR DISEÑO
+  // (multi-especie es decisión, no omisión) — pero el momento vital manda:
+  // memorial/perdida NO reservan. La frontera única lo resuelve.
+  const elegibles = mascotasElegibles(Array.isArray(mascotas) ? mascotas : [], null);
   const mascota = elegibles.find((m) => m.id === mascotaId) ?? null;
   const hoyISO = fechaLocalISO(new Date());
 

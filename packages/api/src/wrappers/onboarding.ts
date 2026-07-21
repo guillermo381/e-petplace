@@ -7,6 +7,7 @@
 
 import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
+import type { EstadoVidaMascota } from './_mascotas-elegibles';
 
 const CODIGOS_ERROR_ONBOARDING = [
   'no_autenticado',
@@ -185,6 +186,11 @@ export interface MascotaResumen {
    *  declarar; la pregunta única salta al entrar al QUIÉN del grooming. */
   talla: 'S' | 'M' | 'L' | null;
   pelaje: 'normal' | 'largo' | null;
+  /** S73 (letra de elegibilidad): momento vital para la frontera
+   *  mascotasElegibles — memorial/perdida NO reservan (apagado
+   *  estructural, jamás if de UI). null = fuera del CHECK (angostado
+   *  honesto) y la elegibilidad falla cerrada. */
+  estado_vida: EstadoVidaMascota | null;
 }
 
 /** Mascotas de una familia (Home del dueño). Reader: mismas claves
@@ -194,7 +200,7 @@ export async function obtenerMascotasDeFamilia(
 ): Promise<ResultadoWrapper<MascotaResumen[], CodigoErrorOnboarding>> {
   const { data, error } = await getClient()
     .from('mascotas')
-    .select('id, nombre, especie, foto_url, paseo_social_ok, talla, pelaje')
+    .select('id, nombre, especie, foto_url, paseo_social_ok, talla, pelaje, estado_vida')
     .eq('familia_id', familiaId)
     .order('fecha_alta', { ascending: true });
 
@@ -211,6 +217,10 @@ export async function obtenerMascotasDeFamilia(
       // Angostado verificando (regla 34): fuera del CHECK = null honesto.
       talla: m.talla === 'S' || m.talla === 'M' || m.talla === 'L' ? m.talla : null,
       pelaje: m.pelaje === 'normal' || m.pelaje === 'largo' ? m.pelaje : null,
+      estado_vida:
+        m.estado_vida === 'activa' || m.estado_vida === 'perdida' || m.estado_vida === 'fallecida'
+          ? m.estado_vida
+          : null,
     })),
   };
 }
