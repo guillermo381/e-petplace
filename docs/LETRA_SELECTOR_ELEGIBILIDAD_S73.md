@@ -107,6 +107,15 @@ memorial era reservable en los 4 oficios** — el hallazgo 🔴 del censo.
 
 ## 7. Historial — el freno S73-A (L-158 en acto)
 
+**PERDIDA-NO-RESERVA — decisión Code regla 67, ratificada mesa, ELEVADA
+AL FOUNDER (puede vetarla):** la frontera exige `estado_vida='activa'`,
+así que una mascota PERDIDA tampoco es elegible — no solo la memorial.
+Fundamento del doble precedente: el mostrador vet ya filtraba
+`.eq('estado_vida','activa')` y la convención viva es
+`es_memorial = estado_vida !== 'activa'`. Si el founder decide que la
+perdida SÍ reserva (p. ej. agendar el vet para cuando aparezca), la cura
+es UNA línea de la frontera — el veto es barato.
+
 El censo de A (reporte 1 de S73) contradijo dos hipótesis de la versión
 de mesa: los chips ya existían desde S61 y el "botón de pie" no era
 disparador. La mesa resolvió con cuatro decisiones: (a) motor con
