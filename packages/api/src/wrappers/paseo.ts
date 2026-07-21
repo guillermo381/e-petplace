@@ -10,6 +10,7 @@
 import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 import type { Database, Json } from '../database.types';
+import type { DescripcionPresupuesto } from './_presupuesto-descripcion';
 
 // ── Códigos de error (verificados contra los RAISE de cada body) ────────────
 
@@ -306,7 +307,7 @@ export type CitaAgendaPaseo = Pick<
    * puebla el lector de veterinaria; undefined en los otros 3 oficios; null
    * cuando la cita no tiene presupuesto o el presupuesto no tiene ítems.
    */
-  descripcionPresupuesto?: { primera: string | null; extras: number } | null;
+  descripcionPresupuesto?: DescripcionPresupuesto | null;
 };
 
 /** El shape del snapshot D-339 (claves fijas de la migración 20260712090000). */

@@ -9,6 +9,7 @@
 
 import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
+import { descripcionDePresupuesto, type DescripcionPresupuesto } from './_presupuesto-descripcion';
 
 const MENSAJE_ERROR = 'No pudimos leer las citas. Prueba de nuevo.';
 
@@ -43,6 +44,15 @@ export interface CitaActivaMascota {
   negocio_nombre: string | null;
   /** Solo con estado='en_vivo': la atención para la pantalla de dos caras. */
   atencion_id: string | null;
+  /**
+   * D-474 (S72-A): la DESCRIPCIÓN del presupuesto de una cita `procedimiento`
+   * — la simetría del dueño con la Pieza 3 del vet. DATOS, NO PROSA: la voz
+   * vive en la pantalla. FALLBACK del dueño DISTINTO al del vet: sin
+   * descripción, la pantalla OMITE el nombre (jamás pinta "Procedimiento" —
+   * ese vocabulario es del motor, Ley 3). null si la cita no tiene
+   * presupuesto o no trae ítems.
+   */
+  descripcion_presupuesto: DescripcionPresupuesto | null;
 }
 
 // Fecha local del dispositivo YYYY-MM-DD (patrón S44: en-CA da ese formato).
@@ -63,8 +73,11 @@ export async function obtenerCitasActivasMascota(
 
   const citas = await cliente
     .from('evento_cita_servicio')
+    // El embed de presupuesto va INLINE (literal) — la inferencia de tipos de
+    // postgrest-js exige el string literal (concatenar desde constante lo
+    // rompe). La lógica de la descripción sí se comparte.
     .select(
-      'id, fecha, hora, tipo_servicio, estado, estado_reserva, expira_en, prestador_id, presupuesto_id, prestadores ( nombre_comercial )',
+      'id, fecha, hora, tipo_servicio, estado, estado_reserva, expira_en, prestador_id, presupuesto_id, prestadores ( nombre_comercial ), presupuesto:presupuesto(items:presupuesto_item(id, descripcion_libre, created_at))',
     )
     .eq('mascota_id', mascotaId)
     .in('estado', ['pendiente', 'confirmada', 'en_curso'])
@@ -170,6 +183,7 @@ export async function obtenerCitasActivasMascota(
           ? (nombresNegocio.get(c.presupuesto_id) ?? null)
           : null,
       atencion_id: atencionPorCita.get(c.id) ?? null,
+      descripcion_presupuesto: descripcionDePresupuesto(c.presupuesto),
     });
   }
   return { ok: true, data };
