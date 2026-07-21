@@ -33,6 +33,7 @@ import {
   Icono,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useAviso,
@@ -280,7 +281,9 @@ export default function PaseoDisponibles() {
             <Celda
               inicio={
                 paraQuien !== null ? (
-                  <AvatarMascota nombre={paraQuien.nombre} fotoUrl={fotos[paraQuien.id]} tamano="sm" />
+                  // xs, no sm: la columna del metadataMono es intocable y con
+                  // sm el titulo colapsaba a cero en 420 (hallazgo M3 S73).
+                  <AvatarMascota nombre={paraQuien.nombre} fotoUrl={fotos[paraQuien.id]} tamano="xs" />
                 ) : undefined
               }
               titulo={
@@ -288,7 +291,11 @@ export default function PaseoDisponibles() {
                   ? t('grooming.ventanaPara', { nombre: paraQuien.nombre })
                   : t('explorar.paseoTitulo')
               }
-              metadataMono={`${fecha} · ${hora} · ${duracion} min`}
+              // La ventana APILADA en la zona fin (S44-B4.1): en una sola
+              // línea el mono de 26 caracteres exprimía el título a cero
+              // con el avatar presente (hallazgo M3 S73).
+              metadataMono={fecha}
+              fin={<Texto variante="dato">{`${hora} · ${duracion} min`}</Texto>}
             />
           );
         })()}
