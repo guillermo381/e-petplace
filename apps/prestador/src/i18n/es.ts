@@ -1328,7 +1328,11 @@ export const prestadorEs = {
     // D-456 (S72-B): la decisión founder — "el mic es el del teclado del SO" —
     // vivía SOLO en un comentario de código. La ayuda prometía hablar y nunca
     // decía cómo. Ahora lo dice. Tuteo por L-148 + censo del diccionario.
-    dictadoAyuda: 'Habla o escribe libremente — para dictar, toca el micrófono de tu teclado. Después revisas todo campo por campo antes de guardar.',
+    // S73-B ítem 8 (a): la frase hacía DOBLE turno (flujo + mic). Se parte:
+    // la cabecera guía el flujo; el hint del mic viaja JUNTO AL CAMPO
+    // (dictadoCampoAyuda → slot ayuda de Campo), donde el teclado sube.
+    dictadoAyuda: 'Habla o escribe libremente. Después revisas todo campo por campo antes de guardar.',
+    dictadoCampoAyuda: 'Para dictar, toca el micrófono de tu teclado.',
     dictadoLabel: 'Nota de la consulta',
     dictadoPlaceholder: 'Motivo, hallazgos, diagnóstico, plan, medicación…',
     estructurar: 'Estructurar la nota',

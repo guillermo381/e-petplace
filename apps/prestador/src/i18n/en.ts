@@ -1202,7 +1202,8 @@ export const prestadorEn = {
     dictadoTitulo: "Dictate {{mascota}}'s consultation",
     // D-456 (S72-B): the "how" was missing — the help promised speaking and
     // never said how. The mic is the OS keyboard's (founder decision, S70).
-    dictadoAyuda: "Speak or type freely — to dictate, tap the microphone on your keyboard. You'll review everything field by field before saving.",
+    dictadoAyuda: "Speak or type freely. You'll review everything field by field before saving.",
+    dictadoCampoAyuda: 'To dictate, tap the microphone on your keyboard.',
     dictadoLabel: 'Consultation note',
     dictadoPlaceholder: 'Reason, findings, diagnosis, plan, medication…',
     estructurar: 'Structure the note',

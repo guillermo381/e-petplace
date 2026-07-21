@@ -22,7 +22,7 @@
 // ─────────────────────────────────────────────────────────────────────
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Keyboard, ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -232,6 +232,8 @@ export default function ConsultaVeterinaria() {
   // ── Dictado → estructuración ───────────────────────────────────────────────
   async function estructurar() {
     if (dictado.trim().length === 0 || estructurando) return;
+    // El dictado terminó: el teclado baja para que la espera no pelee con él.
+    Keyboard.dismiss();
     setEstructurando(true);
     const r = await estructurarNotaClinica({
       texto: dictado,
@@ -495,9 +497,17 @@ export default function ConsultaVeterinaria() {
           <>
             <Texto variante="seccion">{t('consulta.dictadoTitulo', { mascota })}</Texto>
             <Texto variante="apoyo">{t('consulta.dictadoAyuda')}</Texto>
+            {/* S73-B ítem 8 (a): la puerta del dictado se abre sola — autofoco
+                al entrar a la fase (el teclado del SO sube con su micrófono) y
+                el hint del mic VIAJA JUNTO AL CAMPO (slot ayuda de Campo — la
+                ayuda de un campo vive con él, no en la cabecera). La decisión
+                S70 "el mic es el del teclado" no sobrevivió a su primer
+                usuario real sin esta puerta (hallazgo 6 S70 + gate S72). */}
             <Campo
               label={t('consulta.dictadoLabel')}
               placeholder={t('consulta.dictadoPlaceholder')}
+              ayuda={t('consulta.dictadoCampoAyuda')}
+              autoFocus
               value={dictado}
               onChangeText={setDictado}
               multilinea={8}
