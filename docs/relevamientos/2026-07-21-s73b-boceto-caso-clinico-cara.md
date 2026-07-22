@@ -140,3 +140,63 @@ es otro callejón con más pintura.
   loyalty — su tanda propia).
 - El gate de ROL (D-464) — el boceto lo NOMBRA como precondición del
   lector nuevo; la letra es de la mesa (esqueleto de equipo §5).
+
+## 7. ENMIENDA DE MESA S74 — el diagnóstico gana su declaración (incorporada ANTES de la firma)
+
+> Decisión de mesa S74 (entra a MODELO_VETERINARIA §8.3/§12 por mano de
+> A). Este boceto y el contrato del `resumen` de A
+> (`2026-07-22-s74a-contrato-resumen-caso.md`) se leen CON esta enmienda.
+> **Resuelve la pregunta de producto que S73-B dejó reportada sin curar
+> (`276140d`): la nota sin diagnóstico ("todavía no sé, pido exámenes")
+> ES legal — como DECLARACIÓN, jamás como hueco.**
+
+**La letra:** `diagnostico_principal` deja de ser NOT NULL — pasa a
+nullable. Nace una columna HERMANA con el estado de la declaración:
+**definido / no_definido**. La pantalla NO deja guardar sin elegir una de
+las dos (el vet escribe su diagnóstico, o declara explícitamente "aún no
+definido"). **Motivo, para que nadie lo revierta:** el vocabulario
+clínico es LIBRE (§12) — un valor centinela dentro de un campo de texto
+libre obliga a distinguir por string (regla 35, y el precedente exacto de
+`'otro'` en S72).
+
+**COROLARIO (corrige la derivación previa): "no definido" NO es un hueco
+— es una DECLARACIÓN. Se DICE, con la voz del diccionario (Ley 3), nunca
+se muestra en blanco.** El null honesto no es silencio cuando hubo
+declaración.
+
+**Qué cambia en este boceto (declarado, fila por fila):**
+
+1. **M4 / la línea de eventos:** la fila `historia_clinica_registrada`
+   pierde su garantía "resumen siempre" (la tabla de A la derivaba de un
+   NOT NULL que muere). Con `no_definido`, `resumen = null` **+ el estado
+   de la declaración viaja en campo propio del contrato del lector** — y
+   la pantalla lo VISTE con voz del diccionario (key nueva par es/en,
+   candidata: *"Aún sin diagnóstico"*), jamás fila en blanco ni la voz
+   genérica del tipo (eso sería pintar la declaración como ausencia).
+2. **Estados (§4):** entra el estado declarado — evento de HC con
+   diagnóstico no definido: se dice, no se degrada.
+3. **El Durante (consulta, superficie B — POST-motor):** el guard del
+   Confirmar pasa de "Falta el diagnóstico." (cura `276140d`) a exigir
+   UNA de las dos: texto en el campo O la declaración explícita "aún no
+   definido". La forma exacta del control de declaración se firma en su
+   gate (candidata barata: acción junto al campo, anatomía 19.7); la voz
+   "Falta el diagnóstico." se reescribe a la elección de dos vías. CERO
+   código hasta que el motor de A exista.
+
+**PEDIDO DE MOTOR → A (76-b, viaja por mano del founder; CERO SQL acá —
+nombra el TRABAJO, el naming lo decide A contra el schema vivo, L-084):**
+
+1. La tipada de HC: `diagnostico_principal` DROP NOT NULL.
+2. Columna hermana en la MISMA tipada: estado de la declaración del
+   diagnóstico, dos valores (definido / no_definido), NOT NULL.
+   Coherencia EN LA TABLA, no en la UI: definido ⇒ diagnóstico presente ·
+   no_definido ⇒ diagnóstico null.
+3. El guard `nota_sin_diagnostico` del RPC de sedimento pasa de "exige
+   diagnóstico" a "exige la declaración": rebota solo si no vino ni texto
+   ni el `no_definido` explícito. (El muro §8.3 intacto: la IA jamás
+   inventa el diagnóstico — y ahora tampoco inventa la declaración: campo
+   no dictado = la pantalla pide elegir.)
+4. El lector del caso (`obtener_eventos_caso`, aún pedido) y
+   `obtener_parte_consulta` exponen el estado de la declaración junto al
+   diagnóstico — las caras (parte del dueño incluido, territorio A) lo
+   visten por diccionario.
