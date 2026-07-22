@@ -2765,9 +2765,9 @@ Ese es el éxito del documento. Cumplirlo es trabajo de los meses y años que vi
 
 > **Estado: LETRA DE MESA sobre el relevamiento `500ee8d`
 > (`docs/relevamientos/2026-07-21-s73b-relevamiento-equipo.md`). SUPERSEDE el
-> esqueleto** (`ESQUELETO_EQUIPO_PORTAL_PRESTADOR_S73.md`) — que queda como
-> historia con su freno. Destino: sección nueva de PORTAL_PRESTADOR *(este
-> depósito lo cumple)*. **Las decisiones de PRODUCTO ya están firmadas por el
+> esqueleto** — borrador de MESA (nunca depositado en el repo; su freno §0
+> quedó registrado acá), superado por esta letra. Destino: sección nueva de
+> PORTAL_PRESTADOR *(este depósito lo cumple)*. **Las decisiones de PRODUCTO ya están firmadas por el
 > founder** (unidad = negocio · tres roles · acumulables por unión). **Las de
 > ARQUITECTURA las toma esta letra (regla 74) con su porqué.** La MIGRACIÓN la
 > propone Code y espera OK del founder (regla 73) — esta letra es su espec, no
