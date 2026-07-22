@@ -44,12 +44,13 @@ Todo es+en, tuteo L-148. Familias del lote:
 - **De paso D-481** (`a9b8686`): `registradoTocar` voseo→tuteo (string tocado,
   cero barrida).
 
-## 2. El gate en dispositivo de las pantallas B — ABIERTO, y con un hueco de OTA
+## 2. El gate en dispositivo de las pantallas B — DESBLOQUEADO (hueco de OTA hallado y cerrado)
 
-**El OTA vigente del canal prestador NO trae las tres curas finales.** Estado
-verificado contra EAS (`update:list` + `update:view`):
+**El hueco:** el OTA que estaba vigente al emitir este reporte NO traía las
+tres curas finales. Estado verificado contra EAS (`update:list` +
+`update:view`):
 
-- Vigente: group **`4c4b2b19-a01e-4d75-8a14-189f05e92160`** (branch preview,
+- Vigente entonces: group **`4c4b2b19-a01e-4d75-8a14-189f05e92160`** (branch preview,
   runtime 1.0.2, publicado 2026-07-22T03:29Z), `gitCommitHash` anclado a
   **`780a3e0`**. Trae: D-488, la máquina de atención, D-472 tajadas 1-2, el
   mostrador (Ley 23 + la cara del animal), la puerta del dictado, el marcador
@@ -58,16 +59,31 @@ verificado contra EAS (`update:list` + `update:view`):
   **`276140d` 🔴** (el Confirmar enumera QUÉ falta) · **`01d4a23` 🔴**
   (EvitaTeclado — la cura del bug que el founder reportó en campo).
 
-**Decisión de mesa antes de publicar el OTA que falta:** HEAD hoy arrastra el
-entity chip V2 de A (en HOLD del founder) dentro de `packages/ui`
-(`SelectorOpcion`, `AvatarMascota`, temas — `771b7b3`). Son props aditivas que
-ninguna pantalla del prestador consume, riesgo bajo — pero el hold es del
-founder y B no publica por encima de él sin lectura de mesa. Caminos: (a) la
-mesa ratifica que lo held es inerte en prestador y B publica desde HEAD, o
-(b) el OTA espera la lectura del hold en S74.
+**RESUELTO POR MESA (22 Jul, camino (a) con verificación) — OTA PUBLICADO:**
+group **`bc12ed81-17f5-4f8a-94c6-689a91b0f257`** (branch preview, runtime
+1.0.2, android+ios, commit `4b501e5`; android `019f8b89-e823-764f…` · ios
+`019f8b89-e823-7004…`). Entran los tres commits que faltaban: `fe757b9` ·
+`276140d` 🔴 · `01d4a23` 🔴. **El guion del gate queda DESBLOQUEADO.**
 
-**Guion del gate (cuando el OTA esté):** paso 0 = `[update] id=…` contra el
-group nuevo, NO `embedded=true` (L-160) · el teclado arriba con el campo
+La verificación que lo habilitó (literal, no supuesto): el held de
+`packages/ui` es **INERTE en prestador** — en `SelectorOpcion` TODO el modo
+entidad (flexBasis 48% + maxWidth 240, lengüeta, LLENO, boxShadow, centrado
+N=1, flexWrap) cuelga de `entidad` default `false` y a nivel chip exige
+además `opcion.avatar !== undefined`, con la rama vieja byte-idéntica como
+else; `AvatarMascota` suma talla `'entidad'` al union (default `'md'`
+intacto) y `sobreLleno` default `false`; los tokens `controlLleno`/
+`sobreControlLleno` son aditivos y solo se leen dentro del camino entidad.
+Censo prestador: 18 consumidores de `SelectorOpcion`, CERO pasa `entidad`/
+`avatar`/`sobreLleno`; los 4 selectores migrados son de `apps/cliente`.
+También entra al bundle la enmienda de A a `CeldaNavegacion` (`icono`
+requerido→opcional, render gateado — aditiva pura, todo caller existente lo
+pasa) y la muerte de `LaminaS73` (galería, el prestador no la importa —
+typecheck del prestador VERDE pre-publish). Nota de mesa registrada: el chip
+ya viajaba en el canal del CLIENTE desde `ac20799` — el hold era "no
+construir más", no "no despachar lo construido".
+
+**Guion del gate (desbloqueado):** paso 0 = `[update] id=…` contra el group
+`bc12ed81…`, NO `embedded=true` (L-160) · el teclado arriba con el campo
 enfocado en consulta/mostrador/presupuesto/taller (**L-162: la web no prueba
 teclado — este gate es SOLO dispositivo**) · el Confirmar apagado diciendo
 cada falta · el mostrador con cuenta reconocida SIN botón de alta (Ley 23) ·
