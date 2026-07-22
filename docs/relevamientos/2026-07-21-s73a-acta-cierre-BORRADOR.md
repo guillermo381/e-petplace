@@ -1,5 +1,10 @@
 # S73-A · ACTA DE CIERRE — **BORRADOR** (no se deposita hasta la palabra del founder)
 
+> **TRANSPUESTA AL CANON (CLAUDE.md raíz, S73 CERRADA) en S74 — 22 Jul 2026,
+> con la palabra del founder.** Las leyes candidatas de §3/§4 son hoy
+> **L-161 · L-162 · L-158 (refinada S73) · L-163** en DEUDAS_CANONICAS.
+> Este archivo queda como registro; la verdad vigente es el CLAUDE.md raíz.
+
 > Preparada por A a pedido de mesa mientras el founder gatea. El acta
 > final se escribe al CLAUDE.md raíz con la palabra del founder; este
 > borrador junta las piezas con sus literales. Los ítems del lado B se
