@@ -72,8 +72,38 @@ pares"*) a LLENO:
   es de BINARIOS — Interruptor; invertirla es enmienda de ley con firma,
   no barrida).
 
-**Viaja a la vara de B antes de construir.** El v1 de abajo queda como
-registro del camino (rechazado).
+## v2 · VOTO DE MESA (con el founder) — y la precondición dura
+
+- **Proporción: V2 (52/44)** — mesa y boceto coinciden.
+- **(a) sobre (b)**, no por costo: el LLENO hoy significa BINARIO; dos
+  significados para el mismo peso visual exigen su propio gate. (b) =
+  **D-499** (mecánica D-318). El founder juzga la convivencia VIENDO —
+  su palabra manda.
+- **PRECONDICIÓN DURA — el token texto-sobre-control-LLENO por tema,
+  MEDIDO (mini-gate al founder,
+  `scripts/capturas/s73-a-minigate-token-oscuro.png`):**
+
+  | Tema | Fill | Texto | Ratio | Veredicto |
+  |---|---|---|---|---|
+  | LIGHT | magentaDark `#8E1F68` | blanco | **8.25:1** | ✓ (par vivo del gate) |
+  | DARK — el dictado | violetText `#AE59FF` | tinta `#221E19` | **4.47:1** | **✗ FALLA AA** (medido — el dictado "tinta sobre violeta" tampoco pasa) |
+  | DARK — blanco | violetText | blanco | **3.70:1** | ✗ (el lavado, ahora con número) |
+  | DARK — negro puro | violetText | `#000000` | 5.67:1 | pasa pero ROMPE la tinta cálida de la casa |
+  | **DARK — PROPUESTA** | **magentaDark `#8E1F68`** | **blanco** | **8.25:1** | **✓ — el MISMO par en ambos temas** |
+
+  **La propuesta:** el LLENO en dark NO usa `accent.control` (que en dark
+  es violeta CLARO porque es acento de TEXTO — otro trabajo): usa
+  **magentaDark con blanco en AMBOS temas** — un solo par, ya medido en
+  el gate vivo. Token propuesto: `accent.controlLleno` +
+  `accent.sobreControlLleno` (light=magentaDark/blanco ·
+  dark=magentaDark/blanco · memorial=degrada sin lleno). Oficio NO
+  necesita par nuevo (tealDark porta blanco 5.51/5.05, Ley 21 medida);
+  capa N/A (muere como control). **El founder no firmó el dark — el
+  mini-gate es suyo.**
+
+**ORDEN PARA CONSTRUIR: voto de mesa ✓ + vara de B (pedida) + token
+oscuro firmado en el mini-gate. Sin las tres, no se construye.** El v1
+de abajo queda como registro del camino (rechazado).
 
 ---
 

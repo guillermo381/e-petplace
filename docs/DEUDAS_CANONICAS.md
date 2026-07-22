@@ -2124,6 +2124,11 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 #### D-498 — Campos de texto que quedan bajo el teclado al enfocarse 🔴
 🔴 ALTA. Campos de texto que quedan bajo el teclado al enfocarse — el usuario escribe a ciegas. Origen: gate S73, founder tipeando la dosis. Alcance: ambas apps, censo por pantalla. Riesgo: puede exigir config nativa (`windowSoftInputMode`) → tren de build. **Disparo: S74, con el censo hecho.** Censo del lado CLIENTE: `docs/relevamientos/2026-07-21-s73a-censo-teclado-cliente.md` (S73-A); el de prestador lo hace B — los patrones se comparan por mano del founder para que la casa tenga UNO. Letra del founder: *"que eso no pase en NINGÚN campo"*.
 
+### Deuda del entity chip (S73, D-499)
+
+#### D-499 — (b) El LLENO migra a TODOS los selectores — deuda con disparo, jamás arrastre 🟢
+🟢 BAJA. Voto de mesa S73 sobre el entity chip: **(a) sobre (b), y NO principalmente por costo** — el argumento que decide: **el LLENO hoy significa BINARIO en el sistema** (Ley 22: Interruptor); dos significados para el mismo peso visual no se arregla con más trabajo, se arregla decidiendo cuál gana, **y esa decisión merece su propio gate, no venir de arrastre**. (b) = migrar los 32 consumidores de `SelectorOpcion` al elegido LLENO + token texto-sobre-lleno por tema × acentos + re-medición WCAG + **reescribir la Ley 22**. Mecánica D-318 (precedente D-483). **Disparo: se pide sola si el founder, con la forma nueva EN LA MANO, la prefiere a sus vecinos.** La palabra del founder sobre la convivencia manda sobre el voto de mesa. Origen: S73 (boceto entity chip v2).
+
 ### Deuda del hallazgo RLS-familia (S73-A, D-485)
 
 #### D-485 — La visibilidad del dueño sobre mascotas cuelga de `user_id` legacy, no del modelo de familia 🟠
