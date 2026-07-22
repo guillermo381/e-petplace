@@ -2083,11 +2083,17 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 
 ### Deudas del M2 y directiva founder (S73-A, D-491 → D-492)
 
-### D-494 → D-495 — RESERVADAS (S73) para las letras de B
+### Deudas de la fase 3 de B (S73-B, D-494 → D-495)
 
-> **FRENO 76b declarado (segunda vez en la sesión, mismo precedente S68):**
-> la mesa anunció que "llegan de B en el paquete del founder" — el literal
-> no llegó. Se depositan verbatim cuando llegue; números reservados.
+> Depositadas por A con la letra VERBATIM de B (el freno 76b rigió DOS
+> veces en la sesión — ambas por error de mesa declarado: el paquete
+> anunciaba letras que no traía).
+
+#### D-494 — Los helpers de caso re-implementan el chequeo de rol 🟠
+🟠 MEDIA-ALTA. Los dos helpers de caso re-implementan el chequeo de rol por join porque reciben el usuario por parámetro y `empleado_tiene_rol` lee `auth.uid()` — segunda implementación de la regla, contra LETRA_EQUIPO §4 (puerta única). Cura: sobrecarga `empleado_tiene_rol(prestador, roles[], user_id)` y la de dos argumentos delega con `auth.uid()`. Origen: S73-B fase 3, decisión de CÓMO declarada. **Disparo: el próximo toque a los helpers de caso o a la regla de rol.**
+
+#### D-495 — `user_tiene_acceso_a_mascota` con anon/PUBLIC en proacl 🟠
+🟠 MEDIA-ALTA. `user_tiene_acceso_a_mascota` conserva `anon=X` y PUBLIC en su proacl (legacy pre-L-140). Cura: censo de policies alcanzables por anon que la citen → recién después el REVOKE + GRANT mínimo. Origen: S73-B fase 3, hallazgo fuera de scope. **Disparo: la primera migración que toque esa función o sus policies.**
 
 #### D-493 — El hub vet del dueño no existe (el rail navega a un destino declarado) 🟡
 🟡 MEDIA. El hub vet del dueño no existe; el rail vet v1 navega a `/citas/[mascotaId]` como destino declarado (la mascota de la próxima/por-coordinar/última cita vet). Clase C4/callejón: en un hogar multi-mascota con vet activo, el cuadrado aterriza en UNA mascota y las citas de las otras solo se alcanzan por ficha. Origen: vara cruzada S73-B sobre el rail. **Disparo: rail con vet de 2+ mascotas o arco S74.**
