@@ -43,6 +43,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { vozErrorVet } from '@/lib/voz-error-vet';
 
 type Estado =
   | { fase: 'cargando' }
@@ -140,7 +141,7 @@ export default function FijarFecha() {
     const r = await fijarFechaProcedimiento({ citaId, fecha: dia, hora: horaElegida, empleadoId: persona });
     setEnviando(false);
     if (!r.ok) {
-      mostrar({ variante: 'error', texto: r.mensaje });
+      mostrar({ variante: 'error', texto: vozErrorVet(t, 'presupuesto', r) });
       return;
     }
     mostrar({ variante: 'exito', texto: t('coordinar.exito', { mascota: mascotaNombre }) });

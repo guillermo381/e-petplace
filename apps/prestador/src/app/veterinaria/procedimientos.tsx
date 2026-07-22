@@ -48,6 +48,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { vozErrorVet } from '@/lib/voz-error-vet';
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -146,7 +147,7 @@ export default function ProcedimientosVeterinaria() {
       activo: draft.activo,
     });
     setGuardando(false);
-    if (!r.ok) return mostrar({ variante: 'error', texto: r.mensaje });
+    if (!r.ok) return mostrar({ variante: 'error', texto: vozErrorVet(t, 'oferta', r) });
     setPantalla((prev) => {
       if (prev.estado !== 'listo') return prev;
       const existe = prev.procedimientos.some((p) => p.id === r.data.id);
@@ -167,7 +168,7 @@ export default function ProcedimientosVeterinaria() {
     setGuardando(true);
     const r = await eliminarProcedimientoVeterinaria(id);
     setGuardando(false);
-    if (!r.ok) return mostrar({ variante: 'error', texto: r.mensaje });
+    if (!r.ok) return mostrar({ variante: 'error', texto: vozErrorVet(t, 'oferta', r) });
     setPantalla((prev) =>
       prev.estado !== 'listo' ? prev : { ...prev, procedimientos: prev.procedimientos.filter((p) => p.id !== id) },
     );

@@ -41,6 +41,7 @@ import {
 } from '@epetplace/api';
 
 import { verificarSesion } from '@/lib/api';
+import { vozErrorVet } from '@/lib/voz-error-vet';
 import { useTraduccion } from '@/i18n';
 
 type ItemLocal = { key: string; nombre: string; precio: number; cantidad: number };
@@ -125,7 +126,7 @@ export default function NuevoPresupuesto() {
     });
     if (!borr.ok) {
       setEnviando(false);
-      mostrar({ variante: 'error', texto: borr.mensaje });
+      mostrar({ variante: 'error', texto: vozErrorVet(t, 'presupuesto', borr) });
       return;
     }
     // vence en 7 días (default sensato del negocio, declarado).
@@ -133,14 +134,14 @@ export default function NuevoPresupuesto() {
     const env = await enviarPresupuesto(borr.data, venceEn);
     if (!env.ok) {
       setEnviando(false);
-      mostrar({ variante: 'error', texto: env.mensaje });
+      mostrar({ variante: 'error', texto: vozErrorVet(t, 'presupuesto', env) });
       return;
     }
     if (via === 'presencial') {
       const apr = await registrarAprobacionPresencial(borr.data);
       setEnviando(false);
       if (!apr.ok) {
-        mostrar({ variante: 'error', texto: apr.mensaje });
+        mostrar({ variante: 'error', texto: vozErrorVet(t, 'presupuesto', apr) });
         return;
       }
       // VOZ HONESTA: nace sin fecha — coordiná el día (jamás "agendada para…").

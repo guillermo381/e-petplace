@@ -65,6 +65,7 @@ import {
 } from '@epetplace/api';
 
 import { verificarSesion } from '@/lib/api';
+import { vozErrorVet } from '@/lib/voz-error-vet';
 import { useTraduccion } from '@/i18n';
 
 // FormulaConfirmada/VitalesConfirmados no se re-exportan del index — se
@@ -242,7 +243,7 @@ export default function ConsultaVeterinaria() {
     });
     setEstructurando(false);
     if (!r.ok) {
-      mostrar({ variante: 'error', texto: r.mensaje });
+      mostrar({ variante: 'error', texto: vozErrorVet(t, 'estructurar', r) });
       return;
     }
     // Sembrar los editables desde el borrador (null → vacío, jamás relleno falso).
@@ -365,7 +366,7 @@ export default function ConsultaVeterinaria() {
     });
     setSedimentando(false);
     if (!r.ok) {
-      mostrar({ variante: 'error', texto: r.mensaje });
+      mostrar({ variante: 'error', texto: vozErrorVet(t, 'sedimento', r) });
       return;
     }
     setFase('despues');

@@ -76,6 +76,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { vozErrorVet } from '@/lib/voz-error-vet';
 import {
   SeccionHorarios,
   aplicarDiffFranjas,
@@ -417,7 +418,7 @@ export default function TallerVeterinaria() {
       });
       if (!r.ok) {
         setGuardando(false);
-        mostrar({ texto: r.mensaje, variante: 'error' });
+        mostrar({ texto: vozErrorVet(t, 'oferta', r), variante: 'error' });
         return;
       }
       actualizarItem(i, {
@@ -437,7 +438,7 @@ export default function TallerVeterinaria() {
       });
       if (!r.ok) {
         setGuardando(false);
-        mostrar({ texto: r.mensaje, variante: 'error' });
+        mostrar({ texto: vozErrorVet(t, 'oferta', r), variante: 'error' });
         return;
       }
       const ids = r.data.map((f) => f.especialidadId).filter((v): v is string => v !== null);

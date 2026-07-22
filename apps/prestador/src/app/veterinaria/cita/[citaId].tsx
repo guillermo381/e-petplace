@@ -53,6 +53,7 @@ import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 import { verificarSesion } from '@/lib/api';
 import { vozCitaVet } from '@/lib/voz-cita-vet';
 import { useTraduccion } from '@/i18n';
+import { vozErrorVet } from '@/lib/voz-error-vet';
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -100,7 +101,7 @@ export default function DetalleCitaVet() {
     }
     const r = await obtenerCitaVetPorId(citaId);
     if (!r.ok) {
-      setPantalla(r.codigo === 'cita_no_encontrada' ? { estado: 'no_existe' } : { estado: 'error', mensaje: r.mensaje });
+      setPantalla(r.codigo === 'cita_no_encontrada' ? { estado: 'no_existe' } : { estado: 'error', mensaje: vozErrorVet(t, 'citaVet', r) });
       return;
     }
     const fotoUrl = r.data.mascota?.foto_url ? await resolverUrlFoto(r.data.mascota.foto_url) : undefined;
