@@ -65,6 +65,7 @@ import {
   type PresupuestoPrestador,
 } from '@epetplace/api';
 
+import { EvitaTeclado } from '@/components/evita-teclado';
 import { verificarSesion } from '@/lib/api';
 import { vozErrorVet } from '@/lib/voz-error-vet';
 import { useTraduccion } from '@/i18n';
@@ -409,6 +410,9 @@ export default function ConsultaVeterinaria() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('consulta.titulo')} atras onAtras={() => router.back()} />
+      {/* S73-B 🔴: el teclado tapaba el campo (edge-to-edge anula
+          adjustResize) — receta de la Hoja vía EvitaTeclado. */}
+      <EvitaTeclado>
       <ScrollView
         contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[4] }}
         keyboardShouldPersistTaps="handled"
@@ -747,6 +751,7 @@ export default function ConsultaVeterinaria() {
           </>
         )}
       </ScrollView>
+      </EvitaTeclado>
     </View>
   );
 }

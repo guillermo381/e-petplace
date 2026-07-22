@@ -51,6 +51,7 @@ import {
   type MascotaDeClienteRegistrado,
 } from '@epetplace/api';
 
+import { EvitaTeclado } from '@/components/evita-teclado';
 import { vozErrorVet } from '@/lib/voz-error-vet';
 import { useTraduccion } from '@/i18n';
 
@@ -220,6 +221,7 @@ export default function AutorizarMostrador() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('autorizar.titulo')} atras onAtras={() => router.back()} />
+      <EvitaTeclado>
       <ScrollView
         contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[10], gap: spacing[4] }}
         keyboardShouldPersistTaps="handled"
@@ -368,6 +370,7 @@ export default function AutorizarMostrador() {
           </View>
         ) : null}
       </ScrollView>
+      </EvitaTeclado>
     </View>
   );
 }

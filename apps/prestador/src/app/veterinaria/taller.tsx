@@ -75,6 +75,7 @@ import {
   type TipoVeterinariaCatalogo,
 } from '@epetplace/api';
 
+import { EvitaTeclado } from '@/components/evita-teclado';
 import { useTraduccion } from '@/i18n';
 import { vozErrorVet } from '@/lib/voz-error-vet';
 import {
@@ -525,6 +526,7 @@ export default function TallerVeterinaria() {
       )}
 
       {listo && drafts !== null && catalogo !== null && (
+        <EvitaTeclado>
         <ScrollView
           ref={scrollRef}
           contentContainerStyle={{
@@ -747,6 +749,7 @@ export default function TallerVeterinaria() {
             />
           )}
         </ScrollView>
+        </EvitaTeclado>
       )}
 
       {/* Hoja: duración del servicio — MENÚ CURADO + "Otra duración"

@@ -44,6 +44,7 @@ import {
 } from '@epetplace/api';
 
 import { Text } from 'react-native';
+import { EvitaTeclado } from '@/components/evita-teclado';
 import { vozErrorVet } from '@/lib/voz-error-vet';
 import { useTraduccion } from '@/i18n';
 
@@ -114,6 +115,7 @@ export default function Mostrador() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('mostrador.buscarTitulo')} atras onAtras={() => router.back()} />
+      <EvitaTeclado>
       <ScrollView
         contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[6], gap: spacing[4] }}
         keyboardShouldPersistTaps="handled"
@@ -214,6 +216,7 @@ export default function Mostrador() {
           <Boton variante="primario" bloque etiqueta={t('mostrador.registrarNueva')} onPress={irANueva} />
         )}
       </ScrollView>
+      </EvitaTeclado>
     </View>
   );
 }

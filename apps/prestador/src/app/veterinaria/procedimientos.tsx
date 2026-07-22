@@ -47,6 +47,7 @@ import {
   type ProcedimientoVeterinaria,
 } from '@epetplace/api';
 
+import { EvitaTeclado } from '@/components/evita-teclado';
 import { useTraduccion } from '@/i18n';
 import { vozErrorVet } from '@/lib/voz-error-vet';
 
@@ -215,6 +216,7 @@ export default function ProcedimientosVeterinaria() {
       )}
 
       {pantalla.estado === 'listo' && (
+        <EvitaTeclado>
         <ScrollView
           contentContainerStyle={{
             padding: spacing[4],
@@ -257,6 +259,7 @@ export default function ProcedimientosVeterinaria() {
 
           <Boton variante="primario" bloque etiqueta={t('procedimientosVet.agregar')} onPress={abrirAlta} />
         </ScrollView>
+        </EvitaTeclado>
       )}
 
       {/* Hoja: alta/edición — nombre + precio de referencia + visibilidad */}
