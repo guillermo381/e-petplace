@@ -16,7 +16,6 @@ import { spacing } from '../tokens/spacing'
 import { radius } from '../tokens/radius'
 import { ThemeProvider, useTheme } from '../ThemeProvider'
 import { Isotipo } from '../brand/Isotipo'
-import { LaminaS73 } from './LaminaS73'
 import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
 import { Campo } from '../components/Campo'
@@ -1029,10 +1028,6 @@ function GaleriaInterna() {
             ))}
           </View>
         </View>
-
-        {/* LÁMINA S73 — primera sección hasta su firma (gate en dispositivo);
-            muere de la galería con las tres firmas del founder. */}
-        <LaminaS73 />
 
         {/* Paleta */}
         <Seccion titulo="Paleta — marca canonizada (SVG del logo)">

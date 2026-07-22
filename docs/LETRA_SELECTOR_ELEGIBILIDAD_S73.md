@@ -54,11 +54,11 @@ del paseo) borraron su filtro artesanal (Ley 37) y consumen la frontera;
 - **N > 1** → el selector vive: **chips en línea con avatar**
   (`SelectorOpcion`, selección ÚNICA — ojo: el filtro del Hogar es
   `multiple`; este NO), disposición según el ancho ('fila' 2–4,
-  'tira' para familias grandes). **El COLOR lo decide el founder en la
-  lámina** (control vs `capa.identidad` — hoy los 4 viven en
-  `acento="control"` por el barrido Ley 21/22 de S58; ver §7): lo firmado
-  es la ANATOMÍA (avatar dentro del chip, elección visible en línea, sin
-  Hoja de por medio), no un color.
+  'tira' para familias grandes). **COLOR: `acento="control"` — FIRMA ②
+  DEL FOUNDER (21-Jul-2026, gate en dispositivo sobre la lámina): el
+  selector de mascota SIGUE en control.** Lo firmado es la ANATOMÍA
+  (avatar dentro del chip, elección visible en línea, sin Hoja de por
+  medio) Y el acento — el porqué completo en §7.
 - **N = 0** → el servicio no se ofrece para esta familia, o lo dice con
   voz honesta. Es la cláusula del conjunto vacío que la Ley 23 ya trae.
 
@@ -106,6 +106,20 @@ memorial era reservable en los 4 oficios** — el hallazgo 🔴 del censo.
    claro y oscuro, junto al estado N=1-que-dice) — gate en dispositivo.
 
 ## 7. Historial — el freno S73-A (L-158 en acto)
+
+**FIRMA ② (founder, 21-Jul-2026 — el acento del selector): CONTROL, se
+queda como está.** El porqué, a la letra (para que nadie lo revierta
+después): (1) el chip YA porta la CARA (S61-A4) — el avatar distingue
+"quién" infinitamente mejor que el color; el acento estaría resolviendo
+un problema ya resuelto, y lo que no informa, sobra (Chanel). (2)
+`capa.identidad` es VERDE en los cuatro oficios: en paseo daría chips
+verdes + controles magenta + acento teal del oficio = TRES familias en
+una vista, contra la disciplina de Ley 22 (el roce que la propia lámina
+declaró, confirmado viéndolo). (3) `accent.control` fue firmado como LEY
+(Ley 21/22: el control marca ELECCIÓN); la lectura quién-vs-valor de la
+mesa pedía tallar una excepción en una ley firmada, apoyada en un dato
+NO verificado (que SelectorEspecie siempre fue capa) — error de mesa,
+declarado. Ese dato pendiente vive como **D-496**.
 
 **PERDIDA-NO-RESERVA — decisión Code regla 67, ratificada mesa, ELEVADA
 AL FOUNDER (puede vetarla):** la frontera exige `estado_vida='activa'`,

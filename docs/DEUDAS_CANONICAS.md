@@ -2104,6 +2104,21 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 #### D-492 — DIRECTIVA FOUNDER S73: purga de datos pre-corte (1-jul-2026) 🟠
 🟠 MEDIA-ALTA. **DIRECTIVA FOUNDER S73: los datos anteriores al 1-jul-2026 son borrables, EXCEPTO catálogos.** La purga es operación propia: censo tabla-por-tabla de lo pre-corte + plan con catálogos excluidos LISTADOS + OK founder + ejecución. Precauciones: expediente append-only (FKs de procedencia mapeadas — regla 41), portal legado comparte DB (D-471). **Disparo: ventana de mantenimiento que el founder abra — jamás dentro de una sesión de features.**
 
+### Deuda de la firma ② (S73, D-496)
+
+#### D-496 — ¿SelectorEspecie debe migrar a `acento='control'`? 🟢
+🟢 BAJA. Si el selector de mascota es control por ser elección (Ley 21/22), un selector de especie con `capa.identidad` es incoherencia de la casa. **PRECONDICIÓN: verificar con LITERAL qué acento usa hoy SelectorEspecie — la mesa lo afirmó sin fuente.** Origen: gate S73 firma ②. **Disparo: el primer toque a SelectorEspecie.**
+
+### Deuda del piso de performance (S73-A, D-497)
+
+#### D-497 — EL PISO DE PERFORMANCE: hoy ningún gate lo mide (números literales S73-A) 🟠
+🟠 MEDIA-ALTA. **Medición S73-A (ítem 7 del brief founder — números, no adjetivos):**
+- **(a) El arranque del Hogar = 31 requests a Supabase con UNA sola mascota** (runtime real, sesión demo, web): `6× evento_cita_servicio · 4× evento_atencion · 4× tipos_servicio · 3× mascotas · 3× prestadores · 2× rpc · 1× cada uno de otros 9 endpoints`. **Dos multiplicadores POR MASCOTA confirmados en el código:** `obtenerCitasActivasMascota` ×N **con el embed de presupuesto D-474 adentro** (el propio comentario lo declara: *"E3: N llamadas por mascota — v1 honesto"*, `hogar/index.tsx`) y `leerTimelineMascota` ×N (`cargarTimelineHogar`). Con la familia real del founder (2 mascotas) ≈ 35-40 requests por arranque.
+- **(b) expo-updates:** `app.json` sin `checkAutomatically` → default **ON_LOAD**: chequeo de manifest en CADA arranque frío, y tras cada publish la descarga COMPLETA del bundle (**5.1 MB android**, literal del export) por dispositivo — S73 publicó 4 OTAs en un día = hasta 4 descargas de 5 MB para el mismo usuario.
+- **(c) Lectores sin techo:** `serviciosHogar` (0 `limit(` — compone sobre listas COMPLETAS de `obtenerMisCitasPaseo`/`obtenerMisGroomings`/`obtenerMisAdiestramientos`, todas también sin límite) · la query vet nueva del rail (S73, sin límite — 7 filas hoy, crecimiento sin techo declarado al nacer). Con techo ✓: `leerTimelineMascota` (cursor) · `citasMascota` (`limit(50)`). **Magnitudes en DB HOY:** 73 citas totales (máx **55 en UNA mascota**), 121 eventos (máx **78 en una mascota**), 7 citas vet — los "sin techo" ya cargan decenas de filas para el usuario más pesado y crecen linealmente con el uso.
+
+**La deuda:** no existe piso exigible — ni presupuesto de requests por arranque, ni regla "todo lector nace con techo o cursor", ni decisión sobre el chequeo de updates. Candidatos de letra (mesa): (1) presupuesto de arranque del Hogar (≤N requests, N a firmar); (2) regla de plataforma: lector de lista nace con `limit` o cursor, o declara su techo natural; (3) los dos ×N del Hogar migran a UNA query hogar-wide cada uno (el patrón del rail vet S73 ya lo probó). **Disparo: la mesa del arco S74, o la próxima superficie que sume lecturas al arranque del Hogar — lo que llegue primero.** Origen: S73-A (ítem 7, medición literal).
+
 ### Deuda del hallazgo RLS-familia (S73-A, D-485)
 
 #### D-485 — La visibilidad del dueño sobre mascotas cuelga de `user_id` legacy, no del modelo de familia 🟠

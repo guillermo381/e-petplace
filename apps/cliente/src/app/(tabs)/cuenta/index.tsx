@@ -58,11 +58,6 @@ export default function Cuenta() {
     { etiqueta: t('cuenta.preferencias'), ruta: '/cuenta/preferencias' as const, icono: 'preferencias' as const },
     { etiqueta: t('cuenta.pagos'), ruta: '/cuenta/pagos' as const, icono: 'pagos' as const },
     { etiqueta: t('cuenta.ayuda'), ruta: '/cuenta/ayuda' as const, icono: 'ayuda' as const },
-    // S73 — ENTRADA TEMPORAL del gate (H2 del founder: la galería no
-    // tenía NINGUNA entrada en la UI del cliente — el tab Tokens jamás
-    // existió acá; la ruta /gallery vivía huérfana). MUERE con las tres
-    // firmas de la lámina, junto a la lámina (Ley 37, ya declarado).
-    { etiqueta: t('cuenta.laminaGate'), ruta: '/gallery' as const, icono: 'preferencias' as const },
   ];
 
   return (

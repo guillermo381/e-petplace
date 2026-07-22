@@ -245,9 +245,9 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
        NÚMERO en la etiqueta** — "Ver las 5", jamás un "Ver más" mudo.
        **Su forma es la anatomía 19.7 (enmienda S73, reacción de campo
        del founder sobre Momentos): SIN caja, texto + chevron
-       direccional (⌄ revela · ⌃ pliega — variante d, chevron pendiente
-       de firma en dispositivo), SIN glifo (pie de sección: no tiene
-       hermanos), target 44.** La forma vieja (`Boton compacto`) murió
+       direccional (⌄ revela · ⌃ pliega — FIRMADO en dispositivo,
+       21-Jul-2026), SIN glifo (pie de sección: no tiene hermanos),
+       target 44.** La forma vieja (`Boton compacto`) murió
        con la mecánica D-318: sus tres consumidores pasaron por craft
        en S73. El número es lo que deja decidir si vale
        el toque. **No aplica** a paginación (cargar la tanda siguiente de
@@ -291,12 +291,13 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
          sección NO lleva glifo: no tiene hermanos, y un glifo sin
          vecindad es decoración (Chanel).
        - **Texto** en la voz del diccionario (verbo llano, tuteo, L-148).
-       - **Chevron QUE GIRA** *(propuesta de mesa — se sella en el gate
-         en dispositivo con la lámina)*: `›` NAVEGA (te vas a otra
-         pantalla) · `⌄` REVELA en el lugar (se abre abajo tuyo) · `⌃`
-         PLIEGA. La dirección codifica una verdad del contenido (Ley 18);
-         el chevron conserva su rol de discriminador navega/ejecuta que
-         la letra original protegía.
+       - **Chevron QUE GIRA** *(FIRMADO por el founder, 21-Jul-2026 —
+         gate de campo sobre PieRevelar en Momentos, "muchísimo mejor";
+         no lámina)*: `›` NAVEGA (te vas a otra pantalla) · `⌄` REVELA
+         en el lugar (se abre abajo tuyo) · `⌃` PLIEGA. La dirección
+         codifica una verdad del contenido (Ley 18); el chevron conserva
+         su rol de discriminador navega/ejecuta que la letra original
+         protegía.
        - **Target 44** siempre; en fila, la FILA ENTERA tapea con rol
          `button` (precedente `18e0c61`).
        **`Boton ghost` queda PROHIBIDO como acción de fila.** En el
@@ -629,7 +630,7 @@ comprar es lo último, y lo que compra combina con TODO.*
 | `HojaScroll` | Scrollable interno que GANA dentro de la Hoja (patrón SM block — fix S45-B3.2). OBLIGATORIO para toda lista desplazable dentro de una Hoja: el ScrollView plano pierde contra el swipe-to-close en Android y web no lo delata (L-132) |
 | `SelectorAvatar` | La foto de identidad de la mascota (S45). Vacío = AvatarMascota + invitación (la huella es cara válida); Hoja con cámara/galería PARES + "Por ahora no" primera clase; con foto: Cambiar/Quitar. Entrega {uri,width,height}; el upload es de la pantalla. Captura por `capturaFoto` (infra compartida con EvidenciaFoto — no duplicar) |
 | `HeroMarca` | Cabecera con el gradiente firma (S45, contexto cerrado dosis alta). alto=bienvenida · compacto=techo de paso · techoVivo=techo del Hogar (curva 44/26, S58). Isotipo blanco adentro = el UNO por pantalla; CTAs JAMÁS adentro (marca sobre marca). Memorial: bg.card plano, text.primary — degrada solo. **S59: la SAFE AREA superior la absorbe la PRIMITIVA** — el fondo pinta edge-to-edge bajo la barra de estado y el contenido baja por el inset; las pantallas NO agregan paddingTop: insets.top por fuera (`techo={false}` SOLO para muestras fuera de posición, galería). Íconos de barra CLAROS sobre el gradiente: wiring en la pantalla con useFocusEffect (patrón BarraTabs; memorial no lo toca) |
-| `SelectorOpcion` | Chips de selección de VALOR (S45; ENMENDADO S55-B4 y S56). Radiogroup (o checkbox-group con `multiple` — los 7 días del plan); seleccionado = borde 1.5 capa.identidad + tint capaBg (mismo tratamiento que SelectorEspecie, sin accent.active); memorial degrada. `disposicion`: 'fila' (default, 2-4 chips que llenan el ancho) · 'tira' (scroll horizontal — la tira de días del CUÁNDO) · 'grilla' (chips envueltos para conjuntos grandes — inicios/menú de bloques). NO porta estado de datos (eso es Insignia). **OJO Ley 19.3 (S57): PROHIBIDO como tabs/segmento de vistas** — ese trabajo es de `SelectorSegmentado` (vivo desde S58); las pantallas vivas con chips-como-segmento migran en su pasada de craft |
+| `SelectorOpcion` | Chips de selección de VALOR (S45; ENMENDADO S55-B4 y S56). Radiogroup (o checkbox-group con `multiple` — los 7 días del plan); seleccionado = TONAL en el ACENTO por prop `acento` (Ley 21/22): **'control'** (cliente — magentaDark, el acento de ELECCIÓN) · 'oficio' (prestador, tealDark) · 'capa' (verdeVital — MUERE al paso); borde 1.5 + tinte + texto en el acento, sin accent.active; memorial degrada. **NOTA DE VERDAD DE PRODUCCIÓN (corregida S73):** esta entrada decía "capa.identidad como SelectorEspecie" — la espec ORIGINAL; S58-A (`da059ae`) migró los selectores a 'control' por Ley 21/22 y la **firma ② del founder (21-Jul-2026)** consolidó control para el selector de mascota. El índice decía la letra vieja — que nadie "arregle" el color de vuelta. `disposicion`: 'fila' (default, 2-4 chips que llenan el ancho) · 'tira' (scroll horizontal — la tira de días del CUÁNDO) · 'grilla' (chips envueltos para conjuntos grandes — inicios/menú de bloques). NO porta estado de datos (eso es Insignia). **OJO Ley 19.3 (S57): PROHIBIDO como tabs/segmento de vistas** — ese trabajo es de `SelectorSegmentado` (vivo desde S58); las pantallas vivas con chips-como-segmento migran en su pasada de craft |
 | `LineaDeVida` | El timeline del dueño (S45-B5.2). Diccionario CERRADO tipo→voz humana/capa ADENTRO (Ley 3: el dueño jamás ve un código; desconocido degrada digno por eje). Punto hex puro de capa + conector hairline + Tarjeta; mono solo hora/duración. Carga = esqueleto 3 nodos; el vacío es de la pantalla; pie con "Cargar más"/error. cita_servicio NO se muestra (filtra el wrapper) |
 | `VisorFoto` | Lightbox una-foto-a-la-vez (S45-B5.3). SOLO fades (Ley 6/8 gratis); letterbox digno sin recortar; fondo pleno (tinta+scrim, no depende del tema); cierra por X/back(doble vía)/tap-fondo; swipe horizontal = reemplazo directo; contador "n de m" en mono |
 | `FichaVacuna` | La ficha de UNA vacuna en la revisión del carnet (S47-B1.1; derivación S48). Presentacional pura: tap → `onEditar` (la edición es una Hoja de LA PANTALLA), "Esta no es" → `onDescartar`. Estados derivados de los datos: completa neutra (nombre+fecha; **tipo null NO tiñe** — decisión founder S48, los carnets reales no lo rotulan) · dudosa = SOLO fecha faltante, tinte cuidado y voz humana ("No pudimos leer la fecha") · `rechazada` (prop, del item_invalido de la RPC) danger — nada se pierde. Nombre en DM Sans (lo escribió un humano); fechas y lote en mono minúsculas. Memorial degrada: sin tinte, borde neutro |
