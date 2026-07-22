@@ -1065,11 +1065,26 @@ export default function Hogar() {
               datos (hoy 1/24 — deuda E5 declarada). La ficha con
               pideAtencion sigue cubriendo la urgencia por mascota. */}
           <CeldaNavegacion
-            icono="refugio"
+            // S73 C3: el glifo 'refugio' era PRÉSTAMO — con la entrada
+            // real de adopción al lado, dos celdas vecinas con el mismo
+            // glifo y destinos distintos violan la Ley 12. Se devuelve:
+            // agregar-mascota habla de la familia; refugio, de adoptar.
+            icono="familia"
             titulo={t('hogar.agregarMascotaCelda')}
             detalle={t('agregarMascota.entradaDetalle')}
             chevron={false}
             onPress={() => router.push('/hogar/agregar')}
+          />
+          <Separador />
+          {/* S73 ítem 2 (C3, letra founder): la ADOPCIÓN — refugios,
+              otro actor de EL NORTE; feature nueva en peldaño 0 (el
+              próximamente honesto), jamás copy de agregar-mascota. El
+              titulo+detalle componen la frase literal del founder. */}
+          <CeldaNavegacion
+            icono="refugio"
+            titulo={t('hogar.adoptarCelda')}
+            detalle={t('hogar.adoptarCeldaDetalle')}
+            onPress={() => router.push('/adoptar')}
           />
         </Tarjeta>
       </Animated.View>

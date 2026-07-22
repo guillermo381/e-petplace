@@ -155,6 +155,10 @@ export const clienteEs = {
     // hero del próximo paseo: el CUÁNDO relativo en voz corta
     // subtítulos VIVOS del grupo de celdas (jamás descripción estática)
     agregarMascotaCelda: 'Agregar mascota',
+    // S73 C3 (LOTE S73, gate founder pendiente): la frase literal del
+    // founder partida en titulo+detalle de la celda
+    adoptarCelda: 'Adopta a un nuevo miembro',
+    adoptarCeldaDetalle: 'para tu familia',
   },
   coach: {
     // ── El Coach v0 (S53-B2b) — voz APROBADA por founder (cierre S53).
@@ -772,6 +776,13 @@ export const clienteEs = {
   },
   // S55-A A2 — alta de mascota adicional (el hogar que crece).
   // Voz funcional de formulario; nace bilingüe (riel B1, tuteo neutro).
+  // S73 C3 — la puerta de la adopción (refugios, peldaño 0 honesto)
+  adoptar: {
+    titulo: 'Adopción',
+    proximamenteTitulo: 'Los refugios llegan pronto',
+    proximamenteDetalle:
+      'Estamos sumando refugios a e-PetPlace. Cuando estén acá, vas a conocer a sus mascotas en adopción y podrás darles familia.',
+  },
   agregarMascota: {
     entradaTitulo: 'Agregar mascota',
     entradaDetalle: 'Cada quien con su propia historia.',
@@ -815,6 +826,8 @@ export const clienteEs = {
     preferencias: 'Preferencias',
     pagos: 'Pagos',
     ayuda: 'Ayuda y legales',
+    // S73 TEMPORAL (muere con las firmas de la lámina, Ley 37)
+    laminaGate: 'Lámina S73 · gate de diseño',
     errorCargar: 'No pudimos cargar esto. Prueba de nuevo.',
     reintentar: 'Reintentar',
     guardar: 'Guardar cambios',

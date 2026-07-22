@@ -148,6 +148,9 @@ export const clienteEn = {
     reintentar: 'Try again',
     // ── S58 Home pattern v2 — STRING GATE PENDING (S58 batch) ──
     agregarMascotaCelda: 'Add a pet',
+    // S73 C3 (LOTE S73, founder gate pending)
+    adoptarCelda: 'Adopt a new member',
+    adoptarCeldaDetalle: 'of your family',
   },
   coach: {
     // Voz del Coach APROBADA por founder (cierre S53):
@@ -732,6 +735,13 @@ export const clienteEn = {
     guardada: 'Done — your address is saved.',
   },
   // S55-A A2 — additional pet flow (the home that grows).
+  // S73 C3 — the adoption door (shelters, honest step 0)
+  adoptar: {
+    titulo: 'Adoption',
+    proximamenteTitulo: 'Shelters are coming soon',
+    proximamenteDetalle:
+      "We're bringing shelters to e-PetPlace. When they're here, you'll meet their pets up for adoption and get to give them a family.",
+  },
   agregarMascota: {
     entradaTitulo: 'Add a pet',
     entradaDetalle: 'Each with their own story.',
@@ -773,6 +783,8 @@ export const clienteEn = {
     preferencias: 'Preferences',
     pagos: 'Payments',
     ayuda: 'Help and legal',
+    // S73 TEMPORARY (dies with the lamina signatures, Ley 37)
+    laminaGate: 'S73 board · design gate',
     errorCargar: "We couldn't load this. Try again.",
     reintentar: 'Try again',
     guardar: 'Save changes',
