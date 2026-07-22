@@ -2750,6 +2750,201 @@ Ese es el éxito del documento. Cumplirlo es trabajo de los meses y años que vi
 
 ---
 
+## 14. El equipo del negocio — LETRA_EQUIPO (v1, S73)
+
+> **Depositada en la transposición S73→S74 (22 Jul 2026), con la palabra del
+> founder.** La letra de mesa se escribió ANTES de que el motor se construyera;
+> este depósito la ACTUALIZA contra lo construido — los tres §§ superados por
+> los hechos (§3, §4, §5) llevan su delta marcado y conservan la espec original
+> como nota histórica. **La numeración interna §0–§8 es la que citan D-486
+> (§2/§7), D-494 (§4) y `MODELO_NOTIFICACIONES.md`** — resuelve acá. Registro
+> de proceso: el freno 76b rigió una CUARTA vez antes de este depósito (la
+> letra llegó anunciada como "adjunta" sin el literal; se pidió y llegó pegada).
+
+### Letra original (S73, sobre el literal del relevamiento de B)
+
+> **Estado: LETRA DE MESA sobre el relevamiento `500ee8d`
+> (`docs/relevamientos/2026-07-21-s73b-relevamiento-equipo.md`). SUPERSEDE el
+> esqueleto** (`ESQUELETO_EQUIPO_PORTAL_PRESTADOR_S73.md`) — que queda como
+> historia con su freno. Destino: sección nueva de PORTAL_PRESTADOR *(este
+> depósito lo cumple)*. **Las decisiones de PRODUCTO ya están firmadas por el
+> founder** (unidad = negocio · tres roles · acumulables por unión). **Las de
+> ARQUITECTURA las toma esta letra (regla 74) con su porqué.** La MIGRACIÓN la
+> propone Code y espera OK del founder (regla 73) — esta letra es su espec, no
+> su SQL. *(Nota del depósito: la migración ya corrió con OK founder —
+> `20260721210000` motor + `20260721230000` gate; ver §5 y el estado post-S73.)*
+
+### §0. Freno registrado (L-158, de la mesa)
+
+El esqueleto §5 citaba `cuenta_roles` como chasis de roles de persona. El
+literal: **es `tipo_actor` por CUENTA, sin `user_id`** — nombre-trampa, query
+de B rebotó 42703. Esta letra corrige la referencia. Segundo hallazgo del
+literal: `prestadores.tipo` sigue poblado (clinica_veterinaria 2 · paseador 3)
+— **el eje que A3 mató vive en datos**; se registra como deuda con disparo
+(cuando se toque el catálogo de prestadores), cero borrado ahora. *(Hoy
+D-487.)*
+
+### §1. Lo que el literal confirma del esqueleto (no se re-decide)
+
+- El vínculo persona×negocio EXISTE: `prestador_empleados` (10 filas,
+  UNIQUE(prestador_id, user_id), rol CHECK 'dueño'|'empleado'). Los 5
+  titulares S67 viven ahí.
+- La PROCEDENCIA ya preserva la salida: 48 funciones cargan `empleado_id`,
+  13 triggers lo estampan — *el acceso muere, los actos quedan* es verdad de
+  motor HOY. La letra no construye esto: lo declara.
+- La CREDENCIAL tiene depósito: `prestador_documentos` (titulo_profesional,
+  registro_senescyt) + el ciclo admin §14.2. No se duplica.
+- El ACTO tiene tabla: `prestador_empleado_servicios` (0 filas).
+- La ENTRADA tiene motor: `empleado_invitaciones` + 3 RPCs + policy.
+- **D-464 es literal:** `eventos_mascota_select` y `medicacion_select` gatean
+  solo por `user_tiene_acceso_a_mascota` — cero lectura de rol. *(Curado en
+  S73 — ver §5.)*
+
+### §2. DECISIÓN DE ARQUITECTURA — dónde viven los roles
+
+**El rol vive en tabla hija `empleado_roles` (empleado_id FK al vínculo, rol,
+asignado_por, asignado_en), UNIQUE(empleado_id, rol).** El porqué, contra la
+alternativa (columna array en el vínculo):
+
+1. La UNIQUE del vínculo se CONSERVA intacta — el vínculo es la persona en el
+   negocio; el rol es un atributo acumulable de ese vínculo.
+2. Asignar/quitar un rol es INSERT/DELETE con autor y fecha — auditable de
+   nacimiento (quién asignó, cuándo), que un array no da gratis.
+3. Las policies RLS lo leen con EXISTS sobre la hija — patrón que la casa ya
+   usa 28 veces.
+4. Extensible sin ALTER: un rol futuro es un valor nuevo, no un cambio de
+   shape.
+
+**Los tres roles: `dueño` · `profesional` · `recepcion`.** La UNIÓN se
+resuelve en el helper (§4). La columna `rol` vieja del vínculo queda
+CONGELADA como legacy tras el backfill (deuda de DROP con disparo —
+precedente D-471: el portal legado comparte la DB; no se dropea a ciegas).
+*(Hoy D-486; el motor la construyó tal cual — migración `20260721210000`.)*
+
+### §3. Backfill — ACTUALIZADO: lo que de hecho pasó
+
+**El punto de adjudicación quedó SUPERADO por los hechos — cero adjudicación
+ocurrió.** La directiva founder de purga pre-corte 1-jul (D-492) resolvió el
+caso antes de que existiera: los no-titulares eran legacy pre-corte, y **las 3
+filas activas se DESACTIVARON con OK founder** (commit `14e49fa`, UPDATE con
+verificación en la misma txn). Estado final literal: *las 3 filas
+activo=false · 5 dueños intactos · CERO empleados activos con rol legacy
+'empleado' · residuo fixture T7 = 0*. Reversible (`activo=true`); la purga
+definitiva es D-492. Los 5 titulares (rol='dueño') sí se backfillearon
+mecánicos a la hija (`20260721210000`). **El gate D-464 aterrizó sin ningún
+empleado activo sin rol — el requisito de la espec se cumplió por
+desactivación, no por adjudicación.**
+
+*Espec original (nota histórica):* «Los 5 titulares (rol='dueño') → fila
+`dueño` en la hija. Mecánico. **Los 5 no-titulares (rol='empleado') NO se
+adivinan**: profesional vs recepción es exactamente la distinción que no
+existía. Code reporta las 5 filas LITERALES (quiénes son, de qué negocio, si
+son demo/seed) y el founder adjudica ANTES de que el gate D-464 se aplique —
+un empleado sin rol tras el gate pierde lectura clínica, y eso tiene que ser
+decisión, no accidente de migración.»
+
+### §4. El helper único de autorización
+
+Nace UNA función (patrón puerta única): `empleado_tiene_rol(prestador_id,
+roles[])` — SECURITY con las curas de la casa (search_path fijado, REVOKE
+anon/PUBLIC, L-140). **Toda policy y todo RPC que gatee por rol la llama;
+nadie re-implementa el EXISTS.** La unión firmada por el founder ES esta
+función: N filas de rol = N permisos sumados, jamás "rol activo".
+
+**Enmienda v3 (mesa, incorporada al motor):** las TRES policies de la propia
+hija `empleado_roles` — **SELECT, INSERT y DELETE, no solo la escritura** —
+gobiernan por el helper (`empleado_tiene_rol(…, ARRAY['dueño'])`): un
+co-dueño ve y administra los roles de su negocio POR la misma puerta única,
+sin EXISTS artesanal ni en la lectura. Construido tal cual en
+`20260721210000` (policies `empleado_roles_select` /
+`empleado_roles_insert_duenio` / `empleado_roles_delete_duenio`). *(D-494
+registra la excepción viva: los 2 helpers de caso re-implementan el chequeo
+por join porque reciben el usuario por parámetro — cura declarada: sobrecarga
+con `user_id` y delegación.)*
+
+### §5. La cura D-464 — ACTUALIZADO: APLICADA (ya no es espec)
+
+**El gate está APLICADO de motor** (migración
+`20260721230000_s73b_gate_d464_lectura_clinica.sql`, commit `5082360`, OK
+founder, exacto a lo revisado). Lo construido:
+
+- **Nace `user_acceso_clinico_a_mascota(uuid)`** — acceso a la mascota **Y**
+  `empleado_tiene_rol(negocio, ['dueño','profesional'])` para el lado
+  prestador. Su **pata FAMILIA es BYTE-IDÉNTICA al helper viejo** (construida
+  por cita literal de `pg_get_functiondef`; la verificación imperativa PRUEBA
+  la identidad módulo whitespace quitada la única línea del gate). La lectura
+  del lado familia NO se tocó — su arco es S74 (D-485, RLS-familia).
+- **14 policies SELECT clínicas** migraron al helper nuevo (11 directas + 3
+  con `OR is_admin()`), **`eventos_mascota` ENTERA** — razón de mesa: A3 §4
+  nunca prometió el timeline a recepción — y **`mascota_perfil_vigente`
+  gateada con VENTANA DECLARADA S73→S74** (D-489 nombra
+  `tiene_emergencia_activa` para la vista destilada).
+- L-140 con sonda sobre el helper (proacl sin anon/PUBLIC, verificado en la
+  propia migración).
+- La secuencia obligatoria de la espec se honró con la forma §3: mecanismo +
+  backfill titulares (`20260721210000`) → desactivación legacy (`14e49fa`) →
+  el gate (`20260721230000`). **El gate jamás aterrizó con un empleado activo
+  sin rol.**
+
+**Lo que recepción SÍ ve (destilado A3 §4 — identidad + etapa + alerta de
+seguridad) es SUPERFICIE + lectores de S74** (D-489, con veto founder). En
+S73 el motor solo CERRÓ la fuga; no construyó la vista destilada. Cerrar sin
+construir es correcto: mejor una recepcionista que pide ayuda al vet que una
+que lee la HC de todos.
+
+### §6. D-463 — el otorgamiento carga el acto (v1 mínimo)
+
+`prestador_empleado_servicios` se puebla cuando el dueño ACOTA a un
+profesional a ciertos servicios. **Default declarado v1: sin filas = todos
+los actos NO clínicos del negocio.** Los actos CLÍNICOS exigen además
+credencial validada (§14.2) — el muro cuelga de credencial+acto, jamás del
+tipo de negocio (firma founder: la clínica multi-servicio es el caso común).
+La validación fina del acto clínico por credencial es motor de S74 si esta
+ventana satura; la letra queda.
+
+### §7. Deudas que nacen de este literal (numeradas tras las de A)
+
+- DROP de la columna `rol` legacy del vínculo — disparo: portal legado
+  jubilado o auditoría D-471. *(= D-486.)*
+- `prestadores.tipo` poblado con el eje muerto — disparo: primer toque al
+  catálogo de prestadores. *(= D-487.)*
+- La consulta no reconstruible desde URL sola (hallazgo 1 de B, tensión con
+  ESTRATEGIA 7.5) — disparo: la pasada de deep-links. *(= D-488; adelantada
+  en la misma S73, commit `780a3e0`.)*
+- La vista destilada de recepción (superficie S74, ya en el arco).
+  *(= D-489.)*
+
+### §8. Qué ejecuta B en S73 (con OK founder para la migración)
+
+1. Migración: tabla hija + helper + backfill titulares (76(g): declarar si
+   computa anclas; esta es aditiva + backfill acotado — declarar igual).
+   Verificación imperativa regla 40 + sondas L-140. *(EJECUTADO —
+   `20260721210000`, commit `7ce6b91`.)*
+2. Reporte de las 5 filas no-titulares → adjudicación founder. *(SUPERADO —
+   ver §3: directiva 1-jul, desactivación `14e49fa`.)*
+3. El gate D-464 SOLO tras la adjudicación. *(EJECUTADO tras la
+   desactivación — `20260721230000`, commit `5082360`.)*
+4. La superficie (ventana de equipo en NEGOCIO) sigue siendo S74 salvo que
+   la sesión sobre — el orden de caída del brief rige. *(La sesión NO sobró:
+   superficie a S74.)*
+
+### Estado POST-S73 (al depositar, 22 Jul 2026)
+
+**El motor está COMPLETO:** `empleado_roles` con sus tres policies por la
+puerta única · `empleado_tiene_rol` (L-140 verde) · backfill de los 5
+titulares · legacy desactivado (cero empleados activos sin rol) · el gate
+D-464 cerrado de motor (14 policies + `user_acceso_clinico_a_mascota` con
+pata familia byte-idéntica). **Lo que falta es SUPERFICIE, y es S74:** la
+ventana de equipo en NEGOCIO (invitar, asignar roles, acotar actos — sobre
+los 3 RPCs de invitación vivos), la vista destilada de recepción (D-489, veto
+founder pendiente) y la FIRMA del prestador (`MODELO_PRESENCIA` §2 pieza 1,
+misma superficie NEGOCIO). Deudas vivas del frente: D-463 (acto clínico
+fino) · D-486 · D-487 · D-490 (gate de ESCRITURA clínica sin rol) · D-492
+(purga) · D-494/D-495 (helpers de caso y proacl de
+`user_tiene_acceso_a_mascota`).
+
+---
+
 ## Decisiones de modelo cerradas en Sesión 20
 
 Este documento incorpora decisiones de modelo cerradas formalmente durante Sesión 20. Las listamos acá como referencia rápida — el detalle vive en las secciones del documento donde se materializan.
@@ -2831,4 +3026,5 @@ Este documento incorpora decisiones de modelo cerradas formalmente durante Sesi�
 - **v1.0 (Sesión 20 — Mayo 2026):** Primer borrador completo. Visión narrativa del portal del prestador: alma, días 1/30/90, diferenciación por familia de servicios, secciones del portal, momentos narrativos, contexto de mascota, familia humana, niños y familiares autorizados, conexión con el ecosistema, fases F1→F4. *(Entrada reconstruida en S42 desde el header y el cierre del documento; el doc no tenía historial de versiones hasta v1.2.)*
 - **v1.1 (18 May 2026 — S21):** Segunda lectura como lector frío (L-068) cumplida. Fixes mecánicos aplicados: A1 referencia obsoleta, A2 eliminación de referencias a kickoff, B1 consolidación de decisión "3 ciudades", B2 consolidación de "mapa de pertenencia", C1 matiz P13 en sección 9.7, E1 corrección de cifra de decisiones (50 → 69). Hallazgos decisionales pendientes (A3, D1-D7, C2, C3, E2) para ser anotados como deuda en CLAUDE.md en próximos pasos. *(Entrada reconstruida en S42 desde el header v1.1.)*
 - **v1.2 (5 Jul 2026 — S42):** Nota de cambio de superficie (app móvil Expo primaria, web secundaria del mismo código; alma ratificada intacta). Asimetría de complejidad por familia agregada en 5.2. Familia A congelada con disparo. Referencia: `ESTRATEGIA_2026H2.md`.
+- **v1.3 (22 Jul 2026 — transposición S73→S74):** Nace la sección 14 — LETRA_EQUIPO v1 (letra de mesa S73 sobre el relevamiento `500ee8d`), depositada ACTUALIZADA contra el motor construido: §3 backfill superado por la directiva 1-jul (desactivación `14e49fa`, cero adjudicación), §4 con la enmienda v3 (las tres policies de la hija por la puerta única), §5 de espec a estado (gate D-464 aplicado — `20260721230000`, 14 policies + `user_acceso_clinico_a_mascota`), y el estado post-S73 (motor completo; la superficie es S74). Resuelve las citas D-486 (§2/§7), D-494 (§4) y `MODELO_NOTIFICACIONES.md`.
 
