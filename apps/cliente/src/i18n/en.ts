@@ -110,6 +110,11 @@ export const clienteEn = {
     porCoordinarTitulo: "{{mascota}}'s visit is waiting for a date",
     railPaseos: 'Walks',
     railEstetica: 'Grooming',
+    // S73 item 1: the minimum-4 rail (LOTE S73, founder gate pending)
+    railAdiestramiento: 'Training',
+    railVet: 'Vet care',
+    railDescubre: 'Discover',
+    railError: "We couldn't load your services.",
     // "walks left" truncaba con "…" a 96px — la captura M3 lo atrapó;
     // la regla del cuadrado manda: UN número, jamás texto cortado.
     railSaldoUna: '1 left',

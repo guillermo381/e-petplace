@@ -116,6 +116,11 @@ export const clienteEs = {
     porCoordinarTitulo: 'La cita de {{mascota}} espera fecha',
     railPaseos: 'Paseos',
     railEstetica: 'Estética',
+    // S73 ítem 1: el rail mínimo-4 (LOTE S73, gate founder pendiente)
+    railAdiestramiento: 'Adiestramiento',
+    railVet: 'Veterinaria',
+    railDescubre: 'Descubre',
+    railError: 'No pudimos leer tus servicios.',
     railSaldoUna: '1 salida',
     railSaldo: '{{n}} salidas',
     // S61-A11 — el Hogar de Kary (LOTE S61, GATE PENDIENTE founder)

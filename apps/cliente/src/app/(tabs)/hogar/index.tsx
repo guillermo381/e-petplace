@@ -70,6 +70,7 @@ import {
   obtenerCitasActivasMascota,
   obtenerPresupuestosFamilia,
   type PresupuestoFamilia,
+  mascotasElegibles,
   obtenerResumenServiciosHogar,
   type ResumenServiciosHogar,
   obtenerVacunaPorEvento,
@@ -292,6 +293,9 @@ export default function Hogar() {
   // zona de SERVICIOS VIVOS — null mientras carga o si la lectura falló
   // (la zona calla, jamás pinta verosímil-falso — L-139).
   const [resumenServicios, setResumenServicios] = useState<ResumenServiciosHogar | null>(null);
+  // S73 ítem 1: con mínimo-4 el fallo del resumen NO puede callar (antes
+  // era "zona callada") — pintaría cuatro «Descubre» falsos (L-139).
+  const [resumenError, setResumenError] = useState(false);
   // QW1 (S53): el saludo lleva el nombre del miembro (profiles.nombre).
   const [nombrePerfil, setNombrePerfil] = useState<string | null>(null);
   // S71-A3 — PONTE AL DÍA (F2): los habitantes de la sección que preside.
@@ -414,9 +418,13 @@ export default function Hogar() {
             setPlanActivo(pl.data.find((p) => p.estado === 'activa') ?? null);
           }
         });
-        // S60-A6: la posición por servicio (fallo = zona callada, L-139)
+        // S60-A6 → S73: la posición por servicio; el fallo gana banda
+        // con reintento (el mínimo-4 no puede degradar a «Descubre»).
+        setResumenError(false);
         void obtenerResumenServiciosHogar().then((rs) => {
-          if (vigente && rs.ok) setResumenServicios(rs.data);
+          if (!vigente) return;
+          if (rs.ok) setResumenServicios(rs.data);
+          else setResumenError(true);
         });
         void obtenerMiPerfil().then((p) => {
           // sin nombre: el saludo va solo — jamás un nombre inventado
@@ -815,54 +823,185 @@ export default function Hogar() {
         })}
       </Animated.View>
 
-      {/* ── TUS SERVICIOS (S60-A6, D-366 — el insumo rey de Kary): la
-          posición por servicio, sin buscarla. Regla de existencia: la
-          celda vive SOLO con actividad (próximos, saldo, plan, o
-          historial ≤60 días) — cero actividad = cero celda (Explorar
-          descubre, el Hogar anticipa). Lo VIVO manda sobre lo próximo
-          (el hero queda arriba, intacto); UN dato por celda, jamás
-          dos. "Mis paseos" MIGRÓ acá desde el grupo del carnet. ── */}
+      {/* ── TUS SERVICIOS (S60-A6 → S73 ítem 1, letra founder): MÍNIMO 4
+          por prioridad de uso + «Descubre» — la regla de existencia S60
+          ("cero actividad = cero celda") queda REEMPLAZADA para los
+          cuatro oficios (D-462 camino a: el rail dice la verdad
+          completa). Copy corto E4 intacto: UN número o UNA fecha; lo que
+          no tiene esa forma va SIN dato. Orden = prioridad de uso
+          computable (regla simple v1, voto de mesa: próxima > actividad
+          reciente > «Descubre» en orden canónico de apertura). ── */}
       {(() => {
-        const rp = resumenServicios?.paseo;
-        const re = resumenServicios?.estetica;
-        // S71-A3 (F1, letra founder): el rail de CUADRADOS CHICOS — los
-        // servicios son navegación, no acción pendiente; achicarlos y
-        // ponerlos en tira los baja de jerarquía sin esconderlos. Regla
-        // del copy corto (E4): el cuadrado dice UN número o UNA fecha —
-        // la frase entera vive en el hub al que navega; si el dato no
-        // cabe en esa forma (los días del plan), va SIN dato, jamás "…".
-        // E4: nace con LOS 2 REALES (paseo, estética — los que tienen
-        // lector); vet/adiestramiento se suman cuando el suyo exista
-        // (deuda declarada). Regla de existencia intacta.
-        const hayPaseo = (rp !== undefined && (rp.proxima !== null || rp.salidas_saldo > 0)) || hayPlanes;
+        const listaMascotas = Array.isArray(mascotas) ? mascotas : [];
+        // Memorial cede el mínimo (letra de elegibilidad §5): sin mascota
+        // elegible para NADA, los «Descubre» no se montan. Borde declarado
+        // (vara S73-B): estado_vida null y 'perdida' también suprimen —
+        // la frontera falla cerrada, y a un hogar con mascota perdida
+        // tampoco se le hace marketing.
+        const hayElegibles = mascotasElegibles(listaMascotas, null).length > 0;
+        const hoyIso = new Intl.DateTimeFormat('en-CA').format(hoy);
+        const esReciente = (f: string | null) =>
+          f !== null && (Date.parse(hoyIso) - Date.parse(f)) / 86400000 <= 60;
+
+        if (resumenError) {
+          return (
+            <Animated.View entering={entradaZona(2)} style={{ paddingHorizontal: spacing[4], marginTop: spacing[7], gap: spacing[3] }}>
+              <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                {t('hogar.serviciosTitulo')}
+              </Text>
+              <EstadoVacio
+                registro="seccion"
+                titulo={t('hogar.railError')}
+                accion={
+                  <Boton
+                    variante="secundario"
+                    tamaño="sm"
+                    etiqueta={t('hogar.reintentar')}
+                    onPress={() => {
+                      setResumenError(false);
+                      setResumenServicios(null);
+                      void obtenerResumenServiciosHogar().then((rs) => {
+                        if (rs.ok) setResumenServicios(rs.data);
+                        else setResumenError(true);
+                      });
+                    }}
+                  />
+                }
+              />
+            </Animated.View>
+          );
+        }
+        if (resumenServicios === null) {
+          // cargando: el rail espera entero (Ley 13, estático) — no
+          // aparece "de a cuadrados" ni miente «Descubre» a medias.
+          return (
+            <Animated.View entering={entradaZona(2)} style={{ paddingHorizontal: spacing[4], marginTop: spacing[7], gap: spacing[3] }}>
+              <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                {t('hogar.serviciosTitulo')}
+              </Text>
+              <EsqueletoGrupo>
+                <View style={{ flexDirection: 'row', gap: spacing[3] }}>
+                  <Esqueleto forma="bloque" ancho={112} alto={92} />
+                  <Esqueleto forma="bloque" ancho={112} alto={92} />
+                  <Esqueleto forma="bloque" ancho={112} alto={92} />
+                </View>
+              </EsqueletoGrupo>
+            </Animated.View>
+          );
+        }
+
+        const rp = resumenServicios.paseo;
+        const re = resumenServicios.estetica;
+        const ra = resumenServicios.adiestramiento;
+        const rv = resumenServicios.veterinaria;
+
         const datoPaseo =
-          rp?.proxima != null
+          rp.proxima !== null
             ? fechaCortaMono(rp.proxima.fecha, idioma)
-            : rp !== undefined && rp.salidas_saldo > 0
+            : rp.salidas_saldo > 0
               ? rp.salidas_saldo === 1
                 ? t('hogar.railSaldoUna')
                 : t('hogar.railSaldo', { n: rp.salidas_saldo })
               : null; // plan-solo: los días no caben en la forma — sin dato
-        // estética: próxima > historial reciente (ventana 60 días, ratificada)
-        const cerradaReciente =
-          re?.ultima_cerrada != null &&
-          (Date.parse(new Intl.DateTimeFormat('en-CA').format(hoy)) - Date.parse(re.ultima_cerrada)) / 86400000 <= 60;
-        const hayEstetica = re !== undefined && (re.proxima !== null || cerradaReciente);
-        const datoEstetica =
-          re?.proxima != null
-            ? fechaCortaMono(re.proxima.fecha, idioma)
-            : cerradaReciente && re?.ultima_cerrada != null
-              ? fechaCortaMono(re.ultima_cerrada, idioma)
-              : null;
-        if (!hayPaseo && !hayEstetica) return null;
-        const cuadrados: { key: string; icono: 'paseo' | 'grooming'; nombre: string; dato: string | null; destino: '/hogar/paseos' | '/hogar/grooming' }[] = [
-          ...(hayPaseo
-            ? [{ key: 'paseo', icono: 'paseo' as const, nombre: t('hogar.railPaseos'), dato: datoPaseo, destino: '/hogar/paseos' as const }]
-            : []),
-          ...(hayEstetica
-            ? [{ key: 'estetica', icono: 'grooming' as const, nombre: t('hogar.railEstetica'), dato: datoEstetica, destino: '/hogar/grooming' as const }]
-            : []),
+
+        type Cuadrado = {
+          key: string;
+          icono: 'paseo' | 'grooming' | 'training' | 'veterinaria';
+          nombre: string;
+          dato: string | null;
+          actividad: boolean;
+          /** grupo 1: ordena por la fecha de la próxima. */
+          fechaProxima: string | null;
+          /** grupo 2: ordena por recencia (saldo/plan/por-coordinar
+           *  vigentes cuentan como HOY — actividad sin fecha). */
+          recencia: string | null;
+          onPress: () => void;
+        };
+
+        // el orden del array ES el canónico de apertura (grupo 3)
+        const base: Cuadrado[] = [
+          {
+            key: 'paseo',
+            icono: 'paseo',
+            nombre: t('hogar.railPaseos'),
+            dato: datoPaseo,
+            actividad: rp.proxima !== null || rp.salidas_saldo > 0 || hayPlanes,
+            fechaProxima: rp.proxima?.fecha ?? null,
+            recencia: rp.salidas_saldo > 0 || hayPlanes ? hoyIso : null,
+            onPress: () => router.push('/hogar/paseos'),
+          },
+          {
+            key: 'estetica',
+            icono: 'grooming',
+            nombre: t('hogar.railEstetica'),
+            dato:
+              re.proxima !== null
+                ? fechaCortaMono(re.proxima.fecha, idioma)
+                : esReciente(re.ultima_cerrada) && re.ultima_cerrada !== null
+                  ? fechaCortaMono(re.ultima_cerrada, idioma)
+                  : null,
+            actividad: re.proxima !== null || esReciente(re.ultima_cerrada),
+            fechaProxima: re.proxima?.fecha ?? null,
+            recencia: re.ultima_cerrada,
+            onPress: () => router.push('/hogar/grooming'),
+          },
+          {
+            key: 'adiestramiento',
+            icono: 'training',
+            nombre: t('hogar.railAdiestramiento'),
+            dato:
+              ra.proxima !== null
+                ? fechaCortaMono(ra.proxima.fecha, idioma)
+                : esReciente(ra.ultima_cerrada) && ra.ultima_cerrada !== null
+                  ? fechaCortaMono(ra.ultima_cerrada, idioma)
+                  : null,
+            actividad: ra.proxima !== null || esReciente(ra.ultima_cerrada),
+            fechaProxima: ra.proxima?.fecha ?? null,
+            recencia: ra.ultima_cerrada,
+            onPress: () => router.push('/hogar/adiestramiento'),
+          },
+          {
+            key: 'veterinaria',
+            icono: 'veterinaria',
+            nombre: t('hogar.railVet'),
+            // por-coordinar no tiene forma E4 (sin fecha) → sin dato
+            dato:
+              rv.proxima !== null
+                ? fechaCortaMono(rv.proxima.fecha, idioma)
+                : esReciente(rv.ultima_cerrada) && rv.ultima_cerrada !== null
+                  ? fechaCortaMono(rv.ultima_cerrada, idioma)
+                  : null,
+            actividad: rv.proxima !== null || rv.por_coordinar || esReciente(rv.ultima_cerrada),
+            fechaProxima: rv.proxima?.fecha ?? null,
+            recencia: rv.por_coordinar ? hoyIso : rv.ultima_cerrada,
+            onPress: () => {
+              // destino v1 (D-493, hueco del hub vet declarado): la
+              // mascota de la próxima/por-coordinar/última cita vet.
+              const destinoId = rv.mascota_id_destino;
+              const nombre = listaMascotas.find((m) => m.id === destinoId)?.nombre ?? '';
+              if (destinoId !== null) {
+                router.push({ pathname: '/citas/[mascotaId]', params: { mascotaId: destinoId, nombre } });
+              } else {
+                router.push('/explorar/veterinaria');
+              }
+            },
+          },
         ];
+
+        // comparadores con CERO en igualdad: el sort estable conserva el
+        // orden canónico del array base cuando las fechas empatan
+        const grupo1 = base
+          .filter((c) => c.actividad && c.fechaProxima !== null)
+          .sort((a, b) =>
+            (a.fechaProxima as string) < (b.fechaProxima as string) ? -1 : (a.fechaProxima as string) > (b.fechaProxima as string) ? 1 : 0,
+          );
+        const grupo2 = base
+          .filter((c) => c.actividad && c.fechaProxima === null)
+          .sort((a, b) => ((a.recencia ?? '0000') > (b.recencia ?? '0000') ? -1 : (a.recencia ?? '0000') < (b.recencia ?? '0000') ? 1 : 0));
+        const descubre = hayElegibles ? base.filter((c) => !c.actividad) : [];
+        const cuadrados = [...grupo1, ...grupo2, ...descubre];
+        if (cuadrados.length === 0) return null; // hogar sin elegibles y sin historia
+
         return (
           <Animated.View entering={entradaZona(2)} style={{ marginTop: spacing[7], gap: spacing[3] }}>
             <Text style={{ paddingHorizontal: spacing[4], fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.secondary }}>
@@ -882,16 +1021,22 @@ export default function Hogar() {
                   elevacion="reposo"
                   accessibilityRole="button"
                   etiqueta={c.nombre}
-                  onPress={() => router.push(c.destino)}
+                  onPress={c.onPress}
                 >
                   <View style={{ width: 96, gap: spacing[2] }}>
                     <Icono nombre={c.icono} tamano={24} />
                     <Texto variante="apoyo" color="primary" numberOfLines={1}>
                       {c.nombre}
                     </Texto>
-                    {c.dato !== null ? (
+                    {c.actividad && c.dato !== null ? (
                       <Texto variante="dato" numberOfLines={1}>
                         {c.dato}
+                      </Texto>
+                    ) : !c.actividad ? (
+                      // la invitación es voz humana, no dato de máquina
+                      // (Ley 3: sans, no mono)
+                      <Texto variante="apoyo" numberOfLines={1}>
+                        {t('hogar.railDescubre')}
                       </Texto>
                     ) : null}
                   </View>
