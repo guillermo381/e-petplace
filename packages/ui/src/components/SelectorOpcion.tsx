@@ -76,7 +76,11 @@ export interface SelectorOpcionProps {
    *  del CUÁNDO) · 'grilla' (chips envueltos para conjuntos grandes —
    *  los inicios disponibles). Mismo tratamiento de selección en las
    *  tres; el radiogroup y el anuncio por chip no cambian. */
-  disposicion?: 'fila' | 'tira' | 'grilla'
+  /** S73 (gate founder, chips vet): 'columnas' = DOS columnas de ancho
+   *  UNIFORME — media columna cada chip, la etiqueta larga ENVUELVE
+   *  dentro (minHeight 44) y el impar queda a ancho de columna, jamás
+   *  cierra a lo ancho ("mismo tamaño" es la firma). */
+  disposicion?: 'fila' | 'tira' | 'grilla' | 'columnas'
   /** ENMIENDA S56 (Hoja del plan, D-338): selección MÚLTIPLE — los 7
    *  chips L·M·X·J·V·S·D. Cambia la semántica a checkbox-group
    *  (accessibilityRole checkbox + checked por chip); `seleccionadas`
@@ -106,6 +110,7 @@ function Chip({
   seleccionada,
   onSelect,
   crecer,
+  columna,
   modo,
   acento,
 }: {
@@ -115,6 +120,7 @@ function Chip({
   seleccionada: boolean
   onSelect: (codigo: string) => void
   crecer: boolean
+  columna: boolean
   modo: 'radio' | 'checkbox'
   acento: 'capa' | 'control' | 'oficio'
 }) {
@@ -192,7 +198,7 @@ function Chip({
       accessibilityState={{ checked: seleccionada, disabled: deshabilitada, busy: cargando }}
       accessibilityLabel={`${opcion.etiqueta}, opción ${indice + 1} de ${total}`}
       style={[
-        { flexGrow: crecer ? 1 : 0 },
+        columna ? { flexBasis: '48%', maxWidth: '48%', flexGrow: 0 } : { flexGrow: crecer ? 1 : 0 },
         // Focus visible en web, en la voz de la casa (patrón Boton):
         // reemplaza el anillo azul del UA. `outlineStyle:none` en
         // reposo mata el default; enfocada = outline en el acento.
@@ -216,7 +222,8 @@ function Chip({
           alignItems: 'center',
           justifyContent: 'center',
           gap: spacing[2],
-          height: ALTO,
+          // columnas: la etiqueta larga ENVUELVE — minHeight, jamás clip
+          ...(columna ? { minHeight: ALTO, paddingVertical: spacing[2] } : { height: ALTO }),
           paddingHorizontal: spacing[4],
           // LEY DE GEOMETRÍA (S58): lo que se ELIGE es rectángulo suave —
           // la píldora quedó para lo que INFORMA (Insignia intacta)
@@ -234,8 +241,9 @@ function Chip({
           <View style={mostrarSpinner ? { opacity: 0 } : null}>{opcion.adorno}</View>
         ) : null}
         <Text
-          numberOfLines={1}
+          numberOfLines={columna ? undefined : 1}
           style={{
+            textAlign: 'center',
             fontFamily: typography.family.sans.medium,
             fontSize: typography.size.sm,
             // apagada = voz terciaria; el estado NO mueve el layout.
@@ -281,6 +289,7 @@ export function SelectorOpcion({
       seleccionada={multiple ? (seleccionadas ?? []).includes(opcion.codigo) : opcion.codigo === seleccionada}
       onSelect={onSelect}
       crecer={disposicion === 'fila'}
+      columna={disposicion === 'columnas'}
       modo={multiple ? 'checkbox' : 'radio'}
       acento={acento}
     />
@@ -305,7 +314,7 @@ export function SelectorOpcion({
           {chips}
         </ScrollView>
       ) : (
-        <View style={{ flexDirection: 'row', flexWrap: disposicion === 'grilla' ? 'wrap' : 'nowrap', gap: spacing[2] }}>
+        <View style={{ flexDirection: 'row', flexWrap: disposicion === 'grilla' || disposicion === 'columnas' ? 'wrap' : 'nowrap', gap: spacing[2] }}>
           {chips}
         </View>
       )}

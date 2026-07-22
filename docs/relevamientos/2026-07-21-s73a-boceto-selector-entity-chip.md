@@ -1,4 +1,83 @@
-# S73-A · M1 — BOCETO: el ENTITY CHIP del selector de mascota (dictado founder S73)
+# S73-A · M1 — BOCETO: el ENTITY CHIP del selector de mascota (v2 — dictado founder S73)
+
+> **v2 (mismo día): el founder RECHAZÓ las tres proporciones del v1**
+> (avatar DENTRO del chip con inset) **con dictado nuevo, textual:** *"el
+> avatar se ve un poco MÁS GRANDE que el chip, lo que hace que el
+> contorno del chip se FUSIONE con el del avatar y no se vea marcado feo
+> por fuera; fondo blanco, y al escogerlo pasa a FONDO MAGENTA sin
+> resaltar el contorno; de pronto algo de sombra para dar efecto 3D."*
+> **Hallazgo de mesa que lo funda (citado, verificado contra literal):**
+> es la **Ley 20 aplicada a un componente que nunca la recibió** —
+> SKILL.md:329: *"REGLA CHANEL DEL MARCO cableada en Tarjeta: la
+> superficie que gana elevación PIERDE el hairline"* — con la vara
+> Airbnb de la propia ley (sombras pequeñas, sutiles). El founder
+> re-derivó su propia ley sin citarla.
+> Captura v2: `scripts/capturas/s73-a-boceto-entity-chip-v2.png`
+> (3 proporciones × claro/oscuro/MEMORIAL, junto a vecinos de valor en
+> su forma actual).
+
+## v2 · Las condiciones duras, verificadas
+
+- **La sombra sale de `theme.elevacion.reposo`** — es un token STRING de
+  `boxShadow` (`tokens/elevacion.ts:38`, dos capas de tinta cálida); el
+  mock lo aplica como `boxShadow: theme.elevacion.reposo`, cero sombra
+  artesanal. **EXTENSIÓN DE LEY A FIRMAR, no dada por hecha:** la Ley 20
+  lista tarjetas/celdas para `reposo` y dice "la elevación acompaña a la
+  jerarquía" — un CHIP de selección no está en la lista; que un chip
+  califique para elevación es extensión que el gate firma.
+- **Ley 6:** la sombra del mock es estática; en construcción, el pressed
+  escala por `usePresionado` y la sombra viaja con la superficie SIN
+  animarse por separado.
+- **Contraste, medido:** LIGHT `accent.control` (magentaDark) porta
+  blanco = **8.25:1** (par VIVO del gate, corrido en esta sesión —
+  178/0). **HALLAZGO DEL MOCK EN DARK:** `accent.control` resuelve a
+  `violetText` (violeta CLARO) y el blanco encima SE LAVA a ojo — **el
+  lleno exige un token de texto-sobre-control POR TEMA** (light→blanco
+  8.25 ✓ · dark→candidato tinta sobre violeta, A MEDIR · memorial→
+  degrada) **con pares nuevos al gate WCAG ANTES de construir.** La
+  captura lo muestra tal cual.
+- **Overflow, literal de RN:** el default de `overflow` en RN es
+  `'visible'` y `borderRadius` NO clipea hijos salvo
+  `overflow:'hidden'` — el avatar sobresale sin cortarse (hijo absoluto
+  con `top: -sobra`); la fila compensa con `paddingVertical = sobra`
+  para que las filas vecinas no colisionen (capturado: cero colisión).
+- **Memorial:** elevación CONSERVADA (Ley 20: no es celebración), el
+  acento degrada por tema — panel 3 de la captura.
+
+## v2 · Las tres proporciones (riesgo por variante, §6b.3)
+
+- **V1 · avatar 48 / chip 44 (+4, sobresale 2 por lado):** riesgo — el
+  overhang casi no se LEE; se paga la complejidad del absolute sin
+  cobrar la fusión visual.
+- **V2 · avatar 52 / chip 44 (+8, sobresale 4 por lado) — VOTO:** el
+  "un poco más grande" del dictado; la fusión se ve, el texto respira.
+- **V3 · avatar 56 / chip 44 (+12):** el techo — el avatar empieza a
+  dominar y el chip se lee como etiqueta DEL avatar; el paddingVertical
+  de compensación (6) infla el alto efectivo de cada fila.
+
+## v2 · EL RIESGO MAYOR — la decisión (a)/(b) del founder
+
+`SelectorOpcion` es el MISMO componente de duración, día, hora, idioma y
+los 7 días del plan: **32 consumidores literales** (15 en cliente, 16 en
+prestador, +galería — censo por grep de esta sesión). Si "elegido" pasa
+de TONAL (borde+tinte, Ley 22 literal: *"TONAL para SELECCIÓN entre
+pares"*) a LLENO:
+- **(a) forma nueva SOLO para entity chips (identidad):** conviven DOS
+  formas de "elegido" en una misma pantalla — el mock lo monta al lado
+  de los vecinos de valor en su forma actual para que el founder lo
+  JUZGUE viendo (roce Ley 22 directo, declarado).
+- **(b) migran TODOS:** 32 superficies re-gateadas + el token
+  texto-sobre-acento por tema × 3 acentos (control/oficio/capa) +
+  re-medición WCAG completa + **la Ley 22 se REESCRIBE** (hoy el LLENO
+  es de BINARIOS — Interruptor; invertirla es enmienda de ley con firma,
+  no barrida).
+
+**Viaja a la vara de B antes de construir.** El v1 de abajo queda como
+registro del camino (rechazado).
+
+---
+
+# [RECHAZADO v1] S73-A · M1 — BOCETO: el ENTITY CHIP del selector de mascota (dictado founder S73)
 
 > **Estado: BOCETO — viaja a la vara cruzada de B y al gate founder.**
 > Dictado founder (S73): *"el chip pasa a ENTITY CHIP — AvatarMascota al

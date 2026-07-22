@@ -285,7 +285,9 @@ export default function VeterinariaCuando() {
                       tras scroll (la tira es de secuencias — los días). */}
                   <SelectorOpcion
                     acento="control"
-                    disposicion="grilla"
+                    // S73 gate founder (hallazgo 2): variante B firmada —
+                    // dos columnas MISMO tamaño, la larga envuelve.
+                    disposicion="columnas"
                     etiqueta={t('veterinaria.servicioEtiqueta')}
                     opciones={oferta.map((o) => ({
                       codigo: o.tipo_servicio,
