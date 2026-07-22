@@ -2059,6 +2059,22 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 #### D-484 — El par primario+ghost de las Hojas de decisión (entrada nueva del diccionario) 🟡
 🟡 MEDIA. **El patrón más repetido de los que caen bajo "los botones sin fondo" del gate S72 — y NO es 19.7** (no es acción de fila): la decisión binaria en Hoja vive hoy como `primario` + `ghost` apilados. Censo S73-A: "Rechazar" del presupuesto clínico (`citas/[mascotaId].tsx:416`, `ghost bloque` — *rechazar un presupuesto* es acción con consecuencias vestida de label, **ya ilegal por 22c hoy**) · "Rechazar" de la autorización (`autorizacion/[solicitudId].tsx:133`) · los "cancelar" de las Hojas de Cuenta en AMBAS apps (`cuenta/index.tsx:112` cliente · `cuenta/index.tsx:307` prestador). Cura: se propone como **ENTRADA NUEVA del diccionario** (la decisión binaria en Hoja) con su propio boceto M1 y gate founder — jamás cura silenciosa por pantalla, porque el par es un PATRÓN y necesita una sola verdad. **Disparo: el próximo boceto que contenga una Hoja de decisión, o la pasada de craft de cualquiera de las superficies censadas.** Origen: S73 (mesa, `ENMIENDA_19_7_S73.md` §6; censo del literal de A).
 
+### D-486 → D-490 — RESERVADAS por la mesa (S73) para las cinco letras de B
+
+> **FRENO 76b declarado (precedente S68):** la mesa adjudicó estos cinco
+> números a letras de la Sesión B "que viajan en este paquete" — **su texto
+> literal no llegó a la mesa A**. Se depositan verbatim cuando su letra
+> llegue; los números quedan reservados en este orden para que la
+> numeración no se cruce.
+
+### Deudas del M2 y directiva founder (S73-A, D-491 → D-492)
+
+#### D-491 — El diccionario no cubre el catálogo-que-agrega (carrito) 🟡
+🟡 MEDIA. El diccionario no cubre el catálogo-que-agrega (carrito) — **N sólidos por superficie choca textual con 19.7**; la entrada nueva debe declarar que 19.7 gobierna la lista de CONTENIDO y el carrito es otro trabajo. Contexto del hallazgo (M2 S73-A sobre P2): el candidato de forma del boceto (fila tapeable + `+` sólido en el fin + contador «×N») es sano, pero cada fila de catálogo portaría su sólido y la letra de 19.7 dice "por superficie UN sólido" — el deslinde de trabajos lo firma el gate, no un boceto. Origen: M2 sobre P2. **Disparo: la construcción de P2 (su gate firma la forma).**
+
+#### D-492 — DIRECTIVA FOUNDER S73: purga de datos pre-corte (1-jul-2026) 🟠
+🟠 MEDIA-ALTA. **DIRECTIVA FOUNDER S73: los datos anteriores al 1-jul-2026 son borrables, EXCEPTO catálogos.** La purga es operación propia: censo tabla-por-tabla de lo pre-corte + plan con catálogos excluidos LISTADOS + OK founder + ejecución. Precauciones: expediente append-only (FKs de procedencia mapeadas — regla 41), portal legado comparte DB (D-471). **Disparo: ventana de mantenimiento que el founder abra — jamás dentro de una sesión de features.**
+
 ### Deuda del hallazgo RLS-familia (S73-A, D-485)
 
 #### D-485 — La visibilidad del dueño sobre mascotas cuelga de `user_id` legacy, no del modelo de familia 🟠
