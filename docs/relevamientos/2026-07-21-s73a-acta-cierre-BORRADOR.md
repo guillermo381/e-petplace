@@ -63,11 +63,14 @@ cayeron por nombrar componentes como hechos (los chips ya existían; el
   invertía el orden canónico en empates, y la "zona callada" que con
   mínimo-4 habría pintado cuatro «Descubre» falsos (L-139 en carne).
 
-## 7 · 🔴 FRENO VIGENTE — MODELO_PRESENCIA v0
+## 7 · MODELO_PRESENCIA v0 — SEMBRADO en S73 ✅
 
-Anunciado por mesa ("te llega en el paquete del founder para depositar
-en docs/") — **el literal NO llegó** (tercer caso del patrón §2.2). Se
-deposita cuando llegue; este borrador lo registra para que no se pierda.
+Depositado VERBATIM en `docs/MODELO_PRESENCIA.md` (doc canónico nuevo,
+semilla v0, sin fecha de construcción — disparos en su §9). El freno 76b
+rigió una TERCERA vez antes del depósito (anunciado sin letra; llegó en
+un paquete posterior) — el patrón queda contado en §2.2. **La FIRMA (§2
+pieza 1) entra al arco S74 junto a la superficie de equipo — misma
+superficie NEGOCIO.**
 
 ## 8 · Deudas nacidas en S73 (D-483 → D-497)
 
