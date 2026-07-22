@@ -1380,6 +1380,7 @@ export const prestadorEn = {
     casoCondicionPlaceholder: 'e.g. kidney disease',
     casoElegirLabel: 'Choose the case',
     confirmar: 'Save the consultation',
+    medIncompletaAviso: 'Complete the dose and frequency to confirm.',
     listo: "We saved {{mascota}}'s consultation.",
     proximoTitulo: 'Suggested next visit',
     proximoDetalle: '{{control}}',

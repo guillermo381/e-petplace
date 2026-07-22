@@ -691,6 +691,11 @@ export default function ConsultaVeterinaria() {
               )}
             </View>
 
+            {/* S73-B (hallazgo T-B de la trampa L-139, cura de mesa): el
+                botón apagado DICE su porqué — cero explicación literal. */}
+            {medIncompleta && (
+              <Texto variante="apoyo">{t('consulta.medIncompletaAviso')}</Texto>
+            )}
             <Boton
               variante="primario"
               bloque

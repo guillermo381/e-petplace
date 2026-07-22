@@ -1283,6 +1283,7 @@ export const prestadorEs = {
       notaSinDiagnostico: 'La nota necesita un diagnóstico.',
       cuentaSinPrestador: 'El negocio no tiene un profesional configurado.',
       posologiaIncompleta: 'Una medicación no tiene dosis o frecuencia. Complétala antes de guardar.',
+      // (la voz de PANTALLA del mismo muro vive en consulta.medIncompletaAviso)
       medicamentoSinNombre: 'Una medicación no tiene nombre.',
       condicionSinNombre: 'Una condición crónica no tiene nombre.',
       alergiaSinAlergeno: 'Una alergia no tiene alérgeno.',
@@ -1519,6 +1520,8 @@ export const prestadorEs = {
     casoCondicionPlaceholder: 'Ej. enfermedad renal',
     casoElegirLabel: 'Elegí el caso',
     confirmar: 'Guardar la consulta',
+    // S73-B cura de mesa (hallazgo T-B trampa L-139): el botón apagado dice su porqué.
+    medIncompletaAviso: 'Completa la dosis y la frecuencia para confirmar.',
     listo: 'Guardamos la consulta de {{mascota}}.',
     proximoTitulo: 'Próxima consulta sugerida',
     proximoDetalle: '{{control}}',
