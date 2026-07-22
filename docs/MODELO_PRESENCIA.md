@@ -39,6 +39,12 @@ aún no hay prestadores reclutados.
    avatar de 30 píxeles — es presencia visible"); falta construirla.
    **Viaja con S74** (la ventana de equipo vive en la misma superficie
    NEGOCIO): costo marginal.
+   **LA TRAMPA DEL LOGO (hallazgo de B, verificado en mesa S74 —
+   depositado S74-A):** los logos ANCHOS **no se recortan a círculo** —
+   el recorte circular es de caras/avatares; un logo horizontal recortado
+   pierde su identidad. El logo **se CONTIENE: con aire y fondo** (la
+   caja lo aloja entero). Rige en toda superficie que pinte la firma —
+   la del prestador y la que el pet parent ve.
 2. **LA PRESENCIA** — lo que el pet parent ve al elegir y, en el futuro
    próximo, ANTES de elegir: el botón "conocelo" hacia una pantalla chica
    donde el prestador cuenta quién es. Con las reglas de §4-§6.
