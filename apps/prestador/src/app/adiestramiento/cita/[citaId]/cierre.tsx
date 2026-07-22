@@ -47,6 +47,7 @@ import {
 } from '@epetplace/api';
 
 import { verificarSesion } from '@/lib/api';
+import { EvitaTeclado } from '@/components/evita-teclado';
 import { clipsDeSesion } from '@/lib/clips-sesion';
 import { useTraduccion } from '@/i18n';
 
@@ -200,6 +201,9 @@ export default function CierreAdiestramiento() {
           onAtras={() => router.back()}
         />
       </View>
+      {/* S74-B D-498: propagación del patrón EvitaTeclado (gateado en el
+          path vet) — nota al fondo + CTA + ScrollView pelado. */}
+      <EvitaTeclado>
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[5] }}>
         {pantalla.estado === 'cargando' && (
           <EsqueletoGrupo>
@@ -363,6 +367,7 @@ export default function CierreAdiestramiento() {
           </>
         )}
       </ScrollView>
+      </EvitaTeclado>
     </View>
   );
 }

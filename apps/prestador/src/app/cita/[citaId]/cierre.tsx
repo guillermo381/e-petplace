@@ -44,6 +44,7 @@ import {
 } from '@epetplace/api';
 
 import { verificarSesion } from '@/lib/api';
+import { EvitaTeclado } from '@/components/evita-teclado';
 import { useTraduccion } from '@/i18n';
 
 type Pantalla =
@@ -197,6 +198,10 @@ export default function Cierre() {
     // S59-B1 (safe area): el Encabezado ya absorbe y PINTA el inset superior
     // — el SafeAreaView top lo duplicaba (doble banda de papel arriba).
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      {/* S74-B D-498: propagación del patrón EvitaTeclado (gateado en el
+          path vet) — la anatomía exacta del bug de la dosis: nota al
+          fondo + CTA + ScrollView pelado. */}
+      <EvitaTeclado>
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[4] }}>
         <Encabezado variante="navegacion" titulo={t('cita.cierreTitulo')} atras onAtras={() => router.back()} />
 
@@ -381,6 +386,7 @@ export default function Cierre() {
           </>
         )}
       </ScrollView>
+      </EvitaTeclado>
 
       {/* Hoja: registrar el parte desde el cierre (mismo patrón del Durante) */}
       <Hoja visible={hojaParte} onCerrar={() => setHojaParte(false)} titulo={t('cita.parteDelPerro')}>

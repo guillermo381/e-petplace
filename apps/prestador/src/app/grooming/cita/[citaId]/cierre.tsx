@@ -57,6 +57,7 @@ import {
 import { fechaCortaMono, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { verificarSesion } from '@/lib/api';
+import { EvitaTeclado } from '@/components/evita-teclado';
 import { useTraduccion } from '@/i18n';
 
 type Momento = 'recibir' | 'entregar';
@@ -287,6 +288,9 @@ export default function CierreGrooming() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      {/* S74-B D-498: propagación del patrón EvitaTeclado (gateado en el
+          path vet) — nota al fondo + CTA + ScrollView pelado. */}
+      <EvitaTeclado>
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[4] }}>
         <Encabezado
           variante="navegacion"
@@ -475,6 +479,7 @@ export default function CierreGrooming() {
           </>
         )}
       </ScrollView>
+      </EvitaTeclado>
 
       {/* Hoja: reparar el estado de pelaje que faltó (en_cierre) */}
       <Hoja
