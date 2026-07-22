@@ -116,8 +116,16 @@ patrón único a comparar con B por mano del founder; disparo S74).
 
 ## 9 · Gates pendientes al escribir el borrador
 
-Chips vet (3 variantes) · entity chip (3 proporciones, vara de B
-primero) · el rail en dispositivo · C3 en dispositivo · la franja de
-Ponte al día en vivo (sin captura demo — la firma es la desaparición) ·
-el lote de strings del censo de voz (junto al de B) · la trampa L-139 de
-motor (B). **Cero push en toda la sesión** — lo ejecuta el founder.
+**Chips vet: variante B FIRMADA DEFINITIVA (columnas)** ✅ · entity
+chip: **V2 (52/44) elegida PROVISIONAL — punto de partida, no firma
+final**: el founder declaró que en boceto casi no distingue las
+proporciones; **la proporción se cierra en dispositivo CON FOTO REAL**
+(Thor y Zeus, claro/oscuro/memorial), con las dos curas de mesa (el
+fallback que pelea con el relleno · la lengüeta de la esquina) y el
+token oscuro en su mini-gate · el rail en dispositivo · C3 en
+dispositivo · la franja de Ponte al día en vivo (sin captura demo — la
+firma es la desaparición) · el lote de strings del censo de voz (junto
+al de B) · la vara de B sobre el boceto v2. **Cero push en toda la
+sesión** — lo ejecuta el founder. **Nota ③:** la dirección de arte del
+color-completo-sin-borde quedó FIRMADA y depositada en
+`DIRECCION_ARTE.md §7` (ligada a Ley 20 y a la crisis de craft S70).

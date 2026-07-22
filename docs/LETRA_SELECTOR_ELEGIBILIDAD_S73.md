@@ -62,6 +62,16 @@ del paseo) borraron su filtro artesanal (Ley 37) y consumen la frontera;
 - **N = 0** → el servicio no se ofrece para esta familia, o lo dice con
   voz honesta. Es la cláusula del conjunto vacío que la Ley 23 ya trae.
 
+> **ENMIENDA S73 (ley del ancho + convergencia declarada):** con la espec
+> vieja, el caso N=1 — la firma ③ del propio founder — estiraba a la
+> única mascota de borde a borde: el peor caso del desbalance
+> ancla-fija/chip-elástico. La LEY DEL ANCHO (índice de la skill, firmada
+> S73) lo arregla: N=1 SE CENTRA a ~50%. **Y la mención "'tira' para
+> familias grandes" de arriba queda EN REVISIÓN**: la lectura de mesa
+> para N≥5 es ENVOLVER en filas (ver-todo sobre compacto — coherente con
+> los chips de vet ya firmados); si el founder la confirma en el gate de
+> bordes, esa frase se enmienda.
+
 ## 4. Lo que muere y lo que queda (ENMENDADO S73-A: el literal)
 
 - **Los chips en línea YA EXISTEN en los cuatro oficios desde S61-A3/A4**

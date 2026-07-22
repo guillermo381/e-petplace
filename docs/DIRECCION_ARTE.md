@@ -170,6 +170,22 @@ nadie va a montar no se pide — pedirlo es fabricar deuda (precedente
 S71-B2: de 5 conceptos faltantes se pidieron los 2 que la pantalla
 montaba; los otros 3 esperan a que su superficie tenga boceto).
 
+## 7. NOTA DE DIRECCIÓN FIRMADA S73 — el color completo, sin borde, con sombra
+
+Letra del founder (gate del entity chip, 21-Jul-2026), textual:
+
+> *"Me gusta mucho más el color completo y sin borde marcado con algo de
+> sombra: le da imagen y presencia y le quita lo caricaturesco."*
+
+Ligada a la **Ley 20 de la skill** (la regla Chanel del marco: la
+superficie que gana elevación PIERDE el hairline — vara Airbnb, sombras
+sutiles) y al **diagnóstico de la crisis de craft S70** ("el diseño no me
+enamora"): es el founder nombrando el ANTÍDOTO — presencia por
+superficie y sombra, no por contorno. Primer portador: el entity chip
+del selector de mascota (S73). Cuando D-499 dispare (el LLENO a todos
+los selectores), no será cambio de opinión — será esta dirección
+cumpliéndose.
+
 ## Historial
 
 - **v1.1 (S71, 20 Jul 2026):** con la cláusula del ilustrador enmendada
