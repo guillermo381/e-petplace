@@ -2059,13 +2059,26 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 #### D-484 — El par primario+ghost de las Hojas de decisión (entrada nueva del diccionario) 🟡
 🟡 MEDIA. **El patrón más repetido de los que caen bajo "los botones sin fondo" del gate S72 — y NO es 19.7** (no es acción de fila): la decisión binaria en Hoja vive hoy como `primario` + `ghost` apilados. Censo S73-A: "Rechazar" del presupuesto clínico (`citas/[mascotaId].tsx:416`, `ghost bloque` — *rechazar un presupuesto* es acción con consecuencias vestida de label, **ya ilegal por 22c hoy**) · "Rechazar" de la autorización (`autorizacion/[solicitudId].tsx:133`) · los "cancelar" de las Hojas de Cuenta en AMBAS apps (`cuenta/index.tsx:112` cliente · `cuenta/index.tsx:307` prestador). Cura: se propone como **ENTRADA NUEVA del diccionario** (la decisión binaria en Hoja) con su propio boceto M1 y gate founder — jamás cura silenciosa por pantalla, porque el par es un PATRÓN y necesita una sola verdad. **Disparo: el próximo boceto que contenga una Hoja de decisión, o la pasada de craft de cualquiera de las superficies censadas.** Origen: S73 (mesa, `ENMIENDA_19_7_S73.md` §6; censo del literal de A).
 
-### D-486 → D-490 — RESERVADAS por la mesa (S73) para las cinco letras de B
+### Deudas de la tanda 3 de B (S73-B, D-486 → D-490)
 
-> **FRENO 76b declarado (precedente S68):** la mesa adjudicó estos cinco
-> números a letras de la Sesión B "que viajan en este paquete" — **su texto
-> literal no llegó a la mesa A**. Se depositan verbatim cuando su letra
-> llegue; los números quedan reservados en este orden para que la
-> numeración no se cruce.
+> Depositadas por A con la letra VERBATIM de B (el freno 76b del primer
+> intento se liberó cuando el literal llegó — error de mesa declarado:
+> "viajan en este paquete" sin pegarlas).
+
+#### D-486 — DROP de la columna rol legacy de `prestador_empleados` 🟢
+🟢 BAJA. La verdad de roles vive en `empleado_roles` desde S73; la columna vieja (CHECK `'dueño'|'empleado'`) queda CONGELADA con COMMENT — el portal legado comparte la DB y puede leerla (precedente D-471: cero DROP a ciegas). Origen: S73-B, LETRA_EQUIPO §2/§7. **Disparo: portal legado jubilado O la auditoría D-471, lo que llegue primero.** El DROP arrastra: el CHECK `prestador_empleados_rol_check`, el rol de `empleado_invitaciones` (CHECK solo-`'empleado'`) y el backfill perezoso de los 3 RPCs de invitación que lo escriben.
+
+#### D-487 — `prestadores.tipo` poblado con el eje muerto 🟢
+🟢 BAJA. A3 (S72) mató el eje `tipo_prestador`; el literal S73-B (`500ee8d`) muestra la columna VIVA con datos: `clinica_veterinaria` 2 · `paseador` 3. Ninguna lógica nueva debe leerla; la vieja que la lea se releva antes de tocar. Origen: S73-B relevamiento §(d). **Disparo: el primer toque al catálogo/schema de `prestadores`** — esa migración decide si la columna se congela con comment, se migra o se dropea (con censo de lectores contra el portal legado).
+
+#### D-488 — La consulta clínica no es reconstruible desde la URL sola 🟡
+🟡 MEDIA. `/veterinaria/consulta/[citaId]` exige `mascotaId`/`mascotaNombre` por params; con solo `citaId` muere con error (22P02 uuid vacío — los lectores disparan con `''`). Tensión directa con ESTRATEGIA §7.5 ("todo slot de atención reconstruible desde URL/estado; un refresh o deep-link jamás rompe el Durante") — y el Durante CLÍNICO es la tesis del producto. Cura esperada: derivar mascota desde la cita (SELECT_CITA ya la trae embebida). Origen: S73-B, capturas M3 (el script la esquiva navegando como el caller real). **Disparo: la pasada de deep-links, o el primer reporte de campo de un vet que refrescó/volvió del background y perdió la consulta — lo que llegue primero.**
+
+#### D-489 — La vista destilada de RECEPCIÓN (superficie S74) — incluye la ALERTA 🟠
+🟠 MEDIA-ALTA. Tras el gate D-464, `recepcion` no lee expediente clínico — correcto y deliberado ("mejor una recepcionista que pide ayuda al vet que una que lee la HC de todos"). Lo que A3 §4 le promete y aún no existe: identidad + etapa destilada + alerta de seguridad. Incluye `tiene_emergencia_activa` (hoy en `mascota_perfil_vigente`, que queda gateado): su ausencia para recepción es VENTANA DECLARADA S73→S74. **El founder tiene veto sobre la ventana:** si veta, nace un lector angosto solo-alerta (patrón D-455: DEFINER keyed, UN campo expuesto) sin esperar la superficie. Origen: S73-B clasificación de policies + decisión de mesa. **Disparo: arco S74 ("el expediente sabe quién lo mira") — o el veto founder, que adelanta el lector angosto.**
+
+#### D-490 — El gate de ESCRITURA clínica no discrimina rol 🟠
+🟠 MEDIA-ALTA. El gate S73 cubre LECTURA. Quedan escrituras directas por policy que solo exigen empleado activo: `caso_clinico_insert_vet` (INSERT de caso por cualquier empleado activo de la cuenta tratante) y `eventos_mascota_insert` (INSERT de evento con `empleado_id` propio sin mirar rol). Las escrituras por RPC DEFINER quedan cubiertas cuando sus guards adopten `empleado_tiene_rol` (mismo helper, cero segunda verdad). Origen: S73-B clasificación (flag 3). **Disparo: la primera tanda de motor que toque `caso_clinico` o las policies de INSERT clínicas — jamás después de que exista un empleado real con rol `recepcion` activo (ahí sube a 🔴).**
 
 ### Deudas del M2 y directiva founder (S73-A, D-491 → D-492)
 
