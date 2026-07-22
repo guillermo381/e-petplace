@@ -730,9 +730,11 @@ export default function Hogar() {
                 <View style={{ gap: spacing[2] }}>
                   <Texto variante="cuerpo">{h.titulo}</Texto>
                   {h.detalle !== null ? <Texto variante="apoyo">{h.detalle}</Texto> : null}
-                  <View style={{ alignItems: 'flex-start', marginTop: spacing[1] }}>
-                    <Boton variante="compacto" tamaño="sm" etiqueta={h.cta} onPress={h.onPress} />
-                  </View>
+                  {/* S73 (C2 + anatomía 19.7 firmada): el CTA en caja
+                      MURIÓ — la acción baja a label + chevron › (navega),
+                      la vara "igual al de ver cita". Sin glifo: el pie de
+                      la tarjeta no tiene hermanos que varíen (Ley 12). */}
+                  <CeldaNavegacion titulo={h.cta} onPress={h.onPress} />
                 </View>
               </Tarjeta>
             ))}

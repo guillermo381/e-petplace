@@ -409,7 +409,7 @@ export const clienteEn = {
     precioExacto: 'For {{nombre}}: ${{precio}}',
     urgenciaSoloHoy: 'Urgent care is booked for today only, within each vet’s hours.',
     urgenciaSinLugarHoy: 'No urgent-care slots left for today in the app. If it’s serious, contact your vet directly.',
-    eligeMascota: 'Pick your pet to see the schedule.',
+    eligeMascota: 'Pick your pet above to see the schedule.',
     sinInicios: 'No open times that day.',
     vacioTitulo: 'No vets with a schedule yet',
     vacioDetalle: 'We’re adding clinics. Check back soon.',
@@ -783,8 +783,6 @@ export const clienteEn = {
     preferencias: 'Preferences',
     pagos: 'Payments',
     ayuda: 'Help and legal',
-    // S73 TEMPORARY (dies with the lamina signatures, Ley 37)
-    laminaGate: 'S73 board · design gate',
     errorCargar: "We couldn't load this. Try again.",
     reintentar: 'Try again',
     guardar: 'Save changes',

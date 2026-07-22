@@ -26,7 +26,7 @@
  *    (especies_elegibles, §1bis — la DB manda).
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
@@ -68,7 +68,6 @@ export default function VeterinariaCuando() {
   const [mascotas, setMascotas] = useState<MascotaResumen[] | 'cargando' | 'error'>('cargando');
   // S61-A4: la CARA del para-quién — URLs firmadas (patrón del QUIÉN).
   const [fotos, setFotos] = useState<Record<string, string>>({});
-  const scrollRef = useRef<ScrollView>(null);
   const [mascotaId, setMascotaId] = useState<string | null>(null);
   const [oferta, setOferta] = useState<OfertaVet[] | 'cargando' | 'error' | null>(null);
   const [tipoServicio, setTipoServicio] = useState<string | null>(null);
@@ -198,7 +197,7 @@ export default function VeterinariaCuando() {
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('veterinaria.titulo')} atras onAtras={() => router.back()} />
-      <ScrollView ref={scrollRef} contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
+      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
         {mascotas === 'cargando' ? (
           <EsqueletoGrupo>
             <View style={{ gap: spacing[3] }}>
@@ -246,19 +245,13 @@ export default function VeterinariaCuando() {
             />
 
             {mascota === null ? (
-              // sin mascota elegida no hay "desde" (el precio es de SU
-              // techo de especie): invitación con camino, jamás mudo
-              <EstadoVacio
-                registro="seccion"
-                titulo={t('veterinaria.eligeMascota')}
-                accion={
-                  <Boton
-                    variante="compacto"
-                    etiqueta={t('veterinaria.paraQuien')}
-                    onPress={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
-                  />
-                }
-              />
+              // S73 hallazgo founder: el botón que scrolleaba MURIÓ — el
+              // selector vive INMEDIATAMENTE arriba (cero bloques entre
+              // medio): un botón que duplica un control visible es
+              // decoración (Chanel), y su scroll era acción invisible =
+              // control muerto. 17.5 se cumple: el camino ES el control
+              // visible, y la voz apunta a él.
+              <EstadoVacio registro="seccion" titulo={t('veterinaria.eligeMascota')} />
             ) : oferta === 'cargando' || oferta === null ? (
               <EsqueletoGrupo>
                 <View style={{ gap: spacing[3] }}>

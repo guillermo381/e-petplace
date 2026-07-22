@@ -41,8 +41,11 @@ import { Icono, type IconoNombre, type IconoRegistro } from './Icono'
 const ALTURA_MIN = 56 // la métrica de Celda normal
 
 export interface CeldaNavegacionProps {
-  /** Ícono del set b′ — dice a dónde va (Ley 19.1). */
-  icono: IconoNombre
+  /** Ícono del set b′ — dice a dónde va (Ley 19.1). OPCIONAL desde S73
+   *  (anatomía 19.7 firmada): la acción-label SIN hermanos que varíen
+   *  (pie de tarjeta, ej. "Ver su cita ›" de Ponte al día) va SIN glifo
+   *  — un glifo sin vecindad es decoración (Ley 12/Chanel). */
+  icono?: IconoNombre
   titulo: string
   /** Detalle opcional — voz de la pantalla, jamás dato de expediente. */
   detalle?: string
@@ -81,7 +84,7 @@ export function CeldaNavegacion({ icono, titulo, detalle, onPress, registro = 'c
           transitionTimingFunction: cubicBezier(...motion.easing.spring.bezier),
         }}
       >
-        <Icono nombre={icono} registro={registro} />
+        {icono ? <Icono nombre={icono} registro={registro} /> : null}
 
         <View style={{ flex: 1, gap: 2 }}>
           <Text

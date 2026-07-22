@@ -447,7 +447,7 @@ export const clienteEs = {
     precioExacto: 'Para {{nombre}}: ${{precio}}',
     urgenciaSoloHoy: 'Las urgencias se reservan para hoy, dentro del horario de cada veterinario.',
     urgenciaSinLugarHoy: 'Hoy no queda lugar para urgencias por la app. Si es grave, contacta a tu veterinario directamente.',
-    eligeMascota: 'Elige a tu mascota para ver la agenda.',
+    eligeMascota: 'Elige arriba a tu mascota para ver la agenda.',
     sinInicios: 'Ese día no hay horarios con lugar.',
     vacioTitulo: 'Todavía no hay veterinarios con agenda',
     vacioDetalle: 'Estamos sumando clínicas. Vuelve pronto.',
@@ -826,8 +826,6 @@ export const clienteEs = {
     preferencias: 'Preferencias',
     pagos: 'Pagos',
     ayuda: 'Ayuda y legales',
-    // S73 TEMPORAL (muere con las firmas de la lámina, Ley 37)
-    laminaGate: 'Lámina S73 · gate de diseño',
     errorCargar: 'No pudimos cargar esto. Prueba de nuevo.',
     reintentar: 'Reintentar',
     guardar: 'Guardar cambios',

@@ -22,7 +22,7 @@
  *    gobiernan el precio (declarados una vez, editables siempre).
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
@@ -74,7 +74,6 @@ export default function GroomingCuando() {
   // S61-A5 cura 3 (letra founder): la oferta PÚBLICA del peldaño 0 —
   // los comprables con su "desde" real, visibles SIN mascota.
   const [ofertaPublica, setOfertaPublica] = useState<OfertaGroomingPublica[] | 'cargando' | 'error'>('cargando');
-  const scrollRef = useRef<ScrollView>(null);
   // S61-A6 (D-392): la modalidad se elige en el QUÉ — default local.
   const [modalidad, setModalidad] = useState<ModalidadGrooming>('local');
   const [mascotaId, setMascotaId] = useState<string | null>(null);
@@ -222,7 +221,7 @@ export default function GroomingCuando() {
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('grooming.titulo')} atras onAtras={() => router.back()} />
-      <ScrollView ref={scrollRef} contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
+      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
         {mascotas === 'cargando' ? (
           <EsqueletoGrupo>
             <View style={{ gap: spacing[3] }}>
@@ -317,17 +316,14 @@ export default function GroomingCuando() {
                   onSelect={setDia}
                 />
 
+                {/* S73 hallazgo founder: el botón-scroll MURIÓ (control
+                    muerto — el selector queda en pantalla en los
+                    viewports reales, ~3 bloques arriba; la voz del
+                    detalle ya apunta a él: "Elígela arriba…"). */}
                 <EstadoVacio
                   registro="seccion"
                   titulo={t('grooming.horariosSinMascotaTitulo')}
                   descripcion={t('grooming.horariosSinMascotaDetalle')}
-                  accion={
-                    <Boton
-                      variante="compacto"
-                      etiqueta={t('grooming.paraQuien')}
-                      onPress={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
-                    />
-                  }
                 />
               </>
             ) : !perfilCompleto ? (
