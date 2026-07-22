@@ -75,7 +75,20 @@ cayeron por nombrar componentes como hechos (los chips ya existían; el
   invertía el orden canónico en empates, y la "zona callada" que con
   mínimo-4 habría pintado cuatro «Descubre» falsos (L-139 en carne).
 
-## 7 · MODELO_PRESENCIA v0 — SEMBRADO en S73 ✅
+## 7 · DOS CANÓNICOS SEMBRADOS en S73 ✅
+
+**S73 sembró DOS docs canónicos nuevos:** `MODELO_PRESENCIA.md` v0 y
+`MODELO_NOTIFICACIONES.md` v0 (el motor de alcanzar a alguien — nace la
+LEY DE LA PANTALLA BLOQUEADA §4; la deuda de mesa "MODELO_NOTIFICACIONES
+sin escribir" se CERRÓ con el depósito; D-445 queda angosta: solo el
+CENTRO de lectura). **CORRECCIÓN DE ARCOS (mesa S73):** las capas 1–3 del
+motor (intención, destinatario, consentimiento) + modo sombra + la
+superficie de Ajustes **NO esperan a Meta — disparan en S74/S75** con
+precondición del gate de rol que YA CERRÓ; **push no espera a nadie
+externo**; email tampoco. El arco "sin fecha" queda SOLO para WhatsApp
+(respuesta de Meta).
+
+### 7b · MODELO_PRESENCIA v0 — el detalle
 
 Depositado VERBATIM en `docs/MODELO_PRESENCIA.md` (doc canónico nuevo,
 semilla v0, sin fecha de construcción — disparos en su §9). El freno 76b
