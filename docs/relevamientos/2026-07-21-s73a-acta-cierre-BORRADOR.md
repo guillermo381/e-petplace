@@ -35,6 +35,15 @@
 > (`(tabs)/_layout.tsx:20-22`); la prosa de `packages/ui/CLAUDE.md` que
 > lo afirmaba es L-141 pura (pendiente su corrección en el cierre).
 
+**LEY CANDIDATA #2 (origen: el teclado que tapó la dosis — D-498):**
+*"Toda captura M3 de una pantalla con campo de texto se toma DOS VECES —
+sin teclado y CON el teclado arriba y el campo enfocado. Un formulario
+sin captura de teclado no está verificado."* Origen: este bug sobrevivió
+a M3 y llegó a la mano del founder porque el mecanismo nunca miró el
+estado real de uso. Nota operativa: la captura CON teclado exige
+dispositivo/emulador — el render web no tiene teclado blando (límite
+declarado del harness actual).
+
 ## 4 · REFINAMIENTO L-158 (de esta mesa)
 
 **La fila de hipótesis de una tabla de hallazgos nombra el TRABAJO, jamás
@@ -45,8 +54,11 @@ cayeron por nombrar componentes como hechos (los chips ya existían; el
 ## 5 · Ítems del lado B (declarados por mesa; literal en el acta de B)
 
 - **El casi-accidente de las migraciones fantasma de B.**
-- **La trampa L-139 PASS de motor — pendiente mano founder** (los diez
-  minutos que dicen si el producto es lo que promete).
+- **LA TRAMPA L-139: PASS 3/3 EN MANO DEL FOUNDER — LA FIRMA DE LA TESIS
+  DE S73.** Los tres muros pasaron (la nota sin números que no puede
+  producir vitales · la posología incompleta que rebota al guardar · el
+  diferencial que NO aparece como diagnóstico) — dos sesiones esperándola;
+  el dictado clínico dice la verdad y solo la verdad.
 
 ## 6 · Los atrapes del mecanismo (evidencia para el canon)
 
@@ -86,7 +98,8 @@ re-implementan rol (B) · D-495 `user_tiene_acceso_a_mascota` con anon en
 proacl (B) · D-496 ¿SelectorEspecie a control? · D-497 EL PISO DE
 PERFORMANCE (31 requests con una mascota; dos ×N; updates ON_LOAD con
 5.1MB por publish; lectores sin techo — las curas van a S74 con estos
-números).
+números) · D-498 🔴 el teclado tapa campos (censo cliente hecho en S73;
+patrón único a comparar con B por mano del founder; disparo S74).
 
 ## 9 · Gates pendientes al escribir el borrador
 

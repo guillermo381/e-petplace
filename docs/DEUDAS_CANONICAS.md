@@ -2119,6 +2119,11 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 
 **La deuda:** no existe piso exigible — ni presupuesto de requests por arranque, ni regla "todo lector nace con techo o cursor", ni decisión sobre el chequeo de updates. Candidatos de letra (mesa): (1) presupuesto de arranque del Hogar (≤N requests, N a firmar); (2) regla de plataforma: lector de lista nace con `limit` o cursor, o declara su techo natural; (3) los dos ×N del Hogar migran a UNA query hogar-wide cada uno (el patrón del rail vet S73 ya lo probó). **Disparo: la mesa del arco S74, o la próxima superficie que sume lecturas al arranque del Hogar — lo que llegue primero.** Origen: S73-A (ítem 7, medición literal).
 
+### Deuda del teclado (S73, D-498)
+
+#### D-498 — Campos de texto que quedan bajo el teclado al enfocarse 🔴
+🔴 ALTA. Campos de texto que quedan bajo el teclado al enfocarse — el usuario escribe a ciegas. Origen: gate S73, founder tipeando la dosis. Alcance: ambas apps, censo por pantalla. Riesgo: puede exigir config nativa (`windowSoftInputMode`) → tren de build. **Disparo: S74, con el censo hecho.** Censo del lado CLIENTE: `docs/relevamientos/2026-07-21-s73a-censo-teclado-cliente.md` (S73-A); el de prestador lo hace B — los patrones se comparan por mano del founder para que la casa tenga UNO. Letra del founder: *"que eso no pase en NINGÚN campo"*.
+
 ### Deuda del hallazgo RLS-familia (S73-A, D-485)
 
 #### D-485 — La visibilidad del dueño sobre mascotas cuelga de `user_id` legacy, no del modelo de familia 🟠
