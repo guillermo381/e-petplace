@@ -2003,6 +2003,7 @@ Territorio: `packages/api` (sesión A). **Nota de método:** H5 es el más barat
 
 #### D-472 — ~18 strings crudos en los 4 wrappers del path del vet
 🟡 MEDIA. `packages/api` — los wrappers del path clínico del prestador tienen **~18 strings de mensaje crudos** (voseo contra **L-148**, y **sin inglés**): *"No tenés permiso"*, *"Poné…"*, *"Agregá…"*. **No aparecen en el happy path — viven en el CAMINO TRISTE**, que es donde más duele (el vet ve el error en su idioma equivocado justo cuando algo falló). La voz de producto es tuteo neutro + es/en por el riel (L-148 + regla 27). **Territorio: `packages/api` (sesión A).** **Disparo: el próximo wrapper de ese path que se toque.** Origen: S72-B0 (censo de B), depositado por A.
+**LADO CLIENTE (S73-A, sumado por mesa):** dos entradas más del mismo lote — `serviciosHogar.ts:16` (`MENSAJE_ERROR` en voseo: *"Probá de nuevo"*) y el par **en** de `consulta_especializada` que no cubre en `vozServicio` (la UI en inglés muestra "Consulta especializada" en castellano — fallback al `servicio_nombre` de DB, visto en vivo en la captura del ítem 12). Se curan en el lote del censo de voz (ítem 6 S73).
 
 ### Deudas del relevamiento cliente S72-A (D-473 → D-474)
 
@@ -2081,6 +2082,9 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 🟠 MEDIA-ALTA. El gate S73 cubre LECTURA. Quedan escrituras directas por policy que solo exigen empleado activo: `caso_clinico_insert_vet` (INSERT de caso por cualquier empleado activo de la cuenta tratante) y `eventos_mascota_insert` (INSERT de evento con `empleado_id` propio sin mirar rol). Las escrituras por RPC DEFINER quedan cubiertas cuando sus guards adopten `empleado_tiene_rol` (mismo helper, cero segunda verdad). Origen: S73-B clasificación (flag 3). **Disparo: la primera tanda de motor que toque `caso_clinico` o las policies de INSERT clínicas — jamás después de que exista un empleado real con rol `recepcion` activo (ahí sube a 🔴).**
 
 ### Deudas del M2 y directiva founder (S73-A, D-491 → D-492)
+
+#### D-493 — El hub vet del dueño no existe (el rail navega a un destino declarado) 🟡
+🟡 MEDIA. El hub vet del dueño no existe; el rail vet v1 navega a `/citas/[mascotaId]` como destino declarado (la mascota de la próxima/por-coordinar/última cita vet). Clase C4/callejón: en un hogar multi-mascota con vet activo, el cuadrado aterriza en UNA mascota y las citas de las otras solo se alcanzan por ficha. Origen: vara cruzada S73-B sobre el rail. **Disparo: rail con vet de 2+ mascotas o arco S74.**
 
 #### D-491 — El diccionario no cubre el catálogo-que-agrega (carrito) 🟡
 🟡 MEDIA. El diccionario no cubre el catálogo-que-agrega (carrito) — **N sólidos por superficie choca textual con 19.7**; la entrada nueva debe declarar que 19.7 gobierna la lista de CONTENIDO y el carrito es otro trabajo. Contexto del hallazgo (M2 S73-A sobre P2): el candidato de forma del boceto (fila tapeable + `+` sólido en el fin + contador «×N») es sano, pero cada fila de catálogo portaría su sólido y la letra de 19.7 dice "por superficie UN sólido" — el deslinde de trabajos lo firma el gate, no un boceto. Origen: M2 sobre P2. **Disparo: la construcción de P2 (su gate firma la forma).**

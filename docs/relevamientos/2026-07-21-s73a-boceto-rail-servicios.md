@@ -148,7 +148,11 @@ lectores — este lector NACE contándola).
    banda chica de reintento — no se inventa «Descubre» sobre un error.
 5. **MEMORIAL (la frontera de elegibilidad manda):** con
    `mascotasElegibles(mascotas, null).length === 0` (todas en
-   memorial/perdida), **los cuadrados «Descubre» NO se montan** — no se
+   memorial/perdida), **los cuadrados «Descubre» NO se montan**.
+   **Borde declarado (vara de B, ratificado):** `estado_vida null` cae
+   NO-elegible (falla cerrada) y `'perdida'` también suprime — un hogar
+   con mascota perdida tampoco ve marketing. Decisión leída, no
+   sorpresa — no se
    le hace marketing de servicios a un hogar sin mascota elegible; los
    cuadrados CON historia quedan (la historia se lee, P13). El mínimo 4
    cede ante memorial — y es la primera consumidora de la frontera fuera
@@ -160,10 +164,13 @@ lectores — este lector NACE contándola).
 ## 7 · LO QUE ESTE BOCETO PIDE DE LA VARA DE B
 
 1. **La regla de orden de §4** (próxima > actividad > Descubre-canónico)
-   — ¿es "prioridad de uso del cliente" como el founder la dijo, o el
-   founder quería otra métrica (frecuencia histórica)? Leé la fuente del
-   dato: con los resúmenes de §5, la frecuencia NO es computable hoy —
-   si la vara pide frecuencia, es motor nuevo y cambia la tanda.
+   — **ENMENDADO por la vara de B (M2): el argumento "la frecuencia no
+   es computable" era FALSO** — el compositor es client-side sobre
+   listas completas (`serviciosHogar.ts:50-52`); contar cerradas es un
+   `.filter().length`, cero motor. La decisión viaja al gate SIN ese
+   argumento: **voto de mesa vigente (salvo veto founder) = la regla
+   SIMPLE para v1** (predecible y explicable); la frecuencia es opción
+   futura barata, no imposibilidad.
 2. **El destino vet v1** (la mascota de la próxima cita) — ¿aceptable, o
    la vara pide que nazca la deuda del hub vet YA?
 3. **«Descubre» → Explorar** — ratificar contra la letra del rail
