@@ -2083,6 +2083,12 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 
 ### Deudas del M2 y directiva founder (S73-A, D-491 → D-492)
 
+### D-494 → D-495 — RESERVADAS (S73) para las letras de B
+
+> **FRENO 76b declarado (segunda vez en la sesión, mismo precedente S68):**
+> la mesa anunció que "llegan de B en el paquete del founder" — el literal
+> no llegó. Se depositan verbatim cuando llegue; números reservados.
+
 #### D-493 — El hub vet del dueño no existe (el rail navega a un destino declarado) 🟡
 🟡 MEDIA. El hub vet del dueño no existe; el rail vet v1 navega a `/citas/[mascotaId]` como destino declarado (la mascota de la próxima/por-coordinar/última cita vet). Clase C4/callejón: en un hogar multi-mascota con vet activo, el cuadrado aterriza en UNA mascota y las citas de las otras solo se alcanzan por ficha. Origen: vara cruzada S73-B sobre el rail. **Disparo: rail con vet de 2+ mascotas o arco S74.**
 

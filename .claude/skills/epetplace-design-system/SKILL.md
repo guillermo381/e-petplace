@@ -241,9 +241,15 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
        celda que todo lo demás, más ancha porque "tiene más texto". El
        ancho no es jerarquía; la jerarquía se diseña.
     6. **Revelar el resto de una sección** (lo truncado por techo visual,
-       lo plegado por default): **control al PIE de la sección, `Boton`
-       variante `compacto`, con el NÚMERO en la etiqueta** — "Ver las 5",
-       jamás un "Ver más" mudo. El número es lo que deja decidir si vale
+       lo plegado por default): **control al PIE de la sección con el
+       NÚMERO en la etiqueta** — "Ver las 5", jamás un "Ver más" mudo.
+       **Su forma es la anatomía 19.7 (enmienda S73, reacción de campo
+       del founder sobre Momentos): SIN caja, texto + chevron
+       direccional (⌄ revela · ⌃ pliega — variante d, chevron pendiente
+       de firma en dispositivo), SIN glifo (pie de sección: no tiene
+       hermanos), target 44.** La forma vieja (`Boton compacto`) murió
+       con la mecánica D-318: sus tres consumidores pasaron por craft
+       en S73. El número es lo que deja decidir si vale
        el toque. **No aplica** a paginación (cargar la tanda siguiente de
        una lista larga) ni a abrir un compuesto en sus partes (una salida
        grupal ES una unidad: expandirla es entrar a sus miembros, otro
@@ -305,10 +311,13 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
        del gate del Hogar v2 y de la jornada del prestador).
        - **ESTA ES LA ANGOSTA (S73):** `Boton compacto` sigue vigente
          donde manda 22c (comando con consecuencias, acción suelta de
-         pantalla) y en `PieRevelar` (19.6). La ANCHA — la caja del
-         `compacto` muere en todas sus formas — es **D-483** con mecánica
-         D-318 (*migra al tocarse*, pantalla por pantalla en su pasada de
-         craft): cero barrida grande.
+         pantalla). **19.6/`PieRevelar` SALIÓ de esta cláusula el mismo
+         día (reacción de campo del founder sobre Momentos — "el botón
+         que no me gusta"): su forma ES la anatomía 19.7** — la mecánica
+         D-318 ya estaba disparada (sus tres consumidores pasaron por
+         craft en S73). La ANCHA — la caja del `compacto` muere también
+         en 22c — sigue siendo **D-483** con mecánica D-318 (*migra al
+         tocarse*): cero barrida grande.
        - **Vara existente que ya la cumplía:** `prestador/cita/[citaId]`
          — ícono + label + chevron.
        - **Primera aplicación:** S71 (`18e0c61`) — la fila de "Por
@@ -630,7 +639,7 @@ comprar es lo último, y lo que compra combina con TODO.*
 | `VozComision` | La voz del NETO/comisión bajo un precio del taller (S68-B, componente 35 — pagó D-412): "recibís $X" con la comisión VIVA desde `fee_configs` (regla 7.15 del financiero — jamás hardcode). Extraída a `packages/ui` desde los talleres donde vivía DUPLICADA por copia (paseo/grooming inline, hallazgo S68-B0); consumidores: los rieles de precio de los talleres de oficio (paseo/grooming/adiestrador/vet). Voz de máquina para el número (mono), voz humana para la frase; presentacional pura — el fee lo resuelve el caller. Memorial degrada (sin celebración del número) |
 | `Texto` | **La pieza de texto del sistema (S71-A2).** El design system tenía 57 exports y NINGUNO era texto: la consecuencia no era hardcodeo (los tokens estaban bien puestos) sino algo peor — **la jerarquía tipográfica se re-decidía a mano en cada pantalla**, ~200 veces. Cinco variantes (Ley 3): `titulo` DM Sans 300 · **`seccion`** DM Sans 500 con `accessibilityRole="header"` DE FÁBRICA (absorbió **10 definiciones byte-idénticas de `TituloBloque`** + 3 `tituloSeccion` locales) · `cuerpo` la prosa por default · `apoyo` secundario **con `lineHeight` de prosa** (absorbió las **4 `VozSecundaria`**, que coincidían todas en ese interlineado — el censo corrigió al diseñador, no al revés) · `dato` JetBrains Mono con `tabular-nums`. **SIN prop `style`, deliberado:** la escotilla de estilo libre devolvería el gobierno de la jerarquía a la pantalla, que es el problema que existe para cerrar. Es una HOJA: no lleva margin, flex ni ancho — el layout es del padre. `montoCorto` NO nació (D-448: el formateo de plata es del RIEL por idioma, como `fechaCortaMono`) |
 | `FilaDato` | **Etiqueta sobre valor, sin interacción (S71-A2).** Su hueco estaba DECLARADO en un comentario del código desde S70 (`veterinaria/cita/[citaId]`: *"no hay componente de campo de solo lectura"*) — el comentario documentaba la deuda en vez de dispararla. **La prueba de su trabajo: si tocarlo no hace nada, es `FilaDato`** (no `Celda`, que es fila de lista tapeable; no `Campo`, que se edita). `mono` es del VALOR, jamás del rótulo (Ley 3). Hermano de `Texto`, NO variante: es layout (dos nodos apilados) — como variante habría obligado a `Texto` a devolver dos elementos. Un valor ausente NO se dibuja vacío: la pantalla omite la fila o pasa su voz honesta (Ley 13). **Candidato registrado sin construir: la disposición HORIZONTAL compacta** (rótulo izquierda / valor derecha) — el caso del perfil del Antes la pidió y se decidió NO meter una prop al pasar en un componente recién congelado |
-| `PieRevelar` | **El control canónico de la entrada 19.6 (S71-A3, D-454 pagada).** `Boton compacto` centrado al pie de una sección truncada o plegada, con **el NÚMERO en la etiqueta** (`"Ver {{n}} más"`, forma neutra del namespace ui); con `revelado`, pasa a "Ocultar" — plegar de vuelta es el mismo control en el mismo lugar. `n=0` sin revelar: **no se dibuja** (regla de existencia). **NO es paginación** (traer datos que no están: eso es el pie de `LineaDeVida` con su cursor) ni abrir un compuesto en sus partes (`FilaSalida`). Nació con su tercer consumidor real, no antes |
+| `PieRevelar` | **El control canónico de la entrada 19.6 (S71-A3, D-454 pagada; anatomía 19.7 desde S73 — reacción de campo del founder).** SIN caja: texto en tinta + chevron direccional (⌄ revela · ⌃ pliega) centrado al pie de una sección truncada o plegada, target 44, con **el NÚMERO en la etiqueta** (`"Ver {{n}} más"`, forma neutra del namespace ui); con `revelado`, pasa a "Ocultar" — plegar de vuelta es el mismo control en el mismo lugar. `n=0` sin revelar: **no se dibuja** (regla de existencia). **NO es paginación** (traer datos que no están: eso es el pie de `LineaDeVida` con su cursor) ni abrir un compuesto en sus partes (`FilaSalida`). Nació con su tercer consumidor real, no antes |
 | `FichaMascotaHogar` | v2 (S52-P3, espec gateada): la mascota PRESIDE — AvatarMascota 64 (foto primero, huella fallback) sobre superficie Tarjeta, nombre en DM Sans light xl y UNA voz SIN sujeto (ficha.* del riel; las variantes con {{nombre}} se conservan para contextos sin sujeto visible). Semántica intacta: alDia punto verdeVital · pideAtencion punto ochre + warningText · conociendolo neutral. Tap → perfil (pressed 0.99 de Tarjeta); sin badges ni CTA. Diseñada para 1-3 apiladas. Memorial degrada. Cero tokens nuevos |
 
 También: `ThemeProvider`/`useTheme` (light default, memorial forzable),
@@ -663,7 +672,15 @@ dispositivo: CLAUDE.md raíz · dirección de arte e iconografía:
   22c decía "hairline-strong" — el token no existe, el código usa
   `border.default`. Fundada sobre el literal de A (censo ~13 compactos +
   ~12 ghosts en cliente; `PieRevelar.tsx:51`; `Boton.tsx:112/115/117`),
-  no sobre la prosa de la skill.
+  no sobre la prosa de la skill. **ENMIENDA DEL MISMO DÍA (reacción de
+  campo):** el founder vio el `PieRevelar` de Momentos en su camino real
+  ("el botón que no me gusta" — la caja del compacto del gate S72) y
+  **19.6/PieRevelar salió de la cláusula de supervivencia**: su forma es
+  la anatomía 19.7 (sin caja, texto + chevron direccional ⌄/⌃ variante
+  d, sin glifo, target 44); los tres consumidores la heredaron gratis.
+  El chevron direccional se juzga EN VECINDAD (Momentos, datos reales) —
+  esa es la firma ① del gate; la lámina queda para ② el acento y ③ la
+  voz del N=1. D-483 (la ancha de 22c) intacta con su disparo.
 - **S71 (20 Jul 2026) — LAS LEYES QUE SALIERON DEL PRIMER GATE DEL
   MECANISMO.** Entran: **19.6** "revelar el resto de una sección" (la
   depositó B en el gate del piloto B1; su nota se CORRIGE acá —
