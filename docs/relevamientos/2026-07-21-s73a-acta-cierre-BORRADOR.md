@@ -97,7 +97,33 @@ un paquete posterior) — el patrón queda contado en §2.2. **La FIRMA (§2
 pieza 1) entra al arco S74 junto a la superficie de equipo — misma
 superficie NEGOCIO.**
 
-## 8 · Deudas nacidas en S73 (D-483 → D-497)
+## 7c · EL ENTITY CHIP — estado al cierre (hold de mesa)
+
+**Capturas APROBADAS por el founder (no es el gate):** geometría firme —
+lengüeta muerta, fallback que recede, sombra sin borde, centrado a media
+columna. **El gate en dispositivo sigue pendiente con fotos reales**
+(Thor y Zeus, claro/oscuro/memorial), group `5d0c68f2`.
+
+**DECISIONES PENDIENTES QUE VIAJAN A S74 (hold: ninguna bloquea, D-318
+migra al tocarse, y el founder no alcanza esos casos con 2 mascotas):**
+- Los bordes de la ley del ancho: N=3 (lectura de mesa: la huérfana
+  MANTIENE COLUMNA) · N≥5 (lectura: ENVUELVE — contradice la "tira" de
+  la letra del selector §3, que quedó EN REVISIÓN) · maxWidth 240
+  absoluto (propuesta) · nombre largo (hoy trunca). Montados en
+  `s73-a-entity-bordes-ancho.png`.
+- **La ley 19.8** (relleno/contorno) — PROPUESTA en el diccionario,
+  pendiente de firma founder; el censo de los 32 con sus ⚖️ (filtros
+  multiple · catálogos sin precio · talleres del prestador · el bisagra
+  de la duración del paseo con literal) espera SU firma, no se deduce.
+
+**Declarado y aceptado por mesa:** la construcción del entity chip corrió
+ANTES de la vara de B — orden invertido, declarado, reversible; la vara
+igual corre y si contradice, se cura. **Registro con atenuante:**
+fill-vs-fondo dark = 2.24–2.47 (< 3:1 no-textual) — el texto blanco a
+8.25 carga el estado y la distinción elegido/no-elegido se lee igual; si
+un usuario real lo reporta, sube a deuda.
+
+## 8 · Deudas nacidas en S73 (D-483 → D-499)
 
 D-483 la ANCHA de 22c (migra al tocarse) · D-484 el par primario+ghost de
 Hojas de decisión · D-485 RLS-familia (visibilidad por `user_id` legacy;
@@ -112,7 +138,10 @@ proacl (B) · D-496 ¿SelectorEspecie a control? · D-497 EL PISO DE
 PERFORMANCE (31 requests con una mascota; dos ×N; updates ON_LOAD con
 5.1MB por publish; lectores sin techo — las curas van a S74 con estos
 números) · D-498 🔴 el teclado tapa campos (censo cliente hecho en S73;
-patrón único a comparar con B por mano del founder; disparo S74).
+patrón único a comparar con B por mano del founder; disparo S74) ·
+D-499 el relleno se propaga por la ley 19.8 — ENMENDADA (el binario
+(a)/(b) era falso; el founder encontró el eje; con la dirección de arte
+firmada citada adentro).
 
 ## 9 · Gates pendientes al escribir el borrador
 
