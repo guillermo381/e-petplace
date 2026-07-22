@@ -208,11 +208,14 @@ export default function AdiestramientoCuando() {
                 de la gramática canónica) */}
             <SelectorOpcion
               acento="control"
+              // S73 — ENTITY CHIP (dictado founder, V2 provisional): la cara
+              // es ANATOMÍA — overhang, lleno al elegir, cero borde.
+              entidad
               etiqueta={t('adiestramiento.paraQuien')}
               opciones={elegibles.map((m) => ({
                 codigo: m.id,
                 etiqueta: m.nombre,
-                adorno: <AvatarMascota nombre={m.nombre} fotoUrl={fotos[m.id]} tamano="xs" />,
+                avatar: { nombre: m.nombre, fotoUrl: fotos[m.id] },
               }))}
               seleccionada={mascotaId ?? undefined}
               onSelect={setMascotaId}

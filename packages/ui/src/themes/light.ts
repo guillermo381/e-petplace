@@ -54,6 +54,12 @@ export const lightTheme = {
     // ACCIÓN sigue en tinta (CTA primario intacto). El prestador no lo
     // usa: su oficio es tealDark (§15b).
     control:       palette.magentaDark,
+    // S73 (entity chip, token PROPUESTO — mini-gate founder pendiente):
+    // el elegido LLENO. En dark NO usa el violeta (acento de TEXTO):
+    // magentaDark porta blanco 8.25:1 — el MISMO par físico en ambos
+    // temas (ya medido en el gate). Memorial NO porta el slot: degrada.
+    controlLleno: palette.magentaDark,
+    sobreControlLleno: '#FFFFFF',
 
     warm:          palette.terracottaDark,
     warmBg:        palette.terracottaAlphaL,

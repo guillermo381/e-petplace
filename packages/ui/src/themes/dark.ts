@@ -54,6 +54,13 @@ export const darkTheme = {
     // S58 — acento de controles del cliente en dark: violetText (gateado
     // S44 — cero pares nuevos por firma).
     control:       palette.violetText,
+    // S73 — el elegido LLENO, FIRMADO por el founder (opción B del
+    // mini-gate): magentaDark + blanco en AMBOS temas. REGISTRO honesto:
+    // fill-vs-fondo dark = 2.24–2.47 (bajo el 3:1 no-textual de
+    // componentes) — el ojo del founder respondió esa pregunta EN EL
+    // mini-gate ("no se hunde") y su firma manda; blanco encima 8.25:1.
+    controlLleno: palette.magentaDark,
+    sobreControlLleno: '#FFFFFF',
 
     gradient:       gradients.firmaUIDark,  // contextos cerrados (ver palette.ts)
     gradientSubtle: {

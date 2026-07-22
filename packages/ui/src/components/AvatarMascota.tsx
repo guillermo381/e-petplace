@@ -32,7 +32,7 @@ import Svg, { Circle, Path } from 'react-native-svg'
 
 import { useTheme } from '../ThemeProvider'
 
-export type AvatarMascotaTamano = 'xs' | 'sm' | 'md' | 'lg'
+export type AvatarMascotaTamano = 'xs' | 'sm' | 'entidad' | 'md' | 'lg'
 export type AvatarMascotaCapa = 'vida' | 'cuidado' | 'comunidad' | 'comunidadAmplia'
 
 /** Códigos reales de cat_especies (relevados contra DB, S44-B2.3). */
@@ -60,6 +60,9 @@ export interface AvatarMascotaProps {
   especie?: AvatarMascotaEspecie
   tamano?: AvatarMascotaTamano
   capa?: AvatarMascotaCapa
+  /** S73 (entity chip): el FALLBACK sobre un chip LLENO recede — velo
+   *  blanco + huella blanca (con foto no cambia nada). */
+  sobreLleno?: boolean
 }
 
 // SQUIRCLE (S61-A10, dirección de arte firmada por el founder sobre el
@@ -80,6 +83,10 @@ const DIAMETRO: Record<AvatarMascotaTamano, number> = {
   // SelectorOpcion, el para-quién de la reserva) — sm revienta el alto.
   xs: 28,
   sm: 40,
+  // entidad (S73, V2 PROVISIONAL del entity chip — la proporción se
+  // cierra en dispositivo con foto real): sobresale 4 por lado del
+  // chip de 44 (dictado founder: el contorno se FUSIONA con el avatar).
+  entidad: 52,
   md: 64,
   lg: 96,
 }
@@ -88,6 +95,7 @@ const DIAMETRO: Record<AvatarMascotaTamano, number> = {
 const HUELLA: Record<AvatarMascotaTamano, number> = {
   xs: 15,
   sm: 22,
+  entidad: 28,
   md: 36,
   lg: 54,
 }
@@ -128,7 +136,7 @@ function HuellaGenerica({ color, tamano }: { color: string; tamano: number }) {
   )
 }
 
-export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa }: AvatarMascotaProps) {
+export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa, sobreLleno = false }: AvatarMascotaProps) {
   const { theme } = useTheme()
   const [falloCarga, setFalloCarga] = useState(false)
 
@@ -165,8 +173,13 @@ export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa }: AvatarMa
   // Fallback: huella genérica. Capa solo fuera de memorial (Ley 8: neutral).
   const conCapa = capa !== undefined && !esMemorial && 'capaBg' in theme
   const k = CAPA_A_KEY[capa ?? 'vida']
-  const fondo = conCapa ? theme.capaBg[k] : theme.bg.overlay
-  const color = conCapa && 'capaText' in theme ? theme.capaText[k] : theme.text.secondary
+  // S73 (cura del gate: "el fallback pelea con el relleno") — sobre un
+  // chip LLENO, el cuadro pálido + huella se llevaban el ojo y el avatar
+  // pesaba más que el nombre (que es el dato). Tratamiento POR ESTADO:
+  // el fallback RECEDE en el lleno — velo blanco tenue + huella blanca.
+  // (El alpha es candidato a token si el gate lo firma.)
+  const fondo = sobreLleno ? 'rgba(255,255,255,0.16)' : conCapa ? theme.capaBg[k] : theme.bg.overlay
+  const color = sobreLleno ? '#FFFFFF' : conCapa && 'capaText' in theme ? theme.capaText[k] : theme.text.secondary
 
   return (
     <View

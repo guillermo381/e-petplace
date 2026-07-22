@@ -29,6 +29,7 @@ import { ActivityIndicator, Platform, Pressable, ScrollView, Text, View, type Vi
 import Animated from 'react-native-reanimated'
 
 import { usePresionado } from './usePresionado'
+import { AvatarMascota } from './AvatarMascota'
 
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
@@ -41,6 +42,10 @@ const BORDE = 1.5
 const ALTO = 44 // target táctil directo
 
 export interface SelectorOpcionItem {
+  /** S73 (entity chip): la CARA de la entidad — con `entidad` en el
+   *  selector, el componente renderiza AvatarMascota él mismo (overhang
+   *  52/44 V2 provisional; fallback sobreLleno al seleccionar). */
+  avatar?: { nombre: string; fotoUrl?: string }
   codigo: string
   /** VOZ HUMANA — ej: "No sé" (jamás el vocabulario interno del modelo). */
   etiqueta: string
@@ -101,6 +106,15 @@ export interface SelectorOpcionProps {
    *  apaga para no duplicar — el accessibilityLabel del grupo QUEDA
    *  (a11y intacta). Default true: nada existente cambia. */
   etiquetaVisible?: boolean
+  /** S73 — ENTITY CHIP (dictado founder, V2 provisional 52/44): para
+   *  selecciones de ENTIDADES QUE EXISTEN (la mascota). Avatar al borde
+   *  con overhang, contorno FUSIONADO (cero borde — elevacion.reposo,
+   *  regla Chanel del marco Ley 20), elegido = LLENO
+   *  (accent.controlLleno; dark usa pinkDark — magentaDark se hunde,
+   *  medido). Esquinas izquierdas a CHIP/2 (la cura de la lengüeta:
+   *  las dos curvas encajan por geometría). Memorial degrada a tonal
+   *  con borde (sin lleno, elevación conservada). */
+  entidad?: boolean
 }
 
 function Chip({
@@ -111,6 +125,7 @@ function Chip({
   onSelect,
   crecer,
   columna,
+  entidad,
   modo,
   acento,
 }: {
@@ -121,6 +136,7 @@ function Chip({
   onSelect: (codigo: string) => void
   crecer: boolean
   columna: boolean
+  entidad: boolean
   modo: 'radio' | 'checkbox'
   acento: 'capa' | 'control' | 'oficio'
 }) {
@@ -182,6 +198,17 @@ function Chip({
       ? theme.text.secondary
       : theme.border.subtle
 
+  // S73 — entity chip: el LLENO por slot del tema (memorial no lo porta
+  // y degrada a la rama tonal-con-borde: elevación sin lleno).
+  const hayLleno = entidad && 'controlLleno' in theme.accent
+  const llenoActivo = hayLleno && seleccionada
+  const fondoEntidad = llenoActivo
+    ? (theme.accent as { controlLleno: string }).controlLleno
+    : theme.mode === 'dark'
+      ? theme.bg.elevated
+      : theme.bg.card
+  const SOBRA_ENTIDAD = 4 // avatar 52 sobre chip 44 (V2 provisional)
+
   return (
     <Pressable
       onPress={() => {
@@ -198,7 +225,15 @@ function Chip({
       accessibilityState={{ checked: seleccionada, disabled: deshabilitada, busy: cargando }}
       accessibilityLabel={`${opcion.etiqueta}, opción ${indice + 1} de ${total}`}
       style={[
-        columna ? { flexBasis: '48%', maxWidth: '48%', flexGrow: 0 } : { flexGrow: crecer ? 1 : 0 },
+        // LEY DEL ANCHO (S73, letra founder): un chip con avatar JAMÁS
+      // ocupa el 100% — el avatar es ancla FIJA y el chip elástico sin
+      // tope la vuelve estampilla sobre banderola. ~50% (dos por fila);
+      // maxWidth absoluto 240 = PROPUESTA para pantalla ancha (boceto).
+      entidad
+        ? { flexBasis: '48%', maxWidth: 240, flexGrow: 0 }
+        : columna
+          ? { flexBasis: '48%', maxWidth: '48%', flexGrow: 0 }
+          : { flexGrow: crecer ? 1 : 0 },
         // Focus visible en web, en la voz de la casa (patrón Boton):
         // reemplaza el anillo azul del UA. `outlineStyle:none` en
         // reposo mata el default; enfocada = outline en el acento.
@@ -224,20 +259,42 @@ function Chip({
           gap: spacing[2],
           // columnas: la etiqueta larga ENVUELVE — minHeight, jamás clip
           ...(columna ? { minHeight: ALTO, paddingVertical: spacing[2] } : { height: ALTO }),
-          paddingHorizontal: spacing[4],
+          ...(entidad
+            ? {
+                // el avatar overhanguea: RN no clipea hijos por
+                // borderRadius (overflow default 'visible')
+                paddingLeft: 52 + spacing[2],
+                paddingRight: spacing[4],
+                // LA CURA DE LA LENGÜETA: esquinas izquierdas a CHIP/2 —
+                // el semicírculo queda DENTRO de la silueta del avatar
+                // (52 centrado); las dos curvas encajan por geometría.
+                borderTopLeftRadius: ALTO / 2,
+                borderBottomLeftRadius: ALTO / 2,
+                borderTopRightRadius: radius.suave,
+                borderBottomRightRadius: radius.suave,
+              }
+            : { paddingHorizontal: spacing[4] }),
           // LEY DE GEOMETRÍA (S58): lo que se ELIGE es rectángulo suave —
           // la píldora quedó para lo que INFORMA (Insignia intacta)
-          borderRadius: radius.suave,
-          backgroundColor: fondo,
-          borderWidth: BORDE,
-          borderColor: borde,
+          ...(entidad ? null : { borderRadius: radius.suave }),
+          backgroundColor: entidad ? fondoEntidad : fondo,
+          // entidad: contorno FUSIONADO — cero borde, la superficie habla
+          // por elevación (regla Chanel del marco). Memorial conserva el
+          // borde como degradación tonal (sin lleno).
+          ...(entidad && hayLleno
+            ? { boxShadow: theme.elevacion.reposo }
+            : { borderWidth: BORDE, borderColor: borde, ...(entidad ? { boxShadow: theme.elevacion.reposo } : null) }),
           // misma receta que Boton/Tarjeta — LA primitiva (S63)
           ...estiloPresionado,
         }}
       >
         {/* S62 (receta Boton): en carga, adorno y label quedan MONTADOS
             invisibles — preservan el ancho exacto, cero layout shift. */}
-        {opcion.adorno ? (
+        {entidad && opcion.avatar ? (
+          <View style={[{ position: 'absolute', left: 0, top: -SOBRA_ENTIDAD, width: 52, height: 52 }, mostrarSpinner ? { opacity: 0 } : null]}>
+            <AvatarMascota nombre={opcion.avatar.nombre} fotoUrl={opcion.avatar.fotoUrl} tamano="entidad" sobreLleno={llenoActivo} />
+          </View>
+        ) : opcion.adorno ? (
           <View style={mostrarSpinner ? { opacity: 0 } : null}>{opcion.adorno}</View>
         ) : null}
         <Text
@@ -248,7 +305,13 @@ function Chip({
             fontSize: typography.size.sm,
             // apagada = voz terciaria; el estado NO mueve el layout.
             // Ley 22: seleccionada = texto EN el acento (tonal)
-            color: deshabilitada ? theme.text.tertiary : conCapa ? textoTonal : theme.text.primary,
+            color: deshabilitada
+              ? theme.text.tertiary
+              : llenoActivo
+                ? (theme.accent as { sobreControlLleno: string }).sobreControlLleno
+                : conCapa
+                  ? textoTonal
+                  : theme.text.primary,
             opacity: mostrarSpinner ? 0 : 1,
           }}
         >
@@ -273,6 +336,7 @@ export function SelectorOpcion({
   onSelect,
   etiqueta,
   disposicion = 'fila',
+  entidad = false,
   multiple = false,
   seleccionadas,
   acento = 'capa',
@@ -290,6 +354,7 @@ export function SelectorOpcion({
       onSelect={onSelect}
       crecer={disposicion === 'fila'}
       columna={disposicion === 'columnas'}
+      entidad={entidad === true && opcion.avatar !== undefined}
       modo={multiple ? 'checkbox' : 'radio'}
       acento={acento}
     />
@@ -314,7 +379,23 @@ export function SelectorOpcion({
           {chips}
         </ScrollView>
       ) : (
-        <View style={{ flexDirection: 'row', flexWrap: disposicion === 'grilla' || disposicion === 'columnas' ? 'wrap' : 'nowrap', gap: spacing[2] }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            // entidad ENVUELVE siempre (lectura de mesa N>=5: ver-todo
+            // sobre compacto — pendiente firma founder vs la letra
+            // 'tira' del selector §3)
+            flexWrap: entidad || disposicion === 'grilla' || disposicion === 'columnas' ? 'wrap' : 'nowrap',
+            gap: spacing[2],
+            ...(entidad
+              ? {
+                  paddingVertical: 4,
+                  // LEY DEL ANCHO: N=1 se CENTRA — jamás se alarga
+                  justifyContent: opciones.length === 1 ? 'center' : 'flex-start',
+                }
+              : null),
+          }}
+        >
           {chips}
         </View>
       )}

@@ -274,13 +274,14 @@ export default function PaseoCuando() {
                 reuso declarado de la voz del grooming, Ley 17.3) */}
             <SelectorOpcion
               acento="control"
+              // S73 — ENTITY CHIP (dictado founder, V2 provisional): la cara
+              // es ANATOMÍA — overhang, lleno al elegir, cero borde.
+              entidad
               etiqueta={t('grooming.paraQuien')}
               opciones={elegibles.map((m) => ({
                 codigo: m.id,
                 etiqueta: m.nombre,
-                // S61-A4: la cara — foto real primero, huella digna de
-                // fallback (AvatarMascota lo resuelve; memorial adentro).
-                adorno: <AvatarMascota nombre={m.nombre} fotoUrl={fotos[m.id]} tamano="xs" />,
+                avatar: { nombre: m.nombre, fotoUrl: fotos[m.id] },
               }))}
               seleccionada={mascotaId ?? undefined}
               onSelect={setMascotaId}
