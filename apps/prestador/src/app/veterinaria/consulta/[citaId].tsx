@@ -48,6 +48,7 @@ import {
 import {
   estructurarNotaClinica,
   obtenerCasosActivosMascota,
+  obtenerCitaVetPorId,
   obtenerMiCuentaComercial,
   obtenerMiPrestador,
   obtenerPerfilMascota,
@@ -146,6 +147,15 @@ export default function ConsultaVeterinaria() {
 
   const cargadoRef = useRef(false);
 
+  // D-488 (S73, adelantada por mesa): LA FUENTE DE VERDAD de la mascota es
+  // LA CITA (SELECT_CITA ya la trae embebida) — los params quedan de atajo
+  // para el primer render. Con solo citaId la pantalla RECONSTRUYE
+  // (ESTRATEGIA §7.5: un refresh o deep-link jamás rompe el Durante).
+  const [mascotaR, setMascotaR] = useState<{ id: string; nombre: string }>({
+    id: mascotaId,
+    nombre: mascotaNombre,
+  });
+
   // Contexto (cargado una vez en focus).
   const [cargando, setCargando] = useState(true);
   const [errorCarga, setErrorCarga] = useState(false);
@@ -202,11 +212,28 @@ export default function ConsultaVeterinaria() {
         setCargando(false);
         return;
       }
+      // La cita manda (D-488): si es legible, su mascota embebida PISA los
+      // params; si no lo es Y no hay atajo, error honesto — jamás un uuid
+      // vacío disparado a los lectores (el 22P02 del hallazgo).
+      const citaR = await obtenerCitaVetPorId(citaId);
+      if (!vigente) return;
+      let mId = mascotaId;
+      let mNombre = mascotaNombre;
+      if (citaR.ok && citaR.data.mascota !== null) {
+        mId = citaR.data.mascota.id;
+        mNombre = citaR.data.mascota.nombre;
+      }
+      if (mId === '') {
+        setErrorCarga(true);
+        setCargando(false);
+        return;
+      }
+      setMascotaR({ id: mId, nombre: mNombre });
       const [empId, per, cas, pres] = await Promise.all([
         obtenerTitularId(pr.data.id),
-        obtenerPerfilMascota(mascotaId),
-        obtenerCasosActivosMascota(mascotaId, cta.data.id),
-        obtenerPresupuestosPrestador(cta.data.id, { mascotaId }),
+        obtenerPerfilMascota(mId),
+        obtenerCasosActivosMascota(mId, cta.data.id),
+        obtenerPresupuestosPrestador(cta.data.id, { mascotaId: mId }),
       ]);
       if (!vigente) return;
       // Duros: sin empleado tratante o sin perfil, no hay consulta.
@@ -225,9 +252,9 @@ export default function ConsultaVeterinaria() {
     return () => {
       vigente = false;
     };
-  }, [mascotaId]);
+  }, [citaId, mascotaId]);
 
-  const mascota = mascotaNombre || t('consulta.mascotaFallback');
+  const mascota = mascotaR.nombre || t('consulta.mascotaFallback');
   const money = (n: number) => `$${n.toFixed(2)}`;
 
   // ── Dictado → estructuración ───────────────────────────────────────────────
@@ -359,7 +386,7 @@ export default function ConsultaVeterinaria() {
       citaId,
       cuentaComercialId: cuentaId,
       empleadoId,
-      mascotaId,
+      mascotaId: mascotaR.id,
       nota: notaConf,
       caso: construirCaso(),
       countryCode,
