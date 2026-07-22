@@ -26,6 +26,8 @@ import {
   Boton,
   Campo,
   Encabezado,
+  Esqueleto,
+  EsqueletoGrupo,
   EstadoVacio,
   SelectorOpcion,
   SelectorSegmentado,
@@ -63,13 +65,24 @@ export default function AtencionMostrador() {
   const insets = useSafeAreaInsets();
   const { mascotaId = '', nombre = '' } = useLocalSearchParams<{ mascotaId?: string; nombre?: string }>();
 
-  const [prestadorId, setPrestadorId] = useState<string | null>(null);
+  // S73-B (M2 de A sobre el boceto S72-B §2): LA MÁQUINA DE ESTADOS de la
+  // carga — espejo de coordinar/[citaId] (copiar-al-vecino). `null` ya no
+  // significa dos cosas: cargando/error/listo son fases DISTINTAS, y un
+  // fallo de CUALQUIERA de los cinco fetches (prestador + mundo + catálogo
+  // + vacunas + detalle de mascota — el cuarto lo sumó a9b8686 y también
+  // se tragaba en silencio) pasa a 'error' con voz y reintento (Ley 13:
+  // el error jamás se disfraza de botón muerto).
+  type Carga =
+    | { fase: 'cargando' }
+    | { fase: 'error' }
+    | { fase: 'listo'; prestadorId: string; servicios: ServicioActivo[] };
+  const [carga, setCarga] = useState<Carga>({ fase: 'cargando' });
+  const [reintento, setReintento] = useState(0);
   // S73-B ítem 10 (b): el vet tiene que VER al animal que atiende — la
   // identidad se carga por mascotaId (puerta única, RLS; mismo patrón que
   // mascota/[mascotaId] + resolverUrlFoto), jamás foto por params.
   const [fotoFirmada, setFotoFirmada] = useState<string | null>(null);
   const [nombreMascota, setNombreMascota] = useState<string | null>(null);
-  const [servicios, setServicios] = useState<ServicioActivo[] | null>(null);
   const [servicioCodigo, setServicioCodigo] = useState<string | undefined>(undefined);
   const [precio, setPrecio] = useState('');
   const [fase, setFase] = useState<'atencion' | 'cobro'>('atencion');
@@ -85,10 +98,14 @@ export default function AtencionMostrador() {
 
   useEffect(() => {
     let vigente = true;
+    setCarga({ fase: 'cargando' });
     void (async () => {
       const pr = await obtenerMiPrestador();
-      if (!vigente || !pr.ok) return;
-      setPrestadorId(pr.data.id);
+      if (!vigente) return;
+      if (!pr.ok) {
+        setCarga({ fase: 'error' });
+        return;
+      }
       const [mundo, cat, vac, detalle] = await Promise.all([
         obtenerMundoVeterinariaPropio(pr.data.id),
         obtenerCatalogoVeterinaria(),
@@ -96,29 +113,37 @@ export default function AtencionMostrador() {
         obtenerDetalleMascotaPrestador(mascotaId, pr.data.id),
       ]);
       if (!vigente) return;
-      if (vac.ok) setCatalogoVacunas(vac.data);
-      if (detalle.ok) {
-        setNombreMascota(detalle.data.mascota.nombre);
-        // La foto es PATH (S47): se firma por la frontera. Sin foto o si la
-        // firma falla, la huella digna de AvatarMascota es la cara válida.
-        if (detalle.data.mascota.foto_url !== null) {
-          void resolverUrlFoto(detalle.data.mascota.foto_url).then((url) => {
-            if (vigente) setFotoFirmada(url);
-          });
-        }
+      // Un fallo de CUALQUIERA pasa a error — antes: mundo caído se
+      // disfrazaba de "sin servicios", catálogo caído pintaba códigos
+      // crudos (Ley 3), vacunas caídas apagaban el registrable en
+      // silencio, y el detalle caído escondía a la mascota.
+      if (!mundo.ok || !cat.ok || !vac.ok || !detalle.ok) {
+        setCarga({ fase: 'error' });
+        return;
       }
-      const nombres = new Map<string, string>(cat.ok ? cat.data.map((c) => [c.codigo, c.nombre]) : []);
-      const activos: ServicioActivo[] = mundo.ok
-        ? mundo.data.servicios
-            .filter((s) => s.activo)
-            .map((s) => ({ codigo: s.tipoServicio, nombre: nombres.get(s.tipoServicio) ?? s.tipoServicio, precio: s.precio }))
-        : [];
-      setServicios(activos);
+      setCatalogoVacunas(vac.data);
+      setNombreMascota(detalle.data.mascota.nombre);
+      // La foto es PATH (S47): se firma por la frontera. Sin foto o si la
+      // firma falla, la huella digna de AvatarMascota es la cara válida.
+      if (detalle.data.mascota.foto_url !== null) {
+        void resolverUrlFoto(detalle.data.mascota.foto_url).then((url) => {
+          if (vigente) setFotoFirmada(url);
+        });
+      }
+      const nombres = new Map<string, string>(cat.data.map((c) => [c.codigo, c.nombre]));
+      const activos: ServicioActivo[] = mundo.data.servicios
+        .filter((s) => s.activo)
+        .map((s) => ({ codigo: s.tipoServicio, nombre: nombres.get(s.tipoServicio) ?? s.tipoServicio, precio: s.precio }));
+      setCarga({ fase: 'listo', prestadorId: pr.data.id, servicios: activos });
     })();
     return () => {
       vigente = false;
     };
-  }, []);
+  }, [mascotaId, reintento]);
+
+  // Derivados de la máquina — el resto de la pantalla habla como antes.
+  const prestadorId = carga.fase === 'listo' ? carga.prestadorId : null;
+  const servicios = carga.fase === 'listo' ? carga.servicios : null;
 
   function elegirServicio(codigo: string) {
     setServicioCodigo(codigo);
@@ -225,8 +250,44 @@ export default function AtencionMostrador() {
           <Texto variante="titulo">{mascota}</Texto>
         </View>
         {fase === 'atencion' ? (
-          servicios !== null && servicios.length === 0 ? (
-            <EstadoVacio registro="seccion" titulo={t('atencionMostrador.sinServicios')} />
+          carga.fase === 'cargando' ? (
+            // Ley 13: esqueleto ESTÁTICO — antes esta espera era una
+            // pantalla con botón gris que parecía colgada.
+            <EsqueletoGrupo etiqueta={t('atencionMostrador.titulo')}>
+              <View style={{ gap: spacing[3] }}>
+                <Esqueleto forma="linea" ancho="40%" />
+                <Esqueleto forma="bloque" alto={120} />
+                <Esqueleto forma="bloque" alto={56} />
+              </View>
+            </EsqueletoGrupo>
+          ) : carga.fase === 'error' ? (
+            // El error DIRIGE (17.4) — con su camino de reintento.
+            <EstadoVacio
+              registro="seccion"
+              titulo={t('atencionMostrador.errorCarga')}
+              descripcion={t('atencionMostrador.errorCargaDetalle')}
+              accion={
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('agenda.reintentar')}
+                  onPress={() => setReintento((n) => n + 1)}
+                />
+              }
+            />
+          ) : servicios !== null && servicios.length === 0 ? (
+            // El vacío termina en un CAMINO (17.5, M2 de A): el taller es
+            // donde se prenden los servicios.
+            <EstadoVacio
+              registro="seccion"
+              titulo={t('atencionMostrador.sinServicios')}
+              accion={
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('atencionMostrador.sinServiciosCta')}
+                  onPress={() => router.push({ pathname: '/veterinaria/taller', params: { seccion: 'servicios' } })}
+                />
+              }
+            />
           ) : (
             <>
               {servicios !== null && (

@@ -1269,7 +1269,14 @@ export const prestadorEs = {
   atencionMostrador: {
     titulo: 'Registrar atención',
     servicioLabel: '¿Qué servicio?',
-    sinServicios: 'Prendé un servicio en tu consultorio para registrar atenciones.',
+    // S73-B (M2 de A, boceto atencion): voseo→tuteo al tocarse + los
+    // estados que faltaban (error con reintento, CTA al taller — 17.5).
+    sinServicios: 'Prende un servicio en tu consultorio para registrar atenciones.',
+    sinServiciosCta: 'Activar servicios',
+    errorCarga: 'No pudimos cargar tu consultorio.',
+    // «revisá tu conexión» queda RESERVADO a errores de red (S47) — acá
+    // la causa puede ser otra; la voz dirige sin diagnosticar de más.
+    errorCargaDetalle: 'Vuelve a intentarlo en un momento.',
     precioLabel: 'Precio',
     registrarAtencion: 'Registrar atención',
     cobroTitulo: 'Cobro',
