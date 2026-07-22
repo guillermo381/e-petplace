@@ -284,8 +284,15 @@ export default function VeterinariaCuando() {
                 {/* 1 · EL QUÉ — los tipos reservables del mundo vet, con
                     el "desde" agregado server-side */}
                 <View style={{ gap: spacing[2] }}>
+                  {/* S73 ítem 12 (founder): sin disposicion caía en 'fila'
+                      (2-4 chips que LLENAN el ancho) y la oferta vet trae
+                      hasta 5 con etiquetas largas — no se veían todos.
+                      Grilla por precedente del menú de bloques: conjunto
+                      CERRADO de comprables se envuelve, no se esconde
+                      tras scroll (la tira es de secuencias — los días). */}
                   <SelectorOpcion
                     acento="control"
+                    disposicion="grilla"
                     etiqueta={t('veterinaria.servicioEtiqueta')}
                     opciones={oferta.map((o) => ({
                       codigo: o.tipo_servicio,
