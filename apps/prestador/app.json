@@ -27,6 +27,14 @@
     "plugins": [
       "expo-router",
       [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "La app usa el micrófono para dictar la nota de la consulta.",
+          "speechRecognitionPermission": "La app usa el reconocimiento de voz para convertir tu dictado en la nota de la consulta.",
+          "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#208AEF",
