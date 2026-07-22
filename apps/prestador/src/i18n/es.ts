@@ -1522,6 +1522,11 @@ export const prestadorEs = {
     confirmar: 'Guardar la consulta',
     // S73-B cura de mesa (hallazgo T-B trampa L-139): el botón apagado dice su porqué.
     medIncompletaAviso: 'Completa la dosis y la frecuencia para confirmar.',
+    // S73-B 🔴 cura de gate: cada guard del Confirmar con su campo NOMBRADO.
+    faltaMotivo: 'Falta el motivo de consulta.',
+    faltaDiagnostico: 'Falta el diagnóstico.',
+    faltaCasoCondicion: 'Falta la condición del caso.',
+    faltaCasoEleccion: 'Elige el caso activo.',
     listo: 'Guardamos la consulta de {{mascota}}.',
     proximoTitulo: 'Próxima consulta sugerida',
     proximoDetalle: '{{control}}',

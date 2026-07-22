@@ -691,10 +691,32 @@ export default function ConsultaVeterinaria() {
               )}
             </View>
 
-            {/* S73-B (hallazgo T-B de la trampa L-139, cura de mesa): el
-                botón apagado DICE su porqué — cero explicación literal. */}
-            {medIncompleta && (
-              <Texto variante="apoyo">{t('consulta.medIncompletaAviso')}</Texto>
+            {/* S73-B 🔴 (cura de gate — el founder quedó adivinando): el
+                Confirmar apagado DICE QUÉ FALTA, siempre, un guard por
+                línea con su campo nombrado. Espeja los RAISE del RPC
+                (nota_sin_motivo / nota_sin_diagnostico /
+                posologia_incompleta / condicion_requerida) — la lista
+                de guards vive en puedeConfirmar y esta voz NO puede
+                divergir de ella. cuentaId/empleadoId null no se
+                enumeran: ese estado lo frena errorCarga aguas arriba. */}
+            {!sedimentando && !puedeConfirmar && (
+              <View style={{ gap: spacing[1] }}>
+                {motivo.trim().length === 0 && (
+                  <Texto variante="apoyo">{t('consulta.faltaMotivo')}</Texto>
+                )}
+                {diagnostico.trim().length === 0 && (
+                  <Texto variante="apoyo">{t('consulta.faltaDiagnostico')}</Texto>
+                )}
+                {medIncompleta && (
+                  <Texto variante="apoyo">{t('consulta.medIncompletaAviso')}</Texto>
+                )}
+                {modoCaso === 'nuevo' && casoCondicion.trim().length === 0 && (
+                  <Texto variante="apoyo">{t('consulta.faltaCasoCondicion')}</Texto>
+                )}
+                {modoCaso === 'activo' && casoSel === undefined && (
+                  <Texto variante="apoyo">{t('consulta.faltaCasoEleccion')}</Texto>
+                )}
+              </View>
             )}
             <Boton
               variante="primario"
