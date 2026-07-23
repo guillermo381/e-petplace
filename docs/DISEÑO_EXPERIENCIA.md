@@ -379,6 +379,32 @@ vive en la descripción del presupuesto. La regla de qué mostrar:
   orden se cura en un solo lugar. Consumidores S72-A: `veterinaria-atencion.ts`
   (agenda vet) y `citasMascota.ts` (`/citas/[mascotaId]` del dueño).
 
+### 10ter.1 — COROLARIO: N CITAS en una superficie (S74, dictado del founder)
+
+**Letra firmada (founder S74, con su ambigüedad resuelta por él mismo):**
+**"Si la mascota tiene más de una cita activa, se MUESTRAN. Si varias son del
+MISMO servicio, solo la PRÓXIMA EN EL TIEMPO."** *(El founder confirmó "la más
+próxima en el tiempo", no la de creación más nueva.)*
+
+**Por qué es COROLARIO y no enmienda — el contraste, declarado:** §10ter
+gobierna **N ÍTEMS DENTRO DE UNA cita** (los del presupuesto de un
+`procedimiento`: 1→descripción · N→primera+«+N»); esta gobierna **N CITAS
+DISTINTAS en una superficie**. Son ejes distintos: uno dice *cómo se nombra
+una cita*, el otro *cuántas citas se muestran*. **No hay roce.**
+
+**Advertencia de composición (para el boceto, no para el motor):** en una
+superficie que muestre N citas y donde alguna sea un `procedimiento`,
+conviven **dos reglas de «+N» apiladas**. La regla de reparto: **§10ter
+gobierna el NOMBRE de cada cita; este corolario gobierna la LISTA.** Si la
+composición se vuelve ilegible, la que cede es la lista (colapsa con
+`PieRevelar`, 19.6), jamás el nombre.
+
+**Bordes que la letra no cubre y el boceto declara** (se firman con el
+boceto): las citas **`por_coordinar` no tienen fecha** — no entran en "la
+próxima en el tiempo" y necesitan su lugar propio (hoy PRESIDEN por
+`nullsFirst`); y la agrupación por servicio **no pide motor** (el shape ya
+trae `tipo_servicio`).
+
 ## 11. Backlog de construcción de A1 (derivado de este diseño)
 
 Orden fino a trazar al abrir A1; alcance derivado:
