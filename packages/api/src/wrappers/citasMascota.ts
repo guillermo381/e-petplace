@@ -66,9 +66,18 @@ function hoyLocal(): string {
  * ascendente — la primera es "la próxima". Vacía = sin citas activas
  * (el caller decide su voz honesta; el CTA de la ficha ni se dibuja).
  */
-export async function obtenerCitasActivasMascota(
-  mascotaId: string,
-): Promise<ResultadoWrapper<CitaActivaMascota[], 'error_citas_mascota'>> {
+/** S74-A (cura D-497): el ítem hogar-wide dice de QUÉ mascota es. */
+export interface CitaActivaHogar extends CitaActivaMascota {
+  mascota_id: string;
+}
+
+// S74-A (cura D-497): el core acepta N mascotas — UNA query hogar-wide
+// (.in) en lugar de N llamadas por mascota (patrón probado por la rama
+// vet del rail S73); el per-mascota delega con [id]. El límite 50 POR
+// mascota se conserva multiplicando (Thor solo ya vivió 23 activas).
+async function _citasActivas(
+  mascotaIds: string[],
+): Promise<ResultadoWrapper<CitaActivaHogar[], 'error_citas_mascota'>> {
   const cliente = getClient();
 
   const citas = await cliente
@@ -82,9 +91,9 @@ export async function obtenerCitasActivasMascota(
     // es AMBIGUO y PostgREST rompe el select entero (PGRST201). Se desambigua
     // con el nombre de la FK que va cita→presupuesto.
     .select(
-      'id, fecha, hora, tipo_servicio, estado, estado_reserva, expira_en, prestador_id, presupuesto_id, prestadores ( nombre_comercial ), presupuesto:presupuesto!evento_cita_servicio_presupuesto_id_fkey(items:presupuesto_item(id, descripcion_libre, created_at))',
+      'id, mascota_id, fecha, hora, tipo_servicio, estado, estado_reserva, expira_en, prestador_id, presupuesto_id, prestadores ( nombre_comercial ), presupuesto:presupuesto!evento_cita_servicio_presupuesto_id_fkey(items:presupuesto_item(id, descripcion_libre, created_at))',
     )
-    .eq('mascota_id', mascotaId)
+    .in('mascota_id', mascotaIds)
     .in('estado', ['pendiente', 'confirmada', 'en_curso'])
     // S71-A (costura de D-439) — el `.gte('fecha', hoy)` solo escondía:
     // la cita que nace de un presupuesto APROBADO es legal SIN fecha, y
@@ -96,9 +105,9 @@ export async function obtenerCitasActivasMascota(
     // (ley de la casa del prestador, aplicada a la casa del dueño).
     .order('fecha', { ascending: true, nullsFirst: true })
     .order('hora', { ascending: true, nullsFirst: false })
-    // 50: un plan L-V genera ~22 citas/mes — 10 era un tope silencioso
-    // para el "Ver más" (relevado vivo: Thor con 23 activas).
-    .limit(50);
+    // 50 POR mascota: un plan L-V genera ~22 citas/mes — 10 era un tope
+    // silencioso para el "Ver más" (relevado vivo: Thor con 23 activas).
+    .limit(50 * mascotaIds.length);
 
   if (citas.error) {
     return { ok: false, codigo: 'error_citas_mascota', mensaje: MENSAJE_ERROR };
@@ -166,9 +175,14 @@ export async function obtenerCitasActivasMascota(
     }
   }
 
-  const data: CitaActivaMascota[] = [];
+  const data: CitaActivaHogar[] = [];
   for (const c of activas) {
+    // El tipo generado dice nullable; el filtro .in() la exige — el guard
+    // narrowea honesto (regla 34: cero `as` forzados).
+    const mascotaDeCita = c.mascota_id;
+    if (mascotaDeCita === null) continue;
     data.push({
+      mascota_id: mascotaDeCita,
       cita_id: c.id,
       fecha: c.fecha,
       hora: c.hora !== null ? c.hora.slice(0, 5) : null,
@@ -192,4 +206,19 @@ export async function obtenerCitasActivasMascota(
     });
   }
   return { ok: true, data };
+}
+
+export async function obtenerCitasActivasMascota(
+  mascotaId: string,
+): Promise<ResultadoWrapper<CitaActivaMascota[], 'error_citas_mascota'>> {
+  return _citasActivas([mascotaId]);
+}
+
+/** S74-A (cura D-497): las citas activas de TODO el hogar en UNA query
+ *  — el arranque del Hogar deja de multiplicar por mascota. */
+export async function obtenerCitasActivasHogar(
+  mascotaIds: string[],
+): Promise<ResultadoWrapper<CitaActivaHogar[], 'error_citas_mascota'>> {
+  if (mascotaIds.length === 0) return { ok: true, data: [] };
+  return _citasActivas(mascotaIds);
 }

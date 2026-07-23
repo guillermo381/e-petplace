@@ -22,6 +22,7 @@ export {
 } from './wrappers/catalogos';
 export {
   leerTimelineMascota,
+  leerTimelineHogar,
   obtenerFotosDeEvento,
   leerDetalleAtencion,
   type ItemTimeline,
@@ -151,7 +152,13 @@ export {
 } from './wrappers/hogar';
 
 // Citas activas por mascota — D-430 (S67): el detalle contextual
-export { obtenerCitasActivasMascota, type CitaActivaMascota } from './wrappers/citasMascota';
+// (+S74-A cura D-497: la variante hogar-wide en UNA query)
+export {
+  obtenerCitasActivasMascota,
+  obtenerCitasActivasHogar,
+  type CitaActivaMascota,
+  type CitaActivaHogar,
+} from './wrappers/citasMascota';
 export { mascotasElegibles, type EstadoVidaMascota } from './wrappers/_mascotas-elegibles';
 
 // Perfil de mascota — S51-B2.3 (pila de módulos)

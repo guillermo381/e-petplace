@@ -63,11 +63,11 @@ import {
   getEstadoOnboardingDueno,
   obtenerMiPerfil,
   leerDetalleAtencion,
-  leerTimelineMascota,
+  leerTimelineHogar,
   obtenerEstadoHogar,
   obtenerMascotasDeFamilia,
   obtenerMisPlanesPaseo,
-  obtenerCitasActivasMascota,
+  obtenerCitasActivasHogar,
   obtenerPresupuestosFamilia,
   type PresupuestoFamilia,
   mascotasElegibles,
@@ -279,7 +279,9 @@ export default function Hogar() {
   const [items, setItems] = useState<ItemHogar[] | null | 'error'>(null);
   const [filtroMascotas, setFiltroMascotas] = useState<string[]>([]);
   const [filtroTipos, setFiltroTipos] = useState<string[]>([]);
-  const cursoresRef = useRef<Record<string, string | null>>({});
+  // S74-A (cura D-497): el cursor del timeline es GLOBAL — una sola
+  // query hogar-wide reemplazó a las N páginas por mascota.
+  const cursorRef = useRef<string | null>(null);
   const [estadoPie, setEstadoPie] = useState<LineaDeVidaEstadoPie>('nada');
   const cargandoMasRef = useRef(false);
 
@@ -336,57 +338,43 @@ export default function Hogar() {
   const ordenarPorFecha = (a: ItemTimeline, b: ItemTimeline) => (a.fecha_evento < b.fecha_evento ? 1 : -1);
 
   const cargarTimelineHogar = useCallback(async (lista: MascotaResumen[]) => {
-    const paginas = await Promise.all(lista.map((m) => leerTimelineMascota(m.id)));
-    if (paginas.some((p) => !p.ok)) {
+    // S74-A (cura D-497): UNA query hogar-wide — antes eran N llamadas
+    // por mascota (el ítem ya trae mascota_id del wrapper).
+    const pagina = await leerTimelineHogar(lista.map((m) => m.id));
+    if (!pagina.ok) {
       setItems('error');
       setEstadoPie('nada');
       return;
     }
-    const todos: ItemHogar[] = [];
-    const cursores: Record<string, string | null> = {};
-    paginas.forEach((p, i) => {
-      if (p.ok) {
-        todos.push(...p.data.items.map((it) => ({ ...it, mascota_id: lista[i].id })));
-        cursores[lista[i].id] = p.data.siguiente_cursor;
-      }
-    });
-    cursoresRef.current = cursores;
-    todos.sort(ordenarPorFecha);
+    cursorRef.current = pagina.data.siguiente_cursor;
+    const todos: ItemHogar[] = [...pagina.data.items].sort(ordenarPorFecha);
     setItems(todos);
-    setEstadoPie(Object.values(cursores).some((c) => c !== null) ? 'mas' : 'nada');
+    setEstadoPie(pagina.data.siguiente_cursor !== null ? 'mas' : 'nada');
   }, []);
 
   const cargarMas = useCallback(async () => {
     if (cargandoMasRef.current || !Array.isArray(mascotas)) return;
-    const pendientes = Object.entries(cursoresRef.current).filter(([, c]) => c !== null);
-    if (pendientes.length === 0) {
-      // reintento sin cursores: recargar el timeline del hogar
+    const cursor = cursorRef.current;
+    if (cursor === null) {
+      // reintento sin cursor: recargar el timeline del hogar
       setEstadoPie('cargando');
       await cargarTimelineHogar(mascotas);
       return;
     }
     cargandoMasRef.current = true;
     setEstadoPie('cargando');
-    const resultados = await Promise.all(
-      pendientes.map(([id, cursor]) => leerTimelineMascota(id, { cursor: cursor as string })),
-    );
+    const r = await leerTimelineHogar(mascotas.map((m) => m.id), { cursor });
     cargandoMasRef.current = false;
-    if (resultados.some((r) => !r.ok)) {
+    if (!r.ok) {
       setEstadoPie('error');
       return;
     }
-    const nuevos: ItemHogar[] = [];
-    resultados.forEach((r, i) => {
-      if (r.ok) {
-        nuevos.push(...r.data.items.map((it) => ({ ...it, mascota_id: pendientes[i][0] })));
-        cursoresRef.current[pendientes[i][0]] = r.data.siguiente_cursor;
-      }
-    });
+    cursorRef.current = r.data.siguiente_cursor;
     setItems((prev) => {
       const base = Array.isArray(prev) ? prev : [];
-      return [...base, ...nuevos].sort(ordenarPorFecha);
+      return [...base, ...r.data.items].sort(ordenarPorFecha);
     });
-    setEstadoPie(Object.values(cursoresRef.current).some((c) => c !== null) ? 'mas' : 'nada');
+    setEstadoPie(r.data.siguiente_cursor !== null ? 'mas' : 'nada');
   }, [mascotas, cargarTimelineHogar]);
 
   useFocusEffect(
@@ -440,18 +428,28 @@ export default function Hogar() {
           if (!vigente) return;
           setPresupuestosPend(pr.ok ? pr.data.filter((x) => x.estadoEfectivo === 'enviado') : []);
         });
-        // PONTE AL DÍA: citas aprobadas que esperan fecha (E3: N llamadas
-        // por mascota — v1 honesto; el fallo de una no calla a las demás).
-        void Promise.all(
-          lista.map(async (m) => {
-            const rc = await obtenerCitasActivasMascota(m.id);
-            if (!rc.ok) return [];
-            return rc.data
+        // PONTE AL DÍA: citas aprobadas que esperan fecha — S74-A (cura
+        // D-497): UNA query hogar-wide (antes N por mascota). Borde
+        // declarado: muere el aislamiento por-mascota del E3 viejo — el
+        // fallo de la query única deja la franja vacía entera (antes,
+        // solo callaba la mascota fallida); mismo best-effort, un caso.
+        void obtenerCitasActivasHogar(lista.map((m) => m.id)).then((rc) => {
+          if (!vigente) return;
+          if (!rc.ok) {
+            setPorCoordinar([]);
+            return;
+          }
+          const nombrePor = new Map(lista.map((m) => [m.id, m.nombre]));
+          setPorCoordinar(
+            rc.data
               .filter((c) => c.estado === 'por_coordinar')
-              .map((c) => ({ mascotaId: m.id, mascotaNombre: m.nombre, citaId: c.cita_id, negocio: c.negocio_nombre }));
-          }),
-        ).then((arr) => {
-          if (vigente) setPorCoordinar(arr.flat());
+              .map((c) => ({
+                mascotaId: c.mascota_id,
+                mascotaNombre: nombrePor.get(c.mascota_id) ?? '',
+                citaId: c.cita_id,
+                negocio: c.negocio_nombre,
+              })),
+          );
         });
         const paths = lista.map((m) => m.foto_url).filter((p): p is string => typeof p === 'string' && p.length > 0);
         if (paths.length > 0) {

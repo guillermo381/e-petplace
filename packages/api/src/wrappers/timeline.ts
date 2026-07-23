@@ -31,6 +31,9 @@ const BUCKET_ADJUNTOS = 'cita-archivos';
 
 export interface ItemTimeline {
   evento_id: string;
+  /** S74-A (cura D-497): de QUÉ mascota es el ítem — el hogar-wide lo
+   *  necesita para etiquetar y filtrar; en el per-mascota es constante. */
+  mascota_id: string;
   /** Código crudo de eventos_mascota.tipo — la voz humana es de LineaDeVida. */
   tipo: string;
   eje_jtbd: string | null;
@@ -65,16 +68,20 @@ export interface PaginaTimeline {
  * dueño es la atención, no su cita administrativa (decisión B5.2 —
  * el diccionario de LineaDeVida lo documenta).
  */
-export async function leerTimelineMascota(
-  mascotaId: string,
+// S74-A (cura D-497): el core acepta N mascotas — UNA query hogar-wide
+// (.in) en vez de N llamadas por mascota (patrón probado por la rama vet
+// del rail S73); el per-mascota delega con [id]. El límite conserva el
+// volumen por mascota multiplicando.
+async function _timeline(
+  mascotaIds: string[],
   opciones?: { limite?: number; cursor?: string },
 ): Promise<ResultadoWrapper<PaginaTimeline, CodigoErrorTimeline>> {
-  const limite = opciones?.limite ?? 20;
+  const limite = opciones?.limite ?? 20 * mascotaIds.length;
 
   let q = getClient()
     .from('eventos_mascota')
-    .select('id, tipo, eje_jtbd, fecha_evento, prestador_id, datos')
-    .eq('mascota_id', mascotaId)
+    .select('id, mascota_id, tipo, eje_jtbd, fecha_evento, prestador_id, datos')
+    .in('mascota_id', mascotaIds)
     .eq('soft_delete', false)
     .neq('tipo', 'cita_servicio')
     .order('fecha_evento', { ascending: false })
@@ -127,6 +134,7 @@ export async function leerTimelineMascota(
     const vacuna = e.tipo === 'vacuna_aplicada' && datos && typeof datos.vacuna === 'string' ? datos.vacuna : null;
     return {
       evento_id: e.id,
+      mascota_id: e.mascota_id,
       tipo: e.tipo,
       eje_jtbd: e.eje_jtbd ?? null,
       fecha_evento: e.fecha_evento,
@@ -149,6 +157,27 @@ export async function leerTimelineMascota(
       siguiente_cursor: eventos.length === limite ? eventos[eventos.length - 1].fecha_evento : null,
     },
   };
+}
+
+export async function leerTimelineMascota(
+  mascotaId: string,
+  opciones?: { limite?: number; cursor?: string },
+): Promise<ResultadoWrapper<PaginaTimeline, CodigoErrorTimeline>> {
+  return _timeline([mascotaId], opciones);
+}
+
+/** S74-A (cura D-497): el timeline de TODO el hogar en UNA query,
+ *  cronológico global con cursor GLOBAL por fecha_evento. Borde
+ *  DECLARADO: bajo el filtro por mascota de la UI, la de poca actividad
+ *  puede traer menos ítems en la primera tanda que las páginas
+ *  por-mascota viejas — "Cargar más" los trae; el arranque gana N−1
+ *  requests (D-497a). */
+export async function leerTimelineHogar(
+  mascotaIds: string[],
+  opciones?: { limite?: number; cursor?: string },
+): Promise<ResultadoWrapper<PaginaTimeline, CodigoErrorTimeline>> {
+  if (mascotaIds.length === 0) return { ok: true, data: { items: [], siguiente_cursor: null } };
+  return _timeline(mascotaIds, opciones);
 }
 
 // ── 4b · fotos de un evento ──────────────────────────────────────────────────

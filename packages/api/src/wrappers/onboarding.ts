@@ -83,6 +83,7 @@ export interface FamiliaCreada {
 export async function crearFamiliaConPrimeraMascota(
   input: InputCrearFamiliaConPrimeraMascota,
 ): Promise<ResultadoWrapper<FamiliaCreada, CodigoErrorOnboarding>> {
+  _invalidarEstadoOnboarding(); // S74-A: el mutador cambia el estado cacheado
   const { data, error } = await getClient().rpc('crear_familia_con_primera_mascota', {
     p_nombre_familia:   input.nombre_familia,
     p_nombre_mascota:   input.nombre_mascota,
@@ -143,6 +144,7 @@ export interface MascotaAgregada {
 export async function agregarMascotaAFamilia(
   input: InputAgregarMascotaAFamilia,
 ): Promise<ResultadoWrapper<MascotaAgregada, CodigoErrorOnboarding>> {
+  _invalidarEstadoOnboarding(); // S74-A: el mutador cambia el estado cacheado
   const { data, error } = await getClient().rpc('agregar_mascota_a_familia', {
     p_nombre_mascota:   input.nombre_mascota,
     p_especie:          input.especie,
@@ -231,10 +233,26 @@ export interface EstadoOnboardingDueno {
   mascotas_count: number;
 }
 
+// S74-A (cura D-497, medido en vivo): el estado se pedía DOS veces en el
+// arranque (routing del raíz + guard del Hogar) y en cada focus del
+// Hogar. Cache POR USUARIO de sesión (la sesión se lee LOCAL — cero
+// request extra) con invalidación en los dos mutadores de este archivo
+// que lo cambian. Cambio de usuario = cache miss por la llave.
+let _cacheEstado: { userId: string; data: EstadoOnboardingDueno } | null = null;
+
+function _invalidarEstadoOnboarding(): void {
+  _cacheEstado = null;
+}
+
 /** Estado mínimo para el routing al abrir la app del dueño. */
 export async function getEstadoOnboardingDueno(): Promise<
   ResultadoWrapper<EstadoOnboardingDueno, CodigoErrorOnboarding>
 > {
+  const sesion = await getClient().auth.getSession();
+  const uid = sesion.data.session?.user.id ?? null;
+  if (uid !== null && _cacheEstado !== null && _cacheEstado.userId === uid) {
+    return { ok: true, data: _cacheEstado.data };
+  }
   const { data, error } = await getClient().rpc('get_estado_onboarding_dueno');
 
   if (error) return mapeoErrorAResultado(error.message);
@@ -249,12 +267,11 @@ export async function getEstadoOnboardingDueno(): Promise<
     return mapeoErrorAResultado('datos_inconsistentes');
   }
 
-  return {
-    ok: true,
-    data: {
-      tiene_familia: o.tiene_familia,
-      familia_id: (o.familia_id as string | null),
-      mascotas_count: o.mascotas_count,
-    },
+  const estado: EstadoOnboardingDueno = {
+    tiene_familia: o.tiene_familia,
+    familia_id: (o.familia_id as string | null),
+    mascotas_count: o.mascotas_count,
   };
+  if (uid !== null) _cacheEstado = { userId: uid, data: estado };
+  return { ok: true, data: estado };
 }
