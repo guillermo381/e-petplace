@@ -310,6 +310,14 @@ export default function Hogar() {
   const [porCoordinar, setPorCoordinar] = useState<
     { mascotaId: string; mascotaNombre: string; citaId: string; negocio: string | null }[]
   >([]);
+  // S75-A (§10ter.1, superficie firmada): las citas AGENDADAS del hogar
+  // (con fecha) también habitan Ponte al día, colapsadas por servicio a
+  // la PRÓXIMA en el tiempo. El eje de la zona no es el tiempo, es
+  // ACCIÓN vs INFORMACIÓN: las `por_coordinar` (acción) presiden y NO
+  // colapsan; estas (información) van después y SÍ colapsan.
+  const [citasAgendadas, setCitasAgendadas] = useState<
+    { mascotaId: string; mascotaNombre: string; citaId: string; tipoServicio: string | null; fecha: string; hora: string | null }[]
+  >([]);
   const [ponteRevelado, setPonteRevelado] = useState(false);
   const [vacunaAbierta, setVacunaAbierta] = useState(false);
   const [vacuna, setVacuna] = useState<VacunaDeEvento | 'cargando' | 'error'>('cargando');
@@ -437,6 +445,7 @@ export default function Hogar() {
           if (!vigente) return;
           if (!rc.ok) {
             setPorCoordinar([]);
+            setCitasAgendadas([]);
             return;
           }
           const nombrePor = new Map(lista.map((m) => [m.id, m.nombre]));
@@ -450,6 +459,31 @@ export default function Hogar() {
                 negocio: c.negocio_nombre,
               })),
           );
+          // S75-A (§10ter.1): dejar de descartar las agendadas. El lector
+          // ya viene ordenado por fecha+hora ASC, así que la PRIMERA de
+          // cada (mascota, tipo_servicio) es la próxima en el tiempo — el
+          // colapso es quedarse con esa (el resto del plan no se lista).
+          // El `en_vivo` es de OTRA zona (el hero) y no entra acá.
+          const vistas = new Set<string>();
+          const agendadas: {
+            mascotaId: string; mascotaNombre: string; citaId: string;
+            tipoServicio: string | null; fecha: string; hora: string | null;
+          }[] = [];
+          for (const c of rc.data) {
+            if ((c.estado !== 'firme' && c.estado !== 'hold') || c.fecha === null) continue;
+            const clave = `${c.mascota_id}|${c.tipo_servicio ?? ''}`;
+            if (vistas.has(clave)) continue;
+            vistas.add(clave);
+            agendadas.push({
+              mascotaId: c.mascota_id,
+              mascotaNombre: nombrePor.get(c.mascota_id) ?? '',
+              citaId: c.cita_id,
+              tipoServicio: c.tipo_servicio,
+              fecha: c.fecha,
+              hora: c.hora,
+            });
+          }
+          setCitasAgendadas(agendadas);
         });
         const paths = lista.map((m) => m.foto_url).filter((p): p is string => typeof p === 'string' && p.length > 0);
         if (paths.length > 0) {
@@ -654,6 +688,10 @@ export default function Hogar() {
           tinte: 'cuidado' | 'vida';
           titulo: string;
           detalle: string | null;
+          // S75-A: la fecha+hora de una cita agendada, en mono (Ley 3).
+          // Solo las agendadas la traen; las acciones (por_coordinar,
+          // presupuesto, autorización) no tienen tiempo.
+          fechaMono?: string | null;
           cta: string;
           onPress: () => void;
         };
@@ -714,6 +752,30 @@ export default function Hogar() {
                 }),
             }),
           ),
+          // S75-A (§10ter.1): las agendadas van DESPUÉS de las acciones —
+          // son información, no exigen decisión. Voz del servicio (§10ter,
+          // el dueño jamás lee el código); sin voz, la forma honesta "La
+          // cita de {mascota}" (Ley 3, jamás el código crudo). La fecha va
+          // en mono (fechaMono), separada del título humano.
+          ...citasAgendadas.map((c): Habitante => {
+            const voz = vozServicio(t, c.tipoServicio);
+            return {
+              key: `agen-${c.citaId}`,
+              tinte: 'vida',
+              titulo:
+                voz !== null
+                  ? t('hogar.citaAgendadaTitulo', { servicio: voz, mascota: c.mascotaNombre })
+                  : t('hogar.citaAgendadaSinServicio', { mascota: c.mascotaNombre }),
+              detalle: null,
+              fechaMono: `${fechaCortaMono(c.fecha, idioma)}${c.hora !== null ? ` · ${c.hora}` : ''}`,
+              cta: t('hogar.verLaCita'),
+              onPress: () =>
+                router.push({
+                  pathname: '/citas/[mascotaId]',
+                  params: { mascotaId: c.mascotaId, nombre: c.mascotaNombre, citaId: c.citaId },
+                }),
+            };
+          }),
         ];
         if (habitantes.length === 0) return null;
         const visibles = ponteRevelado ? habitantes : habitantes.slice(0, 3);
@@ -728,6 +790,9 @@ export default function Hogar() {
                 <View style={{ gap: spacing[2] }}>
                   <Texto variante="cuerpo">{h.titulo}</Texto>
                   {h.detalle !== null ? <Texto variante="apoyo">{h.detalle}</Texto> : null}
+                  {/* S75-A: la fecha de una cita agendada, en mono (Ley 3);
+                      las acciones no la traen (undefined). */}
+                  {h.fechaMono != null ? <Texto variante="dato">{h.fechaMono}</Texto> : null}
                   {/* S73 (C2 + anatomía 19.7 firmada): el CTA en caja
                       MURIÓ — la acción baja a label + chevron › (navega),
                       la vara "igual al de ver cita". Sin glifo: el pie de

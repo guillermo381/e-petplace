@@ -108,6 +108,8 @@ export const clienteEn = {
     presupuestoPara: 'Estimate for {{mascota}}',
     presupuestoDetalle: '${{total}} for {{mascota}} · expires {{fecha}}',
     porCoordinarTitulo: "{{mascota}}'s visit is waiting for a date",
+    citaAgendadaTitulo: '{{servicio}} for {{mascota}}',
+    citaAgendadaSinServicio: "{{mascota}}'s visit",
     railPaseos: 'Walks',
     railEstetica: 'Grooming',
     // S73 item 1: the minimum-4 rail (LOTE S73, founder gate pending)

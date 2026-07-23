@@ -114,6 +114,8 @@ export const clienteEs = {
     presupuestoPara: 'Presupuesto para {{mascota}}',
     presupuestoDetalle: '${{total}} por {{mascota}} · vence el {{fecha}}',
     porCoordinarTitulo: 'La cita de {{mascota}} espera fecha',
+    citaAgendadaTitulo: '{{servicio}} de {{mascota}}',
+    citaAgendadaSinServicio: 'La cita de {{mascota}}',
     railPaseos: 'Paseos',
     railEstetica: 'Estética',
     // S73 ítem 1: el rail mínimo-4 (LOTE S73, gate founder pendiente)
