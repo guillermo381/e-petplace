@@ -16,7 +16,7 @@ description: >-
 
 # epetplace-design-system — el sistema es exigible, no sugerido
 
-Fuente de verdad: `packages/ui` (tokens v4 + 39 componentes + 3 temas).
+Fuente de verdad: `packages/ui` (tokens v4 + 40 componentes + 3 temas).
 Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 `@epetplace/ui`, no existe en el producto.
 
@@ -618,7 +618,7 @@ comprar es lo último, y lo que compra combina con TODO.*
 //     stroke={theme.text.primary} strokeWidth={1.75} strokeLinecap="round" /></Svg>
 ```
 
-## 3. ÍNDICE — los 39 componentes (import de `@epetplace/ui`)
+## 3. ÍNDICE — los 40 componentes (import de `@epetplace/ui`)
 
 | Export | Cuándo |
 |---|---|
@@ -660,6 +660,7 @@ comprar es lo último, y lo que compra combina con TODO.*
 | `Texto` | **La pieza de texto del sistema (S71-A2).** El design system tenía 57 exports y NINGUNO era texto: la consecuencia no era hardcodeo (los tokens estaban bien puestos) sino algo peor — **la jerarquía tipográfica se re-decidía a mano en cada pantalla**, ~200 veces. Cinco variantes (Ley 3): `titulo` DM Sans 300 · **`seccion`** DM Sans 500 con `accessibilityRole="header"` DE FÁBRICA (absorbió **10 definiciones byte-idénticas de `TituloBloque`** + 3 `tituloSeccion` locales) · `cuerpo` la prosa por default · `apoyo` secundario **con `lineHeight` de prosa** (absorbió las **4 `VozSecundaria`**, que coincidían todas en ese interlineado — el censo corrigió al diseñador, no al revés) · `dato` JetBrains Mono con `tabular-nums`. **SIN prop `style`, deliberado:** la escotilla de estilo libre devolvería el gobierno de la jerarquía a la pantalla, que es el problema que existe para cerrar. Es una HOJA: no lleva margin, flex ni ancho — el layout es del padre. `montoCorto` NO nació (D-448: el formateo de plata es del RIEL por idioma, como `fechaCortaMono`) |
 | `FilaDato` | **Etiqueta sobre valor, sin interacción (S71-A2).** Su hueco estaba DECLARADO en un comentario del código desde S70 (`veterinaria/cita/[citaId]`: *"no hay componente de campo de solo lectura"*) — el comentario documentaba la deuda en vez de dispararla. **La prueba de su trabajo: si tocarlo no hace nada, es `FilaDato`** (no `Celda`, que es fila de lista tapeable; no `Campo`, que se edita). `mono` es del VALOR, jamás del rótulo (Ley 3). Hermano de `Texto`, NO variante: es layout (dos nodos apilados) — como variante habría obligado a `Texto` a devolver dos elementos. Un valor ausente NO se dibuja vacío: la pantalla omite la fila o pasa su voz honesta (Ley 13). **Candidato registrado sin construir: la disposición HORIZONTAL compacta** (rótulo izquierda / valor derecha) — el caso del perfil del Antes la pidió y se decidió NO meter una prop al pasar en un componente recién congelado |
 | `PieRevelar` | **El control canónico de la entrada 19.6 (S71-A3, D-454 pagada; anatomía 19.7 desde S73 — reacción de campo del founder).** SIN caja: texto en tinta + chevron direccional (⌄ revela · ⌃ pliega) centrado al pie de una sección truncada o plegada, target 44, con **el NÚMERO en la etiqueta** (`"Ver {{n}} más"`, forma neutra del namespace ui); con `revelado`, pasa a "Ocultar" — plegar de vuelta es el mismo control en el mismo lugar. `n=0` sin revelar: **no se dibuja** (regla de existencia). **NO es paginación** (traer datos que no están: eso es el pie de `LineaDeVida` con su cursor) ni abrir un compuesto en sus partes (`FilaSalida`). Nació con su tercer consumidor real, no antes |
+| `LogoNegocio` | **El logo del negocio CONTENIDO, jamás recortado (S74 — E2 de la vara A→B; la trampa del logo, `MODELO_PRESENCIA` §2).** Caja `radius.suave` + `bg.overlay` + AIRE interno, `contentFit="contain"` — los logos ANCHOS no se cortan a círculo (el recorte circular es de caras/avatares). Sin logo: MONOGRAMA de iniciales en DM Sans — jamás huella (la huella es de MASCOTA, Ley 12), jamás caja vacía. Escalera declarada: NO muestra datos del expediente. Sin transition (Ley 13). Consumidores: la FIRMA de NEGOCIO (ventana de equipo S74-B) · pieza 2 de PRESENCIA · superficies del pet parent con firma. Gate founder en dispositivo PENDIENTE (nace con su primera pantalla consumidora) |
 | `FichaMascotaHogar` | v2 (S52-P3, espec gateada): la mascota PRESIDE — AvatarMascota 64 (foto primero, huella fallback) sobre superficie Tarjeta, nombre en DM Sans light xl y UNA voz SIN sujeto (ficha.* del riel; las variantes con {{nombre}} se conservan para contextos sin sujeto visible). Semántica intacta: alDia punto verdeVital · pideAtencion punto ochre + warningText · conociendolo neutral. Tap → perfil (pressed 0.99 de Tarjeta); sin badges ni CTA. Diseñada para 1-3 apiladas. Memorial degrada. Cero tokens nuevos |
 
 También: `ThemeProvider`/`useTheme` (light default, memorial forzable),

@@ -40,6 +40,7 @@ import { StepperCantidad } from '../components/StepperCantidad'
 import { CeldaNavegacion } from '../components/CeldaNavegacion'
 import { Texto } from '../components/Texto'
 import { FilaDato } from '../components/FilaDato'
+import { LogoNegocio } from '../components/LogoNegocio'
 import { PieRevelar } from '../components/PieRevelar'
 import { HeroMarca } from '../components/HeroMarca'
 import { LineaDeVida, type LineaDeVidaItem } from '../components/LineaDeVida'
@@ -1119,6 +1120,20 @@ function GaleriaInterna() {
             No es Celda (fila de lista, tapeable) ni Campo (se edita). La prueba: si tocarlo no hace
             nada, es FilaDato. Un valor ausente NO se dibuja vacío — la pantalla omite la fila o pasa
             su voz honesta (Ley 13).
+          </Texto>
+        </Seccion>
+
+        <Seccion titulo="LogoNegocio (61) — el logo contenido, jamás recortado (S74)">
+          <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center' }}>
+            <LogoNegocio nombre="Clínica Aurora" />
+            <LogoNegocio nombre="Paseos Andres" tamano={48} />
+            <LogoNegocio nombre="Aurora" tamano={40} />
+          </View>
+          <View style={{ height: spacing[3] }} />
+          <Texto variante="apoyo">
+            La trampa del logo (MODELO_PRESENCIA §2): los logos anchos NO se recortan a círculo —
+            se contienen con AIRE y FONDO (contain). Sin logo: monograma de iniciales en DM Sans —
+            jamás huella (la huella es de mascota, Ley 12), jamás caja vacía.
           </Texto>
         </Seccion>
 
