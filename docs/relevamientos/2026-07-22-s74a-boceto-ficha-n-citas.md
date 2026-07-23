@@ -1,5 +1,11 @@
 # S74-A · BOCETO M1 — LA FICHA DE MASCOTA CON N CITAS ACTIVAS
-# ⚠️ **SUPERFICIE PROBABLEMENTE EQUIVOCADA — CONGELADO, ESPERA CONFIRMACIÓN**
+# ❌ **SUPERADO — LA SUPERFICIE ERA OTRA (decisión de mesa S74, confirmada)**
+
+> **El boceto vigente es `2026-07-22-s74a-boceto-ponte-al-dia-n-citas.md`.**
+> Este queda como REGISTRO DE MÉTODO: es el precio de bocetear sobre una
+> superficie asumida en vez de esperar el literal — y por eso el propio
+> boceto abría declarando la suposición (§0), que es lo que permitió
+> corregirlo barato.
 
 > **La mesa corrigió (S74): el founder dictó la mejora caminando el ítem 4 —
 > la franja "Ver su cita ›" de PONTE AL DÍA con las por-coordinar reales.**

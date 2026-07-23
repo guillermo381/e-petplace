@@ -186,12 +186,42 @@ Cuatro reglas de superficie:
 Dictado del founder: al asignar el rol de administrador, **un mensaje aclarando
 qué gana esa persona** — datos del negocio, asignar y eliminar empleados, etc.
 
-> **✅ FIRMADO (S74) con su nota de oficio: el botón dice "DAR EL ROL", jamás
-> "hacerla administradora" — el género no se resuelve desde un nombre** (la
-> voz de producto no infiere género de un nombre propio; es la misma
-> disciplina de L-148 sobre el acento). **El LITERAL del string está firmado
-> pero NO VIAJÓ al depósito (L-142): entra en el par es+en cuando llegue —
-> hueco declarado, no olvido.**
+> **✅ FIRMADO (S74) — EL LITERAL, DEPOSITADO (llegó pegado tras el freno):**
+>
+> **es:**
+> ```
+> Vas a darle el rol de administrador a {nombre}.
+>
+> Con este rol va a poder:
+> · Ver los ingresos, la facturación y las liquidaciones del negocio
+> · Invitar, cambiar de rol y desvincular a otras personas del equipo
+> · Editar los datos y la configuración del negocio
+>
+> No va a poder nombrar a otros administradores: eso solo puedes hacerlo tú.
+>
+> [Cancelar]  [Sí, dar el rol]
+> ```
+>
+> **en:**
+> ```
+> You're about to give {nombre} the administrator role.
+>
+> With this role they'll be able to:
+> · See the business's income, billing and payouts
+> · Invite, change roles and remove other people from the team
+> · Edit the business's details and settings
+>
+> They won't be able to name other administrators: only you can do that.
+>
+> [Cancel]  [Yes, give the role]
+> ```
+>
+> **NOTA DE OFICIO QUE VIAJA CON EL STRING:** el botón dice **"dar el rol"**,
+> jamás *"hacerla administradora"* — **el género no se resuelve desde un
+> nombre** (la voz de producto no lo infiere; misma disciplina de L-148 sobre
+> el acento). En inglés, `they` por la misma razón. La enumeración **cierra
+> con lo que el rol NO puede** (§10.2: solo el titular nombra administradores)
+> — el consentimiento informado se completa diciendo también el límite.
 
 **Va ANTES de confirmar, jamás después.** Es consentimiento informado, no un
 cartel: la superficie enumera con todas las letras lo que se está entregando
@@ -281,12 +311,13 @@ afirma haber enviado algo que no se envió.
    equipo lo entrega quien es dueño del negocio, y nadie más* — y con §7.1.4
    (el rol administrador jamás viaja en un link), el poder queda entregado
    **mirando y por el titular**.
-3. **El contenido literal del aviso de §6** → **FIRMADO por el founder**, con
-   su **nota de oficio: el botón dice "dar el rol", jamás "hacerla
-   administradora" — el género no se resuelve desde un nombre.** **⚠️ El
-   literal del string NO VIAJÓ en el paquete que ordenó depositarlo** (freno
-   L-142, quinta vez del patrón en la sesión): **se deposita en el par es+en
-   en cuanto llegue** — no se inventa (L-141).
+3. **El contenido literal del aviso de §6** → **FIRMADO y DEPOSITADO en el
+   par es+en** (ver §6). **Nota de oficio:** el botón dice **"dar el rol"**,
+   jamás *"hacerla administradora"* — el género no se resuelve desde un
+   nombre. **Registro del proceso:** el literal **no viajó en el paquete que
+   ordenó depositarlo** y el **freno L-142 rigió — correctamente, por QUINTA
+   vez en la sesión**; llegó pegado en el paquete siguiente y se depositó sin
+   inventar una sola palabra (L-141). *El error fue de la mesa, no del freno.*
 
 ## Historial
 

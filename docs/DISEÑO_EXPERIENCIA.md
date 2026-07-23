@@ -379,54 +379,38 @@ vive en la descripción del presupuesto. La regla de qué mostrar:
   orden se cura en un solo lugar. Consumidores S72-A: `veterinaria-atencion.ts`
   (agenda vet) y `citasMascota.ts` (`/citas/[mascotaId]` del dueño).
 
-### 10ter.1 — COROLARIO: N CITAS en una superficie (S74) — ⚠️ **EN REVISIÓN: LA SUPERFICIE**
+### 10ter.1 — COROLARIO: N CITAS EN **PONTE AL DÍA** (S74, dictado founder — superficie FIRMADA)
 
-> **⚠️ ESTE COROLARIO ESTÁ EN REVISIÓN Y NO SE CONSTRUYE HASTA QUE EL FOUNDER
-> CONFIRME (S74).** La letra (qué hace la regla) **no se discute**; lo que
-> está en revisión es **DÓNDE aplica**. La mesa lo depositó apuntando a **la
-> ficha de la mascota** y **probablemente esté mal**: el founder dictó la
-> mejora **mientras caminaba el ítem 4 de su cosecha — la franja "Ver su cita ›"
-> de PONTE AL DÍA, con las por-coordinar reales**. Ahí estaba su dedo.
-> **EL ARGUMENTO QUE LO CIERRA: en la ficha de mascota la regla es un NO-OP** —
-> esa superficie ya muestra UNA sola cita, así que *"si son del mismo servicio
-> mostrá solo la próxima"* no cambiaría nada. **La regla solo tiene sentido
-> donde se muestran VARIAS: o sea Ponte al día.** Lectura de su frase con ese
-> encuadre: *"si tiene más de una cita activa, mostrar"* = **ratificación de lo
-> que estaba viendo** · *"si es del mismo servicio, solo la próxima"* = **LA
-> MEJORA NUEVA, la del colapso.**
-> **Al confirmarse: este corolario se enmienda nombrando Ponte al día y el
-> boceto se rehace ahí** (`docs/relevamientos/2026-07-22-s74a-boceto-ficha-n-citas.md`
-> queda superado).
-> **Y EL BORDE DEJA DE SER PERIFÉRICO — pasa a ser el CENTRO del problema:**
-> las `por_coordinar` **no tienen tiempo**, así que *"la próxima en el tiempo"*
-> **no las ordena** — y en Ponte al día **son exactamente las que el founder
-> estaba mirando**. La salida que el boceto proponía (*"que vivan en Ponte al
-> día, su casa"*) **deja de ser una salida**: hay que decidir **cómo conviven
-> las sin-tiempo con las ordenadas por tiempo** en la misma franja.
+**Letra firmada (founder S74):** **"Si la mascota tiene más de una cita activa,
+se MUESTRAN. Si varias son del MISMO servicio, solo la PRÓXIMA EN EL TIEMPO."**
+*(El founder confirmó "la más próxima en el tiempo", no la de creación más
+nueva — y la voz dice **próxima**, jamás "más reciente": Ley 17.3, es lo que el
+resto de la casa ya dice.)*
 
-**Letra firmada (founder S74, con su ambigüedad resuelta por él mismo):**
-**"Si la mascota tiene más de una cita activa, se MUESTRAN. Si varias son del
-MISMO servicio, solo la PRÓXIMA EN EL TIEMPO."** *(El founder confirmó "la más
-próxima en el tiempo", no la de creación más nueva.)*
+**LA SUPERFICIE ES `PONTE AL DÍA` (decisión de mesa S74, corregida):** el
+founder dictó la mejora **caminando el ítem 4 de su cosecha — la franja "Ver su
+cita ›" con las por-coordinar reales**. **El argumento que lo cierra: en la
+ficha de mascota la regla sería un NO-OP** (esa superficie ya muestra UNA sola
+cita, así que "colapsar por servicio" no cambiaría nada). **Una regla de
+colapso solo existe donde compiten VARIAS.**
 
 **Por qué es COROLARIO y no enmienda — el contraste, declarado:** §10ter
 gobierna **N ÍTEMS DENTRO DE UNA cita** (los del presupuesto de un
 `procedimiento`: 1→descripción · N→primera+«+N»); esta gobierna **N CITAS
-DISTINTAS en una superficie**. Son ejes distintos: uno dice *cómo se nombra
-una cita*, el otro *cuántas citas se muestran*. **No hay roce.**
-
-**Advertencia de composición (para el boceto, no para el motor):** en una
-superficie que muestre N citas y donde alguna sea un `procedimiento`,
-conviven **dos reglas de «+N» apiladas**. La regla de reparto: **§10ter
-gobierna el NOMBRE de cada cita; este corolario gobierna la LISTA.** Si la
-composición se vuelve ilegible, la que cede es la lista (colapsa con
+DISTINTAS en una superficie**. Son ejes distintos: uno dice *cómo se nombra una
+cita*, el otro *cuántas citas se muestran*. **No hay roce.** Regla de reparto
+si conviven: **§10ter gobierna el NOMBRE de cada cita; este corolario gobierna
+la LISTA** — si la composición se vuelve ilegible, cede la lista (colapsa con
 `PieRevelar`, 19.6), jamás el nombre.
 
-**Bordes que la letra no cubre y el boceto declara** (se firman con el
-boceto): las citas **`por_coordinar` no tienen fecha** — no entran en "la
-próxima en el tiempo" y necesitan su lugar propio (hoy PRESIDEN por
-`nullsFirst`); y la agrupación por servicio **no pide motor** (el shape ya
-trae `tipo_servicio`).
+**EL BORDE QUE ES EL CENTRO — las `por_coordinar` no tienen tiempo:** en Ponte
+al día son **las protagonistas** (es la casa de lo que espera acción), y *"la
+próxima en el tiempo"* **no las ordena**. La resolución vive en el boceto
+(`docs/relevamientos/2026-07-22-s74a-boceto-ponte-al-dia-n-citas.md`) y su
+principio es: **el eje de Ponte al día no es el TIEMPO, es ACCIÓN vs
+INFORMACIÓN** — lo que espera acción preside y **no colapsa** (colapsar
+acciones esconde trabajo pendiente); el colapso por servicio rige sobre lo
+informativo. **La construcción va a S75 con ese boceto.**
 
 ## 11. Backlog de construcción de A1 (derivado de este diseño)
 
