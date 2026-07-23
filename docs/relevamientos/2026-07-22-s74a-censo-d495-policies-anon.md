@@ -98,6 +98,29 @@ citan SOLO `is_admin`.
 por-helper en 0, sonda L-140 verde, anon = vacío sin error, el dueño real
 sigue viendo lo suyo — asserts in-txn). **`is_admin` NO se revocó** —
 candidata a deuda propia (censo de lectores admin/legado + las 3 de caso;
-número en mesa). Lección operativa: **el cinturón in-migración es la vara
-del censo** — un censo sin assert que lo pruebe es una tabla de hallazgos
-más.
+número en mesa — *post-mesa: son D-503 y D-504*). Lección operativa: **el
+cinturón in-migración es la vara del censo** — un censo sin assert que lo
+pruebe es una tabla de hallazgos más.
+
+## 7 · MÉTODO, REVISADO (pedido de mesa S74: un censo que subcontó dos veces)
+
+Las dos subcuentas de esta tanda comparten UNA causa: **el censo se scopeó
+por HELPER (grep de un nombre en los quals) cuando la decisión era por
+SUPERFICIE** (todas las policies de las tablas afectadas × todos los
+helpers del paquete de cura).
+
+1. **4 vías vs 8 policies:** la tabla del §3 respondía "¿qué policies
+   citan a `user_tiene_acceso_a_mascota`?" — correcta para SU pregunta
+   (4 vías) — pero la cura tocó 8 porque el paquete incluía revocar
+   `user_puede_acceder_prestador` (paseo_update/_nov_update lo citan) y
+   la higiene de la superficie completa (paseo_delete/_nov_delete, que
+   citan `is_admin`). El §4 los nombraba EN PARÉNTESIS y la tabla no los
+   elevó — lo que no está en la tabla no existe para quien decide.
+2. **La extrapolación a `is_admin`** ("misma única vía") se afirmó sin
+   correr SU grep — el cinturón halló 10 policies más.
+
+**La regla que queda:** un censo de seguridad (a) se corta por SUPERFICIE
+completa, (b) eleva a la tabla TODO lo que la cura va a tocar — cero
+paréntesis, y (c) su verdad final la firma un ASSERT ejecutable (el
+cinturón in-migración), jamás la tabla sola. Es L-156 aplicada a los
+censos: lo que un assert puede atrapar no se confía a la prosa.
