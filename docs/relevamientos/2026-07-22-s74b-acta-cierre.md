@@ -131,3 +131,31 @@ condicional al gate Android · los tres cierres con teclado esperan
 estado cerrable o siembra de mesa · el acta del string del aviso
 (firmado, literal sin viajar — freno L-142 de A) toca mi superficie
 cuando llegue.
+
+---
+
+## 7 · POST-FIRMA — el OTA de cierre (la ventana se cierra acá)
+
+**Group `b472ea19-f073-4faf-9a07-2a4092854bfa`** · branch preview ·
+runtime 1.0.2 · android+ios · **ancla `ac7727a` SIN ASTERISCO** — que es
+el commit de la firma misma ("S74 CERRADA"): árbol limpio verificado
+antes y confirmado por el hash del publish (la candidata del árbol
+limpio, cumplida en su primer estreno). **Carga:** la cura D-508
+(`57a602e` — los rebotes de invitar CON VOZ) · la voz angostada del
+handshake (`02eb7e8`) · **el marcador visible en Cuenta** (`0225701`).
+
+**El marcador esperado — POR PRIMERA VEZ EN PANTALLA, sin cable:**
+doble reinicio → **tab Cuenta → el pie dice `update 019f8d56 ·
+preview`**. Si dice `bundle embebido / dev` u otro id, no aplicó.
+
+### Guion corto para el founder (dos cosas)
+
+1. **Invitar YA SE PUEDE TOCAR** — era la pantalla excluida de tu
+   primera caminata por prometer de más. **Reproducí tu caso de campo:
+   invitate a vos mismo con tu propio mail.** Debe leer **"Esa persona
+   ya es parte de tu equipo."** — el rebote real del motor, DICHO. Es el
+   cierre del hallazgo que abrió toda la cadena D-508 → D-514.
+2. **La voz del handshake ahora dice la única verdad que existe:** *"La
+   invitación queda registrada a ese correo. Todavía no le llega sola…"*
+   Leela sabiendo que es honesta y PROVISORIA — sube a "se une al
+   entrar" cuando D-514 (el handshake) se construya.
