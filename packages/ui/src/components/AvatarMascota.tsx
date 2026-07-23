@@ -107,7 +107,13 @@ const DIAMETRO: Record<AvatarMascotaTamano, number> = {
  *  fusiona — B fue la mejor de tres, no un "resuelto": la sombra (D-507)
  *  y el material (D-506) siguen en la lámina v2. Las DEMÁS tallas
  *  conservan el squircle 32% intacto (censo S74: entidad solo vive en
- *  SelectorOpcion + lámina). Proporción 52/44 sigue PROVISIONAL. */
+ *  SelectorOpcion + lámina). Proporción 52/44 sigue PROVISIONAL.
+ *  REGLA PROPUESTA que esta cura implica (mesa S74, PENDIENTE de firma
+ *  founder — letra y censo en DEUDAS_CANONICAS junto a D-507): "el
+ *  avatar ANIDADO deriva su radio del contenedor; el SUELTO conserva el
+ *  squircle". Si se firma, `xs` (anidado en chips de 44, hoy squircle)
+ *  gana su decisión; si no, este derivado queda como excepción única de
+ *  `entidad`. Que nadie generalice NI revierta sin esa firma. */
 const RADIO_ENTIDAD = 44 / 2 - (TALLA_AVATAR_ENTIDAD - 44) / 2 // 18
 
 function radioAvatar(tamano: AvatarMascotaTamano, lado: number): number {

@@ -247,6 +247,14 @@ function BloqueTema({ rotulo, mascotas }: { rotulo: string; mascotas: MascotaLam
 
       {/* ── 1 · LA SOMBRA: escalones 1 / 2 / 3 (1 = el token de hoy) ── */}
       <Rotulo texto="1 · sombra — 1 / 2 / 3" />
+      {modo === 'dark' ? (
+        <Text style={{ fontFamily: typography.family.sans.regular, fontSize: 12, color: theme.text.secondary }}>
+          ojo: en oscuro la elevación HOY se delega al paso de luminancia (convención deliberada
+          del sistema — la sombra es solo contacto). Elegir 2 o 3 acá es una DESVIACIÓN CONSCIENTE
+          de esa convención y quedará escrita en el token (D-507) — para que nadie la
+          &quot;corrija&quot; después citando el sistema.
+        </Text>
+      ) : null}
       {ESCALONES_SOMBRA[modo].map((s, i) => (
         <View key={i} style={{ gap: spacing[2] }}>
           <Rotulo texto={String(i + 1)} />
@@ -254,17 +262,24 @@ function BloqueTema({ rotulo, mascotas }: { rotulo: string; mascotas: MascotaLam
         </View>
       ))}
 
-      {/* ── 2 · EL MATERIAL: foto tal cual vs recorte vs por defecto ── */}
-      <Rotulo texto="2 · material" />
+      {/* ── 2 · EL MATERIAL: los CUATRO — mismo sujeto (Thor), foto y
+          recorte, cada uno en LLENO y NO-LLENO (el no-lleno es el caso
+          MAYORITARIO de una fila: el lleno es uno, el resto no) ── */}
+      <Rotulo texto="2 · material (mismo sujeto, lleno · no-lleno)" />
       <View style={{ gap: spacing[2] }}>
         <Rotulo texto="foto tal cual" />
-        <FilaPar m0={m0} m1={m1} />
+        <FilaPar
+          m0={m0}
+          m1={m0}
+          foto0={m0.fotoUrl !== null ? { uri: m0.fotoUrl } : null}
+          foto1={m0.fotoUrl !== null ? { uri: m0.fotoUrl } : null}
+        />
       </View>
       <View style={{ gap: spacing[2] }}>
         <Rotulo texto="recorte a mano (png alpha)" />
         <FilaPar
           m0={m0}
-          m1={m1}
+          m1={m0}
           foto0={{ asset: THOR_RECORTE, transparente: true }}
           foto1={{ asset: THOR_RECORTE, transparente: true }}
         />
