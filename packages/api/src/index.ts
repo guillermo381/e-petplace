@@ -725,3 +725,17 @@ export {
   type ContactoReservaCita,
   type CodigoErrorContactoReserva,
 } from './wrappers/recepcion';
+
+// S74-B — la ventana de EQUIPO (LETRA_EQUIPO §14, composición sobre lo vivo)
+export {
+  obtenerEquipoNegocio,
+  asignarRolEmpleado,
+  quitarRolEmpleado,
+  desvincularEmpleado,
+  invitarEmpleado,
+  type EquipoNegocio,
+  type MiembroEquipo,
+  type RolEquipo,
+  type CodigoErrorEquipo,
+} from './wrappers/equipo';
+export { obtenerUmbralesMomentoVital } from './wrappers/catalogos';

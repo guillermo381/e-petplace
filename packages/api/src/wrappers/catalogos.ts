@@ -82,3 +82,31 @@ export async function obtenerEspeciesElegibles(
   }
   return { ok: true, data: null };
 }
+
+// ── S74-B (recepción v1, E5 de la vara): los umbrales del momento vital
+// por especie — el patrón literal de adiestramiento-antes.ts (guard de
+// shape L-124 sobre momentos_vitales_jsonb). La ETAPA se computa
+// client-side (packages/domain calcularMomentoVital); acá solo el dato.
+// El tipo UmbralesEspecie ya VIVE en perfilMascota (L-150: una verdad) — se reusa. ──
+import type { UmbralesEspecie } from './perfilMascota';
+
+export async function obtenerUmbralesMomentoVital(
+  especieCodigo: string,
+): Promise<ResultadoWrapper<UmbralesEspecie | null, 'error_catalogo'>> {
+  const { data, error } = await getClient()
+    .from('cat_especies_perfil')
+    .select('momentos_vitales_jsonb')
+    .eq('especie_codigo', especieCodigo)
+    .maybeSingle();
+  if (error) return { ok: false, codigo: 'error_catalogo', mensaje: MENSAJE_ERROR };
+  const jsonb: unknown = data?.momentos_vitales_jsonb;
+  if (typeof jsonb !== 'object' || jsonb === null) return { ok: true, data: null };
+  const o = jsonb as Record<string, unknown>;
+  const m2 = o['M2_inicio_meses'];
+  const m3 = o['M3_inicio_meses'];
+  const m5 = o['M5_inicio_meses'];
+  if (typeof m2 !== 'number' || typeof m3 !== 'number' || typeof m5 !== 'number') {
+    return { ok: true, data: null }; // shape desconocido: null honesto, jamás inventar
+  }
+  return { ok: true, data: { m2InicioMeses: m2, m3InicioMeses: m3, m5InicioMeses: m5 } };
+}
