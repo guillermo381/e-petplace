@@ -82,6 +82,31 @@ policies de S73 gatean por `empleado_tiene_rol`. El chip ES ese rol. Recepción
 se nombra en el motor y **no recibe chips** — es el piso, y por eso no lee
 expediente clínico. La letra no pelea con la RLS: la describe.
 
+> **VERIFICACIÓN CONTRA EL CÓDIGO (S74-A, pedido de mesa sobre la pregunta de
+> mapping de B) — LA CONCLUSIÓN SOBREVIVE, LA PREMISA ERA FALSA (L-158):**
+> la lectura de mesa decía *"las 14 policies la nombran explícitamente"*.
+> El literal: **`policies_que_nombran 'recepcion'` = CERO**. Las 14 llaman a
+> `user_acceso_clinico_a_mascota`, y su body gatea con
+> `empleado_tiene_rol(pe.prestador_id, ARRAY['dueño','profesional'])` — **el
+> motor clínico habilita por PRESENCIA de dueño/profesional y jamás menciona
+> recepción.** Consecuencia: **conceder la fila `recepcion` a todos al entrar
+> NO toca las 14** (no la miran) — *la conclusión de mesa es correcta y no
+> hay migración de reconciliación*, pero por una razón distinta a la
+> declarada.
+> **Y hay un argumento VIVO que confirma que la fila debe CONCEDERSE y no
+> deducirse:** la única función de todo `public` que nombra `recepcion` es el
+> lector de contacto de la visita construido hoy
+> (`obtener_contacto_reserva_cita`, gate
+> `ARRAY['dueño','profesional','recepcion']`) — **habilita por PRESENCIA**.
+> Si recepción fuera un piso implícito (sin fila), ese lector **rebotaría a la
+> recepcionista**, que es exactamente el caso para el que nació. El CHECK de
+> la hija ya admite el valor (`rol = ANY (dueño, profesional, recepcion)`);
+> hoy hay **0 filas `recepcion`** (solo 5 `dueño`), así que conceder el piso
+> es alta de filas, cero cambio de policies.
+> **El dueño del backfill ES el titular — literal, no inferencia:** en las
+> 5 filas `dueño` de la hija, `prestador_empleados.user_id = prestadores.user_id`
+> en **5/5**.
+
 ## 3. El vocabulario — por qué "profesional" y no "especialista"
 
 **La palabra `especialista` queda PROHIBIDA como nombre de nivel de acceso.**
