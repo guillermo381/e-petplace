@@ -58,6 +58,11 @@ export default function Cuenta() {
     { etiqueta: t('cuenta.preferencias'), ruta: '/cuenta/preferencias' as const, icono: 'preferencias' as const },
     { etiqueta: t('cuenta.pagos'), ruta: '/cuenta/pagos' as const, icono: 'pagos' as const },
     { etiqueta: t('cuenta.ayuda'), ruta: '/cuenta/ayuda' as const, icono: 'ayuda' as const },
+    // S74 — ENTRADA TEMPORAL del gate de la fusión del avatar (la lámina
+    // se juzga en DISPOSITIVO: Chromium aplica borderCurve y no puede
+    // desmentir el engaño que produjo). MUERE con la firma del founder,
+    // junto a la lámina (Ley 37 — precedente lámina S73).
+    { etiqueta: t('cuenta.laminaFusion'), ruta: '/lamina-fusion' as const, icono: 'preferencias' as const },
   ];
 
   return (

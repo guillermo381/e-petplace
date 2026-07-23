@@ -811,6 +811,8 @@ export const clienteEs = {
   // APROBADA por founder (lote S55, es y en).
   cuenta: {
     titulo: 'Tu cuenta',
+    // S74 — entrada TEMPORAL del gate de la fusión (muere con la firma, Ley 37)
+    laminaFusion: 'Lámina S74 · la fusión del avatar',
     idioma: 'Idioma',
     idiomaEs: 'Español',
     idiomaEn: 'English',

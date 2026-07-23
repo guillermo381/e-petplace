@@ -769,6 +769,8 @@ export const clienteEn = {
   // S55-A B3 — Account v1. Voiced strings APPROVED by founder (S55 batch).
   cuenta: {
     titulo: 'Your account',
+    // S74 — temporary gate entry (dies with the founder's signature, Ley 37)
+    laminaFusion: 'S74 plate · avatar fusion',
     idioma: 'Language',
     idiomaEs: 'Español',
     idiomaEn: 'English',
