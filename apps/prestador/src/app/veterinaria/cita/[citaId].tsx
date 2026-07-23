@@ -246,6 +246,9 @@ export default function DetalleCitaVet() {
                   // como visita-sin-contacto.
                   <Texto variante="apoyo">{t('citaVet.visitaError')}</Texto>
                 ) : contacto.nombre === null && contacto.telefono === null ? (
+                  // walk-in sin cita de reserva: fila de nulls del motor —
+                  // la persona está enfrente, el dato no existe. Ni error,
+                  // ni blanco (pase de mesa S74, caso 3).
                   <Texto variante="apoyo">{t('citaVet.visitaSinContacto')}</Texto>
                 ) : (
                   <View style={{ gap: spacing[3] }}>
@@ -257,7 +260,12 @@ export default function DetalleCitaVet() {
                         etiqueta={t('citaVet.visitaTelefono')}
                         valor={`${contacto.telefonoCodigoPais !== null ? `+${contacto.telefonoCodigoPais} ` : ''}${contacto.telefono}`}
                       />
-                    ) : null}
+                    ) : (
+                      // null honesto CON VOZ (pase de mesa S74, caso 2 — hay
+                      // caso real en la data viva): SE DICE que falta, jamás
+                      // "sin teléfono registrado" vestido de dato.
+                      <Texto variante="apoyo">{t('citaVet.visitaSinTelefono')}</Texto>
+                    )}
                   </View>
                 )}
               </View>

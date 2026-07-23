@@ -1052,6 +1052,7 @@ export const prestadorEn = {
     visitaReservo: 'Booked by',
     visitaTelefono: 'Phone',
     visitaSinContacto: 'Registered at the front desk — no booking contact.',
+    visitaSinTelefono: 'No phone was left with the booking.',
     visitaError: 'We could not load the contact for this visit.',
     servicio: 'Service',
   },

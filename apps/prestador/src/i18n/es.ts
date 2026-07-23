@@ -1177,6 +1177,7 @@ export const prestadorEs = {
     visitaReservo: 'Reservó',
     visitaTelefono: 'Teléfono',
     visitaSinContacto: 'Se registró en el mostrador — sin contacto de reserva.',
+    visitaSinTelefono: 'No dejó un teléfono al reservar.',
     visitaError: 'No pudimos cargar el contacto de la visita.',
     servicio: 'Servicio',
   },
