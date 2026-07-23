@@ -1,10 +1,9 @@
-# S75-A2 · D-490 — CENSO POR SUPERFICIE + MIGRACIÓN PROPUESTA (VERIFICADA EN DRY RUN, **NO APLICADA**)
+# S75-A2 · D-490 — CENSO POR SUPERFICIE + MIGRACIÓN — ✅ APLICADA (OPCIÓN 1, OK founder)
 
-> **Estado: ESPERA OK DEL FOUNDER (regla 73).** La migración está escrita y
-> corrida entera contra la DB viva **dentro de una transacción con ROLLBACK** —
-> compila, el cinturón pasa y los asserts discriminan. **No se aplicó nada.**
-> El literal completo está en §5 de este documento (regla 76b: texto completo,
-> jamás referencia).
+> **Estado: APLICADA Y REGISTRADA** — `20260723173509_s75a_d490_gate_escritura_clinica.sql`.
+> OK founder OPCIÓN 2 condicionada; el censo del certificado (§4bis, D2) hizo
+> caer la condición → rige OPCIÓN 1. Verificación post-migración al pie (§8).
+> El literal completo vive en la migración versionada; §5 lo describe.
 
 ---
 
@@ -113,9 +112,37 @@ igual, pero el cinturón §5.5(b) no la cubre (chequea por `tabla_tipada`).
 gateada como clínica** (`certificado_select` → `user_acceso_clinico_a_mascota`).
 **NO entró a la cura**: el catálogo es el eje, y cambiar `es_clinico` de un
 código es decisión de catálogo, no de esta migración. **A la mesa: ¿el
-certificado veterinario es clínico?** Si la respuesta es sí, se corrige el
-catálogo y sus dos policies (`certificado_insert`/`certificado_update`) entran
-por el mismo patrón — y ahí el gate del padre las alcanza solo.
+certificado veterinario es clínico?**
+
+> **VEREDICTO DEL CENSO CONDICIONANTE (S75, OK founder OPCIÓN 2 condicionada +
+> L-164) — EL FLIP SE ABORTA, RIGE OPCIÓN 1.**
+> El founder aprobó el flip de `certificado_emitido` a `es_clinico=true` (un
+> certificado veterinario es un juicio clínico firmado) **CONDICIONADO** a
+> censar todo consumidor de `es_clinico` antes: si el único efecto era el gate
+> de escritura del padre, se aplicaba; si CUALQUIER otro consumidor cambiaba
+> comportamiento, se abortaba y el certificado subía a la mesa.
+> **Censo de consumidores de `es_clinico` (SQL + TS, literal):**
+> - **SQL:** `_crear_evento_padre_auto` y `_trg_eventos_procedencia_clinica`.
+>   **Policies/vistas/otros triggers: CERO.**
+> - **TS (`packages` + `apps`): CERO consumidores** (`es_clinico` solo aparece
+>   3 veces en `database.types.ts`, que es el tipo generado, no un consumidor).
+> **Los DOS consumidores SQL CAMBIAN comportamiento con el flip:**
+> 1. `_crear_evento_padre_auto` estampa `CASE WHEN es_clinico THEN
+>    p_procedencia ELSE NULL END`. Hoy el certificado nace con procedencia
+>    **NULL**; con el flip nacería con el default `'declarado_por_familia'`,
+>    que es **semánticamente FALSO** — el certificado lo emite el prestador
+>    (`_trg_certificado_crear_evento` llama al auto-padre sin pasar
+>    procedencia, así que tomaría el default de familia). Cerrarlo bien exige
+>    tocar además el trigger del certificado para pasar
+>    `declarado_por_prestador`.
+> 2. `_trg_eventos_procedencia_clinica` levanta `procedencia_requerida` si un
+>    clínico llega con procedencia NULL — pasa de no-aplicar a aplicar.
+> **Por la regla 3 del founder: FLIP ABORTADO, aplicada OPCIÓN 1.** La
+> migración `20260723173509` NO toca el catálogo ni las policies del
+> certificado. **El certificado queda a la mesa como decisión de catálogo**,
+> con este censo adjunto: cerrarlo es un paquete propio (flip + arreglo del
+> trigger de procedencia + sus dos policies por el patrón D-490), no un
+> renglón de esta migración.
 
 ---
 
@@ -168,3 +195,34 @@ empleado_roles=5` — la DB quedó exactamente como estaba.
    el output del cinturón, pegados en el reporte.
 3. El **paso 2 del E2E del founder** ya tiene su assert: la recepcionista
    intentando escribir clínico **rebota**.
+
+---
+
+## 8. VERIFICACIÓN POST-MIGRACIÓN (aplicada — literal)
+
+`pg_get_functiondef(user_puede_escribir_clinico)`:
+```sql
+CREATE OR REPLACE FUNCTION public.user_puede_escribir_clinico(p_prestador_id uuid, p_mascota_id uuid)
+ RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public', 'pg_temp'
+AS $function$
+  SELECT p_prestador_id IS NOT NULL
+    AND user_tiene_acceso_a_mascota(p_mascota_id)
+    AND (is_admin() OR empleado_tiene_rol(p_prestador_id, ARRAY['dueño', 'profesional']));
+$function$
+```
+`proacl` (L-140): `postgres=X` · `authenticated=X` · `service_role=X` — **cero
+`anon`, cero `PUBLIC`.**
+
+**Cinturón (los dos chequeos de la migración pasaron — sin ABORT):**
+- policies gateadas por rol (`user_puede_escribir_clinico` OR `empleado_tiene_rol`): **19**
+- tipadas clínicas (`es_clinico=true`) con el gate VIEJO `user_puede_acceder_prestador`: **0 (limpio)**
+- policies que nombran la puerta nueva: **15**
+
+Tipos regenerados (`gen:types`): diff limpio, solo la firma nueva. Typecheck
+`@epetplace/api` verde. Registrada en `supabase_migrations.schema_migrations`
+como `20260723173509 · s75a_d490_gate_escritura_clinica`.
+
+**El paso 2 del E2E del founder ya tiene su assert vivo:** una recepcionista
+(empleado activo con rol `recepcion`, sin `profesional`) intentando escribir
+un evento clínico **rebota** por RLS — probado en el dry run (A2), ahora en
+producción.

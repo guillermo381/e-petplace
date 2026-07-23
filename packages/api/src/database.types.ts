@@ -17538,6 +17538,10 @@ export type Database = {
         Args: { p_prestador_id: string }
         Returns: boolean
       }
+      user_puede_escribir_clinico: {
+        Args: { p_mascota_id: string; p_prestador_id: string }
+        Returns: boolean
+      }
       user_puede_ver_dimension: {
         Args: { p_dimension: string; p_mascota_id: string }
         Returns: boolean

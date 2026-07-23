@@ -1,0 +1,316 @@
+-- ─────────────────────────────────────────────────────────────────────
+-- S75-A2 · D-490 — EL GATE DE ESCRITURA CLÍNICA POR ROL (OK founder S75)
+--
+-- LECTURA cerrada en S73 (D-464). ESCRITURA quedó abierta: toda escritura
+-- clínica del lado prestador se autoriza con user_puede_acceder_prestador,
+-- cuyo body es "titular OR empleado activo" SIN rol. Una recepcionista podía
+-- escribir una historia clínica. Esto es D-490, el gemelo de escritura de
+-- D-464. Nace la puerta angosta user_puede_escribir_clinico (mismo ARRAY de
+-- roles, misma puerta única empleado_tiene_rol) y 15 policies pasan a usarla.
+--
+-- VEREDICTO DEL CENSO DEL CERTIFICADO (condición del founder, L-164):
+--   El founder aprobó OPCIÓN 2 (flip certificado_emitido → es_clinico=true)
+--   CONDICIONADA a censar todo consumidor de es_clinico antes. El censo
+--   (docs/relevamientos/2026-07-23-s75a-censo-d490-escritura-clinica.md §4bis
+--   y el commit de A2) halló DOS consumidores SQL de es_clinico cuyo
+--   comportamiento CAMBIARÍA con el flip:
+--     (1) _crear_evento_padre_auto — hoy la procedencia del certificado nace
+--         NULL; con el flip nacería con el default 'declarado_por_familia',
+--         que es SEMÁNTICAMENTE FALSO (un certificado lo emite el prestador).
+--     (2) _trg_eventos_procedencia_clinica — pasa de no-aplicar a aplicar.
+--   Por la regla 3 del founder ("si CUALQUIER otro consumidor cambia →
+--   abortás el flip, aplicás OPCIÓN 1, el certificado sube a la mesa como
+--   decisión de catálogo"): ESTA MIGRACIÓN ES LA OPCIÓN 1 — NO toca el
+--   catálogo, NO toca certificado_insert/certificado_update. El certificado
+--   queda declarado a la mesa (D2 del censo) con su veredicto adjunto.
+--
+-- QUÉ CIERRA: hoy TODA escritura clínica del lado prestador se autoriza con
+-- `user_puede_acceder_prestador(prestador_id)`, cuyo literal es "titular OR
+-- empleado activo" — SIN mirar rol. Una recepcionista (o un empleado sin
+-- ningún rol) puede escribir una historia clínica, prescribir medicación o
+-- registrar una vacuna. La LECTURA se cerró en S73 (D-464, gate de rol dentro
+-- de `user_acceso_clinico_a_mascota`); la ESCRITURA quedó abierta, y eso es
+-- D-490.
+--
+-- QUÉ NO CIERRA — declarado, porque es el riesgo de esta migración:
+--   · NO cierra el MOSTRADOR. Recepción sigue recibiendo (A3.4): la cita, el
+--     walk-in, el cobro presencial y el archivo adjunto NO son escritura
+--     clínica y NO se tocan.
+--   · NO toca `user_tiene_acceso_a_mascota` ni `user_puede_acceder_prestador`.
+--     Blast radius relevado: 60+ policies y 22 funciones dependen de ellos,
+--     incluidos paseo, grooming y adiestramiento. Se agrega una puerta NUEVA
+--     y angosta; no se le cambia el sentido a una vieja y ancha (L-150 al
+--     revés: una verdad nueva, jamás una verdad vieja mutada bajo sus 60
+--     consumidores).
+--   · NO toca la rama del DUEÑO de la mascota. El pet parent que carga su
+--     carnet sigue escribiendo su vacuna: esa rama se conserva verbatim.
+--
+-- EL EJE: `cat_tipos_evento.es_clinico` (S67). No se inventa una lista: se
+-- lee la del catálogo.
+--
+-- 76(g) — VEDA DE ESCRITURA: **NO RIGE**. Esta migración no reescribe filas
+-- de datos vivos ni depende de un ancla de conteo; es DDL de policies + una
+-- función nueva. Cero backfill, cero UPDATE de datos.
+--
+-- L-140: la función nueva cierra con REVOKE de PUBLIC/anon + GRANT mínimo.
+
+BEGIN;
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- 1 · LA PUERTA NUEVA — espejo de escritura del gate de lectura D-464
+-- ─────────────────────────────────────────────────────────────────────────
+-- Simetría deliberada con `user_acceso_clinico_a_mascota`: mismo conjunto de
+-- roles (`dueño`, `profesional`), misma puerta única (`empleado_tiene_rol`,
+-- cuyo brazo 2 ya cubre al titular — por eso acá NO se re-implementa el
+-- EXISTS sobre `prestadores.user_id`).
+CREATE OR REPLACE FUNCTION public.user_puede_escribir_clinico(
+  p_prestador_id uuid,
+  p_mascota_id   uuid
+) RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path TO 'public', 'pg_temp'
+AS $$
+  SELECT
+    p_prestador_id IS NOT NULL
+    AND user_tiene_acceso_a_mascota(p_mascota_id)
+    AND (
+      is_admin()
+      OR empleado_tiene_rol(p_prestador_id, ARRAY['dueño', 'profesional'])
+    );
+$$;
+
+COMMENT ON FUNCTION public.user_puede_escribir_clinico(uuid, uuid) IS
+  'S75 D-490: LA puerta de ESCRITURA clínica del lado prestador. Espejo de '
+  'user_acceso_clinico_a_mascota (lectura, D-464 S73): mismo ARRAY de roles, '
+  'misma puerta única empleado_tiene_rol. NO reemplaza a '
+  'user_puede_acceder_prestador (que sigue gobernando paseo/grooming/'
+  'adiestramiento/mostrador): la acota SOLO donde el evento es clínico.';
+
+REVOKE EXECUTE ON FUNCTION public.user_puede_escribir_clinico(uuid, uuid) FROM PUBLIC, anon;
+GRANT  EXECUTE ON FUNCTION public.user_puede_escribir_clinico(uuid, uuid) TO authenticated;
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- 2 · LAS TIPADAS CLÍNICAS — 11 policies
+-- ─────────────────────────────────────────────────────────────────────────
+-- Patrón: donde decía `user_puede_acceder_prestador(prestador_id) AND
+-- user_tiene_acceso_a_mascota(mascota_id)` ahora dice
+-- `user_puede_escribir_clinico(prestador_id, mascota_id)`.
+-- La rama del DUEÑO de la mascota, donde existe, se conserva VERBATIM.
+
+-- 2.1 alergia_diagnosticada (es_clinico=true) — con rama de dueño
+DROP POLICY IF EXISTS alergia_insert ON public.evento_alergia_diagnosticada;
+CREATE POLICY alergia_insert ON public.evento_alergia_diagnosticada
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    (mascota_id IN (SELECT mascotas.id FROM mascotas WHERE mascotas.user_id = auth.uid()))
+    OR user_puede_escribir_clinico(prestador_id, mascota_id)
+  );
+
+DROP POLICY IF EXISTS alergia_update ON public.evento_alergia_diagnosticada;
+CREATE POLICY alergia_update ON public.evento_alergia_diagnosticada
+  FOR UPDATE TO authenticated
+  USING      (user_puede_escribir_clinico(prestador_id, mascota_id))
+  WITH CHECK (user_puede_escribir_clinico(prestador_id, mascota_id));
+
+-- 2.2 condicion_cronica_diagnosticada (es_clinico=true) — sin rama de dueño
+DROP POLICY IF EXISTS condicion_insert ON public.evento_condicion_cronica_diagnosticada;
+CREATE POLICY condicion_insert ON public.evento_condicion_cronica_diagnosticada
+  FOR INSERT TO authenticated
+  WITH CHECK (user_puede_escribir_clinico(prestador_id, mascota_id));
+
+DROP POLICY IF EXISTS condicion_update ON public.evento_condicion_cronica_diagnosticada;
+CREATE POLICY condicion_update ON public.evento_condicion_cronica_diagnosticada
+  FOR UPDATE TO authenticated
+  USING      (user_puede_escribir_clinico(prestador_id, mascota_id))
+  WITH CHECK (user_puede_escribir_clinico(prestador_id, mascota_id));
+
+-- 2.3 examen_diagnostico (es_clinico=true)
+DROP POLICY IF EXISTS examen_insert ON public.evento_examen_diagnostico;
+CREATE POLICY examen_insert ON public.evento_examen_diagnostico
+  FOR INSERT TO authenticated
+  WITH CHECK (user_puede_escribir_clinico(prestador_id, mascota_id));
+
+DROP POLICY IF EXISTS examen_update ON public.evento_examen_diagnostico;
+CREATE POLICY examen_update ON public.evento_examen_diagnostico
+  FOR UPDATE TO authenticated
+  USING      (user_puede_escribir_clinico(prestador_id, mascota_id))
+  WITH CHECK (user_puede_escribir_clinico(prestador_id, mascota_id));
+
+-- 2.4 historia_clinica_registrada (es_clinico=true) — el corazón del expediente
+DROP POLICY IF EXISTS hc_insert ON public.evento_historia_clinica_registrada;
+CREATE POLICY hc_insert ON public.evento_historia_clinica_registrada
+  FOR INSERT TO authenticated
+  WITH CHECK (user_puede_escribir_clinico(prestador_id, mascota_id));
+
+DROP POLICY IF EXISTS hc_update ON public.evento_historia_clinica_registrada;
+CREATE POLICY hc_update ON public.evento_historia_clinica_registrada
+  FOR UPDATE TO authenticated
+  USING      (user_puede_escribir_clinico(prestador_id, mascota_id))
+  WITH CHECK (user_puede_escribir_clinico(prestador_id, mascota_id));
+
+-- 2.5 intervencion_permanente (es_clinico=true)
+DROP POLICY IF EXISTS intervencion_insert ON public.evento_intervencion_permanente;
+CREATE POLICY intervencion_insert ON public.evento_intervencion_permanente
+  FOR INSERT TO authenticated
+  WITH CHECK (user_puede_escribir_clinico(prestador_id, mascota_id));
+
+-- 2.6 medicacion_prescrita (es_clinico=true)
+DROP POLICY IF EXISTS medicacion_insert ON public.evento_medicacion_prescrita;
+CREATE POLICY medicacion_insert ON public.evento_medicacion_prescrita
+  FOR INSERT TO authenticated
+  WITH CHECK (user_puede_escribir_clinico(prestador_id, mascota_id));
+
+DROP POLICY IF EXISTS medicacion_update ON public.evento_medicacion_prescrita;
+CREATE POLICY medicacion_update ON public.evento_medicacion_prescrita
+  FOR UPDATE TO authenticated
+  USING      (user_puede_escribir_clinico(prestador_id, mascota_id))
+  WITH CHECK (user_puede_escribir_clinico(prestador_id, mascota_id));
+
+-- 2.7 medicacion_administrada — con rama de dueño
+--     (el catálogo tiene tabla_tipada=NULL para este código — divergencia
+--      declarada en el censo, ítem D1; entra por su LECTURA, que SÍ está
+--      gateada como clínica por user_acceso_clinico_a_mascota)
+DROP POLICY IF EXISTS medicacion_adm_insert ON public.evento_medicacion_administrada;
+CREATE POLICY medicacion_adm_insert ON public.evento_medicacion_administrada
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    (mascota_id IN (SELECT mascotas.id FROM mascotas WHERE mascotas.user_id = auth.uid()))
+    OR user_puede_escribir_clinico(prestador_id, mascota_id)
+  );
+
+-- 2.8 vacuna_aplicada (es_clinico=true) — con rama de dueño (el CARNET)
+DROP POLICY IF EXISTS vacuna_insert ON public.evento_vacuna_aplicada;
+CREATE POLICY vacuna_insert ON public.evento_vacuna_aplicada
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    (mascota_id IN (SELECT mascotas.id FROM mascotas WHERE mascotas.user_id = auth.uid()))
+    OR user_puede_escribir_clinico(prestador_id, mascota_id)
+  );
+
+DROP POLICY IF EXISTS vacuna_update ON public.evento_vacuna_aplicada;
+CREATE POLICY vacuna_update ON public.evento_vacuna_aplicada
+  FOR UPDATE TO authenticated
+  USING      (user_puede_escribir_clinico(prestador_id, mascota_id))
+  WITH CHECK (user_puede_escribir_clinico(prestador_id, mascota_id));
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- 3 · EL CASO CLÍNICO — la única de las cuatro que NO estaba gateada
+-- ─────────────────────────────────────────────────────────────────────────
+-- Relevado: `caso_clinico_update_clinica_tratante`,
+-- `consultor_insert_clinica_tratante` y `consultor_update_clinica_tratante`
+-- YA gatean por rol — su helper `_user_clinica_tratante_del_caso` lleva el
+-- `er.rol IN ('dueño','profesional')` desde S73 (D-464). La que quedó afuera
+-- es la de ALTA: `caso_clinico_insert_vet` exige solo `pe.activo = true`.
+DROP POLICY IF EXISTS caso_clinico_insert_vet ON public.caso_clinico;
+CREATE POLICY caso_clinico_insert_vet ON public.caso_clinico
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM cuentas_comerciales cco
+      WHERE cco.id = caso_clinico.cuenta_comercial_tratante_id
+        AND (
+          cco.owner_profile_id = auth.uid()
+          OR EXISTS (
+            SELECT 1
+            FROM prestador_empleados pe
+            JOIN prestadores p ON p.id = pe.prestador_id
+            WHERE p.cuenta_comercial_id = caso_clinico.cuenta_comercial_tratante_id
+              AND pe.user_id = auth.uid()
+              AND pe.activo = true
+              -- ↓ LO ÚNICO QUE CAMBIA: el rol clínico, misma puerta única
+              AND empleado_tiene_rol(pe.prestador_id, ARRAY['dueño', 'profesional'])
+          )
+        )
+    )
+    AND EXISTS (
+      SELECT 1 FROM mascota_acceso_prestador map
+      WHERE map.mascota_id = caso_clinico.mascota_id
+        AND map.cuenta_comercial_id = caso_clinico.cuenta_comercial_tratante_id
+        AND map.revocado_en IS NULL
+        AND (map.expira_en IS NULL OR map.expira_en > now())
+    )
+  );
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- 4 · EL PADRE — `eventos_mascota`, gate CONDICIONAL por es_clinico
+-- ─────────────────────────────────────────────────────────────────────────
+-- `eventos_mascota` es el padre de TODO evento (paseo, grooming, cita,
+-- bitácora…). Gatearlo entero cerraría el mostrador. El gate se aplica SOLO
+-- cuando el tipo del evento es clínico según el CATÁLOGO — y solo cuando el
+-- evento viene de un prestador (los del dueño, con prestador_id NULL, pasan
+-- por donde pasaban).
+DROP POLICY IF EXISTS eventos_mascota_insert ON public.eventos_mascota;
+CREATE POLICY eventos_mascota_insert ON public.eventos_mascota
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    user_tiene_acceso_a_mascota(mascota_id)
+    AND (creado_por_user_id IS NULL OR creado_por_user_id = auth.uid())
+    AND (prestador_id IS NULL OR user_puede_acceder_prestador(prestador_id))
+    AND (
+      empleado_id IS NULL
+      OR EXISTS (
+        SELECT 1 FROM prestador_empleados pe
+        WHERE pe.id = eventos_mascota.empleado_id
+          AND pe.user_id = auth.uid()
+          AND pe.prestador_id = eventos_mascota.prestador_id
+          AND pe.activo = true
+      )
+    )
+    -- ↓ D-490: la cláusula NUEVA. Si el tipo es clínico y viene de un
+    --   prestador, además hace falta el rol clínico. Todo lo demás
+    --   (cita_servicio, atenciones de oficio, bitácora) pasa igual que ayer.
+    AND (
+      prestador_id IS NULL
+      OR NOT EXISTS (
+        SELECT 1 FROM cat_tipos_evento cte
+        WHERE cte.codigo = eventos_mascota.tipo AND cte.es_clinico = true
+      )
+      OR user_puede_escribir_clinico(prestador_id, mascota_id)
+    )
+  );
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- 5 · CINTURÓN IN-MIGRACIÓN (el patrón que atrapó las 10 de D-495)
+-- ─────────────────────────────────────────────────────────────────────────
+-- El censo dijo 15 policies. Si la DB tiene otra cosa, la migración ABORTA:
+-- el censo no manda sobre la DB — la DB manda sobre el censo.
+DO $cinturon$
+DECLARE
+  v_gateadas int;
+  v_huerfanas text;
+BEGIN
+  -- (a) las 15 policies nuevas nombran la puerta nueva o el helper de rol
+  SELECT count(*) INTO v_gateadas
+  FROM pg_policies
+  WHERE schemaname = 'public'
+    AND (coalesce(qual,'') || coalesce(with_check,'')) ~ 'user_puede_escribir_clinico|empleado_tiene_rol';
+
+  IF v_gateadas < 15 THEN
+    RAISE EXCEPTION 'CINTURON D-490: se esperaban >= 15 policies gateadas por rol, hay %', v_gateadas;
+  END IF;
+
+  -- (b) NINGUNA tipada de un tipo es_clinico=true puede quedar con una
+  --     policy de escritura que autorice por `user_puede_acceder_prestador`
+  --     (el gate viejo, sin rol). Si aparece una, es una que el censo NO vio.
+  SELECT string_agg(pol.tablename || '.' || pol.policyname, ', ')
+    INTO v_huerfanas
+  FROM pg_policies pol
+  WHERE pol.schemaname = 'public'
+    AND pol.cmd IN ('INSERT', 'UPDATE')
+    AND (coalesce(pol.qual,'') || coalesce(pol.with_check,'')) LIKE '%user_puede_acceder_prestador%'
+    AND pol.tablename IN (
+      SELECT cte.tabla_tipada FROM cat_tipos_evento cte
+      WHERE cte.es_clinico = true AND cte.tabla_tipada IS NOT NULL
+    );
+
+  IF v_huerfanas IS NOT NULL THEN
+    RAISE EXCEPTION 'CINTURON D-490: escritura clinica sin gate de rol en: %', v_huerfanas;
+  END IF;
+
+  RAISE NOTICE 'CINTURON D-490 OK: % policies gatean por rol, 0 huerfanas', v_gateadas;
+END
+$cinturon$;
+
+COMMIT;
