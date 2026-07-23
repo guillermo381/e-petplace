@@ -66,6 +66,23 @@ export const prestadorEs = {
     password: 'Contraseña',
     entrar: 'Entrar',
   },
+  // S75-B1: EL HANDSHAKE — el invitado inactivo llega acá desde el raíz
+  // (la sonda lo intercepta antes del "sin negocio"). Voz L-139: dice la
+  // verdad verificable, jamás promete un acceso que la puerta niega. El
+  // estado ACEPTADO reusa sesion.empleadoTitulo/Detalle (mismo mensaje).
+  invitacion: {
+    titulo: '{{negocio}} te sumó a su equipo',
+    tituloSinNombre: 'Te sumaron a un equipo', // enmienda (b): nombre null
+    invitadoComo: 'Te invitaron como {{nombre}}',
+    entrar: 'Entrar al equipo',
+    aceptadoSinNombre: 'Ya eres parte del equipo', // enmienda (b) en §5
+    // rebotes del aceptador (clase ok:false), voz humana por código (Ley 3)
+    errorYaActivado: 'Esta invitación ya no está disponible.',
+    errorNoEsTuya: 'Esta invitación no es para tu cuenta.',
+    errorGenerico: 'No pudimos confirmar tu ingreso. Prueba de nuevo.',
+    errorCarga: 'No pudimos cargar tu invitación.',
+    reintentar: 'Probar de nuevo',
+  },
   agenda: {
     // S60-C2.2: la jornada ya no es solo paseos (grooming vivo) — la
     // voz genérica de la jornada, propuesta al gate · LOTE S60

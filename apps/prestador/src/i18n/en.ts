@@ -60,6 +60,19 @@ export const prestadorEn = {
     password: 'Password',
     entrar: 'Sign in',
   },
+  // S75-B1: the handshake — the inactive invitee lands here from the root.
+  invitacion: {
+    titulo: '{{negocio}} added you to their team',
+    tituloSinNombre: 'You were added to a team',
+    invitadoComo: 'You were invited as {{nombre}}',
+    entrar: 'Join the team',
+    aceptadoSinNombre: "You're now part of the team",
+    errorYaActivado: 'This invitation is no longer available.',
+    errorNoEsTuya: 'This invitation is not for your account.',
+    errorGenerico: "We couldn't confirm your access. Try again.",
+    errorCarga: "We couldn't load your invitation.",
+    reintentar: 'Try again',
+  },
   agenda: {
     // S60-C2.2 — Espejo de es.ts · LOTE S60
     // S71-B1 — the day header. `saludo` ('Your day today') died with the

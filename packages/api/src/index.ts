@@ -742,10 +742,14 @@ export {
   invitarEmpleado,
   empleadoTieneRol,
   obtenerNegocioEmpleadoActivo,
+  obtenerInvitacionPendiente,
+  aceptarInvitacionEquipo,
   type EquipoNegocio,
   type MiembroEquipo,
   type RolEquipo,
   type CodigoErrorEquipo,
   type CodigoInvitar,
+  type InvitacionPendiente,
+  type CodigoAceptar,
 } from './wrappers/equipo';
 export { obtenerUmbralesMomentoVital } from './wrappers/catalogos';

@@ -254,3 +254,92 @@ export async function obtenerNegocioEmpleadoActivo(): R<string | null> {
   const nombre = Array.isArray(p) ? (p[0]?.nombre_comercial ?? null) : (p?.nombre_comercial ?? null);
   return { ok: true, data: nombre };
 }
+
+// ── S75-B1 · EL HANDSHAKE DE PRODUCTO (D-514 (a)) ──────────────────────
+// El invitado INACTIVO (crear_empleado_directo dejó su fila activo=false)
+// no tiene camino a entrar: obtenerMiPrestador falla (no es titular) y el
+// raíz lo mandaría a "sin negocio" — MENTIRA, sí tiene, lo invitaron.
+// Esta sonda + su pantalla cierran el handshake. CERO motor nuevo: la
+// sonda lee su propia fila por `empleados_self`; el aceptador es el RPC
+// vivo `aceptar_invitacion_pendiente_login` (clase ok:false, D-511).
+
+export interface InvitacionPendiente {
+  /** el argumento del RPC — NO se renderiza. */
+  empleadoId: string;
+  /** nombre del negocio que invitó; null si el prestador no es legible
+   *  (Ley 13/L-139: la pantalla dice "un equipo", jamás inventa nombre). */
+  negocioNombre: string | null;
+  /** el nombre con que se te sumó (línea de apoyo de la pantalla). */
+  nombreInvitado: string;
+}
+
+/** ¿El user tiene una invitación de equipo SIN aceptar? Lee su fila
+ *  `activo=false` por `empleados_self` (CERO motor). Orden `created_at`
+ *  (enmienda (a): `invitado_en` es nullable) — el vínculo más antiguo
+ *  preside, alineado con R1. null = no hay handshake pendiente (el guard
+ *  no redirige — Ley 23). HERMANA de `obtenerNegocioEmpleadoActivo`
+ *  (esa mira `activo=true`): por eso no colisionan. */
+export async function obtenerInvitacionPendiente(): R<InvitacionPendiente | null> {
+  const cliente = getClient();
+  const { data: auth } = await cliente.auth.getUser();
+  if (!auth.user) return { ok: true, data: null };
+  const { data, error } = await cliente
+    .from('prestador_empleados')
+    .select('id, nombre, created_at, prestadores(nombre_comercial)')
+    .eq('user_id', auth.user.id)
+    .eq('activo', false)
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (error) return { ok: false, codigo: 'error_lectura', mensaje: error.message };
+  if (data === null) return { ok: true, data: null };
+  const p = data.prestadores as { nombre_comercial: string | null } | { nombre_comercial: string | null }[] | null;
+  const negocioNombre = Array.isArray(p) ? (p[0]?.nombre_comercial ?? null) : (p?.nombre_comercial ?? null);
+  return {
+    ok: true,
+    data: { empleadoId: data.id, negocioNombre, nombreInvitado: data.nombre },
+  };
+}
+
+/** Los rebotes suaves de `aceptar_invitacion_pendiente_login` — jsonb
+ *  `{ok:false, mensaje:'<literal>'}` sin campo código (clase D-511, mismo
+ *  patrón que `invitarEmpleado`). Literales verificados contra `prosrc`
+ *  vivo (L-141). */
+export type CodigoAceptar =
+  | 'sin_sesion'
+  | 'ya_activado'
+  | 'no_es_tuya'
+  | 'rebote_desconocido'
+  | 'error_escritura';
+
+const REBOTES_ACEPTAR: ReadonlyArray<{ literal: string; codigo: CodigoAceptar }> = [
+  { literal: 'Sin sesión', codigo: 'sin_sesion' },
+  { literal: 'Empleado no encontrado o ya activado', codigo: 'ya_activado' },
+  { literal: 'No tenés permiso para aceptar esta invitación', codigo: 'no_es_tuya' },
+];
+
+/** Aceptar = el motor pone `activo=true` y marca la invitación aceptada.
+ *  Éxito NO significa acceso a (tabs): la puerta (B3) sigue cerrada — la
+ *  pantalla dice esa verdad honesta (L-139), jamás promete entrar. */
+export async function aceptarInvitacionEquipo(
+  empleadoId: string,
+): Promise<ResultadoWrapper<null, CodigoAceptar>> {
+  const { data, error } = await getClient().rpc('aceptar_invitacion_pendiente_login', {
+    p_empleado_id: empleadoId,
+  });
+  if (error) return { ok: false, codigo: 'error_escritura', mensaje: error.message };
+  const fila = (typeof data === 'object' && data !== null ? data : {}) as {
+    ok?: boolean;
+    mensaje?: string;
+  };
+  if (fila.ok !== true) {
+    const mensaje = typeof fila.mensaje === 'string' ? fila.mensaje : '';
+    const rebote = REBOTES_ACEPTAR.find((r) => mensaje.startsWith(r.literal));
+    return {
+      ok: false,
+      codigo: rebote?.codigo ?? 'rebote_desconocido',
+      mensaje: mensaje.length > 0 ? mensaje : 'No pudimos confirmar tu ingreso.',
+    };
+  }
+  return { ok: true, data: null };
+}

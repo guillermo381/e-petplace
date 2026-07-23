@@ -205,9 +205,15 @@ pura, cero RPC:
 (policy `prestadores_public`). Entonces la pantalla dice *"Te sumaron a un
 equipo"* — **sin inventar un nombre** (L-139). Declarado, no asumido.
 
-**N > 1** (invitado por dos negocios) es legal en el modelo. Hoy el censo da
-**1 fila inactiva por user en las 5**. v1 toma la más reciente y **lo
-declara**; la lista N es deuda con disparo (el segundo negocio real).
+**N > 1** (invitado por dos negocios) es legal en el modelo. **Confirmado
+contra fuente (adelanto de vara de mesa):** hoy el censo da
+`count(DISTINCT prestador_id)=1` para **todos** los users con fila inactiva —
+nadie está invitado por dos negocios distintos. v1 declara **orden
+determinista: el vínculo MÁS ANTIGUO primero** (`invitado_en ASC`, criterio
+de mesa — el primero que te sumó preside), tomando UNA fila; la lista N es
+deuda con disparo (el segundo negocio real). El punto: **se DECLARA el orden,
+no se descubre después** — el hermano exacto del borde `maybeSingle` de R1,
+un piso más abajo.
 
 Wrapper de acción `aceptarInvitacionEquipo(empleadoId)`: llama el RPC y **lee
 el jsonb `ok:false`** — clase D-511, precedente exacto `equipo.ts:131`

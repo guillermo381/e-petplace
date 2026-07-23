@@ -18,7 +18,7 @@
 
 import { useCallback, useState } from 'react';
 import { View } from 'react-native';
-import { Tabs, useFocusEffect } from 'expo-router';
+import { Redirect, Tabs, useFocusEffect } from 'expo-router';
 import {
   BarraTabs,
   Boton,
@@ -32,6 +32,7 @@ import {
 import {
   cerrarSesion,
   empleadoTieneRol,
+  obtenerInvitacionPendiente,
   obtenerMiPrestador,
   obtenerNegocioEmpleadoActivo,
   obtenerSesion,
@@ -51,6 +52,9 @@ type EstadoSesionRaiz =
   // negocioEmpleado: si el user es EMPLEADO ACTIVO esperando la puerta,
   // el nombre de su negocio (voz honesta); null = user sin negocio alguno.
   | { sin_rol: true; email: string; negocioEmpleado: string | null }
+  // S75-B1: hay una invitación de equipo SIN aceptar → el handshake vive
+  // en el RAÍZ (/invitacion), fuera de las tabs (L-161). El guard redirige.
+  | { invitacion_pendiente: true }
   | { sin_sesion: true }
   | { error: true; detalle: string };
 
@@ -79,6 +83,12 @@ export default function TabsLayout() {
           return { ok: true, esGestor: rol.ok ? rol.data : false };
         }
         if (p.codigo === 'sin_prestador') {
+          // S75-B1: ¿handshake pendiente? (invitación INACTIVA) → el raíz
+          // lo intercepta ANTES de la voz "sin negocio" (que para el
+          // invitado es mentira). La sonda mira solo inactivas; el roce
+          // del re-login lo absorbe B3 (confirmado por A y mesa).
+          const inv = await obtenerInvitacionPendiente();
+          if (inv.ok && inv.data !== null) return { invitacion_pendiente: true };
           // ¿empleado ACTIVO esperando la puerta, o user sin negocio?
           // La sonda distingue la voz (cero motor — policy empleados_self).
           const neg = await obtenerNegocioEmpleadoActivo();
@@ -95,9 +105,10 @@ export default function TabsLayout() {
         const voz =
           typeof r === 'string' ? r
             : 'ok' in r ? `ok — gestor=${r.esGestor}`
-              : 'sin_sesion' in r ? 'sin sesión'
-                : 'sin_rol' in r ? `sin rol prestador — ${r.email}${r.negocioEmpleado ? ` (empleado de ${r.negocioEmpleado})` : ''}`
-                  : `error — ${r.detalle}`;
+              : 'invitacion_pendiente' in r ? 'invitación pendiente → /invitacion'
+                : 'sin_sesion' in r ? 'sin sesión'
+                  : 'sin_rol' in r ? `sin rol prestador — ${r.email}${r.negocioEmpleado ? ` (empleado de ${r.negocioEmpleado})` : ''}`
+                    : `error — ${r.detalle}`;
         console.log(`[sesion] raíz prestador: ${voz}`);
         if (vigente) setSesion(r);
       });
@@ -120,6 +131,11 @@ export default function TabsLayout() {
         </EsqueletoGrupo>
       </View>
     );
+  }
+
+  if ('invitacion_pendiente' in sesion) {
+    // S75-B1: handshake pendiente → la pantalla del raíz (fuera de tabs).
+    return <Redirect href="/invitacion" />;
   }
 
   if ('sin_sesion' in sesion) {
