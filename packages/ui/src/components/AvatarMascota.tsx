@@ -96,6 +96,24 @@ const DIAMETRO: Record<AvatarMascotaTamano, number> = {
   lg: 96,
 }
 
+/** S74 — LA GEOMETRÍA DE LA FUSIÓN (firma founder sobre la lámina a/b/c,
+ *  en su Android): en `entidad` el radio interior se DERIVA del chip —
+ *  exterior (44/2 = 22, el target táctil del chip) menos el inset
+ *  (SOBRA = 4) = **18** — en lugar del squircle 32%. Se implementa C
+ *  (= la B firmada + borderCurve, gratis en iOS e IDÉNTICO en Android —
+ *  salvedad registrada: la lámina no podía separar b de c en el
+ *  dispositivo del gate; si el founder ratifica B puro, la cura es
+ *  quitar el borderCurve SOLO en entidad). El founder declaró que aún NO
+ *  fusiona — B fue la mejor de tres, no un "resuelto": la sombra (D-507)
+ *  y el material (D-506) siguen en la lámina v2. Las DEMÁS tallas
+ *  conservan el squircle 32% intacto (censo S74: entidad solo vive en
+ *  SelectorOpcion + lámina). Proporción 52/44 sigue PROVISIONAL. */
+const RADIO_ENTIDAD = 44 / 2 - (TALLA_AVATAR_ENTIDAD - 44) / 2 // 18
+
+function radioAvatar(tamano: AvatarMascotaTamano, lado: number): number {
+  return tamano === 'entidad' ? RADIO_ENTIDAD : radioSquircle(lado)
+}
+
 // Tamaño óptico de la huella dentro del círculo (~55% del diámetro).
 const HUELLA: Record<AvatarMascotaTamano, number> = {
   xs: 15,
@@ -158,7 +176,7 @@ export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa, sobreLleno
         style={{
           width: d,
           height: d,
-          borderRadius: radioSquircle(d),
+          borderRadius: radioAvatar(tamano, d),
           borderCurve: 'continuous',
           overflow: 'hidden',
           ...(esMemorial ? { filter: FILTRO_MEMORIAL } : null),
@@ -194,7 +212,7 @@ export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa, sobreLleno
       style={{
         width: d,
         height: d,
-        borderRadius: radioSquircle(d),
+        borderRadius: radioAvatar(tamano, d),
         borderCurve: 'continuous',
         backgroundColor: fondo,
         alignItems: 'center',
