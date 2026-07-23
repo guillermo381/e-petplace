@@ -118,14 +118,6 @@ export default function Negocio() {
     }, []),
   );
 
-  // los lugares que aún duermen: qué los despierta, en hitos (§2.6)
-  // S52-P6b: filas serenas — el estado "en preparación" lo dice la
-  // sección UNA vez, no una Insignia por fila.
-  // S55-B (B2): Servicios y Horarios DESPERTARON — viven en "Tu oferta".
-  const lugares: Array<{ titulo: string }> = [
-    { titulo: t('negocio.equipo') },
-  ];
-
   // detalle honesto de la Celda de cuenta: el estado real cuando se
   // pudo leer; el hito de siempre mientras tanto
   const detalleCuenta = !cuentaCargada
@@ -350,21 +342,21 @@ export default function Negocio() {
             </Tarjeta>
           </View>
 
-          <View style={{ gap: spacing[3] }}>
-            <Texto variante="seccion">{t('negocio.enPreparacion')}</Texto>
-            <Tarjeta relleno="ninguno">
-              {lugares.map((lugar, i) => (
-                <View key={lugar.titulo}>
-                  {i > 0 ? <Separador /> : null}
-                  <View style={{ paddingHorizontal: spacing[3], paddingVertical: spacing[3], gap: 2 }}>
-                    <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.base, color: theme.text.secondary }}>
-                      {lugar.titulo}
-                    </Text>
-                  </View>
-                </View>
-              ))}
-            </Tarjeta>
-          </View>
+          {/* ── S74-B: EQUIPO despierta de "en preparación" (LETRA_EQUIPO
+              §14; la sección dormida murió con su único habitante — Ley
+              37). La celda se dibuja para quien opera; la PANTALLA gatea
+              por rol con voz digna (E3 de la vara, decisión declarada:
+              gatear la celda costaría un request por visita — D-497 — y
+              hoy cero empleados activos sin rol, §14.3). ── */}
+          <Tarjeta relleno="ninguno">
+            <CeldaNavegacion
+              icono="equipo"
+              registro="aa"
+              titulo={t('negocio.equipo')}
+              detalle={t('negocio.equipoDetalle')}
+              onPress={() => router.push('/negocio/equipo')}
+            />
+          </Tarjeta>
 
         </View>
       </ScrollView>

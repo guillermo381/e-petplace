@@ -36,9 +36,12 @@ import {
 import {
   obtenerDetalleMascotaPrestador,
   obtenerMiPrestador,
+  obtenerUmbralesMomentoVital,
   resolverUrlFoto,
   type DetalleMascotaPrestador,
+  type UmbralesEspecie,
 } from '@epetplace/api';
+import { calcularMomentoVital, edadEnMeses } from '@epetplace/domain';
 
 import { fechaCortaMono } from '@epetplace/i18n';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -61,6 +64,9 @@ export default function DetalleMascota() {
 
   const [detalle, setDetalle] = useState<DetalleMascotaPrestador | 'cargando' | 'error'>('cargando');
   const [fotoFirmada, setFotoFirmada] = useState<string | undefined>(undefined);
+  // S74-B recepción v1 (E5 de la vara): la ETAPA se computa client-side —
+  // umbrales del catálogo + fecha de nacimiento; cero motor nuevo.
+  const [umbrales, setUmbrales] = useState<UmbralesEspecie | 'error' | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -83,6 +89,14 @@ export default function DetalleMascota() {
           return;
         }
         setDetalle(r.data);
+        if (r.data.mascota.especie !== null) {
+          void obtenerUmbralesMomentoVital(r.data.mascota.especie).then((u) => {
+            // E4 GENERALIZADA: el error del catálogo JAMÁS se pinta como
+            // "sin etapa" — se distingue del null honesto (catálogo sin
+            // umbrales para la especie).
+            if (vigente) setUmbrales(u.ok ? u.data : 'error');
+          });
+        }
         if (r.data.mascota.foto_url) {
           void resolverUrlFoto(r.data.mascota.foto_url).then((url) => {
             if (vigente) setFotoFirmada(url ?? undefined);
@@ -129,7 +143,46 @@ export default function DetalleMascota() {
   }
 
   const { mascota, atenciones, vacunas_total } = detalle;
-  // señales de cuidado: SOLO lo real del expediente
+
+  // ── S74-B · LA ETAPA DESTILADA (recepción v1, alcance de mesa:
+  // identidad completa + etapa — el destilado A3.4). Cálculo puro de
+  // @epetplace/domain; es_memorial NO viaja en este wrapper → se pasa
+  // false y M6 queda FUERA de v1 (declarado — la etapa de un memorial
+  // la resuelve su superficie propia, no un falso "Años dorados").
+  // LUGAR RESERVADO (E3 de la vara, cero píxel hoy): la banda de
+  // CUIDADO ESPECIAL entra entre la etapa y lo operativo; el aviso de
+  // emergencia (cuando D-502 le dé motor) entrará ENCIMA de la banda.
+  // CONTACTO: es propiedad de la VISITA, no del animal (decisión de
+  // mesa S74) — vive en el detalle de la CITA (obtenerContactoReservaCita),
+  // jamás acá.
+  const momento =
+    umbrales !== null && umbrales !== 'error'
+      ? calcularMomentoVital({
+          edadMeses: mascota.fecha_nacimiento !== null ? edadEnMeses(mascota.fecha_nacimiento.slice(0, 10), new Date()) : null,
+          tieneCondicionCronica: detalle.tiene_condicion_cronica,
+          esMemorial: false,
+          umbrales,
+        })
+      : null;
+  const vozEtapa =
+    momento === 'M1'
+      ? t('detalleMascota.etapaM1')
+      : momento === 'M2'
+        ? t('detalleMascota.etapaM2')
+        : momento === 'M3'
+          ? t('detalleMascota.etapaM3')
+          : momento === 'M4'
+            ? t('detalleMascota.etapaM4')
+            : momento === 'M5'
+              ? t('detalleMascota.etapaM5')
+              : null;
+
+  // señales de cuidado: SOLO lo real del expediente.
+  // HALLAZGO DECLARADO (S74-B, E1 de la vara de recepción): esta señal
+  // LEE Y PINTA `tiene_emergencia_activa` desde S51 — y D-502 probó que
+  // el flag es fiable solo por vacuidad (sin puerta de abrir/cerrar).
+  // NO se retira acá (decisión de producto de mesa, D-502 la resuelve);
+  // se deja de proponer en superficies NUEVAS.
   const senales: string[] = [];
   if (detalle.tiene_emergencia_activa) senales.push(t('detalleMascota.emergenciaActiva'));
   if (detalle.tiene_condicion_cronica) senales.push(t('detalleMascota.condicionCronica'));
@@ -165,6 +218,13 @@ export default function DetalleMascota() {
           >
             {mascota.nombre}
           </Text>
+          {/* la etapa EN VOZ bajo el nombre (patrón S52-P4 del cliente);
+              error del catálogo ≠ sin etapa (E4 generalizada) */}
+          {vozEtapa !== null ? (
+            <Texto variante="apoyo">{vozEtapa}</Texto>
+          ) : umbrales === 'error' ? (
+            <Texto variante="apoyo">{t('detalleMascota.etapaError')}</Texto>
+          ) : null}
           {senales.length > 0 ? (
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2], justifyContent: 'center' }}>
               {senales.map((s) => (

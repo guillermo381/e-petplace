@@ -41,10 +41,12 @@ import {
 } from '@epetplace/ui';
 import {
   obtenerCitaVetPorId,
+  obtenerContactoReservaCita,
   obtenerMiCuentaComercial,
   obtenerPresupuestosPrestador,
   resolverUrlFoto,
   type CitaAgendaPaseo,
+  type ContactoReservaCita,
   type EstadoPresupuesto,
   type PresupuestoPrestador,
 } from '@epetplace/api';
@@ -74,6 +76,11 @@ export default function DetalleCitaVet() {
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   // Cura de gate: los presupuestos de esta mascota — la relectura de B3.
   const [presupuestos, setPresupuestos] = useState<PresupuestoPrestador[]>([]);
+  // S74-B recepción v1 (decisión de mesa): el CONTACTO es propiedad de
+  // la VISITA — nombre + teléfono de QUIEN RESERVÓ (lector angosto de A,
+  // gate empleado_tiene_rol con recepción incluida). E4 generalizada: su
+  // error se DICE — jamás se pinta como visita-sin-contacto.
+  const [contacto, setContacto] = useState<ContactoReservaCita | 'cargando' | 'error'>('cargando');
 
   // Estado de la cita → Insignia (misma voz que el HOY — Ley 17.3).
   const INSIGNIA_POR_ESTADO: Record<string, { estado: InsigniaEstado; etiqueta: string }> = {
@@ -106,6 +113,12 @@ export default function DetalleCitaVet() {
     }
     const fotoUrl = r.data.mascota?.foto_url ? await resolverUrlFoto(r.data.mascota.foto_url) : undefined;
     setPantalla({ estado: 'listo', cita: r.data, fotoUrl: fotoUrl ?? undefined });
+    // el contacto de la visita — su fallo NO tumba el detalle (Ley 13),
+    // pero se dice en su bloque (E4: error ≠ ausencia).
+    setContacto('cargando');
+    void obtenerContactoReservaCita(citaId).then((c) => {
+      setContacto(c.ok ? c.data : 'error');
+    });
     // Los presupuestos de esta mascota (relectura de B3). Azúcar de vista:
     // su error NO tumba el detalle (Ley 13 — el detalle tiene su camino).
     const mascota = r.data.mascota;
@@ -214,6 +227,39 @@ export default function DetalleCitaVet() {
                     mono
                   />
                 </View>
+              </View>
+            </Tarjeta>
+
+            {/* ── S74-B · LA VISITA (recepción v1, decisión de mesa): quién
+                reservó + su teléfono — propiedad de la CITA, no del animal
+                (cero dependencia de D-485). Walk-in del mostrador: nulls
+                honestos → el hueco SE DICE (la persona está enfrente). ── */}
+            <Tarjeta elevacion="reposo">
+              <View style={{ gap: spacing[3] }}>
+                <Texto variante="seccion">{t('citaVet.visitaTitulo')}</Texto>
+                {contacto === 'cargando' ? (
+                  <EsqueletoGrupo>
+                    <Esqueleto forma="linea" ancho="50%" />
+                  </EsqueletoGrupo>
+                ) : contacto === 'error' ? (
+                  // E4 GENERALIZADA: el error del lector JAMÁS se pinta
+                  // como visita-sin-contacto.
+                  <Texto variante="apoyo">{t('citaVet.visitaError')}</Texto>
+                ) : contacto.nombre === null && contacto.telefono === null ? (
+                  <Texto variante="apoyo">{t('citaVet.visitaSinContacto')}</Texto>
+                ) : (
+                  <View style={{ gap: spacing[3] }}>
+                    {contacto.nombre !== null ? (
+                      <Dato etiqueta={t('citaVet.visitaReservo')} valor={contacto.nombre} />
+                    ) : null}
+                    {contacto.telefono !== null ? (
+                      <Dato
+                        etiqueta={t('citaVet.visitaTelefono')}
+                        valor={`${contacto.telefonoCodigoPais !== null ? `+${contacto.telefonoCodigoPais} ` : ''}${contacto.telefono}`}
+                      />
+                    ) : null}
+                  </View>
+                )}
               </View>
             </Tarjeta>
 
