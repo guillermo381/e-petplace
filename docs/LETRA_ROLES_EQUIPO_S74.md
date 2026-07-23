@@ -282,6 +282,36 @@ Sin eso, el día que aparezca en la lista alguien que el dueño no reconoce, no
 hay forma de saber cómo entró. Es el mismo principio de procedencia del
 Bio-Expediente, aplicado al acceso.
 
+## 7bis. EL MOSTRADOR — decisión FIRMADA del founder (S74, 22 Jul 2026)
+
+**Verbatim del founder: *"por ahora dejémoslo visible."***
+
+**El contexto que la decisión resuelve (relevado con literal, S74-A):** la
+entrada del mostrador se gatea **por SERVICIO ACTIVO DE VET**
+(`(tabs)/index.tsx:906` con `oficiosActivos?.vet`, computado en `:602` como
+*"la oferta vet tiene algún servicio activo"*) — **NO** por `prestadores.tipo`
+(el eje muerto D-487 **no** aparece: el mostrador no lo resucita), **NO** por
+rol, **NO** siempre. **Hoy, de hecho, solo lo ve el titular**, porque la app no
+deja entrar a nadie más (D-512). **El día que D-512 se cure, el mostrador queda
+visible para TODOS los roles sin escribir una línea** — incluido el piso
+(recepción).
+
+**LA DECISIÓN: eso es lo QUERIDO, y se deja así.** Es coherente con el modelo:
+**recibir es el trabajo de recepción**, y el mostrador es su puerta (§5 de la
+casa del prestador: *el mostrador vive en HOY porque HOY acciona*). **No hace
+falta gate de rol acá.**
+
+> **POR QUÉ ESTO SE ESCRIBE (y no se deja como "se ve solo"):** sin esta línea,
+> **S75 leería la ausencia de gate como un descuido y le pondría uno que el
+> founder no pidió** — el modo de fallar del JSDoc mentiroso, al revés: no una
+> prosa que miente, sino un silencio que se lee como error. **Lo que no está
+> escrito se "corrige".**
+>
+> **Nota de alcance (mesa):** *recibir sin cita NO es exclusivo de vet* — un
+> groomer también tiene walk-ins. **v1 es vet** porque el mostrador construido
+> desemboca en consulta clínica; el día que se generalice, **el gate correcto
+> sigue siendo "tiene el oficio X activo", jamás el tipo de negocio.**
+
 ## 8. Lo que este modelo JAMÁS hace
 
 Acceso clínico por cargo administrativo · roles que se auto-asignan desde una
@@ -289,6 +319,24 @@ pantalla · links de invitación eternos, reutilizables o irrevocables · el rol
 de administrador entregado sin que el que lo entrega lea qué entrega · borrar
 lo que un profesional escribió cuando se le quita el rol · una superficie que
 afirma haber enviado algo que no se envió.
+
+> **CONTRASTE CONTRA `MODELO_PRODUCTO` §8, CORRIDO AL FIRMAR (regla de la
+> casa: toda letra nueva se contrasta antes de proponerse) — CERO ROCE, con
+> cuatro puntos que la letra CUMPLE de forma activa:**
+> **§8.1** (*la mascota es dueña de su vida documentada; e-PetPlace es
+> facilitador y guardián, no propietario*) — la letra reparte **acceso**,
+> jamás propiedad: el chip habilita LEER, y **quitar un rol no borra ni
+> desfirma nada** (§5.4, append-only) · **§8.6** (*hitos privados del humano,
+> inviolables*) — **ningún rol los alcanza**: `BIO_EXPEDIENTE` A3.5 los deja
+> fuera de toda vista de prestador, y esta letra no abre esa puerta ·
+> **§8.8** (*datos sensibles con consentimiento explícito, sin defaults
+> opt-in ocultos*) — es el fundamento del **aviso ANTES de confirmar
+> administrador** (§6: consentimiento informado, con la enumeración de lo que
+> se entrega **y su límite**) y de que **el handshake no se elimine sino que
+> se posponga** (D-514: activar por wrapper es fixture de gate, jamás camino
+> de producto — un dueño no mete gente en su negocio sin que acepte) ·
+> **§8.3** (*no sponsoreo en recomendaciones*) — la letra no toca
+> recomendación ni urgencia. **Sin roce que declarar.**
 
 ## 9. Las deudas que esta letra abre o toca
 
