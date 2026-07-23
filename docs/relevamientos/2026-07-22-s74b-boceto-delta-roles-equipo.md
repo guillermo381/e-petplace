@@ -45,7 +45,10 @@ suave — faltaba escucharlo.
 [nombre del miembro]
 ── ¿Qué hace en el negocio? ──
 ( Recepción )( Profesional )( Administrador )   ← selector de TRES,
-                                                  selección única
+                                                  selección única.
+                                                  "Administrador" SOLO
+                                                  existe para el TITULAR
+                                                  (§10, cerrada founder)
 ── Sus servicios ──                             ← SOLO si profesional
 [grooming] [veterinaria] [paseo] [adiestram.]     o administrador
 ── (administrador) ──
@@ -227,30 +230,38 @@ sincronizar que la letra mata): pregunta de motor declarada.
 delta: el wrapper lee el `ok:false` del jsonb de `crear_empleado_directo`
 y lo tipifica — la mentira de éxito-sobre-rebote muere en la frontera.)*
 
-## 10 · LA BIFURCACIÓN DEL FOUNDER — visible, sin elegir por él
+## 10 · LA BIFURCACIÓN — CERRADA POR EL FOUNDER (pase de mesa S74, L-152)
 
-**¿Un administrador puede nombrar a otro administrador?** Las dos
-posiciones sobre la mesa, tal cual:
+**¿Un administrador puede nombrar a otro administrador? NO — "(b) para
+v1: solo el titular."** Decisión de v1 con su porqué, declarado: con el
+link circulando y sin cancelación construida, que el poder máximo se
+multiplique solo es el peor riesgo; abrirlo después es trivial, cerrarlo
+cuando ya se propagó no.
 
-- **La letra (§10.2, mesa del borrador): SÍ** — "es el sentido del rol";
-  el founder puede querer que solo el titular entregue ese nivel.
-- **La mesa del brief S74: NO para v1** — con el link circulando y sin
-  cancelación construida, que el poder máximo se multiplique solo es el
-  peor riesgo; abrirlo después es trivial, cerrarlo cuando ya se propagó
-  no.
+Lo que la decisión fija en la superficie:
 
-**El boceto dibuja las DOS variantes de la misma superficie:** (a) el
-selector de tres completo para todo administrador · (b) la opción
-"Administrador" del selector solo se dibuja si quien mira es el TITULAR
-(existencia, no candado — coherente con §1). La elección es del founder
-en la firma de la letra; la diferencia de construcción es UNA condición.
+1. **El selector de rol, en manos de un ADMINISTRADOR, no ofrece
+   "Administrador"** — la opción NO EXISTE para él: AUSENCIA, jamás
+   opción deshabilitada (la misma disciplina que la celda de equipo con
+   el no-dueño, y que los chips de recepción en §1).
+2. **Solo el TITULAR ve esa opción y solo él dispara el aviso de §2.**
+3. **El cuarto candado de §7.1 se REFUERZA:** el rol administrador ni
+   viaja por link NI lo entrega un administrador. **Un solo camino, una
+   sola mano** (la del titular, adentro de la app, mirando la lista).
+
+**Consecuencia al pedido de motor (§9.1, enmendado):** la escritura de
+la fila `administrador` en la hija se gatea por TITULAR **en el motor**
+(policy/guard), no solo en la UI — una superficie que oculta la opción y
+un motor que la aceptaría de cualquier administrador sería puerta de
+cortesía sin cerradura (Ley 23: el server sigue siendo la autoridad).
 
 ## 11 · M5 — pasada de diccionario
 
 Radiogroup para elegir valor ✓ · chips SOLO multi-selección legal
 (19.3) ✓ · 22c en los tres comandos con consecuencias ✓ · Insignia para
-Titular (19.4) ✓ · existencia-no-candado ×3 (chips de recepción, opción
-administrador en variante (b), link sin motor) — Ley 23 ✓ · el aviso
+Titular (19.4) ✓ · existencia-no-candado ×3 (chips de recepción, la opción
+Administrador para quien no es titular — §10 cerrada —, link sin
+motor) — Ley 23 ✓ · el aviso
 enumera ANTES (espíritu 276140d) ✓ · Ley 3: el jsonb jamás visible ✓ ·
 voseo cero, es+en en par ✓ · L-162: la Hoja de invitar sigue con campos
 — captura doble en su gate ✓.
