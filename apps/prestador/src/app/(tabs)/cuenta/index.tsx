@@ -19,6 +19,7 @@
 
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
+import * as Updates from 'expo-updates';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   Boton,
@@ -278,6 +279,19 @@ export default function Cuenta() {
             <Boton variante="secundario" etiqueta={t('sesion.cerrarSesion')} bloque onPress={() => setSalirAbierta(true)} />
             <Boton variante="ghost" etiqueta={t('miCuenta.eliminarCuenta')} bloque onPress={() => setEliminarAbierta(true)} />
           </View>
+
+          {/* ── S74-B · EL MARCADOR RENDERIZADO (L-160/L-161): el
+              [update] era SOLO console.log — logcat-only, inalcanzable
+              para el founder sin cable (hallazgo del gate S74). La
+              identidad del build gana pantalla: Cuenta → pie. Voz de
+              máquina (Ley 3: metadata en mono); id corto = los primeros
+              8 del updateId (único por publicación); embebido/dev se
+              dice honesto. Camino literal: tab Cuenta → el pie. ── */}
+          <Texto variante="dato">
+            {Updates.updateId !== null
+              ? `update ${Updates.updateId.slice(0, 8)} · ${Updates.channel ?? 'sin canal'}`
+              : 'bundle embebido / dev'}
+          </Texto>
         </View>
       </ScrollView>
 

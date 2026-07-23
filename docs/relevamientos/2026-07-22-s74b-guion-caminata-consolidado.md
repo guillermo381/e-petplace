@@ -2,12 +2,18 @@
 
 ## PASO 0 — el binario (L-160, antes de evaluar NADA)
 
-Doble reinicio de la APK. En logcat, la línea `[update] id=…` debe decir:
-- **android `019f8c99-f8d3-766a-beb3-1eb82ce2d98d`** · ios `019f8c99-f8d3-7568-92a7-650f8aded199`
-- **group `dedae916-6373-4a6b-b1f4-e36c17706651`** · `embedded=false` · canal preview · runtime 1.0.2
+**ENMENDADO (hallazgo del gate, L-161):** el marcador `[update]` era SOLO
+`console.log` — logcat, inalcanzable sin cable. **La verificación de HOY
+es la de reemplazo que te dio la mesa:** doble reinicio de la APK y
+después **tab NEGOCIO → si existe la celda "Equipo", estás en el build
+nuevo** (esa pantalla no existía antes de este OTA). Si la celda no
+aparece tras dos reinicios, seguís en el build viejo — nada de lo de
+abajo es evaluable.
 
-Si dice `embedded=true` o un id distinto, el teléfono NO está en el build
-nuevo — nada de lo de abajo es evaluable.
+*(La cura ya está construida y viaja en el PRÓXIMO OTA: el pie del tab
+Cuenta va a decir `update {id} · preview` — camino literal en pantalla,
+sin cable. Para este OTA el id esperado, solo si hubiera cable a mano:
+android `019f8c99-f8d3-766a…`, group `dedae916…`, `embedded=false`.)*
 
 **Qué carga este OTA (literal):** EQUIPO + FIRMA (`/negocio/equipo`, con
 `LogoNegocio`) · RECEPCIÓN v1 (etapa en el detalle de mascota + "La
