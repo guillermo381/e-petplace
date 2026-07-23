@@ -72,13 +72,13 @@ suave — faltaba escucharlo.
   sección). Cambiar a Recepción con chips puestos: el aviso dice que
   los chips se quitan (el acceso clínico muere de ahí en adelante — lo
   escrito queda), y confirma.
-- **Profesional con CERO chips — bifurcación chica declarada (la letra
-  no lo dice):** por definición del piso, profesional sin servicios ES
-  recepción. Voto de este boceto: el Confirmar de profesional exige ≥1
-  chip con la voz que lo explica ("Sin servicios asignados, es
-  recepción.") — la puerta no pregunta lo que ya sabe. La vara/firma
-  decide si en cambio se auto-degrada en silencio (voto en contra:
-  la magia muda ya nos mordió — corolario Ley 23 S73).
+- **Profesional con CERO chips — CERRADA (la mesa votó con el boceto,
+  pase S74):** profesional sin servicios ES recepción, y **el Confirmar
+  exige ≥1 chip DICIENDO el porqué** ("Sin servicios asignados, es
+  recepción."). Fundamento firmado por mesa: es el corolario de la Ley
+  23 del founder — **la puerta no acepta un estado que después va a
+  renombrar sola**; la auto-degradación muda es magia, y la magia se
+  vuelve confusión el día que acierta mal.
 - **Titular:** NO aparece en el selector (letra §4: no se quita desde la
   app, nadie se auto-nombra). Su fila muestra `Insignia` "Titular" y la
   Hoja no ofrece controles — como hoy el dueño.
