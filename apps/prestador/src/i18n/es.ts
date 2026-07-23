@@ -75,7 +75,6 @@ export const prestadorEs = {
     tituloSinNombre: 'Te sumaron a un equipo', // enmienda (b): nombre null
     invitadoComo: 'Te invitaron como {{nombre}}',
     entrar: 'Entrar al equipo',
-    aceptadoSinNombre: 'Ya eres parte del equipo', // enmienda (b) en §5
     // rebotes del aceptador (clase ok:false), voz humana por código (Ley 3)
     errorYaActivado: 'Esta invitación ya no está disponible.',
     errorNoEsTuya: 'Esta invitación no es para tu cuenta.',

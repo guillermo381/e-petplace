@@ -182,3 +182,72 @@ identidad):**
   del negocio → recibe lo suyo.
 - Si una pantalla resulta **clase 2** (usa campos de la cuenta, no solo el
   id) **NO se fuerza**: se declara en **D-517** y el circuito la esquiva.
+
+---
+
+## ═══ ACTUALIZACIÓN (segunda tanda de mesa) ═══
+
+### LAS 4 CLASE 1 — EJECUTADAS (typecheck api+prestador verde)
+- **#2 autorizar · #3 coordinar · #4 movimiento** — swap
+  `obtenerMiCuentaComercial()` → `obtenerMiPrestador().cuenta_comercial_id`
+  (solo `.id`, clase 1 pura).
+- **#1 consulta/[citaId]** — swap COMPLETO (`.id` + `.countryCode`): A14
+  dio **5/5 sin divergencia**, así que `country_code` viaja seguro (borde
+  declarado en el código: negocio operando en país ≠ al de su cuenta).
+  Es la pantalla del **assert NEGATIVO** del founder.
+- **No-regresión del titular VERIFICADA con literal (5/5):**
+  `prestadores.cuenta_comercial_id` (R1) `IS NOT DISTINCT FROM` la cuenta
+  por `owner_profile_id` (R2) en TODOS los titulares.
+- CLASE 2 (`cuenta-comercial/index` · `bancarios`) **intactas** (owner-only,
+  v2, D-517).
+
+### CURA H1 — EJECUTADA
+`/invitacion` al aceptar → `router.replace('/')` (la puerta abierta lo
+deja entrar). Estado `aceptada` + string `invitacion.aceptadoSinNombre`
+RETIRADOS (Ley 37, murieron con el supuesto de puerta-cerrada).
+
+### B2 VOZ — NO SE RETIRA + DEUDA DECLARADA
+**Verificado contra la fuente:** existe **1 caso vivo** de empleado
+activo de negocio NO-`activo`. Ese empleado cae en `sin_prestador` (borde
+de A1). Mi voz `empleadoTitulo/Detalle` **NO puede mostrarse** para él:
+leer el nombre de un negocio no-`activo` choca con `prestadores_public`
+(estado='activo') → HOY DEGRADA a `sinRol`. Dejada con comentario que
+nombra el borde (para que S76 no la limpie).
+**DEUDA CANDIDATA (a que A la numere, 76d):** un lector del nombre de un
+negocio no-`activo` para el empleado activo (saltea RLS estado='activo')
+— cuando exista, la voz habla. Territorio A (RLS/motor).
+
+### B9 — EL CIRCUITO SE QUEDA EN 4 SESIONES (verificado, no asumido)
+La policy `empleado_roles_insert_duenio` **permitiría** asignar rol a un
+`activo=false` (no exige activo). PERO **`equipo.tsx:192` filtra
+`.filter((m) => m.activo)`** — la ventana solo muestra activos; el
+invitado no aparece hasta aceptar. **No hay UI para asignar rol antes de
+aceptar → 4 sesiones** (invitar → aceptar → asignar recepción → operar).
+Construir el pre-asignado sería feature nueva, fuera de alcance S75. **Se
+declara para que el founder no lo lea como bug a mitad del circuito.**
+
+### 🔴 B10 — AURORA NO SE PUEDE ABRIR (grep definitivo, con literal)
+- **(a) CERO clave documentada** de `demo-vet@epetplace.dev` en
+  `supabase/` · `docs/` · `scripts/`. El seed dice *"el founder crea el
+  user demo en Supabase Auth"* — la clave vive solo ahí, irrecuperable
+  del repo.
+- **(b) `@epetplace.dev` = dominio placeholder demo**, sin buzón real →
+  **sin reset posible**.
+- **Consecuencia:** Aurora (el negocio del gate que fijó A15) solo se abre
+  si el founder RECUERDA la clave. Sin reset, es una dependencia frágil.
+
+### EL NEGOCIO DEL CIRCUITO — RECOMENDACIÓN vs A15 (a mesa/founder)
+A15 fijó **Aurora**; B10 muestra que su titular es frágil de abrir.
+**`Satori Latam sas` cumple 3/4 con ventaja decisiva** (verificado):
+estado=`activo` · **2 servicios vet activos** · titular
+**`satorilatam@gmail.com` = buzón REAL del founder** (reset funciona,
+D-508) · Quito / EC. **La (4ª — visibilidad para `+8` en explorar/vet —
+queda a verificar en el flujo del cliente, territorio A.**
+- **CAVEAT declarado (mesa punto c):** el equipo de Satori muestra sus
+  **5 filas inactivas** (test@test.com · nuevo_test2 · **guillo381@gmail.com**
+  · dianita · diana23434) — el founder las verá al abrir Equipo; NO es
+  bug, son invitaciones legacy.
+- **Decisión de mesa/founder:** Aurora (si el founder tiene la clave demo)
+  o Satori (login robusto, con las 5 inactivas a la vista). Si cambia a
+  Satori, el pedido B8 se reescribe: reservar CON Satori, invitar DESDE
+  Satori. Las tres identidades (+8 · titular · +9) NO cambian.

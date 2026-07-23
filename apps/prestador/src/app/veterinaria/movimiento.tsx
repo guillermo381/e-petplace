@@ -25,7 +25,7 @@ import {
   type InsigniaEstado,
 } from '@epetplace/ui';
 import {
-  obtenerMiCuentaComercial,
+  obtenerMiPrestador,
   obtenerPresupuestosPrestador,
   type EstadoPresupuesto,
   type PresupuestoPrestador,
@@ -56,12 +56,14 @@ export default function Movimiento() {
 
   const cargar = useCallback(async () => {
     setPantalla({ estado: 'cargando' });
-    const cta = await obtenerMiCuentaComercial();
-    if (!cta.ok || cta.data === null) {
+    // S75-B6 (cura R2→R1, clase 1): R1 resuelve por vínculo — el empleado
+    // ya no rebota; el titular recibe el mismo cuenta_comercial_id (5/5).
+    const pr = await obtenerMiPrestador();
+    if (!pr.ok || pr.data.cuenta_comercial_id === null) {
       setPantalla({ estado: 'error' });
       return;
     }
-    const r = await obtenerPresupuestosPrestador(cta.data.id);
+    const r = await obtenerPresupuestosPrestador(pr.data.cuenta_comercial_id);
     if (!r.ok) {
       setPantalla({ estado: 'error' });
       return;

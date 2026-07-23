@@ -47,7 +47,7 @@ import {
   consultarSolicitudAutorizacion,
   crearSolicitudAutorizacion,
   obtenerEspeciesActivas,
-  obtenerMiCuentaComercial,
+  obtenerMiPrestador,
   type MascotaDeClienteRegistrado,
 } from '@epetplace/api';
 
@@ -100,19 +100,22 @@ export default function AutorizarMostrador() {
       cargadoRef.current = true;
       let vigente = true;
       void (async () => {
-        const [cuenta, esp, busqueda] = await Promise.all([
-          obtenerMiCuentaComercial(),
+        const [prestador, esp, busqueda] = await Promise.all([
+          // S75-B6 (cura R2→R1, clase 1): la cuenta owner-only devolvía
+          // null al empleado; R1 resuelve por vínculo y trae el mismo
+          // cuenta_comercial_id (no-regresión del titular verificada 5/5).
+          obtenerMiPrestador(),
           obtenerEspeciesActivas(),
           tipo === 'email' ? buscarClienteAltaAsistida(contacto) : buscarClientePorTelefono(contacto),
         ]);
         if (!vigente) return;
 
-        if (!cuenta.ok || cuenta.data === null) {
+        if (!prestador.ok || prestador.data.cuenta_comercial_id === null) {
           setErrorCarga(true);
           setCargando(false);
           return;
         }
-        setCuentaId(cuenta.data.id);
+        setCuentaId(prestador.data.cuenta_comercial_id);
 
         if (esp.ok) {
           const validas: SelectorEspecieOpcion[] = [];

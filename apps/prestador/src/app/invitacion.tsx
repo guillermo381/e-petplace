@@ -18,11 +18,14 @@
  * TESTS §15: dosis baja (CTA tealDark, cero gradiente, un acento); voz
  *   humana tuteo; sin Encabezado (no hay atrás — Ley 23).
  *
- * FINAL HONESTO (L-139): al aceptar con la puerta cerrada (B3), la persona
- * sigue SIN entrar a (tabs). La pantalla dice la verdad verificable ("ya
- * eres parte") y lo que TODAVÍA no (el acceso al día a día) — jamás
- * promete "ya puedes entrar" / "actualiza" / "vuelve a iniciar sesión".
- * El roce del re-login lo absorbe B3 (confirmado por A y mesa).
+ * LA PUERTA YA ESTÁ ABIERTA (S75, hallazgo B): `obtenerMiPrestador`
+ * resuelve el vínculo ACTIVO en HEAD (R1, `3591db2`) — no hubo B3 que
+ * escribir, lo absorbió ese wrapper. Consecuencia: al ACEPTAR, el
+ * vínculo pasa a activo y la persona YA PUEDE entrar. Por eso al aceptar
+ * se hace `router.replace('/')` → el guard re-resuelve → entra a las tabs
+ * (sin rol aún → sin NEGOCIO por el gate S75-B2). El "final honesto" de
+ * puerta-cerrada murió con su supuesto (Ley 37): habría ATRAPADO al
+ * empleado en un mensaje que dejó de ser verdad.
  */
 import { useCallback, useState } from 'react';
 import { View } from 'react-native';
@@ -51,7 +54,6 @@ import { useTraduccion } from '@/i18n';
 type Pantalla =
   | { estado: 'cargando' }
   | { estado: 'invitacion'; datos: InvitacionPendiente }
-  | { estado: 'aceptada'; negocio: string | null }
   | { estado: 'sin_invitacion' } // el guard no debería traernos, pero es honesto
   | { estado: 'error' };
 
@@ -70,9 +72,6 @@ export default function Invitacion() {
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
-      // no re-sondear si ya aceptamos en esta sesión (el focus volvería a
-      // encontrar cero inactivas y nos mandaría a 'sin_invitacion')
-      if (pantalla.estado === 'aceptada') return;
       void (async () => {
         const r = await obtenerInvitacionPendiente();
         if (!vigente) return;
@@ -106,18 +105,16 @@ export default function Invitacion() {
     if (aceptando) return;
     setAceptando(true);
     const r = await aceptarInvitacionEquipo(datos.empleadoId);
-    setAceptando(false);
-    if (!r.ok) {
-      // 'ya_activado' = la fila ya está activa (otro dispositivo, doble tap):
-      // no es falla del usuario — lo llevamos al final honesto igual.
-      if (r.codigo === 'ya_activado') {
-        setPantalla({ estado: 'aceptada', negocio: datos.negocioNombre });
-        return;
-      }
+    if (!r.ok && r.codigo !== 'ya_activado') {
+      // 'ya_activado' NO es falla (otro dispositivo / doble tap): la fila
+      // ya está activa, así que entrar es correcto. El resto sí rebota.
+      setAceptando(false);
       mostrar({ variante: 'error', texto: vozRebote(r.codigo) });
       return;
     }
-    setPantalla({ estado: 'aceptada', negocio: datos.negocioNombre });
+    // La puerta está abierta (R1): el vínculo ya es activo → entrar. El
+    // guard re-resuelve y lleva a las tabs (sin rol → sin NEGOCIO).
+    router.replace('/');
   }
 
   function salir() {
@@ -162,29 +159,6 @@ export default function Invitacion() {
             />
           }
         />
-      );
-    }
-
-    if (pantalla.estado === 'aceptada') {
-      // FINAL HONESTO — la verdad verificable, sin promesa (L-139)
-      return (
-        <View style={{ alignItems: 'center', gap: spacing[5] }}>
-          <LogoNegocio nombre={pantalla.negocio ?? ''} />
-          <View style={{ alignItems: 'center', gap: spacing[2] }}>
-            <Texto variante="titulo">
-              {pantalla.negocio !== null
-                ? t('sesion.empleadoTitulo', { negocio: pantalla.negocio })
-                : t('invitacion.aceptadoSinNombre')}
-            </Texto>
-            <Texto variante="cuerpo">{t('sesion.empleadoDetalle')}</Texto>
-          </View>
-          <Boton
-            variante="compacto"
-            etiqueta={t('sesion.cerrarSesion')}
-            cargando={saliendo}
-            onPress={salir}
-          />
-        </View>
       );
     }
 

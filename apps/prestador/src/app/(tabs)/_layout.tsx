@@ -147,10 +147,18 @@ export default function TabsLayout() {
 
   if ('sin_rol' in sesion) {
     // sesión válida pero SIN negocio propio. S75-B: DOS voces —
-    //  · EMPLEADO ACTIVO esperando la puerta (negocioEmpleado presente):
-    //    la verdad honesta (te sumaron, aceptaste; el acceso al día a día
-    //    aún no está). Rama INERTE hoy (0 empleados activos no-titulares) y
-    //    MUERE cuando la puerta abra — ahí el empleado entra a las tabs.
+    //  · EMPLEADO ACTIVO de un negocio NO-'activo' (negocioEmpleado
+    //    presente): la puerta abierta (R1) NO lo deja entrar porque
+    //    `prestadores_public` exige estado='activo' y no es el titular
+    //    → `obtenerMiPrestador` cae en `sin_prestador` (BORDE declarado
+    //    por A1). VERIFICADO S75-B: existe 1 caso vivo en DB.
+    //    NO SE RETIRA (mesa S75): la rama cambió de caso, no murió.
+    //    LÍMITE HONESTO — hoy DEGRADA a la voz `sinRol`: para leer el
+    //    nombre de un negocio no-'activo' hace falta un lector que
+    //    saltee la RLS (lógica nueva, territorio A) → DEUDA declarada
+    //    (candidata, ver doc de circuito). Cuando ese lector exista,
+    //    `obtenerNegocioEmpleadoActivo` devolverá el nombre y esta rama
+    //    hablará. S76: NO la "limpies" — está esperando su lector.
     //  · user SIN negocio alguno: la voz de siempre.
     const negocio = sesion.negocioEmpleado; // narrowing: null = user sin negocio
     return (

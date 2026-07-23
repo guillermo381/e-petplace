@@ -38,7 +38,7 @@ import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 import {
   fijarFechaProcedimiento,
   obtenerEmpleadosCuenta,
-  obtenerMiCuentaComercial,
+  obtenerMiPrestador,
   type EmpleadoCuenta,
 } from '@epetplace/api';
 
@@ -113,12 +113,14 @@ export default function FijarFecha() {
 
   const cargar = useCallback(async () => {
     setEstado({ fase: 'cargando' });
-    const cta = await obtenerMiCuentaComercial();
-    if (!cta.ok || cta.data === null) {
+    // S75-B6 (cura R2→R1, clase 1): R1 resuelve por vínculo — el empleado
+    // ya no rebota; el titular recibe el mismo cuenta_comercial_id (5/5).
+    const pr = await obtenerMiPrestador();
+    if (!pr.ok || pr.data.cuenta_comercial_id === null) {
       setEstado({ fase: 'error' });
       return;
     }
-    const emp = await obtenerEmpleadosCuenta(cta.data.id);
+    const emp = await obtenerEmpleadosCuenta(pr.data.cuenta_comercial_id);
     if (!emp.ok) {
       setEstado({ fase: 'error' });
       return;

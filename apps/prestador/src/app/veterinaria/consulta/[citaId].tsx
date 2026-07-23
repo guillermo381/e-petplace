@@ -49,7 +49,6 @@ import {
   estructurarNotaClinica,
   obtenerCasosActivosMascota,
   obtenerCitaVetPorId,
-  obtenerMiCuentaComercial,
   obtenerMiPrestador,
   obtenerPerfilMascota,
   obtenerPresupuestosPrestador,
@@ -196,23 +195,24 @@ export default function ConsultaVeterinaria() {
     cargadoRef.current = true;
     let vigente = true;
     void (async () => {
-      const cta = await obtenerMiCuentaComercial();
-      if (!vigente) return;
-      if (!cta.ok || cta.data === null) {
-        setErrorCarga(true);
-        setCargando(false);
-        return;
-      }
-      setCuentaId(cta.data.id);
-      setCountryCode(cta.data.countryCode);
-
+      // S75-B6 (cura R2→R1, clase 1 + countryCode): la cuenta owner-only
+      // devolvía null al empleado (esta es la pantalla del assert NEGATIVO
+      // del founder — recepción intenta escribir y DEBE rebotar, no caer).
+      // R1 resuelve por vínculo y trae el MISMO cuenta_comercial_id Y
+      // country_code (no-regresión titular 5/5; A14 sin divergencia. Borde
+      // declarado: el día que un negocio opere en país ≠ al de su cuenta,
+      // prestadores.country_code y cuentas_comerciales.country_code pueden
+      // diverger y esto se revisa).
       const pr = await obtenerMiPrestador();
       if (!vigente) return;
-      if (!pr.ok) {
+      if (!pr.ok || pr.data.cuenta_comercial_id === null) {
         setErrorCarga(true);
         setCargando(false);
         return;
       }
+      const cuentaComercialId = pr.data.cuenta_comercial_id;
+      setCuentaId(cuentaComercialId);
+      setCountryCode(pr.data.country_code ?? 'EC');
       // La cita manda (D-488): si es legible, su mascota embebida PISA los
       // params; si no lo es Y no hay atajo, error honesto — jamás un uuid
       // vacío disparado a los lectores (el 22P02 del hallazgo).
@@ -233,8 +233,8 @@ export default function ConsultaVeterinaria() {
       const [empId, per, cas, pres] = await Promise.all([
         obtenerTitularId(pr.data.id),
         obtenerPerfilMascota(mId),
-        obtenerCasosActivosMascota(mId, cta.data.id),
-        obtenerPresupuestosPrestador(cta.data.id, { mascotaId: mId }),
+        obtenerCasosActivosMascota(mId, cuentaComercialId),
+        obtenerPresupuestosPrestador(cuentaComercialId, { mascotaId: mId }),
       ]);
       if (!vigente) return;
       // Duros: sin empleado tratante o sin perfil, no hay consulta.

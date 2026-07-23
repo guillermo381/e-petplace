@@ -66,7 +66,6 @@ export const prestadorEn = {
     tituloSinNombre: 'You were added to a team',
     invitadoComo: 'You were invited as {{nombre}}',
     entrar: 'Join the team',
-    aceptadoSinNombre: "You're now part of the team",
     errorYaActivado: 'This invitation is no longer available.',
     errorNoEsTuya: 'This invitation is not for your account.',
     errorGenerico: "We couldn't confirm your access. Try again.",
