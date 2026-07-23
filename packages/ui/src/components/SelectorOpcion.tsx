@@ -29,7 +29,7 @@ import { ActivityIndicator, Platform, Pressable, ScrollView, Text, View, type Vi
 import Animated from 'react-native-reanimated'
 
 import { usePresionado } from './usePresionado'
-import { AvatarMascota } from './AvatarMascota'
+import { AvatarMascota, TALLA_AVATAR_ENTIDAD } from './AvatarMascota'
 
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
@@ -110,10 +110,13 @@ export interface SelectorOpcionProps {
    *  selecciones de ENTIDADES QUE EXISTEN (la mascota). Avatar al borde
    *  con overhang, contorno FUSIONADO (cero borde — elevacion.reposo,
    *  regla Chanel del marco Ley 20), elegido = LLENO
-   *  (accent.controlLleno; dark usa pinkDark — magentaDark se hunde,
-   *  medido). Esquinas izquierdas a CHIP/2 (la cura de la lengüeta:
-   *  las dos curvas encajan por geometría). Memorial degrada a tonal
-   *  con borde (sin lleno, elevación conservada). */
+   *  (accent.controlLleno — magentaDark + blanco en AMBOS temas, opción
+   *  B FIRMADA por el founder S73; el registro honesto del fill dark
+   *  2.24–2.47 vive en el comentario del tema). Esquinas izquierdas a
+   *  CHIP/2 (la cura de la lengüeta: las dos curvas encajan por
+   *  geometría). Memorial degrada a tonal con borde y SIN sombra (mesa
+   *  S74: memorial conserva el trazo y pierde lo que celebra —
+   *  DIRECCION_ARTE §2.8, la sombra es presencia). */
   entidad?: boolean
 }
 
@@ -207,7 +210,9 @@ function Chip({
     : theme.mode === 'dark'
       ? theme.bg.elevated
       : theme.bg.card
-  const SOBRA_ENTIDAD = 4 // avatar 52 sobre chip 44 (V2 provisional)
+  // S74 (E3, clase L-159): DERIVADA, jamás tipeada — el único número del
+  // provisional vive en TALLA_AVATAR_ENTIDAD (AvatarMascota).
+  const SOBRA_ENTIDAD = (TALLA_AVATAR_ENTIDAD - ALTO) / 2
 
   return (
     <Pressable
@@ -263,11 +268,11 @@ function Chip({
             ? {
                 // el avatar overhanguea: RN no clipea hijos por
                 // borderRadius (overflow default 'visible')
-                paddingLeft: 52 + spacing[2],
+                paddingLeft: TALLA_AVATAR_ENTIDAD + spacing[2],
                 paddingRight: spacing[4],
                 // LA CURA DE LA LENGÜETA: esquinas izquierdas a CHIP/2 —
                 // el semicírculo queda DENTRO de la silueta del avatar
-                // (52 centrado); las dos curvas encajan por geometría.
+                // (centrado); las dos curvas encajan por geometría.
                 borderTopLeftRadius: ALTO / 2,
                 borderBottomLeftRadius: ALTO / 2,
                 borderTopRightRadius: radius.suave,
@@ -280,10 +285,12 @@ function Chip({
           backgroundColor: entidad ? fondoEntidad : fondo,
           // entidad: contorno FUSIONADO — cero borde, la superficie habla
           // por elevación (regla Chanel del marco). Memorial conserva el
-          // borde como degradación tonal (sin lleno).
+          // TRAZO y pierde la SOMBRA (mesa S74 sobre vara de B, E2 —
+          // DIRECCION_ARTE §2.8: la sombra es presencia y memorial no
+          // celebra; borde+sombra era el tercer peso que mata la Ley 20).
           ...(entidad && hayLleno
             ? { boxShadow: theme.elevacion.reposo }
-            : { borderWidth: BORDE, borderColor: borde, ...(entidad ? { boxShadow: theme.elevacion.reposo } : null) }),
+            : { borderWidth: BORDE, borderColor: borde }),
           // misma receta que Boton/Tarjeta — LA primitiva (S63)
           ...estiloPresionado,
         }}
@@ -291,7 +298,7 @@ function Chip({
         {/* S62 (receta Boton): en carga, adorno y label quedan MONTADOS
             invisibles — preservan el ancho exacto, cero layout shift. */}
         {entidad && opcion.avatar ? (
-          <View style={[{ position: 'absolute', left: 0, top: -SOBRA_ENTIDAD, width: 52, height: 52 }, mostrarSpinner ? { opacity: 0 } : null]}>
+          <View style={[{ position: 'absolute', left: 0, top: -SOBRA_ENTIDAD, width: TALLA_AVATAR_ENTIDAD, height: TALLA_AVATAR_ENTIDAD }, mostrarSpinner ? { opacity: 0 } : null]}>
             <AvatarMascota nombre={opcion.avatar.nombre} fotoUrl={opcion.avatar.fotoUrl} tamano="entidad" sobreLleno={llenoActivo} />
           </View>
         ) : opcion.adorno ? (

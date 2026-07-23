@@ -78,15 +78,20 @@ export function radioSquircle(lado: number): number {
   return Math.round(lado * RADIO_SQUIRCLE)
 }
 
+/** S74 (vara de B, E3 — clase L-159): EL número del entity chip vive UNA
+ *  vez. Cerrar el provisional V2 = cambiar SOLO este valor; SelectorOpcion
+ *  deriva overhang y geometría de acá. */
+export const TALLA_AVATAR_ENTIDAD = 52
+
 const DIAMETRO: Record<AvatarMascotaTamano, number> = {
   // xs (S61-A4): la cara DENTRO de un chip de 44 (adorno de
   // SelectorOpcion, el para-quién de la reserva) — sm revienta el alto.
   xs: 28,
   sm: 40,
   // entidad (S73, V2 PROVISIONAL del entity chip — la proporción se
-  // cierra en dispositivo con foto real): sobresale 4 por lado del
-  // chip de 44 (dictado founder: el contorno se FUSIONA con el avatar).
-  entidad: 52,
+  // cierra en dispositivo con foto real): sobresale por lado del chip
+  // de 44 (dictado founder: el contorno se FUSIONA con el avatar).
+  entidad: TALLA_AVATAR_ENTIDAD,
   md: 64,
   lg: 96,
 }
