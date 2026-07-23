@@ -218,10 +218,11 @@ sincronizar que la letra mata): pregunta de motor declarada.
    (mi hallazgo S74, ratificado E4 de la vara): para el rol-de-entrada
    necesita aceptar los valores del selector — MENOS administrador
    (candado 4: jamás viaja en invitación, ni por correo ni por link).
-3. **El token del link con sus CUATRO candados:** vence 72 h (propuesta
-   de mesa, firma pendiente §10.1) · UN SOLO USO (el primero que lo abre
-   lo quema) · CANCELABLE (hoy la invitación no tiene cancelación — con
-   link es bloqueante) · **el rol administrador JAMÁS viaja en el link**.
+3. **El token del link con sus CUATRO candados:** vence **48 h**
+   (FIRMADO founder S74 — bajó la propuesta de mesa de 72; letra §10.1)
+   · UN SOLO USO (el primero que lo abre lo quema) · CANCELABLE (hoy la
+   invitación no tiene cancelación — con link es bloqueante) · **el rol
+   administrador JAMÁS viaja en el link**.
 4. **El registro de auditoría de la invitación:** quién invitó, cuándo,
    con qué rol, por qué vía (correo/link) — el principio de procedencia
    aplicado al acceso (letra §7.2; D-509 ya lo lleva enmendado).
