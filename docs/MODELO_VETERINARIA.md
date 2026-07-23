@@ -1,5 +1,13 @@
 # MODELO_VETERINARIA — El contrato del oficio veterinario y del modelo de actor
 
+> **Versión: v1.7 — S74-A (22 Jul 2026).** Enmienda v1.7 (decisión de mesa
+> S74): **EL ESTADO DE LA DECLARACIÓN DEL DIAGNÓSTICO** — `diagnostico_principal`
+> pasa a nullable con columna hermana `definido`/`no_definido` (§11 muro +
+> §12); la pantalla no deja guardar sin elegir; *"no definido" es DECLARACIÓN
+> y se DICE con la voz del diccionario* (Ley 3 · L-139 — el null honesto no es
+> silencio cuando hubo declaración). Migración: con la construcción del lector
+> de caso. Es enmienda del contrato del `resumen` ANTES de su firma.
+>
 > **Versión: v1.6 — S72-A (21 Jul 2026).** Enmienda v1.6: **§8.1 la cita de
 > procedimiento gana un tipo consumible** (`procedimiento` + estampado en
 > `fijar_fecha`; coordinar le da tipo — la raíz de L-157 no eran los lectores) ·
@@ -474,6 +482,21 @@ se construye el negocio, no la tabla):
   > "ok" del espécimen quedó fotografiada como caso L-139). El muro vive
   > **en el prompt Y en el validador de shape** de la Edge Function.
   >
+  > **EL ESTADO DE LA DECLARACIÓN DEL DIAGNÓSTICO (decisión de mesa S74 —
+  > enmienda v1.7).** `diagnostico_principal` deja de ser NOT NULL en el
+  > modelo nuevo: pasa a **nullable con columna hermana de ESTADO de la
+  > declaración (`definido` / `no_definido`)**, y **la pantalla no deja
+  > guardar sin elegir una de las dos**. El porqué: el vocabulario clínico
+  > es LIBRE (§12) — un valor centinela dentro de un campo de texto libre
+  > obliga a distinguir por string (regla 35), y un código con dos
+  > sentidos ya parió la fuga inversa de `citaSuelta` (precedente `'otro'`,
+  > S72). **Corolario (Ley 3 · L-139): "no definido" NO es un hueco — es
+  > una DECLARACIÓN, y se DICE con la voz del diccionario.** El null
+  > honesto no es silencio cuando hubo declaración. La migración (nullable
+  > + columna) viaja con la construcción del lector de caso — hoy es
+  > letra; el contrato del `resumen` del caso ya la incorpora
+  > (relevamiento S74-A, enmendado ANTES de la firma de B).
+  >
   > **EL SHAPE DE LA FÓRMULA — el espécimen manda (S70).** La lectura en
   > mesa de la HC OkVet de Thor fijó dos cosas: (a) **un evento por
   > medicamento** — la constelación **no agrupa** la fórmula en una fila;
@@ -510,6 +533,11 @@ se construye el negocio, no la tabla):
 - **Catálogos curados = diferido con disparo:** cuando el Coach y las
   alertas cruzadas los necesiten para razonar — se construyen con
   validación veterinaria profesional, no antes.
+- **El diagnóstico hereda la regla del texto libre (mesa S74, v1.7):**
+  precisamente PORQUE el vocabulario es libre, el "sin diagnóstico" vive
+  FUERA del campo — en el estado `definido`/`no_definido` de §11 — y
+  jamás como centinela dentro del texto (regla 35: cero string matching
+  de valores mágicos).
 
 ## 13. PROCEDENCIA de los eventos clínicos + la identidad digital como destino
 
@@ -722,6 +750,15 @@ sesión a sesión, como manda la ruta.
 
 ## Historial
 
+- **v1.7 (S74-A, 22 Jul 2026):** decisión de mesa S74 — **el estado de la
+  declaración del diagnóstico** (§11 muro + §12): `diagnostico_principal`
+  nullable + columna hermana `definido`/`no_definido`; la pantalla exige
+  elegir; el porqué es la regla 35 sobre vocabulario libre (un centinela en
+  texto libre obliga a distinguir por string; precedente `'otro'` S72). "No
+  definido" es declaración y se dice con la voz del diccionario — el null
+  honesto no es silencio cuando hubo declaración. La migración viaja con el
+  lector de caso; el contrato del `resumen` (relevamiento S74-A) quedó
+  enmendado ANTES de la firma de B.
 - **v1.6 (S72-A, 20-21 Jul 2026):** nace **§8.1 LA CITA DE PROCEDIMIENTO GANA
   UN TIPO CONSUMIBLE** — el código `procedimiento` (`es_medico`, `veterinario`,
   `reservable=false`) + el estampado con COALESCE en `fijar_fecha_procedimiento`

@@ -73,4 +73,31 @@ con la anon key puede leerla. Misma clase (sin secretos de pago):
 tablas protegidas. Se registra SIN curar (regla de esta tanda: censo, cero
 cambios; y la semántica ajena se releva, no se opera de pasada — L-150).
 **Merece fila 🔴 y cura corta** (REVOKE de anon sobre la view o
-security_invoker), decisión de mesa.
+security_invoker), decisión de mesa. *(Post-mesa: es **D-501**.)*
+
+## 6 · ADDENDUM S74-A — el cinturón corrigió este censo (L-158 sobre el censo mismo)
+
+La afirmación del §4 *"user_puede_acceder_prestador e is_admin comparten …
+las mismas 4 policies como única vía anon"* era **verosímil-falso para
+`is_admin`**: el cinturón de la migración `20260722200000` (primer intento,
+ABORT con rollback limpio — nada aplicado) atrapó **10 policies más**
+alcanzables por anon que lo citan: 5 admin legacy `{public}`
+(`solicitudes_adopcion/admins_read_all_solicitudes` ·
+`mascotas_adopcion/admins_read_all_mascotas_adopcion` ·
+`productos/admins_manage_productos` · `profiles/admins_read_all_profiles` ·
+`pedidos/admins_update_pedidos`) + 2 de `storage.objects`
+(`productos-fotos: upload/delete admin`) + **las 3 `caso_*_select` de las
+tipadas de caso** (también `{public}` — y su qual llama al helper clínico
+S73 que anon NO puede ejecutar: **un SELECT anónimo ahí ya daría 42501
+HOY**, bug latente registrado sin curar). Verificado por-helper: las 10
+citan SOLO `is_admin`.
+
+**Lo ejecutado (migración `20260722200000`, aplicada con juez verde):** las
+8 policies de paseo → `TO authenticated` + REVOKE anon/PUBLIC de
+`user_tiene_acceso_a_mascota` y `user_puede_acceder_prestador` (cinturón
+por-helper en 0, sonda L-140 verde, anon = vacío sin error, el dueño real
+sigue viendo lo suyo — asserts in-txn). **`is_admin` NO se revocó** —
+candidata a deuda propia (censo de lectores admin/legado + las 3 de caso;
+número en mesa). Lección operativa: **el cinturón in-migración es la vara
+del censo** — un censo sin assert que lo pruebe es una tabla de hallazgos
+más.

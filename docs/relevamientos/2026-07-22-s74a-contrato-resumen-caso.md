@@ -36,7 +36,7 @@ plausible (L-139)**; la pantalla degrada con la voz del tipo.
 
 | tipo | fuente del `resumen` | garantía |
 |---|---|---|
-| `historia_clinica_registrada` | `evento_historia_clinica_registrada.diagnostico_principal` | **siempre** (NOT NULL en la tipada) |
+| `historia_clinica_registrada` | `evento_historia_clinica_registrada.diagnostico_principal` **cuando el ESTADO de la declaración = `definido`** (enmienda de mesa S74, MODELO_VETERINARIA v1.7: la columna pasa a nullable + hermana `definido`/`no_definido`); con `no_definido` → `resumen = null` **y el estado VIAJA en campo propio** — la pantalla lo DICE con la voz del diccionario: *"no definido" es DECLARACIÓN, no silencio* | **condicional por declaración** (el NOT NULL vigente es transitorio: el lector nace contra el modelo nuevo) |
 | `medicacion_prescrita` | `evento_medicacion_prescrita.nombre_medicamento` | **siempre** (NOT NULL; un evento POR medicamento — precisión 2 S70) |
 | `examen_diagnostico` | `evento_examen_diagnostico.tipo_examen` (el `estado` viaja en campo propio si el contrato lo pide — no concatenado) | **siempre** (NOT NULL) |
 | `caso_clinico_abierto` | `evento_caso_clinico_abierto.condicion` | **nullable → null honesto** (la voz del tipo la pone el diccionario) |
@@ -55,3 +55,10 @@ plausible (L-139)**; la pantalla degrada con la voz del tipo.
    el diccionario vive en la pantalla).
 4. La vara del lector (M2) verifica esta tabla CONTRA el body con
    `pg_get_functiondef` — fila por fila, fuente por fuente (L-158).
+5. **(Enmienda de mesa S74, ANTES de la firma de B.)** El "no definido" del
+   diagnóstico **no es un hueco: es una declaración** — `resumen = null` +
+   el estado de la declaración en campo propio del contrato; la VOZ la pone
+   el diccionario de la pantalla (Ley 3). **El lector nace contra el modelo
+   nuevo** (`diagnostico_principal` nullable + estado `definido`/
+   `no_definido`, MODELO_VETERINARIA v1.7), no contra el NOT NULL vigente —
+   la migración viaja con su construcción.
