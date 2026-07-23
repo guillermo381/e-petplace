@@ -25,7 +25,24 @@ typecheck verde y **commit limpio, sin asterisco**.
    sin explicación posible y un bug real se vuelve indistinguible de una
    cura a medio aplicar.
 
-## REGLA CANDIDATA (la firma el founder; el número lo asigna la mesa)
+## REGLA CANDIDATA — SIN NÚMERO, PENDIENTE DE FIRMA FOUNDER
+
+> **REGISTRO DEL ATRAPE (S74-A, orden de mesa):** la mesa ordenó bajar
+> "L-164 y L-165" a propuesta — **y L-165 NUNCA SE DEPOSITÓ**: la
+> verificación en el árbol (`grep L-165` sobre `docs/` y `.claude/`)
+> devolvió **cero hits**. La mesa la ordenó como "firmada por el founder"
+> y no lo estaba — **el mismo error que con L-164**, que sí se había
+> depositado con atribución falsa y hoy bajó a propuesta con su
+> historial. Esta regla del árbol sucio es la candidata que ese número
+> iba a nombrar: **queda acá, sin número, hasta que el founder firme.**
+> **Lo que vale registrar del atrape: es L-141 aplicada contra una ORDEN
+> DE LA MESA, no contra el código** — "relevar lo vivo, jamás inventar"
+> rige también cuando quien afirma es la mesa (es L-158 enmendada S72 en
+> su forma más incómoda: la directiva que baja como premisa). El costo
+> de no atraparlo habría sido una ley fantasma citada por número en
+> sesiones futuras.
+
+### La letra candidata (la firma el founder; el número lo asigna la mesa)
 
 > **Ninguna sesión publica con archivos sin commitear en el árbol —
 > propios O AJENOS: el bundling no distingue territorios.** El pre-check
