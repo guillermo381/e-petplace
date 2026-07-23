@@ -432,6 +432,19 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
     Interruptor. Apagado JAMÁS dice error — apagado es estado, no
     falla.
 
+21b. **LA FORMA DEL AVATAR POR POSICIÓN (S74, FIRMADA por el founder en el
+    gate del chip chico — *"cara flotante dentro"*).** **El avatar ANIDADO
+    deriva su radio del CONTENEDOR; el avatar SUELTO conserva el squircle
+    32%.** Es la EXCEPCIÓN DECLARADA a la firma del squircle
+    (`DIRECCION_ARTE`, S61-A10): dentro de un chip, el squircle hace que la
+    cara FLOTE en vez de fundirse con la superficie que la abraza.
+    Mecánica: `radioEnChip(lado) = ALTO/2 − |ALTO − lado|/2` en
+    `AvatarMascota` (reproduce los dos valores firmados: entidad 52 → **18**
+    · xs en chip 28 → **14**) y la pantalla declara la POSICIÓN con
+    `anidadoEn="chip"` — **vocabulario cerrado, jamás un radio crudo**
+    (Ley 1). **No aplica** al avatar en slot de `Celda` (no hay contenedor
+    curvo del que derivar) ni a las tallas sueltas (fichas, perfiles, hero).
+
 22c. **Comando con consecuencias = ACCIÓN, viste de botón (S58, firma
     founder).** Primaria en tinta (UNA por vista); secundarias =
     `Boton variante="compacto"` (borde `border.default`, radius suave,

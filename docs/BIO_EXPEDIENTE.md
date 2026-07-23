@@ -204,7 +204,7 @@ enmienda:
 |---|---|
 | **COMPLETO** | El eje entero, evento por evento, con su procedencia. |
 | **DESTILADO** | El estado vigente y lo que cambió, en resumen — jamás la fila cruda. *"Trabajando reactividad con correa desde mayo"*, no la sesión entera. |
-| **SEGURIDAD** | Solo lo que protege a la mascota y al que la tiene enfrente: alergias, medicación vigente, condiciones que limitan el acto, alertas de manejo. Sin diagnósticos, sin historia. **🚧 GATEADO — ver nota abajo.** |
+| **SEGURIDAD** | Solo lo que protege a la mascota y al que la tiene enfrente: alergias, medicación vigente, condiciones que limitan el acto, **el CUIDADO ESPECIAL** (ex "alertas de manejo"). Sin diagnósticos, sin historia. **🔓 DESGATEADO S74 — su letra existe y está FIRMADA: `LETRA_CUIDADO_ESPECIAL_S74`; ver nota abajo.** |
 | **NO** | No se muestra. |
 
 **La matriz (firmada S72):**
@@ -227,14 +227,24 @@ enmienda:
    distinto, dejó de caminar igual, el groomer le vio la piel. Un buen
    clínico lee todo eso; lo que no necesita es la sesión de adiestramiento
    entera.
-2. **La alerta de seguridad NUNCA se destila y NUNCA se oculta.** "Muerde"
-   se muestra a los cuatro oficios y a la recepción, siempre, aunque el eje
-   6 esté en DESTILADO o en NO. Es la única regla que atraviesa la matriz.
+2. **La alerta de seguridad NUNCA se destila y NUNCA se oculta.** El
+   CUIDADO ESPECIAL se muestra a los cuatro oficios y a la recepción,
+   siempre, aunque el eje 6 esté en DESTILADO o en NO. Es la única regla
+   que atraviesa la matriz.
+   > **ROCE DECLARADO Y RESUELTO (S74):** el texto original de esta regla
+   > usaba **"Muerde"** como ejemplo. **La `LETRA_CUIDADO_ESPECIAL_S74`
+   > (FIRMADA, más nueva) PROHÍBE esa voz**: el catálogo nace escrito en
+   > **voz de MANEJO, jamás de carácter** (✅ *"Necesita bozal para la
+   > revisión"* · ❌ *"Muerde"*). **Gana el doc firmado más nuevo** — el
+   > ejemplo se retira y la regla queda intacta en su fondo (lo que
+   > atraviesa la matriz es el dato de cuidado, no su redacción vieja).
 3. **Cada oficio ve su propio eje COMPLETO** — es lo que él alimenta.
 4. **El eje 8 es del dueño.** Pólizas, documentos legales y constancias no
    son del prestador. La excepción es lo que él mismo generó (`AC6`).
 
-> **🚧 NOTA DE GATE — el nivel SEGURIDAD está FIRMADO COMO DESTINO y GATEADO EN CONSTRUCCIÓN.** Su precondición es **el modelo de alerta de manejo, que hoy NO EXISTE en el schema** (relevamiento S72-B) — ver **D-469**. **Hasta que ese modelo exista, la franja de seguridad NO se construye:** con lo que hay hoy diría *"tiene alergias"* **sin decir cuál**, que es exactamente el verosímil-inútil que prohíbe la Ley 17.6 del design system (*cada elemento hace UN trabajo; ser específico gana siempre a ser ingenioso*) y la ley de la casa contra el dato plausible-vacío (L-139). Una franja de seguridad que no dice **qué** alergia ni **qué** manejo no protege a nadie: da la sensación de haber mirado. **El nivel se firma; la franja espera a D-469.**
+> **🔓 NOTA DE GATE — ENMENDADA S74 (disparada por la FIRMA de `LETRA_CUIDADO_ESPECIAL_S74`, que la propia letra declaraba como su efecto al firmarse).** La precondición del nivel SEGURIDAD **era la letra, y la letra ya existe firmada**: el objeto es **EL CUIDADO ESPECIAL** — lista por mascota, **código de CATÁLOGO en voz de manejo** (jamás texto libre ni etiqueta de carácter), naturaleza `temporal`/`definitiva` con default del catálogo, `origen` observada/compuesta, **procedencia siempre visible**, y **viaja a TODOS los cuidadores, recepción incluida** (esta matriz es justamente lo que atraviesa). **Lo que sigue gateado NO es la letra sino la CONSTRUCCIÓN: `D-469` (catálogo + objeto + superficie) y `D-500` (el motor de escalada).** La franja se dibuja cuando D-469 esté construida — el criterio original sigue vigente y por eso se conserva abajo: **una franja que no dice QUÉ manejo no protege a nadie.** *(Contexto de construcción S74: el lugar de la banda ya está DECLARADO sin dibujar en el boceto de recepción — se agrega, no se rehace la pantalla.)*
+>
+> *(Texto original de la nota, conservado como registro:)* Su precondición es **el modelo de alerta de manejo, que hoy NO EXISTE en el schema** (relevamiento S72-B) — ver **D-469**. **Hasta que ese modelo exista, la franja de seguridad NO se construye:** con lo que hay hoy diría *"tiene alergias"* **sin decir cuál**, que es exactamente el verosímil-inútil que prohíbe la Ley 17.6 del design system (*cada elemento hace UN trabajo; ser específico gana siempre a ser ingenioso*) y la ley de la casa contra el dato plausible-vacío (L-139). Una franja de seguridad que no dice **qué** alergia ni **qué** manejo no protege a nadie: da la sensación de haber mirado. **El nivel se firma; la franja espera a D-469.**
 
 #### A3.4 — EL ROL DENTRO DEL NEGOCIO (firmado S72)
 

@@ -39,6 +39,12 @@ aún no hay prestadores reclutados.
    avatar de 30 píxeles — es presencia visible"); falta construirla.
    **Viaja con S74** (la ventana de equipo vive en la misma superficie
    NEGOCIO): costo marginal.
+   **ESTADO S74 (construcción):** nace **`LogoNegocio`** en `packages/ui`
+   (el componente que faltaba, Ley 11) — pero **`prestadores.foto_url` NO
+   TIENE PRODUCTOR: 0/5 poblada y cero superficie que la escriba**, así que
+   **el monograma de iniciales sería PERMANENTE y la tesis "quiero que
+   sientan que es suyo" NO se cumple con iniciales** (**D-505**; cura de
+   WRAPPER, no de motor — el trigger D-389 no protege `foto_url`).
    **LA TRAMPA DEL LOGO (hallazgo de B, verificado en mesa S74 —
    depositado S74-A):** los logos ANCHOS **no se recortan a círculo** —
    el recorte circular es de caras/avatares; un logo horizontal recortado

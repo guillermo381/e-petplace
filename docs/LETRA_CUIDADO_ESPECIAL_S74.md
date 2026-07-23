@@ -1,6 +1,20 @@
-# LETRA — EL CUIDADO ESPECIAL (S74, dictado del founder, pendiente de firma)
+# LETRA — EL CUIDADO ESPECIAL (S74, dictado del founder) — ✅ **FIRMADA**
 
-> **Estado: BORRADOR DE MESA — espera firma founder.** Dictado en sesión S74
+> **Estado: ✅ FIRMADA POR EL FOUNDER (S74, 22 Jul 2026).** Los tres puntos
+> abiertos del §11 quedaron contestados por él: **(1)** el catálogo v1 va con
+> **los cuatro grupos propuestos** (manejo físico · sensorial y de capacidad ·
+> ambiental y emocional · clínico de manejo) · **(2)** los **dos bordes de la
+> escalada FIRMADOS** (al menos **2 profesionales distintos** + **ventana
+> móvil de 12 meses**) · **(3)** **LA NOTIFICACIÓN gana letra nueva del
+> founder** y §7 se reescribió con **DOS VOCES** (ver §7).
+> **Disparos ejecutados con la firma (lo que esta letra declaraba que haría):**
+> **D-469** pasa de enmendada a **firme en su alcance** · **`BIO_EXPEDIENTE`
+> A3.3 ENMENDADA** — el nivel SEGURIDAD **desgateado en su letra** (lo que
+> sigue gateado es la CONSTRUCCIÓN: D-469 + D-500), **con un ROCE DECLARADO Y
+> RESUELTO**: A3.3 usaba *"Muerde"* como ejemplo y esta letra lo **prohíbe**
+> (voz de manejo, jamás de carácter) — **gana el doc firmado más nuevo**.
+>
+> *(Estado previo: BORRADOR DE MESA — espera firma founder.)* Dictado en sesión S74
 > (22 Jul 2026), pensado y bordeado por la mesa. **Destino:** enmienda a
 > `BIO_EXPEDIENTE.md` (nivel SEGURIDAD de A3.3) + **enmienda de D-469** (que
 > deja de llamarse "alerta de manejo" y pasa a ser EL CUIDADO ESPECIAL) +
@@ -15,13 +29,13 @@
 > separó miedo/evitación de reactiva: información conductual SIN etiqueta
 > de carácter.
 
-> **NOTA DEL DEPÓSITO (S74-A, 22 Jul 2026):** depositada VERBATIM del
-> literal de mesa. De las tres piezas del destino, HOY se ejecutan dos:
-> la enmienda de D-469 y el nacimiento de D-500 (ambas en
-> `DEUDAS_CANONICAS.md`, con los ítems del §11 marcados PENDIENTES DE
-> FIRMA). **La enmienda de `BIO_EXPEDIENTE` A3.3 NO se toca todavía** —
-> espera la firma del §11 (declarado, no olvidado). Cero construcción
-> (§10 de esta letra).
+> **NOTA DEL DEPÓSITO (S74-A, 22 Jul 2026) — ACTUALIZADA CON LA FIRMA:**
+> depositada VERBATIM del literal de mesa. En el depósito se ejecutaron dos
+> piezas (enmienda de D-469 + nacimiento de D-500) y la tercera —
+> `BIO_EXPEDIENTE` A3.3 — quedó **declarada como pendiente de la firma del
+> §11**. **Esa firma llegó el mismo día y A3.3 YA ESTÁ ENMENDADA** (ver
+> cabecera). **Cero construcción** (§10 de esta letra: D-469 y D-500 siguen
+> sin construirse; lo que existe hoy es la letra).
 
 ---
 
@@ -160,17 +174,49 @@ sacar también.*
   cuidado — es suyo. Decisión de seguridad laboral antes que de privacidad
   (founder S72), ahora ampliada: *la app también cuida al equipo.*
 
-## 7. La voz al pet parent — honestidad con camino
+## 7. La voz al pet parent — DOS VOCES (letra founder S74, FIRMADA)
 
 **Se le dice, siempre.** Nada de esto es secreto para la familia: una marca
 que el dueño no ve es una ficha oculta, y este producto no las tiene.
 
-**Cuándo se dice:** la observación suelta **no interrumpe** — vive en el
-expediente. **La escalada SÍ se comunica**, porque cambió de naturaleza: dejó
-de ser un episodio y pasó a ser algo que hay que tratar.
+**LA LETRA DEL FOUNDER, verbatim:** *"si alguien observó algo, el dueño
+debería conocerlo; no se alerta como algo a tratar antes de escalar, pero sí
+como algo que pasó."*
 
-**Cómo se dice** (voz de producto, tuteo neutro — texto de referencia, la
-string final pasa por su gate):
+De ahí salen **DOS VOCES, no una** — y la diferencia entre ellas es la que
+impide que el modelo se vuelva alarmista:
+
+### 7.1 · La OBSERVACIÓN se CUENTA (no se trata)
+
+- **Voz neutra e informativa, sin alarma.** Dice lo que pasó y quién lo
+  observó — nada más.
+- **SIN CAMINO OFRECIDO.** Es la parte fina: **ofrecer un camino ante un
+  episodio suelto convierte una observación en un problema**, que es
+  exactamente lo que el founder excluyó. El camino aparece con la escalada,
+  jamás antes. *(Y protege el riel ético §8.1: una oferta pegada a cada
+  observación es el atajo por el que la marca empezaría a existir para
+  vender.)*
+- **No interrumpe** — vive en el expediente y llega como aviso de lo que
+  pasó, con la misma dignidad que cualquier otro registro de cuidado.
+
+### 7.2 · La ESCALADA se TRATA
+
+Cambió de naturaleza: dejó de ser un episodio y pasó a ser algo que hay que
+tratar. **Acá SÍ va el camino** (§5), y la voz conserva sus tres rasgos
+exigibles.
+
+> **PRECONDICIÓN DECLARADA (S74 — para que no se descubra en campo):**
+> **`MODELO_NOTIFICACIONES` es v0 y NO tiene productor construido** — el
+> mismo pozo que **D-508** probó con literal (cero productor de email en todo
+> el stack). **La notificación de observación (§7.1) es un CONSUMIDOR de sus
+> capas 1–3** (intención · destinatario · consentimiento): **no puede
+> existir antes que ellas.** Registrado en ambos docs (`MODELO_NOTIFICACIONES`
+> §11 lo declara como consumidor con nombre). Consecuencia práctica: **el
+> cuidado especial puede shippear su catálogo, sus marcas y su franja
+> (D-469) sin la notificación** — lo que espera es la VOZ, no el objeto.
+
+**Cómo se dice la ESCALADA** (voz de producto, tuteo neutro — texto de
+referencia, la string final pasa por su gate):
 
 > *"A Thor le está costando la sala de espera: tres cuidadores lo
 > registraron en los últimos meses. No es un problema de carácter — es algo
@@ -179,6 +225,18 @@ string final pasa por su gate):
 Los tres rasgos exigibles de esa voz: **nombra el hecho** (no el carácter) ·
 **muestra la procedencia** (quiénes, cuándo) · **termina en camino, jamás en
 etiqueta**.
+
+> **CONTRASTE CONTRA `MODELO_PRODUCTO` §8, hecho al firmar (regla de la
+> casa) — CERO ROCE, y de hecho lo CUMPLE literal:** **§8.4** (*"reputación
+> de familias es discreta, no humillante… sistema interno de protección de
+> mascotas es para intervención de SOPORTE, no sanción"*) es exactamente la
+> tesis de esta letra: voz de manejo, marcas que RECEDEN, cero score, cero
+> ranking · **§8.3** (no sponsoreo en recomendaciones) es el §8.1 de acá (la
+> marca jamás nace de una oportunidad comercial) · **§8.5** (memorial respeta
+> el duelo) es el veto de memorial de D-506 y el apagado estructural del
+> motor. *(La letra de ROLES se contrastó igual: §8.6 —hitos privados
+> inviolables— la cumple porque ningún rol los alcanza; A3.5 los deja fuera
+> de toda vista de prestador.)*
 
 ## 8. EL RIEL ÉTICO — la marca existe por el animal, jamás por la venta
 
@@ -227,20 +285,33 @@ y el boceto de la vista de recepción **declara dónde entrará la banda** sin
 dibujarla — para que el día que D-469 esté lista se AGREGUE y no se rehaga la
 pantalla.
 
-## 11. Preguntas abiertas para la firma del founder
+## 11. ✅ LAS TRES, CONTESTADAS POR EL FOUNDER (S74 — la firma)
 
-1. **El contenido del catálogo v1** (§3): las cuatro casuísticas son semilla
-   de mesa. Se firman entrada por entrada, con su voz y su naturaleza por
-   default.
-2. **Los dos bordes de la escalada** (§5): 2 profesionales distintos +
-   ventana de 12 meses son propuesta de mesa sobre el umbral de 5 que el
-   founder firmó. Si los rechaza, la escalada queda como fue dictada.
-3. **La comunicación de la escalada** (§7): la mesa propone que la
-   observación suelta no interrumpa y la escalada sí se comunique. El
-   founder puede querer que TODA marca se comunique al dueño al nacer.
+1. **El contenido del catálogo v1** (§3) → **VAN LOS CUATRO GRUPOS COMO
+   PROPUESTOS**: manejo físico · sensorial y de capacidad · ambiental y
+   emocional · clínico de manejo. *(Las entradas concretas de cada grupo
+   siguen siendo semilla que se afina al sembrar la tabla — lo firmado es la
+   estructura y la VOZ DE MANEJO como propiedad del catálogo, §3.)*
+2. **Los dos bordes de la escalada** (§5) → **FIRMADOS**: al menos **2
+   profesionales distintos** entre las observaciones + **ventana móvil de 12
+   meses**, sobre el umbral de >5 que el founder ya había firmado.
+3. **La comunicación** (§7) → **letra nueva del founder: se comunica SIEMPRE,
+   pero con DOS VOCES.** La observación se **cuenta** (neutra, sin alarma y
+   **sin camino**); la escalada se **trata** (con camino). §7 reescrito.
+   *(El founder resolvió el punto por un tercer camino: ni "solo la escalada"
+   ni "todo igual" — dos registros distintos para dos cosas distintas.)*
 
 ## Historial
 
+- **✅ FIRMADA (S74, 22 Jul 2026):** el founder contestó los tres puntos del
+  §11 — catálogo con los cuatro grupos · los dos bordes de la escalada · y la
+  **letra nueva de la notificación** (*"si alguien observó algo, el dueño
+  debería conocerlo; no se alerta como algo a tratar antes de escalar, pero
+  sí como algo que pasó"*), que reescribió §7 con DOS VOCES y sumó la
+  precondición declarada de `MODELO_NOTIFICACIONES`. **Disparos ejecutados:**
+  D-469 firme en su alcance · `BIO_EXPEDIENTE` A3.3 enmendada (nivel
+  SEGURIDAD desgateado en su letra; roce del ejemplo *"Muerde"* declarado y
+  resuelto a favor de esta letra).
 - **borrador (S74, 22 Jul 2026):** dictado del founder en mesa (el eje de
   riesgo a manejo, el objeto único con marca de catálogo, la escalada por
   repetición >5 con retiro solo-profesional, viaja a todos los cuidadores

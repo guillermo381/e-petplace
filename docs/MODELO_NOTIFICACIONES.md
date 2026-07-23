@@ -13,6 +13,20 @@
 > **Estado del mundo al escribirse:** D-475 🔴 — las tres capas en CERO;
 > el vet no puede tocar al dueño por ningún canal. `realtime` NO es este
 > doc (la app abierta actualizándose sola es otro trabajo).
+> **EVIDENCIA S74 (censo literal, D-508):** *cero productor de email en
+> TODO el stack* — las 3 edge functions son walkin/nota-clínica/vacuna, y
+> `resend|sendgrid|nodemailer|smtp|inviteUserByEmail|sendEmail|mailer`
+> devuelve **cero hits** en monorepo y `supabase/`. El único email que el
+> sistema manda es el de Supabase Auth (signup/reset). Lo que en S73 era
+> "diseñado y no construido" quedó **PROBADO en campo**: la invitación de
+> equipo del founder no llegó **porque nunca hubo envío** — y la superficie
+> decía "enviar" (L-139 en la cara del usuario).
+> **CONSUMIDOR DECLARADO S74 — la notificación de OBSERVACIÓN del CUIDADO
+> ESPECIAL** (`LETRA_CUIDADO_ESPECIAL_S74` §7.1, FIRMADA): cuando alguien
+> observa un cuidado especial, **el dueño debe conocerlo** con voz neutra,
+> sin alarma y **sin camino ofrecido** (el camino es de la escalada, §7.2).
+> **Es un consumidor de las capas 1–3 de este doc — no puede existir antes
+> que ellas**, y se declara acá para que no se descubra en campo.
 
 ---
 

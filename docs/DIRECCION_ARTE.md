@@ -206,3 +206,25 @@ cumpliéndose.
   manos u objetos) → evolución (b′) "la huella presente" FIRMADA.
   Destello Kaxo adoptado re-tokenizado; física de apertura del Coach
   minada del prototipo; enmienda de la espera de marca.
+
+
+## §2.10 — LA FORMA DEL AVATAR POR POSICIÓN (S74, firmada por el founder)
+
+El squircle 32% (S61-A10) se firmó sobre el avatar **SUELTO**. S74 le pone
+su excepción, firmada en el gate del chip chico del filtro por mascota
+(verbatim del founder: ***"cara flotante dentro"***):
+
+> **EL AVATAR ANIDADO DERIVA SU RADIO DEL CONTENEDOR; EL AVATAR SUELTO
+> CONSERVA EL SQUIRCLE 32%.**
+
+**El porqué:** dentro de un chip, un radio que no sigue la curva del
+contenedor hace que la cara **flote** en vez de fundirse con la superficie
+que la abraza — el mismo síntoma que el founder diagnosticó en el chip
+grande (*"aún con fondo la imagen"*) y confirmó en el chico. **Mecánica:**
+`radioEnChip(lado) = ALTO/2 − |ALTO − lado|/2` (reproduce los dos valores
+firmados: entidad 52 → **18** · xs en chip 28 → **14**); la pantalla declara
+la POSICIÓN (`anidadoEn="chip"`), jamás el número. **No aplica** al avatar
+en slot de `Celda` (sin contenedor curvo) ni a las tallas sueltas. La letra
+exigible y su censo viven en la skill (Ley 21b) y en `DEUDAS_CANONICAS`.
+**Sigue abierto (S74):** la FUSIÓN no está resuelta por geometría — el
+material (D-506) y la sombra (D-507) siguen en su lámina.

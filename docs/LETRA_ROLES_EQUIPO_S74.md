@@ -1,6 +1,15 @@
-# LETRA — LOS ROLES DEL EQUIPO (S74, dictado del founder, pendiente de firma)
+# LETRA — LOS ROLES DEL EQUIPO (S74, dictado del founder) — ✅ **FIRMADA**
 
-> **Estado: BORRADOR DE MESA — espera firma founder.** Dictado en sesión S74
+> **Estado: ✅ FIRMADA POR EL FOUNDER (S74, 22 Jul 2026).** Los tres puntos
+> del §10, contestados: **(1)** el link vence en **48 HORAS** (el founder
+> BAJÓ la propuesta de mesa de 72) · **(2)** **el administrador NO nombra
+> administradores: solo el TITULAR** · **(3)** el string del aviso de §6 →
+> **FIRMADO por el founder, pero su LITERAL NO VIAJÓ al paquete de depósito**
+> (freno L-142 declarado abajo, §6) — se deposita en cuanto llegue.
+> **Disparo ejecutado con la firma:** `PORTAL_PRESTADOR` §14 → **LETRA_EQUIPO
+> v2** (doc a **v1.4**), como esta letra declaraba que haría al firmarse.
+>
+> *(Estado previo: BORRADOR DE MESA — espera firma founder.)* Dictado en sesión S74
 > (22 Jul 2026) sobre la ventana de equipo recién construida, con hallazgo de
 > campo del propio founder (la invitación que no llegó).
 > **Destino:** enmienda a `PORTAL_PRESTADOR.md` §14 (LETRA_EQUIPO v1 → v2) +
@@ -15,12 +24,11 @@
 > traducido al motor que ya vive. No es motor nuevo: es la CARA de lo que S73
 > construyó, más los candados que la superficie destapó.
 
-> **NOTA DEL DEPÓSITO (S74-A, 22 Jul 2026):** depositada VERBATIM del literal
-> de mesa. **`PORTAL_PRESTADOR` §14 NO se enmienda todavía — a propósito:**
-> esta letra declara que lo hace AL FIRMARSE, y firmarla es del founder
-> (declarado acá para que nadie lo lea como olvido; mismo patrón que la
-> enmienda de A3.3 pendiente en `LETRA_CUIDADO_ESPECIAL_S74`). Lo que SÍ se
-> ejecutó hoy: **D-510 nace** y **D-509 se ENMIENDA** con la vía en la
+> **NOTA DEL DEPÓSITO (S74-A, 22 Jul 2026) — ACTUALIZADA CON LA FIRMA:**
+> depositada VERBATIM del literal de mesa. En el depósito, `PORTAL_PRESTADOR`
+> §14 quedó **declarado como pendiente de esta firma**; **la firma llegó el
+> mismo día y §14 YA ESTÁ ENMENDADO a LETRA_EQUIPO v2** (doc a v1.4). Lo que
+> también se ejecutó en el depósito: **D-510 nace** y **D-509 se ENMIENDA** con la vía en la
 > auditoría (ya existía del diagnóstico D-508, mismo día — no se duplicó).
 > El §7 de esta letra decía "hipótesis en verificación": **verificada y
 > CONFIRMADA** el mismo día (cero productor de email en el stack) — el
@@ -178,6 +186,13 @@ Cuatro reglas de superficie:
 Dictado del founder: al asignar el rol de administrador, **un mensaje aclarando
 qué gana esa persona** — datos del negocio, asignar y eliminar empleados, etc.
 
+> **✅ FIRMADO (S74) con su nota de oficio: el botón dice "DAR EL ROL", jamás
+> "hacerla administradora" — el género no se resuelve desde un nombre** (la
+> voz de producto no infiere género de un nombre propio; es la misma
+> disciplina de L-148 sobre el acento). **El LITERAL del string está firmado
+> pero NO VIAJÓ al depósito (L-142): entra en el par es+en cuando llegue —
+> hueco declarado, no olvido.**
+
 **Va ANTES de confirmar, jamás después.** Es consentimiento informado, no un
 cartel: la superficie enumera con todas las letras lo que se está entregando
 (la plata, la gestión, el equipo, y los chips si los tiene), y recién entonces
@@ -219,7 +234,9 @@ la cara del usuario, no en un lector.
 Un link se reenvía; un mail no. Si un link de invitación se reenvía a otro
 chat, **entra el que lo abra**.
 
-1. **Vence.** Propuesta de mesa: 72 horas.
+1. **Vence: 48 HORAS** — ✅ FIRMADO por el founder S74, que **bajó** la
+   propuesta de mesa de 72 h. *(Cuanto más corta la ventana, menos vida
+   tiene un link reenviado.)*
 2. **Un solo uso.** El primero que lo abre lo quema.
 3. **Cancelable.** Hoy la invitación NO tiene cancelación (declarado por B en
    S74) — con links, eso pasa de incomodidad a **bloqueante**.
@@ -253,17 +270,33 @@ afirma haber enviado algo que no se envió.
 | D-486 | El DROP del rol legacy congelado — se cruza con este modelo cuando dispare. |
 | D-485 | La mitad familia. No la toca: este modelo es del lado NEGOCIO. |
 
-## 10. Preguntas abiertas para la firma del founder
+## 10. ✅ LAS TRES, CONTESTADAS POR EL FOUNDER (S74 — la firma)
 
-1. **El vencimiento del link:** 72h es propuesta de mesa.
-2. **¿El administrador puede invitar administradores?** La mesa propone que sí
-   (es el sentido del rol), pero el founder puede querer que solo el titular
-   entregue ese nivel.
-3. **El contenido literal del aviso de §6** — se firma como string, con su
-   gate.
+1. **El vencimiento del link** → **48 HORAS** (bajó la propuesta de mesa de
+   72). Rige el candado 1 de §7.1.
+2. **¿El administrador puede invitar administradores?** → **NO: SOLO EL
+   TITULAR entrega ese nivel.** La mesa proponía que sí; el founder cerró al
+   revés. **Consecuencia coherente con §4** (el titular no se quita desde la
+   app y no aparece en el selector): *el nivel que gobierna la plata y el
+   equipo lo entrega quien es dueño del negocio, y nadie más* — y con §7.1.4
+   (el rol administrador jamás viaja en un link), el poder queda entregado
+   **mirando y por el titular**.
+3. **El contenido literal del aviso de §6** → **FIRMADO por el founder**, con
+   su **nota de oficio: el botón dice "dar el rol", jamás "hacerla
+   administradora" — el género no se resuelve desde un nombre.** **⚠️ El
+   literal del string NO VIAJÓ en el paquete que ordenó depositarlo** (freno
+   L-142, quinta vez del patrón en la sesión): **se deposita en el par es+en
+   en cuanto llegue** — no se inventa (L-141).
 
 ## Historial
 
+- **✅ FIRMADA (S74, 22 Jul 2026):** el founder contestó los tres puntos del
+  §10 — **link a 48 h** (bajó de 72) · **solo el TITULAR nombra
+  administradores** (la mesa proponía que el administrador también) · el
+  **string del aviso FIRMADO** con la nota de oficio del botón ("dar el rol",
+  no "hacerla administradora"), **cuyo literal no viajó y queda declarado
+  como hueco** (L-142). **Disparo ejecutado:** `PORTAL_PRESTADOR` §14 →
+  LETRA_EQUIPO **v2** (doc a v1.4).
 - **borrador (S74, 22 Jul 2026):** dictado del founder (el selector de tres, el
   piso de recepción sin chips, los chips acumulables por servicio, la sección
   equipo con sus cuatro acciones solo para administrador, el aviso antes de
