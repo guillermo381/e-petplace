@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import * as Updates from 'expo-updates';
 import {
   Boton,
   Celda,
@@ -18,6 +19,7 @@ import {
   Hoja,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useTheme,
@@ -90,6 +92,19 @@ export default function Cuenta() {
             <Boton variante="secundario" etiqueta={t('ajustes.cerrarSesion')} bloque onPress={() => setSalirAbierta(true)} />
             <Boton variante="compacto" etiqueta={t('cuenta.eliminarCuenta')} bloque onPress={() => setEliminarAbierta(true)} />
           </View>
+
+          {/* ── S74-A · EL MARCADOR RENDERIZADO (L-160 enmendada / L-161):
+              el [update] era SOLO console.log — logcat-only, inalcanzable
+              para el founder sin cable. La identidad del build gana
+              PANTALLA (receta de B, 0225701 — las dos apps no divergen).
+              Voz de máquina (Ley 3); id corto = primeros 8 del updateId
+              (único por publicación); embebido/dev se dice honesto.
+              Camino literal: tab Cuenta → el pie. ── */}
+          <Texto variante="dato">
+            {Updates.updateId !== null
+              ? `update ${Updates.updateId.slice(0, 8)} · ${Updates.channel ?? 'sin canal'}`
+              : 'bundle embebido / dev'}
+          </Texto>
         </View>
       </ScrollView>
 
