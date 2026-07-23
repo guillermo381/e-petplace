@@ -744,5 +744,6 @@ export {
   type MiembroEquipo,
   type RolEquipo,
   type CodigoErrorEquipo,
+  type CodigoInvitar,
 } from './wrappers/equipo';
 export { obtenerUmbralesMomentoVital } from './wrappers/catalogos';

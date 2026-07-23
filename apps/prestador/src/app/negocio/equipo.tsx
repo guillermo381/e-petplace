@@ -163,7 +163,19 @@ export default function EquipoNegocioPantalla() {
     const r = await invitarEmpleado(prestadorId, invEmail.trim(), invNombre.trim());
     setOcupado(false);
     if (!r.ok) {
-      setVozError(t('equipo.errorInvitar'));
+      // CURA D-508: los rebotes suaves del motor GANAN VOZ — jamás
+      // "éxito" sobre un rechazo (el founder lo vio en campo).
+      setVozError(
+        r.codigo === 'ya_es_empleado'
+          ? t('equipo.rebYaEnEquipo')
+          : r.codigo === 'email_sin_cuenta'
+            ? t('equipo.rebSinCuenta')
+            : r.codigo === 'email_es_prestador'
+              ? t('equipo.rebOtroPrestador')
+              : r.codigo === 'no_es_dueno'
+                ? t('equipo.rebNoDueno')
+                : t('equipo.errorInvitar'),
+      );
       return;
     }
     setHojaInvitar(false);
