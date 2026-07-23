@@ -99,3 +99,71 @@ pre-auditoría, pero **la firma del founder solo puede caer sobre
 commits** — E1 es la enmienda que convierte esta vara parcial en
 completa: cuando el bloque S74 exista commiteado, los puntos 1-3 del
 brief se cierran contra él (el sustrato ya está verificado acá).
+
+---
+
+# SEGUNDA PASADA — contra el estado COMMITEADO (`5f08393` + `9f18d45`)
+
+> La E1 de la primera pasada quedó resuelta por el tiempo (A commiteó).
+> Registro de método: audité un blanco móvil — el mismo error que la
+> casa evitó todo el día con el teléfono del founder, colado entre
+> sesiones. Esta pasada corre contra commits.
+
+## VEREDICTO FINAL: **APTO CON ENMIENDAS** — 1 dura + 2 medias
+
+**E1 (DURA — cura de A): el bloque contradice a su propio doc en la
+franja §10ter.1.** `CLAUDE.md` ("LO NO CERRADO") dice *"BOCETO CONGELADO
+y el corolario §10ter.1 EN REVISIÓN… Espera su confirmación; al llegar,
+el corolario se enmienda y el boceto se rehace"* — **FALSIFICADO por el
+repo del mismo commit-stream**: `DISEÑO_EXPERIENCIA.md:382` dice
+**"N CITAS EN PONTE AL DÍA (S74, dictado founder — superficie FIRMADA)"**
+con la decisión de mesa corregida adentro (`:390-395`), y el boceto
+nuevo `2026-07-22-s74a-boceto-ponte-al-dia-n-citas.md` EXISTE. La
+confirmación llegó y se ejecutó (`9f18d45` enmendó el doc) — la línea
+del bloque quedó vieja. S75 leería como pendiente lo firmado: la clase
+exacta de deriva que esta vara existe para matar.
+
+**E2 (MEDIA — cura de A): "el último group publicado" sin app.** La
+línea del teléfono atrasado dice *"El último group publicado es
+`db45530a` (ancla `3ae4edb`)"* — ese es el del CLIENTE, pero la lista de
+pendientes de ESA misma línea mezcla las dos apps (los rebotes de
+invitar, la voz angostada y el marcador en Cuenta del prestador son
+post-`582b3d0`, detrás de `dedae916`). El operativo ya lo dice BIEN por
+app (con la corrección explícita del `bc12ed81` viejo ✓) — esta línea
+debe decirlo por app o remitir al operativo.
+
+**E3 (MEDIA — decisión de mesa): el FRENTE B de S74 no existe en el
+bloque, y "Commits B (19): los de su acta" cita un acta SIN ARCHIVO.**
+El conteo 19 es EXACTO (verificado contra git: de `a3a0012` a `3826c23`;
+la vara `f7977fd` correctamente fuera del corte de la transposición) —
+pero la construcción de B (EQUIPO+FIRMA con las 7 enmiendas · RECEPCIÓN
+v1 tres piezas · EvitaTeclado en los 3 cierres · la cura D-508 con su
+cinturón · guion y censos) solo vive oblicua (el gate, el arco, un
+paréntesis del group). Cura: o el bloque gana su línea FRENTE B, o B
+emite su acta de cierre (patrón S73-B) y la cita gana destino.
+
+## AUDITADO Y VERDE en la segunda pasada (fuente por afirmación)
+
+- **26 + 19 de los resolvedores: EXACTOS** contra grep vivo (26 archivos
+  llaman `obtenerMiPrestador()`, 19 `obtenerMiCuentaComercial()`).
+- **El group del prestador CORREGIDO en el operativo** (`dedae916` /
+  `582b3d0`, publish de B, con la nota "el canon decía bc12ed81… VIEJO")
+  y el incidente del árbol sucio con su asterisco bien contado.
+- **Las dos letras FIRMADAS con disparos ejecutados** — BIO nivel
+  SEGURIDAD desgateado (`:207/:245`) con el roce "Muerde" declarado y
+  resuelto a favor del doc más nuevo · PORTAL §14 → v2 / doc v1.4.
+- **El string del aviso** — "FIRMADO pero su literal NO VIAJÓ (L-142)"
+  ✓ consistente con la letra (el freno de A, correcto y registrado).
+- **Las candidatas SIN firma** ✓ (L-164 PROPUESTA con historial; las dos
+  sin número) y **los CUATRO errores de mesa declarados** — incluido el
+  atrape de L-165 (bajar una ley que nunca existió: L-141 contra una
+  orden de mesa).
+- **Lo mío, bien contado y sin maquillaje:** el arco DESCONECTADO con mi
+  cadena citada literal (cero triggers/edge/llamadas) · invitar EXCLUIDA
+  del gate con el porqué exacto (la voz vieja promete de más) · D-508 y
+  el marcador como commiteado-no-publicado · el gate 16/16 calza fila
+  por fila con mi censo de alcanzabilidad, y los no-gateados con su
+  porqué también. **La regla LA PUERTA VA ÚLTIMA + D-490/D-513 antes de
+  la puerta es una síntesis del cruce A×B mejor que la de mi censo** —
+  la tercera respuesta (ENTREGA ESCRITURA) es el hallazgo que ninguna
+  mitad tenía sola. Registro conforme.
