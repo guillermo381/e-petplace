@@ -145,7 +145,7 @@ export type CodigoInvitar =
   | 'rebote_desconocido'
   | 'error_escritura';
 
-const REBOTES_INVITAR: ReadonlyArray<{ literal: string; codigo: CodigoInvitar }> = [
+export const REBOTES_INVITAR: ReadonlyArray<{ literal: string; codigo: CodigoInvitar }> = [
   { literal: 'No sos dueño de este prestador', codigo: 'no_es_dueno' },
   { literal: 'El email no existe en la plataforma', codigo: 'email_sin_cuenta' },
   { literal: 'Este email pertenece a otro prestador', codigo: 'email_es_prestador' },
@@ -155,8 +155,12 @@ const REBOTES_INVITAR: ReadonlyArray<{ literal: string; codigo: CodigoInvitar }>
 /** Invitar SIN rol (camino v1 ratificado por E4: el CHECK de
  *  `empleado_invitaciones.rol` solo admite 'empleado'). El rol se asigna
  *  cuando la persona aparece en la lista (E1: preside con su acción).
- *  El mecanismo REAL es handshake al próximo login del invitado — acá
- *  no se envía nada (D-508): la voz de la pantalla dice esa verdad. */
+ *  VERIFICADO S74-B (por comportamiento, no por nombre): el handshake
+ *  "al próximo login" NO OCURRE por ningún camino — cero consumidores de
+ *  aceptar/rechazar/marcar, cero triggers, cero edge. La fila queda
+ *  activo=false para siempre. La invitación HOY solo REGISTRA; el
+ *  handshake es pedido de motor BLOQUEANTE (sin él no sirve ni por mail
+ *  ni por link). La voz de la pantalla dice ESA verdad angosta. */
 export async function invitarEmpleado(
   prestadorId: string,
   email: string,

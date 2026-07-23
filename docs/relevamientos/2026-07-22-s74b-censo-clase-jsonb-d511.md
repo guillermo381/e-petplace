@@ -68,3 +68,37 @@ alcance dicha con todas las letras que igual fabricó un verosímil-falso
 en campo el mismo día. La lección es de clase L-139: **declarar un
 atajo no lo vuelve inocuo** — un contrato a medio leer es un contrato
 que miente por vos.
+
+## 6 · Adenda S74-B (pedido de mesa): el handshake verificado + el cinturón
+
+**El handshake NO EXISTE — verificado por comportamiento, no por nombre:**
+los únicos toques a `empleado_invitaciones` en el motor son los 5 RPCs
+del subsistema (sonda a `pg_proc` completa, público y no-público) · cero
+triggers · cero edge functions (las 3 vivas son walkin/nota/vacuna) ·
+cero llamadas en apps (el match de `cuenta-comercial` era copy i18n de
+S51). **Mi voz de la cura era la mentira fina** ("cuando entre, se une")
+— angostada HOY a la verdad ("queda registrada; todavía no le llega
+sola", string final a gate) y **el handshake sube a pedido de motor
+BLOQUEANTE** (boceto delta §9.6): sin él la invitación no sirve por
+ninguna vía.
+
+**El cinturón construido:** `scripts/verify-rebotes-invitacion-s74.mjs`
+— importa `REBOTES_INVITAR` del wrapper (fuente única, jamás copia) y lo
+compara contra el `prosrc` VIVO en las dos direcciones (cada literal
+presente + el conteo de `'ok', false` calza con los tipificados). Falla
+RUIDOSO. Primer run: **VERDE 4/4**. Es la disciplina candidata "la
+verdad la firma un assert ejecutable, jamás la tabla sola" aplicada a su
+propio caso; la salida de raíz (código/RAISE) viaja con D-509.
+
+## 7 · LECCIÓN CANDIDATA — SIN FIRMA (explícito: la mesa NO la atribuye; espera firma founder)
+
+> **"DECLARAR UN ATAJO NO LO VUELVE INOCUO."** Origen: `63dabe7` — la
+> decisión "el Json no se interpreta en v1" estaba DECLARADA con todas
+> las letras, y aun así la pantalla le mintió al founder en campo el
+> mismo día. Declarar deja rastro para después; no protege. El corolario
+> operativo: un atajo declarado sobre un CONTRATO DE RESPUESTA (lo que
+> el motor contesta) es distinto de un atajo declarado sobre alcance —
+> el primero miente activamente mientras vive.
+> **PENDIENTE DE FIRMA FOUNDER** — se registra como candidata, sin
+> número, sin atribución de mesa.
+

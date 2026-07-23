@@ -112,14 +112,16 @@ lista — ni en el link NI en el correo viaja; se asigna cuando la persona
 ya está en la lista).
 
 **Vía 1 — correo: NO SE DIBUJA COMO SI FUNCIONARA.** D-508 CONFIRMADA
-por A (cero productor de email en el stack). Lo que HOY existe de verdad
-es el **handshake al próximo login** (`crear_empleado_directo` inserta;
-cuando esa persona entra a e-PetPlace con ese correo, se une). La voz de
-la Hoja dice ESA verdad: *"La invitación queda lista: cuando {{nombre}}
-entre a e-PetPlace con este correo, se une a tu equipo."* — cero
-"enviamos", cero "revisá tu correo". El día que el productor de email
-exista (MODELO_NOTIFICACIONES capa 1), la voz sube a "le enviamos la
-invitación" sin tocar la estructura.
+por A (cero productor de email). **ENMIENDA S74-B (verificación por
+comportamiento, pedido de mesa): el "handshake al próximo login" TAMPOCO
+existe** — cero consumidores de aceptar/rechazar/marcar, cero triggers,
+cero edge: la fila queda `activo=false` para siempre. La invitación HOY
+solo REGISTRA. La voz vigente dice esa verdad angosta (*"La invitación
+queda registrada a ese correo. Todavía no le llega sola…"* — string
+final a gate) y **el handshake sube a PEDIDO DE MOTOR BLOQUEANTE
+(§9.6)**: sin él la invitación no sirve por NINGUNA vía — ni mail, ni
+link. La escalera de voces cuando el motor llegue: registrada → se une
+al entrar (handshake) → le enviamos (productor de email).
 
 **Vía 2 — LINK (copiar + compartir nativo):** el share sheet del SO no
 requiere Meta ni WABA. **Bloqueada por motor** (D-509: el token con sus
@@ -225,6 +227,12 @@ sincronizar que la letra mata): pregunta de motor declarada.
    aplicado al acceso (letra §7.2; D-509 ya lo lleva enmendado).
 5. **El productor de CANCELACIÓN de invitación** (caso §4.2 — sin él, la
    fila pendiente no puede ganar su acción).
+6. **EL HANDSHAKE DE ACEPTACIÓN — BLOQUEANTE (enmienda S74-B, verificado
+   por comportamiento):** los RPCs `aceptar/rechazar_invitacion_
+   pendiente_login` existen y NADIE los llama; ninguna otra pieza activa
+   al invitado. Sin un camino que consuma la invitación (al login, por
+   token de link, o ambos), TODO el subsistema es una mesa sin patas —
+   la invitación registra y ahí muere.
 
 *(No es motor, es mío y queda comprometido para la construcción del
 delta: el wrapper lee el `ok:false` del jsonb de `crear_empleado_directo`

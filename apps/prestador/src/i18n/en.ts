@@ -1421,7 +1421,7 @@ export const prestadorEn = {
     invitarTitulo: 'Invite to your team',
     invitarNombre: 'Name',
     invitarEmail: 'Email',
-    invitarAyuda: 'They join without permissions. The invitation will be waiting: when they sign in to e-PetPlace with this email, they join your team.',
+    invitarAyuda: 'The invitation is registered to that email. It does not reach them on its own yet: automatic notice and entry are under construction.',
     invitarEnviar: 'Invite',
     // D-508 cure: the motor's 4 soft bounces, in human voice
     rebYaEnEquipo: 'That person is already part of your team.',

@@ -1563,7 +1563,7 @@ export const prestadorEs = {
     invitarTitulo: 'Invitar a tu equipo',
     invitarNombre: 'Nombre',
     invitarEmail: 'Correo',
-    invitarAyuda: 'La persona entra sin permisos. La invitación queda esperándola: cuando entre a e-PetPlace con este correo, se une a tu equipo.',
+    invitarAyuda: 'La invitación queda registrada a ese correo. Todavía no le llega sola: el aviso y la entrada automática están en construcción.',
     invitarEnviar: 'Invitar',
     // CURA D-508: los 4 rebotes suaves del motor, en voz humana (Ley 3)
     rebYaEnEquipo: 'Esa persona ya es parte de tu equipo.',
