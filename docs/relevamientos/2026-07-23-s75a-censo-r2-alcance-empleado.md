@@ -13,67 +13,64 @@
 (+ el hook en `lib/gate-gestor.ts`). Más el gate de AUSENCIA del tab NEGOCIO en
 el bar. **Cobertura: NEGOCIO + los 4 talleres de oficio.**
 
-## 2. LAS 19 CONSUMIDORAS DE R2, CRUZADAS
+## 2. LAS 19 CONSUMIDORAS — TABLA COMPLETA CON LA COLUMNA QUE DECIDE
 
-**⛔ ROMPEN — R2 null ⇒ pantalla de error (alcanzables por no-gestor, FUERA de NEGOCIO):**
+**⛔ ROMPEN (R2 null ⇒ pantalla de error) — SON EXACTAMENTE 6:**
 
-| Ruta | Tab / origen | Línea que rompe |
-|---|---|---|
-| `veterinaria/mostrador/autorizar.tsx` | **HOY → "Registrar atención"** (EL TRABAJO DE RECEPCIÓN) | `:109 if (!cuenta.ok \|\| cuenta.data === null) { setErrorCarga(true) }` |
-| `veterinaria/consulta/[citaId].tsx` | HOY → atención clínica | `:201 setErrorCarga(true)` |
-| `veterinaria/coordinar/[citaId].tsx` | HOY → coordinar | `:118 setEstado({ fase: 'error' })` |
-| `veterinaria/movimiento.tsx` | HOY → movimiento | `:60 setPantalla({ estado: 'error' })` |
-| `cuenta-comercial/index.tsx` | la plata | `:58 setCuenta('error')` |
-| `cuenta-comercial/bancarios.tsx` | la plata | `:79 setBase('error')` |
+| # | Ruta:línea | QUÉ USA DE R2 | CLASE | Camino / alcance |
+|---|---|---|---|---|
+| 1 | `veterinaria/consulta/[citaId].tsx:201` | `cta.data.id` (`:206`) + `cta.data.countryCode` (`:207`) | **1** — `id`→R1 directo; `countryCode`→`prestador.country_code` de R1 (coincide en unipersonal) | HOY→`cita/[citaId]:285`→consulta. **EN EL CIRCUITO** (el prestador atiende la consulta agendada) |
+| 2 | `veterinaria/mostrador/autorizar.tsx:110` | `cuenta.data.id` (`:115`) — nada más | **1** — solo `cuenta_comercial_id` | walk-in (`mostrador/index:172`, `nueva:136`). **NO en el circuito de cita agendada** |
+| 3 | `veterinaria/coordinar/[citaId].tsx:117` | `cta.data.id` (`:121`) | **1** — solo id | HOY→coordinar (`index:1003`), para `por_coordinar`. **NO en el circuito** (founder 0 por_coordinar) |
+| 4 | `veterinaria/movimiento.tsx:60` | `cta.data.id` (`:64`) | **1** — solo id | SOLO desde `negocio.tsx:346`. **Gateada de facto** (NEGOCIO no aparece al no-gestor) |
+| 5 | `cuenta-comercial/index.tsx:58` | `r.data` ENTERO (renderiza la cuenta) | **2** — campos de `cuentas_comerciales` | desde `negocio:322`/`liquidaciones:218`. **Gateada de facto** + owner-only correcto |
+| 6 | `cuenta-comercial/bancarios.tsx:79` | `.id` + `.countryCode` + datos bancarios | **2** — datos bancarios (Decisión L) | idem. **Gateada de facto** + owner-only correcto |
 
-**🟡 DEGRADAN — R2 null ⇒ best-effort, la pantalla sigue (null honesto):**
+**🟡 DEGRADAN (R2 null ⇒ best-effort, la pantalla sigue) — 8:**
 
 | Ruta | Tab | Cómo degrada |
 |---|---|---|
-| `(tabs)/index.tsx` | **HOY** | `:537` comentario literal *"Su error NO rompe la jornada"* — sin la sección "por coordinar" del mostrador |
-| `(tabs)/cuenta/perfil.tsx` | **CUENTA** | `:110-115` `if (rCuenta.ok && …) …; else setVisible(null)` — la fila de estado no aparece |
-| `veterinaria/cita/[citaId].tsx` | HOY | `:127 if (cta.ok && cta.data) { …presupuestos }` — sin presupuestos |
-| `veterinaria/presupuesto/nuevo.tsx` | HOY | `:81 if (cta.ok && cta.data) setCuentaId` — no puede crear (incompleto, no error) |
-| `paseo/index.tsx` · `grooming/index.tsx` · `adiestramiento/index.tsx` | hubs de oficio | el guard mira `rOfertas/rFranjas`, no la cuenta directa |
-| `liquidaciones.tsx` | la plata | el guard mira `rEventos/rLiquidaciones` |
+| `(tabs)/index.tsx:537` | **HOY** | comentario literal *"Su error NO rompe la jornada"* — sin la sección "por coordinar" del mostrador |
+| `(tabs)/cuenta/perfil.tsx:110` | **CUENTA** | `if (rCuenta.ok && …) …; else setVisible(null)` — la fila de estado no aparece |
+| `veterinaria/cita/[citaId].tsx:127` | HOY | `if (cta.ok && cta.data) { …presupuestos }` — sin presupuestos |
+| `veterinaria/presupuesto/nuevo.tsx:81` | HOY | `if (cta.ok && cta.data) setCuentaId` — incompleto, no error |
+| `paseo/index.tsx:106` · `grooming/index.tsx:104` · `adiestramiento/index.tsx:93` | hubs de oficio | el guard mira `rOfertas/rFranjas`, no la cuenta directa |
+| `liquidaciones.tsx:105` | la plata | el guard mira `rEventos/rLiquidaciones` |
 
-**✅ GATEADAS por B2 (un no-gestor no las alcanza):** `(tabs)/negocio.tsx` +
-los 4 `*/taller.tsx`.
+**✅ GATEADAS por B2 (por rol, no de facto):** `(tabs)/negocio.tsx` +
+`paseo/taller` · `grooming/taller` · `adiestramiento/taller` · `veterinaria/taller`.
 
-## 3. EL VEREDICTO PARA EL PUBLISH
+**Cuenta: 6 rompen + 8 degradan + 5 gateadas por B2 = 19.** ✓
 
-**Hay ≥6 pantallas que ROMPEN para un empleado no-gestor, fuera de NEGOCIO — y
-una es el corazón del E2E: `veterinaria/mostrador/autorizar.tsx`, el "Registrar
-atención" de la recepcionista.** R2 es el SEGUNDO MURO que D-512 ya nombraba
-(*"`obtenerMiCuentaComercial` por `owner_profile_id`, 19 pantallas"*), y **no se
-tocó en S75 por decisión founder** (R2/administrador fuera del v1).
+## 3. EL VEREDICTO, CONTRA EL CRITERIO DE MESA (el OTA lleva lo que el circuito TOCA)
 
-**Para el E2E de la recepcionista, camino por camino:**
-- **HOY** → degrada (✓ funciona sin la sección de coordinar).
-- **CUENTA** → degrada (✓).
-- **"Registrar atención" (mostrador)** → **ROMPE** (`setErrorCarga`). Es su
-  trabajo, y es lo primero que una recepcionista toca después de HOY.
+**De las 6 que rompen, solo UNA está en el circuito de la cita agendada del
+founder: `veterinaria/consulta/[citaId].tsx` (la pantalla donde el prestador
+ATIENDE la consulta que el founder reservó desde el cliente).** Es CLASE 1.
 
-**Esto se decide antes del gate, jamás en vivo (mandato de mesa):**
-- **Opción A — GATEAR la navegación:** el mostrador y las pantallas de atención
-  que llaman R2 se cierran a no-owner con voz honesta (Ley 23), como B hizo con
-  NEGOCIO. Pero el mostrador ES de recepción — cerrárselo contradice A3.4 (la
-  recepción recibe). El problema real es que el mostrador **necesita el
-  `cuenta_comercial_id` y lo resuelve por owner**, cuando debería resolverlo por
-  el NEGOCIO del empleado (R1 ya lo trae: `cuenta_comercial_id` entró a
-  `MiPrestador` en A1). **La cura correcta del mostrador es migrar su resolución
-  de R2 a R1** — no gatearlo.
-- **Opción B — DECLARAR el alcance del E2E:** el gate del founder de S75 se
-  limita a HOY + CUENTA + el handshake (que degradan/funcionan), y el mostrador
-  con empleado queda para cuando R2→R1 se migre. El E2E de recepción completo
-  espera esa migración.
+- Las otras dos CLASE 1 alcanzables (`autorizar` walk-in, `coordinar`
+  por_coordinar) **no están en el circuito** de una cita agendada.
+- `movimiento` y las dos `cuenta-comercial/*` (CLASE 2) **están gateadas de
+  facto** — su único camino es desde NEGOCIO, que no aparece al no-gestor.
 
-**Recomendación de la sesión (no decisión):** el mostrador es demasiado central
-para el E2E de recepción como para dejarlo roto o declararlo afuera — pero
-migrar 6 pantallas de R2→R1 es trabajo de arco, no de pre-publish. **Para el
-publish de HOY: Opción B (declarar el alcance), con la migración R2→R1 del
-mostrador como el primer ítem del arco de equipo v2** (nace deuda, ver abajo).
-La decisión es de mesa.
+**Por lo tanto, la pregunta que fija el alcance del OTA es UNA:**
+**¿el gate del founder llega a que el EMPLEADO atienda la consulta, o se detiene
+en el handshake (el empleado entra a HOY)?**
+
+- **Si se detiene en el handshake:** nada del circuito rompe — HOY degrada,
+  CUENTA degrada, el handshake es pantalla nueva. **El OTA sale; las CLASE 1 se
+  declaran en D-517.**
+- **Si el empleado atiende:** `consulta/[citaId]` rompe. La cura es **CLASE 1 =
+  swap R2→R1** (R1 ya trae `cuenta_comercial_id` desde A1) — **las 4 CLASE 1
+  juntas son ~media hora, cero migración**, no un arco. Se curan antes del OTA.
+
+Las 2 CLASE 2 (`cuenta-comercial/*`) NO se tocan: son gestión de la plata,
+owner-only correcto, gateadas de facto por NEGOCIO — v2 con migración + OK
+founder si algún día el administrador las gestiona.
+
+**El mostrador `autorizar` (walk-in) es CLASE 1 pero NO circuito de cita
+agendada** — se cura en la misma tanda de swap cuando el E2E de recepción
+walk-in entre, no bloquea el circuito del gate de S75.
 
 ## 4. VERIFICACIÓN
 
