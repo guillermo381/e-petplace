@@ -1,4 +1,17 @@
 # S74-A · BOCETO M1 — LA FICHA DE MASCOTA CON N CITAS ACTIVAS
+# ⚠️ **SUPERFICIE PROBABLEMENTE EQUIVOCADA — CONGELADO, ESPERA CONFIRMACIÓN**
+
+> **La mesa corrigió (S74): el founder dictó la mejora caminando el ítem 4 —
+> la franja "Ver su cita ›" de PONTE AL DÍA con las por-coordinar reales.**
+> **El argumento que lo cierra: en la ficha la regla sería un NO-OP** (ya
+> muestra UNA sola cita: el colapso por servicio no cambiaría nada). **Este
+> boceto NO se construye; se rehace sobre Ponte al día cuando el founder
+> confirme.** Lo que SÍ sobrevive de acá: el tope + `PieRevelar`, la regla de
+> que **lo colapsado no se cuenta en el «+N»** (L-139) y el contrato sin
+> pedido de motor. **Lo que cambia de raíz: el borde de las `por_coordinar`
+> pasa de nota al pie a CENTRO del problema** — en Ponte al día son las
+> protagonistas, no tienen tiempo, y hay que decidir cómo conviven con las
+> ordenadas por tiempo.
 
 > **BOCETO. CERO código hasta la vara de B + el gate.** Letra: el corolario
 > `DISEÑO_EXPERIENCIA` §10ter.1 (dictado founder S74, "la próxima EN EL

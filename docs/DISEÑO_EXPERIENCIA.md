@@ -379,7 +379,30 @@ vive en la descripción del presupuesto. La regla de qué mostrar:
   orden se cura en un solo lugar. Consumidores S72-A: `veterinaria-atencion.ts`
   (agenda vet) y `citasMascota.ts` (`/citas/[mascotaId]` del dueño).
 
-### 10ter.1 — COROLARIO: N CITAS en una superficie (S74, dictado del founder)
+### 10ter.1 — COROLARIO: N CITAS en una superficie (S74) — ⚠️ **EN REVISIÓN: LA SUPERFICIE**
+
+> **⚠️ ESTE COROLARIO ESTÁ EN REVISIÓN Y NO SE CONSTRUYE HASTA QUE EL FOUNDER
+> CONFIRME (S74).** La letra (qué hace la regla) **no se discute**; lo que
+> está en revisión es **DÓNDE aplica**. La mesa lo depositó apuntando a **la
+> ficha de la mascota** y **probablemente esté mal**: el founder dictó la
+> mejora **mientras caminaba el ítem 4 de su cosecha — la franja "Ver su cita ›"
+> de PONTE AL DÍA, con las por-coordinar reales**. Ahí estaba su dedo.
+> **EL ARGUMENTO QUE LO CIERRA: en la ficha de mascota la regla es un NO-OP** —
+> esa superficie ya muestra UNA sola cita, así que *"si son del mismo servicio
+> mostrá solo la próxima"* no cambiaría nada. **La regla solo tiene sentido
+> donde se muestran VARIAS: o sea Ponte al día.** Lectura de su frase con ese
+> encuadre: *"si tiene más de una cita activa, mostrar"* = **ratificación de lo
+> que estaba viendo** · *"si es del mismo servicio, solo la próxima"* = **LA
+> MEJORA NUEVA, la del colapso.**
+> **Al confirmarse: este corolario se enmienda nombrando Ponte al día y el
+> boceto se rehace ahí** (`docs/relevamientos/2026-07-22-s74a-boceto-ficha-n-citas.md`
+> queda superado).
+> **Y EL BORDE DEJA DE SER PERIFÉRICO — pasa a ser el CENTRO del problema:**
+> las `por_coordinar` **no tienen tiempo**, así que *"la próxima en el tiempo"*
+> **no las ordena** — y en Ponte al día **son exactamente las que el founder
+> estaba mirando**. La salida que el boceto proponía (*"que vivan en Ponte al
+> día, su casa"*) **deja de ser una salida**: hay que decidir **cómo conviven
+> las sin-tiempo con las ordenadas por tiempo** en la misma franja.
 
 **Letra firmada (founder S74, con su ambigüedad resuelta por él mismo):**
 **"Si la mascota tiene más de una cita activa, se MUESTRAN. Si varias son del
