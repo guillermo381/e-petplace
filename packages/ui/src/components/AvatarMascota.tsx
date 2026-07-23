@@ -63,6 +63,13 @@ export interface AvatarMascotaProps {
   /** S73 (entity chip): el FALLBACK sobre un chip LLENO recede — velo
    *  blanco + huella blanca (con foto no cambia nada). */
   sobreLleno?: boolean
+  /** S74 — LA REGLA DE FORMA (firmada): `'chip'` = el avatar va ANIDADO
+   *  dentro de un chip de `SelectorOpcion` (44) y su radio se DERIVA del
+   *  contenedor; sin esta prop, el avatar es SUELTO y conserva el
+   *  squircle 32%. Vocabulario CERRADO a propósito: la pantalla declara
+   *  DÓNDE vive el avatar, jamás un radio crudo (Ley 1). `entidad` lo
+   *  implica y no necesita pasarla. */
+  anidadoEn?: 'chip'
 }
 
 // SQUIRCLE (S61-A10, dirección de arte firmada por el founder sobre el
@@ -97,27 +104,32 @@ const DIAMETRO: Record<AvatarMascotaTamano, number> = {
 }
 
 /** S74 — LA GEOMETRÍA DE LA FUSIÓN (firma founder sobre la lámina a/b/c,
- *  en su Android): en `entidad` el radio interior se DERIVA del chip —
- *  exterior (44/2 = 22, el target táctil del chip) menos el inset
- *  (SOBRA = 4) = **18** — en lugar del squircle 32%. Se implementa C
- *  (= la B firmada + borderCurve, gratis en iOS e IDÉNTICO en Android —
- *  salvedad registrada: la lámina no podía separar b de c en el
- *  dispositivo del gate; si el founder ratifica B puro, la cura es
- *  quitar el borderCurve SOLO en entidad). El founder declaró que aún NO
- *  fusiona — B fue la mejor de tres, no un "resuelto": la sombra (D-507)
- *  y el material (D-506) siguen en la lámina v2. Las DEMÁS tallas
- *  conservan el squircle 32% intacto (censo S74: entidad solo vive en
- *  SelectorOpcion + lámina). Proporción 52/44 sigue PROVISIONAL.
- *  REGLA PROPUESTA que esta cura implica (mesa S74, PENDIENTE de firma
- *  founder — letra y censo en DEUDAS_CANONICAS junto a D-507): "el
- *  avatar ANIDADO deriva su radio del contenedor; el SUELTO conserva el
- *  squircle". Si se firma, `xs` (anidado en chips de 44, hoy squircle)
- *  gana su decisión; si no, este derivado queda como excepción única de
- *  `entidad`. Que nadie generalice NI revierta sin esa firma. */
-const RADIO_ENTIDAD = 44 / 2 - (TALLA_AVATAR_ENTIDAD - 44) / 2 // 18
+ *  en su Android): el radio interior se DERIVA del chip en vez del
+ *  squircle 32%. Se implementó C (= la B firmada + borderCurve, gratis en
+ *  iOS e IDÉNTICO en Android — salvedad: la lámina no podía separar b de
+ *  c en el dispositivo del gate; si el founder ratifica B puro, la cura
+ *  es quitar el borderCurve). El founder declaró que aún NO fusiona — B
+ *  fue la mejor de tres, no un "resuelto": la sombra (D-507) y el
+ *  MATERIAL (D-506, confirmado en dispositivo: *"aún con fondo la
+ *  imagen"*) siguen en la lámina v2. Proporción 52/44 sigue PROVISIONAL.
+ *  **La regla que esta cura implicaba quedó FIRMADA en el mismo gate**
+ *  (el chip chico del filtro: *"cara flotante dentro"*) — ver abajo. */
 
-function radioAvatar(tamano: AvatarMascotaTamano, lado: number): number {
-  return tamano === 'entidad' ? RADIO_ENTIDAD : radioSquircle(lado)
+/** El alto canónico del chip (target táctil de SelectorOpcion). */
+const ALTO_CHIP = 44
+
+/** LA REGLA DE FORMA (S74, FIRMADA por el founder tras el gate del chip
+ *  chico — "cara flotante dentro"): **el avatar ANIDADO deriva su radio
+ *  del contenedor; el SUELTO conserva el squircle 32%.** El radio interior
+ *  sigue la curva del chip: `ALTO/2 − |ALTO − d|/2`. Reproduce los dos
+ *  valores firmados: entidad (52) → **18** (la variante B/C de la lámina) ·
+ *  xs dentro del chip (28) → **14** (hoy squircle 9, el que flotaba). */
+function radioEnChip(lado: number): number {
+  return Math.round(ALTO_CHIP / 2 - Math.abs(ALTO_CHIP - lado) / 2)
+}
+
+function radioAvatar(tamano: AvatarMascotaTamano, lado: number, anidadoEnChip: boolean): number {
+  return tamano === 'entidad' || anidadoEnChip ? radioEnChip(lado) : radioSquircle(lado)
 }
 
 // Tamaño óptico de la huella dentro del círculo (~55% del diámetro).
@@ -165,7 +177,7 @@ function HuellaGenerica({ color, tamano }: { color: string; tamano: number }) {
   )
 }
 
-export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa, sobreLleno = false }: AvatarMascotaProps) {
+export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa, sobreLleno = false, anidadoEn }: AvatarMascotaProps) {
   const { theme } = useTheme()
   const [falloCarga, setFalloCarga] = useState(false)
 
@@ -182,7 +194,7 @@ export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa, sobreLleno
         style={{
           width: d,
           height: d,
-          borderRadius: radioAvatar(tamano, d),
+          borderRadius: radioAvatar(tamano, d, anidadoEn === 'chip'),
           borderCurve: 'continuous',
           overflow: 'hidden',
           ...(esMemorial ? { filter: FILTRO_MEMORIAL } : null),
@@ -218,7 +230,7 @@ export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa, sobreLleno
       style={{
         width: d,
         height: d,
-        borderRadius: radioAvatar(tamano, d),
+        borderRadius: radioAvatar(tamano, d, anidadoEn === 'chip'),
         borderCurve: 'continuous',
         backgroundColor: fondo,
         alignItems: 'center',

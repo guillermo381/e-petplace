@@ -483,6 +483,7 @@ function EjemploSelectorOpcion() {
                 nombre="Thor"
                 fotoUrl="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNs6POsBwAFCAICLIC/vQAAAABJRU5ErkJggg=="
                 tamano="xs"
+                anidadoEn="chip"
               />
             ),
           },
@@ -490,7 +491,7 @@ function EjemploSelectorOpcion() {
             codigo: 'zeus',
             etiqueta: 'Zeus',
             // sin foto: la huella digna de fallback
-            adorno: <AvatarMascota nombre="Zeus" tamano="xs" />,
+            adorno: <AvatarMascota nombre="Zeus" tamano="xs" anidadoEn="chip" />,
           },
         ]}
         seleccionada={quien}

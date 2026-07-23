@@ -1156,7 +1156,13 @@ export default function Hogar() {
                     opciones={mascotas.map((m) => ({
                       codigo: m.id,
                       etiqueta: m.nombre,
-                      adorno: <AvatarMascota nombre={m.nombre} fotoUrl={fotos[m.id]} tamano="xs" />,
+                      // S74 (regla de forma FIRMADA, gate del founder sobre
+                      // este chip: "cara flotante dentro"): el avatar ANIDADO
+                      // deriva su radio del contenedor (chip 44 · avatar 28 ·
+                      // inset 8 → radio 14, antes squircle 9).
+                      adorno: (
+                        <AvatarMascota nombre={m.nombre} fotoUrl={fotos[m.id]} tamano="xs" anidadoEn="chip" />
+                      ),
                     }))}
                     seleccionadas={filtroMascotas}
                     onSelect={(codigo) =>
