@@ -3858,6 +3858,38 @@ export type Database = {
           },
         ]
       }
+      empleado_roles: {
+        Row: {
+          asignado_en: string
+          asignado_por: string
+          empleado_id: string
+          id: string
+          rol: string
+        }
+        Insert: {
+          asignado_en?: string
+          asignado_por: string
+          empleado_id: string
+          id?: string
+          rol: string
+        }
+        Update: {
+          asignado_en?: string
+          asignado_por?: string
+          empleado_id?: string
+          id?: string
+          rol?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "empleado_roles_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "prestador_empleados"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       envio_eventos: {
         Row: {
           ciudad: string | null
@@ -16648,6 +16680,10 @@ export type Database = {
         Args: { p_email: string }
         Returns: string
       }
+      empleado_tiene_rol: {
+        Args: { p_prestador_id: string; p_roles: string[] }
+        Returns: boolean
+      }
       encontrar_prestador_emergencia: {
         Args: {
           p_country?: string
@@ -16935,6 +16971,14 @@ export type Database = {
           servicio_nombre: string
           tipo_servicio: string
           total_congelado: number
+        }[]
+      }
+      obtener_contacto_reserva_cita: {
+        Args: { p_cita_id: string }
+        Returns: {
+          nombre: string
+          telefono: string
+          telefono_codigo_pais: string
         }[]
       }
       obtener_empleados_cuenta: {
@@ -17477,6 +17521,10 @@ export type Database = {
       use_beta_invite: {
         Args: { p_beta_id: string; p_user_id: string }
         Returns: undefined
+      }
+      user_acceso_clinico_a_mascota: {
+        Args: { p_mascota_id: string }
+        Returns: boolean
       }
       user_es_familiar_adulto_de_mascota: {
         Args: { p_mascota_id: string }

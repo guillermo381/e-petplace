@@ -718,3 +718,10 @@ export {
   type EstadoEfectivoPresupuesto,
   type CodigoErrorPresupuestosLeidos,
 } from './wrappers/presupuestos-familia';
+
+// S74-A — el contacto de la VISITA (recepción v1: quién reservó la cita).
+export {
+  obtenerContactoReservaCita,
+  type ContactoReservaCita,
+  type CodigoErrorContactoReserva,
+} from './wrappers/recepcion';
