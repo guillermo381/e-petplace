@@ -30,7 +30,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
@@ -77,6 +77,7 @@ import {
 
 import { EvitaTeclado } from '@/components/evita-teclado';
 import { useTraduccion } from '@/i18n';
+import { useSoloGestorDenegado } from '@/lib/gate-gestor';
 import { vozErrorVet } from '@/lib/voz-error-vet';
 import {
   SeccionHorarios,
@@ -171,6 +172,9 @@ function modalidadDeItem(item: ItemMenuVeterinaria): {
 
 export default function TallerVeterinaria() {
   const router = useRouter();
+  // S75-B: gate de rol de RUTA (inerte hasta la puerta — solo el titular
+  // llega hoy; post-puerta rebota al no-gestor que deep-linkee al taller).
+  const gateDenegado = useSoloGestorDenegado();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
@@ -484,6 +488,9 @@ export default function TallerVeterinaria() {
     else setSeccionForzada('horarios');
     scrollRef.current?.scrollTo({ y: 0, animated: false });
   };
+
+  // Ley 23: al no-gestor confirmado NO se le ofrece el taller (ausencia).
+  if (gateDenegado) return <Redirect href="/(tabs)/negocio" />;
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>

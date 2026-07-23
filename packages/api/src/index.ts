@@ -740,6 +740,8 @@ export {
   quitarRolEmpleado,
   desvincularEmpleado,
   invitarEmpleado,
+  empleadoTieneRol,
+  obtenerNegocioEmpleadoActivo,
   type EquipoNegocio,
   type MiembroEquipo,
   type RolEquipo,

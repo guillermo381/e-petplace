@@ -41,6 +41,12 @@ export const prestadorEn = {
     sinSesion: 'No active session',
     sinRol: "Your account doesn't have a business attached",
     sinRolDetalle: "You're signed in as {{email}}. This app is for those offering services on e-PetPlace — if that's you and you don't see your business, write to us.",
+    // S75-B: the ACTIVE employee waiting for the door (inert today, dies
+    // when the door opens). Honest voice L-139: says what IS true and what
+    // is NOT yet, promising nothing.
+    empleadoTitulo: "You're now part of {{negocio}}",
+    empleadoDetalle:
+      "Access to the day-to-day of the business isn't available in the app yet. We'll let you know when it is.",
     reintentar: 'Try again',
     cerrarSesion: 'Sign out',
     confirmacionCierre: 'Signing out? Your work stays saved.',

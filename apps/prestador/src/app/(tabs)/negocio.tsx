@@ -23,7 +23,7 @@
 import { useCallback, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { Redirect, useFocusEffect, useRouter } from 'expo-router';
 import {
   CeldaNavegacion,
   Icono,
@@ -52,6 +52,7 @@ import {
 import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
+import { useSoloGestorDenegado } from '@/lib/gate-gestor';
 import { TechoOficio, VeloBarraEstadoOficio } from '@/components/techo-oficio';
 
 // hoy en ISO LOCAL (hallazgo harness S55: toISOString corre el día)
@@ -66,6 +67,10 @@ function hoyLocalISO(): string {
 export default function Negocio() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  // S75-B: la pantalla NEGOCIO cierra la ausencia del tab también ante
+  // deep-link — el tab se oculta del bar (layout) y la ruta rebota acá
+  // (inerte hasta la puerta; el gate de ESCRITURA es del server, D-513).
+  const gateDenegado = useSoloGestorDenegado();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
 
@@ -189,6 +194,9 @@ export default function Negocio() {
             n: serviciosVet.length,
             precio: `$${Math.min(...serviciosVet.map((s) => s.precio)).toFixed(2)}`,
           });
+
+  // Ley 23: al no-gestor confirmado NO se le ofrece NEGOCIO (ausencia).
+  if (gateDenegado) return <Redirect href="/(tabs)" />;
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>

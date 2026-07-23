@@ -36,7 +36,7 @@
 
 import { useCallback, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { Redirect, useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
@@ -79,6 +79,7 @@ import {
 
 import { verificarSesion } from '@/lib/api';
 import { useTraduccion } from '@/i18n';
+import { useSoloGestorDenegado } from '@/lib/gate-gestor';
 // S68-B (D-426 muere): la sección de horarios COMPARTIDA entra al
 // taller del adiestramiento — el oficio declara horarios propios con la
 // misma pieza que paseo/grooming/veterinaria (elección de modo D-386
@@ -206,6 +207,9 @@ function draftDe(p: ProgramaAdiestramientoPropio): DraftPrograma {
 export default function TallerAdiestramiento() {
   const { theme } = useTheme();
   const router = useRouter();
+  // S75-B: gate de rol de RUTA (inerte hasta la puerta — solo el titular
+  // llega hoy; post-puerta rebota al no-gestor que deep-linkee al taller).
+  const gateDenegado = useSoloGestorDenegado();
   const { mostrar } = useAviso();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
@@ -458,6 +462,9 @@ export default function TallerAdiestramiento() {
       </Texto>
     );
   }
+
+  // Ley 23: al no-gestor confirmado NO se le ofrece el taller (ausencia).
+  if (gateDenegado) return <Redirect href="/(tabs)/negocio" />;
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>

@@ -41,7 +41,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
@@ -86,6 +86,7 @@ import {
 
 import { useTraduccion } from '@/i18n';
 import { EspejoGrooming, type ServicioEspejoGrooming } from '@/components/espejo-grooming';
+import { useSoloGestorDenegado } from '@/lib/gate-gestor';
 import {
   ORDEN_DISPLAY,
   SeccionHorarios,
@@ -173,6 +174,9 @@ function draftServicioDesdeBase(base: OfertaGroomingPropia | null, servicio: Ser
 
 export default function TallerGrooming() {
   const router = useRouter();
+  // S75-B: gate de rol de RUTA (inerte hasta la puerta — solo el titular
+  // llega hoy; post-puerta rebota al no-gestor que deep-linkee al taller).
+  const gateDenegado = useSoloGestorDenegado();
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
@@ -515,6 +519,9 @@ export default function TallerGrooming() {
     if (router.canGoBack()) router.back();
     else router.replace('/grooming');
   };
+
+  // Ley 23: al no-gestor confirmado NO se le ofrece el taller (ausencia).
+  if (gateDenegado) return <Redirect href="/(tabs)/negocio" />;
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>

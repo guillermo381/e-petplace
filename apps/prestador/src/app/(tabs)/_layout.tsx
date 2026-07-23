@@ -29,7 +29,13 @@ import {
   useTheme,
   type BarraTabsItem,
 } from '@epetplace/ui';
-import { cerrarSesion, obtenerMiPrestador, obtenerSesion } from '@epetplace/api';
+import {
+  cerrarSesion,
+  empleadoTieneRol,
+  obtenerMiPrestador,
+  obtenerNegocioEmpleadoActivo,
+  obtenerSesion,
+} from '@epetplace/api';
 
 import { apiLista } from '@/lib/api';
 import { BienvenidaPrestador } from '@/components/bienvenida';
@@ -38,9 +44,14 @@ import { useTraduccion } from '@/i18n';
 
 type EstadoSesionRaiz =
   | 'verificando'
-  | 'ok'
+  // S75-B: 'ok' pasa a portar esGestor — el gate del tab NEGOCIO lee de
+  // acá (resuelto UNA vez en el guard, jamás por pantalla). Hoy inerte:
+  // el único que llega es el titular, y el titular siempre es gestor.
+  | { ok: true; esGestor: boolean }
+  // negocioEmpleado: si el user es EMPLEADO ACTIVO esperando la puerta,
+  // el nombre de su negocio (voz honesta); null = user sin negocio alguno.
+  | { sin_rol: true; email: string; negocioEmpleado: string | null }
   | { sin_sesion: true }
-  | { sin_rol: true; email: string }
   | { error: true; detalle: string };
 
 export default function TabsLayout() {
@@ -61,17 +72,32 @@ export default function TabsLayout() {
         if (!s.ok) return { error: true, detalle: s.mensaje };
         if (s.data === null) return { sin_sesion: true };
         const p = await obtenerMiPrestador();
-        if (p.ok) return 'ok';
-        if (p.codigo === 'sin_prestador') return { sin_rol: true, email: s.data.email ?? '' };
+        if (p.ok) {
+          // S75-B: el rol de gestión, resuelto UNA vez (gate del tab).
+          // Falla de lectura = false (Ley 23: ante la duda, se cierra).
+          const rol = await empleadoTieneRol(p.data.id, ['dueño', 'administrador']);
+          return { ok: true, esGestor: rol.ok ? rol.data : false };
+        }
+        if (p.codigo === 'sin_prestador') {
+          // ¿empleado ACTIVO esperando la puerta, o user sin negocio?
+          // La sonda distingue la voz (cero motor — policy empleados_self).
+          const neg = await obtenerNegocioEmpleadoActivo();
+          return {
+            sin_rol: true,
+            email: s.data.email ?? '',
+            negocioEmpleado: neg.ok ? neg.data : null,
+          };
+        }
         return { error: true, detalle: p.mensaje };
       })().then((r) => {
         // Forense L-138: el resultado del guard raíz queda LITERAL en
         // el log de Metro/logcat — el gate empieza confirmándolo.
         const voz =
-          r === 'ok' ? 'ok'
-            : typeof r === 'object' && 'sin_sesion' in r ? 'sin sesión'
-              : typeof r === 'object' && 'sin_rol' in r ? `sin rol prestador — ${r.email}`
-                : `error — ${(r as { detalle: string }).detalle}`;
+          typeof r === 'string' ? r
+            : 'ok' in r ? `ok — gestor=${r.esGestor}`
+              : 'sin_sesion' in r ? 'sin sesión'
+                : 'sin_rol' in r ? `sin rol prestador — ${r.email}${r.negocioEmpleado ? ` (empleado de ${r.negocioEmpleado})` : ''}`
+                  : `error — ${r.detalle}`;
         console.log(`[sesion] raíz prestador: ${voz}`);
         if (vigente) setSesion(r);
       });
@@ -96,20 +122,34 @@ export default function TabsLayout() {
     );
   }
 
-  if (sesion !== 'ok' && 'sin_sesion' in sesion) {
+  if ('sin_sesion' in sesion) {
     // sin sesión CONFIRMADO → LA BIENVENIDA (S61-B8, letra founder):
     // el landing con la voz del grupo curado; el EstadoVacio de S51
     // murió — error y sin-rol conservan el suyo.
     return <BienvenidaPrestador />;
   }
 
-  if (sesion !== 'ok' && 'sin_rol' in sesion) {
-    // sesión válida pero SIN negocio: honesto, con salida — jamás trampa
+  if ('sin_rol' in sesion) {
+    // sesión válida pero SIN negocio propio. S75-B: DOS voces —
+    //  · EMPLEADO ACTIVO esperando la puerta (negocioEmpleado presente):
+    //    la verdad honesta (te sumaron, aceptaste; el acceso al día a día
+    //    aún no está). Rama INERTE hoy (0 empleados activos no-titulares) y
+    //    MUERE cuando la puerta abra — ahí el empleado entra a las tabs.
+    //  · user SIN negocio alguno: la voz de siempre.
+    const negocio = sesion.negocioEmpleado; // narrowing: null = user sin negocio
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base, justifyContent: 'center', padding: spacing[5], gap: spacing[4] }}>
         <EstadoVacio
-          titulo={t('sesion.sinRol')}
-          descripcion={t('sesion.sinRolDetalle', { email: sesion.email })}
+          titulo={
+            negocio !== null
+              ? t('sesion.empleadoTitulo', { negocio })
+              : t('sesion.sinRol')
+          }
+          descripcion={
+            negocio !== null
+              ? t('sesion.empleadoDetalle')
+              : t('sesion.sinRolDetalle', { email: sesion.email })
+          }
           accion={
             <Boton
               variante="secundario"
@@ -131,7 +171,7 @@ export default function TabsLayout() {
     );
   }
 
-  if (sesion !== 'ok') {
+  if ('error' in sesion) {
     // error de config/red — el detalle específico jamás se traga (regla 36)
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base, justifyContent: 'center', padding: spacing[5] }}>
@@ -153,10 +193,18 @@ export default function TabsLayout() {
     );
   }
 
+  // S75-B: el tab NEGOCIO gatea por AUSENCIA (Ley 23) — la gestión (oferta,
+  // plata, equipo) es de quien puede TOCARLA (dueño/administrador). HOY y
+  // Mascotas y Cuenta las ve todo el equipo (operan / se identifican).
+  // INERTE hoy: solo el titular llega, y el titular es gestor → el tab
+  // aparece siempre. Cuando la puerta abra, el profesional/recepción entra
+  // sin el tab, sin un candado que explicar.
   const items: BarraTabsItem[] = [
     { key: 'index', etiqueta: t('tabs.hoy'), icono: IconoHoy },
     { key: 'mascotas', etiqueta: t('tabs.mascotas'), icono: IconoMascotas },
-    { key: 'negocio', etiqueta: t('tabs.negocio'), icono: IconoNegocio },
+    ...(sesion.esGestor
+      ? [{ key: 'negocio', etiqueta: t('tabs.negocio'), icono: IconoNegocio } as BarraTabsItem]
+      : []),
     { key: 'cuenta', etiqueta: t('tabs.cuenta'), icono: IconoCuenta },
   ];
 

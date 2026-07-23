@@ -20,9 +20,13 @@
 import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 
-export type RolEquipo = 'dueño' | 'profesional' | 'recepcion';
+// S75-B: `administrador` NACE como valor aparte en el CHECK de
+// `empleado_roles` (migración de A, decisión de mesa firmada) — `dueño`
+// queda RESERVADO al titular, jamás asignable. El tipo del UI lo refleja
+// para razonar el gate ['dueño','administrador'].
+export type RolEquipo = 'dueño' | 'administrador' | 'profesional' | 'recepcion';
 
-const ROLES_VIVOS: readonly RolEquipo[] = ['dueño', 'profesional', 'recepcion'];
+const ROLES_VIVOS: readonly RolEquipo[] = ['dueño', 'administrador', 'profesional', 'recepcion'];
 
 function esRolEquipo(v: string): v is RolEquipo {
   return (ROLES_VIVOS as readonly string[]).includes(v);
@@ -189,4 +193,64 @@ export async function invitarEmpleado(
     };
   }
   return { ok: true, data: null };
+}
+
+// ── S75-B · GATE DE ROL DE NAVEGACIÓN (D-513, la mitad UI) ──────────────
+// Los gates son INERTES hasta que la puerta abra (B3): hoy solo el dueño
+// resuelve prestador (obtenerMiPrestador por user_id — D-512), y el dueño
+// SIEMPRE pasa ['dueño','administrador'] por la rama de titular del helper.
+// Cuando A abra el resolvedor de empleados, este mismo código gatea al
+// profesional/recepción sin tocarse — es el switch armado (D-512).
+
+/** ¿El user de la sesión puede gestionar el NEGOCIO de este prestador?
+ *  Delega en el helper único `empleado_tiene_rol` (§14.4 — la verdad de
+ *  rol es del motor, la UI no la recomputa): true para el TITULAR (rama
+ *  de dueño del helper) y para el empleado con rol en `p_roles`. El gate
+ *  de PRODUCTO de la UI; el gate de ESCRITURA vive en el server (D-490/
+ *  D-513, territorio A). Falla de red = false HONESTO — el gate cierra
+ *  ante la duda (nunca abre lo que no pudo confirmar; Ley 23). */
+export async function empleadoTieneRol(
+  prestadorId: string,
+  roles: readonly RolEquipo[],
+): R<boolean> {
+  const { data, error } = await getClient().rpc('empleado_tiene_rol', {
+    p_prestador_id: prestadorId,
+    p_roles: roles as string[],
+  });
+  if (error) return { ok: false, codigo: 'error_lectura', mensaje: error.message };
+  return { ok: true, data: data === true };
+}
+
+/** El vínculo de empleado ACTIVO del user, si existe — para la VOZ de la
+ *  puerta (S75-B): cuando `obtenerMiPrestador` falla (no sos titular,
+ *  D-512) el raíz cae en `sin_rol`; esta sonda distingue al EMPLEADO
+ *  ACTIVO (te sumaron y aceptaste, pero la puerta aún no abre) del user
+ *  sin negocio alguno. Lee `prestador_empleados` por la policy
+ *  `empleados_self` (user_id = auth.uid()) — CERO motor. Devuelve el
+ *  nombre del negocio para la voz honesta; null = no hay vínculo activo.
+ *  HERMANA de la sonda del handshake B1 (esa mira `activo=false`, esta
+ *  `activo=true`) — por eso no colisionan. MUERE cuando la puerta abra:
+ *  entonces el empleado activo entra a (tabs) y nunca ve esta rama. */
+export async function obtenerNegocioEmpleadoActivo(): R<string | null> {
+  const cliente = getClient();
+  const { data: auth } = await cliente.auth.getUser();
+  if (!auth.user) return { ok: true, data: null };
+  const { data, error } = await cliente
+    .from('prestador_empleados')
+    .select('prestador_id, created_at, prestadores(nombre_comercial)')
+    .eq('user_id', auth.user.id)
+    .eq('activo', true)
+    // Enmienda (a) de la vara S75: `invitado_en` es NULLABLE — el orden
+    // determinista es `created_at` (NOT NULL), alineado con el criterio de
+    // R1. El vínculo más antiguo preside; mismo orden en los dos pisos.
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (error) return { ok: false, codigo: 'error_lectura', mensaje: error.message };
+  if (data === null) return { ok: true, data: null };
+  // el embed puede venir objeto u array según cardinalidad inferida;
+  // el nombre puede ser null si el prestador no es legible (jamás inventa)
+  const p = data.prestadores as { nombre_comercial: string | null } | { nombre_comercial: string | null }[] | null;
+  const nombre = Array.isArray(p) ? (p[0]?.nombre_comercial ?? null) : (p?.nombre_comercial ?? null);
+  return { ok: true, data: nombre };
 }

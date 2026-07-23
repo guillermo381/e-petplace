@@ -45,6 +45,12 @@ export const prestadorEs = {
     // con sesión pero SIN negocio de prestador (D-290): jamás crash
     sinRol: 'Tu cuenta no tiene un negocio asociado',
     sinRolDetalle: 'Entraste como {{email}}. Esta app es para quienes ofrecen servicios en e-PetPlace — si es tu caso y no ves tu negocio, escríbenos.',
+    // S75-B: el EMPLEADO ACTIVO esperando la puerta (rama inerte hoy, muere
+    // cuando la puerta abra). Voz honesta L-139: dice lo que ES verdad (ya
+    // sos parte) y lo que TODAVÍA no (el acceso al día a día), sin prometer.
+    empleadoTitulo: 'Ya eres parte de {{negocio}}',
+    empleadoDetalle:
+      'Tu acceso al día a día del negocio todavía no está disponible en la app. Te avisamos cuando lo esté.',
     reintentar: 'Probar de nuevo',
     cerrarSesion: 'Cerrar sesión',
     confirmacionCierre: '¿Cierras tu sesión? Tu trabajo queda guardado.',
