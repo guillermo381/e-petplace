@@ -46,6 +46,7 @@ import {
   aceptarInvitacionEquipo,
   cerrarSesion,
   obtenerInvitacionPendiente,
+  resolverUrlLogoNegocio,
   type InvitacionPendiente,
 } from '@epetplace/api';
 
@@ -166,7 +167,10 @@ export default function Invitacion() {
     const { datos } = pantalla;
     return (
       <View style={{ alignItems: 'center', gap: spacing[5] }}>
-        <LogoNegocio nombre={datos.negocioNombre ?? ''} />
+        <LogoNegocio
+          nombre={datos.negocioNombre ?? ''}
+          logoUrl={resolverUrlLogoNegocio(datos.negocioLogoPath)}
+        />
         <View style={{ alignItems: 'center', gap: spacing[2] }}>
           <Texto variante="titulo">
             {datos.negocioNombre !== null

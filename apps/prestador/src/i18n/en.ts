@@ -184,6 +184,20 @@ export const prestadorEn = {
     emailContactoLabel: 'Contact email',
     sitioWebLabel: 'Website',
     negocioGuardado: 'Done — your business is up to date.',
+    // S76-B1 — Espejo de es.ts · LOTE S76, GATE PENDIENTE
+    logoLabel: 'Your business logo',
+    logoAyudaSin: 'Without a logo, your business shows its initials.',
+    logoAyudaCon: 'It appears wherever your business signs.',
+    logoAgregar: 'Add your logo',
+    logoCambiar: 'Change logo',
+    logoQuitar: 'Remove logo',
+    logoTomarFoto: 'Take a photo',
+    logoGaleria: 'Choose from gallery',
+    logoGuardado: 'Done — your logo is saved.',
+    logoQuitado: 'Your business shows its initials again.',
+    logoErrorRed: "We couldn't upload the logo. Check your connection.",
+    logoErrorSubida: "We couldn't save the logo. Try again.",
+    logoPermisoCamara: 'We need permission to use the camera.',
   },
   // The E2E walk flow (S44, migrated in D-315 provider leg).
   cita: {
@@ -1333,6 +1347,9 @@ export const prestadorEn = {
     iniciarCta: 'Start consultation',
     iniciarDetalle: 'Dictate the note and save the medical record',
     mascotaFallback: 'the pet',
+    // S76-B2 — Espejo de es.ts · LOTE S76, GATE PENDIENTE
+    soloClinicoTitulo: 'The consultation belongs to the caregiver',
+    soloClinicoDetalle: 'Only a professional at this business can open and sign the clinical consultation.',
     errorTitulo: "We couldn't open the consultation",
     // S75-B16: no false retry promise (if there's no access, retrying
     // won't fix it — Ley 17.4).

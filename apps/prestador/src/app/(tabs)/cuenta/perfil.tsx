@@ -7,13 +7,15 @@
  * FIRMA: el solo-lectura DIGNO que dice su porqué en voz humana (el
  * nombre público espera su perfil público; la sede se cambia con el
  * equipo) — honestidad como comportamiento, no lápices muertos.
- * CHANEL: sin foto (identidad pública — la sesión del perfil público,
- * D-370, junto con el nombre), sin métricas, sin campos admin, sin
- * fiscal (regla 25), UN solo Guardar.
+ * CHANEL: sin métricas, sin campos admin, sin fiscal (regla 25), UN
+ * solo Guardar. (El "sin foto" original cedió en S76-B1: D-505 ordenó
+ * el productor del LOGO — el nombre público sigue esperando D-370.)
  *
- * Editable de la entidad: SOLO descripcion + contacto (whitelist del
- * wrapper actualizarPerfilPrestador — la RLS de prestadores es por
- * fila y no acota columnas; esta es la capa de producto). El estado
+ * Editable de la entidad: descripcion + contacto + EL LOGO (S76-B1,
+ * D-505 — whitelist del wrapper actualizarPerfilPrestador; la RLS de
+ * prestadores es por fila y no acota columnas; esta es la capa de
+ * producto). El logo guarda y no espera al botón Guardar: subir una
+ * imagen ES el acto (patrón SelectorAvatar), un tap y quedó. El estado
  * habla con la voz 7.13 de las portadas (misma key, mismo cómputo:
  * cuenta activa + ≥1 oferta activa + horarios).
  */
@@ -25,11 +27,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
   Campo,
+  Celda,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  Hoja,
+  LogoNegocio,
+  Separador,
   Texto,
+  capturarConCamara,
+  capturarDeGaleria,
   spacing,
   typography,
   useAviso,
@@ -44,10 +52,12 @@ import {
   obtenerMiPrestador,
   obtenerOfertasGroomingPropias,
   obtenerOfertasPaseoPropias,
+  resolverUrlLogoNegocio,
   type MiPrestador,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { quitarLogoNegocio, subirLogoNegocio } from '@/lib/subir-logo';
 
 // E.164 sin '+' (regla 28): validación SUAVE — se limpian espacios,
 // guiones y el '+' inicial; los dígitos son los que viajan.
@@ -77,6 +87,10 @@ export default function PerfilCuenta() {
   const [sitioWeb, setSitioWeb] = useState('');
   const [guardando, setGuardando] = useState(false);
   const [intento, setIntento] = useState(0);
+  // S76-B1 (D-505): el logo — PATH persistido; la URL se deriva al pintar.
+  const [logoPath, setLogoPath] = useState<string | null>(null);
+  const [hojaLogo, setHojaLogo] = useState(false);
+  const [subiendoLogo, setSubiendoLogo] = useState(false);
 
   useEffect(() => {
     let vigente = true;
@@ -92,6 +106,7 @@ export default function PerfilCuenta() {
       setEmail(rPerfil.data.email);
       const p = rPrestador.data;
       setPrestador(p);
+      setLogoPath(p.foto_url);
       setDescripcion(p.descripcion ?? '');
       setTelNegocio(p.telefono ?? '');
       setWhatsapp(p.whatsapp ?? '');
@@ -145,6 +160,46 @@ export default function PerfilCuenta() {
     }
     mostrar({ texto: t('miCuenta.perfilGuardado'), variante: 'exito' });
     router.back();
+  }
+
+  // S76-B1 (D-505): capturar y subir el logo. La Hoja ofrece cámara y
+  // galería PARES (patrón SelectorAvatar/verificación); el guardado es
+  // inmediato — subir la imagen ES el acto, sin esperar al Guardar.
+  async function capturarLogo(camara: boolean) {
+    setHojaLogo(false);
+    const r = camara
+      ? await capturarConCamara({ redimensionarA: 800, calidad: 0.8 })
+      : await capturarDeGaleria({ redimensionarA: 800, calidad: 0.8 });
+    if (r.tipo === 'cancelada') return;
+    if (r.tipo === 'permiso_denegado') {
+      mostrar({ variante: 'error', texto: t('miCuenta.logoPermisoCamara') });
+      return;
+    }
+    setSubiendoLogo(true);
+    const sub = await subirLogoNegocio({ uri: r.foto.uri });
+    setSubiendoLogo(false);
+    if (!sub.ok) {
+      mostrar({
+        variante: 'error',
+        texto: sub.causa === 'red' ? t('miCuenta.logoErrorRed') : t('miCuenta.logoErrorSubida'),
+      });
+      return;
+    }
+    setLogoPath(sub.path);
+    mostrar({ variante: 'exito', texto: t('miCuenta.logoGuardado') });
+  }
+
+  async function quitarLogo() {
+    setHojaLogo(false);
+    setSubiendoLogo(true);
+    const r = await quitarLogoNegocio();
+    setSubiendoLogo(false);
+    if (!r.ok) {
+      mostrar({ variante: 'error', texto: t('miCuenta.logoErrorSubida') });
+      return;
+    }
+    setLogoPath(null);
+    mostrar({ variante: 'exito', texto: t('miCuenta.logoQuitado') });
   }
 
   // La voz del oficio (Ley 3: el slug del motor jamás se pinta; un
@@ -218,6 +273,36 @@ export default function PerfilCuenta() {
           {prestador !== null && (
             <>
               <Texto variante="seccion">{t('miCuenta.negocioTitulo')}</Texto>
+
+              {/* S76-B1 (D-505): EL LOGO — la firma gana productor. La
+                  tesis de PRESENCIA no se cumple con iniciales: acá el
+                  monograma deja de ser permanente. Un tap → Hoja. */}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: spacing[4],
+                  marginBottom: spacing[2],
+                }}
+              >
+                <LogoNegocio
+                  nombre={prestador.nombre_comercial}
+                  logoUrl={resolverUrlLogoNegocio(logoPath)}
+                />
+                <View style={{ flex: 1, gap: spacing[2] }}>
+                  <Texto variante="apoyo">
+                    {logoPath !== null ? t('miCuenta.logoAyudaCon') : t('miCuenta.logoAyudaSin')}
+                  </Texto>
+                  <View style={{ alignSelf: 'flex-start' }}>
+                    <Boton
+                      variante="compacto"
+                      etiqueta={logoPath !== null ? t('miCuenta.logoCambiar') : t('miCuenta.logoAgregar')}
+                      cargando={subiendoLogo}
+                      onPress={() => setHojaLogo(true)}
+                    />
+                  </View>
+                </View>
+              </View>
 
               {/* El estado — la voz 7.13 de las portadas (misma key).
                   null honesto: si una pata no cargó, la fila no miente. */}
@@ -307,6 +392,42 @@ export default function PerfilCuenta() {
           <Boton etiqueta={t('miCuenta.guardar')} bloque cargando={guardando} onPress={() => void guardar()} />
         </ScrollView>
       )}
+
+      {/* S76-B1: cámara / galería PARES (patrón SelectorAvatar) + quitar
+          solo cuando hay logo (la puerta no ofrece lo que no existe). */}
+      <Hoja
+        visible={hojaLogo}
+        onCerrar={() => setHojaLogo(false)}
+        titulo={t('miCuenta.logoLabel')}
+        altura="contenido"
+      >
+        <View style={{ paddingBottom: insets.bottom }}>
+          <Celda
+            interactiva
+            accessibilityRole="button"
+            titulo={t('miCuenta.logoTomarFoto')}
+            onPress={() => void capturarLogo(true)}
+          />
+          <Separador />
+          <Celda
+            interactiva
+            accessibilityRole="button"
+            titulo={t('miCuenta.logoGaleria')}
+            onPress={() => void capturarLogo(false)}
+          />
+          {logoPath !== null && (
+            <>
+              <Separador />
+              <Celda
+                interactiva
+                accessibilityRole="button"
+                titulo={t('miCuenta.logoQuitar')}
+                onPress={() => void quitarLogo()}
+              />
+            </>
+          )}
+        </View>
+      </Hoja>
     </View>
   );
 }

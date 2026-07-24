@@ -41,13 +41,20 @@ export interface LogoNegocioProps {
   tamano?: number
 }
 
-/** Iniciales del nombre comercial: primera letra de las dos primeras
- *  palabras ("Clínica Aurora" → "CA"; "Aurora" → "A"). */
+/** Iniciales del nombre comercial: primera LETRA de las dos primeras
+ *  palabras que tengan una ("Clínica Aurora" → "CA"; "Aurora" → "A").
+ *  S76-B1 (D-505, hallazgo founder): iniciales son LETRAS — el primer
+ *  char crudo convertía "[DEMO S68] Clínica Aurora" en "[S" en su
+ *  pantalla. Una palabra sin letra (un marcador, un número) no aporta
+ *  inicial; un nombre sin ninguna letra cae a '' (la caja con fondo
+ *  sigue siendo cara válida — jamás crashea, jamás pinta basura). */
 function monograma(nombre: string): string {
-  const palabras = nombre.trim().split(/\s+/).filter(Boolean)
-  const primera = palabras[0]?.[0] ?? ''
-  const segunda = palabras[1]?.[0] ?? ''
-  return (primera + segunda).toUpperCase()
+  const iniciales = nombre
+    .trim()
+    .split(/\s+/)
+    .map((palabra) => palabra.match(/\p{L}/u)?.[0] ?? '')
+    .filter(Boolean)
+  return iniciales.slice(0, 2).join('').toUpperCase()
 }
 
 export function LogoNegocio({ nombre, logoUrl, tamano = 64 }: LogoNegocioProps) {

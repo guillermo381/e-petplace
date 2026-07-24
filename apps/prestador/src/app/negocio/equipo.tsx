@@ -51,6 +51,7 @@ import {
   obtenerMiCuentaComercial,
   obtenerMiPrestador,
   quitarRolEmpleado,
+  resolverUrlLogoNegocio,
   type EquipoNegocio,
   type MiembroEquipo,
   type MiPrestador,
@@ -223,7 +224,10 @@ export default function EquipoNegocioPantalla() {
                 el monograma honesto ES la cara (no hueco que gritar). ── */}
             <Tarjeta elevacion="reposo">
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-                <LogoNegocio nombre={pantalla.prestador.nombre_comercial} />
+                <LogoNegocio
+                  nombre={pantalla.prestador.nombre_comercial}
+                  logoUrl={resolverUrlLogoNegocio(pantalla.prestador.foto_url)}
+                />
                 <View style={{ flex: 1, gap: spacing[1] }}>
                   <Texto variante="titulo">{pantalla.prestador.nombre_comercial}</Texto>
                   {pantalla.prestador.ciudad !== null && pantalla.prestador.ciudad.length > 0 ? (

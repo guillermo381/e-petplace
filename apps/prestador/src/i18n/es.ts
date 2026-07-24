@@ -212,6 +212,21 @@ export const prestadorEs = {
     emailContactoLabel: 'Email de contacto',
     sitioWebLabel: 'Sitio web',
     negocioGuardado: 'Listo — tu negocio quedó al día.',
+    // S76-B1 — D-505: el logo del negocio (la firma gana productor) ·
+    // LOTE S76, GATE PENDIENTE
+    logoLabel: 'El logo de tu negocio',
+    logoAyudaSin: 'Sin logo, tu negocio se muestra con sus iniciales.',
+    logoAyudaCon: 'Aparece donde tu negocio firma.',
+    logoAgregar: 'Agregar tu logo',
+    logoCambiar: 'Cambiar el logo',
+    logoQuitar: 'Quitar el logo',
+    logoTomarFoto: 'Tomar una foto',
+    logoGaleria: 'Elegir de la galería',
+    logoGuardado: 'Listo — tu logo quedó guardado.',
+    logoQuitado: 'Tu negocio vuelve a mostrarse con sus iniciales.',
+    logoErrorRed: 'No pudimos subir el logo. Revisa tu conexión.',
+    logoErrorSubida: 'No pudimos guardar el logo. Prueba de nuevo.',
+    logoPermisoCamara: 'Necesitamos permiso para usar la cámara.',
   },
   // El flujo de atención E2E (S44, migrado en D-315 pata prestador).
   // VOZ EMOCIONAL APROBADA por founder (lote S55, es y en) — hunk de
@@ -1476,6 +1491,10 @@ export const prestadorEs = {
     // S75-B16 (censo): voseo → tuteo (L-148), misma pantalla que errorDetalle.
     iniciarDetalle: 'Dicta la nota y guarda la historia clínica',
     mascotaFallback: 'la mascota',
+    // S76-B2 — D-525: la red del gate de ausencia (deep-link/pila vieja).
+    // La voz dice PERMISO, jamás "revisá los datos" · LOTE S76, GATE PENDIENTE
+    soloClinicoTitulo: 'La consulta es de quien atiende',
+    soloClinicoDetalle: 'Solo un profesional del negocio puede abrir y firmar la consulta clínica.',
     errorTitulo: 'No pudimos abrir la consulta',
     // S75-B16 (L-148 tuteo + sin promesa falsa de reintento: si no hay
     // acceso, reintentar no lo arregla — Ley 17.4).
