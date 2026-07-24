@@ -89,6 +89,22 @@ que es exactamente el caso para el que nació. *(Literal: `LETRA_ROLES_EQUIPO`
 §2, verificación S74-A. Censo hoy: `dueño`×5, `recepcion`×1, `administrador`×0,
 `profesional`×0 — A0 punto 1.)*
 
+> **⚠️ ENMIENDA S76-A2bis (L-166 contra la mesa — cuarta vez en S76, la
+> primera DENTRO de un documento firmado):** *"la fila se concede al entrar"*
+> describe como VIVO lo que hoy es **PROPUESTA — no ocurre**. El relevamiento
+> B0.5 probó al literal que `aceptar_invitacion_pendiente_login` (el RPC de
+> aceptación) **NO toca `empleado_roles`**: solo pone `activo=true`. La única
+> fila `recepcion` del censo es **MANUAL**. Consecuencia real hoy: un empleado
+> aceptado por el camino real entra SIN su piso, y `obtener_contacto_reserva_cita`
+> **le rebota** — el lector que se construyó para ella. La frase vino de la
+> letra de S74 (`LETRA_ROLES_EQUIPO` §2), que traía su propio literal honesto
+> (*"hoy hay 0 filas recepcion"*) — la mesa la citó como estado vivo al
+> transponerla acá. **La cura es A2bis** (propuesta, gate del founder): el
+> INSERT de la fila `recepcion` dentro del RPC de aceptación (puerta única,
+> idempotente) — recién con ella la frase pasa a ser verdad. Es L-166: una
+> afirmación de nivel resumen que la fuente no sostiene, esta vez adentro de la
+> propia letra firmada.
+
 ---
 
 ## 2. LA LEY MADRE NUEVA — las dos varas
