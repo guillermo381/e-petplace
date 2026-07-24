@@ -51,6 +51,7 @@ import {
   obtenerCitaVetPorId,
   obtenerMiEmpleadoId,
   obtenerMiPrestador,
+  puedoAtenderClinico,
   obtenerPerfilMascota,
   obtenerPresupuestosPrestador,
   sedimentarNotaClinica,
@@ -159,6 +160,11 @@ export default function ConsultaVeterinaria() {
   // Contexto (cargado una vez en focus).
   const [cargando, setCargando] = useState(true);
   const [errorCarga, setErrorCarga] = useState(false);
+  // S76-B2 (D-525): la RED del gate de ausencia — la entrada ya no se
+  // muestra a quien no atiende, pero un deep-link o una pila vieja
+  // pueden aterrizar acá igual: la ruta dice su verdad con voz honesta
+  // (jamás "revisá los datos" — la voz que miente medida en campo).
+  const [sinRolClinico, setSinRolClinico] = useState(false);
   const [cuentaId, setCuentaId] = useState<string | null>(null);
   const [empleadoId, setEmpleadoId] = useState<string | null>(null);
   const [countryCode, setCountryCode] = useState('EC');
@@ -213,6 +219,16 @@ export default function ConsultaVeterinaria() {
       const cuentaComercialId = pr.data.cuenta_comercial_id;
       setCuentaId(cuentaComercialId);
       setCountryCode(pr.data.country_code ?? 'EC');
+      // S76-B2 (D-525): el gate de PRODUCTO en la ruta — el MISMO gate
+      // del motor (puedoAtenderClinico llama al helper de los 4 DEFINER
+      // D-490 fase 2, cero recomputo): esto evita ofrecer lo que rebota.
+      const atiende = await puedoAtenderClinico(pr.data.id);
+      if (!vigente) return;
+      if (!atiende) {
+        setSinRolClinico(true);
+        setCargando(false);
+        return;
+      }
       // La cita manda (D-488): si es legible, su mascota embebida PISA los
       // params; si no lo es Y no hay atajo, error honesto — jamás un uuid
       // vacío disparado a los lectores (el 22P02 del hallazgo).
@@ -428,6 +444,12 @@ export default function ConsultaVeterinaria() {
             <Esqueleto forma="bloque" alto={120} />
             <Esqueleto forma="bloque" alto={120} />
           </View>
+        ) : sinRolClinico ? (
+          <EstadoVacio
+            registro="seccion"
+            titulo={t('consulta.soloClinicoTitulo')}
+            descripcion={t('consulta.soloClinicoDetalle')}
+          />
         ) : errorCarga || perfil === null ? (
           <EstadoVacio registro="seccion" titulo={t('consulta.errorTitulo')} descripcion={t('consulta.errorDetalle')} />
         ) : fase === 'antes' ? (

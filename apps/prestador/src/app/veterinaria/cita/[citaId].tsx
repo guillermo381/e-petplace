@@ -43,7 +43,9 @@ import {
   obtenerCitaVetPorId,
   obtenerContactoReservaCita,
   obtenerMiCuentaComercial,
+  obtenerMiPrestador,
   obtenerPresupuestosPrestador,
+  puedoAtenderClinico,
   resolverUrlFoto,
   type CitaAgendaPaseo,
   type ContactoReservaCita,
@@ -81,6 +83,13 @@ export default function DetalleCitaVet() {
   // gate empleado_tiene_rol con recepción incluida). E4 generalizada: su
   // error se DICE — jamás se pinta como visita-sin-contacto.
   const [contacto, setContacto] = useState<ContactoReservaCita | 'cargando' | 'error'>('cargando');
+  // S76-B2 (D-525, verbatim founder S75: "la recepción no debería poder
+  // ni verlo"): GATE DE AUSENCIA de la entrada de atender. false hasta
+  // confirmar — ante la duda la acción NO se monta (jamás deshabilitada,
+  // jamás con candado: no existe para quien no atiende). Resuelve por
+  // MOTOR (puedoAtenderClinico = el mismo gate de los 4 DEFINER D-490);
+  // el flip por chip §6.2 es pedido de motor declarado en el wrapper.
+  const [puedeAtender, setPuedeAtender] = useState(false);
 
   // Estado de la cita → Insignia (misma voz que el HOY — Ley 17.3).
   const INSIGNIA_POR_ESTADO: Record<string, { estado: InsigniaEstado; etiqueta: string }> = {
@@ -113,6 +122,13 @@ export default function DetalleCitaVet() {
     }
     const fotoUrl = r.data.mascota?.foto_url ? await resolverUrlFoto(r.data.mascota.foto_url) : undefined;
     setPantalla({ estado: 'listo', cita: r.data, fotoUrl: fotoUrl ?? undefined });
+    // S76-B2 (D-525): ¿quién mira puede ATENDER? — no bloquea el detalle
+    // (Ley 13); mientras no se confirme, la entrada de atender no existe.
+    void (async () => {
+      const pr = await obtenerMiPrestador();
+      if (!pr.ok) return; // el gate cierra ante la duda (patrón S75-B)
+      setPuedeAtender(await puedoAtenderClinico(pr.data.id));
+    })();
     // el contacto de la visita — su fallo NO tumba el detalle (Ley 13),
     // pero se dice en su bloque (E4: error ≠ ausencia).
     setContacto('cargando');
@@ -273,7 +289,10 @@ export default function DetalleCitaVet() {
 
             {/* S70-B2-v2: LA CONSULTA (el Durante clínico) — la acción central
                 de la cita vet: dictado → nota estructurada → sedimento. */}
-            {cita.mascota && (
+            {/* S76-B2 (D-525): la acción de atender EXISTE solo para quien
+                atiende (titular o chip clínico) — gate de ausencia, jamás
+                candado. Para recepción, esta tarjeta no se monta. */}
+            {cita.mascota && puedeAtender && (
               <Tarjeta elevacion="reposo" relleno="ninguno">
                 <CeldaNavegacion
                   icono="veterinaria"
