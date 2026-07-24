@@ -43,6 +43,7 @@ import {
   obtenerDetalleMascotaPrestador,
   obtenerMiPrestador,
   obtenerMundoVeterinariaPropio,
+  puedoAtenderClinico,
   registrarAtencionMostrador,
   registrarCobroPresencial,
   registrarVacunaMostrador,
@@ -77,6 +78,12 @@ export default function AtencionMostrador() {
     | { fase: 'cargando' }
     | { fase: 'error' }
     | { fase: 'listo'; prestadorId: string; servicios: ServicioActivo[] };
+  // S76-B3 (D-524, la ley madre §2): RECIBIR es ventanilla (cualquiera
+  // activo — esta pantalla entera); FIRMAR la vacuna es clínico (solo
+  // quien atiende). false hasta confirmar — el selector de vacuna no se
+  // monta ante la duda (gate de ausencia, jamás candado). "Pendiente de
+  // firma" es DERIVABLE (walk-in médico sin su evento): cero estado nuevo.
+  const [firmaClinica, setFirmaClinica] = useState(false);
   const [carga, setCarga] = useState<Carga>({ fase: 'cargando' });
   const [reintento, setReintento] = useState(0);
   // S73-B ítem 10 (b): el vet tiene que VER al animal que atiende — la
@@ -107,11 +114,15 @@ export default function AtencionMostrador() {
         setCarga({ fase: 'error' });
         return;
       }
-      const [mundo, cat, vac, detalle] = await Promise.all([
+      const [mundo, cat, vac, detalle, firma] = await Promise.all([
         obtenerMundoVeterinariaPropio(pr.data.id),
         obtenerCatalogoVeterinaria(),
         obtenerCatalogoVacunas(),
         obtenerDetalleMascotaPrestador(mascotaId, pr.data.id),
+        // D-524: ¿quién mira puede FIRMAR? Su fallo NO tumba la carga —
+        // devuelve false y la firma simplemente no se ofrece (ventanilla
+        // sigue entera: recibir y cobrar no piden rol).
+        puedoAtenderClinico(pr.data.id),
       ]);
       if (!vigente) return;
       // Un fallo de CUALQUIERA pasa a error — antes: mundo caído se
@@ -123,6 +134,7 @@ export default function AtencionMostrador() {
         return;
       }
       setCatalogoVacunas(vac.data);
+      setFirmaClinica(firma);
       setNombreMascota(detalle.data.mascota.nombre);
       // La foto es PATH (S47): se firma por la frontera. Sin foto o si la
       // firma falla, la huella digna de AvatarMascota es la cara válida.
@@ -189,6 +201,9 @@ export default function AtencionMostrador() {
   // D-434: registra la vacuna si el servicio lo es y hay una elegida.
   // Devuelve false SOLO si el registro falló (frena el cierre).
   async function registrarVacunaSiCorresponde(): Promise<boolean> {
+    // D-524: sin firma clínica no hay nada que registrar (el selector no
+    // se montó); el walk-in queda como "pendiente de firma" derivable.
+    if (!firmaClinica) return true;
     if (!esVacunacion || citaId === null) return true;
     const codigo = vacunaSel && vacunaSel !== OTRA ? vacunaSel : undefined;
     const libre = vacunaSel === OTRA ? vacunaLibre.trim() : undefined;
@@ -320,8 +335,12 @@ export default function AtencionMostrador() {
           )
         ) : (
           <>
-            {/* D-434: el registrable de vacuna, solo en vacunación */}
-            {esVacunacion && (
+            {/* D-434: el registrable de vacuna, solo en vacunación.
+                S76-B3 (D-524, ley madre §2): SOLO para quien FIRMA —
+                recepción recibe y cobra (ventanilla) y la pantalla dice
+                el flujo de dos personas en una frase; el selector que
+                le rebotaría no existe para ella (Ley 23). */}
+            {esVacunacion && firmaClinica && (
               <View style={{ gap: spacing[2] }}>
                 <SelectorOpcion
                   etiqueta={t('atencionMostrador.vacunaLabel')}
@@ -342,6 +361,9 @@ export default function AtencionMostrador() {
                   />
                 )}
               </View>
+            )}
+            {esVacunacion && !firmaClinica && (
+              <Texto variante="apoyo">{t('atencionMostrador.vacunaPendienteFirma')}</Texto>
             )}
             <Texto variante="seccion">
               {t('atencionMostrador.cobroTitulo')}
