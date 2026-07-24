@@ -34,3 +34,19 @@
 
 Ambas anclas **SIN asterisco**: el WIP ajeno que cada sesión veía apareció
 DESPUÉS de su propio publish, con el árbol limpio al momento de bundlear.
+
+## El puente updateId ↔ group (para que el founder pueda verificar)
+
+El marcador de L-160 en pantalla renderiza `Updates.updateId` (el `id` del
+update **por plataforma**), NO el `group` que este canon declara. Son dos
+identificadores del MISMO publish. El puente, verificado con
+`eas update:view … --json` (no de memoria):
+
+- **CLIENTE** group `23c726eb` → updateId **`019f90c2`**-9838-… (ios
+  `…-794f-9a52-41cd00fa6a87` · android `…-71b6-bb6d-ac70ff42f513`) — **coincide
+  con lo que el founder ve en pantalla del cliente. OTA aplicado, confirmado.**
+- **PRESTADOR** group `60a88d2f` → updateId `019f9183`-… (confirma B).
+
+**Que este puente haya que escribirlo a mano es la deuda D-520** (abajo): el
+founder no puede cerrar el lazo de verificación con el camino que la casa
+declaró, porque el marcador muestra un id que el canon no registra.
