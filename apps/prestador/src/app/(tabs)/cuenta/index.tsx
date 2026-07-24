@@ -26,6 +26,7 @@ import {
   CeldaNavegacion,
   Hoja,
   Icono,
+  LogoNegocio,
   Separador,
   Tarjeta,
   Texto,
@@ -41,6 +42,7 @@ import {
   obtenerMiPrestador,
   obtenerOfertasGroomingPropias,
   obtenerOfertasPaseoPropias,
+  resolverUrlLogoNegocio,
 } from '@epetplace/api';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -53,16 +55,28 @@ import {
 } from '@/components/techo-oficio';
 import { useTraduccion } from '@/i18n';
 
-// squircle A10: radio proporcional 32% (la constante canónica vive en
-// AvatarMascota para mascotas; el avatar del NEGOCIO compone acá)
+// El lado del slot de identidad del header CD (S61-B12, firmado).
+// S76-B1.2: `RADIO_SQUIRCLE` MURIÓ con el monograma inline (Ley 37) —
+// el slot lo llena `LogoNegocio`, que trae su propia forma: caja
+// `radius.suave`, la forma canónica del logo de negocio en la casa.
+// DELTA VISIBLE DECLARADO AL GATE: el contenedor pasa de squircle 32%
+// (27) a suave (10). Se elige la COHERENCIA DEL COMPONENTE — el mismo
+// logo se ve idéntico en las tres superficies (portada, equipo,
+// invitación); un squircle acá le daría dos formas al mismo objeto en
+// la misma app. El squircle 32% sigue siendo de las CARAS (Ley 21b,
+// AvatarMascota), y un logo no es una cara. Reversión barata si el
+// founder prefiere la forma vieja: una prop de radio en el componente.
 const LADO_AVATAR = 84;
-const RADIO_SQUIRCLE = Math.round(LADO_AVATAR * 0.32);
 
 type Identidad = {
   nombre: string;
   ciudad: string | null;
   oficio: 'ambos' | 'paseo' | 'grooming' | null;
   hitos: string[];
+  /** S76-B1.2 (D-505): el PATH del logo — la portada lo pinta si existe.
+   *  La lectura ya viene en `obtenerMiPrestador`; lo que faltaba era
+   *  que esta pantalla lo mirara. */
+  logoPath: string | null;
 };
 
 
@@ -109,6 +123,7 @@ export default function Cuenta() {
           oficio:
             paseoActivo && groomingActivo ? 'ambos' : paseoActivo ? 'paseo' : groomingActivo ? 'grooming' : null,
           hitos,
+          logoPath: prestador.data.foto_url,
         });
       })();
       return () => {
@@ -186,21 +201,23 @@ export default function Cuenta() {
 
           {identidad !== null && (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
-              <View
-                style={{
-                  width: LADO_AVATAR,
-                  height: LADO_AVATAR,
-                  borderRadius: RADIO_SQUIRCLE,
-                  borderCurve: 'continuous',
-                  backgroundColor: VIDRIO_OFICIO,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Text style={{ fontFamily: typography.family.sans.light, fontSize: 34, color: palette.light0 }}>
-                  {identidad.nombre.replace(/\[.*?\]\s*/, '').charAt(0)}
-                </Text>
-              </View>
+              {/* S76-B1.2 (D-505, gate del founder): LA PORTADA MOSTRABA
+                  UN MONOGRAMA QUE NUNCA PODÍA SER EL LOGO. Este slot era
+                  un View inline con la inicial (S61-B12, tres sesiones
+                  antes de que LogoNegocio existiera): por eso el founder
+                  subió su logo CUATRO VECES y la pantalla le dijo que no
+                  había pasado nada. No era refresco — era una superficie
+                  que jamás leyó `foto_url`. El slot NO cambia (mismo lado
+                  84, mismo squircle, mismo vidrio): cambia su CONTENIDO
+                  cuando el dato existe, como todo avatar de la casa. El
+                  logo se CONTIENE (decisión de mesa S76: una cara llena
+                  un círculo, una marca se destruye si se recorta). */}
+              <LogoNegocio
+                nombre={identidad.nombre}
+                logoUrl={resolverUrlLogoNegocio(identidad.logoPath)}
+                tamano={LADO_AVATAR}
+                superficie="muro"
+              />
               <View style={{ flex: 1, gap: spacing[1.5] }}>
                 <Text
                   accessibilityRole="header"

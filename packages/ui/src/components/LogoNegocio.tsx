@@ -27,6 +27,7 @@
 import { Image, type ImageSource } from 'expo-image'
 import { Text, View } from 'react-native'
 
+import { palette } from '../tokens/palette'
 import { typography } from '../tokens/typography'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
@@ -39,7 +40,21 @@ export interface LogoNegocioProps {
   logoUrl?: string | number | ImageSource | null
   /** Lado de la caja en px. Default 64. */
   tamano?: number
+  /** S76-B1.2 — SOBRE QUÉ SUPERFICIE vive (el material, no el color):
+   *  'clara' (default) = sobre papel/tarjeta, caja `bg.overlay` y
+   *  monograma en text.secondary · 'muro' = sobre el MURO DE OFICIO
+   *  (§15b.2, tealDark/tealDarkNoche): la caja pasa a VIDRIO OSCURO y
+   *  el monograma a papel PLENO — las dos reglas medidas del muro
+   *  (S61-B12: papel 7.37 sobre el vidrio; el vidrio claro caía a
+   *  4.15 y por eso NO se usa acá). El vidrio se define ADENTRO, no
+   *  se recibe: la app jamás pasa un color crudo (Ley 1). */
+  superficie?: 'clara' | 'muro'
 }
+
+/** El vidrio OSCURO del muro de oficio — mismo material que el techo
+ *  del prestador (S61-B12). Vive acá para que ningún consumidor pase
+ *  un rgba a mano. */
+const VIDRIO_MURO = 'rgba(0,0,0,0.18)'
 
 /** Iniciales del nombre comercial: primera LETRA de las dos primeras
  *  palabras que tengan una ("Clínica Aurora" → "CA"; "Aurora" → "A").
@@ -47,9 +62,15 @@ export interface LogoNegocioProps {
  *  char crudo convertía "[DEMO S68] Clínica Aurora" en "[S" en su
  *  pantalla. Una palabra sin letra (un marcador, un número) no aporta
  *  inicial; un nombre sin ninguna letra cae a '' (la caja con fondo
- *  sigue siendo cara válida — jamás crashea, jamás pinta basura). */
+ *  sigue siendo cara válida — jamás crashea, jamás pinta basura).
+ *  S76-B1.2 (copiar-al-vecino): los MARCADORES ENTRE CORCHETES se
+ *  descartan ANTES — "[DEMO S68] Clínica Aurora" da "CA", jamás "DS".
+ *  El header CD del prestador ya lo resolvía así desde S61-B12 y este
+ *  componente lo ignoraba: la casa tenía la respuesta, el componente
+ *  nuevo la repitió mal. */
 function monograma(nombre: string): string {
   const iniciales = nombre
+    .replace(/\[.*?\]/g, ' ')
     .trim()
     .split(/\s+/)
     .map((palabra) => palabra.match(/\p{L}/u)?.[0] ?? '')
@@ -57,8 +78,9 @@ function monograma(nombre: string): string {
   return iniciales.slice(0, 2).join('').toUpperCase()
 }
 
-export function LogoNegocio({ nombre, logoUrl, tamano = 64 }: LogoNegocioProps) {
+export function LogoNegocio({ nombre, logoUrl, tamano = 64, superficie = 'clara' }: LogoNegocioProps) {
   const { theme } = useTheme()
+  const sobreMuro = superficie === 'muro'
   return (
     <View
       accessibilityRole="image"
@@ -67,7 +89,7 @@ export function LogoNegocio({ nombre, logoUrl, tamano = 64 }: LogoNegocioProps) 
         width: tamano,
         height: tamano,
         borderRadius: radius.suave,
-        backgroundColor: theme.bg.overlay,
+        backgroundColor: sobreMuro ? VIDRIO_MURO : theme.bg.overlay,
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
@@ -85,9 +107,13 @@ export function LogoNegocio({ nombre, logoUrl, tamano = 64 }: LogoNegocioProps) 
       ) : (
         <Text
           style={{
-            fontFamily: typography.family.sans.medium,
-            fontSize: Math.round(tamano * 0.32),
-            color: theme.text.secondary,
+            // Sobre el MURO el monograma es la identidad grande de una
+            // portada (DM Sans light, la voz del header CD); sobre papel
+            // es una marca chica de fila (medium). El ratio 0.40 del muro
+            // reproduce el tamaño firmado en S61-B12 (84 × 0.40 ≈ 34).
+            fontFamily: sobreMuro ? typography.family.sans.light : typography.family.sans.medium,
+            fontSize: Math.round(tamano * (sobreMuro ? 0.4 : 0.32)),
+            color: sobreMuro ? palette.light0 : theme.text.secondary,
           }}
         >
           {monograma(nombre)}
