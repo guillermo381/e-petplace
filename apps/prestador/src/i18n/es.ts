@@ -1419,7 +1419,7 @@ export const prestadorEs = {
     enviarFamilia: 'Enviar a la familia',
     aprobarPresencial: 'Registrar aprobación presencial',
     enviadoFamilia: 'Presupuesto enviado a la familia.',
-    aprobadoPresencial: 'El procedimiento quedó aprobado con precio congelado — coordiná el día con la familia.',
+    aprobadoPresencial: 'El procedimiento quedó aprobado con precio congelado — coordina el día con la familia.',
     // Relectura en el detalle de cita (cura de gate)
     listaTitulo: 'Presupuestos de {{nombre}}',
     estadoBorrador: 'Borrador',
@@ -1435,7 +1435,7 @@ export const prestadorEs = {
     vacioDetalle: 'Cuando armes un presupuesto desde una atención, va a aparecer acá.',
     sinItems: 'Presupuesto',
     error: 'No pudimos cargar el movimiento.',
-    errorDetalle: 'Probá de nuevo en un momento.',
+    errorDetalle: 'Prueba de nuevo en un momento.',
   },
   // S70-B2-v2: la pantalla "Fijar fecha" (coordinar el procedimiento, D-439)
   coordinar: {
@@ -1449,7 +1449,7 @@ export const prestadorEs = {
     confirmar: 'Confirmar fecha',
     exito: 'Listo. Coordinaste la cita de {{mascota}}.',
     error: 'No pudimos cargar los datos.',
-    errorDetalle: 'Probá de nuevo en un momento.',
+    errorDetalle: 'Prueba de nuevo en un momento.',
   },
   // S70-B2-v2: el HANDSHAKE — autorización de la familia en el mostrador
   autorizar: {
