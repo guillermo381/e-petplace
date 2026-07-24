@@ -188,6 +188,41 @@ identidad):**
 
 ---
 
+## ═══ B16/B17/B18 — strings rotos del gate del founder ═══
+
+**B16 (curado):** `consulta.errorDetalle` era voseo + reintento falso
+(*"Revisá tu negocio... y probá de nuevo"*) → **"Puede que no tengas
+acceso a esta mascota."** (tuteo, sin promesa de reintento — si no hay
+acceso, reintentar no lo arregla). De paso, `consulta.iniciarDetalle`
+(voseo *"Dictá... guardá"*, misma pantalla) → tuteo.
+
+**Censo de voseo (mesa B16):** mis strings S75 (`invitacion.*` +
+`sesion.empleado*`) están **LIMPIAS (tuteo)**. **Voseo PRE-EXISTENTE
+encontrado en passing (NO mío, para la mesa — cheap, cabe en el OTA de
+cierre si se quiere barrer):** `veterinaria.aprobadoPresencial`
+(*"coordiná"*) · los `errorDetalle: 'Probá de nuevo...'` del namespace
+vet · y el wrapper `veterinaria-nota-clinica.ts` (*"probá"*, *"tenés"*).
+
+**B17 (curado):** *"Te invitaron como {{nombre}}"* se leía como ROL
+(founder: *"Luos no es un rol"*). **Fuente hallada con literal:**
+`{{nombre}}` = `datos.nombreInvitado` = `prestador_empleados.nombre` — el
+nombre que el TITULAR tipeó al invitar (**dato de la fila, NO
+interpolación rota, NO key mal resuelta**); la invitación v1 no lleva rol
+(E4). Reescrito → **"Tu nombre en el equipo: {{nombre}}"** (claramente un
+nombre, no un cargo). *(Gate de copy del founder: si prefiere quitar la
+línea, es un toque — el dato es marginal.)*
+
+**B18 — DEUDA DECLARADA (no cura, es LETRA):** la app le ofrece
+**"Registrar atención"** en HOY a un empleado que NO puede ejecutarla
+(captura del founder). Es **Ley 23 rota** — la puerta ofrece lo que va a
+rechazar. La cura NO es un parche: exige **definir qué PUEDE hacer
+recepción en HOY** (letra de producto — recepción opera el mostrador
+§7bis, pero "Registrar atención" clínica no es suyo). **Candidata de
+deuda (a que A la numere, 76d):** *gate de "Registrar atención" en HOY
+por rol — recepción ve el mostrador pero no la atención clínica; el menú
+de HOY se compone por lo que el rol PUEDE hacer.* Referencia: captura del
+founder S75 (HOY con "Registrar atención" visible para recepción).
+
 ## ═══ ACTUALIZACIÓN (segunda tanda de mesa) ═══
 
 ### LAS 4 CLASE 1 — EJECUTADAS (typecheck api+prestador verde)

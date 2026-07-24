@@ -64,7 +64,10 @@ export const prestadorEn = {
   invitacion: {
     titulo: '{{negocio}} added you to their team',
     tituloSinNombre: 'You were added to a team',
-    invitadoComo: 'You were invited as {{nombre}}',
+    // S75-B17: was 'You were invited as {{nombre}}' — "as" read as a ROLE
+    // (founder: "Luos is not a role"). {{nombre}} is the name the owner
+    // typed when inviting (row data); v1 invitations carry no role.
+    invitadoComo: 'Your name on the team: {{nombre}}',
     entrar: 'Join the team',
     errorYaActivado: 'This invitation is no longer available.',
     errorNoEsTuya: 'This invitation is not for your account.',
@@ -1331,7 +1334,9 @@ export const prestadorEn = {
     iniciarDetalle: 'Dictate the note and save the medical record',
     mascotaFallback: 'the pet',
     errorTitulo: "We couldn't open the consultation",
-    errorDetalle: 'Check your business and your access to this pet, then try again.',
+    // S75-B16: no false retry promise (if there's no access, retrying
+    // won't fix it — Ley 17.4).
+    errorDetalle: 'You may not have access to this pet.',
     sinRegistros: 'no records',
     requerido: 'Required',
     perfilTitulo: "{{mascota}}'s profile",

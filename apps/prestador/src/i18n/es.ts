@@ -73,7 +73,12 @@ export const prestadorEs = {
   invitacion: {
     titulo: '{{negocio}} te sumó a su equipo',
     tituloSinNombre: 'Te sumaron a un equipo', // enmienda (b): nombre null
-    invitadoComo: 'Te invitaron como {{nombre}}',
+    // S75-B17: era 'Te invitaron como {{nombre}}' — el "como" se leía como
+    // ROL (el founder: "Luos no es un rol"). {{nombre}} es el nombre que el
+    // titular tipeó al invitar (dato de la fila, no interpolación rota); la
+    // invitación v1 NO lleva rol (E4). Reescrito para que sea claramente un
+    // NOMBRE, no un cargo.
+    invitadoComo: 'Tu nombre en el equipo: {{nombre}}',
     entrar: 'Entrar al equipo',
     // rebotes del aceptador (clase ok:false), voz humana por código (Ley 3)
     errorYaActivado: 'Esta invitación ya no está disponible.',
@@ -1468,10 +1473,13 @@ export const prestadorEs = {
   consulta: {
     titulo: 'Consulta',
     iniciarCta: 'Iniciar consulta',
-    iniciarDetalle: 'Dictá la nota y guardá la historia clínica',
+    // S75-B16 (censo): voseo → tuteo (L-148), misma pantalla que errorDetalle.
+    iniciarDetalle: 'Dicta la nota y guarda la historia clínica',
     mascotaFallback: 'la mascota',
     errorTitulo: 'No pudimos abrir la consulta',
-    errorDetalle: 'Revisá tu negocio y tu acceso a esta mascota, y probá de nuevo.',
+    // S75-B16 (L-148 tuteo + sin promesa falsa de reintento: si no hay
+    // acceso, reintentar no lo arregla — Ley 17.4).
+    errorDetalle: 'Puede que no tengas acceso a esta mascota.',
     sinRegistros: 'sin registros',
     requerido: 'Obligatorio',
     perfilTitulo: 'Perfil de {{mascota}}',
