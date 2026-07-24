@@ -24,6 +24,19 @@
   CLASE 1** (el swap R2→R1: `consulta/[citaId]`, `coordinar/[citaId]`,
   `movimiento`, `mostrador/autorizar`).
 
+**PRESTADOR (cierre S75) — group `b00378e0-1134-4e6d-854a-2545763b18bb`**
+(supersede a `60a88d2f`)
+- **Ancla `4cad02a`** · updateId **`019f9201`**-… (ios `…-74a7-862f-c9f9eaf57d1c` ·
+  android `…-71ae-9ee0-13d2ee954ce8`, verificado con `eas update:view`) · runtime
+  1.0.2 · android + ios.
+- **Carga:** la **cura A25** — la consulta vet ABRE para el empleado
+  (`obtenerMiEmpleadoId`: el tratante es quien atiende, no el titular).
+- **⚠️ NO VERIFICA D-490 (A33).** Este OTA hace que el empleado ABRA la consulta
+  — correcto y necesario —, pero la ESCRITURA clínica sin rol sigue abierta en
+  el motor (`sedimentar_nota_clinica` es DEFINER, salta la RLS; fase 2 propuesta
+  sin aplicar). **Jamás se anuncia como "D-490 verificada".** D-490 queda 🔴
+  REABIERTA hasta la fase 2 (ver `2026-07-24-s75a-d490-agujero-definer.md`).
+
 ## El asterisco — verificado retroactivamente (A24), sin adornar
 
 > ancla `4004581` (confirmado por `gitCommitHash` del registro EAS); estado del
