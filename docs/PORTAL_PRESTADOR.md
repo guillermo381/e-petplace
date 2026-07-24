@@ -2750,7 +2750,30 @@ Ese es el éxito del documento. Cumplirlo es trabajo de los meses y años que vi
 
 ---
 
-## 14. El equipo del negocio — LETRA_EQUIPO (v2, S73→S74)
+## 14. El equipo del negocio — LETRA_EQUIPO (v2, S73→S74; enmiendas S75)
+
+> **⚠️ ENMIENDAS S75 (contra el literal del arco de equipo, verificadas — L-158).**
+> **(1) LA PUERTA SE ABRIÓ:** el arco quedó DESCONECTADO en S74 (D-512); S75 lo
+> conectó — `obtenerMiPrestador` (R1) resuelve al empleado por vínculo activo, y
+> con eso el empleado ENTRA a la app y ATIENDE. Un empleado ya no es "una persona
+> = su negocio"; el resolvedor entiende de empleados.
+> **(2) LA ESCRITURA DE NEGOCIO ES TITULAR-ONLY (no "cualquier empleado"):** el
+> censo S75 (`2026-07-23-s75a-censo-d513-gestion-negocio.md`) probó que servicios,
+> horarios, precios, zonas, tallas, programas y perfil se escriben SOLO por
+> `prestadores.user_id = auth.uid()` (el titular). El **administrador** de esta
+> letra §14bis **todavía NO puede gestionar el negocio** — el motor es MÁS
+> restrictivo que la letra; ampliarlo a `titular OR administrador` es **arco v2**
+> (D-513, con el nudo de las franjas por-persona y el borde de un empleado en dos
+> negocios).
+> **(3) EL MOTOR DE AGENDA ES CIEGO AL ROL:** las policies `cita_*` gatean por
+> `activo`, jamás por `empleado_roles` — no distinguen recepción de profesional
+> (D-522). La superficie tampoco (HOY ofrece "Registrar atención" a quien no
+> puede — D-521). La composición por rol es arco v2.
+> **(4) EL MOSTRADOR DE VACUNA PASA A DOS PERSONAS:** con el gate clínico por rol
+> (D-490 fase 2), recepción **recibe** (`registrar_atencion_mostrador`, intacta)
+> pero **no firma** la vacuna (`registrar_vacuna_mostrador` exige dueño/
+> profesional — la ley madre: acceso clínico del CHIP, jamás del cargo). El
+> mostrador es ahora un flujo de dos personas sin diseñar (D-524).
 
 > **Depositada en la transposición S73→S74 (22 Jul 2026), con la palabra del
 > founder.** La letra de mesa se escribió ANTES de que el motor se construyera;

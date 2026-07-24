@@ -1,10 +1,10 @@
-# S75-A · ACTA DE CIERRE (BORRADOR — el cierre formal espera el gate del founder, L-163)
+# S75-A · ACTA DE CIERRE (CERRADA POR PALABRA DEL FOUNDER, 24 Jul 2026)
 
-> **NO es el cierre.** El cierre formal (CLAUDE.md con su commit, L-163) espera
-> UN gate en dispositivo: recepción intenta escribir la consulta en el teléfono
-> del founder → rebota (la confirmación de D-490 por camino real). Este borrador
-> se deposita para que ese cierre sea transcripción, no arqueología. Sin
-> maquillar (patrón del acta de B).
+> **CERRADA por palabra del founder (S75-A53).** El founder cerró S75 sin correr
+> el gate en dispositivo del rebote de D-490 (probó entrando y tipeando, no tocó
+> guardar). D-490 queda CERRADA por su palabra; el toque del rebote es el primer
+> ítem de S76 (confirmación, no verificación — la verificación por camino real
+> ya está). Sin maquillar (patrón del acta de B).
 
 ## 0. LO QUE S75-A HIZO, EN UNA LÍNEA
 

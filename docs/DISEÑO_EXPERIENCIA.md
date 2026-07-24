@@ -379,9 +379,24 @@ vive en la descripción del presupuesto. La regla de qué mostrar:
   orden se cura en un solo lugar. Consumidores S72-A: `veterinaria-atencion.ts`
   (agenda vet) y `citasMascota.ts` (`/citas/[mascotaId]` del dueño).
 
-### 10ter.1 — COROLARIO: N CITAS EN **PONTE AL DÍA** (S74, dictado founder — superficie FIRMADA)
+### 10ter.1 — COROLARIO: N CITAS — LA REGLA FIRMADA, LA SUPERFICIE RECHAZADA EN GATE (S74 firma · S75 enmienda)
 
-**Letra firmada (founder S74):** **"Si la mascota tiene más de una cita activa,
+> **⚠️ ENMIENDA S75 (gate del founder en dispositivo) — LA REGLA SE MANTIENE, LA
+> SUPERFICIE VUELVE A M1.** La regla de colapso (abajo) está firme y se
+> construyó en S75 (Ponte al día, `4b446a6`: agendadas colapsadas por servicio,
+> cero motor). **PERO el founder RECHAZÓ la composición en el gate en dispositivo**
+> — vuelve a boceto (M1). **El porqué, declarado sin maquillar: la decisión de
+> mesa S74 que movió esta superficie de la ficha de mascota a "Ponte al día" se
+> apoyó en un argumento EQUIVOCADO** — dio por fijo que *"en la ficha de mascota
+> la regla sería un NO-OP porque esa superficie ya muestra UNA sola cita"*,
+> cuando el pedido del founder era justamente que la ficha **desplegara VARIAS**
+> (plural, *"Ver sus citas"*). El NO-OP era la premisa falsa, no la ficha. **La
+> superficie definitiva de N citas se re-bocetea en S76** contra el pedido real
+> (el plural en la ficha), no contra "Ponte al día como único hogar". La regla
+> de colapso viaja intacta a ese boceto; lo que se rehace es DÓNDE y CÓMO se
+> muestran las N. Origen: S75 (gate founder + la mesa mirándose el error de S74).
+
+**Letra firmada (founder S74) — LA REGLA, INTACTA:** **"Si la mascota tiene más de una cita activa,
 se MUESTRAN. Si varias son del MISMO servicio, solo la PRÓXIMA EN EL TIEMPO."**
 *(El founder confirmó "la más próxima en el tiempo", no la de creación más
 nueva — y la voz dice **próxima**, jamás "más reciente": Ley 17.3, es lo que el

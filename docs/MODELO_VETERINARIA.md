@@ -303,6 +303,19 @@ existe cuando el cobro pase por la plataforma (línea futura, con Kushki).
 Migración S69-A1bis (`20260718174500`): `registrar_atencion_mostrador`
 + `registrar_cobro_presencial`, L-140 de nacimiento.
 
+> **⚠️ ENMIENDA S75 al §7 (gate clínico por rol, D-490 fase 2) — EL MOSTRADOR
+> ES AHORA UN FLUJO DE DOS PERSONAS.** Con el gate de rol aplicado a los
+> escritores clínicos DEFINER (`20260724034110`), la **recepción RECIBE pero no
+> FIRMA lo clínico**: `registrar_atencion_mostrador` (crear el walk-in) queda
+> intacta y abierta a todo empleado activo (recibir es del piso, A3.4), pero
+> `registrar_vacuna_mostrador` (que escribe `evento_vacuna_aplicada`) ahora exige
+> `dueño`/`profesional` — **una vacuna es clínica, y la ley madre reserva el
+> acto clínico al CHIP, jamás al cargo** (`LETRA_ROLES_EQUIPO_S74`). Consecuencia:
+> el mostrador de vacunación pasa a ser un flujo de **dos personas** (recepción
+> recibe · un chip firma) y **eso no está diseñado** — hoy la pantalla ofrece
+> registrar la vacuna a quien esté en el mostrador, y a recepción le rebota
+> (D-524, S76). No es regresión: es la ley madre haciéndose cumplir.
+
 ## 7bis. EL HANDSHAKE DEL MOSTRADOR (letra founder, S70)
 
 El mostrador §7 resuelve al cliente que **no existe** (alta fantasma).
