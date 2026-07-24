@@ -91,12 +91,17 @@ inactivas (Satori) ni las 3 legacy. El founder NO comerá rebote.
 > ella, el paso 3 atrapa al empleado). Negocio de prueba: **Aurora**
 > (opción B) salvo que la mesa siembre Wizard (opción A).
 
-**LAS TRES IDENTIDADES:**
+**LAS TRES IDENTIDADES (fijas, mesa S75):**
 - 🐾 **PET PARENT** — `guillo381+8@gmail.com` (la de Thor y Zeus, 2
   mascotas). Pasos 1 y 5.
-- 🏢 **TITULAR** — `demo-vet@epetplace.dev` (Aurora) *[o la cuenta del
-  founder si se siembra Wizard]*. Pasos 2 y 4a.
+- 🏢 **TITULAR** — `demo-vet@epetplace.dev` (Aurora; el founder trae la
+  clave). Pasos 2 y 4a.
 - 👤 **EMPLEADO** — `guillo381+9@gmail.com`. Pasos 3 y 4b.
+
+**RITMO: 4 cambios de sesión** (titular → +9 → titular → +9). La
+ventana de equipo filtra `.activo` (B9): el rol NO se puede asignar antes
+de que +9 acepte, así que titular y empleado se turnan. No es bug — es
+el flujo v1.
 
 **(0) MARCADOR — antes de evaluar nada (L-138/L-160).** En **las dos**
 apps (cliente + prestador): tab **Cuenta → el pie**. Verificá el id del
@@ -108,23 +113,21 @@ Explorar → veterinaria → **Aurora** → una consulta → reservar y pagar
 (simulado). Resultado: una cita vet firme de una mascota de +8 en Aurora.
 
 **(2) TITULAR invita.** App **prestador**, cuenta `demo-vet@epetplace.dev`.
-Negocio → **Equipo** → *Invitar* → email **`guillo381+9@gmail.com`** +
-un nombre. **Pre-check hecho (B7): pasa las 3 defensas → NO rebota.**
-Resultado: +9 queda como fila inactiva de Aurora.
+Negocio → **Equipo**. **Vas a ver UNA sola persona: Dra. Aurora (vos) —
+es lo esperado, Aurora no tiene siembra (B14).** → *Invitar* → email
+**`guillo381+9@gmail.com`** + un nombre. **Pre-check hecho (B7 + B14):
+pasa las 3 defensas → NO rebota.** Resultado: +9 queda como fila inactiva
+de Aurora (aún NO aparece en la lista — la lista filtra activos).
 
-**(3) EMPLEADO acepta.** App **prestador**, cuenta `guillo381+9`.
-- **Si la clave de +9 no está a mano:** en la pantalla de login, *"olvidé
-  mi contraseña"* → el reset de **Supabase Auth es el único email que el
-  stack manda de verdad** (D-508), y el alias `+9` cae en el buzón del
-  founder. Que esto NO frene el circuito.
+**(3) EMPLEADO acepta.** App **prestador**, cuenta `guillo381+9`. El
+founder trae la clave (es su cuenta). — *nueva sesión (2ª de 4).*
 - Login → el guard detecta la invitación inactiva y **redirige solo a
   `/invitacion`** → en pantalla: **el logo/monograma de Aurora** + *"Aurora
   te sumó a su equipo"* + *"Te invitaron como {nombre}"* + botón **"Entrar
   al equipo"**.
-- Tap "Entrar al equipo" → **(con la cura del Hallazgo 1)** entra a las
-  tabs: ve **HOY / Mascotas / Cuenta**, **SIN NEGOCIO** (no tiene rol aún
-  — mi gate B2). *(Sin la cura, queda atrapado en "acceso no disponible"
-  — por eso la cura es precondición.)*
+- Tap "Entrar al equipo" → **entra a las tabs** (cura H1 EJECUTADA): ve
+  **HOY / Mascotas / Cuenta**, **SIN NEGOCIO** (no tiene rol aún — gate
+  B2). *(Aún NO ve datos del negocio: el rol llega en 4a.)*
 
 **(4a) TITULAR asigna recepción.** App **prestador**, `demo-vet`.
 Equipo → la fila de +9 → asignar rol **recepción**.
@@ -226,28 +229,26 @@ aceptar → 4 sesiones** (invitar → aceptar → asignar recepción → operar)
 Construir el pre-asignado sería feature nueva, fuera de alcance S75. **Se
 declara para que el founder no lo lea como bug a mitad del circuito.**
 
-### 🔴 B10 — AURORA NO SE PUEDE ABRIR (grep definitivo, con literal)
-- **(a) CERO clave documentada** de `demo-vet@epetplace.dev` en
-  `supabase/` · `docs/` · `scripts/`. El seed dice *"el founder crea el
-  user demo en Supabase Auth"* — la clave vive solo ahí, irrecuperable
-  del repo.
-- **(b) `@epetplace.dev` = dominio placeholder demo**, sin buzón real →
-  **sin reset posible**.
-- **Consecuencia:** Aurora (el negocio del gate que fijó A15) solo se abre
-  si el founder RECUERDA la clave. Sin reset, es una dependencia frágil.
+### B10 → RESUELTO: AURORA CONFIRMADA (correcciones de mesa B12/B13)
+- El grep dio **cero clave documentada** de `demo-vet@epetplace.dev` y
+  `@epetplace.dev` es dominio demo sin buzón → sin reset por mail. PERO
+  **el founder TIENE la clave** (la puso al crear el user; es dueño del
+  proyecto Supabase — la fija desde el panel, no necesita buzón). **Aurora
+  se abre. No hay nada que declarar de acceso.**
+- **`Satori` DESCARTADA (corrección B12 — mi recomendación previa era
+  FALSA):** no falla por geografía (D-518) sino por **`cc.estado='activa'`
+  en el filtro de `_vet_ofertas_cobrables`** — la cuenta comercial de
+  Satori está en **`pendiente_validacion`** (literal de A15), así que su
+  oferta vet NO es cobrable y `+8` no podría reservar. Activarla tocaría
+  el estado comercial de una **empresa REAL del founder** — no se hace
+  por un gate. **El negocio del gate es AURORA, firme.**
 
-### EL NEGOCIO DEL CIRCUITO — RECOMENDACIÓN vs A15 (a mesa/founder)
-A15 fijó **Aurora**; B10 muestra que su titular es frágil de abrir.
-**`Satori Latam sas` cumple 3/4 con ventaja decisiva** (verificado):
-estado=`activo` · **2 servicios vet activos** · titular
-**`satorilatam@gmail.com` = buzón REAL del founder** (reset funciona,
-D-508) · Quito / EC. **La (4ª — visibilidad para `+8` en explorar/vet —
-queda a verificar en el flujo del cliente, territorio A.**
-- **CAVEAT declarado (mesa punto c):** el equipo de Satori muestra sus
-  **5 filas inactivas** (test@test.com · nuevo_test2 · **guillo381@gmail.com**
-  · dianita · diana23434) — el founder las verá al abrir Equipo; NO es
-  bug, son invitaciones legacy.
-- **Decisión de mesa/founder:** Aurora (si el founder tiene la clave demo)
-  o Satori (login robusto, con las 5 inactivas a la vista). Si cambia a
-  Satori, el pedido B8 se reescribe: reservar CON Satori, invitar DESDE
-  Satori. Las tres identidades (+8 · titular · +9) NO cambian.
+### B14 — QUÉ VERÁ EL FOUNDER EN EL EQUIPO DE AURORA (con literal)
+`prestador_empleados` de Aurora (`de680000…e5`): **UNA sola fila — la
+titular** (`[DEMO S68] Dra. Aurora`, `demo-vet@epetplace.dev`, activa).
+**Cero inactivas, cero legacy, cero siembra.** Las 5 filas inactivas de
+la DB son de **Satori**, no de Aurora. → El founder al abrir Equipo se
+verá **solo a sí mismo**; no hay historia vieja que leer como bug.
+**Contra-verificación de invitar:** `+9` no tiene fila en Aurora (Aurora
+solo tiene la titular) → la invitación pasa las 3 defensas (B7 confirmado
+en concreto). El pedido B8 lo dice de antemano.
