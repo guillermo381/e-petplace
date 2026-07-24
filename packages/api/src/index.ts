@@ -642,7 +642,7 @@ export {
   type VacunaMostradorInput,
   type CodigoVacunaMostrador,
 } from './wrappers/veterinaria-mostrador';
-export { obtenerTitularId } from './wrappers/titular';
+export { obtenerTitularId, obtenerMiEmpleadoId } from './wrappers/titular';
 // S69-B (B3): el presupuesto clínico — 5 RPCs del contrato A1 (lane cedida
 // por la A). Hunk aditivo.
 export {

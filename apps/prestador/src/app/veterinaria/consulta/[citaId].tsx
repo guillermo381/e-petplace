@@ -49,10 +49,10 @@ import {
   estructurarNotaClinica,
   obtenerCasosActivosMascota,
   obtenerCitaVetPorId,
+  obtenerMiEmpleadoId,
   obtenerMiPrestador,
   obtenerPerfilMascota,
   obtenerPresupuestosPrestador,
-  obtenerTitularId,
   sedimentarNotaClinica,
   type CasoActivo,
   type CasoRef,
@@ -231,7 +231,13 @@ export default function ConsultaVeterinaria() {
       }
       setMascotaR({ id: mId, nombre: mNombre });
       const [empId, per, cas, pres] = await Promise.all([
-        obtenerTitularId(pr.data.id),
+        // S75-A25: el tratante es QUIEN ATIENDE (el empleado logueado), no
+        // el titular. `obtenerTitularId` devolvía null a todo empleado
+        // no-dueño (RLS empleados_self solo ve la propia fila) → la
+        // consulta moría en la carga. `obtenerMiEmpleadoId` resuelve la
+        // fila propia: el titular obtiene la misma que antes (cero
+        // regresión), el profesional/recepción la suya (ahora ABRE).
+        obtenerMiEmpleadoId(pr.data.id),
         obtenerPerfilMascota(mId),
         obtenerCasosActivosMascota(mId, cuentaComercialId),
         obtenerPresupuestosPrestador(cuentaComercialId, { mascotaId: mId }),
