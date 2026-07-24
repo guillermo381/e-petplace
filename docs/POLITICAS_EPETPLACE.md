@@ -1,7 +1,7 @@
 # POLITICAS_EPETPLACE — Políticas operativas del producto
 
 > Versión: v1.10
-> Última actualización: 19 Jul 2026 — Sesión 70. **P21 FIRMADA (LA LETRA UBER: la cuenta es global, el país es contexto de operación).**
+> Última actualización: 24 Jul 2026 — Sesión 76. **P22 DECLARADA, sin letra (reagenda y cancelación de la cita clínica; custodia conserva P20).**
 > Audiencia: Claude (web y code), devs futuros, equipo de soporte, equipo legal.
 > Análogo a: `CONTRATO_TRABAJO.md` (cómo trabajamos) pero del producto (cómo se comporta).
 
