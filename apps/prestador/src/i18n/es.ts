@@ -225,6 +225,7 @@ export const prestadorEs = {
     logoGuardado: 'Listo — tu logo quedó guardado.',
     logoQuitado: 'Tu negocio vuelve a mostrarse con sus iniciales.',
     logoErrorRed: 'No pudimos subir el logo. Revisa tu conexión.',
+    logoErrorGrande: 'El logo supera 5MB. Elige una versión más liviana.',
     logoErrorSubida: 'No pudimos guardar el logo. Prueba de nuevo.',
     logoPermisoCamara: 'Necesitamos permiso para usar la cámara.',
   },
@@ -1411,6 +1412,9 @@ export const prestadorEs = {
     exito: 'Atención registrada — quedó en la agenda de hoy y en el expediente de {{mascota}}.',
     // D-434: el registrable de vacuna
     vacunaLabel: '¿Qué vacuna?',
+    // S76-B3 — D-524: el flujo de dos personas, dicho en una frase ·
+    // LOTE S76, GATE PENDIENTE
+    vacunaPendienteFirma: 'Registras la visita y el cobro. La vacuna la firma quien atiende.',
     vacunaOtra: 'Otra',
     vacunaLibreLabel: 'Nombre de la vacuna',
     vacunaLibrePlaceholder: 'ej: Bordetella',
@@ -1613,6 +1617,12 @@ export const prestadorEs = {
     invitarNombre: 'Nombre',
     invitarEmail: 'Correo',
     invitarAyuda: 'La invitación queda registrada a ese correo. Todavía no le llega sola: el aviso y la entrada automática están en construcción.',
+    // S76-B4 — el selector de dos (LETRA_RECEPCION §1): chips al invitar ·
+    // LOTE S76, GATE PENDIENTE
+    invitarPrestadorToggle: 'Prestador',
+    invitarOficiosLabel: '¿Qué va a atender?',
+    invitarPisoAyuda: 'Sin servicios activados, entra como recepción: recibe y cobra, sin acceso clínico.',
+    invitarChipsError: 'La persona quedó invitada, pero sus servicios no se pudieron guardar.',
     invitarEnviar: 'Invitar',
     // CURA D-508: los 4 rebotes suaves del motor, en voz humana (Ley 3)
     rebYaEnEquipo: 'Esa persona ya es parte de tu equipo.',

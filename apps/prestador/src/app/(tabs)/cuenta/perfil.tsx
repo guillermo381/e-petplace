@@ -167,9 +167,16 @@ export default function PerfilCuenta() {
   // inmediato — subir la imagen ES el acto, sin esperar al Guardar.
   async function capturarLogo(camara: boolean) {
     setHojaLogo(false);
+    // ALPHA PRESERVADO (freno de mesa S76-B): la GALERÍA no pasa por el
+    // resize — el flatten JPEG de un PNG transparente compone sobre
+    // NEGRO en Android (Bitmap.compress sobre ARGB): el rectángulo
+    // caricaturesco que DIRECCION_ARTE §7 rechaza. calidad 1 = el picker
+    // no re-encodea; el archivo original viaja intacto y subir-logo
+    // detecta el formato por los BYTES. La CÁMARA sí redimensiona
+    // (una foto es JPEG de nacimiento — no hay alpha que perder).
     const r = camara
       ? await capturarConCamara({ redimensionarA: 800, calidad: 0.8 })
-      : await capturarDeGaleria({ redimensionarA: 800, calidad: 0.8 });
+      : await capturarDeGaleria({ calidad: 1 });
     if (r.tipo === 'cancelada') return;
     if (r.tipo === 'permiso_denegado') {
       mostrar({ variante: 'error', texto: t('miCuenta.logoPermisoCamara') });
@@ -181,7 +188,12 @@ export default function PerfilCuenta() {
     if (!sub.ok) {
       mostrar({
         variante: 'error',
-        texto: sub.causa === 'red' ? t('miCuenta.logoErrorRed') : t('miCuenta.logoErrorSubida'),
+        texto:
+          sub.causa === 'red'
+            ? t('miCuenta.logoErrorRed')
+            : sub.causa === 'archivo_grande'
+              ? t('miCuenta.logoErrorGrande')
+              : t('miCuenta.logoErrorSubida'),
       });
       return;
     }

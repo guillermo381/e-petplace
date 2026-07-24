@@ -22,8 +22,30 @@ import { leerBytes } from '@epetplace/ui';
 import { actualizarPerfilPrestador, getClient } from '@epetplace/api';
 
 const BUCKET = 'avatars';
+// Pre-check local (la galería viaja SIN resize para preservar alpha —
+// freno de mesa S76-B): un original enorme sube lento (S45 midió 5MB =
+// 44s); el techo se dice ANTES del round-trip, con voz honesta.
+const MAX_BYTES = 5 * 1024 * 1024;
 
-export type CausaSubidaLogo = 'sin_sesion' | 'lectura' | 'red' | 'servidor';
+export type CausaSubidaLogo = 'sin_sesion' | 'lectura' | 'archivo_grande' | 'red' | 'servidor';
+
+/** El formato se detecta por los BYTES (magic numbers), jamás por una
+ *  extensión inventada: la galería entrega el archivo ORIGINAL (alpha
+ *  intacto) y mentirle el contentType al bucket es basura persistida.
+ *  PNG 89 50 4E 47 · WEBP RIFF….WEBP · resto = JPEG (la cámara). */
+function formatoDeBytes(bytes: ArrayBuffer): { contentType: string; extension: string } {
+  const b = new Uint8Array(bytes.slice(0, 12));
+  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) {
+    return { contentType: 'image/png', extension: 'png' };
+  }
+  if (
+    b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 &&
+    b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50
+  ) {
+    return { contentType: 'image/webp', extension: 'webp' };
+  }
+  return { contentType: 'image/jpeg', extension: 'jpg' };
+}
 
 export type ResultadoSubidaLogo =
   | { ok: true; path: string }
@@ -52,7 +74,6 @@ export async function subirLogoNegocio(input: {
     const userId = auth.user?.id;
     if (!userId) return { ok: false, causa: 'sin_sesion', mensaje: 'No hay sesión activa.' };
 
-    path = `${userId}/logo-negocio-${Date.now()}.jpg`;
     let bytes: ArrayBuffer;
     try {
       bytes = await leerBytes(input.uri);
@@ -61,9 +82,15 @@ export async function subirLogoNegocio(input: {
       console.error(`[subir-logo] LECTURA falló (${Platform.OS}) · uri=${input.uri.slice(0, 80)} · ${lit}`);
       return { ok: false, causa: 'lectura', mensaje: lit };
     }
+    if (bytes.byteLength > MAX_BYTES) {
+      console.error('[subir-logo] archivo_grande pre-check =', bytes.byteLength, 'bytes');
+      return { ok: false, causa: 'archivo_grande', mensaje: 'El logo supera el máximo de 5MB.' };
+    }
+    const { contentType, extension } = formatoDeBytes(bytes);
+    path = `${userId}/logo-negocio-${Date.now()}.${extension}`;
     const { error } = await getClient()
       .storage.from(BUCKET)
-      .upload(path, bytes, { contentType: 'image/jpeg', upsert: false });
+      .upload(path, bytes, { contentType, upsert: false });
     if (error) {
       console.error(`[subir-logo] SUBIDA falló · bucket=${BUCKET} · ${error.message}`);
       return { ok: false, causa: esErrorDeRed(error.message) ? 'red' : 'servidor', mensaje: error.message };

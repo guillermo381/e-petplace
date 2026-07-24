@@ -196,6 +196,7 @@ export const prestadorEn = {
     logoGuardado: 'Done — your logo is saved.',
     logoQuitado: 'Your business shows its initials again.',
     logoErrorRed: "We couldn't upload the logo. Check your connection.",
+    logoErrorGrande: 'The logo is over 5MB. Pick a lighter version.',
     logoErrorSubida: "We couldn't save the logo. Try again.",
     logoPermisoCamara: 'We need permission to use the camera.',
   },
@@ -1268,6 +1269,8 @@ export const prestadorEn = {
     exito: "Visit registered — it's on today's agenda and in {{mascota}}'s record.",
     // D-434: the vaccine registrable
     vacunaLabel: 'Which vaccine?',
+    // S76-B3 — Espejo de es.ts · LOTE S76, GATE PENDIENTE
+    vacunaPendienteFirma: 'You register the visit and the payment. The vaccine is signed by the caregiver.',
     vacunaOtra: 'Other',
     vacunaLibreLabel: 'Vaccine name',
     vacunaLibrePlaceholder: 'e.g. Bordetella',
@@ -1462,6 +1465,11 @@ export const prestadorEn = {
     invitarNombre: 'Name',
     invitarEmail: 'Email',
     invitarAyuda: 'The invitation is registered to that email. It does not reach them on its own yet: automatic notice and entry are under construction.',
+    // S76-B4 — Espejo de es.ts · LOTE S76, GATE PENDIENTE
+    invitarPrestadorToggle: 'Provider',
+    invitarOficiosLabel: 'What will they provide?',
+    invitarPisoAyuda: 'Without services turned on, they join as front desk: they check people in and take payments, with no clinical access.',
+    invitarChipsError: "The person was invited, but their services couldn't be saved.",
     invitarEnviar: 'Invite',
     // D-508 cure: the motor's 4 soft bounces, in human voice
     rebYaEnEquipo: 'That person is already part of your team.',
