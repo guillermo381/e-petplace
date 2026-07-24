@@ -77,6 +77,19 @@ de `recepcion`) — se declara el delta, no se afirma identidad. Lección: *una
 señal de éxito jamás se emite con `RAISE` en un fixture que muta datos —
 resultado a tabla + SELECT.*
 
+### 2.4 · EL GATE DEL FOUNDER — el rebote que no rebotó porque no se ejecutó
+El founder probó la consulta con recepción: entró, tipeó, reportó "puedo
+escribir". La mesa preguntó a la DB antes de responder (A47): **cero escritura
+nueva** — el founder **no tocó guardar** (`escribir ≠ guardar`; el guard vive en
+el RPC, dispara al ENVIAR). El gate nunca se ejecutó; **no hay perforación.**
+**Dos hallazgos gratis del uso real:** (a) +9 quedó SOLO recepción — el founder
+le quitó `profesional` desde la app y **la revocación PERSISTIÓ** (el toggle de
+equipo tiene motor, no es UI muda); (b) por el CAMINO REAL con +9 recepción-pura,
+**cero fuga de lectura clínica** — `user_acceso_clinico=false`, todos los readers
+en 0: **D-464 se cumple**, el editor abre VACÍO. Lo que quedó es superficie
+(D-525): el editor **abre** para recepción (Ley 23) aunque no vea ni escriba
+nada. Verbatim del founder: *"la recepción no debería poder ni verlo."*
+
 ## 3. D-490 — LAS DOS FASES, EL ESTADO EXACTO
 
 - **Fase 1** (S75-A2, `20260723173509`): 15 policies RLS. Correcta pero
@@ -89,17 +102,37 @@ resultado a tabla + SELECT.*
 - **Estado: CURADA Y VERIFICADA POR CAMINO REAL; PENDIENTE GATE EN DISPOSITIVO.**
   Cierra con el rebote en el teléfono del founder. **No se marca CERRADA** (A28
   también dijo "verificada"; la lección (h) prohíbe cerrarla sin el dispositivo).
+  **Cuando el founder reporte el rebote, se marca CERRADA con su palabra como
+  firma — no antes** (L-163: el dispositivo es la única firma que vale). El gate
+  del founder de esta sesión NO ejercitó el guard (solo tipeó, no guardó — §2.4);
+  el rebote real está a un intento de distancia.
 
-## 4. DEUDAS NUEVAS S75-A (D-515 → D-524)
+## 4. DEUDAS NUEVAS S75-A (D-515 → D-525) — el inventario para S76
 
 D-515 (fila dueño redundante ⚪) · D-516 (certificado escribible sin rol 🟠) ·
 D-517 (R2 rompe 6 pantallas para el empleado; 2 CLASE 2 a v2 🟠) · D-518 (la
-reserva no filtra por geografía, 4 oficios 🟠) · D-519 (la voz del handshake no
-nombra negocio no-activo ⚪) · D-520 (marcador updateId vs group del canon 🟠) ·
-D-521 (HOY ofrece lo que el rol no puede — B18 🟠) · D-522 (motor de agenda
-ciego al rol 🟠) · D-523 (voseo en nota-clínica ⚪) · D-524 (mostrador de vacuna
-= flujo de dos personas, sin diseñar 🟠). Enmendadas: D-367 (sistémica),
-D-486 (eje legacy con lector vivo), D-512/D-513 (contra el literal).
+reserva no filtra por geografía, 4 oficios; 🔴 al soft launch por la pata
+ciudad) · D-519 (la voz del handshake no nombra negocio no-activo ⚪) · D-520
+(marcador updateId vs group del canon 🟠) · D-521 (HOY ofrece lo que el rol no
+puede — B18 🟠) · D-522 (motor de agenda ciego al rol 🟠) · D-523 (voseo en
+nota-clínica ⚪) · D-524 (mostrador de vacuna = flujo de dos personas, sin
+diseñar 🟠) · **D-525 (el editor clínico abre para recepción — Ley 23; incluye
+la sub-nota de voz: el rebote dice "Revisá los datos" hasta que
+`rol_sin_escritura_clinica` entre a `CODIGOS_SEDIMENTO` — rebotar mintiendo 🟠)**.
+Enmendadas: D-367 (sistémica), D-486 (eje legacy con lector vivo), D-512/D-513
+(contra el literal), D-490 (dos fases).
+
+## 4bis. EL LOTE DEL FOUNDER QUE NUNCA ENTRÓ A S75 (para S76)
+
+Además de las deudas, la mesa dejó explícito lo que S75 no tocó y S76 hereda:
+**el administrador con su MOTOR** (D-513 v2: ampliar la gestión de negocio al
+rol, con el nudo de horarios/`empleado_id` + el borde de los dos negocios de R1
+— mesa del modelo multi-empleado) · **chips de oficio AL INVITAR** (elegir rol y
+chips en el alta) · **el SELECTOR DE DOS** (la superficie de asignar rol) ·
+**el LINK para usuario nuevo (D-509)** — invitar por link a quien aún no tiene
+cuenta · **Ponte al día a BOCETO** con el plural *"Ver sus citas"* (la
+composición que el founder rechazó vuelve a boceto — de la mesa, no rediseño de
+A) · **el monograma `[s` / D-505** · **la voz del rebote** (dentro de D-525).
 
 ## 5. LAS CANDIDATAS DE REGLA — TODAS PROPUESTA, NINGUNA FIRMADA
 
@@ -113,14 +146,34 @@ De la mesa (arrastre): **(d)** el orden nombra el artefacto que abre · la del
 mensaje de OTA se escribe con menos, no con más".** **NINGUNA se sube a firmada
 sin el founder** (L-141 aplicada a la propia sesión).
 
-## 6. LO NO CERRADO, SIN MAQUILLAR
+## 6. EL FINAL DEL ARCO — EL GATE DEL FOUNDER (A47–A50, `36c0739`)
 
-- **D-490 pendiente del gate en dispositivo** (a un intento).
-- **D-513 v2** (el administrador no puede gestionar; el nudo de horarios/
-  empleado_id + el borde de los dos negocios de R1) — mesa del modelo
-  multi-empleado.
-- **D-517 CLASE 2** (cuenta-comercial/*), **D-516** (certificado), **D-518**
-  (geografía, 🔴 al soft launch por la pata ciudad), **D-521/D-522/D-524** (el
-  motor/superficie ciegos al rol) — todos S76+.
-- **Ponte al día**: la composición que el founder rechazó vuelve a boceto (de
-  la mesa, no rediseño de A).
+El founder probó en su teléfono: entró al editor con rol y sin él, **tipeó y NO
+tocó guardar** → el gate del RPC nunca se ejecutó (escribir ≠ guardar); no hubo
+perforación que buscar. Lo que el gate SÍ probó, con literal:
+- **A48 gratis:** +9 quedó SOLO `recepcion` (asignado_en 03:48) — **el toggle de
+  revocación de la ventana de equipo PERSISTE** (probado por el uso real del
+  founder, no por assert).
+- **A49 — cero fuga de lectura:** con recepción-pura, por el camino real:
+  `user_acceso_clinico=false`, perfil/HC/casos/stream/medicación = **0**. La RLS
+  D-464 se cumple; el editor abre VACÍO.
+- **A50 → D-525:** el editor clínico ABRE para recepción (Ley 23 — la puerta
+  ofrece lo que va a rechazar). Verbatim founder: *"la recepción no debería
+  poder ni verlo."* Cura de superficie (gate de ausencia por rol), S76.
+  **Sub-nota de voz, DENTRO de D-525 con su literal:** hasta que
+  `rol_sin_escritura_clinica` entre a `CODIGOS_SEDIMENTO`, el rebote dirá
+  *"Revisá los datos de la nota"* — **la diferencia entre rebotar y rebotar
+  MINTIENDO** (la cláusula viva, versión voz).
+
+**D-490 queda: CURADA Y VERIFICADA POR CAMINO REAL; PENDIENTE GATE EN
+DISPOSITIVO.** Si el founder reporta el rebote, se marca CERRADA **con su
+palabra como firma** — no antes (la lección (h) sobre la propia deuda).
+
+## 7. EL INVENTARIO COMPLETO PARA S76
+
+**Deudas de S75: D-515 → D-525** (§4 + D-525 arriba).
+
+**Candidatas de regla — TODAS PROPUESTA, ninguna firmada:** (e) ventana
+bilateral + ancla al bundlear · (f) el publish se reporta en el turno ·
+(g) todo dato vivo se lee al momento de usarlo (absorbe e/f y D-520) ·
+(h) el gate se verifica por el camino de la pantalla (hermana L-114) 
