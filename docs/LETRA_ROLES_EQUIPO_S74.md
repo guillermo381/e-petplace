@@ -188,7 +188,68 @@ Cuatro reglas de superficie:
 Dictado del founder: al asignar el rol de administrador, **un mensaje aclarando
 qué gana esa persona** — datos del negocio, asignar y eliminar empleados, etc.
 
-> **✅ FIRMADO (S74) — EL LITERAL, DEPOSITADO (llegó pegado tras el freno):**
+> **✅ FIRMADO (S76, 24 Jul 2026) — EL LITERAL VIGENTE (llegó por mano del
+> founder; reemplaza al par de S74, que queda registrado en el historial):**
+>
+> **es:**
+> ```
+> Vas a darle el rol de administrador a {nombre}.
+>
+> Con este rol va a poder:
+> · Ver los ingresos, la facturación y las liquidaciones del negocio
+> · Editar los servicios, los horarios y la configuración del negocio
+> · Invitar personas al equipo, asignarles los servicios que
+>   atienden y desvincularlas
+>
+> No va a poder:
+> · Nombrar a otros administradores
+> · Cambiar ni quitar el rol de un administrador, ni siquiera el propio
+>
+> Los administradores solo los gestionas tú.
+>
+> [Cancelar]  [Sí, dar el rol]
+> ```
+>
+> **en:**
+> ```
+> You're about to give {nombre} the administrator role.
+>
+> With this role they'll be able to:
+> · See the business's income, billing and payouts
+> · Edit the business's services, hours and settings
+> · Invite people to the team, assign the services they handle,
+>   and remove them
+>
+> They won't be able to:
+> · Name other administrators
+> · Change or remove an administrator's role — not even their own
+>
+> Only you manage administrators.
+>
+> [Cancel]  [Yes, give the role]
+> ```
+>
+> **NOTA DE ENMIENDA (S76):** el límite pasó de **UNA línea a DOS** porque la
+> asimetría dictada en S76 (`LETRA_RECEPCION_S76` §5) tiene **dos patas** — no
+> nombra nuevos administradores, y **no toca a los que existen, incluido él
+> mismo**. Por eso el cierre pasó de frase a **lista**.
+>
+> **REGISTRO OBLIGATORIO — este string es CRITERIO DE ACEPTACIÓN, no superficie
+> alcanzable:** enumera **tres poderes que HOY NO EXISTEN** (D-513: toda la
+> escritura de negocio es titular-only). Queda como **criterio de aceptación del
+> motor administrativo** — R2 y las tres familias de policies están bien
+> construidas el día que esas tres viñetas sean verdad. **NO es alcanzable en
+> S76:** el toggle no se ofrece (`LETRA_RECEPCION_S76` §5, Ley 23).
+>
+> **NOTA DE OFICIO QUE VIAJA CON EL STRING (S74 — se conserva INTACTA):** el
+> botón dice **"dar el rol"**,
+> jamás *"hacerla administradora"* — **el género no se resuelve desde un
+> nombre** (la voz de producto no lo infiere; misma disciplina de L-148 sobre
+> el acento). En inglés, `they` por la misma razón. La enumeración **cierra
+> con lo que el rol NO puede** (§10.2: solo el titular nombra administradores)
+> — el consentimiento informado se completa diciendo también el límite.
+>
+> <details><summary>Histórico — el par FIRMADO S74 (superseded por S76)</summary>
 >
 > **es:**
 > ```
@@ -218,12 +279,7 @@ qué gana esa persona** — datos del negocio, asignar y eliminar empleados, etc
 > [Cancel]  [Yes, give the role]
 > ```
 >
-> **NOTA DE OFICIO QUE VIAJA CON EL STRING:** el botón dice **"dar el rol"**,
-> jamás *"hacerla administradora"* — **el género no se resuelve desde un
-> nombre** (la voz de producto no lo infiere; misma disciplina de L-148 sobre
-> el acento). En inglés, `they` por la misma razón. La enumeración **cierra
-> con lo que el rol NO puede** (§10.2: solo el titular nombra administradores)
-> — el consentimiento informado se completa diciendo también el límite.
+> </details>
 
 **Va ANTES de confirmar, jamás después.** Es consentimiento informado, no un
 cartel: la superficie enumera con todas las letras lo que se está entregando
@@ -378,10 +434,14 @@ afirma haber enviado algo que no se envió.
   derivado (tiene ≥1 chip). Los dos ejes y la ley madre "el acceso clínico viene
   del CHIP" quedan intactos — cambia la CARA, no el modelo. La enmienda se
   DEPOSITÓ como bloque en §2, sin reescribir el original (registro del modelo
-  S74). **PENDIENTE (freno L-142): §6 — el par es+en del aviso de administrador
-  gana su segunda pata** (la asimetría S76: no nombra nuevos administradores /
-  no toca a los existentes, incluido él); su literal FIRMADO viaja por mano del
-  founder y §6 NO se toca hasta entonces. Detalle: `LETRA_RECEPCION_S76` §1/§5.
+  S74). **Y §6 — el aviso de administrador — ganó su literal FIRMADO S76** (llegó
+  por mano del founder tras el freno L-142, mismo día): el límite pasó de UNA
+  línea a DOS (la asimetría tiene dos patas: no nombra nuevos / no toca a los
+  existentes, incluido él), el par de S74 queda como histórico plegado, las notas
+  de oficio de S74 se conservan intactas, y el string queda registrado como
+  **CRITERIO DE ACEPTACIÓN del motor administrativo** (enumera tres poderes que
+  hoy no existen — D-513; no alcanzable en S76: el toggle no se ofrece).
+  Detalle: `LETRA_RECEPCION_S76` §1/§5.
 - **✅ FIRMADA (S74, 22 Jul 2026):** el founder contestó los tres puntos del
   §10 — **link a 48 h** (bajó de 72) · **solo el TITULAR nombra
   administradores** (la mesa proponía que el administrador también) · el
