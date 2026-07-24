@@ -37,24 +37,30 @@ import {
   Insignia,
   Interruptor,
   LogoNegocio,
+  SelectorOpcion,
   Separador,
   Tarjeta,
   Texto,
   spacing,
+  useAviso,
   useTheme,
 } from '@epetplace/ui';
 import {
   asignarRolEmpleado,
   desvincularEmpleado,
+  asignarServiciosEmpleado,
   invitarEmpleado,
   obtenerEquipoNegocio,
   obtenerMiCuentaComercial,
   obtenerMiPrestador,
+  obtenerOficiosNegocio,
   quitarRolEmpleado,
   resolverUrlLogoNegocio,
   type EquipoNegocio,
   type MiembroEquipo,
   type MiPrestador,
+  type OficioChip,
+  type OficioNegocio,
   type RolEquipo,
 } from '@epetplace/api';
 
@@ -71,6 +77,7 @@ export default function EquipoNegocioPantalla() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
+  const { mostrar } = useAviso();
 
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [miembro, setMiembro] = useState<MiembroEquipo | null>(null);
@@ -80,6 +87,17 @@ export default function EquipoNegocioPantalla() {
   const [invEmail, setInvEmail] = useState('');
   const [ocupado, setOcupado] = useState(false);
   const [vozError, setVozError] = useState<string | null>(null);
+  // ── S76-B4: LOS CHIPS AL INVITAR (LETRA_RECEPCION §1/§6, B0 APTO) ──
+  // Decisión founder S76: los toggles escriben SOLO chips de servicio.
+  // RECEPCIÓN NO SE ESCRIBE DESDE LA PANTALLA (su fila la concede el RPC
+  // de aceptación — migración A2bis, tanda de A); `profesional` es
+  // DERIVADO (≥1 chip) y no se escribe. EL TOGGLE ADMINISTRADOR NO SE
+  // OFRECE (§5: su motor no existe — D-513 v2 + D-517 CLASE 2; gatear
+  // no es conceder, Ley 23). null en oficios = no legibles: el toggle
+  // no se ofrece (ausencia ante la duda; el flujo de dos pasos queda).
+  const [oficios, setOficios] = useState<OficioNegocio[] | null>(null);
+  const [invPrestador, setInvPrestador] = useState(false);
+  const [invOficios, setInvOficios] = useState<string[]>([]);
 
   const [prestadorId, setPrestadorId] = useState<string | null>(null);
 
@@ -96,6 +114,12 @@ export default function EquipoNegocioPantalla() {
       return;
     }
     setPrestadorId(prestador.data.id);
+    // S76-B4: los oficios del negocio (chips al invitar). Su fallo NO
+    // tumba la ventana: null = el toggle Prestador no se ofrece y el
+    // flujo de dos pasos sigue entero (§5 regla 2).
+    void obtenerOficiosNegocio(prestador.data.id).then((r) => {
+      setOficios(r.ok ? r.data : null);
+    });
     if (!cuenta.ok || cuenta.data === null) {
       // Sin cuenta comercial no hay lector de equipo (el RPC keyea por
       // cuenta). El error dirige (Ley 17.4), jamás se disfraza de
@@ -162,8 +186,8 @@ export default function EquipoNegocioPantalla() {
     setOcupado(true);
     setVozError(null);
     const r = await invitarEmpleado(prestadorId, invEmail.trim(), invNombre.trim());
-    setOcupado(false);
     if (!r.ok) {
+      setOcupado(false);
       // CURA D-508: los rebotes suaves del motor GANAN VOZ — jamás
       // "éxito" sobre un rechazo (el founder lo vio en campo).
       setVozError(
@@ -179,11 +203,41 @@ export default function EquipoNegocioPantalla() {
       );
       return;
     }
+    // S76-B4: los chips nacen CON la invitación (B0: legal por RLS sobre
+    // la fila activo=false; inertes hasta la aceptación). El fallo de los
+    // chips NO deshace la invitación — es un hecho que ya ocurrió y se
+    // dice la verdad parcial (Ley 13), jamás un éxito redondo falso.
+    const idsElegidos =
+      invPrestador && oficios !== null
+        ? oficios.filter((o) => invOficios.includes(o.oficio)).flatMap((o) => o.servicioIds)
+        : [];
+    let chipsFallaron = false;
+    if (idsElegidos.length > 0) {
+      const chips = await asignarServiciosEmpleado(r.data.empleadoId, idsElegidos);
+      chipsFallaron = !chips.ok;
+    }
+    setOcupado(false);
     setHojaInvitar(false);
     setInvNombre('');
     setInvEmail('');
+    setInvPrestador(false);
+    setInvOficios([]);
+    if (chipsFallaron) {
+      mostrar({ variante: 'error', texto: t('equipo.invitarChipsError') });
+    }
     await cargar();
   }
+
+  // La voz del oficio (Ley 3) — reuso declarado de agenda.filtro* (los
+  // mismos sustantivos de oficio del filtro del HOY, S61-B5/S69-B).
+  const vozOficio = (o: OficioChip): string =>
+    o === 'veterinaria'
+      ? t('agenda.filtroVeterinaria')
+      : o === 'grooming'
+        ? t('agenda.filtroEstetica')
+        : o === 'paseo'
+          ? t('agenda.filtroPaseos')
+          : t('agenda.filtroAdiestramiento');
 
   // E1 (mesa): el aceptado SIN rol PRESIDE — primero en la lista, con su
   // acción dicha al lado (el paso NORMAL del flujo de dos pasos v1).
@@ -363,12 +417,63 @@ export default function EquipoNegocioPantalla() {
             keyboardType="email-address"
           />
           <Texto variante="apoyo">{t('equipo.invitarAyuda')}</Texto>
+
+          {/* ── S76-B4: EL SELECTOR DE DOS (LETRA_RECEPCION §1) ──
+              Recepción es el DEFAULT y no se elige — la puerta no
+              pregunta lo que ya sabe, pero LO DICE (corolario S73).
+              Toggle Prestador → chips a grano de OFICIO (§6: la
+              pantalla escribe oficio, el motor guarda las ofertas).
+              EL TOGGLE ADMINISTRADOR NO SE OFRECE (§5): su motor no
+              existe (D-513 v2 + D-517 CLASE 2) y un toggle que rebota
+              al guardar es Ley 23 rota — entra cuando su motor entre.
+              oficios null (no legibles) u [] (sin ofertas activas):
+              el toggle no se monta y el flujo de dos pasos queda
+              entero (§5 regla 2 — invitar sin rol sigue siendo camino). */}
+          {oficios !== null && oficios.length > 0 && (
+            <View style={{ gap: spacing[3] }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Texto variante="cuerpo">{t('equipo.invitarPrestadorToggle')}</Texto>
+                <Interruptor
+                  encendido={invPrestador}
+                  onCambio={(v) => {
+                    setInvPrestador(v);
+                    if (!v) setInvOficios([]);
+                  }}
+                  etiqueta={t('equipo.invitarPrestadorToggle')}
+                  registro="oficio"
+                />
+              </View>
+              {invPrestador && (
+                <SelectorOpcion
+                  etiqueta={t('equipo.invitarOficiosLabel')}
+                  multiple
+                  acento="oficio"
+                  opciones={oficios.map((o) => ({ codigo: o.oficio, etiqueta: vozOficio(o.oficio) }))}
+                  seleccionadas={invOficios}
+                  onSelect={(codigo) =>
+                    setInvOficios((prev) =>
+                      prev.includes(codigo) ? prev.filter((c) => c !== codigo) : [...prev, codigo],
+                    )
+                  }
+                />
+              )}
+              <Texto variante="apoyo">{t('equipo.invitarPisoAyuda')}</Texto>
+            </View>
+          )}
+
           {vozError !== null ? <Texto variante="apoyo">{vozError}</Texto> : null}
           <Boton
             variante="primario"
             bloque
             cargando={ocupado}
-            deshabilitado={invNombre.trim().length === 0 || invEmail.trim().length === 0}
+            deshabilitado={
+              invNombre.trim().length === 0 ||
+              invEmail.trim().length === 0 ||
+              // Ley 23: el toggle prendido SIN oficio elegido es una
+              // promesa vacía — se completa o se apaga, no se envía a
+              // medias (el rebote sería silencioso: cero filas).
+              (invPrestador && invOficios.length === 0)
+            }
             etiqueta={t('equipo.invitarEnviar')}
             onPress={() => void invitar()}
           />

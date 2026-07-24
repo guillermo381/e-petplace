@@ -747,6 +747,11 @@ export {
   obtenerNegocioEmpleadoActivo,
   obtenerInvitacionPendiente,
   aceptarInvitacionEquipo,
+  // S76-B4: los chips al invitar (B0 APTO + decisión founder)
+  obtenerOficiosNegocio,
+  asignarServiciosEmpleado,
+  type OficioChip,
+  type OficioNegocio,
   type EquipoNegocio,
   type MiembroEquipo,
   type RolEquipo,

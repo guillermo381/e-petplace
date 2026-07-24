@@ -164,12 +164,17 @@ export const REBOTES_INVITAR: ReadonlyArray<{ literal: string; codigo: CodigoInv
  *  aceptar/rechazar/marcar, cero triggers, cero edge. La fila queda
  *  activo=false para siempre. La invitación HOY solo REGISTRA; el
  *  handshake es pedido de motor BLOQUEANTE (sin él no sirve ni por mail
- *  ni por link). La voz de la pantalla dice ESA verdad angosta. */
+ *  ni por link). La voz de la pantalla dice ESA verdad angosta.
+ *  *(Nota S75: el handshake B1 existe desde S75 — /invitacion; la voz
+ *  angosta de arriba es histórico del nacimiento.)*
+ *  S76-B4 (enmienda de contrato, único consumidor equipo.tsx): el éxito
+ *  devuelve el `empleado_id` que el RPC ya traía y el wrapper tiraba —
+ *  los CHIPS AL INVITAR lo necesitan (B0: el camino existe por RLS). */
 export async function invitarEmpleado(
   prestadorId: string,
   email: string,
   nombre: string,
-): Promise<ResultadoWrapper<null, CodigoInvitar>> {
+): Promise<ResultadoWrapper<{ empleadoId: string }, CodigoInvitar>> {
   const { data, error } = await getClient().rpc('crear_empleado_directo', {
     p_prestador_id: prestadorId,
     p_email: email,
@@ -180,8 +185,9 @@ export async function invitarEmpleado(
   const fila = (typeof data === 'object' && data !== null ? data : {}) as {
     ok?: boolean;
     mensaje?: string;
+    empleado_id?: string;
   };
-  if (fila.ok !== true) {
+  if (fila.ok !== true || typeof fila.empleado_id !== 'string') {
     const mensaje = typeof fila.mensaje === 'string' ? fila.mensaje : '';
     const rebote = REBOTES_INVITAR.find((r) => mensaje.startsWith(r.literal));
     return {
@@ -192,6 +198,89 @@ export async function invitarEmpleado(
       mensaje: mensaje.length > 0 ? mensaje : 'La invitación no se pudo crear.',
     };
   }
+  return { ok: true, data: { empleadoId: fila.empleado_id } };
+}
+
+// ── S76-B4 · LOS CHIPS AL INVITAR (B0 dio APTO + decisión founder) ──────
+// El selector de dos toggles (LETRA_RECEPCION §1) escribe SOLO chips de
+// servicio (decisión founder S76: la fila `recepcion` del piso la concede
+// el RPC de aceptación — migración A2bis, tanda de A; `profesional` es
+// DERIVADO de tener ≥1 chip y NO se escribe; el toggle administrador NO
+// se ofrece hasta que su motor exista — §5, Ley 23).
+
+/** Los cuatro oficios del chip (§6: grano de OFICIO en pantalla). */
+export type OficioChip = 'veterinaria' | 'grooming' | 'paseo' | 'adiestramiento';
+
+export interface OficioNegocio {
+  oficio: OficioChip;
+  /** Las ofertas ACTIVAS de ese oficio — lo que la tabla guarda cuando
+   *  la pantalla escribe el oficio (§6: el motor es grano de OFERTA). */
+  servicioIds: string[];
+}
+
+/** Los oficios que el negocio TIENE (ofertas activas, legibles por
+ *  `ps_public`), agrupados por el eje de la casa: es_medico=true ⇒
+ *  veterinaria (canon S69 — emergencia/telemedicina son vet, la
+ *  categoría no manda en lo clínico); si no, la categoría en
+ *  {paseo, grooming, adiestramiento}. hospedaje/otro no son oficio del
+ *  selector v1 — quedan fuera DECLARADO (no hay chip que darles). */
+export async function obtenerOficiosNegocio(prestadorId: string): R<OficioNegocio[]> {
+  const cliente = getClient();
+  const ofertas = await cliente
+    .from('prestador_servicios')
+    .select('id, tipo_servicio')
+    .eq('prestador_id', prestadorId)
+    .eq('activo', true);
+  if (ofertas.error) {
+    return { ok: false, codigo: 'error_lectura', mensaje: ofertas.error.message };
+  }
+  const filas = ofertas.data ?? [];
+  if (filas.length === 0) return { ok: true, data: [] };
+  const slugs = [...new Set(filas.map((f) => f.tipo_servicio))];
+  const tipos = await cliente
+    .from('tipos_servicio')
+    .select('codigo, categoria, es_medico')
+    .in('codigo', slugs);
+  if (tipos.error) {
+    return { ok: false, codigo: 'error_lectura', mensaje: tipos.error.message };
+  }
+  const oficioDe = new Map<string, OficioChip>();
+  for (const t of tipos.data ?? []) {
+    if (t.es_medico === true) oficioDe.set(t.codigo, 'veterinaria');
+    else if (t.categoria === 'paseo' || t.categoria === 'grooming' || t.categoria === 'adiestramiento') {
+      oficioDe.set(t.codigo, t.categoria);
+    }
+  }
+  const porOficio = new Map<OficioChip, string[]>();
+  for (const f of filas) {
+    const oficio = oficioDe.get(f.tipo_servicio);
+    if (oficio === undefined) continue; // hospedaje/otro: fuera del v1
+    porOficio.set(oficio, [...(porOficio.get(oficio) ?? []), f.id]);
+  }
+  const ORDEN: OficioChip[] = ['veterinaria', 'grooming', 'paseo', 'adiestramiento'];
+  return {
+    ok: true,
+    data: ORDEN.filter((o) => porOficio.has(o)).map((o) => ({
+      oficio: o,
+      servicioIds: porOficio.get(o) ?? [],
+    })),
+  };
+}
+
+/** Escribir los chips = INSERT batch en `prestador_empleado_servicios`
+ *  (policy `empleado_servicios_dueño_inserta`, titularidad — B0 punto 3).
+ *  Legal sobre la fila recién invitada (`activo=false`): los chips nacen
+ *  INERTES — las 8 lectoras exigen `pe.activo` (B0 punto 4) y el
+ *  interruptor sigue siendo la aceptación. */
+export async function asignarServiciosEmpleado(
+  empleadoId: string,
+  servicioIds: string[],
+): R<null> {
+  if (servicioIds.length === 0) return { ok: true, data: null };
+  const { error } = await getClient()
+    .from('prestador_empleado_servicios')
+    .insert(servicioIds.map((servicioId) => ({ empleado_id: empleadoId, servicio_id: servicioId })));
+  if (error) return { ok: false, codigo: 'error_escritura', mensaje: error.message };
   return { ok: true, data: null };
 }
 
