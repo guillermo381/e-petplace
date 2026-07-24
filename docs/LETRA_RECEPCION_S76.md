@@ -121,6 +121,18 @@ juntas.
 | **VENTANILLA** | recibir el walk-in · registrar el cobro presencial · registrar la llegada | **cualquiera activo en el negocio** |
 | **CLÍNICO** | escribir el expediente · firmar la vacuna · abrir caso · la nota | **solo quien tiene el chip** |
 
+> **⚠️ LA FILA `recepcion` ES MEMBRESÍA, JAMÁS IDENTIDAD (depósito S76-A2bis,
+> migración `20260724120000` — aviso a B).** Desde A2bis, la fila `recepcion` se
+> concede al entrar a **TODOS** los que aceptan una invitación — veterinarios
+> incluidos (es el piso que habilita la ventanilla, §1). Por lo tanto, al
+> componer el HOY por rol (D-521): **NADA lee la PRESENCIA de `recepcion` como
+> "es recepcionista".** La recepcionista es la **AUSENCIA de los otros roles**
+> (chip clínico / administrador), no la presencia de la fila. Regla de
+> composición: `recepción ⟺ NOT EXISTS chip clínico/administrativo`, jamás
+> `EXISTS recepcion`. La fila solo habilita la VENTANILLA; no describe a la
+> persona. (L-166 en potencia: leerla como identidad sería una afirmación que la
+> fuente — un vet con su piso — no sostiene.)
+
 **Las tres decisiones tuyas que ya la cumplían, cada una por su lado:**
 
 1. **El cobro presencial como DATO** (S69, `MODELO_VETERINARIA` §7 enmienda
