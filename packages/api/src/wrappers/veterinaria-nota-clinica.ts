@@ -62,7 +62,7 @@ const CODIGOS_ESTRUCTURAR = [
 type CodigoEstructurar = (typeof CODIGOS_ESTRUCTURAR)[number];
 
 const MENSAJES_ESTRUCTURAR: Record<CodigoEstructurar | 'error_desconocido' | 'datos_inconsistentes', string> = {
-  entrada_invalida: 'No pudimos leer el dictado. Revisá el texto e intentá de nuevo.',
+  entrada_invalida: 'No pudimos leer el dictado. Revisa el texto e intenta de nuevo.',
   configuracion_faltante: 'El asistente de notas no está disponible en este momento.',
   error_modelo: 'No pudimos estructurar la nota ahora. Probá de nuevo en un rato.',
   estructuracion_fallida: 'No pudimos estructurar el dictado. Revisalo y probá de nuevo.',
@@ -169,27 +169,29 @@ const CODIGOS_SEDIMENTO = [
   'alergia_sin_severidad',
   'condicion_requerida',
   'no_es_tratante',
+  'rol_sin_escritura_clinica',
   'datos_invalidos',
 ] as const;
 export type CodigoErrorSedimento = (typeof CODIGOS_SEDIMENTO)[number];
 
 const MENSAJES_SEDIMENTO: Record<CodigoErrorSedimento, string> = {
-  acceso_denegado: 'Tu sesión no está activa. Iniciá sesión de nuevo.',
-  no_opera_cuenta: 'No operás este negocio.',
-  sin_acceso_mascota: 'No tenés acceso a esta mascota.',
+  acceso_denegado: 'Tu sesión no está activa. Inicia sesión de nuevo.',
+  no_opera_cuenta: 'No operas este negocio.',
+  sin_acceso_mascota: 'No tienes acceso a esta mascota.',
   cita_requerida: 'Falta la cita de la consulta.',
   hc_ya_existe: 'Esta consulta ya tiene una historia clínica registrada.',
   nota_sin_motivo: 'La nota necesita un motivo de consulta.',
   nota_sin_diagnostico: 'La nota necesita un diagnóstico.',
   cuenta_sin_prestador: 'El negocio no tiene un profesional configurado.',
-  posologia_incompleta: 'Una medicación no tiene dosis o frecuencia. Completala antes de guardar.',
+  posologia_incompleta: 'Una medicación no tiene dosis o frecuencia. Complétala antes de guardar.',
   medicamento_sin_nombre: 'Una medicación no tiene nombre.',
   condicion_sin_nombre: 'Una condición crónica no tiene nombre.',
   alergia_sin_alergeno: 'Una alergia no tiene alérgeno.',
   alergia_sin_severidad: 'Una alergia no tiene severidad.',
   condicion_requerida: 'El caso necesita una condición.',
-  no_es_tratante: 'No sos la clínica tratante de este caso.',
-  datos_invalidos: 'Revisá los datos de la nota.',
+  no_es_tratante: 'No eres la clínica tratante de este caso.',
+  rol_sin_escritura_clinica: 'Solo un profesional del negocio puede firmar la consulta clínica.',
+  datos_invalidos: 'Revisa los datos de la nota.',
 };
 
 function falloSedimento<T>(error: { code?: string; message: string }): ResultadoWrapper<T, CodigoErrorSedimento> {
@@ -421,7 +423,7 @@ export async function obtenerParteConsulta(
   const { data, error } = await getClient().rpc('obtener_parte_consulta', { p_evento_id: eventoId });
   if (error) {
     if (error.message.startsWith('parte_no_encontrado')) return { ok: false, codigo: 'parte_no_encontrado', mensaje: 'Este parte ya no está disponible.' };
-    if (error.message.startsWith('sin_acceso')) return { ok: false, codigo: 'sin_acceso', mensaje: 'No tenés acceso a este parte.' };
+    if (error.message.startsWith('sin_acceso')) return { ok: false, codigo: 'sin_acceso', mensaje: 'No tienes acceso a este parte.' };
     return { ok: false, codigo: 'datos_invalidos', mensaje: 'No pudimos cargar el parte.' };
   }
   if (!esObj(data)) return { ok: false, codigo: 'datos_invalidos', mensaje: 'No pudimos cargar el parte.' };
@@ -467,9 +469,9 @@ export interface CasoActivo {
 export type CodigoErrorCasos = 'acceso_denegado' | 'no_opera_cuenta' | 'sin_acceso_mascota' | 'datos_invalidos';
 
 const MENSAJES_CASOS: Record<CodigoErrorCasos, string> = {
-  acceso_denegado: 'Tu sesión no está activa. Iniciá sesión de nuevo.',
-  no_opera_cuenta: 'No operás este negocio.',
-  sin_acceso_mascota: 'No tenés acceso a esta mascota.',
+  acceso_denegado: 'Tu sesión no está activa. Inicia sesión de nuevo.',
+  no_opera_cuenta: 'No operas este negocio.',
+  sin_acceso_mascota: 'No tienes acceso a esta mascota.',
   datos_invalidos: 'No pudimos cargar los casos.',
 };
 
