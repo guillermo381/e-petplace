@@ -48,10 +48,13 @@ export {
 export {
   obtenerMiPrestador,
   actualizarPerfilPrestador,
+  resolverUrlLogoNegocio,
   type InputActualizarPerfilPrestador,
   type MiPrestador,
   type CodigoErrorPrestador,
 } from './wrappers/prestador';
+// S76-B2 (D-525): el gate de PRODUCTO de la superficie de atender.
+export { puedoAtenderClinico } from './wrappers/acceso-clinico';
 export {
   crearFamiliaConPrimeraMascota,
   agregarMascotaAFamilia,

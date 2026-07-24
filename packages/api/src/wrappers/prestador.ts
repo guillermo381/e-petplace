@@ -59,6 +59,9 @@ const MENSAJES: Record<CodigoErrorPrestador | 'error_desconocido' | 'datos_incon
 // CONSUMIR este resolvedor en vez de duplicarlo (L-150: una sola
 // verdad; si no, el empleado resolvería su negocio en 26 pantallas y
 // seguiría sin comisión en el taller).
+// S76-B1 (hunk aditivo, D-505): foto_url — el PATH del logo en el
+// bucket público `avatars` (identidad pública del negocio; el path se
+// resuelve con `resolverUrlLogoNegocio`, jamás se persiste una URL).
 export type MiPrestador = Pick<
   Database['public']['Tables']['prestadores']['Row'],
   | 'id'
@@ -76,10 +79,11 @@ export type MiPrestador = Pick<
   | 'email_contacto'
   | 'sitio_web'
   | 'estado'
+  | 'foto_url'
 >;
 
 const COLUMNAS_MI_PRESTADOR =
-  'id, nombre_comercial, tipo, country_code, cuenta_comercial_id, direccion, ciudad, grooming_extra_pelaje_largo, grooming_recargo_domicilio, descripcion, telefono, whatsapp, email_contacto, sitio_web, estado';
+  'id, nombre_comercial, tipo, country_code, cuenta_comercial_id, direccion, ciudad, grooming_extra_pelaje_largo, grooming_recargo_domicilio, descripcion, telefono, whatsapp, email_contacto, sitio_web, estado, foto_url';
 
 /**
  * El negocio del user logueado — por TITULARIDAD o por VÍNCULO ACTIVO
@@ -154,6 +158,11 @@ export interface InputActualizarPerfilPrestador {
   whatsapp?: string;
   email_contacto?: string;
   sitio_web?: string;
+  /** S76-B1 (D-505): el PATH del logo en el bucket `avatars` — la firma
+   *  gana productor. '' ⇒ NULL honesto (quitar el logo). El trigger
+   *  D-389 NO protege esta columna (relevado S74-A, vara E7): esta
+   *  whitelist es la capa de PRODUCTO que la habilita a propósito. */
+  foto_url?: string;
 }
 
 function aNull(v: string | undefined): string | null | undefined {
@@ -174,12 +183,14 @@ export async function actualizarPerfilPrestador(
   const telefono = aNull(input.telefono);
   const emailContacto = aNull(input.email_contacto);
   const sitioWeb = aNull(input.sitio_web);
+  const fotoUrl = aNull(input.foto_url);
   if (descripcion !== undefined) payload.descripcion = descripcion;
   if (telefono !== undefined) payload.telefono = telefono;
   // whatsapp es NOT NULL en DB (legacy): el "sin dato" es '' — relevado.
   if (input.whatsapp !== undefined) payload.whatsapp = input.whatsapp.trim();
   if (emailContacto !== undefined) payload.email_contacto = emailContacto;
   if (sitioWeb !== undefined) payload.sitio_web = sitioWeb;
+  if (fotoUrl !== undefined) payload.foto_url = fotoUrl;
   if (Object.keys(payload).length === 0) return { ok: true, data: null };
 
   const { data, error } = await getClient()
@@ -192,4 +203,22 @@ export async function actualizarPerfilPrestador(
   if (error) return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
   if (data === null) return { ok: false, codigo: 'sin_prestador', mensaje: MENSAJES.sin_prestador };
   return { ok: true, data: null };
+}
+
+// ── S76-B1 (hunk aditivo, D-505): la URL del logo del negocio ──────────────
+// El logo vive en el bucket PÚBLICO `avatars` (relevado S76-B: public=true,
+// lectura por policy "Avatar read" para todos) — identidad PÚBLICA del
+// negocio: la ve el titular, el invitado (/invitacion) y mañana el pet
+// parent en toda superficie con firma. Por eso NO se firma URL efímera
+// (patrón mascotas, bucket privado): la pública es derivable del path,
+// síncrona e infalible. Se persiste el PATH (la casa jamás guarda URLs).
+
+const BUCKET_LOGOS = 'avatars';
+
+/** URL pública del logo a partir del PATH persistido en
+ *  `prestadores.foto_url`. null entra, null sale (sin logo → el
+ *  monograma honesto de LogoNegocio). */
+export function resolverUrlLogoNegocio(path: string | null): string | null {
+  if (path === null || path.length === 0) return null;
+  return getClient().storage.from(BUCKET_LOGOS).getPublicUrl(path).data.publicUrl;
 }

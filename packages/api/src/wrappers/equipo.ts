@@ -269,6 +269,10 @@ export interface InvitacionPendiente {
   /** nombre del negocio que invitó; null si el prestador no es legible
    *  (Ley 13/L-139: la pantalla dice "un equipo", jamás inventa nombre). */
   negocioNombre: string | null;
+  /** S76-B1 (D-505): el PATH del logo del negocio que invitó — la FIRMA
+   *  de /invitacion deja de ser monograma cuando el logo existe. null =
+   *  sin logo o prestador no legible (LogoNegocio degrada solo). */
+  negocioLogoPath: string | null;
   /** el nombre con que se te sumó (línea de apoyo de la pantalla). */
   nombreInvitado: string;
 }
@@ -285,7 +289,7 @@ export async function obtenerInvitacionPendiente(): R<InvitacionPendiente | null
   if (!auth.user) return { ok: true, data: null };
   const { data, error } = await cliente
     .from('prestador_empleados')
-    .select('id, nombre, created_at, prestadores(nombre_comercial)')
+    .select('id, nombre, created_at, prestadores(nombre_comercial, foto_url)')
     .eq('user_id', auth.user.id)
     .eq('activo', false)
     .order('created_at', { ascending: true })
@@ -293,11 +297,17 @@ export async function obtenerInvitacionPendiente(): R<InvitacionPendiente | null
     .maybeSingle();
   if (error) return { ok: false, codigo: 'error_lectura', mensaje: error.message };
   if (data === null) return { ok: true, data: null };
-  const p = data.prestadores as { nombre_comercial: string | null } | { nombre_comercial: string | null }[] | null;
-  const negocioNombre = Array.isArray(p) ? (p[0]?.nombre_comercial ?? null) : (p?.nombre_comercial ?? null);
+  type PrestadorEmbed = { nombre_comercial: string | null; foto_url: string | null };
+  const p = data.prestadores as PrestadorEmbed | PrestadorEmbed[] | null;
+  const fila = Array.isArray(p) ? (p[0] ?? null) : p;
   return {
     ok: true,
-    data: { empleadoId: data.id, negocioNombre, nombreInvitado: data.nombre },
+    data: {
+      empleadoId: data.id,
+      negocioNombre: fila?.nombre_comercial ?? null,
+      negocioLogoPath: fila?.foto_url ?? null,
+      nombreInvitado: data.nombre,
+    },
   };
 }
 
