@@ -45,7 +45,11 @@ identificadores del MISMO publish. El puente, verificado con
 - **CLIENTE** group `23c726eb` → updateId **`019f90c2`**-9838-… (ios
   `…-794f-9a52-41cd00fa6a87` · android `…-71b6-bb6d-ac70ff42f513`) — **coincide
   con lo que el founder ve en pantalla del cliente. OTA aplicado, confirmado.**
-- **PRESTADOR** group `60a88d2f` → updateId `019f9183`-… (confirma B).
+- **PRESTADOR** group `60a88d2f` → updateId **`019f9183`**-d927-… (ios
+  `…-74cc-85ca-1ad4051403cd` · android `…-7ff5-b52c-eda6e937fcd1`) —
+  verificado con `eas update:view 60a88d2f… --json` desde `apps/prestador/`.
+  **Coincide con lo que el founder ve en pantalla del prestador (`019f9183`).
+  OTA aplicado, confirmado — el circuito corre completo.**
 
 **Que este puente haya que escribirlo a mano es la deuda D-520** (abajo): el
 founder no puede cerrar el lazo de verificación con el camino que la casa
