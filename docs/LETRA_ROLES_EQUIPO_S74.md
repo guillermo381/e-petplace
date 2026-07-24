@@ -58,6 +58,8 @@ limbo: ya es alguien útil en el mostrador.
 
 ## 2. Los dos ejes (y por qué el selector de tres NO los contradice)
 
+> **ENMIENDA S76 — EL SELECTOR DE TRES MUERE; PASA A DOS TOGGLES (`LETRA_RECEPCION_S76` §1, FIRMADA founder 24 Jul 2026).** El selector de §1 (administrador · recepción · profesional) baja a **dos toggles INDEPENDIENTES: Administrador y Prestador**, y recepción **deja de ser una opción del selector — es la AUSENCIA de los dos toggles**. El porqué es el propio corolario del founder aplicado un piso más arriba (*"la puerta no pregunta lo que ya sabe"*, `LETRA_SELECTOR_ELEGIBILIDAD_S73` §1): esta misma letra ya define recepción por AUSENCIA (§1: *"cualquier usuario que no tiene acceso a ningún servicio ES recepción"*), así que ofrecerla como TERCERA opción es preguntar lo que la puerta ya sabe. **`profesional` deja de ser un valor que se elige y pasa a DERIVADO — tiene ≥1 chip** (elimina el estado imposible "profesional sin ningún chip"). **Lo que NO cambia:** los DOS EJES de abajo (administrativo + oficio/chips) sobreviven intactos — la enmienda toca la CARA (dos toggles en vez de tres botones), no el modelo; la **ley madre "el acceso clínico viene del CHIP, jamás del cargo"** queda en pie, y los dos casos que el selector excluyente rompía (el dueño que además atiende · el administrador que no atiende) los salva la INDEPENDENCIA de los dos toggles, no un tercer botón. **La tabla de §1 y el resto de esta sección se conservan como registro del modelo de S74; su cara vigente es la de dos toggles.** Detalle: `LETRA_RECEPCION_S76` §1.
+
 El modelo tiene **dos ejes independientes**, y el selector de tres es su cara
 simplificada — no su reemplazo:
 
@@ -369,6 +371,17 @@ afirma haber enviado algo que no se envió.
 
 ## Historial
 
+- **ENMENDADA §1-§2 (S76, 24 Jul 2026 — `LETRA_RECEPCION_S76` FIRMADA):** el
+  **selector de tres muere y pasa a dos toggles independientes** (Administrador +
+  Prestador); recepción deja de ser opción del selector y pasa a ser la AUSENCIA
+  de los dos (*"la puerta no pregunta lo que ya sabe"*). `profesional` se vuelve
+  derivado (tiene ≥1 chip). Los dos ejes y la ley madre "el acceso clínico viene
+  del CHIP" quedan intactos — cambia la CARA, no el modelo. La enmienda se
+  DEPOSITÓ como bloque en §2, sin reescribir el original (registro del modelo
+  S74). **PENDIENTE (freno L-142): §6 — el par es+en del aviso de administrador
+  gana su segunda pata** (la asimetría S76: no nombra nuevos administradores /
+  no toca a los existentes, incluido él); su literal FIRMADO viaja por mano del
+  founder y §6 NO se toca hasta entonces. Detalle: `LETRA_RECEPCION_S76` §1/§5.
 - **✅ FIRMADA (S74, 22 Jul 2026):** el founder contestó los tres puntos del
   §10 — **link a 48 h** (bajó de 72) · **solo el TITULAR nombra
   administradores** (la mesa proponía que el administrador también) · el
