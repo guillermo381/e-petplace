@@ -314,6 +314,8 @@ y los 5 titulares pasan por el **brazo 2** de `empleado_tiene_rol`
 (titularidad), sin fila. **Con el primer veterinario empleado deja de ser
 gratis.**
 
+> **✅ EL FLIP ESTÁ APLICADO (S76-A4b, migración `20260724140000`, OK founder + censo A4a).** Nace `empleado_tiene_capacidad_clinica(prestador)` = `is_admin()` O titular O empleado activo con chip en oferta `es_medico=true` (NO se exige `ps.activo` — desactivar una oferta no le quita el expediente al vet). Los 6 sitios clínicos flipearon (`user_acceso_clinico_a_mascota`, `user_puede_escribir_clinico`, los 4 DEFINER de D-490); `obtener_contacto_reserva_cita` NO se tocó (ventanilla). **Verificado 4/4 por camino real** (BEGIN/ROLLBACK, señal por resultset, residuo 0): chip médico PASA · titular sin chip PASA · chip grooming NO · recepción pura NO. Censo A4a: cero camino grooming/paseo/adiestramiento toca los helpers. **⚠️ PAR LIGADO CON B (aviso, mismo turno):** `packages/api/src/wrappers/acceso-clinico.ts` cambia su ÚNICA llamada de `empleado_tiene_rol(prestador, ['dueño','profesional'])` a **`empleado_tiene_capacidad_clinica(prestador)`** — o la superficie del prestador diverge del motor (B lo dejó declarado en el header de ese wrapper). **Nota de campo:** entre A0 y A4b, el flujo B4 (chips al invitar) creó 6 chips médicos reales al empleado `afdc7fb9` — con el flip, ese empleado gana capacidad clínica correctamente (chip, no cargo).
+
 ---
 
 ## 7. "LLEGÓ" — un timestamp, jamás un estado
