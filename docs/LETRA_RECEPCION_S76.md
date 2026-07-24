@@ -2,26 +2,26 @@
 
 > **Estado: ✅ FIRMADA POR EL FOUNDER (24 Jul 2026).** Dictada por el
 > founder en sesión S76 (24 Jul 2026) sobre el arco *"S75 hizo seguro el arco;
-> S76 lo hace honesto"*, y firmada el mismo día. Con la firma entran los
-> depósitos SIN colisión: `LETRA_ROLES_EQUIPO_S74` §1-§2 enmendada (el selector
-> de tres muere) · `PORTAL_PRESTADOR` §14 → LETRA_EQUIPO v3.
+> S76 lo hace honesto"*, y firmada el mismo día. Con la firma entraron TODOS los
+> depósitos: `LETRA_ROLES_EQUIPO_S74` §1-§2 enmendada (el selector de tres
+> muere) y §6 (el aviso de administrador, literal firmado S76) ·
+> `PORTAL_PRESTADOR` §14 → LETRA_EQUIPO v3 · **P22** declarada en
+> `POLITICAS_EPETPLACE` (la reagenda clínica — ver la nota de enmienda de
+> numeración al pie de este doc).
 >
-> **DOS FRENOS DECLARADOS, sin resolver por la mesa:**
-> - **El número de la reagenda clínica (§8) COLISIONA.** La letra la nombra
->   "P20", pero **P20 ya está RESERVADA a la letra de CUSTODIA (D-405)** en
->   `POLITICAS_EPETPLACE` (nota de numeración, verificada al cierre S70 — por eso
->   la letra Uber tomó P21). El siguiente número libre es **P22**. NO se deposita
->   en `POLITICAS` bajo ningún número hasta que el founder resuelva: reagenda
->   clínica → P22 (custodia conserva P20), o custodia se mueve. Precedente:
->   "no pises un número" (D-509, S74). Las referencias internas a "P20" de §8/§12
->   quedan como el founder las dictó, pendientes de esa resolución.
-> - **El literal del aviso de administrador (§5) no llegó** (freno L-142): el
->   par es+en para `LETRA_ROLES_EQUIPO_S74` §6 viaja por mano del founder; hasta
->   que llegue, §6 NO se toca.
+> **LOS DOS FRENOS DE LA TANDA, RESUELTOS (ADDENDUM 3, mismo día):**
+> - **La reagenda clínica es P22** (decisión de mesa): custodia CONSERVA P20
+>   (reserva de S70 — D-405 es materia legal y su número puede estar citado
+>   afuera del repo). Las referencias internas de esta letra fueron corregidas
+>   P20 → P22 con nota de enmienda al pie.
+> - **El literal del aviso de administrador (§5) LLEGÓ por mano del founder** y
+>   está depositado en `LETRA_ROLES_EQUIPO_S74` §6 (el par S74 quedó como
+>   histórico plegado; notas de oficio intactas).
 >
 > **Destino al firmarse:** enmienda a `LETRA_ROLES_EQUIPO_S74` §2 (el selector)
 > · `PORTAL_PRESTADOR` §14 → LETRA_EQUIPO **v3** · resuelve D-521, D-522, D-524,
-> D-525 · abre **P20** y **D-526**.
+> D-525 · abre **P22** *(dictada "P20"; corregida por colisión — nota al pie)* y
+> **D-526**.
 >
 > **Contrastes obligatorios (corridos, no anunciados):** `MODELO_PRODUCTO`
 > §2.5/§6.1/§8 — el contraste vive en §11 de esta letra, como manda la casa ·
@@ -156,7 +156,7 @@ mostrador ya la cumplía sin que nadie la hubiera nombrado.
 | **Recibir walk-in** (mostrador) | ✅ | ✅ | ✅ | ✅ |
 | **Registrar cobro presencial** | ✅ | ✅ | ✅ | ✅ |
 | **Coordinar** una `por_coordinar` (fijar fecha) | ✅ *(excepción nombrada, §8)* | ✅ | ✅ | ✅ |
-| **Reagendar** una cita fijada | ⏳ §8 — espera P20 | ⏳ | ⏳ | ⏳ |
+| **Reagendar** una cita fijada | ⏳ §8 — espera P22 | ⏳ | ⏳ | ⏳ |
 | **Cambiar servicio o profesional** de una cita | ❌ | ❌ | ✅ | ✅ |
 | **Escribir clínico** (nota · caso · vacuna) | ❌ | ✅ *(su chip)* | ❌ *(sin chip)* | ✅ |
 | **Leer expediente clínico** | ❌ | ✅ *(su chip)* | ❌ *(sin chip)* | ✅ |
@@ -367,9 +367,10 @@ teléfono es la misma razón por la que existe el mostrador.**
 fecha**) es la excepción nombrada y aprobada en S76: entra ya, acotada a
 fijar-fecha. **Reagendar** una cita ya fijada espera su política.
 
-**NACE P20 — reagenda y cancelación de la cita CLÍNICA**, hermana de P18, con su
+**NACE P22 — reagenda y cancelación de la cita CLÍNICA** *(dictada "P20";
+corregida por colisión de numeración — nota al pie)*, hermana de P18, con su
 contraste financiero obligatorio. **No se construye en S76.** Se declara para
-que el boceto sepa contra qué reserva el lugar. *Lo que P20 tendrá que resolver
+que el boceto sepa contra qué reserva el lugar. *Lo que P22 tendrá que resolver
 y el paseo no tiene: una cita clínica puede arrastrar caso abierto, presupuesto
 atado o instrucciones de preparación.*
 
@@ -469,7 +470,7 @@ recomendación, urgencia ni orden de oferta.
 | **D-526 🔴 NACE** | *La fila del vínculo es escribible por su propio dueño en campos de GOBIERNO.* `empleados_self_actualiza` (USING/WITH CHECK = `user_id = auth.uid()`, sin lista de columnas) + grant de `authenticated` sobre las 16 columnas + **cero triggers** ⇒ **T1: un empleado desactivado se reactiva solo** · **T2: se escribe `rol='dueño'` en su propia fila.** Probado en vivo por A0bis con rollback verificado. **Alcance real, medido: NO toca lo clínico** — `empleado_tiene_rol` lee `empleado_roles` y `prestadores.user_id`, y T2 escribe `prestador_empleados.rol`, que no es ninguna de las dos. **La mudanza de roles a la tabla hija (S73) es lo que impide que esto sea catástrofe.** **Cura firmada para S76: trigger espejo de D-389** (rebota si cambia `activo` o `rol` y el actor no es titular/admin). El REVOKE por columna es v2 con censo — el titular **necesita** escribir `activo` para desvincular. *Número propuesto; la sesión confirma que D-526 está libre antes de depositar.* |
 | **D-486 ENMENDADA** | El eje legacy no tiene **un** lector vivo: tiene **nueve** — `titular.ts` + los 8 predicados de disponibilidad, que se sostienen sobre la rama `pe.rol = 'dueño'`. **Si el DROP llegara sin migrarlos, muere la disponibilidad del titular en las 8 puertas.** La columna congelada es viga y agujero a la vez. |
 | **D-489** | Es la letra de la celda de recepción (§9). No se cierra acá; se cita como su fuente. |
-| **P20 NACE** | Reagenda y cancelación de la cita clínica (§8). Sin fecha. |
+| **P22 NACE** | Reagenda y cancelación de la cita clínica (§8). Sin fecha. *(Dictada "P20"; corregida — nota al pie.)* |
 | D-469 / D-500 | La banda de cuidado especial: **lugar declarado, no dibujado** (§9). |
 | D-513 v2 / D-517 CLASE 2 | Son el motor del toggle administrador (§5). Sin ellas, el toggle no se ofrece. |
 
@@ -488,7 +489,8 @@ recomendación, urgencia ni orden de oferta.
    **D-526 es una puerta abierta HOY**, no un riesgo futuro. Lectura pendiente.
 3. **La composición del tablero del día** (columnas por persona vs filtro vs
    lista) — la decide M1 sobre la lámina, no esta letra.
-4. **P20 no existe.** La reagenda tiene su lugar reservado y nada más.
+4. **P22 no tiene letra.** La reagenda tiene su lugar reservado (P22 DECLARADA
+   en `POLITICAS`) y nada más.
 5. **El string del aviso de administrador** (§5) necesita literal nuevo y
    **segunda firma del founder**.
 
@@ -516,7 +518,7 @@ banda de cuidado especial.
 
 **Lo que el boceto NO dibuja pero SÍ declara** (para no rehacer la pantalla):
 la banda de cuidado especial (`LETRA_CUIDADO_ESPECIAL` §10) · la acción de
-reagendar (espera P20, §8).
+reagendar (espera P22, §8).
 
 **Las cuatro zonas: §9 de esta letra.**
 **Lo que jamás aparece: §10.**
@@ -530,17 +532,29 @@ propuesta es una corazonada con lámina.
 
 ## Historial
 
+- **FRENOS RESUELTOS (S76, 24 Jul 2026 — ADDENDUM 3, decisión de mesa):**
+  (1) **la reagenda clínica es P22** — custodia conserva P20 (reserva S70,
+  D-405 es materia legal y su número puede estar citado afuera del repo);
+  P22 DECLARADA en `POLITICAS_EPETPLACE` v1.10 y las referencias internas de
+  esta letra corregidas P20 → P22 (nota de enmienda al pie); (2) **el literal
+  del aviso de administrador llegó por mano del founder** y está depositado en
+  `LETRA_ROLES_EQUIPO_S74` §6 (el par S74 plegado como histórico; notas de
+  oficio intactas; registrado como criterio de aceptación del motor
+  administrativo — D-513).
 - **FIRMADA (S76, 24 Jul 2026):** el founder firmó la letra el mismo día en que
   fue propuesta. Con la firma se depositan la **enmienda §1-§2 de
   `LETRA_ROLES_EQUIPO_S74`** (el selector de tres muere) y **`PORTAL_PRESTADOR`
   §14 → LETRA_EQUIPO v3**; y se firman las lecciones **L-166** (todo dato vivo se
   lee al usarlo) y **L-167** (un gate se verifica por el camino de la pantalla).
-  **DOS FRENOS quedan sin resolver por la mesa (ver Estado):** (1) el número de
-  la reagenda clínica de §8 COLISIONA — la letra dice "P20" pero P20 está
-  reservada a la custodia (D-405); el siguiente libre es P22, y NO se deposita en
-  `POLITICAS_EPETPLACE` hasta que el founder resuelva; (2) el literal es+en del
-  aviso de administrador (§5) para `LETRA_ROLES_EQUIPO_S74` §6 no llegó (L-142) —
-  §6 no se edita hasta que el founder lo entregue.
+  Al momento de la firma quedaron DOS FRENOS declarados (el número de la reagenda
+  y el literal del aviso) — resueltos el mismo día por ADDENDUM 3 (entrada de
+  arriba). **Nota de PROCEDENCIA:** el texto de mesa original decía *"PROPUESTA,
+  ESPERA FIRMA"* en el título y el Estado; **el estado lo volteó a FIRMADA la
+  sesión S76-A (Code, el escritor único de docs por 76d) al depositar, el
+  24-jul-2026, por orden literal del founder en el ADDENDUM 2** — la mesa NO
+  propuso la letra ya firmada; el "verbatim" del depósito cubre el CUERPO
+  (§1-§13 + anexo), y el encabezado/historial llevan las enmiendas de estado
+  declaradas en este historial.
 - **PROPUESTA (S76, 24 Jul 2026):** redactada por la mesa sobre el dictado del
   founder en sesión, con piso de literal en los relevamientos S76-A0 y A0bis.
   Enmienda el selector de tres de `LETRA_ROLES_EQUIPO_S74` a **dos toggles** ·
@@ -557,3 +571,19 @@ propuesta es una corazonada con lámina.
   `llegada_en` como timestamp y no estado · el gate clínico por `es_medico` ·
   el trigger de herencia de chips en oferta nueva · `profesional` derivado de
   la presencia de chips.
+
+---
+
+**NOTA DE ENMIENDA DE NUMERACIÓN (S76, 24 Jul 2026 — las referencias "P20" de
+esta letra fueron corregidas a P22):** la mesa dictó *"P20"* leyendo el rango
+P1-P19 de un resumen de `CLAUDE.md` en vez de `POLITICAS_EPETPLACE` — donde
+**P20 estaba RESERVADA a la letra de CUSTODIA (D-405) desde S70** (la nota de
+numeración de P21 lo dice con todas las letras; por eso la letra Uber tomó P21).
+**Atrapado por el freno de A** contra el literal de `POLITICAS` antes de
+depositar. Decisión de mesa (ADDENDUM 3): custodia CONSERVA P20 (materia legal,
+su número puede estar citado afuera del repo) y **la reagenda clínica toma
+P22**. **Es L-166 aplicada CONTRA LA MESA, en la sesión que la firmó** — una
+afirmación de nivel resumen que la fuente no sostiene, la tercera de S76 (las
+otras dos: la conclusión de D-522 y el "0 lectores" de
+`prestador_empleado_servicios`). La entrada PROPUESTA del historial conserva
+"P20" como registro fiel de lo dictado.
