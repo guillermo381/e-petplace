@@ -132,11 +132,14 @@ founder trae la clave (es su cuenta). — *nueva sesión (2ª de 4).*
 **(4a) TITULAR asigna recepción.** App **prestador**, `demo-vet`.
 Equipo → la fila de +9 → asignar rol **recepción**.
 
-**(4b) EMPLEADO opera y REBOTA.** App **prestador**, `guillo381+9`.
+**(4b) EMPLEADO opera.** App **prestador**, `guillo381+9`.
 - Ahora ve la **agenda** y, en la visita de +8, **"La visita" CON
   contacto** (nombre+teléfono de quien reservó) **y SIN lo clínico**.
-- Intenta **escribir algo clínico** → **REBOTA** (ese rebote es el assert
-  de **D-490** en la mano del founder — recepción no escribe la HC).
+- **⚠️ ENMENDADO (A33, acta de cierre §0): este paso YA NO promete el
+  rebote de escritura.** El agujero es de motor (`sedimentar_nota_clinica`
+  es DEFINER y salta la RLS); D-490 está 🔴 REABIERTA hasta su fase 2.
+  El rebote se gatea recién con la fase 2 aplicada — prometerlo hoy sería
+  pedirle al founder que gatee algo que puede NO rebotar.
 
 **(5) PET PARENT ve el sedimento.** App **cliente**, `guillo381+8`. La
 consulta aparece **en la Línea de Vida** de la mascota.
