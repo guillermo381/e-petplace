@@ -1,11 +1,11 @@
-# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — 🕐 **PROPUESTA, ESPERA FIRMA** — v1.4
+# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — 🕐 **PROPUESTA, ESPERA FIRMA** — v1.5
 
-> **Estado: PROPUESTA DE MESA (S77, 24 Jul 2026) — v1.4.** Nace del pedido
+> **Estado: PROPUESTA DE MESA (S77, 24 Jul 2026) — v1.5.** Nace del pedido
 > literal del founder en S76: *"edición es agregar o quitar chips de servicio o
 > eliminar a ese prestador de mi negocio."*
 >
 > **PISO DE LITERAL — de dónde sale cada afirmación de motor de esta letra:**
-> las lecturas **S77-A L1 · L2 · L2bis · L3 · L4 · L5 · L6 · L7 · L(P-OP-3)**,
+> las lecturas **S77-A L1 · L2 · L2bis · L3 · L4 · L5 · L6 · L7 · L8 · L(P-OP-3)**,
 > corridas contra la DB linkeada con `pg_constraint`, `pg_policies`,
 > `pg_trigger`, `information_schema` y `pg_get_functiondef`, más lectura de
 > árbol (`apps/prestador`, `packages/api`) con su grep declarado en L3.
@@ -429,14 +429,45 @@ incompleto.** Es **L-167 un piso más arriba**: el censo buscó a los que llaman
 helper, y el sitio que no lo llama se quedó atrás. D-494 deja de ser 🟠 de
 prolijidad.
 
-**La consecuencia operativa, con su radio honesto:** el titular enciende un
-toggle, y esa persona —sin un solo chip, groomer o recepcionista— pasa a ser
-consultor o tratante de un caso clínico. **Es la ley madre al revés** (*el acceso
-clínico viene del CHIP, jamás del cargo*), viva y alcanzable **desde un control
-que existe hoy en la app**. Radio actual: `profesional` × **0 filas** en toda la
-DB (censo A0 punto 6) — el mismo *"hoy el radio es chico"* con el que nació
-D-526. **Lo que NO está medido:** qué policies y qué superficies consumen esos
-dos helpers. Sin ese censo la severidad se estima; con él se sabe (§10).
+**La consecuencia operativa, con su radio MEDIDO (L8):** no son "dos lectores".
+Son **6 policies + 2 RPC `SECURITY DEFINER`**, sobre `caso_clinico` y
+`caso_clinico_consultor`, cubriendo **SELECT · INSERT · UPDATE** — leer el caso,
+editarlo, leer sus consultores, **sumar otra clínica al caso**, cerrar esa
+consultoría, colgarle un evento (`asociar_a_caso`) y anclarle la nota
+(`sedimentar_nota_clinica`). El titular enciende un toggle y esa persona —sin un
+solo chip— entra a todo eso. **Es la ley madre al revés**, viva y alcanzable
+desde un control que existe hoy en la app. Radio de filas: `profesional` × **0**
+en toda la DB (A0 punto 6).
+
+> ## **Y LA ASIMETRÍA CORTA PARA LOS DOS LADOS — el segundo es peor.**
+>
+> `sedimentar_nota_clinica` **corre los dos gates, uno arriba del otro**:
+> **L55** `empleado_tiene_capacidad_clinica` (el chip, S76) · **L73**
+> `_user_clinica_tratante_del_caso` (la fila, sin flipear). **El escritor
+> clínico madre no quedó afuera del flip: quedó con un pie en cada eje.**
+>
+> - **Falso positivo:** una fila `profesional` concedida a mano pasa L73 sin
+>   ningún chip.
+> - **FALSO NEGATIVO —y es el que rompe a un usuario real—:** el vet con chip
+>   médico verdadero **pasa L55 y rebota en L73**, porque no tiene fila
+>   `dueño`/`profesional`. **El veterinario que está atendiendo el caso no puede
+>   anclarle su nota.** Con `profesional` × 0 filas, eso alcanza a **todo
+>   empleado no titular con chips** — exactamente la figura que S76 construyó.
+>
+> **Por eso la cura no es solo cerrar un agujero: es DESTRABAR AL VET.** Se
+> verifica en las dos direcciones, como manda la casa.
+
+**Y la cura tiene vehículo, que es la otra mitad de la ironía: es la de D-494.**
+Los helpers no pueden llamar a `empleado_tiene_capacidad_clinica` porque reciben
+`p_user_id` por argumento y la función lee `auth.uid()`. **La sobrecarga con
+`user_id` que D-494 propone como prolijidad es exactamente lo que habilita el
+flip.** Una migración, dos deudas.
+
+**Cruce con D-504, verificado: son OTRAS, cero solape.** D-504 vive en
+`evento_caso_clinico_*` con policies `{public}` que citan
+`user_acceso_clinico_a_mascota`; esto vive en `caso_clinico` /
+`caso_clinico_consultor`, cuyas **21 policies son `{authenticated}`** y citan los
+helpers. Distinto síntoma, distintas tablas, distinto helper.
 
 ### 6.2ter. EL TOGGLE `recepcion` — verde en su lectura, y peor en su escritura
 
@@ -582,14 +613,26 @@ posición. Declarado por si algún día alguien vende esa posición.
 
 **ABIERTAS:**
 
-1. 🔴 **EL FLIP §6.2 ESTÁ INCOMPLETO — dos lectores clínicos siguen leyendo el
-   CARGO** (§6.2bis). `_user_clinica_consultor_del_caso` y
-   `_user_clinica_tratante_del_caso`, las dos con `er.rol IN
-   ('dueño','profesional')`. **Deuda propuesta: D-535**, y **D-494 se
-   ENMIENDA**: deja de ser prolijidad y pasa a ser la causa registrada de por
-   qué el censo A4a no las alcanzó. **Precondición de la cura: el censo de sus
-   consumidores** (qué policies, qué superficies, qué caminos) — sin él la
-   severidad se estima. **Es la lectura 8, y no espera a esta letra.**
+1. 🔴 **EL FLIP §6.2 ESTÁ INCOMPLETO — y el radio está MEDIDO** (§6.2bis).
+   `_user_clinica_consultor_del_caso` y `_user_clinica_tratante_del_caso`
+   gatean por `er.rol IN ('dueño','profesional')`. **6 policies + 2 RPC DEFINER,
+   SELECT/INSERT/UPDATE, sobre `caso_clinico` y `caso_clinico_consultor`.**
+   `sedimentar_nota_clinica` corre los dos ejes apilados (L55 chip · L73 fila).
+   **Deuda propuesta: D-535 🔴**, con **D-494 ENMENDADA** (deja de ser
+   prolijidad: su sobrecarga con `user_id` es el vehículo de la cura). **Entra
+   ANTES que la edición de chips** — no por la fuga, sino por el falso negativo:
+   el vet con chip no puede anclar su nota al caso.
+   **DOS LECTURAS QUE LA CURA NECESITA Y NADIE CORRIÓ:**
+   - **¿L73 está guardada por `v_caso_id IS NOT NULL`?** Decide si el rebote
+     alcanza a **toda** nota de un empleado con chips o solo a las ancladas a un
+     caso. Las dos son 🔴; la primera es bloqueante del arco.
+   - **¿los helpers tienen brazo de TITULARIDAD?** L8 citó su *"Caso B"* (el
+     brazo de empleado) y no el resto. Si el titular pasa **solo** por su fila
+     `dueño` de `empleado_roles`, entonces **D-515 es una mina**: está declarada
+     ⚪ MÍNIMA sobre la premisa de que esa fila es redundante — redundante para
+     `empleado_tiene_rol` (que tiene brazo de titularidad), **no necesariamente
+     para estos dos, que no lo llaman.** Dropearla dejaría a los 5 titulares sin
+     escritura de caso. **D-515 no dispara hasta que esto se lea.**
 2. **¿`asignarServiciosEmpleado` sirve para quien ya está adentro**, o su firma
    asume el momento de la invitación? (§7.3). Lectura de una función.
 3. **EL AUTO-LOCKOUT DEL TITULAR, POR MOTOR** (§6.3). `desvincularEmpleado` no
@@ -657,6 +700,29 @@ datos en silencio es lo que esta casa no hace, aunque el cambio sea el correcto.
 
 ## Historial
 
+- **v1.5 (S77, 24 Jul 2026) — el censo del flip incompleto: de "dos lectores" a
+  un radio medido, y la cura cambia de signo.** Sobre la lectura **L8**.
+  **§6.2bis:** el radio deja de estimarse — **6 policies + 2 RPC `SECURITY
+  DEFINER`** sobre `caso_clinico` y `caso_clinico_consultor`, cubriendo
+  **SELECT · INSERT · UPDATE** (leer y editar el caso, leer/sumar/cerrar
+  consultores, `asociar_a_caso`, `sedimentar_nota_clinica`). **El hallazgo que
+  da vuelta la clasificación:** `sedimentar_nota_clinica` corre **los dos ejes
+  apilados** (L55 chip · L73 fila), así que la asimetría corta para los dos
+  lados y **el lado que rompe a un usuario real es el falso NEGATIVO** — el vet
+  con chip médico verdadero pasa L55 y **rebota en L73** por no tener fila
+  `dueño`/`profesional`, y con `profesional` × 0 filas eso alcanza a **todo
+  empleado no titular con chips**. **La cura no es solo cerrar un agujero: es
+  destrabar al vet**, y se verifica en las dos direcciones como manda la casa.
+  **Su vehículo es D-494** (la sobrecarga con `user_id` que los helpers
+  necesitan para poder llamar a `empleado_tiene_capacidad_clinica`): una
+  migración, dos deudas. **Cruce con D-504 verificado: cero solape** (otras
+  tablas, otro helper, `{authenticated}` vs `{public}`). **§10.1:** D-535 pasa a
+  🔴 **y entra ANTES que la edición de chips**, con dos lecturas que la cura
+  necesita — el guard de `v_caso_id` en L73, y si los helpers tienen brazo de
+  titularidad; **de la segunda depende que D-515 sea deuda mínima o mina**
+  (dropear la fila `dueño` redundante dejaría a los 5 titulares sin escritura de
+  caso si esos helpers no tienen otro brazo). **D-515 no dispara hasta que eso
+  se lea.** Fuente: reporte S77-A (reemplazo `e65239c` + lectura L8).
 - **v1.4 (S77, 24 Jul 2026) — la lectura 7 encontró un agujero que no es de esta
   letra: es de S76.** **§6.2bis (nace):** el toggle `profesional` **escribe fila
   propia** en `empleado_roles` sin tocar chips, contra la letra firmada que la
