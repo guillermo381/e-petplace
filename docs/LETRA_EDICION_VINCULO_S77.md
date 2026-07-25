@@ -1,11 +1,11 @@
-# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — 🕐 **PROPUESTA, ESPERA FIRMA** — v1.3
+# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — 🕐 **PROPUESTA, ESPERA FIRMA** — v1.4
 
-> **Estado: PROPUESTA DE MESA (S77, 24 Jul 2026) — v1.3.** Nace del pedido
+> **Estado: PROPUESTA DE MESA (S77, 24 Jul 2026) — v1.4.** Nace del pedido
 > literal del founder en S76: *"edición es agregar o quitar chips de servicio o
 > eliminar a ese prestador de mi negocio."*
 >
 > **PISO DE LITERAL — de dónde sale cada afirmación de motor de esta letra:**
-> las lecturas **S77-A L1 · L2 · L2bis · L3 · L4 · L5 · L6 · L(P-OP-3)**,
+> las lecturas **S77-A L1 · L2 · L2bis · L3 · L4 · L5 · L6 · L7 · L(P-OP-3)**,
 > corridas contra la DB linkeada con `pg_constraint`, `pg_policies`,
 > `pg_trigger`, `information_schema` y `pg_get_functiondef`, más lectura de
 > árbol (`apps/prestador`, `packages/api`) con su grep declarado en L3.
@@ -398,6 +398,62 @@ dos interruptores** (§10). La mesa no propone matarlos sin saber qué filas
 mueven — sería exactamente la clase de afirmación que esta sesión viene
 desarmando.
 
+### 6.2bis. LA LECTURA 7 CONTESTÓ, Y LA DIVERGENCIA TIENE CONSECUENCIA CLÍNICA
+
+**El toggle `profesional` escribe fila propia.** `Interruptor` →
+`toggleRol(m,'profesional',v)` → `asignarRolEmpleado` → `INSERT INTO
+empleado_roles (empleado_id, rol='profesional', asignado_por)`. **No toca
+`prestador_empleado_servicios` en ningún punto.** El motor la trata como
+**concedida a mano**; la letra firmada la declara **derivada de ≥1 chip**.
+
+**Y la misma pantalla se contradice a sí misma** — lo que convierte esto en
+hallazgo y no en detalle. La Hoja de **invitar** lo hace bien, y lo dice en su
+propio comentario: *"los toggles escriben SOLO chips de servicio… `profesional`
+es DERIVADO (≥1 chip) y no se escribe."* La Hoja del **miembro** hace lo
+contrario. Un archivo, dos caminos, dos leyes.
+
+> ## **EL FLIP §6.2 DE S76 NO ALCANZÓ A DOS LECTORES CLÍNICOS.**
+
+`_user_clinica_consultor_del_caso` y `_user_clinica_tratante_del_caso` gatean,
+las dos, con `AND er.rol IN ('dueño','profesional')` — **la fila, no el chip.**
+No están entre los seis sitios que S76 flipeó (`user_acceso_clinico_a_mascota`,
+`user_puede_escribir_clinico` y los 4 DEFINER de D-490), y el censo A4a que
+autorizó el flip no podía verlos.
+
+**El porqué es la parte que hay que registrar, porque es una lección y no un
+descuido: no los vio porque NO LLAMAN AL HELPER.** Eso es literalmente **D-494**
+— *"los dos helpers de caso re-implementan el chequeo de rol por join porque
+reciben el usuario por parámetro"*. **Una deuda archivada como cuestión de
+estilo (puerta única) resultó ser la razón por la que un flip de seguridad quedó
+incompleto.** Es **L-167 un piso más arriba**: el censo buscó a los que llaman al
+helper, y el sitio que no lo llama se quedó atrás. D-494 deja de ser 🟠 de
+prolijidad.
+
+**La consecuencia operativa, con su radio honesto:** el titular enciende un
+toggle, y esa persona —sin un solo chip, groomer o recepcionista— pasa a ser
+consultor o tratante de un caso clínico. **Es la ley madre al revés** (*el acceso
+clínico viene del CHIP, jamás del cargo*), viva y alcanzable **desde un control
+que existe hoy en la app**. Radio actual: `profesional` × **0 filas** en toda la
+DB (censo A0 punto 6) — el mismo *"hoy el radio es chico"* con el que nació
+D-526. **Lo que NO está medido:** qué policies y qué superficies consumen esos
+dos helpers. Sin ese censo la severidad se estima; con él se sabe (§10).
+
+### 6.2ter. EL TOGGLE `recepcion` — verde en su lectura, y peor en su escritura
+
+**Nadie lee esa fila como identidad. La letra firmada §2 se cumple.** Censo con
+literal: **un solo lector vivo**, `obtener_contacto_reserva_cita` — la
+ventanilla, el caso legítimo. `aceptar_invitacion_pendiente_login` la **escribe**
+(A2bis), no la lee. Las cuatro funciones clínicas la nombran **solo en un
+comentario**: la palabra está en la prosa, el predicado no la consulta. En TS,
+los dos únicos hits son el interruptor pintándose a sí mismo.
+
+**Pero el toggle no solo sobra: puede romper.** `quitarRolEmpleado` hace `DELETE`
+sobre `empleado_roles`, así que **apagarlo le borra a esa persona el piso que la
+migración A2bis existe para garantizarle** — y `obtener_contacto_reserva_cita`
+gatea por presencia. El titular apaga un switch y la recepcionista deja de poder
+ver el teléfono de quien reservó. **Un control que puede deshacer una migración
+de piso no es un control viejo: es un control peligroso.**
+
 ### 6.3 Lo que la letra le exige a esa Hoja
 
 - **Ley 23, ya cumplida y que no se rompa:** la pantalla entera gatea por
@@ -519,23 +575,30 @@ posición. Declarado por si algún día alguien vende esa posición.
   fila con `rol='dueño'` y `activo=true` (3 de 5 con franjas propias: 7 · 6 ·
   12). **La pantalla no ofrece el auto-lockout**; el hueco es de motor.
 
+- ~~¿qué escriben los dos `Interruptor` de la Hoja?~~ → **§6.2bis / §6.2ter.**
+  `profesional` escribe **fila propia** (motor y letra firmada divergen);
+  `recepcion` tiene **un solo lector legítimo** pero su toggle puede **borrar el
+  piso de A2bis**.
+
 **ABIERTAS:**
 
-1. **¿QUÉ ESCRIBEN HOY LOS DOS `Interruptor` DE LA HOJA** (`profesional` ·
-   `recepcion`)? **NO RELEVADO** y es **precondición de §6.2**: la mesa no
-   propone matar dos controles vivos sin saber qué filas mueven. Es la
-   **lectura 7**, y va antes de cualquier boceto.
+1. 🔴 **EL FLIP §6.2 ESTÁ INCOMPLETO — dos lectores clínicos siguen leyendo el
+   CARGO** (§6.2bis). `_user_clinica_consultor_del_caso` y
+   `_user_clinica_tratante_del_caso`, las dos con `er.rol IN
+   ('dueño','profesional')`. **Deuda propuesta: D-535**, y **D-494 se
+   ENMIENDA**: deja de ser prolijidad y pasa a ser la causa registrada de por
+   qué el censo A4a no las alcanzó. **Precondición de la cura: el censo de sus
+   consumidores** (qué policies, qué superficies, qué caminos) — sin él la
+   severidad se estima. **Es la lectura 8, y no espera a esta letra.**
 2. **¿`asignarServiciosEmpleado` sirve para quien ya está adentro**, o su firma
    asume el momento de la invitación? (§7.3). Lectura de una función.
 3. **EL AUTO-LOCKOUT DEL TITULAR, POR MOTOR** (§6.3). `desvincularEmpleado` no
    discrimina a quién apaga y **pasa la policy de titularidad sobre la propia
    fila**: nadie puede hacerlo desde la pantalla, cualquiera puede hacerlo
-   llamando al wrapper. Es la familia de D-526 —la superficie protege, el motor
-   no— y la cura es barata: **una rama más en el trigger que D-526 ya
-   instaló** (*la fila del titular no se apaga, ni siquiera por él*).
-   **Deuda propuesta: D-534.** *(Límite honesto de la lectura: nadie midió si
-   esos negocios tienen otros empleados con franjas, así que "el negocio queda
-   sin disponibilidad" es consecuencia probable, no medida.)*
+   llamando al wrapper. Familia de D-526; cura barata: **una rama más en el
+   trigger que D-526 ya instaló**. **Deuda propuesta: D-534.** *(Límite honesto:
+   nadie midió si esos negocios tienen otros empleados con franjas, así que "el
+   negocio queda sin disponibilidad" es consecuencia probable, no medida.)*
 4. **`esDueno` (fila de rol) vs las policies de escritura (titularidad)** —
    dos ejes que hoy coinciden y que **D-515 desacopla** (§3). Registro para la
    tanda de D-515, no trabajo de esta letra.
@@ -555,9 +618,9 @@ posición. Declarado por si algún día alguien vende esa posición.
 9. **El eje legacy `pe.rol = 'dueño'`** aparece en las ocho con forma idéntica
    (§4bis). Registro para D-486.
 
-**Todos los números propuestos (D-533, D-534) se re-verifican libres contra el
-depósito al momento de depositar** — máximo leído hoy: D-531, más D-532
-reservado para el bucket `avatars` (L-166).
+**Todos los números propuestos (D-533, D-534, D-535) se re-verifican libres
+contra el depósito al momento de depositar** — máximo leído hoy: D-531, más
+D-532 reservado para el bucket `avatars` (L-166).
 
 ---
 
@@ -594,6 +657,27 @@ datos en silencio es lo que esta casa no hace, aunque el cambio sea el correcto.
 
 ## Historial
 
+- **v1.4 (S77, 24 Jul 2026) — la lectura 7 encontró un agujero que no es de esta
+  letra: es de S76.** **§6.2bis (nace):** el toggle `profesional` **escribe fila
+  propia** en `empleado_roles` sin tocar chips, contra la letra firmada que la
+  declara DERIVADA — y **la misma pantalla se contradice**: la Hoja de invitar
+  escribe solo chips y lo dice en su comentario, la Hoja del miembro escribe la
+  fila. **La consecuencia: el flip §6.2 de S76 NO alcanzó a
+  `_user_clinica_consultor_del_caso` ni a `_user_clinica_tratante_del_caso`**,
+  que siguen gateando por `er.rol IN ('dueño','profesional')` — la ley madre
+  (*el acceso clínico viene del CHIP, jamás del cargo*) con dos excepciones
+  vivas, alcanzables desde un control que existe hoy en la app. **Y el porqué
+  queda registrado como lección: no las vio el censo A4a porque NO LLAMAN AL
+  HELPER — que es literalmente D-494**, archivada como deuda de prolijidad
+  (puerta única) y que resulta ser la causa de un flip de seguridad incompleto;
+  **L-167 un piso más arriba.** **§6.2ter (nace):** el toggle `recepcion` pasa su
+  censo (un solo lector vivo, la ventanilla; las cuatro clínicas la nombran solo
+  en comentarios) **pero puede DELETE-ar el piso que A2bis concede** — un control
+  capaz de deshacer una migración de piso. **§10:** **D-535** propuesta (el flip
+  incompleto) con **D-494 enmendada**, y la **lectura 8** (censo de consumidores
+  de los dos helpers) declarada como precondición de la cura y **explícitamente
+  fuera de la espera de esta letra**. Fuente: reporte S77-A (reemplazo `4e76a06`
+  + lectura L7); D-494 verificada contra su literal en `DEUDAS_CANONICAS:2185`.
 - **v1.3 (S77, 24 Jul 2026) — el freno se levanta: §6 se escribe, y el trabajo
   no estaba donde el brief lo buscaba.** Sobre las lecturas **L3** (superficie) y
   **L6** (candado). **§1:** la casa YA había decidido la baja sobre el borrado —
