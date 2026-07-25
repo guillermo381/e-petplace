@@ -16680,10 +16680,12 @@ export type Database = {
         Args: { p_email: string }
         Returns: string
       }
-      empleado_tiene_capacidad_clinica: {
-        Args: { p_prestador_id: string }
-        Returns: boolean
-      }
+      empleado_tiene_capacidad_clinica:
+        | { Args: { p_prestador_id: string }; Returns: boolean }
+        | {
+            Args: { p_prestador_id: string; p_user_id: string }
+            Returns: boolean
+          }
       empleado_tiene_rol: {
         Args: { p_prestador_id: string; p_roles: string[] }
         Returns: boolean
