@@ -1,11 +1,11 @@
-# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — 🕐 **PROPUESTA, ESPERA FIRMA** — v1.5
+# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — 🕐 **PROPUESTA, ESPERA FIRMA** — v1.6
 
-> **Estado: PROPUESTA DE MESA (S77, 24 Jul 2026) — v1.5.** Nace del pedido
+> **Estado: PROPUESTA DE MESA (S77, 24 Jul 2026) — v1.6.** Nace del pedido
 > literal del founder en S76: *"edición es agregar o quitar chips de servicio o
 > eliminar a ese prestador de mi negocio."*
 >
 > **PISO DE LITERAL — de dónde sale cada afirmación de motor de esta letra:**
-> las lecturas **S77-A L1 · L2 · L2bis · L3 · L4 · L5 · L6 · L7 · L8 · L(P-OP-3)**,
+> las lecturas **S77-A L1 · L2 · L2bis · L3 · L4 · L5 · L6 · L7 · L8 · L9 · L(P-OP-3)**,
 > corridas contra la DB linkeada con `pg_constraint`, `pg_policies`,
 > `pg_trigger`, `information_schema` y `pg_get_functiondef`, más lectura de
 > árbol (`apps/prestador`, `packages/api`) con su grep declarado en L3.
@@ -450,9 +450,30 @@ en toda la DB (A0 punto 6).
 >   ningún chip.
 > - **FALSO NEGATIVO —y es el que rompe a un usuario real—:** el vet con chip
 >   médico verdadero **pasa L55 y rebota en L73**, porque no tiene fila
->   `dueño`/`profesional`. **El veterinario que está atendiendo el caso no puede
->   anclarle su nota.** Con `profesional` × 0 filas, eso alcanza a **todo
->   empleado no titular con chips** — exactamente la figura que S76 construyó.
+>   `dueño`/`profesional`.
+>
+> **ENMIENDA v1.6 (L9) — EL ALCANCE ERA MÁS ANGOSTO DE LO QUE LA v1.5
+> AFIRMÓ, Y CAE EN PEOR LUGAR.** La v1.5 dijo que el rebote alcanzaba a *"toda
+> nota de todo empleado no titular con chips"*. **Falso: L73 está guardada.**
+> `v_caso_id` no es parámetro — se deriva de `p_caso->>'modo'`, y L73 vive
+> **solo dentro del brazo `'existente'`**:
+>
+> | modo | qué pasa | ¿rebota? |
+> |---|---|---|
+> | `null` / ausente | la nota se sedimenta **sin caso** | **no** |
+> | `'nuevo'` | llama `abrir_caso_clinico`, gateada por `empleado_tiene_capacidad_clinica` — **el eje chip, ya flipeado** | **no** |
+> | `'existente'` | L73 exige ser tratante por la FILA DE ROL | **sí** |
+>
+> **Entonces el vet empleado puede escribir una nota suelta y puede ABRIR un
+> caso nuevo; lo único que no puede es SUMAR SU NOTA A UN CASO QUE YA EXISTE.**
+> Ídem `asociar_a_caso`, que es todo brazo `'existente'`.
+>
+> **La deuda no se cae: se afila, y queda apuntando al corazón del producto.**
+> Lo que se rompe no es la primera consulta — es **la CONTINUIDAD del caso**,
+> que es exactamente lo que EL NORTE pone como diferencial en su propia cita:
+> ***"El vet no atendió una consulta — adoptó un caso."*** Un caso que solo
+> puede seguir quien tiene fila de cargo es un caso que el vet empleado abre y
+> no puede acompañar.
 >
 > **Por eso la cura no es solo cerrar un agujero: es DESTRABAR AL VET.** Se
 > verifica en las dos direcciones, como manda la casa.
@@ -613,33 +634,40 @@ posición. Declarado por si algún día alguien vende esa posición.
 
 **ABIERTAS:**
 
-1. 🔴 **EL FLIP §6.2 ESTÁ INCOMPLETO — y el radio está MEDIDO** (§6.2bis).
-   `_user_clinica_consultor_del_caso` y `_user_clinica_tratante_del_caso`
-   gatean por `er.rol IN ('dueño','profesional')`. **6 policies + 2 RPC DEFINER,
-   SELECT/INSERT/UPDATE, sobre `caso_clinico` y `caso_clinico_consultor`.**
-   `sedimentar_nota_clinica` corre los dos ejes apilados (L55 chip · L73 fila).
-   **Deuda propuesta: D-535 🔴**, con **D-494 ENMENDADA** (deja de ser
-   prolijidad: su sobrecarga con `user_id` es el vehículo de la cura). **Entra
-   ANTES que la edición de chips** — no por la fuga, sino por el falso negativo:
-   el vet con chip no puede anclar su nota al caso.
-   **DOS LECTURAS QUE LA CURA NECESITA Y NADIE CORRIÓ:**
-   - **¿L73 está guardada por `v_caso_id IS NOT NULL`?** Decide si el rebote
-     alcanza a **toda** nota de un empleado con chips o solo a las ancladas a un
-     caso. Las dos son 🔴; la primera es bloqueante del arco.
-   - **¿los helpers tienen brazo de TITULARIDAD?** L8 citó su *"Caso B"* (el
-     brazo de empleado) y no el resto. Si el titular pasa **solo** por su fila
-     `dueño` de `empleado_roles`, entonces **D-515 es una mina**: está declarada
-     ⚪ MÍNIMA sobre la premisa de que esa fila es redundante — redundante para
-     `empleado_tiene_rol` (que tiene brazo de titularidad), **no necesariamente
-     para estos dos, que no lo llaman.** Dropearla dejaría a los 5 titulares sin
-     escritura de caso. **D-515 no dispara hasta que esto se lea.**
+1. ✅ **DEPOSITADA COMO D-532 🔴** (número verificado libre antes de escribir;
+   la v1.5 la proponía como "D-535", que habría abierto tres huecos de
+   numeración — corregido). El flip §6.2 incompleto en los dos helpers de caso,
+   con **D-494 enmendada** como su vehículo. **Sus dos lecturas, CERRADAS por
+   L9:**
+   - **L73 SÍ está guardada** (§6.2bis, enmienda v1.6): el rebote alcanza solo
+     al brazo `'existente'` — la continuidad del caso, no la primera consulta.
+   - **Los helpers NO tienen brazo de titularidad.** Tienen exactamente dos:
+     `cco.owner_profile_id = p_user_id` (owner de la **cuenta comercial**) y el
+     de empleado con fila de rol. Sin `is_admin()`, sin familia, sin
+     `prestadores.user_id`.
+   - **⇒ D-515 QUEDA LIBERADA, y el freno de orden se levanta**: los 5
+     titulares pasan **5/5 por el brazo A**, así que quitarles la fila `dueño`
+     no los saca de estos helpers. **Es deuda mínima, no mina.**
+2. ⚠️ **LA COINCIDENCIA `prestadores.user_id` = `cuentas_comerciales.owner_profile_id`
+   ES VIGA, Y SE APOYA EN N=5** (salvedad de L9, elevada acá porque es la
+   SEGUNDA vez que aparece la misma forma). Lo que sostiene a los titulares en
+   D-532 no es su titularidad del prestador: es que **dos columnas distintas hoy
+   valen lo mismo**, 5/5, ninguno sin cuenta. El día que un prestador cuelgue de
+   una cuenta cuyo owner sea otra persona, o que `cuenta_comercial_id` sea NULL,
+   **ese titular cae solo al brazo B y la fila `dueño` deja de ser redundante**
+   — D-515 se reabre sola. **Precedente idéntico ya registrado:** A14 de S75
+   declaró seguro el swap de `countryCode` porque `prestadores.country_code ==
+   cuentas_comerciales.country_code` en **5/5 filas reales**, con su borde
+   declarado. **Misma tabla, misma evidencia, misma clase de supuesto, dos
+   decisiones apoyadas encima.** Candidata a deuda propia — *número al
+   depositar, con su literal.*
 2. **¿`asignarServiciosEmpleado` sirve para quien ya está adentro**, o su firma
    asume el momento de la invitación? (§7.3). Lectura de una función.
 3. **EL AUTO-LOCKOUT DEL TITULAR, POR MOTOR** (§6.3). `desvincularEmpleado` no
    discrimina a quién apaga y **pasa la policy de titularidad sobre la propia
    fila**: nadie puede hacerlo desde la pantalla, cualquiera puede hacerlo
    llamando al wrapper. Familia de D-526; cura barata: **una rama más en el
-   trigger que D-526 ya instaló**. **Deuda propuesta: D-534.** *(Límite honesto:
+   trigger que D-526 ya instaló**. **Deuda propuesta — número al depositar.** *(Límite honesto:
    nadie midió si esos negocios tienen otros empleados con franjas, así que "el
    negocio queda sin disponibilidad" es consecuencia probable, no medida.)*
 4. **`esDueno` (fila de rol) vs las policies de escritura (titularidad)** —
@@ -649,8 +677,8 @@ posición. Declarado por si algún día alguien vende esa posición.
    (§5bis). FK a `prestador_empleados` con `ON DELETE SET NULL`, 0 de 1 filas
    poblada, **ningún generador la lee ni la escribe.** Trampa servida para la
    próxima mesa: el nombre promete *"el paseador del plan"* y el motor no lo
-   cumple. Se declara para desarmarla (L-166, nota de método). **Deuda
-   propuesta: D-533.**
+   cumple. Se declara para desarmarla (L-166, nota de método). **Deuda propuesta —
+   número al depositar, con su literal.**
 6. **La fecha de revocación del chip** (§2). Declarada, no curada.
 7. **Los chips AL INVITAR** siguen sin verificar en su motor —
    `LETRA_RECEPCION_S76` §13 punto 1. L3 probó que **la superficie existe**; que
@@ -661,9 +689,12 @@ posición. Declarado por si algún día alguien vende esa posición.
 9. **El eje legacy `pe.rol = 'dueño'`** aparece en las ocho con forma idéntica
    (§4bis). Registro para D-486.
 
-**Todos los números propuestos (D-533, D-534, D-535) se re-verifican libres
-contra el depósito al momento de depositar** — máximo leído hoy: D-531, más
-D-532 reservado para el bucket `avatars` (L-166).
+**LA NUMERACIÓN NO SE PRE-ASIGNA.** El canon exige numeración corrida SIN
+huecos: cada deuda toma su número **al depositar, con su propio literal y su
+`grep` de verificación en cero** — reservar tres números por adelantado abre
+tres agujeros. Depositado hasta hoy: **D-532** (el flip incompleto). El bucket
+`avatars`, la columna muerta, el auto-lockout y la viga N=5 toman el suyo cuando
+lleguen con su texto.
 
 ---
 
@@ -700,6 +731,29 @@ datos en silencio es lo que esta casa no hace, aunque el cambio sea el correcto.
 
 ## Historial
 
+- **v1.6 (S77, 24 Jul 2026) — la mesa se corrige a sí misma, y D-515 queda
+  liberada bajo condición.** Sobre la lectura **L9**. **§6.2bis ENMENDADA:** la
+  v1.5 afirmó que el rebote de L73 alcanzaba a *"toda nota de todo empleado no
+  titular con chips"* — **falso, y era afirmación de mesa sin su literal.** L73
+  vive **solo dentro del brazo `'existente'`** de un `p_caso->>'modo'` de tres
+  valores: la nota suelta pasa, **abrir un caso nuevo pasa** (va por
+  `abrir_caso_clinico`, ya flipeada al chip), y **lo único que rebota es sumar
+  la nota a un caso que YA existe** (ídem `asociar_a_caso`). **La deuda no se
+  cae: se afila y apunta al corazón del producto** — lo roto es la CONTINUIDAD
+  del caso, la frase de EL NORTE (*"el vet no atendió una consulta — adoptó un
+  caso"*). **§10.1:** D-532 depositada (y registrado que la v1.5 la proponía
+  como "D-535", lo que habría abierto tres huecos de numeración); sus dos
+  lecturas cerradas; **los helpers no tienen brazo de titularidad** —solo owner
+  de cuenta comercial y empleado-con-fila— y **los 5 titulares pasan 5/5 por el
+  brazo A**, así que **D-515 es mínima, no mina, y su freno de orden se
+  levanta.** **§10.2 (nace):** la salvedad de L9 elevada a hallazgo propio —
+  lo que sostiene a los titulares es que `prestadores.user_id` y
+  `cuentas_comerciales.owner_profile_id` **hoy valen lo mismo en 5/5 filas**,
+  dos columnas distintas tratadas como una; **es la SEGUNDA decisión apoyada en
+  esa evidencia** (la primera: A14 de S75, el swap del `countryCode` sobre
+  `country_code` 5/5). **§10 cierre:** la numeración deja de pre-asignarse — cada
+  deuda toma su número al depositar, con su `grep` en cero. Fuente: reporte
+  S77-A (`65cdc87` letra v1.5 · `c5e0aee` D-532 + enmienda D-494 · lectura L9).
 - **v1.5 (S77, 24 Jul 2026) — el censo del flip incompleto: de "dos lectores" a
   un radio medido, y la cura cambia de signo.** Sobre la lectura **L8**.
   **§6.2bis:** el radio deja de estimarse — **6 policies + 2 RPC `SECURITY
