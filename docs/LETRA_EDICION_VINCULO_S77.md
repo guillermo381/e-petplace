@@ -1,11 +1,12 @@
-# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — 🕐 **PROPUESTA, ESPERA FIRMA** — v1.1
+# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — 🕐 **PROPUESTA, ESPERA FIRMA** — v1.2
 
-> **Estado: PROPUESTA DE MESA (S77, 24 Jul 2026) — v1.1.** Nace del pedido
+> **Estado: PROPUESTA DE MESA (S77, 24 Jul 2026) — v1.2.** Nace del pedido
 > literal del founder en S76: *"edición es agregar o quitar chips de servicio o
 > eliminar a ese prestador de mi negocio."*
 >
 > **PISO DE LITERAL — de dónde sale cada afirmación de motor de esta letra:**
-> las lecturas **S77-A L1 · L2 · L2bis · L4 · L(P-OP-3)**, corridas contra la DB
+> las lecturas **S77-A L1 · L2 · L2bis · L4 · L5 · L(P-OP-3)**, corridas contra
+> la DB
 > linkeada con `pg_constraint`, `pg_policies`, `pg_trigger`,
 > `information_schema` y `pg_get_functiondef`. **Ninguna afirmación de motor
 > sale de memoria** (L-141 y L-166, que rigen también para la mesa). Lo que NO
@@ -268,27 +269,48 @@ brief ya sabe llenar: **`empleado_id = NULL` ES "cita de la clínica"**
 > qué hacer con las citas futuras; la respuesta correcta es el objeto que el
 > ítem 2 construye. Separarlos obliga a construir la baja dos veces.
 
-### 5bis. EL SEGUNDO OBJETO — los planes y programas (hallazgo de L4)
+### 5bis. EL SEGUNDO OBJETO — RESUELTO POR EL MOTOR, Y BIEN (lectura L5)
 
-La lectura 4 arrastró algo que la v1.0 no veía: **`_generar_citas_plan` y
-`_generar_citas_programa` están entre las ocho.** No son lectoras de
-disponibilidad — **son las que PARIEN las citas futuras** de un plan de paseo o
-de un programa de adiestramiento, y llevan `pe.activo` en el mismo JOIN.
+La v1.1 abrió este borde temiendo lo peor: que un plan pagado por adelantado
+dejara de generar citas en silencio. **La lectura 5 lo desmiente, y el motor
+sale mejor parado que la sospecha.**
 
-**Entonces la baja no tiene un objeto, tiene dos:**
+**Ni empleado fijo, ni reasignación: elección por FECHA.** Ninguna de las dos
+funciones guarda persona. En cada iteración del bucle resuelven a quién le toca
+—`prestador_horarios` + `pe.activo` + el predicado del chip, desempatando por
+carga del día → `created_at` → `id`— y la estampan **solo** en
+`evento_cita_servicio.empleado_id`. Consecuencia declarada: **con más de un
+profesional, dos fechas del mismo plan pueden caer en personas distintas.** El
+plan es del negocio, no de la persona. *(Trampa declarada:
+`suscripciones_servicio.empleado_id` EXISTE con su FK y **nadie la lee ni la
+escribe** — 0 de 1 filas poblada. Parece "el paseador asignado" y no lo es. Ver
+§10.)*
 
-1. **Las citas ya generadas** — quedan pegadas a la persona y se vuelven
-   invisibles (§5).
-2. **El flujo que las genera** — un plan o programa vivo **deja de producir
-   citas**, y la familia que pagó por adelantado se queda esperando.
+**Cuando no hay nadie elegible, ABORTA — no saltea, no reasigna:**
+`RAISE EXCEPTION 'fecha_sin_cupo: %'`, idéntico en las dos, precedido de
+`prestador_no_disponible` (D-341, vacaciones) y `fuera_de_horario`.
 
-**Lo que la mesa NO afirma:** si el plan está atado a esa persona en
-particular, si el generador la reemplaza por otro libre, o si simplemente deja
-de generar. **Es lectura, no deducción — va a §10.3.** Pero el borde es real y
-cambia la forma de la pregunta de §11: una cita suelta se puede reasignar a la
-clínica; **un plan de doce paseos con una familia que ya pagó, no es lo mismo.**
+**Y las dos puertas fallan distinto, las dos honestas:**
 
-**LA DECISIÓN ES TUYA (§11, la única pregunta de esta letra).**
+| Puerta | Qué pasa | Rastro |
+|---|---|---|
+| **Contratar** (RPC de pantalla) | la excepción sube al wrapper como **código tipado**, la transacción revierte, **nada nace** | sin rastro persistente — pero la persona lo ve en el acto |
+| **Renovar** (cron diario 8:00, `cerrar_y_renovar_planes`) | cada plan en su propio bloque: **no mata la corrida de los demás** | **triple**: `pago_metadata.renovacion_fallida` con `SQLERRM` y timestamp · **notificación in-app al dueño** · contador de errores en el retorno |
+
+> **La baja NO rompe los planes en silencio.** El plan cae a `vencida` y la
+> familia se entera con voz y con camino (*"puedes rearmarlo desde Mis
+> paseos"*). **Esta letra no necesita política para el segundo objeto.**
+
+**Lo que SÍ queda, y vuelve al primer objeto:** el cron solo toca planes cuyo
+período ya cerró. **Las citas del período en curso ya están generadas y siguen
+apuntando a la persona dada de baja.** Ninguna de las dos funciones reasigna
+citas existentes *(límite declarado por la lectura: si existe otro camino que
+reasigne al desactivar, no entró en su alcance)*. Así que la forma real es esta:
+**dos semanas de paseos que el negocio no puede ver (§5), y recién al cierre del
+período el aviso de que el plan no se renovó.** El aviso llega tarde y llega por
+el motivo equivocado.
+
+**LA DECISIÓN ES TUYA (§11) — y ahora es UNA sola.**
 
 ---
 
@@ -313,6 +335,21 @@ corazonada con lámina.** Lo único que la letra fija de antemano:
   un lector que degrada a lista vacía **esconde** el hueco. La forma exacta
   (aviso en la celda · estado vacío · celda navegable a la jornada) la decide
   M1 sobre la lámina; **que la pantalla lo diga es letra.**
+- **LA BAJA NO SE OFRECE SOBRE LA PROPIA FILA DEL TITULAR.** Las ocho lectoras
+  llegan a la persona por `prestador_empleados`, **no** por
+  `prestadores.user_id` — así que un titular que se dé de baja a sí mismo
+  **desaparece de la disponibilidad de su propio negocio** conservando su acceso
+  clínico (que viene del brazo 2, la titularidad). Es un candado silencioso
+  sobre el negocio entero, y el trigger de D-526 **no lo frena**: el titular
+  está autorizado a escribir ese `activo`. La superficie **no dibuja la acción
+  sobre su propia fila** — Ley 23 en su forma preventiva. *(Confirmación de una
+  query antes de construir: §10.)*
+- **LA VOZ DE LA BAJA NO HEREDA EL AVISO DE RENOVACIÓN.** El aviso que hoy
+  recibe la familia cuando un plan no se renueva dice que *cambió la agenda del
+  paseador* (§5bis). En el caso de la baja eso **nombra una causa que no es la
+  causa**, y llega semanas tarde. El aviso al dueño del plan es su propia
+  decisión de voz; **no se resuelve reciclando un string que se escribió para
+  otro motivo.**
 
 ---
 
@@ -391,43 +428,55 @@ posición. Declarado por si algún día alguien vende esa posición.
   qué: el incidente S75-A.)*
 - ~~¿las 8 lectoras exigen `pe.activo`?~~ → **§4bis.** 8 de 8, en el JOIN. La
   baja da de baja. **Esta letra no necesita cura adentro.**
+- ~~¿qué hacen los generadores de citas futuras?~~ → **§5bis.** Eligen por
+  fecha, abortan con código tipado, y la renovación por cron deja **triple
+  rastro con notificación al dueño**. **El segundo objeto no necesita
+  política.**
 
 **ABIERTAS:**
 
 1. **La superficie** (§6): esperando la **lectura 3** — ¿existe hoy el camino de
    desvincular en `/negocio/equipo`? Es lo único que decide si S77 construye una
    superficie o dos.
-2. **La fecha de revocación del chip** (§2, último párrafo). Declarada, no
+2. **Confirmación del candado anti-lockout** (§6): una query — ¿el titular
+   tiene fila propia en `prestador_empleados` con `rol='dueño'`? El literal de
+   las ocho lo implica (si no, la rama `pe.rol='dueño'` sería código muerto y
+   ningún titular sería reservable hoy), **pero implicar no es leer.**
+3. **`suscripciones_servicio.empleado_id` — columna muerta que parece viva**
+   (§5bis). Tiene FK a `prestador_empleados` con `ON DELETE SET NULL`, 0 de 1
+   filas poblada, y **ningún generador la lee ni la escribe.** Es una trampa
+   servida para la próxima mesa: el nombre promete *"el paseador del plan"* y el
+   motor no lo cumple. Se declara para desarmarla (L-166, nota de método).
+   **Deuda propuesta: D-533** — número a re-verificar libre al depositar.
+4. **La fecha de revocación del chip** (§2, último párrafo). Declarada, no
    curada.
-3. **QUÉ HACEN `_generar_citas_plan` Y `_generar_citas_programa` cuando el
-   empleado deja de ser elegible** (§5bis). **NO RELEVADO.** ¿El plan está atado
-   a esa persona? ¿El generador la reemplaza, saltea el turno, o deja de generar?
-   **Es la lectura 5 y va antes de construir la baja** — la respuesta decide si
-   §11 tiene una respuesta o dos.
-4. **Los chips AL INVITAR** siguen sin verificar — `LETRA_RECEPCION_S76` §13
+5. **Los chips AL INVITAR** siguen sin verificar — `LETRA_RECEPCION_S76` §13
    punto 1 lo dice y esta letra no lo mueve. **La mesa no afirma que esté APTO.**
-5. **Las 3 filas legacy desactivadas: ¿personas reales o seed?** Sigue abierta
+6. **Las 3 filas legacy desactivadas: ¿personas reales o seed?** Sigue abierta
    desde S76. Si alguna es real, la baja que esta letra construye tiene un caso
    de uso hoy, no mañana.
-6. **El eje legacy `pe.rol = 'dueño'`** aparece en las ocho con forma idéntica
+7. **El eje legacy `pe.rol = 'dueño'`** aparece en las ocho con forma idéntica
    (§4bis). Es registro para D-486, no trabajo de esta letra.
 
 ---
 
 ## 11. LA ÚNICA PREGUNTA PARA EL FOUNDER
 
-**Cuando das de baja a un profesional que tiene trabajo por delante, ¿qué pasa
-con ese trabajo?**
+**Cuando das de baja a un profesional que tiene citas agendadas, ¿qué pasa con
+esas citas?**
 
-Hoy el motor responde solo, y responde mal **por partida doble**: las citas ya
-agendadas quedan pegadas a él y **se vuelven invisibles para todos menos para
-vos** (§5), y los planes o programas vivos **dejan de generar citas** (§5bis).
+**Es UNA pregunta, no dos.** La v1.1 temía que los planes pagados por adelantado
+necesitaran su propia política; la lectura 5 probó que **el motor ya los resuelve
+con voz** (§5bis). Lo que queda es un solo objeto: **las citas que ya existen.**
 
-**La tabla de abajo responde por el primer objeto — la cita suelta.** El segundo
-(el plan pagado por adelantado) **no se decide hasta la lectura 5** (§10.3): la
-mesa no sabe todavía si el plan está atado a la persona o si el generador
-reasigna solo, y no va a proponerte una política sobre plata de una familia
-apoyada en una suposición.
+Hoy el motor responde solo, y responde mal: quedan pegadas a él y **se vuelven
+invisibles para todos menos para vos** (§5).
+
+**Y el caso del plan es el que le pone cuerpo a la pregunta:** una familia con
+un plan de paseos en curso tiene citas los próximos catorce días. Si el paseador
+se va, esas catorce citas siguen existiendo, **el negocio no las ve**, y el
+único aviso que la familia va a recibir llega al cierre del período diciéndole
+que su plan no se renovó. **Alguien va a estar esperando en la puerta.**
 
 | | Qué hace | Qué cuesta |
 |---|---|---|
@@ -444,6 +493,24 @@ datos en silencio es lo que esta casa no hace, aunque el cambio sea el correcto.
 
 ## Historial
 
+- **v1.2 (S77, 24 Jul 2026) — el segundo objeto se cierra, y la pregunta vuelve
+  a ser una sola.** **§5bis reescrita** sobre la lectura L5: los generadores **no
+  guardan persona** (eligen por fecha; con N>1, dos fechas del mismo plan pueden
+  caer en gente distinta), **abortan con código tipado** en vez de saltear, y la
+  renovación por cron deja **triple rastro con notificación in-app al dueño** —
+  **la baja no rompe planes en silencio y esta letra no necesita política para
+  ellos**. Lo que vuelve al primer objeto: las citas del período EN CURSO ya
+  están generadas y siguen apuntando a la persona, y el aviso de no-renovación
+  llega al cierre del período, tarde y por el motivo equivocado. **§6 gana dos
+  candados:** la baja **no se ofrece sobre la propia fila del titular** (las
+  ocho llegan por `prestador_empleados`, no por `prestadores.user_id` — un
+  titular que se dé de baja se borra de la disponibilidad de su propio negocio y
+  el trigger de D-526 no lo frena, porque está autorizado), y **la voz de la
+  baja no recicla el string de renovación**. **§10 gana la trampa declarada:**
+  `suscripciones_servicio.empleado_id` tiene FK y nadie la lee — parece *"el
+  paseador del plan"* y no lo es (deuda propuesta **D-533**). **§11 colapsa a
+  UNA pregunta**, con el caso del plan como su cuerpo. Fuente: reporte S77-A
+  (reemplazo `97fae6b` + lectura L5). **Sigue abierta la lectura 3.**
 - **v1.1 (S77, 24 Jul 2026) — las dos lecturas que la v1.0 abrió, cerradas con
   literal.** **§1:** el hallazgo candidato de `prestador_atencion_log` se
   resuelve por la rama buena — los dos triggers append-only existen y están
