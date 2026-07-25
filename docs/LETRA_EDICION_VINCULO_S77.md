@@ -1,11 +1,11 @@
-# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — 🕐 **PROPUESTA, ESPERA FIRMA** — v1.6
+# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — 🕐 **PROPUESTA, ESPERA FIRMA** — v1.7
 
-> **Estado: PROPUESTA DE MESA (S77, 24 Jul 2026) — v1.6.** Nace del pedido
+> **Estado: PROPUESTA DE MESA (S77, 24 Jul 2026) — v1.7.** Nace del pedido
 > literal del founder en S76: *"edición es agregar o quitar chips de servicio o
 > eliminar a ese prestador de mi negocio."*
 >
 > **PISO DE LITERAL — de dónde sale cada afirmación de motor de esta letra:**
-> las lecturas **S77-A L1 · L2 · L2bis · L3 · L4 · L5 · L6 · L7 · L8 · L9 · L(P-OP-3)**,
+> las lecturas **S77-A L1 · L2 · L2bis · L3 · L4 · L5 · L6 · L7 · L8 · L9 · L10 · L(P-OP-3)**,
 > corridas contra la DB linkeada con `pg_constraint`, `pg_policies`,
 > `pg_trigger`, `information_schema` y `pg_get_functiondef`, más lectura de
 > árbol (`apps/prestador`, `packages/api`) con su grep declarado en L3.
@@ -648,19 +648,38 @@ posición. Declarado por si algún día alguien vende esa posición.
    - **⇒ D-515 QUEDA LIBERADA, y el freno de orden se levanta**: los 5
      titulares pasan **5/5 por el brazo A**, así que quitarles la fila `dueño`
      no los saca de estos helpers. **Es deuda mínima, no mina.**
-2. ⚠️ **LA COINCIDENCIA `prestadores.user_id` = `cuentas_comerciales.owner_profile_id`
-   ES VIGA, Y SE APOYA EN N=5** (salvedad de L9, elevada acá porque es la
-   SEGUNDA vez que aparece la misma forma). Lo que sostiene a los titulares en
-   D-532 no es su titularidad del prestador: es que **dos columnas distintas hoy
-   valen lo mismo**, 5/5, ninguno sin cuenta. El día que un prestador cuelgue de
-   una cuenta cuyo owner sea otra persona, o que `cuenta_comercial_id` sea NULL,
-   **ese titular cae solo al brazo B y la fila `dueño` deja de ser redundante**
-   — D-515 se reabre sola. **Precedente idéntico ya registrado:** A14 de S75
-   declaró seguro el swap de `countryCode` porque `prestadores.country_code ==
-   cuentas_comerciales.country_code` en **5/5 filas reales**, con su borde
-   declarado. **Misma tabla, misma evidencia, misma clase de supuesto, dos
-   decisiones apoyadas encima.** Candidata a deuda propia — *número al
-   depositar, con su literal.*
+2. ⚠️ **LA COINCIDENCIA `prestadores.user_id` = `cuentas_comerciales.owner_profile_id`:
+   ES INVARIANTE DEL CAMINO FELIZ, SIN CANDADO** (veredicto L10 — **corrige a la
+   v1.6, que la llamó "apoyada en N=5"**). No es suerte: **el alta la fuerza por
+   construcción.** `crear_prestador_inicial` (única puerta de INSERT) escribe
+   `user_id := auth.uid()` y antes exige
+   `_validar_ownership_cuenta_comercial`, que rebota si el owner de la cuenta no
+   es ese mismo `auth.uid()`. Los 5 coinciden **por construcción**.
+   **Pero la garantía es de PROCEDIMIENTO, y tiene dos fugas medidas:**
+   - **El INSERT directo por PostgREST no la exige.** Las policies INSERT de
+     `prestadores` tienen `with_check = (user_id = auth.uid())` y **no dicen
+     nada del `cuenta_comercial_id`**: un `authenticated` puede colgarse un
+     prestador de la cuenta comercial de otra persona sin pasar por el RPC.
+     **Y son DOS policies duplicadas** (`prestador_insert_self` ·
+     `prestadores_insert`) — se evalúan en OR, así que **curar una sola es un
+     verde falso**. Precedente exacto: el cinturón de D-495.
+   - **El lado de la cuenta no está congelado.** `admin_all_cuentas_comerciales`
+     puede reasignar `owner_profile_id` libremente, y
+     `_prestadores_protege_columnas` deja pasar a admin y a todo DEFINER: **el
+     cambio de owner rompe la coincidencia sin que nada rebote.**
+     **Lectura de mesa: eso no es un agujero, es la SUCESIÓN DEL TITULAR
+     (D-510) ocurriendo sin su letra.** Cambiar el owner de una cuenta *es*
+     traspasar el negocio. Hasta que D-510 tenga letra, lo honesto es que
+     **rebote**, no que pase callado.
+   - ~~"o que `cuenta_comercial_id` sea NULL"~~ → **imposible**: la columna es
+     `NOT NULL` (L10.3). Mitad de la salvedad de L9, descartada por el literal.
+   **El porqué parece estructural y no lo es, en una línea de L10:** existen
+   `uq_prestadores_user_id` (un humano ≤ 1 prestador) y `uq_cuentas_owner_profile`
+   (un humano ≤ 1 cuenta), **y dos 1:1 paralelos no componen un 1:1 cruzado.**
+   **Consumidores que descansan encima:** el brazo A de los dos helpers de
+   D-532 · un pedazo de la premisa de D-515 · el swap del `countryCode` de
+   D-517 (A14, la misma pareja de tablas con la misma evidencia). **Deuda —
+   número al depositar, con su literal.**
 2. **¿`asignarServiciosEmpleado` sirve para quien ya está adentro**, o su firma
    asume el momento de la invitación? (§7.3). Lectura de una función.
 3. **EL AUTO-LOCKOUT DEL TITULAR, POR MOTOR** (§6.3). `desvincularEmpleado` no
@@ -688,6 +707,30 @@ posición. Declarado por si algún día alguien vende esa posición.
    desde S76.
 9. **El eje legacy `pe.rol = 'dueño'`** aparece en las ocho con forma idéntica
    (§4bis). Registro para D-486.
+
+### 10bis. LECCIÓN CANDIDATA — nacida del proceso de esta letra
+
+**PROPUESTA, sin firma.** Esta letra se equivocó DOS VECES de la misma forma, y
+las dos las corrigió la fuente, no la mesa:
+
+- **v1.5** afirmó en su cuerpo que el rebote de L73 alcanzaba *"toda nota de
+  todo empleado no titular con chips"* — **mientras su propia §10 listaba
+  "¿L73 está guardada?" como NO LEÍDA.** L9 la desmintió: solo el brazo
+  `'existente'`.
+- **v1.6** llamó *"apoyada en N=5"* a la coincidencia prestador↔cuenta —
+  **mientras pedía la lectura que iba a medirla.** L10 la desmintió: está
+  forzada por construcción, con dos fugas nombradas.
+
+> **L-168 (candidata): UNA LETRA NO AFIRMA EN SU CUERPO LO QUE ELLA MISMA LISTA
+> COMO NO LEÍDO. Mientras la lectura no vuelve, el cuerpo lleva la versión
+> ANGOSTA — la alarmante vive en el pedido de lectura, jamás en la letra.**
+
+Es **L-158 aplicada a la mesa que escribe** (*una fila de hipótesis nombra el
+TRABAJO, jamás el componente como hecho*) y hermana de **L-166**: las dos veces
+lo que falló fue una afirmación de nivel resumen que la fuente no sostenía —
+**esta vez producida por la propia mesa, en el documento que la lista como
+pendiente dos secciones más abajo.** El daño fue cero porque las lecturas
+volvieron rápido; con la letra ya firmada, no lo habría sido.
 
 **LA NUMERACIÓN NO SE PRE-ASIGNA.** El canon exige numeración corrida SIN
 huecos: cada deuda toma su número **al depositar, con su propio literal y su
@@ -731,6 +774,25 @@ datos en silencio es lo que esta casa no hace, aunque el cambio sea el correcto.
 
 ## Historial
 
+- **v1.7 (S77, 24 Jul 2026) — el veredicto de la viga, y la mesa se corrige por
+  SEGUNDA vez en la misma dirección.** Sobre la lectura **L10**. **§10.2
+  REESCRITA:** la coincidencia prestador↔cuenta **no es "N=5 por suerte" —
+  la fuerza el alta por construcción** (`crear_prestador_inicial` escribe
+  `user_id := auth.uid()` y `_validar_ownership_cuenta_comercial` exige que el
+  owner sea ese mismo uid). **Es invariante del camino feliz SIN CANDADO**, con
+  dos fugas medidas: (a) las policies INSERT de `prestadores` solo exigen
+  `user_id = auth.uid()` y **no dicen nada del `cuenta_comercial_id`** — y son
+  **DOS duplicadas**, evaluadas en OR, así que curar una sola sería verde falso
+  (precedente D-495); (b) un admin puede reasignar `owner_profile_id` y nada
+  rebota — **y eso no es agujero, es la SUCESIÓN DEL TITULAR (D-510) ocurriendo
+  sin su letra**. La mitad NULL de la salvedad de L9 **queda descartada**:
+  `cuenta_comercial_id` es `NOT NULL`. **El porqué parece estructural, de L10:**
+  hay dos UNIQUE paralelos (`uq_prestadores_user_id`,
+  `uq_cuentas_owner_profile`) y **dos 1:1 paralelos no componen un 1:1
+  cruzado.** **§10bis (nace): L-168 candidata** — *una letra no afirma en su
+  cuerpo lo que ella misma lista como no leído*; nace de los dos errores de
+  esta misma letra (v1.5 sobre L73, v1.6 sobre la viga), los dos corregidos por
+  la fuente. Fuente: reporte S77-A (`d10742e` letra v1.6 · lectura L10).
 - **v1.6 (S77, 24 Jul 2026) — la mesa se corrige a sí misma, y D-515 queda
   liberada bajo condición.** Sobre la lectura **L9**. **§6.2bis ENMENDADA:** la
   v1.5 afirmó que el rebote de L73 alcanzaba a *"toda nota de todo empleado no
