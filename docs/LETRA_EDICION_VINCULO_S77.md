@@ -1,22 +1,22 @@
-# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — 🕐 **PROPUESTA, ESPERA FIRMA** — v1.2
+# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — 🕐 **PROPUESTA, ESPERA FIRMA** — v1.3
 
-> **Estado: PROPUESTA DE MESA (S77, 24 Jul 2026) — v1.2.** Nace del pedido
+> **Estado: PROPUESTA DE MESA (S77, 24 Jul 2026) — v1.3.** Nace del pedido
 > literal del founder en S76: *"edición es agregar o quitar chips de servicio o
 > eliminar a ese prestador de mi negocio."*
 >
 > **PISO DE LITERAL — de dónde sale cada afirmación de motor de esta letra:**
-> las lecturas **S77-A L1 · L2 · L2bis · L4 · L5 · L(P-OP-3)**, corridas contra
-> la DB
-> linkeada con `pg_constraint`, `pg_policies`, `pg_trigger`,
-> `information_schema` y `pg_get_functiondef`. **Ninguna afirmación de motor
+> las lecturas **S77-A L1 · L2 · L2bis · L3 · L4 · L5 · L6 · L(P-OP-3)**,
+> corridas contra la DB linkeada con `pg_constraint`, `pg_policies`,
+> `pg_trigger`, `information_schema` y `pg_get_functiondef`, más lectura de
+> árbol (`apps/prestador`, `packages/api`) con su grep declarado en L3.
+> **Ninguna afirmación de motor
 > sale de memoria** (L-141 y L-166, que rigen también para la mesa). Lo que NO
 > se relevó está marcado como tal en §10.
 >
-> **FRENO DECLARADO:** la **lectura 3** (¿existe HOY la superficie de
-> desvincular en `/negocio/equipo`?) **no fue reportada** — es territorio B por
-> 76(d). Por eso **§6 (la superficie) está en blanco a propósito**: decide si
-> S77 construye una superficie o dos, y la mesa no lo supone. `CLAUDE.md:42`
-> afirma que B la construyó en S74; eso es resumen, no fuente.
+> **EL FRENO DE LA v1.0–v1.2, LEVANTADO (v1.3).** La lectura 3 llegó: la
+> superficie de `/negocio/equipo` fue leída en su archivo, no heredada de
+> `CLAUDE.md:42`. **§6 deja de estar en blanco** y la pregunta que la abría
+> tiene respuesta: **S77 construye UNA superficie, no dos.**
 >
 > **Contrastes obligatorios (corridos, no anunciados):** `MODELO_PRODUCTO`
 > §2.5 / §6.1 / §8.1 / §8.6 / §8.8 — el contraste vive en **§9** de esta letra,
@@ -77,7 +77,18 @@ preserva). Reactivar a alguien es volver a poner `activo = true` y **todo su
 oficio vuelve solo**, sin reconstruir nada. La persona que volvió del posparto
 no tiene que ser cargada otra vez.
 
-> **✅ EL BORRADO DURO YA REBOTA — POR ACCIDENTE, Y CON UN MENSAJE QUE MIENTE
+> **⚠️ Y LA CASA YA LO HABÍA DECIDIDO — EN UN JSDoc (lectura L3).** El wrapper
+> `desvincularEmpleado` (`packages/api/src/wrappers/equipo.ts`) **no borra: hace
+> `activo = false`**, y trae su porqué escrito arriba, de S74:
+> *"Desvincular = `activo=false` (el mecanismo probado de la desactivación S73).
+> La procedencia preserva los actos (§14.1) — el acceso muere, lo hecho queda."*
+>
+> **Esta letra no está inventando una prohibición: le está poniendo rango de ley
+> a una decisión que ya está construida y funcionando.** Lo que cambia es que
+> deja de vivir en un comentario —donde nadie la vota, nadie la contrasta y
+> cualquiera la "optimiza"— y pasa a tener su porqué en el canon, con el literal
+> de las 32 FKs detrás. Un JSDoc no defiende una ley: la describe hasta que
+> alguien lo borra.
 > (lectura L(P-OP-3), definiciones; NO probado empíricamente).**
 > `prestador_atencion_log.empleado_id` es `ON DELETE SET NULL`, y la tabla lleva
 > **DOS triggers habilitados** (`trg_atencion_log_no_delete` ·
@@ -136,8 +147,16 @@ registra **cuándo se quitó** un chip. `created_at` dice cuándo se dio; el DEL
 no deja fecha. Diez años después, el expediente puede decir *quién* firmó y no
 *si estaba autorizado ese día*. **La mesa NO propone curarlo acá** — sería
 fabricar una tabla de auditoría adentro de una superficie de edición. Se declara
-como su propia línea (§10.3), con la disciplina de registro que
+como su propia línea (§10), con la disciplina de registro que
 `LETRA_ROLES_EQUIPO` §7.2 ya nombra para los roles.
+
+> **LA ASIMETRÍA ESTÁ CONFIRMADA POR LOS DOS LADOS (L2 + L3), Y ES DESPAREJA:**
+> el **vínculo** tiene motor Y superficie (la policy y el wrapper de baja, los
+> dos vivos); el **chip** tiene **motor con la puerta abierta y superficie sin
+> puerta** — `empleado_servicios_dueño_elimina` existe y autoriza el DELETE, y
+> **no hay una sola línea de app que lo llame** (grep en cero sobre
+> `packages` + `apps`). **Ahí está el trabajo de S77, y no está donde el brief
+> lo buscaba.**
 
 ---
 
@@ -170,6 +189,22 @@ que nadie la "corrija" después:
 **La superficie de edición que S77 construya se ofrece SOLO al titular.** El día
 que exista el motor administrativo (D-513 v2 + D-517 CLASE 2), estas dos
 policies se enmiendan junto con las otras — **no antes, y no desde acá**.
+
+> **YA SE CUMPLE (L3), y con voz digna.** `/negocio/equipo` envuelve la lista,
+> el CTA de invitar y la Hoja entera en `pantalla.equipo.esDueno`; el no-dueño
+> que aterriza por deep link recibe **el porqué UNA vez, sin candados** (el
+> patrón de solo-lectura de S60). La firma del negocio se ve siempre. **Ley 23
+> cumplida en la superficie — S77 no la construye, la hereda.**
+>
+> **PERO LOS DOS EJES NO SON EL MISMO EJE, y eso es hallazgo (L3):**
+> `esDueno` sale de la **fila de rol** (`roles.data.length > 0`, apoyado en que
+> el SELECT de `empleado_roles` es dueño-only), mientras que las dos policies de
+> **escritura** que esa pantalla usa gatean por **titularidad**
+> (`prestadores.user_id = auth.uid()`). Hoy coinciden porque los 5 titulares
+> tienen su fila. **El día que D-515 dispare** —la fila `dueño` del titular
+> declarada REDUNDANTE— **la pantalla se apaga y el motor sigue abierto.** No es
+> fuga: es una pantalla que va a mentirle al titular diciéndole que no puede.
+> Se declara acá para que la tanda de D-515 lo encuentre (§10).
 
 ---
 
@@ -314,42 +349,79 @@ el motivo equivocado.
 
 ---
 
-## 6. LA SUPERFICIE — EN BLANCO, ESPERANDO LA LECTURA 3
+## 6. LA SUPERFICIE — UNA SOLA, Y NO ES LA QUE EL BRIEF BUSCABA (lectura L3)
 
-Esta sección no se escribe hasta que B reporte si `/negocio/equipo` ya tiene su
-camino de desvincular. **Un boceto contra una superficie supuesta es una
-corazonada con lámina.** Lo único que la letra fija de antemano:
+**La respuesta a la pregunta que abrió esta letra: S77 construye UNA superficie,
+no dos.** `apps/prestador/src/app/negocio/equipo.tsx` (485 líneas, S74-B) ya
+existe, ya lista al equipo, ya abre una Hoja por miembro, y **ya desvincula
+bien**. Lo que no existe es el chip.
 
-- **Mecanismo M1–M5 sin excepción**, sea superficie nueva o recompuesta.
-- **Ley 23 directa:** la puerta no ofrece lo que el motor va a rechazar — si el
-  actor no es el titular, la acción **no se dibuja** (§3).
-- **L-139:** el conteo de citas futuras que §11 decide mostrar sale de un lector
-  real o no se muestra. **Jamás un número plausible.**
-- **La baja se dice con su verbo honesto.** No es "eliminar": la persona deja de
-  trabajar acá y su firma se queda en el expediente. La voz lo dice; la letra no
-  fija el string acá porque **no hay pantalla contra la cual leerlo**.
-- **EL CHIP NO PROMETE DISPONIBILIDAD** (§4bis). La pantalla que da chips tiene
-  que decir que falta la jornada, o va a mentir por omisión: el titular da el
-  chip de vet, no carga horarios, y esa persona **no aparece en ninguna
-  reserva** sin que nada se lo diga. Es el mismo error que la casa ya conoce —
-  un lector que degrada a lista vacía **esconde** el hueco. La forma exacta
-  (aviso en la celda · estado vacío · celda navegable a la jornada) la decide
-  M1 sobre la lámina; **que la pantalla lo diga es letra.**
-- **LA BAJA NO SE OFRECE SOBRE LA PROPIA FILA DEL TITULAR.** Las ocho lectoras
-  llegan a la persona por `prestador_empleados`, **no** por
-  `prestadores.user_id` — así que un titular que se dé de baja a sí mismo
-  **desaparece de la disponibilidad de su propio negocio** conservando su acceso
-  clínico (que viene del brazo 2, la titularidad). Es un candado silencioso
-  sobre el negocio entero, y el trigger de D-526 **no lo frena**: el titular
-  está autorizado a escribir ese `activo`. La superficie **no dibuja la acción
-  sobre su propia fila** — Ley 23 en su forma preventiva. *(Confirmación de una
-  query antes de construir: §10.)*
+### 6.1 El censo de la superficie, con literal
+
+| Operación del pedido del founder | Hoy | Qué falta |
+|---|---|---|
+| **Eliminar a alguien del negocio** | ✅ **existe y es correcta** — Hoja del miembro, confirmación en dos toques, `desvincularEmpleado` → `activo=false` | **nada de superficie** |
+| **Agregar chips** | ⚠️ **solo AL INVITAR** — toggle + selector múltiple de oficios → `asignarServiciosEmpleado` (INSERT batch) | **el camino para quien YA está adentro** |
+| **Quitar chips** | ❌ **no existe** — grep en cero sobre `packages` + `apps`; el único consumidor de `prestador_empleado_servicios` es el INSERT | **wrapper + superficie** |
+
+**El chip se da una sola vez, en la invitación, y no hay camino de vuelta desde
+ninguna pantalla** — aunque la policy que lo autoriza exista desde siempre. La
+edición del vínculo, hoy, es de ida.
+
+### 6.2 LA COLISIÓN CON LA LETRA FIRMADA — la Hoja quedó vieja
+
+La Hoja del miembro monta **dos `Interruptor` de rol: `profesional` y
+`recepcion`.** Fue construida en S74-B; `LETRA_RECEPCION_S76` se firmó DESPUÉS y
+**dice otra cosa en los dos casos**:
+
+- **`recepcion` no es un toggle.** Es el piso, y desde la migración A2bis
+  (`20260724120000`) **se concede al entrar a todos** — veterinarios incluidos.
+  La propia letra firmada lo pone en piedra: *"la fila `recepcion` es MEMBRESÍA,
+  JAMÁS IDENTIDAD… nada lee su presencia como 'es recepcionista'."* Un
+  interruptor que la enciende y la apaga **está tratando membresía como
+  identidad**, que es exactamente lo que esa ley prohíbe.
+- **`profesional` no se elige.** `LETRA_RECEPCION_S76` §1: *"`profesional` deja
+  de ser un valor que alguien elige y pasa a ser **derivado — tiene ≥1 chip**."*
+  El toggle que corresponde es **Prestador**, y lo que hace al encenderse es
+  **revelar los chips**; la verdad vive en ellos.
+- **El toggle que la letra firmada SÍ define —Administrador— no se ofrece**,
+  porque su motor no existe (§5 de esa letra: *gatear no es conceder*). S77 no
+  lo dibuja.
+
+> **Entonces el trabajo de S77 sobre esta pantalla no es "agregar chips": es
+> RECOMPONER LA HOJA DEL MIEMBRO contra la letra firmada.** Los chips son el
+> contenido; los dos interruptores viejos son lo que sale. Es superficie
+> recompuesta ⇒ **mecanismo M1–M5 sin excepción.**
+
+**Precondición declarada:** antes de tocarla hay que leer **qué escriben hoy esos
+dos interruptores** (§10). La mesa no propone matarlos sin saber qué filas
+mueven — sería exactamente la clase de afirmación que esta sesión viene
+desarmando.
+
+### 6.3 Lo que la letra le exige a esa Hoja
+
+- **Ley 23, ya cumplida y que no se rompa:** la pantalla entera gatea por
+  `esDueno` y el no-dueño recibe su porqué una vez, sin candados (§3).
+- **EL CHIP NO PROMETE DISPONIBILIDAD** (§4bis). El titular da el chip de vet,
+  no carga horarios, y esa persona **no aparece en ninguna reserva** sin que
+  nada se lo diga. Un lector que degrada a lista vacía **esconde** el hueco. La
+  forma (aviso en la celda · estado vacío · celda navegable a la jornada) la
+  decide M1 sobre la lámina; **que la pantalla lo diga es letra.**
+- **QUITAR EL ÚLTIMO CHIP MÉDICO ES UN ACTO CLÍNICO** (§4). Le saca a esa
+  persona el expediente. La superficie lo dice antes, no después.
+- **L-139:** el conteo de citas de §11 sale de un lector real o no se muestra.
+  **Jamás un número plausible.**
+- **La baja ya se dice con su verbo y con dos toques.** No se rehace; se
+  hereda. Lo que S77 le agrega es lo que §11 decida sobre las citas.
 - **LA VOZ DE LA BAJA NO HEREDA EL AVISO DE RENOVACIÓN.** El aviso que hoy
   recibe la familia cuando un plan no se renueva dice que *cambió la agenda del
   paseador* (§5bis). En el caso de la baja eso **nombra una causa que no es la
-  causa**, y llega semanas tarde. El aviso al dueño del plan es su propia
-  decisión de voz; **no se resuelve reciclando un string que se escribió para
-  otro motivo.**
+  causa**, y llega semanas tarde. **No se resuelve reciclando un string escrito
+  para otro motivo.**
+- **El auto-lockout del titular NO es problema de esta pantalla** (L6): la Hoja
+  del titular entra por la rama `roles.includes('dueño')`, que solo pinta una
+  Insignia — **ni interruptores ni botón destructivo**. El hueco es de MOTOR y
+  va a §10 con su número propuesto.
 
 ---
 
@@ -361,10 +433,18 @@ corazonada con lámina.** Lo único que la letra fija de antemano:
    dejan esa oferta **sin profesionales, en silencio**. Converge con esta letra:
    la misma pantalla que da chips es la que hace visible el hueco.
 2. **La resolución de las citas futuras en la baja** (§5 + §11).
-3. **Nada más.** Quitar chip y dar de baja **ya tienen camino de motor** — la
-   policy DELETE existe y el titular ya escribe `activo` (verificado 4/4 en la
-   enmienda A2 v2 de D-526, brazo (b): *"el TITULAR SIGUE escribiendo `activo`
-   — desvincular no se rompió"*).
+3. **EL WRAPPER DE QUITAR CHIP — no existe** (L3, grep en cero). La policy
+   `empleado_servicios_dueño_elimina` autoriza el DELETE desde siempre y
+   `packages/api` **nunca lo expuso**: el único consumidor de la tabla es el
+   INSERT batch de la invitación. **No es motor nuevo — es la puerta única
+   cumpliendo su regla** (los apps jamás llaman `supabase.from()` directo). Su
+   hermano de dar-chip-a-quien-ya-está probablemente sea el mismo
+   `asignarServiciosEmpleado` ya construido; **eso se verifica, no se supone**
+   (§10).
+4. **Nada más de gobierno.** Dar de baja ya tiene motor Y superficie
+   (verificado 4/4 en la enmienda A2 v2 de D-526, brazo (b): *"el TITULAR SIGUE
+   escribiendo `activo` — desvincular no se rompió"*, y `desvincularEmpleado`
+   vivo en la app desde S74).
 
 ---
 
@@ -432,31 +512,52 @@ posición. Declarado por si algún día alguien vende esa posición.
   fecha, abortan con código tipado, y la renovación por cron deja **triple
   rastro con notificación al dueño**. **El segundo objeto no necesita
   política.**
+- ~~¿existe la superficie de desvincular?~~ → **§6.** Existe, hace `activo=false`
+  y ya trae su porqué en el JSDoc. **S77 construye UNA superficie: la Hoja del
+  miembro recompuesta.**
+- ~~confirmación del candado anti-lockout~~ → **§6.3.** Los 5 titulares tienen
+  fila con `rol='dueño'` y `activo=true` (3 de 5 con franjas propias: 7 · 6 ·
+  12). **La pantalla no ofrece el auto-lockout**; el hueco es de motor.
 
 **ABIERTAS:**
 
-1. **La superficie** (§6): esperando la **lectura 3** — ¿existe hoy el camino de
-   desvincular en `/negocio/equipo`? Es lo único que decide si S77 construye una
-   superficie o dos.
-2. **Confirmación del candado anti-lockout** (§6): una query — ¿el titular
-   tiene fila propia en `prestador_empleados` con `rol='dueño'`? El literal de
-   las ocho lo implica (si no, la rama `pe.rol='dueño'` sería código muerto y
-   ningún titular sería reservable hoy), **pero implicar no es leer.**
-3. **`suscripciones_servicio.empleado_id` — columna muerta que parece viva**
-   (§5bis). Tiene FK a `prestador_empleados` con `ON DELETE SET NULL`, 0 de 1
-   filas poblada, y **ningún generador la lee ni la escribe.** Es una trampa
-   servida para la próxima mesa: el nombre promete *"el paseador del plan"* y el
-   motor no lo cumple. Se declara para desarmarla (L-166, nota de método).
-   **Deuda propuesta: D-533** — número a re-verificar libre al depositar.
-4. **La fecha de revocación del chip** (§2, último párrafo). Declarada, no
-   curada.
-5. **Los chips AL INVITAR** siguen sin verificar — `LETRA_RECEPCION_S76` §13
-   punto 1 lo dice y esta letra no lo mueve. **La mesa no afirma que esté APTO.**
-6. **Las 3 filas legacy desactivadas: ¿personas reales o seed?** Sigue abierta
-   desde S76. Si alguna es real, la baja que esta letra construye tiene un caso
-   de uso hoy, no mañana.
-7. **El eje legacy `pe.rol = 'dueño'`** aparece en las ocho con forma idéntica
-   (§4bis). Es registro para D-486, no trabajo de esta letra.
+1. **¿QUÉ ESCRIBEN HOY LOS DOS `Interruptor` DE LA HOJA** (`profesional` ·
+   `recepcion`)? **NO RELEVADO** y es **precondición de §6.2**: la mesa no
+   propone matar dos controles vivos sin saber qué filas mueven. Es la
+   **lectura 7**, y va antes de cualquier boceto.
+2. **¿`asignarServiciosEmpleado` sirve para quien ya está adentro**, o su firma
+   asume el momento de la invitación? (§7.3). Lectura de una función.
+3. **EL AUTO-LOCKOUT DEL TITULAR, POR MOTOR** (§6.3). `desvincularEmpleado` no
+   discrimina a quién apaga y **pasa la policy de titularidad sobre la propia
+   fila**: nadie puede hacerlo desde la pantalla, cualquiera puede hacerlo
+   llamando al wrapper. Es la familia de D-526 —la superficie protege, el motor
+   no— y la cura es barata: **una rama más en el trigger que D-526 ya
+   instaló** (*la fila del titular no se apaga, ni siquiera por él*).
+   **Deuda propuesta: D-534.** *(Límite honesto de la lectura: nadie midió si
+   esos negocios tienen otros empleados con franjas, así que "el negocio queda
+   sin disponibilidad" es consecuencia probable, no medida.)*
+4. **`esDueno` (fila de rol) vs las policies de escritura (titularidad)** —
+   dos ejes que hoy coinciden y que **D-515 desacopla** (§3). Registro para la
+   tanda de D-515, no trabajo de esta letra.
+5. **`suscripciones_servicio.empleado_id` — columna muerta que parece viva**
+   (§5bis). FK a `prestador_empleados` con `ON DELETE SET NULL`, 0 de 1 filas
+   poblada, **ningún generador la lee ni la escribe.** Trampa servida para la
+   próxima mesa: el nombre promete *"el paseador del plan"* y el motor no lo
+   cumple. Se declara para desarmarla (L-166, nota de método). **Deuda
+   propuesta: D-533.**
+6. **La fecha de revocación del chip** (§2). Declarada, no curada.
+7. **Los chips AL INVITAR** siguen sin verificar en su motor —
+   `LETRA_RECEPCION_S76` §13 punto 1. L3 probó que **la superficie existe**; que
+   el `CHECK` y el token la acompañen **sigue sin leerse**. La mesa no afirma
+   que esté APTO.
+8. **Las 3 filas legacy desactivadas: ¿personas reales o seed?** Sigue abierta
+   desde S76.
+9. **El eje legacy `pe.rol = 'dueño'`** aparece en las ocho con forma idéntica
+   (§4bis). Registro para D-486.
+
+**Todos los números propuestos (D-533, D-534) se re-verifican libres contra el
+depósito al momento de depositar** — máximo leído hoy: D-531, más D-532
+reservado para el bucket `avatars` (L-166).
 
 ---
 
@@ -493,6 +594,30 @@ datos en silencio es lo que esta casa no hace, aunque el cambio sea el correcto.
 
 ## Historial
 
+- **v1.3 (S77, 24 Jul 2026) — el freno se levanta: §6 se escribe, y el trabajo
+  no estaba donde el brief lo buscaba.** Sobre las lecturas **L3** (superficie) y
+  **L6** (candado). **§1:** la casa YA había decidido la baja sobre el borrado —
+  `desvincularEmpleado` hace `activo=false` desde S74 **con su porqué en el
+  JSDoc citando §14.1**; esta letra no inventa una prohibición, le da rango de
+  ley a una decisión construida que vivía en un comentario. **§2:** la asimetría
+  confirmada por los dos lados — el vínculo tiene motor Y superficie; el chip
+  tiene **motor con puerta abierta y superficie sin puerta** (grep en cero).
+  **§3:** Ley 23 ya cumplida (`esDueno` envuelve la pantalla, el no-dueño recibe
+  su porqué sin candados) **más el hallazgo de los dos ejes**: la pantalla gatea
+  por FILA DE ROL y el motor por TITULARIDAD — coinciden hoy y **D-515 los
+  desacopla**. **§6 REESCRITA:** S77 construye **UNA** superficie; el censo de
+  las tres operaciones; y **la colisión con la letra firmada** — la Hoja monta
+  `Interruptor` de `profesional` y `recepcion`, y `LETRA_RECEPCION_S76`
+  (posterior) dice que recepción **no es un toggle** (membresía, jamás identidad,
+  concedida a todos por A2bis) y que `profesional` **no se elige** (derivado de
+  chips). El trabajo es **recomponer la Hoja**, no agregarle un control. **§7:**
+  falta el **wrapper de quitar chip** — la policy autoriza desde siempre y
+  `packages/api` nunca lo expuso. **§10:** tres cerradas, nueve abiertas, con la
+  **lectura 7** (qué escriben esos dos interruptores) como precondición de
+  cualquier boceto, y **D-534** propuesta (el auto-lockout del titular por
+  motor: la pantalla no lo ofrece, el wrapper sí lo permite — familia de D-526,
+  cura de una rama en su propio trigger). Fuente: reporte S77-A (reemplazo
+  `4512e3b` + lecturas L3 y L6, territorio de B leído y declarado sin escritura).
 - **v1.2 (S77, 24 Jul 2026) — el segundo objeto se cierra, y la pregunta vuelve
   a ser una sola.** **§5bis reescrita** sobre la lectura L5: los generadores **no
   guardan persona** (eligen por fecha; con N>1, dos fechas del mismo plan pueden
