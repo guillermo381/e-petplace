@@ -1,6 +1,6 @@
-# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — 🕐 **PROPUESTA, ESPERA FIRMA** — v1.8
+# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — 🕐 **PROPUESTA, ESPERA FIRMA** — v1.9
 
-> **Estado: PROPUESTA DE MESA (S77, 24 Jul 2026) — v1.8.** Nace del pedido
+> **Estado: PROPUESTA DE MESA (S77, 24 Jul 2026) — v1.9.** Nace del pedido
 > literal del founder en S76: *"edición es agregar o quitar chips de servicio o
 > eliminar a ese prestador de mi negocio."*
 >
@@ -633,6 +633,12 @@ posición. Declarado por si algún día alguien vende esa posición.
   fila con `rol='dueño'` y `activo=true` (3 de 5 con franjas propias: 7 · 6 ·
   12). **La pantalla no ofrece el auto-lockout**; el hueco es de motor.
 
+- ~~¿el motor distingue "se lo asignamos" de "lo eligió la familia"?~~ →
+  **§11.4.** No, en ningún lado — y la familia nunca eligió persona. **(a) se
+  aplica sin excepción; el borde nace con el ítem 2.**
+- ~~¿cuál es el predicado de "no empezada"?~~ → **§11.** `estado IN
+  ('pendiente','confirmada')` + `cita_aun_no_ocurre`. **`llegada_en` no existe:
+  era un pedido de motor que la mesa usó como mecanismo.**
 - ~~¿qué escriben los dos `Interruptor` de la Hoja?~~ → **§6.2bis / §6.2ter.**
   `profesional` escribe **fila propia** (motor y letra firmada divergen);
   `recepcion` tiene **un solo lector legítimo** pero su toggle puede **borrar el
@@ -704,15 +710,7 @@ posición. Declarado por si algún día alguien vende esa posición.
    próxima mesa: el nombre promete *"el paseador del plan"* y el motor no lo
    cumple. Se declara para desarmarla (L-166, nota de método). **Deuda propuesta —
    número al depositar, con su literal.**
-6. 🔴 **¿EL MOTOR DISTINGUE "SE LO ASIGNAMOS" DE "LO ELIGIÓ LA FAMILIA"?**
-   (§11.4). **NO RELEVADO, y es PRECONDICIÓN de (a):** si no lo guarda, todo
-   `empleado_id` no nulo es ambiguo y despegar a ciegas puede deshacer una
-   elección. Columnas de `evento_cita_servicio`, y por dónde entra el
-   `empleado_id` en cada camino de reserva.
-7. **¿CUÁL ES EL PREDICADO DE "NO EMPEZADA"?** (§11). La máquina de estados de
-   la cita, con `llegada_en` y el estado — el corte de (a) es el acto, no el
-   calendario, y el predicado se lee.
-8. **La fecha de revocación del chip** (§2). Declarada, no curada.
+6. **La fecha de revocación del chip** (§2). Declarada, no curada.
 9. **Los chips AL INVITAR** siguen sin verificar en su motor —
    `LETRA_RECEPCION_S76` §13 punto 1. L3 probó que **la superficie existe**; que
    el `CHECK` y el token la acompañen **sigue sin leerse**. La mesa no afirma
@@ -766,11 +764,28 @@ lleguen con su texto.
 
 **El corte es el acto, no el calendario.** Despegar una cita futura **no borra
 autoría** — todavía no hay nada firmado, solo un plan, y un plan se reasigna.
-Despegar una cita pasada sería exactamente el borrado que §1 prohíbe. **La
-frontera no es "fecha futura" sino "no empezada"** (una consulta con llegada ya
-registrada está en curso y no se le arranca el profesional a mitad). El
-predicado exacto sale de la máquina de estados de la cita — **lectura, no
-deducción** (§10).
+Despegar una cita pasada sería exactamente el borrado que §1 prohíbe.
+
+**EL PREDICADO, con literal (L12) — y con una corrección de la mesa.** La v1.8
+habló de *"llegada ya registrada"* apoyándose en `llegada_en` y
+`registrar_llegada`. **No existen: cero columnas y cero funciones `%llegada%` en
+todo `public`.** Son **pedidos de motor** de `LETRA_RECEPCION_S76` (su §M4 los
+declara "definidos por ausencia") y la mesa los usó como si ya estuvieran
+construidos. El mecanismo real es otro:
+
+- Los estados son un **CHECK**, no un enum: `pendiente` · `confirmada` ·
+  `en_curso` · `completada` · `cancelada` · `no_show` · `rechazada`.
+- **Quién cruza la línea:** las cuatro `iniciar_atencion_*` (cita, paseo,
+  grooming, adiestramiento), todas con el mismo par —
+  `IF v_cita_estado NOT IN ('confirmada','en_curso') THEN RAISE …` y
+  `UPDATE … SET estado = 'en_curso' WHERE id = p_cita_id AND estado = 'confirmada'`.
+
+> **EL PREDICADO DE (a):** `estado IN ('pendiente','confirmada')` **Y** la cita
+> todavía no ocurrió. El primero excluye lo empezado y lo cerrado
+> (`en_curso`, `completada`, `no_show`, `cancelada`, `rechazada` no se tocan
+> nunca); el segundo es cinturón, y **el motor ya sabe decirlo**: el guard
+> `cita_aun_no_ocurre` existe en `iniciar_atencion_paseo`. **Dos guardas, las
+> dos ya expresables — (a) no necesita vocabulario nuevo.**
 
 **Y (a) no inventa un estado nuevo:** `registrar_atencion_mostrador` **ya
 produce `empleado_id = NULL`** cuando el negocio tiene más de un profesional
@@ -839,20 +854,40 @@ puede tomar."*
 **Convertir en "de la clínica" una cita que la familia sacó CON UNA PERSONA
 cambia lo que esa familia compró.** No es un detalle de agenda: es producto.
 
-**Y acá está el problema, dicho angosto:** para saber a cuáles alcanza (a) hay
-que poder distinguir *"se lo asignamos nosotros"* de *"lo eligió la familia"* —
-y **la mesa NO SABE si el motor guarda hoy esa diferencia.** Es la lectura que
-falta (§10). Dos escenarios y sus dos consecuencias:
+**RESUELTO POR L11 — y sale por la rama limpia: EL MOTOR NO GUARDA ESA
+DIFERENCIA EN NINGÚN LADO, PORQUE LA FAMILIA NUNCA ELIGIÓ.**
 
-- **Si el motor la guarda:** (a) se aplica a las de la clínica sin más, y las
-  elegidas necesitan su propia voz — aviso a la familia, o rebote.
-- **Si NO la guarda:** hoy **todo `empleado_id` no nulo es ambiguo**, y aplicar
-  (a) a ciegas puede estar deshaciendo una elección sin saberlo. Entonces la
-  distinción del ítem 2 **no es una mejora que acompaña a (a): es su
-  precondición**.
+- **No hay columna de procedencia.** 33 columnas en `evento_cita_servicio`;
+  `empleado_id` es FK nullable y **nada más**. Ningún camino escribe una clave
+  así en `metadata`.
+- **Cinco de los seis caminos asignan solos** — `SELECT pe.id INTO v_empleado …
+  ORDER BY carga del día, created_at, id LIMIT 1`. El sexto
+  (`registrar_atencion_mostrador`) recibe `p_empleado_id` opcional, pero **es la
+  recepción eligiendo quién atiende en el mostrador**, no la familia.
+- **La pantalla del cliente elige NEGOCIO, no persona.** Las cuatro pantallas de
+  reserva mandan `{prestador_id, prestador_servicio_id, mascota_id, fecha,
+  hora}` — **ni el wrapper ni la RPC aceptan empleado**. Grep de elección de
+  profesional en `apps/cliente`: **cero**.
 
-**La mesa no elige entre las dos ramas sin el literal.** (L-168, la lección que
-esta letra pagó dos veces.)
+> **⇒ HOY TODA CITA ES "SE LO ASIGNAMOS". (a) SE APLICA SIN EXCEPCIÓN Y SIN
+> AMBIGÜEDAD, PORQUE NO HAY ELECCIÓN QUE DESHACER.**
+
+**Y el borde queda fechado, no cancelado.** Nace **el día exacto** en que el
+ítem 2 construya la *cita del profesional* — ahí sí existirá una elección de la
+familia, y despegarla en silencio pasará a ser un cambio de producto. **Por eso
+la excepción viaja DENTRO del ítem 2, no como parche posterior:** la migración
+que hace posible elegir profesional es la misma que tiene que decir qué le pasa
+a esa elección cuando el profesional se va.
+
+*(Hoy la diferencia es además invisible por otra razón, y es de la misma
+familia que la viga de §10.2: `uq_prestadores_user_id` hace que cada prestador
+sea una sola persona, así que negocio y persona coinciden. Se vuelve visible
+con el primer negocio de dos manos.)*
+
+**El único `empleado_id` que hoy porta significado y no sorteo:**
+`_agendar_cita_desde_presupuesto` **hereda el del presupuesto** — el vet que lo
+armó. (a) igual lo despega y está bien (si esa persona se fue, otro va a hacer
+el procedimiento), pero es el caso donde la pantalla más gana en decirlo.
 
 **El caso que le puso cuerpo a la decisión:** una familia con un plan de paseos
 en curso tiene citas los próximos catorce días. Si el paseador se va, esas
@@ -864,6 +899,25 @@ la familia recibe llega al cierre del período diciendo que su plan no se renov�
 
 ## Historial
 
+- **v1.9 (S77, 25 Jul 2026) — (a) queda ejecutable: sin ambigüedad y con
+  predicado.** Sobre las lecturas **L11** y **L12**. **§11.4 RESUELTA por la
+  rama limpia:** el motor **no guarda** la procedencia de la elección en ningún
+  lado —sin columna, cinco de seis caminos asignan por menor carga, y **la
+  pantalla del cliente elige NEGOCIO, no persona** (el wrapper y la RPC ni
+  aceptan empleado)— así que **hoy toda cita es "se lo asignamos" y (a) se
+  aplica sin excepción, porque no hay elección que deshacer.** El borde queda
+  **fechado, no cancelado**: nace con la *cita del profesional* del ítem 2, y
+  por eso la excepción **viaja dentro de esa migración**, no como parche.
+  **§11 CORRIGE A LA MESA:** la v1.8 habló de *"llegada ya registrada"* apoyada
+  en `llegada_en` y `registrar_llegada` — **no existen** (cero columnas, cero
+  funciones): son pedidos de motor de `LETRA_RECEPCION_S76` §M4, declarados
+  "definidos por ausencia", que la mesa usó como si estuvieran construidos. El
+  predicado real: **`estado IN ('pendiente','confirmada')` + el guard
+  `cita_aun_no_ocurre`** que ya existe en `iniciar_atencion_paseo` — **(a) no
+  necesita vocabulario nuevo.** Registrado también el único `empleado_id` que
+  porta significado y no sorteo (`_agendar_cita_desde_presupuesto` hereda el del
+  vet que armó el presupuesto). Fuente: reporte S77-A (`a295b7f` letra v1.8 +
+  lecturas L11 y L12).
 - **v1.8 (S77, 25 Jul 2026) — §11 FIRMADA: (a), las citas pasan a ser de la
   clínica.** Firma del founder, verbatim: *"A, pasa a ser de la clínica."*
   **§11 REESCRITA como ley:** las citas **todavía-no-ocurridas** se despegan
