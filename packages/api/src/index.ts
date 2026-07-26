@@ -750,6 +750,11 @@ export {
   // S76-B4: los chips al invitar (B0 APTO + decisión founder)
   obtenerOficiosNegocio,
   asignarServiciosEmpleado,
+  // S77-A: la edición del chip para quien YA está adentro (LETRA §4/§10.2)
+  obtenerChipsEmpleado,
+  quitarServiciosEmpleado,
+  type ChipEmpleado,
+  type ResultadoQuitarChips,
   type OficioChip,
   type OficioNegocio,
   type EquipoNegocio,

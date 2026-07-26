@@ -284,6 +284,145 @@ export async function asignarServiciosEmpleado(
   return { ok: true, data: null };
 }
 
+// ── S77-A · LA EDICIÓN DEL CHIP PARA QUIEN YA ESTÁ ADENTRO ──────────────
+// LETRA_EDICION_VINCULO_S77 §4 y §10.2. Puerta única, CERO motor nuevo: la
+// policy `empleado_servicios_dueño_elimina` (titularidad) autoriza el DELETE
+// desde que la tabla existe — `packages/api` nunca lo expuso, así que la
+// superficie no tenía por dónde. Esto abre la puerta que ya estaba abierta.
+//
+// L13 (S77-A, declarada): `asignarServiciosEmpleado` NO necesita hermano —
+// su firma es (empleadoId, servicioIds) y su cuerpo no lee `activo` ni
+// invitación; lo que asume la invitación es su JSDoc, no su código, y la
+// policy de INSERT gatea SOLO por titularidad. Se usa tal cual para dar
+// chips a quien ya está adentro.
+
+/** Un chip vivo de la persona, con lo que la pantalla necesita para hablar
+ *  ANTES de tocar nada: qué oficio es y si ese oficio es CLÍNICO. */
+export interface ChipEmpleado {
+  servicioId: string;
+  tipoServicio: string;
+  oficio: OficioChip;
+  /** `tipos_servicio.es_medico` — la llave del gate clínico (S76-A4b).
+   *  Es lo que convierte "quitar un chip" en un acto clínico (§4). */
+  esMedico: boolean;
+}
+
+/** EL BORDE, DECLARADO (§4): quitar el ÚLTIMO chip médico le saca a esa
+ *  persona EL EXPEDIENTE — deja de pasar `empleado_tiene_capacidad_clinica`
+ *  y con ella los 6 sitios clínicos + los 2 helpers de caso (D-532). No es
+ *  una preferencia de vitrina: es acceso a la historia de las mascotas.
+ *  **Por eso este lector existe: la pantalla lo dice ANTES, no después.** */
+export async function obtenerChipsEmpleado(empleadoId: string): R<ChipEmpleado[]> {
+  const cliente = getClient();
+  const chips = await cliente
+    .from('prestador_empleado_servicios')
+    .select('servicio_id')
+    .eq('empleado_id', empleadoId);
+  if (chips.error) return { ok: false, codigo: 'error_lectura', mensaje: chips.error.message };
+  const ids = (chips.data ?? []).map((c) => c.servicio_id);
+  if (ids.length === 0) return { ok: true, data: [] };
+
+  const ofertas = await cliente.from('prestador_servicios').select('id, tipo_servicio').in('id', ids);
+  if (ofertas.error) return { ok: false, codigo: 'error_lectura', mensaje: ofertas.error.message };
+  const filas = ofertas.data ?? [];
+  if (filas.length === 0) return { ok: true, data: [] };
+
+  const slugs = [...new Set(filas.map((f) => f.tipo_servicio))];
+  const tipos = await cliente
+    .from('tipos_servicio')
+    .select('codigo, categoria, es_medico')
+    .in('codigo', slugs);
+  if (tipos.error) return { ok: false, codigo: 'error_lectura', mensaje: tipos.error.message };
+
+  // Mismo criterio de oficio que `obtenerOficiosNegocio` (canon S69: lo
+  // médico manda sobre la categoría). Un tipo fuera del selector v1
+  // (hospedaje/otro) no tiene chip que mostrar y se OMITE, jamás se pinta
+  // crudo (Ley 3).
+  const oficioDe = new Map<string, OficioChip>();
+  const medicoDe = new Map<string, boolean>();
+  for (const t of tipos.data ?? []) {
+    medicoDe.set(t.codigo, t.es_medico === true);
+    if (t.es_medico === true) oficioDe.set(t.codigo, 'veterinaria');
+    else if (t.categoria === 'paseo') oficioDe.set(t.codigo, 'paseo');
+    else if (t.categoria === 'grooming') oficioDe.set(t.codigo, 'grooming');
+    else if (t.categoria === 'adiestramiento') oficioDe.set(t.codigo, 'adiestramiento');
+  }
+  const data: ChipEmpleado[] = [];
+  for (const f of filas) {
+    const oficio = oficioDe.get(f.tipo_servicio);
+    if (oficio === undefined) continue;
+    data.push({
+      servicioId: f.id,
+      tipoServicio: f.tipo_servicio,
+      oficio,
+      esMedico: medicoDe.get(f.tipo_servicio) === true,
+    });
+  }
+  return { ok: true, data };
+}
+
+/** Lo que la pantalla necesita DESPUÉS de quitar, para no re-leer a ciegas
+ *  ni afirmar de más: cuántos chips médicos quedaron y si el acto le sacó
+ *  el expediente a esa persona. */
+export interface ResultadoQuitarChips {
+  chipsRestantes: number;
+  chipsMedicosRestantes: number;
+  /** true ⟺ tenía capacidad clínica POR CHIP y ya no la tiene.
+   *  LÍMITE DECLARADO: se computa sobre CHIPS, que es el brazo que este
+   *  wrapper mueve. `empleado_tiene_capacidad_clinica` tiene además brazo
+   *  de TITULARIDAD (y `is_admin()` en su versión de un argumento): un
+   *  titular no pierde el expediente por quedarse sin chips, y este campo
+   *  NO lo contempla — la Hoja del titular no monta chips (equipo.tsx),
+   *  así que ese caso no es alcanzable hoy por esta puerta. */
+  perdioCapacidadClinicaPorChip: boolean;
+}
+
+/** Quitar chips = DELETE en `prestador_empleado_servicios` (policy
+ *  `empleado_servicios_dueño_elimina`, TITULARIDAD — el administrador NO
+ *  puede, y la pantalla ya gatea por eso, Ley 23).
+ *
+ *  El chip es presencia/ausencia de fila: la tabla es (empleado_id,
+ *  servicio_id, created_at), sin columna `activo` y sin policy de UPDATE —
+ *  **no hay estado intermedio y no queda historia de cuándo se quitó**
+ *  (declarado en L2, S77-A; si esa historia hiciera falta, es motor nuevo).
+ *
+ *  Devuelve el estado resultante para cerrar el lazo sin re-leer, y en
+ *  particular `perdioCapacidadClinicaPorChip` — el hecho que §4 obliga a
+ *  decir. **La advertencia va ANTES, con `obtenerChipsEmpleado`; esto es
+ *  la confirmación de lo que pasó, no el aviso.** */
+export async function quitarServiciosEmpleado(
+  empleadoId: string,
+  servicioIds: string[],
+): R<ResultadoQuitarChips> {
+  const antes = await obtenerChipsEmpleado(empleadoId);
+  if (!antes.ok) return antes;
+  const teniaClinico = antes.data.some((c) => c.esMedico);
+
+  if (servicioIds.length > 0) {
+    const { error } = await getClient()
+      .from('prestador_empleado_servicios')
+      .delete()
+      .eq('empleado_id', empleadoId)
+      .in('servicio_id', servicioIds);
+    if (error) return { ok: false, codigo: 'error_escritura', mensaje: error.message };
+  }
+
+  // Se RE-LEE, no se resta de memoria: el DELETE pudo no alcanzar filas
+  // (id ajeno, ya borrado, carrera con otra sesión) y un conteo calculado
+  // mentiría con cara de dato (L-166 — el dato vivo se lee al usarlo).
+  const despues = await obtenerChipsEmpleado(empleadoId);
+  if (!despues.ok) return despues;
+  const medicosRestantes = despues.data.filter((c) => c.esMedico).length;
+  return {
+    ok: true,
+    data: {
+      chipsRestantes: despues.data.length,
+      chipsMedicosRestantes: medicosRestantes,
+      perdioCapacidadClinicaPorChip: teniaClinico && medicosRestantes === 0,
+    },
+  };
+}
+
 // ── S75-B · GATE DE ROL DE NAVEGACIÓN (D-513, la mitad UI) ──────────────
 // Los gates son INERTES hasta que la puerta abra (B3): hoy solo el dueño
 // resuelve prestador (obtenerMiPrestador por user_id — D-512), y el dueño
