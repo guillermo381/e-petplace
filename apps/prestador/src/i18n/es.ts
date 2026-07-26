@@ -404,6 +404,16 @@ export const prestadorEs = {
   },
   negocio: {
     titulo: 'Tu negocio',
+    // S77-B — D-541: la voz del bloque que NO SE PUDO LEER · LOTE S77,
+    // GATE PENDIENTE. Va en el DETALLE de la fila/tarjeta, así que "esto"
+    // sí tiene antecedente: es esa fila. (Por eso acá sí, y en el muro de
+    // D-536 no — allá no había a qué apuntar.)
+    // Dice que no se pudo CARGAR, jamás que no haya nada configurado —
+    // que es toda la deuda. "ahora" marca que es pasajero SIN diagnosticar
+    // la causa: «revisá tu conexión» queda RESERVADO a errores de red (S47)
+    // y acá puede ser otra. NO promete acción porque no hay ninguna que
+    // ofrecer todavía (Ley 17.4): el reintento por causa depende de D-538.
+    bloqueNoCargo: 'No pudimos cargar esto ahora.',
     enPreparacion: 'En preparación',
     oferta: 'Tu oferta',
     // S58-B B1a (§15b.5): NEGOCIO COMO MUNDOS · LOTE S58, GATE PENDIENTE

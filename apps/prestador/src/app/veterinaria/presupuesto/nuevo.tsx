@@ -68,6 +68,9 @@ export default function NuevoPresupuesto() {
   const [cuentaId, setCuentaId] = useState<string | null>(null);
   const [countryCode, setCountryCode] = useState<string>('EC');
   const [procedimientos, setProcedimientos] = useState<ProcedimientoVeterinaria[]>([]);
+  /** S77-B (D-541): el catálogo NO se pudo leer — distinto de no tener
+   *  procedimientos. Sin esto, las dos cosas se veían igual. */
+  const [catalogoNoCargo, setCatalogoNoCargo] = useState(false);
   const [items, setItems] = useState<ItemLocal[]>([]);
   const [nombreLibre, setNombreLibre] = useState('');
   const [precioLibre, setPrecioLibre] = useState('');
@@ -83,9 +86,22 @@ export default function NuevoPresupuesto() {
         setCountryCode(cta.data.countryCode);
       }
       const pr = await obtenerMiPrestador();
-      if (!vigente || !pr.ok) return;
+      if (!vigente) return;
+      // S77-B (D-541, hermano): estos dos eran RETURN SILENCIOSO. Al fallar,
+      // `procedimientos` se quedaba en [] y la sección de procedimientos NO
+      // se montaba: el vet armaba el presupuesto SIN sus procedimientos
+      // creyendo que no los tenía. El error se veía como catálogo vacío.
+      if (!pr.ok) {
+        setCatalogoNoCargo(true);
+        return;
+      }
       const mundo = await obtenerMundoVeterinariaPropio(pr.data.id);
-      if (!vigente || !mundo.ok) return;
+      if (!vigente) return;
+      if (!mundo.ok) {
+        setCatalogoNoCargo(true);
+        return;
+      }
+      setCatalogoNoCargo(false);
       setProcedimientos(mundo.data.procedimientos.filter((p) => p.activo));
     })();
     return () => {
@@ -165,6 +181,13 @@ export default function NuevoPresupuesto() {
         contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[6], gap: spacing[4] }}
         keyboardShouldPersistTaps="handled"
       >
+        {/* S77-B (D-541): el catálogo que no se pudo leer LO DICE, en el
+            lugar donde iría. Sin esto la sección simplemente no se montaba y
+            el vet leía "no tengo procedimientos" donde hubo un error.
+            Reusa `negocio.bloqueNoCargo` (mismo namespace `prestador`, patrón
+            de reuso cross-sección de `agenda.reintentar` en equipo.tsx). */}
+        {catalogoNoCargo && <Texto variante="apoyo">{t('negocio.bloqueNoCargo')}</Texto>}
+
         {/* Procedimientos del negocio (reservable=false) — quick-add */}
         {procedimientos.length > 0 && (
           <View style={{ gap: spacing[2] }}>

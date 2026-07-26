@@ -64,6 +64,18 @@ function hoyLocalISO(): string {
 
 // S52-P4b sistémico: títulos humanizados — sentence case, sin eyebrow.
 
+/** S77-B (D-541): los bloques que este tab lee, UNO POR LECTURA. Vocabulario
+ *  CERRADO a propósito — el conjunto de fallos no acepta strings sueltos, así
+ *  que una lectura nueva que se agregue sin su bloque rompe el typecheck en
+ *  vez de quedar muda. */
+type BloqueNegocio =
+  | 'cuenta'
+  | 'liquidaciones'
+  | 'paseo'
+  | 'grooming'
+  | 'adiestramiento'
+  | 'veterinaria';
+
 export default function Negocio() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -89,6 +101,24 @@ export default function Negocio() {
   // S68-B: el resumen VIVO del mundo Veterinaria — misma degradación
   const [mundoVeterinaria, setMundoVeterinaria] = useState<MundoVeterinariaPropio | null>(null);
 
+  // ── S77-B · D-541: FALLO ≠ AUSENCIA, BLOQUE POR BLOQUE ──────────────────
+  // El patrón viejo era `if (r.ok) setX(...)` SIN rama de fallo en las siete
+  // lecturas: los estados nacían en `null` y ahí se quedaban, así que con la
+  // red caída este tab —que es PRINCIPAL— se veía IDÉNTICO a un negocio sin
+  // nada configurado. Ley 13 rota (*el error jamás se disfraza de vacío*)
+  // sobre la superficie donde el prestador gestiona su vida comercial.
+  //
+  // POR QUÉ UN CONJUNTO Y NO UN BOOLEANO: son siete lecturas independientes
+  // y el caso real es MIXTO — que caiga una y las otras seis lleguen. Un
+  // booleano obligaría a elegir entre tapar todo el tab por un bloque caído
+  // o callar el bloque caído: las dos mienten. Cada bloque dice SU verdad.
+  //
+  // `cargado` separa CARGANDO de FALLÓ, que era la otra mitad de la mentira:
+  // antes `null` significaba las dos cosas. Mientras carga NADA cambia
+  // respecto de hoy — solo el caso FALLO estrena voz.
+  const [cargado, setCargado] = useState(false);
+  const [fallos, setFallos] = useState<ReadonlySet<BloqueNegocio>>(new Set());
+
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
@@ -99,11 +129,13 @@ export default function Negocio() {
           obtenerMiPrestador(),
         ]);
         if (!vigente) return;
+        const caidos = new Set<BloqueNegocio>();
         if (rCuenta.ok) {
           setCuenta(rCuenta.data);
           setCuentaCargada(true);
-        }
+        } else caidos.add('cuenta');
         if (rPendientes.ok) setPendientes(rPendientes.data);
+        else caidos.add('liquidaciones');
         if (rPrestador.ok) {
           const [rOfertas, rGrooming, rAdiestramiento, rVeterinaria] = await Promise.all([
             obtenerOfertasPaseoPropias(rPrestador.data.id),
@@ -111,11 +143,26 @@ export default function Negocio() {
             obtenerOfertaAdiestramientoPropia(rPrestador.data.id),
             obtenerMundoVeterinariaPropio(rPrestador.data.id),
           ]);
-          if (vigente && rOfertas.ok) setOfertas(rOfertas.data);
-          if (vigente && rGrooming.ok) setOfertasGrooming(rGrooming.data);
-          if (vigente && rAdiestramiento.ok) setMundoAdiestramiento(rAdiestramiento.data);
-          if (vigente && rVeterinaria.ok) setMundoVeterinaria(rVeterinaria.data);
+          if (!vigente) return;
+          if (rOfertas.ok) setOfertas(rOfertas.data);
+          else caidos.add('paseo');
+          if (rGrooming.ok) setOfertasGrooming(rGrooming.data);
+          else caidos.add('grooming');
+          if (rAdiestramiento.ok) setMundoAdiestramiento(rAdiestramiento.data);
+          else caidos.add('adiestramiento');
+          if (rVeterinaria.ok) setMundoVeterinaria(rVeterinaria.data);
+          else caidos.add('veterinaria');
+        } else {
+          // EL CASCADEO, declarado: sin el prestador las CUATRO lecturas de
+          // mundo ni siquiera se disparan. No es que los mundos estén
+          // vacíos — es que no se pudieron pedir. Los cuatro caen juntos.
+          caidos.add('paseo');
+          caidos.add('grooming');
+          caidos.add('adiestramiento');
+          caidos.add('veterinaria');
         }
+        setFallos(caidos);
+        setCargado(true);
       })();
       return () => {
         vigente = false;
@@ -123,9 +170,15 @@ export default function Negocio() {
     }, []),
   );
 
+  /** Voz de fallo del bloque, o `null` si ese bloque está sano (o cargando).
+   *  Se consulta ANTES de la lógica de detalle de cada bloque: lo que no se
+   *  pudo leer no se cuenta como "todavía no lo configuraste". */
+  const fallo = (b: BloqueNegocio): string | null =>
+    cargado && fallos.has(b) ? t('negocio.bloqueNoCargo') : null;
+
   // detalle honesto de la Celda de cuenta: el estado real cuando se
   // pudo leer; el hito de siempre mientras tanto
-  const detalleCuenta = !cuentaCargada
+  const detalleCuenta = fallo('cuenta') ?? (!cuentaCargada
     ? t('negocio.cuentaComercialDetalle')
     : cuenta === null
       ? t('negocio.cuentaComercialDetalle')
@@ -135,15 +188,16 @@ export default function Negocio() {
           ? t('cuenta.estadoActiva')
           : cuenta.estado === 'suspendida'
             ? t('cuenta.estadoSuspendida')
-            : t('cuenta.estadoCerrada');
+            : t('cuenta.estadoCerrada'));
 
   // liquidaciones: peldaño 1 SOLO con eventos reales; 0 conserva el hito
   const detalleLiquidaciones =
-    pendientes !== null && pendientes.cantidad > 0
+    fallo('liquidaciones') ??
+    (pendientes !== null && pendientes.cantidad > 0
       ? pendientes.cantidad === 1
         ? t('negocio.liquidacionesPendientesUno')
         : t('negocio.liquidacionesPendientes', { cantidad: pendientes.cantidad })
-      : t('negocio.liquidacionesDetalle');
+      : t('negocio.liquidacionesDetalle'));
 
   // B1a: el detalle vivo del mundo Paseo — verdad de DB o invitación
   const activas = ofertas?.filter((o) => o.activo) ?? [];
@@ -154,37 +208,41 @@ export default function Negocio() {
     (['S', 'M', 'L'] as const).map((tl) => o.tallas[tl]?.precio).filter((v): v is number => v !== undefined),
   );
   const detalleMundoGrooming =
-    ofertasGrooming === null || activasGrooming.length === 0 || preciosGrooming.length === 0
+    fallo('grooming') ??
+    (ofertasGrooming === null || activasGrooming.length === 0 || preciosGrooming.length === 0
       ? t('negocio.mundoGroomingVacio')
       : t('ofertaGrooming.serviciosDetalle', {
           lista: activasGrooming
             .map((o) => (o.tipoServicio === 'grooming' ? t('tallerGrooming.servicioBano') : t('tallerGrooming.servicioBanoCorte')))
             .join(' · '),
           precio: `$${Math.min(...preciosGrooming).toFixed(2)}`,
-        });
+        }));
 
   const detalleMundoPaseo =
-    ofertas === null || activas.length === 0
+    fallo('paseo') ??
+    (ofertas === null || activas.length === 0
       ? t('negocio.mundoPaseoVacio')
       : activas.length === 1
         ? t('ofertaPaseo.duracionesDetalleUna', { precio: `$${(desde as number).toFixed(2)}` })
-        : t('ofertaPaseo.duracionesDetalle', { n: activas.length, precio: `$${(desde as number).toFixed(2)}` });
+        : t('ofertaPaseo.duracionesDetalle', { n: activas.length, precio: `$${(desde as number).toFixed(2)}` }));
 
   // S63-B: detalle vivo del mundo Adiestramiento — verdad de DB o invitación
   const ofertaAdiestramiento = mundoAdiestramiento?.oferta ?? null;
   const programasActivos = mundoAdiestramiento?.programas.filter((p) => p.activo).length ?? 0;
   const detalleMundoAdiestramiento =
-    ofertaAdiestramiento === null || !ofertaAdiestramiento.activo || ofertaAdiestramiento.precio === null
+    fallo('adiestramiento') ??
+    (ofertaAdiestramiento === null || !ofertaAdiestramiento.activo || ofertaAdiestramiento.precio === null
       ? t('negocio.mundoAdiestramientoVacio')
       : t('negocio.mundoAdiestramientoDetalle', {
           precio: `$${ofertaAdiestramiento.precio.toFixed(2)}`,
           n: programasActivos,
-        });
+        }));
 
   // S68-B: detalle vivo del mundo Veterinaria — verdad de DB o invitación
   const serviciosVet = mundoVeterinaria?.servicios.filter((s) => s.activo) ?? [];
   const detalleMundoVeterinaria =
-    mundoVeterinaria === null || serviciosVet.length === 0
+    fallo('veterinaria') ??
+    (mundoVeterinaria === null || serviciosVet.length === 0
       ? t('negocio.mundoVeterinariaVacio')
       : serviciosVet.length === 1
         ? t('negocio.mundoVeterinariaDetalleUno', {
@@ -193,7 +251,7 @@ export default function Negocio() {
         : t('negocio.mundoVeterinariaDetalle', {
             n: serviciosVet.length,
             precio: `$${Math.min(...serviciosVet.map((s) => s.precio)).toFixed(2)}`,
-          });
+          }));
 
   // Ley 23: al no-gestor confirmado NO se le ofrece NEGOCIO (ausencia).
   if (gateDenegado) return <Redirect href="/(tabs)" />;

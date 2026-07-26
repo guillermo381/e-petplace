@@ -349,6 +349,8 @@ export const prestadorEn = {
   },
   negocio: {
     titulo: 'Your business',
+    // S77-B — D-541 (espejo): mismo criterio que el castellano.
+    bloqueNoCargo: "We couldn't load this right now.",
     enPreparacion: 'In preparation',
     oferta: 'Your offering',
     // S58-B B1a · Espejo de es.ts
