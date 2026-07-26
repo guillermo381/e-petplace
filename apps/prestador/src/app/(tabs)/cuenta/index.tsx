@@ -117,12 +117,28 @@ export default function Cuenta() {
   const [identidad, setIdentidad] = useState<Identidad | null>(null);
   const [negocio, setNegocio] = useState<Negocio | null>(null);
   // D-531: si la identidad NO se puede leer, el esqueleto tiene que
-  // PARARSE. Un esqueleto eterno es peor que el hueco de antes — sería
-  // el error disfrazado de "cargando" (Ley 13, la cara inversa de "el
-  // error jamás se disfraza de vacío"). Sin superficie de error nueva:
-  // con fallo el header colapsa a título+engranaje, EXACTAMENTE lo que
-  // esta pantalla hacía hasta hoy cuando la lectura fallaba.
-  const [falloIdentidad, setFalloIdentidad] = useState(false);
+  // PARARSE. Un esqueleto eterno es peor que el hueco — sería el error
+  // disfrazado de "cargando" (Ley 13, la cara inversa de "el error jamás
+  // se disfraza de vacío").
+  //
+  // D-536 (S77-B) — Y AHORA EL FALLO DICE QUE ES UN FALLO. La cura de
+  // D-531 colapsaba el header a título+engranaje: honesto contra el
+  // esqueleto eterno, pero seguía siendo **el error pintado como dato
+  // ausente**, que es la misma ley por el otro lado. Faltaba la tercera
+  // vía —una voz— y no se tomó entonces porque exigía inventar copy sin
+  // gate. Ahora existe, con UN solo string propuesto.
+  //
+  // `reintentable` NO es decoración: Ley 17.4 — un reintento que no puede
+  // arreglar nada es una promesa falsa. `sin_prestador` y `sin_sesion` no
+  // son fallos de lectura, son ESTADOS (el vínculo existe pero el negocio
+  // no está activo; o no hay sesión) — ahí reintentar no cambia nada.
+  // Precedente literal de la casa: `consulta.errorDetalle` (S75-B16) se
+  // escribió "sin promesa falsa de reintento: si no hay acceso, reintentar
+  // no lo arregla".
+  const [fallo, setFallo] = useState<{ reintentable: boolean } | null>(null);
+  // El reintento re-corre EL MISMO camino de carga en vez de duplicarlo:
+  // el efecto de foco depende de este contador.
+  const [intento, setIntento] = useState(0);
 
   useFocusEffect(
     useCallback(() => {
@@ -131,11 +147,14 @@ export default function Cuenta() {
         const prestador = await obtenerMiPrestador();
         if (!vigente) return;
         if (!prestador.ok) {
-          setFalloIdentidad(true);
+          setFallo({
+            reintentable:
+              prestador.codigo !== 'sin_prestador' && prestador.codigo !== 'sin_sesion',
+          });
           return;
         }
         // ── EL HEADER PINTA ACÁ: los 2 viajes que de verdad necesita ──
-        setFalloIdentidad(false);
+        setFallo(null);
         setIdentidad({
           nombre: prestador.data.nombre_comercial,
           ciudad: prestador.data.ciudad,
@@ -169,7 +188,9 @@ export default function Cuenta() {
       return () => {
         vigente = false;
       };
-    }, [t]),
+      // `intento` (D-536): al reintentar, el efecto vuelve a correr el
+      // mismo camino — cero lógica de carga duplicada.
+    }, [t, intento]),
   );
 
   const vozOficio =
@@ -256,9 +277,9 @@ export default function Cuenta() {
               después crecía de golpe). Inerte por ley: sin shimmer, sin
               pulso, sin fade. NO es la espera de marca — esa la reserva
               DIRECCION_ARTE §5.3 para procesos >2s, y esto es carga de
-              contenido. Con `falloIdentidad` no se dibuja: un esqueleto
+              contenido. Con `fallo` no se dibuja: un esqueleto
               eterno sería el error disfrazado de cargando. */}
-          {identidad === null && !falloIdentidad && (
+          {identidad === null && fallo === null && (
             <EsqueletoGrupo>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
                 <EsqueletoOficio ancho={LADO_AVATAR} alto={LADO_AVATAR} radio={radius.suave} />
@@ -274,6 +295,64 @@ export default function Cuenta() {
                 </View>
               </View>
             </EsqueletoGrupo>
+          )}
+
+          {/* D-536 · LA VOZ DEL FALLO — el error deja de verse como "no hay
+              nada". Ocupa el MISMO slot que la identidad, pero NO su forma:
+              sin caja de logo y sin monograma. Esa distinción es el pedido
+              central de la deuda — un negocio SIN LOGO sigue mostrando su
+              fila completa (monograma + nombre + badge, que es la ausencia
+              REAL y es correcta); un negocio que NO SE PUDO LEER muestra una
+              línea. Ausencia y fallo dejan de ser el mismo dibujo.
+              Un monograma acá sería peor que el hueco: habría que inventarle
+              iniciales a un nombre que justamente no se pudo leer.
+              Materiales: los del muro, ya medidos (§15b.2) — texto en papel
+              PLENO, píldora de VIDRIO OSCURO (papel 7.37 ✓). Cero token
+              nuevo ⇒ cero par WCAG nuevo. */}
+          {fallo !== null && (
+            <View style={{ gap: spacing[3], alignItems: 'flex-start' }}>
+              <Text
+                style={{
+                  fontFamily: typography.family.sans.regular,
+                  fontSize: typography.size.base,
+                  color: palette.light0,
+                }}
+              >
+                {t('miCuenta.identidadNoCargo')}
+              </Text>
+              {/* Ley 17.5 (cero finales mudos) — pero SOLO cuando reintentar
+                  puede servir de algo (Ley 17.4). La píldora reusa el MISMO
+                  material que el badge fundador de esta pantalla y la receta
+                  de presión del engranaje (scale 0.97): vocabulario propio
+                  del archivo, no invención. `Boton` no cruza al muro por la
+                  frontera ya declarada en techo-oficio.tsx (resuelve color de
+                  `theme.*`, que no está en la escala del muro) — su
+                  consolidación es D-535, no esta cura. */}
+              {fallo.reintentable && (
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => setIntento((n) => n + 1)}
+                  style={({ pressed }) => ({
+                    minHeight: 44,
+                    justifyContent: 'center',
+                    paddingHorizontal: spacing[4],
+                    borderRadius: radius.full,
+                    backgroundColor: VIDRIO_OFICIO,
+                    transform: [{ scale: pressed ? 0.97 : 1 }],
+                  })}
+                >
+                  <Text
+                    style={{
+                      fontFamily: typography.family.sans.medium,
+                      fontSize: typography.size.sm,
+                      color: palette.light0,
+                    }}
+                  >
+                    {t('agenda.reintentar')}
+                  </Text>
+                </Pressable>
+              )}
+            </View>
           )}
 
           {identidad !== null && (

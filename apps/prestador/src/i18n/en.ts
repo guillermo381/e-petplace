@@ -153,6 +153,8 @@ export const prestadorEn = {
     hitoAgenda: '{{n}}-day schedule',
     hitoDomicilio: 'home visits',
     errorCargar: "We couldn't load this. Try again.",
+    // S77-B — D-536 (espejo): mismo criterio que el castellano.
+    identidadNoCargo: "We couldn't load your business.",
     guardar: 'Save changes',
     nombreLabel: 'Your name',
     telefonoLabel: 'Phone',

@@ -178,6 +178,17 @@ export const prestadorEs = {
     hitoAgenda: 'agenda {{n}} días',
     hitoDomicilio: 'a domicilio',
     errorCargar: 'No pudimos cargar esto. Prueba de nuevo.',
+    // S77-B — D-536: la voz del fallo del HEADER de Cuenta · LOTE S77,
+    // GATE PENDIENTE. No reusa `errorCargar` a propósito: ese dice "esto"
+    // y vive como título de EstadoVacio a pantalla completa (perfil.tsx),
+    // donde "esto" TIENE antecedente; en el muro no hay antecedente
+    // ninguno. Dice que no se pudo CARGAR (no que no exista), nombra el
+    // objeto del lado del usuario ("tu negocio", jamás "prestador" ni
+    // "identidad" — Ley 17.2), y NO diagnostica la conexión: «revisá tu
+    // conexión» queda RESERVADO a errores de red (S47) y acá la causa
+    // puede ser otra. La acción va aparte y reusa `agenda.reintentar`,
+    // que ya está aprobado — cero copy nuevo para el botón.
+    identidadNoCargo: 'No pudimos cargar tu negocio.',
     guardar: 'Guardar cambios',
     nombreLabel: 'Tu nombre',
     telefonoLabel: 'Teléfono',
