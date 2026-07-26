@@ -1,6 +1,6 @@
-# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — ✅ **FIRMADA** — v2.2
+# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — ✅ **FIRMADA** — v2.3
 
-> **Estado: FIRMADA POR EL FOUNDER (S77, 25 Jul 2026) — v2.2.** Las dos
+> **Estado: FIRMADA POR EL FOUNDER (S77, 25 Jul 2026) — v2.3.** Las dos
 > decisiones que la letra le elevó están firmadas: **§11 = (a), las citas pasan
 > a ser de la clínica** · **§6 = la Hoja del miembro se recompone**. El resto
 > del cuerpo es fotografía del motor con su literal, o ley derivada del canon
@@ -865,6 +865,25 @@ es uno, y ahora está decidido.
 > se siente como quitarle algo a alguien que ya lo tenía.** Este es el único
 > momento en que la decisión es reversible sin costo.
 
+> **NOTA DE PRECISIÓN (L15, S77) — LA LLAVE ES EL TIPO, NO LA OFERTA.**
+> `evento_cita_servicio` **no guarda `prestador_servicio_id`**: guarda
+> `prestador_id` y `tipo_servicio` (un slug). El chip apunta a la OFERTA, así
+> que el cruce que esta firma describe **no es expresable tal cual**. El brazo
+> cruza por **`(prestador_id, tipo_servicio)`**.
+>
+> **Y es EQUIVALENTE, no una aproximación** — no por los datos de hoy sino por
+> construcción: el chip se guarda por oferta pero **se da y se quita siempre a
+> OFICIO COMPLETO** (`obtenerOficiosNegocio` devuelve `{oficio, servicioIds[]}`
+> y el INSERT hace `.flatMap(o => o.servicioIds)`). La única puerta que escribe
+> chips **no puede producir** el estado *"tengo una de las cinco ofertas de
+> paseo y no las otras cuatro"*. El delta formal —el cruce por tipo es más
+> ancho— **es inalcanzable desde la pantalla**.
+>
+> **Salvedad declarada:** un INSERT directo por PostgREST podría crear chips
+> parciales; esa policy es titular-only y ninguna superficie lo hace. Si algún
+> día nace una puerta que dé chips por oferta suelta, **esta equivalencia se
+> rompe y el brazo se relee.**
+
 **LO QUE EL BRAZO NO LLEVA, declarado:** **no** se copia la rama
 `pe.rol = 'dueño'` que arrastran las 8 lectoras de disponibilidad (§4bis). El
 titular ya pasa por el brazo 1 (`prestador_id`), y las 5 filas `dueño` vivas son
@@ -971,6 +990,14 @@ la familia recibe llega al cierre del período diciendo que su plan no se renov�
 
 ## Historial
 
+- **v2.3 (S77, 26 Jul 2026) — nota de precisión sobre la llave del tercer
+  brazo (L15).** §11.1 firmada decía *"el chip de la oferta de esa cita"* y
+  **esa llave no existe**: `evento_cita_servicio` guarda `prestador_id` y
+  `tipo_servicio`. El brazo cruza por **`(prestador_id, tipo_servicio)`**, y es
+  **equivalente por construcción** — los chips se dan y se quitan a oficio
+  completo, así que la puerta no puede producir el estado divergente. Con su
+  salvedad: si nace una puerta que dé chips por oferta suelta, la equivalencia
+  se rompe. **No cambia la decisión firmada.**
 - **v2.2 (S77, 26 Jul 2026) — la FORMA del tercer brazo, firmada.** El founder
   firma, verbatim: ***"solo quien puede atenderla."*** **§11.1 gana el bloque de
   firma:** el brazo es **por CHIP, no por pertenencia** — se ve la cita sin
