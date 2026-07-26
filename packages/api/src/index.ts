@@ -753,8 +753,10 @@ export {
   // S77-A: la edición del chip para quien YA está adentro (LETRA §4/§10.2)
   obtenerChipsEmpleado,
   quitarServiciosEmpleado,
+  obtenerJornadaEmpleado,
   type ChipEmpleado,
   type ResultadoQuitarChips,
+  type JornadaEmpleado,
   type OficioChip,
   type OficioNegocio,
   type EquipoNegocio,

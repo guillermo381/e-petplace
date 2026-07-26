@@ -49,7 +49,17 @@ export interface EquipoNegocio {
   miembros: MiembroEquipo[];
 }
 
-export type CodigoErrorEquipo = 'error_lectura' | 'error_escritura' | 'sin_sesion';
+// S77-A: `estado_no_confirmado` NO es un error de lectura más — es el único
+// caso en que la ESCRITURA YA OCURRIÓ y lo que falló es confirmarla. Sale
+// aparte porque su voz es distinta: `error_lectura` dice "no pasó nada,
+// probá de nuevo"; éste tiene que decir "se quitó, pero no pudimos confirmar
+// cómo quedó". Meterlos en el mismo código hacía que la Hoja mintiera con
+// los chips ya borrados (hallazgo de la vara de B).
+export type CodigoErrorEquipo =
+  | 'error_lectura'
+  | 'error_escritura'
+  | 'sin_sesion'
+  | 'estado_no_confirmado';
 
 type R<T> = Promise<ResultadoWrapper<T, CodigoErrorEquipo>>;
 
@@ -365,6 +375,11 @@ export async function obtenerChipsEmpleado(empleadoId: string): R<ChipEmpleado[]
  *  ni afirmar de más: cuántos chips médicos quedaron y si el acto le sacó
  *  el expediente a esa persona. */
 export interface ResultadoQuitarChips {
+  /** S77-A (pedido de B): los chips SOBREVIVIENTES, no solo su conteo. La
+   *  Hoja repinta con esto y NO vuelve a leer — un viaje menos y, sobre
+   *  todo, **una ventana de desincronía menos** (entre el re-read del
+   *  wrapper y el de la pantalla, otro titular puede haber tocado). */
+  chips: ChipEmpleado[];
   chipsRestantes: number;
   chipsMedicosRestantes: number;
   /** true ⟺ tenía capacidad clínica POR CHIP y ya no la tiene.
@@ -394,10 +409,13 @@ export async function quitarServiciosEmpleado(
   empleadoId: string,
   servicioIds: string[],
 ): R<ResultadoQuitarChips> {
+  // (1) Estado previo. Si ESTO falla, no se tocó nada: `error_lectura`
+  //     honesto, la Hoja puede reintentar sin consecuencias.
   const antes = await obtenerChipsEmpleado(empleadoId);
   if (!antes.ok) return antes;
   const teniaClinico = antes.data.some((c) => c.esMedico);
 
+  // (2) El DELETE. Si falla, tampoco se quitó nada: `error_escritura`.
   if (servicioIds.length > 0) {
     const { error } = await getClient()
       .from('prestador_empleado_servicios')
@@ -407,19 +425,81 @@ export async function quitarServiciosEmpleado(
     if (error) return { ok: false, codigo: 'error_escritura', mensaje: error.message };
   }
 
-  // Se RE-LEE, no se resta de memoria: el DELETE pudo no alcanzar filas
-  // (id ajeno, ya borrado, carrera con otra sesión) y un conteo calculado
-  // mentiría con cara de dato (L-166 — el dato vivo se lee al usarlo).
+  // (3) Se RE-LEE, no se resta de memoria: el DELETE pudo no alcanzar filas
+  //     (id ajeno, ya borrado, carrera con otra sesión) y un conteo calculado
+  //     mentiría con cara de dato (L-166 — el dato vivo se lee al usarlo).
+  //
+  //     SI ESTE READ FALLA, EL BORRADO YA OCURRIÓ. Devolver `error_lectura`
+  //     acá era el bug que la vara de B destapó: la Hoja decía "no se pudo"
+  //     con los chips ya borrados, y el titular reintentaba sobre un estado
+  //     que ya había cambiado. Sale con código PROPIO para que la voz pueda
+  //     decir la verdad incómoda: se quitó, no sabemos cómo quedó, recargá.
   const despues = await obtenerChipsEmpleado(empleadoId);
-  if (!despues.ok) return despues;
+  if (!despues.ok) {
+    return {
+      ok: false,
+      codigo: 'estado_no_confirmado',
+      mensaje: despues.mensaje,
+    };
+  }
+
   const medicosRestantes = despues.data.filter((c) => c.esMedico).length;
   return {
     ok: true,
     data: {
+      chips: despues.data,
       chipsRestantes: despues.data.length,
       chipsMedicosRestantes: medicosRestantes,
       perdioCapacidadClinicaPorChip: teniaClinico && medicosRestantes === 0,
     },
+  };
+}
+
+/** LA JORNADA DE UNA PERSONA — el lector que §4bis necesita para que su
+ *  aviso sea INFORMACIÓN y no ruido permanente.
+ *
+ *  POR QUÉ NACE (pedido de B, S77): `obtenerFranjasHorario`
+ *  (`configuracionPaseo.ts:297`) resuelve por TITULAR — su literal filtra
+ *  `.eq('empleado_id', titularId)` con el id que `obtenerTitularId`
+ *  devuelve — y **no puede responder por otra persona**. Sin este lector, el
+ *  aviso "el chip no promete disponibilidad" tendría que dibujarse SIEMPRE,
+ *  y un aviso incondicional deja de ser información: es ruido que se
+ *  aprende a ignorar, justo sobre el hueco que más importa.
+ *
+ *  DECISIÓN extender-vs-nuevo, DECLARADA (misma que E5 de este archivo): NO
+ *  se ensancha `obtenerFranjasHorario` — sirve al wizard de paseo con OTRO
+ *  contrato (`FranjaHorario[]` completo para editar) y ensancharlo forzaría
+ *  a su consumidor a descartar campos o cambiaría su resolución. Esto es un
+ *  lector nuevo, mínimo y de otro trabajo: la Hoja del miembro.
+ *
+ *  RLS verificada antes de escribirlo (L-167): el titular lee las franjas de
+ *  SU gente por `prestador_horarios_own` (ALL, `prestador_id IN (mis
+ *  prestadores)`) — `ph_empleado_own` alcanza solo a las propias, pero no es
+ *  la única puerta. Sin ese literal, este lector habría devuelto 0 franjas
+ *  con cara de dato y el aviso habría mentido al revés. */
+export interface JornadaEmpleado {
+  /** Franjas con `activo = true` — las únicas que las 8 lectoras de
+   *  disponibilidad miran (todas exigen `h.activo`). */
+  franjasActivas: number;
+  /** Incluye las pausadas: una persona con franjas TODAS pausadas no es lo
+   *  mismo que una que nunca cargó jornada, y la voz puede distinguirlo. */
+  franjasTotales: number;
+  /** El dato que el aviso consume: `franjasActivas === 0` ⟹ esta persona
+   *  NO va a aparecer en ninguna reserva, tenga los chips que tenga. */
+  tieneJornada: boolean;
+}
+
+export async function obtenerJornadaEmpleado(empleadoId: string): R<JornadaEmpleado> {
+  const { data, error } = await getClient()
+    .from('prestador_horarios')
+    .select('id, activo')
+    .eq('empleado_id', empleadoId);
+  if (error) return { ok: false, codigo: 'error_lectura', mensaje: error.message };
+  const filas = data ?? [];
+  const activas = filas.filter((f) => f.activo === true).length;
+  return {
+    ok: true,
+    data: { franjasActivas: activas, franjasTotales: filas.length, tieneJornada: activas > 0 },
   };
 }
 
