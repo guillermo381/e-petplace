@@ -44,20 +44,21 @@ adicionales, esta v2 vuelve a cruzarse.
 - **Sólidos por superficie: 1** — el `Boton destructivo` de desvincular (Ley 19.7).
 - **Interruptores: 2 → 0.**
 - **Targets: 44.**
-- **VIAJES DE RED AL ABRIR LA HOJA: 4.** *(CORREGIDO — la v1 decía 1, y estaba mal:
-  contaba llamadas de WRAPPER, no viajes.)* Desglose leído de la fuente:
-  - `obtenerChipsEmpleado` = **3 en serie**, y son dependientes:
-    `prestador_empleado_servicios` (saca `servicio_id`) → `prestador_servicios`
-    filtrado `.in('id', ids)` → `tipos_servicio` filtrado `.in('codigo', slugs)`.
-    Cada uno se filtra con el resultado del anterior: no paralelizan.
+- **VIAJES DE RED AL ABRIR LA HOJA: 3.** *(Tercera versión de este número, y se deja
+  trazable: **v1 dijo 1** —mal, contaba llamadas de WRAPPER, no viajes— · **v2 dijo 4**
+  —correcto para su momento: 3 de chips + 1 de jornada— · **v3 dice 3**, porque A
+  colapsó el wrapper en **`8e2e642`**.)* Desglose vivo:
+  - `obtenerChipsEmpleado` = **2** — `prestador_empleado_servicios` con EMBED de la
+    oferta (`select('servicio_id, oferta:prestador_servicios(id, tipo_servicio)')`)
+    → `tipos_servicio`.
   - `obtenerJornadaEmpleado` = **1** (`prestador_horarios` por `empleado_id`).
-- **POR QUÉ NO BAJAN A 1, con literal de FKs** (consultado en la DB):
-  existe `prestador_empleado_servicios.servicio_id → prestador_servicios.id`, así que
-  PostgREST **sí** podría embeber el salto 1→2 (3 ⇒ 2). **NO existe FK de
-  `prestador_servicios.tipo_servicio → tipos_servicio.codigo`** (`tipo_servicio` es
-  slug de texto), así que el tercer viaje **no es embebible** con el schema de hoy.
-  **Piso alcanzable hoy: 2. Llegar a 1 exige una FK ⇒ migración ⇒ motor ⇒ territorio A.**
-  Nada de esto es de la Hoja: si A colapsa el wrapper, el boceto no cambia.
+- **POR QUÉ NO BAJA DE 2, con literal de FKs** (consultado en la DB por B y confirmado
+  por A en el mensaje de `8e2e642`): existe
+  `prestador_empleado_servicios.servicio_id → prestador_servicios.id` — ese salto SÍ se
+  embebió. **NO existe FK de `prestador_servicios.tipo_servicio → tipos_servicio.codigo`**
+  (`tipo_servicio` es slug de texto), así que el viaje a `tipos_servicio` **no es
+  embebible** con el schema de hoy. **Piso alcanzable: 2. Llegar a 1 exige FK nueva ⇒
+  migración ⇒ motor.** Nada de esto es de la Hoja.
 
 ---
 
@@ -142,7 +143,8 @@ devuelve una verdad que nadie muestra.
   (S77-A, `b3bdee5`) ⇒ la Hoja repinta con eso, **sin re-lectura extra**.
 
 **AGUJERO DECLARADO (no lo cubre la letra, sale de leer el wrapper):** no hay
-transacción — `quitarServiciosEmpleado` es lectura → DELETE → lectura, tres viajes.
+transacción — `quitarServiciosEmpleado` es lectura → DELETE → lectura, **tres pasos**
+(hoy 5 viajes: 2 + 1 + 2).
 Si el DELETE pasa y la re-lectura de `:413` falla, el wrapper devuelve `error_lectura`
 **con los chips ya borrados**. La Hoja **no puede** decir ahí *"no pudimos quitar el
 chip"*: mentiría. Requisito de voz: estado incierto + re-leer, jamás negar el acto.
@@ -195,7 +197,7 @@ Temas: los tres por tokens. es/en: claves nuevas nacen en par.
 
 | pieza | estado |
 |---|---|
-| `obtenerChipsEmpleado(empleadoId)` | ✅ (3 viajes, ver Números) |
+| `obtenerChipsEmpleado(empleadoId)` | ✅ **2 viajes** desde `8e2e642` (ver Números) |
 | `asignarServiciosEmpleado(empleadoId, servicioIds)` | ✅ — su L13 declara que sirve tal cual para quien ya está adentro |
 | `quitarServiciosEmpleado(empleadoId, servicioIds)` | ✅ — devuelve `chips`, conteos y `perdioCapacidadClinicaPorChip` |
 | `obtenerOficiosNegocio(prestadorId)` | ✅ — `{oficio, servicioIds}`, solo ofertas `activo=true` |
@@ -213,6 +215,6 @@ Temas: los tres por tokens. es/en: claves nuevas nacen en par.
 3. ~~Chips sobrevivientes en `ResultadoQuitarChips`~~ — **ENTREGADO** (`b3bdee5`).
 4. **A decidir por A (no es del boceto):** si `quitarRolEmpleado`/`asignarRolEmpleado`
    quedan sin consumidor al sacar los dos toggles, o si otra superficie los usa.
-5. **Opcional, de A:** colapsar `obtenerChipsEmpleado` de 3 a 2 viajes por embed
-   (la FK del salto 1→2 existe). Bajar a 1 exigiría FK nueva sobre
-   `prestador_servicios.tipo_servicio` ⇒ migración. **El boceto no depende de esto.**
+5. ~~Colapsar `obtenerChipsEmpleado`~~ — **ENTREGADO** (`8e2e642`): 3 ⇒ 2 por embed.
+   Bajar a 1 sigue exigiendo FK nueva sobre `prestador_servicios.tipo_servicio` ⇒
+   migración; queda como nota, no como pedido.
