@@ -1,6 +1,12 @@
 # LETRA — LA EDICIÓN DEL VÍNCULO (S77) — ✅ **FIRMADA** — v2.1
 
-> **Estado: PROPUESTA DE MESA (S77, 24 Jul 2026) — v1.9.** Nace del pedido
+> **Estado: FIRMADA POR EL FOUNDER (S77, 25 Jul 2026) — v2.1.** Las dos
+> decisiones que la letra le elevó están firmadas: **§11 = (a), las citas pasan
+> a ser de la clínica** · **§6 = la Hoja del miembro se recompone**. El resto
+> del cuerpo es fotografía del motor con su literal, o ley derivada del canon
+> ya firmado (§1). **QUÉ NO APRUEBA ESTA FIRMA: ninguna pantalla.** El boceto
+> va con **M1–M5 completo** y tiene su propio gate. **§10 sigue abierta** y sus
+> lecturas no se dan por hechas. Nace del pedido
 > literal del founder en S76: *"edición es agregar o quitar chips de servicio o
 > eliminar a ese prestador de mi negocio."*
 >
