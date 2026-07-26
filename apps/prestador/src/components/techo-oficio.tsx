@@ -22,7 +22,7 @@
  */
 
 import { useCallback, useState, type ReactNode } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View, type DimensionValue } from 'react-native';
 import Animated, { cubicBezier } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
@@ -170,6 +170,48 @@ export function ToggleTecho<C extends string>({
         );
       })}
     </View>
+  );
+}
+
+/**
+ * S77-B (D-531) — LA FORMA DE CARGA SOBRE EL MURO.
+ *
+ * POR QUÉ NO ES `Esqueleto` DE packages/ui: su color es
+ * `theme.bg.overlay`, que en claro resuelve a `#EDEBF5` (casi blanco) —
+ * sobre el muro serían bloques BRILLANTES, más ruidosos que el contenido
+ * que reemplazan, y contra la regla medida de §15b.2 (sobre el muro el
+ * material de superficie es VIDRIO OSCURO; el claro .14 caía a 4.15).
+ * Es la MISMA frontera ya declarada arriba para `Texto`: un componente
+ * del sistema que resuelve su color de `theme.*` no puede vestir el
+ * muro, porque el muro no está en la escala del tema.
+ *
+ * Ley 13 intacta: INERTE — sin shimmer, sin pulso, sin fade. Y se
+ * compone imitando el layout final para que el reemplazo no corra nada
+ * (el punto de D-531: la portada tiene que leerse CARGANDO, no ROTA).
+ * El contrato de a11y se hereda del sistema: cada forma se oculta del
+ * lector y el ANUNCIO lo pone `EsqueletoGrupo` de `@epetplace/ui`, que
+ * es agnóstico de color y por eso sí cruza.
+ *
+ * Composición local del app (patrón espejo-oferta, igual que
+ * `ToggleTecho`); su promoción a packages/ui queda anotada como pedido
+ * a la A: `Esqueleto` con `superficie="clara" | "muro"`, exactamente el
+ * eje que `LogoNegocio` ya resolvió (S76-B1.2).
+ */
+export function EsqueletoOficio({
+  ancho,
+  alto,
+  radio = radius.sm,
+}: {
+  ancho: DimensionValue;
+  alto: number;
+  radio?: number;
+}) {
+  return (
+    <View
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={{ width: ancho, height: alto, borderRadius: radio, backgroundColor: VIDRIO_OFICIO }}
+    />
   );
 }
 

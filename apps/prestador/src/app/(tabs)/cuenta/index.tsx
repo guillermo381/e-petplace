@@ -17,13 +17,14 @@
  * PAPEL). El programa del badge = D-398.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import * as Updates from 'expo-updates';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   Boton,
   CeldaNavegacion,
+  EsqueletoGrupo,
   Hoja,
   Icono,
   LogoNegocio,
@@ -48,6 +49,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
   CURVA_OFICIO,
+  EsqueletoOficio,
   VIDRIO_OFICIO,
   VeloBarraEstadoOficio,
   useBarraEstadoClara,
@@ -68,15 +70,35 @@ import { useTraduccion } from '@/i18n';
 // founder prefiere la forma vieja: una prop de radio en el componente.
 const LADO_AVATAR = 84;
 
+/**
+ * S77-B (D-531) — EL PORTÓN, PARTIDO EN DOS.
+ *
+ * Antes había UN estado y UN `setIdentidad`: el nombre y el logo colgaban
+ * del MISMO gate que la banda de hitos. Medido en S77-B: el header
+ * esperaba CINCO viajes de red en serie cuando solo necesitaba DOS
+ * (`obtenerMiPrestador` = getUser + select). Los otros tres son de los
+ * hitos — contenido SECUNDARIO del muro que estaba tomando de rehén a la
+ * identidad. (Lo que el canon sospechaba, `resolverUrlLogoNegocio`, quedó
+ * descartado con medición: es síncrona y sin red.)
+ *
+ * El estado FINAL es idéntico al de antes; cambia CUÁNDO pinta cada parte.
+ */
 type Identidad = {
   nombre: string;
   ciudad: string | null;
-  oficio: 'ambos' | 'paseo' | 'grooming' | null;
-  hitos: string[];
   /** S76-B1.2 (D-505): el PATH del logo — la portada lo pinta si existe.
    *  La lectura ya viene en `obtenerMiPrestador`; lo que faltaba era
    *  que esta pantalla lo mirara. */
   logoPath: string | null;
+};
+
+/** Lo que sale de las TRES lecturas de oferta y agenda. Llega DESPUÉS y
+ *  su ausencia ya no borra el header: la voz del oficio se suma al
+ *  subtítulo cuando llega, y la banda de hitos conserva su regla de
+ *  existencia (sin hitos NO existe — jamás ceros, S61-B12). */
+type Negocio = {
+  oficio: 'ambos' | 'paseo' | 'grooming' | null;
+  hitos: string[];
 };
 
 
@@ -93,13 +115,34 @@ export default function Cuenta() {
   const [eliminarAbierta, setEliminarAbierta] = useState(false);
   // la identidad del header CD (S61-B12): datos REALES o nada
   const [identidad, setIdentidad] = useState<Identidad | null>(null);
+  const [negocio, setNegocio] = useState<Negocio | null>(null);
+  // D-531: si la identidad NO se puede leer, el esqueleto tiene que
+  // PARARSE. Un esqueleto eterno es peor que el hueco de antes — sería
+  // el error disfrazado de "cargando" (Ley 13, la cara inversa de "el
+  // error jamás se disfraza de vacío"). Sin superficie de error nueva:
+  // con fallo el header colapsa a título+engranaje, EXACTAMENTE lo que
+  // esta pantalla hacía hasta hoy cuando la lectura fallaba.
+  const [falloIdentidad, setFalloIdentidad] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
       void (async () => {
         const prestador = await obtenerMiPrestador();
-        if (!vigente || !prestador.ok) return;
+        if (!vigente) return;
+        if (!prestador.ok) {
+          setFalloIdentidad(true);
+          return;
+        }
+        // ── EL HEADER PINTA ACÁ: los 2 viajes que de verdad necesita ──
+        setFalloIdentidad(false);
+        setIdentidad({
+          nombre: prestador.data.nombre_comercial,
+          ciudad: prestador.data.ciudad,
+          logoPath: prestador.data.foto_url,
+        });
+
+        // ── y recién ahora lo secundario, con su propio estado ──
         const [rPaseo, rGrooming, rFranjas] = await Promise.all([
           obtenerOfertasPaseoPropias(prestador.data.id),
           obtenerOfertasGroomingPropias(prestador.data.id),
@@ -117,13 +160,10 @@ export default function Cuenta() {
         if (paseoActivo || groomingActivo) hitos.push(t('miCuenta.hitoOferta'));
         if (diasActivos > 0) hitos.push(t('miCuenta.hitoAgenda', { n: diasActivos }));
         if (domicilio) hitos.push(t('miCuenta.hitoDomicilio'));
-        setIdentidad({
-          nombre: prestador.data.nombre_comercial,
-          ciudad: prestador.data.ciudad,
+        setNegocio({
           oficio:
             paseoActivo && groomingActivo ? 'ambos' : paseoActivo ? 'paseo' : groomingActivo ? 'grooming' : null,
           hitos,
-          logoPath: prestador.data.foto_url,
         });
       })();
       return () => {
@@ -133,13 +173,22 @@ export default function Cuenta() {
   );
 
   const vozOficio =
-    identidad?.oficio === 'ambos'
+    negocio?.oficio === 'ambos'
       ? t('miCuenta.oficioAmbos')
-      : identidad?.oficio === 'paseo'
+      : negocio?.oficio === 'paseo'
         ? t('miCuenta.oficioPaseos')
-        : identidad?.oficio === 'grooming'
+        : negocio?.oficio === 'grooming'
           ? t('miCuenta.oficioEstetica')
           : null;
+
+  // D-531 (higiene, DECLARADA como tal): la derivación de la URL pública
+  // es síncrona y sin red — está MEDIDO que no es el cuello (microsegundos).
+  // Se memoiza porque corría en cada render sin necesidad, no porque cure
+  // la deuda.
+  const logoUrl = useMemo(
+    () => resolverUrlLogoNegocio(identidad?.logoPath ?? null),
+    [identidad?.logoPath],
+  );
 
   // S58 (D-361 levantado): cada entrada con su ícono b′ del registry —
   // el perfil comparte la chapita 'cuenta' (decisión del lote ea7e8e4)
@@ -199,6 +248,34 @@ export default function Cuenta() {
             </Pressable>
           </View>
 
+          {/* D-531 · LEY 13: mientras la identidad viaja, el muro reserva
+              SU GEOMETRÍA FINAL con formas de vidrio. El lado del logo (84)
+              gobierna el alto de la fila en los dos estados, así que el
+              reemplazo no corre nada — la portada se lee CARGANDO, no ROTA
+              (que es como se leía: el muro pintaba solo título+engranaje y
+              después crecía de golpe). Inerte por ley: sin shimmer, sin
+              pulso, sin fade. NO es la espera de marca — esa la reserva
+              DIRECCION_ARTE §5.3 para procesos >2s, y esto es carga de
+              contenido. Con `falloIdentidad` no se dibuja: un esqueleto
+              eterno sería el error disfrazado de cargando. */}
+          {identidad === null && !falloIdentidad && (
+            <EsqueletoGrupo>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
+                <EsqueletoOficio ancho={LADO_AVATAR} alto={LADO_AVATAR} radio={radius.suave} />
+                <View style={{ flex: 1, gap: spacing[1.5] }}>
+                  {/* el nombre · el subtítulo · la pill del badge */}
+                  <EsqueletoOficio ancho="70%" alto={typography.size.xl} />
+                  <EsqueletoOficio ancho="45%" alto={typography.size.sm} />
+                  <EsqueletoOficio
+                    ancho={104}
+                    alto={typography.size.xs + spacing[3]}
+                    radio={radius.full}
+                  />
+                </View>
+              </View>
+            </EsqueletoGrupo>
+          )}
+
           {identidad !== null && (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
               {/* S76-B1.2 (D-505, gate del founder): LA PORTADA MOSTRABA
@@ -214,7 +291,7 @@ export default function Cuenta() {
                   un círculo, una marca se destruye si se recorta). */}
               <LogoNegocio
                 nombre={identidad.nombre}
-                logoUrl={resolverUrlLogoNegocio(identidad.logoPath)}
+                logoUrl={logoUrl}
                 tamano={LADO_AVATAR}
                 superficie="muro"
               />
@@ -249,7 +326,13 @@ export default function Cuenta() {
             </View>
           )}
 
-          {identidad !== null && identidad.hitos.length > 0 && (
+          {/* D-531: la banda NO lleva esqueleto, a propósito. Su regla de
+              existencia es "sin hitos NO existe" (S61-B12, jamás ceros):
+              un esqueleto acá prometería una banda que en muchos negocios
+              no va a llegar nunca — y al no llegar tendría que desaparecer,
+              que es el corrimiento que se quería evitar, con una promesa
+              rota de yapa. Llega cuando llega. */}
+          {negocio !== null && negocio.hitos.length > 0 && (
             <View
               style={{
                 backgroundColor: VIDRIO_OFICIO,
@@ -266,7 +349,7 @@ export default function Cuenta() {
                   color: palette.light0,
                 }}
               >
-                {identidad.hitos.join(' · ')}
+                {negocio.hitos.join(' · ')}
               </Text>
             </View>
           )}
