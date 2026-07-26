@@ -1,6 +1,6 @@
-# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — ✅ **FIRMADA** — v2.3
+# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — ✅ **FIRMADA** — v2.4
 
-> **Estado: FIRMADA POR EL FOUNDER (S77, 25 Jul 2026) — v2.3.** Las dos
+> **Estado: FIRMADA POR EL FOUNDER (S77, 25 Jul 2026) — v2.4.** Las dos
 > decisiones que la letra le elevó están firmadas: **§11 = (a), las citas pasan
 > a ser de la clínica** · **§6 = la Hoja del miembro se recompone**. El resto
 > del cuerpo es fotografía del motor con su literal, o ley derivada del canon
@@ -826,29 +826,35 @@ produce `empleado_id = NULL`** cuando el negocio tiene más de un profesional
 (A0 punto 3 de S76). *Cita de la clínica* ya existe en el motor; esta letra la
 usa, no la crea.
 
-### 11.1 LO QUE (a) NECESITA PARA NO SER COSMÉTICA — y es duro
+### 11.1 QUÉ NECESITA (a) — corregido por medición (L14bis, S77)
 
-> ## **(a) SOLA NO CAMBIA NADA. NULL NO ES VISIBLE PARA NADIE.**
+> **CORRECCIÓN A LA MESA.** Las v1.8–v2.3 afirmaron, en negrita y firmadas:
+> *"(a) sola no cambia nada. NULL no es visible para nadie."* **Es falso, y el
+> censo que lo sostenía estaba corto.** Sobre `evento_cita_servicio` hay
+> **CINCO** policies SELECT, no las tres que L14.1 relevó. La quinta,
+> `cita_select_por_acceso`, concede por la vía de la **MASCOTA** —
+> `user_tiene_acceso_a_mascota(mascota_id)` — y alcanza a todo empleado
+> activo de una cuenta con acceso a esa mascota. **La cita despegada no se
+> esconde de nadie: ya se veía.**
+>
+> **Medido, no argumentado:** el vet de 6 chips ve **74 de 78** citas, y las
+> 74 son **exactamente** las que ve por mascota. El tercer brazo en el SELECT
+> tiene **delta 0**. Y no puede dejar de tenerlo: las citas `pendiente` nacen
+> CON empleado asignado (`crear_bloqueo_agenda` siempre elige uno), así que un
+> brazo acotado a *sin dueño* no las tocaría; y las citas sin dueño solo
+> nacen del despegue, sobre mascotas que la clínica ya atendió ⇒ que ya
+> tienen otorgamiento ⇒ que ya son visibles.
+>
+> **⇒ EL TERCER BRAZO SE CAE DEL SELECT. Queda SOLO en el UPDATE.** Una
+> policy que no concede nada es peso muerto que la próxima sesión va a leer
+> como si sostuviera algo.
 
-El predicado de las tres policies de agenda, byte-idéntico en las tres
-(`LETRA_RECEPCION_S76` §4):
-
-```
-( prestador_id IN (SELECT id FROM prestadores WHERE user_id = auth.uid()) )
-OR
-( empleado_id IN (SELECT id FROM prestador_empleados
-                  WHERE user_id = auth.uid() AND activo = true) )
-```
-
-Con `empleado_id = NULL`, el segundo brazo **no da true para nadie** — `NULL IN
-(…)` es `NULL`, y `NULL` no es `true`. Así que la cita despegada sigue siendo
-**visible solo para el titular**: exactamente donde estaba antes de la baja,
-solo que ahora además sin dueño. **Mover la cita a NULL sin construir el lector
-de "cita de la clínica" cambia el síntoma de lugar y no lo cura.**
-
-**⇒ La firma de (a) es, en los hechos, la firma del ítem 2.** La RLS de agenda
-tiene que ganar su tercer brazo **en la misma migración**. No son dos frentes:
-es uno, y ahora está decidido.
+**LO QUE (a) SÍ NECESITA, y por qué la decisión no cambia:** (a) no se firmó
+para que la cita se VEA —ya se veía— sino para que alguien pueda **TOMARLA**.
+`cita_select_por_acceso` es SELECT-only: sin el brazo en `cita_update_prestador`,
+el empleado mira la cita huérfana y no puede hacerse cargo. **El valor de (a)
+vive entero en el UPDATE.** La decisión firmada se sostiene; su fundamento era
+el equivocado.
 
 > ## ✅ **LA FORMA DEL TERCER BRAZO — FIRMADA POR EL FOUNDER (S77):**
 > ***"solo quien puede atenderla."***
@@ -990,6 +996,16 @@ la familia recibe llega al cierre del período diciendo que su plan no se renov�
 
 ## Historial
 
+- **v2.4 (S77, 26 Jul 2026) — la medición corrige a la mesa, y la migración
+  se achica.** §11.1 llevaba una premisa FALSA en negrita y firmada: *"NULL no
+  es visible para nadie."* Existe una quinta policy SELECT
+  (`cita_select_por_acceso`) que concede por MASCOTA, y el vet ya ve 74 de 78
+  citas — las 74 son exactamente las que ve por esa vía. **Delta del tercer
+  brazo en el SELECT: 0, y estructuralmente 0.** El brazo se cae del SELECT y
+  queda solo en el UPDATE, que es donde (a) tiene su valor: no visibilidad,
+  **tomabilidad**. La decisión firmada no cambia; su fundamento sí. Origen:
+  el discriminador del gate, que falló tres veces hasta explicar por qué —
+  el protocolo existió para esto.
 - **v2.3 (S77, 26 Jul 2026) — nota de precisión sobre la llave del tercer
   brazo (L15).** §11.1 firmada decía *"el chip de la oferta de esa cita"* y
   **esa llave no existe**: `evento_cita_servicio` guarda `prestador_id` y
