@@ -1,6 +1,6 @@
-# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — ✅ **FIRMADA** — v2.1
+# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — ✅ **FIRMADA** — v2.2
 
-> **Estado: FIRMADA POR EL FOUNDER (S77, 25 Jul 2026) — v2.1.** Las dos
+> **Estado: FIRMADA POR EL FOUNDER (S77, 25 Jul 2026) — v2.2.** Las dos
 > decisiones que la letra le elevó están firmadas: **§11 = (a), las citas pasan
 > a ser de la clínica** · **§6 = la Hoja del miembro se recompone**. El resto
 > del cuerpo es fotografía del motor con su literal, o ley derivada del canon
@@ -847,9 +847,47 @@ solo que ahora además sin dueño. **Mover la cita a NULL sin construir el lecto
 de "cita de la clínica" cambia el síntoma de lugar y no lo cura.**
 
 **⇒ La firma de (a) es, en los hechos, la firma del ítem 2.** La RLS de agenda
-tiene que ganar su tercer brazo —*el empleado del negocio ve las citas de la
-clínica*— **en la misma migración**. No son dos frentes: es uno, y ahora está
-decidido.
+tiene que ganar su tercer brazo **en la misma migración**. No son dos frentes:
+es uno, y ahora está decidido.
+
+> ## ✅ **LA FORMA DEL TERCER BRAZO — FIRMADA POR EL FOUNDER (S77):**
+> ***"solo quien puede atenderla."***
+>
+> **El brazo es POR CHIP, no por pertenencia.** Un empleado activo del negocio
+> ve una cita sin dueño **si tiene el chip de la oferta de esa cita** — no por
+> el solo hecho de trabajar ahí. El groomer no ve las citas veterinarias y el
+> vet no ve las de grooming. Encaja con la letra del founder en S76
+> (*"cualquier prestador libre la toma"*): **solo se puede tomar lo que se sabe
+> hacer.**
+>
+> **Y se firma AHORA porque hoy es gratis:** el radio vivo es **0 citas con
+> `empleado_id` nulo** (L14.4). Ensanchar después es seguro; **angostar después
+> se siente como quitarle algo a alguien que ya lo tenía.** Este es el único
+> momento en que la decisión es reversible sin costo.
+
+**LO QUE EL BRAZO NO LLEVA, declarado:** **no** se copia la rama
+`pe.rol = 'dueño'` que arrastran las 8 lectoras de disponibilidad (§4bis). El
+titular ya pasa por el brazo 1 (`prestador_id`), y las 5 filas `dueño` vivas son
+justamente las de los 5 titulares (L6) — incluirla sería código muerto **y**
+propagar el eje legacy de D-486 a una policy nueva. **Chip y nada más.**
+
+**TRES CONSECUENCIAS QUE LA MIGRACIÓN TIENE QUE DECLARAR EN SU DIFF:**
+
+1. **SELECT y UPDATE no son la misma pregunta que INSERT.** Ver una cita de la
+   clínica y *tomarla* (un UPDATE que se pone de `empleado_id`) son el acto que
+   esta firma habilita. **Crear** una cita sin dueño
+   (`cita_insert_prestador_walkin`) es otra cosa, y acotarla por chip podría
+   dejar a **recepción sin poder abrir una cita de mostrador** — recepción no
+   tiene chips. *(Probablemente hoy no pasa por esa policy, porque
+   `registrar_atencion_mostrador` es DEFINER y saltea RLS — **pero eso se lee,
+   no se supone**.)* El INSERT se decide con su propio literal.
+2. **El brazo abre la puerta de vuelta:** con el tercer brazo en UPDATE,
+   cualquier empleado con el chip puede **devolver** una cita al pool
+   (ponerle `empleado_id = NULL`). Hoy no puede. Puede ser deseable
+   (enfermedad, sobrecarga) o no serlo — **queda declarado, no decidido**.
+3. **Una cita sin oferta identificable no la ve nadie** salvo el titular: sin
+   `prestador_servicio_id` no hay chip contra qué cruzar. Si ese caso existe,
+   es su propia línea.
 
 ### 11.2 LA BAJA DEJA DE SER UN UPDATE — pasa a ser un RPC
 
@@ -933,6 +971,18 @@ la familia recibe llega al cierre del período diciendo que su plan no se renov�
 
 ## Historial
 
+- **v2.2 (S77, 26 Jul 2026) — la FORMA del tercer brazo, firmada.** El founder
+  firma, verbatim: ***"solo quien puede atenderla."*** **§11.1 gana el bloque de
+  firma:** el brazo es **por CHIP, no por pertenencia** — se ve la cita sin
+  dueño si se tiene el chip de su oferta. Se firma ahora porque **el radio vivo
+  es 0 citas** (L14.4) y ensanchar después es seguro mientras angostar después
+  no. **Declarado que NO lleva la rama `pe.rol = 'dueño'`** de las 8 lectoras:
+  el titular ya pasa por el brazo 1 y las 5 filas vivas son suyas — sería código
+  muerto y propagaría D-486 a una policy nueva. **Tres consecuencias que el diff
+  debe declarar:** SELECT/UPDATE ≠ INSERT (acotar el INSERT por chip podría
+  dejar a recepción sin abrir cita de mostrador — se lee, no se supone) · el
+  brazo habilita **devolver** una cita al pool, que hoy no se puede · una cita
+  sin oferta identificable no la ve nadie salvo el titular.
 - **v2.1 (S77, 26 Jul 2026) — un agregado POST-FIRMA, declarado como tal.**
   **§6.3 gana la exigencia de los DOS MOMENTOS** del aviso de último chip
   médico: la advertencia se computa antes del DELETE y el estado puede cambiar
