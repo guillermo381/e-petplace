@@ -1,6 +1,6 @@
-# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — 🕐 **PROPUESTA, ESPERA FIRMA** — v1.7
+# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — 🕐 **PROPUESTA, ESPERA FIRMA** — v1.8
 
-> **Estado: PROPUESTA DE MESA (S77, 24 Jul 2026) — v1.7.** Nace del pedido
+> **Estado: PROPUESTA DE MESA (S77, 24 Jul 2026) — v1.8.** Nace del pedido
 > literal del founder en S76: *"edición es agregar o quitar chips de servicio o
 > eliminar a ese prestador de mi negocio."*
 >
@@ -540,7 +540,13 @@ de piso no es un control viejo: es un control peligroso.**
    oferta nueva y sus chips viejos no la cubren ⇒ las 8 lectoras excluyentes
    dejan esa oferta **sin profesionales, en silencio**. Converge con esta letra:
    la misma pantalla que da chips es la que hace visible el hueco.
-2. **La resolución de las citas futuras en la baja** (§5 + §11).
+2. **EL RPC DE BAJA** (§11.2) — con (a) firmada, `desvincularEmpleado` deja de
+   poder ser un `.update()` directo: apagar la fila y despegar las citas son un
+   solo acto o ninguno. El RPC devuelve el conteo despegado (para §11.3) y
+   rebota sobre la fila del titular (el candado de §10).
+2bis. **EL TERCER BRAZO DE LA RLS DE AGENDA** (§11.1) — *el empleado del negocio
+   ve las citas de la clínica*. **Sin esto, (a) no cambia nada.** Misma
+   migración.
 3. **EL WRAPPER DE QUITAR CHIP — no existe** (L3, grep en cero). La policy
    `empleado_servicios_dueño_elimina` autoriza el DELETE desde siempre y
    `packages/api` **nunca lo expuso**: el único consumidor de la tabla es el
@@ -698,14 +704,22 @@ posición. Declarado por si algún día alguien vende esa posición.
    próxima mesa: el nombre promete *"el paseador del plan"* y el motor no lo
    cumple. Se declara para desarmarla (L-166, nota de método). **Deuda propuesta —
    número al depositar, con su literal.**
-6. **La fecha de revocación del chip** (§2). Declarada, no curada.
-7. **Los chips AL INVITAR** siguen sin verificar en su motor —
+6. 🔴 **¿EL MOTOR DISTINGUE "SE LO ASIGNAMOS" DE "LO ELIGIÓ LA FAMILIA"?**
+   (§11.4). **NO RELEVADO, y es PRECONDICIÓN de (a):** si no lo guarda, todo
+   `empleado_id` no nulo es ambiguo y despegar a ciegas puede deshacer una
+   elección. Columnas de `evento_cita_servicio`, y por dónde entra el
+   `empleado_id` en cada camino de reserva.
+7. **¿CUÁL ES EL PREDICADO DE "NO EMPEZADA"?** (§11). La máquina de estados de
+   la cita, con `llegada_en` y el estado — el corte de (a) es el acto, no el
+   calendario, y el predicado se lee.
+8. **La fecha de revocación del chip** (§2). Declarada, no curada.
+9. **Los chips AL INVITAR** siguen sin verificar en su motor —
    `LETRA_RECEPCION_S76` §13 punto 1. L3 probó que **la superficie existe**; que
    el `CHECK` y el token la acompañen **sigue sin leerse**. La mesa no afirma
    que esté APTO.
-8. **Las 3 filas legacy desactivadas: ¿personas reales o seed?** Sigue abierta
+10. **Las 3 filas legacy desactivadas: ¿personas reales o seed?** Sigue abierta
    desde S76.
-9. **El eje legacy `pe.rol = 'dueño'`** aparece en las ocho con forma idéntica
+11. **El eje legacy `pe.rol = 'dueño'`** aparece en las ocho con forma idéntica
    (§4bis). Registro para D-486.
 
 ### 10bis. LECCIÓN CANDIDATA — nacida del proceso de esta letra
@@ -741,39 +755,134 @@ lleguen con su texto.
 
 ---
 
-## 11. LA ÚNICA PREGUNTA PARA EL FOUNDER
+## 11. LA DECISIÓN DEL FOUNDER — FIRMADA: **(a) PASAN A SER DE LA CLÍNICA**
 
-**Cuando das de baja a un profesional que tiene citas agendadas, ¿qué pasa con
-esas citas?**
+> **Firma del founder, S77:** *"A, pasa a ser de la clínica."*
+>
+> **La ley:** al dar de baja a un profesional, **sus citas todavía-no-ocurridas
+> se despegan de él y pasan a ser CITAS DE LA CLÍNICA** (`empleado_id = NULL`) —
+> cualquier profesional libre del negocio las toma. **Las citas ya ocurridas NO
+> SE TOCAN JAMÁS**: ahí hubo un acto y el acto tiene autor (§1).
 
-**Es UNA pregunta, no dos.** La v1.1 temía que los planes pagados por adelantado
-necesitaran su propia política; la lectura 5 probó que **el motor ya los resuelve
-con voz** (§5bis). Lo que queda es un solo objeto: **las citas que ya existen.**
+**El corte es el acto, no el calendario.** Despegar una cita futura **no borra
+autoría** — todavía no hay nada firmado, solo un plan, y un plan se reasigna.
+Despegar una cita pasada sería exactamente el borrado que §1 prohíbe. **La
+frontera no es "fecha futura" sino "no empezada"** (una consulta con llegada ya
+registrada está en curso y no se le arranca el profesional a mitad). El
+predicado exacto sale de la máquina de estados de la cita — **lectura, no
+deducción** (§10).
 
-Hoy el motor responde solo, y responde mal: quedan pegadas a él y **se vuelven
-invisibles para todos menos para vos** (§5).
+**Y (a) no inventa un estado nuevo:** `registrar_atencion_mostrador` **ya
+produce `empleado_id = NULL`** cuando el negocio tiene más de un profesional
+(A0 punto 3 de S76). *Cita de la clínica* ya existe en el motor; esta letra la
+usa, no la crea.
 
-**Y el caso del plan es el que le pone cuerpo a la pregunta:** una familia con
-un plan de paseos en curso tiene citas los próximos catorce días. Si el paseador
-se va, esas catorce citas siguen existiendo, **el negocio no las ve**, y el
-único aviso que la familia va a recibir llega al cierre del período diciéndole
-que su plan no se renovó. **Alguien va a estar esperando en la puerta.**
+### 11.1 LO QUE (a) NECESITA PARA NO SER COSMÉTICA — y es duro
 
-| | Qué hace | Qué cuesta |
-|---|---|---|
-| **(a) Pasan a ser de la clínica** *(recomendación de mesa)* | `empleado_id → NULL` — cualquier profesional libre la toma | Es el objeto del ítem 2; una migración para los dos |
-| **(b) La baja rebota** | *"Esta persona tiene 3 citas esta semana. Resolvelas primero."* | Honesto, pero le pone al titular una tarea antes de una decisión que ya tomó |
-| **(c) Quedan como están** | nada | **Es el comportamiento de hoy, y es el que rompe en silencio** |
+> ## **(a) SOLA NO CAMBIA NADA. NULL NO ES VISIBLE PARA NADIE.**
 
-**La mesa propone (a), con una condición que no es negociable:** la superficie
-**lo dice antes**, con el número real leído de la agenda — *"tiene N citas en
-los próximos días; al darla de baja pasan a ser citas de la clínica"*. Cambiar
-datos en silencio es lo que esta casa no hace, aunque el cambio sea el correcto.
+El predicado de las tres policies de agenda, byte-idéntico en las tres
+(`LETRA_RECEPCION_S76` §4):
+
+```
+( prestador_id IN (SELECT id FROM prestadores WHERE user_id = auth.uid()) )
+OR
+( empleado_id IN (SELECT id FROM prestador_empleados
+                  WHERE user_id = auth.uid() AND activo = true) )
+```
+
+Con `empleado_id = NULL`, el segundo brazo **no da true para nadie** — `NULL IN
+(…)` es `NULL`, y `NULL` no es `true`. Así que la cita despegada sigue siendo
+**visible solo para el titular**: exactamente donde estaba antes de la baja,
+solo que ahora además sin dueño. **Mover la cita a NULL sin construir el lector
+de "cita de la clínica" cambia el síntoma de lugar y no lo cura.**
+
+**⇒ La firma de (a) es, en los hechos, la firma del ítem 2.** La RLS de agenda
+tiene que ganar su tercer brazo —*el empleado del negocio ve las citas de la
+clínica*— **en la misma migración**. No son dos frentes: es uno, y ahora está
+decidido.
+
+### 11.2 LA BAJA DEJA DE SER UN UPDATE — pasa a ser un RPC
+
+Hoy `desvincularEmpleado` hace `.update({ activo: false })` **directo sobre la
+tabla** (L3). Con (a) firmada eso ya no alcanza: **apagar la fila y despegar las
+citas tienen que ser un solo acto o ninguno.** Si el primero pasa y el segundo
+falla, quedan citas colgadas de alguien que ya no trabaja ahí — el peor de los
+tres mundos.
+
+**Un RPC resuelve tres cosas de una, y las tres ya estaban pedidas:**
+
+1. **Atomicidad** — baja y despegue en una transacción.
+2. **El número honesto** — devuelve **cuántas citas despegó**, que es lo que la
+   pantalla necesita para decirlo antes (§11.3) sin inventarlo (L-139).
+3. **El candado anti-lockout** — rebota si el `empleado_id` es el del titular.
+   Era la cura propuesta para el auto-lockout de §10.3, y acá viaja gratis.
+
+### 11.3 LA CONDICIÓN QUE NO SE NEGOCIA
+
+La superficie **lo dice ANTES**, con el número real leído de la agenda —
+*"tiene N citas en los próximos días; al darla de baja pasan a ser citas de la
+clínica"*. Cambiar datos en silencio es lo que esta casa no hace, aunque el
+cambio sea el correcto.
+
+**Y dice la asimetría, porque existe:** la baja es reversible (§1), **el despegue
+no**. Si el titular reactiva a la persona, sus citas **no vuelven** — para
+entonces otro puede haberlas tomado. Eso se avisa antes, no se descubre después.
+
+### 11.4 EL BORDE QUE (a) NO PUEDE CRUZAR TODAVÍA
+
+**Tu propia letra de S76 parte las citas en dos:** *"si la persona quiere
+agendar con una clínica o con un especialista de esa clínica. Si es de la
+clínica, cualquier prestador libre la toma; si es del profesional, solo ese la
+puede tomar."*
+
+**Convertir en "de la clínica" una cita que la familia sacó CON UNA PERSONA
+cambia lo que esa familia compró.** No es un detalle de agenda: es producto.
+
+**Y acá está el problema, dicho angosto:** para saber a cuáles alcanza (a) hay
+que poder distinguir *"se lo asignamos nosotros"* de *"lo eligió la familia"* —
+y **la mesa NO SABE si el motor guarda hoy esa diferencia.** Es la lectura que
+falta (§10). Dos escenarios y sus dos consecuencias:
+
+- **Si el motor la guarda:** (a) se aplica a las de la clínica sin más, y las
+  elegidas necesitan su propia voz — aviso a la familia, o rebote.
+- **Si NO la guarda:** hoy **todo `empleado_id` no nulo es ambiguo**, y aplicar
+  (a) a ciegas puede estar deshaciendo una elección sin saberlo. Entonces la
+  distinción del ítem 2 **no es una mejora que acompaña a (a): es su
+  precondición**.
+
+**La mesa no elige entre las dos ramas sin el literal.** (L-168, la lección que
+esta letra pagó dos veces.)
+
+**El caso que le puso cuerpo a la decisión:** una familia con un plan de paseos
+en curso tiene citas los próximos catorce días. Si el paseador se va, esas
+catorce citas siguen existiendo, **el negocio no las ve**, y el único aviso que
+la familia recibe llega al cierre del período diciendo que su plan no se renovó.
+**Alguien iba a estar esperando en la puerta.**
 
 ---
 
 ## Historial
 
+- **v1.8 (S77, 25 Jul 2026) — §11 FIRMADA: (a), las citas pasan a ser de la
+  clínica.** Firma del founder, verbatim: *"A, pasa a ser de la clínica."*
+  **§11 REESCRITA como ley:** las citas **todavía-no-ocurridas** se despegan
+  (`empleado_id = NULL`); **las ya ocurridas no se tocan jamás** — despegar un
+  plan no borra autoría, despegar un acto sí. El corte es **el acto, no el
+  calendario** (una consulta con llegada registrada está en curso). (a) **no
+  inventa estado**: `registrar_atencion_mostrador` ya produce `empleado_id =
+  NULL`. **§11.1 (nace) — lo duro:** `NULL IN (…)` es `NULL`, así que **(a) sola
+  no cambia nada** — la cita despegada sigue visible solo para el titular.
+  **Firmar (a) ES firmar el ítem 2**: la RLS de agenda gana su tercer brazo en
+  la misma migración o (a) es cosmética. **§11.2 (nace):** la baja deja de poder
+  ser un `.update()` directo — pasa a **RPC**, que resuelve de una la
+  atomicidad, el conteo honesto para la pantalla y el candado anti-lockout.
+  **§11.3:** se declara la asimetría — la baja es reversible, **el despegue no**.
+  **§11.4 (nace) — el borde:** convertir en "de la clínica" una cita que la
+  familia sacó **con una persona** cambia lo que compró; la mesa **no sabe si el
+  motor guarda esa diferencia** y no elige rama sin el literal (L-168). **§7
+  gana el RPC y el tercer brazo · §10 gana dos lecturas 🔴**, una de ellas
+  precondición de (a).
 - **v1.7 (S77, 24 Jul 2026) — el veredicto de la viga, y la mesa se corrige por
   SEGUNDA vez en la misma dirección.** Sobre la lectura **L10**. **§10.2
   REESCRITA:** la coincidencia prestador↔cuenta **no es "N=5 por suerte" —
