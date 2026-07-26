@@ -323,21 +323,52 @@ export interface ChipEmpleado {
  *  una preferencia de vitrina: es acceso a la historia de las mascotas.
  *  **Por eso este lector existe: la pantalla lo dice ANTES, no después.** */
 export async function obtenerChipsEmpleado(empleadoId: string): R<ChipEmpleado[]> {
+  // DOS VIAJES, NO TRES — Y NO UNO, CON SU PORQUÉ MEDIDO (S77-A, desvío D1
+  // de la vara M2: la versión anterior hacía TRES round-trips encadenados y
+  // el boceto los contaba como "1 llamada"). Es la lección de D-531 aplicada
+  // antes de que duela: una Hoja que abre con una cascada en serie es la
+  // misma forma que allá costó 579 ms.
+  //
+  // POR QUÉ NO SE PUEDE UNO SOLO (verificado, no supuesto): **no existe FK
+  // `prestador_servicios.tipo_servicio → tipos_servicio.codigo`** — la tienen
+  // `evento_cita_servicio` y `presupuesto_item`, ésta no. Sin FK, PostgREST
+  // no puede anidar el embed (`could not find the relation between
+  // prestador_servicios and tipos_servicio`, atrapado por el typecheck) y el
+  // segundo viaje es OBLIGATORIO. Es la misma razón por la que su hermano
+  // `obtenerOficiosNegocio` también lee `tipos_servicio` aparte. Colapsar a
+  // uno exige una migración que agregue esa FK — no viaja escondida acá.
+  //
+  // PRECONDICIÓN VERIFICADA ANTES DE COLAPSAR (L-167 — un embed lo recorta la
+  // RLS de la tabla embebida, y un colapso que devuelve MENOS con cara de
+  // dato es peor que tres viajes):
+  //   · `prestador_servicios`: el titular las ve TODAS por
+  //     `prestador_servicios_own` (ALL, `prestador_id IN (mis prestadores)`),
+  //     activas o no — que es justo lo que este lector necesita (el chip
+  //     sobre oferta apagada SIGUE dando expediente, S76).
+  //   · `tipos_servicio`: solo `ts_public` (`activo = true OR is_admin()`).
+  // BORDE DECLARADO Y MEDIDO: un `tipos_servicio` con `activo = false` es
+  // INVISIBLE al titular ⇒ su chip se omite. **Hoy no puede pasar: 0 de 30
+  // tipos inactivos, 0 ofertas y 0 chips afectados** (medido S77-A). El
+  // recorte es idéntico en las dos formas —la versión de 3 viajes lo tenía
+  // igual—, así que el colapso no lo introduce ni lo cura; queda escrito para
+  // que el día que un tipo se desactive se sepa dónde mirar.
   const cliente = getClient();
-  const chips = await cliente
+  // Viaje 1: los chips CON su oferta embebida (esa FK sí existe:
+  // `prestador_empleado_servicios_servicio_id_fkey`).
+  const conOferta = await cliente
     .from('prestador_empleado_servicios')
-    .select('servicio_id')
+    .select('servicio_id, oferta:prestador_servicios(id, tipo_servicio)')
     .eq('empleado_id', empleadoId);
-  if (chips.error) return { ok: false, codigo: 'error_lectura', mensaje: chips.error.message };
-  const ids = (chips.data ?? []).map((c) => c.servicio_id);
-  if (ids.length === 0) return { ok: true, data: [] };
+  if (conOferta.error) {
+    return { ok: false, codigo: 'error_lectura', mensaje: conOferta.error.message };
+  }
+  const ofertas = (conOferta.data ?? [])
+    .map((f) => f.oferta)
+    .filter((o): o is { id: string; tipo_servicio: string } => o !== null);
+  if (ofertas.length === 0) return { ok: true, data: [] };
 
-  const ofertas = await cliente.from('prestador_servicios').select('id, tipo_servicio').in('id', ids);
-  if (ofertas.error) return { ok: false, codigo: 'error_lectura', mensaje: ofertas.error.message };
-  const filas = ofertas.data ?? [];
-  if (filas.length === 0) return { ok: true, data: [] };
-
-  const slugs = [...new Set(filas.map((f) => f.tipo_servicio))];
+  // Viaje 2 (obligatorio, ver arriba): los tipos.
+  const slugs = [...new Set(ofertas.map((o) => o.tipo_servicio))];
   const tipos = await cliente
     .from('tipos_servicio')
     .select('codigo, categoria, es_medico')
@@ -357,18 +388,18 @@ export async function obtenerChipsEmpleado(empleadoId: string): R<ChipEmpleado[]
     else if (t.categoria === 'grooming') oficioDe.set(t.codigo, 'grooming');
     else if (t.categoria === 'adiestramiento') oficioDe.set(t.codigo, 'adiestramiento');
   }
-  const data: ChipEmpleado[] = [];
-  for (const f of filas) {
-    const oficio = oficioDe.get(f.tipo_servicio);
-    if (oficio === undefined) continue;
-    data.push({
-      servicioId: f.id,
-      tipoServicio: f.tipo_servicio,
+  const chips: ChipEmpleado[] = [];
+  for (const o of ofertas) {
+    const oficio = oficioDe.get(o.tipo_servicio);
+    if (oficio === undefined) continue; // tipo no legible o fuera del v1
+    chips.push({
+      servicioId: o.id,
+      tipoServicio: o.tipo_servicio,
       oficio,
-      esMedico: medicoDe.get(f.tipo_servicio) === true,
+      esMedico: medicoDe.get(o.tipo_servicio) === true,
     });
   }
-  return { ok: true, data };
+  return { ok: true, data: chips };
 }
 
 /** Lo que la pantalla necesita DESPUÉS de quitar, para no re-leer a ciegas
