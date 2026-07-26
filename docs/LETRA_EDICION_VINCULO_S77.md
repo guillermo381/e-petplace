@@ -1,4 +1,4 @@
-# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — 🕐 **PROPUESTA, ESPERA FIRMA** — v1.9
+# LETRA — LA EDICIÓN DEL VÍNCULO (S77) — ✅ **FIRMADA** — v2.1
 
 > **Estado: PROPUESTA DE MESA (S77, 24 Jul 2026) — v1.9.** Nace del pedido
 > literal del founder en S76: *"edición es agregar o quitar chips de servicio o
@@ -351,6 +351,24 @@ el motivo equivocado.
 
 ## 6. LA SUPERFICIE — UNA SOLA, Y NO ES LA QUE EL BRIEF BUSCABA (lectura L3)
 
+> ## ✅ **FIRMADA POR EL FOUNDER (S77).**
+>
+> **Lo que quedó autorizado:** la **Hoja del miembro se RECOMPONE** — los chips
+> entran como su contenido (agregar y quitar, para quien ya está adentro), y
+> **los dos `Interruptor` viejos salen**: `profesional` porque la letra firmada
+> lo declara DERIVADO de tener ≥1 chip (§6.2bis), y `recepcion` porque es
+> membresía y no identidad, se concede a todos al entrar por A2bis, y su toggle
+> puede **borrar el piso** que esa migración garantiza (§6.2ter).
+>
+> **Lo que NO autoriza:** una pantalla. **Es superficie recompuesta ⇒ M1–M5 sin
+> excepción**, boceto antes de construir, vara cruzada M2 de la otra sesión
+> leyendo la fuente, y gate del founder sobre el boceto. El toggle de
+> **Administrador sigue sin dibujarse** — su motor no existe (§3).
+>
+> **Trabajo que la firma suelta, y su carril:** el **wrapper de quitar chip**
+> (§7.3) y el **RPC de baja** con su tercer brazo de RLS (§7.2/§11.2) son
+> motor, carril A. El **boceto M1 de la Hoja** es superficie, carril B.
+
 **La respuesta a la pregunta que abrió esta letra: S77 construye UNA superficie,
 no dos.** `apps/prestador/src/app/negocio/equipo.tsx` (485 líneas, S74-B) ya
 existe, ya lista al equipo, ya abre una Hoja por miembro, y **ya desvincula
@@ -517,6 +535,16 @@ de piso no es un control viejo: es un control peligroso.**
   decide M1 sobre la lámina; **que la pantalla lo diga es letra.**
 - **QUITAR EL ÚLTIMO CHIP MÉDICO ES UN ACTO CLÍNICO** (§4). Le saca a esa
   persona el expediente. La superficie lo dice antes, no después.
+- **Y LO DICE EN DOS MOMENTOS, NO EN UNO** *(agregado post-firma, origen L13 y
+  el diseño del wrapper — no cambia ninguna decisión firmada)*. El aviso se
+  computa **antes** con `obtenerChipsEmpleado`; el DELETE ocurre **después**.
+  Entre los dos, el estado puede haber cambiado —otro titular con la Hoja
+  abierta, otra sesión— así que **la pantalla puede NO avisar y que igual se
+  pierda la capacidad clínica**. Por eso `quitarServiciosEmpleado` devuelve
+  `perdioCapacidadClinicaPorChip` re-leído de la fuente, y **la Hoja tiene que
+  mostrarlo**: advertencia antes, reporte honesto después. Sin el segundo, el
+  motor devuelve una verdad que nadie muestra — que es la misma familia que *un
+  lector degradando a lista vacía esconde regresiones*.
 - **L-139:** el conteo de citas de §11 sale de un lector real o no se muestra.
   **Jamás un número plausible.**
 - **La baja ya se dice con su verbo y con dos toques.** No se rehace; se
@@ -899,6 +927,23 @@ la familia recibe llega al cierre del período diciendo que su plan no se renov�
 
 ## Historial
 
+- **v2.1 (S77, 26 Jul 2026) — un agregado POST-FIRMA, declarado como tal.**
+  **§6.3 gana la exigencia de los DOS MOMENTOS** del aviso de último chip
+  médico: la advertencia se computa antes del DELETE y el estado puede cambiar
+  en el medio, así que la Hoja también muestra el
+  `perdioCapacidadClinicaPorChip` que el wrapper devuelve re-leído. **Origen:
+  lectura L13 y el diseño del wrapper de S77-A (commit `64a3fe4`), no una
+  decisión nueva** — no toca §6 ni §11, que siguen firmadas tal como el founder
+  las aprobó. Entra antes de M1 para que el boceto lo lea de la fuente y no
+  aparezca en M2 obligando a rehacer.
+- **v2.0 (S77, 25 Jul 2026) — FIRMADA.** El founder firma **§6**: la Hoja del
+  miembro se recompone — chips como contenido, los dos `Interruptor` viejos
+  afuera. Con **§11 ya firmada en v1.8** (a), las dos decisiones que la letra le
+  elevó están tomadas y el documento sale de PROPUESTA. **La firma autoriza el
+  TRABAJO, no una pantalla**: superficie recompuesta ⇒ M1–M5 completo, con
+  boceto, vara cruzada y gate propio. Suelta el wrapper de quitar chip y el RPC
+  de baja (carril A) y el boceto M1 de la Hoja (carril B). **§10 queda abierta
+  tal cual** — la firma no cierra lecturas.
 - **v1.9 (S77, 25 Jul 2026) — (a) queda ejecutable: sin ambigüedad y con
   predicado.** Sobre las lecturas **L11** y **L12**. **§11.4 RESUELTA por la
   rama limpia:** el motor **no guarda** la procedencia de la elección en ningún
