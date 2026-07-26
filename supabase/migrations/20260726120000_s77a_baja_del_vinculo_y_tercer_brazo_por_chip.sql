@@ -21,8 +21,8 @@
 --       lee ANTES (PEDIDO 1 del boceto M1 de B, hoy inexistente).
 --   (3) `dar_de_baja_empleado(empleado)` — atómico: `activo=false` +
 --       despegue, devolviendo el conteo REALMENTE despegado.
---   (4) EL TERCER BRAZO por chip en `cita_select_prestador` y
---       `cita_update_prestador`.
+--   (4) EL TERCER BRAZO por chip, **SOLO en `cita_update_prestador`** — el
+--       del SELECT se cayó por medición (ver el bloque (4) abajo).
 --
 -- ── POR QUÉ EL PREDICADO VIVE EN UN SOLO LUGAR ───────────────────────────
 -- Lo consumen el CONTADOR (antes) y el DESPEGUE (después). Si se escribe dos
@@ -301,35 +301,27 @@ GRANT  EXECUTE ON FUNCTION public.dar_de_baja_empleado(uuid) TO authenticated;
 -- ── (4) EL TERCER BRAZO, POR CHIP ───────────────────────────────────────
 -- Los dos brazos viejos quedan BYTE-IDÉNTICOS; el tercero se suma con OR.
 -- Solo SELECT y UPDATE (el INSERT no se toca — ver cabecera).
-DROP POLICY IF EXISTS cita_select_prestador ON public.evento_cita_servicio;
-CREATE POLICY cita_select_prestador
-  ON public.evento_cita_servicio
-  FOR SELECT
-  TO authenticated
-  USING (
-    (prestador_id IN ( SELECT prestadores.id FROM prestadores
-                       WHERE prestadores.user_id = auth.uid()))
-    OR (empleado_id IN ( SELECT prestador_empleados.id FROM prestador_empleados
-                         WHERE prestador_empleados.user_id = auth.uid()
-                           AND prestador_empleados.activo = true))
-    -- S77-A §11.1: el chip del oficio de esta cita, en este negocio.
-    OR EXISTS (
-      SELECT 1
-      FROM prestador_empleados pe
-      JOIN prestador_empleado_servicios pes ON pes.empleado_id = pe.id
-      JOIN prestador_servicios ps           ON ps.id = pes.servicio_id
-      WHERE pe.user_id = auth.uid()
-        AND pe.activo = true
-        AND pe.prestador_id = evento_cita_servicio.prestador_id
-        AND ps.tipo_servicio = evento_cita_servicio.tipo_servicio
-        -- §11.1 FIRMADA: "ve una cita SIN DUEÑO si tiene el chip". El brazo
-        -- alcanza SOLO al pool. Tomarla sigue funcionando: una vez puesto su
-        -- `empleado_id`, la cita entra por el SEGUNDO brazo, que ya es suyo.
-        -- Lo que deja de ser posible es sacársela a un colega — eso no está
-        -- firmado y son datos de familias.
-        AND evento_cita_servicio.empleado_id IS NULL
-    )
-  );
+-- EL BRAZO DEL SELECT SE CAYÓ — MEDIDO, NO OPINADO (S77-A, gate del founder).
+-- La primera versión de esta migración lo llevaba también en el SELECT. El
+-- discriminador lo tumbó: **el empleado YA VE la agenda, y no por la persona
+-- sino por la MASCOTA.** Existe una QUINTA policy SELECT que el censo de
+-- L14.1 no vio — `cita_select_por_acceso`: `(mascota_id IS NOT NULL) AND
+-- user_tiene_acceso_a_mascota(mascota_id)` —, y ese helper concede a todo
+-- empleado activo de una cuenta con acceso a la mascota.
+--
+-- LA MEDICIÓN, con el vet real de 6 chips: ve **74 de 80** citas, y
+-- `por_mascota` da **exactamente 74** ⇒ TODA su visibilidad viene de esa
+-- policy. **Delta del tercer brazo en SELECT: 0.** Y no es circunstancial:
+-- las citas sin dueño solo nacen del DESPEGUE, y esa mascota ya fue atendida
+-- por la clínica ⇒ ya tiene otorgamiento ⇒ ya es visible. El caso sospechado
+-- —`pendiente` de mascota sin otorgamiento— da **0 hoy** y además **nace con
+-- empleado asignado** (`crear_bloqueo_agenda` siempre elige uno), así que el
+-- brazo acotado a `empleado_id IS NULL` tampoco lo alcanzaría.
+--
+-- ⇒ **`cita_select_prestador` NO SE TOCA.** Una policy que no agrega poder es
+-- superficie de ataque y deuda futura. El brazo va SOLO en el UPDATE, que es
+-- donde sí agrega: `cita_select_por_acceso` es SELECT-only, así que sin el
+-- tercer brazo el empleado VE la cita huérfana y NO PUEDE TOMARLA.
 
 DROP POLICY IF EXISTS cita_update_prestador ON public.evento_cita_servicio;
 CREATE POLICY cita_update_prestador
@@ -396,7 +388,8 @@ DECLARE
   v_legacy   int;
   v_acl      text;
 BEGIN
-  -- (1) Las DOS policies existen, con su cmd y su rol.
+  -- (1) Las DOS policies siguen existiendo con su forma (una tocada, una
+  --     INTACTA — y que siga intacta es parte de lo que se verifica).
   SELECT count(*) INTO v_pol
   FROM pg_policies
   WHERE schemaname='public' AND tablename='evento_cita_servicio'
@@ -406,22 +399,30 @@ BEGIN
     RAISE EXCEPTION 'cinturon: se esperaban 2 policies de agenda intactas en forma, hay %', v_pol;
   END IF;
 
-  -- (2) LAS DOS tienen el tercer brazo. `cita_update_prestador` lo lleva en
+  -- (1bis) EL SELECT NO SE TOCÓ: su delta medido fue 0 y quedarse quieto es
+  --        la decisión. Si alguien le mete el brazo, este assert lo caza.
+  SELECT count(*) INTO v_pol
+  FROM pg_policies
+  WHERE schemaname='public' AND tablename='evento_cita_servicio'
+    AND policyname='cita_select_prestador'
+    AND qual NOT LIKE '%prestador_empleado_servicios%';
+  IF v_pol <> 1 THEN
+    RAISE EXCEPTION 'cinturon: cita_select_prestador NO quedo intacta (le entro el tercer brazo, cuyo delta medido es 0)';
+  END IF;
+
+  -- (2) EL UPDATE tiene el tercer brazo. `cita_update_prestador` lo lleva en
   --     qual Y with_check: si faltara en el with_check, el empleado VERÍA y
   --     no podría TOMAR — media cura, que es la peor.
   SELECT count(*) INTO v_brazos
   FROM pg_policies
   WHERE schemaname='public' AND tablename='evento_cita_servicio'
-    AND ((policyname='cita_select_prestador'
-          AND qual LIKE '%prestador_empleado_servicios%'
-          AND qual LIKE '%empleado_id IS NULL%')
-      OR (policyname='cita_update_prestador'
+    AND ((policyname='cita_update_prestador'
           AND qual LIKE '%prestador_empleado_servicios%'
           AND qual LIKE '%empleado_id IS NULL%'
           AND coalesce(with_check,'') LIKE '%prestador_empleado_servicios%'
           AND coalesce(with_check,'') LIKE '%empleado_id IS NULL%'));
-  IF v_brazos <> 2 THEN
-    RAISE EXCEPTION 'cinturon: el tercer brazo no esta completo o no esta ACOTADO a la cita sin dueno (qual y with_check), hay %', v_brazos;
+  IF v_brazos <> 1 THEN
+    RAISE EXCEPTION 'cinturon: el tercer brazo del UPDATE no esta completo o no esta ACOTADO a la cita sin dueno (qual y with_check), hay %', v_brazos;
   END IF;
 
   -- (3) El INSERT quedó INTACTO — se declara que no se tocó, no se supone.
