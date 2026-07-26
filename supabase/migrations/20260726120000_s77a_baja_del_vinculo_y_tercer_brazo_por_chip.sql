@@ -97,6 +97,30 @@
 -- nuevas. El titular ya entra por el PRIMER brazo (`prestador_id IN (mis
 -- prestadores)`), que queda byte-idéntico.
 --
+-- ── 🔴 LA PUERTA VIEJA SIGUE VIVA — RESIDUO NOMBRADO, NO IMPLÍCITO ───────
+-- `desvincularEmpleado` (packages/api/src/wrappers/equipo.ts) sigue haciendo
+-- su `UPDATE prestador_empleados SET activo=false` DIRECTO por la policy
+-- `empleados_dueño_actualiza`. **Mientras la app llame a ese wrapper, la baja
+-- NO DESPEGA NADA** y esta migración queda inerte por el camino real.
+--
+-- DECISIÓN, declarada: el wrapper **NO se cambia en esta tanda**, y el porqué
+-- no es pereza — es orden. Apuntarlo al RPC ahora lo dejaría llamando a una
+-- función que todavía no existe en la DB (esta migración espera gate), y eso
+-- **rompería la baja en producción** hasta que el founder aplique. La
+-- secuencia obligatoria es: (1) aplicar esta migración → (2) recién entonces
+-- apuntar `desvincularEmpleado` a `dar_de_baja_empleado` → (3) el gate del
+-- founder sobre el camino completo. **Hasta el paso (2), esta migración está
+-- aplicada y desconectada** — media cura, y se dice.
+--
+-- ── 🟠 DEFINER NUEVO QUE EL TRIGGER DE D-526 NO VE ───────────────────────
+-- `dar_de_baja_empleado` escribe `prestador_empleados.activo` como `postgres`
+-- (SECURITY DEFINER), y el trigger `prestador_empleados_protege_gobierno`
+-- (D-526) guarda por `current_user = 'authenticated'` ⇒ **este escritor pasa
+-- por debajo**. Es legítimo (su propio gate exige titular o admin, y rebota
+-- al titular sobre sí mismo), pero **es un consumidor más para el censo de
+-- D-528**, que existe exactamente para esto: los DEFINER que escriben esa
+-- tabla y el trigger no alcanza. Entra al censo, no se asume revisado.
+--
 -- Deudas: paga §11.1/§11.2 de la letra firmada. Toca el mismo eje que D-522
 -- (el motor de agenda ciego al rol) sin cerrarla.
 -- Origen: S77-A, lecturas L11 · L12 · L14 · L15.
@@ -243,6 +267,13 @@ BEGIN
   WITH despegadas AS (
     UPDATE evento_cita_servicio c
     SET    empleado_id = NULL,
+           -- REDUNDANTE Y DECLARADO: `trg_evento_cita_servicio_updated_at`
+           -- (BEFORE UPDATE, sin OF) ya lo escribe. Se deja explícito para
+           -- que nadie lea el despegue como una escritura que no toca la
+           -- marca de tiempo. Verificado 4.2: de los 5 triggers de la tabla,
+           -- es el ÚNICO que dispara con este UPDATE — los otros tres son
+           -- `UPDATE OF estado` y el quinto es AFTER INSERT. Cero append-only
+           -- que pueda rebotar (la lección de `prestador_atencion_log`).
            updated_at  = now()
     WHERE  c.empleado_id = p_empleado_id
       AND  public._cita_despegable(c.id, p_empleado_id)
@@ -291,6 +322,12 @@ CREATE POLICY cita_select_prestador
         AND pe.activo = true
         AND pe.prestador_id = evento_cita_servicio.prestador_id
         AND ps.tipo_servicio = evento_cita_servicio.tipo_servicio
+        -- §11.1 FIRMADA: "ve una cita SIN DUEÑO si tiene el chip". El brazo
+        -- alcanza SOLO al pool. Tomarla sigue funcionando: una vez puesto su
+        -- `empleado_id`, la cita entra por el SEGUNDO brazo, que ya es suyo.
+        -- Lo que deja de ser posible es sacársela a un colega — eso no está
+        -- firmado y son datos de familias.
+        AND evento_cita_servicio.empleado_id IS NULL
     )
   );
 
@@ -314,6 +351,12 @@ CREATE POLICY cita_update_prestador
         AND pe.activo = true
         AND pe.prestador_id = evento_cita_servicio.prestador_id
         AND ps.tipo_servicio = evento_cita_servicio.tipo_servicio
+        -- §11.1 FIRMADA: "ve una cita SIN DUEÑO si tiene el chip". El brazo
+        -- alcanza SOLO al pool. Tomarla sigue funcionando: una vez puesto su
+        -- `empleado_id`, la cita entra por el SEGUNDO brazo, que ya es suyo.
+        -- Lo que deja de ser posible es sacársela a un colega — eso no está
+        -- firmado y son datos de familias.
+        AND evento_cita_servicio.empleado_id IS NULL
     )
   )
   WITH CHECK (
@@ -331,6 +374,12 @@ CREATE POLICY cita_update_prestador
         AND pe.activo = true
         AND pe.prestador_id = evento_cita_servicio.prestador_id
         AND ps.tipo_servicio = evento_cita_servicio.tipo_servicio
+        -- §11.1 FIRMADA: "ve una cita SIN DUEÑO si tiene el chip". El brazo
+        -- alcanza SOLO al pool. Tomarla sigue funcionando: una vez puesto su
+        -- `empleado_id`, la cita entra por el SEGUNDO brazo, que ya es suyo.
+        -- Lo que deja de ser posible es sacársela a un colega — eso no está
+        -- firmado y son datos de familias.
+        AND evento_cita_servicio.empleado_id IS NULL
     )
   );
 
@@ -357,19 +406,22 @@ BEGIN
     RAISE EXCEPTION 'cinturon: se esperaban 2 policies de agenda intactas en forma, hay %', v_pol;
   END IF;
 
-  -- (2) LAS TRES tienen el tercer brazo. `cita_update_prestador` lo lleva en
+  -- (2) LAS DOS tienen el tercer brazo. `cita_update_prestador` lo lleva en
   --     qual Y with_check: si faltara en el with_check, el empleado VERÍA y
   --     no podría TOMAR — media cura, que es la peor.
   SELECT count(*) INTO v_brazos
   FROM pg_policies
   WHERE schemaname='public' AND tablename='evento_cita_servicio'
     AND ((policyname='cita_select_prestador'
-          AND qual LIKE '%prestador_empleado_servicios%')
+          AND qual LIKE '%prestador_empleado_servicios%'
+          AND qual LIKE '%empleado_id IS NULL%')
       OR (policyname='cita_update_prestador'
           AND qual LIKE '%prestador_empleado_servicios%'
-          AND coalesce(with_check,'') LIKE '%prestador_empleado_servicios%'));
+          AND qual LIKE '%empleado_id IS NULL%'
+          AND coalesce(with_check,'') LIKE '%prestador_empleado_servicios%'
+          AND coalesce(with_check,'') LIKE '%empleado_id IS NULL%'));
   IF v_brazos <> 2 THEN
-    RAISE EXCEPTION 'cinturon: el tercer brazo no esta completo (qual y with_check), hay %', v_brazos;
+    RAISE EXCEPTION 'cinturon: el tercer brazo no esta completo o no esta ACOTADO a la cita sin dueno (qual y with_check), hay %', v_brazos;
   END IF;
 
   -- (3) El INSERT quedó INTACTO — se declara que no se tocó, no se supone.
