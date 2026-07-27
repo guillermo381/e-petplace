@@ -14,3 +14,8 @@ supabase/.branches/
 
 # capturas de verify-i18n sin SCRATCH seteado (S56 — el default entra con D-351)
 undefined/
+
+# artefactos de build LOCAL (S78: la cuota EAS rebotó y el gate corrió
+# sobre `eas build --local` — el APK queda en apps/<app>/ y jamás entra
+# al repo; el artefacto canónico vive en EAS o en el dispositivo)
+apps/*/build-*.apk
