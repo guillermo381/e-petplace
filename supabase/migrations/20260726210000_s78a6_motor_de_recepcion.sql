@@ -1,14 +1,5 @@
 -- S78-A6 — EL MOTOR DE RECEPCION (§7 y §4 de LETRA_RECEPCION_S76)
 --
--- ⚠️  **ESTO NO ES UNA MIGRACION APLICADA. ES EL CONTRATO ESCRITO.**
--- Vive en docs/relevamientos/ **a proposito**: dentro de
--- supabase/migrations/ un `db push` lo aplicaria solo, y esta tanda
--- cerro antes de aplicarlo (la ventana se dio al push del founder).
--- Para aplicarlo: moverlo a supabase/migrations/ con su timestamp,
--- correr el fixture con su discriminador, y recien ahi `db push`.
--- Su deuda es **D-551**, y su reversa ya esta escrita:
--- docs/relevamientos/2026-07-26-s78a-REVERSA-motor-de-recepcion.sql
---
 -- PAREADO CON EL M1 DE B (`ef171eb`), y esto es lo que hay que leer
 -- junto: B decidio §13.3 —el dia con 2+ profesionales se compone por
 -- SECCIONES POR PERSONA— y de ahi le nacio **la seccion "Del negocio"
@@ -242,7 +233,18 @@ BEGIN
     AND c.fecha = p_fecha
     -- la agenda solo contiene verdad firme (§13): el hold invisible
     AND c.estado IN ('confirmada', 'en_curso', 'completada', 'no_show')
-    AND (v_ve_todo OR c.empleado_id = v_mi_fila)
+    -- "DEL NEGOCIO": la cita con `empleado_id IS NULL` VIAJA SIEMPRE, para
+    -- todos. Es el estado que S77 §11(a) hizo legal —`dar_de_baja_empleado`
+    -- estampa `SET empleado_id = NULL`— y la sección que B compuso en su M1
+    -- lo consume. **Nótese que NO alcanzaba con dejarla en la rama
+    -- `v_ve_todo`:** `c.empleado_id = v_mi_fila` con NULL a la izquierda da
+    -- NULL, o sea FALSO, así que sin esta cláusula la despegada quedaba
+    -- INVISIBLE para el profesional — y en un negocio donde el único que
+    -- queda tiene chips, invisible para TODOS. Se la muestra a cualquier
+    -- miembro y no rompe "el profesional ve solo lo suyo" (§4): una cita sin
+    -- persona no es de otro profesional — no es de NADIE, y esconderla al
+    -- único que puede actuar sobre ella es el bug de invisibilidad otra vez.
+    AND (v_ve_todo OR c.empleado_id = v_mi_fila OR c.empleado_id IS NULL)
   ORDER BY c.hora ASC, c.id ASC;
 END;
 $function$;

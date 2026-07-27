@@ -5223,6 +5223,7 @@ export type Database = {
           guest_email: string | null
           hora: string | null
           id: string
+          llegada_en: string | null
           mascota_id: string | null
           metadata: Json | null
           modalidad: string
@@ -5257,6 +5258,7 @@ export type Database = {
           guest_email?: string | null
           hora?: string | null
           id?: string
+          llegada_en?: string | null
           mascota_id?: string | null
           metadata?: Json | null
           modalidad?: string
@@ -5291,6 +5293,7 @@ export type Database = {
           guest_email?: string | null
           hora?: string | null
           id?: string
+          llegada_en?: string | null
           mascota_id?: string | null
           metadata?: Json | null
           modalidad?: string
@@ -17056,6 +17059,21 @@ export type Database = {
           hora: string
         }[]
       }
+      obtener_jornada_recepcion: {
+        Args: { p_fecha: string; p_prestador_id: string }
+        Returns: {
+          cita_id: string
+          duracion_minutos: number
+          empleado_id: string
+          empleado_nombre: string
+          estado: string
+          hora: string
+          llegada_en: string
+          mascota_id: string
+          mascota_nombre: string
+          tipo_servicio: string
+        }[]
+      }
       obtener_mis_atenciones_grooming: {
         Args: { p_desde?: string; p_hasta?: string }
         Returns: Json
@@ -17166,6 +17184,20 @@ export type Database = {
           duracion_minutos: number
           fecha: string
           hora: string
+        }[]
+      }
+      obtener_solicitudes_mostrador: {
+        Args: { p_cuenta_comercial_id: string }
+        Returns: {
+          created_at: string
+          estado: string
+          expira_en: string
+          mascota_id: string
+          mascota_nombre: string
+          respondida_en: string
+          segundos_restantes: number
+          solicitud_id: string
+          tipo: string
         }[]
       }
       obtener_solicitudes_pendientes_dueno: {
@@ -17329,6 +17361,7 @@ export type Database = {
         }
         Returns: Json
       }
+      registrar_llegada: { Args: { p_cita_id: string }; Returns: string }
       registrar_nota_adiestramiento: {
         Args: {
           p_adiestramiento_id: string
