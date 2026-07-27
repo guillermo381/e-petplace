@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S78-B · M1 v2 — LÁMINA: la agenda de recepción</title>
+<style>
+  :root{
+    --papel:#FAF9F7; --card:#FFFFFF; --overlay:#EDEBF5;
+    --tinta:#1D1A2E; --sec:#6B6584; --ter:#A9A4C0; --borde:#E3E0EF;
+    --teal:#0A7268; --ctaTexto:#FAF9F7;
+    --warnBg:rgba(232,181,71,.24); --warnBorde:rgba(146,95,12,.22); --warnTexto:#925F0C;
+    --reposo:0 1px 2px rgba(31,27,22,.05), 0 2px 8px rgba(31,27,22,.06);
+    --r-suave:10px; --r-md:12px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:26px 16px 64px;background:#EFEDE8;
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  .col{max-width:420px;margin:0 auto}
+  h1{font-size:17px;color:var(--tinta);margin:0 0 6px}
+  .nota{font-size:12px;color:#8A8377;line-height:1.65;margin:0 0 24px}
+  .nota code{background:#E3E0DA;padding:1px 4px;border-radius:4px;font-size:11px}
+  .cap{font-size:12px;color:#8A8377;margin:0 0 4px 4px;font-weight:600}
+  .cap small{font-weight:400;display:block;margin-top:2px;line-height:1.5}
+  .lienzo{background:var(--papel);border-radius:14px;padding:16px;margin:8px 0 28px}
+  .seccion{font-size:15px;font-weight:500;color:var(--tinta);margin:18px 0 2px}
+  .seccion.primera{margin-top:0}
+  .apoyo{font-size:13px;color:var(--sec);line-height:1.5;margin:0}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;color:var(--sec)}
+  .t{display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--r-md);margin-top:10px}
+  .on{background:var(--card);box-shadow:var(--reposo)}
+  .off{background:transparent;border:1px solid var(--borde)}
+  .ava{width:40px;height:40px;border-radius:13px;background:var(--overlay);
+       display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+  .nom{font-size:16px;color:var(--tinta)}
+  .sub{font-size:13px;color:var(--sec);line-height:1.45;margin:2px 0 0}
+  .btn{height:44px;border:0;border-radius:var(--r-suave);font-size:15px;font-family:inherit;cursor:pointer;
+       display:flex;align-items:center;justify-content:center}
+  .cta{width:100%;background:var(--tinta);color:var(--ctaTexto);margin-top:14px}
+  .compacto{background:transparent;color:var(--tinta);border:1px solid var(--borde);padding:0 14px;flex-shrink:0}
+  .seg{display:flex;background:var(--overlay);border-radius:var(--r-suave);padding:3px;margin-top:16px}
+  .seg span{flex:1;text-align:center;padding:8px 0;font-size:14px;color:var(--sec);border-radius:8px}
+  .seg .act{background:var(--card);color:var(--tinta);box-shadow:var(--reposo)}
+  .header{display:flex;align-items:baseline;justify-content:space-between;margin:16px 0 2px}
+  .header .h{font-size:14px;font-weight:500;color:var(--tinta)}
+  .header .n{font-size:12px;color:var(--ter)}
+  .pie{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 0 2px;
+       font-size:14px;color:var(--tinta)}
+  .reloj{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--warnTexto)}
+  .warnCard{background:var(--warnBg);border:1px solid var(--warnBorde);border-radius:var(--r-md);
+            padding:12px;margin-top:10px}
+  .warnCard p{margin:0;font-size:13px;line-height:1.5;color:var(--warnTexto)}
+  .marca{font-size:11px;color:#B04A2A;margin:8px 4px 0;line-height:1.55}
+  .vacio{text-align:center;padding:18px 12px;color:var(--sec);font-size:13px;line-height:1.55}
+</style>
+</head>
+<body>
+<div class="col">
+
+<h1>S78-B · M1 v2 — la agenda de recepción (el HOY por rol)</h1>
+<p class="nota">
+  Re-pasada de ACABADO del M1 firmado (ANEXO <code>LETRA_RECEPCION_S76</code>): la composición de §9 no se
+  rehace — se re-viste. Tarjetas con superficie y sombra, cero hairline sobre elevación, la anatomía
+  <code>TarjetaEstado</code> ya firmada (adentro = superficie · espera = contorno). <strong>Cero clínico en toda
+  celda (D-489).</strong> 🔴 <strong>Construcción BLOQUEADA</strong>: el motor de A (<code>llegada_en</code> ·
+  día por persona · reloj §7bis) no llegó — verificado en el repo, grep en cero.
+</p>
+
+<!-- PANTALLA PRINCIPAL: N≥2 -->
+<p class="cap">LA PANTALLA · N≥2 profesionales — decisión §13.3: SECCIONES POR PERSONA
+  <small>Columnas mueren (390pt no las paga) · filtro muere (esconde el día entero). El header porta al
+  profesional: la celda NO lo repite (Ley 12/18 — el dato marca lo que varía).</small></p>
+<div class="lienzo">
+
+  <p class="seccion primera">En la puerta</p>
+  <div class="t on">
+    <div class="ava">🐕</div>
+    <div style="flex:1"><div class="nom">Thor · perro</div>
+      <div class="sub">Adulto · Adentro con la Dra. Mariana · 10:00</div></div>
+  </div>
+  <div class="t off">
+    <div class="ava">🐈</div>
+    <div style="flex:1"><div class="nom">Zeus · gato</div>
+      <div class="sub">Años dorados · Esperando · 10:30 con Carla</div></div>
+    <button class="btn compacto">Pasó</button>
+  </div>
+  <div class="warnCard">
+    <p><strong>Autorización pedida a la familia de Luna</strong> — la historia se abre si la aceptan.
+      <span class="reloj">quedan 7 min</span></p>
+  </div>
+
+  <button class="btn cta">Registrar atención</button>
+
+  <div class="seg"><span class="act">Hoy</span><span>Adelante</span></div>
+
+  <div class="header"><span class="h">Del negocio · por asignar</span><span class="n">1</span></div>
+  <div class="t off">
+    <div class="ava">🐕</div>
+    <div style="flex:1"><div class="nom">Rocky · perro</div>
+      <div class="sub">Creciendo · 15:00</div></div>
+    <button class="btn compacto">Llegó</button>
+  </div>
+
+  <div class="header"><span class="h">Dra. Mariana Paredes</span><span class="n">4 hoy</span></div>
+  <div class="pie">Ver 2 pasadas ⌄</div>
+  <div class="t on">
+    <div class="ava">🐕</div>
+    <div style="flex:1"><div class="nom">Thor · perro</div>
+      <div class="sub">Adulto · Adentro · 10:00</div></div>
+  </div>
+  <div class="t off">
+    <div class="ava">🐇</div>
+    <div style="flex:1"><div class="nom">Milo · conejo</div>
+      <div class="sub">Primeros meses · 11:30</div></div>
+    <button class="btn compacto">Llegó</button>
+  </div>
+
+  <div class="header"><span class="h">Carla Aurora</span><span class="n">2 hoy</span></div>
+  <div class="t off">
+    <div class="ava">🐈</div>
+    <div style="flex:1"><div class="nom">Zeus · gato</div>
+      <div class="sub">Años dorados · 10:30 · Llegó</div></div>
+  </div>
+
+  <p class="marca">Los avatares acá son emoji SOLO en la lámina — en construcción es <code>AvatarMascota</code>
+    (foto → huella digna). LUGAR RESERVADO ×2, no dibujado: la banda de cuidado especial (entre etapa y hora,
+    §10 CUIDADO_ESPECIAL) y la acción de reagendar (espera P22). El reloj de la autorización envejece por
+    MINUTO — texto que cambia, no animación.</p>
+</div>
+
+<!-- N=1 -->
+<p class="cap">N=1 profesional — lista simple
+  <small>Cero sección, cero vocabulario de persona (la regla dura de S78, misma que turnos).</small></p>
+<div class="lienzo">
+  <p class="seccion primera">El día</p>
+  <div class="t on">
+    <div class="ava">🐕</div>
+    <div style="flex:1"><div class="nom">Thor · perro</div>
+      <div class="sub">Adulto · Adentro · 10:00</div></div>
+  </div>
+  <div class="t off">
+    <div class="ava">🐈</div>
+    <div style="flex:1"><div class="nom">Zeus · gato</div>
+      <div class="sub">Años dorados · 11:30</div></div>
+    <button class="btn compacto">Llegó</button>
+  </div>
+</div>
+
+<!-- ESTADOS -->
+<p class="cap">LOS ESTADOS QUE NO SON EL CAMINO FELIZ
+  <small>D-541 rige acá: el fallo dice fallo. Un falso «no hay citas» manda gente a su casa.</small></p>
+<div class="lienzo">
+  <p class="cap" style="margin:0 0 6px">sin citas hoy — vacío CON camino</p>
+  <div class="vacio">Hoy no hay citas agendadas.<br>Si alguien llega, regístralo y queda en el expediente.</div>
+  <button class="btn cta" style="margin-top:4px">Registrar atención</button>
+
+  <p class="cap" style="margin:22px 0 6px">error — JAMÁS disfrazado de día libre</p>
+  <div class="vacio">No pudimos cargar el día. Prueba de nuevo.</div>
+  <button class="btn compacto" style="width:100%;margin-top:4px">Reintentar</button>
+
+  <p class="cap" style="margin:22px 0 6px">autorización expirada — lo dice, no se esfuma</p>
+  <div class="warnCard" style="margin-top:4px">
+    <p>La familia de Luna no respondió a tiempo. La visita sigue como registro del mostrador.</p>
+  </div>
+
+  <p class="marca">La Puerta VACÍA no se monta (regla de existencia — la firma es la desaparición).
+    Sin nadie esperando, la pantalla abre en el día.</p>
+</div>
+
+<p class="nota" style="margin-top:-6px">
+  <strong>Contrato que espera de A (M4):</strong> <code>llegada_en</code> · <code>empleado_id</code> de la cita
+  y su nombre (dos permisos, §4) · estado §7bis con reloj · lugar de la banda. Estados con datos reales,
+  strings en tuteo, es+en al construir. El único sólido es <strong>Registrar atención</strong>; «Llegó» viste
+  <code>compacto</code> (22c). M2 la corre A.
+</p>
+
+</div>
+</body>
+</html>
