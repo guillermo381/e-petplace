@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S78-B · M1 — LÁMINA: turnos en Días y horarios</title>
+<style>
+  :root{
+    --papel:#FAF9F7; --card:#FFFFFF; --overlay:#EDEBF5;
+    --tinta:#1D1A2E; --sec:#6B6584; --ter:#A9A4C0; --borde:#E3E0EF;
+    --teal:#0A7268; --ctaTexto:#FAF9F7;
+    --warnBg:rgba(232,181,71,.24); --warnBorde:rgba(146,95,12,.22); --warnTexto:#925F0C;
+    --dangBg:rgba(255,92,92,.16); --dangBorde:rgba(190,53,53,.22); --dangTexto:#BE3535;
+    --reposo:0 1px 2px rgba(31,27,22,.05), 0 2px 8px rgba(31,27,22,.06);
+    --r-suave:10px; --r-md:12px; --r-lg:16px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:26px 16px 64px;background:#EFEDE8;
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  .col{max-width:420px;margin:0 auto}
+  h1{font-size:17px;color:var(--tinta);margin:0 0 6px}
+  .nota{font-size:12px;color:#8A8377;line-height:1.65;margin:0 0 24px}
+  .nota code{background:#E3E0DA;padding:1px 4px;border-radius:4px;font-size:11px}
+  .cap{font-size:12px;color:#8A8377;margin:0 0 4px 4px;font-weight:600}
+  .cap small{font-weight:400;display:block;margin-top:2px;line-height:1.5}
+  .lienzo{background:var(--papel);border-radius:14px;padding:16px;margin:8px 0 28px}
+  .seccion{font-size:15px;font-weight:500;color:var(--tinta);margin:0 0 2px}
+  .apoyo{font-size:13px;color:var(--sec);line-height:1.5;margin:0}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;color:var(--sec)}
+
+  /* tarjeta on/off — la anatomía ya firmada en la Hoja del miembro */
+  .t{display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--r-md);margin-top:10px}
+  .on{background:var(--card);box-shadow:var(--reposo)}
+  .off{background:transparent;border:1px solid var(--borde)}
+  .nom{font-size:16px;color:var(--tinta)}
+  .nom.gris{color:var(--sec)}
+  .sub{font-size:13px;color:var(--sec);line-height:1.45;margin:2px 0 0}
+  .ini{width:36px;height:36px;border-radius:var(--r-md);background:var(--overlay);
+       display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--teal);flex-shrink:0}
+  .ini.off{background:transparent;border:1px solid var(--borde);color:var(--ter)}
+
+  .tinte{border-radius:var(--r-md);padding:14px;margin-top:14px;border:1px solid}
+  .warn{background:var(--warnBg);border-color:var(--warnBorde)}
+  .dang{background:var(--dangBg);border-color:var(--dangBorde)}
+  .tinte h3{margin:0 0 5px;font-size:15px;font-weight:500}
+  .tinte p{margin:0;font-size:13px;line-height:1.5}
+  .warn h3,.warn p{color:var(--warnTexto)} .dang h3,.dang p{color:var(--dangTexto)}
+
+  .btn{width:100%;height:44px;border:0;border-radius:var(--r-suave);font-size:15px;
+       font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:12px}
+  .cta{background:var(--teal);color:var(--ctaTexto)}
+  .destructivo{background:var(--dangBg);color:var(--dangTexto)}
+
+  /* lo VIEJO que no se re-acaba — se dibuja tal cual está hoy */
+  .viejo{margin-top:18px;padding-top:14px;border-top:1px dashed #D8D3CB}
+  .viejoTag{font-size:10px;letter-spacing:.06em;color:#B0A99E;margin:0 0 8px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+  .chip{border:1.5px solid var(--teal);color:var(--teal);background:rgba(10,114,104,.08);
+        border-radius:var(--r-suave);padding:7px 0;font-size:14px;flex:1;text-align:center;min-width:36px}
+  .chip.n{border-color:var(--borde);color:var(--sec);background:transparent}
+  .listaVieja{background:var(--card);border-radius:var(--r-lg);border:1px solid rgba(0,0,0,.05);margin-top:10px}
+  .fv{padding:12px;display:flex;justify-content:space-between;align-items:center}
+  .fv+.fv{border-top:1px solid var(--borde)}
+  .marca{font-size:11px;color:#B04A2A;margin:8px 4px 0;line-height:1.55}
+</style>
+</head>
+<body>
+<div class="col">
+
+<h1>S78-B · M1 — turnos dentro de «Días y horarios»</h1>
+<p class="nota">
+  Tema claro, tokens reales de <code>packages/ui</code>. <strong>Lo nuevo va arriba de todo</strong> porque
+  cambia el sujeto de todo lo de abajo. <strong>Lo que NO toca el turno se dibuja tal como está hoy</strong>
+  (bloques con borde punteado y rótulo <em>SIN RE-ACABAR</em>): el alcance lo marca el turno, no la pasada estética.
+  El turno se nombra por sus <strong>horas</strong>, nunca «Turno 1» — ver §0 del M1.
+</p>
+
+<!-- 1 -->
+<p class="cap">ESTADO 1 · N=1 — el negocio de una persona
+  <small>Cero diff. Verificado en la fuente: <code>obtenerFranjasHorario</code> filtra por
+  <code>empleado_id</code> y sin argumento resuelve al titular. No hay nada que esconder.</small></p>
+<div class="lienzo">
+  <p class="seccion">Días y horarios</p>
+  <div class="viejo" style="border-top:0;padding-top:6px">
+    <p class="viejoTag">LA PANTALLA DE HOY, SIN UN PÍXEL DE CAMBIO</p>
+    <div class="chips">
+      <span class="chip">L</span><span class="chip">M</span><span class="chip">X</span>
+      <span class="chip">J</span><span class="chip">V</span><span class="chip n">S</span><span class="chip n">D</span>
+    </div>
+    <div class="listaVieja">
+      <div class="fv"><div><div class="nom">1 mascota a la vez</div><div class="sub">L · M · X · J · V</div></div>
+        <span class="mono">08:00 – 17:00</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 2 -->
+<p class="cap">ESTADO 2 · N≥2, nadie con jornada
+  <small>El bloque APARECE. El turno del negocio no se ofrece: no hay patrón del que copiar.</small></p>
+<div class="lienzo">
+  <p class="seccion">¿De quién es esta jornada?</p>
+  <p class="apoyo">Cada persona tiene su propio horario.</p>
+  <div class="t on"><div class="ini">CA</div><div style="flex:1"><div class="nom">Carla Aurora</div>
+    <div class="sub">Titular · sin jornada</div></div></div>
+  <div class="t off"><div class="ini off">MP</div><div style="flex:1"><div class="nom gris">Mariana Paredes</div>
+    <div class="sub">Sin jornada</div></div></div>
+  <div class="tinte warn">
+    <h3>Todavía nadie tiene jornada</h3>
+    <p>Sin horarios no aparecen cuando una familia busca una cita. Carga la primera y vas a poder reusarla como turno.</p>
+  </div>
+</div>
+
+<!-- 3 -->
+<p class="cap">ESTADO 3 · persona con TURNO asignado
+  <small>«Usa el turno del negocio» es DATO derivado (sus franjas coinciden con el patrón), no una etiqueta suelta.</small></p>
+<div class="lienzo">
+  <p class="seccion">¿De quién es esta jornada?</p>
+  <div class="t off"><div class="ini off">CA</div><div style="flex:1"><div class="nom gris">Carla Aurora</div>
+    <div class="sub">Titular · 08:00 – 17:00</div></div></div>
+  <div class="t on"><div class="ini">MP</div><div style="flex:1"><div class="nom">Mariana Paredes</div>
+    <div class="sub">Usa el turno del negocio · 08:00 – 17:00</div></div></div>
+
+  <div class="viejo">
+    <p class="viejoTag">SÍ SE RE-ACABA — la lista de franjas pasa a tarjetas separadas</p>
+    <div class="t on" style="margin-top:0"><div style="flex:1"><div class="nom">1 mascota a la vez</div>
+      <div class="sub">L · M · X · J · V</div></div><span class="mono">08:00 – 17:00</span></div>
+  </div>
+
+  <div class="viejo">
+    <p class="viejoTag">NO SE RE-ACABA — no lo toca el turno (migra por D-318)</p>
+    <div class="chips">
+      <span class="chip">L</span><span class="chip">M</span><span class="chip">X</span>
+      <span class="chip">J</span><span class="chip">V</span><span class="chip n">S</span><span class="chip n">D</span>
+    </div>
+    <div class="listaVieja"><div class="fv"><div><div class="nom">Vacaciones</div>
+      <div class="sub">Bloquea tu agenda por unos días</div></div><span class="mono">›</span></div></div>
+  </div>
+</div>
+
+<!-- 4 -->
+<p class="cap">ESTADO 4 · persona con JORNADA PROPIA
+  <small>Divergió del patrón y es legal. La oferta de copiar el turno reaparece — sin empujar.</small></p>
+<div class="lienzo">
+  <p class="seccion">¿De quién es esta jornada?</p>
+  <div class="t off"><div class="ini off">CA</div><div style="flex:1"><div class="nom gris">Carla Aurora</div>
+    <div class="sub">Titular · 08:00 – 17:00</div></div></div>
+  <div class="t on"><div class="ini">MP</div><div style="flex:1"><div class="nom">Mariana Paredes</div>
+    <div class="sub">Jornada propia · 10:00 – 19:00</div></div></div>
+  <div class="tinte warn" style="background:transparent;border-color:var(--borde)">
+    <h3 style="color:var(--tinta)">El turno del negocio es 08:00 – 17:00</h3>
+    <p style="color:var(--sec)">Mariana trabaja en otro horario. Si querés igualarla, podés copiarle el turno.</p>
+    <button class="btn cta">Usar el turno del negocio</button>
+  </div>
+</div>
+
+<!-- 5 -->
+<p class="cap">ESTADO 5 · franja PAUSADA
+  <small>Mecánica intacta: <code>activo</code> por franja YA es la pausa y funciona. Solo cambia su vestido.</small></p>
+<div class="lienzo">
+  <div class="t on" style="margin-top:0"><div style="flex:1"><div class="nom">1 mascota a la vez</div>
+    <div class="sub">L · M · X · J · V</div></div><span class="mono">08:00 – 17:00</span></div>
+  <div class="t off"><div style="flex:1"><div class="nom gris">1 mascota a la vez</div>
+    <div class="sub">S · D · Pausada</div></div><span class="mono" style="color:var(--ter)">09:00 – 13:00</span></div>
+  <p class="marca">La pausada usa el MISMO contorno transparente que el servicio apagado de la Hoja del miembro:
+    una sola gramática de «está ahí pero no rige» en toda la app del prestador.</p>
+</div>
+
+<!-- 6 -->
+<p class="cap">ESTADO 6 · cambiar de turno CON CITAS AGENDADAS
+  <small>🔴 El número exige wrapper sobre <code>contar_citas_despegables</code> (existe en DB, sin wrapper).
+  Mientras tanto: la consecuencia SIN cantidad — el mismo patrón que la baja ya firmada.</small></p>
+<div class="lienzo">
+  <p class="cap" style="margin:0 0 6px">v1 — hoy, construible</p>
+  <div class="tinte dang" style="margin-top:0">
+    <h3>Tiene citas en el horario que sale</h3>
+    <p>Al cambiarle el turno, las citas que queden fuera de su nuevo horario pasan a ser citas del negocio.
+       Eso no se deshace.</p>
+  </div>
+  <button class="btn destructivo">Cambiar el turno igual</button>
+
+  <p class="cap" style="margin:22px 0 6px">v2 — cuando A entregue el wrapper</p>
+  <div class="tinte dang" style="margin-top:0">
+    <h3>Tiene 4 citas en el horario que sale</h3>
+    <p>Al cambiarle el turno, esas 4 citas pasan a ser citas del negocio. Eso no se deshace.</p>
+  </div>
+</div>
+
+<p class="nota" style="margin-top:-6px">
+  <strong>Al gate, dos preguntas:</strong> ① ¿turno <strong>derivado</strong> (lo de esta lámina, cero motor)
+  o <strong>entidad</strong> con tabla propia (motor de A, y habilita propagar un cambio a las N personas)? ·
+  ② ¿el estado 6 se construye <strong>sin número</strong> y lo gana después, o espera al wrapper?
+</p>
+
+</div>
+</body>
+</html>
