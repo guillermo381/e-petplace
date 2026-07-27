@@ -466,6 +466,58 @@ se construye el negocio, no la tabla):
   (§3.2.5 — "el sistema persigue el caso") comparte infra con
   loyalty/revelaciones; se construye una vez, en su tanda.
 
+
+### 10bis. QUIÉN ACCEDE A UN CASO CLÍNICO — y por qué (S77, D-532)
+
+> **AGREGADO S77, no corrección: §10 describe la FORMA del caso y calla su
+> GATE.** La regla vivía solo en una deuda, que es donde nadie la va a
+> buscar.
+
+**LA REGLA ES LA MISMA LEY MADRE DE LA CASA: el acceso clínico viene del
+CHIP, jamás del cargo** (`LETRA_ROLES_EQUIPO_S74` · `PORTAL_PRESTADOR` §14).
+Aplicada al caso, con el literal de los dos helpers que la ejecutan —
+`_user_clinica_tratante_del_caso(p_caso_id, p_user_id)` y
+`_user_clinica_consultor_del_caso(...)`, ambos `STABLE SECURITY DEFINER`:
+
+```sql
+-- Caso A: el owner de la cuenta comercial tratante
+cco.owner_profile_id = p_user_id
+-- Caso B (S77-A, migración 20260725120000): capacidad clínica POR EL CHIP
+OR EXISTS (SELECT 1 FROM prestadores p
+           WHERE p.cuenta_comercial_id = cc.cuenta_comercial_tratante_id
+             AND public.empleado_tiene_capacidad_clinica(p.id, p_user_id))
+```
+
+**QUÉ CAMBIÓ Y QUÉ NO.** La ley no cambió: **estaba bien escrita desde S76 y
+el motor la incumplía acá.** Hasta S77, el brazo B de estos dos helpers
+gateaba por `er.rol IN ('dueño','profesional')` — **la fila de rol** — y por
+eso **no entró en el flip §6.2 de S76: no llamaban al helper, re-implementaban
+el chequeo por join** (que es literalmente D-494, archivada como prolijidad y
+que resultó ser la causa de un flip incompleto).
+
+**LAS DOS CARAS QUE ESTO CORTABA, y la segunda es la que dolía:**
+- **falso positivo** — una fila `profesional` concedida a mano daba acceso al
+  caso **sin ningún chip**: acceso clínico por CARGO, la ley madre al revés;
+- **FALSO NEGATIVO, el bloqueante** — el vet con chip médico verdadero
+  **abría el caso y no podía continuarlo**. Con `profesional` en **0 filas**
+  en toda la DB, eso alcanzaba a **todo empleado no titular con chips**: la
+  figura exacta que S76 construyó. **Un caso que solo puede seguir quien
+  tiene fila de cargo es un caso que el vet empleado abre y no acompaña** —
+  contra la propia cita de EL NORTE (*"El vet no atendió una consulta —
+  adoptó un caso"*).
+
+**RADIO DEL GATE:** 6 policies + 2 RPC `SECURITY DEFINER` sobre `caso_clinico`
+y `caso_clinico_consultor` (SELECT · INSERT · UPDATE), incluidos
+`asociar_a_caso` y `sedimentar_nota_clinica` — que corre **los dos ejes
+apilados**: el del chip primero (`empleado_tiene_capacidad_clinica`) y el del
+caso después.
+
+**Vehículo:** la sobrecarga `empleado_tiene_capacidad_clinica(prestador,
+user_id)` — los helpers reciben el usuario por argumento y no podían llamar a
+la versión que lee `auth.uid()`. **Una migración, dos deudas** (D-532 + D-494).
+Gateada en dispositivo por el founder el 26-jul-2026.
+
+
 ## 11. ANTES / DURANTE / DESPUÉS — con la IA como respuesta al discovery
 
 - **ANTES — el resumen destilado:** vista filtrada Eje 3 completo
