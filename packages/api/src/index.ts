@@ -794,3 +794,17 @@ export {
   type CodigoAceptar,
 } from './wrappers/equipo';
 export { obtenerUmbralesMomentoVital } from './wrappers/catalogos';
+// S79-A2 — el contrato de Places (LETRA_PERFIL_S79 §2; contrato-primero
+// para B): sesión de búsqueda + predicciones + resolución con
+// coordenadas REALES o rebote — jamás inventadas (L-139).
+export {
+  crearSesionLugares,
+  buscarLugares,
+  resolverLugar,
+  CODIGOS_ERROR_LUGARES,
+  type PrediccionLugar,
+  type LugarResuelto,
+  type CodigoErrorLugares,
+  type BuscarLugaresInput,
+  type ResolverLugarInput,
+} from './wrappers/lugares';
