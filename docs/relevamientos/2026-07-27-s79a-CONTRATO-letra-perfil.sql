@@ -281,9 +281,14 @@ BEGIN
 
   -- Solo el TITULAR estampa (LETRA §4): la bienvenida §2.3 le habla al
   -- que aplicó; el empleado que entra no toca la marca del negocio.
+  -- Y SOLO con estado='activo' (precisión de la FIRMA, T4 / LETRA_ALTA
+  -- §2 fase 4): el primer ingreso es AL PORTAL — la sala de espera
+  -- (pendiente/en_revision) no quema la ceremonia aunque B llamara
+  -- esta RPC antes de tiempo.
   UPDATE public.prestadores
      SET primer_ingreso_en = now()
    WHERE user_id = v_auth
+     AND estado = 'activo'
      AND primer_ingreso_en IS NULL
   RETURNING primer_ingreso_en, proposito INTO v_estampado, v_proposito;
 

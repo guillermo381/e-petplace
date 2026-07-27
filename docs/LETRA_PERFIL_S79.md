@@ -1,10 +1,13 @@
 # LETRA_PERFIL_S79 — El perfil del prestador y la dirección (v1.1)
 
-**Estado: DEPOSITADA — ESPERA FIRMA DEL FOUNDER.**
-Gate declarado en el mandato de la tanda: *la letra se firma antes de que
-exista una columna*. El anexo §9 lista el DDL exacto que espera esa firma;
-al momento de depositar esta letra, **cero columnas nuevas existen** (medible:
-`information_schema.columns` de `prestadores` idéntico al de la Tanda 1).
+**Estado: FIRMADA POR EL FOUNDER (27 Jul 2026, S79 Tanda 4) — CON DOS
+EXCEPCIONES EXPLÍCITAS DE LA MISMA FIRMA:**
+1. **La firma NO alcanza a §7 (vencimientos)** — sigue siendo PROPUESTA
+   con su gate propio abierto.
+2. **La firma NO autoriza aplicar el CONTRATO todavía** — la condición
+   que queda es que la captura de la sede (B) pase su GATE EN
+   DISPOSITIVO con el founder (T4.6). Hasta entonces, cero columnas
+   nuevas existen (medible: `information_schema.columns`).
 
 Contenido transpuesto de decisiones ya tomadas por el founder y la mesa
 (mandato S79 Tanda 2) — esta letra las ORDENA y las deja exigibles; no las
@@ -414,6 +417,15 @@ leyendo cada body antes de tocarlo (L-141).
 
 ## Historial
 
+- **FIRMA (27 Jul 2026, S79-A Tanda 4):** el founder FIRMÓ la v1.1, con
+  las dos excepciones del encabezado (§7 sigue propuesta; el contrato
+  espera el gate en dispositivo de la captura de sede de B). **Precisión
+  del mismo acto de firma (decisión founder T4: la ceremonia §2.3
+  dispara en la FASE 4 del alta, jamás antes):** `registrar_primer_ingreso`
+  estampa SOLO con `estado='activo'` — el primer ingreso es AL PORTAL, y
+  antes de la activación no hay portal (la sala de espera no quema la
+  ceremonia). El detalle vive en `LETRA_ALTA_S79` §2; el CONTRATO §9.4
+  incorpora la condición.
 - **v1.1 (27 Jul 2026, S79-A Tanda 3 — dos enmiendas de revisión de mesa
   + una medición):** ① §4: `sin_prestador` DEJA de ser excepción — el
   empleado sin fila propia es estado normal y recibe
