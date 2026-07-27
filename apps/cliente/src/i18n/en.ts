@@ -745,6 +745,8 @@ export const clienteEn = {
     referenciasAyuda: 'e.g. blue gate, ring twice',
     guardar: 'Save address',
     guardada: 'Done — your address is saved.',
+    // S79-A4 — Places resolution: location exists only if it was searched.
+    ubicada: 'Pinned on the map.',
   },
   // S55-A A2 — additional pet flow (the home that grows).
   // S73 C3 — the adoption door (shelters, honest step 0)

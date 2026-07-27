@@ -785,6 +785,8 @@ export const clienteEs = {
     referenciasAyuda: 'ej: portón azul, timbre 2',
     guardar: 'Guardar dirección',
     guardada: 'Listo — tu dirección quedó guardada.',
+    // S79-A4 — la resolución Places: la ubicación existe solo si se buscó.
+    ubicada: 'Ubicada en el mapa.',
   },
   // S55-A A2 — alta de mascota adicional (el hogar que crece).
   // Voz funcional de formulario; nace bilingüe (riel B1, tuteo neutro).
