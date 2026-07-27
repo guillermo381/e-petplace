@@ -69,6 +69,7 @@ import { EvitaTeclado } from '@/components/evita-teclado';
 import { verificarSesion } from '@/lib/api';
 import { vozErrorVet } from '@/lib/voz-error-vet';
 import { useTraduccion } from '@/i18n';
+import { DictadoEnVivo } from '@/components/dictado-en-vivo';
 
 // FormulaConfirmada/VitalesConfirmados no se re-exportan del index — se
 // derivan del contrato exportado NotaConfirmada (una sola verdad de shape).
@@ -557,22 +558,22 @@ export default function ConsultaVeterinaria() {
           <>
             <Texto variante="seccion">{t('consulta.dictadoTitulo', { mascota })}</Texto>
             <Texto variante="apoyo">{t('consulta.dictadoAyuda')}</Texto>
-            {/* S73-B ítem 8 (a): la puerta del dictado se abre sola — autofoco
-                al entrar a la fase (el teclado del SO sube con su micrófono) y
-                el hint del mic VIAJA JUNTO AL CAMPO (slot ayuda de Campo — la
-                ayuda de un campo vive con él, no en la cabecera). La decisión
-                S70 "el mic es el del teclado" no sobrevivió a su primer
-                usuario real sin esta puerta (hallazgo 6 S70 + gate S72). */}
+            {/* S78-B (D-456): EL MIC PROPIO — el tren de S73 viaja. El
+                autofoco del puente MUERE con él (boceto: el teclado sube al
+                tocar el campo, el mic al tocar el mic — los dos no compiten
+                al entrar) y el hint del teclado del SO muere también (una
+                puerta, no dos voces — Ley 37, mismo commit). En builds sin
+                el módulo horneado el control no se dibuja (Ley 23) y el
+                campo sigue siendo la vía — nada rebota, nada crashea. */}
             <Campo
               label={t('consulta.dictadoLabel')}
               placeholder={t('consulta.dictadoPlaceholder')}
-              ayuda={t('consulta.dictadoCampoAyuda')}
-              autoFocus
               value={dictado}
               onChangeText={setDictado}
               multilinea={8}
               autoCapitalize="sentences"
             />
+            <DictadoEnVivo value={dictado} onChangeText={setDictado} />
             {estructurando ? (
               <View style={{ alignItems: 'center', gap: spacing[3], paddingVertical: spacing[6] }}>
                 <EsperaDeMarca />

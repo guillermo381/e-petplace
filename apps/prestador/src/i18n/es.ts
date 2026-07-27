@@ -1596,16 +1596,23 @@ export const prestadorEs = {
       rechazado: 'Rechazado',
       vencido: 'Vencido',
     },
-    iniciar: 'Empezar la consulta',
+    // D-545 (S78-B): el botón NOMBRA lo que abre — el founder atendió
+    // una cita entera ESCRIBIENDO porque 'Empezar la consulta' no le
+    // dijo que podía hablar.
+    iniciar: 'Dictar la consulta',
     dictadoTitulo: 'Dicta la consulta de {{mascota}}',
     // D-456 (S72-B): la decisión founder — "el mic es el del teclado del SO" —
     // vivía SOLO en un comentario de código. La ayuda prometía hablar y nunca
     // decía cómo. Ahora lo dice. Tuteo por L-148 + censo del diccionario.
-    // S73-B ítem 8 (a): la frase hacía DOBLE turno (flujo + mic). Se parte:
-    // la cabecera guía el flujo; el hint del mic viaja JUNTO AL CAMPO
-    // (dictadoCampoAyuda → slot ayuda de Campo), donde el teclado sube.
+    // S78-B (D-456): el mic PROPIO vive — el hint del teclado del SO
+    // murió con él (una puerta, no dos voces; Ley 37).
     dictadoAyuda: 'Habla o escribe libremente. Después revisas todo campo por campo antes de guardar.',
-    dictadoCampoAyuda: 'Para dictar, toca el micrófono de tu teclado.',
+    micHint: 'Toca el micrófono para dictar.',
+    micCta: 'Dictar con el micrófono',
+    micParar: 'Parar el dictado',
+    micEscuchando: '● Escuchando — toca de nuevo para parar',
+    micPermisoDenegado: 'Sin permiso de micrófono. Actívalo en los ajustes del teléfono; escribir sigue funcionando.',
+    micCorte: 'La escucha se cortó. Lo dictado quedó en la nota.',
     dictadoLabel: 'Nota de la consulta',
     dictadoPlaceholder: 'Motivo, hallazgos, diagnóstico, plan, medicación…',
     estructurar: 'Estructurar la nota',
