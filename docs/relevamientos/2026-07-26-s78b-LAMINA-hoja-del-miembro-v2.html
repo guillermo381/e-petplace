@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S78-B · M1 v2 — LÁMINA: la Hoja del miembro recompuesta</title>
+<style>
+  :root{
+    /* ── TOKENS REALES, leídos de packages/ui (no de la vara) ── */
+    --papel:#FAF9F7;        /* bg.base · light0 */
+    --card:#FFFFFF;         /* bg.card · light1 */
+    --overlay:#EDEBF5;      /* bg.overlay · light3 */
+    --tinta:#1D1A2E;        /* text.primary · textLight0 */
+    --sec:#6B6584;          /* text.secondary · textLight1 */
+    --ter:#A9A4C0;          /* text.tertiary · textLight2 */
+    --borde:#E3E0EF;        /* border.default · light4 */
+    --teal:#0A7268;         /* accent.cta (prestador, cta="oficio") */
+    --ctaTexto:#FAF9F7;     /* accent.ctaTexto */
+    --warnBg:rgba(232,181,71,.24);      /* status.warningBg */
+    --warnBorde:rgba(146,95,12,.22);    /* status.warningBorder */
+    --warnTexto:#925F0C;                /* status.warningText */
+    --dangBg:rgba(255,92,92,.16);       /* status.dangerBg */
+    --dangBorde:rgba(190,53,53,.22);    /* status.dangerBorder */
+    --dangTexto:#BE3535;                /* status.dangerText */
+    --reposo:0 1px 2px rgba(31,27,22,.05), 0 2px 8px rgba(31,27,22,.06);
+    --elevada:0 2px 4px rgba(31,27,22,.08), 0 12px 32px rgba(31,27,22,.12);
+    --r-suave:10px; --r-md:12px; --r-lg:16px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:26px 16px 64px;background:#EFEDE8;
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  .col{max-width:420px;margin:0 auto}
+  h1{font-size:17px;color:var(--tinta);margin:0 0 6px}
+  .nota{font-size:12px;color:#8A8377;line-height:1.65;margin:0 0 26px}
+  .nota code{background:#E3E0DA;padding:1px 4px;border-radius:4px;font-size:11px}
+  .cap{font-size:12px;color:#8A8377;margin:0 0 4px 4px;font-weight:600}
+  .cap small{font-weight:400;display:block;margin-top:2px;line-height:1.5}
+  .lienzo{background:var(--papel);border-radius:14px;padding:14px;margin:8px 0 30px}
+  .hoja{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--elevada);padding:18px 16px 14px}
+
+  /* ── persona ── */
+  .persona{display:flex;align-items:center;gap:12px}
+  .ini{width:44px;height:44px;border-radius:14px;background:var(--overlay);
+       display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;
+       color:var(--teal);flex-shrink:0}
+  .nom{margin:0;font-size:17px;font-weight:500;color:var(--tinta)}
+  .mail{margin:2px 0 0;font-size:13px;color:var(--sec)}
+
+  /* ── bloques tintados = Tarjeta tinte ── */
+  .tinte{border-radius:var(--r-md);padding:14px;margin-top:16px;border:1px solid}
+  .warn{background:var(--warnBg);border-color:var(--warnBorde)}
+  .dang{background:var(--dangBg);border-color:var(--dangBorde)}
+  .tinte h3{margin:0;font-size:15px;font-weight:500}
+  .tinte p{margin:5px 0 0;font-size:13px;line-height:1.5}
+  .warn h3,.warn p{color:var(--warnTexto)}
+  .dang h3,.dang p{color:var(--dangTexto)}
+
+  /* ── botones ── */
+  .btn{width:100%;height:44px;border:0;border-radius:var(--r-suave);font-size:15px;
+       font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .cta{background:var(--teal);color:var(--ctaTexto);margin-top:12px}
+  .destructivo{background:var(--dangBg);color:var(--dangTexto)}
+  .compacto{background:transparent;color:var(--tinta);border:1px solid var(--borde)}
+
+  /* ── qué atiende ── */
+  .seccion{margin:22px 0 2px;font-size:15px;font-weight:500;color:var(--tinta)}
+  .hint{margin:0 0 4px;font-size:13px;color:var(--sec)}
+  .fila{display:flex;align-items:center;gap:13px;padding:11px 0}
+  .fila.alto{align-items:flex-start}
+  .fila svg{flex-shrink:0}
+  .rot{font-size:16px;color:var(--tinta)}
+  .rot.off{color:var(--sec)}
+  .sub{margin:2px 0 0;font-size:13px;line-height:1.45;color:var(--sec)}
+  .pie{margin-top:18px}
+  .aviso{margin:6px 4px 0;font-size:12px;line-height:1.5;color:var(--sec)}
+  .pill{display:inline-block;padding:3px 10px;border-radius:9999px;font-size:12px;
+        background:var(--overlay);color:var(--sec);margin-top:10px}
+  .sep{height:1px;background:var(--borde);margin:16px 0 0}
+  .marca{font-size:11px;color:#B04A2A;margin:6px 4px 0;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="col">
+
+<h1>S78-B · M1 v2 — la Hoja del miembro, recompuesta</h1>
+<p class="nota">
+  Tema CLARO. <strong>Todo color de esta lámina sale de <code>packages/ui</code> vivo</strong>, no de la vara:
+  la vara pintaba <code>#221E19</code> como texto (es <code>bg.tinta</code>, el techo del prestador) y grises cálidos
+  <code>#7D766B</code>; el tema real tiene <code>text.primary #1D1A2E</code> y <code>text.secondary #6B6584</code>.
+  <strong>Los cuatro glifos son los del registry</strong> (<code>veterinaria · grooming · paseo · training</code>),
+  con la primitiva <code>Huella</code> canónica — no redibujados.
+  <strong>Los dos bloques tintados son <code>Tarjeta tinte="warning"</code> y <code>tinte="danger"</code></strong>,
+  que ya existen y tienen 12+ consumidores vivos en el prestador: los dos hexes que la mesa inventó no nacen.
+</p>
+
+<!-- ══════════════ 1 · OPCIÓN B ══════════════ -->
+<p class="cap">1 · ESTADO NORMAL — opción B: construible HOY
+  <small>El estado se lee por el glifo entero: activo en tinta, apagado en secundario.
+  Cero cambio en <code>packages/ui</code>. Dosis baja cumplida (§15b.1): un solo acento, el teal del oficio.</small></p>
+<div class="lienzo">
+  <div class="hoja">
+
+    <div class="persona">
+      <div class="ini">MP</div>
+      <div style="min-width:0">
+        <p class="nom">Mariana Paredes</p>
+        <p class="mail">mariana@clinicaaurora.ec</p>
+      </div>
+    </div>
+
+    <div class="tinte warn">
+      <h3>Todavía no tiene jornada</h3>
+      <p>Sin horarios no aparece cuando una familia busca una cita.</p>
+      <button class="btn cta">Cargar su jornada</button>
+    </div>
+
+    <p class="seccion">Qué atiende</p>
+    <p class="hint">Los servicios que puede tomar en tu negocio.</p>
+
+    <div class="fila" style="color:var(--tinta);--h:var(--teal)">
+      <svg width="27" height="27" viewBox="0 0 24 24" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7.2 3v3.5a4.8 4.8 0 0 0 9.6 0V3"/>
+          <path d="M12 11.3v2.1c0 2.8-1 4.8-3.1 4.8"/>
+          <circle cx="6.6" cy="18.2" r="2.3"/>
+        </g>
+        <g transform="translate(12.6 12.4) scale(.46)" fill="var(--h)">
+          <ellipse cx="12" cy="15.7" rx="5.7" ry="4.7"/><ellipse cx="12" cy="5.9" rx="2.8" ry="3.5"/>
+          <ellipse cx="5.7" cy="8.3" rx="2.5" ry="3.2" transform="rotate(-24 5.7 8.3)"/>
+          <ellipse cx="18.3" cy="8.3" rx="2.5" ry="3.2" transform="rotate(24 18.3 8.3)"/>
+        </g>
+      </svg>
+      <span class="rot">Veterinaria</span>
+    </div>
+
+    <div class="fila" style="color:var(--ter);--h:var(--ter)">
+      <svg width="27" height="27" viewBox="0 0 24 24" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11.8 4.6 6.4 14.2"/><path d="M6.8 4.6l5.4 9.6"/>
+          <circle cx="5.2" cy="16.6" r="2.4"/><circle cx="13.4" cy="16.6" r="2.4"/>
+        </g>
+        <g transform="translate(13.8 9.2) scale(.42)" fill="var(--h)">
+          <ellipse cx="12" cy="15.7" rx="5.7" ry="4.7"/><ellipse cx="12" cy="5.9" rx="2.8" ry="3.5"/>
+          <ellipse cx="5.7" cy="8.3" rx="2.5" ry="3.2" transform="rotate(-24 5.7 8.3)"/>
+          <ellipse cx="18.3" cy="8.3" rx="2.5" ry="3.2" transform="rotate(24 18.3 8.3)"/>
+        </g>
+      </svg>
+      <span class="rot off">Estética</span>
+    </div>
+
+    <div class="fila" style="color:var(--ter);--h:var(--ter)">
+      <svg width="27" height="27" viewBox="0 0 24 24" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="17" cy="5.4" r="2.5"/><path d="M16.7 7.8c1.1 3.4-2.7 4.6-5.8 5.4"/>
+        </g>
+        <g transform="translate(1.6 12.2) scale(.47)" fill="var(--h)">
+          <ellipse cx="12" cy="15.7" rx="5.7" ry="4.7"/><ellipse cx="12" cy="5.9" rx="2.8" ry="3.5"/>
+          <ellipse cx="5.7" cy="8.3" rx="2.5" ry="3.2" transform="rotate(-24 5.7 8.3)"/>
+          <ellipse cx="18.3" cy="8.3" rx="2.5" ry="3.2" transform="rotate(24 18.3 8.3)"/>
+        </g>
+      </svg>
+      <span class="rot off">Paseos</span>
+    </div>
+
+    <div class="fila alto" style="color:var(--tinta);--h:var(--teal)">
+      <svg width="27" height="27" viewBox="0 0 24 24" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="14.2" r="4.6"/>
+          <path d="M9.6 9.6h9.2a1.2 1.2 0 0 1 1.2 1.2v2l-5.6 1.6"/>
+        </g>
+        <g transform="translate(6.5 11.6) scale(.32)" fill="var(--h)">
+          <ellipse cx="12" cy="15.7" rx="5.7" ry="4.7"/><ellipse cx="12" cy="5.9" rx="2.8" ry="3.5"/>
+          <ellipse cx="5.7" cy="8.3" rx="2.5" ry="3.2" transform="rotate(-24 5.7 8.3)"/>
+          <ellipse cx="18.3" cy="8.3" rx="2.5" ry="3.2" transform="rotate(24 18.3 8.3)"/>
+        </g>
+      </svg>
+      <div style="min-width:0">
+        <span class="rot">Adiestramiento</span>
+        <p class="sub">Ya no lo ofreces en tu negocio. Puedes quitárselo.</p>
+      </div>
+    </div>
+
+    <div class="sep"></div>
+    <div class="pie">
+      <button class="btn destructivo">Desvincular del negocio</button>
+      <p class="aviso">Tiene citas agendadas. Al darla de baja pasan a ser citas de la clínica, y eso no se deshace.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════ 2 · OPCIÓN A ══════════════ -->
+<p class="cap">2 · ESTADO NORMAL — opción A: la vara literal
+  <small>El estado se lee SOLO por la presencia/ausencia de la huella; el trazo queda en tinta siempre.
+  <strong>Exige enmienda aditiva en <code>Icono</code></strong> (hoy la huella no se puede ni ocultar ni recolorear
+  fuera de su capa) ⇒ <code>packages/ui</code>, territorio no designado.</small></p>
+<div class="lienzo">
+  <div class="hoja">
+
+    <p class="seccion" style="margin-top:0">Qué atiende</p>
+    <p class="hint">Los servicios que puede tomar en tu negocio.</p>
+
+    <div class="fila" style="color:var(--tinta);--h:var(--teal)">
+      <svg width="27" height="27" viewBox="0 0 24 24" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7.2 3v3.5a4.8 4.8 0 0 0 9.6 0V3"/><path d="M12 11.3v2.1c0 2.8-1 4.8-3.1 4.8"/>
+          <circle cx="6.6" cy="18.2" r="2.3"/>
+        </g>
+        <g transform="translate(12.6 12.4) scale(.46)" fill="var(--h)">
+          <ellipse cx="12" cy="15.7" rx="5.7" ry="4.7"/><ellipse cx="12" cy="5.9" rx="2.8" ry="3.5"/>
+          <ellipse cx="5.7" cy="8.3" rx="2.5" ry="3.2" transform="rotate(-24 5.7 8.3)"/>
+          <ellipse cx="18.3" cy="8.3" rx="2.5" ry="3.2" transform="rotate(24 18.3 8.3)"/>
+        </g>
+      </svg>
+      <span class="rot">Veterinaria</span>
+    </div>
+
+    <div class="fila" style="color:var(--tinta);--h:transparent">
+      <svg width="27" height="27" viewBox="0 0 24 24" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11.8 4.6 6.4 14.2"/><path d="M6.8 4.6l5.4 9.6"/>
+          <circle cx="5.2" cy="16.6" r="2.4"/><circle cx="13.4" cy="16.6" r="2.4"/>
+        </g>
+        <g transform="translate(13.8 9.2) scale(.42)" fill="var(--h)">
+          <ellipse cx="12" cy="15.7" rx="5.7" ry="4.7"/><ellipse cx="12" cy="5.9" rx="2.8" ry="3.5"/>
+          <ellipse cx="5.7" cy="8.3" rx="2.5" ry="3.2" transform="rotate(-24 5.7 8.3)"/>
+          <ellipse cx="18.3" cy="8.3" rx="2.5" ry="3.2" transform="rotate(24 18.3 8.3)"/>
+        </g>
+      </svg>
+      <span class="rot off">Estética</span>
+    </div>
+
+    <div class="fila" style="color:var(--tinta);--h:transparent">
+      <svg width="27" height="27" viewBox="0 0 24 24" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="17" cy="5.4" r="2.5"/><path d="M16.7 7.8c1.1 3.4-2.7 4.6-5.8 5.4"/>
+        </g>
+        <g transform="translate(1.6 12.2) scale(.47)" fill="var(--h)">
+          <ellipse cx="12" cy="15.7" rx="5.7" ry="4.7"/><ellipse cx="12" cy="5.9" rx="2.8" ry="3.5"/>
+          <ellipse cx="5.7" cy="8.3" rx="2.5" ry="3.2" transform="rotate(-24 5.7 8.3)"/>
+          <ellipse cx="18.3" cy="8.3" rx="2.5" ry="3.2" transform="rotate(24 18.3 8.3)"/>
+        </g>
+      </svg>
+      <span class="rot off">Paseos</span>
+    </div>
+
+    <div class="fila alto" style="color:var(--tinta);--h:var(--teal)">
+      <svg width="27" height="27" viewBox="0 0 24 24" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="14.2" r="4.6"/><path d="M9.6 9.6h9.2a1.2 1.2 0 0 1 1.2 1.2v2l-5.6 1.6"/>
+        </g>
+        <g transform="translate(6.5 11.6) scale(.32)" fill="var(--h)">
+          <ellipse cx="12" cy="15.7" rx="5.7" ry="4.7"/><ellipse cx="12" cy="5.9" rx="2.8" ry="3.5"/>
+          <ellipse cx="5.7" cy="8.3" rx="2.5" ry="3.2" transform="rotate(-24 5.7 8.3)"/>
+          <ellipse cx="18.3" cy="8.3" rx="2.5" ry="3.2" transform="rotate(24 18.3 8.3)"/>
+        </g>
+      </svg>
+      <div style="min-width:0">
+        <span class="rot">Adiestramiento</span>
+        <p class="sub">Ya no lo ofreces en tu negocio. Puedes quitárselo.</p>
+      </div>
+    </div>
+
+    <p class="marca">⚠ La diferencia entre A y B es qué codifica el estado: en A la huella APARECE o NO (y el
+      objeto del oficio queda igual de negro en las cuatro filas); en B se apaga el glifo entero.
+      A es más fina y más silenciosa; B se lee más rápido de lejos y no toca <code>packages/ui</code>.</p>
+
+  </div>
+</div>
+
+<!-- ══════════════ 3 · SEGUNDO ESTADO ══════════════ -->
+<p class="cap">3 · AL QUITAR VETERINARIA — su único servicio médico
+  <small>Confirmación EN EL LUGAR (dos toques, patrón <code>confirmaDesvincular</code> que la Hoja ya usa) —
+  jamás Hoja anidada. El botón es <code>Boton destructivo</code> = TONAL: el sólido ladrillo de la vara está
+  prohibido por ley viva (<code>Boton.tsx:12</code> — «NUNCA coral sólido»).</small></p>
+<div class="lienzo">
+  <div class="hoja">
+
+    <div class="tinte dang" style="margin-top:0">
+      <div style="display:flex;align-items:center;gap:11px">
+        <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink:0;color:var(--dangTexto);--h:var(--ter)">
+          <g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7.2 3v3.5a4.8 4.8 0 0 0 9.6 0V3"/><path d="M12 11.3v2.1c0 2.8-1 4.8-3.1 4.8"/>
+            <circle cx="6.6" cy="18.2" r="2.3"/>
+          </g>
+          <g transform="translate(12.6 12.4) scale(.46)" fill="var(--h)">
+            <ellipse cx="12" cy="15.7" rx="5.7" ry="4.7"/><ellipse cx="12" cy="5.9" rx="2.8" ry="3.5"/>
+            <ellipse cx="5.7" cy="8.3" rx="2.5" ry="3.2" transform="rotate(-24 5.7 8.3)"/>
+            <ellipse cx="18.3" cy="8.3" rx="2.5" ry="3.2" transform="rotate(24 18.3 8.3)"/>
+          </g>
+        </svg>
+        <h3>Deja de ver la historia clínica</h3>
+      </div>
+      <p>Si le quitas veterinaria, Mariana deja de ver la historia clínica de las mascotas de tu negocio.</p>
+    </div>
+
+    <button class="btn destructivo" style="margin-top:12px">Quitar veterinaria</button>
+
+  </div>
+</div>
+
+<!-- ══════════════ 4 · LOS OTROS ESTADOS ══════════════ -->
+<p class="cap">4 · LOS ESTADOS QUE EL CONTRATO YA APROBÓ
+  <small>Sobreviven de la pasada anterior: no se re-abren, se re-visten.</small></p>
+<div class="lienzo">
+  <div class="hoja">
+
+    <div class="persona">
+      <div class="ini">JR</div>
+      <div style="min-width:0">
+        <p class="nom">Julián Rivas</p>
+        <p class="mail">julian@clinicaaurora.ec</p>
+      </div>
+    </div>
+    <span class="pill">Invitación pendiente</span>
+
+    <div class="tinte warn">
+      <h3>Su jornada está pausada</h3>
+      <p>Tiene horarios cargados, pero ninguno activo. Mientras estén pausados no aparece en reservas.</p>
+      <button class="btn cta">Ver su jornada</button>
+    </div>
+
+    <p class="seccion">Qué atiende</p>
+    <p class="hint" style="margin-bottom:0">Todavía no tiene servicios asignados. Puede recibir y cobrar,
+      pero no toma citas ni ve la historia clínica.</p>
+
+    <div class="sep"></div>
+    <div class="pie">
+      <button class="btn destructivo">Desvincular del negocio</button>
+      <p class="aviso">Al darla de baja pierde el acceso al negocio. Lo que hizo queda en el expediente.</p>
+      <p class="marca">Sin lector de citas para esta persona no se dice número (L-139): la consecuencia
+        se dice sin cantidad. El conteo real llega del RPC de baja, que YA lo devuelve
+        (<code>citasDespegadas</code>) — pero DESPUÉS del acto, no antes.</p>
+    </div>
+
+  </div>
+</div>
+
+<p class="nota" style="margin-top:-8px">
+  <strong>Lo que esta lámina NO resuelve y va al gate:</strong> ① A vs B (el mecanismo del estado) ·
+  ② si «Desvincular» se queda tonal o baja a <code>compacto</code> para que el teal presida solo ·
+  ③ la palabra <em>turno</em> (acá dice «una cita» a propósito — ver la alarma de vocabulario del pedido).
+</p>
+
+</div>
+</body>
+</html>
