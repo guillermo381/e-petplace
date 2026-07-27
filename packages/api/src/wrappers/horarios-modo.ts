@@ -22,7 +22,7 @@
 
 import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
-import { obtenerTitularId } from './titular';
+import { resolverPersonaDeFranja } from './titular';
 
 const MENSAJES = {
   sin_sesion:                    'No hay sesión activa.',
@@ -38,6 +38,7 @@ const MENSAJES = {
   rango_horario_invalido:        'La hora de fin tiene que ser después de la de inicio.',
   dia_invalido:                  'El día no es válido.',
   cupo_invalido:                 'El cupo tiene que ser entre 1 y 4.',
+  empleado_invalido:             'Esa persona no trabaja en tu negocio.',
   // S68-B8: los errores tipados de la conversión (RPC A9) con voz propia
   sin_franjas_generales:         'No tienes franjas generales para convertir.',
   sin_servicios_activos:         'Activa al menos un servicio con agenda antes de convertir.',
@@ -152,28 +153,32 @@ export async function convertirHorariosAPorServicio(): Promise<
 }
 
 /**
- * Borra TODAS las franjas propias del prestador (generales y por
- * servicio; las de empleados NO se tocan). Es el camino de "eliminar
- * tus franjas actuales y empezar de nuevo" del cambio de modo — las
- * franjas son configuración, no historia (regla 7.8 protege eventos).
+ * Borra TODAS las franjas DE UNA PERSONA (generales y por servicio). Es
+ * el camino de "eliminar tus franjas actuales y empezar de nuevo" del
+ * cambio de modo — las franjas son configuración, no historia (regla 7.8
+ * protege eventos).
+ *
+ * S78-A2: sigue borrando SOLO las de la persona indicada; ausente = el
+ * titular. **El borrado jamás es del negocio entero** — esa amplitud
+ * sería nueva y peligrosa (una persona limpiando su agenda no puede
+ * vaciar la de sus compañeros), y el cambio de modo se aplica por
+ * persona igual que las franjas.
  */
 export async function eliminarFranjasPrestador(
   prestadorId: string,
+  empleadoId?: string,
 ): Promise<ResultadoWrapper<{ eliminadas: number }, CodigoErrorModoHorarios>> {
   const { data: auth } = await getClient().auth.getUser();
   if (!auth.user?.id) return falla('sin_sesion');
 
-  // V0 (S67): las franjas "propias del prestador" son las del TITULAR
-  // (empleado_id NOT NULL desde la fundación); las de otras personas
-  // NO se tocan — el contrato de este wrapper no cambia.
-  const titularId = await obtenerTitularId(prestadorId);
-  if (titularId === null) return falla('error_desconocido');
+  const personaId = await resolverPersonaDeFranja(prestadorId, empleadoId);
+  if (personaId === null) return falla(empleadoId === undefined ? 'error_desconocido' : 'empleado_invalido');
 
   const { data, error } = await getClient()
     .from('prestador_horarios')
     .delete()
     .eq('prestador_id', prestadorId)
-    .eq('empleado_id', titularId)
+    .eq('empleado_id', personaId)
     .select('id');
 
   if (error) return normalizarError(error.message);
@@ -223,25 +228,28 @@ function mapearFranjaServicio(fila: {
   };
 }
 
-/** Las franjas POR SERVICIO de las ofertas dadas (empleados fuera). */
+/**
+ * Las franjas POR SERVICIO de las ofertas dadas, DE UNA PERSONA.
+ * S78-A2: `empleadoId` ausente = el titular (contrato V0).
+ */
 export async function obtenerFranjasDeServicios(
   prestadorId: string,
   servicioIds: string[],
+  empleadoId?: string,
 ): Promise<ResultadoWrapper<FranjaHorarioServicio[], CodigoErrorModoHorarios>> {
   const { data: auth } = await getClient().auth.getUser();
   if (!auth.user?.id) return falla('sin_sesion');
   if (servicioIds.length === 0) return { ok: true, data: [] };
 
-  // V0 (S67): las franjas por servicio propias son las del TITULAR.
-  const titularId = await obtenerTitularId(prestadorId);
-  if (titularId === null) return falla('error_desconocido');
+  const personaId = await resolverPersonaDeFranja(prestadorId, empleadoId);
+  if (personaId === null) return falla(empleadoId === undefined ? 'error_desconocido' : 'empleado_invalido');
 
   const { data, error } = await getClient()
     .from('prestador_horarios')
     .select(SELECT_FRANJA_SERVICIO)
     .eq('prestador_id', prestadorId)
     .in('servicio_id', servicioIds)
-    .eq('empleado_id', titularId)
+    .eq('empleado_id', personaId)
     .order('dia_semana', { ascending: true })
     .order('hora_inicio', { ascending: true });
 
@@ -252,6 +260,8 @@ export async function obtenerFranjasDeServicios(
 
 export interface InputCrearFranjaServicio {
   prestadorId: string;
+  /** La PERSONA dueña de la franja. Ausente = el titular (contrato V0). */
+  empleadoId?: string;
   /** La OFERTA (prestador_servicios.id) dueña de la franja. */
   servicioId: string;
   /** 0=Domingo … 6=Sábado (regla 32). */
@@ -287,16 +297,17 @@ export async function crearFranjaServicio(
     return falla('cupo_invalido');
   }
 
-  // V0 (S67): la franja por servicio nace de la persona TITULAR.
-  const titularId = await obtenerTitularId(input.prestadorId);
-  if (titularId === null) return falla('error_desconocido');
+  const personaId = await resolverPersonaDeFranja(input.prestadorId, input.empleadoId);
+  if (personaId === null) {
+    return falla(input.empleadoId === undefined ? 'error_desconocido' : 'empleado_invalido');
+  }
 
   const { data: delDia, error: errDia } = await getClient()
     .from('prestador_horarios')
     .select('id, hora_inicio, hora_fin')
     .eq('prestador_id', input.prestadorId)
     .eq('servicio_id', input.servicioId)
-    .eq('empleado_id', titularId)
+    .eq('empleado_id', personaId)
     .eq('dia_semana', input.diaSemana);
   if (errDia || !Array.isArray(delDia)) return falla('error_desconocido');
   const solapa = delDia.some(
@@ -308,7 +319,7 @@ export async function crearFranjaServicio(
     .from('prestador_horarios')
     .insert({
       prestador_id: input.prestadorId,
-      empleado_id: titularId,
+      empleado_id: personaId,
       servicio_id: input.servicioId,
       dia_semana: input.diaSemana,
       hora_inicio: input.horaInicio,

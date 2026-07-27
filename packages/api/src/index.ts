@@ -645,7 +645,10 @@ export {
   type VacunaMostradorInput,
   type CodigoVacunaMostrador,
 } from './wrappers/veterinaria-mostrador';
-export { obtenerTitularId, obtenerMiEmpleadoId } from './wrappers/titular';
+// S78-A2 (D-540): `resolverPersonaDeFranja` es el resolvedor único de la
+// persona dueña de una franja — ausente = titular, presente = verificada
+// contra ESE negocio (la RLS de prestador_horarios no mira empleado_id).
+export { obtenerTitularId, obtenerMiEmpleadoId, resolverPersonaDeFranja } from './wrappers/titular';
 // S69-B (B3): el presupuesto clínico — 5 RPCs del contrato A1 (lane cedida
 // por la A). Hunk aditivo.
 export {

@@ -22,7 +22,7 @@
 import { getClient } from '../client';
 import type { Database } from '../database.types';
 import type { ResultadoWrapper } from '../resultado';
-import { obtenerTitularId } from './titular';
+import { resolverPersonaDeFranja } from './titular';
 
 type UpdateOferta = Database['public']['Tables']['prestador_servicios']['Update'];
 type UpdateFranja = Database['public']['Tables']['prestador_horarios']['Update'];
@@ -38,6 +38,7 @@ const MENSAJES = {
   franja_solapada:        'Esa franja se cruza con una que ya tienes ese día.',
   cupo_invalido:          'El cupo tiene que ser entre 1 y 4.',
   dia_invalido:           'El día no es válido.',
+  empleado_invalido:      'Esa persona no trabaja en tu negocio.',
   no_encontrada:          'No encontramos ese registro tuyo.',
   datos_inconsistentes:   'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:      'Ocurrió un error inesperado. Prueba de nuevo.',
@@ -291,26 +292,28 @@ function mapearFranja(fila: {
 }
 
 /**
- * Las franjas GENERALES del prestador (servicio_id y empleado_id NULL —
- * las franjas por servicio/empleado son el peldaño 2, hueco declarado).
+ * Las franjas GENERALES (servicio_id NULL) de UNA PERSONA del negocio.
+ *
+ * S78-A2 (D-540): `empleadoId` ausente = el TITULAR — el contrato V0
+ * intacto para los consumidores vivos. Presente = la jornada de esa
+ * persona, que es lo que destraba al segundo profesional.
  */
 export async function obtenerFranjasHorario(
   prestadorId: string,
+  empleadoId?: string,
 ): Promise<ResultadoWrapper<FranjaHorario[], CodigoErrorConfiguracionPaseo>> {
   const { data: auth } = await getClient().auth.getUser();
   if (!auth.user?.id) return falla('sin_sesion');
 
-  // V0 (S67): las franjas propias son las del TITULAR (empleado_id
-  // NOT NULL desde la fundación); contrato hacia pantallas IDÉNTICO.
-  const titularId = await obtenerTitularId(prestadorId);
-  if (titularId === null) return falla('error_desconocido');
+  const personaId = await resolverPersonaDeFranja(prestadorId, empleadoId);
+  if (personaId === null) return falla(empleadoId === undefined ? 'error_desconocido' : 'empleado_invalido');
 
   const { data, error } = await getClient()
     .from('prestador_horarios')
     .select(SELECT_FRANJA)
     .eq('prestador_id', prestadorId)
     .is('servicio_id', null)
-    .eq('empleado_id', titularId)
+    .eq('empleado_id', personaId)
     .order('dia_semana', { ascending: true })
     .order('hora_inicio', { ascending: true });
 
@@ -320,6 +323,8 @@ export async function obtenerFranjasHorario(
 
 export interface InputCrearFranja {
   prestadorId: string;
+  /** La PERSONA dueña de la franja. Ausente = el titular (contrato V0). */
+  empleadoId?: string;
   /** 0=Domingo … 6=Sábado (regla 32). */
   diaSemana: number;
   /** 'HH:MM' en la grilla de 30 (v1: grilla fija). */
@@ -331,10 +336,16 @@ export interface InputCrearFranja {
 const HORA_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 /**
- * Agrega una franja general. El SOLAPE se valida acá contra TODAS las
- * franjas del día (activas y pausadas — una pausada que se reactive no
- * puede chocar): el UNIQUE del schema no protege con servicio_id NULL
- * (relevado S55: NULLs no colisionan).
+ * Agrega una franja general A UNA PERSONA. El SOLAPE se valida acá contra
+ * TODAS las franjas del día DE ESA PERSONA (activas y pausadas — una
+ * pausada que se reactive no puede chocar): el UNIQUE del schema no
+ * protege con servicio_id NULL (relevado S55: NULLs no colisionan).
+ *
+ * S78-A2: el solape es POR PERSONA y eso es lo correcto, no una
+ * simplificación — dos personas del mismo negocio SE PISAN LEGALMENTE en
+ * el reloj (D-409, firmada S70: la ocupación protege el cuerpo, no la
+ * agenda). El motor ya lo trata así: `_agenda_ocupacion(p_empleado_id,…)`
+ * cuenta por persona y las lectoras UNEN ventanas (A0, literal).
  */
 export async function crearFranjaHorario(
   input: InputCrearFranja,
@@ -351,17 +362,17 @@ export async function crearFranjaHorario(
     return falla('cupo_invalido');
   }
 
-  // V0 (S67): la franja nace de la persona TITULAR (empleado_id es
-  // NOT NULL desde la fundación).
-  const titularId = await obtenerTitularId(input.prestadorId);
-  if (titularId === null) return falla('error_desconocido');
+  const personaId = await resolverPersonaDeFranja(input.prestadorId, input.empleadoId);
+  if (personaId === null) {
+    return falla(input.empleadoId === undefined ? 'error_desconocido' : 'empleado_invalido');
+  }
 
   const { data: delDia, error: errDia } = await getClient()
     .from('prestador_horarios')
     .select('id, hora_inicio, hora_fin')
     .eq('prestador_id', input.prestadorId)
     .is('servicio_id', null)
-    .eq('empleado_id', titularId)
+    .eq('empleado_id', personaId)
     .eq('dia_semana', input.diaSemana);
   if (errDia || !Array.isArray(delDia)) return falla('error_desconocido');
   const solapa = delDia.some(
@@ -373,7 +384,7 @@ export async function crearFranjaHorario(
     .from('prestador_horarios')
     .insert({
       prestador_id: input.prestadorId,
-      empleado_id: titularId,
+      empleado_id: personaId,
       dia_semana: input.diaSemana,
       hora_inicio: input.horaInicio,
       hora_fin: input.horaFin,
@@ -427,6 +438,8 @@ export async function actualizarFranjaHorario(
 export interface InputEditarFranja {
   id: string;
   prestadorId: string;
+  /** La PERSONA dueña de la franja. Ausente = el titular (contrato V0). */
+  empleadoId?: string;
   /** 'HH:MM' en la grilla de 30 (misma grilla del alta). */
   horaInicio: string;
   horaFin: string;
@@ -469,16 +482,18 @@ export async function editarFranjaHorario(
   if (errFila) return falla('error_desconocido');
   if (fila === null) return falla('no_encontrada');
 
-  // V0 (S67): el solape se valida contra las franjas del TITULAR.
-  const titularId = await obtenerTitularId(input.prestadorId);
-  if (titularId === null) return falla('error_desconocido');
+  // S78-A2: el solape se valida contra las franjas de LA MISMA PERSONA.
+  const personaId = await resolverPersonaDeFranja(input.prestadorId, input.empleadoId);
+  if (personaId === null) {
+    return falla(input.empleadoId === undefined ? 'error_desconocido' : 'empleado_invalido');
+  }
 
   const { data: delDia, error: errDia } = await getClient()
     .from('prestador_horarios')
     .select('id, hora_inicio, hora_fin')
     .eq('prestador_id', input.prestadorId)
     .is('servicio_id', null)
-    .eq('empleado_id', titularId)
+    .eq('empleado_id', personaId)
     .eq('dia_semana', fila.dia_semana)
     .neq('id', input.id);
   if (errDia || !Array.isArray(delDia)) return falla('error_desconocido');
