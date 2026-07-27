@@ -136,10 +136,11 @@ export async function guardarDireccionHogar(
     p_sector: input.sector ?? undefined,
     p_referencias: input.referencias ?? undefined,
     p_telefono: input.telefono ?? undefined,
-    // null EXPLÍCITO cuando no hay resolución Places: el server pisa las
-    // coordenadas viejas (§2.2 — mueren con el texto que las parió).
-    p_lat: input.lat ?? null,
-    p_lon: input.lon ?? null,
+    // Sin resolución Places el parámetro se OMITE y cae al DEFAULT NULL
+    // del server — que PISA las coordenadas viejas (§2.2: mueren con el
+    // texto que las parió). El tipo generado no admite null explícito.
+    p_lat: input.lat ?? undefined,
+    p_lon: input.lon ?? undefined,
   });
 
   if (error) return mapeoErrorAResultado(error.message);
