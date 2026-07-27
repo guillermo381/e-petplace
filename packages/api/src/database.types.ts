@@ -11896,6 +11896,7 @@ export type Database = {
           direccion: string | null
           email_contacto: string | null
           estado: string
+          expone_personas: boolean
           foto_url: string | null
           fotos_galeria: Json | null
           grooming_extra_pelaje_largo: number | null
@@ -11933,6 +11934,7 @@ export type Database = {
           direccion?: string | null
           email_contacto?: string | null
           estado?: string
+          expone_personas?: boolean
           foto_url?: string | null
           fotos_galeria?: Json | null
           grooming_extra_pelaje_largo?: number | null
@@ -11970,6 +11972,7 @@ export type Database = {
           direccion?: string | null
           email_contacto?: string | null
           estado?: string
+          expone_personas?: boolean
           foto_url?: string | null
           fotos_galeria?: Json | null
           grooming_extra_pelaje_largo?: number | null
@@ -16171,6 +16174,7 @@ export type Database = {
       _inicios_disponibles_prestador: {
         Args: {
           p_duracion_minutos: number
+          p_empleado_id?: string
           p_fecha: string
           p_prestador_id: string
           p_servicio_id: string
@@ -16537,6 +16541,7 @@ export type Database = {
       }
       crear_bloqueo_agenda: {
         Args: {
+          p_empleado_id?: string
           p_fecha: string
           p_hora: string
           p_mascota_id: string
@@ -17054,7 +17059,12 @@ export type Database = {
         }[]
       }
       obtener_inicios_vet_disponibles: {
-        Args: { p_fecha: string; p_mascota_id: string; p_tipo_servicio: string }
+        Args: {
+          p_empleado_id?: string
+          p_fecha: string
+          p_mascota_id: string
+          p_tipo_servicio: string
+        }
         Returns: {
           hora: string
         }[]
@@ -17151,6 +17161,14 @@ export type Database = {
         }[]
       }
       obtener_paseo_por_cita: { Args: { p_cita_id: string }; Returns: Json }
+      obtener_personas_que_atienden: {
+        Args: { p_prestador_id: string; p_servicio_id: string }
+        Returns: {
+          empleado_id: string
+          nombre: string
+          tiene_jornada: boolean
+        }[]
+      }
       obtener_resumen_actividad_prestador: {
         Args: {
           p_desde: string
