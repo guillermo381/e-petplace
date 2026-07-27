@@ -48,6 +48,7 @@ export {
 export {
   obtenerMiPrestador,
   actualizarPerfilPrestador,
+  actualizarExponePersonas,
   resolverUrlLogoNegocio,
   type InputActualizarPerfilPrestador,
   type MiPrestador,

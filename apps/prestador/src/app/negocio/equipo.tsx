@@ -63,6 +63,7 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  actualizarExponePersonas,
   asignarServiciosEmpleado,
   desvincularEmpleado,
   invitarEmpleado,
@@ -96,6 +97,13 @@ type Pantalla =
 /** El orden de los oficios en toda superficie del prestador (el mismo del
  *  filtro del HOY). Fijo: la lista no se reordena según quién se la mire. */
 const ORDEN_OFICIOS: readonly OficioChip[] = ['veterinaria', 'grooming', 'paseo', 'adiestramiento'];
+
+/** S78-B · EL GATE MECÁNICO DE LA VITRINA, del lado de la puerta: el
+ *  trigger de A7 rebota el encendido mientras `notificar_reasignacion_cita`
+ *  no exista — y HOY no existe (medido en la migración s78a7). `false`
+ *  hasta que A entregue el LECTOR del gate (pedido emitido): conservador
+ *  solo puede SUB-ofrecer, jamás rebotar (Ley 23). */
+const VITRINA_GATE_ABIERTO = false;
 
 /** EL PUENTE a la jornada (S78-B, hallazgo del gate founder): la ruta del
  *  taller de cada oficio — los cuatro aceptan `?seccion=horarios` (el de
@@ -154,11 +162,9 @@ export default function EquipoNegocioPantalla() {
   /** El oficio cuyo apagado dejaría a la persona SIN capacidad clínica y
    *  espera el segundo toque (§4: no se ejecuta al toque, se informa). */
   const [confirmaQuitar, setConfirmaQuitar] = useState<OficioChip | null>(null);
-  /** EL ARRASTRE (S78-B punto 2): los oficios de CADA miembro, para que el
-   *  subtítulo de la lista diga QUÉ ATIENDE y no "Recepción" a todo el
-   *  mundo. Su fallo NO tumba la ventana: sin dato, el subtítulo se OMITE
-   *  (jamás una identidad inventada — L-139). */
-  const [oficiosPorMiembro, setOficiosPorMiembro] = useState<Record<string, OficioChip[]>>({});
+  // EL ARRASTRE (S78-B punto 2) MIGRÓ A D-547: `MiembroEquipo.oficios`
+  // viaja en el lector de equipo — el 2×N por fila que esta pantalla
+  // pagaba (y declaraba) MURIÓ (A `dc08147`: "B migra cuando quiera").
 
   const cargar = useCallback(async () => {
     setPantalla({ estado: 'cargando' });
@@ -193,22 +199,6 @@ export default function EquipoNegocioPantalla() {
     }
     setPantalla({ estado: 'listo', prestador: prestador.data, equipo: equipo.data });
 
-    // EL ARRASTRE — COSTO DECLARADO (D-497): `MiembroEquipo` NO trae chips
-    // y NO existe lector de equipo-con-chips, así que son 2 viajes por
-    // miembro activo no-titular. Con los equipos de hoy (unidades) es
-    // tolerable; la cura de raíz es ensanchar `obtenerEquipoNegocio` —
-    // PEDIDO A A, no deducido acá. En paralelo y sin bloquear la ventana.
-    const aLeer = equipo.data.miembros.filter((m) => m.activo && !m.roles.includes('dueño'));
-    void Promise.all(
-      aLeer.map(async (m) => {
-        const r = await obtenerChipsEmpleado(m.empleadoId);
-        return { id: m.empleadoId, oficios: r.ok ? [...new Set(r.data.map((c) => c.oficio))] : null };
-      }),
-    ).then((filas) => {
-      const mapa: Record<string, OficioChip[]> = {};
-      for (const f of filas) if (f.oficios !== null) mapa[f.id] = f.oficios;
-      setOficiosPorMiembro(mapa);
-    });
   }, [t]);
 
   useFocusEffect(
@@ -300,10 +290,6 @@ export default function EquipoNegocioPantalla() {
       // Repinta con los chips SOBREVIVIENTES que el motor devuelve — cero
       // re-lectura y, sobre todo, una ventana de desincronía menos.
       setChips(r.data.chips);
-      setOficiosPorMiembro((prev) => ({
-        ...prev,
-        [m.empleadoId]: [...new Set(r.data.chips.map((c) => c.oficio))],
-      }));
       // DESPUÉS (§6.3): el dato AUTORITATIVO es el re-leído tras el DELETE.
       // La advertencia previa puede haber envejecido en las dos direcciones.
       if (r.data.perdioCapacidadClinicaPorChip) {
@@ -329,13 +315,26 @@ export default function EquipoNegocioPantalla() {
     }
     const rc = await obtenerChipsEmpleado(m.empleadoId);
     setOcupado(false);
-    if (rc.ok) {
-      setChips(rc.data);
-      setOficiosPorMiembro((prev) => ({
-        ...prev,
-        [m.empleadoId]: [...new Set(rc.data.map((c) => c.oficio))],
-      }));
+    if (rc.ok) setChips(rc.data);
+  }
+
+  async function alternarVitrina(valor: boolean) {
+    if (ocupado || pantalla.estado !== 'listo') return;
+    setOcupado(true);
+    const r = await actualizarExponePersonas(pantalla.prestador.id, valor);
+    setOcupado(false);
+    if (!r.ok) {
+      // el rebote del gate viaja TIPADO: la voz dice el porqué exacto
+      mostrar({
+        variante: 'error',
+        texto:
+          r.codigo === 'aviso_reasignacion_no_existe'
+            ? t('equipo.vitrinaRebote')
+            : t('equipo.errorEscritura'),
+      });
+      return;
     }
+    await cargar();
   }
 
   async function desvincular(m: MiembroEquipo) {
@@ -428,10 +427,8 @@ export default function EquipoNegocioPantalla() {
   const subtituloMiembro = (m: MiembroEquipo): string | undefined => {
     if (m.roles.includes('dueño')) return t('equipo.rolDueno');
     if (!m.activo) return t('equipo.invitacionPendiente');
-    const suyos = oficiosPorMiembro[m.empleadoId];
-    if (suyos === undefined) return undefined;
-    if (suyos.length === 0) return t('equipo.subtituloRecepcion');
-    return ORDEN_OFICIOS.filter((o) => suyos.includes(o)).map(vozOficio).join(' · ');
+    if (m.oficios.length === 0) return t('equipo.subtituloRecepcion');
+    return ORDEN_OFICIOS.filter((o) => m.oficios.includes(o)).map(vozOficio).join(' · ');
   };
 
   // E1 (mesa): el aceptado SIN rol PRESIDE — primero en la lista, con su
@@ -529,6 +526,40 @@ export default function EquipoNegocioPantalla() {
                     setHojaInvitar(true);
                   }}
                 />
+
+                {/* ── S78-B · LA VITRINA (LETRA_VITRINA A1bis + motor A7).
+                    Se monta SOLO con 2+ personas OFERTABLES (con oficio) —
+                    con una, el concepto no existe (la estructura de
+                    Jornadas). Y SOLO con el gate mecánico ABIERTO: el
+                    trigger de A7 rebota el encendido hasta que exista
+                    `notificar_reasignacion_cita`, y un toggle que rebota
+                    al guardar es Ley 23 rota (el precedente literal del
+                    Administrador, esta misma pantalla L426-428). HOY el
+                    gate está CERRADO (medido: cero productor del aviso a
+                    la familia) ⇒ la sección no se dibuja; el LECTOR del
+                    gate (`puede_encender_vitrina`) es PEDIDO A A — cuando
+                    llegue, la constante muere y esto se enciende solo. ── */}
+                {VITRINA_GATE_ABIERTO &&
+                  miembros.filter((m) => m.oficios.length > 0).length >= 2 && (
+                    <View style={{ gap: spacing[2] }}>
+                      <Texto variante="seccion">{t('equipo.vitrinaSeccion')}</Texto>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Texto variante="cuerpo">{t('equipo.vitrinaToggle')}</Texto>
+                        <Interruptor
+                          encendido={pantalla.prestador.expone_personas === true}
+                          onCambio={(v) => void alternarVitrina(v)}
+                          registro="oficio"
+                          etiqueta={t('equipo.vitrinaToggle')}
+                        />
+                      </View>
+                      {/* la voz honesta de qué cambia PARA LA FAMILIA */}
+                      <Texto variante="apoyo">
+                        {pantalla.prestador.expone_personas === true
+                          ? t('equipo.vitrinaEncendida')
+                          : t('equipo.vitrinaApagada')}
+                      </Texto>
+                    </View>
+                  )}
               </>
             ) : (
               // E3: el no-dueño que aterriza por deep link — voz digna del

@@ -80,10 +80,14 @@ export type MiPrestador = Pick<
   | 'sitio_web'
   | 'estado'
   | 'foto_url'
+  // S78-B (LETRA_VITRINA): el estado del toggle — la escritura tiene su
+  // writer propio abajo; el flip a encendido lo gatea el trigger MECANICO
+  // de A7 (rebota `aviso_reasignacion_no_existe` hasta que el aviso exista).
+  | 'expone_personas'
 >;
 
 const COLUMNAS_MI_PRESTADOR =
-  'id, nombre_comercial, tipo, country_code, cuenta_comercial_id, direccion, ciudad, grooming_extra_pelaje_largo, grooming_recargo_domicilio, descripcion, telefono, whatsapp, email_contacto, sitio_web, estado, foto_url';
+  'id, nombre_comercial, tipo, country_code, cuenta_comercial_id, direccion, ciudad, grooming_extra_pelaje_largo, grooming_recargo_domicilio, descripcion, telefono, whatsapp, email_contacto, sitio_web, estado, foto_url, expone_personas';
 
 /**
  * El negocio del user logueado — por TITULARIDAD o por VÍNCULO ACTIVO
@@ -221,4 +225,30 @@ const BUCKET_LOGOS = 'avatars';
 export function resolverUrlLogoNegocio(path: string | null): string | null {
   if (path === null || path.length === 0) return null;
   return getClient().storage.from(BUCKET_LOGOS).getPublicUrl(path).data.publicUrl;
+}
+
+/** S78-B — el writer del toggle de vitrina (LETRA_VITRINA A1bis). El
+ *  FLIP a encendido lo intercepta el trigger mecánico de A7: mientras
+ *  `notificar_reasignacion_cita` no exista, rebota
+ *  `aviso_reasignacion_no_existe` — el error viaja TIPADO para que la
+ *  superficie nunca lo ofrezca a ciegas (Ley 23). RLS: titular-only
+ *  (la escritura de negocio es del titular — S75 A3). */
+export async function actualizarExponePersonas(
+  prestadorId: string,
+  valor: boolean,
+): Promise<ResultadoWrapper<{ exponePersonas: boolean }, 'aviso_reasignacion_no_existe' | 'error_escritura'>> {
+  const { data, error } = await getClient()
+    .from('prestadores')
+    .update({ expone_personas: valor })
+    .eq('id', prestadorId)
+    .select('expone_personas')
+    .maybeSingle();
+  if (error) {
+    if (error.message.includes('aviso_reasignacion_no_existe')) {
+      return { ok: false, codigo: 'aviso_reasignacion_no_existe', mensaje: error.message };
+    }
+    return { ok: false, codigo: 'error_escritura', mensaje: error.message };
+  }
+  if (data === null) return { ok: false, codigo: 'error_escritura', mensaje: 'sin_fila' };
+  return { ok: true, data: { exponePersonas: data.expone_personas } };
 }

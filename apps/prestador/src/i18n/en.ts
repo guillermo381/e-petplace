@@ -1554,6 +1554,12 @@ export const prestadorEn = {
     rebSinCuenta: 'That email does not have an e-PetPlace account yet. Once they create one, invite them again.',
     rebOtroPrestador: 'That email belongs to another provider business.',
     rebNoDueno: 'Only the business owner can invite.',
+    // S78-B · Showcase — mirror of es.ts
+    vitrinaSeccion: 'Your showcase',
+    vitrinaToggle: 'Show your team when booking',
+    vitrinaEncendida: 'Families see your team and choose who to book with. If that person cannot make it, they are told before the appointment moves.',
+    vitrinaApagada: 'Families book with your business and you decide who attends. Nothing changes for them.',
+    vitrinaRebote: 'This cannot be turned on yet: the family notice for reassigned appointments does not exist.',
     desvincularCta: 'Remove from business',
     desvincularConfirma: '{{nombre}} loses access to the business. Everything they did stays in the record.',
     soloDueno: 'The team is managed by the business owner.',

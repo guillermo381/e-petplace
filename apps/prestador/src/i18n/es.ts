@@ -1732,6 +1732,13 @@ export const prestadorEs = {
     rebSinCuenta: 'Ese correo todavía no tiene cuenta en e-PetPlace. Cuando la cree, invítalo de nuevo.',
     rebOtroPrestador: 'Ese correo pertenece a otro negocio prestador.',
     rebNoDueno: 'Solo quien es dueño del negocio puede invitar.',
+    // S78-B · LA VITRINA (gate mecánico cerrado hoy — la sección no se
+    // dibuja hasta el lector de A; las claves nacen con su superficie)
+    vitrinaSeccion: 'Tu vitrina',
+    vitrinaToggle: 'Mostrar a tu equipo al reservar',
+    vitrinaEncendida: 'Las familias ven a tu equipo y eligen con quién agendar. Si esa persona no puede, se les avisa antes de mover la cita.',
+    vitrinaApagada: 'Las familias reservan con tu negocio y tú decides quién atiende. Nada cambia para ellas.',
+    vitrinaRebote: 'Todavía no se puede encender: falta el aviso a la familia cuando una cita cambia de persona.',
     desvincularCta: 'Desvincular del negocio',
     desvincularConfirma: '{{nombre}} pierde el acceso al negocio. Lo que hizo queda en el expediente.',
     soloDueno: 'El equipo lo administra quien es dueño del negocio.',
