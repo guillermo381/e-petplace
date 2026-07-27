@@ -439,6 +439,9 @@ export {
 export {
   obtenerOfertaVet,
   obtenerIniciosVet,
+  // S78-A7 (LETRA_VITRINA): el selector de persona del CUÁNDO vet.
+  obtenerPersonasQueAtienden,
+  type PersonaQueAtiende,
   obtenerVeterinariosDisponibles,
   type CodigoErrorVetReserva,
   type InputIniciosVet,

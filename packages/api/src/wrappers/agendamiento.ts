@@ -49,6 +49,13 @@ const CODIGOS_ERROR_AGENDAMIENTO = [
   // S68: urgencia ≠ emergencia — los tipos urgencia_* solo aceptan
   // hold/cita/reagenda con fecha = HOY (guard del motor, tz Guayaquil).
   'urgencia_solo_hoy',
+  // S78-A7 (LETRA_VITRINA): la familia ELIGIÓ persona y esa persona no
+  // puede la ventana pedida. Sale APARTE de `slot_ocupado` a propósito —
+  // son dos verdades distintas: "no hay lugar" vs "quien elegiste no
+  // puede, pero el negocio sí". La voz tiene que poder ofrecer el camino
+  // de la segunda (elegir otra hora con esa persona, o soltar la
+  // elección) y no puede hacerlo si el motor las mezcla.
+  'persona_no_disponible',
 ] as const;
 
 export type CodigoErrorAgendamiento = (typeof CODIGOS_ERROR_AGENDAMIENTO)[number];
@@ -73,6 +80,7 @@ const MENSAJES_ERROR_AGENDAMIENTO: Record<
   prestador_no_disponible: 'El paseador no está disponible en esas fechas — elegí otro horario.',
   paseo_social_no:        'Por ahora los paseos son en grupo. Estamos armando algo para tu mascota.',
   servicio_no_reservable: 'Este servicio todavía no se puede reservar por la app.',
+  persona_no_disponible:  'Quien elegiste no tiene ese horario libre — probá otra hora o dejá que la clínica asigne.',
   urgencia_solo_hoy:      'Las urgencias se reservan solo para hoy.',
   datos_inconsistentes:   'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:      'Ocurrió un error inesperado. Probá de nuevo.',
@@ -356,6 +364,11 @@ export interface InputCrearBloqueo {
   /** S61 D-392 (grooming): 'local' | 'domicilio'. Ausente = el motor
    *  resuelve como siempre (paseo intacto; grooming default 'local'). */
   modalidad?: 'local' | 'domicilio';
+  /** S78-A7 (LETRA_VITRINA): la persona ELEGIDA por la familia. Ausente =
+   *  el sistema fija persona como siempre (§2). Presente, el motor la FIJA
+   *  y rebota `persona_no_disponible` si no puede — elegir a alguien y
+   *  recibir a otro en silencio es peor que no poder elegir. */
+  empleado_id?: string;
 }
 
 /** El hold es INVISIBLE al prestador (verdad firme): nace 'pendiente'. */
@@ -369,6 +382,7 @@ export async function crearBloqueoAgenda(
     p_fecha:        input.fecha,
     p_hora:         input.hora,
     ...(input.modalidad !== undefined ? { p_modalidad: input.modalidad } : null),
+    ...(input.empleado_id !== undefined ? { p_empleado_id: input.empleado_id } : null),
   });
 
   if (error) return mapeoErrorAResultado(error.message);

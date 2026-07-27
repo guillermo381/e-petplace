@@ -129,6 +129,12 @@ export interface InputIniciosVet {
   fecha: string;
   tipo_servicio: string;
   mascota_id: string;
+  /** S78-A7 (LETRA_VITRINA): la persona que la familia ELIGIÓ. Ausente =
+   *  reserva "con el negocio" — la unión de ventanas, que es el default
+   *  y lo que ocurre hoy. Solo se manda cuando el negocio expone personas
+   *  (`prestadores.expone_personas`) Y hay 2+ ofertables: con una sola,
+   *  la pantalla NO ofrece la elección (el colapso N=1 es diseño). */
+  empleado_id?: string;
 }
 
 /** Horas de inicio 'HH:MM' donde ALGÚN vet puede la ventana entera.
@@ -140,6 +146,7 @@ export async function obtenerIniciosVet(
     p_fecha: input.fecha,
     p_tipo_servicio: input.tipo_servicio,
     p_mascota_id: input.mascota_id,
+    ...(input.empleado_id !== undefined ? { p_empleado_id: input.empleado_id } : null),
   });
 
   if (error) return fallo(error.message);
@@ -190,6 +197,14 @@ export async function obtenerVeterinariosDisponibles(
     p_hora: input.hora,
     p_tipo_servicio: input.tipo_servicio,
     p_mascota_id: input.mascota_id,
+    // S78-A7 — HUECO DECLARADO, no olvido: el QUIÉN todavía NO filtra por
+    // la persona elegida. `obtener_veterinarios_disponibles` no acepta
+    // `p_empleado_id` (verificado: su firma es fecha/hora/tipo/mascota), y
+    // ensancharlo excede el motor MÍNIMO que la letra presupuestó. Hoy no
+    // rompe nada porque el CUÁNDO ya filtró las horas por esa persona y el
+    // hold la FIJA con rebote tipado — el peor caso es que el QUIÉN liste
+    // un negocio donde esa persona no atiende esa hora, y el hold lo rebota
+    // hablado. Se cierra cuando la superficie del cliente lo pida.
   });
 
   if (error) return fallo(error.message);
@@ -219,4 +234,48 @@ export async function obtenerVeterinariosDisponibles(
     });
   }
   return { ok: true, data: vets };
+}
+
+
+// ── S78-A7 · QUIÉNES ATIENDEN (el selector de persona) ──────────────────────
+//
+// El lector del CUÁNDO cuando el negocio expone personas. El predicado NO se
+// inventa acá ni en la pantalla: sale de `obtener_personas_que_atienden`, que
+// lo extrajo del que ya vive en `_inicios_disponibles_prestador` (titular o
+// chip en ESA oferta) — la puerta no ofrece a nadie que el motor vaya a
+// rechazar (Ley 23).
+//
+// `tieneJornada` viaja A PROPÓSITO: la pantalla necesita distinguir "no
+// atiende esto" de "atiende pero todavía no cargó horario" (D-540 en su forma
+// visible). Sin ese campo, una persona sin franjas se vería idéntica a una
+// que no existe, y el titular no sabría qué le falta.
+
+export interface PersonaQueAtiende {
+  empleadoId: string;
+  /** `null` si el perfil no tiene nombre cargado — null honesto, jamás un
+   *  placeholder inventado (L-139). La pantalla decide cómo lo dice. */
+  nombre: string | null;
+  tieneJornada: boolean;
+}
+
+export async function obtenerPersonasQueAtienden(
+  prestadorId: string,
+  servicioId: string,
+): Promise<ResultadoWrapper<PersonaQueAtiende[], CodigoErrorVetReserva>> {
+  const { data, error } = await getClient().rpc('obtener_personas_que_atienden', {
+    p_prestador_id: prestadorId,
+    p_servicio_id: servicioId,
+  });
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallo('datos_inconsistentes');
+  const personas: PersonaQueAtiende[] = [];
+  for (const fila of data) {
+    if (!esObj(fila) || typeof fila.empleado_id !== 'string') return fallo('datos_inconsistentes');
+    personas.push({
+      empleadoId: fila.empleado_id,
+      nombre: typeof fila.nombre === 'string' ? fila.nombre : null,
+      tieneJornada: fila.tiene_jornada === true,
+    });
+  }
+  return { ok: true, data: personas };
 }
