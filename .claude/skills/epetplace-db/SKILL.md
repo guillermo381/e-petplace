@@ -25,6 +25,15 @@ Las migraciones las **escribe y ejecuta Claude Code** con el schema completo a l
 3. **Catálogo antes de hardcodear** (regla 21): si existe tabla `cat_X`, usarla; si el dato es estable y multi-uso, evaluar crear catálogo. Nunca fallback hardcodeado silencioso (regla 36).
 4. **Confirmar el body de funciones existentes** con `pg_get_functiondef(oid)` aunque el nombre sugiera el comportamiento (regla 40).
 
+## Privilegios por COLUMNA en `prestadores` (S79 — rige desde que el CONTRATO de LETRA_PERFIL_S79 se aplique)
+
+**`prestadores` tiene privilegios por columna: el SELECT de `authenticated` es por LISTA de columnas, no de tabla** (primer uso del mecanismo en la casa — LETRA_PERFIL_S79 §3bis; nació para que `proposito` y `direccion_envio` no viajen por PostgREST pese a que `prestadores_public` concede la fila entera de los activos). Consecuencias exigibles:
+
+1. **TODA columna nueva de `prestadores` nace SIN grant y es INVISIBLE para `authenticated`** — PostgREST rebota `permission denied` al pedirla — hasta que la migración que la crea la agregue explícitamente con `GRANT SELECT (columna) ON public.prestadores TO authenticated`, o decida A PROPÓSITO no dársela (el caso `proposito`/`direccion_envio`). La decisión se escribe en la migración, jamás se hereda en silencio (misma filosofía que L-140 para funciones).
+2. **El síntoma "la columna nueva no lee" en `prestadores` = falta el grant de columna, no un bug de RLS.** Diagnóstico: `SELECT has_column_privilege('authenticated', 'public.prestadores', '<col>', 'SELECT')`.
+3. `select('*')` sobre `prestadores` desde un wrapper REBOTA entero (el `*` expande a columnas sin grant) — se seleccionan columnas NOMBRADAS, que ya era la práctica medida (S79-T3.3: cero `select('*')` vivo).
+4. UPDATE/INSERT siguen a nivel tabla (la RLS own-row + el trigger D-389 gobiernan filas y columnas protegidas); solo el SELECT es por lista.
+
 ## SECURITY DEFINER y tests
 
 - Patrón canónico de RPC: `SECURITY DEFINER` + `SET search_path TO 'public', 'pg_temp'` + gate de auth + helper de acceso + `REVOKE EXECUTE FROM PUBLIC, anon` + `GRANT EXECUTE TO authenticated`.
