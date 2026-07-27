@@ -16079,6 +16079,10 @@ export type Database = {
         Args: { p_atencion_id: string }
         Returns: Record<string, unknown>
       }
+      _cita_despegable: {
+        Args: { p_cita_id: string; p_empleado_id: string }
+        Returns: boolean
+      }
       _crear_evento_padre_auto: {
         Args: {
           p_country_code: string
@@ -16466,6 +16470,10 @@ export type Database = {
         Args: { p_cita_id: string; p_empleado_id_actual?: string }
         Returns: Json
       }
+      contar_citas_despegables: {
+        Args: { p_empleado_id: string }
+        Returns: number
+      }
       contratar_plan_paseo: {
         Args: {
           p_auto_renovar?: boolean
@@ -16654,6 +16662,7 @@ export type Database = {
         }
         Returns: string
       }
+      dar_de_baja_empleado: { Args: { p_empleado_id: string }; Returns: Json }
       debug_estado_user: {
         Args: { p_email: string }
         Returns: {

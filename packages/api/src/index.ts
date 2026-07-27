@@ -757,6 +757,7 @@ export {
   type ChipEmpleado,
   type ResultadoQuitarChips,
   type JornadaEmpleado,
+  type ResultadoBaja,
   type OficioChip,
   type OficioNegocio,
   type EquipoNegocio,

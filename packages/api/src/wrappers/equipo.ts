@@ -130,16 +130,58 @@ export async function quitarRolEmpleado(
   return { ok: true, data: null };
 }
 
-/** Desvincular = `activo=false` (el mecanismo probado de la desactivación
- *  S73). La procedencia preserva los actos (§14.1) — el acceso muere, lo
- *  hecho queda. Policy: `empleados_dueño_actualiza` (E6 arriba). */
-export async function desvincularEmpleado(empleadoId: string): R<null> {
-  const { error } = await getClient()
-    .from('prestador_empleados')
-    .update({ activo: false })
-    .eq('id', empleadoId);
-  if (error) return { ok: false, codigo: 'error_escritura', mensaje: error.message };
-  return { ok: true, data: null };
+/** LA BAJA DEL VÍNCULO — ahora por el RPC atómico (S77-A, §11.2 de la letra
+ *  firmada; migración `20260726120000`).
+ *
+ *  ANTES hacía `UPDATE prestador_empleados SET activo=false` directo por la
+ *  policy `empleados_dueño_actualiza`. **Eso desvinculaba pero NO despegaba
+ *  las citas**: las futuras quedaban colgadas de una persona que ya no
+ *  trabaja acá. §11 firmada decidió **(a): las citas pasan a ser de la
+ *  clínica**, y eso exige atomicidad (baja + despegue en UNA transacción) —
+ *  imposible desde el cliente.
+ *
+ *  QUÉ CAMBIA PARA LA PANTALLA: el retorno deja de ser `null` y trae
+ *  **`citasDespegadas`**, el conteo REALMENTE despegado (re-leído por el
+ *  motor, no el que la Hoja contó antes de confirmar — mismo patrón de los
+ *  dos momentos que ya rige para los chips). La Hoja puede decir qué pasó.
+ *
+ *  RECHAZOS TIPADOS del motor: `no_es_titular` (solo el titular o admin da
+ *  de baja) · `no_se_puede_dar_de_baja_al_titular` (anti-lockout §10: el
+ *  titular no se saca a sí mismo de su propia disponibilidad) ·
+ *  `empleado_no_existe`. */
+export interface ResultadoBaja {
+  /** Cuántas citas quedaron sin dueño. Solo las FUTURAS no empezadas: las
+   *  pasadas, en curso y cerradas conservan su autor (§1 — lo hecho queda
+   *  con quien lo hizo). Verificado en fixture, S77-A. */
+  citasDespegadas: number;
+}
+
+export async function desvincularEmpleado(empleadoId: string): R<ResultadoBaja> {
+  const { data, error } = await getClient().rpc('dar_de_baja_empleado', {
+    p_empleado_id: empleadoId,
+  });
+  if (error) {
+    // Los rebotes del motor viajan tipados por su literal (RAISE EXCEPTION
+    // con nombre, patrón de la casa). `no_se_puede_dar_de_baja_al_titular`
+    // es el único que la pantalla necesita distinguir hoy: su voz no es un
+    // error genérico sino una explicación (§10).
+    const m = error.message;
+    if (m.includes('no_se_puede_dar_de_baja_al_titular')) {
+      return { ok: false, codigo: 'error_escritura', mensaje: 'No puedes darte de baja a ti mismo.' };
+    }
+    if (m.includes('no_es_titular')) {
+      return { ok: false, codigo: 'error_escritura', mensaje: 'Solo el dueño del negocio puede dar de baja.' };
+    }
+    return { ok: false, codigo: 'error_escritura', mensaje: m };
+  }
+  // Guard de shape contra el retorno REAL (`jsonb` ⇒ `Json` en los tipos):
+  // si el motor cambiara su forma, no se cuela un NaN con cara de dato.
+  const bruto =
+    typeof data === 'object' && data !== null && !Array.isArray(data)
+      ? (data as Record<string, unknown>)['citas_despegadas']
+      : undefined;
+  const n = Number(bruto ?? 0);
+  return { ok: true, data: { citasDespegadas: Number.isFinite(n) ? n : 0 } };
 }
 
 /** Los rebotes SUAVES de `crear_empleado_directo` — el RPC devuelve
