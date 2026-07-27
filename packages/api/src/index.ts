@@ -53,6 +53,8 @@ export {
   type InputActualizarPerfilPrestador,
   type MiPrestador,
   type CodigoErrorPrestador,
+  // S78-A8 (pedido de B): el lector del gate de la vitrina.
+  puedeEncenderVitrina,
 } from './wrappers/prestador';
 // S76-B2 (D-525): el gate de PRODUCTO de la superficie de atender.
 export { puedoAtenderClinico } from './wrappers/acceso-clinico';

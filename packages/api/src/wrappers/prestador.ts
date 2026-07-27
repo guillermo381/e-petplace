@@ -252,3 +252,25 @@ export async function actualizarExponePersonas(
   if (data === null) return { ok: false, codigo: 'error_escritura', mensaje: 'sin_fila' };
   return { ok: true, data: { exponePersonas: data.expone_personas } };
 }
+
+
+/**
+ * ¿SE PUEDE ENCENDER LA VITRINA? (S78-A8, pedido de B — el lector del gate.)
+ *
+ * ESPEJO EXACTO del predicado del trigger `trg_prestadores_gate_vitrina`
+ * (la misma expresión `to_regprocedure` sobre la misma firma, en la RPC
+ * `puede_encender_vitrina`): el día que `notificar_reasignacion_cita`
+ * exista, el trigger deja pasar Y este lector devuelve `true` — en el
+ * mismo instante, sin que nadie toque nada. Si divergen, el bug es la
+ * divergencia, no este lector.
+ *
+ * B lo usa para NO dibujar el toggle mientras el gate rebote (Ley 23: un
+ * toggle que rebota al guardar es peor que un toggle ausente). El fallo
+ * de lectura NO se degrada a `false` con cara de dato — sale tipado, y
+ * la pantalla decide (hoy: no dibujar, que coincide con el estado real).
+ */
+export async function puedeEncenderVitrina(): Promise<ResultadoWrapper<boolean, CodigoErrorPrestador | 'error_desconocido'>> {
+  const { data, error } = await getClient().rpc('puede_encender_vitrina');
+  if (error) return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
+  return { ok: true, data: data === true };
+}

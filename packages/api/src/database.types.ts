@@ -17079,6 +17079,8 @@ export type Database = {
           estado: string
           hora: string
           llegada_en: string
+          mascota_especie: string
+          mascota_etapa: string
           mascota_id: string
           mascota_nombre: string
           tipo_servicio: string
@@ -17263,6 +17265,7 @@ export type Database = {
         Returns: undefined
       }
       pausar_atencion: { Args: { p_atencion_id: string }; Returns: Json }
+      puede_encender_vitrina: { Args: never; Returns: boolean }
       quitar_estado_pelaje_grooming: {
         Args: { p_grooming_id: string; p_momento: string }
         Returns: Json
