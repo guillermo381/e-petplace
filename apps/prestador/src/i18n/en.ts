@@ -1459,10 +1459,30 @@ export const prestadorEn = {
     errorEscritura: 'The change was not saved. Try again.',
     errorInvitar: 'We could not create the invitation. Try again.',
     rolDueno: 'Owner',
-    rolProfesional: 'Professional',
-    rolRecepcion: 'Front desk',
-    sinRolAccion: 'No permissions yet — assign a role',
-    rolesAyuda: 'Professional reads the clinical record. Front desk welcomes and registers, without clinical history.',
+    // ── S78-B · Espejo de es.ts. Mueren rolProfesional/rolRecepcion/
+    //    sinRolAccion/rolesAyuda (Ley 37). Vocabulary: the family side
+    //    always says APPOINTMENT — never "turn"/"slot". ──
+    invitacionPendiente: 'Invitation pending',
+    subtituloRecepcion: 'Checks people in and takes payments, no clinical access',
+    jornadaSinTitulo: 'No working hours yet',
+    jornadaSinCuerpo: 'Without saved hours they do not show up when a family looks for an appointment.',
+    jornadaPausadaTitulo: 'Their working hours are paused',
+    jornadaPausadaCuerpo:
+      'They have hours saved, but none active. While paused they do not show up when a family looks for an appointment.',
+    atiendeSeccion: 'What they provide',
+    atiendeHint: 'The services they can take on in your business.',
+    atiendeSinChips:
+      'No services yet. They can check people in and take payments, but they do not take appointments or see clinical history.',
+    ofertaApagada: 'You no longer offer this in your business. You can remove it.',
+    clinicoTitulo: 'They stop seeing clinical history',
+    clinicoCuerpo:
+      'If you remove {{oficio}}, {{nombre}} stops seeing the clinical history of the pets in your business.',
+    clinicoConfirmar: 'Remove {{oficio}}',
+    clinicoPerdida: '{{nombre}} no longer sees clinical history.',
+    estadoNoConfirmado: 'It was removed, but we could not confirm the result. Open it again to see.',
+    desvincularAviso:
+      'Removing them takes away their access to the business. Everything they did stays in the record. Any appointments they have become business appointments, and that cannot be undone.',
+    bajaDespegadas: '{{n}} upcoming appointments became business appointments.',
     equipoDeUno: 'Your team is just you for now. Invite people when you need to.',
     invitarCta: 'Invite to your team',
     invitarTitulo: 'Invite to your team',

@@ -1628,10 +1628,34 @@ export const prestadorEs = {
     errorEscritura: 'No se guardó el cambio. Prueba de nuevo.',
     errorInvitar: 'No pudimos crear la invitación. Prueba de nuevo.',
     rolDueno: 'Dueño',
-    rolProfesional: 'Profesional',
-    rolRecepcion: 'Recepción',
-    sinRolAccion: 'Sin permisos todavía — asigna un rol',
-    rolesAyuda: 'Profesional lee el expediente clínico. Recepción recibe y registra, sin historia clínica.',
+    // ── S78-B · LA HOJA DEL MIEMBRO RECOMPUESTA + EL ARRASTRE ──
+    // MUEREN (Ley 37) `rolProfesional` · `rolRecepcion` · `sinRolAccion` ·
+    // `rolesAyuda`: los dos Interruptor de rol salieron de la Hoja
+    // (`profesional` es DERIVADO de ≥1 chip; `recepcion` es MEMBRESÍA, no
+    // identidad) y el subtítulo de la lista dejó de ser role-driven.
+    // VOCABULARIO CERRADO (S78): cita (familia) · turno (plantilla del
+    // negocio) · jornada (persona). De cara a la familia se dice CITA.
+    invitacionPendiente: 'Invitación pendiente',
+    subtituloRecepcion: 'Recibe y cobra, sin acceso clínico',
+    jornadaSinTitulo: 'Todavía no tiene jornada',
+    jornadaSinCuerpo: 'Sin horarios cargados no aparece cuando una familia busca una cita.',
+    jornadaPausadaTitulo: 'Su jornada está pausada',
+    jornadaPausadaCuerpo:
+      'Tiene horarios cargados, pero ninguno activo. Mientras estén pausados no aparece cuando una familia busca una cita.',
+    atiendeSeccion: 'Qué atiende',
+    atiendeHint: 'Los servicios que puede tomar en tu negocio.',
+    atiendeSinChips:
+      'Todavía no tiene servicios. Puede recibir y cobrar, pero no toma citas ni ve la historia clínica.',
+    ofertaApagada: 'Ya no lo ofreces en tu negocio. Puedes quitárselo.',
+    clinicoTitulo: 'Deja de ver la historia clínica',
+    clinicoCuerpo:
+      'Si le quitas {{oficio}}, {{nombre}} deja de ver la historia clínica de las mascotas de tu negocio.',
+    clinicoConfirmar: 'Quitar {{oficio}}',
+    clinicoPerdida: '{{nombre}} ya no ve la historia clínica.',
+    estadoNoConfirmado: 'Se quitó, pero no pudimos confirmar cómo quedó. Vuelve a abrir para verlo.',
+    desvincularAviso:
+      'Al darla de baja pierde el acceso al negocio. Lo que hizo queda en el expediente. Si tiene citas agendadas pasan a ser citas del negocio, y eso no se deshace.',
+    bajaDespegadas: '{{n}} citas futuras pasaron a ser del negocio.',
     equipoDeUno: 'Tu equipo es tuyo por ahora. Invita cuando lo necesites.',
     invitarCta: 'Invitar a tu equipo',
     invitarTitulo: 'Invitar a tu equipo',
