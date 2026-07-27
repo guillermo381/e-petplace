@@ -16295,6 +16295,10 @@ export type Database = {
         Args: { p_empleado_id: string }
         Returns: Json
       }
+      activar_prestador: {
+        Args: { p_motivo?: string; p_prestador_id: string; p_veredicto: string }
+        Returns: Json
+      }
       actualizar_datos_bancarios: {
         Args: {
           p_banco_codigo?: string
@@ -16907,6 +16911,18 @@ export type Database = {
           mensaje: string
           success: boolean
         }[]
+      }
+      invitar_prestador: {
+        Args: {
+          p_country_code?: string
+          p_email: string
+          p_identificacion_fiscal: string
+          p_nombre_comercial: string
+          p_razon_social: string
+          p_tipo_fiscal: Database["public"]["Enums"]["tipo_fiscal_enum"]
+          p_tipo_prestador: string
+        }
+        Returns: Json
       }
       is_admin: { Args: never; Returns: boolean }
       log_admin_action: {
