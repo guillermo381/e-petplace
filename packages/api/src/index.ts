@@ -53,6 +53,8 @@ export {
   type InputActualizarPerfilPrestador,
   type MiPrestador,
   type CodigoErrorPrestador,
+  // S79-T4.1: los códigos del camino de escritura de la sede.
+  type CodigoErrorPerfilPrestador,
   // S78-A8 (pedido de B): el lector del gate de la vitrina.
   puedeEncenderVitrina,
 } from './wrappers/prestador';

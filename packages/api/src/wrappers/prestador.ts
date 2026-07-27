@@ -36,11 +36,22 @@ import type { Database } from '../database.types';
 const CODIGOS_ERROR_PRESTADOR = ['sin_sesion', 'sin_prestador'] as const;
 export type CodigoErrorPrestador = (typeof CODIGOS_ERROR_PRESTADOR)[number];
 
-const MENSAJES: Record<CodigoErrorPrestador | 'error_desconocido' | 'datos_inconsistentes', string> = {
-  sin_sesion:           'No hay sesión activa.',
-  sin_prestador:        'Tu usuario no tiene un prestador asociado.',
-  datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
-  error_desconocido:    'Ocurrió un error inesperado. Probá de nuevo.',
+// S79-T4.1: los códigos de la SEDE son del camino de ESCRITURA — viven
+// en su propio union para no ensanchar el de lectura (fees.ts subsume
+// los códigos de R1 como subconjunto; agrandar el de lectura rompería
+// esa relación por un error que la lectura jamás produce).
+export type CodigoErrorPerfilPrestador =
+  | CodigoErrorPrestador
+  | 'coordenadas_invalidas'
+  | 'radio_invalido';
+
+const MENSAJES: Record<CodigoErrorPerfilPrestador | 'error_desconocido' | 'datos_inconsistentes', string> = {
+  sin_sesion:            'No hay sesión activa.',
+  sin_prestador:         'Tu usuario no tiene un prestador asociado.',
+  coordenadas_invalidas: 'La ubicación no es válida. Buscá la dirección de nuevo.',
+  radio_invalido:        'El radio de cobertura no es válido.',
+  datos_inconsistentes:  'La respuesta del servidor no tiene la forma esperada.',
+  error_desconocido:     'Ocurrió un error inesperado. Probá de nuevo.',
 };
 
 // S58-B (hunk aditivo): country_code entra al contrato — la fuente ya
@@ -71,6 +82,14 @@ export type MiPrestador = Pick<
   | 'cuenta_comercial_id'
   | 'direccion'
   | 'ciudad'
+  // S79-T4.1: la SEDE completa entra al shape — el editor de B necesita
+  // leer lo que la whitelist de abajo deja escribir (LETRA_PERFIL §1
+  // registro 2). null = no declarado (firma §2.2: sin datos, sin
+  // oferta geográfica — jamás un default).
+  | 'sector'
+  | 'lat'
+  | 'lon'
+  | 'radio_cobertura_km'
   | 'grooming_extra_pelaje_largo'
   | 'grooming_recargo_domicilio'
   | 'descripcion'
@@ -87,7 +106,7 @@ export type MiPrestador = Pick<
 >;
 
 const COLUMNAS_MI_PRESTADOR =
-  'id, nombre_comercial, tipo, country_code, cuenta_comercial_id, direccion, ciudad, grooming_extra_pelaje_largo, grooming_recargo_domicilio, descripcion, telefono, whatsapp, email_contacto, sitio_web, estado, foto_url, expone_personas';
+  'id, nombre_comercial, tipo, country_code, cuenta_comercial_id, direccion, ciudad, sector, lat, lon, radio_cobertura_km, grooming_extra_pelaje_largo, grooming_recargo_domicilio, descripcion, telefono, whatsapp, email_contacto, sitio_web, estado, foto_url, expone_personas';
 
 /**
  * El negocio del user logueado — por TITULARIDAD o por VÍNCULO ACTIVO
@@ -167,6 +186,25 @@ export interface InputActualizarPerfilPrestador {
    *  D-389 NO protege esta columna (relevado S74-A, vara E7): esta
    *  whitelist es la capa de PRODUCTO que la habilita a propósito. */
   foto_url?: string;
+  // ── S79-T4.1 — LA SEDE entra a la whitelist (LETRA_PERFIL_S79 §1
+  // registro 2, firmada v1.1). Las DOS leyes de A4 rigen acá igual:
+  //   · lat/lon PAR-O-REBOTA (`coordenadas_invalidas`), rango validado.
+  //   · LA COORDENADA MUERE CON EL TEXTO (§2.2): si viaja `direccion`
+  //     SIN lat/lon, el wrapper escribe lat/lon NULL — una coordenada
+  //     vieja pegada a un texto nuevo describe OTRA puerta.
+  //   lat/lon SOLO salen del LugarResuelto de resolverLugar (contrato
+  //   lugares.ts) — jamás tipeadas a mano.
+  /** '' ⇒ NULL honesto. Cambiarla sin lat/lon MATA las coordenadas. */
+  direccion?: string;
+  ciudad?: string;
+  sector?: string;
+  /** Par obligatorio con lon; null explícito = borrar la ubicación. */
+  lat?: number | null;
+  lon?: number | null;
+  /** km. null = el prestador deja de declarar radio ⇒ deja de ofertarse
+   *  por geografía (firma §2.2 — decisión suya, jamás un default). El
+   *  15 sugerido vive en el FORMULARIO (§2.1), no acá. */
+  radio_cobertura_km?: number | null;
 }
 
 function aNull(v: string | undefined): string | null | undefined {
@@ -177,7 +215,7 @@ function aNull(v: string | undefined): string | null | undefined {
 
 export async function actualizarPerfilPrestador(
   input: InputActualizarPerfilPrestador,
-): Promise<ResultadoWrapper<null, CodigoErrorPrestador>> {
+): Promise<ResultadoWrapper<null, CodigoErrorPerfilPrestador>> {
   const { data: auth } = await getClient().auth.getUser();
   const uid = auth.user?.id;
   if (!uid) return { ok: false, codigo: 'sin_sesion', mensaje: MENSAJES.sin_sesion };
@@ -195,6 +233,49 @@ export async function actualizarPerfilPrestador(
   if (emailContacto !== undefined) payload.email_contacto = emailContacto;
   if (sitioWeb !== undefined) payload.sitio_web = sitioWeb;
   if (fotoUrl !== undefined) payload.foto_url = fotoUrl;
+
+  // ── la sede (S79-T4.1) ────────────────────────────────────────────
+  const direccionSede = aNull(input.direccion);
+  const ciudadSede = aNull(input.ciudad);
+  const sectorSede = aNull(input.sector);
+  if (direccionSede !== undefined) payload.direccion = direccionSede;
+  if (ciudadSede !== undefined) payload.ciudad = ciudadSede;
+  if (sectorSede !== undefined) payload.sector = sectorSede;
+
+  const latViajo = input.lat !== undefined;
+  const lonViajo = input.lon !== undefined;
+  if (latViajo !== lonViajo) {
+    // media coordenada = relleno plausible (L-139): rebota.
+    return { ok: false, codigo: 'coordenadas_invalidas', mensaje: MENSAJES.coordenadas_invalidas };
+  }
+  if (latViajo && lonViajo) {
+    const lat = input.lat ?? null;
+    const lon = input.lon ?? null;
+    if ((lat === null) !== (lon === null)) {
+      return { ok: false, codigo: 'coordenadas_invalidas', mensaje: MENSAJES.coordenadas_invalidas };
+    }
+    if (lat !== null && lon !== null) {
+      if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) {
+        return { ok: false, codigo: 'coordenadas_invalidas', mensaje: MENSAJES.coordenadas_invalidas };
+      }
+    }
+    payload.lat = lat;
+    payload.lon = lon;
+  } else if (direccionSede !== undefined) {
+    // LA COORDENADA MUERE CON EL TEXTO (§2.2): la dirección cambió sin
+    // resolución Places ⇒ las coordenadas viejas se pisan con NULL.
+    payload.lat = null;
+    payload.lon = null;
+  }
+
+  if (input.radio_cobertura_km !== undefined) {
+    const radio = input.radio_cobertura_km;
+    if (radio !== null && (!Number.isInteger(radio) || radio < 1 || radio > 500)) {
+      return { ok: false, codigo: 'radio_invalido', mensaje: MENSAJES.radio_invalido };
+    }
+    payload.radio_cobertura_km = radio;
+  }
+
   if (Object.keys(payload).length === 0) return { ok: true, data: null };
 
   const { data, error } = await getClient()
