@@ -747,6 +747,8 @@ export {
 // S74-B — la ventana de EQUIPO (LETRA_EQUIPO §14, composición sobre lo vivo)
 export {
   obtenerEquipoNegocio,
+  // S78-A (D-549): el número del aviso de la BAJA — su único consumidor.
+  contarCitasDespegables,
   asignarRolEmpleado,
   quitarRolEmpleado,
   desvincularEmpleado,

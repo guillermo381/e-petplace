@@ -37,6 +37,18 @@ export interface MiembroEquipo {
   nombre: string;
   activo: boolean;
   roles: RolEquipo[];
+  /** S78-A (D-547): los OFICIOS de esta persona, distintos y ya resueltos —
+   *  para que el subtítulo de la lista NO tenga que pedirlos por fila.
+   *  Mismo criterio que `obtenerChipsEmpleado` (lo médico manda sobre la
+   *  categoría, canon S69); un tipo fuera del selector v1 se OMITE, jamás
+   *  se pinta crudo (Ley 3). Lista vacía = esa persona no tiene chips —
+   *  y eso ES el dato (§1 de LETRA_RECEPCION: recepción está definida por
+   *  AUSENCIA), no un fallo: si la lectura falla, el wrapper entero
+   *  devuelve `error_lectura` y esta lista nunca llega vacía por error. */
+  oficios: OficioChip[];
+  /** `true` si alguno de sus chips es de oferta médica — la llave del gate
+   *  clínico (S76-A4b). Viaja gratis en el mismo viaje. */
+  tieneChipMedico: boolean;
 }
 
 export interface EquipoNegocio {
@@ -87,6 +99,75 @@ export async function obtenerEquipoNegocio(cuentaComercialId: string): R<EquipoN
     lista.push(r.rol);
     porEmpleado.set(r.empleado_id, lista);
   }
+
+  // ── S78-A (D-547): LOS CHIPS ENTRAN AL MISMO VIAJE ──────────────────
+  //
+  // ANTES: la lista pedía `obtenerChipsEmpleado` POR FILA — 2 viajes por
+  // miembro, y la Hoja sumaba otro par. La cura ya estaba escrita en el
+  // propio código de la pantalla (`equipo.tsx:182`: *"la cura de raíz es
+  // ensanchar obtenerEquipoNegocio"*); esto la paga.
+  //
+  // AHORA: 2 viajes CONSTANTES, no 2×N — el mismo patrón batcheado que
+  // esta función ya usaba para los roles (`.in('empleado_id', ids)`).
+  //
+  // POR QUÉ NO UN SOLO VIAJE, y no es pereza (medido en S77-A y citado
+  // acá para que nadie lo intente de nuevo): **no existe la FK
+  // `prestador_servicios.tipo_servicio → tipos_servicio.codigo`**, así que
+  // PostgREST no puede anidar el embed y el segundo viaje es OBLIGATORIO.
+  // Colapsarlo exige una migración que agregue esa FK — no viaja escondida
+  // acá.
+  //
+  // EL FALLO NO SE DEGRADA A LISTA VACÍA (L-139 · D-542): si esta lectura
+  // falla, el wrapper entero sale `error_lectura`. Devolver los miembros
+  // con `oficios: []` diría "esta gente no tiene chips" —que es un dato
+  // con significado propio (recepción se define por AUSENCIA, §1)— cuando
+  // lo que hubo fue un error. Es el mismo criterio con que esta función ya
+  // trata el fallo de roles.
+  const chips = ids.length
+    ? await cliente
+        .from('prestador_empleado_servicios')
+        .select('empleado_id, oferta:prestador_servicios(id, tipo_servicio)')
+        .in('empleado_id', ids)
+    : { data: [] as Array<{ empleado_id: string; oferta: { id: string; tipo_servicio: string } | null }>, error: null };
+  if (chips.error) {
+    return { ok: false, codigo: 'error_lectura', mensaje: chips.error.message };
+  }
+
+  const slugs = [
+    ...new Set((chips.data ?? []).map((c) => c.oferta?.tipo_servicio).filter((t): t is string => typeof t === 'string')),
+  ];
+  const tipos = slugs.length
+    ? await cliente.from('tipos_servicio').select('codigo, categoria, es_medico').in('codigo', slugs)
+    : { data: [] as Array<{ codigo: string; categoria: string | null; es_medico: boolean | null }>, error: null };
+  if (tipos.error) {
+    return { ok: false, codigo: 'error_lectura', mensaje: tipos.error.message };
+  }
+
+  // Mismo criterio de oficio que `obtenerChipsEmpleado` / `obtenerOficiosNegocio`
+  // (canon S69: lo médico manda sobre la categoría).
+  const oficioDe = new Map<string, OficioChip>();
+  const medicoDe = new Map<string, boolean>();
+  for (const t of tipos.data ?? []) {
+    medicoDe.set(t.codigo, t.es_medico === true);
+    if (t.es_medico === true) oficioDe.set(t.codigo, 'veterinaria');
+    else if (t.categoria === 'paseo') oficioDe.set(t.codigo, 'paseo');
+    else if (t.categoria === 'grooming') oficioDe.set(t.codigo, 'grooming');
+    else if (t.categoria === 'adiestramiento') oficioDe.set(t.codigo, 'adiestramiento');
+  }
+
+  const oficiosDe = new Map<string, Set<OficioChip>>();
+  const medicoPorEmpleado = new Map<string, boolean>();
+  for (const c of chips.data ?? []) {
+    const slug = c.oferta?.tipo_servicio;
+    if (typeof slug !== 'string') continue;
+    const oficio = oficioDe.get(slug);
+    if (oficio === undefined) continue; // fuera del v1 (hospedaje/otro): se OMITE
+    const set = oficiosDe.get(c.empleado_id) ?? new Set<OficioChip>();
+    set.add(oficio);
+    oficiosDe.set(c.empleado_id, set);
+    if (medicoDe.get(slug) === true) medicoPorEmpleado.set(c.empleado_id, true);
+  }
+
   return {
     ok: true,
     data: {
@@ -96,9 +177,44 @@ export async function obtenerEquipoNegocio(cuentaComercialId: string): R<EquipoN
         nombre: f.nombre,
         activo: f.activo,
         roles: porEmpleado.get(f.empleado_id) ?? [],
+        oficios: [...(oficiosDe.get(f.empleado_id) ?? [])],
+        tieneChipMedico: medicoPorEmpleado.get(f.empleado_id) === true,
       })),
     },
   };
+}
+
+/**
+ * CUÁNTAS CITAS SE DESPEGARÍAN AL DAR DE BAJA A ESTA PERSONA (S78-A, D-549).
+ *
+ * La RPC existe y está aplicada desde S77 (`20260726120000`,
+ * `contar_citas_despegables(p_empleado_id uuid) → integer`, DEFINER, ya sin
+ * `anon` en su `proacl` — firma verificada con `pg_get_functiondef`); lo que
+ * faltaba era la puerta. Sin ella, el aviso de la baja muestra la
+ * advertencia **sin el número**, que es pedirle al titular que decida a
+ * ciegas justo donde la decisión es irreversible para las citas.
+ *
+ * SU CONSUMIDOR ES LA BAJA, Y SOLO LA BAJA — frontera declarada porque el
+ * pedido llegó desde la superficie de TURNOS, y ahí NO va: por la firma del
+ * founder (S78) el cambio de turno **conserva** las citas, así que no tiene
+ * nada que contar ni que bloquear (`LETRA_TURNOS_S78` §4.1: *parecerse no es
+ * ser*; el predicado de la baja no se reusa para el turno). Si turnos alguna
+ * vez quiere informar *"3 citas quedan fuera del nuevo horario"*, esa es OTRA
+ * pregunta —no *"¿se pueden despegar?"* sino *"¿cuáles caen fuera de estas
+ * franjas?"*— y pide **su propio lector** (§4.3).
+ *
+ * El fallo NO se degrada a 0 (L-139): un cero con cara de dato diría "no hay
+ * citas que despegar" y volvería inofensiva una baja que no lo es.
+ */
+export async function contarCitasDespegables(empleadoId: string): R<number> {
+  const { data, error } = await getClient().rpc('contar_citas_despegables', {
+    p_empleado_id: empleadoId,
+  });
+  if (error) return { ok: false, codigo: 'error_lectura', mensaje: error.message };
+  if (typeof data !== 'number') {
+    return { ok: false, codigo: 'error_lectura', mensaje: 'La respuesta del servidor no tiene la forma esperada.' };
+  }
+  return { ok: true, data };
 }
 
 /** Asignar un rol = INSERT en la hija (auditable de nacimiento, §14.2).
