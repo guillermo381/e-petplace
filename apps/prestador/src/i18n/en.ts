@@ -111,6 +111,9 @@ export const prestadorEn = {
     origenMostrador: 'Walk-in',
     // S70-B2-v2 · Espejo de es.ts
     vacioVerSemana: 'See your week',
+    // S79-B (T2-B4) · §2.5 the sober aspirational module · LOTE S79
+    aspiracional:
+      'You are part of a curated group of 15 providers in Ecuador. e-PetPlace is not trying to fill up — it chooses well. Thank you for joining at the beginning.',
     porCoordinarTitulo: 'To schedule',
     porCoordinarCta: 'Set date',
     porCoordinarLibre: 'Procedure',
@@ -145,9 +148,12 @@ export const prestadorEn = {
     perfil: 'Your profile',
     preferencias: 'Preferences',
     // S61-B12: el header CD de la portada (D-370) · LOTE S61, GATE PENDIENTE
-    oficioAmbos: 'Walks & grooming',
+    // S79-B (T2-B3): `oficioAmbos` died (Ley 37) — the trade voice is the
+    // joined list from lib/voz-oficio · LOTE S79, GATE PENDIENTE
     oficioPaseos: 'Walks',
     oficioEstetica: 'Grooming',
+    oficioAdiestramiento: 'Training',
+    oficioVeterinaria: 'Veterinary care',
     fundador: 'Founding provider',
     hitoOferta: 'active offer',
     hitoAgenda: '{{n}}-day schedule',
@@ -373,6 +379,14 @@ export const prestadorEn = {
     vacacionesDetalle: "Mark the days you're not walking.",
     equipo: 'Team',
     equipoDetalle: 'Roles, invitations, and your signature',
+    // S79-B (T2-B5) · the three mute modules gain section + voice + trigger (§2.6)
+    despiertaSeccion: 'Wakes up as you work',
+    casosHeredados: 'Cases entrusted to you',
+    casosHeredadosDetalle: 'Wakes up with the first case a colleague refers to you.',
+    estadisticas: 'Statistics',
+    estadisticasDetalle: 'They wake up with your first appointments.',
+    resenas: 'Reviews',
+    resenasDetalle: 'Wakes up with your first real review.',
     cobros: 'Payments',
     cuentaComercial: 'Business account',
     liquidaciones: 'Payouts',
@@ -1563,5 +1577,46 @@ export const prestadorEn = {
     desvincularCta: 'Remove from business',
     desvincularConfirma: '{{nombre}} loses access to the business. Everything they did stays in the record.',
     soloDueno: 'The team is managed by the business owner.',
+  },
+  // S79-B (T2-B1) · "Prepare your space" — §2.4 third presence · LOTE S79
+  preparaEspacio: {
+    titulo: 'Prepare your space',
+    subtitulo: 'When it is ready, families can find you.',
+    serviciosTitulo: 'Your services',
+    serviciosPorQue: 'Say what you do and how — it is what your clients read when they find you.',
+    horariosTitulo: 'Your hours',
+    horariosPorQue: 'Your schedule only offers the hours you set.',
+    preciosTitulo: 'Your prices',
+    preciosPorQue: 'Every service states its price before it can be booked.',
+    equipoTitulo: 'Your team',
+    equipoPorQue: 'If you work with others, they come in here. If you work alone, this step is not for you.',
+    checkHecho: 'Done',
+  },
+  // S79-B (T2-B2) · the Day-1 welcome letter (§2.3) · LOTE S79
+  dia1: {
+    saludoNombre: 'Hello, {{nombre}}.',
+    saludoSinNombre: 'Hello.',
+    eleccion: 'We chose you to be one of the 15 providers shaping e-PetPlace in Ecuador.',
+    propositoIntro: 'You told us:',
+    propositoCierre: 'Here we help you live it every day.',
+    firmaNombre: 'Guillermo',
+    firmaRol: 'founder, e-PetPlace',
+    dia90:
+      'Your first 90 days are your encounter with e-PetPlace. When the quarter is complete, we go through the graduation moment together.',
+    entrar: 'Enter my space',
+  },
+  // S79-B (T2-B5) · the wake-with-use screens — /liquidaciones step-0 pattern · LOTE S79
+  despierta: {
+    casosNav: 'Cases entrusted to you',
+    casosTitulo: 'The cases other providers entrust to you',
+    casosCuerpo:
+      'When a colleague refers a pet’s clinical case to you, its history arrives here with the family’s consent.',
+    estadisticasNav: 'Statistics',
+    estadisticasTitulo: 'Your numbers will live here',
+    estadisticasCuerpo:
+      'Once your first appointments are closed, this section tells your month: pets cared for, appointments, continuity. Never compared to anyone.',
+    resenasNav: 'Reviews',
+    resenasTitulo: 'What families say about you',
+    resenasCuerpo: 'When a family leaves their first review, it will live here.',
   },
 } as const satisfies Espejo<typeof prestadorEs>;

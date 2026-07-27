@@ -41,6 +41,8 @@ import {
   cerrarSesion,
   obtenerFranjasHorario,
   obtenerMiPrestador,
+  obtenerMundoVeterinariaPropio,
+  obtenerOfertaAdiestramientoPropia,
   obtenerOfertasGroomingPropias,
   obtenerOfertasPaseoPropias,
   resolverUrlLogoNegocio,
@@ -55,6 +57,7 @@ import {
   useBarraEstadoClara,
   useMuroOficio,
 } from '@/components/techo-oficio';
+import { vozOficio } from '@/lib/voz-oficio';
 import { useTraduccion } from '@/i18n';
 
 // El lado del slot de identidad del header CD (S61-B12, firmado).
@@ -92,12 +95,15 @@ type Identidad = {
   logoPath: string | null;
 };
 
-/** Lo que sale de las TRES lecturas de oferta y agenda. Llega DESPUÉS y
+/** Lo que sale de las lecturas de oferta y agenda. Llega DESPUÉS y
  *  su ausencia ya no borra el header: la voz del oficio se suma al
  *  subtítulo cuando llega, y la banda de hitos conserva su regla de
- *  existencia (sin hitos NO existe — jamás ceros, S61-B12). */
+ *  existencia (sin hitos NO existe — jamás ceros, S61-B12).
+ *  S79-B (T2-B3): la voz de oficio pasa a computarse de los CUATRO
+ *  oficios (lib/voz-oficio) — solo-vet y solo-adiestramiento estaban
+ *  MUDOS, y la cohorte que se recluta es de vets. */
 type Negocio = {
-  oficio: 'ambos' | 'paseo' | 'grooming' | null;
+  vozOficio: string | null;
   hitos: string[];
 };
 
@@ -162,26 +168,37 @@ export default function Cuenta() {
         });
 
         // ── y recién ahora lo secundario, con su propio estado ──
-        const [rPaseo, rGrooming, rFranjas] = await Promise.all([
+        // S79-B (T2-B3): entran vet y adiestramiento — la voz de oficio ya
+        // no es ciega a la mitad de los oficios (+2 viajes en la carga
+        // SECUNDARIA; el header ya pintó — D-531 intacta).
+        const [rPaseo, rGrooming, rAdiestramiento, rVet, rFranjas] = await Promise.all([
           obtenerOfertasPaseoPropias(prestador.data.id),
           obtenerOfertasGroomingPropias(prestador.data.id),
+          obtenerOfertaAdiestramientoPropia(prestador.data.id),
+          obtenerMundoVeterinariaPropio(prestador.data.id),
           obtenerFranjasHorario(prestador.data.id),
         ]);
         if (!vigente) return;
         const paseoActivo = rPaseo.ok && rPaseo.data.some((o) => o.activo);
         const groomingActivo = rGrooming.ok && rGrooming.data.some((o) => o.activo);
+        const adiestramientoActivo =
+          rAdiestramiento.ok && (rAdiestramiento.data.oferta?.activo ?? false);
+        const vetActivo = rVet.ok && rVet.data.servicios.some((s) => s.activo);
         const diasActivos = rFranjas.ok
           ? new Set(rFranjas.data.filter((f) => f.activo).map((f) => f.diaSemana)).size
           : 0;
         const domicilio = rGrooming.ok && rGrooming.data.some((o) => o.activo && o.atiendeDomicilio);
         // el trío: SOLO datos reales — sin nada, la banda no existe
         const hitos: string[] = [];
-        if (paseoActivo || groomingActivo) hitos.push(t('miCuenta.hitoOferta'));
+        if (paseoActivo || groomingActivo || adiestramientoActivo || vetActivo)
+          hitos.push(t('miCuenta.hitoOferta'));
         if (diasActivos > 0) hitos.push(t('miCuenta.hitoAgenda', { n: diasActivos }));
         if (domicilio) hitos.push(t('miCuenta.hitoDomicilio'));
         setNegocio({
-          oficio:
-            paseoActivo && groomingActivo ? 'ambos' : paseoActivo ? 'paseo' : groomingActivo ? 'grooming' : null,
+          vozOficio: vozOficio(
+            { paseo: paseoActivo, grooming: groomingActivo, adiestramiento: adiestramientoActivo, vet: vetActivo },
+            t,
+          ),
           hitos,
         });
       })();
@@ -193,14 +210,7 @@ export default function Cuenta() {
     }, [t, intento]),
   );
 
-  const vozOficio =
-    negocio?.oficio === 'ambos'
-      ? t('miCuenta.oficioAmbos')
-      : negocio?.oficio === 'paseo'
-        ? t('miCuenta.oficioPaseos')
-        : negocio?.oficio === 'grooming'
-          ? t('miCuenta.oficioEstetica')
-          : null;
+  const vozDelOficio = negocio?.vozOficio ?? null;
 
   // D-531 (higiene, DECLARADA como tal): la derivación de la URL pública
   // es síncrona y sin red — está MEDIDO que no es el cuello (microsegundos).
@@ -381,9 +391,9 @@ export default function Cuenta() {
                 >
                   {identidad.nombre}
                 </Text>
-                {(vozOficio !== null || identidad.ciudad !== null) && (
+                {(vozDelOficio !== null || identidad.ciudad !== null) && (
                   <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: palette.light0 }}>
-                    {[vozOficio, identidad.ciudad].filter((x): x is string => x !== null).join(' · ')}
+                    {[vozDelOficio, identidad.ciudad].filter((x): x is string => x !== null).join(' · ')}
                   </Text>
                 )}
                 {/* el badge fundador: PILL de vidrio con papel (informa

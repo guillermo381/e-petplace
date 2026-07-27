@@ -39,6 +39,7 @@ import {
 } from '@epetplace/api';
 
 import { apiLista } from '@/lib/api';
+import { bienvenidaVista } from '@/lib/bienvenida';
 import { BienvenidaPrestador } from '@/components/bienvenida';
 import { IconoCuenta, IconoHoy, IconoMascotas, IconoNegocio } from '@/components/iconos-tabs';
 import { useTraduccion } from '@/i18n';
@@ -49,6 +50,10 @@ type EstadoSesionRaiz =
   // acá (resuelto UNA vez en el guard, jamás por pantalla). Hoy inerte:
   // el único que llega es el titular, y el titular siempre es gestor.
   | { ok: true; esGestor: boolean }
+  // S79-B (T2-B2, §2.3): primer login del GESTOR sin bienvenida vista →
+  // la carta preside ANTES de las tabs (precedente /invitacion, L-161).
+  // Puente local declarado (lib/bienvenida) hasta el PEDIDO B→A #1.
+  | { bienvenida_pendiente: true }
   // negocioEmpleado: si el user es EMPLEADO ACTIVO esperando la puerta,
   // el nombre de su negocio (voz honesta); null = user sin negocio alguno.
   | { sin_rol: true; email: string; negocioEmpleado: string | null }
@@ -80,7 +85,15 @@ export default function TabsLayout() {
           // S75-B: el rol de gestión, resuelto UNA vez (gate del tab).
           // Falla de lectura = false (Ley 23: ante la duda, se cierra).
           const rol = await empleadoTieneRol(p.data.id, ['dueño', 'administrador']);
-          return { ok: true, esGestor: rol.ok ? rol.data : false };
+          const esGestor = rol.ok ? rol.data : false;
+          // S79-B (§2.3): la carta del Día 1 — SOLO al gestor (la voz "te
+          // elegimos para ser uno de los 15 prestadores" es del titular,
+          // no del empleado que entra por invitación). Ante la duda del
+          // puente, NO se interrumpe (bienvenidaVista falla a true).
+          if (esGestor && !(await bienvenidaVista(s.data.user_id))) {
+            return { bienvenida_pendiente: true };
+          }
+          return { ok: true, esGestor };
         }
         if (p.codigo === 'sin_prestador') {
           // S75-B1: ¿handshake pendiente? (invitación INACTIVA) → el raíz
@@ -105,10 +118,11 @@ export default function TabsLayout() {
         const voz =
           typeof r === 'string' ? r
             : 'ok' in r ? `ok — gestor=${r.esGestor}`
-              : 'invitacion_pendiente' in r ? 'invitación pendiente → /invitacion'
-                : 'sin_sesion' in r ? 'sin sesión'
-                  : 'sin_rol' in r ? `sin rol prestador — ${r.email}${r.negocioEmpleado ? ` (empleado de ${r.negocioEmpleado})` : ''}`
-                    : `error — ${r.detalle}`;
+              : 'bienvenida_pendiente' in r ? 'primer login → /bienvenida-dia1'
+                : 'invitacion_pendiente' in r ? 'invitación pendiente → /invitacion'
+                  : 'sin_sesion' in r ? 'sin sesión'
+                    : 'sin_rol' in r ? `sin rol prestador — ${r.email}${r.negocioEmpleado ? ` (empleado de ${r.negocioEmpleado})` : ''}`
+                      : `error — ${r.detalle}`;
         console.log(`[sesion] raíz prestador: ${voz}`);
         if (vigente) setSesion(r);
       });
@@ -131,6 +145,11 @@ export default function TabsLayout() {
         </EsqueletoGrupo>
       </View>
     );
+  }
+
+  if ('bienvenida_pendiente' in sesion) {
+    // S79-B (§2.3): la carta del Día 1 — fuera de tabs, una sola vez.
+    return <Redirect href="/bienvenida-dia1" />;
   }
 
   if ('invitacion_pendiente' in sesion) {

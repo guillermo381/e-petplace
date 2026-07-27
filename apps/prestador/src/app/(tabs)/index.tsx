@@ -57,6 +57,8 @@ import {
   obtenerCitasPaseoDelDia,
   obtenerCitasVetDelDia,
   obtenerCitasPorCoordinar,
+  obtenerEquipoNegocio,
+  obtenerFranjasHorario,
   obtenerMascotasAtendidas,
   obtenerMiCuentaComercial,
   obtenerMiPerfil,
@@ -68,6 +70,7 @@ import {
   obtenerOfertaAdiestramientoPropia,
   obtenerOfertasGroomingPropias,
   obtenerOfertasPaseoPropias,
+  resolverUrlLogoNegocio,
   resolverUrlsFotos,
   type BloqueoPrestador,
   type CitaAgendaPaseo,
@@ -77,9 +80,12 @@ import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { verificarSesion } from '@/lib/api';
 import { vozCitaVet } from '@/lib/voz-cita-vet';
+import { vozOficio } from '@/lib/voz-oficio';
 import { TechoOficio, ToggleTecho, VeloBarraEstadoOficio } from '@/components/techo-oficio';
 import { AgendaRecepcion } from '@/components/agenda-recepcion';
 import { FiltroOficio, type FiltroOficioValor } from '@/components/filtro-oficio';
+import { FirmaPrestador } from '@/components/firma-prestador';
+import { PreparaEspacio, type EstadoTareas } from '@/components/prepara-espacio';
 import { useTraduccion } from '@/i18n';
 
 type Pantalla =
@@ -116,6 +122,13 @@ type Pantalla =
        *  inventado (E5). */
       nombre: string | null;
       nombreComercial: string;
+      /** S79-B (T2-B1/B3): la identidad de la firma del modo preparación. */
+      ciudad: string | null;
+      logoPath: string | null;
+      /** S79-B (T2-B1): el estado de las tareas del modo preparación.
+       *  null = el espacio YA está preparado (servicios+horarios) — el
+       *  módulo entero NO existe (regla de existencia del boceto M1). */
+      preparacion: EstadoTareas | null;
     };
 
 /** El oficio de una fila — decide ruta, ícono y filtro. */
@@ -614,6 +627,42 @@ export default function Hoy() {
       const pc = await obtenerCitasPorCoordinar(cuentaR.data.id);
       if (pc.ok) porCoordinar = pc.data;
     }
+    // ── S79-B (T2-B1) · EL MODO PREPARACIÓN ──
+    // serviciosOk/preciosOk salen de las ofertas YA fetcheadas (cero query
+    // nueva); horariosOk cuesta +1 viaje (declarado, familia D-555/D-497);
+    // equipoOk +1 SOLO si el módulo va a renderizar. Checks = señal positiva
+    // VERIFICADA (patrón D-521): fallo de lectura → null, sin check, jamás
+    // un falso estado.
+    const serviciosOk =
+      (ofPaseo.ok && ofPaseo.data.some((o) => o.activo)) ||
+      (ofGrooming.ok && ofGrooming.data.some((o) => o.activo)) ||
+      (ofAdiestramiento.ok && (ofAdiestramiento.data.oferta?.activo ?? false)) ||
+      (ofVet.ok && ofVet.data.servicios.some((s) => s.activo));
+    const preciosOk =
+      (ofPaseo.ok && ofPaseo.data.some((o) => o.activo && o.precio > 0)) ||
+      (ofGrooming.ok &&
+        ofGrooming.data.some(
+          (o) =>
+            o.activo &&
+            (['S', 'M', 'L'] as const).some((tl) => (o.tallas[tl]?.precio ?? 0) > 0),
+        )) ||
+      (ofAdiestramiento.ok &&
+        (ofAdiestramiento.data.oferta?.activo ?? false) &&
+        (ofAdiestramiento.data.oferta?.precio ?? 0) > 0) ||
+      (ofVet.ok && ofVet.data.servicios.some((s) => s.activo && s.precio > 0));
+    const franjasR = await obtenerFranjasHorario(prestador.data.id);
+    const horariosOk: boolean | null = franjasR.ok
+      ? franjasR.data.some((f) => f.activo)
+      : null;
+    let preparacion: EstadoTareas | null = null;
+    if (!(serviciosOk && horariosOk === true)) {
+      let equipoOk: boolean | null = null;
+      if (prestador.data.cuenta_comercial_id !== null) {
+        const equipoR = await obtenerEquipoNegocio(prestador.data.cuenta_comercial_id);
+        if (equipoR.ok) equipoOk = equipoR.data.miembros.filter((m) => m.activo).length >= 2;
+      }
+      preparacion = { serviciosOk, preciosOk, horariosOk, equipoOk };
+    }
     setPantalla({
       estado: 'listo',
       desde,
@@ -621,6 +670,9 @@ export default function Hoy() {
       porCoordinar,
       nombre: perfilR.ok ? perfilR.data.nombre : null,
       nombreComercial: prestador.data.nombre_comercial,
+      ciudad: prestador.data.ciudad,
+      logoPath: prestador.data.foto_url,
+      preparacion,
       groomingIds: new Set(rg.data.map((c) => c.id)),
       adiestramientoIds: new Set(ra.data.map((c) => c.id)),
       vetIds: new Set(rv.data.map((c) => c.id)),
@@ -856,6 +908,24 @@ export default function Hoy() {
           </Tarjeta>
         )}
 
+        {/* ── S79-B (T2-B1/B3): EL MODO PREPARACIÓN — §2.4 primera y
+            tercera presencia. La FIRMA preside (mudanza del bloque de
+            Cuenta, materiales de esta superficie) y "Prepara tu espacio"
+            da el camino. Regla de existencia: solo mientras el espacio NO
+            es reservable (servicios+horarios); preparado el espacio, el
+            bloque entero muere solo. ── */}
+        {pantalla.estado === 'listo' && vista === 'hoy' && pantalla.preparacion !== null && (
+          <View style={{ gap: spacing[4] }}>
+            <FirmaPrestador
+              nombre={pantalla.nombreComercial}
+              vozOficio={vozOficio(pantalla.oficios, t)}
+              ciudad={pantalla.ciudad}
+              logoUrl={resolverUrlLogoNegocio(pantalla.logoPath)}
+            />
+            <PreparaEspacio tareas={pantalla.preparacion} />
+          </View>
+        )}
+
         {pantalla.estado === 'error' && (
           <Tarjeta tinte="danger" relleno="amplio">
             <View style={{ gap: spacing[3] }}>
@@ -963,9 +1033,12 @@ export default function Hoy() {
           // POR FILTRO dice su verdad (hay jornada, no de este servicio).
           hoyVacioPorFiltro ? (
             <EstadoVacio registro="seccion" titulo={t('agenda.filtroVacio')} />
-          ) : citasHoySin.length === 0 ? (
+          ) : citasHoySin.length === 0 && pantalla.preparacion === null ? (
             // v2b: voz honesta + camino a la semana (el mostrador vivo y "Por
             // coordinar" siguen abajo — el día vacío no los apaga).
+            // S79-B (Chanel del boceto M1): EN MODO PREPARACIÓN esta voz
+            // MUERE — prometía un disparo inalcanzable sin oferta; ahí
+            // preside la firma + "Prepara tu espacio".
             <View style={{ gap: spacing[3] }}>
               <EstadoVacio registro="seccion" titulo={t('agenda.vacio')} descripcion={t('agenda.vacioDetalle')} />
               <Boton variante="compacto" etiqueta={t('agenda.vacioVerSemana')} onPress={() => setVista('semana')} />
@@ -1191,6 +1264,13 @@ export default function Hoy() {
         {/* ── Zona 4 — tu trabajo con dignidad: liquidaciones son B2 y
             el motor de hitos de trayectoria (§2.7) no existe → la zona
             NO existe hoy. JAMÁS métricas en cero. ── */}
+
+        {/* ── S79-B (T2-B4) · §2.5 EL MÓDULO ASPIRACIONAL — texto sobrio
+            al pie, no banner, sin acción. Los 15 SON la comunidad (decisión
+            founder); la sección Comunidad sigue oculta por letra §2.6. ── */}
+        {pantalla.estado === 'listo' && vista === 'hoy' && (
+          <Texto variante="apoyo">{t('agenda.aspiracional')}</Texto>
+        )}
         </View>
       </ScrollView>
       {/* S59-B1: el velo de tinta — la zona de la barra de estado JAMÁS

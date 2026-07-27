@@ -424,6 +424,42 @@ export default function Negocio() {
             />
           </Tarjeta>
 
+          {/* ── S79-B (T2-B5) · "SE DESPIERTA CON EL USO" — los tres mudos
+              del audit ganan sección + voz + disparo (§2.6: la navegación
+              muestra el módulo; el detalle NOMBRA qué lo despierta).
+              Patrón replicado de Liquidaciones — cero patrón nuevo.
+              Glifos: 'caso' es propio; 'negocio' y 'refugio' son STAND-IN
+              declarados (sin glifo de estadísticas/reseñas en el registry;
+              L-175 — el pedido nace si el founder lo firma). ── */}
+          <View style={{ gap: spacing[3] }}>
+            <Texto variante="seccion">{t('negocio.despiertaSeccion')}</Texto>
+            <Tarjeta relleno="ninguno">
+              <CeldaNavegacion
+                icono="caso"
+                registro="aa"
+                titulo={t('negocio.casosHeredados')}
+                detalle={t('negocio.casosHeredadosDetalle')}
+                onPress={() => router.push('/negocio/casos-heredados')}
+              />
+              <Separador />
+              <CeldaNavegacion
+                icono="negocio"
+                registro="aa"
+                titulo={t('negocio.estadisticas')}
+                detalle={t('negocio.estadisticasDetalle')}
+                onPress={() => router.push('/negocio/estadisticas')}
+              />
+              <Separador />
+              <CeldaNavegacion
+                icono="refugio"
+                registro="aa"
+                titulo={t('negocio.resenas')}
+                detalle={t('negocio.resenasDetalle')}
+                onPress={() => router.push('/negocio/resenas')}
+              />
+            </Tarjeta>
+          </View>
+
         </View>
       </ScrollView>
       {/* S59-B1: el velo de tinta — la zona de la barra de estado JAMÁS

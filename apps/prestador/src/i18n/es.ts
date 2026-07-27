@@ -132,6 +132,10 @@ export const prestadorEs = {
     origenMostrador: 'Mostrador',
     // S70-B2-v2: jornada V2 (Por coordinar · Ya atendidas · vacío v2b) · LOTE S70, GATE PENDIENTE
     vacioVerSemana: 'Ver tu semana',
+    // S79-B (T2-B4) · §2.5 el módulo aspiracional sobrio — texto, no banner.
+    // N=15 vive acá y se edita al crecer la cohorte · LOTE S79, GATE PENDIENTE
+    aspiracional:
+      'Eres parte de un grupo curado de 15 prestadores en Ecuador. e-PetPlace no busca llenar — busca elegir bien. Gracias por sumarte al comienzo.',
     porCoordinarTitulo: 'Por coordinar',
     porCoordinarCta: 'Fijar fecha',
     porCoordinarLibre: 'Procedimiento',
@@ -170,9 +174,13 @@ export const prestadorEs = {
     perfil: 'Tu perfil',
     preferencias: 'Preferencias',
     // S61-B12: el header CD de la portada (D-370) · LOTE S61, GATE PENDIENTE
-    oficioAmbos: 'Paseos y estética',
+    // S79-B (T2-B3): `oficioAmbos` MURIÓ (Ley 37) — la voz de oficio es la
+    // lista unida de lib/voz-oficio, y entran los dos oficios MUDOS
+    // (la cohorte que se recluta es de vets) · LOTE S79, GATE PENDIENTE
     oficioPaseos: 'Paseos',
     oficioEstetica: 'Estética',
+    oficioAdiestramiento: 'Adiestramiento',
+    oficioVeterinaria: 'Veterinaria',
     fundador: 'Prestador fundador',
     hitoOferta: 'oferta activa',
     hitoAgenda: 'agenda {{n}} días',
@@ -437,6 +445,15 @@ export const prestadorEs = {
     vacacionesDetalle: 'Marca los días en que no paseas.',
     equipo: 'Equipo',
     equipoDetalle: 'Roles, invitaciones y tu firma',
+    // S79-B (T2-B5) · los tres mudos ganan sección + voz + disparo (§2.6):
+    // el detalle NOMBRA qué despierta a cada uno · LOTE S79, GATE PENDIENTE
+    despiertaSeccion: 'Se despierta con el uso',
+    casosHeredados: 'Casos que te confíen',
+    casosHeredadosDetalle: 'Se despierta con el primer caso que un colega te derive.',
+    estadisticas: 'Estadísticas',
+    estadisticasDetalle: 'Se despiertan con tus primeras atenciones.',
+    resenas: 'Reseñas',
+    resenasDetalle: 'Se despierta con tu primera reseña real.',
     cobros: 'Cobros',
     cuentaComercial: 'Cuenta comercial',
     liquidaciones: 'Liquidaciones',
@@ -1742,5 +1759,51 @@ export const prestadorEs = {
     desvincularCta: 'Desvincular del negocio',
     desvincularConfirma: '{{nombre}} pierde el acceso al negocio. Lo que hizo queda en el expediente.',
     soloDueno: 'El equipo lo administra quien es dueño del negocio.',
+  },
+  // S79-B (T2-B1) · "PREPARA TU ESPACIO" — §2.4 tercera presencia: cada
+  // tarea con su POR QUÉ en voz humana · LOTE S79, GATE PENDIENTE
+  preparaEspacio: {
+    titulo: 'Prepara tu espacio',
+    subtitulo: 'Cuando esté listo, las familias te encuentran.',
+    serviciosTitulo: 'Tus servicios',
+    serviciosPorQue: 'Di qué haces y cómo — es lo que tus clientes leen cuando te encuentran.',
+    horariosTitulo: 'Tus horarios',
+    horariosPorQue: 'Tu agenda solo ofrece las horas que tú digas.',
+    preciosTitulo: 'Tus precios',
+    preciosPorQue: 'Cada servicio dice cuánto vale antes de reservarse.',
+    equipoTitulo: 'Tu equipo',
+    equipoPorQue: 'Si trabajas con más gente, acá entran. Si trabajas solo, este paso no es tuyo.',
+    // a11y del check sutil (Insignia soloPunto)
+    checkHecho: 'Lista',
+  },
+  // S79-B (T2-B2) · LA BIENVENIDA DIGITAL DEL DÍA 1 (§2.3) — carta, no
+  // banner. `firmaNombre`: el nombre completo lo firma el founder en el
+  // gate del lote (L-142). `eleccion`: N=15 vive acá · LOTE S79, GATE PENDIENTE
+  dia1: {
+    saludoNombre: 'Hola, {{nombre}}.',
+    saludoSinNombre: 'Hola.',
+    eleccion: 'Te elegimos para ser uno de los 15 prestadores que dan forma a e-PetPlace en Ecuador.',
+    propositoIntro: 'Tú nos dijiste:',
+    propositoCierre: 'Acá te ayudamos a vivirlo todos los días.',
+    firmaNombre: 'Guillermo',
+    firmaRol: 'founder, e-PetPlace',
+    dia90:
+      'Los primeros 90 días son tu encuentro con e-PetPlace. Al cumplir el trimestre completamos juntos el momento de graduación.',
+    entrar: 'Entrar a mi espacio',
+  },
+  // S79-B (T2-B5) · las pantallas de lo que se despierta con el uso —
+  // patrón /liquidaciones peldaño 0 · LOTE S79, GATE PENDIENTE
+  despierta: {
+    casosNav: 'Casos que te confíen',
+    casosTitulo: 'Los casos que otros prestadores te confíen',
+    casosCuerpo:
+      'Cuando un colega te derive el caso clínico de una mascota, su historia llega acá con el consentimiento de la familia.',
+    estadisticasNav: 'Estadísticas',
+    estadisticasTitulo: 'Tus números van a vivir acá',
+    estadisticasCuerpo:
+      'Con tus primeras atenciones cerradas, esta sección cuenta tu mes: mascotas atendidas, citas, continuidad. Sin compararte con nadie.',
+    resenasNav: 'Reseñas',
+    resenasTitulo: 'Lo que las familias digan de ti',
+    resenasCuerpo: 'Cuando una familia deje su primera reseña, va a vivir acá.',
   },
 } as const;
