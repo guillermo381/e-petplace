@@ -1,5 +1,11 @@
 # LETRA DE LA VITRINA — qué expone el negocio
 
+> **Los artefactos de esta letra (S78):** el motor en la migración
+> `20260726220000` (guard mecánico incluido) · la superficie de la familia
+> con su M1 en `docs/relevamientos/2026-07-26-s78a-M1-selector-persona.md`
+> (`3ee46fe`) · el toggle del negocio en B `b37ec33` (sin dibujar hasta que
+> el gate abra — `puedeEncenderVitrina` es su lector).
+
 > **Estado:** PROPUESTA a la firma del founder (S78-A1bis, 26 Jul 2026).
 >
 > **Qué es:** la regla que faltaba para que reservar *"con la persona"* fuera

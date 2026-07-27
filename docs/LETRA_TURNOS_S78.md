@@ -1,5 +1,15 @@
 # LETRA DE TURNOS — la jornada de cada persona del negocio
 
+> **Los artefactos de esta letra (S78, cero huérfanos):** el M1 de B
+> `docs/relevamientos/2026-07-26-s78b-M1-turnos.md` + su lámina
+> `docs/relevamientos/2026-07-26-s78b-LAMINA-turnos.html` (la decisión
+> turno-derivado-vs-entidad) · el puente de jornada
+> `docs/relevamientos/2026-07-26-s78b-M1-puente-jornada.md` · la vara del
+> acabado de la Hoja
+> `docs/relevamientos/2026-07-26-s78-VARA-acabado-hoja-del-miembro.html`
+> (el acabado que los turnos heredaron). Construcción: B `44c94cb` sobre
+> A2 (`8ade0a2`).
+
 > **Estado:** PROPUESTA a la firma del founder (S78, 26 Jul 2026).
 > Las partes marcadas **✅ FIRMADA** llevan su palabra literal y no se reabren.
 >

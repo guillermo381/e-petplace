@@ -694,6 +694,22 @@ dispositivo: CLAUDE.md raíz · dirección de arte e iconografía:
 
 ## Historial de la skill
 
+- **S78 (26-27 Jul 2026) — LA GRAMÁTICA "ESTÁ ADENTRO / ESPERA" (en uso,
+  tres consumidores; letra en `DISEÑO_EXPERIENCIA` §15b.0bis).** En las
+  listas de estado del prestador: **lo que ESTÁ es superficie apoyada con
+  `elevacion.reposo`; lo que ESPERA es contorno** — la Hoja del miembro,
+  las franjas de turnos y la agenda de recepción hablan la misma. Su
+  anatomía portadora es `TarjetaEstado`, que **vive LOCAL en
+  `apps/prestador` (NO está en el índice de esta skill a propósito)**: su
+  promoción a `packages/ui` está declarada en la nota S78 de D-535 y se
+  coordina — quien la necesite en otra superficie NO la copia (L-175: se
+  lee el registry; si no puede darlo, se ENSANCHA). Pasó el gate global
+  del founder (26-jul) sin gate por-anatomía propio. **Y una alerta de
+  gobernanza medida: `iconos-tabs.tsx` + `iconos-oficio.tsx` copian
+  geometría del registry de `Icono` porque el contrato no expone trazo y
+  huella por separado (D-546)** — hasta que esa prop exista, todo glifo
+  nuevo del prestador nace con este riesgo; ver L-175.
+
 - **S73 (21 Jul 2026) — LA ENMIENDA 19.7, versión ANGOSTA (firmada en
   mesa; la anatomía fina — el chevron que gira — se sella en el gate en
   dispositivo con la lámina).** La acción que baja a label gana FORMA

@@ -584,6 +584,24 @@ cuerpo) y el mismo alcance resuelve por **MERGE server-side atómico con
 retorno hablado + `GIST EXCLUDE` como piso**. No existe doc dedicado de
 horarios: esa deuda ES su letra.
 
+## 15b.0bis — LA GRAMÁTICA "ESTÁ ADENTRO / ESPERA" (S78, anatomía en uso; firma founder por gate global)
+
+> **La gramática:** en las listas de estado del prestador, **lo que ESTÁ
+> (adentro, activo, rigiendo) es superficie apoyada con `elevacion.reposo`;
+> lo que ESPERA (pausado, por llegar, sin regir) es contorno.** Una sola
+> distinción visual para un solo significado — la misma en sus TRES
+> consumidores de S78: la Hoja del miembro (chips), la lista de franjas de
+> turnos (activa/pausada) y la agenda de recepción (llegó/esperando).
+> **Anatomía portadora: `TarjetaEstado`** (S78-B, roles checkbox/radio/
+> button + modo estático), que **hoy vive LOCAL en
+> `apps/prestador/src/components/tarjeta-estado.tsx`** — su promoción a
+> `packages/ui` está declarada (nota S78 en D-535: se coordina, no se hace
+> de arrastre). Es pariente de la regla Chanel del marco (Ley 20: la
+> superficie que gana elevación pierde el hairline) aplicada a ESTADO.
+> **Estado de firma:** pasó el gate global del founder (26-jul, dentro de
+> Hoja+turnos+recepción); no tiene gate por-anatomía propio — si el diseño
+> de S79-B (la vitrina) la contradice, se resuelve ahí.
+
 ## 15b. LA DOSIS DEL PRESTADOR (firmada founder S58)
 
 La app del prestador no tiene otro design system — tiene otra dosis.

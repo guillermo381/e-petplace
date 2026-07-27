@@ -170,6 +170,16 @@ nadie va a montar no se pide — pedirlo es fabricar deuda (precedente
 S71-B2: de 5 conceptos faltantes se pidieron los 2 que la pantalla
 montaba; los otros 3 esperan a que su superficie tenga boceto).
 
+## 6bis. REGISTRO S78 — el glifo del MICRÓFONO: gate por ícono PENDIENTE
+
+> `DictadoEnVivo` (S78-B, la puerta del dictado en vivo) entró al gate de
+> graduación del founder y **el flujo dio VERDE — pero el gate POR ÍCONO
+> (§2.9: todo ícono se gatea a 21px, veredicto explícito por ícono) NO
+> tiene veredicto transcrito.** Se registra PENDIENTE, no aprobado por
+> arrastre: un verde de flujo no firma un glifo (la misma distinción que
+> §6 exige — el gate es POR ÍCONO). Se resuelve en el próximo gate visual
+> del prestador o junto al diseño de la vitrina (S79-B).
+
 ## 7. NOTA DE DIRECCIÓN FIRMADA S73 — el color completo, sin borde, con sombra
 
 Letra del founder (gate del entity chip, 21-Jul-2026), textual:

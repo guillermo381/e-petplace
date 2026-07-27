@@ -133,6 +133,26 @@ Corolarios firmados (founder S66):
   habilitada, sin notificar al dueño — SALVO que el dueño haya elegido
   persona explícitamente: ahí SÍ se le avisa (eligió a alguien; la
   verdad firme es con ese alguien).
+  > **ENMIENDA S78 (firmada) — LA CITA DICE QUIÉN ATIENDE:** el *"el
+  > dueño no lo ve"* de la viñeta anterior queda ENMENDADO — la cita
+  > nombra a quien atiende en confirmación y detalle (con dos personas,
+  > el silencio se vuelve mentira por omisión; letra en
+  > `LETRA_TURNOS_S78` §8). La cita lo DICE; la ELECCIÓN sigue gateada
+  > por la vitrina de abajo.
+  > **ESTADO S78 — "QUÉ EXPONE" TIENE LETRA, MOTOR Y GATE MECÁNICO:** la
+  > configuración que esta sección nombró en S66 se escribió en
+  > `LETRA_VITRINA_S78.md` y se construyó entera (migración
+  > `20260726220000`): `prestadores.expone_personas` (default `false` =
+  > lo de hoy) · `p_empleado_id DEFAULT NULL` en las tres puertas (las 9
+  > lectoras intactas) · `obtener_personas_que_atienden` · el selector de
+  > la familia (cliente, M1 en
+  > `docs/relevamientos/2026-07-26-s78a-M1-selector-persona.md`) —
+  > **ofertable = chip + JORNADA**, N=1 colapsa, "Cualquiera del equipo"
+  > preseleccionado. **Y EL ENCENDIDO ESTÁ GATEADO POR MECÁNICA, no por
+  > prosa** (decisión founder: *construir sí, encender no*): el trigger
+  > `trg_prestadores_gate_vitrina` rebota `aviso_reasignacion_no_existe`
+  > mientras `notificar_reasignacion_cita(uuid, uuid)` no exista — el
+  > aviso de ESTA viñeta es la llave, y construirlo abre el gate solo.
 - **Horarios:** los administra el NEGOCIO (su staff, su operación),
   con delegación opcional a cada persona. Default v1: administra el
   negocio. El independiente edita "sus horarios" como siempre.
@@ -772,6 +792,12 @@ construye** — deuda con disparo §16.
 - **V1 — LA OFERTA DEL NEGOCIO:** wizard vet (personas, servicios del
   menú, catálogo libre de procedimientos, precios, horarios por
   persona, qué expone).
+  > **Nota S78: dos patas de V1 quedaron PAGADAS fuera del wizard** —
+  > **horarios por persona** (D-540: `resolverPersonaDeFranja` + turnos
+  > de B + gate founder del circuito de jornada) y **qué expone**
+  > (`LETRA_VITRINA_S78` + migración `20260726220000`, encendido gateado
+  > por mecánica). El wizard V1, cuando llegue, CONSUME estas piezas —
+  > no las re-decide.
 - **V2 — LA RESERVA DEL DUEÑO:** chasis heredado + el "quién" de dos
   niveles (§2).
   > **Nota S68 (enmienda v1.2): V1 ‖ V2 corren en PARALELO A/B** —
@@ -780,6 +806,14 @@ construye** — deuda con disparo §16.
   > lectores de la misma migración. El "quién" v1 = persona directa
   > (N=1 colapsa solo; la unión de ventanas del negocio espera a que
   > exista un negocio con N>1).
+  > **Nota S78: el diferido VENCIÓ y estaba PAGADO DESDE V0** — la
+  > medición de S78-A0 halló que las lectoras ya UNEN ventanas
+  > (`DISTINCT`/`GROUP BY max`/`EXISTS`) y la cita nace con persona
+  > (7/7 productoras estampan; 81/81 sin huérfanas). **La primera
+  > reserva E2E de DOS personas corrió en el teléfono del founder el
+  > 26-jul-2026** — V2 en su forma "con el negocio" está VIVA; la forma
+  > "con la persona" está construida y espera el aviso de reasignación
+  > (§2).
 - **V3 — EL MOSTRADOR:** walk-in con alta mínima de familia (§7).
 - **V4 — EL DURANTE CLÍNICO:** nota IA + registrables Eje 3 + caso
   clínico v1 + presupuesto (§8/§10/§11).

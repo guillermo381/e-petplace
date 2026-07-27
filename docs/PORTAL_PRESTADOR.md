@@ -2750,7 +2750,42 @@ Ese es el éxito del documento. Cumplirlo es trabajo de los meses y años que vi
 
 ---
 
-## 14. El equipo del negocio — LETRA_EQUIPO (v3, S73→S76; enmiendas S75/S76)
+## 14. El equipo del negocio — LETRA_EQUIPO (v3, S73→S76; enmiendas S75/S76/S78)
+
+> **⚠️ ENMIENDAS S78 (27-jul) — LAS PANTALLAS QUE ESTA LETRA DESCRIBÍA COMO
+> FUTURAS SON REALES, y esta nota manda sobre toda prosa vieja de la sección
+> que las describa como pendientes:**
+> **(1) LA JORNADA POR PERSONA EXISTE Y ESTÁ GATEADA (D-540 cerrada en
+> circuito):** las firmas de franjas aceptan `empleadoId`
+> (`resolverPersonaDeFranja`: ausente = titular, presente = verificada contra
+> ese negocio), el bloque de **Jornadas** se monta con la segunda persona con
+> chip del oficio (`44c94cb` — el turno es DERIVADO del patrón del titular,
+> asignarlo COPIA las activas), y **el founder gateó el circuito entero en
+> dispositivo**. El "nudo de las franjas por-persona" de la enmienda S75(2)
+> quedó DESATADO; lo que sigue titular-only es el resto de la gestión (D-513
+> intacta).
+> **(2) LA PRIMERA COMPOSICIÓN DEL HOY POR ROL ATERRIZÓ (D-521 empezó a
+> pagarse):** recepción ⟺ activo + NO titular + CERO chips (§1 de
+> `LETRA_RECEPCION_S76`), y el HOY le monta **la agenda de recepción**
+> (`76499f7`, sobre su lámina
+> `docs/relevamientos/2026-07-26-s78b-LAMINA-agenda-recepcion.html` y su M1
+> `docs/relevamientos/2026-07-26-s78b-M1-agenda-recepcion.md`) en vez de la jornada de oficio — con fallback a jornada normal ante
+> CUALQUIER fallo de lectura (un falso-recepción escondería la jornada del
+> titular). La enmienda S75(3) ("la composición por rol es arco v2") queda
+> PARCIALMENTE pagada: recepción sí; el resto de roles sigue pendiente.
+> **(3) EL MOTOR DE RECEPCIÓN DE §7/§4 DE LA LETRA EXISTE** (migración
+> `20260726210000` + `20260726230000`): `llegada_en` (timestamp, jamás estado)
+> · `registrar_llegada` (membresía, idempotente) · `obtener_jornada_recepcion`
+> (los DOS permisos de §4 en una función; el profesional sigue viendo solo lo
+> suyo; **la cita "Del negocio" —`empleado_id NULL`, la despegada de S77
+> §11a— VIAJA para todos**) · `obtener_solicitudes_mostrador` (el reloj §7bis
+> lo dice el server) · especie+etapa destiladas.
+> **(4) LA HOJA DEL MIEMBRO RECOMPUESTA (§6 de `LETRA_EDICION_VINCULO_S77`)
+> ES REAL** (`63bd97e`, gate founder VERDE) — chips como contenido, la baja
+> con su conteo (`contarCitasDespegables`, D-549). Su M1 vive en
+> `docs/relevamientos/2026-07-26-s78b-M1-hoja-del-miembro-v2.md` y su lámina
+> en `docs/relevamientos/2026-07-26-s78b-LAMINA-hoja-del-miembro-v2.html`. Pendiente
+> D-553: cada aviso de la Hoja gana su camino.
 
 > **⚠️ ENMIENDAS S75 (contra el literal del arco de equipo, verificadas — L-158).**
 > **(1) LA PUERTA SE ABRIÓ:** el arco quedó DESCONECTADO en S74 (D-512); S75 lo
