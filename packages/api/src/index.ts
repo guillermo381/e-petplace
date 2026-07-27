@@ -696,6 +696,11 @@ export {
   type ItemFormulaParte,
   type CasoActivo,
   type CodigoErrorCasos,
+  // S78-A3.1 (D-543): la re-entrada — ¿esta cita ya tiene su nota?
+  obtenerHistoriaClinicaDeCita,
+  type HistoriaClinicaDeCita,
+  type EstadoHistoriaDeCita,
+  type CodigoErrorHistoriaDeCita,
 } from './wrappers/veterinaria-nota-clinica';
 // S70-A3/A3bis: handshake del mostrador.
 export {

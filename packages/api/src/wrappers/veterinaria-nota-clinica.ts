@@ -505,3 +505,96 @@ export async function obtenerCasosActivosMascota(
     })),
   };
 }
+
+// ── S78-A3.1 (D-543 🔴): LA RE-ENTRADA ───────────────────────────────────────
+//
+// EL BUG QUE CURA (gate del founder, 26-jul): la pantalla de consulta no
+// pregunta si la cita YA tiene historia clínica. El vet entra, dicta la
+// consulta entera, la revisa campo por campo, toca guardar — y RECIÉN AHÍ
+// `sedimentar_nota_clinica` rebota `hc_ya_existe`, porque
+// `evento_historia_clinica_registrada` tiene UNIQUE (cita_id) (leído
+// literal). Ley 23 rota en su forma más cara: la puerta ofrece un trabajo
+// que el motor va a rechazar, y el precio lo paga el profesional con su
+// dictado perdido.
+//
+// La cura es de PUERTA: se pregunta ANTES. Este es el lector; la fase
+// `antes` la compone B.
+//
+// LA HONESTIDAD ES EL PUNTO (Ley 13 · L-139 · D-536): un fallo de lectura
+// JAMÁS se degrada a `existe: false`. Si este lector devolviera "no hay
+// nota" cuando en realidad no pudo leer, la pantalla volvería a abrir el
+// formulario vacío — es decir, reproduciría D-543 con otra causa. Por eso
+// el error sale TIPADO y la ausencia sale como dato afirmativo.
+
+export interface HistoriaClinicaDeCita {
+  id: string;
+  /** El evento padre — el camino a la nota ya sedimentada. */
+  eventoId: string | null;
+  casoClinicoId: string | null;
+  completadoEn: string;
+  motivoConsulta: string;
+  diagnosticoPrincipal: string;
+  /** Quién la firmó: user del vet (el schema guarda user, no empleado). */
+  veterinarioUserId: string;
+  empleadoId: string | null;
+}
+
+export type EstadoHistoriaDeCita =
+  | { existe: false }
+  | { existe: true; historia: HistoriaClinicaDeCita };
+
+export type CodigoErrorHistoriaDeCita = 'sin_sesion' | 'error_desconocido';
+
+const MENSAJES_HISTORIA_CITA: Record<CodigoErrorHistoriaDeCita, string> = {
+  sin_sesion: 'No hay sesión activa.',
+  error_desconocido: 'No pudimos comprobar si esta cita ya tiene su nota.',
+};
+
+/**
+ * ¿Esta cita YA tiene su historia clínica? Lectura directa por RLS
+ * (`hc_select` = `user_acceso_clinico_a_mascota(mascota_id)`, censada por
+ * tabla y comando): la puerta es la policy, cero RPC nueva, cero L-140.
+ *
+ * `maybeSingle()` es exacto acá y no una comodidad: el UNIQUE (cita_id)
+ * garantiza 0 o 1 fila — si algún día hubiera dos, esto rebota en vez de
+ * elegir una en silencio.
+ */
+export async function obtenerHistoriaClinicaDeCita(
+  citaId: string,
+): Promise<ResultadoWrapper<EstadoHistoriaDeCita, CodigoErrorHistoriaDeCita>> {
+  const { data: auth } = await getClient().auth.getUser();
+  if (!auth.user?.id) {
+    return { ok: false, codigo: 'sin_sesion', mensaje: MENSAJES_HISTORIA_CITA.sin_sesion };
+  }
+
+  const { data, error } = await getClient()
+    .from('evento_historia_clinica_registrada')
+    .select(
+      'id, evento_id, caso_clinico_id, completado_en, motivo_consulta, diagnostico_principal, veterinario_user_id, empleado_id',
+    )
+    .eq('cita_id', citaId)
+    .maybeSingle();
+
+  // El fallo NO es ausencia (D-536): sale tipado.
+  if (error) {
+    return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES_HISTORIA_CITA.error_desconocido };
+  }
+  if (data === null) return { ok: true, data: { existe: false } };
+
+  return {
+    ok: true,
+    data: {
+      existe: true,
+      historia: {
+        id: data.id,
+        eventoId: data.evento_id,
+        casoClinicoId: data.caso_clinico_id,
+        completadoEn: data.completado_en,
+        motivoConsulta: data.motivo_consulta,
+        diagnosticoPrincipal: data.diagnostico_principal,
+        veterinarioUserId: data.veterinario_user_id,
+        empleadoId: data.empleado_id,
+      },
+    },
+  };
+}
