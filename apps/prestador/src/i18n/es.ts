@@ -899,6 +899,36 @@ export const prestadorEs = {
   },
   // Voces de las franjas que EL TALLER hereda (S58-B B1b: /horarios murió
   // absorbida; keys muertas fuera — Ley 37; textos de los lotes S56 intactos).
+  // ── S78-B · LA AGENDA DE RECEPCIÓN (la Puerta) · LOTE S78, GATE
+  //    PENDIENTE. CERO CLÍNICO (D-489). "cita" de cara a la familia. ──
+  recepcion: {
+    titulo: 'Tu día en la puerta',
+    puerta: 'En la puerta',
+    registrarAtencion: 'Registrar atención',
+    vistaEtiqueta: 'Qué día ver',
+    vistaHoy: 'Hoy',
+    vistaAdelante: 'Adelante',
+    adelanteEtiqueta: 'Días próximos — solo lectura',
+    delNegocio: 'Del negocio · por asignar',
+    personaFallback: 'Sin nombre',
+    citasDelDia: '{{n}} hoy',
+    porLlegar: 'Por llegar',
+    llego: 'Llegó',
+    adentro: 'Adentro',
+    adentroCon: 'Adentro con {{nombre}}',
+    atendida: 'Atendida',
+    noVino: 'No vino',
+    llegoCta: 'Llegó',
+    llegoError: 'No pudimos registrar la llegada. Prueba de nuevo.',
+    llegoNoActiva: 'Esta cita ya no está activa.',
+    solicitudPendiente: 'Autorización pedida a la familia de {{mascota}}',
+    solicitudReloj: 'quedan {{min}} min',
+    solicitudExpirada: 'La familia de {{mascota}} no respondió a tiempo',
+    solicitudExpiradaCuerpo: 'La visita sigue como registro del mostrador.',
+    sinCitas: 'No hay citas agendadas.',
+    sinCitasCamino: 'Si alguien llega, regístralo y queda en el expediente.',
+    errorDia: 'No pudimos cargar el día. Prueba de nuevo.',
+  },
   horarios: {
     // ── S78-B TURNOS · vocabulario cerrado: turno (plantilla del
     //    negocio) · jornada (lo que la persona tiene) · cita (familia —

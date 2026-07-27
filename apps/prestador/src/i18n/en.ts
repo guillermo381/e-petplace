@@ -771,6 +771,35 @@ export const prestadorEn = {
     quitado: 'Block removed.',
   },
   // Voces de las franjas que EL TALLER hereda (S58-B B1b) · Espejo de es.ts
+  // ── S78-B · Front desk agenda — mirror of es.ts ──
+  recepcion: {
+    titulo: 'Your day at the door',
+    puerta: 'At the door',
+    registrarAtencion: 'Register a visit',
+    vistaEtiqueta: 'Which day to see',
+    vistaHoy: 'Today',
+    vistaAdelante: 'Ahead',
+    adelanteEtiqueta: 'Coming days — read only',
+    delNegocio: 'Business · unassigned',
+    personaFallback: 'No name',
+    citasDelDia: '{{n}} today',
+    porLlegar: 'Due to arrive',
+    llego: 'Arrived',
+    adentro: 'Inside',
+    adentroCon: 'Inside with {{nombre}}',
+    atendida: 'Seen',
+    noVino: 'Did not come',
+    llegoCta: 'Arrived',
+    llegoError: 'We could not register the arrival. Try again.',
+    llegoNoActiva: 'This appointment is no longer active.',
+    solicitudPendiente: "Authorization requested from {{mascota}}'s family",
+    solicitudReloj: '{{min}} min left',
+    solicitudExpirada: "{{mascota}}'s family did not respond in time",
+    solicitudExpiradaCuerpo: 'The visit continues as a front-desk record.',
+    sinCitas: 'No appointments scheduled.',
+    sinCitasCamino: 'If someone walks in, register them and it goes to the record.',
+    errorDia: 'We could not load the day. Try again.',
+  },
   horarios: {
     // ── S78-B TURNOS · closed vocabulary: shift (business template) ·
     //    schedule (what a person has) · appointment (family side) ──

@@ -21,7 +21,7 @@
  */
 
 import type { ReactNode } from 'react';
-import { Pressable } from 'react-native';
+import { Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { radius, spacing, usePresionado, useTheme } from '@epetplace/ui';
 
@@ -34,7 +34,10 @@ export function TarjetaEstado({
 }: {
   encendido: boolean;
   etiqueta: string;
-  onPress: () => void;
+  /** AUSENTE = tarjeta ESTÁTICA (S78-B recepción): pura lectura de
+   *  estado, sin Pressable — un toque que no hace nada es una promesa
+   *  rota (Ley 23). Presente = la física de presión de la casa. */
+  onPress?: () => void;
   /** checkbox = alterna algo (la fila de servicio) · radio = elige entre
    *  pares (la persona del selector de Jornadas) · button = navega/abre
    *  (el grupo de franjas: el on/off ahí es ESTADO — activa/pausada —,
@@ -44,6 +47,24 @@ export function TarjetaEstado({
 }) {
   const { theme } = useTheme();
   const { handlers, estiloPresionado } = usePresionado(0.99);
+  const superficie = {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: spacing[3],
+    padding: spacing[3],
+    borderRadius: radius.md,
+    backgroundColor: encendido ? theme.bg.card : 'transparent',
+    ...(encendido
+      ? { boxShadow: theme.elevacion.reposo }
+      : { borderWidth: theme.border.width, borderColor: theme.border.default }),
+  };
+  if (onPress === undefined) {
+    return (
+      <View accessible accessibilityLabel={etiqueta} style={superficie}>
+        {children}
+      </View>
+    );
+  }
   return (
     <Pressable
       onPress={onPress}
@@ -53,24 +74,7 @@ export function TarjetaEstado({
       accessibilityState={rol === 'button' ? undefined : { checked: encendido }}
       accessibilityLabel={etiqueta}
     >
-      <Animated.View
-        style={[
-          {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: spacing[3],
-            padding: spacing[3],
-            borderRadius: radius.md,
-            backgroundColor: encendido ? theme.bg.card : 'transparent',
-          },
-          encendido
-            ? { boxShadow: theme.elevacion.reposo }
-            : { borderWidth: theme.border.width, borderColor: theme.border.default },
-          estiloPresionado,
-        ]}
-      >
-        {children}
-      </Animated.View>
+      <Animated.View style={[superficie, estiloPresionado]}>{children}</Animated.View>
     </Pressable>
   );
 }

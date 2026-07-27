@@ -738,10 +738,18 @@ export {
 } from './wrappers/presupuestos-familia';
 
 // S74-A — el contacto de la VISITA (recepción v1: quién reservó la cita).
+// S78-B — el motor de recepción (s78a6): la jornada con su persona,
+// "Llegó" como hecho, y el reloj §7bis dicho por el server.
 export {
   obtenerContactoReservaCita,
+  obtenerJornadaRecepcion,
+  registrarLlegada,
+  obtenerSolicitudesMostrador,
   type ContactoReservaCita,
   type CodigoErrorContactoReserva,
+  type CitaJornadaRecepcion,
+  type SolicitudMostrador,
+  type CodigoErrorRecepcion,
 } from './wrappers/recepcion';
 
 // S74-B — la ventana de EQUIPO (LETRA_EQUIPO §14, composición sobre lo vivo)

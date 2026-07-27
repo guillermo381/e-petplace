@@ -60,7 +60,10 @@ import {
   obtenerMascotasAtendidas,
   obtenerMiCuentaComercial,
   obtenerMiPerfil,
+  obtenerChipsEmpleado,
+  obtenerMiEmpleadoId,
   obtenerMiPrestador,
+  obtenerTitularId,
   obtenerMundoVeterinariaPropio,
   obtenerOfertaAdiestramientoPropia,
   obtenerOfertasGroomingPropias,
@@ -75,12 +78,17 @@ import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 import { verificarSesion } from '@/lib/api';
 import { vozCitaVet } from '@/lib/voz-cita-vet';
 import { TechoOficio, ToggleTecho, VeloBarraEstadoOficio } from '@/components/techo-oficio';
+import { AgendaRecepcion } from '@/components/agenda-recepcion';
 import { FiltroOficio, type FiltroOficioValor } from '@/components/filtro-oficio';
 import { useTraduccion } from '@/i18n';
 
 type Pantalla =
   | { estado: 'cargando' }
   | { estado: 'error'; mensaje: string }
+  // S78-B — LA PRIMERA COMPOSICIÓN POR ROL (D-521): el HOY de quien es
+  // RECEPCIÓN (miembro activo, no titular, CERO chips — la definición
+  // por AUSENCIA de la letra §1) es LA PUERTA, no la jornada de oficio.
+  | { estado: 'recepcion'; prestadorId: string; cuentaComercialId: string | null; titularId: string | null }
   | {
       estado: 'listo';
       /** El día base del fetch (fecha local al cargar) — ancla de la semana. */
@@ -506,6 +514,30 @@ export default function Hoy() {
       setPantalla({ estado: 'error', mensaje: prestador.mensaje });
       return;
     }
+    // ── S78-B · D-521, la primera composición por rol ──
+    // recepción ⟺ miembro activo, NO titular, CERO chips (§1: definida
+    // por AUSENCIA). Costo declarado: +3 viajes en todo arranque del HOY
+    // (D-497); la cura de raíz es un resolvedor de rol cacheado — pedido
+    // a A, no deducido acá. Ante CUALQUIER fallo de lectura se cae a la
+    // jornada normal: la RLS ya restringe lo que recepción puede ver, y
+    // un falso-recepción escondería la jornada del titular (peor).
+    const miFila = await obtenerMiEmpleadoId(prestador.data.id);
+    if (miFila !== null) {
+      const [titularFila, chipsR] = await Promise.all([
+        obtenerTitularId(prestador.data.id),
+        obtenerChipsEmpleado(miFila),
+      ]);
+      const esTitular = titularFila !== null && titularFila === miFila;
+      if (!esTitular && chipsR.ok && chipsR.data.length === 0) {
+        setPantalla({
+          estado: 'recepcion',
+          prestadorId: prestador.data.id,
+          cuentaComercialId: prestador.data.cuenta_comercial_id,
+          titularId: titularFila,
+        });
+        return;
+      }
+    }
     // UN fetch cubre las dos vistas (S57-B1): rango hoy..hoy+6 — la vista
     // Hoy filtra por `desde`; la Semana agrupa el rango entero.
     const desde = hoyLocal();
@@ -750,6 +782,19 @@ export default function Hoy() {
 
   const esPrimera = (mascotaId: string) =>
     pantalla.estado === 'listo' && !pantalla.atendidas.has(mascotaId);
+
+  // S78-B: el HOY de recepción ES la Puerta — la composición entera
+  // vive en su componente; el techo del oficio no aplica (su jornada no
+  // es de oficio: es de la puerta del negocio).
+  if (pantalla.estado === 'recepcion') {
+    return (
+      <AgendaRecepcion
+        prestadorId={pantalla.prestadorId}
+        cuentaComercialId={pantalla.cuentaComercialId}
+        titularId={pantalla.titularId}
+      />
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
