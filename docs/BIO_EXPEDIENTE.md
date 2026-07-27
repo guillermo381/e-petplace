@@ -101,6 +101,14 @@ Los actores se identifican por la pareja **(cuenta_comercial_id, rol_activo)** o
 | Adoptante secundario | hereda rol pet_parent con consentimiento | ✅ | ✅ TODO |
 | Familiar autorizado | user con permisos delegados por dueño | ✅ notas limitadas | ✅ vista limitada |
 
+> **ENMIENDA S77 — QUÉ SE CORRIGE, CÓMO, Y DÓNDE NO HAY CAMINO PARA NADIE.** La fila de arriba dice *"Admin e-PetPlace · ✅ correcciones con audit"* y **hay que separar dos cosas que esa celda junta**, porque una existe y la otra no.
+>
+> **LO QUE EXISTE, con su literal:** la corrección vive como **EVENTO PROPIO**, no como sobrescritura — `evento_correccion_dato_identidad`, con `campo_corregido · valor_anterior · valor_nuevo · motivo · fecha_correccion · user_id`, y un trigger (`_trg_correccion_dato_crear_evento`) que le crea su padre en `eventos_mascota` con tipo `correccion_dato_identidad` y eje `identidad`. **Ese es el audit: el valor viejo NO se pierde, queda en la fila junto al nuevo, con autor, fecha y motivo.** **Y su alcance es el que su nombre dice: DATOS DE IDENTIDAD de la mascota.**
+>
+> **LO QUE NO EXISTE PARA NADIE — ni admin, ni profesional, ni titular: corregir una NOTA CLÍNICA SEDIMENTADA.** Medido en S77 (D-544): **grep en cero — ni RPC, ni evento, ni policy.** Y el `UNIQUE(cita_id)` de `evento_historia_clinica_registrada` impide volver a sedimentar sobre la misma cita, así que **el segundo intento tampoco es camino** (esa es la otra cara, D-543).
+>
+> **POR QUÉ EL VET NO FIGURA EN ESTA TABLA CON CAPACIDAD DE CORRECCIÓN — no es omisión, es LA LEY:** el muro clínico es **append-only** (P-OP-3; los triggers de `prestador_atencion_log`; la constelación de S70, donde cada evento tipado es inmutable). ⇒ **corregir no puede ser EDITAR: tiene que ser AGREGAR**, con su autor y su fecha, dejando lo anterior visible. **El precedente de forma ya está escrito en esta misma casa y es el de arriba** — lo que falta no es un mecanismo nuevo sino aplicarlo al eje clínico, con sus decisiones de mesa sin tomar (qué se puede corregir · quién · con qué ventana · **y cómo lo ve el DUEÑO**, que ya recibió el parte con la nota original). **Vive en D-544, y esta enmienda existe para que no se lea acá una capacidad que el motor no tiene.** Origen: S77-A.
+
 ### A2 — Visibilidad parcial por tipo de prestador ⚠️ HISTÓRICO
 
 > **Los ejemplos de esta sección son ANTERIORES al modelo de actor (S66). La matriz vigente vive en A3.**

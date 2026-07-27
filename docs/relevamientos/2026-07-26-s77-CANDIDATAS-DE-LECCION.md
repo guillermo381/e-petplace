@@ -1,5 +1,7 @@
 # LAS CANDIDATAS DE LECCIÓN — inventario para la firma del founder (S77)
 
+> **NUEVE candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia.
+
 > **NINGUNA ESTÁ FIRMADA. La firma es del founder.** Este documento no decide:
 > junta lo que hoy vive disperso entre la letra, las deudas y los cierres de
 > S75/S76/S77, con **su origen y su costo medido**, para que se puedan firmar
@@ -11,7 +13,7 @@
 
 ---
 
-## Las ocho con fuente
+## Las nueve
 
 ### 1 · (d) — EL ORDEN NOMBRA EL ARTEFACTO QUE ABRE, JAMÁS EL ARCHIVO DONDE SE LO ESPERA
 **Origen:** S75 (canon, línea 44). **Sin firma desde entonces.**
@@ -53,12 +55,19 @@
 **Costo medido — al revés que las demás: esta AHORRÓ trabajo, dos veces.** ① `prestador_empleado_servicios`: la policy DELETE existía desde que nació la tabla y `packages/api` nunca la expuso — **quitar un chip parecía motor y era un wrapper de 15 líneas**. ② `prestador_horarios`: `prestador_horarios_own` ya deja al titular escribir las franjas de su gente — **D-540 pasó de "motor" a wrapper + superficie**. Y una tercera aparición el mismo día: el brazo del UPDATE **nace abierto y sin puerta**.
 **Regla:** la casa se dio por bloqueada donde el motor ya estaba abierto, y las dos veces **el costo real fue una fracción del estimado**.
 
+### 9 · L-169 — ENTRE DOS CURAS EQUIVALENTES, GANA LA QUE NO DEPENDE DE QUE EL CENSO ESTÉ COMPLETO
+**Origen:** S77, el piso `RESTRICTIVE` de INSERT en `prestadores` (dentro de D-532).
+**Costo medido de la alternativa:** el censo declaró **DOS** policies de INSERT y eran **CUATRO** — las dos `FOR ALL` también son puerta, y las permisivas se combinan en OR. **Endurecer solo las dos `FOR INSERT`, que es lo que la mesa pidió, habría dejado `prestador_own_profile` abierta: una fuga viva con el cinturón en verde.** La forma `RESTRICTIVE` cerró sobre las cuatro **sin que nadie tuviera que saber cuántas eran** — se combina con AND sobre el OR de todas las permisivas, presentes y futuras.
+**La regla, y por qué no es lo mismo que "hacé bien el censo":** los censos van a volver a salir cortos (esta sesión lo probó **seis veces**). Cuando existe una forma cuya corrección **no depende de haber enumerado bien**, esa gana — aunque la otra parezca más quirúrgica.
+**Hermana de D-495**, donde el cinturón in-migración atrapó 10 policies que el censo no había visto.
+**Estado:** viva, sin firma.
+
+> **NOTA DE PROCEDENCIA, y es parte de la lección:** este número estuvo **NOMBRADO en el canon durante toda S77 sin existir**. La mesa lo declaró depositado en la letra y **la edición nunca se hizo** — grep en `docs/` y en `CLAUDE.md` devolvía una sola ocurrencia: la del índice que lo citaba. **Es el mismo patrón que S74 registró con L-165** (una ley ordenada como firmada y jamás escrita). Su texto se deposita acá, en S77, con esta nota puesta: **un número reservado no es una lección; una lección es un texto que alguien puede leer.**
+
 ---
 
-## El hueco: **L-169 NO EXISTE**
+## Nota sobre el conteo
 
-`CLAUDE.md` viene arrastrando *"Candidatas de lección sin firma: L-168 · L-169 · L-170 (viven en la letra y en D-532)"*. **L-168 vive en la letra §10bis y L-170 en D-532 — pero L-169 no está definida en ningún lado**: grep en `docs/` y en el canon devuelve **una sola ocurrencia, la del propio índice que la nombra**.
+**Son NUEVE, y la novena nació acá.** El inventario abrió con ocho porque **L-169 no existía**: el canon la nombraba y ninguna edición la había escrito. Su texto se depositó en S77 (ver arriba), con su nota de procedencia — que es, ella misma, material de la lección.
 
-Es el mismo patrón que S74 registró como error de mesa (**L-165 ordenada como firmada y nunca depositada**): *un número reservado sin letra que lo respalde*. **O la letra de L-169 existe en algún reporte que no llegó al repo —y entonces hay que depositarla—, o el número se libera.** No lo decido acá.
-
-**Y por eso el conteo real es OCHO, no nueve.** Si la novena es L-169, su cuerpo hay que escribirlo; si es otra que no encontré, pasame la fuente y entra.
+Si alguna otra candidata quedó fuera, es porque no encontré su fuente. **Pasame el literal y entra**: el criterio de este documento es que nada figure sin dónde leerlo.
