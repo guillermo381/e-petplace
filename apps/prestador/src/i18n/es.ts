@@ -900,6 +900,25 @@ export const prestadorEs = {
   // Voces de las franjas que EL TALLER hereda (S58-B B1b: /horarios murió
   // absorbida; keys muertas fuera — Ley 37; textos de los lotes S56 intactos).
   horarios: {
+    // ── S78-B TURNOS · vocabulario cerrado: turno (plantilla del
+    //    negocio) · jornada (lo que la persona tiene) · cita (familia —
+    //    JAMÁS "turno" de cara a ella). LOTE S78, GATE PENDIENTE ──
+    jornadas: 'Jornadas',
+    jornadasHint: 'Cada persona tiene su propio horario.',
+    jornadaTitular: 'Titular',
+    jornadaSin: 'Sin jornada',
+    jornadaPausadaCard: 'Jornada pausada',
+    jornadaUsaTurno: 'Usa el turno del negocio',
+    jornadaPropia: 'Jornada propia',
+    guardaAntes: 'Guarda o descarta los cambios antes de cambiar de persona.',
+    personaError: 'No pudimos cargar esa jornada. Prueba de nuevo.',
+    nadieTitulo: 'Todavía nadie tiene jornada',
+    nadieCuerpo: 'Sin horarios no aparecen cuando una familia busca una cita. Carga la primera y vas a poder reusarla como turno.',
+    turnoTitulo: 'El turno del negocio es {{rango}}',
+    turnoCuerpoPropia: '{{nombre}} trabaja en otro horario. Si quieres, puedes copiarle el turno del negocio.',
+    turnoCuerpoSin: 'Puedes darle el turno del negocio para que arranque con el mismo horario.',
+    turnoCta: 'Usar el turno del negocio',
+    turnoCitasConservadas: 'Tiene citas fuera del nuevo horario. Se conservan como están; el turno rige para las nuevas.',
     // LOTE S62 (D-386): la elección de organización de la agenda
     modoEtiqueta: 'Cómo organizas tu agenda',
     modoUniversal: 'Una agenda para todo',

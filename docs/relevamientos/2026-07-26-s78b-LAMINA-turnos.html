@@ -98,7 +98,7 @@
 <p class="cap">ESTADO 2 · N≥2, nadie con jornada
   <small>El bloque APARECE. El turno del negocio no se ofrece: no hay patrón del que copiar.</small></p>
 <div class="lienzo">
-  <p class="seccion">¿De quién es esta jornada?</p>
+  <p class="seccion">Jornadas</p>
   <p class="apoyo">Cada persona tiene su propio horario.</p>
   <div class="t on"><div class="ini">CA</div><div style="flex:1"><div class="nom">Carla Aurora</div>
     <div class="sub">Titular · sin jornada</div></div></div>
@@ -114,7 +114,7 @@
 <p class="cap">ESTADO 3 · persona con TURNO asignado
   <small>«Usa el turno del negocio» es DATO derivado (sus franjas coinciden con el patrón), no una etiqueta suelta.</small></p>
 <div class="lienzo">
-  <p class="seccion">¿De quién es esta jornada?</p>
+  <p class="seccion">Jornadas</p>
   <div class="t off"><div class="ini off">CA</div><div style="flex:1"><div class="nom gris">Carla Aurora</div>
     <div class="sub">Titular · 08:00 – 17:00</div></div></div>
   <div class="t on"><div class="ini">MP</div><div style="flex:1"><div class="nom">Mariana Paredes</div>
@@ -141,14 +141,14 @@
 <p class="cap">ESTADO 4 · persona con JORNADA PROPIA
   <small>Divergió del patrón y es legal. La oferta de copiar el turno reaparece — sin empujar.</small></p>
 <div class="lienzo">
-  <p class="seccion">¿De quién es esta jornada?</p>
+  <p class="seccion">Jornadas</p>
   <div class="t off"><div class="ini off">CA</div><div style="flex:1"><div class="nom gris">Carla Aurora</div>
     <div class="sub">Titular · 08:00 – 17:00</div></div></div>
   <div class="t on"><div class="ini">MP</div><div style="flex:1"><div class="nom">Mariana Paredes</div>
     <div class="sub">Jornada propia · 10:00 – 19:00</div></div></div>
   <div class="tinte warn" style="background:transparent;border-color:var(--borde)">
     <h3 style="color:var(--tinta)">El turno del negocio es 08:00 – 17:00</h3>
-    <p style="color:var(--sec)">Mariana trabaja en otro horario. Si querés igualarla, podés copiarle el turno.</p>
+    <p style="color:var(--sec)">Mariana trabaja en otro horario. Si quieres, puedes copiarle el turno del negocio.</p>
     <button class="btn cta">Usar el turno del negocio</button>
   </div>
 </div>
@@ -166,29 +166,34 @@
 </div>
 
 <!-- 6 -->
-<p class="cap">ESTADO 6 · cambiar de turno CON CITAS AGENDADAS
-  <small>🔴 El número exige wrapper sobre <code>contar_citas_despegables</code> (existe en DB, sin wrapper).
-  Mientras tanto: la consecuencia SIN cantidad — el mismo patrón que la baja ya firmada.</small></p>
+<p class="cap">ESTADO 6 · cambiar de turno CON CITAS AGENDADAS — ✅ FIRMADO: SE CONSERVAN
+  <small>Las citas ya pactadas quedan con su persona. Nada se despega. El aviso es CONTEXTO junto al
+  confirmar (contorno neutro del estado 4), no un muro — y el hecho lo garantiza el motor:
+  <code>evento_cita_servicio</code> no referencia franjas.</small></p>
 <div class="lienzo">
-  <p class="cap" style="margin:0 0 6px">v1 — hoy, construible</p>
-  <div class="tinte dang" style="margin-top:0">
-    <h3>Tiene citas en el horario que sale</h3>
-    <p>Al cambiarle el turno, las citas que queden fuera de su nuevo horario pasan a ser citas del negocio.
-       Eso no se deshace.</p>
+  <p class="cap" style="margin:0 0 6px">v1 — hoy</p>
+  <div class="tinte warn" style="margin-top:0;background:transparent;border-color:var(--borde)">
+    <h3 style="color:var(--tinta)">El turno del negocio es 08:00 – 17:00</h3>
+    <p style="color:var(--sec)">Mariana trabaja en otro horario. Si quieres, puedes copiarle el turno del negocio.</p>
+    <p style="color:var(--sec);margin-top:8px">Tiene citas fuera del nuevo horario. Se conservan como están;
+      el turno rige para las nuevas.</p>
+    <button class="btn cta">Usar el turno del negocio</button>
   </div>
-  <button class="btn destructivo">Cambiar el turno igual</button>
 
-  <p class="cap" style="margin:22px 0 6px">v2 — cuando A entregue el wrapper</p>
-  <div class="tinte dang" style="margin-top:0">
-    <h3>Tiene 4 citas en el horario que sale</h3>
-    <p>Al cambiarle el turno, esas 4 citas pasan a ser citas del negocio. Eso no se deshace.</p>
+  <p class="cap" style="margin:22px 0 6px">v2 — cuando A entregue el wrapper de <code>contar_citas_despegables</code></p>
+  <div class="tinte warn" style="margin-top:0;background:transparent;border-color:var(--borde)">
+    <p style="color:var(--sec)">Tiene 4 citas fuera del nuevo horario. Se conservan como están;
+      el turno rige para las nuevas.</p>
   </div>
+  <p class="marca">LUGAR RESERVADO, no dibujado: la cita conservada fuera del patrón vigente gana una marca
+    de fila en el HOY/Semana (familia «Parte del plan»). Y el COLAPSO declarado: el derivado no tiene
+    memoria — tras el cambio, la persona con citas conservadas se lee como estado 4 («Jornada propia»).</p>
 </div>
 
 <p class="nota" style="margin-top:-6px">
-  <strong>Al gate, dos preguntas:</strong> ① ¿turno <strong>derivado</strong> (lo de esta lámina, cero motor)
-  o <strong>entidad</strong> con tabla propia (motor de A, y habilita propagar un cambio a las N personas)? ·
-  ② ¿el estado 6 se construye <strong>sin número</strong> y lo gana después, o espera al wrapper?
+  <strong>Gate resuelto (26-jul):</strong> estado 6 firmado como conservación · derivado asumido con su
+  colapso declarado · strings en tuteo · título de sección a sustantivo. Esta lámina quedó enmendada
+  en el mismo commit que la construcción.
 </p>
 
 </div>

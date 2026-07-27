@@ -37,9 +37,8 @@
 //   RETIRADA en el gate — el estado se lee por el GLIFO ENTERO.
 // ─────────────────────────────────────────────────────────────────────
 
-import { useCallback, useMemo, useState, type ReactNode } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
-import Animated from 'react-native-reanimated';
+import { useCallback, useMemo, useState } from 'react';
+import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
@@ -61,7 +60,6 @@ import {
   radius,
   spacing,
   useAviso,
-  usePresionado,
   useTheme,
 } from '@epetplace/ui';
 import {
@@ -88,6 +86,7 @@ import {
 import { verificarSesion } from '@/lib/api';
 import { useTraduccion } from '@/i18n';
 import { ControlEstado, IconoOficio } from '@/components/iconos-oficio';
+import { TarjetaEstado } from '@/components/tarjeta-estado';
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -98,70 +97,9 @@ type Pantalla =
  *  filtro del HOY). Fijo: la lista no se reordena según quién la mire. */
 const ORDEN_OFICIOS: readonly OficioChip[] = ['veterinaria', 'grooming', 'paseo', 'adiestramiento'];
 
-/**
- * LA TARJETA DE SERVICIO — la composición firmada en el gate S78.
- *
- * ENCENDIDA: superficie de card + `elevacion.reposo`, **sin borde** — la
- *   regla Chanel del marco (Ley 20): borde + sombra dicen lo mismo dos veces.
- * APAGADA: **transparente** + 1px `border.default`, sin sombra. Sobre el
- *   papel de la Hoja no es una superficie: es un contorno.
- *
- * POR QUÉ NO ES `Tarjeta` (declarado, no improvisado): `Tarjeta` fija
- * `bg.card` como fondo en TODOS sus niveles y `border.subtle` como hairline
- * (`Tarjeta.tsx:82,99-109`). El estado APAGADO de esta composición —
- * transparente con `border.default`— no es expresable con ella. Se compone
- * con TOKENS (Ley 1: cero valores crudos) y la física de presión sale de LA
- * primitiva compartida `usePresionado` (D-401), jamás de un clon.
- *
- * DELTA DECLARADO AL GATE: el founder pidió radio 14 y padding 13/14.
- * Ninguno de los tres es token (`radius`: 12 · 16 — `spacing`: 12 · 16).
- * Se usa `radius.md` (12) y `spacing[3]` (12), que conservan la intención
- * (más chico que las tarjetas de 16). Los valores exactos exigen tokens
- * nuevos en `packages/ui` ⇒ pedido a A, no deducido acá.
- */
-function TarjetaServicio({
-  encendido,
-  etiqueta,
-  onPress,
-  children,
-}: {
-  encendido: boolean;
-  etiqueta: string;
-  onPress: () => void;
-  children: ReactNode;
-}) {
-  const { theme } = useTheme();
-  const { handlers, estiloPresionado } = usePresionado(0.99);
-  return (
-    <Pressable
-      onPress={onPress}
-      onPressIn={handlers.onPressIn}
-      onPressOut={handlers.onPressOut}
-      accessibilityRole="checkbox"
-      accessibilityState={{ checked: encendido }}
-      accessibilityLabel={etiqueta}
-    >
-      <Animated.View
-        style={[
-          {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: spacing[3],
-            padding: spacing[3],
-            borderRadius: radius.md,
-            backgroundColor: encendido ? theme.bg.card : 'transparent',
-          },
-          encendido
-            ? { boxShadow: theme.elevacion.reposo }
-            : { borderWidth: theme.border.width, borderColor: theme.border.default },
-          estiloPresionado,
-        ]}
-      >
-        {children}
-      </Animated.View>
-    </Pressable>
-  );
-}
+// La anatomía on/off firmada acá se EXTRAJO a `components/tarjeta-estado`
+// cuando el selector de Jornadas (S78-B turnos) se volvió su segundo
+// consumidor — una sola definición, cero clones (Ley 19 en espíritu).
 
 export default function EquipoNegocioPantalla() {
   const router = useRouter();
@@ -687,7 +625,7 @@ export default function EquipoNegocioPantalla() {
                       const enConfirmacion = confirmaQuitar === oficio;
                       return (
                         <View key={oficio} style={{ gap: spacing[2] }}>
-                          <TarjetaServicio
+                          <TarjetaEstado
                             encendido={encendido}
                             etiqueta={vozOficio(oficio)}
                             onPress={() => void alternarOficio(miembro, oficio, !encendido)}
@@ -709,7 +647,7 @@ export default function EquipoNegocioPantalla() {
                               colorBorde={theme.border.default}
                               colorCheck={theme.accent.ctaTexto}
                             />
-                          </TarjetaServicio>
+                          </TarjetaEstado>
 
                           {/* ── EL ACTO CLÍNICO (§4): quitar el ÚLTIMO chip
                               médico le saca a esa persona EL EXPEDIENTE. No

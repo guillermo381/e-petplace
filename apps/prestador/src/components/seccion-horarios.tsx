@@ -13,9 +13,32 @@
  * Las franjas son las GENERALES del prestador (servicio_id NULL): el
  * motor las lee para TODO servicio (obtener_slots: servicio_id IS NULL
  * OR = p_servicio_id) — una sola agenda del prestador, dos lápices.
+ *
+ * ── S78-B · TURNOS (habilitado por A2 `8ade0a2`: las seis firmas de
+ *    jornada aceptan `empleadoId`; ausente = el titular, contrato V0) ──
+ *
+ * LA REGLA DURA DEL FOUNDER, cumplida por estructura: con UN solo turno
+ * nadie ve la palabra "turno" — el bloque de Jornadas se monta SOLO con
+ * 2+ personas con chip de ESTE oficio. N=1: cero diff (verificado: el
+ * lector ya filtra por empleado_id y sin argumento resuelve al titular).
+ *
+ * EL TURNO ES DERIVADO, no entidad (M1 de turnos, gate 26-jul): un
+ * patrón de franjas que ya existe — asignarlo COPIA las franjas del
+ * titular a la persona. Sin memoria: tras cambiarlo, la persona con
+ * citas conservadas colapsa al estado "Jornada propia" (declarado).
+ *
+ * ESTADO 6 FIRMADO (founder, 26-jul): las citas ya pactadas SE
+ * CONSERVAN con su persona. El hecho lo garantiza el MOTOR (la cita no
+ * referencia franjas — vive por fecha/hora propias); el aviso es
+ * contexto junto al confirmar, jamás muro, jamás destructivo.
+ *
+ * ALCANCE DEL ACABADO (disciplina anti-S70): se re-acaba SOLO lo que el
+ * turno toca (el bloque de Jornadas nace acabado; la lista de franjas
+ * pasa a TarjetaEstado). Los SelectorOpcion, las tres Hoja, ListaHoras
+ * y la celda de vacaciones quedan pre-acabadas y migran por D-318.
  */
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
@@ -28,6 +51,7 @@ import {
   StepperCantidad,
   Tarjeta,
   Texto,
+  radius,
   spacing,
   typography,
   useAviso,
@@ -42,11 +66,18 @@ import {
   elegirModoHorarios,
   eliminarFranjaHorario,
   eliminarFranjasPrestador,
+  obtenerChipsEmpleado,
+  obtenerEquipoNegocio,
+  obtenerFranjasDeServicios,
+  obtenerFranjasHorario,
+  obtenerMiEmpleadoId,
   type FranjaHorario,
   type ModoHorarios,
+  type OficioChip,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { TarjetaEstado } from '@/components/tarjeta-estado';
 
 export interface DraftFranja {
   key: string;
@@ -121,6 +152,11 @@ export function franjaDirty(f: DraftFranja): boolean {
 export async function aplicarDiffFranjas(
   prestadorId: string,
   franjas: DraftFranja[],
+  /** S78-B (contrato A2): la PERSONA dueña del borrador. Ausente = el
+   *  titular (V0 exacto — los talleres sin selector no cambian). Las
+   *  vías por id (actualizar/eliminar) no lo necesitan: la fila ya
+   *  porta su persona. */
+  empleadoId?: string,
 ): Promise<
   | { ok: true; franjas: DraftFranja[] }
   | { ok: false; franjas: DraftFranja[]; error: { tipo: 'solape'; diaSemana: number } | { tipo: 'otro'; mensaje: string } }
@@ -145,6 +181,7 @@ export async function aplicarDiffFranjas(
         const r = await editarFranjaHorario({
           id: f.id,
           prestadorId,
+          empleadoId,
           horaInicio: f.horaInicio,
           horaFin: f.horaFin,
           maxCitasPorSlot: f.cupo,
@@ -178,6 +215,7 @@ export async function aplicarDiffFranjas(
         f.servicioId !== null
           ? await crearFranjaServicio({
               prestadorId,
+              empleadoId,
               servicioId: f.servicioId,
               diaSemana: f.diaSemana,
               horaInicio: f.horaInicio,
@@ -186,6 +224,7 @@ export async function aplicarDiffFranjas(
             })
           : await crearFranjaHorario({
               prestadorId,
+              empleadoId,
               diaSemana: f.diaSemana,
               horaInicio: f.horaInicio,
               horaFin: f.horaFin,
@@ -223,6 +262,59 @@ function ListaHoras({ minimo, onElegir }: { minimo: string | null; onElegir: (h:
 }
 
 
+/** El resumen de una jornada para las tarjetas del selector (S78-B). */
+interface FranjaResumen {
+  servicioId: string | null;
+  diaSemana: number;
+  horaInicio: string;
+  horaFin: string;
+  cupo: number;
+  activo: boolean;
+}
+
+interface PersonaJornada {
+  /** null = el titular (el contrato V0 de A2: empleadoId ausente). */
+  empleadoId: string | null;
+  nombre: string;
+  esTitular: boolean;
+  /** Snapshot de sus franjas; null = no se pudo leer (Ley 13: el error
+   *  no se disfraza de "sin jornada" — la tarjeta omite el resumen). */
+  patron: FranjaResumen[] | null;
+}
+
+const claveResumen = (f: FranjaResumen): string =>
+  `${f.servicioId ?? ''}|${f.diaSemana}|${f.horaInicio}|${f.horaFin}`;
+
+/** Igualdad de PATRÓN sobre las franjas ACTIVAS (el turno son sus horas
+ *  vivas; una pausada no rompe la pertenencia al turno). */
+function patronIgual(a: FranjaResumen[], b: FranjaResumen[]): boolean {
+  const va = new Set(a.filter((f) => f.activo).map(claveResumen));
+  const vb = new Set(b.filter((f) => f.activo).map(claveResumen));
+  return va.size === vb.size && [...va].every((k) => vb.has(k));
+}
+
+/** `08:00 – 17:00` sobre las activas (dato, no bautismo — el turno se
+ *  nombra por sus horas, jamás "Turno 1"). */
+function rangoDe(patron: FranjaResumen[]): string | null {
+  const vivas = patron.filter((f) => f.activo);
+  if (vivas.length === 0) return null;
+  const min = vivas.reduce((m, f) => (f.horaInicio < m ? f.horaInicio : m), vivas[0].horaInicio);
+  const max = vivas.reduce((m, f) => (f.horaFin > m ? f.horaFin : m), vivas[0].horaFin);
+  return `${min} – ${max}`;
+}
+
+const resumenDeBorrador = (fs: DraftFranja[]): FranjaResumen[] =>
+  fs
+    .filter((f) => !f.quitar)
+    .map((f) => ({
+      servicioId: f.servicioId,
+      diaSemana: f.diaSemana,
+      horaInicio: f.horaInicio,
+      horaFin: f.horaFin,
+      cupo: f.cupo,
+      activo: f.activo,
+    }));
+
 export function SeccionHorarios({
   franjas,
   onCambio,
@@ -233,6 +325,9 @@ export function SeccionHorarios({
   ofertas,
   onModoCambiado,
   hayBorradorExterno,
+  cuentaComercialId,
+  empleadoSel,
+  onEmpleadoCambio,
 }: {
   franjas: DraftFranja[];
   onCambio: (franjas: DraftFranja[]) => void;
@@ -259,6 +354,17 @@ export function SeccionHorarios({
    *  conversión/vuelta avisan ANTES de disparar la recarga que los
    *  perdería. */
   hayBorradorExterno?: boolean;
+  /** S78-B TURNOS — la cuenta comercial del negocio (llave del lector de
+   *  equipo). null = no se pudo leer: el bloque de Jornadas no se monta
+   *  (ausencia ante la duda, jamás un selector roto). */
+  cuentaComercialId: string | null;
+  /** La PERSONA cuyo borrador está abajo. null = el titular. El taller
+   *  lo guarda porque `aplicarDiffFranjas` lo necesita al guardar. */
+  empleadoSel: string | null;
+  /** El switch YA VALIDADO: esta sección hace el refetch y empuja las
+   *  franjas nuevas por `onCambio` ANTES de avisar — el taller solo
+   *  registra el id. */
+  onEmpleadoCambio: (empleadoId: string | null) => void;
 }) {
   const router = useRouter();
   const { theme } = useTheme();
@@ -295,6 +401,171 @@ export function SeccionHorarios({
   const [hastaSel, setHastaSel] = useState<string | null>(null);
   const [cupoSel, setCupoSel] = useState(1);
   const contadorNuevas = useRef(0);
+
+  // ── S78-B TURNOS: las personas con chip de ESTE oficio ──
+  const [personas, setPersonas] = useState<PersonaJornada[] | null>(null);
+  const [cambiandoPersona, setCambiandoPersona] = useState(false);
+
+  /** El lector del patrón, con la MISMA bifurcación que usa el taller
+   *  (por_servicio lee las franjas de las ofertas; universal las
+   *  generales) — un resumen leído con otra vara mentiría. */
+  async function leerPatron(empleadoId: string | null): Promise<FranjaResumen[] | null> {
+    const emp = empleadoId ?? undefined;
+    if (modo === 'por_servicio' && ofertas.length > 0) {
+      const r = await obtenerFranjasDeServicios(prestadorId, ofertas.map((o) => o.id), emp);
+      if (!r.ok) return null;
+      return r.data.map((f) => ({
+        servicioId: f.servicioId,
+        diaSemana: f.diaSemana,
+        horaInicio: f.horaInicio,
+        horaFin: f.horaFin,
+        cupo: f.maxCitasPorSlot,
+        activo: f.activo,
+      }));
+    }
+    const r = await obtenerFranjasHorario(prestadorId, emp);
+    if (!r.ok) return null;
+    return r.data.map((f) => ({
+      servicioId: null,
+      diaSemana: f.diaSemana,
+      horaInicio: f.horaInicio,
+      horaFin: f.horaFin,
+      cupo: f.maxCitasPorSlot,
+      activo: f.activo,
+    }));
+  }
+
+  const patronADrafts = (patron: FranjaResumen[]): DraftFranja[] =>
+    patron.map((fp) => {
+      contadorNuevas.current += 1;
+      return {
+        key: `nueva-${contadorNuevas.current}`,
+        id: null,
+        servicioId: fp.servicioId,
+        diaSemana: fp.diaSemana,
+        horaInicio: fp.horaInicio,
+        horaFin: fp.horaFin,
+        cupo: fp.cupo,
+        activo: true,
+        quitar: false,
+        baseCupo: null,
+        baseActivo: null,
+        baseHoraInicio: null,
+        baseHoraFin: null,
+      };
+    });
+
+  useEffect(() => {
+    let vigente = true;
+    void (async () => {
+      if (cuentaComercialId === null) {
+        setPersonas(null);
+        return;
+      }
+      const eq = await obtenerEquipoNegocio(cuentaComercialId);
+      if (!vigente || !eq.ok) return;
+      const activos = eq.data.miembros.filter((m) => m.activo);
+
+      // Punto 3 del pedido: LA PERSONA AJUSTA SU PROPIA JORNADA. El
+      // no-dueño que llega al taller ve/edita LO SUYO (D2 de A2: la
+      // persona escribe la suya → pasa), sin selector — desde su vista
+      // el negocio es N=1 y la regla dura rige igual.
+      if (!eq.data.esDueno) {
+        const yo = await obtenerMiEmpleadoId(prestadorId);
+        if (!vigente || yo === null) return;
+        // el borrador pasa a SUS franjas (con ids reales, misma firma
+        // del taller) y el taller guarda con su id — jamás el titular
+        if (modo === 'por_servicio' && ofertas.length > 0) {
+          const r = await obtenerFranjasDeServicios(prestadorId, ofertas.map((o) => o.id), yo);
+          if (!vigente || !r.ok) return;
+          onEmpleadoCambio(yo);
+          onCambio(r.data.map((f) => draftDesdeFranja(f, f.servicioId)));
+        } else {
+          const r = await obtenerFranjasHorario(prestadorId, yo);
+          if (!vigente || !r.ok) return;
+          onEmpleadoCambio(yo);
+          onCambio(r.data.map((f) => draftDesdeFranja(f)));
+        }
+        return;
+      }
+
+      // LA REGLA DURA: con una sola persona no existe el concepto.
+      if (activos.length <= 1) return;
+      const titularM = activos.find((m) => m.roles.includes('dueño'));
+      const resto = activos.filter((m) => !m.roles.includes('dueño'));
+      // solo quienes tienen chip de ESTE oficio (2 viajes por cabeza —
+      // el costo D-497 ya declarado; la cura es ensanchar el lector de
+      // equipo, pedido a A)
+      const conChip = await Promise.all(
+        resto.map(async (m) => {
+          const r = await obtenerChipsEmpleado(m.empleadoId);
+          return { m, tiene: r.ok && r.data.some((c) => c.oficio === (oficio as OficioChip)) };
+        }),
+      );
+      if (!vigente) return;
+      const habilitados = conChip.filter((x) => x.tiene).map((x) => x.m);
+      if (habilitados.length === 0) return;
+      const lista: Omit<PersonaJornada, 'patron'>[] = [
+        { empleadoId: null, nombre: titularM?.nombre ?? '', esTitular: true },
+        ...habilitados.map((m) => ({ empleadoId: m.empleadoId, nombre: m.nombre, esTitular: false })),
+      ];
+      const conPatron = await Promise.all(
+        lista.map(async (p) => ({ ...p, patron: await leerPatron(p.empleadoId) })),
+      );
+      if (vigente) setPersonas(conPatron);
+    })();
+    return () => {
+      vigente = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- se relee al
+    // cambiar la cuenta o el modo; el resto viaja por closure a propósito
+  }, [cuentaComercialId, modo]);
+
+  /** El switch de persona — dirty-check, refetch, y RECIÉN AHÍ el aviso
+   *  al taller (jamás un id nuevo sobre franjas viejas). */
+  async function tocarPersona(id: string | null) {
+    if (id === empleadoSel || cambiandoPersona) return;
+    if (franjas.some(franjaDirty)) {
+      mostrar({ texto: t('horarios.guardaAntes'), variante: 'error' });
+      return;
+    }
+    setCambiandoPersona(true);
+    const patron = await leerPatron(id);
+    setCambiandoPersona(false);
+    if (patron === null) {
+      mostrar({ texto: t('horarios.personaError'), variante: 'error' });
+      return;
+    }
+    // frescura del snapshot: la tarjeta que se deja hereda el borrador
+    // (no está dirty ⇒ es lo guardado)
+    setPersonas((prev) =>
+      prev?.map((p) => (p.empleadoId === empleadoSel ? { ...p, patron: resumenDeBorrador(franjas) } : p)) ?? prev,
+    );
+    onEmpleadoCambio(id);
+    // el borrador nuevo se lee CON IDS por la misma firma del taller
+    const emp = id ?? undefined;
+    if (modo === 'por_servicio' && ofertas.length > 0) {
+      const r = await obtenerFranjasDeServicios(prestadorId, ofertas.map((o) => o.id), emp);
+      if (r.ok) onCambio(r.data.map((f) => draftDesdeFranja(f, f.servicioId)));
+    } else {
+      const r = await obtenerFranjasHorario(prestadorId, emp);
+      if (r.ok) onCambio(r.data.map((f) => draftDesdeFranja(f)));
+    }
+  }
+
+  /** Copiar el turno del negocio a la persona elegida — MODIFICA EL
+   *  BORRADOR (las suyas salen, las copias entran); el Guardar del
+   *  taller es quien aplica. ESTADO 6 FIRMADO: sus citas ya pactadas SE
+   *  CONSERVAN (el motor no ata citas a franjas) — el aviso de al lado
+   *  es contexto, no muro. Solo se copian las ACTIVAS del patrón: una
+   *  franja nace activa (el alta no acepta pausada). */
+  function usarTurnoNegocio() {
+    const tit = personas?.find((p) => p.esTitular)?.patron;
+    if (!tit || tit.length === 0) return;
+    const salen = franjas.filter((f) => f.id !== null).map((f) => ({ ...f, quitar: true }));
+    const copias = patronADrafts(tit.filter((f) => f.activo));
+    onCambio([...salen, ...copias]);
+  }
 
   const vozDia = (dia: number): string => t(`horarios.dia${dia as 0 | 1 | 2 | 3 | 4 | 5 | 6}` as const);
   const letraDia = (dia: number): string => t(`taller.diaCorto${dia as 0 | 1 | 2 | 3 | 4 | 5 | 6}` as const);
@@ -362,7 +633,7 @@ export function SeccionHorarios({
   async function confirmarCambioModo() {
     if (modoPendiente === null || modoOcupado) return;
     setModoOcupado(true);
-    const del = await eliminarFranjasPrestador(prestadorId);
+    const del = await eliminarFranjasPrestador(prestadorId, empleadoSel ?? undefined);
     if (!del.ok) {
       setModoOcupado(false);
       mostrar({ variante: 'error', texto: del.mensaje });
@@ -398,6 +669,7 @@ export function SeccionHorarios({
         for (const sid of franjaPendiente.servicios) {
           const rf = await crearFranjaServicio({
             prestadorId,
+            empleadoId: empleadoSel ?? undefined,
             servicioId: sid,
             diaSemana: dia,
             horaInicio: franjaPendiente.desde,
@@ -497,9 +769,132 @@ export function SeccionHorarios({
     setCreandoFranja(false);
   }
 
+  // ── S78-B: derivaciones del bloque de Jornadas ──
+  const personaActiva = personas?.find((p) => p.empleadoId === empleadoSel) ?? null;
+  const patronTitular = personas?.find((p) => p.esTitular)?.patron ?? null;
+  const patronVivo = resumenDeBorrador(franjas);
+  const nadieConJornada =
+    personas !== null &&
+    patronVivo.length === 0 &&
+    personas.every((p) => p.empleadoId === empleadoSel || (p.patron !== null && p.patron.length === 0));
+  // la oferta del turno: persona elegida ≠ titular, el negocio TIENE
+  // patrón, y la persona no lo está usando ya
+  const ofreceTurno =
+    personaActiva !== null &&
+    !personaActiva.esTitular &&
+    patronTitular !== null &&
+    patronTitular.some((f) => f.activo) &&
+    !patronIgual(patronVivo, patronTitular);
+
+  const subtituloPersona = (p: PersonaJornada): string => {
+    const patron = p.empleadoId === empleadoSel ? patronVivo : p.patron;
+    const partes: string[] = [];
+    if (p.esTitular) partes.push(t('horarios.jornadaTitular'));
+    if (patron === null) return partes.join(' · '); // no se pudo leer: ni inventa ni miente
+    if (patron.length === 0) {
+      partes.push(t('horarios.jornadaSin'));
+      return partes.join(' · ');
+    }
+    const rango = rangoDe(patron);
+    if (rango === null) {
+      partes.push(t('horarios.jornadaPausadaCard'));
+      return partes.join(' · ');
+    }
+    if (!p.esTitular && patronTitular !== null && patronIgual(patron, patronTitular)) {
+      partes.push(t('horarios.jornadaUsaTurno'));
+    } else if (!p.esTitular) {
+      partes.push(t('horarios.jornadaPropia'));
+    }
+    partes.push(rango);
+    return partes.join(' · ');
+  };
+
   return (
     <View style={{ gap: spacing[3] }}>
       {titulo}
+
+      {/* ══ S78-B · JORNADAS — se monta SOLO con 2+ personas de este
+          oficio (la regla dura: con una, el concepto no existe). El
+          bloque va ARRIBA porque cambia el SUJETO de todo lo de abajo
+          (momento-primero: la persona antes que los días). ══ */}
+      {personas !== null && personas.length >= 2 && (
+        <View style={{ gap: spacing[2] }}>
+          <Texto variante="seccion">{t('horarios.jornadas')}</Texto>
+          <Texto variante="apoyo">{t('horarios.jornadasHint')}</Texto>
+          <View style={{ gap: spacing[2.5], marginTop: spacing[1] }}>
+            {personas.map((p) => (
+              <TarjetaEstado
+                key={p.empleadoId ?? 'titular'}
+                encendido={p.empleadoId === empleadoSel}
+                rol="radio"
+                etiqueta={p.nombre}
+                onPress={() => void tocarPersona(p.empleadoId)}
+              >
+                <View style={{ flex: 1, gap: spacing[0.5] }}>
+                  <Texto variante="cuerpo">{p.nombre}</Texto>
+                  <Texto variante="apoyo">{subtituloPersona(p)}</Texto>
+                </View>
+              </TarjetaEstado>
+            ))}
+          </View>
+
+          {/* estado 2: nadie tiene jornada — voz con camino, jamás hueco */}
+          {nadieConJornada && (
+            <Tarjeta tinte="warning" relleno="amplio">
+              <View style={{ gap: spacing[1] }}>
+                <Texto variante="seccion">{t('horarios.nadieTitulo')}</Texto>
+                <Texto variante="cuerpo">{t('horarios.nadieCuerpo')}</Texto>
+              </View>
+            </Tarjeta>
+          )}
+
+          {/* estados 4/6: el turno del negocio, ofrecido para copiar.
+              ESTADO 6 FIRMADO: las citas ya pactadas SE CONSERVAN con su
+              persona (el motor no ata citas a franjas) — el aviso es
+              CONTEXTO junto al confirmar, contorno neutro, jamás muro.
+              El CTA es secundario: el sólido de la pantalla es el
+              Guardar del taller (Ley 19.2 — un sólido por superficie;
+              delta declarado contra la lámina, que lo pintó lleno).
+              v2 con número: espera el wrapper de A sobre
+              `contar_citas_despegables` (pedido emitido).
+              LUGAR RESERVADO (no dibujado): la cita conservada fuera
+              del patrón vigente gana su marca de fila en el HOY/Semana
+              (familia "Parte del plan") — se declara para agregar sin
+              rehacer. Y el COLAPSO declarado: el derivado no tiene
+              memoria — tras el cambio, la persona se lee "Jornada
+              propia". */}
+          {ofreceTurno && patronTitular !== null && (
+            <View
+              style={{
+                borderWidth: theme.border.width,
+                borderColor: theme.border.default,
+                borderRadius: radius.md,
+                padding: spacing[3],
+                gap: spacing[2],
+              }}
+            >
+              <Texto variante="seccion">
+                {t('horarios.turnoTitulo', { rango: rangoDe(patronTitular) ?? '' })}
+              </Texto>
+              <Texto variante="cuerpo">
+                {patronVivo.length > 0
+                  ? t('horarios.turnoCuerpoPropia', { nombre: personaActiva.nombre })
+                  : t('horarios.turnoCuerpoSin')}
+              </Texto>
+              {patronVivo.length > 0 && (
+                <Texto variante="apoyo">{t('horarios.turnoCitasConservadas')}</Texto>
+              )}
+              <Boton
+                variante="secundario"
+                bloque
+                etiqueta={t('horarios.turnoCta')}
+                onPress={usarTurnoNegocio}
+              />
+            </View>
+          )}
+        </View>
+      )}
+
       {/* D-386 (S62): LA ELECCIÓN — universal o por servicio, jamás
           mezcla (letra founder S60; el guard de DB la respalda). La
           explica dice la verdad del modo vigente. */}
@@ -553,8 +948,13 @@ export function SeccionHorarios({
       {grupos.length === 0 ? (
         <Texto variante="apoyo">{t('taller.sinFranjas')}</Texto>
       ) : (
-        <Tarjeta relleno="ninguno">
-          {grupos.map((miembros, i) => {
+        /* S78-B: la lista de ESTADO pasa a tarjetas separadas — la misma
+           anatomía firmada en la Hoja del miembro (activa = superficie
+           con sombra · pausada = contorno transparente): UNA gramática
+           de "está ahí pero no rige" en toda la app del prestador. El
+           on/off acá es ESTADO, no acción — el toque ABRE (rol button). */
+        <View style={{ gap: spacing[2.5] }}>
+          {grupos.map((miembros) => {
             const f = miembros[0];
             const partes = [diasDeGrupo(miembros)];
             // D-386: en por_servicio el grupo dice sus ofertas
@@ -565,27 +965,29 @@ export function SeccionHorarios({
             if (!f.activo) partes.push(t('horarios.pausada'));
             if (miembros.some((x) => x.id === null)) partes.push(t('taller.franjaNueva'));
             return (
-              <View key={f.key}>
-                {i > 0 && <Separador />}
-                <Celda
-                  interactiva
-                  accessibilityRole="button"
-                  titulo={vozCupo(f.cupo)}
-                  subtitulo={partes.join(' · ')}
-                  metadataMono={`${f.horaInicio} – ${f.horaFin}`}
-                  onPress={() => {
-                    setHojaGrupo(miembros.map((x) => x.key));
-                    setCupoSel(f.cupo);
-                    setDesdeEdit(f.horaInicio);
-                    setHastaEdit(f.horaFin);
-                    setVistaGrupo('form');
-                    setConfirmandoQuitar(false);
-                  }}
-                />
-              </View>
+              <TarjetaEstado
+                key={f.key}
+                encendido={f.activo}
+                rol="button"
+                etiqueta={`${vozCupo(f.cupo)} · ${partes.join(' · ')}`}
+                onPress={() => {
+                  setHojaGrupo(miembros.map((x) => x.key));
+                  setCupoSel(f.cupo);
+                  setDesdeEdit(f.horaInicio);
+                  setHastaEdit(f.horaFin);
+                  setVistaGrupo('form');
+                  setConfirmandoQuitar(false);
+                }}
+              >
+                <View style={{ flex: 1, gap: spacing[0.5] }}>
+                  <Texto variante="cuerpo">{vozCupo(f.cupo)}</Texto>
+                  <Texto variante="apoyo">{partes.join(' · ')}</Texto>
+                </View>
+                <Texto variante="dato">{`${f.horaInicio} – ${f.horaFin}`}</Texto>
+              </TarjetaEstado>
             );
           })}
-        </Tarjeta>
+        </View>
       )}
       {/* vacaciones — la celda-puente vive con los horarios (§15b.5a) */}
       <Tarjeta relleno="ninguno">

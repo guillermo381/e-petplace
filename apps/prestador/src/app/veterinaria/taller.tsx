@@ -205,6 +205,11 @@ export default function TallerVeterinaria() {
   // horarios (sección compartida + D-386)
   const [franjas, setFranjas] = useState<DraftFranja[] | null>(null);
   const [modoHorarios, setModoHorarios] = useState<ModoHorarios>('universal');
+  // S78-B TURNOS: la persona cuyo borrador de jornada está abajo
+  // (null = el titular, contrato V0). El switch lo maneja la propia
+  // SeccionHorarios (refetch + onCambio) — acá solo se registra.
+  const [empleadoJornada, setEmpleadoJornada] = useState<string | null>(null);
+  const [cuentaComercialId, setCuentaComercialId] = useState<string | null>(null);
   const [ofertasHorarios, setOfertasHorarios] = useState<OfertaParaHorarios[]>([]);
   const [hojaDuracion, setHojaDuracion] = useState<ItemMenuVeterinaria | null>(null);
   // "Otra duración" (B9): el campo visible de la Hoja — se limpia al abrir
@@ -308,6 +313,7 @@ export default function TallerVeterinaria() {
       } else {
         setFranjas(rFranjas.data.map((f) => draftDesdeFranja(f)));
       }
+      setCuentaComercialId(rCuenta.ok ? (rCuenta.data?.id ?? null) : null);
       setPantalla({
         estado: 'listo',
         prestadorId: prestador.data.id,
@@ -453,7 +459,7 @@ export default function TallerVeterinaria() {
       setEspBase({ ids, libres });
     }
 
-    const rf = await aplicarDiffFranjas(pantalla.prestadorId, franjas);
+    const rf = await aplicarDiffFranjas(pantalla.prestadorId, franjas, empleadoJornada ?? undefined);
     setFranjas(rf.franjas);
     if (!rf.ok) {
       setGuardando(false);
@@ -729,7 +735,15 @@ export default function TallerVeterinaria() {
               prestadorId={pantalla.prestadorId}
               modo={modoHorarios}
               ofertas={ofertasHorarios}
-              onModoCambiado={() => setIntento((n) => n + 1)}
+              cuentaComercialId={cuentaComercialId}
+              empleadoSel={empleadoJornada}
+              onEmpleadoCambio={setEmpleadoJornada}
+              // la recarga lee al TITULAR: la persona vuelve a él (sin el
+              // reset, el guardado escribiría lo del titular bajo otro id)
+              onModoCambiado={() => {
+                setEmpleadoJornada(null);
+                setIntento((n) => n + 1);
+              }}
               // S68-B8 (mitad UI D-409): la Hoja avisa si hay borrador vivo
               hayBorradorExterno={hayCambios}
             />

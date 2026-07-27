@@ -221,6 +221,11 @@ export default function TallerPaseo() {
   const [franjas, setFranjas] = useState<DraftFranja[] | null>(null);
   // D-386: la elección vigente + las ofertas del oficio para la réplica
   const [modoHorarios, setModoHorarios] = useState<ModoHorarios>('universal');
+  // S78-B TURNOS: la persona cuyo borrador de jornada está abajo
+  // (null = el titular, contrato V0). El switch lo maneja la propia
+  // SeccionHorarios (refetch + onCambio) — acá solo se registra.
+  const [empleadoJornada, setEmpleadoJornada] = useState<string | null>(null);
+  const [cuentaComercialId, setCuentaComercialId] = useState<string | null>(null);
   const [ofertasHorarios, setOfertasHorarios] = useState<OfertaParaHorarios[]>([]);
   const [zonas, setZonas] = useState<DraftZona[] | null>(null);
   const [ciudades, setCiudades] = useState<CiudadCatalogo[]>([]);
@@ -292,6 +297,7 @@ export default function TallerPaseo() {
       setZonas(rZonas.data.map((z) => ({ key: z.id, id: z.id, ciudad: z.ciudad, quitar: false })));
       setCiudades(rCiudades.ok ? rCiudades.data : []);
       setPaises(rPaises.ok ? rPaises.data : []);
+      setCuentaComercialId(rCuenta.ok ? (rCuenta.data?.id ?? null) : null);
       setPantalla({
         estado: 'listo',
         prestadorId: prestador.data.id,
@@ -417,7 +423,7 @@ export default function TallerPaseo() {
 
     // el diff de franjas vive en la sección compartida (S59-B5)
     {
-      const rf = await aplicarDiffFranjas(pantalla.prestadorId, franjas);
+      const rf = await aplicarDiffFranjas(pantalla.prestadorId, franjas, empleadoJornada ?? undefined);
       setFranjas(rf.franjas);
       if (!rf.ok) {
         setGuardando(false);
@@ -719,9 +725,17 @@ export default function TallerPaseo() {
               prestadorId={pantalla.prestadorId}
               modo={modoHorarios}
               ofertas={ofertasHorarios}
+              cuentaComercialId={cuentaComercialId}
+              empleadoSel={empleadoJornada}
+              onEmpleadoCambio={setEmpleadoJornada}
               // el modo cambió en el server: recarga entera del taller
-              // (la Hoja ya avisó que se empieza de nuevo)
-              onModoCambiado={() => setIntento((n) => n + 1)}
+              // (la Hoja ya avisó que se empieza de nuevo; la recarga lee
+              // al TITULAR, así que la persona vuelve a él — sin reset
+              // el guardado escribiría franjas del titular bajo otro id)
+              onModoCambiado={() => {
+                setEmpleadoJornada(null);
+                setIntento((n) => n + 1);
+              }}
               // S68-B8 (mitad UI D-409): la Hoja avisa si hay borrador vivo
               hayBorradorExterno={hayCambios}
             />

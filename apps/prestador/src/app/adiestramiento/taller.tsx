@@ -68,6 +68,7 @@ import {
   obtenerComisionVigenteCita,
   obtenerFranjasDeServicios,
   obtenerFranjasHorario,
+  obtenerMiCuentaComercial,
   obtenerMiPrestador,
   obtenerModoHorarios,
   obtenerOfertaAdiestramientoPropia,
@@ -240,6 +241,9 @@ export default function TallerAdiestramiento() {
   // post-cambio-de-modo) lo puebla.
   const [franjas, setFranjas] = useState<DraftFranja[] | null>(null);
   const [modoHorarios, setModoHorarios] = useState<ModoHorarios>('universal');
+  // S78-B TURNOS: la persona del borrador de jornada (null = titular)
+  const [empleadoJornada, setEmpleadoJornada] = useState<string | null>(null);
+  const [cuentaComercialId, setCuentaComercialId] = useState<string | null>(null);
   const [ofertasHorarios, setOfertasHorarios] = useState<OfertaParaHorarios[]>([]);
   const [guardandoHorarios, setGuardandoHorarios] = useState(false);
   // S68-B (D-412): el neto visible — el % es DATO leído (7.15)
@@ -256,12 +260,14 @@ export default function TallerAdiestramiento() {
     // S68-B: horarios (D-426) + comisión (D-412) — la comisión y el modo
     // refrescan siempre; el BORRADOR de franjas solo se puebla si está
     // vacío (el refetch-en-focus no pisa trabajo sin guardar)
-    const [rComision, rModo, rFranjas] = await Promise.all([
+    const [rComision, rModo, rFranjas, rCuenta] = await Promise.all([
       obtenerComisionVigenteCita(),
       obtenerModoHorarios(prestador.data.id),
       obtenerFranjasHorario(prestador.data.id),
+      obtenerMiCuentaComercial(),
     ]);
     if (rComision.ok) setComisionPct(rComision.data.porcentaje);
+    setCuentaComercialId(rCuenta.ok ? (rCuenta.data?.id ?? null) : null);
     if (rModo.ok && rFranjas.ok) {
       setModoHorarios(rModo.data);
       const ofertaId = r.data.oferta?.id ?? null;
@@ -412,7 +418,7 @@ export default function TallerAdiestramiento() {
   async function guardarHorarios() {
     if (listo === null || franjas === null || guardandoHorarios) return;
     setGuardandoHorarios(true);
-    const rf = await aplicarDiffFranjas(listo.prestadorId, franjas);
+    const rf = await aplicarDiffFranjas(listo.prestadorId, franjas, empleadoJornada ?? undefined);
     setFranjas(rf.franjas);
     setGuardandoHorarios(false);
     if (!rf.ok) {
@@ -804,7 +810,12 @@ export default function TallerAdiestramiento() {
                   prestadorId={listo.prestadorId}
                   modo={modoHorarios}
                   ofertas={ofertasHorarios}
+                  cuentaComercialId={cuentaComercialId}
+                  empleadoSel={empleadoJornada}
+                  onEmpleadoCambio={setEmpleadoJornada}
+                  // la recarga lee al TITULAR: la persona vuelve a él
                   onModoCambiado={() => {
+                    setEmpleadoJornada(null);
                     setFranjas(null);
                     void cargar(true);
                   }}

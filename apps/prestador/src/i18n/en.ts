@@ -772,6 +772,24 @@ export const prestadorEn = {
   },
   // Voces de las franjas que EL TALLER hereda (S58-B B1b) · Espejo de es.ts
   horarios: {
+    // ── S78-B TURNOS · closed vocabulary: shift (business template) ·
+    //    schedule (what a person has) · appointment (family side) ──
+    jornadas: 'Schedules',
+    jornadasHint: 'Each person has their own hours.',
+    jornadaTitular: 'Owner',
+    jornadaSin: 'No schedule',
+    jornadaPausadaCard: 'Schedule paused',
+    jornadaUsaTurno: 'Uses the business shift',
+    jornadaPropia: 'Own schedule',
+    guardaAntes: 'Save or discard your changes before switching people.',
+    personaError: 'We could not load that schedule. Try again.',
+    nadieTitulo: 'Nobody has a schedule yet',
+    nadieCuerpo: 'Without hours they do not show up when a family looks for an appointment. Set up the first one and you can reuse it as the shift.',
+    turnoTitulo: 'The business shift is {{rango}}',
+    turnoCuerpoPropia: '{{nombre}} works different hours. If you want, you can copy the business shift to them.',
+    turnoCuerpoSin: 'You can give them the business shift so they start with the same hours.',
+    turnoCta: 'Use the business shift',
+    turnoCitasConservadas: 'They have appointments outside the new hours. Those stay as they are; the shift applies to new ones.',
     // LOTE S62 (D-386): la elección de organización de la agenda
     modoEtiqueta: 'How you organize your schedule',
     modoUniversal: 'One schedule for everything',
