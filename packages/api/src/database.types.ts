@@ -11894,6 +11894,7 @@ export type Database = {
           cuenta_comercial_id: string
           descripcion: string | null
           direccion: string | null
+          direccion_envio: string | null
           email_contacto: string | null
           estado: string
           expone_personas: boolean
@@ -11909,6 +11910,8 @@ export type Database = {
           modo_horarios: string
           motivo_rechazo: string | null
           nombre_comercial: string
+          primer_ingreso_en: string | null
+          proposito: string | null
           radio_cobertura_km: number | null
           sector: string | null
           sitio_web: string | null
@@ -11932,6 +11935,7 @@ export type Database = {
           cuenta_comercial_id: string
           descripcion?: string | null
           direccion?: string | null
+          direccion_envio?: string | null
           email_contacto?: string | null
           estado?: string
           expone_personas?: boolean
@@ -11947,6 +11951,8 @@ export type Database = {
           modo_horarios?: string
           motivo_rechazo?: string | null
           nombre_comercial: string
+          primer_ingreso_en?: string | null
+          proposito?: string | null
           radio_cobertura_km?: number | null
           sector?: string | null
           sitio_web?: string | null
@@ -11970,6 +11976,7 @@ export type Database = {
           cuenta_comercial_id?: string
           descripcion?: string | null
           direccion?: string | null
+          direccion_envio?: string | null
           email_contacto?: string | null
           estado?: string
           expone_personas?: boolean
@@ -11985,6 +11992,8 @@ export type Database = {
           modo_horarios?: string
           motivo_rechazo?: string | null
           nombre_comercial?: string
+          primer_ingreso_en?: string | null
+          proposito?: string | null
           radio_cobertura_km?: number | null
           sector?: string | null
           sitio_web?: string | null
@@ -16915,9 +16924,11 @@ export type Database = {
       invitar_prestador: {
         Args: {
           p_country_code?: string
+          p_direccion_envio?: string
           p_email: string
           p_identificacion_fiscal: string
           p_nombre_comercial: string
+          p_proposito?: string
           p_razon_social: string
           p_tipo_fiscal: Database["public"]["Enums"]["tipo_fiscal_enum"]
           p_tipo_prestador: string
@@ -16958,7 +16969,13 @@ export type Database = {
         Returns: string
       }
       obtener_adiestradores_disponibles: {
-        Args: { p_fecha: string; p_hora: string; p_mascota_id: string }
+        Args: {
+          p_fecha: string
+          p_hora: string
+          p_lat?: number
+          p_lon?: number
+          p_mascota_id: string
+        }
         Returns: {
           ciudad: string
           comprable: string
@@ -17034,6 +17051,8 @@ export type Database = {
         Args: {
           p_fecha: string
           p_hora: string
+          p_lat?: number
+          p_lon?: number
           p_mascota_id: string
           p_modalidad?: string
           p_tipo_servicio: string
@@ -17169,7 +17188,13 @@ export type Database = {
         }[]
       }
       obtener_paseadores_disponibles: {
-        Args: { p_duracion_minutos: number; p_fecha: string; p_hora: string }
+        Args: {
+          p_duracion_minutos: number
+          p_fecha: string
+          p_hora: string
+          p_lat?: number
+          p_lon?: number
+        }
         Returns: {
           duracion_minutos: number
           precio: number
@@ -17257,6 +17282,8 @@ export type Database = {
         Args: {
           p_fecha: string
           p_hora: string
+          p_lat?: number
+          p_lon?: number
           p_mascota_id: string
           p_tipo_servicio: string
         }
@@ -17418,6 +17445,7 @@ export type Database = {
         }
         Returns: Json
       }
+      registrar_primer_ingreso: { Args: never; Returns: Json }
       registrar_producto_grooming: {
         Args: {
           p_cantidad?: number
