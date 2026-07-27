@@ -38,6 +38,24 @@ El detalle fino del 403 quedó en los logs de la función (el body de
 Google se loggea server-side; visible en el dashboard de Supabase →
 Functions → lugares → logs).
 
+> **ADDENDUM (misma fecha, re-sonda pedida por la mesa): EL 403 MURIÓ —
+> PLACES ESTÁ VIVO DE PUNTA A PUNTA.** El founder tocó la consola y la
+> re-sonda dio los CUATRO casos en verde:
+> · sin JWT → **401** ✓
+> · `buscar` "Av. de los Shyris, Quito" → **200 con 3 predicciones
+>   REALES** (place_ids de Google, texto principal/secundario separados)
+> · `resolver` la predicción con la MISMA sesión (el cierre con Details
+>   del contrato) → **200**: `{"direccion":"170135 Quito, Ecuador",
+>   "ciudad":"Quito","lat":-0.17277…,"lon":-78.48045…}` — la ciudad
+>   salió de `locality` y las coordenadas son REALES (coherentes con las
+>   de Satori/Carlos medidas en T1: −0.17/−78.48, pleno Quito)
+> · body malformado → **400 `entrada_invalida`** ✓
+> **Criterios (a) y (b): CUMPLIDOS.** Consecuencia inmediata: la captura
+> del hogar (A4, cliente) queda operativa E2E sin ningún deploy — y la
+> superficie de la sede de B nace contra un contrato que ya devuelve
+> datos vivos. D-557 (la key expuesta) NO cambia: la rotación sigue
+> pendiente de confirmación del founder.
+
 ## T3.2 — Medición (a): el alta de prestador NO captura geo — porque EL ALTA NO EXISTE en el monorepo
 
 Literal, punta a punta:
