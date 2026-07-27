@@ -73,6 +73,18 @@ de esta letra.
    `verificacion_profesional_pendiente` — el MISMO nombre del trigger
    vivo de S68, que sigue siendo la autoridad al activar cada oferta
    (este check es la copia del gate en el checklist, no su reemplazo).
+   **DECLARADO (pregunta de la mesa, T4-post): la señal es
+   `prestadores.tipo` — el eje que D-487 declaró muerto.** No hay
+   alternativa en la fase 3: leer `prestador_servicios` sería guarda
+   muerta (al activar todavía no hay filas — este checklist las excluye
+   a propósito). El apoyo en `tipo` es SEGURO porque no es la última
+   línea: si el tipo miente (un invitado como grooming que después suma
+   oferta vet), **el trigger de S68 lo caza igual al activar esa
+   oferta** — el checklist es cortesía temprana; el gate de registro es
+   el trigger. `laboratorio` queda FUERA de la lista médica del
+   checklist a propósito (su gate real es el mismo trigger, oferta por
+   oferta). Si D-487 alguna vez jubila el eje `tipo`, esta condición se
+   re-lee en esa misma tanda — cruce declarado en ambas direcciones.
 
 **El punto de la RPC: que "un prestador activo pero no ofertable por
 geografía" sea MECÁNICAMENTE IMPOSIBLE** — no una regla que haya que
