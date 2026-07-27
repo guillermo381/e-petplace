@@ -1599,7 +1599,8 @@ export const prestadorEn = {
     eleccion: 'We chose you to be one of the 15 providers shaping e-PetPlace in Ecuador.',
     propositoIntro: 'You told us:',
     propositoCierre: 'Here we help you live it every day.',
-    firmaNombre: 'Guillermo',
+    // literal del founder (27-jul-2026) — la firma NO se traduce
+    firmaNombre: 'Guillermo Suárez',
     firmaRol: 'founder, e-PetPlace',
     dia90:
       'Your first 90 days are your encounter with e-PetPlace. When the quarter is complete, we go through the graduation moment together.',

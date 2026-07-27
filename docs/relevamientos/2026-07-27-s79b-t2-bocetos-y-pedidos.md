@@ -186,9 +186,9 @@ línea de "saltar" — la única salida es la única acción (la letra lo pide a
 marca → `Redirect /bienvenida-dia1`; el CTA escribe la marca y `router.replace`
 a las tabs. **V1 puente declarado:** AsyncStorage `s79.bienvenida.vista:<userId>`
 hasta que llegue el motor del PEDIDO #1 (mismo patrón de puente que D-553).
-**Pendiente de founder declarado:** el nombre completo de la firma (hoy
-"Guillermo" — el string entra al lote S79 y se corrige en su gate, L-142) y el
-literal N=15 (vive en el diccionario, se edita al crecer la cohorte).
+**Pendiente de founder — PAGADO en T3:** la firma es literal del founder
+(27-jul-2026): **"Guillermo Suárez / founder, e-PetPlace"**. Queda del lote
+solo el N=15 (vive en el diccionario, se edita al crecer la cohorte).
 
 **Contrato de datos (M4):** `obtenerMiPerfil().nombre` (primer nombre) ·
 `prestadores.proposito` (PEDIDO #2 — hoy siempre ausente) · marca de vista

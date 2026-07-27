@@ -111,8 +111,9 @@ gobierna; un activo que navegue directo ve una pantalla inofensiva).
    `docs/relevamientos/2026-07-27-s79b-mic-montaje.svg` (21px/44px · claro y
    oscuro · reposo y escuchando, junto a 5 del registry). Veredicto explícito.
 9. **EL LOTE DE STRINGS S79** (leer y aprobar, L-142) — con las correcciones
-   B1 adentro: `dia1.*` (la carta; **`firmaNombre` espera el nombre completo
-   del founder**) · `preparaEspacio.*` · `agenda.aspiracional` (N=15) ·
+   B1 adentro: `dia1.*` (la carta; **`firmaNombre` YA FIRMADO por literal del
+   founder: "Guillermo Suárez / founder, e-PetPlace"**) · `preparaEspacio.*` ·
+   `agenda.aspiracional` (N=15) ·
    `sede.*` · `salaEspera.*` · `despierta.*` + `negocio.despierta*` ·
    `miCuenta.oficioAdiestramiento/oficioVeterinaria` (y la muerte de
    `oficioAmbos`) · **`equipo.vitrinaToggle` corregida**: "Dejar que las

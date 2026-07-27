@@ -1781,15 +1781,16 @@ export const prestadorEs = {
     checkHecho: 'Lista',
   },
   // S79-B (T2-B2) · LA BIENVENIDA DIGITAL DEL DÍA 1 (§2.3) — carta, no
-  // banner. `firmaNombre`: el nombre completo lo firma el founder en el
-  // gate del lote (L-142). `eleccion`: N=15 vive acá · LOTE S79, GATE PENDIENTE
+  // banner. `firmaNombre`: LITERAL DEL FOUNDER (27-jul-2026): el pie de la
+  // carta es "Guillermo Suárez / founder, e-PetPlace" — el pendiente de
+  // T2 quedó pagado. `eleccion`: N=15 vive acá · LOTE S79, GATE PENDIENTE
   dia1: {
     saludoNombre: 'Hola, {{nombre}}.',
     saludoSinNombre: 'Hola.',
     eleccion: 'Te elegimos para ser uno de los 15 prestadores que dan forma a e-PetPlace en Ecuador.',
     propositoIntro: 'Tú nos dijiste:',
     propositoCierre: 'Acá te ayudamos a vivirlo todos los días.',
-    firmaNombre: 'Guillermo',
+    firmaNombre: 'Guillermo Suárez',
     firmaRol: 'founder, e-PetPlace',
     dia90:
       'Los primeros 90 días son tu encuentro con e-PetPlace. Al cumplir el trimestre completamos juntos el momento de graduación.',
