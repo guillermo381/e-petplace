@@ -429,6 +429,16 @@ export const clienteEn = {
     dondeTitulo: 'Where it happens',
     dondeDomicilioTitulo: 'Where the vet is going',
     direccionDomicilioVoz: 'For at-home urgent care we need your home address.',
+    // S78-A7 — the person picker (LETRA_VITRINA; only shows when the
+    // clinic exposes its people and 2+ are bookable — N=1 collapses)
+    conQuienTitulo: 'Who with?',
+    conQuienVoz: 'If you like, choose who attends. Otherwise {{negocio}} assigns someone from their team.',
+    cualquieraEquipo: 'Anyone on the team',
+    integranteEquipo: 'Team member',
+    conQuienConfirmar: 'Continue',
+    personaNoPudo: "That exact time doesn't work for them — but the clinic can make it.",
+    dejarQueAsigne: 'Let the clinic assign',
+    atiendeTitulo: 'Who attends',
   },
   // S63-A Bloque 3 — training booking, owner side + the session report
   // (LOTE S63, founder gate pending)

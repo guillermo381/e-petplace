@@ -80,7 +80,7 @@ const MENSAJES_ERROR_AGENDAMIENTO: Record<
   prestador_no_disponible: 'El paseador no está disponible en esas fechas — elegí otro horario.',
   paseo_social_no:        'Por ahora los paseos son en grupo. Estamos armando algo para tu mascota.',
   servicio_no_reservable: 'Este servicio todavía no se puede reservar por la app.',
-  persona_no_disponible:  'Quien elegiste no tiene ese horario libre — probá otra hora o dejá que la clínica asigne.',
+  persona_no_disponible:  'Quien elegiste no tiene ese horario libre. Prueba otra hora o deja que la clínica asigne.',
   urgencia_solo_hoy:      'Las urgencias se reservan solo para hoy.',
   datos_inconsistentes:   'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:      'Ocurrió un error inesperado. Probá de nuevo.',

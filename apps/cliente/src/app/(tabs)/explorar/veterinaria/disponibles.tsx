@@ -24,7 +24,9 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  Hoja,
   Icono,
+  SelectorOpcion,
   Separador,
   Tarjeta,
   spacing,
@@ -35,7 +37,10 @@ import {
 import {
   crearBloqueoAgenda,
   obtenerPerfilMascota,
+  obtenerPersonasQueAtienden,
   obtenerVeterinariosDisponibles,
+  obtenerVitrinaNegocios,
+  type PersonaQueAtiende,
   type PerfilMascota,
   type VeterinarioDisponible,
 } from '@epetplace/api';
@@ -59,11 +64,31 @@ export default function VeterinariaDisponibles() {
   const [perfil, setPerfil] = useState<PerfilMascota | 'cargando' | 'error'>('cargando');
   const [disponibles, setDisponibles] = useState<VeterinarioDisponible[] | 'cargando' | 'error'>('cargando');
   const [creandoHold, setCreandoHold] = useState(false);
+  // S78-A7 (LETRA_VITRINA): qué negocios exponen a sus personas. `null` =
+  // no cargó o falló — la pantalla DEGRADA al camino de siempre (hold
+  // directo), decisión declarada en el M1: la elección es ACCESORIA por
+  // diseño (sin ella la reserva sigue entera); es el caso que D-542 exige
+  // decidir uno por uno, y este queda decidido acá.
+  const [vitrina, setVitrina] = useState<Record<string, boolean> | null>(null);
+  // La Hoja del selector: solo existe con 2+ personas OFERTABLES
+  // (chip + jornada — el filtro vive abajo; N=1 colapsa, es diseño).
+  const [hojaPersonas, setHojaPersonas] = useState<{
+    negocio: VeterinarioDisponible;
+    personas: PersonaQueAtiende[];
+  } | null>(null);
+  const [personaElegida, setPersonaElegida] = useState('cualquiera');
+  const [personaRebotada, setPersonaRebotada] = useState(false);
+  const [abriendoSelector, setAbriendoSelector] = useState<string | null>(null);
 
   const cargarVets = useCallback(() => {
     setDisponibles('cargando');
     void obtenerVeterinariosDisponibles({ fecha, hora, tipo_servicio: tipoServicio, mascota_id: mascotaId }).then((r) => {
       setDisponibles(r.ok ? r.data : 'error');
+      if (r.ok && r.data.length > 0) {
+        void obtenerVitrinaNegocios(r.data.map((v) => v.prestador_id)).then((rv) => {
+          setVitrina(rv.ok ? rv.data : null);
+        });
+      }
     });
   }, [fecha, hora, tipoServicio, mascotaId]);
 
@@ -82,8 +107,10 @@ export default function VeterinariaDisponibles() {
   );
 
   // El hold nace acá: invisible al prestador hasta que el pago confirme.
+  // S78-A7: si la familia ELIGIÓ persona, viaja al motor — que la FIJA o
+  // rebota `persona_no_disponible` (jamás cae en otra en silencio).
   const crearHold = useCallback(
-    async (v: VeterinarioDisponible) => {
+    async (v: VeterinarioDisponible, persona?: PersonaQueAtiende) => {
       if (creandoHold) return;
       setCreandoHold(true);
       const r = await crearBloqueoAgenda({
@@ -92,15 +119,26 @@ export default function VeterinariaDisponibles() {
         mascota_id: mascotaId,
         fecha,
         hora,
+        ...(persona !== undefined ? { empleado_id: persona.empleadoId } : null),
       });
       setCreandoHold(false);
       if (!r.ok) {
+        // VARA 2 — `persona_no_disponible` tiene SU cara, jamás la de
+        // slot_ocupado: son dos verdades ("no hay lugar" vs "quien
+        // elegiste no puede, pero el negocio sí"). Vive DENTRO de la
+        // Hoja, con sus dos caminos.
+        if (r.codigo === 'persona_no_disponible') {
+          setPersonaRebotada(true);
+          return;
+        }
+        setHojaPersonas(null);
         mostrar({ texto: r.mensaje, variante: 'error' });
         if (r.codigo === 'slot_ocupado' || r.codigo === 'slot_en_pasado') cargarVets();
         // urgencia que cruzó la medianoche: el CUÁNDO recalcula HOY
         if (r.codigo === 'urgencia_solo_hoy') router.back();
         return;
       }
+      setHojaPersonas(null);
       router.push({
         pathname: '/explorar/veterinaria/checkout',
         params: {
@@ -115,10 +153,42 @@ export default function VeterinariaDisponibles() {
           direccion: v.direccion ?? '',
           ciudad: v.ciudad ?? '',
           modalidad: esDomicilio ? 'domicilio' : 'local',
+          // §8 LETRA_TURNOS (la mitad "confirmación"): si eligió, se dice.
+          ...(persona !== undefined ? { personaNombre: persona.nombre ?? t('veterinaria.integranteEquipo') } : null),
         },
       });
     },
     [creandoHold, fecha, hora, mascotaId, tipoServicio, esDomicilio, t, cargarVets, mostrar],
+  );
+
+  // S78-A7 — el tap de la fila: la Hoja SOLO si hay elección real.
+  // "Ofertable" = chip + JORNADA (vara 1): `obtener_personas_que_atienden`
+  // trae a propósito al que tiene chip sin jornada (dato del PRESTADOR,
+  // D-540 visible) — la familia jamás lo ve: se filtra acá, y el conteo
+  // del colapso N=1 corre sobre lo filtrado (Ley 23: no se ofrece a
+  // alguien sin horarios).
+  const tocarNegocio = useCallback(
+    async (v: VeterinarioDisponible) => {
+      if (creandoHold || abriendoSelector !== null) return;
+      if (vitrina?.[v.prestador_id] !== true) {
+        void crearHold(v);
+        return;
+      }
+      setAbriendoSelector(v.prestador_servicio_id);
+      const r = await obtenerPersonasQueAtienden(v.prestador_id, v.prestador_servicio_id);
+      setAbriendoSelector(null);
+      const ofertables = r.ok ? r.data.filter((per) => per.tieneJornada) : [];
+      if (ofertables.length < 2) {
+        // colapso N=1 (o fallo de lectura, degradación declarada en M1):
+        // el camino de siempre — la puerta no pregunta lo que ya sabe.
+        void crearHold(v);
+        return;
+      }
+      setPersonaElegida('cualquiera');
+      setPersonaRebotada(false);
+      setHojaPersonas({ negocio: v, personas: ofertables });
+    },
+    [creandoHold, abriendoSelector, vitrina, crearHold],
   );
 
   const mascota = typeof perfil === 'object' ? perfil.mascota : null;
@@ -173,7 +243,7 @@ export default function VeterinariaDisponibles() {
                   metadataMono={`$${v.precio.toFixed(2)} · ${v.duracion_minutos} min`}
                   interactiva
                   accessibilityRole="button"
-                  onPress={() => void crearHold(v)}
+                  onPress={() => void tocarNegocio(v)}
                 />
               </View>
             ))}
@@ -194,6 +264,95 @@ export default function VeterinariaDisponibles() {
           </Text>
         ) : null}
       </ScrollView>
+
+      {/* S78-A7 — LA HOJA DEL SELECTOR DE PERSONA (LETRA_VITRINA). Solo se
+          monta con 2+ ofertables; "Cualquiera del equipo" viene
+          PRESELECCIONADO — continuar sin tocar nada ES el camino de hoy
+          (vara 3: el selector ofrece, no exige). */}
+      <Hoja
+        visible={hojaPersonas !== null}
+        onCerrar={() => setHojaPersonas(null)}
+        titulo={t('veterinaria.conQuienTitulo')}
+        conCerrar
+      >
+        {hojaPersonas !== null ? (
+          <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
+            <Text
+              style={{
+                fontFamily: typography.family.sans.regular,
+                fontSize: typography.size.sm,
+                lineHeight: Math.round(typography.size.sm * 1.4),
+                color: theme.text.secondary,
+              }}
+            >
+              {t('veterinaria.conQuienVoz', { negocio: hojaPersonas.negocio.prestador_nombre })}
+            </Text>
+            <SelectorOpcion
+              etiqueta={t('veterinaria.conQuienTitulo')}
+              etiquetaVisible={false}
+              acento="control"
+              disposicion="columnas"
+              opciones={[
+                { codigo: 'cualquiera', etiqueta: t('veterinaria.cualquieraEquipo') },
+                ...hojaPersonas.personas.map((per) => ({
+                  codigo: per.empleadoId,
+                  // null honesto → etiqueta genérica, jamás un nombre inventado (L-139)
+                  etiqueta: per.nombre ?? t('veterinaria.integranteEquipo'),
+                })),
+              ]}
+              seleccionada={personaElegida}
+              onSelect={(codigo) => {
+                setPersonaElegida(codigo);
+                setPersonaRebotada(false);
+              }}
+            />
+            {personaRebotada ? (
+              /* VARA 2 — la cara PROPIA del rebote, con sus DOS caminos:
+                 soltar la elección (la reserva no se pierde) o volver al
+                 CUÁNDO. Jamás la ropa de slot_ocupado. */
+              <View style={{ gap: spacing[2] }}>
+                <Text
+                  style={{
+                    fontFamily: typography.family.sans.regular,
+                    fontSize: typography.size.sm,
+                    lineHeight: Math.round(typography.size.sm * 1.4),
+                    color: theme.status.warningText,
+                  }}
+                >
+                  {t('veterinaria.personaNoPudo')}
+                </Text>
+                <Boton
+                  variante="primario"
+                  bloque
+                  etiqueta={t('veterinaria.dejarQueAsigne')}
+                  cargando={creandoHold}
+                  onPress={() => void crearHold(hojaPersonas.negocio)}
+                />
+                <Boton
+                  variante="ghost"
+                  bloque
+                  etiqueta={t('explorar.probarOtroHorario')}
+                  onPress={() => {
+                    setHojaPersonas(null);
+                    router.back();
+                  }}
+                />
+              </View>
+            ) : (
+              <Boton
+                variante="primario"
+                bloque
+                etiqueta={t('veterinaria.conQuienConfirmar')}
+                cargando={creandoHold}
+                onPress={() => {
+                  const per = hojaPersonas.personas.find((x) => x.empleadoId === personaElegida);
+                  void crearHold(hojaPersonas.negocio, per);
+                }}
+              />
+            )}
+          </View>
+        ) : null}
+      </Hoja>
     </SafeAreaView>
   );
 }

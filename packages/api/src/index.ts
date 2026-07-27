@@ -443,6 +443,7 @@ export {
   // S78-A7 (LETRA_VITRINA): el selector de persona del CUÁNDO vet.
   obtenerPersonasQueAtienden,
   type PersonaQueAtiende,
+  obtenerVitrinaNegocios,
   obtenerVeterinariosDisponibles,
   type CodigoErrorVetReserva,
   type InputIniciosVet,

@@ -467,6 +467,16 @@ export const clienteEs = {
     dondeTitulo: 'Dónde es',
     dondeDomicilioTitulo: 'A dónde va el veterinario',
     direccionDomicilioVoz: 'Para la urgencia a domicilio necesitamos la dirección de tu hogar.',
+    // S78-A7 — el selector de persona (LETRA_VITRINA; solo se ve con
+    // vitrina encendida y 2+ personas ofertables — colapso N=1 es diseño)
+    conQuienTitulo: '¿Con quién?',
+    conQuienVoz: 'Si quieres, elige quién atiende. Si no, {{negocio}} asigna a alguien de su equipo.',
+    cualquieraEquipo: 'Cualquiera del equipo',
+    integranteEquipo: 'Integrante del equipo',
+    conQuienConfirmar: 'Continuar',
+    personaNoPudo: 'Justo a esa hora no puede — pero la clínica sí.',
+    dejarQueAsigne: 'Dejar que la clínica asigne',
+    atiendeTitulo: 'Quién atiende',
   },
   // S63-A Bloque 3 — la reserva de adiestramiento del dueño + el parte
   // (LOTE S63, gate founder pendiente)

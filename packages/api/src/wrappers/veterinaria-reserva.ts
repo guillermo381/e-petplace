@@ -279,3 +279,32 @@ export async function obtenerPersonasQueAtienden(
   }
   return { ok: true, data: personas };
 }
+
+
+// ── S78-A7 · LA VITRINA DE CADA NEGOCIO (¿expone a sus personas?) ────────────
+//
+// Lectura DIRECTA por RLS — `prestadores_public` deja a cualquier
+// authenticated leer prestadores activos (policy leída literal:
+// `estado='activo' OR user_id=auth.uid() OR is_admin()`). Cero RPC nueva.
+//
+// EL FALLO SALE TIPADO, no como mapa vacío: `{}` diría "ningún negocio
+// expone" con cara de dato. Quién decide degradar es LA PANTALLA — y esa
+// degradación es legal acá porque la elección de persona es ACCESORIA por
+// diseño (sin ella la reserva sigue entera, solo vuelve al camino "con el
+// negocio"); es la clase de caso que D-542 exige decidir uno por uno, y
+// este queda decidido y declarado en el M1.
+
+export async function obtenerVitrinaNegocios(
+  prestadorIds: string[],
+): Promise<ResultadoWrapper<Record<string, boolean>, CodigoErrorVetReserva>> {
+  if (prestadorIds.length === 0) return { ok: true, data: {} };
+  const { data, error } = await getClient()
+    .from('prestadores')
+    .select('id, expone_personas')
+    .in('id', prestadorIds);
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallo('datos_inconsistentes');
+  const vitrina: Record<string, boolean> = {};
+  for (const f of data) vitrina[f.id] = f.expone_personas === true;
+  return { ok: true, data: vitrina };
+}

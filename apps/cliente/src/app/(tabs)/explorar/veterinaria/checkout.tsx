@@ -44,7 +44,13 @@ export default function VeterinariaCheckout() {
     direccion: string;
     ciudad: string;
     modalidad?: string;
+    /** S78-A7: presente SOLO si la familia eligió persona (§8 LETRA_TURNOS,
+     *  la mitad "confirmación" — la cita DICE quién atiende). */
+    personaNombre?: string;
   }>();
+
+  const personaNombre =
+    typeof params.personaNombre === 'string' && params.personaNombre.length > 0 ? params.personaNombre : null;
 
   const direccionSede = typeof params.direccion === 'string' && params.direccion.length > 0 ? params.direccion : null;
   const ciudad = typeof params.ciudad === 'string' && params.ciudad.length > 0 ? params.ciudad : null;
@@ -89,6 +95,18 @@ export default function VeterinariaCheckout() {
       puedePagar={!esDomicilio || (direccionEstado !== 'cargando' && direccionHogar !== null)}
       seccionExtra={
         <View style={{ gap: spacing[2] }}>
+          {personaNombre !== null ? (
+            /* la elección se CONFIRMA — si no eligió, la línea no se monta
+               (Chanel: cero fila "te atiende cualquiera") */
+            <>
+              <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                {t('veterinaria.atiendeTitulo')}
+              </Text>
+              <Tarjeta relleno="ninguno">
+                <Celda titulo={personaNombre} />
+              </Tarjeta>
+            </>
+          ) : null}
           <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.secondary }}>
             {esDomicilio ? t('veterinaria.dondeDomicilioTitulo') : t('veterinaria.dondeTitulo')}
           </Text>
