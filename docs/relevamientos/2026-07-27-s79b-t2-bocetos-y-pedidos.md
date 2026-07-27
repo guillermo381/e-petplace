@@ -270,21 +270,30 @@ necesita se coordina su promoción, nota D-535).
 │    "Todavía no visible" + POR QUÉ con camino (contorno)     │
 │  Campo nombre comercial (read-only) · tipo (read-only)      │
 │ ── Dónde atiendes ──            ← NUEVA, glifo 'ubicacion'  │
-│  Dirección con Places (MOTOR DE A — S79; la superficie      │
-│    consume el wrapper que A entregue, autocompletado en     │
-│    Hoja con HojaScroll)                                     │
-│  Radio de cobertura: control de pasos discretos             │
-│    5·10·15·20·30 km, default 15 FIRMADO — control candidato:│
-│    SelectorOpcion disposicion 'fila' (elegir un valor =     │
-│    TONAL Ley 22); NO SliderPrecio (es de plata)             │
+│  Dirección con Places (contrato lugares.ts VIVO — espejo    │
+│    del patrón A4 del cliente: predicciones inline,          │
+│    resolver cierra la sesión, la coordenada muere con el    │
+│    texto que la parió)                                      │
+│  Radio de cobertura: SIN radio declarado → TarjetaEstado    │
+│    CONTORNO (qué falta y PARA QUÉ: las familias buscan por  │
+│    cercanía) con el 15 como SUGERENCIA RESALTADA en su      │
+│    etiqueta ("15 km · sugerido"), NADA preseleccionado —    │
+│    solo un toque explícito escribe. Con radio → APOYADA.    │
+│    SelectorOpcion 5·10·15·20·30 (TONAL Ley 22);             │
+│    NO SliderPrecio (es de plata)                            │
 ```
 
 Estados: sin dirección → la TarjetaEstado en contorno dice que la dirección
 falta Y PARA QUÉ (las familias buscan por cercanía); con dirección → apoyada.
 Glifos: `ubicacion` ya existe (pin con huella en la gota) — cero glifo nuevo.
-**Bloqueado por el brief de A/founder:** la pregunta del default de
-`radio_cobertura_km` sobre filas vivas es PRIMERA PREGUNTA del brief S79 y es
-del founder — este M1 no la asume en ningún sentido.
+**CORRECCIÓN T3-B1.1 (firma founder):** la versión anterior de este M1 tenía
+el radio "default 15 preseleccionado" — así, un prestador que entra a cambiar
+su teléfono se llevaba un radio que nunca decidió (el DEFAULT que la letra
+mató en el DDL, resucitado en pantalla). El radio ARRANCA SIN DECLARAR;
+NULL = "no declaró".
+**CORRECCIÓN T3-B1.3:** la nota "Bloqueado por el brief" que vivía acá MURIÓ —
+la pregunta está resuelta hace tres tandas: la columna existe, su default vivo
+era 5 (no 15), cayó el DEFAULT y cayó el COALESCE.
 
 ## 7. EN PARALELO — M1 DE LA VITRINA (contra el acabado S78)
 

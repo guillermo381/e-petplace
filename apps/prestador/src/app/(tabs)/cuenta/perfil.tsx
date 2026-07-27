@@ -57,6 +57,8 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { leerSede } from '@/lib/sede';
+import { SeccionSede } from '@/components/seccion-sede';
 import { quitarLogoNegocio, subirLogoNegocio } from '@/lib/subir-logo';
 
 // E.164 sin '+' (regla 28): validación SUAVE — se limpian espacios,
@@ -223,11 +225,6 @@ export default function PerfilCuenta() {
     return tipo;
   };
 
-  const sede =
-    prestador === null
-      ? ''
-      : [prestador.direccion, prestador.ciudad].filter((x): x is string => x !== null && x.length > 0).join(' · ');
-
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -353,13 +350,10 @@ export default function PerfilCuenta() {
                 onChangeText={() => undefined}
                 deshabilitado
               />
-              <Campo
-                label={t('miCuenta.sedeLabel')}
-                value={sede.length > 0 ? sede : t('miCuenta.sinCargar')}
-                onChangeText={() => undefined}
-                ayuda={t('miCuenta.sedeAyuda')}
-                deshabilitado
-              />
+              {/* S79-B (T3-B2): la sede read-only MURIÓ ("se cambia con el
+                  equipo" ya no es verdad — la letra S79 la entrega al
+                  prestador). La captura viva es la sección compartida
+                  "Dónde atiendes" (Places + radio), más abajo. */}
               <Campo
                 label={t('miCuenta.descripcionLabel')}
                 value={descripcion}
@@ -402,6 +396,13 @@ export default function PerfilCuenta() {
           )}
 
           <Boton etiqueta={t('miCuenta.guardar')} bloque cargando={guardando} onPress={() => void guardar()} />
+
+          {/* ── S79-B (T3-B2): DÓNDE ATIENDES — la sección compartida de
+              la sede (Places + radio). Vive DESPUÉS del Guardar del
+              perfil a propósito: tiene sus propias escrituras (la
+              dirección con su botón; el radio por toque explícito) y el
+              Guardar de arriba NO la arrastra. */}
+          {prestador !== null && <SeccionSede sede={leerSede(prestador)} />}
         </ScrollView>
       )}
 

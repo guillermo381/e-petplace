@@ -54,6 +54,10 @@ type EstadoSesionRaiz =
   // la carta preside ANTES de las tabs (precedente /invitacion, L-161).
   // Puente local declarado (lib/bienvenida) hasta el PEDIDO B→A #1.
   | { bienvenida_pendiente: true }
+  // S79-B (T3-B3): estado 'pendiente' → LA SALA DE ESPERA. La regla dura:
+  // el pendiente NO entra al portal — y la carta §2.3 tampoco se le
+  // muestra (primer_ingreso_en marca la fase 4, no la 1).
+  | { sala_espera: true }
   // negocioEmpleado: si el user es EMPLEADO ACTIVO esperando la puerta,
   // el nombre de su negocio (voz honesta); null = user sin negocio alguno.
   | { sin_rol: true; email: string; negocioEmpleado: string | null }
@@ -82,6 +86,12 @@ export default function TabsLayout() {
         if (s.data === null) return { sin_sesion: true };
         const p = await obtenerMiPrestador();
         if (p.ok) {
+          // S79-B (T3-B3): el 'pendiente' se intercepta ANTES que todo —
+          // ni portal ni carta (la bienvenida llega con el primer ingreso
+          // REAL). El literal 'pendiente' es el de la letra S79; el
+          // titular lee su propia fila sea cual sea el estado (RLS
+          // prestadores_public, brazo user_id).
+          if (p.data.estado === 'pendiente') return { sala_espera: true };
           // S75-B: el rol de gestión, resuelto UNA vez (gate del tab).
           // Falla de lectura = false (Ley 23: ante la duda, se cierra).
           const rol = await empleadoTieneRol(p.data.id, ['dueño', 'administrador']);
@@ -118,11 +128,12 @@ export default function TabsLayout() {
         const voz =
           typeof r === 'string' ? r
             : 'ok' in r ? `ok — gestor=${r.esGestor}`
-              : 'bienvenida_pendiente' in r ? 'primer login → /bienvenida-dia1'
-                : 'invitacion_pendiente' in r ? 'invitación pendiente → /invitacion'
-                  : 'sin_sesion' in r ? 'sin sesión'
-                    : 'sin_rol' in r ? `sin rol prestador — ${r.email}${r.negocioEmpleado ? ` (empleado de ${r.negocioEmpleado})` : ''}`
-                      : `error — ${r.detalle}`;
+              : 'sala_espera' in r ? "estado 'pendiente' → /sala-espera"
+                : 'bienvenida_pendiente' in r ? 'primer login → /bienvenida-dia1'
+                  : 'invitacion_pendiente' in r ? 'invitación pendiente → /invitacion'
+                    : 'sin_sesion' in r ? 'sin sesión'
+                      : 'sin_rol' in r ? `sin rol prestador — ${r.email}${r.negocioEmpleado ? ` (empleado de ${r.negocioEmpleado})` : ''}`
+                        : `error — ${r.detalle}`;
         console.log(`[sesion] raíz prestador: ${voz}`);
         if (vigente) setSesion(r);
       });
@@ -145,6 +156,11 @@ export default function TabsLayout() {
         </EsqueletoGrupo>
       </View>
     );
+  }
+
+  if ('sala_espera' in sesion) {
+    // S79-B (T3-B3): el pendiente NO entra al portal.
+    return <Redirect href="/sala-espera" />;
   }
 
   if ('bienvenida_pendiente' in sesion) {

@@ -81,7 +81,16 @@ export default function BienvenidaDia1() {
   async function entrar() {
     if (entrando) return;
     setEntrando(true);
-    if (carta?.userId) await marcarBienvenidaVista(carta.userId);
+    // FALLA REAL atrapada por M3 (captura T3): el CTA tocado ANTES de que
+    // la carta cargue dejaba `userId` null → la marca no se escribía → el
+    // guard rebotaba a la carta (loop para el dedo rápido). La marca no
+    // depende del estado de la carta: se resuelve la sesión acá mismo.
+    let uid = carta?.userId ?? null;
+    if (uid === null) {
+      const s = await obtenerSesion();
+      uid = s.ok && s.data !== null ? s.data.user_id : null;
+    }
+    if (uid !== null) await marcarBienvenidaVista(uid);
     router.replace('/(tabs)');
   }
 

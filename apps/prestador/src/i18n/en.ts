@@ -182,9 +182,8 @@ export const prestadorEn = {
     tipoPaseador: 'Dog walker',
     tipoClinica: 'Veterinary clinic',
     tipoGrooming: 'Grooming',
-    sedeLabel: 'Your location',
-    sedeAyuda: 'Your business location is changed with the e-PetPlace team.',
-    sinCargar: 'Not set',
+    // S79-B (T3-B2): sedeLabel/sedeAyuda/sinCargar died (Ley 37) — the
+    // live capture is the `sede` block of this app.
     descripcionLabel: 'Description',
     descripcionAyuda: 'What families read about your business.',
     contactoTitulo: 'Business contact',
@@ -1570,7 +1569,8 @@ export const prestadorEn = {
     rebNoDueno: 'Only the business owner can invite.',
     // S78-B · Showcase — mirror of es.ts
     vitrinaSeccion: 'Your showcase',
-    vitrinaToggle: 'Show your team when booking',
+    // S79-B (T3-B1.2): what it turns on is families choosing a person · LOTE S79
+    vitrinaToggle: 'Let families choose who they book with',
     vitrinaEncendida: 'Families see your team and choose who to book with. If that person cannot make it, they are told before the appointment moves.',
     vitrinaApagada: 'Families book with your business and you decide who attends. Nothing changes for them.',
     vitrinaRebote: 'This cannot be turned on yet: the family notice for reassigned appointments does not exist.',
@@ -1604,6 +1604,38 @@ export const prestadorEn = {
     dia90:
       'Your first 90 days are your encounter with e-PetPlace. When the quarter is complete, we go through the graduation moment together.',
     entrar: 'Enter my space',
+  },
+  // S79-B (T3-B2) · the venue — "Where you work" (profile + waiting room) · LOTE S79
+  sede: {
+    titulo: 'Where you work',
+    direccionLabel: 'Address',
+    direccionPlaceholder: 'e.g. Av. de los Shyris 1234',
+    ciudadLabel: 'City',
+    ubicadaEnMapa: 'Placed on the map.',
+    escritaAMano: 'Written by hand — no map point.',
+    guardarDireccion: 'Save address',
+    guardada: 'Your address was saved.',
+    radioTitulo: 'How far you go',
+    radioFalta: 'Without a declared radius, families cannot tell if you reach them. They search by distance.',
+    radioDeclarado: 'Families within {{km}} km can find you.',
+    radioKm: '{{km}} km',
+    radioSugerido: '{{km}} km · suggested',
+    radioGuardado: 'Radius saved: {{km}} km.',
+  },
+  // S79-B (T3-B3) · the waiting room — the pending provider's frame · LOTE S79
+  salaEspera: {
+    marco: 'Your space is under review. Meanwhile, you can leave everything ready on your side.',
+    faltaTitulo: 'What is missing on your side',
+    faltaAcaAbajo: 'Complete it right below.',
+    faltaDireccion: 'Your address',
+    faltaRadio: 'How far you go',
+    faltaCuenta: 'Your business account',
+    faltaCuentaDetalle: 'It lets the team validate who gets paid.',
+    faltaTitulo1: 'Your professional license',
+    faltaTituloDetalle: 'The team reviews it to open your practice.',
+    despuesTitulo: 'What happens next',
+    despuesCuerpo:
+      'There is a human review on the other side — someone on the team looks at your space. When it is ready, we let you know. We will not promise a timeline we do not control.',
   },
   // S79-B (T2-B5) · the wake-with-use screens — /liquidaciones step-0 pattern · LOTE S79
   despierta: {

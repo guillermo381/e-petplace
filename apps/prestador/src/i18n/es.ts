@@ -221,9 +221,9 @@ export const prestadorEs = {
     tipoPaseador: 'Paseador',
     tipoClinica: 'Clínica veterinaria',
     tipoGrooming: 'Grooming',
-    sedeLabel: 'Tu sede',
-    sedeAyuda: 'La sede operativa se cambia con el equipo de e-PetPlace.',
-    sinCargar: 'Sin cargar',
+    // S79-B (T3-B2): sedeLabel/sedeAyuda/sinCargar MURIERON (Ley 37) —
+    // la sede read-only ("se cambia con el equipo") dejó de ser verdad:
+    // la captura viva es el bloque `sede` de esta misma app.
     descripcionLabel: 'Descripción',
     descripcionAyuda: 'Lo que las familias leen de tu negocio.',
     contactoTitulo: 'Contacto del negocio',
@@ -1752,7 +1752,11 @@ export const prestadorEs = {
     // S78-B · LA VITRINA (gate mecánico cerrado hoy — la sección no se
     // dibuja hasta el lector de A; las claves nacen con su superficie)
     vitrinaSeccion: 'Tu vitrina',
-    vitrinaToggle: 'Mostrar a tu equipo al reservar',
+    // S79-B (T3-B1.2, corrección del gate): "Mostrar a tu equipo" se leía
+    // como configuración interna; lo que enciende es que las FAMILIAS
+    // elijan persona, con la obligación de aviso adjunta (LETRA_VITRINA
+    // §3) · LOTE S79, GATE PENDIENTE
+    vitrinaToggle: 'Dejar que las familias elijan con quién',
     vitrinaEncendida: 'Las familias ven a tu equipo y eligen con quién agendar. Si esa persona no puede, se les avisa antes de mover la cita.',
     vitrinaApagada: 'Las familias reservan con tu negocio y tú decides quién atiende. Nada cambia para ellas.',
     vitrinaRebote: 'Todavía no se puede encender: falta el aviso a la familia cuando una cita cambia de persona.',
@@ -1790,6 +1794,43 @@ export const prestadorEs = {
     dia90:
       'Los primeros 90 días son tu encuentro con e-PetPlace. Al cumplir el trimestre completamos juntos el momento de graduación.',
     entrar: 'Entrar a mi espacio',
+  },
+  // S79-B (T3-B2) · LA SEDE — "Dónde atiendes" (perfil + sala de espera).
+  // Las dos leyes del contrato lugares.ts §2.2 tienen su voz acá:
+  // "Ubicada en el mapa" SOLO cuando es verdad; editada a mano LO DICE.
+  // Radio: firma founder T3-B1.1 — arranca sin declarar, 15 es sugerencia
+  // en la etiqueta, jamás preselección · LOTE S79, GATE PENDIENTE
+  sede: {
+    titulo: 'Dónde atiendes',
+    direccionLabel: 'Dirección',
+    direccionPlaceholder: 'ej: Av. de los Shyris 1234',
+    ciudadLabel: 'Ciudad',
+    ubicadaEnMapa: 'Ubicada en el mapa.',
+    escritaAMano: 'Escrita a mano — sin punto en el mapa.',
+    guardarDireccion: 'Guardar dirección',
+    guardada: 'Tu dirección quedó guardada.',
+    radioTitulo: 'Hasta dónde llegas',
+    radioFalta: 'Sin un radio declarado, las familias no saben si les llegas. Buscan por cercanía.',
+    radioDeclarado: 'Las familias hasta {{km}} km te encuentran.',
+    radioKm: '{{km}} km',
+    radioSugerido: '{{km}} km · sugerido',
+    radioGuardado: 'Radio guardado: {{km}} km.',
+  },
+  // S79-B (T3-B3) · LA SALA DE ESPERA — el marco del pendiente (la voz
+  // del encabezado se REUSA de `bienvenida`, aprobada) · LOTE S79, GATE PENDIENTE
+  salaEspera: {
+    marco: 'Tu espacio está en revisión. Mientras tanto, puedes dejar todo listo de tu parte.',
+    faltaTitulo: 'Qué falta de tu parte',
+    faltaAcaAbajo: 'Complétala acá abajo.',
+    faltaDireccion: 'Tu dirección',
+    faltaRadio: 'Hasta dónde llegas',
+    faltaCuenta: 'Tu cuenta comercial',
+    faltaCuentaDetalle: 'Con ella el equipo valida quién cobra.',
+    faltaTitulo1: 'Tu título profesional',
+    faltaTituloDetalle: 'El equipo lo revisa para abrir tu consultorio.',
+    despuesTitulo: 'Qué pasa después',
+    despuesCuerpo:
+      'Hay una revisión humana del otro lado — alguien del equipo mira tu espacio. Cuando esté lista, te avisamos. No prometemos un plazo que no controlamos.',
   },
   // S79-B (T2-B5) · las pantallas de lo que se despierta con el uso —
   // patrón /liquidaciones peldaño 0 · LOTE S79, GATE PENDIENTE
