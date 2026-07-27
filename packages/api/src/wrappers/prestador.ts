@@ -290,6 +290,48 @@ export async function actualizarPerfilPrestador(
   return { ok: true, data: null };
 }
 
+// ── S79-T4.6 (hunk aditivo): la ceremonia del primer ingreso ────────────────
+// LETRA_PERFIL §4 (firmada) + LETRA_ALTA §2 fase 4: la marca en MOTOR que
+// reemplaza el puente AsyncStorage de la bienvenida (declarado como puente
+// por B en su boceto — muere consumiendo esto). La RPC es idempotente y
+// atómica: el PRIMER caller de la vida del negocio recibe true; estampa
+// SOLO al TITULAR y SOLO con estado='activo' (la sala de espera no quema
+// la ceremonia). El empleado o quien no tiene negocio recibe respuesta
+// normal {esPrimerIngreso:false, …null} — jamás un error (v1.1).
+
+export interface PrimerIngreso {
+  esPrimerIngreso: boolean;
+  /** ISO timestamp del primer ingreso — null si todavía no ocurrió (o no hay negocio propio). */
+  primerIngresoEn: string | null;
+  /** LETRA §3bis: el propósito NO viaja por PostgREST — esta RPC es su
+   *  lector canónico; la bienvenida lo recibe acá. null honesto. */
+  proposito: string | null;
+}
+
+export async function registrarPrimerIngreso(): Promise<
+  ResultadoWrapper<PrimerIngreso, CodigoErrorPrestador>
+> {
+  const { data, error } = await getClient().rpc('registrar_primer_ingreso');
+  if (error) {
+    const codigo = error.message.startsWith('auth_required') ? 'sin_sesion' : 'error_desconocido';
+    return codigo === 'sin_sesion'
+      ? { ok: false, codigo, mensaje: MENSAJES.sin_sesion }
+      : { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
+  }
+  const o = data as Record<string, unknown> | null;
+  if (o === null || typeof o !== 'object' || o.ok !== true || typeof o.es_primer_ingreso !== 'boolean') {
+    return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.datos_inconsistentes };
+  }
+  return {
+    ok: true,
+    data: {
+      esPrimerIngreso: o.es_primer_ingreso,
+      primerIngresoEn: typeof o.primer_ingreso_en === 'string' ? o.primer_ingreso_en : null,
+      proposito: typeof o.proposito === 'string' && o.proposito.length > 0 ? o.proposito : null,
+    },
+  };
+}
+
 // ── S76-B1 (hunk aditivo, D-505): la URL del logo del negocio ──────────────
 // El logo vive en el bucket PÚBLICO `avatars` (relevado S76-B: public=true,
 // lectura por policy "Avatar read" para todos) — identidad PÚBLICA del

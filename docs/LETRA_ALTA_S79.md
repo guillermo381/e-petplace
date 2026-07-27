@@ -103,6 +103,30 @@ freno de T3.2 detectó — el problema era la invisibilidad SIN CAMINO de
 arreglo; la activación garantiza dirección y radio, y el portal da el
 camino del resto.
 
+## §4bis (T4.6, voto (a) del founder) — EL INVARIANTE: activo ⇒ ofertable
+
+**Hallazgo del gate en dispositivo:** `activar_prestador` dejaba al
+prestador `activo` con su cuenta comercial en `pendiente_validacion` — y
+TODAS las lectoras de oferta exigen las dos (Decisión Q). Un activo
+invisible sin que nada lo diga.
+
+**El voto (a), ejecutado (migración `20260727190000`):**
+`activar_prestador` activa LAS DOS en la misma transacción — la
+validación fiscal ya ocurrió cuando el admin escribió el RUC al invitar.
+Medido antes de diseñar: no existía ninguna RPC de activación de cuentas
+(el legado lo hacía a mano) — el voto no pisó ningún camino vivo. Bordes
+mecánicos: una cuenta `suspendida`/`cerrada` JAMÁS se reactiva por esta
+vía (rebote `cuenta_no_activable` — reactivar es decisión admin propia,
+§7.7); una cuenta ya `activa` es no-op honesto. La colisión con el CHECK
+de bancarios se resolvió con la enmienda a Decisión M del FINANCIERO
+(vacío-o-completo — coherente con §4 de esta letra; el malformado sigue
+rebotando).
+
+**DECLARADO (letra del founder, verbatim del mandato): si algún día hay
+registro self-service, la validación fiscal vuelve a ser gate propio** —
+este invariante vale porque el ADMIN es quien escribe el RUC al invitar;
+un RUC auto-declarado no hereda esa confianza.
+
 ## §4 BANCARIOS: requisito de COBRO, no de activación
 
 Declarado explícito (decisión founder T4): los datos bancarios NO son
@@ -124,7 +148,10 @@ de aplicación), junto con la dirección de envío del kit (§2.2). Su
 persistencia: las columnas nacen con el CONTRATO de LETRA_PERFIL (§3);
 **cuando el contrato aplique (T4.6), `invitar_prestador` gana
 `p_proposito` y `p_direccion_envio` en la MISMA tanda** (DROP+CREATE,
-L-119 — declarado acá para que no se pierda). La cura de privilegios por
+L-119 — declarado acá para que no se pierda). **✅ CUMPLIDO (T4.6,
+migración `20260727210000`): los dos params existen, NULL honesto,
+verificado en fixture (F3: persisten; F6: el propósito vuelve al titular
+en la ceremonia).** La cura de privilegios por
 columna (pieza 5 del CONTRATO) los cubre desde el nacimiento: ninguno
 viaja por PostgREST; el propósito vuelve al titular por
 `registrar_primer_ingreso` (la bienvenida), la dirección de envío es

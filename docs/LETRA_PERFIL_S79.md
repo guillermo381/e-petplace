@@ -1,13 +1,16 @@
 # LETRA_PERFIL_S79 — El perfil del prestador y la dirección (v1.1)
 
-**Estado: FIRMADA POR EL FOUNDER (27 Jul 2026, S79 Tanda 4) — CON DOS
-EXCEPCIONES EXPLÍCITAS DE LA MISMA FIRMA:**
-1. **La firma NO alcanza a §7 (vencimientos)** — sigue siendo PROPUESTA
-   con su gate propio abierto.
-2. **La firma NO autoriza aplicar el CONTRATO todavía** — la condición
-   que queda es que la captura de la sede (B) pase su GATE EN
-   DISPOSITIVO con el founder (T4.6). Hasta entonces, cero columnas
-   nuevas existen (medible: `information_schema.columns`).
+**Estado: FIRMADA (27 Jul 2026, Tanda 4) Y CONTRATO APLICADO (misma
+fecha, T4.6 — liberado por el gate en dispositivo del founder: el alta
+completa contra Paseos Shyris).** Migraciones `20260727200000` (las 5
+piezas del contrato) + `20260727210000` (las tres lectoras hermanas con
+el mismo AND + `invitar_prestador` con propósito/dirección de envío) +
+`20260727190000` (el invariante §4bis de LETRA_ALTA). Fixture 12/12 con
+ROLLBACK y residuo 0 — incluido el discriminador de la firma: el
+paseador sin coordenadas DESAPARECE de la oferta con cliente
+geolocalizado y reaparece sin él.
+**La única excepción de la firma sigue viva: §7 (vencimientos) es
+PROPUESTA con gate propio abierto.**
 
 Contenido transpuesto de decisiones ya tomadas por el founder y la mesa
 (mandato S79 Tanda 2) — esta letra las ORDENA y las deja exigibles; no las
