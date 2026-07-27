@@ -15,7 +15,7 @@
 -- la cita despegada quedaría visible SOLO para el titular — donde ya estaba,
 -- pero ahora además sin dueño. Despegar sin el tercer brazo es esconder.
 --
--- ── LAS TRES PIEZAS ──────────────────────────────────────────────────────
+-- ── LAS CUATRO PIEZAS ────────────────────────────────────────────────────
 --   (1) `_cita_despegable(...)` — EL PREDICADO, ESCRITO UNA SOLA VEZ.
 --   (2) `contar_citas_despegables(empleado)` — el lector que la pantalla
 --       lee ANTES (PEDIDO 1 del boceto M1 de B, hoy inexistente).
@@ -96,6 +96,23 @@
 -- código muerto en este camino, y copiarlo propagaría la deuda a dos policies
 -- nuevas. El titular ya entra por el PRIMER brazo (`prestador_id IN (mis
 -- prestadores)`), que queda byte-idéntico.
+--
+-- ── 🟠 EL BRAZO DEL UPDATE ES MOTOR SIN PUERTA — DECLARADO ───────────────
+-- El brazo habilita **tomar una cita de la clínica**: poner el propio
+-- `empleado_id` en una cita huérfana. **Esa superficie NO EXISTE.** Censo
+-- S77-A: **ningún wrapper de `packages/api` escribe
+-- `evento_cita_servicio.empleado_id`** (los hits de ese nombre son de otras
+-- tablas —`empleado_roles`, `prestador_empleado_servicios`,
+-- `prestador_horarios`— o parámetros `p_empleado_id` de RPCs), y **cero
+-- pantallas** lo asignan.
+--
+-- ⇒ **Esta policy es PRECONDICIÓN, no función viva.** Es la tercera vez en la
+-- misma sesión que la casa encuentra el mismo patrón: la policy DELETE de los
+-- chips (existía desde siempre, sin wrapper) · las franjas de empleados
+-- (`prestador_horarios_own` ya lo permite, el muro es de wrapper — L23) · y
+-- ahora ésta, que nace abierta y espera su puerta. **Se declara para que
+-- nadie la lea como capacidad disponible: hasta que exista el "tomar esta
+-- cita" en la superficie, el brazo no cambia nada que un usuario pueda ver.**
 --
 -- ── 🔴 LA PUERTA VIEJA SIGUE VIVA — RESIDUO NOMBRADO, NO IMPLÍCITO ───────
 -- `desvincularEmpleado` (packages/api/src/wrappers/equipo.ts) sigue haciendo
@@ -298,9 +315,11 @@ REVOKE EXECUTE ON FUNCTION public.dar_de_baja_empleado(uuid) FROM PUBLIC, anon;
 GRANT  EXECUTE ON FUNCTION public.dar_de_baja_empleado(uuid) TO authenticated;
 
 
--- ── (4) EL TERCER BRAZO, POR CHIP ───────────────────────────────────────
+-- ── (4) EL TERCER BRAZO, POR CHIP — SOLO EN EL UPDATE ───────────────────
 -- Los dos brazos viejos quedan BYTE-IDÉNTICOS; el tercero se suma con OR.
--- Solo SELECT y UPDATE (el INSERT no se toca — ver cabecera).
+-- **Va SOLO en `cita_update_prestador`.** `cita_select_prestador` quedó
+-- INTACTA por medición (delta 0, ver abajo) y el INSERT tampoco se toca
+-- (no tiene consumidor — ver cabecera).
 -- EL BRAZO DEL SELECT SE CAYÓ — MEDIDO, NO OPINADO (S77-A, gate del founder).
 -- La primera versión de esta migración lo llevaba también en el SELECT. El
 -- discriminador lo tumbó: **el empleado YA VE la agenda, y no por la persona
