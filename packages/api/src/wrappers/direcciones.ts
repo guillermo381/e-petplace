@@ -16,6 +16,8 @@ const CODIGOS_ERROR_DIRECCION = [
   'direccion_requerida',
   'ciudad_requerida',
   'telefono_invalido',
+  // S79-A4: las coordenadas van en PAR y en rango, o no van (L-139).
+  'coordenadas_invalidas',
 ] as const;
 
 export type CodigoErrorDireccion = (typeof CODIGOS_ERROR_DIRECCION)[number];
@@ -28,6 +30,7 @@ const MENSAJES_ERROR_DIRECCION: Record<
   direccion_requerida:  'Contanos la dirección de tu hogar.',
   ciudad_requerida:     'Contanos en qué ciudad está tu hogar.',
   telefono_invalido:    'El teléfono no es válido — sin el signo +.',
+  coordenadas_invalidas: 'La ubicación no es válida. Buscá la dirección de nuevo.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:    'Ocurrió un error inesperado. Probá de nuevo.',
 };
@@ -56,6 +59,10 @@ export interface DireccionHogar {
   sector: string | null;
   referencias: string | null;
   telefono: string | null;
+  /** S79-A4: coordenadas de la resolución Places — null = dirección
+   *  sin ubicar en el mapa (honesto; escribirlas exige resolver). */
+  lat: number | null;
+  lon: number | null;
 }
 
 /**
@@ -68,7 +75,7 @@ export async function obtenerDireccionHogar(): Promise<
   const supabase = getClient();
   const { data, error } = await supabase
     .from('direcciones_guardadas')
-    .select('id, direccion, ciudad, sector, referencias, telefono')
+    .select('id, direccion, ciudad, sector, referencias, telefono, lat, lon')
     .eq('es_principal', true)
     .maybeSingle();
 
@@ -90,6 +97,8 @@ export async function obtenerDireccionHogar(): Promise<
       sector: data.sector ?? null,
       referencias: data.referencias ?? null,
       telefono: data.telefono ?? null,
+      lat: typeof data.lat === 'number' ? data.lat : null,
+      lon: typeof data.lon === 'number' ? data.lon : null,
     },
   };
 }
@@ -103,6 +112,12 @@ export interface GuardarDireccionHogarInput {
   referencias?: string | null;
   /** E.164 SIN '+' (regla 28) — el server rebota telefono_invalido si lo trae. */
   telefono?: string | null;
+  /** S79-A4: SOLO del LugarResuelto de resolverLugar (contrato lugares.ts) —
+   *  jamás tipeadas a mano. Omitidas o null = guardado sin ubicación, y el
+   *  server PISA las viejas con NULL: la coordenada muere con el texto que
+   *  la parió (LETRA_PERFIL_S79 §2.2). Van en par o rebota. */
+  lat?: number | null;
+  lon?: number | null;
 }
 
 /**
@@ -121,6 +136,10 @@ export async function guardarDireccionHogar(
     p_sector: input.sector ?? undefined,
     p_referencias: input.referencias ?? undefined,
     p_telefono: input.telefono ?? undefined,
+    // null EXPLÍCITO cuando no hay resolución Places: el server pisa las
+    // coordenadas viejas (§2.2 — mueren con el texto que las parió).
+    p_lat: input.lat ?? null,
+    p_lon: input.lon ?? null,
   });
 
   if (error) return mapeoErrorAResultado(error.message);

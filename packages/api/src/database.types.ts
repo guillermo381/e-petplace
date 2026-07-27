@@ -16879,6 +16879,8 @@ export type Database = {
         Args: {
           p_ciudad: string
           p_direccion: string
+          p_lat?: number
+          p_lon?: number
           p_referencias?: string
           p_sector?: string
           p_telefono?: string
@@ -17473,6 +17475,10 @@ export type Database = {
       }
       responder_solicitud_autorizacion: {
         Args: { p_accion: string; p_solicitud_id: string }
+        Returns: Json
+      }
+      revisar_documento_prestador: {
+        Args: { p_documento_id: string; p_notas?: string; p_veredicto: string }
         Returns: Json
       }
       saltar_cita_plan: {
