@@ -295,6 +295,16 @@ silencio.** Las 8 son excluyentes: no rebota, simplemente no hay quien atienda.
 Aditivo, una función, **las 8 quedan intactas**. La alternativa —migrar las 8 a
 grano de oficio— es el arco que no queremos.
 
+
+> **NOTA S77 — EL TRIGGER DE HERENCIA SIGUE SIN DUEÑO, Y ESO ES LO QUE HAY QUE
+> VER AL ABRIR S78.** La cura que esta sección describe (que una oferta NUEVA
+> herede el chip a quien ya tiene ese oficio) se declaró en S76 y **ninguna
+> sesión se la asignó desde entonces**: no fue construida en S76, **no se tocó
+> en S77**, y §13 la sigue listando como abierta. **No está en curso en ningún
+> lado.** La letra de S77 la repitió como pedido de motor #1 y S77 tampoco la
+> tomó — su tanda se fue en el gate clínico (D-532) y en la baja del vínculo
+> (§11.1/§11.2). **Se escribe acá para que no se lea como trabajo en marcha:
+> hoy no tiene sesión.** Origen: S77-A (auditoría del canon).
 ### 6.2 El gate clínico pasa a leer el chip
 
 **El agujero que esta letra cierra:** hoy el gate clínico lee `profesional`
