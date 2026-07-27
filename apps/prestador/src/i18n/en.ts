@@ -1485,6 +1485,8 @@ export const prestadorEn = {
     jornadaSinTitulo: 'No working hours yet',
     jornadaSinCuerpo: 'Without saved hours they do not show up when a family looks for an appointment.',
     jornadaPausadaTitulo: 'Their working hours are paused',
+    jornadaCargarCta: 'Set up their schedule',
+    jornadaVerCta: 'See their schedule',
     jornadaPausadaCuerpo:
       'They have hours saved, but none active. While paused they do not show up when a family looks for an appointment.',
     atiendeSeccion: 'What they provide',

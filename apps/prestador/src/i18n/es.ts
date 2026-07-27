@@ -1659,6 +1659,8 @@ export const prestadorEs = {
     jornadaSinTitulo: 'Todavía no tiene jornada',
     jornadaSinCuerpo: 'Sin horarios cargados no aparece cuando una familia busca una cita.',
     jornadaPausadaTitulo: 'Su jornada está pausada',
+    jornadaCargarCta: 'Cargar su jornada',
+    jornadaVerCta: 'Ver su jornada',
     jornadaPausadaCuerpo:
       'Tiene horarios cargados, pero ninguno activo. Mientras estén pausados no aparece cuando una familia busca una cita.',
     atiendeSeccion: 'Qué atiende',

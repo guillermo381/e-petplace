@@ -181,7 +181,7 @@ export default function TallerGrooming() {
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
   const insets = useSafeAreaInsets();
-  const { seccion, modo } = useLocalSearchParams<{ seccion?: string; modo?: string }>();
+  const { seccion, modo, persona } = useLocalSearchParams<{ seccion?: string; modo?: string; persona?: string }>();
 
   const modoWizard = modo === 'wizard';
   const seccionParam: Seccion = seccion === 'horarios' ? 'horarios' : 'servicios';
@@ -205,7 +205,13 @@ export default function TallerGrooming() {
   // S78-B TURNOS: la persona cuyo borrador de jornada está abajo
   // (null = el titular, contrato V0). El switch lo maneja la propia
   // SeccionHorarios (refetch + onCambio) — acá solo se registra.
-  const [empleadoJornada, setEmpleadoJornada] = useState<string | null>(null);
+  // EL PUENTE (hallazgo del gate founder): la Hoja del miembro llega con
+  // ?persona=<empleadoId> y esa persona arranca SELECCIONADA — el
+  // founder no la encuentra de nuevo. Un id inválido rebota tipado en el
+  // wrapper (empleado_invalido, guard A2) — jamás franjas ajenas.
+  const [empleadoJornada, setEmpleadoJornada] = useState<string | null>(
+    typeof persona === 'string' && persona.length > 0 ? persona : null,
+  );
   const [cuentaComercialId, setCuentaComercialId] = useState<string | null>(null);
   const [ofertasHorarios, setOfertasHorarios] = useState<OfertaParaHorarios[]>([]);
   // EL DÓNDE (S61-B2, letra founder): GLOBAL en la UI (precedente
@@ -241,7 +247,7 @@ export default function TallerGrooming() {
       }
       const [rOfertas, rFranjas, rCuenta, rComision, rModo] = await Promise.all([
         obtenerOfertasGroomingPropias(prestador.data.id),
-        obtenerFranjasHorario(prestador.data.id),
+        obtenerFranjasHorario(prestador.data.id, empleadoJornada ?? undefined),
         obtenerMiCuentaComercial(),
         obtenerComisionVigenteCita(),
         // D-386: la elección vigente decide QUÉ franjas se cargan
@@ -295,6 +301,7 @@ export default function TallerGrooming() {
         const rEsp = await obtenerFranjasDeServicios(
           prestador.data.id,
           rOfertas.data.map((o) => o.id),
+          empleadoJornada ?? undefined,
         );
         if (!vigente) return;
         if (!rEsp.ok) {

@@ -94,8 +94,25 @@ type Pantalla =
   | { estado: 'listo'; prestador: MiPrestador; equipo: EquipoNegocio };
 
 /** El orden de los oficios en toda superficie del prestador (el mismo del
- *  filtro del HOY). Fijo: la lista no se reordena según quién la mire. */
+ *  filtro del HOY). Fijo: la lista no se reordena según quién se la mire. */
 const ORDEN_OFICIOS: readonly OficioChip[] = ['veterinaria', 'grooming', 'paseo', 'adiestramiento'];
+
+/** EL PUENTE a la jornada (S78-B, hallazgo del gate founder): la ruta del
+ *  taller de cada oficio — los cuatro aceptan `?seccion=horarios` (el de
+ *  adiestramiento es página única: el param sobra y no daña) y
+ *  `?persona=<empleadoId>` (S78-B). */
+const RUTA_TALLER = {
+  veterinaria: '/veterinaria/taller',
+  grooming: '/grooming/taller',
+  paseo: '/paseo/taller',
+  adiestramiento: '/adiestramiento/taller',
+} as const satisfies Record<OficioChip, string>;
+
+/** El oficio del destino: el PRIMER oficio con chip en el orden fijo de la
+ *  casa (voto founder: sin selector para un caso — multi-oficio — que hoy
+ *  no existe en datos; las Jornadas del taller ya muestran a la persona). */
+const oficioDestino = (chips: ChipEmpleado[]): OficioChip | null =>
+  ORDEN_OFICIOS.find((o) => chips.some((c) => c.oficio === o)) ?? null;
 
 // La anatomía on/off firmada acá se EXTRAJO a `components/tarjeta-estado`
 // cuando el selector de Jornadas (S78-B turnos) se volvió su segundo
@@ -580,13 +597,15 @@ export default function EquipoNegocioPantalla() {
                     NUNCA cargó (se crea) · la otra la PAUSÓ (se reactiva).
                     Solo con ≥1 chip: sin chips no hay promesa que romper.
 
-                    🔴 EL CTA NO SE DIBUJA, Y ES A PROPÓSITO (Ley 23 — la
-                    puerta no ofrece lo que va a rechazar): NO EXISTE destino
-                    de jornada por empleado. `SeccionHorarios` se monta desde
-                    los cuatro talleres, keyea por `oficio` y no acepta
-                    empleado; no hay ruta /horarios ni /jornada. Es D-540, y
-                    es MOTOR de A. El bloque dice el hecho; el botón entra el
-                    día que exista a dónde ir. ── */}
+                    EL PUENTE (hallazgo del gate founder, 26-jul): el CTA
+                    que esta construcción dejó declarado-sin-destino AHORA
+                    TIENE destino (A2 + turnos `44c94cb`). Navega a Días y
+                    horarios del taller del PRIMER oficio con chip (voto
+                    founder: sin selector para un caso que hoy no existe en
+                    datos) con ?persona= — la persona llega SELECCIONADA.
+                    La regla de siempre: se monta SOLO si resuelve; el
+                    bloque solo se pinta con ≥1 chip, así que el destino
+                    resuelve siempre que el CTA exista. ── */}
                 {chips !== null && chips.length > 0 && jornada !== null && jornada.franjasActivas === 0 ? (
                   <Tarjeta tinte="warning" relleno="amplio">
                     <View style={{ gap: spacing[2] }}>
@@ -600,6 +619,27 @@ export default function EquipoNegocioPantalla() {
                           ? t('equipo.jornadaSinCuerpo')
                           : t('equipo.jornadaPausadaCuerpo')}
                       </Texto>
+                      {oficioDestino(chips) !== null ? (
+                        <Boton
+                          variante="primario"
+                          bloque
+                          etiqueta={
+                            jornada.franjasTotales === 0
+                              ? t('equipo.jornadaCargarCta')
+                              : t('equipo.jornadaVerCta')
+                          }
+                          onPress={() => {
+                            const destino = oficioDestino(chips);
+                            if (destino === null) return;
+                            const empleadoId = miembro.empleadoId;
+                            setMiembro(null);
+                            router.push({
+                              pathname: RUTA_TALLER[destino],
+                              params: { seccion: 'horarios', persona: empleadoId },
+                            });
+                          }}
+                        />
+                      ) : null}
                     </View>
                   </Tarjeta>
                 ) : null}

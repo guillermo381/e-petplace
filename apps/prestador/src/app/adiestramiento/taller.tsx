@@ -36,7 +36,7 @@
 
 import { useCallback, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { Redirect, useFocusEffect, useRouter } from 'expo-router';
+import { Redirect, useFocusEffect, useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
@@ -241,8 +241,14 @@ export default function TallerAdiestramiento() {
   // post-cambio-de-modo) lo puebla.
   const [franjas, setFranjas] = useState<DraftFranja[] | null>(null);
   const [modoHorarios, setModoHorarios] = useState<ModoHorarios>('universal');
-  // S78-B TURNOS: la persona del borrador de jornada (null = titular)
-  const [empleadoJornada, setEmpleadoJornada] = useState<string | null>(null);
+  // S78-B TURNOS: la persona del borrador de jornada (null = titular).
+  // EL PUENTE (hallazgo del gate founder): la Hoja del miembro llega con
+  // ?persona=<empleadoId> y esa persona arranca SELECCIONADA. Un id
+  // inválido rebota tipado en el wrapper (empleado_invalido, guard A2).
+  const { persona } = useLocalSearchParams<{ persona?: string }>();
+  const [empleadoJornada, setEmpleadoJornada] = useState<string | null>(
+    typeof persona === 'string' && persona.length > 0 ? persona : null,
+  );
   const [cuentaComercialId, setCuentaComercialId] = useState<string | null>(null);
   const [ofertasHorarios, setOfertasHorarios] = useState<OfertaParaHorarios[]>([]);
   const [guardandoHorarios, setGuardandoHorarios] = useState(false);
@@ -263,7 +269,7 @@ export default function TallerAdiestramiento() {
     const [rComision, rModo, rFranjas, rCuenta] = await Promise.all([
       obtenerComisionVigenteCita(),
       obtenerModoHorarios(prestador.data.id),
-      obtenerFranjasHorario(prestador.data.id),
+      obtenerFranjasHorario(prestador.data.id, empleadoJornada ?? undefined),
       obtenerMiCuentaComercial(),
     ]);
     if (rComision.ok) setComisionPct(rComision.data.porcentaje);
@@ -273,7 +279,7 @@ export default function TallerAdiestramiento() {
       const ofertaId = r.data.oferta?.id ?? null;
       setOfertasHorarios(ofertaId === null ? [] : [{ id: ofertaId, etiqueta: t('tallerAdiestramiento.horariosOferta') }]);
       if (rModo.data === 'por_servicio' && ofertaId !== null) {
-        const rEsp = await obtenerFranjasDeServicios(prestador.data.id, [ofertaId]);
+        const rEsp = await obtenerFranjasDeServicios(prestador.data.id, [ofertaId], empleadoJornada ?? undefined);
         if (rEsp.ok) {
           setFranjas((prev) => (prev === null ? rEsp.data.map((f) => draftDesdeFranja(f, f.servicioId)) : prev));
         }
@@ -307,7 +313,10 @@ export default function TallerAdiestramiento() {
       return sig;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- la persona
+    // entra a las deps para que el reset por cambio de modo no relea con
+    // el closure viejo; el resto viaja a propósito
+  }, [empleadoJornada]);
 
   useFocusEffect(
     useCallback(() => {

@@ -203,7 +203,7 @@ export default function TallerPaseo() {
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
   const insets = useSafeAreaInsets();
-  const { seccion, modo } = useLocalSearchParams<{ seccion?: string; modo?: string }>();
+  const { seccion, modo, persona } = useLocalSearchParams<{ seccion?: string; modo?: string; persona?: string }>();
 
   const modoWizard = modo === 'wizard';
   const seccionParam: Seccion =
@@ -224,7 +224,13 @@ export default function TallerPaseo() {
   // S78-B TURNOS: la persona cuyo borrador de jornada está abajo
   // (null = el titular, contrato V0). El switch lo maneja la propia
   // SeccionHorarios (refetch + onCambio) — acá solo se registra.
-  const [empleadoJornada, setEmpleadoJornada] = useState<string | null>(null);
+  // EL PUENTE (hallazgo del gate founder): la Hoja del miembro llega con
+  // ?persona=<empleadoId> y esa persona arranca SELECCIONADA — el
+  // founder no la encuentra de nuevo. Un id inválido rebota tipado en el
+  // wrapper (empleado_invalido, guard A2) — jamás franjas ajenas.
+  const [empleadoJornada, setEmpleadoJornada] = useState<string | null>(
+    typeof persona === 'string' && persona.length > 0 ? persona : null,
+  );
   const [cuentaComercialId, setCuentaComercialId] = useState<string | null>(null);
   const [ofertasHorarios, setOfertasHorarios] = useState<OfertaParaHorarios[]>([]);
   const [zonas, setZonas] = useState<DraftZona[] | null>(null);
@@ -255,7 +261,7 @@ export default function TallerPaseo() {
       }
       const [rOfertas, rFranjas, rZonas, rCiudades, rPaises, rCuenta, rComision, rModo] = await Promise.all([
         obtenerOfertasPaseoPropias(prestador.data.id),
-        obtenerFranjasHorario(prestador.data.id),
+        obtenerFranjasHorario(prestador.data.id, empleadoJornada ?? undefined),
         obtenerZonasDePrestador(prestador.data.id),
         obtenerCatalogoCiudades(),
         obtenerPaisesActivos(),
@@ -284,6 +290,7 @@ export default function TallerPaseo() {
         const rEsp = await obtenerFranjasDeServicios(
           prestador.data.id,
           rOfertas.data.map((o) => o.id),
+          empleadoJornada ?? undefined,
         );
         if (!vigente) return;
         if (!rEsp.ok) {
