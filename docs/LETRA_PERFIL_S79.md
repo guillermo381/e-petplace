@@ -1,4 +1,4 @@
-# LETRA_PERFIL_S79 — El perfil del prestador y la dirección (v1.0)
+# LETRA_PERFIL_S79 — El perfil del prestador y la dirección (v1.1)
 
 **Estado: DEPOSITADA — ESPERA FIRMA DEL FOUNDER.**
 Gate declarado en el mandato de la tanda: *la letra se firma antes de que
@@ -173,6 +173,40 @@ baja a la operativa, lo operativo no sube a la fiscal).
   de correo, no un eje de motor; puede capturarse con Places por comodidad,
   pero se persiste como texto.
 
+### §3bis (v1.1) — El régimen de COLUMNA: el propósito y la casa del fundador no viajan por PostgREST
+
+Medición T3.3 (S79 Tanda 3, literal de `pg_policies`): la policy
+`prestadores_public` concede **SELECT de FILA ENTERA a todo authenticated**
+sobre los prestadores activos (`estado='activo' OR own OR admin`). El
+`Pick` de 17 columnas de R1 es TypeScript — **no es frontera** (familia
+L-140): cualquier usuario logueado puede pedir por PostgREST las columnas
+que quiera. Sin más, `proposito` (la respuesta personal del fundador) y
+`direccion_envio` (su casa) serían públicas de facto.
+
+**Al paquete gated entra el PRIMER uso de privilegios por COLUMNA de la
+casa** (medido: `pg_attribute.attacl` vacío en todo `public` — el
+mecanismo no se usaba): se revoca el SELECT de tabla a `authenticated` y
+se re-concede por LISTA de columnas — todas MENOS `proposito` y
+`direccion_envio`. Compatibilidad medida, no supuesta: **cero
+`select('*')` sobre `prestadores` en los wrappers vivos** (todos
+seleccionan columnas nombradas — T3.3).
+
+**Los lectores legítimos que quedan, y por dónde leen:**
+- `proposito` → el TITULAR, vía `registrar_primer_ingreso()` (DEFINER —
+  §4: la bienvenida lo recibe en la misma respuesta) y la escritura vía
+  su whitelist. El admin, vía service_role/DEFINER.
+- `direccion_envio` → SOLO founder/admin (operar el envío del kit):
+  service_role o lector DEFINER gateado por `is_admin()` si alguna
+  superficie lo pide. El cliente JAMÁS.
+- Todo el resto de la tabla → igual que hoy (la lista de columnas
+  concedidas es exhaustiva).
+
+Declarado: la alternativa (tabla aparte `prestador_privado` con RLS
+owner-only) evitaría el mecanismo de columnas, pero parte el registro de
+la sede en dos tablas; la mesa eligió columna. Si un futuro
+`select('*')` aparece, el rebote de permiso lo delata en desarrollo —
+mejor un error ruidoso que una fuga silenciosa.
+
 ---
 
 ## §4 El primer ingreso — la marca en MOTOR (el pedido de B, diseñado acá)
@@ -189,20 +223,36 @@ negocio, no una vez por instalación).
   ceremonial, se escribe una vez y no se toca (familia D-544: sin deshacer,
   declarado).
 - RPC **`registrar_primer_ingreso()`** — SECURITY DEFINER, patrón de la casa:
-  - Gate: `auth.uid()` debe ser **el TITULAR** (`prestadores.user_id`).
-    Un empleado que entra NO estampa la marca del negocio — la bienvenida
-    del §2.3 le habla al que aplicó y respondió el propósito; la bienvenida
-    del empleado es otra letra (fuera de alcance, declarado).
+  - Gate: solo **el TITULAR** (`prestadores.user_id`) estampa la marca.
+    Un empleado que entra NO estampa — la bienvenida del §2.3 le habla al
+    que aplicó y respondió el propósito; la bienvenida del empleado es
+    otra letra (fuera de alcance, declarado).
+  - **ENMIENDA v1.1 (revisión de mesa): el que NO tiene fila propia en
+    `prestadores` NO es una excepción — es un estado normal.** Todo
+    empleado vive en `prestador_empleados` sin fila propia en
+    `prestadores` (Clínica Aurora tiene dos activos, y el arco S76–S78
+    los puso a loguearse acá): la RPC les devuelve
+    `{ ok: true, es_primer_ingreso: false, primer_ingreso_en: null }` —
+    jamás un RAISE. La única excepción que queda es `auth_required`.
+    **Consecuencia de diseño, declarada: la RPC NO exige que el caller
+    sepa de antemano si es titular** — B la llama al resolver la raíz
+    del portal para CUALQUIER sesión, y la respuesta ya viene modulada.
+    El acoplamiento "A publica una RPC que B solo puede llamar si antes
+    resolvió la titularidad por otro lado" queda eliminado.
   - **Idempotente y atómica**: `UPDATE … SET primer_ingreso_en = now()
     WHERE user_id = auth.uid() AND primer_ingreso_en IS NULL` y devuelve
     `{ es_primer_ingreso: (FOUND), primer_ingreso_en }`. El PRIMER caller
     recibe `true`; todos los siguientes `false` — la condición de carrera
     de dos dispositivos se resuelve en la fila, no en la pantalla.
-  - B la llama al resolver la raíz del portal con sesión de titular;
-    `es_primer_ingreso=true` → muestra la bienvenida §2.3. Borde declarado
-    y aceptado: si la app muere entre el estampado y el render, la
-    ceremonia se pierde para siempre — es UN tap de ventana; no se
-    construye máquina de dos fases para eso.
+  - **La respuesta del titular trae ADEMÁS su `proposito`** — la
+    bienvenida §2.3 lo necesita exactamente en ese momento (*"Vos nos
+    dijiste: …"*), y con el régimen de columna de §3bis el propósito no
+    viaja por PostgREST: esta RPC es su lector canónico. Cero lector
+    extra para B.
+  - `es_primer_ingreso=true` → B muestra la bienvenida §2.3. Borde
+    declarado y aceptado: si la app muere entre el estampado y el
+    render, la ceremonia se pierde para siempre — es UN tap de ventana;
+    no se construye máquina de dos fases para eso.
 - Los prestadores de prueba existentes quedan con NULL — **cero backfill**
   (L-176: una migración no concede historia). Que el demo vea la bienvenida
   una vez es correcto, no un bug.
@@ -261,25 +311,49 @@ admin verificado (`admin_users`, censo A0).
 
 ---
 
-## §7 El motor de vencimientos — PROPUESTA (espera gate del founder, NO construida)
+## §7 El motor de vencimientos — PROPUESTA v1.1 (espera gate del founder, NO construida)
 
 Medido: `fecha_vencimiento` NULL en 7/7 filas; el estado `'vencido'` existe
-en el CHECK sin productor. Propuesta para la firma (cero código hoy):
+en el CHECK sin productor.
 
-- **Expiración PEREZOSA, patrón de la casa** (S78 mostrador): NINGÚN cron,
-  NINGÚN escritor. Los lectores derivan `estado_efectivo = CASE WHEN
-  estado='aprobado' AND fecha_vencimiento < current_date THEN 'vencido'
-  ELSE estado END`. La fila no se toca; el valor `'vencido'` del CHECK
-  queda como estado DERIVADO en lectura (o se escribe solo cuando un admin
-  re-veredicta — decisión dentro de esta propuesta).
-- La captura gana el campo `fecha_vencimiento` opcional en la subida (hoy
-  el wrapper no lo pide).
-- La alerta del §6.5.2 (*"vencimiento y renovación visibles"*) nace como
-  fila en la pantalla de verificación del prestador, no como notificación —
-  el motor de notificaciones tiene su propio arco (MODELO_NOTIFICACIONES).
-- Lo que el doc maestro deja "a refinar" (*"documentos sin renovar pueden
-  afectar visibilidad pública"*) se decide RECIÉN cuando el primer
-  documento real tenga fecha: hoy sería letra sobre datos que no existen.
+**La v1.0 de esta propuesta tenía un hueco que la invalidaba (revisión de
+mesa, T3.4):** derivaba el vencimiento SOLO en los lectores de UI, pero el
+único lugar donde el vencimiento IMPORTA es el gate —
+`_trg_ps_verificacion_profesional` lee la columna `estado` CRUDA y exige
+`'aprobado'`. Un título vencido seguiría diciendo `'aprobado'` en la fila
+y el trigger dejaría activar ofertas médicas igual: el motor habría
+existido en la pantalla y no en la puerta.
+
+**Propuesta v1.1 — la derivación perezosa entra AL GATE (sigue sin cron y
+sin escritor):**
+
+1. **El gate deriva.** El `NOT EXISTS` del trigger gana la condición de
+   vigencia: `d.estado = 'aprobado' AND (d.fecha_vencimiento IS NULL OR
+   d.fecha_vencimiento >= current_date)`. Un documento vencido deja de
+   contar como credencial EN LA PUERTA — que es el único lugar con
+   autoridad. La fila no se toca (patrón S78: la expiración se evalúa en
+   lectura; escribir el vencimiento convertiría un gate en un escritor).
+2. **Los lectores de UI derivan lo mismo** (`estado_efectivo`) para que
+   la pantalla del prestador y el admin digan la misma verdad que la
+   puerta. El valor `'vencido'` del CHECK queda reservado: solo lo
+   escribiría un admin re-veredictando a mano, si alguna vez quiere
+   dejarlo asentado.
+3. **Limitación DECLARADA, no resuelta acá:** el trigger corre AL
+   ACTIVAR una oferta — una oferta médica YA ACTIVA no se desactiva sola
+   cuando el título vence después. Cerrarla de verdad exige o un barrido
+   (cron — la casa lo evita), o que las lectoras de OFERTA médica sumen
+   la condición de credencial vigente (un EXISTS por prestador en el
+   listado — costo declarado), o la revisión humana del admin. **Cuál de
+   las tres, lo decide el founder en el gate de esta propuesta** — hoy
+   es teórico: 7/7 documentos sin fecha de vencimiento.
+4. La captura gana el campo `fecha_vencimiento` opcional en la subida
+   (hoy el wrapper no lo pide).
+5. La alerta del §6.5.2 (*"vencimiento y renovación visibles"*) nace
+   como fila en la pantalla de verificación del prestador, no como
+   notificación — el motor de notificaciones tiene su propio arco.
+6. Lo que el doc maestro deja "a refinar" (*"documentos sin renovar
+   pueden afectar visibilidad pública"*) se decide RECIÉN cuando el
+   primer documento real tenga fecha.
 
 ---
 
@@ -316,11 +390,19 @@ adentro un `db push` lo aplicaría solo), con su reversa al lado
 3. `obtener_paseadores_disponibles` — gana `p_lat/p_lon DEFAULT NULL` + el
    AND de §2.2. **Cambio de firma ⇒ DROP explícito de la vieja + REVOKE/GRANT
    re-establecidos** (L-119 + L-140).
-4. RPC `registrar_primer_ingreso()` (§4) con su REVOKE anon/PUBLIC + sonda
-   proacl.
-5. Post-aplicación: `gen:types` + fixture in-txn ROLLBACK (radio NULL entra
-   · titular estampa primer ingreso una sola vez · paseador sin coords
-   desaparece de la oferta CON cliente geolocalizado y reaparece SIN él).
+4. RPC `registrar_primer_ingreso()` (§4 v1.1 — el empleado recibe
+   respuesta normal, jamás excepción; el titular recibe además su
+   `proposito`) con su REVOKE anon/PUBLIC + sonda proacl.
+5. **(v1.1)** El régimen de columna de §3bis: REVOKE SELECT de tabla a
+   `authenticated` + GRANT por lista de columnas (todas menos `proposito`
+   y `direccion_envio`) — primer uso del mecanismo en la casa,
+   compatibilidad medida (cero `select('*')` vivo).
+6. Post-aplicación: `gen:types` + fixture in-txn ROLLBACK (radio NULL entra
+   · titular estampa primer ingreso una sola vez y recibe su propósito ·
+   EMPLEADO recibe `es_primer_ingreso:false` sin excepción · paseador sin
+   coords desaparece de la oferta CON cliente geolocalizado y reaparece
+   SIN él · authenticated NO puede SELECT `proposito` por PostgREST y SÍ
+   el resto de columnas).
 
 **76(g), declarada por adelantado para ese paquete: NO RIGE** — DDL aditivo
 (columnas nullable sin DEFAULT — instantáneas, sin reescritura), cero
@@ -332,6 +414,20 @@ leyendo cada body antes de tocarlo (L-141).
 
 ## Historial
 
+- **v1.1 (27 Jul 2026, S79-A Tanda 3 — dos enmiendas de revisión de mesa
+  + una medición):** ① §4: `sin_prestador` DEJA de ser excepción — el
+  empleado sin fila propia es estado normal y recibe
+  `{ok, es_primer_ingreso:false, primer_ingreso_en:null}`; la RPC ya no
+  exige que el caller resuelva titularidad antes (acoplamiento A↔B
+  eliminado); el titular recibe además su `proposito` en la respuesta.
+  ② §7 reescrita: la expiración perezosa entra AL GATE (el trigger
+  deriva vigencia con `fecha_vencimiento`), con la limitación de las
+  ofertas ya-activas DECLARADA y sus tres salidas a decisión del
+  founder. ③ §3bis NUEVA (medición T3.3): `prestadores_public` expone
+  fila entera a authenticated ⇒ el paquete gated gana el régimen de
+  privilegios por COLUMNA para `proposito`/`direccion_envio` (primer uso
+  del mecanismo; compatibilidad medida). Sigue esperando firma; cero
+  columnas existen.
 - **v1.0 (27 Jul 2026, S79-A Tanda 2):** depositada. Transpone las
   decisiones del mandato Tanda 2 (cuatro registros · caída del default 5 ·
   firma sin-datos-sin-oferta · propósito y dirección de envío · primer

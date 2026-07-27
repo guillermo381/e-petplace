@@ -255,7 +255,15 @@ $function$;
 REVOKE EXECUTE ON FUNCTION public.obtener_paseadores_disponibles(date, time without time zone, integer, double precision, double precision) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.obtener_paseadores_disponibles(date, time without time zone, integer, double precision, double precision) TO authenticated;
 
--- ── 4) registrar_primer_ingreso (§4 — el pedido de B) ────────────────
+-- ── 4) registrar_primer_ingreso (§4 v1.1 — el pedido de B) ───────────
+-- ENMIENDA v1.1 (T3.4-1): el que NO tiene fila propia en prestadores
+-- NO es excepción — es TODO EMPLEADO (viven en prestador_empleados;
+-- Aurora tiene dos activos logueándose acá desde S76). Respuesta
+-- normal {ok, es_primer_ingreso:false, primer_ingreso_en:null}; la
+-- ÚNICA excepción es auth_required. La RPC no exige que el caller sepa
+-- si es titular: B la llama para cualquier sesión.
+-- Y la respuesta del TITULAR trae su proposito (§3bis: esta RPC es el
+-- lector canónico del propósito — por PostgREST la columna no viaja).
 CREATE FUNCTION public.registrar_primer_ingreso()
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -265,6 +273,7 @@ AS $function$
 DECLARE
   v_auth uuid := auth.uid();
   v_estampado timestamptz;
+  v_proposito text;
 BEGIN
   IF v_auth IS NULL THEN
     RAISE EXCEPTION 'auth_required' USING ERRCODE = '42501';
@@ -276,29 +285,58 @@ BEGIN
      SET primer_ingreso_en = now()
    WHERE user_id = v_auth
      AND primer_ingreso_en IS NULL
-  RETURNING primer_ingreso_en INTO v_estampado;
+  RETURNING primer_ingreso_en, proposito INTO v_estampado, v_proposito;
 
   IF v_estampado IS NOT NULL THEN
     -- El PRIMER caller de la vida del negocio — la carrera de dos
     -- dispositivos se resuelve acá, en la fila.
     RETURN jsonb_build_object('ok', true, 'es_primer_ingreso', true,
-                              'primer_ingreso_en', v_estampado);
+                              'primer_ingreso_en', v_estampado,
+                              'proposito', v_proposito);
   END IF;
 
-  SELECT p.primer_ingreso_en INTO v_estampado
+  SELECT p.primer_ingreso_en, p.proposito INTO v_estampado, v_proposito
   FROM public.prestadores p WHERE p.user_id = v_auth;
 
   IF NOT FOUND THEN
-    RAISE EXCEPTION 'sin_prestador' USING ERRCODE = '22023';
+    -- v1.1: empleado (o cualquier sesión sin negocio propio) = estado
+    -- normal, jamás RAISE. NULL honesto en todo.
+    RETURN jsonb_build_object('ok', true, 'es_primer_ingreso', false,
+                              'primer_ingreso_en', NULL,
+                              'proposito', NULL);
   END IF;
 
   RETURN jsonb_build_object('ok', true, 'es_primer_ingreso', false,
-                            'primer_ingreso_en', v_estampado);
+                            'primer_ingreso_en', v_estampado,
+                            'proposito', v_proposito);
 END;
 $function$;
 
 REVOKE EXECUTE ON FUNCTION public.registrar_primer_ingreso() FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.registrar_primer_ingreso() TO authenticated;
+
+-- ── 5) El régimen de COLUMNA (§3bis, v1.1 — medición T3.3) ──────────
+-- prestadores_public concede SELECT de FILA ENTERA a authenticated
+-- sobre los activos; el Pick de R1 es TypeScript, no frontera (L-140).
+-- Primer uso de privilegios por columna de la casa (attacl medido
+-- vacío en todo public). Compatibilidad MEDIDA: cero select('*') sobre
+-- prestadores en los wrappers vivos (T3.3).
+-- Mecánica PostgreSQL: no existe "REVOKE de una columna" — se revoca el
+-- SELECT de tabla y se re-concede por LISTA (todas menos proposito y
+-- direccion_envio). UPDATE/INSERT de tabla NO se tocan (la RLS own-row
+-- sigue gateando filas; el titular escribe su proposito por whitelist).
+REVOKE SELECT ON public.prestadores FROM authenticated;
+GRANT SELECT (
+  id, user_id, country_code, tipo, nombre_comercial, descripcion,
+  foto_url, fotos_galeria, telefono, whatsapp, email_contacto,
+  sitio_web, direccion, ciudad, sector, lat, lon, estado, aprobado_por,
+  aprobado_en, motivo_rechazo, calificacion_promedio, total_citas,
+  total_resenas, acepta_emergencias, acepta_telemedicina,
+  radio_cobertura_km, created_at, updated_at, matricula_profesional,
+  cuenta_comercial_id, metadata, grooming_extra_pelaje_largo,
+  grooming_recargo_domicilio, modo_horarios, expone_personas,
+  primer_ingreso_en
+) ON public.prestadores TO authenticated;
 
 -- ── Verificación imperativa ──────────────────────────────────────────
 DO $$
@@ -329,6 +367,16 @@ BEGIN
     AND r.rolname='anon';
   IF v_anon > 0 THEN
     RAISE EXCEPTION 'verificacion L-140: anon con % grants en las funciones nuevas', v_anon;
+  END IF;
+
+  -- §3bis: la frontera de columna quedó — proposito/direccion_envio NO
+  -- legibles por authenticated; el resto SÍ.
+  IF has_column_privilege('authenticated', 'public.prestadores', 'proposito', 'SELECT')
+     OR has_column_privilege('authenticated', 'public.prestadores', 'direccion_envio', 'SELECT') THEN
+    RAISE EXCEPTION 'verificacion §3bis: authenticated puede leer proposito/direccion_envio';
+  END IF;
+  IF NOT has_column_privilege('authenticated', 'public.prestadores', 'nombre_comercial', 'SELECT') THEN
+    RAISE EXCEPTION 'verificacion §3bis: authenticated perdio el SELECT de columnas normales';
   END IF;
 END $$;
 

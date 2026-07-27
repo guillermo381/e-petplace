@@ -13,7 +13,14 @@
 -- ═════════════════════════════════════════════════════════════════════
 begin;
 
+-- 5) (v1.1) cae el régimen de columna: vuelve el SELECT de tabla
+--    entero a authenticated (el estado medido en T3.3 — la exposición
+--    de fila entera de prestadores_public era lo VIGENTE pre-contrato).
+GRANT SELECT ON public.prestadores TO authenticated;
+
 -- 4) muere la RPC del primer ingreso
+--    (v1.1 no cambia esta reversa: la enmienda del empleado vive en el
+--    body que acá se DROPea entero — declarado en T3.4.)
 DROP FUNCTION IF EXISTS public.registrar_primer_ingreso();
 
 -- 3) vuelve la lectora de 3 parámetros (body vivo pre-contrato,
