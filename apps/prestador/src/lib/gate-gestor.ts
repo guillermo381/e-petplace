@@ -31,7 +31,7 @@
  *    (components/gate-roto.tsx), jamás nada.
  */
 import { useCallback, useEffect, useState } from 'react';
-import { empleadoTieneRol, obtenerMiPrestador, obtenerTitularId } from '@epetplace/api';
+import { empleadoTieneRol, obtenerMiEmpleadoId, obtenerMiPrestador, obtenerTitularId } from '@epetplace/api';
 
 export type GateGestor = 'verificando' | 'permitido' | 'denegado' | 'roto';
 
@@ -69,6 +69,23 @@ export function useGateGestor(): { gate: GateGestor; reintentarGate: () => void 
       const titular = await obtenerTitularId(prestador.data.id);
       if (!vigente) return;
       if (titular === null) {
+        // S80-B3 — EL FALSO ROTO, medido en campo (el founder como
+        // empleado leyó "los datos se contradicen" con un Reintentar que
+        // jamás cura): titular=null NO distingue "no hay titular" de "la
+        // RLS me lo esconde" — `empleados_self` oculta las filas ajenas,
+        // así que TODO empleado activo caía acá. La coherencia gana el
+        // dato que la RLS SÍ garantiza: MI fila. Empleado activo sin rol
+        // de gestión ⇒ la denegación ES coherente (ausencia, Ley 23).
+        // Sin fila propia (roto real o lectura caída) ⇒ 'roto' se
+        // conserva tal cual — la protección S79 del titular expulsado
+        // queda intacta (un negocio sin fila dueño se DICE, jamás se
+        // deniega).
+        const miFila = await obtenerMiEmpleadoId(prestador.data.id);
+        if (!vigente) return;
+        if (miFila !== null) {
+          setGate('denegado');
+          return;
+        }
         console.error('[gate-gestor] datos rotos: rol=false y titular=null — no se deniega, se dice');
         setGate('roto');
         return;

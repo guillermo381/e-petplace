@@ -57,6 +57,7 @@ import {
   obtenerCitasPaseoDelDia,
   obtenerCitasVetDelDia,
   obtenerCitasPorCoordinar,
+  empleadoTieneRol,
   obtenerEquipoNegocio,
   obtenerFranjasHorario,
   obtenerMascotasAtendidas,
@@ -535,12 +536,16 @@ export default function Hoy() {
     // jornada normal: la RLS ya restringe lo que recepción puede ver, y
     // un falso-recepción escondería la jornada del titular (peor).
     const miFila = await obtenerMiEmpleadoId(prestador.data.id);
+    // S80-B3: esTitular sale del gate de recepción y también gatea el
+    // módulo de preparación (abajo) — el titular lee su propia fila
+    // dueño, así que para él la resolución no cuesta ningún viaje nuevo.
+    let esTitular = false;
     if (miFila !== null) {
       const [titularFila, chipsR] = await Promise.all([
         obtenerTitularId(prestador.data.id),
         obtenerChipsEmpleado(miFila),
       ]);
-      const esTitular = titularFila !== null && titularFila === miFila;
+      esTitular = titularFila !== null && titularFila === miFila;
       if (!esTitular && chipsR.ok && chipsR.data.length === 0) {
         setPantalla({
           estado: 'recepcion',
@@ -650,18 +655,40 @@ export default function Hoy() {
         (ofAdiestramiento.data.oferta?.activo ?? false) &&
         (ofAdiestramiento.data.oferta?.precio ?? 0) > 0) ||
       (ofVet.ok && ofVet.data.servicios.some((s) => s.activo && s.precio > 0));
-    const franjasR = await obtenerFranjasHorario(prestador.data.id);
-    const horariosOk: boolean | null = franjasR.ok
-      ? franjasR.data.some((f) => f.activo)
-      : null;
+    // ── S80-B3 · EL GATE DEL MÓDULO (D-521, disparo de campo: el founder
+    // como empleado con chip vio "Prepara tu espacio" con Los Shyris YA
+    // configurada) ── El módulo es del GESTOR (PORTAL §2.4). La verdad de
+    // rol es del motor: `empleado_tiene_rol` §14.4 — JAMÁS la fila
+    // `recepcion` (membresía, no identidad, S76-A2bis). El titular ya se
+    // resolvió arriba sin viaje; no-titular paga +1 RPC (familia D-555).
+    // Sin gate, `obtenerFranjasHorario` resuelve por TITULAR y la fila
+    // dueño es INVISIBLE para un empleado (empleados_self) → horariosOk
+    // null → falso "falta configurar" con cara de dato (medido S80-B3,
+    // JWT vet3: titular_visible=0 con 5 franjas activas en la tabla).
+    // Lectura de rol caída → sin módulo (Ley 23: la ayuda de preparación
+    // no se monta ante la duda; la escritura la protege el server).
+    // NOTA para el ADMINISTRADOR futuro (D-513 v2): serviciosOk lee por
+    // los wrappers _own del titular — a un gestor no-titular le va a
+    // mentir igual; se cura cuando ese rol gane motor.
+    let esGestor = esTitular;
+    if (!esGestor) {
+      const rolR = await empleadoTieneRol(prestador.data.id, ['dueño', 'administrador']);
+      esGestor = rolR.ok && rolR.data;
+    }
     let preparacion: EstadoTareas | null = null;
-    if (!(serviciosOk && horariosOk === true)) {
-      let equipoOk: boolean | null = null;
-      if (prestador.data.cuenta_comercial_id !== null) {
-        const equipoR = await obtenerEquipoNegocio(prestador.data.cuenta_comercial_id);
-        if (equipoR.ok) equipoOk = equipoR.data.miembros.filter((m) => m.activo).length >= 2;
+    if (esGestor) {
+      const franjasR = await obtenerFranjasHorario(prestador.data.id);
+      const horariosOk: boolean | null = franjasR.ok
+        ? franjasR.data.some((f) => f.activo)
+        : null;
+      if (!(serviciosOk && horariosOk === true)) {
+        let equipoOk: boolean | null = null;
+        if (prestador.data.cuenta_comercial_id !== null) {
+          const equipoR = await obtenerEquipoNegocio(prestador.data.cuenta_comercial_id);
+          if (equipoR.ok) equipoOk = equipoR.data.miembros.filter((m) => m.activo).length >= 2;
+        }
+        preparacion = { serviciosOk, preciosOk, horariosOk, equipoOk };
       }
-      preparacion = { serviciosOk, preciosOk, horariosOk, equipoOk };
     }
     setPantalla({
       estado: 'listo',
