@@ -253,6 +253,21 @@ devengos**: cada cita del plan devenga sola al cerrar con calidad
 >    CONFIGURADOR. El cobro sigue SIMULADO; ciclo real, prorrateo,
 >    reintentos y pasarela son del ARCO DE PAGOS — disparo: Kushki real
 >    (la infra `kushki_subscription_id`/`proximo_cobro_en` ya espera).
+> 8. **EL AVISO DE 72 h Y EL PRECIO QUE CAMBIA (declaración S79-t10,
+>    mesa — destapado por el fixture: renovación a $150 sobre un
+>    contrato de $120):** el prestador puede cambiar
+>    `precio_mensual_plan` y la renovación cobra el precio VIGENTE — la
+>    familia pagaría más sin haberlo aceptado. No es conducta nueva (el
+>    COALESCE viejo leía la oferta actual igual), pero recién ahora es
+>    visible. **LA LETRA: el aviso de 72 h nombra el monto SIEMPRE
+>    (medido: ya lo hace), y cuando difiere del período anterior, LO
+>    DICE** — *"tu plan pasa de $120 a $150"* — porque un aumento que
+>    aterriza en silencio es dark pattern por omisión
+>    (`MODELO_PRODUCTO` §8). Estado medido: el aviso vivo NO compara
+>    todavía (tiene `precio_mensual` del período anterior a mano y no
+>    lo usa). **Construir la comparación es del ARCO DE PAGOS** (misma
+>    tanda que el ciclo real); declarado hoy para que ese arco no
+>    llegue sin esta línea.
 
 ### 6.3 Evolución opcional (apagada)
 
