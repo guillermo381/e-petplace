@@ -64,6 +64,18 @@ primer login del portal"*):
 ya tiene para la carta y la placa (≈15 fundadores; los Momentos
 posteriores exigen la invitación real de D-509).
 
+> **TERCERA LECTURA DE D-509 (founder, cierre S79) — la salida
+> permanente no es un link: es la PANTALLA DE REGISTRO en la app del
+> prestador.** El diagnóstico corregido separó dos problemas: nadie en
+> el producto crea cuentas de auth (①) y el link no puede repartirse
+> (②) — y ① no necesita ②. Con registro propio, la persona se crea la
+> cuenta sola (VACÍA — la curaduría intacta: ser prestador sigue
+> exigiendo `invitar_prestador`, ser empleado la invitación del
+> titular), el paso Studio de este §1bis MUERE, y la carta transporta
+> solo la bienvenida. El motor de esta letra ya lo espera
+> (`usuario_no_registrado` = "registrate primero"). **Candidato a
+> primer arco de S80**; el detalle en D-509.
+
 ## §2 Las CUATRO FASES
 
 | Fase | Quién | Qué pasa | Motor |

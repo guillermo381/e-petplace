@@ -142,6 +142,15 @@ las dos por decisión del founder en vuelo.
    §2.2 la transporta** (la letra del PORTAL ya lo decía) + cambio de
    clave en la sala (D-562, pedido a B). Cohorte-scoped, no mecánica
    permanente.
+   **Y LA TERCERA LECTURA (founder, cierre) corrigió el diagnóstico:
+   son DOS problemas — ① nadie en el producto crea cuentas de auth
+   (prestadores Y empleados) y ② el link sin canal — y ① no necesita
+   ②: la PANTALLA DE REGISTRO en la app del prestador (port de
+   registro.tsx + estado vacío del registrado sin vínculo; cero build,
+   cero App Links, cero SMTP; curaduría intacta — la cuenta nace VACÍA
+   y los vínculos siguen gateados por admin/titular) mata el paso
+   Studio y la escala del problema (cada empleado de cada fundador por
+   Studio). ⇒ CANDIDATO A PRIMER ARCO DE S80.**
 2. **§7 vencimientos**: propuesta con gate.
 3. **Gates founder en dispositivo pendientes**: la Hoja del plan
    mensual + el rebote del chip · la captura del hogar con Places · el
