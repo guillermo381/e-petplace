@@ -78,6 +78,10 @@ function hoyISO(): string {
   return `${hoy.getFullYear()}-${p(hoy.getMonth() + 1)}-${p(hoy.getDate())}`;
 }
 
+// S79-B (cura de gate): el crash de render termina en una superficie que
+// habla — jamás en blanco (frontera por ruta de expo-router).
+export { PantallaCaida as ErrorBoundary } from '@/components/pantalla-caida';
+
 export default function OfertaGrooming() {
   const router = useRouter();
   const { theme } = useTheme();

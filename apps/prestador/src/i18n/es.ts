@@ -1817,6 +1817,14 @@ export const prestadorEs = {
     radioSugerido: '{{km}} km · sugerido',
     radioGuardado: 'Radio guardado: {{km}} km.',
   },
+  // S79-B (cura de gate) · LA PANTALLA CAÍDA — la voz de la frontera de
+  // crash (Ley 17.4: dice qué pasó y qué hacer; "revisá tu conexión"
+  // sigue RESERVADO a red — esto NO es red) · LOTE S79, GATE PENDIENTE
+  caida: {
+    titulo: 'Esta pantalla no se pudo mostrar',
+    detalle: 'Es un problema nuestro, no de tu configuración — tus datos están a salvo. Prueba de nuevo.',
+    reintentar: 'Reintentar',
+  },
   // S79-B (T3-B3) · LA SALA DE ESPERA — el marco del pendiente (la voz
   // del encabezado se REUSA de `bienvenida`, aprobada) · LOTE S79, GATE PENDIENTE
   salaEspera: {

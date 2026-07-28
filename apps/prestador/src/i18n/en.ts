@@ -1623,6 +1623,12 @@ export const prestadorEn = {
     radioSugerido: '{{km}} km · suggested',
     radioGuardado: 'Radius saved: {{km}} km.',
   },
+  // S79-B (cura de gate) · the crash boundary voice · LOTE S79
+  caida: {
+    titulo: 'This screen could not be shown',
+    detalle: 'It is a problem on our side, not your setup — your data is safe. Try again.',
+    reintentar: 'Try again',
+  },
   // S79-B (T3-B3) · the waiting room — the pending provider's frame · LOTE S79
   salaEspera: {
     marco: 'Your space is under review. Meanwhile, you can leave everything ready on your side.',

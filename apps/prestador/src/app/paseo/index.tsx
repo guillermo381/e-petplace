@@ -79,6 +79,10 @@ function hoyISO(): string {
 }
 
 
+// S79-B (cura de gate): el crash de render termina en una superficie que
+// habla — jamás en blanco (frontera por ruta de expo-router).
+export { PantallaCaida as ErrorBoundary } from '@/components/pantalla-caida';
+
 export default function OfertaPaseo() {
   const router = useRouter();
   const { theme } = useTheme();

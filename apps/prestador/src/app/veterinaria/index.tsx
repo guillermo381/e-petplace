@@ -78,6 +78,10 @@ function baseDeItem(item: ItemMenuVeterinaria, servicios: OfertaVeterinariaPropi
   }
 }
 
+// S79-B (cura de gate): el crash de render termina en una superficie que
+// habla — jamás en blanco (frontera por ruta de expo-router).
+export { PantallaCaida as ErrorBoundary } from '@/components/pantalla-caida';
+
 export default function PortadaVeterinaria() {
   const router = useRouter();
   const { theme } = useTheme();
