@@ -1143,8 +1143,8 @@ function GaleriaInterna() {
           <MuestraPieRevelar />
         </Seccion>
 
-        <Seccion titulo="FilaCita (62) — la fila de cita con su canto ADENTRO (S80, dominio)">
-          <Tarjeta elevacion="reposo" relleno="ninguno">
+        <Seccion titulo="FilaCita (62) — una tarjeta = una cita, con su canto ADENTRO (S80, dominio)">
+          <View style={{ gap: spacing[3] }}>
             <FilaCita
               oficio="paseo"
               titulo="Thor"
@@ -1153,7 +1153,6 @@ function GaleriaInterna() {
               mascota={{ nombre: 'Thor' }}
               onPress={() => {}}
             />
-            <Separador />
             <FilaCita
               oficio="veterinaria"
               titulo="Zeus"
@@ -1162,7 +1161,6 @@ function GaleriaInterna() {
               mascota={{ nombre: 'Zeus' }}
               onPress={() => {}}
             />
-            <Separador />
             <FilaCita
               oficio="grooming"
               titulo="Luna"
@@ -1171,12 +1169,12 @@ function GaleriaInterna() {
               mascota={{ nombre: 'Luna' }}
               onPress={() => {}}
             />
-          </Tarjeta>
+          </View>
           <View style={{ height: spacing[3] }} />
           <Texto variante="apoyo">
-            El canto de capa (§9.1/§9.2) vive ADENTRO: el tono sale del oficio (mapa del registry),
-            el piso de alfa 33% y la posición al ras son del componente — cero API de color. La
-            pantalla pone la voz y los datos; el craft no se puede romper desde afuera.
+            Una tarjeta = una cita (B14/B15): el canto SÓLIDO es el borde izquierdo del portador del
+            radio — sigue la curva por construcción, sin mordida. Tono por oficio (mapa del
+            registry), cero API de color: el craft no se puede romper desde afuera.
           </Texto>
         </Seccion>
 
