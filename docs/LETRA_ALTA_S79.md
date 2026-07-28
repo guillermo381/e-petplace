@@ -49,6 +49,32 @@ invita después). Una cuenta comercial por humano
 | **3 · Revisión y activación** | admin | `activar_prestador(id, veredicto, motivo)` — el checklist §3 es MECÁNICO: si falta un ítem, rebota tipado. `activo` escribe `aprobado_por/aprobado_en`; `rechazado` exige motivo | RPC S79; primer escritor de transiciones de `estado` del monorepo (medido: ninguna función viva las escribía — eran del admin legado) |
 | **4 · Primer login al portal** | el titular | **La ceremonia §2.3 dispara ACÁ, jamás antes**: `registrar_primer_ingreso` estampa SOLO con `estado='activo'` (condición en la RPC — la sala de espera no quema la bienvenida ni aunque se la llame antes de tiempo) | CONTRATO §9.4 (gated) |
 
+### §2bis (post-diagnóstico vet2, OK founder) — EL ESPEJO DEL TITULAR
+
+**El alta crea TODO lo que un titular necesita para existir — y la
+especificación de eso es el BACKFILL de la historia, no el síntoma que
+dolió.** Leído entero (orden del founder): V0 (S67) materializó por
+titular la fila `prestador_empleados rol='dueño'` COMPLETA (nombre desde
+profiles con fallback al comercial, activo, modelo_pago manual,
+activado_en, created_by) y el motor de equipo S73 sumó la segunda pieza:
+`empleado_roles rol='dueño'`. `invitar_prestador` (v3, migración
+`20260727220000`) crea LAS DOS; `activar_prestador` gana el ítem 0 del
+checklist con predicado PRECISO (`prestador_id = X AND rol='dueño' AND
+activo` — no "alguna fila") y rebote hablado `fila_dueno_faltante`.
+
+**EL PARIENTE, DECLARADO: `crear_prestador_inicial` tiene el MISMO
+agujero.** Su body (leído entero en T1/T4.6) inserta en `prestadores` y
+en `cuenta_roles` y JAMÁS toca `prestador_empleados` — sus prestadores
+históricos existen porque el backfill de V0 los curó DESPUÉS. Hoy no
+muerde (cero callers en el monorepo, el legado no está desplegado —
+D-471 enmendada), pero la función vive en la DB: **el día que alguien la
+reviva, el bug vuelve entero.** Si se revive, se le copia el espejo en
+esa misma tanda — o se jubila con D-471.
+
+**El invariante de fondo — "todo prestador tiene exactamente UNA fila
+dueño activa" — es de CONSTRAINT o TRIGGER, no de checklist: D-561, con
+disparo, no construido hoy.**
+
 Los estados legales (CHECK medido): `pendiente · en_revision · activo ·
 suspendido · rechazado`. `en_revision` queda como estado intermedio legal
 de la fase 3 (Carlos vive ahí); `suspendido` es gobierno posterior, fuera
