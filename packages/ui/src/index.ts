@@ -47,6 +47,9 @@ export { Texto, type TextoProps, type TextoVariante, type TextoColor } from './c
 export { FilaDato, type FilaDatoProps } from './components/FilaDato'
 export { PieRevelar, type PieRevelarProps } from './components/PieRevelar'
 export { LogoNegocio, type LogoNegocioProps } from './components/LogoNegocio'
+// FilaCita — S80-B12 Parte 3 (dominio: la fila de cita con su canto ADENTRO;
+// cero API de color/posición/alfa — el molde de "cero genéricos")
+export { FilaCita, type FilaCitaProps, type FilaCitaOficio } from './components/FilaCita'
 export {
   Insignia,
   type InsigniaProps,

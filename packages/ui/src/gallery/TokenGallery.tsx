@@ -41,6 +41,7 @@ import { CeldaNavegacion } from '../components/CeldaNavegacion'
 import { Texto } from '../components/Texto'
 import { FilaDato } from '../components/FilaDato'
 import { LogoNegocio } from '../components/LogoNegocio'
+import { FilaCita } from '../components/FilaCita'
 import { PieRevelar } from '../components/PieRevelar'
 import { HeroMarca } from '../components/HeroMarca'
 import { LineaDeVida, type LineaDeVidaItem } from '../components/LineaDeVida'
@@ -1140,6 +1141,43 @@ function GaleriaInterna() {
 
         <Seccion titulo="PieRevelar (60) — revelar el resto de una sección (19.6)">
           <MuestraPieRevelar />
+        </Seccion>
+
+        <Seccion titulo="FilaCita (62) — la fila de cita con su canto ADENTRO (S80, dominio)">
+          <Tarjeta elevacion="reposo" relleno="ninguno">
+            <FilaCita
+              oficio="paseo"
+              titulo="Thor"
+              subtitulo="Paseo de 60 min"
+              metadataMono="09:00 · 60 min"
+              mascota={{ nombre: 'Thor' }}
+              onPress={() => {}}
+            />
+            <Separador />
+            <FilaCita
+              oficio="veterinaria"
+              titulo="Zeus"
+              subtitulo="Consulta general"
+              metadataMono="10:30 · 30 min"
+              mascota={{ nombre: 'Zeus' }}
+              onPress={() => {}}
+            />
+            <Separador />
+            <FilaCita
+              oficio="grooming"
+              titulo="Luna"
+              subtitulo="Baño y corte"
+              metadataMono="11:30 · 90 min"
+              mascota={{ nombre: 'Luna' }}
+              onPress={() => {}}
+            />
+          </Tarjeta>
+          <View style={{ height: spacing[3] }} />
+          <Texto variante="apoyo">
+            El canto de capa (§9.1/§9.2) vive ADENTRO: el tono sale del oficio (mapa del registry),
+            el piso de alfa 33% y la posición al ras son del componente — cero API de color. La
+            pantalla pone la voz y los datos; el craft no se puede romper desde afuera.
+          </Texto>
         </Seccion>
 
         {/* Tipografía */}
