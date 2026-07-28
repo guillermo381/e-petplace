@@ -156,6 +156,11 @@ function sugerido(precioTexto: string, factor: number): string {
 // MENSUAL — el MISMO 60% de descuento de siempre, sobre el mes típico de
 // 4 salidas (0.6 × 4 = 2.4× del suelto), al paso del riel mensual ($1).
 // CERO derivación por salida: el número que se ve es el que se guarda.
+// ⚠️ PEDIDO ABIERTO (cierre S79-B, orden founder): ese "mes típico de 4"
+// es una FRECUENCIA FANTASMA — el sugerido debe derivar de la frecuencia
+// DECLARADA; sin frecuencia declarada, campo vacío y la ayuda dice por
+// qué. Un número inventado sobre una frecuencia fantasma es el bug
+// original (÷4) con otra ropa. NO curado acá: registrado en el acta.
 const PASO_MES = PASO_PRECIO * 4;
 function sugeridoMes(precioTexto: string): string {
   const p = Number.parseFloat(precioTexto.replace(',', '.'));
