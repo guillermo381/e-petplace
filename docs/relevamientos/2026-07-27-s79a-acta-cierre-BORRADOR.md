@@ -1,9 +1,10 @@
-# S79-A · ACTA DE CIERRE — BORRADOR (27 Jul 2026)
+# S79-A · ACTA DE CIERRE (27 Jul 2026)
 
-**BORRADOR por L-163:** una sesión no está cerrada hasta que el canon lo
-dice — la transposición a `CLAUDE.md` corre con la palabra del founder.
-Este acta es el insumo completo de esa transposición, lado A (los ítems
-de B se citan por sus commits; su literal vive en su acta).
+**TRANSPUESTA AL CANON en la Tanda 11 por orden del founder** (L-163
+cumplida: `CLAUDE.md` declara S79 CERRADA con este acta como fuente).
+Lado A; los ítems de B se citan por sus commits — su literal vive en su
+acta. La sección final (CIERRE DOCUMENTAL t11) registra el pre-check,
+los errores de la mesa y la lista de revisión del barrido.
 
 ---
 
@@ -189,3 +190,85 @@ las dos por decisión del founder en vuelo.
 
 *(Cuarta, ya depositada en D-557: las credenciales van del navegador a
 la terminal directo — la mesa nunca necesita el valor de un secret.)*
+
+---
+
+# CIERRE DOCUMENTAL (Tanda 11)
+
+## El pre-check: el 11.25 y la LÁPIDA de `precio_plan`
+
+El founder cazó un TERCER valor post-reforma: `precio_plan=11.25` con
+`mensual=45` (45÷4 exacto) en la oferta `8c45ab59` de Clínica Los
+Shyris, nacida el 27-jul 02:16 durante su configuración REAL. Medido:
+**cero escritores en DB** (el único match de prosrc era el COMENTARIO de
+`contratar_plan_paseo` — L-170) y **cero en el árbol HEAD** (B ya migró;
+su taller dejó anotada la frecuencia fantasma). **El escritor era el
+BUNDLE VIVO pre-reforma** (su taller viejo manda la clave y el wrapper
+la aceptaba). Veredicto de mesa ejecutado (migración `20260727233000`,
+reversa con ids completos medidos): los DOS residuos a NULL + **lápida
+mecánica** — trigger que congela `precio_plan` en NULL (el SAVE del
+bundle viejo no se rompe; su escritura muerta no aterriza; verificado:
+un UPDATE a 99.99 no aterrizó). La lápida muere con el DROP de la
+columna. **Recién con esto la reforma se documenta limpia.**
+
+## Los CINCO errores de la mesa (misma raíz: prescribir sobre premisa no medida)
+
+1. **Documentos presupuestada como inexistente** — T1 encontró tabla,
+   bucket, circuito y 7 filas vivas: §6.5.2 era remate, no construcción.
+2. **El recorrido prescrito antes de medir el alta** — el brief asumía
+   un alta que T3.2 probó inexistente en el monorepo (cero callers).
+3. **"GATE PASADO" declarado con el paso 11 pendiente** — hoy regla 77:
+   el gate del alta queda PARCIAL, con lo faltante nombrado.
+4. **L-154 rota por la propia mesa** (secuencia publish/marcador en el
+   flujo del OTA de B).
+5. **El `SELECT *` que confundió el diagnóstico de privilegios** — la
+   hipótesis principal del incidente vet2 nació de un patrón que el
+   árbol no tenía; las mediciones la falsificaron, pero costó la mitad
+   del diagnóstico.
+
+## El conflicto P14 (depositado, NO resuelto)
+
+P14 (firmada S55) promete crédito/reembolso proporcional de lo no
+ejecutado; la voz publicada del plan mensual dice lo contrario; **el
+motor todavía cumple P14** (el crédito de `cerrar_y_renovar_planes`
+vive); el unitario ya no es base estable. Las DOS salidas (α: P14 se
+enmienda a suscripción pura · β: la voz se corrige y el crédito vive) y
+el disparo (ANTES del primer plan real) viven en la nota de P14
+(`POLITICAS`) + `MODELO_PASEO` §6.2.8bis. Es firma del founder — plata
+de cara al cliente.
+
+## La lista de revisión del BARRIDO (grep de docs/ entero, no memoria)
+
+**Ya enmendados en este cierre:** MODELO_PASEO · MODELO_FINANCIERO ·
+POLITICAS (P14, conflicto) · PORTAL_PRESTADOR (§2/§2.6/§6.5.1/§6.5.2) ·
+MODELO_VETERINARIA (§14.2) · LETRA_PERFIL/LETRA_ALTA · DEUDAS ·
+CONTRATO (v1.13).
+
+**A REVISAR (S80 — cada uno con el término que lo trajo):**
+- `DISEÑO_EXPERIENCIA.md` — "por salida" (la escalera del precio del
+  paseo puede nombrar el per-salida del plan muerto).
+- `MODELO_PRODUCTO.md` — "unitario" · "invitación" (prosa general; bajo
+  riesgo, se confirma).
+- `PORTAL_PRESTADOR.md` — "unitario" (fuera de los § ya enmendados).
+- `LETRA_EDICION_VINCULO_S77` · `LETRA_RECEPCION_S76` ·
+  `LETRA_ROLES_EQUIPO_S74` · `LETRA_TURNOS_S78` — "invitación" /
+  "registro" / `crear_prestador_inicial`: el flujo de invitación de
+  EMPLEADOS cambia cuando S80 construya el registro (D-509 3ª lectura);
+  se releen en ese arco.
+- `MODELO_NOTIFICACIONES.md` — "invitación" (ídem D-509).
+- `DEFINICION_SOFTLAUNCH.md` — **CERO matches de término** (declarado:
+  el barrido no lo alcanzó por grep); **entra por ORDEN DE MESA y por
+  contenido**: su lista de precondiciones del 1-oct debe releerse
+  contra lo que S79 cambió (reclutamiento posible, geo construida
+  sin encender, el alta real).
+
+## Lo depositado además en t11
+
+- Reglas **77** y **78** al CONTRATO (v1.13).
+- Lecciones **L-177 → L-180** numeradas en DEUDAS.
+- La ley del gate coherente + `GateRoto`/`PantallaCaida` a la skill de
+  diseño (historial S79, con la promoción L-175 declarada).
+- D-518/D-367: la distancia SUBSUME la ciudad (el puente NO se
+  construye — que nadie lo busque) + el disparo del encendido del
+  filtro (cohorte activa y geo-completa).
+- El sugerido-solo-de-lo-declarado a MODELO_PASEO §6.4 (L-180).
