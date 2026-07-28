@@ -5,7 +5,7 @@
 // Verdad firme (test 8): SOLO estado='pendiente_liquidar' — lo reversado,
 // en disputa o ya liquidado no cuenta acá.
 
-import { getClient } from '../client';
+import { getClient, uidActual } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 import type { Json } from '../database.types';
 
@@ -30,8 +30,7 @@ export interface ResumenPendienteLiquidar {
 export async function obtenerResumenPendienteLiquidar(): Promise<
   ResultadoWrapper<ResumenPendienteLiquidar, CodigoErrorEventosEconomicos>
 > {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) {
+  if ((await uidActual()) === null) {
     return { ok: false, codigo: 'sin_sesion', mensaje: MENSAJES.sin_sesion };
   }
 
@@ -103,8 +102,7 @@ function leerTipoServicio(origenData: Json | null): string | null {
 export async function obtenerDesglosePendienteLiquidar(): Promise<
   ResultadoWrapper<EventoPendienteLiquidar[], CodigoErrorEventosEconomicos>
 > {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) {
+  if ((await uidActual()) === null) {
     return { ok: false, codigo: 'sin_sesion', mensaje: MENSAJES.sin_sesion };
   }
 

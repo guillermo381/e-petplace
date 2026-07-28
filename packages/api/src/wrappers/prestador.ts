@@ -29,7 +29,7 @@
 // por `owner_profile_id`, fuera del v1 por decisión founder) y no
 // gatea nada por rol — la identidad no es permiso (D-490/D-513).
 
-import { getClient } from '../client';
+import { getClient, uidActual } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 import type { Database } from '../database.types';
 
@@ -116,8 +116,7 @@ const COLUMNAS_MI_PRESTADOR =
 export async function obtenerMiPrestador(): Promise<
   ResultadoWrapper<MiPrestador, CodigoErrorPrestador>
 > {
-  const { data: auth } = await getClient().auth.getUser();
-  const uid = auth.user?.id;
+  const uid = await uidActual();
   if (!uid) return { ok: false, codigo: 'sin_sesion', mensaje: MENSAJES.sin_sesion };
 
   // (1) Titularidad — el camino de siempre, byte por byte: las 26
@@ -216,8 +215,7 @@ function aNull(v: string | undefined): string | null | undefined {
 export async function actualizarPerfilPrestador(
   input: InputActualizarPerfilPrestador,
 ): Promise<ResultadoWrapper<null, CodigoErrorPerfilPrestador>> {
-  const { data: auth } = await getClient().auth.getUser();
-  const uid = auth.user?.id;
+  const uid = await uidActual();
   if (!uid) return { ok: false, codigo: 'sin_sesion', mensaje: MENSAJES.sin_sesion };
 
   const payload: Partial<Database['public']['Tables']['prestadores']['Update']> = {};

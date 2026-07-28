@@ -4,7 +4,7 @@
 // comercial ve las suyas; admin todo vía is_admin). SOLO SELECT — generar,
 // aprobar y pagar liquidaciones es del admin (MODELO_FINANCIERO §7.2).
 
-import { getClient } from '../client';
+import { getClient, uidActual } from '../client';
 import type { Database } from '../database.types';
 import type { ResultadoWrapper } from '../resultado';
 
@@ -38,8 +38,7 @@ export interface LiquidacionPropia {
 export async function obtenerMisLiquidaciones(): Promise<
   ResultadoWrapper<LiquidacionPropia[], CodigoErrorLiquidaciones>
 > {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) {
+  if ((await uidActual()) === null) {
     return { ok: false, codigo: 'sin_sesion', mensaje: MENSAJES.sin_sesion };
   }
 

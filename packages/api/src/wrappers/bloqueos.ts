@@ -11,7 +11,7 @@
 // extremos, granularidad día. El bloqueo mata oferta y holds NUEVOS;
 // las citas ya confirmadas siguen en pie (P14/P16, jamás automático).
 
-import { getClient } from '../client';
+import { getClient, uidActual } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 
 const MENSAJES = {
@@ -61,8 +61,7 @@ const ISO_FECHA = /^\d{4}-\d{2}-\d{2}$/;
 export async function obtenerBloqueosPrestador(
   prestadorId: string,
 ): Promise<ResultadoWrapper<BloqueoPrestador[], CodigoErrorBloqueos>> {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) return falla('sin_sesion');
+  if ((await uidActual()) === null) return falla('sin_sesion');
 
   const { data, error } = await getClient()
     .from('prestador_bloqueos')
@@ -86,8 +85,7 @@ export interface InputCrearBloqueoPrestador {
 export async function crearBloqueoPrestador(
   input: InputCrearBloqueoPrestador,
 ): Promise<ResultadoWrapper<BloqueoPrestador, CodigoErrorBloqueos>> {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) return falla('sin_sesion');
+  if ((await uidActual()) === null) return falla('sin_sesion');
 
   if (!ISO_FECHA.test(input.fechaInicio) || !ISO_FECHA.test(input.fechaFin)) {
     return falla('rango_invalido');
@@ -118,8 +116,7 @@ export async function crearBloqueoPrestador(
 export async function eliminarBloqueoPrestador(
   id: string,
 ): Promise<ResultadoWrapper<null, CodigoErrorBloqueos>> {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) return falla('sin_sesion');
+  if ((await uidActual()) === null) return falla('sin_sesion');
 
   const { data, error } = await getClient()
     .from('prestador_bloqueos')

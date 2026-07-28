@@ -6,7 +6,7 @@
 // wrappers filtraban con .is('empleado_id', null) son ahora las del
 // titular — la conspiración de NULLs murió en la migración
 // 20260717170000; este helper es la única resolución del lado app.
-import { getClient } from '../client';
+import { getClient, uidActual } from '../client';
 
 /**
  * El id de la persona TITULAR (prestador_empleados.rol='dueño', activa)
@@ -48,9 +48,8 @@ export async function obtenerTitularId(prestadorId: string): Promise<string | nu
  * para el empleado, la suya.
  */
 export async function obtenerMiEmpleadoId(prestadorId: string): Promise<string | null> {
-  const { data: auth } = await getClient().auth.getUser();
-  const uid = auth.user?.id;
-  if (uid === undefined) return null;
+  const uid = await uidActual();
+  if (uid === null) return null;
   const { data, error } = await getClient()
     .from('prestador_empleados')
     .select('id')

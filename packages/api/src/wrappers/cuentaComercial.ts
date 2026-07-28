@@ -14,7 +14,7 @@
 // string-matching); la validación client-side (máscaras por catálogo) minimiza
 // que ese camino se recorra.
 
-import { getClient } from '../client';
+import { getClient, uidActual } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 import type { Database } from '../database.types';
 
@@ -113,8 +113,7 @@ function derivarResumenBancario(datos: unknown): DatosBancariosResumen | null {
 export async function obtenerMiCuentaComercial(): Promise<
   ResultadoWrapper<MiCuentaComercial | null, CodigoErrorCuentaComercial>
 > {
-  const { data: auth } = await getClient().auth.getUser();
-  const uid = auth.user?.id;
+  const uid = await uidActual();
   if (!uid) return errorGenerico('sin_sesion');
 
   const { data, error } = await getClient()

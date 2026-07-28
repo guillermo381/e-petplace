@@ -17,7 +17,7 @@
 // desvincular. v1 unipersonal alcanza; la absorbe la próxima pasada del
 // motor de equipo.
 
-import { getClient } from '../client';
+import { getClient, uidActual } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 
 // S75-B: `administrador` NACE como valor aparte en el CHECK de
@@ -224,11 +224,11 @@ export async function asignarRolEmpleado(
   rol: Exclude<RolEquipo, 'dueño'>,
 ): R<null> {
   const cliente = getClient();
-  const { data: auth } = await cliente.auth.getUser();
-  if (!auth.user) return { ok: false, codigo: 'sin_sesion', mensaje: 'No hay sesión activa.' };
+  const uid = await uidActual();
+  if (uid === null) return { ok: false, codigo: 'sin_sesion', mensaje: 'No hay sesión activa.' };
   const { error } = await cliente
     .from('empleado_roles')
-    .insert({ empleado_id: empleadoId, rol, asignado_por: auth.user.id });
+    .insert({ empleado_id: empleadoId, rol, asignado_por: uid });
   if (error) return { ok: false, codigo: 'error_escritura', mensaje: error.message };
   return { ok: true, data: null };
 }
@@ -730,12 +730,14 @@ export async function empleadoTieneRol(
  *  entonces el empleado activo entra a (tabs) y nunca ve esta rama. */
 export async function obtenerNegocioEmpleadoActivo(): R<string | null> {
   const cliente = getClient();
-  const { data: auth } = await cliente.auth.getUser();
-  if (!auth.user) return { ok: true, data: null };
+  // SONDA: sin sesión NO es error acá — el guard raíz la consume (S80-A14:
+  // la semántica ok:true/data:null se preserva, es contrato del guard).
+  const uid = await uidActual();
+  if (uid === null) return { ok: true, data: null };
   const { data, error } = await cliente
     .from('prestador_empleados')
     .select('prestador_id, created_at, prestadores(nombre_comercial)')
-    .eq('user_id', auth.user.id)
+    .eq('user_id', uid)
     .eq('activo', true)
     // Enmienda (a) de la vara S75: `invitado_en` es NULLABLE — el orden
     // determinista es `created_at` (NOT NULL), alineado con el criterio de
@@ -782,12 +784,14 @@ export interface InvitacionPendiente {
  *  (esa mira `activo=true`): por eso no colisionan. */
 export async function obtenerInvitacionPendiente(): R<InvitacionPendiente | null> {
   const cliente = getClient();
-  const { data: auth } = await cliente.auth.getUser();
-  if (!auth.user) return { ok: true, data: null };
+  // SONDA: sin sesión NO es error acá — el guard raíz la consume (S80-A14:
+  // la semántica ok:true/data:null se preserva, es contrato del guard).
+  const uid = await uidActual();
+  if (uid === null) return { ok: true, data: null };
   const { data, error } = await cliente
     .from('prestador_empleados')
     .select('id, nombre, created_at, prestadores(nombre_comercial, foto_url)')
-    .eq('user_id', auth.user.id)
+    .eq('user_id', uid)
     .eq('activo', false)
     .order('created_at', { ascending: true })
     .limit(1)

@@ -7,7 +7,7 @@
 
 import { FunctionsHttpError } from '@supabase/supabase-js';
 
-import { getClient } from '../client';
+import { getClient, uidActual } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 
 function esObj(v: unknown): v is Record<string, unknown> {
@@ -562,8 +562,7 @@ const MENSAJES_HISTORIA_CITA: Record<CodigoErrorHistoriaDeCita, string> = {
 export async function obtenerHistoriaClinicaDeCita(
   citaId: string,
 ): Promise<ResultadoWrapper<EstadoHistoriaDeCita, CodigoErrorHistoriaDeCita>> {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) {
+  if ((await uidActual()) === null) {
     return { ok: false, codigo: 'sin_sesion', mensaje: MENSAJES_HISTORIA_CITA.sin_sesion };
   }
 

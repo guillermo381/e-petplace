@@ -19,7 +19,7 @@
 // prestador_horarios_own, ALL con WITH CHECK por prestadores.user_id).
 // La RLS es la puerta — cero RPC nueva, cero L-140 acá.
 
-import { getClient } from '../client';
+import { getClient, uidActual } from '../client';
 import type { Database } from '../database.types';
 import type { ResultadoWrapper } from '../resultado';
 import { resolverPersonaDeFranja } from './titular';
@@ -133,8 +133,7 @@ const SELECT_OFERTA = 'id, duracion_minutos, precio, precio_plan, precio_mensual
 export async function obtenerOfertasPaseoPropias(
   prestadorId: string,
 ): Promise<ResultadoWrapper<OfertaPaseoPropia[], CodigoErrorConfiguracionPaseo>> {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) return falla('sin_sesion');
+  if ((await uidActual()) === null) return falla('sin_sesion');
 
   const { data, error } = await getClient()
     .from('prestador_servicios')
@@ -165,8 +164,7 @@ export interface InputCrearOfertaPaseo {
 export async function crearOfertaPaseo(
   input: InputCrearOfertaPaseo,
 ): Promise<ResultadoWrapper<OfertaPaseoPropia, CodigoErrorConfiguracionPaseo>> {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) return falla('sin_sesion');
+  if ((await uidActual()) === null) return falla('sin_sesion');
 
   if (!BLOQUES_PASEO.includes(input.duracionMinutos as BloquePaseo)) return falla('bloque_invalido');
   if (!Number.isFinite(input.precio) || input.precio <= 0) return falla('precio_invalido');
@@ -248,8 +246,7 @@ export interface InputActualizarOfertaPaseo {
 export async function actualizarOfertaPaseo(
   input: InputActualizarOfertaPaseo,
 ): Promise<ResultadoWrapper<OfertaPaseoPropia, CodigoErrorConfiguracionPaseo>> {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) return falla('sin_sesion');
+  if ((await uidActual()) === null) return falla('sin_sesion');
 
   if (input.precio !== undefined && (!Number.isFinite(input.precio) || input.precio <= 0)) {
     return falla('precio_invalido');
@@ -331,8 +328,7 @@ export async function obtenerFranjasHorario(
   prestadorId: string,
   empleadoId?: string,
 ): Promise<ResultadoWrapper<FranjaHorario[], CodigoErrorConfiguracionPaseo>> {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) return falla('sin_sesion');
+  if ((await uidActual()) === null) return falla('sin_sesion');
 
   const personaId = await resolverPersonaDeFranja(prestadorId, empleadoId);
   if (personaId === null) return falla(empleadoId === undefined ? 'error_desconocido' : 'empleado_invalido');
@@ -379,8 +375,7 @@ const HORA_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 export async function crearFranjaHorario(
   input: InputCrearFranja,
 ): Promise<ResultadoWrapper<FranjaHorario, CodigoErrorConfiguracionPaseo>> {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) return falla('sin_sesion');
+  if ((await uidActual()) === null) return falla('sin_sesion');
 
   if (!Number.isInteger(input.diaSemana) || input.diaSemana < 0 || input.diaSemana > 6) {
     return falla('dia_invalido');
@@ -438,8 +433,7 @@ export interface InputActualizarFranja {
 export async function actualizarFranjaHorario(
   input: InputActualizarFranja,
 ): Promise<ResultadoWrapper<FranjaHorario, CodigoErrorConfiguracionPaseo>> {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) return falla('sin_sesion');
+  if ((await uidActual()) === null) return falla('sin_sesion');
 
   if (
     input.maxCitasPorSlot !== undefined &&
@@ -491,8 +485,7 @@ export interface InputEditarFranja {
 export async function editarFranjaHorario(
   input: InputEditarFranja,
 ): Promise<ResultadoWrapper<FranjaHorario, CodigoErrorConfiguracionPaseo>> {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) return falla('sin_sesion');
+  if ((await uidActual()) === null) return falla('sin_sesion');
 
   if (!HORA_RE.test(input.horaInicio) || !HORA_RE.test(input.horaFin)) return falla('rango_horario_invalido');
   if (input.horaFin <= input.horaInicio) return falla('rango_horario_invalido');
@@ -555,8 +548,7 @@ export async function editarFranjaHorario(
 export async function eliminarFranjaHorario(
   id: string,
 ): Promise<ResultadoWrapper<{ id: string }, CodigoErrorConfiguracionPaseo>> {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) return falla('sin_sesion');
+  if ((await uidActual()) === null) return falla('sin_sesion');
 
   const { data, error } = await getClient()
     .from('prestador_horarios')

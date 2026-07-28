@@ -20,7 +20,7 @@
 // se expone (Ley 3: ningún paseador piensa "los lunes atiendo paseos
 // de 30 pero no de 60").
 
-import { getClient } from '../client';
+import { getClient, uidActual } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 import { resolverPersonaDeFranja } from './titular';
 
@@ -82,8 +82,7 @@ function normalizarError(mensaje: string): Falla {
 export async function obtenerModoHorarios(
   prestadorId: string,
 ): Promise<ResultadoWrapper<ModoHorarios, CodigoErrorModoHorarios>> {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) return falla('sin_sesion');
+  if ((await uidActual()) === null) return falla('sin_sesion');
 
   const { data, error } = await getClient()
     .from('prestadores')
@@ -107,8 +106,7 @@ export async function obtenerModoHorarios(
 export async function elegirModoHorarios(
   modo: ModoHorarios,
 ): Promise<ResultadoWrapper<ModoHorarios, CodigoErrorModoHorarios>> {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) return falla('sin_sesion');
+  if ((await uidActual()) === null) return falla('sin_sesion');
 
   const { data, error } = await getClient().rpc('elegir_modo_horarios', { p_modo: modo });
 
@@ -132,8 +130,7 @@ export async function elegirModoHorarios(
 export async function convertirHorariosAPorServicio(): Promise<
   ResultadoWrapper<{ franjasConvertidas: number; servicios: number }, CodigoErrorModoHorarios>
 > {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) return falla('sin_sesion');
+  if ((await uidActual()) === null) return falla('sin_sesion');
 
   const { data, error } = await getClient().rpc('convertir_horarios_a_por_servicio');
 
@@ -168,8 +165,7 @@ export async function eliminarFranjasPrestador(
   prestadorId: string,
   empleadoId?: string,
 ): Promise<ResultadoWrapper<{ eliminadas: number }, CodigoErrorModoHorarios>> {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) return falla('sin_sesion');
+  if ((await uidActual()) === null) return falla('sin_sesion');
 
   const personaId = await resolverPersonaDeFranja(prestadorId, empleadoId);
   if (personaId === null) return falla(empleadoId === undefined ? 'error_desconocido' : 'empleado_invalido');
@@ -237,8 +233,7 @@ export async function obtenerFranjasDeServicios(
   servicioIds: string[],
   empleadoId?: string,
 ): Promise<ResultadoWrapper<FranjaHorarioServicio[], CodigoErrorModoHorarios>> {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) return falla('sin_sesion');
+  if ((await uidActual()) === null) return falla('sin_sesion');
   if (servicioIds.length === 0) return { ok: true, data: [] };
 
   const personaId = await resolverPersonaDeFranja(prestadorId, empleadoId);
@@ -285,8 +280,7 @@ const HORA_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 export async function crearFranjaServicio(
   input: InputCrearFranjaServicio,
 ): Promise<ResultadoWrapper<FranjaHorarioServicio, CodigoErrorModoHorarios>> {
-  const { data: auth } = await getClient().auth.getUser();
-  if (!auth.user?.id) return falla('sin_sesion');
+  if ((await uidActual()) === null) return falla('sin_sesion');
 
   if (!Number.isInteger(input.diaSemana) || input.diaSemana < 0 || input.diaSemana > 6) {
     return falla('dia_invalido');
