@@ -40,6 +40,30 @@ invita después). Una cuenta comercial por humano
 (`uq_prestadores_user_id`): los rebotes `ya_tiene_cuenta` /
 `ya_es_prestador` son espejo de esos índices.
 
+### §1bis (S79-t11, decisión founder en dispositivo) — El camino de la COHORTE: la carta transporta la clave
+
+**El scheme no entra** (D-509, 2ª aparición con diagnóstico terminado:
+WhatsApp no linkea esquemas propios y el navegador los trata como
+búsqueda — el link no puede REPARTIRSE; la respuesta nombrada es App
+Links con `https` = build nativa, no OTA). **La invitación real
+(T5.2/T5.3) sale de S79** y espera esa build.
+
+**Para la cohorte fundadora, el camino DECLARADO — que además ya estaba
+en la letra del PORTAL §2.2** (el sobre físico incluye *"el dato del
+primer login del portal"*):
+
+1. El admin crea el usuario **en Studio** con CLAVE TEMPORAL.
+2. **LA CARTA FÍSICA de §2.2 la transporta** — el link vive donde §2.2
+   siempre dijo que viviría: en el papel, no en un chat.
+3. `invitar_prestador` con ese mail — el flujo S79 entero, intacto
+   (espejo del titular incluido).
+4. La SALA DE ESPERA pide el **CAMBIO DE CLAVE** al primer ingreso
+   (pedido a B — **D-562**: una clave impresa no puede quedar viva).
+
+**Cohorte-scoped, NO mecánica permanente** — la misma cláusula que §2.2
+ya tiene para la carta y la placa (≈15 fundadores; los Momentos
+posteriores exigen la invitación real de D-509).
+
 ## §2 Las CUATRO FASES
 
 | Fase | Quién | Qué pasa | Motor |

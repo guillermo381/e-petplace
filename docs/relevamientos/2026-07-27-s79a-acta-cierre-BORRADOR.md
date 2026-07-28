@@ -131,9 +131,17 @@ las dos por decisión del founder en vuelo.
 
 ## LO QUE ESPERA (sin maquillaje)
 
-1. **T5.2 (la invitación real) — EN ESPERA DEL SCHEME EN DISPOSITIVO**
-   (A3, orden de mesa): si el APK vivo no responde a `prestador://`, el
-   tamaño deja de ser chico. No arranca sin ese dato.
+1. **T5.2/T5.3 (la invitación real) — FUERA DE S79 (decisión founder,
+   t11):** el dato del dispositivo llegó y mató el CANAL, no el APK —
+   WhatsApp no linkea esquemas propios y el navegador los trata como
+   búsqueda: el link no puede repartirse. D-509 quedó con su 2ª
+   aparición y el diagnóstico TERMINADO + la respuesta nombrada (App
+   Links `https`: dominio verificado + assetlinks.json + intentFilters
+   = BUILD NATIVA, no OTA). El camino de la COHORTE quedó declarado en
+   `LETRA_ALTA` §1bis — Studio + clave temporal + **la carta física de
+   §2.2 la transporta** (la letra del PORTAL ya lo decía) + cambio de
+   clave en la sala (D-562, pedido a B). Cohorte-scoped, no mecánica
+   permanente.
 2. **§7 vencimientos**: propuesta con gate.
 3. **Gates founder en dispositivo pendientes**: la Hoja del plan
    mensual + el rebote del chip · la captura del hogar con Places · el
