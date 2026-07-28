@@ -29,6 +29,8 @@ import {
   Boton,
   Celda,
   CeldaNavegacion,
+  Esqueleto,
+  EsqueletoGrupo,
   Insignia,
   Separador,
   Tarjeta,
@@ -110,7 +112,28 @@ export default function SalaEspera() {
   );
 
   if (pantalla.estado === 'cargando') {
-    return <View style={{ flex: 1, backgroundColor: theme.bg.base }} />;
+    // S80-B12 cura 5 (Ley 13 — hallazgo del censo: acá había un View
+    // VACÍO con 3 lecturas de red delante): el esqueleto imita el
+    // layout real — marco de texto, la tarjeta de tareas, la sede.
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: theme.bg.base,
+          paddingTop: insets.top + spacing[8],
+          paddingHorizontal: spacing[5],
+        }}
+      >
+        <EsqueletoGrupo>
+          <View style={{ gap: spacing[4] }}>
+            <Esqueleto forma="linea" ancho="70%" />
+            <Esqueleto forma="linea" ancho="90%" />
+            <Esqueleto forma="bloque" ancho="100%" alto={200} />
+            <Esqueleto forma="bloque" ancho="100%" alto={120} />
+          </View>
+        </EsqueletoGrupo>
+      </View>
+    );
   }
 
   const { sede, cuentaOk, tituloOk, esVet } = pantalla;

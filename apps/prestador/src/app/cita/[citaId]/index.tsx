@@ -98,8 +98,15 @@ export default function DetalleCita() {
       return;
     }
 
+    // S80-B12 cura 6 (los 4 segundos, auditoría C): estado y cita van EN
+    // PARALELO — eran secuenciales sin depender uno del otro. El costo de
+    // la rama redirect (una lectura tirada) es 1 RT barato contra 1 RT
+    // secuencial ahorrado en TODA entrada.
+    const [paseo, rCita] = await Promise.all([
+      obtenerPaseoPorCita(citaId),
+      obtenerCitaPaseoPorId(citaId),
+    ]);
     // 1. La verdad del estado (7.5): redirect si la atención ya avanzó.
-    const paseo = await obtenerPaseoPorCita(citaId);
     if (!paseo.ok) {
       if (paseo.codigo === 'cita_no_encontrada') setPantalla({ estado: 'no_existe' });
       else setPantalla({ estado: 'error', mensaje: paseo.mensaje });
@@ -117,7 +124,6 @@ export default function DetalleCita() {
     // 2. sin_iniciar: la cita POR SU ID (cura S60-C2.1 ampliada — la
     // lista del día dejaba fuera toda cita de otro día, y la SEMANA
     // del HOY las hace tapeables; la RLS es el guard).
-    const rCita = await obtenerCitaPaseoPorId(citaId);
     if (!rCita.ok) {
       if (rCita.codigo === 'cita_no_encontrada') setPantalla({ estado: 'no_existe' });
       else setPantalla({ estado: 'error', mensaje: rCita.mensaje });

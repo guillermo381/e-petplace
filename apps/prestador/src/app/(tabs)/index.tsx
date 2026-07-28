@@ -34,6 +34,7 @@ import {
   AvatarMascota,
   Boton,
   Celda,
+  FilaCita as FilaCitaUi,
   CeldaNavegacion,
   CitaEnVivo,
   Esqueleto,
@@ -84,7 +85,6 @@ import { vozCitaVet } from '@/lib/voz-cita-vet';
 import { vozOficio } from '@/lib/voz-oficio';
 import { TechoOficio, ToggleTecho, VeloBarraEstadoOficio } from '@/components/techo-oficio';
 import { AgendaRecepcion } from '@/components/agenda-recepcion';
-import { CantoOficio } from '@/components/canto-oficio';
 import { FiltroOficio, type FiltroOficioValor } from '@/components/filtro-oficio';
 import { FirmaPrestador } from '@/components/firma-prestador';
 import { PreparaEspacio, type EstadoTareas } from '@/components/prepara-espacio';
@@ -332,7 +332,6 @@ function FilaCita({
 }) {
   const router = useRouter();
   const { t } = useTraduccion();
-  const { theme } = useTheme();
   const insignias = useInsigniasEstado();
   const hora = cita.hora ? cita.hora.slice(0, 5) : '—';
   // S57-B1: la duración REAL de la cita (snapshot S55-B2), no el default
@@ -346,31 +345,33 @@ function FilaCita({
   // los otros oficios → la etiqueta del tipo, como siempre.
   const voz = vozCitaVet(cita.descripcionPresupuesto, cita.tipo.nombre, t);
 
-  // ── S80-B8/B10/B11 · EL CANTO DE CAPA (§9.1/§9.2) ──
-  // El color: el MISMO mapa que el registry de Icono (L-175). Los TRES
-  // temas portan `capa` por tipo (el typecheck lo probó: la rama sin
-  // capa es `never`). VEREDICTO DEL GATE B10-③: el canto PASA A DECIR
-  // OFICIO — paseo y adiestramiento no comparten; el 4º tono lo elige
-  // LA MESA del censo (violet/comunidadAmplia es el candidato sin
-  // colisión §8.2) — hasta esa firma, training sigue en cuidado y el
-  // límite queda dicho acá. La fila EN VIVO lleva canto como todas
-  // (§9.2: el glow cuenta elementos VIVOS; esta tinta es estática).
-  // B11-②: el ELEMENTO COMPARTIDO se RETIRÓ (decisión founder, mesa
-  // S80) — no por malo sino por costo (26 pantallas sobre API
-  // experimental REA4) contra retorno medido en dispositivo (cero); el
-  // fundamento vive en el M2 s80-b8. La continuidad pasa a nivel
-  // NAVEGADOR (transición de pantalla entera, B11-③).
-  const colorCanto =
-    oficio === 'vet'
-      ? theme.capa.identidad
-      : oficio === 'grooming'
-        ? theme.status.warning
-        : theme.capa.cuidado;
-
+  // S80-B12 Parte 3: la fila ES el componente de DOMINIO de packages/ui
+  // — el canto (§9.1/§9.2, piso 33%, mapa oficio→capa) vive ADENTRO y
+  // esta pantalla no puede elegir color, posición ni alfa. El 4º tono
+  // del adiestramiento lo firma el founder (censo E de la auditoría);
+  // cuando firme, cambia en el componente y acá no se toca nada. La
+  // historia del canto y el retiro del elemento compartido (B10/B11):
+  // M2 s80-b8 + auditoría s80-b12. La fila EN VIVO lleva canto como
+  // todas (§9.2: el glow cuenta VIVOS; la tinta es estática).
+  const nombre = cita.mascota?.nombre ?? t('agenda.mascotaFallback');
   return (
-    <View style={{ position: 'relative' }}>
-    <Celda
-      interactiva
+    <FilaCitaUi
+      oficio={
+        oficio === 'vet' ? 'veterinaria' : oficio === 'grooming' ? 'grooming' : oficio === 'adiestramiento' ? 'adiestramiento' : 'paseo'
+      }
+      titulo={nombre}
+      // La marca "parte del plan" (D-338, S56-B T7) — escalera intacta.
+      subtitulo={
+        cita.suscripcion_servicio_id !== null
+          ? `${voz} · ${t('agenda.parteDelPlan')}`
+          : voz
+      }
+      metadataMono={`${hora}${dur ? ` · ${dur} min` : ''}`}
+      mascota={{
+        nombre,
+        fotoUrl,
+        especie: cita.mascota && esEspecie(cita.mascota.especie) ? cita.mascota.especie : undefined,
+      }}
       onPress={() =>
         router.push(
           oficio === 'grooming'
@@ -382,29 +383,8 @@ function FilaCita({
                 : { pathname: '/cita/[citaId]', params: { citaId: cita.id } },
         )
       }
-      accessibilityRole="button"
-      titulo={cita.mascota?.nombre ?? t('agenda.mascotaFallback')}
-      // La marca "parte del plan" (D-338, S56-B T7) — escalera: peldaño 0 =
-      // sin planes, invisible (hoy) · peldaño 1 = este sufijo cuando la fila
-      // trae suscripcion_servicio_id · peldaño 2 = detalle del plan visible
-      // al prestador (hueco declarado en el pedido D-338 (c), RLS futura).
-      subtitulo={
-        cita.suscripcion_servicio_id !== null
-          ? `${voz} · ${t('agenda.parteDelPlan')}`
-          : voz
-      }
-      inicio={
-        <AvatarMascota
-          nombre={cita.mascota?.nombre ?? t('agenda.mascotaFallback')}
-          fotoUrl={fotoUrl}
-          especie={cita.mascota && esEspecie(cita.mascota.especie) ? cita.mascota.especie : undefined}
-          tamano="sm"
-        />
-      }
-      metadataMono={`${hora}${dur ? ` · ${dur} min` : ''}`}
-      // S61-B12 (pulgar del mock B7): LA MARCA DE OFICIO por fila — el
-      // ícono b′ en registro aa (tealDark paseo / ámbar AA estética),
-      // junto a la Insignia de estado. Color funcional, jamás hex puro.
+      // fin = slot de DATOS (Ley 3: la voz es de la pantalla):
+      // S61-B12 la marca de oficio b′ + S70-B1 el chip de origen + estado.
       fin={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1.5] }}>
           <Icono
@@ -420,9 +400,6 @@ function FilaCita({
             registro="aa"
             tamano={21}
           />
-          {/* S70-B1: el origen releído (metadata.origen). El walk-in del
-              mostrador lo dice con un chip discreto en reposo — jamás acento;
-              la reserva in-app no marca (es el implícito). */}
           {cita.origen === 'mostrador' && (
             <Insignia estado="info" etiqueta={t('agenda.origenMostrador')} tamaño="sm" />
           )}
@@ -430,10 +407,6 @@ function FilaCita({
         </View>
       }
     />
-    {/* después de la Celda: la tinta sobrevive al resalte del pressed;
-        pointerEvents none — la fila entera sigue siendo el tocable */}
-    <CantoOficio color={colorCanto} />
-    </View>
   );
 }
 

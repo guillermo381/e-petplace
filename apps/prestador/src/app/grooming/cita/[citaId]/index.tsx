@@ -112,8 +112,14 @@ export default function AntesGrooming() {
         return;
       }
 
+      // S80-B12 cura 6 (los 4 segundos, auditoría C): estado y cita EN
+      // PARALELO (eran secuenciales sin dependencia); ficha y foto, la
+      // segunda onda, también entre sí. 4-5 ondas → 2.
+      const [g, rCita] = await Promise.all([
+        obtenerGroomingPorCita(citaId),
+        obtenerCitaGroomingPorId(citaId),
+      ]);
       // 1. La verdad del estado (7.5): redirect si la atención ya avanzó.
-      const g = await obtenerGroomingPorCita(citaId);
       if (!g.ok) {
         if (g.codigo === 'cita_no_encontrada') setPantalla({ estado: 'no_existe' });
         else setPantalla({ estado: 'error', mensaje: g.mensaje });
@@ -133,7 +139,6 @@ export default function AntesGrooming() {
       // 2. sin_iniciar: la cita POR SU ID (cura S60-C2.1 — la lista del
       // día dejaba fuera toda cita de otro día, y la SEMANA del HOY las
       // hace tapeables; la RLS es el guard, verdad firme intacta).
-      const rCita = await obtenerCitaGroomingPorId(citaId);
       if (!rCita.ok) {
         if (rCita.codigo === 'cita_no_encontrada') setPantalla({ estado: 'no_existe' });
         else setPantalla({ estado: 'error', mensaje: rCita.mensaje });
@@ -142,17 +147,12 @@ export default function AntesGrooming() {
       const cita = rCita.data;
       // La ficha de 30 segundos — si la lectura del perfil falla, la cita
       // igual se muestra (la ficha degrada, jamás bloquea el trabajo).
-      let ficha: FichaAntesGrooming | null = null;
-      if (cita.mascota) {
-        const f = await obtenerFichaAntesGrooming(cita.mascota.id);
-        if (f.ok) ficha = f.data;
-      }
-      if (cita.mascota?.foto_url) {
-        const url = await resolverUrlFoto(cita.mascota.foto_url);
-        setFotoFirmada(url ?? undefined);
-      } else {
-        setFotoFirmada(undefined);
-      }
+      const [f, url] = await Promise.all([
+        cita.mascota ? obtenerFichaAntesGrooming(cita.mascota.id) : Promise.resolve(null),
+        cita.mascota?.foto_url ? resolverUrlFoto(cita.mascota.foto_url) : Promise.resolve(null),
+      ]);
+      const ficha: FichaAntesGrooming | null = f !== null && f.ok ? f.data : null;
+      setFotoFirmada(url ?? undefined);
       setPantalla({ estado: 'listo', cita, ficha });
     },
     [citaId, router],

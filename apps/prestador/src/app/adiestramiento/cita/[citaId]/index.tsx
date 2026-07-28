@@ -107,14 +107,15 @@ export default function AntesAdiestramientoCita() {
         return;
       }
 
+      // S80-B12 cura 6: ficha y foto EN PARALELO (eran secuenciales).
       const mascotaId = rCita.data.mascota?.id;
-      const rFicha = mascotaId ? await obtenerFichaAntesAdiestramiento(mascotaId) : null;
-      setPantalla({ estado: 'listo', cita: rCita.data, ficha: rFicha?.ok ? rFicha.data : null });
       const path = rCita.data.mascota?.foto_url;
-      if (path) {
-        const firmada = await resolverUrlFoto(path);
-        setFotoFirmada(firmada ?? undefined);
-      }
+      const [rFicha, firmada] = await Promise.all([
+        mascotaId ? obtenerFichaAntesAdiestramiento(mascotaId) : Promise.resolve(null),
+        path ? resolverUrlFoto(path) : Promise.resolve(null),
+      ]);
+      setPantalla({ estado: 'listo', cita: rCita.data, ficha: rFicha?.ok ? rFicha.data : null });
+      if (firmada) setFotoFirmada(firmada);
     },
     [citaId, router],
   );

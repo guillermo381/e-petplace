@@ -72,7 +72,19 @@ export default function RootLayout() {
                 foco (ver techo-oficio.tsx); nadie más lo toca. */}
             <StatusBar style="auto" />
             <AnimatedSplashOverlay />
-            <Stack screenOptions={{ headerShown: false }}>
+            {/* S80-B12 cura 3 — LA CONTINUIDAD DEL NAVEGADOR (§9.6 a
+                nivel pantalla): lo que entra viene de la derecha, lo que
+                sale cede a la izquierda, volver invierte — el preset
+                DIRECCIONAL del stack nativo lo garantiza en ambas
+                plataformas (Android por default usa fade/plataforma).
+                MEDIDO contra el stack INSTALADO (react-native-screens
+                types): los presets son el techo — NO exponen duración ni
+                curva (`animationDuration` no existe en los tipos
+                instalados), así que los 340ms/bezier de la casa NO son
+                configurables acá; la física la pone la plataforma. Si la
+                mesa exige la curva exacta, es JS-stack (otro navegador,
+                decisión aparte). Cero API experimental. */}
+            <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
               <Stack.Screen name="(tabs)" />
             </Stack>
           </AvisoProvider>
