@@ -64,9 +64,9 @@ CONTRA la ley vigente y se fabrica deuda que después hay que auditar.
 |---|---|---|
 | Entrada escalonada 45 ms (+300 ms, bezier de la casa, translateY 15) | **MIGRADO** | `DIRECCION_ARTE` §5 registro S80 (depositado A3, cerrado A5). Fuente única: §5 — la nota de §5 sobre "directiva no depositada" queda resuelta por este depósito |
 | Presión 0.972 | **RETIRADA (founder, S80-A6bis)** | el roce que este censo declaró lo resolvió el founder: 0.972 fue transcripción imprecisa de la mesa, no calibración — se retira del Bloque F (nota en el bloque). **Rige `usePresionado` 0.97/0.99 (S62) sin cambio** |
-| Empuje de pantalla −16% | **FUERA DEL BLOQUE (mesa A7)** | material de lámina sin depositar como ley — el Bloque F conserva SOLO la entrada |
-| Huella de tab con overshoot 280 ms | **FUERA DEL BLOQUE (mesa A7)** | ídem; si algún día se quiere, toca `BarraTabs`/`estadoPorHuella` en packages/ui = enmienda de primitiva con gate propio |
-| Foco en fila de barrido (cuatro escalas) | **FUERA DEL BLOQUE (mesa A7)** | sobrevive SOLO como calibración local de D3 (la rueda, su única pantalla); generalizarlo a "fila de barrido" exigiría gate |
+| Empuje de pantalla −16% | **CANDIDATA a `DIRECCION_ARTE` §5.2, SIN FIRMA (gate propio)** | es la mitad que §5.2 no cubre: documenta la Hoja que SUBE, no la pantalla que RETROCEDE. Salió del bloque por una orden de mesa demasiado ancha (A7, intención: solo la presión) — corregida en A8, NO descartada |
+| Huella de tab con overshoot 280 ms | **CANDIDATA a la Ley 6 (§2.6), SIN FIRMA (gate propio)** | la Ley 6 manda que la huella APAREZCA y nunca dijo CÓMO — este es su candidato de física. Salió por la misma orden ancha de A7, corregida en A8, NO descartada. La construcción tocaría `BarraTabs`/`estadoPorHuella` en packages/ui = enmienda de primitiva |
+| Foco en fila de barrido (cuatro escalas) | **CALIBRACIÓN LOCAL de D3 (A7, sin cambio en A8)** | sus números viven en D3 (la rueda, su única pantalla); generalizarlo a "fila de barrido" exigiría gate |
 
 **LOS DEMÁS BLOQUES (no exigidos por el censo, reconciliados igual —
 "si aparecen más, decilo"):**
@@ -162,17 +162,20 @@ D3 · LA RUEDA DE FECHAS: ítem 66 · separación 10 · paso 76 · el elegido
 Entrada escalonada 45 ms · 300 ms · cubic-bezier(.32,.72,0,1) ·
 desde translateY 15.
 
-> **EL BLOQUE CONSERVA SOLO LA ENTRADA (mesa A7).** El original del
-> 26-jul traía además: *presión 0.972* — **RETIRADA** (S80-A6bis:
-> transcripción imprecisa de la mesa, no calibración; rige
-> `usePresionado` 0.97/0.99, receta única S62 — un tercer valor sería
-> enmienda de primitiva con gate propio, y nadie lo pidió) — y *empuje
-> de pantalla −16% · overshoot de tab 280 ms · foco en fila de barrido
-> con sus cuatro escalas* — **FUERA del bloque de movimiento canónico
-> por orden A7**: quedan registrados acá como material de lámina SIN
-> DEPOSITAR como ley (el foco de barrido sobrevive como calibración
-> local de D3, que es su única pantalla). La fuente única de la
-> entrada es `DIRECCION_ARTE` §5 registro S80.
+> **LO QUE QUEDÓ DE CADA PIEZA (A7 corregida por A8 — error de mesa
+> declarado: la orden A7 "conserva SOLO la entrada" era demasiado
+> ancha; su intención era retirar LA PRESIÓN, y los otros tres salieron
+> por arrastre):**
+> · **Entrada** — MIGRADA; fuente única `DIRECCION_ARTE` §5 registro S80.
+> · **Presión 0.972** — **RETIRADA** (A6bis: transcripción imprecisa,
+>   no calibración; rige `usePresionado` 0.97/0.99, receta única S62 —
+>   un tercer valor sería enmienda de primitiva con gate propio).
+> · **Empuje de pantalla −16%** — **CANDIDATA a `DIRECCION_ARTE` §5.2**
+>   (la mitad que §5.2 no cubre: la pantalla que retrocede). Sin firma,
+>   gate propio.
+> · **Overshoot de tab 280 ms** — **CANDIDATA a la Ley 6 (§2.6)** (la
+>   huella debe aparecer; nunca se dijo cómo). Sin firma, gate propio.
+> · **Foco de barrido** — calibración LOCAL de D3, su única pantalla.
 
 ## §10 ALCANCE
 

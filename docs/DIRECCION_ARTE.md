@@ -180,13 +180,16 @@ de memoria sería L-139; duplicar el path en otro archivo sería D-546.**
    · **Brillo de placa (§8.5):** **6 s LINEALES, en loop** (número del
      founder, S80, sobre lámina — cerrado en A5). **Lento lo material:
      6 s es el paso del vidrio; por debajo de ~4 s se lee como LED.**
-   *Nota (mesa A7): la presión rige por `usePresionado` (0.97/0.99,
-   receta única S62); el 0.972 de las láminas S80 fue transcripción
-   imprecisa, no calibración. Un tercer valor sería enmienda de
-   primitiva con gate propio. **El Bloque F conserva SOLO la entrada**
-   (45 ms / 300 ms / bezier .32,.72,0,1 / translateY 15) — este
-   registro es su fuente única (`DIRECTIVA_CRAFT_CLIENTE` §0bis lleva
-   la reconciliación).*
+   *Nota (mesa A7, alcance corregido en A8): la presión rige por
+   `usePresionado` (0.97/0.99, receta única S62); el 0.972 de las
+   láminas S80 fue transcripción imprecisa, no calibración — un tercer
+   valor sería enmienda de primitiva con gate propio. De la lámina, la
+   ENTRADA (45 ms / 300 ms / bezier .32,.72,0,1 / translateY 15) es la
+   única pieza firmada y este registro es su fuente única. Dos
+   CANDIDATAS sin firma esperan gate propio: el empuje de pantalla
+   −16% (a §5.2 — la pantalla que retrocede) y el overshoot 280 ms de
+   la huella de tab (a la Ley 6/§2.6 — el CÓMO aparece). La
+   reconciliación entera: `DIRECTIVA_CRAFT_CLIENTE` §0bis.*
 
 ## 5b. La nariz considerada — por qué la huella (nota S53)
 
