@@ -113,10 +113,9 @@ la nariz.
 posición (esquina superior derecha, centro fuera del lienzo), la escala
 (~60% del ancho del techo), y la regla dura de A4 — **SIGUE SIENDO EL
 ÚNICO ADORNO PERMITIDO EN UN TECHO**. Esta enmienda no agrega un
-elemento: le da identidad al que ya existe. *(Nota de depósito, L-142:
-la regla "A4" se cita por orden de mesa S80 y no tiene casa depositada
-en el repo al escribir esto — la cláusula "único adorno del techo" rige
-por esta cita hasta que su letra madre se deposite.)*
+elemento: le da identidad al que ya existe. *(La letra madre de A4 —
+✅ FIRMADA — vive en `DIRECTIVA_CRAFT_CLIENTE` Bloque A, depositada
+S80-A6; la nota de sin-casa que esta sección llevó quedó resuelta.)*
 
 **EL PORQUÉ** (§5b, que ya separó los dos símbolos): la nariz es QUIÉN
 SOMOS; la huella es QUIÉN ESTÁ. Un fondo no dice quién está presente —
@@ -181,10 +180,12 @@ de memoria sería L-139; duplicar el path en otro archivo sería D-546.**
    · **Brillo de placa (§8.5):** **6 s LINEALES, en loop** (número del
      founder, S80, sobre lámina — cerrado en A5). **Lento lo material:
      6 s es el paso del vidrio; por debajo de ~4 s se lee como LED.**
-   *Nota de referencia declarada (L-142): el brief S80 rotula estos
-   valores como "Bloque F" de la directiva de craft; esa directiva NO
-   está depositada en el repo — su casa canónica es ESTE registro hasta
-   que se deposite.*
+   *Los valores de entrada son la pieza MIGRADA del "Bloque F" de
+   `DIRECTIVA_CRAFT_CLIENTE` (depositada S80-A6): ESTE registro es su
+   fuente única. Las demás piezas del Bloque F (presión 0.972 — que
+   ROZA la receta única de `usePresionado` —, empuje −16%, overshoot
+   de tab, foco de barrido) viven allá SIN FIRMA, con su
+   reconciliación en el §0bis de ese doc.*
 
 ## 5b. La nariz considerada — por qué la huella (nota S53)
 
@@ -327,8 +328,9 @@ funcionó.)*
 
 **9.4 — LA FORMA LLEVA EL DATO.** Prueba: tapá el texto. Si la pantalla
 sigue diciendo lo mismo, la forma trabaja. Si enmudece, la forma era
-relleno. Espejo de L-c (§5.3 de la directiva de craft — directiva NO
-depositada en el repo al escribir esto; referencia declarada, L-142).
+relleno. Espejo de L-c (`DIRECTIVA_CRAFT_CLIENTE`, depositada S80-A6:
+si al quitar la animación dice lo mismo, sobraba — la misma prueba,
+una sobre la forma estática y otra sobre el movimiento).
 
 **9.5 — LA MONOTONÍA ES SÍNTOMA DE COMPOSICIÓN POR PLANTILLA.** Una
 pantalla que se repite y se ve igual pase lo que pase es MUDA, no
