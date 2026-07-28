@@ -56,7 +56,7 @@ CONTRA la ley vigente y se fabrica deuda que después hay que auditar.
 |---|---|---|
 | L-b (el relleno pleno se reserva a la ELECCIÓN QUE CIERRA; en fila de barrido la selección va por elevación/escala/color de texto) | **HUÉRFANO→CASA** | la mesa la usó para rechazar la fecha rellena y grep da cero en todo el repo. Desde acá tiene casa. **Cruce declarado, no resuelto:** la ley 19.8 (SE RELLENA LO QUE EXISTE · SE CONTORNEA LO QUE SE FIJA, propuesta S73 sin firma) habla del relleno con OTRO eje (qué ES el dato vs qué CIERRA la elección) — si convergen o chocan lo decide la mesa de D-499, no este depósito |
 | L-c (si al quitar la animación dice lo mismo, sobraba) | **VIVE ACÁ, con referencia migrada** | `DIRECCION_ARTE` §9.4 la cita como su espejo ("la forma lleva el dato" es L-c aplicada a la forma estática); la ley del MOVIMIENTO en sí vive acá — la nota "directiva no depositada" de §9.4 queda resuelta por este depósito |
-| L-f (el CTA toma el color de la capa; muere tinta/negro como CTA cliente) | **VIVE ACÁ, SIN FIRMA — ⚠️ CHOQUE DECLARADO CONTRA LEY FIRMADA** | contradice de frente la enmienda Ley 21 (S63, FIRMADA en dispositivo): *"cliente en tinta, memorial SIEMPRE tinta"* — el CTA del cliente ES tinta por ley vigente. Por la regla de la casa (S63: un choque contra letra firmada se DECLARA, jamás se difiere en silencio) y por el hueco 1 del header (sin acta de porqués, lo sin-firma se re-argumenta): **L-f NO RIGE hasta gate founder explícito que resuelva el choque.** Hasta ese gate, la Ley 21 manda |
+| L-f (el CTA toma el color de la capa; muere tinta/negro como CTA cliente) | **VIVE ACÁ, SIN FIRMA — ⚠️ CHOQUE DECLARADO CONTRA LEY FIRMADA** | contradice de frente la enmienda Ley 21 (S63, FIRMADA en dispositivo): *"cliente en tinta, memorial SIEMPRE tinta"* — el CTA del cliente ES tinta por ley vigente. Por la regla de la casa (S63: un choque contra letra firmada se DECLARA, jamás se difiere en silencio) y por el hueco 1 del header (sin acta de porqués, lo sin-firma se re-argumenta): **L-f NO RIGE hasta gate founder explícito que resuelva el choque.** Hasta ese gate, la Ley 21 manda. **NOTA A7 — el argumento inválido que igual acertó:** la mesa de S80 usó L-f como argumento para rechazar la fecha rellena; **el argumento era INVÁLIDO** (L-f no rige) **y la conclusión SE SOSTIENE por L-b** (la fecha no es la elección que cierra). Registrado para que nadie reabra la fecha creyendo que dependía de L-f |
 
 **BLOQUE F — MOVIMIENTO:**
 
@@ -64,9 +64,9 @@ CONTRA la ley vigente y se fabrica deuda que después hay que auditar.
 |---|---|---|
 | Entrada escalonada 45 ms (+300 ms, bezier de la casa, translateY 15) | **MIGRADO** | `DIRECCION_ARTE` §5 registro S80 (depositado A3, cerrado A5). Fuente única: §5 — la nota de §5 sobre "directiva no depositada" queda resuelta por este depósito |
 | Presión 0.972 | **RETIRADA (founder, S80-A6bis)** | el roce que este censo declaró lo resolvió el founder: 0.972 fue transcripción imprecisa de la mesa, no calibración — se retira del Bloque F (nota en el bloque). **Rige `usePresionado` 0.97/0.99 (S62) sin cambio** |
-| Empuje de pantalla −16% | **VIVE ACÁ, SIN FIRMA** | cero equivalente en el canon (grep: cero) |
-| Huella de tab con overshoot 280 ms | **VIVE ACÁ, SIN FIRMA** | cero equivalente (grep: cero); toca `BarraTabs`/`estadoPorHuella` — packages/ui, mismo tratamiento que la presión |
-| Foco en fila de barrido (cuatro escalas) | **VIVE ACÁ, SIN FIRMA** | las escalas viven en D3 (la rueda); generalizado a "fila de barrido" espera gate |
+| Empuje de pantalla −16% | **FUERA DEL BLOQUE (mesa A7)** | material de lámina sin depositar como ley — el Bloque F conserva SOLO la entrada |
+| Huella de tab con overshoot 280 ms | **FUERA DEL BLOQUE (mesa A7)** | ídem; si algún día se quiere, toca `BarraTabs`/`estadoPorHuella` en packages/ui = enmienda de primitiva con gate propio |
+| Foco en fila de barrido (cuatro escalas) | **FUERA DEL BLOQUE (mesa A7)** | sobrevive SOLO como calibración local de D3 (la rueda, su única pantalla); generalizarlo a "fila de barrido" exigiría gate |
 
 **LOS DEMÁS BLOQUES (no exigidos por el censo, reconciliados igual —
 "si aparecen más, decilo"):**
@@ -159,14 +159,20 @@ D3 · LA RUEDA DE FECHAS: ítem 66 · separación 10 · paso 76 · el elegido
 
 ## BLOQUE F — MOVIMIENTO
 
-Entrada escalonada 45 ms · empuje de pantalla −16% · huella de tab con
-overshoot 280 ms · foco en fila de barrido con sus cuatro escalas.
+Entrada escalonada 45 ms · 300 ms · cubic-bezier(.32,.72,0,1) ·
+desde translateY 15.
 
-> **RETIRO DECLARADO (founder, S80-A6bis):** el original de la mesa
-> traía "presión 0.972" — fue **transcripción imprecisa de la mesa, no
-> una calibración**. Se retira y no se deposita: **rige `usePresionado`
-> (0.97 controles / 0.99 superficies, S62) sin cambio.** Enmendar una
-> primitiva de `packages/ui` exige gate propio, y nadie lo pidió.
+> **EL BLOQUE CONSERVA SOLO LA ENTRADA (mesa A7).** El original del
+> 26-jul traía además: *presión 0.972* — **RETIRADA** (S80-A6bis:
+> transcripción imprecisa de la mesa, no calibración; rige
+> `usePresionado` 0.97/0.99, receta única S62 — un tercer valor sería
+> enmienda de primitiva con gate propio, y nadie lo pidió) — y *empuje
+> de pantalla −16% · overshoot de tab 280 ms · foco en fila de barrido
+> con sus cuatro escalas* — **FUERA del bloque de movimiento canónico
+> por orden A7**: quedan registrados acá como material de lámina SIN
+> DEPOSITAR como ley (el foco de barrido sobrevive como calibración
+> local de D3, que es su única pantalla). La fuente única de la
+> entrada es `DIRECCION_ARTE` §5 registro S80.
 
 ## §10 ALCANCE
 

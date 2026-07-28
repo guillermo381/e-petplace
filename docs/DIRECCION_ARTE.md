@@ -180,13 +180,13 @@ de memoria sería L-139; duplicar el path en otro archivo sería D-546.**
    · **Brillo de placa (§8.5):** **6 s LINEALES, en loop** (número del
      founder, S80, sobre lámina — cerrado en A5). **Lento lo material:
      6 s es el paso del vidrio; por debajo de ~4 s se lee como LED.**
-   *Los valores de entrada son la pieza MIGRADA del "Bloque F" de
-   `DIRECTIVA_CRAFT_CLIENTE` (depositada S80-A6): ESTE registro es su
-   fuente única. Las demás piezas del Bloque F (empuje −16%, overshoot
-   de tab, foco de barrido) viven allá SIN FIRMA, con su reconciliación
-   en el §0bis de ese doc; la "presión 0.972" del original fue RETIRADA
-   por el founder (transcripción imprecisa — rige `usePresionado`
-   0.97/0.99 sin cambio).*
+   *Nota (mesa A7): la presión rige por `usePresionado` (0.97/0.99,
+   receta única S62); el 0.972 de las láminas S80 fue transcripción
+   imprecisa, no calibración. Un tercer valor sería enmienda de
+   primitiva con gate propio. **El Bloque F conserva SOLO la entrada**
+   (45 ms / 300 ms / bezier .32,.72,0,1 / translateY 15) — este
+   registro es su fuente única (`DIRECTIVA_CRAFT_CLIENTE` §0bis lleva
+   la reconciliación).*
 
 ## 5b. La nariz considerada — por qué la huella (nota S53)
 

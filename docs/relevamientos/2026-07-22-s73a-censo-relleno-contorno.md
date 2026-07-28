@@ -72,3 +72,19 @@ salida de 60 con su precio". ⚖️ El founder firma (es el caso bisagra).
   con literal arriba).
 - **Confirmación práctica verificada:** ningún caso RELLENO del censo
   supera 6 opciones — la ley no pide paredes de relleno.
+
+## ADDENDUM S80 (mesa A7) — la pregunta PREVIA que el cruce L-b × 19.8 abre
+
+**Antes de firmar cualquier fila de este censo, hay una pregunta de EJE
+que las precede: ¿el relleno marca EXISTENCIA (ley 19.8: se rellena lo
+que existe, se contornea lo que se fija) o marca CIERRE (L-b de
+`DIRECTIVA_CRAFT_CLIENTE`: el relleno pleno se reserva a la elección
+que cierra)?** Las dos leyes conviven sin firma y no siempre coinciden
+— un catálogo con precio EXISTE (19.8 → relleno) pero elegirlo puede no
+CERRAR nada todavía (L-b → sin relleno pleno). **Es firma del FOUNDER,
+no de mesa, y va ANTES de la primera pantalla rediseñada con
+selectores** — firmar las filas de este censo sin resolver el eje sería
+clasificar con una vara que todavía no se eligió. (El cruce quedó
+declarado también en `DIRECTIVA_CRAFT_CLIENTE` §0bis, fila L-b; los 4
+consumidores post-censo que B6 detectó sin fila — radio de sede, zonas
+del taller, modo de horarios, ofertas-aplica — esperan la misma firma.)
