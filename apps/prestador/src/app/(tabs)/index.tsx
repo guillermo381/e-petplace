@@ -84,6 +84,7 @@ import { vozCitaVet } from '@/lib/voz-cita-vet';
 import { vozOficio } from '@/lib/voz-oficio';
 import { TechoOficio, ToggleTecho, VeloBarraEstadoOficio } from '@/components/techo-oficio';
 import { AgendaRecepcion } from '@/components/agenda-recepcion';
+import { CantoOficio } from '@/components/canto-oficio';
 import { FiltroOficio, type FiltroOficioValor } from '@/components/filtro-oficio';
 import { FirmaPrestador } from '@/components/firma-prestador';
 import { PreparaEspacio, type EstadoTareas } from '@/components/prepara-espacio';
@@ -331,6 +332,7 @@ function FilaCita({
 }) {
   const router = useRouter();
   const { t } = useTraduccion();
+  const { theme } = useTheme();
   const insignias = useInsigniasEstado();
   const hora = cita.hora ? cita.hora.slice(0, 5) : '—';
   // S57-B1: la duración REAL de la cita (snapshot S55-B2), no el default
@@ -344,7 +346,28 @@ function FilaCita({
   // los otros oficios → la etiqueta del tipo, como siempre.
   const voz = vozCitaVet(cita.descripcionPresupuesto, cita.tipo.nombre, t);
 
+  // ── S80-B8 · EL CANTO DE CAPA (§9.1/§9.2, boceto M2) ──
+  // El MISMO mapa que el registry de Icono (L-175: la fuente única) —
+  // cuidado=paseo/adiestramiento · identidad=vet · ocre=grooming; los
+  // TRES temas portan `capa` por tipo (el guard del registry sobra acá
+  // — el typecheck lo probó: la rama sin capa es `never`; memorial
+  // resuelve sus tonos en el propio tema). Límite DECLARADO en el M2:
+  // adiestramiento comparte cuidado con paseo por decisión del registry
+  // — si el gate exige distinguirlos por canto, la enmienda es del
+  // registry, no un hex acá. La fila en vivo LLEVA canto (§9.2:
+  // propiedad del TIPO — el glow cuenta elementos VIVOS y esta tinta es
+  // estática); lo que no lleva es el TAG: el experimento de continuidad
+  // mide UNA transición limpia (desvío §6b declarado, reversible en gate).
+  const colorCanto =
+    oficio === 'vet'
+      ? theme.capa.identidad
+      : oficio === 'grooming'
+        ? theme.status.warning
+        : theme.capa.cuidado;
+  const tagCanto = oficio === 'paseo' && !enVivo ? `canto-cita-${cita.id}` : undefined;
+
   return (
+    <View style={{ position: 'relative' }}>
     <Celda
       interactiva
       onPress={() =>
@@ -406,6 +429,10 @@ function FilaCita({
         </View>
       }
     />
+    {/* después de la Celda: la tinta sobrevive al resalte del pressed;
+        pointerEvents none — la fila entera sigue siendo el tocable */}
+    <CantoOficio color={colorCanto} tag={tagCanto} />
+    </View>
   );
 }
 

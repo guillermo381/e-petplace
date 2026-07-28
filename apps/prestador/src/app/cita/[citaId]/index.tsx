@@ -16,6 +16,8 @@ import { useCallback, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+
+import { CantoOficio } from '@/components/canto-oficio';
 import {
   AvatarMascota,
   Boton,
@@ -223,8 +225,14 @@ export default function DetalleCita() {
 
         {cita && (
           <>
-            {/* La mascota — voz humana */}
-            <View style={{ alignItems: 'center', gap: spacing[3], paddingVertical: spacing[4] }}>
+            {/* La mascota — voz humana.
+                S80-B8 (§9.6, experimento B7): la CABECERA es el DESTINO
+                del canto — el mismo tag que la fila del HOY: la tira que
+                tocaste es la que te recibe, y al volver regresa a SU
+                fila. Sin origen con tag (deep link, fila en vivo, web)
+                degrada a fade solo. */}
+            <View style={{ position: 'relative', alignItems: 'center', gap: spacing[3], paddingVertical: spacing[4] }}>
+              <CantoOficio color={theme.capa.cuidado} tag={`canto-cita-${citaId}`} />
               <AvatarMascota
                 nombre={nombre}
                 fotoUrl={fotoFirmada}
