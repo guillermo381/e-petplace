@@ -27,11 +27,12 @@
  *    Chanel del marco), duplicación ACOTADA a este archivo y declarada.
  *
  * LA VARA DEL PATRÓN: la pantalla no elige color, ni posición, ni
- * ancho, ni alfa — el tono sale del OFICIO (mapa del registry:
- * cuidado=paseo/adiestramiento · identidad=veterinaria ·
- * ocre=grooming). Cero API que permita romper la ley. El 4º tono del
- * adiestramiento lo firma el founder (censo E, auditoría B12) — cuando
- * firme, cambia ACÁ y todas las pantallas lo heredan.
+ * ancho, ni alfa — **EL CANTO DICE CATEGORÍA, EL GLIFO DICE SERVICIO**
+ * (DIRECCION_ARTE Ley 10, S80-B16 — la ley del reparto): SALUD =
+ * `capa.identidad` (veterinaria) · CUIDADO = `capa.cuidado` (paseo,
+ * grooming y adiestramiento COMPARTEN teal A PROPÓSITO — los separa el
+ * glifo, no el canto). Cero API que permita romper la ley; si la
+ * taxonomía crece, cambia ACÁ y todas las pantallas heredan.
  *
  * `fin` y `acciones` son slots de DATOS/navegación (la voz es de la
  * pantalla, Ley 3) — jamás de craft.
@@ -69,13 +70,9 @@ export interface FilaCitaProps {
 
 export function FilaCita({ oficio, titulo, subtitulo, metadataMono, mascota, fin, acciones, onPress }: FilaCitaProps) {
   const { theme } = useTheme()
-  // El mapa del registry de Icono — LA fuente única de capa por oficio.
-  const color =
-    oficio === 'veterinaria'
-      ? theme.capa.identidad
-      : oficio === 'grooming'
-        ? theme.status.warning
-        : theme.capa.cuidado
+  // Ley 10 (DIRECCION_ARTE v1.3): el canto dice CATEGORÍA — SALUD =
+  // identidad (vet) · CUIDADO = cuidado (paseo/grooming/adiestramiento).
+  const color = oficio === 'veterinaria' ? theme.capa.identidad : theme.capa.cuidado
 
   return (
     <View
