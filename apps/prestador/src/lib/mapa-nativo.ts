@@ -24,4 +24,13 @@
  * disparo declarado).
  */
 
-export const MAPA_NATIVO_DISPONIBLE = false;
+/**
+ * FLIP a true (S80-B19, 28-jul-2026) — LAS DOS CONDICIONES CUMPLIDAS:
+ *  1. build-s80-b19.apk verificado POR MANIFEST antes de instalar
+ *     (meta-data geo.API_KEY presente, key AIza adentro, 1.0.3).
+ *  2. El APK roto (1785163333370) REEMPLAZADO por `adb install -r`
+ *     en el dispositivo del founder (R5CY201ZDVL) — Success.
+ * El guard NO se retira: si una build futura sale sin el secret, este
+ * flag vuelve a false y cuesta el mapa, jamás la app.
+ */
+export const MAPA_NATIVO_DISPONIBLE = true;
