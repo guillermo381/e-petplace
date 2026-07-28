@@ -1,6 +1,13 @@
 # DIRECCION_ARTE — El lenguaje visual propio de e-PetPlace
 
-> **Versión: v1.2 — S80 (28 Jul 2026).** Enmienda v1.2: nacen **§8 LA
+> **Versión: v1.3 — S80 (28 Jul 2026).** Enmienda v1.3 (A16, FIRMADA
+> founder): **§2 pasa a nombrar CATEGORÍAS, no servicios** — nace la
+> **ley 10, LA TAXONOMÍA DE CAPAS Y LA LEY DEL REPARTO** (SALUD ·
+> CUIDADO · COMUNIDAD · CONSUMO + MARCA/AFECTO reservada; el canto dice
+> categoría —cerrado, tope 5—, el glifo dice servicio —abierto—; si la
+> taxonomía pasa de 5 se cambia de mecanismo, no de paleta) y §2 suelta
+> "cuidado" del ocre — **D-573 cerrada por (a) en el mismo acto**.
+> Previa v1.2: nacen **§8 LA
 > DOSIS DE LA RAMPA** (dónde trabaja el magenta, dónde decora la marca,
 > la dirección turquesa→magenta fijada, el brillo del objeto y la luz de
 > lo que cambió) y **§9 COMPOSICIÓN Y FORMA** (los dos cantos, la
@@ -52,10 +59,17 @@ punto decorativo.**
    **1.9** en tinta (`text.primary` del tema), remates redondeados
    (`strokeLinecap/Linejoin="round"`).
 2. **La huella:** UNA por ícono, RELLENA, en el **hex PURO de la capa**
-   del concepto (teal paseo, verde vital salud/protección, magenta
-   marca/afecto, ocre cuidado/consumo). Forma canónica: elipse
+   del concepto — y la capa se nombra por CATEGORÍA, no por servicio
+   (la taxonomía firmada, ley 10): **verde vital SALUD · teal CUIDADO ·
+   pink COMUNIDAD · terracotta CONSUMO** (el magenta es MARCA/AFECTO —
+   reservada, §8.2: no es capa de servicio). Forma canónica: elipse
    (almohadilla) + tres dedos — el path canónico vive en `packages/ui`
    como primitiva `Huella` y NADIE lo redibuja a mano.
+   *(ENMIENDA S80-A16: esta línea decía "teal paseo … ocre
+   cuidado/consumo" — §2 SUELTA la palabra "cuidado" del ocre y se la
+   da al teal, alineando con el token `capa.cuidado = teal` que lo dice
+   desde V0. Con esto **D-573 se cierra por su camino (a)**: una línea,
+   sin migrar ~30 consumidores. El ocre queda donde vive: `status.warning`.)*
 3. **Escala de la huella:** prominente y legible — entre 0.7 y 1.1 de su
    escala base según el aire del ícono; jamás tan chica que se lea como
    punto.
@@ -80,6 +94,35 @@ punto decorativo.**
    simplificarse. La huella es lo que hace al glifo NUESTRO (regla
    madre §1) — un glifo cuya huella muere a 21px es un glifo genérico
    con decoración invisible, y ahí el ruido cuesta más que el ícono.
+10. **LA TAXONOMÍA DE CAPAS Y LA LEY DEL REPARTO (S80, FIRMADA por el
+    founder — un solo acto con el cierre de D-573):**
+
+    | Categoría | Capa/token | Servicios adentro (del destino, SOFTLAUNCH §2) |
+    |---|---|---|
+    | **SALUD** | verde vital (`capa.identidad`) | veterinaria · telemedicina · seguros |
+    | **CUIDADO** | teal (`capa.cuidado`) | paseo · grooming · adiestramiento · hotel · guardería |
+    | **COMUNIDAD** | pink (`capa.comunidad`) | adopción · refugios · donaciones |
+    | **CONSUMO** | terracotta (`accent.warm` hoy; su slot de capa nace cuando la tienda lo pida) | tienda · despensa |
+    | **MARCA/AFECTO** | magenta — **RESERVADA, §8.2: no es capa de servicio** | — |
+
+    **LA LEY DEL REPARTO, que es lo que hace que esto escale: EL CANTO
+    DICE CATEGORÍA (conjunto CERRADO, tope 5). EL GLIFO DICE SERVICIO
+    (conjunto ABIERTO).** Un canto de 3px distingue 4-5 cosas; la
+    taxonomía que crece va al glifo, que ya lo hace bien (el registry
+    ya tiene hotel/guardería/seguros/telemedicina). **Corolario: si la
+    taxonomía pasa de 5, hay que cambiar de MECANISMO, no de paleta.**
+
+    **Consecuencia declarada: paseo y adiestramiento comparten canto A
+    PROPÓSITO — los dos son CUIDADO. Los separa el glifo.** El "4º
+    tono" (B10-③) deja de existir como problema.
+
+    **Terracotta, verificada antes de depositar (los tres temas):**
+    claro = `terracottaDark #AF5433` (oscurecido en S43-B2 exactamente
+    para pasar AA sobre el base) · oscuro = `terracotta #D97757` —
+    ambos DENTRO del gate programático corrido hoy (**178 pares / 0
+    fallos**, vía `accent.warm`/`warmBg`/`warmBorder`) · memorial NO
+    porta terracotta y NO DEBE: la ley 8 degrada toda capa (jamás
+    color en memorial) — N/A por ley, no hueco.
 
 ## 3. ENMIENDA a la Ley 12 de `epetplace-design-system`
 
@@ -358,6 +401,16 @@ que no leen lo que dicen leer.**
 
 ## Historial
 
+- **v1.3 (S80-A16, 28 Jul 2026 — FIRMADA founder):** §2 nombra
+  CATEGORÍAS (ley 2 enmendada: verde vital SALUD · teal CUIDADO · pink
+  COMUNIDAD · terracotta CONSUMO · magenta MARCA/AFECTO reservada) +
+  ley 10 nueva (la taxonomía + LA LEY DEL REPARTO: canto=categoría
+  cerrada tope 5, glifo=servicio abierto; corolario del mecanismo;
+  paseo y adiestramiento comparten canto A PROPÓSITO — el "4º tono"
+  muere como problema). D-573 cerrada por (a) en el MISMO acto (§2
+  suelta "cuidado" del ocre). Terracotta verificada en gate programático
+  (178/0) con memorial N/A por ley 8. Un solo acto por diseño: separar
+  la taxonomía del cierre de D-573 reabría la colisión.
 - **v1.2 (S80, 28 Jul 2026):** nacen **§8 LA DOSIS DE LA RAMPA** (8.1
   inundar/acentuar · 8.2 el magenta tiene trabajo — con los dos
   rechazos del founder como origen · 8.3 la marca vive en la firma ·
