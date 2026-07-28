@@ -40,13 +40,15 @@ export const prestadorEn = {
   sesion: {
     sinSesion: 'No active session',
     sinRol: "Your account doesn't have a business attached",
-    // S80-B1 (dead-end cure): the generic voice gains THE PATH
+    // S80-B1 (dead-end cure): the generic voice gains THE PATH.
+    // S80-B4bis: the EMAIL goes FIRST — a clamp eats the tail, and the
+    // actionable datum must not live there.
     sinRolDetalle:
-      "You're signed in as {{email}}. If you work at a business that uses e-PetPlace, ask whoever runs it to invite you with this email — when they do, the invitation shows up right here.",
+      "You're signed in as {{email}}. If you work at a business that uses e-PetPlace, ask whoever runs it to invite you with that email — the invitation shows up right here.",
     // S80-B1 (D-509 ①) — THE THIRD VOICE: just registered this JS session
     registradoTitulo: 'Your account is ready',
     registradoDetalle:
-      'Let whoever runs the business know they can invite you with {{email}}. When they do, the invitation shows up right here for you to accept.',
+      'Your email is {{email}}. Let whoever runs the business know they can invite you with that email — the invitation shows up right here for you to accept.',
     // S75-B: the ACTIVE employee waiting for the door (inert today, dies
     // when the door opens). Honest voice L-139: says what IS true and what
     // is NOT yet, promising nothing.

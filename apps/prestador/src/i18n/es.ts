@@ -46,13 +46,16 @@ export const prestadorEs = {
     // S80-B1 (cura de callejón): la voz genérica gana EL CAMINO — el
     // "escríbenos" sin destino murió · LOTE S80, GATE PENDIENTE
     sinRol: 'Tu cuenta no tiene un negocio asociado',
+    // S80-B4bis (hallazgo founder: la voz llegaba CORTADA por el clamp y
+    // se perdía el email): el EMAIL va ADELANTE — la cola es lo que un
+    // techo se come; el dato accionable no vive en la cola.
     sinRolDetalle:
-      'Entraste como {{email}}. Si trabajas en un negocio que usa e-PetPlace, pídele a quien lo administra que te invite con este correo — cuando lo haga, la invitación te aparece acá.',
+      'Entraste como {{email}}. Si trabajas en un negocio que usa e-PetPlace, pídele a quien lo administra que te invite con ese correo — la invitación te aparece acá.',
     // S80-B1 (D-509 ①) — LA TERCERA VOZ: recién registrado en esta
     // sesión de JS. Encadena con registro.* (Ley 17.3) · LOTE S80
     registradoTitulo: 'Tu cuenta está lista',
     registradoDetalle:
-      'Avísale a quien administra el negocio que te invite con {{email}}. Cuando lo haga, la invitación te aparece acá para aceptarla.',
+      'Tu correo es {{email}}. Avísale a quien administra el negocio que te invite con ese correo — la invitación te aparece acá para aceptarla.',
     // S75-B: el EMPLEADO ACTIVO esperando la puerta (rama inerte hoy, muere
     // cuando la puerta abra). Voz honesta L-139: dice lo que ES verdad (ya
     // sos parte) y lo que TODAVÍA no (el acceso al día a día), sin prometer.
