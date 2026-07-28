@@ -212,6 +212,48 @@ descuento por volumen lo configura el prestador; **un pago, N
 devengos**: cada cita del plan devenga sola al cerrar con calidad
 (variante (b) intacta). `MODELO_FINANCIERO.md` v2.6 §Decisión S.
 
+> **ENMIENDA S79 (decisión founder + 2 enmiendas de mesa — LA REFORMA
+> DEL PRECIO: el plan es SUSCRIPCIÓN MENSUAL; migración
+> `20260727230000`, fixture 5/5):**
+> 1. **El precio es del PERÍODO, no de la cita.** El prestador configura
+>    `precio_mensual_plan` (el MES); si la familia usa 5 salidas de 20,
+>    paga el mes completo. **`precio_plan` (por-salida) QUEDA JUBILADA**
+>    del camino de cobro — cero funciones la leen; sus 2 valores vivos
+>    NO se tradujeron (nadie puede saber qué quiso decir un 60-sobre-10;
+>    el prestador declara el mensual desde cero — la ley del radio). Su
+>    DROP: al retirar el último bundle pre-reforma.
+> 2. **Sin precio mensual declarado NO se contrata** (enmienda ① de
+>    mesa): `contratar_plan_paseo` y la renovación rebotan
+>    `plan_no_ofrecido` con `precio_mensual_plan NULL`. Murió por
+>    omisión el `COALESCE(precio_plan, precio)` — la conducta "plan al
+>    precio suelto × N" ERA el modelo per-cita jubilado. La transición
+>    del bundle viejo es honesta POR esta guarda: el RETURNS de la
+>    lectora conserva la clave `precio_plan` emitiendo SIEMPRE NULL
+>    (D-375 la lee como "plan sin descuento" y estimaría ×N — pero ese
+>    contratar REBOTA: nadie paga un número que el server no cobra).
+> 3. **La cita nacida de un plan NO es cobrable individualmente.** Se
+>    distingue de la suelta por `suscripcion_servicio_id NOT NULL` (+
+>    `metadata.origen='plan'`): ese es EL discriminador — ningún camino
+>    de cobro individual la toca; su `precio` snapshoteado es el
+>    unitario DERIVADO, no un precio de venta.
+> 4. **El unitario efectivo = mensual / N generadas es DERIVADO y NO
+>    ESTABLE entre períodos** (enmienda ② de mesa): N varía con el mes.
+>    Correcto como base del devengo variante (b); TRAMPA para cualquier
+>    reporte que asuma precio unitario fijo — queda prohibido asumirlo.
+>    N=0 está guardado (`plan_sin_citas`) en contratación y renovación.
+> 5. **El batch de renovación SALTEA la fila que rebota** (enmienda ②):
+>    handler por fila — la suscripción vence honesta con
+>    `renovacion_fallida` registrado y su notificación; el lote sigue.
+>    La oferta que dejó de declarar mensual NO renueva (el aviso de 72 h
+>    ya lo dice ANTES: "no va a renovarse").
+> 6. **`saltar_cita_plan` tiene significado económico explícito: mueve
+>    AGENDA, jamás devuelve plata** (body medido: fecha/hora dentro del
+>    mismo período, cero contacto con precios).
+> 7. **EL CORTE:** esta reforma define el MODELO y arregla el
+>    CONFIGURADOR. El cobro sigue SIMULADO; ciclo real, prorrateo,
+>    reintentos y pasarela son del ARCO DE PAGOS — disparo: Kushki real
+>    (la infra `kushki_subscription_id`/`proximo_cobro_en` ya espera).
+
 ### 6.3 Evolución opcional (apagada)
 
 **Plan anual:** registrado como evolución posible del mismo chasis
@@ -232,6 +274,14 @@ Lo que se persiste sigue siendo el precio que el prestador CONFIRMA
 prorrateo del motor). **Nota de calibración declarada:** si los
 prestadores suben sistemáticamente el sugerido del plan en el ensayo,
 el 60% se recalibra — el sugerido es hipótesis de incentivo, no ley.
+
+> **ENMIENDA S79 (reforma del plan mensual):** el sugerido del PLAN se
+> re-expresa en términos MENSUALES — la superficie del taller (B)
+> pre-llena `precio_mensual_plan` derivándolo del suelto (candidato:
+> 60% × precio por salida × salidas típicas del mes según los días
+> elegidos; la fórmula exacta es de la superficie y se calibra ahí).
+> El sugerido del PAQUETE (80% por salida) queda INTACTO — el paquete
+> sigue siendo por-salida.
 
 ## 6bis. El PAQUETE DE SALIDAS (bono) — espec FIRMADA (founder S56), construcción D-343
 
