@@ -104,6 +104,55 @@ el tinte suave de su capa, con el motivo en trazo encima. Reglas:
   dispare.
 - Puede convivir con la huella (un guijarro puede contener la huella).
 
+## 4bis. CANDIDATA S80 — LA LUZ DE LA ESQUINA LLEVA LA NARIZ (espera gate del founder; SIN firma)
+
+**QUÉ CAMBIA: la forma.** El círculo genérico pasa a ser el ISOTIPO —
+la nariz.
+
+**QUÉ NO CAMBIA, y es la mayor parte:** la dosis (blanco al 7%), la
+posición (esquina superior derecha, centro fuera del lienzo), la escala
+(~60% del ancho del techo), y la regla dura de A4 — **SIGUE SIENDO EL
+ÚNICO ADORNO PERMITIDO EN UN TECHO**. Esta enmienda no agrega un
+elemento: le da identidad al que ya existe. *(Nota de depósito, L-142:
+la regla "A4" se cita por orden de mesa S80 y no tiene casa depositada
+en el repo al escribir esto — la cláusula "único adorno del techo" rige
+por esta cita hasta que su letra madre se deposite.)*
+
+**EL PORQUÉ** (§5b, que ya separó los dos símbolos): la nariz es QUIÉN
+SOMOS; la huella es QUIÉN ESTÁ. Un fondo no dice quién está presente —
+dice de quién es esta casa. Por eso el que se disuelve en el techo es
+el isotipo, JAMÁS la huella. Un techo con huellas de fondo diría "acá
+hay mascotas" en una pantalla donde puede no haber ninguna.
+
+**LA GUARDA, o se arruina:** al 7% y disuelto, no puede leerse como
+patrón repetido ni pedir atención. **Si se NOTA como decoración, ya es
+demasiado.** Una sola, jamás repetida, jamás en dos superficies de la
+misma pantalla.
+
+**EL GATE — cuatro veredictos explícitos, en dispositivo:**
+
+1. **LEY 9 A ESCALA NUEVA.** El círculo lee a cualquier tamaño porque
+   no tiene detalle interno; la nariz sí lo tiene. En el techo MÁS
+   CHICO que existe hoy (~96 px), ¿la nariz SOBREVIVE o es barro? Si se
+   empasta, se simplifica la silueta — no se sube la opacidad.
+2. **EL DEGRADADO.** El techo tiene dos paradas (A3). Un blanco al 7%
+   contrasta distinto arriba que abajo. ¿La nariz se lee pareja o
+   aparece y desaparece según dónde caiga?
+3. **EL TEMA OSCURO.** En tealDarkNoche el 7% se comporta distinto.
+   Veredicto propio, no heredado del claro.
+4. **EL RECORTE.** Con el centro fuera del lienzo, ¿qué parte de la
+   nariz entra? Es decisión de composición y se firma con la forma a la
+   vista, no antes.
+
+**SI EL GATE FALLA: A4 QUEDA COMO ESTÁ.** Es ley firmada; una candidata
+no la erosiona por defecto.
+
+**BLOQUEO — RESUELTO (S80-B7):** el boceto exigía el path real del
+isotipo. Está extraído: vive en `packages/ui/src/brand/Isotipo.tsx`
+(`PATH_D`, viewBox 471.82×324 — la nariz del Manual de Marca,
+`Iso_Estandar0.svg`). **El boceto consume ESA fuente única — dibujarlo
+de memoria sería L-139; duplicar el path en otro archivo sería D-546.**
+
 ## 5. El motion de marca
 
 1. **El destello de la IA** (adoptado de Kaxo, decisión founder): trío de
@@ -129,9 +178,9 @@ el tinte suave de su capa, con el motivo en trazo encima. Reglas:
      duración **300 ms** · `cubic-bezier(.32,.72,0,1)` (la física de la
      casa, ya canónica en el punto 2) · desde `translateY: 15`.
      **Rápido lo funcional.**
-   · **Brillo de placa (§8.5):** duración **PENDIENTE — el founder pasa
-     el número**. **Lento lo material.** Hasta ese número, el brillo no
-     se construye (un valor inventado sería L-180 en motion).
+   · **Brillo de placa (§8.5):** **6 s LINEALES, en loop** (número del
+     founder, S80, sobre lámina — cerrado en A5). **Lento lo material:
+     6 s es el paso del vidrio; por debajo de ~4 s se lee como LED.**
    *Nota de referencia declarada (L-142): el brief S80 rotula estos
    valores como "Bloque F" de la directiva de craft; esa directiva NO
    está depositada en el repo — su casa canónica es ESTE registro hasta
@@ -243,8 +292,9 @@ S80; se fija acá.
 **8.5 — EL BRILLO ES DEL OBJETO.** Legal donde la cosa ES un objeto:
 placa, sello, credencial — la luz sobre el vidrio de `PORTAL` §2.2.
 **PROHIBIDO sobre texto, botones o datos.** Censo al firmar: UNO (la
-pill "Prestador fundador", acotada a los ~15 fundadores). Su duración
-espera el número del founder (§5.4 — lento lo material). Deuda ligada:
+pill "Prestador fundador", acotada a los ~15 fundadores). Su duración:
+**6 s lineales, en loop** (§5.4, firmado S80 — el paso del vidrio; por
+debajo de ~4 s se lee como LED). Deuda ligada:
 **D-572** (el contraste de la tinta sobre la pill mientras brilla no
 está medido — WCAG AA sobre el punto más claro de la rampa).
 
@@ -269,11 +319,11 @@ canto al borde aunque hoy esté sola.
 M1 declara qué dato tiene el usuario que la va a ver. **Una pantalla
 cuyo boceto solo existe LLENA es una pantalla sin diseñar.** Origen:
 tres fallas de campo del mismo día (D-570 · D-571 · el clamp del email)
-— ninguna fue de craft, las tres de composición. *(Nota de depósito,
-regla 66: D-570/D-571 se citan por orden de mesa y al escribir esta
-enmienda NO están depositadas en `DEUDAS_CANONICAS` — números
-reservados por esa cita; nacen cuando su letra llegue, precedente
-D-434/D-435 S68.)*
+— ninguna fue de craft, las tres de composición. *(Nota de depósito:
+al escribir la v1.2 D-570/D-571 estaban citadas sin letra — quedaron
+RESERVADAS por regla 66; su letra llegó en la misma sesión (S80-A4) y
+están depositadas en `DEUDAS_CANONICAS`. El protocolo D-434/D-435
+funcionó.)*
 
 **9.4 — LA FORMA LLEVA EL DATO.** Prueba: tapá el texto. Si la pantalla
 sigue diciendo lo mismo, la forma trabaja. Si enmudece, la forma era
@@ -284,6 +334,16 @@ depositada en el repo al escribir esto; referencia declarada, L-142).
 pantalla que se repite y se ve igual pase lo que pase es MUDA, no
 aburrida. **El antídoto es dejar ver lo real, jamás agregar variedad
 decorativa** — un adorno repetido cansa más rápido que la sobriedad.
+
+**9.6 — EL ORIGEN Y EL DESTINO SON PARTE DEL DATO.** Nada aparece de
+la nada ni desaparece en la nada; **el destino acusa recibo**. Prueba:
+si al terminar no sabés de dónde salió ni adónde fue, la transición
+ENTRETUVO en vez de informar. **Corolario: fluidez es CONTINUIDAD
+CAUSAL, no suavidad** — una animación suave que rompe la cadena
+origen→destino es ruido con buena física. (Primer banco de prueba: la
+continuidad lista-del-día→cita de B7 — una tarjeta que al volver no
+regresa a SU fila es una transición fallada por esta ley, por más
+correcta que sea su curva.)
 
 **DISPARO DE RECONSIDERACIÓN DE §8-§9 (obligatorio, mecánica §5b):**
 estas leyes nacieron de la LECTURA del founder sobre la lámina S80, no
