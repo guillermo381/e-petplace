@@ -346,25 +346,26 @@ function FilaCita({
   // los otros oficios → la etiqueta del tipo, como siempre.
   const voz = vozCitaVet(cita.descripcionPresupuesto, cita.tipo.nombre, t);
 
-  // ── S80-B8 · EL CANTO DE CAPA (§9.1/§9.2, boceto M2) ──
-  // El MISMO mapa que el registry de Icono (L-175: la fuente única) —
-  // cuidado=paseo/adiestramiento · identidad=vet · ocre=grooming; los
-  // TRES temas portan `capa` por tipo (el guard del registry sobra acá
-  // — el typecheck lo probó: la rama sin capa es `never`; memorial
-  // resuelve sus tonos en el propio tema). Límite DECLARADO en el M2:
-  // adiestramiento comparte cuidado con paseo por decisión del registry
-  // — si el gate exige distinguirlos por canto, la enmienda es del
-  // registry, no un hex acá. La fila en vivo LLEVA canto (§9.2:
-  // propiedad del TIPO — el glow cuenta elementos VIVOS y esta tinta es
-  // estática); lo que no lleva es el TAG: el experimento de continuidad
-  // mide UNA transición limpia (desvío §6b declarado, reversible en gate).
+  // ── S80-B8/B10/B11 · EL CANTO DE CAPA (§9.1/§9.2) ──
+  // El color: el MISMO mapa que el registry de Icono (L-175). Los TRES
+  // temas portan `capa` por tipo (el typecheck lo probó: la rama sin
+  // capa es `never`). VEREDICTO DEL GATE B10-③: el canto PASA A DECIR
+  // OFICIO — paseo y adiestramiento no comparten; el 4º tono lo elige
+  // LA MESA del censo (violet/comunidadAmplia es el candidato sin
+  // colisión §8.2) — hasta esa firma, training sigue en cuidado y el
+  // límite queda dicho acá. La fila EN VIVO lleva canto como todas
+  // (§9.2: el glow cuenta elementos VIVOS; esta tinta es estática).
+  // B11-②: el ELEMENTO COMPARTIDO se RETIRÓ (decisión founder, mesa
+  // S80) — no por malo sino por costo (26 pantallas sobre API
+  // experimental REA4) contra retorno medido en dispositivo (cero); el
+  // fundamento vive en el M2 s80-b8. La continuidad pasa a nivel
+  // NAVEGADOR (transición de pantalla entera, B11-③).
   const colorCanto =
     oficio === 'vet'
       ? theme.capa.identidad
       : oficio === 'grooming'
         ? theme.status.warning
         : theme.capa.cuidado;
-  const tagCanto = oficio === 'paseo' && !enVivo ? `canto-cita-${cita.id}` : undefined;
 
   return (
     <View style={{ position: 'relative' }}>
@@ -431,7 +432,7 @@ function FilaCita({
     />
     {/* después de la Celda: la tinta sobrevive al resalte del pressed;
         pointerEvents none — la fila entera sigue siendo el tocable */}
-    <CantoOficio color={colorCanto} tag={tagCanto} />
+    <CantoOficio color={colorCanto} />
     </View>
   );
 }

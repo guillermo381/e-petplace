@@ -16,8 +16,6 @@ import { useCallback, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-
-import { CantoOficio } from '@/components/canto-oficio';
 import {
   AvatarMascota,
   Boton,
@@ -226,13 +224,13 @@ export default function DetalleCita() {
         {cita && (
           <>
             {/* La mascota — voz humana.
-                S80-B8 (§9.6, experimento B7): la CABECERA es el DESTINO
-                del canto — el mismo tag que la fila del HOY: la tira que
-                tocaste es la que te recibe, y al volver regresa a SU
-                fila. Sin origen con tag (deep link, fila en vivo, web)
-                degrada a fade solo. */}
-            <View style={{ position: 'relative', alignItems: 'center', gap: spacing[3], paddingVertical: spacing[4] }}>
-              <CantoOficio color={theme.capa.cuidado} tag={`canto-cita-${citaId}`} />
+                S80-B11-②: el canto y el elemento compartido SALIERON de
+                acá (decisión founder, mesa S80): en el detalle el canto
+                no distingue hermanos — su único trabajo era viajar, y el
+                SET se retiró por costo (API experimental REA4, 26
+                pantallas) contra retorno medido cero. Fundamento: el M2
+                s80-b8. La continuidad es del NAVEGADOR (B11-③). */}
+            <View style={{ alignItems: 'center', gap: spacing[3], paddingVertical: spacing[4] }}>
               <AvatarMascota
                 nombre={nombre}
                 fotoUrl={fotoFirmada}
