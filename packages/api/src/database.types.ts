@@ -11777,6 +11777,7 @@ export type Database = {
           nombre_custom: string | null
           precio: number
           precio_emergencia: number | null
+          precio_mensual_plan: number | null
           precio_paquete: number | null
           precio_plan: number | null
           prestador_id: string
@@ -11796,6 +11797,7 @@ export type Database = {
           nombre_custom?: string | null
           precio?: number
           precio_emergencia?: number | null
+          precio_mensual_plan?: number | null
           precio_paquete?: number | null
           precio_plan?: number | null
           prestador_id: string
@@ -11815,6 +11817,7 @@ export type Database = {
           nombre_custom?: string | null
           precio?: number
           precio_emergencia?: number | null
+          precio_mensual_plan?: number | null
           precio_paquete?: number | null
           precio_plan?: number | null
           prestador_id?: string
@@ -17198,6 +17201,7 @@ export type Database = {
         Returns: {
           duracion_minutos: number
           precio: number
+          precio_mensual_plan: number
           precio_plan: number
           prestador_id: string
           prestador_nombre: string
