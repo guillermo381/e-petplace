@@ -52,6 +52,7 @@ import {
 } from '@epetplace/api';
 
 import { verificarSesion } from '@/lib/api';
+import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 import { useTrackGps, type EstadoGps } from '@/lib/use-track-gps';
 import { subirEvidencia } from '@/lib/subir-evidencia';
 import { useTraduccion } from '@/i18n';
@@ -417,7 +418,17 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
           la reconstrucción 7.5 ya no pierde el dibujo (los puntos que
           esta sesión flusheó pueden repetirse en ambas mitades tras un
           refetch en foco: el trazo es idéntico, inofensivo). */}
-      <MapaRecorrido puntos={[...datos.trackPrevio, ...gps.puntosSesion]} modo="vivo" capa="cuidado" alto={220} />
+      {/* S80-B19 🔴: el guard del mapa — sin key en el manifest, montar
+          MapView mata el PROCESO (hilo nativo, sin ErrorBoundary). El
+          guard queda VIVO aunque la build salga bien; el GPS sigue
+          grabando igual (expo-location no depende de la key de Maps). */}
+      {MAPA_NATIVO_DISPONIBLE ? (
+        <MapaRecorrido puntos={[...datos.trackPrevio, ...gps.puntosSesion]} modo="vivo" capa="cuidado" alto={220} />
+      ) : (
+        <Tarjeta relleno="amplio">
+          <Texto variante="apoyo">{t('cita.mapaApagadoVivo')}</Texto>
+        </Tarjeta>
+      )}
 
       {/* Parte del perro — chips de un toque, orden del catálogo (sin
           encabezados de grupo: 12 chips, el orden ya agrupa — dosis baja) */}

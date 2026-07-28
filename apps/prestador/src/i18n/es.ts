@@ -381,6 +381,10 @@ export const prestadorEs = {
     cierreTitulo: 'Parte del paseo',
     resumenConteos: '{{puntos}} puntos gps · {{fotos}} fotos · {{notas}} notas',
     sinRutaGps: 'Sin ruta GPS: {{motivo}}',
+    // S80-B19 🔴 (guard del mapa nativo — la voz honesta del puente;
+    // el GPS graba igual, solo el dibujo espera build) · LOTE S80
+    mapaApagadoVivo: 'El mapa no está disponible en esta versión de la app. El recorrido se sigue grabando igual.',
+    mapaApagadoCerrado: 'El mapa no está disponible en esta versión de la app. El recorrido quedó grabado.',
     // LOTE S62 (curas del track): el hueco del mapa deja de callar
     sinRutaNoRegistrada: 'El recorrido no se registró en este paseo.',
     sinRutaSoloPartida: 'Solo se registró el punto de partida — el recorrido no alcanzó a dibujarse.',

@@ -44,6 +44,7 @@ import {
 } from '@epetplace/api';
 
 import { verificarSesion } from '@/lib/api';
+import { MAPA_NATIVO_DISPONIBLE } from '@/lib/mapa-nativo';
 import { EvitaTeclado } from '@/components/evita-teclado';
 import { useTraduccion } from '@/i18n';
 
@@ -275,7 +276,13 @@ export default function Cierre() {
             {/* Recorrido real, o la verdad si no lo hay — S62 (cura 2):
                 el hueco del mapa JAMÁS calla (Ley 13): con motivo lo
                 dice; con 1 punto lo dice; con 0 sin motivo lo dice. */}
-            {listo.track.length > 1 ? (
+            {/* S80-B19 🔴: guard del mapa nativo (ver lib/mapa-nativo) —
+                el recorrido QUEDÓ grabado; solo el dibujo espera build. */}
+            {listo.track.length > 1 && !MAPA_NATIVO_DISPONIBLE ? (
+              <Tarjeta relleno="amplio">
+                <Texto variante="apoyo">{t('cita.mapaApagadoCerrado')}</Texto>
+              </Tarjeta>
+            ) : listo.track.length > 1 ? (
               <MapaRecorrido puntos={listo.track} modo="recorrido" capa="cuidado" alto={200} />
             ) : (
               <Tarjeta relleno="amplio">

@@ -322,6 +322,9 @@ export const prestadorEn = {
     cierreTitulo: 'Walk report',
     resumenConteos: '{{puntos}} gps points · {{fotos}} photos · {{notas}} notes',
     sinRutaGps: 'No GPS route: {{motivo}}',
+    // S80-B19 (native map guard — honest bridge voice)
+    mapaApagadoVivo: 'The map is not available in this version of the app. The route is still being recorded.',
+    mapaApagadoCerrado: 'The map is not available in this version of the app. The route was recorded.',
     // LOTE S62 (curas del track): el hueco del mapa deja de callar
     sinRutaNoRegistrada: "The route wasn't recorded on this walk.",
     sinRutaSoloPartida: "Only the starting point was recorded — the route didn't get drawn.",
