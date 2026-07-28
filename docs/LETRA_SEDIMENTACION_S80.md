@@ -75,8 +75,38 @@ fuerte, pero exige saber si ALGUIEN miró, dato que hoy NO se captura:
 ninguna lectora registra vistas). **La v1 de esta letra solo puede
 prometer (a) sin motor nuevo; (b) pide un dato de audiencia que no
 existe y su propia decisión de producto** (¿queremos medir miradas? —
-cruza con privacidad y con el espíritu anti-métrica de LOYALTY).
-La voz candidata de §2 queda condicionada a esa elección.
+cruza con privacidad y con el espíritu anti-métrica de LOYALTY). **Y
+sobre (b) rige la advertencia de `LETRA_TURNOS_S78` §1, citada literal:
+e-PetPlace no mide fichadas ni productividad — *"si esta letra derivara
+en reportes de cumplimiento o en ranking, está mal leída"*. Medir si la
+familia miró es medir personas: (b) nace con esa frontera encima.**
+
+**LA TERCERA OPCIÓN (mesa A10) — (c) el acuse MUESTRA el evento, no lo
+describe.** Cero motor, cero métrica: al cerrar, el prestador VE el
+nodo tal como quedó en la Línea de Vida — §9.6 en su forma más literal
+(el destino acusa recibo MOSTRANDO el destino). **Medición A10 de lo
+que un prestador puede leer de la mascota que acaba de atender** (body
+entero de `user_acceso_clinico_a_mascota` + prueba en datos):
+
+- El brazo prestador tiene DOS niveles: **el TITULAR pasa liso**
+  (cuenta comercial con acceso vigente en `mascota_acceso_prestador`;
+  caducidad PEREZOSA de 6 meses parametrizable
+  (`acceso_prestador_caducidad_meses`), re-validada contra cita real
+  para el método `cita_automatica`) — verificado en datos: el titular
+  demo lee 14/16 eventos de los dos Zeus. **El EMPLEADO activo pasa
+  SOLO con `empleado_tiene_capacidad_clinica`** — chip médico, titular
+  o admin (el flip S76). **Consecuencia declarada: el empleado
+  paseador — exactamente quien más cierra paseos en un negocio con
+  equipo — NO puede leer el evento por la pata mascota.**
+- La salida honesta de (c) para ese caso, declarada sin resolver: el
+  acuse del empleado se compone desde SUS lectoras (la atención es
+  suya — parte, fotos, track propios), no desde la Línea de Vida
+  ajena; o la mesa decide que el acuse-espejo pleno es de titulares
+  en v1.
+
+**LAS TRES OPCIONES — (a) registro · (b) audiencia (con su frontera) ·
+(c) mostrar — VAN A LA FIRMA DEL FOUNDER.** La voz de §2 y la
+superficie de §5 quedan condicionadas a esa firma.
 
 ## §1 — La ley
 
