@@ -63,7 +63,7 @@ CONTRA la ley vigente y se fabrica deuda que después hay que auditar.
 | Pieza | Marca | Destino literal |
 |---|---|---|
 | Entrada escalonada 45 ms (+300 ms, bezier de la casa, translateY 15) | **MIGRADO** | `DIRECCION_ARTE` §5 registro S80 (depositado A3, cerrado A5). Fuente única: §5 — la nota de §5 sobre "directiva no depositada" queda resuelta por este depósito |
-| Presión 0.972 | **VIVE ACÁ, SIN FIRMA — ⚠️ ROCE DECLARADO** | la receta ÚNICA de la casa es `usePresionado` 0.97 (controles) / 0.99 (superficies), primitiva de `packages/ui` (S62, un solo lugar). 0.972 es un TERCER valor: adoptarlo es enmienda de PRIMITIVA (packages/ui, con gate), jamás calibración por pantalla |
+| Presión 0.972 | **RETIRADA (founder, S80-A6bis)** | el roce que este censo declaró lo resolvió el founder: 0.972 fue transcripción imprecisa de la mesa, no calibración — se retira del Bloque F (nota en el bloque). **Rige `usePresionado` 0.97/0.99 (S62) sin cambio** |
 | Empuje de pantalla −16% | **VIVE ACÁ, SIN FIRMA** | cero equivalente en el canon (grep: cero) |
 | Huella de tab con overshoot 280 ms | **VIVE ACÁ, SIN FIRMA** | cero equivalente (grep: cero); toca `BarraTabs`/`estadoPorHuella` — packages/ui, mismo tratamiento que la presión |
 | Foco en fila de barrido (cuatro escalas) | **VIVE ACÁ, SIN FIRMA** | las escalas viven en D3 (la rueda); generalizado a "fila de barrido" espera gate |
@@ -159,9 +159,14 @@ D3 · LA RUEDA DE FECHAS: ítem 66 · separación 10 · paso 76 · el elegido
 
 ## BLOQUE F — MOVIMIENTO
 
-Entrada escalonada 45 ms · presión 0.972 · empuje de pantalla −16% ·
-huella de tab con overshoot 280 ms · foco en fila de barrido con sus
-cuatro escalas.
+Entrada escalonada 45 ms · empuje de pantalla −16% · huella de tab con
+overshoot 280 ms · foco en fila de barrido con sus cuatro escalas.
+
+> **RETIRO DECLARADO (founder, S80-A6bis):** el original de la mesa
+> traía "presión 0.972" — fue **transcripción imprecisa de la mesa, no
+> una calibración**. Se retira y no se deposita: **rige `usePresionado`
+> (0.97 controles / 0.99 superficies, S62) sin cambio.** Enmendar una
+> primitiva de `packages/ui` exige gate propio, y nadie lo pidió.
 
 ## §10 ALCANCE
 

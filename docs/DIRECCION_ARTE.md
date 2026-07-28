@@ -182,10 +182,11 @@ de memoria sería L-139; duplicar el path en otro archivo sería D-546.**
      6 s es el paso del vidrio; por debajo de ~4 s se lee como LED.**
    *Los valores de entrada son la pieza MIGRADA del "Bloque F" de
    `DIRECTIVA_CRAFT_CLIENTE` (depositada S80-A6): ESTE registro es su
-   fuente única. Las demás piezas del Bloque F (presión 0.972 — que
-   ROZA la receta única de `usePresionado` —, empuje −16%, overshoot
-   de tab, foco de barrido) viven allá SIN FIRMA, con su
-   reconciliación en el §0bis de ese doc.*
+   fuente única. Las demás piezas del Bloque F (empuje −16%, overshoot
+   de tab, foco de barrido) viven allá SIN FIRMA, con su reconciliación
+   en el §0bis de ese doc; la "presión 0.972" del original fue RETIRADA
+   por el founder (transcripción imprecisa — rige `usePresionado`
+   0.97/0.99 sin cambio).*
 
 ## 5b. La nariz considerada — por qué la huella (nota S53)
 
