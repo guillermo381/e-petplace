@@ -544,7 +544,8 @@ export const prestadorEn = {
     agregarDuracion: 'Offer another duration',
     planInterruptor: 'Offer a monthly plan',
     planRotulo: 'What your client pays per month',
-    planEquivale: 'Typical month of 4 outings · {{salida}} per outing',
+    // T4-B2: planEquivale died (Ley 37) — the new voice states the MODEL · LOTE S79
+    planModeloVoz: 'The family pays the full month. Unused walks are not deducted.',
     paqueteInterruptor: 'Offer an outing package',
     paqueteRotulo: 'Price per outing when buying a package',
     paso: 'Step {{n}} of 3',
@@ -1612,6 +1613,8 @@ export const prestadorEn = {
     direccionLabel: 'Address',
     direccionPlaceholder: 'e.g. Av. de los Shyris 1234',
     ciudadLabel: 'City',
+    sectorLabel: 'Neighborhood',
+    sectorAyuda: 'The neighborhood or area — helps families place you.',
     ubicadaEnMapa: 'Placed on the map.',
     escritaAMano: 'Written by hand — no map point.',
     guardarDireccion: 'Save address',

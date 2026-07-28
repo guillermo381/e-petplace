@@ -23,6 +23,8 @@ export const SEDE_GUARDABLE = true;
 export interface SedeLeida {
   direccion: string | null;
   ciudad: string | null;
+  /** T4-B4 (D-559): el barrio/zona — entró a la whitelist en T4.1. */
+  sector: string | null;
   lat: number | null;
   lon: number | null;
   /** null = "no declaró". */
@@ -33,6 +35,7 @@ export function leerSede(prestador: MiPrestador): SedeLeida {
   return {
     direccion: prestador.direccion,
     ciudad: prestador.ciudad,
+    sector: prestador.sector,
     lat: prestador.lat,
     lon: prestador.lon,
     radioKm: prestador.radio_cobertura_km,
@@ -47,6 +50,8 @@ export type InputGuardarSede =
       tipo: 'direccion';
       direccion: string;
       ciudad: string | null;
+      /** null = se borra en DB ('' → NULL honesto del wrapper). */
+      sector: string | null;
       /** SOLO de un LugarResuelto vigente — la coordenada muere con el texto. */
       lat: number | null;
       lon: number | null;
@@ -63,6 +68,7 @@ export async function guardarSede(input: InputGuardarSede): Promise<ResultadoGua
       ? {
           direccion: input.direccion,
           ciudad: input.ciudad ?? '',
+          sector: input.sector ?? '',
           lat: input.lat,
           lon: input.lon,
         }

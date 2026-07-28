@@ -11,11 +11,12 @@
  * Tono: carta, no banner. Cero íconos celebratorios (hasta el isotipo se
  * quitó — Chanel). Tipografía y aire hacen el trabajo.
  *
- * GATE DE PRIMER LOGIN — PUENTE DECLARADO (boceto M1 §2): AsyncStorage
- * `s79.bienvenida.vista:<userId>` hasta que llegue la marca durable del
- * PEDIDO B→A #1. Límites conocidos: reinstalar o cambiar de dispositivo la
- * muestra otra vez (aceptado, es una carta). La marca se escribe al tocar la
- * única acción — la carta se cierra por donde se entra al espacio.
+ * GATE DE PRIMER INGRESO — DEL MOTOR (T4-B1; el puente AsyncStorage
+ * MURIÓ): el guard raíz llama `registrar_primer_ingreso` (idempotente,
+ * estampa SOLO al titular activo — LETRA_PERFIL §4) y redirige acá con
+ * esPrimerIngreso=true. Esta pantalla LEE (segunda llamada = lectura) y
+ * su única acción solo entra: la marca ya está en la DB, cualquier
+ * dispositivo y cualquier gestor ven su carta exactamente una vez.
  */
 
 import { useCallback, useState } from 'react';
@@ -23,16 +24,16 @@ import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Boton, Texto, spacing, useTheme } from '@epetplace/ui';
-import { obtenerMiPerfil, obtenerMiPrestador, obtenerSesion } from '@epetplace/api';
+import { obtenerMiPerfil, registrarPrimerIngreso } from '@epetplace/api';
 
-import { marcarBienvenidaVista } from '@/lib/bienvenida';
 import { useTraduccion } from '@/i18n';
 
 type Carta = {
   nombre: string | null;
-  /** PEDIDO B→A #2: hoy siempre null — el bloque queda construido y apagado. */
+  /** T4-B1: `registrarPrimerIngreso` es el LECTOR CANÓNICO del propósito
+   *  (§3bis: no viaja por PostgREST). null honesto = el bloque "Tú nos
+   *  dijiste" NO se dibuja (L-139 — hoy solo vet2 lo tiene con texto). */
   proposito: string | null;
-  userId: string | null;
 };
 
 export default function BienvenidaDia1() {
@@ -47,23 +48,13 @@ export default function BienvenidaDia1() {
     useCallback(() => {
       let vigente = true;
       void (async () => {
-        const [sesion, perfil, prestador] = await Promise.all([
-          obtenerSesion(),
-          obtenerMiPerfil(),
-          obtenerMiPrestador(),
-        ]);
+        // T4-B1: la marca ya la estampó el guard raíz (RPC idempotente);
+        // esta segunda llamada es LECTURA — el propósito llega por acá.
+        const [perfil, ingreso] = await Promise.all([obtenerMiPerfil(), registrarPrimerIngreso()]);
         if (!vigente) return;
-        // La devolución del propósito lee el dato SI el motor ya lo trae
-        // (PEDIDO #2); el acceso es defensivo a propósito — cuando la columna
-        // exista y gen:types corra, esto la encuentra sin tocar esta pantalla.
-        const prop =
-          prestador.ok && 'proposito' in prestador.data
-            ? (prestador.data as { proposito?: unknown }).proposito
-            : null;
         setCarta({
           nombre: perfil.ok ? perfil.data.nombre : null,
-          proposito: typeof prop === 'string' && prop.trim().length > 0 ? prop.trim() : null,
-          userId: sesion.ok && sesion.data !== null ? sesion.data.user_id : null,
+          proposito: ingreso.ok ? ingreso.data.proposito : null,
         });
       })();
       return () => {
@@ -78,19 +69,12 @@ export default function BienvenidaDia1() {
     ? t('dia1.saludoNombre', { nombre: carta.nombre.trim().split(' ')[0] })
     : t('dia1.saludoSinNombre');
 
-  async function entrar() {
+  function entrar() {
     if (entrando) return;
     setEntrando(true);
-    // FALLA REAL atrapada por M3 (captura T3): el CTA tocado ANTES de que
-    // la carta cargue dejaba `userId` null → la marca no se escribía → el
-    // guard rebotaba a la carta (loop para el dedo rápido). La marca no
-    // depende del estado de la carta: se resuelve la sesión acá mismo.
-    let uid = carta?.userId ?? null;
-    if (uid === null) {
-      const s = await obtenerSesion();
-      uid = s.ok && s.data !== null ? s.data.user_id : null;
-    }
-    if (uid !== null) await marcarBienvenidaVista(uid);
+    // T4-B1: la marca es del MOTOR y ya está estampada (el guard la
+    // escribió al decidir mostrar la carta) — el loop del dedo rápido
+    // murió de raíz: acá solo se entra.
     router.replace('/(tabs)');
   }
 
@@ -131,7 +115,7 @@ export default function BienvenidaDia1() {
           bloque
           etiqueta={t('dia1.entrar')}
           cargando={entrando}
-          onPress={() => void entrar()}
+          onPress={entrar}
         />
       </ScrollView>
     </View>

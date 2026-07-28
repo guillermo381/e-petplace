@@ -36,10 +36,10 @@ import {
   obtenerMiPrestador,
   obtenerNegocioEmpleadoActivo,
   obtenerSesion,
+  registrarPrimerIngreso,
 } from '@epetplace/api';
 
 import { apiLista } from '@/lib/api';
-import { bienvenidaVista } from '@/lib/bienvenida';
 import { BienvenidaPrestador } from '@/components/bienvenida';
 import { IconoCuenta, IconoHoy, IconoMascotas, IconoNegocio } from '@/components/iconos-tabs';
 import { useTraduccion } from '@/i18n';
@@ -50,9 +50,10 @@ type EstadoSesionRaiz =
   // acá (resuelto UNA vez en el guard, jamás por pantalla). Hoy inerte:
   // el único que llega es el titular, y el titular siempre es gestor.
   | { ok: true; esGestor: boolean }
-  // S79-B (T2-B2, §2.3): primer login del GESTOR sin bienvenida vista →
-  // la carta preside ANTES de las tabs (precedente /invitacion, L-161).
-  // Puente local declarado (lib/bienvenida) hasta el PEDIDO B→A #1.
+  // S79-B (T2-B2, §2.3; T4-B1): primer ingreso del GESTOR según el MOTOR
+  // (`registrar_primer_ingreso`, LETRA_PERFIL §4) → la carta preside
+  // ANTES de las tabs (precedente /invitacion, L-161). El puente
+  // AsyncStorage murió consumiendo esa RPC.
   | { bienvenida_pendiente: true }
   // S79-B (T3-B3): estado 'pendiente' → LA SALA DE ESPERA. La regla dura:
   // el pendiente NO entra al portal — y la carta §2.3 tampoco se le
@@ -66,6 +67,11 @@ type EstadoSesionRaiz =
   | { invitacion_pendiente: true }
   | { sin_sesion: true }
   | { error: true; detalle: string };
+
+// S79-B (T4-B1): la ceremonia se pregunta UNA vez por sesión de JS — la
+// RPC es idempotente, pero el guard corre en cada focus y no hace falta
+// repetirle la pregunta al server (costo declarado en cero).
+let ceremoniaResuelta = false;
 
 export default function TabsLayout() {
   const { theme } = useTheme();
@@ -86,22 +92,30 @@ export default function TabsLayout() {
         if (s.data === null) return { sin_sesion: true };
         const p = await obtenerMiPrestador();
         if (p.ok) {
-          // S79-B (T3-B3): el 'pendiente' se intercepta ANTES que todo —
-          // ni portal ni carta (la bienvenida llega con el primer ingreso
-          // REAL). El literal 'pendiente' es el de la letra S79; el
-          // titular lee su propia fila sea cual sea el estado (RLS
-          // prestadores_public, brazo user_id).
-          if (p.data.estado === 'pendiente') return { sala_espera: true };
+          // S79-B (T3-B3; T4-B3 · D-560): LISTA BLANCA — al portal entra
+          // SOLO 'activo'; TODO lo demás (pendiente, en_revision,
+          // suspendido, rechazado, y el sexto estado que nazca mañana)
+          // aterriza en la sala de espera por default. La lista negra
+          // vieja ('pendiente' solo) dejaba colar tres estados por
+          // omisión. El titular lee su propia fila sea cual sea el
+          // estado (RLS prestadores_public, brazo user_id).
+          if (p.data.estado !== 'activo') return { sala_espera: true };
           // S75-B: el rol de gestión, resuelto UNA vez (gate del tab).
           // Falla de lectura = false (Ley 23: ante la duda, se cierra).
           const rol = await empleadoTieneRol(p.data.id, ['dueño', 'administrador']);
           const esGestor = rol.ok ? rol.data : false;
-          // S79-B (§2.3): la carta del Día 1 — SOLO al gestor (la voz "te
-          // elegimos para ser uno de los 15 prestadores" es del titular,
-          // no del empleado que entra por invitación). Ante la duda del
-          // puente, NO se interrumpe (bienvenidaVista falla a true).
-          if (esGestor && !(await bienvenidaVista(s.data.user_id))) {
-            return { bienvenida_pendiente: true };
+          // S79-B (T4-B1, §2.3): la ceremonia del primer ingreso es del
+          // MOTOR (LETRA_PERFIL §4) — el puente AsyncStorage MURIÓ entero
+          // (era por dispositivo: en una tablet de clínica el segundo
+          // gestor jamás veía su carta). La RPC estampa SOLO al titular
+          // activo y es idempotente; ante fallo de lectura NO se
+          // interrumpe (la carta es ceremonia, no candado).
+          if (esGestor && !ceremoniaResuelta) {
+            const ingreso = await registrarPrimerIngreso();
+            if (ingreso.ok) {
+              ceremoniaResuelta = true;
+              if (ingreso.data.esPrimerIngreso) return { bienvenida_pendiente: true };
+            }
           }
           return { ok: true, esGestor };
         }

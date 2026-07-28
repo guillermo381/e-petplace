@@ -152,6 +152,18 @@ function sugerido(precioTexto: string, factor: number): string {
   return v.toFixed(2);
 }
 
+// S79 (reforma del plan, T4-B2): el sugerido del plan se re-expresa EN
+// MENSUAL — el MISMO 60% de descuento de siempre, sobre el mes típico de
+// 4 salidas (0.6 × 4 = 2.4× del suelto), al paso del riel mensual ($1).
+// CERO derivación por salida: el número que se ve es el que se guarda.
+const PASO_MES = PASO_PRECIO * 4;
+function sugeridoMes(precioTexto: string): string {
+  const p = Number.parseFloat(precioTexto.replace(',', '.'));
+  const base = Number.isFinite(p) && p > 0 ? p : 5;
+  const v = Math.max(PASO_MES, Math.round((base * 2.4) / PASO_MES) * PASO_MES);
+  return v.toFixed(2);
+}
+
 function leerPrecio(texto: string): number | null {
   const v = Number.parseFloat(texto.replace(',', '.'));
   if (!Number.isFinite(v) || v <= 0) return null;
@@ -172,7 +184,9 @@ function draftDesdeBase(o: OfertaPaseoPropia | null): DraftOferta {
         base: o,
         ofrecida: o.activo,
         precio: o.precio.toFixed(2),
-        plan: o.precioPlan !== null ? o.precioPlan.toFixed(2) : '',
+        // T4-B2: `plan` es el MENSUAL (precioMensualPlan) — la per-salida
+        // jubilada (precioPlan) NO se lee: null mensual = sin plan, honesto.
+        plan: o.precioMensualPlan !== null ? o.precioMensualPlan.toFixed(2) : '',
         paquete: o.precioPaquete !== null ? o.precioPaquete.toFixed(2) : '',
       }
     : { base: null, ofrecida: false, precio: '', plan: '', paquete: '' };
@@ -188,7 +202,7 @@ function ofertaDirty(d: DraftOferta): boolean {
   return (
     d.ofrecida !== d.base.activo ||
     (precio !== null && precio !== d.base.precio) ||
-    (plan !== 'invalido' && plan !== d.base.precioPlan) ||
+    (plan !== 'invalido' && plan !== d.base.precioMensualPlan) ||
     (paquete !== 'invalido' && paquete !== d.base.precioPaquete)
   );
 }
@@ -356,14 +370,21 @@ export default function TallerPaseo() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [drafts === null]);
   const etiquetasPasos = useMemo(() => pasos.map(monto), [pasos]);
-  // el PLAN se muestra EN MENSUAL (corrección founder S58): mes típico de
-  // 4 salidas → mismo riel, etiquetas ×4 (paso visible $1). El CONTRATO
-  // sigue POR SALIDA (7.14): se guarda pasos[i], jamás el mensual.
-  const etiquetasMes = useMemo(() => pasos.map((p) => monto(p * 4)), [pasos]);
+  // T4-B2 (reforma S79): el plan ES mensual de punta a punta — riel
+  // mensual (paso $1), se guarda EL MISMO número que se ve. La época del
+  // "se ve mensual, se guarda por salida" (÷4) MURIÓ: con ella el plan
+  // salía más caro por paseo que el suelto — el descuento hecho recargo.
+  const pasosMes = useMemo(() => pasos.map((p) => Math.round(p * 4 * 100) / 100), [pasos]);
+  const etiquetasMes = useMemo(() => pasosMes.map(monto), [pasosMes]);
   const indicePrecio = (texto: string): number => {
     const v = leerPrecio(texto);
     if (v === null) return Math.round(5 / PASO_PRECIO) - 1;
     return Math.min(Math.max(Math.round(v / PASO_PRECIO) - 1, 0), pasos.length - 1);
+  };
+  const indiceMes = (texto: string): number => {
+    const v = leerPrecio(texto);
+    if (v === null) return Math.round(20 / PASO_MES) - 1;
+    return Math.min(Math.max(Math.round(v / PASO_MES) - 1, 0), pasosMes.length - 1);
   };
 
   // el espejo VIVO — la firma: deriva del borrador entero en cada paso
@@ -400,7 +421,8 @@ export default function TallerPaseo() {
           prestadorId: pantalla.prestadorId,
           duracionMinutos: b,
           precio,
-          precioPlan: plan === 'invalido' ? null : plan,
+          // T4-B2: el plan viaja MENSUAL; la per-salida jubilada no se escribe.
+          precioMensualPlan: plan === 'invalido' ? null : plan,
           precioPaquete: paquete === 'invalido' ? null : paquete,
         });
         if (!r.ok) {
@@ -416,7 +438,7 @@ export default function TallerPaseo() {
         const r = await actualizarOfertaPaseo({
           id: d.base.id,
           precio: precio ?? undefined,
-          precioPlan: plan === 'invalido' ? undefined : plan,
+          precioMensualPlan: plan === 'invalido' ? undefined : plan,
           precioPaquete: paquete === 'invalido' ? undefined : paquete,
           activo: d.ofrecida,
         });
@@ -640,7 +662,7 @@ export default function TallerPaseo() {
                               etiqueta={t('taller.planInterruptor')}
                               registro="oficio"
                               encendido={d.plan !== ''}
-                              onCambio={(v) => actualizarDraft(b, { plan: v ? sugerido(d.precio, 0.6) : '' })}
+                              onCambio={(v) => actualizarDraft(b, { plan: v ? sugeridoMes(d.precio) : '' })}
                             />
                           </View>
                           {d.plan !== '' && (
@@ -652,19 +674,20 @@ export default function TallerPaseo() {
                               <SliderPrecio
                                 etiqueta={t('taller.planRotulo')}
                                 pasos={etiquetasMes}
-                                indice={indicePrecio(d.plan)}
-                                onCambio={(i) => actualizarDraft(b, { plan: pasos[i].toFixed(2) })}
+                                indice={indiceMes(d.plan)}
+                                onCambio={(i) => actualizarDraft(b, { plan: pasosMes[i]!.toFixed(2) })}
                                 registro="aa"
                               />
-                              <VozComision pct={pct} precio={(leerPrecio(d.plan) ?? 0) * 4} />
-                              {/* la línea VIVA invertida: el contrato sigue POR
-                                  SALIDA (7.14) — acá se declara la equivalencia */}
+                              <VozComision pct={pct} precio={leerPrecio(d.plan) ?? 0} />
+                              {/* T4-B2: la voz dice el MODELO, no solo el número —
+                                  y la equivalencia por salida MURIÓ (cero
+                                  derivación por salida en esta pantalla). */}
                               <Texto variante="apoyo">
-                                {t('taller.planEquivale', { salida: monto(leerPrecio(d.plan) ?? 0) })}
+                                {t('taller.planModeloVoz')}
                               </Texto>
                             </>
                           )}
-                          {d.base?.precioPlan != null && (
+                          {d.base?.precioMensualPlan != null && (
                             // editar o quitar un plan GUARDADO: la voz de
                             // renovación de siempre
                             <Texto variante="apoyo">{t('servicios.precioPlanAyuda')}</Texto>

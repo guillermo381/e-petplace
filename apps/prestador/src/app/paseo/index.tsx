@@ -204,7 +204,8 @@ export default function OfertaPaseo() {
         const diasActivos = ORDEN_DISPLAY.filter((d) => franjasActivas.some((f) => f.diaSemana === d));
         const hayBloqueoVigente = bloqueos.some((b) => b.fechaFin >= hoyISO());
 
-        const conPlan = activas.some((o) => o.precioPlan !== null);
+        // T4-B2: la verdad del plan es el MENSUAL (la per-salida está jubilada).
+        const conPlan = activas.some((o) => o.precioMensualPlan !== null);
         const conPaquete = activas.some((o) => o.precioPaquete !== null);
         // v3.2: la fila "Plan y paquete" MURIÓ (Chanel, mismo destino que
         // Duraciones) — su verdad vive en ESTE subtítulo vivo

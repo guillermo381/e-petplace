@@ -55,6 +55,8 @@ export function SeccionSede({ sede }: { sede: SedeLeida }) {
 
   const [direccion, setDireccion] = useState(sede.direccion ?? '');
   const [ciudad, setCiudad] = useState(sede.ciudad ?? '');
+  // T4-B4 (D-559): el barrio/zona — captura manual, cero motor extra.
+  const [sector, setSector] = useState(sede.sector ?? '');
   const [guardando, setGuardando] = useState(false);
   // El radio local refleja el último toque confirmado por el server.
   const [radioKm, setRadioKm] = useState<number | null>(sede.radioKm);
@@ -131,6 +133,7 @@ export function SeccionSede({ sede }: { sede: SedeLeida }) {
       tipo: 'direccion',
       direccion: direccion.trim(),
       ciudad: ciudad.trim() === '' ? null : ciudad.trim(),
+      sector: sector.trim() === '' ? null : sector.trim(),
       lat: resuelta ? lugar.lat : null,
       lon: resuelta ? lugar.lon : null,
     });
@@ -203,6 +206,13 @@ export function SeccionSede({ sede }: { sede: SedeLeida }) {
         </View>
       ) : null}
       <Campo label={t('sede.ciudadLabel')} value={ciudad} onChangeText={setCiudad} autoCapitalize="words" />
+      <Campo
+        label={t('sede.sectorLabel')}
+        value={sector}
+        onChangeText={setSector}
+        ayuda={t('sede.sectorAyuda')}
+        autoCapitalize="words"
+      />
       <Boton
         etiqueta={t('sede.guardarDireccion')}
         bloque

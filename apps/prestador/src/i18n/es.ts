@@ -634,7 +634,9 @@ export const prestadorEs = {
     // corrección founder S58: el plan se dice EN MENSUAL; el contrato
     // sigue por salida (7.14) — la equivalencia se declara abajo
     planRotulo: 'Lo que tu cliente paga al mes',
-    planEquivale: 'Mes típico de 4 salidas · {{salida}} por salida',
+    // T4-B2: `planEquivale` MURIÓ (Ley 37 — cero derivación por salida);
+    // la voz nueva dice el MODELO · LOTE S79, GATE PENDIENTE
+    planModeloVoz: 'La familia paga el mes completo. Las salidas que no use no se descuentan.',
     paqueteInterruptor: 'Ofrecer paquete de salidas',
     paqueteRotulo: 'Precio de cada salida al comprar paquete',
     // el wizard (v3): progreso sereno
@@ -1806,6 +1808,9 @@ export const prestadorEs = {
     direccionLabel: 'Dirección',
     direccionPlaceholder: 'ej: Av. de los Shyris 1234',
     ciudadLabel: 'Ciudad',
+    // T4-B4 (D-559): el barrio/zona — cero motor extra (whitelist T4.1)
+    sectorLabel: 'Sector',
+    sectorAyuda: 'El barrio o la zona — ayuda a las familias a ubicarte.',
     ubicadaEnMapa: 'Ubicada en el mapa.',
     escritaAMano: 'Escrita a mano — sin punto en el mapa.',
     guardarDireccion: 'Guardar dirección',
