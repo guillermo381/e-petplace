@@ -253,6 +253,16 @@ devengos**: cada cita del plan devenga sola al cerrar con calidad
 >    CONFIGURADOR. El cobro sigue SIMULADO; ciclo real, prorrateo,
 >    reintentos y pasarela son del ARCO DE PAGOS — disparo: Kushki real
 >    (la infra `kushki_subscription_id`/`proximo_cobro_en` ya espera).
+> 8bis. **⚠️ CONFLICTO ABIERTO CON P14 (auditoría de mesa, cierre S79 —
+>    NO resuelto acá):** las cláusulas de devolución de P14 (crédito/
+>    reembolso proporcional al unitario efectivo; *"lo no ejecutado
+>    vuelve o se acredita"*) chocan con la voz publicada del mes fijo
+>    (*"las salidas que no uses no se descuentan"*) y con la
+>    no-estabilidad del unitario (punto 4). El motor HOY cumple P14 (el
+>    crédito de `cerrar_y_renovar_planes` vive); la voz dice otra cosa.
+>    Las dos salidas y el disparo viven en la nota de P14
+>    (`POLITICAS_EPETPLACE.md`) — decide el founder ANTES del primer
+>    plan real.
 > 8. **EL AVISO DE 72 h Y EL PRECIO QUE CAMBIA (declaración S79-t10,
 >    mesa — destapado por el fixture: renovación a $150 sobre un
 >    contrato de $120):** el prestador puede cambiar
@@ -291,12 +301,21 @@ prestadores suben sistemáticamente el sugerido del plan en el ensayo,
 el 60% se recalibra — el sugerido es hipótesis de incentivo, no ley.
 
 > **ENMIENDA S79 (reforma del plan mensual):** el sugerido del PLAN se
-> re-expresa en términos MENSUALES — la superficie del taller (B)
-> pre-llena `precio_mensual_plan` derivándolo del suelto (candidato:
-> 60% × precio por salida × salidas típicas del mes según los días
-> elegidos; la fórmula exacta es de la superficie y se calibra ahí).
-> El sugerido del PAQUETE (80% por salida) queda INTACTO — el paquete
-> sigue siendo por-salida.
+> re-expresa en términos MENSUALES. El sugerido del PAQUETE (80% por
+> salida) queda INTACTO — el paquete sigue siendo por-salida.
+> **SEGUNDA ENMIENDA S79 (cierre, mesa — L-180, con el bug encontrado
+> por el founder configurando una oferta REAL): EL SUGERIDO SE DERIVA DE
+> LA FRECUENCIA DECLARADA; SIN FRECUENCIA, NO HAY SUGERENCIA.** La
+> primera versión del sugerido mensual asumía "4 salidas al mes" — una
+> FRECUENCIA FANTASMA que el prestador jamás declaró: un sugerido
+> derivado de un supuesto no declarado fabrica el mismo dato inventado
+> que un DEFAULT de DDL (la familia exacta del DEFAULT 5 del radio que
+> esta sesión mató). La regla exigible: el pre-llenado del mensual solo
+> puede computarse de insumos que el prestador YA declaró en esa
+> pantalla; si el insumo no está, el campo queda VACÍO esperando su
+> número — jamás una sugerencia sobre aire. (Pedido a B, registrado al
+> cierre S79; su taller ya dejó anotada la frecuencia fantasma como
+> deuda propia.)
 
 ## 6bis. El PAQUETE DE SALIDAS (bono) — espec FIRMADA (founder S56), construcción D-343
 

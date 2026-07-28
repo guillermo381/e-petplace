@@ -99,6 +99,22 @@ El día que un prestador piense "no me puedo ir de e-PetPlace porque salir es pe
 
 Lo que sigue describe el día 1 en detalle. Por las razones de la sección 1.2, hay diferencias entre los tres momentos. Donde aplica, las distinguimos. La estructura general es la misma.
 
+> **ESTADO S79 — EL ALTA ES REAL (letra: `LETRA_ALTA_S79`).** Este §2
+> ganó su motor: registro por INVITACIÓN en **cuatro fases** (aplicación
+> `invitar_prestador` con el espejo del titular → **SALA DE ESPERA**,
+> autenticado FUERA del portal, donde el invitado completa su sede con
+> Places → activación admin con checklist MECÁNICO
+> (`activar_prestador`: geo + radio + credencial médica, y activa
+> prestador Y cuenta) → **primer login al portal = la ceremonia de
+> §2.3**, estampada en motor: `registrar_primer_ingreso`, solo titular,
+> solo activo, una vez — y devuelve el PROPÓSITO de §2.1 para que la
+> bienvenida lo cite). La bienvenida, "prepará tu espacio" y la firma
+> del home viven construidos (S79-B). El camino de la COHORTE (§2.2: la
+> carta física transporta la clave del primer login — la letra de este
+> doc, cumplida al pie) está en LETRA_ALTA §1bis, cohorte-scoped. El
+> registro self-service de cuentas (sin vínculo — la curaduría intacta)
+> es el candidato a primer arco de S80 (D-509, 3ª lectura).
+
 ### 2.1 El antes del día 1 — el proceso de selección
 
 El portal empieza antes del portal. Cuando un prestador aplica a e-PetPlace, el proceso comunica selectividad y propósito desde el primer contacto.
@@ -193,6 +209,19 @@ Lo que no aparece el día 1:
 - **Notificaciones push activas.** Silenciadas hasta primera cita real programada. No spamear a quien todavía no tiene clientes.
 
 El principio que une todo: **portal vacío es portal en preparación, no portal fracasado**. Cada módulo aparece cuando tiene algo digno que mostrar. La navegación lateral sí muestra los módulos como secciones existentes — pero al entrar, cada una comunica con claridad por qué está silenciada y qué la va a despertar.
+
+> **ESTADO S79 — DE DIAGNÓSTICO A CONSTRUIDO (las curas del Día 1,
+> S79-B).** El Día 1 vivo cumple este principio: la bienvenida §2.3 con
+> el propósito devuelto y la firma literal del founder · "prepará tu
+> espacio" como invitación · los mudos ganaron voz. **Lo que quedó
+> FUERA, con su disparo (no cerrado en silencio):** la mascota demo
+> ZEUS del §2.4 (su montaje curado es trabajo propio — disparo: el
+> rediseño del portal S80) · los HITOS de trayectoria de §2.7 (sin
+> motor — disparan con la primera cita real de un fundador) · la 5ª
+> tarea de §2.4 (condiciones operativas: cancelación/anticipo — espera
+> su letra). Y el paso 11 del runbook de la cohorte ("prepará tu
+> espacio" desaparece al configurar) quedó como el ÚNICO paso del gate
+> en dispositivo sin correr — pendiente vivo, no cerrado.
 
 ### 2.7 Hitos de trayectoria, no de tarea
 
@@ -1162,6 +1191,17 @@ Datos del prestador como persona/negocio:
 
 **Diagnóstico inicial:** **RC**. El portal hoy maneja perfil básico; necesita alinearse con el modelo de página pública y de insignias del Día 90.
 
+> **ESTADO S79 — RECOMPUESTO COMO LOS CUATRO REGISTROS
+> (`LETRA_PERFIL_S79` §1, FIRMADA):** el perfil se compone por DUEÑO DE
+> DATO y RÉGIMEN DE ACCESO — **el fiscal** (cuentas_comerciales,
+> owner-only) · **la sede** (dirección por Places + lat/lon + radio —
+> la vitrina, editable por el titular) · **la persona** · **las
+> credenciales** (documentos, titular + admin). **La regla del ENLACE:
+> el registro fiscal se ENLAZA desde el perfil, JAMÁS se dibuja inline**
+> — el muro D-517 (R2 owner-only) es diseño correcto, no bug: un
+> empleado no ve la plata del negocio. `proposito` y `direccion_envio`
+> viven bajo privilegios por COLUMNA (no viajan por PostgREST).
+
 #### 6.5.2 Documentos
 
 Cédula / pasaporte / equivalente del prestador. RUC / equivalente del negocio. Diplomas y licencias profesionales (para vets, registro de médico veterinario habilitante). Permisos sanitarios y de operación del local. Certificados de capacitación cuando aplica.
@@ -1171,6 +1211,19 @@ Cédula / pasaporte / equivalente del prestador. RUC / equivalente del negocio. 
 Esta sub-sección es **defensiva ante auditorías**. Si vienen autoridades a pedir documentación, el prestador la tiene a mano en el portal.
 
 **Diagnóstico inicial:** **CN** o **RC** según lo construido. Documentos como entidad estructurada con vencimientos y renovaciones es modelo significativo.
+
+> **ESTADO S79 — DEJA DE SER CN: EL CHASIS EXISTÍA Y AHORA TIENE
+> PROCESO.** `prestador_documentos` (8 tipos, estados con revisión) +
+> bucket privado con mime y CHECK de path (molde D-310) + el circuito
+> del prestador (S68) + **el lado admin que faltaba**:
+> `revisar_documento_prestador` gateada por `is_admin()` (S79-A3,
+> fixture 6/6) — con la consulta pública del SENESCYT como el paso que
+> vuelve la aprobación VERIFICACIÓN (MODELO_VETERINARIA §14.2). La
+> regla de qué bloquea: la CREDENCIAL DE LA PERSONA gatea la oferta
+> médica; el permiso del establecimiento se RECOLECTA (LETRA_PERFIL
+> §6). **Los VENCIMIENTOS siguen siendo PROPUESTA con gate abierto**
+> (LETRA_PERFIL §7 — la única pieza de este sub-§ sin firma; disparo:
+> el primer documento real con fecha).
 
 #### 6.5.3 Servicios
 

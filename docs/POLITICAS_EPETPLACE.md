@@ -292,6 +292,31 @@ plataforma garantiza que la plata siga a lo EJECUTADO (el devengo solo
 existe por cierre con calidad; lo no ejecutado vuelve o se acredita,
 nunca queda en un limbo).
 
+> **⚠️ CONFLICTO ABIERTO S79 (auditoría de mesa al cierre — NO
+> RESUELTO; es firma del founder y plata de cara al cliente):** la
+> REFORMA DEL PLAN MENSUAL (`MODELO_PASEO` §6.2 enmienda S79)
+> contradice las cláusulas de DEVOLUCIÓN de esta política. (a)/(b)
+> prometen crédito/reembolso proporcional *"al precio unitario
+> efectivo"* y el porqué promete que *"lo no ejecutado vuelve o se
+> acredita, nunca queda en un limbo"* — pero la voz publicada del plan
+> dice lo contrario (*"las salidas que no uses no se descuentan"*), y
+> el unitario ya NO es base estable (mensual ÷ N, con N variable por
+> período — declarado en §6.2.4). **Estado medido, para que el
+> conflicto se vea entero: el MOTOR todavía cumple P14** —
+> `cerrar_y_renovar_planes` computa `crédito = unitario × sobrantes` y
+> lo acredita/reembolsa (simulado); **la contradicción viva es
+> VOZ-contra-P14/motor**, más la base unitaria debilitada. **Las dos
+> salidas (decide el founder):** (α) **P14 se enmienda al modelo de
+> suscripción pura** — pausar evita el próximo cobro; lo no usado del
+> período corriente NO se devuelve (la voz publicada gana; el crédito
+> del motor MUERE; (b) falla-del-prestador probablemente sobrevive como
+> excepción); o (β) **la voz se corrige y el crédito vive** — P14 gana
+> ("no se descuentan" muere de la Hoja; el unitario derivado queda
+> consagrado como base de crédito pese a su no-estabilidad, declarada).
+> **Disparo: ANTES del primer plan contratado por una familia REAL** —
+> hasta la firma, el cobro simulado hace el conflicto invisible pero no
+> menos real. `MODELO_PASEO` §6.2 punto 9 lo cruza.
+
 ---
 
 ## P15 — Eliminación de cuenta del dueño (CANDIDATA — S55, pendiente de firma del founder)

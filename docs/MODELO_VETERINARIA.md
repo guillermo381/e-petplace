@@ -684,6 +684,22 @@ construye** — deuda con disparo §16.
 2. **Verificación del vet:** título/registro profesional a la cuenta,
    gate admin (`requiere_validacion_admin` existe; el PROCESO se
    construye). Sin esto no hay procedencia verificada ni certificados.
+   > **ESTADO S79 — YA NO ES PRECONDICIÓN PENDIENTE: EL PROCESO
+   > EXISTE.** Las tres piezas, vivas y verificadas: el TRIGGER de S68
+   > (`trg_ps_verificacion_profesional`: activar oferta médica sin
+   > título/SENESCYT aprobado rebota) · el VEREDICTO del admin
+   > (`revisar_documento_prestador`, S79-A3 — sin pantalla, por diseño:
+   > el portal admin no nace) · el founder como admin verificado
+   > (`admin_users`). El checklist del alta suma la copia temprana
+   > (`activar_prestador` exige credencial aprobada para tipos médicos —
+   > LETRA_ALTA §3, con la señal `tipo`/D-487 declarada). **Y EL
+   > PROCEDIMIENTO REAL, anotado: la consulta PÚBLICA del SENESCYT
+   > (siau.senescyt.gob.ec) con la cédula del profesional es lo que
+   > convierte la aprobación en VERIFICACIÓN y no en trámite** — el
+   > admin contrasta el título subido contra el registro estatal antes
+   > de veredictar. La regla de qué bloquea quedó en letra
+   > (LETRA_PERFIL §6): el gate es la CREDENCIAL DE LA PERSONA; el
+   > permiso del establecimiento se recolecta, no bloquea.
 3. **La conversación con vet/clínica REAL** — BLOQUEANTE para
    desmarcar seeds y abrir (patrón §10.3 grooming): valida menú,
    catálogo libre, defaults de duración, el mostrador y la escalera

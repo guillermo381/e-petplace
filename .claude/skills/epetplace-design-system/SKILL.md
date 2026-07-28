@@ -694,6 +694,24 @@ dispositivo: CLAUDE.md raíz · dirección de arte e iconografía:
 
 ## Historial de la skill
 
+- **S79 (27 Jul 2026) — LA LEY DEL GATE COHERENTE Y SUS DOS ANATOMÍAS
+  (S79-B, nacidas del diagnóstico vet2; ley L-178).** **Un dato
+  faltante JAMÁS se disfraza de permiso denegado: el gate que no pudo
+  LEER no deniega — dibuja `GateRoto`** (el dato roto HABLA y ofrece
+  reintentar; frontera app-wide por voto de mesa), **y las portadas de
+  oferta jamás quedan en blanco: `PantallaCaida`** (habla y reintenta;
+  verificada con crash inducido). El corolario que ninguna herramienta
+  atrapa: una cadena de gates que REDIRIGEN entre sí puede dibujar NADA
+  sin lanzar jamás — cero throw, cero ErrorBoundary; los gates se
+  auditan como FLUJO. **Ambas anatomías viven LOCALES en
+  `apps/prestador` (NO están en el índice a propósito, patrón
+  TarjetaEstado S78):** su promoción a `packages/ui` se coordina —
+  quien las necesite en otra superficie NO las copia (L-175: se lee el
+  registry; si no puede darlo, se ENSANCHA). Convive con Ley 13 sin
+  pisarla: Ley 13 gobierna cómo se muestra el estado de DATOS
+  (cargando/vacío/error de contenido); esta gobierna el veredicto de
+  los GATES (autorización/routing) — el error jamás se disfraza de
+  vacío, y la denegación jamás se fabrica desde un dato ilegible.
 - **S78 (26-27 Jul 2026) — LA GRAMÁTICA "ESTÁ ADENTRO / ESPERA" (en uso,
   tres consumidores; letra en `DISEÑO_EXPERIENCIA` §15b.0bis).** En las
   listas de estado del prestador: **lo que ESTÁ es superficie apoyada con
