@@ -77,7 +77,8 @@ import {
 
 import { EvitaTeclado } from '@/components/evita-teclado';
 import { useTraduccion } from '@/i18n';
-import { useSoloGestorDenegado } from '@/lib/gate-gestor';
+import { useGateGestor } from '@/lib/gate-gestor';
+import { GateRoto } from '@/components/gate-roto';
 import { vozErrorVet } from '@/lib/voz-error-vet';
 import {
   SeccionHorarios,
@@ -174,7 +175,7 @@ export default function TallerVeterinaria() {
   const router = useRouter();
   // S75-B: gate de rol de RUTA (inerte hasta la puerta — solo el titular
   // llega hoy; post-puerta rebota al no-gestor que deep-linkee al taller).
-  const gateDenegado = useSoloGestorDenegado();
+  const { gate, reintentarGate } = useGateGestor();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
@@ -503,7 +504,11 @@ export default function TallerVeterinaria() {
   };
 
   // Ley 23: al no-gestor confirmado NO se le ofrece el taller (ausencia).
-  if (gateDenegado) return <Redirect href="/(tabs)/negocio" />;
+  if (gate === 'denegado') return <Redirect href="/(tabs)/negocio" />;
+  // S79-B: datos del gate CONTRADICTORIOS (rol=false + titular=null) —
+  // jamás expulsión muda: la superficie habla y reintenta (el blanco del
+  // gate del founder nacía acá).
+  if (gate === 'roto') return <GateRoto onReintentar={reintentarGate} />;
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>

@@ -52,7 +52,8 @@ import {
 import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
-import { useSoloGestorDenegado } from '@/lib/gate-gestor';
+import { useGateGestor } from '@/lib/gate-gestor';
+import { GateRoto } from '@/components/gate-roto';
 import { TechoOficio, VeloBarraEstadoOficio } from '@/components/techo-oficio';
 
 // hoy en ISO LOCAL (hallazgo harness S55: toISOString corre el día)
@@ -82,7 +83,7 @@ export default function Negocio() {
   // S75-B: la pantalla NEGOCIO cierra la ausencia del tab también ante
   // deep-link — el tab se oculta del bar (layout) y la ruta rebota acá
   // (inerte hasta la puerta; el gate de ESCRITURA es del server, D-513).
-  const gateDenegado = useSoloGestorDenegado();
+  const { gate, reintentarGate } = useGateGestor();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
 
@@ -254,7 +255,11 @@ export default function Negocio() {
           }));
 
   // Ley 23: al no-gestor confirmado NO se le ofrece NEGOCIO (ausencia).
-  if (gateDenegado) return <Redirect href="/(tabs)" />;
+  if (gate === 'denegado') return <Redirect href="/(tabs)" />;
+  // S79-B: datos del gate CONTRADICTORIOS (rol=false + titular=null) —
+  // jamás expulsión muda: la superficie habla y reintenta (el blanco del
+  // gate del founder nacía acá).
+  if (gate === 'roto') return <GateRoto onReintentar={reintentarGate} />;
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>

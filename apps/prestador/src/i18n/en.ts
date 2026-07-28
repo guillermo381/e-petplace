@@ -1629,6 +1629,13 @@ export const prestadorEn = {
     detalle: 'It is a problem on our side, not your setup — your data is safe. Try again.',
     reintentar: 'Try again',
   },
+  // S79-B · the role gate with contradictory data — never a mute expulsion · LOTE S79
+  gateRoto: {
+    titulo: 'We could not confirm your place in the business',
+    detalle: 'The business data contradicts itself and we prefer not to guess. It is on our side — try again.',
+    reintentar: 'Try again',
+    volver: 'Go back',
+  },
   // S79-B (T3-B3) · the waiting room — the pending provider's frame · LOTE S79
   salaEspera: {
     marco: 'Your space is under review. Meanwhile, you can leave everything ready on your side.',

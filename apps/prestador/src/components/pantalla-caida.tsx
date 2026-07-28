@@ -19,12 +19,62 @@
 import { useEffect } from 'react';
 import { View } from 'react-native';
 import type { ErrorBoundaryProps } from 'expo-router';
-import { Boton, EstadoVacio, spacing, useTheme } from '@epetplace/ui';
+import { Boton, EstadoVacio, ThemeProvider, spacing, useTheme } from '@epetplace/ui';
 
+import { prestadorEs } from '@/i18n/es';
 import { useTraduccion } from '@/i18n';
 
-export function PantallaCaida({ error, retry }: ErrorBoundaryProps) {
+/**
+ * S79-B (voto de mesa, APP-WIDE): la frontera del RAÍZ. El root _layout
+ * monta los providers (tema + i18n) DENTRO de su propio render — si el
+ * árbol revienta, la frontera del raíz se dibuja SIN ellos (`useTheme`
+ * TIRA sin provider; el init de i18n es de montaje del ProveedorI18n).
+ * Por eso esta variante es AUTOSUFICIENTE: se envuelve en su propio
+ * ThemeProvider (light default) y lee el diccionario `es` DIRECTO — los
+ * strings viven en el riel, el idioma queda fijo en es para la
+ * superficie de último recurso (declarado; las rutas con boundary
+ * propio conservan la versión i18n completa de abajo).
+ */
+export function PantallaCaidaRaiz({ error, retry }: ErrorBoundaryProps) {
+  useEffect(() => {
+    console.error(`[caida] render roto (raíz): ${error.message}`, error);
+  }, [error]);
+  return (
+    <ThemeProvider>
+      <CuerpoCaida
+        titulo={prestadorEs.caida.titulo}
+        detalle={prestadorEs.caida.detalle}
+        etiquetaReintentar={prestadorEs.caida.reintentar}
+        onReintentar={() => void retry()}
+      />
+    </ThemeProvider>
+  );
+}
+
+function CuerpoCaida({
+  titulo,
+  detalle,
+  etiquetaReintentar,
+  onReintentar,
+}: {
+  titulo: string;
+  detalle: string;
+  etiquetaReintentar: string;
+  onReintentar: () => void;
+}) {
   const { theme } = useTheme();
+  return (
+    <View style={{ flex: 1, backgroundColor: theme.bg.base, justifyContent: 'center', padding: spacing[5] }}>
+      <EstadoVacio
+        titulo={titulo}
+        descripcion={detalle}
+        accion={<Boton variante="secundario" etiqueta={etiquetaReintentar} onPress={onReintentar} />}
+      />
+    </View>
+  );
+}
+
+export function PantallaCaida({ error, retry }: ErrorBoundaryProps) {
   const { t } = useTraduccion();
 
   useEffect(() => {
@@ -34,18 +84,11 @@ export function PantallaCaida({ error, retry }: ErrorBoundaryProps) {
   }, [error]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.bg.base, justifyContent: 'center', padding: spacing[5] }}>
-      <EstadoVacio
-        titulo={t('caida.titulo')}
-        descripcion={t('caida.detalle')}
-        accion={
-          <Boton
-            variante="secundario"
-            etiqueta={t('caida.reintentar')}
-            onPress={() => void retry()}
-          />
-        }
-      />
-    </View>
+    <CuerpoCaida
+      titulo={t('caida.titulo')}
+      detalle={t('caida.detalle')}
+      etiquetaReintentar={t('caida.reintentar')}
+      onReintentar={() => void retry()}
+    />
   );
 }

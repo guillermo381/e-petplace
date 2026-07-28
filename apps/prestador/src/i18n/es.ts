@@ -1825,6 +1825,14 @@ export const prestadorEs = {
     detalle: 'Es un problema nuestro, no de tu configuración — tus datos están a salvo. Prueba de nuevo.',
     reintentar: 'Reintentar',
   },
+  // S79-B (cura del blanco) · el gate de rol con datos CONTRADICTORIOS —
+  // jamás expulsión muda (Ley 13/D-541) · LOTE S79, GATE PENDIENTE
+  gateRoto: {
+    titulo: 'No pudimos confirmar tu lugar en el negocio',
+    detalle: 'Los datos del negocio se contradicen y preferimos no adivinar. Es un problema nuestro — prueba de nuevo.',
+    reintentar: 'Reintentar',
+    volver: 'Volver',
+  },
   // S79-B (T3-B3) · LA SALA DE ESPERA — el marco del pendiente (la voz
   // del encabezado se REUSA de `bienvenida`, aprobada) · LOTE S79, GATE PENDIENTE
   salaEspera: {

@@ -80,7 +80,8 @@ import {
 
 import { verificarSesion } from '@/lib/api';
 import { useTraduccion } from '@/i18n';
-import { useSoloGestorDenegado } from '@/lib/gate-gestor';
+import { useGateGestor } from '@/lib/gate-gestor';
+import { GateRoto } from '@/components/gate-roto';
 // S68-B (D-426 muere): la sección de horarios COMPARTIDA entra al
 // taller del adiestramiento — el oficio declara horarios propios con la
 // misma pieza que paseo/grooming/veterinaria (elección de modo D-386
@@ -210,7 +211,7 @@ export default function TallerAdiestramiento() {
   const router = useRouter();
   // S75-B: gate de rol de RUTA (inerte hasta la puerta — solo el titular
   // llega hoy; post-puerta rebota al no-gestor que deep-linkee al taller).
-  const gateDenegado = useSoloGestorDenegado();
+  const { gate, reintentarGate } = useGateGestor();
   const { mostrar } = useAviso();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
@@ -479,7 +480,11 @@ export default function TallerAdiestramiento() {
   }
 
   // Ley 23: al no-gestor confirmado NO se le ofrece el taller (ausencia).
-  if (gateDenegado) return <Redirect href="/(tabs)/negocio" />;
+  if (gate === 'denegado') return <Redirect href="/(tabs)/negocio" />;
+  // S79-B: datos del gate CONTRADICTORIOS (rol=false + titular=null) —
+  // jamás expulsión muda: la superficie habla y reintenta (el blanco del
+  // gate del founder nacía acá).
+  if (gate === 'roto') return <GateRoto onReintentar={reintentarGate} />;
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>

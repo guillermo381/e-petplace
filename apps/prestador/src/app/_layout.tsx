@@ -37,6 +37,11 @@ SplashScreen.preventAutoHideAsync();
 // de L-138: confirmar que NO corre el embedded viejo). Guardado: en dev/
 // Expo Go / web `updateId` es null — el marcador lo dice honesto.
 console.log('[bundle] prestador S79-B');
+
+// S79-B (voto de mesa, APP-WIDE): todo crash de render sin frontera más
+// cercana termina en una superficie que habla — jamás en blanco. La
+// variante RAÍZ es autosuficiente (providers propios): ver pantalla-caida.
+export { PantallaCaidaRaiz as ErrorBoundary } from '@/components/pantalla-caida';
 console.log(
   `[update] id=${Updates.updateId ?? 'ninguno (embedded/dev)'} · ` +
     `embedded=${Updates.isEmbeddedLaunch} · canal=${Updates.channel ?? 'ninguno'}`,
