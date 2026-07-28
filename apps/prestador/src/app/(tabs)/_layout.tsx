@@ -40,6 +40,7 @@ import {
 } from '@epetplace/api';
 
 import { apiLista } from '@/lib/api';
+import { esRegistroReciente } from '@/lib/registro-reciente';
 import { BienvenidaPrestador } from '@/components/bienvenida';
 import { IconoCuenta, IconoHoy, IconoMascotas, IconoNegocio } from '@/components/iconos-tabs';
 import { useTraduccion } from '@/i18n';
@@ -146,7 +147,7 @@ export default function TabsLayout() {
                 : 'bienvenida_pendiente' in r ? 'primer login → /bienvenida-dia1'
                   : 'invitacion_pendiente' in r ? 'invitación pendiente → /invitacion'
                     : 'sin_sesion' in r ? 'sin sesión'
-                      : 'sin_rol' in r ? `sin rol prestador — ${r.email}${r.negocioEmpleado ? ` (empleado de ${r.negocioEmpleado})` : ''}`
+                      : 'sin_rol' in r ? `sin rol prestador — ${r.email}${r.negocioEmpleado ? ` (empleado de ${r.negocioEmpleado})` : ''}${esRegistroReciente(r.email) ? ' (recién registrado)' : ''}`
                         : `error — ${r.detalle}`;
         console.log(`[sesion] raíz prestador: ${voz}`);
         if (vigente) setSesion(r);
@@ -209,19 +210,32 @@ export default function TabsLayout() {
     //    `obtenerNegocioEmpleadoActivo` devolverá el nombre y esta rama
     //    hablará. S76: NO la "limpies" — está esperando su lector.
     //  · user SIN negocio alguno: la voz de siempre.
+    //  · S80-B1 (D-509 ①) — LA TERCERA VOZ: el que se acaba de registrar
+    //    en ESTA sesión de JS (lib/registro-reciente, patrón
+    //    ceremoniaResuelta) no es un callejón: su cuenta está lista y el
+    //    paso siguiente se dice ("que el negocio te invite con este
+    //    correo"). Tras reiniciar la app cae a la voz genérica, que
+    //    desde S80 dice EL MISMO camino (degradación honesta declarada
+    //    en el M1). sala-espera NO se ensancha: su contrato de datos ES
+    //    MiPrestador y sin fila rebota en cadena (L-178).
     const negocio = sesion.negocioEmpleado; // narrowing: null = user sin negocio
+    const recienRegistrado = negocio === null && esRegistroReciente(sesion.email);
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base, justifyContent: 'center', padding: spacing[5], gap: spacing[4] }}>
         <EstadoVacio
           titulo={
             negocio !== null
               ? t('sesion.empleadoTitulo', { negocio })
-              : t('sesion.sinRol')
+              : recienRegistrado
+                ? t('sesion.registradoTitulo')
+                : t('sesion.sinRol')
           }
           descripcion={
             negocio !== null
               ? t('sesion.empleadoDetalle')
-              : t('sesion.sinRolDetalle', { email: sesion.email })
+              : recienRegistrado
+                ? t('sesion.registradoDetalle', { email: sesion.email })
+                : t('sesion.sinRolDetalle', { email: sesion.email })
           }
           accion={
             <Boton

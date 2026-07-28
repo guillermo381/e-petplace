@@ -42,9 +42,17 @@ export const prestadorEs = {
     // sin sesión aterriza en LA BIENVENIDA (S61-B8) — sinSesion queda
     // para la rama de error; el detalle y el CTA viejos murieron (Ley 37).
     sinSesion: 'No hay una sesión activa',
-    // con sesión pero SIN negocio de prestador (D-290): jamás crash
+    // con sesión pero SIN negocio de prestador (D-290): jamás crash.
+    // S80-B1 (cura de callejón): la voz genérica gana EL CAMINO — el
+    // "escríbenos" sin destino murió · LOTE S80, GATE PENDIENTE
     sinRol: 'Tu cuenta no tiene un negocio asociado',
-    sinRolDetalle: 'Entraste como {{email}}. Esta app es para quienes ofrecen servicios en e-PetPlace — si es tu caso y no ves tu negocio, escríbenos.',
+    sinRolDetalle:
+      'Entraste como {{email}}. Si trabajas en un negocio que usa e-PetPlace, pídele a quien lo administra que te invite con este correo — cuando lo haga, la invitación te aparece acá.',
+    // S80-B1 (D-509 ①) — LA TERCERA VOZ: recién registrado en esta
+    // sesión de JS. Encadena con registro.* (Ley 17.3) · LOTE S80
+    registradoTitulo: 'Tu cuenta está lista',
+    registradoDetalle:
+      'Avísale a quien administra el negocio que te invite con {{email}}. Cuando lo haga, la invitación te aparece acá para aceptarla.',
     // S75-B: el EMPLEADO ACTIVO esperando la puerta (rama inerte hoy, muere
     // cuando la puerta abra). Voz honesta L-139: dice lo que ES verdad (ya
     // sos parte) y lo que TODAVÍA no (el acceso al día a día), sin prometer.
@@ -58,13 +66,29 @@ export const prestadorEs = {
     titulo: 'Sesión',
   },
   // Login del prestador (S54-B, D-290) — email+contraseña por los
-  // wrappers de auth existentes; el registro del prestador es otro ciclo.
+  // wrappers de auth existentes. S80-B1: el registro dejó de ser otro
+  // ciclo — la entrada a /registro vive acá.
   login: {
     titulo: 'Iniciar sesión',
     email: 'Email',
     emailPlaceholder: 'ej: ana@correo.com',
     password: 'Contraseña',
     entrar: 'Entrar',
+    // LOTE S80, GATE PENDIENTE
+    crearCuenta: '¿Primera vez? Crear tu cuenta',
+  },
+  // REGISTRO del prestador (S80-B1, D-509 ① — port del cliente S45).
+  // La cuenta nace VACÍA: el negocio te suma invitándote (curaduría
+  // intacta). TUTEO NEUTRO · LOTE S80, GATE PENDIENTE
+  registro: {
+    titulo: 'Crear cuenta',
+    contexto: 'Con tu cuenta, el negocio donde trabajas puede sumarte a su equipo.',
+    nombreLabel: 'Tu nombre',
+    emailLabel: 'Email',
+    passwordLabel: 'Contraseña',
+    passwordAyuda: 'Al menos 6 caracteres',
+    crearMiCuenta: 'Crear mi cuenta',
+    correoConfirmacion: 'Te mandamos un correo para confirmar tu cuenta.',
   },
   // S75-B1: EL HANDSHAKE — el invitado inactivo llega acá desde el raíz
   // (la sonda lo intercepta antes del "sin negocio"). Voz L-139: dice la
@@ -1738,7 +1762,11 @@ export const prestadorEs = {
     invitarTitulo: 'Invitar a tu equipo',
     invitarNombre: 'Nombre',
     invitarEmail: 'Correo',
-    invitarAyuda: 'La invitación queda registrada a ese correo. Todavía no le llega sola: el aviso y la entrada automática están en construcción.',
+    // S80-B1 (cura): la voz sub-prometía — la entrada al próximo ingreso
+    // SÍ ocurre desde S75 (/invitacion); lo que NO existe es el aviso.
+    // LOTE S80, GATE PENDIENTE
+    invitarAyuda:
+      'La invitación queda registrada a ese correo. No le llega un aviso todavía: cuando esa persona entre a la app con ese correo, la invitación le aparece para aceptarla.',
     // S76-B4 — el selector de dos (LETRA_RECEPCION §1): chips al invitar ·
     // LOTE S76, GATE PENDIENTE
     invitarPrestadorToggle: 'Prestador',
@@ -1748,7 +1776,10 @@ export const prestadorEs = {
     invitarEnviar: 'Invitar',
     // CURA D-508: los 4 rebotes suaves del motor, en voz humana (Ley 3)
     rebYaEnEquipo: 'Esa persona ya es parte de tu equipo.',
-    rebSinCuenta: 'Ese correo todavía no tiene cuenta en e-PetPlace. Cuando la cree, invítalo de nuevo.',
+    // S80-B1 (cura): gana el camino — /registro existe; nombra el label
+    // verbatim de la entrada (Ley 17.3) · LOTE S80, GATE PENDIENTE
+    rebSinCuenta:
+      'Ese correo todavía no tiene cuenta en e-PetPlace. Pídele que la cree desde esta app, en "Crear tu cuenta", y vuelve a invitarlo.',
     rebOtroPrestador: 'Ese correo pertenece a otro negocio prestador.',
     rebNoDueno: 'Solo quien es dueño del negocio puede invitar.',
     // S78-B · LA VITRINA (gate mecánico cerrado hoy — la sección no se

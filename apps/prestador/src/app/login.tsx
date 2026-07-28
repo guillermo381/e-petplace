@@ -1,7 +1,8 @@
 /**
  * LOGIN DEL PRESTADOR — S54-B (D-290): email+contraseña por los
  * wrappers de auth EXISTENTES (S45 — se reusan tal cual, cero social).
- * El registro del prestador es otro ciclo — acá solo se entra.
+ * S80-B1 (D-509 ①): el registro dejó de ser otro ciclo — /registro
+ * existe y la entrada vive acá (ghost bajo "Entrar").
  *
  * Patrón heredado del cliente S45: errores de credenciales/confirmación
  * inline en el campo; el resto por Aviso. Al entrar, replace('/') y el
@@ -81,6 +82,16 @@ export default function Login() {
           cargando={cargando}
           deshabilitado={!puedeEnviar}
           onPress={() => void entrar()}
+        />
+        {/* S80-B1 (D-509 ①): la entrada al registro — espejo del par
+            primario+ghost de la bienvenida. El empleado al que le
+            dijeron "registrate" llega acá por "Ingresar" y encuentra
+            el camino a un toque. */}
+        <Boton
+          variante="ghost"
+          etiqueta={t('login.crearCuenta')}
+          bloque
+          onPress={() => router.push('/registro')}
         />
       </ScrollView>
     </View>

@@ -40,7 +40,13 @@ export const prestadorEn = {
   sesion: {
     sinSesion: 'No active session',
     sinRol: "Your account doesn't have a business attached",
-    sinRolDetalle: "You're signed in as {{email}}. This app is for those offering services on e-PetPlace — if that's you and you don't see your business, write to us.",
+    // S80-B1 (dead-end cure): the generic voice gains THE PATH
+    sinRolDetalle:
+      "You're signed in as {{email}}. If you work at a business that uses e-PetPlace, ask whoever runs it to invite you with this email — when they do, the invitation shows up right here.",
+    // S80-B1 (D-509 ①) — THE THIRD VOICE: just registered this JS session
+    registradoTitulo: 'Your account is ready',
+    registradoDetalle:
+      'Let whoever runs the business know they can invite you with {{email}}. When they do, the invitation shows up right here for you to accept.',
     // S75-B: the ACTIVE employee waiting for the door (inert today, dies
     // when the door opens). Honest voice L-139: says what IS true and what
     // is NOT yet, promising nothing.
@@ -59,6 +65,20 @@ export const prestadorEn = {
     emailPlaceholder: 'e.g. ana@mail.com',
     password: 'Password',
     entrar: 'Sign in',
+    // S80-B1: the entry to /registro
+    crearCuenta: 'First time? Create your account',
+  },
+  // PROVIDER-SIDE REGISTRATION (S80-B1, D-509 ① — port of client S45).
+  // The account is born EMPTY: the business adds you by inviting you.
+  registro: {
+    titulo: 'Create account',
+    contexto: 'With your account, the business where you work can add you to their team.',
+    nombreLabel: 'Your name',
+    emailLabel: 'Email',
+    passwordLabel: 'Password',
+    passwordAyuda: 'At least 6 characters',
+    crearMiCuenta: 'Create my account',
+    correoConfirmacion: 'We sent you an email to confirm your account.',
   },
   // S75-B1: the handshake — the inactive invitee lands here from the root.
   invitacion: {
@@ -1556,7 +1576,10 @@ export const prestadorEn = {
     invitarTitulo: 'Invite to your team',
     invitarNombre: 'Name',
     invitarEmail: 'Email',
-    invitarAyuda: 'The invitation is registered to that email. It does not reach them on its own yet: automatic notice and entry are under construction.',
+    // S80-B1 (cure): entry at next sign-in DOES happen since S75 —
+    // what does not exist yet is the notice.
+    invitarAyuda:
+      'The invitation is registered to that email. They do not get a notice yet: when that person opens the app with that email, the invitation shows up for them to accept.',
     // S76-B4 — Espejo de es.ts · LOTE S76, GATE PENDIENTE
     invitarPrestadorToggle: 'Provider',
     invitarOficiosLabel: 'What will they provide?',
@@ -1565,7 +1588,10 @@ export const prestadorEn = {
     invitarEnviar: 'Invite',
     // D-508 cure: the motor's 4 soft bounces, in human voice
     rebYaEnEquipo: 'That person is already part of your team.',
-    rebSinCuenta: 'That email does not have an e-PetPlace account yet. Once they create one, invite them again.',
+    // S80-B1 (cure): gains the path — /registro exists; names the entry
+    // label verbatim (Ley 17.3)
+    rebSinCuenta:
+      'That email does not have an e-PetPlace account yet. Ask them to create one from this app, under "Create your account", then invite them again.',
     rebOtroPrestador: 'That email belongs to another provider business.',
     rebNoDueno: 'Only the business owner can invite.',
     // S78-B · Showcase — mirror of es.ts
