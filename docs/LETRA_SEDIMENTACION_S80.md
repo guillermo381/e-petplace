@@ -38,6 +38,46 @@ lo recibe — lo que NO existe es el ACUSE.** El circuito del NORTE
 ("el expediente es el sedimento de todas las experiencias") corre
 completo del lado del dato y queda MUDO del lado de quien lo produjo.
 
+## §0bis — LA MEDICIÓN A9: la familia lo ve MIENTRAS OCURRE
+
+La pregunta de mesa (¿la familia ve el sedimento en vivo?) medida en
+las tres patas, 28-jul:
+
+1. **Las lectoras del cliente que alcanzan el evento** — cuatro:
+   `_timeline` (la Línea de Vida, `timeline.ts:82`) ·
+   `obtenerSenalesHogar` (`hogar.ts` — deriva las `atenciones_en_curso`
+   de `evento_atencion.estado='en_curso'` y lee el TIPO del evento raíz
+   para el oficio de la celda viva) · `perfilMascota.ts:105` (el conteo
+   de paseos) · `leerDetalleAtencion` (la pantalla del paseo). **RLS:
+   una sola policy de lectura** — `eventos_mascota_select:
+   user_acceso_clinico_a_mascota(mascota_id)` (la familia entra por su
+   pata; D-464/S75 cerró la de terceros).
+2. **La Línea de Vida lo muestra DESDE EL INICIO, no al cerrar.** El
+   filtro literal del lector: `.eq('soft_delete', false)` ·
+   `.neq('tipo', 'cita_servicio')` · orden `fecha_evento desc` — **cero
+   filtro por estado de la atención**. El evento que
+   `iniciar_atencion_paseo` crea es visible al toque (la duración se
+   computa solo cuando `terminada_en` existe — hasta entonces, null
+   honesto).
+3. **Y hay VIVO de verdad**: la celda de atención en curso en el Hogar
+   (N vivas, §7.5) → `paseo/[atencionId]` cara EN VIVO — mapa con tramo
+   acumulado, Cronometro, novedades en voz de familia, fotos, **sondeo
+   de 30 s con la pantalla en foco** (`SONDEO_MS = 30_000`; el GPS del
+   paseador escribe ~60 s foreground, D-292).
+
+**LA CONSECUENCIA, declarada (es la disyuntiva del founder, no de esta
+letra):** el acuse honesto del cierre NO es "quedó registrado" — al
+momento de cerrar, **la familia ya pudo estar VIENDO la salida en
+vivo**. Hay dos productos posibles y son distintos: **(a) el acuse de
+REGISTRO** ("quedó en la vida de {nombre}" — sereno, siempre verdad) y
+**(b) el acuse de AUDIENCIA** ("la familia lo siguió en vivo" — más
+fuerte, pero exige saber si ALGUIEN miró, dato que hoy NO se captura:
+ninguna lectora registra vistas). **La v1 de esta letra solo puede
+prometer (a) sin motor nuevo; (b) pide un dato de audiencia que no
+existe y su propia decisión de producto** (¿queremos medir miradas? —
+cruza con privacidad y con el espíritu anti-métrica de LOYALTY).
+La voz candidata de §2 queda condicionada a esa elección.
+
 ## §1 — La ley
 
 **Todo cierre de atención produce un ACUSE DE RECIBO al prestador: el
