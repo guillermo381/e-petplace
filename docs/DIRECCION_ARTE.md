@@ -1,6 +1,15 @@
 # DIRECCION_ARTE — El lenguaje visual propio de e-PetPlace
 
-> **Versión: v1.1 — S71 (20 Jul 2026).** Enmienda v1.1: nace **§6b el
+> **Versión: v1.2 — S80 (28 Jul 2026).** Enmienda v1.2: nacen **§8 LA
+> DOSIS DE LA RAMPA** (dónde trabaja el magenta, dónde decora la marca,
+> la dirección turquesa→magenta fijada, el brillo del objeto y la luz de
+> lo que cambió) y **§9 COMPOSICIÓN Y FORMA** (los dos cantos, la
+> posición del canto, el estado real primero, la forma que lleva el
+> dato, la monotonía como síntoma) — leyes de craft del rediseño del
+> portal, firmadas por el founder sobre la lámina S80; §5 gana el
+> REGISTRO S80 del movimiento. Con **disparo de reconsideración
+> declarado** (mecánica §5b): nacieron de la lectura del founder, no de
+> un ensayo con prestadores. Previa v1.1 — S71: nace **§6b el
 > estándar de la hoja de contacto** (el método de autoría de glifos, ahora
 > que la sesión los autora) y la **Ley 9 se afila** con el criterio del
 > founder (*a 21px la huella sobrevive o es ruido*). Base v1.0 — S53
@@ -114,6 +123,19 @@ el tinte suave de su capa, con el motivo en trazo encima. Reglas:
    de marca — la huella/isotipo trazándose en loop sereno — SIEMPRE con
    la voz honesta debajo ("puede tardar un minuto"). Es la única
    animación de espera legal, y es de marca, no shimmer.
+4. **REGISTRO S80 — los valores del movimiento (founder, rediseño del
+   portal):**
+   · **Entrada de contenido:** escalón **45 ms** entre elementos ·
+     duración **300 ms** · `cubic-bezier(.32,.72,0,1)` (la física de la
+     casa, ya canónica en el punto 2) · desde `translateY: 15`.
+     **Rápido lo funcional.**
+   · **Brillo de placa (§8.5):** duración **PENDIENTE — el founder pasa
+     el número**. **Lento lo material.** Hasta ese número, el brillo no
+     se construye (un valor inventado sería L-180 en motion).
+   *Nota de referencia declarada (L-142): el brief S80 rotula estos
+   valores como "Bloque F" de la directiva de craft; esa directiva NO
+   está depositada en el repo — su casa canónica es ESTE registro hasta
+   que se deposite.*
 
 ## 5b. La nariz considerada — por qué la huella (nota S53)
 
@@ -196,8 +218,97 @@ del selector de mascota (S73). Cuando D-499 dispare (el LLENO a todos
 los selectores), no será cambio de opinión — será esta dirección
 cumpliéndose.
 
+## 8. LA DOSIS DE LA RAMPA (leyes de craft S80, firma founder)
+
+**8.1 — La rampa se INUNDA en la marca y se ACENTÚA en el producto.**
+Mismo alfabeto, dos volúmenes. Evidencia: el feed de Instagram vivo —
+la marca allá afuera se permite el degradado a superficie completa; el
+producto lo administra en acentos.
+
+**8.2 — EL MAGENTA TIENE TRABAJO.** Sus tres empleos: marca/afecto
+(§2), el destello del Coach (§5.1), y el control que elige. **Donde no
+hay ninguno de los tres, el magenta MIENTE: promete una acción que no
+existe.** Turquesa, lima y amarillo son solo-marca (no prometen nada) y
+por eso pueden decorar. Origen: firma founder S80, sobre dos rechazos
+concretos — magenta en la fecha y magenta en un dato de contexto.
+
+**8.3 — LA MARCA VIVE EN LA FIRMA.** El taller es sobrio. La rampa
+entra donde el prestador SE VE A SÍ MISMO (el monograma, la pill de
+fundador) y en los momentos. Jamás en la herramienta.
+
+**8.4 — DIRECCIÓN DE LA RAMPA: turquesa → magenta, SIEMPRE**, en todo
+degradado de marca (monograma incluido). Era inconsistente en la lámina
+S80; se fija acá.
+
+**8.5 — EL BRILLO ES DEL OBJETO.** Legal donde la cosa ES un objeto:
+placa, sello, credencial — la luz sobre el vidrio de `PORTAL` §2.2.
+**PROHIBIDO sobre texto, botones o datos.** Censo al firmar: UNO (la
+pill "Prestador fundador", acotada a los ~15 fundadores). Su duración
+espera el número del founder (§5.4 — lento lo material). Deuda ligada:
+**D-572** (el contraste de la tinta sobre la pill mientras brilla no
+está medido — WCAG AA sobre el punto más claro de la rampa).
+
+**8.6 — LA LUZ MARCA LO QUE CAMBIÓ.** Dato en reposo, sobrio. Al
+cambiar se enciende en turquesa y VUELVE SOLO. **Corolario exigible: si
+todo queda encendido, nada informa — el retorno no es opcional.**
+
+## 9. COMPOSICIÓN Y FORMA (leyes de craft S80, firma founder)
+
+**9.1 — DOS CANTOS, DOS VOCES.** Canto de CAPA (un tono, degradado en
+alfa) = tu trabajo, y de qué oficio. Canto de MARCA (turquesa→magenta)
+= acá te habla e-PetPlace. **Nunca en la misma tarjeta.** Censo del
+canto de marca en el portal: `PORTAL` §2.3 bienvenida · §2.5
+aspiracional · §2.7 hitos · §3.3 Día 30 · §4 graduación.
+
+**9.2 — POSICIÓN DEL CANTO.** Al BORDE cuando distingue entre hermanos
+(trabajo de barrido). ADENTRO cuando es voz única. **Es propiedad del
+TIPO de tarjeta, no del instante** — una tarjeta de servicio lleva su
+canto al borde aunque hoy esté sola.
+
+**9.3 — TODA PANTALLA SE DISEÑA CON SU ESTADO REAL PRIMERO.** El boceto
+M1 declara qué dato tiene el usuario que la va a ver. **Una pantalla
+cuyo boceto solo existe LLENA es una pantalla sin diseñar.** Origen:
+tres fallas de campo del mismo día (D-570 · D-571 · el clamp del email)
+— ninguna fue de craft, las tres de composición. *(Nota de depósito,
+regla 66: D-570/D-571 se citan por orden de mesa y al escribir esta
+enmienda NO están depositadas en `DEUDAS_CANONICAS` — números
+reservados por esa cita; nacen cuando su letra llegue, precedente
+D-434/D-435 S68.)*
+
+**9.4 — LA FORMA LLEVA EL DATO.** Prueba: tapá el texto. Si la pantalla
+sigue diciendo lo mismo, la forma trabaja. Si enmudece, la forma era
+relleno. Espejo de L-c (§5.3 de la directiva de craft — directiva NO
+depositada en el repo al escribir esto; referencia declarada, L-142).
+
+**9.5 — LA MONOTONÍA ES SÍNTOMA DE COMPOSICIÓN POR PLANTILLA.** Una
+pantalla que se repite y se ve igual pase lo que pase es MUDA, no
+aburrida. **El antídoto es dejar ver lo real, jamás agregar variedad
+decorativa** — un adorno repetido cansa más rápido que la sobriedad.
+
+**DISPARO DE RECONSIDERACIÓN DE §8-§9 (obligatorio, mecánica §5b):**
+estas leyes nacieron de la LECTURA del founder sobre la lámina S80, no
+de un ensayo con prestadores. **Se reabren si la cohorte de 15 muestra
+que no leen lo que dicen leer.**
+
 ## Historial
 
+- **v1.2 (S80, 28 Jul 2026):** nacen **§8 LA DOSIS DE LA RAMPA** (8.1
+  inundar/acentuar · 8.2 el magenta tiene trabajo — con los dos
+  rechazos del founder como origen · 8.3 la marca vive en la firma ·
+  8.4 dirección turquesa→magenta fijada · 8.5 el brillo es del objeto,
+  censo=1 · 8.6 la luz marca lo que cambió, con el retorno exigible) y
+  **§9 COMPOSICIÓN Y FORMA** (9.1 dos cantos dos voces con su censo ·
+  9.2 posición del canto por TIPO de tarjeta · 9.3 el estado real
+  primero — origen: tres fallas de campo del mismo día · 9.4 la forma
+  lleva el dato — la prueba de tapar el texto · 9.5 la monotonía como
+  síntoma). §5 gana el **REGISTRO S80 del movimiento** (entrada 45 ms /
+  300 ms / la física de la casa desde translateY 15; el brillo de placa
+  espera su número — no se construye sin él). Disparo de
+  reconsideración declarado sobre §8-§9 entero (mecánica §5b): la
+  cohorte de 15 es el ensayo que falta. Deuda ligada: D-572 (contraste
+  de la tinta sobre la pill que brilla). Dos referencias del brief
+  declaradas sin casa en el repo (L-142): la "directiva de craft" (y su
+  "Bloque F"/L-c) y D-570/D-571 — nacen cuando su letra llegue.
 - **v1.1 (S71, 20 Jul 2026):** con la cláusula del ilustrador enmendada
   (la sesión autora, no hay externo), el método deja de ser tácito:
   nace **§6b EL ESTÁNDAR DE LA HOJA DE CONTACTO** — estudio de familia
