@@ -33,6 +33,7 @@ const MENSAJES = {
   precio_invalido:        'El precio tiene que ser mayor a cero.',
   bloque_duplicado:       'Ya ofreces un paseo de esa duración.',
   precio_plan_invalido:   'El precio del plan tiene que ser mayor a cero. Déjalo vacío si no ofreces plan.',
+  precio_mensual_plan_invalido: 'El precio mensual del plan tiene que ser mayor a cero. Déjalo vacío si no ofreces plan.',
   precio_paquete_invalido: 'El precio por salida del paquete tiene que ser mayor a cero. Déjalo vacío si no ofreces paquete.',
   rango_horario_invalido: 'La hora de fin tiene que ser después de la de inicio.',
   franja_solapada:        'Esa franja se cruza con una que ya tienes ese día.',
@@ -60,12 +61,18 @@ export interface OfertaPaseoPropia {
   duracionMinutos: number;
   precio: number;
   /**
-   * Precio POR SALIDA cuando el bloque es parte de un plan mensual
-   * (D-338, contrato S56 ratificado: columna en prestador_servicios,
-   * SIN CHECK relacional contra precio — el plan puede valer más).
-   * null = el prestador NO ofrece plan en este bloque (oferta honesta).
+   * JUBILADA (S79, reforma del plan mensual): el per-salida del plan
+   * murió del camino de cobro — el motor no la lee. Se conserva en el
+   * shape solo mientras el taller de B migra su campo (pedido S79);
+   * escribirla YA NO afecta ningún cobro. NO consumir en código nuevo.
    */
   precioPlan: number | null;
+  /**
+   * S79 (reforma): el precio del PERÍODO mensual del plan — la
+   * suscripción. null = el prestador NO ofrece plan en este bloque
+   * (contratar rebota `plan_no_ofrecido`; jamás fallback al suelto).
+   */
+  precioMensualPlan: number | null;
   /**
    * Precio POR SALIDA cuando el bloque se compra como PAQUETE de salidas
    * (D-343, S57 — patrón idéntico a precioPlan: columna
@@ -101,6 +108,7 @@ function mapearOferta(fila: {
   duracion_minutos: number | null;
   precio: number;
   precio_plan: number | null;
+  precio_mensual_plan: number | null;
   precio_paquete: number | null;
   nombre_custom: string | null;
   descripcion: string | null;
@@ -111,6 +119,7 @@ function mapearOferta(fila: {
     duracionMinutos: fila.duracion_minutos ?? 30,
     precio: fila.precio,
     precioPlan: fila.precio_plan,
+    precioMensualPlan: fila.precio_mensual_plan,
     precioPaquete: fila.precio_paquete,
     nombre: fila.nombre_custom,
     descripcion: fila.descripcion,
@@ -118,7 +127,7 @@ function mapearOferta(fila: {
   };
 }
 
-const SELECT_OFERTA = 'id, duracion_minutos, precio, precio_plan, precio_paquete, nombre_custom, descripcion, activo';
+const SELECT_OFERTA = 'id, duracion_minutos, precio, precio_plan, precio_mensual_plan, precio_paquete, nombre_custom, descripcion, activo';
 
 /** Los bloques de paseo del prestador propio, del más corto al más largo. */
 export async function obtenerOfertasPaseoPropias(
@@ -142,8 +151,10 @@ export interface InputCrearOfertaPaseo {
   prestadorId: string;
   duracionMinutos: number;
   precio: number;
-  /** Precio por salida en plan mensual; ausente/null = sin plan en este bloque. */
+  /** JUBILADA S79 (ver shape) — solo mientras B migra el taller. */
   precioPlan?: number | null;
+  /** S79: precio del MES del plan; ausente/null = sin plan en este bloque. */
+  precioMensualPlan?: number | null;
   /** Precio por salida en paquete; ausente/null = sin paquete en este bloque (D-343). */
   precioPaquete?: number | null;
   nombre?: string;
@@ -165,6 +176,13 @@ export async function crearOfertaPaseo(
     (!Number.isFinite(input.precioPlan) || input.precioPlan <= 0)
   ) {
     return falla('precio_plan_invalido');
+  }
+  if (
+    input.precioMensualPlan !== undefined &&
+    input.precioMensualPlan !== null &&
+    (!Number.isFinite(input.precioMensualPlan) || input.precioMensualPlan <= 0)
+  ) {
+    return falla('precio_mensual_plan_invalido');
   }
   if (
     input.precioPaquete !== undefined &&
@@ -194,6 +212,7 @@ export async function crearOfertaPaseo(
       duracion_minutos: input.duracionMinutos,
       precio: input.precio,
       precio_plan: input.precioPlan ?? null,
+      precio_mensual_plan: input.precioMensualPlan ?? null,
       precio_paquete: input.precioPaquete ?? null,
       nombre_custom: input.nombre?.trim() || null,
       descripcion: input.descripcion?.trim() || null,
@@ -212,6 +231,8 @@ export interface InputActualizarOfertaPaseo {
   precio?: number;
   /** number = precio por salida del plan · null = quitar el plan del bloque · ausente = no tocar. */
   precioPlan?: number | null;
+  /** S79: precio del MES del plan; null = deja de ofrecer plan. */
+  precioMensualPlan?: number | null;
   /** number = precio por salida del paquete · null = quitar el paquete del bloque · ausente = no tocar. */
   precioPaquete?: number | null;
   nombre?: string | null;
@@ -241,6 +262,13 @@ export async function actualizarOfertaPaseo(
     return falla('precio_plan_invalido');
   }
   if (
+    input.precioMensualPlan !== undefined &&
+    input.precioMensualPlan !== null &&
+    (!Number.isFinite(input.precioMensualPlan) || input.precioMensualPlan <= 0)
+  ) {
+    return falla('precio_mensual_plan_invalido');
+  }
+  if (
     input.precioPaquete !== undefined &&
     input.precioPaquete !== null &&
     (!Number.isFinite(input.precioPaquete) || input.precioPaquete <= 0)
@@ -251,6 +279,7 @@ export async function actualizarOfertaPaseo(
   const cambios: UpdateOferta = {};
   if (input.precio !== undefined) cambios.precio = input.precio;
   if (input.precioPlan !== undefined) cambios.precio_plan = input.precioPlan;
+  if (input.precioMensualPlan !== undefined) cambios.precio_mensual_plan = input.precioMensualPlan;
   if (input.precioPaquete !== undefined) cambios.precio_paquete = input.precioPaquete;
   if (input.nombre !== undefined) cambios.nombre_custom = input.nombre?.trim() || null;
   if (input.descripcion !== undefined) cambios.descripcion = input.descripcion?.trim() || null;

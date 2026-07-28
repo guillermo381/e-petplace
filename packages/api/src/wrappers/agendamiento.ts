@@ -196,10 +196,16 @@ export interface PaseadorDisponible {
   prestador_nombre: string;
   servicio_nombre: string;
   precio: number;
-  /** D-375 (S59): precio POR SALIDA dentro del plan — espejo del server
-   *  de cobro (COALESCE(precio_plan, precio) en contratar_plan_paseo).
-   *  null honesto = sin descuento de plan, rige `precio`. */
+  /** JUBILADA (S79, reforma del plan mensual): el per-salida del plan
+   *  murió — el server la emite SIEMPRE NULL (clave conservada por
+   *  compat de bundles pre-reforma; la guarda `plan_no_ofrecido` del
+   *  server vuelve honesta la transición). NO consumir en código nuevo. */
   precio_plan: number | null;
+  /** S79: el precio del PERÍODO mensual del plan (suscripción — la
+   *  familia paga el mes, use 5 salidas o 20). null honesto = este
+   *  paseador NO ofrece plan (la Hoja del plan no se abre — Ley 23;
+   *  el server rebota `plan_no_ofrecido` igual). */
+  precio_mensual_plan: number | null;
   duracion_minutos: number;
 }
 
@@ -238,6 +244,7 @@ export async function obtenerPaseadoresDisponibles(
       typeof p.servicio_nombre !== 'string' ||
       typeof p.precio !== 'number' ||
       (p.precio_plan !== null && typeof p.precio_plan !== 'number') ||
+      (p.precio_mensual_plan !== null && typeof p.precio_mensual_plan !== 'number') ||
       typeof p.duracion_minutos !== 'number'
     ) {
       return mapeoErrorAResultado('datos_inconsistentes');
@@ -249,6 +256,7 @@ export async function obtenerPaseadoresDisponibles(
       servicio_nombre: p.servicio_nombre,
       precio: p.precio,
       precio_plan: p.precio_plan,
+      precio_mensual_plan: p.precio_mensual_plan,
       duracion_minutos: p.duracion_minutos,
     });
   }

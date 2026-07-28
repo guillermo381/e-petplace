@@ -149,12 +149,13 @@ export function PlanHoja({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cubiertos, t]);
 
-  // D-375 (S59): el precio por salida del PLAN — espejo exacto del
-  // server de cobro (COALESCE(precio_plan, precio)); murió el
-  // verosímil-falso que estimaba con el precio del suelto.
-  const precioSalida = paseador.precio_plan ?? paseador.precio;
+  // S79 (reforma): EL MES ES EL MES — el precio es del PERÍODO, espejo
+  // exacto del server (precio_mensual_plan; sin él, contratar rebota
+  // plan_no_ofrecido y esta Hoja ni se abre — gate Ley 23 en
+  // disponibles). Murió el per-salida × N (D-375 queda honrada: cero
+  // estimaciones que el server no cobre).
+  const precioMensual = paseador.precio_mensual_plan;
   const estimado = estimarSalidas(dias, frecuencia);
-  const totalEstimado = estimado * precioSalida;
 
   async function contratar() {
     if (contratando || dias.length === 0) return;
@@ -244,14 +245,15 @@ export function PlanHoja({
 
         <Separador />
 
-        {/* La plata, honesta: por salida real + estimado declarado */}
+        {/* S79: la plata, honesta — el MES fijo preside; las salidas son
+            informativas (Ley 3: el dato en mono; la regla dicha en voz) */}
         <View style={{ gap: 2 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-              {t('plan.precioPorSalida')}
+            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.primary }}>
+              {t('plan.precioMes')}
             </Text>
             <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.sm, color: theme.text.primary, fontVariant: ['tabular-nums'] }}>
-              ${precioSalida.toFixed(2)} · {paseador.duracion_minutos} min
+              {precioMensual !== null ? `$${precioMensual.toFixed(2)}` : '—'}
             </Text>
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -259,19 +261,11 @@ export function PlanHoja({
               {t('plan.salidasEstimadas')}
             </Text>
             <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.sm, color: theme.text.primary, fontVariant: ['tabular-nums'] }}>
-              {estimado}
-            </Text>
-          </View>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.primary }}>
-              {t('plan.totalEstimado')}
-            </Text>
-            <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.sm, color: theme.text.primary, fontVariant: ['tabular-nums'] }}>
-              ${totalEstimado.toFixed(2)}
+              {estimado} · {paseador.duracion_minutos} min
             </Text>
           </View>
           <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
-            {t('plan.totalNota')}
+            {t('plan.mesNota')}
           </Text>
         </View>
 
@@ -284,7 +278,7 @@ export function PlanHoja({
           etiqueta={t('plan.contratar')}
           bloque
           cargando={contratando}
-          deshabilitado={dias.length === 0 || cubiertos === 'cargando' || estimado === 0}
+          deshabilitado={dias.length === 0 || cubiertos === 'cargando' || estimado === 0 || precioMensual === null}
           onPress={() => void contratar()}
         />
       </View>

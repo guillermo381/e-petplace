@@ -203,6 +203,13 @@ export default function PaseoDisponibles() {
   const continuarConMascota = useCallback(
     (p: PaseadorDisponible, mascotaId: string) => {
       if (modoPlan) {
+        // S79 + Ley 23: la puerta no ofrece lo que el server va a
+        // rechazar — sin precio mensual declarado, contratar rebota
+        // plan_no_ofrecido; la Hoja no se abre y la voz da el camino.
+        if (p.precio_mensual_plan === null) {
+          mostrar({ texto: t('plan.noOfrecido'), variante: 'error' });
+          return;
+        }
         setPlan({ paseador: p, mascotaId });
         return;
       }
