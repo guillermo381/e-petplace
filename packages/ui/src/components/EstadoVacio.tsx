@@ -102,8 +102,14 @@ export function EstadoVacio({
           {titulo}
         </Text>
         {descripcion ? (
+          // S80-B4bis (hallazgo founder en dispositivo, enmienda 76(d)
+          // declarada): el clamp de 3 líneas se COMÍA la cola de la voz
+          // — "…que te invite co…" perdió el email, el dato accionable.
+          // En el registro `pantalla` el vacío ES la pantalla: envolver
+          // no rompe nada y truncar pierde información — el clamp muere
+          // ACÁ. El de `seccion` (arriba) se conserva: vive dentro de
+          // flujos con contenido, donde el techo protege el layout.
           <Text
-            numberOfLines={3}
             style={{
               textAlign: 'center',
               fontFamily: typography.family.sans.regular,
