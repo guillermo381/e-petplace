@@ -1,41 +1,53 @@
 /**
- * FILTRO POR OFICIO del HOY (S61-B5; re-vestido S61-B12; **RE-HECHO
- * S80-B12 cura 4 — Ley 6 §2.6, veredicto founder en dispositivo**).
+ * FILTRO POR OFICIO del HOY (S61-B5 → S80-B15, LA LÍNEA VIAJERA —
+ * firmada por el founder).
  *
- * LA LEY: el estado activo se marca porque su HUELLA APARECE — sin
- * recuadros ni pills (la firma de BarraTabs desde S53, ley firmada).
- * MURIERON (Chanel): el riel `bg.overlay`, la superficie apoyada con
- * elevación del segmento activo y su borderRadius — el recuadro que el
- * founder señaló. Quedan los glifos: **inactivo = trazo en secundaria
- * SIN huella · activo = la huella aparece en el AA de su capa** (la
- * pieza es `IconoOficio`, trazo y huella independientes — D-546). Los
- * glifos suben a 21px (§2.9: el gate ES a 21 — los 18 violaban Ley 9,
- * hallazgo del censo B12). "Todos" no es un oficio y no lleva glifo:
- * habla por peso y color (activo = primaria+medium).
+ * LA ENMIENDA DE LEY (frontera, no debilitamiento): en TABS la huella
+ * marca el estado (Ley 6 §2.6, intacta); en FILTROS la huella está
+ * SIEMPRE (es identidad del glifo) y **el estado lo marca UNA LÍNEA
+ * QUE VIAJA** entre opciones — no recuadro, no pill; una línea que
+ * viaja cumple §9.6 por construcción (se ve de dónde viene y a dónde
+ * llega). El porqué: el filtro tiene "todos" como estado legal y sus
+ * opciones aparecen según la oferta — la posición es lo que el ojo
+ * pide, y la huella sola no leía (veredicto founder en dispositivo).
  *
- * Boceto M2 en la auditoría B12. A11y intacta (tablist/tab/selected);
- * press = la receta de la casa (0.99 spring fast, D-401).
+ * B14 ②: LAS CUATRO CON ETIQUETA — "Todos" era texto y los oficios
+ * glifos sueltos: nada comparable. Ahora todos hablan igual (glifo con
+ * huella + etiqueta; "Todos" sin glifo porque no es un oficio).
+ *
+ * Física: motion.duration.fast + bezier de la casa; memorial =
+ * reemplazo directo, la línea no viaja (Ley 8).
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import Animated, { cubicBezier } from 'react-native-reanimated';
-import { motion, spacing, typography, useTheme } from '@epetplace/ui';
+import Animated, {
+  Easing,
+  cubicBezier,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
+import { motion, radius, spacing, typography, useTheme } from '@epetplace/ui';
 
 import { IconoOficio } from '@/components/iconos-oficio';
 import { useTraduccion } from '@/i18n';
 
 export type FiltroOficioValor = 'todos' | 'paseo' | 'grooming' | 'adiestramiento' | 'vet';
 
+const FISICA = { duration: motion.duration.fast, easing: Easing.bezier(0.32, 0.72, 0, 1) };
+
 function Segmento({
   esActivo,
   onPress,
   accessibilityLabel,
+  onLayout,
   children,
 }: {
   esActivo: boolean;
   onPress: () => void;
   accessibilityLabel: string;
+  onLayout: (x: number, ancho: number) => void;
   children: React.ReactNode;
 }) {
   const [presionado, setPresionado] = useState(false);
@@ -47,6 +59,7 @@ function Segmento({
       onPress={onPress}
       onPressIn={() => setPresionado(true)}
       onPressOut={() => setPresionado(false)}
+      onLayout={(e) => onLayout(e.nativeEvent.layout.x, e.nativeEvent.layout.width)}
       style={{ flex: 1 }}
     >
       <Animated.View
@@ -80,39 +93,61 @@ export function FiltroOficio({
 }) {
   const { theme } = useTheme();
   const { t } = useTraduccion();
-  // Guard espejo del registry de Icono: memorial NO porta capaText —
-  // ahí la huella activa habla en secundaria (nada celebra, Ley 8).
+  const esMemorial = theme.mode === 'memorial';
+  // Guard espejo del registry de Icono: memorial no porta capaText.
   const aa = 'capaText' in theme ? theme.capaText : null;
+
   const segmentos: {
     codigo: FiltroOficioValor;
     etiqueta: string;
     oficio: 'paseo' | 'grooming' | 'adiestramiento' | 'veterinaria' | null;
-    /** El AA de su capa — el tono en que la huella APARECE (Ley 6). */
-    huellaActiva: string | null;
+    /** El AA de su capa — la huella (SIEMPRE) y la línea cuando preside. */
+    capaAa: string;
   }[] = [
-    { codigo: 'todos', etiqueta: t('agenda.filtroTodos'), oficio: null, huellaActiva: null },
+    { codigo: 'todos', etiqueta: t('agenda.filtroTodos'), oficio: null, capaAa: theme.text.primary },
     ...(oficios.paseo
-      ? [{ codigo: 'paseo' as const, etiqueta: t('agenda.filtroPaseos'), oficio: 'paseo' as const, huellaActiva: aa !== null ? aa.cuidado : theme.text.secondary }]
+      ? [{ codigo: 'paseo' as const, etiqueta: t('agenda.filtroPaseos'), oficio: 'paseo' as const, capaAa: aa !== null ? aa.cuidado : theme.text.secondary }]
       : []),
     ...(oficios.grooming
-      ? [{ codigo: 'grooming' as const, etiqueta: t('agenda.filtroEstetica'), oficio: 'grooming' as const, huellaActiva: theme.status.warningText }]
+      ? [{ codigo: 'grooming' as const, etiqueta: t('agenda.filtroEstetica'), oficio: 'grooming' as const, capaAa: theme.status.warningText }]
       : []),
     ...(oficios.adiestramiento
-      ? [{ codigo: 'adiestramiento' as const, etiqueta: t('agenda.filtroAdiestramiento'), oficio: 'adiestramiento' as const, huellaActiva: aa !== null ? aa.cuidado : theme.text.secondary }]
+      ? [{ codigo: 'adiestramiento' as const, etiqueta: t('agenda.filtroAdiestramiento'), oficio: 'adiestramiento' as const, capaAa: aa !== null ? aa.cuidado : theme.text.secondary }]
       : []),
     ...(oficios.vet
-      ? [{ codigo: 'vet' as const, etiqueta: t('agenda.filtroVeterinaria'), oficio: 'veterinaria' as const, huellaActiva: aa !== null ? aa.identidad : theme.text.secondary }]
+      ? [{ codigo: 'vet' as const, etiqueta: t('agenda.filtroVeterinaria'), oficio: 'veterinaria' as const, capaAa: aa !== null ? aa.identidad : theme.text.secondary }]
       : []),
   ];
-  // Con 4 segmentos el ancho no da para 4 labels: los oficios hablan por
-  // su glifo (el a11y label queda entero); 'Todos' conserva su voz.
-  const soloIcono = segmentos.length >= 4;
+
+  // LA LÍNEA VIAJERA — posición/ancho por onLayout de cada segmento;
+  // el primer posicionamiento no viaja (no hay origen que mostrar).
+  const [marcos, setMarcos] = useState<Record<string, { x: number; ancho: number }>>({});
+  const lineaX = useSharedValue(0);
+  const lineaAncho = useSharedValue(0);
+  useEffect(() => {
+    const marco = marcos[activo];
+    if (!marco) return;
+    if (lineaAncho.value === 0 || esMemorial) {
+      // primer render o memorial: reemplazo directo, sin viaje
+      lineaX.value = marco.x;
+      lineaAncho.value = marco.ancho;
+      return;
+    }
+    lineaX.value = withTiming(marco.x, FISICA);
+    lineaAncho.value = withTiming(marco.ancho, FISICA);
+  }, [activo, marcos, esMemorial, lineaX, lineaAncho]);
+  const estiloLinea = useAnimatedStyle(() => ({
+    transform: [{ translateX: lineaX.value }],
+    width: lineaAncho.value,
+  }));
+
+  const colorLinea = segmentos.find((s) => s.codigo === activo)?.capaAa ?? theme.text.primary;
 
   return (
     <View
       accessibilityRole="tablist"
       accessibilityLabel={t('agenda.filtroEtiqueta')}
-      style={{ flexDirection: 'row' }}
+      style={{ flexDirection: 'row', position: 'relative', paddingBottom: spacing[1] }}
     >
       {segmentos.map((s) => {
         const esActivo = s.codigo === activo;
@@ -122,31 +157,43 @@ export function FiltroOficio({
             esActivo={esActivo}
             onPress={() => onCambio(s.codigo)}
             accessibilityLabel={s.etiqueta}
+            onLayout={(x, ancho) =>
+              setMarcos((m) =>
+                m[s.codigo]?.x === x && m[s.codigo]?.ancho === ancho ? m : { ...m, [s.codigo]: { x, ancho } },
+              )
+            }
           >
             {s.oficio !== null && (
-              <IconoOficio
-                oficio={s.oficio}
-                tamano={21}
-                color={esActivo ? theme.text.primary : theme.text.secondary}
-                // Ley 6: la huella APARECE al activarse — 'transparent'
-                // no es un color inventado: es la AUSENCIA (§2.6).
-                colorHuella={esActivo && s.huellaActiva !== null ? s.huellaActiva : 'transparent'}
-              />
+              // B15: la huella SIEMPRE — es identidad del glifo, no estado.
+              <IconoOficio oficio={s.oficio} tamano={21} color={esActivo ? theme.text.primary : theme.text.secondary} colorHuella={s.capaAa} />
             )}
-            {(!soloIcono || s.oficio === null) && (
-              <Text
-                style={{
-                  fontFamily: esActivo ? typography.family.sans.medium : typography.family.sans.regular,
-                  fontSize: typography.size.sm,
-                  color: esActivo ? theme.text.primary : theme.text.secondary,
-                }}
-              >
-                {s.etiqueta}
-              </Text>
-            )}
+            <Text
+              numberOfLines={1}
+              style={{
+                fontFamily: esActivo ? typography.family.sans.medium : typography.family.sans.regular,
+                fontSize: typography.size.sm,
+                color: esActivo ? theme.text.primary : theme.text.secondary,
+              }}
+            >
+              {s.etiqueta}
+            </Text>
           </Segmento>
         );
       })}
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          {
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            height: 2,
+            borderRadius: radius.full,
+            backgroundColor: colorLinea,
+          },
+          estiloLinea,
+        ]}
+      />
     </View>
   );
 }

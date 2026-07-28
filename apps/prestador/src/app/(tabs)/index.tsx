@@ -323,12 +323,15 @@ function FilaCita({
   enVivo,
   fotoUrl,
   oficio = 'paseo',
+  acciones,
 }: {
   cita: CitaAgendaPaseo;
   enVivo: boolean;
   fotoUrl?: string;
   /** S60-B1/S63-B: cada oficio navega a SU flujo (Antes/Durante/Cierre). */
   oficio?: OficioCita;
+  /** B14 ①: las acciones de ESTA cita — viven adentro de SU tarjeta. */
+  acciones?: React.ReactNode;
 }) {
   const router = useRouter();
   const { t } = useTraduccion();
@@ -372,6 +375,7 @@ function FilaCita({
         fotoUrl,
         especie: cita.mascota && esEspecie(cita.mascota.especie) ? cita.mascota.especie : undefined,
       }}
+      acciones={acciones}
       onPress={() =>
         router.push(
           oficio === 'grooming'
@@ -442,8 +446,11 @@ function FilaSalida({
   const efComun = efs.size === 1 ? [...efs][0]! : null;
   const insignia = efComun ? insignias[efComun] : undefined;
 
+  // B14 ① / B15: la salida es SU tarjeta (unidad D-385) y sus miembros
+  // expandidos son TARJETAS HERMANAS — dos citas jamás comparten tarjeta.
   return (
-    <View>
+    <View style={{ gap: spacing[3] }}>
+      <Tarjeta elevacion="reposo" relleno="ninguno">
       <Celda
         interactiva
         onPress={onToggle}
@@ -472,17 +479,16 @@ function FilaSalida({
           </View>
         }
       />
+      </Tarjeta>
       {abierta &&
         citas.map((c) => (
-          <View key={c.id}>
-            <Separador indentacion={spacing[3] + 40 + spacing[3]} />
-            <FilaCita
-              cita={c}
-              enVivo={false}
-              oficio="paseo"
-              fotoUrl={c.mascota?.foto_url ? urlsFotos.get(c.mascota.foto_url) : undefined}
-            />
-          </View>
+          <FilaCita
+            key={c.id}
+            cita={c}
+            enVivo={false}
+            oficio="paseo"
+            fotoUrl={c.mascota?.foto_url ? urlsFotos.get(c.mascota.foto_url) : undefined}
+          />
         ))}
     </View>
   );
@@ -987,51 +993,46 @@ export default function Hoy() {
                 hero (el botón ghost de solo texto murió: no decía que se
                 toca ni a dónde va). Ícono 'carnet' = el expediente; la
                 señal "Primera vez" (solo si es REAL) vive en el detalle. */}
-            {(() => {
-              // D-385: la SALIDA entera preside — cada cita su fila (el
-              // vivo real marca la suya), y el "Antes" POR MASCOTA (el
-              // paseador va a salir con TODAS: cada expediente a un tap).
-              const filas = salidaDestacada.map((c, i) => (
-                <View key={c.id}>
-                  {i > 0 && <Separador indentacion={spacing[3] + 40 + spacing[3]} />}
+            {/* S80-B14 ① (vigente por B15): UNA TARJETA = UNA CITA — la
+                salida ya no comparte Tarjeta (el canto moría en el medio,
+                donde no hay curva que lo justifique). Cada cita con su
+                canto de punta a punta y su "Conocer" ADENTRO; el vivo
+                real envuelve SU tarjeta con CitaEnVivo. */}
+            <View style={{ gap: spacing[3] }}>
+              {salidaDestacada.map((c) => {
+                const esViva = enVivo?.id === c.id;
+                const mascota = c.mascota;
+                const card = (
                   <FilaCita
                     cita={c}
-                    enVivo={enVivo?.id === c.id}
+                    enVivo={esViva}
                     oficio={oficioDe(c)}
-                    fotoUrl={c.mascota?.foto_url ? urlsFotos.get(c.mascota.foto_url) : undefined}
-                  />
-                </View>
-              ));
-              const mascotas = [
-                ...new Map(
-                  salidaDestacada
-                    .map((c) => c.mascota)
-                    .filter((m): m is NonNullable<typeof m> => m != null)
-                    .map((m) => [m.id, m] as const),
-                ).values(),
-              ];
-              const conocer = mascotas.map((mascota) => (
-                <View key={mascota.id}>
-                  <Separador />
-                  <CeldaNavegacion
-                    icono="carnet"
-                    registro="aa"
-                    titulo={t('agenda.conocerMascota', { nombre: mascota.nombre })}
-                    detalle={esPrimera(mascota.id) ? t('agenda.primeraVez') : undefined}
-                    onPress={() =>
-                      router.push({ pathname: '/mascota/[mascotaId]', params: { mascotaId: mascota.id } })
+                    fotoUrl={mascota?.foto_url ? urlsFotos.get(mascota.foto_url) : undefined}
+                    acciones={
+                      mascota ? (
+                        <>
+                          <Separador />
+                          <CeldaNavegacion
+                            icono="carnet"
+                            registro="aa"
+                            titulo={t('agenda.conocerMascota', { nombre: mascota.nombre })}
+                            detalle={esPrimera(mascota.id) ? t('agenda.primeraVez') : undefined}
+                            onPress={() =>
+                              router.push({ pathname: '/mascota/[mascotaId]', params: { mascotaId: mascota.id } })
+                            }
+                          />
+                        </>
+                      ) : undefined
                     }
                   />
-                </View>
-              ));
-              const cuerpo = (
-                <Tarjeta elevacion={enVivo ? 'plana' : 'sm'} relleno="ninguno">
-                  {filas}
-                  {conocer}
-                </Tarjeta>
-              );
-              return enVivo ? <CitaEnVivo capa="cuidado">{cuerpo}</CitaEnVivo> : cuerpo;
-            })()}
+                );
+                return (
+                  <View key={c.id}>
+                    {esViva ? <CitaEnVivo capa="cuidado">{card}</CitaEnVivo> : card}
+                  </View>
+                );
+              })}
+            </View>
           </View>
         )}
 
@@ -1074,12 +1075,12 @@ export default function Hoy() {
           ) : null
         )}
 
-        {/* ── Zona 2 — el día (compacta; D-385: agrupada por salida) ── */}
+        {/* ── Zona 2 — el día (B14 ①: una tarjeta = una cita; los
+            Separadores entre citas murieron con la Tarjeta compartida) ── */}
         {pantalla.estado === 'listo' && vista === 'hoy' && restoItems.length > 0 && (
-          <Tarjeta elevacion="sm" relleno="ninguno">
-            {restoItems.map((item, i) => (
+          <View style={{ gap: spacing[3] }}>
+            {restoItems.map((item) => (
               <View key={item.tipo === 'cita' ? item.cita.id : item.clave}>
-                {i > 0 && <Separador indentacion={spacing[3] + 40 + spacing[3]} />}
                 {item.tipo === 'cita' ? (
                   <FilaCita cita={item.cita} enVivo={false} oficio={oficioDe(item.cita)} fotoUrl={item.cita.mascota?.foto_url ? urlsFotos.get(item.cita.mascota.foto_url) : undefined} />
                 ) : (
@@ -1092,7 +1093,7 @@ export default function Hoy() {
                 )}
               </View>
             ))}
-          </Tarjeta>
+          </View>
         )}
 
         {/* ── S70-B2-v2: POR COORDINAR — citas de presupuesto aprobado SIN
@@ -1211,10 +1212,9 @@ export default function Hoy() {
               {t('agenda.yaAtendidas', { n: resto.filter(esAtendida).length })}
             </Texto>
             {atendidasAbierto && (
-              <Tarjeta elevacion="sm" relleno="ninguno">
-                {atendidasItems.map((item, i) => (
+              <View style={{ gap: spacing[3] }}>
+                {atendidasItems.map((item) => (
                   <View key={item.tipo === 'cita' ? item.cita.id : item.clave}>
-                    {i > 0 && <Separador indentacion={spacing[3] + 40 + spacing[3]} />}
                     {item.tipo === 'cita' ? (
                       <FilaCita cita={item.cita} enVivo={false} oficio={oficioDe(item.cita)} fotoUrl={item.cita.mascota?.foto_url ? urlsFotos.get(item.cita.mascota.foto_url) : undefined} />
                     ) : (
@@ -1222,7 +1222,7 @@ export default function Hoy() {
                     )}
                   </View>
                 ))}
-              </Tarjeta>
+              </View>
             )}
             <Boton
               variante="compacto"
@@ -1259,10 +1259,9 @@ export default function Hoy() {
                   {dia.bloqueado && <Insignia estado="info" etiqueta={t('agenda.diaBloqueado')} tamaño="sm" />}
                 </View>
                 {dia.citas.length > 0 ? (
-                  <Tarjeta elevacion="sm" relleno="ninguno">
-                    {agruparSalidas(dia.citas, sinAgruparIds).map((item, i) => (
+                  <View style={{ gap: spacing[3] }}>
+                    {agruparSalidas(dia.citas, sinAgruparIds).map((item) => (
                       <View key={item.tipo === 'cita' ? item.cita.id : item.clave}>
-                        {i > 0 && <Separador indentacion={spacing[3] + 40 + spacing[3]} />}
                         {item.tipo === 'cita' ? (
                           <FilaCita cita={item.cita} enVivo={false} oficio={oficioDe(item.cita)} fotoUrl={item.cita.mascota?.foto_url ? urlsFotos.get(item.cita.mascota.foto_url) : undefined} />
                         ) : (
@@ -1275,7 +1274,7 @@ export default function Hoy() {
                         )}
                       </View>
                     ))}
-                  </Tarjeta>
+                  </View>
                 ) : dia.bloqueado ? null : (
                   <Texto variante="apoyo">
                     {t('agenda.diaLibre')}
