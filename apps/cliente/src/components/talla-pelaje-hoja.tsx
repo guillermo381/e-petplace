@@ -94,6 +94,7 @@ export function TallaPelajeHoja({
           </Text>
           <SelectorOpcion
             acento="control"
+            solitario
             etiqueta={t('grooming.tallaEtiqueta')}
             opciones={[
               { codigo: 'S', etiqueta: t('grooming.tallaS') },

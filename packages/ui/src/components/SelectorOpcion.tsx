@@ -133,6 +133,23 @@ export interface SelectorOpcionProps {
    *  espec propia (S73) y no consume esta prop. Memorial degrada a
    *  contorno solo (sin tinte — patrón 'capaBg' in theme). */
   naturaleza?: 'existe' | 'seFija'
+  /** ⚠️ S81 — LA CLASE «ELEGIDOR» (la respuesta de Campo sinCaja,
+   *  generalizada): el elegidor SOLITARIO — una decisión suelta en su
+   *  pantalla (talla/pelaje, franjas de seccion-horarios, bancarios) —
+   *  pierde la caja. Reposo = RELLENO `bg.overlay` sin borde (§7:
+   *  presencia por superficie); ELEGIDO = superficie APOYADA
+   *  (`elevacion.reposo`) + texto en el acento — la elevación NO queda
+   *  como única señal (C2: "elevación, escala y color del texto"; y el
+   *  canal accesible no puede ser solo sombra). CENSO A LA VISTA (por
+   *  qué acá y no pieza nueva ni Celda): los 3 solitarios del síntoma
+   *  YA son SelectorOpcion fila; Celda NAVEGA, no elige; una segunda
+   *  pieza haciendo lo mismo sería deuda. El matiz de C se respeta:
+   *  las filas de LISTA conservan su affordance por convención — esto
+   *  es solo para el solitario. Precedencia: entidad > solitario >
+   *  naturaleza. Memorial: elegido por borde sereno, sin sombra (no
+   *  celebra). Primer caso: el estado de pelaje; los 22 restantes
+   *  esperan su gate. */
+  solitario?: boolean
 }
 
 function Chip({
@@ -147,6 +164,7 @@ function Chip({
   modo,
   acento,
   naturaleza,
+  solitario,
 }: {
   opcion: SelectorOpcionItem
   indice: number
@@ -159,6 +177,7 @@ function Chip({
   modo: 'radio' | 'checkbox'
   acento: 'capa' | 'control' | 'oficio'
   naturaleza: 'existe' | 'seFija'
+  solitario: boolean
 }) {
   const { theme } = useTheme()
   // S63 (D-401): el clon muere — la física vive en LA primitiva
@@ -206,6 +225,9 @@ function Chip({
   // 'capaBg' in theme (degrada a contorno, sin tinta). La elección
   // sigue escalando por el borde TONAL (Ley 22 intacta).
   const rellenoExiste = naturaleza === 'existe' && !entidad && 'capaBg' in theme
+  // S81 — la clase ELEGIDOR (ver JSDoc de `solitario`): reposo relleno
+  // overlay sin borde; elegido = superficie apoyada + texto en acento.
+  const esSolitario = solitario === true && !entidad
   const tinteAcento = !('capaBg' in theme)
     ? fondoReposo
     : acento === 'control'
@@ -213,18 +235,28 @@ function Chip({
       : acento === 'oficio'
         ? theme.accent.primaryBg
         : theme.capaBg.identidad
-  const fondo = conCapa || rellenoExiste ? tinteAcento : fondoReposo
-  const borde = conCapa
-    ? acento === 'control' && 'control' in theme.accent
-      ? theme.accent.control
-      : acento === 'oficio'
-        ? theme.accent.primary
-        : theme.capa.identidad
-    : rellenoExiste
-      ? 'transparent'
-      : seleccionada
-        ? theme.text.secondary
-        : theme.border.subtle
+  const fondo = esSolitario
+    ? seleccionada
+      ? fondoReposo // la superficie APOYADA (card/elevated) se despega del overlay
+      : theme.bg.overlay
+    : conCapa || rellenoExiste
+      ? tinteAcento
+      : fondoReposo
+  const borde = esSolitario
+    ? seleccionada && !('capaBg' in theme)
+      ? theme.text.secondary // memorial: la señal es el borde sereno (sin sombra)
+      : 'transparent'
+    : conCapa
+      ? acento === 'control' && 'control' in theme.accent
+        ? theme.accent.control
+        : acento === 'oficio'
+          ? theme.accent.primary
+          : theme.capa.identidad
+      : rellenoExiste
+        ? 'transparent'
+        : seleccionada
+          ? theme.text.secondary
+          : theme.border.subtle
 
   // S73 — entity chip: el LLENO por slot del tema (memorial no lo porta
   // y degrada a la rama tonal-con-borde: elevación sin lleno).
@@ -316,6 +348,11 @@ function Chip({
           ...(entidad && hayLleno
             ? { boxShadow: theme.elevacion.reposo }
             : { borderWidth: BORDE, borderColor: borde }),
+          // ELEGIDOR: el elegido se APOYA (la sombra es la señal, con el
+          // texto en acento de compañía); memorial queda fuera (no celebra)
+          ...(esSolitario && seleccionada && 'capaBg' in theme
+            ? { boxShadow: theme.elevacion.reposo }
+            : null),
           // misma receta que Boton/Tarjeta — LA primitiva (S63)
           ...estiloPresionado,
         }}
@@ -374,6 +411,7 @@ export function SelectorOpcion({
   acento = 'capa',
   etiquetaVisible = true,
   naturaleza = 'seFija',
+  solitario = false,
 }: SelectorOpcionProps) {
   const { theme } = useTheme()
 
@@ -391,6 +429,7 @@ export function SelectorOpcion({
       modo={multiple ? 'checkbox' : 'radio'}
       acento={acento}
       naturaleza={naturaleza}
+      solitario={solitario}
     />
   ))
 
