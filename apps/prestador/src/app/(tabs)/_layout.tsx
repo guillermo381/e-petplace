@@ -50,7 +50,7 @@ type EstadoSesionRaiz =
   // S75-B: 'ok' pasa a portar esGestor — el gate del tab NEGOCIO lee de
   // acá (resuelto UNA vez en el guard, jamás por pantalla). Hoy inerte:
   // el único que llega es el titular, y el titular siempre es gestor.
-  | { ok: true; esGestor: boolean }
+  | { ok: true; esGestor: boolean; ceremonia: 'consultada' | 'resuelta-para-este-usuario' | 'no-gestor' }
   // S79-B (T2-B2, §2.3; T4-B1): primer ingreso del GESTOR según el MOTOR
   // (`registrar_primer_ingreso`, LETRA_PERFIL §4) → la carta preside
   // ANTES de las tabs (precedente /invitacion, L-161). El puente
@@ -72,7 +72,13 @@ type EstadoSesionRaiz =
 // S79-B (T4-B1): la ceremonia se pregunta UNA vez por sesión de JS — la
 // RPC es idempotente, pero el guard corre en cada focus y no hace falta
 // repetirle la pregunta al server (costo declarado en cero).
-let ceremoniaResuelta = false;
+// S81 (hallazgo del vehículo Shyris): el flag booleano era POR PROCESO,
+// no por usuario — el founder consumió la ceremonia de Aurora, cambió a
+// vet1 SIN reiniciar la app, y la ceremonia de vet1 se saltó MUDA (ni
+// RPC, ni redirect, ni log distintivo — L-192). La cura: el flag guarda
+// EL user_id que ya resolvió; otro usuario en el mismo proceso vuelve a
+// preguntar. Y el skip HABLA (el forense lo distingue — puede salir rojo).
+let ceremoniaResueltaPara: string | null = null;
 
 export default function TabsLayout() {
   const { theme } = useTheme();
@@ -111,14 +117,19 @@ export default function TabsLayout() {
           // gestor jamás veía su carta). La RPC estampa SOLO al titular
           // activo y es idempotente; ante fallo de lectura NO se
           // interrumpe (la carta es ceremonia, no candado).
-          if (esGestor && !ceremoniaResuelta) {
+          if (esGestor && ceremoniaResueltaPara !== s.data.user_id) {
             const ingreso = await registrarPrimerIngreso();
             if (ingreso.ok) {
-              ceremoniaResuelta = true;
+              ceremoniaResueltaPara = s.data.user_id;
               if (ingreso.data.esPrimerIngreso) return { bienvenida_pendiente: true };
             }
+            return { ok: true, esGestor, ceremonia: 'consultada' as const };
           }
-          return { ok: true, esGestor };
+          return {
+            ok: true,
+            esGestor,
+            ceremonia: esGestor ? ('resuelta-para-este-usuario' as const) : ('no-gestor' as const),
+          };
         }
         if (p.codigo === 'sin_prestador') {
           // S75-B1: ¿handshake pendiente? (invitación INACTIVA) → el raíz
@@ -142,7 +153,7 @@ export default function TabsLayout() {
         // el log de Metro/logcat — el gate empieza confirmándolo.
         const voz =
           typeof r === 'string' ? r
-            : 'ok' in r ? `ok — gestor=${r.esGestor}`
+            : 'ok' in r ? `ok — gestor=${r.esGestor} · ceremonia=${r.ceremonia}`
               : 'sala_espera' in r ? "estado 'pendiente' → /sala-espera"
                 : 'bienvenida_pendiente' in r ? 'primer login → /bienvenida-dia1'
                   : 'invitacion_pendiente' in r ? 'invitación pendiente → /invitacion'
