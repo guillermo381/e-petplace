@@ -3,8 +3,9 @@
  * propuesta Claude Design — TRADUCIDA a la casa, no verbatim):
  * composición vertical serena — isotipo en gradiente oficial (el UNO
  * por pantalla; el isotipo va FUERA de la contabilidad de dosis, Ley 4)
- * · "el ecosistema del mundo mascota" en mono minúsculas · lockup
- * e.petplace · el titular EL NORTE en DM Sans light display (Playfair
+ * · lockup e.petplace (la línea mono del ecosistema MURIÓ en S82 —
+ * Chanel contra la vara "el sujeto sin explicación")
+ * · el titular EL NORTE en DM Sans light display (Playfair
  * PROHIBIDA; el acento en "una vida" es GRÁFICA — palette.pink, la
  * reserva del destello) · Boton marca (gradiente = la dosis del
  * contexto cerrado) · secundario · legales HONESTOS sin link muerto
@@ -39,19 +40,14 @@ export default function Bienvenida() {
         paddingHorizontal: spacing[5],
       }}
     >
-      {/* La identidad — el isotipo preside, la voz de máquina lo rotula */}
+      {/* La identidad — el isotipo preside, el lockup lo rotula.
+          S82 (vara: "se entra sabiendo que el sujeto es la mascota, sin
+          que nadie lo explique") — Chanel: murió la línea mono "el
+          ecosistema del mundo mascota". Era la única línea que EXPLICABA
+          (y hablaba de la plataforma, no de la mascota); el lockup ya
+          rotula la marca. El titular queda solo con su trabajo. */}
       <View style={{ alignItems: 'center', gap: spacing[3] }}>
         <Isotipo size={72} variant="gradiente" />
-        <Text
-          style={{
-            fontFamily: typography.family.mono.regular,
-            fontSize: typography.size.xs,
-            letterSpacing: typography.tracking.mono,
-            color: theme.text.secondary,
-          }}
-        >
-          {t('bienvenida.ecosistema')}
-        </Text>
         {/* el lockup — nombre de marca, identidad (no es string de voz) */}
         <Text
           style={{

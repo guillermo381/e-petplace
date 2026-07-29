@@ -17,7 +17,6 @@ export const clienteEn = {
   // S61-A8 — the welcome, rewritten (founder letter; LOTE S61, GATE
   // PENDIENTE). heroTitulo/heroSubtitulo died with the hero (Ley 37).
   bienvenida: {
-    ecosistema: 'the pet world ecosystem',
     titular: "Your pet doesn't have a record. It has",
     titularAcento: 'a life.',
     crearCuenta: 'Create account',

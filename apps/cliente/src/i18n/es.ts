@@ -16,7 +16,6 @@ export const clienteEs = {
   // S61-A8 — la bienvenida reescrita (letra founder; LOTE S61, GATE
   // PENDIENTE). heroTitulo/heroSubtitulo murieron con el hero (Ley 37).
   bienvenida: {
-    ecosistema: 'el ecosistema del mundo mascota',
     titular: 'Tu mascota no tiene un expediente. Tiene',
     titularAcento: 'una vida.',
     crearCuenta: 'Crear cuenta',
