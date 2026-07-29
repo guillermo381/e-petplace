@@ -108,9 +108,12 @@ export interface OfertaParaHorarios {
 // display lunes-primero; el ÍNDICE que viaja a DB sigue siendo 0=Domingo
 export const ORDEN_DISPLAY = [1, 2, 3, 4, 5, 6, 0] as const;
 
-// grilla v1: pasos de 30 min, 05:00–22:00 (heredada de /horarios S55-B)
+// LA GRILLA DEL DÍA ENTERO (S81 — muere la herencia 05:00–22:00 de
+// /horarios S55-B que este comentario confesaba): 48 medias horas,
+// mismo día, fin > inicio vive en las DOS puertas (h > minimo). CERO
+// motor: C5 midió que 22:30→23:30 ya produce slots y el wrapper guarda.
 const HORAS: string[] = [];
-for (let m = 5 * 60; m <= 22 * 60; m += 30) {
+for (let m = 0; m < 24 * 60; m += 30) {
   HORAS.push(`${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`);
 }
 
@@ -247,16 +250,31 @@ export async function aplicarDiffFranjas(
 }
 
 /** La grilla de horas (una sola verdad — la usan la Hoja de franja
- *  nueva y la edición del grupo, S61-B5). */
-function ListaHoras({ minimo, onElegir }: { minimo: string | null; onElegir: (h: string) => void }) {
+ *  nueva y la edición del grupo, S61-B5). S81: con el día entero son
+ *  48 medias horas — la LISTA de Celdas murió (48 filas no son lista);
+ *  UNA GRILLA (SelectorOpcion, coordenadas = contorno legal 7bis). */
+function ListaHoras({
+  minimo,
+  onElegir,
+  etiqueta,
+  seleccionada,
+}: {
+  minimo: string | null;
+  onElegir: (h: string) => void;
+  etiqueta: string;
+  seleccionada?: string | null;
+}) {
   return (
     <HojaScroll>
-      {HORAS.filter((h) => (minimo !== null ? h > minimo : true)).map((h, i) => (
-        <View key={h}>
-          {i > 0 && <Separador />}
-          <Celda interactiva accessibilityRole="button" titulo={h} onPress={() => onElegir(h)} />
-        </View>
-      ))}
+      <SelectorOpcion
+        etiqueta={etiqueta}
+        etiquetaVisible={false}
+        acento="oficio"
+        disposicion="grilla"
+        opciones={HORAS.filter((h) => (minimo !== null ? h > minimo : true)).map((h) => ({ codigo: h, etiqueta: h }))}
+        seleccionada={seleccionada ?? undefined}
+        onSelect={onElegir}
+      />
     </HojaScroll>
   );
 }
@@ -1013,6 +1031,8 @@ export function SeccionHorarios({
         {grupoEnHoja !== null && grupoEnHoja.length > 0 && vistaGrupo !== 'form' ? (
           // S61-B5: el picker de horas de la EDICIÓN — la misma grilla
           <ListaHoras
+            etiqueta={t(vistaGrupo === 'hasta' ? 'horarios.hasta' : 'horarios.desde')}
+            seleccionada={vistaGrupo === 'hasta' ? hastaEdit : desdeEdit}
             minimo={vistaGrupo === 'hasta' ? desdeEdit : null}
             onElegir={(h) => {
               if (vistaGrupo === 'desde') {
@@ -1221,27 +1241,20 @@ export function SeccionHorarios({
             />
           </View>
         ) : (
-          <HojaScroll>
-            {HORAS.filter((h) => (vistaNueva === 'hasta' && desdeSel !== null ? h > desdeSel : true)).map((h, i) => (
-              <View key={h}>
-                {i > 0 && <Separador />}
-                <Celda
-                  interactiva
-                  accessibilityRole="button"
-                  titulo={h}
-                  onPress={() => {
-                    if (vistaNueva === 'desde') {
-                      setDesdeSel(h);
-                      if (hastaSel !== null && hastaSel <= h) setHastaSel(null);
-                    } else {
-                      setHastaSel(h);
-                    }
-                    setVistaNueva('form');
-                  }}
-                />
-              </View>
-            ))}
-          </HojaScroll>
+          <ListaHoras
+            etiqueta={t(vistaNueva === 'hasta' ? 'horarios.hasta' : 'horarios.desde')}
+            seleccionada={vistaNueva === 'hasta' ? hastaSel : desdeSel}
+            minimo={vistaNueva === 'hasta' && desdeSel !== null ? desdeSel : null}
+            onElegir={(h) => {
+              if (vistaNueva === 'desde') {
+                setDesdeSel(h);
+                if (hastaSel !== null && hastaSel <= h) setHastaSel(null);
+              } else {
+                setHastaSel(h);
+              }
+              setVistaNueva('form');
+            }}
+          />
         )}
       </Hoja>
 
