@@ -235,17 +235,9 @@ export default function OfertaAdiestramiento() {
                   }}
                 />
                 <View style={{ flex: 1, gap: spacing[1] }}>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.medium,
-                      fontSize: typography.size.base,
-                      color: theme.text.primary,
-                    }}
-                  >
-                    {visible
+                  <Texto variante="seccion">{visible
                       ? t('ofertaAdiestramiento.visibleTitulo')
-                      : t('ofertaAdiestramiento.noVisibleTitulo')}
-                  </Text>
+                      : t('ofertaAdiestramiento.noVisibleTitulo')}</Texto>
                   <Texto variante="apoyo">
                     {visible ? t('ofertaAdiestramiento.visibleVoz') : razon}
                   </Texto>
