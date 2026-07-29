@@ -19,7 +19,7 @@
 import { View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Isotipo, palette, spacing, typography, useTheme } from '@epetplace/ui';
+import { Boton, Entrada, Isotipo, palette, spacing, typography, useTheme } from '@epetplace/ui';
 
 import { useTraduccion } from '@/i18n';
 
@@ -64,38 +64,51 @@ export default function Bienvenida() {
         </Text>
       </View>
 
-      {/* EL NORTE — el titular respira en el centro */}
+      {/* EL NORTE — el titular respira en el centro.
+          S81 (regla 80 · §5 LA ENTRADA): la lectura entra escalonada —
+          titular → CTAs → legales. La IDENTIDAD (isotipo/lockup) NO se
+          envuelve: es el ancla del lugar, no ordena lectura (L-c —
+          decisión declarada para el gate; la pantalla no tiene
+          subtítulo nombrable: la línea mono es identidad). */}
       <View style={{ flex: 1, justifyContent: 'center' }}>
-        <Text
-          style={{
-            fontFamily: typography.family.sans.light,
-            fontSize: typography.size['3xl'],
-            lineHeight: Math.round(typography.size['3xl'] * typography.leading.snug),
-            letterSpacing: typography.tracking.tight,
-            color: theme.text.primary,
-          }}
-        >
-          {t('bienvenida.titular')}{' '}
-          <Text style={{ color: palette.pink }}>{t('bienvenida.titularAcento')}</Text>
-        </Text>
+        <Entrada>
+          <Text
+            style={{
+              fontFamily: typography.family.sans.light,
+              fontSize: typography.size['3xl'],
+              lineHeight: Math.round(typography.size['3xl'] * typography.leading.snug),
+              letterSpacing: typography.tracking.tight,
+              color: theme.text.primary,
+            }}
+          >
+            {t('bienvenida.titular')}{' '}
+            <Text style={{ color: palette.pink }}>{t('bienvenida.titularAcento')}</Text>
+          </Text>
+        </Entrada>
       </View>
 
       {/* Los caminos + los legales honestos */}
       <View style={{ gap: spacing[2] }}>
-        <Boton variante="marca" etiqueta={t('bienvenida.crearCuenta')} bloque onPress={() => router.push('/registro')} />
-        <Boton variante="secundario" etiqueta={t('bienvenida.yaTengoCuenta')} bloque onPress={() => router.push('/login')} />
-        <Text
-          style={{
-            fontFamily: typography.family.sans.regular,
-            fontSize: typography.size.xs,
-            lineHeight: Math.round(typography.size.xs * typography.leading.normal),
-            color: theme.text.tertiary,
-            textAlign: 'center',
-            marginTop: spacing[2],
-          }}
-        >
-          {t('bienvenida.legales')}
-        </Text>
+        <Entrada orden={1}>
+          <View style={{ gap: spacing[2] }}>
+            <Boton variante="marca" etiqueta={t('bienvenida.crearCuenta')} bloque onPress={() => router.push('/registro')} />
+            <Boton variante="secundario" etiqueta={t('bienvenida.yaTengoCuenta')} bloque onPress={() => router.push('/login')} />
+          </View>
+        </Entrada>
+        <Entrada orden={2}>
+          <Text
+            style={{
+              fontFamily: typography.family.sans.regular,
+              fontSize: typography.size.xs,
+              lineHeight: Math.round(typography.size.xs * typography.leading.normal),
+              color: theme.text.tertiary,
+              textAlign: 'center',
+              marginTop: spacing[2],
+            }}
+          >
+            {t('bienvenida.legales')}
+          </Text>
+        </Entrada>
       </View>
     </View>
   );
