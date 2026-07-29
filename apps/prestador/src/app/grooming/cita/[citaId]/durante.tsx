@@ -30,6 +30,7 @@ import {
   Hoja,
   SelectorOpcion,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useAviso,
@@ -83,19 +84,11 @@ type FotoCola = {
 };
 
 function Seccion({ titulo, children }: { titulo: string; children: React.ReactNode }) {
-  const { theme } = useTheme();
+  // S81-C: el rótulo de bloque es del SISTEMA (Texto seccion, rol de
+  // header de fábrica) — la receta local sm/secondary era pre-S71.
   return (
     <View style={{ gap: spacing[2] }}>
-      <Text
-        accessibilityRole="header"
-        style={{
-          fontFamily: typography.family.sans.medium,
-          fontSize: typography.size.sm,
-          color: theme.text.secondary,
-        }}
-      >
-        {titulo}
-      </Text>
+      <Texto variante="seccion">{titulo}</Texto>
       {children}
     </View>
   );
@@ -294,13 +287,6 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
     );
   }
 
-  const vozSecundaria = {
-    fontFamily: typography.family.sans.regular,
-    fontSize: typography.size.sm,
-    lineHeight: typography.size.sm * 1.4,
-    color: theme.text.secondary,
-  } as const;
-
   return (
     <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[5] }}>
       {/* El tiempo de la sesión corre desde el server */}
@@ -368,7 +354,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
             subtitulo={estadosPelaje.entregar ? t('citaGrooming.pelaje') : undefined}
           />
         </Tarjeta>
-        {!hayFotoEntregar && <Text style={vozSecundaria}>{t('citaGrooming.fotoEntregarAyuda')}</Text>}
+        {!hayFotoEntregar && <Texto variante="apoyo">{t('citaGrooming.fotoEntregarAyuda')}</Texto>}
         <FotosDeTipo tipo="foto_entregar" />
       </Seccion>
 
@@ -471,22 +457,15 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
         titulo={t('citaGrooming.terminarTitulo')}
       >
         <View style={{ padding: spacing[4], gap: spacing[4] }}>
-          <Text
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.base,
-              lineHeight: typography.size.base * 1.4,
-              color: theme.text.primary,
-            }}
-          >
-            {/* Guard de UI contra el callejón del motor: los servicios NO
-                se pueden registrar después de terminar (solo el estado de
-                pelaje tiene vía en el cierre) — sin ≥1 servicio, cerrar
-                sería imposible. El error dirige ANTES de ocurrir. */}
+          {/* Guard de UI contra el callejón del motor: los servicios NO
+              se pueden registrar después de terminar (solo el estado de
+              pelaje tiene vía en el cierre) — sin ≥1 servicio, cerrar
+              sería imposible. El error dirige ANTES de ocurrir. */}
+          <Texto variante="cuerpo">
             {aplicados.length === 0
               ? t('citaGrooming.terminarFaltaServicio')
               : t('citaGrooming.terminarExplicacion')}
-          </Text>
+          </Texto>
           <Boton
             variante="primario"
             bloque
