@@ -12,10 +12,17 @@
  * chip del CUÁNDO); peldaño 1 = un plan con sus salidas tal cual;
  * peldaño 2 = historial rico por DATOS (paseos cerrados), no por
  * versión.
+ *
+ * S82-C LAZO 4b (CLARIDAD): los 5 Text crudos de voz secundaria de las
+ * Hojas → Texto apoyo (la variante que absorbió VozSecundaria con su
+ * interlineado, S71). El hub ya estaba migrado a los rieles (S58/S60/
+ * S73 — SelectorSegmentado, CeldaNavegacion, PieRevelar en la lista
+ * fusionada): esta pasada CIERRA su mecánica; cero cambios de
+ * composición. CHANEL corrida: nada sobraba.
  */
 
 import { useCallback, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -35,8 +42,8 @@ import {
   SelectorSegmentado,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
-  typography,
   useAviso,
   useTheme,
 } from '@epetplace/ui';
@@ -577,9 +584,7 @@ export default function MisPaseos() {
         <HojaScroll>
           {moviendo !== null ? (
             <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
-              <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
-                {t('plan.moverVoz')}
-              </Text>
+              <Texto variante="apoyo">{t('plan.moverVoz')}</Texto>
               <SelectorOpcion
                 acento="control"
                 disposicion="tira"
@@ -593,9 +598,7 @@ export default function MisPaseos() {
                   <Esqueleto forma="bloque" ancho="100%" alto={44} />
                 </EsqueletoGrupo>
               ) : horasNuevas !== null && horasNuevas.length === 0 ? (
-                <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-                  {t('plan.moverSinHoras')}
-                </Text>
+                <Texto variante="apoyo">{t('plan.moverSinHoras')}</Texto>
               ) : horasNuevas !== null ? (
                 <SelectorOpcion
                   acento="control"
@@ -627,9 +630,7 @@ export default function MisPaseos() {
               subtitulo={t(detalle.origen === 'paquete' ? 'paquete.citaDePaquete' : 'suelto.citaSuelta')}
               metadataMono={`${detalle.hora.slice(0, 5)} · ${detalle.duracion_minutos} min${detalle.precio !== null ? ` · $${detalle.precio.toFixed(2)}` : ''}`}
             />
-            <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
-              {t(detalle.origen === 'paquete' ? 'paquete.ventanasVoz' : 'suelto.ventanasVoz')}
-            </Text>
+            <Texto variante="apoyo">{t(detalle.origen === 'paquete' ? 'paquete.ventanasVoz' : 'suelto.ventanasVoz')}</Texto>
             {detalle.origen === 'suelta' ? (
               <>
                 <Boton
@@ -674,9 +675,7 @@ export default function MisPaseos() {
         <HojaScroll>
           {reagendando !== null && reagendando !== 'resolviendo' ? (
             <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
-              <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
-                {t('suelto.reagendarVoz')}
-              </Text>
+              <Texto variante="apoyo">{t('suelto.reagendarVoz')}</Texto>
               <SelectorOpcion
                 acento="control"
                 disposicion="tira"
@@ -690,9 +689,7 @@ export default function MisPaseos() {
                   <Esqueleto forma="bloque" ancho="100%" alto={44} />
                 </EsqueletoGrupo>
               ) : horasNuevas !== null && horasNuevas.length === 0 ? (
-                <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-                  {t('plan.moverSinHoras')}
-                </Text>
+                <Texto variante="apoyo">{t('plan.moverSinHoras')}</Texto>
               ) : horasNuevas !== null ? (
                 <SelectorOpcion
                   acento="control"
