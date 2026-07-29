@@ -26,6 +26,7 @@
     "typescript": "~5.9.0"
   },
   "dependencies": {
+    "@epetplace/domain": "workspace:*",
     "@epetplace/i18n": "workspace:*",
     "@expo-google-fonts/dm-sans": "^0.4.1",
     "@expo-google-fonts/jetbrains-mono": "^0.4.1"

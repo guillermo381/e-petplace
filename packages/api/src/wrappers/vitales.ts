@@ -11,19 +11,21 @@ const MENSAJE_ERROR = 'No pudimos leer sus vitales. Probá de nuevo.';
 export interface PaseoConTrack {
   fecha: string;
   duracionMin: number | null;
-  puntos: Array<{ lat: number; lng: number }>;
+  /** `t` viaja (S81): sin él, el filtro de outliers del cálculo queda
+   *  MUDO — mismo hallazgo que timeline.ts en S81-A1. */
+  puntos: Array<{ lat: number; lng: number; t?: string }>;
 }
 
 // Guard de shape del track (L-124): puntos {lat,lng,t} relevados en
 // DB viva S53 — lo que no matchee se descarta, jamás se inventa.
-function parsearPuntos(track: unknown): Array<{ lat: number; lng: number }> {
+function parsearPuntos(track: unknown): Array<{ lat: number; lng: number; t?: string }> {
   if (!Array.isArray(track)) return [];
-  const puntos: Array<{ lat: number; lng: number }> = [];
+  const puntos: Array<{ lat: number; lng: number; t?: string }> = [];
   for (const p of track) {
     if (typeof p === 'object' && p !== null) {
       const o = p as Record<string, unknown>;
       if (typeof o.lat === 'number' && typeof o.lng === 'number') {
-        puntos.push({ lat: o.lat, lng: o.lng });
+        puntos.push({ lat: o.lat, lng: o.lng, ...(typeof o.t === 'string' ? { t: o.t } : null) });
       }
     }
   }

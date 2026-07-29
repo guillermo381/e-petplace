@@ -5,7 +5,11 @@
  * superó a la anterior en distancia — jamás una lectura sin respaldo.
  */
 
-export type PuntoTrack = { lat: number; lng: number };
+import { filtrarTrack } from './filtroTrack';
+
+/** `t` (S81): habilita el filtro de outliers — un punto sin timestamp
+ *  no se juzga y suma como siempre (regla (c) del filtro). */
+export type PuntoTrack = { lat: number; lng: number; t?: string };
 
 export type PaseoVital = {
   /** ISO timestamp del cierre (o inicio si no cerró con timestamp). */
@@ -43,8 +47,12 @@ function haversineKm(a: PuntoTrack, b: PuntoTrack): number {
 }
 
 export function distanciaTrackKm(puntos: PuntoTrack[]): number {
+  // S81 (pedido B): el CÁLCULO consume LA MISMA pieza que el dibujo —
+  // filtroTrack.ts, jamás dos filtros que se desincronizan. El número
+  // que lo ordenó: un solo outlier inflaba el Vitales +30.3% (A-S81-2).
+  const limpios = filtrarTrack(puntos);
   let km = 0;
-  for (let i = 1; i < puntos.length; i++) km += haversineKm(puntos[i - 1], puntos[i]);
+  for (let i = 1; i < limpios.length; i++) km += haversineKm(limpios[i - 1], limpios[i]);
   return km;
 }
 

@@ -24,3 +24,10 @@ export {
   type PuntoTrack,
   type VitalesPaseos,
 } from './vitalesPaseos';
+
+export {
+  distanciaM,
+  filtrarTrack,
+  VELOCIDAD_MAX_MS,
+  type PuntoTrackFiltrable,
+} from './filtroTrack';
