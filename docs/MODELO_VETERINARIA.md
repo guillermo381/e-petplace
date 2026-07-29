@@ -308,7 +308,7 @@ da de alta mínima (la clínica como puerta de entrada de familias — el
 ecosistema alimentando al ecosistema).
 
 **El cobro presencial es DATO, no transacción de plataforma (enmienda
-v1.4, decisión founder S69):** el cobro del walk-in NO pasa por Kushki
+v1.4, decisión founder S69):** el cobro del walk-in NO pasa por la pasarela *(enmienda S81: sin apellido de proveedor)*
 — se cobró en el mostrador. Coherencia con FINANCIERO §2.5 (*si no pasa
 por la plataforma, no se cobra*): el mostrador v1 **REGISTRA el cobro
 como dato** (tabla `cobro_presencial_registrado`: monto + medio
@@ -319,7 +319,7 @@ económico**. La cita nace `estado='confirmada'`, `estado_reserva=
 para el pago in-app). El reporte de rentabilidad distingue honesto
 "cobrado en la app" vs "registrado en mostrador" (dato de primera
 clase, SQL — jamás en metadata). El devengo/comisión variante (b) sólo
-existe cuando el cobro pase por la plataforma (línea futura, con Kushki).
+existe cuando el cobro pase por la plataforma (línea futura, con la pasarela).
 Migración S69-A1bis (`20260718174500`): `registrar_atencion_mostrador`
 + `registrar_cobro_presencial`, L-140 de nacimiento.
 
@@ -431,7 +431,7 @@ raíz de L-157 no eran los lectores.
 **Chasis entero, sin mecanismos nuevos de plata:** gramática canónica
 (mascota→qué→día→hora→quién→pagar; el "quién" respeta §2) ·
 momento-primero · hold 15' con expiración perezosa · regla 7.13 · pago
-simulado DECLARADO hasta Kushki · **devengo al CIERRE, variante (b)** ·
+simulado DECLARADO hasta la PASARELA real · **devengo al CIERRE, variante (b)** ·
 **fee 15% genérico existente** (`fee_configs` fila
 prestador_servicios/cita EC — SIN fila nueva, SIN tocar el enum;
 `categoria_origen` queda como palanca si algún día el vet negocia

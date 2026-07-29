@@ -61,7 +61,7 @@ Origen: S10. Prioridad: 🔴.
 Cerrado el 10 May 2026 con upgrade a plan Pro de Supabase ($25/mes).
 Daily backups activos con retención 7 días. PITR no se activó (es
 add-on adicional de $100/mes); se mantiene como deuda nueva con
-criterio de disparo: cuando arranque flujo Kushki real con
+criterio de disparo: cuando arranque flujo de PASARELA real con
 transacciones en producción.
 
 #### D-007 — Ambiente staging separado de producción
@@ -233,8 +233,8 @@ Origen: S8. Prioridad: 🟢.
 (consolida #59)
 
 #### D-040 — Wiring citas pagadas a `eventos_economicos` (Sprint 3.1.B.3)
-Bloqueado por Kushki + integración con app v2.
-Origen: S8. Prioridad: ⏸ DIFERIDA. Disparo: cuando Kushki esté integrado.
+Bloqueado por la pasarela + integración con app v2.
+Origen: S8. Prioridad: ⏸ DIFERIDA. Disparo: cuando la pasarela esté integrada.
 (consolida #66)
 
 #### D-041 — Default `cuentas_comerciales.modelo_comercial` → `mixto`
@@ -367,7 +367,7 @@ Origen: S7. Prioridad: ⏸.
 Origen: S7. Prioridad: ⏸.
 (consolida X2)
 
-#### D-070 — Integración Kushki
+#### D-070 — Integración de la PASARELA de pagos *(enmienda S81: era «Integración Kushki» — el apellido se jubila; el proveedor se decide aparte y su nombre vivirá en UN solo lugar)*
 Origen: S7+. Prioridad: ⏸.
 (consolida #35-#37, "35,36,37 sistémicos")
 
@@ -595,7 +595,7 @@ Implementar formatters centralizados para moneda, fecha, número, teléfono. Cad
 Origen: S15 cierre extendido. Prioridad: 🔴 BLOQUEANTE antes de expansión geográfica más allá de Ecuador. Disparo: inmediato (mismo bloque que i18n).
 
 #### D-141 — Stack de observabilidad: Sentry + PostHog + logs estructurados
-**Antes del primer prestador real cobrando con Kushki.** Sentry para errores frontend y backend (Edge Functions). PostHog para analítica de producto (eventos, funnels, retention). Logs estructurados en JSON con correlación entre frontend → Edge Function → DB. Sin esto, cuando algo falle en producción estamos a ciegas y no podemos diagnosticar.
+**Antes del primer prestador real cobrando con la pasarela.** Sentry para errores frontend y backend (Edge Functions). PostHog para analítica de producto (eventos, funnels, retention). Logs estructurados en JSON con correlación entre frontend → Edge Function → DB. Sin esto, cuando algo falle en producción estamos a ciegas y no podemos diagnosticar.
 Origen: S15 cierre extendido. Consolida y reemplaza D-083 (que tenía prioridad menor). Prioridad: 🔴 BLOQUEANTE. Disparo: antes del primer prestador real (coincide con disparo de D-094 PITR, mismo bloque de trabajo).
 
 #### D-142 — Modelo `mascota.estado_vida` con propagación desde eventos ✅
@@ -918,9 +918,9 @@ Origen: S26. Prioridad: 🟢 MEDIA (alta palanca de diferenciación, pero no urg
 El cierre de S25 (CLAUDE.md) menciona "D-010 (bug `formatFechaCorta(created_at)`)" como sub-sesión específica de fix trivial. Pero la entrada D-010 del Backlog canónico es "Catálogo documentos requeridos por tipo de prestador" (origen Planning 8 mayo), sin relación con `formatFechaCorta`. Una de las dos referencias usa el ID equivocado — probablemente el cierre de S25, donde la deuda heredada de la sesión paralela del sistema de pruebas debió recibir un D-NNN libre propio en lugar de "D-010". No bloquea Fase 2.
 Origen: S26 (detectado al cruzar archivos en el arranque). Prioridad: 🟢 MEDIA. Disparo: próxima sesión que toque mantenimiento de CLAUDE.md o la sub-sesión del bug `formatFechaCorta`. Resolución: identificar el ID correcto de la deuda del bug `formatFechaCorta`, asignar D-NNN libre, corregir la mención en el cierre de S25.
 
-#### D-236 — Confirmación post-pago de cita con Kushki
-Cuando se integre Kushki, una cita pagada debe poder pasar a `confirmada` sin aceptación explícita del prestador. Para que las citas de la app no pisen la agenda externa del prestador, se necesitarán opciones de bloqueo de franjas.
-Origen: S27 (diseño del mecanismo de acceso por cita). Prioridad: 🟡 ALTA. Disparo: integración de Kushki al ciclo de cita.
+#### D-236 — Confirmación post-pago de cita con la pasarela
+Cuando se integre la pasarela, una cita pagada debe poder pasar a `confirmada` sin aceptación explícita del prestador. Para que las citas de la app no pisen la agenda externa del prestador, se necesitarán opciones de bloqueo de franjas.
+Origen: S27 (diseño del mecanismo de acceso por cita). Prioridad: 🟡 ALTA. Disparo: integración de la pasarela al ciclo de cita.
 
 #### D-237 — Inventario prestador↔producto de oficio
 Sección post-MVP para que el prestador marque (toggle) qué productos del catálogo maestro `cat_productos_oficio` usa, agregue los suyos con foto y componentes activos. No estricto en MVP — el prestador debe verlo útil, no como trabajo extra.
@@ -937,7 +937,7 @@ Origen: S27 (consolida marca de validación de S26). Prioridad: 🟡 ALTA. Dispa
 
 #### D-240 — Estado `no_show` sin punto de entrada en el portal
 La RPC `marcar_no_show_cita` existe y está verificada (transición `confirmada → no_show`), pero no hay botón ni pantalla que la invoque en el portal del prestador. Decisiones de producto pendientes sobre el efecto económico de una cita pagada que pasa a `no_show`: reembolso o penalización. El founder decidió que eso se resuelve junto con el modelo de liquidaciones del servicio.
-Origen: S28. Prioridad: 🟡 ALTA. Disparo: modelo financiero / liquidaciones, o integración de Kushki (relacionada con D-236). El botón/pantalla es Fase 4 del flujo de grooming.
+Origen: S28. Prioridad: 🟡 ALTA. Disparo: modelo financiero / liquidaciones, o integración de la pasarela (relacionada con D-236). El botón/pantalla es Fase 4 del flujo de grooming.
 
 #### D-241 — Zona horaria del "día" en `obtener_resumen_dia_grooming`
 El filtro de fecha del resumen usa `terminada_en::date = p_fecha`, que compara en la zona horaria del servidor (UTC). Para un prestador en Colombia (UTC-5) una atención cerrada cerca de medianoche local puede caer en otro día UTC. El cálculo es correcto; lo que falta definir es si el "día" del resumen es el del prestador (zona local) o UTC.
@@ -1005,7 +1005,7 @@ Origen: S10. Prioridad: 🟡 → ✅ cerrada.
 Add-on adicional al plan Pro. ~$100/mes. Permite restaurar a punto
 exacto en el tiempo (no solo daily snapshot).
 Origen: S11. Prioridad: ⏸ DIFERIDA. Disparo: cuando arranque flujo
-Kushki real con transacciones en producción.
+PASARELA real con transacciones en producción.
 
 ### Deudas de Sesión 29 (21 Mayo 2026)
 
@@ -1227,10 +1227,10 @@ Disparo: aplicar el patrón del `SlotFamiliaPaseo` al Durante de grooming (leer 
 ### Deudas de Sesión 39 (10 Jun 2026)
 
 #### D-280 — Subsistema comercial estadias/suscripciones_servicio/bonos pre-patrón
-Tres tablas creadas pre-S26 sin DDL versionado en este repo; escritura por INSERT directo desde TS (sin RPC SECURITY DEFINER, anti-patrón canónico); CHECKs de tipo_servicio hardcodeados y desalineados del catálogo (estadias solo 'hotel'; bonos solo 'paseo'; suscripciones solo 'guarderia_mensual'|'paseo_mensual'); estadias sin conexión a evento_cita_servicio ni a la capa de atención. 0 filas en las tres; consumo front read-only (Dashboard/Agenda/Citas/Contratos) + 2 modales de creación. Patrón vivo: bonos y suscripciones amparan citas vía evento_cita_servicio.bono_id / suscripcion_servicio_id (FK SET NULL) — la cita sigue siendo la unidad operativa. Hipótesis de destino (S39): estadía como contenedor comercial de N citas-día (calco del patrón suscripción→cita), 1 atención por día sobre la capa. Prioridad: 🟡 ALTA. Disparo: B3 hotel (estadias) / integración Kushki (suscripciones, bonos). B2/guardería ya NO está en MVP. Origen: S39.
+Tres tablas creadas pre-S26 sin DDL versionado en este repo; escritura por INSERT directo desde TS (sin RPC SECURITY DEFINER, anti-patrón canónico); CHECKs de tipo_servicio hardcodeados y desalineados del catálogo (estadias solo 'hotel'; bonos solo 'paseo'; suscripciones solo 'guarderia_mensual'|'paseo_mensual'); estadias sin conexión a evento_cita_servicio ni a la capa de atención. 0 filas en las tres; consumo front read-only (Dashboard/Agenda/Citas/Contratos) + 2 modales de creación. Patrón vivo: bonos y suscripciones amparan citas vía evento_cita_servicio.bono_id / suscripcion_servicio_id (FK SET NULL) — la cita sigue siendo la unidad operativa. Hipótesis de destino (S39): estadía como contenedor comercial de N citas-día (calco del patrón suscripción→cita), 1 atención por día sobre la capa. Prioridad: 🟡 ALTA. Disparo: B3 hotel (estadias) / integración de la pasarela (suscripciones, bonos). B2/guardería ya NO está en MVP. Origen: S39.
 
 #### D-281 — Camino a activar los 3 servicios MVP desde la app mobile (4 capas)
-Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en orden de desarrollo: (1) operación/atención del prestador — paseo+grooming hechos, falta endurecer D-268/D-279 y construir veterinario; (2) integridad operativa — D-278, D-275 A; (3) configuración del servicio desde vista prestador (horarios, condiciones, precios, disponibilidad, capacidad) — arrastra D-200 y D-210; (4) cliente/app mobile (OTRO repo) — descubrimiento, agendamiento, cobro Kushki, devolución de evidencia; relevamiento del repo app-cliente pendiente. Metodología: simulación por DB con tests imperativos por bloque hasta el final de capa 4, donde recién corre el E2E 100% por UI. Veterinario arrastra además el refactor RLS Bio-Expediente (D-107/108/109/110/154). Prioridad: 🔴 BLOQUEANTE soft launch. Origen: S39.
+Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en orden de desarrollo: (1) operación/atención del prestador — paseo+grooming hechos, falta endurecer D-268/D-279 y construir veterinario; (2) integridad operativa — D-278, D-275 A; (3) configuración del servicio desde vista prestador (horarios, condiciones, precios, disponibilidad, capacidad) — arrastra D-200 y D-210; (4) cliente/app mobile (OTRO repo) — descubrimiento, agendamiento, cobro por la pasarela, devolución de evidencia; relevamiento del repo app-cliente pendiente. Metodología: simulación por DB con tests imperativos por bloque hasta el final de capa 4, donde recién corre el E2E 100% por UI. Veterinario arrastra además el refactor RLS Bio-Expediente (D-107/108/109/110/154). Prioridad: 🔴 BLOQUEANTE soft launch. Origen: S39.
 
 ### Deudas de Sesión 41 (3-4 Jul 2026)
 
@@ -1515,7 +1515,7 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 🟢 MEDIA. La agenda demo no tiene franjas de domingo (relevado S57: prestador_horarios días 1-6). Verificar: si es CONFIG del prestador (lo esperable — franjas semanales que él define), la voz honesta del flujo debe poder decirlo ("no atiende domingos" es oferta, no bug); si alguna regla en código excluye domingos por fuera de la config, SE EXTIRPA. Disparo: próxima sesión que toque agenda. Origen: S57 founder (pregunta del gate).
 
 #### D-364 — Pantalla de elección de destino del reembolso (banco vs saldo e-PetPlace)
-⏸ DIFERIDA (ya declarada en P18 — esta entrada es el puntero de deuda). La elección del destino (medio de pago original con sus ~15 días hábiles declarados / saldo e-PetPlace en segundos) se construye con las DOS vías reales; el saldo e-PetPlace nace con su letra financiera propia ANTES del primer crédito (financiero v2.7 §7.16). Disparo: Kushki fase 1. Origen: P18 (founder S57).
+⏸ DIFERIDA (ya declarada en P18 — esta entrada es el puntero de deuda). La elección del destino (medio de pago original con sus ~15 días hábiles declarados / saldo e-PetPlace en segundos) se construye con las DOS vías reales; el saldo e-PetPlace nace con su letra financiera propia ANTES del primer crédito (financiero v2.7 §7.16). Disparo: PASARELA fase 1. Origen: P18 (founder S57).
 
 #### D-365 — Gates de ESPERA del founder (hold que expira, paquete que vence) ✅ CERRADA (S59 — gates corridos VERDES)
 ~~🟡 ALTA~~ **CERRADA en S59**: el founder corrió los dos escenarios de espera en la tanda de gates S59 y salieron VERDES — sin curas. Letra original:
@@ -1568,7 +1568,7 @@ Origen: gate founder S55. Causa: `router.dismissTo('/hogar')` solo busca en el s
 ⏸ DIFERIDA. La v1 del paquete (S57-A, D-343) usa **precio único por salida** (`prestador_servicios.precio_paquete`) para los tres presets 5/10/15 — el descuento por volumen es uno solo, no escala con el tamaño del preset (decisión técnica de Code ratificada por el arquitecto S57: patrón Decisión S/precio_plan, una columna). La escalera por preset (5 a un precio, 15 a otro) queda declarada como evolución posible del mismo contrato: exigiría columnas/jsonb por preset + enmienda del wrapper y de la Hoja de compra, sin tocar el chasis (el bono ya snapshotea SU precio de origen). Sin lugar en UI hasta el disparo. **Disparo: pedido del founder tras el gate del paquete.** Origen: respuesta del arquitecto S57-A.
 
 #### D-353 — Devolución al saldo post-vencimiento queda fuera del breakage ya declarado
-⚪ BAJA. Edge declarado en `20260712180000`: una reserva hecha antes del vencimiento del paquete y cancelada en ventana DESPUÉS de que el pase de vencimiento corrió devuelve la salida a un bono ya 'vencido' — la fila dice la verdad (unidades_usadas baja, `pago_metadata.devolucion_post_vencimiento`) pero el evento de breakage ya nació sin esa salida. Ventana de horas, caso raro. Disparo: primer caso real en datos (o Kushki fase 1, que rediseña el cierre del reembolso). Origen: S57-A2a (auto-declarada en construcción).
+⚪ BAJA. Edge declarado en `20260712180000`: una reserva hecha antes del vencimiento del paquete y cancelada en ventana DESPUÉS de que el pase de vencimiento corrió devuelve la salida a un bono ya 'vencido' — la fila dice la verdad (unidades_usadas baja, `pago_metadata.devolucion_post_vencimiento`) pero el evento de breakage ya nació sin esa salida. Ventana de horas, caso raro. Disparo: primer caso real en datos (o PASARELA fase 1, que rediseña el cierre del reembolso). Origen: S57-A2a (auto-declarada en construcción).
 
 #### D-343 — Construcción del PAQUETE DE SALIDAS (bono anclado) ✅ CERRADA (S57, ambas sesiones)
 ~~🟡 ALTA~~ **CERRADA en S57**: DB+wrappers+UI dueño por la A (`09687a7`+`3dabd51`+`2c59ba2`; enmienda v1.4 del gate — paquete DEL HOGAR + comprar≠reservar en la UI + especie por servicio — en `18789ec`+`b040733`), superficie del prestador (/servicios, campo precio del paquete sobre el contrato precio_paquete) por la B (`704462b`), vista del prestador de la cancelación (`dfd69ac`). Gates felices del founder PERFECTOS; quedan los de ESPERA (D-365). Letra original:
@@ -1905,7 +1905,7 @@ El motor de recordatorios apuntando al NEGOCIO (no a la familia); candidata bara
 🟡 MEDIA. Lo que hoy detecta un grep y ningún gate: recetas de texto inline y hex crudos en apps. **Conteos RE-MEDIDOS al depositar (los del dictado estaban desactualizados — se declaran los reales):** `fontSize:` inline en apps = **408** · `fontFamily:` inline = **398** · hex crudos de 6 dígitos = **17** · `fontSize: 34` = **1** (el dictado decía 209; ese número no corresponde a este patrón). **Los `insets` YA NO son deuda: verificado, quedan 2 `paddingBottom` numéricos y ambos son `paddingBottom: 0` de layout legítimo — B los pagó en B1/B5.** **`apps/prestador/src/components/themed-text.tsx` está MUERTO: 0 consumidores** (regla 37 — se borra, no se lintea). El linter es la red para que la migración a `Texto` (D-450) no se re-ensucie por detrás. **Disparo: después del congelamiento de `Texto`.** Origen: S71-A0 (deep research, Bloque 0).
 
 #### D-448 — `montoCorto` al riel
-🟢 MEDIA. **42 formateos de monto** en el repo, **2 divergentes** entre sí. El formateo de plata vive artesanal por pantalla, igual que las fechas antes de `fechaCortaMono`. La cura es una función por idioma en el riel, no una variante de componente — por eso **`montoCorto` NO nace como variante de `Texto`** (decisión de mesa al congelar). **Disparo: P21 / la entrada de Kushki** — cuando el monto deje de ser simulado, la divergencia deja de ser cosmética. Origen: S71 (congelamiento de `Texto`).
+🟢 MEDIA. **42 formateos de monto** en el repo, **2 divergentes** entre sí. El formateo de plata vive artesanal por pantalla, igual que las fechas antes de `fechaCortaMono`. La cura es una función por idioma en el riel, no una variante de componente — por eso **`montoCorto` NO nace como variante de `Texto`** (decisión de mesa al congelar). **Disparo: P21 / la entrada de la PASARELA** — cuando el monto deje de ser simulado, la divergencia deja de ser cosmética. Origen: S71 (congelamiento de `Texto`).
 
 #### D-449 — Barrido iconográfico del mundo vet
 🟢 BAJA. Quedan **11 pantallas** del oficio veterinario con iconografía pre-b′ o provisional. Migran al tocarse (patrón D-318), no en big-bang. **Disparo: gate founder de B2 (la consulta).** Origen: S71-B0.
@@ -2045,7 +2045,7 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 🟠 MEDIA-ALTA. `extract` ya lee carnets OkVet. **Precondición de letra:** §14.4 fijó el camino v1 honesto (adjuntar PDF/foto) y difirió la importación rica a D-422. **Decisión de mesa S72:** la procedencia del alta masiva es `declarado_por_prestador` (un profesional declaró; el trigger ya estampa con `prestador_id`). **§14.2 intacta: NO produce `verificado_por_prestador`.** **Peso estratégico:** en F1 la pata "DEMANDA" de la tesis es una PROMESA, no un hecho — no hay clientes que traerle a nadie todavía; por eso la migración sin dolor es EL arma de conversión mientras la demanda no exista. **Disparo: la primera clínica real que diga que sí.** Origen: S72.
 
 #### D-479 — M5 · La plata (pulso, no cola de liquidación) 🟠
-🟠 MEDIA-ALTA. **Corrección del mandato S72, con evidencia:** NEGOCIO ya tiene plata — el techo es dato de liquidación (`negocio.tsx:220-227`) y existe la sección Cobros entera. **El hueco real es más preciso: LA PLATA QUE MUESTRA ES COLA DE LIQUIDACIÓN, NO PULSO** — sin mes, sin ingreso bruto, sin conteo de atenciones, sin desagregación por oficio (el único total de la app, `liquidaciones.tsx:230`, suma `pendiente_liquidar` sin ventana temporal: lo liquidado desaparece del número). **D-457 no crea el lugar: le cambia el contenido** — más barata de lo que el mandato supuso. Kushki (día 1, `DEFINICION_SOFTLAUNCH`) y SRI (D-419, ya declarada primera tanda post-apertura) sin cambio. **Disparo: D-457 (S72, el pulso del negocio).** Origen: S72.
+🟠 MEDIA-ALTA. **Corrección del mandato S72, con evidencia:** NEGOCIO ya tiene plata — el techo es dato de liquidación (`negocio.tsx:220-227`) y existe la sección Cobros entera. **El hueco real es más preciso: LA PLATA QUE MUESTRA ES COLA DE LIQUIDACIÓN, NO PULSO** — sin mes, sin ingreso bruto, sin conteo de atenciones, sin desagregación por oficio (el único total de la app, `liquidaciones.tsx:230`, suma `pendiente_liquidar` sin ventana temporal: lo liquidado desaparece del número). **D-457 no crea el lugar: le cambia el contenido** — más barata de lo que el mandato supuso. La pasarela (día 1, `DEFINICION_SOFTLAUNCH`) y SRI (D-419, ya declarada primera tanda post-apertura) sin cambio. **Disparo: D-457 (S72, el pulso del negocio).** Origen: S72.
 
 #### D-480 — M6 · ¿El procedimiento gana tipo catalogado? 🟢 DECISIÓN FOUNDER ABIERTA
 🟢 BAJA. Hoy el procedimiento es `prestador_servicios.nombre_custom`, texto libre — **por eso hubo dos "Ecografia"** (limpiada en la migración `20260721120000`) **y por eso los glifos por tipo no tienen de dónde colgarse** (`DIRECCION_ARTE` §6b: un glifo que nadie monta no se pide). **PRECISIÓN HONESTA: esto NO cura la invisibilidad** — eso ya lo curó el motor (`procedimiento` + estampado en `fijar_fecha`, S72-A). Se sostiene solo por: calidad de catálogo, glifos por tipo, recordatorio por tipo, y el vet viendo su plata por procedimiento. **Disparo: decisión founder, sin fecha.** Origen: S72.

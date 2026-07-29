@@ -82,8 +82,11 @@ fecha. El destino incluye:
 > decisión de alcance, no un límite del modelo de identidad.
 
 - **Cobro in-app desde el día 1** (decisión founder S49): el dueño
-  paga los servicios dentro de la app. Pasarela: Kushki Fase 1 (la que
-  el ecosistema ya opera). Con su camino triste digno: rechazo,
+  paga los servicios dentro de la app. Pasarela: Fase 1, proveedor SIN
+  DECIDIR *(enmienda S81: esta línea decía "Kushki Fase 1 (la que el
+  ecosistema ya opera)" y hoy es FALSO — Kushki/NUVEI pendiente del
+  founder; el disparo sobrevive al proveedor y el nombre vivirá en UN
+  solo lugar cuando se firme)*. Con su camino triste digno: rechazo,
   reintento y reembolso con voz honesta. **El contrato del dinero es
   `MODELO_FINANCIERO.md`** — toda feature que toque plata lo lee antes.
 - **Prime preparado, apagado** (decisión founder S49): la infra de

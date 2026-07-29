@@ -59,7 +59,7 @@ El efecto red es **multi-lado**: hay 5+ tipos de actores contribuyendo, no 2 com
 
 ### Por integración con prestadores reales
 
-A diferencia de apps "directorio de vets", e-PetPlace gestiona el **flujo completo de la transacción**: booking, pago (Kushki), historia clínica registrada en DB, liquidación al prestador, soporte al cliente. El prestador no usa otro software paralelo — usa e-PetPlace como su CRM y operador financiero.
+A diferencia de apps "directorio de vets", e-PetPlace gestiona el **flujo completo de la transacción**: booking, pago (pasarela), historia clínica registrada en DB, liquidación al prestador, soporte al cliente. El prestador no usa otro software paralelo — usa e-PetPlace como su CRM y operador financiero.
 
 Esto crea costo de cambio alto para el prestador (su data está en e-PetPlace) y diferenciación frente a competidores que solo conectan sin operar la transacción.
 
@@ -80,7 +80,7 @@ Definidos en detalle en `MODELO_FINANCIERO.md`. Resumen:
 7. **Donaciones a refugios** — fee mínimo sobre flujo (motor financiero ya soporta este origen).
 8. **Bonos** — venta de bonos prepagados con margen.
 
-Multi-moneda y multi-país soportado desde el motor financiero. Kushki como gateway en LatAm.
+Multi-moneda y multi-país soportado desde el motor financiero. Una pasarela de pagos como gateway en LatAm *(enmienda S81: decía «Kushki» — proveedor sin decidir; el nombre vivirá en UN solo lugar cuando se firme)*.
 
 ### Costo de adquisición vs costo de captura de data
 
@@ -197,7 +197,7 @@ La regla operativa es: **si la pieza no encaja con la visión, reconstrucción i
 ### Hitos próximos (en orden)
 
 1. Cerrar Bio-Expediente end-to-end (RLS + wrappers + UI).
-2. Primer prestador real registrado (criterio de disparo para staging separado, PITR, primer cobro real con Kushki).
+2. Primer prestador real registrado (criterio de disparo para staging separado, PITR, primer cobro real con la pasarela).
 3. Primer dueño con expediente real cargado.
 4. Primera transacción completa (cita + pago + HC + liquidación).
 5. Wearable integration (ya hay schema, falta motor de alertas e integración con fabricantes).

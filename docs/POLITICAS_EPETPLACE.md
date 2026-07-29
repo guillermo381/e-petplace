@@ -534,7 +534,7 @@ La plataforma no litiga la falla del lado que cobró.
 - El prestador VE la cancelación/reagenda con honestidad en su agenda
   (lado Sesión B): la franja liberada vuelve a ofertarse sola.
 
-**CON PASARELA REAL (disparo: Kushki fase 1):**
+**CON PASARELA REAL (disparo: PASARELA fase 1 — sin apellido de proveedor, enmienda S81):**
 - La elección de destino se enciende con las dos vías reales y sus
   tiempos honestos.
 - El saldo e-PetPlace nace con su letra financiera propia ANTES del
