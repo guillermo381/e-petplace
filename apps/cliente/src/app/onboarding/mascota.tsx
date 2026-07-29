@@ -20,7 +20,8 @@ import {
   useTheme,
   type AvatarMascotaEspecie,
   type SelectorEspecieOpcion,
-EvitaTeclado, } from '@epetplace/ui';
+  EvitaTeclado,
+} from '@epetplace/ui';
 import { obtenerEspeciesActivas } from '@epetplace/api';
 
 import { esEspecieUi } from '@/lib/params';

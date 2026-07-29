@@ -41,6 +41,7 @@ import {
   spacing,
   useAviso,
   useTheme,
+  Entrada,
 } from '@epetplace/ui';
 import {
   aceptarInvitacionEquipo,
@@ -172,6 +173,8 @@ export default function Invitacion() {
           logoUrl={resolverUrlLogoNegocio(datos.negocioLogoPath)}
         />
         <View style={{ alignItems: 'center', gap: spacing[2] }}>
+          {/* §5 firmada (S81) */}
+          <Entrada>
           <Texto variante="titulo">
             {datos.negocioNombre !== null
               ? t('invitacion.titulo', { negocio: datos.negocioNombre })
@@ -179,12 +182,15 @@ export default function Invitacion() {
           </Texto>
           <Texto variante="apoyo">{t('invitacion.invitadoComo', { nombre: datos.nombreInvitado })}</Texto>
         </View>
+        </Entrada>
+        <Entrada orden={1}>
         <Boton
           etiqueta={t('invitacion.entrar')}
           bloque
           cargando={aceptando}
           onPress={() => void aceptar(datos)}
         />
+        </Entrada>
         <Boton
           variante="compacto"
           etiqueta={t('sesion.cerrarSesion')}

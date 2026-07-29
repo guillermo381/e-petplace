@@ -37,6 +37,7 @@ import {
   Texto,
   spacing,
   useTheme,
+  Entrada,
 } from '@epetplace/ui';
 import {
   cerrarSesion,
@@ -152,6 +153,8 @@ export default function SalaEspera() {
         }}
       >
         {/* el marco: la voz del landing, reusada tal cual (aprobada) */}
+        {/* §5 firmada (S81) */}
+        <Entrada>
         <View style={{ gap: spacing[2] }}>
           <Texto variante="titulo">{t('bienvenida.titular')}</Texto>
           <Texto variante="apoyo">{t('bienvenida.subtitulo')}</Texto>
@@ -159,6 +162,8 @@ export default function SalaEspera() {
         </View>
 
         {/* ── QUÉ FALTA DE TU PARTE ── */}
+        </Entrada>
+        <Entrada orden={1}>
         <View style={{ gap: spacing[2] }}>
           <Texto variante="seccion">{t('salaEspera.faltaTitulo')}</Texto>
           <Tarjeta elevacion="reposo" relleno="ninguno">
@@ -202,6 +207,7 @@ export default function SalaEspera() {
             )}
           </Tarjeta>
         </View>
+        </Entrada>
 
         {/* ── mismos campos, misma pieza: la sede ── */}
         <SeccionSede sede={sede} />
