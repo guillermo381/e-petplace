@@ -19,6 +19,16 @@
  * Herencias vivas de la pantalla S45-S48 que esta reemplaza: Hoja de
  * detalle de vacuna (tap en nodo) y VisorFoto del carnet. La Hoja de
  * Ajustes/sesión MIGRÓ a Cuenta (B2.5).
+ *
+ * S82-C LAZO 4d (CLARIDAD, pasada ANGOSTA a propósito — el Hogar es LA
+ * PANTALLA PATRÓN firmada): migran SOLO las recetas exactas de Texto
+ * (acordeón error/sin-detalle → apoyo · la Hoja de vacuna: nombre →
+ * seccion, detalle → apoyo). NO SE TOCAN, declarado: los títulos de
+ * zona sm/medium/secondary (calibración de la FIRMA hogar-v2 — no se
+ * estandarizan a `seccion` sin gate) · el mensaje de familia del
+ * acordeón (voz humana con interlineado, fuera de la API) · el
+ * verEnVivo en accent (color fuera de la API) · la meta mono xs con
+ * tracking (escala fuera de `dato`).
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -206,9 +216,7 @@ function DetalleNodoHogar({ atencionId, onVerCompleto }: { atencionId: string; o
   }
   if (detalle === 'error') {
     return (
-      <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.status.dangerText }}>
-        {t('hogar.acordeonError')}
-      </Text>
+      <Texto variante="apoyo" color="danger">{t('hogar.acordeonError')}</Texto>
     );
   }
   const sinNada = detalle.mensaje_familia === null && detalle.servicios_aplicados.length === 0;
@@ -235,9 +243,7 @@ function DetalleNodoHogar({ atencionId, onVerCompleto }: { atencionId: string; o
         </View>
       ) : null}
       {sinNada ? (
-        <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-          {t('hogar.acordeonSinDetalle')}
-        </Text>
+        <Texto variante="apoyo">{t('hogar.acordeonSinDetalle')}</Texto>
       ) : null}
       {detalle.oficio === 'paseo' ? (
         <View style={{ alignSelf: 'flex-start' }}>
@@ -1304,13 +1310,11 @@ export default function Hogar() {
           </View>
         ) : (
           <View style={{ gap: spacing[3], padding: spacing[4] }}>
-            <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}>
-              {vacuna.nombre_vacuna}
-            </Text>
+            <Texto variante="seccion">{vacuna.nombre_vacuna}</Texto>
             {(vacuna.tipo_vacuna || vacuna.veterinario_nombre_externo) && (
-              <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+              <Texto variante="apoyo">
                 {[vacuna.tipo_vacuna, vacuna.veterinario_nombre_externo].filter(Boolean).join(' · ')}
-              </Text>
+              </Texto>
             )}
             {(vacuna.fecha_aplicada || vacuna.fecha_proxima || vacuna.lote) && (
               <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.secondary }}>
