@@ -251,15 +251,7 @@ export default function OfertaPaseo() {
                   }}
                 />
                 <View style={{ flex: 1, gap: spacing[1] }}>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.medium,
-                      fontSize: typography.size.base,
-                      color: theme.text.primary,
-                    }}
-                  >
-                    {visible ? t('ofertaPaseo.visibleTitulo') : t('ofertaPaseo.noVisibleTitulo')}
-                  </Text>
+                  <Texto variante="seccion">{visible ? t('ofertaPaseo.visibleTitulo') : t('ofertaPaseo.noVisibleTitulo')}</Texto>
                   <Texto variante="apoyo">
                     {visible ? t('ofertaPaseo.visibleVoz') : razon}
                   </Texto>
