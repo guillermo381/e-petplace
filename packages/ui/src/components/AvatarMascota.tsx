@@ -31,6 +31,7 @@ import { Image, type ImageSource } from 'expo-image'
 import Svg, { Circle, Path } from 'react-native-svg'
 
 import { useTheme } from '../ThemeProvider'
+import { palette } from '../tokens/palette'
 
 export type AvatarMascotaTamano = 'xs' | 'sm' | 'entidad' | 'md' | 'lg'
 export type AvatarMascotaCapa = 'vida' | 'cuidado' | 'comunidad' | 'comunidadAmplia'
@@ -220,7 +221,7 @@ export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa, sobreLleno
   // el fallback RECEDE en el lleno — velo blanco tenue + huella blanca.
   // (El alpha es candidato a token si el gate lo firma.)
   const fondo = sobreLleno ? 'rgba(255,255,255,0.16)' : conCapa ? theme.capaBg[k] : theme.bg.overlay
-  const color = sobreLleno ? '#FFFFFF' : conCapa && 'capaText' in theme ? theme.capaText[k] : theme.text.secondary
+  const color = sobreLleno ? palette.white : conCapa && 'capaText' in theme ? theme.capaText[k] : theme.text.secondary
 
   return (
     <View

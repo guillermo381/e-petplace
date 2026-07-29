@@ -35,6 +35,7 @@ import Svg, { Circle, Path } from 'react-native-svg'
 
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
+import { radius } from '../tokens/radius'
 import { useTheme } from '../ThemeProvider'
 import { useTraduccionUi } from '../i18n'
 import { fechaCortaMono } from '@epetplace/i18n'
@@ -145,7 +146,7 @@ export function FichaVacuna({
       <View style={{ gap: spacing[2] }}>
         {/* nombre — un humano lo escribió en un carnet: DM Sans */}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
-          <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: puntoCapa }} />
+          <View style={{ width: 8, height: 8, borderRadius: radius.full, backgroundColor: puntoCapa }} />
           <Text
             numberOfLines={1}
             style={{
