@@ -79,12 +79,20 @@ function Ficha({
   // Selección con capa solo fuera de memorial (Ley 8: memorial sin tinte,
   // borde neutral en text.secondary). Patrón `'capaBg' in theme` de AvatarMascota.
   const conCapa = seleccionada && 'capaBg' in theme
-  const fondo = conCapa ? theme.capaBg.identidad : fondoReposo
+  // S81 (7bis FIRMADO — censo B #4): las especies son CATÁLOGO, siempre —
+  // el reposo se RELLENA (tinte identidad SIN borde marcado, §7); la
+  // elección sigue escalando por el BORDE de capa (espec S45 intacta).
+  // Con 6 hermanos rige L-b: intermedio, jamás pleno. Memorial queda en
+  // contorno por el mismo gate 'capaBg' in theme (sin tinta).
+  const rellenoCatalogo = !seleccionada && 'capaBg' in theme
+  const fondo = conCapa || rellenoCatalogo ? theme.capaBg.identidad : fondoReposo
   const borde = conCapa
     ? theme.capa.identidad
-    : seleccionada
-      ? theme.text.secondary
-      : theme.border.subtle
+    : rellenoCatalogo
+      ? 'transparent'
+      : seleccionada
+        ? theme.text.secondary
+        : theme.border.subtle
 
   return (
     <Pressable
