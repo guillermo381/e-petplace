@@ -14,6 +14,15 @@
  *      invitación digna, jamás un formulario ni datos fake.
  *
  * Módulo sin datos = EstadoVacio con voz (Ley 13: vacío confirmado).
+ *
+ * S82-C LAZO 4c (CLARIDAD): la absorción S71 que esta pantalla se había
+ * perdido — `TituloModulo` local era byte-idéntico a `Texto seccion` y
+ * MUERE (4 usos migrados); los `fin` de Celda, la invitación de
+ * identidad y la línea educativa pasan a `Texto apoyo` (receta exacta).
+ * NO SE TOCAN, declarado: la fila hero display de Vitales (matiz Ley 3
+ * S53, FIRMADA — escala display fuera de la API de Texto) y el header
+ * de identidad (composición S52-P4a). CHANEL: el componente local
+ * muerto es la remoción de la pasada.
  */
 
 import { useCallback, useRef, useState } from 'react';
@@ -37,6 +46,7 @@ import {
   LineaDeVida,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useTheme,
@@ -108,24 +118,6 @@ function MotivoLuna({ color }: { color: string }) {
     <Svg width={26} height={26} viewBox="0 0 24 24">
       <Path d="M14.8 4.6a7.6 7.6 0 1 0 4.6 12.9 8.8 8.8 0 0 1-4.6-12.9Z" {...trazoMotivo(color)} />
     </Svg>
-  );
-}
-
-// S52-P4b: título de módulo HUMANIZADO — DM Sans medium en sentence
-// case (el eyebrow uppercase trackeado murió: leía como formulario).
-function TituloModulo({ texto }: { texto: string }) {
-  const { theme } = useTheme();
-  return (
-    <Text
-      accessibilityRole="header"
-      style={{
-        fontFamily: typography.family.sans.medium,
-        fontSize: typography.size.md,
-        color: theme.text.primary,
-      }}
-    >
-      {texto}
-    </Text>
   );
 }
 
@@ -322,7 +314,7 @@ export default function PerfilDeMascota() {
             se expande (actividad/descanso/tendencias) — revelación
             progresiva, cero refactor (DISEÑO_EXPERIENCIA §4). ═══ */}
         <View style={{ gap: spacing[3] }}>
-          <TituloModulo texto={t('perfil.vitales')} />
+          <Texto variante="seccion">{t('perfil.vitales')}</Texto>
 
           {/* (a) LO REAL — los paseos de ESTA mascota, de sus tracks */}
           {vitales === 'cargando' ? (
@@ -426,7 +418,7 @@ export default function PerfilDeMascota() {
 
         {/* ── 2 · Salud (el carnet vivo) ── */}
         <View style={{ gap: spacing[3] }}>
-          <TituloModulo texto={t('perfil.salud')} />
+          <Texto variante="seccion">{t('perfil.salud')}</Texto>
           {vacunas.length === 0 ? (
             <EstadoVacio
               titulo={t('perfil.carnetVacio')}
@@ -480,7 +472,7 @@ export default function PerfilDeMascota() {
             estado sigue primero) y lo PAGINABLE cierra la página. ── */}
         {/* ── 3 · Identidad (progresiva) ── */}
         <View style={{ gap: spacing[3] }}>
-          <TituloModulo texto={t('perfil.identidad')} />
+          <Texto variante="seccion">{t('perfil.identidad')}</Texto>
           {datosIdentidad.length > 0 ? (
             <Tarjeta relleno="ninguno">
               {datosIdentidad.map((d, i) => (
@@ -489,11 +481,7 @@ export default function PerfilDeMascota() {
                   {d.mono ? (
                     <Celda titulo={d.etiqueta} metadataMono={d.valor} />
                   ) : (
-                    <Celda titulo={d.etiqueta} fin={
-                      <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-                        {d.valor}
-                      </Text>
-                    } />
+                    <Celda titulo={d.etiqueta} fin={<Texto variante="apoyo">{d.valor}</Texto>} />
                   )}
                 </View>
               ))}
@@ -509,13 +497,13 @@ export default function PerfilDeMascota() {
                 accessibilityRole="button"
                 onPress={() => setSocialHojaAbierta(true)}
                 fin={
-                  <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                  <Texto variante="apoyo">
                     {mascota.paseo_social_ok === null
                       ? t('paseoSocial.estadoSinResponder')
                       : mascota.paseo_social_ok
                         ? t('paseoSocial.estadoSi')
                         : t('paseoSocial.estadoNo')}
-                  </Text>
+                  </Texto>
                 }
               />
             </Tarjeta>
@@ -531,30 +519,21 @@ export default function PerfilDeMascota() {
                 accessibilityRole="button"
                 onPress={() => setTallaHojaAbierta(true)}
                 fin={
-                  <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+                  <Texto variante="apoyo">
                     {mascota.talla === null || mascota.pelaje === null
                       ? t('grooming.tallaEstadoSinDeclarar')
                       : `${t(mascota.talla === 'S' ? 'grooming.tallaS' : mascota.talla === 'M' ? 'grooming.tallaM' : 'grooming.tallaL')}${mascota.pelaje === 'largo' ? ` · ${t('grooming.pelajeLargoCorto')}` : ''}`}
-                  </Text>
+                  </Texto>
                 }
               />
             </Tarjeta>
           ) : null}
           {/* la invitación digna: texto, jamás formulario muerto */}
-          <Text
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.sm,
-              lineHeight: typography.size.sm * typography.leading.normal,
-              color: theme.text.secondary,
-            }}
-          >
-            {t('perfil.identidadInvitacion')}
-          </Text>
+          <Texto variante="apoyo">{t('perfil.identidadInvitacion')}</Texto>
         </View>
         {/* ── 4 · Su vida ── */}
         <View style={{ gap: spacing[3] }}>
-          <TituloModulo texto={t('perfil.vida')} />
+          <Texto variante="seccion">{t('perfil.vida')}</Texto>
           {items === null ? (
             <LineaDeVida items={[]} cargando />
           ) : items === 'error' ? (
@@ -625,9 +604,9 @@ export default function PerfilDeMascota() {
           <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.base, lineHeight: typography.size.base * typography.leading.normal, color: theme.text.primary }}>
             {indiceAbierto === 'salud' ? t('perfil.eduSaludQue') : t('perfil.eduDescansoQue')}
           </Text>
-          <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * typography.leading.normal, color: theme.text.secondary }}>
+          <Texto variante="apoyo">
             {indiceAbierto === 'salud' ? t('perfil.eduSaludDeQue') : t('perfil.eduDescansoDeQue')}
-          </Text>
+          </Texto>
           <Boton
             etiqueta={t('perfil.eduAccion')}
             bloque
