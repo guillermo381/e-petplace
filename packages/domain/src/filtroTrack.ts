@@ -1,43 +1,48 @@
 /**
- * EL FILTRO DEL TRACK (S81, D-578) — LA PIEZA ÚNICA.
+ * EL FILTRO DEL TRACK (S81, D-578) — LA PIEZA ÚNICA, v2: LA REGLA DE
+ * SEGMENTOS (orden de mesa S81 sobre la medición de los extremos).
  *
- * Nació en packages/ui (MapaRecorrido.filtro.ts, S81-B1) como filtro del
- * DIBUJO; S81 lo sube a domain porque el CÁLCULO de distancia (Vitales)
- * consume la misma verdad — dibujo y cálculo jamás pueden divergir en qué
- * punto es outlier (pedido de B, S81; el número que lo ordenó: la
- * distancia CRUDA del paseo del 28-jul daba 4820 m contra 3360 m
- * filtrados — +30.3% por UN solo outlier; el en-curso del 29-jul, +48%).
- * packages/ui re-exporta desde acá — UNA implementación, cero copias.
+ * La v1 (dos aristas >15 m/s condenan el punto) cazaba PÚAS de un punto
+ * y la medición la venció con el caso vivo del 28-jul: una MESETA
+ * FANTASMA (2+ puntos seguidos en la misma posición falsa) retiene la
+ * arista de salida y el salto sobrevive con una sola arista rápida
+ * (185.7 m y 593.0 m de trazo falso en el último minuto del paseo).
  *
- * LA LEY: el crudo NO se toca — el filtro corre al LEER (dibujar o
- * calcular), jamás al guardar (el track de DB es evidencia).
+ * LA REGLA v2, por segmentos:
+ *  1. ORDENAR por `t`. Marcar como CORTE toda arista con v > 15 m/s
+ *     **Y** Δt < 120 s. (Los dos, no uno: Δt largo es HUECO DE
+ *     CAPTURA — otra cosa; no se descarta, no se inventa línea.)
+ *  2. PARTIR en segmentos por los cortes. El DOMINANTE = más puntos.
+ *  3. DESCARTAR solo segmentos MENORES al 5% del dominante.
+ *     ⚠️ Si quedan DOS (o más) segmentos grandes, NO se descarta
+ *     NINGUNO: es hueco real y se declara — perder recorrido bueno es
+ *     peor que dibujar de más.
+ *  4. EL CRUDO INTACTO: se filtra al LEER (dibujar o calcular), jamás
+ *     al guardar (el track de DB es evidencia).
  *
- * Reglas, en orden (implementación VERBATIM de S81-B1):
- *  a) ORDENAR por `t` antes de juzgar (sort estable; puntos sin `t`
- *     conservan su posición relativa — no se inventa un orden).
- *  b) DESCARTAR un punto SOLO si la velocidad implícita de sus DOS
- *     aristas (llegada Y salida) supera VELOCIDAD_MAX_MS. Una sola
- *     arista rápida no condena: puede ser el vecino el que salta.
- *     Corolario estructural: el primer y el último punto tienen UNA
- *     arista — jamás se descartan.
- *  c) Punto sin `t` = velocidad no computable = NO excede (el filtro
- *     solo juzga lo que puede medir, principio L-139).
+ * Punto sin `t` = arista no computable = NO es corte (el filtro solo
+ * juzga lo que puede medir, principio L-139).
  *
- * Umbral: 15 m/s (54 km/h) — muy por encima de todo paseo real y por
- * debajo de la púa GPS típica. Calibrado CON NÚMERO (S81-B1 sobre los 12
- * tracks reales: 26/1355 descartados, todos con aristas 15.8-108.9 m/s;
- * A-S81-2 lo re-midió por SQL espejo con el mismo veredicto). Se
- * recalibra con medición, jamás a ojo (L-131).
+ * Umbrales calibrados CON NÚMERO, jamás a ojo (L-131): 15 m/s (54 km/h,
+ * sobre todo paseo real y bajo la púa GPS típica — v1, S81-B1 sobre los
+ * 12 tracks) · 120 s de Δt (el gap de captura medido en los tracks
+ * reales arranca en ~350 s; el salto de fix vive en 5-40 s) · 5%
+ * (la meseta fantasma medida es de 2 puntos contra dominantes de
+ * 400+ — 0.5%; un tramo real de recorrido nunca es tan chico).
+ * Consumidores: MapaRecorrido (dibujo, vía re-export en packages/ui) y
+ * distanciaTrackKm (cálculo, vitalesPaseos.ts) — UNA implementación.
  */
 
 export interface PuntoTrackFiltrable {
   lat: number;
   lng: number;
-  /** ISO timestamp de la lectura. Sin él, el punto no se juzga. */
+  /** ISO timestamp de la lectura. Sin él, la arista no se juzga. */
   t?: string;
 }
 
 export const VELOCIDAD_MAX_MS = 15;
+export const DELTA_T_CORTE_S = 120;
+export const FRACCION_SEGMENTO_MENOR = 0.05;
 
 const RADIO_TIERRA_M = 6_371_000;
 
@@ -53,41 +58,69 @@ export function distanciaM(a: PuntoTrackFiltrable, b: PuntoTrackFiltrable): numb
 }
 
 /**
- * Velocidad implícita de la arista a→b en m/s.
- * null = no computable (algún extremo sin `t`): no excede por regla (c).
- * dt<=0 con distancia >0 = teletransporte: Infinity (excede).
- * dt<=0 con distancia 0 = punto repetido (flush duplicado S62): 0.
+ * ¿La arista a→b es un CORTE? Solo si es rápida (v > 15 m/s) Y corta
+ * en tiempo (Δt < 120 s). Δt ≥ 120 s = hueco de captura: no corta.
+ * Sin `t` en algún extremo: no computable, no corta (L-139).
+ * dt <= 0 con distancia > 0 = teletransporte: corta.
  */
-function velocidadArista(a: PuntoTrackFiltrable, b: PuntoTrackFiltrable): number | null {
-  if (!a.t || !b.t) return null;
+function esCorte(a: PuntoTrackFiltrable, b: PuntoTrackFiltrable): boolean {
+  if (!a.t || !b.t) return false;
   const ta = Date.parse(a.t);
   const tb = Date.parse(b.t);
-  if (Number.isNaN(ta) || Number.isNaN(tb)) return null;
-  const d = distanciaM(a, b);
+  if (Number.isNaN(ta) || Number.isNaN(tb)) return false;
   const dt = (tb - ta) / 1000;
-  if (dt <= 0) return d === 0 ? 0 : Infinity;
-  return d / dt;
+  if (dt >= DELTA_T_CORTE_S) return false;
+  const d = distanciaM(a, b);
+  if (dt <= 0) return d > 0;
+  return d / dt > VELOCIDAD_MAX_MS;
 }
 
-export function filtrarTrack<P extends PuntoTrackFiltrable>(puntos: P[]): P[] {
-  // Con <3 puntos ningún punto tiene dos aristas: no hay veredicto posible.
-  if (puntos.length < 3) return puntos;
+/** El detalle del análisis — para quien tenga que DECLARAR (regla 3). */
+export interface FiltroTrackDetalle<P extends PuntoTrackFiltrable> {
+  puntos: P[];
+  nSegmentos: number;
+  descartados: number;
+  /** true = 2+ segmentos grandes: hueco real, nada se descartó. */
+  huecoReal: boolean;
+}
 
-  // (a) orden por t — sort nativo es estable: los sin-t no se mueven.
+export function filtrarTrackDetalle<P extends PuntoTrackFiltrable>(puntos: P[]): FiltroTrackDetalle<P> {
+  if (puntos.length < 2) {
+    return { puntos, nSegmentos: puntos.length, descartados: 0, huecoReal: false };
+  }
+
+  // 1. orden por t — sort nativo es estable: los sin-t no se mueven.
   const orden = [...puntos].sort((p, q) => {
     if (!p.t || !q.t) return 0;
     return Date.parse(p.t) - Date.parse(q.t);
   });
 
-  // Velocidad de cada arista i→i+1, una sola pasada.
-  const v: (number | null)[] = [];
-  for (let i = 0; i < orden.length - 1; i++) v.push(velocidadArista(orden[i], orden[i + 1]));
+  // 2. partir en segmentos por los cortes.
+  const segmentos: P[][] = [[orden[0]]];
+  for (let i = 1; i < orden.length; i++) {
+    if (esCorte(orden[i - 1], orden[i])) segmentos.push([orden[i]]);
+    else segmentos[segmentos.length - 1].push(orden[i]);
+  }
+  if (segmentos.length === 1) {
+    return { puntos: orden, nSegmentos: 1, descartados: 0, huecoReal: false };
+  }
 
-  // (b) ambas aristas por encima del umbral — sobre la secuencia original,
-  // sin cascada: el veredicto de cada punto se toma contra sus vecinos crudos.
-  const excede = (x: number | null) => x !== null && x > VELOCIDAD_MAX_MS;
-  return orden.filter((_, i) => {
-    if (i === 0 || i === orden.length - 1) return true;
-    return !(excede(v[i - 1]) && excede(v[i]));
-  });
+  // 3. dominante y clasificación.
+  const dominante = Math.max(...segmentos.map((s) => s.length));
+  const grandes = segmentos.filter((s) => s.length >= dominante * FRACCION_SEGMENTO_MENOR);
+  if (grandes.length >= 2) {
+    // Hueco real: NO se descarta ninguno — se declara.
+    return { puntos: orden, nSegmentos: segmentos.length, descartados: 0, huecoReal: true };
+  }
+  const conservados = grandes.flat();
+  return {
+    puntos: conservados,
+    nSegmentos: segmentos.length,
+    descartados: orden.length - conservados.length,
+    huecoReal: false,
+  };
+}
+
+export function filtrarTrack<P extends PuntoTrackFiltrable>(puntos: P[]): P[] {
+  return filtrarTrackDetalle(puntos).puntos;
 }

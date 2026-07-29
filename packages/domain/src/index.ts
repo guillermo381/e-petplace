@@ -26,8 +26,12 @@ export {
 } from './vitalesPaseos';
 
 export {
+  DELTA_T_CORTE_S,
   distanciaM,
   filtrarTrack,
+  filtrarTrackDetalle,
+  FRACCION_SEGMENTO_MENOR,
   VELOCIDAD_MAX_MS,
+  type FiltroTrackDetalle,
   type PuntoTrackFiltrable,
 } from './filtroTrack';
