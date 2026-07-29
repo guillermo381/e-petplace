@@ -241,15 +241,7 @@ export default function PortadaVeterinaria() {
                   }}
                 />
                 <View style={{ flex: 1, gap: spacing[1] }}>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.medium,
-                      fontSize: typography.size.base,
-                      color: theme.text.primary,
-                    }}
-                  >
-                    {verificado ? t('veterinaria.verificadoTitulo') : t('verificacionVet.titulo')}
-                  </Text>
+                  <Texto variante="seccion">{verificado ? t('veterinaria.verificadoTitulo') : t('verificacionVet.titulo')}</Texto>
                   <Texto variante="apoyo">
                     {vozVerificacion}
                   </Texto>
