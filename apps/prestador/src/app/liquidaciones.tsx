@@ -201,17 +201,7 @@ export default function Liquidaciones() {
                 // el paso real hacia cobrar, con su porqué arriba del CTA
                 // (la descripcion de EstadoVacio trunca a 3 líneas — acá no)
                 <View style={{ gap: spacing[3], alignItems: 'center' }}>
-                  <Text
-                    style={{
-                      textAlign: 'center',
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.sm,
-                      lineHeight: typography.size.sm * typography.leading.normal,
-                      color: theme.text.secondary,
-                    }}
-                  >
-                    {t('cobros.vacioSinCuentaActiva')}
-                  </Text>
+                  <Texto variante="apoyo" centrado>{t('cobros.vacioSinCuentaActiva')}</Texto>
                   <Boton
                     variante="primario"
                     etiqueta={t('cobros.vacioCta')}
@@ -277,16 +267,7 @@ export default function Liquidaciones() {
               </Tarjeta>
               {pantalla.liquidaciones.length === 0 && (
                 // educa UNA vez cómo sigue; cuando existan liquidaciones, se ven solas
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.regular,
-                    fontSize: typography.size.xs,
-                    lineHeight: typography.size.xs * typography.leading.normal,
-                    color: theme.text.tertiary,
-                  }}
-                >
-                  {t('cobros.esperandoEducacion')}
-                </Text>
+                <Texto variante="apoyo" color="tertiary">{t('cobros.esperandoEducacion')}</Texto>
               )}
             </View>
           )}
