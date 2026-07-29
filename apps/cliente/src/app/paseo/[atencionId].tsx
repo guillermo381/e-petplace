@@ -25,7 +25,7 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { Platform, Pressable, RefreshControl, ScrollView, Text, View, useWindowDimensions, type LayoutChangeEvent } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 import Svg, { Path } from 'react-native-svg';
 import { Image } from 'expo-image';
@@ -118,13 +118,14 @@ export default function DetallePaseo() {
   const despl = useSharedValue(altoPantalla); // entra deslizando desde abajo
   const extAlto = useSharedValue(0); // alto medido del bloque extendible
   const desplBase = useSharedValue(0); // ancla del arrastre en curso
-  // S81-B 3ª pasada (vara: "sin tocar nada tiene que SABER que abajo hay
-  // más"): la asomada MUESTRA UN PEDAZO — traslada extAlto−PEEK, así el
-  // filo de la primera fila de la extendida asoma CORTADO por el canto
-  // de la pantalla (un elemento cortado es la señal más clara de
-  // continuación; el asa es convención). Sin borde (A6), sin badge ni
-  // "Ver más" (19.6). 56 ≈ media fila de pill/foto: garantiza el corte.
-  const PEEK = 56;
+  // S81-B 5ª pasada (plan B ordenado — el asomo fue MUDO): el corte ES
+  // la señal. PEEK 26 = padding [3] (12) + MEDIA pill de Insignia md
+  // (26/2=13→14): la primera pill queda CORTADA A LA MITAD por el canto
+  // de la pantalla — un elemento interrumpido es la señal más clara de
+  // continuación. Con 56 la pill entraba ENTERA (38<56) y el ojo leía
+  // pie de página (diagnóstico 4ª pasada). Sin borde (A6), sin badge ni
+  // "Ver más" (19.6).
+  const PEEK = 26;
   const estiloBanda = useAnimatedStyle(() => ({ transform: [{ translateY: despl.value }] }));
 
   const fijarExtendida = useCallback((v: boolean) => {
@@ -143,16 +144,12 @@ export default function DetallePaseo() {
     [despl, extAlto, fijarExtendida],
   );
 
-  // S81-B 4ª pasada — EL ASOMO (diagnóstico medido: con novedades
-  // primero, la pill entra ENTERA en el peek — 12+26=38 < 56, cero
-  // corte: el ojo lee pie de página. La vía fuerte es el MOVIMIENTO):
-  // al llegar, la banda sube y baja 10px UNA sola vez — "esto se
-  // mueve". Una vez por montaje, jamás en re-medidas (L-c: repetido
-  // sería decoración). Local a la banda a propósito: Entrada (ui) es
-  // entrada de CONTENIDO y la banda ya tiene la suya posicional —
-  // envolverla duplicaría entradas. Promoción sistémica: con el gate.
-  const ASOMO = 10;
-  const asomoHechoRef = useRef(false);
+  // S81-B 5ª pasada — EL ASOMO SE RETIRA (L-c decidió, letra de la
+  // orden: "si con el corte la pantalla ya dice que hay más, el asomo
+  // sobraba"). El asomo decía "hay más" en movimiento y fue MUDO; el
+  // corte de la pill lo dice quieto y siempre visible. Dos señales con
+  // el mismo mensaje = decoración: muere la redundante. La entrada
+  // deslizante de la banda QUEDA (esa es su llegada, no una señal).
 
   // el bloque extendible se mide al layout: fija el imán "asomada" (con
   // su PEEK) y re-ancla si el contenido cambió (fotos que llegan en vivo).
@@ -162,18 +159,7 @@ export default function DetallePaseo() {
       if (h === extAlto.value) return;
       extAlto.value = h;
       if (!bandaExtendidaRef.current) {
-        const asomada = Math.max(h - PEEK, 0);
-        const fisica = { duration: motion.duration.normal, dampingRatio: 0.85 };
-        if (!asomoHechoRef.current) {
-          asomoHechoRef.current = true;
-          despl.value = withSequence(
-            withSpring(asomada, fisica),
-            withSpring(asomada - ASOMO, fisica),
-            withSpring(asomada, fisica),
-          );
-        } else {
-          despl.value = withSpring(asomada, fisica);
-        }
+        despl.value = withSpring(Math.max(h - PEEK, 0), { duration: motion.duration.normal, dampingRatio: 0.85 });
       }
     },
     [despl, extAlto],
