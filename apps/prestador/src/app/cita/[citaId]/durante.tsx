@@ -109,18 +109,11 @@ const MOTIVOS_GPS = [
 ];
 
 function Seccion({ titulo, children }: { titulo: string; children: React.ReactNode }) {
-  const { theme } = useTheme();
+  // S81-C: el rótulo de bloque es del SISTEMA (Texto seccion, con su rol
+  // de header de fábrica) — la receta local sm/secondary era pre-S71.
   return (
     <View style={{ gap: spacing[2] }}>
-      <Text
-        style={{
-          fontFamily: typography.family.sans.medium,
-          fontSize: typography.size.sm,
-          color: theme.text.secondary,
-        }}
-      >
-        {titulo}
-      </Text>
+      <Texto variante="seccion">{titulo}</Texto>
       {children}
     </View>
   );
@@ -359,51 +352,16 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
 
   return (
     <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[5] }}>
-      {/* Estado GPS + puntos */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
-        <Insignia estado={chipGps.estado} etiqueta={chipGps.etiqueta} tamaño="sm" />
-        <Text
-          style={{
-            fontFamily: typography.family.mono.regular,
-            fontSize: typography.size.xs,
-            letterSpacing: typography.tracking.mono,
-            color: theme.text.secondary,
-          }}
-        >
-          {gps.puntosTotal === 1 ? t('cita.unPunto') : t('cita.puntos', { n: gps.puntosTotal })}
-        </Text>
-      </View>
-
-      {/* D-292 (S63-B): la voz honesta dice la verdad del MODO. En
-          'fondo' la letra S62 "pantalla encendida" SE RETIRA (dejó de
-          ser verdad) y la reemplaza la del bolsillo; en el fallback
-          'pantalla' la limitación sigue declarada (L-141): voz
-          secundaria, visible siempre, dosis baja. */}
-      <Text
-        style={{
-          fontFamily: typography.family.sans.regular,
-          fontSize: typography.size.sm,
-          lineHeight: typography.size.sm * 1.4,
-          color: theme.text.secondary,
-          marginTop: -spacing[3],
-        }}
-      >
-        {gps.modo === 'fondo' ? t('cita.trackEnBolsillo') : t('cita.trackPantallaEncendida')}
-      </Text>
-
+      {/* S81-C (composición — §9.3 el estado real primero): EL MOMENTO
+          VIVO preside — cronómetro y mapa son lo que está pasando. La
+          telemetría (chip GPS · puntos · voz del modo) baja a vivir CON
+          el mapa: es la verdad del track, no la de la pantalla. Solo el
+          PROBLEMA sube: la card degradada dirige desde arriba cuando
+          existe (Ley 13/17.4 — el error dirige, no espera). */}
       {cardGps && (
         <Tarjeta relleno="amplio">
           <View style={{ gap: spacing[3] }}>
-            <Text
-              style={{
-                fontFamily: typography.family.sans.regular,
-                fontSize: typography.size.base,
-                lineHeight: typography.size.base * 1.4,
-                color: theme.text.primary,
-              }}
-            >
-              {cardGps.texto}
-            </Text>
+            <Texto variante="cuerpo">{cardGps.texto}</Texto>
             <View style={{ alignSelf: 'flex-start' }}>
               <Boton variante="secundario" tamaño="sm" etiqueta={cardGps.accion} onPress={cardGps.onAccion} />
             </View>
@@ -424,13 +382,29 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
           MapView mata el PROCESO (hilo nativo, sin ErrorBoundary). El
           guard queda VIVO aunque la build salga bien; el GPS sigue
           grabando igual (expo-location no depende de la key de Maps). */}
-      {MAPA_NATIVO_DISPONIBLE ? (
-        <MapaRecorrido puntos={[...datos.trackPrevio, ...gps.puntosSesion]} modo="vivo" capa="cuidado" alto={220} />
-      ) : (
-        <Tarjeta relleno="amplio">
-          <Texto variante="apoyo">{t('cita.mapaApagadoVivo')}</Texto>
-        </Tarjeta>
-      )}
+      <View style={{ gap: spacing[2] }}>
+        {MAPA_NATIVO_DISPONIBLE ? (
+          <MapaRecorrido puntos={[...datos.trackPrevio, ...gps.puntosSesion]} modo="vivo" capa="cuidado" alto={220} />
+        ) : (
+          <Tarjeta relleno="amplio">
+            <Texto variante="apoyo">{t('cita.mapaApagadoVivo')}</Texto>
+          </Tarjeta>
+        )}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+          <Insignia estado={chipGps.estado} etiqueta={chipGps.etiqueta} tamaño="sm" />
+          <Texto variante="dato">
+            {gps.puntosTotal === 1 ? t('cita.unPunto') : t('cita.puntos', { n: gps.puntosTotal })}
+          </Texto>
+        </View>
+        {/* D-292 (S63-B): la voz honesta dice la verdad del MODO. En
+            'fondo' la letra S62 "pantalla encendida" SE RETIRA (dejó de
+            ser verdad) y la reemplaza la del bolsillo; en el fallback
+            'pantalla' la limitación sigue declarada (L-141): voz
+            secundaria, visible siempre, dosis baja. */}
+        <Texto variante="apoyo">
+          {gps.modo === 'fondo' ? t('cita.trackEnBolsillo') : t('cita.trackPantallaEncendida')}
+        </Texto>
+      </View>
 
       {/* Parte del perro — chips de un toque, orden del catálogo (sin
           encabezados de grupo: 12 chips, el orden ya agrupa — dosis baja) */}
@@ -554,16 +528,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
         <View style={{ padding: spacing[4], gap: spacing[3] }}>
           {!pideMotivo ? (
             <>
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.regular,
-                  fontSize: typography.size.base,
-                  lineHeight: typography.size.base * 1.4,
-                  color: theme.text.secondary,
-                }}
-              >
-                {t('cita.terminarExplicacion')}
-              </Text>
+              <Texto variante="cuerpo" color="secondary">{t('cita.terminarExplicacion')}</Texto>
               <Boton
                 variante="primario"
                 bloque
@@ -575,16 +540,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
             </>
           ) : (
             <>
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.regular,
-                  fontSize: typography.size.base,
-                  lineHeight: typography.size.base * 1.4,
-                  color: theme.text.secondary,
-                }}
-              >
-                {t('cita.sinRutaMotivo')}
-              </Text>
+              <Texto variante="cuerpo" color="secondary">{t('cita.sinRutaMotivo')}</Texto>
               {MOTIVOS_GPS.map((m) => (
                 <Boton
                   key={m}
@@ -610,16 +566,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
         titulo={t('cita.fondoHojaTitulo')}
       >
         <View style={{ padding: spacing[4], gap: spacing[3] }}>
-          <Text
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.base,
-              lineHeight: typography.size.base * 1.4,
-              color: theme.text.secondary,
-            }}
-          >
-            {t('cita.fondoHojaExplicacion')}
-          </Text>
+          <Texto variante="cuerpo" color="secondary">{t('cita.fondoHojaExplicacion')}</Texto>
           <Texto variante="apoyo">
             {t('cita.fondoHojaComo')}
           </Texto>
