@@ -687,15 +687,7 @@ export default function TallerGrooming() {
               <Tarjeta elevacion="reposo">
                 <View style={{ gap: spacing[4] }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
-                    <Text
-                      style={{
-                        fontFamily: typography.family.sans.regular,
-                        fontSize: typography.size.base,
-                        color: theme.text.primary,
-                      }}
-                    >
-                      {t('tallerGrooming.extraInterruptor')}
-                    </Text>
+                    <Texto variante="cuerpo">{t('tallerGrooming.extraInterruptor')}</Texto>
                     <Interruptor
                       etiqueta={t('tallerGrooming.extraInterruptor')}
                       registro="oficio"
@@ -730,15 +722,7 @@ export default function TallerGrooming() {
               <Tarjeta elevacion="reposo">
                 <View style={{ gap: spacing[4] }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
-                    <Text
-                      style={{
-                        fontFamily: typography.family.sans.regular,
-                        fontSize: typography.size.base,
-                        color: theme.text.primary,
-                      }}
-                    >
-                      {t('tallerGrooming.atiendesLocal')}
-                    </Text>
+                    <Texto variante="cuerpo">{t('tallerGrooming.atiendesLocal')}</Texto>
                     <Interruptor
                       etiqueta={t('tallerGrooming.atiendesLocal')}
                       registro="oficio"
@@ -747,15 +731,7 @@ export default function TallerGrooming() {
                     />
                   </View>
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
-                    <Text
-                      style={{
-                        fontFamily: typography.family.sans.regular,
-                        fontSize: typography.size.base,
-                        color: theme.text.primary,
-                      }}
-                    >
-                      {t('tallerGrooming.atiendesDomicilio')}
-                    </Text>
+                    <Texto variante="cuerpo">{t('tallerGrooming.atiendesDomicilio')}</Texto>
                     <Interruptor
                       etiqueta={t('tallerGrooming.atiendesDomicilio')}
                       registro="oficio"
@@ -770,15 +746,7 @@ export default function TallerGrooming() {
                     <>
                       <Separador />
                       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
-                        <Text
-                          style={{
-                            fontFamily: typography.family.sans.regular,
-                            fontSize: typography.size.base,
-                            color: theme.text.primary,
-                          }}
-                        >
-                          {t('tallerGrooming.recargoInterruptor')}
-                        </Text>
+                        <Texto variante="cuerpo">{t('tallerGrooming.recargoInterruptor')}</Texto>
                         <Interruptor
                           etiqueta={t('tallerGrooming.recargoInterruptor')}
                           registro="oficio"
