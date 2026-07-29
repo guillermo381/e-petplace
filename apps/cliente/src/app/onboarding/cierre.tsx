@@ -131,7 +131,7 @@ export default function Cierre() {
   // Ley 13: esqueleto estático que imita el Home que viene (avatar + nombre + timeline)
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base, padding: spacing[5], paddingTop: spacing[12] }}>
-      <EsqueletoGrupo etiqueta={t('onboarding.guardando')}>
+      <EsqueletoGrupo etiqueta={t('onboarding.guardando', { nombre: params.nombre || t('onboarding.tuMascota') })}>
         <View style={{ alignItems: 'center', gap: spacing[3] }}>
           <Esqueleto forma="circulo" alto={96} />
           <Esqueleto forma="linea" ancho="40%" />

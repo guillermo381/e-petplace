@@ -128,7 +128,7 @@ export default function AgregarCierre() {
   // Ley 13: esqueleto estático que imita el Hogar que viene
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base, padding: spacing[5], paddingTop: spacing[12] }}>
-      <EsqueletoGrupo etiqueta={t('agregarMascota.guardando')}>
+      <EsqueletoGrupo etiqueta={t('agregarMascota.guardando', { nombre: params.nombre || t('onboarding.tuMascota') })}>
         <View style={{ alignItems: 'center', gap: spacing[3] }}>
           <Esqueleto forma="circulo" alto={96} />
           <Esqueleto forma="linea" ancho="40%" />

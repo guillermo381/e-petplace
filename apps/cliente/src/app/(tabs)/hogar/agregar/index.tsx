@@ -102,8 +102,10 @@ export default function AgregarPasoMascota() {
           <Boton variante="secundario" etiqueta={t('agregarMascota.reintentar')} onPress={() => router.replace('/hogar/agregar')} />
         ) : null}
 
+        {/* S82 (vara ALTA: presentar, no formulario): CTA vivo — espejo
+            del onboarding. */}
         <Boton
-          etiqueta={t('agregarMascota.continuar')}
+          etiqueta={puedeContinuar ? t('agregarMascota.presentar', { nombre: nombre.trim() }) : t('agregarMascota.continuar')}
           bloque
           deshabilitado={!puedeContinuar}
           onPress={() => {

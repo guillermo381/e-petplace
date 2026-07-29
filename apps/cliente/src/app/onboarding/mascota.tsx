@@ -96,8 +96,12 @@ export default function PasoMascota() {
           <Boton variante="secundario" etiqueta={t('onboarding.reintentar')} onPress={() => router.replace('/onboarding/mascota')} />
         ) : null}
 
+        {/* S82 (vara ALTA: presentar, no formulario): el CTA cobra vida —
+            con quién y cómo se llama, el acto deja de ser "continuar" y
+            pasa a ser la PRESENTACIÓN. Deshabilitado conserva el verbo
+            neutro (nada que presentar todavía). */}
         <Boton
-          etiqueta={t('onboarding.continuar')}
+          etiqueta={puedeContinuar ? t('onboarding.presentar', { nombre: nombre.trim() }) : t('onboarding.continuar')}
           bloque
           deshabilitado={!puedeContinuar}
           onPress={() => {

@@ -50,12 +50,15 @@ export const clienteEs = {
   // por founder (lote S55, es y en).
   onboarding: {
     titulo: '¿Quién vive contigo?',
-    nombreLabel: 'Su nombre',
+    // S82 (vara ALTA: presentar, no formulario): la voz pregunta como se
+    // pregunta por alguien — el label de formulario murió.
+    nombreLabel: '¿Cómo se llama?',
     nombrePlaceholder: 'ej: Zeus',
     especieEtiqueta: '¿Qué especie es?',
     cargandoEspecies: 'Cargando especies',
     reintentar: 'Reintentar',
     continuar: 'Continuar',
+    presentar: 'Presentar a {{nombre}}',
     tituloSobre: 'Sobre {{nombre}}',
     tuMascota: 'tu mascota',
     fechaLabel: '¿Cuándo nació?',
@@ -68,7 +71,7 @@ export const clienteEs = {
     // nombre de familia GENERADO (dato persistido — se traduce al crearse)
     nombreFamilia: 'Familia de {{nombre}}',
     nombreFamiliaFallback: 'Mi familia',
-    guardando: 'Guardando',
+    guardando: 'Preparando el lugar de {{nombre}}',
     errorTitulo: 'No pudimos guardar todavía',
     errorFoto: 'La foto no se pudo subir. Puedes probar de nuevo o seguir sin ella por ahora.',
     probarDeNuevo: 'Probar de nuevo',
@@ -803,12 +806,14 @@ export const clienteEs = {
     entradaTitulo: 'Agregar mascota',
     entradaDetalle: 'Cada quien con su propia historia.',
     titulo: '¿Quién más vive contigo?',
-    nombreLabel: 'Su nombre',
+    // S82 (vara ALTA): espejo del onboarding — presentar, no formulario.
+    nombreLabel: '¿Cómo se llama?',
     nombrePlaceholder: 'ej: Zeus',
     especieEtiqueta: '¿Qué especie es?',
     cargandoEspecies: 'Cargando especies',
     reintentar: 'Reintentar',
     continuar: 'Continuar',
+    presentar: 'Presentar a {{nombre}}',
     tituloSobre: 'Sobre {{nombre}}',
     fechaLabel: '¿Cuándo nació?',
     fechaAyuda: 'Si no sabes el día exacto, no pasa nada.',
@@ -817,7 +822,7 @@ export const clienteEs = {
     sexoHembra: 'Hembra',
     sexoNoSe: 'No sé',
     tituloFoto: 'La cara de {{nombre}}',
-    guardando: 'Guardando',
+    guardando: 'Preparando el lugar de {{nombre}}',
     errorTitulo: 'No pudimos guardar todavía',
     errorFoto: 'La foto no se pudo subir. Puedes probar de nuevo o seguir sin ella por ahora.',
     probarDeNuevo: 'Probar de nuevo',
