@@ -50,6 +50,9 @@ export { LogoNegocio, type LogoNegocioProps } from './components/LogoNegocio'
 // FilaCita — S80-B12 Parte 3 (dominio: la fila de cita con su canto ADENTRO;
 // cero API de color/posición/alfa — el molde de "cero genéricos")
 export { FilaCita, type FilaCitaProps, type FilaCitaOficio } from './components/FilaCita'
+// CantoMarca — S81-B (promoción del Svg local S81-C; §9.1 dos cantos dos
+// voces: MARCA = rampa turquesa→magenta, cinco sitios firmados en el censo)
+export { CantoMarca } from './components/CantoMarca'
 export {
   Insignia,
   type InsigniaProps,
