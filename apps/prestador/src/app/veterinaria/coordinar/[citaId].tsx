@@ -198,15 +198,9 @@ export default function FijarFecha() {
                   {mascotaNombre}
                 </Texto>
                 {servicioNombre.trim().length > 0 && (
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.base,
-                      color: theme.text.secondary,
-                    }}
-                  >
+                  <Texto variante="cuerpo" color="secondary">
                     {servicioNombre}
-                  </Text>
+                  </Texto>
                 )}
                 <View
                   style={{
