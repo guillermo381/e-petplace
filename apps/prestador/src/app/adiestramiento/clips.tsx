@@ -30,6 +30,7 @@ import {
   Encabezado,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useAviso,
@@ -199,13 +200,6 @@ export default function ClipsSesionPantalla() {
     setVista({ v: 'lista' });
   }
 
-  const vozSecundaria = {
-    fontFamily: typography.family.sans.regular,
-    fontSize: typography.size.sm,
-    lineHeight: typography.size.sm * 1.4,
-    color: theme.text.secondary,
-  } as const;
-
   // ── CÁMARA (pantalla entera; controles debajo, jamás overlay) ──────
   if (vista.v === 'camara') {
     return (
@@ -270,7 +264,7 @@ export default function ClipsSesionPantalla() {
           {vista.v === 'revision' ? (
             corto ? (
               <>
-                <Text style={vozSecundaria}>{t('clips.quedoCorto')}</Text>
+                <Texto variante="apoyo">{t('clips.quedoCorto')}</Texto>
                 <Boton variante="primario" bloque etiqueta={t('clips.repetir')} onPress={() => void abrirCamara()} />
                 <Boton
                   variante="ghost"
@@ -299,7 +293,7 @@ export default function ClipsSesionPantalla() {
             <>
               {vista.clip.estado === 'error' && (
                 <>
-                  <Text style={vozSecundaria}>{t('clips.noSeEnvio')}</Text>
+                  <Texto variante="apoyo">{t('clips.noSeEnvio')}</Texto>
                   <Boton
                     variante="primario"
                     bloque
@@ -313,7 +307,7 @@ export default function ClipsSesionPantalla() {
               )}
               {vista.clip.estado === 'registrado' ? (
                 // Ya está en el parte del dueño: quitarlo acá mentiría.
-                <Text style={vozSecundaria}>{t('clips.enElParte')}</Text>
+                <Texto variante="apoyo">{t('clips.enElParte')}</Texto>
               ) : (
                 <Boton
                   variante="destructivo"
@@ -337,21 +331,12 @@ export default function ClipsSesionPantalla() {
         <Encabezado variante="navegacion" titulo={t('clips.titulo')} atras onAtras={() => router.back()} />
       </View>
       <ScrollView contentContainerStyle={{ padding: spacing[4], gap: spacing[4] }}>
-        <Text style={vozSecundaria}>{t('clips.explica', { min: CLIP_MIN_S, max: CLIP_MAX_S, techo: CLIPS_MAX })}</Text>
+        <Texto variante="apoyo">{t('clips.explica', { min: CLIP_MIN_S, max: CLIP_MAX_S, techo: CLIPS_MAX })}</Texto>
 
         {sinPermiso !== null && (
           <Tarjeta relleno="amplio">
             <View style={{ gap: spacing[3] }}>
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.regular,
-                  fontSize: typography.size.base,
-                  lineHeight: typography.size.base * 1.4,
-                  color: theme.text.primary,
-                }}
-              >
-                {t('clips.sinPermiso')}
-              </Text>
+              <Texto variante="cuerpo">{t('clips.sinPermiso')}</Texto>
               <View style={{ alignSelf: 'flex-start' }}>
                 <Boton
                   variante="secundario"
@@ -396,7 +381,7 @@ export default function ClipsSesionPantalla() {
         )}
 
         {techo ? (
-          <Text style={vozSecundaria}>{t('clips.techoAlcanzado', { techo: CLIPS_MAX })}</Text>
+          <Texto variante="apoyo">{t('clips.techoAlcanzado', { techo: CLIPS_MAX })}</Texto>
         ) : (
           <Boton variante="primario" bloque etiqueta={t('clips.grabarClip')} onPress={() => void abrirCamara()} />
         )}
@@ -404,7 +389,7 @@ export default function ClipsSesionPantalla() {
         {/* LA VOZ HONESTA, retirada donde dejó de ser verdad (tanda
             corta): habla SOLO por los clips que siguen sin registrar. */}
         {clips.some((c) => c.estado !== 'registrado') && (
-          <Text style={vozSecundaria}>{t('clips.envioPendiente')}</Text>
+          <Texto variante="apoyo">{t('clips.envioPendiente')}</Texto>
         )}
       </ScrollView>
     </View>
