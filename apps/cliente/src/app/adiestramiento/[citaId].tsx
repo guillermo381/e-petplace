@@ -20,6 +20,20 @@
  * TESIS: "Esto fue lo que tu perro aprendió hoy — y así vas vos con él."
  * FIRMA: la frase de vínculo de la progresión (voz humana DM Sans
  * light, §6: 'Zeus ya domina 3 de los 5 comandos de su programa.').
+ *
+ * S82-C LAZO 2 (MOMENTO ④ del triage C7) — mecánica S81 + orden de
+ * lectura. Los rótulos de sección pasan a `Texto seccion` (la jerarquía
+ * deja de re-decidirse a mano; coherencia con el vecino parte/[eventoId])
+ * y el k/N a `Texto dato`. `Entrada` ordena la lectura: la frase de
+ * vínculo (0) → lo trabajado y los clips (1) → el resto (2) — L-c: el
+ * parte se lee en ese orden o no se entiende como progresión.
+ * DECLARADO (no se degrada la pantalla real por mecánica): la frase de
+ * vínculo (xl light + interlineado), la prosa (md + interlineado) y el
+ * mensaje a la familia (lg light) quedan en Text tokenizado — la API de
+ * `Texto` no tiene esas tres voces; candidata de MESA (interlineado de
+ * prosa / voz humana lg), jamás prop inventada al pasar (JSDoc de Texto).
+ * CHANEL: nada se quitó — la pasada se hizo; cada bloque monta solo si
+ * su dato existe (regla de existencia ya vigente en toda la pantalla).
  */
 
 import { useCallback, useState } from 'react';
@@ -30,12 +44,14 @@ import {
   Boton,
   ClipSesion,
   Encabezado,
+  Entrada,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
   Insignia,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useTheme,
@@ -128,171 +144,138 @@ export default function ParteAdiestramientoPantalla() {
           />
         ) : (
           <>
-            {/* Sesión k de N — identidad del programa (§1), voz de máquina */}
-            {parte.sesion !== null ? (
-              <Text
-                style={{
-                  fontFamily: typography.family.mono.regular,
-                  fontSize: typography.size.sm,
-                  color: theme.text.secondary,
-                }}
-              >
-                {t('adiestramiento.sesionKdeN', {
-                  k: String(parte.sesion.numero),
-                  n: String(parte.sesion.de),
-                }).toLowerCase()}
-              </Text>
-            ) : null}
-
-            {/* LA FIRMA — la frase de vínculo (§6). Memorial: progresion
-                llega NULL y esta sección NO existe — sin hueco. */}
-            {parte.progresion !== null ? (
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.light,
-                  fontSize: typography.size.xl,
-                  lineHeight: Math.round(typography.size.xl * 1.3),
-                  color: theme.text.primary,
-                }}
-              >
-                {fraseProgresion(parte.progresion)}
-              </Text>
-            ) : null}
-
-            {/* Lo que trabajaron — chips en voz de familia; el logrado
-                se distingue (alDia), jamás checklist */}
-            {parte.objetivos.length > 0 ? (
-              <View style={{ gap: spacing[2] }}>
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.medium,
-                    fontSize: typography.size.sm,
-                    color: theme.text.secondary,
-                  }}
-                >
-                  {t('adiestramiento.parteObjetivos')}
-                </Text>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
-                  {parte.objetivos.map((o) => (
-                    <Insignia
-                      key={o.codigo}
-                      estado={o.alcanzado ? 'alDia' : 'info'}
-                      etiqueta={idioma === 'en' ? o.nombre_familia_en : o.nombre_familia}
-                    />
-                  ))}
-                </View>
-              </View>
-            ) : null}
-
-            {/* Los clips — el medio del oficio (§5); ≤3, techo del motor */}
-            {parte.clips.length > 0 ? (
+            {/* 0 — LA FIRMA: sesión k de N + la frase de vínculo (§6).
+                Memorial: progresion llega NULL y la sección NO existe. */}
+            <Entrada>
               <View style={{ gap: spacing[3] }}>
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.medium,
-                    fontSize: typography.size.sm,
-                    color: theme.text.secondary,
-                  }}
-                >
-                  {t('adiestramiento.parteClips')}
-                </Text>
-                {parte.clips.map((c) => {
-                  const url = clipUrls[c.storage_path];
-                  return url !== undefined ? (
-                    <ClipSesion
-                      key={c.storage_path}
-                      uri={url}
-                      duracionSegundos={c.duracion_segundos}
-                      descripcion={c.descripcion}
-                    />
-                  ) : null;
-                })}
-              </View>
-            ) : null}
-
-            {/* La nota conductual */}
-            {parte.notas.length > 0 ? (
-              <View style={{ gap: spacing[2] }}>
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.medium,
-                    fontSize: typography.size.sm,
-                    color: theme.text.secondary,
-                  }}
-                >
-                  {t('adiestramiento.parteNotas')}
-                </Text>
-                {parte.notas.map((n, i) => (
-                  <Text
-                    key={i}
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.md,
-                      lineHeight: Math.round(typography.size.md * 1.45),
-                      color: theme.text.primary,
-                    }}
-                  >
-                    {n.texto}
-                  </Text>
-                ))}
-              </View>
-            ) : null}
-
-            {/* Para practicar en casa (§5 founder S62) — sección propia */}
-            {parte.instrucciones_familia !== null ? (
-              <Tarjeta tinte="cuidado">
-                <View style={{ gap: spacing[2] }}>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.medium,
-                      fontSize: typography.size.sm,
-                      color: theme.text.secondary,
-                    }}
-                  >
-                    {t('adiestramiento.parteInstrucciones')}
-                  </Text>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.md,
-                      lineHeight: Math.round(typography.size.md * 1.45),
-                      color: theme.text.primary,
-                    }}
-                  >
-                    {parte.instrucciones_familia}
-                  </Text>
-                </View>
-              </Tarjeta>
-            ) : null}
-
-            {/* El mensaje a la familia — cierre emocional VERBATIM
-                (patrón del parte del paseo) */}
-            {parte.mensaje_familia !== null ? (
-              <>
-                <Separador />
-                <View style={{ gap: spacing[2] }}>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.medium,
-                      fontSize: typography.size.sm,
-                      color: theme.text.secondary,
-                    }}
-                  >
-                    {t('adiestramiento.parteMensajeTitulo')}
-                  </Text>
+                {parte.sesion !== null ? (
+                  <Texto variante="dato">
+                    {t('adiestramiento.sesionKdeN', {
+                      k: String(parte.sesion.numero),
+                      n: String(parte.sesion.de),
+                    }).toLowerCase()}
+                  </Texto>
+                ) : null}
+                {parte.progresion !== null ? (
+                  // Voz humana xl con interlineado de prosa — fuera de la
+                  // API de Texto (candidata de mesa, declarada arriba).
                   <Text
                     style={{
                       fontFamily: typography.family.sans.light,
-                      fontSize: typography.size.lg,
-                      lineHeight: Math.round(typography.size.lg * 1.4),
+                      fontSize: typography.size.xl,
+                      lineHeight: Math.round(typography.size.xl * 1.3),
                       color: theme.text.primary,
                     }}
                   >
-                    {parte.mensaje_familia}
+                    {fraseProgresion(parte.progresion)}
                   </Text>
-                </View>
-              </>
-            ) : null}
+                ) : null}
+              </View>
+            </Entrada>
+
+            {/* 1 — LO QUE PASÓ: chips en voz de familia + los clips. */}
+            <Entrada orden={1}>
+              <View style={{ gap: spacing[5] }}>
+                {parte.objetivos.length > 0 ? (
+                  <View style={{ gap: spacing[2] }}>
+                    <Texto variante="seccion">{t('adiestramiento.parteObjetivos')}</Texto>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
+                      {parte.objetivos.map((o) => (
+                        <Insignia
+                          key={o.codigo}
+                          estado={o.alcanzado ? 'alDia' : 'info'}
+                          etiqueta={idioma === 'en' ? o.nombre_familia_en : o.nombre_familia}
+                        />
+                      ))}
+                    </View>
+                  </View>
+                ) : null}
+
+                {/* Los clips — el medio del oficio (§5); ≤3, techo del motor */}
+                {parte.clips.length > 0 ? (
+                  <View style={{ gap: spacing[3] }}>
+                    <Texto variante="seccion">{t('adiestramiento.parteClips')}</Texto>
+                    {parte.clips.map((c) => {
+                      const url = clipUrls[c.storage_path];
+                      return url !== undefined ? (
+                        <ClipSesion
+                          key={c.storage_path}
+                          uri={url}
+                          duracionSegundos={c.duracion_segundos}
+                          descripcion={c.descripcion}
+                        />
+                      ) : null;
+                    })}
+                  </View>
+                ) : null}
+              </View>
+            </Entrada>
+
+            {/* 2 — EL RESTO: la nota, lo de practicar, el mensaje. */}
+            <Entrada orden={2}>
+              <View style={{ gap: spacing[5] }}>
+                {parte.notas.length > 0 ? (
+                  <View style={{ gap: spacing[2] }}>
+                    <Texto variante="seccion">{t('adiestramiento.parteNotas')}</Texto>
+                    {parte.notas.map((n, i) => (
+                      // Prosa con interlineado — fuera de la API de Texto
+                      // (candidata de mesa, declarada arriba).
+                      <Text
+                        key={i}
+                        style={{
+                          fontFamily: typography.family.sans.regular,
+                          fontSize: typography.size.md,
+                          lineHeight: Math.round(typography.size.md * 1.45),
+                          color: theme.text.primary,
+                        }}
+                      >
+                        {n.texto}
+                      </Text>
+                    ))}
+                  </View>
+                ) : null}
+
+                {/* Para practicar en casa (§5 founder S62) — sección propia */}
+                {parte.instrucciones_familia !== null ? (
+                  <Tarjeta tinte="cuidado">
+                    <View style={{ gap: spacing[2] }}>
+                      <Texto variante="seccion">{t('adiestramiento.parteInstrucciones')}</Texto>
+                      <Text
+                        style={{
+                          fontFamily: typography.family.sans.regular,
+                          fontSize: typography.size.md,
+                          lineHeight: Math.round(typography.size.md * 1.45),
+                          color: theme.text.primary,
+                        }}
+                      >
+                        {parte.instrucciones_familia}
+                      </Text>
+                    </View>
+                  </Tarjeta>
+                ) : null}
+
+                {/* El mensaje a la familia — cierre emocional VERBATIM
+                    (patrón del parte del paseo) */}
+                {parte.mensaje_familia !== null ? (
+                  <>
+                    <Separador />
+                    <View style={{ gap: spacing[2] }}>
+                      <Texto variante="seccion">{t('adiestramiento.parteMensajeTitulo')}</Texto>
+                      <Text
+                        style={{
+                          fontFamily: typography.family.sans.light,
+                          fontSize: typography.size.lg,
+                          lineHeight: Math.round(typography.size.lg * 1.4),
+                          color: theme.text.primary,
+                        }}
+                      >
+                        {parte.mensaje_familia}
+                      </Text>
+                    </View>
+                  </>
+                ) : null}
+              </View>
+            </Entrada>
           </>
         )}
       </ScrollView>
