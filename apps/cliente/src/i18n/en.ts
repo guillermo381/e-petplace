@@ -255,10 +255,12 @@ export const clienteEn = {
     tipoOpcional: "If your card doesn't list the vaccine type, that's okay. You can add it later.",
     porCompletarUna: 'There is 1 vaccine to complete before saving.',
     porCompletar: 'There are {{n}} vaccines to complete before saving.',
-    guardarUna: 'Save 1 vaccine',
-    guardarN: 'Save {{n}} vaccines',
-    exitoUna: "We saved 1 vaccine to {{nombre}}'s story",
-    exitoN: "We saved {{n}} vaccines to {{nombre}}'s story",
+    // S82 (CARNET: identity, not record-keeping) — CTA/success pair share
+    // the flow's verb: adding to their story.
+    guardarUna: 'Add 1 vaccine to their story',
+    guardarN: 'Add {{n}} vaccines to their story',
+    exitoUna: "We added 1 vaccine to {{nombre}}'s story",
+    exitoN: "We added {{n}} vaccines to {{nombre}}'s story",
     hojaGaleriaTitulo: 'Another way to load the card',
     elegirGaleria: 'Pick from the gallery',
     edicionTitulo: 'Review this vaccine',

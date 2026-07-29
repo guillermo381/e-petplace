@@ -285,10 +285,14 @@ export const clienteEs = {
     tipoOpcional: 'Si tu carnet no trae el tipo de vacuna, no pasa nada. Puedes agregarlo después.',
     porCompletarUna: 'Hay 1 vacuna por completar antes de guardar.',
     porCompletar: 'Hay {{n}} vacunas por completar antes de guardar.',
-    guardarUna: 'Guardar 1 vacuna',
-    guardarN: 'Guardar {{n}} vacunas',
-    exitoUna: 'Guardamos 1 vacuna en la historia de {{nombre}}',
-    exitoN: 'Guardamos {{n}} vacunas en la historia de {{nombre}}',
+    // S82 (vara CARNET: identidad, no registro): el verbo del flujo YA
+    // era "sumar a su historia" (espera, multiPagina) — el CTA decía
+    // "Guardar" (registro). El par CTA/éxito se alinea al mismo nombre
+    // en todo el flujo (Ley 17.3).
+    guardarUna: 'Sumar 1 vacuna a su historia',
+    guardarN: 'Sumar {{n}} vacunas a su historia',
+    exitoUna: 'Sumamos 1 vacuna a la historia de {{nombre}}',
+    exitoN: 'Sumamos {{n}} vacunas a la historia de {{nombre}}',
     hojaGaleriaTitulo: 'Otra forma de cargar el carnet',
     elegirGaleria: 'Elegir de la galería',
     edicionTitulo: 'Revisa esta vacuna',
