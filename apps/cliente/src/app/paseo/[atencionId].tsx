@@ -397,8 +397,16 @@ export default function DetallePaseo() {
         {detalle.novedades.length > 0 ? (
           <View style={{ gap: spacing[2] }}>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
+              {/* S81 (regla 80, vara: "dos novedades iguales tienen que
+                  poder distinguirse"): la HORA entra a la pill — created_at
+                  ya viajaba y se descartaba. horaMono = hora LOCAL del
+                  dispositivo (jamás UTC — la lección del carnet, D-312). */}
               {detalle.novedades.map((n, i) => (
-                <Insignia key={i} capa="cuidado" etiqueta={nombreNovedad(n.novedad_codigo)} />
+                <Insignia
+                  key={i}
+                  capa="cuidado"
+                  etiqueta={`${nombreNovedad(n.novedad_codigo)} · ${horaMono(n.created_at)}`}
+                />
               ))}
             </View>
             {detalle.novedades
