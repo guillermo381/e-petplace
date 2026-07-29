@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -19,6 +19,7 @@ import {
   spacing,
   typography,
   useTheme,
+  EvitaTeclado,
 } from '@epetplace/ui';
 import { obtenerDireccionHogar, type DireccionHogar } from '@epetplace/api';
 
@@ -85,10 +86,7 @@ export default function DireccionCuenta() {
       ) : (
         // Cura S56 (orden founder): el campo enfocado SIEMPRE visible —
         // el teclado empuja el scroll, no lo tapa (Android e iOS).
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
+        <EvitaTeclado>
           <ScrollView
             contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[4] }}
             keyboardShouldPersistTaps="handled"
@@ -105,7 +103,7 @@ export default function DireccionCuenta() {
             </Text>
             <DireccionHogarForm inicial={direccion} onGuardada={() => router.back()} />
           </ScrollView>
-        </KeyboardAvoidingView>
+        </EvitaTeclado>
       )}
     </View>
   );

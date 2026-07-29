@@ -57,6 +57,8 @@ export { CantoMarca } from './components/CantoMarca'
 // ADENTRO; la pantalla declara QUE entra y su orden de lectura, jamás
 // los números — patrón FilaCita)
 export { Entrada, type EntradaProps } from './components/Entrada'
+// EvitaTeclado — S81 (D-498): la casa tiene UNA (subió del prestador S73-B)
+export { EvitaTeclado } from './components/EvitaTeclado'
 export {
   Insignia,
   type InsigniaProps,

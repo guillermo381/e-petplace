@@ -12,7 +12,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import {
   Boton,
@@ -23,6 +23,7 @@ import {
   spacing,
   typography,
   useTheme,
+  EvitaTeclado,
 } from '@epetplace/ui';
 import { obtenerDireccionHogar, type DireccionHogar } from '@epetplace/api';
 import { CheckoutReserva } from '@/components/checkout-reserva';
@@ -147,7 +148,7 @@ export default function VeterinariaCheckout() {
         esDomicilio ? (
           /* D-339 heredado: el MISMO formulario de dirección, en Hoja */
           <Hoja visible={hojaDireccion} onCerrar={() => setHojaDireccion(false)} titulo={t('direccion.titulo')} conCerrar>
-            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+            <EvitaTeclado>
               <HojaScroll>
                 <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
                   <Text
@@ -169,7 +170,7 @@ export default function VeterinariaCheckout() {
                   />
                 </View>
               </HojaScroll>
-            </KeyboardAvoidingView>
+            </EvitaTeclado>
           </Hoja>
         ) : undefined
       }

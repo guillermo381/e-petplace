@@ -9,7 +9,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import {
   Boton,
@@ -20,6 +20,7 @@ import {
   spacing,
   typography,
   useTheme,
+  EvitaTeclado,
 } from '@epetplace/ui';
 import { obtenerDireccionHogar, type DireccionHogar } from '@epetplace/api';
 import { CheckoutReserva } from '@/components/checkout-reserva';
@@ -111,7 +112,7 @@ export default function PaseoCheckout() {
            Cuenta·Tu dirección, en Hoja (una vez, jamás en cada reserva) */
         <Hoja visible={hojaDireccion} onCerrar={() => setHojaDireccion(false)} titulo={t('direccion.titulo')} conCerrar>
           {/* Cura S56 (orden founder): el teclado no tapa el campo activo */}
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <EvitaTeclado>
             <HojaScroll>
               <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
                 <Text
@@ -133,7 +134,7 @@ export default function PaseoCheckout() {
                 />
               </View>
             </HojaScroll>
-          </KeyboardAvoidingView>
+          </EvitaTeclado>
         </Hoja>
       }
     />
