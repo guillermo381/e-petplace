@@ -25,7 +25,7 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { Platform, Pressable, RefreshControl, ScrollView, Text, View, useWindowDimensions, type LayoutChangeEvent } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 import Svg, { Path } from 'react-native-svg';
 import { Image } from 'expo-image';
@@ -143,6 +143,17 @@ export default function DetallePaseo() {
     [despl, extAlto, fijarExtendida],
   );
 
+  // S81-B 4ª pasada — EL ASOMO (diagnóstico medido: con novedades
+  // primero, la pill entra ENTERA en el peek — 12+26=38 < 56, cero
+  // corte: el ojo lee pie de página. La vía fuerte es el MOVIMIENTO):
+  // al llegar, la banda sube y baja 10px UNA sola vez — "esto se
+  // mueve". Una vez por montaje, jamás en re-medidas (L-c: repetido
+  // sería decoración). Local a la banda a propósito: Entrada (ui) es
+  // entrada de CONTENIDO y la banda ya tiene la suya posicional —
+  // envolverla duplicaría entradas. Promoción sistémica: con el gate.
+  const ASOMO = 10;
+  const asomoHechoRef = useRef(false);
+
   // el bloque extendible se mide al layout: fija el imán "asomada" (con
   // su PEEK) y re-ancla si el contenido cambió (fotos que llegan en vivo).
   const medirExtendida = useCallback(
@@ -151,7 +162,18 @@ export default function DetallePaseo() {
       if (h === extAlto.value) return;
       extAlto.value = h;
       if (!bandaExtendidaRef.current) {
-        despl.value = withSpring(Math.max(h - PEEK, 0), { duration: motion.duration.normal, dampingRatio: 0.85 });
+        const asomada = Math.max(h - PEEK, 0);
+        const fisica = { duration: motion.duration.normal, dampingRatio: 0.85 };
+        if (!asomoHechoRef.current) {
+          asomoHechoRef.current = true;
+          despl.value = withSequence(
+            withSpring(asomada, fisica),
+            withSpring(asomada - ASOMO, fisica),
+            withSpring(asomada, fisica),
+          );
+        } else {
+          despl.value = withSpring(asomada, fisica);
+        }
       }
     },
     [despl, extAlto],
