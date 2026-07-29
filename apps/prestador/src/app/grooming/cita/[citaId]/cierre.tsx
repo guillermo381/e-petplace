@@ -37,6 +37,7 @@ import {
   Insignia,
   SelectorOpcion,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useAviso,
@@ -262,15 +263,15 @@ export default function CierreGrooming() {
     if (codigo) {
       return (
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: spacing[3] }}>
-          <Text style={vozSecundaria}>{rotulo}</Text>
-          <Text style={vozPrimaria}>{nombreEstado(codigo)}</Text>
+          <Texto variante="apoyo">{rotulo}</Texto>
+          <Texto variante="cuerpo">{nombreEstado(codigo)}</Texto>
         </View>
       );
     }
     if (listo.modo === 'lectura') return null;
     return (
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: spacing[3] }}>
-        <Text style={vozSecundaria}>{rotulo}</Text>
+        <Texto variante="apoyo">{rotulo}</Texto>
         <Boton
           variante="ghost"
           tamaño="sm"
@@ -290,14 +291,18 @@ export default function CierreGrooming() {
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       {/* S74-B D-498: propagación del patrón EvitaTeclado (gateado en el
           path vet) — nota al fondo + CTA + ScrollView pelado. */}
-      <EvitaTeclado>
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[4] }}>
+      {/* S81-C: el Encabezado sale del scroll — fijo, como en el durante
+          y el cierre del paseo (coherencia entre vecinas 1c.3). */}
+      <View style={{ paddingHorizontal: spacing[4], paddingTop: spacing[2] }}>
         <Encabezado
           variante="navegacion"
           titulo={t('citaGrooming.cierreTitulo')}
           atras
           onAtras={() => router.back()}
         />
+      </View>
+      <EvitaTeclado>
+      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[4] }}>
 
         {pantalla.estado === 'cargando' && (
           <EsqueletoGrupo>
@@ -325,7 +330,7 @@ export default function CierreGrooming() {
             {listo.modo === 'lectura' && (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
                 <Insignia estado="alDia" etiqueta={t('agenda.estadoCerrado')} tamaño="sm" />
-                <Text style={mono}>{t('citaGrooming.cerradoMono')}</Text>
+                <Texto variante="dato">{t('citaGrooming.cerradoMono')}</Texto>
               </View>
             )}
 
@@ -333,7 +338,7 @@ export default function CierreGrooming() {
             <Tarjeta relleno="amplio">
               <View style={{ gap: spacing[3] }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: spacing[3] }}>
-                  <Text style={vozSecundaria}>{t('citaGrooming.tiempoTrabajo')}</Text>
+                  <Texto variante="apoyo">{t('citaGrooming.tiempoTrabajo')}</Texto>
                   <Text
                     style={{
                       fontFamily: typography.family.mono.regular,
@@ -348,7 +353,7 @@ export default function CierreGrooming() {
                 <FilaMomento momento="recibir" />
                 <FilaMomento momento="entregar" />
                 <View style={{ gap: spacing[1.5] }}>
-                  <Text style={vozSecundaria}>{t('citaGrooming.serviciosAplicados')}</Text>
+                  <Texto variante="apoyo">{t('citaGrooming.serviciosAplicados')}</Texto>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[1.5] }}>
                     {resumen.servicios_aplicados.map((s) => (
                       <Insignia key={s.codigo} estado="alDia" etiqueta={s.nombre} tamaño="sm" />
@@ -371,7 +376,7 @@ export default function CierreGrooming() {
                   )}
                 </View>
                 {resumen.fotos_total > 0 && (
-                  <Text style={mono}>{t('citaGrooming.fotosSufijo', { n: resumen.fotos_total })}</Text>
+                  <Texto variante="dato">{t('citaGrooming.fotosSufijo', { n: resumen.fotos_total })}</Texto>
                 )}
                 {/* la fecha sugerida §8 (S60-A3 pieza 1): fecha, jamás
                     cita — en edición se elige (Hoja), en lectura es dato */}
@@ -384,7 +389,7 @@ export default function CierreGrooming() {
                       gap: spacing[3],
                     }}
                   >
-                    <Text style={vozSecundaria}>{t('citaGrooming.proximaSesion')}</Text>
+                    <Texto variante="apoyo">{t('citaGrooming.proximaSesion')}</Texto>
                     <Boton
                       variante="ghost"
                       tamaño="sm"
@@ -401,7 +406,7 @@ export default function CierreGrooming() {
                   </View>
                 ) : resumen.proxima_sesion_sugerida !== null ? (
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: spacing[3] }}>
-                    <Text style={vozSecundaria}>{t('citaGrooming.proximaSesion')}</Text>
+                    <Texto variante="apoyo">{t('citaGrooming.proximaSesion')}</Texto>
                     <Text style={{ ...mono, color: theme.text.primary }}>
                       {fechaCortaMono(resumen.proxima_sesion_sugerida, idioma as IdiomaSoportado)}
                     </Text>
@@ -414,11 +419,11 @@ export default function CierreGrooming() {
             {resumen.notas.length > 0 && (
               <Tarjeta relleno="amplio">
                 <View style={{ gap: spacing[2] }}>
-                  <Text style={vozSecundaria}>{t('citaGrooming.notasTitulo')}</Text>
+                  <Texto variante="apoyo">{t('citaGrooming.notasTitulo')}</Texto>
                   {resumen.notas.map((n) => (
-                    <Text key={n.id} style={vozPrimaria}>
+                    <Texto key={n.id} variante="cuerpo">
                       {n.texto}
-                    </Text>
+                    </Texto>
                   ))}
                 </View>
               </Tarjeta>
@@ -426,11 +431,11 @@ export default function CierreGrooming() {
             {resumen.incidencias.length > 0 && (
               <Tarjeta tinte="warning" relleno="amplio">
                 <View style={{ gap: spacing[2] }}>
-                  <Text style={vozSecundaria}>{t('citaGrooming.incidenciasTitulo')}</Text>
+                  <Texto variante="apoyo">{t('citaGrooming.incidenciasTitulo')}</Texto>
                   {resumen.incidencias.map((i) => (
                     <View key={i.id} style={{ gap: spacing[1] }}>
-                      <Text style={vozPrimaria}>{i.nombre}</Text>
-                      {i.descripcion !== null && <Text style={vozSecundaria}>{i.descripcion}</Text>}
+                      <Texto variante="cuerpo">{i.nombre}</Texto>
+                      {i.descripcion !== null && <Texto variante="apoyo">{i.descripcion}</Texto>}
                     </View>
                   ))}
                 </View>
@@ -460,8 +465,8 @@ export default function CierreGrooming() {
                 {resumen.mensaje_familia !== null && (
                   <Tarjeta relleno="amplio">
                     <View style={{ gap: spacing[2] }}>
-                      <Text style={vozSecundaria}>{t('cita.mensajeFamilia')}</Text>
-                      <Text style={vozPrimaria}>{resumen.mensaje_familia}</Text>
+                      <Texto variante="apoyo">{t('cita.mensajeFamilia')}</Texto>
+                      <Texto variante="cuerpo">{resumen.mensaje_familia}</Texto>
                     </View>
                   </Tarjeta>
                 )}
@@ -560,7 +565,7 @@ export default function CierreGrooming() {
           resultado es una FECHA que viaja con el cierre, jamás una cita */}
       <Hoja visible={hojaFecha} onCerrar={() => setHojaFecha(false)} titulo={t('citaGrooming.proximaSesion')}>
         <View style={{ padding: spacing[4], gap: spacing[4] }}>
-          <Text style={vozSecundaria}>{t('citaGrooming.proximaSesionAyuda')}</Text>
+          <Texto variante="apoyo">{t('citaGrooming.proximaSesionAyuda')}</Texto>
           <SelectorOpcion
             acento="oficio"
             etiqueta={t('citaGrooming.proximaSesionSugerir')}
