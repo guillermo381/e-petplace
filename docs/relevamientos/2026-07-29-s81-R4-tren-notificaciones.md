@@ -162,12 +162,17 @@ fcm-credentials — 29-jul, no de memoria):**
    si preferís no commitearlos — cualquiera de las dos vías sirve,
    UNA sola por app).
 
-**Lo que queda para EL DÍA DEL TREN (Code, con veda):** bump
-`version` (cliente 1.0.2→1.0.3 · prestador 1.0.3→1.0.4 — NO antes: el
-bump en main envenena el runtime de los OTA en curso) → `eas build -p
-android --profile preview` ×2 → **checklist D-574 POR MANIFEST**
-(geo.API_KEY + la meta-data de FCM + la sonda presente) → instalar →
-pie de Cuenta → primer OTA contra los runtimes nuevos.
+**Lo que queda para EL DÍA DEL TREN (Code, con veda):** fijar
+`googleServicesFile: "./google-services.json"` en cada app (los json
+YA están commiteados y verificados — cliente multi-app, prestador
+single, proyecto `e-petplace-7854e`) → bump `version` (cliente
+1.0.2→1.0.3 · prestador 1.0.3→1.0.4 — NO antes: el bump en main
+envenena el runtime de los OTA en curso) → `eas build -p android
+--profile preview` ×2 → **EL GUARD DURO: `node
+scripts/verify-manifest-apk.mjs <apk> --app <app>`** (package +
+geo.API_KEY + google_app_id + MESSAGING_EVENT; `exit != 0` = LA BUILD
+NO SE DISTRIBUYE — prueba de fuego L-192 ya corrida en rojo) →
+instalar → pie de Cuenta → primer OTA contra los runtimes nuevos.
 
 ## 4 · El orden propuesto del tren (para cuando la mesa lo dispare)
 
