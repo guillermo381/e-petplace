@@ -25,7 +25,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { Boton, Isotipo, Texto, palette, radius, spacing, useTheme } from '@epetplace/ui';
-import { obtenerMiPerfil, registrarPrimerIngreso } from '@epetplace/api';
+import { obtenerMiPerfil, obtenerMiPrestador, registrarPrimerIngreso } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 
@@ -56,6 +56,11 @@ function CantoDeMarca() {
 
 type Carta = {
   nombre: string | null;
+  /** S81-C (letra founder): el SEGUNDO nombre de la carta — el negocio
+   *  entra en el cuerpo (es su decisión de traer SU casa al ecosistema,
+   *  no la de una cuenta). null honesto = la frase se ACORTA (L-139:
+   *  jamás un genérico inventado). */
+  negocio: string | null;
   /** T4-B1: `registrarPrimerIngreso` es el LECTOR CANÓNICO del propósito
    *  (§3bis: no viaja por PostgREST). null honesto = el bloque "Tú nos
    *  dijiste" NO se dibuja (L-139 — hoy solo vet2 lo tiene con texto). */
@@ -76,10 +81,15 @@ export default function BienvenidaDia1() {
       void (async () => {
         // T4-B1: la marca ya la estampó el guard raíz (RPC idempotente);
         // esta segunda llamada es LECTURA — el propósito llega por acá.
-        const [perfil, ingreso] = await Promise.all([obtenerMiPerfil(), registrarPrimerIngreso()]);
+        const [perfil, ingreso, prestador] = await Promise.all([
+          obtenerMiPerfil(),
+          registrarPrimerIngreso(),
+          obtenerMiPrestador(),
+        ]);
         if (!vigente) return;
         setCarta({
           nombre: perfil.ok ? perfil.data.nombre : null,
+          negocio: prestador.ok ? prestador.data.nombre_comercial : null,
           proposito: ingreso.ok ? ingreso.data.proposito : null,
         });
       })();
@@ -160,6 +170,16 @@ export default function BienvenidaDia1() {
             <Texto variante="titulo">{saludo}</Texto>
 
             <Texto variante="cuerpo">{t('dia1.eleccion')}</Texto>
+
+            {/* S81-C (letra founder): EL SEGUNDO NOMBRE — el negocio en
+                el cuerpo de la carta. Sin nombre legible, la frase se
+                acorta ("tu casa" es la letra del founder, no un genérico
+                — L-139); la elección firmada de arriba no se toca. */}
+            <Texto variante="cuerpo">
+              {carta?.negocio
+                ? t('dia1.casaConNegocio', { negocio: carta.negocio })
+                : t('dia1.casaSinNegocio')}
+            </Texto>
 
             {carta?.proposito !== null && carta?.proposito !== undefined && (
               <View style={{ gap: spacing[2] }}>

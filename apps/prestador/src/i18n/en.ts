@@ -1629,6 +1629,9 @@ export const prestadorEn = {
     saludoNombre: 'Hello, {{nombre}}.',
     saludoSinNombre: 'Hello.',
     eleccion: 'We chose you to be one of the 15 providers shaping e-PetPlace in Ecuador.',
+    // S81-C: el SEGUNDO nombre de la carta — GATE PENDIENTE lote S81
+    casaConNegocio: 'And {{negocio}} comes in with you: bringing your house into the ecosystem was your decision.',
+    casaSinNegocio: 'And your house comes in with you: bringing it here was your decision.',
     propositoIntro: 'You told us:',
     propositoCierre: 'Here we help you live it every day.',
     // literal del founder (27-jul-2026) — la firma NO se traduce

@@ -1831,6 +1831,9 @@ export const prestadorEs = {
     saludoNombre: 'Hola, {{nombre}}.',
     saludoSinNombre: 'Hola.',
     eleccion: 'Te elegimos para ser uno de los 15 prestadores que dan forma a e-PetPlace en Ecuador.',
+    // S81-C: el SEGUNDO nombre de la carta — GATE PENDIENTE lote S81
+    casaConNegocio: 'Y {{negocio}} entra contigo: fue tu decisión traer tu casa al ecosistema.',
+    casaSinNegocio: 'Y tu casa entra contigo: fue tu decisión traerla al ecosistema.',
     propositoIntro: 'Tú nos dijiste:',
     propositoCierre: 'Acá te ayudamos a vivirlo todos los días.',
     firmaNombre: 'Guillermo Suárez',
