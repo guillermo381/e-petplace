@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "676099697994",
+    "project_id": "e-petplace-7854e",
+    "storage_bucket": "e-petplace-7854e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:676099697994:android:cd9f4d072e236fdf32e5b3",
+        "android_client_info": {
+          "package_name": "com.epetplace.cliente"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVuZg9ZhqwzNrJWmU2bGzQ0uW_6yOXVXU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:676099697994:android:87a60f369de7ddef32e5b3",
+        "android_client_info": {
+          "package_name": "com.epetplace.prestador"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVuZg9ZhqwzNrJWmU2bGzQ0uW_6yOXVXU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
