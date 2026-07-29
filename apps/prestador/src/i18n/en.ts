@@ -35,7 +35,6 @@ export const prestadorEn = {
     whatsappMensaje:
       "Hi, I'm interested in offering my pet care services through e-PetPlace. I'm reaching out from the provider app.",
     whatsappFallback: "WhatsApp couldn't open. Message us at {{numero}}.",
-    volver: 'Back',
   },
   sesion: {
     sinSesion: 'No active session',

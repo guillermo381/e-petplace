@@ -11,7 +11,7 @@
 import { useState } from 'react';
 import { Linking, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Boton, Encabezado, spacing, typography, useTheme } from '@epetplace/ui';
+import { Boton, Encabezado, Texto, spacing, typography, useTheme } from '@epetplace/ui';
 
 import { WHATSAPP_EQUIPO_HUMANO, urlWhatsApp } from '@/lib/contacto';
 import { useTraduccion } from '@/i18n';
@@ -41,50 +41,44 @@ export default function SolicitarAcceso() {
         atras
         onAtras={() => router.back()}
       />
-      <View style={{ flex: 1, justifyContent: 'center', padding: spacing[6], gap: spacing[5] }}>
-        <Text
-          style={{
-            fontFamily: typography.family.sans.light,
-            fontSize: typography.size.xl,
-            lineHeight: typography.size.xl * typography.leading.snug,
-            color: theme.text.primary,
-            textAlign: 'center',
-          }}
-        >
-          {t('bienvenida.solicitarCuerpoTitulo')}
-        </Text>
-        <Text
-          style={{
-            fontFamily: typography.family.sans.regular,
-            fontSize: typography.size.base,
-            lineHeight: typography.size.base * typography.leading.normal,
-            color: theme.text.secondary,
-            textAlign: 'center',
-          }}
-        >
-          {t('bienvenida.solicitarCuerpo')}
-        </Text>
-        <Boton
-          variante="primario"
-          etiqueta={t('bienvenida.escribenosWhatsApp')}
-          bloque
-          onPress={() => void abrirWhatsApp()}
-        />
-        {sinWhatsApp && (
-          <Text
-            selectable
-            style={{
-              fontFamily: typography.family.mono.regular,
-              fontSize: typography.size.sm,
-              letterSpacing: typography.tracking.mono,
-              color: theme.text.secondary,
-              textAlign: 'center',
-            }}
-          >
-            {t('bienvenida.whatsappFallback', { numero: WHATSAPP_EQUIPO_HUMANO })}
-          </Text>
-        )}
-        <Boton variante="ghost" etiqueta={t('bienvenida.volver')} bloque onPress={() => router.back()} />
+      {/* S81-C (composición): de bloque centrado-vertical a CARTA
+          arriba-izquierda — el mismo marco que sus vecinas del recorrido
+          (bienvenida-dia1, sala-espera): la pantalla habla, no flota.
+          Título y cuerpo por las piezas del sistema (jerarquía de
+          Texto, no receta artesanal). CHANEL: murió el ghost "Volver"
+          — el Encabezado ya tiene atrás; dos controles para el mismo
+          trabajo era un tablero. */}
+      <View style={{ flex: 1, padding: spacing[6], gap: spacing[6] }}>
+        <View style={{ gap: spacing[3] }}>
+          <Texto variante="titulo">{t('bienvenida.solicitarCuerpoTitulo')}</Texto>
+          <Texto variante="cuerpo" color="secondary">
+            {t('bienvenida.solicitarCuerpo')}
+          </Texto>
+        </View>
+        <View style={{ gap: spacing[3] }}>
+          <Boton
+            variante="primario"
+            etiqueta={t('bienvenida.escribenosWhatsApp')}
+            bloque
+            onPress={() => void abrirWhatsApp()}
+          />
+          {sinWhatsApp && (
+            // Text crudo A PROPÓSITO: el número se COPIA (`selectable`)
+            // y `Texto` no expone selectable — hueco reportado a B, no
+            // se inventa acá (Ley 11).
+            <Text
+              selectable
+              style={{
+                fontFamily: typography.family.mono.regular,
+                fontSize: typography.size.sm,
+                letterSpacing: typography.tracking.mono,
+                color: theme.text.secondary,
+              }}
+            >
+              {t('bienvenida.whatsappFallback', { numero: WHATSAPP_EQUIPO_HUMANO })}
+            </Text>
+          )}
+        </View>
       </View>
     </View>
   );

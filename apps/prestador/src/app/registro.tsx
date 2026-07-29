@@ -82,34 +82,40 @@ export default function Registro() {
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('registro.titulo')} atras onAtras={() => router.back()} />
       <ScrollView
-        contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[2] }}
+        contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[6] }}
         keyboardShouldPersistTaps="handled"
       >
+        {/* S81-C (composición): tres bloques con aire entre sí —
+            contexto · formulario · acción. Antes el gap uniforme [2]
+            apelmazaba la línea de contexto contra el primer campo y el
+            CTA contra el último: densidad pareja = nada manda. */}
         <Texto variante="apoyo">{t('registro.contexto')}</Texto>
-        <Campo
-          label={t('registro.nombreLabel')}
-          value={nombre}
-          onChangeText={setNombre}
-          autoCapitalize="words"
-        />
-        <Campo
-          label={t('registro.emailLabel')}
-          value={email}
-          onChangeText={setEmail}
-          error={errores.email}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          autoComplete="email"
-        />
-        <Campo
-          label={t('registro.passwordLabel')}
-          ayuda={t('registro.passwordAyuda')}
-          value={password}
-          onChangeText={setPassword}
-          error={errores.password}
-          secure
-          autoCapitalize="none"
-        />
+        <View style={{ gap: spacing[2] }}>
+          <Campo
+            label={t('registro.nombreLabel')}
+            value={nombre}
+            onChangeText={setNombre}
+            autoCapitalize="words"
+          />
+          <Campo
+            label={t('registro.emailLabel')}
+            value={email}
+            onChangeText={setEmail}
+            error={errores.email}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            autoComplete="email"
+          />
+          <Campo
+            label={t('registro.passwordLabel')}
+            ayuda={t('registro.passwordAyuda')}
+            value={password}
+            onChangeText={setPassword}
+            error={errores.password}
+            secure
+            autoCapitalize="none"
+          />
+        </View>
         <Boton
           etiqueta={t('registro.crearMiCuenta')}
           bloque

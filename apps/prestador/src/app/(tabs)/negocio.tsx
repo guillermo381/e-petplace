@@ -21,7 +21,7 @@
  */
 
 import { useCallback, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Redirect, useFocusEffect, useRouter } from 'expo-router';
 import {
@@ -31,7 +31,6 @@ import {
   Tarjeta,
   Texto,
   spacing,
-  typography,
   useTheme,
 } from '@epetplace/ui';
 import {
@@ -281,91 +280,39 @@ export default function Negocio() {
               jamás decoración muerta */}
           <View style={{ gap: spacing[3] }}>
             <Texto variante="seccion">{t('negocio.oferta')}</Texto>
-            <Tarjeta
-              interactiva
-              elevacion="reposo"
-              accessibilityRole="button"
-              etiqueta={t('negocio.paseo')}
-              onPress={() => router.push('/paseo')}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-                <Icono nombre="paseo" registro="aa" tamano={28} />
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Texto variante="seccion">
-                    {t('negocio.paseo')}
-                  </Texto>
-                  <Texto variante="apoyo">
-                    {detalleMundoPaseo}
-                  </Texto>
+            {/* S81-C (composición): las cuatro tarjetas de mundo eran la
+                MISMA anatomía copiada 4× inline (paseo S54 → grooming
+                S59 → adiestramiento S63 → vet S68, cada gemela pegada a
+                mano). Una sola forma, datos por fila — el drift entre
+                gemelas ya no puede nacer. Cero cambio visual. Historia
+                de cada mundo: paseo S54 · grooming S59-B5 FASE 2 ·
+                adiestramiento S63/S65-B2 P1 (entra por su PORTADA) ·
+                veterinaria S68 (glifo del lote S53). */}
+            {(
+              [
+                { etiqueta: t('negocio.paseo'), icono: 'paseo', ruta: '/paseo', detalle: detalleMundoPaseo },
+                { etiqueta: t('negocio.mundoGrooming'), icono: 'grooming', ruta: '/grooming', detalle: detalleMundoGrooming },
+                { etiqueta: t('negocio.mundoAdiestramiento'), icono: 'training', ruta: '/adiestramiento', detalle: detalleMundoAdiestramiento },
+                { etiqueta: t('negocio.mundoVeterinaria'), icono: 'veterinaria', ruta: '/veterinaria', detalle: detalleMundoVeterinaria },
+              ] as const
+            ).map((mundo) => (
+              <Tarjeta
+                key={mundo.ruta}
+                interactiva
+                elevacion="reposo"
+                accessibilityRole="button"
+                etiqueta={mundo.etiqueta}
+                onPress={() => router.push(mundo.ruta)}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+                  <Icono nombre={mundo.icono} registro="aa" tamano={28} />
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <Texto variante="seccion">{mundo.etiqueta}</Texto>
+                    <Texto variante="apoyo">{mundo.detalle}</Texto>
+                  </View>
                 </View>
-              </View>
-            </Tarjeta>
-            {/* S59-B5 FASE 2: el mundo Grooming ABRIÓ — la gemela
-                interactiva de la de Paseo (el enchufe de FASE 1(b);
-                el coming-soon y su key MURIERON, Ley 37). */}
-            <Tarjeta
-              interactiva
-              elevacion="reposo"
-              accessibilityRole="button"
-              etiqueta={t('negocio.mundoGrooming')}
-              onPress={() => router.push('/grooming')}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-                <Icono nombre="grooming" registro="aa" tamano={28} />
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Texto variante="seccion">
-                    {t('negocio.mundoGrooming')}
-                  </Texto>
-                  <Texto variante="apoyo">
-                    {detalleMundoGrooming}
-                  </Texto>
-                </View>
-              </View>
-            </Tarjeta>
-            {/* S63-B: el mundo Adiestramiento ABRIÓ — gemela de las dos
-                de arriba. S65-B2 P1: entra por su PORTADA (hallazgo
-                founder — el oficio entraba directo al taller). */}
-            <Tarjeta
-              interactiva
-              elevacion="reposo"
-              accessibilityRole="button"
-              etiqueta={t('negocio.mundoAdiestramiento')}
-              onPress={() => router.push('/adiestramiento')}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-                <Icono nombre="training" registro="aa" tamano={28} />
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Texto variante="seccion">
-                    {t('negocio.mundoAdiestramiento')}
-                  </Texto>
-                  <Texto variante="apoyo">
-                    {detalleMundoAdiestramiento}
-                  </Texto>
-                </View>
-              </View>
-            </Tarjeta>
-            {/* S68-B: el mundo Veterinaria ABRE — cuarta gemela; entra
-                por su portada (precedente S65-B2 P1). Glifo 'veterinaria'
-                del lote S53 (gate por ícono ya cumplido en dirección). */}
-            <Tarjeta
-              interactiva
-              elevacion="reposo"
-              accessibilityRole="button"
-              etiqueta={t('negocio.mundoVeterinaria')}
-              onPress={() => router.push('/veterinaria')}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-                <Icono nombre="veterinaria" registro="aa" tamano={28} />
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Texto variante="seccion">
-                    {t('negocio.mundoVeterinaria')}
-                  </Texto>
-                  <Texto variante="apoyo">
-                    {detalleMundoVeterinaria}
-                  </Texto>
-                </View>
-              </View>
-            </Tarjeta>
+              </Tarjeta>
+            ))}
           </View>
 
           {/* cobros — los módulos vivos de S54 */}

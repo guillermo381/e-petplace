@@ -490,9 +490,12 @@ export default function Cuenta() {
 
       <Hoja visible={salirAbierta} onCerrar={() => setSalirAbierta(false)} titulo={t('sesion.titulo')}>
         <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
-          <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.base, color: theme.text.secondary }}>
+          {/* S81-C: la prosa de la Hoja por la pieza del sistema — los
+              Text crudos del MURO quedan (frontera techo-oficio, D-535);
+              este vive sobre el tema y no tenía excusa. */}
+          <Texto variante="cuerpo" color="secondary">
             {t('sesion.confirmacionCierre')}
-          </Text>
+          </Texto>
           <Boton
             variante="destructivo"
             etiqueta={t('sesion.cerrarSesion')}
@@ -520,9 +523,9 @@ export default function Cuenta() {
           se escriben como enmienda de letra ANTES de construir. */}
       <Hoja visible={eliminarAbierta} onCerrar={() => setEliminarAbierta(false)} titulo={t('miCuenta.eliminarCuenta')} conCerrar>
         <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
-          <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.base, lineHeight: typography.size.base * 1.4, color: theme.text.secondary }}>
+          <Texto variante="cuerpo" color="secondary">
             {t('miCuenta.eliminarVoz')}
-          </Text>
+          </Texto>
           <Boton variante="secundario" etiqueta={t('miCuenta.entendido')} bloque onPress={() => setEliminarAbierta(false)} />
         </View>
       </Hoja>

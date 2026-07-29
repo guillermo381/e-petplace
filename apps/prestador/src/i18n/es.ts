@@ -35,7 +35,6 @@ export const prestadorEs = {
     whatsappMensaje:
       'Hola, estoy interesado en prestar mis servicios de cuidado de mascotas a través de e-PetPlace. Vengo desde la app de prestadores.',
     whatsappFallback: 'WhatsApp no se pudo abrir. Escríbenos al {{numero}}.',
-    volver: 'Volver',
   },
   sesion: {
     // El estado honesto del raíz (S51; auth real desde S54/D-290):

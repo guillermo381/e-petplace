@@ -56,43 +56,51 @@ export default function Login() {
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('login.titulo')} atras onAtras={() => router.back()} />
       <ScrollView
-        contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[2] }}
+        contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[6] }}
         keyboardShouldPersistTaps="handled"
       >
-        <Campo
-          label={t('login.email')}
-          placeholder={t('login.emailPlaceholder')}
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          autoComplete="email"
-        />
-        <Campo
-          label={t('login.password')}
-          value={password}
-          onChangeText={setPassword}
-          error={error}
-          secure
-          autoCapitalize="none"
-        />
-        <Boton
-          etiqueta={t('login.entrar')}
-          bloque
-          cargando={cargando}
-          deshabilitado={!puedeEnviar}
-          onPress={() => void entrar()}
-        />
-        {/* S80-B1 (D-509 ①): la entrada al registro — espejo del par
-            primario+ghost de la bienvenida. El empleado al que le
-            dijeron "registrate" llega acá por "Ingresar" y encuentra
-            el camino a un toque. */}
-        <Boton
-          variante="ghost"
-          etiqueta={t('login.crearCuenta')}
-          bloque
-          onPress={() => router.push('/registro')}
-        />
+        {/* S81-C (composición): el FORMULARIO y la ACCIÓN son dos
+            bloques — antes todo iba a gap uniforme [2] y el CTA quedaba
+            pegado al último campo: nada mandaba. El aire entre bloques
+            es la jerarquía (Ley 18: tipografía y aire, no más cajas). */}
+        <View style={{ gap: spacing[2] }}>
+          <Campo
+            label={t('login.email')}
+            placeholder={t('login.emailPlaceholder')}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            autoComplete="email"
+          />
+          <Campo
+            label={t('login.password')}
+            value={password}
+            onChangeText={setPassword}
+            error={error}
+            secure
+            autoCapitalize="none"
+          />
+        </View>
+        <View style={{ gap: spacing[2] }}>
+          <Boton
+            etiqueta={t('login.entrar')}
+            bloque
+            cargando={cargando}
+            deshabilitado={!puedeEnviar}
+            onPress={() => void entrar()}
+          />
+          {/* S80-B1 (D-509 ①): la entrada al registro — espejo del par
+              primario+ghost de la bienvenida. El empleado al que le
+              dijeron "registrate" llega acá por "Ingresar" y encuentra
+              el camino a un toque. */}
+          <Boton
+            variante="ghost"
+            etiqueta={t('login.crearCuenta')}
+            bloque
+            onPress={() => router.push('/registro')}
+          />
+        </View>
       </ScrollView>
     </View>
   );

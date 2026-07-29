@@ -205,8 +205,11 @@ export default function SalaEspera() {
           <Texto variante="cuerpo">{t('salaEspera.despuesCuerpo')}</Texto>
         </View>
 
+        {/* S81-C (jerarquía): cerrar sesión baja a ghost — en esta
+            pantalla lo que manda es el checklist de lo que falta; la
+            salida es terciaria y un secundario en bloque le competía. */}
         <Boton
-          variante="secundario"
+          variante="ghost"
           etiqueta={t('sesion.cerrarSesion')}
           bloque
           cargando={saliendo}
