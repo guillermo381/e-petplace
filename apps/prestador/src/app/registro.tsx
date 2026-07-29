@@ -92,12 +92,14 @@ export default function Registro() {
         <Texto variante="apoyo">{t('registro.contexto')}</Texto>
         <View style={{ gap: spacing[2] }}>
           <Campo
+            sinCaja
             label={t('registro.nombreLabel')}
             value={nombre}
             onChangeText={setNombre}
             autoCapitalize="words"
           />
           <Campo
+            sinCaja
             label={t('registro.emailLabel')}
             value={email}
             onChangeText={setEmail}
@@ -107,6 +109,7 @@ export default function Registro() {
             autoComplete="email"
           />
           <Campo
+            sinCaja
             label={t('registro.passwordLabel')}
             ayuda={t('registro.passwordAyuda')}
             value={password}

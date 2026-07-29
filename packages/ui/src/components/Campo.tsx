@@ -59,6 +59,16 @@ export interface CampoProps
   /** Mensaje de error (dangerText) — anunciado con liveRegion polite. */
   error?: string
   deshabilitado?: boolean
+  /** ⚠️ CANDIDATA S81 (el arbitraje ⚖️ de A6 sobre Campo — ¿el borde del
+   *  input es affordance o caja?): reposo SIN borde — la affordance la
+   *  da el RELLENO (bg.overlay, §7: presencia por superficie). El borde
+   *  INFORMATIVO queda intacto: foco (accent.active) y error (danger)
+   *  siguen pintando — como el borde de tinte de Tarjeta, es semántico
+   *  y sobrevive a A6. El grosor jamás cambia (transparent en reposo:
+   *  cero layout shift, la ley del Campo intacta). Se contesta MIRANDO:
+   *  aplicada al registro del prestador; el founder firma o cae y esta
+   *  nota muere con el veredicto. */
+  sinCaja?: boolean
   /** Password con toggle ver/ocultar integrado (ocupa el slot iconoDer). */
   secure?: boolean
   /** Líneas visibles — alto FIJO, no auto-grow. */
@@ -72,6 +82,7 @@ export function Campo({
   ayuda,
   error,
   deshabilitado = false,
+  sinCaja = false,
   secure = false,
   multilinea,
   iconoIzq,
@@ -89,7 +100,9 @@ export function Campo({
     ? theme.status.danger
     : enfocado
       ? accentActive  // el campo enfocado ES el elemento activo de la vista
-      : theme.bg.border
+      : sinCaja
+        ? 'transparent' // CANDIDATA A6: el reposo sin caja — foco/error siguen
+        : theme.bg.border
 
   const altoCampo = multilinea
     ? multilinea * Math.round(typography.size.base * typography.leading.normal) + spacing[3] * 2
@@ -118,7 +131,11 @@ export function Campo({
           borderRadius: radius.md,
           borderWidth: BORDE,               // SIEMPRE 1.5 — el estado cambia color, no grosor
           borderColor: colorBorde,
-          backgroundColor: theme.mode === 'light' ? theme.bg.card : theme.bg.elevated,
+          backgroundColor: sinCaja
+            ? theme.bg.overlay // CANDIDATA A6: la affordance es el relleno
+            : theme.mode === 'light'
+              ? theme.bg.card
+              : theme.bg.elevated,
           paddingHorizontal: spacing[3],
           gap: spacing[2],
           // única animación permitida: color del borde
