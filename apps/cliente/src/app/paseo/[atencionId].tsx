@@ -22,8 +22,11 @@
  * la voz de otro.
  */
 
-import { useCallback, useRef, useState } from 'react';
-import { Platform, Pressable, RefreshControl, ScrollView, Text, View, useWindowDimensions } from 'react-native';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { Platform, Pressable, RefreshControl, ScrollView, Text, View, useWindowDimensions, type LayoutChangeEvent } from 'react-native';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 import Svg, { Path } from 'react-native-svg';
 import { Image } from 'expo-image';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
@@ -42,6 +45,7 @@ import {
   Separador,
   Tarjeta,
   VisorFoto,
+  motion,
   radius,
   spacing,
   typography,
@@ -102,6 +106,73 @@ export default function DetallePaseo() {
   // por default (orden de mesa); el asa alterna. Se ajusta viendo.
   const [bandaExtendida, setBandaExtendida] = useState(false);
   const { height: altoPantalla } = useWindowDimensions();
+
+  // ── S81-B 2ª pasada (regla 80, vara: "la banda tiene que invitar a
+  //    subirla y moverse como algo que se agarra"). LA FÍSICA ES LA DE
+  //    LA CASA, calcada de Hoja (packages/ui): Gesture.Pan + withSpring
+  //    {duration normal, dampingRatio .85} + umbral de velocidad 800.
+  //    La extendida vive SIEMPRE montada: la banda TRASLADA (translateY),
+  //    jamás teletransporta (L-c: el movimiento acá es significado —
+  //    la banda que sube muestra que hay más abajo). ──
+  const bandaExtendidaRef = useRef(false);
+  const despl = useSharedValue(altoPantalla); // entra deslizando desde abajo
+  const extAlto = useSharedValue(0); // alto medido del bloque extendible
+  const desplBase = useSharedValue(0); // ancla del arrastre en curso
+  const estiloBanda = useAnimatedStyle(() => ({ transform: [{ translateY: despl.value }] }));
+
+  const fijarExtendida = useCallback((v: boolean) => {
+    bandaExtendidaRef.current = v;
+    setBandaExtendida(v);
+  }, []);
+
+  const irABanda = useCallback(
+    (extendida: boolean) => {
+      despl.value = withSpring(extendida ? 0 : extAlto.value, {
+        duration: motion.duration.normal,
+        dampingRatio: 0.85,
+      });
+      fijarExtendida(extendida);
+    },
+    [despl, extAlto, fijarExtendida],
+  );
+
+  // el bloque extendible se mide al layout: fija el imán "asomada" y
+  // re-ancla si el contenido cambió (fotos que llegan en vivo).
+  const medirExtendida = useCallback(
+    (e: LayoutChangeEvent) => {
+      const h = e.nativeEvent.layout.height;
+      if (h === extAlto.value) return;
+      extAlto.value = h;
+      if (!bandaExtendidaRef.current) {
+        despl.value = withSpring(h, { duration: motion.duration.normal, dampingRatio: 0.85 });
+      }
+    },
+    [despl, extAlto],
+  );
+
+  // arrastre sobre el asa Y la cabecera; las dos posiciones son imanes,
+  // la velocidad de salida decide (receta Hoja: 800). El clic sigue vivo.
+  const panBanda = useMemo(
+    () =>
+      Gesture.Pan()
+        .onStart(() => {
+          desplBase.value = despl.value;
+        })
+        .onChange((e) => {
+          const v = desplBase.value + e.translationY;
+          despl.value = Math.min(Math.max(v, 0), extAlto.value);
+        })
+        .onEnd((e) => {
+          const abrir =
+            e.velocityY < -800 ? true : e.velocityY > 800 ? false : despl.value < extAlto.value / 2;
+          despl.value = withSpring(abrir ? 0 : extAlto.value, {
+            duration: motion.duration.normal,
+            dampingRatio: 0.85,
+          });
+          scheduleOnRN(fijarExtendida, abrir);
+        }),
+    [despl, desplBase, extAlto, fijarExtendida],
+  );
 
   // Recarga silenciosa (§7.4): reemplazo directo, jamás re-esqueleto
   // (Ley 13/6 — el sondeo no puede hacer parpadear la pantalla). El
@@ -403,23 +474,32 @@ export default function DetallePaseo() {
           backgroundColor: theme.bg.card,
           borderTopLeftRadius: radius.xl,
           borderTopRightRadius: radius.xl,
-          boxShadow: theme.elevacion.elevada,
-          paddingBottom: insets.bottom + spacing[3],
+          // S81-B 2ª pasada (③ "casi no se ve" — SIN devolver el borde,
+          // A6 intacta; §7: presencia = color completo + sombra): la
+          // elevación va por el token RN de la casa, jamás box-shadow.
+          // Memorial no tiene lg y degrada a md (menos presencia, a tono).
+          ...('lg' in theme.shadow ? theme.shadow.lg : theme.shadow.md),
         }}
       >
-        {/* el asa — alterna asomada ⇄ extendida */}
-        <Pressable
-          onPress={() => setBandaExtendida((v) => !v)}
-          accessibilityRole="button"
-          accessibilityLabel={bandaExtendida ? t('paseo.bandaPlegar') : t('paseo.bandaVerMas')}
-          style={{ alignItems: 'center', paddingVertical: spacing[2], minHeight: 24 }}
-        >
-          <View style={{ width: 36, height: 4, borderRadius: radius.full, backgroundColor: theme.bg.overlay }} />
-        </Pressable>
+        {/* CABECERA ARRASTRABLE: asa + estado — el pan vive acá (no en
+            el scroll de la extendida: el gesto no pelea con la lista) */}
+        <GestureDetector gesture={panBanda}>
+          <View>
+            {/* el asa — clic sigue vivo; anatomía CANÓNICA de Hoja
+                (36×4, bg.border — el bg.overlay anterior era el
+                "casi no se ve": desvío mío, no falta de ley) */}
+            <Pressable
+              onPress={() => irABanda(!bandaExtendida)}
+              accessibilityRole="button"
+              accessibilityLabel={bandaExtendida ? t('paseo.bandaPlegar') : t('paseo.bandaVerMas')}
+              style={{ alignItems: 'center', paddingVertical: spacing[2], minHeight: 24 }}
+            >
+              <View style={{ width: 36, height: 4, borderRadius: radius.full, backgroundColor: theme.bg.border }} />
+            </Pressable>
 
-        {/* ASOMADA — el ESTADO, visible siempre (M1 §4): cronómetro/
-            horarios + frescura; lo que CUENTA vive en la extendida */}
-        <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
+            {/* ASOMADA — el ESTADO, visible siempre (M1 §4): cronómetro/
+                horarios + frescura; lo que CUENTA vive en la extendida */}
+            <View style={{ paddingHorizontal: spacing[5], gap: spacing[1], paddingBottom: insets.bottom + spacing[3] }}>
           {enVivo ? (
             <>
               {detalle.iniciada_en !== null ? (
@@ -466,13 +546,16 @@ export default function DetallePaseo() {
               {lineaHorarios}
             </>
           )}
-        </View>
+            </View>
+          </View>
+        </GestureDetector>
 
-        {/* EXTENDIDA — lo que CUENTA el paseo */}
-        {bandaExtendida ? (
+        {/* EXTENDIDA — lo que CUENTA el paseo. SIEMPRE montada (la
+            banda la revela trasladándose); su alto medido fija el imán */}
+        <View onLayout={medirExtendida}>
           <ScrollView
             style={{ maxHeight: Math.round(altoPantalla * 0.55) }}
-            contentContainerStyle={{ padding: spacing[5], paddingTop: spacing[3], gap: spacing[4] }}
+            contentContainerStyle={{ padding: spacing[5], paddingTop: spacing[3], paddingBottom: insets.bottom + spacing[4], gap: spacing[4] }}
             refreshControl={
               enVivo ? (
                 <RefreshControl refreshing={refrescando} onRefresh={() => void recargar('pull')} tintColor={theme.text.secondary} />
@@ -481,7 +564,7 @@ export default function DetallePaseo() {
           >
             {seccionesParte}
           </ScrollView>
-        ) : null}
+        </View>
       </View>
     );
 
@@ -517,7 +600,8 @@ export default function DetallePaseo() {
             backgroundColor: theme.bg.card,
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: theme.elevacion.reposo,
+            // mismo criterio que la banda: token RN, jamás box-shadow
+            ...theme.shadow.sm,
           }}
         >
           <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
@@ -526,10 +610,14 @@ export default function DetallePaseo() {
         </Pressable>
 
         {/* LA BANDA — en vivo la envuelve CitaEnVivo (Ley 7: UNA por
-            pantalla; el pill flota sobre el mapa en el borde superior) */}
-        <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
-          {enVivo ? <CitaEnVivo capa="cuidado">{banda}</CitaEnVivo> : banda}
-        </View>
+            pantalla; el pill flota sobre el mapa en el borde superior).
+            El contenedor TRASLADA (física de Hoja); GHRootView habilita
+            el pan de la cabecera (patrón Hoja: root propio del gesto) */}
+        <Animated.View style={[{ position: 'absolute', left: 0, right: 0, bottom: 0 }, estiloBanda]}>
+          <GestureHandlerRootView>
+            {enVivo ? <CitaEnVivo capa="cuidado">{banda}</CitaEnVivo> : banda}
+          </GestureHandlerRootView>
+        </Animated.View>
 
         <VisorFoto
           visible={visorAbierto}
