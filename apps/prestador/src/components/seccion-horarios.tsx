@@ -919,6 +919,7 @@ export function SeccionHorarios({
       <SelectorOpcion
         etiqueta={t('horarios.modoEtiqueta')}
         acento="oficio"
+        solitario
         opciones={[
           { codigo: 'universal', etiqueta: t('horarios.modoUniversal') },
           { codigo: 'por_servicio', etiqueta: t('horarios.modoPorServicio') },

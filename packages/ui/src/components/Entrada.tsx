@@ -35,14 +35,12 @@ import { useTheme } from '../ThemeProvider'
 const DURACION = 300 // techo de Ley 6 — NO SE TOCA
 const DESDE_Y = 15
 const CURVA = Easing.bezier(...motion.easing.easeOut.bezier)
-/** ⚠️ ESCALÓN CANDIDATO (S81 — NO es la ley todavía): §5 firma 45 ms,
- *  pero el gate del founder sobre bienvenida (3 bloques) dio "hay un
- *  orden pero no lo cacho" — con 45, los tres onsets caben en 90 ms y
- *  todo resuelve en ~390: por debajo del umbral en que el ojo separa
- *  secuencia de simultaneidad. CANDIDATA: motion.stagger.slow (120,
- *  token de la casa — onsets 0/120/240, secuencia legible). El founder
- *  mira; si pasa, A ENMIENDA §5 con su firma y esta nota muere; si no,
- *  se vuelve a 45 o L-c la mata entera (o se percibe, o sobra). */
+/** ESCALÓN 120 — FIRMADO (S81, orden de mesa "sin gate"): §5 pasa de
+ *  45 a 120 (motion.stagger.slow, token de la casa). El porqué quedó
+ *  medido: con 45, tres bloques resuelven en ~390 ms — por debajo del
+ *  umbral en que el ojo separa secuencia de simultaneidad ("hay un
+ *  orden pero no lo cacho", founder). La LETRA de §5 la enmienda A con
+ *  la firma. La duración 300 es techo de Ley 6: INTOCABLE. */
 const ESCALON = motion.stagger.slow
 
 export interface EntradaProps {

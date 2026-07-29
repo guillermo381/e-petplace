@@ -25,7 +25,7 @@ import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Campo, Encabezado, Texto, spacing, useAviso, useTheme } from '@epetplace/ui';
+import { Boton, Campo, Encabezado, Entrada, Texto, spacing, useAviso, useTheme } from '@epetplace/ui';
 import { registrarse, type CodigoErrorAuth } from '@epetplace/api';
 
 import { marcarRegistroReciente } from '@/lib/registro-reciente';
@@ -89,17 +89,19 @@ export default function Registro() {
             contexto · formulario · acción. Antes el gap uniforme [2]
             apelmazaba la línea de contexto contra el primer campo y el
             CTA contra el último: densidad pareja = nada manda. */}
+        {/* §5 firmada (S81): los tres bloques de C entran ordenando lectura */}
+        <Entrada>
         <Texto variante="apoyo">{t('registro.contexto')}</Texto>
+        </Entrada>
+        <Entrada orden={1}>
         <View style={{ gap: spacing[2] }}>
           <Campo
-            sinCaja
             label={t('registro.nombreLabel')}
             value={nombre}
             onChangeText={setNombre}
             autoCapitalize="words"
           />
           <Campo
-            sinCaja
             label={t('registro.emailLabel')}
             value={email}
             onChangeText={setEmail}
@@ -109,7 +111,6 @@ export default function Registro() {
             autoComplete="email"
           />
           <Campo
-            sinCaja
             label={t('registro.passwordLabel')}
             ayuda={t('registro.passwordAyuda')}
             value={password}
@@ -119,6 +120,8 @@ export default function Registro() {
             autoCapitalize="none"
           />
         </View>
+        </Entrada>
+        <Entrada orden={2}>
         <Boton
           etiqueta={t('registro.crearMiCuenta')}
           bloque
@@ -126,6 +129,7 @@ export default function Registro() {
           deshabilitado={!puedeEnviar}
           onPress={() => void crearCuenta()}
         />
+        </Entrada>
       </ScrollView>
     </View>
   );

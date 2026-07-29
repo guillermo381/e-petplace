@@ -59,15 +59,15 @@ export interface CampoProps
   /** Mensaje de error (dangerText) — anunciado con liveRegion polite. */
   error?: string
   deshabilitado?: boolean
-  /** ⚠️ CANDIDATA S81 (el arbitraje ⚖️ de A6 sobre Campo — ¿el borde del
-   *  input es affordance o caja?): reposo SIN borde — la affordance la
-   *  da el RELLENO (bg.overlay, §7: presencia por superficie). El borde
-   *  INFORMATIVO queda intacto: foco (accent.active) y error (danger)
-   *  siguen pintando — como el borde de tinte de Tarjeta, es semántico
-   *  y sobrevive a A6. El grosor jamás cambia (transparent en reposo:
-   *  cero layout shift, la ley del Campo intacta). Se contesta MIRANDO:
-   *  aplicada al registro del prestador; el founder firma o cae y esta
-   *  nota muere con el veredicto. */
+  /** FIRMADA S81 (el arbitraje ⚖️ se contestó por orden de mesa, sin
+   *  gate: A6 ALCANZA a Campo — el borde de reposo era caja, no
+   *  affordance): DEFAULT true — reposo SIN borde, la affordance la da
+   *  el RELLENO (bg.overlay, §7). El borde INFORMATIVO queda: foco
+   *  (accent.active) y error (danger) siguen pintando — semántico,
+   *  sobrevive a A6 (patrón del borde de tinte de Tarjeta). Grosor
+   *  intacto (transparent en reposo: cero layout shift). `sinCaja=
+   *  {false}` queda para la excepción DECLARADA con dueño (patrón del
+   *  flip de Tarjeta). */
   sinCaja?: boolean
   /** Password con toggle ver/ocultar integrado (ocupa el slot iconoDer). */
   secure?: boolean
@@ -82,7 +82,7 @@ export function Campo({
   ayuda,
   error,
   deshabilitado = false,
-  sinCaja = false,
+  sinCaja = true,
   secure = false,
   multilinea,
   iconoIzq,

@@ -11,7 +11,7 @@
 import { useState } from 'react';
 import { Linking, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Boton, Encabezado, Texto, spacing, typography, useTheme } from '@epetplace/ui';
+import { Boton, Encabezado, Entrada, Texto, spacing, typography, useTheme } from '@epetplace/ui';
 
 import { WHATSAPP_EQUIPO_HUMANO, urlWhatsApp } from '@/lib/contacto';
 import { useTraduccion } from '@/i18n';
@@ -49,12 +49,16 @@ export default function SolicitarAcceso() {
           — el Encabezado ya tiene atrás; dos controles para el mismo
           trabajo era un tablero. */}
       <View style={{ flex: 1, padding: spacing[6], gap: spacing[6] }}>
+        {/* §5 firmada (S81): cuerpo → acción */}
+        <Entrada>
         <View style={{ gap: spacing[3] }}>
           <Texto variante="titulo">{t('bienvenida.solicitarCuerpoTitulo')}</Texto>
           <Texto variante="cuerpo" color="secondary">
             {t('bienvenida.solicitarCuerpo')}
           </Texto>
         </View>
+        </Entrada>
+        <Entrada orden={1}>
         <View style={{ gap: spacing[3] }}>
           <Boton
             variante="primario"
@@ -69,6 +73,7 @@ export default function SolicitarAcceso() {
             </Texto>
           )}
         </View>
+        </Entrada>
       </View>
     </View>
   );

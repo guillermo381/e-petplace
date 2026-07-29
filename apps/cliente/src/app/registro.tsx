@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Campo, Encabezado, spacing, useAviso, useTheme } from '@epetplace/ui';
+import { Boton, Campo, Encabezado, Entrada, spacing, useAviso, useTheme } from '@epetplace/ui';
 import { registrarse, type CodigoErrorAuth } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -61,6 +61,8 @@ export default function Registro() {
         contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[2] }}
         keyboardShouldPersistTaps="handled"
       >
+        {/* §5 firmada (S81): el formulario entra ordenando lectura */}
+        <Entrada>
         <Campo
           label={t('registro.nombreLabel')}
           placeholder={t('registro.nombrePlaceholder')}
@@ -87,13 +89,16 @@ export default function Registro() {
           secure
           autoCapitalize="none"
         />
-        <Boton
+        </Entrada>
+        <Entrada orden={1}>
+                <Boton
           etiqueta={t('registro.crearMiCuenta')}
           bloque
           cargando={cargando}
           deshabilitado={!puedeEnviar}
           onPress={() => void crearCuenta()}
         />
+        </Entrada>
       </ScrollView>
     </View>
   );

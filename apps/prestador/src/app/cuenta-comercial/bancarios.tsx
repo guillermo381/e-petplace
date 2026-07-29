@@ -209,6 +209,7 @@ export default function DatosBancarios() {
         ) : null}
 
         <SelectorOpcion
+          solitario
           acento="oficio"
           etiqueta={t('cuenta.tipoCuenta')}
           opciones={[
@@ -241,6 +242,7 @@ export default function DatosBancarios() {
         />
 
         <SelectorOpcion
+          solitario
           acento="oficio"
           etiqueta={t('cuenta.titularTipoDocumento')}
           opciones={base.tiposDoc.map((x) => ({ codigo: x.codigo, etiqueta: x.nombre }))}

@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Campo, Encabezado, spacing, useAviso, useTheme } from '@epetplace/ui';
+import { Boton, Campo, Encabezado, Entrada, spacing, useAviso, useTheme } from '@epetplace/ui';
 import { iniciarSesion } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -51,6 +51,8 @@ export default function Login() {
         contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[2] }}
         keyboardShouldPersistTaps="handled"
       >
+        {/* §5 firmada (S81): el formulario entra ordenando lectura */}
+        <Entrada>
         <Campo
           label={t('login.emailLabel')}
           placeholder={t('login.emailPlaceholder')}
@@ -68,6 +70,8 @@ export default function Login() {
           secure
           autoCapitalize="none"
         />
+        </Entrada>
+        <Entrada orden={1}>
         <Boton
           etiqueta={t('login.entrar')}
           bloque
@@ -75,6 +79,7 @@ export default function Login() {
           deshabilitado={!puedeEnviar}
           onPress={() => void entrar()}
         />
+        </Entrada>
       </ScrollView>
     </View>
   );

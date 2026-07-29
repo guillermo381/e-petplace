@@ -14,7 +14,7 @@ import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Campo, Encabezado, spacing, useAviso, useTheme } from '@epetplace/ui';
+import { Boton, Campo, Encabezado, Entrada, spacing, useAviso, useTheme } from '@epetplace/ui';
 import { iniciarSesion } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -63,6 +63,8 @@ export default function Login() {
             bloques — antes todo iba a gap uniforme [2] y el CTA quedaba
             pegado al último campo: nada mandaba. El aire entre bloques
             es la jerarquía (Ley 18: tipografía y aire, no más cajas). */}
+        {/* §5 firmada (S81): los dos bloques de C entran ordenando lectura */}
+        <Entrada>
         <View style={{ gap: spacing[2] }}>
           <Campo
             label={t('login.email')}
@@ -82,6 +84,8 @@ export default function Login() {
             autoCapitalize="none"
           />
         </View>
+        </Entrada>
+        <Entrada orden={1}>
         <View style={{ gap: spacing[2] }}>
           <Boton
             etiqueta={t('login.entrar')}
@@ -101,6 +105,7 @@ export default function Login() {
             onPress={() => router.push('/registro')}
           />
         </View>
+        </Entrada>
       </ScrollView>
     </View>
   );
