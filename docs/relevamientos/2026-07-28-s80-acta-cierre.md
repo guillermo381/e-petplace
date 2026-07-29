@@ -150,6 +150,13 @@ jamás la app.
   SU VOZ MIENTE**: dice "el mapa no está disponible en esa versión de
   Android" y culpa al teléfono del prestador — la causa es el APK sin
   key. **Cura de una línea, y va con el build.**
+  *(ENMIENDA S81-A, caso L-166 contra la mesa: la cita entre comillas
+  es PARÁFRASIS ERRADA del acta — el string JAMÁS dijo "Android".
+  `git log -S'versión de Android'` = cero; el literal de e39366c era
+  "El mapa no está disponible en esta versión de la app. El recorrido
+  se sigue grabando igual." El founder citó bien; el acta depositó la
+  paráfrasis como cita sin releer la fuente. La reescritura igual
+  corrió — B `30b806a`, gate pendiente.)*
 - **EL CENSO DEL CLIENTE, CONTESTADO EN CAMPO:** el cliente vio el
   paseo completo con sus puntos ⇒ **su APK SÍ tiene la key. El agujero
   es SOLO del prestador** (build local S78). D-575 se acota a eso.
