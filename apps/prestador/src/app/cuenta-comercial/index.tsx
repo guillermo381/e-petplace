@@ -150,16 +150,7 @@ export default function CuentaComercial() {
           <View style={{ flexDirection: 'row' }}>
             <Insignia estado={estadoUi.estado} etiqueta={estadoUi.etiqueta} />
           </View>
-          <Text
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.base,
-              lineHeight: typography.size.base * typography.leading.normal,
-              color: theme.text.secondary,
-            }}
-          >
-            {estadoUi.voz}
-          </Text>
+          <Texto variante="cuerpo" color="secondary">{estadoUi.voz}</Texto>
         </View>
 
         {/* datos fiscales */}
@@ -180,26 +171,8 @@ export default function CuentaComercial() {
           {bancarios === null ? (
             <Tarjeta>
               <View style={{ gap: spacing[3] }}>
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.regular,
-                    fontSize: typography.size.base,
-                    lineHeight: typography.size.base * typography.leading.normal,
-                    color: theme.text.secondary,
-                  }}
-                >
-                  {t('cuenta.bancariosFaltan')}
-                </Text>
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.regular,
-                    fontSize: typography.size.sm,
-                    lineHeight: typography.size.sm * typography.leading.normal,
-                    color: theme.text.tertiary,
-                  }}
-                >
-                  {t('cuenta.bancariosEducacion')}
-                </Text>
+                <Texto variante="cuerpo" color="secondary">{t('cuenta.bancariosFaltan')}</Texto>
+                <Texto variante="apoyo" color="tertiary">{t('cuenta.bancariosEducacion')}</Texto>
                 {puedeEditarBancarios ? (
                   <Boton
                     variante="primario"
