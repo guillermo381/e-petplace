@@ -32,10 +32,18 @@ import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
 
 // Los números de la ley — PRIVADOS a propósito (la condición de la mesa).
-const DURACION = 300
-const ESCALON = 45
+const DURACION = 300 // techo de Ley 6 — NO SE TOCA
 const DESDE_Y = 15
 const CURVA = Easing.bezier(...motion.easing.easeOut.bezier)
+/** ⚠️ ESCALÓN CANDIDATO (S81 — NO es la ley todavía): §5 firma 45 ms,
+ *  pero el gate del founder sobre bienvenida (3 bloques) dio "hay un
+ *  orden pero no lo cacho" — con 45, los tres onsets caben en 90 ms y
+ *  todo resuelve en ~390: por debajo del umbral en que el ojo separa
+ *  secuencia de simultaneidad. CANDIDATA: motion.stagger.slow (120,
+ *  token de la casa — onsets 0/120/240, secuencia legible). El founder
+ *  mira; si pasa, A ENMIENDA §5 con su firma y esta nota muere; si no,
+ *  se vuelve a 45 o L-c la mata entera (o se percibe, o sobra). */
+const ESCALON = motion.stagger.slow
 
 export interface EntradaProps {
   /** Posición en el ORDEN DE LECTURA (0 = lo primero). Semántica, no física. */
