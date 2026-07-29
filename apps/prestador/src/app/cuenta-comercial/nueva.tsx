@@ -27,6 +27,7 @@ import {
   HojaScroll,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useAviso,
@@ -195,16 +196,7 @@ export default function NuevaCuentaComercial() {
         contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[8], gap: spacing[5] }}
         keyboardShouldPersistTaps="handled"
       >
-        <Text
-          style={{
-            fontFamily: typography.family.sans.regular,
-            fontSize: typography.size.base,
-            lineHeight: typography.size.base * typography.leading.normal,
-            color: theme.text.secondary,
-          }}
-        >
-          {t('cuenta.nuevaIdentificacionVoz')}
-        </Text>
+        <Texto variante="cuerpo" color="secondary">{t('cuenta.nuevaIdentificacionVoz')}</Texto>
 
         <Tarjeta relleno="ninguno">
           <Celda
@@ -248,16 +240,7 @@ export default function NuevaCuentaComercial() {
           />
         ) : (
           <>
-            <Text
-              style={{
-                fontFamily: typography.family.sans.regular,
-                fontSize: typography.size.base,
-                lineHeight: typography.size.base * typography.leading.normal,
-                color: theme.text.secondary,
-              }}
-            >
-              {t('cuenta.nuevaDatosVoz')}
-            </Text>
+            <Texto variante="cuerpo" color="secondary">{t('cuenta.nuevaDatosVoz')}</Texto>
             <Campo
               label={t('cuenta.razonSocial')}
               value={razonSocial}
