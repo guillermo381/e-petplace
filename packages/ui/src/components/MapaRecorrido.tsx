@@ -69,6 +69,7 @@ export function MapaRecorrido({
   capa = 'cuidado',
   centroInicial,
   alto = ALTO_DEFAULT,
+  aSangre = false,
 }: MapaRecorridoProps) {
   const { theme } = useTheme()
   const mapRef = useRef<MapView>(null)
@@ -112,7 +113,8 @@ export function MapaRecorrido({
   }
 
   return (
-    <View style={{ height: alto, borderRadius: radius.md, overflow: 'hidden' }}>
+    // aSangre (S82-B, A6 §9bis.1): sin caja — el mapa es FONDO, no tarjeta.
+    <View style={{ height: alto, borderRadius: aSangre ? 0 : radius.md, overflow: 'hidden' }}>
       <MapView
         ref={mapRef}
         style={{ flex: 1 }}

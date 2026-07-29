@@ -35,4 +35,15 @@ export interface MapaRecorridoProps {
   centroInicial?: PuntoLatLng
   /** Alto del bloque. El ancho es 100% del padre. */
   alto?: number
+  /** S82-B (promoción del override probado en pantalla real — regla 80):
+   *  el mapa A SANGRE (A6 §9bis.1, M1 §9 "se ensancha, no se duplica").
+   *  Mata la caja propia del componente (radius.md + hairline implícito):
+   *  el mapa pinta hasta el borde del viewport — el FONDO de la pantalla,
+   *  no una tarjeta. Origen: el override LOCAL declarado de la cara MAPA
+   *  del cliente (`paseo/[atencionId]` S81-A), que lo lograba empujando
+   *  las esquinas curvas fuera del viewport con desborde negativo; con
+   *  este modo esa gimnasia MUERE — el consumidor migra al tocarse
+   *  (D-318, lo ejecuta A). Default false: la caja sigue siendo el
+   *  reposo de los consumidores en flujo. */
+  aSangre?: boolean
 }

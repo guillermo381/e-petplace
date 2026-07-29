@@ -43,13 +43,13 @@ function IconoMapa({ color, tamano }: { color: string; tamano: number }) {
   )
 }
 
-export function MapaRecorrido({ alto = ALTO_DEFAULT }: MapaRecorridoProps) {
+export function MapaRecorrido({ alto = ALTO_DEFAULT, aSangre = false }: MapaRecorridoProps) {
   const { theme } = useTheme()
   return (
     <View
       style={{
         height: alto,
-        borderRadius: radius.md,
+        borderRadius: aSangre ? 0 : radius.md,
         backgroundColor: theme.bg.overlay,
         alignItems: 'center',
         justifyContent: 'center',
