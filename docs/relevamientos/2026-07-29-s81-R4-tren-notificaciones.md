@@ -93,6 +93,22 @@
 - **Pasajero 2 — el entierro del b19: GRATIS.** La build nueva del
   prestador embebe el bundle ACTUAL (flip true + filtro + voces) —
   muere el embebido con guard-false.
+- **Pasajero 4 — EL TECLADO: `softwareKeyboardLayoutMode: "pan"` —
+  CANDIDATO CONDICIONADO, NO firmado (corrección de mesa S81).**
+  **Disparo: que el barrido de EvitaTeclado (la mitad OTA, de B — ya
+  promovido a packages/ui) NO resuelva el síntoma EN DISPOSITIVO.**
+  El porqué, con el literal del JSDoc de B (EvitaTeclado.tsx:9-13):
+  *"el manifest trae `windowSoftInputMode="adjustResize"`, pero SDK 57
+  fuerza EDGE-TO-EDGE en Android y ahí el sistema NO achica la ventana
+  — adjustResize queda letra muerta"* — la MISMA suerte puede correr
+  `"pan"`: **poner una línea de manifest que no gobierna es la clase
+  de verificación decorativa que L-192 persigue.** Si el disparo suena,
+  la línea se escribe EL DÍA DEL TREN y se gatea en dispositivo (una
+  config de manifest también tiene que poder salir roja). *(Nota de
+  historial: la línea llegó a escribirse en ambos app.json bajo una
+  orden previa y se REVIRTIÓ con esta corrección — cero rastro en el
+  árbol.)* Medición base: 31 pantallas con campos (8 cliente · 23
+  prestador), cero config previa.
 - **Pasajero 3 — D-298 LargeSecureStore: BANCO DE ESPERA.** Sigue
   condicionado a que el founder LEVANTE su "cero librerías nuevas"
   (lib AES nativa). Si lo levanta ANTES del build, se instala y sube;
@@ -102,13 +118,27 @@
 contra la doc vigente de Expo, docs.expo.dev/push-notifications/
 fcm-credentials — 29-jul, no de memoria):**
 
-1. **Los dos `google-services.json`** (uno por app):
-   `console.firebase.google.com` → EL PROYECTO LEGADO → ⚙️ Project
-   settings → General → "Your apps" → **Add app → Android** DOS veces:
-   package `com.epetplace.prestador` y package `com.epetplace.cliente`
-   → descargar el `google-services.json` de CADA una. (Si el legado ya
-   tiene apps Android registradas con otros packages, se AGREGAN estas
-   dos — no se toca nada existente; una sola identidad de remitente.)
+0. **⚠️ CORRECCIÓN POR MEDICIÓN (S81-A25 — la premisa "se reusa el
+   Firebase del legado" quedó FALSADA):** se buscó en LOS SEIS repos
+   del ecosistema (e-petplace · admin · prestadores · v2 ·
+   sistema-pruebas · supabase/): **CERO** google-services.json, CERO
+   GoogleService-Info.plist, CERO firebase-messaging, CERO FIREBASE_*/
+   FCM_* en env. Y el discriminador: "el admin v2 opera notificaciones"
+   = un COMPOSITOR de campañas sobre tablas (`notificaciones`, 24 filas
+   in-app) con canales declarados (push/email/whatsapp/in_app) — pero
+   **`push_tokens` tiene 0 FILAS** y shape genérico sin proveedor: el
+   push jamás existió del lado del dispositivo. **⇒ EL TREN NECESITA UN
+   PROYECTO FIREBASE NUEVO** — es gratis y no toca nada del legado
+   (que no tiene nada que tocar). Bonus heredable: `push_tokens` y el
+   compositor del admin son chasis reutilizable (la tabla espera
+   tokens; el motor OTA la llena).
+1. **Crear el proyecto + los dos `google-services.json`**:
+   `console.firebase.google.com` → **"Add project"** (nombre sugerido:
+   `e-petplace`; Google Analytics: NO hace falta) → Create. Luego
+   ⚙️ Project settings → General → "Your apps" → **Add app → Android**
+   DOS veces: package `com.epetplace.prestador` y package
+   `com.epetplace.cliente` → descargar el `google-services.json` de
+   CADA una. (Una sola identidad de remitente para el ecosistema.)
 2. **La credencial FCM V1** (la llave del servidor de push) — flujo
    LITERAL de la doc: mismo Project settings → **Service accounts →
    "Generate New Private Key" → "Generate Key"** → baja UN JSON (sirve
