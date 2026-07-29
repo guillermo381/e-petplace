@@ -26,7 +26,8 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, Share, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PaseoSocialHoja } from '@/components/paseo-social-hoja';
@@ -34,7 +35,6 @@ import { TallaPelajeHoja } from '@/components/talla-pelaje-hoja';
 import Svg, { Path } from 'react-native-svg';
 import Animated from 'react-native-reanimated';
 import {
-  AvatarMascota,
   BarrasSemana,
   Boton,
   Celda,
@@ -44,10 +44,12 @@ import {
   EstadoVacio,
   Guijarro,
   Hoja,
-  LineaDeVida,
+  Huella,
+  Insignia,
   Separador,
   Tarjeta,
   Texto,
+  radius,
   spacing,
   typography,
   usePresionado,
@@ -56,6 +58,7 @@ import {
 } from '@epetplace/ui';
 import {
   leerTimelineMascota,
+  obtenerEstadoHogar,
   obtenerPaseosConTrack,
   obtenerPerfilMascota,
   resolverUrlFoto,
@@ -65,14 +68,22 @@ import {
 import {
   calcularMomentoVital,
   calcularVitales,
+  calcularVozHogar,
   edadEnMeses,
   type MomentoVital,
   type VitalesPaseos,
 } from '@epetplace/domain';
+import { FAMILIA_DE_TIPO, vozHecho } from '@/lib/voz-hecho';
+
+/** @override-s82c — SERIF LOCAL hasta la pieza de B (candidata; el
+ *  founder la ordenó para el perfil y la ELECCIÓN de fuente es de B):
+ *  la serif del sistema por plataforma — cero fuente instalada, cero
+ *  escala paralela (los tamaños siguen siendo de typography.size).
+ *  CHOQUE DECLARADO al gate: DM Sans es la única UI firmada en v4. */
+const SERIF_LOCAL = Platform.select({ ios: 'Georgia', default: 'serif' });
 
 import { fechaCortaMono } from '@epetplace/i18n';
 
-import { esEspecieUi } from '@/lib/params';
 import { useTraduccion } from '@/i18n';
 
 type TraductorPerfil = ReturnType<typeof useTraduccion>['t'];
@@ -146,6 +157,10 @@ export default function PerfilDeMascota() {
   const [cursor, setCursor] = useState<string | null>(null);
   const [estadoPie, setEstadoPie] = useState<LineaDeVidaEstadoPie>('nada');
   const cargandoMasRef = useRef(false);
+  // S82-C (imagen-acuerdo, ítem 1): la PASTILLA de estado al pie de la
+  // foto — la MISMA verdad que la ficha del Hogar (señales reales +
+  // calcularVozHogar); sin señal todavía, la pastilla no se monta.
+  const [pastilla, setPastilla] = useState<'alDia' | 'pideAtencion' | 'conociendolo' | null>(null);
 
   const cargarPrimeraPagina = useCallback(async (id: string) => {
     const r = await leerTimelineMascota(id);
@@ -203,18 +218,29 @@ export default function PerfilDeMascota() {
           });
         }
         void cargarPrimeraPagina(mascotaId);
+        void obtenerEstadoHogar([mascotaId]).then((eh) => {
+          if (!vigente || !eh.ok) return;
+          const s = eh.data.senales.find((x) => x.mascota_id === mascotaId);
+          if (!s) return;
+          setPastilla(
+            calcularVozHogar(
+              {
+                tieneEmergenciaActiva: s.tiene_emergencia_activa,
+                vacunasTotal: s.vacunas_total,
+                ultimaVacunaAplicada: s.ultima_vacuna_aplicada,
+                proximaVacuna: s.proxima_vacuna,
+                ultimaAtencionCerrada: s.ultima_atencion_cerrada,
+              },
+              new Date(),
+            ).voz,
+          );
+        });
       })();
       return () => {
         vigente = false;
       };
     }, [mascotaId, router, cargarPrimeraPagina]),
   );
-
-  const alTocarNodo = (item: { atencion_id?: string | null; evento_id: string; tipo?: string }) => {
-    if (item.atencion_id) {
-      router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: item.atencion_id } });
-    }
-  };
 
   if (perfil === 'cargando') {
     return (
@@ -288,10 +314,33 @@ export default function PerfilDeMascota() {
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo="" atras onAtras={() => router.back()} />
       <ScrollView contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[8], gap: spacing[6] }}>
-        {/* ── Header de identidad ── */}
-        <View style={{ alignItems: 'center', gap: spacing[2] }}>
-          {/* S82: tap → editar la foto (encuadre). Pressed por usePresionado
-              (la receta única de la casa — jamás scale artesanal). */}
+        {/* ── 1 · HEADER ALTO (imagen-acuerdo S82-C): editar · compartir ·
+            foto grande CIRCULAR con anillo · pastilla al pie · nombre en
+            serif · meta en mono. El atrás vive en el Encabezado de
+            arriba. Los textos Editar/Compartir son PROVISIONALES hasta
+            la imagen (sin glifos: el set no tiene lápiz ni compartir —
+            cero genéricos, Ley 12). */}
+        <View style={{ alignItems: 'center', gap: spacing[3] }}>
+          <View style={{ flexDirection: 'row', alignSelf: 'stretch', justifyContent: 'flex-end', gap: spacing[4] }}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() =>
+                router.push({ pathname: '/hogar/foto-mascota', params: { mascotaId: mascota.id, nombre: mascota.nombre } })
+              }
+              style={{ minHeight: 44, justifyContent: 'center' }}
+            >
+              <Texto variante="apoyo" color="primary">{t('perfil.editar')}</Texto>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => void Share.share({ message: t('perfil.compartirMensaje', { nombre: mascota.nombre }) })}
+              style={{ minHeight: 44, justifyContent: 'center' }}
+            >
+              <Texto variante="apoyo" color="primary">{t('perfil.compartir')}</Texto>
+            </Pressable>
+          </View>
+          {/* S82: tap en la foto → editar el encuadre (la puerta de A).
+              Pressed por usePresionado (la receta única de la casa). */}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('fotoEncuadre.editarFotoA11y', { nombre: mascota.nombre })}
@@ -301,29 +350,119 @@ export default function PerfilDeMascota() {
             {...presionAvatar.handlers}
           >
             <Animated.View style={presionAvatar.estiloPresionado}>
-              <AvatarMascota
-                nombre={mascota.nombre}
-                fotoUrl={fotoFirmada}
-                especie={esEspecieUi(mascota.especie) ? mascota.especie : undefined}
-                tamano="lg"
-                capa="vida"
-              />
+              {/* @override-s82c — FOTO CIRCULAR CON ANILLO (orden founder;
+                  CHOQUE DECLARADO contra el squircle 32% FIRMADO S61-A10 —
+                  lo resuelve el gate; por eso NO pasa por AvatarMascota:
+                  a la primitiva firmada no se le talla una excepción
+                  desde una pantalla). Anillo = aro de papel + elevación.
+                  Sin foto: la Huella digna sobre el tinte de su capa. */}
+              <View
+                style={{
+                  width: 124,
+                  height: 124,
+                  borderRadius: radius.full,
+                  backgroundColor: theme.bg.card,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: theme.elevacion.reposo,
+                }}
+              >
+                {fotoFirmada !== undefined ? (
+                  <Image
+                    source={{ uri: fotoFirmada }}
+                    style={{ width: 112, height: 112, borderRadius: radius.full }}
+                    contentFit="cover"
+                    accessibilityIgnoresInvertColors
+                  />
+                ) : (
+                  <View
+                    style={{
+                      width: 112,
+                      height: 112,
+                      borderRadius: radius.full,
+                      backgroundColor: 'capaBg' in theme ? theme.capaBg.identidad : theme.bg.overlay,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Svg width={52} height={52} viewBox="0 0 24 24">
+                      <Huella color={theme.capa.identidad} escala={0.9} x={1.2} y={1.2} />
+                    </Svg>
+                  </View>
+                )}
+              </View>
+              {/* la pastilla de estado MONTADA al pie de la foto — la
+                  misma verdad que la ficha del Hogar; sin señal, calla */}
+              {pastilla !== null ? (
+                <View style={{ position: 'absolute', bottom: -spacing[1], alignSelf: 'center' }}>
+                  <Insignia
+                    estado={pastilla === 'alDia' ? 'alDia' : pastilla === 'pideAtencion' ? 'atencion' : 'info'}
+                    etiqueta={
+                      pastilla === 'alDia'
+                        ? t('perfil.pastillaAlDia')
+                        : pastilla === 'pideAtencion'
+                          ? t('perfil.pastillaAtencion')
+                          : t('perfil.pastillaConociendo')
+                    }
+                    tamaño="sm"
+                  />
+                </View>
+              ) : null}
             </Animated.View>
           </Pressable>
-          <Text
-            accessibilityRole="header"
-            style={{ fontFamily: typography.family.sans.light, fontSize: typography.size['2xl'], color: theme.text.primary }}
-          >
+          {/* @override-s82c — el nombre en SERIF (la pieza es de B;
+              acá el hueco local, tamaño de la escala de la casa). */}
+          <Text accessibilityRole="header" style={{ fontFamily: SERIF_LOCAL, fontSize: typography.size['2xl'], color: theme.text.primary }}>
             {mascota.nombre}
           </Text>
-          {/* S52-P4a: el momento vital es VOZ bajo el nombre, no chip
-              de estado — habla como una persona que lo conoce. */}
+          {/* la meta en MONO (imagen-acuerdo — supersede la voz sans de
+              S52-P4a en ESTA pantalla; el gate lo firma o lo devuelve) */}
           {chipMomento !== null || meses !== null ? (
-            <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.base, color: theme.text.secondary }}>
-              {[chipMomento, meses !== null ? vozEdad(meses, t) : null].filter(Boolean).join(' · ')}
-            </Text>
+            <Texto variante="dato">
+              {[meses !== null ? vozEdad(meses, t) : null, chipMomento]
+                .filter(Boolean)
+                .join(' · ')
+                .toLowerCase()}
+            </Texto>
           ) : null}
         </View>
+
+        {/* ── 2 · LOS HECHOS (imagen-acuerdo; MODELO_LOYALTY §3 y el
+            criterio D2: HECHOS del expediente — jamás puntaje ni %
+            completo). La celda CONSULTAS del pedido NO SE MONTA: el
+            contrato del perfil no trae contador de consultas y contarlas
+            desde una página del timeline subcontaría (L-139) — el pedido
+            del contador viaja al escritor de api en el reporte. Ambos en
+            cero = la tarjeta no existe (regla de existencia). El montaje
+            sobre el borde del header espera LA IMAGEN (sin banda de
+            color detrás, el solape no se deriva — freno declarado). */}
+        {perfil.paseos_total > 0 || vacunas.length > 0 ? (
+          <Tarjeta elevacion="elevada">
+            <View style={{ flexDirection: 'row', alignItems: 'stretch' }}>
+              <View style={{ flex: 1, alignItems: 'center', gap: spacing[1] }}>
+                <Text style={{ fontFamily: typography.family.sans.light, fontSize: typography.size['2xl'], fontVariant: ['tabular-nums'], color: theme.text.primary }}>
+                  {perfil.paseos_total}
+                </Text>
+                <Texto variante="apoyo">{t('perfil.hechosPaseos')}</Texto>
+              </View>
+              <View style={{ width: 1, backgroundColor: theme.border.default, marginVertical: spacing[1] }} />
+              <View style={{ flex: 1, alignItems: 'center', gap: spacing[1] }}>
+                <Text style={{ fontFamily: typography.family.sans.light, fontSize: typography.size['2xl'], fontVariant: ['tabular-nums'], color: theme.text.primary }}>
+                  {vacunas.length}
+                </Text>
+                <Texto variante="apoyo">{t('perfil.hechosVacunas')}</Texto>
+              </View>
+            </View>
+          </Tarjeta>
+        ) : null}
+
+        {/* ═══ FRENO L-142 (ítems 3 y 4 del pedido S82-C perfil): la
+            tarjeta de VOZ (canto violeta + procedencia ⓘ) y la grilla
+            CÓMO ESTÁ HOY (2×2, canto por estado) esperan LA
+            IMAGEN-ACUERDO que no viajó — qué dato es "la voz" y cuáles
+            son las cuatro celdas no se derivan de la letra y no se
+            inventan (L-139; protocolo D-434: nacen cuando su literal
+            llegue). Vitales queda como interino del ítem 4. ═══ */}
 
         {/* ── 1 · VITALES (S53-B2c.1: el estado antes que el log — §4 v1.3) ──
             ═══ HUECO M-WEAR: el día que la mascota tenga collar
@@ -548,11 +687,22 @@ export default function PerfilDeMascota() {
           {/* la invitación digna: texto, jamás formulario muerto */}
           <Texto variante="apoyo">{t('perfil.identidadInvitacion')}</Texto>
         </View>
-        {/* ── 4 · Su vida ── */}
+        {/* ── 5 · SU HISTORIA (imagen-acuerdo): filas con CANTO CORTO —
+            título en voz de familia + prestador + fecha en mono. El tap
+            va al destino del hecho (la consulta → su parte; la atención
+            → su detalle); la vacuna no navega (su detalle vive en el
+            carnet de Salud, arriba). LineaDeVida deja esta pantalla —
+            la pieza queda en ui, su destino lo decide B. */}
         <View style={{ gap: spacing[3] }}>
           <Texto variante="seccion">{t('perfil.vida')}</Texto>
           {items === null ? (
-            <LineaDeVida items={[]} cargando />
+            <EsqueletoGrupo etiqueta={t('hogar.cargando')}>
+              <View style={{ gap: spacing[2] }}>
+                <Esqueleto forma="bloque" ancho="100%" alto={56} />
+                <Esqueleto forma="bloque" ancho="100%" alto={56} />
+                <Esqueleto forma="bloque" ancho="100%" alto={56} />
+              </View>
+            </EsqueletoGrupo>
           ) : items === 'error' ? (
             <EstadoVacio
               titulo={t('hogar.errorHistoria')}
@@ -571,9 +721,77 @@ export default function PerfilDeMascota() {
           ) : items.length === 0 ? (
             <EstadoVacio titulo={t('hogar.historiaEmpieza')} descripcion={t('hogar.historiaEmpiezaDetalle')} />
           ) : (
-            <LineaDeVida items={items} onPressNodo={alTocarNodo} estadoPie={estadoPie} onCargarMas={() => void cargarMas()} />
+            <>
+              <Tarjeta relleno="ninguno" elevacion="reposo">
+                {items.map((it, i) => {
+                  const familia = FAMILIA_DE_TIPO[it.tipo];
+                  const color =
+                    familia === 'salud' ? theme.capa.identidad : familia !== undefined ? theme.capa.cuidado : null;
+                  const destino =
+                    it.tipo === 'historia_clinica_registrada'
+                      ? () => router.push({ pathname: '/parte/[eventoId]', params: { eventoId: it.evento_id, nombre: mascota.nombre } })
+                      : it.atencion_id !== null
+                        ? () => router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: it.atencion_id as string } })
+                        : null;
+                  const meta = [
+                    it.titulo_fuente !== null ? it.titulo_fuente.toLowerCase() : null,
+                    fechaCortaMono(it.fecha_evento.slice(0, 10), idioma),
+                  ]
+                    .filter((x): x is string => x !== null)
+                    .join(' · ');
+                  const fila = (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3], paddingHorizontal: spacing[4], paddingVertical: spacing[3], minHeight: 44 }}>
+                      {/* el canto corto: la marca de familia de la fila */}
+                      <View style={{ width: 3, height: 24, borderRadius: radius.full, backgroundColor: color ?? theme.border.default }} />
+                      <View style={{ flex: 1, minWidth: 0, gap: spacing[0.5] }}>
+                        <Texto variante="cuerpo" numberOfLines={1}>{vozHecho(it, t)}</Texto>
+                        <Texto variante="dato" numberOfLines={1}>{meta}</Texto>
+                      </View>
+                      {destino !== null ? (
+                        <Svg width={19} height={19} viewBox="0 0 24 24">
+                          <Path d="M9 5l7 7-7 7" stroke={theme.text.tertiary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                        </Svg>
+                      ) : null}
+                    </View>
+                  );
+                  return (
+                    <View key={it.evento_id}>
+                      {i > 0 ? <Separador /> : null}
+                      {destino !== null ? (
+                        <Pressable accessibilityRole="button" onPress={destino}>
+                          {fila}
+                        </Pressable>
+                      ) : (
+                        fila
+                      )}
+                    </View>
+                  );
+                })}
+              </Tarjeta>
+              {estadoPie === 'mas' ? (
+                <View style={{ alignSelf: 'center' }}>
+                  <Boton variante="compacto" etiqueta={t('hogar.vidaCargarMas')} onPress={() => void cargarMas()} />
+                </View>
+              ) : estadoPie === 'cargando' ? (
+                <EsqueletoGrupo etiqueta={t('hogar.cargando')}>
+                  <Esqueleto forma="linea" ancho="40%" />
+                </EsqueletoGrupo>
+              ) : estadoPie === 'error' ? (
+                <View style={{ alignSelf: 'center' }}>
+                  <Boton variante="compacto" etiqueta={t('hogar.reintentar')} onPress={() => void cargarMas()} />
+                </View>
+              ) : null}
+            </>
           )}
         </View>
+
+        {/* ── 6 · EL CTA (imagen-acuerdo): reservar, a lo ancho ── */}
+        <Boton
+          variante="primario"
+          bloque
+          etiqueta={t('perfil.reservarServicio')}
+          onPress={() => router.navigate('/explorar')}
+        />
 
       </ScrollView>
 

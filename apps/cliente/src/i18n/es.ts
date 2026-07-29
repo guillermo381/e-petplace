@@ -235,7 +235,18 @@ export const clienteEs = {
     edadMeses: '{{meses}} meses',
     edadUnMes: '1 mes',
     // ── secciones de la pila ──
-    vida: 'Su vida',
+    // S82-C (imagen-acuerdo del perfil): la sección pasa a SU HISTORIA;
+    // + el header alto (editar/compartir/pastilla), los HECHOS y el CTA.
+    vida: 'Su historia',
+    editar: 'Editar',
+    compartir: 'Compartir',
+    compartirMensaje: 'Conoce a {{nombre}} en e-PetPlace',
+    pastillaAlDia: 'Al día',
+    pastillaAtencion: 'Necesita atención',
+    pastillaConociendo: 'Conociéndolo',
+    hechosPaseos: 'Paseos',
+    hechosVacunas: 'Vacunas',
+    reservarServicio: 'Reservar un servicio',
     salud: 'Salud',
     identidad: 'Identidad',
     // ── salud ──

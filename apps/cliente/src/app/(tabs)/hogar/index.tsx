@@ -107,6 +107,7 @@ import { fechaCortaMono, fechaLargaHumana } from '@epetplace/i18n';
 import { CoachHoja } from '@/components/coach';
 import { useTraduccion } from '@/i18n';
 import { vozServicio } from '@/lib/voz-servicio';
+import { FAMILIA_DE_TIPO, vozHecho } from '@/lib/voz-hecho';
 
 
 type TraductorHogar = ReturnType<typeof useTraduccion>['t'];
@@ -180,19 +181,6 @@ type EstadoMascotas = MascotaResumen[] | 'cargando' | 'error';
 // multi-mascota etiqueta; leerTimelineMascota es por mascota).
 type ItemHogar = ItemTimeline & { mascota_id: string };
 
-// El filtro por TIPO habla en familias de servicio (Ley 3) — el código
-// del evento jamás sale de acá. 'otros' pasa solo con el filtro en
-// "todo". S82-C (lámina): 'vacunas' se ensancha a SALUD (vacunas +
-// consultas — la familia que el dueño reconoce).
-const FAMILIA_DE_TIPO: Record<string, 'paseos' | 'estetica' | 'adiestramiento' | 'salud'> = {
-  atencion_paseo_registrada: 'paseos',
-  atencion_grooming_registrada: 'estetica',
-  // S65 (hallazgo founder): la sesión cerrada no tenía familia — sin
-  // chip en "¿Qué momentos?" y con filtro activo desaparecía.
-  atencion_adiestramiento_registrada: 'adiestramiento',
-  vacuna_aplicada: 'salud',
-  historia_clinica_registrada: 'salud',
-};
 
 // ═══════════ S82-C RONDA 2 — LA LÁMINA POSICIÓN CONSOLIDADA ═══════════
 // (docs/laminas/2026-07-29-s82-posicion-consolidada.html ES el acuerdo;
@@ -393,23 +381,6 @@ function FiltroVida({
       })}
     </ScrollView>
   );
-}
-
-/** La voz humana del hecho (Ley 3: el código del evento jamás sale de
- *  acá; desconocido degrada digno — 'Momento de cuidado', precedente
- *  LineaDeVida). El detalle rico vive en el despliegue. */
-function vozHecho(item: ItemHogar, t: TraductorHogar): string {
-  switch (item.tipo) {
-    case 'atencion_paseo_registrada': return t('hogar.hechoPaseo');
-    case 'atencion_grooming_registrada': return t('hogar.hechoGrooming');
-    case 'atencion_adiestramiento_registrada': return t('hogar.hechoAdiestramiento');
-    case 'vacuna_aplicada':
-      return item.vacuna_nombre !== null
-        ? t('hogar.hechoVacuna', { nombre: item.vacuna_nombre })
-        : t('hogar.hechoVacunaSinNombre');
-    case 'historia_clinica_registrada': return t('hogar.hechoConsulta');
-    default: return t('hogar.hechoMomento');
-  }
 }
 
 /** La línea mono del hecho: fecha (fecha_sola = partes UTC, S48-B6.3 —

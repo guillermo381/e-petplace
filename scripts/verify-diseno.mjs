@@ -275,7 +275,9 @@ function r9(archivos) {
  *  eso esta regla lee el fuente CRUDO, sin despojar). DURA EN 0 fuera
  *  de la casa. Reconciliación declarada: no cubre la reinvención sin
  *  marcador — esa la atrapa el gate de craft, no un grep. */
-const CASA_OVERRIDE_S82C = /apps\/cliente\/src\/app\/\(tabs\)\/hogar\/index\.tsx$/;
+/** Dos casas declaradas: el Hogar (ronda 2) y el PERFIL (ronda 3 — la
+ *  imagen-acuerdo del founder ordenó serif/círculo locales ahí). */
+const CASA_OVERRIDE_S82C = /apps\/cliente\/src\/app\/\(tabs\)\/hogar\/(index|mascota\/\[mascotaId\])\.tsx$/;
 function r10(archivos) {
   const fallos = [];
   for (const { path, src } of archivos) {
