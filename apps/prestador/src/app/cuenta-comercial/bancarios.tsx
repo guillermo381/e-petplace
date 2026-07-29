@@ -24,6 +24,7 @@ import {
   SelectorOpcion,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useAviso,
@@ -190,16 +191,7 @@ export default function DatosBancarios() {
         keyboardShouldPersistTaps="handled"
       >
         {/* la educación del modelo (§4.1): una cuenta, una transferencia */}
-        <Text
-          style={{
-            fontFamily: typography.family.sans.regular,
-            fontSize: typography.size.sm,
-            lineHeight: typography.size.sm * typography.leading.normal,
-            color: theme.text.tertiary,
-          }}
-        >
-          {t('cuenta.bancariosEducacion')}
-        </Text>
+        <Texto variante="apoyo" color="tertiary">{t('cuenta.bancariosEducacion')}</Texto>
 
         <Tarjeta relleno="ninguno">
           <Celda
@@ -211,16 +203,9 @@ export default function DatosBancarios() {
           />
         </Tarjeta>
         {errores.banco !== undefined ? (
-          <Text
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.sm,
-              color: theme.status.dangerText,
-              marginTop: -spacing[4],
-            }}
-          >
-            {errores.banco}
-          </Text>
+          <View style={{ marginTop: -spacing[4] }}>
+            <Texto variante="apoyo" color="danger">{errores.banco}</Texto>
+          </View>
         ) : null}
 
         <SelectorOpcion
