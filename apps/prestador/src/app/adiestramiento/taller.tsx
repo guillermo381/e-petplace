@@ -444,13 +444,6 @@ export default function TallerAdiestramiento() {
     mostrar({ variante: 'exito', texto: t('taller.guardado') });
   }
 
-  const vozSecundaria = {
-    fontFamily: typography.family.sans.regular,
-    fontSize: typography.size.sm,
-    lineHeight: typography.size.sm * 1.4,
-    color: theme.text.secondary,
-  } as const;
-
   const VOZ_NIVEL: Record<NivelPrograma, string> = {
     basico: t('tallerAdiestramiento.nivelBasico'),
     medio: t('tallerAdiestramiento.nivelMedio'),
@@ -518,16 +511,7 @@ export default function TallerAdiestramiento() {
         {pantalla.estado === 'error' && (
           <Tarjeta tinte="danger" relleno="amplio">
             <View style={{ gap: spacing[3] }}>
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.regular,
-                  fontSize: typography.size.base,
-                  lineHeight: typography.size.base * 1.4,
-                  color: theme.status.dangerText,
-                }}
-              >
-                {pantalla.mensaje}
-              </Text>
+              <Texto variante="cuerpo" color="danger">{pantalla.mensaje}</Texto>
               <View style={{ alignSelf: 'flex-start' }}>
                 <Boton variante="secundario" tamaño="sm" etiqueta={t('agenda.reintentar')} onPress={() => void cargar()} />
               </View>
@@ -540,7 +524,7 @@ export default function TallerAdiestramiento() {
             {/* ── CON QUIÉN TRABAJAS — el paso bloqueante ── */}
             <View style={{ gap: spacing[3] }}>
               <Titulo texto={t('tallerAdiestramiento.especiesTitulo')} />
-              <Text style={vozSecundaria}>{t('tallerAdiestramiento.especiesExplica')}</Text>
+              <Texto variante="apoyo">{t('tallerAdiestramiento.especiesExplica')}</Texto>
               <SelectorOpcion
                 acento="oficio"
                 multiple
@@ -551,7 +535,7 @@ export default function TallerAdiestramiento() {
                   setEspecies((prev) => (prev.includes(codigo) ? prev.filter((e) => e !== codigo) : [...prev, codigo]))
                 }
               />
-              <Text style={vozSecundaria}>{t('tallerAdiestramiento.especiesTecho')}</Text>
+              <Texto variante="apoyo">{t('tallerAdiestramiento.especiesTecho')}</Texto>
             </View>
 
             {/* ── LA SESIÓN SUELTA (§4: precio único, sin matriz) ── */}
@@ -560,15 +544,7 @@ export default function TallerAdiestramiento() {
               <Tarjeta relleno="amplio">
                 <View style={{ gap: spacing[4] }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Text
-                      style={{
-                        fontFamily: typography.family.sans.regular,
-                        fontSize: typography.size.base,
-                        color: theme.text.primary,
-                      }}
-                    >
-                      {t('tallerAdiestramiento.ofrecer')}
-                    </Text>
+                    <Texto variante="cuerpo">{t('tallerAdiestramiento.ofrecer')}</Texto>
                     <Interruptor
                       encendido={activo}
                       onCambio={setActivo}
@@ -578,7 +554,7 @@ export default function TallerAdiestramiento() {
                   </View>
                   <View style={{ gap: spacing[2] }}>
                     {/* S68-B7: el valor vive dentro del slider (Chanel) */}
-                    <Text style={vozSecundaria}>{t('tallerAdiestramiento.precioSesion')}</Text>
+                    <Texto variante="apoyo">{t('tallerAdiestramiento.precioSesion')}</Texto>
                     <SliderPrecio
                       etiqueta={t('tallerAdiestramiento.precioSesion')}
                       pasos={PASOS_SESION.map((p) => `$${p.toFixed(2)}`)}
@@ -607,7 +583,7 @@ export default function TallerAdiestramiento() {
 
             {/* EL BLOQUEO REAL: sin especies no hay publicación — el CTA
                 se apaga y el porqué queda a la vista (Ley 17.4). */}
-            {!especiesDeclaradas && <Text style={vozSecundaria}>{t('tallerAdiestramiento.especiesFalta')}</Text>}
+            {!especiesDeclaradas && <Texto variante="apoyo">{t('tallerAdiestramiento.especiesFalta')}</Texto>}
             <Boton
               variante="primario"
               bloque
@@ -622,9 +598,9 @@ export default function TallerAdiestramiento() {
                 puerta a las especialidades (supuesto declarado) ── */}
             <View style={{ gap: spacing[3] }}>
               <Titulo texto={t('tallerAdiestramiento.programasTitulo')} />
-              <Text style={vozSecundaria}>{t('tallerAdiestramiento.programasExplica')}</Text>
+              <Texto variante="apoyo">{t('tallerAdiestramiento.programasExplica')}</Texto>
               {listo.oferta === null ? (
-                <Text style={vozSecundaria}>{t('tallerAdiestramiento.programasEsperanOferta')}</Text>
+                <Texto variante="apoyo">{t('tallerAdiestramiento.programasEsperanOferta')}</Texto>
               ) : (() => {
                 const { troncal, otros } = separarProgramas(listo.programas);
                 return (
@@ -658,19 +634,11 @@ export default function TallerAdiestramiento() {
                               }}
                             >
                               <View style={{ flex: 1, gap: spacing[1] }}>
-                                <Text
-                                  style={{
-                                    fontFamily: typography.family.sans.medium,
-                                    fontSize: typography.size.base,
-                                    color: theme.text.primary,
-                                  }}
-                                >
-                                  {VOZ_NIVEL[nivel]}
-                                </Text>
+                                <Texto variante="seccion">{VOZ_NIVEL[nivel]}</Texto>
                                 {rango !== undefined && (
-                                  <Text style={vozSecundaria}>
+                                  <Texto variante="apoyo">
                                     {t('tallerAdiestramiento.rangoSugerido', { min: rango.min, max: rango.max })}
-                                  </Text>
+                                  </Texto>
                                 )}
                               </View>
                               {/* anti doble-disparo: el guard vive en
@@ -693,7 +661,7 @@ export default function TallerAdiestramiento() {
                                     justifyContent: 'space-between',
                                   }}
                                 >
-                                  <Text style={vozSecundaria}>{t('tallerAdiestramiento.sesiones')}</Text>
+                                  <Texto variante="apoyo">{t('tallerAdiestramiento.sesiones')}</Texto>
                                   <StepperCantidad
                                     valor={d.nSesiones}
                                     min={2}
@@ -708,7 +676,7 @@ export default function TallerAdiestramiento() {
 
                                 <View style={{ gap: spacing[2] }}>
                                   {/* S68-B7: el valor vive dentro del slider (Chanel) */}
-                                  <Text style={vozSecundaria}>{t('tallerAdiestramiento.precioPrograma')}</Text>
+                                  <Texto variante="apoyo">{t('tallerAdiestramiento.precioPrograma')}</Texto>
                                   <SliderPrecio
                                     etiqueta={t('tallerAdiestramiento.precioPrograma')}
                                     pasos={PASOS_PROGRAMA.map((p) => `$${p.toFixed(2)}`)}
@@ -732,9 +700,9 @@ export default function TallerAdiestramiento() {
                                   multilinea={3}
                                 />
 
-                                <Text style={vozSecundaria}>
+                                <Texto variante="apoyo">
                                   {t('tallerAdiestramiento.condiciones', { semanas: semanasVigencia, min: minutosSesion })}
-                                </Text>
+                                </Texto>
 
                                 {dirty && (
                                   <Boton
@@ -755,16 +723,8 @@ export default function TallerAdiestramiento() {
                     {/* Personalizado — la puerta a las especialidades (§1) */}
                     <Tarjeta relleno="amplio">
                       <View style={{ gap: spacing[3] }}>
-                        <Text
-                          style={{
-                            fontFamily: typography.family.sans.medium,
-                            fontSize: typography.size.base,
-                            color: theme.text.primary,
-                          }}
-                        >
-                          {t('tallerAdiestramiento.personalizadoTitulo')}
-                        </Text>
-                        <Text style={vozSecundaria}>{t('tallerAdiestramiento.personalizadoExplica')}</Text>
+                        <Texto variante="seccion">{t('tallerAdiestramiento.personalizadoTitulo')}</Texto>
+                        <Texto variante="apoyo">{t('tallerAdiestramiento.personalizadoExplica')}</Texto>
                         <View style={{ alignSelf: 'flex-start' }}>
                           <Boton
                             variante="compacto"
@@ -866,9 +826,9 @@ export default function TallerAdiestramiento() {
         <HojaScroll>
           <View style={{ padding: spacing[4], paddingBottom: spacing[4] + insets.bottom, gap: spacing[4] }}>
             {rango !== undefined && (
-              <Text style={vozSecundaria}>
+              <Texto variante="apoyo">
                 {t('tallerAdiestramiento.rangoSugerido', { min: rango.min, max: rango.max })}
-              </Text>
+              </Texto>
             )}
 
             <Campo
@@ -887,7 +847,7 @@ export default function TallerAdiestramiento() {
             />
 
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Text style={vozSecundaria}>{t('tallerAdiestramiento.sesiones')}</Text>
+              <Texto variante="apoyo">{t('tallerAdiestramiento.sesiones')}</Texto>
               <StepperCantidad
                 valor={draft.nSesiones}
                 min={2}
@@ -906,7 +866,7 @@ export default function TallerAdiestramiento() {
 
             <View style={{ gap: spacing[2] }}>
               {/* S68-B7: el valor vive dentro del slider (Chanel) */}
-              <Text style={vozSecundaria}>{t('tallerAdiestramiento.precioPrograma')}</Text>
+              <Texto variante="apoyo">{t('tallerAdiestramiento.precioPrograma')}</Texto>
               <SliderPrecio
                 etiqueta={t('tallerAdiestramiento.precioPrograma')}
                 pasos={PASOS_PROGRAMA.map((p) => `$${p.toFixed(2)}`)}
@@ -920,9 +880,9 @@ export default function TallerAdiestramiento() {
 
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
               <View style={{ flex: 1, paddingRight: spacing[3], gap: spacing[1] }}>
-                <Text style={vozSecundaria}>
+                <Texto variante="apoyo">
                   {t('tallerAdiestramiento.vigencia')} · {t('tallerAdiestramiento.vigenciaSemanas', { n: draft.vigenciaSemanas })}
-                </Text>
+                </Texto>
               </View>
               <StepperCantidad
                 valor={draft.vigenciaSemanas}
@@ -933,7 +893,7 @@ export default function TallerAdiestramiento() {
                 registro="oficio"
               />
             </View>
-            <Text style={vozSecundaria}>{t('tallerAdiestramiento.vigenciaExplica')}</Text>
+            <Texto variante="apoyo">{t('tallerAdiestramiento.vigenciaExplica')}</Texto>
 
             {/* misma cura S65 que la sesión suelta: la fila de 5 chips
                 desborda — 'tira' (scroll horizontal de la casa) */}
@@ -948,15 +908,7 @@ export default function TallerAdiestramiento() {
 
             {draft.programaId !== null && (
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.regular,
-                    fontSize: typography.size.base,
-                    color: theme.text.primary,
-                  }}
-                >
-                  {t('tallerAdiestramiento.programaActivo')}
-                </Text>
+                <Texto variante="cuerpo">{t('tallerAdiestramiento.programaActivo')}</Texto>
                 <Interruptor
                   encendido={draft.activo}
                   onCambio={(v) => setDraft((d) => ({ ...d, activo: v }))}
