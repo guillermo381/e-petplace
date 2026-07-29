@@ -5,7 +5,7 @@
  * superó a la anterior en distancia — jamás una lectura sin respaldo.
  */
 
-import { filtrarTrack } from './filtroTrack';
+import { filtrarTrackTramos } from './filtroTrack';
 
 /** `t` (S81): habilita el filtro de outliers — un punto sin timestamp
  *  no se juzga y suma como siempre (regla (c) del filtro). */
@@ -50,9 +50,12 @@ export function distanciaTrackKm(puntos: PuntoTrack[]): number {
   // S81 (pedido B): el CÁLCULO consume LA MISMA pieza que el dibujo —
   // filtroTrack.ts, jamás dos filtros que se desincronizan. El número
   // que lo ordenó: un solo outlier inflaba el Vitales +30.3% (A-S81-2).
-  const limpios = filtrarTrack(puntos);
+  // S81 (el corte llega al dibujo): la distancia suma DENTRO de cada
+  // tramo y JAMÁS entre tramos — coser tramos es inventar recorrido.
   let km = 0;
-  for (let i = 1; i < limpios.length; i++) km += haversineKm(limpios[i - 1], limpios[i]);
+  for (const tramo of filtrarTrackTramos(puntos)) {
+    for (let i = 1; i < tramo.length; i++) km += haversineKm(tramo[i - 1], tramo[i]);
+  }
   return km;
 }
 

@@ -38,7 +38,7 @@ import { palette } from '../tokens/palette'
 import { radius } from '../tokens/radius'
 import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
-import { filtrarTrackDibujo } from './MapaRecorrido.filtro'
+import { filtrarTrackDibujoTramos } from './MapaRecorrido.filtro'
 import type { MapaRecorridoProps } from './MapaRecorrido.tipos'
 
 export type {
@@ -76,10 +76,15 @@ export function MapaRecorrido({
   const colorTrazo = 'capaText' in theme ? theme.capaText[k] : theme.capa[k]
   const colorPunto = theme.capa[k]
 
-  // S81 (D-578 ①②): el DIBUJO se filtra (orden por t + descarte de púas
-  // por velocidad de doble arista); el crudo de las props no se toca.
-  // El fit y el seguimiento en vivo consumen el MISMO set filtrado.
-  const coords = filtrarTrackDibujo(puntos).map((p) => ({ latitude: p.lat, longitude: p.lng }))
+  // S81 (D-578 ①②): el DIBUJO se filtra; el crudo de las props no se
+  // toca. S81 (el corte LLEGA al dibujo): un track con cortes son
+  // VARIOS tramos — UNA Polyline POR TRAMO; donde hubo corte hay HUECO,
+  // que es la verdad: no sabemos por dónde fue. Lo plano cosía.
+  const tramos = filtrarTrackDibujoTramos(puntos).map((tr) =>
+    tr.map((p) => ({ latitude: p.lat, longitude: p.lng })),
+  )
+  // El encuadre y el seguimiento en vivo abarcan TODOS los tramos.
+  const coords = tramos.flat()
   const ultimo = coords.length > 0 ? coords[coords.length - 1] : null
   const esVivo = modo === 'vivo'
 
@@ -125,14 +130,17 @@ export function MapaRecorrido({
         showsCompass={false}
         showsMyLocationButton={false}
       >
-        {coords.length > 1 && (
-          <Polyline
-            coordinates={coords}
-            strokeColor={colorTrazo}
-            strokeWidth={4.5}
-            lineCap="round"
-            lineJoin="round"
-          />
+        {tramos.map((tr, i) =>
+          tr.length > 1 ? (
+            <Polyline
+              key={i}
+              coordinates={tr}
+              strokeColor={colorTrazo}
+              strokeWidth={4.5}
+              lineCap="round"
+              lineJoin="round"
+            />
+          ) : null,
         )}
         {esVivo && ultimo !== null && (
           <Marker coordinate={ultimo} anchor={{ x: 0.5, y: 0.5 }} tracksViewChanges={false}>

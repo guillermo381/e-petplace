@@ -10,12 +10,19 @@
  * número, la ley "el crudo no se toca") vive con el código en domain.
  */
 
-import { filtrarTrack } from '@epetplace/domain'
+import { filtrarTrack, filtrarTrackTramos } from '@epetplace/domain'
 
 import type { PuntoLatLng } from './MapaRecorrido.tipos'
 
 export { distanciaM, VELOCIDAD_MAX_MS } from '@epetplace/domain'
 
+/** LOS TRAMOS (S81, el corte llega al dibujo): una Polyline POR TRAMO —
+ *  donde hubo corte hay hueco, que es la verdad. */
+export function filtrarTrackDibujoTramos(puntos: PuntoLatLng[]): PuntoLatLng[][] {
+  return filtrarTrackTramos(puntos)
+}
+
+/** Compatibilidad (plano): SOLO para contar puntos — lo plano cose. */
 export function filtrarTrackDibujo(puntos: PuntoLatLng[]): PuntoLatLng[] {
   return filtrarTrack(puntos)
 }

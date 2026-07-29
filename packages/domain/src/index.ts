@@ -30,6 +30,7 @@ export {
   distanciaM,
   filtrarTrack,
   filtrarTrackDetalle,
+  filtrarTrackTramos,
   FRACCION_SEGMENTO_MENOR,
   VELOCIDAD_MAX_MS,
   type FiltroTrackDetalle,

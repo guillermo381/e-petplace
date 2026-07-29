@@ -77,6 +77,12 @@ function esCorte(a: PuntoTrackFiltrable, b: PuntoTrackFiltrable): boolean {
 
 /** El detalle del análisis — para quien tenga que DECLARAR (regla 3). */
 export interface FiltroTrackDetalle<P extends PuntoTrackFiltrable> {
+  /** LOS TRAMOS conservados (S81: el corte LLEGA al dibujo — un track
+   *  con cortes son VARIOS tramos, jamás uno; lo plano fabrica la
+   *  COSTURA que vuelve a coser los saltos descartados). */
+  tramos: P[][];
+  /** Compatibilidad: los tramos aplanados — SOLO para quien cuenta
+   *  puntos. Dibujo y distancia consumen `tramos`. */
   puntos: P[];
   nSegmentos: number;
   descartados: number;
@@ -86,7 +92,13 @@ export interface FiltroTrackDetalle<P extends PuntoTrackFiltrable> {
 
 export function filtrarTrackDetalle<P extends PuntoTrackFiltrable>(puntos: P[]): FiltroTrackDetalle<P> {
   if (puntos.length < 2) {
-    return { puntos, nSegmentos: puntos.length, descartados: 0, huecoReal: false };
+    return {
+      tramos: puntos.length > 0 ? [puntos] : [],
+      puntos,
+      nSegmentos: puntos.length,
+      descartados: 0,
+      huecoReal: false,
+    };
   }
 
   // 1. orden por t — sort nativo es estable: los sin-t no se mueven.
@@ -102,18 +114,26 @@ export function filtrarTrackDetalle<P extends PuntoTrackFiltrable>(puntos: P[]):
     else segmentos[segmentos.length - 1].push(orden[i]);
   }
   if (segmentos.length === 1) {
-    return { puntos: orden, nSegmentos: 1, descartados: 0, huecoReal: false };
+    return { tramos: segmentos, puntos: orden, nSegmentos: 1, descartados: 0, huecoReal: false };
   }
 
   // 3. dominante y clasificación.
   const dominante = Math.max(...segmentos.map((s) => s.length));
   const grandes = segmentos.filter((s) => s.length >= dominante * FRACCION_SEGMENTO_MENOR);
   if (grandes.length >= 2) {
-    // Hueco real: NO se descarta ninguno — se declara.
-    return { puntos: orden, nSegmentos: segmentos.length, descartados: 0, huecoReal: true };
+    // Hueco real: NO se descarta ninguno — se declara. Y los cortes
+    // IGUAL parten el dibujo: todos los segmentos, cada uno su tramo.
+    return {
+      tramos: segmentos,
+      puntos: orden,
+      nSegmentos: segmentos.length,
+      descartados: 0,
+      huecoReal: true,
+    };
   }
   const conservados = grandes.flat();
   return {
+    tramos: grandes,
     puntos: conservados,
     nSegmentos: segmentos.length,
     descartados: orden.length - conservados.length,
@@ -121,6 +141,16 @@ export function filtrarTrackDetalle<P extends PuntoTrackFiltrable>(puntos: P[]):
   };
 }
 
+/** LOS TRAMOS conservados — el consumo canónico de dibujo y distancia:
+ *  una línea POR TRAMO, la distancia suma DENTRO de cada tramo y jamás
+ *  entre tramos. Donde hubo corte hay HUECO — que es la verdad: no
+ *  sabemos por dónde fue. */
+export function filtrarTrackTramos<P extends PuntoTrackFiltrable>(puntos: P[]): P[][] {
+  return filtrarTrackDetalle(puntos).tramos;
+}
+
+/** Compatibilidad (plano): SOLO para quien cuenta puntos — lo plano es
+ *  lo que fabrica la costura; dibujo y distancia usan los TRAMOS. */
 export function filtrarTrack<P extends PuntoTrackFiltrable>(puntos: P[]): P[] {
   return filtrarTrackDetalle(puntos).puntos;
 }
