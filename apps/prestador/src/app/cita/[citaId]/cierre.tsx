@@ -232,16 +232,7 @@ export default function Cierre() {
         {pantalla.estado === 'error' && (
           <Tarjeta tinte="danger" relleno="amplio">
             <View style={{ gap: spacing[3] }}>
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.regular,
-                  fontSize: typography.size.base,
-                  lineHeight: typography.size.base * 1.4,
-                  color: theme.status.dangerText,
-                }}
-              >
-                {pantalla.mensaje}
-              </Text>
+              <Texto variante="cuerpo" color="danger">{pantalla.mensaje}</Texto>
               <View style={{ alignSelf: 'flex-start' }}>
                 <Boton variante="secundario" tamaño="sm" etiqueta={t('agenda.reintentar')} onPress={() => void cargar()} />
               </View>
@@ -282,16 +273,9 @@ export default function Cierre() {
                   </Texto>
                 </Tarjeta>
               )}
-              <Text
-                style={{
-                  fontFamily: typography.family.mono.regular,
-                  fontSize: typography.size.md,
-                  letterSpacing: typography.tracking.mono,
-                  color: theme.text.primary,
-                }}
-              >
+              <Texto variante="datoMd">
                 {`${hhmm(resumen.iniciada_en)} → ${hhmm(resumen.terminada_en)} · ${duracion(resumen.tiempo_sesion_segundos)}`}
-              </Text>
+              </Texto>
               <Texto variante="dato">
                 {t('cita.resumenConteos', { puntos: resumen.gps.puntos, fotos: resumen.conteos.fotos, notas: resumen.conteos.notas })}
               </Texto>
@@ -356,17 +340,9 @@ export default function Cierre() {
                 onPress={() => void cerrar()}
               />
             ) : (
-              <Text
-                style={{
-                  fontFamily: typography.family.mono.regular,
-                  fontSize: typography.size.xs,
-                  letterSpacing: typography.tracking.mono,
-                  color: theme.text.tertiary,
-                  textAlign: 'center',
-                }}
-              >
+              <Texto variante="dato" color="tertiary" centrado>
                 {`${t('cita.parteEnviadoMono')} · ${hhmm(resumen.cerrada_en)}`}
-              </Text>
+              </Texto>
             )}
           </>
         )}

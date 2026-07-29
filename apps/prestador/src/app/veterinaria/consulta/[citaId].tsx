@@ -764,9 +764,7 @@ export default function ConsultaVeterinaria() {
           // fase === 'despues'
           <>
             <View style={{ alignItems: 'center', gap: spacing[3], paddingTop: spacing[6] }}>
-              <Text style={{ fontFamily: typography.family.sans.light, fontSize: typography.size.xl, color: theme.text.primary, textAlign: 'center' }}>
-                {t('consulta.listo', { mascota })}
-              </Text>
+              <Texto variante="titulo" centrado>{t('consulta.listo', { mascota })}</Texto>
             </View>
             {nota?.proximoControl ? (
               <Tarjeta elevacion="reposo">

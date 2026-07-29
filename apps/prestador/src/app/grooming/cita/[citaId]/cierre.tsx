@@ -33,6 +33,7 @@ import {
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
+  FilaDato,
   Hoja,
   Insignia,
   SelectorOpcion,
@@ -234,18 +235,6 @@ export default function CierreGrooming() {
     return listo.estadosCatalogo.find((e) => e.codigo === codigo)?.nombre ?? codigo;
   };
 
-  const vozSecundaria = {
-    fontFamily: typography.family.sans.regular,
-    fontSize: typography.size.sm,
-    lineHeight: typography.size.sm * 1.4,
-    color: theme.text.secondary,
-  } as const;
-  const vozPrimaria = {
-    fontFamily: typography.family.sans.regular,
-    fontSize: typography.size.base,
-    lineHeight: typography.size.base * 1.4,
-    color: theme.text.primary,
-  } as const;
   const mono = {
     fontFamily: typography.family.mono.regular,
     fontSize: typography.size.sm,
@@ -262,10 +251,11 @@ export default function CierreGrooming() {
     const rotulo = momento === 'recibir' ? t('citaGrooming.recibiste') : t('citaGrooming.entregaste');
     if (codigo) {
       return (
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: spacing[3] }}>
-          <Texto variante="apoyo">{rotulo}</Texto>
-          <Texto variante="cuerpo">{nombreEstado(codigo)}</Texto>
-        </View>
+        <FilaDato
+          disposicion="horizontal"
+          etiqueta={rotulo}
+          valor={nombreEstado(codigo) ?? codigo}
+        />
       );
     }
     if (listo.modo === 'lectura') return null;
@@ -317,7 +307,7 @@ export default function CierreGrooming() {
         {pantalla.estado === 'error' && (
           <Tarjeta tinte="danger" relleno="amplio">
             <View style={{ gap: spacing[3] }}>
-              <Text style={{ ...vozPrimaria, color: theme.status.dangerText }}>{pantalla.mensaje}</Text>
+              <Texto variante="cuerpo" color="danger">{pantalla.mensaje}</Texto>
               <View style={{ alignSelf: 'flex-start' }}>
                 <Boton variante="secundario" tamaño="sm" etiqueta={t('agenda.reintentar')} onPress={() => void cargar()} />
               </View>
@@ -337,19 +327,12 @@ export default function CierreGrooming() {
             {/* El trabajo, contado: servicios + estados + conteos */}
             <Tarjeta relleno="amplio">
               <View style={{ gap: spacing[3] }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: spacing[3] }}>
-                  <Texto variante="apoyo">{t('citaGrooming.tiempoTrabajo')}</Texto>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.mono.regular,
-                      fontSize: typography.size.sm,
-                      letterSpacing: typography.tracking.mono,
-                      color: theme.text.primary,
-                    }}
-                  >
-                    {t('citaGrooming.minutosSufijo', { n: minutosTrabajo })}
-                  </Text>
-                </View>
+                <FilaDato
+                  disposicion="horizontal"
+                  mono
+                  etiqueta={t('citaGrooming.tiempoTrabajo')}
+                  valor={t('citaGrooming.minutosSufijo', { n: minutosTrabajo })}
+                />
                 <FilaMomento momento="recibir" />
                 <FilaMomento momento="entregar" />
                 <View style={{ gap: spacing[1.5] }}>
@@ -405,12 +388,12 @@ export default function CierreGrooming() {
                     />
                   </View>
                 ) : resumen.proxima_sesion_sugerida !== null ? (
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: spacing[3] }}>
-                    <Texto variante="apoyo">{t('citaGrooming.proximaSesion')}</Texto>
-                    <Text style={{ ...mono, color: theme.text.primary }}>
-                      {fechaCortaMono(resumen.proxima_sesion_sugerida, idioma as IdiomaSoportado)}
-                    </Text>
-                  </View>
+                  <FilaDato
+                    disposicion="horizontal"
+                    mono
+                    etiqueta={t('citaGrooming.proximaSesion')}
+                    valor={fechaCortaMono(resumen.proxima_sesion_sugerida, idioma as IdiomaSoportado)}
+                  />
                 ) : null}
               </View>
             </Tarjeta>

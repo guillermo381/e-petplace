@@ -222,17 +222,9 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
     <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[5] }}>
       {/* Contexto del programa — jamás score (§6) */}
       {datos.sesionKN !== null && (
-        <Text
-          style={{
-            fontFamily: typography.family.mono.regular,
-            fontSize: typography.size.sm,
-            letterSpacing: typography.tracking.mono,
-            color: theme.text.secondary,
-            textAlign: 'center',
-          }}
-        >
+        <Texto variante="dato" centrado>
           {t('citaAdiestramiento.sesionKN', { k: datos.sesionKN.k, n: datos.sesionKN.n })}
-        </Text>
+        </Texto>
       )}
       <View style={{ alignItems: 'center' }}>
         <Cronometro inicioTs={datos.iniciadaEn} />
@@ -523,16 +515,7 @@ export default function DuranteAdiestramiento() {
         <View style={{ padding: spacing[4] }}>
           <Tarjeta tinte="danger" relleno="amplio">
             <View style={{ gap: spacing[3] }}>
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.regular,
-                  fontSize: typography.size.base,
-                  lineHeight: typography.size.base * 1.4,
-                  color: theme.status.dangerText,
-                }}
-              >
-                {pantalla.mensaje}
-              </Text>
+              <Texto variante="cuerpo" color="danger">{pantalla.mensaje}</Texto>
               <View style={{ alignSelf: 'flex-start' }}>
                 <Boton variante="secundario" tamaño="sm" etiqueta={t('agenda.reintentar')} onPress={() => void cargar()} />
               </View>

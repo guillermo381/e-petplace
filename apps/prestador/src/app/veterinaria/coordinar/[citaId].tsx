@@ -213,15 +213,7 @@ export default function FijarFecha() {
                   <Texto variante="apoyo">
                     {t('coordinar.contexto')}
                   </Texto>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.mono.medium,
-                      fontSize: typography.size.base,
-                      color: theme.text.primary,
-                    }}
-                  >
-                    ${total}
-                  </Text>
+                  <Texto variante="datoMd">${total}</Texto>
                 </View>
               </View>
             </Tarjeta>

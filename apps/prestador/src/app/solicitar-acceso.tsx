@@ -63,20 +63,10 @@ export default function SolicitarAcceso() {
             onPress={() => void abrirWhatsApp()}
           />
           {sinWhatsApp && (
-            // Text crudo A PROPÓSITO: el número se COPIA (`selectable`)
-            // y `Texto` no expone selectable — hueco reportado a B, no
-            // se inventa acá (Ley 11).
-            <Text
-              selectable
-              style={{
-                fontFamily: typography.family.mono.regular,
-                fontSize: typography.size.sm,
-                letterSpacing: typography.tracking.mono,
-                color: theme.text.secondary,
-              }}
-            >
+            // S81: el hueco se cobró — Texto ganó `seleccionable` (B).
+            <Texto variante="dato" seleccionable>
               {t('bienvenida.whatsappFallback', { numero: WHATSAPP_EQUIPO_HUMANO })}
-            </Text>
+            </Texto>
           )}
         </View>
       </View>

@@ -178,12 +178,6 @@ export default function CierreAdiestramiento() {
     );
   }
 
-  const vozSecundaria = {
-    fontFamily: typography.family.sans.regular,
-    fontSize: typography.size.sm,
-    lineHeight: typography.size.sm * 1.4,
-    color: theme.text.secondary,
-  } as const;
 
   const clipsLocales = datos !== null ? clipsDeSesion(datos.adiestramientoId).length : 0;
 
@@ -214,9 +208,7 @@ export default function CierreAdiestramiento() {
         {pantalla.estado === 'error' && (
           <Tarjeta tinte="danger" relleno="amplio">
             <View style={{ gap: spacing[3] }}>
-              <Text style={{ ...vozSecundaria, fontSize: typography.size.base, color: theme.status.dangerText }}>
-                {pantalla.mensaje}
-              </Text>
+              <Texto variante="cuerpo" color="danger">{pantalla.mensaje}</Texto>
               <View style={{ alignSelf: 'flex-start' }}>
                 <Boton variante="secundario" tamaño="sm" etiqueta={t('agenda.reintentar')} onPress={() => void cargar()} />
               </View>
@@ -227,17 +219,9 @@ export default function CierreAdiestramiento() {
         {datos !== null && (
           <>
             {datos.sesionKN !== null && (
-              <Text
-                style={{
-                  fontFamily: typography.family.mono.regular,
-                  fontSize: typography.size.sm,
-                  letterSpacing: typography.tracking.mono,
-                  color: theme.text.secondary,
-                  textAlign: 'center',
-                }}
-              >
+              <Texto variante="dato" centrado>
                 {t('citaAdiestramiento.sesionKN', { k: datos.sesionKN.k, n: datos.sesionKN.n })}
-              </Text>
+              </Texto>
             )}
 
             {/* Lo registrado — el parte se arma de esto */}
