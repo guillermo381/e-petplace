@@ -13,6 +13,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...(config as ExpoConfig),
   android: {
     ...config.android,
+    // S81 (el tren de notificaciones): google-services.json como env
+    // var de ARCHIVO en EAS — condicional: sin la variable, nada cambia
+    // (mecánica calcada del prestador; R4 §1.3).
+    ...(process.env.GOOGLE_SERVICES_JSON
+      ? { googleServicesFile: process.env.GOOGLE_SERVICES_JSON }
+      : null),
     config: {
       ...config.android?.config,
       googleMaps: {

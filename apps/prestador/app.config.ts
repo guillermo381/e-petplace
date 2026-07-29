@@ -16,6 +16,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...(config as ExpoConfig),
   android: {
     ...config.android,
+    // S81 (el tren de notificaciones): google-services.json viaja como
+    // env var de ARCHIVO en EAS (GOOGLE_SERVICES_JSON → path en el
+    // build). CONDICIONAL a propósito: sin la variable (hoy, y en todo
+    // flujo OTA/dev) la config queda EXACTAMENTE como era — el tren no
+    // descarrila nada hasta que el founder suba el archivo (R4 §1.3).
+    ...(process.env.GOOGLE_SERVICES_JSON
+      ? { googleServicesFile: process.env.GOOGLE_SERVICES_JSON }
+      : null),
     config: {
       ...config.android?.config,
       googleMaps: {

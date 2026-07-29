@@ -70,6 +70,68 @@
 | **D-298 · LargeSecureStore** (endurecer la sesión, pre-soft-launch) | exige lib AES NATIVA — es exactamente carga de tren; si no sube acá, necesita OTRO tren antes del 1-oct | espera la decisión founder "cero librerías nuevas" |
 | NO sube nada más | barrido del canon: mic (D-456) ya viajó · video ya viajó · mapas ya — cero deudas "espera build" restantes | — |
 
+## 5 · EL TREN ARMADO (S81-A23 — decisión founder: SE REUSA el Firebase del legado)
+
+**Lo que ya está EN EL ÁRBOL (commiteado, inerte hasta el build):**
+
+- `expo-notifications@~57.0.7` instalado en AMBAS apps (nativo ⇒ solo
+  vive en la build; ningún JS lo importa todavía — los OTA actuales no
+  lo bundlean).
+- El plugin `"expo-notifications"` en ambos `app.json`.
+- `googleServicesFile` CONDICIONAL en ambos `app.config.ts` (lee
+  `GOOGLE_SERVICES_JSON` del entorno — env var de ARCHIVO de EAS; sin
+  la variable, la config queda byte-idéntica a la de hoy: cero riesgo
+  para los OTA en curso).
+- **Pasajero 1 — D-579, LA SONDA DEL MANIFEST:**
+  `apps/prestador/modules/sonda-manifest/` (módulo Expo local, Kotlin:
+  `PackageManager.getApplicationInfo(GET_META_DATA)`), PREPARADO-APAGADO
+  patrón D-456: `requireOptionalNativeModule` → null honesto en APK
+  pre-tren (L-187), CERO consumidores hasta la mesa post-tren.
+  **DECLARADO: compila RECIÉN en el tren — Kotlin/gradle sin build
+  local posible acá; si el build lo rebota, se baja del tren sin
+  frenar a los demás (es pasajero, no locomotora).**
+- **Pasajero 2 — el entierro del b19: GRATIS.** La build nueva del
+  prestador embebe el bundle ACTUAL (flip true + filtro + voces) —
+  muere el embebido con guard-false.
+- **Pasajero 3 — D-298 LargeSecureStore: BANCO DE ESPERA.** Sigue
+  condicionado a que el founder LEVANTE su "cero librerías nuevas"
+  (lib AES nativa). Si lo levanta ANTES del build, se instala y sube;
+  si no, espera otro tren. NO instalado.
+
+**LO QUE NECESITO DEL FOUNDER — exacto, con su dónde:**
+
+1. **Los dos `google-services.json`** (uno por app):
+   `console.firebase.google.com` → EL PROYECTO LEGADO → ⚙️ Project
+   settings → General → "Your apps" → **Add app → Android** DOS veces:
+   package `com.epetplace.prestador` y package `com.epetplace.cliente`
+   → descargar el `google-services.json` de CADA una. (Si el legado ya
+   tiene apps Android registradas con otros packages, se AGREGAN estas
+   dos — no se toca nada existente; una sola identidad de remitente.)
+2. **La credencial FCM V1** (la llave del servidor de push):
+   mismo Project settings → **Service accounts → Firebase Admin SDK →
+   "Generate new private key"** → baja UN JSON (sirve para las dos
+   apps). Luego, POR CADA app y por consola (`apps/prestador/` y
+   `apps/cliente/`): `npx eas-cli credentials` → Android → el proyecto
+   → **Push Notifications: Manage FCM V1 service account key → Upload**
+   ese JSON. *(Alternativa por navegador: expo.dev → cada proyecto →
+   Credentials → FCM V1.)*
+3. **Entregarme los `google-services.json` SIN chat** (regla de
+   credenciales S79: navegador→terminal, jamás al chat): por CADA app,
+   desde su carpeta: `npx eas-cli env:create --scope project
+   --environment development --name GOOGLE_SERVICES_JSON --type file
+   --visibility secret --value ./google-services.json` (con el archivo
+   descargado en esa carpeta; después se borra del disco — el repo
+   jamás lo ve, el `.gitignore` igual lo cubre de fábrica en Expo).
+   *Nota: el JSON de google-services no es un secreto duro (viaja
+   dentro de todo APK), pero la casa lo trata con la misma disciplina.*
+
+**Lo que queda para EL DÍA DEL TREN (Code, con veda):** bump
+`version` (cliente 1.0.2→1.0.3 · prestador 1.0.3→1.0.4 — NO antes: el
+bump en main envenena el runtime de los OTA en curso) → `eas build -p
+android --profile preview` ×2 → **checklist D-574 POR MANIFEST**
+(geo.API_KEY + la meta-data de FCM + la sonda presente) → instalar →
+pie de Cuenta → primer OTA contra los runtimes nuevos.
+
 ## 4 · El orden propuesto del tren (para cuando la mesa lo dispare)
 
 ① El founder resuelve FCM (¿proyecto legado o nuevo? + los
