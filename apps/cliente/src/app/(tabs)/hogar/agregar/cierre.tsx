@@ -17,7 +17,7 @@ import {
   spacing,
   useTheme,
 } from '@epetplace/ui';
-import { agregarMascotaAFamilia, obtenerSesion } from '@epetplace/api';
+import { agregarMascotaAFamilia, declararFotoMascota, obtenerSesion } from '@epetplace/api';
 
 import { esPrecision, esSexo } from '@/lib/params';
 import { subirAvatar } from '@/lib/subir-avatar';
@@ -34,6 +34,10 @@ export default function AgregarCierre() {
     precision?: string;
     sexo?: string;
     fotoUri?: string;
+    // S82: el encuadre declarado en el paso foto (lámina 2026-07-29)
+    cx?: string;
+    cy?: string;
+    z?: string;
   }>();
 
   const [error, setError] = useState<string | undefined>(undefined);
@@ -84,6 +88,18 @@ export default function AgregarCierre() {
         }
         setError(r.mensaje);
         return;
+      }
+
+      // S82: declarar el encuadre del paso foto. DECISIÓN DECLARADA: no
+      // frena el alta — si falla rige el default de DB y el error se
+      // dice en el log (espejo del onboarding).
+      if (fotoPath !== undefined && params.cx !== undefined && params.cy !== undefined && params.z !== undefined) {
+        const enc = await declararFotoMascota(r.data.mascota_id, {
+          cx: Number(params.cx),
+          cy: Number(params.cy),
+          z: Number(params.z),
+        });
+        if (!enc.ok) console.error('[agregar/cierre] encuadre no declarado:', enc.codigo);
       }
       router.replace('/hogar');
     })();

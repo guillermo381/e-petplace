@@ -16,7 +16,7 @@ import {
   spacing,
   useTheme,
 } from '@epetplace/ui';
-import { crearFamiliaConPrimeraMascota, obtenerSesion } from '@epetplace/api';
+import { crearFamiliaConPrimeraMascota, declararFotoMascota, obtenerSesion } from '@epetplace/api';
 
 import { esPrecision, esSexo } from '@/lib/params';
 import { subirAvatar } from '@/lib/subir-avatar';
@@ -33,6 +33,10 @@ export default function Cierre() {
     precision?: string;
     sexo?: string;
     fotoUri?: string;
+    // S82: el encuadre declarado en el paso foto (lámina 2026-07-29)
+    cx?: string;
+    cy?: string;
+    z?: string;
   }>();
 
   const [error, setError] = useState<string | undefined>(undefined);
@@ -87,6 +91,19 @@ export default function Cierre() {
         }
         setError(r.mensaje);
         return;
+      }
+
+      // S82: declarar el encuadre que el paso foto trajo (solo si hubo
+      // foto). DECISIÓN DECLARADA: el encuadre NO frena el alta — si
+      // falla, rige el default de DB (.5/.42/1.3) y el error se dice en
+      // el log (no hay silencio: el forense lo ve; la mascota ya nació).
+      if (fotoPath !== undefined && params.cx !== undefined && params.cy !== undefined && params.z !== undefined) {
+        const enc = await declararFotoMascota(r.data.mascota_id, {
+          cx: Number(params.cx),
+          cy: Number(params.cy),
+          z: Number(params.z),
+        });
+        if (!enc.ok) console.error('[onboarding/cierre] encuadre no declarado:', enc.codigo);
       }
       router.replace('/hogar');
     })();

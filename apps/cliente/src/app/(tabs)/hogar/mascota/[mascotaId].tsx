@@ -26,12 +26,13 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PaseoSocialHoja } from '@/components/paseo-social-hoja';
 import { TallaPelajeHoja } from '@/components/talla-pelaje-hoja';
 import Svg, { Path } from 'react-native-svg';
+import Animated from 'react-native-reanimated';
 import {
   AvatarMascota,
   BarrasSemana,
@@ -49,6 +50,7 @@ import {
   Texto,
   spacing,
   typography,
+  usePresionado,
   useTheme,
   type LineaDeVidaEstadoPie,
 } from '@epetplace/ui';
@@ -138,6 +140,8 @@ export default function PerfilDeMascota() {
   const [vitales, setVitales] = useState<VitalesPaseos | 'cargando' | 'error'>('cargando');
   const [indiceAbierto, setIndiceAbierto] = useState<'salud' | 'descanso' | null>(null);
   const [fotoFirmada, setFotoFirmada] = useState<string | undefined>(undefined);
+  // S82: el avatar es la puerta a editar la foto (encuadre de la casa).
+  const presionAvatar = usePresionado(0.99);
   const [items, setItems] = useState<ItemTimeline[] | null | 'error'>(null);
   const [cursor, setCursor] = useState<string | null>(null);
   const [estadoPie, setEstadoPie] = useState<LineaDeVidaEstadoPie>('nada');
@@ -286,13 +290,26 @@ export default function PerfilDeMascota() {
       <ScrollView contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[8], gap: spacing[6] }}>
         {/* ── Header de identidad ── */}
         <View style={{ alignItems: 'center', gap: spacing[2] }}>
-          <AvatarMascota
-            nombre={mascota.nombre}
-            fotoUrl={fotoFirmada}
-            especie={esEspecieUi(mascota.especie) ? mascota.especie : undefined}
-            tamano="lg"
-            capa="vida"
-          />
+          {/* S82: tap → editar la foto (encuadre). Pressed por usePresionado
+              (la receta única de la casa — jamás scale artesanal). */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('fotoEncuadre.editarFotoA11y', { nombre: mascota.nombre })}
+            onPress={() =>
+              router.push({ pathname: '/hogar/foto-mascota', params: { mascotaId: mascota.id, nombre: mascota.nombre } })
+            }
+            {...presionAvatar.handlers}
+          >
+            <Animated.View style={presionAvatar.estiloPresionado}>
+              <AvatarMascota
+                nombre={mascota.nombre}
+                fotoUrl={fotoFirmada}
+                especie={esEspecieUi(mascota.especie) ? mascota.especie : undefined}
+                tamano="lg"
+                capa="vida"
+              />
+            </Animated.View>
+          </Pressable>
           <Text
             accessibilityRole="header"
             style={{ fontFamily: typography.family.sans.light, fontSize: typography.size['2xl'], color: theme.text.primary }}

@@ -1,28 +1,32 @@
 /**
- * Onboarding · paso foto (S45-B4) — SelectorAvatar (identidad, no
- * evidencia). "Por ahora no" (en la Hoja) y "Continuar" siguen al
- * cierre sin foto: la huella es cara válida.
+ * Onboarding · paso foto (S45-B4 → REESCRITO S82-A por la lámina
+ * docs/laminas/2026-07-29-s82-foto-onboarding.html — EL ACUERDO):
+ * la foto se elige ENTERA (sin recorte nativo 1:1 — HojaFotoMascota) y
+ * el ENCUADRE es de la casa: pinza + arrastre con clamp, previews de
+ * las superficies EN VIVO (EncuadreFoto). El encuadre viaja al cierre
+ * por params (cx/cy/z) y se declara tras el alta (declararFotoMascota).
  *
- * NOTA: la foto capturada viaja al cierre por params, pero su
- * persistencia (upload + mascotas.foto_url) espera el OK founder de
- * la propuesta S45-B4 (la RPC no tiene p_foto_url y el dueño no puede
- * UPDATE mascotas por RLS). El paso funciona completo; el destino
- * llega con esa migración.
+ * "Por ahora no" sigue siendo primera clase: Continuar funciona sin
+ * foto — la huella es cara válida (S45).
  */
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  AvatarMascota,
   Boton,
   Encabezado,
-  SelectorAvatar,
+  Texto,
   spacing,
   useTheme,
-  type SelectorAvatarFoto,
+  type FotoCapturada,
 } from '@epetplace/ui';
 
+import { EncuadreFoto } from '@/components/EncuadreFoto';
+import { HojaFotoMascota } from '@/components/HojaFotoMascota';
+import { ENCUADRE_DEFAULT, type Encuadre } from '@/components/foto-encuadre';
 import { esEspecieUi } from '@/lib/params';
 import { useTraduccion } from '@/i18n';
 
@@ -38,24 +42,57 @@ export default function PasoFoto() {
     precision?: string;
     sexo?: string;
   }>();
+  const nombre = params.nombre ?? t('onboarding.tuMascota');
 
-  const [foto, setFoto] = useState<SelectorAvatarFoto | null>(null);
+  const [foto, setFoto] = useState<FotoCapturada | null>(null);
+  const [hojaAbierta, setHojaAbierta] = useState(false);
+  const [permisoDenegado, setPermisoDenegado] = useState(false);
+  // El encuadre vigente NO re-renderiza la pantalla: vive en ref y las
+  // previews viven en el UI thread (EncuadreFoto).
+  const encuadreRef = useRef<Encuadre>(ENCUADRE_DEFAULT);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado
         variante="navegacion"
-        titulo={t('onboarding.tituloFoto', { nombre: params.nombre ?? t('onboarding.tuMascota') })}
+        titulo={t('onboarding.tituloFoto', { nombre })}
         atras
         onAtras={() => router.back()}
       />
-      <ScrollView contentContainerStyle={{ padding: spacing[5], paddingTop: spacing[8], paddingBottom: insets.bottom + spacing[6], gap: spacing[8] }}>
-        <SelectorAvatar
-          nombre={params.nombre ?? t('onboarding.tuMascota')}
-          especie={esEspecieUi(params.especie) ? params.especie : undefined}
-          foto={foto}
-          onCambiar={setFoto}
-        />
+      <ScrollView contentContainerStyle={{ padding: spacing[5], paddingTop: spacing[6], paddingBottom: insets.bottom + spacing[8], gap: spacing[5] }}>
+        {foto === null ? (
+          <View style={{ alignItems: 'center', gap: spacing[4], paddingTop: spacing[6] }}>
+            <AvatarMascota
+              nombre={nombre}
+              especie={esEspecieUi(params.especie) ? params.especie : undefined}
+              tamano="lg"
+            />
+            <Texto variante="apoyo" centrado>
+              {t('fotoEncuadre.elegirDetalle')}
+            </Texto>
+            {permisoDenegado ? (
+              <Texto variante="apoyo" color="danger" centrado>
+                {t('fotoEncuadre.permisoCamara')}
+              </Texto>
+            ) : null}
+            <Boton variante="secundario" bloque etiqueta={t('fotoEncuadre.elegirFoto')} onPress={() => setHojaAbierta(true)} />
+          </View>
+        ) : (
+          <>
+            <EncuadreFoto
+              key={foto.uri}
+              uri={foto.uri}
+              dim={{ iw: foto.width, ih: foto.height }}
+              inicial={ENCUADRE_DEFAULT}
+              nombre={nombre}
+              onCambio={(e) => {
+                encuadreRef.current = e;
+              }}
+            />
+            <Boton variante="ghost" bloque etiqueta={t('fotoEncuadre.cargarOtra')} onPress={() => setHojaAbierta(true)} />
+          </>
+        )}
+
         <Boton
           etiqueta={t('onboarding.continuar')}
           bloque
@@ -67,12 +104,31 @@ export default function PasoFoto() {
                 especie: params.especie ?? '',
                 ...(params.fecha ? { fecha: params.fecha, precision: params.precision } : null),
                 ...(params.sexo ? { sexo: params.sexo } : null),
-                ...(foto && typeof foto.uri === 'string' ? { fotoUri: foto.uri } : null),
+                ...(foto !== null
+                  ? {
+                      fotoUri: foto.uri,
+                      cx: String(encuadreRef.current.cx),
+                      cy: String(encuadreRef.current.cy),
+                      z: String(encuadreRef.current.z),
+                    }
+                  : null),
               },
             })
           }
         />
       </ScrollView>
+
+      <HojaFotoMascota
+        visible={hojaAbierta}
+        titulo={t('fotoEncuadre.hojaTitulo')}
+        onCerrar={() => setHojaAbierta(false)}
+        onFoto={(f) => {
+          setPermisoDenegado(false);
+          encuadreRef.current = ENCUADRE_DEFAULT;
+          setFoto(f);
+        }}
+        onPermisoDenegado={() => setPermisoDenegado(true)}
+      />
     </View>
   );
 }

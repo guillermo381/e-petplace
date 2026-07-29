@@ -305,6 +305,36 @@ export const clienteEs = {
     guardarCambios: 'Guardar cambios',
     carnetDe: 'Carnet de {{nombre}}',
   },
+  // S82-A — el encuadre de la foto de mascota (lámina 2026-07-29;
+  // lote S82 pendiente de gate founder). Tuteo neutro (la lámina venía
+  // en voseo — regla 27 manda).
+  fotoEncuadre: {
+    tituloEditar: 'La foto de {{nombre}}',
+    elegirFoto: 'Elegir una foto',
+    elegirDetalle: 'Elige una donde se le vea bien la cara. Puedes acomodarla después.',
+    hojaTitulo: 'Su foto',
+    camara: 'Sacar una foto',
+    galeria: 'Elegir de la galería',
+    permisoCamara: 'Necesitamos permiso para usar la cámara. Puedes habilitarlo en los ajustes del teléfono, o elegir una foto de la galería.',
+    cargarOtra: 'Cargar otra foto',
+    arrastra: 'Arrastra la foto para acomodarla.',
+    acerca: 'Acerca con dos dedos para poder acomodar el encuadre.',
+    visorA11y: 'El encuadre de la foto de {{nombre}}. Pellizca para acercar y arrastra para acomodar.',
+    asiSeVe: 'Así lo vas a ver',
+    asiSeVeDetalle: 'El perfil respeta tu centro y abre el plano. Todo lo chico usa el encuadre exacto.',
+    enPerfil: 'En su perfil',
+    enHogar: 'En tu hogar y al elegir mascota',
+    enSalaVet: 'En la sala del veterinario',
+    alReservar: 'Al reservar, sin elegir',
+    alReservarElegido: 'Al reservar, elegido',
+    filaTitulo: 'Paseo de {{nombre}}',
+    filaDetalle: 'sábado · 10:30',
+    leyendaFila: 'En sus citas, y en el mapa mientras alguien lo pasea',
+    listo: 'Listo',
+    exito: 'La foto de {{nombre}} quedó lista.',
+    editarFotoA11y: 'Cambiar la foto de {{nombre}}',
+    errorCargar: 'No pudimos cargar la foto. Revisa tu conexión y prueba de nuevo.',
+  },
   // S55-A A3 (D-315): detalle del paseo al riel (voseo→tuteo).
   paseo: {
     titulo: 'Paseo',
