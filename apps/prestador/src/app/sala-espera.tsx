@@ -162,15 +162,22 @@ export default function SalaEspera() {
         <View style={{ gap: spacing[2] }}>
           <Texto variante="seccion">{t('salaEspera.faltaTitulo')}</Texto>
           <Tarjeta elevacion="reposo" relleno="ninguno">
+            {/* S81-C: el puntero "está acá abajo" SOLO mientras la tarea
+                falta — cumplida, el check ya lo dice y el puntero es
+                ruido (Chanel). El camino se ofrece cuando sirve. */}
             <Celda
               titulo={t('salaEspera.faltaDireccion')}
-              subtitulo={t('salaEspera.faltaAcaAbajo')}
+              subtitulo={
+                sede.direccion !== null && sede.direccion.length > 0
+                  ? undefined
+                  : t('salaEspera.faltaAcaAbajo')
+              }
               fin={check(sede.direccion !== null && sede.direccion.length > 0)}
             />
             <Separador />
             <Celda
               titulo={t('salaEspera.faltaRadio')}
-              subtitulo={t('salaEspera.faltaAcaAbajo')}
+              subtitulo={sede.radioKm !== null ? undefined : t('salaEspera.faltaAcaAbajo')}
               fin={check(sede.radioKm !== null)}
             />
             <Separador />
