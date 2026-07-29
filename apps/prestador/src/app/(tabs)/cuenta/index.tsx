@@ -476,8 +476,12 @@ export default function Cuenta() {
               máquina (Ley 3: metadata en mono); id corto = los primeros
               8 del updateId (único por publicación); embebido/dev se
               dice honesto. Camino literal: tab Cuenta → el pie. ── */}
+          {/* S81-B2: el lanzamiento EMBEBIDO de un release tiene updateId
+              NO-nulo (el id de assets/app.manifest — el founder leyó
+              "update 6aab7106" corriendo el bundle embebido). El
+              discriminador es isEmbeddedLaunch, no la nulidad (L-160). */}
           <Texto variante="dato">
-            {Updates.updateId !== null
+            {!Updates.isEmbeddedLaunch && Updates.updateId !== null
               ? `update ${Updates.updateId.slice(0, 8)} · ${Updates.channel ?? 'sin canal'}`
               : 'bundle embebido / dev'}
           </Texto>
