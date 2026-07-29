@@ -46,6 +46,7 @@ import {
   SelectorOpcion,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useAviso,
@@ -201,12 +202,6 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
 
   const clipsLocales = clipsDeSesion(datos.adiestramientoId).length;
 
-  const vozSecundaria = {
-    fontFamily: typography.family.sans.regular,
-    fontSize: typography.size.sm,
-    lineHeight: typography.size.sm * 1.4,
-    color: theme.text.secondary,
-  } as const;
   const tituloSeccion = {
     fontFamily: typography.family.sans.medium,
     fontSize: typography.size.sm,
@@ -245,9 +240,9 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
 
       {/* LA FIRMA — el vocabulario a un toque (registrar sin fricción) */}
       <View style={{ gap: spacing[3] }}>
-        <Text style={tituloSeccion}>
+        <Texto variante="seccion">
           {`${t('citaAdiestramiento.objetivosTitulo')}${objetivos.length > 0 ? ` · ${objetivos.length}` : ''}`}
-        </Text>
+        </Texto>
         {sugeridos.length > 0 && (
           <SelectorOpcion
             acento="oficio"
@@ -302,9 +297,9 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
                   >
                     {vozDe.get(o.objetivo_codigo) ?? o.objetivo_codigo}
                   </Text>
-                  <Text style={vozSecundaria}>
+                  <Texto variante="apoyo">
                     {o.alcanzado ? t('citaAdiestramiento.alcanzado') : t('citaAdiestramiento.trabajado')}
-                  </Text>
+                  </Texto>
                 </View>
                 <Interruptor
                   encendido={o.alcanzado}
@@ -419,10 +414,10 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
               >
                 {t('citaAdiestramiento.pisoTitulo')}
               </Text>
-              {!pisoObjetivo && <Text style={vozSecundaria}>{`· ${t('citaAdiestramiento.pisoFaltaObjetivo')}`}</Text>}
-              {!pisoNotaClip && <Text style={vozSecundaria}>{`· ${t('citaAdiestramiento.pisoFaltaNotaClip')}`}</Text>}
+              {!pisoObjetivo && <Texto variante="apoyo">{`· ${t('citaAdiestramiento.pisoFaltaObjetivo')}`}</Texto>}
+              {!pisoNotaClip && <Texto variante="apoyo">{`· ${t('citaAdiestramiento.pisoFaltaNotaClip')}`}</Texto>}
               {!pisoNotaClip && clipsLocales > 0 && (
-                <Text style={vozSecundaria}>{t('citaAdiestramiento.pisoClipsLocales')}</Text>
+                <Texto variante="apoyo">{t('citaAdiestramiento.pisoClipsLocales')}</Texto>
               )}
               <Boton
                 variante="primario"
