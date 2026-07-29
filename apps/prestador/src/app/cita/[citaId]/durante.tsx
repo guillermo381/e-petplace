@@ -49,6 +49,7 @@ import {
   terminarAtencionPaseo,
   type IncidenciaCatalogoPaseo,
   type NovedadCatalogoPaseo,
+  type PuntoGpsPaseo,
 } from '@epetplace/api';
 
 import { verificarSesion } from '@/lib/api';
@@ -64,8 +65,9 @@ type DatosListos = {
   puntosIniciales: number;
   /** S62 (cura 1): el track YA en DB — la polilínea se SIEMBRA desde
    *  acá y el buffer local de la sesión suma encima (salir y volver a
-   *  mitad de paseo ya no muestra mapa vacío con contador >0). */
-  trackPrevio: { lat: number; lng: number }[];
+   *  mitad de paseo ya no muestra mapa vacío con contador >0).
+   *  S81 (D-578): CON `t` — el filtro del dibujo lo necesita. */
+  trackPrevio: PuntoGpsPaseo[];
   novedadesCatalogo: NovedadCatalogoPaseo[];
   incidenciasCatalogo: IncidenciaCatalogoPaseo[];
   novedadesRegistradas: string[];
@@ -684,7 +686,7 @@ export default function Durante() {
       iniciadaEn: paseo.data.iniciada_en,
       prestadorId: prestador.data.id,
       puntosIniciales: resumen.data.gps.puntos,
-      trackPrevio: track.data.map((p) => ({ lat: p.lat, lng: p.lng })),
+      trackPrevio: track.data,
       novedadesCatalogo: novedades.data,
       incidenciasCatalogo: incidencias.data,
       novedadesRegistradas: resumen.data.novedades.map((n) => n.nombre),

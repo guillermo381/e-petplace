@@ -383,8 +383,12 @@ export const prestadorEs = {
     sinRutaGps: 'Sin ruta GPS: {{motivo}}',
     // S80-B19 🔴 (guard del mapa nativo — la voz honesta del puente;
     // el GPS graba igual, solo el dibujo espera build) · LOTE S80
-    mapaApagadoVivo: 'El mapa no está disponible en esta versión de la app. El recorrido se sigue grabando igual.',
-    mapaApagadoCerrado: 'El mapa no está disponible en esta versión de la app. El recorrido quedó grabado.',
+    // S81-B1-2 (GATE PENDIENTE — lote S81): la primera mitad dice la
+    // VERDAD (esta instalación salió sin la clave del mapa — no es una
+    // función que falte); la segunda mitad se CONSERVA INTACTA (honesta,
+    // salvó el paseo — mandato de la tanda).
+    mapaApagadoVivo: 'Esta instalación de la app salió sin la clave del mapa — se corrige con una versión nueva. El recorrido se sigue grabando igual.',
+    mapaApagadoCerrado: 'Esta instalación de la app salió sin la clave del mapa — se corrige con una versión nueva. El recorrido quedó grabado.',
     // LOTE S62 (curas del track): el hueco del mapa deja de callar
     sinRutaNoRegistrada: 'El recorrido no se registró en este paseo.',
     sinRutaSoloPartida: 'Solo se registró el punto de partida — el recorrido no alcanzó a dibujarse.',

@@ -29,6 +29,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as Location from 'expo-location';
+import type { PuntoGpsPaseo } from '@epetplace/api';
 
 import {
   aceptarPunto,
@@ -75,8 +76,9 @@ export interface ResultadoFlushFinal {
 export interface UseTrackGps {
   estado: EstadoGps;
   puntosTotal: number;
-  ultimoPunto: { lat: number; lng: number } | null;
-  puntosSesion: { lat: number; lng: number }[];
+  ultimoPunto: PuntoGpsPaseo | null;
+  /** S81 (D-578): con `t` — el filtro del dibujo juzga por velocidad. */
+  puntosSesion: PuntoGpsPaseo[];
   /** 'fondo' = D-292 vivo (el bolsillo registra) · 'pantalla' = fallback
    *  foreground: la voz honesta "pantalla encendida" sigue vigente. */
   modo: ModoTrack;
@@ -99,7 +101,7 @@ export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): 
   const { t } = useTraduccion();
   const [estado, setEstado] = useState<EstadoGps>('iniciando');
   const [puntosTotal, setPuntosTotal] = useState(puntosIniciales);
-  const [puntosSesion, setPuntosSesion] = useState<{ lat: number; lng: number }[]>([]);
+  const [puntosSesion, setPuntosSesion] = useState<PuntoGpsPaseo[]>([]);
   const [modo, setModo] = useState<ModoTrack>('pantalla');
   const [fondoPedible, setFondoPedible] = useState(false);
   const [intento, setIntento] = useState(0);

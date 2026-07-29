@@ -40,7 +40,7 @@ const MAX_BUFFER = 12;
 const FLUSH_PERIOD_MS = 60_000;
 
 export interface OyenteTrack {
-  onPunto?: (p: { lat: number; lng: number }) => void;
+  onPunto?: (p: PuntoGpsPaseo) => void;
   onTotal?: (total: number) => void;
   /** El server declaró la atención fuera de curso: la captura ya se apagó. */
   onServerDetuvo?: () => void;
@@ -49,7 +49,8 @@ export interface OyenteTrack {
 interface SesionTrack {
   eventoAtencionId: string;
   buffer: PuntoGpsPaseo[];
-  puntosSesion: { lat: number; lng: number }[];
+  // S81 (D-578): la sesión conserva `t` — el filtro del dibujo lo necesita.
+  puntosSesion: PuntoGpsPaseo[];
   lastT: number;
   lastFlushT: number;
   flushing: boolean;
@@ -87,7 +88,7 @@ export function suscribirTrack(o: OyenteTrack): () => void {
   };
 }
 
-export function puntosSesionActual(): { lat: number; lng: number }[] {
+export function puntosSesionActual(): PuntoGpsPaseo[] {
   return sesion ? [...sesion.puntosSesion] : [];
 }
 
@@ -101,9 +102,10 @@ export function aceptarPunto(lat: number, lng: number): void {
   const ahora = Date.now();
   if (ahora - s.lastT < INTERVALO_MS) return;
   s.lastT = ahora;
-  s.buffer.push({ lat, lng, t: new Date(ahora).toISOString() });
-  s.puntosSesion.push({ lat, lng });
-  oyente?.onPunto?.({ lat, lng });
+  const punto: PuntoGpsPaseo = { lat, lng, t: new Date(ahora).toISOString() };
+  s.buffer.push(punto);
+  s.puntosSesion.push(punto);
+  oyente?.onPunto?.(punto);
   if (s.buffer.length >= MAX_BUFFER || ahora - s.lastFlushT >= FLUSH_PERIOD_MS) void flushTrack();
 }
 

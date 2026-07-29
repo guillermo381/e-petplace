@@ -7,6 +7,12 @@
 export interface PuntoLatLng {
   lat: number
   lng: number
+  /**
+   * ISO timestamp de la lectura (S81, D-578): habilita el filtro del
+   * DIBUJO (orden + descarte de púas por velocidad). Opcional: un punto
+   * sin `t` se dibuja igual — el filtro solo juzga lo que puede medir.
+   */
+  t?: string
 }
 
 export type MapaRecorridoModo = 'vivo' | 'recorrido'
