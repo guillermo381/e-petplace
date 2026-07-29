@@ -243,16 +243,9 @@ export default function VerificacionVeterinaria() {
                       gap: spacing[3],
                     }}
                   >
-                    <Text
-                      style={{
-                        flex: 1,
-                        fontFamily: typography.family.sans.medium,
-                        fontSize: typography.size.md,
-                        color: theme.text.primary,
-                      }}
-                    >
-                      {vozTipo(tipo)}
-                    </Text>
+                    <View style={{ flex: 1 }}>
+                      <Texto variante="seccion">{vozTipo(tipo)}</Texto>
+                    </View>
                     {doc !== null && (
                       <Insignia
                         estado={aprobado ? 'alDia' : pendiente ? 'proximo' : 'atencion'}
@@ -303,17 +296,11 @@ export default function VerificacionVeterinaria() {
                           </Texto>
                         </View>
                       )}
-                      <Text
-                        numberOfLines={2}
-                        style={{
-                          flex: 1,
-                          fontFamily: typography.family.mono.regular,
-                          fontSize: typography.size.sm,
-                          color: theme.text.secondary,
-                        }}
-                      >
-                        {nombreArchivo(doc.archivoPath).toLowerCase()}
-                      </Text>
+                      <View style={{ flex: 1 }}>
+                        <Texto variante="dato" numberOfLines={2}>
+                          {nombreArchivo(doc.archivoPath).toLowerCase()}
+                        </Texto>
+                      </View>
                     </View>
                   )}
                   {/* aprobado no re-sube (nada que reparar); el resto sí */}
