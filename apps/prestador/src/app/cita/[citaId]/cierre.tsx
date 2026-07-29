@@ -202,9 +202,13 @@ export default function Cierre() {
       {/* S74-B D-498: propagación del patrón EvitaTeclado (gateado en el
           path vet) — la anatomía exacta del bug de la dosis: nota al
           fondo + CTA + ScrollView pelado. */}
+      {/* S81-C: el Encabezado sale del scroll — fijo como en el durante
+          (coherencia entre vecinas del mismo flujo, 1c.3). */}
+      <View style={{ paddingHorizontal: spacing[4], paddingTop: spacing[2] }}>
+        <Encabezado variante="navegacion" titulo={t('cita.cierreTitulo')} atras onAtras={() => router.back()} />
+      </View>
       <EvitaTeclado>
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[4] }}>
-        <Encabezado variante="navegacion" titulo={t('cita.cierreTitulo')} atras onAtras={() => router.back()} />
 
         {pantalla.estado === 'cargando' && (
           <EsqueletoGrupo>
@@ -247,66 +251,57 @@ export default function Cierre() {
 
         {listo && resumen && (
           <>
-            {/* Resumen — ventana/duración en voz de máquina + conteos */}
-            <Tarjeta elevacion="plana" relleno="amplio">
-              <View style={{ gap: spacing[2] }}>
-                <Text
-                  style={{
-                    fontFamily: typography.family.mono.regular,
-                    fontSize: typography.size.md,
-                    letterSpacing: typography.tracking.mono,
-                    color: theme.text.primary,
-                  }}
-                >
-                  {`${hhmm(resumen.iniciada_en)} → ${hhmm(resumen.terminada_en)} · ${duracion(resumen.tiempo_sesion_segundos)}`}
-                </Text>
-                <Text
-                  style={{
-                    fontFamily: typography.family.mono.regular,
-                    fontSize: typography.size.sm,
-                    letterSpacing: typography.tracking.mono,
-                    color: theme.text.secondary,
-                  }}
-                >
-                  {t('cita.resumenConteos', { puntos: resumen.gps.puntos, fotos: resumen.conteos.fotos, notas: resumen.conteos.notas })}
-                </Text>
-              </View>
-            </Tarjeta>
-
+            {/* S81-C (composición — espejo del durante): EL PASEO
+                preside — el recorrido primero, y su resumen (ventana ·
+                duración · conteos) DEBAJO, acompañándolo: es la verdad
+                del paseo que terminó, no una tarjeta de números antes
+                de la evidencia. La ventana en mono md primary queda en
+                Text crudo A PROPÓSITO: es el dato-resumen del paseo y
+                Texto no tiene variante mono de esa jerarquía (pedido a
+                B ya reportado). */}
             {/* Recorrido real, o la verdad si no lo hay — S62 (cura 2):
                 el hueco del mapa JAMÁS calla (Ley 13): con motivo lo
                 dice; con 1 punto lo dice; con 0 sin motivo lo dice. */}
             {/* S80-B19 🔴: guard del mapa nativo (ver lib/mapa-nativo) —
                 el recorrido QUEDÓ grabado; solo el dibujo espera build. */}
-            {listo.track.length > 1 && !MAPA_NATIVO_DISPONIBLE ? (
-              <Tarjeta relleno="amplio">
-                <Texto variante="apoyo">{t('cita.mapaApagadoCerrado')}</Texto>
-              </Tarjeta>
-            ) : listo.track.length > 1 ? (
-              <MapaRecorrido puntos={listo.track} modo="recorrido" capa="cuidado" alto={200} />
-            ) : (
-              <Tarjeta relleno="amplio">
-                <Texto variante="apoyo">
-                  {resumen.gps.motivo_fallo
-                    ? t('cita.sinRutaGps', { motivo: resumen.gps.motivo_fallo })
-                    : listo.track.length === 1
-                      ? t('cita.sinRutaSoloPartida')
-                      : t('cita.sinRutaNoRegistrada')}
-                </Texto>
-              </Tarjeta>
-            )}
+            <View style={{ gap: spacing[2] }}>
+              {listo.track.length > 1 && !MAPA_NATIVO_DISPONIBLE ? (
+                <Tarjeta relleno="amplio">
+                  <Texto variante="apoyo">{t('cita.mapaApagadoCerrado')}</Texto>
+                </Tarjeta>
+              ) : listo.track.length > 1 ? (
+                <MapaRecorrido puntos={listo.track} modo="recorrido" capa="cuidado" alto={200} />
+              ) : (
+                <Tarjeta relleno="amplio">
+                  <Texto variante="apoyo">
+                    {resumen.gps.motivo_fallo
+                      ? t('cita.sinRutaGps', { motivo: resumen.gps.motivo_fallo })
+                      : listo.track.length === 1
+                        ? t('cita.sinRutaSoloPartida')
+                        : t('cita.sinRutaNoRegistrada')}
+                  </Texto>
+                </Tarjeta>
+              )}
+              <Text
+                style={{
+                  fontFamily: typography.family.mono.regular,
+                  fontSize: typography.size.md,
+                  letterSpacing: typography.tracking.mono,
+                  color: theme.text.primary,
+                }}
+              >
+                {`${hhmm(resumen.iniciada_en)} → ${hhmm(resumen.terminada_en)} · ${duracion(resumen.tiempo_sesion_segundos)}`}
+              </Text>
+              <Texto variante="dato">
+                {t('cita.resumenConteos', { puntos: resumen.gps.puntos, fotos: resumen.conteos.fotos, notas: resumen.conteos.notas })}
+              </Texto>
+            </View>
 
             {/* Lo registrado */}
             <View style={{ gap: spacing[2] }}>
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.medium,
-                  fontSize: typography.size.sm,
-                  color: theme.text.secondary,
-                }}
-              >
+              <Texto variante="seccion">
                 {`${t('cita.parteDelPerro')}${resumen.conteos.novedades > 0 ? ` · ${resumen.conteos.novedades}` : ''}`}
-              </Text>
+              </Texto>
               {resumen.novedades.length > 0 ? (
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[1.5] }}>
                   {resumen.novedades.map((n) => (
@@ -345,25 +340,8 @@ export default function Cierre() {
             ) : resumen.mensaje_familia ? (
               <Tarjeta relleno="amplio">
                 <View style={{ gap: spacing[1] }}>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.medium,
-                      fontSize: typography.size.sm,
-                      color: theme.text.secondary,
-                    }}
-                  >
-                    {t('cita.mensajeFamilia')}
-                  </Text>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.base,
-                      lineHeight: typography.size.base * 1.4,
-                      color: theme.text.primary,
-                    }}
-                  >
-                    {resumen.mensaje_familia}
-                  </Text>
+                  <Texto variante="apoyo">{t('cita.mensajeFamilia')}</Texto>
+                  <Texto variante="cuerpo">{resumen.mensaje_familia}</Texto>
                 </View>
               </Tarjeta>
             ) : null}
