@@ -34,6 +34,7 @@ import {
   SelectorEspecie,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useAviso,
@@ -287,16 +288,7 @@ export default function AutorizarMostrador() {
             <Tarjeta elevacion="reposo" relleno="amplio">
               <View style={{ alignItems: 'center', gap: spacing[3] }}>
                 <AvatarMascota nombre={elegida.nombre} fotoUrl={elegida.fotoUrl ?? undefined} especie={undefined} tamano="lg" />
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.light,
-                    fontSize: typography.size.xl,
-                    color: theme.text.primary,
-                    textAlign: 'center',
-                  }}
-                >
-                  {elegida.nombre}
-                </Text>
+                <Texto variante="titulo" centrado>{elegida.nombre}</Texto>
               </View>
             </Tarjeta>
             <Boton
@@ -359,17 +351,9 @@ export default function AutorizarMostrador() {
             >
               {t('autorizar.esperando', { nombre })}
             </Text>
-            <Text
-              style={{
-                fontFamily: typography.family.sans.regular,
-                fontSize: typography.size.base,
-                lineHeight: typography.size.base * 1.4,
-                color: theme.text.secondary,
-                textAlign: 'center',
-              }}
-            >
+            <Texto variante="cuerpo" color="secondary" centrado>
               {t('autorizar.esperandoDetalle')}
-            </Text>
+            </Texto>
           </View>
         ) : null}
       </ScrollView>
