@@ -317,6 +317,9 @@ export const clienteEs = {
     vivoSinGps: 'Aún no recibimos la ubicación del paseador. El mapa se enciende solo cuando llega su señal.',
     actualizadoRecien: 'Actualizado recién',
     actualizadoHace: 'Actualizado hace {{min}} min',
+    // S81-B (la cara MAPA — GATE PENDIENTE, lote S81): el asa de la banda
+    bandaVerMas: 'Ver más del paseo',
+    bandaPlegar: 'Plegar el detalle',
     verFoto: 'Ver foto {{i}} de {{total}}',
     deFuente: 'De {{fuente}}:',
     fotosDelPaseo: 'Fotos del paseo',

@@ -23,7 +23,8 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
-import { Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { Platform, Pressable, RefreshControl, ScrollView, Text, View, useWindowDimensions } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import { Image } from 'expo-image';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -96,6 +97,11 @@ export default function DetallePaseo() {
   // avatar + estado en voz de familia (no hay track en una silla de
   // grooming; el hueco del mapa NO deja cicatriz).
   const [mascota, setMascota] = useState<{ nombre: string; fotoUrl?: string } | null>(null);
+  // S81-B (vara: "el recorrido es el protagonista de su pantalla"):
+  // LA BANDA de dos posiciones sobre el mapa a sangre — cliente ASOMADA
+  // por default (orden de mesa); el asa alterna. Se ajusta viendo.
+  const [bandaExtendida, setBandaExtendida] = useState(false);
+  const { height: altoPantalla } = useWindowDimensions();
 
   // Recarga silenciosa (§7.4): reemplazo directo, jamás re-esqueleto
   // (Ley 13/6 — el sondeo no puede hacer parpadear la pantalla). El
@@ -231,6 +237,310 @@ export default function DetallePaseo() {
     if (seg < 45) return t('paseo.actualizadoRecien');
     return t('paseo.actualizadoHace', { min: Math.max(1, Math.round(seg / 60)) });
   })();
+
+  // ── S81-B: piezas COMPARTIDAS entre la cara MAPA (banda) y la
+  //    composición clásica (web/grooming/sin-track) — una sola fuente. ──
+
+  const lineaHorarios = (
+    <Text
+      style={{
+        fontFamily: typography.family.mono.regular,
+        fontSize: typography.size.sm,
+        letterSpacing: typography.tracking.mono,
+        color: theme.text.secondary,
+      }}
+    >
+      {horaMono(detalle.iniciada_en)} – {horaMono(detalle.terminada_en)}
+      {detalle.iniciada_en !== null && detalle.terminada_en !== null
+        ? ` · ${Math.round((new Date(detalle.terminada_en).getTime() - new Date(detalle.iniciada_en).getTime()) / 60000)} min`
+        : ''}
+    </Text>
+  );
+
+  const seccionesParte = (
+    <>
+      {/* novedades del parte — voz humana del catálogo */}
+      {detalle.novedades.length > 0 ? (
+        <View style={{ gap: spacing[2] }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
+            {/* S81 (regla 80, vara: "dos novedades iguales tienen que
+                poder distinguirse"): la HORA entra a la pill — created_at
+                ya viajaba y se descartaba. horaMono = hora LOCAL del
+                dispositivo (jamás UTC — la lección del carnet, D-312). */}
+            {detalle.novedades.map((n, i) => (
+              <Insignia
+                key={i}
+                capa="cuidado"
+                etiqueta={`${nombreNovedad(n.novedad_codigo)} · ${horaMono(n.created_at)}`}
+              />
+            ))}
+          </View>
+          {detalle.novedades
+            .filter((n) => n.detalle !== null && n.detalle.length > 0)
+            .map((n, i) => (
+              <Text
+                key={i}
+                style={{
+                  fontFamily: typography.family.sans.regular,
+                  fontSize: typography.size.sm,
+                  color: theme.text.secondary,
+                }}
+              >
+                {n.detalle}
+              </Text>
+            ))}
+        </View>
+      ) : null}
+
+      {/* fotos → VisorFoto */}
+      {detalle.fotos.length > 0 ? (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
+          {detalle.fotos.map((f, i) => (
+            <Pressable
+              key={f.id}
+              onPress={() => {
+                setFotoInicial(i);
+                setVisorAbierto(true);
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={t('paseo.verFoto', { i: i + 1, total: detalle.fotos.length })}
+            >
+              <Image
+                source={{ uri: f.url }}
+                contentFit="cover"
+                transition={0}
+                style={{ width: LADO_THUMB, height: LADO_THUMB, borderRadius: radius.md }}
+              />
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
+
+      {/* S61-A2 (D-387): los cuidados de la sesión en VOZ DE FAMILIA */}
+      {detalle.servicios_aplicados.length > 0 ? (
+        <View style={{ gap: spacing[2] }}>
+          <Text
+            style={{
+              fontFamily: typography.family.sans.medium,
+              fontSize: typography.size.sm,
+              color: theme.text.secondary,
+            }}
+          >
+            {t('grooming.parteCuidados')}
+          </Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
+            {detalle.servicios_aplicados.map((s) => (
+              <Insignia key={s.codigo} estado="info" etiqueta={idioma === 'en' ? s.voz_en : s.voz} />
+            ))}
+          </View>
+        </View>
+      ) : null}
+
+      {/* cierre emocional: la palabra del paseador, VERBATIM */}
+      {detalle.mensaje_familia !== null ? (
+        <>
+          <Separador />
+          <Tarjeta relleno="amplio">
+            {detalle.titulo_fuente !== null ? (
+              <Text
+                style={{
+                  fontFamily: typography.family.sans.medium,
+                  fontSize: typography.size.sm,
+                  color: theme.text.secondary,
+                  marginBottom: spacing[2],
+                }}
+              >
+                {t('paseo.deFuente', { fuente: detalle.titulo_fuente })}
+              </Text>
+            ) : null}
+            <Text
+              style={{
+                // voz humana: DM Sans 300 en lg (regla de voz)
+                fontFamily: typography.family.sans.light,
+                fontSize: typography.size.lg,
+                lineHeight: Math.round(typography.size.lg * typography.leading.snug),
+                color: theme.text.primary,
+              }}
+            >
+              “{detalle.mensaje_familia}”
+            </Text>
+          </Tarjeta>
+        </>
+      ) : null}
+
+      {/* S61-A2: la próxima sesión sugerida — null honesto */}
+      {detalle.proxima_sesion_sugerida !== null ? (
+        <Text
+          style={{
+            fontFamily: typography.family.sans.regular,
+            fontSize: typography.size.sm,
+            color: theme.text.secondary,
+          }}
+        >
+          {t('grooming.proximaSugerida', {
+            fecha: fechaLargaHumana(detalle.proxima_sesion_sugerida, idioma),
+          })}
+        </Text>
+      ) : null}
+    </>
+  );
+
+  // ── S81-B · LA CARA MAPA (construcción por orden de mesa, sin firma
+  //    previa — "se ajusta viendo"): el recorrido es el protagonista de
+  //    su pantalla. Mapa de FONDO a sangre (A6 §9bis.1) + LA BANDA de
+  //    dos posiciones (M1 S81-B3 como insumo). Solo cuando HAY dibujo:
+  //    web, grooming, sin-track y el guard degradan a la composición
+  //    clásica de abajo (M1 §7 — la voz honesta no se esconde). ──
+  const pantallaMapa =
+    Platform.OS !== 'web' &&
+    !esGrooming &&
+    (enVivo ? detalle.track_gps.length > 0 : detalle.track_gps.length >= 2);
+
+  if (pantallaMapa) {
+    const banda = (
+      <View
+        style={{
+          backgroundColor: theme.bg.card,
+          borderTopLeftRadius: radius.xl,
+          borderTopRightRadius: radius.xl,
+          boxShadow: theme.elevacion.elevada,
+          paddingBottom: insets.bottom + spacing[3],
+        }}
+      >
+        {/* el asa — alterna asomada ⇄ extendida */}
+        <Pressable
+          onPress={() => setBandaExtendida((v) => !v)}
+          accessibilityRole="button"
+          accessibilityLabel={bandaExtendida ? t('paseo.bandaPlegar') : t('paseo.bandaVerMas')}
+          style={{ alignItems: 'center', paddingVertical: spacing[2], minHeight: 24 }}
+        >
+          <View style={{ width: 36, height: 4, borderRadius: radius.full, backgroundColor: theme.bg.overlay }} />
+        </Pressable>
+
+        {/* ASOMADA — el ESTADO, visible siempre (M1 §4): cronómetro/
+            horarios + frescura; lo que CUENTA vive en la extendida */}
+        <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
+          {enVivo ? (
+            <>
+              {detalle.iniciada_en !== null ? (
+                <>
+                  <Cronometro inicioTs={detalle.iniciada_en} />
+                  <Text
+                    style={{
+                      fontFamily: typography.family.mono.regular,
+                      fontSize: typography.size.sm,
+                      letterSpacing: typography.tracking.mono,
+                      color: theme.text.secondary,
+                    }}
+                  >
+                    {t('paseo.vivoEmpezo', { hora: horaMono(detalle.iniciada_en) })}
+                  </Text>
+                </>
+              ) : null}
+              {frescura !== null ? (
+                <Text
+                  style={{
+                    fontFamily: typography.family.mono.regular,
+                    fontSize: typography.size.xs,
+                    letterSpacing: typography.tracking.mono,
+                    color: theme.text.tertiary,
+                  }}
+                >
+                  {frescura}
+                </Text>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <Text
+                style={{
+                  fontFamily: typography.family.sans.medium,
+                  fontSize: typography.size.sm,
+                  color: theme.text.secondary,
+                }}
+              >
+                {detalle.iniciada_en !== null
+                  ? t('paseo.tituloConFecha', { fecha: fechaLargaHumana(detalle.iniciada_en, idioma) })
+                  : t('paseo.titulo')}
+              </Text>
+              {lineaHorarios}
+            </>
+          )}
+        </View>
+
+        {/* EXTENDIDA — lo que CUENTA el paseo */}
+        {bandaExtendida ? (
+          <ScrollView
+            style={{ maxHeight: Math.round(altoPantalla * 0.55) }}
+            contentContainerStyle={{ padding: spacing[5], paddingTop: spacing[3], gap: spacing[4] }}
+            refreshControl={
+              enVivo ? (
+                <RefreshControl refreshing={refrescando} onRefresh={() => void recargar('pull')} tintColor={theme.text.secondary} />
+              ) : undefined
+            }
+          >
+            {seccionesParte}
+          </ScrollView>
+        ) : null}
+      </View>
+    );
+
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+        {/* EL MAPA A SANGRE — override LOCAL declarado: MapaRecorrido
+            pinta radius.md + overflow hidden; el desborde de -radius.md
+            por los cuatro lados empuja las esquinas curvas FUERA del
+            viewport. La promoción a modo propio del componente espera
+            el veredicto del founder (M1 §9 — se ensancha, no se
+            duplica). */}
+        <View style={{ position: 'absolute', top: -radius.md, left: -radius.md, right: -radius.md, bottom: -radius.md }}>
+          <MapaRecorrido
+            modo={enVivo ? 'vivo' : 'recorrido'}
+            puntos={detalle.track_gps}
+            capa="cuidado"
+            alto={altoPantalla + radius.md * 2}
+          />
+        </View>
+
+        {/* volver — flotante sobre el mapa (glifo canónico de Encabezado) */}
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel={t('paseo.volver')}
+          style={{
+            position: 'absolute',
+            top: insets.top + spacing[2],
+            left: spacing[4],
+            width: 44,
+            height: 44,
+            borderRadius: radius.full,
+            backgroundColor: theme.bg.card,
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: theme.elevacion.reposo,
+          }}
+        >
+          <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+            <Path d="M15 18l-6-6 6-6" stroke={theme.text.primary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        </Pressable>
+
+        {/* LA BANDA — en vivo la envuelve CitaEnVivo (Ley 7: UNA por
+            pantalla; el pill flota sobre el mapa en el borde superior) */}
+        <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
+          {enVivo ? <CitaEnVivo capa="cuidado">{banda}</CitaEnVivo> : banda}
+        </View>
+
+        <VisorFoto
+          visible={visorAbierto}
+          onCerrar={() => setVisorAbierto(false)}
+          fotos={detalle.fotos.map((f) => f.url)}
+          indiceInicial={fotoInicial}
+          etiqueta={t('paseo.fotosDelPaseo')}
+        />
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -376,150 +686,13 @@ export default function DetallePaseo() {
               </View>
             )}
 
-            {/* horarios y duración — voz de máquina */}
-            <Text
-              style={{
-                fontFamily: typography.family.mono.regular,
-                fontSize: typography.size.sm,
-                letterSpacing: typography.tracking.mono,
-                color: theme.text.secondary,
-              }}
-            >
-              {horaMono(detalle.iniciada_en)} – {horaMono(detalle.terminada_en)}
-              {detalle.iniciada_en !== null && detalle.terminada_en !== null
-                ? ` · ${Math.round((new Date(detalle.terminada_en).getTime() - new Date(detalle.iniciada_en).getTime()) / 60000)} min`
-                : ''}
-            </Text>
+            {/* horarios y duración — voz de máquina (compartida S81-B) */}
+            {lineaHorarios}
           </>
         )}
 
-        {/* novedades del parte — voz humana del catálogo */}
-        {detalle.novedades.length > 0 ? (
-          <View style={{ gap: spacing[2] }}>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
-              {/* S81 (regla 80, vara: "dos novedades iguales tienen que
-                  poder distinguirse"): la HORA entra a la pill — created_at
-                  ya viajaba y se descartaba. horaMono = hora LOCAL del
-                  dispositivo (jamás UTC — la lección del carnet, D-312). */}
-              {detalle.novedades.map((n, i) => (
-                <Insignia
-                  key={i}
-                  capa="cuidado"
-                  etiqueta={`${nombreNovedad(n.novedad_codigo)} · ${horaMono(n.created_at)}`}
-                />
-              ))}
-            </View>
-            {detalle.novedades
-              .filter((n) => n.detalle !== null && n.detalle.length > 0)
-              .map((n, i) => (
-                <Text
-                  key={i}
-                  style={{
-                    fontFamily: typography.family.sans.regular,
-                    fontSize: typography.size.sm,
-                    color: theme.text.secondary,
-                  }}
-                >
-                  {n.detalle}
-                </Text>
-              ))}
-          </View>
-        ) : null}
-
-        {/* fotos → VisorFoto */}
-        {detalle.fotos.length > 0 ? (
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
-            {detalle.fotos.map((f, i) => (
-              <Pressable
-                key={f.id}
-                onPress={() => {
-                  setFotoInicial(i);
-                  setVisorAbierto(true);
-                }}
-                accessibilityRole="button"
-                accessibilityLabel={t('paseo.verFoto', { i: i + 1, total: detalle.fotos.length })}
-              >
-                <Image
-                  source={{ uri: f.url }}
-                  contentFit="cover"
-                  transition={0}
-                  style={{ width: LADO_THUMB, height: LADO_THUMB, borderRadius: radius.md }}
-                />
-              </Pressable>
-            ))}
-          </View>
-        ) : null}
-
-        {/* S61-A2 (D-387): los cuidados de la sesión en VOZ DE FAMILIA —
-            chips del catálogo (nombre_familia es/en), jamás el código.
-            Pinta también EN VIVO (mismo wrapper — el dueño ve lo que ya
-            se hizo mientras la sesión corre, §8 estado y novedades). */}
-        {detalle.servicios_aplicados.length > 0 ? (
-          <View style={{ gap: spacing[2] }}>
-            <Text
-              style={{
-                fontFamily: typography.family.sans.medium,
-                fontSize: typography.size.sm,
-                color: theme.text.secondary,
-              }}
-            >
-              {t('grooming.parteCuidados')}
-            </Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
-              {detalle.servicios_aplicados.map((s) => (
-                <Insignia key={s.codigo} estado="info" etiqueta={idioma === 'en' ? s.voz_en : s.voz} />
-              ))}
-            </View>
-          </View>
-        ) : null}
-
-        {/* cierre emocional: la palabra del paseador, VERBATIM */}
-        {detalle.mensaje_familia !== null ? (
-          <>
-            <Separador />
-            <Tarjeta relleno="amplio">
-              {detalle.titulo_fuente !== null ? (
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.medium,
-                    fontSize: typography.size.sm,
-                    color: theme.text.secondary,
-                    marginBottom: spacing[2],
-                  }}
-                >
-                  {t('paseo.deFuente', { fuente: detalle.titulo_fuente })}
-                </Text>
-              ) : null}
-              <Text
-                style={{
-                  // voz humana: DM Sans 300 en lg (regla de voz)
-                  fontFamily: typography.family.sans.light,
-                  fontSize: typography.size.lg,
-                  lineHeight: Math.round(typography.size.lg * typography.leading.snug),
-                  color: theme.text.primary,
-                }}
-              >
-                “{detalle.mensaje_familia}”
-              </Text>
-            </Tarjeta>
-          </>
-        ) : null}
-
-        {/* S61-A2: la próxima sesión sugerida (§8 — FECHA, jamás cita)
-            en voz humana; null honesto = la línea no existe. */}
-        {detalle.proxima_sesion_sugerida !== null ? (
-          <Text
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.sm,
-              color: theme.text.secondary,
-            }}
-          >
-            {t('grooming.proximaSugerida', {
-              fecha: fechaLargaHumana(detalle.proxima_sesion_sugerida, idioma),
-            })}
-          </Text>
-        ) : null}
+        {/* el parte completo — piezas compartidas con la cara MAPA (S81-B) */}
+        {seccionesParte}
       </ScrollView>
 
       <VisorFoto

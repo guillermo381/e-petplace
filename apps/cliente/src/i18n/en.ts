@@ -287,6 +287,9 @@ export const clienteEn = {
     vivoSinGps: "We haven't received the walker's location yet. The map lights up as soon as their signal arrives.",
     actualizadoRecien: 'Updated just now',
     actualizadoHace: 'Updated {{min}} min ago',
+    // S81-B (la cara MAPA — GATE PENDIENTE, lote S81): espejo de es.ts
+    bandaVerMas: 'See more of the walk',
+    bandaPlegar: 'Collapse details',
     verFoto: 'See photo {{i}} of {{total}}',
     deFuente: 'From {{fuente}}:',
     fotosDelPaseo: 'Walk photos',
