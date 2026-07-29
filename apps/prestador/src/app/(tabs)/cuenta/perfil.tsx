@@ -42,7 +42,7 @@ import {
   typography,
   useAviso,
   useTheme,
-} from '@epetplace/ui';
+EvitaTeclado, } from '@epetplace/ui';
 import {
   actualizarMiPerfil,
   actualizarPerfilPrestador,
@@ -258,6 +258,7 @@ export default function PerfilCuenta() {
           />
         </View>
       ) : (
+        <EvitaTeclado>
         <ScrollView
           contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[2] }}
           keyboardShouldPersistTaps="handled"
@@ -325,15 +326,7 @@ export default function PerfilCuenta() {
                       backgroundColor: visible ? theme.status.success : theme.status.warning,
                     }}
                   />
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.medium,
-                      fontSize: typography.size.base,
-                      color: theme.text.primary,
-                    }}
-                  >
-                    {visible ? t('ofertaPaseo.visibleTitulo') : t('ofertaPaseo.noVisibleTitulo')}
-                  </Text>
+                  <Texto variante="seccion">{visible ? t('ofertaPaseo.visibleTitulo') : t('ofertaPaseo.noVisibleTitulo')}</Texto>
                 </View>
               )}
 
@@ -404,6 +397,7 @@ export default function PerfilCuenta() {
               Guardar de arriba NO la arrastra. */}
           {prestador !== null && <SeccionSede sede={leerSede(prestador)} />}
         </ScrollView>
+        </EvitaTeclado>
       )}
 
       {/* S76-B1: cámara / galería PARES (patrón SelectorAvatar) + quitar
