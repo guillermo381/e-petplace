@@ -131,6 +131,7 @@ export {
   type MapaRecorridoModo,
   type MapaRecorridoCapa,
   type PuntoLatLng,
+  type PuntoTrackMapa,
 } from './components/MapaRecorrido.tipos'
 export { AvisoProvider, useAviso, type AvisoInput, type AvisoVariante } from './components/Aviso'
 export { EstadoVacio } from './components/EstadoVacio'

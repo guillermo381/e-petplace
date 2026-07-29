@@ -54,7 +54,7 @@ import { EsperaDeMarca } from '../brand/EsperaDeMarca'
 import { Guijarro } from '../brand/Guijarro'
 import { Cronometro } from '../components/Cronometro'
 import { EvidenciaFoto, type EvidenciaFotoEstado } from '../components/EvidenciaFoto'
-import { MapaRecorrido } from '../components/MapaRecorrido'
+import { MapaRecorrido, type PuntoTrackMapa } from '../components/MapaRecorrido'
 
 // Foto local de ejemplo (generada, sin URL remota) — demuestra cover,
 // recorte circular y la desaturación memorial.
@@ -681,7 +681,11 @@ function EjemploEvidenciaFoto() {
 
 // MapaRecorrido: track simulado realista — una vuelta a la manzana del
 // Parque La Carolina (Quito), ~40 puntos con wobble determinístico.
-const TRACK_SIMULADO: { lat: number; lng: number }[] = (() => {
+// S81 (junta A+B): `t` es requerido en el punto de track — el fixture
+// camina a ~5 s por punto desde un instante FIJO (determinístico).
+const T0_TRACK = Date.parse('2026-07-29T12:00:00Z')
+const enT = (n: number) => new Date(T0_TRACK + n * 5_000).toISOString()
+const TRACK_SIMULADO: PuntoTrackMapa[] = (() => {
   const esquinas = [
     { lat: -0.1826, lng: -78.4845 },
     { lat: -0.1826, lng: -78.4787 },
@@ -689,7 +693,7 @@ const TRACK_SIMULADO: { lat: number; lng: number }[] = (() => {
     { lat: -0.1872, lng: -78.4845 },
     { lat: -0.1826, lng: -78.4845 },
   ]
-  const pts: { lat: number; lng: number }[] = []
+  const pts: PuntoTrackMapa[] = []
   for (let i = 0; i < esquinas.length - 1; i++) {
     const a = esquinas[i]
     const b = esquinas[i + 1]
@@ -698,10 +702,11 @@ const TRACK_SIMULADO: { lat: number; lng: number }[] = (() => {
       pts.push({
         lat: a.lat + (b.lat - a.lat) * t + Math.sin((i * 10 + j) * 1.7) * 0.00008,
         lng: a.lng + (b.lng - a.lng) * t + Math.cos((i * 10 + j) * 1.3) * 0.00008,
+        t: enT(i * 10 + j),
       })
     }
   }
-  pts.push(esquinas[esquinas.length - 1])
+  pts.push({ ...esquinas[esquinas.length - 1], t: enT(40) })
   return pts
 })()
 

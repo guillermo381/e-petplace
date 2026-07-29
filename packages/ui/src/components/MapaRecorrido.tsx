@@ -46,6 +46,7 @@ export type {
   MapaRecorridoModo,
   MapaRecorridoCapa,
   PuntoLatLng,
+  PuntoTrackMapa,
 } from './MapaRecorrido.tipos'
 
 const CAPA_A_KEY = {

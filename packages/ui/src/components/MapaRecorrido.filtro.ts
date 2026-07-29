@@ -12,17 +12,17 @@
 
 import { filtrarTrack, filtrarTrackTramos } from '@epetplace/domain'
 
-import type { PuntoLatLng } from './MapaRecorrido.tipos'
+import type { PuntoTrackMapa } from './MapaRecorrido.tipos'
 
 export { distanciaM, VELOCIDAD_MAX_MS } from '@epetplace/domain'
 
 /** LOS TRAMOS (S81, el corte llega al dibujo): una Polyline POR TRAMO —
  *  donde hubo corte hay hueco, que es la verdad. */
-export function filtrarTrackDibujoTramos(puntos: PuntoLatLng[]): PuntoLatLng[][] {
+export function filtrarTrackDibujoTramos(puntos: PuntoTrackMapa[]): PuntoTrackMapa[][] {
   return filtrarTrackTramos(puntos)
 }
 
 /** Compatibilidad (plano): SOLO para contar puntos — lo plano cose. */
-export function filtrarTrackDibujo(puntos: PuntoLatLng[]): PuntoLatLng[] {
+export function filtrarTrackDibujo(puntos: PuntoTrackMapa[]): PuntoTrackMapa[] {
   return filtrarTrack(puntos)
 }

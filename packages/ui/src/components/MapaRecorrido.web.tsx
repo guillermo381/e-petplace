@@ -19,6 +19,7 @@ export type {
   MapaRecorridoModo,
   MapaRecorridoCapa,
   PuntoLatLng,
+  PuntoTrackMapa,
 } from './MapaRecorrido.tipos'
 
 const ALTO_DEFAULT = 220

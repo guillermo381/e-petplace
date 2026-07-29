@@ -4,15 +4,22 @@
  * el contrato no derive entre plataformas.
  */
 
+/** Una coordenada del MUNDO — un lugar, sin tiempo (el centro de
+ *  encuadre). S81 (junta A+B): el tipo se PARTIÓ en dos — antes un solo
+ *  tipo con `t?` servía a centro y track, y la opcionalidad dejó mudo
+ *  un rename (`ts`) que compiló verde. */
 export interface PuntoLatLng {
   lat: number
   lng: number
-  /**
-   * ISO timestamp de la lectura (S81, D-578): habilita el filtro del
-   * DIBUJO (orden + descarte de púas por velocidad). Opcional: un punto
-   * sin `t` se dibuja igual — el filtro solo juzga lo que puede medir.
-   */
-  t?: string
+}
+
+/** Un punto de TRACK — una MEDICIÓN, con su instante. `t` es REQUERIDO:
+ *  el dato lo banca (12/12 tracks, 100% de puntos con `t`, medido) — la
+ *  tolerancia protegía un fantasma. El parser de api lo GARANTIZA por
+ *  la frontera jsonb (assert de datos); este tipo caza los renames. */
+export interface PuntoTrackMapa extends PuntoLatLng {
+  /** ISO timestamp de la lectura — habilita orden y filtro del dibujo. */
+  t: string
 }
 
 export type MapaRecorridoModo = 'vivo' | 'recorrido'
@@ -20,7 +27,7 @@ export type MapaRecorridoModo = 'vivo' | 'recorrido'
 export type MapaRecorridoCapa = 'vida' | 'cuidado' | 'comunidad' | 'comunidadAmplia'
 
 export interface MapaRecorridoProps {
-  puntos: PuntoLatLng[]
+  puntos: PuntoTrackMapa[]
   modo: MapaRecorridoModo
   /** Color del trazo/marker. Default: cuidado (el paseo es Capa 2). */
   capa?: MapaRecorridoCapa
