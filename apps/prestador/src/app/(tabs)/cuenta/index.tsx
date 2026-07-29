@@ -17,9 +17,17 @@
  * PAPEL). El programa del badge = D-398.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import * as Updates from 'expo-updates';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   Boton,
@@ -72,6 +80,53 @@ import { useTraduccion } from '@/i18n';
 // AvatarMascota), y un logo no es una cara. Reversión barata si el
 // founder prefiere la forma vieja: una prop de radio en el componente.
 const LADO_AVATAR = 84;
+
+/**
+ * S81-C — EL BRILLO DE PLACA de la pill "Prestador fundador" (§8.5, LA
+ * ley del brillo: legal solo donde la cosa ES un objeto — placa, sello,
+ * credencial; censo al firmar S80 = UNO, exactamente esta pill). El
+ * número es del founder y está FIRMADO: **6 s LINEALES, en loop** —
+ * "lento lo material: 6 s es el paso del vidrio; por debajo de ~4 s se
+ * lee como LED" (§5.4). D-572 MEDIDA (L-131): papel sobre vidrio del
+ * muro + pico del brillo al 14% blanco = 5.22 en el peor muro
+ * (tealDark claro) — AA con margen; a 18% caía a 4.74 y se eligió 14
+ * por número. Y el HALLAZGO de la medición: la variante rampa-de-fondo
+ * con tinta (la lámina S80) queda REFUTADA — falla en el punto MEDIO de
+ * la interpolación (4.48 < 4.5), no en el más claro que D-572
+ * sospechaba. La pill conserva vidrio + papel (regla S61: sobre el muro
+ * el acento funcional es PAPEL); el brillo es la luz sobre ese vidrio.
+ */
+function BrilloDePlaca() {
+  const progreso = useSharedValue(0);
+  useEffect(() => {
+    progreso.value = withRepeat(
+      withTiming(1, { duration: 6000, easing: Easing.linear }),
+      -1,
+      false,
+    );
+  }, [progreso]);
+  const estilo = useAnimatedStyle(() => ({
+    // la banda barre de fuera a fuera; la pill (~140 px) queda cubierta
+    transform: [{ translateX: -60 + progreso.value * 260 }],
+  }));
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[{ position: 'absolute', top: 0, bottom: 0, width: 48 }, estilo]}
+    >
+      <Svg width="100%" height="100%" preserveAspectRatio="none">
+        <Defs>
+          <LinearGradient id="brilloPlaca" x1="0" y1="0" x2="1" y2="0">
+            <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0" />
+            <Stop offset="0.5" stopColor="#FFFFFF" stopOpacity="0.14" />
+            <Stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
+          </LinearGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100%" height="100%" fill="url(#brilloPlaca)" />
+      </Svg>
+    </Animated.View>
+  );
+}
 
 /**
  * S77-B (D-531) — EL PORTÓN, PARTIDO EN DOS.
@@ -397,7 +452,10 @@ export default function Cuenta() {
                   </Text>
                 )}
                 {/* el badge fundador: PILL de vidrio con papel (informa
-                    = píldora, Ley 21; el programa es D-398) */}
+                    = píldora, Ley 21; el programa es D-398) — desde
+                    S81-C es LA PLACA: gana el brillo §8.5 (el único
+                    sitio del censo), la firma física de §2.2 traducida
+                    al portal. */}
                 <View
                   style={{
                     alignSelf: 'flex-start',
@@ -405,8 +463,10 @@ export default function Cuenta() {
                     borderRadius: radius.full,
                     paddingVertical: spacing[1],
                     paddingHorizontal: spacing[3],
+                    overflow: 'hidden',
                   }}
                 >
+                  <BrilloDePlaca />
                   <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.xs, color: palette.light0 }}>
                     {t('miCuenta.fundador')}
                   </Text>
