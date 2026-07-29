@@ -37,7 +37,11 @@ export function Isotipo({
   variant?: IsotipoVariant
   /** S61-B8 (enmienda ADITIVA, letra founder de la bienvenida del
    *  prestador: isotipo en tealDark): override puntual del color de
-   *  relleno — solo aplica sobre tinta/blanco, jamás sobre gradiente. */
+   *  relleno — solo aplica sobre tinta/blanco, jamás sobre gradiente.
+   *  S81 (respuesta al pedido de C, bienvenida-dia1): esto ES el fill
+   *  custom — el tono-sobre-tono (p.ej. marca de agua teal) se hace con
+   *  esta prop; existía desde S61 y el pedido se contesta con el
+   *  literal, cero código nuevo. El gradiente sigue INTOCABLE. */
   color?: string
 }) {
   const width = (size * VIEWBOX_W) / VIEWBOX_H

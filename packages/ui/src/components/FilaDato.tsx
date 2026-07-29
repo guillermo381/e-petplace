@@ -45,19 +45,39 @@ export type FilaDatoProps = {
   mono?: boolean
   /** Truncado del valor. */
   numberOfLines?: number
+  /** S81 (el candidato S71 madura — ~8 consumidores reales juntados en
+   *  los cierres de grooming/adiestramiento, reporte de C): la
+   *  disposición HORIZONTAL compacta — rótulo a la IZQUIERDA, valor a
+   *  la DERECHA, una línea. Para listas densas de pares (el resumen del
+   *  cierre); la vertical sigue siendo el default (el perfil, el
+   *  formulario de solo lectura). El rótulo jamás se encoge; el valor
+   *  trunca. */
+  disposicion?: 'vertical' | 'horizontal'
 }
 
-export function FilaDato({ etiqueta, valor, mono = false, numberOfLines }: FilaDatoProps) {
+export function FilaDato({ etiqueta, valor, mono = false, numberOfLines, disposicion = 'vertical' }: FilaDatoProps) {
+  const nodoValor =
+    typeof valor === 'string' ? (
+      <Texto variante={mono ? 'dato' : 'cuerpo'} color="primary" numberOfLines={numberOfLines}>
+        {valor}
+      </Texto>
+    ) : (
+      valor
+    )
+
+  if (disposicion === 'horizontal') {
+    return (
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
+        <Texto variante="apoyo">{etiqueta}</Texto>
+        <View style={{ flexShrink: 1, alignItems: 'flex-end' }}>{nodoValor}</View>
+      </View>
+    )
+  }
+
   return (
     <View style={{ gap: spacing[0.5] }}>
       <Texto variante="apoyo">{etiqueta}</Texto>
-      {typeof valor === 'string' ? (
-        <Texto variante={mono ? 'dato' : 'cuerpo'} color="primary" numberOfLines={numberOfLines}>
-          {valor}
-        </Texto>
-      ) : (
-        valor
-      )}
+      {nodoValor}
     </View>
   )
 }

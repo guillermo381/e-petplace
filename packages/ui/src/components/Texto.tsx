@@ -69,8 +69,11 @@ import type { ReactNode } from 'react'
 import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
 
-export type TextoVariante = 'titulo' | 'seccion' | 'cuerpo' | 'apoyo' | 'dato'
-export type TextoColor = 'primary' | 'secondary' | 'tertiary'
+export type TextoVariante = 'titulo' | 'seccion' | 'cuerpo' | 'apoyo' | 'dato' | 'datoMd'
+/** S81 (pedido de C, los spreads dangerText de los cierres): entran los
+ *  colores de STATUS — 'danger' y 'success' resuelven contra
+ *  theme.status.*Text (los registros AA). El resto sigue en theme.text. */
+export type TextoColor = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'success'
 
 export type TextoProps = {
   children: ReactNode
@@ -80,6 +83,13 @@ export type TextoProps = {
   color?: TextoColor
   /** Truncado. Passthrough a react-native. */
   numberOfLines?: number
+  /** S81 (pedido de C — el k/N de la sesión de adiestramiento, mono
+   *  centrado): centra el texto. Semántica de composición, no estilo
+   *  libre. */
+  centrado?: boolean
+  /** S81 (pedido de mesa): el texto se puede seleccionar/copiar (ids,
+   *  códigos, el pie de identidad). Passthrough a react-native. */
+  seleccionable?: boolean
 }
 
 const RECETA: Record<
@@ -100,20 +110,29 @@ const RECETA: Record<
   cuerpo:  { fontFamily: typography.family.sans.regular, fontSize: typography.size.md, color: 'primary'   },
   apoyo:   { fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: 'secondary', leading: typography.size.sm * typography.leading.normal },
   dato:    { fontFamily: typography.family.mono.regular, fontSize: typography.size.sm, color: 'secondary', tabular: true },
+  // S81 (pedido de C — "el precio mono-primary" de coordinar y los
+  // cierres): el dato PROMINENTE — mono a md en primary. Sigue siendo
+  // voz de máquina (Ley 3); el traje crece con el protagonismo.
+  datoMd:  { fontFamily: typography.family.mono.regular, fontSize: typography.size.md, color: 'primary', tabular: true },
 }
 
-export function Texto({ children, variante = 'cuerpo', color, numberOfLines }: TextoProps) {
+export function Texto({ children, variante = 'cuerpo', color, numberOfLines, centrado, seleccionable }: TextoProps) {
   const { theme } = useTheme()
   const receta = RECETA[variante]
+  const c = color ?? receta.color
+  const colorResuelto =
+    c === 'danger' ? theme.status.dangerText : c === 'success' ? theme.status.successText : theme.text[c]
 
   return (
     <Text
       accessibilityRole={receta.header === true ? 'header' : undefined}
       numberOfLines={numberOfLines}
+      selectable={seleccionable}
       style={{
         fontFamily: receta.fontFamily,
         fontSize: receta.fontSize,
-        color: theme.text[color ?? receta.color],
+        color: colorResuelto,
+        ...(centrado ? { textAlign: 'center' as const } : null),
         ...(receta.leading !== undefined ? { lineHeight: receta.leading } : null),
         ...(receta.tabular ? { fontVariant: ['tabular-nums' as const] } : null),
       }}
