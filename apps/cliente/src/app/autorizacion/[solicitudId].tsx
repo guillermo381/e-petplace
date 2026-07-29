@@ -8,13 +8,26 @@
  * `obtenerSolicitudesPendientesDueno()` en el Hogar (badge + apertura sin
  * push) queda para integrar en `hogar/index.tsx`. Acá vive el destino del
  * deep-link, autónomo.
+ *
+ * S82-C LAZO 3 (MOMENTO ⑤ del triage C7) — la vara:
+ *   TESIS: {negocio} te pide permiso — decidís en un toque, sabiendo qué
+ *   autorizas.
+ *   FIRMA: el título que NOMBRA el pedido completo (negocio + mascota +
+ *   qué va a poder hacer) — ya vivía; se conserva y nada le compite.
+ *   CHANEL: nada nuevo que quitar; el par primario+ghost de la Hoja de
+ *   decisión queda TAL CUAL (D-484: entrada de diccionario pendiente de
+ *   boceto y gate — no se improvisa antes de su firma). Sin Entrada:
+ *   la Hoja ya tiene su entrada propia y doblarla viola L-c.
+ *   Curas: el cuerpo a Texto (mecánica S81) + voseo→tuteo en es.ts
+ *   ('Si autorizás' → 'Si autorizas' — C3 de la directiva, re-verificado
+ *   contra fuente §2.6; regla 27).
  */
 
 import { useCallback, useState } from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { Boton, Esqueleto, EsqueletoGrupo, Hoja, spacing, typography, useAviso, useTheme } from '@epetplace/ui';
+import { Boton, Esqueleto, EsqueletoGrupo, Hoja, Texto, spacing, useAviso, useTheme } from '@epetplace/ui';
 import {
   obtenerSolicitudesPendientesDueno,
   responderSolicitudAutorizacion,
@@ -112,15 +125,9 @@ export default function AutorizacionScreen() {
             <Boton variante="secundario" bloque etiqueta={t('autorizacion.cerrar')} onPress={cerrar} />
           ) : (
             <>
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.regular,
-                  fontSize: typography.size.md,
-                  color: theme.text.secondary,
-                }}
-              >
+              <Texto variante="cuerpo" color="secondary">
                 {t('autorizacion.cuerpo')}
-              </Text>
+              </Texto>
               <View style={{ gap: spacing[2] }}>
                 <Boton
                   variante="primario"

@@ -996,7 +996,9 @@ export const clienteEs = {
   autorizacion: {
     tituloAtencion: '{{negocio}} quiere atender a {{mascota}}',
     tituloAlta: '{{negocio}} quiere registrar a {{mascota}} en tu familia y atenderlo hoy',
-    cuerpo: 'Si autorizás, el negocio va a poder ver y cuidar su expediente.',
+    // S82-C L3: voseo→tuteo al tocarse la pantalla (regla 27; C3 de la
+    // directiva de craft, re-verificado contra fuente).
+    cuerpo: 'Si autorizas, el negocio va a poder ver y cuidar su expediente.',
     autorizar: 'Autorizar',
     rechazar: 'Rechazar',
     autorizadaOk: 'Listo, {{negocio}} ya puede atenderlo.',
