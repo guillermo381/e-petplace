@@ -302,15 +302,7 @@ export default function ProcedimientosVeterinaria() {
 
             {draft.procedimientoId !== null && (
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.regular,
-                    fontSize: typography.size.base,
-                    color: theme.text.primary,
-                  }}
-                >
-                  {t('procedimientosVet.visible')}
-                </Text>
+                <Texto variante="cuerpo">{t('procedimientosVet.visible')}</Texto>
                 <Interruptor
                   encendido={draft.activo}
                   onCambio={(v) => setDraft((d) => (d === null ? d : { ...d, activo: v }))}
