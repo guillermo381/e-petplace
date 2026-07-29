@@ -16931,6 +16931,7 @@ export type Database = {
           p_email: string
           p_identificacion_fiscal: string
           p_nombre_comercial: string
+          p_nombre_titular: string
           p_proposito?: string
           p_razon_social: string
           p_tipo_fiscal: Database["public"]["Enums"]["tipo_fiscal_enum"]
