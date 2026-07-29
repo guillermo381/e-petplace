@@ -293,6 +293,7 @@ export default function PaseoCuando() {
               acento="control"
                 etiqueta={t('explorar.cuandoDuracion')}
                 disposicion="grilla"
+                naturaleza="existe"
                 opciones={bloques.map((b) => ({ codigo: String(b.duracion), etiqueta: etiquetaBloque(b.duracion) }))}
                 seleccionada={duracion !== null ? String(duracion) : undefined}
                 onSelect={(codigo) => setDuracion(Number(codigo))}

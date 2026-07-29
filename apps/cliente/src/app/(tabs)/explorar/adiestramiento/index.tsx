@@ -228,6 +228,7 @@ export default function AdiestramientoCuando() {
               <SelectorOpcion
                 acento="control"
                 etiqueta={t('adiestramiento.comprableEtiqueta')}
+                naturaleza="existe"
                 opciones={[
                   { codigo: 'sesion', etiqueta: t('adiestramiento.comprableSesion') },
                   { codigo: 'programa', etiqueta: t('adiestramiento.comprablePrograma') },

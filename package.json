@@ -9,7 +9,8 @@
     "lint": "turbo run lint",
     "dev:prestador": "pnpm --filter prestador start",
     "dev:cliente": "pnpm --filter cliente start",
-    "verify:contrast": "tsx scripts/verify-contrast.ts"
+    "verify:contrast": "tsx scripts/verify-contrast.ts",
+    "verify:diseno": "node scripts/verify-diseno.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.61.1",

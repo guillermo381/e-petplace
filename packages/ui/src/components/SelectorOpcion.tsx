@@ -118,6 +118,21 @@ export interface SelectorOpcionProps {
    *  S74: memorial conserva el trazo y pierde lo que celebra —
    *  DIRECCION_ARTE §2.8, la sombra es presencia). */
   entidad?: boolean
+  /** S81 — EL EJE DEL RELLENO (7bis, FIRMADO por el founder 29-jul-2026):
+   *  SE RELLENA LO QUE EXISTE · SE CONTORNEA LO QUE SE FIJA. La pantalla
+   *  DECLARA la naturaleza de sus opciones (el componente no puede
+   *  saberla — árbitro: fila de catálogo con nombre+precio = existe):
+   *  'existe' = catálogo (servicio, tipo, comprable, especie, duración
+   *  ofertada) → reposo RELLENO: tinte del acento SIN borde (§7: color
+   *  completo + presencia; la elección sigue diciendo TONAL con borde).
+   *  'seFija' = coordenadas (día, hora, cantidad) → reposo CONTORNO
+   *  (default — cero cambio para lo existente hasta que declare).
+   *  Intensidad: SOLO el intermedio — el PLENO con <4 hermanos queda
+   *  RESERVADO a lámina+gate (L-b es la dosis; B4(c) mostró la señal de
+   *  elección sin resolver sobre cama plena). `entidad` es relleno por
+   *  espec propia (S73) y no consume esta prop. Memorial degrada a
+   *  contorno solo (sin tinte — patrón 'capaBg' in theme). */
+  naturaleza?: 'existe' | 'seFija'
 }
 
 function Chip({
@@ -131,6 +146,7 @@ function Chip({
   entidad,
   modo,
   acento,
+  naturaleza,
 }: {
   opcion: SelectorOpcionItem
   indice: number
@@ -142,6 +158,7 @@ function Chip({
   entidad: boolean
   modo: 'radio' | 'checkbox'
   acento: 'capa' | 'control' | 'oficio'
+  naturaleza: 'existe' | 'seFija'
 }) {
   const { theme } = useTheme()
   // S63 (D-401): el clon muere — la física vive en LA primitiva
@@ -184,22 +201,30 @@ function Chip({
   // accent.primary/tealDark, §15b) · 'capa' (verdeVital — MUERE como
   // color de control; las pantallas migran AL PASO de la pasada).
   // Memorial degrada igual en los tres: sin tinte, borde text.secondary.
-  const fondo = !conCapa
+  // S81 (7bis): el reposo de EXISTENCIA se rellena — tinte del acento
+  // SIN borde marcado (§7). Memorial queda fuera por el mismo gate
+  // 'capaBg' in theme (degrada a contorno, sin tinta). La elección
+  // sigue escalando por el borde TONAL (Ley 22 intacta).
+  const rellenoExiste = naturaleza === 'existe' && !entidad && 'capaBg' in theme
+  const tinteAcento = !('capaBg' in theme)
     ? fondoReposo
     : acento === 'control'
       ? theme.capaBg.comunidad
       : acento === 'oficio'
         ? theme.accent.primaryBg
         : theme.capaBg.identidad
+  const fondo = conCapa || rellenoExiste ? tinteAcento : fondoReposo
   const borde = conCapa
     ? acento === 'control' && 'control' in theme.accent
       ? theme.accent.control
       : acento === 'oficio'
         ? theme.accent.primary
         : theme.capa.identidad
-    : seleccionada
-      ? theme.text.secondary
-      : theme.border.subtle
+    : rellenoExiste
+      ? 'transparent'
+      : seleccionada
+        ? theme.text.secondary
+        : theme.border.subtle
 
   // S73 — entity chip: el LLENO por slot del tema (memorial no lo porta
   // y degrada a la rama tonal-con-borde: elevación sin lleno).
@@ -316,7 +341,7 @@ function Chip({
               ? theme.text.tertiary
               : llenoActivo
                 ? (theme.accent as { sobreControlLleno: string }).sobreControlLleno
-                : conCapa
+                : conCapa || rellenoExiste
                   ? textoTonal
                   : theme.text.primary,
             opacity: mostrarSpinner ? 0 : 1,
@@ -348,6 +373,7 @@ export function SelectorOpcion({
   seleccionadas,
   acento = 'capa',
   etiquetaVisible = true,
+  naturaleza = 'seFija',
 }: SelectorOpcionProps) {
   const { theme } = useTheme()
 
@@ -364,6 +390,7 @@ export function SelectorOpcion({
       entidad={entidad === true && opcion.avatar !== undefined}
       modo={multiple ? 'checkbox' : 'radio'}
       acento={acento}
+      naturaleza={naturaleza}
     />
   ))
 

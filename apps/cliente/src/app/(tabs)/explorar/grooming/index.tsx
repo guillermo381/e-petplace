@@ -290,6 +290,7 @@ export default function GroomingCuando() {
                     <SelectorOpcion
                       acento="control"
                       etiqueta={t('grooming.servicioEtiqueta')}
+                      naturaleza="existe"
                       opciones={ofertaPublica.map((o) => ({
                         codigo: o.tipo_servicio,
                         etiqueta: vozServicio(t, o.tipo_servicio) ?? o.tipo_servicio,
@@ -365,6 +366,7 @@ export default function GroomingCuando() {
                   <SelectorOpcion
                     acento="control"
                     etiqueta={t('grooming.servicioEtiqueta')}
+                    naturaleza="existe"
                     opciones={oferta.map((o) => ({
                       codigo: o.tipo_servicio,
                       etiqueta: vozServicio(t, o.tipo_servicio, o.servicio_nombre) ?? o.servicio_nombre,
