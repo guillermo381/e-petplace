@@ -108,16 +108,23 @@ export const clienteEs = {
     // S71-A3 — PONTE AL DÍA (F2, letra founder) + el rail de servicios (F1).
     // LOTE PENDIENTE DE GATE FOUNDER. Tuteo neutro.
     ponteAlDia: 'Ponte al día',
-    verYDecidir: 'Ver y decidir',
-    verlo: 'Verlo',
-    verLaCita: 'Ver la cita',
+    // S82-C (lámina posición-consolidada): RECOMENDACIONES — el conteo
+    // mono de la cabecera + las filas nuevas (vacuna que vence · citas
+    // de la semana). verYDecidir/verlo/verLaCita murieron con los CTAs
+    // de tarjeta (las filas navegan enteras, Ley 37).
+    recoUnaCosa: '1 cosa',
+    recoCosas: '{{n}} cosas',
+    recoVacunaDetalle: 'Agendar el refuerzo',
+    recoCitaSemana: 'Tienes 1 cita esta semana',
+    recoCitasSemana: 'Tienes {{n}} citas esta semana',
+    recoHoy: '{{n}} hoy',
+    recoManana: '{{n}} mañana',
+    recoLuego: '{{n}} más adelante',
     venceEnMin: 'Vence en {{n}} min',
     presupuestoDe: 'Presupuesto de {{negocio}}',
     presupuestoPara: 'Presupuesto para {{mascota}}',
     presupuestoDetalle: '${{total}} por {{mascota}} · vence el {{fecha}}',
     porCoordinarTitulo: 'La cita de {{mascota}} espera fecha',
-    citaAgendadaTitulo: '{{servicio}} de {{mascota}}',
-    citaAgendadaSinServicio: 'La cita de {{mascota}}',
     railPaseos: 'Paseos',
     railEstetica: 'Estética',
     // S73 ítem 1: el rail mínimo-4 (LOTE S73, gate founder pendiente)
@@ -128,14 +135,25 @@ export const clienteEs = {
     railSaldoUna: '1 salida',
     railSaldo: '{{n}} salidas',
     // S61-A11 — el Hogar de Kary (LOTE S61, GATE PENDIENTE founder)
-    vidaTitulo: 'La vida del hogar',
-    filtroQuien: '¿De quién?',
-    filtroQue: '¿Qué momentos?',
+    // S82-C (lámina): "Tu vida" — filtro único por familia con glifo
+    // (¿De quién?/¿Qué momentos? murieron: la mascota vive en el chip
+    // del detalle y en su perfil); las voces del hecho (Ley 3 — el
+    // código del evento jamás visible; desconocido degrada digno).
+    vidaTitulo: 'Tu vida',
+    filtroTodo: 'Todo',
+    filtroSalud: 'Salud',
     filtroPaseos: 'Paseos',
     filtroAdiestramiento: 'Adiestramiento',
     filtroEstetica: 'Estética',
-    filtroVacunas: 'Vacunas',
-    filtroSinMomentos: 'Nada por acá con esos filtros.',
+    filtroSinMomentos: 'Nada por acá con ese filtro.',
+    hechoPaseo: 'Salió a pasear',
+    hechoGrooming: 'Sesión de estética',
+    hechoAdiestramiento: 'Sesión de adiestramiento',
+    hechoVacuna: 'Recibió la vacuna {{nombre}}',
+    hechoVacunaSinNombre: 'Recibió una vacuna',
+    hechoConsulta: 'Visita al veterinario',
+    hechoMomento: 'Momento de cuidado',
+    vidaCargarMas: 'Cargar más',
     acordeonCargando: 'Cargando el momento',
     acordeonError: 'No pudimos cargar este momento.',
     acordeonSinDetalle: 'Este momento no dejó más detalle.',

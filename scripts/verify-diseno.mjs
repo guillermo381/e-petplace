@@ -265,6 +265,28 @@ function r9(archivos) {
   return { fallos: [], info: `con-camino=${conCamino} · sin-camino=${sinCamino} (⚖️ 17.5 vs próximamente-sereno: arbitraje founder)` };
 }
 
+/** R10 · Los overrides LOCALES de la lámina S82-C (marca de agua ·
+ *  canto que pinta la curva · fila de recomendación · filtro de la
+ *  vida) NO SE GENERALIZAN desde la pantalla — la promoción es de B
+ *  después del gate (orden founder S82 ronda 2). El guard ata el
+ *  MARCADOR `@override-s82c` a su única casa (hogar/index del cliente):
+ *  cubre el vector real de propagación — el copy-paste, que viaja CON
+ *  el comentario (L-170 al revés: acá el comentario ES la señal, por
+ *  eso esta regla lee el fuente CRUDO, sin despojar). DURA EN 0 fuera
+ *  de la casa. Reconciliación declarada: no cubre la reinvención sin
+ *  marcador — esa la atrapa el gate de craft, no un grep. */
+const CASA_OVERRIDE_S82C = /apps\/cliente\/src\/app\/\(tabs\)\/hogar\/index\.tsx$/;
+function r10(archivos) {
+  const fallos = [];
+  for (const { path, src } of archivos) {
+    if (CASA_OVERRIDE_S82C.test(path)) continue;
+    for (const m of src.matchAll(/@override-s82c/g)) {
+      fallos.push(`${path}:${lineaDe(src, m.index)} — @override-s82c fuera de su casa: el override local NO se generaliza (la promoción es de B, post-gate)`);
+    }
+  }
+  return { fallos, info: `${fallos.length} fugas del override` };
+}
+
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
 const FIXTURES = {
@@ -276,8 +298,9 @@ const FIXTURES = {
   R6: [{ path: '(fixture)', src: '<KeyboardAvoidingView behavior="padding">' }],
   R7: [{ path: '(fixture)', src: Array(BASELINE_FADEIN + 1).fill('entering={FadeInDown}').join('\n') }],
   R8: [{ path: '(fixture)', src: '<Entrada><EstadoVacio titulo="x" /></Entrada>\n<Animated.View entering={FadeIn}><EstadoVacio titulo="y" /></Animated.View>' }],
+  R10: [{ path: 'apps/cliente/src/app/otra-pantalla.tsx', src: '/** @override-s82c — copia ilegal */' }],
 };
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9 };
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -326,6 +349,7 @@ const corridas = [
   ['R7 (§5/Entrada: FadeIn artesanal)', r7(apps)],
   ['R8 (Ley 13/EstadoVacio: el vacío no se anima)', r8(apps)],
   ['R9 (Ley 17.5/EstadoVacio — informativa)', r9(apps)],
+  ['R10 (override-s82c atado a su casa)', r10(apps)],
 ];
 for (const [nombre, res] of corridas) {
   console.log(`${nombre} · ${res.info}`);

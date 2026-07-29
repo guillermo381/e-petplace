@@ -33,6 +33,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StatusBar, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { router, useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -57,9 +58,12 @@ import {
   SelectorOpcion,
   Separador,
   Tarjeta,
+  Huella,
+  Isotipo,
   Texto,
   VisorFoto,
   motion,
+  radius,
   spacing,
   typography,
   useAviso,
@@ -67,6 +71,7 @@ import {
   useTheme,
   type FichaMascotaHogarAccion,
   type FichaMascotaHogarVoz,
+  type IconoNombre,
   type LineaDeVidaEstadoPie,
 } from '@epetplace/ui';
 import {
@@ -176,20 +181,262 @@ type EstadoMascotas = MascotaResumen[] | 'cargando' | 'error';
 type ItemHogar = ItemTimeline & { mascota_id: string };
 
 // El filtro por TIPO habla en familias de servicio (Ley 3) — el código
-// del evento jamás sale de acá. 'otros' pasa solo sin filtro activo.
-const FAMILIA_DE_TIPO: Record<string, 'paseos' | 'estetica' | 'adiestramiento' | 'vacunas'> = {
+// del evento jamás sale de acá. 'otros' pasa solo con el filtro en
+// "todo". S82-C (lámina): 'vacunas' se ensancha a SALUD (vacunas +
+// consultas — la familia que el dueño reconoce).
+const FAMILIA_DE_TIPO: Record<string, 'paseos' | 'estetica' | 'adiestramiento' | 'salud'> = {
   atencion_paseo_registrada: 'paseos',
   atencion_grooming_registrada: 'estetica',
   // S65 (hallazgo founder): la sesión cerrada no tenía familia — sin
   // chip en "¿Qué momentos?" y con filtro activo desaparecía.
   atencion_adiestramiento_registrada: 'adiestramiento',
-  vacuna_aplicada: 'vacunas',
+  vacuna_aplicada: 'salud',
+  historia_clinica_registrada: 'salud',
 };
 
-// ── S61-A11: el acordeón de la vida — el detalle se despliega DEBAJO
-// (jamás navega de una). Se monta recién al expandir: fetch perezoso.
-// "Ver completo" SOLO para el paseo (el mapa no cabe digno acá).
-function DetalleNodoHogar({ atencionId, onVerCompleto }: { atencionId: string; onVerCompleto: () => void }) {
+// ═══════════ S82-C RONDA 2 — LA LÁMINA POSICIÓN CONSOLIDADA ═══════════
+// (docs/laminas/2026-07-29-s82-posicion-consolidada.html ES el acuerdo;
+// §10: criterio no evidencia — sombras por elevacion.ts, motion por los
+// rieles de RN. Overrides LOCALES: viajan a B como candidatas tras el
+// gate; el guard R10 de verify:diseno vigila que el marcador
+// @override-s82c no salga de esta pantalla.)
+
+/** @override-s82c — EL CANTO QUE PINTA LA CURVA (ítem 2). El principio
+ *  resuelto del lado prestador (FilaCita S80-B15, leído de ahí): el
+ *  color vive en el ELEMENTO PORTADOR DEL RADIO — jamás un View
+ *  absoluto recortado (la mordida medida en B13). Anatomía de la
+ *  lámina: el color ES el fondo de la tarjeta exterior (radius.lg,
+ *  elevacion.reposo) y la superficie entra 6px desde la izquierda con
+ *  RADIO MENOR (radius.md) — la curva queda pintada por construcción.
+ *  RECONCILIACIÓN DECLARADA: la lámina degrada el color a 40% de alfa
+ *  hacia abajo; la FIRMA B15 dice canto SÓLIDO en lista contigua (el
+ *  degradado repetido da serrucho) — gana la firma: sólido. */
+function CantoCurva({ color, children }: { color: string | null; children: React.ReactNode }) {
+  const { theme } = useTheme();
+  return (
+    <View
+      style={{
+        backgroundColor: color ?? theme.bg.card,
+        borderRadius: radius.lg,
+        boxShadow: theme.elevacion.reposo,
+      }}
+    >
+      <View
+        style={{
+          marginLeft: color !== null ? 6 : 0,
+          backgroundColor: theme.bg.card,
+          borderRadius: radius.md,
+          overflow: 'hidden',
+        }}
+      >
+        {children}
+      </View>
+    </View>
+  );
+}
+
+/** El chevron de fila (path canónico de CeldaNavegacion): › navega ·
+ *  ⌄ revela · ⌃ pliega (la dirección codifica la verdad, Ley 18; el
+ *  giro se dice por REEMPLAZO de path — precedente PieRevelar, L-c:
+ *  animar la rotación no agrega significado). */
+function ChevronFila({ forma }: { forma: 'navega' | 'revela' | 'pliega' }) {
+  const { theme } = useTheme();
+  const d = forma === 'navega' ? 'M9 5l7 7-7 7' : forma === 'revela' ? 'M6 9l6 6 6-6' : 'M6 15l6-6 6 6';
+  return (
+    <Svg width={19} height={19} viewBox="0 0 24 24">
+      <Path d={d} stroke={theme.text.tertiary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </Svg>
+  );
+}
+
+/** @override-s82c — LA FILA DE RECOMENDACIÓN (ítem 1): glifo en placa
+ *  tintada de su capa + título + detalle + chevron; alto mínimo 44;
+ *  la fila ENTERA navega (rol button, precedente 18e0c61). Candidata a
+ *  B: es prima de CeldaNavegacion con placa de capa — no se generaliza
+ *  desde acá (Ley 11: nace en ui por su puerta, después del gate). */
+function FilaReco({
+  capa,
+  icono,
+  titulo,
+  detalle,
+  onPress,
+}: {
+  capa: 'identidad' | 'cuidado';
+  icono: IconoNombre;
+  titulo: string;
+  detalle: string | null;
+  onPress: () => void;
+}) {
+  const { theme } = useTheme();
+  const presion = usePresionado(0.99);
+  return (
+    <Pressable
+      onPress={onPress}
+      onPressIn={presion.handlers.onPressIn}
+      onPressOut={presion.handlers.onPressOut}
+      accessibilityRole="button"
+      accessibilityLabel={[titulo, detalle].filter(Boolean).join(', ')}
+    >
+      <Animated.View
+        style={[
+          presion.estiloPresionado,
+          {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: spacing[3],
+            paddingHorizontal: spacing[4],
+            paddingVertical: spacing[3],
+            minHeight: 44,
+          },
+        ]}
+      >
+        <View
+          style={{
+            width: 42,
+            height: 42,
+            borderRadius: radius.md,
+            // memorial no tiene registro capaBg: la placa degrada a
+            // overlay neutro (memorial no se celebra, Ley 8).
+            backgroundColor: 'capaBg' in theme ? theme.capaBg[capa] : theme.bg.overlay,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Icono nombre={icono} tamano={21} />
+        </View>
+        <View style={{ flex: 1, minWidth: 0, gap: spacing[0.5] }}>
+          <Texto variante="cuerpo" numberOfLines={2}>{titulo}</Texto>
+          {detalle !== null ? <Texto variante="apoyo" numberOfLines={1}>{detalle}</Texto> : null}
+        </View>
+        <ChevronFila forma="navega" />
+      </Animated.View>
+    </Pressable>
+  );
+}
+
+/** Las familias del filtro de la vida (Ley 3: el código del evento
+ *  jamás sale de acá). 'salud' junta vacunas y consultas. */
+type FamiliaVida = 'salud' | 'paseos' | 'estetica' | 'adiestramiento';
+type FiltroVidaCodigo = 'todo' | FamiliaVida;
+
+/** @override-s82c — EL FILTRO DE LA VIDA (ítem 3): pills de 44 con
+ *  glifo en TRAZO; el elegido gana LA huella rellena — glifo sobre
+ *  fondo tinta (lámina). "Todo" lleva la Huella canónica (la primitiva
+ *  — nadie la redibuja, Ley 12). Separación 10, scroll horizontal.
+ *  Borde 1.5 de la casa (la lámina traza 1.9: ese grosor es de GLIFO,
+ *  no de borde — divergencia declarada). */
+function FiltroVida({
+  activo,
+  onCambio,
+  etiquetas,
+}: {
+  activo: FiltroVidaCodigo;
+  onCambio: (c: FiltroVidaCodigo) => void;
+  etiquetas: Record<FiltroVidaCodigo, string>;
+}) {
+  const { theme } = useTheme();
+  const OPCIONES: { codigo: FiltroVidaCodigo; icono: IconoNombre | 'huella' }[] = [
+    { codigo: 'todo', icono: 'huella' },
+    { codigo: 'salud', icono: 'veterinaria' },
+    { codigo: 'paseos', icono: 'paseo' },
+    { codigo: 'estetica', icono: 'grooming' },
+    { codigo: 'adiestramiento', icono: 'training' },
+  ];
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing[2.5], paddingHorizontal: spacing[4] }}>
+      {OPCIONES.map((o) => {
+        const elegido = o.codigo === activo;
+        const tintaGlifo = elegido ? theme.bg.card : theme.text.secondary;
+        return (
+          <Pressable
+            key={o.codigo}
+            onPress={() => onCambio(o.codigo)}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: elegido }}
+            accessibilityLabel={etiquetas[o.codigo]}
+            style={{
+              height: 44,
+              borderRadius: radius.full,
+              borderWidth: 1.5,
+              borderColor: elegido ? theme.text.primary : theme.border.default,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: spacing[2],
+              paddingLeft: spacing[1.5],
+              paddingRight: spacing[4],
+              ...(elegido ? { boxShadow: theme.elevacion.reposo } : null),
+            }}
+          >
+            <View
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: radius.full,
+                backgroundColor: elegido ? theme.text.primary : 'transparent',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {o.icono === 'huella' ? (
+                <Svg width={16} height={16} viewBox="0 0 24 24">
+                  <Huella color={tintaGlifo} escala={0.85} x={1.8} y={1.8} />
+                </Svg>
+              ) : (
+                <Icono nombre={o.icono} tamano={16} registro="tinta" tinta={tintaGlifo} />
+              )}
+            </View>
+            <Texto variante="apoyo" color={elegido ? 'primary' : 'secondary'}>
+              {etiquetas[o.codigo]}
+            </Texto>
+          </Pressable>
+        );
+      })}
+    </ScrollView>
+  );
+}
+
+/** La voz humana del hecho (Ley 3: el código del evento jamás sale de
+ *  acá; desconocido degrada digno — 'Momento de cuidado', precedente
+ *  LineaDeVida). El detalle rico vive en el despliegue. */
+function vozHecho(item: ItemHogar, t: TraductorHogar): string {
+  switch (item.tipo) {
+    case 'atencion_paseo_registrada': return t('hogar.hechoPaseo');
+    case 'atencion_grooming_registrada': return t('hogar.hechoGrooming');
+    case 'atencion_adiestramiento_registrada': return t('hogar.hechoAdiestramiento');
+    case 'vacuna_aplicada':
+      return item.vacuna_nombre !== null
+        ? t('hogar.hechoVacuna', { nombre: item.vacuna_nombre })
+        : t('hogar.hechoVacunaSinNombre');
+    case 'historia_clinica_registrada': return t('hogar.hechoConsulta');
+    default: return t('hogar.hechoMomento');
+  }
+}
+
+/** La línea mono del hecho: fecha (fecha_sola = partes UTC, S48-B6.3 —
+ *  jamás una hora inventada) · hora local · duración · quién. */
+function metaHecho(item: ItemHogar, idioma: 'es' | 'en'): string {
+  const fecha = item.fecha_sola
+    ? fechaCortaMono(item.fecha_evento.slice(0, 10), idioma)
+    : fechaCortaMono(new Intl.DateTimeFormat('en-CA').format(new Date(item.fecha_evento)), idioma);
+  const hora = item.fecha_sola ? null : new Date(item.fecha_evento).toTimeString().slice(0, 5);
+  const dur = item.duracion_min !== null ? `${item.duracion_min} min` : null;
+  const fuente = item.titulo_fuente !== null ? item.titulo_fuente.toLowerCase() : null;
+  return [fecha, hora, dur, fuente].filter((x): x is string => x !== null).join(' · ');
+}
+
+// ── S61-A11 → S82-C: el detalle de la vida — se despliega DEBAJO al
+// tocar (jamás navega de una); fetch perezoso al expandir. Gana FOTOS
+// y QUIÉN LO CARGÓ (lámina ítem 3); "Ver completo" para paseo y
+// adiestramiento como hasta ahora.
+function DetalleNodoHogar({
+  atencionId,
+  mascota,
+  onVerCompleto,
+}: {
+  atencionId: string;
+  mascota: { nombre: string; fotoUrl?: string } | null;
+  onVerCompleto: () => void;
+}) {
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
   const [detalle, setDetalle] = useState<DetalleAtencion | 'cargando' | 'error'>('cargando');
@@ -219,9 +466,10 @@ function DetalleNodoHogar({ atencionId, onVerCompleto }: { atencionId: string; o
       <Texto variante="apoyo" color="danger">{t('hogar.acordeonError')}</Texto>
     );
   }
-  const sinNada = detalle.mensaje_familia === null && detalle.servicios_aplicados.length === 0;
+  const sinNada =
+    detalle.mensaje_familia === null && detalle.servicios_aplicados.length === 0 && detalle.fotos.length === 0;
   return (
-    <View style={{ gap: spacing[2] }}>
+    <View style={{ gap: spacing[3] }}>
       {detalle.mensaje_familia !== null ? (
         <Text
           style={{
@@ -242,8 +490,42 @@ function DetalleNodoHogar({ atencionId, onVerCompleto }: { atencionId: string; o
           ))}
         </View>
       ) : null}
+      {/* Lámina ítem 3: las FOTOS del momento — tiras 78×62 con radio de
+          la casa; las URLs ya vienen firmadas del wrapper. Sin tap en v1
+          (la lámina no lo pide; el completo vive en "Ver completo"). */}
+      {detalle.fotos.length > 0 ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing[2] }}>
+          {detalle.fotos.map((f) => (
+            <Image
+              key={f.id}
+              source={{ uri: f.url }}
+              style={{ width: 78, height: 62, borderRadius: radius.md, backgroundColor: theme.bg.overlay }}
+              contentFit="cover"
+              accessibilityIgnoresInvertColors
+            />
+          ))}
+        </ScrollView>
+      ) : null}
       {sinNada ? (
         <Texto variante="apoyo">{t('hogar.acordeonSinDetalle')}</Texto>
+      ) : null}
+      {/* Lámina ítem 3: QUIÉN LO CARGÓ — la mascota (chip con su cara) y
+          el autor (voz de máquina, minúsculas de la casa — la lámina lo
+          escribe en mayúsculas: criterio, no evidencia; manda Ley 3). */}
+      {mascota !== null || detalle.titulo_fuente !== null ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+          {mascota !== null ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1.5] }}>
+              <AvatarMascota nombre={mascota.nombre} fotoUrl={mascota.fotoUrl} tamano="xs" />
+              <Texto variante="apoyo">{mascota.nombre}</Texto>
+            </View>
+          ) : null}
+          {detalle.titulo_fuente !== null ? (
+            <View style={{ flex: 1, alignItems: 'flex-end' }}>
+              <Texto variante="dato" numberOfLines={1}>{detalle.titulo_fuente.toLowerCase()}</Texto>
+            </View>
+          ) : null}
+        </View>
       ) : null}
       {detalle.oficio === 'paseo' ? (
         <View style={{ alignSelf: 'flex-start' }}>
@@ -266,6 +548,134 @@ function DetalleNodoHogar({ atencionId, onVerCompleto }: { atencionId: string; o
   );
 }
 
+/** El detalle INLINE de una vacuna (lámina ítem 3: la vida se despliega
+ *  en su lugar — la Hoja de vacuna del S45 murió absorbida, Ley 37).
+ *  Reusa las voces vacunaHoja.* y el camino Ver carnet → VisorFoto. */
+function DetalleVacunaVida({ eventoId, onVerCarnet }: { eventoId: string; onVerCarnet: (path: string) => void }) {
+  const { theme } = useTheme();
+  const { t } = useTraduccion();
+  const idioma = useTraduccion().idioma;
+  const [vacuna, setVacuna] = useState<VacunaDeEvento | 'cargando' | 'error'>('cargando');
+
+  useEffect(() => {
+    let vigente = true;
+    void obtenerVacunaPorEvento(eventoId).then((r) => {
+      if (vigente) setVacuna(r.ok ? r.data : 'error');
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [eventoId]);
+
+  if (vacuna === 'cargando') {
+    return (
+      <EsqueletoGrupo etiqueta={t('vacunaHoja.cargando')}>
+        <View style={{ gap: spacing[2] }}>
+          <Esqueleto forma="linea" ancho="60%" />
+          <Esqueleto forma="linea" ancho="40%" />
+        </View>
+      </EsqueletoGrupo>
+    );
+  }
+  if (vacuna === 'error') {
+    return <Texto variante="apoyo" color="danger">{t('vacunaHoja.error')}</Texto>;
+  }
+  return (
+    <View style={{ gap: spacing[2] }}>
+      {(vacuna.tipo_vacuna || vacuna.veterinario_nombre_externo) && (
+        <Texto variante="apoyo">
+          {[vacuna.tipo_vacuna, vacuna.veterinario_nombre_externo].filter(Boolean).join(' · ')}
+        </Texto>
+      )}
+      {(vacuna.fecha_aplicada || vacuna.fecha_proxima || vacuna.lote) && (
+        <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.secondary }}>
+          {[
+            vacuna.fecha_aplicada ? `${t('vacunaHoja.aplicada')} ${fechaCortaMono(vacuna.fecha_aplicada, idioma)}` : null,
+            vacuna.fecha_proxima ? `${t('vacunaHoja.proxima')} ${fechaCortaMono(vacuna.fecha_proxima, idioma)}` : null,
+            vacuna.lote ? `${t('vacunaHoja.lote')} ${vacuna.lote.toLowerCase()}` : null,
+          ].filter(Boolean).join(' · ')}
+        </Text>
+      )}
+      {vacuna.archivo_url !== null && (
+        <View style={{ alignSelf: 'flex-start' }}>
+          <Boton
+            variante="compacto"
+            etiqueta={t('vacunaHoja.verCarnet')}
+            onPress={() => { if (vacuna.archivo_url !== null) onVerCarnet(vacuna.archivo_url); }}
+          />
+        </View>
+      )}
+    </View>
+  );
+}
+
+/** @override-s82c — LA CARTA DE UN HECHO de "tu vida" (ítem 3, sobre el
+ *  canto que pinta la curva): título + fecha SIEMPRE visibles; el tap
+ *  despliega el detalle en su lugar (⌄/⌃ por reemplazo de path) o
+ *  navega (›) cuando el hecho tiene su propia pantalla MOMENTO (la
+ *  consulta → el parte). El despliegue monta directo — el layout de
+ *  listas no se anima (Ley 6); la transición de altura de la lámina no
+ *  viaja, declarado. */
+function EventoVida({
+  color,
+  titulo,
+  meta,
+  navega,
+  expandido,
+  onPress,
+  children,
+}: {
+  color: string | null;
+  titulo: string;
+  meta: string;
+  /** true = el chevron es › y el tap navega (no hay despliegue). */
+  navega?: boolean;
+  expandido?: boolean;
+  /** Sin onPress el hecho es INERTE: sin chevron, sin rol button. */
+  onPress?: () => void;
+  children?: React.ReactNode;
+}) {
+  const presion = usePresionado(0.99);
+  if (onPress === undefined) {
+    return (
+      <CantoCurva color={color}>
+        <View style={{ gap: spacing[1], padding: spacing[4], minHeight: 44, justifyContent: 'center' }}>
+          <Texto variante="cuerpo" numberOfLines={2}>{titulo}</Texto>
+          <Texto variante="dato" numberOfLines={1}>{meta}</Texto>
+        </View>
+      </CantoCurva>
+    );
+  }
+  return (
+    <CantoCurva color={color}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={presion.handlers.onPressIn}
+        onPressOut={presion.handlers.onPressOut}
+        accessibilityRole="button"
+        accessibilityState={navega ? undefined : { expanded: expandido === true }}
+        accessibilityLabel={`${titulo}, ${meta}`}
+      >
+        <Animated.View
+          style={[
+            presion.estiloPresionado,
+            { flexDirection: 'row', alignItems: 'center', gap: spacing[3], padding: spacing[4], minHeight: 44 },
+          ]}
+        >
+          <View style={{ flex: 1, minWidth: 0, gap: spacing[1] }}>
+            <Texto variante="cuerpo" numberOfLines={2}>{titulo}</Texto>
+            <Texto variante="dato" numberOfLines={1}>{meta}</Texto>
+          </View>
+          <ChevronFila forma={navega ? 'navega' : expandido ? 'pliega' : 'revela'} />
+        </Animated.View>
+      </Pressable>
+      {expandido === true && children !== undefined ? (
+        <View style={{ paddingHorizontal: spacing[4], paddingBottom: spacing[4] }}>{children}</View>
+      ) : null}
+    </CantoCurva>
+  );
+}
+
 export default function Hogar() {
   const router = useRouter();
   const { theme } = useTheme();
@@ -283,8 +693,12 @@ export default function Hogar() {
   // S61-A11: cada item porta SU mascota (el merge la etiqueta) — el
   // filtro por mascota y el avatar del chip la necesitan.
   const [items, setItems] = useState<ItemHogar[] | null | 'error'>(null);
-  const [filtroMascotas, setFiltroMascotas] = useState<string[]>([]);
-  const [filtroTipos, setFiltroTipos] = useState<string[]>([]);
+  // S82-C (lámina, ítem 3): UN filtro por familia con glifo — reemplaza
+  // a los dos SelectorOpcion (¿De quién? y ¿Qué momentos?). La dimensión
+  // mascota sigue visible: cada hecho lleva su chip en el detalle; la
+  // vista por-mascota vive en su perfil. Retiro declarado al gate.
+  const [filtroVida, setFiltroVida] = useState<FiltroVidaCodigo>('todo');
+  const [hechosAbiertos, setHechosAbiertos] = useState<Record<string, boolean>>({});
   // S74-A (cura D-497): el cursor del timeline es GLOBAL — una sola
   // query hogar-wide reemplazó a las N páginas por mascota.
   const cursorRef = useRef<string | null>(null);
@@ -316,18 +730,23 @@ export default function Hogar() {
   const [porCoordinar, setPorCoordinar] = useState<
     { mascotaId: string; mascotaNombre: string; citaId: string; negocio: string | null }[]
   >([]);
-  // S75-A (§10ter.1, superficie firmada): las citas AGENDADAS del hogar
-  // (con fecha) también habitan Ponte al día, colapsadas por servicio a
-  // la PRÓXIMA en el tiempo. El eje de la zona no es el tiempo, es
-  // ACCIÓN vs INFORMACIÓN: las `por_coordinar` (acción) presiden y NO
-  // colapsan; estas (información) van después y SÍ colapsan.
-  const [citasAgendadas, setCitasAgendadas] = useState<
-    { mascotaId: string; mascotaNombre: string; citaId: string; tipoServicio: string | null; fecha: string; hora: string | null }[]
-  >([]);
+  // S82-C (lámina, ítem 1 — ENMIENDA DE SUPERFICIE a §10ter.1, declarada):
+  // las agendadas colapsadas por servicio salen de la lista y entran como
+  // UNA fila-resumen "citas de la semana" (el eje acción-vs-información
+  // se conserva: la fila es información y va última). El conteo es sobre
+  // TODAS las citas firmes/hold de los próximos 7 días (rc.data crudo —
+  // el colapso por servicio subcontaría, L-139).
+  const [citasSemana, setCitasSemana] = useState<{
+    n: number;
+    nHoy: number;
+    nManana: number;
+    primera: { mascotaId: string; mascotaNombre: string; citaId: string };
+  } | null>(null);
   const [ponteRevelado, setPonteRevelado] = useState(false);
-  const [vacunaAbierta, setVacunaAbierta] = useState(false);
-  const [vacuna, setVacuna] = useState<VacunaDeEvento | 'cargando' | 'error'>('cargando');
+  // S82-C: la Hoja de vacuna del S45 MURIÓ — el detalle se despliega en
+  // la carta del hecho (DetalleVacunaVida); queda el visor del carnet.
   const [carnetFirmado, setCarnetFirmado] = useState<string | null>(null);
+  const [vidaRevelada, setVidaRevelada] = useState(false);
   // S70-A5: solicitudes de autorización del mostrador pendientes (poll en foco;
   // el badge abre la Hoja SIN depender del push).
   const [solicitudesPend, setSolicitudesPend] = useState<SolicitudPendiente[]>([]);
@@ -451,7 +870,7 @@ export default function Hogar() {
           if (!vigente) return;
           if (!rc.ok) {
             setPorCoordinar([]);
-            setCitasAgendadas([]);
+            setCitasSemana(null);
             return;
           }
           const nombrePor = new Map(lista.map((m) => [m.id, m.nombre]));
@@ -465,31 +884,35 @@ export default function Hogar() {
                 negocio: c.negocio_nombre,
               })),
           );
-          // S75-A (§10ter.1): dejar de descartar las agendadas. El lector
-          // ya viene ordenado por fecha+hora ASC, así que la PRIMERA de
-          // cada (mascota, tipo_servicio) es la próxima en el tiempo — el
-          // colapso es quedarse con esa (el resto del plan no se lista).
-          // El `en_vivo` es de OTRA zona (el hero) y no entra acá.
-          const vistas = new Set<string>();
-          const agendadas: {
-            mascotaId: string; mascotaNombre: string; citaId: string;
-            tipoServicio: string | null; fecha: string; hora: string | null;
-          }[] = [];
-          for (const c of rc.data) {
-            if ((c.estado !== 'firme' && c.estado !== 'hold') || c.fecha === null) continue;
-            const clave = `${c.mascota_id}|${c.tipo_servicio ?? ''}`;
-            if (vistas.has(clave)) continue;
-            vistas.add(clave);
-            agendadas.push({
-              mascotaId: c.mascota_id,
-              mascotaNombre: nombrePor.get(c.mascota_id) ?? '',
-              citaId: c.cita_id,
-              tipoServicio: c.tipo_servicio,
-              fecha: c.fecha,
-              hora: c.hora,
-            });
-          }
-          setCitasAgendadas(agendadas);
+          // S82-C (lámina ítem 1): "citas de la semana" — TODAS las
+          // firmes/hold de los próximos 7 días (el lector viene ordenado
+          // fecha+hora ASC: la [0] es la más próxima). El `en_vivo` es de
+          // OTRA zona (el hero) y no entra acá.
+          const fmt = (d: Date) => new Intl.DateTimeFormat('en-CA').format(d);
+          const hoyIso = fmt(new Date());
+          const manana = new Date();
+          manana.setDate(manana.getDate() + 1);
+          const mananaIso = fmt(manana);
+          const en7 = new Date();
+          en7.setDate(en7.getDate() + 7);
+          const sieteIso = fmt(en7);
+          const semana = rc.data.filter(
+            (c) => (c.estado === 'firme' || c.estado === 'hold') && c.fecha !== null && c.fecha >= hoyIso && c.fecha <= sieteIso,
+          );
+          setCitasSemana(
+            semana.length === 0
+              ? null
+              : {
+                  n: semana.length,
+                  nHoy: semana.filter((c) => c.fecha === hoyIso).length,
+                  nManana: semana.filter((c) => c.fecha === mananaIso).length,
+                  primera: {
+                    mascotaId: semana[0].mascota_id,
+                    mascotaNombre: nombrePor.get(semana[0].mascota_id) ?? '',
+                    citaId: semana[0].cita_id,
+                  },
+                },
+          );
         });
         const paths = lista.map((m) => m.foto_url).filter((p): p is string => typeof p === 'string' && p.length > 0);
         if (paths.length > 0) {
@@ -510,25 +933,6 @@ export default function Hogar() {
       };
     }, [router, cargarTimelineHogar]),
   );
-
-  const alTocarNodo = (item: { atencion_id?: string | null; evento_id: string; tipo?: string }) => {
-    // S70-A4: el nodo de consulta clínica lleva al PARTE del dueño.
-    if (item.tipo === 'historia_clinica_registrada') {
-      router.push({ pathname: '/parte/[eventoId]', params: { eventoId: item.evento_id } });
-      return;
-    }
-    if (item.tipo === 'vacuna_aplicada') {
-      setVacunaAbierta(true);
-      setVacuna('cargando');
-      void obtenerVacunaPorEvento(item.evento_id).then((r) => {
-        setVacuna(r.ok ? r.data : 'error');
-      });
-      return;
-    }
-    if (item.atencion_id) {
-      router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: item.atencion_id } });
-    }
-  };
 
   async function verCarnet(path: string) {
     const url = await resolverUrlFoto(path);
@@ -586,8 +990,27 @@ export default function Hogar() {
   const nombreDe = (id: string) => (Array.isArray(mascotas) ? (mascotas.find((m) => m.id === id)?.nombre ?? '') : '');
 
   return (
+    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      {/* @override-s82c — LA MARCA DE AGUA (ítem 4 de la lámina
+          posición-consolidada): el isotipo en tinta al 6%, CENTRADO EN
+          PANTALLA (fijo — no scrollea, como en la lámina: el agua vive
+          fuera del cuerpo). OVERRIDE LOCAL de esta pantalla: NO se
+          generaliza — la promoción es de B después del gate (guard R10).
+          CHOQUE DECLARADO, no resuelto en silencio (regla S63): la Ley 4
+          dice isotipo UNO por pantalla y el techo ya lleva el suyo — la
+          lámina del founder ordena el agua igual; el gate resuelve.
+          Calibración DE LÁMINA: opacidad .06 y ~340 de ancho (size 210 ×
+          ratio del viewBox) — números de acuerdo, no tokens. */}
+      <View
+        pointerEvents="none"
+        style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, alignItems: 'center', justifyContent: 'center' }}
+      >
+        <View style={{ opacity: 0.06 }}>
+          <Isotipo size={210} variant="tinta" />
+        </View>
+      </View>
     <ScrollView
-      style={{ flex: 1, backgroundColor: theme.bg.base }}
+      style={{ flex: 1 }}
       contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}
     >
       {/* ── Zona 1 — el hogar ───────────────────────────────────
@@ -638,6 +1061,195 @@ export default function Hogar() {
         </Pressable>
       </View>
 
+      {/* @override-s82c — RECOMENDACIONES (lámina, ítem 1): LA TARJETA
+          SOBRE LA BANDA. Ponte al día pasa a FILAS compactas — glifo en
+          placa de su capa + título + detalle + chevron; cada fila NAVEGA
+          a la superficie donde se decide (la decisión se toma con el
+          contexto delante, precedente CURA-1). Solapa el techo (margen
+          negativo — calibración de lámina, el gate ajusta). Regla de
+          existencia intacta: hogar al día = la tarjeta NO EXISTE (la
+          firma de la pantalla sigue siendo la desaparición). Memorial:
+          no se monta (a un memorial no se le pide acción). La fila
+          ALIMENTO del pedido queda DECLARADA SIN MONTAR: cero motor de
+          despensa (L-139 — no se fabrica el dato); monta cuando exista. */}
+      {(() => {
+        if (esMemorial) return null;
+        type Fila = {
+          key: string;
+          capa: 'identidad' | 'cuidado';
+          icono: IconoNombre;
+          titulo: string;
+          detalle: string | null;
+          onPress: () => void;
+        };
+        const ahora = Date.now();
+        // vacuna que vence (lámina): sale de las señales REALES del hogar
+        // (la misma verdad que la voz de la ficha — acá como acción).
+        const vacunasQueVencen: Fila[] = mascotas.flatMap((m): Fila[] => {
+          const s = senalesPorMascota.get(m.id);
+          if (!s) return [];
+          const voz = calcularVozHogar(
+            {
+              tieneEmergenciaActiva: s.tiene_emergencia_activa,
+              vacunasTotal: s.vacunas_total,
+              ultimaVacunaAplicada: s.ultima_vacuna_aplicada,
+              proximaVacuna: s.proxima_vacuna,
+              ultimaAtencionCerrada: s.ultima_atencion_cerrada,
+            },
+            hoy,
+          );
+          if (voz.voz !== 'pideAtencion' || voz.causa === 'emergencia') return [];
+          const titulo =
+            voz.causa === 'vacunaVence'
+              ? voz.dias === 0
+                ? t('hogar.vozVacunaVenceHoy', { nombre: m.nombre, vacuna: voz.vacuna })
+                : voz.dias === 1
+                  ? t('hogar.vozVacunaVenceUnDia', { nombre: m.nombre, vacuna: voz.vacuna })
+                  : t('hogar.vozVacunaVence', { nombre: m.nombre, vacuna: voz.vacuna, dias: voz.dias })
+              : voz.dias === 1
+                ? t('hogar.vozVacunaVencidaUnDia', { nombre: m.nombre, vacuna: voz.vacuna })
+                : t('hogar.vozVacunaVencida', { nombre: m.nombre, vacuna: voz.vacuna, dias: voz.dias });
+          return [
+            {
+              key: `vac-${m.id}`,
+              capa: 'identidad',
+              icono: 'carnet',
+              titulo,
+              detalle: t('hogar.recoVacunaDetalle'),
+              onPress: () => router.push('/explorar/veterinaria'),
+            },
+          ];
+        });
+        const filas: Fila[] = [
+          // acciones primero (el orden acción-vs-información se conserva)
+          ...solicitudesPend.map((s): Fila => {
+            const min = Math.max(1, Math.round((Date.parse(s.expiraEn) - ahora) / 60000));
+            return {
+              key: `sol-${s.solicitudId}`,
+              capa: 'cuidado',
+              icono: 'familia',
+              titulo:
+                s.tipo === 'alta_mascota'
+                  ? t('autorizacion.tituloAlta', { negocio: s.negocioNombre ?? '', mascota: s.mascotaNombre ?? '' })
+                  : t('autorizacion.tituloAtencion', { negocio: s.negocioNombre ?? '', mascota: s.mascotaNombre ?? '' }),
+              detalle: t('hogar.venceEnMin', { n: min }),
+              onPress: () =>
+                router.push({ pathname: '/autorizacion/[solicitudId]', params: { solicitudId: s.solicitudId } }),
+            };
+          }),
+          ...presupuestosPend.map(
+            (p): Fila => ({
+              key: `pre-${p.id}`,
+              capa: 'identidad',
+              icono: 'presupuesto',
+              titulo:
+                p.negocioNombre !== null
+                  ? t('hogar.presupuestoDe', { negocio: p.negocioNombre })
+                  : t('hogar.presupuestoPara', { mascota: p.mascotaNombre ?? '' }),
+              detalle: t('hogar.presupuestoDetalle', {
+                total: p.total,
+                mascota: p.mascotaNombre ?? '',
+                fecha: fechaLargaHumana(p.venceEn.slice(0, 10), idioma),
+              }),
+              onPress: () =>
+                router.push({
+                  pathname: '/citas/[mascotaId]',
+                  params: { mascotaId: p.mascotaId, nombre: p.mascotaNombre ?? '' },
+                }),
+            }),
+          ),
+          ...porCoordinar.map(
+            (c): Fila => ({
+              key: `coord-${c.citaId}`,
+              capa: 'identidad',
+              icono: 'veterinaria',
+              titulo: t('hogar.porCoordinarTitulo', { mascota: c.mascotaNombre }),
+              detalle:
+                c.negocio !== null
+                  ? t('citasMascota.coordinaraNegocio', { negocio: c.negocio })
+                  : t('citasMascota.coordinaranSinNombre'),
+              onPress: () =>
+                router.push({
+                  pathname: '/citas/[mascotaId]',
+                  params: { mascotaId: c.mascotaId, nombre: c.mascotaNombre, citaId: c.citaId },
+                }),
+            }),
+          ),
+          ...vacunasQueVencen,
+          // información al final: el resumen de la semana (lámina)
+          ...(citasSemana !== null
+            ? [
+                {
+                  key: 'citas-semana',
+                  capa: 'cuidado' as const,
+                  icono: 'hoy' as const,
+                  titulo:
+                    citasSemana.n === 1
+                      ? t('hogar.recoCitaSemana')
+                      : t('hogar.recoCitasSemana', { n: citasSemana.n }),
+                  detalle:
+                    [
+                      citasSemana.nHoy > 0 ? t('hogar.recoHoy', { n: citasSemana.nHoy }) : null,
+                      citasSemana.nManana > 0 ? t('hogar.recoManana', { n: citasSemana.nManana }) : null,
+                      citasSemana.n - citasSemana.nHoy - citasSemana.nManana > 0
+                        ? t('hogar.recoLuego', { n: citasSemana.n - citasSemana.nHoy - citasSemana.nManana })
+                        : null,
+                    ]
+                      .filter((x): x is string => x !== null)
+                      .join(' · ') || null,
+                  onPress: () =>
+                    router.push({
+                      pathname: '/citas/[mascotaId]',
+                      params: {
+                        mascotaId: citasSemana.primera.mascotaId,
+                        nombre: citasSemana.primera.mascotaNombre,
+                        citaId: citasSemana.primera.citaId,
+                      },
+                    }),
+                },
+              ]
+            : []),
+        ];
+        if (filas.length === 0) return null;
+        const visibles = ponteRevelado ? filas : filas.slice(0, 3);
+        return (
+          <View style={{ paddingHorizontal: spacing[4], marginTop: -spacing[8], zIndex: 2 }}>
+            <Tarjeta elevacion="elevada" relleno="ninguno">
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'baseline',
+                  justifyContent: 'space-between',
+                  paddingHorizontal: spacing[4],
+                  paddingTop: spacing[4],
+                  paddingBottom: spacing[2],
+                }}
+              >
+                <Texto variante="seccion">{t('hogar.ponteAlDia')}</Texto>
+                <Texto variante="dato">
+                  {filas.length === 1 ? t('hogar.recoUnaCosa') : t('hogar.recoCosas', { n: filas.length })}
+                </Texto>
+              </View>
+              {visibles.map((f, i) => (
+                <View key={f.key}>
+                  {i > 0 ? <Separador /> : null}
+                  <FilaReco capa={f.capa} icono={f.icono} titulo={f.titulo} detalle={f.detalle} onPress={f.onPress} />
+                </View>
+              ))}
+              {filas.length > 3 ? (
+                <View style={{ paddingBottom: spacing[2] }}>
+                  <PieRevelar
+                    n={filas.length - 3}
+                    revelado={ponteRevelado}
+                    onPress={() => setPonteRevelado((v) => !v)}
+                  />
+                </View>
+              ) : null}
+            </Tarjeta>
+          </View>
+        );
+      })()}
+
       {/* ── HERO de hoy (patrón v2: arriba, es lo que viene) ────────
           En curso gana el lugar (Ley 7); si no, el próximo paseo en
           tarjeta de DOS PISOS: servicio+estado relativo en capa teal /
@@ -676,145 +1288,6 @@ export default function Hogar() {
           acción migró a la FICHA de cada mascota (una acción por
           precedencia). El EN VIVO queda como único hero (Ley 7). */}
 
-      {/* ── PONTE AL DÍA (S71-A3, F2 letra founder): lo que el sistema
-          necesita de vos, PRESIDIENDO. La casa de los dos huérfanos
-          (autorización S70-A5 + presupuesto S69) más la superficie nueva
-          (cita por coordinar). Regla de existencia: hogar al día = la
-          sección NO EXISTE — esa desaparición ES la firma de la pantalla
-          (Ley 15). Memorial: no se monta (a un memorial no se le pide
-          acción). Orden: lo perecedero primero (E2 — la RPC ya ordena
-          expira_en ASC; el lector de presupuestos, venceEn ASC). Capas
-          E8: autorización=cuidado · presupuesto y cita=salud (tinte
-          'vida'). UNA acción por tarjeta (precedente CURA-1: la decisión
-          se toma en su superficie, con el contexto delante). ── */}
-      {(() => {
-        if (esMemorial) return null;
-        type Habitante = {
-          key: string;
-          tinte: 'cuidado' | 'vida';
-          titulo: string;
-          detalle: string | null;
-          // S75-A: la fecha+hora de una cita agendada, en mono (Ley 3).
-          // Solo las agendadas la traen; las acciones (por_coordinar,
-          // presupuesto, autorización) no tienen tiempo.
-          fechaMono?: string | null;
-          cta: string;
-          onPress: () => void;
-        };
-        const ahora = Date.now();
-        const habitantes: Habitante[] = [
-          ...solicitudesPend.map((s): Habitante => {
-            const min = Math.max(1, Math.round((Date.parse(s.expiraEn) - ahora) / 60000));
-            return {
-              key: `sol-${s.solicitudId}`,
-              tinte: 'cuidado',
-              titulo:
-                s.tipo === 'alta_mascota'
-                  ? t('autorizacion.tituloAlta', { negocio: s.negocioNombre ?? '', mascota: s.mascotaNombre ?? '' })
-                  : t('autorizacion.tituloAtencion', { negocio: s.negocioNombre ?? '', mascota: s.mascotaNombre ?? '' }),
-              detalle: t('hogar.venceEnMin', { n: min }),
-              cta: t('hogar.verYDecidir'),
-              onPress: () =>
-                router.push({ pathname: '/autorizacion/[solicitudId]', params: { solicitudId: s.solicitudId } }),
-            };
-          }),
-          ...presupuestosPend.map(
-            (p): Habitante => ({
-              key: `pre-${p.id}`,
-              tinte: 'vida',
-              // D-455 (motor S71): el negocio se nombra; sin nombre, la
-              // forma honesta — jamás inventar quién.
-              titulo:
-                p.negocioNombre !== null
-                  ? t('hogar.presupuestoDe', { negocio: p.negocioNombre })
-                  : t('hogar.presupuestoPara', { mascota: p.mascotaNombre ?? '' }),
-              detalle: t('hogar.presupuestoDetalle', {
-                total: p.total,
-                mascota: p.mascotaNombre ?? '',
-                fecha: fechaLargaHumana(p.venceEn.slice(0, 10), idioma),
-              }),
-              cta: t('hogar.verlo'),
-              onPress: () =>
-                router.push({
-                  pathname: '/citas/[mascotaId]',
-                  params: { mascotaId: p.mascotaId, nombre: p.mascotaNombre ?? '' },
-                }),
-            }),
-          ),
-          ...porCoordinar.map(
-            (c): Habitante => ({
-              key: `coord-${c.citaId}`,
-              tinte: 'vida',
-              titulo: t('hogar.porCoordinarTitulo', { mascota: c.mascotaNombre }),
-              detalle:
-                c.negocio !== null
-                  ? t('citasMascota.coordinaraNegocio', { negocio: c.negocio })
-                  : t('citasMascota.coordinaranSinNombre'),
-              cta: t('hogar.verLaCita'),
-              onPress: () =>
-                router.push({
-                  pathname: '/citas/[mascotaId]',
-                  params: { mascotaId: c.mascotaId, nombre: c.mascotaNombre, citaId: c.citaId },
-                }),
-            }),
-          ),
-          // S75-A (§10ter.1): las agendadas van DESPUÉS de las acciones —
-          // son información, no exigen decisión. Voz del servicio (§10ter,
-          // el dueño jamás lee el código); sin voz, la forma honesta "La
-          // cita de {mascota}" (Ley 3, jamás el código crudo). La fecha va
-          // en mono (fechaMono), separada del título humano.
-          ...citasAgendadas.map((c): Habitante => {
-            const voz = vozServicio(t, c.tipoServicio);
-            return {
-              key: `agen-${c.citaId}`,
-              tinte: 'vida',
-              titulo:
-                voz !== null
-                  ? t('hogar.citaAgendadaTitulo', { servicio: voz, mascota: c.mascotaNombre })
-                  : t('hogar.citaAgendadaSinServicio', { mascota: c.mascotaNombre }),
-              detalle: null,
-              fechaMono: `${fechaCortaMono(c.fecha, idioma)}${c.hora !== null ? ` · ${c.hora}` : ''}`,
-              cta: t('hogar.verLaCita'),
-              onPress: () =>
-                router.push({
-                  pathname: '/citas/[mascotaId]',
-                  params: { mascotaId: c.mascotaId, nombre: c.mascotaNombre, citaId: c.citaId },
-                }),
-            };
-          }),
-        ];
-        if (habitantes.length === 0) return null;
-        const visibles = ponteRevelado ? habitantes : habitantes.slice(0, 3);
-        return (
-          <Animated.View
-            entering={entradaZona(1)}
-            style={{ paddingHorizontal: spacing[4], paddingTop: spacing[5], gap: spacing[3] }}
-          >
-            <Texto variante="seccion">{t('hogar.ponteAlDia')}</Texto>
-            {visibles.map((h) => (
-              <Tarjeta key={h.key} tinte={h.tinte} elevacion="reposo">
-                <View style={{ gap: spacing[2] }}>
-                  <Texto variante="cuerpo">{h.titulo}</Texto>
-                  {h.detalle !== null ? <Texto variante="apoyo">{h.detalle}</Texto> : null}
-                  {/* S75-A: la fecha de una cita agendada, en mono (Ley 3);
-                      las acciones no la traen (undefined). */}
-                  {h.fechaMono != null ? <Texto variante="dato">{h.fechaMono}</Texto> : null}
-                  {/* S73 (C2 + anatomía 19.7 firmada): el CTA en caja
-                      MURIÓ — la acción baja a label + chevron › (navega),
-                      la vara "igual al de ver cita". Sin glifo: el pie de
-                      la tarjeta no tiene hermanos que varíen (Ley 12). */}
-                  <CeldaNavegacion titulo={h.cta} onPress={h.onPress} />
-                </View>
-              </Tarjeta>
-            ))}
-            <PieRevelar
-              n={habitantes.length - 3}
-              revelado={ponteRevelado}
-              onPress={() => setPonteRevelado((v) => !v)}
-            />
-          </Animated.View>
-        );
-      })()}
 
       {/* ── Tu hogar (Zona 1): la mascota preside, su próxima cita visible ── */}
       <Animated.View
@@ -1168,192 +1641,174 @@ export default function Hogar() {
           planitud era exactamente que exigían acción sin sección donde
           vivir. Ley 37: el código murió con ellos. */}
 
-      {/* ── Zona 4 — la vida ─────────────────────────────────────
-          Ritmo S52-P2c: entre zonas spacing[7]; adentro spacing[4].
-          S82-B (cobro del lint R8, Ley 13): si la zona MONTA en vacío o
-          error, aparece QUIETA — el vacío jamás entra animado ("un vacío
-          que anima llama la atención sobre sí mismo"); la entrada
-          escalonada queda para la zona con historia. El envoltorio se
-          decide por estado; la composición interna no cambia. */}
+      {/* ── Zona 4 — TU VIDA (lámina, ítem 3) ─────────────────────
+          El marco-Tarjeta S61 MURIÓ (A6 SIN CAJA + lámina): cada hecho
+          es su propia carta sobre el canto que pinta la curva. Título +
+          fecha SIEMPRE visibles; el tap despliega cuerpo/fotos/quién en
+          su lugar (la consulta navega › a su parte — tiene pantalla
+          MOMENTO propia). Filtros con glifo en trazo, el elegido gana la
+          huella rellena. El conteo total de la lámina ("41 hechos") NO
+          se pinta: el contrato del timeline no lo trae y no se inventa
+          (L-139). S82-B/R8: vacío y error aparecen QUIETOS. */}
       {(() => {
-        const vidaSinHistoria = items === 'error' || (Array.isArray(items) && items.length === 0);
-        const estiloZonaVida = { paddingHorizontal: spacing[4], marginTop: spacing[7] } as const;
+        const cabecera = (
+          <Text
+            accessibilityRole="header"
+            style={{
+              paddingHorizontal: spacing[4],
+              fontFamily: typography.family.sans.medium,
+              fontSize: typography.size.sm,
+              color: theme.text.secondary,
+            }}
+          >
+            {t('hogar.vidaTitulo')}
+          </Text>
+        );
         const zonaVida = (
-        <>
-        {/* S61-A12 (cura 2): la vida gana su MARCO por sistema —
-            Tarjeta reposo (elevación D-358, jamás borde artesanal);
-            título y filtros ADENTRO; el acordeón expande en el marco.
-            Memorial/dark heredan de Tarjeta (cero caso especial). */}
-        <Tarjeta elevacion="reposo">
-        <View style={{ gap: spacing[4] }}>
-        <Text
-          accessibilityRole="header"
-          style={{
-            fontFamily: typography.family.sans.medium,
-            fontSize: typography.size.sm,
-            color: theme.text.secondary,
-          }}
-        >
-          {t('hogar.vidaTitulo')}
-        </Text>
-        {/* la invitación del carnet MIGRÓ al grupo de celdas (Chanel S58) */}
-        {items === null ? (
-          <LineaDeVida items={[]} cargando />
-        ) : items === 'error' ? (
-          <EstadoVacio
-            titulo={t('hogar.errorHistoria')}
-            descripcion={t('hogar.errorHistoriaDetalle')}
-            accion={
-              <Boton
-                variante="secundario"
-                etiqueta={t('hogar.reintentar')}
-                onPress={() => {
-                  setItems(null);
-                  if (Array.isArray(mascotas)) void cargarTimelineHogar(mascotas);
-                }}
-              />
-            }
-          />
-        ) : items.length === 0 ? (
-          <EstadoVacio titulo={t('hogar.historiaEmpieza')} descripcion={t('hogar.historiaEmpiezaDetalle')} />
-        ) : (
-          (() => {
-            // S61-A11: filtros que NO persisten — vacío = todo pasa;
-            // 'otros' (tipos sin familia) solo pasa sin filtro activo.
-            const itemsFiltrados = items.filter(
-              (it) =>
-                (filtroMascotas.length === 0 || filtroMascotas.includes(it.mascota_id)) &&
-                (filtroTipos.length === 0 || filtroTipos.includes(FAMILIA_DE_TIPO[it.tipo] ?? '')),
-            );
-            return (
-              <View style={{ gap: spacing[3] }}>
-                {mascotas.length > 1 ? (
-                  <SelectorOpcion
-                    multiple
-                    acento="control"
-                    disposicion="tira"
-                    etiqueta={t('hogar.filtroQuien')}
-                    opciones={mascotas.map((m) => ({
-                      codigo: m.id,
-                      etiqueta: m.nombre,
-                      // S74 (regla de forma FIRMADA, gate del founder sobre
-                      // este chip: "cara flotante dentro"): el avatar ANIDADO
-                      // deriva su radio del contenedor (chip 44 · avatar 28 ·
-                      // inset 8 → radio 14, antes squircle 9).
-                      adorno: (
-                        <AvatarMascota nombre={m.nombre} fotoUrl={fotos[m.id]} tamano="xs" anidadoEn="chip" />
-                      ),
-                    }))}
-                    seleccionadas={filtroMascotas}
-                    onSelect={(codigo) =>
-                      setFiltroMascotas((f) => (f.includes(codigo) ? f.filter((x) => x !== codigo) : [...f, codigo]))
-                    }
-                  />
-                ) : null}
-                <SelectorOpcion
-                  multiple
-                  acento="control"
-                  disposicion="tira"
-                  etiqueta={t('hogar.filtroQue')}
-                  opciones={[
-                    { codigo: 'paseos', etiqueta: t('hogar.filtroPaseos') },
-                    { codigo: 'estetica', etiqueta: t('hogar.filtroEstetica') },
-                    { codigo: 'adiestramiento', etiqueta: t('hogar.filtroAdiestramiento') },
-                    { codigo: 'vacunas', etiqueta: t('hogar.filtroVacunas') },
-                  ]}
-                  seleccionadas={filtroTipos}
-                  onSelect={(codigo) =>
-                    setFiltroTipos((f) => (f.includes(codigo) ? f.filter((x) => x !== codigo) : [...f, codigo]))
+          <View style={{ gap: spacing[3] }}>
+            {cabecera}
+            {items === null ? (
+              <View style={{ paddingHorizontal: spacing[4] }}>
+                <EsqueletoGrupo etiqueta={t('hogar.cargando')}>
+                  <View style={{ gap: spacing[3] }}>
+                    <Esqueleto forma="bloque" ancho="100%" alto={64} />
+                    <Esqueleto forma="bloque" ancho="100%" alto={64} />
+                    <Esqueleto forma="bloque" ancho="100%" alto={64} />
+                  </View>
+                </EsqueletoGrupo>
+              </View>
+            ) : items === 'error' ? (
+              <View style={{ paddingHorizontal: spacing[4] }}>
+                <EstadoVacio
+                  titulo={t('hogar.errorHistoria')}
+                  descripcion={t('hogar.errorHistoriaDetalle')}
+                  accion={
+                    <Boton
+                      variante="secundario"
+                      etiqueta={t('hogar.reintentar')}
+                      onPress={() => {
+                        setItems(null);
+                        if (Array.isArray(mascotas)) void cargarTimelineHogar(mascotas);
+                      }}
+                    />
                   }
                 />
-                {itemsFiltrados.length === 0 ? (
-                  // el camino está a la vista: los chips de arriba
-                  <EstadoVacio registro="seccion" titulo={t('hogar.filtroSinMomentos')} />
-                ) : (
-                  <LineaDeVida
-                    items={itemsFiltrados}
-                    visiblesIniciales={3}
-                    detalleDe={(item) =>
-                      item.atencion_id ? (
-                        <DetalleNodoHogar
-                          atencionId={item.atencion_id}
-                          onVerCompleto={() =>
-                            router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: item.atencion_id as string } })
-                          }
-                        />
-                      ) : null
-                    }
-                    onPressNodo={alTocarNodo}
-                    estadoPie={estadoPie}
-                    onCargarMas={() => void cargarMas()}
-                  />
-                )}
               </View>
-            );
-          })()
-        )}
-        </View>
-        </Tarjeta>
-        </>
+            ) : items.length === 0 ? (
+              <View style={{ paddingHorizontal: spacing[4] }}>
+                <EstadoVacio titulo={t('hogar.historiaEmpieza')} descripcion={t('hogar.historiaEmpiezaDetalle')} />
+              </View>
+            ) : (
+              (() => {
+                const filtrados = items.filter(
+                  (it) => filtroVida === 'todo' || FAMILIA_DE_TIPO[it.tipo] === filtroVida,
+                );
+                const visibles = vidaRevelada ? filtrados : filtrados.slice(0, 3);
+                return (
+                  <View style={{ gap: spacing[3] }}>
+                    <FiltroVida
+                      activo={filtroVida}
+                      onCambio={(c) => setFiltroVida(c)}
+                      etiquetas={{
+                        todo: t('hogar.filtroTodo'),
+                        salud: t('hogar.filtroSalud'),
+                        paseos: t('hogar.filtroPaseos'),
+                        estetica: t('hogar.filtroEstetica'),
+                        adiestramiento: t('hogar.filtroAdiestramiento'),
+                      }}
+                    />
+                    {filtrados.length === 0 ? (
+                      <View style={{ paddingHorizontal: spacing[4] }}>
+                        <EstadoVacio registro="seccion" titulo={t('hogar.filtroSinMomentos')} />
+                      </View>
+                    ) : (
+                      <View style={{ paddingHorizontal: spacing[4], gap: spacing[3] }}>
+                        {visibles.map((it) => {
+                          const familia = FAMILIA_DE_TIPO[it.tipo];
+                          const color =
+                            familia === 'salud'
+                              ? theme.capa.identidad
+                              : familia !== undefined
+                                ? theme.capa.cuidado
+                                : null;
+                          const navega = it.tipo === 'historia_clinica_registrada';
+                          const expandible = it.atencion_id !== null || it.tipo === 'vacuna_aplicada';
+                          const abierto = hechosAbiertos[it.evento_id] === true;
+                          return (
+                            <EventoVida
+                              key={it.evento_id}
+                              color={color}
+                              titulo={vozHecho(it, t)}
+                              meta={metaHecho(it, idioma)}
+                              navega={navega}
+                              expandido={expandible ? abierto : undefined}
+                              onPress={
+                                navega
+                                  ? () =>
+                                      router.push({ pathname: '/parte/[eventoId]', params: { eventoId: it.evento_id } })
+                                  : expandible
+                                    ? () => setHechosAbiertos((s) => ({ ...s, [it.evento_id]: !abierto }))
+                                    : undefined
+                              }
+                            >
+                              {expandible && abierto ? (
+                                it.atencion_id !== null ? (
+                                  <DetalleNodoHogar
+                                    atencionId={it.atencion_id}
+                                    mascota={{ nombre: nombreDe(it.mascota_id), fotoUrl: fotos[it.mascota_id] }}
+                                    onVerCompleto={() =>
+                                      router.push({
+                                        pathname: '/paseo/[atencionId]',
+                                        params: { atencionId: it.atencion_id as string },
+                                      })
+                                    }
+                                  />
+                                ) : (
+                                  <DetalleVacunaVida eventoId={it.evento_id} onVerCarnet={(path) => void verCarnet(path)} />
+                                )
+                              ) : null}
+                            </EventoVida>
+                          );
+                        })}
+                        <PieRevelar
+                          n={filtrados.length - 3}
+                          revelado={vidaRevelada}
+                          onPress={() => setVidaRevelada((v) => !v)}
+                        />
+                        {vidaRevelada || filtrados.length <= 3 ? (
+                          estadoPie === 'mas' ? (
+                            <View style={{ alignSelf: 'center' }}>
+                              <Boton variante="compacto" etiqueta={t('hogar.vidaCargarMas')} onPress={() => void cargarMas()} />
+                            </View>
+                          ) : estadoPie === 'cargando' ? (
+                            <EsqueletoGrupo etiqueta={t('hogar.cargando')}>
+                              <Esqueleto forma="linea" ancho="40%" />
+                            </EsqueletoGrupo>
+                          ) : estadoPie === 'error' ? (
+                            <View style={{ alignSelf: 'center' }}>
+                              <Boton variante="compacto" etiqueta={t('hogar.reintentar')} onPress={() => void cargarMas()} />
+                            </View>
+                          ) : null
+                        ) : null}
+                      </View>
+                    )}
+                  </View>
+                );
+              })()
+            )}
+          </View>
         );
-        return vidaSinHistoria ? (
-          <View style={estiloZonaVida}>{zonaVida}</View>
-        ) : (
-          <Animated.View entering={entradaZona(4)} style={estiloZonaVida}>
-            {zonaVida}
-          </Animated.View>
-        );
+        {/* S82-C: la zona monta SIEMPRE quieta — el vacío del filtro
+            vive adentro y el vacío jamás entra animado (Ley 13/R8);
+            el escalonado S52 de esta zona era pre-§5 y migró al
+            tocarse (D-318). */}
+        return <View style={{ marginTop: spacing[7] }}>{zonaVida}</View>;
       })()}
 
       {/* S71-A3: el selector "¿De quién es el carnet?" murió con la celda
           del carnet — el flujo ahora nace DENTRO de cada mascota, donde
           la pregunta no existe (Ley 37). */}
 
-      {/* Detalle de vacuna (tap en nodo) — Hoja + Ver carnet firmado */}
-      <Hoja visible={vacunaAbierta} onCerrar={() => { setVacunaAbierta(false); setCarnetFirmado(null); }} titulo={t('vacunaHoja.titulo')} conCerrar>
-        {vacuna === 'cargando' ? (
-          <View style={{ padding: spacing[4] }}>
-            <EsqueletoGrupo etiqueta={t('vacunaHoja.cargando')}>
-              <View style={{ gap: spacing[2] }}>
-                <Esqueleto forma="linea" ancho="60%" />
-                <Esqueleto forma="linea" ancho="40%" />
-              </View>
-            </EsqueletoGrupo>
-          </View>
-        ) : vacuna === 'error' ? (
-          <View style={{ padding: spacing[4] }}>
-            <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.base, color: theme.status.dangerText }}>
-              {t('vacunaHoja.error')}
-            </Text>
-          </View>
-        ) : (
-          <View style={{ gap: spacing[3], padding: spacing[4] }}>
-            <Texto variante="seccion">{vacuna.nombre_vacuna}</Texto>
-            {(vacuna.tipo_vacuna || vacuna.veterinario_nombre_externo) && (
-              <Texto variante="apoyo">
-                {[vacuna.tipo_vacuna, vacuna.veterinario_nombre_externo].filter(Boolean).join(' · ')}
-              </Texto>
-            )}
-            {(vacuna.fecha_aplicada || vacuna.fecha_proxima || vacuna.lote) && (
-              <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.secondary }}>
-                {[
-                  vacuna.fecha_aplicada ? `${t('vacunaHoja.aplicada')} ${fechaCortaMono(vacuna.fecha_aplicada, idioma)}` : null,
-                  vacuna.fecha_proxima ? `${t('vacunaHoja.proxima')} ${fechaCortaMono(vacuna.fecha_proxima, idioma)}` : null,
-                  vacuna.lote ? `${t('vacunaHoja.lote')} ${vacuna.lote.toLowerCase()}` : null,
-                ].filter(Boolean).join(' · ')}
-              </Text>
-            )}
-            {vacuna.archivo_url !== null && (
-              <Boton
-                variante="secundario"
-                bloque
-                etiqueta={t('vacunaHoja.verCarnet')}
-                onPress={() => { if (vacuna.archivo_url !== null) void verCarnet(vacuna.archivo_url); }}
-              />
-            )}
-          </View>
-        )}
-      </Hoja>
 
       <CoachHoja visible={coachAbierto} onCerrar={() => setCoachAbierto(false)} mascotas={mascotas} />
 
@@ -1367,5 +1822,6 @@ export default function Hogar() {
       )}
 
     </ScrollView>
+    </View>
   );
 }
