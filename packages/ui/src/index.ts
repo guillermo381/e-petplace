@@ -53,6 +53,10 @@ export { FilaCita, type FilaCitaProps, type FilaCitaOficio } from './components/
 // CantoMarca — S81-B (promoción del Svg local S81-C; §9.1 dos cantos dos
 // voces: MARCA = rampa turquesa→magenta, cinco sitios firmados en el censo)
 export { CantoMarca } from './components/CantoMarca'
+// Entrada — S81-B: el portador de §5 LA ENTRADA (45/300/translateY 15
+// ADENTRO; la pantalla declara QUE entra y su orden de lectura, jamás
+// los números — patrón FilaCita)
+export { Entrada, type EntradaProps } from './components/Entrada'
 export {
   Insignia,
   type InsigniaProps,
