@@ -64,18 +64,10 @@ function esEspecie(v: string | null): v is AvatarMascotaEspecie {
 }
 
 function Seccion({ titulo, children }: { titulo: string; children: React.ReactNode }) {
-  const { theme } = useTheme();
+  // S81-C: el rótulo de bloque es del SISTEMA (Texto seccion).
   return (
     <View style={{ gap: spacing[2] }}>
-      <Text
-        style={{
-          fontFamily: typography.family.sans.medium,
-          fontSize: typography.size.sm,
-          color: theme.text.secondary,
-        }}
-      >
-        {titulo}
-      </Text>
+      <Texto variante="seccion">{titulo}</Texto>
       {children}
     </View>
   );
@@ -125,13 +117,6 @@ export default function AntesAdiestramiento() {
       void cargar(true);
     }, [cargar]),
   );
-
-  const vozSecundaria = {
-    fontFamily: typography.family.sans.regular,
-    fontSize: typography.size.sm,
-    lineHeight: typography.size.sm * 1.4,
-    color: theme.text.secondary,
-  } as const;
 
   const ficha = pantalla.estado === 'listo' ? pantalla.ficha : null;
   const bitacora = pantalla.estado === 'listo' ? pantalla.bitacora : [];
@@ -183,16 +168,7 @@ export default function AntesAdiestramiento() {
         {pantalla.estado === 'error' && (
           <Tarjeta tinte="danger" relleno="amplio">
             <View style={{ gap: spacing[3] }}>
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.regular,
-                  fontSize: typography.size.base,
-                  lineHeight: typography.size.base * 1.4,
-                  color: theme.status.dangerText,
-                }}
-              >
-                {pantalla.mensaje}
-              </Text>
+              <Texto variante="cuerpo" color="danger">{pantalla.mensaje}</Texto>
               <View style={{ alignSelf: 'flex-start' }}>
                 <Boton variante="secundario" tamaño="sm" etiqueta={t('agenda.reintentar')} onPress={() => void cargar()} />
               </View>
@@ -215,16 +191,7 @@ export default function AntesAdiestramiento() {
                   {ficha.nombre}
                 </Texto>
                 {ficha.raza !== null && (
-                  <Text
-                    style={{
-                      fontFamily: typography.family.mono.regular,
-                      fontSize: typography.size.sm,
-                      letterSpacing: typography.tracking.mono,
-                      color: theme.text.secondary,
-                    }}
-                  >
-                    {ficha.raza.toLowerCase()}
-                  </Text>
+                  <Texto variante="dato">{ficha.raza.toLowerCase()}</Texto>
                 )}
               </View>
               {flags.length > 0 && (
@@ -246,7 +213,7 @@ export default function AntesAdiestramiento() {
             {/* LA FIRMA: señales conductuales de paseos reales */}
             <Seccion titulo={t('adiestramiento.senalesTitulo')}>
               {ficha.senales.length === 0 ? (
-                <Text style={vozSecundaria}>{t('adiestramiento.senalesVacio')}</Text>
+                <Texto variante="apoyo">{t('adiestramiento.senalesVacio')}</Texto>
               ) : (
                 <Tarjeta>
                   {ficha.senales.map((s, i) => (
@@ -261,13 +228,13 @@ export default function AntesAdiestramiento() {
                   ))}
                 </Tarjeta>
               )}
-              {ficha.senales.length > 0 && <Text style={vozSecundaria}>{t('adiestramiento.senalesOrigen')}</Text>}
+              {ficha.senales.length > 0 && <Texto variante="apoyo">{t('adiestramiento.senalesOrigen')}</Texto>}
             </Seccion>
 
             {/* Programas contigo (verdad de RLS: solo los propios) */}
             <Seccion titulo={t('adiestramiento.programasTitulo')}>
               {ficha.programas_previos.length === 0 ? (
-                <Text style={vozSecundaria}>{t('adiestramiento.programasVacio')}</Text>
+                <Texto variante="apoyo">{t('adiestramiento.programasVacio')}</Texto>
               ) : (
                 <Tarjeta>
                   {ficha.programas_previos.map((p, i) => (
@@ -291,23 +258,14 @@ export default function AntesAdiestramiento() {
                 texto verbatim; aportado_por_menor NO es voz de UI. */}
             <Seccion titulo={t('adiestramiento.bitacoraTitulo')}>
               {bitacora.length === 0 ? (
-                <Text style={vozSecundaria}>{t('adiestramiento.bitacoraVacia')}</Text>
+                <Texto variante="apoyo">{t('adiestramiento.bitacoraVacia')}</Texto>
               ) : (
                 <Tarjeta>
                   {bitacora.map((e, i) => (
                     <View key={e.bitacora_id}>
                       {i > 0 && <Separador />}
                       <View style={{ paddingHorizontal: spacing[4], paddingVertical: spacing[3], gap: spacing[2] }}>
-                        <Text
-                          style={{
-                            fontFamily: typography.family.mono.regular,
-                            fontSize: typography.size.xs,
-                            letterSpacing: typography.tracking.mono,
-                            color: theme.text.secondary,
-                          }}
-                        >
-                          {fechaCortaMono(e.created_at, idioma as IdiomaSoportado)}
-                        </Text>
+                        <Texto variante="dato">{fechaCortaMono(e.created_at, idioma as IdiomaSoportado)}</Texto>
                         {e.chips.length > 0 && (
                           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[1.5] }}>
                             {e.chips.map((c) => (
@@ -321,16 +279,7 @@ export default function AntesAdiestramiento() {
                           </View>
                         )}
                         {e.texto !== null && (
-                          <Text
-                            style={{
-                              fontFamily: typography.family.sans.regular,
-                              fontSize: typography.size.base,
-                              lineHeight: typography.size.base * 1.4,
-                              color: theme.text.primary,
-                            }}
-                          >
-                            {e.texto}
-                          </Text>
+                          <Texto variante="cuerpo">{e.texto}</Texto>
                         )}
                       </View>
                     </View>
