@@ -118,6 +118,13 @@ export default function DetallePaseo() {
   const despl = useSharedValue(altoPantalla); // entra deslizando desde abajo
   const extAlto = useSharedValue(0); // alto medido del bloque extendible
   const desplBase = useSharedValue(0); // ancla del arrastre en curso
+  // S81-B 3ª pasada (vara: "sin tocar nada tiene que SABER que abajo hay
+  // más"): la asomada MUESTRA UN PEDAZO — traslada extAlto−PEEK, así el
+  // filo de la primera fila de la extendida asoma CORTADO por el canto
+  // de la pantalla (un elemento cortado es la señal más clara de
+  // continuación; el asa es convención). Sin borde (A6), sin badge ni
+  // "Ver más" (19.6). 56 ≈ media fila de pill/foto: garantiza el corte.
+  const PEEK = 56;
   const estiloBanda = useAnimatedStyle(() => ({ transform: [{ translateY: despl.value }] }));
 
   const fijarExtendida = useCallback((v: boolean) => {
@@ -127,7 +134,7 @@ export default function DetallePaseo() {
 
   const irABanda = useCallback(
     (extendida: boolean) => {
-      despl.value = withSpring(extendida ? 0 : extAlto.value, {
+      despl.value = withSpring(extendida ? 0 : Math.max(extAlto.value - PEEK, 0), {
         duration: motion.duration.normal,
         dampingRatio: 0.85,
       });
@@ -136,15 +143,15 @@ export default function DetallePaseo() {
     [despl, extAlto, fijarExtendida],
   );
 
-  // el bloque extendible se mide al layout: fija el imán "asomada" y
-  // re-ancla si el contenido cambió (fotos que llegan en vivo).
+  // el bloque extendible se mide al layout: fija el imán "asomada" (con
+  // su PEEK) y re-ancla si el contenido cambió (fotos que llegan en vivo).
   const medirExtendida = useCallback(
     (e: LayoutChangeEvent) => {
       const h = e.nativeEvent.layout.height;
       if (h === extAlto.value) return;
       extAlto.value = h;
       if (!bandaExtendidaRef.current) {
-        despl.value = withSpring(h, { duration: motion.duration.normal, dampingRatio: 0.85 });
+        despl.value = withSpring(Math.max(h - PEEK, 0), { duration: motion.duration.normal, dampingRatio: 0.85 });
       }
     },
     [despl, extAlto],
@@ -160,12 +167,12 @@ export default function DetallePaseo() {
         })
         .onChange((e) => {
           const v = desplBase.value + e.translationY;
-          despl.value = Math.min(Math.max(v, 0), extAlto.value);
+          despl.value = Math.min(Math.max(v, 0), Math.max(extAlto.value - PEEK, 0));
         })
         .onEnd((e) => {
-          const abrir =
-            e.velocityY < -800 ? true : e.velocityY > 800 ? false : despl.value < extAlto.value / 2;
-          despl.value = withSpring(abrir ? 0 : extAlto.value, {
+          const asomada = Math.max(extAlto.value - PEEK, 0);
+          const abrir = e.velocityY < -800 ? true : e.velocityY > 800 ? false : despl.value < asomada / 2;
+          despl.value = withSpring(abrir ? 0 : asomada, {
             duration: motion.duration.normal,
             dampingRatio: 0.85,
           });
@@ -497,9 +504,11 @@ export default function DetallePaseo() {
               <View style={{ width: 36, height: 4, borderRadius: radius.full, backgroundColor: theme.bg.border }} />
             </Pressable>
 
-            {/* ASOMADA — el ESTADO, visible siempre (M1 §4): cronómetro/
-                horarios + frescura; lo que CUENTA vive en la extendida */}
-            <View style={{ paddingHorizontal: spacing[5], gap: spacing[1], paddingBottom: insets.bottom + spacing[3] }}>
+            {/* ASOMADA — el ESTADO, visible siempre (M1 §4). 3ª pasada:
+                el colchón de insets MURIÓ — el PEEK de la extendida ocupa
+                el pie y su primera fila se corta contra el canto (esa es
+                la señal); el inset de verdad vive en el scroll extendido */}
+            <View style={{ paddingHorizontal: spacing[5], gap: spacing[1], paddingBottom: spacing[2] }}>
           {enVivo ? (
             <>
               {detalle.iniciada_en !== null ? (
@@ -532,11 +541,14 @@ export default function DetallePaseo() {
             </>
           ) : (
             <>
+              {/* 3ª pasada: JERARQUÍA, no color nuevo — la fecha es la
+                  línea que preside la asomada y estaba en gris sm (todo
+                  el bloque pesaba igual contra el blanco) */}
               <Text
                 style={{
                   fontFamily: typography.family.sans.medium,
-                  fontSize: typography.size.sm,
-                  color: theme.text.secondary,
+                  fontSize: typography.size.base,
+                  color: theme.text.primary,
                 }}
               >
                 {detalle.iniciada_en !== null
