@@ -174,6 +174,29 @@ geo.API_KEY + google_app_id + MESSAGING_EVENT; `exit != 0` = LA BUILD
 NO SE DISTRIBUYE — prueba de fuego L-192 ya corrida en rojo) →
 instalar → pie de Cuenta → primer OTA contra los runtimes nuevos.
 
+## 4bis · LA VÍA DE ENVÍO — **PROPUESTA SIN FIRMA (el founder no la
+eligió todavía; que nadie la dé por elegida)**
+
+Medido contra la doc vigente (`sending-notifications-custom`,
+literal: *"instead of uploading your FCM key to Expo, you would use
+that key directly in your server"* · *"the expo-notifications API is
+push-service agnostic"*), las DOS vías con su tradeoff:
+
+- **(a) PROPUESTA — Edge Function contra la API HTTP v1 de FCM,
+  directo:** el token nativo (`getDevicePushTokenAsync()`), el envío
+  server-side (el patrón vivo de `estructurar-nota-clinica`), y **la
+  llave FCM V1 como SECRET DE SUPABASE que el founder custodia —
+  JAMÁS se sube a EAS**. Costo declarado: sin recibos/batching del
+  servicio de Expo; APNs será pieza aparte cuando haya iOS (ya fuera
+  de este tren).
+- **(b) El push service de Expo:** ExpoPushToken unificado + recibos —
+  a cambio de subir la llave a EAS credentials.
+
+El único consumidor de EAS-credentials es la vía (b); el
+`google-services.json` commiteado alcanza para TODO el lado nativo en
+ambas vías. **La elección es firma del founder** — hasta entonces, el
+motor OTA no se escribe contra ninguna de las dos.
+
 ## 4 · El orden propuesto del tren (para cuando la mesa lo dispare)
 
 ① El founder resuelve FCM (¿proyecto legado o nuevo? + los

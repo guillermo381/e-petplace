@@ -1,10 +1,10 @@
-# S81 · ACTA DE CIERRE — BORRADOR (29 Jul 2026, sesión de ~24 h)
+# S81 · ACTA DE CIERRE (29 Jul 2026 — sesión de ~24 h; DEFINITIVA)
 
-> BORRADOR de la sesión A (la transposición al canon es de la mesa,
-> L-163 — el cierre EXISTE cuando CLAUDE.md lo declare). B y C se citan
-> POR COMMIT; su literal vive en sus reportes
+> Acta de la sesión A, DEFINITIVA en el mismo acto de la transposición
+> al canon (L-163 — CLAUDE.md declara S81 en este cierre). B y C se
+> citan POR COMMIT; su literal vive en sus reportes
 > (`s81-B-reporte-aplicacion` · `s81-B1/B2/B3/B4/B5` ·
-> `s81-C1/C2/C3/C4` + sus commits de momentos/claridades).
+> `s81-C1…C7` + sus commits de momentos/claridades).
 
 ## LA TESIS DE LA SESIÓN, cumplida en tres frentes
 
@@ -64,21 +64,29 @@ ancla y tres verificaciones mudas parieron 76(h), la enmienda de la
 - **Enmienda regla 79** — "commit por commit" = CADA hash CON SU
   ASUNTO, incluidos los de A.
 - **L-191** — el exit code se lee del comando, jamás del pipe.
-- **L-192 — LA LECCIÓN QUE GOBIERNA EL DÍA: una verificación cuyo modo
-  de falla es el SILENCIO no es una verificación. CINCO variantes en
-  UNA sesión, todas fallando sin decirlo:** ① el SECRET OMITIDO (el
+- **L-192 — LA LECCIÓN QUE GOBIERNA LA SESIÓN: una verificación cuyo
+  modo de falla es el SILENCIO no es una verificación. SEIS cobros en
+  UNA sesión, todos fallando sin decirlo:** ① el SECRET OMITIDO (el
   config plugin que compila sin la key — D-574, la familia entera) ·
   ② el EXIT DEL PIPE (`typecheck | tail` verde con el fallo adentro —
   L-191) · ③ el GUARD DECORATIVO (`git status && echo "porcelain=0"`
-  imprimiendo verde con el árbol sucio) · ④ el CAMPO RENOMBRADO
+  imprimiendo verde con el árbol sucio — reincidió hasta en el commit
+  de cierre del propio depósito de la lección) · ④ el CAMPO RENOMBRADO
   (`ts`/`t`: el filtro mudo compilando verde porque el campo era
   opcional) · ⑤ el CD ENCADENADO (el cwd colgado en `apps/cliente`
   hizo "desaparecer" `docs/` entero — una medición corriendo en el
-  contexto equivocado lee cualquier cosa). La prueba de fuego quedó en
-  la ley: a todo guard se le produce la falla UNA vez y se la ve salir
-  roja. B la MECANIZÓ en verify:diseno con auto-prueba (`74a5f1c`):
-  toda regla corre contra su fixture de violación o el lint entero se
-  declara decorativo.
+  contexto equivocado lee cualquier cosa; mordió TRES veces más en la
+  cola de la sesión) · ⑥ **EL TYPECHECK QUE NO CAZA JSX CRUZADO** (el
+  cobro del cierre: `tsc --noEmit` VERDE con `invitacion.tsx` roto —
+  "Expected corresponding JSX closing tag" — y el export del prestador
+  ROJO en HEAD; el publish de cierre lo destapó, no el typecheck: el
+  guard del publish es hoy el único que atrapa esa clase). La prueba
+  de fuego quedó en la ley: a todo guard se le produce la falla UNA
+  vez y se la ve salir roja. B la MECANIZÓ en verify:diseno con
+  auto-prueba (`74a5f1c`) y A en el guard del manifest
+  (`verify-manifest-apk.mjs`, rojo producido contra artefacto
+  inválido): toda regla corre contra su fixture de violación o se
+  declara decorativa.
 - **Caso L-166 contra la mesa**: el string del guard jamás dijo
   "Android" (git -S en cero) — el acta S80 citó mal; enmendada.
 - **EL EJE DEL RELLENO FIRMADO** (founder): 19.8 a FIRMADA en la
@@ -106,22 +114,23 @@ ancla y tres verificaciones mudas parieron 76(h), la enmienda de la
 - **A**: Entrada EN UNA (bienvenida cliente, `2327382` — identidad no
   se envuelve, L-c declarada) · la hora en la pill (`3e2ccf9`).
 
-## EL BURN-DOWN CONSOLIDADO (regla 81, dos ejes)
+## EL BURN-DOWN FINAL (regla 81, dos ejes — el número del cierre)
 
-- **MECÁNICA (reporta B): 0 → 78 de 102 (76%)** con ≥1 capa cumplida
-  y VIGILADA por lint (Tarjeta 69 · SelectorOpcion 27 · SelectorEspecie
-  4; unión 78). Las 24 restantes son EL CLUSTER DE PUERTAS — y su
-  multiplicador (`Entrada`/§5) NACIÓ al cierre con primera aplicación:
-  **~15-17 de las 24 quedan a un commit de distancia**.
-- **COMPOSICIÓN (foto base C3): ✅1 · en curso 1 · parciales 12 ·
-  pre-S80 88.** Movidas EN S81 con vara y lazo regla 80: **14
-  pantallas** (12 prestador: carta · sala-espera · cuenta/firma ·
-  negocio · solicitar-acceso · los durante/cierre de paseo, grooming y
-  adiestramiento · vet coordinar — 2 cliente: paseo/[atencionId] con
-  banda+mapa a sangre · bienvenida con Entrada). **Su reclasificación
-  formal (✅/parcial) espera EL GATE del founder en dispositivo** — los
-  OTA del cierre las llevan todas; el triage C4 ordena el barrido que
-  sigue.
+- **MECÁNICA: 0 → ~90 de 102** al cierre — la base de B (78 vigiladas
+  por lint: Tarjeta 69 · SelectorOpcion 27 · SelectorEspecie 4) + el
+  cluster de puertas mordido por `Entrada` (bienvenidas, invitación y
+  dos puertas más, B①②) + el barrido del teclado (D-498 ✅) + las tres
+  leyes por barrido (`8606308`) + Campo sinCaja candidata aplicada.
+  Todo VIGILADO por verify:diseno con auto-prueba (L-192 mecanizada).
+- **COMPOSICIÓN — el prestador cerró su tabla: 12/12 MOMENTOS + 37/37
+  CLARIDADES** (C, por el triage C4: los momentos del Día 1 y de los
+  oficios con lazo regla 80; las claridades en cuatro tandas t1-t4).
+  Cliente: 2 movidas (paseo/[atencionId] banda+mapa a sangre ·
+  bienvenida con Entrada) + LA FICHA DE MASCOTA (primera del cliente,
+  `b63d7bb`) — el triage C7 (las 48 del cliente) deja el orden del
+  barrido que sigue. **La reclasificación formal ✅/parcial del
+  inventario espera EL GATE del founder en dispositivo** — los OTA del
+  cierre llevan todo.
 
 ## EL ALTA Y EL NOMBRE (motor)
 
