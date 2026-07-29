@@ -1,7 +1,7 @@
 # Contrato de trabajo — Guillermo (founder e-PetPlace) ↔ Claude
 
-> **Versión:** v1.14 (con enmiendas S14 + S15 + S16 + S19 + S21 + S42 + S48 + S54 + S59 + S68 + S71 + S79 + S80)
-> **Última actualización:** 28 Jul 2026 — Sesión 80. Regla 79: EL PUSH PASA A SER DE LA SESIÓN A (decisión founder — la disciplina "CERO push" produjo 45 commits sin fuente remota con un OTA vivo anclado a ellos). *(El header venía declarando v1.12 con la v1.13 ya en el historial — corregido acá de paso.)*
+> **Versión:** v1.15 (con enmiendas S14 + S15 + S16 + S19 + S21 + S42 + S48 + S54 + S59 + S68 + S71 + S79 + S80 + S81)
+> **Última actualización:** 29 Jul 2026 — Sesión 81. Regla 80: EL CRAFT SE VE EN LA PANTALLA REAL (founder — para UI la ley del boceto se invierte: vara escrita → aplicar en la pantalla real → OTA y mirar → la ley se escribe DESPUÉS, del resultado firmado).
 > **Audiencia:** Claude (web y code) en toda sesión futura. Cualquier dev que se sume al proyecto.
 
 ---
@@ -429,6 +429,17 @@ Origen: S54 (el freno de la Sesión A ante el backfill-por-referencia y el patch
 - **CUÁNDO: al CIERRE de tanda, jamás en el medio.** El push es el momento en que el founder puede ver la tanda entera; ese punto de control se conserva por el REPORTE, no por el tipeo.
 - **Y LA CONDICIÓN QUE YA REGÍA, ahora con dueño: ninguna sesión publica un OTA cuyo ancla no esté en origin.** Con el push propio, esa condición deja de depender de mano ajena.
 
+**Regla 80 — EL CRAFT SE VE EN LA PANTALLA REAL (S81, founder).** La ley del boceto (M1) rige para MODELO y LETRA. Para UI se invierte:
+
+1. **VARA en una línea.** Qué tiene que lograr esta pantalla. Escrita, no dibujada. **Sin vara no se toca** (es lo que S70 curaba).
+2. **APLICAR en la pantalla real.** Commit chico.
+3. **OTA y MIRAR en el teléfono.** Ajustar en el mismo lazo.
+4. **CUANDO QUEDA, sube a la directiva y recién ahí MULTIPLICA.** La ley se escribe DESPUÉS, del resultado firmado.
+
+**LÍMITE ÚNICO:** si el cambio toca `packages/ui`, se aplica primero con **override LOCAL en una pantalla**. Se promueve a la primitiva después del gate. Aplicar directo en ui son 77 instancias sin mirar.
+
+**Y lo que no cambia:** el gate en dispositivo sigue siendo la única firma (L-153). Lo que cambia es cuánto se gasta ANTES de llegar ahí.
+
 - **v1.5 (15 May 2026 — S19)**: enmienda con regla 71 nueva (sesgo a fragmentar bajo sospecha: distinguir prudencia genuina vs ansiedad disfrazada; si los datos respaldan avanzar, avanzar sin fragmentar es la opción correcta).
 - **v1.6 (18 May 2026 — S21)**: enmienda con regla 72 nueva (el cierre de sesión lo dictan las señales humanas, no el alcance planeado: alcance al inicio es expectativa, no contrato de cierre; saturación se detecta en operación, no en planning).
 - **v1.7 (5 Jul 2026 — S42):** enmienda con reglas 73 (Code crea y ejecuta migraciones con acceso a DB; reemplaza pata operativa de reglas 16-17; founder conserva gates de aprobación y revisión visual) y 74 (Claude como arquitecto de e-PetPlace; amplía regla 3). Contexto completo en `ESTRATEGIA_2026H2.md`.
@@ -438,4 +449,5 @@ Origen: S54 (el freno de la Sesión A ante el backfill-por-referencia y el patch
 - **v1.10 (13 Jul 2026 — S59):** enmienda 76(f) FIRMADA — staging SIEMPRE explícito por ruta en tandas paralelas (git add -A/. prohibidos) + `git status` pre-commit verificando territorio propio; archivo ajeno modificado se deja intacto y se declara. Origen: incidente S58 (`3691b1a`→`98c7e5e`). Cierra D-376.
 - **v1.13 (27 Jul 2026 — S79):** enmienda con reglas 77 (un gate se declara PASADO solo con el runbook ENTERO; si no, PARCIAL con lo faltante nombrado) y 78 (todo apply que toca GRANTS/RETURNS se secuencia contra los BUNDLES VIVOS — checklist de tres preguntas; = L-179). Origen: los errores de mesa del cierre S79 (acta).
 - **v1.14 (28 Jul 2026 — S80):** enmienda con regla 79 — EL PUSH PASA A SER DE LA SESIÓN A (decisión founder): el push es del REPO (A pushea también lo de B, declarando rango y autoría), al CIERRE de tanda, con freno ante commits no reconocidos; OTA/migraciones de riesgo/gates/producto siguen siendo del founder; ningún OTA se publica con ancla fuera de origin. Origen medido: 45 commits sin fuente remota con un OTA vivo anclado (S79→S80).
+- **v1.15 (29 Jul 2026 — S81):** enmienda con regla 80 — EL CRAFT SE VE EN LA PANTALLA REAL (founder): la ley del boceto (M1) queda para MODELO y LETRA; para UI se invierte — vara en una línea (sin vara no se toca) → aplicar en la pantalla real con commit chico → OTA y mirar en el teléfono, ajustando en el mismo lazo → cuando queda, sube a la directiva y recién ahí multiplica (la ley se escribe DESPUÉS, del resultado firmado). Límite único: cambios que tocan packages/ui se aplican primero con override LOCAL en una pantalla y se promueven a la primitiva después del gate. El gate en dispositivo sigue siendo la única firma (L-153).
 - **v1.12 (20 Jul 2026 — S71):** enmienda 76(f2) FIRMADA — cada sesión commitea únicamente sus propias rutas (`git commit --only <rutas>`). Prohibido commitear con staged ajeno en el índice: si el status muestra cambios que no son tuyos, freno y aviso a la mesa antes de commitear. Origen: tres incidentes documentados (S63, S71 ×2). La 76(f) queda como piso (staging por ruta); la f2 cierra el hueco que quedaba — `git add` acotado no acota el commit: `git commit` sin `--only` publica el índice ENTERO, staged ajeno incluido (el mecanismo exacto del incidente `31688f4` S71). Cierra D-411.
