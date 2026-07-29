@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>S81-B5 · El peor caso EN EL LENGUAJE APROBADO — ¿sobrevive a 23?</title>
+<style>
+  /* Lámina web HECHA A MANO — CRITERIO, NO EVIDENCIA (§10 directiva).
+     Anatomía LITERAL de SelectorOpcion (packages/ui, medida S81-B5):
+     alto 44 · paddingH 16 (spacing[4]) · radio 10 (radius.suave) ·
+     borde 1.5 · label DM Sans medium 13 (size.sm) UNA LÍNEA (grilla
+     no envuelve — numberOfLines=1, medido) · reposo: bg.card #FFFFFF +
+     border.subtle rgba(0,0,0,.05) + texto #1D1A2E · elegido TONAL
+     control: bg pinkAlpha08 rgba(255,0,175,.08) + borde #8E1F68 +
+     texto #8E1F68. DM Sans sustituida por sans del sistema (declarado). */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#FAF9F7; color:#1D1A2E;
+         font-family:-apple-system,'Segoe UI',Roboto,sans-serif; padding:32px;
+         display:flex; gap:28px; flex-wrap:wrap; justify-content:center; }
+  .marco { width:390px; background:#FAF9F7; border:1px solid #E3E0EF;
+           border-radius:18px; padding:20px 16px 24px; }
+  .rotulo { font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+            color:#6B6584; margin-bottom:4px; }
+  .titulo { font-size:19px; font-weight:300; margin-bottom:10px; }
+  .pregunta { font-size:15px; font-weight:500; margin:10px 0 8px; }
+  .campo { border:1.5px solid #E3E0EF; background:#FFFFFF; border-radius:10px;
+           padding:10px 12px; color:#6B6584; font-size:14px; margin-bottom:12px; }
+  .set { display:flex; flex-wrap:wrap; gap:8px; }
+  .chip { height:44px; display:inline-flex; align-items:center;
+          padding:0 16px; border-radius:10px; font-size:13px; font-weight:500;
+          white-space:nowrap; /* grilla: UNA línea, medido */
+          background:#FFFFFF; border:1.5px solid rgba(0,0,0,.05); color:#1D1A2E; }
+  .chip.sel { background:rgba(255,0,175,.08); border-color:#8E1F68; color:#8E1F68; }
+  .nota { font-size:11.5px; color:#6B6584; margin-top:14px; line-height:1.5; }
+</style>
+</head>
+<body>
+
+<div class="marco">
+  <div class="rotulo">Marco de control</div>
+  <div class="titulo">El hábitat aprobado — 3 hermanos</div>
+  <div class="pregunta">¿Cuánto tiempo?</div>
+  <div class="set">
+    <div class="chip">30 min</div>
+    <div class="chip sel">1 hora</div>
+    <div class="chip">2 horas</div>
+  </div>
+  <div class="nota">El lenguaje donde la pieza FUNCIONA hoy (la reserva:
+  duración · día · hora — sets de 3 a 8). Mismo tratamiento, mismos tokens.</div>
+</div>
+
+<div class="marco">
+  <div class="rotulo">El peor caso</div>
+  <div class="titulo">El MISMO lenguaje — los 23</div>
+  <div class="pregunta">¿Qué trabajaron hoy?</div>
+  <div class="campo">Buscar en lo que sabe hacer…</div>
+  <div class="set" id="set-23"></div>
+  <div class="nota"><strong>La pregunta que se firma viendo: ¿la pieza que
+  funciona con 3 hermanos sobrevive a 23?</strong> Reposo y elección
+  idénticos al marco de control — cero variable escondida. Registro
+  honesto: en grilla el label es UNA línea (medido) — los nombres largos
+  hacen chips anchos y filas de 1-2; eso ES el lenguaje aprobado a N=23,
+  no un defecto de la lámina.</div>
+</div>
+
+<script>
+/* LOS 23 REALES — cat_objetivos_adiestramiento.nombre_familia, DB viva
+   29-jul-2026, orden orden_display (mismo set que la lámina B4). */
+const VOCAB = [
+  'Te mira cuando le hablas',
+  'Se sienta cuando se lo pides',
+  'Se echa cuando se lo pides',
+  'Viene cuando lo llamas',
+  'Pasea sin tirar de la correa',
+  'Se queda quieto donde le pides',
+  'Suelta lo que tiene al pedírselo',
+  'Saluda sin saltar encima',
+  'Se queda quieto aunque pase de todo',
+  'Viene aunque haya distracciones',
+  'Camina pegado a tu paso',
+  'Va a su lugar cuando se lo pides',
+  'Espera antes de cruzar la puerta',
+  'Espera con calma su turno',
+  'Responde aunque estés lejos',
+  'Se queda quieto largo rato',
+  'Viene incluso en espacios abiertos',
+  'Encadena varias órdenes seguidas',
+  'Se queda quieto aunque no te vea',
+  'Se queda tranquilo cuando no estás',
+  'Se cruza con otros perros con calma',
+  'Da la pata',
+  'Rueda cuando se lo pides',
+];
+const SEL = new Set([1, 3, 4]); /* los mismos 3 de B4 */
+const cont = document.getElementById('set-23');
+VOCAB.forEach((n, i) => {
+  const el = document.createElement('div');
+  el.className = 'chip' + (SEL.has(i) ? ' sel' : '');
+  el.textContent = n;
+  cont.appendChild(el);
+});
+</script>
+</body>
+</html>
