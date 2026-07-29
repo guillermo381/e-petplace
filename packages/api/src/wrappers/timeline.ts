@@ -429,8 +429,10 @@ export async function leerDetalleAtencion(
     }));
   }
 
-  // track_gps es jsonb [[lat,lng,ts]...] o [{lat,lng,ts}...] según registrador —
-  // normalizamos al shape de MapaRecorrido con guard, sin as ciego.
+  // track_gps es jsonb [{lat,lng,t}...] — la key del timestamp es `t`
+  // (registrar_track_paseo la exige así; medido en DB S81-R2). Este
+  // lector leía `o.ts` y perdía el timestamp en el 100% de los puntos
+  // (S81-A1: cura en el LECTOR, jamás en el dato).
   const track: PuntoTrack[] = [];
   const crudo = paseo.data?.track_gps;
   if (Array.isArray(crudo)) {
@@ -438,7 +440,7 @@ export async function leerDetalleAtencion(
       if (p !== null && typeof p === 'object' && !Array.isArray(p)) {
         const o = p as Record<string, unknown>;
         if (typeof o.lat === 'number' && typeof o.lng === 'number') {
-          track.push({ lat: o.lat, lng: o.lng, ...(typeof o.ts === 'string' ? { ts: o.ts } : null) });
+          track.push({ lat: o.lat, lng: o.lng, ...(typeof o.t === 'string' ? { ts: o.t } : null) });
         }
       }
     }
