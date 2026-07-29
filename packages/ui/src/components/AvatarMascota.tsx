@@ -161,11 +161,28 @@ const CAPA_A_KEY = {
  *  fijó color) · la luz inferior blanca al 45% (px espejo suave,
  *  derivados) · el hairline interno al 8%. Memorial lo CONSERVA (como
  *  la elevación, Ley 20: material, no celebración). */
-const CAP_FOTO = [
-  'inset 0 2px 5px rgba(31,27,22,0.34)',
-  'inset 0 -2px 4px rgba(255,255,255,0.45)',
-  'inset 0 0 0 1px rgba(31,27,22,0.08)',
+/** CORREGIDO CONTRA EL LITERAL (S81 — la lámina ya está archivada en
+ *  docs/relevamientos/2026-07-27-s79-epetplace-foto-onboarding-v3.html,
+ *  líneas 37-39 y 55): el color es rgba(23,19,28) — no tinta cálida —,
+ *  la luz inferior es NÍTIDA (0 -1px 0, sin blur), y hay DOS recetas:
+ *  la grande y la de los marks chicos (.mk, ≤44). El anillo del chip
+ *  elegido es CAPA INSET del propio cap (:55), no borderWidth. */
+const CAP_FOTO_GRANDE = [
+  'inset 0 2px 5px rgba(23,19,28,0.34)',
+  'inset 0 -1px 0 rgba(255,255,255,0.45)',
+  'inset 0 0 0 1px rgba(23,19,28,0.08)',
 ].join(', ')
+const CAP_FOTO_CHICO = [
+  'inset 0 2px 4px rgba(23,19,28,0.3)',
+  'inset 0 -1px 0 rgba(255,255,255,0.4)',
+  'inset 0 0 0 1px rgba(23,19,28,0.07)',
+].join(', ')
+const CAP_ELEGIDO = [
+  'inset 0 0 0 1.5px rgba(255,255,255,0.5)',
+  'inset 0 2px 4px rgba(23,19,28,0.2)',
+].join(', ')
+const capFoto = (lado: number, sobreLleno: boolean) =>
+  sobreLleno ? CAP_ELEGIDO : lado <= 44 ? CAP_FOTO_CHICO : CAP_FOTO_GRANDE
 
 /** ── S81 — EL ENCUADRE DEFAULT DEL LITERAL: centro vertical 0.42 ·
  *  zoom 1.30. DEFAULT DE RENDER, jamás elección del dueño — el
@@ -232,8 +249,6 @@ export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa, sobreLleno
           borderRadius: radio,
           borderCurve: 'continuous',
           overflow: 'hidden',
-          // ④ el chip elegido: el anillo que despega el avatar del relleno
-          ...(sobreLleno ? ANILLO_SOBRE_LLENO : null),
           ...(esMemorial ? { filter: FILTRO_MEMORIAL } : null),
         }}
       >
@@ -245,10 +260,11 @@ export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa, sobreLleno
           style={{ position: 'absolute', width: FOTO_LADO, height: FOTO_LADO, left: FOTO_LEFT, top: FOTO_TOP }}
           onError={() => setFalloCarga(true)}
         />
-        {/* ③ el .cap: la foto DENTRO del marco (fusión D-506, material) */}
+        {/* ③ el .cap: la foto DENTRO del marco (fusión D-506, material).
+            ④ elegido: el anillo es CAPA del cap (literal :55) */}
         <View
           pointerEvents="none"
-          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: radio, borderCurve: 'continuous', boxShadow: CAP_FOTO }}
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: radio, borderCurve: 'continuous', boxShadow: capFoto(d, sobreLleno) }}
         />
       </View>
     )
