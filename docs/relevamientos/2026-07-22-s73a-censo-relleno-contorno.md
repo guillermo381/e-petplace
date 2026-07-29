@@ -88,3 +88,13 @@ clasificar con una vara que todavía no se eligió. (El cruce quedó
 declarado también en `DIRECTIVA_CRAFT_CLIENTE` §0bis, fila L-b; los 4
 consumidores post-censo que B6 detectó sin fila — radio de sede, zonas
 del taller, modo de horarios, ofertas-aplica — esperan la misma firma.)
+
+## ADDENDUM S81 — EL EJE FUE FIRMADO; la clasificación vive en C2
+
+**El founder firmó EL EJE A (brief S81-C2): "se pinta lo que EXISTE, se
+contornea lo que se FIJA. Árbitro = el catálogo."** La pregunta previa
+de arriba quedó respondida (existencia; L-b sobrevive como recorte ≥4
+hermanos). **La clasificación de este censo contra el eje — con los N
+medidos y las candidatas al INTERMEDIO — vive en
+`2026-07-29-s81-C2-censo-d499-eje-firmado.md`**; este archivo queda
+como registro histórico S73, no se re-clasifica acá.
