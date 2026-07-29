@@ -28,6 +28,7 @@ import {
   Insignia,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useAviso,
@@ -183,11 +184,6 @@ export default function CierreAdiestramiento() {
     lineHeight: typography.size.sm * 1.4,
     color: theme.text.secondary,
   } as const;
-  const tituloSeccion = {
-    fontFamily: typography.family.sans.medium,
-    fontSize: typography.size.sm,
-    color: theme.text.secondary,
-  } as const;
 
   const clipsLocales = datos !== null ? clipsDeSesion(datos.adiestramientoId).length : 0;
 
@@ -246,7 +242,7 @@ export default function CierreAdiestramiento() {
 
             {/* Lo registrado — el parte se arma de esto */}
             <View style={{ gap: spacing[2] }}>
-              <Text style={tituloSeccion}>{t('citaAdiestramiento.resumenTitulo')}</Text>
+              <Texto variante="seccion">{t('citaAdiestramiento.resumenTitulo')}</Texto>
               <Tarjeta>
                 {datos.registro.objetivos.map((o, i) => (
                   <View key={o.objetivo_codigo}>
@@ -280,7 +276,7 @@ export default function CierreAdiestramiento() {
                   </View>
                 ))}
               </Tarjeta>
-              <Text style={vozSecundaria}>
+              <Texto variante="apoyo">
                 {`${
                   datos.registro.notas_total === 1
                     ? t('citaAdiestramiento.unaNota')
@@ -290,9 +286,9 @@ export default function CierreAdiestramiento() {
                     ? t('citaAdiestramiento.unClip')
                     : t('citaAdiestramiento.clipsN', { n: datos.registro.clips_total })
                 }`}
-              </Text>
+              </Texto>
               {clipsLocales > 0 && datos.registro.clips_total === 0 && (
-                <Text style={vozSecundaria}>{t('clips.envioPendiente')}</Text>
+                <Texto variante="apoyo">{t('clips.envioPendiente')}</Texto>
               )}
 
               {/* S65 (hallazgo founder): el clip se VE donde el conteo
@@ -318,7 +314,7 @@ export default function CierreAdiestramiento() {
 
             {datos.cerrada ? (
               // Ya cerrada por otra vía: estado sereno, cero formulario.
-              <Text style={vozSecundaria}>{t('citaAdiestramiento.yaCerrada')}</Text>
+              <Texto variante="apoyo">{t('citaAdiestramiento.yaCerrada')}</Texto>
             ) : (
               <>
                 {/* Mensaje a la familia */}
@@ -339,7 +335,7 @@ export default function CierreAdiestramiento() {
                     multilinea={4}
                     placeholder={t('citaAdiestramiento.instruccionesPlaceholder')}
                   />
-                  <Text style={vozSecundaria}>{t('citaAdiestramiento.instruccionesExplica')}</Text>
+                  <Texto variante="apoyo">{t('citaAdiestramiento.instruccionesExplica')}</Texto>
                   {datos.registro.objetivos.length > 0 && (
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
                       {datos.registro.objetivos.map((o) => (
