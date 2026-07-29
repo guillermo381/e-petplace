@@ -1,6 +1,13 @@
 # DIRECCION_ARTE — El lenguaje visual propio de e-PetPlace
 
-> **Versión: v1.3 — S80 (28 Jul 2026).** Enmienda v1.3 (A16, FIRMADA
+> **Versión: v1.4 — S81 (29 Jul 2026).** Enmienda v1.4 (C-S81, ACTO 1
+> del brief — depósito ordenado por §0 de `DIRECTIVA_CRAFT_CLIENTE`):
+> nace **§9bis EL BLOQUE A DEL LADO CLIENTE** — migración con estatuto
+> real por ítem: A6 SIN CAJA ✅ · A4 la luz de la esquina ✅ · A5 la
+> exclusión de #0F5E56 ✅ (lo firmado RIGE) · A1 y A3 entran como
+> CANDIDATAS SIN FIRMA con gate propio · A2 ya era §1 · A7 VACÍA, no se
+> reconstruye. La fuente única del Bloque A pasa a ser este doc; en la
+> directiva queda la referencia. Previa v1.3 (A16, FIRMADA
 > founder): **§2 pasa a nombrar CATEGORÍAS, no servicios** — nace la
 > **ley 10, LA TAXONOMÍA DE CAPAS Y LA LEY DEL REPARTO** (SALUD ·
 > CUIDADO · COMUNIDAD · CONSUMO + MARCA/AFECTO reservada; el canto dice
@@ -157,8 +164,9 @@ posición (esquina superior derecha, centro fuera del lienzo), la escala
 (~60% del ancho del techo), y la regla dura de A4 — **SIGUE SIENDO EL
 ÚNICO ADORNO PERMITIDO EN UN TECHO**. Esta enmienda no agrega un
 elemento: le da identidad al que ya existe. *(La letra madre de A4 —
-✅ FIRMADA — vive en `DIRECTIVA_CRAFT_CLIENTE` Bloque A, depositada
-S80-A6; la nota de sin-casa que esta sección llevó quedó resuelta.)*
+✅ FIRMADA — vive en **§9bis.2** desde S81; había pasado por
+`DIRECTIVA_CRAFT_CLIENTE` Bloque A en el depósito S80-A6, y la nota de
+sin-casa que esta sección llevó quedó resuelta entonces.)*
 
 **EL PORQUÉ** (§5b, que ya separó los dos símbolos): la nariz es QUIÉN
 SOMOS; la huella es QUIÉN ESTÁ. Un fondo no dice quién está presente —
@@ -399,8 +407,87 @@ estas leyes nacieron de la LECTURA del founder sobre la lámina S80, no
 de un ensayo con prestadores. **Se reabren si la cohorte de 15 muestra
 que no leen lo que dicen leer.**
 
+## 9bis. EL BLOQUE A DEL LADO CLIENTE (depósito S81 — fuente única desde acá)
+
+> **Origen y estatuto:** firmas del 26-jul-2026 (sesión de craft founder
+> + arquitecto sobre láminas), depositadas en `DIRECTIVA_CRAFT_CLIENTE`
+> S80-A6, **migradas acá en S81** porque el Bloque A es ENMIENDA DE LEY
+> (§0 de la directiva: nada se construye antes de que esté en la ley).
+> **Este depósito NO entra al disparo de reconsideración de §8-§9** (la
+> cohorte de 15): su procedencia es otra sesión y otra firma. Lo ✅
+> FIRMADO rige; lo SIN FIRMA entra como CANDIDATA con gate propio —
+> regla del hueco 1 de la directiva: `ACTA_DISENO_CRAFT` (el hermano de
+> los porqués) NO EXISTE, así que **lo sin-firma se RE-ARGUMENTA en su
+> gate, jamás se hereda**. Alcance: LADO CLIENTE (la dosis del
+> prestador §15b es otra; el teal oscuro sigue siendo suyo — directiva
+> §10). Las láminas de origen son web hechas a mano: SON CRITERIO, NO
+> EVIDENCIA — toda calibración se traduce a los rieles de RN
+> (elevation/shadow\*, Reanimated) en su gate, no por copy-paste de CSS.
+
+**9bis.1 — SIN CAJA (A6). ✅ FIRMADA (26-jul-2026).** Letra literal
+completa: **"SIN CAJA."** Su alcance fino se lee en el gate de cada
+pantalla — el porqué vivía en el acta hermana que no existe, y **no se
+reconstruye** (reconstruirlo sería L-139): la firma es del QUÉ.
+
+**9bis.2 — LA LUZ DE LA ESQUINA (A4). ✅ FIRMADA.** Círculo de blanco
+al 7% desbordando por la esquina superior derecha del techo, diámetro
+~60% del ancho, centro fuera del lienzo. **Es el ÚNICO adorno permitido
+en un techo.** Esta es la letra madre (antes vivía en la directiva; la
+nota de sin-casa de §4bis quedó resuelta en S80 y la casa definitiva es
+esta). La candidata §4bis (la nariz) la ENMIENDA solo si su gate de
+cuatro veredictos pasa; **si falla, A4 queda como está**.
+
+**9bis.3 — LA EXCLUSIÓN DE #0F5E56 (A5, la mitad que es ley). ✅
+FIRMADA.** **#0F5E56 y familia quedan FUERA del lado cliente** — es
+barro, no está en la marca, y colisiona con el acento firmado del
+prestador. Las otras dos mitades de A5 NO viven acá y se referencian
+para no duplicar: los 6 stops de la rampa del isotipo (#ff00af ·
+#d32eb7 · #68a2cd · #28e8da · #90ff8b · #fff645) viven como
+`gradients.logo` en `packages/ui/src/tokens/palette.ts` (fuente única
+de los hex), y el estatuto solo-marca de los verdes/amarillo es ley v4
+vigente. **Nota de no-confusión (heredada del censo S80):** la rampa de
+MARCA de §8.4 (turquesa→magenta) es OTRA regla — dirección de
+degradados de marca en producto, no los stops del isotipo.
+
+**9bis.4 — CANDIDATAS SIN FIRMA (gate propio; NO RIGEN hasta su gate):**
+
+- **A1 — la escala de la huella en números: 0.70 de la grilla en glifos
+  de superficie, 0.50 en tabs.** La regla madre §1 y la ley §2.3 ya
+  firman que la huella es el relleno prominente; **el NÚMERO fijo por
+  contexto es nuevo y espera gate**. Choque declarado, no resuelto: el
+  0.50 de tabs queda POR DEBAJO del rango 0.7–1.1 que §2.3 firma — el
+  gate de A1 resuelve ese choque (enmienda §2.3 o rechazo), nadie lo
+  resuelve por arrastre.
+- **A3 — EL MATERIAL DEL TECHO: dos paradas del mismo tono (claro
+  arriba → oscuro abajo, ~175°), sombra proyectada del MISMO color al
+  34-38%, luz interior de 1px al 16% en el borde superior.** La mesa lo
+  usó en tres láminas y §4bis lo cita ("el techo tiene dos paradas
+  (A3)") — pero SIN FIRMA: gate propio en dispositivo. Su traducción a
+  RN (la "luz interior 1px" y la sombra son calibraciones de lámina
+  web) se decide en ese gate.
+
+**9bis.5 — Registro de lo que NO vive acá:** **A2** (el resto en trazo;
+la huella único relleno) ES la regla madre §1 (S53, firmada) — fuente
+única §1, no se duplica. **A7 está VACÍA** — número sin letra (su
+literal remitía al acta hermana que no existe) — **y NO SE
+RECONSTRUYE**: nace cuando su literal llegue (protocolo D-434/D-435).
+
 ## Historial
 
+- **v1.4 (C-S81, 29 Jul 2026 — depósito, no firma nueva):** nace
+  **§9bis EL BLOQUE A DEL LADO CLIENTE** — la migración que §0 de
+  `DIRECTIVA_CRAFT_CLIENTE` exigía antes de toda construcción, cada
+  ítem con su estatuto real: **A6 SIN CAJA ✅** (letra literal, el
+  porqué no se reconstruye) · **A4 la luz de la esquina ✅** (letra
+  madre acá; §4bis la enmienda solo si su gate pasa) · **A5 la
+  exclusión de #0F5E56 ✅** (las otras mitades referenciadas:
+  `gradients.logo` + solo-marca v4) · **A1 (0.70/0.50) y A3 (material
+  del techo) CANDIDATAS SIN FIRMA con gate propio** (choque A1 vs
+  §2.3 declarado) · **A2** fuente única §1 · **A7 VACÍA, no se
+  reconstruye** (D-434/D-435). §9bis declarado FUERA del disparo de
+  reconsideración de §8-§9 (otra procedencia, otra firma). §4bis
+  re-apuntada a §9bis.2. Ninguna firma nueva: es mudanza con estatuto,
+  no ley nueva.
 - **v1.3 (S80-A16, 28 Jul 2026 — FIRMADA founder):** §2 nombra
   CATEGORÍAS (ley 2 enmendada: verde vital SALUD · teal CUIDADO · pink
   COMUNIDAD · terracotta CONSUMO · magenta MARCA/AFECTO reservada) +

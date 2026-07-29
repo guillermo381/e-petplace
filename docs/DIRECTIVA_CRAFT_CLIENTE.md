@@ -27,6 +27,15 @@ depositado en DIRECCION_ARTE y en la skill. El Bloque A es ENMIENDA DE
 LEY: si las pantallas se construyen antes de enmendarla, se construye
 CONTRA la ley vigente y se fabrica deuda que después hay que auditar.
 
+> **ESTADO S81 (29 Jul 2026): el depósito en DIRECCION_ARTE está
+> EJECUTADO — `DIRECCION_ARTE` §9bis (v1.4), cada ítem con su estatuto
+> real** (A4/A5-exclusión/A6 firmadas RIGEN; A1/A3 candidatas con gate
+> propio; A2 era §1; A7 vacía). **La pata "y en la skill" también está
+> EJECUTADA (orden de mesa S81):** la skill
+> `epetplace-design-system` lleva la referencia al Bloque A (§9bis como
+> fuente única, estatutos declarados) en su cabecera de craft. §0 queda
+> CUMPLIDO en sus dos mitades.
+
 ## §0bis LA RECONCILIACIÓN (S80-A6 — el corazón del depósito)
 
 > Entre el 26-jul y este depósito, parte de esta directiva ya entró al
@@ -42,13 +51,13 @@ CONTRA la ley vigente y se fabrica deuda que después hay que auditar.
 
 | Ítem | Marca | Destino/verificación literal |
 |---|---|---|
-| A1 (huella 0.70/0.50 de la grilla) | **VIVE ACÁ, SIN FIRMA** | las proporciones NO están en DIRECCION_ARTE ni en la skill (grep `0.70`: cero); la regla madre §1 firma que la huella es el relleno, el NÚMERO es nuevo y espera gate |
+| A1 (huella 0.70/0.50 de la grilla) | **MIGRADA S81 — CANDIDATA en `DIRECCION_ARTE` §9bis.4, SIN FIRMA (gate propio)** | el número espera gate; choque declarado allá: el 0.50 de tabs queda por debajo del rango 0.7–1.1 de §2.3 — lo resuelve el gate de A1, no el arrastre |
 | A2 (el resto en trazo; la huella único relleno) | **MIGRADO** | es la regla madre de `DIRECCION_ARTE` §1 (S53, firmada) — "objeto del oficio en trazo 1.9 + UNA Huella rellena". Fuente única: §1 |
-| A3 (el material del techo: dos paradas ~175°, sombra del mismo color 34-38%, luz interior 1px/16%) | **HUÉRFANO→CASA** | la mesa lo usó en tres láminas y `DIRECCION_ARTE` §4bis lo cita ("el techo tiene dos paradas (A3)"); grep de `34-38`/`luz interior`: cero en el canon. Desde este depósito, A3 vive ACÁ |
-| A4 (la luz de la esquina, único adorno del techo) ✅ FIRMADA | **HUÉRFANO→CASA** | `DIRECCION_ARTE` §4bis la cita como "la regla dura de A4" con nota L-142 de sin-casa — esa nota queda RESUELTA: la letra madre es esta fila. La candidata §4bis (la nariz) la enmienda SI su gate pasa; si falla, A4 queda como está |
-| A5 (la rampa del isotipo, 6 stops; verdes/amarillo solo-marca; #0F5E56 fuera del cliente) ✅ FIRMADA | **MIGRADO PARCIAL + VIVE ACÁ** | los 6 stops YA viven como `gradients.logo` en `packages/ui/src/tokens/palette.ts` (los mismos hex, fuente única de tokens) y el solo-marca es ley v4 vigente; **lo que vive ACÁ: la EXCLUSIÓN de #0F5E56 y familia del lado cliente** (grep: cero en el canon — es letra nueva). Nota de no-confusión: la rampa de MARCA de `DIRECCION_ARTE` §8.4 (turquesa→magenta) es OTRA regla — dirección de degradados de marca en producto, no los stops del isotipo |
-| A6 (SIN CAJA) ✅ FIRMADA | **VIVE ACÁ** | cero equivalente en el canon (grep "SIN CAJA": cero). Firmada el 26-jul; su alcance fino se lee en el gate de cada pantalla (el porqué vivía en el acta hermana que no existe) |
-| A7 | **VACÍA — NO SE RECONSTRUYE** | el original dice "ver literal del founder si aparece en el acta hermana" y el acta hermana NO EXISTE: A7 es un número sin letra. Reconstruirla sería L-139. Nace cuando su literal llegue (protocolo D-434/D-435) |
+| A3 (el material del techo) | **MIGRADA S81 — CANDIDATA en `DIRECCION_ARTE` §9bis.4, SIN FIRMA (gate propio)** | era HUÉRFANO→CASA acá (S80); la casa definitiva es la ley. Su traducción a RN se decide en su gate (las láminas son criterio, no evidencia — §10) |
+| A4 (la luz de la esquina, único adorno del techo) ✅ FIRMADA | **MIGRADA S81 — letra madre: `DIRECCION_ARTE` §9bis.2** | RIGE. La candidata §4bis (la nariz) la enmienda SI su gate pasa; si falla, A4 queda como está |
+| A5 (la rampa del isotipo, 6 stops; verdes/amarillo solo-marca; #0F5E56 fuera del cliente) ✅ FIRMADA | **MIGRADA S81 — la exclusión: `DIRECCION_ARTE` §9bis.3** | RIGE. Los 6 stops siguen en `gradients.logo` (`packages/ui/src/tokens/palette.ts`, fuente única de los hex) y el solo-marca es ley v4 vigente; la nota de no-confusión con la rampa de MARCA §8.4 viajó con la letra |
+| A6 (SIN CAJA) ✅ FIRMADA | **MIGRADA S81 — `DIRECCION_ARTE` §9bis.1** | RIGE. Letra literal completa ("SIN CAJA."); su alcance fino se lee en el gate de cada pantalla — el porqué no se reconstruye |
+| A7 | **VACÍA — NO SE RECONSTRUYE** | el original dice "ver literal del founder si aparece en el acta hermana" y el acta hermana NO EXISTE: A7 es un número sin letra. Reconstruirla sería L-139. Nace cuando su literal llegue (protocolo D-434/D-435). Registrada también en §9bis.5 |
 
 **LAS LEYES L-\*:**
 
@@ -101,25 +110,19 @@ Se lee la fuente antes de curar (L-158). Ningún ítem de esta directiva
 se da por cierto sin verificarlo contra el código vivo; si la fuente
 contradice a la directiva, GANA LA FUENTE.
 
-## BLOQUE A — ENMIENDAS DE LEY (preceden a toda construcción)
+## BLOQUE A — ENMIENDAS DE LEY (MIGRADO S81 — fuente única: `DIRECCION_ARTE` §9bis)
 
-A1 · La huella crece y es lo único relleno: 0.70 de la grilla en glifos
-     de superficie, 0.50 en tabs.
-A2 · El resto del glifo queda en trazo; la huella es el único relleno.
-A3 · EL MATERIAL DEL TECHO: dos paradas del mismo tono (claro arriba →
-     oscuro abajo, ~175°), sombra proyectada del MISMO color al 34-38%,
-     luz interior de 1px al 16% en el borde superior.
-A4 · LA LUZ DE LA ESQUINA: círculo de blanco al 7% desbordando por la
-     esquina superior derecha del techo, diámetro ~60% del ancho,
-     centro fuera del lienzo. Es el ÚNICO adorno permitido en un techo.
-     ✅ FIRMADA
-A5 · LA RAMPA DEL ISOTIPO: #ff00af · #d32eb7 · #68a2cd · #28e8da ·
-     #90ff8b · #fff645. Los verdes de la rampa y el amarillo siguen
-     siendo SOLO-MARCA. #0F5E56 y familia quedan fuera del lado
-     cliente — es barro, no está en la marca, y colisiona con el
-     acento firmado del prestador. ✅ FIRMADA
-A6 · SIN CAJA. ✅ FIRMADA
-A7 · (ver literal del founder si aparece en el acta hermana)
+> El texto del Bloque A YA NO VIVE ACÁ (regla del §0bis: fuente única,
+> jamás texto duplicado). Referencia por ítem:
+>
+> · **A1** (0.70/0.50) — CANDIDATA SIN FIRMA, `DIRECCION_ARTE` §9bis.4
+> · **A2** — regla madre `DIRECCION_ARTE` §1 (S53, firmada)
+> · **A3** (material del techo) — CANDIDATA SIN FIRMA, §9bis.4
+> · **A4** (la luz de la esquina) ✅ — letra madre §9bis.2
+> · **A5** ✅ — la exclusión de #0F5E56 en §9bis.3; los 6 stops en
+>   `gradients.logo` (tokens); solo-marca = ley v4
+> · **A6** (SIN CAJA) ✅ — §9bis.1
+> · **A7** — VACÍA, no se reconstruye (§9bis.5; protocolo D-434/D-435)
 
 ## LAS LEYES L-*
 

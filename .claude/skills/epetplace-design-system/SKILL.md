@@ -26,6 +26,15 @@ materiales: las Leyes 1–13 dicen CON QUÉ se construye; la capa de craft
 protocolo del diseñador (§1c) dice CÓMO SE PIENSA antes de tocar código.
 El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
 
+> **BLOQUE A DEL LADO CLIENTE (depósito S81 — esta línea es la que §0 de
+> `DIRECTIVA_CRAFT_CLIENTE` exige "y en la skill").** La letra vive en
+> `docs/DIRECCION_ARTE.md` **§9bis** (fuente única; acá jamás se
+> duplica): **RIGEN A6 SIN CAJA ✅ · A4 la luz de la esquina (único
+> adorno del techo) ✅ · A5 #0F5E56 y familia FUERA del lado cliente ✅.**
+> A1 (huella 0.70/0.50) y A3 (material del techo) son CANDIDATAS SIN
+> FIRMA con gate propio — **no rigen**. Alcance: lado cliente; la dosis
+> del prestador (§15b) no se toca.
+
 ## 1. LAS LEYES DE MATERIALES (1–13 — violarlas = PR rechazado)
 
 1. **Cero hex/valores crudos en apps.** Todo color, tamaño, radio, sombra
