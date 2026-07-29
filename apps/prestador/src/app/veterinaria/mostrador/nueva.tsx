@@ -31,6 +31,7 @@ import {
   SelectorSegmentado,
   spacing,
   typography,
+  Texto,
   useAviso,
   useTheme,
   type AvatarMascotaEspecie,
@@ -202,9 +203,7 @@ export default function AltaMostrador() {
             etiqueta={t('mostrador.especieLabel')}
           />
         ) : (
-          <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.status.dangerText }}>
-            {errorCatalogo}
-          </Text>
+          <Texto variante="cuerpo" color="danger">{errorCatalogo}</Texto>
         )}
 
         <Campo

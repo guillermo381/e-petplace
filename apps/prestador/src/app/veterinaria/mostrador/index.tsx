@@ -30,6 +30,7 @@ import {
   EstadoVacio,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useTheme,
@@ -197,15 +198,7 @@ export default function Mostrador() {
 
         {resultado.estado === 'error' && (
           <Tarjeta tinte="danger" relleno="amplio">
-            <Text
-              style={{
-                fontFamily: typography.family.sans.regular,
-                fontSize: typography.size.base,
-                color: theme.status.dangerText,
-              }}
-            >
-              {resultado.mensaje}
-            </Text>
+            <Texto variante="cuerpo" color="danger">{resultado.mensaje}</Texto>
           </Tarjeta>
         )}
 
