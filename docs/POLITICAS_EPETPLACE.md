@@ -394,6 +394,24 @@ agenda real); lo nunca comprometido que el dueño dejó vencer se declara
 como lo que es — ingreso de plataforma por flexibilidad no usada, avisado
 en la superficie de compra.
 
+> **ENMIENDA FIRMADA S80 — DIFERIDA AL SOFT LAUNCH (decisión founder).**
+> **LA REGLA, verbatim del founder:** *"El prestador cobra la capacidad
+> que comprometió. Lo que el cliente no usa, lo pierde el cliente y lo
+> cobra el prestador. Lo único que le corta el cobro al prestador es su
+> propio incumplimiento."* Coincide ya con P14(b), P16(c) y P16(d) — las
+> GENERALIZA. **Lo que cambia cuando dispare: lo vencido de (e) pasa de
+> ingreso de plataforma a PAYOUT DEL PRESTADOR** (enmienda gemela en
+> `MODELO_FINANCIERO` — Decisión T y 7.15 — con el argumento del
+> descuento que la justifica). **EL DISPARO, escrito:** el soft launch
+> (1-oct) — y como `vencer_paquetes_salidas` existe SIN CRON (medido
+> S80: nadie la corre, cero breakage en la historia), **encender el
+> reloj y aplicar esta enmienda son el MISMO ACTO** — jamás se enciende
+> uno sin el otro. El aviso de (e) queda firmado: periódico y sereno,
+> saldo + fecha, jamás countdown, SIEMPRE nombra la renovación (un
+> aviso que anuncia la pérdida sin ofrecer el camino es una amenaza);
+> cadencia de ESTADO, no de calendario — saldo cero, cero mensajes.
+> Cruza con `MODELO_NOTIFICACIONES` §3 (`saldo_pagado`, a la firma).
+
 > Nota de ventanas: P14 (plan) usa 24 h; P16 (paquete) usa 2 h. Es
 > DECISIÓN, no accidente: el plan genera citas automáticas con antelación;
 > el paquete se reserva a demanda. Si el ensayo con paseadores reales

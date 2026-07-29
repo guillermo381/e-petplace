@@ -54,6 +54,19 @@ que la operación existía. **Lección S49 (detección del founder):** un
 soft launch sin operación definida no es un destino — es una demo con
 fecha. El destino incluye:
 
+> **PRECONDICIONES DEL 1-OCT SUMADAS AL CIERRE S80 (firmas del founder
+> con diferimiento explícito — que la lista las cargue, no la memoria):**
+> ① **EL RELOJ DEL VENCIMIENTO + SU ENMIENDA, como UN solo acto:**
+> `vencer_paquetes_salidas` existe SIN cron (medido S80 — cero breakage
+> en la historia, el aviso jamás enviado); encenderla ES aplicar la
+> enmienda firmada de P14/P16 (lo vencido = payout del prestador, la
+> regla verbatim del founder en POLITICAS). Jamás se enciende uno sin
+> el otro. ② **EL MOTOR DE NOTIFICACIONES es precondición de DOS
+> decisiones ya firmadas:** el aviso de vencimiento de P16(e) (categoría
+> `saldo_pagado`, MODELO_NOTIFICACIONES §3 — a la firma) y el aviso de
+> renovación 72 h del plan (P14) — hoy ambos escriben a una tabla que
+> ninguna superficie del cliente muestra con push real.
+
 > **NOTA DE OPERACIÓN — LA LETRA UBER (founder S70, 19 Jul 2026;
 > letra completa en `POLITICAS_EPETPLACE.md` P21).** Todo lo que sigue
 > en esta sección es **operación**, y la operación **sí** es por país:

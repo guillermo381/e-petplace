@@ -83,11 +83,20 @@ transporte a un motor ya probado.
 | `relacional` | mensajes, respuesta a una solicitud | utility | sí, por canal |
 | `resumen` | digests (§8) | utility | sí, opt-in |
 | `comercial` | promos, ofertas, novedades | **marketing** | sí — **OPT-IN, apagado por defecto** |
+| `saldo_pagado` *(ENMIENDA S80 — A LA FIRMA)* | saldo pagado que vence: paquetes, planes (el aviso de P16(e)) | utility | **NO en existencia** — sí en canal |
 
 Dos categorías **no se apagan** porque su ausencia daña a la mascota o a
 la cuenta — pero **el canal siempre se elige**: nadie está obligado a
 recibir una urgencia por WhatsApp. Nunca se puede desactivar el aviso; sí
 por dónde llega.
+
+> **ENMIENDA S80 (a la firma del founder):** nace `saldo_pagado` y el
+> porqué de la columna "Apagable" se AMPLÍA: *"su ausencia daña a la
+> mascota, a la cuenta **O AL DINERO YA PAGADO**"*. Un aviso de
+> vencimiento de saldo que el usuario pudo apagar convierte el breakage
+> en emboscada. Cadencia de ESTADO, no de calendario (saldo cero, cero
+> mensajes); jamás viaja con `comercial`. Gemelas: P16(e) enmendada
+> S80 + `MODELO_FINANCIERO` Decisión T.
 
 `comercial` **jamás viaja en el mismo mensaje** que otra categoría. Un
 recordatorio de vacuna con un cupón adentro es P11 roto: la alerta existe

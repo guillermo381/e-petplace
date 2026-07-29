@@ -222,6 +222,20 @@ El principio que une todo: **portal vacío es portal en preparación, no portal 
 > su letra). Y el paso 11 del runbook de la cohorte ("prepará tu
 > espacio" desaparece al configurar) quedó como el ÚNICO paso del gate
 > en dispositivo sin correr — pendiente vivo, no cerrado.
+>
+> **ESTADO S80 (cierre):** **el paso 11 PASÓ** — con Los Shyris
+> configurada el módulo no aparece (verde founder en dispositivo) ⇒
+> **el gate del alta S79 sale de PARCIAL y se declara PASADO ENTERO**
+> (regla 77 honrada, cuatro sesiones después). · **La 5ª tarea quedó
+> APROBADA POR EL FOUNDER con su letra SIN ESCRIBIR**: catálogo CERRADO
+> de 2-3 políticas que escribe la casa (jamás números libres) ·
+> snapshot de la reserva (precedente LETRA_TURNOS §4) · la falla del
+> prestador NUNCA configurable; dependencia declarada: sin
+> causa-con-actor (D-567) el catálogo es una perilla que el motor no
+> puede honrar. · **D-509 ① CERRADA**: la pantalla de registro existe y
+> su gate pasó entero (6 pasos). Zeus §2.4 sigue con su disparo (el
+> rediseño; el censo de lo que falta vive en A2.2 S80: flag de ejemplo
+> + pata RLS + curaduría).
 
 ### 2.7 Hitos de trayectoria, no de tarea
 

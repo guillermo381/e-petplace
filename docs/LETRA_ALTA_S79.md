@@ -75,6 +75,13 @@ posteriores exigen la invitación real de D-509).
 > solo la bienvenida. El motor de esta letra ya lo espera
 > (`usuario_no_registrado` = "registrate primero"). **Candidato a
 > primer arco de S80**; el detalle en D-509.
+>
+> **CUMPLIDA (S80, gate founder en dispositivo — 6 pasos enteros):** la
+> pantalla de registro EXISTE en la app del prestador y el circuito
+> corrió con el dedo del founder (registro → invitación → handshake →
+> tabs con el piso recepcion). **El paso de Studio de este §1bis MUERE;
+> la carta transporta solo la bienvenida.** D-509 ① cerrada; el link
+> (②, App Links = build nativa) sigue su propio camino.
 
 ## §2 Las CUATRO FASES
 
