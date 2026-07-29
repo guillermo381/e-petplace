@@ -150,6 +150,39 @@ const CAPA_A_KEY = {
   comunidadAmplia: 'comunidadAmplia',
 } as const
 
+/** ── S81 — EL .cap DEL LITERAL (fuente: epetplace-foto-onboarding-v3,
+ *  S79 — la lámina NO está en el repo; su letra viajó transcrita en la
+ *  orden de mesa): la SOMBRA INTERIOR sobre la foto — lo que hace que
+ *  la cara se vea DENTRO del marco en vez de pegada encima. Es la
+ *  fusión que D-506 persigue, por material y no por geometría.
+ *  Tres capas inset en UN boxShadow (RN ≥0.76 new arch — el repo corre
+ *  0.86 new arch; web CSS nativo; old-arch NO lo banca, declarado):
+ *  la sombra 0 2px 5px al 34% (tinta cálida de la casa — el literal no
+ *  fijó color) · la luz inferior blanca al 45% (px espejo suave,
+ *  derivados) · el hairline interno al 8%. Memorial lo CONSERVA (como
+ *  la elevación, Ley 20: material, no celebración). */
+const CAP_FOTO = [
+  'inset 0 2px 5px rgba(31,27,22,0.34)',
+  'inset 0 -2px 4px rgba(255,255,255,0.45)',
+  'inset 0 0 0 1px rgba(31,27,22,0.08)',
+].join(', ')
+
+/** ── S81 — EL ENCUADRE DEFAULT DEL LITERAL: centro vertical 0.42 ·
+ *  zoom 1.30. DEFAULT DE RENDER, jamás elección del dueño — el
+ *  encuadre real (cx/cy/z persistidos) es OTRA decisión y NO se
+ *  construye acá (orden de mesa §5). Derivación: alto/ancho 130%,
+ *  x centrado (−15%), y = −(0.42·1.30 − 0.5) = −4.6%. */
+const ZOOM_FOTO = 1.3
+const CENTRO_Y_FOTO = 0.42
+const FOTO_LADO = `${ZOOM_FOTO * 100}%`
+const FOTO_LEFT = `-${((ZOOM_FOTO - 1) / 2) * 100}%`
+const FOTO_TOP = `-${(CENTRO_Y_FOTO * ZOOM_FOTO - 0.5) * 100}%`
+
+/** ── S81 — LA RECETA DEL CHIP ELEGIDO (el literal): sobre el lleno
+ *  magenta, el avatar gana ANILLO blanco 1.5 al 50% y su fondo pasa a
+ *  blanco 18% — es lo que lo despega del relleno. */
+const ANILLO_SOBRE_LLENO = { borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.5)' } as const
+
 // Desaturación leve memorial — que se note, sin filtro fúnebre (gate B2.3).
 // Forma string de filter: la única que RN nativo (0.76+) Y RN-web aplican
 // por igual (la forma array [{saturate}] se ignora silenciosa en web).
@@ -187,6 +220,7 @@ export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa, sobreLleno
   const conFoto = fotoUrl !== undefined && !falloCarga
 
   if (conFoto) {
+    const radio = radioAvatar(tamano, d, anidadoEn === 'chip')
     return (
       <View
         accessible
@@ -195,18 +229,26 @@ export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa, sobreLleno
         style={{
           width: d,
           height: d,
-          borderRadius: radioAvatar(tamano, d, anidadoEn === 'chip'),
+          borderRadius: radio,
           borderCurve: 'continuous',
           overflow: 'hidden',
+          // ④ el chip elegido: el anillo que despega el avatar del relleno
+          ...(sobreLleno ? ANILLO_SOBRE_LLENO : null),
           ...(esMemorial ? { filter: FILTRO_MEMORIAL } : null),
         }}
       >
+        {/* ⑤ el encuadre DEFAULT del literal (0.42 / 1.30) — render, no dato */}
         <Image
           source={typeof fotoUrl === 'string' ? { uri: fotoUrl } : fotoUrl}
           contentFit="cover"
           transition={0}
-          style={{ width: '100%', height: '100%' }}
+          style={{ position: 'absolute', width: FOTO_LADO, height: FOTO_LADO, left: FOTO_LEFT, top: FOTO_TOP }}
           onError={() => setFalloCarga(true)}
+        />
+        {/* ③ el .cap: la foto DENTRO del marco (fusión D-506, material) */}
+        <View
+          pointerEvents="none"
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: radio, borderCurve: 'continuous', boxShadow: CAP_FOTO }}
         />
       </View>
     )
@@ -220,7 +262,8 @@ export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa, sobreLleno
   // pesaba más que el nombre (que es el dato). Tratamiento POR ESTADO:
   // el fallback RECEDE en el lleno — velo blanco tenue + huella blanca.
   // (El alpha es candidato a token si el gate lo firma.)
-  const fondo = sobreLleno ? 'rgba(255,255,255,0.16)' : conCapa ? theme.capaBg[k] : theme.bg.overlay
+  // ④ S81 (la receta del chip elegido, literal): fondo blanco 18 (era 16)
+  const fondo = sobreLleno ? 'rgba(255,255,255,0.18)' : conCapa ? theme.capaBg[k] : theme.bg.overlay
   const color = sobreLleno ? palette.white : conCapa && 'capaText' in theme ? theme.capaText[k] : theme.text.secondary
 
   return (
@@ -236,6 +279,8 @@ export function AvatarMascota({ nombre, fotoUrl, tamano = 'md', capa, sobreLleno
         backgroundColor: fondo,
         alignItems: 'center',
         justifyContent: 'center',
+        // ④ la receta del chip elegido rige con y sin foto
+        ...(sobreLleno ? ANILLO_SOBRE_LLENO : null),
       }}
     >
       <HuellaGenerica color={color} tamano={HUELLA[tamano]} />
