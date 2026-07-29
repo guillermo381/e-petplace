@@ -345,8 +345,12 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
          siempre una de las dos no es de la fila — subí una al header de
          sección o bajala al detalle.
 
-    8. **[PROPUESTA S73 — el founder la firma en su próximo gate]
+    8. **[FIRMADA — founder, 29-jul-2026, S81: EL EJE DEL RELLENO]
        SE RELLENA LO QUE EXISTE · SE CONTORNEA LO QUE SE FIJA.**
+       **La nota del cruce (misma firma): L-b de
+       `DIRECTIVA_CRAFT_CLIENTE` NO queda derogada — convive como ley
+       de DOSIS (el pleno se cae con ≥4 hermanos). EL EJE dice QUÉ se
+       rellena; L-b dice CUÁNTO relleno pleno tolera una fila.**
        Prueba: *"¿esto existiría igual si yo no estuviera reservando?"*
        Thor existe; "baño y corte" existe (fila de catálogo, con nombre
        y precio); "martes" y "10:30" NO existen — son coordenadas que

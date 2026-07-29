@@ -323,6 +323,21 @@ del selector de mascota (S73). Cuando D-499 dispare (el LLENO a todos
 los selectores), no será cambio de opinión — será esta dirección
 cumpliéndose.
 
+## 7bis. EL EJE DEL RELLENO — FIRMADO (founder, 29-jul-2026, S81)
+
+**SE RELLENA LO QUE EXISTE · SE CONTORNEA LO QUE SE FIJA** (ley 19.8
+del diccionario de la skill, propuesta S73 → FIRMADA S81 — el acto que
+ordena el rediseño con selectores: las filas del censo D-499 se
+clasifican con esta vara). Prueba: *"¿esto existiría igual si yo no
+estuviera reservando?"* — árbitro de borde: el CATÁLOGO (fila con
+nombre+precio = existe = relleno; parámetro = se fija = contorno).
+
+**La nota del cruce, misma firma:** L-b de `DIRECTIVA_CRAFT_CLIENTE`
+(el relleno pleno se cae con ≥4 hermanos) **NO queda derogada —
+convive como ley de DOSIS**. EL EJE dice **QUÉ** se rellena; L-b dice
+**CUÁNTO** relleno pleno tolera una fila. Es la dirección de §7 (el
+color completo con sombra) ganando su criterio de aplicación.
+
 ## 8. LA DOSIS DE LA RAMPA (leyes de craft S80, firma founder)
 
 **8.1 — La rampa se INUNDA en la marca y se ACENTÚA en el producto.**
