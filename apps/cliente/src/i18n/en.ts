@@ -510,7 +510,6 @@ export const clienteEn = {
     // S65 — quick filter + group accordion (LOTE S65, founder gate)
     bitacoraFiltroLabel: 'Search an observation',
     bitacoraFiltroPlaceholder: 'e.g. barked, leash, door',
-    bitacoraGrupoMarcadas: 'You marked {{n}}',
     bitacoraTextoLabel: 'Tell us more (optional)',
     bitacoraTextoPlaceholder: 'e.g. today they sat on their own before eating',
     bitacoraGuardar: 'Save',

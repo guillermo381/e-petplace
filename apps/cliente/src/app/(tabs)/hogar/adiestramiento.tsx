@@ -16,10 +16,19 @@
  * (LOYALTY §5: cero contador, cero racha — la familia escribe porque
  * le importa su perro). Registrar cuesta segundos: chips + texto en
  * una Hoja.
+ *
+ * S81 — LA BITÁCORA HABLA EL IDIOMA APROBADO (orden de mesa, sobre el
+ * eje 19.8 firmado): el vocabulario (N=23) se muestra ENTERO en
+ * SelectorOpcion estándar por grupo — murió el acordeón S65 (Celda
+ * como encabezado plegable: anatomía que S71 mató — "plegar no es
+ * navegar" — y chevron con gramática pre-S73). La densidad de los 23
+ * se juzga EN DISPOSITIVO y se ajusta ahí (letra de la orden), no acá.
+ * El filtro S65 sigue: reordena coincidencias PRIMERO dentro de cada
+ * grupo (mostrar primero, no esconder — todo chip sigue alcanzable).
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import {
@@ -38,8 +47,8 @@ import {
   SelectorOpcion,
   SelectorSegmentado,
   Tarjeta,
+  Texto,
   spacing,
-  typography,
   useAviso,
   useTheme,
   useTraduccionUi,
@@ -56,7 +65,6 @@ import {
   type EntradaBitacora,
   type MascotaResumen,
 } from '@epetplace/api';
-import Svg, { Path } from 'react-native-svg';
 import { fechaCortaMono } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 
@@ -74,25 +82,6 @@ const palabrasDe = (s: string) =>
     .filter((p) => p.length >= 4);
 const vozDelChip = (v: ChipVocabularioAgrupado, idioma: string) =>
   normalizarVoz(idioma === 'en' ? v.nombre_familia_en : v.nombre_familia);
-
-// El chevron del acordeón (glifo de la casa, CeldaNavegacion §19.1):
-// affordance decorativa en text.tertiary — el canal semántico es el rol
-// button del header. Rota a "abajo" cuando el grupo está abierto; giro
-// por reemplazo directo, sin animación (patrón D-385).
-function ChevronAcordeon({ abierto, color }: { abierto: boolean; color: string }) {
-  return (
-    <Svg
-      width={20}
-      height={20}
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-      style={{ transform: [{ rotate: abierto ? '90deg' : '0deg' }] }}
-    >
-      <Path d="M9 18l6-6-6-6" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-    </Svg>
-  );
-}
 
 export default function HubAdiestramiento() {
   const { theme } = useTheme();
@@ -129,11 +118,6 @@ export default function HubAdiestramiento() {
   const [chips, setChips] = useState<string[]>([]);
   const [texto, setTexto] = useState('');
   const [guardando, setGuardando] = useState(false);
-  // S65 (gate founder): el acordeón de grupos — todos nacen CERRADOS;
-  // el set de abiertos es memoria MANUAL del usuario (vista, jamás
-  // persiste). El filtro no la pisa: al vaciarse, vuelve lo que el
-  // usuario dejó tocado.
-  const [abiertos, setAbiertos] = useState<Set<string>>(new Set());
   const [filtro, setFiltro] = useState('');
 
   const cargar = useCallback(() => {
@@ -214,36 +198,28 @@ export default function HubAdiestramiento() {
       .map((s) => s.v);
   }, [texto, vocabulario, idioma]);
 
-  // S65 — el filtro rápido sobre los chips (MISMO matching que el
-  // autocompletado): mientras hay palabras, (a) solo los grupos con
-  // coincidencia se auto-expanden, (b) adentro las coincidencias van
-  // PRIMERO (mostrar primero, no esconder: todo chip sigue alcanzable).
+  // S65→S81 — el filtro rápido sobre los chips (MISMO matching que el
+  // autocompletado): mientras hay palabras, las coincidencias van
+  // PRIMERO dentro de su grupo (mostrar primero, no esconder: todo
+  // chip sigue alcanzable). El auto-expandir murió con el acordeón.
   const palabrasFiltro = useMemo(() => palabrasDe(filtro), [filtro]);
   const filtrando = palabrasFiltro.length > 0;
   const gruposRender = useMemo(
     () =>
       gruposVocabulario.map((g) => {
-        if (!filtrando) return { ...g, itemsRender: g.items, coincide: false };
+        if (!filtrando) return { ...g, itemsRender: g.items };
         const con = g.items.filter((v) => {
           const voz = vozDelChip(v, idioma);
           return palabrasFiltro.some((p) => voz.includes(p));
         });
-        if (con.length === 0) return { ...g, itemsRender: g.items, coincide: false };
-        return { ...g, itemsRender: [...con, ...g.items.filter((v) => !con.includes(v))], coincide: true };
+        if (con.length === 0) return { ...g, itemsRender: g.items };
+        return { ...g, itemsRender: [...con, ...g.items.filter((v) => !con.includes(v))] };
       }),
     [gruposVocabulario, palabrasFiltro, filtrando, idioma],
   );
 
   const alternarChip = (codigo: string) =>
     setChips((prev) => (prev.includes(codigo) ? prev.filter((c) => c !== codigo) : [...prev, codigo]));
-
-  const alternarGrupo = (clave: string) =>
-    setAbiertos((prev) => {
-      const n = new Set(prev);
-      if (n.has(clave)) n.delete(clave);
-      else n.add(clave);
-      return n;
-    });
 
   const guardar = async () => {
     if (guardando || mascotaId === null) return;
@@ -332,15 +308,9 @@ export default function HubAdiestramiento() {
                   <View key={e.bitacora_id}>
                     {i > 0 ? <Separador /> : null}
                     <View style={{ padding: spacing[3], gap: spacing[2] }}>
-                      <Text
-                        style={{
-                          fontFamily: typography.family.mono.regular,
-                          fontSize: typography.size.xs,
-                          color: theme.text.tertiary,
-                        }}
-                      >
+                      <Texto variante="dato" color="tertiary">
                         {`${nombrePorMascota.get(e.mascota_id)?.toLowerCase() ?? ''} · ${fechaCortaMono(e.created_at.slice(0, 10), idioma)}`}
-                      </Text>
+                      </Texto>
                       {e.chips.length > 0 ? (
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
                           {e.chips.map((ch) => (
@@ -352,18 +322,7 @@ export default function HubAdiestramiento() {
                           ))}
                         </View>
                       ) : null}
-                      {e.texto !== null ? (
-                        <Text
-                          style={{
-                            fontFamily: typography.family.sans.regular,
-                            fontSize: typography.size.md,
-                            lineHeight: Math.round(typography.size.md * 1.45),
-                            color: theme.text.primary,
-                          }}
-                        >
-                          {e.texto}
-                        </Text>
-                      ) : null}
+                      {e.texto !== null ? <Texto variante="cuerpo">{e.texto}</Texto> : null}
                     </View>
                   </View>
                 ))}
@@ -472,46 +431,27 @@ export default function HubAdiestramiento() {
               value={filtro}
               onChangeText={setFiltro}
             />
-            {/* S65 (gate founder) — el ACORDEÓN: cada grupo nace
-                cerrado (nombre + contador); filtrando, solo los grupos
-                con coincidencia se abren. Patrón D-385: header tocable
-                + render condicional, sin animación. */}
-            <Tarjeta relleno="ninguno">
-              {gruposRender.map((g, i) => {
-                const abierto = filtrando ? g.coincide : abiertos.has(g.clave);
-                const marcadas = g.items.filter((v) => chips.includes(v.codigo)).length;
-                return (
-                  <View key={g.clave}>
-                    {i > 0 ? <Separador /> : null}
-                    <Celda
-                      interactiva
-                      onPress={() => alternarGrupo(g.clave)}
-                      accessibilityRole="button"
-                      titulo={`${g.etiqueta} (${g.items.length})`}
-                      subtitulo={marcadas > 0 ? t('adiestramiento.bitacoraGrupoMarcadas', { n: String(marcadas) }) : undefined}
-                      fin={<ChevronAcordeon abierto={abierto} color={theme.text.tertiary} />}
-                    />
-                    {abierto ? (
-                      <View style={{ paddingHorizontal: spacing[3], paddingBottom: spacing[3] }}>
-                        <SelectorOpcion
-                          acento="control"
-                          etiqueta={g.etiqueta}
-                          etiquetaVisible={false}
-                          disposicion="grilla"
-                          multiple
-                          opciones={g.itemsRender.map((v) => ({
-                            codigo: v.codigo,
-                            etiqueta: idioma === 'en' ? v.nombre_familia_en : v.nombre_familia,
-                          }))}
-                          seleccionadas={chips}
-                          onSelect={alternarChip}
-                        />
-                      </View>
-                    ) : null}
-                  </View>
-                );
-              })}
-            </Tarjeta>
+            {/* S81 — el vocabulario ENTERO en el lenguaje aprobado: un
+                SelectorOpcion estándar por grupo (grilla, multiple,
+                tonal control — Ley 22), con la etiqueta PROPIA del
+                componente como rótulo del grupo (Ley 18: el grupo es
+                convención viva de DB). Los 23 a la vista; la densidad
+                se juzga en dispositivo. */}
+            {gruposRender.map((g) => (
+              <SelectorOpcion
+                key={g.clave}
+                acento="control"
+                etiqueta={g.etiqueta}
+                disposicion="grilla"
+                multiple
+                opciones={g.itemsRender.map((v) => ({
+                  codigo: v.codigo,
+                  etiqueta: idioma === 'en' ? v.nombre_familia_en : v.nombre_familia,
+                }))}
+                seleccionadas={chips}
+                onSelect={alternarChip}
+              />
+            ))}
             <Campo
               label={t('adiestramiento.bitacoraTextoLabel')}
               placeholder={t('adiestramiento.bitacoraTextoPlaceholder')}
