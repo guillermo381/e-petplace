@@ -929,7 +929,6 @@ export const clienteEs = {
     // sin nombre visible del negocio: la verdad igual, sin inventar quién
     coordinaranSinNombre: 'Te van a contactar para agendar',
     quienAtiende: 'Quien la atiende',
-    verMas: 'Ver más',
     otrasActivas: 'Sus otras citas',
     vacio: 'Sin citas por venir',
     vacioDetalle: 'Cuando reserves una cita, la vas a ver acá.',
@@ -945,8 +944,6 @@ export const clienteEs = {
     recibido: 'Te llegó el {{fecha}}',
     vence: 'Vale hasta el {{fecha}}',
     total: 'Total',
-    verItems: 'Ver el detalle',
-    ocultarItems: 'Ocultar el detalle',
     queSigue: 'Si lo apruebas, la clínica coordina contigo el día del procedimiento — el precio queda congelado.',
     aprobar: 'Aprobar',
     rechazar: 'Rechazar',

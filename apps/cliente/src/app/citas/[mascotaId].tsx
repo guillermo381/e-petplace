@@ -21,10 +21,20 @@
  * SIN chevron — el perfil público del prestador no existe en cliente
  * (D-370, mock firmado S61, letra pendiente); cuando nazca, esta fila
  * gana su navegación.
+ *
+ * S82-C LAZO 4a (CLARIDAD, familia hogar-diario) — la migración D-318
+ * que la skill tenía anotada para esta pantalla: los DOS "ver más"
+ * mudos pasan a PieRevelar (19.6 con el número en la etiqueta y el
+ * chevron que gira; el Boton secundario de "Ver más" y el Pressable de
+ * texto de los ítems del presupuesto MUEREN). Mecánica S81: Text crudo
+ * → Texto · los pares del presupuesto (ítem/precio, total) a FilaDato
+ * horizontal (la disposición S81 nacida para listas densas de pares).
+ * CHANEL: mueren las keys verMas/verItems/ocultarItems (Ley 37 — el
+ * PieRevelar trae su etiqueta canónica del namespace ui).
  */
 
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
@@ -36,12 +46,14 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  FilaDato,
   Icono,
   Insignia,
+  PieRevelar,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
-  typography,
   useAviso,
   useTheme,
 } from '@epetplace/ui';
@@ -197,38 +209,14 @@ export default function CitasDeMascota() {
           {servicio !== null ? (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
               {icono !== null ? <Icono nombre={icono} tamano={28} /> : null}
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.light,
-                  fontSize: typography.size.xl,
-                  color: theme.text.primary,
-                }}
-              >
-                {servicio}
-              </Text>
+              <Texto variante="titulo">{servicio}</Texto>
             </View>
           ) : null}
-          <Text
-            style={{
-              fontFamily: typography.family.mono.regular,
-              fontSize: typography.size.md,
-              color: theme.text.primary,
-            }}
-          >
-            {cuando}
-          </Text>
+          <Texto variante="datoMd">{cuando}</Texto>
           {c.estado === 'en_vivo' ? (
             // §7.1 — la voz única "En vivo" la pone el pill de CitaEnVivo;
             // acá solo la invitación a la pantalla de dos caras.
-            <Text
-              style={{
-                fontFamily: typography.family.sans.regular,
-                fontSize: typography.size.sm,
-                color: theme.text.secondary,
-              }}
-            >
-              {t('hogar.verEnVivo')}
-            </Text>
+            <Texto variante="apoyo">{t('hogar.verEnVivo')}</Texto>
           ) : (
             <Insignia
               estado={c.estado === 'hold' || c.estado === 'por_coordinar' ? 'proximo' : 'alDia'}
@@ -245,19 +233,13 @@ export default function CitasDeMascota() {
               verificado en DB). Con nombre lo decimos; sin nombre decimos
               la verdad igual, sin inventar quién. */}
           {c.estado === 'por_coordinar' ? (
-            <Text
-              style={{
-                fontFamily: typography.family.sans.regular,
-                fontSize: typography.size.sm,
-                color: theme.text.secondary,
-              }}
-            >
+            <Texto variante="apoyo">
               {/* D-455 cerrada (S71-A motor): el nombre del negocio llega por
                   la RPC angosta — la forma pobre queda de fallback real. */}
               {(c.prestador_nombre ?? c.negocio_nombre) !== null
                 ? t('citasMascota.coordinaraNegocio', { negocio: c.prestador_nombre ?? c.negocio_nombre ?? '' })
                 : t('citasMascota.coordinaranSinNombre')}
-            </Text>
+            </Texto>
           ) : null}
           {c.prestador_nombre !== null ? (
             <>
@@ -296,107 +278,46 @@ export default function CitasDeMascota() {
           return (
             <Tarjeta key={p.id} elevacion="reposo">
               <View style={{ gap: spacing[3] }}>
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.medium,
-                    fontSize: typography.size.lg,
-                    color: theme.text.primary,
-                  }}
-                >
-                  {t('presupuesto.tituloPendiente')}
-                </Text>
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.regular,
-                    fontSize: typography.size.sm,
-                    color: theme.text.secondary,
-                  }}
-                >
+                <Texto variante="seccion">{t('presupuesto.tituloPendiente')}</Texto>
+                <Texto variante="apoyo">
                   {t('presupuesto.recibido', { fecha: fechaLargaHumana(p.recibidoEn.slice(0, 10), idioma) })}
                   {'  ·  '}
                   {t('presupuesto.vence', { fecha: fechaLargaHumana(p.venceEn.slice(0, 10), idioma) })}
-                </Text>
+                </Texto>
 
                 <Separador />
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.md,
-                      color: theme.text.secondary,
-                    }}
-                  >
-                    {t('presupuesto.total')}
-                  </Text>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.mono.regular,
-                      fontSize: typography.size.xl,
-                      color: theme.text.primary,
-                    }}
-                  >
-                    {`$ ${p.total}`}
-                  </Text>
-                </View>
+                <FilaDato
+                  disposicion="horizontal"
+                  etiqueta={t('presupuesto.total')}
+                  valor={<Texto variante="datoMd">{`$ ${p.total}`}</Texto>}
+                />
 
                 {p.items.length > 0 ? (
                   <>
-                    <Pressable
-                      accessibilityRole="button"
-                      onPress={() => setItemsAbiertos((s) => ({ ...s, [p.id]: !abierto }))}
-                    >
-                      <Text
-                        style={{
-                          fontFamily: typography.family.sans.medium,
-                          fontSize: typography.size.sm,
-                          color: theme.text.secondary,
-                        }}
-                      >
-                        {abierto ? t('presupuesto.ocultarItems') : t('presupuesto.verItems')}
-                      </Text>
-                    </Pressable>
                     {abierto ? (
                       <View style={{ gap: spacing[2] }}>
                         {p.items.map((it) => (
-                          <View
+                          <FilaDato
                             key={it.id}
-                            style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}
-                          >
-                            <Text
-                              style={{
-                                flex: 1,
-                                fontFamily: typography.family.sans.regular,
-                                fontSize: typography.size.sm,
-                                color: theme.text.primary,
-                              }}
-                            >
-                              {it.cantidad > 1 ? `${it.nombre} ×${it.cantidad}` : it.nombre}
-                            </Text>
-                            <Text
-                              style={{
-                                fontFamily: typography.family.mono.regular,
-                                fontSize: typography.size.sm,
-                                color: theme.text.secondary,
-                              }}
-                            >
-                              {`$ ${it.precio * it.cantidad}`}
-                            </Text>
-                          </View>
+                            disposicion="horizontal"
+                            etiqueta={it.cantidad > 1 ? `${it.nombre} ×${it.cantidad}` : it.nombre}
+                            valor={`$ ${it.precio * it.cantidad}`}
+                            mono
+                          />
                         ))}
                       </View>
                     ) : null}
+                    {/* 19.6 — el desglose plegado se revela con el número;
+                        murió el Pressable de texto mudo (D-318). */}
+                    <PieRevelar
+                      n={p.items.length}
+                      revelado={abierto}
+                      onPress={() => setItemsAbiertos((s) => ({ ...s, [p.id]: !abierto }))}
+                    />
                   </>
                 ) : null}
 
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.regular,
-                    fontSize: typography.size.sm,
-                    color: theme.text.secondary,
-                  }}
-                >
-                  {t('presupuesto.queSigue')}
-                </Text>
+                <Texto variante="apoyo">{t('presupuesto.queSigue')}</Texto>
 
                 <View style={{ gap: spacing[2] }}>
                   <Boton
@@ -454,22 +375,12 @@ export default function CitasDeMascota() {
           <>
             {detalleHero(hero)}
 
-            {/* N>1 activas: "Ver más" despliega EN LA MISMA pantalla;
-                con una sola, NO se dibuja (nada apagado). */}
-            {otras.length > 0 && !desplegado ? (
-              <Boton variante="secundario" bloque etiqueta={t('citasMascota.verMas')} onPress={() => setDesplegado(true)} />
-            ) : null}
+            {/* N>1 activas: el resto se revela EN LA MISMA pantalla con el
+                número (19.6, PieRevelar — murió el Boton secundario mudo,
+                D-318); con una sola, NO se dibuja (nada apagado). */}
             {otras.length > 0 && desplegado ? (
               <View style={{ gap: spacing[3] }}>
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.medium,
-                    fontSize: typography.size.sm,
-                    color: theme.text.secondary,
-                  }}
-                >
-                  {t('citasMascota.otrasActivas')}
-                </Text>
+                <Texto variante="seccion">{t('citasMascota.otrasActivas')}</Texto>
                 <Tarjeta relleno="ninguno" elevacion="reposo">
                   {otras.map((c, i) => (
                     <View key={c.cita_id}>
@@ -488,6 +399,9 @@ export default function CitasDeMascota() {
                   ))}
                 </Tarjeta>
               </View>
+            ) : null}
+            {otras.length > 0 ? (
+              <PieRevelar n={otras.length} revelado={desplegado} onPress={() => setDesplegado((d) => !d)} />
             ) : null}
           </>
         )}
