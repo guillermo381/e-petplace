@@ -43,6 +43,13 @@ export interface IdentidadMascota {
   talla: 'S' | 'M' | 'L' | null;
   /** §3 grooming (S60): pelaje — null honesto hasta declarar. */
   pelaje: 'normal' | 'largo' | null;
+  /** S82: el ENCUADRE de la foto (lámina 2026-07-29). cx/cy ∈ [0,1]
+   *  centro del recorte · z ∈ [1,3] zoom sobre min(iw,ih). Los DEFAULT
+   *  de DB (.5/.42/1.3) son el encuadre canónico — nunca null. Se
+   *  declara/edita SIEMPRE por declararFotoMascota (molde P19). */
+  foto_cx: number;
+  foto_cy: number;
+  foto_z: number;
 }
 
 export interface PerfilMascota {
@@ -78,7 +85,7 @@ export async function obtenerPerfilMascota(
   // sin acceso la fila no existe para este user — error honesto.
   const mascota = await cliente
     .from('mascotas')
-    .select('id, nombre, especie, raza, sexo, fecha_nacimiento, fecha_nacimiento_precision, microchip, foto_url, estado_vida, paseo_social_ok, talla, pelaje')
+    .select('id, nombre, especie, raza, sexo, fecha_nacimiento, fecha_nacimiento_precision, microchip, foto_url, estado_vida, paseo_social_ok, talla, pelaje, foto_cx, foto_cy, foto_z')
     .eq('id', mascotaId)
     .maybeSingle();
   if (mascota.error) return { ok: false, codigo: 'error_perfil', mensaje: MENSAJE_ERROR };
@@ -144,6 +151,9 @@ export async function obtenerPerfilMascota(
           mascota.data.pelaje === 'normal' || mascota.data.pelaje === 'largo'
             ? mascota.data.pelaje
             : null,
+        foto_cx: mascota.data.foto_cx,
+        foto_cy: mascota.data.foto_cy,
+        foto_z: mascota.data.foto_z,
       },
       vacunas: vacunas.data.map((v) => ({
         evento_id: v.evento_id,
@@ -160,4 +170,67 @@ export async function obtenerPerfilMascota(
       umbrales: parsearUmbrales(catalogo.data?.momentos_vitales_jsonb ?? null),
     },
   };
+}
+
+// ── S82: declarar (o editar) el encuadre de la foto — molde P19 ────────────
+
+export type CodigoErrorFotoMascota =
+  | 'sin_sesion'
+  | 'sin_acceso'
+  | 'encuadre_invalido'
+  | 'foto_url_no_es_path'
+  | 'desconocido';
+
+export interface EncuadreFotoDeclarado {
+  mascota_id: string;
+  cx: number;
+  cy: number;
+  z: number;
+}
+
+const MENSAJE_ERROR_FOTO = 'No pudimos guardar la foto. Revisa tu conexión y prueba de nuevo.';
+
+// L-115: la RPC levanta 'codigo: detalle' — se normaliza por startsWith.
+function codigoFoto(mensaje: string): CodigoErrorFotoMascota {
+  if (mensaje.startsWith('auth_required')) return 'sin_sesion';
+  if (mensaje.startsWith('no_access_to_mascota')) return 'sin_acceso';
+  if (mensaje.startsWith('encuadre_invalido')) return 'encuadre_invalido';
+  if (mensaje.startsWith('foto_url_no_es_path')) return 'foto_url_no_es_path';
+  return 'desconocido';
+}
+
+/** Declara (o EDITA) el encuadre de la foto de la mascota — y
+ *  opcionalmente la foto misma (PATH del bucket, jamás URL). Sirve las
+ *  dos superficies del mandato S82: el cierre del alta (encuadre de la
+ *  foto que la RPC de alta ya llevó) y EDITAR desde el perfil (foto
+ *  nueva + encuadre en el mismo acto). */
+export async function declararFotoMascota(
+  mascotaId: string,
+  encuadre: { cx: number; cy: number; z: number },
+  fotoPath?: string,
+): Promise<ResultadoWrapper<EncuadreFotoDeclarado, CodigoErrorFotoMascota>> {
+  const { data, error } = await getClient().rpc('declarar_foto_mascota', {
+    p_mascota_id: mascotaId,
+    p_cx: encuadre.cx,
+    p_cy: encuadre.cy,
+    p_z: encuadre.z,
+    ...(fotoPath !== undefined ? { p_foto_url: fotoPath } : null),
+  });
+
+  if (error) {
+    return { ok: false, codigo: codigoFoto(error.message), mensaje: MENSAJE_ERROR_FOTO };
+  }
+  const o = data as Record<string, unknown> | null;
+  if (
+    o === null ||
+    typeof o !== 'object' ||
+    o.ok !== true ||
+    typeof o.mascota_id !== 'string' ||
+    typeof o.cx !== 'number' ||
+    typeof o.cy !== 'number' ||
+    typeof o.z !== 'number'
+  ) {
+    return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR_FOTO };
+  }
+  return { ok: true, data: { mascota_id: o.mascota_id, cx: o.cx, cy: o.cy, z: o.z } };
 }

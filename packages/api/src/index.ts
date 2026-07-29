@@ -175,9 +175,12 @@ export { mascotasElegibles, type EstadoVidaMascota } from './wrappers/_mascotas-
 // Perfil de mascota — S51-B2.3 (pila de módulos)
 export {
   obtenerPerfilMascota,
+  declararFotoMascota,
   type PerfilMascota,
   type UmbralesEspecie,
   type VacunaDeMascota,
+  type CodigoErrorFotoMascota,
+  type EncuadreFotoDeclarado,
 } from './wrappers/perfilMascota';
 export type { IdentidadMascota } from './wrappers/perfilMascota';
 

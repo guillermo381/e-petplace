@@ -1,0 +1,210 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>e-PetPlace · la foto de tu mascota</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+:root{--tealT:#DFF7F4;--tealD:#146B62;--teal:#28E8DA;--magenta:#B01D6F;
+ --tinta:#17131C;--tinta2:#6C6572;--tinta3:#9A94A1;--fondo:#EEECE8;
+ --e1:0 1px 2px rgba(23,19,28,.05),0 2px 6px rgba(23,19,28,.04);
+ --e2:0 2px 4px rgba(23,19,28,.06),0 8px 20px rgba(23,19,28,.07);
+ --e3:0 4px 8px rgba(23,19,28,.08),0 16px 36px rgba(23,19,28,.11);
+ --curva:cubic-bezier(.32,.72,0,1)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#DAD7D1;font-family:'DM Sans',system-ui,sans-serif;color:var(--tinta);
+ padding:26px 16px 70px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.pista{font:400 12px 'DM Sans',sans-serif;color:#5C5852;text-align:center;max-width:440px;line-height:1.55}
+.tel{width:390px;height:800px;background:var(--fondo);border-radius:44px;overflow:hidden;position:relative;
+ box-shadow:0 0 0 10px #1A1A1C,0 0 0 12px #35343A,0 30px 70px rgba(0,0,0,.35)}
+.notch{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:104px;height:26px;background:#1A1A1C;border-radius:999px;z-index:60}
+.cuerpo{position:absolute;inset:0;overflow-y:auto;scrollbar-width:none}
+.cuerpo::-webkit-scrollbar{display:none}
+.barra{padding:52px 20px 16px;background:#FFF;box-shadow:0 1px 0 rgba(23,19,28,.06)}
+.barra b{font:500 19px 'DM Sans',sans-serif;letter-spacing:-.02em;display:block}
+.barra span{font:400 13px 'DM Sans',sans-serif;color:var(--tinta2);display:block;margin-top:3px}
+.zona{margin:22px 18px;border:2px dashed #C9C5BD;border-radius:22px;padding:44px 20px;text-align:center;cursor:pointer;
+ background:#FBFAF8}
+.zona:hover{border-color:var(--tealD);background:#F3FAF8}
+.zona b{font:500 14.5px 'DM Sans',sans-serif;display:block;margin-bottom:5px}
+.zona span{font:400 12.5px 'DM Sans',sans-serif;color:var(--tinta2)}
+input[type=file]{display:none}
+.visorbox{padding:22px 18px 0;display:flex;justify-content:center}
+.visor{position:relative;width:248px;height:248px;border-radius:79px;overflow:hidden;background:#DFDCD6;
+ touch-action:none;box-shadow:var(--e3)}
+.visor.puede{cursor:grab}.visor.mov{cursor:grabbing}
+.visor img,.mk img{position:absolute;max-width:none;display:block}
+.cap{position:absolute;inset:0;pointer-events:none;
+ box-shadow:inset 0 2px 5px rgba(23,19,28,.34),inset 0 -1px 0 rgba(255,255,255,.45),inset 0 0 0 1px rgba(23,19,28,.08)}
+.mk .cap{box-shadow:inset 0 2px 4px rgba(23,19,28,.3),inset 0 -1px 0 rgba(255,255,255,.4),inset 0 0 0 1px rgba(23,19,28,.07)}
+.pistaMov{font:400 12px 'DM Sans',sans-serif;color:var(--tinta2);text-align:center;margin:12px 18px 0}
+.zoombox{padding:14px 24px 0;display:flex;align-items:center;gap:12px}
+.zoombox svg{flex:none;color:var(--tinta3)}
+input[type=range]{flex:1;accent-color:var(--tealD)}
+.rot{font:500 16px 'DM Sans',sans-serif;letter-spacing:-.015em;margin:28px 20px 4px}
+.rotsub{font:400 12.5px 'DM Sans',sans-serif;color:var(--tinta2);margin:0 20px 14px;line-height:1.5}
+.rej{display:flex;flex-wrap:wrap;gap:14px;padding:0 18px;align-items:flex-end}
+.pos{display:flex;flex-direction:column;align-items:center;gap:8px}
+.pos small{font:400 11px 'DM Sans',sans-serif;color:var(--tinta3);text-align:center;line-height:1.35;max-width:116px}
+.mk{position:relative;overflow:hidden;flex:none;background:var(--tealT)}
+.chipd{display:inline-flex;align-items:center;background:#F2F1EE;border-radius:999px;padding:3px 15px 3px 3px;box-shadow:var(--e1)}
+.chipd b{font:500 13px 'DM Sans',sans-serif;padding-left:10px}
+.chipd.el{background:var(--magenta);box-shadow:0 5px 14px rgba(176,29,111,.34)}
+.chipd.el b{color:#FFF}
+.chipd.el .mk{background:rgba(255,255,255,.18)}
+.chipd.el .mk .cap{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.5),inset 0 2px 4px rgba(23,19,28,.2)}
+.filad{display:flex;background:#FFF;border-radius:15px;overflow:hidden;box-shadow:var(--e2);width:100%}
+.filad .cnt{width:5px;background:linear-gradient(180deg,var(--teal),#28E8DA55)}
+.filad .in{display:flex;align-items:center;gap:11px;padding:11px 12px}
+.filad b{font:500 13.5px 'DM Sans',sans-serif;display:block}
+.filad span{font:400 11.5px 'DM Sans',sans-serif;color:var(--tinta2)}
+.mapa{width:100%;height:104px;border-radius:15px;position:relative;overflow:hidden;box-shadow:var(--e1);
+ background:repeating-linear-gradient(0deg,#E4E7E2 0 1px,transparent 1px 22px),
+  repeating-linear-gradient(90deg,#E4E7E2 0 1px,transparent 1px 26px),linear-gradient(160deg,#F2F3F0,#E9EDE8)}
+.mapa:before{content:'';position:absolute;left:-10%;top:44%;width:120%;height:8px;background:#DDE3DA;transform:rotate(-6deg)}
+.leyfila{font:400 11px 'DM Sans',sans-serif;color:var(--tinta3);text-align:center;margin-top:8px}
+.pie{padding:26px 18px 30px;display:flex;flex-direction:column;gap:8px}
+.cta{width:100%;border:0;border-radius:17px;padding:17px;background:var(--tealD);color:#FFF;cursor:pointer;
+ font:500 15.5px 'DM Sans',sans-serif;box-shadow:0 6px 18px rgba(20,107,98,.34);transition:transform .18s var(--curva)}
+.cta:active{transform:scale(.975)}
+.otra{width:100%;border:0;border-radius:17px;padding:15px;background:transparent;color:var(--tinta2);cursor:pointer;
+ font:500 14px 'DM Sans',sans-serif}
+.oculto{display:none}
+</style>
+
+<p class="pista">Acercá y arrastrá. Ahora el visor grande responde, y el perfil usa tu mismo centro con más aire — no la foto entera.</p>
+
+<div class="tel">
+  <div class="notch"></div>
+  <div class="cuerpo">
+    <div class="barra"><b>La foto de Thor</b><span id="sub">Elegí una donde se le vea bien la cara.</span></div>
+
+    <div id="pasoA"><div class="zona" id="zona"><b>Elegir una foto</b><span>Podés acomodarla después.</span></div></div>
+    <input type="file" id="file" accept="image/*">
+
+    <div id="pasoB" class="oculto">
+      <div class="visorbox"><div class="visor" id="visor"><img id="vimg" alt=""><div class="cap"></div></div></div>
+      <p class="pistaMov" id="pistaMov">Arrastrá la foto para acomodarla.</p>
+      <div class="zoombox">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input type="range" id="zoom" min="100" max="300" value="130">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5M8 11h6M11 8v6"/></svg>
+      </div>
+
+      <div class="rot">Así lo vas a ver</div>
+      <p class="rotsub">El perfil respeta tu centro y abre el plano. Todo lo chico usa el encuadre exacto.</p>
+
+      <div class="rej">
+        <div class="pos"><div class="mk" data-aire="1.75" data-l="132" data-r="42"><img alt=""><div class="cap"></div></div>
+          <small>En su perfil</small></div>
+        <div class="pos"><div class="mk" data-l="58" data-r="19"><img alt=""><div class="cap"></div></div>
+          <small>En tu hogar<br>y al elegir mascota</small></div>
+        <div class="pos"><div class="mk" data-l="44" data-r="14"><img alt=""><div class="cap"></div></div>
+          <small>En la sala<br>del veterinario</small></div>
+      </div>
+
+      <div class="rej" style="margin-top:20px">
+        <div class="pos"><div class="chipd"><div class="mk" data-l="38" data-r="19"><img alt=""><div class="cap"></div></div><b>Thor</b></div>
+          <small>Al reservar<br>sin elegir</small></div>
+        <div class="pos"><div class="chipd el"><div class="mk" data-l="38" data-r="19"><img alt=""><div class="cap"></div></div><b>Thor</b></div>
+          <small>Al reservar<br>elegido</small></div>
+      </div>
+
+      <div style="padding:20px 18px 0">
+        <div class="filad"><div class="cnt"></div><div class="in">
+          <div class="mk" data-l="36" data-r="12"><img alt=""><div class="cap"></div></div>
+          <div><b>Paseo de Thor</b><span>sábado 25 · con Carlos Andrade</span></div></div></div>
+        <div class="mapa" style="margin-top:12px">
+          <div style="position:absolute;left:50%;top:10px;transform:translateX(-50%);width:58px;height:70px">
+            <svg width="58" height="70" style="position:absolute;filter:drop-shadow(0 5px 8px rgba(23,19,28,.28))">
+              <path d="M29 68C29 68 52 44.5 52 27.5A23 23 0 006 27.5C6 44.5 29 68 29 68z" fill="#146B62"/></svg>
+            <div style="position:absolute;left:9px;top:9px">
+              <div class="mk" data-l="40" data-r="20"><img alt=""><div class="cap"></div></div></div></div>
+        </div>
+        <p class="leyfila">En sus citas, y en el mapa mientras alguien lo pasea</p>
+      </div>
+
+      <div class="pie"><button class="cta">Listo</button><button class="otra" id="otra">Cargar otra foto</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = i => document.getElementById(i);
+let src=null, iw=0, ih=0, cx=.5, cy=.42, z=1.3, ar=false, ox=0, oy=0, marcos=[];
+
+$('zona').onclick = () => $('file').click();
+$('otra').onclick = () => $('file').click();
+$('file').onchange = e => { if(e.target.files[0]) leer(e.target.files[0]); };
+
+function leer(f){
+  const r = new FileReader();
+  r.onload = () => { const im = new Image();
+    im.onload = () => {
+      src=r.result; iw=im.naturalWidth; ih=im.naturalHeight;
+      cx=.5; cy=.42; z=1.3; $('zoom').value=130;
+      $('pasoA').classList.add('oculto'); $('pasoB').classList.remove('oculto');
+      $('sub').textContent='Acomodala hasta que quede como querés.';
+      marcos = [...document.querySelectorAll('#pasoB .mk')].map(el => ({
+        img: el.querySelector('img'), L:+el.dataset.l, R:+el.dataset.r,
+        aire: el.dataset.aire ? +el.dataset.aire : 1,
+        el
+      }));
+      marcos.forEach(m => { m.el.style.width=m.L+'px'; m.el.style.height=m.L+'px';
+        m.el.style.borderRadius=m.R+'px'; m.img.src=src; });
+      $('vimg').src = src;
+      clamp(); aplicar();
+    };
+    im.src = r.result; };
+  r.readAsDataURL(f);
+}
+
+const base = () => Math.min(iw,ih);
+const lado = () => base()/z;
+function margen(){ const s=lado(); return { x:(iw-s)/2/iw, y:(ih-s)/2/ih }; }
+function clamp(){ const m=margen();
+  cx = Math.max(.5-m.x, Math.min(.5+m.x, cx));
+  cy = Math.max(.5-m.y, Math.min(.5+m.y, cy)); }
+
+function poner(img, L, aire){
+  const s = Math.min(lado()*aire, base());
+  const k = L/s;
+  let px = cx*iw, py = cy*ih;
+  px = Math.max(s/2, Math.min(iw-s/2, px));
+  py = Math.max(s/2, Math.min(ih-s/2, py));
+  img.style.width  = (iw*k)+'px';
+  img.style.height = (ih*k)+'px';
+  img.style.left   = (-(px - s/2)*k)+'px';
+  img.style.top    = (-(py - s/2)*k)+'px';
+}
+
+function aplicar(){
+  if(!src) return;
+  poner($('vimg'), 248, 1);
+  marcos.forEach(m => poner(m.img, m.L, m.aire));
+  const m = margen(), hay = m.x > .002 || m.y > .002;
+  $('visor').classList.toggle('puede', hay);
+  $('pistaMov').textContent = hay ? 'Arrastrá la foto para acomodarla.'
+    : 'Acercá para poder acomodar el encuadre.';
+}
+
+const v = $('visor');
+v.addEventListener('pointerdown', e => {
+  const m = margen(); if(m.x <= .002 && m.y <= .002) return;
+  ar=true; ox=e.clientX; oy=e.clientY;
+  v.classList.add('mov'); v.setPointerCapture(e.pointerId); e.preventDefault();
+});
+v.addEventListener('pointermove', e => {
+  if(!ar) return;
+  const k = 248/lado();
+  cx -= (e.clientX-ox)/k/iw; cy -= (e.clientY-oy)/k/ih;
+  ox=e.clientX; oy=e.clientY; clamp(); aplicar();
+});
+['pointerup','pointercancel'].forEach(t =>
+  v.addEventListener(t, () => { ar=false; v.classList.remove('mov'); }));
+v.addEventListener('wheel', e => { if(!src) return; e.preventDefault();
+  z = Math.max(1, Math.min(3, z - e.deltaY/600));
+  $('zoom').value = Math.round(z*100); clamp(); aplicar(); }, {passive:false});
+
+$('zoom').oninput = e => { z = e.target.value/100; clamp(); aplicar(); };
+</script>

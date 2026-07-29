@@ -9839,7 +9839,10 @@ export type Database = {
           fecha_alta: string
           fecha_nacimiento: string | null
           fecha_nacimiento_precision: string | null
+          foto_cx: number
+          foto_cy: number
           foto_url: string | null
+          foto_z: number
           id: string
           microchip: string | null
           nombre: string
@@ -9865,7 +9868,10 @@ export type Database = {
           fecha_alta?: string
           fecha_nacimiento?: string | null
           fecha_nacimiento_precision?: string | null
+          foto_cx?: number
+          foto_cy?: number
           foto_url?: string | null
+          foto_z?: number
           id?: string
           microchip?: string | null
           nombre: string
@@ -9891,7 +9897,10 @@ export type Database = {
           fecha_alta?: string
           fecha_nacimiento?: string | null
           fecha_nacimiento_precision?: string | null
+          foto_cx?: number
+          foto_cy?: number
           foto_url?: string | null
+          foto_z?: number
           id?: string
           microchip?: string | null
           nombre?: string
@@ -16695,6 +16704,16 @@ export type Database = {
         }[]
       }
       debug_session: { Args: never; Returns: Json }
+      declarar_foto_mascota: {
+        Args: {
+          p_cx: number
+          p_cy: number
+          p_foto_url?: string
+          p_mascota_id: string
+          p_z: number
+        }
+        Returns: Json
+      }
       declarar_talla_pelaje: {
         Args: { p_mascota_id: string; p_pelaje: string; p_talla: string }
         Returns: Json
