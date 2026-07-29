@@ -98,7 +98,9 @@
   (lib AES nativa). Si lo levanta ANTES del build, se instala y sube;
   si no, espera otro tren. NO instalado.
 
-**LO QUE NECESITO DEL FOUNDER — exacto, con su dónde:**
+**LO QUE NECESITO DEL FOUNDER — exacto, con su dónde (VERIFICADO
+contra la doc vigente de Expo, docs.expo.dev/push-notifications/
+fcm-credentials — 29-jul, no de memoria):**
 
 1. **Los dos `google-services.json`** (uno por app):
    `console.firebase.google.com` → EL PROYECTO LEGADO → ⚙️ Project
@@ -107,23 +109,28 @@
    → descargar el `google-services.json` de CADA una. (Si el legado ya
    tiene apps Android registradas con otros packages, se AGREGAN estas
    dos — no se toca nada existente; una sola identidad de remitente.)
-2. **La credencial FCM V1** (la llave del servidor de push):
-   mismo Project settings → **Service accounts → Firebase Admin SDK →
-   "Generate new private key"** → baja UN JSON (sirve para las dos
-   apps). Luego, POR CADA app y por consola (`apps/prestador/` y
-   `apps/cliente/`): `npx eas-cli credentials` → Android → el proyecto
-   → **Push Notifications: Manage FCM V1 service account key → Upload**
-   ese JSON. *(Alternativa por navegador: expo.dev → cada proyecto →
-   Credentials → FCM V1.)*
-3. **Entregarme los `google-services.json` SIN chat** (regla de
-   credenciales S79: navegador→terminal, jamás al chat): por CADA app,
-   desde su carpeta: `npx eas-cli env:create --scope project
-   --environment development --name GOOGLE_SERVICES_JSON --type file
-   --visibility secret --value ./google-services.json` (con el archivo
-   descargado en esa carpeta; después se borra del disco — el repo
-   jamás lo ve, el `.gitignore` igual lo cubre de fábrica en Expo).
-   *Nota: el JSON de google-services no es un secreto duro (viaja
-   dentro de todo APK), pero la casa lo trata con la misma disciplina.*
+2. **La credencial FCM V1** (la llave del servidor de push) — flujo
+   LITERAL de la doc: mismo Project settings → **Service accounts →
+   "Generate New Private Key" → "Generate Key"** → baja UN JSON (sirve
+   para las dos apps; **este JSON SÍ es secreto: jamás al repo ni al
+   chat**). Luego, POR CADA app desde su carpeta (`apps/prestador/` y
+   `apps/cliente/`): `npx eas-cli credentials` → **Android →
+   production → Google Service Account → "Manage your Google Service
+   Account Key for Push Notifications (FCM V1)" → "Set up... → Upload
+   a new service account key"** (EAS detecta el JSON local y pide
+   confirmar). *(Alternativa navegador, literal de la doc: expo.dev →
+   Project settings → Credentials → Android → Service Credentials →
+   FCM V1 service account key → Add a service account key → Upload
+   new key.)*
+3. **Los `google-services.json` — la vía SIMPLE, sancionada por la
+   doc:** *"contiene public-facing identifiers"* — PUEDE commitearse
+   (el que es secreto es el private key del paso 2, no éste). Colocá
+   cada uno en `apps/prestador/google-services.json` y
+   `apps/cliente/google-services.json` y avisá: el día del tren Code
+   fija `"googleServicesFile": "./google-services.json"` (mi
+   app.config condicional ya cubre la alternativa por env de archivo
+   si preferís no commitearlos — cualquiera de las dos vías sirve,
+   UNA sola por app).
 
 **Lo que queda para EL DÍA DEL TREN (Code, con veda):** bump
 `version` (cliente 1.0.2→1.0.3 · prestador 1.0.3→1.0.4 — NO antes: el
