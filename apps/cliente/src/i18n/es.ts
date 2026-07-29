@@ -348,6 +348,8 @@ export const clienteEs = {
     cargarOtra: 'Cargar otra foto',
     arrastra: 'Arrastra la foto para acomodarla.',
     acerca: 'Acerca con dos dedos para poder acomodar el encuadre.',
+    // r3 — el hint jamás afirma una capacidad muerta (clase D-574)
+    gestoMuerto: 'El ajuste no está respondiendo en este teléfono. Puedes guardar así — la foto queda centrada.',
     visorA11y: 'El encuadre de la foto de {{nombre}}. Pellizca para acercar y arrastra para acomodar.',
     asiSeVe: 'Así lo vas a ver',
     asiSeVeDetalle: 'El perfil respeta tu centro y abre el plano. Todo lo chico usa el encuadre exacto.',

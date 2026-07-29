@@ -47,6 +47,8 @@ export default function PasoFoto() {
   const [foto, setFoto] = useState<FotoCapturada | null>(null);
   const [hojaAbierta, setHojaAbierta] = useState(false);
   const [permisoDenegado, setPermisoDenegado] = useState(false);
+  // r3 paso 2: mientras el gesto vive, el scroll padre NO compite.
+  const [gestoActivo, setGestoActivo] = useState(false);
   // El encuadre vigente NO re-renderiza la pantalla: vive en ref y las
   // previews viven en el UI thread (EncuadreFoto).
   const encuadreRef = useRef<Encuadre>(ENCUADRE_DEFAULT);
@@ -59,7 +61,10 @@ export default function PasoFoto() {
         atras
         onAtras={() => router.back()}
       />
-      <ScrollView contentContainerStyle={{ padding: spacing[5], paddingTop: spacing[6], paddingBottom: insets.bottom + spacing[8], gap: spacing[5] }}>
+      <ScrollView
+        scrollEnabled={!gestoActivo}
+        contentContainerStyle={{ padding: spacing[5], paddingTop: spacing[6], paddingBottom: insets.bottom + spacing[8], gap: spacing[5] }}
+      >
         {foto === null ? (
           <View style={{ alignItems: 'center', gap: spacing[4], paddingTop: spacing[6] }}>
             <AvatarMascota
@@ -88,6 +93,7 @@ export default function PasoFoto() {
               onCambio={(e) => {
                 encuadreRef.current = e;
               }}
+              onInteraccion={setGestoActivo}
             />
             <Boton variante="ghost" bloque etiqueta={t('fotoEncuadre.cargarOtra')} onPress={() => setHojaAbierta(true)} />
           </>

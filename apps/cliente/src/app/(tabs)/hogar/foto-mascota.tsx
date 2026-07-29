@@ -60,6 +60,8 @@ export default function FotoMascota() {
   const [permisoDenegado, setPermisoDenegado] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [errorGuardar, setErrorGuardar] = useState<string | null>(null);
+  // r3 paso 2: mientras el gesto vive, el scroll padre NO compite.
+  const [gestoActivo, setGestoActivo] = useState(false);
   // El encuadre vigente del editor (ref-como-estado: el editor reporta al
   // soltar cada gesto; guardar lee lo último).
   const [encuadre, setEncuadre] = useState<Encuadre>(ENCUADRE_DEFAULT);
@@ -166,7 +168,10 @@ export default function FotoMascota() {
         atras
         onAtras={() => router.back()}
       />
-      <ScrollView contentContainerStyle={{ padding: spacing[5], paddingTop: spacing[5], paddingBottom: insets.bottom + spacing[8], gap: spacing[5] }}>
+      <ScrollView
+        scrollEnabled={!gestoActivo}
+        contentContainerStyle={{ padding: spacing[5], paddingTop: spacing[5], paddingBottom: insets.bottom + spacing[8], gap: spacing[5] }}
+      >
         {vigente.t === 'cargando' && fotoNueva === null ? (
           <EsqueletoGrupo etiqueta={t('hogar.cargando')}>
             <View style={{ alignItems: 'center', gap: spacing[4] }}>
@@ -204,6 +209,7 @@ export default function FotoMascota() {
               inicial={editorInicial}
               nombre={nombre}
               onCambio={setEncuadre}
+              onInteraccion={setGestoActivo}
             />
             <Boton variante="ghost" bloque etiqueta={t('fotoEncuadre.cargarOtra')} onPress={() => setHojaAbierta(true)} />
           </>

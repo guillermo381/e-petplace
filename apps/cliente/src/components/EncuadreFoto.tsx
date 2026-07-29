@@ -21,7 +21,7 @@
  * matemática se promueven cuando AvatarMascota gane `encuadre`.
  */
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import Svg, { Path } from 'react-native-svg';
@@ -101,9 +101,21 @@ export interface EncuadreFotoProps {
   nombre: string;
   /** Se llama al SOLTAR cada gesto con el encuadre vigente (clampeado). */
   onCambio: (e: Encuadre) => void;
+  /** S82 r3 (paso 2): true mientras hay un gesto sobre el visor — la
+   *  pantalla BLOQUEA el scroll del padre (scrollEnabled={!activa}) para
+   *  que el ScrollView no se coma el arrastre vertical. */
+  onInteraccion?: (activa: boolean) => void;
 }
 
-export function EncuadreFoto({ uri, dim, inicial, nombre, onCambio }: EncuadreFotoProps) {
+/** S82 r3 — EL HINT SE DERIVA DEL GESTO VIVO, no solo del margen (la
+ *  clase D-574: una voz que afirma una capacidad que nadie probó).
+ *  'sin_probar' = nadie tocó todavía · 'vivo' = un gesto de GH llegó ·
+ *  'muerto' = hubo TOQUE (evento RN, que dispara siempre) y GH no
+ *  respondió en la ventana — el hint dice la falla en vez de prometer. */
+type EstadoGesto = 'sin_probar' | 'vivo' | 'muerto';
+const VENTANA_GESTO_MS = 400;
+
+export function EncuadreFoto({ uri, dim, inicial, nombre, onCambio, onInteraccion }: EncuadreFotoProps) {
   const { theme } = useTheme();
   const { t } = useTraduccion();
 
@@ -113,10 +125,44 @@ export function EncuadreFoto({ uri, dim, inicial, nombre, onCambio }: EncuadreFo
   const z = useSharedValue(ini.z);
   const zInicio = useSharedValue(ini.z);
   const [conMargen, setConMargen] = useState(hayMargen(dim, ini.z));
+  const [estadoGesto, setEstadoGesto] = useState<EstadoGesto>('sin_probar');
+  const sondaRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const sync = (e: Encuadre) => onCambio(e);
 
+  // La sonda del gesto: el onTouchStart de RN dispara SIEMPRE; si GH no
+  // reporta onBegin dentro de la ventana, el gesto está MUDO y se dice
+  // (voz honesta + forense — jamás el hint prometiendo arrastre).
+  const alTocarRN = () => {
+    if (estadoGesto !== 'sin_probar' || sondaRef.current !== null) return;
+    sondaRef.current = setTimeout(() => {
+      sondaRef.current = null;
+      setEstadoGesto((prev) => {
+        if (prev !== 'sin_probar') return prev;
+        console.error('[EncuadreFoto] GESTO MUDO: toque RN sin onBegin de GH — ¿GestureHandlerRootView ausente? (guard: scripts/verify-gestos-cliente.mjs)');
+        return 'muerto';
+      });
+    }, VENTANA_GESTO_MS);
+  };
+  const alComenzarGesto = () => {
+    if (sondaRef.current !== null) {
+      clearTimeout(sondaRef.current);
+      sondaRef.current = null;
+    }
+    setEstadoGesto('vivo');
+    onInteraccion?.(true);
+  };
+  const alTerminarGesto = () => {
+    onInteraccion?.(false);
+  };
+
   const pan = Gesture.Pan()
+    .onBegin(() => {
+      runOnJS(alComenzarGesto)();
+    })
+    .onFinalize(() => {
+      runOnJS(alTerminarGesto)();
+    })
     .onChange((ev) => {
       const k = LADO_VISOR / ladoRecorte(dim, z.value);
       const c = clampEncuadre(dim, {
@@ -132,6 +178,12 @@ export function EncuadreFoto({ uri, dim, inicial, nombre, onCambio }: EncuadreFo
     });
 
   const pinch = Gesture.Pinch()
+    .onBegin(() => {
+      runOnJS(alComenzarGesto)();
+    })
+    .onFinalize(() => {
+      runOnJS(alTerminarGesto)();
+    })
     .onStart(() => {
       zInicio.value = z.value;
     })
@@ -165,10 +217,13 @@ export function EncuadreFoto({ uri, dim, inicial, nombre, onCambio }: EncuadreFo
 
   return (
     <View style={{ gap: spacing[4] }}>
-      {/* El visor — pinza + arrastre. Sombra: NIVEL existente (elevada). */}
+      {/* El visor — pinza + arrastre. Sombra: NIVEL existente (elevada).
+          onTouchStart = la sonda RN del gesto (dispara siempre; si GH
+          calla, el hint deja de prometer). */}
       <View style={{ alignItems: 'center' }}>
         <GestureDetector gesture={gesto}>
           <View
+            onTouchStart={alTocarRN}
             style={{
               width: LADO_VISOR,
               height: LADO_VISOR,
@@ -184,9 +239,18 @@ export function EncuadreFoto({ uri, dim, inicial, nombre, onCambio }: EncuadreFo
           </View>
         </GestureDetector>
       </View>
-      <Texto variante="apoyo" centrado>
-        {conMargen ? t('fotoEncuadre.arrastra') : t('fotoEncuadre.acerca')}
-      </Texto>
+      {/* El hint por ESTADO DEL GESTO primero, margen después (r3): un
+          gesto muerto se DICE — la voz jamás afirma una capacidad que
+          nadie probó (clase D-574). */}
+      {estadoGesto === 'muerto' ? (
+        <Texto variante="apoyo" color="danger" centrado>
+          {t('fotoEncuadre.gestoMuerto')}
+        </Texto>
+      ) : (
+        <Texto variante="apoyo" centrado>
+          {conMargen ? t('fotoEncuadre.arrastra') : t('fotoEncuadre.acerca')}
+        </Texto>
+      )}
 
       {/* Así lo vas a ver — las superficies de la lámina, EN VIVO */}
       <View style={{ gap: spacing[1] }}>

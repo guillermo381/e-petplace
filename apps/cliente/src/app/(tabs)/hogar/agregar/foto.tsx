@@ -43,6 +43,8 @@ export default function AgregarPasoFoto() {
   const [foto, setFoto] = useState<FotoCapturada | null>(null);
   const [hojaAbierta, setHojaAbierta] = useState(false);
   const [permisoDenegado, setPermisoDenegado] = useState(false);
+  // r3 paso 2: mientras el gesto vive, el scroll padre NO compite.
+  const [gestoActivo, setGestoActivo] = useState(false);
   const encuadreRef = useRef<Encuadre>(ENCUADRE_DEFAULT);
 
   return (
@@ -53,7 +55,10 @@ export default function AgregarPasoFoto() {
         atras
         onAtras={() => router.back()}
       />
-      <ScrollView contentContainerStyle={{ padding: spacing[5], paddingTop: spacing[6], paddingBottom: insets.bottom + spacing[8], gap: spacing[5] }}>
+      <ScrollView
+        scrollEnabled={!gestoActivo}
+        contentContainerStyle={{ padding: spacing[5], paddingTop: spacing[6], paddingBottom: insets.bottom + spacing[8], gap: spacing[5] }}
+      >
         {foto === null ? (
           <View style={{ alignItems: 'center', gap: spacing[4], paddingTop: spacing[6] }}>
             <AvatarMascota
@@ -82,6 +87,7 @@ export default function AgregarPasoFoto() {
               onCambio={(e) => {
                 encuadreRef.current = e;
               }}
+              onInteraccion={setGestoActivo}
             />
             <Boton variante="ghost" bloque etiqueta={t('fotoEncuadre.cargarOtra')} onPress={() => setHojaAbierta(true)} />
           </>

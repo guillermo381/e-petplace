@@ -306,6 +306,8 @@ export const clienteEn = {
     cargarOtra: 'Load another photo',
     arrastra: 'Drag the photo to adjust it.',
     acerca: 'Pinch to zoom in so you can adjust the framing.',
+    // r3 — the hint never claims a dead capability (D-574 class)
+    gestoMuerto: "Adjusting isn't responding on this phone. You can save as is — the photo stays centered.",
     visorA11y: "The framing of {{nombre}}'s photo. Pinch to zoom and drag to adjust.",
     asiSeVe: "How you'll see them",
     asiSeVeDetalle: 'The profile keeps your center and opens the frame. Everything small uses the exact framing.',

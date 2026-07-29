@@ -1,5 +1,12 @@
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
+// CURA S82-A r3 (espejo EXACTO de la cura S58 del prestador, misma clase):
+// EncuadreFoto es el PRIMER GestureDetector en el CUERPO de una pantalla
+// del CLIENTE — Hoja/VisorFoto traen su GestureHandlerRootView ADENTRO
+// del Modal (por eso nunca dolió) y este raíz no tenía ninguno: el gesto
+// sale MUDO al dispositivo sin avisar (L-192; la web no lo exige — el
+// smoke fue verde). Guard mecánico: scripts/verify-gestos-cliente.mjs.
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Updates from 'expo-updates';
@@ -58,12 +65,14 @@ export default function RootLayout() {
   if (!fontsLoaded && !fontsError) return null;
 
   return (
-    <ProveedorI18n recursos={recursos}>
-      <EpetThemeProvider mode={colorScheme === 'dark' ? 'dark' : 'light'}>
-        <AvisoProvider>
-          <Stack screenOptions={{ headerShown: false }} />
-        </AvisoProvider>
-      </EpetThemeProvider>
-    </ProveedorI18n>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ProveedorI18n recursos={recursos}>
+        <EpetThemeProvider mode={colorScheme === 'dark' ? 'dark' : 'light'}>
+          <AvisoProvider>
+            <Stack screenOptions={{ headerShown: false }} />
+          </AvisoProvider>
+        </EpetThemeProvider>
+      </ProveedorI18n>
+    </GestureHandlerRootView>
   );
 }
