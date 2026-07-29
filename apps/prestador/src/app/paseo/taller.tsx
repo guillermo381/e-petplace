@@ -654,15 +654,7 @@ export default function TallerPaseo() {
                               existe solo encendido; el sugerido (60% del
                               suelto al paso $0.25) jamás es campo vacío ── */}
                           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
-                            <Text
-                              style={{
-                                fontFamily: typography.family.sans.regular,
-                                fontSize: typography.size.base,
-                                color: theme.text.primary,
-                              }}
-                            >
-                              {t('taller.planInterruptor')}
-                            </Text>
+                            <Texto variante="cuerpo">{t('taller.planInterruptor')}</Texto>
                             <Interruptor
                               etiqueta={t('taller.planInterruptor')}
                               registro="oficio"
@@ -702,15 +694,7 @@ export default function TallerPaseo() {
                               los presets 5/10/15 EN LETRA viven ACÁ (la
                               intro de sección murió, punto 3) ── */}
                           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing[3] }}>
-                            <Text
-                              style={{
-                                fontFamily: typography.family.sans.regular,
-                                fontSize: typography.size.base,
-                                color: theme.text.primary,
-                              }}
-                            >
-                              {t('taller.paqueteInterruptor')}
-                            </Text>
+                            <Texto variante="cuerpo">{t('taller.paqueteInterruptor')}</Texto>
                             <Interruptor
                               etiqueta={t('taller.paqueteInterruptor')}
                               registro="oficio"
