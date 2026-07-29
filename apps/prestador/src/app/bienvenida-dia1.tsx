@@ -24,7 +24,7 @@ import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
-import { Boton, Texto, palette, radius, spacing, useTheme } from '@epetplace/ui';
+import { Boton, Isotipo, Texto, palette, radius, spacing, useTheme } from '@epetplace/ui';
 import { obtenerMiPerfil, registrarPrimerIngreso } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -106,10 +106,37 @@ export default function BienvenidaDia1() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      {/* S81-C (lazo regla 80, orden founder): el PAPEL de la carta —
+          fondo teal casi imperceptible (papel + tealAlpha16 → #D8F6F2)
+          + el isotipo en MARCA DE AGUA (la pieza de ui, no redibujado;
+          tinta al 3%, esquina inferior derecha con el centro fuera del
+          lienzo — composición A4). Sin caja. CONTRASTE MEDIDO (L-131),
+          peor caso texto SOBRE la marca: primary 14.05 · secondary
+          4.56 (AA ✓) · marca vs fondo 1.058 (casi imperceptible). El
+          5% original FALLÓ secondary (4.39 < 4.5) y se bajó a 3% por
+          número, no a ojo. Tono-sobre-tono teal exigiría fill custom
+          en Isotipo — pedido a B, no se toca ui. */}
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: palette.tealAlpha16,
+        }}
+      />
+      <View
+        pointerEvents="none"
+        style={{ position: 'absolute', right: -70, bottom: -30, opacity: 0.03 }}
+      >
+        <Isotipo size={280} variant="tinta" />
+      </View>
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,
-          paddingTop: insets.top + spacing[10],
+          paddingTop: insets.top + spacing[8],
           paddingBottom: insets.bottom + spacing[8],
           paddingHorizontal: spacing[6],
           gap: spacing[6],
@@ -122,9 +149,14 @@ export default function BienvenidaDia1() {
             (las palabras DEL PRESTADOR) gana su aire: sangría propia —
             sus palabras adentro de nuestra carta, distinguibles sin
             comillas de utilería. */}
-        <View style={{ flexDirection: 'row', gap: spacing[4] }}>
+        {/* S81-C (lazo founder: "la carta ocupa su hoja"): el cuerpo se
+            CENTRA en el alto disponible y el aire interno sube a [8] —
+            se reparte el aire, no se estiran tipografías. El flex:1 del
+            wrapper reemplaza al spacer que empujaba todo arriba y
+            dejaba media pantalla vacía abajo. */}
+        <View style={{ flex: 1, justifyContent: 'center', flexDirection: 'row', gap: spacing[4] }}>
           <CantoDeMarca />
-          <View style={{ flex: 1, gap: spacing[6] }}>
+          <View style={{ flex: 1, justifyContent: 'center', gap: spacing[8] }}>
             <Texto variante="titulo">{saludo}</Texto>
 
             <Texto variante="cuerpo">{t('dia1.eleccion')}</Texto>
@@ -147,8 +179,6 @@ export default function BienvenidaDia1() {
         </View>
 
         <Texto variante="apoyo">{t('dia1.dia90')}</Texto>
-
-        <View style={{ flex: 1 }} />
 
         <Boton
           variante="primario"
