@@ -472,34 +472,13 @@ export default function PerfilDeMascota() {
           ) : null}
         </View>
 
-        {/* ── 3 · Su vida ── */}
-        <View style={{ gap: spacing[3] }}>
-          <TituloModulo texto={t('perfil.vida')} />
-          {items === null ? (
-            <LineaDeVida items={[]} cargando />
-          ) : items === 'error' ? (
-            <EstadoVacio
-              titulo={t('hogar.errorHistoria')}
-              descripcion={t('hogar.errorHistoriaDetalle')}
-              accion={
-                <Boton
-                  variante="secundario"
-                  etiqueta={t('hogar.reintentar')}
-                  onPress={() => {
-                    setItems(null);
-                    if (typeof mascotaId === 'string') void cargarPrimeraPagina(mascotaId);
-                  }}
-                />
-              }
-            />
-          ) : items.length === 0 ? (
-            <EstadoVacio titulo={t('hogar.historiaEmpieza')} descripcion={t('hogar.historiaEmpiezaDetalle')} />
-          ) : (
-            <LineaDeVida items={items} onPressNodo={alTocarNodo} estadoPie={estadoPie} onCargarMas={() => void cargarMas()} />
-          )}
-        </View>
-
-        {/* ── 4 · Identidad (progresiva) ── */}
+        {/* ── S81-C (vara founder: "el perfil de la mascota se lee
+            ANTES que su historial") — la Identidad sube por encima de
+            Su vida: quién es (raza·sexo·microchip·socialización·talla,
+            el expediente diferenciador) dejaba de leerse sepultado bajo
+            una Línea de Vida paginada. La pila v1.3 queda intacta (el
+            estado sigue primero) y lo PAGINABLE cierra la página. ── */}
+        {/* ── 3 · Identidad (progresiva) ── */}
         <View style={{ gap: spacing[3] }}>
           <TituloModulo texto={t('perfil.identidad')} />
           {datosIdentidad.length > 0 ? (
@@ -573,6 +552,33 @@ export default function PerfilDeMascota() {
             {t('perfil.identidadInvitacion')}
           </Text>
         </View>
+        {/* ── 4 · Su vida ── */}
+        <View style={{ gap: spacing[3] }}>
+          <TituloModulo texto={t('perfil.vida')} />
+          {items === null ? (
+            <LineaDeVida items={[]} cargando />
+          ) : items === 'error' ? (
+            <EstadoVacio
+              titulo={t('hogar.errorHistoria')}
+              descripcion={t('hogar.errorHistoriaDetalle')}
+              accion={
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('hogar.reintentar')}
+                  onPress={() => {
+                    setItems(null);
+                    if (typeof mascotaId === 'string') void cargarPrimeraPagina(mascotaId);
+                  }}
+                />
+              }
+            />
+          ) : items.length === 0 ? (
+            <EstadoVacio titulo={t('hogar.historiaEmpieza')} descripcion={t('hogar.historiaEmpiezaDetalle')} />
+          ) : (
+            <LineaDeVida items={items} onPressNodo={alTocarNodo} estadoPie={estadoPie} onCargarMas={() => void cargarMas()} />
+          )}
+        </View>
+
       </ScrollView>
 
       <PaseoSocialHoja
