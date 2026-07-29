@@ -224,7 +224,11 @@ de memoria sería L-139; duplicar el path en otro archivo sería D-546.**
    animación de espera legal, y es de marca, no shimmer.
 4. **REGISTRO S80 — los valores del movimiento (founder, rediseño del
    portal):**
-   · **Entrada de contenido:** escalón **45 ms** entre elementos ·
+   · **Entrada de contenido:** escalón **120 ms** entre elementos
+     *(ENMIENDA FIRMADA S81 — founder: el 45 de S80 pasó a 120,
+     `motion.stagger.slow`, el token de la casa; el porqué medido en el
+     lazo regla 80 de B: con 45, tres bloques resolvían en ~390 ms y el
+     escalonado no se PERCIBÍA como orden de lectura)* ·
      duración **300 ms** · `cubic-bezier(.32,.72,0,1)` (la física de la
      casa, ya canónica en el punto 2) · desde `translateY: 15`.
      **Rápido lo funcional.**
@@ -235,8 +239,9 @@ de memoria sería L-139; duplicar el path en otro archivo sería D-546.**
    `usePresionado` (0.97/0.99, receta única S62); el 0.972 de las
    láminas S80 fue transcripción imprecisa, no calibración — un tercer
    valor sería enmienda de primitiva con gate propio. De la lámina, la
-   ENTRADA (45 ms / 300 ms / bezier .32,.72,0,1 / translateY 15) es la
-   única pieza firmada y este registro es su fuente única. Dos
+   ENTRADA (300 ms / bezier .32,.72,0,1 / translateY 15; escalón 45→
+   **120 FIRMADO S81**) es la única pieza firmada y este registro es su
+   fuente única. Dos
    CANDIDATAS sin firma esperan gate propio: el empuje de pantalla
    −16% (a §5.2 — la pantalla que retrocede) y el overshoot 280 ms de
    la huella de tab (a la Ley 6/§2.6 — el CÓMO aparece). La
@@ -522,8 +527,9 @@ RECONSTRUYE**: nace cuando su literal llegue (protocolo D-434/D-435).
   9.2 posición del canto por TIPO de tarjeta · 9.3 el estado real
   primero — origen: tres fallas de campo del mismo día · 9.4 la forma
   lleva el dato — la prueba de tapar el texto · 9.5 la monotonía como
-  síntoma). §5 gana el **REGISTRO S80 del movimiento** (entrada 45 ms /
-  300 ms / la física de la casa desde translateY 15; el brillo de placa
+  síntoma). §5 gana el **REGISTRO S80 del movimiento** (entrada 300 ms /
+  la física de la casa desde translateY 15; escalón 45→**120 firmado
+  S81**; el brillo de placa
   espera su número — no se construye sin él). Disparo de
   reconsideración declarado sobre §8-§9 entero (mecánica §5b): la
   cohorte de 15 es el ensayo que falta. Deuda ligada: D-572 (contraste

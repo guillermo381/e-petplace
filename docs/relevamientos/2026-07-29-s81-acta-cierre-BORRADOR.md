@@ -165,6 +165,43 @@ ancla y tres verificaciones mudas parieron 76(h), la enmienda de la
 - Commits A del día: ~21 (A1…A21). B y C: los suyos, todos pusheados
   y nombrados en los rangos declarados. HEAD == origin al cierre.
 
+## ADDENDUM — LA COLA DE LA SESIÓN (A23-A26 + los cobros de la tarde)
+
+- **L-193 DEPOSITADA — LA PREMISA HEREDADA QUE NADIE FECHÓ** (hermana
+  de L-192, tres cobros en el día): el límite 05:00-22:00 de S55 · el
+  `adjustResize` letra-muerta bajo edge-to-edge SDK 57 · **el Firebase
+  del legado que NO EXISTÍA** (medido en los seis repos: cero; el
+  "admin opera notificaciones" = compositor sobre tablas con
+  `push_tokens` en 0 filas — el push jamás existió). Ninguna la puso
+  una decisión.
+- **EL TREN (R4): con PROYECTO FIREBASE NUEVO** (la premisa del reuse
+  falsada) — armado entero: expo-notifications en ambas apps + plugin +
+  googleServicesFile condicional + la sonda del manifest (D-579,
+  preparada-apagada) + checklist del founder verificado contra doc
+  vigente. Pasajero teclado `"pan"`: CANDIDATO CONDICIONADO (disparo:
+  que EvitaTeclado no resuelva en dispositivo).
+- **EL HUECO DE LOGIN, medido (cero cura):** recuperar contraseña NO
+  EXISTE (ni pantalla ni envío, ambas apps — el wrapper tiene 4
+  funciones) · verificación de email DESACTIVADA (D-299) · **8 cuentas
+  SOLO-Google del legado en CALLEJÓN TOTAL** (Satori incluida — sin
+  botón Google en las apps, sin clave que recuperar) · eliminar cuenta
+  con pantalla y voz pero NO funcional (D-337). Config-vs-arco
+  separado: activar verificación = config; recuperar/Google
+  móvil/delete funcional = construcción.
+- **EL ALTA/NOMBRE cerró su arco:** RPC v2 aplicada · censo 9
+  superficies/0 rompen con NULL · backfill preparado (y el de Satori
+  sale del DATO: `full_name` "Satori Latam" en su metadata Google) ·
+  la ceremonia con flag por user_id.
+- **EL CHECK del rango horario aplicado** (`20260729190000` — la
+  invertida rebota, la nocturna válida pasa) y **B habilitó la grilla
+  del día entero** (la línea (a) del founder, viva).
+- **EvitaTeclado SUBIÓ a ui** (B — la casa tiene UNA; D-498 paga su
+  mitad OTA) · **el escalón de §5 FIRMADO 45→120** (código de B +
+  letra depositada en DIRECCION_ARTE).
+- **La pasarela: sigue sin proveedor** (jubilada de nombre en S81; la
+  decisión Kushki/NUVEI es del founder y el arco de pagos está muerto
+  hasta ella — 62 días).
+
 ## PARA LA MESA (lo abierto, sin maquillaje)
 
 el gate del founder en dispositivo sobre TODO el lote S81 (tramos ·
