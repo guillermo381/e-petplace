@@ -172,16 +172,16 @@ export default function Invitacion() {
           nombre={datos.negocioNombre ?? ''}
           logoUrl={resolverUrlLogoNegocio(datos.negocioLogoPath)}
         />
-        <View style={{ alignItems: 'center', gap: spacing[2] }}>
-          {/* §5 firmada (S81) */}
-          <Entrada>
-          <Texto variante="titulo">
-            {datos.negocioNombre !== null
-              ? t('invitacion.titulo', { negocio: datos.negocioNombre })
-              : t('invitacion.tituloSinNombre')}
-          </Texto>
-          <Texto variante="apoyo">{t('invitacion.invitadoComo', { nombre: datos.nombreInvitado })}</Texto>
-        </View>
+        {/* §5 firmada (S81) */}
+        <Entrada>
+          <View style={{ alignItems: 'center', gap: spacing[2] }}>
+            <Texto variante="titulo">
+              {datos.negocioNombre !== null
+                ? t('invitacion.titulo', { negocio: datos.negocioNombre })
+                : t('invitacion.tituloSinNombre')}
+            </Texto>
+            <Texto variante="apoyo">{t('invitacion.invitadoComo', { nombre: datos.nombreInvitado })}</Texto>
+          </View>
         </Entrada>
         <Entrada orden={1}>
         <Boton
