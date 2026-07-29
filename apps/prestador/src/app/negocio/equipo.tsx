@@ -57,6 +57,7 @@ import {
   Separador,
   Tarjeta,
   Texto,
+  palette,
   radius,
   spacing,
   useAviso,
@@ -712,11 +713,16 @@ export default function EquipoNegocioPantalla() {
                                 <Texto variante="apoyo">{t('equipo.ofertaApagada')}</Texto>
                               ) : null}
                             </View>
+                            {/* S82-B (cobro del lint R5, Ley 21/22): el
+                                slot accent.cta* es de Boton — el check
+                                sobre fill SÓLIDO va en blanco, como el
+                                thumb del Interruptor (Ley 22: "contenido
+                                en blanco/papel"). */}
                             <ControlEstado
                               encendido={encendido}
                               colorEncendido={theme.accent.primary}
                               colorBorde={theme.border.default}
-                              colorCheck={theme.accent.ctaTexto}
+                              colorCheck={palette.white}
                             />
                           </TarjetaEstado>
 

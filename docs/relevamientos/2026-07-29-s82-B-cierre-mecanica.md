@@ -87,6 +87,37 @@ gate humano.
   cero duplicación. CantoMarca sigue esperando su primer consumidor
   migrado (C, al tocar `bienvenida-dia1`).
 
+## 3bis. RONDA 2 (orden founder, mientras se espera el gate)
+
+- **D-482 PAGADA:** `Texto.cuerpo` md/18 → **base/15** (decisión FIRMADA
+  S72-A; desbloquea la migración del carnet de A). Re-censo al pagar
+  (L-141): los "3 consumidores" de la ficha eran **71** hoy — y **cero
+  `<Texto>` sin variante** (nadie hereda a ciegas). De los de S72 solo
+  el Hogar y la galería: la galería sigue al token por definición; el
+  del Hogar (título de tarjeta de Ponte al día, cuerpo sobre apoyo)
+  conserva jerarquía por color+2px — **señalado para la captura
+  claro/oscuro del gate**. Los 68 post-S72 adoptaron `cuerpo` como
+  "prosa por default", que es exactamente lo que la firma corrige a 15.
+- **Los 3 hallazgos del estreno, COBRADOS (adjudicación founder — fuera
+  de territorio autorizada explícita):** `equipo.tsx:719` — el check
+  sobre fill SÓLIDO pasa de `accent.ctaTexto` (slot de Boton, Ley 21) a
+  `palette.white` (Ley 22: "contenido en blanco/papel", el canon del
+  thumb del Interruptor) · `hogar/index` 913 — la rama de error del rail
+  a `View` plano (el error aparece CON la pantalla) · `hogar/index` 1164
+  — la zona de la vida decide su envoltorio por estado: monta en
+  vacío/error = QUIETA, monta con historia = entrada escalonada (la
+  composición interna no cambió). **Baselines R5 y R8 al PISO: 0/0** —
+  de cero no se sube jamás. Lint VERDE exit 0; typechecks ui/prestador
+  exit 0; **cliente exit 2 por WIP AJENO** (`EncuadreFoto.tsx` de la
+  pista A, archivo nuevo sin commit — cero errores en mis archivos,
+  atribución verificada).
+- **Las promociones de C (canto-curva → FilaCita · marca de agua al
+  fondo compartido): ARMADAS, NO EJECUTADAS** — la orden las condiciona
+  al gate ("después del gate, no antes"). Nota de coordinación: C
+  publicó el OTA del gate con ancla `b22c83d`; esta ronda queda DESPUÉS
+  del ancla — el lote que el founder juzga no la incluye, D-482 viaja
+  en el próximo publish.
+
 ## 4. Pendientes con dueño
 
 - **Founder:** el ⚖️ 17.5 vs próximamente-sereno (49 censados) · el

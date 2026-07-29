@@ -153,9 +153,10 @@ function r4(archivos) {
  *  prestador pasa 'oficio'" — solo el raíz; medido: el único vivo es el
  *  raíz legal) · `accent.cta`/`ctaTexto` directo = RATCHET baseline 1
  *  (el hallazgo del estreno de esta regla: negocio/equipo.tsx:719
- *  colorCheck={theme.accent.ctaTexto} — pre-existente, dueño la pista
- *  de pantallas del prestador, migra al tocarse D-318). Solo baja. */
-const BASELINE_ACCENT_CTA = 1;
+ *  colorCheck={theme.accent.ctaTexto} — COBRADO en S82-B ronda 2 por
+ *  orden founder: el check sobre fill pasó al blanco del canon SÓLIDO,
+ *  Ley 22). Baseline EN EL PISO: solo baja, y de 0 no se sube jamás. */
+const BASELINE_ACCENT_CTA = 0;
 function r5(archivos) {
   const fallos = [];
   let directos = 0;
@@ -217,11 +218,11 @@ function r7(archivos) {
  *  de adoptar en Entrada. Dos vías: <Entrada> conteniendo <EstadoVacio
  *  = DURA EN 0 (la vía del veto — el portador nuevo no absorbe vacíos)
  *  · <Animated.View entering=> conteniendo <EstadoVacio = RATCHET
- *  baseline 2 (el estreno la midió: las zonas escalonadas S52 del Hogar
- *  —hogar/index:913 y :1164— llevan sus vacíos adentro; MISMO archivo y
- *  misma deuda pre-§5 que el baseline de R7, migra al tocarse D-318).
- *  Solo baja. */
-const BASELINE_VACIO_ENTERING = 2;
+ *  baseline 0 — EN EL PISO: los dos del estreno (hogar/index 913/1164)
+ *  se COBRARON en S82-B ronda 2 por orden founder (la rama de error a
+ *  View plano; la zona de la vida decide su envoltorio por estado —
+ *  monta en vacío = aparece QUIETA). Solo baja — de 0 no se sube. */
+const BASELINE_VACIO_ENTERING = 0;
 function r8(archivos) {
   const fallos = [];
   let entering = 0;

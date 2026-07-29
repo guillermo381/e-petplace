@@ -915,8 +915,11 @@ export default function Hogar() {
           f !== null && (Date.parse(hoyIso) - Date.parse(f)) / 86400000 <= 60;
 
         if (resumenError) {
+          // S82-B (cobro del lint R8, Ley 13): la rama de error NO entra
+          // animada — el vacío/error aparece CON la pantalla, no después.
+          // La entrada escalonada queda para las ramas con contenido.
           return (
-            <Animated.View entering={entradaZona(2)} style={{ paddingHorizontal: spacing[4], marginTop: spacing[7], gap: spacing[3] }}>
+            <View style={{ paddingHorizontal: spacing[4], marginTop: spacing[7], gap: spacing[3] }}>
               <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: theme.text.secondary }}>
                 {t('hogar.serviciosTitulo')}
               </Text>
@@ -939,7 +942,7 @@ export default function Hogar() {
                   />
                 }
               />
-            </Animated.View>
+            </View>
           );
         }
         if (resumenServicios === null) {
@@ -1166,11 +1169,17 @@ export default function Hogar() {
           vivir. Ley 37: el código murió con ellos. */}
 
       {/* ── Zona 4 — la vida ─────────────────────────────────────
-          Ritmo S52-P2c: entre zonas spacing[7]; adentro spacing[4]. */}
-      <Animated.View
-        entering={entradaZona(4)}
-        style={{ paddingHorizontal: spacing[4], marginTop: spacing[7] }}
-      >
+          Ritmo S52-P2c: entre zonas spacing[7]; adentro spacing[4].
+          S82-B (cobro del lint R8, Ley 13): si la zona MONTA en vacío o
+          error, aparece QUIETA — el vacío jamás entra animado ("un vacío
+          que anima llama la atención sobre sí mismo"); la entrada
+          escalonada queda para la zona con historia. El envoltorio se
+          decide por estado; la composición interna no cambia. */}
+      {(() => {
+        const vidaSinHistoria = items === 'error' || (Array.isArray(items) && items.length === 0);
+        const estiloZonaVida = { paddingHorizontal: spacing[4], marginTop: spacing[7] } as const;
+        const zonaVida = (
+        <>
         {/* S61-A12 (cura 2): la vida gana su MARCO por sistema —
             Tarjeta reposo (elevación D-358, jamás borde artesanal);
             título y filtros ADENTRO; el acordeón expande en el marco.
@@ -1285,7 +1294,16 @@ export default function Hogar() {
         )}
         </View>
         </Tarjeta>
-      </Animated.View>
+        </>
+        );
+        return vidaSinHistoria ? (
+          <View style={estiloZonaVida}>{zonaVida}</View>
+        ) : (
+          <Animated.View entering={entradaZona(4)} style={estiloZonaVida}>
+            {zonaVida}
+          </Animated.View>
+        );
+      })()}
 
       {/* S71-A3: el selector "¿De quién es el carnet?" murió con la celda
           del carnet — el flujo ahora nace DENTRO de cada mascota, donde

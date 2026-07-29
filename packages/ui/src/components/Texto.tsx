@@ -24,7 +24,18 @@
  *   · titulo  → DM Sans 300 · 28px · lo humano a escala de voz.
  *   · seccion → DM Sans 500 · 18px · el rótulo de un bloque, con
  *               `accessibilityRole="header"` DE FÁBRICA.
- *   · cuerpo  → DM Sans 400 · 18px · la prosa por default.
+ *   · cuerpo  → DM Sans 400 · 15px · la prosa por default. **D-482 PAGADA
+ *               (S82-B, decisión FIRMADA S72-A):** nació en md/18 con 3
+ *               consumidores; el censo de B halló 49 sitios en base/15
+ *               que no la adoptaban porque el tamaño no coincidía — el
+ *               censo corrige al diseñador (precedente VozSecundaria):
+ *               la prosa real de la casa es base/15. Re-censado al pagar
+ *               (L-141): 71 consumidores explícitos, cero `<Texto>` sin
+ *               variante; los 68 post-S72 la adoptaron como "prosa por
+ *               default", que es exactamente lo que la firma corrige.
+ *               El sitio S72 más visible del cambio: el título de las
+ *               tarjetas de Ponte al día (hogar) — señalado para la
+ *               captura claro/oscuro del gate.
  *   · apoyo   → DM Sans 400 · 13px · secundario, subtítulos, ayudas.
  *   · dato    → JetBrains Mono 400 · 13px · metadata que generó una máquina
  *               (fechas, horas, IDs, códigos), con `tabular-nums` para que
@@ -107,7 +118,8 @@ const RECETA: Record<
 > = {
   titulo:  { fontFamily: typography.family.sans.light,   fontSize: typography.size.xl, color: 'primary'   },
   seccion: { fontFamily: typography.family.sans.medium,  fontSize: typography.size.md, color: 'primary',   header: true },
-  cuerpo:  { fontFamily: typography.family.sans.regular, fontSize: typography.size.md, color: 'primary'   },
+  cuerpo:  { fontFamily: typography.family.sans.regular, fontSize: typography.size.base, color: 'primary' }, // D-482: base/15
+
   apoyo:   { fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: 'secondary', leading: typography.size.sm * typography.leading.normal },
   dato:    { fontFamily: typography.family.mono.regular, fontSize: typography.size.sm, color: 'secondary', tabular: true },
   // S81 (pedido de C — "el precio mono-primary" de coordinar y los
