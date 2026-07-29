@@ -20,7 +20,7 @@ import {
   useTheme,
   type AvatarMascotaEspecie,
   type SelectorEspecieOpcion,
-} from '@epetplace/ui';
+EvitaTeclado, } from '@epetplace/ui';
 import { obtenerEspeciesActivas } from '@epetplace/api';
 
 import { esEspecieUi } from '@/lib/params';
@@ -62,6 +62,7 @@ export default function PasoMascota() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="portada" saludo={t('onboarding.titulo')} isotipo="ninguno" />
+      <EvitaTeclado>
       <ScrollView
         contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[4] }}
         keyboardShouldPersistTaps="handled"
@@ -107,6 +108,7 @@ export default function PasoMascota() {
           }}
         />
       </ScrollView>
+      </EvitaTeclado>
     </View>
   );
 }

@@ -21,7 +21,7 @@ import {
   spacing,
   useTheme,
   type SelectorEspecieOpcion,
-} from '@epetplace/ui';
+EvitaTeclado, } from '@epetplace/ui';
 import { obtenerEspeciesActivas } from '@epetplace/api';
 
 import { esEspecieUi } from '@/lib/params';
@@ -63,6 +63,7 @@ export default function AgregarPasoMascota() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('agregarMascota.titulo')} atras onAtras={() => router.back()} />
+      <EvitaTeclado>
       <ScrollView
         contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[4] }}
         keyboardShouldPersistTaps="handled"
@@ -114,6 +115,7 @@ export default function AgregarPasoMascota() {
           }}
         />
       </ScrollView>
+      </EvitaTeclado>
     </View>
   );
 }

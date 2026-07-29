@@ -60,7 +60,7 @@ import {
   typography,
   useAviso,
   useTheme,
-} from '@epetplace/ui';
+EvitaTeclado, } from '@epetplace/ui';
 import {
   RANGO_SUGERIDO_POR_NIVEL,
   guardarOfertaAdiestramiento,
@@ -491,6 +491,7 @@ export default function TallerAdiestramiento() {
       </View>
       {/* safe-area (requisito duro S65): el último botón del scroll
           jamás queda bajo la barra de navegación del sistema */}
+      <EvitaTeclado>
       <ScrollView
         contentContainerStyle={{
           padding: spacing[4],
@@ -808,6 +809,7 @@ export default function TallerAdiestramiento() {
           </>
         )}
       </ScrollView>
+      </EvitaTeclado>
 
       {/* Hoja del programa personalizado (S65-B2: el nivel viene del
           punto de entrada — nueva = especialidad; una fila existente

@@ -32,7 +32,7 @@ import {
   typography,
   useAviso,
   useTheme,
-} from '@epetplace/ui';
+EvitaTeclado, } from '@epetplace/ui';
 import {
   crearCuentaComercialInicial,
   obtenerPaisesParaRegistro,
@@ -192,6 +192,7 @@ export default function NuevaCuentaComercial() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('cuenta.nuevaTitulo')} atras onAtras={() => router.back()} />
+      <EvitaTeclado>
       <ScrollView
         contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[8], gap: spacing[5] }}
         keyboardShouldPersistTaps="handled"
@@ -267,6 +268,7 @@ export default function NuevaCuentaComercial() {
           </>
         )}
       </ScrollView>
+      </EvitaTeclado>
 
       {/* país — hoy uno (EC); la lista está lista para cuando se abran más */}
       <Hoja visible={hojaPais} onCerrar={() => setHojaPais(false)} titulo={t('cuenta.pais')}>

@@ -25,7 +25,7 @@ import {
   typography,
   useAviso,
   useTheme,
-} from '@epetplace/ui';
+EvitaTeclado, } from '@epetplace/ui';
 import { obtenerMiFamilia, renombrarFamilia, type MiFamilia } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -108,6 +108,7 @@ export default function FamiliaCuenta() {
           />
         </View>
       ) : (
+        <EvitaTeclado>
         <ScrollView
           contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[4] }}
           keyboardShouldPersistTaps="handled"
@@ -155,6 +156,7 @@ export default function FamiliaCuenta() {
             </Tarjeta>
           </View>
         </ScrollView>
+        </EvitaTeclado>
       )}
     </View>
   );

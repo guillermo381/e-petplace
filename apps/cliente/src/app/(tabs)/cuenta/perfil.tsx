@@ -26,7 +26,7 @@ import {
   typography,
   useAviso,
   useTheme,
-} from '@epetplace/ui';
+EvitaTeclado, } from '@epetplace/ui';
 import {
   actualizarMiPerfil,
   obtenerMiPerfil,
@@ -153,6 +153,7 @@ export default function PerfilCuenta() {
           />
         </View>
       ) : (
+        <EvitaTeclado>
         <ScrollView
           contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[2] }}
           keyboardShouldPersistTaps="handled"
@@ -200,6 +201,7 @@ export default function PerfilCuenta() {
           />
           <Boton etiqueta={t('cuenta.guardar')} bloque cargando={guardando} onPress={() => void guardar()} />
         </ScrollView>
+        </EvitaTeclado>
       )}
 
       <Hoja visible={hojaFoto} onCerrar={() => setHojaFoto(false)} titulo={t('cuenta.fotoTitulo')}>

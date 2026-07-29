@@ -29,7 +29,7 @@ import {
   typography,
   useAviso,
   useTheme,
-} from '@epetplace/ui';
+EvitaTeclado, } from '@epetplace/ui';
 import {
   actualizarDatosBancarios,
   obtenerBancosDePais,
@@ -186,6 +186,7 @@ export default function DatosBancarios() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('cuenta.datosBancarios')} atras onAtras={() => router.back()} />
+      <EvitaTeclado>
       <ScrollView
         contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[8], gap: spacing[5] }}
         keyboardShouldPersistTaps="handled"
@@ -267,6 +268,7 @@ export default function DatosBancarios() {
           onPress={() => void alGuardar()}
         />
       </ScrollView>
+      </EvitaTeclado>
 
       {/* 17 bancos EC: scroll propio dentro de la Hoja (HojaScroll, L-132) */}
       <Hoja visible={hojaBanco} onCerrar={() => setHojaBanco(false)} titulo={t('cuenta.bancoElegir')} altura="media">
