@@ -227,7 +227,11 @@ export interface NovedadDeAtencion {
 export interface PuntoTrack {
   lat: number;
   lng: number;
-  ts?: string;
+  /** ISO timestamp de la lectura — MISMO nombre que la key del jsonb y
+   *  que el contrato del filtro (`t`). S81: se llamaba `ts` y el rename
+   *  silencioso dejó MUDO el filtro del dibujo en el detalle del
+   *  cliente (el mismatch compilaba verde porque `t` era opcional). */
+  t?: string;
 }
 
 /** S61-A2 (D-387): un registrable aplicado, ya con su voz de familia
@@ -440,7 +444,7 @@ export async function leerDetalleAtencion(
       if (p !== null && typeof p === 'object' && !Array.isArray(p)) {
         const o = p as Record<string, unknown>;
         if (typeof o.lat === 'number' && typeof o.lng === 'number') {
-          track.push({ lat: o.lat, lng: o.lng, ...(typeof o.t === 'string' ? { ts: o.t } : null) });
+          track.push({ lat: o.lat, lng: o.lng, ...(typeof o.t === 'string' ? { t: o.t } : null) });
         }
       }
     }

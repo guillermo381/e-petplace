@@ -88,9 +88,31 @@ export interface FiltroTrackDetalle<P extends PuntoTrackFiltrable> {
   descartados: number;
   /** true = 2+ segmentos grandes: hueco real, nada se descartó. */
   huecoReal: boolean;
+  /** Puntos SIN `t` (no juzgables). Un punto suelto sin t es tolerable
+   *  (legado); un track ENTERO sin t es contrato roto y LANZA (abajo). */
+  sinT: number;
+}
+
+/**
+ * EL ASSERT DEL CONTRATO (S81, L-192 — "todo chequeo tiene que poder
+ * salir ROJO"): un track con >0 puntos donde el 100% llega SIN `t` no
+ * es dato legado — es CONTRATO INCUMPLIDO (la key del jsonb es `t` y
+ * el emisor la garantiza; lo que produce un track entero sin t es un
+ * RENAME silencioso aguas arriba — el mismatch ts/t costó tres rondas
+ * en S81). Antes de esto, esa falla era MUDA: cero cortes, un tramo,
+ * la costura de vuelta, y nadie se enteraba.
+ */
+function assertContratoT(puntos: readonly PuntoTrackFiltrable[], sinT: number): void {
+  if (puntos.length > 0 && sinT === puntos.length) {
+    throw new Error(
+      `track_sin_timestamps: ${puntos.length} puntos y NINGUNO trae 't' — contrato roto (¿rename silencioso aguas arriba?), no dato legado`,
+    );
+  }
 }
 
 export function filtrarTrackDetalle<P extends PuntoTrackFiltrable>(puntos: P[]): FiltroTrackDetalle<P> {
+  const sinT = puntos.reduce((n, p) => n + (p.t ? 0 : 1), 0);
+  assertContratoT(puntos, sinT);
   if (puntos.length < 2) {
     return {
       tramos: puntos.length > 0 ? [puntos] : [],
@@ -98,6 +120,7 @@ export function filtrarTrackDetalle<P extends PuntoTrackFiltrable>(puntos: P[]):
       nSegmentos: puntos.length,
       descartados: 0,
       huecoReal: false,
+      sinT,
     };
   }
 
@@ -114,7 +137,7 @@ export function filtrarTrackDetalle<P extends PuntoTrackFiltrable>(puntos: P[]):
     else segmentos[segmentos.length - 1].push(orden[i]);
   }
   if (segmentos.length === 1) {
-    return { tramos: segmentos, puntos: orden, nSegmentos: 1, descartados: 0, huecoReal: false };
+    return { tramos: segmentos, puntos: orden, nSegmentos: 1, descartados: 0, huecoReal: false, sinT };
   }
 
   // 3. dominante y clasificación.
@@ -129,6 +152,7 @@ export function filtrarTrackDetalle<P extends PuntoTrackFiltrable>(puntos: P[]):
       nSegmentos: segmentos.length,
       descartados: 0,
       huecoReal: true,
+      sinT,
     };
   }
   const conservados = grandes.flat();
@@ -138,6 +162,7 @@ export function filtrarTrackDetalle<P extends PuntoTrackFiltrable>(puntos: P[]):
     nSegmentos: segmentos.length,
     descartados: orden.length - conservados.length,
     huecoReal: false,
+    sinT,
   };
 }
 
