@@ -78,6 +78,24 @@ if (hexes > BASELINE_HEX) {
   console.log(`R2 (Ley 1 hex crudos) · ${hexes}/${BASELINE_HEX} — ${hexes < BASELINE_HEX ? 'BAJÓ: actualizar baseline' : 'estable'}`);
 }
 
+// ── R3 · A6+§7 sobre Tarjeta (default 'reposo' desde S81): censo de
+//    adopción — quien necesita plano lo DECLARA. Informativo: el número
+//    de 'plana' explícitas solo debería MOVERSE con decisión (cada una
+//    es una excepción a la ley con dueño en su pantalla). ──
+let tPlana = 0, tExplicita = 0, tImplicita = 0;
+for (const f of archivos) {
+  const src = readFileSync(f, 'utf8');
+  for (const m of src.matchAll(/<Tarjeta\b/g)) {
+    const fin = src.indexOf('>', m.index);
+    const tag = src.slice(m.index, fin === -1 ? m.index + 400 : fin);
+    const ele = tag.match(/elevacion="(\w+)"/);
+    if (ele?.[1] === 'plana') tPlana++;
+    else if (ele) tExplicita++;
+    else tImplicita++;
+  }
+}
+console.log(`R3 (A6+§7/Tarjeta) · plana-declarada=${tPlana} · otra-explícita=${tExplicita} · reposo-por-default=${tImplicita}`);
+
 if (fallos > 0) {
   console.error(`\nverify:diseno — ${fallos} fallo(s)`);
   process.exit(1);

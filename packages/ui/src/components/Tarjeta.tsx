@@ -49,7 +49,12 @@ export type TarjetaRelleno = 'normal' | 'amplio' | 'ninguno'
 type Comun = {
   children: ReactNode
   tinte?: TarjetaTinte
-  /** plana = borde sutil sin sombra (default). La sombra JAMÁS se anima (jank nativo). */
+  /** S81 (aplicación masiva del censo B — A6 SIN CAJA + §7 presencia por
+   *  sombra, ambas FIRMADAS): el default pasa de 'plana' a 'reposo' — la
+   *  superficie nace apoyada (elevación de la casa, Chanel del marco:
+   *  sin hairline) en vez de en-caja. 'plana' QUEDA para quien lo
+   *  DECLARE a propósito (verify:diseno lo censa). El borde de TINTE se
+   *  conserva (semántico). La sombra JAMÁS se anima (jank nativo). */
   elevacion?: TarjetaElevacion
   /** normal 12 (default) · amplio 16 · ninguno (imagen edge-to-edge). */
   relleno?: TarjetaRelleno
@@ -72,7 +77,7 @@ const RELLENO: Record<TarjetaRelleno, number> = {
 }
 
 export function Tarjeta(props: TarjetaProps) {
-  const { children, tinte = 'ninguno', elevacion = 'plana', relleno = 'normal' } = props
+  const { children, tinte = 'ninguno', elevacion = 'reposo', relleno = 'normal' } = props
   const { theme } = useTheme()
   // S63 (D-401): el clon muere — la física vive en LA primitiva
   const { handlers, estiloPresionado } = usePresionado(0.99)
