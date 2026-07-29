@@ -64,6 +64,7 @@ import {
   resolverUrlFoto,
   type ItemTimeline,
   type PerfilMascota,
+  type SenalesHogarMascota,
 } from '@epetplace/api';
 import {
   calcularMomentoVital,
@@ -74,6 +75,7 @@ import {
   type VitalesPaseos,
 } from '@epetplace/domain';
 import { FAMILIA_DE_TIPO, vozHecho } from '@/lib/voz-hecho';
+import { CantoCurva } from '@/components/canto-curva';
 
 /** @override-s82c — SERIF LOCAL hasta la pieza de B (candidata; el
  *  founder la ordenó para el perfil y la ELECCIÓN de fuente es de B):
@@ -98,6 +100,35 @@ function vozMomento(momento: MomentoVital, t: TraductorPerfil): string | null {
     case 'M5': return t('perfil.momentoM5');
     case 'M6': return null; // memorial: el tema habla, el chip calla
   }
+}
+
+/** r3 ítem ③ — la voz del MOMENTO para la tarjeta de voz (literal
+ *  transcrito; diccionario CERRADO por momento — jamás desempeño ni
+ *  progreso, MODELO_LOYALTY §3, guard R11). M6 (memorial) calla. */
+function vozCardDe(momento: MomentoVital, nombre: string, t: TraductorPerfil): string | null {
+  switch (momento) {
+    case 'M1': return t('perfil.vozCardM1', { nombre });
+    case 'M2': return t('perfil.vozCardM2', { nombre });
+    case 'M3': return t('perfil.vozCardM3', { nombre });
+    case 'M4': return t('perfil.vozCardM4', { nombre });
+    case 'M5': return t('perfil.vozCardM5', { nombre });
+    case 'M6': return null;
+  }
+}
+
+/** El glifo ⓘ de la procedencia (trazo local 1.9 — precedente de los
+ *  motivos de guijarro de esta misma pantalla; candidato al registry
+ *  por su puerta si se repite). */
+function GlifoInfo({ color }: { color: string }) {
+  return (
+    <Svg width={15} height={15} viewBox="0 0 24 24">
+      <Path
+        d="M12 3.4a8.6 8.6 0 110 17.2 8.6 8.6 0 010-17.2Z"
+        stroke={color} strokeWidth={1.9} fill="none"
+      />
+      <Path d="M12 11v5M12 7.7v.3" stroke={color} strokeWidth={1.9} strokeLinecap="round" fill="none" />
+    </Svg>
+  );
 }
 
 function vozEdad(meses: number, t: TraductorPerfil): string {
@@ -157,10 +188,10 @@ export default function PerfilDeMascota() {
   const [cursor, setCursor] = useState<string | null>(null);
   const [estadoPie, setEstadoPie] = useState<LineaDeVidaEstadoPie>('nada');
   const cargandoMasRef = useRef(false);
-  // S82-C (imagen-acuerdo, ítem 1): la PASTILLA de estado al pie de la
-  // foto — la MISMA verdad que la ficha del Hogar (señales reales +
-  // calcularVozHogar); sin señal todavía, la pastilla no se monta.
-  const [pastilla, setPastilla] = useState<'alDia' | 'pideAtencion' | 'conociendolo' | null>(null);
+  // S82-C (imagen-acuerdo, ítem 1 + r3 ítem 4): la SEÑAL completa del
+  // hogar para esta mascota — alimenta la pastilla del header Y las
+  // celdas de CÓMO ESTÁ HOY (una sola verdad, un solo fetch).
+  const [senal, setSenal] = useState<SenalesHogarMascota | null>(null);
 
   const cargarPrimeraPagina = useCallback(async (id: string) => {
     const r = await leerTimelineMascota(id);
@@ -220,20 +251,7 @@ export default function PerfilDeMascota() {
         void cargarPrimeraPagina(mascotaId);
         void obtenerEstadoHogar([mascotaId]).then((eh) => {
           if (!vigente || !eh.ok) return;
-          const s = eh.data.senales.find((x) => x.mascota_id === mascotaId);
-          if (!s) return;
-          setPastilla(
-            calcularVozHogar(
-              {
-                tieneEmergenciaActiva: s.tiene_emergencia_activa,
-                vacunasTotal: s.vacunas_total,
-                ultimaVacunaAplicada: s.ultima_vacuna_aplicada,
-                proximaVacuna: s.proxima_vacuna,
-                ultimaAtencionCerrada: s.ultima_atencion_cerrada,
-              },
-              new Date(),
-            ).voz,
-          );
+          setSenal(eh.data.senales.find((x) => x.mascota_id === mascotaId) ?? null);
         });
       })();
       return () => {
@@ -278,6 +296,21 @@ export default function PerfilDeMascota() {
   const { mascota, vacunas, peso_clinico_kg, tiene_condicion_cronica, umbrales } = perfil;
   const hoy = new Date();
   const meses = mascota.fecha_nacimiento !== null ? edadEnMeses(mascota.fecha_nacimiento, hoy) : null;
+  // r3: la voz del hogar (una sola verdad) — pastilla + celda de vacunas
+  const vozEstadoHogar =
+    senal !== null
+      ? calcularVozHogar(
+          {
+            tieneEmergenciaActiva: senal.tiene_emergencia_activa,
+            vacunasTotal: senal.vacunas_total,
+            ultimaVacunaAplicada: senal.ultima_vacuna_aplicada,
+            proximaVacuna: senal.proxima_vacuna,
+            ultimaAtencionCerrada: senal.ultima_atencion_cerrada,
+          },
+          hoy,
+        )
+      : null;
+  const pastilla = vozEstadoHogar?.voz ?? null;
   const momento =
     umbrales !== null
       ? calcularMomentoVital({
@@ -456,13 +489,114 @@ export default function PerfilDeMascota() {
           </Tarjeta>
         ) : null}
 
-        {/* ═══ FRENO L-142 (ítems 3 y 4 del pedido S82-C perfil): la
-            tarjeta de VOZ (canto violeta + procedencia ⓘ) y la grilla
-            CÓMO ESTÁ HOY (2×2, canto por estado) esperan LA
-            IMAGEN-ACUERDO que no viajó — qué dato es "la voz" y cuáles
-            son las cuatro celdas no se derivan de la letra y no se
-            inventan (L-139; protocolo D-434: nacen cuando su literal
-            llegue). Vitales queda como interino del ítem 4. ═══ */}
+        {/* ── 3 · LA TARJETA DE VOZ (r3, literal transcrito
+            2026-07-29 — GATE EXIGIBLE: el founder confirma el literal;
+            si la PNG llega y contradice, gana la PNG). La voz LEE EL
+            MOMENTO VITAL — jamás desempeño ni progreso (MODELO_LOYALTY
+            §3; guard R11 vigila el diccionario). Sin raza o sin edad NO
+            SE MONTA — cero frase genérica (L-139). ROCE DECLARADO, no
+            resuelto: la procedencia dice "raza y edad" (literal) pero el
+            momento hoy se computa de ESPECIE (umbrales) + edad — la raza
+            es condición de existencia, no insumo del cálculo; si eso
+            miente, el gate ajusta la línea o el motor. */}
+        {(() => {
+          if (mascota.raza === null || meses === null || momento === null) return null;
+          const cuerpoVoz = vozCardDe(momento, mascota.nombre, t);
+          if (cuerpoVoz === null) return null;
+          return (
+            <CantoCurva color={theme.capa.comunidadAmplia}>
+              <View style={{ padding: spacing[4], gap: spacing[3] }}>
+                {/* @override-s82c — el cuerpo en la voz del producto
+                    (serif local hasta la pieza de B) */}
+                <Text
+                  style={{
+                    fontFamily: SERIF_LOCAL,
+                    fontSize: typography.size.lg,
+                    lineHeight: Math.round(typography.size.lg * 1.4),
+                    color: theme.text.primary,
+                  }}
+                >
+                  {cuerpoVoz}
+                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1.5] }}>
+                  <GlifoInfo color={theme.text.tertiary} />
+                  <Texto variante="apoyo">{t('perfil.vozProcedencia')}</Texto>
+                </View>
+              </View>
+            </CantoCurva>
+          );
+        })()}
+
+        {/* ── 4 · CÓMO ESTÁ HOY (r3, literal transcrito — mismo gate
+            exigible). Grilla 2×2, CANTO POR ESTADO que pinta la curva:
+            ámbar pide algo · verde no pide nada · gris no sabe.
+            ⚠️ CHOQUE DECLARADO, NO RESUELTO (orden del pedido): acá el
+            canto codifica ESTADO; la Ley 10 lo tiene como CATEGORÍA —
+            dos significados para el canto en el mismo producto; lo
+            decide el gate del founder. Cada celda dice SOLO lo que el
+            dato sostiene (L-139): 'Sin registro' con guion es el patrón
+            del nulo honesto (jamás 'ninguna conocida'); el 'estable 6
+            meses' de la captura NO se pinta (no hay historia de peso);
+            desparasitación no tiene motor (backlog M2/D-475) y alergias
+            no tiene campo — ambas dicen la verdad: sin registro. */}
+        <View style={{ gap: spacing[3] }}>
+          <Texto variante="seccion">{t('perfil.hoyTitulo')}</Texto>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] }}>
+            {(() => {
+              type CeldaHoy = { key: string; rotulo: string; valor: string; detalle: string; estado: 'atencion' | 'alDia' | 'sinDato' };
+              const hoyIso = new Intl.DateTimeFormat('en-CA').format(hoy);
+              const pv = senal?.proxima_vacuna ?? null;
+              const celdaVacunas: CeldaHoy =
+                senal === null || senal.vacunas_total === 0
+                  ? { key: 'vacunas', rotulo: t('perfil.hechosVacunas'), valor: t('perfil.hoySinRegistro'), detalle: '–', estado: 'sinDato' }
+                  : pv !== null && pv.fecha < hoyIso
+                    ? { key: 'vacunas', rotulo: t('perfil.hechosVacunas'), valor: t('perfil.hoyFaltaUna'), detalle: t('perfil.hoyRefuerzoVencido'), estado: 'atencion' }
+                    : pv !== null
+                      ? { key: 'vacunas', rotulo: t('perfil.hechosVacunas'), valor: t('perfil.hoyAlDia'), detalle: t('perfil.hoyHasta', { fecha: fechaCortaMono(pv.fecha, idioma) }), estado: 'alDia' }
+                      : {
+                          // sin fecha próxima el estado NO se afirma (hoy
+                          // 1/24 la trae — deuda E5): gris = no sabe, con
+                          // el dato que SÍ existe (cuántas hay al carnet).
+                          key: 'vacunas',
+                          rotulo: t('perfil.hechosVacunas'),
+                          valor: t('perfil.hoyEnCarnet', { n: senal.vacunas_total }),
+                          detalle:
+                            senal.ultima_vacuna_aplicada !== null
+                              ? t('perfil.hoyUltima', { fecha: fechaCortaMono(senal.ultima_vacuna_aplicada, idioma) })
+                              : '–',
+                          estado: 'sinDato',
+                        };
+              const celdas: CeldaHoy[] = [
+                celdaVacunas,
+                // desparasitación: CERO motor (M2 del backlog, D-475) — la
+                // celda dice la verdad hasta que exista.
+                { key: 'despar', rotulo: t('perfil.hoyDesparasitacion'), valor: t('perfil.hoySinRegistro'), detalle: '–', estado: 'sinDato' },
+                peso_clinico_kg !== null
+                  ? { key: 'peso', rotulo: t('perfil.peso'), valor: `${peso_clinico_kg} kg`, detalle: '–', estado: 'alDia' }
+                  : { key: 'peso', rotulo: t('perfil.peso'), valor: t('perfil.hoySinRegistro'), detalle: '–', estado: 'sinDato' },
+                // alergias: sin campo en el expediente — LA REFERENCIA del
+                // patrón del nulo honesto (literal transcrito).
+                { key: 'alergias', rotulo: t('perfil.hoyAlergias'), valor: t('perfil.hoySinRegistro'), detalle: '–', estado: 'sinDato' },
+              ];
+              const colorDe = (e: CeldaHoy['estado']) =>
+                e === 'atencion' ? theme.status.warning : e === 'alDia' ? theme.status.success : theme.border.default;
+              return celdas.map((c) => (
+                <View key={c.key} style={{ flexBasis: '47%', flexGrow: 1 }}>
+                  <CantoCurva color={colorDe(c.estado)}>
+                    <View style={{ padding: spacing[3], gap: spacing[1] }}>
+                      <Texto variante="apoyo">{c.rotulo}</Texto>
+                      {/* valor sans en negrita (literal) — medium de la casa */}
+                      <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}>
+                        {c.valor}
+                      </Text>
+                      <Texto variante="dato" numberOfLines={1}>{c.detalle}</Texto>
+                    </View>
+                  </CantoCurva>
+                </View>
+              ));
+            })()}
+          </View>
+        </View>
 
         {/* ── 1 · VITALES (S53-B2c.1: el estado antes que el log — §4 v1.3) ──
             ═══ HUECO M-WEAR: el día que la mascota tenga collar

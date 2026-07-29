@@ -275,9 +275,14 @@ function r9(archivos) {
  *  eso esta regla lee el fuente CRUDO, sin despojar). DURA EN 0 fuera
  *  de la casa. Reconciliación declarada: no cubre la reinvención sin
  *  marcador — esa la atrapa el gate de craft, no un grep. */
-/** Dos casas declaradas: el Hogar (ronda 2) y el PERFIL (ronda 3 — la
- *  imagen-acuerdo del founder ordenó serif/círculo locales ahí). */
-const CASA_OVERRIDE_S82C = /apps\/cliente\/src\/app\/\(tabs\)\/hogar\/(index|mascota\/\[mascotaId\])\.tsx$/;
+/** TRES casas declaradas: el Hogar (ronda 2), el PERFIL (ronda 3 — la
+ *  imagen-acuerdo ordenó serif/círculo locales ahí) y canto-curva.tsx
+ *  (la pieza extraída para que el perfil no la clone — regla 37; sigue
+ *  siendo override local del CLIENTE, jamás packages/ui). NOTA VIVA:
+ *  en su primer día esta regla cobró una fuga REAL — la propia
+ *  extracción de CantoCurva salió sin declarar su casa y el lint la
+ *  paró (exit 1). El guard no es decorativo. */
+const CASA_OVERRIDE_S82C = /apps\/cliente\/src\/(app\/\(tabs\)\/hogar\/(index|mascota\/\[mascotaId\])|components\/canto-curva)\.tsx$/;
 function r10(archivos) {
   const fallos = [];
   for (const { path, src } of archivos) {
@@ -288,6 +293,28 @@ function r10(archivos) {
   }
   return { fallos, info: `${fallos.length} fugas del override` };
 }
+
+/** R11 · MODELO_LOYALTY §3 sobre LA VOZ DEL MOMENTO (S82-C r3, del
+ *  literal transcrito del perfil): la voz describe la ETAPA — si algún
+ *  día dice "va bien", "nivel", "%", "racha" o "completaste", cruzó lo
+ *  que §3 prohíbe. Mecanizable porque la voz es DICCIONARIO CERRADO
+ *  (keys vozCardM*): se escanean las líneas de esas keys en los
+ *  diccionarios del cliente contra el vocabulario de score. DURA EN 0. */
+const RE_VOZCARD = /vozCardM\d\s*:/;
+const RE_SCORE = /%|\bnivel\b|\bprogres\w*|\bpunt(?:os|aje)\b|\brachas?\b|\bcomplet(?:aste|ado|é)\b|\bva bien\b|\blevel\b|\bstreak\b|\bscore\b/i;
+function r11(archivosDic) {
+  const fallos = [];
+  for (const { path, src } of archivosDic) {
+    src.split('\n').forEach((lineaTxt, i) => {
+      if (RE_VOZCARD.test(lineaTxt) && RE_SCORE.test(lineaTxt)) {
+        fallos.push(`${path}:${i + 1} — la voz del momento habla de DESEMPEÑO (LOYALTY §3): ${lineaTxt.trim().slice(0, 70)}`);
+      }
+    });
+  }
+  return { fallos, info: `${fallos.length} voces con score` };
+}
+const DICCIONARIOS = ['apps/cliente/src/i18n/es.ts', 'apps/cliente/src/i18n/en.ts'];
+const dics = DICCIONARIOS.map((p) => ({ path: p, src: readFileSync(p, 'utf8') }));
 
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
@@ -301,8 +328,9 @@ const FIXTURES = {
   R7: [{ path: '(fixture)', src: Array(BASELINE_FADEIN + 1).fill('entering={FadeInDown}').join('\n') }],
   R8: [{ path: '(fixture)', src: '<Entrada><EstadoVacio titulo="x" /></Entrada>\n<Animated.View entering={FadeIn}><EstadoVacio titulo="y" /></Animated.View>' }],
   R10: [{ path: 'apps/cliente/src/app/otra-pantalla.tsx', src: '/** @override-s82c — copia ilegal */' }],
+  R11: [{ path: '(fixture)/es.ts', src: "    vozCardM3: '{{nombre}} completó el 60% de su nivel — ¡sigue la racha!'," }],
 };
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10 };
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -352,6 +380,7 @@ const corridas = [
   ['R8 (Ley 13/EstadoVacio: el vacío no se anima)', r8(apps)],
   ['R9 (Ley 17.5/EstadoVacio — informativa)', r9(apps)],
   ['R10 (override-s82c atado a su casa)', r10(apps)],
+  ['R11 (LOYALTY §3: la voz del momento sin score)', r11(dics)],
 ];
 for (const [nombre, res] of corridas) {
   console.log(`${nombre} · ${res.info}`);

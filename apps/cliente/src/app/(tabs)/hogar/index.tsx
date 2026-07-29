@@ -108,6 +108,7 @@ import { CoachHoja } from '@/components/coach';
 import { useTraduccion } from '@/i18n';
 import { vozServicio } from '@/lib/voz-servicio';
 import { FAMILIA_DE_TIPO, vozHecho } from '@/lib/voz-hecho';
+import { CantoCurva } from '@/components/canto-curva';
 
 
 type TraductorHogar = ReturnType<typeof useTraduccion>['t'];
@@ -188,40 +189,6 @@ type ItemHogar = ItemTimeline & { mascota_id: string };
 // rieles de RN. Overrides LOCALES: viajan a B como candidatas tras el
 // gate; el guard R10 de verify:diseno vigila que el marcador
 // @override-s82c no salga de esta pantalla.)
-
-/** @override-s82c — EL CANTO QUE PINTA LA CURVA (ítem 2). El principio
- *  resuelto del lado prestador (FilaCita S80-B15, leído de ahí): el
- *  color vive en el ELEMENTO PORTADOR DEL RADIO — jamás un View
- *  absoluto recortado (la mordida medida en B13). Anatomía de la
- *  lámina: el color ES el fondo de la tarjeta exterior (radius.lg,
- *  elevacion.reposo) y la superficie entra 6px desde la izquierda con
- *  RADIO MENOR (radius.md) — la curva queda pintada por construcción.
- *  RECONCILIACIÓN DECLARADA: la lámina degrada el color a 40% de alfa
- *  hacia abajo; la FIRMA B15 dice canto SÓLIDO en lista contigua (el
- *  degradado repetido da serrucho) — gana la firma: sólido. */
-function CantoCurva({ color, children }: { color: string | null; children: React.ReactNode }) {
-  const { theme } = useTheme();
-  return (
-    <View
-      style={{
-        backgroundColor: color ?? theme.bg.card,
-        borderRadius: radius.lg,
-        boxShadow: theme.elevacion.reposo,
-      }}
-    >
-      <View
-        style={{
-          marginLeft: color !== null ? 6 : 0,
-          backgroundColor: theme.bg.card,
-          borderRadius: radius.md,
-          overflow: 'hidden',
-        }}
-      >
-        {children}
-      </View>
-    </View>
-  );
-}
 
 /** El chevron de fila (path canónico de CeldaNavegacion): › navega ·
  *  ⌄ revela · ⌃ pliega (la dirección codifica la verdad, Ley 18; el
