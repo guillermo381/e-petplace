@@ -2,35 +2,48 @@
  * S70-A4 — EL PARTE DEL DUEÑO: la consulta clínica en voz de familia.
  * La FÓRMULA destacada (nombre, presentación, cantidad, posología en
  * palabras llanas); el original clínico del veterinario PRESERVADO detrás
- * de "Ver completo" (Ley 3, dos registros); próximo control visible si
- * existe. Guion de referencia: la diarrea de Thor que Kary entendería.
+ * de la celda "La nota del veterinario" (Ley 3, dos registros); próximo
+ * control visible si existe.
  *
- * ENTRADA (anotada para la sesión de gate, territorio B en vuelo): el
- * nodo `historia_clinica_registrada` de la LineaDeVida rutea acá con su
- * `evento_id` — una línea en el resolver del timeline.
+ * S82-C LAZO 1 (MOMENTO del triage C7) — la vara:
+ *   TESIS: el vet te dejó dicho qué tiene tu mascota y qué darle — acá,
+ *   en tu idioma.
+ *   FIRMA: el diagnóstico PRESIDE en voz humana y la Entrada escalonada
+ *   ordena la lectura (qué encontró → qué darle → el resto). L-c: el
+ *   orden de lectura ES el contenido del parte.
+ *   CHANEL: murió el glifo `veterinaria` repetido en CADA tarjeta de la
+ *   fórmula (Ley 12: un glifo repetido por fila de su propia sección no
+ *   informa — el header ya dijo de qué son todas) · murió el '—' del
+ *   diagnóstico ausente (Ley 13: el hueco no se disfraza de dato — la
+ *   tarjeta se omite y la fórmula preside) · murió el ghost mudo "Ver
+ *   completo" (19.1: el botón blanco de solo texto no dice a dónde va —
+ *   ahora es CeldaNavegacion sin glifo, anatomía S73: acción-label sin
+ *   hermanos que varíen).
  *
  * Ley 13: el error jamás se disfraza de vacío. Back siempre.
  */
 
 import { useCallback, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
   Celda,
+  CeldaNavegacion,
   Encabezado,
+  Entrada,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  FilaDato,
   Hoja,
   HojaScroll,
-  Icono,
   Insignia,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
-  typography,
   useTheme,
 } from '@epetplace/ui';
 import { obtenerParteConsulta, type ItemFormulaParte, type ParteConsulta } from '@epetplace/api';
@@ -127,229 +140,127 @@ export default function ParteConsultaScreen() {
         <ScrollView
           contentContainerStyle={{ padding: spacing[4], gap: spacing[4], paddingBottom: insets.bottom + spacing[8] }}
         >
-          {estado.negocioNombre !== null ? (
-            <Text
-              style={{
-                fontFamily: typography.family.sans.regular,
-                fontSize: typography.size.sm,
-                color: theme.text.secondary,
-              }}
-            >
-              {t('parte.enNegocio', { negocio: estado.negocioNombre })} · {fechaLargaHumana(estado.fecha, idioma)}
-            </Text>
-          ) : null}
+          {/* 0 — QUÉ ENCONTRÓ: el diagnóstico preside (la firma). */}
+          <Entrada>
+            <View style={{ gap: spacing[4] }}>
+              {estado.negocioNombre !== null ? (
+                <Texto variante="apoyo">
+                  {t('parte.enNegocio', { negocio: estado.negocioNombre })} · {fechaLargaHumana(estado.fecha, idioma)}
+                </Texto>
+              ) : null}
 
-          {/* Lo que encontró el veterinario (voz de familia) */}
-          <Tarjeta elevacion="reposo">
-            <View style={{ gap: spacing[2] }}>
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.regular,
-                  fontSize: typography.size.sm,
-                  color: theme.text.secondary,
-                }}
-              >
-                {t('parte.diagnostico')}
-              </Text>
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.light,
-                  fontSize: typography.size.xl,
-                  color: theme.text.primary,
-                }}
-              >
-                {estado.consulta.diagnostico ?? estado.consulta.motivo ?? '—'}
-              </Text>
-              {estado.consulta.motivo !== null && estado.consulta.diagnostico !== null ? (
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.regular,
-                    fontSize: typography.size.md,
-                    color: theme.text.secondary,
-                  }}
-                >
-                  {estado.consulta.motivo}
-                </Text>
+              {estado.consulta.diagnostico !== null || estado.consulta.motivo !== null ? (
+                <Tarjeta elevacion="reposo">
+                  <View style={{ gap: spacing[2] }}>
+                    <Texto variante="apoyo">{t('parte.diagnostico')}</Texto>
+                    <Texto variante="titulo">{estado.consulta.diagnostico ?? estado.consulta.motivo}</Texto>
+                    {estado.consulta.motivo !== null && estado.consulta.diagnostico !== null ? (
+                      <Texto variante="cuerpo" color="secondary">
+                        {estado.consulta.motivo}
+                      </Texto>
+                    ) : null}
+                  </View>
+                </Tarjeta>
               ) : null}
             </View>
-          </Tarjeta>
+          </Entrada>
 
-          {/* LA FÓRMULA destacada */}
-          <View style={{ gap: spacing[3] }}>
-            <Text
-              style={{
-                fontFamily: typography.family.sans.regular,
-                fontSize: typography.size.md,
-                color: theme.text.primary,
-              }}
-            >
-              {t('parte.formulaTitulo')}
-            </Text>
-            {estado.formula.length === 0 ? (
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.regular,
-                  fontSize: typography.size.sm,
-                  color: theme.text.secondary,
-                }}
-              >
-                {t('parte.sinFormula')}
-              </Text>
-            ) : (
-              estado.formula.map((m: ItemFormulaParte, i: number) => (
-                <Tarjeta key={i} elevacion="reposo">
-                  <View style={{ flexDirection: 'row', gap: spacing[3] }}>
-                    <Icono nombre="veterinaria" tamano={24} />
-                    <View style={{ flex: 1, gap: spacing[1] }}>
-                      <Text
-                        style={{
-                          fontFamily: typography.family.sans.light,
-                          fontSize: typography.size.lg,
-                          color: theme.text.primary,
-                        }}
-                      >
-                        {m.nombre}
-                      </Text>
-                      {/* S71-A CURA-2(b) 🔴 — `principioActivo` viajaba en el
-                          wrapper y JAMÁS se renderizaba. Va bajo el nombre
-                          comercial, que es donde el dueño lo busca (es como
-                          está rotulada la caja). Verbatim del vet: cero
-                          etiqueta inventada (muro §8.3). */}
-                      {m.principioActivo !== null ? (
-                        <Text
-                          style={{
-                            fontFamily: typography.family.sans.regular,
-                            fontSize: typography.size.sm,
-                            color: theme.text.secondary,
-                          }}
-                        >
-                          {m.principioActivo}
-                        </Text>
-                      ) : null}
+          {/* 1 — QUÉ DARLE: la fórmula destacada. */}
+          <Entrada orden={1}>
+            <View style={{ gap: spacing[3] }}>
+              <Texto variante="seccion">{t('parte.formulaTitulo')}</Texto>
+              {estado.formula.length === 0 ? (
+                <Texto variante="apoyo">{t('parte.sinFormula')}</Texto>
+              ) : (
+                estado.formula.map((m: ItemFormulaParte, i: number) => (
+                  <Tarjeta key={i} elevacion="reposo">
+                    <View style={{ gap: spacing[1] }}>
+                      <Texto variante="titulo">{m.nombre}</Texto>
+                      {/* S71-A CURA-2(b): principioActivo bajo el nombre
+                          comercial — es como está rotulada la caja. */}
+                      {m.principioActivo !== null ? <Texto variante="apoyo">{m.principioActivo}</Texto> : null}
                       {m.presentacion !== null || m.cantidad !== null ? (
-                        <Text
-                          style={{
-                            fontFamily: typography.family.mono.regular,
-                            fontSize: typography.size.sm,
-                            color: theme.text.secondary,
-                          }}
-                        >
+                        <Texto variante="dato">
                           {[m.presentacion, m.cantidad !== null ? t('parte.cantidad', { n: m.cantidad }) : null]
                             .filter((x) => x !== null)
                             .join(' · ')}
-                        </Text>
+                        </Texto>
                       ) : null}
-                      {/* S71-A CURA-2(a) 🔴 — la línea exigía dosis Y frecuencia:
-                          una fórmula con dosis y sin frecuencia ("1 tableta",
-                          frecuencia null porque el vet no la dictó — L-139) NO
-                          MOSTRABA LA DOSIS. El dueño veía el remedio sin saber
-                          cuánto darle. Cada campo se muestra si existe. */}
+                      {/* S71-A CURA-2(a): cada campo se muestra si existe —
+                          una dosis sin frecuencia NO se calla. */}
                       {m.dosis !== null || m.frecuencia !== null ? (
-                        <Text
-                          style={{
-                            fontFamily: typography.family.sans.regular,
-                            fontSize: typography.size.md,
-                            color: theme.text.primary,
-                          }}
-                        >
+                        <Texto variante="cuerpo">
                           {m.dosis !== null && m.frecuencia !== null
                             ? t('parte.dosisLinea', { dosis: m.dosis, frecuencia: m.frecuencia })
                             : (m.dosis ?? m.frecuencia)}
-                        </Text>
+                        </Texto>
                       ) : null}
                       {m.duracionDias !== null ? (
-                        <Text
-                          style={{
-                            fontFamily: typography.family.sans.regular,
-                            fontSize: typography.size.sm,
-                            color: theme.text.secondary,
-                          }}
-                        >
+                        <Texto variante="apoyo">
                           {t('parte.porDias', { dias: m.duracionDias })}
                           {m.via !== null ? ` · ${t('parte.via', { via: m.via })}` : ''}
-                        </Text>
+                        </Texto>
                       ) : m.via !== null ? (
-                        <Text
-                          style={{
-                            fontFamily: typography.family.sans.regular,
-                            fontSize: typography.size.sm,
-                            color: theme.text.secondary,
-                          }}
-                        >
-                          {t('parte.via', { via: m.via })}
-                        </Text>
+                        <Texto variante="apoyo">{t('parte.via', { via: m.via })}</Texto>
                       ) : null}
-                      {/* S71-A CURA-2(b) 🔴 — `indicaciones` POR MEDICAMENTO
-                          viajaba y jamás se renderizaba: "dáselo con comida"
-                          moría en el wrapper. Es el campo MÁS accionable del
-                          parte — la única instrucción que la familia ejecuta.
-                          Va último y en texto primario. (OJO: la
-                          `consulta.indicaciones` de la nota entera SÍ se
-                          renderiza, pero dentro de "Ver completo" — son
-                          campos distintos con el mismo nombre.) */}
-                      {m.indicaciones !== null ? (
-                        <Text
-                          style={{
-                            fontFamily: typography.family.sans.regular,
-                            fontSize: typography.size.md,
-                            color: theme.text.primary,
-                          }}
-                        >
-                          {m.indicaciones}
-                        </Text>
-                      ) : null}
+                      {/* S71-A CURA-2(b): `indicaciones` por medicamento es
+                          lo MÁS accionable del parte — último y primario. */}
+                      {m.indicaciones !== null ? <Texto variante="cuerpo">{m.indicaciones}</Texto> : null}
                     </View>
-                  </View>
-                </Tarjeta>
-              ))
-            )}
-          </View>
+                  </Tarjeta>
+                ))
+              )}
+            </View>
+          </Entrada>
 
-          {/* Estudios pedidos */}
-          {estado.examenes.length > 0 ? (
-            <View style={{ gap: spacing[2] }}>
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.regular,
-                  fontSize: typography.size.md,
-                  color: theme.text.primary,
-                }}
-              >
-                {t('parte.examenesTitulo')}
-              </Text>
-              <Tarjeta elevacion="reposo">
-                {estado.examenes.map((e, i) => (
-                  <View key={i}>
-                    {i > 0 ? <Separador /> : null}
-                    <Celda
-                      titulo={e.tipoExamen}
-                      fin={(() => {
-                        const v = VOZ_EXAMEN[e.estado];
-                        // desconocido degrada DIGNO: sin insignia, jamás una
-                        // etiqueta inventada (precedente LineaDeVida, Ley 3).
-                        return v === undefined ? undefined : (
-                          <Insignia estado={v.insignia} etiqueta={t(v.clave)} tamaño="sm" />
-                        );
-                      })()}
-                    />
-                  </View>
-                ))}
+          {/* 2 — EL RESTO: estudios, control, el registro original. */}
+          <Entrada orden={2}>
+            <View style={{ gap: spacing[4] }}>
+              {estado.examenes.length > 0 ? (
+                <View style={{ gap: spacing[2] }}>
+                  <Texto variante="seccion">{t('parte.examenesTitulo')}</Texto>
+                  <Tarjeta elevacion="reposo">
+                    {estado.examenes.map((e, i) => (
+                      <View key={i}>
+                        {i > 0 ? <Separador /> : null}
+                        <Celda
+                          titulo={e.tipoExamen}
+                          fin={(() => {
+                            const v = VOZ_EXAMEN[e.estado];
+                            // desconocido degrada DIGNO: sin insignia, jamás una
+                            // etiqueta inventada (precedente LineaDeVida, Ley 3).
+                            return v === undefined ? undefined : (
+                              <Insignia estado={v.insignia} etiqueta={t(v.clave)} tamaño="sm" />
+                            );
+                          })()}
+                        />
+                      </View>
+                    ))}
+                  </Tarjeta>
+                </View>
+              ) : null}
+
+              {estado.proximoControl !== null ? (
+                <Tarjeta elevacion="reposo">
+                  <FilaDato
+                    etiqueta={t('parte.proximoControl')}
+                    valor={fechaLargaHumana(estado.proximoControl, idioma)}
+                    mono
+                  />
+                </Tarjeta>
+              ) : null}
+
+              {/* El original clínico (Ley 3): celda que dice a dónde va —
+                  sin glifo (acción-label sin hermanos que varíen, S73). */}
+              <Tarjeta elevacion="reposo" relleno="ninguno">
+                <CeldaNavegacion
+                  titulo={t('parte.notaDelVet')}
+                  detalle={t('parte.notaDelVetDetalle')}
+                  onPress={() => setVerNota(true)}
+                />
               </Tarjeta>
             </View>
-          ) : null}
-
-          {/* Próximo control */}
-          {estado.proximoControl !== null ? (
-            <Tarjeta elevacion="reposo">
-              <Celda
-                titulo={t('parte.proximoControl')}
-                subtitulo={t('parte.proximoControlFecha', { fecha: fechaLargaHumana(estado.proximoControl, idioma) })}
-              />
-            </Tarjeta>
-          ) : null}
-
-          {/* Ver la nota completa del veterinario (el original clínico) */}
-          <Boton variante="ghost" bloque etiqueta={t('parte.verCompleto')} onPress={() => setVerNota(true)} />
+          </Entrada>
         </ScrollView>
       )}
 
@@ -369,26 +280,7 @@ export default function ParteConsultaScreen() {
             )
               .filter(([, valor]) => valor !== null)
               .map(([clave, valor]) => (
-                <View key={clave} style={{ gap: spacing[1] }}>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.sm,
-                      color: theme.text.secondary,
-                    }}
-                  >
-                    {t(`parte.${clave}` as 'parte.notaMotivo')}
-                  </Text>
-                  <Text
-                    style={{
-                      fontFamily: typography.family.sans.regular,
-                      fontSize: typography.size.md,
-                      color: theme.text.primary,
-                    }}
-                  >
-                    {valor}
-                  </Text>
-                </View>
+                <FilaDato key={clave} etiqueta={t(`parte.${clave}` as 'parte.notaMotivo')} valor={valor ?? ''} />
               ))}
           </HojaScroll>
         </Hoja>

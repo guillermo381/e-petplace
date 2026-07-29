@@ -961,7 +961,6 @@ export const clienteEs = {
     tituloSinNombre: 'La visita al veterinario',
     enNegocio: 'En {{negocio}}',
     diagnostico: 'Lo que encontró el veterinario',
-    motivoLabel: 'Por qué fueron',
     formulaTitulo: 'Lo que tienes que darle',
     cantidad: 'Cantidad {{n}}',
     dosisLinea: '{{dosis}}, {{frecuencia}}',
@@ -976,8 +975,11 @@ export const clienteEs = {
     examenRevisado: 'Revisado por el vet',
     examenCancelado: 'Cancelado',
     proximoControl: 'Próximo control',
-    proximoControlFecha: 'El {{fecha}}',
-    verCompleto: 'Ver la nota completa del veterinario',
+    // S82-C lazo 1: la celda que preserva el original clínico (19.1 —
+    // murió el ghost mudo "Ver completo"; motivoLabel/proximoControlFecha
+    // /verCompleto salieron por Ley 37: cero consumidores).
+    notaDelVet: 'La nota del veterinario',
+    notaDelVetDetalle: 'El registro original, tal como lo escribió',
     notaClinica: 'Nota clínica',
     notaMotivo: 'Motivo de consulta',
     notaAnamnesis: 'Antecedentes',
