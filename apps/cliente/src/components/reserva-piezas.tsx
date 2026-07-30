@@ -31,13 +31,12 @@
  *    tachadas — dice que no hay, dice por qué, ofrece la salida, y el
  *    PIE FLOTANTE DESAPARECE (no hay total de algo que no existe).
  *
- * 🔴 DATO QUE NO EXISTE, DECLARADO (no se inventa): la lámina pinta
- * días CERRADOS (`.rit.cerr`) desde un array hardcodeado. Nuestro motor
- * responde por UN día (`obtenerIniciosPaseo`) — marcar los cerrados
- * costaría 10-14 llamadas (D-497). Todos los días nacen TOCABLES y el
- * nulo honesto sostiene el caso. El lector es un pedido a A,
- * secuenciado. La prop `cerrados` ya existe acá: el día que el lector
- * llegue, se llena y nada más cambia.
+ * ✅ r15 — EL DATO QUE NO EXISTÍA, YA EXISTE. En r9 declaré los días
+ * CERRADOS como dato ausente (la lámina los pintaba de un array
+ * hardcodeado) y dejé la prop esperando en vez de inventarlos. A
+ * construyó el lector en su r7 (`obtener_dias_cerrados` + wrapper) y
+ * acá se consume. Lo que la prop esperaba, llegó — y el hueco se
+ * cerró en el orden correcto: primero el motor, después la pantalla.
  */
 
 import { useEffect, useState } from 'react';
@@ -191,11 +190,13 @@ function RuedaDias({
   dias,
   elegido,
   cerrados,
+  etiquetaCerrado,
   onElegir,
 }: {
   dias: DiaOpcion[];
   elegido: string;
   cerrados: Set<string>;
+  etiquetaCerrado: string;
   onElegir: (iso: string) => void;
 }) {
   const { theme } = useTheme();
@@ -215,9 +216,12 @@ function RuedaDias({
     desplaz.value = withTiming(centro(indice), { duration: D3.duracion, easing: CURVA_D3 });
   }, [indice, ancho]);
 
+  // r15: el día CERRADO se elige igual — y es a propósito. Ver la nota
+  // de `cerrados` en SelectorDia: un día apagado y mudo es el bug que
+  // esto viene a curar, no la cura.
   const elegirPorIndice = (i: number) => {
     const d = dias[i];
-    if (d !== undefined && !cerrados.has(d.iso)) onElegir(d.iso);
+    if (d !== undefined) onElegir(d.iso);
   };
 
   /** EL IMÁN: al soltar, la rueda cae al día más cercano — jamás queda
@@ -262,6 +266,7 @@ function RuedaDias({
               theme={theme}
               acento={theme.accent.control}
               tinta={theme.text.primary}
+              etiquetaCerrado={etiquetaCerrado}
             />
           ))}
         </Animated.View>
@@ -282,6 +287,7 @@ function ItemRueda({
   theme,
   acento,
   tinta,
+  etiquetaCerrado,
 }: {
   dia: DiaOpcion;
   indice: number;
@@ -292,6 +298,9 @@ function ItemRueda({
   /** Colores YA resueltos (el worklet no puede leer el tema). */
   acento: string;
   tinta: string;
+  /** La voz de "cerrado" para el lector de pantalla: el día apagado se
+   *  ve, pero un lector no ve opacidades — el estado tiene que DECIRSE. */
+  etiquetaCerrado: string;
 }) {
   const vivo = useAnimatedStyle(() => {
     const anillo = Math.min(Math.abs(indice - indiceVivo.value), D3.escalas.length - 1);
@@ -322,10 +331,8 @@ function ItemRueda({
   return (
     <Animated.View style={vivo}>
       <Pressable
-        disabled={cerrado}
         accessibilityRole="radio"
-        accessibilityState={{ disabled: cerrado }}
-        accessibilityLabel={`${dia.dia} ${dia.numero}`}
+        accessibilityLabel={cerrado ? `${dia.dia} ${dia.numero} · ${etiquetaCerrado}` : `${dia.dia} ${dia.numero}`}
         onPress={onPress}
         style={{
           width: D3.item,
@@ -364,13 +371,35 @@ function ItemRueda({
 export function SelectorDia(props: {
   dias: DiaOpcion[];
   elegido: string;
-  /** Fechas SIN disponibilidad. Hoy llega VACÍO: el dato no existe en
-   *  el motor y no se inventa (ver cabecera). */
+  /** ✅ r15 — CABLEADO. Fechas que el negocio declaró CERRADAS (el
+   *  lector de A, `obtenerDiasCerrados`, existe desde su r7). La prop
+   *  esperaba desde r9 con el hueco declarado; ya no espera.
+   *
+   *  ⚠️ EL DÍA CERRADO SE PUEDE TOCAR, y es la decisión de esta ronda:
+   *  hasta r14 estaba `disabled`. Un día apagado Y MUDO es exactamente
+   *  el bug que este cableado viene a curar — el usuario ve algo gris y
+   *  no sabe si el negocio cierra o si nadie configuró. Y el `disabled`
+   *  hacía INALCANZABLE la voz que lo explica: el nulo honesto solo se
+   *  monta para el día ELEGIDO, y a un día que no se puede elegir no se
+   *  llega jamás (L-161 en su forma chica: un gate que no se alcanza no
+   *  existe). Ahora el día se toca y la pantalla CONTESTA.
+   *  Ley 23 sigue en pie: la puerta no ofrece lo que va a RECHAZAR — acá
+   *  el toque no se rechaza, se responde. */
   cerrados?: Set<string>;
+  /** Cómo se dice "cerrado" — el lector de pantalla no ve opacidades. */
+  etiquetaCerrado: string;
   onElegir: (iso: string) => void;
 }) {
   const cerrados = props.cerrados ?? new Set<string>();
-  return <RuedaDias dias={props.dias} elegido={props.elegido} cerrados={cerrados} onElegir={props.onElegir} />;
+  return (
+    <RuedaDias
+      dias={props.dias}
+      elegido={props.elegido}
+      cerrados={cerrados}
+      etiquetaCerrado={props.etiquetaCerrado}
+      onElegir={props.onElegir}
+    />
+  );
 }
 
 // ═══════════════ LA GRILLA QUE ELIGE + EL NULO HONESTO ═══════════════

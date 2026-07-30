@@ -44,11 +44,13 @@ import {
 } from '@epetplace/ui';
 import {
   getEstadoOnboardingDueno,
+  obtenerDiasCerrados,
   obtenerEspeciesElegibles,
   obtenerIniciosPaseo,
   obtenerMascotasDeFamilia,
   obtenerOfertaPaseo,
   resolverUrlFoto,
+  type DiaCerrado,
   type MascotaResumen,
   type OfertaPaseo,
   mascotasElegibles,
@@ -84,12 +86,28 @@ export default function PaseoCuando() {
   // el guard perro-only (§1bis) filtra ACÁ con voz honesta con camino.
   const [mascotas, setMascotas] = useState<MascotaResumen[] | 'cargando' | 'error'>('cargando');
   const [especies, setEspecies] = useState<string[] | null>(null);
-  // r12-5: la mascota LLEGA ELEGIDA del log (param). El estado local
-  // queda para el salvavidas del deep-link sin param.
+  // ⚠️ r15-bis · LA MASCOTA EQUIVOCADA — el defecto más caro de la
+  // sesión, y su mecanismo tiene TRES eslabones que solo juntos fallan:
+  //  ① el log llama con `router.navigate`, que REUSA la ruta si ya está
+  //    en el stack en vez de montar una nueva;
+  //  ② el stack de Explorar NO se vacía al cambiar de tab — el
+  //    `popToTopOnBlur` murió en S63 (D-402 enmendada, y con razón: era
+  //    peor el desvío que curaba);
+  //  ③ y esta pantalla COPIABA el param a estado con `useState(param)`,
+  //    que corre UNA sola vez, en el montaje.
+  // Resultado: entrás con Zeus, la pantalla sigue montada de la visita
+  // anterior, el estado sigue diciendo Thor — y el param de Zeus se
+  // ignora en silencio. Ninguno de los tres es un bug por su cuenta;
+  // el bug es la copia.
+  // LA CURA ES DEJAR DE COPIAR: el param se LEE VIVO en cada render y
+  // MANDA SIEMPRE. El estado local queda para lo único que es suyo —
+  // el deep-link o el log vacío, donde no hay param y la pantalla
+  // pregunta.
   const { mascotaId: mascotaParam } = useLocalSearchParams<{ mascotaId?: string }>();
-  const [mascotaId, setMascotaId] = useState<string | null>(
-    typeof mascotaParam === 'string' && mascotaParam.length > 0 ? mascotaParam : null,
-  );
+  const paramMascota =
+    typeof mascotaParam === 'string' && mascotaParam.trim().length > 0 ? mascotaParam : null;
+  const [elegidaLocal, setElegidaLocal] = useState<string | null>(null);
+  const mascotaId = paramMascota ?? elegidaLocal;
   // S61-A4: la CARA del para-quién — URLs firmadas (patrón del QUIÉN).
   const [fotos, setFotos] = useState<Record<string, string>>({});
   const [oferta, setOferta] = useState<OfertaPaseo[] | 'cargando' | 'error'>('cargando');
@@ -106,11 +124,31 @@ export default function PaseoCuando() {
 
   const mascota = elegibles.find((m) => m.id === mascotaId) ?? null;
 
-  // Con UNA elegible, se elige sola (cero fricción) — y el selector la
-  // muestra igual: la mascota elegida PRESENTE en pantalla (rasgo 1).
+  // ⚠️ EL SEGUNDO CAMINO AL MISMO SÍNTOMA, y este es el que el founder
+  // nombró: EL DEFAULT SILENCIOSO. La regla "con UNA elegible se elige
+  // sola" es buena cuando NO hay nada pedido — pero si el log pidió a
+  // Zeus y Zeus no resuelve (no está, o no puede reservar paseos), esta
+  // línea elegía a Thor sin decir una palabra. Un dato de IDENTIDAD
+  // rellenado por conveniencia es L-139 en su forma más cara: la
+  // pantalla queda coherente, el typecheck verde, y la reserva sale
+  // para la mascota equivocada.
+  // Ahora la comodidad solo rige SIN param: con un pedido explícito,
+  // esta pantalla no elige por el usuario jamás.
+  const pidioAlguien = paramMascota !== null;
   useEffect(() => {
-    if (mascotaId === null && elegibles.length === 1) setMascotaId(elegibles[0].id);
-  }, [elegibles, mascotaId]);
+    if (!pidioAlguien && elegidaLocal === null && elegibles.length === 1) setElegidaLocal(elegibles[0].id);
+  }, [elegibles, elegidaLocal, pidioAlguien]);
+
+  /** El pedido llegó y NO resuelve: ni se rellena ni se sigue de largo.
+   *  (Se espera a que las mascotas carguen — `especies` puede quedar
+   *  null si su lectura falla, y `mascotasElegibles` trata ese null como
+   *  "sin restricción": esperar por él dejaría la pantalla en limbo.) */
+  const paramSinResolver = pidioAlguien && Array.isArray(mascotas) && mascota === null;
+  /** El nombre de lo pedido, si existe en la familia — para poder DECIR
+   *  a quién no se pudo abrir. Si no está, no se inventa. */
+  const nombrePedido = Array.isArray(mascotas)
+    ? (mascotas.find((m) => m.id === paramMascota)?.nombre ?? null)
+    : null;
 
   useFocusEffect(
     useCallback(() => {
@@ -183,27 +221,113 @@ export default function PaseoCuando() {
       weekday: 'short',
       day: 'numeric',
     });
-    const lista: Array<{ iso: string; etiqueta: string; corta: string }> = [];
+    const lista: Array<{ iso: string; etiqueta: string; corta: string; dow: number }> = [];
     for (let i = 0; i < 14; i++) {
       const d = new Date();
       d.setDate(d.getDate() + i);
       const iso = fechaLocalISO(d);
       const corta = fmt.format(d).toLowerCase();
       const etiqueta = i === 0 ? t('explorar.cuandoHoy') : i === 1 ? t('explorar.cuandoManana') : corta;
-      lista.push({ iso, etiqueta, corta });
+      // r15 · el día de semana se toma de ESTE Date, que es LOCAL. Volver
+      // a parsear el iso ('2026-08-02') lo leería como medianoche UTC y en
+      // UTC-5 devolvería el día anterior — el sábado saldría viernes y los
+      // cerrados quedarían corridos uno. La trampa de siempre, esquivada
+      // no arreglada: el dato bueno ya estaba acá.
+      lista.push({ iso, etiqueta, corta, dow: d.getDay() });
     }
     return lista;
   }, [idioma, t]);
 
+  // ── r15 · LOS DÍAS CERRADOS ────────────────────────────────────────
+  // EL CONTRATO DE A ES POR PRESTADOR (`obtenerDiasCerrados(prestadorId)`
+  // → días de semana) y ESTA PANTALLA ES MULTI-PRESTADOR: la grilla
+  // muestra los inicios donde ALGÚN paseador tiene lugar. O sea que el
+  // dato no se enchufa derecho, y la traducción es una DECISIÓN, no un
+  // detalle: para el cliente un día está cerrado ⟺ lo declararon
+  // cerrado TODOS los que ofertan la duración elegida. Con que uno abra,
+  // el día está abierto. Cerrarlo por mayoría sería inventar.
+  const [cerradosPorPrestador, setCerradosPorPrestador] = useState<Record<string, DiaCerrado[]>>({});
+
+  // Los prestadores de la duración ELEGIDA — no los de toda la oferta:
+  // el conjunto que importa es exactamente el que alimenta esa grilla.
+  const prestadoresDeLaDuracion = useMemo(() => {
+    if (!Array.isArray(oferta) || duracion === null) return [];
+    return [...new Set(oferta.filter((o) => o.duracion_minutos === duracion).map((o) => o.prestador_id))];
+  }, [oferta, duracion]);
+
+  // N llamadas, UNA VEZ POR PRESTADOR EN TODA LA SESIÓN (cacheadas por
+  // id): cambiar de duración no vuelve a pedir lo que ya se sabe. Es la
+  // disciplina de D-497 — el arranque del Hogar se fue a 31 requests por
+  // pedir de a poco muchas veces.
+  useEffect(() => {
+    const faltan = prestadoresDeLaDuracion.filter((id) => !(id in cerradosPorPrestador));
+    if (faltan.length === 0) return;
+    let vigente = true;
+    void Promise.all(faltan.map((id) => obtenerDiasCerrados(id).then((r) => [id, r] as const))).then((res) => {
+      if (!vigente) return;
+      setCerradosPorPrestador((prev) => {
+        const sig = { ...prev };
+        for (const [id, r] of res) {
+          // el fallo NO se guarda como "no cierra": sin dato, el día no
+          // se marca (Ley 13 — un error jamás se disfraza de respuesta)
+          if (r.ok) sig[id] = r.data;
+        }
+        return sig;
+      });
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [prestadoresDeLaDuracion, cerradosPorPrestador]);
+
+  /** Días de semana cerrados PARA EL CLIENTE + el motivo si es unánime.
+   *  El motivo es voz del NEGOCIO: con varios prestadores solo se dice
+   *  si todos dicen lo mismo; si difieren, la pantalla dice "cerrado" y
+   *  se calla el porqué (inventar un motivo compuesto sería peor que no
+   *  darlo — L-139: el verosímil-falso es peor que el null honesto). */
+  const semanaCerrada = useMemo(() => {
+    const mapa = new Map<number, string | null>();
+    // sin respuesta de TODOS los prestadores no se concluye nada
+    const respondieron = prestadoresDeLaDuracion.filter((id) => id in cerradosPorPrestador);
+    if (prestadoresDeLaDuracion.length === 0 || respondieron.length !== prestadoresDeLaDuracion.length) return mapa;
+    for (let dow = 0; dow < 7; dow += 1) {
+      const filas = respondieron.map((id) => (cerradosPorPrestador[id] ?? []).find((d) => d.dia_semana === dow));
+      if (filas.some((f) => f === undefined)) continue; // alguno abre
+      const motivos = new Set(filas.map((f) => f?.motivo ?? null));
+      mapa.set(dow, motivos.size === 1 ? ([...motivos][0] ?? null) : null);
+    }
+    return mapa;
+  }, [prestadoresDeLaDuracion, cerradosPorPrestador]);
+
+  /** Las FECHAS cerradas de la tira (el semanal proyectado a los 14). */
+  const cerradosISO = useMemo(
+    () => new Set(dias.filter((d) => semanaCerrada.has(d.dow)).map((d) => d.iso)),
+    [dias, semanaCerrada],
+  );
+  const diaElegidoCerrado = cerradosISO.has(dia);
+  const motivoDelDiaElegido = semanaCerrada.get(dias.find((d) => d.iso === dia)?.dow ?? -1) ?? null;
+
   // S61-A5 cura 1 (§6ter): el día siguiente en la tira, o null en el último.
+  // r15: y el siguiente ABIERTO — ofrecer "Probar dom" cuando el domingo
+  // está cerrado es la Ley 23 rota en la salida de emergencia (la puerta
+  // no ofrece lo que ya sabe que va a rechazar).
   const diaSiguiente = useMemo(() => {
     const idx = dias.findIndex((d) => d.iso === dia);
-    return idx >= 0 && idx + 1 < dias.length ? dias[idx + 1] : null;
-  }, [dias, dia]);
+    if (idx < 0) return null;
+    return dias.slice(idx + 1).find((d) => !cerradosISO.has(d.iso)) ?? null;
+  }, [dias, dia, cerradosISO]);
 
   // La grilla recalcula VIVA con cada cambio de día o duración.
   useEffect(() => {
     if (duracion === null || !Array.isArray(oferta) || oferta.length === 0) return;
+    // r15: al día CERRADO no se le pregunta. La respuesta ya se sabe, y
+    // preguntarla igual gastaría un viaje para volver con "no hay
+    // horarios", que es justamente la voz equivocada (D-497).
+    if (diaElegidoCerrado) {
+      setInicios([]);
+      setHora(null);
+      return;
+    }
     let vigente = true;
     setInicios('cargando');
     void obtenerIniciosPaseo({ fecha: dia, duracion_minutos: duracion }).then((r) => {
@@ -214,7 +338,7 @@ export default function PaseoCuando() {
     return () => {
       vigente = false;
     };
-  }, [dia, duracion, oferta, reintento]);
+  }, [dia, duracion, oferta, reintento, diaElegidoCerrado]);
 
   const bloqueElegido = bloques.find((b) => b.duracion === duracion) ?? null;
   const listo = mascota !== null && duracion !== null && hora !== null;
@@ -222,7 +346,13 @@ export default function PaseoCuando() {
   // r11 · el pie SOLO existe si hay algo que totalizar (tercera ley de
   // la lámina). Sin bloque elegido o sin horas del día, NO SE MONTA.
   const hayHoras = Array.isArray(inicios) && inicios.length > 0;
-  const pieVive = bloqueElegido !== null && hayHoras;
+  // r15-bis · y el pie MUERE con el sujeto. Lo cazó el smoke, no la
+  // lectura: la falla ruidosa reemplaza el contenido del scroll, pero el
+  // pie se monta AFUERA de ese ternario y quedaba vivo — precio y CTA
+  // sobre una pantalla que dice "no encontramos esa mascota". El botón
+  // estaba deshabilitado, así que no rompía nada; decía otra cosa, que
+  // es peor: media pantalla negando lo que la otra media ofrece.
+  const pieVive = bloqueElegido !== null && hayHoras && !paramSinResolver;
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -263,6 +393,32 @@ export default function PaseoCuando() {
                     setOferta('cargando');
                     setMascotas('cargando');
                   }}
+                />
+              }
+            />
+          </View>
+        ) : paramSinResolver ? (
+          /* ⚠️ LA FALLA RUIDOSA (r15-bis). Se pidió una mascota y no se
+             pudo resolver: la pantalla lo DICE y no arma nada. Antes
+             seguía de largo y —con una sola elegible— reservaba para
+             otra. Acá no hay grilla, no hay pie y no hay CTA: sin sujeto
+             no hay reserva. La salida es explícita, no un default. */
+          <View style={{ paddingHorizontal: spacing[4] }}>
+            <EstadoVacio
+              icono={<Icono nombre="paseo" tamano={48} />}
+              titulo={
+                nombrePedido !== null
+                  ? t('explorar.mascotaNoReservable', { nombre: nombrePedido })
+                  : t('explorar.mascotaNoEncontrada')
+              }
+              descripcion={t('explorar.mascotaNoReservableDetalle')}
+              accion={
+                <Boton
+                  variante="primario"
+                  etiqueta={t('explorar.elegirOtraMascota')}
+                  // limpiar el param es lo que devuelve la palabra al
+                  // usuario: sin pedido, la pantalla vuelve a PREGUNTAR
+                  onPress={() => router.setParams({ mascotaId: '' })}
                 />
               }
             />
@@ -321,7 +477,7 @@ export default function PaseoCuando() {
                     avatar: { nombre: m.nombre, fotoUrl: fotos[m.id] },
                   }))}
                   seleccionada={mascotaId ?? undefined}
-                  onSelect={setMascotaId}
+                  onSelect={setElegidaLocal}
                 />
               </View>
             ) : null}
@@ -374,6 +530,8 @@ export default function PaseoCuando() {
               <SelectorDia
                 dias={dias.map((d) => ({ iso: d.iso, dia: d.corta.split(' ')[0] ?? '', numero: d.iso.slice(8, 10) }))}
                 elegido={dia}
+                cerrados={cerradosISO}
+                etiquetaCerrado={t('explorar.cuandoDiaCerrado')}
                 onElegir={setDia}
               />
             </View>
@@ -396,10 +554,25 @@ export default function PaseoCuando() {
             ) : inicios.length === 0 ? (
               /* EL NULO HONESTO (tercera ley): dice que no hay, dice POR
                  QUÉ, ofrece la salida — jamás ocho celdas tachadas. Y el
-                 PIE DESAPARECE (no hay total de algo que no existe). */
+                 PIE DESAPARECE (no hay total de algo que no existe).
+
+                 ✅ r15 — Y AHORA DICE **CUÁL** DE LAS DOS VERDADES. Hasta
+                 hoy "el negocio cierra los domingos" y "nadie configuró el
+                 domingo" caían las dos en la misma frase —"los paseadores
+                 no tienen lugar libre ese día"—, que en el primer caso es
+                 falsa: no es que no haya lugar, es que no se atiende. Dos
+                 estados distintos con una sola voz es el verosímil-falso
+                 de L-139 en su forma más barata. El motor ya sabe
+                 distinguirlos desde la r7 de A; esta pantalla, desde hoy.
+                 Y el MOTIVO, si el negocio lo declaró, se dice CON SU VOZ:
+                 la pantalla no lo redacta ni lo inventa cuando falta. */
               <DiaSinHorarios
-                titulo={t('explorar.cuandoSinInicios')}
-                porque={t('explorar.cuandoSinIniciosPorque')}
+                titulo={diaElegidoCerrado ? t('explorar.cuandoDiaCerrado') : t('explorar.cuandoSinInicios')}
+                porque={
+                  diaElegidoCerrado
+                    ? (motivoDelDiaElegido ?? t('explorar.cuandoDiaCerradoPorque'))
+                    : t('explorar.cuandoSinIniciosPorque')
+                }
                 etiquetaSalida={diaSiguiente !== null ? t('explorar.sinIniciosProbarDia', { dia: diaSiguiente.corta }) : null}
                 onSalida={() => {
                   if (diaSiguiente !== null) setDia(diaSiguiente.iso);

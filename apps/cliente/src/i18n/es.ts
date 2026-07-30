@@ -527,6 +527,16 @@ export const clienteEs = {
     cuandoSalidaBano: 'La salida al baño.',
     cuandoDesde: 'desde ${{precio}}',
     cuandoPrecio: '${{precio}}',
+    // r15 · EL DÍA CERRADO — el estado que hasta hoy no se podía
+    // decir: "cierra los domingos" viajaba con la voz de "no hay lugar".
+    // r15-bis · LA MASCOTA QUE NO RESUELVE — la falla RUIDOSA. Antes
+    // esto no tenía voz porque la pantalla elegía otra en silencio.
+    mascotaNoReservable: '{{nombre}} no puede reservar un paseo',
+    mascotaNoEncontrada: 'No encontramos esa mascota',
+    mascotaNoReservableDetalle: 'No armamos la reserva para no hacerla con la mascota equivocada. Elegí vos a quién.',
+    elegirOtraMascota: 'Elegir a quién',
+    cuandoDiaCerrado: 'Ese día no se atiende',
+    cuandoDiaCerradoPorque: 'El negocio no abre ese día. Elegí otro y seguimos.',
     cuandoSinIniciosPorque: 'Los paseadores no tienen lugar libre ese día para esa duración.',
     cuandoSinInicios: 'Ese día no hay horarios libres para este bloque. Prueba con otro día.',
     // S61-A5 cura 1 — §6ter: el camino tocable del día sin lugar (LOTE S61)

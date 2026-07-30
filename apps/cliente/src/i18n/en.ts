@@ -470,6 +470,14 @@ export const clienteEn = {
     cuandoSalidaBano: 'The bathroom break.',
     cuandoDesde: 'from ${{precio}}',
     cuandoPrecio: '${{precio}}',
+    // r15 · THE CLOSED DAY — the state that had no voice until today.
+    // r15-bis · THE PET THAT DOESN'T RESOLVE — the LOUD failure.
+    mascotaNoReservable: "{{nombre}} can't book a walk",
+    mascotaNoEncontrada: "We couldn't find that pet",
+    mascotaNoReservableDetalle: "We didn't build the booking, so it wouldn't go out for the wrong pet. Pick who it's for.",
+    elegirOtraMascota: 'Pick who',
+    cuandoDiaCerrado: 'Closed that day',
+    cuandoDiaCerradoPorque: "The business doesn't open that day. Pick another one and we'll keep going.",
     cuandoSinIniciosPorque: 'Walkers have no open slot that day for that duration.',
     cuandoSinInicios: 'No free times that day for this block. Try another day.',
     // S61-A5 cure 1 — §6ter: the tappable path out of an empty day (LOTE S61)
