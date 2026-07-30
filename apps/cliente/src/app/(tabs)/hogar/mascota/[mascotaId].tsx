@@ -931,7 +931,7 @@ export default function PerfilDeMascota() {
                           ) : null;
                         })()}
                       </View>
-                      <Icono nombre="veterinaria" tamano={26} />
+                      <Icono nombre="vacuna" tamano={26} />
                       {/* › NAVEGA (Ley 19.7: la dirección codifica la verdad) */}
                       <Svg width={19} height={19} viewBox="0 0 24 24">
                         <Path d="M9 5l7 7-7 7" stroke={theme.text.tertiary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
