@@ -127,6 +127,39 @@ export const palette = {
    *  Magenta suave · Cálido") entra como QUINTO cuando el zip llegue al
    *  repo — al abrir esta ronda NO estaba (medido: docs/laminas/ sin él).
    *  Recomendación de B anotada, NO valor: el 3%. */
+  /** S82-B r11 — LOS TRES CANDIDATOS DEL CTA OCRE DEL CLIENTE (dirección
+   *  founder; NADA encendido: el CTA vivo sigue en tinta hasta la firma —
+   *  esto enmienda la Ley 21 y va al gate, no se rompe en silencio).
+   *  Derivados de la familia ámbar que YA existe (ochre #E8B547, el
+   *  ámbar de ALERTA a L59%), un escalón más oscuro Y saturado: la
+   *  distancia del alerta se busca por SATURACIÓN + PROFUNDIDAD, no solo
+   *  por ratio.
+   *  Cada uno viaja con SU par de texto, porque el slot es un PAR
+   *  (`accent.cta` + `accent.ctaTexto`) — y ahí está el hallazgo de la
+   *  medición: con label BLANCO el ocre tiene que bajar a L≈31% y ES
+   *  MARRÓN; con label TINTA un ámbar vibrante pasa de sobra. El número
+   *  que la orden pidió (el más claro que pasa 4.5:1 sobre el tapiz) es
+   *  el candidato `ocreProfundo`: #966708 = 4.50 EXACTO, y es marrón. */
+  ctaOcreCandidatos: [
+    {
+      etiqueta: 'ámbar profundo',
+      valor: '#F5A70A',
+      texto: '#1D1A2E',
+      nota: 'label TINTA 8.40 · fill vs tapiz 1.83 (no llega a 3 — el botón no despega del fondo por color, lo haría por elevación)',
+    },
+    {
+      etiqueta: 'ámbar tostado',
+      valor: '#CE7809',
+      texto: '#1D1A2E',
+      nota: 'label TINTA 5.09 · fill vs tapiz 3.02 — EL ÚNICO que pasa las DOS restricciones (texto 4.5 y fill 3)',
+    },
+    {
+      etiqueta: 'ocre profundo (el del número)',
+      valor: '#966708',
+      texto: '#FFFFFF',
+      nota: 'el más claro que pasa 4.5:1 sobre el tapiz (4.50 exacto) y admite BLANCO (6.1) — pero está a 3 puntos de luminosidad de ochreDark, que es un token de TEXTO: se lee MARRÓN',
+    },
+  ] as const,
   papelTapizCandidatos: [
     { etiqueta: '2%', valor: '#FAF4F6' },
     { etiqueta: '3%', valor: '#FAF2F5' },

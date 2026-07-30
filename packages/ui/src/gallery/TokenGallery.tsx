@@ -7,6 +7,7 @@
 
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import Svg, { Path } from 'react-native-svg'
+import { LinearGradient } from 'expo-linear-gradient'
 
 import { useState } from 'react'
 
@@ -417,6 +418,82 @@ function LaminaGateTapiz() {
         </View>
       ))}
     </View>
+  )
+}
+
+/** LÁMINA DE GATE S82-B r11 — el CTA ocre sobre los DOS fondos que
+ *  importan (orden founder). Los botones se dibujan con el MISMO cuerpo
+ *  de `Boton primario` (alto 48, radius.md, label medium) pero con los
+ *  colores del candidato: la lámina no puede usar `Boton` porque el
+ *  candidato NO está en el tema todavía — y meterlo al tema sería
+ *  encenderlo, que es exactamente lo que la orden prohíbe.
+ *  ALCANCE de la lámina, declarado: solo el slot del CTA QUE CIERRA. La
+ *  placa del filtro elegido (tinta por §7bis + frontera S63) y "Cargar
+ *  carnet" (secundario, va sinCaja) NO se muestran acá a propósito. */
+function LaminaGateCtaOcre() {
+  const { theme } = useTheme()
+  const FONDOS = [
+    { etiqueta: 'papel tapiz (3%)', fondo: palette.papelTapiz, gradiente: false },
+    { etiqueta: 'degradado del techo (el peor punto del ocre)', fondo: '', gradiente: true },
+  ]
+  return (
+    <View style={{ gap: spacing[5] }}>
+      {FONDOS.map((f) => (
+        <View key={f.etiqueta} style={{ gap: spacing[2] }}>
+          <Texto variante="apoyo">{f.etiqueta}</Texto>
+          <Contenedor fondo={f} >
+            <View style={{ gap: spacing[3] }}>
+              {palette.ctaOcreCandidatos.map((c) => (
+                <View key={c.valor} style={{ gap: spacing[1] }}>
+                  <View
+                    style={{
+                      height: 48,
+                      borderRadius: radius.md,
+                      backgroundColor: c.valor,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: theme.elevacion.reposo,
+                    }}
+                  >
+                    <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: c.texto }}>
+                      Reservar servicio de Thor
+                    </Text>
+                  </View>
+                  <Texto variante="dato">{`${c.etiqueta} ${c.valor} · label ${c.texto === '#FFFFFF' ? 'blanco' : 'tinta'}`}</Texto>
+                </View>
+              ))}
+              {/* La vara: el CTA de HOY (tinta) y el ámbar de ALERTA, para
+                  juzgar la DISTANCIA — que es lo que la orden pide. */}
+              <View style={{ height: 48, borderRadius: radius.md, backgroundColor: theme.text.primary, alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: palette.light0 }}>
+                  el CTA de hoy (tinta · Ley 21)
+                </Text>
+              </View>
+              <Insignia estado="atencion" etiqueta="necesita atención (el ámbar de ALERTA — la distancia se juzga acá)" />
+            </View>
+          </Contenedor>
+        </View>
+      ))}
+    </View>
+  )
+}
+
+/** Contenedor de la lámina r11: fondo plano o el degradado firma. */
+function Contenedor({ fondo, children }: { fondo: { fondo: string; gradiente: boolean }; children: React.ReactNode }) {
+  const { theme } = useTheme()
+  if (!fondo.gradiente) {
+    return <View style={{ padding: spacing[4], borderRadius: radius.md, backgroundColor: fondo.fondo }}>{children}</View>
+  }
+  return (
+    <LinearGradient
+      colors={[...theme.accent.gradient.colors] as [string, string, ...string[]]}
+      locations={[...theme.accent.gradient.locations] as [number, number, ...number[]]}
+      start={{ x: 0.13, y: 0 }}
+      end={{ x: 0.87, y: 1 }}
+      style={{ padding: spacing[4], borderRadius: radius.md }}
+    >
+      {children}
+    </LinearGradient>
   )
 }
 
@@ -1976,6 +2053,11 @@ function GaleriaInterna() {
             jamás como muestra de color al lado de otra. */}
         <Seccion titulo="⭐ GATE S82-B r9 — PAPEL TAPIZ (el valor lo elige el ojo) · la marca de agua · los glifos de control a 21px · la VOZ del producto">
           <LaminaGateTapiz />
+        </Seccion>
+
+        {/* ── LÁMINA DE GATE S82-B r11 — EL CTA OCRE ── */}
+        <Seccion titulo="⭐ GATE S82-B r11 — EL CTA OCRE DEL CLIENTE: tres candidatos sobre los DOS fondos (papel tapiz · degradado del techo). NADA encendido: el CTA vivo sigue en tinta (Ley 21) hasta la firma">
+          <LaminaGateCtaOcre />
         </Seccion>
 
         {/* Set b′ — DIRECCION_ARTE v1.0 (S53): la mascota presente */}
