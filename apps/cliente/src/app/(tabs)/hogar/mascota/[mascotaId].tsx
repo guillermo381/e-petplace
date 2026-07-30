@@ -109,7 +109,12 @@ function RotuloSeccion({ titulo, cuenta }: { titulo: string; cuenta: string | nu
         marginBottom: spacing[3],
       }}
     >
-      <Texto variante="dato">{titulo.toUpperCase()}</Texto>
+      {/* r8 · ARBITRAJE DE FUENTE (A tenía razón en la sustancia): el
+          rótulo NO va en mono-mayúsculas. Ley 3 pide el mono en
+          MINÚSCULAS y solo para metadata de máquina; un rótulo de
+          sección es interfaz → SANS (Texto seccion, el patrón vivo).
+          La CUENTA sí es dato de máquina → mono minúsculas. */}
+      <Texto variante="seccion">{titulo}</Texto>
       {cuenta !== null ? <Texto variante="dato">{cuenta}</Texto> : null}
     </View>
   );
@@ -123,7 +128,7 @@ function FilaIdentidad({ etiqueta, valor, mono }: { etiqueta: string; valor: str
   return (
     <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing[3], paddingHorizontal: spacing[4], paddingVertical: spacing[3], minHeight: 44 }}>
       <View style={{ width: 112 }}>
-        <Texto variante="dato" numberOfLines={1}>{etiqueta.toUpperCase()}</Texto>
+        <Texto variante="apoyo" numberOfLines={1}>{etiqueta}</Texto>
       </View>
       <View style={{ flex: 1 }}>
         <Texto variante={mono === true ? 'dato' : 'cuerpo'} color="primary">{valor}</Texto>
@@ -242,7 +247,6 @@ export default function PerfilDeMascota() {
   // celdas de CÓMO ESTÁ HOY (una sola verdad, un solo fetch).
   const [senal, setSenal] = useState<SenalesHogarMascota | null>(null);
   // r5: vacunas agrupadas-colapsadas + historia colapsada con filtros
-  const [vacunasAbiertas, setVacunasAbiertas] = useState(false);
   const [historiaRevelada, setHistoriaRevelada] = useState(false);
   const [filtroHistoria, setFiltroHistoria] = useState<FiltroHistoria>('todo');
 
@@ -678,19 +682,44 @@ export default function PerfilDeMascota() {
               <RotuloSeccion titulo={t('perfil.hoyTitulo')} cuenta={t('perfil.hoyDeCuantos', { n: celdas.length, total })} />
               {celdas.length > 0 ? (
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2.5], paddingHorizontal: spacing[5] }}>
-                  {celdas.map((c) => (
-                    <View key={c.key} style={{ flexBasis: '47%', flexGrow: 1 }}>
+                  {celdas.map((c) => {
+                    const cuerpo = (
                       <CantoCurva color={c.estado === 'atencion' ? theme.status.warning : theme.status.success}>
-                        <View style={{ padding: spacing[3], gap: spacing[1.5] }}>
-                          <Texto variante="dato">{c.rotulo.toUpperCase()}</Texto>
+                        <View style={{ padding: spacing[3], gap: spacing[1.5], minHeight: 44 }}>
+                          <Texto variante="apoyo">{c.rotulo}</Texto>
                           <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}>
                             {c.valor}
                           </Text>
                           {c.detalle !== null ? <Texto variante="dato" numberOfLines={1}>{c.detalle}</Texto> : null}
                         </View>
                       </CantoCurva>
-                    </View>
-                  ))}
+                    );
+                    return (
+                      <View key={c.key} style={{ flexBasis: '47%', flexGrow: 1 }}>
+                        {/* r8: la celda de VACUNAS navega al PLAN DE VACUNAS
+                            que A construyó (contexto 1 de la misma lámina) —
+                            estaba VIVA E INALCANZABLE: ninguna superficie la
+                            enlazaba. La de peso no navega (no tiene destino
+                            propio: su historia vive en el expediente). */}
+                        {c.key === 'vac' ? (
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={`${c.rotulo}, ${c.valor}`}
+                            onPress={() =>
+                              router.push({
+                                pathname: '/hogar/vacunas/[mascotaId]',
+                                params: { mascotaId: mascota.id, nombre: mascota.nombre },
+                              })
+                            }
+                          >
+                            {cuerpo}
+                          </Pressable>
+                        ) : (
+                          cuerpo
+                        )}
+                      </View>
+                    );
+                  })}
                 </View>
               ) : null}
               {faltan.length > 0 ? (
@@ -800,38 +829,45 @@ export default function PerfilDeMascota() {
               />
             ) : (
               <>
-                <CantoCurva color={theme.capa.identidad}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3], padding: spacing[4] }}>
-                    <View style={{ flex: 1, minWidth: 0, gap: spacing[1] }}>
-                      <Texto variante="cuerpo">
-                        {vacunas.length === 1 ? t('perfil.vacunasResumenUna') : t('perfil.vacunasResumen', { n: vacunas.length })}
-                      </Texto>
-                      {(() => {
-                        const ultima = vacunas.reduce<string | null>(
-                          (max, v) => (v.fecha_aplicada !== null && (max === null || v.fecha_aplicada > max) ? v.fecha_aplicada : max),
-                          null,
-                        );
-                        return ultima !== null ? (
-                          <Texto variante="dato">{t('perfil.hoyUltima', { fecha: fechaCortaMono(ultima, idioma) })}</Texto>
-                        ) : null;
-                      })()}
+                {/* r8 (la lámina lo pide y AHORA existe el destino): el
+                    resumen NAVEGA al PLAN DE VACUNAS de A — "ver el
+                    carnet completo". Muere el despliegue inline: la
+                    lista de 8 vacunas competía con la pantalla
+                    dedicada (Chanel — un solo gesto, una sola casa). */}
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('perfil.verCarnetCompleto')}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/hogar/vacunas/[mascotaId]',
+                      params: { mascotaId: mascota.id, nombre: mascota.nombre },
+                    })
+                  }
+                >
+                  <CantoCurva color={theme.capa.identidad}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3], padding: spacing[4], minHeight: 58 }}>
+                      <View style={{ flex: 1, minWidth: 0, gap: spacing[1] }}>
+                        <Texto variante="cuerpo">
+                          {vacunas.length === 1 ? t('perfil.vacunasResumenUna') : t('perfil.vacunasResumen', { n: vacunas.length })}
+                        </Texto>
+                        {(() => {
+                          const ultima = vacunas.reduce<string | null>(
+                            (max, v) => (v.fecha_aplicada !== null && (max === null || v.fecha_aplicada > max) ? v.fecha_aplicada : max),
+                            null,
+                          );
+                          return ultima !== null ? (
+                            <Texto variante="dato">{t('perfil.hoyUltima', { fecha: fechaCortaMono(ultima, idioma) })}</Texto>
+                          ) : null;
+                        })()}
+                      </View>
+                      <Icono nombre="veterinaria" tamano={26} />
+                      {/* › NAVEGA (Ley 19.7: la dirección codifica la verdad) */}
+                      <Svg width={19} height={19} viewBox="0 0 24 24">
+                        <Path d="M9 5l7 7-7 7" stroke={theme.text.tertiary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                      </Svg>
                     </View>
-                    <Icono nombre="veterinaria" tamano={26} />
-                  </View>
-                  {vacunasAbiertas
-                    ? vacunas.map((v, i) => (
-                        <View key={`${v.nombre_vacuna}-${i}`}>
-                          <Separador />
-                          <Celda
-                            titulo={v.nombre_vacuna}
-                            subtitulo={v.tipo_vacuna ?? undefined}
-                            metadataMono={v.fecha_aplicada !== null ? fechaCortaMono(v.fecha_aplicada, idioma) : undefined}
-                          />
-                        </View>
-                      ))
-                    : null}
-                </CantoCurva>
-                <PieRevelar n={vacunas.length} revelado={vacunasAbiertas} onPress={() => setVacunasAbiertas((v) => !v)} />
+                  </CantoCurva>
+                </Pressable>
               </>
             )}
           </View>
@@ -1073,7 +1109,7 @@ export default function PerfilDeMascota() {
         <View style={{ paddingHorizontal: spacing[5], marginTop: spacing[8] }}>
           <Tarjeta elevacion="elevada">
             <View style={{ gap: spacing[3] }}>
-              <Texto variante="dato">{t('perfil.pieRotulo').toUpperCase()}</Texto>
+              <Texto variante="apoyo">{t('perfil.pieRotulo')}</Texto>
               <Texto variante="apoyo">
                 {(() => {
                   const hoyIso2 = new Intl.DateTimeFormat('en-CA').format(hoy);

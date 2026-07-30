@@ -271,6 +271,7 @@ export const clienteEs = {
     // r5: vacunas agrupadas + la línea honesta del sin-dato + filtros
     // de tiempo de la historia.
     vacunas: 'Vacunas',
+    verCarnetCompleto: 'Ver el carnet completo',
     vacunasResumenUna: '1 vacuna en su carnet',
     vacunasResumen: '{{n}} vacunas en su carnet',
     hoySinRegistroLinea: 'Sin registro todavía: {{lista}}',
