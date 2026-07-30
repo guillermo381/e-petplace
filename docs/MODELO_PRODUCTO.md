@@ -2883,6 +2883,57 @@ Si `BIO_EXPEDIENTE.md` dice algo que contradice a `MODELO_PRODUCTO.md`, **preval
 
 ---
 
+## CANDIDATA — LA AUSENCIA TIENE TIPOS (S82, 30-jul-2026)
+
+> ⚠️ **ES CANDIDATA, NO LETRA.** Se deposita para que no se pierda y para
+> que el gate la juzgue con pantallas delante — **entra al modelo DESPUÉS
+> del gate, jamás antes** (regla 80: la ley se escribe después del
+> resultado firmado). Mientras tanto NO se cita como ley ni se construye
+> contra ella.
+
+**La observación, y por qué merece estar acá: salió CUATRO veces en un
+solo día, de TRES pistas que no se estaban hablando.** Cada una llegó por
+su lado a la misma pared — el modelo tiene UN solo hueco donde el
+producto necesita varios:
+
+| lo que el modelo colapsaba en "no hay dato" | lo que en realidad significa | de dónde salió |
+|---|---|---|
+| **sin registro** | nadie preguntó nunca | grilla "Cómo está hoy" (C) |
+| **ninguna conocida** | alguien SÍ miró y no había — es un hecho clínico | alergias (A, r4) |
+| **aún no corresponde** | la pregunta todavía no aplica (por edad, por etapa) | plan vacunal (A, r7) |
+| **cerrado** vs **no configurado** | decisión declarada vs omisión | días del prestador (A, r7) |
+| **sin fecha de refuerzo** | hay hecho, falta UNA coordenada del hecho | pantalla de vacunas (A, r5) |
+
+**La tesis:** **L-139 dice que no se rellena lo que falta — nunca dijo que
+faltar tenga una sola forma.** Y la diferencia no es de copy: es de
+MODELO. "Ninguna alergia conocida" es un hecho clínico que alguien
+declaró y que un veterinario puede usar; "sin registro" es la ausencia de
+ese acto. Colapsarlos en la misma celda gris hace que la pantalla mienta
+en las dos direcciones — dice "no sabemos" cuando sí se sabe, y sugiere
+"todo bien" cuando nadie miró.
+
+**Por qué es de MODELO_PRODUCTO y no de una skill de UI:** la distinción
+no se puede resolver pintando distinto. Cada tipo de ausencia exige que
+*el motor pueda producirlo* — hizo falta una columna con fecha y autor
+para poder decir "ninguna conocida" (S82 r4), una tabla puente con
+periodicidad y edad para poder decir "aún no corresponde" (r7), y una
+declaración explícita para separar "cerrado" de "no configurado" (r7). La
+pantalla solo puede decir lo que el modelo sabe distinguir.
+
+**Lo que el gate tiene que juzgar, con pantallas delante:** si esto es UNA
+ley transversal del expediente (todo dato ausente declara su tipo) o si
+son cuatro casos que se parecen y conviene dejar sueltos. **La respuesta
+honesta hoy es que no lo sabemos** — hay cuatro casos, y cuatro casos son
+un patrón sospechado, no una ley.
+
+**Ya construido que la sostiene (por si el gate la firma):**
+`mascota_perfil_vigente.alergias_ninguna_declarada_en/_por` ·
+`cat_plan_vacunal.edad_inicio_meses` → estado `aun_no_corresponde` ·
+`prestador_dias_cerrados` · `AlergiasEstado` y `EstadoPlanVacuna` en
+`packages/api`.
+
+---
+
 ## Próximas secciones (en redacción)
 
 Documento completo en su primera versión integral. Próximas evoluciones pueden incluir:

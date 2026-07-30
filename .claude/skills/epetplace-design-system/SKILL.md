@@ -46,7 +46,7 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
    PROGRAMÁTICO: si tocás `palette.ts` o `themes/`, corré
    `pnpm verify:contrast` y pegá el output en el reporte. Gate en rojo =
    no se mergea.
-3. **Regla de voz (MATIZ S53).** JetBrains Mono para metadata CHICA de
+3. **Regla de voz (MATIZ S53 · ACLARADA S82).** JetBrains Mono para metadata CHICA de
    máquina (fechas, horas, IDs inline — minúsculas, tracking suave;
    `Celda.metadataMono` lo fuerza). A ESCALA DISPLAY (números grandes
    de dashboard) el dato viste DM Sans light/regular con
@@ -56,6 +56,33 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
    El vocabulario interno del modelo (M1..M7) JAMÁS visible. Las
    FECHAS se formatean con `fechaCortaMono` del riel (una función por
    idioma para todos los módulos — cero formateos artesanales).
+   > **ACLARACIÓN S82 (30-jul-2026) — DÓNDE VIVE LA PROHIBICIÓN DEL
+   > MONO-MAYÚSCULAS, con los tres literales cotejados.** Esta ley **NO
+   > dice** "prohibido mono en mayúsculas" con esas palabras: dice que el
+   > mono es para metadata chica de máquina, *minúsculas, tracking
+   > suave*. **La prohibición existe y es MÁS FUERTE, pero vive en otro
+   > lado:** en **S52** (*"el eyebrow uppercase trackeado murió en las 6
+   > pantallas — prohibición explícita"*) y la generaliza la **Ley 18**
+   > (*"era estructura decorativa"*). Un rótulo mono + uppercase +
+   > tracking **es exactamente el eyebrow que S52 mató**, venga de donde
+   > venga. *Origen: arbitraje de C sobre el choque que A declaró al
+   > traducir la lámina — **A acertó el QUÉ y erró la CITA** (es Ley 3 +
+   > S52/Ley 18, no la Ley 3 sola); C había portado el
+   > `text-transform:uppercase` del CSS de la lámina sin cotejarlo.
+   > Corolario que ninguna de las dos discute: **la tipografía de una
+   > lámina es CRITERIO, no fuente** — igual que sus hexes. Commit
+   > `5386f90`.*
+   > **CASO DEL MISMO DÍA (C, `d2fa970` ⑥, founder mirando): EL NOMBRE DE
+   > LA MASCOTA VA EN SANS.** Al morir la banda de color de la fila de
+   > oficio se destapó que la banda lo pintaba en **mono** — y un nombre
+   > **no es dato de máquina**: es lo más humano de la pantalla. Pasa a
+   > sans. *(La banda murió con el founder delante, dos rondas después de
+   > elegir cuál de las dos ganaba: r12 eligió ENTRE dos bandas, r14 sacó
+   > la banda de la mesa. La reemplaza glifo del oficio + isotipo teñido
+   > + label — ver el desvío declarado en la Ley 4. Y el PRECIO no viajó
+   > con ella: mostraba el MISMO número que el pie, y dos veces el mismo
+   > dato es Chanel directa; queda solo en el pie, con la consecuencia
+   > honesta de que un día sin horarios ya no dice precio de nada.)*
 4. **Dosis.** Prestador = baja: UN acento de capa por vista, CTA primario
    anclado al OFICIO (tealDark vía `accent.cta` — enmienda Ley 21 S63;
    memorial siempre tinta), sin gradiente UI. Dueño = alta: capas visibles,
@@ -64,6 +91,29 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
    del Hogar — HeroMarca compacto con el saludo por franja). El isotipo es IDENTIDAD: va en
    gradiente oficial por default, fuera de la contabilidad de dosis —
    pero UNO por pantalla.
+   > **LECTURA FIJADA S82 (30-jul-2026) — SON DOS CLÁUSULAS, NO UNA.** La
+   > lista cerrada de contextos gobierna **el GRADIENTE COMO SUPERFICIE**;
+   > el **ISOTIPO tiene cláusula propia que lo EXIME** de esa lista
+   > ("fuera de la contabilidad de dosis"), con un único límite: uno por
+   > pantalla. *Origen: A leyó la lista cerrada como si alcanzara al
+   > isotipo y declaró que su pantalla interna no podía llevarlo; el
+   > founder la cazó en dispositivo señalando Explorar y Cuenta —
+   > **ninguna de las dos estaba en violación**: son `Encabezado portada`,
+   > cuya anatomía firmada S52-P1 ES el lockup isotipo+voz. Commit
+   > `1f7d53b`.*
+   > **DOS RESOLUCIONES MÁS DEL MISMO DÍA, ninguna enmienda:**
+   > · **el AGUA no es un isotipo** — sangrada por los cuatro bordes no
+   >   identifica, es TEXTURA (parentesco: el Guijarro, §4 de
+   >   DIRECCION_ARTE). La variante completa murió con su trabajo hecho.
+   >   *(B, galería, `d7fe130`.)*
+   > · **DESVÍO DECLARADO Y FIRMADO: el isotipo TEÑIDO** de la fila de
+   >   oficio (la banda de color murió y lo reemplaza glifo + isotipo
+   >   teñido + label). Es desvío porque el default es gradiente; sus dos
+   >   atenuantes están MEDIDOS — la prop `color` de `Isotipo` nació en
+   >   S61-B8 por letra del founder (isotipo en tealDark), y el default
+   >   habría sido el choque real, porque el gradiente es de contexto
+   >   cerrado y ésa es pantalla interna. **Lo firma el founder, no se
+   >   deduce.** *(C, `d2fa970` ⑥.)*
 5. **accent.active: UN elemento activo por vista.** En la raíz ya lo usa
    la `BarraTabs` (el pill) — las pantallas bajo tabs no suman otro.
 6. **Motion.** <300ms en UI (tokens de `motion.ts`); spring SOLO como
@@ -243,6 +293,16 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
        exclusivas. **Los chips QUEDAN PROHIBIDOS como tabs/segmentos**
        (decisión founder S57): chips son para filtros y multi-selección
        (los 7 días del plan), donde elegir varios o ninguno es legal.
+       > **ENMIENDA S82 (30-jul-2026; origen: C, la pantalla del log del
+       > paseo — D-357 ENMENDADA con esta letra).** Cuando el eje de
+       > vistas **convive con otros ejes de su familia** en la misma
+       > pantalla, el `SelectorSegmentado` **cede a `FiltroPills`**: **la
+       > gramática de la PANTALLA manda sobre la del control suelto** —
+       > tres ejes hermanos que se ven distinto se leen como tres cosas
+       > distintas, y ahí la coherencia local vale más que el patrón
+       > aislado. La prohibición de arriba **sigue rigiendo** para el
+       > caso normal (un eje de vistas exclusivas, solo, en su pantalla).
+       > Corolario Ley 37: cuando el componente sale del import, sale.
     4. **Estado/dato pasivo** (De vacaciones, Parte del plan): chip
        informativo, sin pretender ser botón.
     5. **Elemento hero de una posición consolidada** (la próxima cita,
@@ -433,6 +493,38 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
     del prestador sigue en tealDark (§15b; su par oscuro del MURO es
     tealDarkNoche #0A4A44, D-407 pagada S63).
 
+    > **ENMIENDA S82 — EL ORO (FIRMADA en galería por el founder,
+    > 30-jul-2026; origen: B, commits `788bc1b` + `ce812d7`).**
+    > **El CTA primario del CLIENTE deja de anclar en tinta y pasa al ORO
+    > — `palette.ctaOro` `#FCBC1D`, con el label en TINTA.** Es **un solo
+    > color para los DOS temas**: el par que manda —label sobre fill— da
+    > **9.96 idéntico en claro y en oscuro**, y esa igualdad es lo que
+    > hace posible un color único. **La mitad del PRESTADOR queda
+    > INTACTA** (su CTA sigue anclado al oficio, tealDark, por
+    > `lightOficio`/`darkOficio`) y **memorial sigue SIEMPRE en tinta**
+    > por `getTheme` — las dos garantías viven en la FUENTE, no en la
+    > disciplina de cada pantalla. **MUERE la frase "cada CTA nuevo del
+    > cliente nace negro".** Alcance medido: 43 instancias de
+    > `Boton variante="primario"` en ~20 pantallas del cliente;
+    > prestador CERO. Reversa de una línea: `accent.cta` a
+    > `palette.textLight0` / `textDark0` con sus `ctaTexto`.
+    > **Lo que lo mantiene distinguible del ámbar de ALERTA no es el
+    > matiz** (viven a ~4°: a esa distancia el ojo no separa) sino que el
+    > alerta vive como **tinte** y el CTA como **fill saturado** — eso lo
+    > protege la regla **R20** de `verify:diseno`, no la disciplina.
+    > **ADDENDUM, firma aparte de la misma sesión — LA ELEVACIÓN DEL CTA:
+    > SÍ, y SOLO en el cliente.** Nace `accent.ctaElevado` y los temas de
+    > OFICIO lo pisan a `false` (mismo patrón con el que el prestador
+    > quedó fuera del papel tapiz); **memorial: false** — memorial no se
+    > celebra. Es SLOT y no prop: la pantalla no elige. *El argumento que
+    > la separó de la firma del color es del founder: el prestador usa la
+    > misma variante con su teal y su CTA no tiene el problema del oro
+    > contra papel (1.55) — meterle relieve habría sido arrastre.*
+    > **`#fff645` RETIRADO** como CTA oscuro (con un color para los dos
+    > temas dejó de hacer falta) y **el estatuto solo-marca de la rampa
+    > del isotipo queda INTACTO, SIN enmienda** — ver A5 en
+    > `DIRECCION_ARTE` §9bis.3.
+
 22. **La ley de intensidad del acento (S58, firma founder).** El acento
     tiene DOS intensidades por FUNCIÓN — **TONAL** (borde 1.5 en el
     acento + tinte claro del acento + TEXTO en el acento) para
@@ -444,6 +536,22 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
     disfrazado de chips es un bug de rol: se desenmascara a
     Interruptor. Apagado JAMÁS dice error — apagado es estado, no
     falla.
+
+    > **ENMIENDA S82 — LA VARIANTE `sinCaja` Y SU CANAL (30-jul-2026;
+    > origen: B, commit `bfe0d70`).** El secundario del cliente pierde el
+    > contorno (A6) y gana **`accent.sinCaja` por tema** — claro
+    > `#E0DBE9` · oscuro `#2C2C3C` · memorial la superficie serena que ya
+    > existe — **más `elevacion.reposo`**.
+    > **EL HALLAZGO QUE DECIDE EL DISEÑO, medido:** el fill de un
+    > secundario tonal **NO puede llegar a 3:1 contra el fondo sin
+    > volverse primario** (bajando cinco pasos llega a 1.43 y ya es gris
+    > pesado). **Su canal NO es el color: es la SUPERFICIE APOYADA** —
+    > precedente exacto del segmento activo de `SelectorSegmentado`
+    > (Chanel: sombra, jamás borde). *Error declarado en el camino: la
+    > primera versión usó `bg.overlay`, que es un token de HOVER con 19
+    > consumidores — quitar el borde sin reemplazar el canal era el
+    > defecto real, no el fondo. `bg.overlay` quedó intacto: no se toca
+    > un token de N consumidores para curar uno.*
 
 21b. **LA FORMA DEL AVATAR POR POSICIÓN (S74, FIRMADA por el founder en el
     gate del chip chico — *"cara flotante dentro"*).** **El avatar ANIDADO

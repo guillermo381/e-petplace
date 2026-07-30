@@ -457,6 +457,30 @@ nota de sin-casa de §4bis quedó resuelta en S80 y la casa definitiva es
 esta). La candidata §4bis (la nariz) la ENMIENDA solo si su gate de
 cuatro veredictos pasa; **si falla, A4 queda como está**.
 
+> **ENMIENDA S82 — EL VALOR ES POR CONTEXTO, LA INTENCIÓN NO CAMBIA
+> (corrección del founder en dispositivo, 30-jul-2026; origen: C, commit
+> `551e332`).** **A4 NO SE MATA.** Se conservan la intención, **el alfa
+> FIRMADO (7%)**, el diámetro (~60% del ancho) y el desborde por la
+> esquina superior derecha: **lo único que cambia es el REGISTRO del
+> color, resuelto POR CONTEXTO — sobre techo OSCURO la luz es BLANCA,
+> sobre techo CLARO es TINTA.** Es el patrón que la casa ya tiene
+> probado (tealDark: mismo color, otro registro; y el tapiz). El valor
+> sale del token del tema (`text.primary` + opacity), **jamás de un
+> literal**.
+> *El porqué de esta enmienda es un ERROR DE MÉTODO declarado por su
+> autora, y la distinción importa: la MEDICIÓN era correcta (blanco al
+> 7% sobre tinte claro no se ve) pero la CONCLUSIÓN estaba mal — matar
+> A4 apoyándose en L-c era resolver EN SILENCIO un choque contra letra
+> firmada, que es justo lo que la casa prohíbe (precedente S63: el
+> choque SE DECLARA, jamás se difiere callado). La letra de A4 dice "el
+> ÚNICO adorno permitido EN UN TECHO", sin acotar a techo de marca.*
+> **AL GATE, declarado y NO resuelto:** si la inversión TAMPOCO se lee,
+> entonces A4 necesita **ALCANCE FINO** ("en un techo de MARCA") — y eso
+> **lo firma el founder, no se deduce de una pantalla**. Por eso el
+> techo claro **NO PROPAGA** a los otros oficios hasta esa firma: si la
+> luz muriera en cada techo, A4 moriría en veinte pantallas sin que
+> nadie lo haya decidido.
+
 **9bis.3 — LA EXCLUSIÓN DE #0F5E56 (A5, la mitad que es ley). ✅
 FIRMADA.** **#0F5E56 y familia quedan FUERA del lado cliente** — es
 barro, no está en la marca, y colisiona con el acento firmado del
@@ -468,6 +492,20 @@ de los hex), y el estatuto solo-marca de los verdes/amarillo es ley v4
 vigente. **Nota de no-confusión (heredada del censo S80):** la rampa de
 MARCA de §8.4 (turquesa→magenta) es OTRA regla — dirección de
 degradados de marca en producto, no los stops del isotipo.
+
+> **ALCANCE FINO S82 — EL ESTATUTO SOLO-MARCA CUBRE EL ROL INFORMACIÓN,
+> Y UN CTA DECIDE (30-jul-2026; origen: B, `d7fe130` r15 ②, ratificado
+> al firmar el oro en `788bc1b`).** La pregunta que lo forzó fue si el
+> amarillo de marca `#fff645` podía ser el CTA del tema oscuro. **No, y
+> el porqué es de alcance, no de gusto:** el estatuto solo-marca cubre
+> el rol **INFORMACIÓN** — **un CTA DECIDE, no informa**, así que
+> usarlo ahí sería **ENMENDAR el estatuto, no aplicarlo**, y eso exige
+> firma propia. **Desenlace: `#fff645` quedó RETIRADO** (el oro
+> `#FCBC1D` sirve a los DOS temas con un solo color y lo volvió
+> innecesario) ⇒ **el estatuto solo-marca de los verdes y el amarillo
+> sigue INTACTO, sin enmienda.** *Lección de método que deja: cuando un
+> candidato obliga a tocar una ley firmada, la salida barata suele ser
+> un candidato mejor — no una enmienda.*
 
 **9bis.4 — CANDIDATAS SIN FIRMA (gate propio; NO RIGEN hasta su gate):**
 
