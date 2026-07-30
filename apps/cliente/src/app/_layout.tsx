@@ -22,6 +22,11 @@ import { recursos } from '@/i18n';
 
 SplashScreen.preventAutoHideAsync();
 
+// S82-A r4 — LA FRONTERA DEL CRASH (espejo S79-B del prestador; voto de
+// mesa "app-wide" que el cliente incumplía): sin esto, un crash de
+// render pinta BLANCO mudo. Guard bilateral: verify-frontera-caida.mjs.
+export { PantallaCaidaRaiz as ErrorBoundary } from '@/components/pantalla-caida';
+
 // MARCADOR DE BUNDLE (L-138, práctica permanente): el gate en dispositivo
 // EMPIEZA confirmando que Metro imprime la línea de la sesión vigente —
 // sin ella, el teléfono corre un bundle fantasma y no se gatea.

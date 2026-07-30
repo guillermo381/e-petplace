@@ -23,6 +23,12 @@ export const clienteEn = {
     yaTengoCuenta: 'I already have an account',
     legales: 'By creating your account you accept our Terms and our Privacy Policy.',
   },
+  // S82-A r4 — crash boundary (verbatim mirror of prestador S79-B voices)
+  caida: {
+    titulo: 'This screen could not be shown',
+    detalle: 'It is a problem on our side, not your setup — your data is safe. Try again.',
+    reintentar: 'Try again',
+  },
   // S55-A A3 (D-315): root + auth on the rail
   raiz: {
     tardando: 'This is taking longer than usual',

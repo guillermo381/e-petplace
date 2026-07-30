@@ -22,6 +22,13 @@ export const clienteEs = {
     yaTengoCuenta: 'Ya tengo cuenta',
     legales: 'Al crear tu cuenta aceptas nuestros Términos y nuestra Política de privacidad.',
   },
+  // S82-A r4 — la frontera del crash (espejo VERBATIM de las voces S79-B
+  // del prestador, ya aprobadas allá; lote S82 igual las lista)
+  caida: {
+    titulo: 'Esta pantalla no se pudo mostrar',
+    detalle: 'Es un problema nuestro, no de tu configuración — tus datos están a salvo. Prueba de nuevo.',
+    reintentar: 'Reintentar',
+  },
   // S55-A A3 (D-315): raíz + auth extraídos al riel (voseo→tuteo al tocarse)
   raiz: {
     tardando: 'Esto está tardando más de lo normal',
