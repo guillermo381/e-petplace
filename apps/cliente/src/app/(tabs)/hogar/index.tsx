@@ -34,6 +34,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StatusBar, Text, View } from 'react-native';
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { router, useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -48,7 +49,6 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   FichaMascotaHogar,
-  HeroMarca,
   Hoja,
   Icono,
   HojaScroll,
@@ -112,6 +112,29 @@ import { CantoCurva } from '@/components/canto-curva';
 
 
 type TraductorHogar = ReturnType<typeof useTraduccion>['t'];
+
+/** R12 (guard, r4-defecto 2): EL SOLAPE JAMÁS EXCEDE EL RESPIRO — la
+ *  tarjeta de recomendaciones sube sobre la banda SOLO dentro del aire
+ *  que el techo deja bajo las mascotas; si alguien agranda el solape
+ *  por encima del respiro, tapa el saludo/nombres y el lint lo para.
+ *  Verificado por construcción: 56 > 32. */
+const RESPIRO_BANDA = spacing[14]; // el aire al pie del degradado
+const SOLAPE_RECO = spacing[8]; // cuánto sube la tarjeta sobre la banda
+
+/** r4-defecto 3: la fecha del techo — "jueves 23 de julio", mono
+ *  minúsculas (Ley 3). Candidata al RIEL (fechaConDiaMono) declarada:
+ *  el formateo por idioma es del riel; nace acá porque el riel no
+ *  tiene la forma con día de semana y packages no es territorio de
+ *  esta ronda. */
+function fechaConDiaMono(d: Date, idioma: 'es' | 'en'): string {
+  return new Intl.DateTimeFormat(idioma === 'en' ? 'en-US' : 'es-EC', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  })
+    .format(d)
+    .toLowerCase();
+}
 
 // Saludo por franja horaria (S52-P2a, voz del lote): la app saluda
 // como una persona — mañana/tarde/noche del reloj del dispositivo.
@@ -310,23 +333,25 @@ function FiltroVida({
             accessibilityState={{ selected: elegido }}
             accessibilityLabel={etiquetas[o.codigo]}
             style={{
+              // r4-4 (CORRECCIÓN DE ARQUITECTURA del founder): §7bis
+              // gobierna el DATO, no el CONTROL — un control SE RELLENA
+              // o va SIN CAJA (A6 firmada). Reposo: cero borde, cero
+              // fondo. Elegido: la PLACA del glifo se rellena (30 de
+              // lado, rectángulo suave — Ley 21: lo que se elige es
+              // rectángulo) y el label pasa a tinta plena. NUNCA
+              // contorno, en ningún estado.
               height: 44,
-              borderRadius: radius.full,
-              borderWidth: 1.5,
-              borderColor: elegido ? theme.text.primary : theme.border.default,
               flexDirection: 'row',
               alignItems: 'center',
               gap: spacing[2],
-              paddingLeft: spacing[1.5],
-              paddingRight: spacing[4],
-              ...(elegido ? { boxShadow: theme.elevacion.reposo } : null),
+              paddingRight: spacing[2],
             }}
           >
             <View
               style={{
                 width: 30,
                 height: 30,
-                borderRadius: radius.full,
+                borderRadius: radius.suave,
                 backgroundColor: elegido ? theme.text.primary : 'transparent',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -951,30 +976,194 @@ export default function Hogar() {
       style={{ flex: 1 }}
       contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}
     >
-      {/* ── Zona 1 — el hogar ───────────────────────────────────
-          Techo: HeroMarca compacto (enmienda Ley 4 S52, SELLADA
-          condicionada al gate visual del founder). PUNTO DE REVERSIÓN
-          BARATA: si el gate lo baja, reemplazar este bloque por
-          <Encabezado variante="portada" saludo={saludoPorFranja(...)}/>
-          — el lockup en tinta de P1; un cambio de componente, cero
-          lógica. El isotipo blanco de adentro es el UNO por pantalla.
-          Memorial degrada solo (bg.card plano). */}
+      {/* @override-s82c — EL TECHO DEL HOGAR, local (r4: la lámina no
+          había llegado completa — las mascotas van ADENTRO del
+          degradado, la fecha en mono SOBRE el saludo). HeroMarca no
+          tiene slots para fecha-antes-del-saludo ni para la fila de
+          mascotas: se compone local COPIANDO NIVEL de la primitiva
+          (gradiente firma + curva 44/26 del patrón v2 + safe area
+          absorbida + memorial plano) — CANDIDATA a B: HeroMarca gana
+          slots fecha/contenido-de-techo. A4 (§9bis.2, FIRMADA): la luz
+          de la esquina es el ÚNICO adorno. El respiro del pie
+          (RESPIRO_BANDA) es MAYOR que el solape de la tarjeta
+          (SOLAPE_RECO) — guard R12: la tarjeta nunca tapa contenido. */}
       <View>
-        {/* S58 patrón v2: el TECHO VIVO — la base curva 44/26 (la
-            calibración final se sella en el gate en dispositivo).
-            S59: la safe area la absorbe HeroMarca (el gradiente pinta
-            bajo la barra de estado; el padding externo murió). */}
-        <HeroMarca
-          titulo={`${saludoPorFranja(hoy.getHours(), t)}${nombrePerfil ? `, ${nombrePerfil.trim().split(' ')[0]}` : ''}`}
-          variante="techoVivo"
-        />
-        {/* LA ENTRADA DEL COACH (S53-B2b, §6 + DIRECCION_ARTE §5.1):
-            el destello vive en el techo del Hogar, discreto. Blanco
-            sobre el gradiente (misma familia que el isotipo — marca,
-            no CTA); memorial degrada solo por el registry del Icono.
-            El PUNTO DE NOVEDAD se enciende solo cuando el motor de
-            revelaciones (B4) tenga algo nuevo que decir — jamás badge
-            permanente; su lugar queda hecho abajo. */}
+        {(() => {
+          const relleno = {
+            paddingTop: insets.top + spacing[5],
+            paddingBottom: RESPIRO_BANDA,
+            paddingHorizontal: spacing[5],
+            borderBottomLeftRadius: 44,
+            borderBottomRightRadius: 26,
+            overflow: 'hidden' as const,
+          };
+          const textoTecho = esMemorial ? theme.text.primary : theme.text.onGradient;
+          const contenido = (
+            <>
+              {/* A4 — la luz de la esquina (blanco 7% desbordando por la
+                  esquina superior derecha; centro fuera del lienzo).
+                  Memorial: sin adorno (el color se apaga, Ley 8). */}
+              {!esMemorial ? (
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: -40,
+                    right: -70,
+                    width: 290,
+                    height: 290,
+                    borderRadius: 999,
+                    backgroundColor: 'rgba(255,255,255,0.075)',
+                  }}
+                />
+              ) : null}
+              <Isotipo size={28} variant="blanco" />
+              {/* r4-3: la fecha en mono SOBRE el saludo (Ley 3, minúsculas) */}
+              <Text
+                style={{
+                  fontFamily: typography.family.mono.regular,
+                  fontSize: typography.size.sm,
+                  letterSpacing: typography.tracking.mono,
+                  color: textoTecho,
+                  marginTop: spacing[4],
+                }}
+              >
+                {fechaConDiaMono(hoy, idioma)}
+              </Text>
+              <Text
+                accessibilityRole="header"
+                style={{
+                  fontFamily: typography.family.sans.light,
+                  fontSize: typography.size.lg,
+                  lineHeight: Math.round(typography.size.lg * typography.leading.snug),
+                  color: textoTecho,
+                  marginTop: spacing[1],
+                }}
+              >
+                {`${saludoPorFranja(hoy.getHours(), t)}${nombrePerfil ? `, ${nombrePerfil.trim().split(' ')[0]}` : ''}`}
+              </Text>
+              {/* r4-1: LAS MASCOTAS EN EL HEADER — squircle 112/36 (32%,
+                  S61-A10), punto de estado 26 con aro de papel 4, nombre
+                  debajo; fila horizontal + el "+" de 72 (→ agregar). */}
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ gap: spacing[4], alignItems: 'flex-start', paddingTop: spacing[5] }}
+              >
+                {mascotas.map((m) => {
+                  const s = senalesPorMascota.get(m.id);
+                  const v = s
+                    ? calcularVozHogar(
+                        {
+                          tieneEmergenciaActiva: s.tiene_emergencia_activa,
+                          vacunasTotal: s.vacunas_total,
+                          ultimaVacunaAplicada: s.ultima_vacuna_aplicada,
+                          proximaVacuna: s.proxima_vacuna,
+                          ultimaAtencionCerrada: s.ultima_atencion_cerrada,
+                        },
+                        hoy,
+                      ).voz
+                    : null;
+                  const colorEstado =
+                    v === 'alDia' ? theme.status.success : v === 'pideAtencion' ? theme.status.warning : theme.text.tertiary;
+                  return (
+                    <Pressable
+                      key={m.id}
+                      accessibilityRole="button"
+                      accessibilityLabel={m.nombre}
+                      onPress={() => router.push({ pathname: '/hogar/mascota/[mascotaId]', params: { mascotaId: m.id } })}
+                      style={{ alignItems: 'center', gap: spacing[2] }}
+                    >
+                      <View>
+                        <View
+                          style={{
+                            width: 112,
+                            height: 112,
+                            borderRadius: 36,
+                            borderCurve: 'continuous',
+                            overflow: 'hidden',
+                            backgroundColor: esMemorial ? theme.bg.overlay : 'rgba(255,255,255,0.17)',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          {fotos[m.id] !== undefined ? (
+                            <Image
+                              source={{ uri: fotos[m.id] }}
+                              style={{ width: 112, height: 112 }}
+                              contentFit="cover"
+                              accessibilityIgnoresInvertColors
+                            />
+                          ) : (
+                            <Svg width={52} height={52} viewBox="0 0 24 24">
+                              <Huella color={textoTecho} escala={0.9} x={1.2} y={1.2} />
+                            </Svg>
+                          )}
+                        </View>
+                        {/* el punto de estado — solo con señal (L-139) */}
+                        {v !== null ? (
+                          <View
+                            style={{
+                              position: 'absolute',
+                              right: -2,
+                              bottom: -2,
+                              width: 26,
+                              height: 26,
+                              borderRadius: 999,
+                              backgroundColor: colorEstado,
+                              borderWidth: 4,
+                              borderColor: esMemorial ? theme.bg.card : theme.bg.base,
+                            }}
+                          />
+                        ) : null}
+                      </View>
+                      <Text
+                        style={{
+                          fontFamily: typography.family.sans.medium,
+                          fontSize: typography.size.sm,
+                          color: textoTecho,
+                        }}
+                      >
+                        {m.nombre}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('hogar.agregarMascotaCelda')}
+                  onPress={() => router.push('/hogar/agregar')}
+                  style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: 999,
+                    backgroundColor: esMemorial ? theme.bg.overlay : 'rgba(255,255,255,0.17)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginTop: spacing[5],
+                  }}
+                >
+                  <Svg width={28} height={28} viewBox="0 0 24 24">
+                    <Path d="M12 5v14M5 12h14" stroke={textoTecho} strokeWidth={1.9} strokeLinecap="round" fill="none" />
+                  </Svg>
+                </Pressable>
+              </ScrollView>
+            </>
+          );
+          return esMemorial ? (
+            <View style={[relleno, { backgroundColor: theme.bg.card }]}>{contenido}</View>
+          ) : (
+            <LinearGradient
+              colors={[...theme.accent.gradient.colors] as [string, string, ...string[]]}
+              locations={[...theme.accent.gradient.locations] as [number, number, ...number[]]}
+              start={{ x: 0.13, y: 0 }}
+              end={{ x: 0.87, y: 1 }}
+              style={relleno}
+            >
+              {contenido}
+            </LinearGradient>
+          );
+        })()}
+        {/* LA ENTRADA DEL COACH (S53-B2b) — intacta sobre el techo local */}
         <Pressable
           onPress={() => setCoachAbierto(true)}
           {...pressedCoach.handlers}
@@ -991,15 +1180,13 @@ export default function Hogar() {
             justifyContent: 'center',
           }}
         >
-          {/* D-401: el destello confirma el dedo (0.97, receta única) */}
           <Animated.View style={pressedCoach.estiloPresionado}>
             <Icono nombre="coach" tamano={24} registro="tinta" tinta={esMemorial ? theme.text.secondary : theme.text.onGradient} />
           </Animated.View>
-          {/* punto de novedad — motor B4: {hayNovedadCoach ? <View .../> : null} */}
         </Pressable>
       </View>
 
-      {/* @override-s82c — RECOMENDACIONES (lámina, ítem 1): LA TARJETA
+      {/* @override-s82c — RECOMENDACIONES      {/* @override-s82c — RECOMENDACIONES (lámina, ítem 1): LA TARJETA
           SOBRE LA BANDA. Ponte al día pasa a FILAS compactas — glifo en
           placa de su capa + título + detalle + chevron; cada fila NAVEGA
           a la superficie donde se decide (la decisión se toma con el
@@ -1151,7 +1338,7 @@ export default function Hogar() {
         if (filas.length === 0) return null;
         const visibles = ponteRevelado ? filas : filas.slice(0, 3);
         return (
-          <View style={{ paddingHorizontal: spacing[4], marginTop: -spacing[8], zIndex: 2 }}>
+          <View style={{ paddingHorizontal: spacing[4], marginTop: -SOLAPE_RECO, zIndex: 2 }}>
             <Tarjeta elevacion="elevada" relleno="ninguno">
               <View
                 style={{

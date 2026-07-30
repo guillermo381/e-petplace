@@ -435,6 +435,31 @@ function r13(archivos) {
   return { fallos, info: `${total}/${sumaBaseline} contorneados (baseline nominal: FiltroVida de C — se resuelve en su gate)${total < sumaBaseline ? ' — BAJÓ: actualizar baseline' : ''}` };
 }
 
+/** R14 · LA TARJETA NO TAPA EL SALUDO (S82-C r4, defecto 2 del gate
+ *  mecanizado): la tarjeta de recomendaciones solapa la banda SOLO
+ *  dentro del respiro que el techo deja al pie — SOLAPE_RECO tiene que
+ *  ser ESTRICTAMENTE MENOR que RESPIRO_BANDA en hogar/index. Las
+ *  constantes se leen del fuente (spacing[K]); si desaparecen o dejan
+ *  de ser spacing-token, la regla FALLA (el silencio no verifica,
+ *  L-192). Tabla de spacing espejada del token (estable desde v3.1). */
+const SPACING_R14 = { 4: 16, 5: 20, 6: 24, 7: 28, 8: 32, 10: 40, 12: 48, 14: 56, 16: 64 };
+function r14(archivos) {
+  const hogar = archivos.find((a) => /hogar\/index\.tsx$/.test(a.path));
+  if (!hogar) return { fallos: ['R14: hogar/index.tsx no encontrado — sin fuente no hay verificación'], info: 'SIN FUENTE' };
+  const respiro = hogar.src.match(/RESPIRO_BANDA = spacing\[(\d+)\]/);
+  const solape = hogar.src.match(/SOLAPE_RECO = spacing\[(\d+)\]/);
+  if (!respiro || !solape)
+    return { fallos: ['R14: RESPIRO_BANDA/SOLAPE_RECO no encontrados en hogar/index — la relación no se puede verificar (L-192)'], info: 'CONSTANTES AUSENTES' };
+  const r = SPACING_R14[Number(respiro[1])];
+  const s = SPACING_R14[Number(solape[1])];
+  if (r === undefined || s === undefined)
+    return { fallos: [`R14: spacing[${respiro[1]}]/spacing[${solape[1]}] fuera de la tabla espejada — ensanchar SPACING_R14`], info: 'TOKEN DESCONOCIDO' };
+  const fallos = s >= r
+    ? [`hogar/index — SOLAPE_RECO (${s}) ≥ RESPIRO_BANDA (${r}): la tarjeta TAPA el saludo/nombres del techo (defecto 2 del gate r4)`]
+    : [];
+  return { fallos, info: `solape=${s} < respiro=${r}` };
+}
+
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
 const FIXTURES = {
@@ -450,8 +475,9 @@ const FIXTURES = {
   R11: [{ path: '(fixture)/es.ts', src: "    vozCardM3: '{{nombre}} completó el 60% de su nivel — ¡sigue la racha!'," }],
   R12: [{ tema: 'light', clase: 'texto', nombre: '(fixture)', ratio: 2.0, minimo: 4.5 }],
   R13: [{ path: '(fixture)', src: '<Pressable style={{ borderWidth: 1.5, borderColor: theme.border.default }}>' }],
+  R14: [{ path: 'x/hogar/index.tsx', src: 'const RESPIRO_BANDA = spacing[8];\nconst SOLAPE_RECO = spacing[14];' }],
 };
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13 };
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -502,6 +528,7 @@ const corridas = [
   ['R9 (Ley 17.5/EstadoVacio — informativa)', r9(apps)],
   ['R10 (override-s82c atado a su casa)', r10(apps)],
   ['R11 (LOYALTY §3: la voz del momento sin score)', r11(dics)],
+  ['R14 (el solape no tapa el saludo)', r14(apps)],
 ];
 // R12 corre sobre el volcador vivo; si el volcador cayó, FALLA FUERTE.
 const pares = paresReales();
