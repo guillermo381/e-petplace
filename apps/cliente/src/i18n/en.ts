@@ -279,6 +279,36 @@ export const clienteEn = {
   },
   // S55-A A3 (D-315): vaccine-card flow on the rail. EN renderings
   // APPROVED by founder (S55 batch).
+  // S82-A r5 — the vaccine plan (patron-2 context 1). Third figure says
+  // "no booster date", NOT "no record": there is no base plan in the DB.
+  planVacunas: {
+    titulo: "{{nombre}}'s vaccines",
+    pesoKg: '{{kg}} kg',
+    cargando: 'Loading their vaccines',
+    resumenAlDia: 'up to date',
+    resumenAtencion: 'needs attention',
+    resumenSinFecha: 'no booster date',
+    ejeTodo: 'All',
+    ejeAlDia: 'Up to date',
+    ejeAtencion: 'Needs attention',
+    ejeSinFecha: 'No date',
+    rotulo: 'Their vaccines',
+    hasta: 'until {{fecha}}',
+    vencio: 'due {{fecha}}',
+    sinFecha: 'no booster date',
+    aplicada: 'Given',
+    tipo: 'Type',
+    proximo: 'Next booster',
+    filtroVacio: 'Nothing with that filter.',
+    filtroVacioDetalle: 'Remove it to see all their vaccines.',
+    verTodo: 'See all',
+    vacioTitulo: 'Their card is still empty',
+    vacioDetalle: 'Add it with a photo and we save their vaccines with their dates.',
+    cargarCarnet: 'Add the card',
+    errorTitulo: "We couldn't load their vaccines",
+    errorDetalle: 'Check your connection and try again.',
+    reintentar: 'Try again',
+  },
   carnet: {
     titulo: 'Vaccine card',
     capturaTitulo: "Take a photo of {{nombre}}'s vaccine card — we read the vaccines",

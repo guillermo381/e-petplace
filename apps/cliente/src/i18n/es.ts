@@ -322,6 +322,39 @@ export const clienteEs = {
   // S55-A A3 (D-315): flujo carnet al riel (voseo→tuteo). La voz de
   // espera es la aprobada S48 VERBATIM; las traducciones EN quedaron
   // APROBADAS por founder (lote S55).
+  // S82-A r5 — EL PLAN DE VACUNAS (contexto 1 de la lámina patron-2;
+  // ADENDA al lote consolidado 2026-07-30, no un lote nuevo).
+  // OJO: la tercera cifra dice "sin fecha de refuerzo", NO "sin
+  // registro" — el plan base no existe en la DB (cat_vacunas es
+  // vocabulario) y afirmar lo que falta sería L-139.
+  planVacunas: {
+    titulo: 'Las vacunas de {{nombre}}',
+    pesoKg: '{{kg}} kg',
+    cargando: 'Cargando sus vacunas',
+    resumenAlDia: 'al día',
+    resumenAtencion: 'necesita atención',
+    resumenSinFecha: 'sin fecha de refuerzo',
+    ejeTodo: 'Todo',
+    ejeAlDia: 'Al día',
+    ejeAtencion: 'Necesita atención',
+    ejeSinFecha: 'Sin fecha',
+    rotulo: 'Sus vacunas',
+    hasta: 'hasta {{fecha}}',
+    vencio: 'venció {{fecha}}',
+    sinFecha: 'sin fecha de refuerzo',
+    aplicada: 'Aplicada',
+    tipo: 'Tipo',
+    proximo: 'Próximo refuerzo',
+    filtroVacio: 'Nada con ese filtro.',
+    filtroVacioDetalle: 'Quítalo para ver todas sus vacunas.',
+    verTodo: 'Ver todo',
+    vacioTitulo: 'Su carnet todavía está vacío',
+    vacioDetalle: 'Cárgalo con una foto y guardamos sus vacunas con sus fechas.',
+    cargarCarnet: 'Cargar el carnet',
+    errorTitulo: 'No pudimos traer sus vacunas',
+    errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
+    reintentar: 'Reintentar',
+  },
   carnet: {
     titulo: 'Carnet de vacunas',
     capturaTitulo: 'Sácale una foto al carnet de {{nombre}} — nosotros leemos las vacunas',
