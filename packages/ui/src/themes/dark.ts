@@ -15,6 +15,16 @@ export const darkTheme = {
     card:     palette.dark1,
     elevated: palette.dark2,
     overlay:  palette.dark3,
+    // S82-B r22 — RE-DECLARADO (no migrado): su rol es **SUPERFICIE
+    // NEUTRA de la casa**, y el hover es UN CASO de ese rol, no un rol
+    // aparte. El comentario decía "hover states" y quedó viejo: de 43
+    // consumidores, **28 lo usan como superficie de fill** (rieles
+    // hundidos, chips en reposo, cajas neutras). Cero migraciones, cero
+    // cambio de valor — lo que cambia es lo que el token DICE que es.
+    // ⚠️ LO QUE NO ES, con el precedente de r12 escrito: **superficie
+    // neutra NO es fill de CONTROL**. Un control necesita su propio
+    // canal — es la letra de `sinCaja`, que nació justo porque este
+    // token no tenía presencia de control (par 1.07 en claro).
     border:   palette.dark4,
     warm:     palette.creamAlpha06,
     tinta:    palette.tinta,   // S58: el techo del prestador (constante en los 3 temas)

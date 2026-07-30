@@ -308,7 +308,13 @@ export function EncuadreFoto({ uri, dim, inicial, nombre, onCambio, onInteraccio
                   style={{
                     fontFamily: typography.family.sans.medium,
                     fontSize: typography.size.sm,
-                    color: lleno ? theme.text.onGradient : theme.text.primary,
+                    // S82-B r22 — el token POR ROL: el fondo de acá es el magenta de
+    // control (accent.control / controlLleno), NO el gradiente de marca.
+    // Funcionaba por COINCIDENCIA DE VALOR (onGradient resuelve a blanco
+    // y el magenta es oscuro), jamás por contrato. `sobreControlLleno` no
+    // vive en memorial a propósito (ahí el chip degrada), de ahí el
+    // narrowing con su fallback.
+    color: lleno ? ('sobreControlLleno' in theme.accent ? (theme.accent as { sobreControlLleno: string }).sobreControlLleno : theme.text.onGradient) : theme.text.primary,
                   }}
                 >
                   {nombre}

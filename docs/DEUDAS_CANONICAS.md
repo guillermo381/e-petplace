@@ -2609,6 +2609,11 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 
 > **☠️ CONDICIÓN DE MUERTE (lo que la retira, escrito al nacer):** se cierra el día que **`Theme` deje de derivarse de los temas concretos y pase a ser una interfaz declarada**. Con eso hecho: los casts se borran, el ratchet de R21 llega a 0 y **R21 se retira junto con esta ficha** — el guard no sobrevive a su razón. **Quién la retira:** la pista que haga la tanda de tipos de `packages/ui`. **Disparo:** el TERCER override que necesite cast (el founder ya declaró que no espera a ese), o la próxima tanda que toque `themes/` por otro motivo. Origen: S82-B (r10 · la elevación del CTA).
 
+#### D-583 — Los tokens `warm` no tienen consumidores: declarados, con fecha de muerte ⚪
+⚪ BAJA. **Medido S82-B r22: `bg.warm` 0 · `text.warm` 0 · `accent.warm` 0** — tres slots del tema que nadie usó nunca. **NO SE MATAN DE APURO, y el porqué es que hay historia:** `palette.cream` y `palette.terracotta` vienen del **MANUAL DE MARCA** con la paleta v4 (S43-B2, `47e78e6`), no son invención de un tema; matar el slot no mata el color, pero **borra la única pista de que la casa tiene un registro CÁLIDO reservado** para la voz de hogar/familia — una narrativa que el producto todavía no construyó. **PERO ES LA TRAMPA QUE EL FOUNDER NOMBRÓ:** un token que nadie usó **jamás pasó por un gate**, y el próximo que lo encuentre lo va a estrenar sin que nadie lo haya mirado. Ninguna ley lo nombra (grep en cero sobre `DIRECCION_ARTE` y la skill). **RESOLUCIÓN: quedan DECLARADOS en el tema con su rol escrito, y con fecha.**
+
+> **☠️ CONDICIÓN DE MUERTE:** si al **soft launch (1-oct-2026)** siguen en cero consumidores, **mueren los tres slots** (el color de paleta se conserva: es de marca). Y si antes de esa fecha alguien los estrena, **su primer consumidor entra por gate del founder** — porque sería la primera vez que ese registro se ve en pantalla. **Quién la retira:** quien haga la pasada de tokens huérfanos, o el primer consumidor. Origen: S82-B r22 (censo de tokens con nombre más general que su rol).
+
 ## Lecciones del monorepo (L-NNN — continúa la numeración del repo prestadores, congelado en L-130)
 
 ### Lecciones del cierre S80 (L-181 → L-190; números verificados libres)

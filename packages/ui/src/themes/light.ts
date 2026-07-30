@@ -28,9 +28,32 @@ export const lightTheme = {
     base:     palette.papelTapiz as string,   // S82-B r10: pink 3% sobre papel
     card:     palette.light1,   // #FFFFFF
     elevated: palette.light2,   // #F8F7FC
-    overlay:  palette.light3,   // #EDEBF5 — hover
+    overlay:  palette.light3,
+    // S82-B r22 — RE-DECLARADO (no migrado): su rol es **SUPERFICIE
+    // NEUTRA de la casa**, y el hover es UN CASO de ese rol, no un rol
+    // aparte. El comentario decía "hover states" y quedó viejo: de 43
+    // consumidores, **28 lo usan como superficie de fill** (rieles
+    // hundidos, chips en reposo, cajas neutras). Cero migraciones, cero
+    // cambio de valor — lo que cambia es lo que el token DICE que es.
+    // ⚠️ LO QUE NO ES, con el precedente de r12 escrito: **superficie
+    // neutra NO es fill de CONTROL**. Un control necesita su propio
+    // canal — es la letra de `sinCaja`, que nació justo porque este
+    // token no tenía presencia de control (par 1.07 en claro).
     border:   palette.light4,   // #E3E0EF
-    warm:     palette.cream,    // narrativa cálida sólida
+    /** ⏳ S82-B r22 — CERO CONSUMIDORES (medido: bg.warm 0 · text.warm 0
+     *  · accent.warm 0). NO SE MATA, y el porqué es que hay historia:
+     *  `cream` y `terracotta` vienen del MANUAL DE MARCA con la paleta v4
+     *  (S43-B2), no son invención de un tema — matar el slot no mata el
+     *  color, pero borra la única pista de que la casa tiene un registro
+     *  CÁLIDO reservado. Su rol declarado: **la voz de hogar/familia** —
+     *  la narrativa que el producto todavía no construyó (ninguna
+     *  superficie narrativa existe hoy).
+     *  ⚠️ PERO ES LA TRAMPA QUE EL FOUNDER NOMBRÓ: un token que nadie usó
+     *  jamás pasó por un gate, y el próximo que lo encuentre lo va a
+     *  estrenar sin que nadie lo haya mirado. Por eso queda DECLARADO CON
+     *  FECHA (D-583): si al soft launch (1-oct-2026) sigue en cero,
+     *  MUERE — y su primer consumidor, cuando llegue, entra por gate. */
+    warm:     palette.cream,    // narrativa cálida (hogar/familia) — SIN consumidores
     tinta:    palette.tinta,    // S58: el techo del prestador (constante en los 3 temas)
   },
 
