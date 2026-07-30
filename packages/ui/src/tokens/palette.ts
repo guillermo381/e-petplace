@@ -102,6 +102,10 @@ export const palette = {
   dark1: '#0D0D12',   // cards nivel 1
   dark2: '#13131A',   // cards nivel 2 / hover
   dark3: '#1A1A24',   // elementos elevados
+  /** S82-B r12 — el mismo fill en OSCURO, con MÁS presencia (orden
+   *  founder): en dark la elevación es contacto mínimo por diseño, así
+   *  que el canal tiene que ser el TONO. 1.49 vs base · texto 11.93. */
+  sinCajaDark: '#2C2C3C',
   dark4: '#222230',   // bordes visibles / separadores
 
   // ── Fondos light (§7.3 B1 — DEFAULT del producto) ──
@@ -171,6 +175,13 @@ export const palette = {
   light1: '#FFFFFF',  // cards
   light2: '#F8F7FC',  // elevated / secciones
   light3: '#EDEBF5',  // hover states
+  /** S82-B r12 — EL FILL DEL SECUNDARIO SIN CAJA (Boton `sinCaja`). NO se
+   *  reusa `light3`: es un token de HOVER (su propio comentario lo dice) y
+   *  lo consumen 19 componentes vía bg.overlay — no se toca un token de N
+   *  consumidores para curar uno (el principio que el founder fijó con
+   *  light0 en r9). Un paso más de presencia que el hover, medido contra
+   *  el TAPIZ (el fondo real del cliente): 1.23 · texto tinta 12.49. */
+  sinCajaLight: '#E0DBE9',
   light4: '#E3E0EF',  // bordes visibles / separadores
 
   // ── Tinta (S58, depósito prestador) — superficie del TECHO del

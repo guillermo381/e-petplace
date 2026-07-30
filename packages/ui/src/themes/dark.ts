@@ -54,6 +54,9 @@ export const darkTheme = {
     // S58 — acento de controles del cliente en dark: violetText (gateado
     // S44 — cero pares nuevos por firma).
     control:       palette.violetText,
+    // S82-B r12 — el fondo del Boton `sinCaja` (MÁS presencia: en dark el canal es el tono):
+    // el secundario sin borde necesita un canal, y el borde ya no está.
+    sinCaja:      palette.sinCajaDark,
     // S73 — el elegido LLENO, FIRMADO por el founder (opción B del
     // mini-gate): magentaDark + blanco en AMBOS temas. REGISTRO honesto:
     // fill-vs-fondo dark = 2.24–2.47 (bajo el 3:1 no-textual de

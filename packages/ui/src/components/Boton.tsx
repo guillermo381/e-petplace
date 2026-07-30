@@ -126,7 +126,17 @@ export function Boton({
     marca:       { fondo: 'transparent', texto: theme.text.onGradient },
     secundario:  { fondo: theme.bg.overlay, texto: theme.text.primary, borde: theme.border.subtle },
     ghost:       { fondo: 'transparent', texto: theme.text.primary },
-    sinCaja:     { fondo: theme.bg.overlay, texto: theme.text.primary },
+    // S82-B r12 (hallazgo del founder en dispositivo: "en oscuro casi no
+    // se ve, en claro se lava"). ERROR DE r12 SOBRE r5, DECLARADO: en r5
+    // le puse `bg.overlay`, que es un token de HOVER (su comentario lo
+    // dice) con 19 consumidores — nunca tuvo presencia de control.
+    // MEDIDO: el par overlay/fondo daba 1.07 en claro y 1.18 en oscuro, y
+    // el tapiz apenas lo movió (1.12→1.07): **el tapiz NO era la causa,
+    // la elección del token sí.** Ahora usa su slot propio (`accent.sinCaja`,
+    // un paso real de presencia por tema) + `elevacion.reposo` como
+    // canal — el precedente exacto es el segmento activo de
+    // SelectorSegmentado (superficie apoyada, Chanel: sombra jamás borde).
+    sinCaja:     { fondo: theme.accent.sinCaja, texto: theme.text.primary },
     destructivo: { fondo: theme.status.dangerBg, texto: theme.status.dangerText },
     compacto:    { fondo: 'transparent', texto: theme.text.primary, borde: theme.border.default },
   }
@@ -147,6 +157,13 @@ export function Boton({
     flexDirection: 'row',
     gap: spacing[2],
     backgroundColor: esMarca ? undefined : c.fondo,
+    // S82-B r12: `sinCaja` gana la ELEVACIÓN como canal (Ley 20 · el
+    // patrón del segmento activo). El fill de un secundario tonal no
+    // puede llegar a 3:1 contra el fondo sin volverse primario —medido:
+    // ni bajando cinco pasos— así que su canal no es el color: es la
+    // superficie apoyada. En memorial y dark la elevación es contacto
+    // mínimo por diseño, y ahí manda el tono del slot.
+    ...(varianteEfectiva === 'sinCaja' ? { boxShadow: theme.elevacion.reposo } : null),
     ...(c.borde ? { borderWidth: theme.border.width, borderColor: c.borde } : null),
     ...(bloque ? { alignSelf: 'stretch' as const } : { alignSelf: 'flex-start' as const }),
   }
