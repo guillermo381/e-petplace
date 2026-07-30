@@ -355,6 +355,11 @@ function EjemploSetBPrima() {
     // LOTE S71-B2 (firmados founder sobre hoja de contacto — carpeta del
     // caso · documento con desglose):
     'caso', 'presupuesto',
+    // LOS DOS DE CONTROL (S82-B r7, del archivo de referencia del
+    // founder): el gate a 21px de la fila de abajo es EL gate — si la
+    // punta del lápiz o la bandeja del compartir no se leen ahí, se
+    // simplifican. Sin huella (son controles, no oficios).
+    'lapiz', 'compartir',
   ]
   return (
     <View style={{ gap: spacing[4] }}>

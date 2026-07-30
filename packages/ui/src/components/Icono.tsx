@@ -37,6 +37,12 @@ export type IconoNombre =
   // ── LOTE S71-B2 (proceso enmendado DIRECCION_ARTE: la sesión autora,
   //    hoja de contacto de 3 variantes, firma founder POR ícono) ──
   | 'caso' | 'presupuesto'
+  // ── LOS DOS PRIMEROS GLIFOS DE CONTROL (S82-B r7, importados del
+  //    archivo de referencia que el founder entregó: `ficha-mascota`).
+  //    GATE POR ÍCONO A 21px PENDIENTE (§2.9) · su LETRA NO SE ESCRIBE
+  //    acá: la categoría "glifo de control" es §6bis de DIRECCION_ARTE,
+  //    PENDIENTE desde S78 — regla 80 (la ley va DESPUÉS del gate).
+  | 'lapiz' | 'compartir'
 export type IconoRegistro = 'capa' | 'aa' | 'tinta'
 
 const TRAZO = 1.9
@@ -317,6 +323,43 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       <Huella color={huella} x={12.4} y={13.6} escala={0.32} />
     </>
   ),
+
+  // ── GLIFOS DE CONTROL (S82-B r7) ───────────────────────────────────
+  // SIN HUELLA, y el criterio VIAJÓ CON LA REFERENCIA (no lo inventa
+  // esta sesión — literal del archivo del founder): *"Trazo 1.9, sin
+  // huella: no son objetos del oficio, son controles."* Un lápiz no
+  // tiene capa y una huella adentro de un lápiz no diría nada (Chanel).
+  // CHOQUE DECLARADO, no resuelto en silencio: Ley 12 pide "objeto del
+  // oficio + UNA huella rellena" — su letra habla de los glifos de
+  // OFICIO; la categoría de control es §6bis de DIRECCION_ARTE,
+  // PENDIENTE DESDE S78 (el glifo del micrófono la pidió primero). Estos
+  // dos NO la fundan: esperan el gate por ícono y recién ahí se escribe
+  // (regla 80). El `huella` del pincel queda sin usar a propósito.
+  // Convergencia medida: el `stroke-width: 1.9` de la referencia es
+  // EXACTAMENTE el TRAZO de este registry — cero traducción.
+  //
+  // El lápiz: cuerpo diagonal + la punta que toca la base. Se conserva
+  // la geometría de la referencia y se le suma el CORTE de la punta
+  // (la línea corta del bisel) — sin él, a 21px la punta se lee como un
+  // triángulo mudo. El `carnet` (S58) usa un lápiz COMO OBJETO con su
+  // huella: son distintos por rol, y por eso este no lo reusa.
+  lapiz: ({ tinta }) => (
+    <>
+      <Path d="M15.5 4.5 19.5 8.5 8 20H4v-4z" {...trazo(tinta)} />
+      <Path d="M13.6 6.4 17.6 10.4" {...trazo(tinta)} />
+    </>
+  ),
+  // Compartir: la flecha que SALE de la bandeja (convención de
+  // plataforma iOS/Android — el trazo de la referencia, literal). La
+  // bandeja abierta arriba dice "sale de acá", jamás un nodo-y-aristas
+  // (ese grafo es de red social, no de un expediente que se comparte).
+  compartir: ({ tinta }) => (
+    <>
+      <Path d="M12 15V4" {...trazo(tinta)} />
+      <Path d="M8 7.6 12 3.6l4 4" {...trazo(tinta)} />
+      <Path d="M5 14v5.5h14V14" {...trazo(tinta)} />
+    </>
+  ),
 }
 
 export function Icono({
@@ -364,6 +407,12 @@ export function Icono({
     // LOTE S71-B2 (firma founder): caso = historia clínica (familia de
     // carnet/vet) · presupuesto = plata del cuidado (familia pagos/negocio)
     caso: identidad, presupuesto: ocre,
+    // GLIFOS DE CONTROL (S82-B r7): TINTA en los dos registros — un
+    // control no pertenece a una capa (no hay oficio del que tomar
+    // color) y su huella no se dibuja. El `registro="capa"` de un
+    // control resuelve a tinta a propósito: pedirle capa no lo tiñe.
+    lapiz: { pura: colorTinta, aa: colorTinta },
+    compartir: { pura: colorTinta, aa: colorTinta },
   }
 
   // §2.8 memorial: la huella a tinta secundaria, el trazo se conserva.
