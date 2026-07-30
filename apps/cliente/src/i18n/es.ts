@@ -122,11 +122,10 @@ export const clienteEs = {
     recoUnaCosa: '1 cosa',
     recoCosas: '{{n}} cosas',
     recoVacunaDetalle: 'Agendar el refuerzo',
-    recoCitaSemana: 'Tienes 1 cita esta semana',
-    recoCitasSemana: 'Tienes {{n}} citas esta semana',
-    recoHoy: '{{n}} hoy',
-    recoManana: '{{n}} mañana',
-    recoLuego: '{{n}} más adelante',
+    // r6-2: las fichas murieron — su contenido son estas filas; la
+    // fila-resumen de la semana murió con sus keys (Ley 37).
+    recoCitaDe: 'La cita de {{mascota}}',
+    recoCargarCarnet: 'Cargar el carnet de {{mascota}}',
     venceEnMin: 'Vence en {{n}} min',
     presupuestoDe: 'Presupuesto de {{negocio}}',
     presupuestoPara: 'Presupuesto para {{mascota}}',

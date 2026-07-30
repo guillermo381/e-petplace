@@ -48,7 +48,6 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
-  FichaMascotaHogar,
   Hoja,
   Icono,
   HojaScroll,
@@ -69,8 +68,6 @@ import {
   useAviso,
   usePresionado,
   useTheme,
-  type FichaMascotaHogarAccion,
-  type FichaMascotaHogarVoz,
   type IconoNombre,
   type LineaDeVidaEstadoPie,
 } from '@epetplace/ui';
@@ -155,42 +152,6 @@ const entradaZona = (orden: number) =>
 // sus keys (enMinutos/enHoras/planDias…) murieron con ellos (Ley 37).
 
 
-// Código de voz (Ley 3: jamás visible) → texto del riel + semántica.
-// S52-P3: la ficha usa las voces SIN sujeto (ficha.*) — el nombre
-// preside la card y no se repite. Las variantes con {{nombre}}
-// (hogar.voz*) se CONSERVAN para contextos sin sujeto visible
-// (notificaciones, Coach, alertas — decisión founder S52).
-function vozATexto(voz: VozEstadoHogar, t: TraductorHogar): { texto: string; semantica: FichaMascotaHogarVoz } {
-  switch (voz.voz) {
-    case 'alDia':
-      return { texto: t('ficha.vozAlDia'), semantica: 'alDia' };
-    case 'pideAtencion': {
-      if (voz.causa === 'emergencia') {
-        return { texto: t('ficha.vozEmergencia'), semantica: 'pideAtencion' };
-      }
-      const { vacuna, dias } = voz;
-      if (voz.causa === 'vacunaVence') {
-        const texto =
-          dias === 0
-            ? t('ficha.vozVacunaVenceHoy', { vacuna })
-            : dias === 1
-              ? t('ficha.vozVacunaVenceUnDia', { vacuna })
-              : t('ficha.vozVacunaVence', { vacuna, dias });
-        return { texto, semantica: 'pideAtencion' };
-      }
-      const texto =
-        dias === 1
-          ? t('ficha.vozVacunaVencidaUnDia', { vacuna })
-          : t('ficha.vozVacunaVencida', { vacuna, dias });
-      return { texto, semantica: 'pideAtencion' };
-    }
-    case 'conociendolo':
-      return {
-        texto: voz.causa === 'expedienteRalo' ? t('ficha.vozConociendolo') : t('ficha.vozQuieto'),
-        semantica: 'conociendolo',
-      };
-  }
-}
 
 // ═══════════ ZONA 3 — EN CONTEXTO (hueco estructural) ═══════════
 // El motor de revelaciones NO existe (nace en B4 junto al de alertas —
@@ -238,12 +199,15 @@ function FilaReco({
   icono,
   titulo,
   detalle,
+  detalleMono,
   onPress,
 }: {
   capa: 'identidad' | 'cuidado';
   icono: IconoNombre;
   titulo: string;
   detalle: string | null;
+  /** r6: el detalle es voz de máquina (fecha·hora) — Ley 3. */
+  detalleMono?: boolean;
   onPress: () => void;
 }) {
   const { theme } = useTheme();
@@ -285,7 +249,9 @@ function FilaReco({
         </View>
         <View style={{ flex: 1, minWidth: 0, gap: spacing[0.5] }}>
           <Texto variante="cuerpo" numberOfLines={2}>{titulo}</Texto>
-          {detalle !== null ? <Texto variante="apoyo" numberOfLines={1}>{detalle}</Texto> : null}
+          {detalle !== null ? (
+            <Texto variante={detalleMono === true ? 'dato' : 'apoyo'} numberOfLines={1}>{detalle}</Texto>
+          ) : null}
         </View>
         <ChevronFila forma="navega" />
       </Animated.View>
@@ -616,18 +582,9 @@ export default function Hogar() {
   const [porCoordinar, setPorCoordinar] = useState<
     { mascotaId: string; mascotaNombre: string; citaId: string; negocio: string | null }[]
   >([]);
-  // S82-C (lámina, ítem 1 — ENMIENDA DE SUPERFICIE a §10ter.1, declarada):
-  // las agendadas colapsadas por servicio salen de la lista y entran como
-  // UNA fila-resumen "citas de la semana" (el eje acción-vs-información
-  // se conserva: la fila es información y va última). El conteo es sobre
-  // TODAS las citas firmes/hold de los próximos 7 días (rc.data crudo —
-  // el colapso por servicio subcontaría, L-139).
-  const [citasSemana, setCitasSemana] = useState<{
-    n: number;
-    nHoy: number;
-    nManana: number;
-    primera: { mascotaId: string; mascotaNombre: string; citaId: string };
-  } | null>(null);
+  // r6-2/3: la fila-resumen "citas de la semana" MURIÓ absorbida por las
+  // filas POR MASCOTA (la cita de cada una) — un sistema, no dos; Chanel:
+  // la de resumen decía lo mismo dos veces. Declarado al gate.
   const [ponteRevelado, setPonteRevelado] = useState(false);
   // S82-C: la Hoja de vacuna del S45 MURIÓ — el detalle se despliega en
   // la carta del hecho (DetalleVacunaVida); queda el visor del carnet.
@@ -756,7 +713,6 @@ export default function Hogar() {
           if (!vigente) return;
           if (!rc.ok) {
             setPorCoordinar([]);
-            setCitasSemana(null);
             return;
           }
           const nombrePor = new Map(lista.map((m) => [m.id, m.nombre]));
@@ -769,35 +725,6 @@ export default function Hogar() {
                 citaId: c.cita_id,
                 negocio: c.negocio_nombre,
               })),
-          );
-          // S82-C (lámina ítem 1): "citas de la semana" — TODAS las
-          // firmes/hold de los próximos 7 días (el lector viene ordenado
-          // fecha+hora ASC: la [0] es la más próxima). El `en_vivo` es de
-          // OTRA zona (el hero) y no entra acá.
-          const fmt = (d: Date) => new Intl.DateTimeFormat('en-CA').format(d);
-          const hoyIso = fmt(new Date());
-          const manana = new Date();
-          manana.setDate(manana.getDate() + 1);
-          const mananaIso = fmt(manana);
-          const en7 = new Date();
-          en7.setDate(en7.getDate() + 7);
-          const sieteIso = fmt(en7);
-          const semana = rc.data.filter(
-            (c) => (c.estado === 'firme' || c.estado === 'hold') && c.fecha !== null && c.fecha >= hoyIso && c.fecha <= sieteIso,
-          );
-          setCitasSemana(
-            semana.length === 0
-              ? null
-              : {
-                  n: semana.length,
-                  nHoy: semana.filter((c) => c.fecha === hoyIso).length,
-                  nManana: semana.filter((c) => c.fecha === mananaIso).length,
-                  primera: {
-                    mascotaId: semana[0].mascota_id,
-                    mascotaNombre: nombrePor.get(semana[0].mascota_id) ?? '',
-                    citaId: semana[0].cita_id,
-                  },
-                },
           );
         });
         const paths = lista.map((m) => m.foto_url).filter((p): p is string => typeof p === 'string' && p.length > 0);
@@ -874,6 +801,151 @@ export default function Hogar() {
   // S61-A11: proximaCita (el hero global) MURIÓ — la acción vive en la
   // ficha de cada mascota (proxima_cita_por_mascota); Ley 37 aplicada.
   const nombreDe = (id: string) => (Array.isArray(mascotas) ? (mascotas.find((m) => m.id === id)?.nombre ?? '') : '');
+
+  // ── r6: LAS FILAS DE PONTE AL DÍA se computan ACÁ porque el punto de
+  // estado de cada mascota del techo muestra SU cuenta de pendientes —
+  // un sistema, no dos (letra founder r6-3). Las fichas de mascota
+  // MURIERON (r6-2): su contenido son estas filas.
+  type FilaReco_ = {
+    key: string;
+    mascotaId: string | null;
+    capa: 'identidad' | 'cuidado';
+    icono: IconoNombre;
+    titulo: string;
+    detalle: string | null;
+    detalleMono?: boolean;
+    onPress: () => void;
+  };
+  const filasReco: FilaReco_[] = (() => {
+    if (esMemorial) return [];
+    const ahora = Date.now();
+    const vozDe = (id: string) => {
+      const s = senalesPorMascota.get(id);
+      if (!s) return null;
+      return calcularVozHogar(
+        {
+          tieneEmergenciaActiva: s.tiene_emergencia_activa,
+          vacunasTotal: s.vacunas_total,
+          ultimaVacunaAplicada: s.ultima_vacuna_aplicada,
+          proximaVacuna: s.proxima_vacuna,
+          ultimaAtencionCerrada: s.ultima_atencion_cerrada,
+        },
+        hoy,
+      );
+    };
+    const filas: FilaReco_[] = [
+      ...solicitudesPend.map((s): FilaReco_ => {
+        const min = Math.max(1, Math.round((Date.parse(s.expiraEn) - ahora) / 60000));
+        return {
+          key: `sol-${s.solicitudId}`,
+          mascotaId: s.mascotaId,
+          capa: 'cuidado',
+          icono: 'familia',
+          titulo:
+            s.tipo === 'alta_mascota'
+              ? t('autorizacion.tituloAlta', { negocio: s.negocioNombre ?? '', mascota: s.mascotaNombre ?? '' })
+              : t('autorizacion.tituloAtencion', { negocio: s.negocioNombre ?? '', mascota: s.mascotaNombre ?? '' }),
+          detalle: t('hogar.venceEnMin', { n: min }),
+          onPress: () => router.push({ pathname: '/autorizacion/[solicitudId]', params: { solicitudId: s.solicitudId } }),
+        };
+      }),
+      ...presupuestosPend.map(
+        (p): FilaReco_ => ({
+          key: `pre-${p.id}`,
+          mascotaId: p.mascotaId,
+          capa: 'identidad',
+          icono: 'presupuesto',
+          titulo:
+            p.negocioNombre !== null
+              ? t('hogar.presupuestoDe', { negocio: p.negocioNombre })
+              : t('hogar.presupuestoPara', { mascota: p.mascotaNombre ?? '' }),
+          detalle: t('hogar.presupuestoDetalle', {
+            total: p.total,
+            mascota: p.mascotaNombre ?? '',
+            fecha: fechaLargaHumana(p.venceEn.slice(0, 10), idioma),
+          }),
+          onPress: () =>
+            router.push({ pathname: '/citas/[mascotaId]', params: { mascotaId: p.mascotaId, nombre: p.mascotaNombre ?? '' } }),
+        }),
+      ),
+      ...porCoordinar.map(
+        (c): FilaReco_ => ({
+          key: `coord-${c.citaId}`,
+          mascotaId: c.mascotaId,
+          capa: 'identidad',
+          icono: 'veterinaria',
+          titulo: t('hogar.porCoordinarTitulo', { mascota: c.mascotaNombre }),
+          detalle:
+            c.negocio !== null
+              ? t('citasMascota.coordinaraNegocio', { negocio: c.negocio })
+              : t('citasMascota.coordinaranSinNombre'),
+          onPress: () =>
+            router.push({ pathname: '/citas/[mascotaId]', params: { mascotaId: c.mascotaId, nombre: c.mascotaNombre, citaId: c.citaId } }),
+        }),
+      ),
+      // la alerta de vacuna (era la voz pideAtencion de la ficha)
+      ...mascotas.flatMap((m): FilaReco_[] => {
+        const voz = vozDe(m.id);
+        if (voz === null || voz.voz !== 'pideAtencion' || voz.causa === 'emergencia') return [];
+        const titulo =
+          voz.causa === 'vacunaVence'
+            ? voz.dias === 0
+              ? t('hogar.vozVacunaVenceHoy', { nombre: m.nombre, vacuna: voz.vacuna })
+              : voz.dias === 1
+                ? t('hogar.vozVacunaVenceUnDia', { nombre: m.nombre, vacuna: voz.vacuna })
+                : t('hogar.vozVacunaVence', { nombre: m.nombre, vacuna: voz.vacuna, dias: voz.dias })
+            : voz.dias === 1
+              ? t('hogar.vozVacunaVencidaUnDia', { nombre: m.nombre, vacuna: voz.vacuna })
+              : t('hogar.vozVacunaVencida', { nombre: m.nombre, vacuna: voz.vacuna, dias: voz.dias });
+        return [
+          {
+            key: `vac-${m.id}`,
+            mascotaId: m.id,
+            capa: 'identidad',
+            icono: 'carnet',
+            titulo,
+            detalle: t('hogar.recoVacunaDetalle'),
+            onPress: () => router.push('/explorar/veterinaria'),
+          },
+        ];
+      }),
+      // r6-2: LA CITA de cada mascota (era la ficha) — info, navega
+      ...mascotas.flatMap((m): FilaReco_[] => {
+        const pc = estadoHogar?.proxima_cita_por_mascota[m.id];
+        if (!pc) return [];
+        return [
+          {
+            key: `cita-${m.id}`,
+            mascotaId: m.id,
+            capa: 'cuidado',
+            icono: 'hoy',
+            titulo: t('hogar.recoCitaDe', { mascota: m.nombre }),
+            detalle: `${fechaCortaMono(pc.fecha, idioma)}${pc.hora ? ` · ${pc.hora}` : ''}`,
+            detalleMono: true,
+            onPress: () => router.push({ pathname: '/citas/[mascotaId]', params: { mascotaId: m.id, nombre: m.nombre } }),
+          },
+        ];
+      }),
+      // r6-2: el carnet vacío (era la acción de la ficha conociéndolo)
+      ...mascotas.flatMap((m): FilaReco_[] => {
+        const s = senalesPorMascota.get(m.id);
+        if (!s || s.vacunas_total > 0) return [];
+        return [
+          {
+            key: `carnet-${m.id}`,
+            mascotaId: m.id,
+            capa: 'identidad',
+            icono: 'carnet',
+            titulo: t('hogar.recoCargarCarnet', { mascota: m.nombre }),
+            detalle: null,
+            onPress: () => router.push({ pathname: '/carnet', params: { mascotaId: m.id, nombre: m.nombre } }),
+          },
+        ];
+      }),
+    ];
+    return filas;
+  })();
+  const pendientesDe = (id: string) => filasReco.filter((f) => f.mascotaId === id).length;
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -986,8 +1058,6 @@ export default function Hogar() {
                         hoy,
                       ).voz
                     : null;
-                  const colorEstado =
-                    v === 'alDia' ? theme.status.success : v === 'pideAtencion' ? theme.status.warning : theme.text.tertiary;
                   return (
                     <Pressable
                       key={m.id}
@@ -1022,22 +1092,44 @@ export default function Hogar() {
                             </Svg>
                           )}
                         </View>
-                        {/* el punto de estado — solo con señal (L-139) */}
-                        {v !== null ? (
-                          <View
-                            style={{
-                              position: 'absolute',
-                              right: -2,
-                              bottom: -2,
-                              width: 26,
-                              height: 26,
-                              borderRadius: 999,
-                              backgroundColor: colorEstado,
-                              borderWidth: 4,
-                              borderColor: esMemorial ? theme.bg.card : theme.bg.base,
-                            }}
-                          />
-                        ) : null}
+                        {/* r6-3 (propuesta al gate): el punto GANA GLIFO —
+                            un color sin leyenda no comunica. Check = al
+                            día · el NÚMERO = la cuenta de SUS filas en
+                            Ponte al día (un sistema, no dos). 26 − aro 4
+                            = ~18 de glifo. Solo con señal (L-139). */}
+                        {(() => {
+                          const n = pendientesDe(m.id);
+                          if (v === null && n === 0) return null;
+                          const alDia = n === 0 && v === 'alDia';
+                          const bg = n > 0 ? theme.status.warning : alDia ? theme.status.success : theme.text.tertiary;
+                          return (
+                            <View
+                              style={{
+                                position: 'absolute',
+                                right: -2,
+                                bottom: -2,
+                                width: 26,
+                                height: 26,
+                                borderRadius: 999,
+                                backgroundColor: bg,
+                                borderWidth: 4,
+                                borderColor: esMemorial ? theme.bg.card : theme.bg.base,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}
+                            >
+                              {n > 0 ? (
+                                <Text style={{ fontFamily: typography.family.sans.medium, fontSize: 12, color: theme.bg.card }}>
+                                  {n > 9 ? '9+' : String(n)}
+                                </Text>
+                              ) : alDia ? (
+                                <Svg width={12} height={12} viewBox="0 0 24 24">
+                                  <Path d="M5 12.5l4.5 4.5L19 7.5" stroke={theme.bg.card} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                                </Svg>
+                              ) : null}
+                            </View>
+                          );
+                        })()}
                       </View>
                       <Text
                         style={{
@@ -1104,7 +1196,24 @@ export default function Hogar() {
           }}
         >
           <Animated.View style={pressedCoach.estiloPresionado}>
-            <Icono nombre="coach" tamano={24} registro="tinta" tinta={esMemorial ? theme.text.secondary : theme.text.onGradient} />
+            {/* r6-1: el botón de IA se DEMARCA — relleno en degradado de
+                la familia del header (violeta→azul: los stops 2-3 del
+                gradiente FIRMA, que es la familia del techo; la rampa
+                del isotipo NO — A5 la reserva a marca). Memorial: plano. */}
+            {esMemorial ? (
+              <View style={{ width: 42, height: 42, borderRadius: 999, backgroundColor: theme.bg.overlay, alignItems: 'center', justifyContent: 'center' }}>
+                <Icono nombre="coach" tamano={22} registro="tinta" tinta={theme.text.secondary} />
+              </View>
+            ) : (
+              <LinearGradient
+                colors={[theme.accent.gradient.colors[1], theme.accent.gradient.colors[2]] as [string, string]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{ width: 42, height: 42, borderRadius: 999, alignItems: 'center', justifyContent: 'center' }}
+              >
+                <Icono nombre="coach" tamano={22} registro="tinta" tinta={theme.text.onGradient} />
+              </LinearGradient>
+            )}
           </Animated.View>
         </Pressable>
       </View>
@@ -1122,142 +1231,7 @@ export default function Hogar() {
           despensa (L-139 — no se fabrica el dato); monta cuando exista. */}
       {(() => {
         if (esMemorial) return null;
-        type Fila = {
-          key: string;
-          capa: 'identidad' | 'cuidado';
-          icono: IconoNombre;
-          titulo: string;
-          detalle: string | null;
-          onPress: () => void;
-        };
-        const ahora = Date.now();
-        // vacuna que vence (lámina): sale de las señales REALES del hogar
-        // (la misma verdad que la voz de la ficha — acá como acción).
-        const vacunasQueVencen: Fila[] = mascotas.flatMap((m): Fila[] => {
-          const s = senalesPorMascota.get(m.id);
-          if (!s) return [];
-          const voz = calcularVozHogar(
-            {
-              tieneEmergenciaActiva: s.tiene_emergencia_activa,
-              vacunasTotal: s.vacunas_total,
-              ultimaVacunaAplicada: s.ultima_vacuna_aplicada,
-              proximaVacuna: s.proxima_vacuna,
-              ultimaAtencionCerrada: s.ultima_atencion_cerrada,
-            },
-            hoy,
-          );
-          if (voz.voz !== 'pideAtencion' || voz.causa === 'emergencia') return [];
-          const titulo =
-            voz.causa === 'vacunaVence'
-              ? voz.dias === 0
-                ? t('hogar.vozVacunaVenceHoy', { nombre: m.nombre, vacuna: voz.vacuna })
-                : voz.dias === 1
-                  ? t('hogar.vozVacunaVenceUnDia', { nombre: m.nombre, vacuna: voz.vacuna })
-                  : t('hogar.vozVacunaVence', { nombre: m.nombre, vacuna: voz.vacuna, dias: voz.dias })
-              : voz.dias === 1
-                ? t('hogar.vozVacunaVencidaUnDia', { nombre: m.nombre, vacuna: voz.vacuna })
-                : t('hogar.vozVacunaVencida', { nombre: m.nombre, vacuna: voz.vacuna, dias: voz.dias });
-          return [
-            {
-              key: `vac-${m.id}`,
-              capa: 'identidad',
-              icono: 'carnet',
-              titulo,
-              detalle: t('hogar.recoVacunaDetalle'),
-              onPress: () => router.push('/explorar/veterinaria'),
-            },
-          ];
-        });
-        const filas: Fila[] = [
-          // acciones primero (el orden acción-vs-información se conserva)
-          ...solicitudesPend.map((s): Fila => {
-            const min = Math.max(1, Math.round((Date.parse(s.expiraEn) - ahora) / 60000));
-            return {
-              key: `sol-${s.solicitudId}`,
-              capa: 'cuidado',
-              icono: 'familia',
-              titulo:
-                s.tipo === 'alta_mascota'
-                  ? t('autorizacion.tituloAlta', { negocio: s.negocioNombre ?? '', mascota: s.mascotaNombre ?? '' })
-                  : t('autorizacion.tituloAtencion', { negocio: s.negocioNombre ?? '', mascota: s.mascotaNombre ?? '' }),
-              detalle: t('hogar.venceEnMin', { n: min }),
-              onPress: () =>
-                router.push({ pathname: '/autorizacion/[solicitudId]', params: { solicitudId: s.solicitudId } }),
-            };
-          }),
-          ...presupuestosPend.map(
-            (p): Fila => ({
-              key: `pre-${p.id}`,
-              capa: 'identidad',
-              icono: 'presupuesto',
-              titulo:
-                p.negocioNombre !== null
-                  ? t('hogar.presupuestoDe', { negocio: p.negocioNombre })
-                  : t('hogar.presupuestoPara', { mascota: p.mascotaNombre ?? '' }),
-              detalle: t('hogar.presupuestoDetalle', {
-                total: p.total,
-                mascota: p.mascotaNombre ?? '',
-                fecha: fechaLargaHumana(p.venceEn.slice(0, 10), idioma),
-              }),
-              onPress: () =>
-                router.push({
-                  pathname: '/citas/[mascotaId]',
-                  params: { mascotaId: p.mascotaId, nombre: p.mascotaNombre ?? '' },
-                }),
-            }),
-          ),
-          ...porCoordinar.map(
-            (c): Fila => ({
-              key: `coord-${c.citaId}`,
-              capa: 'identidad',
-              icono: 'veterinaria',
-              titulo: t('hogar.porCoordinarTitulo', { mascota: c.mascotaNombre }),
-              detalle:
-                c.negocio !== null
-                  ? t('citasMascota.coordinaraNegocio', { negocio: c.negocio })
-                  : t('citasMascota.coordinaranSinNombre'),
-              onPress: () =>
-                router.push({
-                  pathname: '/citas/[mascotaId]',
-                  params: { mascotaId: c.mascotaId, nombre: c.mascotaNombre, citaId: c.citaId },
-                }),
-            }),
-          ),
-          ...vacunasQueVencen,
-          // información al final: el resumen de la semana (lámina)
-          ...(citasSemana !== null
-            ? [
-                {
-                  key: 'citas-semana',
-                  capa: 'cuidado' as const,
-                  icono: 'hoy' as const,
-                  titulo:
-                    citasSemana.n === 1
-                      ? t('hogar.recoCitaSemana')
-                      : t('hogar.recoCitasSemana', { n: citasSemana.n }),
-                  detalle:
-                    [
-                      citasSemana.nHoy > 0 ? t('hogar.recoHoy', { n: citasSemana.nHoy }) : null,
-                      citasSemana.nManana > 0 ? t('hogar.recoManana', { n: citasSemana.nManana }) : null,
-                      citasSemana.n - citasSemana.nHoy - citasSemana.nManana > 0
-                        ? t('hogar.recoLuego', { n: citasSemana.n - citasSemana.nHoy - citasSemana.nManana })
-                        : null,
-                    ]
-                      .filter((x): x is string => x !== null)
-                      .join(' · ') || null,
-                  onPress: () =>
-                    router.push({
-                      pathname: '/citas/[mascotaId]',
-                      params: {
-                        mascotaId: citasSemana.primera.mascotaId,
-                        nombre: citasSemana.primera.mascotaNombre,
-                        citaId: citasSemana.primera.citaId,
-                      },
-                    }),
-                },
-              ]
-            : []),
-        ];
+        const filas = filasReco;
         if (filas.length === 0) return null;
         const visibles = ponteRevelado ? filas : filas.slice(0, 3);
         return (
@@ -1281,7 +1255,7 @@ export default function Hogar() {
               {visibles.map((f, i) => (
                 <View key={f.key}>
                   {i > 0 ? <Separador /> : null}
-                  <FilaReco capa={f.capa} icono={f.icono} titulo={f.titulo} detalle={f.detalle} onPress={f.onPress} />
+                  <FilaReco capa={f.capa} icono={f.icono} titulo={f.titulo} detalle={f.detalle} detalleMono={f.detalleMono === true} onPress={f.onPress} />
                 </View>
               ))}
               {filas.length > 3 ? (
@@ -1337,83 +1311,13 @@ export default function Hogar() {
           precedencia). El EN VIVO queda como único hero (Ley 7). */}
 
 
-      {/* ── Tu hogar (Zona 1): la mascota preside, su próxima cita visible ── */}
-      <Animated.View
-        entering={entradaZona(1)}
-        style={{ paddingHorizontal: spacing[4], paddingTop: spacing[5], gap: spacing[3] }}
-      >
-        {mascotas.map((m) => {
-          const senales = senalesPorMascota.get(m.id);
-          // Sin señales todavía (estado del hogar cargando): la ficha
-          // muestra solo el nombre — jamás una voz inventada (L-139).
-          const voz = senales
-            ? vozATexto(
-                calcularVozHogar(
-                  {
-                    tieneEmergenciaActiva: senales.tiene_emergencia_activa,
-                    vacunasTotal: senales.vacunas_total,
-                    ultimaVacunaAplicada: senales.ultima_vacuna_aplicada,
-                    proximaVacuna: senales.proxima_vacuna,
-                    ultimaAtencionCerrada: senales.ultima_atencion_cerrada,
-                  },
-                  hoy,
-                ),
-                t,
-              )
-            : null;
-          const pc = estadoHogar?.proxima_cita_por_mascota[m.id];
-          // S61-A11 (letra firmada): UNA acción por ficha, la más
-          // importante por PRECEDENCIA — en vivo > cita > alerta de
-          // cuidado accionable > invitación de expediente > NADA
-          // (Thor al día no gana CTA de relleno: silencio digno).
-          const vivoDe = estadoHogar?.atenciones_en_curso.find((a) => a.mascota_id === m.id);
-          // S61-A12: la acción viste su NATURALEZA (gate A11) — vivo =
-          // pill §7.1 · ver cita = navegación (chevron, capa cuidado) ·
-          // carnet = ACCIÓN tonal (flujo con consecuencias, Ley 22c).
-          const accion: FichaMascotaHogarAccion | undefined = vivoDe
-            ? {
-                tipo: 'vivo',
-                onPress: () =>
-                  router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: vivoDe.atencion_id } }),
-              }
-            : pc
-              ? {
-                  tipo: 'navegacion',
-                  capa: 'cuidado',
-                  etiqueta: t('hogar.fichaVerCita'),
-                  // D-430 (S67, regla de plataforma founder): contexto de
-                  // mascota ⇒ el detalle de SU cita — jamás un hub (el
-                  // multi-oficio destapó que TODO caía en "Mis paseos").
-                  onPress: () =>
-                    router.push({ pathname: '/citas/[mascotaId]', params: { mascotaId: m.id, nombre: m.nombre } }),
-                }
-              : voz?.semantica === 'pideAtencion'
-                ? {
-                    tipo: 'accion',
-                    etiqueta: t('hogar.fichaVerCarnet'),
-                    onPress: () => router.push({ pathname: '/carnet', params: { mascotaId: m.id, nombre: m.nombre } }),
-                  }
-                : senales && senales.vacunas_total === 0
-                  ? {
-                      tipo: 'accion',
-                      etiqueta: t('hogar.fichaCargarCarnet'),
-                      onPress: () => router.push({ pathname: '/carnet', params: { mascotaId: m.id, nombre: m.nombre } }),
-                    }
-                  : undefined;
-          return (
-            <FichaMascotaHogar
-              key={m.id}
-              nombre={m.nombre}
-              fotoUrl={fotos[m.id]}
-              voz={voz?.semantica ?? 'conociendolo'}
-              textoEstado={voz?.texto ?? ''}
-              proximaCitaMono={pc ? `${fechaCortaMono(pc.fecha, idioma)}${pc.hora ? ` · ${pc.hora}` : ''}` : undefined}
-              accion={accion}
-              onPress={() => router.push({ pathname: '/hogar/mascota/[mascotaId]', params: { mascotaId: m.id } })}
-            />
-          );
-        })}
-      </Animated.View>
+      {/* r6-2: LAS TARJETAS DE MASCOTA MURIERON — con las mascotas en el
+          header eran redundantes; su contenido (la cita, el carnet)
+          vive como FILAS de Ponte al día, y el punto de estado del
+          techo cuenta ESAS filas (un sistema, no dos). Ley 37: el
+          código murió con ellas; las voces de ficha y hogar.voz QUEDAN
+          — pares conservados por decisión founder S52 para contextos
+          sin sujeto visible. */}
 
       {/* ── TUS SERVICIOS (S60-A6 → S73 ítem 1, letra founder): MÍNIMO 4
           por prioridad de uso + «Descubre» — la regla de existencia S60
@@ -1758,11 +1662,11 @@ export default function Hogar() {
                       activo={filtroVida}
                       onCambio={(c) => setFiltroVida(c)}
                       opciones={[
-                        { codigo: 'todo', etiqueta: t('hogar.filtroTodo'), icono: 'huella' },
-                        { codigo: 'salud', etiqueta: t('hogar.filtroSalud'), icono: 'veterinaria' },
-                        { codigo: 'paseos', etiqueta: t('hogar.filtroPaseos'), icono: 'paseo' },
-                        { codigo: 'estetica', etiqueta: t('hogar.filtroEstetica'), icono: 'grooming' },
-                        { codigo: 'adiestramiento', etiqueta: t('hogar.filtroAdiestramiento'), icono: 'training' },
+                        { codigo: 'todo', etiqueta: t('hogar.filtroTodo'), icono: 'huella', capa: null },
+                        { codigo: 'salud', etiqueta: t('hogar.filtroSalud'), icono: 'veterinaria', capa: 'identidad' },
+                        { codigo: 'paseos', etiqueta: t('hogar.filtroPaseos'), icono: 'paseo', capa: 'cuidado' },
+                        { codigo: 'estetica', etiqueta: t('hogar.filtroEstetica'), icono: 'grooming', capa: 'cuidado' },
+                        { codigo: 'adiestramiento', etiqueta: t('hogar.filtroAdiestramiento'), icono: 'training', capa: 'cuidado' },
                       ]}
                     />
                     {filtrados.length === 0 ? (

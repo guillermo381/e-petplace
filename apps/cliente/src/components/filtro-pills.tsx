@@ -1,16 +1,24 @@
 /**
- * @override-s82c — EL FILTRO DE PILLS SIN CAJA (r4 defecto 4, corrección
- * de arquitectura del founder: §7bis gobierna el DATO, no el CONTROL —
- * un control SE RELLENA o va SIN CAJA, A6 firmada; NUNCA contorno).
- * Extraído de hogar/index cuando el perfil pidió "los mismos filtros"
- * (r5 ítem 6) — regla 37: cero clones.
+ * @override-s82c — EL FILTRO DE PILLS (r6 — CORRECCIÓN del founder
+ * sobre la r4, declarada como tal: el chip NO va sin caja — lleva
+ * contenedor RELLENO suave con la placa del glifo adentro. "A6 mata el
+ * CONTORNO, no el relleno; R13 caza borderWidth, no background").
+ * La imagen del acuerdo es el png de los filtros (cotejo al gate; esta
+ * anatomía sale del literal r6).
  *
- * Anatomía: reposo = glifo en trazo + label tinta2, cero borde, cero
- * fondo · elegido = LA PLACA del glifo se rellena (30 de lado,
- * rectángulo suave — Ley 21) con el glifo claro, y el label pasa a
- * tinta plena. Sin glifo (filtros de tiempo), el elegido es el label
- * pleno solo. 44 de alto, 10 de separación, scroll horizontal.
- * OVERRIDE LOCAL del cliente — la promoción es de B, post-gate (R10).
+ * Anatomía: chip = píldora RELLENA (papel de tarjeta sobre el fondo de
+ * la casa — para separarse en claro lleva la elevación de reposo, y el
+ * consumidor la APOYA EN EL FONDO, jamás dentro de una Tarjeta) · placa
+ * del glifo 30 rectángulo suave adentro. Reposo: placa TENUE
+ * (bg.overlay) + glifo en trazo secundario + label gris. Elegido: la
+ * placa se rellena con el color de su CATEGORÍA (Ley 10; sin categoría
+ * — todo/tiempo — tinta) + glifo INVERTIDO (papel) + label pleno.
+ * NUNCA contorno. 44 de alto, 10 de separación, scroll horizontal.
+ * Los dos temas salen de los tokens del tema.
+ *
+ * Compartido por hogar/tu-vida y perfil/su-historia (regla 37 — cero
+ * clones). OVERRIDE LOCAL del cliente: la promoción es de B, post-gate
+ * (R10 vigila el marcador).
  */
 
 import { Pressable, ScrollView, View } from 'react-native';
@@ -22,6 +30,9 @@ export type OpcionFiltro<C extends string> = {
   etiqueta: string;
   /** Glifo del set b′, 'huella' (la primitiva canónica) o null (solo texto). */
   icono: IconoNombre | 'huella' | null;
+  /** La CATEGORÍA del filtro (Ley 10) — pinta la placa del elegido;
+   *  null (todo / tiempo) = tinta. */
+  capa?: 'identidad' | 'cuidado' | null;
 };
 
 export function FiltroPills<C extends string>({
@@ -38,10 +49,12 @@ export function FiltroPills<C extends string>({
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ gap: spacing[2.5], paddingHorizontal: spacing[4] }}
+      contentContainerStyle={{ gap: spacing[2.5], paddingHorizontal: spacing[4], paddingVertical: spacing[1] }}
     >
       {opciones.map((o) => {
         const elegido = o.codigo === activo;
+        const colorPlaca =
+          o.capa === 'identidad' ? theme.capa.identidad : o.capa === 'cuidado' ? theme.capa.cuidado : theme.text.primary;
         const tintaGlifo = elegido ? theme.bg.card : theme.text.secondary;
         return (
           <Pressable
@@ -52,10 +65,14 @@ export function FiltroPills<C extends string>({
             accessibilityLabel={o.etiqueta}
             style={{
               height: 44,
+              borderRadius: radius.full,
+              backgroundColor: theme.bg.card,
+              boxShadow: theme.elevacion.reposo,
               flexDirection: 'row',
               alignItems: 'center',
               gap: spacing[2],
-              paddingRight: spacing[2],
+              paddingLeft: o.icono !== null ? spacing[1.5] : spacing[4],
+              paddingRight: spacing[4],
             }}
           >
             {o.icono !== null ? (
@@ -64,7 +81,7 @@ export function FiltroPills<C extends string>({
                   width: 30,
                   height: 30,
                   borderRadius: radius.suave,
-                  backgroundColor: elegido ? theme.text.primary : 'transparent',
+                  backgroundColor: elegido ? colorPlaca : theme.bg.overlay,
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}

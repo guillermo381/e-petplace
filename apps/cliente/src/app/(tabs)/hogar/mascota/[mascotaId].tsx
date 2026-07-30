@@ -409,10 +409,12 @@ export default function PerfilDeMascota() {
                   a la primitiva firmada no se le talla una excepción
                   desde una pantalla). Anillo = aro de papel + elevación.
                   Sin foto: la Huella digna sobre el tinte de su capa. */}
+              {/* r6-5: el diámetro sube 124→160 — el aire alrededor lo
+                  justifica (gate founder). */}
               <View
                 style={{
-                  width: 124,
-                  height: 124,
+                  width: 160,
+                  height: 160,
                   borderRadius: radius.full,
                   backgroundColor: theme.bg.card,
                   alignItems: 'center',
@@ -423,22 +425,22 @@ export default function PerfilDeMascota() {
                 {fotoFirmada !== undefined ? (
                   <Image
                     source={{ uri: fotoFirmada }}
-                    style={{ width: 112, height: 112, borderRadius: radius.full }}
+                    style={{ width: 148, height: 148, borderRadius: radius.full }}
                     contentFit="cover"
                     accessibilityIgnoresInvertColors
                   />
                 ) : (
                   <View
                     style={{
-                      width: 112,
-                      height: 112,
+                      width: 148,
+                      height: 148,
                       borderRadius: radius.full,
                       backgroundColor: 'capaBg' in theme ? theme.capaBg.identidad : theme.bg.overlay,
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}
                   >
-                    <Svg width={52} height={52} viewBox="0 0 24 24">
+                    <Svg width={64} height={64} viewBox="0 0 24 24">
                       <Huella color={theme.capa.identidad} escala={0.9} x={1.2} y={1.2} />
                     </Svg>
                   </View>
@@ -673,211 +675,7 @@ export default function PerfilDeMascota() {
           <Texto variante="apoyo">{t('perfil.identidadInvitacion')}</Texto>
         </View>
 
-        {/* ── VACUNAS (r5 ítem 5 — se llama VACUNAS, no "Salud"):
-            AGRUPADO Y COLAPSADO — el resumen visible, el despliegue
-            hacia abajo (PieRevelar), y "Cargar carnet" DENTRO de la
-            misma tarjeta como celda con diseño (jamás botón suelto). */}
-        <View style={{ gap: spacing[3] }}>
-          <Texto variante="seccion">{t('perfil.vacunas')}</Texto>
-          {vacunas.length === 0 ? (
-            <EstadoVacio
-              titulo={t('perfil.carnetVacio')}
-              descripcion={t('perfil.carnetVacioDetalle')}
-              accion={
-                <Boton
-                  variante="secundario"
-                  etiqueta={t('perfil.cargarCarnet')}
-                  onPress={() => router.push({ pathname: '/carnet', params: { mascotaId: mascota.id, nombre: mascota.nombre } })}
-                />
-              }
-            />
-          ) : (
-            <Tarjeta relleno="ninguno" elevacion="reposo">
-              <View style={{ padding: spacing[4], gap: spacing[1] }}>
-                <Texto variante="cuerpo">
-                  {vacunas.length === 1 ? t('perfil.vacunasResumenUna') : t('perfil.vacunasResumen', { n: vacunas.length })}
-                </Texto>
-                {(() => {
-                  const ultima = vacunas.reduce<string | null>(
-                    (max, v) => (v.fecha_aplicada !== null && (max === null || v.fecha_aplicada > max) ? v.fecha_aplicada : max),
-                    null,
-                  );
-                  return ultima !== null ? (
-                    <Texto variante="dato">{t('perfil.hoyUltima', { fecha: fechaCortaMono(ultima, idioma) })}</Texto>
-                  ) : null;
-                })()}
-              </View>
-              {vacunasAbiertas
-                ? vacunas.map((v, i) => (
-                    <View key={`${v.nombre_vacuna}-${i}`}>
-                      <Separador />
-                      <Celda
-                        titulo={v.nombre_vacuna}
-                        subtitulo={v.tipo_vacuna ?? undefined}
-                        metadataMono={v.fecha_aplicada !== null ? fechaCortaMono(v.fecha_aplicada, idioma) : undefined}
-                      />
-                    </View>
-                  ))
-                : null}
-              <PieRevelar n={vacunas.length} revelado={vacunasAbiertas} onPress={() => setVacunasAbiertas((v) => !v)} />
-              <Separador />
-              <CeldaNavegacion
-                icono="carnet"
-                titulo={t('perfil.cargarCarnet')}
-                onPress={() => router.push({ pathname: '/carnet', params: { mascotaId: mascota.id, nombre: mascota.nombre } })}
-              />
-            </Tarjeta>
-          )}
-        </View>
-
-        {/* ── SU HISTORIA (r5 ítem 6): COLAPSADA (3 + PieRevelar) y con
-            FILTROS — esta semana · este mes · por tipo con su glifo
-            (FiltroPills, la misma anatomía del Hogar: sin caja en
-            reposo, placa rellena en el elegido). La barra de tinta a la
-            izquierda SE CONSERVA — el founder la firmó como correcta. */}
-        <View style={{ gap: spacing[3] }}>
-          <Texto variante="seccion">{t('perfil.vida')}</Texto>
-          {items === null ? (
-            <EsqueletoGrupo etiqueta={t('hogar.cargando')}>
-              <View style={{ gap: spacing[2] }}>
-                <Esqueleto forma="bloque" ancho="100%" alto={56} />
-                <Esqueleto forma="bloque" ancho="100%" alto={56} />
-                <Esqueleto forma="bloque" ancho="100%" alto={56} />
-              </View>
-            </EsqueletoGrupo>
-          ) : items === 'error' ? (
-            <EstadoVacio
-              titulo={t('hogar.errorHistoria')}
-              descripcion={t('hogar.errorHistoriaDetalle')}
-              accion={
-                <Boton
-                  variante="secundario"
-                  etiqueta={t('hogar.reintentar')}
-                  onPress={() => {
-                    setItems(null);
-                    if (typeof mascotaId === 'string') void cargarPrimeraPagina(mascotaId);
-                  }}
-                />
-              }
-            />
-          ) : items.length === 0 ? (
-            <EstadoVacio titulo={t('hogar.historiaEmpieza')} descripcion={t('hogar.historiaEmpiezaDetalle')} />
-          ) : (
-            (() => {
-              const hoyIso = new Intl.DateTimeFormat('en-CA').format(hoy);
-              const hace = (dias: number) => {
-                const d = new Date(hoy);
-                d.setDate(d.getDate() - dias);
-                return new Intl.DateTimeFormat('en-CA').format(d);
-              };
-              const filtrados = items.filter((it) => {
-                if (filtroHistoria === 'todo') return true;
-                if (filtroHistoria === 'semana') return it.fecha_evento.slice(0, 10) >= hace(7) && it.fecha_evento.slice(0, 10) <= hoyIso;
-                if (filtroHistoria === 'mes') return it.fecha_evento.slice(0, 10) >= hace(30) && it.fecha_evento.slice(0, 10) <= hoyIso;
-                return FAMILIA_DE_TIPO[it.tipo] === filtroHistoria;
-              });
-              const visibles = historiaRevelada ? filtrados : filtrados.slice(0, 3);
-              return (
-                <View style={{ gap: spacing[3], marginHorizontal: -spacing[5] }}>
-                  <FiltroPills
-                    activo={filtroHistoria}
-                    onCambio={(c) => setFiltroHistoria(c)}
-                    opciones={[
-                      { codigo: 'todo', etiqueta: t('hogar.filtroTodo'), icono: 'huella' },
-                      { codigo: 'semana', etiqueta: t('perfil.filtroSemana'), icono: null },
-                      { codigo: 'mes', etiqueta: t('perfil.filtroMes'), icono: null },
-                      { codigo: 'salud', etiqueta: t('hogar.filtroSalud'), icono: 'veterinaria' },
-                      { codigo: 'paseos', etiqueta: t('hogar.filtroPaseos'), icono: 'paseo' },
-                      { codigo: 'estetica', etiqueta: t('hogar.filtroEstetica'), icono: 'grooming' },
-                      { codigo: 'adiestramiento', etiqueta: t('hogar.filtroAdiestramiento'), icono: 'training' },
-                    ]}
-                  />
-                  <View style={{ paddingHorizontal: spacing[5], gap: spacing[3] }}>
-                    {filtrados.length === 0 ? (
-                      <EstadoVacio registro="seccion" titulo={t('hogar.filtroSinMomentos')} />
-                    ) : (
-                      <>
-                        <Tarjeta relleno="ninguno" elevacion="reposo">
-                          {visibles.map((it, i) => {
-                            const familia = FAMILIA_DE_TIPO[it.tipo];
-                            const color =
-                              familia === 'salud' ? theme.capa.identidad : familia !== undefined ? theme.capa.cuidado : null;
-                            const destino =
-                              it.tipo === 'historia_clinica_registrada'
-                                ? () => router.push({ pathname: '/parte/[eventoId]', params: { eventoId: it.evento_id, nombre: mascota.nombre } })
-                                : it.atencion_id !== null
-                                  ? () => router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: it.atencion_id as string } })
-                                  : null;
-                            const meta = [
-                              it.titulo_fuente !== null ? it.titulo_fuente.toLowerCase() : null,
-                              fechaCortaMono(it.fecha_evento.slice(0, 10), idioma),
-                            ]
-                              .filter((x): x is string => x !== null)
-                              .join(' · ');
-                            const fila = (
-                              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3], paddingHorizontal: spacing[4], paddingVertical: spacing[3], minHeight: 44 }}>
-                                {/* la barra de tinta — FIRMADA por el founder */}
-                                <View style={{ width: 3, height: 24, borderRadius: radius.full, backgroundColor: color ?? theme.border.default }} />
-                                <View style={{ flex: 1, minWidth: 0, gap: spacing[0.5] }}>
-                                  <Texto variante="cuerpo" numberOfLines={1}>{vozHecho(it, t)}</Texto>
-                                  <Texto variante="dato" numberOfLines={1}>{meta}</Texto>
-                                </View>
-                                {destino !== null ? (
-                                  <Svg width={19} height={19} viewBox="0 0 24 24">
-                                    <Path d="M9 5l7 7-7 7" stroke={theme.text.tertiary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                                  </Svg>
-                                ) : null}
-                              </View>
-                            );
-                            return (
-                              <View key={it.evento_id}>
-                                {i > 0 ? <Separador /> : null}
-                                {destino !== null ? (
-                                  <Pressable accessibilityRole="button" onPress={destino}>
-                                    {fila}
-                                  </Pressable>
-                                ) : (
-                                  fila
-                                )}
-                              </View>
-                            );
-                          })}
-                        </Tarjeta>
-                        <PieRevelar
-                          n={filtrados.length - 3}
-                          revelado={historiaRevelada}
-                          onPress={() => setHistoriaRevelada((v) => !v)}
-                        />
-                        {(historiaRevelada || filtrados.length <= 3) && estadoPie !== 'nada' ? (
-                          estadoPie === 'cargando' ? (
-                            <EsqueletoGrupo etiqueta={t('hogar.cargando')}>
-                              <Esqueleto forma="linea" ancho="40%" />
-                            </EsqueletoGrupo>
-                          ) : (
-                            // cero botones contorneados (A6, orden r5): la
-                            // paginación es label sin caja, target 44
-                            <Pressable
-                              accessibilityRole="button"
-                              onPress={() => void cargarMas()}
-                              style={{ minHeight: 44, alignItems: 'center', justifyContent: 'center' }}
-                            >
-                              <Texto variante="apoyo" color="primary">
-                                {estadoPie === 'error' ? t('hogar.reintentar') : t('hogar.vidaCargarMas')}
-                              </Texto>
-                            </Pressable>
-                          )
-                        ) : null}
-                      </>
-                    )}
-                  </View>
-                </View>
-              );
-            })()
-          )}
-        </View>
-
-
-        {/* ── VITALES — CONSERVADA DECLARADA (r5 no la lista; matarla
+        {/* ── VITALES — r6-6: DEBAJO de identidad (orden founder); antes: conservada declarada (matarla
             tiraría la fila hero display FIRMADA S53 y el hueco M-WEAR
             sin orden explícita — el destino lo decide el gate).
             DECLARADO AL GATE, no resuelto: el "Índice de salud" de los
@@ -991,6 +789,211 @@ export default function PerfilDeMascota() {
             </View>
           </View>
         </View>
+
+        {/* ── VACUNAS (r5 ítem 5 — se llama VACUNAS, no "Salud"):
+            AGRUPADO Y COLAPSADO — el resumen visible, el despliegue
+            hacia abajo (PieRevelar), y "Cargar carnet" DENTRO de la
+            misma tarjeta como celda con diseño (jamás botón suelto). */}
+        <View style={{ gap: spacing[3] }}>
+          <Texto variante="seccion">{t('perfil.vacunas')}</Texto>
+          {vacunas.length === 0 ? (
+            <EstadoVacio
+              titulo={t('perfil.carnetVacio')}
+              descripcion={t('perfil.carnetVacioDetalle')}
+              accion={
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('perfil.cargarCarnet')}
+                  onPress={() => router.push({ pathname: '/carnet', params: { mascotaId: mascota.id, nombre: mascota.nombre } })}
+                />
+              }
+            />
+          ) : (
+            <Tarjeta relleno="ninguno" elevacion="reposo">
+              <View style={{ padding: spacing[4], gap: spacing[1] }}>
+                <Texto variante="cuerpo">
+                  {vacunas.length === 1 ? t('perfil.vacunasResumenUna') : t('perfil.vacunasResumen', { n: vacunas.length })}
+                </Texto>
+                {(() => {
+                  const ultima = vacunas.reduce<string | null>(
+                    (max, v) => (v.fecha_aplicada !== null && (max === null || v.fecha_aplicada > max) ? v.fecha_aplicada : max),
+                    null,
+                  );
+                  return ultima !== null ? (
+                    <Texto variante="dato">{t('perfil.hoyUltima', { fecha: fechaCortaMono(ultima, idioma) })}</Texto>
+                  ) : null;
+                })()}
+              </View>
+              {vacunasAbiertas
+                ? vacunas.map((v, i) => (
+                    <View key={`${v.nombre_vacuna}-${i}`}>
+                      <Separador />
+                      <Celda
+                        titulo={v.nombre_vacuna}
+                        subtitulo={v.tipo_vacuna ?? undefined}
+                        metadataMono={v.fecha_aplicada !== null ? fechaCortaMono(v.fecha_aplicada, idioma) : undefined}
+                      />
+                    </View>
+                  ))
+                : null}
+              <PieRevelar n={vacunas.length} revelado={vacunasAbiertas} onPress={() => setVacunasAbiertas((v) => !v)} />
+              <Separador />
+              <CeldaNavegacion
+                icono="carnet"
+                titulo={t('perfil.cargarCarnet')}
+                onPress={() => router.push({ pathname: '/carnet', params: { mascotaId: mascota.id, nombre: mascota.nombre } })}
+              />
+            </Tarjeta>
+          )}
+        </View>
+
+        {/* ── SU HISTORIA (r5 ítem 6): COLAPSADA (3 + PieRevelar) y con
+            FILTROS — esta semana · este mes · por tipo con su glifo
+            (FiltroPills, la misma anatomía del Hogar: sin caja en
+            reposo, placa rellena en el elegido). La barra de tinta a la
+            izquierda SE CONSERVA — el founder la firmó como correcta. */}
+        <View style={{ gap: spacing[3] }}>
+          <Texto variante="seccion">{t('perfil.vida')}</Texto>
+          {items === null ? (
+            <EsqueletoGrupo etiqueta={t('hogar.cargando')}>
+              <View style={{ gap: spacing[2] }}>
+                <Esqueleto forma="bloque" ancho="100%" alto={56} />
+                <Esqueleto forma="bloque" ancho="100%" alto={56} />
+                <Esqueleto forma="bloque" ancho="100%" alto={56} />
+              </View>
+            </EsqueletoGrupo>
+          ) : items === 'error' ? (
+            <EstadoVacio
+              titulo={t('hogar.errorHistoria')}
+              descripcion={t('hogar.errorHistoriaDetalle')}
+              accion={
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('hogar.reintentar')}
+                  onPress={() => {
+                    setItems(null);
+                    if (typeof mascotaId === 'string') void cargarPrimeraPagina(mascotaId);
+                  }}
+                />
+              }
+            />
+          ) : items.length === 0 ? (
+            <EstadoVacio titulo={t('hogar.historiaEmpieza')} descripcion={t('hogar.historiaEmpiezaDetalle')} />
+          ) : (
+            (() => {
+              const hoyIso = new Intl.DateTimeFormat('en-CA').format(hoy);
+              const hace = (dias: number) => {
+                const d = new Date(hoy);
+                d.setDate(d.getDate() - dias);
+                return new Intl.DateTimeFormat('en-CA').format(d);
+              };
+              const filtrados = items.filter((it) => {
+                if (filtroHistoria === 'todo') return true;
+                if (filtroHistoria === 'semana') return it.fecha_evento.slice(0, 10) >= hace(7) && it.fecha_evento.slice(0, 10) <= hoyIso;
+                if (filtroHistoria === 'mes') return it.fecha_evento.slice(0, 10) >= hace(30) && it.fecha_evento.slice(0, 10) <= hoyIso;
+                return FAMILIA_DE_TIPO[it.tipo] === filtroHistoria;
+              });
+              const visibles = historiaRevelada ? filtrados : filtrados.slice(0, 3);
+              return (
+                <View style={{ gap: spacing[3], marginHorizontal: -spacing[5] }}>
+                  <FiltroPills
+                    activo={filtroHistoria}
+                    onCambio={(c) => setFiltroHistoria(c)}
+                    opciones={[
+                      { codigo: 'todo', etiqueta: t('hogar.filtroTodo'), icono: 'huella', capa: null },
+                      { codigo: 'semana', etiqueta: t('perfil.filtroSemana'), icono: null, capa: null },
+                      { codigo: 'mes', etiqueta: t('perfil.filtroMes'), icono: null, capa: null },
+                      { codigo: 'salud', etiqueta: t('hogar.filtroSalud'), icono: 'veterinaria', capa: 'identidad' },
+                      { codigo: 'paseos', etiqueta: t('hogar.filtroPaseos'), icono: 'paseo', capa: 'cuidado' },
+                      { codigo: 'estetica', etiqueta: t('hogar.filtroEstetica'), icono: 'grooming', capa: 'cuidado' },
+                      { codigo: 'adiestramiento', etiqueta: t('hogar.filtroAdiestramiento'), icono: 'training', capa: 'cuidado' },
+                    ]}
+                  />
+                  <View style={{ paddingHorizontal: spacing[5], gap: spacing[3] }}>
+                    {filtrados.length === 0 ? (
+                      <EstadoVacio registro="seccion" titulo={t('hogar.filtroSinMomentos')} />
+                    ) : (
+                      <>
+                        <Tarjeta relleno="ninguno" elevacion="reposo">
+                          {visibles.map((it, i) => {
+                            const familia = FAMILIA_DE_TIPO[it.tipo];
+                            const color =
+                              familia === 'salud' ? theme.capa.identidad : familia !== undefined ? theme.capa.cuidado : null;
+                            const destino =
+                              it.tipo === 'historia_clinica_registrada'
+                                ? () => router.push({ pathname: '/parte/[eventoId]', params: { eventoId: it.evento_id, nombre: mascota.nombre } })
+                                : it.atencion_id !== null
+                                  ? () => router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: it.atencion_id as string } })
+                                  : null;
+                            const meta = [
+                              it.titulo_fuente !== null ? it.titulo_fuente.toLowerCase() : null,
+                              fechaCortaMono(it.fecha_evento.slice(0, 10), idioma),
+                            ]
+                              .filter((x): x is string => x !== null)
+                              .join(' · ');
+                            const fila = (
+                              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3], paddingHorizontal: spacing[4], paddingVertical: spacing[3], minHeight: 44 }}>
+                                {/* la barra de tinta — FIRMADA por el founder */}
+                                <View style={{ width: 3, height: 24, borderRadius: radius.full, backgroundColor: color ?? theme.border.default }} />
+                                <View style={{ flex: 1, minWidth: 0, gap: spacing[0.5] }}>
+                                  <Texto variante="cuerpo" numberOfLines={1}>{vozHecho(it, t)}</Texto>
+                                  <Texto variante="dato" numberOfLines={1}>{meta}</Texto>
+                                </View>
+                                {destino !== null ? (
+                                  <Svg width={19} height={19} viewBox="0 0 24 24">
+                                    <Path d="M9 5l7 7-7 7" stroke={theme.text.tertiary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                                  </Svg>
+                                ) : null}
+                              </View>
+                            );
+                            return (
+                              <View key={it.evento_id}>
+                                {i > 0 ? <Separador /> : null}
+                                {destino !== null ? (
+                                  <Pressable accessibilityRole="button" onPress={destino}>
+                                    {fila}
+                                  </Pressable>
+                                ) : (
+                                  fila
+                                )}
+                              </View>
+                            );
+                          })}
+                        </Tarjeta>
+                        <PieRevelar
+                          n={filtrados.length - 3}
+                          revelado={historiaRevelada}
+                          onPress={() => setHistoriaRevelada((v) => !v)}
+                        />
+                        {(historiaRevelada || filtrados.length <= 3) && estadoPie !== 'nada' ? (
+                          estadoPie === 'cargando' ? (
+                            <EsqueletoGrupo etiqueta={t('hogar.cargando')}>
+                              <Esqueleto forma="linea" ancho="40%" />
+                            </EsqueletoGrupo>
+                          ) : (
+                            // cero botones contorneados (A6, orden r5): la
+                            // paginación es label sin caja, target 44
+                            <Pressable
+                              accessibilityRole="button"
+                              onPress={() => void cargarMas()}
+                              style={{ minHeight: 44, alignItems: 'center', justifyContent: 'center' }}
+                            >
+                              <Texto variante="apoyo" color="primary">
+                                {estadoPie === 'error' ? t('hogar.reintentar') : t('hogar.vidaCargarMas')}
+                              </Texto>
+                            </Pressable>
+                          )
+                        ) : null}
+                      </>
+                    )}
+                  </View>
+                </View>
+              );
+            })()
+          )}
+        </View>
+
+
 
         {/* ── AL FINAL DE TODO (r5 ítem 7): el CTA en DEGRADADO — el de
             la lámina (el founder declaró que negro también sirve; se
