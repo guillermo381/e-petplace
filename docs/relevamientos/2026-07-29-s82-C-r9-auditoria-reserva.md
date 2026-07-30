@@ -55,11 +55,15 @@ igual*.
    **DECISIÓN: gana la escalera firmada.** El pie dice "desde" cuando
    varía. No se porta el total exacto.
 
-7. **La duración debería RELLENARSE** (ley 1 de la lámina: son tres
-   hermanos) pero `SelectorOpcion acento="control"` es TONAL por
-   construcción. Día y hora ya cumplen (no se rellenan). El relleno de
-   la duración pide una prop nueva en `SelectorOpcion` = **packages/ui,
-   territorio de B**. **DECLARADO, no construido.**
+7. ~~**La duración debería RELLENARSE** y pide prop nueva en
+   `SelectorOpcion` (packages/ui, territorio de B).~~
+   **CORREGIDO EN r11 — el defecto era MÍO, no del componente:** la
+   duración YA se rellena y lo hace POR LEY, no por excepción. La
+   pantalla pasa `naturaleza="existe"`, que es la **ley 19.8** (SE
+   RELLENA LO QUE EXISTE) y **L-b** la acota a fila corta. No hacía
+   falta nada de B. Medido con literal en r11 (`grep naturaleza=` sobre
+   la pantalla). Queda como registro de que una declaración de hueco
+   también se verifica contra la fuente.
 
 8. **Plan y Paquete interrumpen el flujo**: dos `CeldaNavegacion` a
    otras pantallas, metidas entre la hora y el CTA. La lámina resuelve

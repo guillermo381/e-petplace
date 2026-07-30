@@ -467,6 +467,7 @@ export const clienteEn = {
     cuandoSalidaBano: 'The bathroom break.',
     cuandoDesde: 'from ${{precio}}',
     cuandoPrecio: '${{precio}}',
+    cuandoSinIniciosPorque: 'Walkers have no open slot that day for that duration.',
     cuandoSinInicios: 'No free times that day for this block. Try another day.',
     // S61-A5 cure 1 — §6ter: the tappable path out of an empty day (LOTE S61)
     sinIniciosProbarDia: 'Try {{dia}}',

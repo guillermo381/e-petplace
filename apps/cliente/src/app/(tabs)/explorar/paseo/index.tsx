@@ -40,6 +40,7 @@ import {
   SelectorOpcion,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   typography,
   useTheme,
@@ -56,6 +57,16 @@ import {
   mascotasElegibles,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
+import {
+  DiaSinHorarios,
+  GrillaHoras,
+  PieReserva,
+  SelectorDia,
+  SwitchGate,
+  TechoReserva,
+  type ModoDia,
+  type ModoTecho,
+} from '@/components/reserva-piezas';
 
 function fechaLocalISO(d: Date): string {
   return new Intl.DateTimeFormat('en-CA').format(d);
@@ -90,6 +101,10 @@ export default function PaseoCuando() {
   const [fotos, setFotos] = useState<Record<string, string>>({});
   const [oferta, setOferta] = useState<OfertaPaseo[] | 'cargando' | 'error'>('cargando');
   const [duracion, setDuracion] = useState<number | null>(null);
+  // r11 · LOS DOS GATES ABIERTOS (ninguno firmado): el founder elige
+  // mirando, en el teléfono. La perdedora muere después del gate.
+  const [modoTecho, setModoTecho] = useState<ModoTecho>('oscuro');
+  const [modoDia, setModoDia] = useState<ModoDia>('riel');
   const [dia, setDia] = useState<string>(fechaLocalISO(new Date()));
   const [inicios, setInicios] = useState<string[] | 'cargando' | 'error'>('cargando');
   const [hora, setHora] = useState<string | null>(null);
@@ -215,82 +230,117 @@ export default function PaseoCuando() {
   const bloqueElegido = bloques.find((b) => b.duracion === duracion) ?? null;
   const listo = mascota !== null && duracion !== null && hora !== null;
 
+  // r11 · el pie SOLO existe si hay algo que totalizar (tercera ley de
+  // la lámina). Sin bloque elegido o sin horas del día, NO SE MONTA.
+  const hayHoras = Array.isArray(inicios) && inicios.length > 0;
+  const pieVive = bloqueElegido !== null && hayHoras;
+
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('explorar.paseoTitulo')} atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
+    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      {/* ① EL TECHO DEL OFICIO — LAS DOS OPCIONES tras el switch. La
+          lámina afirma "el gate quedó en B" y es FALSO: nunca se firmó
+          (el founder rechazó el verde y aceptó el petróleo diciendo
+          "aún son colores que no contrastan bien"). El argumento de la
+          lámina a favor del claro viaja con la opción (b): la marca YA
+          es el degradado oscuro del hogar y la ficha, así que un oficio
+          oscuro compite. El founder decide mirando. */}
+      <TechoReserva
+        modo={modoTecho}
+        oficio="paseo"
+        titulo={t('explorar.paseoTitulo')}
+        detalle={mascota !== null ? mascota.nombre : null}
+        // la ESCALERA DEL PRECIO (S61-A13, FIRMADA) manda: el exacto no
+        // existe hasta elegir prestador → "desde" cuando varía.
+        precio={bloqueElegido !== null ? `$ ${bloqueElegido.desde.toFixed(2)}` : null}
+        precioDesde={bloqueElegido?.varia ?? false}
+        onAtras={() => router.back()}
+        insetTop={insets.top}
+      />
+      {/* el andamio del gate — muere con la firma */}
+      <SwitchGate techo={modoTecho} dia={modoDia} onTecho={setModoTecho} onDia={setModoDia} />
+
+      <ScrollView contentContainerStyle={{ paddingTop: spacing[5], paddingBottom: spacing[8], gap: spacing[5] }}>
         {oferta === 'cargando' || mascotas === 'cargando' ? (
-          <EsqueletoGrupo>
-            <View style={{ gap: spacing[3] }}>
-              <Esqueleto forma="bloque" ancho="100%" alto={56} />
-              <Esqueleto forma="bloque" ancho="100%" alto={56} />
-              <Esqueleto forma="bloque" ancho="100%" alto={120} />
-            </View>
-          </EsqueletoGrupo>
+          <View style={{ paddingHorizontal: spacing[4] }}>
+            <EsqueletoGrupo>
+              <View style={{ gap: spacing[3] }}>
+                <Esqueleto forma="bloque" ancho="100%" alto={56} />
+                <Esqueleto forma="bloque" ancho="100%" alto={56} />
+                <Esqueleto forma="bloque" ancho="100%" alto={120} />
+              </View>
+            </EsqueletoGrupo>
+          </View>
         ) : oferta === 'error' || mascotas === 'error' ? (
-          <EstadoVacio
-            titulo={t('explorar.paseadoresError')}
-            descripcion={t('hogar.errorHistoriaDetalle')}
-            accion={
-              <Boton
-                variante="secundario"
-                etiqueta={t('hogar.reintentar')}
-                onPress={() => {
-                  setOferta('cargando');
-                  setMascotas('cargando');
-                }}
-              />
-            }
-          />
+          <View style={{ paddingHorizontal: spacing[4] }}>
+            <EstadoVacio
+              titulo={t('explorar.paseadoresError')}
+              descripcion={t('hogar.errorHistoriaDetalle')}
+              accion={
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('hogar.reintentar')}
+                  onPress={() => {
+                    setOferta('cargando');
+                    setMascotas('cargando');
+                  }}
+                />
+              }
+            />
+          </View>
         ) : elegibles.length === 0 ? (
-          // §1bis ACÁ (rasgo del patrón): el hogar sin perro no llega a
-          // mitad de reserva — voz honesta CON camino, paso 0.
-          <EstadoVacio
-            icono={<Icono nombre="paseo" tamano={48} />}
-            titulo={t('paquete.sinPerrosTitulo')}
-            descripcion={t('paquete.sinPerrosDetalle')}
-            accion={
-              <Boton
-                variante="primario"
-                etiqueta={t('paquete.sinPerrosAccion')}
-                onPress={() => {
-                  if (router.canDismiss()) router.dismissAll();
-                  router.navigate('/hogar/agregar');
-                }}
-              />
-            }
-          />
+          <View style={{ paddingHorizontal: spacing[4] }}>
+            <EstadoVacio
+              icono={<Icono nombre="paseo" tamano={48} />}
+              titulo={t('paquete.sinPerrosTitulo')}
+              descripcion={t('paquete.sinPerrosDetalle')}
+              accion={
+                <Boton
+                  variante="primario"
+                  etiqueta={t('paquete.sinPerrosAccion')}
+                  onPress={() => {
+                    if (router.canDismiss()) router.dismissAll();
+                    router.navigate('/hogar/agregar');
+                  }}
+                />
+              }
+            />
+          </View>
         ) : oferta.length === 0 ? (
-          // Peldaño 0 — el vacío honesto que educa.
-          <EstadoVacio
-            icono={<Icono nombre="paseo" tamano={48} />}
-            titulo={t('explorar.paseadoresVacio')}
-            descripcion={t('explorar.paseadoresVacioDetalle')}
-          />
+          <View style={{ paddingHorizontal: spacing[4] }}>
+            <EstadoVacio
+              icono={<Icono nombre="paseo" tamano={48} />}
+              titulo={t('explorar.paseadoresVacio')}
+              descripcion={t('explorar.paseadoresVacioDetalle')}
+            />
+          </View>
         ) : (
           <>
-            {/* 0 · LA MASCOTA — la gramática canónica (S61-A3): el
-                para-quién abre y QUEDA VISIBLE (una sola = chip elegido;
-                reuso declarado de la voz del grooming, Ley 17.3) */}
-            <SelectorOpcion
-              acento="control"
-              // S73 — ENTITY CHIP (dictado founder, V2 provisional): la cara
-              // es ANATOMÍA — overhang, lleno al elegir, cero borde.
-              entidad
-              etiqueta={t('grooming.paraQuien')}
-              opciones={elegibles.map((m) => ({
-                codigo: m.id,
-                etiqueta: m.nombre,
-                avatar: { nombre: m.nombre, fotoUrl: fotos[m.id] },
-              }))}
-              seleccionada={mascotaId ?? undefined}
-              onSelect={setMascotaId}
-            />
-
-            {/* 1 · DURACIÓN — solo bloques ofertados de verdad */}
-            <View style={{ gap: spacing[2] }}>
+            {/* 0 · LA MASCOTA — gramática canónica (S61-A3): el
+                para-quién abre y QUEDA VISIBLE. Entity chip S73. */}
+            <View style={{ paddingHorizontal: spacing[4] }}>
               <SelectorOpcion
-              acento="control"
+                acento="control"
+                entidad
+                etiqueta={t('grooming.paraQuien')}
+                opciones={elegibles.map((m) => ({
+                  codigo: m.id,
+                  etiqueta: m.nombre,
+                  avatar: { nombre: m.nombre, fotoUrl: fotos[m.id] },
+                }))}
+                seleccionada={mascotaId ?? undefined}
+                onSelect={setMascotaId}
+              />
+            </View>
+
+            {/* 1 · DURACIÓN — el ÚNICO selector que se RELLENA, y lo
+                hace por LEY, no por excepción: `naturaleza="existe"` es
+                la 19.8 (SE RELLENA LO QUE EXISTE) y L-b la acota a
+                fila corta. (Corrección a mi propio reporte de r9: dije
+                que el relleno pedía una prop nueva de B — ya existía.)
+                El precio del bloque vive acá, con su "desde". */}
+            <View style={{ paddingHorizontal: spacing[4], gap: spacing[2] }}>
+              <SelectorOpcion
+                acento="control"
                 etiqueta={t('explorar.cuandoDuracion')}
                 disposicion="grilla"
                 naturaleza="existe"
@@ -298,143 +348,127 @@ export default function PaseoCuando() {
                 seleccionada={duracion !== null ? String(duracion) : undefined}
                 onSelect={(codigo) => setDuracion(Number(codigo))}
               />
-              {bloqueElegido !== null ? (
-                <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
-                  {bloqueElegido.varia
-                    ? t('explorar.cuandoDesde', { precio: bloqueElegido.desde.toFixed(2) })
-                    : t('explorar.cuandoPrecio', { precio: bloqueElegido.desde.toFixed(2) })}
-                  {bloqueElegido.duracion === 30 ? ` · ${t('explorar.cuandoSalidaBano')}` : ''}
-                </Text>
+              {bloqueElegido !== null && bloqueElegido.duracion === 30 ? (
+                <Texto variante="apoyo">{t('explorar.cuandoSalidaBano')}</Texto>
               ) : null}
             </View>
 
-            {/* 2 · DÍA — la tira horizontal (hoy+13) */}
-            <SelectorOpcion
-              acento="control"
-              etiqueta={t('explorar.cuandoDia')}
-              disposicion="tira"
-              opciones={dias.map((d) => ({ codigo: d.iso, etiqueta: d.etiqueta }))}
-              seleccionada={dia}
-              onSelect={setDia}
-            />
-
-            {/* 2b · GRILLA de inicios reales para ESA duración */}
-            {inicios === 'cargando' ? (
-              <EsqueletoGrupo>
-                <Esqueleto forma="bloque" ancho="100%" alto={100} />
-              </EsqueletoGrupo>
-            ) : inicios === 'error' ? (
-              <EstadoVacio
-                registro="seccion"
-                titulo={t('explorar.paseadoresError')}
-                accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setReintento((n) => n + 1)} />}
+            {/* 2 · EL DÍA — RIEL o RUEDA (D3) por el switch. Ni relleno
+                ni contorno: ELEVACIÓN + ESCALA + COLOR DE TEXTO (son
+                catorce hermanos comparables — L-b).
+                🔴 DÍAS CERRADOS: el dato NO EXISTE en el motor (medido
+                por las dos pistas). No se pinta: todos nacen tocables y
+                el nulo honesto de abajo sostiene el caso. La prop
+                `cerrados` está lista para el lector cuando A lo dé. */}
+            <View style={{ gap: spacing[2] }}>
+              <View style={{ paddingHorizontal: spacing[4] }}>
+                <Texto variante="apoyo">{t('explorar.cuandoDia')}</Texto>
+              </View>
+              <SelectorDia
+                modo={modoDia}
+                dias={dias.map((d) => ({ iso: d.iso, dia: d.corta.split(' ')[0] ?? '', numero: d.iso.slice(8, 10) }))}
+                elegido={dia}
+                onElegir={setDia}
               />
+            </View>
+
+            {/* 3 · LA HORA — misma gramática (elevación/escala/color) */}
+            {inicios === 'cargando' ? (
+              <View style={{ paddingHorizontal: spacing[4] }}>
+                <EsqueletoGrupo>
+                  <Esqueleto forma="bloque" ancho="100%" alto={100} />
+                </EsqueletoGrupo>
+              </View>
+            ) : inicios === 'error' ? (
+              <View style={{ paddingHorizontal: spacing[4] }}>
+                <EstadoVacio
+                  registro="seccion"
+                  titulo={t('explorar.paseadoresError')}
+                  accion={<Boton variante="secundario" etiqueta={t('hogar.reintentar')} onPress={() => setReintento((n) => n + 1)} />}
+                />
+              </View>
             ) : inicios.length === 0 ? (
-              // §6ter (S61-A5 cura 1): el día sin lugar gana CAMINO
-              // TOCABLE — avanza la tira al día siguiente. Decisión (b)
-              // declarada: el motor es por-día (el "próximo día con
-              // lugar" real costaría hasta 13 llamadas); el motor NO se
-              // toca. En el último día de la tira, sin botón (honesto).
-              <EstadoVacio
-                registro="seccion"
+              /* EL NULO HONESTO (tercera ley): dice que no hay, dice POR
+                 QUÉ, ofrece la salida — jamás ocho celdas tachadas. Y el
+                 PIE DESAPARECE (no hay total de algo que no existe). */
+              <DiaSinHorarios
                 titulo={t('explorar.cuandoSinInicios')}
-                accion={
-                  diaSiguiente !== null ? (
-                    <Boton
-                      variante="compacto"
-                      etiqueta={t('explorar.sinIniciosProbarDia', { dia: diaSiguiente.corta })}
-                      onPress={() => setDia(diaSiguiente.iso)}
-                    />
-                  ) : undefined
-                }
+                porque={t('explorar.cuandoSinIniciosPorque')}
+                etiquetaSalida={diaSiguiente !== null ? t('explorar.sinIniciosProbarDia', { dia: diaSiguiente.corta }) : null}
+                onSalida={() => {
+                  if (diaSiguiente !== null) setDia(diaSiguiente.iso);
+                }}
               />
             ) : (
-              <SelectorOpcion
-              acento="control"
-                etiqueta={t('explorar.cuandoHora')}
-                disposicion="grilla"
-                opciones={inicios.map((h) => ({ codigo: h, etiqueta: h }))}
-                seleccionada={hora ?? undefined}
-                onSelect={setHora}
-              />
+              <View style={{ gap: spacing[2] }}>
+                <View style={{ paddingHorizontal: spacing[4] }}>
+                  <Texto variante="apoyo">{t('explorar.cuandoHora')}</Texto>
+                </View>
+                <GrillaHoras horas={inicios} elegida={hora} onElegir={setHora} />
+              </View>
             )}
 
-            {/* 4 · "Hacerlo frecuente" — el candado del plan MURIÓ (D-338,
-                S56): el chip enciende el modo plan; la Hoja nace en el
-                QUIÉN, con el paseador ELEGIDO (alcance v1 §6.1 v1.2). */}
-            {/* S58 (adenda, Ley 19.1): la ENTRADA AL PLAN y al paquete son
-                celdas de navegación CON ÍCONO — la celda dice a dónde va.
-                No listas todavía: la misma anatomía sin navegación (el
-                ícono se conserva por el slot de Celda). El PRECIO del plan
-                del lado dueño sigue enterrado en la RPC del QUIÉN —
-                enmienda propuesta al gate founder (ver reporte S58). */}
-            <Tarjeta relleno="ninguno" elevacion="reposo">
-              {listo ? (
-                <CeldaNavegacion
-                  icono="paseo"
-                  titulo={t('plan.chip')}
-                  detalle={t('plan.chipDetalle')}
-                  onPress={() => {
-                    router.push({
-                      pathname: '/explorar/paseo/disponibles',
-                      params: { fecha: dia, hora, duracion: String(duracion), plan: '1', mascotaId: mascota?.id ?? '' },
-                    });
-                  }}
-                />
-              ) : (
-                <Celda inicio={<Icono nombre="paseo" />} titulo={t('plan.chip')} subtitulo={t('plan.chipElegiPrimero')} />
-              )}
-              <Separador />
-              {/* 5 · el PAQUETE (v1.4 §6bis.2bis): comprar NO es reservar —
-                  alcanza la DURACIÓN; el paseador se elige en su propia
-                  pantalla, sin fecha ni hora. */}
-              {duracion !== null ? (
-                <CeldaNavegacion
-                  icono="despensa"
-                  titulo={t('paquete.chip')}
-                  detalle={t('paquete.chipDetalle')}
-                  onPress={() => {
-                    router.push({
-                      pathname: '/explorar/paseo/paquete',
-                      params: { duracion: String(duracion) },
-                    });
-                  }}
-                />
-              ) : (
-                <Celda inicio={<Icono nombre="despensa" />} titulo={t('paquete.chip')} subtitulo={t('paquete.chipElegiDuracion')} />
-              )}
-            </Tarjeta>
+            {/* 4-5 · PLAN y PAQUETE — su ubicación es LETRA FIRMADA
+                (P14 · §6bis.2bis: comprar ≠ reservar). Declarado en la
+                auditoría r9 y NO tocado: moverlos es decisión de
+                producto, va al gate. */}
+            <View style={{ paddingHorizontal: spacing[4] }}>
+              <Tarjeta relleno="ninguno" elevacion="reposo">
+                {listo ? (
+                  <CeldaNavegacion
+                    icono="paseo"
+                    titulo={t('plan.chip')}
+                    detalle={t('plan.chipDetalle')}
+                    onPress={() => {
+                      router.push({
+                        pathname: '/explorar/paseo/disponibles',
+                        params: { fecha: dia, hora, duracion: String(duracion), plan: '1', mascotaId: mascota?.id ?? '' },
+                      });
+                    }}
+                  />
+                ) : (
+                  <Celda inicio={<Icono nombre="paseo" />} titulo={t('plan.chip')} subtitulo={t('plan.chipElegiPrimero')} />
+                )}
+                <Separador />
+                {duracion !== null ? (
+                  <CeldaNavegacion
+                    icono="despensa"
+                    titulo={t('paquete.chip')}
+                    detalle={t('paquete.chipDetalle')}
+                    onPress={() => {
+                      router.push({ pathname: '/explorar/paseo/paquete', params: { duracion: String(duracion) } });
+                    }}
+                  />
+                ) : (
+                  <Celda inicio={<Icono nombre="despensa" />} titulo={t('paquete.chip')} subtitulo={t('paquete.chipElegiDuracion')} />
+                )}
+              </Tarjeta>
+            </View>
           </>
         )}
       </ScrollView>
 
-      {/* S61-A3 (rasgo 2 del patrón): el CTA de reservar vive ABAJO,
-          FIJO — fuera del scroll, una sola acción primaria (Ley 19.2). */}
-      {Array.isArray(oferta) && oferta.length > 0 && elegibles.length > 0 ? (
-        <View
-          style={{
-            paddingHorizontal: spacing[4],
-            paddingTop: spacing[3],
-            paddingBottom: Math.max(insets.bottom, spacing[4]),
-            backgroundColor: theme.bg.base,
-            borderTopWidth: 1,
-            borderTopColor: theme.border.subtle,
+      {/* EL PIE — el ÚNICO relleno pleno de la pantalla es su CTA, y va
+          EN EL SLOT (Boton primario resuelve accent.cta): no se pinta
+          acá; el ocre entra por token cuando el founder lo firme.
+          DESAPARECE cuando no hay qué totalizar (tercera ley). */}
+      {Array.isArray(oferta) && oferta.length > 0 && elegibles.length > 0 && pieVive ? (
+        <PieReserva
+          total={bloqueElegido !== null ? `$ ${bloqueElegido.desde.toFixed(2)}` : null}
+          totalDesde={bloqueElegido?.varia ?? false}
+          cuando={hora !== null ? `${dias.find((d) => d.iso === dia)?.corta ?? ''} · ${hora}` : null}
+          etiqueta={t('explorar.verQuienPuede')}
+          habilitado={listo}
+          onPress={() => {
+            if (!listo) return;
+            router.push({
+              pathname: '/explorar/paseo/disponibles',
+              params: { fecha: dia, hora, duracion: String(duracion), mascotaId: mascota.id },
+            });
           }}
-        >
-          <Boton
-            variante="primario"
-            etiqueta={t('explorar.verQuienPuede')}
-            deshabilitado={!listo}
-            onPress={() => {
-              if (!listo) return;
-              router.push({
-                pathname: '/explorar/paseo/disponibles',
-                params: { fecha: dia, hora, duracion: String(duracion), mascotaId: mascota.id },
-              });
-            }}
-          />
-        </View>
+          insetBottom={insets.bottom}
+        />
       ) : null}
-    </SafeAreaView>
+    </View>
   );
 }

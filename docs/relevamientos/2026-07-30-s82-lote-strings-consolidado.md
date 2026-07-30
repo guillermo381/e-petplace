@@ -146,6 +146,12 @@ fecha (al día / falta una). **+ el eje temporal de Vitales:**
 `ventanaHoy` "Hoy" · `ventanaSemana` "Última semana" · `ventanaMes`
 "Último mes" · `vitalesSinSalidas` "No salió a pasear en este tramo." /
 "No walks in this period."
+**ADENDA §6 · S82-C r11** (reserva): `explorar.cuandoSinIniciosPorque`
+"Los paseadores no tienen lugar libre ese día para esa duración." / "Walkers
+have no open slot that day for that duration." — la mitad del NULO HONESTO
+que faltaba: el día sin horarios ya decía QUÉ pasa y ofrecía salida, pero
+no decía POR QUÉ.
+
 **Muerte de r10 (Ley 37):** `hoyDeCuantos` — la fracción "1 de 4" murió
 sin consumidores (el founder preguntó cuáles eran los otros tres: el
 rótulo no nombraba lo que contaba, y la línea de ausencia ya los nombra).
