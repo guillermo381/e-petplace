@@ -1,0 +1,125 @@
+/**
+ * verify-diseno-pares.ts — el VOLCADOR de pares de R12 (S82-B r4).
+ *
+ * Enumera los pares texto/superficie y canto/fondo REALES de la casa en
+ * CLARO y OSCURO y emite JSON para que verify:diseno (R12) los juzgue.
+ * La matemática es la MISMA de verify-contrast.ts (S43) — parse/blend/
+ * luminance copiadas literales para que los dos gates jamás midan
+ * distinto. No reemplaza a verify:contrast (que gatea los 178 pares
+ * curados por componente con sus exenciones de espec): este volcador
+ * cubre el barrido SISTEMÁTICO de R12 — todo par de texto y todo canto,
+ * en LOS DOS temas, sin curaduría por componente.
+ *
+ * Umbrales (los aplica R12, acá solo se declaran en el JSON):
+ *   texto = 4.5 · canto/gráfica = 3.0 (no-textual WCAG).
+ *
+ * Correr suelto: pnpm exec tsx scripts/verify-diseno-pares.ts
+ */
+
+import { lightTheme, darkTheme } from '../packages/ui/src/themes'
+
+type RGBA = { r: number; g: number; b: number; a: number }
+
+function parse(color: string): RGBA {
+  if (color.startsWith('#')) {
+    const h = color.slice(1)
+    const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h
+    return {
+      r: parseInt(full.slice(0, 2), 16),
+      g: parseInt(full.slice(2, 4), 16),
+      b: parseInt(full.slice(4, 6), 16),
+      a: 1,
+    }
+  }
+  const m = color.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+))?\)/)
+  if (!m) throw new Error(`Color no parseable: ${color}`)
+  return { r: +m[1], g: +m[2], b: +m[3], a: m[4] !== undefined ? +m[4] : 1 }
+}
+
+function blend(fg: RGBA, bg: RGBA): RGBA {
+  const a = fg.a
+  return {
+    r: Math.round(fg.r * a + bg.r * (1 - a)),
+    g: Math.round(fg.g * a + bg.g * (1 - a)),
+    b: Math.round(fg.b * a + bg.b * (1 - a)),
+    a: 1,
+  }
+}
+
+function luminance({ r, g, b }: RGBA): number {
+  const lin = (c: number) => {
+    const s = c / 255
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4)
+  }
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
+}
+
+function contraste(fgRaw: string, bgRaw: string, base: string): number {
+  const bg = blend(parse(bgRaw), parse(base))
+  const fg = blend(parse(fgRaw), bg)
+  const l1 = luminance(fg)
+  const l2 = luminance(bg)
+  return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05)
+}
+
+export interface ParMedido {
+  tema: 'light' | 'dark'
+  clase: 'texto' | 'canto'
+  nombre: string
+  ratio: number
+  minimo: number
+}
+
+const pares: ParMedido[] = []
+const temas = { light: lightTheme, dark: darkTheme } as const
+
+for (const [tema, t] of Object.entries(temas) as ['light' | 'dark', typeof lightTheme][]) {
+  const base = t.bg.base
+  const texto = (nombre: string, fg: string, bg: string) =>
+    pares.push({ tema, clase: 'texto', nombre, ratio: contraste(fg, bg, base), minimo: 4.5 })
+  const canto = (nombre: string, fg: string, bg: string) =>
+    pares.push({ tema, clase: 'canto', nombre, ratio: contraste(fg, bg, base), minimo: 3 })
+
+  // TEXTO sobre sus superficies reales (primary/secondary — tertiary es
+  // placeholder/decorativo, fuera de AA por la letra del gate S43).
+  for (const s of ['base', 'card', 'overlay'] as const) {
+    texto(`text.primary/bg.${s}`, t.text.primary, t.bg[s])
+    texto(`text.secondary/bg.${s}`, t.text.secondary, t.bg[s])
+  }
+  // La voz de capa: sobre su tinte y sobre las superficies neutras.
+  for (const k of Object.keys(t.capaText) as (keyof typeof t.capaText)[]) {
+    texto(`capaText.${k}/capaBg.${k}`, t.capaText[k], t.capaBg[k])
+    texto(`capaText.${k}/bg.card`, t.capaText[k], t.bg.card)
+  }
+  // Status: la voz sobre su tinte.
+  for (const k of ['success', 'warning', 'danger', 'info'] as const) {
+    const kText = `${k}Text` as const, kBg = `${k}Bg` as const
+    if (kText in t.status && kBg in t.status)
+      texto(`status.${kText}/status.${kBg}`, (t.status as Record<string, string>)[kText], (t.status as Record<string, string>)[kBg])
+  }
+  // El CTA (Ley 21: el slot del par).
+  texto('accent.ctaTexto/accent.cta', t.accent.ctaTexto, t.accent.cta)
+
+  // CANTOS (no-textual 3:1): el hex PURO de capa como canto SÓLIDO al
+  // borde de una superficie (FilaCita/CantoCurva sólido) — contra la
+  // superficie que lo porta y contra el fondo de la pantalla.
+  for (const k of Object.keys(t.capa) as (keyof typeof t.capa)[]) {
+    canto(`capa.${k}/bg.card`, t.capa[k], t.bg.card)
+    canto(`capa.${k}/bg.base`, t.capa[k], t.bg.base)
+  }
+  // El fill del chip entidad (Ley 21 controlLleno) como bloque sobre fondo.
+  if ('controlLleno' in t.accent)
+    canto('accent.controlLleno/bg.card', (t.accent as Record<string, string>).controlLleno, t.bg.card)
+}
+
+// Salida: JSON por stdout (R12 lo consume); legible con --tabla.
+if (process.argv.includes('--tabla')) {
+  for (const p of pares) {
+    const ok = p.ratio >= p.minimo
+    console.log(`${ok ? '  ' : '✗ '}${p.tema.padEnd(5)} ${p.clase.padEnd(5)} ${p.nombre.padEnd(46)} ${p.ratio.toFixed(2)} (mín ${p.minimo})`)
+  }
+  const fallan = pares.filter((p) => p.ratio < p.minimo)
+  console.log(`\n${pares.length} pares medidos · ${fallan.length} bajo mínimo`)
+} else {
+  console.log(JSON.stringify(pares))
+}

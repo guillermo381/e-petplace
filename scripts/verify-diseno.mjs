@@ -22,6 +22,7 @@
 
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { execSync } from 'node:child_process';
 
 const RAICES = ['apps/cliente/src', 'apps/prestador/src'];
 const RAICES_UI = ['packages/ui/src/components', 'packages/ui/src/brand'];
@@ -316,6 +317,124 @@ function r11(archivosDic) {
 const DICCIONARIOS = ['apps/cliente/src/i18n/es.ts', 'apps/cliente/src/i18n/en.ts'];
 const dics = DICCIONARIOS.map((p) => ({ path: p, src: readFileSync(p, 'utf8') }));
 
+/** R12 · CONTRASTE EN LOS DOS TEMAS (S82-B r4, orden founder): todo par
+ *  texto/superficie (4.5) y todo canto sobre su fondo (3.0 no-textual)
+ *  pasa en claro Y en oscuro. Los pares los enumera el VOLCADOR
+ *  (`scripts/verify-diseno-pares.ts`, misma matemática que
+ *  verify-contrast S43 — los dos gates jamás miden distinto); esta
+ *  regla los juzga. NO reemplaza a verify:contrast (178 pares curados
+ *  por componente): este es el barrido SISTEMÁTICO.
+ *  El censo del estreno (29-jul) midió 56 pares y halló 6 bajo mínimo:
+ *  1 EXENTA FIRMADA + 5 A BASELINE nominal (lista servida al founder en
+ *  el reporte r4) — solo-baja: un par que sale del baseline no vuelve,
+ *  y todo par NUEVO bajo mínimo es rojo. Si el volcador no corre o no
+ *  parsea, la regla FALLA FUERTE (L-192: el silencio no verifica). */
+const EXENTAS_R12 = new Set([
+  // FIRMADA S73 (registro del entity chip): fill-vs-fondo dark 2.24–2.47
+  // — "el blanco 8.25 carga el estado; el ojo del founder lo firmó
+  // igual; sube a deuda si un usuario real lo reporta".
+  'dark·canto·accent.controlLleno/bg.card',
+]);
+const BASELINE_R12 = new Set([
+  // Los 5 del censo del estreno — deuda declarada, arbitraje founder:
+  // el borderline de texto (4.48, y el porqué: el gate S43 compone el
+  // tinte sobre CARD y pasa; sobre BASE queda 0.02 abajo)…
+  'light·texto·status.dangerText/status.dangerBg',
+  // …y los 4 cantos claros: los hex puros de identidad (verdeVital) y
+  // cuidado (teal) sobre papel no llegan a 3:1 — la letra vigente del
+  // gate S43 los EXIME como registro gráfico redundante (el glifo y la
+  // voz portan el canal); R12 los pone a la vista para que la exención
+  // se ratifique o muera EN LA MESA, no por costumbre.
+  'light·canto·capa.identidad/bg.card',
+  'light·canto·capa.identidad/bg.base',
+  'light·canto·capa.cuidado/bg.card',
+  'light·canto·capa.cuidado/bg.base',
+]);
+function r12(pares) {
+  const fallos = [];
+  let exentas = 0, enBaseline = 0, bajaron = 0;
+  for (const p of pares) {
+    const clave = `${p.tema}·${p.clase}·${p.nombre}`;
+    if (p.ratio >= p.minimo) {
+      if (BASELINE_R12.has(clave)) bajaron++;
+      continue;
+    }
+    if (EXENTAS_R12.has(clave)) { exentas++; continue; }
+    if (BASELINE_R12.has(clave)) { enBaseline++; continue; }
+    fallos.push(`R12: ${clave} = ${p.ratio.toFixed(2)} (mín ${p.minimo}) — par bajo mínimo FUERA de baseline/exentas`);
+  }
+  return {
+    fallos,
+    info: `pares=${pares.length} · exentas-firmadas=${exentas} · baseline-founder=${enBaseline}/${BASELINE_R12.size}${bajaron > 0 ? ` · ${bajaron} BAJARON: actualizar baseline` : ''}`,
+  };
+}
+/** El volcador corre UNA vez por invocación; si cae, R12 falla fuerte. */
+function paresReales() {
+  try {
+    const out = execSync('pnpm exec tsx scripts/verify-diseno-pares.ts', {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    const pares = JSON.parse(out);
+    if (!Array.isArray(pares) || pares.length === 0) throw new Error('volcador vacío');
+    return pares;
+  } catch (e) {
+    return { caido: String(e.message ?? e).slice(0, 120) };
+  }
+}
+
+/** R13 · CONTROL CONTORNEADO (S82-B r4, orden founder — A6 SIN CAJA
+ *  firmada, lado cliente): borderWidth sobre un tocable ARTESANAL
+ *  (Pressable/Touchable*) = rojo — se rellena o va sin caja.
+ *  ALCANCE DECLARADO, con sus tres bordes:
+ *  (a) apps/cliente SOLO — A6 rige lado cliente por su propia letra
+ *      (§9bis: "la dosis del prestador no se toca"), y en el prestador
+ *      la gramática está/espera S78 FIRMADA usa contorno para "lo que
+ *      espera" (medido hoy igual: prestador 0 contorneados inline).
+ *  (b) El contorno FIRMADO de packages/ui queda FUERA de este scan y su
+ *      destino es de MESA, no de este lint: Boton secundario/compacto
+ *      (22c letra viva; la ANCHA es D-483), SelectorOpcion seFija (7bis
+ *      FIRMADA: "se contornea lo que SE FIJA") y Campo (cola ⚖️). El
+ *      choque entre el eslogan de la orden ("nunca contorno") y esas
+ *      letras firmadas queda DECLARADO en el reporte r4 — esta regla
+ *      caza lo ARTESANAL en pantallas, que es donde A6 no tiene juez.
+ *  (c) Solo estilos INLINE en el tag (un StyleSheet con nombre escapa
+ *      al scan — limitación declarada; hoy: cero casos, medido).
+ *  Censo del estreno: UN contorneado en todo el monorepo — el
+ *  FiltroVida de C (hogar/index:306, lote esperando SU gate) → baseline
+ *  NOMINAL por archivo, dueño C: se rellena o pierde la caja en el
+ *  gate. Solo baja. */
+const BASELINE_R13 = { 'apps/cliente/src/app/(tabs)/hogar/index.tsx': 1 };
+function finDeTagJsx(src, i) {
+  let d = 0;
+  for (let j = i; j < src.length && j < i + 4000; j++) {
+    const c = src[j];
+    if (c === '{') d++;
+    else if (c === '}') d--;
+    else if (c === '>' && d === 0) return j;
+  }
+  return Math.min(i + 4000, src.length);
+}
+function r13(archivos) {
+  const fallos = [];
+  let total = 0;
+  const sumaBaseline = Object.values(BASELINE_R13).reduce((a, b) => a + b, 0);
+  for (const { path, src } of archivos) {
+    if (!/apps\/cliente\//.test(path) && path !== '(fixture)') continue;
+    let enArchivo = 0;
+    for (const m of src.matchAll(/<(Pressable|TouchableOpacity|TouchableHighlight|TouchableWithoutFeedback)\b/g)) {
+      const tag = src.slice(m.index, finDeTagJsx(src, m.index));
+      if (/borderWidth/.test(tag)) {
+        enArchivo++;
+        if (enArchivo > (BASELINE_R13[path] ?? 0))
+          fallos.push(`${path}:${lineaDe(src, m.index)} — control CONTORNEADO (<${m[1]}> con borderWidth, A6): se rellena o va sin caja`);
+      }
+    }
+    total += enArchivo;
+  }
+  return { fallos, info: `${total}/${sumaBaseline} contorneados (baseline nominal: FiltroVida de C — se resuelve en su gate)${total < sumaBaseline ? ' — BAJÓ: actualizar baseline' : ''}` };
+}
+
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
 const FIXTURES = {
@@ -329,8 +448,10 @@ const FIXTURES = {
   R8: [{ path: '(fixture)', src: '<Entrada><EstadoVacio titulo="x" /></Entrada>\n<Animated.View entering={FadeIn}><EstadoVacio titulo="y" /></Animated.View>' }],
   R10: [{ path: 'apps/cliente/src/app/otra-pantalla.tsx', src: '/** @override-s82c — copia ilegal */' }],
   R11: [{ path: '(fixture)/es.ts', src: "    vozCardM3: '{{nombre}} completó el 60% de su nivel — ¡sigue la racha!'," }],
+  R12: [{ tema: 'light', clase: 'texto', nombre: '(fixture)', ratio: 2.0, minimo: 4.5 }],
+  R13: [{ path: '(fixture)', src: '<Pressable style={{ borderWidth: 1.5, borderColor: theme.border.default }}>' }],
 };
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11 };
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -382,6 +503,14 @@ const corridas = [
   ['R10 (override-s82c atado a su casa)', r10(apps)],
   ['R11 (LOYALTY §3: la voz del momento sin score)', r11(dics)],
 ];
+// R12 corre sobre el volcador vivo; si el volcador cayó, FALLA FUERTE.
+const pares = paresReales();
+corridas.push(
+  'caido' in (pares ?? {})
+    ? ['R12 (contraste dos temas)', { fallos: [`el VOLCADOR no corrió (${pares.caido}) — sin pares no hay verificación (L-192)`], info: 'VOLCADOR CAÍDO' }]
+    : ['R12 (contraste dos temas: texto 4.5 · canto 3.0)', r12(pares)],
+);
+corridas.push(['R13 (A6: control contorneado, cliente)', r13(apps)]);
 for (const [nombre, res] of corridas) {
   console.log(`${nombre} · ${res.info}`);
   for (const f of res.fallos) { console.error(`  ✗ ${f}`); fallosTotal++; }
