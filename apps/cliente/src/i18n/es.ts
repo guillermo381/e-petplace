@@ -262,6 +262,11 @@ export const clienteEs = {
     hoyDesparasitacion: 'Desparasitación',
     hoyAlergias: 'Alergias',
     hoySinRegistro: 'Sin registro',
+    hoySinFechaRefuerzo: 'Sin fecha de refuerzo',
+    ventanaHoy: 'Hoy',
+    ventanaSemana: 'Última semana',
+    ventanaMes: 'Último mes',
+    vitalesSinSalidas: 'No salió a pasear en este tramo.',
     hoyAlDia: 'Al día',
     hoyFaltaUna: 'Falta una',
     hoyRefuerzoVencido: 'refuerzo vencido',
@@ -280,7 +285,6 @@ export const clienteEs = {
     // r7 (lámina ficha-mascota): la cuenta del rótulo, la voz serif del
     // expediente, la línea de los índices que NO existen, y el pie que
     // dice POR QUÉ reservar (la razón sale del expediente).
-    hoyDeCuantos: '{{n}} de {{total}}',
     vozExpediente: 'Su expediente se completa de a poco. Cada dato que sumas es uno menos que hay que adivinar en una urgencia.',
     indicesTodavia: 'Índice de salud y descanso se construyen con su expediente. Todavía no hay con qué.',
     pieRotulo: 'Lo próximo',

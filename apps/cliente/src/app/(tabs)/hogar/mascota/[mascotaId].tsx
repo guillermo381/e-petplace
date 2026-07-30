@@ -26,7 +26,7 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
-import { Platform, Pressable, ScrollView, Share, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, Share, StatusBar, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
@@ -69,6 +69,7 @@ import {
   obtenerPerfilMascota,
   resolverUrlFoto,
   type ItemTimeline,
+  type PaseoConTrack,
   type PerfilMascota,
   type SenalesHogarMascota,
 } from '@epetplace/api';
@@ -76,6 +77,7 @@ import {
   calcularMomentoVital,
   calcularVitales,
   calcularVozHogar,
+  distanciaTrackKm,
   edadEnMeses,
   type MomentoVital,
   type VitalesPaseos,
@@ -95,6 +97,15 @@ const SERIF_LOCAL = Platform.select({ ios: 'Georgia', default: 'serif' });
  *  (el tramo temporal vive en la pantalla completa — contrato de la
  *  lámina 02, contexto 2). */
 type FiltroHistoria = 'todo' | 'salud' | 'paseos' | 'estetica' | 'adiestramiento';
+
+/** r10-5 · el eje TEMPORAL de Vitales — el mismo que ya usa Su
+ *  historia, con FiltroPills. NOTA DE API declarada: `calcularVitales`
+ *  de packages/domain está CABLEADA A 7 DÍAS (corte7d/corte14d y una
+ *  barra de 7 posiciones) y NO acepta ventana; ensancharla es
+ *  packages/domain = territorio ajeno (76d). Se compone ACÁ con
+ *  `distanciaTrackKm`, que domain SÍ exporta — cero duplicación de la
+ *  fórmula, cero cambio en territorio de otro. */
+type VentanaVitales = 'hoy' | 'semana' | 'mes';
 
 /** @override-s82c — EL RÓTULO DE SECCIÓN con su CUENTA (patrón 6 de la
  *  lámina): mono uppercase + la cuenta a la derecha. Candidata a B. */
@@ -238,6 +249,16 @@ export default function PerfilDeMascota() {
   // S82: el avatar es la puerta a editar la foto (encuadre de la casa).
   const presionAvatar = usePresionado(0.99);
   const esMemorial = theme.mode === 'memorial';
+  // r10-1: el techo pinta bajo la barra de estado → íconos CLAROS
+  // mientras la pantalla tiene foco; al salir se restaura la voz del
+  // tema (patrón BarraTabs/Hogar — packages/ui no conoce el foco).
+  useFocusEffect(
+    useCallback(() => {
+      if (esMemorial) return;
+      StatusBar.setBarStyle('light-content');
+      return () => StatusBar.setBarStyle(theme.mode === 'dark' ? 'light-content' : 'dark-content');
+    }, [esMemorial, theme.mode]),
+  );
   const [items, setItems] = useState<ItemTimeline[] | null | 'error'>(null);
   const [cursor, setCursor] = useState<string | null>(null);
   const [estadoPie, setEstadoPie] = useState<LineaDeVidaEstadoPie>('nada');
@@ -249,6 +270,9 @@ export default function PerfilDeMascota() {
   // r5: vacunas agrupadas-colapsadas + historia colapsada con filtros
   const [historiaRevelada, setHistoriaRevelada] = useState(false);
   const [filtroHistoria, setFiltroHistoria] = useState<FiltroHistoria>('todo');
+  const [ventana, setVentana] = useState<VentanaVitales>('semana');
+  // los paseos crudos: la ventana se computa acá (ver nota de API)
+  const [paseosTrack, setPaseosTrack] = useState<PaseoConTrack[] | null>(null);
 
   const cargarPrimeraPagina = useCallback(async (id: string) => {
     const r = await leerTimelineMascota(id);
@@ -298,7 +322,9 @@ export default function PerfilDeMascota() {
         }
         setPerfil(r.data);
         void obtenerPaseosConTrack(mascotaId).then((pv) => {
-          if (vigente) setVitales(pv.ok ? calcularVitales(pv.data, new Date()) : 'error');
+          if (!vigente) return;
+          setVitales(pv.ok ? calcularVitales(pv.data, new Date()) : 'error');
+          setPaseosTrack(pv.ok ? pv.data : null);
         });
         if (r.data.mascota.foto_url) {
           void resolverUrlFoto(r.data.mascota.foto_url).then((url) => {
@@ -414,7 +440,15 @@ export default function PerfilDeMascota() {
           <Isotipo size={1000} variant="tinta" color={theme.text.primary} />
         </View>
       </View>
-      <Encabezado variante="navegacion" titulo="" atras onAtras={() => router.back()} />
+      {/* r10-1 · EL HUECO BLANCO: había DOS botones de atrás. CORRECCIÓN
+          DE DIAGNÓSTICO (medida, no asumida): la banda NO era el header
+          nativo — el Stack del hogar YA tiene headerShown:false desde
+          S51; era MI PROPIO <Encabezado navegacion> que sobrevivió al
+          reemplazo de r7 (empecé el corte en el ScrollView y quedó
+          arriba). Muere acá: el degradado va A SANGRE hasta el borde
+          superior y la safe area se paga con padding ADENTRO del techo
+          (insets.top, ya cableado). Los Encabezado de los early-returns
+          (cargando/error) SE CONSERVAN: esas ramas no tienen techo. */}
       {/* ═══ r7 · LA LÁMINA ficha-mascota.html ES EL ACUERDO ═══
           Leída como CRITERIO (§10): cero box-shadow/transición de CSS
           (sombras por elevacion.ts), el .js es DOM y su lógica se
@@ -656,17 +690,40 @@ export default function PerfilDeMascota() {
             CUENTA. "Cargar el carnet" vive ACÁ, en la fila de la falta
             — por eso muere el segundo CTA de Vacunas. */}
         {(() => {
-          type CeldaHoy = { key: string; rotulo: string; valor: string; detalle: string | null; estado: 'atencion' | 'alDia' };
+          // r10-2 · LOS TRES CASOS de vacunas (la celda medía mal y la
+          // pantalla se contradecía: decía "sin registro" con 8 vacunas
+          // en el carnet abajo). La celda mide si sabemos el ESTADO:
+          //   · sin NINGÚN registro   → no se monta; va a la ausencia
+          //   · con registros, SIN fecha_proxima → "Sin fecha de
+          //     refuerzo" en gris (no sabemos, y NO es que falten datos)
+          //   · con fecha → al día / falta una
+          type CeldaHoy = {
+            key: string;
+            rotulo: string;
+            valor: string;
+            detalle: string | null;
+            estado: 'atencion' | 'alDia' | 'sinSaber';
+          };
           const hoyIso = new Intl.DateTimeFormat('en-CA').format(hoy);
           const pv = senal?.proxima_vacuna ?? null;
           const celdas: CeldaHoy[] = [];
           const faltan: string[] = [];
-          if (senal !== null && senal.vacunas_total > 0 && pv !== null) {
-            celdas.push(
-              pv.fecha < hoyIso
-                ? { key: 'vac', rotulo: t('perfil.hechosVacunas'), valor: t('perfil.hoyFaltaUna'), detalle: t('perfil.hoyRefuerzoVencido'), estado: 'atencion' }
-                : { key: 'vac', rotulo: t('perfil.hechosVacunas'), valor: t('perfil.hoyAlDia'), detalle: t('perfil.hoyHasta', { fecha: fechaCortaMono(pv.fecha, idioma) }), estado: 'alDia' },
-            );
+          if (senal !== null && senal.vacunas_total > 0) {
+            if (pv === null) {
+              celdas.push({
+                key: 'vac',
+                rotulo: t('perfil.hechosVacunas'),
+                valor: t('perfil.hoySinFechaRefuerzo'),
+                detalle: t('perfil.hoyEnCarnet', { n: senal.vacunas_total }),
+                estado: 'sinSaber',
+              });
+            } else {
+              celdas.push(
+                pv.fecha < hoyIso
+                  ? { key: 'vac', rotulo: t('perfil.hechosVacunas'), valor: t('perfil.hoyFaltaUna'), detalle: t('perfil.hoyRefuerzoVencido'), estado: 'atencion' }
+                  : { key: 'vac', rotulo: t('perfil.hechosVacunas'), valor: t('perfil.hoyAlDia'), detalle: t('perfil.hoyHasta', { fecha: fechaCortaMono(pv.fecha, idioma) }), estado: 'alDia' },
+              );
+            }
           } else {
             faltan.push(t('perfil.hechosVacunas').toLowerCase());
           }
@@ -676,15 +733,25 @@ export default function PerfilDeMascota() {
             faltan.push(t('perfil.peso').toLowerCase());
           }
           faltan.push(t('perfil.hoyDesparasitacion').toLowerCase(), t('perfil.hoyAlergias').toLowerCase());
-          const total = celdas.length + faltan.length;
           return (
             <View style={{ marginTop: spacing[8] }}>
-              <RotuloSeccion titulo={t('perfil.hoyTitulo')} cuenta={t('perfil.hoyDeCuantos', { n: celdas.length, total })} />
+              {/* r10-3: la fracción "1 de 4" MURIÓ — no nombraba lo que
+                  contaba (el founder preguntó cuáles eran los otros
+                  tres) y la fila de ausencia de abajo YA los nombra. */}
+              <RotuloSeccion titulo={t('perfil.hoyTitulo')} cuenta={null} />
               {celdas.length > 0 ? (
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2.5], paddingHorizontal: spacing[5] }}>
                   {celdas.map((c) => {
                     const cuerpo = (
-                      <CantoCurva color={c.estado === 'atencion' ? theme.status.warning : theme.status.success}>
+                      <CantoCurva
+                        color={
+                          c.estado === 'atencion'
+                            ? theme.status.warning
+                            : c.estado === 'alDia'
+                              ? theme.status.success
+                              : theme.text.tertiary
+                        }
+                      >
                         <View style={{ padding: spacing[3], gap: spacing[1.5], minHeight: 44 }}>
                           <Texto variante="apoyo">{c.rotulo}</Texto>
                           <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}>
@@ -729,8 +796,12 @@ export default function PerfilDeMascota() {
                       <Texto variante="cuerpo">{t('perfil.hoySinRegistro')}</Texto>
                       <Texto variante="dato">{faltan.join(' · ')}</Texto>
                       <View style={{ alignSelf: 'flex-start', marginTop: spacing[1] }}>
+                        {/* r10-4: NO va en negro. Es acción SECUNDARIA
+                            dentro de una tarjeta → `sinCaja` de B (su
+                            relleno tenue) — este es su consumidor real
+                            en una pantalla que el founder SÍ mira. */}
                         <Boton
-                          variante="primario"
+                          variante="sinCaja"
                           tamaño="sm"
                           etiqueta={t('perfil.cargarCarnet')}
                           onPress={() => router.push({ pathname: '/carnet', params: { mascotaId: mascota.id, nombre: mascota.nombre } })}
@@ -1046,60 +1117,97 @@ export default function PerfilDeMascota() {
             de mono, jamás en dos tarjetas. Km, min, salidas y una barra
             por día: hechos del expediente. */}
         {vitales !== 'cargando' && vitales !== 'error' && vitales.totalSalidas > 0 ? (
-          <View style={{ marginTop: spacing[8] }}>
-            <RotuloSeccion titulo={t('perfil.vitales')} cuenta={t('perfil.vitalesUltimos7')} />
-            <View style={{ paddingHorizontal: spacing[5] }}>
-              <Tarjeta elevacion="reposo">
-                <View style={{ gap: spacing[3] }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing[6] }}>
-                    <View>
-                      <Text style={{ fontFamily: typography.family.mono.medium, fontSize: typography.size['2xl'], fontVariant: ['tabular-nums'], color: theme.text.primary }}>
-                        {vitales.km7d.toFixed(1)}
-                      </Text>
-                      <Texto variante="apoyo">{t('perfil.vitalesKm')}</Texto>
-                    </View>
-                    <View>
-                      <Text style={{ fontFamily: typography.family.mono.medium, fontSize: typography.size['2xl'], fontVariant: ['tabular-nums'], color: theme.text.primary }}>
-                        {vitales.min7d}
-                      </Text>
-                      <Texto variante="apoyo">{t('perfil.vitalesMin')}</Texto>
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <BarrasSemana
-                        valores={vitales.kmPorDia}
-                        capa="cuidado"
-                        etiqueta={t('perfil.vitalesBarrasA11y', { n: vitales.kmPorDia.filter((v) => v > 0).length })}
-                      />
-                    </View>
+          (() => {
+            // r10-5: la ventana se compone acá (ver nota de API arriba).
+            const DIA = 24 * 60 * 60 * 1000;
+            const dias = ventana === 'hoy' ? 1 : ventana === 'semana' ? 7 : 30;
+            const corte = hoy.getTime() - dias * DIA;
+            const enVentana = (paseosTrack ?? []).filter((p) => {
+              const ts = new Date(p.fecha).getTime();
+              return !Number.isNaN(ts) && ts >= corte;
+            });
+            const km = enVentana.reduce((s, p) => s + distanciaTrackKm(p.puntos), 0);
+            const min = enVentana.reduce((s, p) => s + (p.duracionMin ?? 0), 0);
+            const salidas = enVentana.length;
+            return (
+              <View style={{ marginTop: spacing[8] }}>
+                <RotuloSeccion titulo={t('perfil.vitales')} cuenta={null} />
+                <FiltroPills
+                  activo={ventana}
+                  onCambio={(v) => setVentana(v)}
+                  opciones={[
+                    { codigo: 'hoy' as VentanaVitales, etiqueta: t('perfil.ventanaHoy'), icono: null, capa: null },
+                    { codigo: 'semana' as VentanaVitales, etiqueta: t('perfil.ventanaSemana'), icono: null, capa: null },
+                    { codigo: 'mes' as VentanaVitales, etiqueta: t('perfil.ventanaMes'), icono: null, capa: null },
+                  ]}
+                />
+                <View style={{ paddingHorizontal: spacing[5], marginTop: spacing[3] }}>
+                  {salidas === 0 ? (
+                    // el nulo honesto de la ventana: no hay salidas en
+                    // este tramo — se dice, no se pintan ceros (L-139)
+                    <EstadoVacio registro="seccion" titulo={t('perfil.vitalesSinSalidas')} />
+                  ) : (
+                    <Tarjeta elevacion="reposo">
+                      <View style={{ gap: spacing[3] }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing[6] }}>
+                          <View>
+                            <Text style={{ fontFamily: typography.family.mono.medium, fontSize: typography.size['2xl'], fontVariant: ['tabular-nums'], color: theme.text.primary }}>
+                              {km.toFixed(1)}
+                            </Text>
+                            <Texto variante="apoyo">{t('perfil.vitalesKm')}</Texto>
+                          </View>
+                          <View>
+                            <Text style={{ fontFamily: typography.family.mono.medium, fontSize: typography.size['2xl'], fontVariant: ['tabular-nums'], color: theme.text.primary }}>
+                              {min}
+                            </Text>
+                            <Texto variante="apoyo">{t('perfil.vitalesMin')}</Texto>
+                          </View>
+                          {/* la barra es POR DÍA DE LA SEMANA: solo tiene
+                              sentido en la ventana de 7 días. En hoy y mes
+                              NO se dibuja — si un eje no parte los datos,
+                              no se dibuja (ley de la lámina). */}
+                          {ventana === 'semana' ? (
+                            <View style={{ flex: 1 }}>
+                              <BarrasSemana
+                                valores={vitales.kmPorDia}
+                                capa="cuidado"
+                                etiqueta={t('perfil.vitalesBarrasA11y', { n: vitales.kmPorDia.filter((v) => v > 0).length })}
+                              />
+                            </View>
+                          ) : null}
+                        </View>
+                        <Separador />
+                        <Texto variante="dato">
+                          {(salidas === 1
+                            ? t('perfil.vitalesMetaUna', { fecha: vitales.ultimaSalida !== null ? fechaCortaMono(vitales.ultimaSalida, idioma) : '—' })
+                            : t('perfil.vitalesMetaVarias', { n: salidas, fecha: vitales.ultimaSalida !== null ? fechaCortaMono(vitales.ultimaSalida, idioma) : '—' })
+                          ).toLowerCase()}
+                        </Texto>
+                      </View>
+                    </Tarjeta>
+                  )}
+                  {/* la comparativa es SEMANA contra semana: solo ahí */}
+                  {ventana === 'semana' && vitales.caminoMasQueAnterior ? (
+                    <Text
+                      style={{
+                        fontFamily: SERIF_LOCAL,
+                        fontStyle: 'italic',
+                        fontSize: typography.size.md,
+                        lineHeight: Math.round(typography.size.md * 1.5),
+                        color: theme.text.secondary,
+                        marginTop: spacing[3],
+                      }}
+                    >
+                      {t('perfil.vitalesComparativa')}
+                    </Text>
+                  ) : null}
+                  <View style={{ marginTop: spacing[3] }}>
+                    <Texto variante="dato">{t('perfil.indicesTodavia')}</Texto>
                   </View>
-                  <Separador />
-                  <Texto variante="dato">
-                    {(vitales.salidas7d === 1
-                      ? t('perfil.vitalesMetaUna', { fecha: vitales.ultimaSalida !== null ? fechaCortaMono(vitales.ultimaSalida, idioma) : '—' })
-                      : t('perfil.vitalesMetaVarias', { n: vitales.salidas7d, fecha: vitales.ultimaSalida !== null ? fechaCortaMono(vitales.ultimaSalida, idioma) : '—' })
-                    ).toLowerCase()}
-                  </Texto>
                 </View>
-              </Tarjeta>
-              {vitales.caminoMasQueAnterior ? (
-                <Text
-                  style={{
-                    fontFamily: SERIF_LOCAL,
-                    fontStyle: 'italic',
-                    fontSize: typography.size.md,
-                    lineHeight: Math.round(typography.size.md * 1.5),
-                    color: theme.text.secondary,
-                    marginTop: spacing[3],
-                  }}
-                >
-                  {t('perfil.vitalesComparativa')}
-                </Text>
-              ) : null}
-              <View style={{ marginTop: spacing[3] }}>
-                <Texto variante="dato">{t('perfil.indicesTodavia')}</Texto>
               </View>
-            </View>
-          </View>
+            );
+          })()
         ) : null}
 
         {/* ── ⑧ EL PIE QUE DICE POR QUÉ (propuesta de la lámina: "un

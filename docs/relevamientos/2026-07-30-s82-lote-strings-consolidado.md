@@ -134,6 +134,22 @@ verYDecidir · verlo · verLaCita · citaAgendadaTitulo ·
 citaAgendadaSinServicio · filtroQuien · filtroQue · filtroVacunas ·
 motivoLabel · proximoControlFecha · verCompleto (grep en cero).
 
+**ADENDA §6 · S82-C r10** (entra a ESTE lote por orden founder — no se
+abre un sexto): **`perfil.hoySinFechaRefuerzo`** "Sin fecha de refuerzo"
+/ "No booster date" — nace de un defecto REAL del gate: la celda decía
+"Sin registro" mientras la pantalla mostraba "8 vacunas en su carnet"
+dos secciones abajo. La celda mide si sabemos el ESTADO, y con vacunas
+cargadas SIN `fecha_proxima` lo que falta es la fecha, no los datos. Los
+tres casos quedan distinguidos: sin ningún registro (va a la línea de
+ausencia) · con registros y sin fecha (esta voz, canto neutro) · con
+fecha (al día / falta una). **+ el eje temporal de Vitales:**
+`ventanaHoy` "Hoy" · `ventanaSemana` "Última semana" · `ventanaMes`
+"Último mes" · `vitalesSinSalidas` "No salió a pasear en este tramo." /
+"No walks in this period."
+**Muerte de r10 (Ley 37):** `hoyDeCuantos` — la fracción "1 de 4" murió
+sin consumidores (el founder preguntó cuáles eran los otros tres: el
+rótulo no nombraba lo que contaba, y la línea de ausencia ya los nombra).
+
 ---
 
 **Nota de la grilla y los motores (r4):** las celdas de "Cómo está hoy"
