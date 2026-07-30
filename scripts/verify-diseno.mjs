@@ -344,6 +344,20 @@ const BASELINE_R12 = new Set([
   // no lo pone el gusto: lo pone el texto de capa del oscuro. Subir la
   // superficie exige subir ANTES violetText/pinkDark y re-medir los 178
   // — es una tanda propia con su gate, no un token. Revertido a 1.05.
+  //
+  // S82-B r20 — EL OTRO LADO DEL PAR TAMBIÉN CERRADO, por una razón
+  // DISTINTA: bajar `bg.base` con card quieto NO rompe nada (los seis
+  // pares eran texto sobre SUPERFICIE; los que tocan el FONDO ganan —
+  // text.primary 17.73→18.29 · secondary 8.49→8.76 · capaText
+  // 13.23→13.65) pero **NO ALCANZA**: con card en #0D0D12 y el fondo en
+  // NEGRO ABSOLUTO el par llega a **1.083**, y de #050508 a #000000 sube
+  // apenas 0.033. EL PORQUÉ: el +0.05 de la fórmula WCAG DOMINA cuando
+  // las dos luminancias son ~0 (card L=0.00417, base L=0.00158) — el
+  // contraste SE APLANA en el extremo oscuro. No falta margen: NO HAY
+  // margen por debajo, y el tema perdería su "bosque nocturno" a cambio
+  // de 0.03. ⇒ LOS DOS LADOS MEDIDOS Y CERRADOS; la decisión es del
+  // founder: (a) abrir la tanda de los textos de capa del oscuro, o
+  // (b) que el oscuro separe por otro canal — borde NO (A6/Ley 20).
   'dark·superficie·bg.card/bg.base',
   'dark·superficie·bg.elevated/bg.base',
   // VACÍO desde S82-B r5 (solo-baja EJECUTADO): los 5 del censo del
