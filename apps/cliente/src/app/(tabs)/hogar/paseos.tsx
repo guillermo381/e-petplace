@@ -708,41 +708,32 @@ export default function MisPaseos() {
             // r12-11 · EL CTA VIVO (patrón del alta: deshabilitado
             // "Continuar" / con dato "Presentar a {nombre}"): el botón
             // DICE QUÉ FALTA antes de que lo toquen.
+            // r12-11b · MI WRAPPER LOCAL MURIÓ: B construyó el patrón en
+            // la primitiva (`razonDeshabilitado` + `onRazon`, S82-B) y
+            // el clon local se absorbe en su componente — regla 37, y el
+            // orden correcto: el toque-en-apagado es de TODOS los
+            // botones de la casa, no de esta pantalla.
             const elegida = mascotasHogar.find((m) => m.id === filtroMascota) ?? null;
-            const cta = (
+            return (
               <Boton
                 variante="primario"
                 bloque
                 etiqueta={
-                  elegida !== null
-                    ? t('plan.agendarDe', { nombre: elegida.nombre })
-                    : t('plan.agendarPaseo')
+                  elegida !== null ? t('plan.agendarDe', { nombre: elegida.nombre }) : t('plan.agendarPaseo')
                 }
                 deshabilitado={elegida === null}
+                razonDeshabilitado={t('plan.elegiMascota')}
+                onRazon={() => {
+                  // la PANTALLA decide cómo se cuenta (el componente no
+                  // elige): acá se señala la hilera y se sube hasta ella
+                  setPidiendoMascota(true);
+                  scrollRef.current?.scrollTo({ y: 0, animated: true });
+                }}
                 onPress={() => {
                   if (elegida === null) return;
                   router.navigate({ pathname: '/explorar/paseo', params: { mascotaId: elegida.id } });
                 }}
               />
-            );
-            // deshabilitado PERO TOCABLE: el Boton pone `disabled` y no
-            // recibe el toque, así que el Pressable padre lo capta (sin
-            // tocar packages/ui). Con mascota elegida el padre no tiene
-            // onPress: cero doble disparo.
-            return elegida !== null ? (
-              cta
-            ) : (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('plan.agendarPaseo')}
-                accessibilityHint={t('plan.elegiMascota')}
-                onPress={() => {
-                  setPidiendoMascota(true);
-                  scrollRef.current?.scrollTo({ y: 0, animated: true });
-                }}
-              >
-                {cta}
-              </Pressable>
             );
           })()}
         </View>
