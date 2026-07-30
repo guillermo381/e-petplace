@@ -28,7 +28,7 @@
  * pantalla manda sobre la del control suelto.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -102,6 +102,10 @@ export default function MisPaseos() {
   const [ventanaFecha, setVentanaFecha] = useState<'todos' | 'semana' | 'mes'>('todos');
   const [mascotasHogar, setMascotasHogar] = useState<{ id: string; nombre: string; fotoUrl?: string }[]>([]);
   const [abierta, setAbierta] = useState<string | null>(null);
+  // r12-11: el CTA deshabilitado SIGUE TOCABLE y, al tocarlo, señala la
+  // hilera: nunca un botón muerto que no responde.
+  const [pidiendoMascota, setPidiendoMascota] = useState(false);
+  const scrollRef = useRef<ScrollView>(null);
   const [planes, setPlanes] = useState<PlanPaseo[] | 'cargando' | 'error'>('cargando');
   const [citas, setCitas] = useState<Record<string, CitaDePlan[]>>({});
   // D-343 + P18: los paquetes del dueño y sus paseos fuera del plan
@@ -400,7 +404,10 @@ export default function MisPaseos() {
           />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[4] }}>
+        <ScrollView
+          ref={scrollRef}
+          contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[4] }}
+        >
           {/* r12 · LOS TRES EJES DEL LOG (el CTA de agendar se fue al
               PIE FIJO — abajo). ① la MASCOTA es el PRIMER filtro (con
               su regla L-b adentro: pleno con 2-3, barrido con 4+). */}
@@ -409,10 +416,19 @@ export default function MisPaseos() {
               <FiltroMascotas
                 mascotas={mascotasHogar}
                 elegida={filtroMascota}
-                onElegir={setFiltroMascota}
-                etiquetaTodas={t('plan.filtroTodas')}
+                onElegir={(id) => {
+                  setFiltroMascota(id);
+                  if (id !== null) setPidiendoMascota(false);
+                }}
               />
             </View>
+          ) : null}
+
+          {/* r12-11: el mensaje SEÑALA la hilera — vive pegado a ella,
+              jamás flotando en el medio de la pantalla. El ojo sabe a
+              dónde ir porque el texto está donde está la respuesta. */}
+          {pidiendoMascota ? (
+            <Texto variante="apoyo" color="danger">{t('plan.elegiMascota')}</Texto>
           ) : null}
 
           {/* ② el ESTADO — con glifos coherentes (D-357 enmendada: el
@@ -688,18 +704,47 @@ export default function MisPaseos() {
             borderTopColor: theme.border.subtle,
           }}
         >
-          <Boton
-            variante="primario"
-            bloque
-            etiqueta={t('plan.agendarPaseo')}
-            onPress={() =>
-              router.navigate(
-                filtroMascota !== null
-                  ? { pathname: '/explorar/paseo', params: { mascotaId: filtroMascota } }
-                  : '/explorar/paseo',
-              )
-            }
-          />
+          {(() => {
+            // r12-11 · EL CTA VIVO (patrón del alta: deshabilitado
+            // "Continuar" / con dato "Presentar a {nombre}"): el botón
+            // DICE QUÉ FALTA antes de que lo toquen.
+            const elegida = mascotasHogar.find((m) => m.id === filtroMascota) ?? null;
+            const cta = (
+              <Boton
+                variante="primario"
+                bloque
+                etiqueta={
+                  elegida !== null
+                    ? t('plan.agendarDe', { nombre: elegida.nombre })
+                    : t('plan.agendarPaseo')
+                }
+                deshabilitado={elegida === null}
+                onPress={() => {
+                  if (elegida === null) return;
+                  router.navigate({ pathname: '/explorar/paseo', params: { mascotaId: elegida.id } });
+                }}
+              />
+            );
+            // deshabilitado PERO TOCABLE: el Boton pone `disabled` y no
+            // recibe el toque, así que el Pressable padre lo capta (sin
+            // tocar packages/ui). Con mascota elegida el padre no tiene
+            // onPress: cero doble disparo.
+            return elegida !== null ? (
+              cta
+            ) : (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('plan.agendarPaseo')}
+                accessibilityHint={t('plan.elegiMascota')}
+                onPress={() => {
+                  setPidiendoMascota(true);
+                  scrollRef.current?.scrollTo({ y: 0, animated: true });
+                }}
+              >
+                {cta}
+              </Pressable>
+            );
+          })()}
         </View>
       ) : null}
 

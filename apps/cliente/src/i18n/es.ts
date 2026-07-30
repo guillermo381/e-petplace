@@ -865,8 +865,9 @@ export const clienteEs = {
     sinPlanesTitulo: 'Todavía no tienes un plan',
     sinPlanesDetalle: 'Cuando agendes un paseo, tócale "Hacerlo frecuente" y tu plan nace ahí.',
     // S58 hub v2 — GATE DE STRINGS PENDIENTE (lote S58)
-    filtroTodas: 'Todas',
     filtroTodos: 'Todos',
+    agendarDe: 'Agendar el paseo de {{nombre}}',
+    elegiMascota: 'Elige a quién le quieres reservar.',
     agendarPaseo: 'Agendar un paseo',
     vacioSegmento: 'Nada por aquí todavía.',
     salidaCompletada: 'Completada',

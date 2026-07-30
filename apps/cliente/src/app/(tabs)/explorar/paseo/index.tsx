@@ -300,12 +300,20 @@ export default function PaseoCuando() {
           </View>
         ) : (
           <>
-            {/* r12-5: EL PASO DE ELEGIR MASCOTA MURIÓ ACÁ — ya viene
-                elegida del LOG (param `mascotaId`) y el techo la muestra
-                en su detalle: un dato elegido no se vuelve a preguntar
-                (Ley 23, la puerta no pregunta lo que ya sabe). Queda
-                SOLO como salvavidas de deep-link sin param — ahí sí hay
-                que preguntar, y ahí sí parte los datos. */}
+            {/* r12-5: EL PASO DE ELEGIR MASCOTA MURIÓ del camino normal
+                — viene elegida del LOG (param) y el techo la muestra: un
+                dato elegido no se vuelve a preguntar (Ley 23).
+                ⚠️ HALLAZGO r12-11, declarado al verificar: sobrevive
+                para DOS casos reales, no uno.
+                  ① deep-link sin param.
+                  ② EL VACÍO DEL LOG — un hogar sin ningún paseo muestra
+                    su EstadoVacio y NO tiene hilera de mascotas; su CTA
+                    "Explorar" entra acá sin param, y ahí preguntar es lo
+                    correcto: la puerta pregunta lo que NO sabe (Ley 23
+                    por su otra cara), y ahí sí parte los datos.
+                O sea: en el gate, el paso NO debe aparecer viniendo de
+                Agendar (que ya nunca se dispara sin mascota) pero SÍ
+                aparece —y debe— viniendo del log vacío. */}
             {mascota === null ? (
               <View style={{ paddingHorizontal: spacing[4] }}>
                 <SelectorOpcion

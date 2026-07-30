@@ -133,17 +133,18 @@ export function FiltroMascotas({
   mascotas,
   elegida,
   onElegir,
-  etiquetaTodas,
 }: {
   mascotas: { id: string; nombre: string; fotoUrl?: string }[];
-  /** null = todas. */
+  /** null = NINGUNA elegida (el log entra sin filtro y muestra todo).
+   *  Se LEE porque ningún chip queda activo — r12-11: el chip "Todas"
+   *  murió, el comportamiento no. */
   elegida: string | null;
   onElegir: (id: string | null) => void;
-  etiquetaTodas: string;
 }) {
   const { theme } = useTheme();
-  // la fila incluye el chip "Todas": los hermanos comparables son N+1
-  const esBarrido = mascotas.length + 1 >= 4;
+  // r12-11: sin el chip "Todas", los hermanos comparables son las
+  // mascotas y nada más. L-b sigue rigiendo: 4+ pasa a barrido.
+  const esBarrido = mascotas.length >= 4;
 
   const chip = (
     key: string,
@@ -191,36 +192,6 @@ export function FiltroMascotas({
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{ gap: spacing[2.5], paddingHorizontal: spacing[4], paddingVertical: spacing[1] }}
     >
-      {chip(
-        'todas',
-        elegida === null,
-        <>
-          <View
-            style={{
-              width: 30,
-              height: 30,
-              borderRadius: radius.full,
-              backgroundColor: elegida === null && !esBarrido ? 'rgba(255,255,255,0.22)' : theme.bg.overlay,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Svg width={16} height={16} viewBox="0 0 24 24">
-              <Huella
-                color={elegida === null && !esBarrido ? theme.text.onGradient : theme.text.secondary}
-                escala={0.85}
-                x={1.8}
-                y={1.8}
-              />
-            </Svg>
-          </View>
-          <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.sm, color: colorLabel(elegida === null) }}>
-            {etiquetaTodas}
-          </Text>
-        </>,
-        () => onElegir(null),
-        etiquetaTodas,
-      )}
       {mascotas.map((m) =>
         chip(
           m.id,
@@ -231,7 +202,7 @@ export function FiltroMascotas({
               {m.nombre}
             </Text>
           </>,
-          () => onElegir(m.id),
+          () => onElegir(elegida === m.id ? null : m.id),
           m.nombre,
         ),
       )}
