@@ -780,6 +780,34 @@ function r20(archivos) {
   return { fallos, info: `${fallos.length} fills de alerta` };
 }
 
+
+/** R21 · LOS CASTS DE `Theme` (S82-B — D-582, "no esperes la tercera").
+ *  `Theme` se DERIVA de los temas concretos (`typeof lightTheme | ...`),
+ *  así que cada campo queda como LITERAL y todo override de los temas de
+ *  oficio necesita un cast. Dos cobros en una sesión (`bg.base as string`,
+ *  `ctaElevado as boolean`), los dos cazados por el tsc. RATCHET en 11:
+ *  solo baja. La cura NO es castear mejor — es declarar `Theme` como
+ *  interfaz y que los temas la cumplan con `satisfies`; ese día esto
+ *  llega a 0 y **la regla se retira con la deuda** (su condición de
+ *  muerte, escrita al nacer). */
+const BASELINE_CASTS_TEMA = 10;  // L-141: lo mide EL LINT (mi grep -c dijo 11 — contaba LÍNEAS)
+function r21(archivos) {
+  let n = 0;
+  const porArchivo = [];
+  for (const { path, src } of archivos) {
+    const c = (sinComentarios(src).match(/\bas (?:string|boolean|number)\b/g) ?? []).length;
+    if (c > 0) { n += c; porArchivo.push(`${path}: ${c}`); }
+  }
+  const fallos = n > BASELINE_CASTS_TEMA
+    ? [`D-582: ${n} casts en themes/ (baseline ${BASELINE_CASTS_TEMA}) — SUBIÓ. La cura es declarar Theme como interfaz, no castear otro campo:\n    ${porArchivo.join('\n    ')}`]
+    : [];
+  return { fallos, info: `${n}/${BASELINE_CASTS_TEMA}${n < BASELINE_CASTS_TEMA ? ' — BAJÓ: actualizar baseline' : ''}` };
+}
+const FUENTES_R21 = ['light', 'dark', 'memorial', 'index'].map((f) => ({
+  path: `packages/ui/src/themes/${f}.ts`,
+  src: readFileSync(`packages/ui/src/themes/${f}.ts`, 'utf8'),
+}));
+
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
 const FIXTURES = {
@@ -799,6 +827,7 @@ const FIXTURES = {
   R15: [{ tema: 'light', ruta: '(fixture)', valor: '#0F5E56' }],
   // tinte ENCENDIDO y ningún override en lightOficio = el caso que la
   // regla existe para atrapar.
+  R21: [{ path: '(fixture)', src: Array(BASELINE_CASTS_TEMA + 1).fill('x as string').join('\n') }],
   R20: [{ path: '(fixture)', src: 'style={{ backgroundColor: theme.status.warning }}' }],
   R17: { index: "export { PiezaFantasma } from './components/PiezaFantasma'", galeria: '' },
   R18: { cuenta: '<CeldaNavegacion titulo="Preferencias" onPress={() => router.push("/cuenta/preferencias")} />' },
@@ -806,7 +835,7 @@ const FIXTURES = {
   R19: [{ path: '(fixture)', src: 'const pleno = elegido && sinGlifo;' }],
   R16: { palette: "light0: '#FAF9F7',\npapelTapiz: '#FAF2F5',", temas: 'const lightOficio: Theme = { ...lightTheme }' },
 };
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R19: r19, R20: r20 };
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R19: r19, R20: r20, R21: r21 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -872,6 +901,7 @@ corridas.push(['R13 (A6: control contorneado, cliente)', r13(apps)]);
 corridas.push(['R16 (papel tapiz: el prestador no recibe tinte)', r16(FUENTES_R16)]);
 corridas.push(['R17 (la galería no envejece)', r17(FUENTES_R17)]);
 corridas.push(['R20 (la familia alerta no se rellena)', r20([...apps, ...ui])]);
+corridas.push(['R21 (casts de Theme — D-582)', r21(FUENTES_R21)]);
 corridas.push(['R18 (D-580: la entrada a la galería NO desaparece)', r18({ cuenta: readFileSync(CUENTA_CLIENTE, 'utf8') })]);
 corridas.push([
   'R19 (L-b: el relleno pleno se computa contra sus hermanos)',
