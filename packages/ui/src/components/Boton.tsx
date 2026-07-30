@@ -76,6 +76,36 @@ export interface BotonProps {
   deshabilitado?: boolean
   /** Slot de ícono — ReactNode, sin librería acoplada. */
   iconoIzq?: ReactNode
+  /**
+   * S82-B r14 — EL DESHABILITADO QUE EXPLICA (candidata de C, evaluada y
+   * construida). El motivo por el que el botón está apagado. Cuando
+   * viene: el botón se pinta apagado PERO SIGUE TOCABLE, el toque NO
+   * dispara `onPress` y en su lugar llama a `onRazon`.
+   *
+   * POR QUÉ VIVE ACÁ Y NO EN LA PANTALLA (lo que decidió construirlo):
+   * el workaround obligado era envolver el Boton en un `Pressable` padre
+   * —porque un Pressable con `disabled` no recibe eventos— y eso deja
+   * **DOS nodos de a11y anidados, los dos `role="button"`**: el padre
+   * habilitado con el hint y el hijo deshabilitado adentro. Un lector de
+   * pantalla lee el par como dos controles. Desde el componente es UN
+   * nodo: `disabled` sigue siendo TRUE en `accessibilityState` (es la
+   * verdad del control) y la razón viaja en `accessibilityHint`, así el
+   * lector la anuncia AL ENFOCAR — sin depender del toque.
+   *
+   * NO REEMPLAZA A LA FORMA VISIBLE, y esto es letra vigente: el
+   * precedente S63-B dice *"el Confirmar apagado dice QUÉ FALTA,
+   * SIEMPRE"*, y la segunda enmienda de SliderPrecio (S68) fijó que la
+   * affordance es VISIBLE, no solo accesible. Una razón que aparece
+   * únicamente al tocar está escondida. Lo preferido sigue siendo
+   * decirla en la pantalla (un `Texto apoyo` bajo el botón, o la
+   * etiqueta que ya nombra lo que falta); esta prop es para cuando el
+   * motivo no cabe ahí, y para que el toque JAMÁS quede muerto.
+   */
+  razonDeshabilitado?: string
+  /** Qué hacer cuando tocan un botón apagado con razón: señalar el
+   *  campo que falta, abrir un aviso, scrollear a la hilera. Lo decide
+   *  la PANTALLA — el componente no elige cómo se cuenta. */
+  onRazon?: () => void
 }
 
 export function Boton({
@@ -87,6 +117,8 @@ export function Boton({
   cargando = false,
   deshabilitado = false,
   iconoIzq,
+  razonDeshabilitado,
+  onRazon,
 }: BotonProps) {
   const { theme } = useTheme()
   // S63 (D-401, cura en la fuente): el hundimiento vive en LA primitiva
@@ -96,6 +128,11 @@ export function Boton({
 
   const t = TAMAÑOS[tamaño]
   const inactivo = deshabilitado || cargando
+  // Apagado CON motivo: sigue tocable y el toque cuenta el porqué. No
+  // rige mientras carga (ahí el motivo es obvio y el toque no debe hacer
+  // nada) ni sin `onRazon` (un toque que no lleva a ningún lado sería el
+  // mismo botón muerto con más código).
+  const conRazon = deshabilitado && !cargando && razonDeshabilitado !== undefined && onRazon !== undefined
 
   // Regla emil: "loading solo se muestra si la operación supera 150ms;
   // debajo de eso, nada". El spinner aparece recién pasado el umbral
@@ -194,15 +231,23 @@ export function Boton({
 
   return (
     <Pressable
-      onPress={inactivo ? undefined : onPress}
+      // conRazon: el toque va a `onRazon`, JAMÁS a `onPress` — un botón
+      // apagado no ejecuta su acción por explicarse.
+      onPress={conRazon ? onRazon : inactivo ? undefined : onPress}
       onPressIn={handlers.onPressIn}
       onPressOut={handlers.onPressOut}
       onFocus={() => setEnfocado(true)}
       onBlur={() => setEnfocado(false)}
-      disabled={inactivo}
+      // `disabled` del Pressable mata los eventos; con razón queda vivo
+      // para poder contarla (era exactamente por esto que el patrón
+      // obligaba a un Pressable padre en la pantalla).
+      disabled={conRazon ? false : inactivo}
       hitSlop={tamaño === 'sm' ? (44 - TAMAÑOS.sm.alto) / 2 : undefined}
       accessibilityRole="button"
+      // La a11y dice LA VERDAD: sigue deshabilitado aunque acepte el
+      // toque — y el hint entrega el motivo AL ENFOCAR, sin exigirlo.
       accessibilityState={{ disabled: inactivo, busy: cargando }}
+      accessibilityHint={conRazon ? razonDeshabilitado : undefined}
       accessibilityLabel={etiqueta}
       style={bloque ? { alignSelf: 'stretch' } : { alignSelf: 'flex-start' }}
     >
