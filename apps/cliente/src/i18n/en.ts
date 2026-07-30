@@ -213,6 +213,7 @@ export const clienteEn = {
     // S82-C — mirror of es.ts (Espejo enforces parity).
     vida: 'Their story',
     editar: 'Edit',
+    volver: 'Back',
     compartir: 'Share',
     compartirMensaje: 'Meet {{nombre}} on e-PetPlace',
     pastillaAlDia: 'Up to date',
@@ -240,6 +241,15 @@ export const clienteEn = {
     hoySinRegistroLinea: 'No record yet: {{lista}}',
     filtroSemana: 'This week',
     filtroMes: 'This month',
+    // r7 — mirror of es.ts (Espejo enforces parity).
+    hoyDeCuantos: '{{n}} of {{total}}',
+    vozExpediente: 'Their record fills in bit by bit. Every detail you add is one less to guess in an emergency.',
+    indicesTodavia: 'Health and rest indexes are built from their record. There is nothing to build them with yet.',
+    pieRotulo: 'What is next',
+    pieRazonVacuna: 'Their {{vacuna}} is overdue. A check-up brings it up to date.',
+    pieRazonSinCarnet: 'No vaccines on record for {{nombre}} yet. A check-up opens their clinical history.',
+    pieRazonGeneral: 'A regular check-up keeps {{nombre}}\'s record up to date.',
+    reservarServicioDe: 'Book a service for {{nombre}}',
     pastillaAtencion: 'Needs attention',
     pastillaConociendo: 'Getting to know them',
     hechosPaseos: 'Walks',

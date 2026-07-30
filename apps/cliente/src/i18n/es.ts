@@ -245,6 +245,7 @@ export const clienteEs = {
     // + el header alto (editar/compartir/pastilla), los HECHOS y el CTA.
     vida: 'Su historia',
     editar: 'Editar',
+    volver: 'Volver',
     compartir: 'Compartir',
     compartirMensaje: 'Conoce a {{nombre}} en e-PetPlace',
     pastillaAlDia: 'Al día',
@@ -275,6 +276,17 @@ export const clienteEs = {
     hoySinRegistroLinea: 'Sin registro todavía: {{lista}}',
     filtroSemana: 'Esta semana',
     filtroMes: 'Este mes',
+    // r7 (lámina ficha-mascota): la cuenta del rótulo, la voz serif del
+    // expediente, la línea de los índices que NO existen, y el pie que
+    // dice POR QUÉ reservar (la razón sale del expediente).
+    hoyDeCuantos: '{{n}} de {{total}}',
+    vozExpediente: 'Su expediente se completa de a poco. Cada dato que sumas es uno menos que hay que adivinar en una urgencia.',
+    indicesTodavia: 'Índice de salud y descanso se construyen con su expediente. Todavía no hay con qué.',
+    pieRotulo: 'Lo próximo',
+    pieRazonVacuna: 'Su {{vacuna}} está vencida. Un control lo pone al día.',
+    pieRazonSinCarnet: 'Todavía no hay vacunas cargadas de {{nombre}}. Un control abre su historia clínica.',
+    pieRazonGeneral: 'Un control periódico mantiene el expediente de {{nombre}} al día.',
+    reservarServicioDe: 'Reservar un servicio para {{nombre}}',
     pastillaAtencion: 'Necesita atención',
     pastillaConociendo: 'Conociéndolo',
     hechosPaseos: 'Paseos',
