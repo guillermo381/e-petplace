@@ -25,7 +25,7 @@ import { Separador } from '../components/Separador'
 import { Insignia } from '../components/Insignia'
 import { Encabezado } from '../components/Encabezado'
 import { BarraTabs, type BarraTabsItem } from '../components/BarraTabs'
-import { Hoja, type HojaAltura } from '../components/Hoja'
+import { Hoja, HojaScroll, type HojaAltura } from '../components/Hoja'
 import { CitaEnVivo } from '../components/CitaEnVivo'
 import { Esqueleto, EsqueletoGrupo } from '../components/Esqueleto'
 import { AvatarMascota } from '../components/AvatarMascota'
@@ -45,7 +45,7 @@ import { LogoNegocio } from '../components/LogoNegocio'
 import { FilaCita } from '../components/FilaCita'
 import { PieRevelar } from '../components/PieRevelar'
 import { HeroMarca } from '../components/HeroMarca'
-import { LineaDeVida, type LineaDeVidaItem } from '../components/LineaDeVida'
+import { LineaDeVida, LineaDeVidaNodo, type LineaDeVidaItem } from '../components/LineaDeVida'
 import { VisorFoto } from '../components/VisorFoto'
 import { FichaVacuna } from '../components/FichaVacuna'
 import { FichaMascotaHogar } from '../components/FichaMascotaHogar'
@@ -54,7 +54,12 @@ import { Icono, type IconoNombre } from '../components/Icono'
 import { EsperaDeMarca } from '../brand/EsperaDeMarca'
 import { Guijarro } from '../brand/Guijarro'
 import { Cronometro } from '../components/Cronometro'
-import { EvidenciaFoto, type EvidenciaFotoEstado } from '../components/EvidenciaFoto'
+import { EvidenciaFoto, EvidenciaFotoThumbnail, type EvidenciaFotoEstado } from '../components/EvidenciaFoto'
+import { BarrasSemana } from '../components/BarrasSemana'
+import { CantoMarca } from '../components/CantoMarca'
+import { Entrada } from '../components/Entrada'
+import { EvitaTeclado } from '../components/EvitaTeclado'
+import { Huella } from '../brand/Huella'
 import { MapaRecorrido, type PuntoTrackMapa } from '../components/MapaRecorrido'
 
 // Foto local de ejemplo (generada, sin URL remota) — demuestra cover,
@@ -371,6 +376,138 @@ function Decision({ n, asunto, decide, children }: { n: string; asunto: string; 
       </View>
       {children}
       <View style={{ height: 1, backgroundColor: theme.border.default }} />
+    </View>
+  )
+}
+
+
+/** S82-B r17 — LAS NUEVE ENTRADAS QUE FALTABAN. Cada pieza importada de
+ *  packages/ui; cero clones (regla dura del founder: "una galería que
+ *  muestra un botón que no es EL botón hace firmar algo que no corre"). */
+/** S82-B r17 — LO RECHAZADO, MARCADO Y NO BORRADO (orden founder): si
+ *  la pieza sigue viva en el código, la galería la muestra con su sello
+ *  y su FECHA DE GATE — así se ve qué queda por curar en vez de
+ *  desaparecer del radar. Lo que muere del código muere de la galería
+ *  (Ley 37); esto es lo otro: lo que sobrevive sin haber sido firmado. */
+function Rechazado({ fecha, razon, children }: { fecha: string; razon: string; children: React.ReactNode }) {
+  const { theme } = useTheme()
+  return (
+    <View style={{ gap: spacing[2], padding: spacing[3], borderRadius: radius.md, backgroundColor: theme.status.dangerBg }}>
+      <Texto variante="dato" color="danger">{`RECHAZADO en gate ${fecha}`}</Texto>
+      <Texto variante="apoyo" color="danger">{razon}</Texto>
+      {children}
+    </View>
+  )
+}
+
+/** Las piezas que el founder rechazó y siguen vivas en el código. */
+function LoRechazado() {
+  return (
+    <View style={{ gap: spacing[4] }}>
+      <Rechazado
+        fecha="29-jul-2026"
+        razon="EL CTA DEL CLIENTE EN TINTA (Ley 21, mitad del cliente). Enmendado en r15: el CTA pasó a ocre con label tinta. Sobrevive como `accent.cta` del PRESTADOR (tealDark) y en memorial, donde SÍ rige — por eso no se borra."
+      >
+        <View style={{ height: 48, borderRadius: radius.md, backgroundColor: palette.textLight0, alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: palette.light0 }}>el CTA negro de antes</Text>
+        </View>
+      </Rechazado>
+
+      <Rechazado
+        fecha="29-jul-2026"
+        razon="EL CONTORNO COMO ACCIÓN. `Boton secundario` y `compacto` siguen con borde y siguen VIVOS en decenas de pantallas: su muerte ANCHA es D-483 con mecánica al-tocarse (migra por craft, jamás por barrida). `sinCaja` es el reemplazo firmado — se ve arriba, con su sombra."
+      >
+        <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+          <View style={{ flex: 1 }}><Boton variante="secundario" etiqueta="secundario" bloque onPress={() => {}} /></View>
+          <View style={{ flex: 1 }}><Boton variante="compacto" etiqueta="compacto" bloque onPress={() => {}} /></View>
+        </View>
+      </Rechazado>
+    </View>
+  )
+}
+
+function PiezasFaltantes() {
+  const { theme } = useTheme()
+  const [remonte, setRemonte] = useState(0)
+  const [hojaScrollAbierta, setHojaScrollAbierta] = useState(false)
+  return (
+    <View style={{ gap: spacing[5] }}>
+
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">BarrasSemana — 7 días reales; el día sin dato es barra base (la verdad tal cual, L-139)</Texto>
+        <BarrasSemana valores={[38, 0, 26, 44, 0, 31, 22]} etiqueta="Kilómetros por día, últimos 7" />
+      </View>
+
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">CantoMarca — cero props: el ancho y la rampa son LEY (§9.1)</Texto>
+        <View style={{ flexDirection: 'row', height: 60 }}>
+          <CantoMarca />
+          <View style={{ flex: 1, backgroundColor: theme.bg.card, justifyContent: 'center', paddingLeft: spacing[3] }}>
+            <Texto variante="cuerpo">el canto al borde del portador</Texto>
+          </View>
+        </View>
+      </View>
+
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">Entrada — §5: 300 ms · escalón 120 · desde 15. REMONTABLE: se ve la animación, no una captura</Texto>
+        <Boton variante="compacto" etiqueta="Verla otra vez" onPress={() => setRemonte((n) => n + 1)} />
+        <View key={remonte} style={{ gap: spacing[2] }}>
+          <Entrada><Texto variante="seccion">lo primero que el ojo encuentra</Texto></Entrada>
+          <Entrada orden={1}><Texto variante="cuerpo">lo segundo</Texto></Entrada>
+          <Entrada orden={2}><Texto variante="apoyo">lo tercero</Texto></Entrada>
+        </View>
+      </View>
+
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">EvidenciaFoto.Thumbnail — los tres estados; la foto JAMÁS desaparece por error</Texto>
+        <View style={{ flexDirection: 'row', gap: spacing[3] }}>
+          {(['subiendo', 'subida', 'error'] as EvidenciaFotoEstado[]).map((e) => (
+            <EvidenciaFotoThumbnail key={e} uri={FOTO_MASCOTA_EJEMPLO} estado={e} tamano={72} onReintentar={() => {}} />
+          ))}
+        </View>
+        <Texto variante="apoyo">
+          EvidenciaFoto.Capturar NO se monta: abre la CÁMARA al tocarse y dispararía permisos del sistema dentro de una herramienta de verificación (exención declarada en R17).
+        </Texto>
+      </View>
+
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">EvitaTeclado — la casa tiene UNA (D-498); envuelve el campo para que el teclado no lo tape</Texto>
+        <EvitaTeclado>
+          <Campo label="Escribí para ver el patrón" placeholder="el teclado no lo tapa" />
+        </EvitaTeclado>
+      </View>
+
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">HojaScroll — el scrollable que GANA dentro de la Hoja (patrón SM block, L-132)</Texto>
+        <Boton variante="compacto" etiqueta="Abrir una Hoja con lista larga" onPress={() => setHojaScrollAbierta(true)} />
+        <Hoja visible={hojaScrollAbierta} onCerrar={() => setHojaScrollAbierta(false)} titulo="HojaScroll" conCerrar>
+          <HojaScroll>
+            <View style={{ gap: spacing[2], paddingBottom: spacing[4] }}>
+              {Array.from({ length: 14 }, (_, i) => (
+                <Texto key={i} variante="cuerpo">{`fila ${i + 1} — arrastrá: el scroll gana contra el swipe-to-close`}</Texto>
+              ))}
+            </View>
+          </HojaScroll>
+        </Hoja>
+      </View>
+
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">Huella — LA primitiva canónica (nadie la redibuja). Devuelve un &lt;G&gt;: SIEMPRE dentro de un Svg</Texto>
+        <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center' }}>
+          {[1, 0.5, 0.35].map((e) => (
+            <Svg key={e} width={24 * (e === 1 ? 1.6 : 1.6)} height={24 * 1.6} viewBox="0 0 24 24">
+              <Huella color={theme.capa.comunidad} escala={e} x={e === 1 ? 0 : 12 - 12 * e} y={e === 1 ? 0 : 12 - 12 * e} />
+            </Svg>
+          ))}
+          <Texto variante="apoyo">escala 1 · 0.5 (tabs) · 0.35 (glifos)</Texto>
+        </View>
+      </View>
+
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">LineaDeVidaNodo — el nodo suelto (la lista entera vive en su propia sección)</Texto>
+        <LineaDeVidaNodo item={itemsLineaDeVida()[0]} conAgrupador={false} esUltimo />
+      </View>
+
     </View>
   )
 }
@@ -2016,6 +2153,21 @@ function GaleriaInterna() {
               </PanelTema>
             </ThemeProvider>
           </View>
+        </Seccion>
+
+        {/* ══ LAS NUEVE QUE FALTABAN (S82-B r17) — R17 a cero ══
+            La galería IMPORTA, jamás reimplementa: todo lo de acá es la
+            pieza REAL de packages/ui. Lo que no se puede montar sin
+            clonarlo quedó DECLARADO en R17 (usePresionado, la cámara de
+            EvidenciaFoto.Capturar y los rieles sin forma). */}
+        <Seccion titulo="Piezas que faltaban en la galería (S82-B r17) — importadas, jamás reimplementadas">
+          <PiezasFaltantes />
+        </Seccion>
+
+        {/* Lo rechazado NO se borra: se marca con su fecha de gate, para
+            que se vea qué queda pendiente de curar (orden founder r16). */}
+        <Seccion titulo="⛔ RECHAZADO EN GATE — vivo en el código, pendiente de curar">
+          <LoRechazado />
         </Seccion>
 
         {/* ══ EL GATE S82 — LA PASADA ÚNICA (r13) ══

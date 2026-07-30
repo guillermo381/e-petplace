@@ -595,12 +595,10 @@ const EXENTOS_R17 = new Set([
   'usePresionado', 'useTraduccionUi', 'recursosUi', 'useAviso', 'AvisoProvider',
   'ThemeProvider', 'useTheme', 'EvidenciaFotoCapturar',
 ]);
-/** Las que HOY no tienen entrada — se pagan de a una, jamás sube. */
-const SIN_ENTRADA_R17 = new Set([
-  'BarrasSemana', 'CantoMarca', 'Entrada', 'EvidenciaFoto',
-  'EvidenciaFotoThumbnail', 'EvitaTeclado', 'HojaScroll', 'Huella',
-  'LineaDeVidaNodo',
-]);
+/** VACÍO desde S82-B r17: las NUEVE ganaron su entrada en la misma
+ *  tanda que la regla las enumeró — importadas, jamás reimplementadas.
+ *  De vacío no se sube: toda exportación nueva es roja el primer día. */
+const SIN_ENTRADA_R17 = new Set([]);
 function r17(fuentes) {
   const idx = fuentes.index ?? '';
   const gal = fuentes.galeria ?? '';
@@ -617,7 +615,7 @@ function r17(fuentes) {
   let presentes = 0, exentas = 0, pendientes = 0;
   for (const n of nombres) {
     if (EXENTOS_R17.has(n)) { exentas++; continue; }
-    if (new RegExp('<' + n + '[\\s/>]|\\b' + n + '\\(').test(gal)) { presentes++; continue; }
+    if (new RegExp('<' + n + '[\\s/>.]|\\b' + n + '\\(').test(gal)) { presentes++; continue; }
     if (SIN_ENTRADA_R17.has(n)) { pendientes++; continue; }
     fallos.push(`R17: ${n} se exporta desde packages/ui y NO aparece en la galería — una pieza que nadie puede mirar no se puede firmar`);
   }
