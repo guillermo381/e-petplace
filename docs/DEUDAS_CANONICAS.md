@@ -2052,7 +2052,10 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 
 ### Decisión firmada, ejecución post-gate (D-482)
 
-#### D-482 — `Texto.cuerpo` pasa de md/18 a base/15 🟢
+#### D-482 — `Texto.cuerpo` pasa de md/18 a base/15 ✅ PAGADA (S82-B r2)
+✅ **PAGADA por B en S82 r2 (commit `65f1154`), adjudicación founder.** `Texto.cuerpo` pasó a base/15 con re-censo L-141 en el mismo acto: **71 consumidores** (no los 3 de la ficha — el conteo venía de S72), cero `<Texto>` sin variante; el sitio S72 visible (título de tarjeta de Ponte al día) quedó señalado para la captura del gate. El desbloqueo que la ficha anticipaba se cumplió: el carnet de A puede migrar a `Texto` cuando su pasada de craft lo toque (la prosa base/15 ya coincide). *(Marca asentada por A en S82 r4 — escritora de docs de la tanda.)*
+
+*(Ficha histórica de la decisión, S72-A:)*
 🟢 BAJA. **Decisión firmada S72-A, ejecución diferida al post-gate del founder.** La variante `cuerpo` de `Texto` (S71) nació en `size.md` (18px) y tiene **3 consumidores explícitos**; el censo de B halló **49 sitios en base/15** que NO la adoptan porque su tamaño no coincide. **El censo corrige al diseñador** (precedente exacto: los 4 clones de VozSecundaria, S71): la prosa real de la casa es base/15, no md/18 — `cuerpo` nació con el tamaño equivocado. Cura: `cuerpo` → `size.base` (15), **con los 3 consumidores actuales auditados de a uno** (no romper una jerarquía donde md/18 fuera intencional) + captura claro/oscuro para el gate. **Disparo: post-gate del founder de S72** (no entra al bundle antes de que corra el E2E — es cosmético, no bloquea el gate funcional). Origen: S72-A (censo de B + relevamiento A).
 
 ### Deuda de gobierno (D-481)
