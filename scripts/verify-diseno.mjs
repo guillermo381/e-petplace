@@ -336,6 +336,16 @@ const EXENTAS_R12 = new Set([
   'dark·canto·accent.controlLleno/bg.card',
 ]);
 const BASELINE_R12 = new Set([
+  // S82-B r19 — LOS DOS PARES DE SUPERFICIE DEL OSCURO, con el hallazgo
+  // que los pone acá y no en una cura: subir bg.card ROMPE los textos que
+  // van encima. Medido: a 1.26 caen SEIS pares AA firmados (capaText
+  // comunidadAmplia y comunidad, dangerText sobre su tinte, dos avatares
+  // de iniciales, el tonal de Ley 22) y a 1.11 todavía caen DOS. El techo
+  // no lo pone el gusto: lo pone el texto de capa del oscuro. Subir la
+  // superficie exige subir ANTES violetText/pinkDark y re-medir los 178
+  // — es una tanda propia con su gate, no un token. Revertido a 1.05.
+  'dark·superficie·bg.card/bg.base',
+  'dark·superficie·bg.elevated/bg.base',
   // VACÍO desde S82-B r5 (solo-baja EJECUTADO): los 5 del censo del
   // estreno CURARON por orden founder — capa.identidad/cuidado del tema
   // CLARO bajaron al primer escalón oscuro de su rampa (verdeVitalDark ·

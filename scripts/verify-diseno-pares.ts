@@ -64,7 +64,7 @@ function contraste(fgRaw: string, bgRaw: string, base: string): number {
 
 export interface ParMedido {
   tema: 'light' | 'dark'
-  clase: 'texto' | 'canto'
+  clase: 'texto' | 'canto' | 'superficie'
   nombre: string
   ratio: number
   minimo: number
@@ -79,6 +79,23 @@ for (const [tema, t] of Object.entries(temas) as ['light' | 'dark', typeof light
     pares.push({ tema, clase: 'texto', nombre, ratio: contraste(fg, bg, base), minimo: 4.5 })
   const canto = (nombre: string, fg: string, bg: string) =>
     pares.push({ tema, clase: 'canto', nombre, ratio: contraste(fg, bg, base), minimo: 3 })
+  // S82-B r19 — LA CLASE QUE FALTABA: SUPERFICIE contra FONDO. R12 medía
+  // texto/superficie y por eso pasaba con nota alta mientras la pieza
+  // desaparecía: una tarjeta con texto 16:1 sobre un fondo del que no se
+  // separa es invisible como PIEZA aunque su contenido se lea perfecto.
+  // Mínimo 1.25 (propuesto r19): no es umbral WCAG —no existe uno para
+  // esto— sino el punto medido donde el ojo separa sin que la superficie
+  // se lea gris (1.18 es el piso; >1.33 rompe la sobriedad del oscuro).
+  // EL MÍNIMO ES SOLO DEL OSCURO, y el porqué es físico: en claro la
+  // superficie tiene DOS canales (luminosidad y la sombra de tinta sobre
+  // papel, que SÍ se ve), y en oscuro tiene UNO — una sombra oscura sobre
+  // fondo oscuro no existe. En claro se mide informativo (mínimo 0) para
+  // que el número esté a la vista sin fabricar un rojo que la sombra ya
+  // resuelve.
+  const superficie = (nombre: string, sup: string, fondo: string) =>
+    pares.push({ tema, clase: 'superficie', nombre, ratio: contraste(sup, fondo, base), minimo: tema === 'dark' ? 1.25 : 0 })
+  superficie('bg.card/bg.base', t.bg.card, t.bg.base)
+  superficie('bg.elevated/bg.base', t.bg.elevated, t.bg.base)
 
   // TEXTO sobre sus superficies reales (primary/secondary — tertiary es
   // placeholder/decorativo, fuera de AA por la letra del gate S43).

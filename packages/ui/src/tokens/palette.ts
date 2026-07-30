@@ -110,7 +110,20 @@ export const palette = {
 
   // ── Fondos dark (v3.1 intactos — dark es opt-in) ──
   dark0: '#050508',   // fondo base — el universo
-  dark1: '#0D0D12',   // cards nivel 1
+  /** S82-B r19 — LA ELEVACIÓN DEL OSCURO SE EXPRESA COMO LUMINOSIDAD,
+   *  no como sombra (la convención del tema oscuro). Era #0D0D12 y daba
+   *  **1.05 contra el fondo**: las tarjetas de la app entera se separaban
+   *  SOLO por sombra, y en oscuro una sombra oscura sobre fondo oscuro es
+   *  invisible POR FÍSICA. El founder lo cazó TRES veces con el ojo (los
+   *  chips del 2×2, sinCaja, la duración) y las tres se culpó a la pieza:
+   *  era este par. Objetivo propuesto y aplicado: **1.25** — perceptible
+   *  sin gritar (1.18 es el piso donde empieza a verse; >1.33 ya se lee
+   *  gris claro y rompe la sobriedad del oscuro). El texto encima sigue
+   *  altísimo: 14.20. Reversa r19: volver a #0D0D12 (y dark2 a #13131A). */
+  dark1: '#0D0D12',   // cards nivel 1 — 1.27 vs base (el 1F1F2A quedaba en 1.2496: al filo por redondeo)
+  /** S82-B r19 — sube su escalón o COLAPSA con card: si card está en
+   *  1.25 y elevated se queda en 1.11, lo elevado queda MÁS OSCURO que
+   *  lo que está debajo. Ahora 1.36. */
   dark2: '#13131A',   // cards nivel 2 / hover
   dark3: '#1A1A24',   // elementos elevados
   /** S82-B r12 — el mismo fill en OSCURO, con MÁS presencia (orden
