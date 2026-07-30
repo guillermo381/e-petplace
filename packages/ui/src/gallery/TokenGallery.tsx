@@ -512,6 +512,53 @@ function PiezasFaltantes() {
   )
 }
 
+
+/** S82-B r21 — LAS TRES SALIDAS DEL OSCURO, sobre EL MISMO chip de
+ *  duración y lado a lado. Los dos lados del par están cerrados por
+ *  medición (r19: subir card rompe 6 pares AA · r20: bajar el fondo no
+ *  alcanza — el +0.05 de WCAG aplana el extremo oscuro), así que lo que
+ *  se compara acá NO es un valor: son tres MANERAS de que una superficie
+ *  exista en oscuro. */
+function TresSalidasOscuro() {
+  const { theme } = useTheme()
+  const chip = (extra: object) => (
+    <View style={{ height: 64, borderRadius: radius.suave, backgroundColor: theme.bg.card, alignItems: 'center', justifyContent: 'center', ...extra }}>
+      <Texto variante="cuerpo">60 min</Texto>
+      <Texto variante="dato">$12</Texto>
+    </View>
+  )
+  return (
+    <View style={{ gap: spacing[4], backgroundColor: theme.bg.base, padding: spacing[4], borderRadius: radius.md }}>
+      <View style={{ flexDirection: 'row', gap: spacing[3] }}>
+        <View style={{ flex: 1, gap: spacing[2] }}>{chip({})}<Texto variante="dato">(a) HOY · 1.05</Texto></View>
+        <View style={{ flex: 1, gap: spacing[2] }}>
+          {chip({ borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.14)' })}
+          <Texto variante="dato">(b) HALO · la masa sigue en 1.05</Texto>
+        </View>
+        <View style={{ flex: 1, gap: spacing[2] }}>
+          <View style={{ height: 64, alignItems: 'center', justifyContent: 'center' }}>
+            <Texto variante="cuerpo">60 min</Texto>
+            <Texto variante="dato">$12</Texto>
+          </View>
+          <Texto variante="dato">(c) SIN TARJETA</Texto>
+        </View>
+      </View>
+      <Texto variante="apoyo">
+        (a) LA REFERENCIA. Cuesta: nada. Toca: ninguna ley — y es el estado que el founder cazó tres veces con el ojo.
+      </Texto>
+      <Texto variante="apoyo">
+        (b) HALO — en oscuro la elevación se expresa como LUZ, no como sombra. Cuesta: una línea de 1px al 14% (rinde 2.09 contra el fondo: el ojo la ve, y es justo lo que la sombra no puede dar en oscuro). NO mueve el par superficie/fondo: separa por CONTORNO, no por masa, así que NO toca ni un texto ni los 178 pares. LA LEY QUE ROZA, declarada: A6 dice SIN CAJA y Ley 20 manda la sombra por token — un halo NO es caja (no rodea: es el borde superior donde pegaría la luz) y NO es sombra artesanal si nace como token de elevación oscura. Las dos cosas son de mesa, no las decido acá.
+      </Texto>
+      <Texto variante="apoyo">
+        (c) SIN TARJETA — si la aritmética no permite separar, quizá el oscuro no deba tener tarjetas y el agrupamiento lo haga el AIRE. Cuesta: la superficie desaparece como pieza y hay que re-componer con espaciado; el contenido no pierde nada (el texto ya vive sobre el fondo con 17.73). Toca: nada firmado — pero cambia la gramática del tema, y eso es decisión de producto, no de token.
+      </Texto>
+      <Texto variante="apoyo" color="danger">
+        LA CARA, para elegirla sabiendo que lo es: subir los textos de capa del oscuro (violetText/pinkDark) ANTES, después las superficies, y re-medir los 178 pares. Es una tanda propia con su gate.
+      </Texto>
+    </View>
+  )
+}
+
 function GateS82() {
   const TAPIZ = palette.papelTapiz
   return (
@@ -2165,6 +2212,10 @@ function GaleriaInterna() {
 
         {/* Lo rechazado NO se borra: se marca con su fecha de gate, para
             que se vea qué queda pendiente de curar (orden founder r16). */}
+        <Seccion titulo="⭐ GATE S82-B r21 — LA SEPARACIÓN DE SUPERFICIE EN OSCURO: tres salidas sobre el mismo chip (los dos lados del par están cerrados por medición)">
+          <ThemeProvider defaultMode="dark"><TresSalidasOscuro /></ThemeProvider>
+        </Seccion>
+
         <Seccion titulo="⛔ RECHAZADO EN GATE — vivo en el código, pendiente de curar">
           <LoRechazado />
         </Seccion>
