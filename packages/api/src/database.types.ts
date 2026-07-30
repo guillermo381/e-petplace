@@ -5569,6 +5569,89 @@ export type Database = {
           },
         ]
       }
+      evento_desparasitacion_aplicada: {
+        Row: {
+          archivo_url: string | null
+          country_code: string | null
+          created_at: string
+          empleado_id: string | null
+          evento_id: string | null
+          fecha_aplicada: string | null
+          fecha_proxima: string | null
+          id: string
+          lote: string | null
+          mascota_id: string
+          notas: string | null
+          prestador_id: string | null
+          producto: string
+          tipo_desparasitacion: string | null
+          updated_at: string
+        }
+        Insert: {
+          archivo_url?: string | null
+          country_code?: string | null
+          created_at?: string
+          empleado_id?: string | null
+          evento_id?: string | null
+          fecha_aplicada?: string | null
+          fecha_proxima?: string | null
+          id?: string
+          lote?: string | null
+          mascota_id: string
+          notas?: string | null
+          prestador_id?: string | null
+          producto: string
+          tipo_desparasitacion?: string | null
+          updated_at?: string
+        }
+        Update: {
+          archivo_url?: string | null
+          country_code?: string | null
+          created_at?: string
+          empleado_id?: string | null
+          evento_id?: string | null
+          fecha_aplicada?: string | null
+          fecha_proxima?: string | null
+          id?: string
+          lote?: string | null
+          mascota_id?: string
+          notas?: string | null
+          prestador_id?: string | null
+          producto?: string
+          tipo_desparasitacion?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evento_desparasitacion_aplicada_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: true
+            referencedRelation: "eventos_mascota"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_desparasitacion_aplicada_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_desparasitacion_aplicada_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_desparasitacion_aplicada_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       evento_emergencia_solicitada: {
         Row: {
           cita_resultante_id: string | null
@@ -9698,6 +9781,8 @@ export type Database = {
       mascota_perfil_vigente: {
         Row: {
           alergias: Json
+          alergias_ninguna_declarada_en: string | null
+          alergias_ninguna_declarada_por: string | null
           condiciones_cronicas: Json
           created_at: string
           identidad_personal: Json
@@ -9721,6 +9806,8 @@ export type Database = {
         }
         Insert: {
           alergias?: Json
+          alergias_ninguna_declarada_en?: string | null
+          alergias_ninguna_declarada_por?: string | null
           condiciones_cronicas?: Json
           created_at?: string
           identidad_personal?: Json
@@ -9744,6 +9831,8 @@ export type Database = {
         }
         Update: {
           alergias?: Json
+          alergias_ninguna_declarada_en?: string | null
+          alergias_ninguna_declarada_por?: string | null
           condiciones_cronicas?: Json
           created_at?: string
           identidad_personal?: Json
@@ -16714,6 +16803,10 @@ export type Database = {
         }
         Returns: Json
       }
+      declarar_sin_alergias_conocidas: {
+        Args: { p_mascota_id: string }
+        Returns: Json
+      }
       declarar_talla_pelaje: {
         Args: { p_mascota_id: string; p_pelaje: string; p_talla: string }
         Returns: Json
@@ -17429,6 +17522,17 @@ export type Database = {
         Args: { p_cita_id: string; p_medio: string; p_monto: number }
         Returns: string
       }
+      registrar_desparasitacion: {
+        Args: {
+          p_fecha_aplicada?: string
+          p_fecha_proxima?: string
+          p_mascota_id: string
+          p_notas?: string
+          p_producto: string
+          p_tipo?: string
+        }
+        Returns: Json
+      }
       registrar_discrepancia_talla_grooming: {
         Args: { p_cita_id: string; p_talla_observada: string }
         Returns: Json
@@ -17466,6 +17570,16 @@ export type Database = {
           p_alcanzado?: boolean
           p_nota?: string
           p_objetivo_codigo: string
+        }
+        Returns: Json
+      }
+      registrar_peso_mascota: {
+        Args: {
+          p_fecha?: string
+          p_mascota_id: string
+          p_metodo?: string
+          p_notas?: string
+          p_peso_kg: number
         }
         Returns: Json
       }

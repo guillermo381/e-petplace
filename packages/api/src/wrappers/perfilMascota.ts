@@ -52,6 +52,21 @@ export interface IdentidadMascota {
   foto_z: number;
 }
 
+/** S82 r4: la desparasitación del expediente (molde vacunas — el 2º tipo
+ *  fecha-sola, D-312). */
+export interface DesparasitacionDeMascota {
+  producto: string;
+  tipo: 'interna' | 'externa' | 'mixta' | null;
+  fecha_aplicada: string | null;
+  fecha_proxima: string | null;
+}
+
+/** S82 r4 — LA DISTINCIÓN del mandato: "sin registro" y "ninguna
+ *  conocida" son dos hechos clínicos DISTINTOS. Precedencia (declarada
+ *  en la migración 20260730011000): lista NO vacía GANA a la
+ *  declaración; la declaración GANA al silencio. */
+export type AlergiasEstado = 'sin_registro' | 'ninguna_conocida' | 'con_alergias';
+
 export interface PerfilMascota {
   mascota: IdentidadMascota;
   vacunas: VacunaDeMascota[];
@@ -62,6 +77,17 @@ export interface PerfilMascota {
   tiene_emergencia_activa: boolean;
   /** null honesto si el catálogo no trae umbrales parseables. */
   umbrales: UmbralesEspecie | null;
+  /** S82 r4 — los motores que el gate descubrió por ausencia: */
+  alergias_estado: AlergiasEstado;
+  /** el jsonb del snapshot tal cual (shape del sedimento clínico) —
+   *  solo cuando estado = con_alergias; [] en los otros dos. */
+  alergias_detalle: unknown[];
+  alergias_ninguna_declarada_en: string | null;
+  desparasitaciones: DesparasitacionDeMascota[];
+  /** Conteo VERDADERO server-side (count exact de
+   *  historia_clinica_registrada) — jamás desde páginas del timeline,
+   *  que subcuenta (hallazgo de C, S82). */
+  consultas_total: number;
 }
 
 // Guard de shape del jsonb del catálogo (L-124: contra el dato real,
@@ -94,7 +120,7 @@ export async function obtenerPerfilMascota(
   }
   const especie = mascota.data.especie;
 
-  const [vacunas, perfil, paseos, catalogo] = await Promise.all([
+  const [vacunas, perfil, paseos, catalogo, desparasitaciones, consultas] = await Promise.all([
     cliente
       .from('evento_vacuna_aplicada')
       .select('evento_id, nombre_vacuna, tipo_vacuna, fecha_aplicada, fecha_proxima')
@@ -102,7 +128,7 @@ export async function obtenerPerfilMascota(
       .order('fecha_aplicada', { ascending: false, nullsFirst: false }),
     cliente
       .from('mascota_perfil_vigente')
-      .select('peso_clinico_kg, condiciones_cronicas, tiene_emergencia_activa')
+      .select('peso_clinico_kg, condiciones_cronicas, tiene_emergencia_activa, alergias, alergias_ninguna_declarada_en')
       .eq('mascota_id', mascotaId)
       .maybeSingle(),
     cliente
@@ -118,13 +144,34 @@ export async function obtenerPerfilMascota(
       .select('momentos_vitales_jsonb')
       .eq('especie_codigo', especie)
       .maybeSingle(),
+    cliente
+      .from('evento_desparasitacion_aplicada')
+      .select('producto, tipo_desparasitacion, fecha_aplicada, fecha_proxima')
+      .eq('mascota_id', mascotaId)
+      .order('fecha_aplicada', { ascending: false, nullsFirst: false }),
+    // el conteo VERDADERO (hallazgo de C: contar páginas del timeline subcuenta)
+    cliente
+      .from('eventos_mascota')
+      .select('id', { count: 'exact', head: true })
+      .eq('mascota_id', mascotaId)
+      .eq('tipo', 'historia_clinica_registrada')
+      .eq('soft_delete', false),
   ]);
 
-  if (vacunas.error || perfil.error || paseos.error || catalogo.error) {
+  if (vacunas.error || perfil.error || paseos.error || catalogo.error || desparasitaciones.error || consultas.error) {
     return { ok: false, codigo: 'error_perfil', mensaje: MENSAJE_ERROR };
   }
 
   const condiciones = perfil.data?.condiciones_cronicas;
+
+  // S82 r4 — la PRECEDENCIA de alergias (declarada en la migración):
+  // lista no vacía GANA a la declaración; la declaración GANA al silencio.
+  const alergiasJson = perfil.data?.alergias;
+  const alergiasLista = Array.isArray(alergiasJson) ? alergiasJson : [];
+  const ningunaDeclaradaEn = perfil.data?.alergias_ninguna_declarada_en ?? null;
+  const alergiasEstado: AlergiasEstado =
+    alergiasLista.length > 0 ? 'con_alergias' : ningunaDeclaradaEn !== null ? 'ninguna_conocida' : 'sin_registro';
+
   return {
     ok: true,
     data: {
@@ -168,6 +215,19 @@ export async function obtenerPerfilMascota(
       tiene_condicion_cronica: Array.isArray(condiciones) && condiciones.length > 0,
       tiene_emergencia_activa: perfil.data?.tiene_emergencia_activa ?? false,
       umbrales: parsearUmbrales(catalogo.data?.momentos_vitales_jsonb ?? null),
+      alergias_estado: alergiasEstado,
+      alergias_detalle: alergiasEstado === 'con_alergias' ? alergiasLista : [],
+      alergias_ninguna_declarada_en: ningunaDeclaradaEn,
+      desparasitaciones: desparasitaciones.data.map((d) => ({
+        producto: d.producto,
+        tipo:
+          d.tipo_desparasitacion === 'interna' || d.tipo_desparasitacion === 'externa' || d.tipo_desparasitacion === 'mixta'
+            ? d.tipo_desparasitacion
+            : null,
+        fecha_aplicada: d.fecha_aplicada,
+        fecha_proxima: d.fecha_proxima,
+      })),
+      consultas_total: consultas.count ?? 0,
     },
   };
 }

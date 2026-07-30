@@ -144,9 +144,11 @@ async function _timeline(
       fotos_count: fotosPorEvento.get(e.id) ?? 0,
       vacuna_nombre: vacuna,
       // La vacuna es fecha-sola POR TIPO (el carnet registra días, no
-      // momentos). Si nace otro tipo fecha-sola, la precisión pasa al
-      // modelo (eventos_mascota) — D-312.
-      fecha_sola: e.tipo === 'vacuna_aplicada',
+      // momentos). S82 r4: nació el SEGUNDO tipo fecha-sola
+      // (desparasitación) — EL DISPARO DE D-312 SONÓ: llevar la
+      // precisión al modelo (eventos_mascota) queda declarado en la
+      // deuda; mientras, el set vive acá, en la puerta única.
+      fecha_sola: e.tipo === 'vacuna_aplicada' || e.tipo === 'desparasitacion_aplicada',
     };
   });
 

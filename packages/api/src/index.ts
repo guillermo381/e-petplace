@@ -182,7 +182,20 @@ export {
   type CodigoErrorFotoMascota,
   type EncuadreFotoDeclarado,
 } from './wrappers/perfilMascota';
-export type { IdentidadMascota } from './wrappers/perfilMascota';
+export type { IdentidadMascota, AlergiasEstado, DesparasitacionDeMascota } from './wrappers/perfilMascota';
+
+// Salud del expediente — S82 r4: los productores del dueño (los tres
+// motores del gate) + el lector de la serie de peso
+export {
+  registrarDesparasitacion,
+  declararSinAlergiasConocidas,
+  registrarPesoMascota,
+  obtenerHistoriaPeso,
+  type CodigoErrorSalud,
+  type TipoDesparasitacion,
+  type MetodoPeso,
+  type PesoDeLaSerie,
+} from './wrappers/salud';
 
 // Config del país — S51-B2.4 (Explorar por country_config)
 export { obtenerServiciosPais, type ServiciosPais } from './wrappers/paisConfig';
