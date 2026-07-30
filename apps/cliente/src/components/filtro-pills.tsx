@@ -72,99 +72,42 @@ export type OpcionFiltro<C extends string> = {
   capa?: 'identidad' | 'cuidado' | null;
 };
 
-/** r17 · CÓMO SE MARCA EL ELEGIDO EN UN EJE SIN CATEGORÍA. Las dos
- *  candidatas del founder, montadas para que elija MIRANDO:
- *   'linea'  = (a) placa del glifo en TINTA + LA LÍNEA QUE VIAJA.
- *   'huella' = (b) LA HUELLA marca el elegido — se marca por FORMA, sin
- *              pedirle prestado un color a una categoría que no existe. */
-export type MarcaFiltro = 'linea' | 'huella';
-
-// La física de la línea, LEÍDA de `filtro-oficio.tsx` del prestador
-// (S80-B15, firmada por el founder) — no se re-calibra: si las dos apps
-// mueven la misma línea, la mueven igual.
-const FISICA = { duration: motion.duration.fast, easing: Easing.bezier(0.32, 0.72, 0, 1) };
-
 export function FiltroPills<C extends string>({
   opciones,
   activo,
   onCambio,
-  marca = 'linea',
 }: {
   opciones: OpcionFiltro<C>[];
   activo: C;
   onCambio: (c: C) => void;
-  marca?: MarcaFiltro;
 }) {
   const { theme } = useTheme();
-  const esMemorial = theme.mode === 'memorial';
-
-  // ── (a) LA LÍNEA VIAJERA — mismo mecanismo que el prestador: posición
-  //    y ancho por onLayout de cada chip; el PRIMER posicionamiento no
-  //    viaja (no hay origen que mostrar) y memorial no viaja nunca (Ley 8).
-  const [marcos, setMarcos] = useState<Record<string, { x: number; ancho: number }>>({});
-  const lineaX = useSharedValue(0);
-  const lineaAncho = useSharedValue(0);
-  useEffect(() => {
-    const m = marcos[activo];
-    if (!m) return;
-    if (lineaAncho.value === 0 || esMemorial) {
-      lineaX.value = m.x;
-      lineaAncho.value = m.ancho;
-      return;
-    }
-    lineaX.value = withTiming(m.x, FISICA);
-    lineaAncho.value = withTiming(m.ancho, FISICA);
-  }, [activo, marcos, esMemorial, lineaX, lineaAncho]);
-  const estiloLinea = useAnimatedStyle(() => ({
-    transform: [{ translateX: lineaX.value }],
-    width: lineaAncho.value,
-  }));
-  const opcionActiva = opciones.find((o) => o.codigo === activo);
-  const colorLinea =
-    opcionActiva?.capa === 'identidad'
-      ? theme.capa.identidad
-      : opcionActiva?.capa === 'cuidado'
-        ? theme.capa.cuidado
-        : theme.text.primary;
 
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{
-        gap: spacing[2.5],
-        paddingHorizontal: spacing[4],
-        paddingVertical: spacing[1],
-        ...(marca === 'linea' ? { paddingBottom: spacing[2] } : null),
-      }}
+      contentContainerStyle={{ gap: spacing[2.5], paddingHorizontal: spacing[4], paddingVertical: spacing[1] }}
     >
       {opciones.map((o) => {
         const elegido = o.codigo === activo;
         const colorPlaca =
           o.capa === 'identidad' ? theme.capa.identidad : o.capa === 'cuidado' ? theme.capa.cuidado : theme.text.primary;
         const tintaGlifo = elegido ? theme.bg.card : theme.text.secondary;
-        // r14-2 · LA HILERA SIN GLIFO TAMBIÉN MARCA. El founder lo
-        // diagnosticó exacto — "sin glifo no hay placa que rellenar" —
-        // y sin placa el elegido solo cambiaba el gris del label por
-        // tinta: no marcaba. La marca pasa AL CHIP: se rellena entero
-        // con el color y el label invierte.
-        // ⚠️ LA REGLA VIVE ACÁ, COMPUTADA, no en la cabeza de cada
-        // pantalla (mismo criterio que L-b en FiltroMascotas): el
-        // relleno pleno solo entra con 3 hermanos o menos. Una hilera
-        // sin glifo de 4+ es barrido y cae a elevación + label pleno.
-        const sinGlifo = o.icono === null;
-        const pleno = elegido && sinGlifo && opciones.length <= 3;
+        // ☠️ r18 · EL RELLENO PLENO DEL CHIP MURIÓ CON (a). Nació en
+        // r14-2 como SUSTITUTO: la hilera sin glifo no tenía placa que
+        // rellenar, así que se rellenaba el chip entero. Ahora existe una
+        // marca que no depende del glifo —la huella— y el sustituto
+        // sobra: dos marcas para un mismo estado es el tercer peso que
+        // no informa (Ley 18 + Chanel). Y es el ARGUMENTO DEL FOUNDER
+        // aplicado hasta el final: rellenar el chip en tinta también era
+        // pedirle prestado un color a un eje que no tiene categoría.
+        // Con esto se va también la cuenta de L-b de esta hilera: sin
+        // relleno no hay dosis que acotar. (En FiltroMascotas sigue
+        // rigiendo — ahí el pleno está firmado y es de ENTIDADES.)
         return (
           <Pressable
             key={o.codigo}
-            onLayout={(e) => {
-              const { x, width } = e.nativeEvent.layout;
-              setMarcos((prev) =>
-                prev[o.codigo]?.x === x && prev[o.codigo]?.ancho === width
-                  ? prev
-                  : { ...prev, [o.codigo]: { x, ancho: width } },
-              );
-            }}
             onPress={() => onCambio(o.codigo)}
             accessibilityRole="radio"
             accessibilityState={{ selected: elegido }}
@@ -172,8 +115,8 @@ export function FiltroPills<C extends string>({
             style={{
               height: 44,
               borderRadius: radius.full,
-              backgroundColor: pleno ? colorPlaca : theme.bg.card,
-              boxShadow: elegido && sinGlifo ? theme.elevacion.elevada : theme.elevacion.reposo,
+              backgroundColor: theme.bg.card,
+              boxShadow: elegido ? theme.elevacion.elevada : theme.elevacion.reposo,
               flexDirection: 'row',
               alignItems: 'center',
               gap: spacing[2],
@@ -201,69 +144,34 @@ export function FiltroPills<C extends string>({
                 )}
               </View>
             ) : null}
-            {pleno ? (
-              // ⚠️ r17-2 · EL LABEL SOBRE EL RELLENO — acá estaba el chip
-              // invisible en oscuro, y NO era un negro hardcodeado (la
-              // sospecha, honestamente descartada): el relleno YA sale de
-              // `text.primary`, que es tinta POR TEMA y hace lo correcto.
-              // El que mentía era el LABEL: `text.onGradient` es blanco en
-              // claro Y en oscuro a propósito —es el color para texto
-              // sobre el gradiente de marca, violeta en los dos temas—,
-              // así que en oscuro quedaba blanco sobre tinta clara.
-              // MEDIDO, y muerde en DOS temas, no en uno:
-              //   claro    relleno #1D1A2E · label blanco = 16.94 ✓
-              //   oscuro   relleno #F0EEF8 · label blanco =  1.15 ✗
-              //   memorial relleno #E8DCC8 · label crema  =  1.31 ✗
-              // El inverso de la tinta es el PAPEL de la casa: `bg.base`
-              // da 15.40 / 17.73 / 14.35 en los tres. Un token, tres temas.
-              <Text
-                style={{
-                  fontFamily: typography.family.sans.medium,
-                  fontSize: typography.size.sm,
-                  color: theme.bg.base,
-                }}
-              >
-                {o.etiqueta}
-              </Text>
-            ) : (
-              <Texto variante="apoyo" color={elegido ? 'primary' : 'secondary'}>
-                {o.etiqueta}
-              </Texto>
-            )}
+            {/* ⚠️ EL LABEL — la nota del chip invisible en oscuro se
+                CONSERVA aunque el relleno haya muerto, porque su lección
+                sobrevive al código: NO era un negro hardcodeado (sospecha
+                del founder, descartada midiendo). El relleno salía bien de
+                `text.primary` (tinta POR TEMA); el que mentía era el label
+                con `text.onGradient`, blanco en claro Y en oscuro a
+                propósito — es el color para texto sobre el gradiente de
+                marca. Medido en los tres: claro 16.94 ✓ · oscuro 1.15 ✗ ·
+                memorial 1.31 ✗. Si algún día vuelve un relleno de chip, el
+                label va en `bg.base` (15.40 / 17.73 / 14.35), jamás en
+                onGradient. */}
+            <Texto variante="apoyo" color={elegido ? 'primary' : 'secondary'}>
+              {o.etiqueta}
+            </Texto>
             {/* (b) LA HUELLA COMO MARCA DE ELECCIÓN — se AGREGA, no
                 reemplaza: el eje de SERVICIO ya lleva glifo de categoría
                 en su placa y ese glifo es IDENTIDAD, no estado. Verificado
                 el roce que el founder pidió mirar: la huella entra a la
                 DERECHA del label, fuera de la placa, así que a 44 de alto
                 no se pelea con el glifo — comparten la fila, no el lugar. */}
-            {marca === 'huella' && elegido ? (
+            {elegido ? (
               <Svg width={13} height={13} viewBox="0 0 24 24">
-                <Huella color={pleno ? theme.bg.base : theme.text.primary} escala={0.9} x={1.2} y={1.2} />
+                <Huella color={theme.text.primary} escala={0.9} x={1.2} y={1.2} />
               </Svg>
             ) : null}
           </Pressable>
         );
       })}
-      {/* (a) LA LÍNEA QUE VIAJA — al PIE de la hilera, del ancho del chip
-          elegido. Cumple §9.6 por construcción: se ve de dónde viene y a
-          dónde llega. En un eje sin categoría el color es TINTA; el eje de
-          servicio conserva el de su capa. Memorial no viaja (Ley 8). */}
-      {marca === 'linea' ? (
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            {
-              position: 'absolute',
-              left: 0,
-              bottom: 0,
-              height: 2,
-              borderRadius: 999,
-              backgroundColor: colorLinea,
-            },
-            estiloLinea,
-          ]}
-        />
-      ) : null}
     </ScrollView>
   );
 }
@@ -336,7 +244,13 @@ export function FiltroMascotas({
 
   const colorLabel = (activo: boolean) => {
     if (!activo) return theme.text.primary;
-    return esBarrido ? theme.accent.control : theme.text.onGradient;
+    // S82-B r22 — el token POR ROL: el fondo de acá es el magenta de
+    // control (accent.control / controlLleno), NO el gradiente de marca.
+    // Funcionaba por COINCIDENCIA DE VALOR (onGradient resuelve a blanco
+    // y el magenta es oscuro), jamás por contrato. `sobreControlLleno` no
+    // vive en memorial a propósito (ahí el chip degrada), de ahí el
+    // narrowing con su fallback.
+    return esBarrido ? theme.accent.control : ('sobreControlLleno' in theme.accent ? (theme.accent as { sobreControlLleno: string }).sobreControlLleno : theme.text.onGradient);
   };
 
   return (

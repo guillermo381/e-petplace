@@ -458,45 +458,22 @@ export default function MisPaseos() {
               SelectorSegmentado cede a FiltroPills porque acá el eje
               convive con otros dos de la misma familia; la gramática
               de la pantalla manda sobre la del control suelto). */}
-          {/* ⚠️ r17-1 · EL EJE DE ESTADO PIERDE EL COLOR DE CAPA, y no es
-              ajuste: es una corrección de SIGNIFICADO. Próximos/historial
-              es ESTADO, no categoría — le estaba pidiendo prestado el
-              verde de `cuidado`, que es el color de una CLASE DE SERVICIO
-              (Ley 10). Solo el eje de servicio tiene categorías, así que
-              solo ese eje lleva su color; los demás se marcan en TINTA.
-              🔬 ANDAMIO DE GATE (muere con la firma, Ley 37 — precedente
-              del SwitchGate de r9): las DOS candidatas montadas sobre el
-              MISMO eje para elegir mirando. Comparten estado: tocar una
-              mueve la otra, así que se juzga el mismo cambio dos veces. */}
-          <View style={{ gap: spacing[1] }}>
-            <View style={{ paddingHorizontal: spacing[0.5] }}>
-              <Texto variante="dato">{'(a) línea viajera'}</Texto>
-            </View>
-            <View style={{ marginHorizontal: -spacing[4] }}>
-              <FiltroPills
-                marca="linea"
-                activo={segmento}
-                onCambio={(c) => setSegmento(c)}
-                opciones={[
-                  { codigo: 'proximos' as Segmento, etiqueta: t('plan.segProximos'), icono: 'hoy', capa: null },
-                  { codigo: 'historial' as Segmento, etiqueta: t('plan.segHistorial'), icono: 'paseo', capa: null },
-                ]}
-              />
-            </View>
-            <View style={{ paddingHorizontal: spacing[0.5], marginTop: spacing[2] }}>
-              <Texto variante="dato">{'(b) la huella marca'}</Texto>
-            </View>
-            <View style={{ marginHorizontal: -spacing[4] }}>
-              <FiltroPills
-                marca="huella"
-                activo={segmento}
-                onCambio={(c) => setSegmento(c)}
-                opciones={[
-                  { codigo: 'proximos' as Segmento, etiqueta: t('plan.segProximos'), icono: 'hoy', capa: null },
-                  { codigo: 'historial' as Segmento, etiqueta: t('plan.segHistorial'), icono: 'paseo', capa: null },
-                ]}
-              />
-            </View>
+          {/* ✅ r18 · FIRMADO: LA HUELLA MARCA EL ELEGIDO. El andamio de
+              las dos candidatas murió con el gate (Ley 37 — precedente
+              del SwitchGate de r9: era andamio y el gate ya pasó).
+              Y el eje conserva su corrección de r17: próximos/historial
+              es ESTADO, no categoría — `capa: null`, porque el color de
+              capa es de una CLASE DE SERVICIO (Ley 10) y este eje no
+              tiene ninguna. Solo el eje de servicio lleva su color. */}
+          <View style={{ marginHorizontal: -spacing[4] }}>
+            <FiltroPills
+              activo={segmento}
+              onCambio={(c) => setSegmento(c)}
+              opciones={[
+                { codigo: 'proximos' as Segmento, etiqueta: t('plan.segProximos'), icono: 'hoy', capa: null },
+                { codigo: 'historial' as Segmento, etiqueta: t('plan.segHistorial'), icono: 'paseo', capa: null },
+              ]}
+            />
           </View>
 
           {/* ③ la FECHA — SOLO EN HISTORIAL. En próximos no parte los
