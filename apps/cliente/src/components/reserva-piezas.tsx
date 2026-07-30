@@ -451,7 +451,17 @@ export function GrillaElegir({
   // iguales SIEMPRE, y la fila incompleta queda alineada con las de
   // arriba en vez de deformarse.
   const gap = spacing[2];
-  const celda = ancho > 0 ? (ancho - gap * (COLUMNAS - 1)) / COLUMNAS : 0;
+  // 🔴 r17-3 · LA CUENTA ERA EXACTA Y POR ESO FALLABA. `(ancho - gaps)/4`
+  // da un decimal (p.ej. 95.909…) cuyos cuatro anchos + tres gaps suman
+  // EXACTAMENTE el contenedor en aritmética real — pero Yoga redondea
+  // cada hijo a la grilla de píxeles del dispositivo, y basta que UNO
+  // redondee hacia arriba para que la fila no entre y el cuarto chip
+  // baje. Se ven tres y sobra hueco a la derecha, que es lo que el
+  // founder vio. El diagnóstico que traía la orden ("divide contra un
+  // ancho fijo") no era el caso — el reparto sí usa el ancho real; lo
+  // que faltaba era CEDER EL RESTO: piso entero, y el sobrante (menos
+  // de 4 px) queda al final en vez de romper la fila.
+  const celda = ancho > 0 ? Math.floor((ancho - gap * (COLUMNAS - 1)) / COLUMNAS) : 0;
   return (
     // el padding vive AFUERA y la medición ADENTRO: `layout.width` de una
     // View con padding devuelve el ancho CON el padding, y restarlo a mano

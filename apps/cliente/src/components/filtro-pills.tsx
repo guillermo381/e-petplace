@@ -45,13 +45,16 @@
  * puerta principal — la placa.
  */
 
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import Svg from 'react-native-svg';
 import {
   AvatarMascota,
   Huella,
   Icono,
   Texto,
+  motion,
   radius,
   spacing,
   typography,
@@ -69,21 +72,71 @@ export type OpcionFiltro<C extends string> = {
   capa?: 'identidad' | 'cuidado' | null;
 };
 
+/** r17 · CÓMO SE MARCA EL ELEGIDO EN UN EJE SIN CATEGORÍA. Las dos
+ *  candidatas del founder, montadas para que elija MIRANDO:
+ *   'linea'  = (a) placa del glifo en TINTA + LA LÍNEA QUE VIAJA.
+ *   'huella' = (b) LA HUELLA marca el elegido — se marca por FORMA, sin
+ *              pedirle prestado un color a una categoría que no existe. */
+export type MarcaFiltro = 'linea' | 'huella';
+
+// La física de la línea, LEÍDA de `filtro-oficio.tsx` del prestador
+// (S80-B15, firmada por el founder) — no se re-calibra: si las dos apps
+// mueven la misma línea, la mueven igual.
+const FISICA = { duration: motion.duration.fast, easing: Easing.bezier(0.32, 0.72, 0, 1) };
+
 export function FiltroPills<C extends string>({
   opciones,
   activo,
   onCambio,
+  marca = 'linea',
 }: {
   opciones: OpcionFiltro<C>[];
   activo: C;
   onCambio: (c: C) => void;
+  marca?: MarcaFiltro;
 }) {
   const { theme } = useTheme();
+  const esMemorial = theme.mode === 'memorial';
+
+  // ── (a) LA LÍNEA VIAJERA — mismo mecanismo que el prestador: posición
+  //    y ancho por onLayout de cada chip; el PRIMER posicionamiento no
+  //    viaja (no hay origen que mostrar) y memorial no viaja nunca (Ley 8).
+  const [marcos, setMarcos] = useState<Record<string, { x: number; ancho: number }>>({});
+  const lineaX = useSharedValue(0);
+  const lineaAncho = useSharedValue(0);
+  useEffect(() => {
+    const m = marcos[activo];
+    if (!m) return;
+    if (lineaAncho.value === 0 || esMemorial) {
+      lineaX.value = m.x;
+      lineaAncho.value = m.ancho;
+      return;
+    }
+    lineaX.value = withTiming(m.x, FISICA);
+    lineaAncho.value = withTiming(m.ancho, FISICA);
+  }, [activo, marcos, esMemorial, lineaX, lineaAncho]);
+  const estiloLinea = useAnimatedStyle(() => ({
+    transform: [{ translateX: lineaX.value }],
+    width: lineaAncho.value,
+  }));
+  const opcionActiva = opciones.find((o) => o.codigo === activo);
+  const colorLinea =
+    opcionActiva?.capa === 'identidad'
+      ? theme.capa.identidad
+      : opcionActiva?.capa === 'cuidado'
+        ? theme.capa.cuidado
+        : theme.text.primary;
+
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ gap: spacing[2.5], paddingHorizontal: spacing[4], paddingVertical: spacing[1] }}
+      contentContainerStyle={{
+        gap: spacing[2.5],
+        paddingHorizontal: spacing[4],
+        paddingVertical: spacing[1],
+        ...(marca === 'linea' ? { paddingBottom: spacing[2] } : null),
+      }}
     >
       {opciones.map((o) => {
         const elegido = o.codigo === activo;
@@ -104,6 +157,14 @@ export function FiltroPills<C extends string>({
         return (
           <Pressable
             key={o.codigo}
+            onLayout={(e) => {
+              const { x, width } = e.nativeEvent.layout;
+              setMarcos((prev) =>
+                prev[o.codigo]?.x === x && prev[o.codigo]?.ancho === width
+                  ? prev
+                  : { ...prev, [o.codigo]: { x, ancho: width } },
+              );
+            }}
             onPress={() => onCambio(o.codigo)}
             accessibilityRole="radio"
             accessibilityState={{ selected: elegido }}
@@ -141,13 +202,25 @@ export function FiltroPills<C extends string>({
               </View>
             ) : null}
             {pleno ? (
-              // el label INVIERTE sobre el relleno — mismo token que el
-              // chip pleno de mascota, que es su vecino en la pantalla
+              // ⚠️ r17-2 · EL LABEL SOBRE EL RELLENO — acá estaba el chip
+              // invisible en oscuro, y NO era un negro hardcodeado (la
+              // sospecha, honestamente descartada): el relleno YA sale de
+              // `text.primary`, que es tinta POR TEMA y hace lo correcto.
+              // El que mentía era el LABEL: `text.onGradient` es blanco en
+              // claro Y en oscuro a propósito —es el color para texto
+              // sobre el gradiente de marca, violeta en los dos temas—,
+              // así que en oscuro quedaba blanco sobre tinta clara.
+              // MEDIDO, y muerde en DOS temas, no en uno:
+              //   claro    relleno #1D1A2E · label blanco = 16.94 ✓
+              //   oscuro   relleno #F0EEF8 · label blanco =  1.15 ✗
+              //   memorial relleno #E8DCC8 · label crema  =  1.31 ✗
+              // El inverso de la tinta es el PAPEL de la casa: `bg.base`
+              // da 15.40 / 17.73 / 14.35 en los tres. Un token, tres temas.
               <Text
                 style={{
                   fontFamily: typography.family.sans.medium,
                   fontSize: typography.size.sm,
-                  color: theme.text.onGradient,
+                  color: theme.bg.base,
                 }}
               >
                 {o.etiqueta}
@@ -157,9 +230,40 @@ export function FiltroPills<C extends string>({
                 {o.etiqueta}
               </Texto>
             )}
+            {/* (b) LA HUELLA COMO MARCA DE ELECCIÓN — se AGREGA, no
+                reemplaza: el eje de SERVICIO ya lleva glifo de categoría
+                en su placa y ese glifo es IDENTIDAD, no estado. Verificado
+                el roce que el founder pidió mirar: la huella entra a la
+                DERECHA del label, fuera de la placa, así que a 44 de alto
+                no se pelea con el glifo — comparten la fila, no el lugar. */}
+            {marca === 'huella' && elegido ? (
+              <Svg width={13} height={13} viewBox="0 0 24 24">
+                <Huella color={pleno ? theme.bg.base : theme.text.primary} escala={0.9} x={1.2} y={1.2} />
+              </Svg>
+            ) : null}
           </Pressable>
         );
       })}
+      {/* (a) LA LÍNEA QUE VIAJA — al PIE de la hilera, del ancho del chip
+          elegido. Cumple §9.6 por construcción: se ve de dónde viene y a
+          dónde llega. En un eje sin categoría el color es TINTA; el eje de
+          servicio conserva el de su capa. Memorial no viaja (Ley 8). */}
+      {marca === 'linea' ? (
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            {
+              position: 'absolute',
+              left: 0,
+              bottom: 0,
+              height: 2,
+              borderRadius: 999,
+              backgroundColor: colorLinea,
+            },
+            estiloLinea,
+          ]}
+        />
+      ) : null}
     </ScrollView>
   );
 }
