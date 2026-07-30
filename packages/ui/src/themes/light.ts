@@ -61,6 +61,11 @@ export const lightTheme = {
     // por `getTheme` — las dos garantías viven en la fuente.
     cta:           palette.ctaOro as string,
     ctaTexto:      palette.textLight0 as string,
+    /** S82-B — ¿el CTA lleva ELEVACIÓN? el oro NO se recorta contra papel (1.55): su canal es la superficie apoyada
+     *  Es SLOT y no prop: la pantalla no elige, y el prestador lo pisa en
+     *  `lightOficio`/`darkOficio` (su teal no tiene el problema del oro
+     *  contra papel — meterle relieve sería ARRASTRE). */
+    ctaElevado:    true as boolean,
     primary:       palette.tealDark,
     primaryBg:     palette.tealAlpha16,     // B2.1: tint sobre el hex puro
     primaryBorder: palette.tealBorderL,

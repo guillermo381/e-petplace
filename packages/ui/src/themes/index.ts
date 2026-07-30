@@ -27,11 +27,13 @@ const lightOficio: Theme = {
   // EXIGE esta línea mientras `papelTapiz !== light0` — su rojo fue
   // producido antes de escribirla (exit 1, r9).
   bg: { ...lightTheme.bg, base: palette.light0 },
-  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0 },
+  // S82-B: el prestador NO recibe la elevación del CTA (su teal no
+  // tiene el problema del oro contra papel — sería arrastre).
+  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false },
 }
 const darkOficio: Theme = {
   ...darkTheme,
-  accent: { ...darkTheme.accent, cta: palette.tealDark, ctaTexto: palette.textDark0 },
+  accent: { ...darkTheme.accent, cta: palette.tealDark, ctaTexto: palette.textDark0, ctaElevado: false },
 }
 
 /** El default del producto es CLARO (B1 §7.3). Dark es opt-in. Memorial es automático (M6). */

@@ -201,6 +201,14 @@ export function Boton({
     // superficie apoyada. En memorial y dark la elevación es contacto
     // mínimo por diseño, y ahí manda el tono del slot.
     ...(varianteEfectiva === 'sinCaja' ? { boxShadow: theme.elevacion.reposo } : null),
+    // S82-B — LA ELEVACIÓN DEL CTA, por SLOT y solo donde hace falta: el
+    // oro del cliente da 1.55 contra papel y no se recorta por color, así
+    // que su canal es la superficie apoyada (la cura de `sinCaja`). El
+    // prestador NO la recibe: su teal no tiene ese problema y el tema de
+    // oficio pisa el slot en false — meterla a las dos apps sería arrastre.
+    ...(varianteEfectiva === 'primario' && 'ctaElevado' in theme.accent && theme.accent.ctaElevado
+      ? { boxShadow: theme.elevacion.reposo }
+      : null),
     ...(c.borde ? { borderWidth: theme.border.width, borderColor: c.borde } : null),
     ...(bloque ? { alignSelf: 'stretch' as const } : { alignSelf: 'flex-start' as const }),
   }

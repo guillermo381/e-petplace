@@ -39,6 +39,11 @@ export const darkTheme = {
     // por `getTheme` — las dos garantías viven en la fuente.
     cta:           palette.ctaOro as string,
     ctaTexto:      palette.textLight0 as string,
+    /** S82-B — ¿el CTA lleva ELEVACIÓN? coherencia de anatomía entre temas del cliente (en oscuro el color ya separa: 11.97)
+     *  Es SLOT y no prop: la pantalla no elige, y el prestador lo pisa en
+     *  `lightOficio`/`darkOficio` (su teal no tiene el problema del oro
+     *  contra papel — meterle relieve sería ARRASTRE). */
+    ctaElevado:    true as boolean,
     primary:       palette.teal,
     primaryBg:     palette.tealAlpha15,
     primaryBorder: palette.tealBorder,

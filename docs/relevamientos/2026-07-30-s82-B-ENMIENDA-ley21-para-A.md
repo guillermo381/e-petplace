@@ -42,3 +42,20 @@ las Hojas de decisión. **Prestador: CERO.**
 
 `accent.cta` a `palette.textLight0` en claro y `palette.textDark0` en
 oscuro, con sus `ctaTexto` respectivos.
+
+## Addendum — LA ELEVACIÓN DEL CTA (firma aparte del founder, misma sesión)
+
+**SÍ, y SOLO en el cliente.** El slot lo permitió sin contrabando: nace
+`accent.ctaElevado` y los temas de OFICIO lo pisan a `false`
+(`lightOficio`/`darkOficio`), exactamente el mismo patrón con el que el
+prestador se quedó fuera del papel tapiz. **Memorial: false** — memorial no
+se celebra, su CTA es tinta plana sin relieve.
+
+**El argumento que la separó es del propio founder:** el prestador usa la
+misma variante con su teal y **su CTA no tiene el problema del oro contra
+papel** (1.55) — meterle relieve habría sido arrastre.
+
+Es SLOT y no prop: la pantalla no elige, y no se puede romper desde una
+superficie. El `tsc` volvió a cazar lo mismo que con `bg.base` (el tipo
+deriva del literal, así que `true` no aceptaba el override `false`) — curado
+con el mismo `as boolean` y por la misma razón.
