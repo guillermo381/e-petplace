@@ -348,152 +348,208 @@ function EjemploFichaVacuna() {
  *  isotipo en sus dos alfas vivos, los dos glifos de control a 21px y la
  *  variante `voz`. El valor NO está decidido — esta lámina existe para
  *  que el ojo elija (regla 80: la ley después del resultado firmado). */
-function LaminaGateTapiz() {
-  // (el tema lo consume MarcaDeAgua adentro — la lámina no lo necesita)
-  const CANDIDATOS = [
-    { etiqueta: 'papel (hoy)', valor: palette.light0 },
-    ...palette.papelTapizCandidatos.map((c) => ({ etiqueta: c.etiqueta, valor: c.valor })),
-  ]
-  const [i, setI] = useState(1) // arranca en 2% para que el switch se note
-  const fondo = CANDIDATOS[i].valor
-  // S82-B r10: el alfa quedó UNIFICADO en 0.06 (el FIRMADO del Hogar; el
-  // perfil sube, jamás baja lo firmado — corrección del founder). Lo que
-  // el gate compara ahora son LAS DOS ANATOMÍAS del agua, porque de eso
-  // depende cuál lectura de la Ley 4 aplica: COMPLETA (silueta cerrada =
-  // es un isotipo ⇒ lectura A, hace falta enmienda) vs SANGRADA (cortada
-  // por los cuatro bordes = textura ⇒ lectura B, la ley queda intacta).
-  const ANATOMIAS = [
-    { sangrada: false, voz: 'COMPLETA (210 centrado, la calibración de la lámina) — silueta CERRADA: se lee isotipo ⇒ Ley 4 muerde, hace falta enmienda' },
-    { sangrada: true, voz: 'SANGRADA (150% del ancho) — cortada por los cuatro bordes: se lee TEXTURA ⇒ Ley 4 intacta, cero enmienda' },
-  ]
+/** ══════════════════════════════════════════════════════════════════
+ *  GATE S82 — LA GALERÍA PARA DECIDIR, no para catalogar (orden founder
+ *  r13). Cada decisión abierta trae: (a) los candidatos LADO A LADO —
+ *  jamás en secuencia, porque un color no se elige de memoria —, (b) el
+ *  FONDO REAL del cliente (el tapiz; y el degradado del techo donde
+ *  importa, porque ahí el ocre pierde: 3.11 medido), (c) su par de
+ *  texto, que es la restricción que manda, y (d) UNA LÍNEA QUE DICE QUÉ
+ *  DECIDE esa elección — la consecuencia en la ley, no el nombre del
+ *  candidato.
+ *  ══════════════════════════════════════════════════════════════════ */
 
+/** Encabezado de decisión: el número, el asunto y la CONSECUENCIA. */
+function Decision({ n, asunto, decide, children }: { n: string; asunto: string; decide: string; children: React.ReactNode }) {
+  const { theme } = useTheme()
   return (
-    <View style={{ gap: spacing[4] }}>
-      {/* SelectorOpcion y NO SelectorSegmentado: cinco candidatos es
-          elegir un VALOR, no cambiar de vista (Ley 19.3 acota el
-          segmento a 2-3 vistas exclusivas y su propio dev-warn lo
-          dice). Los candidatos SE FIJAN → contorno por 7bis. */}
-      <SelectorOpcion
-        etiqueta="Candidato de papel tapiz"
-        disposicion="tira"
-        acento="control"
-        opciones={CANDIDATOS.map((c, k) => ({ codigo: String(k), etiqueta: c.etiqueta }))}
-        seleccionada={String(i)}
-        onSelect={(c) => setI(Number(c))}
-      />
-      <Texto variante="dato">
-        {`fondo ${fondo}${i === 0 ? ' · sin tinte' : ` · pink ${CANDIDATOS[i].etiqueta} sobre papel algodón`}`}
-      </Texto>
+    <View style={{ gap: spacing[3], paddingTop: spacing[4] }}>
+      <View style={{ gap: spacing[1] }}>
+        <Texto variante="seccion">{`${n} · ${asunto}`}</Texto>
+        {/* QUÉ DECIDE — en danger a propósito: no es descripción, es la
+            consecuencia de firmar. */}
+        <Texto variante="apoyo" color="danger">{decide}</Texto>
+      </View>
+      {children}
+      <View style={{ height: 1, backgroundColor: theme.border.default }} />
+    </View>
+  )
+}
 
-      {/* El panel a sangre con el agua detrás y contenido real encima */}
-      {ANATOMIAS.map((a) => (
-        <View key={String(a.sangrada)} style={{ gap: spacing[2] }}>
-          <Texto variante="apoyo">{a.voz}</Texto>
-          <View style={{ height: 260, borderRadius: radius.md, overflow: 'hidden', backgroundColor: fondo }}>
-            {/* la pieza REAL de packages/ui — no una copia de galería:
-                lo que el founder mira es lo que va a correr */}
-            <MarcaDeAgua sangrada={a.sangrada} />
-            <View style={{ padding: spacing[4], gap: spacing[3] }}>
-              <Texto variante="seccion">Thor</Texto>
-              {/* LA VOZ DEL PRODUCTO — su primera aparición visible */}
-              <Texto variante="voz">
-                Su expediente se completa de a poco. Cada dato que sumás es uno menos que hay que adivinar en una urgencia.
-              </Texto>
-              <Tarjeta elevacion="reposo">
-                <View style={{ gap: spacing[1] }}>
-                  <Texto variante="cuerpo">Salió a pasear</Texto>
-                  <Texto variante="dato">28 jul · 3,1 km en 52 min</Texto>
-                </View>
-              </Tarjeta>
-              {/* Los glifos de control, en su target real y a 21 */}
-              <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
-                <Icono nombre="lapiz" tamano={21} registro="tinta" />
-                <Icono nombre="compartir" tamano={21} registro="tinta" />
-                <Icono nombre="lapiz" tamano={28} registro="tinta" />
-                <Icono nombre="compartir" tamano={28} registro="tinta" />
-                <Texto variante="apoyo">21 (gate §2.9) · 28</Texto>
-              </View>
+/** Contenido mínimo REAL para juzgar un fondo (no un swatch de color). */
+function MuestraFondo({ fondo, ancho }: { fondo: string; ancho: number }) {
+  return (
+    <View style={{ width: ancho, gap: spacing[2], padding: spacing[2], backgroundColor: fondo, borderRadius: radius.md }}>
+      <Texto variante="seccion">Thor</Texto>
+      <Texto variante="voz">Su expediente se completa de a poco.</Texto>
+      <Tarjeta elevacion="reposo">
+        <Texto variante="dato">28 jul · 3,1 km</Texto>
+      </Tarjeta>
+    </View>
+  )
+}
+
+function GateS82() {
+  const { theme } = useTheme()
+  const TAPIZ = palette.papelTapiz
+  return (
+    <View style={{ gap: spacing[2] }}>
+
+      <Decision
+        n="1"
+        asunto="EL PAPEL TAPIZ — el fondo del cliente"
+        decide="Decide el fondo de TODAS las pantallas del cliente. El 3% está VIVO desde r10; elegir otro cambia el token y arrastra las curas de successText/warningText que ya viajaron."
+      >
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing[2] }}>
+          {[{ etiqueta: 'papel (sin tinte)', valor: palette.light0 }, ...palette.papelTapizCandidatos].map((c) => (
+            <View key={c.valor} style={{ gap: spacing[1] }}>
+              <MuestraFondo fondo={c.valor} ancho={150} />
+              <Texto variante="dato">{`${c.etiqueta}${c.valor === TAPIZ ? ' ← VIVO' : ''}`}</Texto>
             </View>
+          ))}
+        </ScrollView>
+      </Decision>
+
+      <Decision
+        n="2"
+        asunto="EL CTA OCRE — sobre el tapiz Y sobre el techo"
+        decide="Enmienda la Ley 21 (el CTA del cliente en tinta), que es la ley por la que cada CTA nuevo nace negro — o la deja intacta y el CTA sigue en tinta."
+      >
+        {[{ g: false, voz: 'sobre el tapiz (el fondo real)' }, { g: true, voz: 'sobre el degradado del techo — MEDIDO: acá el ocre PIERDE (3.11 vs el violeta · 2.24 vs pinkDark)' }].map((f) => (
+          <View key={String(f.g)} style={{ gap: spacing[2] }}>
+            <Texto variante="apoyo">{f.voz}</Texto>
+            <ContenedorGate gradiente={f.g} fondo={TAPIZ}>
+              <View style={{ gap: spacing[2] }}>
+                {palette.ctaOcreCandidatos.map((c) => (
+                  <View key={c.valor} style={{ gap: spacing[1] }}>
+                    <BotonMuestra fondo={c.valor} texto={c.texto} />
+                    <Texto variante="dato">{`${c.etiqueta} ${c.valor} · label ${c.texto === '#FFFFFF' ? 'blanco' : 'tinta'}`}</Texto>
+                  </View>
+                ))}
+                {/* la VARA: el de hoy y el ámbar de ALERTA, para juzgar
+                    la DISTANCIA (si comparten registro, el color no dice nada) */}
+                <BotonMuestra fondo={theme.text.primary} texto={palette.light0} etiqueta="el CTA de hoy (tinta · Ley 21)" />
+                <Insignia estado="atencion" etiqueta="necesita atención — el ámbar de ALERTA" />
+              </View>
+            </ContenedorGate>
+          </View>
+        ))}
+      </Decision>
+
+      <Decision
+        n="3"
+        asunto="sinCaja — el secundario sin borde, con su slot y su sombra nuevos"
+        decide="Si se ve: muere el contorno del secundario y es enmienda a la Ley 22 EN MESA. Si no se ve: sinCaja muere y el secundario se queda con su borde."
+      >
+        {(['light', 'dark'] as const).map((m) => (
+          <ThemeProvider key={m} defaultMode={m}>
+            <PanelGateTema etiqueta={m === 'light' ? 'claro — fill 1.23 sobre el tapiz + elevacion.reposo como canal' : 'oscuro — fill 1.49 (más presencia: en dark el canal es el TONO, la elevación es contacto mínimo)'}>
+              <View style={{ flexDirection: 'row', gap: spacing[2], alignItems: 'flex-start' }}>
+                <View style={{ flex: 1 }}><Boton variante="sinCaja" etiqueta="Ya tengo cuenta" bloque onPress={() => {}} /></View>
+                <View style={{ flex: 1 }}><Boton variante="secundario" etiqueta="con borde (hoy)" bloque onPress={() => {}} /></View>
+              </View>
+            </PanelGateTema>
+          </ThemeProvider>
+        ))}
+      </Decision>
+
+      <Decision
+        n="4"
+        asunto="LA MARCA DE AGUA — completa contra sangrada"
+        decide="Si se lee TEXTURA, la Ley 4 (isotipo UNO por pantalla) queda INTACTA y el agua puede ir en todas. Si se lee ISOTIPO, el agua + el techo son dos y hace falta ENMIENDA a la Ley 4."
+      >
+        <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+          {[{ s: false, voz: 'COMPLETA — silueta cerrada' }, { s: true, voz: 'SANGRADA — cortada por los 4 bordes' }].map((a) => (
+            <View key={String(a.s)} style={{ flex: 1, gap: spacing[1] }}>
+              <View style={{ height: 200, borderRadius: radius.md, overflow: 'hidden', backgroundColor: TAPIZ }}>
+                <MarcaDeAgua sangrada={a.s} />
+                <View style={{ padding: spacing[3] }}>
+                  <Texto variante="apoyo">contenido encima</Texto>
+                </View>
+              </View>
+              <Texto variante="dato">{a.voz}</Texto>
+            </View>
+          ))}
+        </View>
+      </Decision>
+
+      <Decision
+        n="5"
+        asunto="LA VOZ DEL PRODUCTO — la itálica contra el gris que reemplaza"
+        decide="Si gana: el producto tiene un registro propio para lo que PIENSA (hoy pide prestado el apoyo gris). Si no: la variante muere y esa voz sigue siendo microcopy."
+      >
+        <View style={{ backgroundColor: TAPIZ, padding: spacing[3], borderRadius: radius.md, gap: spacing[3] }}>
+          <View style={{ gap: spacing[1] }}>
+            <Texto variante="dato">voz (itálica md · la candidata)</Texto>
+            <Texto variante="voz">Su expediente se completa de a poco. Cada dato que sumás es uno menos que hay que adivinar en una urgencia.</Texto>
+          </View>
+          <View style={{ gap: spacing[1] }}>
+            <Texto variante="dato">apoyo (sm gris · lo que se usa HOY para eso)</Texto>
+            <Texto variante="apoyo">Su expediente se completa de a poco. Cada dato que sumás es uno menos que hay que adivinar en una urgencia.</Texto>
           </View>
         </View>
-      ))}
-    </View>
-  )
-}
+      </Decision>
 
-/** LÁMINA DE GATE S82-B r11 — el CTA ocre sobre los DOS fondos que
- *  importan (orden founder). Los botones se dibujan con el MISMO cuerpo
- *  de `Boton primario` (alto 48, radius.md, label medium) pero con los
- *  colores del candidato: la lámina no puede usar `Boton` porque el
- *  candidato NO está en el tema todavía — y meterlo al tema sería
- *  encenderlo, que es exactamente lo que la orden prohíbe.
- *  ALCANCE de la lámina, declarado: solo el slot del CTA QUE CIERRA. La
- *  placa del filtro elegido (tinta por §7bis + frontera S63) y "Cargar
- *  carnet" (secundario, va sinCaja) NO se muestran acá a propósito. */
-function LaminaGateCtaOcre() {
-  const { theme } = useTheme()
-  const FONDOS = [
-    { etiqueta: 'papel tapiz (3%)', fondo: palette.papelTapiz, gradiente: false },
-    { etiqueta: 'degradado del techo (el peor punto del ocre)', fondo: '', gradiente: true },
-  ]
-  return (
-    <View style={{ gap: spacing[5] }}>
-      {FONDOS.map((f) => (
-        <View key={f.etiqueta} style={{ gap: spacing[2] }}>
-          <Texto variante="apoyo">{f.etiqueta}</Texto>
-          <Contenedor fondo={f} >
-            <View style={{ gap: spacing[3] }}>
-              {palette.ctaOcreCandidatos.map((c) => (
-                <View key={c.valor} style={{ gap: spacing[1] }}>
-                  <View
-                    style={{
-                      height: 48,
-                      borderRadius: radius.md,
-                      backgroundColor: c.valor,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: theme.elevacion.reposo,
-                    }}
-                  >
-                    <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: c.texto }}>
-                      Reservar servicio de Thor
-                    </Text>
-                  </View>
-                  <Texto variante="dato">{`${c.etiqueta} ${c.valor} · label ${c.texto === '#FFFFFF' ? 'blanco' : 'tinta'}`}</Texto>
-                </View>
-              ))}
-              {/* La vara: el CTA de HOY (tinta) y el ámbar de ALERTA, para
-                  juzgar la DISTANCIA — que es lo que la orden pide. */}
-              <View style={{ height: 48, borderRadius: radius.md, backgroundColor: theme.text.primary, alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: palette.light0 }}>
-                  el CTA de hoy (tinta · Ley 21)
-                </Text>
-              </View>
-              <Insignia estado="atencion" etiqueta="necesita atención (el ámbar de ALERTA — la distancia se juzga acá)" />
+      <Decision
+        n="6"
+        asunto="LOS GLIFOS DE CONTROL Y LA VACUNA — a 21px"
+        decide="Gate POR ÍCONO (§2.9). La pregunta puntual: ¿el corte del bisel del lápiz sobrevive a 21, o la punta se simplifica? Y la jeringa: ¿se lee sin graduaciones?"
+      >
+        <View style={{ backgroundColor: TAPIZ, padding: spacing[3], borderRadius: radius.md, gap: spacing[3] }}>
+          {[21, 28].map((t) => (
+            <View key={t} style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
+              <Texto variante="dato">{`${t}px`}</Texto>
+              <Icono nombre="lapiz" tamano={t} registro="tinta" />
+              <Icono nombre="compartir" tamano={t} registro="tinta" />
+              <Icono nombre="vacuna" tamano={t} />
+              {/* la vara: el de veterinaria, que era el que la vacuna suplía */}
+              <Icono nombre="veterinaria" tamano={t} />
             </View>
-          </Contenedor>
+          ))}
         </View>
-      ))}
+      </Decision>
+
     </View>
   )
 }
 
-/** Contenedor de la lámina r11: fondo plano o el degradado firma. */
-function Contenedor({ fondo, children }: { fondo: { fondo: string; gradiente: boolean }; children: React.ReactNode }) {
+/** El cuerpo de un CTA con los colores del candidato. NO usa `Boton` a
+ *  propósito: el candidato no está en el tema todavía, y meterlo sería
+ *  encenderlo — que es exactamente lo que el gate viene a decidir. */
+function BotonMuestra({ fondo, texto, etiqueta = 'Reservar servicio de Thor' }: { fondo: string; texto: string; etiqueta?: string }) {
   const { theme } = useTheme()
-  if (!fondo.gradiente) {
-    return <View style={{ padding: spacing[4], borderRadius: radius.md, backgroundColor: fondo.fondo }}>{children}</View>
-  }
+  return (
+    <View style={{ height: 48, borderRadius: radius.md, backgroundColor: fondo, alignItems: 'center', justifyContent: 'center', boxShadow: theme.elevacion.reposo }}>
+      <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: texto }}>{etiqueta}</Text>
+    </View>
+  )
+}
+
+/** Fondo plano (tapiz) o el degradado firma del techo. */
+function ContenedorGate({ gradiente, fondo, children }: { gradiente: boolean; fondo: string; children: React.ReactNode }) {
+  const { theme } = useTheme()
+  if (!gradiente) return <View style={{ padding: spacing[3], borderRadius: radius.md, backgroundColor: fondo }}>{children}</View>
   return (
     <LinearGradient
       colors={[...theme.accent.gradient.colors] as [string, string, ...string[]]}
       locations={[...theme.accent.gradient.locations] as [number, number, ...number[]]}
       start={{ x: 0.13, y: 0 }}
       end={{ x: 0.87, y: 1 }}
-      style={{ padding: spacing[4], borderRadius: radius.md }}
+      style={{ padding: spacing[3], borderRadius: radius.md }}
     >
       {children}
     </LinearGradient>
+  )
+}
+
+/** Panel con el fondo del tema anidado (para juzgar claro vs oscuro). */
+function PanelGateTema({ etiqueta, children }: { etiqueta: string; children: React.ReactNode }) {
+  const { theme } = useTheme()
+  return (
+    <View style={{ gap: spacing[2], padding: spacing[3], borderRadius: radius.md, backgroundColor: theme.bg.base }}>
+      <Texto variante="apoyo">{etiqueta}</Texto>
+      {children}
+    </View>
   )
 }
 
@@ -2045,19 +2101,13 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
-        {/* ── LÁMINA DE GATE S82-B r9 — LA PASADA ÚNICA DE TELÉFONO ──
-            Los cuatro asuntos del gate en UN lugar (orden founder: "va en
-            la misma pasada de teléfono, con el tinte, el agua y el
-            registro nuevo"). El switch elige candidato de fondo y el
-            panel se pinta ENTERO con él — el tinte se juzga en contexto,
-            jamás como muestra de color al lado de otra. */}
-        <Seccion titulo="⭐ GATE S82-B r9 — PAPEL TAPIZ (el valor lo elige el ojo) · la marca de agua · los glifos de control a 21px · la VOZ del producto">
-          <LaminaGateTapiz />
-        </Seccion>
-
-        {/* ── LÁMINA DE GATE S82-B r11 — EL CTA OCRE ── */}
-        <Seccion titulo="⭐ GATE S82-B r11 — EL CTA OCRE DEL CLIENTE: tres candidatos sobre los DOS fondos (papel tapiz · degradado del techo). NADA encendido: el CTA vivo sigue en tinta (Ley 21) hasta la firma">
-          <LaminaGateCtaOcre />
+        {/* ══ EL GATE S82 — LA PASADA ÚNICA (r13) ══
+            Reescrita para DECIDIR y no para catalogar: cada decisión con
+            sus candidatos LADO A LADO, sobre el fondo real, y con la
+            línea que dice qué se firma al elegir. Va PRIMERA: es lo que
+            el founder viene a mirar. */}
+        <Seccion titulo="⭐⭐ GATE S82 — LAS SEIS DECISIONES ABIERTAS. Cada una: candidatos lado a lado · fondo real del cliente · y QUÉ DECIDE la elección (en rojo)">
+          <GateS82 />
         </Seccion>
 
         {/* Set b′ — DIRECCION_ARTE v1.0 (S53): la mascota presente */}

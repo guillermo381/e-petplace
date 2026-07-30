@@ -109,6 +109,44 @@ export default function Cuenta() {
               ? `update ${Updates.updateId.slice(0, 8)} · ${Updates.channel ?? 'sin canal'}`
               : 'bundle embebido / dev'}
           </Texto>
+
+          {/* ── S82-B r13 · LA ENTRADA A LA GALERÍA DE TOKENS ──
+              CRUCE DE TERRITORIO DECLARADO: esta pantalla es del cliente
+              (A/C) y la toca B con AUTORIZACIÓN EXPLÍCITA del founder,
+              citada: *"La entrada en Cuenta va, SIN __DEV__ — el founder
+              gatea en preview y con __DEV__ no llegaría justo donde la
+              necesita… Cruce declarado en el commit con mi autorización
+              citada."* (S82, orden r12bis/r13.)
+
+              SIN `__DEV__` A PROPÓSITO: el gate corre en el APK PREVIEW,
+              donde `__DEV__` es false — un guard ahí la haría
+              inalcanzable exactamente donde se la necesita. Es la misma
+              lección que el marcador de arriba: L-161 (una superficie de
+              gate se verifica ALCANZABLE en el build del founder).
+
+              POR QUÉ ES LA ÚNICA VÍA, medido en r13: el scheme SÍ está
+              horneado (el APK hermano trae `android:scheme="prestador"` +
+              `"exp+prestador"` en su intent filter, y el del cliente vive
+              en app.json desde el scaffold) — así que el deep link
+              funciona, pero **exige cable/adb**: Chrome no abre schemes
+              custom tipeados y WhatsApp no los linkea (D-509②, medido en
+              S79). Sin cable no hay forma de disparar el intent. La
+              entrada no es comodidad: es la vía.
+
+              🔴 DEUDA: se RETIRA o se esconde tras un gesto ANTES del
+              soft launch (1-oct-2026) — una herramienta de sesión en la
+              superficie real también la alcanza un usuario. ── */}
+          {/* `icono` es TIPADO (IconoNombre), jamás slot libre — el
+              contrato de CeldaNavegacion lo dice en su propio JSDoc.
+              Los textos van LITERALES y no por el riel i18n a propósito:
+              es una herramienta de sesión con fecha de retiro, y meterle
+              keys al diccionario dejaría basura que sobrevive a la deuda. */}
+          <CeldaNavegacion
+            icono="preferencias"
+            titulo="Galería de tokens"
+            detalle="herramienta de sesión — no es pantalla de producto"
+            onPress={() => router.push('/gallery')}
+          />
         </View>
       </ScrollView>
 
