@@ -519,27 +519,26 @@ function GateS82() {
 
       <Decision
         n="1"
-        asunto="EL CTA OSCURO — #FFF645 contra el ocre claro del tema claro"
-        decide="ÚNICA DECISIÓN ABIERTA. Si los dos se leen como EL MISMO color en distinta luz, el sistema cierra con un CTA por tema. Si se leen como DOS colores, no cierra. Y #FFF645 arrastra un CHOQUE declarado abajo."
+        asunto="EL ORO — un solo color para los DOS temas, label tinta"
+        decide="ÚNICA DECISIÓN ABIERTA. El hueco entre el amarillo de MARCA (H57.1, prohibido ±12° ⇒ [45.2,69.2]) y el ámbar de ALERTA (H41.0) es de CUATRO GRADOS: hay lugar, pero a 2-4° el ojo NO separa por matiz — la distancia la cargan la saturación (95-100% contra 78%) y que el alerta viva como TINTE, no como fill. El swatch del founder NO llegó al repo; su ~50° estimado cae ADENTRO de lo prohibido."
       >
-        <View style={{ flexDirection: 'row', gap: spacing[2] }}>
-          {/* el firmado, sobre su fondo real */}
-          <View style={{ flex: 1, gap: spacing[1], backgroundColor: TAPIZ, padding: spacing[3], borderRadius: radius.md }}>
-            <BotonMuestra fondo={palette.ctaOcre} texto={palette.textLight0} etiqueta="Agendar" />
-            <Texto variante="dato">{`claro · ${palette.ctaOcre} · label tinta 8.40`}</Texto>
+        {[{ f: TAPIZ, voz: 'sobre PAPEL — el fill da 1.43-1.66: el color NO recorta el botón' }, { f: palette.dark0, voz: 'sobre NEGRO — el fill da 11-13: acá el color SÍ carga la separación' }].map((fondo) => (
+          <View key={fondo.f} style={{ gap: spacing[2], backgroundColor: fondo.f, padding: spacing[3], borderRadius: radius.md }}>
+            <Texto variante="dato">{fondo.voz}</Texto>
+            {palette.ctaOroCandidatos.map((c) => (
+              <View key={c.valor} style={{ gap: spacing[1] }}>
+                <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+                  <View style={{ flex: 1 }}><BotonMuestra fondo={c.valor} texto={palette.textLight0} etiqueta="con elevación" /></View>
+                  <View style={{ flex: 1, height: 48, borderRadius: radius.md, backgroundColor: c.valor, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: palette.textLight0 }}>sin elevación</Text>
+                  </View>
+                </View>
+                <Texto variante="dato">{`${c.etiqueta} ${c.valor} · label tinta ${c.tinta} (igual en los dos temas) · fill papel ${c.papel} · negro ${c.negro}`}</Texto>
+              </View>
+            ))}
+            <Insignia estado="atencion" etiqueta="el ámbar de ALERTA — vive como TINTE, no como fill: ahí está la distancia real" />
           </View>
-          {/* el propuesto, sobre el oscuro real */}
-          <View style={{ flex: 1, gap: spacing[1], backgroundColor: palette.dark0, padding: spacing[3], borderRadius: radius.md }}>
-            <BotonMuestra fondo={palette.amarillo} texto={palette.textLight0} etiqueta="Agendar" />
-            <Texto variante="dato">{`oscuro · ${palette.amarillo} · label tinta 14.94`}</Texto>
-          </View>
-        </View>
-        <Texto variante="apoyo" color="danger">
-          EL CHOQUE, declarado y NO resuelto: #FFF645 es `palette.amarillo`, con estatuto SOLO-MARCA vigente en v4 ("JAMÁS funcional"), y es stop de `gradients.logo`. El alcance fino de A5 cubría el rol INFORMACIÓN — y un CTA decide, no informa. Firmarlo es enmendar ese estatuto, no aplicarlo.
-        </Texto>
-        <Texto variante="apoyo">
-          Distancia medida entre los dos: 17° de matiz y +14 puntos de luminosidad. Sobre el oscuro el fill rinde 17.95 (contra 1.83 del ocre sobre papel — en claro el canal es la elevación, en oscuro es el color).
-        </Texto>
+        ))}
       </Decision>
 
       <Decision

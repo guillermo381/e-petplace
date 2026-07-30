@@ -142,38 +142,42 @@ export const palette = {
    *  Magenta suave · Cálido") entra como QUINTO cuando el zip llegue al
    *  repo — al abrir esta ronda NO estaba (medido: docs/laminas/ sin él).
    *  Recomendación de B anotada, NO valor: el 3%. */
-  /** S82-B r11 — LOS TRES CANDIDATOS DEL CTA OCRE DEL CLIENTE (dirección
-   *  founder; NADA encendido: el CTA vivo sigue en tinta hasta la firma —
-   *  esto enmienda la Ley 21 y va al gate, no se rompe en silencio).
-   *  Derivados de la familia ámbar que YA existe (ochre #E8B547, el
-   *  ámbar de ALERTA a L59%), un escalón más oscuro Y saturado: la
-   *  distancia del alerta se busca por SATURACIÓN + PROFUNDIDAD, no solo
-   *  por ratio.
-   *  Cada uno viaja con SU par de texto, porque el slot es un PAR
-   *  (`accent.cta` + `accent.ctaTexto`) — y ahí está el hallazgo de la
-   *  medición: con label BLANCO el ocre tiene que bajar a L≈31% y ES
-   *  MARRÓN; con label TINTA un ámbar vibrante pasa de sobra. El número
-   *  que la orden pidió (el más claro que pasa 4.5:1 sobre el tapiz) es
-   *  el candidato `ocreProfundo`: #966708 = 4.50 EXACTO, y es marrón. */
-  ctaOcreCandidatos: [
-    {
-      etiqueta: 'ámbar profundo',
-      valor: '#F5A70A',
-      texto: '#1D1A2E',
-      nota: 'label TINTA 8.40 · fill vs tapiz 1.83 (no llega a 3 — el botón no despega del fondo por color, lo haría por elevación)',
-    },
-    {
-      etiqueta: 'ámbar tostado',
-      valor: '#CE7809',
-      texto: '#1D1A2E',
-      nota: 'label TINTA 5.09 · fill vs tapiz 3.02 — EL ÚNICO que pasa las DOS restricciones (texto 4.5 y fill 3)',
-    },
-    {
-      etiqueta: 'ocre profundo (el del número)',
-      valor: '#966708',
-      texto: '#FFFFFF',
-      nota: 'el más claro que pasa 4.5:1 sobre el tapiz (4.50 exacto) y admite BLANCO (6.1) — pero está a 3 puntos de luminosidad de ochreDark, que es un token de TEXTO: se lee MARRÓN',
-    },
+  /** S82-B r18 — LOS TRES CANDIDATOS DEL ORO: **UN color para los DOS
+   *  temas**, con label TINTA (los de r11 quedaron atrás: eran del claro y
+   *  pedían un token oscuro aparte).
+   *
+   *  LOS TRES NÚMEROS QUE PEDISTE, medidos: `#fff645` (amarillo de MARCA)
+   *  = **H57.1** · `ochre` (warning/consumo) = **H41.0** · `ctaOcre` de
+   *  hoy = H40.1. **El swatch del founder NO llegó al repo** (mismo caso
+   *  que el zip de r9) — su estimación declarada de ~50° cae **ADENTRO**
+   *  de la ventana prohibida, confirmando la sospecha.
+   *
+   *  LA VENTANA Y EL HUECO: ±12° del amarillo de marca ⇒ PROHIBIDO
+   *  [45.2, 69.2]. Por abajo está el ámbar de ALERTA en H41.0. **El hueco
+   *  real es 41.0–45.2: CUATRO GRADOS.** Sí hay lugar (no es el caso del
+   *  teal, donde no había ninguno) — pero es angosto, y de ahí sale el
+   *  hallazgo que importa: **a 2-4° de matiz el ojo NO separa el CTA del
+   *  alerta.** La distancia tiene que venir de otro lado, y viene: estos
+   *  candidatos van a S95-100% contra el S78% del ochre, y sobre todo el
+   *  alerta casi nunca aparece como FILL — vive como tinte al 24% con su
+   *  texto AA. El CTA es fill saturado; el alerta, tinte pálido. Esa es
+   *  la separación real, no el matiz.
+   *
+   *  EL BORDE, CONFIRMADO: contra papel el oro da 1.43–1.66 (el ~1.6 que
+   *  el founder anticipó) — el botón NO se recorta por color. El label sí
+   *  se lee (9.26–10.78). Sobre negro el fill da 11–13: **en oscuro el
+   *  color carga la separación, en claro no.** Por eso el CTA que cierra
+   *  lleva ELEVACIÓN — la cura de `sinCaja` (r12): cuando el color no
+   *  puede cargar la separación, el canal es la superficie apoyada.
+   *  La galería los monta CON y SIN, sobre los dos fondos.
+   *
+   *  `#fff645` como CTA oscuro: RETIRADO por el founder — con un solo
+   *  color para los dos temas deja de hacer falta, y evita enmendar el
+   *  estatuto solo-marca. */
+  ctaOroCandidatos: [
+    { etiqueta: 'oro A · H43', valor: '#FCBC1D', tinta: '9.96', papel: '1.55', negro: '11.97' },
+    { etiqueta: 'oro B · H44 (el más luminoso)', valor: '#FFC629', tinta: '10.78', papel: '1.43', negro: '12.95' },
+    { etiqueta: 'oro C · H42 (el más cerca del alerta)', valor: '#F9B310', tinta: '9.26', papel: '1.66', negro: '11.13' },
   ] as const,
   papelTapizCandidatos: [
     { etiqueta: '2%', valor: '#FAF4F6' },
