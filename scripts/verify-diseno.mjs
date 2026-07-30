@@ -283,7 +283,7 @@ function r9(archivos) {
  *  en su primer día esta regla cobró una fuga REAL — la propia
  *  extracción de CantoCurva salió sin declarar su casa y el lint la
  *  paró (exit 1). El guard no es decorativo. */
-const CASA_OVERRIDE_S82C = /apps\/cliente\/src\/(app\/\(tabs\)\/hogar\/(index|mascota\/\[mascotaId\])|components\/(canto-curva|filtro-pills))\.tsx$/;
+const CASA_OVERRIDE_S82C = /apps\/cliente\/src\/(app\/\(tabs\)\/hogar\/(index|mascota\/\[mascotaId\])|components\/(canto-curva|filtro-pills|reserva-piezas))\.tsx$/;
 function r10(archivos) {
   const fallos = [];
   for (const { path, src } of archivos) {
