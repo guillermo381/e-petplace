@@ -38,14 +38,17 @@ import {
   BarrasSemana,
   Boton,
   Celda,
+  CeldaNavegacion,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  FilaDato,
   Guijarro,
   Hoja,
   Huella,
-  Insignia,
+  Isotipo,
+  PieRevelar,
   Separador,
   Tarjeta,
   Texto,
@@ -76,6 +79,7 @@ import {
 } from '@epetplace/domain';
 import { FAMILIA_DE_TIPO, vozHecho } from '@/lib/voz-hecho';
 import { CantoCurva } from '@/components/canto-curva';
+import { FiltroPills } from '@/components/filtro-pills';
 
 /** @override-s82c — SERIF LOCAL hasta la pieza de B (candidata; el
  *  founder la ordenó para el perfil y la ELECCIÓN de fuente es de B):
@@ -192,6 +196,10 @@ export default function PerfilDeMascota() {
   // hogar para esta mascota — alimenta la pastilla del header Y las
   // celdas de CÓMO ESTÁ HOY (una sola verdad, un solo fetch).
   const [senal, setSenal] = useState<SenalesHogarMascota | null>(null);
+  // r5: vacunas agrupadas-colapsadas + historia colapsada con filtros
+  const [vacunasAbiertas, setVacunasAbiertas] = useState(false);
+  const [historiaRevelada, setHistoriaRevelada] = useState(false);
+  const [filtroHistoria, setFiltroHistoria] = useState<'todo' | 'semana' | 'mes' | 'salud' | 'paseos' | 'estetica' | 'adiestramiento'>('todo');
 
   const cargarPrimeraPagina = useCallback(async (id: string) => {
     const r = await leerTimelineMascota(id);
@@ -345,6 +353,18 @@ export default function PerfilDeMascota() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      {/* @override-s82c — r5 ítem 1: LA MARCA DE AGUA del fondo,
+          escalada a SALIRSE por los cuatro lados al 4% ("una forma
+          completa es una marca; cortada es papel — así la Ley 4 no
+          muerde", letra founder). Fija, detrás de todo. */}
+      <View
+        pointerEvents="none"
+        style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}
+      >
+        <View style={{ opacity: 0.04 }}>
+          <Isotipo size={1000} variant="tinta" color={theme.text.primary} />
+        </View>
+      </View>
       <Encabezado variante="navegacion" titulo="" atras onAtras={() => router.back()} />
       <ScrollView contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[8], gap: spacing[6] }}>
         {/* ── 1 · HEADER ALTO (imagen-acuerdo S82-C): editar · compartir ·
@@ -427,18 +447,39 @@ export default function PerfilDeMascota() {
               {/* la pastilla de estado MONTADA al pie de la foto — la
                   misma verdad que la ficha del Hogar; sin señal, calla */}
               {pastilla !== null ? (
-                <View style={{ position: 'absolute', bottom: -spacing[1], alignSelf: 'center' }}>
-                  <Insignia
-                    estado={pastilla === 'alDia' ? 'alDia' : pastilla === 'pideAtencion' ? 'atencion' : 'info'}
-                    etiqueta={
-                      pastilla === 'alDia'
-                        ? t('perfil.pastillaAlDia')
-                        : pastilla === 'pideAtencion'
-                          ? t('perfil.pastillaAtencion')
-                          : t('perfil.pastillaConociendo')
-                    }
-                    tamaño="sm"
-                  />
+                // r5-2: NADA de verde flúor — el registro AA (la familia
+                // "terrosa": successText/warningText) sobre papel con
+                // elevación; pares medidos del sistema en ambos temas.
+                <View
+                  style={{
+                    position: 'absolute',
+                    bottom: -spacing[1],
+                    alignSelf: 'center',
+                    borderRadius: radius.full,
+                    backgroundColor: theme.bg.card,
+                    paddingHorizontal: spacing[3],
+                    paddingVertical: spacing[1],
+                    boxShadow: theme.elevacion.reposo,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontFamily: typography.family.sans.medium,
+                      fontSize: typography.size.sm,
+                      color:
+                        pastilla === 'alDia'
+                          ? theme.status.successText
+                          : pastilla === 'pideAtencion'
+                            ? theme.status.warningText
+                            : theme.text.secondary,
+                    }}
+                  >
+                    {pastilla === 'alDia'
+                      ? t('perfil.pastillaAlDia')
+                      : pastilla === 'pideAtencion'
+                        ? t('perfil.pastillaAtencion')
+                        : t('perfil.pastillaConociendo')}
+                  </Text>
                 </View>
               ) : null}
             </Animated.View>
@@ -527,78 +568,323 @@ export default function PerfilDeMascota() {
           );
         })()}
 
-        {/* ── 4 · CÓMO ESTÁ HOY (r3, literal transcrito — mismo gate
-            exigible). Grilla 2×2, CANTO POR ESTADO que pinta la curva:
-            ámbar pide algo · verde no pide nada · gris no sabe.
-            ⚠️ CHOQUE DECLARADO, NO RESUELTO (orden del pedido): acá el
-            canto codifica ESTADO; la Ley 10 lo tiene como CATEGORÍA —
-            dos significados para el canto en el mismo producto; lo
-            decide el gate del founder. Cada celda dice SOLO lo que el
-            dato sostiene (L-139): 'Sin registro' con guion es el patrón
-            del nulo honesto (jamás 'ninguna conocida'); el 'estable 6
-            meses' de la captura NO se pinta (no hay historia de peso);
-            desparasitación no tiene motor (backlog M2/D-475) y alergias
-            no tiene campo — ambas dicen la verdad: sin registro. */}
-        <View style={{ gap: spacing[3] }}>
-          <Texto variante="seccion">{t('perfil.hoyTitulo')}</Texto>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] }}>
-            {(() => {
-              type CeldaHoy = { key: string; rotulo: string; valor: string; detalle: string; estado: 'atencion' | 'alDia' | 'sinDato' };
-              const hoyIso = new Intl.DateTimeFormat('en-CA').format(hoy);
-              const pv = senal?.proxima_vacuna ?? null;
-              const celdaVacunas: CeldaHoy =
-                senal === null || senal.vacunas_total === 0
-                  ? { key: 'vacunas', rotulo: t('perfil.hechosVacunas'), valor: t('perfil.hoySinRegistro'), detalle: '–', estado: 'sinDato' }
-                  : pv !== null && pv.fecha < hoyIso
-                    ? { key: 'vacunas', rotulo: t('perfil.hechosVacunas'), valor: t('perfil.hoyFaltaUna'), detalle: t('perfil.hoyRefuerzoVencido'), estado: 'atencion' }
-                    : pv !== null
-                      ? { key: 'vacunas', rotulo: t('perfil.hechosVacunas'), valor: t('perfil.hoyAlDia'), detalle: t('perfil.hoyHasta', { fecha: fechaCortaMono(pv.fecha, idioma) }), estado: 'alDia' }
-                      : {
-                          // sin fecha próxima el estado NO se afirma (hoy
-                          // 1/24 la trae — deuda E5): gris = no sabe, con
-                          // el dato que SÍ existe (cuántas hay al carnet).
-                          key: 'vacunas',
-                          rotulo: t('perfil.hechosVacunas'),
-                          valor: t('perfil.hoyEnCarnet', { n: senal.vacunas_total }),
-                          detalle:
-                            senal.ultima_vacuna_aplicada !== null
-                              ? t('perfil.hoyUltima', { fecha: fechaCortaMono(senal.ultima_vacuna_aplicada, idioma) })
-                              : '–',
-                          estado: 'sinDato',
-                        };
-              const celdas: CeldaHoy[] = [
-                celdaVacunas,
-                // desparasitación: CERO motor (M2 del backlog, D-475) — la
-                // celda dice la verdad hasta que exista.
-                { key: 'despar', rotulo: t('perfil.hoyDesparasitacion'), valor: t('perfil.hoySinRegistro'), detalle: '–', estado: 'sinDato' },
-                peso_clinico_kg !== null
-                  ? { key: 'peso', rotulo: t('perfil.peso'), valor: `${peso_clinico_kg} kg`, detalle: '–', estado: 'alDia' }
-                  : { key: 'peso', rotulo: t('perfil.peso'), valor: t('perfil.hoySinRegistro'), detalle: '–', estado: 'sinDato' },
-                // alergias: sin campo en el expediente — LA REFERENCIA del
-                // patrón del nulo honesto (literal transcrito).
-                { key: 'alergias', rotulo: t('perfil.hoyAlergias'), valor: t('perfil.hoySinRegistro'), detalle: '–', estado: 'sinDato' },
-              ];
-              const colorDe = (e: CeldaHoy['estado']) =>
-                e === 'atencion' ? theme.status.warning : e === 'alDia' ? theme.status.success : theme.border.default;
-              return celdas.map((c) => (
-                <View key={c.key} style={{ flexBasis: '47%', flexGrow: 1 }}>
-                  <CantoCurva color={colorDe(c.estado)}>
-                    <View style={{ padding: spacing[3], gap: spacing[1] }}>
-                      <Texto variante="apoyo">{c.rotulo}</Texto>
-                      {/* valor sans en negrita (literal) — medium de la casa */}
-                      <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}>
-                        {c.valor}
-                      </Text>
-                      <Texto variante="dato" numberOfLines={1}>{c.detalle}</Texto>
+        {/* ── CÓMO ESTÁ HOY (r5: SOLO las celdas CON DATO — cuatro
+            nulos en grilla no es honestidad, es una pantalla que dice
+            "no sabemos nada"; lo sin dato colapsa en UNA línea honesta,
+            L-139 sin dedicarle tarjetas a la ausencia). El peso migró a
+            IDENTIDAD (r5 ítem 4). Canto por ESTADO — el choque
+            estado-vs-categoría (Ley 10) sigue DECLARADO al gate. */}
+        {(() => {
+          type CeldaHoy = { key: string; rotulo: string; valor: string; detalle: string; estado: 'atencion' | 'alDia' };
+          const hoyIso = new Intl.DateTimeFormat('en-CA').format(hoy);
+          const pv = senal?.proxima_vacuna ?? null;
+          const celdas: CeldaHoy[] = [];
+          if (senal !== null && senal.vacunas_total > 0) {
+            if (pv !== null && pv.fecha < hoyIso) {
+              celdas.push({ key: 'vacunas', rotulo: t('perfil.hechosVacunas'), valor: t('perfil.hoyFaltaUna'), detalle: t('perfil.hoyRefuerzoVencido'), estado: 'atencion' });
+            } else if (pv !== null) {
+              celdas.push({ key: 'vacunas', rotulo: t('perfil.hechosVacunas'), valor: t('perfil.hoyAlDia'), detalle: t('perfil.hoyHasta', { fecha: fechaCortaMono(pv.fecha, idioma) }), estado: 'alDia' });
+            }
+            // sin fecha próxima el estado no se afirma (deuda E5): la
+            // celda NO se monta — vive en la línea honesta de abajo.
+          }
+          const sinDato: string[] = [];
+          if (!(senal !== null && senal.vacunas_total > 0 && pv !== null)) sinDato.push(t('perfil.hechosVacunas').toLowerCase());
+          sinDato.push(t('perfil.hoyDesparasitacion').toLowerCase(), t('perfil.hoyAlergias').toLowerCase());
+          const colorDe = (e: CeldaHoy['estado']) => (e === 'atencion' ? theme.status.warning : theme.status.success);
+          return (
+            <View style={{ gap: spacing[3] }}>
+              <Texto variante="seccion">{t('perfil.hoyTitulo')}</Texto>
+              {celdas.length > 0 ? (
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] }}>
+                  {celdas.map((c) => (
+                    <View key={c.key} style={{ flexBasis: '47%', flexGrow: 1 }}>
+                      <CantoCurva color={colorDe(c.estado)}>
+                        <View style={{ padding: spacing[3], gap: spacing[1] }}>
+                          <Texto variante="apoyo">{c.rotulo}</Texto>
+                          <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}>
+                            {c.valor}
+                          </Text>
+                          <Texto variante="dato" numberOfLines={1}>{c.detalle}</Texto>
+                        </View>
+                      </CantoCurva>
                     </View>
-                  </CantoCurva>
+                  ))}
                 </View>
-              ));
-            })()}
-          </View>
+              ) : null}
+              {sinDato.length > 0 ? (
+                <Texto variante="apoyo">{t('perfil.hoySinRegistroLinea', { lista: sinDato.join(' · ') })}</Texto>
+              ) : null}
+            </View>
+          );
+        })()}
+
+        {/* ── IDENTIDAD, ARRIBA Y CON DISEÑO (r5 ítem 4): los hechos de
+            identidad en UNA tarjeta con grilla de pares — deja de leerse
+            como formulario. Talla/pelaje y paseos-en-grupo siguen
+            EDITABLES (P19, letra firmada) por tap en su par — sin
+            contorno (A6). */}
+        <View style={{ gap: spacing[3] }}>
+          <Texto variante="seccion">{t('perfil.identidad')}</Texto>
+          <Tarjeta elevacion="reposo">
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: spacing[4] }}>
+              {datosIdentidad.map((d) => (
+                <View key={d.etiqueta} style={{ width: '50%', paddingRight: spacing[3] }}>
+                  <FilaDato etiqueta={d.etiqueta} valor={d.valor} mono={d.mono === true} />
+                </View>
+              ))}
+              {mascota.especie === 'perro' ? (
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => setSocialHojaAbierta(true)}
+                  style={{ width: '50%', paddingRight: spacing[3], minHeight: 44 }}
+                >
+                  <FilaDato
+                    etiqueta={t('paseoSocial.celdaTitulo')}
+                    valor={
+                      mascota.paseo_social_ok === null
+                        ? t('paseoSocial.estadoSinResponder')
+                        : mascota.paseo_social_ok
+                          ? t('paseoSocial.estadoSi')
+                          : t('paseoSocial.estadoNo')
+                    }
+                  />
+                </Pressable>
+              ) : null}
+              {mascota.especie === 'perro' || mascota.especie === 'gato' ? (
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => setTallaHojaAbierta(true)}
+                  style={{ width: '50%', paddingRight: spacing[3], minHeight: 44 }}
+                >
+                  <FilaDato
+                    etiqueta={t('grooming.tallaCeldaTitulo')}
+                    valor={
+                      mascota.talla === null || mascota.pelaje === null
+                        ? t('grooming.tallaEstadoSinDeclarar')
+                        : `${t(mascota.talla === 'S' ? 'grooming.tallaS' : mascota.talla === 'M' ? 'grooming.tallaM' : 'grooming.tallaL')}${mascota.pelaje === 'largo' ? ` · ${t('grooming.pelajeLargoCorto')}` : ''}`
+                    }
+                  />
+                </Pressable>
+              ) : null}
+            </View>
+          </Tarjeta>
+          {/* la invitación digna: texto, jamás formulario muerto */}
+          <Texto variante="apoyo">{t('perfil.identidadInvitacion')}</Texto>
         </View>
 
-        {/* ── 1 · VITALES (S53-B2c.1: el estado antes que el log — §4 v1.3) ──
+        {/* ── VACUNAS (r5 ítem 5 — se llama VACUNAS, no "Salud"):
+            AGRUPADO Y COLAPSADO — el resumen visible, el despliegue
+            hacia abajo (PieRevelar), y "Cargar carnet" DENTRO de la
+            misma tarjeta como celda con diseño (jamás botón suelto). */}
+        <View style={{ gap: spacing[3] }}>
+          <Texto variante="seccion">{t('perfil.vacunas')}</Texto>
+          {vacunas.length === 0 ? (
+            <EstadoVacio
+              titulo={t('perfil.carnetVacio')}
+              descripcion={t('perfil.carnetVacioDetalle')}
+              accion={
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('perfil.cargarCarnet')}
+                  onPress={() => router.push({ pathname: '/carnet', params: { mascotaId: mascota.id, nombre: mascota.nombre } })}
+                />
+              }
+            />
+          ) : (
+            <Tarjeta relleno="ninguno" elevacion="reposo">
+              <View style={{ padding: spacing[4], gap: spacing[1] }}>
+                <Texto variante="cuerpo">
+                  {vacunas.length === 1 ? t('perfil.vacunasResumenUna') : t('perfil.vacunasResumen', { n: vacunas.length })}
+                </Texto>
+                {(() => {
+                  const ultima = vacunas.reduce<string | null>(
+                    (max, v) => (v.fecha_aplicada !== null && (max === null || v.fecha_aplicada > max) ? v.fecha_aplicada : max),
+                    null,
+                  );
+                  return ultima !== null ? (
+                    <Texto variante="dato">{t('perfil.hoyUltima', { fecha: fechaCortaMono(ultima, idioma) })}</Texto>
+                  ) : null;
+                })()}
+              </View>
+              {vacunasAbiertas
+                ? vacunas.map((v, i) => (
+                    <View key={`${v.nombre_vacuna}-${i}`}>
+                      <Separador />
+                      <Celda
+                        titulo={v.nombre_vacuna}
+                        subtitulo={v.tipo_vacuna ?? undefined}
+                        metadataMono={v.fecha_aplicada !== null ? fechaCortaMono(v.fecha_aplicada, idioma) : undefined}
+                      />
+                    </View>
+                  ))
+                : null}
+              <PieRevelar n={vacunas.length} revelado={vacunasAbiertas} onPress={() => setVacunasAbiertas((v) => !v)} />
+              <Separador />
+              <CeldaNavegacion
+                icono="carnet"
+                titulo={t('perfil.cargarCarnet')}
+                onPress={() => router.push({ pathname: '/carnet', params: { mascotaId: mascota.id, nombre: mascota.nombre } })}
+              />
+            </Tarjeta>
+          )}
+        </View>
+
+        {/* ── SU HISTORIA (r5 ítem 6): COLAPSADA (3 + PieRevelar) y con
+            FILTROS — esta semana · este mes · por tipo con su glifo
+            (FiltroPills, la misma anatomía del Hogar: sin caja en
+            reposo, placa rellena en el elegido). La barra de tinta a la
+            izquierda SE CONSERVA — el founder la firmó como correcta. */}
+        <View style={{ gap: spacing[3] }}>
+          <Texto variante="seccion">{t('perfil.vida')}</Texto>
+          {items === null ? (
+            <EsqueletoGrupo etiqueta={t('hogar.cargando')}>
+              <View style={{ gap: spacing[2] }}>
+                <Esqueleto forma="bloque" ancho="100%" alto={56} />
+                <Esqueleto forma="bloque" ancho="100%" alto={56} />
+                <Esqueleto forma="bloque" ancho="100%" alto={56} />
+              </View>
+            </EsqueletoGrupo>
+          ) : items === 'error' ? (
+            <EstadoVacio
+              titulo={t('hogar.errorHistoria')}
+              descripcion={t('hogar.errorHistoriaDetalle')}
+              accion={
+                <Boton
+                  variante="secundario"
+                  etiqueta={t('hogar.reintentar')}
+                  onPress={() => {
+                    setItems(null);
+                    if (typeof mascotaId === 'string') void cargarPrimeraPagina(mascotaId);
+                  }}
+                />
+              }
+            />
+          ) : items.length === 0 ? (
+            <EstadoVacio titulo={t('hogar.historiaEmpieza')} descripcion={t('hogar.historiaEmpiezaDetalle')} />
+          ) : (
+            (() => {
+              const hoyIso = new Intl.DateTimeFormat('en-CA').format(hoy);
+              const hace = (dias: number) => {
+                const d = new Date(hoy);
+                d.setDate(d.getDate() - dias);
+                return new Intl.DateTimeFormat('en-CA').format(d);
+              };
+              const filtrados = items.filter((it) => {
+                if (filtroHistoria === 'todo') return true;
+                if (filtroHistoria === 'semana') return it.fecha_evento.slice(0, 10) >= hace(7) && it.fecha_evento.slice(0, 10) <= hoyIso;
+                if (filtroHistoria === 'mes') return it.fecha_evento.slice(0, 10) >= hace(30) && it.fecha_evento.slice(0, 10) <= hoyIso;
+                return FAMILIA_DE_TIPO[it.tipo] === filtroHistoria;
+              });
+              const visibles = historiaRevelada ? filtrados : filtrados.slice(0, 3);
+              return (
+                <View style={{ gap: spacing[3], marginHorizontal: -spacing[5] }}>
+                  <FiltroPills
+                    activo={filtroHistoria}
+                    onCambio={(c) => setFiltroHistoria(c)}
+                    opciones={[
+                      { codigo: 'todo', etiqueta: t('hogar.filtroTodo'), icono: 'huella' },
+                      { codigo: 'semana', etiqueta: t('perfil.filtroSemana'), icono: null },
+                      { codigo: 'mes', etiqueta: t('perfil.filtroMes'), icono: null },
+                      { codigo: 'salud', etiqueta: t('hogar.filtroSalud'), icono: 'veterinaria' },
+                      { codigo: 'paseos', etiqueta: t('hogar.filtroPaseos'), icono: 'paseo' },
+                      { codigo: 'estetica', etiqueta: t('hogar.filtroEstetica'), icono: 'grooming' },
+                      { codigo: 'adiestramiento', etiqueta: t('hogar.filtroAdiestramiento'), icono: 'training' },
+                    ]}
+                  />
+                  <View style={{ paddingHorizontal: spacing[5], gap: spacing[3] }}>
+                    {filtrados.length === 0 ? (
+                      <EstadoVacio registro="seccion" titulo={t('hogar.filtroSinMomentos')} />
+                    ) : (
+                      <>
+                        <Tarjeta relleno="ninguno" elevacion="reposo">
+                          {visibles.map((it, i) => {
+                            const familia = FAMILIA_DE_TIPO[it.tipo];
+                            const color =
+                              familia === 'salud' ? theme.capa.identidad : familia !== undefined ? theme.capa.cuidado : null;
+                            const destino =
+                              it.tipo === 'historia_clinica_registrada'
+                                ? () => router.push({ pathname: '/parte/[eventoId]', params: { eventoId: it.evento_id, nombre: mascota.nombre } })
+                                : it.atencion_id !== null
+                                  ? () => router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: it.atencion_id as string } })
+                                  : null;
+                            const meta = [
+                              it.titulo_fuente !== null ? it.titulo_fuente.toLowerCase() : null,
+                              fechaCortaMono(it.fecha_evento.slice(0, 10), idioma),
+                            ]
+                              .filter((x): x is string => x !== null)
+                              .join(' · ');
+                            const fila = (
+                              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3], paddingHorizontal: spacing[4], paddingVertical: spacing[3], minHeight: 44 }}>
+                                {/* la barra de tinta — FIRMADA por el founder */}
+                                <View style={{ width: 3, height: 24, borderRadius: radius.full, backgroundColor: color ?? theme.border.default }} />
+                                <View style={{ flex: 1, minWidth: 0, gap: spacing[0.5] }}>
+                                  <Texto variante="cuerpo" numberOfLines={1}>{vozHecho(it, t)}</Texto>
+                                  <Texto variante="dato" numberOfLines={1}>{meta}</Texto>
+                                </View>
+                                {destino !== null ? (
+                                  <Svg width={19} height={19} viewBox="0 0 24 24">
+                                    <Path d="M9 5l7 7-7 7" stroke={theme.text.tertiary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                                  </Svg>
+                                ) : null}
+                              </View>
+                            );
+                            return (
+                              <View key={it.evento_id}>
+                                {i > 0 ? <Separador /> : null}
+                                {destino !== null ? (
+                                  <Pressable accessibilityRole="button" onPress={destino}>
+                                    {fila}
+                                  </Pressable>
+                                ) : (
+                                  fila
+                                )}
+                              </View>
+                            );
+                          })}
+                        </Tarjeta>
+                        <PieRevelar
+                          n={filtrados.length - 3}
+                          revelado={historiaRevelada}
+                          onPress={() => setHistoriaRevelada((v) => !v)}
+                        />
+                        {(historiaRevelada || filtrados.length <= 3) && estadoPie !== 'nada' ? (
+                          estadoPie === 'cargando' ? (
+                            <EsqueletoGrupo etiqueta={t('hogar.cargando')}>
+                              <Esqueleto forma="linea" ancho="40%" />
+                            </EsqueletoGrupo>
+                          ) : (
+                            // cero botones contorneados (A6, orden r5): la
+                            // paginación es label sin caja, target 44
+                            <Pressable
+                              accessibilityRole="button"
+                              onPress={() => void cargarMas()}
+                              style={{ minHeight: 44, alignItems: 'center', justifyContent: 'center' }}
+                            >
+                              <Texto variante="apoyo" color="primary">
+                                {estadoPie === 'error' ? t('hogar.reintentar') : t('hogar.vidaCargarMas')}
+                              </Texto>
+                            </Pressable>
+                          )
+                        ) : null}
+                      </>
+                    )}
+                  </View>
+                </View>
+              );
+            })()
+          )}
+        </View>
+
+
+        {/* ── VITALES — CONSERVADA DECLARADA (r5 no la lista; matarla
+            tiraría la fila hero display FIRMADA S53 y el hueco M-WEAR
+            sin orden explícita — el destino lo decide el gate).
+            DECLARADO AL GATE, no resuelto: el "Índice de salud" de los
+            guijarros es un PUNTAJE en potencia — MODELO_LOYALTY §3
+            prohíbe nivel y % completo; hoy dice "se construye con su
+            expediente" (sin número); si algún día muestra un número,
+            cruzó la frontera. ──
             ═══ HUECO M-WEAR: el día que la mascota tenga collar
             conectado, los ÍNDICES de abajo se llenan y el dashboard
             se expande (actividad/descanso/tendencias) — revelación
@@ -706,222 +992,13 @@ export default function PerfilDeMascota() {
           </View>
         </View>
 
-        {/* ── 2 · Salud (el carnet vivo) ── */}
-        <View style={{ gap: spacing[3] }}>
-          <Texto variante="seccion">{t('perfil.salud')}</Texto>
-          {vacunas.length === 0 ? (
-            <EstadoVacio
-              titulo={t('perfil.carnetVacio')}
-              descripcion={t('perfil.carnetVacioDetalle')}
-              accion={
-                <Boton
-                  variante="secundario"
-                  etiqueta={t('perfil.cargarCarnet')}
-                  onPress={() => router.push({ pathname: '/carnet', params: { mascotaId: mascota.id, nombre: mascota.nombre } })}
-                />
-              }
-            />
-          ) : (
-            <Tarjeta relleno="ninguno">
-              {vacunas.map((v, i) => (
-                <View key={`${v.nombre_vacuna}-${i}`}>
-                  {i > 0 ? <Separador /> : null}
-                  <Celda
-                    titulo={v.nombre_vacuna}
-                    subtitulo={v.tipo_vacuna ?? undefined}
-                    metadataMono={v.fecha_aplicada !== null ? fechaCortaMono(v.fecha_aplicada, idioma) : undefined}
-                  />
-                </View>
-              ))}
-            </Tarjeta>
-          )}
-          {/* S71-A3 (F2, la mudanza del carnet): la entrada del Hogar
-              murió y ESTA es su casa. Con carnet vacío el CTA vive en el
-              EstadoVacio (arriba); con carnet lleno faltaba el camino
-              para cargar más páginas — este botón lo cierra (Ley 22c:
-              acción con consecuencias viste de botón compacto). */}
-          {vacunas.length > 0 ? (
-            <View style={{ alignItems: 'flex-start' }}>
-              <Boton
-                variante="compacto"
-                tamaño="sm"
-                etiqueta={t('perfil.cargarCarnet')}
-                onPress={() =>
-                  router.push({ pathname: '/carnet', params: { mascotaId: mascota.id, nombre: mascota.nombre } })
-                }
-              />
-            </View>
-          ) : null}
-        </View>
-
-        {/* ── S81-C (vara founder: "el perfil de la mascota se lee
-            ANTES que su historial") — la Identidad sube por encima de
-            Su vida: quién es (raza·sexo·microchip·socialización·talla,
-            el expediente diferenciador) dejaba de leerse sepultado bajo
-            una Línea de Vida paginada. La pila v1.3 queda intacta (el
-            estado sigue primero) y lo PAGINABLE cierra la página. ── */}
-        {/* ── 3 · Identidad (progresiva) ── */}
-        <View style={{ gap: spacing[3] }}>
-          <Texto variante="seccion">{t('perfil.identidad')}</Texto>
-          {datosIdentidad.length > 0 ? (
-            <Tarjeta relleno="ninguno">
-              {datosIdentidad.map((d, i) => (
-                <View key={d.etiqueta}>
-                  {i > 0 ? <Separador /> : null}
-                  {d.mono ? (
-                    <Celda titulo={d.etiqueta} metadataMono={d.valor} />
-                  ) : (
-                    <Celda titulo={d.etiqueta} fin={<Texto variante="apoyo">{d.valor}</Texto>} />
-                  )}
-                </View>
-              ))}
-            </Tarjeta>
-          ) : null}
-          {/* P19 (S59-A4): la socialización del paseo — celda simple,
-              editable siempre; el NO re-registrado también cuenta (RPC). */}
-          {mascota.especie === 'perro' ? (
-            <Tarjeta relleno="ninguno">
-              <Celda
-                titulo={t('paseoSocial.celdaTitulo')}
-                interactiva
-                accessibilityRole="button"
-                onPress={() => setSocialHojaAbierta(true)}
-                fin={
-                  <Texto variante="apoyo">
-                    {mascota.paseo_social_ok === null
-                      ? t('paseoSocial.estadoSinResponder')
-                      : mascota.paseo_social_ok
-                        ? t('paseoSocial.estadoSi')
-                        : t('paseoSocial.estadoNo')}
-                  </Texto>
-                }
-              />
-            </Tarjeta>
-          ) : null}
-          {/* §3 grooming (S60): talla y pelaje del perfil — la voz dice
-              el estado real; NULL honesto invita a declarar. Perro y
-              gato (el techo de especies del grooming, §5). */}
-          {mascota.especie === 'perro' || mascota.especie === 'gato' ? (
-            <Tarjeta relleno="ninguno">
-              <Celda
-                titulo={t('grooming.tallaCeldaTitulo')}
-                interactiva
-                accessibilityRole="button"
-                onPress={() => setTallaHojaAbierta(true)}
-                fin={
-                  <Texto variante="apoyo">
-                    {mascota.talla === null || mascota.pelaje === null
-                      ? t('grooming.tallaEstadoSinDeclarar')
-                      : `${t(mascota.talla === 'S' ? 'grooming.tallaS' : mascota.talla === 'M' ? 'grooming.tallaM' : 'grooming.tallaL')}${mascota.pelaje === 'largo' ? ` · ${t('grooming.pelajeLargoCorto')}` : ''}`}
-                  </Texto>
-                }
-              />
-            </Tarjeta>
-          ) : null}
-          {/* la invitación digna: texto, jamás formulario muerto */}
-          <Texto variante="apoyo">{t('perfil.identidadInvitacion')}</Texto>
-        </View>
-        {/* ── 5 · SU HISTORIA (imagen-acuerdo): filas con CANTO CORTO —
-            título en voz de familia + prestador + fecha en mono. El tap
-            va al destino del hecho (la consulta → su parte; la atención
-            → su detalle); la vacuna no navega (su detalle vive en el
-            carnet de Salud, arriba). LineaDeVida deja esta pantalla —
-            la pieza queda en ui, su destino lo decide B. */}
-        <View style={{ gap: spacing[3] }}>
-          <Texto variante="seccion">{t('perfil.vida')}</Texto>
-          {items === null ? (
-            <EsqueletoGrupo etiqueta={t('hogar.cargando')}>
-              <View style={{ gap: spacing[2] }}>
-                <Esqueleto forma="bloque" ancho="100%" alto={56} />
-                <Esqueleto forma="bloque" ancho="100%" alto={56} />
-                <Esqueleto forma="bloque" ancho="100%" alto={56} />
-              </View>
-            </EsqueletoGrupo>
-          ) : items === 'error' ? (
-            <EstadoVacio
-              titulo={t('hogar.errorHistoria')}
-              descripcion={t('hogar.errorHistoriaDetalle')}
-              accion={
-                <Boton
-                  variante="secundario"
-                  etiqueta={t('hogar.reintentar')}
-                  onPress={() => {
-                    setItems(null);
-                    if (typeof mascotaId === 'string') void cargarPrimeraPagina(mascotaId);
-                  }}
-                />
-              }
-            />
-          ) : items.length === 0 ? (
-            <EstadoVacio titulo={t('hogar.historiaEmpieza')} descripcion={t('hogar.historiaEmpiezaDetalle')} />
-          ) : (
-            <>
-              <Tarjeta relleno="ninguno" elevacion="reposo">
-                {items.map((it, i) => {
-                  const familia = FAMILIA_DE_TIPO[it.tipo];
-                  const color =
-                    familia === 'salud' ? theme.capa.identidad : familia !== undefined ? theme.capa.cuidado : null;
-                  const destino =
-                    it.tipo === 'historia_clinica_registrada'
-                      ? () => router.push({ pathname: '/parte/[eventoId]', params: { eventoId: it.evento_id, nombre: mascota.nombre } })
-                      : it.atencion_id !== null
-                        ? () => router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: it.atencion_id as string } })
-                        : null;
-                  const meta = [
-                    it.titulo_fuente !== null ? it.titulo_fuente.toLowerCase() : null,
-                    fechaCortaMono(it.fecha_evento.slice(0, 10), idioma),
-                  ]
-                    .filter((x): x is string => x !== null)
-                    .join(' · ');
-                  const fila = (
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3], paddingHorizontal: spacing[4], paddingVertical: spacing[3], minHeight: 44 }}>
-                      {/* el canto corto: la marca de familia de la fila */}
-                      <View style={{ width: 3, height: 24, borderRadius: radius.full, backgroundColor: color ?? theme.border.default }} />
-                      <View style={{ flex: 1, minWidth: 0, gap: spacing[0.5] }}>
-                        <Texto variante="cuerpo" numberOfLines={1}>{vozHecho(it, t)}</Texto>
-                        <Texto variante="dato" numberOfLines={1}>{meta}</Texto>
-                      </View>
-                      {destino !== null ? (
-                        <Svg width={19} height={19} viewBox="0 0 24 24">
-                          <Path d="M9 5l7 7-7 7" stroke={theme.text.tertiary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                        </Svg>
-                      ) : null}
-                    </View>
-                  );
-                  return (
-                    <View key={it.evento_id}>
-                      {i > 0 ? <Separador /> : null}
-                      {destino !== null ? (
-                        <Pressable accessibilityRole="button" onPress={destino}>
-                          {fila}
-                        </Pressable>
-                      ) : (
-                        fila
-                      )}
-                    </View>
-                  );
-                })}
-              </Tarjeta>
-              {estadoPie === 'mas' ? (
-                <View style={{ alignSelf: 'center' }}>
-                  <Boton variante="compacto" etiqueta={t('hogar.vidaCargarMas')} onPress={() => void cargarMas()} />
-                </View>
-              ) : estadoPie === 'cargando' ? (
-                <EsqueletoGrupo etiqueta={t('hogar.cargando')}>
-                  <Esqueleto forma="linea" ancho="40%" />
-                </EsqueletoGrupo>
-              ) : estadoPie === 'error' ? (
-                <View style={{ alignSelf: 'center' }}>
-                  <Boton variante="compacto" etiqueta={t('hogar.reintentar')} onPress={() => void cargarMas()} />
-                </View>
-              ) : null}
-            </>
-          )}
-        </View>
-
-        {/* ── 6 · EL CTA (imagen-acuerdo): reservar, a lo ancho ── */}
+        {/* ── AL FINAL DE TODO (r5 ítem 7): el CTA en DEGRADADO — el de
+            la lámina (el founder declaró que negro también sirve; se
+            elige el de la lámina). Boton marca = gradiente firma,
+            contexto cerrado legal (CTA principal del dueño, Ley 4);
+            memorial degrada solo a primario. */}
         <Boton
-          variante="primario"
+          variante="marca"
           bloque
           etiqueta={t('perfil.reservarServicio')}
           onPress={() => router.navigate('/explorar')}

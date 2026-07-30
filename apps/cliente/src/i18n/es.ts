@@ -261,12 +261,19 @@ export const clienteEs = {
     hoyHasta: 'hasta {{fecha}}',
     hoyEnCarnet: '{{n}} en el carnet',
     hoyUltima: 'última {{fecha}}',
+    // r5: vacunas agrupadas + la línea honesta del sin-dato + filtros
+    // de tiempo de la historia.
+    vacunas: 'Vacunas',
+    vacunasResumenUna: '1 vacuna en su carnet',
+    vacunasResumen: '{{n}} vacunas en su carnet',
+    hoySinRegistroLinea: 'Sin registro todavía: {{lista}}',
+    filtroSemana: 'Esta semana',
+    filtroMes: 'Este mes',
     pastillaAtencion: 'Necesita atención',
     pastillaConociendo: 'Conociéndolo',
     hechosPaseos: 'Paseos',
     hechosVacunas: 'Vacunas',
     reservarServicio: 'Reservar un servicio',
-    salud: 'Salud',
     identidad: 'Identidad',
     // ── salud ──
     carnetVacio: 'Su carnet todavía está vacío',

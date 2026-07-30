@@ -109,6 +109,7 @@ import { useTraduccion } from '@/i18n';
 import { vozServicio } from '@/lib/voz-servicio';
 import { FAMILIA_DE_TIPO, vozHecho } from '@/lib/voz-hecho';
 import { CantoCurva } from '@/components/canto-curva';
+import { FiltroPills } from '@/components/filtro-pills';
 
 
 type TraductorHogar = ReturnType<typeof useTraduccion>['t'];
@@ -296,84 +297,6 @@ function FilaReco({
  *  jamás sale de acá). 'salud' junta vacunas y consultas. */
 type FamiliaVida = 'salud' | 'paseos' | 'estetica' | 'adiestramiento';
 type FiltroVidaCodigo = 'todo' | FamiliaVida;
-
-/** @override-s82c — EL FILTRO DE LA VIDA (ítem 3): pills de 44 con
- *  glifo en TRAZO; el elegido gana LA huella rellena — glifo sobre
- *  fondo tinta (lámina). "Todo" lleva la Huella canónica (la primitiva
- *  — nadie la redibuja, Ley 12). Separación 10, scroll horizontal.
- *  Borde 1.5 de la casa (la lámina traza 1.9: ese grosor es de GLIFO,
- *  no de borde — divergencia declarada). */
-function FiltroVida({
-  activo,
-  onCambio,
-  etiquetas,
-}: {
-  activo: FiltroVidaCodigo;
-  onCambio: (c: FiltroVidaCodigo) => void;
-  etiquetas: Record<FiltroVidaCodigo, string>;
-}) {
-  const { theme } = useTheme();
-  const OPCIONES: { codigo: FiltroVidaCodigo; icono: IconoNombre | 'huella' }[] = [
-    { codigo: 'todo', icono: 'huella' },
-    { codigo: 'salud', icono: 'veterinaria' },
-    { codigo: 'paseos', icono: 'paseo' },
-    { codigo: 'estetica', icono: 'grooming' },
-    { codigo: 'adiestramiento', icono: 'training' },
-  ];
-  return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing[2.5], paddingHorizontal: spacing[4] }}>
-      {OPCIONES.map((o) => {
-        const elegido = o.codigo === activo;
-        const tintaGlifo = elegido ? theme.bg.card : theme.text.secondary;
-        return (
-          <Pressable
-            key={o.codigo}
-            onPress={() => onCambio(o.codigo)}
-            accessibilityRole="radio"
-            accessibilityState={{ selected: elegido }}
-            accessibilityLabel={etiquetas[o.codigo]}
-            style={{
-              // r4-4 (CORRECCIÓN DE ARQUITECTURA del founder): §7bis
-              // gobierna el DATO, no el CONTROL — un control SE RELLENA
-              // o va SIN CAJA (A6 firmada). Reposo: cero borde, cero
-              // fondo. Elegido: la PLACA del glifo se rellena (30 de
-              // lado, rectángulo suave — Ley 21: lo que se elige es
-              // rectángulo) y el label pasa a tinta plena. NUNCA
-              // contorno, en ningún estado.
-              height: 44,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: spacing[2],
-              paddingRight: spacing[2],
-            }}
-          >
-            <View
-              style={{
-                width: 30,
-                height: 30,
-                borderRadius: radius.suave,
-                backgroundColor: elegido ? theme.text.primary : 'transparent',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              {o.icono === 'huella' ? (
-                <Svg width={16} height={16} viewBox="0 0 24 24">
-                  <Huella color={tintaGlifo} escala={0.85} x={1.8} y={1.8} />
-                </Svg>
-              ) : (
-                <Icono nombre={o.icono} tamano={16} registro="tinta" tinta={tintaGlifo} />
-              )}
-            </View>
-            <Texto variante="apoyo" color={elegido ? 'primary' : 'secondary'}>
-              {etiquetas[o.codigo]}
-            </Texto>
-          </Pressable>
-        );
-      })}
-    </ScrollView>
-  );
-}
 
 /** La línea mono del hecho: fecha (fecha_sola = partes UTC, S48-B6.3 —
  *  jamás una hora inventada) · hora local · duración · quién. */
@@ -969,7 +892,7 @@ export default function Hogar() {
         style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, alignItems: 'center', justifyContent: 'center' }}
       >
         <View style={{ opacity: 0.06 }}>
-          <Isotipo size={210} variant="tinta" />
+          <Isotipo size={210} variant="tinta" color={theme.text.primary} />
         </View>
       </View>
     <ScrollView
@@ -1831,16 +1754,16 @@ export default function Hogar() {
                 const visibles = vidaRevelada ? filtrados : filtrados.slice(0, 3);
                 return (
                   <View style={{ gap: spacing[3] }}>
-                    <FiltroVida
+                    <FiltroPills
                       activo={filtroVida}
                       onCambio={(c) => setFiltroVida(c)}
-                      etiquetas={{
-                        todo: t('hogar.filtroTodo'),
-                        salud: t('hogar.filtroSalud'),
-                        paseos: t('hogar.filtroPaseos'),
-                        estetica: t('hogar.filtroEstetica'),
-                        adiestramiento: t('hogar.filtroAdiestramiento'),
-                      }}
+                      opciones={[
+                        { codigo: 'todo', etiqueta: t('hogar.filtroTodo'), icono: 'huella' },
+                        { codigo: 'salud', etiqueta: t('hogar.filtroSalud'), icono: 'veterinaria' },
+                        { codigo: 'paseos', etiqueta: t('hogar.filtroPaseos'), icono: 'paseo' },
+                        { codigo: 'estetica', etiqueta: t('hogar.filtroEstetica'), icono: 'grooming' },
+                        { codigo: 'adiestramiento', etiqueta: t('hogar.filtroAdiestramiento'), icono: 'training' },
+                      ]}
                     />
                     {filtrados.length === 0 ? (
                       <View style={{ paddingHorizontal: spacing[4] }}>
