@@ -360,19 +360,100 @@ function r12(pares) {
     info: `pares=${pares.length} · exentas-firmadas=${exentas} · baseline-founder=${enBaseline}/${BASELINE_R12.size}${bajaron > 0 ? ` · ${bajaron} BAJARON: actualizar baseline` : ''}`,
   };
 }
-/** El volcador corre UNA vez por invocación; si cae, R12 falla fuerte. */
-function paresReales() {
+/** El volcador corre UNA vez por invocación; si cae, R12 y R15 fallan
+ *  fuerte. Desde r6 emite { pares, tokens } (los tokens para R15). */
+function volcadorReal() {
   try {
     const out = execSync('pnpm exec tsx scripts/verify-diseno-pares.ts', {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
     });
-    const pares = JSON.parse(out);
-    if (!Array.isArray(pares) || pares.length === 0) throw new Error('volcador vacío');
-    return pares;
+    const dump = JSON.parse(out);
+    if (!Array.isArray(dump?.pares) || dump.pares.length === 0) throw new Error('volcador sin pares');
+    if (!Array.isArray(dump?.tokens) || dump.tokens.length === 0) throw new Error('volcador sin tokens');
+    return dump;
   } catch (e) {
     return { caido: String(e.message ?? e).slice(0, 120) };
   }
+}
+
+/** R15 · LA EXCLUSIÓN DE A5 (§9bis.3 FIRMADA, S82-B r6 — orden founder):
+ *  ningún token del tema del CLIENTE resuelve a #0F5E56 ni a su familia.
+ *  La letra define la familia por ejemplar y por porqué ("es barro, no
+ *  está en la marca, y colisiona con el acento firmado del prestador");
+ *  el lint necesita números — OPERACIONALIZACIÓN DECLARADA de B
+ *  (ajustable en mesa, jamás ley nueva): familia = matiz a ±12° de
+ *  #0F5E56 (H≈174°) · saturación ≥30% · luminosidad ≤35% (el carácter
+ *  oscuro-apagado). Verificada contra los ejemplares: #0F5E56 ✓ dentro ·
+ *  tealDark #0A7268 ✓ dentro (ES el acento del prestador — la colisión
+ *  literal) · tealDarkNoche ✓ dentro · teal vivo #28E8DA fuera (L 53%,
+ *  está en la marca) · verdeVitalDark fuera (H 133°).
+ *  Alcance: valores OPACOS (hex/rgb); los tints con alpha se CUENTAN
+ *  como info (un rgba .25 de familia compositado no es barro — su
+ *  destino es de mesa, no de este lint).
+ *  EL CENSO DEL ESTRENO (29-jul): 8 tokens del tema claro resuelven a
+ *  familia HOY — 1 de r5 (capa.cuidado, con sus opciones a/b en el
+ *  reporte r6) y 7 PRE-EXISTENTES a r5 que nadie censó contra A5 desde
+ *  su firma (accent.primary · capaText.cuidado · status.infoText · los
+ *  5 de servicios) — TODOS a PENDIENTES nominales, arbitraje founder;
+ *  solo-baja: el que sale no vuelve, y todo token NUEVO en familia es
+ *  rojo. R12 pasó verde mientras esto se rompía porque mide RATIOS, no
+ *  identidades — por eso esta regla existe aparte. */
+const H_FAMILIA = 174.2, TOL_H = 12, MIN_S = 0.30, MAX_L = 0.35;
+const PENDIENTES_R15 = new Set([
+  'light·capa.cuidado',              // r5 — opciones (a)/(b) en el reporte r6
+  'light·capaText.cuidado',          // pre-r5 (registro AA vivo desde S53)
+  'light·accent.primary',            // pre-r5
+  'light·status.infoText',           // pre-r5
+  'light·services.vet',              // pre-r5
+  'light·services.grooming',         // pre-r5
+  'light·services.walking',          // pre-r5
+  'light·services.boarding',         // pre-r5
+  'light·services.store',            // pre-r5
+  // pre-r5 Y EL MÁS GRANDE del censo: la COLA del gradiente firma UI
+  // claro (firmaUILight stop 3) ES tealDark — la familia adentro del
+  // gradiente de MARCA del cliente (el Boton marca de bienvenida).
+  'light·accent.gradient.colors[2]',
+]);
+function hslDe(valor) {
+  let r, g, b;
+  const hex = valor.match(/^#([0-9a-fA-F]{6})$/);
+  const rgb = valor.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+))?\)$/);
+  if (hex) { r = parseInt(hex[1].slice(0, 2), 16); g = parseInt(hex[1].slice(2, 4), 16); b = parseInt(hex[1].slice(4, 6), 16); }
+  else if (rgb) {
+    if (rgb[4] !== undefined && +rgb[4] < 1) return { alpha: true };
+    r = +rgb[1]; g = +rgb[2]; b = +rgb[3];
+  } else return null;
+  r /= 255; g /= 255; b /= 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2;
+  if (mx === mn) return { h: 0, s: 0, l };
+  const d = mx - mn;
+  const s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+  const h = 60 * (mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4);
+  return { h, s, l };
+}
+const esFamilia = (c) => c && !c.alpha && Math.abs(c.h - H_FAMILIA) <= TOL_H && c.s >= MIN_S && c.l <= MAX_L;
+function r15(tokens) {
+  const fallos = [];
+  let pendientes = 0, tintsAlpha = 0, bajaron = PENDIENTES_R15.size;
+  for (const t of tokens) {
+    const c = hslDe(t.valor);
+    if (c?.alpha) {
+      // tint con alpha: si su base es familia, se cuenta como info
+      const base = hslDe(t.valor.replace(/,\s*[\d.]+\)$/, ')').replace('rgba', 'rgb'));
+      if (esFamilia(base)) tintsAlpha++;
+      continue;
+    }
+    if (!esFamilia(c)) continue;
+    const clave = `${t.tema}·${t.ruta}`;
+    if (PENDIENTES_R15.has(clave)) { pendientes++; continue; }
+    fallos.push(`R15: ${clave} = ${t.valor} — familia de #0F5E56 en el tema del cliente (A5 §9bis.3 FIRMADA)`);
+  }
+  bajaron -= pendientes;
+  return {
+    fallos,
+    info: `pendientes-arbitraje=${pendientes}/${PENDIENTES_R15.size} · tints-alpha-familia(info)=${tintsAlpha}${bajaron > 0 ? ` · ${bajaron} BAJARON: actualizar pendientes` : ''}`,
+  };
 }
 
 /** R13 · CONTROL CONTORNEADO (S82-B r4, orden founder — A6 SIN CAJA
@@ -471,8 +552,9 @@ const FIXTURES = {
   R12: [{ tema: 'light', clase: 'texto', nombre: '(fixture)', ratio: 2.0, minimo: 4.5 }],
   R13: [{ path: '(fixture)', src: '<Pressable style={{ borderWidth: 1.5, borderColor: theme.border.default }}>' }],
   R14: [{ path: 'x/hogar/index.tsx', src: 'const RESPIRO_BANDA = spacing[8];\nconst SOLAPE_RECO = spacing[14];' }],
+  R15: [{ tema: 'light', ruta: '(fixture)', valor: '#0F5E56' }],
 };
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14 };
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -525,13 +607,15 @@ const corridas = [
   ['R11 (LOYALTY §3: la voz del momento sin score)', r11(dics)],
   ['R14 (el solape no tapa el saludo)', r14(apps)],
 ];
-// R12 corre sobre el volcador vivo; si el volcador cayó, FALLA FUERTE.
-const pares = paresReales();
-corridas.push(
-  'caido' in (pares ?? {})
-    ? ['R12 (contraste dos temas)', { fallos: [`el VOLCADOR no corrió (${pares.caido}) — sin pares no hay verificación (L-192)`], info: 'VOLCADOR CAÍDO' }]
-    : ['R12 (contraste dos temas: texto 4.5 · canto 3.0)', r12(pares)],
-);
+// R12 y R15 corren sobre el volcador vivo; si cayó, FALLAN FUERTE.
+const dump = volcadorReal();
+if ('caido' in (dump ?? {})) {
+  corridas.push(['R12 (contraste dos temas)', { fallos: [`el VOLCADOR no corrió (${dump.caido}) — sin pares no hay verificación (L-192)`], info: 'VOLCADOR CAÍDO' }]);
+  corridas.push(['R15 (exclusión A5)', { fallos: [`el VOLCADOR no corrió (${dump.caido}) — sin tokens no hay verificación (L-192)`], info: 'VOLCADOR CAÍDO' }]);
+} else {
+  corridas.push(['R12 (contraste dos temas: texto 4.5 · canto 3.0)', r12(dump.pares)]);
+  corridas.push(['R15 (A5 §9bis.3: la familia de #0F5E56 fuera del tema cliente)', r15(dump.tokens)]);
+}
 corridas.push(['R13 (A6: control contorneado, cliente)', r13(apps)]);
 for (const [nombre, res] of corridas) {
   console.log(`${nombre} · ${res.info}`);

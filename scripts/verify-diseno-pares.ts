@@ -16,7 +16,7 @@
  * Correr suelto: pnpm exec tsx scripts/verify-diseno-pares.ts
  */
 
-import { lightTheme, darkTheme } from '../packages/ui/src/themes'
+import { lightTheme, darkTheme, memorialTheme } from '../packages/ui/src/themes'
 
 type RGBA = { r: number; g: number; b: number; a: number }
 
@@ -112,14 +112,41 @@ for (const [tema, t] of Object.entries(temas) as ['light' | 'dark', typeof light
     canto('accent.controlLleno/bg.card', (t.accent as Record<string, string>).controlLleno, t.bg.card)
 }
 
-// Salida: JSON por stdout (R12 lo consume); legible con --tabla.
+// ── R15 (S82-B r6): el volcado de TOKENS del tema del cliente —
+// los tres temas que el cliente consume, aplanados a rutas con su
+// valor string, para que el lint juzgue identidades (no ratios). ──
+export interface TokenPlano {
+  tema: string
+  ruta: string
+  valor: string
+}
+const tokens: TokenPlano[] = []
+function aplanar(tema: string, obj: unknown, ruta: string) {
+  if (typeof obj === 'string') {
+    tokens.push({ tema, ruta, valor: obj })
+    return
+  }
+  if (Array.isArray(obj)) {
+    obj.forEach((v, i) => aplanar(tema, v, `${ruta}[${i}]`))
+    return
+  }
+  if (obj !== null && typeof obj === 'object') {
+    for (const [k, v] of Object.entries(obj)) aplanar(tema, v, ruta ? `${ruta}.${k}` : k)
+  }
+}
+aplanar('light', lightTheme, '')
+aplanar('dark', darkTheme, '')
+aplanar('memorial', memorialTheme, '')
+
+// Salida: JSON por stdout ({ pares, tokens } — R12 y R15 lo consumen);
+// legible con --tabla.
 if (process.argv.includes('--tabla')) {
   for (const p of pares) {
     const ok = p.ratio >= p.minimo
     console.log(`${ok ? '  ' : '✗ '}${p.tema.padEnd(5)} ${p.clase.padEnd(5)} ${p.nombre.padEnd(46)} ${p.ratio.toFixed(2)} (mín ${p.minimo})`)
   }
   const fallan = pares.filter((p) => p.ratio < p.minimo)
-  console.log(`\n${pares.length} pares medidos · ${fallan.length} bajo mínimo`)
+  console.log(`\n${pares.length} pares medidos · ${fallan.length} bajo mínimo · ${tokens.length} tokens volcados`)
 } else {
-  console.log(JSON.stringify(pares))
+  console.log(JSON.stringify({ pares, tokens }))
 }
