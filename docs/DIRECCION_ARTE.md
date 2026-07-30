@@ -87,6 +87,67 @@ punto decorativo.**
 6. **Estado activo en tabs:** la tab activa se marca porque su huella
    APARECE (en reposo, el ícono de tab va solo en trazo). La huella es el
    sistema de estado — sin recuadros, sin pills.
+
+   > **ENMIENDA S82 — LA HUELLA TAMBIÉN PUEDE MARCAR EN UN FILTRO
+   > (FIRMADA por el founder en dispositivo, 30-jul-2026, sobre las dos
+   > candidatas montadas lado a lado; origen: C, r17 propuesta → r18
+   > firma).** **En un filtro, el estado lo puede marcar LA HUELLA — y
+   > cuando lo hace, la huella aparece SOLO EN LA OPCIÓN ELEGIDA.** La
+   > línea que viaja **NO se deroga**: sigue vigente donde la huella no
+   > puede marcar (ver el alcance). Lo que se enmienda es su
+   > **exclusividad** — hasta hoy era el único marcador legal de estado
+   > en un filtro (frontera S80-B15, `filtro-oficio.tsx`).
+   >
+   > **EL PORQUÉ, que es lo que esta enmienda existe para dejar escrito:
+   > el veredicto de S80 no se contradice, se EXPLICA.** Ahí se midió que
+   > *"la huella sola no leía"* — **pero en ese caso la huella estaba en
+   > TODAS las opciones**, como identidad del glifo (los b′ llevan una
+   > huella rellena por ley 2). **Una marca presente en todos los
+   > hermanos no puede señalar a uno: no falló la huella, falló la huella
+   > COMO CONSTANTE.** Por eso hizo falta la posición, y la posición la
+   > da la línea. En la firma de hoy la huella aparece **solo en la
+   > elegida**: marca por PRESENCIA, que es justamente lo que no podía
+   > hacer estando en todas. **Es otro mecanismo, no el mismo intento dos
+   > veces.** Y resuelve de raíz lo que abrió la ronda: **un eje sin
+   > categoría no tiene color propio** (próximos/historial es ESTADO,
+   > todos/semana/mes es TIEMPO; solo el eje de SERVICIO tiene categorías
+   > — ley 10), así que marcar con color obligaba a pedir prestado un
+   > verde de capa ajeno. **La forma no se pide prestada.**
+   >
+   > **ALCANCE — dónde rige cada una:** filtro del CLIENTE
+   > (`FiltroPills`) → **la huella**, solo en la elegida (sus ejes no
+   > tienen categoría) · filtro de OFICIO del prestador
+   > (`filtro-oficio`) → **la línea que viaja**, porque ahí cada opción
+   > ES un oficio y su glifo b′ ya lleva huella: la huella no puede
+   > marcar una sin estar en todas · **tabs (§2.6): INTACTO.**
+   >
+   > **DIVERGENCIA DECLARADA, no escondida:** las dos apps marcan el
+   > estado de un filtro de manera distinta. Es legítimo porque la
+   > restricción es distinta —el prestador filtra por oficio y sus glifos
+   > ya portan huella—, pero **es divergencia y se declara.
+   > Unificarlas sería OTRA decisión**, con su costo: tocar un filtro del
+   > prestador ya construido, firmado y gateado.
+   >
+   > **COROLARIO EXIGIBLE — LA HUELLA DE MARCA JAMÁS VA ADENTRO DE LA
+   > PLACA.** Lo que mantiene distinguibles las DOS huellas de un chip
+   > (la del objeto y la de la marca) es **escala y aislamiento**: dentro
+   > del glifo, a 16px y adentro de la placa, es un DETALLE DEL OBJETO;
+   > sola, a 13px, al lado del label y fuera de la placa, es una MARCA.
+   > **El día que alguien la meta adentro de la placa, vuelve a ser el
+   > caso de S80 — una huella más entre huellas — y la firma deja de
+   > leerse sin que nadie haya cambiado la ley.** Por eso está MECANIZADO
+   > en `R22` de `verify:diseno` (orden del founder): el defecto se ve
+   > como decisión de layout, no como cambio de ley — no rompe el build,
+   > no cambia un color, no toca nada escrito. **R22 nace con su
+   > condición de muerte escrita:** se retira el día que el founder firme
+   > un diseño donde la marca viva adentro de la placa (en el MISMO
+   > commit de esa firma) o que `FiltroPills` suba a `packages/ui` con el
+   > invariante en el CONTRATO del componente.
+   >
+   > **Murió con la firma (Ley 37):** la línea viajera del filtro del
+   > CLIENTE y su maquinaria (vive intacta en el prestador) · el relleno
+   > pleno del chip sin glifo, que había nacido como sustituto — **dos
+   > marcas para un mismo estado es el tercer peso que no informa**.
 7. **Dosis del prestador:** el mismo lenguaje, con la huella en el color
    funcional AA de su capa (no hex puro) o en tinta cuando la vista ya
    porta su único acento — la sobriedad es aplicación, no otro idioma.

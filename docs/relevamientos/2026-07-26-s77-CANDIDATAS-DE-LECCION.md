@@ -1,6 +1,6 @@
-# LAS CANDIDATAS DE LECCIÓN — inventario para la firma del founder (S77)
+# LAS CANDIDATAS DE LECCIÓN — inventario para la firma del founder (S77, ampliado S82)
 
-> **NUEVE candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia.
+> **DIEZ candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **La décima entró en S82** (el nombre de un token es su rol) — el inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
 
 > **NINGUNA ESTÁ FIRMADA. La firma es del founder.** Este documento no decide:
 > junta lo que hoy vive disperso entre la letra, las deudas y los cierres de
@@ -13,7 +13,7 @@
 
 ---
 
-## Las nueve
+## Las diez
 
 ### 1 · (d) — EL ORDEN NOMBRA EL ARTEFACTO QUE ABRE, JAMÁS EL ARCHIVO DONDE SE LO ESPERA
 **Origen:** S75 (canon, línea 44). **Sin firma desde entonces.**
@@ -66,8 +66,50 @@
 
 ---
 
+### 10 · UN TOKEN SE NOMBRA POR SU ROL, NO POR DÓNDE SE USÓ PRIMERO
+*(sumada en S82, 30-jul-2026 — origen: el trabajo de B sobre el tema del cliente)*
+
+**El texto candidato:** un token se nombra por **su ROL**, jamás por el
+lugar donde se usó la primera vez. **Y si su uso mayoritario contradice
+el nombre, lo que se corrige es EL NOMBRE — no se migran los usos.** El
+nombre viejo mintiendo es más caro que el rename: cada lectura futura
+decide mal, y la decisión mala es invisible (nadie revisa un token que
+"ya existe").
+
+**Costo medido — TRES casos, los tres de esta sesión:**
+- **`bg.overlay`** — declarado como token de HOVER en su propio
+  comentario, y **28 de sus 43 consumidores lo usan fuera de ese rol**.
+  El defecto que destapó: se lo eligió como fill del secundario `sinCaja`
+  porque un censo lo llamaba *"el material intermedio"* — **un hover no
+  es un fill**, y la elección salió mal justamente por leer el uso en vez
+  del rol.
+- **`text.onGradient`** — **dos sitios que funcionaban por COINCIDENCIA
+  DE VALOR**, no porque hubiera gradiente: el token decía "sobre
+  gradiente" y el papel del consumidor era otro. Funcionaba hasta que
+  alguien cambiara el valor por la razón correcta.
+- **`#EEECE8`** — el arquitecto lo tomó del CSS de una lámina **creyendo
+  que era token de la casa**. No lo era. *(Hermana directa del corolario
+  ya firmado en S82: la tipografía y los hexes de una lámina son
+  CRITERIO, no fuente — acá el mismo error, en sentido inverso: un valor
+  de lámina que se coló como si fuera ley.)*
+
+**Por qué merece ser ley y no solo anécdota:** las tres fallas son
+**silenciosas** — ninguna rompe el build, ninguna cambia un píxel el día
+que se comete. Se cobran meses después, cuando alguien confía en el
+nombre. Es la familia de L-192 aplicada al vocabulario del tema.
+
+**Estado:** viva, sin firma. *(Su contra-argumento honesto, para que el
+gate lo tenga: renombrar un token de N consumidores tiene costo propio y
+puede chocar con "no se toca un token de N consumidores para curar uno"
+— el principio que el propio founder fijó con `light0`. La candidata dice
+CUÁNDO renombrar, no que renombrar sea gratis.)*
+
+---
+
 ## Nota sobre el conteo
 
 **Son NUEVE, y la novena nació acá.** El inventario abrió con ocho porque **L-169 no existía**: el canon la nombraba y ninguna edición la había escrito. Su texto se depositó en S77 (ver arriba), con su nota de procedencia — que es, ella misma, material de la lección.
+
+> **RE-MEDIDO S82 (30-jul-2026): son DIEZ.** Entró la décima —*un token se nombra por su ROL*— desde el trabajo de B sobre el tema del cliente, con sus tres casos medidos. El conteo se corrige acá y en el título en el MISMO acto (L-141: un contador que envejece miente igual que una ley sin escribir). **Las nueve de S77 siguen SIN FIRMA**, ninguna cerrada: este documento acumula, no vence.
 
 Si alguna otra candidata quedó fuera, es porque no encontré su fuente. **Pasame el literal y entra**: el criterio de este documento es que nada figure sin dónde leerlo.
