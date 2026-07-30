@@ -13,7 +13,13 @@ export const lightTheme = {
   mode: 'light' as const,
 
   bg: {
-    base:     palette.light0,   // #FAF9F7 — papel algodón (D-360 S58), nunca blanco puro
+    // S82-B r9 (orden founder punto 1): el fondo del claro resuelve a
+    // PAPEL TAPIZ — hermano de papel algodón. `light0` QUEDA INTACTO a
+    // propósito: tiene DOS consumidores (este fondo y `accent.ctaTexto`,
+    // el texto sobre el CTA de tinta) y no se toca un token de dos
+    // consumidores para cambiar uno. Hoy `papelTapiz === light0`: el
+    // cableado vive, el color espera su firma en el gate.
+    base:     palette.papelTapiz,   // hoy #FAF9F7 (papel algodón, D-360 S58)
     card:     palette.light1,   // #FFFFFF
     elevated: palette.light2,   // #F8F7FC
     overlay:  palette.light3,   // #EDEBF5 — hover

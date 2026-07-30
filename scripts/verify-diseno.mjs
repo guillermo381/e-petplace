@@ -536,6 +536,37 @@ function r14(archivos) {
   return { fallos, info: `solape=${s} < respiro=${r}` };
 }
 
+/** R16 · EL GUARD DEL PAPEL TAPIZ (S82-B r9 — mecaniza la promesa de los
+ *  puntos 4 y 5 de la orden: "el prestador NO recibe tinte" y "la
+ *  separación se construye con el valor firmado"). El modo de fallo que
+ *  cierra es EL SILENCIO: el día que alguien encienda `papelTapiz` con
+ *  el valor firmado, el prestador se tiñe SOLO —comparte `lightTheme`—
+ *  y nadie lo nota hasta un gate. Entonces: **si `papelTapiz !==
+ *  light0` (tinte ENCENDIDO), el tema del prestador (`lightOficio`)
+ *  TIENE que pisar `bg.base` a `light0`**. Hoy pasa en verde por el
+ *  apagado (papelTapiz === light0) — y cuando el color llegue, el lint
+ *  exige su separación en el MISMO acto. Patrón del guard de la vitrina
+ *  (S78): el orden nombra el artefacto que abre. */
+function r16(fuentes) {
+  const pal = fuentes.palette ?? '';
+  const temas = fuentes.temas ?? '';
+  const luz = pal.match(/\blight0:\s*'(#[0-9A-Fa-f]{6})'/);
+  const tapiz = pal.match(/\bpapelTapiz:\s*'(#[0-9A-Fa-f]{6})'/);
+  if (!luz || !tapiz)
+    return { fallos: ['R16: no se pudo leer light0/papelTapiz de palette.ts — sin los valores no hay verificación (L-192)'], info: 'SIN FUENTE' };
+  const encendido = luz[1].toUpperCase() !== tapiz[1].toUpperCase();
+  // La separación: lightOficio (el tema del prestador) pisando bg.base.
+  const separado = /const lightOficio[\s\S]*?\bbg:\s*\{[^}]*\bbase:\s*palette\.light0/.test(temas);
+  const fallos = encendido && !separado
+    ? [`R16: papelTapiz (${tapiz[1]}) está ENCENDIDO y lightOficio NO pisa bg.base a light0 — el prestador estaría recibiendo el tinte del cliente (orden founder S82 r8/r9 punto 5)`]
+    : [];
+  return { fallos, info: `tapiz=${encendido ? 'ENCENDIDO ' + tapiz[1] : 'apagado (=light0)'} · separación-prestador=${separado ? 'construida' : 'no construida'}` };
+}
+const FUENTES_R16 = {
+  palette: readFileSync('packages/ui/src/tokens/palette.ts', 'utf8'),
+  temas: readFileSync('packages/ui/src/themes/index.ts', 'utf8'),
+};
+
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
 const FIXTURES = {
@@ -553,8 +584,11 @@ const FIXTURES = {
   R13: [{ path: '(fixture)', src: '<Pressable style={{ borderWidth: 1.5, borderColor: theme.border.default }}>' }],
   R14: [{ path: 'x/hogar/index.tsx', src: 'const RESPIRO_BANDA = spacing[8];\nconst SOLAPE_RECO = spacing[14];' }],
   R15: [{ tema: 'light', ruta: '(fixture)', valor: '#0F5E56' }],
+  // tinte ENCENDIDO y ningún override en lightOficio = el caso que la
+  // regla existe para atrapar.
+  R16: { palette: "light0: '#FAF9F7',\npapelTapiz: '#FAF2F5',", temas: 'const lightOficio: Theme = { ...lightTheme }' },
 };
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15 };
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -617,6 +651,7 @@ if ('caido' in (dump ?? {})) {
   corridas.push(['R15 (A5 §9bis.3: la familia de #0F5E56 fuera del tema cliente)', r15(dump.tokens)]);
 }
 corridas.push(['R13 (A6: control contorneado, cliente)', r13(apps)]);
+corridas.push(['R16 (papel tapiz: el prestador no recibe tinte)', r16(FUENTES_R16)]);
 for (const [nombre, res] of corridas) {
   console.log(`${nombre} · ${res.info}`);
   for (const f of res.fallos) { console.error(`  ✗ ${f}`); fallosTotal++; }

@@ -34,6 +34,12 @@ export const typography = {
       regular: 'DMSans_400Regular',
       medium:  'DMSans_500Medium',
       bold:    'DMSans_700Bold',
+      // S82-B r9 — LA VOZ DEL PRODUCTO: la itálica REAL de la misma
+      // familia (Ley 3 intacta: DM Sans sigue siendo la única de UI).
+      // En RN el archivo se elige por fontFamily — la itálica es OTRO
+      // archivo, no un fontStyle sobre el regular (el sintético no es
+      // consistente entre plataformas).
+      italica: 'DMSans_400Regular_Italic',
     },
     // JETBRAINS MONO — metadata generada por máquina (ver REGLA DE VOZ)
     mono: {

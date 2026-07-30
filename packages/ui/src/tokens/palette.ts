@@ -96,6 +96,33 @@ export const palette = {
 
   // ── Fondos light (§7.3 B1 — DEFAULT del producto) ──
   light0: '#FAF9F7',  // fondo base — PAPEL ALGODÓN (D-360 firmado S58; era lavanda #F5F4FA).
+  /** PAPEL TAPIZ (S82-B r9, orden founder) — hermano de papel algodón: el
+   *  fondo del tema CLARO con un tinte magenta muy leve. **NACE APAGADO:
+   *  su valor de hoy ES `light0` — cero cambio visual, cero tinte al
+   *  prestador** (patrón preparado-apagado, precedente D-456/D-579).
+   *  El porqué del apagado, declarado: la orden pide que `bg.base`
+   *  resuelva acá (punto 1) Y que la separación del prestador se
+   *  construya recién con el valor firmado (punto 4) — con un valor
+   *  encendido hoy, el prestador recibiría el tinte que la orden le
+   *  prohíbe. Así el cableado existe y el color espera su firma.
+   *  LOS CANDIDATOS van a la lámina de gate (`papelTapizCandidatos`) —
+   *  el ojo elige, no el contraste (medido r8: cero pares caen).
+   *  AL FIRMARSE: esta línea toma el candidato + nace el slot de fondo
+   *  del provider para que el prestador siga en papel. Reversa: volver
+   *  a `light0`. */
+  papelTapiz: '#FAF9F7',
+  /** Los candidatos del gate (S82-B r9) — pink puro compositado sobre
+   *  papel algodón al 2/3/4/5%: mezcla de DOS tokens FIRMADOS, jamás
+   *  hexes huérfanos. El de la lámina de Claude Design ("PAPEL TAPIZ ·
+   *  Magenta suave · Cálido") entra como QUINTO cuando el zip llegue al
+   *  repo — al abrir esta ronda NO estaba (medido: docs/laminas/ sin él).
+   *  Recomendación de B anotada, NO valor: el 3%. */
+  papelTapizCandidatos: [
+    { etiqueta: '2%', valor: '#FAF4F6' },
+    { etiqueta: '3%', valor: '#FAF2F5' },
+    { etiqueta: '4%', valor: '#FAEFF4' },
+    { etiqueta: '5%', valor: '#FAEDF3' },
+  ] as const,
                       // La otra mitad del efecto papel es la sombra de tinta cálida
                       // de tokens/elevacion.ts. Nunca blanco puro.
   light1: '#FFFFFF',  // cards

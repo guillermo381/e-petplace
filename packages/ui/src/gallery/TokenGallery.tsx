@@ -341,6 +341,85 @@ function EjemploFichaVacuna() {
 }
 
 
+/** LÁMINA DE GATE S82-B r9 (orden founder): los candidatos de PAPEL
+ *  TAPIZ pintados A SANGRE en un panel con contenido real, el agua del
+ *  isotipo en sus dos alfas vivos, los dos glifos de control a 21px y la
+ *  variante `voz`. El valor NO está decidido — esta lámina existe para
+ *  que el ojo elija (regla 80: la ley después del resultado firmado). */
+function LaminaGateTapiz() {
+  const { theme } = useTheme()
+  const CANDIDATOS = [
+    { etiqueta: 'papel (hoy)', valor: palette.light0 },
+    ...palette.papelTapizCandidatos.map((c) => ({ etiqueta: c.etiqueta, valor: c.valor })),
+  ]
+  const [i, setI] = useState(1) // arranca en 2% para que el switch se note
+  const fondo = CANDIDATOS[i].valor
+  // El agua: los DOS alfas que hoy viven en producción (hallazgo r8 —
+  // el Hogar en .06 FIRMADO, el perfil en .04). La corrección del
+  // founder: si algo se mueve, sube el PERFIL al Hogar, nunca al revés.
+  const AGUAS = [0.04, 0.06]
+
+  return (
+    <View style={{ gap: spacing[4] }}>
+      {/* SelectorOpcion y NO SelectorSegmentado: cinco candidatos es
+          elegir un VALOR, no cambiar de vista (Ley 19.3 acota el
+          segmento a 2-3 vistas exclusivas y su propio dev-warn lo
+          dice). Los candidatos SE FIJAN → contorno por 7bis. */}
+      <SelectorOpcion
+        etiqueta="Candidato de papel tapiz"
+        disposicion="tira"
+        acento="control"
+        opciones={CANDIDATOS.map((c, k) => ({ codigo: String(k), etiqueta: c.etiqueta }))}
+        seleccionada={String(i)}
+        onSelect={(c) => setI(Number(c))}
+      />
+      <Texto variante="dato">
+        {`fondo ${fondo}${i === 0 ? ' · sin tinte' : ` · pink ${CANDIDATOS[i].etiqueta} sobre papel algodón`}`}
+      </Texto>
+
+      {/* El panel a sangre con el agua detrás y contenido real encima */}
+      {AGUAS.map((alfa) => (
+        <View key={alfa} style={{ gap: spacing[2] }}>
+          <Texto variante="apoyo">
+            {alfa === 0.06 ? 'agua 6% — la del Hogar (FIRMADA)' : 'agua 4% — la del perfil (descalibrada, r8)'}
+          </Texto>
+          <View style={{ height: 260, borderRadius: radius.md, overflow: 'hidden', backgroundColor: fondo }}>
+            <View
+              pointerEvents="none"
+              style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <View style={{ opacity: alfa }}>
+                <Isotipo size={190} variant="tinta" color={theme.text.primary} />
+              </View>
+            </View>
+            <View style={{ padding: spacing[4], gap: spacing[3] }}>
+              <Texto variante="seccion">Thor</Texto>
+              {/* LA VOZ DEL PRODUCTO — su primera aparición visible */}
+              <Texto variante="voz">
+                Su expediente se completa de a poco. Cada dato que sumás es uno menos que hay que adivinar en una urgencia.
+              </Texto>
+              <Tarjeta elevacion="reposo">
+                <View style={{ gap: spacing[1] }}>
+                  <Texto variante="cuerpo">Salió a pasear</Texto>
+                  <Texto variante="dato">28 jul · 3,1 km en 52 min</Texto>
+                </View>
+              </Tarjeta>
+              {/* Los glifos de control, en su target real y a 21 */}
+              <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
+                <Icono nombre="lapiz" tamano={21} registro="tinta" />
+                <Icono nombre="compartir" tamano={21} registro="tinta" />
+                <Icono nombre="lapiz" tamano={28} registro="tinta" />
+                <Icono nombre="compartir" tamano={28} registro="tinta" />
+                <Texto variante="apoyo">21 (gate §2.9) · 28</Texto>
+              </View>
+            </View>
+          </View>
+        </View>
+      ))}
+    </View>
+  )
+}
+
 function EjemploSetBPrima() {
   // El lote 1 firmado (DIRECCION_ARTE §6) — cada ícono a su tamaño de
   // diseño (28) Y la fila de 21px (§2.9: el gate del founder corre acá;
@@ -1884,6 +1963,16 @@ function GaleriaInterna() {
               </PanelTema>
             </ThemeProvider>
           </View>
+        </Seccion>
+
+        {/* ── LÁMINA DE GATE S82-B r9 — LA PASADA ÚNICA DE TELÉFONO ──
+            Los cuatro asuntos del gate en UN lugar (orden founder: "va en
+            la misma pasada de teléfono, con el tinte, el agua y el
+            registro nuevo"). El switch elige candidato de fondo y el
+            panel se pinta ENTERO con él — el tinte se juzga en contexto,
+            jamás como muestra de color al lado de otra. */}
+        <Seccion titulo="⭐ GATE S82-B r9 — PAPEL TAPIZ (el valor lo elige el ojo) · la marca de agua · los glifos de control a 21px · la VOZ del producto">
+          <LaminaGateTapiz />
         </Seccion>
 
         {/* Set b′ — DIRECCION_ARTE v1.0 (S53): la mascota presente */}

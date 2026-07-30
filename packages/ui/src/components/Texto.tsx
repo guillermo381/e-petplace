@@ -40,6 +40,11 @@
  *   · dato    → JetBrains Mono 400 · 13px · metadata que generó una máquina
  *               (fechas, horas, IDs, códigos), con `tabular-nums` para que
  *               los dígitos no bailen (precedente Cronometro, S44).
+ *   · voz     → DM Sans ITÁLICA 400 · 18px · interlineado de prosa · tinta
+ *               secundaria. **LA VOZ DEL PRODUCTO** (S82-B r9): lo que el
+ *               producto piensa sobre la mascota, no lo que la interfaz
+ *               explica. Capacidad ADITIVA: no cambia ninguna pantalla
+ *               hasta que alguien la use.
  *
  * CONGELADO S71-A2 con las cuatro enmiendas de mesa, todas MEDIDAS antes
  * de decidir (no dictadas):
@@ -80,7 +85,7 @@ import type { ReactNode } from 'react'
 import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
 
-export type TextoVariante = 'titulo' | 'seccion' | 'cuerpo' | 'apoyo' | 'dato' | 'datoMd'
+export type TextoVariante = 'titulo' | 'seccion' | 'cuerpo' | 'apoyo' | 'dato' | 'datoMd' | 'voz'
 /** S81 (pedido de C, los spreads dangerText de los cierres): entran los
  *  colores de STATUS — 'danger' y 'success' resuelven contra
  *  theme.status.*Text (los registros AA). El resto sigue en theme.text. */
@@ -126,6 +131,21 @@ const RECETA: Record<
   // cierres): el dato PROMINENTE — mono a md en primary. Sigue siendo
   // voz de máquina (Ley 3); el traje crece con el protagonismo.
   datoMd:  { fontFamily: typography.family.mono.regular, fontSize: typography.size.md, color: 'primary', tabular: true },
+  // S82-B r9 — LA VOZ DEL PRODUCTO (orden founder punto 6; el reencuadre
+  // que retiró la serif). NO falta tipografía: faltaba REGISTRO. Hoy "lo
+  // que el producto piensa" pide prestado `apoyo` — sans secundario 13px,
+  // que ES el microcopy gris que la referencia critica. Cuatro mediciones
+  // independientes lo pidieron (C ×3 en S82, B ×1 en r7).
+  // La receta, dentro de DM Sans: ITÁLICA real (archivo propio) · md/18
+  // (por encima del cuerpo 15: la voz no es nota al pie) · interlineado
+  // de PROSA (normal 1.6 — respira, es la única variante con dos o tres
+  // líneas por diseño) · tinta SECUNDARIA (piensa en voz baja: no compite
+  // con el título ni desaparece como el apoyo).
+  // Qué NO es: no rotula (eso es `seccion`), no da datos (eso es `dato`),
+  // no es la prosa de la interfaz (eso es `cuerpo`). Su prueba: *si la
+  // frase la podría haber dicho el producto sobre la mascota, es `voz`;
+  // si describe un control, no lo es.*
+  voz:     { fontFamily: typography.family.sans.italica, fontSize: typography.size.md, color: 'secondary', leading: typography.size.md * typography.leading.normal },
 }
 
 export function Texto({ children, variante = 'cuerpo', color, numberOfLines, centrado, seleccionable }: TextoProps) {
