@@ -68,6 +68,10 @@ export const palette = {
                               // (#9E3AFF da 4.16:1 sobre card — gate S43-B2). rgb(166,75,255)
   coral:          '#FF5C5C',  // danger · separado del pink de marca — rgb(255,92,92)
   coralDark:      '#BE3535',  // rgb(190,53,53) — oscurecido MÍNIMO en B2.1: #C73A3A
+  coralDarkTexto: '#B93333',  // S82-B r5 (orden founder): UN paso más oscuro — dangerText
+                              // sobre dangerBg∘papel daba 4.48 (R12); este paso da 4.69.
+                              // Consumidor: light.dangerText (coralDark quedó sin consumidores
+                              // de texto — se conserva como escalón de la rampa)
                               // daba 4.30:1 sobre el tint danger saturado (gate WCAG)
   ochre:          '#E8B547',  // warning — rgb(232,181,71)
   ochreDark:      '#925F0C',  // rgb(146,95,12) — oscurecido en B2.1: #97620C daba 4.44:1

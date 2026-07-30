@@ -88,7 +88,12 @@ export default function Bienvenida() {
         <Entrada orden={1}>
           <View style={{ gap: spacing[2] }}>
             <Boton variante="marca" etiqueta={t('bienvenida.crearCuenta')} bloque onPress={() => router.push('/registro')} />
-            <Boton variante="secundario" etiqueta={t('bienvenida.yaTengoCuenta')} bloque onPress={() => router.push('/login')} />
+            {/* S82-B r5 — LA PANTALLA DEL GATE de 'sinCaja' (única
+                consumidora hasta la firma): el rol secundario en tinte
+                sin borde (A6 candidata). Si el founder la firma, muere
+                el contorno del secundario (enmienda Ley 22 en mesa); si
+                no, esta línea vuelve a variante="secundario". */}
+            <Boton variante="sinCaja" etiqueta={t('bienvenida.yaTengoCuenta')} bloque onPress={() => router.push('/login')} />
           </View>
         </Entrada>
         <Entrada orden={2}>

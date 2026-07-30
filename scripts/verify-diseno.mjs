@@ -283,7 +283,7 @@ function r9(archivos) {
  *  en su primer día esta regla cobró una fuga REAL — la propia
  *  extracción de CantoCurva salió sin declarar su casa y el lint la
  *  paró (exit 1). El guard no es decorativo. */
-const CASA_OVERRIDE_S82C = /apps\/cliente\/src\/(app\/\(tabs\)\/hogar\/(index|mascota\/\[mascotaId\])|components\/canto-curva)\.tsx$/;
+const CASA_OVERRIDE_S82C = /apps\/cliente\/src\/(app\/\(tabs\)\/hogar\/(index|mascota\/\[mascotaId\])|components\/(canto-curva|filtro-pills))\.tsx$/;
 function r10(archivos) {
   const fallos = [];
   for (const { path, src } of archivos) {
@@ -336,19 +336,11 @@ const EXENTAS_R12 = new Set([
   'dark·canto·accent.controlLleno/bg.card',
 ]);
 const BASELINE_R12 = new Set([
-  // Los 5 del censo del estreno — deuda declarada, arbitraje founder:
-  // el borderline de texto (4.48, y el porqué: el gate S43 compone el
-  // tinte sobre CARD y pasa; sobre BASE queda 0.02 abajo)…
-  'light·texto·status.dangerText/status.dangerBg',
-  // …y los 4 cantos claros: los hex puros de identidad (verdeVital) y
-  // cuidado (teal) sobre papel no llegan a 3:1 — la letra vigente del
-  // gate S43 los EXIME como registro gráfico redundante (el glifo y la
-  // voz portan el canal); R12 los pone a la vista para que la exención
-  // se ratifique o muera EN LA MESA, no por costumbre.
-  'light·canto·capa.identidad/bg.card',
-  'light·canto·capa.identidad/bg.base',
-  'light·canto·capa.cuidado/bg.card',
-  'light·canto·capa.cuidado/bg.base',
+  // VACÍO desde S82-B r5 (solo-baja EJECUTADO): los 5 del censo del
+  // estreno CURARON por orden founder — capa.identidad/cuidado del tema
+  // CLARO bajaron al primer escalón oscuro de su rampa (verdeVitalDark ·
+  // tealDark) y dangerText ganó su paso (coralDarkTexto). La reversa
+  // vive en themes/light.ts (una línea). De vacío no se sube jamás.
 ]);
 function r12(pares) {
   const fallos = [];
@@ -404,7 +396,10 @@ function paresReales() {
  *  FiltroVida de C (hogar/index:306, lote esperando SU gate) → baseline
  *  NOMINAL por archivo, dueño C: se rellena o pierde la caja en el
  *  gate. Solo baja. */
-const BASELINE_R13 = { 'apps/cliente/src/app/(tabs)/hogar/index.tsx': 1 };
+// VACÍO desde S82-B r5 (solo-baja EJECUTADO por la cura de C en su r4:
+// el FiltroVida perdió el contorno en el gate — "reposo SIN CAJA...
+// NUNCA contorno", convergencia con esta regla). DURA EN 0 desde acá.
+const BASELINE_R13 = {};
 function finDeTagJsx(src, i) {
   let d = 0;
   for (let j = i; j < src.length && j < i + 4000; j++) {

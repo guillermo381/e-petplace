@@ -76,11 +76,20 @@ export const lightTheme = {
   // El color codifica CAPA, no servicio (v3 — intacto).
   // B2.1 — REGISTRO GRÁFICO: hex PUROS para puntos/indicadores/decoración
   // (el punto vida ya no necesita anillo). Para TEXTO usar capaText.
+  // S82-B r5 (orden founder, censo R12): en CLARO los hex vivos de vida y
+  // cuidado no llegaban a 3:1 sobre papel (1.46–1.63) — el valor de TEMA
+  // CLARO baja al PRIMER escalón oscuro de su propia rampa que pasa
+  // (tealDark 5.51 · verdeVitalDark 5.13); la CATEGORÍA no cambia, y en
+  // claro capa colapsa al mismo registro que capaText. Dark/memorial
+  // intactos (allá los vivos pasan). Multiplica a toda superficie que
+  // lea theme.capa en claro (huella de Icono, puntos, cantos) — asumido
+  // en la orden. REVERSA r5 (una línea): identidad=palette.verdeVital ·
+  // cuidado=palette.teal · dangerText=palette.coralDark.
   capa: {
-    identidad:       palette.verdeVital,  // Capa 1 · vida
-    cuidado:         palette.teal,        // Capa 2 · cuidado activo
-    comunidad:       palette.pink,        // Capa 3 · vínculo propio
-    comunidadAmplia: palette.violet,      // Capa 3 · comunidad amplia
+    identidad:       palette.verdeVitalDark,  // Capa 1 · vida (era verdeVital)
+    cuidado:         palette.tealDark,        // Capa 2 · cuidado activo (era teal)
+    comunidad:       palette.pink,            // Capa 3 · vínculo propio
+    comunidadAmplia: palette.violet,          // Capa 3 · comunidad amplia
   },
 
   // B2.1 — REGISTRO DE TEXTO: variantes AA. AA gobierna texto, no gráfica.
@@ -117,7 +126,7 @@ export const lightTheme = {
     danger:        palette.coral,
     dangerBg:      palette.coralAlpha16,
     dangerBorder:  palette.coralBorderL,
-    dangerText:    palette.coralDark,
+    dangerText:    palette.coralDarkTexto,  // S82-B r5: 4.48→4.69 sobre dangerBg∘papel (R12)
 
     info:          palette.teal,
     infoBg:        palette.tealAlpha16,

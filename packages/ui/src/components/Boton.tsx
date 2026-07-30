@@ -44,7 +44,17 @@ import { useTheme } from '../ThemeProvider'
 // S73 (enmienda 19.7 angosta): PROHIBIDO como acción DENTRO de una fila
 // (ahí baja a label con la anatomía de CeldaNavegacion); ghost ídem.
 // La caja del compacto migra al tocarse (D-483).
-export type BotonVariante = 'primario' | 'marca' | 'secundario' | 'ghost' | 'destructivo' | 'compacto'
+//
+// 'sinCaja' (S82-B r5, orden founder — A6 CANDIDATA para el rol
+// secundario): el material INTERMEDIO que el censo S81-B ya nombró
+// (tinte sin borde, §7): fondo bg.overlay + CERO borde + texto tinta +
+// target 44 garantizado por el sistema de tamaños (md 48 · sm compensa
+// con hitSlop). CONVIVENCIA DECLARADA: el contorno de 'secundario'
+// (Ley 22 TONAL) NO muere todavía — 'sinCaja' se gatea en UNA pantalla
+// (bienvenida del cliente); si el founder la firma, muere el contorno
+// del secundario y la enmienda a la Ley 22 pasa por la MESA. Hasta esa
+// firma, código nuevo sigue usando 'secundario'.
+export type BotonVariante = 'primario' | 'marca' | 'secundario' | 'ghost' | 'destructivo' | 'compacto' | 'sinCaja'
 export type BotonTamaño = 'sm' | 'md' | 'lg'
 
 // md 48 = default: target táctil. sm 36 compensa con hitSlop (target efectivo 44).
@@ -116,6 +126,7 @@ export function Boton({
     marca:       { fondo: 'transparent', texto: theme.text.onGradient },
     secundario:  { fondo: theme.bg.overlay, texto: theme.text.primary, borde: theme.border.subtle },
     ghost:       { fondo: 'transparent', texto: theme.text.primary },
+    sinCaja:     { fondo: theme.bg.overlay, texto: theme.text.primary },
     destructivo: { fondo: theme.status.dangerBg, texto: theme.status.dangerText },
     compacto:    { fondo: 'transparent', texto: theme.text.primary, borde: theme.border.default },
   }
