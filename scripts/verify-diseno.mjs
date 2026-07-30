@@ -725,6 +725,37 @@ function r19(archivos) {
   return { fallos, info: fallos.length === 0 ? 'todo relleno atado a su conteo' : `${fallos.length} fallo(s)` };
 }
 
+
+/** R20 · LA FAMILIA ALERTA NO SE RELLENA (S82-B, orden founder — el
+ *  guard que protege los 4.2 grados).
+ *
+ *  POR QUÉ EXISTE: el CTA de oro vive a 4.2° del ámbar de alerta
+ *  (medido r18: hueco 41.0–45.2 entre el alerta y la ventana prohibida
+ *  del amarillo de marca). A esa distancia **el matiz no separa nada** —
+ *  lo único que mantiene distinguibles al CTA y a "necesita atención" es
+ *  que juegan en registros distintos: **el CTA es FILL saturado; el
+ *  alerta vive como TINTE con su texto AA**. Si algún día un badge ámbar
+ *  se rellena, los dos colapsan y **ningún grado de matiz lo arregla**:
+ *  la cura sería mover el CTA, que ya no tiene a dónde ir.
+ *
+ *  QUÉ VIGILA: `backgroundColor` resuelto a `status.warning` (el campo
+ *  gráfico) o a `palette.ochre` (el puro) en apps Y en packages/ui.
+ *  QUÉ NO TOCA, y es la mayor parte de su uso legítimo: `warningBg` (el
+ *  tinte — su forma correcta), `warningText`, `warningBorder`, y
+ *  `status.warning` como color de ÍCONO o barra (registro gráfico, Ley
+ *  2: AA gobierna texto, no gráfica).
+ *  DURA EN 0: medido hoy, cero fills de alerta en las dos apps y en ui. */
+function r20(archivos) {
+  const fallos = [];
+  for (const { path, src } of archivos) {
+    const limpio = sinComentarios(src);
+    for (const m of limpio.matchAll(/backgroundColor:\s*(theme\.status\.warning\b(?!Bg|Text|Border)|palette\.ochre\b(?!Dark|Alpha|Border))/g)) {
+      fallos.push(`${path}:${lineaDe(limpio, m.index)} — la familia ALERTA como FILL (${m[1]}): el ámbar vive como TINTE con su texto AA. Rellenarlo colapsa el CTA de oro con "necesita atención" — están a 4.2° y el matiz no los separa`);
+    }
+  }
+  return { fallos, info: `${fallos.length} fills de alerta` };
+}
+
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
 const FIXTURES = {
@@ -744,13 +775,14 @@ const FIXTURES = {
   R15: [{ tema: 'light', ruta: '(fixture)', valor: '#0F5E56' }],
   // tinte ENCENDIDO y ningún override en lightOficio = el caso que la
   // regla existe para atrapar.
+  R20: [{ path: '(fixture)', src: 'style={{ backgroundColor: theme.status.warning }}' }],
   R17: { index: "export { PiezaFantasma } from './components/PiezaFantasma'", galeria: '' },
   R18: { cuenta: '<CeldaNavegacion titulo="Preferencias" onPress={() => router.push("/cuenta/preferencias")} />' },
   // el pleno que ignora a sus hermanos: exactamente mi defecto de r11
   R19: [{ path: '(fixture)', src: 'const pleno = elegido && sinGlifo;' }],
   R16: { palette: "light0: '#FAF9F7',\npapelTapiz: '#FAF2F5',", temas: 'const lightOficio: Theme = { ...lightTheme }' },
 };
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R19: r19 };
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R19: r19, R20: r20 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -815,6 +847,7 @@ if ('caido' in (dump ?? {})) {
 corridas.push(['R13 (A6: control contorneado, cliente)', r13(apps)]);
 corridas.push(['R16 (papel tapiz: el prestador no recibe tinte)', r16(FUENTES_R16)]);
 corridas.push(['R17 (la galería no envejece)', r17(FUENTES_R17)]);
+corridas.push(['R20 (la familia alerta no se rellena)', r20([...apps, ...ui])]);
 corridas.push(['R18 (D-580: la entrada a la galería NO desaparece)', r18({ cuenta: readFileSync(CUENTA_CLIENTE, 'utf8') })]);
 corridas.push([
   'R19 (L-b: el relleno pleno se computa contra sus hermanos)',
