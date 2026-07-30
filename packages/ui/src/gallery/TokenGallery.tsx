@@ -7,7 +7,6 @@
 
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import Svg, { Path } from 'react-native-svg'
-import { LinearGradient } from 'expo-linear-gradient'
 
 import { useState } from 'react'
 
@@ -376,137 +375,72 @@ function Decision({ n, asunto, decide, children }: { n: string; asunto: string; 
   )
 }
 
-/** Contenido mínimo REAL para juzgar un fondo (no un swatch de color). */
-function MuestraFondo({ fondo, ancho }: { fondo: string; ancho: number }) {
-  return (
-    <View style={{ width: ancho, gap: spacing[2], padding: spacing[2], backgroundColor: fondo, borderRadius: radius.md }}>
-      <Texto variante="seccion">Thor</Texto>
-      <Texto variante="voz">Su expediente se completa de a poco.</Texto>
-      <Tarjeta elevacion="reposo">
-        <Texto variante="dato">28 jul · 3,1 km</Texto>
-      </Tarjeta>
-    </View>
-  )
-}
-
 function GateS82() {
-  const { theme } = useTheme()
   const TAPIZ = palette.papelTapiz
   return (
     <View style={{ gap: spacing[2] }}>
 
       <Decision
         n="1"
-        asunto="EL PAPEL TAPIZ — el fondo del cliente"
-        decide="Decide el fondo de TODAS las pantallas del cliente. El 3% está VIVO desde r10; elegir otro cambia el token y arrastra las curas de successText/warningText que ya viajaron."
+        asunto="EL CTA OSCURO — #FFF645 contra el ocre claro del tema claro"
+        decide="ÚNICA DECISIÓN ABIERTA. Si los dos se leen como EL MISMO color en distinta luz, el sistema cierra con un CTA por tema. Si se leen como DOS colores, no cierra. Y #FFF645 arrastra un CHOQUE declarado abajo."
       >
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing[2] }}>
-          {[{ etiqueta: 'papel (sin tinte)', valor: palette.light0 }, ...palette.papelTapizCandidatos].map((c) => (
-            <View key={c.valor} style={{ gap: spacing[1] }}>
-              <MuestraFondo fondo={c.valor} ancho={150} />
-              <Texto variante="dato">{`${c.etiqueta}${c.valor === TAPIZ ? ' ← VIVO' : ''}`}</Texto>
-            </View>
-          ))}
-        </ScrollView>
+        <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+          {/* el firmado, sobre su fondo real */}
+          <View style={{ flex: 1, gap: spacing[1], backgroundColor: TAPIZ, padding: spacing[3], borderRadius: radius.md }}>
+            <BotonMuestra fondo={palette.ctaOcre} texto={palette.textLight0} etiqueta="Agendar" />
+            <Texto variante="dato">{`claro · ${palette.ctaOcre} · label tinta 8.40`}</Texto>
+          </View>
+          {/* el propuesto, sobre el oscuro real */}
+          <View style={{ flex: 1, gap: spacing[1], backgroundColor: palette.dark0, padding: spacing[3], borderRadius: radius.md }}>
+            <BotonMuestra fondo={palette.amarillo} texto={palette.textLight0} etiqueta="Agendar" />
+            <Texto variante="dato">{`oscuro · ${palette.amarillo} · label tinta 14.94`}</Texto>
+          </View>
+        </View>
+        <Texto variante="apoyo" color="danger">
+          EL CHOQUE, declarado y NO resuelto: #FFF645 es `palette.amarillo`, con estatuto SOLO-MARCA vigente en v4 ("JAMÁS funcional"), y es stop de `gradients.logo`. El alcance fino de A5 cubría el rol INFORMACIÓN — y un CTA decide, no informa. Firmarlo es enmendar ese estatuto, no aplicarlo.
+        </Texto>
+        <Texto variante="apoyo">
+          Distancia medida entre los dos: 17° de matiz y +14 puntos de luminosidad. Sobre el oscuro el fill rinde 17.95 (contra 1.83 del ocre sobre papel — en claro el canal es la elevación, en oscuro es el color).
+        </Texto>
       </Decision>
 
       <Decision
         n="2"
-        asunto="EL CTA OCRE — sobre el tapiz Y sobre el techo"
-        decide="Enmienda la Ley 21 (el CTA del cliente en tinta), que es la ley por la que cada CTA nuevo nace negro — o la deja intacta y el CTA sigue en tinta."
-      >
-        {[{ g: false, voz: 'sobre el tapiz (el fondo real)' }, { g: true, voz: 'sobre el degradado del techo — MEDIDO: acá el ocre PIERDE (3.11 vs el violeta · 2.24 vs pinkDark)' }].map((f) => (
-          <View key={String(f.g)} style={{ gap: spacing[2] }}>
-            <Texto variante="apoyo">{f.voz}</Texto>
-            <ContenedorGate gradiente={f.g} fondo={TAPIZ}>
-              <View style={{ gap: spacing[2] }}>
-                {palette.ctaOcreCandidatos.map((c) => (
-                  <View key={c.valor} style={{ gap: spacing[1] }}>
-                    <BotonMuestra fondo={c.valor} texto={c.texto} />
-                    <Texto variante="dato">{`${c.etiqueta} ${c.valor} · label ${c.texto === '#FFFFFF' ? 'blanco' : 'tinta'}`}</Texto>
-                  </View>
-                ))}
-                {/* la VARA: el de hoy y el ámbar de ALERTA, para juzgar
-                    la DISTANCIA (si comparten registro, el color no dice nada) */}
-                <BotonMuestra fondo={theme.text.primary} texto={palette.light0} etiqueta="el CTA de hoy (tinta · Ley 21)" />
-                <Insignia estado="atencion" etiqueta="necesita atención — el ámbar de ALERTA" />
-              </View>
-            </ContenedorGate>
-          </View>
-        ))}
-      </Decision>
-
-      <Decision
-        n="3"
-        asunto="sinCaja — el secundario sin borde, con su slot y su sombra nuevos"
-        decide="Si se ve: muere el contorno del secundario y es enmienda a la Ley 22 EN MESA. Si no se ve: sinCaja muere y el secundario se queda con su borde."
-      >
-        {(['light', 'dark'] as const).map((m) => (
-          <ThemeProvider key={m} defaultMode={m}>
-            <PanelGateTema etiqueta={m === 'light' ? 'claro — fill 1.23 sobre el tapiz + elevacion.reposo como canal' : 'oscuro — fill 1.49 (más presencia: en dark el canal es el TONO, la elevación es contacto mínimo)'}>
-              <View style={{ flexDirection: 'row', gap: spacing[2], alignItems: 'flex-start' }}>
-                <View style={{ flex: 1 }}><Boton variante="sinCaja" etiqueta="Ya tengo cuenta" bloque onPress={() => {}} /></View>
-                <View style={{ flex: 1 }}><Boton variante="secundario" etiqueta="con borde (hoy)" bloque onPress={() => {}} /></View>
-              </View>
-            </PanelGateTema>
-          </ThemeProvider>
-        ))}
-      </Decision>
-
-      <Decision
-        n="4"
-        asunto="LA MARCA DE AGUA — completa contra sangrada"
-        decide="Si se lee TEXTURA, la Ley 4 (isotipo UNO por pantalla) queda INTACTA y el agua puede ir en todas. Si se lee ISOTIPO, el agua + el techo son dos y hace falta ENMIENDA a la Ley 4."
-      >
-        <View style={{ flexDirection: 'row', gap: spacing[2] }}>
-          {[{ s: false, voz: 'COMPLETA — silueta cerrada' }, { s: true, voz: 'SANGRADA — cortada por los 4 bordes' }].map((a) => (
-            <View key={String(a.s)} style={{ flex: 1, gap: spacing[1] }}>
-              <View style={{ height: 200, borderRadius: radius.md, overflow: 'hidden', backgroundColor: TAPIZ }}>
-                <MarcaDeAgua sangrada={a.s} />
-                <View style={{ padding: spacing[3] }}>
-                  <Texto variante="apoyo">contenido encima</Texto>
-                </View>
-              </View>
-              <Texto variante="dato">{a.voz}</Texto>
-            </View>
-          ))}
-        </View>
-      </Decision>
-
-      <Decision
-        n="5"
-        asunto="LA VOZ DEL PRODUCTO — la itálica contra el gris que reemplaza"
-        decide="Si gana: el producto tiene un registro propio para lo que PIENSA (hoy pide prestado el apoyo gris). Si no: la variante muere y esa voz sigue siendo microcopy."
+        asunto="LO FIRMADO EN ESTA PASADA — verificación, no elección"
+        decide="Ya no se elige: se comprueba que lo firmado corre. Si algo acá no coincide con lo que firmaste, es un bug mío, no una opción."
       >
         <View style={{ backgroundColor: TAPIZ, padding: spacing[3], borderRadius: radius.md, gap: spacing[3] }}>
-          <View style={{ gap: spacing[1] }}>
-            <Texto variante="dato">voz (itálica md · la candidata)</Texto>
-            <Texto variante="voz">Su expediente se completa de a poco. Cada dato que sumás es uno menos que hay que adivinar en una urgencia.</Texto>
-          </View>
-          <View style={{ gap: spacing[1] }}>
-            <Texto variante="dato">apoyo (sm gris · lo que se usa HOY para eso)</Texto>
-            <Texto variante="apoyo">Su expediente se completa de a poco. Cada dato que sumás es uno menos que hay que adivinar en una urgencia.</Texto>
+          <Texto variante="dato">CTA del cliente — ocre con label tinta (Ley 21 enmendada en su mitad del cliente)</Texto>
+          <Boton variante="primario" etiqueta="Agendar" bloque onPress={() => {}} />
+          <Texto variante="dato">la VOZ del producto — sin itálica: 300 light · 18 · interlineado 1.75</Texto>
+          <Texto variante="voz">Su expediente se completa de a poco. Cada dato que sumás es uno menos que hay que adivinar en una urgencia.</Texto>
+          <Texto variante="dato">contra el cuerpo (400 · 15) y el apoyo (400 · 13), para ver que el registro se separa</Texto>
+          <Texto variante="cuerpo">Su expediente se completa de a poco.</Texto>
+          <Texto variante="apoyo">Su expediente se completa de a poco.</Texto>
+          <Texto variante="dato">glifos — los DOS tamaños firmados, elegidos por componente</Texto>
+          <View style={{ flexDirection: 'row', gap: spacing[4], alignItems: 'center' }}>
+            <Texto variante="dato">21</Texto>
+            <Icono nombre="lapiz" tamano={21} registro="tinta" />
+            <Icono nombre="compartir" tamano={21} registro="tinta" />
+            <Icono nombre="vacuna" tamano={21} />
+            <Texto variante="dato">28</Texto>
+            <Icono nombre="lapiz" tamano={28} registro="tinta" />
+            <Icono nombre="compartir" tamano={28} registro="tinta" />
+            <Icono nombre="vacuna" tamano={28} />
           </View>
         </View>
-      </Decision>
-
-      <Decision
-        n="6"
-        asunto="LOS GLIFOS DE CONTROL Y LA VACUNA — a 21px"
-        decide="Gate POR ÍCONO (§2.9). La pregunta puntual: ¿el corte del bisel del lápiz sobrevive a 21, o la punta se simplifica? Y la jeringa: ¿se lee sin graduaciones?"
-      >
-        <View style={{ backgroundColor: TAPIZ, padding: spacing[3], borderRadius: radius.md, gap: spacing[3] }}>
-          {[21, 28].map((t) => (
-            <View key={t} style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
-              <Texto variante="dato">{`${t}px`}</Texto>
-              <Icono nombre="lapiz" tamano={t} registro="tinta" />
-              <Icono nombre="compartir" tamano={t} registro="tinta" />
-              <Icono nombre="vacuna" tamano={t} />
-              {/* la vara: el de veterinaria, que era el que la vacuna suplía */}
-              <Icono nombre="veterinaria" tamano={t} />
-            </View>
-          ))}
+        <View style={{ height: 200, borderRadius: radius.md, overflow: 'hidden', backgroundColor: TAPIZ }}>
+          <MarcaDeAgua />
+          <View style={{ padding: spacing[3] }}>
+            <Texto variante="apoyo">la marca de agua SANGRADA — la Ley 4 quedó intacta: esto es textura, no un isotipo</Texto>
+          </View>
         </View>
+        <ThemeProvider defaultMode="dark">
+          <PanelGateTema etiqueta="oscuro — sin tinte (firmado) · y sinCaja con su presencia nueva">
+            <Boton variante="sinCaja" etiqueta="Ya tengo cuenta" bloque onPress={() => {}} />
+          </PanelGateTema>
+        </ThemeProvider>
       </Decision>
 
     </View>
@@ -522,23 +456,6 @@ function BotonMuestra({ fondo, texto, etiqueta = 'Reservar servicio de Thor' }: 
     <View style={{ height: 48, borderRadius: radius.md, backgroundColor: fondo, alignItems: 'center', justifyContent: 'center', boxShadow: theme.elevacion.reposo }}>
       <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: texto }}>{etiqueta}</Text>
     </View>
-  )
-}
-
-/** Fondo plano (tapiz) o el degradado firma del techo. */
-function ContenedorGate({ gradiente, fondo, children }: { gradiente: boolean; fondo: string; children: React.ReactNode }) {
-  const { theme } = useTheme()
-  if (!gradiente) return <View style={{ padding: spacing[3], borderRadius: radius.md, backgroundColor: fondo }}>{children}</View>
-  return (
-    <LinearGradient
-      colors={[...theme.accent.gradient.colors] as [string, string, ...string[]]}
-      locations={[...theme.accent.gradient.locations] as [number, number, ...number[]]}
-      start={{ x: 0.13, y: 0 }}
-      end={{ x: 0.87, y: 1 }}
-      style={{ padding: spacing[3], borderRadius: radius.md }}
-    >
-      {children}
-    </LinearGradient>
   )
 }
 

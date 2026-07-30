@@ -40,11 +40,13 @@
  *   · dato    → JetBrains Mono 400 · 13px · metadata que generó una máquina
  *               (fechas, horas, IDs, códigos), con `tabular-nums` para que
  *               los dígitos no bailen (precedente Cronometro, S44).
- *   · voz     → DM Sans ITÁLICA 400 · 18px · interlineado de prosa · tinta
- *               secundaria. **LA VOZ DEL PRODUCTO** (S82-B r9): lo que el
- *               producto piensa sobre la mascota, no lo que la interfaz
- *               explica. Capacidad ADITIVA: no cambia ninguna pantalla
- *               hasta que alguien la use.
+ *   · voz     → DM Sans **300 light** · 18px · interlineado 1.75 · tinta
+ *               secundaria. **LA VOZ DEL PRODUCTO** (S82-B r9; la itálica
+ *               MURIÓ en r15 por decisión founder —estigma de texto
+ *               generado por IA— y el registro se reconstruyó con peso,
+ *               tamaño e interlineado). Lo que el producto piensa sobre la
+ *               mascota, no lo que la interfaz explica. ADITIVA: no cambia
+ *               ninguna pantalla hasta que alguien la use.
  *
  * CONGELADO S71-A2 con las cuatro enmiendas de mesa, todas MEDIDAS antes
  * de decidir (no dictadas):
@@ -145,7 +147,17 @@ const RECETA: Record<
   // no es la prosa de la interfaz (eso es `cuerpo`). Su prueba: *si la
   // frase la podría haber dicho el producto sobre la mascota, es `voz`;
   // si describe un control, no lo es.*
-  voz:     { fontFamily: typography.family.sans.italica, fontSize: typography.size.md, color: 'secondary', leading: typography.size.md * typography.leading.normal },
+  // S82-B r15 — LA ITÁLICA MURIÓ y el REGISTRO VIVE. Decisión founder: la
+  // itálica está estigmatizada como marca de texto generado por IA en su
+  // mercado. La voz se reconstruye con las tres palancas que quedan:
+  //  · PESO 300 (light) — la voz humana de la casa (Ley 3: "voz humana =
+  //    DM Sans 300"); el `cuerpo` es 400, así que ya no comparten trazo.
+  //  · TAMAÑO md/18 — por encima del cuerpo (15): la voz no es nota al pie.
+  //  · INTERLINEADO relaxed 1.75 (era normal 1.6) — el aire es lo que
+  //    reemplaza a la inclinación: dice "esto se lee distinto" sin inclinar.
+  // El color secundario se CONSERVA. Las tres juntas separan `voz` de
+  // `cuerpo` (400/15/1.6) y de `apoyo` (400/13) sin una fuente nueva.
+  voz:     { fontFamily: typography.family.sans.light, fontSize: typography.size.md, color: 'secondary', leading: typography.size.md * typography.leading.relaxed },
 }
 
 export function Texto({ children, variante = 'cuerpo', color, numberOfLines, centrado, seleccionable }: TextoProps) {

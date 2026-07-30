@@ -10,7 +10,6 @@
 import {
   DMSans_300Light,
   DMSans_400Regular,
-  DMSans_400Regular_Italic,
   DMSans_500Medium,
   DMSans_700Bold,
 } from '@expo-google-fonts/dm-sans'
@@ -22,14 +21,9 @@ import {
 export const epetplaceFonts = {
   DMSans_300Light,
   DMSans_400Regular,
-  // S82-B r9 — LA VOZ DEL PRODUCTO (orden founder punto 6): la itálica
-  // REAL de DM Sans, del MISMO paquete ya instalado (`^0.4.1`): cero dep
-  // nueva, cero módulo nativo ⇒ **cero L-134** (asset del bundle, viaja
-  // por OTA). Ley 3 INTACTA: sigue siendo DM Sans, familia única de UI —
-  // lo que nace es un REGISTRO, no una familia. El `fontStyle: 'italic'`
-  // sintético quedaba descartado por inconsistente entre plataformas
-  // (Android no lo sintetiza igual que iOS): la itálica se CARGA.
-  DMSans_400Regular_Italic,
+  // S82-B r15: la itálica que r9 había cargado SE RETIRA — el founder la
+  // mató (estigma de texto generado por IA en su mercado). Se descarga
+  // del mapa: un asset que nadie usa igual pesa en el bundle.
   DMSans_500Medium,
   DMSans_700Bold,
   JetBrainsMono_400Regular,

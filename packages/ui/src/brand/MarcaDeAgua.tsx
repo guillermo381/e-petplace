@@ -22,29 +22,17 @@
  * ratificado por el founder en r9 §3), y un agua sin su tinte sería la
  * mitad de la pieza.
  *
- * ⚠️ LEY 4 — LAS DOS LECTURAS, NINGUNA RESUELTA ACÁ (el literal lo
- * trajo A: el isotipo está FUERA de la contabilidad de dosis pero con
- * límite DURO de UNO POR PANTALLA). Con el agua en todas + el del techo
- * ya son DOS, y con el que el founder pide al lado del título, TRES:
- *
- *   (A) EL AGUA ES UN ISOTIPO ⇒ la ley MUERDE y hace falta ENMIENDA (o
- *       el techo cede el suyo, o el agua no va). Es la lectura literal:
- *       la forma es la de la marca y su centrado es intencional.
- *   (B) EL AGUA NO ES UN ISOTIPO, ES TEXTURA ⇒ no entra a la cuenta y la
- *       Ley 4 queda INTACTA, cero enmienda. El argumento: al 6% y
- *       cortada por los cuatro bordes no IDENTIFICA — no tiene silueta
- *       cerrada, ni escala legible, ni contorno propio; funciona como
- *       material del papel (parentesco en la casa: el Guijarro es
- *       ilustración §4, no identidad).
- *
- * **LA (B) EXIGE UNA ANATOMÍA QUE LA CALIBRACIÓN HEREDADA NO TIENE, y
- * ese es el hallazgo:** el 210 centrado de la lámina S82-C se ve
- * COMPLETO en una pantalla de 390×844 — silueta cerrada, o sea marca.
- * Para que "textura" sea verdad y no un adjetivo, el agua tiene que
- * SANGRAR (`sangrada`, la variante sobredimensionada de abajo). De cuál
- * elija el founder en el gate depende cuál lectura aplica: la completa
- * empuja a (A) —enmienda—, la sangrada habilita (B) —ley intacta—.
- * Las dos viven en la galería, comparables. Nadie lo da por sentado.
+ * ✅ LEY 4 — RESUELTA SIN ENMIENDA (firma founder, S82-B r15). El literal
+ * (que trajo A) dice: el isotipo está FUERA de la contabilidad de dosis
+ * pero con límite DURO de UNO POR PANTALLA — y el agua + el techo eran
+ * dos. La salida no fue enmendar la ley: fue que **el agua no es un
+ * isotipo**. Al 6% y cortada por los cuatro bordes no IDENTIFICA (no hay
+ * silueta cerrada, ni escala legible, ni contorno propio): funciona como
+ * material del papel — parentesco en la casa: el Guijarro es ilustración
+ * §4, no identidad. **La Ley 4 queda INTACTA y el agua no entra a su
+ * cuenta.** Lo que hizo verdadero el argumento fue la ANATOMÍA: la
+ * variante completa (210 centrado) se veía entera y se leía marca; el
+ * founder firmó la SANGRADA mirando las dos.
  */
 
 import { useWindowDimensions, View } from 'react-native'
@@ -53,23 +41,21 @@ import { Isotipo } from './Isotipo'
 import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
 
-/** COMPLETA — la calibración heredada de la lámina S82-C r2 (size 210 ≈
- *  340 de ancho por el ratio del viewBox). Silueta cerrada y visible:
- *  es la que empuja la lectura (A) de la Ley 4. */
-const TAMANO_COMPLETA = 210
-/** SANGRADA — sobredimensionada al 150% del ancho de pantalla para que
- *  la silueta SALGA por los cuatro bordes: es la anatomía que el
- *  argumento "textura, no marca" necesita para ser verdad (lectura B).
- *  Se deriva de la pantalla, no es un número fijo: en un teléfono
- *  angosto tiene que sangrar igual. */
+/** SANGRADA — FIRMADA por el founder en galería (S82-B r15). El isotipo
+ *  se sobredimensiona al 150% del ancho de pantalla para que la silueta
+ *  SALGA por los cuatro bordes: sin silueta cerrada no identifica, y por
+ *  eso se lee TEXTURA y no marca. Se deriva de la PANTALLA y no es un
+ *  número fijo — en un teléfono angosto tiene que sangrar igual.
+ *  LA VARIANTE COMPLETA MURIÓ con su trabajo hecho (Ley 37): existió
+ *  para que el gate pudiera comparar, y la comparación ya ocurrió. */
 const FACTOR_SANGRADA = 1.5
 
-export function MarcaDeAgua({ sangrada = false }: { sangrada?: boolean }) {
+export function MarcaDeAgua() {
   const { theme } = useTheme()
   const { width } = useWindowDimensions()
   // Memorial: la pieza no se monta (Ley 8 — degrada sola, en la fuente).
   if (theme.mode === 'memorial') return null
-  const tamano = sangrada ? Math.round(width * FACTOR_SANGRADA) : TAMANO_COMPLETA
+  const tamano = Math.round(width * FACTOR_SANGRADA)
   return (
     <View
       pointerEvents="none"

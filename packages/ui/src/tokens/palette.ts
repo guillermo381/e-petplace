@@ -79,6 +79,17 @@ export const palette = {
                               // de texto — se conserva como escalón de la rampa)
                               // daba 4.30:1 sobre el tint danger saturado (gate WCAG)
   ochre:          '#E8B547',  // warning — rgb(232,181,71)
+  /** S82-B r15 — EL CTA DEL CLIENTE, FIRMADO EN GALERÍA (el ámbar más
+   *  claro de los tres candidatos, con LABEL EN TINTA). El par que manda
+   *  es el label sobre el fill: **tinta 8.40** (blanco daba 2.02 — por eso
+   *  el label es tinta y no al revés). Fill vs tapiz 1.83: NO llega al 3
+   *  no-textual y está DECLARADO — su canal es la elevación, igual que
+   *  `sinCaja` (r12): un fill que llegue a 3:1 contra papel ya es marrón
+   *  (medido r11: el más claro que pasa es #966708 y se lee marrón).
+   *  Distancia del ámbar de ALERTA (#E8B547, L59%): 9 puntos de
+   *  luminosidad y +14 de saturación — si compartieran registro, el color
+   *  no diría nada. */
+  ctaOcre:        '#F5A70A',  // rgb(245,167,10)
   /** S82-B r10 — CURA COORDINADA DEL TAPIZ: era #925F0C y vivía en
    *  **4.50 EXACTO** sobre su tinte SIN tapiz (el más frágil de los tres
    *  status — cualquier tinte lo tumbaba: 4.35 al 3%). Un paso más:

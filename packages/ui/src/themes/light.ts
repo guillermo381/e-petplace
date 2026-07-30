@@ -47,8 +47,16 @@ export const lightTheme = {
     // S63 — enmienda Ley 21 FIRMADA: el CTA primario resuelve por SLOT.
     // Default 'tinta' (este valor); ThemeProvider cta='oficio' lo ancla a
     // tealDark en light Y dark. Memorial SIEMPRE tinta (no se celebra).
-    cta:           palette.textLight0 as string,
-    ctaTexto:      palette.light0 as string,
+    // S82-B r15 — EL CTA DEL CLIENTE PASA A OCRE (FIRMADO por el founder
+    // en galería). ENMIENDA A LA LEY 21 en su mitad del cliente: "el CTA
+    // primario del CLIENTE sigue en tinta" deja de regir — era la ley por
+    // la que cada CTA nuevo nacía negro. La mitad del PRESTADOR queda
+    // INTACTA (su oficio ancla a tealDark por `lightOficio`), y memorial
+    // SIGUE EN TINTA por `getTheme` (memorial no se celebra) — las dos
+    // garantías viven en la fuente, no en la disciplina de cada pantalla.
+    // El par que manda: label TINTA sobre el ocre = 8.40 (blanco daba 2.02).
+    cta:           palette.ctaOcre as string,
+    ctaTexto:      palette.textLight0 as string,
     primary:       palette.tealDark,
     primaryBg:     palette.tealAlpha16,     // B2.1: tint sobre el hex puro
     primaryBorder: palette.tealBorderL,
