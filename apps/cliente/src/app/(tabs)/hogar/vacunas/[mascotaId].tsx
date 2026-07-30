@@ -30,11 +30,23 @@
  * ④ EL RÓTULO NO VA EN MONO MAYÚSCULAS. La lámina pide mono uppercase
  *    tracking .16em; la Ley 3 lo PROHÍBE con su ejemplo literal ("mono
  *    jamás en mayúsculas"). Va en `Texto seccion` con su cuenta en mono.
- * ⑤ EL TECHO NO LLEVA EL GRADIENTE DE MARCA. Ley 4: el gradiente firma
- *    vive en contextos cerrados (hero de onboarding, CTA principal,
- *    momento adopción, techo del Hogar) — una pantalla interna no está
- *    en esa lista y sumarlo es decisión de arte que exige firma.
+ * ⑤ EL TECHO NO LLEVA EL GRADIENTE DE MARCA COMO SUPERFICIE. Ley 4: el
+ *    gradiente firma vive en contextos cerrados (hero de onboarding, CTA
+ *    principal, momento adopción, techo del Hogar) — una pantalla interna
+ *    no está en esa lista y sumarlo es decisión de arte que exige firma.
  *    `Encabezado navegacion` + el bloque de identidad debajo.
+ *    ⚠️ **ENMIENDA r6 — MI LECTURA DE r5 FUE ANGOSTA, y el founder la
+ *    cazó en dispositivo.** La Ley 4 tiene DOS cláusulas, no una, y yo
+ *    apliqué la primera a lo que gobierna la segunda. Literal: «gradiente
+ *    firma solo en contextos cerrados (…). **El isotipo es IDENTIDAD: va
+ *    en gradiente oficial por default, fuera de la contabilidad de dosis
+ *    — pero UNO por pantalla.**» La lista cerrada gobierna el GRADIENTE
+ *    COMO SUPERFICIE; el ISOTIPO tiene cláusula propia que lo EXIME
+ *    explícitamente, con un único límite: uno por pantalla. Explorar y
+ *    Cuenta NO están en violación — son `Encabezado portada`, cuya
+ *    anatomía firmada S52-P1 ES el lockup isotipo+voz. Lo que sigue en
+ *    pie de ⑤ es solo el gradiente de fondo; el isotipo entró en r6 por
+ *    orden founder, y la ley lo permitía desde el principio.
  * ⑥ `PieRevelar` va SIN CAJA (anatomía 19.7, FIRMADA en dispositivo por
  *    el founder en S73). La lámina le pone caja `--sup2`: gana la casa.
  *
@@ -70,6 +82,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   FilaDato,
+  Isotipo,
   PieRevelar,
   Texto,
   radius,
@@ -235,11 +248,31 @@ export default function PlanDeVacunas() {
         contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}
         showsVerticalScrollIndicator={false}
       >
-        {/* La identidad de la pantalla — quién, y de qué se habla */}
+        {/* La identidad de la pantalla — quién, y de qué se habla.
+            r6 (ORDEN FOUNDER en dispositivo): EL ISOTIPO A LA IZQUIERDA,
+            antes del texto. Es el LOCKUP de `Encabezado portada`
+            (S52-P1) copiado VERBATIM del vecino que ya corre en Explorar
+            y en Cuenta — row · alignItems center · gap spacing[3] ·
+            Isotipo 32 · la voz en flex 1 (copiar-al-vecino: el patrón se
+            copia, no se reinventa). Memorial degrada a 'blanco' con la
+            misma expresión del componente (bg.base de memorial es
+            bosque nocturno: el blanco se lee). Ley 4 CUMPLIDA: es el
+            ÚNICO isotipo de esta pantalla. */}
         <Entrada>
-          <View style={{ paddingHorizontal: spacing[5], paddingTop: spacing[2], gap: spacing[1] }}>
-            <Texto variante="titulo">{t('planVacunas.titulo', { nombre })}</Texto>
-            {identidad.length > 0 ? <Texto variante="dato">{identidad.join(' · ')}</Texto> : null}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: spacing[3],
+              paddingHorizontal: spacing[5],
+              paddingTop: spacing[2],
+            }}
+          >
+            <Isotipo size={32} variant={theme.mode === 'memorial' ? 'blanco' : 'gradiente'} />
+            <View style={{ flex: 1, gap: spacing[1] }}>
+              <Texto variante="titulo">{t('planVacunas.titulo', { nombre })}</Texto>
+              {identidad.length > 0 ? <Texto variante="dato">{identidad.join(' · ')}</Texto> : null}
+            </View>
           </View>
         </Entrada>
 
