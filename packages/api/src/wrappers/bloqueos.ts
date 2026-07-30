@@ -130,3 +130,67 @@ export async function eliminarBloqueoPrestador(
   if (!Array.isArray(data) || data.length === 0) return falla('no_eliminable');
   return { ok: true, data: null };
 }
+
+// ── S82 r7 · DÍAS CERRADOS (recurrencia semanal) ──
+// Distinto de `prestador_bloqueos`, que son RANGOS DE FECHA (vacaciones):
+// esto es "el negocio cierra los domingos". Sin esta declaración el motor
+// no puede distinguir "cierra" de "todavía no configuró" — las dos cosas
+// daban cero franjas y la pantalla no podía decir "cerrado" sin mentir.
+
+export interface DiaCerrado {
+  /** 0..6 — MISMA convención que prestador_horarios.dia_semana. */
+  dia_semana: number;
+  /** Voz del negocio; null = cerrado sin motivo declarado (la pantalla
+   *  dice "cerrado" y nada más — jamás inventa el porqué). */
+  motivo: string | null;
+}
+
+/** Los días que el negocio declaró CERRADOS. Lista vacía = no declaró
+ *  ninguno (que NO es lo mismo que "abre todos los días": un día sin
+ *  franjas sigue siendo "sin horarios", otro estado y otra voz). */
+export async function obtenerDiasCerrados(
+  prestadorId: string,
+): Promise<ResultadoWrapper<DiaCerrado[], 'error_lectura'>> {
+  const { data, error } = await getClient().rpc('obtener_dias_cerrados', { p_prestador_id: prestadorId });
+  if (error || !Array.isArray(data)) {
+    return { ok: false, codigo: 'error_lectura', mensaje: 'No pudimos leer los días de atención.' };
+  }
+  const filas: DiaCerrado[] = [];
+  for (const f of data as Record<string, unknown>[]) {
+    if (typeof f.dia_semana !== 'number') continue;
+    filas.push({ dia_semana: f.dia_semana, motivo: typeof f.motivo === 'string' ? f.motivo : null });
+  }
+  return { ok: true, data: filas };
+}
+
+/** El negocio declara (o levanta) un día cerrado. `cerrado=false` borra
+ *  la declaración — volver a "sin horarios" es explícito. */
+export async function declararDiaCerrado(
+  prestadorId: string,
+  diaSemana: number,
+  cerrado: boolean,
+  motivo?: string,
+): Promise<ResultadoWrapper<{ dia_semana: number; cerrado: boolean }, 'sin_sesion' | 'sin_acceso' | 'dia_invalido' | 'desconocido'>> {
+  const { data, error } = await getClient().rpc('declarar_dia_cerrado', {
+    p_prestador_id: prestadorId,
+    p_dia_semana: diaSemana,
+    p_cerrado: cerrado,
+    ...(motivo !== undefined ? { p_motivo: motivo } : null),
+  });
+  if (error) {
+    const m = error.message;
+    const codigo = m.startsWith('auth_required')
+      ? 'sin_sesion'
+      : m.startsWith('no_access_to_prestador')
+        ? 'sin_acceso'
+        : m.startsWith('dia_invalido')
+          ? 'dia_invalido'
+          : 'desconocido';
+    return { ok: false, codigo, mensaje: 'No pudimos guardar el día. Prueba de nuevo.' };
+  }
+  const o = data as Record<string, unknown> | null;
+  if (o === null || o.ok !== true || typeof o.dia_semana !== 'number' || typeof o.cerrado !== 'boolean') {
+    return { ok: false, codigo: 'desconocido', mensaje: 'No pudimos guardar el día. Prueba de nuevo.' };
+  }
+  return { ok: true, data: { dia_semana: o.dia_semana, cerrado: o.cerrado } };
+}

@@ -1602,6 +1602,54 @@ export type Database = {
         }
         Relationships: []
       }
+      cat_plan_vacunal: {
+        Row: {
+          activo: boolean
+          created_at: string
+          edad_inicio_meses: number | null
+          especie_codigo: string
+          obligatoria: boolean
+          orden: number
+          periodicidad_meses: number | null
+          vacuna_codigo: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          edad_inicio_meses?: number | null
+          especie_codigo: string
+          obligatoria?: boolean
+          orden?: number
+          periodicidad_meses?: number | null
+          vacuna_codigo: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          edad_inicio_meses?: number | null
+          especie_codigo?: string
+          obligatoria?: boolean
+          orden?: number
+          periodicidad_meses?: number | null
+          vacuna_codigo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cat_plan_vacunal_especie_codigo_fkey"
+            columns: ["especie_codigo"]
+            isOneToOne: false
+            referencedRelation: "cat_especies"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "cat_plan_vacunal_vacuna_codigo_fkey"
+            columns: ["vacuna_codigo"]
+            isOneToOne: false
+            referencedRelation: "cat_vacunas"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
       cat_productos_oficio: {
         Row: {
           activo: boolean
@@ -7530,6 +7578,7 @@ export type Database = {
           prestador_id: string | null
           tipo_vacuna: string | null
           updated_at: string
+          vacuna_codigo: string | null
           veterinario_nombre_externo: string | null
           via_administracion: string | null
         }
@@ -7550,6 +7599,7 @@ export type Database = {
           prestador_id?: string | null
           tipo_vacuna?: string | null
           updated_at?: string
+          vacuna_codigo?: string | null
           veterinario_nombre_externo?: string | null
           via_administracion?: string | null
         }
@@ -7570,6 +7620,7 @@ export type Database = {
           prestador_id?: string | null
           tipo_vacuna?: string | null
           updated_at?: string
+          vacuna_codigo?: string | null
           veterinario_nombre_externo?: string | null
           via_administracion?: string | null
         }
@@ -7615,6 +7666,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_prestadores_publicos"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_vacuna_aplicada_vacuna_codigo_fkey"
+            columns: ["vacuna_codigo"]
+            isOneToOne: false
+            referencedRelation: "cat_vacunas"
+            referencedColumns: ["codigo"]
           },
         ]
       }
@@ -11301,6 +11359,45 @@ export type Database = {
           },
           {
             foreignKeyName: "prestador_bloqueos_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prestador_dias_cerrados: {
+        Row: {
+          created_at: string
+          dia_semana: number
+          motivo: string | null
+          prestador_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dia_semana: number
+          motivo?: string | null
+          prestador_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dia_semana?: number
+          motivo?: string | null
+          prestador_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prestador_dias_cerrados_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestador_dias_cerrados_prestador_id_fkey"
             columns: ["prestador_id"]
             isOneToOne: false
             referencedRelation: "v_prestadores_publicos"
@@ -16316,6 +16413,10 @@ export type Database = {
         Args: { p_fecha: string; p_prestador_id: string }
         Returns: boolean
       }
+      _proxima_vacuna_derivada: {
+        Args: { p_periodicidad_meses: number; p_ultima_aplicada: string }
+        Returns: string
+      }
       _resolver_fee_aplicable: {
         Args: {
           p_categoria_origen?: string
@@ -16793,6 +16894,15 @@ export type Database = {
         }[]
       }
       debug_session: { Args: never; Returns: Json }
+      declarar_dia_cerrado: {
+        Args: {
+          p_cerrado: boolean
+          p_dia_semana: number
+          p_motivo?: string
+          p_prestador_id: string
+        }
+        Returns: Json
+      }
       declarar_foto_mascota: {
         Args: {
           p_cx: number
@@ -17155,6 +17265,13 @@ export type Database = {
           telefono_codigo_pais: string
         }[]
       }
+      obtener_dias_cerrados: {
+        Args: { p_prestador_id: string }
+        Returns: {
+          dia_semana: number
+          motivo: string
+        }[]
+      }
       obtener_empleados_cuenta: {
         Args: { p_cuenta_comercial_id: string }
         Returns: {
@@ -17329,6 +17446,19 @@ export type Database = {
           empleado_id: string
           nombre: string
           tiene_jornada: boolean
+        }[]
+      }
+      obtener_plan_vacunal: {
+        Args: { p_mascota_id: string }
+        Returns: {
+          estado: string
+          nombre: string
+          obligatoria: boolean
+          periodicidad_meses: number
+          proxima: string
+          proxima_es_derivada: boolean
+          ultima_aplicada: string
+          vacuna_codigo: string
         }[]
       }
       obtener_resumen_actividad_prestador: {

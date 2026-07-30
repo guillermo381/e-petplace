@@ -153,3 +153,72 @@ export async function obtenerHistoriaPeso(
     })),
   };
 }
+
+// ── S82 r7 · EL PLAN BASE DE VACUNAS (el hueco más grande del producto) ──
+
+/** El estado de UNA vacuna DEL PLAN — incluye lo que FALTA, que es
+ *  justamente lo que antes no se podía computar (cat_vacunas era
+ *  vocabulario sin periodicidad ni obligatoriedad). */
+export type EstadoPlanVacuna =
+  | 'al_dia'
+  | 'vencida'
+  /** hay aplicación pero no se puede saber la próxima (sin periodicidad
+   *  y sin fecha capturada) — se dice, no se inventa. */
+  | 'sin_fecha'
+  | 'nunca_aplicada'
+  /** por edad todavía no toca: JAMÁS se muestra como falta. */
+  | 'aun_no_corresponde';
+
+export interface VacunaDelPlan {
+  vacuna_codigo: string;
+  nombre: string;
+  obligatoria: boolean;
+  periodicidad_meses: number | null;
+  ultima_aplicada: string | null;
+  proxima: string | null;
+  /** true = la próxima la DERIVÓ la casa (última + periodicidad); false =
+   *  la capturó el carnet. La capturada SIEMPRE gana a la derivada; la
+   *  superficie puede decir la diferencia si quiere (L-139). */
+  proxima_es_derivada: boolean;
+  estado: EstadoPlanVacuna;
+}
+
+const ESTADOS_PLAN: readonly string[] = ['al_dia', 'vencida', 'sin_fecha', 'nunca_aplicada', 'aun_no_corresponde'];
+
+/** El plan vacunal de una mascota: UNA FILA POR VACUNA QUE SU ESPECIE
+ *  NECESITA — aplicadas y faltantes. Es el lector que habilita el tablero
+ *  de vacunas, la grilla "Cómo está hoy" y la fila de recomendación del
+ *  Hogar (que hoy solo podía computar citas). */
+export async function obtenerPlanVacunal(
+  mascotaId: string,
+): Promise<ResultadoWrapper<VacunaDelPlan[], CodigoErrorSalud>> {
+  const { data, error } = await getClient().rpc('obtener_plan_vacunal', { p_mascota_id: mascotaId });
+  if (error) return { ok: false, codigo: codigoSalud(error.message), mensaje: MENSAJE_ERROR };
+  if (!Array.isArray(data)) return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR };
+
+  const filas: VacunaDelPlan[] = [];
+  for (const f of data as Record<string, unknown>[]) {
+    // guard de shape contra el retorno REAL (L-124): una fila que no
+    // cierra se DESCARTA, jamás se completa con inventos.
+    if (
+      typeof f.vacuna_codigo !== 'string' ||
+      typeof f.nombre !== 'string' ||
+      typeof f.obligatoria !== 'boolean' ||
+      typeof f.estado !== 'string' ||
+      !ESTADOS_PLAN.includes(f.estado)
+    ) {
+      continue;
+    }
+    filas.push({
+      vacuna_codigo: f.vacuna_codigo,
+      nombre: f.nombre,
+      obligatoria: f.obligatoria,
+      periodicidad_meses: typeof f.periodicidad_meses === 'number' ? f.periodicidad_meses : null,
+      ultima_aplicada: typeof f.ultima_aplicada === 'string' ? f.ultima_aplicada : null,
+      proxima: typeof f.proxima === 'string' ? f.proxima : null,
+      proxima_es_derivada: f.proxima_es_derivada === true,
+      estado: f.estado as EstadoPlanVacuna,
+    });
+  }
+  return { ok: true, data: filas };
+}

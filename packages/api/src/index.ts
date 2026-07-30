@@ -195,6 +195,9 @@ export {
   type TipoDesparasitacion,
   type MetodoPeso,
   type PesoDeLaSerie,
+  obtenerPlanVacunal,
+  type EstadoPlanVacuna,
+  type VacunaDelPlan,
 } from './wrappers/salud';
 
 // Config del país — S51-B2.4 (Explorar por country_config)
@@ -288,6 +291,9 @@ export {
   type BloqueoPrestador,
   type InputCrearBloqueoPrestador,
   type CodigoErrorBloqueos,
+  obtenerDiasCerrados,
+  declararDiaCerrado,
+  type DiaCerrado,
 } from './wrappers/bloqueos';
 
 // Comisión vigente visible al prestador — S56-B (TAREA 4, financiero v2.6
