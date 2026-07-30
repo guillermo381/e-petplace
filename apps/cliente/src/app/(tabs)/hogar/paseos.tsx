@@ -353,6 +353,29 @@ export default function MisPaseos() {
     ),
   ].sort((a, b) => (`${a.cita.fecha}T${a.cita.hora}` < `${b.cita.fecha}T${b.cita.hora}` ? -1 : 1));
 
+  // r14-1 · LA MITAD QUE FALTABA DE ESA MISMA FUSIÓN. El founder vio
+  // DOS listas en el historial: la diseñada (canto + despliegue) y
+  // debajo otra plana con hairlines. La plana era LEGADO — S60-A6 fusionó
+  // las citas FUTURAS del plan con las sueltas y dejó las PASADAS donde
+  // estaban; r12 rediseñó las pasadas SUELTAS y las del plan quedaron
+  // otra vez atrás. Dos migraciones a medias, el mismo resto.
+  // NO SE BORRA LA LISTA: se FUSIONA. Borrarla a secas se llevaba
+  // puesto el historial entero del plan, que es DATO del dueño.
+  // Y la fusión cura de paso un desvío real: el filtro de FECHA
+  // mordía solo las sueltas — las del plan se pintaban siempre, así
+  // que "semana" mostraba meses. Ahora el corte es de la lista, no de
+  // media lista.
+  // Orden DESCENDENTE: un historial se lee desde lo último que pasó
+  // (los próximos suben, el pasado baja — ejes opuestos, a propósito).
+  const pasadasFusionadas: CitaFusionada[] = [
+    ...librasPasadas.map((c) => ({ clase: 'libre' as const, cita: c })),
+    ...listaPlanes.flatMap((p) =>
+      (citas[p.id] ?? [])
+        .filter((c) => (c.estado !== 'confirmada' || c.fecha < hoy) && cortePorVentana(c.fecha))
+        .map((c) => ({ clase: 'plan' as const, cita: c, plan: p })),
+    ),
+  ].sort((a, b) => (`${a.cita.fecha}T${a.cita.hora}` > `${b.cita.fecha}T${b.cita.hora}` ? -1 : 1));
+
   function vozEstado(p: PlanPaseo): { etiqueta: string; estado: 'alDia' | 'info' } {
     if (p.estado === 'activa' && p.auto_renovar) return { etiqueta: t('plan.estadoActiva'), estado: 'alDia' };
     if (p.estado === 'activa') return { etiqueta: t('plan.estadoPausada'), estado: 'info' };
@@ -591,95 +614,76 @@ export default function MisPaseos() {
               ) : null}
             </View>
           ) : (
-            <View style={{ gap: spacing[4] }}>
-              {/* lo caminado fuera del plan también es sedimento */}
-              {librasPasadas.length > 0 ? (
-                <View style={{ gap: spacing[2.5] }}>
-                  {librasPasadas.map((c) => {
-                    // r12-3: MISMO diseño que el home — canto que pinta
-                    // la curva + despliegue en su lugar, UNA SOLA
-                    // ABIERTA a la vez (dos abiertas y el resumen deja
-                    // de presidir).
-                    const abierto = abierta === c.id;
-                    return (
-                      <CantoCurva key={c.id} color={theme.capa.cuidado}>
-                        <Pressable
-                          accessibilityRole="button"
-                          accessibilityState={{ expanded: abierto }}
-                          onPress={() => setAbierta(abierto ? null : c.id)}
-                        >
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3], padding: spacing[3], minHeight: 58 }}>
-                            <View style={{ flex: 1, minWidth: 0, gap: spacing[0.5] }}>
-                              <Texto variante="cuerpo" numberOfLines={1}>
-                                {t(c.origen === 'paquete' ? 'paquete.citaDePaquete' : 'suelto.citaSuelta')}
-                              </Texto>
-                              <Texto variante="dato" numberOfLines={1}>
-                                {`${fechaCortaMono(c.fecha, idioma)} · ${c.hora.slice(0, 5)} · ${c.duracion_minutos} min`}
-                              </Texto>
-                            </View>
-                            <Insignia
-                              estado={c.estado === 'completada' ? 'alDia' : 'info'}
-                              etiqueta={t(
-                                c.estado === 'completada'
-                                  ? 'plan.salidaCompletada'
-                                  : c.estado === 'no_show'
-                                    ? 'suelto.salidaPerdida'
-                                    : 'plan.salidaCancelada',
-                              )}
-                              tamaño="sm"
-                            />
-                          </View>
-                        </Pressable>
-                        {abierto ? (
-                          <View style={{ paddingHorizontal: spacing[3], paddingBottom: spacing[3], gap: spacing[2] }}>
-                            <Separador />
-                            {c.precio !== null ? (
-                              <FilaDato
-                                disposicion="horizontal"
-                                etiqueta={t('presupuesto.total')}
-                                valor={`$ ${c.precio.toFixed(2)}`}
-                                mono
-                              />
-                            ) : null}
-                            <FilaDato
-                              disposicion="horizontal"
-                              etiqueta={t('explorar.cuandoDuracion')}
-                              valor={`${c.duracion_minutos} min`}
-                              mono
-                            />
-                          </View>
-                        ) : null}
-                      </CantoCurva>
-                    );
-                  })}
-                </View>
-              ) : null}
-              {librasPasadas.length === 0 &&
-              listaPlanes.every((p) => (citas[p.id] ?? []).every((c) => c.estado === 'confirmada' && c.fecha >= hoy)) ? (
+            /* r14-1 · UNA SOLA LISTA. Todo lo caminado —suelto,
+               paquete y plan— en la MISMA cronología y con la MISMA
+               pieza. La lista plana de hairlines murió acá (Ley 37);
+               lo que mostraba no se perdió: viaja fusionado. */
+            <View style={{ gap: spacing[2.5] }}>
+              {pasadasFusionadas.length === 0 ? (
                 <EstadoVacio registro="seccion" titulo={t('plan.vacioSegmento')} />
               ) : (
-                listaPlanes.map((p) => {
-                  const pasadas = (citas[p.id] ?? []).filter((c) => c.estado !== 'confirmada' || c.fecha < hoy);
-                  if (pasadas.length === 0) return null;
+                pasadasFusionadas.map((f) => {
+                  // r12-3: MISMO diseño que el home — canto que pinta
+                  // la curva + despliegue en su lugar, UNA SOLA
+                  // ABIERTA a la vez (dos abiertas y el resumen deja
+                  // de presidir).
+                  const c = f.cita;
+                  const abierto = abierta === c.id;
                   return (
-                    <Tarjeta key={p.id} relleno="ninguno">
-                      {pasadas.map((c, i) => (
-                        <View key={c.id}>
-                          {i > 0 ? <Separador /> : null}
-                          <Celda
-                            titulo={fechaCortaMono(c.fecha, idioma)}
-                            metadataMono={`${c.hora.slice(0, 5)} · ${c.duracion_minutos} min`}
-                            fin={
-                              // Ley 3: jamás el estado crudo del modelo
-                              <Insignia
-                                estado={c.estado === 'completada' ? 'alDia' : 'info'}
-                                etiqueta={t(c.estado === 'completada' ? 'plan.salidaCompletada' : 'plan.salidaCancelada')}
-                              />
-                            }
+                    <CantoCurva key={c.id} color={theme.capa.cuidado}>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityState={{ expanded: abierto }}
+                        onPress={() => setAbierta(abierto ? null : c.id)}
+                      >
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3], padding: spacing[3], minHeight: 58 }}>
+                          <View style={{ flex: 1, minWidth: 0, gap: spacing[0.5] }}>
+                            <Texto variante="cuerpo" numberOfLines={1}>
+                              {t(
+                                f.clase === 'plan'
+                                  ? 'plan.citaDePlan'
+                                  : f.cita.origen === 'paquete'
+                                    ? 'paquete.citaDePaquete'
+                                    : 'suelto.citaSuelta',
+                              )}
+                            </Texto>
+                            <Texto variante="dato" numberOfLines={1}>
+                              {`${fechaCortaMono(c.fecha, idioma)} · ${c.hora.slice(0, 5)} · ${c.duracion_minutos} min`}
+                            </Texto>
+                          </View>
+                          <Insignia
+                            estado={c.estado === 'completada' ? 'alDia' : 'info'}
+                            etiqueta={t(
+                              c.estado === 'completada'
+                                ? 'plan.salidaCompletada'
+                                : c.estado === 'no_show'
+                                  ? 'suelto.salidaPerdida'
+                                  : 'plan.salidaCancelada',
+                            )}
+                            tamaño="sm"
                           />
                         </View>
-                      ))}
-                    </Tarjeta>
+                      </Pressable>
+                      {abierto ? (
+                        <View style={{ paddingHorizontal: spacing[3], paddingBottom: spacing[3], gap: spacing[2] }}>
+                          <Separador />
+                          {c.precio !== null ? (
+                            <FilaDato
+                              disposicion="horizontal"
+                              etiqueta={t('presupuesto.total')}
+                              valor={`$ ${c.precio.toFixed(2)}`}
+                              mono
+                            />
+                          ) : null}
+                          <FilaDato
+                            disposicion="horizontal"
+                            etiqueta={t('explorar.cuandoDuracion')}
+                            valor={`${c.duracion_minutos} min`}
+                            mono
+                          />
+                        </View>
+                      ) : null}
+                    </CantoCurva>
                   );
                 })
               )}

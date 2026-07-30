@@ -513,6 +513,9 @@ export const clienteEs = {
     paseadoresNota: 'Precios y horarios reales de cada paseador. Elegir horario y pagar desde acá llega pronto.',
     // S54-B3.2 — momento-primero: el CUÁNDO y el QUIÉN
     paseoTitulo: 'Paseo',
+    // r14-6 (literal del founder) — el label del cabezal, ahí donde
+    // murió la banda de color. Al LOTE CONSOLIDADO de strings que armó A.
+    agendaPaseos: 'Agenda Paseos',
     cuandoDia: 'Día',
     cuandoHora: 'Hora de inicio',
     cuandoDuracion: 'Duración',

@@ -44,6 +44,7 @@ import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import Animated, {
   Easing,
+  interpolateColor,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
@@ -56,6 +57,7 @@ import {
   Boton,
   EstadoVacio,
   Icono,
+  Isotipo,
   Texto,
   radius,
   spacing,
@@ -64,140 +66,101 @@ import {
   type IconoNombre,
 } from '@epetplace/ui';
 
-// ═══════════════ ① EL TECHO — LAS DOS OPCIONES ═══════════════
+// ═══════════════ ① EL CABEZAL — LA BANDA DE COLOR MURIÓ ═══════════════
 
-/** EL TECHO CLARO POR SERVICIO — FIRMADO en dispositivo (r12). Toma el
- *  TINTE de la capa del oficio sobre papel; el texto va en tinta. */
-export function TechoReserva({
+/** EL CABEZAL DEL OFICIO (r14-6 — decisión del founder MIRANDO, sobre
+ *  su propia firma de r12: el techo claro por servicio ganó el gate y
+ *  DOS RONDAS DESPUÉS la banda entera muere. Se registra así, no como
+ *  si la banda nunca hubiera existido: el gate de r12 eligió entre dos
+ *  bandas; r14 saca la banda de la mesa).
+ *
+ *  Lo que queda en su lugar: EL GLIFO DEL OFICIO ADELANTE + EL ISOTIPO
+ *  TEÑIDO DEL COLOR DEL OFICIO + el label. Sin banda, sin curva, sin
+ *  luz de esquina — no hay techo que adornar.
+ *
+ *  ⚠️ DESVÍO DECLARADO — LEY 4: *"el isotipo es IDENTIDAD: va en
+ *  gradiente oficial por default"*. Teñirlo del color del oficio se
+ *  desvía de ese default y por eso se declara aunque sea chico contra
+ *  una banda entera. DOS COSAS QUE LO ATENÚAN, medidas y no supuestas:
+ *   ① el MECANISMO ya existe y está firmado — la prop `color` de
+ *     `Isotipo` nació en S61-B8 por letra del founder ("isotipo en
+ *     tealDark", bienvenida del prestador): teñir el isotipo con el
+ *     color de un oficio YA tiene precedente firmado en la casa.
+ *   ② el default habría sido el CHOQUE: el gradiente oficial es de
+ *     CONTEXTO CERRADO (Ley 4 dosis) y esta es pantalla interna. Poner
+ *     el isotipo en gradiente acá rompía la dosis; teñirlo la respeta.
+ *  Igual es DESVÍO y lo firma el founder, no esta pantalla.
+ *
+ *  ⚠️ EL PRECIO NO VIAJA ACÁ, y es RETIRO, no olvido: la banda mostraba
+ *  el MISMO número que el pie ("$ X · desde"). Dos veces el mismo dato
+ *  es la regla Chanel directa. Queda SOLO en el pie — y el caso del día
+ *  sin horarios queda honesto por consecuencia: si no hay nada que
+ *  reservar, no hay precio que decir (el pie tampoco se monta). */
+export function CabezalOficio({
   oficio,
   titulo,
   detalle,
-  precio,
-  precioDesde,
   onAtras,
   insetTop,
 }: {
   oficio: IconoNombre;
   titulo: string;
+  /** El sujeto de la reserva (la mascota). En SANS: es un NOMBRE, no
+   *  metadata de máquina — la Ley 3 reserva el mono para lo segundo, y
+   *  la banda vieja lo pintaba en mono (defecto hallado al reescribir). */
   detalle: string | null;
-  /** null = todavía no hay precio que decir (nada se inventa). */
-  precio: string | null;
-  /** true = el precio VARÍA entre prestadores → dice "desde" (escalera
-   *  del precio S61-A13, FIRMADA: el exacto se dice en el QUIÉN). */
-  precioDesde: boolean;
   onAtras: () => void;
   insetTop: number;
 }) {
   const { theme } = useTheme();
-  const esMemorial = theme.mode === 'memorial';
-  // (b) el techo claro toma el TINTE de la capa del oficio; (a) el
-  // oscuro toma la tinta de la casa. Cero hex nuevo. (El tinte se
-  // resuelve ANTES del ternario: memorial no tiene registro capaBg y
-  // el narrowing del `in` dentro del ternario dejaba theme en never.)
-  // el tinte de la capa del oficio (memorial no tiene registro capaBg)
-  const fondo = 'capaBg' in theme ? theme.capaBg.cuidado : theme.bg.overlay;
-  const sobre = theme.text.primary;
-  const sobreSuave = theme.text.secondary;
+  // el color del OFICIO — el mismo tinte de capa que pintaba la banda,
+  // ahora en su registro pleno: de fondo pasa a TINTA del isotipo.
+  const colorOficio = theme.capa.cuidado;
 
   return (
     <View
       style={{
-        backgroundColor: fondo,
+        backgroundColor: theme.bg.base,
         paddingTop: insetTop + spacing[3],
         paddingHorizontal: spacing[5],
-        paddingBottom: spacing[5],
-        borderBottomLeftRadius: 26,
-        borderBottomRightRadius: 26,
-        overflow: 'hidden',
+        paddingBottom: spacing[3],
       }}
     >
-      {/* ⚠️ A4 — LA LUZ DE LA ESQUINA, INVERTIDA (r12-bis, corrección
-          del founder sobre MI error de método). Lo que hice mal en r12:
-          MATÉ la luz apoyándome en L-c, pero A4 está FIRMADA (§9bis.2)
-          y su letra dice "el ÚNICO adorno permitido EN UN TECHO" — sin
-          acotar a techo de marca. Matar una firmada por medición propia
-          es exactamente lo que la casa prohíbe: el choque SE DECLARA.
-          La medición seguía siendo correcta (blanco al 7% sobre tinte
-          claro no se ve); lo que estaba mal era la conclusión.
-          LA INVERSIÓN: misma intención, mismo alfa FIRMADO (7%), mismo
-          diámetro (~60% del ancho) y mismo desborde por la esquina
-          superior derecha — lo único que cambia es el REGISTRO del
-          color, que se resuelve POR CONTEXTO: sobre techo oscuro la luz
-          es blanca; sobre techo claro es TINTA. Es el patrón que la
-          casa ya usa en tealDark (mismo color, otro registro) y en el
-          tapiz. El valor sale del token del tema, no de un literal.
-          ⚠️ AL GATE, no resuelto acá: si la inversión TAMPOCO se lee,
-          entonces A4 necesita ALCANCE FINO ("en un techo de MARCA") y
-          eso lo firma el founder — no se deduce de una pantalla. Por
-          eso el techo claro NO SE PROPAGA a los otros oficios todavía:
-          si la luz muere en cada techo, A4 moriría en veinte pantallas
-          sin que nadie lo haya decidido. */}
-      <View
-        style={{
-          position: 'absolute',
-          top: -86,
-          right: -64,
-          width: 242,
-          height: 242,
-          borderRadius: 999,
-          backgroundColor: theme.text.primary,
-          opacity: 0.07,
-        }}
-      />
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
         <Pressable
           accessibilityRole="button"
           onPress={onAtras}
-          style={{
-            width: 38,
-            height: 38,
-            borderRadius: 999,
-            backgroundColor: theme.bg.card,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
+          hitSlop={8}
+          style={{ width: 38, height: 38, alignItems: 'center', justifyContent: 'center', marginLeft: -spacing[2] }}
         >
-          <Svg width={20} height={20} viewBox="0 0 24 24">
-            <Path d="m14 5-7 7 7 7" stroke={sobre} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <Svg width={22} height={22} viewBox="0 0 24 24">
+            <Path
+              d="m14 5-7 7 7 7"
+              stroke={theme.text.primary}
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
           </Svg>
         </Pressable>
-        <Icono nombre={oficio} tamano={26} registro="tinta" tinta={sobre} />
-      </View>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: spacing[3], marginTop: spacing[5] }}>
+        {/* el glifo del oficio ADELANTE; el isotipo TEÑIDO detrás de él */}
+        <Icono nombre={oficio} tamano={24} registro="capa" />
+        <Isotipo size={20} color={colorOficio} />
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={{ fontFamily: typography.family.sans.light, fontSize: typography.size.xl, color: sobre }}>
+          <Text
+            numberOfLines={1}
+            style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: theme.text.primary }}
+          >
             {titulo}
           </Text>
-          {detalle !== null ? (
-            <Text
-              style={{
-                fontFamily: typography.family.mono.regular,
-                fontSize: typography.size.sm,
-                letterSpacing: typography.tracking.mono,
-                color: sobreSuave,
-                marginTop: spacing[1],
-              }}
-            >
-              {detalle}
-            </Text>
-          ) : null}
         </View>
-        {/* el precio del techo: SOLO si existe, y con "desde" cuando
-            varía — la escalera FIRMADA le gana al total exacto de la
-            lámina (que mentiría antes de elegir prestador). */}
-        {precio !== null ? (
-          <View style={{ alignItems: 'flex-end' }}>
-            <Text style={{ fontFamily: typography.family.mono.medium, fontSize: typography.size.lg, color: sobre }}>
-              {precio}
-            </Text>
-            {precioDesde ? (
-              <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.xs, color: sobreSuave }}>
-                {'desde'}
-              </Text>
-            ) : null}
-          </View>
-        ) : null}
       </View>
+      {detalle !== null ? (
+        <View style={{ marginTop: spacing[1], marginLeft: 38 + spacing[3] }}>
+          <Texto variante="apoyo">{detalle}</Texto>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -297,6 +260,8 @@ function RuedaDias({
               cerrado={cerrados.has(d.iso)}
               onPress={() => elegirPorIndice(i)}
               theme={theme}
+              acento={theme.accent.control}
+              tinta={theme.text.primary}
             />
           ))}
         </Animated.View>
@@ -315,6 +280,8 @@ function ItemRueda({
   cerrado,
   onPress,
   theme,
+  acento,
+  tinta,
 }: {
   dia: DiaOpcion;
   indice: number;
@@ -322,6 +289,9 @@ function ItemRueda({
   cerrado: boolean;
   onPress: () => void;
   theme: ReturnType<typeof useTheme>['theme'];
+  /** Colores YA resueltos (el worklet no puede leer el tema). */
+  acento: string;
+  tinta: string;
 }) {
   const vivo = useAnimatedStyle(() => {
     const anillo = Math.min(Math.abs(indice - indiceVivo.value), D3.escalas.length - 1);
@@ -334,6 +304,21 @@ function ItemRueda({
     const opacidad = D3.opacidades[bajo] + (D3.opacidades[alto] - D3.opacidades[bajo]) * t;
     return { transform: [{ scale: escala }], opacity: cerrado ? 0.18 : opacidad };
   });
+
+  /** r14-3 · EL ACENTO DEL DÍA — la letra literal de D3 ("el acento
+   *  queda en el número"), que se había perdido cuando el imán entró:
+   *  el elegido se distinguía solo por escala y ahí el acento no vive.
+   *  VA EN EL MISMO WORKLET que la escala, y no en estado de React, por
+   *  una razón de comportamiento: durante el arrastre el estado no
+   *  cambia hasta soltar (`runOnJS` en `onEnd`), así que un acento
+   *  atado a React llegaría TARDE — el color tiene que viajar con el
+   *  dedo igual que el tamaño. Memorial degrada solo: ahí
+   *  `accent.control` ES la tinta (Ley 8, sin rama propia). */
+  const acentoNumero = useAnimatedStyle(() => {
+    const anillo = Math.min(Math.abs(indice - indiceVivo.value), 1);
+    return { color: interpolateColor(anillo, [0, 1], [acento, tinta]) };
+  });
+
   return (
     <Animated.View style={vivo}>
       <Pressable
@@ -354,15 +339,23 @@ function ItemRueda({
         }}
       >
         <Texto variante="dato">{dia.dia}</Texto>
-        <Text
-          style={{
-            fontFamily: typography.family.mono.medium,
-            fontSize: typography.size.xl,
-            color: theme.text.primary,
-          }}
+        {/* r14-5 · EL NÚMERO A SANS con tabular-nums. El mono es dato
+            de MÁQUINA (Ley 3) y un día que ELEGÍS es una elección, no
+            un dato leído: el traje cambia con el rol. La cifra tabular
+            conserva lo único que el mono aportaba acá — que 11 y 22
+            ocupen lo mismo y la rueda no tiemble al pasar. */}
+        <Animated.Text
+          style={[
+            {
+              fontFamily: typography.family.sans.medium,
+              fontSize: typography.size.xl,
+              fontVariant: ['tabular-nums'],
+            },
+            acentoNumero,
+          ]}
         >
           {dia.numero}
-        </Text>
+        </Animated.Text>
       </Pressable>
     </Animated.View>
   );
@@ -380,28 +373,48 @@ export function SelectorDia(props: {
   return <RuedaDias dias={props.dias} elegido={props.elegido} cerrados={cerrados} onElegir={props.onElegir} />;
 }
 
-// ═══════════════ LA GRILLA DE HORAS + EL NULO HONESTO ═══════════════
+// ═══════════════ LA GRILLA QUE ELIGE + EL NULO HONESTO ═══════════════
 
-export function GrillaHoras({
-  horas,
+/** LA GRILLA — una celda por opción, gramática ELEVACIÓN + ESCALA +
+ *  COLOR DE TEXTO. Jamás relleno, jamás contorno.
+ *
+ *  r14-4 · GANÓ UN SEGUNDO CONSUMIDOR Y POR ESO SE GENERALIZÓ (era
+ *  `GrillaHoras`, hora-only): la DURACIÓN venía de `SelectorOpcion`, y
+ *  ahí el elegido se dibuja con BORDE en el acento — contorno magenta,
+ *  que es lo que A6 mata y el founder rechazó cuatro veces. La cura NO
+ *  es "sacarle el borde al SelectorOpcion" (es de `packages/ui`, y su
+ *  contorno lo usan veinte pantallas): es que la duración hable la
+ *  MISMA gramática que la hora, que es su vecina en la misma pantalla.
+ *
+ *  Y el relleno tampoco entra por la puerta de atrás: son CINCO
+ *  hermanos comparables y L-b veta el pleno de 4 en adelante. Lo que
+ *  queda es exactamente lo que la ley deja — elevación, escala, color
+ *  de texto. Los dos ejes de la pantalla quedan con una sola voz. */
+export function GrillaElegir({
+  opciones,
   elegida,
   onElegir,
+  voz = 'mono',
 }: {
-  horas: string[];
+  opciones: { codigo: string; etiqueta: string }[];
   elegida: string | null;
-  onElegir: (h: string) => void;
+  onElegir: (codigo: string) => void;
+  /** 'mono' = dato de máquina (la hora) · 'sans' = voz humana (la
+   *  duración: "30 min", "1 h"). Ley 3, sin excepción por comodidad. */
+  voz?: 'mono' | 'sans';
 }) {
   const { theme } = useTheme();
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2], paddingHorizontal: spacing[5] }}>
-      {horas.map((h) => {
-        const on = h === elegida;
+      {opciones.map((o) => {
+        const on = o.codigo === elegida;
         return (
           <Pressable
-            key={h}
+            key={o.codigo}
             accessibilityRole="radio"
             accessibilityState={{ selected: on }}
-            onPress={() => onElegir(h)}
+            accessibilityLabel={o.etiqueta}
+            onPress={() => onElegir(o.codigo)}
             style={{
               flexBasis: '22%',
               flexGrow: 1,
@@ -417,12 +430,12 @@ export function GrillaHoras({
           >
             <Text
               style={{
-                fontFamily: typography.family.mono.regular,
+                fontFamily: voz === 'mono' ? typography.family.mono.regular : typography.family.sans.medium,
                 fontSize: typography.size.sm,
                 color: on ? theme.accent.control : theme.text.secondary,
               }}
             >
-              {h}
+              {o.etiqueta}
             </Text>
           </Pressable>
         );

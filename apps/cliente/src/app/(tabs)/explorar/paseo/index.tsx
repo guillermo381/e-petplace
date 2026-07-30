@@ -24,15 +24,13 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
-  AvatarMascota,
   Boton,
   Celda,
   CeldaNavegacion,
-  Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -42,7 +40,6 @@ import {
   Tarjeta,
   Texto,
   spacing,
-  typography,
   useTheme,
 } from '@epetplace/ui';
 import {
@@ -57,7 +54,7 @@ import {
   mascotasElegibles,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
-import { DiaSinHorarios, GrillaHoras, PieReserva, SelectorDia, TechoReserva } from '@/components/reserva-piezas';
+import { CabezalOficio, DiaSinHorarios, GrillaElegir, PieReserva, SelectorDia } from '@/components/reserva-piezas';
 
 function fechaLocalISO(d: Date): string {
   return new Intl.DateTimeFormat('en-CA').format(d);
@@ -229,17 +226,15 @@ export default function PaseoCuando() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      {/* ✅ EL TECHO CLARO POR SERVICIO — FIRMADO en dispositivo (r12).
-          El oscuro murió: la marca ya es el degradado oscuro del hogar
-          y de la ficha, y un oficio oscuro competía con ella. */}
-      <TechoReserva
+      {/* r14-6 · LA BANDA DE COLOR MURIÓ (decisión del founder mirando,
+          dos rondas después de haber firmado cuál de las dos bandas
+          ganaba). En su lugar, el cabezal: glifo del oficio + isotipo
+          teñido + label. El desvío de Ley 4 y el retiro del precio
+          duplicado están declarados en la pieza. */}
+      <CabezalOficio
         oficio="paseo"
-        titulo={t('explorar.paseoTitulo')}
+        titulo={t('explorar.agendaPaseos')}
         detalle={mascota !== null ? mascota.nombre : null}
-        // la ESCALERA DEL PRECIO (S61-A13, FIRMADA) manda: el exacto no
-        // existe hasta elegir prestador → "desde" cuando varía.
-        precio={bloqueElegido !== null ? `$ ${bloqueElegido.desde.toFixed(2)}` : null}
-        precioDesde={bloqueElegido?.varia ?? false}
         onAtras={() => router.back()}
         insetTop={insets.top}
       />
@@ -331,24 +326,37 @@ export default function PaseoCuando() {
               </View>
             ) : null}
 
-            {/* 1 · DURACIÓN — el ÚNICO selector que se RELLENA, y lo
-                hace por LEY, no por excepción: `naturaleza="existe"` es
-                la 19.8 (SE RELLENA LO QUE EXISTE) y L-b la acota a
-                fila corta. (Corrección a mi propio reporte de r9: dije
-                que el relleno pedía una prop nueva de B — ya existía.)
-                El precio del bloque vive acá, con su "desde". */}
-            <View style={{ paddingHorizontal: spacing[4], gap: spacing[2] }}>
-              <SelectorOpcion
-                acento="control"
-                etiqueta={t('explorar.cuandoDuracion')}
-                disposicion="grilla"
-                naturaleza="existe"
+            {/* 1 · DURACIÓN — r14-4: SALE de `SelectorOpcion` y pasa a
+                la MISMA grilla que la hora.
+                EL PORQUÉ, en dos capas y las dos medidas:
+                 ① `SelectorOpcion` dibuja el elegido con BORDE en el
+                   acento — contorno magenta. A6 (SIN CAJA) lo prohíbe y
+                   el founder lo rechazó cuatro veces; el borde vive en
+                   el componente compartido, así que la cura no es
+                   tocarlo (lo consumen veinte pantallas) sino no usarlo
+                   para este trabajo.
+                 ② Y el relleno tampoco: son CINCO bloques ofertados
+                   —hermanos comparables— y L-b veta el pleno de 4 en
+                   adelante. Acá corrijo mi propia r11: declaré
+                   `naturaleza="existe"` como la solución "por ley", y
+                   la 19.8 dice QUÉ se rellena mientras L-b dice CUÁNTO.
+                   Leí la primera y me salteé la segunda.
+                Queda lo que las dos leyes dejan en pie: elevación,
+                escala y color de texto — la voz de su vecina la hora. */}
+            <View style={{ gap: spacing[2] }}>
+              <View style={{ paddingHorizontal: spacing[5] }}>
+                <Texto variante="apoyo">{t('explorar.cuandoDuracion')}</Texto>
+              </View>
+              <GrillaElegir
+                voz="sans"
                 opciones={bloques.map((b) => ({ codigo: String(b.duracion), etiqueta: etiquetaBloque(b.duracion) }))}
-                seleccionada={duracion !== null ? String(duracion) : undefined}
-                onSelect={(codigo) => setDuracion(Number(codigo))}
+                elegida={duracion !== null ? String(duracion) : null}
+                onElegir={(codigo) => setDuracion(Number(codigo))}
               />
               {bloqueElegido !== null && bloqueElegido.duracion === 30 ? (
-                <Texto variante="apoyo">{t('explorar.cuandoSalidaBano')}</Texto>
+                <View style={{ paddingHorizontal: spacing[5] }}>
+                  <Texto variante="apoyo">{t('explorar.cuandoSalidaBano')}</Texto>
+                </View>
               ) : null}
             </View>
 
@@ -360,7 +368,7 @@ export default function PaseoCuando() {
                 el nulo honesto de abajo sostiene el caso. La prop
                 `cerrados` está lista para el lector cuando A lo dé. */}
             <View style={{ gap: spacing[2] }}>
-              <View style={{ paddingHorizontal: spacing[4] }}>
+              <View style={{ paddingHorizontal: spacing[5] }}>
                 <Texto variante="apoyo">{t('explorar.cuandoDia')}</Texto>
               </View>
               <SelectorDia
@@ -399,10 +407,14 @@ export default function PaseoCuando() {
               />
             ) : (
               <View style={{ gap: spacing[2] }}>
-                <View style={{ paddingHorizontal: spacing[4] }}>
+                <View style={{ paddingHorizontal: spacing[5] }}>
                   <Texto variante="apoyo">{t('explorar.cuandoHora')}</Texto>
                 </View>
-                <GrillaHoras horas={inicios} elegida={hora} onElegir={setHora} />
+                <GrillaElegir
+                  opciones={inicios.map((h) => ({ codigo: h, etiqueta: h }))}
+                  elegida={hora}
+                  onElegir={setHora}
+                />
               </View>
             )}
 

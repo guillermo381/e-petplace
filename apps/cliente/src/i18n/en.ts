@@ -456,6 +456,9 @@ export const clienteEn = {
     paseadoresNota: 'Real prices and hours from each walker. Picking a time and paying from here is coming soon.',
     // S54-B3.2 — moment-first: the WHEN and the WHO
     paseoTitulo: 'Walk',
+    // r14-6 — the header label. 'Book Walks' keeps the double reading
+    // of the Spanish literal (a place you go to, an action you take).
+    agendaPaseos: 'Book Walks',
     cuandoDia: 'Day',
     cuandoHora: 'Start time',
     cuandoDuracion: 'Length',

@@ -19,6 +19,30 @@
  * Compartido por hogar/tu-vida y perfil/su-historia (regla 37 — cero
  * clones). OVERRIDE LOCAL del cliente: la promoción es de B, post-gate
  * (R10 vigila el marcador).
+ *
+ * ⚠️ r14-2 — LA HILERA SIN GLIFO, Y POR QUÉ NO LLEVA GLIFO TODAVÍA.
+ * La orden fue literal: *"dales glifo y la placa rellena en el
+ * elegido, como las otras dos hileras"*. El diagnóstico es exacto y la
+ * marca se construyó; lo que NO se pudo ejecutar es la mitad del
+ * glifo, por dos cosas medidas, no supuestas:
+ *  ① EL SET NO EXISTE. Los tres chips son «todos · semana · mes» y en
+ *    el registry no hay glifos de VENTANA TEMPORAL (`hoy` ya rotula
+ *    "próximos" en la hilera de al lado; `vacaciones` es del prestador).
+ *    Repetir UN mismo glifo en los tres es justamente lo que la Ley 12
+ *    enmendada prohíbe —el glifo marca lo que VARÍA dentro de la unidad
+ *    de barrido— y su corolario nombra este caso con todas las letras:
+ *    *"si un set necesita el MISMO glifo repetido por fila, lo que
+ *    falta es un set POR TIPO"*.
+ *  ② NO PUEDO AUTORARLO DESDE ACÁ. El registry vive en `packages/ui` y
+ *    la pista C tiene esa frontera cerrada; además todo glifo nuevo
+ *    pasa por §6b (hoja de contacto, 2-3 variantes, gate POR ÍCONO a
+ *    21px). Es un arco, no un renglón de esta ronda.
+ * LO QUE SE HIZO: la hilera MARCA — el chip elegido se rellena entero
+ * y el label invierte (L-b lo permite con 3 hermanos, y la regla queda
+ * computada acá para que no mienta si algún día son 4+).
+ * LO QUE QUEDA COMO PEDIDO: un set de ventana temporal para B. El día
+ * que exista, esta rama se retira y los tres chips entran por la
+ * puerta principal — la placa.
  */
 
 import { Pressable, ScrollView, Text, View } from 'react-native';
@@ -66,6 +90,17 @@ export function FiltroPills<C extends string>({
         const colorPlaca =
           o.capa === 'identidad' ? theme.capa.identidad : o.capa === 'cuidado' ? theme.capa.cuidado : theme.text.primary;
         const tintaGlifo = elegido ? theme.bg.card : theme.text.secondary;
+        // r14-2 · LA HILERA SIN GLIFO TAMBIÉN MARCA. El founder lo
+        // diagnosticó exacto — "sin glifo no hay placa que rellenar" —
+        // y sin placa el elegido solo cambiaba el gris del label por
+        // tinta: no marcaba. La marca pasa AL CHIP: se rellena entero
+        // con el color y el label invierte.
+        // ⚠️ LA REGLA VIVE ACÁ, COMPUTADA, no en la cabeza de cada
+        // pantalla (mismo criterio que L-b en FiltroMascotas): el
+        // relleno pleno solo entra con 3 hermanos o menos. Una hilera
+        // sin glifo de 4+ es barrido y cae a elevación + label pleno.
+        const sinGlifo = o.icono === null;
+        const pleno = elegido && sinGlifo && opciones.length <= 3;
         return (
           <Pressable
             key={o.codigo}
@@ -76,8 +111,8 @@ export function FiltroPills<C extends string>({
             style={{
               height: 44,
               borderRadius: radius.full,
-              backgroundColor: theme.bg.card,
-              boxShadow: theme.elevacion.reposo,
+              backgroundColor: pleno ? colorPlaca : theme.bg.card,
+              boxShadow: elegido && sinGlifo ? theme.elevacion.elevada : theme.elevacion.reposo,
               flexDirection: 'row',
               alignItems: 'center',
               gap: spacing[2],
@@ -105,9 +140,23 @@ export function FiltroPills<C extends string>({
                 )}
               </View>
             ) : null}
-            <Texto variante="apoyo" color={elegido ? 'primary' : 'secondary'}>
-              {o.etiqueta}
-            </Texto>
+            {pleno ? (
+              // el label INVIERTE sobre el relleno — mismo token que el
+              // chip pleno de mascota, que es su vecino en la pantalla
+              <Text
+                style={{
+                  fontFamily: typography.family.sans.medium,
+                  fontSize: typography.size.sm,
+                  color: theme.text.onGradient,
+                }}
+              >
+                {o.etiqueta}
+              </Text>
+            ) : (
+              <Texto variante="apoyo" color={elegido ? 'primary' : 'secondary'}>
+                {o.etiqueta}
+              </Texto>
+            )}
           </Pressable>
         );
       })}
