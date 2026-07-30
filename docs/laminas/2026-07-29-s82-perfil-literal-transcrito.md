@@ -13,6 +13,14 @@
 > *(Nota de depósito C-S82 r3: el pedido decía que este archivo ya estaba
 > guardado acá y no estaba — su contenido viajó VERBATIM en el cuerpo del
 > pedido y esta copia lo deposita tal cual, cero paráfrasis nueva.)*
+>
+> *(Nota r5, cotejo de procedencia: llegaron DOS fotos a `docs/laminas/`
+> (`2026-07-29-s82-perfil-captura-1/2.jpeg`) — son la EVIDENCIA DEL GATE
+> en dispositivo (el Hogar pre-r4 y el perfil r3 con Thor: los defectos
+> que las rondas r4/r5 curaron), NO las tomas de Zeus del chat que este
+> literal transcribe. Las PNG del ACUERDO siguen sin depositarse: esta
+> transcripción SIGUE VIGENTE como fuente de ③④, con su gate exigible
+> intacto.)*
 
 ---
 
