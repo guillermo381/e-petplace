@@ -72,6 +72,36 @@ export type OpcionFiltro<C extends string> = {
   capa?: 'identidad' | 'cuidado' | null;
 };
 
+/** ⚠️⚠️ LA MARCA DEL ELEGIDO — Y LA CONDICIÓN QUE PUEDE ROMPERLA SOLA.
+ *
+ *  Existe como COMPONENTE CON NOMBRE por una razón que no es de estilo:
+ *  la ley que la gobierna se ve como una decisión de layout, y por eso
+ *  se le puso nombre y se mecanizó (R22). Sin nombre, el guard tendría
+ *  que vigilar un `<Svg>` anónimo entre otros.
+ *
+ *  LA LEY (enmienda de Ley 6, S82, firmada — §5 del documento
+ *  `2026-07-30-s82-C-ENMIENDA-ley6-para-A.md`):
+ *  **LA HUELLA DE MARCA JAMÁS VA ADENTRO DE LA PLACA DEL GLIFO.**
+ *
+ *  EL PORQUÉ, que es lo que hace invisible al defecto: los glifos b′
+ *  CONTIENEN una huella rellena (Ley 12), así que en un chip con glifo
+ *  hay DOS huellas. Lo único que las mantiene distinguibles es ESCALA y
+ *  AISLAMIENTO — adentro de la placa, a 16px, la huella es un DETALLE
+ *  DEL OBJETO; sola, a 13px, al lado del label y FUERA de la placa, es
+ *  una MARCA. Meterla adentro no rompe nada visible ni cambia ninguna
+ *  ley: simplemente vuelve al caso que S80 midió —una huella entre
+ *  huellas, que no puede señalar a ninguna— y (b) deja de leerse sin
+ *  que nadie se entere.
+ *
+ *  Por eso la marca es HERMANA del label, nunca hija de la placa. */
+function MarcaElegido({ color }: { color: string }) {
+  return (
+    <Svg width={13} height={13} viewBox="0 0 24 24">
+      <Huella color={color} escala={0.9} x={1.2} y={1.2} />
+    </Svg>
+  );
+}
+
 export function FiltroPills<C extends string>({
   opciones,
   activo,
@@ -158,17 +188,10 @@ export function FiltroPills<C extends string>({
             <Texto variante="apoyo" color={elegido ? 'primary' : 'secondary'}>
               {o.etiqueta}
             </Texto>
-            {/* (b) LA HUELLA COMO MARCA DE ELECCIÓN — se AGREGA, no
-                reemplaza: el eje de SERVICIO ya lleva glifo de categoría
-                en su placa y ese glifo es IDENTIDAD, no estado. Verificado
-                el roce que el founder pidió mirar: la huella entra a la
-                DERECHA del label, fuera de la placa, así que a 44 de alto
-                no se pelea con el glifo — comparten la fila, no el lugar. */}
-            {elegido ? (
-              <Svg width={13} height={13} viewBox="0 0 24 24">
-                <Huella color={theme.text.primary} escala={0.9} x={1.2} y={1.2} />
-              </Svg>
-            ) : null}
+            {/* (b) LA MARCA DEL ELEGIDO — HERMANA DEL LABEL, JAMÁS HIJA
+                DE LA PLACA. Su posición es la ley, no el layout: ver el
+                bloque de `MarcaElegido` y R22 en verify-diseno. */}
+            {elegido ? <MarcaElegido color={theme.text.primary} /> : null}
           </Pressable>
         );
       })}

@@ -84,6 +84,29 @@ El día que alguien la meta ahí, vuelve a ser el caso de S80 — una huella
 más entre huellas — y (b) deja de leerse sin que nadie haya cambiado la
 ley.
 
+**✅ MECANIZADO (orden del founder, S82-C r19): `R22` en
+`scripts/verify-diseno.mjs`.** El motivo por el que merecía guard es
+exactamente el que el founder nombró: **el defecto se ve como una
+decisión de layout, no como un cambio de ley** — no rompe el build, no
+cambia un color, no toca nada escrito. La marca ganó nombre propio
+(`MarcaElegido`) para que haya algo que vigilar; el guard verifica que
+exista, que se monte, y que su render no caiga dentro del bloque de la
+placa. **Rojo producido contra el archivo REAL** —mudando la marca
+adentro de la placa: exit 1 con el mensaje que nombra el caso de S80—,
+restaurado y verde.
+
+**☠️ SU CONDICIÓN DE MUERTE, ESCRITA AL NACER.** R22 se retira el día que
+ocurra cualquiera de las dos:
+① el founder **firma** un diseño donde la marca viva adentro de la placa
+— eso enmienda este §5, la regla queda equivocada y **se borra EN EL
+MISMO COMMIT de la firma**, no después;
+② `FiltroPills` se promueve a `packages/ui` **con el invariante metido en
+el CONTRATO** del componente (la marca como slot que no se puede
+anidar) — ahí el guard es redundante y **lo retira B en el commit de la
+promoción**.
+Un guard que sobrevive a su razón es basura que después nadie se anima a
+tocar.
+
 ## 6 · LO QUE MURIÓ CON LA FIRMA (Ley 37)
 
 - **La línea viajera del filtro del CLIENTE** y su maquinaria (marcos por

@@ -808,6 +808,66 @@ const FUENTES_R21 = ['light', 'dark', 'memorial', 'index'].map((f) => ({
   src: readFileSync(`packages/ui/src/themes/${f}.ts`, 'utf8'),
 }));
 
+/** R22 · LA MARCA DEL ELEGIDO NO SE METE ADENTRO DE LA PLACA
+ *  (S82-C r19 — enmienda de Ley 6 firmada; §5 de
+ *  `docs/relevamientos/2026-07-30-s82-C-ENMIENDA-ley6-para-A.md`).
+ *
+ *  POR QUÉ MERECE GUARD, que es el único criterio (L-192): **el defecto
+ *  se ve como una decisión de layout, no como un cambio de ley.** Mover
+ *  la huella adentro de la placa no rompe el build, no cambia ningún
+ *  color, no toca ninguna ley escrita — y sin embargo devuelve el
+ *  producto al caso que S80 midió: los glifos b′ CONTIENEN una huella
+ *  (Ley 12), así que adentro de la placa la marca queda como una huella
+ *  entre huellas y deja de señalar. Lo único que la hace legible es
+ *  ESCALA y AISLAMIENTO — 13px, sola, fuera de la placa.
+ *
+ *  QUÉ VIGILA: que `MarcaElegido` exista y se monte (no puede
+ *  desaparecer en silencio) y que su render NO caiga dentro del bloque
+ *  de la placa del glifo. Es HERMANA del label, jamás hija de la placa.
+ *
+ *  ☠️ CONDICIÓN DE MUERTE, escrita al nacer: esta regla se retira el día
+ *  que ocurra cualquiera de las dos —
+ *   ① el founder FIRMA un diseño donde la marca viva adentro de la placa
+ *     (eso enmienda §5 de la enmienda: la regla queda equivocada y se
+ *     borra EN EL MISMO COMMIT de la firma, no después);
+ *   ② `FiltroPills` se promueve a `packages/ui` con el invariante
+ *     metido en el CONTRATO del componente — la marca como slot que no
+ *     se puede anidar. Ahí el guard es redundante y lo retira B en el
+ *     commit de la promoción.
+ *  Un guard que sobrevive a su razón es basura que después nadie se
+ *  anima a tocar. */
+const PIEZA_R22 = 'apps/cliente/src/components/filtro-pills.tsx';
+function r22(fuentes) {
+  const src = fuentes.filtro ?? '';
+  const limpio = sinComentarios(src);
+  const fallos = [];
+  if (!/function\s+MarcaElegido\b/.test(limpio)) {
+    fallos.push(
+      `${PIEZA_R22} — MarcaElegido DESAPARECIÓ. La marca del elegido tiene nombre propio porque la ley que la gobierna se ve como layout; sin el nombre no hay nada que vigilar.`,
+    );
+  }
+  const usos = [...limpio.matchAll(/<MarcaElegido\b/g)];
+  if (usos.length === 0) {
+    fallos.push(`${PIEZA_R22} — MarcaElegido no se monta: el chip elegido se quedó sin marca.`);
+  }
+  // el bloque de la PLACA: desde su ancho declarado hasta su cierre
+  const abre = limpio.indexOf('width: 30');
+  if (abre === -1) {
+    fallos.push(
+      `${PIEZA_R22} — no se encontró la placa del glifo (width: 30): la regla quedó vigilando un fantasma. Si la placa cambió de forma, se re-ancla la regla EN EL MISMO COMMIT.`,
+    );
+  } else {
+    const cierra = limpio.indexOf('</View>', abre);
+    const dentro = cierra === -1 ? limpio.slice(abre) : limpio.slice(abre, cierra);
+    if (/<MarcaElegido\b/.test(dentro)) {
+      fallos.push(
+        `${PIEZA_R22} — LA MARCA QUEDÓ ADENTRO DE LA PLACA. Los glifos b′ ya contienen una huella (Ley 12): adentro, la marca es una huella entre huellas y deja de señalar — el caso exacto que S80 midió. Es HERMANA del label, jamás hija de la placa.`,
+      );
+    }
+  }
+  return { fallos, info: fallos.length === 0 ? 'marca viva y fuera de la placa' : `${fallos.length} fallo(s)` };
+}
+
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
 const FIXTURES = {
@@ -833,9 +893,11 @@ const FIXTURES = {
   R18: { cuenta: '<CeldaNavegacion titulo="Preferencias" onPress={() => router.push("/cuenta/preferencias")} />' },
   // el pleno que ignora a sus hermanos: exactamente mi defecto de r11
   R19: [{ path: '(fixture)', src: 'const pleno = elegido && sinGlifo;' }],
+  // la marca anidada adentro de la placa: el defecto que se ve como layout
+  R22: { filtro: 'function MarcaElegido() {}\n<View style={{ width: 30 }}><MarcaElegido /></View>' },
   R16: { palette: "light0: '#FAF9F7',\npapelTapiz: '#FAF2F5',", temas: 'const lightOficio: Theme = { ...lightTheme }' },
 };
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R19: r19, R20: r20, R21: r21 };
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R19: r19, R20: r20, R21: r21, R22: r22 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -903,6 +965,10 @@ corridas.push(['R17 (la galería no envejece)', r17(FUENTES_R17)]);
 corridas.push(['R20 (la familia alerta no se rellena)', r20([...apps, ...ui])]);
 corridas.push(['R21 (casts de Theme — D-582)', r21(FUENTES_R21)]);
 corridas.push(['R18 (D-580: la entrada a la galería NO desaparece)', r18({ cuenta: readFileSync(CUENTA_CLIENTE, 'utf8') })]);
+corridas.push([
+  'R22 (la marca del elegido no se mete en la placa)',
+  r22({ filtro: readFileSync(PIEZA_R22, 'utf8') }),
+]);
 corridas.push([
   'R19 (L-b: el relleno pleno se computa contra sus hermanos)',
   r19(PIEZAS_R19.map((p) => ({ path: p, src: readFileSync(p, 'utf8') }))),
