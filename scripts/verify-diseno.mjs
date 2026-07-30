@@ -631,6 +631,38 @@ const FUENTES_R17 = {
   galeria: readFileSync('packages/ui/src/gallery/TokenGallery.tsx', 'utf8'),
 };
 
+/** R18 · D-580 ENMENDADA (orden founder S82): LA ENTRADA A LA GALERÍA
+ *  EN CUENTA **QUEDA VISIBLE** hasta el gate de producción, y su retiro
+ *  exige FIRMA — ninguna sesión la paga por iniciativa propia.
+ *
+ *  LA POLARIDAD ES EL PUNTO (letra founder): el modo de falla de este
+ *  guard es que la entrada **DESAPAREZCA**, jamás que aparezca. Un
+ *  guard con la polaridad invertida (vigilar que NO esté) haría el
+ *  trabajo de retirarla sin firma, que es exactamente lo que la orden
+ *  prohíbe. Por eso vigila DOS cosas y las dos en positivo:
+ *    ① la navegación a '/gallery' EXISTE en la Cuenta del cliente
+ *    ② y NO está escondida tras `__DEV__` (el gate corre sobre el APK
+ *      preview, donde `__DEV__` es false: esconderla ahí la mata justo
+ *      donde se la necesita — L-161, la misma lección del marcador).
+ *  El día que el founder firme el retiro, esta regla se BORRA en el
+ *  mismo acto (y su borrado queda en el commit de la firma). */
+const CUENTA_CLIENTE = 'apps/cliente/src/app/(tabs)/cuenta/index.tsx';
+function r18(fuentes) {
+  const src = fuentes.cuenta ?? '';
+  const fallos = [];
+  if (!/router\.push\(['"]\/gallery['"]\)/.test(sinComentarios(src))) {
+    fallos.push(
+      `${CUENTA_CLIENTE} — LA ENTRADA A /gallery DESAPARECIÓ. D-580 (enmienda founder S82): queda VISIBLE hasta el gate de producción; su retiro exige FIRMA EXPLÍCITA, y con la firma se borra esta regla en el mismo acto.`,
+    );
+  }
+  if (/__DEV__/.test(sinComentarios(src))) {
+    fallos.push(
+      `${CUENTA_CLIENTE} — la Cuenta usa __DEV__: la entrada a la galería NO se esconde ahí (el gate corre sobre el APK preview, donde __DEV__ es false — L-161).`,
+    );
+  }
+  return { fallos, info: fallos.length === 0 ? 'entrada viva y sin __DEV__' : `${fallos.length} fallo(s)` };
+}
+
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
 const FIXTURES = {
@@ -651,9 +683,10 @@ const FIXTURES = {
   // tinte ENCENDIDO y ningún override en lightOficio = el caso que la
   // regla existe para atrapar.
   R17: { index: "export { PiezaFantasma } from './components/PiezaFantasma'", galeria: '' },
+  R18: { cuenta: '<CeldaNavegacion titulo="Preferencias" onPress={() => router.push("/cuenta/preferencias")} />' },
   R16: { palette: "light0: '#FAF9F7',\npapelTapiz: '#FAF2F5',", temas: 'const lightOficio: Theme = { ...lightTheme }' },
 };
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17 };
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -718,6 +751,7 @@ if ('caido' in (dump ?? {})) {
 corridas.push(['R13 (A6: control contorneado, cliente)', r13(apps)]);
 corridas.push(['R16 (papel tapiz: el prestador no recibe tinte)', r16(FUENTES_R16)]);
 corridas.push(['R17 (la galería no envejece)', r17(FUENTES_R17)]);
+corridas.push(['R18 (D-580: la entrada a la galería NO desaparece)', r18({ cuenta: readFileSync(CUENTA_CLIENTE, 'utf8') })]);
 for (const [nombre, res] of corridas) {
   console.log(`${nombre} · ${res.info}`);
   for (const f of res.fallos) { console.error(`  ✗ ${f}`); fallosTotal++; }
