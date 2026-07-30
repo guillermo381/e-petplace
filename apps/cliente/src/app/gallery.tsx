@@ -41,7 +41,7 @@ const DURACIONES = ['30 min', '1 h', '2 h'].map((d) => ({ codigo: d, etiqueta: d
 /** Las TRES piezas que el founder nombró, juntas y en su orden real de
  *  reserva. `envoltorio` decide CÓMO existe la superficie: es lo ÚNICO
  *  que cambia entre las tres alternativas — las piezas son las mismas. */
-function PiezasReales({ envoltorio }: { envoltorio: 'tarjeta' | 'halo' | 'aire' }) {
+function PiezasReales({ envoltorio }: { envoltorio: 'tarjeta' | 'halo' | 'haloRodea' | 'aire' }) {
   const { theme } = useTheme();
   const contenido = (
     <View style={{ gap: spacing[4] }}>
@@ -56,6 +56,24 @@ function PiezasReales({ envoltorio }: { envoltorio: 'tarjeta' | 'halo' | 'aire' 
   if (envoltorio === 'aire') {
     // (c) SIN TARJETA: la superficie desaparece y agrupa el AIRE.
     return <View style={{ paddingVertical: spacing[5] }}>{contenido}</View>;
+  }
+  if (envoltorio === 'haloRodea') {
+    // EL CONTRASTE (S82-B, pregunta del founder): la MISMA luz, pero en
+    // los CUATRO lados. Existe para que la diferencia se VEA y no haya
+    // que creerla: si rodea, es un borde con otro nombre y A6 muerde.
+    return (
+      <View
+        style={{
+          backgroundColor: theme.bg.card,
+          borderRadius: radius.md,
+          padding: spacing[4],
+          borderWidth: 1,
+          borderColor: 'rgba(255,255,255,0.14)',
+        }}
+      >
+        {contenido}
+      </View>
+    );
   }
   if (envoltorio === 'halo') {
     // (b) HALO: la elevación del oscuro expresada como LUZ. Línea de 1px
@@ -91,9 +109,15 @@ function LaminaSeparacionOscuro() {
     },
     {
       k: 'halo' as const,
-      titulo: '(b) HALO — la elevación como LUZ',
+      titulo: '(b) HALO DIRECCIONAL — solo el canto superior',
       linea:
-        'Cuesta: una línea de 1px al 14% arriba de la superficie (rinde 2.09 contra el fondo: el ojo la ve, y es justo lo que la sombra no puede dar en oscuro). NO mueve el par superficie/fondo — separa por CONTORNO, no por masa: cero textos tocados, cero de los 178 pares. Toca: A6 dice SIN CAJA (un halo no es caja: no rodea, es el borde donde pegaría la luz) y Ley 20 manda la sombra por token (no sería artesanal si nace como token de elevación oscura). Las dos son de mesa.',
+        'DIRECCIONAL, verificado en el literal: `borderTopWidth` — la luz entra por arriba y NO rodea, por eso A6 (SIN CAJA) no aplica. Cuesta: una línea de 1px al 14% arriba de la superficie (rinde 2.09 contra el fondo: el ojo la ve, y es justo lo que la sombra no puede dar en oscuro). NO mueve el par superficie/fondo — separa por CONTORNO, no por masa: cero textos tocados, cero de los 178 pares. Toca: A6 dice SIN CAJA (un halo no es caja: no rodea, es el borde donde pegaría la luz) y Ley 20 manda la sombra por token (no sería artesanal si nace como token de elevación oscura). Las dos son de mesa.',
+    },
+    {
+      k: 'haloRodea' as const,
+      titulo: '(b′) EL CONTRASTE — la misma luz, RODEANDO',
+      linea:
+        'NO es una propuesta: está montada para que la diferencia se vea. Si el halo rodea, es un BORDE con otro nombre y A6 muerde — haría falta enmienda de mesa. La (b) de arriba es direccional (solo el canto superior, `borderTopWidth`), que es lo que sostiene el argumento: no rodea, es el borde donde pegaría la luz. La diferencia entre esta y la de arriba es la diferencia entre una enmienda y ninguna.',
     },
     {
       k: 'aire' as const,
