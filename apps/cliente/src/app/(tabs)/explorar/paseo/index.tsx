@@ -221,7 +221,15 @@ export default function PaseoCuando() {
       weekday: 'short',
       day: 'numeric',
     });
-    const lista: Array<{ iso: string; etiqueta: string; corta: string; dow: number }> = [];
+    // 🔴 r16 · EL DÍA DE LA SEMANA SE PIDE POR SU PARTE, JAMÁS SE
+    // RECORTA DEL STRING. Hasta hoy la rueda hacía `corta.split(' ')[0]`
+    // (mío, r9) — y eso funciona en español POR CASUALIDAD DEL ORDEN:
+    // es → "jue 30" (parte[0] = "jue") · en → "30 Thu" (parte[0] = "30").
+    // Resultado visible en el emulador con la app en inglés: la rueda
+    // decía el NÚMERO DOS VECES, arriba y abajo. `formatToParts` entrega
+    // la parte por su NOMBRE y el orden deja de importar.
+    const partes = new Intl.DateTimeFormat(idioma === 'es' ? 'es' : 'en', { weekday: 'short' });
+    const lista: Array<{ iso: string; etiqueta: string; corta: string; dow: number; diaCorto: string }> = [];
     for (let i = 0; i < 14; i++) {
       const d = new Date();
       d.setDate(d.getDate() + i);
@@ -233,7 +241,17 @@ export default function PaseoCuando() {
       // UTC-5 devolvería el día anterior — el sábado saldría viernes y los
       // cerrados quedarían corridos uno. La trampa de siempre, esquivada
       // no arreglada: el dato bueno ya estaba acá.
-      lista.push({ iso, etiqueta, corta, dow: d.getDay() });
+      lista.push({
+        iso,
+        etiqueta,
+        corta,
+        dow: d.getDay(),
+        // la parte del día de semana, por NOMBRE (no por posición)
+        diaCorto: partes
+          .formatToParts(d)
+          .find((p) => p.type === 'weekday')
+          ?.value.toLowerCase() ?? '',
+      });
     }
     return lista;
   }, [idioma, t]);
@@ -528,7 +546,7 @@ export default function PaseoCuando() {
                 <Texto variante="apoyo">{t('explorar.cuandoDia')}</Texto>
               </View>
               <SelectorDia
-                dias={dias.map((d) => ({ iso: d.iso, dia: d.corta.split(' ')[0] ?? '', numero: d.iso.slice(8, 10) }))}
+                dias={dias.map((d) => ({ iso: d.iso, dia: d.diaCorto, numero: d.iso.slice(8, 10) }))}
                 elegido={dia}
                 cerrados={cerradosISO}
                 etiquetaCerrado={t('explorar.cuandoDiaCerrado')}

@@ -717,7 +717,24 @@ export default function MisPaseos() {
             // el clon local se absorbe en su componente — regla 37, y el
             // orden correcto: el toque-en-apagado es de TODOS los
             // botones de la casa, no de esta pantalla.
-            const elegida = mascotasHogar.find((m) => m.id === filtroMascota) ?? null;
+            // 🔴 r16 · EL CTA MUERTO DEL HOGAR DE UNA SOLA MASCOTA —
+            // hallado corriendo el gate en el emulador, NO leyendo.
+            // La hilera de chips se monta solo con 2+ (arriba, y está
+            // bien: un filtro de uno no filtra nada). Pero r12-11 ató
+            // Agendar a que HAYA una elegida en esa hilera — así que en
+            // una familia de UNA mascota el chooser no existe,
+            // `filtroMascota` se queda en null PARA SIEMPRE, y el botón
+            // que abre la reserva no se habilita jamás. El usuario más
+            // común del producto —una mascota— no podía agendar desde
+            // el log. No lo vi antes porque la familia de prueba del
+            // founder tiene dos.
+            // Con UNA no hay nada que elegir: la puerta no pregunta lo
+            // que ya sabe (Ley 23), y es la MISMA regla que la pantalla
+            // de reserva aplica del otro lado. Con 2+ nada cambia: sigue
+            // exigiendo elección explícita, que es el punto de r12-11.
+            const elegida =
+              mascotasHogar.find((m) => m.id === filtroMascota) ??
+              (mascotasHogar.length === 1 ? mascotasHogar[0] : null);
             return (
               <Boton
                 variante="primario"

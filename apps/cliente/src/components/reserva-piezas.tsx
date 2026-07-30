@@ -419,6 +419,8 @@ export function SelectorDia(props: {
  *  hermanos comparables y L-b veta el pleno de 4 en adelante. Lo que
  *  queda es exactamente lo que la ley deja — elevación, escala, color
  *  de texto. Los dos ejes de la pantalla quedan con una sola voz. */
+const COLUMNAS = 4;
+
 export function GrillaElegir({
   opciones,
   elegida,
@@ -433,8 +435,32 @@ export function GrillaElegir({
   voz?: 'mono' | 'sans';
 }) {
   const { theme } = useTheme();
+  const [ancho, setAncho] = useState(0);
+  // r16-2 · ANCHO UNIFORME, POR COLUMNAS IGUALES. De los dos caminos
+  // que el founder ofreció, se elige LA GRILLA y no el scroll, por tres
+  // razones y ninguna es estética:
+  //  ① la grilla ya es la gramática de la HORA, que es su vecina en la
+  //    misma pantalla — y unificar esas dos voces fue el punto de r14-4;
+  //  ② un scroll ESCONDE opciones: cinco bloques de duración es un
+  //    catálogo chico y completo, y lo que no se ve no se elige;
+  //  ③ arriba vive la rueda de días, que ya captura el pan horizontal —
+  //    dos carruseles apilados se pelean el mismo gesto.
+  // El ancho se MIDE (no se estima con porcentajes): con `flexBasis:22%`
+  // + `flexGrow:1` cada celda crecía según su contenido y la última fila
+  // estiraba al chip solitario a todo el ancho. Columna medida = todas
+  // iguales SIEMPRE, y la fila incompleta queda alineada con las de
+  // arriba en vez de deformarse.
+  const gap = spacing[2];
+  const celda = ancho > 0 ? (ancho - gap * (COLUMNAS - 1)) / COLUMNAS : 0;
   return (
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2], paddingHorizontal: spacing[5] }}>
+    // el padding vive AFUERA y la medición ADENTRO: `layout.width` de una
+    // View con padding devuelve el ancho CON el padding, y restarlo a mano
+    // es la clase de cuenta que se desincroniza sola.
+    <View style={{ paddingHorizontal: spacing[5] }}>
+    <View
+      onLayout={(e) => setAncho(e.nativeEvent.layout.width)}
+      style={{ flexDirection: 'row', flexWrap: 'wrap', gap }}
+    >
       {opciones.map((o) => {
         const on = o.codigo === elegida;
         return (
@@ -445,8 +471,9 @@ export function GrillaElegir({
             accessibilityLabel={o.etiqueta}
             onPress={() => onElegir(o.codigo)}
             style={{
-              flexBasis: '22%',
-              flexGrow: 1,
+              width: celda > 0 ? celda : undefined,
+              flexGrow: 0,
+              flexShrink: 0,
               height: 44,
               borderRadius: radius.suave,
               backgroundColor: theme.bg.card,
@@ -469,6 +496,7 @@ export function GrillaElegir({
           </Pressable>
         );
       })}
+    </View>
     </View>
   );
 }
