@@ -111,9 +111,39 @@ export function TechoReserva({
         overflow: 'hidden',
       }}
     >
-      {/* r12: la luz de la esquina (A4) MURIÓ acá — sobre un tinte
-          claro, blanco al 7% es invisible: si no dice nada, sobraba
-          (L-c). Sigue viva en los techos de MARCA (hogar, ficha). */}
+      {/* ⚠️ A4 — LA LUZ DE LA ESQUINA, INVERTIDA (r12-bis, corrección
+          del founder sobre MI error de método). Lo que hice mal en r12:
+          MATÉ la luz apoyándome en L-c, pero A4 está FIRMADA (§9bis.2)
+          y su letra dice "el ÚNICO adorno permitido EN UN TECHO" — sin
+          acotar a techo de marca. Matar una firmada por medición propia
+          es exactamente lo que la casa prohíbe: el choque SE DECLARA.
+          La medición seguía siendo correcta (blanco al 7% sobre tinte
+          claro no se ve); lo que estaba mal era la conclusión.
+          LA INVERSIÓN: misma intención, mismo alfa FIRMADO (7%), mismo
+          diámetro (~60% del ancho) y mismo desborde por la esquina
+          superior derecha — lo único que cambia es el REGISTRO del
+          color, que se resuelve POR CONTEXTO: sobre techo oscuro la luz
+          es blanca; sobre techo claro es TINTA. Es el patrón que la
+          casa ya usa en tealDark (mismo color, otro registro) y en el
+          tapiz. El valor sale del token del tema, no de un literal.
+          ⚠️ AL GATE, no resuelto acá: si la inversión TAMPOCO se lee,
+          entonces A4 necesita ALCANCE FINO ("en un techo de MARCA") y
+          eso lo firma el founder — no se deduce de una pantalla. Por
+          eso el techo claro NO SE PROPAGA a los otros oficios todavía:
+          si la luz muere en cada techo, A4 moriría en veinte pantallas
+          sin que nadie lo haya decidido. */}
+      <View
+        style={{
+          position: 'absolute',
+          top: -86,
+          right: -64,
+          width: 242,
+          height: 242,
+          borderRadius: 999,
+          backgroundColor: theme.text.primary,
+          opacity: 0.07,
+        }}
+      />
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
         <Pressable
           accessibilityRole="button"
