@@ -57,7 +57,8 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -77,7 +78,7 @@ import {
   usePresionado,
   useTheme,
 } from '@epetplace/ui';
-import { fechaCortaMono } from '@epetplace/i18n';
+import { fechaCortaMono, type IdiomaSoportado } from '@epetplace/i18n';
 import { obtenerPerfilMascota, type PerfilMascota, type VacunaDeMascota } from '@epetplace/api';
 
 import { CantoCurva } from '@/components/canto-curva';
@@ -389,7 +390,11 @@ function FilaVacuna({
   estado: EstadoVacuna;
   abierta: boolean;
   onToggle: () => void;
-  idioma: string;
+  /** r6: el tipo DEL RIEL, jamás `string` — `useTraduccion` ya devuelve
+   *  `IdiomaSoportado` y el prop era el único lugar donde se perdía. La
+   *  firma de `fechaCortaMono` NO se ensancha (patrón de C, r2: las
+   *  funciones locales declaran `'es' | 'en'`). */
+  idioma: IdiomaSoportado;
 }) {
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -419,75 +424,94 @@ function FilaVacuna({
   }
   const desplegable = detalle.length > 0;
 
+  // La cabecera vive en una variable: la usan las dos ramas (tocable y
+  // no tocable) — cero duplicación de composición.
+  const cabecera = (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: spacing[3],
+        paddingHorizontal: spacing[3],
+        paddingVertical: spacing[3],
+        minHeight: 58,
+      }}
+    >
+      <View style={{ flex: 1, gap: spacing[0.5] }}>
+        <Texto variante="cuerpo" numberOfLines={1}>
+          {vacuna.nombre_vacuna}
+        </Texto>
+        {/* la vigencia es voz de máquina y su COLOR dice el estado — el
+            canto queda para la categoría (la excepción declarada de la
+            lámina, que acá se cumple sola) */}
+        <Text
+          style={{
+            fontFamily: typography.family.mono.regular,
+            fontSize: typography.size.sm,
+            letterSpacing: typography.tracking.mono,
+            color: colorEstado,
+          }}
+        >
+          {vigencia}
+        </Text>
+      </View>
+      {desplegable ? (
+        <Chevron abierto={abierta} color={theme.text.tertiary} />
+      ) : (
+        // sin detalle no hay promesa de despliegue (principio de la puerta)
+        <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.sm, color: theme.text.tertiary }}>
+          —
+        </Text>
+      )}
+    </View>
+  );
+
   return (
     // el canto de la vacuna es capa.identidad — la MISMA con que el
     // timeline la pinta (protección de vida, S52). CantoCurva es de C.
     <CantoCurva color={theme.capa.identidad}>
-      <View
-        {...(desplegable ? handlers : null)}
-        style={desplegable ? estiloPresionado : undefined}
-        accessibilityRole={desplegable ? 'button' : undefined}
-        accessibilityState={desplegable ? { expanded: abierta } : undefined}
-        accessibilityLabel={`${vacuna.nombre_vacuna} · ${vigencia}`}
-        onTouchEnd={desplegable ? onToggle : undefined}
-      >
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: spacing[3],
-            paddingHorizontal: spacing[3],
-            paddingVertical: spacing[3],
-            minHeight: 58,
-          }}
+      {/* r6 · EL PRESIONADO VA POR REANIMATED, JAMÁS POR CAST: el estilo
+          de `usePresionado` lleva transitionProperty/Duration/Timing —
+          campos que el `<View>` de RN no tipa y que un `as` habría
+          silenciado (en dispositivo se leería como "no anima": la MISMA
+          clase de falla muda que el gesto mudo de r3, mismo día).
+          El patrón de la casa: `Pressable` porta los handlers,
+          `Animated.View` porta el estilo (precedente: el Coach del Hogar
+          y el avatar del perfil). El CUERPO desplegado queda AFUERA del
+          tocable — tocarlo no pliega, y el escalado no arrastra al
+          detalle abierto. */}
+      {desplegable ? (
+        <Pressable
+          {...handlers}
+          onPress={onToggle}
+          accessibilityRole="button"
+          accessibilityState={{ expanded: abierta }}
+          accessibilityLabel={`${vacuna.nombre_vacuna} · ${vigencia}`}
         >
-          <View style={{ flex: 1, gap: spacing[0.5] }}>
-            <Texto variante="cuerpo" numberOfLines={1}>
-              {vacuna.nombre_vacuna}
-            </Texto>
-            {/* la vigencia es voz de máquina y su COLOR dice el estado —
-                el canto queda para la categoría (la excepción declarada
-                de la lámina, que acá se cumple sola) */}
-            <Text
-              style={{
-                fontFamily: typography.family.mono.regular,
-                fontSize: typography.size.sm,
-                letterSpacing: typography.tracking.mono,
-                color: colorEstado,
-              }}
-            >
-              {vigencia}
-            </Text>
-          </View>
-          {desplegable ? (
-            <Chevron abierto={abierta} color={theme.text.tertiary} />
-          ) : (
-            // sin detalle no hay promesa de despliegue (principio de la puerta)
-            <Text style={{ fontFamily: typography.family.mono.regular, fontSize: typography.size.sm, color: theme.text.tertiary }}>
-              —
-            </Text>
-          )}
-        </View>
+          <Animated.View style={estiloPresionado}>{cabecera}</Animated.View>
+        </Pressable>
+      ) : (
+        <View accessibilityLabel={`${vacuna.nombre_vacuna} · ${vigencia}`}>{cabecera}</View>
+      )}
 
-        {abierta && desplegable ? (
-          <Entrada>
-            <View
-              style={{
-                paddingHorizontal: spacing[3],
-                paddingBottom: spacing[3],
-                gap: spacing[2],
-                borderTopWidth: 1,
-                borderTopColor: theme.border.subtle,
-                paddingTop: spacing[3],
-              }}
-            >
-              {detalle.map((d) => (
-                <FilaDato key={d.etiqueta} etiqueta={d.etiqueta} valor={d.valor} mono disposicion="horizontal" />
-              ))}
-            </View>
-          </Entrada>
-        ) : null}
-      </View>
+      {abierta && desplegable ? (
+        <Entrada>
+          <View
+            style={{
+              paddingHorizontal: spacing[3],
+              paddingBottom: spacing[3],
+              gap: spacing[2],
+              borderTopWidth: 1,
+              borderTopColor: theme.border.subtle,
+              paddingTop: spacing[3],
+            }}
+          >
+            {detalle.map((d) => (
+              <FilaDato key={d.etiqueta} etiqueta={d.etiqueta} valor={d.valor} mono disposicion="horizontal" />
+            ))}
+          </View>
+        </Entrada>
+      ) : null}
     </CantoCurva>
   );
 }
