@@ -13,16 +13,23 @@
  * peldaño 2 = historial rico por DATOS (paseos cerrados), no por
  * versión.
  *
- * S82-C LAZO 4b (CLARIDAD): los 5 Text crudos de voz secundaria de las
- * Hojas → Texto apoyo (la variante que absorbió VozSecundaria con su
- * interlineado, S71). El hub ya estaba migrado a los rieles (S58/S60/
- * S73 — SelectorSegmentado, CeldaNavegacion, PieRevelar en la lista
- * fusionada): esta pasada CIERRA su mecánica; cero cambios de
- * composición. CHANEL corrida: nada sobraba.
+ * S82-C r12 — ESTA PANTALLA ES **EL LOG** del oficio: la primera que
+ * se ve al tocar el servicio en Explorar (ruteo verificado con
+ * literal: explorar/index:91 navega ACÁ, no a /explorar/paseo). Es el
+ * primer cambio del patrón que después se replica a los otros oficios.
+ * SUS TRES EJES: ① la MASCOTA (el PRIMER filtro, con L-b adentro:
+ * relleno pleno con 2-3 hermanos, barrido con 4+) · ② el ESTADO
+ * (próximos · historial) · ③ la FECHA, **solo en historial** — en
+ * próximos no parte los datos y un eje que no parte no se dibuja.
+ * El historial es COLAPSABLE con una sola abierta (el diseño del
+ * home), y AGENDAR vive en el PIE FIJO, en el slot del CTA sin pintar.
+ * D-357 ENMENDADA: el SelectorSegmentado cede a FiltroPills porque acá
+ * el eje convive con otros dos de su familia — la gramática de la
+ * pantalla manda sobre la del control suelto.
  */
 
 import { useCallback, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -33,13 +40,13 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  FilaDato,
   Hoja,
   HojaScroll,
   Icono,
   Insignia,
   PieRevelar,
   SelectorOpcion,
-  SelectorSegmentado,
   Separador,
   Tarjeta,
   Texto,
@@ -48,6 +55,9 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  getEstadoOnboardingDueno,
+  obtenerMascotasDeFamilia,
+  resolverUrlsFotos,
   cancelarCitaSuelta,
   cancelarReservaPaquete,
   configurarRenovacionPlan,
@@ -66,6 +76,8 @@ import {
 } from '@epetplace/api';
 import { fechaCortaMono, obtenerIdiomaActual } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
+import { FiltroMascotas, FiltroPills } from '@/components/filtro-pills';
+import { CantoCurva } from '@/components/canto-curva';
 
 // S60-A6 pieza 2 (D-366): el tap Agenda MURIÓ fusionado en Próximos —
 // enmienda DECLARADA de D-366, no reapertura del servicio cerrado.
@@ -83,6 +95,13 @@ export default function MisPaseos() {
   const idioma = obtenerIdiomaActual();
 
   const [segmento, setSegmento] = useState<Segmento>('proximos');
+  // r12 · LOS TRES EJES DEL LOG. El de FECHA solo existe en historial:
+  // en próximos NO PARTE LOS DATOS (lo que viene es futuro por
+  // definición) y un eje que no parte no se dibuja.
+  const [filtroMascota, setFiltroMascota] = useState<string | null>(null);
+  const [ventanaFecha, setVentanaFecha] = useState<'todos' | 'semana' | 'mes'>('todos');
+  const [mascotasHogar, setMascotasHogar] = useState<{ id: string; nombre: string; fotoUrl?: string }[]>([]);
+  const [abierta, setAbierta] = useState<string | null>(null);
   const [planes, setPlanes] = useState<PlanPaseo[] | 'cargando' | 'error'>('cargando');
   const [citas, setCitas] = useState<Record<string, CitaDePlan[]>>({});
   // D-343 + P18: los paquetes del dueño y sus paseos fuera del plan
@@ -105,6 +124,21 @@ export default function MisPaseos() {
 
   const cargar = useCallback(() => {
     setPlanes('cargando');
+    // r12: las mascotas del hogar alimentan el PRIMER filtro
+    void getEstadoOnboardingDueno().then(async (e) => {
+      if (!e.ok || e.data.familia_id === null) return;
+      const r = await obtenerMascotasDeFamilia(e.data.familia_id);
+      if (!r.ok) return;
+      const paths = r.data.map((m) => m.foto_url).filter((x): x is string => typeof x === 'string' && x.length > 0);
+      const urls = paths.length > 0 ? await resolverUrlsFotos(paths) : new Map<string, string>();
+      setMascotasHogar(
+        r.data.map((m) => ({
+          id: m.id,
+          nombre: m.nombre,
+          fotoUrl: m.foto_url ? urls.get(m.foto_url) : undefined,
+        })),
+      );
+    });
     void (async () => {
       const [r, pq, cl] = await Promise.all([
         obtenerMisPlanesPaseo(),
@@ -282,8 +316,19 @@ export default function MisPaseos() {
   const paquetesVigentes = paquetes.filter(
     (p) => p.estado === 'activo' && p.saldo > 0 && (p.fecha_vencimiento === null || p.fecha_vencimiento >= hoy),
   );
-  const librasProximas = citasLibres.filter((c) => c.estado === 'confirmada' && c.fecha >= hoy);
-  const librasPasadas = citasLibres.filter((c) => c.estado !== 'confirmada' || c.fecha < hoy);
+  // r12: el filtro de MASCOTA muerde toda la pantalla; el de FECHA
+  // solo el historial (en próximos no parte los datos).
+  const porMascota = (c: CitaPaseoDueno) => filtroMascota === null || c.mascota_id === filtroMascota;
+  const cortePorVentana = (iso: string) => {
+    if (ventanaFecha === 'todos') return true;
+    const d = new Date();
+    d.setDate(d.getDate() - (ventanaFecha === 'semana' ? 7 : 30));
+    return iso >= new Intl.DateTimeFormat('en-CA').format(d);
+  };
+  const librasProximas = citasLibres.filter((c) => c.estado === 'confirmada' && c.fecha >= hoy && porMascota(c));
+  const librasPasadas = citasLibres.filter(
+    (c) => (c.estado !== 'confirmada' || c.fecha < hoy) && porMascota(c) && cortePorVentana(c.fecha),
+  );
   const hayAlgo = listaPlanes.length > 0 || paquetesVigentes.length > 0 || citasLibres.length > 0;
 
   // S60-A6 pieza 2 — LA LISTA FUSIONADA (enmienda declarada de D-366):
@@ -356,29 +401,51 @@ export default function MisPaseos() {
         </View>
       ) : (
         <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[4] }}>
-          {/* Hub v2 (S58, D-347): la ACCIÓN preside — jamás es un
-              segmento (Ley 19/22); los tres segmentos son solo VISTAS. */}
-          <Boton
-            variante="primario"
-            bloque
-            etiqueta={t('plan.agendarPaseo')}
-            onPress={() => router.navigate('/explorar/paseo')}
-          />
-          {/* D-357 (S58): PRIMERA migración chips→toggle — el trabajo de
-              vistas exclusivas es del SelectorSegmentado (Ley 19.3);
-              SelectorOpcion queda en esta pantalla solo para VALORES
-              (días/horas de las Hojas). */}
-          <SelectorSegmentado
-            etiqueta={t('plan.hubTitulo')}
-            segmentos={[
-              { codigo: 'proximos', etiqueta: t('plan.segProximos') },
-              { codigo: 'historial', etiqueta: t('plan.segHistorial') },
-            ]}
-            activo={segmento}
-            onCambio={(codigo) => {
-              if (codigo === 'proximos' || codigo === 'historial') setSegmento(codigo);
-            }}
-          />
+          {/* r12 · LOS TRES EJES DEL LOG (el CTA de agendar se fue al
+              PIE FIJO — abajo). ① la MASCOTA es el PRIMER filtro (con
+              su regla L-b adentro: pleno con 2-3, barrido con 4+). */}
+          {mascotasHogar.length > 1 ? (
+            <View style={{ marginHorizontal: -spacing[4] }}>
+              <FiltroMascotas
+                mascotas={mascotasHogar}
+                elegida={filtroMascota}
+                onElegir={setFiltroMascota}
+                etiquetaTodas={t('plan.filtroTodas')}
+              />
+            </View>
+          ) : null}
+
+          {/* ② el ESTADO — con glifos coherentes (D-357 enmendada: el
+              SelectorSegmentado cede a FiltroPills porque acá el eje
+              convive con otros dos de la misma familia; la gramática
+              de la pantalla manda sobre la del control suelto). */}
+          <View style={{ marginHorizontal: -spacing[4] }}>
+            <FiltroPills
+              activo={segmento}
+              onCambio={(c) => setSegmento(c)}
+              opciones={[
+                { codigo: 'proximos' as Segmento, etiqueta: t('plan.segProximos'), icono: 'hoy', capa: 'cuidado' },
+                { codigo: 'historial' as Segmento, etiqueta: t('plan.segHistorial'), icono: 'paseo', capa: 'cuidado' },
+              ]}
+            />
+          </View>
+
+          {/* ③ la FECHA — SOLO EN HISTORIAL. En próximos no parte los
+              datos (lo que viene es futuro por definición) y un eje que
+              no parte NO SE DIBUJA. */}
+          {segmento === 'historial' ? (
+            <View style={{ marginHorizontal: -spacing[4] }}>
+              <FiltroPills
+                activo={ventanaFecha}
+                onCambio={(v) => setVentanaFecha(v)}
+                opciones={[
+                  { codigo: 'todos' as const, etiqueta: t('plan.filtroTodos'), icono: null, capa: null },
+                  { codigo: 'semana' as const, etiqueta: t('perfil.ventanaSemana'), icono: null, capa: null },
+                  { codigo: 'mes' as const, etiqueta: t('perfil.ventanaMes'), icono: null, capa: null },
+                ]}
+              />
+            </View>
+          ) : null}
 
           {segmento === 'proximos' ? (
             <View style={{ gap: spacing[4] }}>
@@ -511,30 +578,65 @@ export default function MisPaseos() {
             <View style={{ gap: spacing[4] }}>
               {/* lo caminado fuera del plan también es sedimento */}
               {librasPasadas.length > 0 ? (
-                <Tarjeta relleno="ninguno">
-                  {librasPasadas.map((c, i) => (
-                    <View key={c.id}>
-                      {i > 0 ? <Separador /> : null}
-                      <Celda
-                        titulo={fechaCortaMono(c.fecha, idioma)}
-                        subtitulo={t(c.origen === 'paquete' ? 'paquete.citaDePaquete' : 'suelto.citaSuelta')}
-                        metadataMono={`${c.hora.slice(0, 5)} · ${c.duracion_minutos} min`}
-                        fin={
-                          <Insignia
-                            estado={c.estado === 'completada' ? 'alDia' : 'info'}
-                            etiqueta={t(
-                              c.estado === 'completada'
-                                ? 'plan.salidaCompletada'
-                                : c.estado === 'no_show'
-                                  ? 'suelto.salidaPerdida'
-                                  : 'plan.salidaCancelada',
-                            )}
-                          />
-                        }
-                      />
-                    </View>
-                  ))}
-                </Tarjeta>
+                <View style={{ gap: spacing[2.5] }}>
+                  {librasPasadas.map((c) => {
+                    // r12-3: MISMO diseño que el home — canto que pinta
+                    // la curva + despliegue en su lugar, UNA SOLA
+                    // ABIERTA a la vez (dos abiertas y el resumen deja
+                    // de presidir).
+                    const abierto = abierta === c.id;
+                    return (
+                      <CantoCurva key={c.id} color={theme.capa.cuidado}>
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityState={{ expanded: abierto }}
+                          onPress={() => setAbierta(abierto ? null : c.id)}
+                        >
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3], padding: spacing[3], minHeight: 58 }}>
+                            <View style={{ flex: 1, minWidth: 0, gap: spacing[0.5] }}>
+                              <Texto variante="cuerpo" numberOfLines={1}>
+                                {t(c.origen === 'paquete' ? 'paquete.citaDePaquete' : 'suelto.citaSuelta')}
+                              </Texto>
+                              <Texto variante="dato" numberOfLines={1}>
+                                {`${fechaCortaMono(c.fecha, idioma)} · ${c.hora.slice(0, 5)} · ${c.duracion_minutos} min`}
+                              </Texto>
+                            </View>
+                            <Insignia
+                              estado={c.estado === 'completada' ? 'alDia' : 'info'}
+                              etiqueta={t(
+                                c.estado === 'completada'
+                                  ? 'plan.salidaCompletada'
+                                  : c.estado === 'no_show'
+                                    ? 'suelto.salidaPerdida'
+                                    : 'plan.salidaCancelada',
+                              )}
+                              tamaño="sm"
+                            />
+                          </View>
+                        </Pressable>
+                        {abierto ? (
+                          <View style={{ paddingHorizontal: spacing[3], paddingBottom: spacing[3], gap: spacing[2] }}>
+                            <Separador />
+                            {c.precio !== null ? (
+                              <FilaDato
+                                disposicion="horizontal"
+                                etiqueta={t('presupuesto.total')}
+                                valor={`$ ${c.precio.toFixed(2)}`}
+                                mono
+                              />
+                            ) : null}
+                            <FilaDato
+                              disposicion="horizontal"
+                              etiqueta={t('explorar.cuandoDuracion')}
+                              valor={`${c.duracion_minutos} min`}
+                              mono
+                            />
+                          </View>
+                        ) : null}
+                      </CantoCurva>
+                    );
+                  })}
+                </View>
               ) : null}
               {librasPasadas.length === 0 &&
               listaPlanes.every((p) => (citas[p.id] ?? []).every((c) => c.estado === 'confirmada' && c.fecha >= hoy)) ? (
@@ -569,6 +671,37 @@ export default function MisPaseos() {
           )}
         </ScrollView>
       )}
+
+      {/* r12-4 · AGENDAR — PIE FIJO, como el "ver quién puede" de la
+          pantalla siguiente. EN EL SLOT y SIN PINTAR: el ocre entra por
+          token cuando el founder elija su candidato en /gallery.
+          Lleva la mascota FILTRADA si hay una (así la reserva no
+          vuelve a preguntar — r12-5). */}
+      {planes !== 'cargando' && planes !== 'error' && hayAlgo ? (
+        <View
+          style={{
+            paddingHorizontal: spacing[4],
+            paddingTop: spacing[3],
+            paddingBottom: Math.max(insets.bottom, spacing[4]),
+            backgroundColor: theme.bg.base,
+            borderTopWidth: 1,
+            borderTopColor: theme.border.subtle,
+          }}
+        >
+          <Boton
+            variante="primario"
+            bloque
+            etiqueta={t('plan.agendarPaseo')}
+            onPress={() =>
+              router.navigate(
+                filtroMascota !== null
+                  ? { pathname: '/explorar/paseo', params: { mascotaId: filtroMascota } }
+                  : '/explorar/paseo',
+              )
+            }
+          />
+        </View>
+      ) : null}
 
       {/* Mover una salida (P14a — el server valida ≥24 h, período y cupo) */}
       <Hoja

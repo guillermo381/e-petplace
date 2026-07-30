@@ -803,6 +803,8 @@ export const clienteEn = {
     movida: 'Done — the walk was moved.',
     sinPlanesTitulo: "You don't have a plan yet",
     sinPlanesDetalle: 'When you book a walk, tap "Make it a routine" and your plan starts there.',
+    filtroTodas: 'All',
+    filtroTodos: 'All',
     agendarPaseo: 'Book a walk',
     vacioSegmento: 'Nothing here yet.',
     salidaCompletada: 'Completed',

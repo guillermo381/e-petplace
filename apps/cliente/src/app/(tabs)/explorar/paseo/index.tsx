@@ -26,7 +26,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { router, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   AvatarMascota,
   Boton,
@@ -57,16 +57,7 @@ import {
   mascotasElegibles,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
-import {
-  DiaSinHorarios,
-  GrillaHoras,
-  PieReserva,
-  SelectorDia,
-  SwitchGate,
-  TechoReserva,
-  type ModoDia,
-  type ModoTecho,
-} from '@/components/reserva-piezas';
+import { DiaSinHorarios, GrillaHoras, PieReserva, SelectorDia, TechoReserva } from '@/components/reserva-piezas';
 
 function fechaLocalISO(d: Date): string {
   return new Intl.DateTimeFormat('en-CA').format(d);
@@ -96,15 +87,16 @@ export default function PaseoCuando() {
   // el guard perro-only (§1bis) filtra ACÁ con voz honesta con camino.
   const [mascotas, setMascotas] = useState<MascotaResumen[] | 'cargando' | 'error'>('cargando');
   const [especies, setEspecies] = useState<string[] | null>(null);
-  const [mascotaId, setMascotaId] = useState<string | null>(null);
+  // r12-5: la mascota LLEGA ELEGIDA del log (param). El estado local
+  // queda para el salvavidas del deep-link sin param.
+  const { mascotaId: mascotaParam } = useLocalSearchParams<{ mascotaId?: string }>();
+  const [mascotaId, setMascotaId] = useState<string | null>(
+    typeof mascotaParam === 'string' && mascotaParam.length > 0 ? mascotaParam : null,
+  );
   // S61-A4: la CARA del para-quién — URLs firmadas (patrón del QUIÉN).
   const [fotos, setFotos] = useState<Record<string, string>>({});
   const [oferta, setOferta] = useState<OfertaPaseo[] | 'cargando' | 'error'>('cargando');
   const [duracion, setDuracion] = useState<number | null>(null);
-  // r11 · LOS DOS GATES ABIERTOS (ninguno firmado): el founder elige
-  // mirando, en el teléfono. La perdedora muere después del gate.
-  const [modoTecho, setModoTecho] = useState<ModoTecho>('oscuro');
-  const [modoDia, setModoDia] = useState<ModoDia>('riel');
   const [dia, setDia] = useState<string>(fechaLocalISO(new Date()));
   const [inicios, setInicios] = useState<string[] | 'cargando' | 'error'>('cargando');
   const [hora, setHora] = useState<string | null>(null);
@@ -237,15 +229,10 @@ export default function PaseoCuando() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      {/* ① EL TECHO DEL OFICIO — LAS DOS OPCIONES tras el switch. La
-          lámina afirma "el gate quedó en B" y es FALSO: nunca se firmó
-          (el founder rechazó el verde y aceptó el petróleo diciendo
-          "aún son colores que no contrastan bien"). El argumento de la
-          lámina a favor del claro viaja con la opción (b): la marca YA
-          es el degradado oscuro del hogar y la ficha, así que un oficio
-          oscuro compite. El founder decide mirando. */}
+      {/* ✅ EL TECHO CLARO POR SERVICIO — FIRMADO en dispositivo (r12).
+          El oscuro murió: la marca ya es el degradado oscuro del hogar
+          y de la ficha, y un oficio oscuro competía con ella. */}
       <TechoReserva
-        modo={modoTecho}
         oficio="paseo"
         titulo={t('explorar.paseoTitulo')}
         detalle={mascota !== null ? mascota.nombre : null}
@@ -256,8 +243,6 @@ export default function PaseoCuando() {
         onAtras={() => router.back()}
         insetTop={insets.top}
       />
-      {/* el andamio del gate — muere con la firma */}
-      <SwitchGate techo={modoTecho} dia={modoDia} onTecho={setModoTecho} onDia={setModoDia} />
 
       <ScrollView contentContainerStyle={{ paddingTop: spacing[5], paddingBottom: spacing[8], gap: spacing[5] }}>
         {oferta === 'cargando' || mascotas === 'cargando' ? (
@@ -315,22 +300,28 @@ export default function PaseoCuando() {
           </View>
         ) : (
           <>
-            {/* 0 · LA MASCOTA — gramática canónica (S61-A3): el
-                para-quién abre y QUEDA VISIBLE. Entity chip S73. */}
-            <View style={{ paddingHorizontal: spacing[4] }}>
-              <SelectorOpcion
-                acento="control"
-                entidad
-                etiqueta={t('grooming.paraQuien')}
-                opciones={elegibles.map((m) => ({
-                  codigo: m.id,
-                  etiqueta: m.nombre,
-                  avatar: { nombre: m.nombre, fotoUrl: fotos[m.id] },
-                }))}
-                seleccionada={mascotaId ?? undefined}
-                onSelect={setMascotaId}
-              />
-            </View>
+            {/* r12-5: EL PASO DE ELEGIR MASCOTA MURIÓ ACÁ — ya viene
+                elegida del LOG (param `mascotaId`) y el techo la muestra
+                en su detalle: un dato elegido no se vuelve a preguntar
+                (Ley 23, la puerta no pregunta lo que ya sabe). Queda
+                SOLO como salvavidas de deep-link sin param — ahí sí hay
+                que preguntar, y ahí sí parte los datos. */}
+            {mascota === null ? (
+              <View style={{ paddingHorizontal: spacing[4] }}>
+                <SelectorOpcion
+                  acento="control"
+                  entidad
+                  etiqueta={t('grooming.paraQuien')}
+                  opciones={elegibles.map((m) => ({
+                    codigo: m.id,
+                    etiqueta: m.nombre,
+                    avatar: { nombre: m.nombre, fotoUrl: fotos[m.id] },
+                  }))}
+                  seleccionada={mascotaId ?? undefined}
+                  onSelect={setMascotaId}
+                />
+              </View>
+            ) : null}
 
             {/* 1 · DURACIÓN — el ÚNICO selector que se RELLENA, y lo
                 hace por LEY, no por excepción: `naturaleza="existe"` es
@@ -365,7 +356,6 @@ export default function PaseoCuando() {
                 <Texto variante="apoyo">{t('explorar.cuandoDia')}</Texto>
               </View>
               <SelectorDia
-                modo={modoDia}
                 dias={dias.map((d) => ({ iso: d.iso, dia: d.corta.split(' ')[0] ?? '', numero: d.iso.slice(8, 10) }))}
                 elegido={dia}
                 onElegir={setDia}

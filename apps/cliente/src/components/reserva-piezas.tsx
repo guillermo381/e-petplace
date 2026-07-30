@@ -4,19 +4,20 @@
  * cero box-shadow/transición de CSS, el motion va por Reanimated, el
  * .js es DOM y su lógica se re-pensó).
  *
- * ⚠️ DOS GATES ABIERTOS, LAS DOS OPCIONES CONSTRUIDAS (orden founder —
- * la lámina daba por firmado lo que no lo está):
+ * ✅ LOS DOS GATES, CERRADOS POR EL FOUNDER EN DISPOSITIVO (r12):
  *
- *  ① EL TECHO DEL OFICIO **NUNCA SE FIRMÓ**. La lámina afirma "el gate
- *    quedó en B" y es FALSO. Van las dos: (a) techo OSCURO con texto
- *    papel · (b) techo CLARO por oficio. El founder elige en el
- *    teléfono; la perdedora muere después del gate.
+ *  ① GANA EL TECHO CLARO POR SERVICIO. El oscuro MURIÓ (Ley 37) — y su
+ *    porqué queda escrito: la marca YA es el degradado oscuro del hogar
+ *    y de la ficha, así que un oficio oscuro competía con ella.
  *
- *  ② EL RIEL NO REEMPLAZA A D3. D3 es una RUEDA con calibración
- *    FIRMADA (escalas 1.16/0.94/0.84/0.78 · opacidades 1/.62/.34/.18 ·
- *    520 ms cubic-bezier(.32,.72,0,1) · ítem 66 · separación 10 · paso
- *    76 · el elegido SIEMPRE centrado). El riel es OTRA INTERACCIÓN,
- *    no otra calibración de la misma. Van las dos tras el mismo switch.
+ *  ② GANA LA RUEDA D3, CON IMÁN. El riel MURIÓ. La calibración FIRMADA
+ *    se conserva íntegra (escalas 1.16/0.94/0.84/0.78 · opacidades
+ *    1/.62/.34/.18 · 520 ms cubic-bezier(.32,.72,0,1) · ítem 66 · paso
+ *    76 · el elegido SIEMPRE centrado). Lo que se suma es el GESTO: pan
+ *    + snap al intervalo, con la curva de la casa — hasta hoy la rueda
+ *    solo respondía al clic, que es media rueda.
+ *
+ *  El SwitchGate murió con ellos: era andamio y el gate ya pasó.
  *
  * ⚠️ COLOR: cero hexes de la lámina (mismo paro que r7 — 16 de 17 no
  * existen en palette.ts). Todo con nuestros tokens.
@@ -43,10 +44,13 @@ import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import Animated, {
   Easing,
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
+  type SharedValue,
 } from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Svg, { Path } from 'react-native-svg';
 import {
   Boton,
@@ -60,74 +64,11 @@ import {
   type IconoNombre,
 } from '@epetplace/ui';
 
-// ═══════════════ EL SWITCH DE GATE (debug, muere post-gate) ═══════════
-
-export type ModoTecho = 'oscuro' | 'oficio';
-export type ModoDia = 'riel' | 'rueda';
-
-/** El control que el founder toca EN EL TELÉFONO para comparar las dos
- *  opciones de cada gate. NO usa `__DEV__` a propósito: `__DEV__` no
- *  viaja al bundle de preview y el gate se corre sobre la APK (L-138).
- *  Se ve feo A PROPÓSITO — es andamio, no producto, y su fealdad es lo
- *  que garantiza que nadie lo confunda con una pieza terminada. */
-export function SwitchGate({
-  techo,
-  dia,
-  onTecho,
-  onDia,
-}: {
-  techo: ModoTecho;
-  dia: ModoDia;
-  onTecho: (m: ModoTecho) => void;
-  onDia: (m: ModoDia) => void;
-}) {
-  const { theme } = useTheme();
-  const btn = (activo: boolean) => ({
-    paddingHorizontal: spacing[2],
-    paddingVertical: spacing[1],
-    borderRadius: radius.suave,
-    backgroundColor: activo ? theme.text.primary : theme.bg.overlay,
-  });
-  const txt = (activo: boolean) => ({
-    fontFamily: typography.family.mono.regular,
-    fontSize: 11,
-    color: activo ? theme.bg.card : theme.text.secondary,
-  });
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing[2],
-        paddingHorizontal: spacing[4],
-        paddingVertical: spacing[2],
-        backgroundColor: theme.bg.overlay,
-      }}
-    >
-      <Text style={{ fontFamily: typography.family.mono.regular, fontSize: 10, color: theme.text.tertiary }}>gate</Text>
-      <Pressable onPress={() => onTecho('oscuro')} style={btn(techo === 'oscuro')} accessibilityRole="radio">
-        <Text style={txt(techo === 'oscuro')}>techo oscuro</Text>
-      </Pressable>
-      <Pressable onPress={() => onTecho('oficio')} style={btn(techo === 'oficio')} accessibilityRole="radio">
-        <Text style={txt(techo === 'oficio')}>techo claro</Text>
-      </Pressable>
-      <View style={{ width: 1, height: 16, backgroundColor: theme.border.default }} />
-      <Pressable onPress={() => onDia('riel')} style={btn(dia === 'riel')} accessibilityRole="radio">
-        <Text style={txt(dia === 'riel')}>riel</Text>
-      </Pressable>
-      <Pressable onPress={() => onDia('rueda')} style={btn(dia === 'rueda')} accessibilityRole="radio">
-        <Text style={txt(dia === 'rueda')}>rueda D3</Text>
-      </Pressable>
-    </View>
-  );
-}
-
 // ═══════════════ ① EL TECHO — LAS DOS OPCIONES ═══════════════
 
-/** (a) OSCURO con texto papel · (b) CLARO por oficio (el tinte de la
- *  capa sobre papel). Ninguna está firmada: el gate decide. */
+/** EL TECHO CLARO POR SERVICIO — FIRMADO en dispositivo (r12). Toma el
+ *  TINTE de la capa del oficio sobre papel; el texto va en tinta. */
 export function TechoReserva({
-  modo,
   oficio,
   titulo,
   detalle,
@@ -136,7 +77,6 @@ export function TechoReserva({
   onAtras,
   insetTop,
 }: {
-  modo: ModoTecho;
   oficio: IconoNombre;
   titulo: string;
   detalle: string | null;
@@ -150,16 +90,14 @@ export function TechoReserva({
 }) {
   const { theme } = useTheme();
   const esMemorial = theme.mode === 'memorial';
-  const claro = modo === 'oficio' && !esMemorial;
   // (b) el techo claro toma el TINTE de la capa del oficio; (a) el
   // oscuro toma la tinta de la casa. Cero hex nuevo. (El tinte se
   // resuelve ANTES del ternario: memorial no tiene registro capaBg y
   // el narrowing del `in` dentro del ternario dejaba theme en never.)
-  const tinteCapa = 'capaBg' in theme ? theme.capaBg.cuidado : theme.bg.overlay;
-  const tintaCasa = theme.bg.tinta;
-  const fondo = esMemorial ? theme.bg.card : claro ? tinteCapa : tintaCasa;
-  const sobre = esMemorial || claro ? theme.text.primary : theme.text.onGradient;
-  const sobreSuave = esMemorial || claro ? theme.text.secondary : theme.text.onGradient;
+  // el tinte de la capa del oficio (memorial no tiene registro capaBg)
+  const fondo = 'capaBg' in theme ? theme.capaBg.cuidado : theme.bg.overlay;
+  const sobre = theme.text.primary;
+  const sobreSuave = theme.text.secondary;
 
   return (
     <View
@@ -173,22 +111,9 @@ export function TechoReserva({
         overflow: 'hidden',
       }}
     >
-      {/* la luz de la esquina (A4 §9bis.2 FIRMADA) — el único adorno.
-          En el claro se apaga: sobre un tinte suave, blanco al 7% es
-          ruido invisible (L-c: si no dice nada, sobraba). */}
-      {!claro && !esMemorial ? (
-        <View
-          style={{
-            position: 'absolute',
-            top: -86,
-            right: -64,
-            width: 242,
-            height: 242,
-            borderRadius: 999,
-            backgroundColor: 'rgba(255,255,255,0.07)',
-          }}
-        />
-      ) : null}
+      {/* r12: la luz de la esquina (A4) MURIÓ acá — sobre un tinte
+          claro, blanco al 7% es invisible: si no dice nada, sobraba
+          (L-c). Sigue viva en los techos de MARCA (hogar, ficha). */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
         <Pressable
           accessibilityRole="button"
@@ -197,7 +122,7 @@ export function TechoReserva({
             width: 38,
             height: 38,
             borderRadius: 999,
-            backgroundColor: claro || esMemorial ? theme.bg.card : 'rgba(255,255,255,0.15)',
+            backgroundColor: theme.bg.card,
             alignItems: 'center',
             justifyContent: 'center',
           }}
@@ -253,71 +178,11 @@ export type DiaOpcion = { iso: string; dia: string; numero: string };
 
 const CURVA_D3 = Easing.bezier(0.32, 0.72, 0, 1);
 
-/** (a) EL RIEL — la propuesta de la lámina: tarjetas 66×80, el elegido
- *  crece a 1.06 y se eleva; los otros a 0.955 y 0.86 de opacidad. */
-function RielDias({
-  dias,
-  elegido,
-  cerrados,
-  onElegir,
-}: {
-  dias: DiaOpcion[];
-  elegido: string;
-  cerrados: Set<string>;
-  onElegir: (iso: string) => void;
-}) {
-  const { theme } = useTheme();
-  return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ gap: spacing[2.5], paddingHorizontal: spacing[5], paddingVertical: spacing[1] }}
-    >
-      {dias.map((d) => {
-        const on = d.iso === elegido;
-        const cerrado = cerrados.has(d.iso);
-        return (
-          <Pressable
-            key={d.iso}
-            disabled={cerrado}
-            accessibilityRole="radio"
-            accessibilityState={{ selected: on, disabled: cerrado }}
-            accessibilityLabel={`${d.dia} ${d.numero}`}
-            onPress={() => onElegir(d.iso)}
-            style={{
-              width: 66,
-              height: 80,
-              borderRadius: 22,
-              backgroundColor: theme.bg.card,
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 2,
-              // ELEVACIÓN + ESCALA, jamás relleno (ley 1 de la lámina)
-              boxShadow: on ? theme.elevacion.elevada : theme.elevacion.reposo,
-              transform: [{ scale: on ? 1.06 : 0.955 }],
-              opacity: cerrado ? 0.42 : on ? 1 : 0.86,
-            }}
-          >
-            <Texto variante="dato">{d.dia}</Texto>
-            <Text
-              style={{
-                fontFamily: typography.family.mono.medium,
-                fontSize: typography.size.xl,
-                // COLOR DE TEXTO: el tercer eje legal de la selección
-                color: on ? theme.accent.control : theme.text.secondary,
-              }}
-            >
-              {d.numero}
-            </Text>
-          </Pressable>
-        );
-      })}
-    </ScrollView>
-  );
-}
-
-/** (b) LA RUEDA — D3, con su calibración FIRMADA. El elegido SIEMPRE
- *  centrado (translateX), los vecinos decaen por anillo:
+/** LA RUEDA D3 — FIRMADA en dispositivo (r12), con su calibración
+ *  intacta Y SU IMÁN: pan + snap al intervalo con la curva de la casa.
+ *  Hasta r11 solo respondía al clic, que es media rueda: el gesto es
+ *  la mitad que la hace rueda. El elegido SIEMPRE centrado
+ *  (translateX), los vecinos decaen por anillo:
  *  escalas 1.16/0.94/0.84/0.78 · opacidades 1/.62/.34/.18 ·
  *  520 ms cubic-bezier(.32,.72,0,1) · ítem 66 · separación 10 ·
  *  paso 76. El movimiento lo pone Reanimated (§10), jamás CSS. */
@@ -343,70 +208,137 @@ function RuedaDias({
   const { theme } = useTheme();
   const [ancho, setAncho] = useState(0);
   const indice = Math.max(0, dias.findIndex((d) => d.iso === elegido));
+  // `centro` = el desplazamiento que deja al elegido en el medio.
+  const centro = (i: number) => ancho / 2 - D3.item / 2 - i * D3.paso;
   const desplaz = useSharedValue(0);
+  const inicioPan = useSharedValue(0);
+  // el índice VIVO durante el arrastre (para que escalas y opacidades
+  // sigan al dedo, no al estado de React)
+  const indiceVivo = useSharedValue(indice);
 
   useEffect(() => {
     if (ancho === 0) return;
-    // el elegido SIEMPRE centrado (la letra de D3)
-    desplaz.value = withTiming(ancho / 2 - D3.item / 2 - indice * D3.paso, {
-      duration: D3.duracion,
-      easing: CURVA_D3,
+    indiceVivo.value = indice;
+    desplaz.value = withTiming(centro(indice), { duration: D3.duracion, easing: CURVA_D3 });
+  }, [indice, ancho]);
+
+  const elegirPorIndice = (i: number) => {
+    const d = dias[i];
+    if (d !== undefined && !cerrados.has(d.iso)) onElegir(d.iso);
+  };
+
+  /** EL IMÁN: al soltar, la rueda cae al día más cercano — jamás queda
+   *  entre dos. El snap usa la MISMA curva y duración firmadas. */
+  const pan = Gesture.Pan()
+    .onBegin(() => {
+      inicioPan.value = desplaz.value;
+    })
+    .onUpdate((e) => {
+      desplaz.value = inicioPan.value + e.translationX;
+      const i = Math.round((ancho / 2 - D3.item / 2 - desplaz.value) / D3.paso);
+      indiceVivo.value = Math.min(Math.max(i, 0), dias.length - 1);
+    })
+    .onEnd(() => {
+      const crudo = (ancho / 2 - D3.item / 2 - desplaz.value) / D3.paso;
+      const i = Math.min(Math.max(Math.round(crudo), 0), dias.length - 1);
+      indiceVivo.value = i;
+      desplaz.value = withTiming(ancho / 2 - D3.item / 2 - i * D3.paso, {
+        duration: D3.duracion,
+        easing: CURVA_D3,
+      });
+      runOnJS(elegirPorIndice)(i);
     });
-  }, [indice, ancho, desplaz]);
 
   const pista = useAnimatedStyle(() => ({ transform: [{ translateX: desplaz.value }] }));
 
   return (
-    <View
-      onLayout={(e) => setAncho(e.nativeEvent.layout.width)}
-      style={{ height: 96, justifyContent: 'center', overflow: 'hidden' }}
-    >
-      <Animated.View style={[{ flexDirection: 'row', gap: D3.paso - D3.item }, pista]}>
-        {dias.map((d, i) => {
-          const anillo = Math.min(Math.abs(i - indice), D3.escalas.length - 1);
-          const cerrado = cerrados.has(d.iso);
-          const on = i === indice;
-          return (
-            <Pressable
+    <GestureDetector gesture={pan}>
+      <View
+        onLayout={(e) => setAncho(e.nativeEvent.layout.width)}
+        style={{ height: 96, justifyContent: 'center', overflow: 'hidden' }}
+      >
+        <Animated.View style={[{ flexDirection: 'row', gap: D3.paso - D3.item }, pista]}>
+          {dias.map((d, i) => (
+            <ItemRueda
               key={d.iso}
-              disabled={cerrado}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: on, disabled: cerrado }}
-              accessibilityLabel={`${d.dia} ${d.numero}`}
-              onPress={() => onElegir(d.iso)}
-              style={{
-                width: D3.item,
-                height: 76,
-                borderRadius: 22,
-                backgroundColor: theme.bg.card,
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 2,
-                boxShadow: on ? theme.elevacion.elevada : theme.elevacion.reposo,
-                transform: [{ scale: D3.escalas[anillo] }],
-                opacity: cerrado ? 0.18 : D3.opacidades[anillo],
-              }}
-            >
-              <Texto variante="dato">{d.dia}</Texto>
-              <Text
-                style={{
-                  fontFamily: typography.family.mono.medium,
-                  fontSize: typography.size.xl,
-                  color: on ? theme.accent.control : theme.text.secondary,
-                }}
-              >
-                {d.numero}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </Animated.View>
-    </View>
+              dia={d}
+              indice={i}
+              indiceVivo={indiceVivo}
+              cerrado={cerrados.has(d.iso)}
+              onPress={() => elegirPorIndice(i)}
+              theme={theme}
+            />
+          ))}
+        </Animated.View>
+      </View>
+    </GestureDetector>
+  );
+}
+
+/** Un día de la rueda. Escala y opacidad SIGUEN AL DEDO (worklet sobre
+ *  `indiceVivo`), no al estado de React: durante el arrastre el anillo
+ *  se recalcula en el hilo de UI. */
+function ItemRueda({
+  dia,
+  indice,
+  indiceVivo,
+  cerrado,
+  onPress,
+  theme,
+}: {
+  dia: DiaOpcion;
+  indice: number;
+  indiceVivo: SharedValue<number>;
+  cerrado: boolean;
+  onPress: () => void;
+  theme: ReturnType<typeof useTheme>['theme'];
+}) {
+  const vivo = useAnimatedStyle(() => {
+    const anillo = Math.min(Math.abs(indice - indiceVivo.value), D3.escalas.length - 1);
+    const bajo = Math.floor(anillo);
+    const alto = Math.min(bajo + 1, D3.escalas.length - 1);
+    const t = anillo - bajo;
+    // interpolación entre anillos: el decaimiento es continuo mientras
+    // el dedo arrastra, y cae exacto en la calibración al soltar
+    const escala = D3.escalas[bajo] + (D3.escalas[alto] - D3.escalas[bajo]) * t;
+    const opacidad = D3.opacidades[bajo] + (D3.opacidades[alto] - D3.opacidades[bajo]) * t;
+    return { transform: [{ scale: escala }], opacity: cerrado ? 0.18 : opacidad };
+  });
+  return (
+    <Animated.View style={vivo}>
+      <Pressable
+        disabled={cerrado}
+        accessibilityRole="radio"
+        accessibilityState={{ disabled: cerrado }}
+        accessibilityLabel={`${dia.dia} ${dia.numero}`}
+        onPress={onPress}
+        style={{
+          width: D3.item,
+          height: 76,
+          borderRadius: 22,
+          backgroundColor: theme.bg.card,
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 2,
+          boxShadow: theme.elevacion.reposo,
+        }}
+      >
+        <Texto variante="dato">{dia.dia}</Texto>
+        <Text
+          style={{
+            fontFamily: typography.family.mono.medium,
+            fontSize: typography.size.xl,
+            color: theme.text.primary,
+          }}
+        >
+          {dia.numero}
+        </Text>
+      </Pressable>
+    </Animated.View>
   );
 }
 
 export function SelectorDia(props: {
-  modo: ModoDia;
   dias: DiaOpcion[];
   elegido: string;
   /** Fechas SIN disponibilidad. Hoy llega VACÍO: el dato no existe en
@@ -415,11 +347,7 @@ export function SelectorDia(props: {
   onElegir: (iso: string) => void;
 }) {
   const cerrados = props.cerrados ?? new Set<string>();
-  return props.modo === 'rueda' ? (
-    <RuedaDias dias={props.dias} elegido={props.elegido} cerrados={cerrados} onElegir={props.onElegir} />
-  ) : (
-    <RielDias dias={props.dias} elegido={props.elegido} cerrados={cerrados} onElegir={props.onElegir} />
-  );
+  return <RuedaDias dias={props.dias} elegido={props.elegido} cerrados={cerrados} onElegir={props.onElegir} />;
 }
 
 // ═══════════════ LA GRILLA DE HORAS + EL NULO HONESTO ═══════════════
