@@ -868,6 +868,48 @@ function r22(fuentes) {
   return { fallos, info: fallos.length === 0 ? 'marca viva y fuera de la placa' : `${fallos.length} fallo(s)` };
 }
 
+
+/** R23 · LA HUELLA DE MARCA NO VA ADENTRO DE LA PLACA (corolario de C,
+ *  mecanizado S82-B r23).
+ *
+ *  POR QUÉ MERECE GUARD y no basta la letra: **no se ve como cambio de
+ *  ley, se ve como decisión de layout.** Alguien que mueve un glifo
+ *  adentro de la placa no siente que está tocando la enmienda — y sin
+ *  embargo la rompe sola, porque la placa es fondo de CAPA y la huella
+ *  rellena en hex de capa desaparecería sobre su propio color.
+ *
+ *  LA DISTINCIÓN QUE VIGILA, declarada porque el literal del corolario no
+ *  llegó al repo (sí su enunciado): lo prohibido es la **huella de
+ *  MARCA** — la rellena en hex de CAPA (`theme.capa.*` / `capaText.*`),
+ *  que es el relleno prominente de Ley 12. La Huella en TINTA sí vive
+ *  adentro (hoy: el filtro "Todo" de `filtro-pills:170`, `tintaGlifo`)
+ *  porque ahí es OBJETO del glifo, no marca. Si el literal de C dice otra
+ *  cosa, esta regla se ajusta — el criterio está escrito para poder
+ *  discutirlo, no escondido en un regex.
+ *  DURA EN 0: medido hoy.
+ *
+ *  ☠️ CONDICIÓN DE MUERTE (escrita al nacer): esta regla se retira **el
+ *  día que la placa deje de ser fondo de CAPA** — si el elegido pasa a
+ *  tinta plana (o a cualquier fondo que no sea el color de la capa), la
+ *  huella rellena ya no desaparecería sobre su propio color y el guard
+ *  pierde su razón. También muere si el corolario de C se deposita con un
+ *  literal que contradiga esta lectura: ahí se ajusta o se retira, pero
+ *  no sobrevive "por las dudas". **Quién la retira:** la pista que cambie
+ *  la anatomía del filtro elegido, o la mesa que deposite el literal. */
+function r23(archivos) {
+  const fallos = [];
+  for (const { path, src } of archivos) {
+    for (const m of src.matchAll(/backgroundColor:[^\n]*(?:colorPlaca|theme\.capa\.)/g)) {
+      // ventana del bloque de la placa: hasta su cierre razonable
+      const bloque = src.slice(m.index, m.index + 900);
+      const h = bloque.match(/<Huella[^>]*color=\{([^}]+)\}/);
+      if (h && /capa|capaText/.test(h[1]))
+        fallos.push(`${path}:${lineaDe(src, m.index)} — HUELLA DE MARCA adentro de la placa (color de CAPA: ${h[1].trim()}): la placa ya es fondo de capa y la huella rellena desaparece sobre su propio color. La de TINTA sí vive adentro (es objeto, no marca)`);
+    }
+  }
+  return { fallos, info: `${fallos.length} huellas de marca en placa` };
+}
+
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
 const FIXTURES = {
@@ -887,6 +929,7 @@ const FIXTURES = {
   R15: [{ tema: 'light', ruta: '(fixture)', valor: '#0F5E56' }],
   // tinte ENCENDIDO y ningún override en lightOficio = el caso que la
   // regla existe para atrapar.
+  R23: [{ path: '(fixture)', src: 'backgroundColor: colorPlaca,\n<Huella color={theme.capa.comunidad} />' }],
   R21: [{ path: '(fixture)', src: Array(BASELINE_CASTS_TEMA + 1).fill('x as string').join('\n') }],
   R20: [{ path: '(fixture)', src: 'style={{ backgroundColor: theme.status.warning }}' }],
   R17: { index: "export { PiezaFantasma } from './components/PiezaFantasma'", galeria: '' },
@@ -897,7 +940,7 @@ const FIXTURES = {
   R22: { filtro: 'function MarcaElegido() {}\n<View style={{ width: 30 }}><MarcaElegido /></View>' },
   R16: { palette: "light0: '#FAF9F7',\npapelTapiz: '#FAF2F5',", temas: 'const lightOficio: Theme = { ...lightTheme }' },
 };
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R19: r19, R20: r20, R21: r21, R22: r22 };
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R19: r19, R20: r20, R21: r21, R22: r22, R23: r23 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -964,6 +1007,7 @@ corridas.push(['R16 (papel tapiz: el prestador no recibe tinte)', r16(FUENTES_R1
 corridas.push(['R17 (la galería no envejece)', r17(FUENTES_R17)]);
 corridas.push(['R20 (la familia alerta no se rellena)', r20([...apps, ...ui])]);
 corridas.push(['R21 (casts de Theme — D-582)', r21(FUENTES_R21)]);
+corridas.push(['R23 (la huella de marca no va en la placa)', r23(apps)]);
 corridas.push(['R18 (D-580: la entrada a la galería NO desaparece)', r18({ cuenta: readFileSync(CUENTA_CLIENTE, 'utf8') })]);
 corridas.push([
   'R22 (la marca del elegido no se mete en la placa)',
