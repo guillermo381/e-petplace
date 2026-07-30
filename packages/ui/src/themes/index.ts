@@ -20,6 +20,13 @@ export type CtaAncla = 'tinta' | 'oficio'
 // (light) · textDark0 #F0EEF8 / tealDark = 5.05 (dark).
 const lightOficio: Theme = {
   ...lightTheme,
+  // S82-B r10 — LA SEPARACIÓN DEL FONDO (orden founder r8 §5 y r9 §4,
+  // firmada dos veces: "el prestador NO recibe tinte. Es fondo del
+  // cliente"). El tapiz se encendió en el tema del cliente; acá el
+  // prestador se queda en PAPEL ALGODÓN. El guard R16 de verify:diseno
+  // EXIGE esta línea mientras `papelTapiz !== light0` — su rojo fue
+  // producido antes de escribirla (exit 1, r9).
+  bg: { ...lightTheme.bg, base: palette.light0 },
   accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0 },
 }
 const darkOficio: Theme = {

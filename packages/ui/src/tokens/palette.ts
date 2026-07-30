@@ -57,7 +57,12 @@ export const palette = {
 
   // ── Capa Vida (B2.1 — semántica, no cambia por tema) ──
   verdeVital:     '#2BE86B',  // capa vida + success en LOS TRES temas (registro gráfico) — rgb(43,232,107)
-  verdeVitalDark: '#1E7A33',  // texto AA de vida/success en claro — rgb(30,122,51)
+  /** S82-B r10 — CURA COORDINADA DEL TAPIZ (medida por R12, no supuesta):
+   *  era #1E7A33 y con el tinte encendido el par successText/successBg
+   *  caía a 4.42 (el tinte se composita SOBRE bg.base, así que mover el
+   *  fondo mueve el tinte y con él el par). Un paso más oscuro: 5.18.
+   *  Reversa r10: volver a #1E7A33 junto con papelTapiz a light0. */
+  verdeVitalDark: '#1B6E2E',  // texto AA de vida/success en claro — rgb(27,110,46)
 
   // ── Extensiones v3.1 (mismos hex) ──
   violet:         '#9E3AFF',  // Capa 3 · comunidad amplia — rgb(158,58,255)
@@ -74,7 +79,12 @@ export const palette = {
                               // de texto — se conserva como escalón de la rampa)
                               // daba 4.30:1 sobre el tint danger saturado (gate WCAG)
   ochre:          '#E8B547',  // warning — rgb(232,181,71)
-  ochreDark:      '#925F0C',  // rgb(146,95,12) — oscurecido en B2.1: #97620C daba 4.44:1
+  /** S82-B r10 — CURA COORDINADA DEL TAPIZ: era #925F0C y vivía en
+   *  **4.50 EXACTO** sobre su tinte SIN tapiz (el más frágil de los tres
+   *  status — cualquier tinte lo tumbaba: 4.35 al 3%). Un paso más:
+   *  4.90. Historia del token: B2.1 ya lo había oscurecido desde
+   *  #97620C porque daba 4.44. Reversa r10: #925F0C. */
+  ochreDark:      '#875809',  // rgb(135,88,9) — warning AA en claro
                               // sobre el tint warning saturado (v3.1 #A66E10 ya había fallado en B2)
   terracotta:     '#D97757',  // hogar, familia — rgb(217,119,87)
   terracottaDark: '#AF5433',  // rgb(175,84,51) — oscurecido MÍNIMO en S43-B2: el v3.1
@@ -110,7 +120,7 @@ export const palette = {
    *  AL FIRMARSE: esta línea toma el candidato + nace el slot de fondo
    *  del provider para que el prestador siga en papel. Reversa: volver
    *  a `light0`. */
-  papelTapiz: '#FAF9F7',
+  papelTapiz: '#FAF2F5',  // S82-B r10 ENCENDIDO (orden founder): pink 3% sobre papel algodón
   /** Los candidatos del gate (S82-B r9) — pink puro compositado sobre
    *  papel algodón al 2/3/4/5%: mezcla de DOS tokens FIRMADOS, jamás
    *  hexes huérfanos. El de la lámina de Claude Design ("PAPEL TAPIZ ·

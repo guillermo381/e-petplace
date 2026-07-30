@@ -143,6 +143,9 @@ export { AvisoProvider, useAviso, type AvisoInput, type AvisoVariante } from './
 export { EstadoVacio } from './components/EstadoVacio'
 export { epetplaceFonts } from './fonts'
 export { Isotipo, type IsotipoVariant } from './brand/Isotipo'
+// S82-B r10 — el papel tapiz: pieza del FONDO compartido (el número del
+// alfa vive UNA vez; el montaje lo hace ThemeProvider marcaDeAgua).
+export { MarcaDeAgua } from './brand/MarcaDeAgua'
 export { TokenGallery } from './gallery/TokenGallery'
 
 // Namespace i18n del design system (S51-B1a): la voz de los componentes

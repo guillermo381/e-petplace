@@ -16,6 +16,9 @@
  */
 
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
+import { View } from 'react-native'
+
+import { MarcaDeAgua } from './brand/MarcaDeAgua'
 import { getTheme, type CtaAncla, type Theme, type ThemeMode } from './themes'
 
 type ThemeContextValue = {
@@ -32,6 +35,7 @@ export function ThemeProvider({
   defaultMode = 'light',
   memorial = false,
   cta = 'tinta',
+  marcaDeAgua = false,
 }: {
   children: ReactNode
   /** Modo CONTROLADO: si viene, el provider lo sigue reactivo (cambio
@@ -45,6 +49,15 @@ export function ThemeProvider({
    *  MEMORIAL SIEMPRE tinta, gane quien gane esta prop: memorial no
    *  se celebra. */
   cta?: CtaAncla
+  /** S82-B r10 (orden founder: el agua "VA EN TODAS LAS PANTALLAS —
+   *  nace como pieza del fondo compartido, NO override por pantalla").
+   *  Encendida acá, el agua queda detrás de TODO el árbol de la app en
+   *  UN solo lugar: cero pantalla tocada, cero copia que se
+   *  desincronice (el modo de fallo ya ocurrido: 0.06 vs 0.04).
+   *  DEFAULT false a propósito — el prestador no la recibe (su fondo se
+   *  queda en papel algodón, r8 §5) y la galería no se contamina en sus
+   *  paneles anidados. */
+  marcaDeAgua?: boolean
 }) {
   const [modeInterno, setMode] = useState<ThemeMode>(defaultMode)
   const mode = modeControlado ?? modeInterno
@@ -55,7 +68,21 @@ export function ThemeProvider({
     [effectiveMode, cta],
   )
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  return (
+    <ThemeContext.Provider value={value}>
+      {marcaDeAgua ? (
+        // El wrapper existe SOLO con el agua encendida: sin ella el árbol
+        // de render queda EXACTAMENTE como antes (cero riesgo de flex
+        // para el prestador y la galería).
+        <View style={{ flex: 1, backgroundColor: value.theme.bg.base }}>
+          <MarcaDeAgua />
+          {children}
+        </View>
+      ) : (
+        children
+      )}
+    </ThemeContext.Provider>
+  )
 }
 
 export function useTheme(): ThemeContextValue {

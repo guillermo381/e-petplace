@@ -19,7 +19,13 @@ export const lightTheme = {
     // el texto sobre el CTA de tinta) y no se toca un token de dos
     // consumidores para cambiar uno. Hoy `papelTapiz === light0`: el
     // cableado vive, el color espera su firma en el gate.
-    base:     palette.papelTapiz,   // hoy #FAF9F7 (papel algodón, D-360 S58)
+    // `as string` NO es un atajo: el tipo `Theme` deriva de estos
+    // objetos, y sin ensanchar, `bg.base` queda como UNIÓN DE LITERALES
+    // de los tres temas — el override del prestador (light0) no sería
+    // asignable. Es el MISMO precedente del slot `cta` unas líneas abajo,
+    // y por la misma razón: un slot que se resuelve distinto por tema.
+    // Lo cazó el tsc al construir la separación (r10), no la prosa.
+    base:     palette.papelTapiz as string,   // S82-B r10: pink 3% sobre papel
     card:     palette.light1,   // #FFFFFF
     elevated: palette.light2,   // #F8F7FC
     overlay:  palette.light3,   // #EDEBF5 — hover

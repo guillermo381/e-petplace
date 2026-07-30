@@ -16,6 +16,7 @@ import { spacing } from '../tokens/spacing'
 import { radius } from '../tokens/radius'
 import { ThemeProvider, useTheme } from '../ThemeProvider'
 import { Isotipo } from '../brand/Isotipo'
+import { MarcaDeAgua } from '../brand/MarcaDeAgua'
 import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
 import { Campo } from '../components/Campo'
@@ -347,17 +348,23 @@ function EjemploFichaVacuna() {
  *  variante `voz`. El valor NO está decidido — esta lámina existe para
  *  que el ojo elija (regla 80: la ley después del resultado firmado). */
 function LaminaGateTapiz() {
-  const { theme } = useTheme()
+  // (el tema lo consume MarcaDeAgua adentro — la lámina no lo necesita)
   const CANDIDATOS = [
     { etiqueta: 'papel (hoy)', valor: palette.light0 },
     ...palette.papelTapizCandidatos.map((c) => ({ etiqueta: c.etiqueta, valor: c.valor })),
   ]
   const [i, setI] = useState(1) // arranca en 2% para que el switch se note
   const fondo = CANDIDATOS[i].valor
-  // El agua: los DOS alfas que hoy viven en producción (hallazgo r8 —
-  // el Hogar en .06 FIRMADO, el perfil en .04). La corrección del
-  // founder: si algo se mueve, sube el PERFIL al Hogar, nunca al revés.
-  const AGUAS = [0.04, 0.06]
+  // S82-B r10: el alfa quedó UNIFICADO en 0.06 (el FIRMADO del Hogar; el
+  // perfil sube, jamás baja lo firmado — corrección del founder). Lo que
+  // el gate compara ahora son LAS DOS ANATOMÍAS del agua, porque de eso
+  // depende cuál lectura de la Ley 4 aplica: COMPLETA (silueta cerrada =
+  // es un isotipo ⇒ lectura A, hace falta enmienda) vs SANGRADA (cortada
+  // por los cuatro bordes = textura ⇒ lectura B, la ley queda intacta).
+  const ANATOMIAS = [
+    { sangrada: false, voz: 'COMPLETA (210 centrado, la calibración de la lámina) — silueta CERRADA: se lee isotipo ⇒ Ley 4 muerde, hace falta enmienda' },
+    { sangrada: true, voz: 'SANGRADA (150% del ancho) — cortada por los cuatro bordes: se lee TEXTURA ⇒ Ley 4 intacta, cero enmienda' },
+  ]
 
   return (
     <View style={{ gap: spacing[4] }}>
@@ -378,20 +385,13 @@ function LaminaGateTapiz() {
       </Texto>
 
       {/* El panel a sangre con el agua detrás y contenido real encima */}
-      {AGUAS.map((alfa) => (
-        <View key={alfa} style={{ gap: spacing[2] }}>
-          <Texto variante="apoyo">
-            {alfa === 0.06 ? 'agua 6% — la del Hogar (FIRMADA)' : 'agua 4% — la del perfil (descalibrada, r8)'}
-          </Texto>
+      {ANATOMIAS.map((a) => (
+        <View key={String(a.sangrada)} style={{ gap: spacing[2] }}>
+          <Texto variante="apoyo">{a.voz}</Texto>
           <View style={{ height: 260, borderRadius: radius.md, overflow: 'hidden', backgroundColor: fondo }}>
-            <View
-              pointerEvents="none"
-              style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, alignItems: 'center', justifyContent: 'center' }}
-            >
-              <View style={{ opacity: alfa }}>
-                <Isotipo size={190} variant="tinta" color={theme.text.primary} />
-              </View>
-            </View>
+            {/* la pieza REAL de packages/ui — no una copia de galería:
+                lo que el founder mira es lo que va a correr */}
+            <MarcaDeAgua sangrada={a.sangrada} />
             <View style={{ padding: spacing[4], gap: spacing[3] }}>
               <Texto variante="seccion">Thor</Texto>
               {/* LA VOZ DEL PRODUCTO — su primera aparición visible */}
@@ -439,6 +439,9 @@ function EjemploSetBPrima() {
     // punta del lápiz o la bandeja del compartir no se leen ahí, se
     // simplifican. Sin huella (son controles, no oficios).
     'lapiz', 'compartir',
+    // S82-B r10: LA VACUNA con su glifo propio (la fila del perfil
+    // pintaba `veterinaria` — sustitución genérica que Ley 12 prohíbe).
+    'vacuna',
   ]
   return (
     <View style={{ gap: spacing[4] }}>

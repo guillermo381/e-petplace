@@ -43,6 +43,12 @@ export type IconoNombre =
   //    acá: la categoría "glifo de control" es §6bis de DIRECCION_ARTE,
   //    PENDIENTE desde S78 — regla 80 (la ley va DESPUÉS del gate).
   | 'lapiz' | 'compartir'
+  // ── S82-B r10: LA VACUNA gana su glifo (orden founder). Hasta hoy la
+  //    fila de vacunas del perfil pintaba `veterinaria` (medido:
+  //    `mascota/[mascotaId].tsx:863`) — la sustitución genérica que la
+  //    Ley 12 prohíbe, y el mismo caso por el que lápiz y compartir se
+  //    frenaron en r7. Gate por ícono a 21px PENDIENTE.
+  | 'vacuna'
 export type IconoRegistro = 'capa' | 'aa' | 'tinta'
 
 const TRAZO = 1.9
@@ -324,6 +330,25 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
     </>
   ),
 
+  // LA JERINGA (S82-B r10) — objeto del acto, con su huella: la vacuna
+  // ES del expediente de una mascota (capa IDENTIDAD, familia de
+  // carnet/vet: protección de vida). Trazo 1.9 como todo el set.
+  // Anatomía pensada PARA 21px (la lección del set: a ese tamaño
+  // sobrevive lo simple): cuerpo vertical + aletas + vástago con su
+  // tope + aguja; CERO graduaciones (a 21 son ruido — Chanel aplicada
+  // antes del gate, no después). Desplazada a la derecha del centro
+  // para que la huella respire abajo-izquierda, como en `carnet`.
+  vacuna: ({ tinta, huella }) => (
+    <>
+      <Path d="M10.6 8.6h4.8v8.6h-4.8z" {...trazo(tinta)} />
+      <Path d="M9 8.6h8" {...trazo(tinta)} />
+      <Path d="M13 8.6V4.8" {...trazo(tinta)} />
+      <Path d="M10.8 4.8h4.4" {...trazo(tinta)} />
+      <Path d="M13 17.2v3.4" {...trazo(tinta)} />
+      <Huella color={huella} x={2.4} y={14.8} escala={0.32} />
+    </>
+  ),
+
   // ── GLIFOS DE CONTROL (S82-B r7) ───────────────────────────────────
   // SIN HUELLA, y el criterio VIAJÓ CON LA REFERENCIA (no lo inventa
   // esta sesión — literal del archivo del founder): *"Trazo 1.9, sin
@@ -407,6 +432,9 @@ export function Icono({
     // LOTE S71-B2 (firma founder): caso = historia clínica (familia de
     // carnet/vet) · presupuesto = plata del cuidado (familia pagos/negocio)
     caso: identidad, presupuesto: ocre,
+    // S82-B r10: la vacuna es PROTECCIÓN DE VIDA — capa identidad, la
+    // misma que carnet/vet/seguros (§ Ley 10: la taxonomía manda).
+    vacuna: identidad,
     // GLIFOS DE CONTROL (S82-B r7): TINTA en los dos registros — un
     // control no pertenece a una capa (no hay oficio del que tomar
     // color) y su huella no se dibuja. El `registro="capa"` de un
