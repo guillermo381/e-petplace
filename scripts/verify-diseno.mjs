@@ -567,6 +567,70 @@ const FUENTES_R16 = {
   temas: readFileSync('packages/ui/src/themes/index.ts', 'utf8'),
 };
 
+
+/** R17 · LA GALERÍA NO ENVEJECE (S82-B r16, orden founder: "toda pieza
+ *  exportada desde packages/ui tiene que aparecer en la galería. Una
+ *  exportación nueva sin entrada = rojo"). El modo de fallo es el que YA
+ *  ocurrió, y por eso existe: la galería se quedó atrás de S81 y S82 sin
+ *  que nada lo dijera — lo vio el founder, no el sistema.
+ *
+ *  EXENTOS DECLARADOS — no es pereza: son piezas que NO SE PUEDEN MOSTRAR
+ *  SIN CLONARLAS, y la regla dura de la orden manda declarar y no montar
+ *  ("una galería que muestra un botón que no es EL botón hace firmar algo
+ *  que no corre"):
+ *   · `usePresionado` — HOOK de física: mostrarlo exige construir un
+ *     tocable de ejemplo, o sea CLONAR el gesto. Se ve APLICADO en
+ *     Boton/Tarjeta/Celda, que sí están.
+ *   · `useTraduccionUi` · `recursosUi` — riel de idioma: no tienen forma.
+ *   · `useAviso` · `AvisoProvider` — el Aviso se ve por su DISPARO (la
+ *     galería lo dispara); el hook en sí no se dibuja.
+ *   · `ThemeProvider` · `useTheme` — la galería ENTERA es su demostración.
+ *   · `EvidenciaFotoCapturar` — abre la CÁMARA al tocarse: montarlo
+ *     dispararía permisos del sistema dentro de una herramienta de
+ *     verificación. Su hermano Thumbnail (presentacional) sí se monta.
+ *  El resto es baseline NOMINAL solo-baja: la pieza que gana su entrada
+ *  sale de la lista y no vuelve; toda exportación NUEVA es roja desde el
+ *  primer día. */
+const EXENTOS_R17 = new Set([
+  'usePresionado', 'useTraduccionUi', 'recursosUi', 'useAviso', 'AvisoProvider',
+  'ThemeProvider', 'useTheme', 'EvidenciaFotoCapturar',
+]);
+/** Las que HOY no tienen entrada — se pagan de a una, jamás sube. */
+const SIN_ENTRADA_R17 = new Set([
+  'BarrasSemana', 'CantoMarca', 'Entrada', 'EvidenciaFoto',
+  'EvidenciaFotoThumbnail', 'EvitaTeclado', 'HojaScroll', 'Huella',
+  'LineaDeVidaNodo',
+]);
+function r17(fuentes) {
+  const idx = fuentes.index ?? '';
+  const gal = fuentes.galeria ?? '';
+  const nombres = new Set();
+  for (const m of idx.matchAll(/export\s*\{([^}]+)\}/g)) {
+    for (const parte of m[1].split(',')) {
+      const t = parte.trim();
+      if (!t || t.startsWith('type ')) continue;
+      const n = t.split(/\s+as\s+/)[0].trim();
+      if (/^[A-Z][A-Za-z]*$/.test(n) || /^use[A-Z]/.test(n)) nombres.add(n);
+    }
+  }
+  const fallos = [];
+  let presentes = 0, exentas = 0, pendientes = 0;
+  for (const n of nombres) {
+    if (EXENTOS_R17.has(n)) { exentas++; continue; }
+    if (new RegExp('<' + n + '[\\s/>]|\\b' + n + '\\(').test(gal)) { presentes++; continue; }
+    if (SIN_ENTRADA_R17.has(n)) { pendientes++; continue; }
+    fallos.push(`R17: ${n} se exporta desde packages/ui y NO aparece en la galería — una pieza que nadie puede mirar no se puede firmar`);
+  }
+  return {
+    fallos,
+    info: `exportaciones=${nombres.size} · en-galería=${presentes} · exentas-declaradas=${exentas} · pendientes=${pendientes}/${SIN_ENTRADA_R17.size}`,
+  };
+}
+const FUENTES_R17 = {
+  index: readFileSync('packages/ui/src/index.ts', 'utf8'),
+  galeria: readFileSync('packages/ui/src/gallery/TokenGallery.tsx', 'utf8'),
+};
+
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
 const FIXTURES = {
@@ -586,9 +650,10 @@ const FIXTURES = {
   R15: [{ tema: 'light', ruta: '(fixture)', valor: '#0F5E56' }],
   // tinte ENCENDIDO y ningún override en lightOficio = el caso que la
   // regla existe para atrapar.
+  R17: { index: "export { PiezaFantasma } from './components/PiezaFantasma'", galeria: '' },
   R16: { palette: "light0: '#FAF9F7',\npapelTapiz: '#FAF2F5',", temas: 'const lightOficio: Theme = { ...lightTheme }' },
 };
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16 };
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -652,6 +717,7 @@ if ('caido' in (dump ?? {})) {
 }
 corridas.push(['R13 (A6: control contorneado, cliente)', r13(apps)]);
 corridas.push(['R16 (papel tapiz: el prestador no recibe tinte)', r16(FUENTES_R16)]);
+corridas.push(['R17 (la galería no envejece)', r17(FUENTES_R17)]);
 for (const [nombre, res] of corridas) {
   console.log(`${nombre} · ${res.info}`);
   for (const f of res.fallos) { console.error(`  ✗ ${f}`); fallosTotal++; }
