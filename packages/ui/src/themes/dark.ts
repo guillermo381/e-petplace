@@ -33,8 +33,12 @@ export const darkTheme = {
     // S63 — enmienda Ley 21 FIRMADA: el CTA primario resuelve por SLOT.
     // Default 'tinta' (este valor); ThemeProvider cta='oficio' lo ancla a
     // tealDark en light Y dark. Memorial SIEMPRE tinta (no se celebra).
-    cta:           palette.textDark0 as string,
-    ctaTexto:      palette.dark0 as string,
+    // S82-B — EL ORO FIRMADO. Un solo color para los DOS temas (label
+    // tinta 9.96 en ambos). El PRESTADOR no lo recibe: su oficio ancla a
+    // tealDark por `lightOficio`/`darkOficio`; memorial sigue en tinta
+    // por `getTheme` — las dos garantías viven en la fuente.
+    cta:           palette.ctaOro as string,
+    ctaTexto:      palette.textLight0 as string,
     primary:       palette.teal,
     primaryBg:     palette.tealAlpha15,
     primaryBorder: palette.tealBorder,

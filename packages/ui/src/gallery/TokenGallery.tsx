@@ -566,26 +566,19 @@ function GateS82() {
 
       <Decision
         n="1"
-        asunto="EL ORO — un solo color para los DOS temas, label tinta"
-        decide="ÚNICA DECISIÓN ABIERTA. El hueco entre el amarillo de MARCA (H57.1, prohibido ±12° ⇒ [45.2,69.2]) y el ámbar de ALERTA (H41.0) es de CUATRO GRADOS: hay lugar, pero a 2-4° el ojo NO separa por matiz — la distancia la cargan la saturación (95-100% contra 78%) y que el alerta viva como TINTE, no como fill. El swatch del founder NO llegó al repo; su ~50° estimado cae ADENTRO de lo prohibido."
+        asunto="EL ORO — FIRMADO (oro A #FCBC1D, label tinta)"
+        decide="YA NO SE ELIGE: se verifica. Los otros dos candidatos salieron (Ley 37: el gate ocurrió). #fff645 retirado y el estatuto solo-marca INTACTO, sin enmienda."
       >
-        {[{ f: TAPIZ, voz: 'sobre PAPEL — el fill da 1.43-1.66: el color NO recorta el botón' }, { f: palette.dark0, voz: 'sobre NEGRO — el fill da 11-13: acá el color SÍ carga la separación' }].map((fondo) => (
-          <View key={fondo.f} style={{ gap: spacing[2], backgroundColor: fondo.f, padding: spacing[3], borderRadius: radius.md }}>
-            <Texto variante="dato">{fondo.voz}</Texto>
-            {palette.ctaOroCandidatos.map((c) => (
-              <View key={c.valor} style={{ gap: spacing[1] }}>
-                <View style={{ flexDirection: 'row', gap: spacing[2] }}>
-                  <View style={{ flex: 1 }}><BotonMuestra fondo={c.valor} texto={palette.textLight0} etiqueta="con elevación" /></View>
-                  <View style={{ flex: 1, height: 48, borderRadius: radius.md, backgroundColor: c.valor, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: palette.textLight0 }}>sin elevación</Text>
-                  </View>
-                </View>
-                <Texto variante="dato">{`${c.etiqueta} ${c.valor} · label tinta ${c.tinta} (igual en los dos temas) · fill papel ${c.papel} · negro ${c.negro}`}</Texto>
-              </View>
-            ))}
-            <Insignia estado="atencion" etiqueta="el ámbar de ALERTA — vive como TINTE, no como fill: ahí está la distancia real" />
+        <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+          <View style={{ flex: 1, backgroundColor: TAPIZ, padding: spacing[3], borderRadius: radius.md, gap: spacing[1] }}>
+            <Boton variante="primario" etiqueta="Agendar" bloque onPress={() => {}} />
+            <Texto variante="dato">claro · fill 1.55</Texto>
           </View>
-        ))}
+          <View style={{ flex: 1, backgroundColor: palette.dark0, padding: spacing[3], borderRadius: radius.md, gap: spacing[1] }}>
+            <ThemeProvider defaultMode="dark"><Boton variante="primario" etiqueta="Agendar" bloque onPress={() => {}} /></ThemeProvider>
+            <Texto variante="dato">oscuro · fill 11.97</Texto>
+          </View>
+        </View>
       </Decision>
 
       <Decision
@@ -626,18 +619,6 @@ function GateS82() {
         </ThemeProvider>
       </Decision>
 
-    </View>
-  )
-}
-
-/** El cuerpo de un CTA con los colores del candidato. NO usa `Boton` a
- *  propósito: el candidato no está en el tema todavía, y meterlo sería
- *  encenderlo — que es exactamente lo que el gate viene a decidir. */
-function BotonMuestra({ fondo, texto, etiqueta = 'Reservar servicio de Thor' }: { fondo: string; texto: string; etiqueta?: string }) {
-  const { theme } = useTheme()
-  return (
-    <View style={{ height: 48, borderRadius: radius.md, backgroundColor: fondo, alignItems: 'center', justifyContent: 'center', boxShadow: theme.elevacion.reposo }}>
-      <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.base, color: texto }}>{etiqueta}</Text>
     </View>
   )
 }

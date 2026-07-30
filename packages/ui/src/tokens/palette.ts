@@ -89,7 +89,20 @@ export const palette = {
    *  Distancia del ámbar de ALERTA (#E8B547, L59%): 9 puntos de
    *  luminosidad y +14 de saturación — si compartieran registro, el color
    *  no diría nada. */
-  ctaOcre:        '#F5A70A',  // rgb(245,167,10)
+  /** S82-B — EL CTA DEL CLIENTE, **FIRMADO POR EL FOUNDER EN GALERÍA**
+   *  (oro A). UN SOLO COLOR PARA LOS DOS TEMAS, con label en TINTA: el
+   *  par que manda da **9.96 idéntico en claro y en oscuro**, y eso es
+   *  justo lo que hace posible un color único. Vive en el hueco de
+   *  CUATRO GRADOS entre el ámbar de alerta (H41.0) y la ventana
+   *  prohibida del amarillo de marca (H45.2): H43, S97%, L55%.
+   *  Fill vs papel 1.55 · vs negro 11.97 — en oscuro el color carga la
+   *  separación, en claro NO (ver la nota de elevación en Boton).
+   *  Lo que su firma cierra: `#fff645` queda RETIRADO como CTA oscuro y
+   *  **el estatuto solo-marca de la rampa del isotipo queda INTACTO, sin
+   *  enmienda** — un color para los dos temas lo volvió innecesario.
+   *  Reversa: `accent.cta` a `palette.textLight0` (claro) y
+   *  `palette.textDark0` (oscuro), con sus ctaTexto. */
+  ctaOro:         '#FCBC1D',  // rgb(252,188,29) — H43 S97% L55%
   /** S82-B r10 — CURA COORDINADA DEL TAPIZ: era #925F0C y vivía en
    *  **4.50 EXACTO** sobre su tinte SIN tapiz (el más frágil de los tres
    *  status — cualquier tinte lo tumbaba: 4.35 al 3%). Un paso más:
@@ -155,43 +168,6 @@ export const palette = {
    *  Magenta suave · Cálido") entra como QUINTO cuando el zip llegue al
    *  repo — al abrir esta ronda NO estaba (medido: docs/laminas/ sin él).
    *  Recomendación de B anotada, NO valor: el 3%. */
-  /** S82-B r18 — LOS TRES CANDIDATOS DEL ORO: **UN color para los DOS
-   *  temas**, con label TINTA (los de r11 quedaron atrás: eran del claro y
-   *  pedían un token oscuro aparte).
-   *
-   *  LOS TRES NÚMEROS QUE PEDISTE, medidos: `#fff645` (amarillo de MARCA)
-   *  = **H57.1** · `ochre` (warning/consumo) = **H41.0** · `ctaOcre` de
-   *  hoy = H40.1. **El swatch del founder NO llegó al repo** (mismo caso
-   *  que el zip de r9) — su estimación declarada de ~50° cae **ADENTRO**
-   *  de la ventana prohibida, confirmando la sospecha.
-   *
-   *  LA VENTANA Y EL HUECO: ±12° del amarillo de marca ⇒ PROHIBIDO
-   *  [45.2, 69.2]. Por abajo está el ámbar de ALERTA en H41.0. **El hueco
-   *  real es 41.0–45.2: CUATRO GRADOS.** Sí hay lugar (no es el caso del
-   *  teal, donde no había ninguno) — pero es angosto, y de ahí sale el
-   *  hallazgo que importa: **a 2-4° de matiz el ojo NO separa el CTA del
-   *  alerta.** La distancia tiene que venir de otro lado, y viene: estos
-   *  candidatos van a S95-100% contra el S78% del ochre, y sobre todo el
-   *  alerta casi nunca aparece como FILL — vive como tinte al 24% con su
-   *  texto AA. El CTA es fill saturado; el alerta, tinte pálido. Esa es
-   *  la separación real, no el matiz.
-   *
-   *  EL BORDE, CONFIRMADO: contra papel el oro da 1.43–1.66 (el ~1.6 que
-   *  el founder anticipó) — el botón NO se recorta por color. El label sí
-   *  se lee (9.26–10.78). Sobre negro el fill da 11–13: **en oscuro el
-   *  color carga la separación, en claro no.** Por eso el CTA que cierra
-   *  lleva ELEVACIÓN — la cura de `sinCaja` (r12): cuando el color no
-   *  puede cargar la separación, el canal es la superficie apoyada.
-   *  La galería los monta CON y SIN, sobre los dos fondos.
-   *
-   *  `#fff645` como CTA oscuro: RETIRADO por el founder — con un solo
-   *  color para los dos temas deja de hacer falta, y evita enmendar el
-   *  estatuto solo-marca. */
-  ctaOroCandidatos: [
-    { etiqueta: 'oro A · H43', valor: '#FCBC1D', tinta: '9.96', papel: '1.55', negro: '11.97' },
-    { etiqueta: 'oro B · H44 (el más luminoso)', valor: '#FFC629', tinta: '10.78', papel: '1.43', negro: '12.95' },
-    { etiqueta: 'oro C · H42 (el más cerca del alerta)', valor: '#F9B310', tinta: '9.26', papel: '1.66', negro: '11.13' },
-  ] as const,
   papelTapizCandidatos: [
     { etiqueta: '2%', valor: '#FAF4F6' },
     { etiqueta: '3%', valor: '#FAF2F5' },

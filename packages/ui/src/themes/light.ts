@@ -55,7 +55,11 @@ export const lightTheme = {
     // SIGUE EN TINTA por `getTheme` (memorial no se celebra) — las dos
     // garantías viven en la fuente, no en la disciplina de cada pantalla.
     // El par que manda: label TINTA sobre el ocre = 8.40 (blanco daba 2.02).
-    cta:           palette.ctaOcre as string,
+    // S82-B — EL ORO FIRMADO. Un solo color para los DOS temas (label
+    // tinta 9.96 en ambos). El PRESTADOR no lo recibe: su oficio ancla a
+    // tealDark por `lightOficio`/`darkOficio`; memorial sigue en tinta
+    // por `getTheme` — las dos garantías viven en la fuente.
+    cta:           palette.ctaOro as string,
     ctaTexto:      palette.textLight0 as string,
     primary:       palette.tealDark,
     primaryBg:     palette.tealAlpha16,     // B2.1: tint sobre el hex puro
