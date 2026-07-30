@@ -94,11 +94,30 @@ export type OpcionFiltro<C extends string> = {
  *  que nadie se entere.
  *
  *  Por eso la marca es HERMANA del label, nunca hija de la placa. */
+const PATA = 24;
+/** Cuánto MONTA el canto. Sale del tamaño, no se tipea suelto (clase
+ *  L-159, precedente `SOBRA_ENTIDAD` de SelectorOpcion). */
+const MONTA = PATA / 3;
+
 function MarcaElegido({ color }: { color: string }) {
   return (
-    <Svg width={13} height={13} viewBox="0 0 24 24">
-      <Huella color={color} escala={0.9} x={1.2} y={1.2} />
-    </Svg>
+    <View
+      pointerEvents="none"
+      style={{
+        position: 'absolute',
+        top: -MONTA,
+        right: -MONTA / 2,
+        width: PATA,
+        height: PATA,
+        // la pata se APOYA, y algo que se apoya casi nunca cae recto:
+        // la inclinación es lo que la separa de un símbolo centrado.
+        transform: [{ rotate: '-14deg' }],
+      }}
+    >
+      <Svg width={PATA} height={PATA} viewBox="0 0 24 24">
+        <Huella color={color} escala={0.95} x={0.6} y={0.6} />
+      </Svg>
+    </View>
   );
 }
 
@@ -117,7 +136,15 @@ export function FiltroPills<C extends string>({
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ gap: spacing[2.5], paddingHorizontal: spacing[4], paddingVertical: spacing[1] }}
+      // ⚠️ el aire de ARRIBA no es estético: la pata MONTA el canto y un
+      // ScrollView recorta a sus bordes. Con paddingTop 4 (lo que había)
+      // la pata se cortaba por la mitad. 12 > MONTA(8), con margen.
+      contentContainerStyle={{
+        gap: spacing[2.5],
+        paddingHorizontal: spacing[4],
+        paddingTop: spacing[3],
+        paddingBottom: spacing[1],
+      }}
     >
       {opciones.map((o) => {
         const elegido = o.codigo === activo;
@@ -145,8 +172,33 @@ export function FiltroPills<C extends string>({
             style={{
               height: 44,
               borderRadius: radius.full,
-              backgroundColor: theme.bg.card,
-              boxShadow: elegido ? theme.elevacion.elevada : theme.elevacion.reposo,
+              // r18-3 · EL CHIP SE HUNDE BAJO LA PATA. Lo que se hunde
+              // NO PROYECTA: pierde la elevación y baja de superficie.
+              // ⚠️ NO EXISTE UN REGISTRO HUNDIDO EN LOS TEMAS, y hay que
+              // decirlo: el contrato de `elevacion` tiene EXACTAMENTE dos
+              // niveles (reposo · elevada) y ninguno es un hueco. Lo que
+              // la casa llama "hundido" es una CONVENCIÓN DE SUPERFICIE
+              // —`bg.overlay`, los rieles de SelectorSegmentado, Slider y
+              // Stepper (B lo re-declaró en su r22: superficie neutra)—
+              // y esa convención es SOLO DE CLARO. Medido:
+              //   claro    card #FFFFFF → overlay #EDEBF5  MÁS OSCURO ✓
+              //   oscuro   card #0D0D12 → overlay #1A1A24  más claro ✗
+              //   memorial card #141A14 → overlay #141A14  igual (1.00) ✗
+              // En oscuro y memorial `overlay` ELEVA en vez de hundir, así
+              // que ahí el hueco lo da `bg.base` (1.05 / 1.10 más oscuro
+              // que la tarjeta). PEDIDO A B, declarado: falta el slot
+              // `bg.hundido`; mientras no exista, esta rama por tema vive
+              // acá y se retira sola el día que el slot llegue.
+              // Y mi PRIMER intento fue peor y lo corregí mirando: puse
+              // `bg.base` en los TRES, y en claro eso deja al chip del
+              // color EXACTO de la página — no se hunde, DESAPARECE.
+              backgroundColor: elegido
+                ? theme.mode === 'light'
+                  ? theme.bg.overlay
+                  : theme.bg.base
+                : theme.bg.card,
+              boxShadow: elegido ? 'none' : theme.elevacion.reposo,
+              transform: [{ scale: elegido ? 0.98 : 1 }],
               flexDirection: 'row',
               alignItems: 'center',
               gap: spacing[2],
@@ -191,7 +243,7 @@ export function FiltroPills<C extends string>({
             {/* (b) LA MARCA DEL ELEGIDO — HERMANA DEL LABEL, JAMÁS HIJA
                 DE LA PLACA. Su posición es la ley, no el layout: ver el
                 bloque de `MarcaElegido` y R22 en verify-diseno. */}
-            {elegido ? <MarcaElegido color={theme.text.primary} /> : null}
+            {elegido ? <MarcaElegido color={theme.accent.control} /> : null}
           </Pressable>
         );
       })}
@@ -280,7 +332,15 @@ export function FiltroMascotas({
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ gap: spacing[2.5], paddingHorizontal: spacing[4], paddingVertical: spacing[1] }}
+      // ⚠️ el aire de ARRIBA no es estético: la pata MONTA el canto y un
+      // ScrollView recorta a sus bordes. Con paddingTop 4 (lo que había)
+      // la pata se cortaba por la mitad. 12 > MONTA(8), con margen.
+      contentContainerStyle={{
+        gap: spacing[2.5],
+        paddingHorizontal: spacing[4],
+        paddingTop: spacing[3],
+        paddingBottom: spacing[1],
+      }}
     >
       {mascotas.map((m) =>
         chip(
