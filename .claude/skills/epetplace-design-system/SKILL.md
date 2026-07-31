@@ -439,6 +439,46 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
     > relevamiento L-144: la Celda de lista NO cumplía la letra — sin
     > chevron, slot de ícono libre, pressed que resalta). Las pantallas
     > vivas con chips-como-segmento migran en su pasada de craft.
+
+    9. **[FIRMADA — founder, 31-jul-2026, S82: EL LOG DE UN OFICIO]
+       LA FILA Y SU DESPLIEGUE SON UNO SOLO PARA LOS CUATRO OFICIOS.**
+       El log (paseo · grooming · veterinaria · adiestramiento) no es
+       cuatro pantallas parecidas: es UNA con cuatro datos. Lo exigible:
+       - **La fila es `FilaCita`**, con `cara?: boolean` (el log la
+         APAGA: ya filtra por mascota y el título dice el nombre —
+         repetir la cara es el elemento que hace doble turno, Ley 17.6)
+         y **`direccion` OBLIGATORIA sin default** (19.7 + E14: la fila
+         declara si despliega o lleva; el tsc obliga a decidirlo).
+       - **El despliegue dice PRESTADOR + COSTO**, en los cuatro. Y
+         **donde el costo no existe, el nulo es HONESTO y dice POR QUÉ**
+         (vet antes del presupuesto: el número no existe todavía, y
+         decirlo vale más que omitirlo). `$0,00` es mentira con formato
+         de dato.
+       - **El estado SOLO se anuncia cuando la cita cerró.** El defecto
+         que lo disparó es del tipo más caro: `"completada"` escrito a
+         mano en la lista de FUTURAS — compila, no rompe nada, y afirma
+         algo falso.
+       - **El corte de agenda es UNO** (`apps/cliente/src/lib/corte-agenda.ts`):
+         mira **estado Y tiempo**, y **lo firme-sin-fecha sobrevive como
+         próximo** (D-439: una cita puede ser firme y no tener fecha —
+         un corte por fecha sola la desaparece, que es el bug de S71).
+         Cuatro logs con cuatro cortes eran cuatro respuestas distintas
+         a la misma pregunta.
+       - **Elección excluyente ≠ toggle:** dos interruptores que se
+         excluyen prometen independencia — el control miente antes de
+         que lo toquen. El `Interruptor` queda para el AGREGADO real
+         (domicilio se prende sobre local; el plan frecuente).
+       > EL PORQUÉ, que es la ley detrás de la ley: **lo que se copia,
+       > diverge.** Los cuatro logs habían nacido por copia y los cuatro
+       > respondían distinto — grooming y adiestramiento habían perdido
+       > el precio ENTERO del pie; paseo era el único que miraba estado
+       > Y tiempo. **La cura no es más disciplina: es que la pieza sea
+       > una** (`FilaCita`, `PieReserva`, `corte-agenda.ts`). El corolario
+       > operativo: **la prop de identidad va OBLIGATORIA sin default**
+       > — `capa=` en `CabezalOficio` obligó a cada clon a declararla, y
+       > la primera consumidora real (vet, `"salud"`) probó que sin ella
+       > el clon salía teal.
+
 20. **La elevación (el 3D sutil, por sistema).** Nacen los tokens de
     elevación — hoy el sistema es plano y por eso las pantallas no
     despegan (diagnóstico del founder S57, vara Airbnb: sombras
@@ -469,6 +509,43 @@ El porqué, del founder: *"cada componente que nace mal es doble trabajo."*
     > `shadows` v4 sigue vivo SOLO para glow semántico (Ley 7) y Aviso.
     > Ley 6 intacta: las sombras JAMÁS se animan. La calibración fina
     > se sella en la pantalla patrón del Hogar (D-358).
+
+    > **ENMIENDA S82 — EL HALO DIRECCIONAL: LA SEPARACIÓN DE SUPERFICIE
+    > EN OSCURO (E11, FIRMADA en dispositivo 31-jul-2026; origen: B).**
+    > **En los temas oscuros la elevación por SOMBRA no separa, y no es
+    > cuestión de calibrarla mejor: la luminancia está agotada por los
+    > dos lados.** Medido: subir `bg.card` rompe SEIS pares AA; bajar
+    > `bg.base` no compra nada, porque el `+0.05` de la fórmula WCAG
+    > domina cuando L≈0. La separación tiene que venir de otro canal —
+    > **el contorno**: `borderTopWidth` SOLO, 1px al 14%, que rinde
+    > **1.51 en dark y 1.67 en memorial** contra 1.037/1.100 de antes.
+    > **A6 (sin caja) queda INTACTA, y el porqué es físico, no un
+    > permiso: una caja necesita CUATRO lados — el halo no rodea, es el
+    > borde donde pegaría la luz.** La variante que rodeaba murió en el
+    > gate. Es TOKEN (esta misma ley: cero contornos artesanales), vive
+    > en `Tarjeta` con elevación y rige en los DOS temas oscuros.
+    > **Corolario del método, que es lo reutilizable:** cuando un canal
+    > se agota, no se insiste con más dosis — se cambia de canal (es la
+    > misma forma del hallazgo de `sinCaja` en la Ley 22: un secundario
+    > tonal no llega a 3:1 sin volverse primario, así que su canal es la
+    > superficie, no el color).
+
+    > **ENMIENDA S82 — QUÉ SUPERFICIE SOBREVIVE: EL CRITERIO DEL PISO
+    > (E13, FIRMADA 31-jul-2026, con su corrección de alcance).**
+    > **Sobrevive la superficie que separa PLANOS; muere la que agrupa
+    > en el MISMO plano.** Sobreviven: Hoja, VisorFoto, Aviso, BarraTabs,
+    > el techo de marca y la barra fija del CTA (10 pantallas del
+    > cliente). **ALCANCE, y es la parte que costó:** "sin tarjeta" rige
+    > en los **CHIPS** de día, hora y duración — **las tarjetas de
+    > agrupamiento CONSERVAN su fondo**, el founder pidió el blanco de
+    > vuelta tras verlo. La firma original se hizo sobre chips y se
+    > extendió a contenedores de contenido: eso es cruzar de familia, y
+    > cruzar de familia se DECLARA antes de aplicar (regla 83 con
+    > alcance) — no después de 25 archivos. **LA EXCEPCIÓN, que se juzga
+    > de a una y JAMÁS con regex:** la `Tarjeta` que envuelve un bloque
+    > tocable **es también el área tocable y su `pressed`** — quitarle el
+    > fondo le quita el cuerpo al toque. *(Nota para el prestador: su
+    > HOY tiene 4 tarjetas y 2 son candidatas a esta excepción.)*
 
 21. **La ley de geometría (S58, firma founder).** Lo que se ELIGE es
     rectángulo suave (`radius.suave` 10 a 12 — SelectorOpcion vive en
@@ -795,7 +872,7 @@ comprar es lo último, y lo que compra combina con TODO.*
 | `FilaDato` | **Etiqueta sobre valor, sin interacción (S71-A2).** Su hueco estaba DECLARADO en un comentario del código desde S70 (`veterinaria/cita/[citaId]`: *"no hay componente de campo de solo lectura"*) — el comentario documentaba la deuda en vez de dispararla. **La prueba de su trabajo: si tocarlo no hace nada, es `FilaDato`** (no `Celda`, que es fila de lista tapeable; no `Campo`, que se edita). `mono` es del VALOR, jamás del rótulo (Ley 3). Hermano de `Texto`, NO variante: es layout (dos nodos apilados) — como variante habría obligado a `Texto` a devolver dos elementos. Un valor ausente NO se dibuja vacío: la pantalla omite la fila o pasa su voz honesta (Ley 13). **Candidato registrado sin construir: la disposición HORIZONTAL compacta** (rótulo izquierda / valor derecha) — el caso del perfil del Antes la pidió y se decidió NO meter una prop al pasar en un componente recién congelado |
 | `PieRevelar` | **El control canónico de la entrada 19.6 (S71-A3, D-454 pagada; anatomía 19.7 desde S73 — reacción de campo del founder).** SIN caja: texto en tinta + chevron direccional (⌄ revela · ⌃ pliega) centrado al pie de una sección truncada o plegada, target 44, con **el NÚMERO en la etiqueta** (`"Ver {{n}} más"`, forma neutra del namespace ui); con `revelado`, pasa a "Ocultar" — plegar de vuelta es el mismo control en el mismo lugar. `n=0` sin revelar: **no se dibuja** (regla de existencia). **NO es paginación** (traer datos que no están: eso es el pie de `LineaDeVida` con su cursor) ni abrir un compuesto en sus partes (`FilaSalida`). Nació con su tercer consumidor real, no antes |
 | `LogoNegocio` | **El logo del negocio CONTENIDO, jamás recortado (S74 — E2 de la vara A→B; la trampa del logo, `MODELO_PRESENCIA` §2).** Caja `radius.suave` + `bg.overlay` + AIRE interno, `contentFit="contain"` — los logos ANCHOS no se cortan a círculo (el recorte circular es de caras/avatares). Sin logo: MONOGRAMA de iniciales en DM Sans — jamás huella (la huella es de MASCOTA, Ley 12), jamás caja vacía. Escalera declarada: NO muestra datos del expediente. Sin transition (Ley 13). Consumidores: la FIRMA de NEGOCIO (ventana de equipo S74-B) · pieza 2 de PRESENCIA · superficies del pet parent con firma. Gate founder en dispositivo PENDIENTE (nace con su primera pantalla consumidora) |
-| `FilaCita` | La fila de UNA cita en la jornada del prestador (S80-B12 Parte 3, componente de DOMINIO — el molde de "cero genéricos"). Recibe oficio+voz+mascota y dibuja Celda + AvatarMascota + **su CANTO DE CAPA adentro** (§9.1/§9.2: tono por oficio del mapa del registry, piso de alfa 33%, al ras — **CERO API de color/posición/alfa: ninguna pantalla puede romper la ley**). `fin` es slot de DATOS (insignias/chips — la voz es de la pantalla, Ley 3); el contenedor de filas recorta esquinas (Tarjeta relleno ninguno). Límite declarado: adiestramiento comparte cuidado con paseo POR EL REGISTRY — el 4º tono lo firma el founder y cambia SOLO acá. Primer consumidor: el HOY del prestador |
+| `FilaCita` | La fila de UNA cita en la jornada del prestador (S80-B12 Parte 3, componente de DOMINIO — el molde de "cero genéricos"). Recibe oficio+voz+mascota y dibuja Celda + AvatarMascota + **su CANTO DE CAPA adentro** (§9.1/§9.2: tono por oficio del mapa del registry, piso de alfa 33%, al ras — **CERO API de color/posición/alfa: ninguna pantalla puede romper la ley**). `fin` es slot de DATOS (insignias/chips — la voz es de la pantalla, Ley 3); el contenedor de filas recorta esquinas (Tarjeta relleno ninguno). Límite declarado: adiestramiento comparte cuidado con paseo POR EL REGISTRY — el 4º tono lo firma el founder y cambia SOLO acá. Primer consumidor: el HOY del prestador. **S82 (E15, 19.9): gana `cara?: boolean` —el log la APAGA— y `direccion` OBLIGATORIA sin default (despliega ⌄/⌃ vs lleva ›, E14). Es la fila de los CUATRO logs del cliente, no solo de la jornada del prestador** |
 | `FichaMascotaHogar` | v2 (S52-P3, espec gateada): la mascota PRESIDE — AvatarMascota 64 (foto primero, huella fallback) sobre superficie Tarjeta, nombre en DM Sans light xl y UNA voz SIN sujeto (ficha.* del riel; las variantes con {{nombre}} se conservan para contextos sin sujeto visible). Semántica intacta: alDia punto verdeVital · pideAtencion punto ochre + warningText · conociendolo neutral. Tap → perfil (pressed 0.99 de Tarjeta); sin badges ni CTA. Diseñada para 1-3 apiladas. Memorial degrada. Cero tokens nuevos |
 
 También: `ThemeProvider`/`useTheme` (light default, memorial forzable),
