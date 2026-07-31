@@ -52,6 +52,7 @@ import { useTraduccion } from '@/i18n';
 import { vozServicio } from '@/lib/voz-servicio';
 import { FiltroMascotas, FiltroPills } from '@/components/filtro-pills';
 import { CantoCurva } from '@/components/canto-curva';
+import { esHistorial, esProxima } from '@/lib/corte-agenda';
 
 type Tap = 'proximos' | 'historial';
 
@@ -102,10 +103,17 @@ export default function HubGrooming() {
     d.setDate(d.getDate() - (ventanaFecha === 'semana' ? 7 : 30));
     return iso >= new Intl.DateTimeFormat('en-CA').format(d);
   };
-  const proximos = Array.isArray(filas) ? filas.filter((f) => f.estado === 'confirmada' && porMascota(f)) : [];
+  // r39 · el corte sale de la FRONTERA: le faltaba el eje TIEMPO (una
+  // cita confirmada de ayer se quedaba en "próximos" para siempre).
+  // `cerrada` para grooming = tiene atención cerrada o el motor la dio
+  // por completada.
+  const cerradaG = (f: GroomingDelHogar) => f.atencion_id !== null || f.estado === 'completada';
+  const proximos = Array.isArray(filas)
+    ? filas.filter((f) => porMascota(f) && esProxima(f.fecha, cerradaG(f)))
+    : [];
   const historial = Array.isArray(filas)
     ? filas
-        .filter((f) => f.atencion_id !== null && porMascota(f) && cortePorVentana(f.fecha))
+        .filter((f) => porMascota(f) && esHistorial(f.fecha, cerradaG(f)) && cortePorVentana(f.fecha))
         .sort((a, b) => (a.fecha > b.fecha ? -1 : 1))
     : [];
   const hayAlgo = Array.isArray(filas) && filas.length > 0;

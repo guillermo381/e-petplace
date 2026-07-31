@@ -78,6 +78,7 @@ import {
 
 import { CantoCurva } from '@/components/canto-curva';
 import { FiltroMascotas, FiltroPills } from '@/components/filtro-pills';
+import { esHistorial, esProxima } from '@/lib/corte-agenda';
 import { vozServicio } from '@/lib/voz-servicio';
 import { useTraduccion } from '@/i18n';
 
@@ -134,9 +135,15 @@ export default function LogVeterinaria() {
 
   // "Próximos" incluye LO QUE ESPERA FECHA — una cita firme sin día es
   // trabajo pendiente del dueño, no historia.
-  const proximos = porMascota.filter((c) => c.estado !== 'completada' && c.atencion_id === null);
+  // r39 · el corte por la FRONTERA. ⚠️ Y ACÁ VIVE D-439: las citas
+  // FIRMES SIN FECHA (presupuesto aprobado, coordinación pendiente)
+  // tienen `fecha` null — un corte `fecha >= hoy` las hacía DESAPARECER
+  // de las dos listas, que es el bug de S71 exacto. La frontera las
+  // trata como PRÓXIMAS: todavía no ocurrió nada.
+  const cerradaV = (c: (typeof porMascota)[number]) => c.atencion_id !== null || c.estado === 'completada';
+  const proximos = porMascota.filter((c) => esProxima(c.fecha, cerradaV(c)));
   const historial = porMascota
-    .filter((c) => c.atencion_id !== null || c.estado === 'completada')
+    .filter((c) => esHistorial(c.fecha, cerradaV(c)))
     .sort((a, b) => ((a.fecha ?? '') > (b.fecha ?? '') ? -1 : 1));
 
   // El eje de TIPO se computa sobre lo que HAY en el historial: si un

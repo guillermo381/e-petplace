@@ -78,6 +78,7 @@ import { fechaCortaMono, obtenerIdiomaActual } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 import { FiltroMascotas, FiltroPills } from '@/components/filtro-pills';
 import { CantoCurva } from '@/components/canto-curva';
+import { esHistorial, esProxima } from '@/lib/corte-agenda';
 
 // S60-A6 pieza 2 (D-366): el tap Agenda MURIÓ fusionado en Próximos —
 // enmienda DECLARADA de D-366, no reapertura del servicio cerrado.
@@ -329,9 +330,14 @@ export default function MisPaseos() {
     d.setDate(d.getDate() - (ventanaFecha === 'semana' ? 7 : 30));
     return iso >= new Intl.DateTimeFormat('en-CA').format(d);
   };
-  const librasProximas = citasLibres.filter((c) => c.estado === 'confirmada' && c.fecha >= hoy && porMascota(c));
+  // r39 · PASEO TAMBIÉN PASA POR LA FRONTERA. Su corte era el correcto
+  // —es del que salió la regla— pero seguía escrito a mano: dejarlo así
+  // era conservar el cuarto original del que ya divergieron tres copias.
+  // `cerrada` para paseo = el motor la sacó de 'confirmada'.
+  const cerradaP = (c: CitaPaseoDueno) => c.estado !== 'confirmada';
+  const librasProximas = citasLibres.filter((c) => porMascota(c) && esProxima(c.fecha, cerradaP(c)));
   const librasPasadas = citasLibres.filter(
-    (c) => (c.estado !== 'confirmada' || c.fecha < hoy) && porMascota(c) && cortePorVentana(c.fecha),
+    (c) => porMascota(c) && esHistorial(c.fecha, cerradaP(c)) && cortePorVentana(c.fecha),
   );
   const hayAlgo = listaPlanes.length > 0 || paquetesVigentes.length > 0 || citasLibres.length > 0;
 

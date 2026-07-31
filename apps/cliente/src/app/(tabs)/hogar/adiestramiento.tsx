@@ -71,6 +71,7 @@ import { fechaCortaMono } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 import { FiltroMascotas, FiltroPills } from '@/components/filtro-pills';
 import { CantoCurva } from '@/components/canto-curva';
+import { esHistorial, esProxima } from '@/lib/corte-agenda';
 
 // §7 (S65) — matching compartido del vocabulario (el filtro de chips y
 // el autocompletado del texto libre hablan IGUAL): minúsculas sin
@@ -152,11 +153,12 @@ export default function HubAdiestramiento() {
     [mascotas],
   );
 
-  const proximos = Array.isArray(citas)
-    ? citas.filter((c) => c.estado === 'confirmada' || c.estado === 'en_curso')
-    : [];
+  // r39 · el corte por la FRONTERA — le faltaba el eje TIEMPO igual que
+  // a sus dos hermanas. `cerrada` para adiestramiento = tiene parte.
+  const cerradaA = (c: AdiestramientoDelHogar) => c.tiene_parte;
+  const proximos = Array.isArray(citas) ? citas.filter((c) => esProxima(c.fecha, cerradaA(c))) : [];
   const historial = Array.isArray(citas)
-    ? citas.filter((c) => c.tiene_parte).slice().reverse()
+    ? citas.filter((c) => esHistorial(c.fecha, cerradaA(c))).slice().reverse()
     : [];
   const visibles = vista === 'proximos' ? proximos : historial;
 
