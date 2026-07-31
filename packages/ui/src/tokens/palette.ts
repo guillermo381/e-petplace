@@ -143,6 +143,14 @@ export const palette = {
    *  founder): en dark la elevación es contacto mínimo por diseño, así
    *  que el canal tiene que ser el TONO. 1.49 vs base · texto 11.93. */
   sinCajaDark: '#2C2C3C',
+  /** S82-B — EL HUNDIDO DEL OSCURO. `overlay` no sirve para hundir acá:
+   *  medido, es **2.6× MÁS LUMINOSO que la tarjeta** (#1A1A24 L=0.01086
+   *  vs #0D0D12 L=0.00417), así que un riel de overlay se lee ELEVADO —
+   *  la inversión exacta de lo que "hundido" significa. En claro el mismo
+   *  token sí hunde (#EDEBF5 es más oscuro que el blanco de la card): el
+   *  bug existe SOLO en oscuro, y por eso el slot se resuelve por tema.
+   *  Valor: el fondo base — un hueco hacia el fondo ES lo que hunde. */
+  hundidoDark: '#050508',
   dark4: '#222230',   // bordes visibles / separadores
 
   // ── Fondos light (§7.3 B1 — DEFAULT del producto) ──

@@ -269,7 +269,7 @@ export function SliderPrecio({
         style={{ height: 44, justifyContent: 'center' }}
       >
         {/* riel hundido con el tramo recorrido en el acento */}
-        <View style={{ height: ALTO_RIEL, borderRadius: radius.full, backgroundColor: theme.bg.overlay, marginHorizontal: THUMB / 2 }}>
+        <View style={{ height: ALTO_RIEL, borderRadius: radius.full, backgroundColor: theme.bg.hundido, marginHorizontal: THUMB / 2 }}>
           <View style={{ height: ALTO_RIEL, borderRadius: radius.full, backgroundColor: acento, width: paso > 0 ? x : 0 }} />
           {/* puntos de paso — el control DICE que es discreto */}
           {pasos.map((_, i) => (

@@ -24,6 +24,12 @@ export const memorialTheme = {
     card:     palette.memorialDark1,
     elevated: palette.memorialDark1,
     overlay:  palette.memorialDark1,
+    /** S82-B — SUPERFICIE HUNDIDA (rieles, botones -/+): el hueco.
+     *  Nace porque `overlay` NO hunde en oscuro (es 2.6× más luminoso que
+     *  la tarjeta: el riel se leía ELEVADO). En claro coincide con overlay
+     *  —ahí sí hundía—, en oscuro baja al fondo. El slot ABSORBE la rama
+     *  por tema que SelectorSegmentado tenía que hacer a mano. */
+    hundido:  palette.memorialDark1,
     // S82-B r22 — RE-DECLARADO (no migrado): su rol es **SUPERFICIE
     // NEUTRA de la casa**, y el hover es UN CASO de ese rol, no un rol
     // aparte. El comentario decía "hover states" y quedó viejo: de 43

@@ -83,7 +83,7 @@ function BotonPaso({
           width: BOTON,
           height: BOTON,
           borderRadius: radius.suave,
-          backgroundColor: theme.bg.overlay,
+          backgroundColor: theme.bg.hundido,
           alignItems: 'center',
           justifyContent: 'center',
           transform: [{ scale: presionado ? 0.99 : 1 }],

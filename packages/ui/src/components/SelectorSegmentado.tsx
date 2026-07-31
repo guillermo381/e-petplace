@@ -97,7 +97,7 @@ export function SelectorSegmentado({ segmentos, activo, onCambio, etiqueta }: Se
       onLayout={(e) => setAnchoRiel(e.nativeEvent.layout.width)}
       style={{
         flexDirection: 'row',
-        backgroundColor: theme.bg.overlay,
+        backgroundColor: theme.bg.hundido,
         borderRadius: RADIO_RIEL,
         padding: RELLENO_RIEL,
       }}
