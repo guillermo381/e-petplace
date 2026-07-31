@@ -358,6 +358,13 @@ const BASELINE_R12 = new Set([
   // de 0.03. ⇒ LOS DOS LADOS MEDIDOS Y CERRADOS; la decisión es del
   // founder: (a) abrir la tanda de los textos de capa del oscuro, o
   // (b) que el oscuro separe por otro canal — borde NO (A6/Ley 20).
+  // S82-B r29 — RE-DECLARADOS, NO RETIRADOS (tu punto 5). Con (c) SIN
+  // TARJETA firmado, `card` deja de ser "la tarjeta del contenido" —
+  // pero NO deja de existir: sigue siendo la superficie de LO QUE
+  // FLOTA (Hojas, modales, la barra fija del CTA), y eso es el PISO que
+  // no puede desaparecer. Así que el par sigue midiendo algo real; lo
+  // que cambió es QUÉ mide. Quedan en baseline con el mismo número y
+  // otro significado, y su cura sigue siendo la misma tanda cara.
   'dark·superficie·bg.card/bg.base',
   'dark·superficie·bg.elevated/bg.base',
   // VACÍO desde S82-B r5 (solo-baja EJECUTADO): los 5 del censo del

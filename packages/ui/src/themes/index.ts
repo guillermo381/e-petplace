@@ -33,6 +33,10 @@ const lightOficio: Theme = {
 }
 const darkOficio: Theme = {
   ...darkTheme,
+  // S82-B r29 (orden ENMENDADA por el founder): el prestador NO se aísla
+  // del tapiz — tiene EL SUYO. Un tinte por casa, misma gramática: el
+  // cliente en magenta, el prestador en el verde de SU oficio.
+  bg: { ...darkTheme.bg, base: palette.tapizDarkOficio },
   accent: { ...darkTheme.accent, cta: palette.tealDark, ctaTexto: palette.textDark0, ctaElevado: false },
 }
 

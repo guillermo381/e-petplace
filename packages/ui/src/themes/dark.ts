@@ -11,7 +11,7 @@ export const darkTheme = {
   mode: 'dark' as const,
 
   bg: {
-    base:     palette.tapizDark,  // S82-B r26 (reversa: palette.dark0)
+    base:     palette.tapizDark as string,  // S82-B r29: 8% firmado (reversa: palette.dark0)
     card:     palette.dark1,
     elevated: palette.dark2,
     overlay:  palette.dark3,
@@ -21,6 +21,16 @@ export const darkTheme = {
      *  —ahí sí hundía—, en oscuro baja al fondo. El slot ABSORBE la rama
      *  por tema que SelectorSegmentado tenía que hacer a mano. */
     hundido:  palette.hundidoDark,
+    /* S82-B r29 — LA REFERENCIA CAMBIÓ, y tu punto 4 tenía razón: este
+     *  slot nació midiendo contra la TARJETA (el riel se leía elevado
+     *  porque overlay era 2.6× más luminoso que card). SIN TARJETA, el
+     *  hundido ya no hunde respecto de una superficie: hunde respecto
+     *  del FONDO. Y sigue funcionando por suerte medida, no por diseño:
+     *  el valor (#050508, el negro de siempre) es MÁS OSCURO que el
+     *  tapiz al 8% (#190515), así que el riel sigue leyéndose como
+     *  hueco. SU CONDICIÓN DE MUERTE NO SE CUMPLIÓ pero se ACORTÓ: si
+     *  el tapiz sube más, el hundido y el fondo se acercan y el slot
+     *  necesita bajar con él o pierde sentido. */
     // S82-B r22 — RE-DECLARADO (no migrado): su rol es **SUPERFICIE
     // NEUTRA de la casa**, y el hover es UN CASO de ese rol, no un rol
     // aparte. El comentario decía "hover states" y quedó viejo: de 43
