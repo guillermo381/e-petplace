@@ -818,6 +818,8 @@ export const clienteEn = {
     agendarDe: "Book {{nombre}}'s walk",
     elegiMascota: 'Choose who you want to book for.',
     agendarPaseo: 'Book a walk',
+    // r30 · the OFF label names what's missing (S63-B).
+    agendarFaltaMascota: 'Choose who first',
     vacioSegmento: 'Nothing here yet.',
     salidaCompletada: 'Completed',
     salidaCancelada: 'Cancelled',

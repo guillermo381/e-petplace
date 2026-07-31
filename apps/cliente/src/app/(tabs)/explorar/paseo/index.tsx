@@ -381,6 +381,7 @@ export default function PaseoCuando() {
           duplicado están declarados en la pieza. */}
       <CabezalOficio
         oficio="paseo"
+        capa="cuidado"
         titulo={t('explorar.agendaPaseos')}
         detalle={mascota !== null ? mascota.nombre : null}
         onAtras={() => router.back()}

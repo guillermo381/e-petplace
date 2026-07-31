@@ -882,6 +882,9 @@ export const clienteEs = {
     agendarDe: 'Agendar el paseo de {{nombre}}',
     elegiMascota: 'Elige a quién le quieres reservar.',
     agendarPaseo: 'Agendar un paseo',
+    // r30 · la ETIQUETA del apagado nombra lo que falta (S63-B: el
+    // apagado dice QUÉ FALTA, SIEMPRE — el hint no lo reemplaza).
+    agendarFaltaMascota: 'Elige a quién primero',
     vacioSegmento: 'Nada por aquí todavía.',
     salidaCompletada: 'Completada',
     salidaCancelada: 'Cancelada',

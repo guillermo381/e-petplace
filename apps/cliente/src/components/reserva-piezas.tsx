@@ -97,12 +97,31 @@ import {
  *  reservar, no hay precio que decir (el pie tampoco se monta). */
 export function CabezalOficio({
   oficio,
+  capa,
   titulo,
   detalle,
   onAtras,
   insetTop,
 }: {
   oficio: IconoNombre;
+  /** ⚠️ r30 · LA CATEGORÍA, DECLARADA POR LA PANTALLA — y OBLIGATORIA a
+   *  propósito. Hasta hoy el tinte estaba fijo en `capa.cuidado`, que es
+   *  correcto para paseo y MENTIRA para veterinaria; el riesgo real no
+   *  era el color de hoy sino que se clonara así a tres oficios más
+   *  (orden del founder: resolverlo ANTES de que se clone). Sin default:
+   *  el tsc obliga a cada clon a DECIRLO, que es la única forma de que
+   *  una taxonomía no se herede por copiar-pegar.
+   *  Ley 10: paseo · grooming · adiestramiento = CUIDADO ·
+   *  veterinaria = SALUD.
+   *
+   *  ⚠️ Y EL NOMBRE DEL TOKEN NO COINCIDE CON LA LEY, medido: NO EXISTE
+   *  `capa.salud`. Las cuatro claves del tema son identidad · cuidado ·
+   *  comunidad · comunidadAmplia, y lo que la Ley 10 llama SALUD vive
+   *  bajo `identidad` (verdeVitalDark, "Capa 1 · vida" en el comentario
+   *  del tema) — el token es más viejo que la taxonomía. La pantalla
+   *  habla la LEY y la pieza traduce al token que existe, en UN solo
+   *  lugar. Si algún día nace `capa.salud`, se cambia acá y nada más. */
+  capa: 'cuidado' | 'salud';
   titulo: string;
   /** El sujeto de la reserva (la mascota). En SANS: es un NOMBRE, no
    *  metadata de máquina — la Ley 3 reserva el mono para lo segundo, y
@@ -114,7 +133,12 @@ export function CabezalOficio({
   const { theme } = useTheme();
   // el color del OFICIO — el mismo tinte de capa que pintaba la banda,
   // ahora en su registro pleno: de fondo pasa a TINTA del isotipo.
-  const colorOficio = theme.capa.cuidado;
+  // ⚠️ NOTA DE LÁMINA (advertencia del founder): en CLARO `capa.cuidado`
+  // YA NO es el teal vivo — es tealDark. El vivo daba 1.46 sobre papel
+  // algodón (medido: 1.46 sobre light0, 1.40 sobre el tapiz) y B lo bajó
+  // en su r5. Cualquier canto copiado de una lámina vieja trae el vivo:
+  // acá el color sale del TEMA, jamás de una lámina.
+  const colorOficio = capa === 'salud' ? theme.capa.identidad : theme.capa.cuidado;
 
   return (
     <View

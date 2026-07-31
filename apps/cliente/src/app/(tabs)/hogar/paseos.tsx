@@ -746,8 +746,20 @@ export default function MisPaseos() {
               <Boton
                 variante="primario"
                 bloque
+                // ⚠️ r30 · EL APAGADO DICE QUÉ FALTA EN LA ETIQUETA, no
+                // solo en el hint. `razonDeshabilitado` (B, S82) hace que
+                // el toque nunca quede muerto y anuncia la razón al
+                // ENFOCAR — pero NO reemplaza la forma VISIBLE: el
+                // precedente S63-B manda que el apagado diga qué falta
+                // SIEMPRE, y la 2ª enmienda de SliderPrecio (S68) fijó
+                // que la affordance es VISIBLE, no solo accesible. Una
+                // razón que solo aparece al tocar está escondida. Las dos
+                // capas conviven: la etiqueta lo dice a la vista, el hint
+                // se lo dice al lector de pantalla.
                 etiqueta={
-                  elegida !== null ? t('plan.agendarDe', { nombre: elegida.nombre }) : t('plan.agendarPaseo')
+                  elegida !== null
+                    ? t('plan.agendarDe', { nombre: elegida.nombre })
+                    : t('plan.agendarFaltaMascota')
                 }
                 deshabilitado={elegida === null}
                 razonDeshabilitado={t('plan.elegiMascota')}
