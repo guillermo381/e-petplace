@@ -639,6 +639,7 @@ export const clienteEn = {
       'All {{n}} sessions are on the schedule: the first on {{primera}} and the last on {{ultima}}. Valid until {{vigencia}}.',
     irAlHogar: 'Go Home',
     hubTitulo: 'Training',
+    agendarDe: "Book {{nombre}}'s session",
     agendar: 'Book',
     hubProximos: 'Upcoming',
     hubHistorial: 'History',

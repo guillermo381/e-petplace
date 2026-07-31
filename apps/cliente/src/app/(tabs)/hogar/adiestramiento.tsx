@@ -28,8 +28,8 @@
  * grupo (mostrar primero, no esconder — todo chip sigue alcanzable).
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import {
@@ -41,6 +41,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  FilaDato,
   Hoja,
   HojaScroll,
   Icono,
@@ -68,7 +69,8 @@ import {
 } from '@epetplace/api';
 import { fechaCortaMono } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
-import { FiltroPills } from '@/components/filtro-pills';
+import { FiltroMascotas, FiltroPills } from '@/components/filtro-pills';
+import { CantoCurva } from '@/components/canto-curva';
 
 // §7 (S65) — matching compartido del vocabulario (el filtro de chips y
 // el autocompletado del texto libre hablan IGUAL): minúsculas sin
@@ -113,6 +115,9 @@ export default function HubAdiestramiento() {
   const [citas, setCitas] = useState<AdiestramientoDelHogar[] | 'cargando' | 'error'>('cargando');
   const [mascotas, setMascotas] = useState<MascotaResumen[]>([]);
   const [mascotaId, setMascotaId] = useState<string | null>(null);
+  const [pidiendoMascota, setPidiendoMascota] = useState(false);
+  const [abierta, setAbierta] = useState<string | null>(null);
+  const scrollRef = useRef<ScrollView>(null);
 
   const cargar = useCallback(() => {
     setCitas('cargando');
@@ -158,29 +163,43 @@ export default function HubAdiestramiento() {
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('adiestramiento.hubTitulo')} atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[4] }}>
-        <Boton
-          variante="primario"
-          bloque
-          etiqueta={t('adiestramiento.agendar')}
-          onPress={() =>
-            router.navigate({
-              pathname: '/explorar/adiestramiento',
-              ...(mascotaId !== null ? { params: { mascotaId } } : null),
-            })
-          }
-        />
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[4] }}>
+
+        {/* ① la MASCOTA — el PRIMER filtro (la pieza decide relleno vs
+            barrido con L-b adentro). Entra SIN filtro: ninguna nace
+            elegida. */}
+        {mascotas.length > 1 ? (
+          <View style={{ marginHorizontal: -spacing[4] }}>
+            <FiltroMascotas
+              mascotas={mascotas.map((m) => ({ id: m.id, nombre: m.nombre }))}
+              elegida={mascotaId}
+              onElegir={(id) => {
+                setMascotaId(id);
+                if (id !== null) setPidiendoMascota(false);
+              }}
+            />
+          </View>
+        ) : null}
+        {pidiendoMascota ? <Texto variante="apoyo" color="danger">{t('plan.elegiMascota')}</Texto> : null}
 
         {/* ✅ r33 · LA BITÁCORA SALIÓ DEL EJE — acceso propio, con la
             forma que el diccionario 19.1 le da a ENTRAR A UNA SECCIÓN:
             celda de navegación con glifo, título y chevron. Un control
             que filtra dos veces y navega la tercera enseña mal. */}
-        <CeldaNavegacion
-          icono="carnet"
-          titulo={t('adiestramiento.bitacoraTab')}
-          detalle={t('adiestramiento.bitacoraAnotar')}
-          onPress={() => router.push('/hogar/bitacora')}
-        />
+        {/* r34 · sobre superficie de tarjeta (venía sin fondo, flotando
+            sobre la página) y con SU PROPIO glifo: B lo dibujó en r34 —
+            hasta ayer pedía prestado el de VACUNA, que es la sustitución
+            genérica que la Ley 12 prohíbe. */}
+        <Tarjeta relleno="ninguno">
+          <CeldaNavegacion
+            icono="bitacora"
+            titulo={t('adiestramiento.bitacoraTab')}
+            detalle={t('adiestramiento.bitacoraAnotar')}
+            onPress={() => router.push('/hogar/bitacora')}
+          />
+        </Tarjeta>
 
         {/* ② el ESTADO — FiltroPills, con `capa: null` (es ESTADO, no
             categoría: el color de capa pertenece a una CLASE DE SERVICIO,
@@ -230,56 +249,106 @@ export default function HubAdiestramiento() {
             }
           />
         ) : (
-          <Tarjeta relleno="ninguno">
-            {visibles.map((c, i) => {
-              // la identidad k del programa (§1) — estado pasivo,
-              // jamás botón (Ley 19.4). Mientras la matrícula está EN
-              // MARCHA el chip dice la sesión (el estado no agrega —
-              // Chanel); cuando el programa terminó, el chip dice su
-              // destino con la voz firmada (ui.programaEstado).
+          <View style={{ gap: spacing[2.5] }}>
+            {visibles.map((c) => {
+              // r34 · EL MISMO DISEÑO QUE LOS OTROS TRES: canto que pinta
+              // la curva + despliegue en su lugar, UNA SOLA ABIERTA (dos
+              // abiertas y el resumen deja de presidir). La identidad k
+              // del programa sigue siendo estado PASIVO, jamás botón.
               const vozFinal =
                 c.programa_estado !== null && c.programa_estado !== 'activo'
                   ? vozEstadoPrograma(c.programa_estado)
                   : null;
-              const fin =
-                c.sesion_numero !== null ? (
-                  <Insignia
-                    estado="info"
-                    etiqueta={vozFinal ?? t('adiestramiento.sesionK', { k: String(c.sesion_numero) })}
-                  />
-                ) : undefined;
-              const titulo = c.mascota_nombre ?? t('adiestramiento.titulo');
-              const subtitulo = c.prestador_nombre ?? undefined;
-              const metadataMono = `${fechaCortaMono(c.fecha, idioma)} · ${c.hora}`;
+              const abierto = abierta === c.cita_id;
               const navegable = vista === 'historial' && c.tiene_parte;
               return (
-                <View key={c.cita_id}>
-                  {i > 0 ? <Separador /> : null}
-                  {navegable ? (
-                    <Celda
-                      titulo={titulo}
-                      subtitulo={subtitulo}
-                      metadataMono={metadataMono}
-                      fin={fin}
-                      interactiva
-                      accessibilityRole="button"
-                      onPress={() =>
-                        router.push({
-                          pathname: '/adiestramiento/[citaId]',
-                          params: { citaId: c.cita_id, mascotaNombre: c.mascota_nombre ?? '' },
-                        })
-                      }
-                    />
-                  ) : (
-                    // la cita futura se PREPARA, no se toca (S60-C1)
-                    <Celda titulo={titulo} subtitulo={subtitulo} metadataMono={metadataMono} fin={fin} />
-                  )}
-                </View>
+                <CantoCurva key={c.cita_id} color={theme.capa.cuidado}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityState={{ expanded: abierto }}
+                    onPress={() => setAbierta(abierto ? null : c.cita_id)}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3], padding: spacing[3], minHeight: 58 }}>
+                      <View style={{ flex: 1, minWidth: 0, gap: spacing[0.5] }}>
+                        <Texto variante="cuerpo" numberOfLines={1}>
+                          {c.mascota_nombre ?? t('adiestramiento.titulo')}
+                        </Texto>
+                        <Texto variante="dato" numberOfLines={1}>
+                          {`${fechaCortaMono(c.fecha, idioma)} · ${c.hora}`}
+                        </Texto>
+                      </View>
+                      {c.sesion_numero !== null ? (
+                        <Insignia
+                          estado="info"
+                          etiqueta={vozFinal ?? t('adiestramiento.sesionK', { k: String(c.sesion_numero) })}
+                          tamaño="sm"
+                        />
+                      ) : null}
+                    </View>
+                  </Pressable>
+                  {abierto ? (
+                    <View style={{ paddingHorizontal: spacing[3], paddingBottom: spacing[3], gap: spacing[2] }}>
+                      <Separador />
+                      {c.prestador_nombre !== null ? (
+                        <FilaDato disposicion="horizontal" etiqueta={t('adiestramiento.paraQuien')} valor={c.prestador_nombre} />
+                      ) : null}
+                      {navegable ? (
+                        <Boton
+                          variante="compacto"
+                          tamaño="sm"
+                          etiqueta={t('hogar.acordeonVerCompleto')}
+                          onPress={() =>
+                            router.push({
+                              pathname: '/adiestramiento/[citaId]',
+                              params: { citaId: c.cita_id, mascotaNombre: c.mascota_nombre ?? '' },
+                            })
+                          }
+                        />
+                      ) : null}
+                    </View>
+                  ) : null}
+                </CantoCurva>
               );
             })}
-          </Tarjeta>
+          </View>
         )}
       </ScrollView>
+
+      {/* r34 · AGENDAR baja al PIE FIJO, como los otros tres. Y con el
+          CTA VIVO: apagado pero tocable, la razón señala la hilera, y la
+          etiqueta nombra lo que falta además del hint (S63-B). Con UNA
+          sola mascota se resuelve sola — la hilera no se monta con una. */}
+      {(() => {
+        const elegida = mascotas.find((m) => m.id === mascotaId) ?? (mascotas.length === 1 ? mascotas[0] : null);
+        return (
+          <View
+            style={{
+              paddingHorizontal: spacing[4],
+              paddingTop: spacing[3],
+              paddingBottom: Math.max(insets.bottom, spacing[4]),
+              backgroundColor: theme.bg.base,
+              borderTopWidth: 1,
+              borderTopColor: theme.border.subtle,
+            }}
+          >
+            <Boton
+              variante="primario"
+              bloque
+              etiqueta={elegida !== null ? t('adiestramiento.agendarDe', { nombre: elegida.nombre }) : t('plan.agendarFaltaMascota')}
+              deshabilitado={elegida === null}
+              razonDeshabilitado={t('plan.elegiMascota')}
+              onRazon={() => {
+                setPidiendoMascota(true);
+                scrollRef.current?.scrollTo({ y: 0, animated: true });
+              }}
+              onPress={() => {
+                if (elegida === null) return;
+                router.navigate({ pathname: '/explorar/adiestramiento', params: { mascotaId: elegida.id } });
+              }}
+            />
+          </View>
+        );
+      })()}
 
       {/* §7 — la Hoja de registro: chips + texto, guardar. Segundos,
           jamás un formulario. */}

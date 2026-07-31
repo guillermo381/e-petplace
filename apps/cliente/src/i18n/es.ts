@@ -706,6 +706,7 @@ export const clienteEs = {
       'Las {{n}} sesiones quedaron en la agenda: la primera el {{primera}} y la última el {{ultima}}. Vigencia hasta el {{vigencia}}.',
     irAlHogar: 'Ir al Hogar',
     hubTitulo: 'Adiestramiento',
+    agendarDe: 'Agendar la sesión de {{nombre}}',
     agendar: 'Agendar',
     hubProximos: 'Próximos',
     hubHistorial: 'Historial',
