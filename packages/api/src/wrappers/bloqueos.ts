@@ -194,3 +194,42 @@ export async function declararDiaCerrado(
   }
   return { ok: true, data: { dia_semana: o.dia_semana, cerrado: o.cerrado } };
 }
+
+/** Los días cerrados de UN SERVICIO — la respuesta a la oferta AGREGADA
+ *  (hallazgo de C: `obtenerDiasCerrados` es por prestador y la oferta de
+ *  grooming llega sin nombrar prestadores, así que no había a quién
+ *  preguntarle).
+ *
+ *  SEMÁNTICA: un día está cerrado para el servicio **solo si TODOS los
+ *  prestadores con oferta activa lo declararon cerrado** — si uno abre,
+ *  hay dónde reservar y el día NO se apaga. La intersección vive en el
+ *  MOTOR, una vez, no en cada pantalla.
+ *
+ *  POR QUÉ POR SERVICIO Y NO EXPONIENDO `prestador_id` en la oferta: la
+ *  gramática canónica (DISEÑO §1.8, founder S61 "en piedra") pone el
+ *  QUIÉN DESPUÉS del DÍA y la HORA; exponer prestadores en el paso del
+ *  QUÉ la contradice. Además `obtener_inicios_*_disponibles` YA responde
+ *  por servicio: este lector habla el mismo idioma sobre el mismo
+ *  conjunto.
+ *
+ *  EL ERROR SE INCLINA AL LADO SEGURO (declarado en la migración): puede
+ *  apagar de menos —el día queda tocable y el motor dice la verdad con
+ *  el nulo honesto—, jamás de más. */
+export async function obtenerDiasCerradosServicio(
+  tipoServicio: string,
+): Promise<ResultadoWrapper<{ dias: number[]; prestadores_totales: number }, 'error_lectura'>> {
+  const { data, error } = await getClient().rpc('obtener_dias_cerrados_servicio', {
+    p_tipo_servicio: tipoServicio,
+  });
+  if (error || !Array.isArray(data)) {
+    return { ok: false, codigo: 'error_lectura', mensaje: 'No pudimos leer los días de atención.' };
+  }
+  const dias: number[] = [];
+  let totales = 0;
+  for (const f of data as Record<string, unknown>[]) {
+    if (typeof f.dia_semana !== 'number') continue;
+    dias.push(f.dia_semana);
+    if (typeof f.prestadores_totales === 'number') totales = f.prestadores_totales;
+  }
+  return { ok: true, data: { dias, prestadores_totales: totales } };
+}

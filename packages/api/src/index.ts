@@ -292,6 +292,7 @@ export {
   type InputCrearBloqueoPrestador,
   type CodigoErrorBloqueos,
   obtenerDiasCerrados,
+  obtenerDiasCerradosServicio,
   declararDiaCerrado,
   type DiaCerrado,
 } from './wrappers/bloqueos';

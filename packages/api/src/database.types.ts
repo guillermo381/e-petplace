@@ -17272,6 +17272,13 @@ export type Database = {
           motivo: string
         }[]
       }
+      obtener_dias_cerrados_servicio: {
+        Args: { p_tipo_servicio: string }
+        Returns: {
+          dia_semana: number
+          prestadores_totales: number
+        }[]
+      }
       obtener_empleados_cuenta: {
         Args: { p_cuenta_comercial_id: string }
         Returns: {
