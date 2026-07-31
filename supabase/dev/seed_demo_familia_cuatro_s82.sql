@@ -50,11 +50,29 @@ declare
   v_m2 uuid := 'de820000-0000-4000-8000-000000000a02';
   v_m3 uuid := 'de820000-0000-4000-8000-000000000a03';
   v_m4 uuid := 'de820000-0000-4000-8000-000000000a04';
+  -- La foto de Nina. PATH, jamás URL (bucket PRIVADO desde S47; el CHECK
+  -- `mascotas_foto_url_es_path` rebota cualquier cosa que empiece con
+  -- http). La carpeta es el user_id del titular, que es como el bucket
+  -- está particionado — se resuelve abajo, con el uid ya leído, para que
+  -- el path no quede hardcodeado dos veces.
+  v_foto text;
   v_n  int;
 begin
   select id into v_uid from auth.users where email = v_email;
   if v_uid is null then
     raise exception E'seed S82 familia de cuatro: el user % no existe en auth.users.\n  Crearlo en Supabase Auth con ese email y volver a correr — el seed resuelve el uid solo.', v_email;
+  end if;
+  v_foto := v_uid::text || '/avatar-demo-cuatro-s82.png';
+
+  -- EL SEED NO PUEDE SUBIR BYTES: los objetos del bucket no viven en una
+  -- tabla que un INSERT alcance. Si el archivo no está, la fila tendría
+  -- un path que no resuelve y la app pintaría un hueco — el avatar roto
+  -- es PEOR que el fallback de iniciales, porque parece un bug del
+  -- render. Así que se verifica su existencia y, si falta, el seed DICE
+  -- cómo subirlo en vez de sembrar una promesa (L-192).
+  if not exists (select 1 from storage.objects
+                  where bucket_id = 'mascotas' and name = v_foto) then
+    raise exception E'seed S82: falta el archivo del avatar en el bucket.\n  Generarlo y subirlo (una sola vez):\n    node supabase/dev/generar_avatar_demo_s82.mjs /tmp/avatar-nina.png\n    npx supabase storage cp /tmp/avatar-nina.png ss:///mascotas/% --experimental', v_foto;
   end if;
 
   insert into profiles (id, email) values (v_uid, v_email)
@@ -80,13 +98,31 @@ begin
   -- honesto de una demo y el mayoritario del sistema (11 de 16 filas).
   -- ESTE CAMPO LO DESTAPÓ LA PRUEBA IN-TXN: el seed escrito "a ojo"
   -- habría rebotado recién el día que el founder lo corriera.
-  insert into mascotas (id, user_id, familia_id, nombre, especie, raza, sexo, country_code, estado_vida, origen, talla, pelaje)
+  -- NINA LLEVA FOTO, LAS OTRAS TRES NO (S82-A r18-bis) — y la MEZCLA es
+  -- el punto: una lista donde TODAS tienen foto no prueba el fallback, y
+  -- una donde ninguna la tiene no prueba el render. Con 1 de 4 conviven
+  -- los dos caminos en la misma pantalla, en todos los tamaños a la vez.
+  -- Nina es la SEGUNDA alfabéticamente pero la primera que el ojo cruza
+  -- en el orden del seed tras Roco; el founder la nombró por eso.
+  --
+  -- LOS CAMPOS DE ENCUADRE NO SE TOCAN A PROPÓSITO: quedan en su DEFAULT
+  -- (cx .5 · cy .42 · z 1.3, migración 20260729233000). El discriminador
+  -- tiene que probar el encuadre POR DEFECTO, que es el que va a ver el
+  -- 99% de las mascotas reales — sembrar valores a medida probaría un
+  -- caso que casi nadie tiene.
+  insert into mascotas (id, user_id, familia_id, nombre, especie, raza, sexo, country_code, estado_vida, origen, talla, pelaje, foto_url)
   values
-    (v_m1, v_uid, v_fam, 'Roco',  'perro', 'Mestizo',            'macho',  'EC', 'activa', 'desconocido', 'M', 'normal'),
-    (v_m2, v_uid, v_fam, 'Nina',  'perro', 'Beagle',             'hembra', 'EC', 'activa', 'desconocido', 'S', 'normal'),
-    (v_m3, v_uid, v_fam, 'Bruno', 'perro', 'Labrador',           'macho',  'EC', 'activa', 'desconocido', 'L', 'normal'),
-    (v_m4, v_uid, v_fam, 'Lía',   'perro', 'Schnauzer miniatura','hembra', 'EC', 'activa', 'desconocido', 'S', 'largo')
+    (v_m1, v_uid, v_fam, 'Roco',  'perro', 'Mestizo',            'macho',  'EC', 'activa', 'desconocido', 'M', 'normal', null),
+    (v_m2, v_uid, v_fam, 'Nina',  'perro', 'Beagle',             'hembra', 'EC', 'activa', 'desconocido', 'S', 'normal', v_foto),
+    (v_m3, v_uid, v_fam, 'Bruno', 'perro', 'Labrador',           'macho',  'EC', 'activa', 'desconocido', 'L', 'normal', null),
+    (v_m4, v_uid, v_fam, 'Lía',   'perro', 'Schnauzer miniatura','hembra', 'EC', 'activa', 'desconocido', 'S', 'largo',   null)
   on conflict (id) do nothing;
+
+  -- El `do nothing` de arriba no alcanza para una familia YA sembrada
+  -- antes de que existiera la foto (que es el caso del founder hoy): sin
+  -- este UPDATE, re-correr el seed lo dejaría exactamente igual y el
+  -- silencio parecería éxito. Es idempotente y solo toca a Nina.
+  update mascotas set foto_url = v_foto where id = v_m2 and foto_url is distinct from v_foto;
 
   -- ── VERIFICACIÓN: el seed DECLARA lo que dejó (L-192: un seed que no
   --    verifica su propio resultado es una esperanza, no un seed) ──
@@ -96,6 +132,13 @@ begin
   end if;
   if not exists (select 1 from familia_miembro where familia_id = v_fam and user_id = v_uid) then
     raise exception 'seed S82: el titular no quedó vinculado a la familia';
+  end if;
+  -- La MEZCLA es el discriminador: exactamente una con foto y tres sin
+  -- ella. Si alguna vez quedan 0 (el UPDATE no corrió) o 4 (alguien las
+  -- sembró todas), el seed dejó de probar lo que vino a probar.
+  select count(*) into v_n from mascotas where familia_id = v_fam and foto_url is not null;
+  if v_n <> 1 then
+    raise exception 'seed S82: quedaron % mascotas con foto, se esperaba exactamente 1 (la mezcla ES el discriminador)', v_n;
   end if;
 
   raise notice 'SEED S82 OK — familia % con 4 perros (Roco · Nina · Bruno · Lía), titular % (%). Los cuatro casos del extremo quedan visibles: selector sin auto-resolver · CTA apagado · barrido L-b · filtro por mascota con 4 chips.', v_fam, v_email, v_uid;

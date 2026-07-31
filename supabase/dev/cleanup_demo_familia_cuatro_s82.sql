@@ -38,6 +38,15 @@ begin
   if exists (select 1 from familia where id = v_fam) then
     raise exception 'cleanup S82: la familia sigue viva';
   end if;
-  raise notice 'CLEANUP S82 OK — familia de cuatro borrada (el user de auth y su profile QUEDAN, a propósito).';
+
+  -- EL ARCHIVO DEL AVATAR NO LO BORRA ESTE SCRIPT, y se dice en voz alta
+  -- (S82-A r18-bis): los BYTES no viven en una tabla — borrar la fila de
+  -- `storage.objects` por SQL dejaría el objeto huérfano en el bucket,
+  -- que es exactamente la basura que S47-B0.1 tuvo que barrer a mano
+  -- (22 objetos). Se borra por la misma puerta por la que entró:
+  --   npx supabase storage rm ss:///mascotas/<uid>/avatar-demo-cuatro-s82.png --experimental
+  -- Dejarlo tampoco hace daño: pesa 2.9 KB, vive en la carpeta del
+  -- titular demo y solo él lo lee.
+  raise notice 'CLEANUP S82 OK — familia de cuatro borrada (el user de auth y su profile QUEDAN, a propósito). EL AVATAR del bucket NO se borró: sacarlo con `supabase storage rm` si molesta (ver nota arriba).';
 end;
 $cleanup$;
