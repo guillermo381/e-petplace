@@ -600,15 +600,30 @@ export default function MisPaseos() {
                       <FilaCita
                         key={f.cita.id}
                         oficio="paseo"
-                        titulo={nombre ?? t('explorar.paseoTitulo')}
-                        subtitulo={t(
+                        // r40-2 · EL REPARTO DEL DATO. La "segunda columna
+                        // que no se lee" es el slot `metadataMono` de
+                        // Celda: una columna alineada a la DERECHA, hecha
+                        // para dato de máquina CORTO — y yo le metí fecha
+                        // + hora + duración (r39-5). Tres datos en una
+                        // columna angosta compiten con el título por el
+                        // ancho y ninguno gana.
+                        // Ahora cada uno en su lugar: el CUÁNDO corto en
+                        // la columna (que es lo que la lámina del founder
+                        // muestra — "mañana 08:00") y la duración baja al
+                        // subtítulo, con el origen, donde hay ancho.
+                        titulo={
+                          nombre !== null
+                            ? t('plan.filaTitulo', { nombre })
+                            : t('explorar.paseoTitulo')
+                        }
+                        subtitulo={`${t(
                           f.clase === 'plan'
                             ? 'plan.citaDePlan'
                             : f.cita.origen === 'paquete'
                               ? 'paquete.citaDePaquete'
                               : 'suelto.citaSuelta',
-                        )}
-                        metadataMono={`${fechaCortaMono(f.cita.fecha, idioma)} · ${f.cita.hora.slice(0, 5)} · ${f.cita.duracion_minutos} min`}
+                        )} · ${f.cita.duracion_minutos} min`}
+                        metadataMono={`${fechaCortaMono(f.cita.fecha, idioma)} · ${f.cita.hora.slice(0, 5)}`}
                         mascota={{
                           nombre: nombre ?? t('explorar.paseoTitulo'),
                           fotoUrl: mascotasHogar.find((m) => m.nombre === nombre)?.fotoUrl,

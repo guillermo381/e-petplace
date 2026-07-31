@@ -814,6 +814,7 @@ export const clienteEn = {
     segProximos: 'Upcoming',
     segHistorial: 'History',
     // S60-A6 piece 2 — the fused list (LOTE S60): Schedule tab died
+    filaTitulo: "{{nombre}}'s walk",
     citaDePlan: 'From your plan',
     estadoActiva: 'Active',
     estadoPausada: 'Renewal paused',

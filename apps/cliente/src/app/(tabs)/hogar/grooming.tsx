@@ -135,7 +135,7 @@ export default function HubGrooming() {
       .filter(Boolean)
       .join(' · ');
 
-  const filaHistorial = (f: GroomingDelHogar) => {
+  const filaHistorial = (f: GroomingDelHogar, cerrada: boolean) => {
     const abierto = abierta === f.cita_id;
     return (
       <CantoCurva key={f.cita_id} color={theme.capa.cuidado}>
@@ -153,7 +153,19 @@ export default function HubGrooming() {
                 {`${fechaCortaMono(f.fecha, idioma)} · ${f.hora}`}
               </Texto>
             </View>
-            <Insignia estado="alDia" etiqueta={t('plan.salidaCompletada')} tamaño="sm" />
+            {/* 🔴 r40-3 · EL DATO QUE MENTÍA, curado. Este renderer sirve
+                a LAS DOS listas y pintaba `"completada"` HARDCODEADO, así
+                que una cita de las 2 de la tarde DE HOY —futura— se
+                anunciaba como cerrada. El lector no traía mal el estado:
+                LA FILA PINTABA UN LITERAL. Es mío, de r31, y es la clase
+                más cara de defecto: no rompe nada y afirma algo falso.
+                Ahora rige el estándar del founder — EL ESTADO SOLO
+                CUANDO DICE ALGO: en una cita futura normal, "confirmada"
+                es ruido y no se monta; el chip aparece solo si la cita
+                YA CERRÓ. */}
+            {cerrada ? (
+              <Insignia estado="alDia" etiqueta={t('plan.salidaCompletada')} tamaño="sm" />
+            ) : null}
           </View>
         </Pressable>
         {abierto ? (
@@ -261,7 +273,7 @@ export default function HubGrooming() {
               descripcion={t('grooming.hubProximosVacioDetalle')}
             />
           ) : (
-            <View style={{ gap: spacing[2.5] }}>{proximos.map(filaHistorial)}</View>
+            <View style={{ gap: spacing[2.5] }}>{proximos.map((f) => filaHistorial(f, false))}</View>
           )
         ) : historial.length === 0 ? (
           <EstadoVacio
@@ -270,7 +282,7 @@ export default function HubGrooming() {
             descripcion={t('grooming.hubHistorialVacioDetalle')}
           />
         ) : (
-          <View style={{ gap: spacing[2.5] }}>{historial.map(filaHistorial)}</View>
+          <View style={{ gap: spacing[2.5] }}>{historial.map((f) => filaHistorial(f, true))}</View>
         )}
       </ScrollView>
 

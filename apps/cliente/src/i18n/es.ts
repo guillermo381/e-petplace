@@ -881,6 +881,7 @@ export const clienteEs = {
     segProximos: 'Próximos',
     segHistorial: 'Historial',
     // S60-A6 pieza 2 — la lista fusionada (LOTE S60): Agenda murió
+    filaTitulo: 'Paseo de {{nombre}}',
     citaDePlan: 'De tu plan',
     estadoActiva: 'Activo',
     estadoPausada: 'Renovación pausada',
