@@ -571,54 +571,14 @@ export function DiaSinHorarios({
   );
 }
 
-// ═══════════════ EL PIE FLOTANTE — QUE DESAPARECE ═══════════════
+// ═══════════════ EL PIE FLOTANTE — SE MUDÓ A LA CASA ═══════════════
 
-/** El ÚNICO relleno pleno de la pantalla: el CTA que cierra. Y la
- *  cláusula de la tercera ley: si no hay qué totalizar, el pie NO SE
- *  MONTA (no hay total de algo que no existe). */
-export function PieReserva({
-  total,
-  totalDesde,
-  cuando,
-  etiqueta,
-  habilitado,
-  onPress,
-  insetBottom,
-}: {
-  total: string | null;
-  totalDesde: boolean;
-  cuando: string | null;
-  etiqueta: string;
-  habilitado: boolean;
-  onPress: () => void;
-  insetBottom: number;
-}) {
-  const { theme } = useTheme();
-  return (
-    <View
-      style={{
-        paddingHorizontal: spacing[5],
-        paddingTop: spacing[3],
-        paddingBottom: Math.max(insetBottom, spacing[4]),
-        backgroundColor: theme.bg.base,
-        borderTopWidth: 1,
-        borderTopColor: theme.border.subtle,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing[4],
-      }}
-    >
-      {total !== null ? (
-        <View>
-          <Text style={{ fontFamily: typography.family.mono.medium, fontSize: typography.size.lg, color: theme.text.primary }}>
-            {total}
-          </Text>
-          {cuando !== null ? <Texto variante="dato">{totalDesde ? `desde · ${cuando}` : cuando}</Texto> : null}
-        </View>
-      ) : null}
-      <View style={{ flex: 1 }}>
-        <Boton variante="primario" bloque etiqueta={etiqueta} deshabilitado={!habilitado} onPress={onPress} />
-      </View>
-    </View>
-  );
-}
+/** `PieReserva` YA NO VIVE ACÁ: subió a `@epetplace/ui` en S82-B r35,
+ *  porque dos de sus cuatro pantallas lo tenían COPIADO A MANO y la
+ *  copia había perdido el precio entero. Se re-exporta desde este
+ *  archivo —en vez de cambiarle el import a cada consumidor— para que
+ *  la mudanza no toque ni una pantalla: las tres que ya lo usaban
+ *  siguen igual, y el `verify:diseno` R24 se encarga de que la próxima
+ *  no nazca copiada. El contrato y sus tres cláusulas viven en el
+ *  archivo de la pieza, que es donde se leen antes de tocarla. */
+export { PieReserva, type PieReservaProps } from '@epetplace/ui';
