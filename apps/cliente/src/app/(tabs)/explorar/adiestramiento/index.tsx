@@ -39,6 +39,8 @@ import {
 } from '@epetplace/ui';
 import {
   getEstadoOnboardingDueno,
+  TIPO_ADIESTRAMIENTO,
+  obtenerDiasCerradosServicio,
   obtenerEspeciesElegibles,
   obtenerIniciosAdiestramiento,
   obtenerMascotasDeFamilia,
@@ -65,6 +67,22 @@ export default function AdiestramientoCuando() {
   const [fotos, setFotos] = useState<Record<string, string>>({});
   const [mascotaId, setMascotaId] = useState<string | null>(null);
   const [comprable, setComprable] = useState<ComprableAdiestramiento>('sesion');
+  // ✅ r34 · LOS DÍAS CERRADOS, CABLEADOS con el lector POR SERVICIO de A
+  // (el hueco que declaré en r32: los inicios llegan agregados y no
+  // nombran prestadores). La intersección vive en el MOTOR: cerrado ⟺ lo
+  // declararon TODOS los que ofertan; si uno abre, el día no se apaga.
+  const [diasCerrados, setDiasCerrados] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    let vigente = true;
+    void obtenerDiasCerradosServicio(TIPO_ADIESTRAMIENTO).then((r) => {
+      // el fallo no se guarda como "no cierra" (Ley 13)
+      if (vigente && r.ok) setDiasCerrados(new Set(r.data.dias));
+    });
+    return () => {
+      vigente = false;
+    };
+  }, []);
   const [dia, setDia] = useState<string>(fechaLocalISO(new Date()));
   const [inicios, setInicios] = useState<string[] | 'cargando' | 'error'>('cargando');
   const [hora, setHora] = useState<string | null>(null);
@@ -127,17 +145,32 @@ export default function AdiestramientoCuando() {
       day: 'numeric',
     });
     const desde = comprable === 'programa' ? 1 : 0;
-    const lista: Array<{ iso: string; etiqueta: string; corta: string }> = [];
+    const partes = new Intl.DateTimeFormat(idioma === 'es' ? 'es' : 'en', { weekday: 'short' });
+    const lista: Array<{ iso: string; etiqueta: string; corta: string; dow: number; diaCorto: string }> = [];
     for (let i = desde; i < 14; i++) {
       const d = new Date();
       d.setDate(d.getDate() + i);
       const iso = fechaLocalISO(d);
       const corta = fmt.format(d).toLowerCase();
       const etiqueta = i === 0 ? t('explorar.cuandoHoy') : i === 1 ? t('explorar.cuandoManana') : corta;
-      lista.push({ iso, etiqueta, corta });
+      lista.push({
+        iso,
+        etiqueta,
+        corta,
+        // dow del Date LOCAL (re-parsear el iso corre el día en UTC-5) y
+        // el día corto POR SU PARTE (en inglés el ICU ordena "30 Thu")
+        dow: d.getDay(),
+        diaCorto: partes.formatToParts(d).find((x) => x.type === 'weekday')?.value.toLowerCase() ?? '',
+      });
     }
     return lista;
   }, [idioma, t, comprable]);
+
+  const cerradosISO = useMemo(
+    () => new Set(dias.filter((d) => diasCerrados.has(d.dow)).map((d) => d.iso)),
+    [dias, diasCerrados],
+  );
+  const diaElegidoCerrado = cerradosISO.has(dia);
 
   // si el cambio de comprable dejó el día fuera de la tira (programa
   // arranca mañana), el día se corrige solo
@@ -286,8 +319,9 @@ export default function AdiestramientoCuando() {
                   La intersección de paseo no se puede computar. Se declara
                   y no se inventa; la prop queda lista. */}
               <SelectorDia
-                dias={dias.map((d) => ({ iso: d.iso, dia: d.corta.split(' ')[0] ?? '', numero: d.iso.slice(8, 10) }))}
+                dias={dias.map((d) => ({ iso: d.iso, dia: d.diaCorto, numero: d.iso.slice(8, 10) }))}
                 elegido={dia}
+                cerrados={cerradosISO}
                 etiquetaCerrado={t('explorar.cuandoDiaCerrado')}
                 onElegir={setDia}
               />
@@ -308,7 +342,8 @@ export default function AdiestramientoCuando() {
               // §6ter heredado: camino tocable, jamás final mudo
               <EstadoVacio
                 registro="seccion"
-                titulo={t('adiestramiento.sinInicios')}
+                titulo={diaElegidoCerrado ? t('explorar.cuandoDiaCerrado') : t('adiestramiento.sinInicios')}
+                descripcion={diaElegidoCerrado ? t('explorar.cuandoDiaCerradoPorque') : undefined}
                 accion={
                   diaSiguiente !== null ? (
                     <Boton

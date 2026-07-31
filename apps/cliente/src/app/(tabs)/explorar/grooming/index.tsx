@@ -41,6 +41,7 @@ import {
 } from '@epetplace/ui';
 import {
   getEstadoOnboardingDueno,
+  obtenerDiasCerradosServicio,
   obtenerEspeciesElegibles,
   obtenerIniciosGrooming,
   obtenerMascotasDeFamilia,
@@ -92,6 +93,13 @@ export default function GroomingCuando() {
   const [tallaHoja, setTallaHoja] = useState(false);
   const [oferta, setOferta] = useState<OfertaGrooming[] | 'cargando' | 'error' | null>(null);
   const [tipoServicio, setTipoServicio] = useState<string | null>(null);
+  // ✅ r34 · LOS DÍAS CERRADOS, CABLEADOS. En r31 declaré el hueco (la
+  // oferta llega agregada y no nombra prestadores, así que no había a
+  // quién preguntarle) y A construyó el lector POR SERVICIO — con la
+  // intersección en el MOTOR, que es mejor que mi propuesta: una vez, no
+  // en cada pantalla. Semántica: cerrado ⟺ lo declararon TODOS los que
+  // ofertan; si uno abre, el día no se apaga.
+  const [diasCerrados, setDiasCerrados] = useState<Set<number>>(new Set());
   const [dia, setDia] = useState<string>(fechaLocalISO(new Date()));
   const [inicios, setInicios] = useState<string[] | 'cargando' | 'error'>('cargando');
   const [hora, setHora] = useState<string | null>(null);
@@ -196,17 +204,34 @@ export default function GroomingCuando() {
       weekday: 'short',
       day: 'numeric',
     });
-    const lista: Array<{ iso: string; etiqueta: string; corta: string }> = [];
+    // el día de semana se pide POR SU PARTE, jamás se recorta del string
+    // (en inglés el ICU ordena "30 Thu" y el recorte devuelve el número)
+    const partes = new Intl.DateTimeFormat(idioma === 'es' ? 'es' : 'en', { weekday: 'short' });
+    const lista: Array<{ iso: string; etiqueta: string; corta: string; dow: number; diaCorto: string }> = [];
     for (let i = 0; i < 14; i++) {
       const d = new Date();
       d.setDate(d.getDate() + i);
       const iso = fechaLocalISO(d);
       const corta = fmt.format(d).toLowerCase();
       const etiqueta = i === 0 ? t('explorar.cuandoHoy') : i === 1 ? t('explorar.cuandoManana') : corta;
-      lista.push({ iso, etiqueta, corta });
+      lista.push({
+        iso,
+        etiqueta,
+        corta,
+        // el dow sale de ESTE Date, que es LOCAL: re-parsear el iso lo
+        // leería como medianoche UTC y en UTC-5 correría los cerrados un día
+        dow: d.getDay(),
+        diaCorto: partes.formatToParts(d).find((x) => x.type === 'weekday')?.value.toLowerCase() ?? '',
+      });
     }
     return lista;
   }, [idioma, t]);
+
+  const cerradosISO = useMemo(
+    () => new Set(dias.filter((d) => diasCerrados.has(d.dow)).map((d) => d.iso)),
+    [dias, diasCerrados],
+  );
+  const diaElegidoCerrado = cerradosISO.has(dia);
 
   // S61-A5 cura 1 (§6ter): el día siguiente en la tira, o null en el último.
   const diaSiguiente = useMemo(() => {
@@ -347,8 +372,9 @@ export default function GroomingCuando() {
                       se inventa: la prop queda lista para cuando exista el
                       lector. Pedido a A, secuenciado. */}
                   <SelectorDia
-                    dias={dias.map((d) => ({ iso: d.iso, dia: d.corta.split(' ')[0] ?? '', numero: d.iso.slice(8, 10) }))}
+                    dias={dias.map((d) => ({ iso: d.iso, dia: d.diaCorto, numero: d.iso.slice(8, 10) }))}
                     elegido={dia}
+                    cerrados={cerradosISO}
                     etiquetaCerrado={t('explorar.cuandoDiaCerrado')}
                     onElegir={setDia}
                   />
@@ -462,8 +488,9 @@ export default function GroomingCuando() {
                       se inventa: la prop queda lista para cuando exista el
                       lector. Pedido a A, secuenciado. */}
                   <SelectorDia
-                    dias={dias.map((d) => ({ iso: d.iso, dia: d.corta.split(' ')[0] ?? '', numero: d.iso.slice(8, 10) }))}
+                    dias={dias.map((d) => ({ iso: d.iso, dia: d.diaCorto, numero: d.iso.slice(8, 10) }))}
                     elegido={dia}
+                    cerrados={cerradosISO}
                     etiquetaCerrado={t('explorar.cuandoDiaCerrado')}
                     onElegir={setDia}
                   />
@@ -485,7 +512,8 @@ export default function GroomingCuando() {
                   // §6ter (S61-A5 cura 1): camino tocable — espejo del paseo.
                   <EstadoVacio
                     registro="seccion"
-                    titulo={t('grooming.sinInicios')}
+                    titulo={diaElegidoCerrado ? t('explorar.cuandoDiaCerrado') : t('grooming.sinInicios')}
+                    descripcion={diaElegidoCerrado ? t('explorar.cuandoDiaCerradoPorque') : undefined}
                     accion={
                       diaSiguiente !== null ? (
                         <Boton
