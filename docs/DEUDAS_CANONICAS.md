@@ -1921,6 +1921,17 @@ El motor de recordatorios apuntando al NEGOCIO (no a la familia); candidata bara
 >
 > **EL COSTO REAL, medido:** el riel en sí es chico (una función `montoPorPais(valor, country, idioma)` sobre datos que ya existen). **Lo caro es el barrido: 115 sitios**, y ninguno pasa por `packages/api`, así que no hay un cuello por donde curarlos a todos de una. **Y hay un costo escondido que conviene saber antes de empezar:** hoy los lectores **no exponen la moneda junto al precio** — los wrappers devuelven `precio: number` pelado (las únicas menciones de moneda del contrato están en `cuentaComercial`, que es del alta del negocio, no de la transacción). Así que el riel solo no alcanza: **cada lector de precio tiene que empezar a devolver su `country_code`**, o la pantalla adivina. Ese ensanche del contrato es la mitad invisible del trabajo.
 >
+> > **ENMIENDA 2 (S82-A r16) — EL BARRIDO NO SE PUDO HACER, Y LA MEDICIÓN DICE POR QUÉ. Dos correcciones más:**
+>
+> **① EL CONTEO SE SOLAPABA: son 73 SITIOS, no 115 "formateos".** Las 41 interpolaciones y los 74 `toFixed(2)` **no son conjuntos disjuntos** — una línea `$${x.toFixed(2)}` es UN sitio a curar, no dos. Medido por sitio: **29 en el cliente · 44 en el prestador**. El trabajo es **un tercio menor** de lo que esta ficha decía. *(Tercera vez que un contador de esta ficha se corrige al medirlo de verdad.)*
+>
+> **② DE LOS 29 DEL CLIENTE, EXACTAMENTE UNO ES CURABLE HOY.** Solo `hogar/grooming` consume un lector con `country_code` (de los tres ensanchados en r15); los otros 28 leen catálogo/oferta, donde el país es del PRESTADOR y la fila no lo trae. **Curarlos sería inventar la moneda** — y eso es peor que dejarlos a mano (orden del founder). **EL DESBLOQUEO REAL NO ES BARRER: ES ENSANCHAR ESOS LECTORES.** Después el barrido es mecánico.
+> *Y el único curable NO se curó: está en pantalla de C y exige extraer un componente para poder llamar el hook (regla de hooks) — refactor de territorio ajeno, declarado y no hecho.*
+>
+> **③ NACE EL GUARD `scripts/verify-moneda.mjs`** — baseline SOLO-BAJA por app (29 · 44), rojo producido, y **condición de muerte escrita al nacer**: se retira el día que las dos apps lleguen a 0 y el riel sea el único camino. También reporta cuando el baseline quedó viejo *hacia abajo*: un número que dice 29 cuando quedan 25 miente sobre cuánto falta. **Y el guard se corrigió a sí mismo al producir su rojo**: su exclusión decía `/moneda\.ts$/` y eximía también a `usar-moneda.ts` (y a cualquier `*-moneda.ts` futuro) — daba VERDE con un sitio sucio sembrado adentro. Sin intentar el rojo, ese agujero viajaba.
+>
+> **④ Nace `usarMoneda`** (`apps/cliente/src/lib`), el puente riel+config para que ninguna pantalla cablee las dos piezas: **si el lector no trae país, devuelve `null` y NO inventa** — la pantalla decide. El fallback vive en el riel y se usa a la vista, jamás por omisión.
+>
 > **RIESGO HOY: BAJO Y ACOTADO** — CO está inactivo y las 93 citas son EC, así que la divergencia todavía es cosmética, exactamente como la ficha decía. **Se vuelve real el día que CO se active o entre la pasarela**, y ahí ya no es un rename: es contrato + 115 sitios. **Disparo confirmado, con su orden: el riel y el ensanche del contrato van ANTES del barrido — barrer primero sería tocar 115 sitios dos veces.**
 
 #### D-449 — Barrido iconográfico del mundo vet
