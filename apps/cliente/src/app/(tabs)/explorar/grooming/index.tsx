@@ -341,6 +341,13 @@ export default function GroomingCuando() {
                 ) : Array.isArray(ofertaPublica) && ofertaPublica.length > 0 ? (
                   <View style={{ gap: spacing[2] }}>
                     <SelectorSegmentado
+                      // r38-bis · `proposito="eleccion"`: B terminó la
+                      // pieza (r37) y acá se consume en su modo correcto.
+                      // Sin esto el control queda en 'vista', que es el
+                      // default para los consumidores viejos — y este eje
+                      // NO cambia de vista: ELIGE PRODUCTO. El modo trae
+                      // la pata y el magenta; el rol deja de mentir.
+                      proposito="eleccion"
                       etiqueta={t('grooming.servicioEtiqueta')}
                       segmentos={ofertaPublica.map((o) => ({
                         codigo: o.tipo_servicio,
@@ -426,6 +433,13 @@ export default function GroomingCuando() {
                     con el "desde" YA resuelto por la talla del perfil */}
                 <View style={{ gap: spacing[2] }}>
                   <SelectorSegmentado
+                      // r38-bis · `proposito="eleccion"`: B terminó la
+                      // pieza (r37) y acá se consume en su modo correcto.
+                      // Sin esto el control queda en 'vista', que es el
+                      // default para los consumidores viejos — y este eje
+                      // NO cambia de vista: ELIGE PRODUCTO. El modo trae
+                      // la pata y el magenta; el rol deja de mentir.
+                      proposito="eleccion"
                     etiqueta={t('grooming.servicioEtiqueta')}
                     segmentos={oferta.map((o) => ({
                       codigo: o.tipo_servicio,

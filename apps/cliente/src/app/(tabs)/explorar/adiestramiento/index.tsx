@@ -289,6 +289,13 @@ export default function AdiestramientoCuando() {
                 las sesiones se agendan solas, antes de todo precio. */}
             <View style={{ gap: spacing[2] }}>
               <SelectorSegmentado
+                      // r38-bis · `proposito="eleccion"`: B terminó la
+                      // pieza (r37) y acá se consume en su modo correcto.
+                      // Sin esto el control queda en 'vista', que es el
+                      // default para los consumidores viejos — y este eje
+                      // NO cambia de vista: ELIGE PRODUCTO. El modo trae
+                      // la pata y el magenta; el rol deja de mentir.
+                      proposito="eleccion"
                 etiqueta={t('adiestramiento.comprableEtiqueta')}
                 segmentos={[
                   { codigo: 'sesion', etiqueta: t('adiestramiento.comprableSesion') },
