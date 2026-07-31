@@ -50,6 +50,7 @@ import {
   mascotasElegibles,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
+import { FiltroMascotas } from '@/components/filtro-pills';
 import { CabezalOficio, GrillaElegir, SelectorDia } from '@/components/reserva-piezas';
 
 function fechaLocalISO(d: Date): string {
@@ -261,20 +262,19 @@ export default function AdiestramientoCuando() {
           <>
             {/* 0 · LA MASCOTA — presente en pantalla siempre (rasgo 1
                 de la gramática canónica) */}
-            <SelectorOpcion
-              acento="control"
-              // S73 — ENTITY CHIP (dictado founder, V2 provisional): la cara
-              // es ANATOMÍA — overhang, lleno al elegir, cero borde.
-              entidad
-              etiqueta={t('adiestramiento.paraQuien')}
-              opciones={elegibles.map((m) => ({
-                codigo: m.id,
-                etiqueta: m.nombre,
-                avatar: { nombre: m.nombre, fotoUrl: fotos[m.id] },
-              }))}
-              seleccionada={mascotaId ?? undefined}
-              onSelect={setMascotaId}
-            />
+            {/* ⚠️ r34 · LOS CHIPS DEL SALVAVIDAS, MIGRADOS A LOS NUEVOS.
+                Este camino —deep-link sin param, o el log VACÍO— es el que
+                NADIE recorre, y por eso conservaba los viejos: un resto no
+                sobrevive por difícil, sobrevive por INVISIBLE. Censo del
+                founder confirmado y era UNIFORME: los CUATRO oficios lo
+                tenían, no solo veterinaria. */}
+            <View style={{ marginHorizontal: -spacing[4] }}>
+              <FiltroMascotas
+                mascotas={elegibles.map((m) => ({ id: m.id, nombre: m.nombre, fotoUrl: fotos[m.id] }))}
+                elegida={mascotaId}
+                onElegir={setMascotaId}
+              />
+            </View>
 
             {/* 1 · EL QUÉ — sesión-o-programa (§8). La FIRMA de la
                 pantalla: si es programa, la voz honesta dice ACÁ que

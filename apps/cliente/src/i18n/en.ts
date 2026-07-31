@@ -329,6 +329,7 @@ export const clienteEn = {
     titulo: 'Their vet visits',
     cargando: 'Loading their visits',
     esperaFecha: 'waiting for a date',
+    agendarDe: "Book {{nombre}}'s visit",
     agendar: 'Book a visit',
     desdeNota: 'Each visit is priced by their vet clinic.',
     vacioProximos: 'No visits coming up',

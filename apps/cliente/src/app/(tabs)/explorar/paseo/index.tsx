@@ -56,6 +56,7 @@ import {
   mascotasElegibles,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
+import { FiltroMascotas } from '@/components/filtro-pills';
 import { CabezalOficio, DiaSinHorarios, GrillaElegir, PieReserva, SelectorDia } from '@/components/reserva-piezas';
 
 function fechaLocalISO(d: Date): string {
@@ -486,18 +487,19 @@ export default function PaseoCuando() {
                 aparece —y debe— viniendo del log vacío. */}
             {mascota === null ? (
               <View style={{ paddingHorizontal: spacing[4] }}>
-                <SelectorOpcion
-                  acento="control"
-                  entidad
-                  etiqueta={t('grooming.paraQuien')}
-                  opciones={elegibles.map((m) => ({
-                    codigo: m.id,
-                    etiqueta: m.nombre,
-                    avatar: { nombre: m.nombre, fotoUrl: fotos[m.id] },
-                  }))}
-                  seleccionada={mascotaId ?? undefined}
-                  onSelect={setElegidaLocal}
-                />
+                {/* ⚠️ r34 · LOS CHIPS DEL SALVAVIDAS, MIGRADOS A LOS NUEVOS.
+                    Este camino —deep-link sin param, o el log VACÍO— es el que
+                    NADIE recorre, y por eso conservaba los viejos: un resto no
+                    sobrevive por difícil, sobrevive por INVISIBLE. Censo del
+                    founder confirmado y era UNIFORME: los CUATRO oficios lo
+                    tenían, no solo veterinaria. */}
+                <View style={{ marginHorizontal: -spacing[4] }}>
+                  <FiltroMascotas
+                    mascotas={elegibles.map((m) => ({ id: m.id, nombre: m.nombre, fotoUrl: fotos[m.id] }))}
+                    elegida={mascotaId}
+                    onElegir={setElegidaLocal}
+                  />
+                </View>
               </View>
             ) : null}
 

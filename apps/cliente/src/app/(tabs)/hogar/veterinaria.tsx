@@ -51,7 +51,7 @@
  * PROPÓSITO; grooming es cuidado; lo clínico es salud).
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
@@ -93,6 +93,9 @@ export default function LogVeterinaria() {
   const [mascotas, setMascotas] = useState<{ id: string; nombre: string; fotoUrl?: string }[]>([]);
   // ① la MASCOTA — el PRIMER filtro (null = todas, sin chip activo)
   const [mascotaElegida, setMascotaElegida] = useState<string | null>(null);
+  // r34 · el CTA vivo necesita señalar la hilera cuando falta la mascota
+  const [pidiendoMascota, setPidiendoMascota] = useState(false);
+  const scrollRef = useRef<ScrollView>(null);
   // ② el ESTADO
   const [segmento, setSegmento] = useState<Segmento>('proximos');
   // ③ el TIPO DE CONSULTA — solo en historial (ver abajo)
@@ -161,6 +164,7 @@ export default function LogVeterinaria() {
       <Encabezado variante="navegacion" titulo={t('logVet.titulo')} atras onAtras={() => router.back()} />
 
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={{
           paddingHorizontal: spacing[4],
           paddingTop: spacing[2],
@@ -173,9 +177,20 @@ export default function LogVeterinaria() {
             C decide relleno vs barrido según cuántos hermanos hay) */}
         {mascotas.length > 1 ? (
           <View style={{ marginHorizontal: -spacing[4] }}>
-            <FiltroMascotas mascotas={mascotas} elegida={mascotaElegida} onElegir={setMascotaElegida} />
+            <FiltroMascotas
+              mascotas={mascotas}
+              elegida={mascotaElegida}
+              onElegir={(id) => {
+                setMascotaElegida(id);
+                if (id !== null) setPidiendoMascota(false);
+              }}
+            />
           </View>
         ) : null}
+        {/* el mensaje SEÑALA la hilera: vive pegado a ella, jamás flotando
+            en el medio — el ojo sabe a dónde ir porque el texto está donde
+            está la respuesta. */}
+        {pidiendoMascota ? <Texto variante="apoyo" color="danger">{t('plan.elegiMascota')}</Texto> : null}
 
         {/* ② el ESTADO — sin capa: este eje no es una clase de servicio
             (Ley 10), así que no pide prestado ningún color */}
@@ -280,17 +295,38 @@ export default function LogVeterinaria() {
           backgroundColor: theme.bg.base,
         }}
       >
-        <Boton
-          variante="primario"
-          bloque
-          etiqueta={t('logVet.agendar')}
-          onPress={() =>
-            router.navigate({
-              pathname: '/explorar/veterinaria',
-              ...(mascotaElegida !== null ? { params: { mascotaId: mascotaElegida } } : null),
-            })
-          }
-        />
+        {(() => {
+          // 🔴 r34 · EL CTA NAVEGABA SIN MASCOTA — y la reserva del otro
+          // lado ya no la pregunta, así que el usuario aterrizaba en una
+          // pantalla sin sujeto. Es el CTA VIVO que paseo tiene curado
+          // desde r15, traído acá: nace APAGADO pero TOCABLE, la razón
+          // señala la hilera, y la ETIQUETA NOMBRA lo que falta además
+          // del hint (S63-B: el apagado dice qué falta SIEMPRE; una
+          // razón que solo aparece al tocar está escondida).
+          // Con UNA sola mascota se resuelve sola: la hilera no se monta
+          // con una y atar el CTA a ella lo dejaría muerto para siempre
+          // (Ley 23 — la puerta no pregunta lo que ya sabe). Es el mismo
+          // defecto que en paseo vivió desde r12 sin que nadie lo viera.
+          const elegida =
+            mascotas.find((m) => m.id === mascotaElegida) ?? (mascotas.length === 1 ? mascotas[0] : null);
+          return (
+            <Boton
+              variante="primario"
+              bloque
+              etiqueta={elegida !== null ? t('logVet.agendarDe', { nombre: elegida.nombre }) : t('plan.agendarFaltaMascota')}
+              deshabilitado={elegida === null}
+              razonDeshabilitado={t('plan.elegiMascota')}
+              onRazon={() => {
+                setPidiendoMascota(true);
+                scrollRef.current?.scrollTo({ y: 0, animated: true });
+              }}
+              onPress={() => {
+                if (elegida === null) return;
+                router.navigate({ pathname: '/explorar/veterinaria', params: { mascotaId: elegida.id } });
+              }}
+            />
+          );
+        })()}
       </View>
     </SafeAreaView>
   );

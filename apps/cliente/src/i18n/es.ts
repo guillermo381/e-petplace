@@ -379,6 +379,7 @@ export const clienteEs = {
     titulo: 'Sus visitas al veterinario',
     cargando: 'Cargando sus visitas',
     esperaFecha: 'espera fecha',
+    agendarDe: 'Agendar la visita de {{nombre}}',
     agendar: 'Agendar una consulta',
     desdeNota: 'El precio de cada consulta lo pone su veterinaria.',
     vacioProximos: 'No tiene visitas por venir',

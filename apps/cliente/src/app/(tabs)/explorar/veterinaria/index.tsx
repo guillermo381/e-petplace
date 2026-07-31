@@ -56,6 +56,7 @@ import {
   mascotasElegibles,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
+import { FiltroMascotas } from '@/components/filtro-pills';
 import { CabezalOficio, GrillaElegir, PieReserva, SelectorDia } from '@/components/reserva-piezas';
 import { vozServicio } from '@/lib/voz-servicio';
 
@@ -295,24 +296,19 @@ export default function VeterinariaCuando() {
                 ① el deep-link sin param · ② el log VACÍO, cuyo CTA entra
                 acá sin mascota — y ahí preguntar es lo correcto, porque es
                 lo que la puerta NO sabe.
-                (Su forma sigue siendo el entity chip firmado en S73; los
-                chips NUEVOS con huella son del LOG, que es donde el eje
-                filtra. Acá no filtra: identifica.) */}
+                ⚠️ r34 · Y SUS CHIPS SON LOS NUEVOS. Conservaba los
+                viejos justamente porque este camino no se recorre: un
+                resto no sobrevive por difícil, sobrevive por INVISIBLE.
+                (Censo del founder confirmado y era UNIFORME: los CUATRO
+                oficios lo tenían, no solo veterinaria.) */}
             {mascota === null ? (
-              <SelectorOpcion
-                acento="control"
-                // S73 — ENTITY CHIP (dictado founder, V2 provisional): la cara
-                // es ANATOMÍA — overhang, lleno al elegir, cero borde.
-                entidad
-                etiqueta={t('veterinaria.paraQuien')}
-                opciones={elegibles.map((m) => ({
-                  codigo: m.id,
-                  etiqueta: m.nombre,
-                  avatar: { nombre: m.nombre, fotoUrl: fotos[m.id] },
-                }))}
-                seleccionada={mascotaId ?? undefined}
-                onSelect={setMascotaId}
-              />
+              <View style={{ marginHorizontal: -spacing[4] }}>
+                <FiltroMascotas
+                  mascotas={elegibles.map((m) => ({ id: m.id, nombre: m.nombre, fotoUrl: fotos[m.id] }))}
+                  elegida={mascotaId}
+                  onElegir={setMascotaId}
+                />
+              </View>
             ) : null}
 
             {mascota === null ? (

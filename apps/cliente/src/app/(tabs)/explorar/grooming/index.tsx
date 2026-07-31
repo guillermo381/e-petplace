@@ -33,6 +33,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   Icono,
+  Interruptor,
   SelectorOpcion,
   Texto,
   spacing,
@@ -56,7 +57,8 @@ import {
 } from '@epetplace/api';
 import { TallaPelajeHoja } from '@/components/talla-pelaje-hoja';
 import { useTraduccion } from '@/i18n';
-import { CabezalOficio, GrillaElegir, SelectorDia } from '@/components/reserva-piezas';
+import { FiltroMascotas } from '@/components/filtro-pills';
+import { CabezalOficio, GrillaElegir, PieReserva, SelectorDia } from '@/components/reserva-piezas';
 import { vozServicio } from '@/lib/voz-servicio';
 
 function fechaLocalISO(d: Date): string {
@@ -310,20 +312,19 @@ export default function GroomingCuando() {
                 S61-A3 (rasgo 1 de la gramática canónica): el selector se
                 pinta SIEMPRE — la mascota elegida queda presente en
                 pantalla, no es un paso que se olvida. */}
-            <SelectorOpcion
-              acento="control"
-              // S73 — ENTITY CHIP (dictado founder, V2 provisional): la cara
-              // es ANATOMÍA — overhang, lleno al elegir, cero borde.
-              entidad
-              etiqueta={t('grooming.paraQuien')}
-              opciones={elegibles.map((m) => ({
-                codigo: m.id,
-                etiqueta: m.nombre,
-                avatar: { nombre: m.nombre, fotoUrl: fotos[m.id] },
-              }))}
-              seleccionada={mascotaId ?? undefined}
-              onSelect={setMascotaId}
-            />
+            {/* ⚠️ r34 · LOS CHIPS DEL SALVAVIDAS, MIGRADOS A LOS NUEVOS.
+                Este camino —deep-link sin param, o el log VACÍO— es el que
+                NADIE recorre, y por eso conservaba los viejos: un resto no
+                sobrevive por difícil, sobrevive por INVISIBLE. Censo del
+                founder confirmado y era UNIFORME: los CUATRO oficios lo
+                tenían, no solo veterinaria. */}
+            <View style={{ marginHorizontal: -spacing[4] }}>
+              <FiltroMascotas
+                mascotas={elegibles.map((m) => ({ id: m.id, nombre: m.nombre, fotoUrl: fotos[m.id] }))}
+                elegida={mascotaId}
+                onElegir={setMascotaId}
+              />
+            </View>
 
             {mascota === null ? (
               // S61-A5 cura 3 (letra founder): SIN mascota, la oferta se
@@ -451,28 +452,39 @@ export default function GroomingCuando() {
                     cita la porta igual). El recargo se DECLARA en el
                     chip (el mínimo real entre groomers con domicilio). */}
                 {oferta.some((o) => o.atiende_domicilio) && oferta.some((o) => o.atiende_local) ? (
-                  <SelectorOpcion
-                    acento="control"
-                    etiqueta={t('grooming.dondeEtiqueta')}
-                    opciones={[
-                      { codigo: 'local', etiqueta: t('grooming.modalidadLocal') },
-                      {
-                        codigo: 'domicilio',
-                        etiqueta: (() => {
-                          // S61-A13: exacto si no varía, "desde" si varía —
-                          // cero número exacto sobre un agregado que miente.
-                          const o = servicioElegido ?? oferta[0];
-                          const recargo = o?.recargo_domicilio_desde ?? null;
-                          if (recargo === null || recargo <= 0) return t('grooming.modalidadDomicilio');
-                          return o?.recargo_domicilio_varia
+                  /* ⚠️ r34 · INTERRUPTOR REAL, no dos opciones. El par
+                     local/domicilio NO son dos alternativas simétricas:
+                     LOCAL es el default del oficio y domicilio es un
+                     AGREGADO que se PRENDE y que cuesta más. Dos chips
+                     mienten sobre eso — presentan como equivalentes lo
+                     que no lo es, y obligan a elegir algo que ya está
+                     elegido. El interruptor dice la verdad de la
+                     estructura: hay un estado normal y uno que sumás.
+                     El recargo se DECLARA en el detalle, con su "desde"
+                     cuando varía (S61-A13: cero número exacto sobre un
+                     agregado que miente). */
+                  <View style={{ paddingHorizontal: spacing[5], gap: spacing[1] }}>
+                    <Interruptor
+                      etiqueta={t('grooming.modalidadDomicilio')}
+                      encendido={modalidad === 'domicilio'}
+                      onCambio={(v) => setModalidad(v ? 'domicilio' : 'local')}
+                    />
+                    {/* el recargo va AL LADO y no adentro: `Interruptor` no
+                        tiene slot de detalle (medido, no supuesto) y no se
+                        le inventa uno desde una pantalla. */}
+                    {(() => {
+                      const o = servicioElegido ?? oferta[0];
+                      const recargo = o?.recargo_domicilio_desde ?? null;
+                      if (recargo === null || recargo <= 0) return null;
+                      return (
+                        <Texto variante="apoyo">
+                          {o?.recargo_domicilio_varia
                             ? t('grooming.modalidadDomicilioRecargoDesde', { recargo: recargo.toFixed(2) })
-                            : t('grooming.modalidadDomicilioRecargo', { recargo: recargo.toFixed(2) });
-                        })(),
-                      },
-                    ]}
-                    seleccionada={modalidad}
-                    onSelect={(codigo) => setModalidad(codigo === 'domicilio' ? 'domicilio' : 'local')}
-                  />
+                            : t('grooming.modalidadDomicilioRecargo', { recargo: recargo.toFixed(2) })}
+                        </Texto>
+                      );
+                    })()}
+                  </View>
                 ) : null}
 
                 {/* 2 · DÍA — la tira horizontal (hoy+13) */}
@@ -543,32 +555,25 @@ export default function GroomingCuando() {
         )}
       </ScrollView>
 
-      {/* S61-A3 (rasgo 2 de la gramática canónica): el CTA de reservar
-          vive ABAJO, FIJO — fuera del scroll, una sola acción primaria. */}
-      {Array.isArray(mascotas) && elegibles.length > 0 ? (
-        <View
-          style={{
-            paddingHorizontal: spacing[4],
-            paddingTop: spacing[3],
-            paddingBottom: Math.max(insets.bottom, spacing[4]),
-            backgroundColor: theme.bg.base,
-            borderTopWidth: 1,
-            borderTopColor: theme.border.subtle,
+      {/* r34 · EL PIE, COMO PASEO: precio a la izquierda con su "desde",
+          CTA a la derecha, fijo. La escalera del precio (S61-A13) manda:
+          el exacto no existe hasta elegir groomer. */}
+      {Array.isArray(mascotas) && elegibles.length > 0 && servicioElegido !== null ? (
+        <PieReserva
+          total={`$ ${servicioElegido.desde_precio.toFixed(2)}`}
+          totalDesde={servicioElegido.varia}
+          cuando={hora !== null ? `${dias.find((d) => d.iso === dia)?.corta ?? ''} · ${hora}` : null}
+          etiqueta={t('explorar.verQuienPuede')}
+          habilitado={listo}
+          onPress={() => {
+            if (!listo || mascota === null) return;
+            router.push({
+              pathname: '/explorar/grooming/disponibles',
+              params: { fecha: dia, hora, tipoServicio, mascotaId: mascota.id, modalidad },
+            });
           }}
-        >
-          <Boton
-            variante="primario"
-            etiqueta={t('explorar.verQuienPuede')}
-            deshabilitado={!listo}
-            onPress={() => {
-              if (!listo || mascota === null) return;
-              router.push({
-                pathname: '/explorar/grooming/disponibles',
-                params: { fecha: dia, hora, tipoServicio, mascotaId: mascota.id, modalidad },
-              });
-            }}
-          />
-        </View>
+          insetBottom={insets.bottom}
+        />
       ) : null}
 
       {/* §3 — la pregunta única: se declara UNA vez, queda en el PERFIL,
