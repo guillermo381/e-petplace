@@ -85,3 +85,46 @@ es la pieza: es que las pantallas pintan literales.
 Los puntos ① y ④ en los CUATRO logs. C no los ejecuta con clones
 locales: se consumen el día que la variante exista, y ese día es **un
 renglón por log**.
+
+---
+
+# ADDENDUM — PEDIDO A A: EL LECTOR PÚBLICO DE ADIESTRAMIENTO
+
+> Escrito ANTES de que exista, con la forma exacta en que se va a
+> consumir, para que aterrice en un renglón y no en otra ronda
+> (orden del founder: *"no dos pasadas"*).
+
+**El hueco, medido:** el único lector de oferta de adiestramiento es
+`obtenerOfertaAdiestramientoPropia(prestadorId)` — es del PRESTADOR y va
+keyed por su id. El dueño **no conoce prestador en ese paso**: la
+gramática canónica pone el QUIÉN DESPUÉS del día y la hora. Sus hermanos
+sí tienen lector público (`obtenerOfertaPaseo`,
+`obtenerOfertaGroomingPublica`); adiestramiento no.
+
+**La forma en que C lo va a consumir** — un solo dato por comprable:
+
+```ts
+// el "desde" del catálogo, agregado sobre ofertas ACTIVAS
+{ comprable: 'sesion' | 'programa', desde: number, varia: boolean }[]
+```
+
+- `desde` = el mínimo real entre prestadores que ofertan ese comprable.
+- `varia` = true si hay más de un precio distinto → el pie dice **"desde"**
+  (escalera del precio S61-A13, FIRMADA: el exacto no existe hasta elegir
+  prestador, y se dice en el QUIÉN).
+
+**Dónde entra, exacto:** `explorar/adiestramiento/index.tsx`, en el
+`PieReserva` que YA ESTÁ MONTADO con `total={null}` — se reemplaza el
+null por el `desde` del comprable elegido y `totalDesde` por su `varia`.
+**Dos líneas.** El pie, su condición y su CTA no se tocan.
+
+**⚠️ Y SI EL DATO NO EXISTE PARA UN COMPRABLE, que llegue null y no cero:**
+un `0` con formato de precio es el verosímil-falso de L-139 — miente con
+cara de dato medido. `PieReserva` ya trata `total={null}` como "no se
+dibuja", así que el nulo honesto está soportado de fábrica.
+
+**Y el otro pedido de la misma familia** (declarado en r42): el seed de la
+familia de CUATRO no tiene fotos —`foto_url` NULL en las cuatro, medido—
+así que hoy es el único fixture con 2+ mascotas y **no puede probar nada
+de fotos**. Con una foto sembrada pasa a ser el discriminador permanente
+de ese caso, y deja de depender de la cuenta del founder.
