@@ -1,0 +1,56 @@
+#!/bin/sh
+# ─────────────────────────────────────────────────────────────────────
+# EL GATE DEL COMMIT (S82-B r28) — paga la mitad que faltaba de D-481.
+#
+# POR QUÉ EXISTE, con su evidencia: D-481 declaró que "lo que se confía a
+# que un humano se acuerde de correr, se incumple". El lint nació en S81
+# y en S82 se probó solo: DOS de DOS rondas entraron commits con
+# verify:diseno en exit 1 — el número estaba en pantalla y se siguió
+# igual. Leer un exit es memoria humana; esto es mecanismo.
+#
+# COSTO MEDIDO (por eso corre SOLO lo tocado — un hook lento se saltea
+# por costumbre y volvemos al mismo lugar por otra puerta):
+#   verify:diseno 0.5s · tsc packages/ui 1.3s · tsc apps/* ~3s c/u.
+#   Commit típico de un paquete: ~2s. Peor caso (toca los tres): ~8s.
+#
+# ESCAPE DECLARADO Y RUIDOSO: `SALTAR_GATE="motivo"` — a veces hay que
+# commitear en rojo a propósito, y eso SE DECLARA. El motivo se imprime
+# acá y `prepare-commit-msg` lo escribe DENTRO del mensaje, así el rastro
+# sobrevive al commit. LIMITACIÓN HONESTA: `git commit --no-verify` no
+# ejecuta NINGÚN hook, así que ese escape es mudo por diseño de git y no
+# se puede instrumentar — queda como la puerta sin rastro.
+# ─────────────────────────────────────────────────────────────────────
+set -e
+RAIZ=$(git rev-parse --show-toplevel)
+cd "$RAIZ"
+
+if [ -n "$SALTAR_GATE" ]; then
+  echo "⚠️  GATE SALTEADO A PROPÓSITO — motivo: $SALTAR_GATE"
+  echo "   (queda escrito en el mensaje del commit)"
+  exit 0
+fi
+
+CAMBIOS=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$CAMBIOS" ] && exit 0
+
+echo "── gate del commit ──"
+node scripts/verify-diseno.mjs >/dev/null 2>&1 || {
+  echo "✗ verify:diseno EN ROJO — el commit NO ocurre."
+  node scripts/verify-diseno.mjs 2>&1 | grep "✗" | head -5
+  echo ""
+  echo "  curalo, o declaralo:  SALTAR_GATE=\"por qué\" git commit ..."
+  exit 1
+}
+
+for P in packages/ui apps/cliente apps/prestador; do
+  case "$CAMBIOS" in
+    *"$P"*)
+      (cd "$P" && npx tsc --noEmit >/dev/null 2>&1) || {
+        echo "✗ tsc EN ROJO en $P — el commit NO ocurre."
+        (cd "$P" && npx tsc --noEmit 2>&1 | head -5)
+        exit 1
+      }
+      ;;
+  esac
+done
+echo "✓ gate verde"

@@ -1,0 +1,5 @@
+#!/bin/sh
+# Deja el RASTRO del escape dentro del mensaje (S82-B r28): un gate
+# salteado sin rastro es peor que no tener gate — parece verde.
+[ -n "$SALTAR_GATE" ] && printf '\n[GATE SALTEADO] %s\n' "$SALTAR_GATE" >> "$1"
+exit 0
