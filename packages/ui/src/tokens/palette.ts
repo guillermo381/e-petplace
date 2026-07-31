@@ -136,6 +136,15 @@ export const palette = {
    *  **cae por debajo de 1.50 a partir del 5%** — de ahí para arriba ni
    *  el halo compensa. Reversa r26: `base: palette.dark0`. */
   tapizDark: '#0D050D',
+  /** Los candidatos del gate (S82-B r27) — pink sobre el base oscuro al
+   *  3/5/8%, con su TECHO medido en la nota: el halo direccional rinde
+   *  1.53 en negro y cae bajo 1.50 desde el 5%. Viven acá y no en la
+   *  lámina porque un hex en una pantalla es Ley 1 (lo cazó R2). */
+  tapizDarkCandidatos: [
+    { valor: '#0D050D', etiqueta: '3% (vivo)', nota: 'card/base 1.037 · halo 1.51 — el halo todavía compensa' },
+    { valor: '#120510', etiqueta: '5%', nota: 'card/base 1.027 · halo 1.49 — EL TECHO: de acá para arriba ni el halo alcanza' },
+    { valor: '#190515', etiqueta: '8%', nota: 'card/base 1.009 · halo 1.47 — card y base son EL MISMO COLOR: la tarjeta desaparece aun con la cura puesta' },
+  ] as const,
   /** S82-B r19 — LA ELEVACIÓN DEL OSCURO SE EXPRESA COMO LUMINOSIDAD,
    *  no como sombra (la convención del tema oscuro). Era #0D0D12 y daba
    *  **1.05 contra el fondo**: las tarjetas de la app entera se separaban

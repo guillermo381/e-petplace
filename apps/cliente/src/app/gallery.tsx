@@ -18,6 +18,7 @@ import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
+  palette,
   SelectorOpcion,
   Tarjeta,
   Texto,
@@ -103,15 +104,11 @@ function PiezasReales({ envoltorio }: { envoltorio: 'tarjeta' | 'halo' | 'haloRo
 /** Los tres candidatos de tapiz oscuro (S82-B r26). El 3% es el VIVO.
  *  El techo está medido y va escrito al lado de cada uno: el halo
  *  direccional rinde 1.53 en negro y CAE bajo 1.50 desde el 5%. */
-const TINTES = [
-  { codigo: '#0D050D', etiqueta: '3% (vivo)', nota: 'card/base 1.037 · halo 1.51 — el halo todavía compensa' },
-  { codigo: '#120510', etiqueta: '5%', nota: 'card/base 1.027 · halo 1.49 — EL TECHO: de acá para arriba ni el halo alcanza' },
-  { codigo: '#190515', etiqueta: '8%', nota: 'card/base 1.009 · halo 1.47 — card y base son EL MISMO COLOR: la tarjeta desaparece aun con la cura puesta' },
-];
+const TINTES = palette.tapizDarkCandidatos.map((c) => ({ codigo: c.valor, etiqueta: c.etiqueta, nota: c.nota }));
 
 function LaminaSeparacionOscuro() {
   const { theme } = useTheme();
-  const [tinte, setTinte] = useState(TINTES[0].codigo);
+  const [tinte, setTinte] = useState<string>(TINTES[0].codigo);
   const elegido = TINTES.find((t) => t.codigo === tinte) ?? TINTES[0];
   const OPCIONES = [
     {
