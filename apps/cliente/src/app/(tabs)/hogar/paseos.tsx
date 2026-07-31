@@ -45,6 +45,7 @@ import {
   HojaScroll,
   Icono,
   Insignia,
+  FilaCita,
   PieRevelar,
   SelectorOpcion,
   Separador,
@@ -581,14 +582,25 @@ export default function MisPaseos() {
                   acciones (detalle P18 / Mover P14). Ventana de 10 con
                   "Cargar más" — jamás lista infinita sin paginar. */}
               {futurasFusionadas.length > 0 ? (
-                <Tarjeta relleno="ninguno">
-                  {futurasFusionadas.slice(0, ventana).map((f, i) => (
-                    <View key={f.cita.id}>
-                      {i > 0 ? <Separador /> : null}
-                      <Celda
-                        interactiva
-                        accessibilityRole="button"
-                        titulo={fechaCortaMono(f.cita.fecha, idioma)}
+                <View style={{ gap: spacing[2.5] }}>
+                  {/* ✅ r39-5 · LA PIEZA DE LA CASA, CONSUMIDA. `FilaCita`
+                      es el componente de DOMINIO de S80-B12: lleva el
+                      canto ADENTRO y cero prop de color — la pantalla NO
+                      elige el tinte, lo elige el oficio. Por eso se
+                      consume y no se reinventa: reinventarla habría sido
+                      la quinta copia de un canto que ya tiene dueño.
+                      La mascota PRESIDE (es el titulo) y el servicio baja
+                      a subtitulo — la lámina del founder, tal cual:
+                      "mañana 08:00 · Adiestramiento de Zeus". */}
+                  {futurasFusionadas.slice(0, ventana).map((f) => {
+                    const nombre =
+                      mascotasHogar.find((m) => m.id === (f.clase === 'libre' ? f.cita.mascota_id : null))?.nombre ??
+                      null;
+                    return (
+                      <FilaCita
+                        key={f.cita.id}
+                        oficio="paseo"
+                        titulo={nombre ?? t('explorar.paseoTitulo')}
                         subtitulo={t(
                           f.clase === 'plan'
                             ? 'plan.citaDePlan'
@@ -596,7 +608,11 @@ export default function MisPaseos() {
                               ? 'paquete.citaDePaquete'
                               : 'suelto.citaSuelta',
                         )}
-                        metadataMono={`${f.cita.hora.slice(0, 5)} · ${f.cita.duracion_minutos} min`}
+                        metadataMono={`${fechaCortaMono(f.cita.fecha, idioma)} · ${f.cita.hora.slice(0, 5)} · ${f.cita.duracion_minutos} min`}
+                        mascota={{
+                          nombre: nombre ?? t('explorar.paseoTitulo'),
+                          fotoUrl: mascotasHogar.find((m) => m.nombre === nombre)?.fotoUrl,
+                        }}
                         onPress={() => {
                           if (f.clase === 'plan') {
                             setMoviendo({ cita: f.cita, plan: f.plan });
@@ -607,8 +623,8 @@ export default function MisPaseos() {
                           }
                         }}
                       />
-                    </View>
-                  ))}
+                    );
+                  })}
                   {/* S73: ley 19.6 — esto NO es paginación (slice sobre
                       datos YA cargados): es revelar por tandas, y su
                       control canónico es PieRevelar con el número. */}
@@ -623,7 +639,7 @@ export default function MisPaseos() {
                       </View>
                     </>
                   ) : null}
-                </Tarjeta>
+                </View>
               ) : null}
             </View>
           ) : (
