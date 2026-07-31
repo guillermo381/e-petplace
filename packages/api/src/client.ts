@@ -79,3 +79,42 @@ export async function uidActual(): Promise<string | null> {
   const { data } = await getClient().auth.getSession();
   return data.session?.user.id ?? null;
 }
+
+/**
+ * Mis familias VIGENTES — el espejo EXACTO de la pata familiar que usan
+ * las policies del dueño (`familia_id IN (SELECT fm.familia_id FROM
+ * familia_miembro fm WHERE fm.user_id = auth.uid() AND fm.hasta IS NULL)`).
+ * Nació en S82-A r17b para que los lectores del hub puedan **declarar
+ * desde qué rol preguntan** sin romper la lectura de la familia.
+ *
+ * POR QUÉ ES `familia`, NO `user_id`: el paquete de salidas es **DEL
+ * HOGAR** (MODELO_PASEO v1.4 §6bis) — quien lo compró y quien lo usa
+ * pueden ser personas distintas. Filtrar por comprador escondería el
+ * saldo al resto de la familia, que es un defecto peor que el que se
+ * está curando. Por eso el filtro es el predicado ENTERO, las dos patas.
+ *
+ * SIN CACHÉ, A PROPÓSITO (L-166: todo dato vivo se lee al momento de
+ * usarlo). La membresía cambia — alguien entra, alguien sale — y un Map
+ * propio con TTL sería exactamente la invalidación que nos olvidamos.
+ * Cuesta UN viaje; el costo está declarado en el reporte de r17b y su
+ * cura, si algún día pesa, es un RPC que resuelva server-side, no un
+ * caché acá.
+ *
+ * EL FALLO NO SE DISFRAZA DE VACÍO (L-178): si la lectura falla devuelve
+ * `ok:false`, jamás `[]` — una lista vacía haría desaparecer TODOS los
+ * paquetes de la familia y la pantalla diría "no tenés ninguno", que es
+ * mentira con cara de dato.
+ */
+export async function misFamiliasVigentes(): Promise<
+  { ok: true; familias: string[] } | { ok: false }
+> {
+  const uid = await uidActual();
+  if (uid === null) return { ok: true, familias: [] };
+  const { data, error } = await getClient()
+    .from('familia_miembro')
+    .select('familia_id')
+    .eq('user_id', uid)
+    .is('hasta', null);
+  if (error) return { ok: false };
+  return { ok: true, familias: (data ?? []).map((f) => f.familia_id) };
+}

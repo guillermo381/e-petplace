@@ -8,7 +8,7 @@
 // el contrato. Patrón canónico: códigos tipados + normalización por
 // prefijo (L-115) + guards contra el retorno REAL (L-124).
 
-import { getClient } from '../client';
+import { getClient, misFamiliasVigentes, uidActual } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 
 // ── Códigos de error (verificados contra los RAISE de cada body) ────────────
@@ -32,6 +32,13 @@ const CODIGOS_ERROR_PAQUETE = [
   'cita_no_es_de_paquete',
   'cita_estado_invalido',
   'ventana_vencida',
+  // S82-A r17b: los lectores del hub exigen sesión para poder declarar
+  // desde qué rol preguntan (ver `obtenerMisPaquetesSalidas`).
+  'sin_sesion',
+  // …y si la membresía familiar no se puede leer, el saldo NO se pinta
+  // vacío: se dice que falló (L-178 — un fallo jamás se disfraza de
+  // "no tenés paquetes", que es mentira con cara de dato).
+  'error_familia',
 ] as const;
 
 export type CodigoErrorPaquete = (typeof CODIGOS_ERROR_PAQUETE)[number];
@@ -58,6 +65,8 @@ const MENSAJES_ERROR_PAQUETE: Record<
   cita_no_es_de_paquete: 'Esa salida no es parte de un paquete.',
   cita_estado_invalido:  'Esa salida ya no se puede cancelar.',
   ventana_vencida:       'Faltan menos de 2 horas — esta salida ya no se puede cancelar.',
+  sin_sesion:            'No hay sesión activa.',
+  error_familia:         'No pudimos leer tu hogar — probá de nuevo.',
   datos_inconsistentes:  'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:     'Ocurrió un error inesperado. Probá de nuevo.',
 };
@@ -223,7 +232,30 @@ export async function cancelarReservaPaquete(
   return { ok: true, data: { saldo: Number(o.saldo) } };
 }
 
-// ── El saldo visible (lecturas por RLS solo-comprador) ──────────────────────
+// ── El saldo visible (lecturas que DECLARAN el rol del que pregunta) ────────
+
+/**
+ * El filtro de PostgREST que espeja, literal, la pata del dueño de
+ * `bonos_pet_parent_own`: `user_id = auth.uid() OR familia_id IN (…)`.
+ *
+ * Una sola verdad para los dos lectores del hub — si mañana la policy
+ * gana una pata, se cambia acá y los dos la heredan (la alternativa era
+ * clonar el predicado en dos sitios, que es exactamente cómo nacen las
+ * divergencias que esta sesión viene curando).
+ */
+async function puertaDelDueno(): Promise<
+  { ok: true; filtro: string } | { ok: false; codigo: 'sin_sesion' | 'error_familia' }
+> {
+  const uid = await uidActual();
+  if (uid === null) return { ok: false, codigo: 'sin_sesion' };
+  const fam = await misFamiliasVigentes();
+  if (!fam.ok) return { ok: false, codigo: 'error_familia' };
+  const patas = [`user_id.eq.${uid}`];
+  // `familia_id.in.()` con lista vacía es sintaxis inválida — sin
+  // familias, la pata simplemente no existe (y la del comprador alcanza).
+  if (fam.familias.length > 0) patas.push(`familia_id.in.(${fam.familias.join(',')})`);
+  return { ok: true, filtro: patas.join(',') };
+}
 
 export interface PaqueteSalidas {
   id: string;
@@ -242,15 +274,40 @@ export interface PaqueteSalidas {
   fecha_vencimiento: string | null;
 }
 
-/** Los paquetes del dueño (todos los estados — la superficie decide qué pinta). */
+/**
+ * Los paquetes del dueño (todos los estados — la superficie decide qué pinta).
+ *
+ * ══ POR QUÉ DECLARA SU ROL EN VEZ DE APOYARSE EN LA RLS ══
+ * (S82-A r17b — hermano exacto de `obtenerMisPlanesPaseo`, mismo defecto
+ *  y MISMA PANTALLA; reporte en
+ *  `docs/relevamientos/2026-07-31-s82a-r17-suscripciones.md`)
+ *
+ * `bonos` tiene **CUATRO puertas de lectura** —dueño, prestador,
+ * empleado, admin— y las cuatro son correctas. Este lector dice "MIS
+ * paquetes" y hasta hoy no declaraba desde cuál preguntaba: en una
+ * cuenta de **doble papel** (dueño Y paseador, el caso normal de un
+ * groomer con perro) el hub de la familia pintaba el saldo de los
+ * paquetes que esa persona **VENDIÓ**.
+ *
+ * **EL FILTRO ES EL ESPEJO DEL PREDICADO, NO UN `.eq('user_id')`** — y
+ * esa es la diferencia con el plan. La puerta del dueño de `bonos` tiene
+ * DOS patas (`user_id = auth.uid() OR familia_id IN (mis vigentes)`)
+ * porque **el paquete es DEL HOGAR** (v1.4 §6bis): quien compra y quien
+ * usa pueden ser distintos. Filtrar por comprador habría escondido el
+ * saldo al resto de la familia — un defecto peor que el curado. Medir el
+ * literal antes de elegir la columna fue lo que lo evitó.
+ */
 export async function obtenerMisPaquetesSalidas(): Promise<
   ResultadoWrapper<PaqueteSalidas[], CodigoErrorPaquete>
 > {
   const supabase = getClient();
+  const puerta = await puertaDelDueno();
+  if (!puerta.ok) return { ok: false, codigo: puerta.codigo, mensaje: MENSAJES_ERROR_PAQUETE[puerta.codigo] };
   const { data, error } = await supabase
     .from('bonos')
     .select('id, prestador_id, prestador_servicio_id, mascota_id, estado, unidades_total, unidades_usadas, duracion_minutos, precio_por_unidad, fecha_compra, fecha_vencimiento')
     .eq('tipo_servicio', 'paseo')
+    .or(puerta.filtro)
     .order('fecha_compra', { ascending: false });
   if (error) return mapeoError(error.message);
 
@@ -286,14 +343,23 @@ export interface SaldoPaquete {
 
 /**
  * El saldo VIGENTE del ancla (prestador + oferta) — DEL HOGAR (v1.4):
- * la RLS familiar decide qué bonos ve el usuario; la mascota ya no
- * participa del saldo. null honesto si no hay ninguno.
+ * el paquete es del hogar y la mascota se elige por reserva, así que el
+ * saldo lo ve toda la familia. null honesto si no hay ninguno.
+ *
+ * DECLARA SU ROL igual que su hermano (r17b), y acá el borde es MÁS
+ * filoso: este lector está keyed por prestador, no por dueño, y alimenta
+ * el flujo de COMPRA/RESERVA. Un dueño que además es paseador, mirando
+ * su propia oferta, veía **sumado el saldo de los paquetes que le
+ * compraron sus clientes** — un número ajeno entrando a una pantalla
+ * donde decide plata. La clave del ancla no protege: solo acota.
  */
 export async function obtenerSaldoPaquete(input: {
   prestador_id: string;
   prestador_servicio_id: string;
 }): Promise<ResultadoWrapper<SaldoPaquete | null, CodigoErrorPaquete>> {
   const supabase = getClient();
+  const puerta = await puertaDelDueno();
+  if (!puerta.ok) return { ok: false, codigo: puerta.codigo, mensaje: MENSAJES_ERROR_PAQUETE[puerta.codigo] };
   const hoy = new Intl.DateTimeFormat('en-CA').format(new Date());
   const { data, error } = await supabase
     .from('bonos')
@@ -303,7 +369,8 @@ export async function obtenerSaldoPaquete(input: {
     .eq('prestador_servicio_id', input.prestador_servicio_id)
     .eq('estado', 'activo')
     .eq('estado_pago', 'pagado')
-    .gte('fecha_vencimiento', hoy);
+    .gte('fecha_vencimiento', hoy)
+    .or(puerta.filtro);
   if (error) return mapeoError(error.message);
 
   let saldo = 0;

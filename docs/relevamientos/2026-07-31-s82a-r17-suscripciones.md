@@ -113,16 +113,96 @@ atadas a un padre ya leído bajo RLS (`eq('grooming_id', …)`,
 
 **El próximo a curar es `bonos`** — no por severidad teórica sino porque
 es el mismo defecto, en la misma pantalla, reproducible con la misma
-cuenta.
+cuenta. ✅ **CURADO en r17b — ver §7.**
 
 ### Lo que este censo NO cubre (declarado, no barrido en silencio)
 Solo miró `packages/api`. Un lector de la app que llame directo a
 PostgREST quedaría afuera — pero la puerta única (`@epetplace/api`) lo
 prohíbe, así que el censo es completo **si la puerta única se cumple**.
 
+---
+
+## 7. `bonos` — curado (r17b), y enseñó algo que el plan no podía enseñar
+
+### 7.1 Eran DOS lectores, no uno
+
+El censo había cazado `paquetes.ts:251` (`obtenerMisPaquetesSalidas`).
+Al abrir el archivo apareció el segundo: **`obtenerSaldoPaquete`**, keyed
+por prestador + oferta, **el que alimenta el flujo de compra/reserva**.
+La clave del ancla no protege: **solo acota**. Un dueño que además es
+paseador, mirando su propia oferta, veía sumado el saldo de los paquetes
+que le compraron sus clientes — **un número ajeno entrando a una pantalla
+donde se decide plata**.
+
+*(Nota de método: el censo cuenta por SITIO de `.from()`, y ese conteo es
+un piso, no un total. Abrir el archivo encontró un hermano que el grep
+había puesto en otra fila.)*
+
+### 7.2 EL `.eq('user_id')` HABRÍA SIDO LA CURA EQUIVOCADA
+
+El literal de `bonos_pet_parent_own` **no es el mismo** que el del plan:
+
+```
+(user_id = auth.uid())
+OR (familia_id IN (SELECT fm.familia_id FROM familia_miembro fm
+                    WHERE fm.user_id = auth.uid() AND fm.hasta IS NULL))
+```
+
+**Dos patas**, porque **el paquete es DEL HOGAR** (MODELO_PASEO v1.4
+§6bis): quien compra y quien usa pueden ser personas distintas. Copiar la
+cura del plan —`.eq('user_id', uid)`— habría **escondido el saldo al
+resto de la familia**: un defecto peor que el que se estaba curando, y
+silencioso.
+
+**Discriminador corrido** (miembro TEMPORAL de la familia de `+8` que no
+compró nada, in-txn, **residuo 0 verificado después, no asumido**):
+
+| | ve |
+|---|---|
+| con `.eq('user_id')` — la cura ingenua | **1** (solo el suyo) 🔴 |
+| con el ESPEJO del predicado | **3** (el suyo + los 2 del hogar) ✅ |
+
+**Esto es L-169 en su forma dura:** entre dos curas que se parecen, gana
+la que se midió. El literal de la policy **eligió la columna del filtro**
+— no la analogía con el caso anterior.
+
+### 7.3 El rojo, producido en los dos lectores
+
+JWT de `demo-prestador@epetplace.dev` (dueño **y** prestador):
+
+| lector | hoy | con la puerta |
+|---|---|---|
+| `obtenerMisPaquetesSalidas` (el hub) | **2 paquetes ajenos** 🔴 | **0** ✅ |
+| `obtenerSaldoPaquete` (compra/reserva) | **18 salidas ajenas** 🔴 | **0** ✅ |
+
+No-regresión con el dueño real (`guillo381+8`): **2 y 18, iguales**.
+
+### 7.4 La forma de la cura
+
+Nace **`misFamiliasVigentes()`** en `client.ts`, al lado de `uidActual()`
+— el espejo de la pata familiar, **sin caché a propósito** (L-166: la
+membresía cambia, y un Map con TTL propio es la invalidación que nos
+olvidamos). Y `puertaDelDueno()` en `paquetes.ts`: **una sola verdad para
+los dos lectores** — si mañana la policy gana una pata, se toca un lugar.
+Los dos fallos nuevos son tipados (`sin_sesion`, `error_familia`) y
+**ninguno se disfraza de lista vacía** (L-178): un error leyendo la
+membresía diría "no tenés paquetes", que es mentira con cara de dato.
+
+**COSTO DECLARADO:** cada lector paga **un viaje más** (la membresía).
+En el hub son dos lecturas de `familia_miembro` por pantalla. Roza
+D-497 (el piso de performance). **La cura de ese costo, si algún día
+pesa, es un RPC que resuelva la puerta server-side — jamás un caché de
+membresía acá.**
+
+---
+
 ## 6. Archivos
 
 - `packages/api/src/wrappers/planes.ts` — filtro + `sin_sesion` + el porqué
-  escrito en el propio lector.
+  escrito en el propio lector (r17).
+- `packages/api/src/client.ts` — nace `misFamiliasVigentes()` (r17b).
+- `packages/api/src/wrappers/paquetes.ts` — `puertaDelDueno()` + los DOS
+  lectores + dos códigos tipados (r17b).
 - Cero migraciones: **la DB no se toca** — no había nada roto en la DB.
-- typecheck `@epetplace/api` y `cliente`: verdes, exit real 0 (L-191).
+- typechecks `@epetplace/api`, `cliente` y `prestador`: verdes, exit real
+  0 leído del comando (L-191).
