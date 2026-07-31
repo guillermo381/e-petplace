@@ -324,6 +324,19 @@ export const clienteEn = {
     errorDetalle: 'Check your connection and try again.',
     reintentar: 'Try again',
   },
+  // S82-A r9 — the vet log (D-493). Addendum to the consolidated batch.
+  logVet: {
+    titulo: 'Their vet visits',
+    cargando: 'Loading their visits',
+    esperaFecha: 'waiting for a date',
+    agendar: 'Book a visit',
+    desdeNota: 'Each visit is priced by their vet clinic.',
+    vacioProximos: 'No visits coming up',
+    vacioProximosDetalle: "When you book a visit, it'll show up here.",
+    vacioHistorial: 'No visits saved yet',
+    vacioHistorialDetalle: 'Every visit they get stays in their story.',
+    errorTitulo: "We couldn't load their visits",
+  },
   carnet: {
     titulo: 'Vaccine card',
     capturaTitulo: "Take a photo of {{nombre}}'s vaccine card — we read the vaccines",

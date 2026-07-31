@@ -308,3 +308,109 @@ export async function obtenerVitrinaNegocios(
   for (const f of data) vitrina[f.id] = f.expone_personas === true;
   return { ok: true, data: vitrina };
 }
+
+// ── S82-A r9 · EL LECTOR DEL HUB VET DEL DUEÑO (D-493) ────────────────────
+//
+// Molde: `obtenerMisGroomings` (clonado del literal, no reinventado). Las
+// DIFERENCIAS con ese molde son las que la medición obligó, y cada una
+// está declarada:
+//
+//  · **La fecha puede faltar y NO es dato roto.** El molde de grooming
+//    descarta `fecha === null` porque "una sesión pagada tiene fecha
+//    firme". En vet NO: desde D-439 la aprobación de un presupuesto
+//    agenda cita FIRME **sin fecha** (`por_coordinar`) — descartarla
+//    escondería justo la que el dueño tiene que coordinar. Viaja con
+//    `fecha: null` y la superficie la dice.
+//  · **`estado_reserva` no gatea.** En vet hay citas que el dueño NUNCA
+//    reservó: las del MOSTRADOR (walk-in, S69) nacen en el negocio y el
+//    dueño las ve aparecer. Exigir `pagada` las borraría del hub de su
+//    propia mascota.
+//  · **El caso clínico viaja aunque hoy esté vacío** (`caso_clinico_id`:
+//    0 de 13 citas al medir) — para que el día que el motor lo estampe,
+//    el hub agrupe sin cambiar el contrato.
+
+export interface ConsultaDelHogar {
+  cita_id: string;
+  /** 'YYYY-MM-DD' · **null legal**: cita firme sin fecha (D-439). */
+  fecha: string | null;
+  /** 'HH:MM' · null cuando no hay fecha. */
+  hora: string | null;
+  estado: string;
+  tipo_servicio: string;
+  servicio_nombre: string;
+  precio: number | null;
+  mascota_id: string | null;
+  mascota_nombre: string | null;
+  prestador_nombre: string | null;
+  /** SOLO si la atención cerró: navega al parte. */
+  atencion_id: string | null;
+  /** El caso que la agrupa — hoy siempre null (el motor no lo estampa
+   *  todavía); el contrato ya lo trae para no migrarlo después. */
+  caso_clinico_id: string | null;
+}
+
+/** Las consultas veterinarias del hogar. A diferencia del hub de
+ *  grooming, incluye las citas SIN FECHA (por coordinar) y las nacidas
+ *  en el mostrador — el dueño tiene que verlas aunque no las haya
+ *  agendado él. */
+export async function obtenerMisConsultasVet(): Promise<
+  ResultadoWrapper<ConsultaDelHogar[], CodigoErrorVetReserva>
+> {
+  const cliente = getClient();
+  const [tipos, citas] = await Promise.all([
+    cliente.from('tipos_servicio').select('codigo, nombre').eq('es_medico', true),
+    cliente
+      .from('evento_cita_servicio')
+      .select('id, fecha, hora, estado, precio, prestador_id, mascota_id, tipo_servicio, caso_clinico_id')
+      .in('estado', ['confirmada', 'en_curso', 'completada', 'por_coordinar'])
+      .order('fecha', { ascending: true, nullsFirst: true })
+      .order('hora', { ascending: true }),
+  ]);
+  if (tipos.error || citas.error) return fallo('error_desconocido');
+  const nombrePorCodigo = new Map(tipos.data.map((t) => [t.codigo, t.nombre]));
+
+  const filas = (citas.data ?? []).filter(
+    (c) => c.tipo_servicio !== null && nombrePorCodigo.has(c.tipo_servicio),
+  );
+  if (filas.length === 0) return { ok: true, data: [] };
+
+  const prestadorIds = [...new Set(filas.map((c) => c.prestador_id).filter((v): v is string => v !== null))];
+  const mascotaIds = [...new Set(filas.map((c) => c.mascota_id).filter((v): v is string => v !== null))];
+  const citaIds = filas.map((c) => c.id);
+
+  const [prestadores, mascotas, atenciones] = await Promise.all([
+    prestadorIds.length > 0
+      ? cliente.from('prestadores').select('id, nombre_comercial').in('id', prestadorIds)
+      : Promise.resolve({ data: [], error: null }),
+    mascotaIds.length > 0
+      ? cliente.from('mascotas').select('id, nombre').in('id', mascotaIds)
+      : Promise.resolve({ data: [], error: null }),
+    cliente.from('evento_atencion').select('id, cita_id').in('cita_id', citaIds).eq('estado', 'cerrada_con_calidad'),
+  ]);
+  if (prestadores.error || mascotas.error || atenciones.error) return fallo('error_desconocido');
+
+  const prestadorPorId = new Map((prestadores.data ?? []).map((p) => [p.id, p.nombre_comercial]));
+  const mascotaPorId = new Map((mascotas.data ?? []).map((m) => [m.id, m.nombre]));
+  const atencionPorCita = new Map((atenciones.data ?? []).map((a) => [a.cita_id, a.id]));
+
+  return {
+    ok: true,
+    data: filas.map((c) => {
+      const tipo = c.tipo_servicio ?? '';
+      return {
+        cita_id: c.id,
+        fecha: c.fecha === null ? null : String(c.fecha),
+        hora: c.hora === null ? null : String(c.hora).slice(0, 5),
+        estado: c.estado ?? '',
+        tipo_servicio: tipo,
+        servicio_nombre: nombrePorCodigo.get(tipo) ?? tipo,
+        precio: c.precio === null ? null : Number(c.precio),
+        mascota_id: c.mascota_id ?? null,
+        mascota_nombre: c.mascota_id !== null ? mascotaPorId.get(c.mascota_id) ?? null : null,
+        prestador_nombre: c.prestador_id !== null ? prestadorPorId.get(c.prestador_id) ?? null : null,
+        atencion_id: atencionPorCita.get(c.id) ?? null,
+        caso_clinico_id: c.caso_clinico_id ?? null,
+      };
+    }),
+  };
+}

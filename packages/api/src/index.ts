@@ -479,6 +479,8 @@ export {
   type InputVeterinariosDisponibles,
   type OfertaVet,
   type VeterinarioDisponible,
+  obtenerMisConsultasVet,
+  type ConsultaDelHogar,
 } from './wrappers/veterinaria-reserva';
 
 // ── La reserva de adiestramiento del DUEÑO (S63-A Bloque 3 — hunk Sesión A) ─

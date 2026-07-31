@@ -1,6 +1,6 @@
 # LAS CANDIDATAS DE LECCIÓN — inventario para la firma del founder (S77, ampliado S82)
 
-> **DIEZ candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **La décima entró en S82** (el nombre de un token es su rol) — el inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
+> **ONCE candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **La décima y la undécima entraron en S82** — el nombre de un token es su rol, y su inversa: el nombre que envejeció — el inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
 
 > **NINGUNA ESTÁ FIRMADA. La firma es del founder.** Este documento no decide:
 > junta lo que hoy vive disperso entre la letra, las deudas y los cierres de
@@ -13,7 +13,7 @@
 
 ---
 
-## Las diez
+## Las once
 
 ### 1 · (d) — EL ORDEN NOMBRA EL ARTEFACTO QUE ABRE, JAMÁS EL ARCHIVO DONDE SE LO ESPERA
 **Origen:** S75 (canon, línea 44). **Sin firma desde entonces.**
@@ -104,12 +104,55 @@ puede chocar con "no se toca un token de N consumidores para curar uno"
 — el principio que el propio founder fijó con `light0`. La candidata dice
 CUÁNDO renombrar, no que renombrar sea gratis.)*
 
+### 11 · UN TOKEN CUYO NOMBRE ENVEJECIÓ FALLA AL BUSCARLO, NO AL USARLO — Y ES PEOR
+*(sumada en S82, 30-jul-2026 — origen: C, el canto de veterinaria. **Es la INVERSA de la #10 y por eso va aparte, no como nota suya.**)*
+
+**El texto candidato:** cuando una taxonomía se firma DESPUÉS que sus
+tokens, el token queda haciendo lo correcto con **el nombre viejo**. No
+es el caso de la #10 —ahí el nombre prometía más de lo que el token
+era—: acá **el token cumple y el nombre quedó desactualizado respecto de
+la ley**. **La cura es una PIEZA QUE TRADUCE: la pantalla habla LA LEY,
+una sola pieza mapea al token que existe, y nadie más tiene que saber
+que no se llaman igual.**
+
+**El caso:** la Ley 10 (taxonomía firmada S80) dice que lo clínico es
+**SALUD** — y el token que pinta ese canto se llama **`capa.identidad`**
+(nació en v4, mucho antes de la taxonomía). El token hace exactamente lo
+correcto: es el verde de la capa de vida, es el que el timeline usa para
+la vacuna desde S52. Solo su NOMBRE quedó viejo.
+
+**Por qué es PEOR que la #10, y es lo que la vuelve candidata propia:**
+
+| | #10 (`bg.overlay`) | #11 (`capa.identidad`) |
+|---|---|---|
+| dónde falla | **al USARLO** — alguien lo elige mal | **al BUSCARLO** — no lo encuentra |
+| qué produce | un uso equivocado, visible en la pantalla | **un token DUPLICADO** — el que busca `capa.salud` no lo halla y crea uno |
+| cómo se nota | mirando la pantalla | **no se nota**: dos tokens coexistiendo y divergiendo con el tiempo |
+
+**Costo evitado, medido en esta sesión:** dos pistas escribieron el canto
+clínico el mismo día (C en el perfil, A en el log de veterinaria) y las
+dos tuvieron que resolver a mano que "SALUD" es `capa.identidad`. Una
+tercera que no lo supiera habría creado `capa.salud` — y el día que
+alguien cambie uno de los dos, divergen sin que nada avise.
+
+**La cura, que vale como PATRÓN (aplicada por C):** no renombrar el token
+—que arrastra sus consumidores y choca con el principio de `light0`—
+sino **una sola pieza que traduzca ley→token**. La pantalla escribe el
+nombre de la LEY; la traducción vive en un lugar y se corrige en un
+lugar.
+
+**Estado:** viva, sin firma. *Con su pregunta abierta para el gate: si la
+pieza traductora es la respuesta general, ¿cuándo conviene igual
+renombrar? La #10 y la #11 piden cosas distintas —una re-declarar el
+nombre, la otra traducirlo— y el gate tiene que decidir si son dos leyes
+o dos caras de una.*
+
 ---
 
 ## Nota sobre el conteo
 
 **Son NUEVE, y la novena nació acá.** El inventario abrió con ocho porque **L-169 no existía**: el canon la nombraba y ninguna edición la había escrito. Su texto se depositó en S77 (ver arriba), con su nota de procedencia — que es, ella misma, material de la lección.
 
-> **RE-MEDIDO S82 (30-jul-2026): son DIEZ.** Entró la décima —*un token se nombra por su ROL*— desde el trabajo de B sobre el tema del cliente, con sus tres casos medidos. El conteo se corrige acá y en el título en el MISMO acto (L-141: un contador que envejece miente igual que una ley sin escribir). **Las nueve de S77 siguen SIN FIRMA**, ninguna cerrada: este documento acumula, no vence.
+> **RE-MEDIDO S82 (30-jul-2026): son ONCE.** Entraron la décima —*un token se nombra por su ROL*, del trabajo de B sobre el tema— y la undécima —*el nombre que envejeció falla al BUSCARLO*, del canto de veterinaria de C. **Son INVERSAS y por eso van separadas:** una falla al usar el token, la otra al no encontrarlo (y ésa produce duplicados, que es peor porque no se ve). El conteo se corrige acá y en el título en el MISMO acto (L-141: un contador que envejece miente igual que una ley sin escribir). **Las nueve de S77 siguen SIN FIRMA**, ninguna cerrada: este documento acumula, no vence.
 
 Si alguna otra candidata quedó fuera, es porque no encontré su fuente. **Pasame el literal y entra**: el criterio de este documento es que nada figure sin dónde leerlo.

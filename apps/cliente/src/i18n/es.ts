@@ -372,6 +372,21 @@ export const clienteEs = {
     errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
     reintentar: 'Reintentar',
   },
+  // S82-A r9 — EL LOG DE VETERINARIA (D-493). ADENDA al lote
+  // consolidado. OJO: "espera fecha" es el nulo honesto de D-439 — una
+  // cita firme puede no tener día todavía.
+  logVet: {
+    titulo: 'Sus visitas al veterinario',
+    cargando: 'Cargando sus visitas',
+    esperaFecha: 'espera fecha',
+    agendar: 'Agendar una consulta',
+    desdeNota: 'El precio de cada consulta lo pone su veterinaria.',
+    vacioProximos: 'No tiene visitas por venir',
+    vacioProximosDetalle: 'Cuando agendes una consulta, va a aparecer acá.',
+    vacioHistorial: 'Todavía no hay visitas guardadas',
+    vacioHistorialDetalle: 'Cada consulta que reciba queda en su historia.',
+    errorTitulo: 'No pudimos traer sus visitas',
+  },
   carnet: {
     titulo: 'Carnet de vacunas',
     capturaTitulo: 'Sácale una foto al carnet de {{nombre}} — nosotros leemos las vacunas',
