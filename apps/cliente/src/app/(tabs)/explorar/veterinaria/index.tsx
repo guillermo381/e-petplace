@@ -29,7 +29,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { router, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   AvatarMascota,
   Boton,
@@ -39,12 +39,14 @@ import {
   EstadoVacio,
   Icono,
   SelectorOpcion,
+  Texto,
   spacing,
   typography,
   useTheme,
 } from '@epetplace/ui';
 import {
   getEstadoOnboardingDueno,
+  obtenerDiasCerradosServicio,
   obtenerIniciosVet,
   obtenerMascotasDeFamilia,
   obtenerOfertaVet,
@@ -54,6 +56,7 @@ import {
   mascotasElegibles,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
+import { CabezalOficio, GrillaElegir, PieReserva, SelectorDia } from '@/components/reserva-piezas';
 import { vozServicio } from '@/lib/voz-servicio';
 
 function fechaLocalISO(d: Date): string {
@@ -68,9 +71,21 @@ export default function VeterinariaCuando() {
   const [mascotas, setMascotas] = useState<MascotaResumen[] | 'cargando' | 'error'>('cargando');
   // S61-A4: la CARA del para-quién — URLs firmadas (patrón del QUIÉN).
   const [fotos, setFotos] = useState<Record<string, string>>({});
-  const [mascotaId, setMascotaId] = useState<string | null>(null);
+  // ⚠️ r33 · LA MASCOTA VIAJA DESDE EL LOG y NO se vuelve a preguntar
+  // (Ley 23: la puerta no pregunta lo que ya sabe). Se LEE VIVA, no se
+  // copia: `router.navigate` reusa la ruta montada y `useState(param)`
+  // la congelaría en la del primer montaje — el defecto de r15-bis,
+  // cortado antes de que ocurra. El estado local sobrevive SOLO para el
+  // deep-link sin param y el log vacío.
+  const { mascotaId: mascotaParam } = useLocalSearchParams<{ mascotaId?: string }>();
+  const paramMascota =
+    typeof mascotaParam === 'string' && mascotaParam.trim().length > 0 ? mascotaParam : null;
+  const [elegidaLocal, setElegidaLocal] = useState<string | null>(null);
+  const mascotaId = paramMascota ?? elegidaLocal;
+  const setMascotaId = setElegidaLocal;
   const [oferta, setOferta] = useState<OfertaVet[] | 'cargando' | 'error' | null>(null);
   const [tipoServicio, setTipoServicio] = useState<string | null>(null);
+  const [diasCerrados, setDiasCerrados] = useState<Set<number>>(new Set());
   const [dia, setDia] = useState<string>(fechaLocalISO(new Date()));
   const [inicios, setInicios] = useState<string[] | 'cargando' | 'error'>('cargando');
   const [hora, setHora] = useState<string | null>(null);
@@ -159,17 +174,34 @@ export default function VeterinariaCuando() {
       weekday: 'short',
       day: 'numeric',
     });
-    const lista: Array<{ iso: string; etiqueta: string; corta: string }> = [];
+    const partes = new Intl.DateTimeFormat(idioma === 'es' ? 'es' : 'en', { weekday: 'short' });
+    const lista: Array<{ iso: string; etiqueta: string; corta: string; dow: number; diaCorto: string }> = [];
     for (let i = 0; i < 14; i++) {
       const d = new Date();
       d.setDate(d.getDate() + i);
       const iso = fechaLocalISO(d);
       const corta = fmt.format(d).toLowerCase();
       const etiqueta = i === 0 ? t('explorar.cuandoHoy') : i === 1 ? t('explorar.cuandoManana') : corta;
-      lista.push({ iso, etiqueta, corta });
+      lista.push({
+        iso,
+        etiqueta,
+        corta,
+        // dow del Date LOCAL · el día corto POR SU PARTE (las dos trampas
+        // ya cobradas en paseo: UTC corre el día, el ICU inglés ordena "30 Thu")
+        dow: d.getDay(),
+        diaCorto: partes.formatToParts(d).find((x) => x.type === 'weekday')?.value.toLowerCase() ?? '',
+      });
     }
     return lista;
   }, [idioma, t]);
+
+  // r33 · los días cerrados POR SERVICIO — el tipo lo elige el usuario en
+  // "qué necesita", así que el lector se re-pregunta cuando ese eje cambia.
+  const cerradosISO = useMemo(
+    () => new Set(dias.filter((d) => diasCerrados.has(d.dow)).map((d) => d.iso)),
+    [dias, diasCerrados],
+  );
+  const diaElegidoCerrado = cerradosISO.has(dia);
 
   // §6ter: el día siguiente en la tira, o null en el último.
   const diaSiguiente = useMemo(() => {
@@ -194,9 +226,36 @@ export default function VeterinariaCuando() {
 
   const listo = mascota !== null && tipoServicio !== null && hora !== null;
 
+  useEffect(() => {
+    if (tipoServicio === null || tipoServicio.length === 0) return;
+    let vigente = true;
+    void obtenerDiasCerradosServicio(tipoServicio).then((r) => {
+      if (vigente && r.ok) setDiasCerrados(new Set(r.data.dias));
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [tipoServicio]);
+
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('veterinaria.titulo')} atras onAtras={() => router.back()} />
+    /* r33 · el SafeAreaView murió: el cabezal ABSORBE el inset superior.
+       ⚠️ CORRECCIÓN MEDIDA AL BRIEF: esta pantalla SÍ tenía encabezado —
+       tenía el VIEJO (`Encabezado navegación`). No es que le faltara uno:
+       es la única que quedó sin MIGRAR al cabezal nuevo. La diferencia
+       importa porque "no tiene" pide agregar y "tiene el viejo" pide
+       migrar, que es lo que se hizo.
+       Y ESTRENA `capa="salud"`: veterinaria es la ÚNICA de los cuatro
+       oficios que no es CUIDADO (Ley 10), o sea la primera consumidora
+       real de la prop obligatoria que nació en r30 justamente para esto. */
+    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <CabezalOficio
+        oficio="veterinaria"
+        capa="salud"
+        titulo={t('veterinaria.titulo')}
+        detalle={mascota !== null ? mascota.nombre : null}
+        onAtras={() => router.back()}
+        insetTop={insets.top}
+      />
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
         {mascotas === 'cargando' ? (
           <EsqueletoGrupo>
@@ -230,22 +289,31 @@ export default function VeterinariaCuando() {
           />
         ) : (
           <>
-            {/* 0 · LA MASCOTA — la gramática canónica: el para-quién
-                VISIBLE siempre, con la cara (S61-A3/A4). */}
-            <SelectorOpcion
-              acento="control"
-              // S73 — ENTITY CHIP (dictado founder, V2 provisional): la cara
-              // es ANATOMÍA — overhang, lleno al elegir, cero borde.
-              entidad
-              etiqueta={t('veterinaria.paraQuien')}
-              opciones={elegibles.map((m) => ({
-                codigo: m.id,
-                etiqueta: m.nombre,
-                avatar: { nombre: m.nombre, fotoUrl: fotos[m.id] },
-              }))}
-              seleccionada={mascotaId ?? undefined}
-              onSelect={setMascotaId}
-            />
+            {/* ⚠️ r33 · EL PASO DE ELEGIR MASCOTA YA NO PRESIDE: la
+                mascota VIAJA DESDE EL LOG y un dato elegido no se vuelve a
+                preguntar (Ley 23). Sobrevive para DOS casos reales, no uno:
+                ① el deep-link sin param · ② el log VACÍO, cuyo CTA entra
+                acá sin mascota — y ahí preguntar es lo correcto, porque es
+                lo que la puerta NO sabe.
+                (Su forma sigue siendo el entity chip firmado en S73; los
+                chips NUEVOS con huella son del LOG, que es donde el eje
+                filtra. Acá no filtra: identifica.) */}
+            {mascota === null ? (
+              <SelectorOpcion
+                acento="control"
+                // S73 — ENTITY CHIP (dictado founder, V2 provisional): la cara
+                // es ANATOMÍA — overhang, lleno al elegir, cero borde.
+                entidad
+                etiqueta={t('veterinaria.paraQuien')}
+                opciones={elegibles.map((m) => ({
+                  codigo: m.id,
+                  etiqueta: m.nombre,
+                  avatar: { nombre: m.nombre, fotoUrl: fotos[m.id] },
+                }))}
+                seleccionada={mascotaId ?? undefined}
+                onSelect={setMascotaId}
+              />
+            ) : null}
 
             {mascota === null ? (
               // S73 hallazgo founder: el botón que scrolleaba MURIÓ — el
@@ -315,14 +383,18 @@ export default function VeterinariaCuando() {
                     {t('veterinaria.urgenciaSoloHoy')}
                   </Text>
                 ) : (
-                  <SelectorOpcion
-                    acento="control"
-                    etiqueta={t('explorar.cuandoDia')}
-                    disposicion="tira"
-                    opciones={dias.map((d) => ({ codigo: d.iso, etiqueta: d.etiqueta }))}
-                    seleccionada={dia}
-                    onSelect={setDia}
-                  />
+                  <View style={{ gap: spacing[2] }}>
+                    <View style={{ paddingHorizontal: spacing[5] }}>
+                      <Texto variante="apoyo">{t('explorar.cuandoDia')}</Texto>
+                    </View>
+                    <SelectorDia
+                      dias={dias.map((d) => ({ iso: d.iso, dia: d.diaCorto, numero: d.iso.slice(8, 10) }))}
+                      elegido={dia}
+                      cerrados={cerradosISO}
+                      etiquetaCerrado={t('explorar.cuandoDiaCerrado')}
+                      onElegir={setDia}
+                    />
+                  </View>
                 )}
 
                 {/* 2b · GRILLA de inicios reales — la duración la puso
@@ -355,14 +427,16 @@ export default function VeterinariaCuando() {
                     }
                   />
                 ) : (
-                  <SelectorOpcion
-                    acento="control"
-                    etiqueta={t('explorar.cuandoHora')}
-                    disposicion="grilla"
-                    opciones={inicios.map((h) => ({ codigo: h, etiqueta: h }))}
-                    seleccionada={hora ?? undefined}
-                    onSelect={setHora}
-                  />
+                  <View style={{ gap: spacing[2] }}>
+                    <View style={{ paddingHorizontal: spacing[5] }}>
+                      <Texto variante="apoyo">{t('explorar.cuandoHora')}</Texto>
+                    </View>
+                    <GrillaElegir
+                      opciones={inicios.map((h) => ({ codigo: h, etiqueta: h }))}
+                      elegida={hora}
+                      onElegir={setHora}
+                    />
+                  </View>
                 )}
               </>
             )}
@@ -370,32 +444,26 @@ export default function VeterinariaCuando() {
         )}
       </ScrollView>
 
-      {/* La gramática canónica: el CTA abajo, FIJO — una sola primaria. */}
-      {Array.isArray(mascotas) && elegibles.length > 0 ? (
-        <View
-          style={{
-            paddingHorizontal: spacing[4],
-            paddingTop: spacing[3],
-            paddingBottom: Math.max(insets.bottom, spacing[4]),
-            backgroundColor: theme.bg.base,
-            borderTopWidth: 1,
-            borderTopColor: theme.border.subtle,
+      {/* r33 · EL PIE, COMO PASEO: el precio a la izquierda con su
+          "desde" y el CTA a la derecha. La escalera del precio (S61-A13,
+          FIRMADA) manda: el exacto no existe hasta elegir prestador. */}
+      {Array.isArray(mascotas) && elegibles.length > 0 && servicioElegido !== null ? (
+        <PieReserva
+          total={`$ ${servicioElegido.desde_precio.toFixed(2)}`}
+          totalDesde={servicioElegido.varia}
+          cuando={hora !== null ? `${dias.find((d) => d.iso === dia)?.corta ?? ''} · ${hora}` : null}
+          etiqueta={t('explorar.verQuienPuede')}
+          habilitado={listo}
+          onPress={() => {
+            if (!listo || mascota === null) return;
+            router.push({
+              pathname: '/explorar/veterinaria/disponibles',
+              params: { fecha: dia, hora, tipoServicio, mascotaId: mascota.id },
+            });
           }}
-        >
-          <Boton
-            variante="primario"
-            etiqueta={t('explorar.verQuienPuede')}
-            deshabilitado={!listo}
-            onPress={() => {
-              if (!listo || mascota === null) return;
-              router.push({
-                pathname: '/explorar/veterinaria/disponibles',
-                params: { fecha: dia, hora, tipoServicio, mascotaId: mascota.id },
-              });
-            }}
-          />
-        </View>
+          insetBottom={insets.bottom}
+        />
       ) : null}
-    </SafeAreaView>
+    </View>
   );
 }
