@@ -14,9 +14,11 @@
 // hace firmar algo que no corre"*. Así que la lámina se monta donde las
 // piezas SÍ se pueden importar: la galería del cliente.
 
+import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
+  SelectorOpcion,
   Tarjeta,
   Texto,
   ThemeProvider,
@@ -98,20 +100,31 @@ function PiezasReales({ envoltorio }: { envoltorio: 'tarjeta' | 'halo' | 'haloRo
   return <Tarjeta elevacion="reposo">{contenido}</Tarjeta>;
 }
 
+/** Los tres candidatos de tapiz oscuro (S82-B r26). El 3% es el VIVO.
+ *  El techo está medido y va escrito al lado de cada uno: el halo
+ *  direccional rinde 1.53 en negro y CAE bajo 1.50 desde el 5%. */
+const TINTES = [
+  { codigo: '#0D050D', etiqueta: '3% (vivo)', nota: 'card/base 1.037 · halo 1.51 — el halo todavía compensa' },
+  { codigo: '#120510', etiqueta: '5%', nota: 'card/base 1.027 · halo 1.49 — EL TECHO: de acá para arriba ni el halo alcanza' },
+  { codigo: '#190515', etiqueta: '8%', nota: 'card/base 1.009 · halo 1.47 — card y base son EL MISMO COLOR: la tarjeta desaparece aun con la cura puesta' },
+];
+
 function LaminaSeparacionOscuro() {
   const { theme } = useTheme();
+  const [tinte, setTinte] = useState(TINTES[0].codigo);
+  const elegido = TINTES.find((t) => t.codigo === tinte) ?? TINTES[0];
   const OPCIONES = [
     {
-      k: 'tarjeta' as const,
-      titulo: '(a) COMO ESTÁ HOY — 1.05',
-      linea:
-        'Cuesta: nada. Toca: ninguna ley. Es el estado que el founder cazó TRES veces (los chips del 2×2, sinCaja, y ahora el día/duración/horario) — la tarjeta se separa solo por SOMBRA, y en oscuro una sombra oscura sobre fondo oscuro es invisible por física.',
-    },
-    {
       k: 'halo' as const,
-      titulo: '(b) HALO DIRECCIONAL — solo el canto superior',
+      titulo: '(b) HALO DIRECCIONAL — LA PROPUESTA POR DEFECTO',
       linea:
         'DIRECCIONAL, verificado en el literal: `borderTopWidth` — la luz entra por arriba y NO rodea, por eso A6 (SIN CAJA) no aplica. Cuesta: una línea de 1px al 14% arriba de la superficie (rinde 2.09 contra el fondo: el ojo la ve, y es justo lo que la sombra no puede dar en oscuro). NO mueve el par superficie/fondo — separa por CONTORNO, no por masa: cero textos tocados, cero de los 178 pares. Toca: A6 dice SIN CAJA (un halo no es caja: no rodea, es el borde donde pegaría la luz) y Ley 20 manda la sombra por token (no sería artesanal si nace como token de elevación oscura). Las dos son de mesa.',
+    },
+    {
+      k: 'tarjeta' as const,
+      titulo: '(a) COMO ESTÁ HOY — la referencia',
+      linea:
+        'Cuesta: nada. Toca: ninguna ley. Es el estado que el founder cazó TRES veces (los chips del 2×2, sinCaja, y ahora el día/duración/horario) — la tarjeta se separa solo por SOMBRA, y en oscuro una sombra oscura sobre fondo oscuro es invisible por física.',
     },
     {
       k: 'haloRodea' as const,
@@ -127,7 +140,7 @@ function LaminaSeparacionOscuro() {
     },
   ];
   return (
-    <View style={{ gap: spacing[6], padding: spacing[4], backgroundColor: theme.bg.base }}>
+    <View style={{ gap: spacing[6], padding: spacing[4], backgroundColor: tinte }}>
       <View style={{ gap: spacing[1] }}>
         <Texto variante="seccion">LA SEPARACIÓN EN OSCURO — sobre las piezas reales</Texto>
         <Texto variante="apoyo" color="danger">
@@ -136,6 +149,19 @@ function LaminaSeparacionOscuro() {
         <Texto variante="apoyo">
           LA OPCIÓN CARA, declarada como tal: subir los textos de capa del oscuro (violetText/pinkDark) ANTES, después las superficies, y re-medir los 178 pares. Es una tanda propia con su gate — se elige sabiendo que lo es.
         </Texto>
+      </View>
+      {/* EL EJE DEL TINTE — se juzga JUNTO con la separación, porque
+          subir el tinte EMPEORA el par y el halo es lo que lo compensa. */}
+      <View style={{ gap: spacing[2] }}>
+        <SelectorOpcion
+          etiqueta="Tapiz del oscuro"
+          disposicion="tira"
+          acento="control"
+          opciones={TINTES.map((t) => ({ codigo: t.codigo, etiqueta: t.etiqueta }))}
+          seleccionada={tinte}
+          onSelect={setTinte}
+        />
+        <Texto variante="dato">{`${elegido.codigo} · ${elegido.nota}`}</Texto>
       </View>
       {OPCIONES.map((o) => (
         <View key={o.k} style={{ gap: spacing[2] }}>
