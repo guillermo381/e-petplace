@@ -559,6 +559,40 @@ function TresSalidasOscuro() {
   )
 }
 
+
+/** S82-B r33 — EL HALO SOBRE UNA TARJETA REAL. LA PREGUNTA QUE QUEDÓ
+ *  ABIERTA SIN QUE NADIE LO NOTARA: el founder eligió sin-tarjeta sobre
+ *  halo, pero eligió mirando CHIPS (la lámina montaba SelectorDia y
+ *  GrillaElegir). Las TARJETAS siguen sin separarse en oscuro — que es
+ *  lo que cazó CUATRO veces — y esa es OTRA pregunta.
+ *  Acá el halo va sobre `Tarjeta` de verdad, con su contenido real. */
+function HaloSobreTarjeta() {
+  const { theme } = useTheme()
+  const cuerpo = (
+    <View style={{ gap: spacing[1] }}>
+      <Texto variante="cuerpo">Salió a pasear</Texto>
+      <Texto variante="dato">28 jul · 3,1 km en 52 min</Texto>
+    </View>
+  )
+  return (
+    <View style={{ gap: spacing[4], backgroundColor: theme.bg.base, padding: spacing[4], borderRadius: radius.md }}>
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">(a) la Tarjeta como está — card/base 1.037 al 3%</Texto>
+        <Tarjeta elevacion="reposo">{cuerpo}</Tarjeta>
+      </View>
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">(b) LA MISMA Tarjeta con halo direccional (1px al 14% arriba)</Texto>
+        <View style={{ backgroundColor: theme.bg.card, borderRadius: radius.md, padding: spacing[4], borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.14)' }}>
+          {cuerpo}
+        </View>
+      </View>
+      <Texto variante="apoyo" color="danger">
+        ESTA ES OTRA PREGUNTA, no la que ya firmaste: sin-tarjeta resolvió los CHIPS (día, hora, duración), donde L-b ya mandaba escala y color de texto con ≥4 hermanos. Las TARJETAS siguen sin separarse — y el halo no las toca ni toca ningún texto: solo agrega el borde donde pegaría la luz.
+      </Texto>
+    </View>
+  )
+}
+
 function GateS82() {
   const TAPIZ = palette.papelTapiz
   return (
@@ -2195,6 +2229,10 @@ function GaleriaInterna() {
             que se vea qué queda pendiente de curar (orden founder r16). */}
         <Seccion titulo="⭐ GATE S82-B r21 — LA SEPARACIÓN DE SUPERFICIE EN OSCURO: tres salidas sobre el mismo chip (los dos lados del par están cerrados por medición)">
           <ThemeProvider defaultMode="dark"><TresSalidasOscuro /></ThemeProvider>
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S82-B r33 — EL HALO SOBRE UNA TARJETA REAL (otra pregunta: sin-tarjeta resolvió los CHIPS, las tarjetas siguen sin separarse)">
+          <ThemeProvider defaultMode="dark"><HaloSobreTarjeta /></ThemeProvider>
         </Seccion>
 
         <Seccion titulo="⛔ RECHAZADO EN GATE — vivo en el código, pendiente de curar">

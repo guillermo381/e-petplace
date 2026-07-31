@@ -48,7 +48,7 @@ import {
   PieRevelar,
   SelectorOpcion,
   Separador,
-  radius,
+  Tarjeta,
   Texto,
   spacing,
   useAviso,
@@ -507,7 +507,7 @@ export default function MisPaseos() {
               {/* D-343: el SALDO del paquete, donde el dueño lo busca. La
                   vigencia en voz llana — sin countdown (P16e). */}
               {paquetesVigentes.map((pq) => (
-                <View key={pq.id} style={{ borderRadius: radius.md, overflow: 'hidden' }}>
+                <Tarjeta key={pq.id} relleno="ninguno" elevacion="reposo">
                   <Celda
                     titulo={t('paquete.tarjetaTitulo', { min: pq.duracion_minutos ?? 30 })}
                     subtitulo={
@@ -536,12 +536,12 @@ export default function MisPaseos() {
                       />
                     </>
                   ) : null}
-                </View>
+                </Tarjeta>
               ))}
               {listaPlanes.map((p) => {
                 const estado = vozEstado(p);
                 return (
-                  <View key={p.id} style={{ borderRadius: radius.md, overflow: 'hidden' }}>
+                  <Tarjeta key={p.id} relleno="ninguno">
                     {/* S60-A6: las próximas del plan MIGRARON a la lista
                         fusionada de abajo — la tarjeta queda PRODUCTO
                         puro (estado, renovación, pausa; D-343 intacto). */}
@@ -566,7 +566,7 @@ export default function MisPaseos() {
                         </View>
                       </>
                     ) : null}
-                  </View>
+                  </Tarjeta>
                 );
               })}
 
@@ -575,7 +575,7 @@ export default function MisPaseos() {
                   acciones (detalle P18 / Mover P14). Ventana de 10 con
                   "Cargar más" — jamás lista infinita sin paginar. */}
               {futurasFusionadas.length > 0 ? (
-                <View style={{ borderRadius: radius.md, overflow: 'hidden' }}>
+                <Tarjeta relleno="ninguno">
                   {futurasFusionadas.slice(0, ventana).map((f, i) => (
                     <View key={f.cita.id}>
                       {i > 0 ? <Separador /> : null}
@@ -617,7 +617,7 @@ export default function MisPaseos() {
                       </View>
                     </>
                   ) : null}
-                </View>
+                </Tarjeta>
               ) : null}
             </View>
           ) : (
