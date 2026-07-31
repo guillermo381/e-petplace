@@ -263,6 +263,7 @@ export function FiltroMascotas({
   mascotas,
   elegida,
   onElegir,
+  marca = 'ley',
 }: {
   mascotas: { id: string; nombre: string; fotoUrl?: string }[];
   /** null = NINGUNA elegida (el log entra sin filtro y muestra todo).
@@ -270,6 +271,12 @@ export function FiltroMascotas({
    *  murió, el comportamiento no. */
   elegida: string | null;
   onElegir: (id: string | null) => void;
+  /** 🔬 r36 · ANDAMIO DE GATE, muere con la firma. `'ley'` = lo que hay
+   *  hoy (los tres canales de L-b). `'huella'` = la propuesta: la huella
+   *  marca POR PRESENCIA, como el founder firmó en los filtros de tu
+   *  vida. NO rompe L-b — la ley prohíbe el RELLENO PLENO con 4+
+   *  hermanos, no marcar por forma. */
+  marca?: 'ley' | 'huella';
 }) {
   const { theme } = useTheme();
   // r12-11: sin el chip "Todas", los hermanos comparables son las
@@ -307,6 +314,14 @@ export function FiltroMascotas({
         }}
       >
         {contenido}
+        {/* la huella como MARCA DE PRESENCIA: aparece SOLO en la elegida,
+            que es lo único que la vuelve señal (el veredicto de S80 midió
+            que la huella en TODAS no puede señalar a una). */}
+        {marca === 'huella' && activo ? (
+          <Svg width={13} height={13} viewBox="0 0 24 24">
+            <Huella color={theme.accent.control} escala={0.9} x={1.2} y={1.2} />
+          </Svg>
+        ) : null}
       </Pressable>
     );
   };
