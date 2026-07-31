@@ -7,37 +7,51 @@
  * SIN tap Agenda: no hay plan en v1 (§9); el solape Próximos/Agenda del
  * hub del paseo es defecto anotado en D-366 y NO se clona.
  *
- * Esqueleto = las piezas de la casa (Encabezado + Boton + Selector-
- * Segmentado + Celda/Tarjeta) — el hub del paseo no presta componente
- * intermedio (su cuerpo es plan/paquete/P18-específico) y NO se toca.
+ * S82-C r31 — EL PATRÓN DEL LOG, APLICADO (no copiado). Lo que viaja
+ * de paseo porque está FIRMADO EN DISPOSITIVO: la hilera de mascota con
+ * la HUELLA marcando la elegida · el eje de ESTADO en FiltroPills · el
+ * de FECHA **solo en historial** · el CTA VIVO en pie fijo que nombra a
+ * la mascota y, apagado, dice qué falta · y el historial con el canto
+ * que pinta la curva.
+ * LO QUE **NO** VIAJA, y es la mitad que importa: el cuerpo del paseo
+ * (plan / paquete / P18) NO existe acá — grooming no tiene plan en v1
+ * (§9). Aplicar el patrón es traer la GRAMÁTICA, no el contenido.
  *
  * ESCALERA (§4b): peldaño 0 = vacíos con camino (Agendar) · peldaño 1 =
  * todo lo pintado es REAL (citas pagadas, dirección de sede sembrada) ·
  * peldaño 2 = el parte del cierre (fotos + mensaje) vive en la historia.
  */
 
-import { useCallback, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import {
   Boton,
-  Celda,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  FilaDato,
   Icono,
-  SelectorSegmentado,
+  Insignia,
   Separador,
-  Tarjeta,
+  Texto,
   spacing,
   useTheme,
 } from '@epetplace/ui';
-import { obtenerMisGroomings, type GroomingDelHogar } from '@epetplace/api';
+import {
+  getEstadoOnboardingDueno,
+  obtenerMascotasDeFamilia,
+  obtenerMisGroomings,
+  resolverUrlsFotos,
+  type GroomingDelHogar,
+} from '@epetplace/api';
 import { fechaCortaMono } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 import { vozServicio } from '@/lib/voz-servicio';
+import { FiltroMascotas, FiltroPills } from '@/components/filtro-pills';
+import { CantoCurva } from '@/components/canto-curva';
 
 type Tap = 'proximos' | 'historial';
 
@@ -47,11 +61,29 @@ export default function HubGrooming() {
   const { t, idioma } = useTraduccion();
   const [tap, setTap] = useState<Tap>('proximos');
   const [filas, setFilas] = useState<GroomingDelHogar[] | 'cargando' | 'error'>('cargando');
+  // r31 · LOS TRES EJES DEL LOG. El de FECHA solo existe en historial:
+  // en próximos no parte los datos y un eje que no parte NO SE DIBUJA.
+  const [filtroMascota, setFiltroMascota] = useState<string | null>(null);
+  const [ventanaFecha, setVentanaFecha] = useState<'todos' | 'semana' | 'mes'>('todos');
+  const [mascotasHogar, setMascotasHogar] = useState<{ id: string; nombre: string; fotoUrl?: string }[]>([]);
+  const [abierta, setAbierta] = useState<string | null>(null);
+  const [pidiendoMascota, setPidiendoMascota] = useState(false);
+  const scrollRef = useRef<ScrollView>(null);
 
   const cargar = useCallback(() => {
     setFilas('cargando');
     void obtenerMisGroomings().then((r) => {
       setFilas(r.ok ? r.data : 'error');
+    });
+    void getEstadoOnboardingDueno().then(async (e) => {
+      if (!e.ok || e.data.familia_id === null) return;
+      const r = await obtenerMascotasDeFamilia(e.data.familia_id);
+      if (!r.ok) return;
+      const paths = r.data.map((m) => m.foto_url).filter((x): x is string => typeof x === 'string' && x.length > 0);
+      const urls = paths.length > 0 ? await resolverUrlsFotos(paths) : new Map<string, string>();
+      setMascotasHogar(
+        r.data.map((m) => ({ id: m.id, nombre: m.nombre, fotoUrl: m.foto_url ? urls.get(m.foto_url) : undefined })),
+      );
     });
   }, []);
 
@@ -63,10 +95,28 @@ export default function HubGrooming() {
 
   // Próximos = lo confirmado por venir (verdad firme; el EN VIVO vive en
   // el Hogar como celda viva) · Historial = lo cerrado, del más reciente.
-  const proximos = Array.isArray(filas) ? filas.filter((f) => f.estado === 'confirmada') : [];
+  const porMascota = (f: GroomingDelHogar) => filtroMascota === null || f.mascota_id === filtroMascota;
+  const cortePorVentana = (iso: string) => {
+    if (ventanaFecha === 'todos') return true;
+    const d = new Date();
+    d.setDate(d.getDate() - (ventanaFecha === 'semana' ? 7 : 30));
+    return iso >= new Intl.DateTimeFormat('en-CA').format(d);
+  };
+  const proximos = Array.isArray(filas) ? filas.filter((f) => f.estado === 'confirmada' && porMascota(f)) : [];
   const historial = Array.isArray(filas)
-    ? filas.filter((f) => f.atencion_id !== null).sort((a, b) => (a.fecha > b.fecha ? -1 : 1))
+    ? filas
+        .filter((f) => f.atencion_id !== null && porMascota(f) && cortePorVentana(f.fecha))
+        .sort((a, b) => (a.fecha > b.fecha ? -1 : 1))
     : [];
+  const hayAlgo = Array.isArray(filas) && filas.length > 0;
+  // 🔴 EL CTA MUERTO DE UNA SOLA MASCOTA (el defecto que costó caro en
+  // paseo, vivo desde r12 sin que nadie lo viera): la hilera NO se monta
+  // con 1, así que atar el CTA a "hay una elegida en la hilera" lo deja
+  // apagado PARA SIEMPRE en el hogar más común del producto. Con UNA no
+  // hay nada que elegir — la puerta no pregunta lo que ya sabe (Ley 23).
+  const elegida =
+    mascotasHogar.find((m) => m.id === filtroMascota) ??
+    (mascotasHogar.length === 1 ? mascotasHogar[0] : null);
 
   const subtituloDe = (f: GroomingDelHogar, conDonde: boolean): string =>
     [
@@ -77,29 +127,109 @@ export default function HubGrooming() {
       .filter(Boolean)
       .join(' · ');
 
+  const filaHistorial = (f: GroomingDelHogar) => {
+    const abierto = abierta === f.cita_id;
+    return (
+      <CantoCurva key={f.cita_id} color={theme.capa.cuidado}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ expanded: abierto }}
+          onPress={() => setAbierta(abierto ? null : f.cita_id)}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3], padding: spacing[3], minHeight: 58 }}>
+            <View style={{ flex: 1, minWidth: 0, gap: spacing[0.5] }}>
+              <Texto variante="cuerpo" numberOfLines={1}>
+                {vozServicio(t, f.tipo_servicio, f.servicio_nombre) ?? f.servicio_nombre}
+              </Texto>
+              <Texto variante="dato" numberOfLines={1}>
+                {`${fechaCortaMono(f.fecha, idioma)} · ${f.hora}`}
+              </Texto>
+            </View>
+            <Insignia estado="alDia" etiqueta={t('plan.salidaCompletada')} tamaño="sm" />
+          </View>
+        </Pressable>
+        {abierto ? (
+          <View style={{ paddingHorizontal: spacing[3], paddingBottom: spacing[3], gap: spacing[2] }}>
+            <Separador />
+            {f.mascota_nombre !== null ? (
+              <FilaDato disposicion="horizontal" etiqueta={t('grooming.paraQuien')} valor={f.mascota_nombre} />
+            ) : null}
+            {f.prestador_nombre !== null ? (
+              <FilaDato disposicion="horizontal" etiqueta={t('grooming.dondeEtiqueta')} valor={f.prestador_nombre} />
+            ) : null}
+            {f.precio !== null ? (
+              <FilaDato disposicion="horizontal" etiqueta={t('presupuesto.total')} valor={`$ ${f.precio.toFixed(2)}`} mono />
+            ) : null}
+            {f.atencion_id !== null ? (
+              <Boton
+                variante="compacto"
+                tamaño="sm"
+                etiqueta={t('hogar.acordeonVerCompleto')}
+                onPress={() => {
+                  if (f.atencion_id !== null) {
+                    router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: f.atencion_id } });
+                  }
+                }}
+              />
+            ) : null}
+          </View>
+        ) : null}
+      </CantoCurva>
+    );
+  };
+
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <Encabezado variante="navegacion" titulo={t('grooming.hubTitulo')} atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[4] }}>
-        {/* la acción primaria del hub — aterriza en el CUÁNDO ya construido */}
-        <Boton
-          variante="primario"
-          bloque
-          etiqueta={t('grooming.agendar')}
-          onPress={() => router.navigate('/explorar/grooming')}
-        />
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[8], gap: spacing[4] }}
+      >
+        {/* ① la MASCOTA — el PRIMER filtro. Entra SIN filtro y ninguna
+            nace elegida (el chip "Todas" murió: el log sin filtro ES el
+            estado inicial, no una opción que haya que tocar). */}
+        {mascotasHogar.length > 1 ? (
+          <View style={{ marginHorizontal: -spacing[4] }}>
+            <FiltroMascotas
+              mascotas={mascotasHogar}
+              elegida={filtroMascota}
+              onElegir={(id) => {
+                setFiltroMascota(id);
+                if (id !== null) setPidiendoMascota(false);
+              }}
+            />
+          </View>
+        ) : null}
+        {pidiendoMascota ? <Texto variante="apoyo" color="danger">{t('plan.elegiMascota')}</Texto> : null}
 
-        <SelectorSegmentado
-          etiqueta={t('grooming.hubTitulo')}
-          segmentos={[
-            { codigo: 'proximos', etiqueta: t('plan.segProximos') },
-            { codigo: 'historial', etiqueta: t('plan.segHistorial') },
-          ]}
-          activo={tap}
-          onCambio={(codigo) => {
-            if (codigo === 'proximos' || codigo === 'historial') setTap(codigo);
-          }}
-        />
+        {/* ② el ESTADO. `capa: null` — próximos/historial es ESTADO, no
+            categoría: el color de capa es de una CLASE DE SERVICIO
+            (Ley 10) y este eje no tiene ninguna. */}
+        <View style={{ marginHorizontal: -spacing[4] }}>
+          <FiltroPills
+            activo={tap}
+            onCambio={(c) => setTap(c)}
+            opciones={[
+              { codigo: 'proximos' as Tap, etiqueta: t('plan.segProximos'), icono: 'hoy', capa: null },
+              { codigo: 'historial' as Tap, etiqueta: t('plan.segHistorial'), icono: 'grooming', capa: null },
+            ]}
+          />
+        </View>
+
+        {/* ③ la FECHA — SOLO en historial: en próximos no parte los datos */}
+        {tap === 'historial' ? (
+          <View style={{ marginHorizontal: -spacing[4] }}>
+            <FiltroPills
+              activo={ventanaFecha}
+              onCambio={(v) => setVentanaFecha(v)}
+              opciones={[
+                { codigo: 'todos' as const, etiqueta: t('plan.filtroTodos'), icono: null, capa: null },
+                { codigo: 'semana' as const, etiqueta: t('perfil.ventanaSemana'), icono: null, capa: null },
+                { codigo: 'mes' as const, etiqueta: t('perfil.ventanaMes'), icono: null, capa: null },
+              ]}
+            />
+          </View>
+        ) : null}
 
         {filas === 'cargando' ? (
           <EsqueletoGrupo>
@@ -123,18 +253,7 @@ export default function HubGrooming() {
               descripcion={t('grooming.hubProximosVacioDetalle')}
             />
           ) : (
-            <Tarjeta relleno="ninguno">
-              {proximos.map((f, i) => (
-                <View key={f.cita_id}>
-                  {i > 0 ? <Separador /> : null}
-                  <Celda
-                    titulo={vozServicio(t, f.tipo_servicio, f.servicio_nombre) ?? f.servicio_nombre}
-                    subtitulo={subtituloDe(f, true)}
-                    metadataMono={`${fechaCortaMono(f.fecha, idioma)} · ${f.hora}`}
-                  />
-                </View>
-              ))}
-            </Tarjeta>
+            <View style={{ gap: spacing[2.5] }}>{proximos.map(filaHistorial)}</View>
           )
         ) : historial.length === 0 ? (
           <EstadoVacio
@@ -143,27 +262,45 @@ export default function HubGrooming() {
             descripcion={t('grooming.hubHistorialVacioDetalle')}
           />
         ) : (
-          <Tarjeta relleno="ninguno">
-            {historial.map((f, i) => (
-              <View key={f.cita_id}>
-                {i > 0 ? <Separador /> : null}
-                <Celda
-                  titulo={vozServicio(t, f.tipo_servicio, f.servicio_nombre) ?? f.servicio_nombre}
-                  subtitulo={subtituloDe(f, false)}
-                  metadataMono={`${fechaCortaMono(f.fecha, idioma)} · ${f.hora}`}
-                  interactiva
-                  accessibilityRole="button"
-                  onPress={() => {
-                    if (f.atencion_id !== null) {
-                      router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: f.atencion_id } });
-                    }
-                  }}
-                />
-              </View>
-            ))}
-          </Tarjeta>
+          <View style={{ gap: spacing[2.5] }}>{historial.map(filaHistorial)}</View>
         )}
       </ScrollView>
+
+      {/* EL CTA VIVO, en PIE FIJO. Apagado SIGUE TOCABLE (razonDeshabilitado)
+          y la ETIQUETA nombra lo que falta además del hint — S63-B: el
+          apagado dice qué falta SIEMPRE; el hint no lo reemplaza. */}
+      {hayAlgo ? (
+        <View
+          style={{
+            paddingHorizontal: spacing[4],
+            paddingTop: spacing[3],
+            paddingBottom: Math.max(insets.bottom, spacing[4]),
+            backgroundColor: theme.bg.base,
+            borderTopWidth: 1,
+            borderTopColor: theme.border.subtle,
+          }}
+        >
+          <Boton
+            variante="primario"
+            bloque
+            etiqueta={
+              elegida !== null
+                ? t('grooming.agendarDe', { nombre: elegida.nombre })
+                : t('plan.agendarFaltaMascota')
+            }
+            deshabilitado={elegida === null}
+            razonDeshabilitado={t('plan.elegiMascota')}
+            onRazon={() => {
+              setPidiendoMascota(true);
+              scrollRef.current?.scrollTo({ y: 0, animated: true });
+            }}
+            onPress={() => {
+              if (elegida === null) return;
+              router.navigate({ pathname: '/explorar/grooming', params: { mascotaId: elegida.id } });
+            }}
+          />
+        </View>
+      ) : null}
     </SafeAreaView>
   );
 }

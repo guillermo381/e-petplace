@@ -741,6 +741,7 @@ export const clienteEn = {
     proximaSugerida: 'Suggested next session: {{fecha}}',
     // S60-A4 — the owner's hub (LOTE S60)
     hubTitulo: 'My grooming sessions',
+    agendarDe: "Book {{nombre}}'s grooming",
     agendar: 'Book a session',
     hubProximosVacio: 'No upcoming sessions',
     hubProximosVacioDetalle: "When you book, you'll see it here with its place and time.",

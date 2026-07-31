@@ -24,17 +24,17 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { router, useFocusEffect } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   AvatarMascota,
   Boton,
-  Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
   Icono,
   SelectorOpcion,
+  Texto,
   spacing,
   typography,
   useTheme,
@@ -55,6 +55,7 @@ import {
 } from '@epetplace/api';
 import { TallaPelajeHoja } from '@/components/talla-pelaje-hoja';
 import { useTraduccion } from '@/i18n';
+import { CabezalOficio, GrillaElegir, SelectorDia } from '@/components/reserva-piezas';
 import { vozServicio } from '@/lib/voz-servicio';
 
 function fechaLocalISO(d: Date): string {
@@ -76,7 +77,18 @@ export default function GroomingCuando() {
   const [ofertaPublica, setOfertaPublica] = useState<OfertaGroomingPublica[] | 'cargando' | 'error'>('cargando');
   // S61-A6 (D-392): la modalidad se elige en el QUÉ — default local.
   const [modalidad, setModalidad] = useState<ModalidadGrooming>('local');
-  const [mascotaId, setMascotaId] = useState<string | null>(null);
+  // ⚠️ r31 · LA MASCOTA VIAJA DESDE EL LOG — y se lee VIVA, no se copia.
+  // Es la cura de r15-bis aplicada ANTES de que el defecto ocurra acá:
+  // `router.navigate` reusa la ruta montada, el stack de Explorar no se
+  // vacía al cambiar de tab, y copiar el param a estado con useState lo
+  // congela en el del primer montaje. El param MANDA en cada render; el
+  // estado local queda solo para el log vacío y el deep-link sin param.
+  const { mascotaId: mascotaParam } = useLocalSearchParams<{ mascotaId?: string }>();
+  const paramMascota =
+    typeof mascotaParam === 'string' && mascotaParam.trim().length > 0 ? mascotaParam : null;
+  const [elegidaLocal, setElegidaLocal] = useState<string | null>(null);
+  const mascotaId = paramMascota ?? elegidaLocal;
+  const setMascotaId = setElegidaLocal;
   const [tallaHoja, setTallaHoja] = useState(false);
   const [oferta, setOferta] = useState<OfertaGrooming[] | 'cargando' | 'error' | null>(null);
   const [tipoServicio, setTipoServicio] = useState<string | null>(null);
@@ -136,7 +148,10 @@ export default function GroomingCuando() {
   // Con UNA elegible, se elige sola (cero fricción); la pregunta de
   // talla salta al quedar elegida (abajo), jamás antes de tiempo.
   useEffect(() => {
-    if (mascotaId === null && elegibles.length === 1) setMascotaId(elegibles[0].id);
+    // el default por comodidad rige SOLO sin pedido: con un param
+    // explícito la pantalla no elige por el usuario jamás (L-139 — un
+    // dato de IDENTIDAD rellenado por conveniencia es el error caro).
+    if (paramMascota === null && mascotaId === null && elegibles.length === 1) setMascotaId(elegibles[0].id);
   }, [elegibles, mascotaId]);
 
   // La puerta de §3: mascota elegida sin talla/pelaje → la Hoja. Se
@@ -219,9 +234,20 @@ export default function GroomingCuando() {
   const listo = mascota !== null && tipoServicio !== null && hora !== null;
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('grooming.titulo')} atras onAtras={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
+    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      {/* r31 · EL CABEZAL DEL OFICIO — la banda de color murió en paseo y
+          acá nace ya sin ella. `capa` es OBLIGATORIA: grooming es CUIDADO
+          (Ley 10) y el tsc obliga a declararlo, que es lo que impide que
+          la taxonomía se herede por copiar-pegar. */}
+      <CabezalOficio
+        oficio="grooming"
+        capa="cuidado"
+        titulo={t('grooming.titulo')}
+        detalle={mascota !== null ? mascota.nombre : null}
+        onAtras={() => router.back()}
+        insetTop={insets.top}
+      />
+      <ScrollView contentContainerStyle={{ paddingTop: spacing[5], paddingBottom: spacing[8], gap: spacing[5] }}>
         {mascotas === 'cargando' ? (
           <EsqueletoGrupo>
             <View style={{ gap: spacing[3] }}>
@@ -309,14 +335,24 @@ export default function GroomingCuando() {
                   </View>
                 ) : null}
 
-                <SelectorOpcion
-                  acento="control"
-                  etiqueta={t('explorar.cuandoDia')}
-                  disposicion="tira"
-                  opciones={dias.map((d) => ({ codigo: d.iso, etiqueta: d.etiqueta }))}
-                  seleccionada={dia}
-                  onSelect={setDia}
-                />
+                <View style={{ gap: spacing[2] }}>
+                  <View style={{ paddingHorizontal: spacing[5] }}>
+                    <Texto variante="apoyo">{t('explorar.cuandoDia')}</Texto>
+                  </View>
+                  {/* 🔴 DÍAS CERRADOS: NO VIAJAN A GROOMING, y no es olvido.
+                      `obtenerDiasCerrados` es POR PRESTADOR y la oferta de
+                      grooming llega AGREGADA (desde_precio/varia) — no
+                      nombra a los prestadores, así que la intersección que
+                      paseo hace no se puede computar acá. Se declara y no
+                      se inventa: la prop queda lista para cuando exista el
+                      lector. Pedido a A, secuenciado. */}
+                  <SelectorDia
+                    dias={dias.map((d) => ({ iso: d.iso, dia: d.corta.split(' ')[0] ?? '', numero: d.iso.slice(8, 10) }))}
+                    elegido={dia}
+                    etiquetaCerrado={t('explorar.cuandoDiaCerrado')}
+                    onElegir={setDia}
+                  />
+                </View>
 
                 {/* S73 hallazgo founder: el botón-scroll MURIÓ (control
                     muerto — el selector queda en pantalla en los
@@ -414,14 +450,24 @@ export default function GroomingCuando() {
                 ) : null}
 
                 {/* 2 · DÍA — la tira horizontal (hoy+13) */}
-                <SelectorOpcion
-                  acento="control"
-                  etiqueta={t('explorar.cuandoDia')}
-                  disposicion="tira"
-                  opciones={dias.map((d) => ({ codigo: d.iso, etiqueta: d.etiqueta }))}
-                  seleccionada={dia}
-                  onSelect={setDia}
-                />
+                <View style={{ gap: spacing[2] }}>
+                  <View style={{ paddingHorizontal: spacing[5] }}>
+                    <Texto variante="apoyo">{t('explorar.cuandoDia')}</Texto>
+                  </View>
+                  {/* 🔴 DÍAS CERRADOS: NO VIAJAN A GROOMING, y no es olvido.
+                      `obtenerDiasCerrados` es POR PRESTADOR y la oferta de
+                      grooming llega AGREGADA (desde_precio/varia) — no
+                      nombra a los prestadores, así que la intersección que
+                      paseo hace no se puede computar acá. Se declara y no
+                      se inventa: la prop queda lista para cuando exista el
+                      lector. Pedido a A, secuenciado. */}
+                  <SelectorDia
+                    dias={dias.map((d) => ({ iso: d.iso, dia: d.corta.split(' ')[0] ?? '', numero: d.iso.slice(8, 10) }))}
+                    elegido={dia}
+                    etiquetaCerrado={t('explorar.cuandoDiaCerrado')}
+                    onElegir={setDia}
+                  />
+                </View>
 
                 {/* 2b · GRILLA de inicios reales — la duración la puso
                     cada groomer (servicio × talla), jamás el dueño */}
@@ -451,14 +497,16 @@ export default function GroomingCuando() {
                     }
                   />
                 ) : (
-                  <SelectorOpcion
-                    acento="control"
-                    etiqueta={t('explorar.cuandoHora')}
-                    disposicion="grilla"
-                    opciones={inicios.map((h) => ({ codigo: h, etiqueta: h }))}
-                    seleccionada={hora ?? undefined}
-                    onSelect={setHora}
-                  />
+                  <View style={{ gap: spacing[2] }}>
+                    <View style={{ paddingHorizontal: spacing[5] }}>
+                      <Texto variante="apoyo">{t('explorar.cuandoHora')}</Texto>
+                    </View>
+                    <GrillaElegir
+                      opciones={inicios.map((h) => ({ codigo: h, etiqueta: h }))}
+                      elegida={hora}
+                      onElegir={setHora}
+                    />
+                  </View>
                 )}
 
               </>
@@ -508,6 +556,6 @@ export default function GroomingCuando() {
           setTallaHoja(false);
         }}
       />
-    </SafeAreaView>
+    </View>
   );
 }

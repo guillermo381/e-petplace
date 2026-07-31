@@ -807,6 +807,7 @@ export const clienteEs = {
     proximaSugerida: 'Próxima sesión sugerida: {{fecha}}',
     // S60-A4 — el hub del dueño (LOTE S60)
     hubTitulo: 'Mis sesiones de estética',
+    agendarDe: 'Agendar el grooming de {{nombre}}',
     agendar: 'Agendar una sesión',
     hubProximosVacio: 'Sin sesiones próximas',
     hubProximosVacioDetalle: 'Cuando reserves, la verás acá con su lugar y su hora.',
