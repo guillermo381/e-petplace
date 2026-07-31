@@ -172,31 +172,25 @@ export function FiltroPills<C extends string>({
             style={{
               height: 44,
               borderRadius: radius.full,
-              // r18-3 · EL CHIP SE HUNDE BAJO LA PATA. Lo que se hunde
-              // NO PROYECTA: pierde la elevación y baja de superficie.
-              // ⚠️ NO EXISTE UN REGISTRO HUNDIDO EN LOS TEMAS, y hay que
-              // decirlo: el contrato de `elevacion` tiene EXACTAMENTE dos
-              // niveles (reposo · elevada) y ninguno es un hueco. Lo que
-              // la casa llama "hundido" es una CONVENCIÓN DE SUPERFICIE
-              // —`bg.overlay`, los rieles de SelectorSegmentado, Slider y
-              // Stepper (B lo re-declaró en su r22: superficie neutra)—
-              // y esa convención es SOLO DE CLARO. Medido:
-              //   claro    card #FFFFFF → overlay #EDEBF5  MÁS OSCURO ✓
-              //   oscuro   card #0D0D12 → overlay #1A1A24  más claro ✗
-              //   memorial card #141A14 → overlay #141A14  igual (1.00) ✗
-              // En oscuro y memorial `overlay` ELEVA en vez de hundir, así
-              // que ahí el hueco lo da `bg.base` (1.05 / 1.10 más oscuro
-              // que la tarjeta). PEDIDO A B, declarado: falta el slot
-              // `bg.hundido`; mientras no exista, esta rama por tema vive
-              // acá y se retira sola el día que el slot llegue.
-              // Y mi PRIMER intento fue peor y lo corregí mirando: puse
-              // `bg.base` en los TRES, y en claro eso deja al chip del
-              // color EXACTO de la página — no se hunde, DESAPARECE.
-              backgroundColor: elegido
-                ? theme.mode === 'light'
-                  ? theme.bg.overlay
-                  : theme.bg.base
-                : theme.bg.card,
+              // ✅ r19 · EL CHIP SE HUNDE BAJO LA PATA, POR SLOT. Lo que
+              // se hunde NO PROYECTA: pierde la elevación y baja de
+              // superficie. La rama por tema que vivía acá MURIÓ con su
+              // condición cumplida — `bg.hundido` llegó (S82-B, d1e0e36)
+              // y el tema vuelve a decidir lo que es del tema.
+              // COTEJADO CONTRA LO QUE LA RAMA RESOLVÍA, no asumido:
+              //   claro    slot #EDEBF5 = IDÉNTICO a lo que daba (1.18)
+              //   oscuro   slot #050508 = IDÉNTICO a lo que daba (1.05)
+              //   memorial slot #141A14 ≠ lo que daba (#0A0E0A, 1.10)
+              // ⚠️ EN MEMORIAL EL SLOT NO DA PASO (1.00 — es el MISMO
+              // valor que la tarjeta), y se declara en vez de pisarlo:
+              // memorial tiene UNA sola superficie a propósito (card,
+              // elevated y overlay son el mismo color), así que un hueco
+              // por color ahí no existe. El hundimiento en memorial lo
+              // cargan la elevación perdida y la escala — que es
+              // exactamente cómo memorial dice las cosas (Ley 8: degrada,
+              // no celebra). Pisar el slot localmente sería reconstruir
+              // la rama que se acaba de retirar.
+              backgroundColor: elegido ? theme.bg.hundido : theme.bg.card,
               boxShadow: elegido ? 'none' : theme.elevacion.reposo,
               transform: [{ scale: elegido ? 0.98 : 1 }],
               flexDirection: 'row',

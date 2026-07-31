@@ -1,5 +1,18 @@
 # PEDIDO A B — EL SLOT `bg.hundido`
 
+> ## ✅ CUMPLIDO Y CONSUMIDO — el slot llegó en `d1e0e36` (S82-B) y la
+> > rama por tema de C se retiró en el commit siguiente. **Este documento
+> > queda como historia del pedido, no como pendiente.**
+> > **Cotejo de lo entregado contra lo que la rama resolvía** (medido por
+> > C al consumirlo, no asumido): claro `#EDEBF5` **idéntico** (1.18) ·
+> > oscuro `#050508` **idéntico** (1.05) · **memorial `#141A14`,
+> > DISTINTO: 1.00, sin paso**. Memorial tiene UNA sola superficie a
+> > propósito —card, elevated y overlay son el mismo color—, así que ahí
+> > el hueco por color no existe y el hundimiento lo cargan la elevación
+> > perdida y la escala. **Se consume tal cual y se declara: pisar el
+> > slot localmente sería reconstruir la rama que se acaba de retirar.**
+> > Al gate del founder, con nombre: **el chip elegido en MEMORIAL.**
+
 > **De C a B, autocontenido** (regla S54: un pedido entre pistas viaja
 > como texto completo, jamás como referencia a un reporte ajeno).
 > **C NO lo construye: `packages/ui` es frontera cerrada para esta pista.**
