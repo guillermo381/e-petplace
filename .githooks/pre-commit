@@ -33,7 +33,29 @@ fi
 CAMBIOS=$(git diff --cached --name-only --diff-filter=ACM)
 [ -z "$CAMBIOS" ] && exit 0
 
-echo "── gate del commit ──"
+# S82-B r35 (hallazgo de A) — EL GATE MIDE LO STAGED, NO EL ÁRBOL. Antes
+# corría sobre el working tree entero, así que el WIP ROTO DE UNA PISTA
+# FRENABA EL COMMIT DE OTRA (A esperó a que C curara; que saliera bien
+# fue TIMING, no diseño). `stash --keep-index` guarda lo no-staged, el
+# gate ve EXACTAMENTE lo que va a entrar, y el trap restaura pase lo que
+# pase — si el gate falla, si el usuario corta, si el tsc explota.
+GUARDADO=0
+if [ -n "$(git diff --name-only)" ]; then
+  git stash push --keep-index --include-untracked -q -m "gate-pre-commit" 2>/dev/null && GUARDADO=1
+fi
+restaurar() { [ "$GUARDADO" = "1" ] && git stash pop -q 2>/dev/null; }
+trap restaurar EXIT INT TERM
+
+# AVISO DE ARRASTRE (hallazgo 2 de A, TERCERA vez en la casa: S55·S63·hoy).
+# El índice es COMPARTIDO entre las tres pistas: `git add` de una entra
+# junto con lo que otra dejó staged. El hook no puede saber qué es de
+# quién —no hay dueño en git— pero SÍ puede decir cuántos archivos y de
+# qué carpetas van a entrar, para que el arrastre se vea ANTES y no en
+# el `git show` de después.
+N=$(echo "$CAMBIOS" | wc -l | tr -d ' ')
+echo "── gate del commit · $N archivo(s) van a entrar:"
+echo "$CAMBIOS" | sed 's|/[^/]*$||' | sort -u | sed 's/^/   /'
+echo "   (el índice es compartido: si ves una carpeta que no es tuya, es arrastre)"
 node scripts/verify-diseno.mjs >/dev/null 2>&1 || {
   echo "✗ verify:diseno EN ROJO — el commit NO ocurre."
   node scripts/verify-diseno.mjs 2>&1 | grep "✗" | head -5
