@@ -1640,6 +1640,7 @@ function GaleriaInterna() {
         <Seccion titulo="FilaCita (62) — una tarjeta = una cita, con su canto ADENTRO (S80, dominio)">
           <View style={{ gap: spacing[3] }}>
             <FilaCita
+              direccion="derecha"
               oficio="paseo"
               titulo="Thor"
               subtitulo="Paseo de 60 min"
@@ -1648,6 +1649,7 @@ function GaleriaInterna() {
               onPress={() => {}}
             />
             <FilaCita
+              direccion="derecha"
               oficio="veterinaria"
               titulo="Zeus"
               subtitulo="Consulta general"
@@ -1656,6 +1658,8 @@ function GaleriaInterna() {
               onPress={() => {}}
             />
             <FilaCita
+              cara={false}
+              direccion="abajo"
               oficio="grooming"
               titulo="Luna"
               subtitulo="Baño y corte"

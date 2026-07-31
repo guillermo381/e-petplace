@@ -40,9 +40,11 @@
 
 import type { ReactNode } from 'react'
 import { View } from 'react-native'
+import Svg, { Path } from 'react-native-svg'
 
 import { useTheme } from '../ThemeProvider'
 import { radius } from '../tokens/radius'
+import { spacing } from '../tokens/spacing'
 import { Celda } from './Celda'
 import { AvatarMascota, type AvatarMascotaEspecie } from './AvatarMascota'
 
@@ -58,8 +60,45 @@ export interface FilaCitaProps {
   subtitulo?: string
   /** Voz de máquina: hora · duración. */
   metadataMono?: string
-  /** La cara: el avatar se compone ADENTRO (huella digna sin foto). */
+  /** La cara: el avatar se compone ADENTRO (huella digna sin foto).
+   *
+   *  SIGUE REQUERIDA aun con `cara={false}`, y es a propósito: una fila
+   *  de cita ES de una mascota (B14 ①) — hacerla opcional permitiría una
+   *  fila sin sujeto, que es otra pieza. Con la cara apagada el dato no
+   *  se dibuja pero no es basura: es la identidad de la fila, y el día
+   *  que quiera decir la especie o mostrar la foto la tiene. */
   mascota: { nombre: string; fotoUrl?: string; especie?: AvatarMascotaEspecie }
+  /**
+   * ¿SE DIBUJA LA CARA? Default `true` — cero consumidores existentes
+   * cambian.
+   *
+   * El LOG la apaga, y el porqué es de composición y no de gusto: ahí
+   * arriba ya se filtró POR MASCOTA y el título dice su nombre. Repetir
+   * el avatar en cada fila es decir tres veces lo mismo en la misma
+   * pantalla, y la regla Chanel se lo lleva.
+   */
+  cara?: boolean
+  /**
+   * QUÉ PASA AL TOCARLA. **SIN DEFAULT, y esa es la mitad importante
+   * del pedido:** una fila que no declara su dirección es exactamente el
+   * defecto que el founder reportó — no se sabe qué se puede tocar.
+   * Obligarla es lo que hace que el próximo consumidor no pueda
+   * olvidarse.
+   *
+   * Las tres son la letra de la 19.7, firmada en gate de campo
+   * (21-jul-2026) y con los MISMOS paths que ya usan CeldaNavegacion y
+   * PieRevelar — acá no nace geometría nueva:
+   *   · `'derecha'` → `›` NAVEGA (te vas a otra pantalla)
+   *   · `'abajo'`   → `⌄` REVELA en el lugar (se abre abajo tuyo)
+   *   · `'arriba'`  → `⌃` PLIEGA (ya está abierta)
+   *
+   * POR QUÉ SON TRES Y NO LAS DOS QUE SE PIDIERON, declarado: con solo
+   * `'abajo'`, una fila YA DESPLEGADA seguiría mostrando `⌄` para
+   * siempre — el chevron que miente, que es justo lo que 19.7 vino a
+   * matar. La tercera no es un agregado mío: es la letra que ya estaba
+   * firmada, y sin ella la pieza no podría cumplirla.
+   */
+  direccion: 'derecha' | 'abajo' | 'arriba'
   /** Slot de DATOS (insignias/chips) — jamás de craft. */
   fin?: ReactNode
   /** Las acciones DE ESTA cita — viven adentro de SU tarjeta (B14 ①).
@@ -68,7 +107,29 @@ export interface FilaCitaProps {
   onPress: () => void
 }
 
-export function FilaCita({ oficio, titulo, subtitulo, metadataMono, mascota, fin, acciones, onPress }: FilaCitaProps) {
+/** Los TRES paths del chevron, copiados VERBATIM de sus dueños
+ *  (CeldaNavegacion para `›`, PieRevelar para `⌄`/`⌃`). Están acá como
+ *  tabla y no re-dibujados a ojo: si algún día el trazo cambia, cambia
+ *  en un lugar y esta tabla es lo que hace visible que son tres estados
+ *  del MISMO glifo y no tres íconos. */
+const CHEVRON: Record<FilaCitaProps['direccion'], string> = {
+  derecha: 'M9 18l6-6-6-6',
+  abajo: 'M6 9l6 6 6-6',
+  arriba: 'M6 15l6-6 6 6',
+}
+
+export function FilaCita({
+  oficio,
+  titulo,
+  subtitulo,
+  metadataMono,
+  mascota,
+  cara = true,
+  direccion,
+  fin,
+  acciones,
+  onPress,
+}: FilaCitaProps) {
   const { theme } = useTheme()
   // Ley 10 (DIRECCION_ARTE v1.3): el canto dice CATEGORÍA — SALUD =
   // identidad (vet) · CUIDADO = cuidado (paseo/grooming/adiestramiento).
@@ -95,15 +156,34 @@ export function FilaCita({ oficio, titulo, subtitulo, metadataMono, mascota, fin
         titulo={titulo}
         subtitulo={subtitulo}
         inicio={
-          <AvatarMascota
-            nombre={mascota.nombre}
-            fotoUrl={mascota.fotoUrl}
-            especie={mascota.especie}
-            tamano="sm"
-          />
+          cara ? (
+            <AvatarMascota
+              nombre={mascota.nombre}
+              fotoUrl={mascota.fotoUrl}
+              especie={mascota.especie}
+              tamano="sm"
+            />
+          ) : undefined
         }
         metadataMono={metadataMono}
-        fin={fin}
+        // El chevron va DESPUÉS del slot de datos, no adentro: `fin` es
+        // del consumidor (insignias, chips) y el chevron es de la PIEZA
+        // — mezclarlos dejaría que una pantalla se lo saltee, que es el
+        // defecto que esta variante vino a cerrar.
+        fin={
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+            {fin}
+            <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" aria-hidden>
+              <Path
+                d={CHEVRON[direccion]}
+                stroke={theme.text.tertiary}
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </Svg>
+          </View>
+        }
       />
       {acciones}
     </View>

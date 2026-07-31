@@ -359,6 +359,9 @@ function FilaCita({
   const nombre = cita.mascota?.nombre ?? t('agenda.mascotaFallback');
   return (
     <FilaCitaUi
+      // S82-B r38: la dirección se DECLARA (sin default). Acá el onPress
+      // hace router.push a la pantalla de la cita: NAVEGA ⇒ '›'.
+      direccion="derecha"
       oficio={
         oficio === 'vet' ? 'veterinaria' : oficio === 'grooming' ? 'grooming' : oficio === 'adiestramiento' ? 'adiestramiento' : 'paseo'
       }
