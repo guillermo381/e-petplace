@@ -56,3 +56,61 @@ export async function obtenerServiciosPais(
     },
   };
 }
+
+// ── S82-A r15 · LA MONEDA DEL PAÍS — la otra mitad del riel ────────────
+//
+// El formato vive en `packages/i18n` (`monto`, función pura); LA CONFIG
+// vive acá, porque es DATO y el dato lo dice la DB (regla 21). Las tres
+// columnas están sembradas en `country_config` desde hace meses y hasta
+// hoy **ningún consumidor las leía**: EC = USD `$` 2 · CO = COP `$` 2.
+//
+// CACHE POR PROCESO, y su porqué: la config de moneda de un país **no
+// cambia entre renders** — pedirla en cada fila de precio sería un viaje
+// de red por monto pintado. Se cachea por `country_code` (mismo criterio
+// que `_cacheEstado` en onboarding.ts). No expira: si algún día cambia
+// una moneda, cambia con un deploy, no en caliente.
+
+const _cacheMoneda = new Map<string, ConfigMonedaPais>();
+
+export interface ConfigMonedaPais {
+  /** ISO 4217 — 'USD' | 'COP'. */
+  codigo: string;
+  simbolo: string;
+  decimales: number;
+}
+
+/** La config de moneda de un país. **Devuelve `ok:false` en vez de
+ *  inventar un default**: el llamador decide si cae al fallback del riel
+ *  (`MONEDA_FALLBACK`) o si dice que no pudo — un monto pintado con la
+ *  moneda equivocada es peor que un monto que no se pinta. */
+export async function obtenerConfigMoneda(
+  countryCode: string,
+): Promise<ResultadoWrapper<ConfigMonedaPais, 'error_config_pais'>> {
+  const cacheada = _cacheMoneda.get(countryCode);
+  if (cacheada !== undefined) return { ok: true, data: cacheada };
+
+  const { data, error } = await getClient()
+    .from('country_config')
+    .select('currency_code, currency_symbol, currency_decimals')
+    .eq('country_code', countryCode)
+    .maybeSingle();
+
+  if (error || data === null) {
+    return { ok: false, codigo: 'error_config_pais', mensaje: MENSAJE_ERROR };
+  }
+  // Guard de shape (L-124): una config incompleta NO se completa a ojo.
+  if (
+    typeof data.currency_code !== 'string' ||
+    typeof data.currency_symbol !== 'string' ||
+    typeof data.currency_decimals !== 'number'
+  ) {
+    return { ok: false, codigo: 'error_config_pais', mensaje: MENSAJE_ERROR };
+  }
+  const config: ConfigMonedaPais = {
+    codigo: data.currency_code,
+    simbolo: data.currency_symbol,
+    decimales: data.currency_decimals,
+  };
+  _cacheMoneda.set(countryCode, config);
+  return { ok: true, data: config };
+}

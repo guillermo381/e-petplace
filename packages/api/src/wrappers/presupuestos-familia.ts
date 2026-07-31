@@ -31,6 +31,10 @@ export interface PresupuestoFamilia {
    */
   negocioNombre: string | null;
   total: number;
+  /** S82 r15 — el país de la OPERACIÓN junto al total (P21): la moneda
+   *  la manda el país del hecho, no la identidad del dueño. Estampado en
+   *  la fila del presupuesto. */
+  countryCode: string | null;
   /** ISO. La cara del dueño lo muestra siempre. */
   venceEn: string;
   /** ISO — cuándo se recibió (se envió). */
@@ -74,6 +78,7 @@ function mapFila(f: Record<string, unknown>, nombres: Map<string, string>): Pres
     mascotaNombre: mascota && typeof mascota['nombre'] === 'string' ? (mascota['nombre'] as string) : null,
     negocioNombre: nombres.get(String(f['id'])) ?? null,
     total: Number(f['total'] ?? 0),
+    countryCode: typeof f['country_code'] === 'string' ? f['country_code'] : null,
     venceEn,
     recibidoEn: String(f['created_at'] ?? ''),
     estadoEfectivo,
@@ -92,7 +97,7 @@ export async function obtenerPresupuestosFamilia(): Promise<
   const { data, error } = await getClient()
     .from('presupuesto')
     .select(
-      'id, mascota_id, total, vence_en, created_at, estado, ' +
+      'id, mascota_id, total, country_code, vence_en, created_at, estado, ' +
         'mascota:mascotas(nombre), ' +
         'items:presupuesto_item(id, descripcion_libre, precio, cantidad, tipo:tipos_servicio(nombre))',
     )

@@ -341,6 +341,9 @@ export interface GroomingDelHogar {
   servicio_nombre: string;
   duracion_minutos: number;
   precio: number | null;
+  /** S82 r15 — el país de la OPERACIÓN junto al precio (P21): sin él la
+   *  pantalla adivina la moneda. Estampado en la fila de la cita. */
+  country_code: string | null;
   mascota_id: string | null;
   mascota_nombre: string | null;
   prestador_nombre: string | null;
@@ -361,7 +364,7 @@ export async function obtenerMisGroomings(): Promise<
     cliente.from('tipos_servicio').select('codigo, nombre').eq('categoria', 'grooming'),
     cliente
       .from('evento_cita_servicio')
-      .select('id, fecha, hora, estado, duracion_minutos, precio, prestador_id, mascota_id, tipo_servicio, estado_reserva')
+      .select('id, fecha, hora, estado, duracion_minutos, precio, country_code, prestador_id, mascota_id, tipo_servicio, estado_reserva')
       .in('estado', ['confirmada', 'en_curso', 'completada'])
       .order('fecha', { ascending: true })
       .order('hora', { ascending: true }),
@@ -419,6 +422,7 @@ export async function obtenerMisGroomings(): Promise<
         servicio_nombre: nombrePorCodigo.get(tipo) ?? tipo,
         duracion_minutos: Number(c.duracion_minutos),
         precio: c.precio === null ? null : Number(c.precio),
+        country_code: c.country_code ?? null,
         mascota_id: c.mascota_id ?? null,
         mascota_nombre: c.mascota_id !== null ? mascotaPorId.get(c.mascota_id) ?? null : null,
         prestador_nombre: pr?.nombre_comercial ?? null,

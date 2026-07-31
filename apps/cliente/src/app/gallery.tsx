@@ -143,7 +143,16 @@ function LaminaSeparacionOscuro() {
   return (
     <View style={{ gap: spacing[6], padding: spacing[4], backgroundColor: tinte }}>
       <View style={{ gap: spacing[1] }}>
-        <Texto variante="seccion">LA SEPARACIÓN EN OSCURO — sobre las piezas reales</Texto>
+        {/* S82-B: el rótulo dice QUÉ SE DECIDE y DÓNDE ESTÁN LAS OTRAS.
+            Esta lámina vive acá y no en TokenGallery porque monta piezas
+            de apps/cliente (un paquete no importa de una app) — pero eso
+            es una razón de build, y al founder le llegaba como "aparece
+            una y las otras no sé dónde". */}
+        <Texto variante="seccion">
+          ⭐ GATE r30 (solo en el cliente) — LA SEPARACIÓN SOBRE LAS PIEZAS REALES · qué decide: cómo se
+          separan la rueda del día, la duración y el horario en oscuro (tarjeta · halo · aire). LAS OTRAS
+          CUATRO LÁMINAS DE GATE están más abajo, arriba de todo el catálogo, numeradas ① a ④.
+        </Texto>
         <Texto variante="apoyo" color="danger">
           LOS DOS LADOS DEL PAR ESTÁN CERRADOS POR MEDICIÓN: subir bg.card rompe SEIS pares AA firmados (el techo lo pone el texto de capa) · bajar bg.base no rompe nada pero NO ALCANZA (con el fondo en negro absoluto el par llega a 1.083 — el +0.05 de WCAG aplana el extremo oscuro). Por eso lo que se elige acá no es un valor: son tres MANERAS de que una superficie exista.
         </Texto>

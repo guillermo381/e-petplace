@@ -1420,6 +1420,47 @@ function GaleriaInterna() {
           </View>
         </View>
 
+        {/* ═══════════════════════════════════════════════════════════
+            LO QUE ESPERA TU FIRMA — VA PRIMERO, Y ESTA VEZ DE VERDAD
+            ═══════════════════════════════════════════════════════════
+            S82-B: este bloque vivía en la posición 36 de 58, detrás del
+            catálogo entero, con un comentario que decía "Va PRIMERA: es
+            lo que el founder viene a mirar". **El comentario decía la
+            intención y el orden decía otra cosa** — el founder tuvo que
+            pedir los nombres porque no las encontraba.
+
+            LA REGLA QUE DEJA, y es del founder: *una lámina de gate que
+            no se encuentra no es una lámina de gate.* La galería hace
+            DOS trabajos y no son el mismo: CATÁLOGO (referencia, se
+            hojea cuando hace falta) y LÁMINA DE GATE (una decisión que
+            espera hoy). Lo que espera decisión va arriba; el catálogo
+            es lo que se hojea. Cuando un gate se firma, su sección
+            BAJA al catálogo o muere (Ley 37) — no se queda arriba
+            ocupando el lugar del siguiente. ═══════════════════════ */}
+        <Seccion titulo="① ⭐⭐ GATE S82 — LAS SEIS DECISIONES ABIERTAS · qué decide: el lote completo de la pasada (cada una con sus candidatos lado a lado sobre el fondo real, y en rojo qué se firma al elegir)">
+          <GateS82 />
+        </Seccion>
+
+        <Seccion titulo="② ⭐ GATE r21 — LA SEPARACIÓN DE SUPERFICIE EN OSCURO · qué decide: CÓMO existe una superficie cuando el color ya no puede separarla (tres salidas sobre el mismo chip; los dos lados del par están cerrados por medición)">
+          <ThemeProvider defaultMode="dark"><TresSalidasOscuro /></ThemeProvider>
+        </Seccion>
+
+        <Seccion titulo="③ ⭐ GATE r33 — EL HALO SOBRE UNA TARJETA REAL · qué decide: si el halo va SOLO en el canto superior (sin enmienda) o RODEA (y entonces A6 muerde y hace falta mesa). Sin-tarjeta resolvió los CHIPS; las tarjetas siguen sin separarse">
+          <ThemeProvider defaultMode="dark"><HaloSobreTarjeta /></ThemeProvider>
+        </Seccion>
+
+        <Seccion titulo="④ ⭐ GATE r34 — LA ELECCIÓN EXCLUYENTE · qué decide: CUÁL de las tres formas enseña mejor que solo una puede estar prendida (dos Interruptor vs SelectorSegmentado vs SelectorOpcion). Mi lectura, para que la contradigas mirando: SelectorOpcion">
+          <EleccionExcluyente />
+        </Seccion>
+
+        {/* Lo rechazado NO se borra: se marca con su fecha de gate, para
+            que se vea qué queda pendiente de curar (orden founder r16).
+            No espera firma — ya la tuvo, y es la deuda que dejó. */}
+        <Seccion titulo="⑤ ⛔ RECHAZADO EN GATE — NO espera tu firma: ya la tuvo. Es lo que sigue vivo en el código y falta curar">
+          <LoRechazado />
+        </Seccion>
+
+
         {/* Paleta */}
         <Seccion titulo="Paleta — marca canonizada (SVG del logo)">
           <Fila>
@@ -2305,33 +2346,6 @@ function GaleriaInterna() {
             EvidenciaFoto.Capturar y los rieles sin forma). */}
         <Seccion titulo="Piezas que faltaban en la galería (S82-B r17) — importadas, jamás reimplementadas">
           <PiezasFaltantes />
-        </Seccion>
-
-        {/* Lo rechazado NO se borra: se marca con su fecha de gate, para
-            que se vea qué queda pendiente de curar (orden founder r16). */}
-        <Seccion titulo="⭐ GATE S82-B r21 — LA SEPARACIÓN DE SUPERFICIE EN OSCURO: tres salidas sobre el mismo chip (los dos lados del par están cerrados por medición)">
-          <ThemeProvider defaultMode="dark"><TresSalidasOscuro /></ThemeProvider>
-        </Seccion>
-
-        <Seccion titulo="⭐ GATE S82-B r33 — EL HALO SOBRE UNA TARJETA REAL (otra pregunta: sin-tarjeta resolvió los CHIPS, las tarjetas siguen sin separarse)">
-          <ThemeProvider defaultMode="dark"><HaloSobreTarjeta /></ThemeProvider>
-        </Seccion>
-
-        <Seccion titulo="⭐ GATE S82-B r34 — LA ELECCIÓN EXCLUYENTE: dos Interruptor vs SelectorSegmentado vs SelectorOpcion (¿cuál enseña mejor que solo uno puede estar prendido?)">
-          <EleccionExcluyente />
-        </Seccion>
-
-        <Seccion titulo="⛔ RECHAZADO EN GATE — vivo en el código, pendiente de curar">
-          <LoRechazado />
-        </Seccion>
-
-        {/* ══ EL GATE S82 — LA PASADA ÚNICA (r13) ══
-            Reescrita para DECIDIR y no para catalogar: cada decisión con
-            sus candidatos LADO A LADO, sobre el fondo real, y con la
-            línea que dice qué se firma al elegir. Va PRIMERA: es lo que
-            el founder viene a mirar. */}
-        <Seccion titulo="⭐⭐ GATE S82 — LAS SEIS DECISIONES ABIERTAS. Cada una: candidatos lado a lado · fondo real del cliente · y QUÉ DECIDE la elección (en rojo)">
-          <GateS82 />
         </Seccion>
 
         {/* Set b′ — DIRECCION_ARTE v1.0 (S53): la mascota presente */}

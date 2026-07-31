@@ -339,6 +339,12 @@ export interface ConsultaDelHogar {
   tipo_servicio: string;
   servicio_nombre: string;
   precio: number | null;
+  /** S82 r15 — EL PAÍS DE LA OPERACIÓN, junto al precio: sin él la
+   *  pantalla adivina la moneda. Viene ESTAMPADO en la fila de la cita
+   *  (P21: el país es contexto de operación, jamás de identidad), así
+   *  que no cuesta un viaje extra. `null` = fila sin país (dato viejo):
+   *  el consumidor cae al fallback del riel y lo sabe. */
+  country_code: string | null;
   mascota_id: string | null;
   mascota_nombre: string | null;
   prestador_nombre: string | null;
@@ -361,7 +367,7 @@ export async function obtenerMisConsultasVet(): Promise<
     cliente.from('tipos_servicio').select('codigo, nombre').eq('es_medico', true),
     cliente
       .from('evento_cita_servicio')
-      .select('id, fecha, hora, estado, precio, prestador_id, mascota_id, tipo_servicio, caso_clinico_id')
+      .select('id, fecha, hora, estado, precio, country_code, prestador_id, mascota_id, tipo_servicio, caso_clinico_id')
       .in('estado', ['confirmada', 'en_curso', 'completada', 'por_coordinar'])
       .order('fecha', { ascending: true, nullsFirst: true })
       .order('hora', { ascending: true }),
@@ -405,6 +411,7 @@ export async function obtenerMisConsultasVet(): Promise<
         tipo_servicio: tipo,
         servicio_nombre: nombrePorCodigo.get(tipo) ?? tipo,
         precio: c.precio === null ? null : Number(c.precio),
+        country_code: c.country_code ?? null,
         mascota_id: c.mascota_id ?? null,
         mascota_nombre: c.mascota_id !== null ? mascotaPorId.get(c.mascota_id) ?? null : null,
         prestador_nombre: c.prestador_id !== null ? prestadorPorId.get(c.prestador_id) ?? null : null,

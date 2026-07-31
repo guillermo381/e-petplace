@@ -14,3 +14,5 @@ export { ProveedorI18n } from './ProveedorI18n';
 export { crearUseTraduccion, type TraductorTipado } from './useTraduccion';
 export type { ClaveDe, Diccionario, Espejo, RecursosPorIdioma } from './tipos';
 export { fechaCortaMono, fechaDiaSemanaHumana, fechaLargaHumana } from './fechas';
+// S82-A r15 — EL RIEL DE MONEDA (el país manda la moneda, el idioma el formato)
+export { monto, montoConCodigo, MONEDA_FALLBACK, type ConfigMoneda } from './moneda';
