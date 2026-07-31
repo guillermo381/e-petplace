@@ -493,6 +493,7 @@ export {
 export {
   COMPRABLES_ADIESTRAMIENTO,
   obtenerIniciosAdiestramiento,
+  obtenerOfertaAdiestramientoPublica,
   obtenerAdiestradoresDisponibles,
   contratarPrograma,
   obtenerParteAdiestramiento,
@@ -503,6 +504,7 @@ export {
   type CodigoErrorAdiestramientoReserva,
   type ComprableAdiestramiento,
   type ObjetivoDelParte,
+  type OfertaAdiestramientoPublica,
   type OfertaAdiestrador,
   type ParteAdiestramiento,
   type ProgramaContratado,

@@ -138,6 +138,62 @@ export async function obtenerIniciosAdiestramiento(
   return { ok: true, data: horas };
 }
 
+// ── A bis · LA OFERTA PÚBLICA (el peldaño 0: qué cuesta, antes del QUIÉN) ───
+
+export interface OfertaAdiestramientoPublica {
+  /** 'sesion' | 'programa' — los dos comprables del oficio (§1). */
+  comprable: ComprableAdiestramiento;
+  /** El mínimo REAL entre las ofertas que HOY se pueden comprar.
+   *  Es selección sobre precios del server, jamás cálculo. */
+  desde_precio: number;
+  /** true = hay más de un precio ⇒ la voz dice "desde". Con N=1 el
+   *  precio es EXACTO y la superficie puede decirlo sin "desde"
+   *  (la escalera del precio honesto, DISEÑO_EXPERIENCIA §11). */
+  varia: boolean;
+}
+
+/**
+ * La oferta de adiestramiento del PELDAÑO 0 — lo que cuesta el oficio
+ * antes de elegir mascota, día o adiestrador (S82-A r18).
+ *
+ * POR QUÉ NO ALCANZABA EL LECTOR QUE YA EXISTÍA: el único era
+ * `obtenerOfertaAdiestramientoPropia(prestadorId)` — keyed por el
+ * prestador, que es justo el dato que el dueño NO conoce en este paso.
+ * La gramática canónica pone al QUIÉN **después** (§11), así que un
+ * lector que exige el prestador no sirve para la pantalla de entrada.
+ *
+ * POR QUÉ RPC: el gate 7.13 ("no se oferta quien no puede cobrar") exige
+ * `cuentas_comerciales.estado = 'activa'`, y esa RLS es solo-owner — el
+ * criterio SOLO puede vivir server-side. Se sigue el molde de
+ * `obtenerOfertaPaseo`, **no el de `obtenerOfertaGroomingPublica`**, que
+ * lee por RLS y declara en su propio comentario que no replica ese gate.
+ *
+ * COMPRABLE SIN PRECIO REAL = SIN FILA. La lista puede volver corta (o
+ * vacía) y eso es la verdad: la superficie no pinta "desde $0", que es
+ * el verosímil-falso que L-139 prohíbe.
+ */
+export async function obtenerOfertaAdiestramientoPublica(): Promise<
+  ResultadoWrapper<OfertaAdiestramientoPublica[], CodigoErrorAdiestramientoReserva>
+> {
+  const { data, error } = await getClient().rpc('obtener_oferta_adiestramiento_publica');
+  if (error) return fallo(error.message);
+  if (!Array.isArray(data)) return fallo('datos_inconsistentes');
+
+  const ofertas: OfertaAdiestramientoPublica[] = [];
+  for (const o of data) {
+    if (
+      !esObj(o) ||
+      (o.comprable !== 'sesion' && o.comprable !== 'programa') ||
+      typeof o.desde_precio !== 'number' ||
+      typeof o.varia !== 'boolean'
+    ) {
+      return fallo('datos_inconsistentes');
+    }
+    ofertas.push({ comprable: o.comprable, desde_precio: o.desde_precio, varia: o.varia });
+  }
+  return { ok: true, data: ofertas };
+}
+
 // ── B · El QUIÉN/QUÉ (los dos comprables por adiestrador disponible) ────────
 
 export interface OfertaAdiestrador {

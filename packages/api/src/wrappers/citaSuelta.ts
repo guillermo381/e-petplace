@@ -104,6 +104,20 @@ export interface CitaPaseoDueno {
   duracion_minutos: number;
   precio: number | null;
   prestador_id: string | null;
+  /**
+   * S82-A r18 (aditivo): la VOZ del prestador, no su uuid.
+   *
+   * Era el único de los cuatro tipos del hogar sin este campo — los
+   * otros tres (`AdiestramientoDelHogar`, `ConsultaDelHogar`, el de
+   * grooming) ya lo traen. Resolverlo desde la pantalla habría sido **un
+   * viaje por fila**; acá es UNA lectura por lote, que es el patrón que
+   * los tres hermanos ya usan.
+   *
+   * `null` HONESTO cuando el prestador no es legible (RLS: solo los
+   * activos son públicos) — una cita vieja de un prestador dado de baja
+   * conserva su historia y la superficie dice lo que sabe, sin inventar.
+   */
+  prestador_nombre: string | null;
   /** S60-A6 (aditivo): la zona de servicios del Hogar habla con nombre. */
   mascota_id: string | null;
   tipo_servicio: string | null;
@@ -172,11 +186,31 @@ export async function obtenerMisCitasPaseo(): Promise<
       duracion_minutos: Number(fila.duracion_minutos),
       precio: fila.precio === null ? null : Number(fila.precio),
       prestador_id: fila.prestador_id ?? null,
+      prestador_nombre: null, // se resuelve abajo, por LOTE
       mascota_id: fila.mascota_id ?? null,
       tipo_servicio: fila.tipo_servicio ?? null,
       origen: fila.bono_id !== null ? 'paquete' : 'suelta',
       bono_id: fila.bono_id ?? null,
     });
+  }
+
+  // S82-A r18 · LA VOZ DEL PRESTADOR, en UNA lectura para todas las filas
+  // (patrón ya vivo en los tres hermanos del hogar — vet, grooming,
+  // adiestramiento). Se hace DESPUÉS del filtrado, así el `in()` lleva
+  // solo los prestadores que de verdad se van a pintar.
+  const prestadorIds = [...new Set(citas.map((c) => c.prestador_id).filter((v): v is string => v !== null))];
+  if (prestadorIds.length > 0) {
+    const pres = await supabase.from('prestadores').select('id, nombre_comercial').in('id', prestadorIds);
+    // Un fallo acá NO tumba el hub: las citas son el dato, el nombre es
+    // el adorno. Se pintan con `null` —que la superficie ya sabe leer,
+    // porque un prestador dado de baja produce exactamente eso— en vez
+    // de negar al dueño sus propios paseos por no poder rotular uno.
+    if (!pres.error) {
+      const nombrePorId = new Map(pres.data.map((p) => [p.id, p.nombre_comercial]));
+      for (const c of citas) {
+        c.prestador_nombre = c.prestador_id !== null ? nombrePorId.get(c.prestador_id) ?? null : null;
+      }
+    }
   }
   return { ok: true, data: citas };
 }

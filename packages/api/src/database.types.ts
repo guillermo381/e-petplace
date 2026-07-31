@@ -17374,6 +17374,14 @@ export type Database = {
           presupuesto_id: string
         }[]
       }
+      obtener_oferta_adiestramiento_publica: {
+        Args: never
+        Returns: {
+          comprable: string
+          desde_precio: number
+          varia: boolean
+        }[]
+      }
       obtener_oferta_grooming: {
         Args: { p_mascota_id: string; p_modalidad?: string }
         Returns: {
