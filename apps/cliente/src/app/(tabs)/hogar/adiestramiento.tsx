@@ -59,6 +59,7 @@ import {
   getEstadoOnboardingDueno,
   obtenerBitacora,
   obtenerMascotasDeFamilia,
+  resolverUrlsFotos,
   obtenerMisAdiestramientos,
   obtenerVocabularioBitacora,
   registrarBitacoraFamilia,
@@ -117,6 +118,7 @@ export default function HubAdiestramiento() {
   const [mascotas, setMascotas] = useState<MascotaResumen[]>([]);
   const [mascotaId, setMascotaId] = useState<string | null>(null);
   const [pidiendoMascota, setPidiendoMascota] = useState(false);
+  const [fotosMascota, setFotosMascota] = useState<Map<string, string>>(new Map());
   const [abierta, setAbierta] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView>(null);
 
@@ -135,7 +137,17 @@ export default function HubAdiestramiento() {
         const estado = await getEstadoOnboardingDueno();
         if (!vigente || !estado.ok || !estado.data.familia_id) return;
         const r = await obtenerMascotasDeFamilia(estado.data.familia_id);
-        if (vigente && r.ok) setMascotas(r.data);
+        if (!vigente || !r.ok) return;
+        setMascotas(r.data);
+        // ⚠️ r43 · LAS FOTOS, AHORA SÍ. El lector trae `foto_url` (un PATH
+        // del bucket privado), y pintarlo directo no muestra nada: hay que
+        // pedir la URL FIRMADA. Sus tres hermanas lo hacen; ésta era la
+        // única que no — y mi cura de r42 NUNCA ATERRIZÓ EN ESTE ARCHIVO
+        // (el reemplazo falló en silencio y lo reporté por intención).
+        const paths = r.data.map((m) => m.foto_url).filter((x): x is string => typeof x === 'string' && x.length > 0);
+        if (paths.length === 0) return;
+        const urls = await resolverUrlsFotos(paths);
+        if (vigente) setFotosMascota(urls);
       })();
       return () => {
         vigente = false;
@@ -175,7 +187,11 @@ export default function HubAdiestramiento() {
         {mascotas.length > 1 ? (
           <View style={{ marginHorizontal: -spacing[4] }}>
             <FiltroMascotas
-              mascotas={mascotas.map((m) => ({ id: m.id, nombre: m.nombre }))}
+              mascotas={mascotas.map((m) => ({
+                id: m.id,
+                nombre: m.nombre,
+                fotoUrl: m.foto_url !== null ? fotosMascota.get(m.foto_url) : undefined,
+              }))}
               elegida={mascotaId}
               onElegir={(id) => {
                 setMascotaId(id);
