@@ -122,7 +122,20 @@ export const palette = {
   roseDark: '#9E6A6A',  // rgb(158,106,106)
 
   // ── Fondos dark (v3.1 intactos — dark es opt-in) ──
-  dark0: '#050508',   // fondo base — el universo
+  dark0: '#050508',   // fondo base ORIGINAL — el universo (reversa r26)
+  /** S82-B r26 — EL TAPIZ DEL OSCURO (decisión founder: el tinte va en el
+   *  FONDO, no en la tarjeta —descartada explícitamente—; el motivo es
+   *  IDENTIDAD: los dos temas tienen que sentirse la misma casa).
+   *  Vivo: pink 3% sobre el base (mi recomendación; los 3 candidatos van
+   *  al switch de galería — el valor lo firma el founder MIRANDO).
+   *  ⚠️ EL ARGUMENTO QUE VIAJA CON ÉL, medido: **cuanto más tinte, MENOS
+   *  separación** — el tinte sube la luminancia del fondo y la tarjeta no
+   *  se mueve, así que el par card/base BAJA (1.050 → 1.037 al 3% → 1.027
+   *  al 5% → 1.009 al 8%, donde card y base son casi idénticos).
+   *  EL TECHO: el halo direccional rinde 1.53 contra el fondo en negro y
+   *  **cae por debajo de 1.50 a partir del 5%** — de ahí para arriba ni
+   *  el halo compensa. Reversa r26: `base: palette.dark0`. */
+  tapizDark: '#0D050D',
   /** S82-B r19 — LA ELEVACIÓN DEL OSCURO SE EXPRESA COMO LUMINOSIDAD,
    *  no como sombra (la convención del tema oscuro). Era #0D0D12 y daba
    *  **1.05 contra el fondo**: las tarjetas de la app entera se separaban

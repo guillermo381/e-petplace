@@ -11,7 +11,7 @@ export const darkTheme = {
   mode: 'dark' as const,
 
   bg: {
-    base:     palette.dark0,
+    base:     palette.tapizDark as string,  // S82-B r26 (reversa: palette.dark0)
     card:     palette.dark1,
     elevated: palette.dark2,
     overlay:  palette.dark3,
