@@ -276,7 +276,7 @@ export function FiltroMascotas({
    *  marca POR PRESENCIA, como el founder firmó en los filtros de tu
    *  vida. NO rompe L-b — la ley prohíbe el RELLENO PLENO con 4+
    *  hermanos, no marcar por forma. */
-  marca?: 'ley' | 'huella';
+  marca?: 'ley' | 'huella' | 'pata';
 }) {
   const { theme } = useTheme();
   // r12-11: sin el chip "Todas", los hermanos comparables son las
@@ -303,9 +303,15 @@ export function FiltroMascotas({
         style={{
           height: 44,
           borderRadius: radius.full,
-          backgroundColor: pleno ? theme.accent.control : theme.bg.card,
-          boxShadow: activo ? theme.elevacion.elevada : theme.elevacion.reposo,
-          transform: [{ scale: activo && esBarrido ? 1.04 : 1 }],
+          // con la PATA el chip CEDE: lo que se hunde no proyecta —
+          // pierde la elevación y baja al slot `bg.hundido` (el que B
+          // construyó en d1e0e36), y se achica en vez de crecer.
+          backgroundColor: marca === 'pata' && activo ? theme.bg.hundido : pleno ? theme.accent.control : theme.bg.card,
+          boxShadow:
+            marca === 'pata' && activo ? 'none' : activo ? theme.elevacion.elevada : theme.elevacion.reposo,
+          transform: [
+            { scale: marca === 'pata' && activo ? 0.98 : activo && esBarrido ? 1.04 : 1 },
+          ],
           flexDirection: 'row',
           alignItems: 'center',
           gap: spacing[2],
@@ -322,6 +328,10 @@ export function FiltroMascotas({
             <Huella color={theme.accent.control} escala={0.9} x={1.2} y={1.2} />
           </Svg>
         ) : null}
+        {/* (c) LA PATA SOBRE EL CANTO — la MISMA pieza de FiltroPills, no
+            una copia: montada arriba-derecha, montando el canto, en
+            magenta. R22 la sigue vigilando por nombre. */}
+        {marca === 'pata' && activo ? <MarcaElegido color={theme.accent.control} /> : null}
       </Pressable>
     );
   };

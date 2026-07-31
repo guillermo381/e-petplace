@@ -207,6 +207,7 @@ const CUATRO = [
 function LaminaBarridoCuatro() {
   const [a, setA] = useState<string | null>('b');
   const [b, setB] = useState<string | null>('b');
+  const [c, setC] = useState<string | null>('b');
   return (
     <View style={{ paddingVertical: spacing[5], gap: spacing[5] }}>
       <View style={{ paddingHorizontal: spacing[4], gap: spacing[1] }}>
@@ -226,6 +227,17 @@ function LaminaBarridoCuatro() {
           <Texto variante="dato">{'(b) + la huella marcando por presencia'}</Texto>
         </View>
         <FiltroMascotas marca="huella" mascotas={CUATRO} elegida={b} onElegir={setB} />
+      </View>
+      <View style={{ gap: spacing[2] }}>
+        <View style={{ paddingHorizontal: spacing[4] }}>
+          <Texto variante="dato">{'(c) la pata PISANDO el canto · el chip cede'}</Texto>
+        </View>
+        <FiltroMascotas marca="pata" mascotas={CUATRO} elegida={c} onElegir={setC} />
+      </View>
+      <View style={{ paddingHorizontal: spacing[4] }}>
+        <Texto variante="apoyo">
+          {'(b) falló porque la huella adentro compite con la foto en el mismo plano. (c) la pone en otro plano: la misma anatomía firmada en los filtros de tu vida.'}
+        </Texto>
       </View>
     </View>
   );
