@@ -48,6 +48,32 @@ const ui = leer(RAICES_UI.flatMap(archivosTsx));
 const sinComentarios = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
 const lineaDe = (src, index) => src.slice(0, index).split('\n').length;
 
+/** EL ANCLA — TERCERA CAPA DE L-192 (S82-B r36).
+ *
+ *  Las dos primeras capas preguntan si la regla PUEDE salir roja
+ *  (fixture) y si CORRE contra la casa (guard de corridas). Falta la
+ *  tercera, y es la que deja mudas a las reglas de AUSENCIA: una regla
+ *  que dice "no encontré ninguna violación" da exactamente la misma
+ *  salida verde cuando **no hay nada que mirar** — porque la carpeta se
+ *  renombró, porque la clave que vigila cambió de nombre, porque el
+ *  archivo se reestructuró. La regla sigue en su lugar, sigue corriendo,
+ *  y ya no verifica nada.
+ *
+ *  El ancla lo cierra: la regla declara el MÍNIMO de corpus que necesita
+ *  para que su silencio signifique algo. Sin ese mínimo, ROJO — el mismo
+ *  criterio que ya aplicaban R12/R14/R15/R16/R19/R22 cada una por su
+ *  cuenta ("sin fuente no hay verificación"); acá se vuelve una pieza con
+ *  nombre para que la próxima regla no tenga que reinventarla.
+ *
+ *  CONDICIÓN DE MUERTE: ninguna — muere con el lint. Lo que sí puede
+ *  morir es cada ancla suelta, el día que su regla deje de existir. */
+function ancla(nombre, encontrado, minimo, queEs) {
+  if (encontrado >= minimo) return [];
+  return [
+    `${nombre}: ANCLA ROTA — esperaba al menos ${minimo} ${queEs} y encontró ${encontrado}. Una regla de AUSENCIA sin corpus pasa en VERDE sin verificar nada: su silencio dejó de significar "no hay violaciones" y pasó a significar "no miré" (L-192, tercera capa).`,
+  ];
+}
+
 // ── LAS REGLAS: funciones puras (archivos) → { fallos: string[], info } ──
 
 /** R1 · 7bis sobre SelectorOpcion: naturaleza legal; entidad y
@@ -305,14 +331,24 @@ const RE_VOZCARD = /vozCardM\d\s*:/;
 const RE_SCORE = /%|\bnivel\b|\bprogres\w*|\bpunt(?:os|aje)\b|\brachas?\b|\bcomplet(?:aste|ado|é)\b|\bva bien\b|\blevel\b|\bstreak\b|\bscore\b/i;
 function r11(archivosDic) {
   const fallos = [];
+  let vigiladas = 0;
   for (const { path, src } of archivosDic) {
+    let enArchivo = 0;
     src.split('\n').forEach((lineaTxt, i) => {
-      if (RE_VOZCARD.test(lineaTxt) && RE_SCORE.test(lineaTxt)) {
+      if (!RE_VOZCARD.test(lineaTxt)) return;
+      enArchivo++;
+      if (RE_SCORE.test(lineaTxt)) {
         fallos.push(`${path}:${i + 1} — la voz del momento habla de DESEMPEÑO (LOYALTY §3): ${lineaTxt.trim().slice(0, 70)}`);
       }
     });
+    // ANCLA: esta regla vigila una FAMILIA DE CLAVES POR NOMBRE
+    // (`vozCardM<n>`). Si esas claves se renombran en una reforma de
+    // i18n, el regex deja de matchear y la regla informa "0 voces con
+    // score" para siempre — verde perfecto, vigilando un fantasma.
+    fallos.push(...ancla('R11', enArchivo, 1, `clave(s) vozCardM* en ${path}`));
+    vigiladas += enArchivo;
   }
-  return { fallos, info: `${fallos.length} voces con score` };
+  return { fallos, info: `${fallos.length} fallo(s) · ${vigiladas} voces vigiladas` };
 }
 const DICCIONARIOS = ['apps/cliente/src/i18n/es.ts', 'apps/cliente/src/i18n/en.ts'];
 const dics = DICCIONARIOS.map((p) => ({ path: p, src: readFileSync(p, 'utf8') }));
@@ -650,6 +686,13 @@ function r17(fuentes) {
     if (SIN_ENTRADA_R17.has(n)) { pendientes++; continue; }
     fallos.push(`R17: ${n} se exporta desde packages/ui y NO aparece en la galería — una pieza que nadie puede mirar no se puede firmar`);
   }
+  // ANCLA: R17 deriva su corpus del PARSEO de index.ts. Si ese archivo
+  // cambia de forma de export (o la galería deja de importar), el parseo
+  // devuelve cero nombres y la regla informa "0 pendientes" — verde sin
+  // haber mirado una sola pieza. Las dos puntas se anclan: hay nombres
+  // que vigilar Y hay al menos uno montado en la galería.
+  fallos.push(...ancla('R17', nombres.size, 1, 'export(s) parseados de packages/ui/src/index.ts'));
+  fallos.push(...ancla('R17', presentes, 1, 'pieza(s) encontradas en la galería'));
   return {
     fallos,
     info: `exportaciones=${nombres.size} · en-galería=${presentes} · exentas-declaradas=${exentas} · pendientes=${pendientes}/${SIN_ENTRADA_R17.size}`,
@@ -881,12 +924,15 @@ const BASELINE_R24 = {
   'apps/cliente/src/app/(tabs)/explorar/adiestramiento/index.tsx': 1,
   'apps/cliente/src/app/(tabs)/explorar/adiestramiento/confirmar-programa.tsx': 1,
 };
+const OFICIOS_R24 = ['paseo', 'veterinaria', 'grooming', 'adiestramiento'];
 function r24(archivos) {
   const fallos = [];
   let total = 0;
+  let corpus = 0;
   const sumaBaseline = Object.values(BASELINE_R24).reduce((a, b) => a + b, 0);
   for (const { path, src } of archivos) {
     if (!/\/explorar\//.test(path)) continue;
+    corpus++;
     let enArchivo = 0;
     for (const m of sinComentarios(src).matchAll(/paddingBottom:\s*Math\.max\(\s*insets\.bottom/g)) {
       enArchivo++;
@@ -897,9 +943,20 @@ function r24(archivos) {
     }
     total += enArchivo;
   }
+  // ANCLA — y la escribo contra MI PROPIA regla, que nació con este
+  // hueco: R24 filtra por la RUTA `explorar/`. Si esas pantallas se
+  // mueven o el segmento se renombra, el filtro no matchea nada, el
+  // conteo da 0 y el lint informa "0 pies a mano" — verde, y la próxima
+  // copia entra sin que nadie se entere. No basta con "algún archivo":
+  // los CUATRO oficios tienen que estar, porque la regla existe para
+  // esa familia y para el quinto que venga.
+  const vistos = OFICIOS_R24.filter((o) =>
+    archivos.some((a) => a.path.includes(`/explorar/${o}/index.tsx`)),
+  );
+  fallos.push(...ancla('R24', vistos.length, OFICIOS_R24.length, `pantalla(s) de reserva (faltan: ${OFICIOS_R24.filter((o) => !vistos.includes(o)).join(', ') || 'ninguna'})`));
   return {
     fallos,
-    info: `${total}/${sumaBaseline} pies a mano en explorar/ (baseline: los dos de adiestramiento, de C)${total < sumaBaseline ? ' — BAJÓ: actualizar baseline' : ''}`,
+    info: `${total}/${sumaBaseline} pies a mano en ${corpus} archivos de explorar/ · oficios anclados=${vistos.length}/4 (baseline: los dos de adiestramiento, de C)${total < sumaBaseline ? ' — BAJÓ: actualizar baseline' : ''}`,
   };
 }
 
@@ -931,7 +988,11 @@ const FIXTURES = {
   R22: { filtro: 'function MarcaElegido() {}\n<View style={{ width: 30 }}><MarcaElegido /></View>' },
   R16: { palette: "light0: '#FAF9F7',\npapelTapiz: '#FAF2F5',", temas: 'const lightOficio: Theme = { ...lightTheme }' },
   // el pie a mano en una pantalla de explorar que NO está en el baseline
+  // el fixture trae los CUATRO oficios para que el ancla NO sea lo que
+  // lo pone rojo: lo que tiene que salir roja es la copia, y una prueba
+  // que pasa por el motivo equivocado no prueba la regla que dice probar
   R24: [
+    ...OFICIOS_R24.map((o) => ({ path: `apps/cliente/src/app/(tabs)/explorar/${o}/index.tsx`, src: '' })),
     {
       path: 'apps/cliente/src/app/(tabs)/explorar/(fixture)/index.tsx',
       src: 'paddingBottom: Math.max(insets.bottom, spacing[4]),\nborderTopWidth: 1,',
