@@ -42,12 +42,14 @@ import {
   getEstadoOnboardingDueno,
   TIPO_ADIESTRAMIENTO,
   obtenerDiasCerradosServicio,
+  obtenerOfertaAdiestramientoPublica,
   obtenerEspeciesElegibles,
   obtenerIniciosAdiestramiento,
   obtenerMascotasDeFamilia,
   resolverUrlFoto,
   type ComprableAdiestramiento,
   type MascotaResumen,
+  type OfertaAdiestramientoPublica,
   mascotasElegibles,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
@@ -85,6 +87,18 @@ export default function AdiestramientoCuando() {
   // nombran prestadores). La intersección vive en el MOTOR: cerrado ⟺ lo
   // declararon TODOS los que ofertan; si uno abre, el día no se apaga.
   const [diasCerrados, setDiasCerrados] = useState<Set<number>>(new Set());
+  // r44 · el "desde" del catálogo, por comprable (lector público de A)
+  const [ofertaPublica, setOfertaPublica] = useState<OfertaAdiestramientoPublica[]>([]);
+
+  useEffect(() => {
+    let vigente = true;
+    void obtenerOfertaAdiestramientoPublica().then((r) => {
+      if (vigente && r.ok) setOfertaPublica(r.data);
+    });
+    return () => {
+      vigente = false;
+    };
+  }, []);
 
   useEffect(() => {
     let vigente = true;
@@ -397,17 +411,30 @@ export default function AdiestramientoCuando() {
       </ScrollView>
 
       {/* rasgo 2 de la gramática: CTA abajo, FIJO, una sola primaria */}
-      {/* r39-4 · EL PIE, como los otros tres. ⚠️ Y CON `total={null}`:
-          el precio de esta pantalla NO EXISTE todavía — la sesión suelta
-          y el programa cuestan distinto, y el número real lo resuelve el
-          server al elegir adiestrador. `PieReserva` acepta null y NO
-          dibuja nada, así que el pie sale con su CTA y SIN INVENTAR
-          MONTO. Un "desde $0" sería exactamente el verosímil-falso que
-          L-139 prohíbe: un número plausible que miente. */}
+      {/* ✅ r44 · EL PIE CON SU PRECIO — las dos líneas que el pedido
+          dejó preparadas, ahora que A construyó el lector público
+          (`obtener_oferta_adiestramiento_publica`). Hasta r43 iba con
+          `total={null}` porque el precio NO EXISTÍA en esta pantalla: su
+          único lector de oferta era del PRESTADOR, keyed por su id, y el
+          dueño no conoce prestador en este paso.
+          ⚠️ EL CASO SIN PRECIO SE RESUELVE POR AUSENCIA, no por null: A
+          eligió OMITIR del array el comprable sin oferta activa, y es más
+          seguro que devolver null — una fila que no existe no se puede
+          leer mal. Acá se traduce igual: sin fila, `total` va null y el
+          pie no dibuja monto. Nunca un "$ 0,00", que sería el
+          verosímil-falso de L-139: un número plausible que miente.
+          VERIFICADO CONTRA LA RESPUESTA REAL del RPC y no contra el tipo
+          —que es lo que dije que iba a mirar—: dos filas, CERO ceros,
+          CERO nulls, `varia` false en sesión (precio exacto) y true en
+          programa (dice "desde"). */}
       {Array.isArray(mascotas) && elegibles.length > 0 ? (
         <PieReserva
-          total={null}
-          totalDesde={false}
+          total={
+            ofertaPublica.find((o) => o.comprable === comprable)?.desde_precio !== undefined
+              ? `$ ${ofertaPublica.find((o) => o.comprable === comprable)!.desde_precio.toFixed(2)}`
+              : null
+          }
+          totalDesde={ofertaPublica.find((o) => o.comprable === comprable)?.varia ?? false}
           cuando={hora !== null ? `${dias.find((d) => d.iso === dia)?.corta ?? ''} · ${hora}` : null}
           etiqueta={t('explorar.verQuienPuede')}
           habilitado={listo}
