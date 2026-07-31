@@ -175,6 +175,10 @@ export { ClipSesion, type ClipSesionProps } from './components/ClipSesion'
 // prohibida.
 export { VozComision, type VozComisionProps } from './components/VozComision'
 export { EsperaDeMarca } from './brand/EsperaDeMarca'
+// MarcaEleccion — S82 r37: LA PATA que pisa lo elegido. Sube a primitiva
+// porque ya marca en TRES controles y una gramática copiada en tres
+// archivos no es gramática: son tres coincidencias esperando divergir.
+export { MarcaEleccion, PATA, MONTA, type MarcaEleccionProps } from './brand/MarcaEleccion'
 // PieReserva — S82-B r35: el pie fijo de una reserva, componente de
 // DOMINIO. Sube porque sus dos copias a mano habían perdido el PRECIO
 // entero (la causa del founder: lo que se copia, diverge).

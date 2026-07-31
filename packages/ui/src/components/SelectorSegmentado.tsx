@@ -10,6 +10,39 @@
  * (Insignia). Presentacional puro: la pantalla es dueña de la vista.
  * ═══════════════════════════════════════════════════════════════════
  *
+ * ⚠️ EL DESVÍO, DECLARADO Y NO RESUELTO (S82 r37, gate del founder).
+ *
+ * La Ley 19.3 dice que este control CAMBIA DE VISTA. Con
+ * `proposito="eleccion"` **elige un PRODUCTO** (baño vs baño-y-corte;
+ * sesión vs programa). Eso es un uso fuera del propósito con el que la
+ * ley lo firmó, y va escrito acá porque una ley que se estira en
+ * silencio deja de ser ley: la próxima sesión que lea 19.3 y vea este
+ * uso tiene que encontrar el porqué, no deducirlo.
+ *
+ * LO QUE LA MESA ARGUMENTÓ EN CONTRA (B y el arquitecto, `ce195b3`): el
+ * segmentado DECLARA cambio de vista, y en la reserva no se cambia de
+ * vista — se elige qué comprar; además convive con día, hora y duración,
+ * que ya son chips, así que un segmentado ahí se leería como otra cosa.
+ * La propuesta era `SelectorOpcion`, excluyente por contrato y hablando
+ * la gramática de sus hermanos.
+ *
+ * LO QUE EL FOUNDER RESOLVIÓ MIRANDO, y es el argumento que gana: **con
+ * la pata y el magenta deja de leerse como cambio de vista.** La
+ * gramática que la mesa buscaba por otra pieza, este control la habla
+ * con los dos agregados puestos — y encima conserva lo que
+ * `SelectorOpcion` no tiene: la exclusividad ES LA FORMA (un riel, una
+ * superficie que se mueve), no una promesa del contrato.
+ *
+ * LO QUE QUEDA ABIERTO, sin maquillaje: si 19.3 se ENMIENDA para incluir
+ * la elección de producto, o si nace una entrada nueva del diccionario
+ * para "elegir entre 2-3 alternativas excluyentes de un mismo eje". Es
+ * decisión de mesa y NO la toma este archivo. Lo que sí hace este
+ * archivo es no mentir: con `proposito="eleccion"` el rol de
+ * accesibilidad deja de ser `tab` y pasa a `radio` — porque el desvío
+ * es de LEY, no de semántica, y anunciar "pestaña" al que está
+ * comprando sería un error aparte.
+ * ═══════════════════════════════════════════════════════════════════
+ *
  * Anatomía (espec firmada): riel contenedor en superficie hundida
  * (bg.overlay) + 2-3 segmentos; el segmento ACTIVO es una superficie
  * apoyada sobre el riel con elevacion.reposo — el lenguaje del material
@@ -50,6 +83,7 @@ import { spacing } from '../tokens/spacing'
 import { radius } from '../tokens/radius'
 import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
+import { MarcaEleccion, MONTA } from '../brand/MarcaEleccion'
 
 // riel radius.md (12) − padding spacing[1] (4) = 8 → el activo es radius.sm
 const RADIO_RIEL = radius.md
@@ -71,11 +105,31 @@ export interface SelectorSegmentadoProps {
   onCambio: (codigo: string) => void
   /** accessibilityLabel del grupo (el control no lleva label visible). */
   etiqueta: string
+  /**
+   * QUÉ TRABAJO HACE ESTE CONTROL. Default `'vista'` = el de siempre
+   * (Ley 19.3), byte por byte: los consumidores viejos no cambian.
+   *
+   * `'eleccion'` = ELIGE UN PRODUCTO, no cambia de vista. Trae los dos
+   * agregados que el founder firmó mirando —la letra de la elegida en
+   * magenta y LA PATA pisándola— y, lo que no se ve pero es lo que más
+   * importa, **cambia la semántica de accesibilidad**: pasa de
+   * tablist/tab a radiogroup/radio. Un lector de pantalla que anuncia
+   * "pestaña" cuando lo que estás haciendo es elegir qué comprar dice
+   * algo falso, y eso no lo arregla ningún color.
+   */
+  proposito?: 'vista' | 'eleccion'
 }
 
-export function SelectorSegmentado({ segmentos, activo, onCambio, etiqueta }: SelectorSegmentadoProps) {
+export function SelectorSegmentado({
+  segmentos,
+  activo,
+  onCambio,
+  etiqueta,
+  proposito = 'vista',
+}: SelectorSegmentadoProps) {
   const { theme } = useTheme()
   const [anchoRiel, setAnchoRiel] = useState(0)
+  const eligiendo = proposito === 'eleccion'
 
   if (__DEV__ && (segmentos.length < 2 || segmentos.length > 3)) {
     console.warn(
@@ -90,9 +144,27 @@ export function SelectorSegmentado({ segmentos, activo, onCambio, etiqueta }: Se
   // Paso de luminancia del activo por tema (ver doc de cabecera)
   const superficieActiva = theme.mode === 'light' ? theme.bg.card : theme.border.default
 
-  return (
+  // ═══ EL AIRE DE LA PATA — la verificación de overflow, resuelta ACÁ ═══
+  // La pata monta MONTA px sobre el canto superior del segmento activo, y
+  // ese segmento vive a RELLENO_RIEL del borde del riel: la pata SE SALE
+  // del riel por (MONTA − RELLENO_RIEL) px. Un contenedor que recorte —o
+  // el elemento de arriba— se la come, y eso YA PASÓ una vez (el
+  // ScrollView de FiltroPills con paddingTop 4 < MONTA 8: la pata salía
+  // cortada por la mitad).
+  //
+  // LA DIFERENCIA CON AQUEL CASO, y es de diseño: allá el aire lo tuvo
+  // que poner el CONSUMIDOR, porque los chips son el contenido de un
+  // scroll. Acá la pieza es dueña de su caja, así que **el aire lo
+  // reserva ella** — envuelve el riel y se lo cobra a sí misma. El
+  // consumidor no tiene que saber que existe una pata, que es la única
+  // forma de que el cuarto consumidor no se olvide.
+  //
+  // Solo cuando hay pata: en 'vista' el ritmo vertical queda intacto.
+  const aire = eligiendo ? Math.max(0, MONTA - RELLENO_RIEL) : 0
+
+  const riel = (
     <View
-      accessibilityRole="tablist"
+      accessibilityRole={eligiendo ? 'radiogroup' : 'tablist'}
       accessibilityLabel={etiqueta}
       onLayout={(e) => setAnchoRiel(e.nativeEvent.layout.width)}
       style={{
@@ -142,9 +214,12 @@ export function SelectorSegmentado({ segmentos, activo, onCambio, etiqueta }: Se
             onPress={() => {
               if (!esActivo) onCambio(s.codigo)
             }}
-            accessibilityRole="tab"
+            accessibilityRole={eligiendo ? 'radio' : 'tab'}
             accessibilityLabel={s.etiqueta}
-            accessibilityState={{ selected: esActivo }}
+            // `checked` es el canal del radio; `selected` el de la tab.
+            // Mandar el que no corresponde deja el estado MUDO en el
+            // lector — el rol y su estado viajan juntos o no viajan.
+            accessibilityState={eligiendo ? { checked: esActivo } : { selected: esActivo }}
             style={{
               flex: 1,
               minHeight: ALTO_SEGMENTO,
@@ -159,14 +234,31 @@ export function SelectorSegmentado({ segmentos, activo, onCambio, etiqueta }: Se
               style={{
                 fontFamily: typography.family.sans.medium,
                 fontSize: typography.size.sm,
-                color: esActivo ? theme.text.primary : theme.text.secondary,
+                // FIRMADO: eligiendo, la letra de la elegida va en el
+                // acento del control (magenta). En 'vista' sigue en tinta
+                // — cambiar de vista no es elegir, y el color lo dice.
+                color: esActivo
+                  ? eligiendo
+                    ? theme.accent.control
+                    : theme.text.primary
+                  : theme.text.secondary,
               }}
             >
               {s.etiqueta}
             </Text>
+            {/* LA PATA, hermana del label y NUNCA hija de una placa (R22):
+                cuelga del segmento, no del glifo. Va acá y no sobre la
+                superficie que se desliza a propósito — si viajara con el
+                deslizamiento, una marca que se APOYA saldría patinando, y
+                el −14° de apoyo dejaría de significar lo que significa. */}
+            {eligiendo && esActivo ? <MarcaEleccion color={theme.accent.control} /> : null}
           </Pressable>
         )
       })}
     </View>
   )
+
+  // el aire vive AFUERA del riel: adentro lo comería el padding y el
+  // fondo hundido crecería con él (el riel se vería más alto sin serlo).
+  return aire > 0 ? <View style={{ paddingTop: aire }}>{riel}</View> : riel
 }

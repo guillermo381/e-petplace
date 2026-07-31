@@ -45,6 +45,7 @@ import { LogoNegocio } from '../components/LogoNegocio'
 import { FilaCita } from '../components/FilaCita'
 import { PieRevelar } from '../components/PieRevelar'
 import { PieReserva } from '../components/PieReserva'
+import { MarcaEleccion } from '../brand/MarcaEleccion'
 import { HeroMarca } from '../components/HeroMarca'
 import { LineaDeVida, LineaDeVidaNodo, type LineaDeVidaItem } from '../components/LineaDeVida'
 import { VisorFoto } from '../components/VisorFoto'
@@ -600,43 +601,35 @@ function HaloSobreTarjeta() {
  *  "toggle" pero declaró que nunca pueden estar los dos prendidos, y eso
  *  NO es dos binarios: es UNA elección. */
 function EleccionExcluyente() {
-  const [a, setA] = useState(false)
-  const [b, setB] = useState(true)
   const [seg, setSeg] = useState('bano')
-  const [chip, setChip] = useState('bano')
+  // FIRMADO (S82 r37): gana SelectorSegmentado con los DOS agregados del
+  // founder — la letra de la elegida en magenta y LA PATA pisándola. Los
+  // otros dos candidatos (dos Interruptor · SelectorOpcion) MURIERON con
+  // su trabajo hecho: el gate ocurrió y Ley 37 los saca del código, no
+  // los deja "por si acaso". Lo que sobrevive de ellos es el ARGUMENTO,
+  // que vive escrito en la cabecera de SelectorSegmentado — ahí es donde
+  // lo va a buscar quien dude, no en una lámina que ya se firmó.
   return (
-    <View style={{ gap: spacing[5] }}>
-      <View style={{ gap: spacing[2] }}>
-        <Texto variante="dato">(a) DOS Interruptor — lo que hay hoy</Texto>
-        <Interruptor etiqueta="Baño" encendido={a} onCambio={setA} />
-        <Interruptor etiqueta="Baño y corte" encendido={b} onCambio={setB} />
-        <Texto variante="apoyo" color="danger">
-          Dos interruptores PROMETEN INDEPENDENCIA: la forma dice "podés tener los dos, o ninguno". Si el motor lo prohíbe, el control miente antes de que lo toques — y la mentira se descubre con un rebote.
-        </Texto>
-      </View>
-      <View style={{ gap: spacing[2] }}>
-        <Texto variante="dato">(b) SelectorSegmentado — la forma limpia que pediste</Texto>
-        <SelectorSegmentado
-          etiqueta="Servicio"
-          segmentos={[{ codigo: 'bano', etiqueta: 'Baño' }, { codigo: 'corte', etiqueta: 'Baño y corte' }]}
-          activo={seg}
-          onCambio={setSeg}
-        />
-        <Texto variante="apoyo">Excluyente por contrato: uno activo, siempre. Su trabajo declarado (Ley 19.3) es CAMBIAR DE VISTA — acá no cambia de vista, elige un producto.</Texto>
-      </View>
-      <View style={{ gap: spacing[2] }}>
-        <Texto variante="dato">(c) SelectorOpcion — chips de selección ÚNICA</Texto>
-        <SelectorOpcion
-          etiqueta="Servicio"
-          acento="control"
-          opciones={[{ codigo: 'bano', etiqueta: 'Baño' }, { codigo: 'corte', etiqueta: 'Baño y corte' }]}
-          seleccionada={chip}
-          onSelect={setChip}
-        />
-        <Texto variante="apoyo">
-          También excluyente por contrato (radiogroup), Y habla la gramática de sus HERMANOS: en la pantalla de reserva este eje convive con día, hora y duración, que ya son chips. Un segmentado ahí se leería como "otra cosa".
-        </Texto>
-      </View>
+    <View style={{ gap: spacing[3] }}>
+      <SelectorSegmentado
+        etiqueta="Servicio"
+        proposito="eleccion"
+        segmentos={[{ codigo: 'bano', etiqueta: 'Baño' }, { codigo: 'corte', etiqueta: 'Baño y corte' }]}
+        activo={seg}
+        onCambio={setSeg}
+      />
+      <Texto variante="apoyo">
+        Con la pata y el magenta deja de leerse como cambio de vista — que era el reparo de la mesa, y
+        el founder lo resolvió mirando. La pata es la MISMA pieza de los otros dos controles
+        (`MarcaEleccion`), no una versión nueva: PATA 24 · MONTA = PATA/3 · −14° · absoluta sobre el
+        canto. Y el aire que la pata invade lo reserva EL COMPONENTE, no la pantalla.
+      </Texto>
+      <Texto variante="apoyo" color="danger">
+        DESVÍO DECLARADO: la Ley 19.3 dice que este control cambia de VISTA y acá elige PRODUCTO. Va
+        escrito en su cabecera con las dos posiciones. Si 19.3 se enmienda o nace una entrada nueva del
+        diccionario es decisión de MESA — el componente no la toma; lo único que hace es no mentir en
+        accesibilidad (con `proposito="eleccion"` el rol pasa de `tab` a `radio`).
+      </Texto>
     </View>
   )
 }
@@ -1459,7 +1452,9 @@ function GaleriaInterna() {
           <ThemeProvider defaultMode="dark"><HaloSobreTarjeta /></ThemeProvider>
         </Seccion>
 
-        <Seccion titulo="④ ⭐ GATE r34 — LA ELECCIÓN EXCLUYENTE · qué decide: CUÁL de las tres formas enseña mejor que solo una puede estar prendida (dos Interruptor vs SelectorSegmentado vs SelectorOpcion). Mi lectura, para que la contradigas mirando: SelectorOpcion">
+        {/* ④ FIRMADO (S82 r37): gana SelectorSegmentado con los dos
+            agregados del founder. Baja de "espera firma" a MUESTRA. */}
+        <Seccion titulo="LA ELECCIÓN EXCLUYENTE — FIRMADA (S82): SelectorSegmentado con la letra en magenta y LA PATA pisando la elegida">
           <EleccionExcluyente />
         </Seccion>
 
@@ -1575,6 +1570,32 @@ function GaleriaInterna() {
             La trampa del logo (MODELO_PRESENCIA §2): los logos anchos NO se recortan a círculo —
             se contienen con AIRE y FONDO (contain). Sin logo: monograma de iniciales en DM Sans —
             jamás huella (la huella es de mascota, Ley 12), jamás caja vacía.
+          </Texto>
+        </Seccion>
+
+        <Seccion titulo="MarcaEleccion (64) — LA PATA que pisa lo elegido (S82, primitiva de marca)">
+          {/* Montada sobre una caja de muestra para que se vea CÓMO monta
+              el canto — que es su anatomía, no un detalle: una marca que
+              no monta está al lado, y al lado no marca. */}
+          <View style={{ flexDirection: 'row', gap: spacing[6], paddingTop: spacing[3] }}>
+            <View style={{ height: 44, width: 110, borderRadius: radius.suave, backgroundColor: theme.bg.card, boxShadow: theme.elevacion.reposo, alignItems: 'center', justifyContent: 'center' }}>
+              <Texto variante="dato">elegida</Texto>
+              <MarcaEleccion color={theme.accent.control} />
+            </View>
+            <View style={{ height: 44, width: 110, borderRadius: radius.suave, backgroundColor: theme.bg.card, boxShadow: theme.elevacion.reposo, alignItems: 'center', justifyContent: 'center' }}>
+              <Texto variante="dato">no elegida</Texto>
+            </View>
+          </View>
+          <View style={{ height: spacing[3] }} />
+          <Texto variante="apoyo">
+            Sube a primitiva porque ya marca en TRES controles (FiltroPills · FiltroMascotas ·
+            SelectorSegmentado) y una gramática copiada en tres archivos no es gramática: son tres
+            coincidencias esperando divergir. Anatomía FIRMADA: PATA 24 · MONTA = PATA/3 · −14°
+            (algo que se apoya casi nunca cae recto — es lo único que la separa de un símbolo
+            centrado). Sus tres condiciones: aparece SOLO en la elegida · JAMÁS adentro de la placa
+            (R22 lo mecaniza: los glifos b′ ya llevan huella, y adentro sería una huella entre
+            huellas) · apoyada sobre el canto, con el aire reservado por quien la porta. El COLOR es
+            del consumidor: la pieza no elige dosis desde adentro (Ley 4).
           </Texto>
         </Seccion>
 

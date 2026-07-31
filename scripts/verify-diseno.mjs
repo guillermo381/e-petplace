@@ -661,6 +661,10 @@ const FUENTES_R16 = {
 const EXENTOS_R17 = new Set([
   'usePresionado', 'useTraduccionUi', 'recursosUi', 'useAviso', 'AvisoProvider',
   'ThemeProvider', 'useTheme', 'EvidenciaFotoCapturar',
+  // NÚMEROS, no piezas: la anatomía firmada de la pata (S82 r37). Se
+  // exportan para que el consumidor CALCULE el aire que la pata invade
+  // en vez de estimarlo — mirarlos en una galería no diría nada.
+  'PATA', 'MONTA',
 ]);
 /** VACÍO desde S82-B r17: las NUEVE ganaron su entrada en la misma
  *  tanda que la regla las enumeró — importadas, jamás reimplementadas.
@@ -910,6 +914,52 @@ function r24(archivos) {
   };
 }
 
+/** R25 · LA PATA NO SE REINVENTA (S82-B r37 — la ley de la marca de
+ *  elección, mecanizada el día que se firmó).
+ *
+ *  POR QUÉ EXISTE: la pata marca la elección en TRES controles
+ *  (`FiltroPills`, `FiltroMascotas`, `SelectorSegmentado`). Dejó de ser
+ *  una decisión por pieza y pasó a ser gramática de la casa — y una
+ *  gramática copiada en tres archivos no es gramática: son tres
+ *  coincidencias esperando divergir. Es la MISMA enfermedad del pie de
+ *  reserva, cazada esta vez ANTES de que divergiera.
+ *
+ *  QUÉ MIRA, y por qué ESTE literal: `rotate: '-14deg'` es la huella
+ *  dactilar de la anatomía firmada — nadie llega a −14° por casualidad;
+ *  si aparece, alguien está re-dibujando la pata. Es un net ANGOSTO a
+ *  propósito: el obvio ("una Huella dentro de algo absoluto") da SEIS
+ *  archivos y cinco son legítimos (AvatarMascota usa la huella como cara,
+ *  el Hogar también) — una regla que grita donde no hay delito se
+ *  desactiva sola en la cabeza de quien la lee.
+ *
+ *  BASELINE con nombre y CONDICIÓN DE MUERTE: 1, el `MarcaElegido` de
+ *  `filtro-pills` (de C, byte-equivalente a la primitiva). Cuando C la
+ *  adopte, el conteo baja y el lint PIDE bajar el baseline. */
+const CASA_PATA = 'packages/ui/src/brand/MarcaEleccion.tsx';
+const BASELINE_R25 = { 'apps/cliente/src/components/filtro-pills.tsx': 1 };
+function r25(archivos) {
+  const fallos = [];
+  let total = 0;
+  let casa = 0;
+  const sumaBaseline = Object.values(BASELINE_R25).reduce((a, b) => a + b, 0);
+  for (const { path, src } of archivos) {
+    const n = (sinComentarios(src).match(/rotate:\s*'-14deg'/g) ?? []).length;
+    if (path.endsWith('MarcaEleccion.tsx')) { casa += n; continue; }
+    total += n;
+    if (n > (BASELINE_R25[path] ?? 0))
+      fallos.push(
+        `${path} — LA PATA RE-DIBUJADA. La marca de la elección es UNA pieza: <MarcaEleccion> de @epetplace/ui (PATA 24 · MONTA = PATA/3 · −14° · absoluta sobre el canto). Sus tres condiciones viven ahí: aparece SOLO en la elegida · JAMÁS adentro de la placa (R22) · apoyada sobre el canto, con el aire reservado por quien la porta.`,
+      );
+  }
+  // ANCLA: si la primitiva pierde su −14° (renombre, refactor), esta
+  // regla queda vigilando un fantasma y todo pasa en verde.
+  fallos.push(...ancla('R25', casa, 1, `−14° en la propia primitiva (${CASA_PATA})`));
+  return {
+    fallos,
+    info: `${total}/${sumaBaseline} patas re-dibujadas (baseline: el MarcaElegido de filtro-pills, de C)${total < sumaBaseline ? ' — BAJÓ: actualizar baseline' : ''}`,
+  };
+}
+
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
 const FIXTURES = {
@@ -940,6 +990,10 @@ const FIXTURES = {
   // el fixture trae los CUATRO oficios para que el ancla NO sea lo que
   // lo pone rojo: lo que tiene que salir roja es la copia, y una prueba
   // que pasa por el motivo equivocado no prueba la regla que dice probar
+  R25: [
+    { path: 'packages/ui/src/brand/MarcaEleccion.tsx', src: "transform: [{ rotate: '-14deg' }]" },
+    { path: 'apps/cliente/src/(fixture)/OtraPata.tsx', src: "transform: [{ rotate: '-14deg' }]" },
+  ],
   R24: [
     ...OFICIOS_R24.map((o) => ({ path: `apps/cliente/src/app/(tabs)/explorar/${o}/index.tsx`, src: '' })),
     {
@@ -948,7 +1002,7 @@ const FIXTURES = {
     },
   ],
 };
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R22: r22, R24: r24 };
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R22: r22, R24: r24, R25: r25 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -1020,6 +1074,7 @@ corridas.push([
   r22({ filtro: readFileSync(PIEZA_R22, 'utf8') }),
 ]);
 corridas.push(['R24 (el pie de reserva no se copia)', r24(apps)]);
+corridas.push(['R25 (la pata no se reinventa)', r25([...apps, ...ui])]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,
