@@ -1,6 +1,6 @@
 # LAS CANDIDATAS DE LECCIÓN — inventario para la firma del founder (S77, ampliado S82)
 
-> **DOCE candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **La décima, la undécima y la duodécima entraron en S82** — el nombre de un token es su rol · su inversa (el nombre que envejeció) · y la ausencia con tipos — el inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
+> **TRECE candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **Las candidatas 10 a 13 entraron en S82** — el nombre de un token es su rol · su inversa (el nombre que envejeció) · la ausencia con tipos · y el defecto que vive porque el DATO DE PRUEBA no lo alcanza — el inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
 
 > **NINGUNA ESTÁ FIRMADA. La firma es del founder.** Este documento no decide:
 > junta lo que hoy vive disperso entre la letra, las deudas y los cierres de
@@ -13,7 +13,7 @@
 
 ---
 
-## Las doce
+## Las trece
 
 ### 1 · (d) — EL ORDEN NOMBRA EL ARTEFACTO QUE ABRE, JAMÁS EL ARCHIVO DONDE SE LO ESPERA
 **Origen:** S75 (canon, línea 44). **Sin firma desde entonces.**
@@ -186,12 +186,56 @@ una hipótesis de mesa: es una falla que ya cobró.**
 patrón sospechado, no una ley — lo que el gate tiene que juzgar es si es
 UNA ley transversal del expediente o cinco cosas que se parecen.*
 
+### 13 · UN DEFECTO PUEDE VIVIR INVISIBLE PORQUE EL DATO DE PRUEBA NO LO ALCANZA
+*(sumada en S82, 30-jul-2026 — origen: lo que destapó sembrar la familia de cuatro.)*
+
+**El texto candidato:** un defecto no sobrevive solo porque el camino sea
+difícil de recorrer — sobrevive porque **los datos con los que probamos
+no llegan hasta él**. La cura NO es más disciplina de gate: es que **el
+dato de prueba cubra los extremos**. Un extremo que ninguna cuenta de
+prueba alcanza es un extremo que nadie va a ver hasta que lo vea un
+usuario real.
+
+**Costo medido — CUATRO casos, todos de esta sesión:**
+
+| defecto | por qué nadie lo vio | el extremo que faltaba |
+|---|---|---|
+| **el CTA muerto de UNA mascota** | con una, el selector **se auto-resuelve** y el estado "sin elegir → deshabilitado" no existe | una familia de **1** |
+| **el barrido de L-b (4+)** | el relleno pleno se cae con 4 hermanos y **el máximo del sistema eran DOS** | una familia de **4** |
+| **los chips viejos en los cuatro salvavidas** | esas pantallas solo aparecen en estados que la demo feliz no produce | los estados de **borde** |
+| **`bg.overlay` invertido en oscuro** | el tema oscuro **casi no se mira** | el **segundo tema** |
+
+**La evidencia que la vuelve candidata y no anécdota:** el CTA muerto del
+paseo **vivió desde S57 hasta S82** — no porque fuera difícil de
+alcanzar, sino porque **la familia del founder tiene DOS mascotas** y con
+dos ese camino no se dibuja. Nadie fue descuidado: el dato no llegaba
+ahí. Y la contraprueba es del mismo día: **sembrar una familia de cuatro
+hizo visibles dos caminos en una sola corrida** (`seed_demo_familia_cuatro_s82`).
+
+**Por qué es hermana de L-161 pero NO la misma:** L-161 exige que la
+superficie sea **alcanzable** —que exista el camino—; ésta dice que
+**existir el camino no basta si el dato no te pone en la rama**. Se puede
+llegar a la pantalla y aun así no ver nunca su estado defectuoso.
+
+**La forma de la cura, ya probada:** un seed por EXTREMO, versionado,
+**que no reemplaza al feliz sino que convive** — y barato si no siembra
+nada fechado (el de cuatro no tiene una sola fecha, así que no envejece).
+El seed feliz sigue siendo el que se parece a un usuario real; el de
+extremo existe para las ramas que ese nunca toca.
+
+**Estado:** viva, sin firma. *Pregunta abierta para el gate: ¿qué otros
+extremos merecen su dato? Los candidatos que esta sesión rozó — familia
+de UNA (existe), de CUATRO (existe), **memorial** (nadie tiene una
+mascota fallecida sembrada), **hogar sin mascotas**, **cuenta sin
+oferta** — y cuántos seeds es sano mantener antes de que el costo se dé
+vuelta.*
+
 ---
 
 ## Nota sobre el conteo
 
 **Son NUEVE, y la novena nació acá.** El inventario abrió con ocho porque **L-169 no existía**: el canon la nombraba y ninguna edición la había escrito. Su texto se depositó en S77 (ver arriba), con su nota de procedencia — que es, ella misma, material de la lección.
 
-> **RE-MEDIDO S82 (30-jul-2026): son DOCE.** Entraron la décima —*un token se nombra por su ROL*, del trabajo de B sobre el tema— y la undécima —*el nombre que envejeció falla al BUSCARLO*, del canto de veterinaria de C. **Son INVERSAS y por eso van separadas:** una falla al usar el token, la otra al no encontrarlo (y ésa produce duplicados, que es peor porque no se ve). La duodécima —*la ausencia tiene tipos*— entró al inventario en r11 con su quinto tipo; su texto completo vive en `MODELO_PRODUCTO` y acá figura para que se firme con las demás. El conteo se corrige acá y en el título en el MISMO acto (L-141: un contador que envejece miente igual que una ley sin escribir). **Las nueve de S77 siguen SIN FIRMA**, ninguna cerrada: este documento acumula, no vence.
+> **RE-MEDIDO S82 (30-jul-2026): son TRECE.** Entraron la décima —*un token se nombra por su ROL*, del trabajo de B sobre el tema— y la undécima —*el nombre que envejeció falla al BUSCARLO*, del canto de veterinaria de C. **Son INVERSAS y por eso van separadas:** una falla al usar el token, la otra al no encontrarlo (y ésa produce duplicados, que es peor porque no se ve). La duodécima —*la ausencia tiene tipos*— entró al inventario en r11 con su quinto tipo; su texto completo vive en `MODELO_PRODUCTO` y acá figura para que se firme con las demás. La decimotercera —*un defecto vive invisible si el dato de prueba no lo alcanza*— entró en r14 con sus cuatro casos y su contraprueba del mismo día (la familia de cuatro hizo visibles dos caminos en una corrida). El conteo se corrige acá y en el título en el MISMO acto (L-141: un contador que envejece miente igual que una ley sin escribir). **Las nueve de S77 siguen SIN FIRMA**, ninguna cerrada: este documento acumula, no vence.
 
 Si alguna otra candidata quedó fuera, es porque no encontré su fuente. **Pasame el literal y entra**: el criterio de este documento es que nada figure sin dónde leerlo.
