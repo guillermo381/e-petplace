@@ -35,6 +35,7 @@ import {
   Icono,
   Interruptor,
   SelectorOpcion,
+  SelectorSegmentado,
   Texto,
   spacing,
   typography,
@@ -339,16 +340,14 @@ export default function GroomingCuando() {
                   </EsqueletoGrupo>
                 ) : Array.isArray(ofertaPublica) && ofertaPublica.length > 0 ? (
                   <View style={{ gap: spacing[2] }}>
-                    <SelectorOpcion
-                      acento="control"
+                    <SelectorSegmentado
                       etiqueta={t('grooming.servicioEtiqueta')}
-                      naturaleza="existe"
-                      opciones={ofertaPublica.map((o) => ({
+                      segmentos={ofertaPublica.map((o) => ({
                         codigo: o.tipo_servicio,
                         etiqueta: vozServicio(t, o.tipo_servicio) ?? o.tipo_servicio,
                       }))}
-                      seleccionada={tipoServicio ?? undefined}
-                      onSelect={setTipoServicio}
+                      activo={tipoServicio ?? ''}
+                      onCambio={setTipoServicio}
                     />
                     {(() => {
                       const elegida = ofertaPublica.find((o) => o.tipo_servicio === tipoServicio) ?? null;
@@ -426,16 +425,14 @@ export default function GroomingCuando() {
                 {/* 1 · EL SERVICIO — los dos comprables del menú (§1),
                     con el "desde" YA resuelto por la talla del perfil */}
                 <View style={{ gap: spacing[2] }}>
-                  <SelectorOpcion
-                    acento="control"
+                  <SelectorSegmentado
                     etiqueta={t('grooming.servicioEtiqueta')}
-                    naturaleza="existe"
-                    opciones={oferta.map((o) => ({
+                    segmentos={oferta.map((o) => ({
                       codigo: o.tipo_servicio,
-                      etiqueta: vozServicio(t, o.tipo_servicio, o.servicio_nombre) ?? o.servicio_nombre,
+                      etiqueta: vozServicio(t, o.tipo_servicio) ?? o.tipo_servicio,
                     }))}
-                    seleccionada={tipoServicio ?? undefined}
-                    onSelect={setTipoServicio}
+                    activo={tipoServicio ?? ''}
+                    onCambio={setTipoServicio}
                   />
                   {servicioElegido !== null ? (
                     <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>

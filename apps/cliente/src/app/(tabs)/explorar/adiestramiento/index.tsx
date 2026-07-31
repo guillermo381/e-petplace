@@ -32,6 +32,7 @@ import {
   EstadoVacio,
   Icono,
   SelectorOpcion,
+  SelectorSegmentado,
   Texto,
   spacing,
   typography,
@@ -287,16 +288,14 @@ export default function AdiestramientoCuando() {
                 pantalla: si es programa, la voz honesta dice ACÁ que
                 las sesiones se agendan solas, antes de todo precio. */}
             <View style={{ gap: spacing[2] }}>
-              <SelectorOpcion
-                acento="control"
+              <SelectorSegmentado
                 etiqueta={t('adiestramiento.comprableEtiqueta')}
-                naturaleza="existe"
-                opciones={[
+                segmentos={[
                   { codigo: 'sesion', etiqueta: t('adiestramiento.comprableSesion') },
                   { codigo: 'programa', etiqueta: t('adiestramiento.comprablePrograma') },
                 ]}
-                seleccionada={comprable}
-                onSelect={(c) => setComprable(c === 'programa' ? 'programa' : 'sesion')}
+                activo={comprable}
+                onCambio={(c) => setComprable(c === 'programa' ? 'programa' : 'sesion')}
               />
               {comprable === 'programa' ? (
                 <Text
