@@ -1473,17 +1473,14 @@ export default function Hogar() {
             actividad: rv.proxima !== null || rv.por_coordinar || esReciente(rv.ultima_cerrada),
             fechaProxima: rv.proxima?.fecha ?? null,
             recencia: rv.por_coordinar ? hoyIso : rv.ultima_cerrada,
-            onPress: () => {
-              // destino v1 (D-493, hueco del hub vet declarado): la
-              // mascota de la próxima/por-coordinar/última cita vet.
-              const destinoId = rv.mascota_id_destino;
-              const nombre = listaMascotas.find((m) => m.id === destinoId)?.nombre ?? '';
-              if (destinoId !== null) {
-                router.push({ pathname: '/citas/[mascotaId]', params: { mascotaId: destinoId, nombre } });
-              } else {
-                router.push('/explorar/veterinaria');
-              }
-            },
+            // S82-A r12 (CRUCE DE TERRITORIO declarado, UNA línea):
+            // **D-493 QUEDA PAGADA ACÁ.** El destino v1 era prestado —
+            // `/citas/[mascotaId]`, la mascota de la próxima cita vet —
+            // y su propio defecto estaba escrito en la deuda: en un
+            // hogar multi-mascota aterrizaba en UNA y las otras solo se
+            // alcanzaban por ficha. Ahora va al LOG, que las trae todas
+            // y filtra por mascota.
+            onPress: () => router.push('/hogar/veterinaria'),
           },
         ];
 

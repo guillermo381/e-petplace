@@ -49,6 +49,10 @@ export type IconoNombre =
   //    Ley 12 prohíbe, y el mismo caso por el que lápiz y compartir se
   //    frenaron en r7. Gate por ícono a 21px PENDIENTE.
   | 'vacuna'
+  // S82-B r34: LA BITÁCORA gana su glifo — adiestramiento mostraba el de
+  // VACUNA (sustitución genérica, Ley 12: el mismo caso de lápiz/compartir
+  // en r7 y de la vacuna en r10). Gate por ícono a 21px PENDIENTE.
+  | 'bitacora'
 export type IconoRegistro = 'capa' | 'aa' | 'tinta'
 
 const TRAZO = 1.9
@@ -349,6 +353,19 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
     </>
   ),
 
+  // LA BITÁCORA (S82-B r34) — el cuaderno del progreso, con su huella:
+  // la bitácora ES de una mascota (capa IDENTIDAD, familia carnet/caso).
+  // Anatomía PARA 21px: cuerpo + lomo + DOS renglones (tres ya son ruido
+  // a ese tamaño — Chanel antes del gate, como en la jeringa).
+  bitacora: ({ tinta, huella }) => (
+    <>
+      <Path d="M9 4h9a1.5 1.5 0 0 1 1.5 1.5v13a1.5 1.5 0 0 1-1.5 1.5H9z" {...trazo(tinta)} />
+      <Path d="M11.4 4v16" {...trazo(tinta)} />
+      <Path d="M13.6 9h3.2M13.6 12.4h3.2" {...trazo(tinta)} />
+      <Huella color={huella} x={2} y={13.4} escala={0.3} />
+    </>
+  ),
+
   // ── GLIFOS DE CONTROL (S82-B r7) ───────────────────────────────────
   // SIN HUELLA, y el criterio VIAJÓ CON LA REFERENCIA (no lo inventa
   // esta sesión — literal del archivo del founder): *"Trazo 1.9, sin
@@ -435,6 +452,8 @@ export function Icono({
     // S82-B r10: la vacuna es PROTECCIÓN DE VIDA — capa identidad, la
     // misma que carnet/vet/seguros (§ Ley 10: la taxonomía manda).
     vacuna: identidad,
+    // La bitácora es del expediente de la mascota — capa identidad.
+    bitacora: identidad,
     // GLIFOS DE CONTROL (S82-B r7): TINTA en los dos registros — un
     // control no pertenece a una capa (no hay oficio del que tomar
     // color) y su huella no se dibuja. El `registro="capa"` de un

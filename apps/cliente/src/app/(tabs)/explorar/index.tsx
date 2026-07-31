@@ -96,7 +96,11 @@ export default function Explorar() {
     // S68-A2 (V2): la card vet despierta — va al CUÁNDO directo (el hub
     // del oficio queda declarado como resto de la tanda del Durante; la
     // cita pagada ya tiene superficie: /citas/[mascotaId] D-430 + Hogar).
-    if (servicios.veterinary) fichasActivas.push({ clave: 'vet', titulo: t('explorar.servicioVet'), detalle: t('explorar.servicioVetDetalle'), icono: <Icono nombre="veterinaria" tamano={34} />, onPress: () => router.navigate('/explorar/veterinaria') });
+    // S82-A r12 (CRUCE DE TERRITORIO declarado, UNA línea): vet entra a
+    // SU LOG como los otros tres oficios — era la ÚNICA de las cuatro
+    // que caía directo en la reserva, y por eso el log de r9 nacía sin
+    // entrada (el founder cayó en reserva al tocar Veterinaria).
+    if (servicios.veterinary) fichasActivas.push({ clave: 'vet', titulo: t('explorar.servicioVet'), detalle: t('explorar.servicioVetDetalle'), icono: <Icono nombre="veterinaria" tamano={34} />, onPress: () => router.navigate('/hogar/veterinaria') });
     if (servicios.training) fichasActivas.push({ clave: 'adiestramiento', titulo: t('explorar.servicioAdiestramiento'), detalle: t('explorar.servicioAdiestramientoDetalle'), icono: <Icono nombre="training" tamano={26} />, onPress: () => router.navigate('/hogar/adiestramiento') });
     if (!servicios.hotel) proximamente.push({ nombre: t('explorar.proxHotel'), icono: 'hotel' }, { nombre: t('explorar.proxGuarderia'), icono: 'guarderia' });
     if (!servicios.insurance) proximamente.push({ nombre: t('explorar.proxSeguros'), icono: 'seguros' });

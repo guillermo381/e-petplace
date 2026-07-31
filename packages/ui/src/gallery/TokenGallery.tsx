@@ -593,6 +593,53 @@ function HaloSobreTarjeta() {
   )
 }
 
+
+/** S82-B r34 — LA ELECCIÓN EXCLUYENTE: tres formas de la misma pregunta
+ *  (baño vs baño-y-corte · sesión vs programa). El founder pidió
+ *  "toggle" pero declaró que nunca pueden estar los dos prendidos, y eso
+ *  NO es dos binarios: es UNA elección. */
+function EleccionExcluyente() {
+  const [a, setA] = useState(false)
+  const [b, setB] = useState(true)
+  const [seg, setSeg] = useState('bano')
+  const [chip, setChip] = useState('bano')
+  return (
+    <View style={{ gap: spacing[5] }}>
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">(a) DOS Interruptor — lo que hay hoy</Texto>
+        <Interruptor etiqueta="Baño" encendido={a} onCambio={setA} />
+        <Interruptor etiqueta="Baño y corte" encendido={b} onCambio={setB} />
+        <Texto variante="apoyo" color="danger">
+          Dos interruptores PROMETEN INDEPENDENCIA: la forma dice "podés tener los dos, o ninguno". Si el motor lo prohíbe, el control miente antes de que lo toques — y la mentira se descubre con un rebote.
+        </Texto>
+      </View>
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">(b) SelectorSegmentado — la forma limpia que pediste</Texto>
+        <SelectorSegmentado
+          etiqueta="Servicio"
+          segmentos={[{ codigo: 'bano', etiqueta: 'Baño' }, { codigo: 'corte', etiqueta: 'Baño y corte' }]}
+          activo={seg}
+          onCambio={setSeg}
+        />
+        <Texto variante="apoyo">Excluyente por contrato: uno activo, siempre. Su trabajo declarado (Ley 19.3) es CAMBIAR DE VISTA — acá no cambia de vista, elige un producto.</Texto>
+      </View>
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="dato">(c) SelectorOpcion — chips de selección ÚNICA</Texto>
+        <SelectorOpcion
+          etiqueta="Servicio"
+          acento="control"
+          opciones={[{ codigo: 'bano', etiqueta: 'Baño' }, { codigo: 'corte', etiqueta: 'Baño y corte' }]}
+          seleccionada={chip}
+          onSelect={setChip}
+        />
+        <Texto variante="apoyo">
+          También excluyente por contrato (radiogroup), Y habla la gramática de sus HERMANOS: en la pantalla de reserva este eje convive con día, hora y duración, que ya son chips. Un segmentado ahí se leería como "otra cosa".
+        </Texto>
+      </View>
+    </View>
+  )
+}
+
 function GateS82() {
   const TAPIZ = palette.papelTapiz
   return (
@@ -689,7 +736,7 @@ function EjemploSetBPrima() {
     'lapiz', 'compartir',
     // S82-B r10: LA VACUNA con su glifo propio (la fila del perfil
     // pintaba `veterinaria` — sustitución genérica que Ley 12 prohíbe).
-    'vacuna',
+    'vacuna', 'bitacora',
   ]
   return (
     <View style={{ gap: spacing[4] }}>
@@ -2233,6 +2280,10 @@ function GaleriaInterna() {
 
         <Seccion titulo="⭐ GATE S82-B r33 — EL HALO SOBRE UNA TARJETA REAL (otra pregunta: sin-tarjeta resolvió los CHIPS, las tarjetas siguen sin separarse)">
           <ThemeProvider defaultMode="dark"><HaloSobreTarjeta /></ThemeProvider>
+        </Seccion>
+
+        <Seccion titulo="⭐ GATE S82-B r34 — LA ELECCIÓN EXCLUYENTE: dos Interruptor vs SelectorSegmentado vs SelectorOpcion (¿cuál enseña mejor que solo uno puede estar prendido?)">
+          <EleccionExcluyente />
         </Seccion>
 
         <Seccion titulo="⛔ RECHAZADO EN GATE — vivo en el código, pendiente de curar">
