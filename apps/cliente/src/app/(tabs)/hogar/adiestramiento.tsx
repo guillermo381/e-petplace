@@ -163,7 +163,12 @@ export default function HubAdiestramiento() {
           variante="primario"
           bloque
           etiqueta={t('adiestramiento.agendar')}
-          onPress={() => router.push('/explorar/adiestramiento')}
+          onPress={() =>
+            router.navigate({
+              pathname: '/explorar/adiestramiento',
+              ...(mascotaId !== null ? { params: { mascotaId } } : null),
+            })
+          }
         />
 
         {/* ✅ r33 · LA BITÁCORA SALIÓ DEL EJE — acceso propio, con la

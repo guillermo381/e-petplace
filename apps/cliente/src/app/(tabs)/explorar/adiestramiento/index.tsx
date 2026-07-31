@@ -23,7 +23,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { router, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   AvatarMascota,
   Boton,
@@ -65,7 +65,18 @@ export default function AdiestramientoCuando() {
   // §2: especies elegibles de la DB — la UI filtra, la DB manda.
   const [especies, setEspecies] = useState<string[] | null>(null);
   const [fotos, setFotos] = useState<Record<string, string>>({});
-  const [mascotaId, setMascotaId] = useState<string | null>(null);
+  // ⚠️ r33 · LA MASCOTA VIAJA DESDE EL LOG y NO se vuelve a preguntar
+  // (Ley 23: la puerta no pregunta lo que ya sabe). Se LEE VIVA, no se
+  // copia: `router.navigate` reusa la ruta montada y `useState(param)`
+  // la congelaría en la del primer montaje — el defecto de r15-bis,
+  // cortado antes de que ocurra. El estado local sobrevive SOLO para el
+  // deep-link sin param y el log vacío.
+  const { mascotaId: mascotaParam } = useLocalSearchParams<{ mascotaId?: string }>();
+  const paramMascota =
+    typeof mascotaParam === 'string' && mascotaParam.trim().length > 0 ? mascotaParam : null;
+  const [elegidaLocal, setElegidaLocal] = useState<string | null>(null);
+  const mascotaId = paramMascota ?? elegidaLocal;
+  const setMascotaId = setElegidaLocal;
   const [comprable, setComprable] = useState<ComprableAdiestramiento>('sesion');
   // ✅ r34 · LOS DÍAS CERRADOS, CABLEADOS con el lector POR SERVICIO de A
   // (el hueco que declaré en r32: los inicios llegan agregados y no
