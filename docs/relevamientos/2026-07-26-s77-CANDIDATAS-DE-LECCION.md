@@ -1,6 +1,6 @@
 # LAS CANDIDATAS DE LECCIÓN — inventario para la firma del founder (S77, ampliado S82)
 
-> **TRECE candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **Las candidatas 10 a 13 entraron en S82** — el nombre de un token es su rol · su inversa (el nombre que envejeció) · la ausencia con tipos · y el defecto que vive porque el DATO DE PRUEBA no lo alcanza — el inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
+> **CATORCE candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **Las candidatas 10 a 14 entraron en S82** — el nombre de un token es su rol · su inversa (el nombre que envejeció) · la ausencia con tipos · el defecto que vive porque el DATO DE PRUEBA no lo alcanza · y el lector que se apoya solo en la RLS y por eso nadie puede auditarlo leyendo — el inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
 
 > **NINGUNA ESTÁ FIRMADA. La firma es del founder.** Este documento no decide:
 > junta lo que hoy vive disperso entre la letra, las deudas y los cierres de
@@ -232,10 +232,54 @@ vuelta.*
 
 ---
 
+### 14 · UN LECTOR QUE SE APOYA SOLO EN LA RLS ES UN LECTOR QUE NADIE PUEDE AUDITAR LEYENDO
+
+**El texto propuesto:**
+
+> **Un lector que se apoya SOLO en la RLS es un lector que nadie puede
+> auditar leyendo.** Para saber qué devuelve hay que ir a `pg_policy`, y
+> ahí el que audita descubre lo que el que escribió el lector nunca
+> declaró: **de qué ROL está preguntando.** En una tabla con más de una
+> puerta de lectura, el filtro explícito no es redundancia con la RLS —
+> es **el contrato del lector**. La RLS defiende; el filtro **declara**.
+
+**El origen (S82-A r17, con rojo producido).** C halló que
+`obtenerMisPlanesPaseo` consultaba `suscripciones_servicio` sin filtro
+alguno y que en una cuenta demo aparecía un plan de otra familia. La
+sospecha razonable era **fuga de RLS**. La medición dijo otra cosa: la
+policy del dueño **corta** (`user_id = auth.uid()`) — pero esa tabla
+tiene **cuatro puertas de lectura**, y las otras tres (prestador,
+empleado, admin) también son **correctas**. La fila llegaba por la puerta
+del **prestador**, porque la cuenta era de **doble papel**: dueño y
+paseador a la vez. El hub de la familia pintaba, como propio, el plan que
+esa persona **vende**.
+
+**Por qué merece ley y no solo una cura.** El defecto es **invisible en
+cuentas de un solo papel** — que son todas las que alguien prueba a
+mano. Y no es un caso de laboratorio: **un groomer que es dueño de su
+perro es el usuario normal del producto**. Además, la cura correcta era
+*al revés* de lo que la sospecha pedía: **tocar la policy habría roto la
+lectura legítima del prestador**. Sin el literal de `pg_policy` delante,
+la cura "obvia" era el daño.
+
+**Su hermana mayor:** la #8 (*antes de presupuestar un arco se leen las
+policies*) — la misma raíz, otro momento. Aquella evita presupuestar mal;
+ésta evita **escribir un lector cuyo alcance nadie declaró**. Y la #13
+explica por qué sobrevivió tanto: **el dato de prueba de un solo papel
+nunca lo alcanza.**
+
+**Estado:** viva, sin firma. *Su forma exigible ya existe y está medida:
+**puertas de lectura > 1 · lector sin filtro propio = LECTOR
+AMBIGUO**, con cinco casos censados en D-587.*
+
+---
+
 ## Nota sobre el conteo
 
 **Son NUEVE, y la novena nació acá.** El inventario abrió con ocho porque **L-169 no existía**: el canon la nombraba y ninguna edición la había escrito. Su texto se depositó en S77 (ver arriba), con su nota de procedencia — que es, ella misma, material de la lección.
 
-> **RE-MEDIDO S82 (30-jul-2026): son TRECE.** Entraron la décima —*un token se nombra por su ROL*, del trabajo de B sobre el tema— y la undécima —*el nombre que envejeció falla al BUSCARLO*, del canto de veterinaria de C. **Son INVERSAS y por eso van separadas:** una falla al usar el token, la otra al no encontrarlo (y ésa produce duplicados, que es peor porque no se ve). La duodécima —*la ausencia tiene tipos*— entró al inventario en r11 con su quinto tipo; su texto completo vive en `MODELO_PRODUCTO` y acá figura para que se firme con las demás. La decimotercera —*un defecto vive invisible si el dato de prueba no lo alcanza*— entró en r14 con sus cuatro casos y su contraprueba del mismo día (la familia de cuatro hizo visibles dos caminos en una corrida). El conteo se corrige acá y en el título en el MISMO acto (L-141: un contador que envejece miente igual que una ley sin escribir). **Las nueve de S77 siguen SIN FIRMA**, ninguna cerrada: este documento acumula, no vence.
+> **RE-MEDIDO S82 (31-jul-2026): son CATORCE.** La decimocuarta —*un lector que se apoya solo en la RLS no se puede auditar leyendo*— entró en r17: la sospecha era fuga, la medición la desmintió **y encontró un defecto peor de ver** (la cuenta de doble papel), con su rojo producido y cinco hermanos censados en D-587. Es hermana de la #8 en otro momento del trabajo, y la #13 explica por qué sobrevivió.
+>
+> **RE-MEDIDO S82 (30-jul-2026): eran TRECE.** Entraron la décima —*un token se nombra por su ROL*, del trabajo de B sobre el tema— y la undécima —*el nombre que envejeció falla al BUSCARLO*, del canto de veterinaria de C. **Son INVERSAS y por eso van separadas:** una falla al usar el token, la otra al no encontrarlo (y ésa produce duplicados, que es peor porque no se ve). La duodécima —*la ausencia tiene tipos*— entró al inventario en r11 con su quinto tipo; su texto completo vive en `MODELO_PRODUCTO` y acá figura para que se firme con las demás. La decimotercera —*un defecto vive invisible si el dato de prueba no lo alcanza*— entró en r14 con sus cuatro casos y su contraprueba del mismo día (la familia de cuatro hizo visibles dos caminos en una corrida). El conteo se corrige acá y en el título en el MISMO acto (L-141: un contador que envejece miente igual que una ley sin escribir). **Las nueve de S77 siguen SIN FIRMA**, ninguna cerrada: este documento acumula, no vence.
 
 Si alguna otra candidata quedó fuera, es porque no encontré su fuente. **Pasame el literal y entra**: el criterio de este documento es que nada figure sin dónde leerlo.

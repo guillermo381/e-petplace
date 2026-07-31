@@ -6,7 +6,7 @@
 // normalización por prefijo (L-115) + guards contra el DDL real de la
 // migración 20260712130000 (L-124).
 
-import { getClient } from '../client';
+import { getClient, uidActual } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 
 // ── Códigos de error (verificados contra los RAISE de cada body) ────────────
@@ -35,6 +35,11 @@ const CODIGOS_ERROR_PLAN = [
   'cita_estado_invalido',
   'aviso_tarde',
   'fuera_del_periodo',
+  // S82-A r17: los lectores del HUB del dueño exigen sesión para poder
+  // filtrar por dueño explícitamente. Sin uid no se lee "a ver qué trae
+  // la RLS" — se dice que no hay sesión (L-178: un dato faltante jamás
+  // se disfraza de otra cosa).
+  'sin_sesion',
 ] as const;
 
 export type CodigoErrorPlan = (typeof CODIGOS_ERROR_PLAN)[number];
@@ -64,6 +69,7 @@ const MENSAJES_ERROR_PLAN: Record<
   cita_estado_invalido: 'Esa salida ya no se puede mover.',
   aviso_tarde:          'Faltan menos de 24 horas — esta salida ya no se puede mover.',
   fuera_del_periodo:    'La nueva fecha tiene que caer dentro del período de tu plan.',
+  sin_sesion:           'No hay sesión activa.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:    'Ocurrió un error inesperado. Probá de nuevo.',
 };
@@ -188,13 +194,45 @@ export interface PlanPaseo {
   auto_renovar: boolean;
 }
 
-/** Los planes de paseo del dueño (todos los estados — el hub decide qué pinta). */
+/**
+ * Los planes de paseo del dueño (todos los estados — el hub decide qué pinta).
+ *
+ * ══ POR QUÉ ESTE LECTOR FILTRA POR `user_id` Y NO SE APOYA EN LA RLS ══
+ * (S82-A r17 — medido, con rojo producido; el reporte del hallazgo vive
+ *  en `docs/relevamientos/2026-07-31-s82a-r17-suscripciones.md`)
+ *
+ * `suscripciones_servicio` tiene **CINCO puertas de RLS**, y solo UNA es
+ * la del dueño: `suscr_servicio_pet_parent_own` (`user_id = auth.uid()`).
+ * Las otras cuatro conceden por PRESTADOR, por EMPLEADO y por ADMIN — y
+ * todas son correctas: el paseador tiene que ver los planes que vende.
+ *
+ * El defecto no estaba en la policy: estaba en que **este lector dice
+ * "MIS planes" y no declaraba desde qué ROL**. En una cuenta de un solo
+ * papel nunca se nota; en una cuenta que es dueño Y prestador —que es un
+ * escenario REAL del producto, no un artefacto de la demo— el hub de la
+ * familia pintaba un plan de otra familia, concedido por la puerta del
+ * prestador. Medido: con el JWT de `demo-prestador@epetplace.dev` este
+ * SELECT devolvía el plan de Thor (familia `ce057f90`, que no es la
+ * suya); con el filtro, 0. Y el dueño real (`guillo381+8`) sigue
+ * devolviendo su plan: 1 antes, 1 después.
+ *
+ * LA REGLA QUE DEJA: **un lector que se apoya SOLO en la RLS es un
+ * lector que nadie puede auditar leyendo** — hay que ir a `pg_policy`
+ * para saber qué devuelve. El filtro explícito no reemplaza a la RLS
+ * (cinturón y tiradores): la RLS sigue siendo la defensa, el filtro es
+ * la DECLARACIÓN de qué rol está preguntando.
+ */
 export async function obtenerMisPlanesPaseo(): Promise<ResultadoWrapper<PlanPaseo[], CodigoErrorPlan>> {
   const supabase = getClient();
+  const uid = await uidActual();
+  if (uid === null) {
+    return { ok: false, codigo: 'sin_sesion', mensaje: MENSAJES_ERROR_PLAN.sin_sesion };
+  }
   const { data, error } = await supabase
     .from('suscripciones_servicio')
     .select('id, mascota_id, prestador_id, prestador_servicio_id, estado, estado_pago, periodo_inicio, periodo_fin, precio_mensual, precio_unitario_efectivo, dias_semana, hora, duracion_minutos, frecuencia, auto_renovar')
     .eq('tipo_servicio', 'paseo_mensual')
+    .eq('user_id', uid)
     .order('created_at', { ascending: false });
   if (error) return mapeoErrorAResultado(error.message);
 
