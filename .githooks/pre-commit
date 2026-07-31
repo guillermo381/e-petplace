@@ -30,8 +30,105 @@ if [ -n "$SALTAR_GATE" ]; then
   exit 0
 fi
 
+# ─────────────────────────────────────────────────────────────────────
+# ① PATHSPEC OBLIGATORIO (orden founder S82, tras DOS arrastres seguidos
+#    contra B en el mismo commit).
+#
+#    LO QUE LOS DOS ARRASTRES PROBARON: 76(f2) manda `git add` acotado y
+#    ES INSUFICIENTE POR CONSTRUCCIÓN. `git add` acota lo que UNO agrega;
+#    `git commit` se lleva TODO EL ÍNDICE. Entre los dos hay una ventana,
+#    y con tres pistas sobre un índice esa ventana se llena — no por
+#    descuido: commitear no es atómico respecto del índice ajeno.
+#    Limpiar el índice antes tampoco alcanza: eso es una carrera, y B la
+#    perdió dos veces seguidas contra el mismo WIP de A.
+#
+#    `git commit -- <rutas>` es inmune: commitea el árbol de ESAS rutas
+#    ignorando el índice para todo lo demás, y deja lo ajeno donde estaba.
+#
+#    EL DISCRIMINADOR, medido en un repo de prueba y no supuesto: git le
+#    dice al hook cuál forma se usó, porque la forma pathspec trabaja
+#    sobre un índice TEMPORAL —
+#      · `git commit` a secas    → GIT_INDEX_FILE = .git/index
+#      · `git commit -- <rutas>` → GIT_INDEX_FILE = .git/next-index-<pid>
+#    Es exacto y no depende de parsear la línea de comando (que el hook
+#    no recibe).
+#
+#    LAS EXCEPCIONES SON DE GIT, NO DE CRITERIO: merge, cherry-pick,
+#    revert y rebase construyen su commit sin que nadie pueda pasarle
+#    rutas. Se detectan por los archivos de estado del propio git y pasan
+#    solas — jamás por una lista de nombres que haya que mantener.
+# ─────────────────────────────────────────────────────────────────────
+DIRGIT=$(git rev-parse --git-dir)
+ESPECIAL=""
+for F in MERGE_HEAD CHERRY_PICK_HEAD REVERT_HEAD BISECT_LOG; do
+  [ -e "$DIRGIT/$F" ] && ESPECIAL="$F"
+done
+[ -d "$DIRGIT/rebase-merge" ] || [ -d "$DIRGIT/rebase-apply" ] && ESPECIAL="rebase"
+
+case "${GIT_INDEX_FILE:-$DIRGIT/index}" in
+  */next-index*) ;;                     # forma pathspec: lo que la casa exige
+  *)
+    if [ -n "$ESPECIAL" ]; then
+      echo "── gate: commit de $ESPECIAL — pathspec no aplica acá (lo arma git), sigo."
+    else
+      echo "✗ COMMIT A SECAS — el commit NO ocurre."
+      echo ""
+      echo "  La casa commitea SIEMPRE con rutas (orden founder S82):"
+      echo "      git commit -F <msg> -- <tus/rutas>"
+      echo ""
+      echo "  El porqué, y costó dos arrastres seguidos: 'git add' acota lo que VOS"
+      echo "  agregás, pero 'git commit' se lleva TODO EL ÍNDICE — y el índice es UNO"
+      echo "  solo para las tres pistas. Entre tu add y tu commit, otra pista stagea"
+      echo "  lo suyo y viaja adentro del tuyo. La forma con rutas es inmune: trabaja"
+      echo "  sobre un índice temporal y deja lo ajeno donde estaba."
+      echo ""
+      echo "  Si de verdad tenés que commitear a secas:  SALTAR_GATE=\"por qué\" git commit ..."
+      exit 1
+    fi
+    ;;
+esac
+
 CAMBIOS=$(git diff --cached --name-only --diff-filter=ACM)
 [ -z "$CAMBIOS" ] && exit 0
+
+# ─────────────────────────────────────────────────────────────────────
+# ② LA ABORTO POR CARPETA AJENA — 76(h) hecha mecánica (orden founder).
+#
+#    76(h) dice que cada sesión DECLARA sus archivos al abrir tanda. Eso
+#    vivía en el chat, o sea en la memoria de alguien. Con `TERRITORIO`
+#    declarado, el hook lo hace exigible: cualquier ruta fuera ABORTA.
+#
+#    POR QUÉ ABORTA Y YA NO AVISA, con su evidencia: el aviso existía,
+#    imprimió las carpetas ajenas, y B siguió de largo LAS DOS VECES que
+#    lo arrastró. **Un aviso que no frena, no frena** — es la misma
+#    lección que parió este hook (D-481) aplicada al hook mismo.
+#
+#    Sin `TERRITORIO` declarado sigue avisando, porque negarle el commit
+#    a quien no conoce la variable sería un gate que enseña a saltearse.
+#      Uso:  TERRITORIO="packages/ui scripts" git commit -F m -- <rutas>
+# ─────────────────────────────────────────────────────────────────────
+N=$(echo "$CAMBIOS" | wc -l | tr -d ' ')
+if [ -n "$TERRITORIO" ]; then
+  AJENOS=""
+  for RUTA in $CAMBIOS; do
+    DENTRO=""
+    for T in $TERRITORIO; do
+      case "$RUTA" in "$T"*) DENTRO=1 ;; esac
+    done
+    [ -z "$DENTRO" ] && AJENOS="$AJENOS
+   $RUTA"
+  done
+  if [ -n "$AJENOS" ]; then
+    echo "✗ CARPETA AJENA EN TU COMMIT — el commit NO ocurre."
+    echo "   territorio declarado: $TERRITORIO"
+    echo "   fuera de él:$AJENOS"
+    echo ""
+    echo "   Si el cruce es a propósito, declaralo en el territorio (76(d) pide"
+    echo "   que se DIGA, no que no se haga):  TERRITORIO=\"$TERRITORIO <la otra>\""
+    exit 1
+  fi
+  echo "── gate del commit · $N archivo(s), todos dentro de: $TERRITORIO"
+fi
 
 # S82-B r35 — EL GATE MIDE EL ÁRBOL, NO LO STAGED (hallazgo 1 de A, NO
 # CURADO y declarado): el WIP roto de una pista frena el commit de otra.
@@ -42,16 +139,16 @@ CAMBIOS=$(git diff --cached --name-only --diff-filter=ACM)
 # que resuelve. La cura probablemente sea worktrees (D-586), no más
 # lógica acá.
 
-# AVISO DE ARRASTRE (hallazgo 2 de A, TERCERA vez en la casa: S55·S63·hoy).
-# El índice es COMPARTIDO entre las tres pistas: `git add` de una entra
-# junto con lo que otra dejó staged. El hook no puede saber qué es de
-# quién —no hay dueño en git— pero SÍ puede decir cuántos archivos y de
-# qué carpetas van a entrar, para que el arrastre se vea ANTES y no en
-# el `git show` de después.
-N=$(echo "$CAMBIOS" | wc -l | tr -d ' ')
-echo "── gate del commit · $N archivo(s) van a entrar:"
-echo "$CAMBIOS" | sed 's|/[^/]*$||' | sort -u | sed 's/^/   /'
-echo "   (el índice es compartido: si ves una carpeta que no es tuya, es arrastre)"
+# AVISO DE ARRASTRE — el camino de quien NO declaró TERRITORIO. Queda
+# como estaba (imprime carpetas) con su limitación dicha en la cara: un
+# aviso no frena. La forma pathspec de ① ya vuelve el arrastre casi
+# imposible; esto es la red para el pathspec ANCHO (`-- .`).
+if [ -z "$TERRITORIO" ]; then
+  echo "── gate del commit · $N archivo(s) van a entrar:"
+  echo "$CAMBIOS" | sed 's|/[^/]*$||' | sort -u | sed 's/^/   /'
+  echo "   (sin TERRITORIO declarado esto solo AVISA — y un aviso no frena."
+  echo "    Para que aborte: TERRITORIO=\"tus/rutas\" git commit -F m -- <rutas>)"
+fi
 node scripts/verify-diseno.mjs >/dev/null 2>&1 || {
   echo "✗ verify:diseno EN ROJO — el commit NO ocurre."
   node scripts/verify-diseno.mjs 2>&1 | grep "✗" | head -5
