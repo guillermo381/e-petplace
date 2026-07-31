@@ -104,7 +104,10 @@ function PiezasReales({ envoltorio }: { envoltorio: 'tarjeta' | 'halo' | 'haloRo
 /** Los tres candidatos de tapiz oscuro (S82-B r26). El 3% es el VIVO.
  *  El techo está medido y va escrito al lado de cada uno: el halo
  *  direccional rinde 1.53 en negro y CAE bajo 1.50 desde el 5%. */
-const TINTES = palette.tapizDarkCandidatos.map((c) => ({ codigo: c.valor, etiqueta: c.etiqueta, nota: c.nota }));
+// S82-B r29: los candidatos MURIERON con su trabajo hecho — el founder
+// firmó el 8% mirando (Ley 37). La lámina deja de OFRECER tinte y pasa a
+// mostrar el firmado, que es el fondo real del tema.
+const TINTES = [{ codigo: palette.tapizDark, etiqueta: '8% (FIRMADO)', nota: 'card/base 1.009 — card y base son el mismo color: por eso el agrupamiento pasó al AIRE (sin tarjeta)' }];
 
 function LaminaSeparacionOscuro() {
   const { theme } = useTheme();
