@@ -17,7 +17,6 @@
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { FiltroMascotas } from '@/components/filtro-pills';
 import {
   palette,
   SelectorOpcion,
@@ -184,81 +183,10 @@ function LaminaSeparacionOscuro() {
   );
 }
 
-/** 🔬 r36 · EL BARRIDO DE L-b CON CUATRO — lo que el founder no puede
- *  juzgar en su teléfono sin una familia de cuatro, montado acá con las
- *  DOS versiones una encima de otra para compararlas de un vistazo.
- *
- *  LO QUE LA MEDICIÓN DICE, y por eso esta lámina existe: LOS TRES
- *  CANALES DE L-b ESTÁN APLICADOS —elevación `elevada` contra `reposo`,
- *  escala **1.04**, color de texto `accent.control`— o sea que NO es una
- *  ley incumplida, es una ley que no alcanza acá. Sobre un chip de 44 de
- *  alto, 1.04 son MENOS DE 2 px; el salto de sombra sobre una píldora
- *  chica es casi invisible; y el único canal que se ve es el color, que
- *  es exactamente lo que el founder describió.
- *
- *  Y LA HIPÓTESIS DE POR QUÉ ACÁ NO ALCANZA Y EN OTRAS HILERAS SÍ: este
- *  chip LLEVA FOTO. La cara ya carga peso visual y compite con la
- *  escala — el ojo mira la foto, no el tamaño del contenedor. Es la
- *  lectura del founder y la medición la sostiene.
- *
- *  LA PROPUESTA: la HUELLA marcando por PRESENCIA, como él mismo firmó
- *  para los filtros de tu vida. NO rompe L-b — la ley prohíbe el RELLENO
- *  PLENO con 4+ hermanos, no marcar por FORMA. Cero relleno acá.
- *  Si con la huella TAMPOCO se lee, entonces L-b necesita enmienda para
- *  el caso "chip con foto" — y eso lo firma el founder, no esta pieza. */
-const CUATRO = [
-  { id: 'a', nombre: 'Thor' },
-  { id: 'b', nombre: 'Zeus' },
-  { id: 'c', nombre: 'Kira' },
-  { id: 'd', nombre: 'Nala' },
-];
-
-function LaminaBarridoCuatro() {
-  const [a, setA] = useState<string | null>('b');
-  const [b, setB] = useState<string | null>('b');
-  const [c, setC] = useState<string | null>('b');
-  return (
-    <View style={{ paddingVertical: spacing[5], gap: spacing[5] }}>
-      <View style={{ paddingHorizontal: spacing[4], gap: spacing[1] }}>
-        <Texto variante="seccion">{'el barrido de L-b · 4 hermanos'}</Texto>
-        <Texto variante="apoyo">
-          {'los tres canales están aplicados: elevación, escala 1.04 y color. la foto compite con la escala.'}
-        </Texto>
-      </View>
-      <View style={{ gap: spacing[2] }}>
-        <View style={{ paddingHorizontal: spacing[4] }}>
-          <Texto variante="dato">{'(a) hoy — los tres canales de L-b'}</Texto>
-        </View>
-        <FiltroMascotas mascotas={CUATRO} elegida={a} onElegir={setA} />
-      </View>
-      <View style={{ gap: spacing[2] }}>
-        <View style={{ paddingHorizontal: spacing[4] }}>
-          <Texto variante="dato">{'(b) + la huella marcando por presencia'}</Texto>
-        </View>
-        <FiltroMascotas marca="huella" mascotas={CUATRO} elegida={b} onElegir={setB} />
-      </View>
-      <View style={{ gap: spacing[2] }}>
-        <View style={{ paddingHorizontal: spacing[4] }}>
-          <Texto variante="dato">{'(c) la pata PISANDO el canto · el chip cede'}</Texto>
-        </View>
-        <FiltroMascotas marca="pata" mascotas={CUATRO} elegida={c} onElegir={setC} />
-      </View>
-      <View style={{ paddingHorizontal: spacing[4] }}>
-        <Texto variante="apoyo">
-          {'(b) falló porque la huella adentro compite con la foto en el mismo plano. (c) la pone en otro plano: la misma anatomía firmada en los filtros de tu vida.'}
-        </Texto>
-      </View>
-    </View>
-  );
-}
-
 export default function GalleryRoute() {
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1 }}>
       <ScrollView>
-        {/* r36 · el barrido de cuatro va PRIMERO: es el gate que el
-            founder no puede correr sin una familia de cuatro. */}
-        <LaminaBarridoCuatro />
         {/* La lámina va PRIMERA: es la decisión más grande que queda abierta. */}
         <ThemeProvider defaultMode="dark">
           <LaminaSeparacionOscuro />

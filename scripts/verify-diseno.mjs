@@ -735,69 +735,19 @@ function r18(fuentes) {
   return { fallos, info: fallos.length === 0 ? 'entrada viva y sin __DEV__' : `${fallos.length} fallo(s)` };
 }
 
-/** R19 · L-b MECANIZADA (S82-C r14): EL RELLENO PLENO SE COMPUTA CONTRA
- *  EL NÚMERO DE HERMANOS — jamás incondicional.
- *
- *  EL DEFECTO QUE LA PARE ES MÍO Y ESTÁ FECHADO. En r11 puse la
- *  duración a rellenarse con `naturaleza="existe"` y lo declaré "por
- *  ley": leí la 19.8 (SE RELLENA LO QUE EXISTE) y me salteé L-b, que
- *  es la que dice CUÁNTO — *"el relleno pleno se reserva a la ELECCIÓN
- *  QUE CIERRA; en fila de barrido (≥4 hermanos comparables) la
- *  selección va por elevación, escala y color de texto"*. Eran CINCO
- *  bloques. El founder lo cobró tres rondas después, mirando.
- *
- *  POR QUÉ ES SILENCIOSO (que es el único motivo por el que merece
- *  guard, L-192): un pleno incondicional COMPILA, se ve BIEN en el
- *  hogar de prueba —dos mascotas, tres chips— y solo miente cuando el
- *  usuario real tiene cuatro. El typecheck no lo ve, el gate en
- *  dispositivo tampoco si el dispositivo tiene pocos datos. Es un
- *  defecto que solo aparece en la casa de otro.
- *
- *  QUÉ VIGILA, y por qué así: en las piezas locales de C que rellenan
- *  al elegir, toda decisión de relleno tiene que ATARSE A UN CONTEO.
- *  No verifica el número (3 o 4 es dosis, y la dosis la firma el
- *  founder) — verifica que el conteo ESTÉ. Un `pleno` que no mira
- *  cuántos hermanos hay ya decidió ignorar L-b. */
-const PIEZAS_R19 = ['apps/cliente/src/components/filtro-pills.tsx'];
-function r19(archivos) {
-  const fallos = [];
-  for (const { path, src } of archivos) {
-    const limpio = sinComentarios(src);
-    // toda asignación de `pleno` (const o dentro de una función)
-    const asignaciones = limpio.match(/\bpleno\s*=\s*[^;\n]+/g) ?? [];
-    if (asignaciones.length === 0) {
-      fallos.push(
-        `${path} — pieza declarada en R19 sin ninguna decisión de relleno: o la pieza dejó de rellenar (y sale de la lista, en el mismo commit) o el nombre cambió y la regla quedó vigilando un fantasma.`,
-      );
-      continue;
-    }
-    // El conteo puede vivir a UNA indirección — y debe poder: en
-    // FiltroMascotas el umbral se llama `esBarrido` y lleva su comentario
-    // de L-b encima, que es donde tiene que estar. Exigir `.length`
-    // literal en la misma línea castigaba a la pieza que MEJOR aplicaba
-    // la ley. (Primera corrida de esta regla: roja contra código
-    // correcto — se corrigió la regla, no el código.)
-    const definiciones = new Map();
-    for (const m of limpio.matchAll(/\bconst\s+([A-Za-z_$][\w$]*)\s*=\s*([^;\n]+)/g)) {
-      definiciones.set(m[1], m[2]);
-    }
-    const cuenta = (expr, saltos = 0) => {
-      if (/\.length/.test(expr)) return true;
-      if (saltos >= 2) return false;
-      return (expr.match(/[A-Za-z_$][\w$]*/g) ?? []).some(
-        (id) => definiciones.has(id) && cuenta(definiciones.get(id), saltos + 1),
-      );
-    };
-    for (const a of asignaciones) {
-      if (!cuenta(a)) {
-        fallos.push(
-          `${path} — relleno pleno SIN conteo de hermanos: «${a.trim()}». L-b: con 4+ comparables el pleno se cae y la selección va por elevación, escala y color de texto. El conteo se computa en la PIEZA, no en la cabeza de cada pantalla.`,
-        );
-      }
-    }
-  }
-  return { fallos, info: fallos.length === 0 ? 'todo relleno atado a su conteo' : `${fallos.length} fallo(s)` };
-}
+/* ☠️ R19 SE RETIRÓ EN S82-C r38, Y SU PROPIA REGLA DICTÓ EL RETIRO.
+ *  Vigilaba que el relleno pleno se computara contra el número de
+ *  hermanos (L-b). Cuando la marca del chip elegido pasó a ser LA PATA
+ *  —forma, no relleno— la última pieza que rellenaba dejó de rellenar, y
+ *  la regla salió ROJA diciendo exactamente lo que había que hacer: "o
+ *  la pieza dejó de rellenar (y sale de la lista, EN EL MISMO COMMIT) o
+ *  el nombre cambió y la regla quedó vigilando un fantasma". Era el
+ *  primer caso, y la rama estaba escrita para esto.
+ *  SIN CONSUMIDOR UN GUARD NO PROTEGE: DECORA — y su verde pasa a
+ *  significar "no hay nada que mirar", que es el modo de fallo que
+ *  L-192 existe para matar. L-b SIGUE RIGIENDO donde haya relleno; lo
+ *  que ya no hay es relleno en las piezas locales de C. El día que
+ *  alguna vuelva a rellenar, la regla se reescribe con su lista nueva. */
 
 
 /** R20 · LA FAMILIA ALERTA NO SE RELLENA (S82-B, orden founder — el
@@ -983,7 +933,6 @@ const FIXTURES = {
   R17: { index: "export { PiezaFantasma } from './components/PiezaFantasma'", galeria: '' },
   R18: { cuenta: '<CeldaNavegacion titulo="Preferencias" onPress={() => router.push("/cuenta/preferencias")} />' },
   // el pleno que ignora a sus hermanos: exactamente mi defecto de r11
-  R19: [{ path: '(fixture)', src: 'const pleno = elegido && sinGlifo;' }],
   // la marca anidada adentro de la placa: el defecto que se ve como layout
   R22: { filtro: 'function MarcaElegido() {}\n<View style={{ width: 30 }}><MarcaElegido /></View>' },
   R16: { palette: "light0: '#FAF9F7',\npapelTapiz: '#FAF2F5',", temas: 'const lightOficio: Theme = { ...lightTheme }' },
@@ -999,7 +948,7 @@ const FIXTURES = {
     },
   ],
 };
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R19: r19, R20: r20, R22: r22, R24: r24 };
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R22: r22, R24: r24 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -1069,10 +1018,6 @@ corridas.push(['R18 (D-580: la entrada a la galería NO desaparece)', r18({ cuen
 corridas.push([
   'R22 (la marca del elegido no se mete en la placa)',
   r22({ filtro: readFileSync(PIEZA_R22, 'utf8') }),
-]);
-corridas.push([
-  'R19 (L-b: el relleno pleno se computa contra sus hermanos)',
-  r19(PIEZAS_R19.map((p) => ({ path: p, src: readFileSync(p, 'utf8') }))),
 ]);
 corridas.push(['R24 (el pie de reserva no se copia)', r24(apps)]);
 

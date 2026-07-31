@@ -263,7 +263,6 @@ export function FiltroMascotas({
   mascotas,
   elegida,
   onElegir,
-  marca = 'ley',
 }: {
   mascotas: { id: string; nombre: string; fotoUrl?: string }[];
   /** null = NINGUNA elegida (el log entra sin filtro y muestra todo).
@@ -271,18 +270,14 @@ export function FiltroMascotas({
    *  murió, el comportamiento no. */
   elegida: string | null;
   onElegir: (id: string | null) => void;
-  /** 🔬 r36 · ANDAMIO DE GATE, muere con la firma. `'ley'` = lo que hay
-   *  hoy (los tres canales de L-b). `'huella'` = la propuesta: la huella
-   *  marca POR PRESENCIA, como el founder firmó en los filtros de tu
-   *  vida. NO rompe L-b — la ley prohíbe el RELLENO PLENO con 4+
-   *  hermanos, no marcar por forma. */
-  marca?: 'ley' | 'huella' | 'pata';
+
 }) {
   const { theme } = useTheme();
-  // r12-11: sin el chip "Todas", los hermanos comparables son las
-  // mascotas y nada más. L-b sigue rigiendo: 4+ pasa a barrido.
-  const esBarrido = mascotas.length >= 4;
-
+  // ☠️ r38 · L-b DEJA DE COMPUTARSE ACÁ, y no porque la ley se derogue:
+  // porque esta hilera YA NO RELLENA. L-b es una ley de DOSIS —dice
+  // CUÁNTO relleno tolera una fila según cuántos hermanos tenga— y con
+  // la marca por FORMA no hay relleno que dosificar. La ley sigue
+  // rigiendo donde haya relleno; acá no hay.
   const chip = (
     key: string,
     activo: boolean,
@@ -290,9 +285,6 @@ export function FiltroMascotas({
     onPress: () => void,
     etiqueta: string,
   ) => {
-    // pleno SOLO si la fila es corta (L-b); en barrido, elevación +
-    // escala + color de texto, jamás relleno
-    const pleno = activo && !esBarrido;
     return (
       <Pressable
         key={key}
@@ -303,15 +295,16 @@ export function FiltroMascotas({
         style={{
           height: 44,
           borderRadius: radius.full,
-          // con la PATA el chip CEDE: lo que se hunde no proyecta —
-          // pierde la elevación y baja al slot `bg.hundido` (el que B
-          // construyó en d1e0e36), y se achica en vez de crecer.
-          backgroundColor: marca === 'pata' && activo ? theme.bg.hundido : pleno ? theme.accent.control : theme.bg.card,
-          boxShadow:
-            marca === 'pata' && activo ? 'none' : activo ? theme.elevacion.elevada : theme.elevacion.reposo,
-          transform: [
-            { scale: marca === 'pata' && activo ? 0.98 : activo && esBarrido ? 1.04 : 1 },
-          ],
+          // ✅ r38 · FIRMADO: LA PATA PISA Y EL CHIP CEDE. Lo que se hunde
+          // no proyecta — pierde la elevación, baja al slot `bg.hundido` y
+          // se ACHICA en vez de crecer. Las otras dos candidatas murieron
+          // CON SU MAQUINARIA (Ley 37: el gate ocurrió; nada queda "por si
+          // acaso"). Con eso se va también la cuenta de L-b de esta
+          // hilera: sin relleno pleno no hay dosis que acotar — la marca
+          // es de FORMA y la forma no tiene dosis.
+          backgroundColor: activo ? theme.bg.hundido : theme.bg.card,
+          boxShadow: activo ? 'none' : theme.elevacion.reposo,
+          transform: [{ scale: activo ? 0.98 : 1 }],
           flexDirection: 'row',
           alignItems: 'center',
           gap: spacing[2],
@@ -323,29 +316,19 @@ export function FiltroMascotas({
         {/* la huella como MARCA DE PRESENCIA: aparece SOLO en la elegida,
             que es lo único que la vuelve señal (el veredicto de S80 midió
             que la huella en TODAS no puede señalar a una). */}
-        {marca === 'huella' && activo ? (
-          <Svg width={13} height={13} viewBox="0 0 24 24">
-            <Huella color={theme.accent.control} escala={0.9} x={1.2} y={1.2} />
-          </Svg>
-        ) : null}
-        {/* (c) LA PATA SOBRE EL CANTO — la MISMA pieza de FiltroPills, no
-            una copia: montada arriba-derecha, montando el canto, en
-            magenta. R22 la sigue vigilando por nombre. */}
-        {marca === 'pata' && activo ? <MarcaElegido color={theme.accent.control} /> : null}
+
+        {/* LA PATA SOBRE EL CANTO — la MISMA pieza de FiltroPills, no una
+            copia. Su porqué, que es lo que ganó el gate: la huella ADENTRO
+            competía con la foto EN EL MISMO PLANO; sobre el canto es otro
+            objeto en otro plano. R22 la vigila por nombre. */}
+        {activo ? <MarcaElegido color={theme.accent.control} /> : null}
       </Pressable>
     );
   };
 
-  const colorLabel = (activo: boolean) => {
-    if (!activo) return theme.text.primary;
-    // S82-B r22 — el token POR ROL: el fondo de acá es el magenta de
-    // control (accent.control / controlLleno), NO el gradiente de marca.
-    // Funcionaba por COINCIDENCIA DE VALOR (onGradient resuelve a blanco
-    // y el magenta es oscuro), jamás por contrato. `sobreControlLleno` no
-    // vive en memorial a propósito (ahí el chip degrada), de ahí el
-    // narrowing con su fallback.
-    return esBarrido ? theme.accent.control : ('sobreControlLleno' in theme.accent ? (theme.accent as { sobreControlLleno: string }).sobreControlLleno : theme.text.onGradient);
-  };
+  // el label acompaña a la marca: en el elegido, el acento; en el resto,
+  // tinta. Sin rama por cantidad — la pata marca igual con 2 que con 8.
+  const colorLabel = (activo: boolean) => (activo ? theme.accent.control : theme.text.primary);
 
   return (
     <ScrollView
