@@ -1,7 +1,8 @@
 /**
  * EL HUB DE ADIESTRAMIENTO DEL DUEÑO (S63-A Bloque 3, gemela del hub de
  * grooming S60-A4): entre el pago y la sesión, la cita tiene superficie.
- * Próximos · Historial (SelectorSegmentado, Ley 19.3) — la cita futura
+ * Próximos · Historial (S82-C r31: FiltroPills — el eje convive con
+ * otros de su familia y la gramática de la pantalla manda) — la cita futura
  * se PREPARA, no se toca (precedente S60-C1); la cerrada navega a SU
  * PARTE. La identidad k/N del programa se dice en cada fila (§1: la
  * sesión 3 no es la 7).
@@ -45,7 +46,6 @@ import {
   Insignia,
   Separador,
   SelectorOpcion,
-  SelectorSegmentado,
   Tarjeta,
   Texto,
   spacing,
@@ -67,6 +67,7 @@ import {
 } from '@epetplace/api';
 import { fechaCortaMono } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
+import { FiltroPills } from '@/components/filtro-pills';
 
 // §7 (S65) — matching compartido del vocabulario (el filtro de chips y
 // el autocompletado del texto libre hablan IGUAL): minúsculas sin
@@ -263,16 +264,31 @@ export default function HubAdiestramiento() {
           onPress={() => router.push('/explorar/adiestramiento')}
         />
 
-        <SelectorSegmentado
-          etiqueta={t('adiestramiento.hubTitulo')}
-          segmentos={[
-            { codigo: 'proximos', etiqueta: t('adiestramiento.hubProximos') },
-            { codigo: 'historial', etiqueta: t('adiestramiento.hubHistorial') },
-            { codigo: 'bitacora', etiqueta: t('adiestramiento.bitacoraTab') },
-          ]}
-          activo={vista}
-          onCambio={(v) => setVista(v === 'historial' ? 'historial' : v === 'bitacora' ? 'bitacora' : 'proximos')}
-        />
+        {/* ② el ESTADO — FiltroPills, con `capa: null` (es ESTADO, no
+            categoría: el color de capa pertenece a una CLASE DE SERVICIO,
+            Ley 10, y este eje no tiene ninguna).
+
+            ⚠️ HALLAZGO QUE DECLARO Y NO RESUELVO, porque es de producto:
+            **este eje tiene TRES valores y el tercero no es un estado.**
+            Próximos e Historial parten UN conjunto (las citas: las que
+            vienen y las que pasaron); BITÁCORA es OTRO objeto entero —
+            las observaciones que la familia registra, que no son citas y
+            no tienen ni próximas ni pasadas. El eje no parte datos: en
+            dos de sus posiciones filtra y en la tercera CAMBIA DE
+            SUPERFICIE. Se conserva el comportamiento de hoy (no rompo lo
+            que funciona por una lectura mía) y va al gate: si la bitácora
+            es otra superficie, su lugar no es este eje. */}
+        <View style={{ marginHorizontal: -spacing[4] }}>
+          <FiltroPills
+            activo={vista}
+            onCambio={(v) => setVista(v)}
+            opciones={[
+              { codigo: 'proximos' as typeof vista, etiqueta: t('adiestramiento.hubProximos'), icono: 'hoy', capa: null },
+              { codigo: 'historial' as typeof vista, etiqueta: t('adiestramiento.hubHistorial'), icono: 'training', capa: null },
+              { codigo: 'bitacora' as typeof vista, etiqueta: t('adiestramiento.bitacoraTab'), icono: 'carnet', capa: null },
+            ]}
+          />
+        </View>
 
         {vista === 'bitacora' ? (
           // §7 — LA BITÁCORA: registrar cuesta segundos, cero

@@ -671,6 +671,11 @@ export const clienteEs = {
     comprableEtiqueta: 'Qué quieres reservar',
     comprableSesion: 'Sesión suelta',
     comprablePrograma: 'Programa completo',
+    // r32 · EL SIGNIFICADO DEL DÍA CAMBIA CON EL COMPRABLE, y se dice
+    // DONDE se decide: con programa el día no es cuándo ES, es cuándo
+    // EMPIEZA. La voz honesta del QUÉ explica; estos rótulos avisan.
+    cuandoEmpieza: 'Cuándo empieza',
+    horaPrimera: 'Hora de la primera',
     comprableProgramaVoz:
       'Un programa son varias sesiones ordenadas, una por semana, con el mismo adiestrador. Eliges la fecha y hora de la primera y las demás se agendan solas.',
     vacioTitulo: 'Todavía no hay adiestradores disponibles',

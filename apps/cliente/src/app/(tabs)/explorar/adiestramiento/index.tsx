@@ -22,17 +22,17 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import {
   AvatarMascota,
   Boton,
-  Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
   Icono,
   SelectorOpcion,
+  Texto,
   spacing,
   typography,
   useTheme,
@@ -48,6 +48,7 @@ import {
   mascotasElegibles,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
+import { CabezalOficio, GrillaElegir, SelectorDia } from '@/components/reserva-piezas';
 
 function fechaLocalISO(d: Date): string {
   return new Intl.DateTimeFormat('en-CA').format(d);
@@ -168,8 +169,18 @@ export default function AdiestramientoCuando() {
   const listo = mascota !== null && hora !== null;
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado variante="navegacion" titulo={t('adiestramiento.titulo')} atras onAtras={() => router.back()} />
+    /* el SafeAreaView murió: el cabezal ABSORBE el inset superior
+       (insetTop) y dejar los dos duplicaba el aire de arriba — el mismo
+       cambio que en paseo y grooming. */
+    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <CabezalOficio
+        oficio="training"
+        capa="cuidado"
+        titulo={t('adiestramiento.titulo')}
+        detalle={mascota !== null ? mascota.nombre : null}
+        onAtras={() => router.back()}
+        insetTop={insets.top}
+      />
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[8], gap: spacing[5] }}>
         {mascotas === 'cargando' ? (
           <EsqueletoGrupo>
@@ -250,15 +261,37 @@ export default function AdiestramientoCuando() {
               ) : null}
             </View>
 
-            {/* 2 · DÍA — la tira (programa: desde mañana, §12.2) */}
-            <SelectorOpcion
-              acento="control"
-              etiqueta={t('explorar.cuandoDia')}
-              disposicion="tira"
-              opciones={dias.map((d) => ({ codigo: d.iso, etiqueta: d.etiqueta }))}
-              seleccionada={dia}
-              onSelect={setDia}
-            />
+            {/* 2 · DÍA — la rueda (programa: desde mañana, §12.2).
+                🔴 Y ACÁ VIVE EL DEFECTO MÁS CARO POSIBLE DE ESTA PANTALLA,
+                cortado en su raíz: **con programa, el día no es cuándo ES
+                — es cuándo EMPIEZA**. Alguien que elige jueves 6 creyendo
+                que reserva una clase y compra OCHO es exactamente el daño
+                que no se puede permitir.
+                La voz honesta ya lo dice arriba, en el QUÉ ("eliges la
+                fecha y hora de la primera y las demás se agendan solas") —
+                pero decirlo ANTES no alcanza si en el momento de elegir el
+                rótulo dice "Día" como en cualquier reserva puntual. EL
+                RÓTULO CAMBIA CON EL COMPRABLE: el significado se dice
+                DONDE se decide, no solo donde se explica. */}
+            <View style={{ gap: spacing[2] }}>
+              <View style={{ paddingHorizontal: spacing[5] }}>
+                <Texto variante="apoyo">
+                  {t(comprable === 'programa' ? 'adiestramiento.cuandoEmpieza' : 'explorar.cuandoDia')}
+                </Texto>
+              </View>
+              {/* 🔴 DÍAS CERRADOS: NO VIAJAN — mismo bloqueo que grooming,
+                  medido: `obtenerDiasCerrados` es POR PRESTADOR y acá los
+                  inicios llegan AGREGADOS (`obtenerIniciosAdiestramiento`
+                  no nombra prestadores; cero prestador_id en la pantalla).
+                  La intersección de paseo no se puede computar. Se declara
+                  y no se inventa; la prop queda lista. */}
+              <SelectorDia
+                dias={dias.map((d) => ({ iso: d.iso, dia: d.corta.split(' ')[0] ?? '', numero: d.iso.slice(8, 10) }))}
+                elegido={dia}
+                etiquetaCerrado={t('explorar.cuandoDiaCerrado')}
+                onElegir={setDia}
+              />
+            </View>
 
             {/* 2b · GRILLA de inicios reales del comprable */}
             {mascota === null ? null : inicios === 'cargando' ? (
@@ -287,14 +320,18 @@ export default function AdiestramientoCuando() {
                 }
               />
             ) : (
-              <SelectorOpcion
-                acento="control"
-                etiqueta={t('explorar.cuandoHora')}
-                disposicion="grilla"
-                opciones={inicios.map((h) => ({ codigo: h, etiqueta: h }))}
-                seleccionada={hora ?? undefined}
-                onSelect={setHora}
-              />
+              <View style={{ gap: spacing[2] }}>
+                <View style={{ paddingHorizontal: spacing[5] }}>
+                  <Texto variante="apoyo">
+                    {t(comprable === 'programa' ? 'adiestramiento.horaPrimera' : 'explorar.cuandoHora')}
+                  </Texto>
+                </View>
+                <GrillaElegir
+                  opciones={inicios.map((h) => ({ codigo: h, etiqueta: h }))}
+                  elegida={hora}
+                  onElegir={setHora}
+                />
+              </View>
             )}
           </>
         )}
@@ -326,6 +363,6 @@ export default function AdiestramientoCuando() {
           />
         </View>
       ) : null}
-    </SafeAreaView>
+    </View>
   );
 }

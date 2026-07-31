@@ -606,6 +606,9 @@ export const clienteEn = {
     comprableEtiqueta: 'What do you want to book',
     comprableSesion: 'Single session',
     comprablePrograma: 'Full program',
+    // r32 · the day means something else with a program: when it STARTS.
+    cuandoEmpieza: 'When it starts',
+    horaPrimera: 'First session time',
     comprableProgramaVoz:
       'A program is several ordered sessions, one per week, with the same trainer. You pick the date and time of the first one and the rest are scheduled for you.',
     vacioTitulo: 'No trainers available yet',
