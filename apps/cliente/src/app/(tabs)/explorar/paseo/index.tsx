@@ -35,6 +35,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   Icono,
+  Interruptor,
   SelectorOpcion,
   Separador,
   Tarjeta,
@@ -117,6 +118,8 @@ export default function PaseoCuando() {
   const [inicios, setInicios] = useState<string[] | 'cargando' | 'error'>('cargando');
   const [hora, setHora] = useState<string | null>(null);
   const [reintento, setReintento] = useState(0);
+  // r39-6 · el plan como AGREGADO que se prende (no un destino de lista)
+  const [frecuente, setFrecuente] = useState(false);
 
   // S73 (letra de elegibilidad): la frontera UNICA del motor decide —
   // momento vital primero (memorial/perdida NO reservan), especie después.
@@ -618,21 +621,36 @@ export default function PaseoCuando() {
                 producto, va al gate. */}
             <View style={{ paddingHorizontal: spacing[4] }}>
               <Tarjeta relleno="ninguno" elevacion="reposo">
-                {listo ? (
-                  <CeldaNavegacion
-                    icono="paseo"
-                    titulo={t('plan.chip')}
-                    detalle={t('plan.chipDetalle')}
-                    onPress={() => {
-                      router.push({
-                        pathname: '/explorar/paseo/disponibles',
-                        params: { fecha: dia, hora, duracion: String(duracion), plan: '1', mascotaId: mascota?.id ?? '' },
-                      });
+                {/* ⚠️ r39-6 · "HACERLO FRECUENTE" PASA A INTERRUPTOR —
+                    pedido del founder, y el criterio ya es ley de la casa
+                    desde local/domicilio (r34): **no son dos alternativas
+                    simétricas**. Reservar UNA salida es lo normal; el plan
+                    es un AGREGADO que se PRENDE. Como celda navegable
+                    parecía un destino más de una lista, y el lenguaje de
+                    la pantalla decía "acá se va a otro lado" cuando lo
+                    que hace es cambiar la naturaleza de esta reserva.
+                    El interruptor dice la verdad de la estructura: hay un
+                    estado normal y uno que sumás.
+                    Sin los pasos previos NO SE PRENDE, y lo dice: un
+                    interruptor apagado que explica qué falta es honesto;
+                    uno que se deja prender y después rebota, no. */}
+                <View style={{ padding: spacing[3], gap: spacing[1] }}>
+                  <Interruptor
+                    etiqueta={t('plan.chip')}
+                    encendido={frecuente}
+                    onCambio={(v) => {
+                      if (!listo) return;
+                      setFrecuente(v);
+                      if (v) {
+                        router.push({
+                          pathname: '/explorar/paseo/disponibles',
+                          params: { fecha: dia, hora, duracion: String(duracion), plan: '1', mascotaId: mascota?.id ?? '' },
+                        });
+                      }
                     }}
                   />
-                ) : (
-                  <Celda inicio={<Icono nombre="paseo" />} titulo={t('plan.chip')} subtitulo={t('plan.chipElegiPrimero')} />
-                )}
+                  <Texto variante="apoyo">{listo ? t('plan.chipDetalle') : t('plan.chipElegiPrimero')}</Texto>
+                </View>
                 <Separador />
                 {duracion !== null ? (
                   <CeldaNavegacion

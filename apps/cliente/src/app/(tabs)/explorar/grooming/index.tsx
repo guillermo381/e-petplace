@@ -313,19 +313,25 @@ export default function GroomingCuando() {
                 S61-A3 (rasgo 1 de la gramática canónica): el selector se
                 pinta SIEMPRE — la mascota elegida queda presente en
                 pantalla, no es un paso que se olvida. */}
-            {/* ⚠️ r34 · LOS CHIPS DEL SALVAVIDAS, MIGRADOS A LOS NUEVOS.
-                Este camino —deep-link sin param, o el log VACÍO— es el que
-                NADIE recorre, y por eso conservaba los viejos: un resto no
-                sobrevive por difícil, sobrevive por INVISIBLE. Censo del
-                founder confirmado y era UNIFORME: los CUATRO oficios lo
-                tenían, no solo veterinaria. */}
-            <View style={{ marginHorizontal: -spacing[4] }}>
-              <FiltroMascotas
-                mascotas={elegibles.map((m) => ({ id: m.id, nombre: m.nombre, fotoUrl: fotos[m.id] }))}
-                elegida={mascotaId}
-                onElegir={setMascotaId}
-              />
-            </View>
+            {/* ⚠️ r39 · LA HILERA SE OCULTA CUANDO LA MASCOTA YA VIAJÓ.
+                NO era doble render (lo medí): grooming la pintaba SIEMPRE,
+                por la letra de S61-A3 —"el para-quién VISIBLE, la mascota
+                elegida presente en pantalla"—. Esa letra sigue siendo
+                buena y HOY LA CUMPLE OTRO: el CABEZAL muestra el nombre
+                de la mascota como su detalle. La presencia está; lo que
+                sobraba era el CONTROL, que además la volvía re-editable
+                en una pantalla donde ya está decidida (Ley 23).
+                Sobrevive para el deep-link sin param y el log vacío —
+                ahí sí es el eje ⓪ y la precondición de talla lo exige. */}
+            {mascota === null ? (
+              <View style={{ marginHorizontal: -spacing[4] }}>
+                <FiltroMascotas
+                  mascotas={elegibles.map((m) => ({ id: m.id, nombre: m.nombre, fotoUrl: fotos[m.id] }))}
+                  elegida={mascotaId}
+                  onElegir={setMascotaId}
+                />
+              </View>
+            ) : null}
 
             {mascota === null ? (
               // S61-A5 cura 3 (letra founder): SIN mascota, la oferta se
@@ -339,7 +345,7 @@ export default function GroomingCuando() {
                     <Esqueleto forma="bloque" ancho="100%" alto={56} />
                   </EsqueletoGrupo>
                 ) : Array.isArray(ofertaPublica) && ofertaPublica.length > 0 ? (
-                  <View style={{ gap: spacing[2] }}>
+                  <View style={{ gap: spacing[2], paddingHorizontal: spacing[5] }}>
                     <SelectorSegmentado
                       // r38-bis · `proposito="eleccion"`: B terminó la
                       // pieza (r37) y acá se consume en su modo correcto.
@@ -431,7 +437,7 @@ export default function GroomingCuando() {
               <>
                 {/* 1 · EL SERVICIO — los dos comprables del menú (§1),
                     con el "desde" YA resuelto por la talla del perfil */}
-                <View style={{ gap: spacing[2] }}>
+                <View style={{ gap: spacing[2], paddingHorizontal: spacing[5] }}>
                   <SelectorSegmentado
                       // r38-bis · `proposito="eleccion"`: B terminó la
                       // pieza (r37) y acá se consume en su modo correcto.

@@ -52,7 +52,7 @@ import {
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
 import { FiltroMascotas } from '@/components/filtro-pills';
-import { CabezalOficio, GrillaElegir, SelectorDia } from '@/components/reserva-piezas';
+import { CabezalOficio, GrillaElegir, PieReserva, SelectorDia } from '@/components/reserva-piezas';
 
 function fechaLocalISO(d: Date): string {
   return new Intl.DateTimeFormat('en-CA').format(d);
@@ -397,30 +397,29 @@ export default function AdiestramientoCuando() {
       </ScrollView>
 
       {/* rasgo 2 de la gramática: CTA abajo, FIJO, una sola primaria */}
+      {/* r39-4 · EL PIE, como los otros tres. ⚠️ Y CON `total={null}`:
+          el precio de esta pantalla NO EXISTE todavía — la sesión suelta
+          y el programa cuestan distinto, y el número real lo resuelve el
+          server al elegir adiestrador. `PieReserva` acepta null y NO
+          dibuja nada, así que el pie sale con su CTA y SIN INVENTAR
+          MONTO. Un "desde $0" sería exactamente el verosímil-falso que
+          L-139 prohíbe: un número plausible que miente. */}
       {Array.isArray(mascotas) && elegibles.length > 0 ? (
-        <View
-          style={{
-            paddingHorizontal: spacing[4],
-            paddingTop: spacing[3],
-            paddingBottom: Math.max(insets.bottom, spacing[4]),
-            backgroundColor: theme.bg.base,
-            borderTopWidth: 1,
-            borderTopColor: theme.border.subtle,
+        <PieReserva
+          total={null}
+          totalDesde={false}
+          cuando={hora !== null ? `${dias.find((d) => d.iso === dia)?.corta ?? ''} · ${hora}` : null}
+          etiqueta={t('explorar.verQuienPuede')}
+          habilitado={listo}
+          onPress={() => {
+            if (!listo || mascota === null || hora === null) return;
+            router.push({
+              pathname: '/explorar/adiestramiento/disponibles',
+              params: { fecha: dia, hora, comprable, mascotaId: mascota.id, mascotaNombre: mascota.nombre },
+            });
           }}
-        >
-          <Boton
-            variante="primario"
-            etiqueta={t('explorar.verQuienPuede')}
-            deshabilitado={!listo}
-            onPress={() => {
-              if (!listo || mascota === null || hora === null) return;
-              router.push({
-                pathname: '/explorar/adiestramiento/disponibles',
-                params: { fecha: dia, hora, comprable, mascotaId: mascota.id, mascotaNombre: mascota.nombre },
-              });
-            }}
-          />
-        </View>
+          insetBottom={insets.bottom}
+        />
       ) : null}
     </View>
   );
