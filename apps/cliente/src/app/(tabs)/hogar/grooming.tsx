@@ -269,7 +269,14 @@ export default function HubGrooming() {
       {/* EL CTA VIVO, en PIE FIJO. Apagado SIGUE TOCABLE (razonDeshabilitado)
           y la ETIQUETA nombra lo que falta además del hint — S63-B: el
           apagado dice qué falta SIEMPRE; el hint no lo reemplaza. */}
-      {hayAlgo ? (
+      {/* 🔴 r35 · EL CTA YA NO DEPENDE DE QUE HAYA DATOS. Estaba
+          condicionado a `hayAlgo`, así que EL LOG VACÍO SE QUEDABA SIN
+          BOTÓN DE RESERVAR — desaparecía exactamente cuando es la única
+          acción posible. Lo destapó la familia de CUATRO: con dos
+          mascotas que ya tenían historia, el caso no existía. Es la
+          misma clase que el resto del salvavidas (r34): lo que no se
+          camina, no se ve. */}
+      {filas !== 'cargando' && filas !== 'error' ? (
         <View
           style={{
             paddingHorizontal: spacing[4],

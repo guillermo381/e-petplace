@@ -417,15 +417,14 @@ export default function MisPaseos() {
             accion={<Boton variante="secundario" etiqueta={t('cuenta.reintentar')} onPress={cargar} />}
           />
         </View>
-      ) : !hayAlgo ? (
-        <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
-          <EstadoVacio
-            icono={<Icono nombre="paseo" tamano={48} />}
-            titulo={t('plan.sinPlanesTitulo')}
-            descripcion={t('plan.sinPlanesDetalle')}
-            accion={<Boton variante="primario" etiqueta={t('tabs.explorar')} onPress={() => router.navigate('/explorar/paseo')} />}
-          />
-        </View>
+      /* ⚠️ r35 · LA PANTALLA VACÍA COMPLETA MURIÓ. Reemplazaba TODO
+         —la hilera de mascotas, los dos ejes, el CTA— por un cartel con
+         "Explorar", así que el log vacío no se parecía en nada al log
+         lleno: el usuario nuevo aprendía una pantalla distinta de la que
+         iba a usar. El patrón correcto es el de VETERINARIA, que el
+         founder señaló: la hilera y los ejes SE QUEDAN, y lo que habla es
+         un vacío DE SECCIÓN con su glifo y su voz. La composición vive;
+         lo que cambia es qué dice la sección. */
       ) : (
         <ScrollView
           ref={scrollRef}
@@ -500,7 +499,8 @@ export default function MisPaseos() {
               {paquetesVigentes.length === 0 && librasProximas.length === 0 && listaPlanes.length === 0 ? (
                 <EstadoVacio
                   registro="seccion"
-                  titulo={t('plan.vacioSegmento')}
+                  icono={<Icono nombre="paseo" tamano={48} />}
+                  titulo={t('plan.sinPlanesTitulo')}
                   descripcion={t('plan.sinPlanesDetalle')}
                 />
               ) : null}
@@ -627,7 +627,12 @@ export default function MisPaseos() {
                lo que mostraba no se perdió: viaja fusionado. */
             <View style={{ gap: spacing[2.5] }}>
               {pasadasFusionadas.length === 0 ? (
-                <EstadoVacio registro="seccion" titulo={t('plan.vacioSegmento')} />
+                <EstadoVacio
+                  registro="seccion"
+                  icono={<Icono nombre="paseo" tamano={48} />}
+                  titulo={t('plan.vacioSegmento')}
+                  descripcion={t('plan.sinPlanesDetalle')}
+                />
               ) : (
                 pasadasFusionadas.map((f) => {
                   // r12-3: MISMO diseño que el home — canto que pinta
@@ -704,7 +709,14 @@ export default function MisPaseos() {
           token cuando el founder elija su candidato en /gallery.
           Lleva la mascota FILTRADA si hay una (así la reserva no
           vuelve a preguntar — r12-5). */}
-      {planes !== 'cargando' && planes !== 'error' && hayAlgo ? (
+      {/* 🔴 r35 · EL CTA YA NO DEPENDE DE QUE HAYA DATOS. Estaba
+          condicionado a `hayAlgo`, así que EL LOG VACÍO SE QUEDABA SIN
+          BOTÓN DE RESERVAR — desaparecía exactamente cuando es la única
+          acción posible. Lo destapó la familia de CUATRO: con dos
+          mascotas que ya tenían historia, el caso no existía. Es la
+          misma clase que el resto del salvavidas (r34): lo que no se
+          camina, no se ve. */}
+      {planes !== 'cargando' && planes !== 'error' ? (
         <View
           style={{
             paddingHorizontal: spacing[4],

@@ -262,19 +262,26 @@ export default function AdiestramientoCuando() {
           <>
             {/* 0 · LA MASCOTA — presente en pantalla siempre (rasgo 1
                 de la gramática canónica) */}
-            {/* ⚠️ r34 · LOS CHIPS DEL SALVAVIDAS, MIGRADOS A LOS NUEVOS.
-                Este camino —deep-link sin param, o el log VACÍO— es el que
-                NADIE recorre, y por eso conservaba los viejos: un resto no
-                sobrevive por difícil, sobrevive por INVISIBLE. Censo del
-                founder confirmado y era UNIFORME: los CUATRO oficios lo
-                tenían, no solo veterinaria. */}
-            <View style={{ marginHorizontal: -spacing[4] }}>
+            {/* ⚠️ r35 · EL SALVAVIDAS DESAPARECE AL ELEGIR — la decisión del
+                founder sobre cuál de los dos comportamientos es el correcto,
+                resuelta por SIGNIFICADO y no por mayoría: en el LOG los chips
+                FILTRAN, y un filtro se queda porque se puede cambiar; en el
+                SALVAVIDAS IDENTIFICAN, y una identificación se cierra cuando
+                se dio (Ley 23: la puerta no pregunta lo que ya sabe). Paseo,
+                grooming y veterinaria ya lo hacían; adiestramiento era el que
+                estaba mal.
+                Y sus chips son los NUEVOS desde r34 — este camino conservaba
+                los viejos porque nadie lo recorre: un resto no sobrevive por
+                difícil, sobrevive por INVISIBLE. */}
+            {mascota === null ? (
+              <View style={{ marginHorizontal: -spacing[4] }}>
               <FiltroMascotas
                 mascotas={elegibles.map((m) => ({ id: m.id, nombre: m.nombre, fotoUrl: fotos[m.id] }))}
                 elegida={mascotaId}
                 onElegir={setMascotaId}
               />
             </View>
+            ) : null}
 
             {/* 1 · EL QUÉ — sesión-o-programa (§8). La FIRMA de la
                 pantalla: si es programa, la voz honesta dice ACÁ que
