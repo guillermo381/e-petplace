@@ -19,13 +19,11 @@ export const lightTheme = {
     // el texto sobre el CTA de tinta) y no se toca un token de dos
     // consumidores para cambiar uno. Hoy `papelTapiz === light0`: el
     // cableado vive, el color espera su firma en el gate.
-    // `as string` NO es un atajo: el tipo `Theme` deriva de estos
-    // objetos, y sin ensanchar, `bg.base` queda como UNIÓN DE LITERALES
-    // de los tres temas — el override del prestador (light0) no sería
-    // asignable. Es el MISMO precedente del slot `cta` unas líneas abajo,
-    // y por la misma razón: un slot que se resuelve distinto por tema.
-    // Lo cazó el tsc al construir la separación (r10), no la prosa.
-    base:     palette.papelTapiz as string,   // S82-B r10: pink 3% sobre papel
+    // (Acá vivía la explicación del `as string`. S82-B r30: D-582 PAGADA
+    // — `Theme` dejó de derivarse y los 11 casts murieron juntos. El
+    // comentario se retira con ellos: describía un problema que ya no
+    // existe, y un comentario que sobrevive a su causa desinforma.)
+    base:     palette.papelTapiz,   // S82-B r10: pink 3% sobre papel
     card:     palette.light1,   // #FFFFFF
     elevated: palette.light2,   // #F8F7FC
     overlay:  palette.light3,
@@ -88,13 +86,13 @@ export const lightTheme = {
     // tinta 9.96 en ambos). El PRESTADOR no lo recibe: su oficio ancla a
     // tealDark por `lightOficio`/`darkOficio`; memorial sigue en tinta
     // por `getTheme` — las dos garantías viven en la fuente.
-    cta:           palette.ctaOro as string,
-    ctaTexto:      palette.textLight0 as string,
+    cta:           palette.ctaOro,
+    ctaTexto:      palette.textLight0,
     /** S82-B — ¿el CTA lleva ELEVACIÓN? el oro NO se recorta contra papel (1.55): su canal es la superficie apoyada
      *  Es SLOT y no prop: la pantalla no elige, y el prestador lo pisa en
      *  `lightOficio`/`darkOficio` (su teal no tiene el problema del oro
      *  contra papel — meterle relieve sería ARRASTRE). */
-    ctaElevado:    true as boolean,
+    ctaElevado:    true,
     primary:       palette.tealDark,
     primaryBg:     palette.tealAlpha16,     // B2.1: tint sobre el hex puro
     primaryBorder: palette.tealBorderL,

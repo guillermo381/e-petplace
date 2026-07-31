@@ -5,7 +5,40 @@ import { palette } from '../tokens/palette'
 
 export { lightTheme, darkTheme, memorialTheme }
 
-export type Theme = typeof lightTheme | typeof darkTheme | typeof memorialTheme
+/** `Theme` — LA UNIÓN ENSANCHADA (S82-B r30, paga D-582).
+ *  ANTES derivaba de los objetos, así que cada campo quedaba LITERAL y
+ *  todo override necesitaba un cast: cobró CUATRO veces en una sesión,
+ *  la última BLOQUEANDO trabajo firmado.
+ *  EL MAPA que costó un intento fallido: (a) la UNIÓN SE CONSERVA — los
+ *  componentes narrowean con `'capa' in theme` porque MEMORIAL no porta
+ *  todos los campos, y un tipo único colapsa ese narrowing a `never`
+ *  (rompía 20+ componentes); (b) hay TRES formas de literal, no una:
+ *  string, boolean y los OBJETOS DE SOMBRA — y estos últimos NO se
+ *  ensanchan, porque `shadow.glow` también se narrowea por tema. */
+type Ancho<T> = {
+  [K in keyof T]: T[K] extends string ? string
+    : T[K] extends boolean ? boolean
+    : T[K] extends object ? Ancho<T[K]>
+    : T[K]
+}
+/** Ensancha los colores y DEJA INTACTOS los que se narrowean (`shadow`,
+ *  `elevacion`) y el discriminante de la unión (`mode`). */
+type TemaAncho<T extends { shadow: unknown; elevacion: unknown; mode: unknown }> =
+  Omit<Ancho<T>, 'shadow' | 'elevacion' | 'mode'> & Pick<T, 'shadow' | 'elevacion' | 'mode'>
+export type Theme = TemaAncho<typeof lightTheme> | TemaAncho<typeof darkTheme> | TemaAncho<typeof memorialTheme>
+
+/** ⭐ LOS SLOTS — el número que antes NO EXISTÍA (S82-B r30).
+ *  Un SLOT no es "un campo que cambia entre temas" (eso son casi todos:
+ *  es lo que un tema ES). Un slot es un campo que un tema DERIVADO PISA
+ *  para separar las dos casas — `lightOficio`/`darkOficio`. **Son
+ *  CUATRO**, y hasta hoy había que abrir los tres archivos y comparar
+ *  para saber cuáles:
+ *    1. `bg.base`           — el fondo: el tapiz es del cliente
+ *    2. `accent.cta`        — oro el cliente · tealDark el oficio
+ *    3. `accent.ctaTexto`   — el par del anterior
+ *    4. `accent.ctaElevado` — el relieve del CTA, solo del cliente
+ *  Si aparece un quinto, se agrega ACÁ: la lista es el contrato. */
+export type SlotDeTema = 'bg.base' | 'accent.cta' | 'accent.ctaTexto' | 'accent.ctaElevado' 
 export type ThemeMode = 'light' | 'dark' | 'memorial'
 export type ServiceKey = keyof typeof lightTheme.services
 export type StatusKey = 'success' | 'warning' | 'danger' | 'info'

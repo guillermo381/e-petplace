@@ -63,13 +63,13 @@ export const darkTheme = {
     // tinta 9.96 en ambos). El PRESTADOR no lo recibe: su oficio ancla a
     // tealDark por `lightOficio`/`darkOficio`; memorial sigue en tinta
     // por `getTheme` — las dos garantías viven en la fuente.
-    cta:           palette.ctaOro as string,
-    ctaTexto:      palette.textLight0 as string,
+    cta:           palette.ctaOro,
+    ctaTexto:      palette.textLight0,
     /** S82-B — ¿el CTA lleva ELEVACIÓN? coherencia de anatomía entre temas del cliente (en oscuro el color ya separa: 11.97)
      *  Es SLOT y no prop: la pantalla no elige, y el prestador lo pisa en
      *  `lightOficio`/`darkOficio` (su teal no tiene el problema del oro
      *  contra papel — meterle relieve sería ARRASTRE). */
-    ctaElevado:    true as boolean,
+    ctaElevado:    true,
     primary:       palette.teal,
     primaryBg:     palette.tealAlpha15,
     primaryBorder: palette.tealBorder,

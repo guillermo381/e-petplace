@@ -60,13 +60,13 @@ export const memorialTheme = {
     // S63 — enmienda Ley 21 FIRMADA: el CTA primario resuelve por SLOT.
     // Default 'tinta' (este valor); ThemeProvider cta='oficio' lo ancla a
     // tealDark en light Y dark. Memorial SIEMPRE tinta (no se celebra).
-    cta:           palette.textMemorialDark as string,
-    ctaTexto:      palette.memorialDark0 as string,
+    cta:           palette.textMemorialDark,
+    ctaTexto:      palette.memorialDark0,
     /** S82-B — ¿el CTA lleva ELEVACIÓN? memorial no se celebra — el CTA es tinta plana, sin relieve
      *  Es SLOT y no prop: la pantalla no elige, y el prestador lo pisa en
      *  `lightOficio`/`darkOficio` (su teal no tiene el problema del oro
      *  contra papel — meterle relieve sería ARRASTRE). */
-    ctaElevado:    false as boolean,
+    ctaElevado:    false,
     primary:       palette.sage,
     primaryBg:     palette.sageAlpha14,
     primaryBorder: 'rgba(143,166,142,.28)',
