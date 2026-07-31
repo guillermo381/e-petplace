@@ -62,6 +62,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  FilaCita,
   Icono,
   Texto,
   spacing,
@@ -96,6 +97,7 @@ export default function LogVeterinaria() {
   const [mascotaElegida, setMascotaElegida] = useState<string | null>(null);
   // r34 · el CTA vivo necesita señalar la hilera cuando falta la mascota
   const [pidiendoMascota, setPidiendoMascota] = useState(false);
+  const [abierta, setAbierta] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView>(null);
   // ② el ESTADO
   const [segmento, setSegmento] = useState<Segmento>('proximos');
@@ -160,9 +162,6 @@ export default function LogVeterinaria() {
     c.fecha === null
       ? t('logVet.esperaFecha') // el nulo honesto: no hay día, y se dice
       : `${fechaCortaMono(c.fecha, idioma)}${c.hora !== null ? ` · ${c.hora}` : ''}`;
-
-  const subtitulo = (c: ConsultaDelHogar): string =>
-    [c.mascota_nombre, c.prestador_nombre].filter(Boolean).join(' · ');
 
   const visibles = segmento === 'proximos' ? proximos : historialFiltrado;
 
@@ -252,30 +251,33 @@ export default function LogVeterinaria() {
         ) : (
           <View style={{ gap: spacing[2.5] }}>
             {visibles.map((c) => {
-              const titulo = vozServicio(t, c.tipo_servicio, c.servicio_nombre) ?? c.servicio_nombre;
-              const atencionId = c.atencion_id;
+              // r41 · la variante + el criterio firmado. La fila del
+              // HISTORIAL con parte NAVEGA a otra pantalla (›); la de
+              // PRÓXIMOS no tiene a dónde ir y no abre nada, así que no
+              // promete: despliega en su lugar (⌄).
+              const navega = c.atencion_id !== null;
               return (
-                // el CANTO es SALUD — el único de los cuatro oficios
-                <CantoCurva key={c.cita_id} color={theme.capa.identidad}>
-                  {/* `Celda` es unión discriminada: interactiva exige su
-                      par onPress+role. Dos ramas explícitas, jamás un
-                      spread condicional que rompa el discriminante —
-                      solo la visita CERRADA tiene parte que abrir
-                      (principio de la puerta: no se ofrece lo que no
-                      lleva a ningún lado). */}
-                  {atencionId !== null ? (
-                    <Celda
-                      titulo={titulo}
-                      subtitulo={subtitulo(c)}
-                      metadataMono={cuando(c)}
-                      interactiva
-                      accessibilityRole="button"
-                      onPress={() => router.push({ pathname: '/paseo/[atencionId]', params: { atencionId } })}
-                    />
-                  ) : (
-                    <Celda titulo={titulo} subtitulo={subtitulo(c)} metadataMono={cuando(c)} />
-                  )}
-                </CantoCurva>
+                <FilaCita
+                  key={c.cita_id}
+                  oficio="veterinaria"
+                  cara={false}
+                  direccion={navega ? 'derecha' : abierta === c.cita_id ? 'arriba' : 'abajo'}
+                  titulo={c.mascota_nombre ?? t('veterinaria.titulo')}
+                  // r41 · el subtítulo YA NO repite la mascota: con el
+                  // título diciendo su nombre, `subtitulo(c)` la decía dos
+                  // veces en la misma fila (regla Chanel). Queda el
+                  // prestador, que es lo que el título no dice.
+                  subtitulo={c.prestador_nombre ?? undefined}
+                  metadataMono={cuando(c)}
+                  mascota={{ nombre: c.mascota_nombre ?? '' }}
+                  onPress={() => {
+                    if (navega && c.atencion_id !== null) {
+                      router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: c.atencion_id } });
+                      return;
+                    }
+                    setAbierta(abierta === c.cita_id ? null : c.cita_id);
+                  }}
+                />
               );
             })}
           </View>

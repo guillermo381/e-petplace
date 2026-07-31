@@ -620,7 +620,15 @@ export default function MisPaseos() {
                         // tienen flecha y otras no, y el usuario no sabe
                         // qué se puede tocar".
                         cara={false}
-                        direccion="abajo"
+                        // ✅ FIRMADO r41 · INFORMACIÓN DESPLIEGA (⌄) · ACCIÓN
+                        // CON FORMULARIO ABRE HOJA Y LLEVA (›). Yo había
+                        // puesto "abajo" y B leyó bien: la Hoja NO hace
+                        // crecer la fila —viene del borde y tapa el
+                        // contexto—, así que ⌄ prometía algo que no pasa.
+                        // Estas filas abren Hoja CON acciones (Mover del
+                        // plan · reagendar/cancelar del suelto), o sea que
+                        // llevan. La flecha ahora dice la verdad.
+                        direccion="derecha"
                         // r40-2 · EL REPARTO DEL DATO. La "segunda columna
                         // que no se lee" es el slot `metadataMono` de
                         // Celda: una columna alineada a la DERECHA, hecha

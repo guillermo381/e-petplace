@@ -32,6 +32,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  FilaCita,
   FilaDato,
   Icono,
   Insignia,
@@ -51,7 +52,6 @@ import { fechaCortaMono } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 import { vozServicio } from '@/lib/voz-servicio';
 import { FiltroMascotas, FiltroPills } from '@/components/filtro-pills';
-import { CantoCurva } from '@/components/canto-curva';
 import { esHistorial, esProxima } from '@/lib/corte-agenda';
 
 type Tap = 'proximos' | 'historial';
@@ -138,63 +138,46 @@ export default function HubGrooming() {
   const filaHistorial = (f: GroomingDelHogar, cerrada: boolean) => {
     const abierto = abierta === f.cita_id;
     return (
-      <CantoCurva key={f.cita_id} color={theme.capa.cuidado}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ expanded: abierto }}
-          onPress={() => setAbierta(abierto ? null : f.cita_id)}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3], padding: spacing[3], minHeight: 58 }}>
-            <View style={{ flex: 1, minWidth: 0, gap: spacing[0.5] }}>
-              <Texto variante="cuerpo" numberOfLines={1}>
-                {vozServicio(t, f.tipo_servicio, f.servicio_nombre) ?? f.servicio_nombre}
-              </Texto>
-              <Texto variante="dato" numberOfLines={1}>
-                {`${fechaCortaMono(f.fecha, idioma)} · ${f.hora}`}
-              </Texto>
+      <FilaCita
+        key={f.cita_id}
+        oficio="grooming"
+        // r41 · la variante: sin cara (el log ya filtra por mascota y la
+        // fila la nombra) y DESPLIEGA — esta fila no abre Hoja ni lleva a
+        // ningún lado: muestra información en su lugar, como su hermana
+        // de historial. El criterio firmado, aplicado.
+        cara={false}
+        direccion={abierta === f.cita_id ? 'arriba' : 'abajo'}
+        titulo={vozServicio(t, f.tipo_servicio, f.servicio_nombre) ?? f.servicio_nombre}
+        subtitulo={f.mascota_nombre ?? undefined}
+        metadataMono={`${fechaCortaMono(f.fecha, idioma)} · ${f.hora}`}
+        mascota={{ nombre: f.mascota_nombre ?? '', fotoUrl: undefined }}
+        fin={cerrada ? <Insignia estado="alDia" etiqueta={t('plan.salidaCompletada')} tamaño="sm" /> : undefined}
+        acciones={
+          abierta === f.cita_id ? (
+            <View style={{ paddingHorizontal: spacing[3], paddingBottom: spacing[3], gap: spacing[2] }}>
+              {f.prestador_nombre !== null ? (
+                <FilaDato disposicion="horizontal" etiqueta={t('grooming.dondeEtiqueta')} valor={f.prestador_nombre} />
+              ) : null}
+              {f.precio !== null ? (
+                <FilaDato disposicion="horizontal" etiqueta={t('presupuesto.total')} valor={`$ ${f.precio.toFixed(2)}`} mono />
+              ) : null}
+              {f.atencion_id !== null ? (
+                <Boton
+                  variante="compacto"
+                  tamaño="sm"
+                  etiqueta={t('hogar.acordeonVerCompleto')}
+                  onPress={() => {
+                    if (f.atencion_id !== null) {
+                      router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: f.atencion_id } });
+                    }
+                  }}
+                />
+              ) : null}
             </View>
-            {/* 🔴 r40-3 · EL DATO QUE MENTÍA, curado. Este renderer sirve
-                a LAS DOS listas y pintaba `"completada"` HARDCODEADO, así
-                que una cita de las 2 de la tarde DE HOY —futura— se
-                anunciaba como cerrada. El lector no traía mal el estado:
-                LA FILA PINTABA UN LITERAL. Es mío, de r31, y es la clase
-                más cara de defecto: no rompe nada y afirma algo falso.
-                Ahora rige el estándar del founder — EL ESTADO SOLO
-                CUANDO DICE ALGO: en una cita futura normal, "confirmada"
-                es ruido y no se monta; el chip aparece solo si la cita
-                YA CERRÓ. */}
-            {cerrada ? (
-              <Insignia estado="alDia" etiqueta={t('plan.salidaCompletada')} tamaño="sm" />
-            ) : null}
-          </View>
-        </Pressable>
-        {abierto ? (
-          <View style={{ paddingHorizontal: spacing[3], paddingBottom: spacing[3], gap: spacing[2] }}>
-            <Separador />
-            {f.mascota_nombre !== null ? (
-              <FilaDato disposicion="horizontal" etiqueta={t('grooming.paraQuien')} valor={f.mascota_nombre} />
-            ) : null}
-            {f.prestador_nombre !== null ? (
-              <FilaDato disposicion="horizontal" etiqueta={t('grooming.dondeEtiqueta')} valor={f.prestador_nombre} />
-            ) : null}
-            {f.precio !== null ? (
-              <FilaDato disposicion="horizontal" etiqueta={t('presupuesto.total')} valor={`$ ${f.precio.toFixed(2)}`} mono />
-            ) : null}
-            {f.atencion_id !== null ? (
-              <Boton
-                variante="compacto"
-                tamaño="sm"
-                etiqueta={t('hogar.acordeonVerCompleto')}
-                onPress={() => {
-                  if (f.atencion_id !== null) {
-                    router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: f.atencion_id } });
-                  }
-                }}
-              />
-            ) : null}
-          </View>
-        ) : null}
-      </CantoCurva>
+          ) : undefined
+        }
+        onPress={() => setAbierta(abierta === f.cita_id ? null : f.cita_id)}
+      />
     );
   };
 

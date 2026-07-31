@@ -41,7 +41,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
-  FilaDato,
+  FilaCita,
   Hoja,
   HojaScroll,
   Icono,
@@ -70,7 +70,6 @@ import {
 import { fechaCortaMono } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 import { FiltroMascotas, FiltroPills } from '@/components/filtro-pills';
-import { CantoCurva } from '@/components/canto-curva';
 import { esHistorial, esProxima } from '@/lib/corte-agenda';
 
 // §7 (S65) — matching compartido del vocabulario (el filtro de chips y
@@ -264,37 +263,30 @@ export default function HubAdiestramiento() {
               const abierto = abierta === c.cita_id;
               const navegable = vista === 'historial' && c.tiene_parte;
               return (
-                <CantoCurva key={c.cita_id} color={theme.capa.cuidado}>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityState={{ expanded: abierto }}
-                    onPress={() => setAbierta(abierto ? null : c.cita_id)}
-                  >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3], padding: spacing[3], minHeight: 58 }}>
-                      <View style={{ flex: 1, minWidth: 0, gap: spacing[0.5] }}>
-                        <Texto variante="cuerpo" numberOfLines={1}>
-                          {c.mascota_nombre ?? t('adiestramiento.titulo')}
-                        </Texto>
-                        <Texto variante="dato" numberOfLines={1}>
-                          {`${fechaCortaMono(c.fecha, idioma)} · ${c.hora}`}
-                        </Texto>
-                      </View>
-                      {c.sesion_numero !== null ? (
-                        <Insignia
-                          estado="info"
-                          etiqueta={vozFinal ?? t('adiestramiento.sesionK', { k: String(c.sesion_numero) })}
-                          tamaño="sm"
-                        />
-                      ) : null}
-                    </View>
-                  </Pressable>
-                  {abierto ? (
-                    <View style={{ paddingHorizontal: spacing[3], paddingBottom: spacing[3], gap: spacing[2] }}>
-                      <Separador />
-                      {c.prestador_nombre !== null ? (
-                        <FilaDato disposicion="horizontal" etiqueta={t('adiestramiento.paraQuien')} valor={c.prestador_nombre} />
-                      ) : null}
-                      {navegable ? (
+                <FilaCita
+                  key={c.cita_id}
+                  oficio="adiestramiento"
+                  // r41 · la variante + el criterio firmado: información
+                  // DESPLIEGA. Esta fila no abre Hoja ni lleva: muestra
+                  // su detalle en el lugar.
+                  cara={false}
+                  direccion={abierta === c.cita_id ? 'arriba' : 'abajo'}
+                  titulo={c.mascota_nombre ?? t('adiestramiento.titulo')}
+                  subtitulo={c.prestador_nombre ?? undefined}
+                  metadataMono={`${fechaCortaMono(c.fecha, idioma)} · ${c.hora}`}
+                  mascota={{ nombre: c.mascota_nombre ?? '' }}
+                  fin={
+                    c.sesion_numero !== null ? (
+                      <Insignia
+                        estado="info"
+                        etiqueta={vozFinal ?? t('adiestramiento.sesionK', { k: String(c.sesion_numero) })}
+                        tamaño="sm"
+                      />
+                    ) : undefined
+                  }
+                  acciones={
+                    abierta === c.cita_id && vista === 'historial' && c.tiene_parte ? (
+                      <View style={{ paddingHorizontal: spacing[3], paddingBottom: spacing[3] }}>
                         <Boton
                           variante="compacto"
                           tamaño="sm"
@@ -306,10 +298,11 @@ export default function HubAdiestramiento() {
                             })
                           }
                         />
-                      ) : null}
-                    </View>
-                  ) : null}
-                </CantoCurva>
+                      </View>
+                    ) : undefined
+                  }
+                  onPress={() => setAbierta(abierta === c.cita_id ? null : c.cita_id)}
+                />
               );
             })}
           </View>
