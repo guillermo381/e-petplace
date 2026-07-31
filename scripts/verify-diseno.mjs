@@ -850,6 +850,58 @@ function r22(fuentes) {
 }
 
 
+/** R24 · EL PIE DE RESERVA NO SE COPIA (S82-B r35 — la regla que la
+ *  extracción necesitaba para servir de algo).
+ *
+ *  EL DEFECTO QUE MECANIZA, medido y no supuesto: el pie fijo de la
+ *  reserva vivía como pieza y DOS de sus cuatro pantallas lo tenían
+ *  copiado a mano — y la copia no había divergido en un matiz: **había
+ *  perdido el precio entero.** Nadie lo hizo mal a propósito; se copió
+ *  porque copiar era posible. La pieza subió a `packages/ui`, y esta
+ *  regla es lo que hace que la próxima copia no llegue a existir.
+ *
+ *  QUÉ MIRA: un `paddingBottom: Math.max(insets.bottom …)` dentro de
+ *  `explorar/` — la firma exacta de un pie fijo hecho a mano. El
+ *  `Math.max` es lo que delata la copia: es la decisión que la pieza ya
+ *  toma por vos (la ley chica de la cola de scroll, S70-B5), y
+ *  recalcularla en la pantalla es cómo se divergió la primera vez.
+ *
+ *  SU ALCANCE, ACOTADO A PROPÓSITO (y esto es letra, no pereza): rige
+ *  SOLO en `explorar/`, que es la familia que el founder nombró. Un pie
+ *  fijo en un LOG o en el Hogar es otro trabajo —no lleva precio ni
+ *  "desde"— y esta regla no opina sobre él. Ensanchar el alcance a
+ *  "todo pie fijo" convertiría una ley medida en una superstición.
+ *
+ *  BASELINE con nombre y CONDICIÓN DE MUERTE: quedan DOS, las dos de
+ *  adiestramiento, y NO las curo yo — C las tiene declaradas como su
+ *  paso siguiente (D-586: el índice es compartido). Cuando adopten la
+ *  pieza, el conteo baja y el lint PIDE bajar el baseline: un guard que
+ *  sobrevive a su propia razón es basura que nadie se anima a tocar. */
+const BASELINE_R24 = {
+  'apps/cliente/src/app/(tabs)/explorar/adiestramiento/index.tsx': 1,
+  'apps/cliente/src/app/(tabs)/explorar/adiestramiento/confirmar-programa.tsx': 1,
+};
+function r24(archivos) {
+  const fallos = [];
+  let total = 0;
+  const sumaBaseline = Object.values(BASELINE_R24).reduce((a, b) => a + b, 0);
+  for (const { path, src } of archivos) {
+    if (!/\/explorar\//.test(path)) continue;
+    let enArchivo = 0;
+    for (const m of sinComentarios(src).matchAll(/paddingBottom:\s*Math\.max\(\s*insets\.bottom/g)) {
+      enArchivo++;
+      if (enArchivo > (BASELINE_R24[path] ?? 0))
+        fallos.push(
+          `${path}:${lineaDe(src, m.index)} — PIE DE RESERVA COPIADO A MANO. La pieza es <PieReserva> (@epetplace/ui): trae el precio con su "desde", el CTA y el piso de la safe area. La copia de esta familia ya perdió el precio entero una vez — por eso existe la pieza.`,
+        );
+    }
+    total += enArchivo;
+  }
+  return {
+    fallos,
+    info: `${total}/${sumaBaseline} pies a mano en explorar/ (baseline: los dos de adiestramiento, de C)${total < sumaBaseline ? ' — BAJÓ: actualizar baseline' : ''}`,
+  };
+}
 
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
@@ -878,8 +930,15 @@ const FIXTURES = {
   // la marca anidada adentro de la placa: el defecto que se ve como layout
   R22: { filtro: 'function MarcaElegido() {}\n<View style={{ width: 30 }}><MarcaElegido /></View>' },
   R16: { palette: "light0: '#FAF9F7',\npapelTapiz: '#FAF2F5',", temas: 'const lightOficio: Theme = { ...lightTheme }' },
+  // el pie a mano en una pantalla de explorar que NO está en el baseline
+  R24: [
+    {
+      path: 'apps/cliente/src/app/(tabs)/explorar/(fixture)/index.tsx',
+      src: 'paddingBottom: Math.max(insets.bottom, spacing[4]),\nborderTopWidth: 1,',
+    },
+  ],
 };
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R19: r19, R20: r20, R22: r22 };
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R19: r19, R20: r20, R22: r22, R24: r24 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -954,6 +1013,26 @@ corridas.push([
   'R19 (L-b: el relleno pleno se computa contra sus hermanos)',
   r19(PIEZAS_R19.map((p) => ({ path: p, src: readFileSync(p, 'utf8') }))),
 ]);
+corridas.push(['R24 (el pie de reserva no se copia)', r24(apps)]);
+
+/** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
+ *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,
+ *  PASAR la auto-prueba… y no correr NUNCA contra el código real, porque
+ *  `corridas` se arma a mano. Salió roja contra su fixture y muda contra
+ *  la casa: exactamente el modo de falla que L-192 prohíbe, un piso más
+ *  arriba. El guard cierra el triángulo (regla · fixture · corrida). */
+const enCorridas = new Set(corridas.map(([n]) => n.match(/^R\d+/)?.[0]));
+for (const nombre of Object.keys(REGLAS)) {
+  if (!enCorridas.has(nombre)) {
+    console.error(`ESTRUCTURA ✗ ${nombre} tiene regla y fixture pero NO CORRE contra el código real (L-192)`);
+    estructuraRota++;
+  }
+}
+if (estructuraRota > 0) {
+  console.error(`\nverify:diseno — estructura rota (${estructuraRota}): el lint se declara inválido`);
+  process.exit(1);
+}
+
 for (const [nombre, res] of corridas) {
   console.log(`${nombre} · ${res.info}`);
   for (const f of res.fallos) { console.error(`  ✗ ${f}`); fallosTotal++; }

@@ -44,6 +44,7 @@ import { FilaDato } from '../components/FilaDato'
 import { LogoNegocio } from '../components/LogoNegocio'
 import { FilaCita } from '../components/FilaCita'
 import { PieRevelar } from '../components/PieRevelar'
+import { PieReserva } from '../components/PieReserva'
 import { HeroMarca } from '../components/HeroMarca'
 import { LineaDeVida, LineaDeVidaNodo, type LineaDeVidaItem } from '../components/LineaDeVida'
 import { VisorFoto } from '../components/VisorFoto'
@@ -1523,6 +1524,40 @@ function GaleriaInterna() {
             La trampa del logo (MODELO_PRESENCIA §2): los logos anchos NO se recortan a círculo —
             se contienen con AIRE y FONDO (contain). Sin logo: monograma de iniciales en DM Sans —
             jamás huella (la huella es de mascota, Ley 12), jamás caja vacía.
+          </Texto>
+        </Seccion>
+
+        <Seccion titulo="PieReserva (63) — el pie fijo de una reserva (S82, dominio)">
+          {/* Los DOS estados que el contrato distingue, montados juntos
+              porque la diferencia es la decisión: CON precio (paseo,
+              vet, grooming) y SIN precio (adiestramiento, que no tiene
+              número en esta pantalla y no lo inventa). */}
+          <View style={{ gap: spacing[5] }}>
+            <PieReserva
+              total="$ 12.00"
+              totalDesde
+              cuando="jue 30 · 14:00"
+              etiqueta="Ver quién puede"
+              habilitado
+              onPress={() => {}}
+              insetBottom={0}
+            />
+            <PieReserva
+              total={null}
+              etiqueta="Ver quién puede"
+              habilitado={false}
+              onPress={() => {}}
+              insetBottom={0}
+            />
+          </View>
+          <View style={{ height: spacing[3] }} />
+          <Texto variante="apoyo">
+            Sube a la casa porque dos de sus cuatro consumidores lo tenían COPIADO A MANO y la copia
+            había perdido el precio entero (S82-B r35). `total = null` no dibuja un vacío: el bloque
+            no se monta y el CTA ocupa el pie — adiestramiento no tiene precio en esa pantalla y la
+            pieza no lo inventa (L-139). El &quot;desde&quot; viene del DATO (`varia` resuelto
+            server-side), jamás del oficio. Y el `paddingBottom` de la safe area lo pone la pieza:
+            si cada pantalla lo recalcula, vuelve a divergir.
           </Texto>
         </Seccion>
 

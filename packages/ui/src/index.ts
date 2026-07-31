@@ -175,3 +175,7 @@ export { ClipSesion, type ClipSesionProps } from './components/ClipSesion'
 // prohibida.
 export { VozComision, type VozComisionProps } from './components/VozComision'
 export { EsperaDeMarca } from './brand/EsperaDeMarca'
+// PieReserva — S82-B r35: el pie fijo de una reserva, componente de
+// DOMINIO. Sube porque sus dos copias a mano habían perdido el PRECIO
+// entero (la causa del founder: lo que se copia, diverge).
+export { PieReserva, type PieReservaProps } from './components/PieReserva'
