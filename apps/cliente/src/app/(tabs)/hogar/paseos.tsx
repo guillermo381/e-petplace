@@ -80,6 +80,7 @@ import { useTraduccion } from '@/i18n';
 import { FiltroMascotas, FiltroPills } from '@/components/filtro-pills';
 import { CantoCurva } from '@/components/canto-curva';
 import { esHistorial, esProxima } from '@/lib/corte-agenda';
+import { DetalleCita } from '@/components/detalle-cita';
 
 // S60-A6 pieza 2 (D-366): el tap Agenda MURIÓ fusionado en Próximos —
 // enmienda DECLARADA de D-366, no reapertura del servicio cerrado.
@@ -743,23 +744,20 @@ export default function MisPaseos() {
                         </View>
                       </Pressable>
                       {abierto ? (
-                        <View style={{ paddingHorizontal: spacing[3], paddingBottom: spacing[3], gap: spacing[2] }}>
-                          <Separador />
-                          {c.precio !== null ? (
-                            <FilaDato
-                              disposicion="horizontal"
-                              etiqueta={t('presupuesto.total')}
-                              valor={`$ ${c.precio.toFixed(2)}`}
-                              mono
-                            />
-                          ) : null}
-                          <FilaDato
-                            disposicion="horizontal"
-                            etiqueta={t('explorar.cuandoDuracion')}
-                            valor={`${c.duracion_minutos} min`}
-                            mono
-                          />
-                        </View>
+                        <DetalleCita
+                          // 🔴 `prestador` en NULL y NO es olvido:
+                          // `CitaPaseoDueno` es el ÚNICO de los cuatro
+                          // tipos SIN `prestador_nombre` (medido) — trae
+                          // `prestador_id`, que es un uuid, no una voz.
+                          // La pieza no dibuja esa fila. Pedido a A
+                          // declarado; traducir el uuid desde la pantalla
+                          // sería pagar un viaje POR FILA para lo que se
+                          // arregla con un campo en el lector.
+                          prestador={null}
+                          costo={c.precio}
+                          etiquetaPrestador={t('grooming.dondeEtiqueta')}
+                          etiquetaCosto={t('presupuesto.total')}
+                        />
                       ) : null}
                     </CantoCurva>
                   );

@@ -80,6 +80,7 @@ import {
 import { CantoCurva } from '@/components/canto-curva';
 import { FiltroMascotas, FiltroPills } from '@/components/filtro-pills';
 import { esHistorial, esProxima } from '@/lib/corte-agenda';
+import { DetalleCita } from '@/components/detalle-cita';
 import { vozServicio } from '@/lib/voz-servicio';
 import { useTraduccion } from '@/i18n';
 
@@ -270,6 +271,21 @@ export default function LogVeterinaria() {
                   subtitulo={c.prestador_nombre ?? undefined}
                   metadataMono={cuando(c)}
                   mascota={{ nombre: c.mascota_nombre ?? '' }}
+                  acciones={
+                    !navega && abierta === c.cita_id ? (
+                      <DetalleCita
+                        prestador={c.prestador_nombre}
+                        costo={c.precio}
+                        etiquetaPrestador={t('veterinaria.paraQuien')}
+                        etiquetaCosto={t('presupuesto.total')}
+                        // ⚠️ en vet el costo PUEDE NO EXISTIR hasta que haya
+                        // presupuesto. Ahí la fila dice lo que SABE con la
+                        // voz honesta del oficio, en vez de un "$ 0,00" que
+                        // sería mentira con formato de dato (L-139).
+                        vozSinCosto={t('logVet.desdeNota')}
+                      />
+                    ) : undefined
+                  }
                   onPress={() => {
                     if (navega && c.atencion_id !== null) {
                       router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: c.atencion_id } });

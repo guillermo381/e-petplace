@@ -53,6 +53,7 @@ import { useTraduccion } from '@/i18n';
 import { vozServicio } from '@/lib/voz-servicio';
 import { FiltroMascotas, FiltroPills } from '@/components/filtro-pills';
 import { esHistorial, esProxima } from '@/lib/corte-agenda';
+import { DetalleCita } from '@/components/detalle-cita';
 
 type Tap = 'proximos' | 'historial';
 
@@ -154,26 +155,24 @@ export default function HubGrooming() {
         fin={cerrada ? <Insignia estado="alDia" etiqueta={t('plan.salidaCompletada')} tamaño="sm" /> : undefined}
         acciones={
           abierta === f.cita_id ? (
-            <View style={{ paddingHorizontal: spacing[3], paddingBottom: spacing[3], gap: spacing[2] }}>
-              {f.prestador_nombre !== null ? (
-                <FilaDato disposicion="horizontal" etiqueta={t('grooming.dondeEtiqueta')} valor={f.prestador_nombre} />
-              ) : null}
-              {f.precio !== null ? (
-                <FilaDato disposicion="horizontal" etiqueta={t('presupuesto.total')} valor={`$ ${f.precio.toFixed(2)}`} mono />
-              ) : null}
-              {f.atencion_id !== null ? (
-                <Boton
-                  variante="compacto"
-                  tamaño="sm"
-                  etiqueta={t('hogar.acordeonVerCompleto')}
-                  onPress={() => {
-                    if (f.atencion_id !== null) {
-                      router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: f.atencion_id } });
+            <DetalleCita
+              prestador={f.prestador_nombre}
+              costo={f.precio}
+              etiquetaPrestador={t('grooming.dondeEtiqueta')}
+              etiquetaCosto={t('presupuesto.total')}
+              accion={
+                f.atencion_id !== null
+                  ? {
+                      etiqueta: t('hogar.acordeonVerCompleto'),
+                      onPress: () => {
+                        if (f.atencion_id !== null) {
+                          router.push({ pathname: '/paseo/[atencionId]', params: { atencionId: f.atencion_id } });
+                        }
+                      },
                     }
-                  }}
-                />
-              ) : null}
-            </View>
+                  : undefined
+              }
+            />
           ) : undefined
         }
         onPress={() => setAbierta(abierta === f.cita_id ? null : f.cita_id)}

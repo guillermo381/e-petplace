@@ -71,6 +71,7 @@ import { fechaCortaMono } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 import { FiltroMascotas, FiltroPills } from '@/components/filtro-pills';
 import { esHistorial, esProxima } from '@/lib/corte-agenda';
+import { DetalleCita } from '@/components/detalle-cita';
 
 // §7 (S65) — matching compartido del vocabulario (el filtro de chips y
 // el autocompletado del texto libre hablan IGUAL): minúsculas sin
@@ -285,20 +286,25 @@ export default function HubAdiestramiento() {
                     ) : undefined
                   }
                   acciones={
-                    abierta === c.cita_id && vista === 'historial' && c.tiene_parte ? (
-                      <View style={{ paddingHorizontal: spacing[3], paddingBottom: spacing[3] }}>
-                        <Boton
-                          variante="compacto"
-                          tamaño="sm"
-                          etiqueta={t('hogar.acordeonVerCompleto')}
-                          onPress={() =>
-                            router.push({
-                              pathname: '/adiestramiento/[citaId]',
-                              params: { citaId: c.cita_id, mascotaNombre: c.mascota_nombre ?? '' },
-                            })
-                          }
-                        />
-                      </View>
+                    abierta === c.cita_id ? (
+                      <DetalleCita
+                        prestador={c.prestador_nombre}
+                        costo={c.precio}
+                        etiquetaPrestador={t('adiestramiento.paraQuien')}
+                        etiquetaCosto={t('presupuesto.total')}
+                        accion={
+                          vista === 'historial' && c.tiene_parte
+                            ? {
+                                etiqueta: t('hogar.acordeonVerCompleto'),
+                                onPress: () =>
+                                  router.push({
+                                    pathname: '/adiestramiento/[citaId]',
+                                    params: { citaId: c.cita_id, mascotaNombre: c.mascota_nombre ?? '' },
+                                  }),
+                              }
+                            : undefined
+                        }
+                      />
                     ) : undefined
                   }
                   onPress={() => setAbierta(abierta === c.cita_id ? null : c.cita_id)}
