@@ -1,6 +1,6 @@
 # LAS CANDIDATAS DE LECCIÓN — inventario para la firma del founder (S77, ampliado S82)
 
-> **ONCE candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **La décima y la undécima entraron en S82** — el nombre de un token es su rol, y su inversa: el nombre que envejeció — el inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
+> **DOCE candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **La décima, la undécima y la duodécima entraron en S82** — el nombre de un token es su rol · su inversa (el nombre que envejeció) · y la ausencia con tipos — el inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
 
 > **NINGUNA ESTÁ FIRMADA. La firma es del founder.** Este documento no decide:
 > junta lo que hoy vive disperso entre la letra, las deudas y los cierres de
@@ -13,7 +13,7 @@
 
 ---
 
-## Las once
+## Las doce
 
 ### 1 · (d) — EL ORDEN NOMBRA EL ARTEFACTO QUE ABRE, JAMÁS EL ARCHIVO DONDE SE LO ESPERA
 **Origen:** S75 (canon, línea 44). **Sin firma desde entonces.**
@@ -147,12 +147,51 @@ renombrar? La #10 y la #11 piden cosas distintas —una re-declarar el
 nombre, la otra traducirlo— y el gate tiene que decidir si son dos leyes
 o dos caras de una.*
 
+### 12 · LA AUSENCIA TIENE TIPOS, Y EL MODELO LOS COLAPSABA EN UNO
+*(sumada al censo en S82, 30-jul-2026 — **el texto completo vive en
+`MODELO_PRODUCTO`, sección "CANDIDATA — la ausencia tiene tipos"**; acá
+entra al inventario para que se firme o se cierre con las demás.)*
+
+**El texto candidato:** **L-139 dice que no se rellena lo que falta —
+nunca dijo que faltar tenga UNA SOLA FORMA.** La diferencia entre los
+tipos de ausencia no es de copy: es de MODELO, porque cada uno exige que
+*el motor pueda producirlo*.
+
+**Costo medido — CINCO tipos, de TRES pistas que no se estaban hablando,
+en UN día:**
+
+| tipo | qué significa de verdad | de dónde salió |
+|---|---|---|
+| **sin registro** | nadie preguntó nunca | grilla "Cómo está hoy" (C) |
+| **ninguna conocida** | alguien SÍ miró y no había — hecho clínico | alergias (A, r4) |
+| **aún no corresponde** | la pregunta todavía no aplica (edad/etapa) | plan vacunal (A, r7) |
+| **cerrado** vs **no configurado** | decisión declarada vs omisión | días del prestador (A, r7) |
+| **firme sin fecha** | el compromiso existe; falta coordinarlo | citas vet (A, r9 · D-439) |
+
+**El quinto es el que más lejos lleva la tesis, y tiene daño REAL
+registrado:** una cita firme sin fecha no resta, **agrega trabajo** — y
+tratarla como "dato faltante" la ESCONDE. Eso ya pasó: fue el bug 🔴 de
+S71, donde el dueño aprobaba un presupuesto y su procedimiento no
+aparecía en ninguna superficie suya porque el lector filtraba
+`fecha >= hoy` y una fecha nula no pasa ningún filtro de fecha. **No es
+una hipótesis de mesa: es una falla que ya cobró.**
+
+**Lo ya construido que la sostiene** (por si el gate la firma):
+`alergias_ninguna_declarada_en/_por` · `cat_plan_vacunal.edad_inicio_meses`
+→ estado `aun_no_corresponde` · `prestador_dias_cerrados` ·
+`ConsultaDelHogar.fecha: string | null` con su nulo declarado.
+
+**Estado:** viva, sin firma. **Va DESPUÉS del gate, jamás antes** (regla
+80). *Y su honestidad, escrita en la propia candidata: cinco casos son un
+patrón sospechado, no una ley — lo que el gate tiene que juzgar es si es
+UNA ley transversal del expediente o cinco cosas que se parecen.*
+
 ---
 
 ## Nota sobre el conteo
 
 **Son NUEVE, y la novena nació acá.** El inventario abrió con ocho porque **L-169 no existía**: el canon la nombraba y ninguna edición la había escrito. Su texto se depositó en S77 (ver arriba), con su nota de procedencia — que es, ella misma, material de la lección.
 
-> **RE-MEDIDO S82 (30-jul-2026): son ONCE.** Entraron la décima —*un token se nombra por su ROL*, del trabajo de B sobre el tema— y la undécima —*el nombre que envejeció falla al BUSCARLO*, del canto de veterinaria de C. **Son INVERSAS y por eso van separadas:** una falla al usar el token, la otra al no encontrarlo (y ésa produce duplicados, que es peor porque no se ve). El conteo se corrige acá y en el título en el MISMO acto (L-141: un contador que envejece miente igual que una ley sin escribir). **Las nueve de S77 siguen SIN FIRMA**, ninguna cerrada: este documento acumula, no vence.
+> **RE-MEDIDO S82 (30-jul-2026): son DOCE.** Entraron la décima —*un token se nombra por su ROL*, del trabajo de B sobre el tema— y la undécima —*el nombre que envejeció falla al BUSCARLO*, del canto de veterinaria de C. **Son INVERSAS y por eso van separadas:** una falla al usar el token, la otra al no encontrarlo (y ésa produce duplicados, que es peor porque no se ve). La duodécima —*la ausencia tiene tipos*— entró al inventario en r11 con su quinto tipo; su texto completo vive en `MODELO_PRODUCTO` y acá figura para que se firme con las demás. El conteo se corrige acá y en el título en el MISMO acto (L-141: un contador que envejece miente igual que una ley sin escribir). **Las nueve de S77 siguen SIN FIRMA**, ninguna cerrada: este documento acumula, no vence.
 
 Si alguna otra candidata quedó fuera, es porque no encontré su fuente. **Pasame el literal y entra**: el criterio de este documento es que nada figure sin dónde leerlo.

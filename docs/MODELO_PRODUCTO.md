@@ -2903,6 +2903,22 @@ producto necesita varios:
 | **aún no corresponde** | la pregunta todavía no aplica (por edad, por etapa) | plan vacunal (A, r7) |
 | **cerrado** vs **no configurado** | decisión declarada vs omisión | días del prestador (A, r7) |
 | **sin fecha de refuerzo** | hay hecho, falta UNA coordenada del hecho | pantalla de vacunas (A, r5) |
+| **firme sin fecha** | el compromiso EXISTE y es firme; lo que falta es coordinarlo | citas vet (A, r9 — D-439) |
+
+> **EL QUINTO TIPO, sumado en r11 con su literal — y es el que más lejos
+> lleva la tesis.** Una cita `por_coordinar` (D-439, legal desde S69: al
+> aprobar un presupuesto la cita nace **FIRME y SIN FECHA**) no es una
+> cita incompleta ni un dato roto: **el compromiso ya existe** —el
+> negocio va a atender, el precio está congelado— y lo único ausente es
+> la coordinación. Un modelo que trate esa fecha como "falta un dato"
+> hace exactamente lo que el producto no puede permitirse: **la esconde**
+> (fue el bug 🔴 de S71 — el dueño aprobaba y su procedimiento no
+> aparecía en ninguna superficie suya, porque el lector filtraba por
+> `fecha >= hoy` y una fecha nula no pasa ningún filtro de fecha).
+> Es el caso donde **la ausencia no resta: agrega trabajo** — hay algo
+> que hacer, y es del dueño. Por eso el lector de r9
+> (`obtenerMisConsultasVet`) la admite explícitamente y la pantalla la
+> PRESIDE en vez de descartarla.
 
 **La tesis:** **L-139 dice que no se rellena lo que falta — nunca dijo que
 faltar tenga una sola forma.** Y la diferencia no es de copy: es de
