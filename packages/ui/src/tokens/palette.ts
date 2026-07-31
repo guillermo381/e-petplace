@@ -144,8 +144,8 @@ export const palette = {
    *  firmado del prestador. No muerde; se declara para que nadie lo
    *  descubra después. A esa dilución además es papel, no marca: S52% a
    *  L6.5% sobre negro no identifica nada. Reversa: `palette.dark0`. */
-  tapizDarkOficio: '#081719',
-  tapizDark: '#190515',  // S82-B r29: 8% FIRMADO (reversa: '#0D050D' 3%, o palette.dark0 sin tapiz)
+  tapizDarkOficio: '#050508',  // S82-B r30 REVERTIDO al negro (el par tapiz+sin-tarjeta se firmó JUNTO y no viaja solo; el 8% verde era '#081719')
+  tapizDark: '#050508',  // S82-B r30 REVERTIDO al negro (el 8% magenta era '#190515'; card/base quedaba en 1.009 sin reemplazo)
   /** S82-B r19 — LA ELEVACIÓN DEL OSCURO SE EXPRESA COMO LUMINOSIDAD,
    *  no como sombra (la convención del tema oscuro). Era #0D0D12 y daba
    *  **1.05 contra el fondo**: las tarjetas de la app entera se separaban
