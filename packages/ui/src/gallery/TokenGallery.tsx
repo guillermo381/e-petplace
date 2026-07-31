@@ -1445,7 +1445,17 @@ function GaleriaInterna() {
           <ThemeProvider defaultMode="dark"><TresSalidasOscuro /></ThemeProvider>
         </Seccion>
 
-        <Seccion titulo="③ ⭐ GATE r33 — EL HALO SOBRE UNA TARJETA REAL · qué decide: si el halo va SOLO en el canto superior (sin enmienda) o RODEA (y entonces A6 muerde y hace falta mesa). Sin-tarjeta resolvió los CHIPS; las tarjetas siguen sin separarse">
+        {/* ③ FIRMADO (S82, gate del founder): DIRECCIONAL, solo el canto
+            superior. La variante que RODEA era contraste y murió con el
+            gate (Ley 37). La sección baja de "espera firma" a MUESTRA DEL
+            MATERIAL: ya no ofrece, muestra lo que rige.
+            EL PORQUÉ, ESCRITO PARA QUE NADIE LO REABRA: **A6 (SIN CAJA)
+            queda INTACTA, sin enmienda** — un halo direccional NO es una
+            caja: no rodea, no encierra, no delimita. Lo que A6 prohíbe es
+            el contorno que hace de caja, y una caja necesita CUATRO
+            lados. El día que alguien lo dibuje en los cuatro, eso sí es
+            un borde con otro nombre y ahí sí hace falta mesa. */}
+        <Seccion titulo="EL HALO — FIRMADO en su forma direccional (S82). El canto de luz que separa la superficie en oscuro, donde la sombra no puede: A6 intacta porque no rodea">
           <ThemeProvider defaultMode="dark"><HaloSobreTarjeta /></ThemeProvider>
         </Seccion>
 

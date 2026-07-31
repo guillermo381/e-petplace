@@ -44,7 +44,7 @@ const DURACIONES = ['30 min', '1 h', '2 h'].map((d) => ({ codigo: d, etiqueta: d
 /** Las TRES piezas que el founder nombró, juntas y en su orden real de
  *  reserva. `envoltorio` decide CÓMO existe la superficie: es lo ÚNICO
  *  que cambia entre las tres alternativas — las piezas son las mismas. */
-function PiezasReales({ envoltorio }: { envoltorio: 'tarjeta' | 'halo' | 'haloRodea' | 'aire' }) {
+function PiezasReales({ envoltorio }: { envoltorio: 'tarjeta' | 'halo' | 'aire' }) {
   const { theme } = useTheme();
   const contenido = (
     <View style={{ gap: spacing[4] }}>
@@ -59,24 +59,6 @@ function PiezasReales({ envoltorio }: { envoltorio: 'tarjeta' | 'halo' | 'haloRo
   if (envoltorio === 'aire') {
     // (c) SIN TARJETA: la superficie desaparece y agrupa el AIRE.
     return <View style={{ paddingVertical: spacing[5] }}>{contenido}</View>;
-  }
-  if (envoltorio === 'haloRodea') {
-    // EL CONTRASTE (S82-B, pregunta del founder): la MISMA luz, pero en
-    // los CUATRO lados. Existe para que la diferencia se VEA y no haya
-    // que creerla: si rodea, es un borde con otro nombre y A6 muerde.
-    return (
-      <View
-        style={{
-          backgroundColor: theme.bg.card,
-          borderRadius: radius.md,
-          padding: spacing[4],
-          borderWidth: 1,
-          borderColor: 'rgba(255,255,255,0.14)',
-        }}
-      >
-        {contenido}
-      </View>
-    );
   }
   if (envoltorio === 'halo') {
     // (b) HALO: la elevación del oscuro expresada como LUZ. Línea de 1px
@@ -125,12 +107,6 @@ function LaminaSeparacionOscuro() {
       titulo: '(a) COMO ESTÁ HOY — la referencia',
       linea:
         'Cuesta: nada. Toca: ninguna ley. Es el estado que el founder cazó TRES veces (los chips del 2×2, sinCaja, y ahora el día/duración/horario) — la tarjeta se separa solo por SOMBRA, y en oscuro una sombra oscura sobre fondo oscuro es invisible por física.',
-    },
-    {
-      k: 'haloRodea' as const,
-      titulo: '(b′) EL CONTRASTE — la misma luz, RODEANDO',
-      linea:
-        'NO es una propuesta: está montada para que la diferencia se vea. Si el halo rodea, es un BORDE con otro nombre y A6 muerde — haría falta enmienda de mesa. La (b) de arriba es direccional (solo el canto superior, `borderTopWidth`), que es lo que sostiene el argumento: no rodea, es el borde donde pegaría la luz. La diferencia entre esta y la de arriba es la diferencia entre una enmienda y ninguna.',
     },
     {
       k: 'aire' as const,

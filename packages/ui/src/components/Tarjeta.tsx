@@ -114,6 +114,23 @@ export function Tarjeta(props: TarjetaProps) {
       : null),
     // Ley 6 intacta: la sombra JAMÁS se anima
     ...(nivel !== null ? { boxShadow: theme.elevacion[nivel] } : null),
+    // EL HALO (S82, gate ③ FIRMADO): en los temas OSCUROS la sombra no
+    // puede separar —negro sobre negro, es física— y el paso de
+    // luminancia está cerrado por los dos lados (medido: card/base 1.037
+    // en dark, 1.100 en memorial). El canto de luz es el tercer canal, y
+    // es DIRECCIONAL: solo arriba, donde pegaría la luz. Por eso A6 no
+    // aplica y NO hace falta enmienda — una caja necesita cuatro lados.
+    //
+    // DOS CONDICIONES, las dos por Chanel y no por capricho:
+    //  · solo con elevación (una superficie PLANA no está apoyada: no
+    //    tiene canto donde la luz pegue).
+    //  · solo SIN borde de tinte. Si el tinte ya dibujó un contorno
+    //    semántico, la superficie YA está separada y el halo repetiría
+    //    el trabajo — además de pisarle el color a su lado de arriba,
+    //    que es lo que volvería ilegible al tinte.
+    ...(nivel !== null && tinte === 'ninguno' && theme.elevacion.halo !== null
+      ? { borderTopWidth: 1, borderTopColor: theme.elevacion.halo }
+      : null),
   }
 
   if (!props.interactiva) {
