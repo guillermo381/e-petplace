@@ -593,13 +593,34 @@ export default function MisPaseos() {
                       a subtitulo — la lámina del founder, tal cual:
                       "mañana 08:00 · Adiestramiento de Zeus". */}
                   {futurasFusionadas.slice(0, ventana).map((f) => {
-                    const nombre =
-                      mascotasHogar.find((m) => m.id === (f.clase === 'libre' ? f.cita.mascota_id : null))?.nombre ??
-                      null;
+                    // 🔴 r40-bis · LA MASCOTA NO PRESIDÍA EN LAS CITAS DE
+                    // PLAN, y lo vi EN PANTALLA, no leyendo: el título
+                    // decía "Walk" a secas. La causa está medida y es de
+                    // contrato — `CitaDePlan` NO TRAE `mascota_id` (a
+                    // diferencia de `CitaPaseoDueno`), así que para esas
+                    // filas yo pasaba null y caía al fallback genérico.
+                    // No hacía falta pedir nada: **el PLAN sí lo trae**
+                    // (`PlanPaseo.mascota_id`), y la fila fusionada ya
+                    // lleva su plan al lado. Se resuelve por ahí.
+                    const idMascota = f.clase === 'libre' ? f.cita.mascota_id : f.plan.mascota_id;
+                    const nombre = mascotasHogar.find((m) => m.id === idMascota)?.nombre ?? null;
                     return (
                       <FilaCita
                         key={f.cita.id}
                         oficio="paseo"
+                        // ✅ r40-2b · LA VARIANTE DE B, CONSUMIDA. `cara={false}`
+                        // porque el log YA FILTRA por mascota arriba y la
+                        // fila la nombra en el título: la cara repetida en
+                        // cada fila no informa —es la misma en todas— y la
+                        // regla Chanel se la lleva. `direccion="abajo"`
+                        // porque esta fila DESPLIEGA (abre la Hoja de sus
+                        // acciones), no navega. Sin default a propósito:
+                        // que cada consumidor lo DECLARE es justo la cura
+                        // del defecto que el founder describió — "unas
+                        // tienen flecha y otras no, y el usuario no sabe
+                        // qué se puede tocar".
+                        cara={false}
+                        direccion="abajo"
                         // r40-2 · EL REPARTO DEL DATO. La "segunda columna
                         // que no se lee" es el slot `metadataMono` de
                         // Celda: una columna alineada a la DERECHA, hecha
@@ -626,7 +647,7 @@ export default function MisPaseos() {
                         metadataMono={`${fechaCortaMono(f.cita.fecha, idioma)} · ${f.cita.hora.slice(0, 5)}`}
                         mascota={{
                           nombre: nombre ?? t('explorar.paseoTitulo'),
-                          fotoUrl: mascotasHogar.find((m) => m.nombre === nombre)?.fotoUrl,
+                          fotoUrl: mascotasHogar.find((m) => m.id === idMascota)?.fotoUrl,
                         }}
                         onPress={() => {
                           if (f.clase === 'plan') {
