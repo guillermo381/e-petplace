@@ -3076,3 +3076,22 @@ quotePath=false  → docs/DISEÑO_EXPERIENCIA.md
 **Y tiene un agravante propio: aparece justo cuando la casa hace lo correcto.** Retirar un guard que ya no sirve es higiene sana (*"un guard que sobrevive a su propia razón es basura que nadie se anima a tocar"*, propuesta S82). **El acto virtuoso es el que siembra las instrucciones falsas** — por eso la cura tiene que ser parte del acto, no una pasada posterior.
 
 > **☠️ CONDICIÓN DE MUERTE — la CANDIDATA que deja, sin firma (regla 80):** **cuando un guard se retira, su lápida incluye el GREP DE SUS MENCIONES.** Forma exigible propuesta: el commit que retira una regla **corre `grep -rn "<Rnn>"` sobre `packages/`, `apps/` y `scripts/`** y **declara el resultado en su mensaje** — cero menciones huérfanas, o las que curó. **Cuesta un comando y cierra la clase entera**, porque el único momento en que alguien sabe con certeza que un guard murió es el momento en que lo mata. *(El precedente ya existe y salió bien: B mató R26 con lápida escrita en el script Y curó los dos comentarios en el mismo arco — lo que falta es que sea ley, no criterio.)* **Quién la retira:** la mesa, cuando firme la candidata. Origen: S83-B (dos hallazgos propios en el día), medido y re-medido por A.
+
+#### D-605 — `text.tertiary` no llega al mínimo AA en NINGÚN tema, y está EXENTO por espec: la exención es vieja, el número es peor de lo reportado 🟠
+🟠 **DECLARADO POR B y RE-MEDIDO POR A CONTRA EL THEME RESUELTO — y la medición corrigió el dato en las dos direcciones.** El reporte llegó como *"3.22 contra 3, con tapiz o sin él"*. **Los números reales, salidos del medidor (`verify-contrast.ts`, no de hexes a mano):**
+
+| tema | `text.tertiary` / `bg.base` | contra el mínimo 3:1 |
+|---|---|---|
+| **LIGHT** | **2.18:1** | **−0.82 · el peor de los tres** |
+| DARK | **3.18:1** | +0.18 · pasa raspando |
+| MEMORIAL | **2.90:1** | −0.10 |
+
+**La corrección importa y va para el lado incómodo: no es un tema a 0.22 del mínimo — son DOS de tres POR DEBAJO, y el claro está a 0.82.** El 3.18 de DARK es el que se parece al dato reportado; **el del tema por defecto del producto es 2.18.**
+
+**LO QUE LA MEDICIÓN TAMBIÉN CONFIRMÓ, y cambia la naturaleza de la ficha: NO es un hueco — es una EXENCIÓN DECLARADA, y vieja.** `verify-contrast.ts:10` lo dice en su cabecera: *"`text.tertiary` — placeholder/decorativo, **no texto funcional**"*, y `:281` lo imprime como **`(info) … — exento por espec"`** en los tres temas. La espec que lo exime es **B3.7 (el tab inactivo de `BarraTabs`)**. **Así que la casa no se distrajo: decidió** — lo que no hizo fue volver a mirar la decisión después de que el fondo cambiara (el tapiz de S82-B r10 movió `bg.base`).
+
+**POR QUÉ MERECE FICHA IGUAL, y ésta es la pregunta que hay que contestar: la exención se firmó para UN uso (el tab inactivo) y el token se usa en MÁS DE UNO.** Mientras `text.tertiary` pinte solo lo que la espec contempló —un tab apagado, un placeholder— 2.18 es una decisión legítima: **lo apagado tiene que verse apagado**. Pero el token está disponible para cualquier superficie, y **nada impide que mañana vista un dato que el usuario sí necesita leer**. La exención no distingue: exime al token, no al uso.
+
+**Su parentesco, que ordena cómo curarla:** es de la familia de **D-599** (*la galería fuera del corpus del lint*) y **D-590** (*el fill sobre fondo sin barrido*) — **las tres son la misma pregunta: qué está dentro del corpus del gate y qué no, y si eso está DECLARADO o simplemente ocurre.** Acá, a diferencia de D-599, **sí está declarado** — el problema no es el silencio: es que la declaración **exime por token en vez de por uso**.
+
+> **☠️ CONDICIÓN DE MUERTE — tiene DOS salidas y la mesa elige, pero primero hay que contestar una pregunta que hoy nadie tiene medida:** ¿**dónde se usa `text.tertiary` además del tab inactivo?** Sin ese censo cualquier decisión es a ciegas. Después: ① **si solo viste lo apagado**, la exención se **RE-CONFIRMA con los números de hoy** (no con los de antes del tapiz) y se **ACOTA por uso** — deja de eximir al token y pasa a eximir al rol; ② **si viste algo legible**, ese sitio migra a `text.secondary` y el token vuelve al corpus. **Verificación exigible:** el censo de usos + el número re-medido **del medidor**, jamás calculado a mano (candidata #17, que nació de este mismo trabajo). **Quién la retira:** la pista dueña de `packages/ui` (B) con el censo, y la mesa con la decisión de alcance. Origen: S83-B (declarado), re-medido por A — **el número del reporte no coincidía con el del theme resuelto**.

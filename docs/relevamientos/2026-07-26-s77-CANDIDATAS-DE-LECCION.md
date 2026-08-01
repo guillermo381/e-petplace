@@ -1,6 +1,6 @@
 # LAS CANDIDATAS DE LECCIÓN — inventario para la firma del founder (S77, ampliado S82)
 
-> **DIECISÉIS candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **Las candidatas 10 a 14 entraron en S82** — el nombre de un token es su rol · su inversa (el nombre que envejeció) · la ausencia con tipos · el defecto que vive porque el DATO DE PRUEBA no lo alcanza · y el lector que se apoya solo en la RLS y por eso nadie puede auditarlo leyendo. **Las 15 y 16 entraron en S83, y son PARIENTES: las dos son L-192 mudada de lugar** — una regla con auto-prueba puede tener BRAZOS que no salen rojos (el guard del guard) · un grep por la PROP mide quién la pasa, no qué se RENDERIZA (L-192 en el método de medición). El inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
+> **DIECISIETE candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **Las candidatas 10 a 14 entraron en S82** — el nombre de un token es su rol · su inversa (el nombre que envejeció) · la ausencia con tipos · el defecto que vive porque el DATO DE PRUEBA no lo alcanza · y el lector que se apoya solo en la RLS y por eso nadie puede auditarlo leyendo. **Las 15, 16 y 17 entraron en S83, y son PARIENTES: las tres son L-192 mudada de lugar** — una regla con auto-prueba puede tener BRAZOS que no salen rojos (el guard del guard) · un grep por la PROP mide quién la pasa, no qué se RENDERIZA (L-192 en la búsqueda) · **razonar el efecto de un token no es medirlo** (L-192 en la medición: el modo de falla es *un número plausible*). **Las tres describen instrumentos que devuelven algo y no verifican nada** — y la 17 cobró tres veces en un solo turno, una de ellas contra la mesa que la estaba escribiendo. El inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
 
 > **NINGUNA ESTÁ FIRMADA. La firma es del founder.** Este documento no decide:
 > junta lo que hoy vive disperso entre la letra, las deudas y los cierres de
@@ -13,7 +13,7 @@
 
 ---
 
-## Las dieciséis
+## Las diecisiete
 
 ### 1 · (d) — EL ORDEN NOMBRA EL ARTEFACTO QUE ABRE, JAMÁS EL ARCHIVO DONDE SE LO ESPERA
 **Origen:** S75 (canon, línea 44). **Sin firma desde entonces.**
@@ -368,6 +368,54 @@ CONSULTA.
 **D-597** *existe porque el segundo grep encontró lo que el primero no
 podía ver.*
 
+### 17 · RAZONAR EL EFECTO DE UN TOKEN NO ES MEDIRLO
+
+**El texto propuesto:**
+
+> **Un token no tiene el efecto que su definición sugiere: tiene el que
+> rinde en el theme resuelto.** Razonar *"esto no debería mover el par"* es
+> una hipótesis, y en color las hipótesis fallan por composición: alphas
+> que se compositan, capas que se acumulan, fondos que ya no son el hex que
+> uno recuerda. **Todo par que se REPORTA sale del theme resuelto —
+> `getTheme(...)` y el medidor— jamás de un hex escrito a mano.**
+
+**El origen (S83-B, DOS casos en el mismo turno).** ① *"La `Atmosfera` no
+mueve el par"* — **falso: sí lo mueve, y en direcciones OPUESTAS según el
+nivel.** ② un cálculo hecho **con hexes inventados** para valores que en
+realidad son `rgba` **con alpha**: el número salía, era plausible, y no
+correspondía a ningún píxel de la pantalla.
+
+**TERCER CASO, del mismo día y de esta mesa — que es el que prueba que la
+candidata no es sobre B:** al verificar `text.tertiary` para fichar D-605,
+A calculó a mano `#A9A4C0` sobre `#FAF9F7` y obtuvo **2.279**. El medidor
+sobre el theme resuelto devuelve **2.18**. La diferencia no es de redondeo:
+**`bg.base` del tema claro ya no es `#FAF9F7`** — es `palette.papelTapiz`
+(*pink 3% sobre papel*, S82-B r10). **El hex "de memoria" era el de antes
+del tapiz.** Tres casos, dos personas, un solo turno.
+
+**Por qué merece ley y no cuidado.** El modo de falla es **un número
+plausible**: no rompe nada, no dispara ningún gate, **y se cita después como
+si fuera medición**. Es la familia de *el literal que miente* (D-602) pero
+sin mala fe y sin rótulo: **acá el que miente es el método.** Y en color es
+especialmente traicionero porque **la intuición funciona casi siempre** —
+los hexes suelen ser estables, hasta que alguien mete un alpha, un tapiz o
+una capa y todo el razonamiento previo queda viejo **sin aviso**.
+
+**Su forma exigible, y es barata:** cualquier par de contraste que entre a
+un reporte, una ficha o un commit **se saca del medidor**
+(`scripts/verify-contrast.ts` o `getTheme`), y si se calculó a mano **se
+dice que se calculó a mano**. Un número sin procedencia declarada **no es
+un dato: es una impresión con decimales**.
+
+**Sus hermanas:** la **#16** (*un grep por la prop mide quién la pasa, no
+qué se renderiza*) — las dos son *el instrumento decide qué podés ver*,
+una en búsqueda y otra en medición. Y **L-166**: el dato se lee de la
+fuente al momento del acto; acá la fuente es el theme resuelto, no la
+memoria del hex.
+
+**Estado:** viva, sin firma. *Ya cobró tres veces en un solo turno, y una
+fue de quien la estaba escribiendo.*
+
 ---
 
 ## Nota sobre el conteo
@@ -384,6 +432,9 @@ podía ver.*
 >
 
 > **RE-MEDIDO S83 (31-jul-2026, segunda entrada del día): son DIECISÉIS.** La decimosexta —*un grep por la prop mide quién la pasa, no qué se renderiza*— nace de la **autocorrección de B** en B9/B10: el censo por prop de la marca de agua devolvió cero consumidores, y el censo por RENDER encontró **tres aguas inline con tres anatomías distintas** (hoy D-597). Es **L-192 mudada al método de medición**: la verificación corre, sale limpia, y su limpieza no prueba nada porque la pregunta estaba mal hecha. Hermana de L-170 (el instrumento decide qué puede aparecer) y de la #13 (allá el hueco lo abre el dato, acá la consulta). El conteo se corrige acá y en el título en el MISMO acto (L-141).
+>
+
+> **RE-MEDIDO S83 (1-ago-2026): son DIECISIETE.** La decimoséptima —*razonar el efecto de un token no es medirlo*— entra con **TRES casos del mismo turno**: los dos de B (la `Atmosfera` que "no movía el par" y sí lo movía en direcciones opuestas · el cálculo con hexes inventados sobre valores `rgba` con alpha) **y uno de esta mesa**, que calculó `text.tertiary` a mano sobre un `#FAF9F7` que **ya no es el fondo** (`bg.base` es `papelTapiz` desde S82-B r10): 2.279 a mano contra **2.18** del medidor. Su modo de falla es **un número plausible** que después se cita como si fuera medición. Hermana de la #16 (el instrumento decide qué podés ver) y de L-166. El conteo se corrige acá y en el título en el MISMO acto (L-141).
 >
 
 Si alguna otra candidata quedó fuera, es porque no encontré su fuente. **Pasame el literal y entra**: el criterio de este documento es que nada figure sin dónde leerlo.
