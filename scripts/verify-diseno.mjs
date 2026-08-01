@@ -379,7 +379,7 @@ const BASELINE_R12 = new Set([
   // LAS CUATRO LAS CAUSÓ EL TAPIZ AL 8% (S83-B25, `42ffaef`, FIRMADO por
   // el founder), y el barrido las cazó en su PRIMERA corrida — media hora
   // después del commit. Antes/después, mismo medidor:
-  //     fill accent.cta/bg.base ................ 3.37 → 2.79  (mín 3)
+  //     fill accent.cta/bg.base ... 3.37 → 2.79 → ✅ CURADO en B31 (10.50)
   //     capaText.comunidad/capaBg.comunidad .... 5.22 → 4.35  (mín 4.5)
   //     capaText.comunidadAmplia/capaBg... ..... 4.71 → 3.87  (mín 4.5)
   //     status.dangerText/status.dangerBg ...... 5.48 → 4.43  (mín 4.5)
@@ -402,7 +402,6 @@ const BASELINE_R12 = new Set([
   // que es el único slot de acento del oficio que no tiene), y subir
   // violetText/pinkDark/dangerText del oscuro, que es tanda propia con su
   // re-medición. NO SE ELIGE ACÁ.
-  'darkOficio·fill·accent.cta/bg.base',
   'darkOficio·texto·capaText.comunidad/capaBg.comunidad',
   'darkOficio·texto·capaText.comunidadAmplia/capaBg.comunidadAmplia',
   'darkOficio·texto·status.dangerText/status.dangerBg',
@@ -458,7 +457,6 @@ const BASELINE_R12 = new Set([
  *  "baseline-founder". Un número que mezcla lo decidido con lo que hay que
  *  decidir esconde justo lo que hay que mirar. */
 const REGRESION_B25 = new Set([
-  'darkOficio·fill·accent.cta/bg.base',
   'darkOficio·texto·capaText.comunidad/capaBg.comunidad',
   'darkOficio·texto·capaText.comunidadAmplia/capaBg.comunidadAmplia',
   'darkOficio·texto·status.dangerText/status.dangerBg',
