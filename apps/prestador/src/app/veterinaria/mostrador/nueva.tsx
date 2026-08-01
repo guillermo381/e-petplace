@@ -214,7 +214,15 @@ export default function AltaMostrador() {
           autoCapitalize="words"
         />
         <View style={{ gap: spacing[2] }}>
+          {/* S83-C25 ③ — ELECCIÓN, y es el caso que más se parece a una
+              vista sin serlo. Cambia el Campo de abajo, sí — pero abajo
+              NO hay dos vistas del mismo dato: hay DOS FORMAS DE DATO y
+              solo una viaja. Lo dice el encabezado de esta pantalla desde
+              que nació: "toggle real … envía email XOR teléfono". El
+              cambio de campo es la CONSECUENCIA de la elección, no su
+              propósito — y ése es el criterio, no el síntoma. */}
           <SelectorSegmentado
+            proposito="eleccion"
             etiqueta={t('mostrador.contactoEtiqueta')}
             segmentos={[
               { codigo: 'email', etiqueta: t('mostrador.contactoEmail') },
