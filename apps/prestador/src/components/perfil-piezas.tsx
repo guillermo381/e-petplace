@@ -246,8 +246,28 @@ export function EspejoNegocio({
         gap: spacing[4],
       }}
     >
+      {/* ④ S83-C34 — "ASÍ TE VEN TUS CLIENTES", el rótulo que faltaba.
+          §15b.5 declara el espejo del artesano para las DOS caras del
+          mundo, y el espejo estaba construido pero MUDO: sin la frase,
+          el bloque se lee como una cabecera decorativa y no como lo que
+          es — la vista de la familia. Es la diferencia entre adornar la
+          pantalla y explicarle al prestador qué está mirando. */}
+      <Text
+        style={{
+          fontFamily: typography.family.sans.regular,
+          fontSize: typography.size.sm,
+          color: palette.light0,
+        }}
+      >
+        Así te ven tus clientes
+      </Text>
+
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
-        <Pressable onPress={onEditarLogo} accessibilityRole="button" accessibilityLabel="Cambiar el logo del negocio">
+        <Pressable
+          onPress={onEditarLogo}
+          accessibilityRole="button"
+          accessibilityLabel={logoUrl === null ? 'Agregar el logo del negocio' : 'Cambiar el logo del negocio'}
+        >
           <LogoNegocio nombre={nombre} logoUrl={logoUrl} tamano={76} superficie="muro" />
         </Pressable>
         {/* ⚠️ SOBRE EL MURO NO ENTRA `Texto` — es la frontera que esta
@@ -279,6 +299,32 @@ export function EspejoNegocio({
           >
             {tipo}
           </Text>
+
+          {/* ④ EL CTA VISIBLE — el defecto del founder era de AFFORDANCE:
+              el logo se tocaba y nada lo decía, así que para quien no
+              adivina el tap, el logo no se podía cambiar.
+              ⚠️ LA VOZ NO DICE "AJUSTAR" A PROPÓSITO (Ley 23 · 17.1): el
+              editor de zoom y encuadre TODAVÍA NO EXISTE de este lado —
+              vive en `apps/cliente/EncuadreFoto` y su promoción es de B.
+              Un botón que dijera "Ajustar" prometería una pantalla que no
+              abre. Dice lo que HOY pasa al tocarlo, y pasará a "Ajustar
+              logo" el día que el editor llegue. */}
+          <Pressable
+            onPress={onEditarLogo}
+            accessibilityRole="button"
+            style={{ alignSelf: 'flex-start', minHeight: 44, justifyContent: 'center' }}
+          >
+            <Text
+              style={{
+                fontFamily: typography.family.sans.medium,
+                fontSize: typography.size.sm,
+                color: palette.light0,
+                textDecorationLine: 'underline',
+              }}
+            >
+              {logoUrl === null ? 'Agregar logo' : 'Cambiar logo'}
+            </Text>
+          </Pressable>
         </View>
       </View>
 
@@ -309,50 +355,17 @@ export function EspejoNegocio({
   );
 }
 
-/**
- * EL RASTRO — la fila compacta que queda pegada al tope cuando el
- * espejo se fue (gate a′). Existe para que nunca dejes de saber qué
- * negocio estás editando; cuesta alto permanente, y por eso es gate.
- */
-export function RastroNegocio({ nombre, visible }: { nombre: string; visible: boolean }) {
-  const insets = useSafeAreaInsets();
-  const muro = useMuroOficio();
-
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing[3],
-        backgroundColor: muro,
-        paddingTop: insets.top + spacing[2],
-        paddingBottom: spacing[2],
-        paddingHorizontal: spacing[5],
-      }}
-    >
-      <LogoNegocio nombre={nombre} logoUrl={null} tamano={30} superficie="muro" />
-      <View style={{ flex: 1, minWidth: 0 }}>
-        {/* misma frontera del muro que el espejo: papel pleno por token */}
-        <Text
-          numberOfLines={1}
-          style={{
-            fontFamily: typography.family.sans.medium,
-            fontSize: typography.size.base,
-            color: palette.light0,
-          }}
-        >
-          {nombre}
-        </Text>
-      </View>
-      <Text
-        style={{
-          fontFamily: typography.family.mono.regular,
-          fontSize: typography.size.sm,
-          color: palette.light0,
-        }}
-      >
-        {visible ? 'visible' : 'oculto'}
-      </Text>
-    </View>
-  );
-}
+/* ☠️ EL RASTRO MURIÓ EN SU GATE (S83-C34 ①, firma del founder en
+ * dispositivo). Era la fila compacta que se pegaba al tope cuando el
+ * espejo se iba, y había pasado el gate (a′) en la LÁMINA. En pantalla
+ * real, con el pulgar y el scroll de verdad, el veredicto fue otro:
+ * *"genera un efecto de flaseo feo"* — la fila aparecía y desaparecía
+ * al cruzar el umbral y ese parpadeo cuesta más que el dato que traía.
+ *
+ * NO SE SUAVIZÓ (orden explícita): no hay fade, ni histéresis, ni umbral
+ * más alto. Un elemento que el ojo rechaza no se negocia a la baja — se
+ * saca. **L-153 en su forma más limpia: la lámina propone, la pantalla
+ * dispone**, y entre las dos gana la que el founder mira.
+ * Ley 37: se fue la pieza, su estado (`rastroVisible`), su `onScroll` y
+ * su import. Lo que quedó fue el espejo de arriba, que nunca parpadeó
+ * porque nunca dependió del scroll. */

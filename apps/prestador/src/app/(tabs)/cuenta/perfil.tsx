@@ -78,7 +78,7 @@ import { useTraduccion } from '@/i18n';
 import { quitarLogoNegocio, subirLogoNegocio } from '@/lib/subir-logo';
 import { SeccionSede } from '@/components/seccion-sede';
 import { leerSede } from '@/lib/sede';
-import { EspejoNegocio, RastroNegocio, SeccionDesplegable, SelectorPais } from '@/components/perfil-piezas';
+import { EspejoNegocio, SeccionDesplegable, SelectorPais } from '@/components/perfil-piezas';
 import { useBarraEstadoClara } from '@/components/techo-oficio';
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -244,11 +244,9 @@ export default function PerfilV2() {
      que perder.
 
      Y EL LOGO NO ESPERA AL GUARDAR: subir la imagen ES el acto. */
-  async function capturarLogo(camara: boolean) {
+  async function capturarLogo() {
     setHojaLogo(false);
-    const r = camara
-      ? await capturarConCamara({ redimensionarA: 800, calidad: 0.8 })
-      : await capturarDeGaleria({ calidad: 1 });
+    const r = await capturarDeGaleria({ calidad: 1 });
     if (r.tipo === 'cancelada') return;
     if (r.tipo === 'permiso_denegado') {
       mostrar({ variante: 'error', texto: t('miCuenta.logoPermisoCamara') });
@@ -267,7 +265,11 @@ export default function PerfilV2() {
             ? t('miCuenta.logoErrorRed')
             : sub.causa === 'archivo_grande'
               ? t('miCuenta.logoErrorGrande')
-              : t('miCuenta.logoErrorSubida'),
+              : // ④ el rebote de formato DIRIGE y dice el porqué (17.4):
+                // sin el motivo, "elegí otro" se lee como capricho.
+                sub.causa === 'formato_no_png'
+                ? 'El logo tiene que ser un PNG. Es el formato que guarda el fondo transparente, para que tu marca no salga dentro de un rectángulo.'
+                : t('miCuenta.logoErrorSubida'),
       });
       return;
     }
@@ -324,7 +326,6 @@ export default function PerfilV2() {
     mostrar({ texto: t('miCuenta.perfilGuardado'), variante: 'exito' });
     router.back();
   }
-  const [rastroVisible, setRastroVisible] = useState(false);
   const [paisDe, setPaisDe] = useState<'telNegocio' | 'whatsapp' | null>(null);
   const [paisTel, setPaisTel] = useState(PAIS_DEFAULT);
   const [paisWa, setPaisWa] = useState(PAIS_DEFAULT);
@@ -414,9 +415,10 @@ export default function PerfilV2() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <MarcaDeAgua />
-      {/* ② FIRMADO: el rastro. Vive FUERA del scroll — se pega al tope
-          cuando el espejo se fue, y ya no se elige. */}
-      {rastroVisible && prestador !== null && <RastroNegocio nombre={prestador.nombre_comercial} visible />}
+      {/* ① S83-C34 — ACÁ VIVÍA EL RASTRO, y murió en su gate. La lápida
+          con el porqué vive en `perfil-piezas` (donde estaba la pieza).
+          Lo que queda es el espejo de abajo, dentro del scroll: nunca
+          parpadeó porque nunca dependió de cruzar un umbral. */}
 
       {/* Ley 13: esqueleto ESTÁTICO al cargar · el fallo DICE que es fallo
           y ofrece reintentar · el contenido solo con datos confirmados. */}
@@ -454,10 +456,11 @@ export default function PerfilV2() {
         <ScrollView
           contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}
           keyboardShouldPersistTaps="handled"
-          scrollEventThrottle={16}
-          onScroll={(e) => setRastroVisible(e.nativeEvent.contentOffset.y > 150)}
         >
-          {/* EL ESPEJO — a sangre, arriba, y se va con el scroll */}
+          {/* EL ESPEJO — a sangre, arriba, y se va con el scroll.
+              ① El `onScroll`/`scrollEventThrottle` murieron con el rastro:
+              eran su único consumidor, y un listener de scroll que no
+              alimenta nada es costo por turno de frame sin dueño. */}
           <EspejoNegocio
             nombre={prestador?.nombre_comercial ?? ""}
             logoUrl={resolverUrlLogoNegocio(logoPath)}
@@ -511,42 +514,69 @@ export default function PerfilV2() {
                 Son datos del negocio y los ven las familias. Tu teléfono personal vive en Cuenta.
               </Texto>
 
-              <View style={{ flexDirection: 'row', gap: spacing[2], alignItems: 'flex-end' }}>
-                <SelectorPais
-                  bandera={bandera(paisTel)}
-                  prefijo={prefijoDe(paisTel)}
-                  onPress={() => setPaisDe('telNegocio')}
-                />
-                <View style={{ flex: 1 }}>
-                  <Campo
-                    label="Teléfono del negocio"
-                    placeholder="99 123 4567"
-                    value={telNegocio}
-                    onChangeText={setTelNegocio}
-                    keyboardType="phone-pad"
-                    ayuda={vTel?.ok === true ? vTel.voz : undefined}
-                    error={vTel?.ok === false ? vTel.voz : undefined}
+              {/* ③ S83-C34 — LA HIPÓTESIS DEL FOUNDER ERA LA CAUSA, y se
+                  verifica leyendo la caja, no a ojo: la fila alinea por
+                  `alignItems:'flex-end'` (por ABAJO), y `Campo` renderiza
+                  su ayuda/error DENTRO de su propio alto. Con voz, el alto
+                  del Campo crece hacia abajo ⇒ al alinear los pies, el pie
+                  que manda es el del TEXTO DE AYUDA y la caja del input
+                  sube — el selector queda calzado contra una línea que no
+                  es la suya. Sin voz los dos coincidían, que es por qué el
+                  defecto solo aparecía al escribir.
+
+                  LA CURA ES DE PERTENENCIA, no de margen: la voz habla
+                  del CONJUNTO indicativo+número (dice el E.164 completo,
+                  que ninguna de las dos piezas tiene sola), así que vive
+                  DEBAJO DEL CONJUNTO. La fila vuelve a tener dos hijos de
+                  igual anatomía —label + caja— y sus pies coinciden solos.
+                  Es la misma regla del glifo (Ley 12): lo que describe al
+                  grupo no cuelga de uno de sus miembros. */}
+              <View style={{ gap: spacing[1] }}>
+                <View style={{ flexDirection: 'row', gap: spacing[2], alignItems: 'flex-end' }}>
+                  <SelectorPais
+                    bandera={bandera(paisTel)}
+                    prefijo={prefijoDe(paisTel)}
+                    onPress={() => setPaisDe('telNegocio')}
                   />
+                  <View style={{ flex: 1 }}>
+                    <Campo
+                      label="Teléfono del negocio"
+                      placeholder="99 123 4567"
+                      value={telNegocio}
+                      onChangeText={setTelNegocio}
+                      keyboardType="phone-pad"
+                    />
+                  </View>
                 </View>
+                {vTel !== null && (
+                  <Texto variante="apoyo" color={vTel.ok ? undefined : 'danger'}>
+                    {vTel.voz}
+                  </Texto>
+                )}
               </View>
 
-              <View style={{ flexDirection: 'row', gap: spacing[2], alignItems: 'flex-end' }}>
-                <SelectorPais
-                  bandera={bandera(paisWa)}
-                  prefijo={prefijoDe(paisWa)}
-                  onPress={() => setPaisDe('whatsapp')}
-                />
-                <View style={{ flex: 1 }}>
-                  <Campo
-                    label="WhatsApp"
-                    placeholder="99 900 0333"
-                    value={whatsapp}
-                    onChangeText={setWhatsapp}
-                    keyboardType="phone-pad"
-                    ayuda={vWa?.ok === true ? vWa.voz : undefined}
-                    error={vWa?.ok === false ? vWa.voz : undefined}
+              <View style={{ gap: spacing[1] }}>
+                <View style={{ flexDirection: 'row', gap: spacing[2], alignItems: 'flex-end' }}>
+                  <SelectorPais
+                    bandera={bandera(paisWa)}
+                    prefijo={prefijoDe(paisWa)}
+                    onPress={() => setPaisDe('whatsapp')}
                   />
+                  <View style={{ flex: 1 }}>
+                    <Campo
+                      label="WhatsApp"
+                      placeholder="99 900 0333"
+                      value={whatsapp}
+                      onChangeText={setWhatsapp}
+                      keyboardType="phone-pad"
+                    />
+                  </View>
                 </View>
+                {vWa !== null && (
+                  <Texto variante="apoyo" color={vWa.ok ? undefined : 'danger'}>
+                    {vWa.voz}
+                  </Texto>
+                )}
               </View>
 
               <Campo
@@ -676,19 +706,24 @@ export default function PerfilV2() {
           SelectorAvatar); "Quitar" SOLO cuando hay logo: la puerta no
           ofrece lo que no existe (Ley 23). */}
       <Hoja visible={hojaLogo} onCerrar={() => setHojaLogo(false)} titulo="El logo de tu negocio" altura="contenido">
-        <View style={{ paddingBottom: insets.bottom }}>
-          <Celda
-            interactiva
-            accessibilityRole="button"
-            titulo={t('miCuenta.logoTomarFoto')}
-            onPress={() => void capturarLogo(true)}
-          />
-          <Separador />
+        <View style={{ paddingBottom: insets.bottom, gap: spacing[2] }}>
+          {/* ④ ☠️ "TOMAR FOTO" MURIÓ, y es CONSECUENCIA del PNG, no una
+              decisión aparte: la cámara entrega JPEG de nacimiento, así
+              que esa puerta habría rebotado SIEMPRE. Ley 23 en su forma
+              exacta — la puerta no ofrece lo que va a rechazar. Y el
+              caso de uso tampoco existía: un logo es un archivo que te
+              pasa tu diseñador, no algo que se fotografía. */}
+          <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[2] }}>
+            <Texto variante="apoyo">
+              Tiene que ser un PNG: es el formato que guarda el fondo transparente, para que tu marca no salga dentro de
+              un rectángulo.
+            </Texto>
+          </View>
           <Celda
             interactiva
             accessibilityRole="button"
             titulo={t('miCuenta.logoGaleria')}
-            onPress={() => void capturarLogo(false)}
+            onPress={() => void capturarLogo()}
           />
           {logoPath !== null && (
             <>
