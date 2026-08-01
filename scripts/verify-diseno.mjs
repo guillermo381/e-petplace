@@ -372,6 +372,50 @@ const EXENTAS_R12 = new Set([
   'dark·canto·accent.controlLleno/bg.card',
 ]);
 const BASELINE_R12 = new Set([
+  // ═══ S83-B30 · REGRESIÓN VIVA, NO HERENCIA — y se rotula así a
+  // propósito, porque un baseline que no distingue lo heredado de lo que
+  // uno acaba de romper es donde se esconde el daño propio.
+  //
+  // LAS CUATRO LAS CAUSÓ EL TAPIZ AL 8% (S83-B25, `42ffaef`, FIRMADO por
+  // el founder), y el barrido las cazó en su PRIMERA corrida — media hora
+  // después del commit. Antes/después, mismo medidor:
+  //     fill accent.cta/bg.base ................ 3.37 → 2.79  (mín 3)
+  //     capaText.comunidad/capaBg.comunidad .... 5.22 → 4.35  (mín 4.5)
+  //     capaText.comunidadAmplia/capaBg... ..... 4.71 → 3.87  (mín 4.5)
+  //     status.dangerText/status.dangerBg ...... 5.48 → 4.43  (mín 4.5)
+  //
+  // LA CAUSA, medida: `capaBg` y `statusBg` son rgba con ALPHA y se
+  // componen sobre `bg.base`. Aclarar el fondo aclara el tinte, y el
+  // texto de capa —que es claro— pierde contraste contra él. **TRES de
+  // las cuatro son de TEXTO**, o sea AA de verdad y no elemento gráfico.
+  //
+  // POR QUÉ EN BASELINE Y NO EN ROJO: el rojo bloquearía el hook a las
+  // tres pistas en pleno ciclo de campo. Entran acotadas y VISIBLES en
+  // cada corrida, no exentas — `EXENTAS_R12` es para lo que la casa
+  // decidió; esto es lo que hay que decidir.
+  //
+  // ☠️ SU MUERTE ES UNA DECISIÓN DEL FOUNDER Y TIENE LAS DOS SALIDAS
+  // MEDIDAS: (a) volver el tapiz al 3% cura las CUATRO de una y devuelve
+  // el fondo que él gateó dos veces como "muy leve"; (b) sostener el 8% y
+  // pagar sus cuatro curas — el CTA a teal puro con label en TINTA (fill
+  // 10.50 ✓ / label 11.01 ✓, que además le da al CTA los dos registros
+  // que es el único slot de acento del oficio que no tiene), y subir
+  // violetText/pinkDark/dangerText del oscuro, que es tanda propia con su
+  // re-medición. NO SE ELIGE ACÁ.
+  'darkOficio·fill·accent.cta/bg.base',
+  'darkOficio·texto·capaText.comunidad/capaBg.comunidad',
+  'darkOficio·texto·capaText.comunidadAmplia/capaBg.comunidadAmplia',
+  'darkOficio·texto·status.dangerText/status.dangerBg',
+  // ═══ S83-B30 · HEREDADAS DEL CLIENTE, que el barrido nuevo hizo
+  // visibles pero NO nacieron hoy:
+  // · el ORO contra papel (1.55) es EXENCIÓN FIRMADA — E1 lo midió y el
+  //   founder firmó igual, compensando con `ctaElevado`. Su lugar sería
+  //   EXENTAS, pero se deja acá con su nota hasta que la mesa lo mueva:
+  //   moverlo yo sería firmar una exención que no firmé.
+  'light·fill·accent.cta/bg.base',
+  'light·fill·accent.cta/bg.card',
+  // · los tres del oscuro del cliente, ya conocidos por r19/r20 (abajo).
+  'darkOficio·canto·accent.controlLleno/bg.card',
   // S82-B r19 — LOS DOS PARES DE SUPERFICIE DEL OSCURO, con el hallazgo
   // que los pone acá y no en una cura: subir bg.card ROMPE los textos que
   // van encima. Medido: a 1.26 caen SEIS pares AA firmados (capaText
@@ -409,9 +453,19 @@ const BASELINE_R12 = new Set([
   // tealDark) y dangerText ganó su paso (coralDarkTexto). La reversa
   // vive en themes/light.ts (una línea). De vacío no se sube jamás.
 ]);
+/** Las que están en baseline por REGRESIÓN de S83-B25 (el tapiz al 8%),
+ *  no por herencia: se cuentan aparte para que el info no las disfrace de
+ *  "baseline-founder". Un número que mezcla lo decidido con lo que hay que
+ *  decidir esconde justo lo que hay que mirar. */
+const REGRESION_B25 = new Set([
+  'darkOficio·fill·accent.cta/bg.base',
+  'darkOficio·texto·capaText.comunidad/capaBg.comunidad',
+  'darkOficio·texto·capaText.comunidadAmplia/capaBg.comunidadAmplia',
+  'darkOficio·texto·status.dangerText/status.dangerBg',
+]);
 function r12(pares) {
   const fallos = [];
-  let exentas = 0, enBaseline = 0, bajaron = 0;
+  let exentas = 0, enBaseline = 0, bajaron = 0, regresion = 0;
   for (const p of pares) {
     const clave = `${p.tema}·${p.clase}·${p.nombre}`;
     if (p.ratio >= p.minimo) {
@@ -419,12 +473,18 @@ function r12(pares) {
       continue;
     }
     if (EXENTAS_R12.has(clave)) { exentas++; continue; }
+    if (REGRESION_B25.has(clave)) { regresion++; continue; }
     if (BASELINE_R12.has(clave)) { enBaseline++; continue; }
     fallos.push(`R12: ${clave} = ${p.ratio.toFixed(2)} (mín ${p.minimo}) — par bajo mínimo FUERA de baseline/exentas`);
   }
   return {
     fallos,
-    info: `pares=${pares.length} · exentas-firmadas=${exentas} · baseline-founder=${enBaseline}/${BASELINE_R12.size}${bajaron > 0 ? ` · ${bajaron} BAJARON: actualizar baseline` : ''}`,
+    info:
+      `pares=${pares.length} · exentas-firmadas=${exentas} · baseline=${enBaseline}` +
+      (regresion > 0
+        ? ` · ⚠️ ${regresion} REGRESIÓN ABIERTA del tapiz 8% (S83-B25) — espera decisión del founder, NO es baseline`
+        : '') +
+      (bajaron > 0 ? ` · ${bajaron} BAJARON: actualizar baseline` : ''),
   };
 }
 /** El volcador corre UNA vez por invocación; si cae, R12 y R15 fallan
