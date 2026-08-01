@@ -183,6 +183,47 @@ errores visibles — producen anclas que mienten**. Un ancla con asterisco no ro
 nada hoy; rompe la trazabilidad del día que alguien pregunte *qué corría en ese
 OTA*. **Es exactamente la clase de defecto que la casa decidió no acumular.**
 
+## 2quater · `text.tertiary` — LA ÚNICA TANDA DE S84 QUE LLEGA CON TAMAÑO YA MEDIDO
+
+**D-605 (texto) y D-606 (gráfica), partidas en S83-A23.** El censo que su
+condición de muerte pedía **ya está hecho** (S83-A22), así que esta tanda no
+empieza por relevar: **empieza por curar.**
+
+**Lo que el censo decidió, y decidió por dato:** la salida *"re-confirmar la
+exención y acotarla al rol apagado"* —que sonaba a la barata— **queda
+descartada: acotar al rol obliga a migrar ~20 sitios igual.** No es
+re-confirmar, es trabajo.
+
+**El tamaño, medido y CONCENTRADO en cuatro grupos** (no son 20 sitios
+dispersos):
+
+| grupo | n | dueño |
+|---|---|---|
+| **los 2 helpers de `packages/ui`** | 2 | B |
+| los 4 checkouts del cliente | 5 usos | `apps/cliente` — **sin dueño en S83** |
+| `plan-hoja` | 6 | `apps/cliente` — sin dueño |
+| los 3 educativos del prestador | 3 | C |
+
+**La prioridad sale sola y no hace falta discutirla:**
+1. **Los 2 helpers de `packages/ui` — máximo ALCANCE.** No son dos pantallas:
+   **los hereda cada `Campo` de la casa**, en las dos apps. Dos líneas mueven
+   todos los formularios.
+2. **El mono de `checkout-reserva:241` — máximo DAÑO.** Dato de máquina, en la
+   pantalla donde se paga, a **2.18 en el tema por defecto**.
+
+**Y una dependencia que conviene ver antes de empezar: D-606 (la gráfica) NO se
+cierra sola.** Es familia de **D-590** y **D-599**, y las tres comparten la
+causa raíz que ninguna nombra sola — **el corpus de pares gráficos de
+`verify-contrast` es MANUAL**. Curar los chevrones con pares agregados a mano
+deja el hueco abierto para el próximo glifo. **Las tres se cierran juntas o
+ninguna cierra del todo.**
+
+**Nota de reparto que se repite:** de los cuatro grupos, **dos viven en
+`apps/cliente`, que no tuvo dueño en S83** — el mismo hueco que §2bis (el
+chevron divergente). **Es el segundo caso del día que espera al reparto**, y
+refuerza §1bis: con fichas por TERRITORIO esto no esperaría a que alguien las
+adopte.
+
 ## 3 · LAS OTRAS FICHAS S83 CON DISPARO PROPIO
 
 | | qué espera |

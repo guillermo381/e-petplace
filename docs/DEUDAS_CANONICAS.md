@@ -3077,7 +3077,7 @@ quotePath=false  → docs/DISEÑO_EXPERIENCIA.md
 
 > **☠️ CONDICIÓN DE MUERTE — la CANDIDATA que deja, sin firma (regla 80):** **cuando un guard se retira, su lápida incluye el GREP DE SUS MENCIONES.** Forma exigible propuesta: el commit que retira una regla **corre `grep -rn "<Rnn>"` sobre `packages/`, `apps/` y `scripts/`** y **declara el resultado en su mensaje** — cero menciones huérfanas, o las que curó. **Cuesta un comando y cierra la clase entera**, porque el único momento en que alguien sabe con certeza que un guard murió es el momento en que lo mata. *(El precedente ya existe y salió bien: B mató R26 con lápida escrita en el script Y curó los dos comentarios en el mismo arco — lo que falta es que sea ley, no criterio.)* **Quién la retira:** la mesa, cuando firme la candidata. Origen: S83-B (dos hallazgos propios en el día), medido y re-medido por A.
 
-#### D-605 — `text.tertiary` no llega al mínimo AA en NINGÚN tema, y está EXENTO por espec: la exención es vieja, el número es peor de lo reportado 🟠
+#### D-605 — `text.tertiary` como TEXTO QUE SE LEE: la exención se firmó para un ROL y el token viste ~20 sitios legibles 🟠 CENSADO, con tamaño medido
 🟠 **DECLARADO POR B y RE-MEDIDO POR A CONTRA EL THEME RESUELTO — y la medición corrigió el dato en las dos direcciones.** El reporte llegó como *"3.22 contra 3, con tapiz o sin él"*. **Los números reales, salidos del medidor (`verify-contrast.ts`, no de hexes a mano):**
 
 | tema | `text.tertiary` / `bg.base` | contra el mínimo 3:1 |
@@ -3095,3 +3095,45 @@ quotePath=false  → docs/DISEÑO_EXPERIENCIA.md
 **Su parentesco, que ordena cómo curarla:** es de la familia de **D-599** (*la galería fuera del corpus del lint*) y **D-590** (*el fill sobre fondo sin barrido*) — **las tres son la misma pregunta: qué está dentro del corpus del gate y qué no, y si eso está DECLARADO o simplemente ocurre.** Acá, a diferencia de D-599, **sí está declarado** — el problema no es el silencio: es que la declaración **exime por token en vez de por uso**.
 
 > **☠️ CONDICIÓN DE MUERTE — tiene DOS salidas y la mesa elige, pero primero hay que contestar una pregunta que hoy nadie tiene medida:** ¿**dónde se usa `text.tertiary` además del tab inactivo?** Sin ese censo cualquier decisión es a ciegas. Después: ① **si solo viste lo apagado**, la exención se **RE-CONFIRMA con los números de hoy** (no con los de antes del tapiz) y se **ACOTA por uso** — deja de eximir al token y pasa a eximir al rol; ② **si viste algo legible**, ese sitio migra a `text.secondary` y el token vuelve al corpus. **Verificación exigible:** el censo de usos + el número re-medido **del medidor**, jamás calculado a mano (candidata #17, que nació de este mismo trabajo). **Quién la retira:** la pista dueña de `packages/ui` (B) con el censo, y la mesa con la decisión de alcance. Origen: S83-B (declarado), re-medido por A — **el número del reporte no coincidía con el del theme resuelto**.
+
+> **📋 EL CENSO QUE LA CONDICIÓN DE MUERTE PEDÍA COMO PRIMER PASO — HECHO (S83-A22), Y DECIDE LA FICHA.** La pregunta era *"¿dónde se usa `text.tertiary` además del tab inactivo?"*. **Respuesta: en ~52 sitios de producto** (12 en `packages/ui` · 10 en `apps/prestador` · 30 en `apps/cliente`, sumando la vía directa `theme.text.tertiary` y la indirecta `Texto color="tertiary"`). *(La galería aporta 28 más y NO cuenta: herramienta, no superficie — L-161.)*
+>
+> **Clasificados POR USO, que es lo que la ficha necesitaba y no el total:**
+>
+> | | clase | ≈ | qué es |
+> |---|---|---|---|
+> | **A** | apagado / deshabilitado ✅ | 8 | `BarraTabs:118` — **el tab inactivo, EL caso de la espec B3.7** · `StepperCantidad:141,162` en el tope · `equipo:708-709` |
+> | **B** | placeholder ✅ | 2 | `Campo:155` · `CampoFecha:312` |
+> | **C** | 🟠 glifo / affordance — **no es texto** | ~10 | chevrons de `FilaCita:173`, `CeldaNavegacion:141`, `PieRevelar:94`, `(tabs)/index:1178`, `perfil-piezas:178` · `CantoCurva` |
+> | **D** | 🔴 **TEXTO QUE SE LEE** | **~20** | abajo |
+>
+> **LA CLASE D, que es la que decide:**
+> - **El HELPER del formulario, y lo declara el propio JSDoc:** `Campo.tsx:57` dice textual *"Helper bajo el campo (`text.tertiary`)"*, y `:202` lo pinta (`error ? dangerText : tertiary`); igual `CampoFecha:329`. **Un helper no es placeholder ni está apagado: es la instrucción de cómo llenar el campo** — el texto que uno lee **justo cuando no sabe qué poner**.
+> - **Texto EDUCATIVO:** `liquidaciones:270` (`cobros.esperandoEducacion`) · `cuenta-comercial/index:175` y `bancarios:195` (`bancariosEducacion`).
+> - **PANTALLAS DE PLATA:** los cuatro checkouts del cliente (`paseo/checkout:102,139` · `veterinaria` y `grooming:134` · `checkout-reserva:250`) — y **`checkout-reserva:241` es MONO: dato de máquina en una pantalla de pago, a 2.18.**
+> - **Prosa larga:** `plan-hoja` concentra **6** · `vacunas:317` pinta el resumen *"sin fecha"* · `cita/cierre:343` un `Texto dato`.
+>
+> **LO QUE EL CENSO DECIDE — y decide por DATO, no por criterio:**
+> - **LA SALIDA ① QUEDA DESCARTADA.** *"Re-confirmar la exención y acotarla al rol apagado"* sonaba a la salida barata; **con el censo delante, acotar al rol OBLIGA A MIGRAR ~20 sitios. No es re-confirmar: es trabajo** — el mismo trabajo que la ②, con otro nombre.
+> - **LA SALIDA ② TIENE TAMAÑO MEDIDO Y ESTÁ CONCENTRADA**, que es la buena noticia: **4 checkouts · `plan-hoja` (6) · 3 educativos del prestador · 2 helpers de `packages/ui`**. No son 20 sitios dispersos: son **cuatro grupos**.
+>
+> **LA PRIORIDAD SALE SOLA DEL CENSO, y no hace falta discutirla:**
+> 1. **Los 2 helpers de `packages/ui` — MÁXIMO ALCANCE POR SITIO.** No son dos pantallas: **los hereda CADA `Campo` de la casa**, en las dos apps. Dos líneas mueven todos los formularios.
+> 2. **El mono de `checkout-reserva:241` — MÁXIMO DAÑO.** Dato de máquina, en la pantalla donde se paga, a **2.18 en el tema por defecto**. Es el sitio donde un texto ilegible cuesta más caro.
+>
+> **LÍMITE DECLARADO DEL CENSO (para que nadie lo herede como completo — es la trampa que D-600 cobró):** los de `packages/ui` y `apps/prestador` están **leídos uno por uno**; el reparto A/C/D de `apps/cliente` **se clasificó por contexto de línea sin abrir las 15 pantallas**, así que **es aproximado en el margen**. Los contrastes salen del **medidor**, jamás calculados a mano (candidata #17, que nació de este mismo trabajo). **NO SE ORDENA LA CURA HOY:** es tanda propia y va al arranque de S84 con este tamaño.
+
+#### D-606 — `text.tertiary` como GRÁFICA: ~10 glifos a 2.18 contra un mínimo de 3:1 🟠 *(partida de D-605 — es otra pregunta)*
+🟠 **NACE PARTIDA DE D-605 EN S83-A23, y la partición no es orden: es que son dos preguntas con dos mínimos, dos curas y dos dueños.**
+
+**El hecho:** ~10 de los usos de `text.tertiary` **no pintan texto — pintan GRÁFICA**: los chevrons de `FilaCita:173`, `CeldaNavegacion:141`, `PieRevelar:94`, `(tabs)/index:1178`, `perfil-piezas:178`, los `Path` de `mascota/[mascotaId]:937,1063`, `CantoCurva:794`. **Su mínimo no es 4.5:1 (texto) sino 3:1** — WCAG 1.4.11, elementos no textuales. **Y a `2.18` en el tema claro tampoco lo pasan.**
+
+**POR QUÉ SE PARTE Y NO SE DEJA ADENTRO DE D-605:**
+- **Distinto mínimo** (3:1 vs 4.5:1) ⇒ **distinto veredicto posible**: un chevron podría resolverse subiendo poco; un helper necesita `text.secondary`.
+- **Distinta cura:** el texto **migra de token**; la gráfica puede resolverse por token **o por grosor/tamaño** (un trazo más grueso cambia la percepción sin tocar el color) — **es decisión de dirección de arte, no de accesibilidad de texto.**
+- **Distinto dueño:** casi toda la gráfica vive en **primitivas de `packages/ui`** (B); el texto de la clase D está repartido entre las dos apps.
+- **Y una razón de honestidad: `CeldaNavegacion:15` DECLARA el criterio** — *"el chevron es affordance decorativa en `text.tertiary`"*. **Eso no es un descuido: es una decisión escrita.** Meterla en la misma bolsa que el helper del formulario —que nadie decidió que fuera decorativo— confundiría una decisión con un olvido.
+
+**SU FAMILIA, y es la que ordena la cura: D-590 y D-599.** Las tres son **la misma pregunta — qué está dentro del corpus del gate**: D-599 (la galería fuera del corpus, en silencio) · D-590 (el fill del CTA sobre fondo, sin barrido) · ésta (la gráfica en `tertiary`). **Y comparten la causa raíz que ninguna nombra sola: el corpus de pares GRÁFICOS de `verify-contrast` es MANUAL** — los pares 3:1 se agregan a mano (`:168-175`), así que **ningún glifo nuevo entra solo.** **Curar ésta con un par agregado a mano deja el hueco abierto para el próximo glifo.**
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando **la gráfica en `text.tertiary` rinda ≥3:1 en los tres temas** —por token o por forma, es decisión de arte— **y el barrido sistemático de pares gráficos exista**, de modo que el siguiente glifo entre solo. **Las dos mitades:** sin el barrido, la cura es puntual y la clase sobrevive. **Quién la retira:** B (la gráfica vive en primitivas de `packages/ui`) + quien cierre el barrido de D-590. **Leer D-590 y D-599 antes de tocar ésta: las tres se cierran juntas o ninguna cierra del todo.** Origen: S83-A22 (censo de A sobre el hallazgo de B).
