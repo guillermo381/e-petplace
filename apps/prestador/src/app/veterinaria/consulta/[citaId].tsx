@@ -693,7 +693,17 @@ export default function ConsultaVeterinaria() {
             {/* Caso — nuevo / activo / ninguno */}
             <View style={{ gap: spacing[2] }}>
               <Texto variante="seccion">{t('consulta.casoTitulo')}</Texto>
+              {/* S83-C25 ① — ELECCIÓN, no vista. Lo que se elige acá se
+                  ESCRIBE: `modoCaso` decide si esta consulta abre un caso
+                  clínico nuevo, se cuelga de uno activo, o ninguno — y con
+                  'nuevo' aparece un Campo debajo para su condición. Un
+                  `tab` promete cambiar de vista sobre el mismo contenido;
+                  acá el toque tiene consecuencia CLÍNICA. Con `eleccion`
+                  el rol pasa de tab a radio (el lector deja de anunciar
+                  "pestaña" a un vet que está abriendo un caso) y entra la
+                  pata, que ya sale en el teal de su casa. */}
               <SelectorSegmentado
+                proposito="eleccion"
                 etiqueta={t('consulta.casoModoLabel')}
                 segmentos={
                   casos.length > 0
