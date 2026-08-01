@@ -1,90 +1,67 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>e-PetPlace · lámina del Perfil del prestador (S83-C8)</title>
+<title>e-PetPlace · lámina del Perfil del prestador · v2 (S83-C9)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
 /* ─────────────────────────────────────────────────────────────────────
-   ⑤ CERO HEXES PROPIOS. Cada variable de abajo salió de correr
-   getTheme(modo, 'oficio') sobre packages/ui/src/themes/index.ts en el
-   commit c52c207 y volcar el objeto. El nombre de la var ES la ruta del
-   token — si no coincide con palette.ts, la lámina miente y se cae sola.
-   Lo único que NO es token: la carcasa del teléfono y el fondo de la
-   mesa (andamiaje de la lámina, jamás de la pantalla).
+   ⑤ CERO HEXES DE PANTALLA. Cada var salió de correr
+   getTheme(modo,'oficio') sobre packages/ui/src/themes/index.ts en
+   c52c207 y volcar el objeto; el nombre de la var ES la ruta del token.
+   Lo único con hex propio: la carcasa del teléfono y el fondo de la mesa
+   — andamiaje de la lámina, jamás pantalla. Declarado también abajo.
    ───────────────────────────────────────────────────────────────────── */
 :root[data-tema="light"]{
-  --bg-base:#FAF9F7;        /* bg.base — lightOficio lo PISA a light0: el tapiz es del cliente */
-  --bg-card:#FFFFFF;        /* bg.card */
-  --bg-elevated:#F8F7FC;    /* bg.elevated */
-  --bg-hundido:#EDEBF5;     /* bg.hundido (= bg.overlay en claro: mismo valor) */
-  --bg-border:#E3E0EF;      /* bg.border */
-  --text-primary:#1D1A2E;   /* text.primary */
-  --text-secondary:#6B6584; /* text.secondary */
-  --text-tertiary:#A9A4C0;  /* text.tertiary */
-  --accent-cta:#0A7268;         /* accent.cta — slot 2, oficio */
-  --accent-ctaTexto:#FAF9F7;    /* accent.ctaTexto — slot 3 */
-  --accent-control:#0A7268;     /* accent.control — SLOT 5 (S83-B6, fd96019) */
-  --accent-active:#FF00AF;      /* accent.active — NO es slot: el prestador lo hereda */
-  --accent-sinCaja:#E0DBE9;     /* accent.sinCaja */
-  --status-successText:#1B6E2E; /* status.successText */
-  --status-warningText:#875809; /* status.warningText */
-  --status-dangerText:#B93333;  /* status.dangerText */
-  --capaText-identidad:#1B6E2E; /* capaText.identidad */
-  --capaText-cuidado:#0A7268;   /* capaText.cuidado */
-  --border-default:#E3E0EF;     /* border.default */
-  --border-subtle:rgba(0,0,0,.05); /* border.subtle */
-  --elev-reposo:0 1px 2px rgba(31,27,22,0.05), 0 2px 8px rgba(31,27,22,0.06); /* elevacion.reposo */
+  --bg-base:#FAF9F7; --bg-card:#FFFFFF; --bg-elevated:#F8F7FC;
+  --bg-hundido:#EDEBF5; --bg-border:#E3E0EF;
+  --text-primary:#1D1A2E; --text-secondary:#6B6584; --text-tertiary:#A9A4C0;
+  --accent-cta:#0A7268; --accent-ctaTexto:#FAF9F7; --accent-control:#0A7268;
+  --accent-active:#FF00AF; --accent-sinCaja:#E0DBE9;
+  --status-successText:#1B6E2E; --status-warningText:#875809; --status-dangerText:#B93333;
+  --capaText-identidad:#1B6E2E; --capaText-cuidado:#0A7268;
+  --border-default:#E3E0EF; --border-subtle:rgba(0,0,0,.05);
+  --elev-reposo:0 1px 2px rgba(31,27,22,0.05), 0 2px 8px rgba(31,27,22,0.06);
   --elev-elevada:0 2px 4px rgba(31,27,22,0.08), 0 12px 32px rgba(31,27,22,0.12);
-  --halo:transparent;       /* elevacion.halo = null en claro (la sombra ya separa) */
-  --muro:#0A7268;           /* palette.tealDark — el muro del oficio, §15b.2 */
+  --halo:transparent;              /* elevacion.halo = null en claro */
+  --muro:#0A7268;                  /* palette.tealDark — §15b.2 */
+  --sobreMuro:#FAF9F7;             /* papel PLENO sobre el muro (regla medida) */
+  --vidrioMuro:rgba(0,0,0,0.18);   /* VIDRIO_OFICIO — el vidrio del muro es OSCURO */
 }
 :root[data-tema="dark"]{
-  --bg-base:#080D0E;        /* bg.base — darkOficio: tapizDarkOficio, 3% de SU verde */
-  --bg-card:#0D0D12;
-  --bg-elevated:#13131A;
-  --bg-hundido:#050508;     /* bg.hundido — acá SÍ hunde (overlay no hundía) */
-  --bg-border:#222230;
-  --text-primary:#F0EEF8;
-  --text-secondary:rgba(240,238,248,.65);
-  --text-tertiary:rgba(240,238,248,.38);
-  --accent-cta:#0A7268;
-  --accent-ctaTexto:#F0EEF8;
-  --accent-control:#0A7268;
-  --accent-active:#FF00AF;
-  --accent-sinCaja:#2C2C3C;
-  --status-successText:#2BE86B;
-  --status-warningText:#E8B547;
-  --status-dangerText:#FF5C5C;
-  --capaText-identidad:#2BE86B;
-  --capaText-cuidado:#28E8DA;
-  --border-default:#222230;
-  --border-subtle:rgba(255,255,255,.05);
+  --bg-base:#080D0E; --bg-card:#0D0D12; --bg-elevated:#13131A;
+  --bg-hundido:#050508; --bg-border:#222230;
+  --text-primary:#F0EEF8; --text-secondary:rgba(240,238,248,.65); --text-tertiary:rgba(240,238,248,.38);
+  --accent-cta:#0A7268; --accent-ctaTexto:#F0EEF8; --accent-control:#0A7268;
+  --accent-active:#FF00AF; --accent-sinCaja:#2C2C3C;
+  --status-successText:#2BE86B; --status-warningText:#E8B547; --status-dangerText:#FF5C5C;
+  --capaText-identidad:#2BE86B; --capaText-cuidado:#28E8DA;
+  --border-default:#222230; --border-subtle:rgba(255,255,255,.05);
   --elev-reposo:0 1px 2px rgba(0,0,0,0.45);
   --elev-elevada:0 2px 6px rgba(0,0,0,0.55);
-  --halo:rgba(255,255,255,0.14); /* elevacion.halo — SOLO oscuro/memorial */
-  --muro:#0A4A44;           /* palette.tealDarkNoche — D-407 */
+  --halo:rgba(255,255,255,0.14);   /* elevacion.halo — solo oscuro/memorial */
+  --muro:#0A4A44;                  /* palette.tealDarkNoche — D-407 */
+  --sobreMuro:#F0EEF8;
+  --vidrioMuro:rgba(0,0,0,0.18);
 }
-/* tipografía: typography.ts — size.xs 11 · sm 13 · base 15 · md 18 · lg 22 · xl 28
+/* typography.ts — xs 11 · sm 13 · base 15 · md 18 · lg 22 · xl 28
    radius.ts — suave 10 · md 12 · lg 16 · xl 20 · full 9999
    spacing.ts — [1]4 [1.5]6 [2]8 [3]12 [4]16 [5]20 [6]24 */
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{background:#D8D5D0;font-family:'DM Sans',system-ui,sans-serif;color:#241F2C;
   padding:26px 16px 90px;display:flex;flex-direction:column;align-items:center;gap:18px}
-
-/* ── andamiaje de la mesa (NO es pantalla) ───────────────────────── */
-.doc{max-width:860px;width:100%;display:flex;flex-direction:column;gap:14px}
+.doc{max-width:880px;width:100%;display:flex;flex-direction:column;gap:13px}
 .doc h1{font:500 25px 'DM Sans';letter-spacing:-.02em}
 .doc .sub{font:400 14px 'DM Sans';color:#5A5560;line-height:1.6}
 .nota{background:#FFF;border-radius:14px;padding:15px 17px;box-shadow:0 1px 3px rgba(0,0,0,.07);
   font:400 13.5px 'DM Sans';line-height:1.65;color:#3A3542}
 .nota b{font-weight:500}
 .nota code{font:400 12.5px 'DM Mono';background:#F0EEF5;padding:1px 5px;border-radius:5px}
+.nota.alerta{box-shadow:0 1px 3px rgba(0,0,0,.07),inset 3px 0 0 #B93333}
 .barra{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
-.btn{border:none;background:#241F2C;color:#FFF;font:500 13px 'DM Sans';padding:9px 15px;
-  border-radius:999px;cursor:pointer}
+.btn{border:none;background:#241F2C;color:#FFF;font:500 13px 'DM Sans';padding:9px 15px;border-radius:999px;cursor:pointer}
 .btn.sec{background:#FFF;color:#241F2C;box-shadow:inset 0 0 0 1px rgba(0,0,0,.13)}
 .leyenda{font:400 12px 'DM Mono';color:#5A5560}
 
@@ -97,128 +74,132 @@ body{background:#D8D5D0;font-family:'DM Sans',system-ui,sans-serif;color:#241F2C
 .cuerpo{position:absolute;inset:0;overflow-y:auto;scrollbar-width:none;color:var(--text-primary)}
 .cuerpo::-webkit-scrollbar{display:none}
 
-/* Encabezado variante navegación (packages/ui Encabezado) */
-.enc{position:sticky;top:0;z-index:30;background:var(--bg-base);padding:52px 16px 12px;
-  display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-subtle)}
-.enc .atras{width:40px;height:40px;border-radius:999px;display:grid;place-items:center;color:var(--text-primary)}
-.enc h2{font:500 18px 'DM Sans';letter-spacing:-.01em}   /* Texto seccion: md/18 medium */
+/* ② atrás FLOTA sobre el espejo — la pantalla empieza en el borde */
+.atras{position:absolute;top:52px;left:14px;z-index:40;width:38px;height:38px;border-radius:999px;
+  display:grid;place-items:center;background:var(--vidrioMuro);color:var(--sobreMuro);backdrop-filter:blur(6px)}
 
-.scroll{padding:16px 20px 40px;display:flex;flex-direction:column;gap:8px}
+/* ② EL RASTRO — la fila compacta que queda al tope (gate a′) */
+.rastro{position:sticky;top:0;z-index:35;display:flex;align-items:center;gap:11px;
+  padding:52px 16px 11px;background:var(--muro);color:var(--sobreMuro);
+  opacity:0;transform:translateY(-6px);transition:opacity .16s,transform .16s;pointer-events:none}
+.rastro.on{opacity:1;transform:none;pointer-events:auto}
+.rastro .mini{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;flex:none;
+  background:var(--vidrioMuro);font:500 12px 'DM Sans'}
+.rastro b{font:500 15px 'DM Sans';flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rastro .ok{font:400 12px 'DM Mono';opacity:.85}
+body[data-rastro="no"] .rastro{display:none}
 
-/* ── ① EL ESPEJO ─────────────────────────────────────────────────── */
-.espejo{background:var(--bg-card);border-radius:20px;padding:20px;box-shadow:var(--elev-reposo);
-  border-top:1px solid var(--halo);position:relative;overflow:hidden}
-.espejo.pegado{position:sticky;top:104px;z-index:20}
-.espejo .muro{position:absolute;inset:0 0 auto 0;height:78px;background:var(--muro)}
-.espejo .fila{display:flex;gap:15px;align-items:flex-start;position:relative}
-.logo{width:72px;height:72px;border-radius:20px;flex:none;display:grid;place-items:center;
-  background:var(--bg-hundido);color:var(--text-secondary);font:500 24px 'DM Sans';letter-spacing:.02em}
-.espejo .idt{flex:1;min-width:0;padding-top:2px}
-.espejo .idt h3{font:300 28px 'DM Sans';letter-spacing:-.025em;line-height:1.15} /* Texto titulo: xl/28 light */
-.espejo .idt .tipo{font:400 13px 'DM Sans';color:var(--text-secondary);margin-top:3px}
-.estado{display:inline-flex;align-items:center;gap:7px;margin-top:13px;
-  font:400 13px 'DM Sans';color:var(--text-secondary)}
-.punto{width:10px;height:10px;border-radius:999px;flex:none}
-.punto.si{background:var(--status-successText)}
-.punto.no{background:var(--status-warningText)}
-.vacio-honesto{margin-top:13px;padding-top:13px;border-top:1px solid var(--border-subtle);
-  font:400 13px 'DM Sans';color:var(--text-secondary);line-height:1.6}
+/* ── ① EL ESPEJO, a sangre y scrolleable ─────────────────────────── */
+.espejo{background:var(--muro);color:var(--sobreMuro);padding:96px 20px 22px;
+  border-bottom-left-radius:26px;border-bottom-right-radius:26px;position:relative;margin-top:-1px}
+.espejo .fila{display:flex;gap:15px;align-items:center}
+.logo{width:76px;height:76px;border-radius:22px;flex:none;display:grid;place-items:center;
+  background:var(--vidrioMuro);color:var(--sobreMuro);font:500 26px 'DM Sans';letter-spacing:.02em;position:relative}
+.logo .lap{position:absolute;right:-6px;bottom:-6px;width:28px;height:28px;border-radius:999px;
+  background:var(--bg-card);color:var(--text-primary);display:grid;place-items:center;box-shadow:var(--elev-reposo)}
+.espejo .idt{flex:1;min-width:0}
+.espejo .idt h3{font:300 28px 'DM Sans';letter-spacing:-.028em;line-height:1.12}  /* Texto titulo xl/28 light */
+.espejo .idt .tipo{font:400 13px 'DM Mono';opacity:.8;margin-top:4px;letter-spacing:.01em}
+.espejo .estado{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font:400 13px 'DM Sans';opacity:.95}
+.punto{width:9px;height:9px;border-radius:999px;flex:none;background:var(--sobreMuro)}
+.vacio{margin-top:14px;padding:11px 13px;border-radius:12px;background:var(--vidrioMuro);
+  font:400 13px 'DM Sans';line-height:1.55}
 
-/* ── rótulo de sección: Texto seccion ────────────────────────────── */
-.rot{font:500 18px 'DM Sans';letter-spacing:-.01em;margin:22px 0 4px}
-.ayuda{font:400 13px 'DM Sans';color:var(--text-secondary);line-height:1.55;margin-bottom:6px}
+/* ── ① SECCIONES DESPLEGABLES (E14: información despliega ⌄/⌃) ───── */
+.secs{padding:10px 16px 40px;display:flex;flex-direction:column}
+.sec{border-bottom:1px solid var(--border-subtle)}
+.cab{display:flex;align-items:center;gap:12px;padding:15px 4px;min-height:44px;cursor:pointer}
+.cab .g{width:24px;height:24px;flex:none;color:var(--text-primary)}
+.cab .tt{flex:1;min-width:0}
+.cab .tt b{display:block;font:500 18px 'DM Sans';letter-spacing:-.012em}   /* Texto seccion md/18 */
+.cab .tt small{display:block;font:400 13px 'DM Mono';color:var(--text-secondary);margin-top:2px;letter-spacing:.01em}
+.cab .tt small.falta{color:var(--status-warningText)}
+.cab .cv{color:var(--text-tertiary);flex:none;transition:transform .18s cubic-bezier(.32,.72,0,1)}
+.sec.on .cab .cv{transform:rotate(180deg)}
+.panel{display:none;padding:2px 4px 18px}
+.sec.on .panel{display:block}
 
-/* ── Campo (sinCaja = default desde S81) ─────────────────────────── */
-.campo{background:var(--bg-hundido);border-radius:12px;padding:9px 13px 10px;
-  border:1px solid transparent;transition:border-color .12s}
+/* ── Campo (sinCaja por default desde S81) — densidad de HERRAMIENTA ── */
+.campo{background:var(--bg-hundido);border-radius:12px;padding:8px 12px 9px;border:1px solid transparent;
+  transition:border-color .12s;margin-top:8px}
 .campo:focus-within{border-color:var(--accent-active)}
 .campo.mal{border-color:var(--status-dangerText)}
-.campo label{display:block;font:400 13px 'DM Sans';color:var(--text-secondary);margin-bottom:1px}
+.campo label{display:block;font:400 12px 'DM Sans';color:var(--text-secondary)}
 .campo input,.campo textarea{width:100%;border:none;background:none;outline:none;resize:none;
-  font:400 15px 'DM Sans';color:var(--text-primary)}   /* base/15 */
+  font:400 15px 'DM Sans';color:var(--text-primary)}
 .campo input::placeholder,.campo textarea::placeholder{color:var(--text-tertiary)}
-.campo.ro{opacity:.72}
-.err{font:400 13px 'DM Sans';color:var(--status-dangerText);padding:5px 3px 0}
-.ok{font:400 13px 'DM Sans';color:var(--status-successText);padding:5px 3px 0}
+.campo.mono input{font-family:'DM Mono'}
+.err{font:400 12.5px 'DM Sans';color:var(--status-dangerText);padding:4px 3px 0}
+.ok2{font:400 12.5px 'DM Mono';color:var(--status-successText);padding:4px 3px 0}
+.ayuda{font:400 12.5px 'DM Sans';color:var(--text-secondary);line-height:1.5;padding:2px 3px 0}
 
-/* ── el campo de teléfono con indicativo ─────────────────────────── */
-.tel-fila{display:flex;gap:8px;align-items:stretch}
-.pais{background:var(--bg-hundido);border-radius:12px;padding:9px 11px 10px;display:flex;
-  align-items:center;gap:7px;cursor:pointer;flex:none;border:1px solid transparent}
-.pais .cod{font:400 15px 'DM Mono';color:var(--text-primary)}  /* mono: dato de máquina, Ley 3 */
-.pais .caret{color:var(--text-tertiary)}
-.tel-fila .campo{flex:1;min-width:0}
+.tel-fila{display:flex;gap:8px;align-items:stretch;margin-top:8px}
+.pais{background:var(--bg-hundido);border-radius:12px;padding:8px 10px 9px;display:flex;align-items:center;gap:7px;
+  cursor:pointer;flex:none}
+.pais .bnd{font-size:19px;line-height:1}
+.pais .cod{font:400 15px 'DM Mono';color:var(--text-primary)}
+.tel-fila .campo{flex:1;min-width:0;margin-top:0}
 
-/* ── CeldaNavegacion ─────────────────────────────────────────────── */
-.celda{display:flex;align-items:center;gap:13px;padding:15px 4px;min-height:44px;cursor:pointer;
+.fila-nav{display:flex;align-items:center;gap:12px;padding:13px 4px;min-height:44px;cursor:pointer;
   border-top:1px solid var(--border-subtle)}
-.celda .ct{flex:1;min-width:0}
-.celda .ct b{display:block;font:400 15px 'DM Sans';font-weight:400}
-.celda .ct small{display:block;font:400 13px 'DM Sans';color:var(--text-secondary);margin-top:2px}
-.celda .chev{color:var(--text-tertiary);flex:none}
+.fila-nav .g{width:22px;height:22px;flex:none;color:var(--text-secondary)}
+.fila-nav .ct{flex:1;min-width:0}
+.fila-nav .ct b{display:block;font:400 15px 'DM Sans'}
+.fila-nav .ct small{display:block;font:400 12.5px 'DM Sans';color:var(--text-secondary);margin-top:1px}
+.fila-nav .dato{font:400 13px 'DM Mono';color:var(--text-secondary);flex:none}
+.fila-nav .chev{color:var(--text-tertiary);flex:none}
 
-/* ── Boton ───────────────────────────────────────────────────────── */
 .cta{width:100%;border:none;border-radius:12px;padding:15px;cursor:pointer;
-  background:var(--accent-cta);color:var(--accent-ctaTexto);font:500 15px 'DM Sans';margin-top:20px}
-.compacto{border:none;border-radius:10px;padding:9px 14px;cursor:pointer;
-  background:var(--accent-sinCaja);color:var(--text-primary);font:500 13px 'DM Sans'}
+  background:var(--accent-cta);color:var(--accent-ctaTexto);font:500 15px 'DM Sans';margin-top:6px}
 
-/* ── el gate rotulado EN la lámina ───────────────────────────────── */
-.gate{border:1px dashed var(--accent-active);border-radius:14px;padding:13px 15px;margin-top:14px;
+/* ── gate rotulado ───────────────────────────────────────────────── */
+.gate{border:1px dashed var(--accent-active);border-radius:14px;padding:12px 14px;margin:14px 0 4px;
   background:color-mix(in srgb, var(--accent-active) 7%, transparent)}
-.gate .g{display:inline-block;font:500 11px 'DM Mono';letter-spacing:.06em;text-transform:uppercase;
+.gate .g2{display:inline-block;font:500 10.5px 'DM Mono';letter-spacing:.07em;text-transform:uppercase;
   color:var(--accent-active);margin-bottom:6px}
-.gate p{font:400 13px 'DM Sans';color:var(--text-primary);line-height:1.6}
-.gate .ops{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.gate .op{font:400 12.5px 'DM Sans';padding:7px 12px;border-radius:999px;cursor:pointer;
+.gate p{font:400 13px 'DM Sans';color:var(--text-primary);line-height:1.58}
+.gate .ops{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap}
+.gate .op{font:400 12.5px 'DM Sans';padding:6px 12px;border-radius:999px;cursor:pointer;
   background:var(--bg-hundido);color:var(--text-secondary)}
 .gate .op.on{background:var(--accent-control);color:var(--accent-ctaTexto)}
 
-/* ── hoja del selector de país ───────────────────────────────────── */
+/* ── Hoja del país ───────────────────────────────────────────────── */
 .scrim{position:absolute;inset:0;background:rgba(0,0,0,.42);z-index:70;display:none}
 .scrim.on{display:block}
-.hoja{position:absolute;left:0;right:0;bottom:0;max-height:76%;background:var(--bg-card);
+.hoja{position:absolute;left:0;right:0;bottom:0;max-height:78%;background:var(--bg-card);
   border-radius:24px 24px 0 0;z-index:80;display:none;flex-direction:column;overflow:hidden;
   box-shadow:var(--elev-elevada);border-top:1px solid var(--halo)}
 .hoja.on{display:flex}
-.hoja .hd{padding:18px 20px 10px;border-bottom:1px solid var(--border-subtle)}
+.hoja .hd{padding:17px 20px 11px;border-bottom:1px solid var(--border-subtle)}
 .hoja .hd b{font:500 18px 'DM Sans'}
-.hoja .hd small{display:block;font:400 13px 'DM Sans';color:var(--text-secondary);margin-top:3px;line-height:1.5}
-.hoja .lista{overflow-y:auto;padding:6px 0 26px}
-.pfila{display:flex;align-items:center;gap:12px;padding:13px 20px;min-height:44px;cursor:pointer}
+.hoja .hd small{display:block;font:400 12.5px 'DM Sans';color:var(--text-secondary);margin-top:3px;line-height:1.5}
+.hoja .lista{overflow-y:auto;padding:4px 0 26px}
+.pfila{display:flex;align-items:center;gap:12px;padding:12px 20px;min-height:44px;cursor:pointer}
 .pfila:not(.off):hover{background:var(--bg-hundido)}
+.pfila .bnd{font-size:21px;line-height:1;width:26px;flex:none}
 .pfila .nom{flex:1;font:400 15px 'DM Sans'}
 .pfila .pre{font:400 15px 'DM Mono';color:var(--text-secondary)}
-.pfila.off{opacity:.38;cursor:not-allowed}
+.pfila.off{opacity:.4;cursor:not-allowed}
 .pfila.off .luego{font:400 11px 'DM Sans';color:var(--text-tertiary)}
 .pfila .tick{color:var(--accent-control);flex:none;width:18px}
+body[data-bandera="letras"] .bnd{font:500 12px 'DM Mono';letter-spacing:.03em;
+  background:var(--bg-hundido);border-radius:4px;padding:2px 4px;color:var(--text-secondary)}
 
-.pieinfo{font:400 12.5px 'DM Mono';color:var(--text-tertiary);text-align:center;padding:22px 20px 0;line-height:1.7}
+.pieinfo{font:400 12px 'DM Mono';color:var(--text-tertiary);text-align:center;padding:20px 20px 0;line-height:1.7}
 </style>
 
 <div class="doc">
-  <h1>Lámina · El Perfil del prestador</h1>
+  <h1>Lámina · El Perfil del prestador <span style="font:400 15px 'DM Mono';color:#5A5560">v2</span></h1>
   <p class="sub">
-    S83-C8 · pista C · criterio para firmar <b>antes</b> de una línea de pantalla.
-    Estructura, orden y agrupación propuestos sobre las mediciones de C4 (columnas reales,
-    catálogo real, pipeline real). <b>No es fuente</b> (§10): la fuente son
-    <code>packages/ui</code> y la DB — esta página solo propone cómo se ordenan.
+    S83-C9 · pista C. <b>El orden está aprobado y no se rediscute</b> — esta versión es craft
+    sobre esa estructura: secciones desplegables, la pantalla desde arriba, el país con su bandera,
+    los glifos de la casa y la jerarquía de herramienta.
   </p>
-
-  <div class="nota">
-    <b>De dónde salió cada color.</b> Todas las variables CSS son el volcado de
-    <code>getTheme(modo, 'oficio')</code> sobre <code>packages/ui/src/themes/index.ts</code> en
-    <code>c52c207</code>, con el nombre del token como nombre de la variable. <b>Cero hexes propios.</b>
-    Lo único inventado acá es la carcasa del teléfono y el fondo de esta mesa — andamiaje, no pantalla.
-    Dos consecuencias que se ven solas al cambiar de tema: en <b>claro</b> el halo es
-    <code>null</code> (la sombra ya separa) y el fondo se queda en papel algodón; en <b>oscuro</b>
-    aparece el halo y el fondo lleva el 3% del verde del oficio.
-  </div>
 
   <div class="barra">
     <button class="btn" id="bTema">Cambiar a oscuro</button>
-    <button class="btn sec" id="bEspejo">Gate (a): espejo pegado / que scrollee</button>
-    <button class="btn sec" id="bDonde">Gate (b): mostrar / ocultar “Dónde atiendes”</button>
+    <button class="btn sec" id="bRastro">Gate (a′): con rastro / sin rastro</button>
+    <button class="btn sec" id="bBandera">Ver banderas como las pinta Android</button>
     <span class="leyenda" id="lTema">tema: light · oficio</span>
   </div>
 </div>
@@ -226,102 +207,192 @@ body{background:#D8D5D0;font-family:'DM Sans',system-ui,sans-serif;color:#241F2C
 <div class="escena">
 <div class="tel">
   <div class="notch"></div>
-  <div class="cuerpo">
+  <div class="cuerpo" id="cuerpo">
 
-    <div class="enc">
-      <div class="atras"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <h2>Tu perfil</h2>
+    <div class="atras">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
 
-    <div class="scroll">
+    <!-- ② EL RASTRO (gate a′) -->
+    <div class="rastro" id="rastro">
+      <span class="mini">PA</span>
+      <b>Paseos Andres</b>
+      <span class="ok">visible</span>
+    </div>
 
-      <!-- ① EL ESPEJO ─────────────────────────────────────────── -->
-      <div class="espejo" id="espejo">
-        <div class="fila">
-          <div class="logo" id="logo">PA</div>
-          <div class="idt">
-            <h3>Paseos Andres</h3>
-            <div class="tipo">Paseador · Quito</div>
+    <!-- ① ② EL ESPEJO: a sangre, arriba, y se va con el scroll -->
+    <div class="espejo" id="espejo">
+      <div class="fila">
+        <div class="logo">PA
+          <span class="lap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M15.5 4.5 19.5 8.5 8 20H4v-4z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M13.6 6.4 17.6 10.4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <div class="idt">
+          <h3>Paseos Andres</h3>
+          <div class="tipo">PASEADOR · QUITO</div>
+        </div>
+      </div>
+      <div class="estado"><span class="punto"></span> Visible para las familias</div>
+      <div class="vacio" id="vacio">
+        Una familia que te encuentra hoy <b>no tiene cómo escribirte</b>: no cargaste teléfono,
+        correo ni sitio. Tu WhatsApp sí está.
+      </div>
+    </div>
+
+    <div class="secs">
+
+      <div class="gate">
+        <span class="g2">Gate (a′) — el nuevo, el de (a) ya lo contestaste</span>
+        <p>
+          El espejo scrollea. La pregunta que queda: <b>¿se va del todo, o deja un rastro?</b>
+          El rastro es una fila compacta que se pega al tope —logo mini, nombre, estado— para que
+          nunca dejes de saber qué negocio estás editando. Cuesta ~44 px de alto permanente.
+        </p>
+        <div class="ops"><span class="op on" data-rastro="si">deja rastro</span><span class="op" data-rastro="no">se va del todo</span></div>
+      </div>
+
+      <div class="gate">
+        <span class="g2">Gate (d) — qué está abierto al entrar</span>
+        <p>
+          <b>¿Todas cerradas</b> —la pantalla es un índice de cuatro líneas que se lee en dos
+          segundos— <b>o se abre sola la primera incompleta?</b> Abrir la incompleta te pone a
+          trabajar sin buscar; todas cerradas respeta que la mayoría de las visitas son para
+          mirar, no para editar.
+        </p>
+        <div class="ops"><span class="op on" data-abrir="cerradas">todas cerradas</span><span class="op" data-abrir="incompleta">la primera incompleta</span></div>
+      </div>
+
+      <!-- ── PORTADA ───────────────────────────────────────────── -->
+      <div class="sec" data-sec="portada" data-completa="0">
+        <div class="cab">
+          <span class="g"><!-- Icono b′ 'negocio' — registry packages/ui -->
+            <svg viewBox="0 0 24 24" fill="none" width="24" height="24">
+              <path d="M4.4 8.6h15.2V18a1.5 1.5 0 0 1-1.5 1.5H5.9A1.5 1.5 0 0 1 4.4 18Z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M9.4 8.6V6.9a1.9 1.9 0 0 1 1.9-1.9h1.4a1.9 1.9 0 0 1 1.9 1.9v1.7" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+              <g transform="translate(8.7 10.7) scale(0.4)" fill="var(--capaText-cuidado)">
+                <ellipse cx="12" cy="15.7" rx="5.7" ry="4.7"/><ellipse cx="12" cy="5.9" rx="2.8" ry="3.5"/>
+                <ellipse cx="5.7" cy="8.3" rx="2.5" ry="3.2" transform="rotate(-24 5.7 8.3)"/>
+                <ellipse cx="18.3" cy="8.3" rx="2.5" ry="3.2" transform="rotate(24 18.3 8.3)"/>
+              </g>
+            </svg>
+          </span>
+          <span class="tt"><b>Tu portada</b><small class="falta">SIN DESCRIPCIÓN</small></span>
+          <span class="cv"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+        <div class="panel">
+          <div class="ayuda">Lo primero que lee una familia. Dos o tres líneas alcanzan.</div>
+          <div class="campo">
+            <label>Descripción</label>
+            <textarea rows="3" placeholder="Paseos tranquilos por el norte de Quito, grupos chicos y reporte con fotos."></textarea>
           </div>
         </div>
-        <div class="estado"><span class="punto si"></span> Visible para las familias</div>
-        <div class="vacio-honesto" id="vacioHonesto">
-          Una familia que te encuentra hoy <b>no tiene cómo escribirte</b>: no cargaste teléfono,
-          correo ni sitio. Tu WhatsApp sí está.
+      </div>
+
+      <!-- ── CONTACTO ──────────────────────────────────────────── -->
+      <div class="sec" data-sec="contacto" data-completa="0">
+        <div class="cab">
+          <span class="g" data-falta-glifo="contacto">
+            <!-- ④ NO EXISTE glifo de contacto/teléfono en el registry.
+                 Se usa 'compartir' como PRESTADO y se declara — jamás se dibuja uno nuevo. -->
+            <svg viewBox="0 0 24 24" fill="none" width="24" height="24">
+              <path d="M12 15V4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 7.6 12 3.6l4 4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5 14v5.5h14V14" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="tt"><b>Cómo te contactan</b><small class="falta" id="resContacto">SOLO WHATSAPP</small></span>
+          <span class="cv"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         </div>
-        <div style="margin-top:14px"><button class="compacto">Agregar tu logo</button></div>
+        <div class="panel">
+          <div class="ayuda">Son datos del <b>negocio</b> y los ven las familias. Tu teléfono personal vive en Cuenta.</div>
+
+          <div class="tel-fila">
+            <div class="pais" data-destino="telNegocio">
+              <span class="bnd" id="bndtelNegocio">🇪🇨</span><span class="cod" id="codtelNegocio">+593</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="color:var(--text-tertiary)"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="campo mono" id="cmp-telNegocio">
+              <label>Teléfono del negocio</label>
+              <input id="telNegocio" inputmode="tel" placeholder="99 123 4567">
+            </div>
+          </div>
+          <div id="msg-telNegocio"></div>
+
+          <div class="tel-fila">
+            <div class="pais" data-destino="wa">
+              <span class="bnd" id="bndwa">🇪🇨</span><span class="cod" id="codwa">+593</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="color:var(--text-tertiary)"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="campo mono" id="cmp-wa">
+              <label>WhatsApp</label>
+              <input id="wa" inputmode="tel" value="99 900 0333">
+            </div>
+          </div>
+          <div id="msg-wa"></div>
+
+          <div class="campo"><label>Correo de contacto</label><input inputmode="email" placeholder="hola@paseosandres.ec"></div>
+          <div class="campo"><label>Sitio web</label><input placeholder="paseosandres.ec"></div>
+        </div>
+      </div>
+
+      <!-- ── DÓNDE ATENDÉS ─────────────────────────────────────── -->
+      <div class="sec" data-sec="donde" data-completa="1">
+        <div class="cab">
+          <span class="g"><!-- Icono b′ 'ubicacion' — registry -->
+            <svg viewBox="0 0 24 24" fill="none" width="24" height="24">
+              <path d="M12 21s-7-5.3-7-11a7 7 0 1 1 14 0c0 5.7-7 11-7 11Z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+              <g transform="translate(8.9 6.6) scale(0.36)" fill="var(--capaText-cuidado)">
+                <ellipse cx="12" cy="15.7" rx="5.7" ry="4.7"/><ellipse cx="12" cy="5.9" rx="2.8" ry="3.5"/>
+                <ellipse cx="5.7" cy="8.3" rx="2.5" ry="3.2" transform="rotate(-24 5.7 8.3)"/>
+                <ellipse cx="18.3" cy="8.3" rx="2.5" ry="3.2" transform="rotate(24 18.3 8.3)"/>
+              </g>
+            </svg>
+          </span>
+          <span class="tt"><b>Dónde atendés</b><small>QUITO · 5 KM</small></span>
+          <span class="cv"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+        <div class="panel">
+          <div class="ayuda">Se guarda sola: no espera al botón de abajo.</div>
+          <div class="fila-nav" style="border-top:none">
+            <div class="ct"><b>Av. República del Salvador y Suecia, local 3</b><small>Quito · Ecuador</small></div>
+            <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="fila-nav">
+            <div class="ct"><b>Radio de cobertura</b><small>Fuera de ese radio no te ofrecemos.</small></div>
+            <span class="dato">5 km</span>
+            <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── LO PERSONAL: NAVEGA (›), no despliega — E14 al pie ── -->
+      <div class="sec">
+        <div class="cab" style="cursor:pointer">
+          <span class="g"><!-- Icono b′ 'cuenta' — registry -->
+            <svg viewBox="0 0 24 24" fill="none" width="24" height="24">
+              <circle cx="12" cy="5.6" r="1.9" stroke="currentColor" stroke-width="1.9"/>
+              <circle cx="12" cy="13.6" r="6.6" stroke="currentColor" stroke-width="1.9"/>
+              <g transform="translate(8.9 10.6) scale(0.38)" fill="var(--capaText-identidad)">
+                <ellipse cx="12" cy="15.7" rx="5.7" ry="4.7"/><ellipse cx="12" cy="5.9" rx="2.8" ry="3.5"/>
+                <ellipse cx="5.7" cy="8.3" rx="2.5" ry="3.2" transform="rotate(-24 5.7 8.3)"/>
+                <ellipse cx="18.3" cy="8.3" rx="2.5" ry="3.2" transform="rotate(24 18.3 8.3)"/>
+              </g>
+            </svg>
+          </span>
+          <span class="tt"><b id="rotuloPersonal">Tus datos personales</b><small>NO LOS VEN LAS FAMILIAS</small></span>
+          <span class="cv" style="transform:none">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </div>
       </div>
 
       <div class="gate">
-        <span class="g">Gate (a) — abierto</span>
-        <p>
-          ¿El espejo <b>vive arriba fijo</b> mientras editás —siempre ves lo que la familia ve—,
-          o <b>se va con el scroll</b> y la pantalla es puro formulario?
-          Probalo con el botón de arriba: la diferencia se siente al bajar.
-        </p>
-        <div class="ops"><span class="op on" data-op="pegado">fijo</span><span class="op" data-op="scroll">scrollea</span></div>
-      </div>
-
-      <!-- ② LA PORTADA ────────────────────────────────────────── -->
-      <div class="rot">Tu portada</div>
-      <div class="ayuda">Lo primero que lee una familia. Dos o tres líneas alcanzan.</div>
-      <div class="campo">
-        <label>Descripción</label>
-        <textarea rows="3" placeholder="Paseos tranquilos por el norte de Quito, grupos chicos y reporte con fotos."></textarea>
-      </div>
-
-      <!-- ③ CONTACTO ──────────────────────────────────────────── -->
-      <div class="rot">Cómo te contactan</div>
-      <div class="ayuda">Estos datos son del <b>negocio</b> y los ven las familias. Tu teléfono personal vive en Cuenta.</div>
-
-      <div class="tel-fila">
-        <div class="pais" data-destino="telNegocio"><span class="cod" id="codtelNegocio">+593</span>
-          <svg class="caret" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-        <div class="campo" id="cmp-telNegocio">
-          <label>Teléfono del negocio</label>
-          <input id="telNegocio" inputmode="tel" placeholder="99 123 4567">
-        </div>
-      </div>
-      <div id="msg-telNegocio"></div>
-
-      <div class="tel-fila" style="margin-top:8px">
-        <div class="pais" data-destino="wa"><span class="cod" id="codwa">+593</span>
-          <svg class="caret" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-        <div class="campo" id="cmp-wa">
-          <label>WhatsApp</label>
-          <input id="wa" inputmode="tel" value="99 900 0333">
-        </div>
-      </div>
-      <div id="msg-wa"></div>
-
-      <div class="campo" style="margin-top:8px">
-        <label>Correo de contacto</label>
-        <input inputmode="email" placeholder="hola@paseosandres.ec">
-      </div>
-      <div class="campo" style="margin-top:8px">
-        <label>Sitio web</label>
-        <input placeholder="paseosandres.ec">
-      </div>
-
-      <!-- ④ LO PERSONAL MIGRA ─────────────────────────────────── -->
-      <div class="rot">Vos</div>
-      <div class="celda">
-        <div class="ct">
-          <b id="rotuloPersonal">Tus datos personales</b>
-          <small>Tu nombre, tu teléfono y tu correo de ingreso. No los ven las familias.</small>
-        </div>
-        <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-
-      <div class="gate">
-        <span class="g">Gate (c) — abierto</span>
-        <p>
-          ¿Cómo se llama esa sección cuando aterrice en Cuenta? Las tres candidatas dicen
-          cosas distintas: <b>“Vos”</b> es la más humana, <b>“Tus datos personales”</b> la más
-          literal, <b>“Tu cuenta”</b> la más funcional (y choca con el nombre del tab).
-        </p>
+        <span class="g2">Gate (c) — sigue abierto</span>
+        <p>El rótulo de esa fila cuando aterrice en Cuenta. Tocá para verlo en su lugar.</p>
         <div class="ops">
           <span class="op" data-rot="Vos">Vos</span>
           <span class="op on" data-rot="Tus datos personales">Tus datos personales</span>
@@ -329,48 +400,19 @@ body{background:#D8D5D0;font-family:'DM Sans',system-ui,sans-serif;color:#241F2C
         </div>
       </div>
 
-      <!-- Gate (b) — Dónde atiendes -->
-      <div id="bloqueDonde">
-        <div class="rot">Dónde atendés</div>
-        <div class="ayuda">Tu dirección y hasta dónde te movés. Se guarda sola, no espera al botón.</div>
-        <div class="celda" style="border-top:none">
-          <div class="ct"><b>Av. República del Salvador y Suecia, local 3</b><small>Quito · Ecuador</small></div>
-          <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-        <div class="celda">
-          <div class="ct"><b>Radio de 5 km</b><small>Fuera de ese radio no te ofrecemos.</small></div>
-          <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-      </div>
-
-      <div class="gate">
-        <span class="g">Gate (b) — abierto</span>
-        <p>
-          <b>“Dónde atendés” ¿entra a esta pantalla o queda aparte?</b> Hoy vive acá pero
-          <i>debajo del Guardar</i>, con sus propias escrituras — o sea que la pantalla tiene
-          dos maneras de guardar y no lo dice. O sube y se integra, o sale a su propia celda.
-        </p>
-        <div class="ops"><span class="op on" data-donde="dentro">entra acá</span><span class="op" data-donde="fuera">queda aparte</span></div>
-      </div>
-
       <button class="cta">Guardar</button>
-
-      <div class="pieinfo">
-        prestador de300000-…-e5 · datos leídos de la DB viva<br>
-        c52c207 · tokens de getTheme(·,'oficio')
-      </div>
+      <div class="pieinfo">prestador de300000-…-e5 · datos de la DB viva<br>c52c207 · getTheme(·,'oficio')</div>
     </div>
   </div>
 
-  <!-- ── la Hoja del país ────────────────────────────────────────── -->
   <div class="scrim" id="scrim"></div>
   <div class="hoja" id="hoja">
     <div class="hd">
       <b>País del número</b>
       <small>
-        El indicativo es un dato aparte del número — vive en
-        <code style="font-family:'DM Mono'">profiles.telefono_codigo_pais</code>, no adentro del texto.
-        Hoy solo Ecuador está activo: los demás están cargados y apagados.
+        El indicativo es un dato aparte del número: su slot es
+        <code style="font-family:'DM Mono'">profiles.telefono_codigo_pais</code>.
+        Hoy solo Ecuador está activo; los demás están cargados y apagados.
       </small>
     </div>
     <div class="lista" id="listaPaises"></div>
@@ -379,176 +421,223 @@ body{background:#D8D5D0;font-family:'DM Sans',system-ui,sans-serif;color:#241F2C
 </div>
 
 <div class="doc">
-  <div class="nota">
-    <b>Lo que la lámina dice y la pantalla de hoy no.</b>
-    ① El <b>espejo</b> existe porque hoy no hay ninguno: los cuatro campos read-only
-    (nombre comercial, tipo, estado, logo) están mezclados entre los editables y nada preside.
-    ② <b>Tres campos se llaman “Teléfono”</b> en la pantalla viva —personal, del negocio y WhatsApp—
-    y comparten hasta la línea de ayuda (<code>miCuenta.telefonoLabel</code> reusada tres veces):
-    la separación por sección es lo único que los distingue.
-    ③ El bloque de <b>vacío honesto</b> del espejo colapsa en UNA línea lo que si no serían
-    cuatro celdas diciendo “sin dato” — y dice la consecuencia, no la ausencia.
-    ④ <b>Lo personal se va a Cuenta</b>: son otras dos columnas de otra tabla
-    (<code>profiles.nombre</code> / <code>profiles.telefono</code>) con otra audiencia — nadie.
+
+  <div class="nota alerta">
+    <b>③ LA BANDERA: medí primero, y hay un riesgo real que la lámina no puede tapar.</b>
+    La ruta natural es <b>emoji unicode derivado de <code>codigo_iso2</code></b> (cada letra →
+    su indicador regional: <code>'EC' → 🇪🇨</code>, dos <code>codePointAt</code> + 127397). Cuesta cero
+    assets y sale del dato que ya está en la tabla. <b>Pero el glifo lo pone la fuente del
+    sistema, no nosotros:</b> medido en el repo, la app carga <b>solo DM Sans (4 pesos) y
+    JetBrains Mono (2)</b> — <code>packages/ui/src/fonts.ts</code> — y ninguna trae banderas, así que
+    el carácter cae a la fuente de emoji de la plataforma. <b>iOS las dibuja; en Android la fuente
+    del sistema históricamente NO trae glifos de bandera y muestra las dos letras</b>
+    (<code>EC</code>). <b>Tocá “Ver banderas como las pinta Android”</b> arriba: la lámina te
+    muestra las dos salidas para que decidas mirando, no leyendo.
+    <br><br>
+    <b>Y el dato que cierra la decisión: en el repo hay CERO banderas hoy</b> — ningún asset,
+    ningún emoji de bandera en código (grep en las dos apps y en <code>packages/ui</code>).
+    El precedente vivo de país, <code>cuenta-comercial/nueva.tsx</code>, lista
+    <code>cat_paises</code> <b>sin bandera</b>. Las salidas honestas son tres, y la elige el founder:
+    <b>(1)</b> emoji, aceptando que en Android son letras; <b>(2)</b> un set de 23 SVG en
+    <code>packages/ui</code> — se ve igual en todos lados y es trabajo real de assets;
+    <b>(3)</b> sin bandera, solo nombre + prefijo, que es lo que la casa ya hace.
+    <b>Prometer una bandera que la mitad del parque no puede pintar sería la promesa falsa
+    que la orden pide evitar.</b>
+  </div>
+
+  <div class="nota alerta">
+    <b>④ LOS GLIFOS: tres son de la casa, uno NO EXISTE y lo digo en vez de dibujarlo.</b>
+    Usados tal cual del registry de <code>packages/ui/src/components/Icono.tsx</code>, con su trazo
+    1.9 y su huella rellena: <b><code>negocio</code></b> (portada) · <b><code>ubicacion</code></b>
+    (dónde atendés) · <b><code>cuenta</code></b> (lo personal) · <b><code>lapiz</code></b> (editar el
+    logo). <b>Falta el de CONTACTO.</b> El registry tiene 32 nombres y no hay
+    <code>telefono</code>, <code>whatsapp</code>, <code>correo</code>, <code>sitio</code> ni
+    <code>contacto</code>. En la lámina la sección lleva <code>compartir</code>
+    <b>como préstamo declarado</b> — es el que menos miente (sacar algo hacia afuera), pero
+    <b>no es su glifo</b>. Un glifo nuevo se pide con su gate por ícono a 21 px (§6b), no se
+    improvisa en una lámina. Las filas internas tampoco llevan glifo propio a propósito: cuatro
+    glifos prestados en cuatro filas sería ruido, y la etiqueta ya las nombra.
   </div>
 
   <div class="nota">
-    <b>Lo que la lámina NO inventó, y por qué (L-139).</b>
-    El pedido decía “Paseos Andres, su logo”. Medido en la DB:
-    <code>prestadores.foto_url</code> es <b>NULL</b> — <b>ese negocio no tiene logo cargado</b>
-    (tampoco “Paseos Shyris”). Así que el espejo muestra el <b>monograma real</b> que
-    produciría <code>LogoNegocio</code> hoy: <b>PA</b>, por su regla de iniciales
-    (descarta corchetes, toma la primera letra de las dos primeras palabras).
-    Dibujar un logo habría sido rellenar un dato que no existe.
-    También son NULL de verdad <code>descripcion</code>, <code>telefono</code>,
-    <code>email_contacto</code> y <code>sitio_web</code>; el único cargado es
-    <code>whatsapp = 593999000333</code> — que es exactamente el argumento del bloque
-    de vacío honesto, y salió del dato, no del diseño.
+    <b>⑤ LA JERARQUÍA, que es lo que “le falta diseño” estaba pidiendo.</b>
+    <b>Preside el ESPEJO</b>, y ahora preside de verdad: va a sangre contra el muro del oficio,
+    el nombre en <code>Texto titulo</code> (28 light) y el logo a 76 px con su lápiz encima —
+    <b>no son campos, son la portada</b>. Debajo, <b>ninguna sección compite</b>: las cuatro son
+    filas de 44 px con glifo + título + <b>su estado en mono</b> (<code>SIN DESCRIPCIÓN</code> ·
+    <code>SOLO WHATSAPP</code> · <code>QUITO · 5 KM</code>). Cerrada, la pantalla es un
+    <b>índice de cuatro líneas que se lee en dos segundos</b> — eso es densidad de herramienta
+    (§15b.3): el cliente celebra, el prestador trabaja. Adentro, el dato de máquina va en mono
+    (los teléfonos, el radio), la ayuda baja a la línea secundaria y los campos pierden su caja
+    (<code>sinCaja</code> es default desde S81). <b>El vacío no se reparte en celdas</b>: una sola
+    línea en el espejo dice la consecuencia y se recalcula al tipear.
   </div>
 
   <div class="nota">
-    <b>El selector de país es real, no un dibujo.</b> Las 23 filas de abajo salieron de
-    <code>select … from cat_paises</code> contra el proyecto vivo: nombre, <code>codigo_iso2</code>,
-    <code>prefijo_telefono</code> y <code>activo</code>. Ecuador es el único con
-    <code>activo = true</code>; los otros 22 se muestran apagados con su prefijo real.
-    La validación en vivo usa el <code>formato_telefono</code> de la propia fila EC:
-    <code>^\+593\d{8,9}$</code> — no una regex escrita acá.
-    <b>El precedente ya existe en esta misma app</b>: <code>cuenta-comercial/nueva.tsx</code> ya
-    consume <code>cat_paises</code> con la nota “cero hardcode”. Esta pantalla es la que falta.
+    <b>① Por qué ⌄/⌃ y no ›, con la letra en la mano (E14).</b> Las tres secciones que
+    <b>despliegan información en su lugar</b> —portada, contacto, dónde atendés— llevan chevron
+    <b>hacia abajo</b> y giran al abrir. La cuarta, <b>lo personal, LLEVA ›</b>: no despliega, se
+    va a otra pantalla. Es el mismo criterio que la casa ya firmó — <i>información despliega,
+    acción lleva</i> — y acá se ve el contraste en una sola pantalla.
+  </div>
+
+  <div class="nota">
+    <b>Lo que sigue sin inventarse (L-139).</b> <code>prestadores.foto_url</code> es <b>NULL</b>:
+    no hay logo, así que el espejo muestra el monograma real que produciría
+    <code>LogoNegocio</code> — <b>PA</b>. También son NULL <code>descripcion</code>,
+    <code>telefono</code>, <code>email_contacto</code> y <code>sitio_web</code>; el único dato
+    cargado es <code>whatsapp = 593999000333</code>, y por eso el resumen de la sección dice
+    <code>SOLO WHATSAPP</code>. Las 23 filas del selector, sus prefijos y el
+    <code>^\+593\d{8,9}$</code> que valida en vivo salen de <code>cat_paises</code> medido, no de
+    una lista escrita acá.
   </div>
 </div>
 
 <script>
-/* ─── cat_paises: las 23 filas MEDIDAS (proyecto zyltipqscdsdsxnjclhp) ─── */
 const PAISES = [
- {iso:'AR',nombre:'Argentina',pre:'+54',activo:false},
- {iso:'BO',nombre:'Bolivia',pre:'+591',activo:false},
- {iso:'BR',nombre:'Brasil',pre:'+55',activo:false},
- {iso:'CA',nombre:'Canadá',pre:'+1',activo:false},
- {iso:'CL',nombre:'Chile',pre:'+56',activo:false},
- {iso:'CO',nombre:'Colombia',pre:'+57',activo:false},
- {iso:'CR',nombre:'Costa Rica',pre:'+506',activo:false},
- {iso:'CU',nombre:'Cuba',pre:'+53',activo:false},
+ {iso:'AR',nombre:'Argentina',pre:'+54',activo:false},{iso:'BO',nombre:'Bolivia',pre:'+591',activo:false},
+ {iso:'BR',nombre:'Brasil',pre:'+55',activo:false},{iso:'CA',nombre:'Canadá',pre:'+1',activo:false},
+ {iso:'CL',nombre:'Chile',pre:'+56',activo:false},{iso:'CO',nombre:'Colombia',pre:'+57',activo:false},
+ {iso:'CR',nombre:'Costa Rica',pre:'+506',activo:false},{iso:'CU',nombre:'Cuba',pre:'+53',activo:false},
  {iso:'DO',nombre:'República Dominicana',pre:'+1',activo:false},
  {iso:'EC',nombre:'Ecuador',pre:'+593',activo:true,formato:'^\\+593\\d{8,9}$'},
- {iso:'ES',nombre:'España',pre:'+34',activo:false},
- {iso:'GT',nombre:'Guatemala',pre:'+502',activo:false},
- {iso:'HN',nombre:'Honduras',pre:'+504',activo:false},
- {iso:'MX',nombre:'México',pre:'+52',activo:false},
- {iso:'NI',nombre:'Nicaragua',pre:'+505',activo:false},
- {iso:'PA',nombre:'Panamá',pre:'+507',activo:false},
- {iso:'PE',nombre:'Perú',pre:'+51',activo:false},
- {iso:'PR',nombre:'Puerto Rico',pre:'+1',activo:false},
- {iso:'PY',nombre:'Paraguay',pre:'+595',activo:false},
- {iso:'SV',nombre:'El Salvador',pre:'+503',activo:false},
- {iso:'US',nombre:'Estados Unidos',pre:'+1',activo:false},
- {iso:'UY',nombre:'Uruguay',pre:'+598',activo:false},
+ {iso:'ES',nombre:'España',pre:'+34',activo:false},{iso:'GT',nombre:'Guatemala',pre:'+502',activo:false},
+ {iso:'HN',nombre:'Honduras',pre:'+504',activo:false},{iso:'MX',nombre:'México',pre:'+52',activo:false},
+ {iso:'NI',nombre:'Nicaragua',pre:'+505',activo:false},{iso:'PA',nombre:'Panamá',pre:'+507',activo:false},
+ {iso:'PE',nombre:'Perú',pre:'+51',activo:false},{iso:'PR',nombre:'Puerto Rico',pre:'+1',activo:false},
+ {iso:'PY',nombre:'Paraguay',pre:'+595',activo:false},{iso:'SV',nombre:'El Salvador',pre:'+503',activo:false},
+ {iso:'US',nombre:'Estados Unidos',pre:'+1',activo:false},{iso:'UY',nombre:'Uruguay',pre:'+598',activo:false},
  {iso:'VE',nombre:'Venezuela',pre:'+58',activo:false},
 ];
+/* ③ la bandera SALE del codigo_iso2 — el mismo cálculo que haría la app */
+const bandera = iso => String.fromCodePoint(...[...iso].map(c => c.codePointAt(0) + 127397));
+const comoAndroid = () => document.body.dataset.bandera === 'letras';
+const pintarBnd = iso => comoAndroid() ? iso : bandera(iso);
+
 const elegido = {telNegocio:'EC', wa:'EC'};
 let destino = 'telNegocio';
-
-/* ── tema ── */
 const raiz = document.documentElement;
 raiz.setAttribute('data-tema','light');
+document.body.dataset.rastro = 'si';
+document.body.dataset.bandera = 'emoji';
+
 document.getElementById('bTema').onclick = () => {
   const n = raiz.getAttribute('data-tema') === 'light' ? 'dark' : 'light';
   raiz.setAttribute('data-tema', n);
   document.getElementById('bTema').textContent = n === 'light' ? 'Cambiar a oscuro' : 'Cambiar a claro';
   document.getElementById('lTema').textContent = 'tema: ' + n + ' · oficio';
 };
-
-/* ── gate (a): espejo fijo o scrolleando ── */
-document.getElementById('bEspejo').onclick = () => togglePegado();
-function togglePegado(forzar){
-  const e = document.getElementById('espejo');
-  const on = forzar !== undefined ? forzar : !e.classList.contains('pegado');
-  e.classList.toggle('pegado', on);
-  document.querySelectorAll('[data-op]').forEach(o =>
-    o.classList.toggle('on', (o.dataset.op === 'pegado') === on));
+document.getElementById('bBandera').onclick = () => {
+  document.body.dataset.bandera = comoAndroid() ? 'emoji' : 'letras';
+  document.getElementById('bBandera').textContent = comoAndroid()
+    ? 'Ver banderas como las pinta iOS' : 'Ver banderas como las pinta Android';
+  refrescarBanderas();
+};
+function refrescarBanderas(){
+  ['telNegocio','wa'].forEach(id => document.getElementById('bnd'+id).textContent = pintarBnd(elegido[id]));
+  if (document.getElementById('hoja').classList.contains('on')) pintarLista();
 }
-document.querySelectorAll('[data-op]').forEach(o =>
-  o.onclick = () => togglePegado(o.dataset.op === 'pegado'));
-togglePegado(true);
 
-/* ── gate (b): “Dónde atendés” dentro o fuera ── */
-document.getElementById('bDonde').onclick = () => toggleDonde();
-function toggleDonde(forzar){
-  const b = document.getElementById('bloqueDonde');
-  const dentro = forzar !== undefined ? forzar : b.style.display === 'none';
-  b.style.display = dentro ? '' : 'none';
-  document.querySelectorAll('[data-donde]').forEach(o =>
-    o.classList.toggle('on', (o.dataset.donde === 'dentro') === dentro));
+/* ① SECCIONES DESPLEGABLES — E14: información despliega ⌄/⌃ */
+document.querySelectorAll('.sec[data-sec] .cab').forEach(c =>
+  c.onclick = () => c.parentElement.classList.toggle('on'));
+
+/* gate (d): qué está abierto al entrar */
+function aplicarApertura(modo){
+  document.querySelectorAll('.sec[data-sec]').forEach(s => s.classList.remove('on'));
+  if (modo === 'incompleta') {
+    const s = [...document.querySelectorAll('.sec[data-sec]')].find(x => x.dataset.completa === '0');
+    if (s) s.classList.add('on');
+  }
+  document.querySelectorAll('[data-abrir]').forEach(o => o.classList.toggle('on', o.dataset.abrir === modo));
 }
-document.querySelectorAll('[data-donde]').forEach(o =>
-  o.onclick = () => toggleDonde(o.dataset.donde === 'dentro'));
+document.querySelectorAll('[data-abrir]').forEach(o => o.onclick = () => aplicarApertura(o.dataset.abrir));
+aplicarApertura('cerradas');
 
-/* ── gate (c): el rótulo de lo personal ── */
+/* ② gate (a′): el rastro */
+function aplicarRastro(v){
+  document.body.dataset.rastro = v;
+  document.querySelectorAll('[data-rastro]').forEach(o => o.classList.toggle('on', o.dataset.rastro === v));
+}
+document.querySelectorAll('[data-rastro]').forEach(o => o.onclick = () => aplicarRastro(o.dataset.rastro));
+document.getElementById('bRastro').onclick = () =>
+  aplicarRastro(document.body.dataset.rastro === 'si' ? 'no' : 'si');
+
+/* el rastro aparece cuando el espejo se fue */
+const cuerpo = document.getElementById('cuerpo'), espejo = document.getElementById('espejo');
+cuerpo.addEventListener('scroll', () => {
+  const fuera = cuerpo.scrollTop > espejo.offsetHeight - 84;
+  document.getElementById('rastro').classList.toggle('on', fuera);
+});
+
+/* gate (c) */
 document.querySelectorAll('[data-rot]').forEach(o => o.onclick = () => {
   document.getElementById('rotuloPersonal').textContent = o.dataset.rot;
   document.querySelectorAll('[data-rot]').forEach(x => x.classList.toggle('on', x === o));
 });
 
-/* ── la Hoja del país ── */
+/* Hoja del país */
 const hoja = document.getElementById('hoja'), scrim = document.getElementById('scrim');
 function pintarLista(){
   const cur = elegido[destino];
   document.getElementById('listaPaises').innerHTML = PAISES.map(p => `
-    <div class="pfila ${p.activo ? '' : 'off'}" data-iso="${p.iso}">
-      <span class="tick">${p.iso === cur ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}</span>
-      <span class="nom">${p.nombre} ${p.activo ? '' : '<span class="luego">· todavía no</span>'}</span>
+    <div class="pfila ${p.activo?'':'off'}" data-iso="${p.iso}">
+      <span class="tick">${p.iso===cur?'<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}</span>
+      <span class="bnd">${pintarBnd(p.iso)}</span>
+      <span class="nom">${p.nombre}${p.activo?'':' <span class="luego">· todavía no</span>'}</span>
       <span class="pre">${p.pre}</span>
     </div>`).join('');
   document.querySelectorAll('.pfila:not(.off)').forEach(f => f.onclick = () => {
     elegido[destino] = f.dataset.iso;
-    document.getElementById('cod' + destino).textContent =
-      PAISES.find(p => p.iso === f.dataset.iso).pre;
+    const p = PAISES.find(x => x.iso === f.dataset.iso);
+    document.getElementById('cod'+destino).textContent = p.pre;
+    document.getElementById('bnd'+destino).textContent = pintarBnd(p.iso);
     cerrar(); validar(destino);
   });
 }
-document.querySelectorAll('.pais').forEach(b => b.onclick = () => {
-  destino = b.dataset.destino; pintarLista();
+document.querySelectorAll('.pais').forEach(b => b.onclick = e => {
+  e.stopPropagation(); destino = b.dataset.destino; pintarLista();
   hoja.classList.add('on'); scrim.classList.add('on');
 });
 function cerrar(){ hoja.classList.remove('on'); scrim.classList.remove('on'); }
 scrim.onclick = cerrar;
 
-/* ── validación EN VIVO contra cat_paises.formato_telefono ── */
+/* validación EN VIVO contra cat_paises.formato_telefono */
 function validar(id){
-  const input = document.getElementById(id);
-  const campo = document.getElementById('cmp-' + id);
-  const msg   = document.getElementById('msg-' + id);
-  const pais  = PAISES.find(p => p.iso === elegido[id]);
-  const crudo = input.value.replace(/[\s-]/g, '');
-  if (crudo === '') { campo.classList.remove('mal'); msg.innerHTML = ''; return; }
-  const e164 = pais.pre + crudo;
-  const re = pais.formato ? new RegExp(pais.formato) : null;
-  if (!re) {                                  // país sin formato declarado: no se inventa
-    campo.classList.remove('mal');
-    msg.innerHTML = `<div class="ok">${e164} · ${pais.nombre} no tiene formato declarado en el catálogo — no lo validamos.</div>`;
-    return;
-  }
+  const input = document.getElementById(id), campo = document.getElementById('cmp-'+id),
+        msg = document.getElementById('msg-'+id), pais = PAISES.find(p => p.iso === elegido[id]);
+  const crudo = input.value.replace(/[\s-]/g,'');
+  if (crudo === '') { campo.classList.remove('mal'); msg.innerHTML=''; return; }
+  const e164 = pais.pre + crudo, re = pais.formato ? new RegExp(pais.formato) : null;
+  if (!re) { campo.classList.remove('mal');
+    msg.innerHTML = `<div class="ayuda">${pais.nombre} no tiene formato declarado en el catálogo — no lo validamos.</div>`; return; }
   const bien = re.test(e164);
   campo.classList.toggle('mal', !bien);
   msg.innerHTML = bien
-    ? `<div class="ok">Se guarda como <b>${e164}</b></div>`
+    ? `<div class="ok2">se guarda ${e164}</div>`
     : `<div class="err">Un número de ${pais.nombre} lleva 8 o 9 dígitos después de ${pais.pre}. Van ${crudo.length}.</div>`;
 }
 ['telNegocio','wa'].forEach(id => {
-  document.getElementById(id).addEventListener('input', () => { validar(id); repintarVacio(); });
+  document.getElementById(id).addEventListener('input', () => { validar(id); repintar(); });
   validar(id);
 });
 
-/* ── el vacío honesto se recalcula solo (no es texto fijo) ── */
-function repintarVacio(){
-  const tel = document.getElementById('telNegocio').value.trim();
-  const wa  = document.getElementById('wa').value.trim();
-  const el  = document.getElementById('vacioHonesto');
-  if (tel && wa) { el.innerHTML = 'Las familias pueden escribirte por teléfono y por WhatsApp.'; return; }
-  if (!tel && !wa) { el.innerHTML = 'Una familia que te encuentra hoy <b>no tiene cómo escribirte</b>.'; return; }
-  el.innerHTML = tel
+/* el resumen de la sección y el vacío honesto se RECALCULAN */
+function repintar(){
+  const tel = document.getElementById('telNegocio').value.trim(),
+        wa  = document.getElementById('wa').value.trim(),
+        res = document.getElementById('resContacto'),
+        vac = document.getElementById('vacio'),
+        sec = document.querySelector('.sec[data-sec="contacto"]');
+  if (tel && wa) { res.textContent='TELÉFONO · WHATSAPP'; res.classList.remove('falta'); sec.dataset.completa='1';
+    vac.innerHTML='Las familias pueden escribirte por teléfono y por WhatsApp.'; return; }
+  sec.dataset.completa='0'; res.classList.add('falta');
+  if (!tel && !wa) { res.textContent='SIN CONTACTO';
+    vac.innerHTML='Una familia que te encuentra hoy <b>no tiene cómo escribirte</b>.'; return; }
+  res.textContent = tel ? 'SOLO TELÉFONO' : 'SOLO WHATSAPP';
+  vac.innerHTML = tel
     ? 'Las familias pueden llamarte. Te falta el WhatsApp.'
     : 'Una familia que te encuentra hoy <b>no tiene cómo escribirte</b>: no cargaste teléfono, correo ni sitio. Tu WhatsApp sí está.';
 }
-repintarVacio();
+repintar(); refrescarBanderas();
 </script>
