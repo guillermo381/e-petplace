@@ -101,17 +101,31 @@ export function SeccionDesplegable({
  * las métricas de la fuente base y el emoji quedó fuera de la línea
  * base — no era un problema de espaciado.
  *
- * LA CURA ES DE ALINEACIÓN REAL, no un margen a ojo, y son tres cosas
- * juntas — ninguna alcanza sola:
- *  ① DOS nodos de texto hermanos en una fila con `alignItems:'center'`:
- *    se alinean por CONTENEDOR, no por línea base — la línea base es
- *    justamente lo que no comparten.
- *  ② `lineHeight` EXPLÍCITO e IGUAL en los dos: sin él cada nodo pide
- *    el alto que su fuente quiera y el centro del contenedor se corre.
- *  ③ `includeFontPadding:false` (Android): por default Android agrega
- *    el padding métrico de la fuente arriba y abajo, y es asimétrico
- *    entre la fuente de emoji y la de texto — es el que más desplaza,
- *    y en iOS es no-op.
+ * ⚠️ LA PRIMERA CURA (S83-C13) NO ALCANZÓ — y el founder la volvió a
+ * reportar en el gate del Perfil cableado (S83-C32 ①). **El error de
+ * método fue mío y se declara: la di por curada POR CONSTRUCCIÓN, no por
+ * PANTALLA** (L-153 aplicada a quien construye). Al re-medir, lo primero
+ * que se descartó fue la hipótesis barata: `SelectorPais` SÍ era la pieza
+ * montada (líneas 348 y 367 de `cuenta/perfil`), así que no había un
+ * clon viejo corriendo — lo que estaba mal era la cura.
+ *
+ * POR QUÉ NO PODÍA GANAR: peleaba contra las MÉTRICAS del texto, y las
+ * métricas de esa fuente no son nuestras.
+ *  · `textAlignVertical` en Android **solo actúa con alto acotado** —
+ *    sin altura fija el flag es decorativo.
+ *  · La fuente de emoji del sistema **puede ignorar el `lineHeight` que
+ *    le pedimos**: no la cargamos nosotros y no le imponemos su caja.
+ * Pedirle a un glifo ajeno que respete nuestra tipografía es pedirle
+ * algo que no está obligado a cumplir.
+ *
+ * LA CURA QUE RIGE (S83-C33) — **CAJA FIJA, no métricas**: el emoji va
+ * dentro de un `View` de alto y ancho FIJOS (`linea`), centrado por
+ * `alignItems/justifyContent`. La geometría deja de depender de la
+ * línea base y pasa a depender de la caja, que sí controlamos.
+ * *Un glifo que no controlo no se alinea por métrica; se alinea por caja.*
+ * `includeFontPadding:false` SOBREVIVE (sigue siendo correcto en
+ * Android); lo que murió es el `lineHeight`/`textAlignVertical` sobre el
+ * nodo del emoji, que prometían una alineación que no podían dar.
  *
  * Y EL BORDE QUE PIDE LA ORDEN — el prefijo más largo contra el más
  * corto (`+593`/`+591` de 4 contra `+1` de 2): el prefijo va en MONO
@@ -147,25 +161,29 @@ export function SelectorPais({
         backgroundColor: theme.bg.hundido,
       }}
     >
-      <Text
-        allowFontScaling={false}
-        style={{
-          fontSize: typography.size.md,
-          lineHeight: linea, // ②
-          includeFontPadding: false, // ③ (Android; no-op en iOS)
-          textAlignVertical: 'center',
-          color: theme.text.primary,
-        }}
-      >
-        {bandera}
-      </Text>
+      {/* ① S83-C33 — LA CAJA FIJA. Ver el porqué arriba: se dejó de pelear
+          con las métricas. El emoji vive DENTRO de un View de alto y ancho
+          FIJOS que lo centra por contenedor; lo que la fuente haga con su
+          línea base ya no puede correr nada, porque el nodo de texto ya no
+          define la geometría — la define la caja. */}
+      <View style={{ width: linea, height: linea, alignItems: 'center', justifyContent: 'center' }}>
+        <Text
+          allowFontScaling={false}
+          style={{
+            fontSize: typography.size.md,
+            includeFontPadding: false, // Android; no-op en iOS
+            color: theme.text.primary,
+          }}
+        >
+          {bandera}
+        </Text>
+      </View>
       <Text
         style={{
           fontFamily: typography.family.mono.regular,
           fontSize: typography.size.base,
-          lineHeight: linea, // ② el MISMO alto
-          includeFontPadding: false, // ③
-          textAlignVertical: 'center',
+          lineHeight: linea,
+          includeFontPadding: false,
           // el borde de la orden: +1 (2 chars) y +593 (4) no cambian el ancho
           minWidth: 44,
           color: theme.text.primary,
