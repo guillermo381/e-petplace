@@ -558,6 +558,27 @@ bocetos v2 (también firmados).
    **administra**: configura, revisa, cambia reglas. Una pantalla que pide
    "gestionar" desde el HOY está mal ubicada; una acción del día enterrada
    en NEGOCIO, también.
+
+   **1bis. CUENTA es tu relación con la PLATAFORMA — el tercer verbo
+   (firmada founder S83, 31-jul-2026).** Letra del founder:
+
+   > *"**CUENTA es tu relación con la plataforma: identidad, plata que
+   > entra, acceso.** El discriminador es medible: **si la familia no lo
+   > ve y no configura la oferta, es Cuenta**."*
+
+   Los tres verbos quedan: **HOY hace · NEGOCIO ofrece · CUENTA es tu
+   relación con nosotros.** Lo que distingue a este de los otros dos no es
+   solo el contenido — es que **su discriminador se puede CORRER**:
+
+   - **EL JUEZ ES `v_prestadores_publicos`.** *"¿La familia lo ve?"* no se
+     opina: **se consulta la vista**. Lo que ella expone es lo que la
+     familia ve; lo que no expone, no. *(Medición de C16, S83.)*
+   - **Un discriminador que se puede correr vale distinto de uno que se
+     opina**, y por eso se escribe acá y no en un reporte: los dos verbos
+     de S70 se aplican con criterio y admiten discusión de buena fe en el
+     borde; **éste se contesta con una query.** Cuando el juez y la
+     intuición discrepan, **gana el juez** — y si la vista está mal, se
+     enmienda la vista, que es un acto declarado, no una interpretación.
 2. **Lo que sigue PRESIDE; lo pasado se PLIEGA.** La jerarquía de la
    jornada es temporal: lo próximo ocupa la parte alta y el cuerpo grande;
    lo ya ocurrido se colapsa (acordeón, "ver más", lista corta). El
@@ -576,6 +597,37 @@ bocetos v2 (también firmados).
 pantalla nueva del prestador nace **contra un boceto** (L-143) y se audita
 contra estos cuatro puntos — y la vara **la firma el founder sobre píxeles
 publicados, jamás la sesión que construyó** (L-153).
+
+### 15b.0 · ALCANCE DE LA FIRMA DEL TERCER VERBO (S83) — lo que decide y lo que NO
+
+**LO QUE LA FIRMA DECIDE:**
+
+1. **El discriminador tiene juez medible** (arriba): `v_prestadores_publicos`.
+2. **LA PRECONDICIÓN DEL CENSO, y viene INVERTIDA respecto de lo que la mesa
+   presuponía: Cuenta se secciona PRIMERO** (identidad · plata · acceso), y
+   **Cobros viaja DESPUÉS, entero.** La lectura que esto corrige importa más
+   que el orden: **NEGOCIO no está "revuelta"** — está correctamente
+   seccionada **con una sección que no le pertenece**. Un diagnóstico de
+   "revuelta" habría mandado a re-ordenar Negocio entera; el diagnóstico real
+   manda a **sacarle una pieza y ponerla donde va**. *Mover una sección
+   completa a un lugar que todavía no tiene secciones es mudarse a una casa
+   sin habitaciones: por eso Cuenta se secciona primero.*
+3. **"Tu cuenta" es el nombre de la TAB, y de nada más adentro.** Ninguna
+   celda lleva ese nombre: **la celda de C13 pasa a ser la sección
+   IDENTIDAD.** Un contenedor y su contenido no comparten nombre — si lo
+   comparten, el usuario no sabe si entró o sigue afuera.
+
+**LO QUE LA FIRMA *NO* DECIDE — queda a S84, SIN FIRMA (regla 80):**
+
+- **Los rótulos finales** de las tres secciones (identidad · plata · acceso
+  son los CONCEPTOS, no necesariamente las palabras en pantalla).
+- **`casos-heredados` → HOY cuando despierte.** Hallazgo (4) de C16, con su
+  razón: **agrupar por MADUREZ mezcla familias** — poner junto "lo que
+  todavía no existe" es un criterio de construcción, no de uso, y al usuario
+  le llega como un cajón de cosas sin relación entre sí.
+- **El orden de las secciones en pantalla.**
+
+*Los tres se deciden viendo píxeles (regla 80), y ninguno bloquea al otro.*
 
 **Ver también — horarios:** la letra de solape/merge de franjas vive en la
 deuda **D-409** (`DEUDAS_CANONICAS.md`), firmada en S70: el solape entre
