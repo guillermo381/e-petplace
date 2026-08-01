@@ -40,12 +40,14 @@
  * con `elevacion.luz`, que resuelve `null` en claro porque en claro la
  * superficie ya existe sin ayuda.
  *
- * ── EL COLOR NO TIENE DEFAULT, a propósito ────────────────────────────
- * La pantalla declara de qué CAPA es su atmósfera. Un default sería la
- * pieza decidiendo dosis desde adentro, que es justo lo que
- * `MarcaEleccion` declara que no hace. En el prestador el color es su
- * oficio (`accent.cta` / `palette.tealDark`); en el cliente, la capa del
- * contexto.
+ * ── EL COLOR SALE DEL SLOT (S83-B34) ──────────────────────────────────
+ * `accent.atmosfera`, el OCTAVO slot: magenta en el cliente, el verde del
+ * oficio en el prestador. Nació sin default con el argumento de que "la
+ * pantalla declara su capa"; ese argumento cayó cuando el efecto pasó a
+ * ser de las DOS casas — si cada pantalla elige, cada pantalla puede
+ * equivocarse de casa, y el magenta en el prestador es lo que §15b.1
+ * prohíbe. La prop sobrevive para el caso legítimo: una pantalla del
+ * cliente cuya atmósfera es la de otra capa.
  */
 
 import { View } from 'react-native'
@@ -66,8 +68,17 @@ const ORIGEN: Record<OrigenAtmosfera, { cx: string; cy: string }> = {
 }
 
 export type AtmosferaProps = {
-  /** El color de la CAPA. Sin default: la pantalla lo declara. */
-  color: string
+  /** El color de la luz. **Default: `accent.atmosfera`** (S83-B34, el
+   *  octavo slot) — magenta en el cliente, el verde del oficio en el
+   *  prestador, resuelto POR CASA como los otros siete.
+   *  Nació sin default en B16 con el argumento de que "la pantalla
+   *  declara de qué capa es". Ese argumento CAYÓ cuando el efecto pasó a
+   *  ser de las DOS casas: si cada pantalla declara el color, cada
+   *  pantalla puede equivocarse de casa — y el magenta en el prestador es
+   *  justo lo que §15b.1 prohíbe. El slot lo hace imposible por
+   *  construcción. La prop sobrevive para el caso legítimo: una pantalla
+   *  del cliente cuya atmósfera es la de OTRA capa (salud, cuidado). */
+  color?: string
   /** Dónde nace la luz. Default `'arriba-derecha'`, el único que el
    *  portal viejo usó en producción. */
   origen?: OrigenAtmosfera
@@ -95,6 +106,10 @@ export function Atmosfera({ color, origen = 'arriba-derecha', intensidad = 0.18 
   // claro, declarando 0.12 contra 0.22 de oscuro.
   if (theme.mode === 'memorial' || theme.mode === 'light') return null
   const { cx, cy } = ORIGEN[origen]
+  // `atmosfera` vive en LOS TRES temas base, así que el acceso es
+  // directo: sin `in`, sin cast. Si algún día un tema no lo trajera, el
+  // tsc lo diría acá — que es donde tiene que decirlo.
+  const tinta = color ?? theme.accent.atmosfera
   return (
     <View pointerEvents="none" style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }} aria-hidden>
       <Svg width="100%" height="100%">
@@ -102,9 +117,9 @@ export function Atmosfera({ color, origen = 'arriba-derecha', intensidad = 0.18 
           {/* Tres stops y no dos: con dos, el borde del degradado se ve
               como un anillo. El del medio es lo que lo hace atmósfera. */}
           <RadialGradient id="atmosfera" cx={cx} cy={cy} r="55%">
-            <Stop offset="0" stopColor={color} stopOpacity={intensidad} />
-            <Stop offset="0.55" stopColor={color} stopOpacity={intensidad * 0.32} />
-            <Stop offset="1" stopColor={color} stopOpacity={0} />
+            <Stop offset="0" stopColor={tinta} stopOpacity={intensidad} />
+            <Stop offset="0.55" stopColor={tinta} stopOpacity={intensidad * 0.32} />
+            <Stop offset="1" stopColor={tinta} stopOpacity={0} />
           </RadialGradient>
         </Defs>
         <Rect x="0" y="0" width="100%" height="100%" fill="url(#atmosfera)" />

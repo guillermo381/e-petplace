@@ -207,6 +207,19 @@ export const palette = {
    *  AL FIRMARSE: esta línea toma el candidato + nace el slot de fondo
    *  del provider para que el prestador siga en papel. Reversa: volver
    *  a `light0`. */
+  /** EL PAPEL DEL PRESTADOR (S83-B33) — la ENMIENDA de la letra de S82.
+   *  Aquella decía "el prestador NO recibe tinte, es fondo del cliente"
+   *  (r8 §5, r9 §4) y valía cuando el tinte era UNO. Con "un tinte por
+   *  casa" (r29) el oscuro ganó el suyo y el CLARO quedó con la letra
+   *  vieja — una casa con tinte en un tema y sin tinte en el otro, que
+   *  nadie decidió. El founder lo firmó en S83.
+   *  MISMO MÉTODO QUE EL DEL CLIENTE, verificado reproduciéndolo: su
+   *  #FAF2F5 es EXACTAMENTE pink puro al 3% sobre light0, así que éste es
+   *  teal puro al 3% sobre light0. Mismo hex de marca, misma dosis, mismo
+   *  orden — no un verde elegido a ojo.
+   *  La escala 2/3/4/5% va a galería para su gate: el founder elige el
+   *  nivel mirando, como hizo con el oscuro. Reversa: `light0`. */
+  papelTapizOficio: '#F4F8F6',
   papelTapiz: '#FAF2F5',  // S82-B r10 ENCENDIDO (orden founder): pink 3% sobre papel algodón
   /** Los candidatos del gate (S82-B r9) — pink puro compositado sobre
    *  papel algodón al 2/3/4/5%: mezcla de DOS tokens FIRMADOS, jamás

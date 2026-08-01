@@ -95,6 +95,10 @@ export const memorialTheme = {
      *  divergencia por accidente. Si el founder decide que la pata SIEMPRE
      *  sigue al control, este campo se borra y la pata lee `control`. */
     marcaEleccion: palette.textMemorialDark,
+    /** El color de la LUZ DE AMBIENTE (S83-B34). En el cliente es su
+     *  MAGENTA de marca; los temas de oficio lo pisan a su verde. En
+     *  memorial da igual — la pieza no se monta (Ley 8). */
+    atmosfera: palette.textMemorialDark,
     // S82-B r12 — el fondo del Boton `sinCaja` (memorial: la superficie serena que ya existe):
     // el secundario sin borde necesita un canal, y el borde ya no está.
     sinCaja:      palette.memorialDark1,

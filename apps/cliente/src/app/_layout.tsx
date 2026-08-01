@@ -11,7 +11,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Updates from 'expo-updates';
 import { useFonts } from 'expo-font';
-import { AvisoProvider, ThemeProvider as EpetThemeProvider, epetplaceFonts } from '@epetplace/ui';
+import { Atmosfera, AvisoProvider, ThemeProvider as EpetThemeProvider, epetplaceFonts } from '@epetplace/ui';
 import { ProveedorI18n } from '@epetplace/i18n';
 
 // Bootstrap de la puerta única (initApi + persistencia de sesión) —
@@ -73,6 +73,19 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ProveedorI18n recursos={recursos}>
         <EpetThemeProvider mode={colorScheme === 'dark' ? 'dark' : 'light'}>
+          {/* S83-B34 — LA ATMOSFERA DEL CLIENTE (firma founder: el glow es
+              de las DOS casas). Va en el RAÍZ, misma casa que en el
+              prestador y el mismo lugar que el AmbientGlow del portal
+              viejo (Layout.tsx:148) — es fondo compartido, no override
+              por pantalla.
+              SIN PROP `color`: lo toma de `accent.atmosfera` (el octavo
+              slot, S83-B34), que resuelve MAGENTA acá y el verde del
+              oficio del otro lado. Pasarle `accent.primary` —como se
+              montó en el prestador antes de que el slot existiera— daría
+              TEAL en el cliente: ese token es el mismo en las dos casas.
+              DARK-ONLY y memorial apagado: los dos viven EN LA PIEZA
+              (S83-B29/B16), no acá. */}
+          <Atmosfera origen="arriba-derecha" />
           <AvisoProvider>
             <Stack screenOptions={{ headerShown: false }} />
           </AvisoProvider>
