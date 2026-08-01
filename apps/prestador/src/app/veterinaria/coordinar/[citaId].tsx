@@ -25,6 +25,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  MarcaDeAgua,
   SelectorOpcion,
   Tarjeta,
   Texto,
@@ -161,6 +162,7 @@ export default function FijarFecha() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('coordinar.titulo')} atras onAtras={() => router.back()} />
       <ScrollView
         contentContainerStyle={{

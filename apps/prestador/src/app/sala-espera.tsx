@@ -32,6 +32,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   Insignia,
+  MarcaDeAgua,
   Separador,
   Tarjeta,
   Texto,
@@ -144,6 +145,7 @@ export default function SalaEspera() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + spacing[8],

@@ -29,6 +29,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  MarcaDeAgua,
   Separador,
   Tarjeta,
   Texto,
@@ -119,6 +120,7 @@ export default function OfertaAdiestramiento() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado
         variante="navegacion"
         titulo={t('ofertaAdiestramiento.titulo')}

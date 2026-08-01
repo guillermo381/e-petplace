@@ -35,6 +35,7 @@ import {
   EstadoVacio,
   Hoja,
   HojaScroll,
+  MarcaDeAgua,
   SelectorOpcion,
   Separador,
   Tarjeta,
@@ -180,6 +181,7 @@ export default function Vacaciones() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('vacaciones.titulo')} atras onAtras={() => router.back()} />
 
       {pantalla.estado === 'cargando' && (

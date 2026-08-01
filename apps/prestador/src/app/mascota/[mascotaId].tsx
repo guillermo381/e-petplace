@@ -25,6 +25,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   Insignia,
+  MarcaDeAgua,
   Separador,
   Tarjeta,
   Texto,
@@ -112,6 +113,7 @@ export default function DetalleMascota() {
   if (detalle === 'cargando') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
         <Encabezado variante="navegacion" titulo="" atras onAtras={() => router.back()} />
         <View style={{ padding: spacing[5] }}>
           <EsqueletoGrupo>
@@ -130,6 +132,7 @@ export default function DetalleMascota() {
   if (detalle === 'error') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
         <Encabezado variante="navegacion" titulo="" atras onAtras={() => router.back()} />
         <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
           <EstadoVacio
@@ -202,6 +205,7 @@ export default function DetalleMascota() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo="" atras onAtras={() => router.back()} />
       <ScrollView contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[8], gap: spacing[6] }}>
         {/* ── cabecera con presencia (§6.4.4) ── */}

@@ -11,7 +11,7 @@
 import { useState } from 'react';
 import { Linking, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Boton, Encabezado, Entrada, Texto, spacing, typography, useTheme } from '@epetplace/ui';
+import { Boton, Encabezado, Entrada, MarcaDeAgua, spacing, Texto, typography, useTheme } from '@epetplace/ui';
 
 import { WHATSAPP_EQUIPO_HUMANO, urlWhatsApp } from '@/lib/contacto';
 import { useTraduccion } from '@/i18n';
@@ -35,6 +35,7 @@ export default function SolicitarAcceso() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado
         variante="navegacion"
         titulo={t('bienvenida.solicitarTitulo')}

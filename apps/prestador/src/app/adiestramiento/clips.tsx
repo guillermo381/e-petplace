@@ -28,6 +28,7 @@ import {
   Celda,
   ClipSesion,
   Encabezado,
+  MarcaDeAgua,
   Separador,
   Tarjeta,
   Texto,
@@ -204,6 +205,7 @@ export default function ClipsSesionPantalla() {
   if (vista.v === 'camara') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
         <CameraView
           ref={camRef}
           style={{ flex: 1 }}
@@ -250,6 +252,7 @@ export default function ClipsSesionPantalla() {
     const corto = duracionS < CLIP_MIN_S;
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
         <View style={{ paddingHorizontal: spacing[4], paddingTop: spacing[2] }}>
           <Encabezado
             variante="navegacion"
@@ -327,6 +330,7 @@ export default function ClipsSesionPantalla() {
   const techo = clips.length >= CLIPS_MAX;
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <View style={{ paddingHorizontal: spacing[4], paddingTop: spacing[2] }}>
         <Encabezado variante="navegacion" titulo={t('clips.titulo')} atras onAtras={() => router.back()} />
       </View>

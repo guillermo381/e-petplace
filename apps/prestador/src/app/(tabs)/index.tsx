@@ -42,6 +42,7 @@ import {
   EstadoVacio,
   Icono,
   Insignia,
+  MarcaDeAgua,
   Separador,
   Tarjeta,
   Texto,
@@ -887,6 +888,7 @@ export default function Hoy() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <ScrollView
         contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}
         refreshControl={<RefreshControl refreshing={refrescando} onRefresh={() => void refrescar()} />}

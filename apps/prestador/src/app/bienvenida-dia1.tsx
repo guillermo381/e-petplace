@@ -24,7 +24,7 @@ import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
-import { Boton, Isotipo, Texto, palette, radius, spacing, useTheme } from '@epetplace/ui';
+import { Boton, Isotipo, MarcaDeAgua, palette, radius, spacing, Texto, useTheme } from '@epetplace/ui';
 import { obtenerMiPerfil, obtenerMiPrestador, registrarPrimerIngreso } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -116,6 +116,7 @@ export default function BienvenidaDia1() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       {/* S81-C (lazo regla 80, orden founder): el PAPEL de la carta —
           fondo teal casi imperceptible (papel + tealAlpha16 → #D8F6F2)
           + el isotipo en MARCA DE AGUA (la pieza de ui, no redibujado;

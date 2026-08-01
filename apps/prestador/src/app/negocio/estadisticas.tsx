@@ -7,7 +7,7 @@
 
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Encabezado, EstadoVacio, spacing, useTheme } from '@epetplace/ui';
+import { Encabezado, EstadoVacio, MarcaDeAgua, spacing, useTheme } from '@epetplace/ui';
 
 import { useTraduccion } from '@/i18n';
 
@@ -18,6 +18,7 @@ export default function Estadisticas() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('despierta.estadisticasNav')} atras onAtras={() => router.back()} />
       <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
         <EstadoVacio titulo={t('despierta.estadisticasTitulo')} descripcion={t('despierta.estadisticasCuerpo')} />

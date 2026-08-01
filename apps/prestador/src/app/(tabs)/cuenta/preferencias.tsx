@@ -13,6 +13,7 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Encabezado,
+  MarcaDeAgua,
   SelectorOpcion,
   Tarjeta,
   Texto,
@@ -51,6 +52,7 @@ export default function PreferenciasCuenta() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('miCuenta.preferencias')} atras onAtras={() => router.back()} />
 
       <ScrollView contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[6], gap: spacing[5] }}>

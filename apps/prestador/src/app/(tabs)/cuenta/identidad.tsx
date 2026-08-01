@@ -40,6 +40,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   EvitaTeclado,
+  MarcaDeAgua,
   Texto,
   spacing,
   useAviso,
@@ -49,14 +50,28 @@ import { actualizarMiPerfil, obtenerMiPerfil } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 
-/** E.164 sin '+' (regla 28): validación SUAVE — se limpian espacios,
- *  guiones y el '+' inicial; los dígitos son los que viajan. Es la MISMA
- *  normalización que usaba `cuenta/perfil`, portada tal cual: la regla no
- *  cambia porque la pantalla se parta. */
-function normalizarTelefono(v: string): string {
-  return v.trim().replace(/^\+/, '').replace(/[\s-]/g, '');
-}
-
+/* ⑤ S83-C33 — EL TELÉFONO SE FUE DE ACÁ (defecto del founder).
+ *
+ * Letra: *"ahí va nombre + correo de inicio de sesión. El teléfono es del
+ * negocio y vive en contacto."* Y el error era DOBLE: además del campo,
+ * el detalle de la celda que trae acá decía "Tu nombre, tu teléfono y tu
+ * correo" — mientras la sección de contacto del Perfil dice "tu teléfono
+ * personal vive en Cuenta". **Dos frases que no pueden ser ciertas a la
+ * vez**: una pantalla que se contradice con su vecina enseña mal el
+ * modelo. Se curan las dos (la celda, en `cuenta/perfil`).
+ *
+ * ⚠️ EL DATO NO SE PIERDE Y NO SE BORRA: `profiles.telefono` sigue vivo
+ * en la DB y `actualizarMiPerfil` sigue aceptándolo — lo que se retira es
+ * la SUPERFICIE. Quitar un campo de una pantalla no es motivo para
+ * escribir null sobre un dato que el usuario cargó: esta pantalla deja de
+ * mandar la columna, y el valor de quien ya lo tenía queda intacto.
+ * ☠️ Su casa definitiva se decide con el seccionado de Cuenta (S84): si
+ * el personal necesita teléfono propio, nace ahí con su letra — no vuelve
+ * de contrabando.
+ *
+ * `normalizarTelefono` MURIÓ con su único consumidor (Ley 37). Su gemela
+ * sigue viva en `cuenta/perfil`, que es donde el teléfono vive de verdad.
+ */
 export default function NombreYAcceso() {
   const router = useRouter();
   const { theme } = useTheme();
@@ -66,7 +81,6 @@ export default function NombreYAcceso() {
 
   const [estado, setEstado] = useState<'cargando' | 'listo' | 'error'>('cargando');
   const [nombre, setNombre] = useState('');
-  const [telefono, setTelefono] = useState('');
   const [email, setEmail] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
 
@@ -82,7 +96,6 @@ export default function NombreYAcceso() {
           return;
         }
         setNombre(r.data.nombre ?? '');
-        setTelefono(r.data.telefono ?? '');
         setEmail(r.data.email);
         setEstado('listo');
       })();
@@ -95,7 +108,9 @@ export default function NombreYAcceso() {
   async function guardar() {
     if (guardando) return;
     setGuardando(true);
-    const r = await actualizarMiPerfil({ nombre, telefono: normalizarTelefono(telefono) });
+    // ⑤ SOLO el nombre: la pantalla dejó de mandar `telefono` y por eso no
+    // puede pisarlo. El wrapper lo sigue aceptando — es campo opcional.
+    const r = await actualizarMiPerfil({ nombre });
     setGuardando(false);
     if (!r.ok) {
       mostrar({ texto: r.mensaje, variante: 'error' });
@@ -107,6 +122,7 @@ export default function NombreYAcceso() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo="Nombre y acceso" atras onAtras={() => router.back()} />
 
       {estado === 'cargando' && (
@@ -150,14 +166,6 @@ export default function NombreYAcceso() {
             <Texto variante="apoyo">Estos datos son tuyos. No los ven las familias.</Texto>
 
             <Campo label={t('miCuenta.nombreLabel')} value={nombre} onChangeText={setNombre} autoCapitalize="words" />
-            <Campo
-              label={t('miCuenta.telefonoLabel')}
-              value={telefono}
-              onChangeText={setTelefono}
-              ayuda={t('miCuenta.telefonoAyuda')}
-              keyboardType="phone-pad"
-              autoCapitalize="none"
-            />
             {/* La firma: el read-only DICE SU PORQUÉ. Un campo gris sin
                 explicación se lee como error del producto. */}
             <Campo

@@ -18,6 +18,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   Insignia,
+  MarcaDeAgua,
   Separador,
   Tarjeta,
   spacing,
@@ -79,6 +80,7 @@ export default function Movimiento() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('movimiento.titulo')} atras onAtras={() => router.back()} />
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[4] }}>
         {pantalla.estado === 'cargando' && (
