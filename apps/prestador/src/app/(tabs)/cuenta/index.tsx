@@ -551,6 +551,49 @@ export default function Cuenta() {
             onPress={() => router.push('/perfil-v2')}
           />
 
+          {/* ── S83-C15 · LA PUERTA DE LA GALERÍA (decisión founder).
+              El prestador NUNCA la tuvo: `/gallery` está registrada en
+              el layout pero vive SOLO por URL (medido en C10) — y con
+              las tres firmas de atmósfera publicadas, eso dejaba TRES
+              gates del founder inalcanzables. Es L-161 al pie de la
+              letra: una superficie de gate que no se puede alcanzar no
+              es un gate. El cliente la tiene desde D-580; ésta es su
+              hermana. SIN `__DEV__`: en un APK preview `__DEV__` es
+              false y la entrada desaparecería justo donde tiene que
+              existir — el defecto exacto que R18 vigila del lado
+              cliente.
+
+              ⚠️ SU CONDICIÓN NO ES LA DE SU VECINA, y la distinción es
+              lo que hay que leer antes de tocarla: la celda de Perfil v2
+              (arriba) SÍ muere — cuando esa pantalla se firme y
+              reemplace a la vieja. **Ésta NO se retira por iniciativa de
+              ninguna sesión.** La enmienda FIRMADA del founder en D-580
+              lo dice para la hermana del cliente y rige igual acá: la
+              galería queda visible en Cuenta, no se esconde tras
+              `__DEV__` sin orden explícita, y **su retiro se DECIDE en
+              el gate de producción — es una FIRMA, no una fecha del
+              calendario**. El checklist de tiendas es insumo de esa
+              decisión, no la decisión.
+              Se escribe así, y no como "provisional", porque el modo de
+              falla real es que alguien la borre creyendo que paga una
+              deuda: del lado cliente eso lo caza el guard R18, cuya
+              polaridad es que la entrada EXISTA.
+              ⚠️ HUECO DECLARADO: **R18 mira SOLO la Cuenta del cliente**
+              (`CUENTA_CLIENTE` en `verify-diseno.mjs`) — esta entrada
+              queda SIN guard hasta que la regla se ensanche a las dos
+              casas. Es una línea, y va aparte de este OTA.
+
+              Los textos van LITERALES fuera del riel i18n — igual que su
+              hermana del cliente: la galería no es pantalla de producto
+              y su copy no pertenece al lote de strings. ── */}
+          <CeldaNavegacion
+            icono="preferencias"
+            titulo="Galería de tokens"
+            detalle="herramienta de sesión — no es pantalla de producto"
+            registro="aa"
+            onPress={() => router.push('/gallery')}
+          />
+
           {/* ── S74-B · EL MARCADOR RENDERIZADO (L-160/L-161): el
               [update] era SOLO console.log — logcat-only, inalcanzable
               para el founder sin cable (hallazgo del gate S74). La
