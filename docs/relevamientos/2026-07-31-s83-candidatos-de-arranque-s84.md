@@ -112,11 +112,23 @@ Dos son del prestador y tienen dueño (C). **El tercero no tiene dueño y es el
 - Los dos del prestador (`(tabs)/index.tsx:1177` · `prepara-espacio.tsx:54`)
   son **byte-idénticos** al canónico. Costo **futuro**: el día que el trazo
   cambie quedan viejos. **Síntoma hoy: cero.**
-- El del cliente (`(tabs)/hogar/index.tsx:184`, forma `'navega'`) usa
-  **`M9 5l7 7-7 7`** contra el canónico **`M9 18l6-6-6-6`**. **No es otro
-  string: es otra geometría** — 7 unidades arrancando en `y=5` contra 6
-  arrancando en `y=18`. **Dos flechas de tamaño y proporción distintos
-  haciendo el mismo trabajo en dos apps de la misma casa, hoy, en pantalla.**
+- El del cliente usa **`M9 5l7 7-7 7`** contra el canónico
+  **`M9 18l6-6-6-6`**. **No es otro string: es otra geometría** — 7 unidades
+  arrancando en `y=5` contra 6 arrancando en `y=18`. **Dos flechas de tamaño y
+  proporción distintos haciendo el mismo trabajo en dos apps de la misma casa,
+  hoy, en pantalla.**
+
+**⚠️ CORREGIDO EN S83-A11 al correr el grep abierto de cierre: la divergencia
+del cliente NO es un sitio, son TRES** — `(tabs)/hogar/index.tsx:184` ·
+`hogar/mascota/[mascotaId].tsx:937` · `:1063`. **Eso cambia cómo hay que
+tratarla:** con un solo sitio se leía como descuido puntual; **con tres, en dos
+archivos, es el trazo que la app del cliente usa COMO SUYO** — la cura tiene
+que asumir *dos sistemas conviviendo*, no una línea rebelde. *(Y el censo total
+pasó de 3 a 6: el sexto es `prestador/components/perfil-piezas.tsx:54`, que
+**nació el mismo día** en C10 mientras B unificaba — coherente con su diseño
+—anatomía local hasta que se retire— pero deja el hecho crudo: **una pista
+cerraba la fuente única mientras otra creaba un duplicado nuevo sin saberlo.**
+Detalle completo en la corrección de D-600.)*
 
 **Por qué nadie lo vio hasta ahora, y conviene tenerlo presente al barrer:**
 el mismo archivo del cliente **acierta los otros dos trazos** (`'revela'` y

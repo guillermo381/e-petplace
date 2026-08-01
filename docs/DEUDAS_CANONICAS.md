@@ -2969,4 +2969,21 @@ quotePath=false  → docs/DISEÑO_EXPERIENCIA.md
 
 **Territorio, con su asimetría declarada:** los dos del prestador son de **C** (reparto S83). **`apps/cliente` NO TIENE DUEÑO EN S83** — la divergencia, que es la única de las tres con síntoma visible, es justamente la que hoy **no le toca a nadie**. Se anota en los candidatos de arranque de S84 por eso.
 
-> **☠️ CONDICIÓN DE MUERTE:** los tres mueren **cuando la pantalla consuma la PIEZA que porta el chevron** (`CeldaNavegacion`, `FilaCita`, `PieRevelar` — las tres ya lo toman de `chevron.ts`), **jamás importando el path suelto**: importar `CHEVRON` desde una pantalla movería el problema de sitio en vez de cerrarlo — el trazo es un detalle de la anatomía, no un token que las pantallas deban conocer. **Verificación exigible:** `grep -rn "M9 18l6-6-6-6\|M9 5l7 7-7 7" apps/` en **cero**. **Quién los retira:** C (los dos del prestador, al tocar esas pantallas) · **sin dueño el del cliente** hasta que S84 reparta. Origen: S83-B12 (censo y cura de B), literal de los tres restantes verificado por A.
+> **☠️ CONDICIÓN DE MUERTE:** mueren **cuando la pantalla consuma la PIEZA que porta el chevron** (`CeldaNavegacion`, `FilaCita`, `PieRevelar` — las tres ya lo toman de `chevron.ts`), **jamás importando el path suelto**: importar `CHEVRON` desde una pantalla movería el problema de sitio en vez de cerrarlo — el trazo es un detalle de la anatomía, no un token que las pantallas deban conocer. **Verificación exigible:** `grep -rn "M9 18l6-6-6-6\|M9 5l7 7-7 7" apps/` en **cero**. **Quién los retira:** C (los del prestador, al tocar esas pantallas) · **sin dueño los del cliente** hasta que S84 reparta. Origen: S83-B12 (censo y cura de B), literal verificado por A.
+
+> **🔴 CORRECCIÓN INMEDIATA S83-A11 — ESTA FICHA NACIÓ CON EL MISMO DEFECTO QUE DENUNCIA: DIJO "TRES" Y SON SEIS.** Al correr la verificación de cierre —el `grep` abierto que la propia condición de muerte exige— el conteo dio **6 sitios en 5 archivos**, no 3. **Censo completo, medido:**
+>
+> | sitio | trazo | clase |
+> |---|---|---|
+> | `prestador/(tabs)/index.tsx:1177` | `M9 18l6-6-6-6` | duplicación |
+> | `prestador/components/prepara-espacio.tsx:54` | `M9 18l6-6-6-6` | duplicación |
+> | **`prestador/components/perfil-piezas.tsx:54`** | `derecha: 'M9 18l6-6-6-6'` | **duplicación NUEVA — nació HOY** |
+> | `cliente/(tabs)/hogar/index.tsx:184` | `M9 5l7 7-7 7` | 🔴 divergencia |
+> | **`cliente/hogar/mascota/[mascotaId].tsx:937`** | `M9 5l7 7-7 7` | 🔴 **divergencia, NO censada** |
+> | **`cliente/hogar/mascota/[mascotaId].tsx:1063`** | `M9 5l7 7-7 7` | 🔴 **divergencia, NO censada** |
+>
+> **Los dos hallazgos que cambian la lectura de la ficha:**
+> 1. **La divergencia del cliente NO es un sitio suelto: son TRES**, en dos archivos. Deja de poder leerse como un descuido puntual — **es el trazo que la app del cliente usa como suyo.** Cualquier cura tiene que tratarla como *dos sistemas conviviendo*, no como una línea rebelde.
+> 2. **`perfil-piezas.tsx:54` nació HOY**, en C10 (`0527d50`), **el mismo día en que B unificaba el chevron en `packages/ui`**. Es coherente con su diseño —el Perfil v2 consume anatomía local hasta que se retire, y por eso no está mal hecho— pero deja el hecho crudo: **mientras una pista cerraba la fuente única, otra creaba un duplicado nuevo sin saberlo.** No es culpa de ninguna de las dos: es el costo del paralelo sin un censo compartido, y es exactamente lo que D-586 describe en otro plano.
+>
+> **MI ERROR DE MÉTODO, dicho con su nombre:** verifiqué **uno por uno** los tres sitios que la orden nombraba —y los tres estaban bien medidos— pero **no corrí el grep abierto hasta el final**. Verificar lo que te dieron no es censar; **censar es preguntarle al árbol, no a la lista.** Es la **candidata #16** aplicada mal por quien acababa de escribirla: usé el grep correcto (por el render), pero **como comprobación final en vez de como método de descubrimiento**. Se corrige acá, en la misma ficha y sin borrar el error, porque una ficha que se auto-corrige enseña más que una que nace perfecta.
