@@ -1,6 +1,6 @@
 # LAS CANDIDATAS DE LECCIÓN — inventario para la firma del founder (S77, ampliado S82)
 
-> **QUINCE candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **Las candidatas 10 a 14 entraron en S82** — el nombre de un token es su rol · su inversa (el nombre que envejeció) · la ausencia con tipos · el defecto que vive porque el DATO DE PRUEBA no lo alcanza · y el lector que se apoya solo en la RLS y por eso nadie puede auditarlo leyendo. **La 15 entró en S83** — una regla con auto-prueba puede tener BRAZOS que no pueden salir rojos (L-192 aplicada a sí misma), y es la única que llega con su costo medido de antemano. El inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
+> **DIECISÉIS candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **Las candidatas 10 a 14 entraron en S82** — el nombre de un token es su rol · su inversa (el nombre que envejeció) · la ausencia con tipos · el defecto que vive porque el DATO DE PRUEBA no lo alcanza · y el lector que se apoya solo en la RLS y por eso nadie puede auditarlo leyendo. **Las 15 y 16 entraron en S83, y son PARIENTES: las dos son L-192 mudada de lugar** — una regla con auto-prueba puede tener BRAZOS que no salen rojos (el guard del guard) · un grep por la PROP mide quién la pasa, no qué se RENDERIZA (L-192 en el método de medición). El inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
 
 > **NINGUNA ESTÁ FIRMADA. La firma es del founder.** Este documento no decide:
 > junta lo que hoy vive disperso entre la letra, las deudas y los cierres de
@@ -13,7 +13,7 @@
 
 ---
 
-## Las trece
+## Las dieciséis
 
 ### 1 · (d) — EL ORDEN NOMBRA EL ARTEFACTO QUE ABRE, JAMÁS EL ARCHIVO DONDE SE LO ESPERA
 **Origen:** S75 (canon, línea 44). **Sin firma desde entonces.**
@@ -303,17 +303,70 @@ el brazo de los hexes, la auto-prueba grita BRAZO DECORATIVO"*); lo que
 S83 agrega es la **medición del conjunto**, que es la que muestra que es
 clase y no anécdota.
 
-**Su costo, declarado — y por eso es candidata y no orden.** Llevarla a
-ley cuesta **~40 sitios** (un fixture por brazo, no por regla) **más
-trabajo de runner** (el reporte tiene que contar y exhibir BRAZOS, si no
-la ley es inauditable desde su propia salida). No es gratis, y esa es
-justamente la decisión que le toca al founder: **si no se paga el runner,
-la ley nace sin forma de verificarse a sí misma** — que es el defecto que
-viene a corregir.
+**Su costo, declarado — y por eso era candidata y no orden.** Llevarla a
+ley se presupuestó en **~40 sitios** (un fixture por brazo, no por regla)
+**más trabajo de runner** (el reporte tiene que contar y exhibir BRAZOS,
+si no la ley es inauditable desde su propia salida).
+
+**➕ ENMIENDA S83-A7 — EL COSTO YA NO ES HIPOTÉTICO: B LO PAGÓ.** En
+**S83-B7 (`d121262`)** los ocho brazos decorativos ganaron su rojo y **el
+censo bajó de 8 a CERO**. Con eso, la candidata cambia de naturaleza y hay
+que decirlo sin maquillar: **ya no propone un gasto, describe un gasto
+hecho.** Lo que queda para firmar no es *"¿vale la pena pagarlo?"* sino
+**"¿esto es ley de la casa de acá en adelante?"** — es decir, si todo
+brazo nuevo nace con su rojo producido o si S83 fue una limpieza puntual.
+**La pregunta cara ya está contestada por medición; la barata sigue
+abierta y es la única que le queda al founder.** *(El pago es de B; A
+verificó el merge por contenido, no re-midió los ocho.)*
 
 **Su hermana:** L-192 (una verificación cuyo modo de falla es el silencio
 no es una verificación). Ésta es su aplicación recursiva: **el guard del
 guard.**
+
+### 16 · UN GREP POR LA PROP MIDE QUIÉN LA PASA, NO QUÉ SE RENDERIZA
+
+**El texto propuesto:**
+
+> **Buscar por la PROP encuentra a los que usan la pieza; no encuentra a
+> los que la reimplementaron.** Un inline no pasa props: pinta. Por eso es
+> **invisible** a la búsqueda que uno cree exhaustiva — y el resultado no
+> es "no encontré nada", es **"no hay nada", dicho con la autoridad de un
+> grep**. Para censar una anatomía se busca **por lo que queda en la
+> pantalla**: el elemento renderizado, el token, la forma. La prop es
+> evidencia de adopción; **el render es evidencia de existencia.**
+
+**El origen (S83-B9/B10).** B censó la marca de agua buscando por su prop
+y concluyó que la pieza no tenía consumidores — cierto, pero incompleto:
+**había TRES aguas vivas, todas inline**, con opacidades 0.06 / 0.04 /
+0.03, tamaños 210 / 1000 / 280 y tres disposiciones distintas (entera,
+sangrada, esquina). El grep que las encontró fue otro: **por el render**
+(`opacity: 0.0*` junto a `<Isotipo`). B lo declaró él mismo al corregirse
+— la candidata nace de su autocorrección, no de una auditoría externa.
+
+**Por qué merece ley y no solo un recordatorio.** El modo de falla es
+**silencioso y con forma de rigor**: un censo por prop devuelve cero, y
+cero se reporta como *"no existe"*. **Es L-192 mudada al método de
+medición** — la verificación corre, sale limpia, y su limpieza no prueba
+nada porque la pregunta estaba mal hecha. Y es la clase de error que
+**agranda el trabajo después**: sobre ese cero se decide "entonces la
+pieza no hace falta" o "entonces promuevo sin migrar nada", y las tres
+copias siguen divergiendo un ciclo más.
+
+**Su forma exigible, para que no quede en consejo:** todo censo de
+anatomía declara **por qué buscó** (prop · render · token · forma) y, si
+buscó por prop, **dice explícitamente que los inline quedan fuera de su
+alcance**. Un censo que no declara su método no se puede auditar — y
+heredarlo como si fuera completo es lo que produjo D-597.
+
+**Sus hermanas:** L-170 (*un censo por `pg_get_functiondef` lee los
+comentarios como código*) — la misma familia: **el instrumento decide qué
+puede aparecer**. Y la #13 (*un defecto vive invisible si el dato de
+prueba no lo alcanza*): allá el hueco lo abre el DATO, acá lo abre la
+CONSULTA.
+
+**Estado:** viva, sin firma. *Su primer cobro ya está en el archivo:*
+**D-597** *existe porque el segundo grep encontró lo que el primero no
+podía ver.*
 
 ---
 
@@ -328,6 +381,9 @@ guard.**
 > **RE-MEDIDO S82 (30-jul-2026): eran TRECE.** Entraron la décima —*un token se nombra por su ROL*, del trabajo de B sobre el tema— y la undécima —*el nombre que envejeció falla al BUSCARLO*, del canto de veterinaria de C. **Son INVERSAS y por eso van separadas:** una falla al usar el token, la otra al no encontrarlo (y ésa produce duplicados, que es peor porque no se ve). La duodécima —*la ausencia tiene tipos*— entró al inventario en r11 con su quinto tipo; su texto completo vive en `MODELO_PRODUCTO` y acá figura para que se firme con las demás. La decimotercera —*un defecto vive invisible si el dato de prueba no lo alcanza*— entró en r14 con sus cuatro casos y su contraprueba del mismo día (la familia de cuatro hizo visibles dos caminos en una corrida). El conteo se corrige acá y en el título en el MISMO acto (L-141: un contador que envejece miente igual que una ley sin escribir). **Las nueve de S77 siguen SIN FIRMA**, ninguna cerrada: este documento acumula, no vence.
 
 > **RE-MEDIDO S83 (31-jul-2026): son QUINCE.** La decimoquinta —*una regla con auto-prueba puede tener brazos que no pueden salir rojos*— entra del censo de B en S83-B4: **40 brazos, 8 decorativos, en DOS familias**. Es **L-192 aplicada a sí misma** (el guard del guard) y la única de esta lista que llega **con su costo medido de antemano** (~40 sitios + trabajo de runner), porque sin el runner la ley no puede verificarse desde su propia salida. Los números son de B y se citan como suyos: **A no los re-midió**. El conteo se corrige acá y en el título en el MISMO acto (L-141).
+>
+
+> **RE-MEDIDO S83 (31-jul-2026, segunda entrada del día): son DIECISÉIS.** La decimosexta —*un grep por la prop mide quién la pasa, no qué se renderiza*— nace de la **autocorrección de B** en B9/B10: el censo por prop de la marca de agua devolvió cero consumidores, y el censo por RENDER encontró **tres aguas inline con tres anatomías distintas** (hoy D-597). Es **L-192 mudada al método de medición**: la verificación corre, sale limpia, y su limpieza no prueba nada porque la pregunta estaba mal hecha. Hermana de L-170 (el instrumento decide qué puede aparecer) y de la #13 (allá el hueco lo abre el dato, acá la consulta). El conteo se corrige acá y en el título en el MISMO acto (L-141).
 >
 
 Si alguna otra candidata quedó fuera, es porque no encontré su fuente. **Pasame el literal y entra**: el criterio de este documento es que nada figure sin dónde leerlo.
