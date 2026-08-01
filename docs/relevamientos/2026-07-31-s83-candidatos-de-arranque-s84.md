@@ -224,6 +224,50 @@ chevron divergente). **Es el segundo caso del día que espera al reparto**, y
 refuerza §1bis: con fichas por TERRITORIO esto no esperaría a que alguien las
 adopte.
 
+## 0 · LA VITRINA ABRE S84 — y su primera decisión NO es de diseño
+
+**El founder firmó el modelo (Kaxo/Fluvi): el Perfil se parte en tres ejes y
+"Tu perfil" pasa a ser LA VITRINA**, con espejo *"Así te ven"* y portada +
+galería. **Antes de dibujar una línea hay una decisión de MODELO que le toca al
+founder, no a la mesa ni a las pistas.**
+
+### La primera decisión: **D-173** — el choque, abierto desde S21
+
+> El TDR de Portal Sellers declara como principio fundacional: *"para el
+> comprador, el seller es e-PetPlace; el comprador **nunca ve ni interactúa
+> con el seller directamente**"*.
+> `PORTAL_PRESTADOR` §4.4 le da al prestador **cara, nombre, biografía y URL
+> propia**.
+
+**Son incompatibles tal como están escritos**, y D-173 lo llama **"decisión de
+modelo bloqueante"** desde S21. **Construir la vitrina como cara pública del
+prestador es tomar partido en ese choque** — y conviene que sea **a propósito y
+con firma**, no como consecuencia de haber empezado a dibujar. *(Nota: el choque
+es prestador ↔ seller. Puede resolverse distinto para cada uno — pero eso
+también hay que decidirlo.)*
+
+### Lo que YA está escrito y hay que leer antes (no re-descubrir)
+
+**`PORTAL_PRESTADOR` §4.4, línea 504 — DECISIÓN CERRADA S20**, con sus ocho
+contenidos y la promesa de que la página es *"activo real del prestador"* atada
+a la **graduación (Día 90)**. **No es candidata: está firmada.** Detalle,
+huecos y literal en **D-612**.
+
+### Los tres huecos que la letra deja, medidos
+
+| | qué falta | por qué importa |
+|---|---|---|
+| **el anclaje** | la deuda documental que S20 se auto-declaró (`MODELO_PRODUCTO` + `EPETPLACE`) **nunca se pagó** — cero menciones | `MODELO_PRODUCTO` **es paquete de arranque** y `PORTAL_PRESTADOR` no: una sesión puede diseñar la vitrina **sin enterarse de que la letra existe** |
+| **el slug** | no hay columna, y el literal dice *"o equivalente final"* | `ciudad+nombre` **no es único** y el nombre **es editable**: un rename rompe la URL **y el SEO que la letra promete** |
+| **las insignias** | certificación · Fundador · Familia G **sin modelo de dato** | §4.4 las exige visibles; ninguna está en las 18 columnas de `v_prestadores_publicos` |
+
+### Y lo que la vitrina desbloquea de paso
+
+**D-601** — los cuatro campos de contacto (`telefono`·`whatsapp`·
+`email_contacto`·`sitio_web`) **dejan de ser escritura sin lector**: §4.4 los
+pide como *"información de contacto y reserva"*. **El WhatsApp obligatorio que
+el founder firmó tiene, por fin, a dónde llegar.**
+
 ## 3 · LAS OTRAS FICHAS S83 CON DISPARO PROPIO
 
 | | qué espera |
