@@ -730,6 +730,46 @@ function r26(fuentes) {
 }
 const FUENTES_R26 = { temas: readFileSync('packages/ui/src/themes/index.ts', 'utf8') };
 
+/** R27 · EL PINK NO ENTRA AL PRESTADOR POR LA PUERTA DEL ESTADO ACTIVO
+ *  (S83-B13). Hermana exacta de R26 y por la misma física: los temas de
+ *  oficio se arman por SPREAD, así que quitar el override de
+ *  `accent.active` no rompe nada, el tsc no lo ve —el campo existe igual,
+ *  heredado— y el prestador vuelve a enfocar en MAGENTA sin que nadie se
+ *  entere. Guard por AUSENCIA de la línea, no por presencia de un hex.
+ *
+ *  Y VIGILA ALGO MÁS QUE R26: aquí los dos brazos esperan valores
+ *  DISTINTOS —tealDark en claro, teal PURO en oscuro—, porque el focus es
+ *  gráfica y ninguno solo pasa en los dos temas (medido: puro REPRUEBA en
+ *  claro con 1.46; tealDark en oscuro pasa con margen 0.37 y no ilumina).
+ *  Un guard que aceptara cualquiera de los dos en cualquier tema dejaría
+ *  pasar justo el error que la medición encontró.
+ *
+ *  ☠️ CONDICIÓN DE MUERTE: la misma de R16 y R26 — muere el día que los
+ *  slots dejen de resolverse por herencia y pasen a obligación de TIPO
+ *  (tsc rojo si falta). La retira la sesión que haga ese cambio,
+ *  produciendo primero el rojo del tsc y recién después borrando la
+ *  regla. Si el founder cambiara el verde, la regla no muere: cambia de
+ *  valor esperado. */
+function r27(fuentes) {
+  const temas = fuentes.temas ?? '';
+  const fallos = [];
+  const ESPERADO = { lightOficio: 'tealDark', darkOficio: 'teal' };
+  for (const [casa, token] of Object.entries(ESPERADO)) {
+    const bloque = new RegExp(`const ${casa}[\\s\\S]*?\\n\\}`).exec(temas)?.[0] ?? '';
+    if (!bloque) {
+      fallos.push(`R27: no se encontró ${casa} en themes/index.ts — sin la fuente no hay verificación (L-192)`);
+      continue;
+    }
+    const m = /\baccent:\s*\{[^}]*\bactive:\s*palette\.(\w+)/.exec(bloque);
+    if (!m)
+      fallos.push(`R27: ${casa} NO pisa accent.active — el prestador estaría enfocando en MAGENTA por herencia (§15b.1 + firma founder S83: el focus del prestador va en verde)`);
+    else if (m[1] !== token)
+      fallos.push(`R27: ${casa} pisa accent.active a palette.${m[1]} y se esperaba palette.${token} — el focus es GRÁFICA y necesita sus DOS registros (puro reprueba en claro: 1.46)`);
+  }
+  return { fallos, info: fallos.length === 0 ? 'el estado activo del oficio: tealDark en claro · teal puro en oscuro' : `${fallos.length} fallo(s)` };
+}
+const FUENTES_R27 = { temas: readFileSync('packages/ui/src/themes/index.ts', 'utf8') };
+
 
 /** R17 · LA GALERÍA NO ENVEJECE (S82-B r16, orden founder: "toda pieza
  *  exportada desde packages/ui tiene que aparecer en la galería. Una
@@ -1091,6 +1131,13 @@ const FIXTURES = {
   // su rojo en EXTRAS_R16: ningún fixture único puede encender los tres.)
   // S83-B6 · lightOficio SIN pisar control (darkOficio sano a propósito:
   // el rojo tiene que venir del brazo que se prueba, no del otro).
+  // S83-B13 · lightOficio sin pisar active (darkOficio sano): el rojo
+  // viene del brazo que se prueba y no del otro.
+  R27: {
+    temas:
+      'const lightOficio: Theme = {\n  accent: { ...lightTheme.accent, control: palette.tealDark },\n}\n' +
+      'const darkOficio: Theme = {\n  accent: { ...darkTheme.accent, active: palette.teal },\n}',
+  },
   R26: {
     temas:
       'const lightOficio: Theme = {\n  accent: { ...lightTheme.accent, cta: palette.tealDark },\n}\n' +
@@ -1118,7 +1165,7 @@ const FIXTURES = {
     },
   ],
 };
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R22: r22, R24: r24, R25: r25, R26: r26 };
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R22: r22, R24: r24, R25: r25, R26: r26, R27: r27 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -1213,6 +1260,26 @@ for (const [nombre, regla, fx] of EXTRAS_BRAZOS) {
   }
 }
 
+const EXTRAS_R27 = [
+  ['R27·brazo darkOficio (sin pisar active)', {
+    temas:
+      'const lightOficio: Theme = {\n  accent: { ...lightTheme.accent, active: palette.tealDark },\n}\n' +
+      'const darkOficio: Theme = {\n  accent: { ...darkTheme.accent, control: palette.tealDark },\n}',
+  }],
+  ['R27·el registro equivocado (puro en claro, que REPRUEBA)', {
+    temas:
+      'const lightOficio: Theme = {\n  accent: { ...lightTheme.accent, active: palette.teal },\n}\n' +
+      'const darkOficio: Theme = {\n  accent: { ...darkTheme.accent, active: palette.teal },\n}',
+  }],
+  ['R27·guard de fuente (themes ausente)', { temas: '' }],
+];
+for (const [nombre, fx] of EXTRAS_R27) {
+  if (r27(fx).fallos.length === 0) {
+    console.error(`AUTO-PRUEBA ✗ ${nombre} no salió roja — BRAZO DECORATIVO (L-192)`);
+    decorativas++;
+  }
+}
+
 const EXTRAS_R26 = [
   ['R26·brazo darkOficio (sin pisar control)', {
     temas:
@@ -1277,6 +1344,7 @@ corridas.push([
 corridas.push(['R24 (el pie de reserva no se copia)', r24(apps)]);
 corridas.push(['R25 (la pata no se reinventa)', r25([...apps, ...ui])]);
 corridas.push(['R26 (el magenta no elige en el prestador)', r26(FUENTES_R26)]);
+corridas.push(['R27 (el pink no enfoca en el prestador)', r27(FUENTES_R27)]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,

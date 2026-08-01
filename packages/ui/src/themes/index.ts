@@ -30,23 +30,26 @@ export type Theme = TemaAncho<typeof lightTheme> | TemaAncho<typeof darkTheme> |
 /** ⭐ LOS SLOTS — el número que antes NO EXISTÍA (S82-B r30).
  *  Un SLOT no es "un campo que cambia entre temas" (eso son casi todos:
  *  es lo que un tema ES). Un slot es un campo que un tema DERIVADO PISA
- *  para separar las dos casas — `lightOficio`/`darkOficio`. **Son CINCO**
- *  (eran cuatro hasta S83-B6), y hasta r30 había que abrir los tres
+ *  para separar las dos casas — `lightOficio`/`darkOficio`. **Son SEIS**
+ *  (cuatro hasta S83-B6, cinco hasta B13), y hasta r30 había que abrir los tres
  *  archivos y comparar para saber cuáles:
  *    1. `bg.base`           — el fondo: el tapiz es del cliente
  *    2. `accent.cta`        — oro el cliente · tealDark el oficio
  *    3. `accent.ctaTexto`   — el par del anterior
  *    4. `accent.ctaElevado` — el relieve del CTA, solo del cliente
  *    5. `accent.control`    — el acento de ELECCIÓN: magenta el cliente ·
- *       tealDark el oficio (S83-B6). Apareció el quinto y se agregó acá,
- *       como la nota de r30 mandaba: la lista ES el contrato.
- *  Si aparece un sexto, se agrega ACÁ: la lista es el contrato. */
+ *       tealDark el oficio (S83-B6).
+ *    6. `accent.active`     — el acento de ESTADO ACTIVO: pink el cliente
+ *       · el VERDE del oficio, EN SUS DOS REGISTROS (S83-B13). Apareció
+ *       el sexto y se agregó acá, como la lista mandaba.
+ *  Si aparece un séptimo, se agrega ACÁ: la lista es el contrato. */
 export type SlotDeTema =
   | 'bg.base'
   | 'accent.cta'
   | 'accent.ctaTexto'
   | 'accent.ctaElevado'
   | 'accent.control'
+  | 'accent.active'
 export type ThemeMode = 'light' | 'dark' | 'memorial'
 export type ServiceKey = keyof typeof lightTheme.services
 export type StatusKey = 'success' | 'warning' | 'danger' | 'info'
@@ -77,7 +80,23 @@ const lightOficio: Theme = {
   // silencio. NO arrastra la PATA: su color lo firma el founder y hoy
   // vive aparte, en `accent.marcaEleccion` (su nota está en los temas).
   // Lo vigila R26 de verify:diseno, con su rojo producido.
-  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, control: palette.tealDark },
+  // S83-B13 — EL SEXTO SLOT: `accent.active` es el acento de ESTADO
+  // ACTIVO (focus del Campo y de CampoFecha, outline de foco del Boton,
+  // huella/pill de la tab). FIRMA DEL FOUNDER en dispositivo sobre el
+  // focus del campo: en el prestador NO es magenta, va en verde que
+  // ILUMINE. Con eso ARBITRA D-598 a favor de §15b.1 y la posición S72
+  // ("accent.active es reserva de MARCA, el magenta en el prestador NO es
+  // desvío") queda ENMENDADA — su literal vive en CLAUDE.md:160 y lo
+  // enmienda A: dos letras firmadas contradiciéndose es peor que una
+  // equivocada, y ésta es la que pierde.
+  //
+  // POR QUÉ DOS REGISTROS Y NO UN COLOR, medido y no heredado: el focus
+  // es BORDE/gráfica (mín 3:1 no textual) y ninguno solo sirve en los dos
+  // temas — teal PURO REPRUEBA en claro (1.46 sobre papel) y tealDark en
+  // oscuro pasa por poco (3.37, margen 0.37) y no "ilumina". El par da
+  // 5.51 en claro y 12.70 en oscuro. Es la regla de dos registros de la
+  // Ley 2 y §15b.2 aplicada al estado, no una excepción nueva.
+  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, control: palette.tealDark, active: palette.tealDark },
 }
 const darkOficio: Theme = {
   ...darkTheme,
@@ -92,7 +111,23 @@ const darkOficio: Theme = {
   // silencio. NO arrastra la PATA: su color lo firma el founder y hoy
   // vive aparte, en `accent.marcaEleccion` (su nota está en los temas).
   // Lo vigila R26 de verify:diseno, con su rojo producido.
-  accent: { ...darkTheme.accent, cta: palette.tealDark, ctaTexto: palette.textDark0, ctaElevado: false, control: palette.tealDark },
+  // S83-B13 — EL SEXTO SLOT: `accent.active` es el acento de ESTADO
+  // ACTIVO (focus del Campo y de CampoFecha, outline de foco del Boton,
+  // huella/pill de la tab). FIRMA DEL FOUNDER en dispositivo sobre el
+  // focus del campo: en el prestador NO es magenta, va en verde que
+  // ILUMINE. Con eso ARBITRA D-598 a favor de §15b.1 y la posición S72
+  // ("accent.active es reserva de MARCA, el magenta en el prestador NO es
+  // desvío") queda ENMENDADA — su literal vive en CLAUDE.md:160 y lo
+  // enmienda A: dos letras firmadas contradiciéndose es peor que una
+  // equivocada, y ésta es la que pierde.
+  //
+  // POR QUÉ DOS REGISTROS Y NO UN COLOR, medido y no heredado: el focus
+  // es BORDE/gráfica (mín 3:1 no textual) y ninguno solo sirve en los dos
+  // temas — teal PURO REPRUEBA en claro (1.46 sobre papel) y tealDark en
+  // oscuro pasa por poco (3.37, margen 0.37) y no "ilumina". El par da
+  // 5.51 en claro y 12.70 en oscuro. Es la regla de dos registros de la
+  // Ley 2 y §15b.2 aplicada al estado, no una excepción nueva.
+  accent: { ...darkTheme.accent, cta: palette.tealDark, ctaTexto: palette.textDark0, ctaElevado: false, control: palette.tealDark, active: palette.teal },
 }
 
 /** El default del producto es CLARO (B1 §7.3). Dark es opt-in. Memorial es automático (M6). */

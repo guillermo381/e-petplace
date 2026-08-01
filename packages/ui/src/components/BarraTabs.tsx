@@ -82,15 +82,21 @@ export function BarraTabs({
    *  (sin recuadros, sin pills). La huella activa hereda el rol de
    *  accent.active: sigue siendo EL elemento activo de la vista. */
   estadoPorHuella?: boolean
-  /** PROP DE GATE (S83-B11) — override del acento de la tab activa.
-   *  Default: `accent.active` (el magenta), que es lo que corre.
-   *  Existe SOLO para que la lámina pueda montar la BARRA REAL con el
-   *  teal del oficio al lado de la de hoy: el choque S72-vs-§15b.1 se
-   *  arbitra mirando la pieza, no un clon.
-   *  ☠️ MUERTE: con la firma del founder. Si gana el teal, el camino es
-   *  un SEXTO SLOT en el tema (`accent.active` por casa, como
-   *  `accent.control` en S83-B6) y esta prop se borra en ese mismo acto;
-   *  si gana el magenta, se borra igual. En ningún escenario sobrevive. */
+  /** PROP DE GATE — override del acento de la tab activa. Default:
+   *  `accent.active`, que desde S83-B13 es SLOT y ya resuelve por casa
+   *  (pink el cliente · el verde del oficio en sus dos registros).
+   *
+   *  SU PRIMER GATE YA SE FIRMÓ Y LA PROP SOBREVIVIÓ AL CAMBIO DE
+   *  PREGUNTA, así que su letra se corrige en vez de dejarla mintiendo:
+   *  nació (B11) para arbitrar magenta-vs-teal, y el founder firmó el
+   *  verde en dispositivo. Lo que queda abierto es CUÁL verde, y para eso
+   *  sigue haciendo falta montar la BARRA REAL con los tres candidatos
+   *  (tealDark · puro · el par) uno al lado del otro — cosa que el slot,
+   *  por definición, no puede hacer: resuelve UNO por tema.
+   *
+   *  ☠️ MUERTE: con la firma del REGISTRO. Gane el que gane, el valor
+   *  vive en el slot y esta prop se borra en ese mismo acto — la API de
+   *  una lámina no sobrevive a su lámina (Ley 37). */
   acento?: string
 }) {
   const { theme } = useTheme()
