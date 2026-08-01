@@ -10,7 +10,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Updates from 'expo-updates';
 import { useFonts } from 'expo-font';
-import { AvisoProvider, ThemeProvider as EpetThemeProvider, epetplaceFonts } from '@epetplace/ui';
+import { Atmosfera, AvisoProvider, ThemeProvider as EpetThemeProvider, epetplaceFonts, useTheme } from '@epetplace/ui';
 import { ProveedorI18n } from '@epetplace/i18n';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
@@ -47,6 +47,33 @@ console.log(
     `embedded=${Updates.isEmbeddedLaunch} · canal=${Updates.channel ?? 'ninguno'}`,
 );
 
+/**
+ * S83-C28 ① — LA ATMOSFERA DEL OFICIO, con su gate de tema.
+ *
+ * ⚠️ EL GATE ES DE ACÁ Y NO DE LA PIEZA, y el porqué está medido: la
+ * pieza degrada SOLA en memorial (`return null`) pero **NO se apaga en
+ * claro** — y el founder la firmó EN OSCURO. Las tres montas de la
+ * galería viven dentro de `<ThemeProvider defaultMode="dark">`: lo que
+ * firmó fue la luz sobre negro, no sobre papel. Montarla sin gate sería
+ * publicar un estado que nunca vio.
+ * Vive en el LAYOUT (mi territorio) y no en `packages/ui`: si la mesa
+ * decide que el apagado en claro es de la FUENTE —como el de memorial—
+ * es una línea de B y esta se retira sola.
+ *
+ * EL COLOR ES `accent.primary`, y la elección la corrigió el lint: el
+ * JSDoc de la pieza sugiere `accent.cta`, pero **R5 lo prohíbe en apps**
+ * (ese slot lo resuelve `Boton`, nadie más) — y al medir los dos, R5
+ * además tenía razón de FONDO: en oscuro `cta` da #0A7268, que es el
+ * color del MURO, mientras `primary` da #28E8DA, que es el `palette.teal`
+ * con el que la galería montó lo que el founder firmó. El token legal y
+ * el token correcto resultaron el mismo. En claro los dos coinciden.
+ */
+function AtmosferaDelOficio() {
+  const { theme, mode } = useTheme();
+  if (mode !== 'dark') return null;
+  return <Atmosfera color={theme.accent.primary} origen="arriba-derecha" />;
+}
+
 export default function RootLayout() {
   // D-305 (S48): el tema lo decide el SISTEMA — el app lo resuelve acá
   // y lo pasa controlado al provider (packages/ui no importa Appearance).
@@ -64,8 +91,27 @@ export default function RootLayout() {
         {/* S63 arte — enmienda Ley 21 FIRMADA: el CTA del prestador ancla
             al oficio (accent.cta = tealDark en light Y dark; memorial
             SIEMPRE tinta, resuelto en getTheme — imposible de saltear). */}
-        <EpetThemeProvider mode={colorScheme === 'dark' ? 'dark' : 'light'} cta="oficio">
+        {/* S83-C28 ② — EL AGUA, ENCENDIDA. La prop existía desde S82-B r10
+            con default false y NADIE la prendía del lado prestador: la
+            pieza estaba construida y su superficie no existía. Acá el agua
+            queda detrás de TODO el árbol en UN solo lugar — cero pantalla
+            tocada, cero copia que se desincronice (el modo de falla que
+            ese mismo commit declara: 0.06 vs 0.04).
+            ⚠️ NOTA A B — PROSA VENCIDA, no la toco por territorio: el
+            JSDoc de `marcaDeAgua` sigue diciendo "el prestador no la
+            recibe (su fondo se queda en papel algodón)". Eso era S82; el
+            founder firmó el agua en la casa verde en S83 (B9). La línea
+            manda lo contrario de lo que hoy rige. */}
+        <EpetThemeProvider mode={colorScheme === 'dark' ? 'dark' : 'light'} cta="oficio" marcaDeAgua>
           <AvisoProvider>
+            {/* S83-C28 ① — LA ATMOSFERA, en el LAYOUT y no por pantalla:
+                es la misma casa que el AmbientGlow del portal viejo
+                (Layout.tsx:148, `top-right`), y una atmósfera montada
+                pantalla por pantalla sería N copias de una dosis que la
+                Ley 5/7 define POR VISTA — una sola expresión la garantiza.
+                Va DESPUÉS del agua (textura al fondo, luz encima) y ANTES
+                del Stack (es fondo: pointerEvents none, aria-hidden). */}
+            <AtmosferaDelOficio />
             {/* S59-B1 (safe area): el DEFAULT de los íconos de la barra de
                 estado — 'auto' = oscuros sobre papel en claro, claros en
                 dark. Las pantallas con techo de tinta fuerzan 'light' con
