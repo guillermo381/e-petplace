@@ -344,6 +344,12 @@ export default function TabsLayout() {
       <Tabs.Screen name="cuenta" options={{ popToTopOnBlur: true }} />
       {/* galería de tokens: fuera de la barra, viva por URL (/gallery) */}
       <Tabs.Screen name="gallery" />
+      {/* S83-C10 — PERFIL v2: pantalla de VERIFICACIÓN, mismo molde que
+          la galería (registrada, sin botón de tab). NO reemplaza a
+          `cuenta/perfil`, que sigue viva e intacta hasta la firma.
+          Su entrada está al pie de Cuenta (L-161: una ruta sin entrada
+          no es un gate — `/gallery` del prestador es justamente eso). */}
+      <Tabs.Screen name="perfil-v2" />
     </Tabs>
   );
 }
