@@ -5,7 +5,7 @@ import { useColorScheme } from 'react-native';
 // y el raíz no tenía ninguno: gesture-handler TIRA en Android/iOS y la
 // web no lo exige (el smoke fue verde — Ley 9 confirmada por el camino).
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Stack } from 'expo-router';
+import { DefaultTheme, Stack, ThemeProvider as TemaNavegador } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Updates from 'expo-updates';
@@ -125,7 +125,13 @@ export default function RootLayout() {
             pintar su propio fondo Y el navegador deje de pintar el suyo
             sin costo de transición, la prop vuelve acá y las 61 montas
             mueren de una. */}
-        <EpetThemeProvider mode={colorScheme === 'dark' ? 'dark' : 'light'} cta="oficio">
+        {/* ⑦ EL AGUA VUELVE AL PROVIDER **SOLO PARA EL EXPERIMENTO**: es
+            la mitad que hay que medir — si desde UNA monta se ve, las 65
+            inline sobran. Mientras dura la prueba conviven: sobre las
+            pantallas que conservan su fondo esta agua queda tapada (no se
+            duplica con la de ellas, porque nunca se ven las dos), y la
+            única que la deja pasar es la que viaja sin fondo. */}
+        <EpetThemeProvider mode={colorScheme === 'dark' ? 'dark' : 'light'} cta="oficio" marcaDeAgua>
           <AvisoProvider>
             {/* S83-C28 ① — LA ATMOSFERA, en el LAYOUT y no por pantalla:
                 es la misma casa que el AmbientGlow del portal viejo
@@ -153,9 +159,45 @@ export default function RootLayout() {
                 configurables acá; la física la pone la plataforma. Si la
                 mesa exige la curva exacta, es JS-stack (otro navegador,
                 decisión aparte). Cero API experimental. */}
-            <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
-              <Stack.Screen name="(tabs)" />
-            </Stack>
+            {/* ⑦ S83-C38 — EL EXPERIMENTO DE DOS ARCHIVOS (medición, no
+                cura). La pregunta que decide si se barren 71 pantallas:
+                con las escenas del navegador TRANSPARENTES, ¿el agua y el
+                glow del provider se ven desde una sola monta, y a qué
+                precio en la transición?
+
+                POR QUÉ ACÁ: el navegador pinta `colors.background` en DOS
+                capas propias (`contentStyle` por escena y
+                `nativeContainerStyle` del ScreenStack) y su tema por
+                default lo tiene en `rgb(242,242,242)`. Esas capas viven
+                ENTRE el provider —donde están el agua y la Atmosfera— y
+                las pantallas: mientras pinten, quitar el fondo de una
+                pantalla descubre GRIS, no agua. En transparente, deja de
+                haber capa y se ve lo del provider.
+
+                ⚠️ LO QUE ESTE EXPERIMENTO EXISTE PARA MEDIR, y es el
+                riesgo que yo mismo declaré: la fuente instalada aplica el
+                fondo opaco SALVO en `transparentModal` — o sea, para el
+                navegador la opacidad por escena ES la definición de
+                `card`. Si eso significa que el `slide_from_right` firmado
+                en S80-B12 deja ver la pantalla de abajo mientras entra,
+                la cura de las 71 pantallas NO va y esto se revierte con
+                dos líneas. **Una sola pantalla viaja sin fondo
+                (`cuenta/identidad`) — el resto conserva el suyo, así que
+                el precio del experimento está acotado a ella.**
+                ☠️ MUERTE: este bloque se va con el veredicto — si el
+                slide está limpio, el fondo se resuelve acá para siempre y
+                las 65 montas del agua mueren; si no, vuelve el default y
+                el agua se queda donde está. */}
+            <TemaNavegador
+              value={{
+                ...DefaultTheme,
+                colors: { ...DefaultTheme.colors, background: 'transparent' },
+              }}
+            >
+              <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+                <Stack.Screen name="(tabs)" />
+              </Stack>
+            </TemaNavegador>
           </AvisoProvider>
         </EpetThemeProvider>
       </ProveedorI18n>

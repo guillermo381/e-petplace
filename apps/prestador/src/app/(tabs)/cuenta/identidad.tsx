@@ -40,11 +40,9 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   EvitaTeclado,
-  MarcaDeAgua,
   Texto,
   spacing,
   useAviso,
-  useTheme,
 } from '@epetplace/ui';
 import { actualizarMiPerfil, obtenerMiPerfil } from '@epetplace/api';
 
@@ -74,7 +72,6 @@ import { useTraduccion } from '@/i18n';
  */
 export default function NombreYAcceso() {
   const router = useRouter();
-  const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { mostrar } = useAviso();
   const { t } = useTraduccion();
@@ -121,8 +118,18 @@ export default function NombreYAcceso() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <MarcaDeAgua />
+    /* ⑦ S83-C38 — LA PANTALLA DEL EXPERIMENTO, y la única.
+       Viaja SIN su fondo y SIN su monta de agua a propósito: si acá se
+       ven el papel, el agua y el glow, es que el provider los está
+       entregando por sí solo y las otras 64 montas sobran. Si en cambio
+       al entrar desde "Tu perfil" se ve el perfil a través de esta
+       mientras entra, el navegador exige fondo opaco por escena y la
+       cura de las 71 pantallas queda descartada CON evidencia.
+       Se eligió ésta por barata de alcanzar (Cuenta → Tu perfil →
+       Nombre y acceso) y porque se entra con un PUSH, que es justo el
+       movimiento que hay que mirar.
+       ☠️ Vuelve a tener fondo y agua con el veredicto, gane quien gane. */
+    <View style={{ flex: 1 }}>
       <Encabezado variante="navegacion" titulo="Nombre y acceso" atras onAtras={() => router.back()} />
 
       {estado === 'cargando' && (
