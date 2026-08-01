@@ -375,7 +375,13 @@ export default function AtencionMostrador() {
               onChangeText={setMonto}
               keyboardType="decimal-pad"
             />
+            {/* S83-C25 ② — ELECCIÓN. El medio de cobro SE PERSISTE con el
+                cobro presencial: no es una vista del mismo dato, es el
+                dato. Y su posición lo confirma — vive entre el Campo del
+                monto y el botón "Registrar cobro": es un campo del
+                formulario, no un conmutador de pantalla. */}
             <SelectorSegmentado
+              proposito="eleccion"
               etiqueta={t('atencionMostrador.medioLabel')}
               segmentos={medioSegmentos}
               activo={medio}
