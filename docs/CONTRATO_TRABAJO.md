@@ -1,7 +1,7 @@
 # Contrato de trabajo — Guillermo (founder e-PetPlace) ↔ Claude
 
-> **Versión:** v1.21 (con enmiendas S14 + S15 + S16 + S19 + S21 + S42 + S48 + S54 + S59 + S68 + S71 + S79 + S80 + S81 + S82)
-> **Última actualización:** 31 Jul 2026 — Sesión 82. Reglas **84** (los CUATRO eslabones del cierre: pathspec obligatorio · `cat-file`+`merge-base` por CONTENIDO · group publicado · y lo que consumís sigue vigente) y **85** (worktree por pista = la PRIMERA decisión de una sesión paralela, pendiente). **El arranque de la sesión del prestador vive en `docs/relevamientos/2026-07-31-s82-acta-del-metodo.md` §5** y el censo de enmiendas de ley de S82 en `…-s82-censo-de-enmiendas.md` — se REFERENCIAN, no se copian.
+> **Versión:** v1.22 (con enmiendas S14 + S15 + S16 + S19 + S21 + S42 + S48 + S54 + S59 + S68 + S71 + S79 + S80 + S81 + S82 + S83)
+> **Última actualización:** 31 Jul 2026 — Sesión 83: **ENMIENDA A LA REGLA 80 — muere la lámina HTML como instrumento de diseño de PANTALLA; el ciclo es `UI real sin cablear → gate en dispositivo → cableado`** (la lámina sobrevive solo para comparar variantes de un token barato). Sesión 82. Reglas **84** (los CUATRO eslabones del cierre: pathspec obligatorio · `cat-file`+`merge-base` por CONTENIDO · group publicado · y lo que consumís sigue vigente) y **85** (worktree por pista = la PRIMERA decisión de una sesión paralela, pendiente). **El arranque de la sesión del prestador vive en `docs/relevamientos/2026-07-31-s82-acta-del-metodo.md` §5** y el censo de enmiendas de ley de S82 en `…-s82-censo-de-enmiendas.md` — se REFERENCIAN, no se copian.
 > **Audiencia:** Claude (web y code) en toda sesión futura. Cualquier dev que se sume al proyecto.
 
 ---
@@ -442,6 +442,25 @@ Origen: S54 (el freno de la Sesión A ante el backfill-por-referencia y el patch
 **LÍMITE ÚNICO:** si el cambio toca `packages/ui`, se aplica primero con **override LOCAL en una pantalla**. Se promueve a la primitiva después del gate. Aplicar directo en ui son 77 instancias sin mirar.
 
 **Y lo que no cambia:** el gate en dispositivo sigue siendo la única firma (L-153). Lo que cambia es cuánto se gasta ANTES de llegar ahí.
+
+**ENMIENDA S83 (founder, 31-jul-2026) — MUERE LA LÁMINA HTML COMO INSTRUMENTO DE DISEÑO DE PANTALLA. El ciclo pasa a ser:**
+
+> ### **UI real sin cablear → gate en dispositivo → cableado.**
+
+**El porqué, con la letra del founder:** *las idas y vueltas de la traducción HTML→RN cuestan más que el resultado.* Una lámina que se aprueba hay que traducirla, y la traducción **vuelve a abrir todas las decisiones que la lámina creía cerradas** — con el agravante medido de que el CSS de la lámina **tienta a portarse como fuente** (S82: tres portes literales, `#EEECE8` entre ellos).
+
+**Y el argumento de la casa que lo respalda — es una vara que SUBE, no que baja.** `DIRECTIVA_CRAFT_CLIENTE` §10 dice que las láminas son **CRITERIO, no evidencia**, y su razón es exacta: *"nada de esto se vio en un teléfono real"*. **Una pantalla real montada con piezas de `packages/ui` SÍ es evidencia** — corre en el dispositivo, usa los tokens vivos, respeta los temas y hereda el comportamiento de las primitivas. Cambiar lámina por UI real **no relaja el estándar: lo endurece**, porque lo que se firma pasa a ser lo que existe.
+
+**LO QUE LA LÁMINA PROTEGÍA Y HAY QUE PRESERVAR — las tres cláusulas no son opcionales:**
+1. **La UI sin cablear vive en RUTA DE VERIFICACIÓN**, no suelta en el árbol de navegación del producto.
+2. **NO reemplaza la pantalla viva.** Convive con ella; la vieja sigue sirviendo al usuario hasta la firma.
+3. **NO se cablea hasta la firma en dispositivo.** Cablear antes es exactamente el gasto que esta enmienda viene a evitar: se paga el trabajo de datos sobre una composición que puede no sobrevivir al gate.
+
+**LO QUE SOBREVIVE DEL INSTRUMENTO (no muere entero):** la lámina HTML **sigue sirviendo para comparar VARIANTES DE UN TOKEN barato** — la galería del agua, la del glow, la de la huella. Ahí es el instrumento correcto: la pregunta es *"¿cuál de estos tres?"*, la respuesta no depende del contexto de una pantalla, y montar tres variantes en HTML cuesta minutos. **La frontera es: variantes de un token → lámina · composición de una pantalla → UI real.**
+
+**Última de su especie:** `docs/laminas/lamina-perfil-prestador.html` (S83-C8/C9, `beb5974` + `e04784e`) es la última lámina construida para diseñar una pantalla. Se conserva —el criterio que contiene sigue valiendo— pero **no se construyen más con ese propósito**.
+
+*(Esta enmienda SUPERSEDE el ciclo escrito en `docs/relevamientos/2026-07-31-s82-acta-del-metodo.md` §1.1 y §1.2, y el punto 3 de su checklist de arranque §5 — el acta queda como registro histórico de S82 y NO se reescribe; lleva una nota de enmienda al pie que apunta acá. Barrido declarado como NO hecho: `DIRECCION_ARTE` y la skill tienen otras menciones de lámina que no se auditaron una por una en S83.)*
 
 **Regla 82 — LA VEDA DE PUBLICACIÓN CON MECÁNICA (S81, founder — tras TRES carreras de ancla en un día).** Quien publica ANUNCIA **"VEDA ABIERTA — nadie toca el árbol"**. Las otras sesiones CONFIRMAN congeladas — **sin confirmación explícita de TODAS, no se publica**. Recién ahí corre el bundling. Al terminar: **"VEDA CERRADA"** con el ancla declarada. **ENMIENDA S81 (misma sesión, founder): EL ANUNCIO Y EL CIERRE SON DE LA MESA — quien publica los PIDE.** Una veda que solo vive en el reporte de quien publica no le llega a las otras sesiones (el estreno costó una ronda entera): la sesión que va a publicar PIDE la veda a la mesa, la mesa la anuncia a todas y recoge las confirmaciones, y la mesa declara el cierre con el ancla que quien publicó le reporta. *(CANDIDATA declarada, no orden — letra founder: si la veda vuelve a fallar, la cura es publicar desde un WORKTREE en detached sobre el sha declarado — el ancla deja de depender de la coordinación humana; queda candidata porque el comportamiento de EAS en detached no se conoce lo suficiente para mandarla.)*
 

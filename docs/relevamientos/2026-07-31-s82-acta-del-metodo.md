@@ -24,6 +24,16 @@ oscuro, el oro #FCBC1D en los CTAs del cliente, papel tapiz en las dos casas.
 
 ## 1 · LO QUE PRODUJO EL RESULTADO — en orden de peso
 
+> ### ⚠️ ENMIENDA S83 (founder, 31-jul-2026) — §1.1 y §1.2 QUEDAN SUPERSEDED, y §5 punto 3 con ellas
+>
+> **El ciclo de esta acta ya no rige. El vigente es: `UI real sin cablear → gate en dispositivo → cableado`** — letra en `CONTRATO_TRABAJO` **regla 80, enmienda S83** (contrato v1.22), que es la fuente. **La lámina HTML muere como instrumento de diseño de PANTALLA:** *las idas y vueltas de la traducción HTML→RN cuestan más que el resultado* (founder). Los tres portes literales que §1.2 documenta **no eran un problema de disciplina: eran el costo estructural del instrumento**, y por eso la cura no fue otra advertencia sino cambiar el instrumento.
+>
+> **Y es una vara que SUBE:** §10 llama a la lámina *criterio, no evidencia* porque *"nada de esto se vio en un teléfono real"* — **una pantalla real montada con piezas de `packages/ui` SÍ es evidencia.** Se firma lo que existe.
+>
+> **Lo que de esta sección SIGUE VIGENTE y no lo toca la enmienda:** (a) **el acuerdo entra al repo antes de que alguien lo necesite** — los cuatro bloqueos de S82 se repetirían igual con UI real; (b) **`palette.ts` gana siempre**, ninguna fuente externa es fuente de tokens; (c) la lámina HTML **sobrevive para comparar VARIANTES DE UN TOKEN barato** (el agua, el glow, la huella), que es donde sigue siendo el instrumento correcto.
+>
+> **Esta acta NO se reescribe** — es el registro de lo que rigió en S82 y su valor es histórico. Esta nota existe para que nadie construya contra letra derogada, que es el trabajo que el censo de enmiendas de S82 inauguró.
+
 ### 1.1 La lámina existe antes de construir, y vive en el repo
 La única pantalla que el founder llamó "perfecta" en el día 1 fue la única que
 tuvo lámina previa. Las pantallas construidas desde prosa itemizada salieron como
@@ -292,7 +302,7 @@ animación de memoria.
 1. **Worktree por pista** — la primera decisión, con el árbol limpio.
 2. **El inventario en la mano ANTES de repartir** (S82 no lo tuvo: sin
    burn-down y cuatro cruces).
-3. Las láminas del prestador en `docs/laminas/` desde el minuto uno.
+3. ~~Las láminas del prestador en `docs/laminas/` desde el minuto uno.~~ **SUPERSEDED S83** (ver la enmienda al pie de §1): el instrumento pasa a ser **UI real sin cablear en ruta de verificación**. Lo que sobrevive del punto es su intención — **el acuerdo entra al repo antes de que alguien lo necesite**, ahora como pantalla montada en vez de HTML.
 4. El bloque de auditoría rige desde la primera directiva.
 5. **Su lote de S81 nunca fue gateado** — va primero al teléfono.
 6. Los tres eslabones del cierre + el cuarto (lo que consumís sigue vigente).

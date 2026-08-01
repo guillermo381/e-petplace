@@ -39,11 +39,47 @@ se hizo con D-576. **Costo: no medido.** Nadie corrió el grep todavía, así
 que el tamaño del barrido es desconocido — **medirlo es el primer paso, no
 presupuestarlo de memoria** (regla que esta sesión cobró tres veces).
 
-**Y la pregunta de fondo que el barrido va a destapar, dicha de antemano:**
-si el dueño de una ficha caduca cada vez que cambia el reparto, quizá **las
-fichas no deberían nombrar pista sino TERRITORIO** (*"quien toque
-`apps/prestador`"* en vez de *"C"*) — eso no caduca nunca. **Es candidata de
-ley y no se decide acá.**
+**Y la pregunta de fondo que el barrido va a destapar** está desarrollada
+abajo, en §1bis — el founder pidió anotarla aparte porque **no es una nota al
+pie del barrido: es lo que hace que el barrido no haya que repetirlo.**
+
+---
+
+## 1bis · LA CANDIDATA QUE RESUELVE LA CLASE ENTERA — *las fichas nombran TERRITORIO, no pista*
+
+**Anotada por orden del founder (S83-A9).**
+
+**El texto candidato:**
+
+> **Una deuda nombra el TERRITORIO que hay que tocar para retirarla, jamás
+> la pista que lo tenía asignado.** *"Quien toque `apps/prestador`"* no
+> caduca; *"C"* caduca **la próxima vez que se reparta** — y caduca en
+> silencio, porque una ficha con dueño viejo sigue siendo correcta, sigue
+> siendo legible y **no falla en ninguna corrida**: solo deja de tener
+> destinatario.
+
+**Por qué resuelve una clase y no un caso:** el reparto cambió **tres veces en
+cuatro sesiones** (S80: B tenía prestador · S82: tres pistas con otro corte ·
+S83: B tooling + `packages/ui`, C prestador). Con dueño-por-pista, **cada
+re-reparto vuelve a envejecer el archivo entero** y hay que barrerlo de nuevo;
+con dueño-por-territorio, **el barrido de §1 se hace UNA vez y no vuelve**: la
+ficha se resuelve sola contra el reparto vigente, sea cual sea.
+
+**Su forma exigible (propuesta, sin firma):** el campo *"Quién la retira"*
+nombra **una ruta o un paquete** (`apps/prestador`, `packages/ui`,
+`supabase/`, `scripts/`), y **solo nombra pista cuando el trabajo no es de un
+territorio** sino de alguien con un contexto irrepetible — un gate del
+founder, un arbitraje de mesa. **Esa excepción hay que dejarla escrita**, o la
+regla se fuerza a ruta donde no corresponde.
+
+**El costo, honesto:** convertir las fichas existentes **es el mismo barrido
+de §1** — no es trabajo adicional, es el criterio con el que ese barrido se
+hace. **Por eso conviene firmar esta candidata ANTES de barrer:** barrer con
+el criterio viejo obliga a barrer dos veces.
+
+**Estado:** candidata, **sin firma** (regla 80: la ley se escribe después del
+resultado). Origen: S83-A7/A8 (límite declarado por A), anotada por orden del
+founder en A9.
 
 ---
 

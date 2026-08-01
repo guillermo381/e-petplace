@@ -747,6 +747,51 @@ viaja, el maquillaje no** — si una pantalla mejora, la mejora tiene que
 ser reproducible por sistema (tokens, componentes, leyes), no un retoque
 artesanal que la siguiente pantalla no hereda.
 
+## 1b-bis. EL CICLO DE UNA PANTALLA NUEVA (enmienda S83 a la regla 80 — founder, 31-jul-2026)
+
+> ### **UI real sin cablear → gate en dispositivo → cableado.**
+>
+> **LA LÁMINA HTML MURIÓ como instrumento de diseño de PANTALLA.** Letra
+> completa en `CONTRATO_TRABAJO` **regla 80, enmienda S83** (v1.22) — eso
+> es la fuente; acá va lo exigible al construir.
+>
+> **El porqué (founder):** *las idas y vueltas de la traducción HTML→RN
+> cuestan más que el resultado.* Una lámina aprobada hay que traducirla, y
+> la traducción **reabre todas las decisiones que la lámina creía
+> cerradas** — con el costo medido en S82: **tres portes literales desde
+> CSS** (`#EEECE8` como si fuera token · el `text-transform:uppercase` que
+> resucitó el eyebrow que S52 mató · los 17 hexes de la v7, el único porte
+> que se frenó a tiempo). **No era indisciplina: era el instrumento.**
+>
+> **Y SUBE LA VARA, no la baja.** `DIRECTIVA_CRAFT_CLIENTE` §10 llama a la
+> lámina *criterio, no evidencia* con esta razón: *"nada de esto se vio en
+> un teléfono real"*. **Una pantalla montada con piezas de `packages/ui`
+> SÍ es evidencia** — corre en el dispositivo, usa los tokens vivos,
+> respeta los tres temas y hereda el comportamiento de las primitivas.
+> **Se firma lo que existe.**
+>
+> **LAS TRES CLÁUSULAS, no opcionales** (son lo que la lámina protegía):
+> 1. La UI sin cablear vive en **RUTA DE VERIFICACIÓN**, no suelta en la
+>    navegación del producto.
+> 2. **NO reemplaza la pantalla viva.** Conviven; la vieja sigue sirviendo
+>    al usuario hasta la firma.
+> 3. **NO se cablea hasta la firma en dispositivo.** Cablear antes es
+>    justo el gasto que la enmienda evita: trabajo de datos sobre una
+>    composición que puede no sobrevivir al gate.
+>
+> **LO QUE SOBREVIVE DE LA LÁMINA:** comparar **VARIANTES DE UN TOKEN
+> barato** (el agua, el glow, la huella). Ahí sigue siendo el instrumento
+> correcto: la pregunta es *"¿cuál de estos tres?"*, no depende del
+> contexto de una pantalla, y montar tres variantes en HTML cuesta
+> minutos. **La frontera: variantes de un token → lámina · composición de
+> una pantalla → UI real.**
+>
+> **Lo que NO cambia:** `palette.ts` gana siempre (ninguna fuente externa
+> es fuente de tokens) · el gate en dispositivo sigue siendo la única
+> firma (L-153) · el acuerdo entra al repo antes de que alguien lo
+> necesite. **Última lámina de pantalla:** `docs/laminas/lamina-perfil-prestador.html`
+> (S83-C8/C9) — se conserva por su criterio, no se hacen más.
+
 ## 1c. CÓMO PIENSA EL DISEÑADOR (protocolo obligatorio, founder S57)
 
 Antes de crear, agregar o modificar CUALQUIER componente visual, la
