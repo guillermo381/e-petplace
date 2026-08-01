@@ -149,6 +149,40 @@ importando `CHEVRON` desde la pantalla** — eso movería el problema de sitio e
 vez de cerrarlo: el trazo es un detalle de la anatomía, no un token que las
 pantallas deban conocer.
 
+## 2ter · MEDIR `eas update` DESDE UN WORKTREE — *la candidata que cierra DOS deudas de raíz*
+
+**Está en el canon desde S81 como letra founder** (*"si la veda vuelve a fallar, la
+cura es publicar desde un WORKTREE en detached sobre el sha declarado"*) y quedó
+**candidata** por una razón honesta: *"el comportamiento de EAS en detached no se
+conoce lo suficiente para mandarla"*. **S83 no la resolvió, pero le sumó el segundo
+incidente que la respalda.**
+
+**Lo que S83 aprendió y cambia el cálculo:** el worktree por pista (regla 85) se
+estrenó y **curó la mitad del problema** — tres árboles, tres índices, **cero
+arrastres en toda la sesión** contra los tres que D-586 documentaba. **Pero la clase
+era más ancha que el índice: es trabajo concurrente sobre un recurso compartido**, y
+la otra mitad —**el árbol de trabajo de `main`, desde donde se publica**— siguió viva
+y **cobró el mismo día** (incidente C17: porcelain vacío en ①, árbol sucio durante el
+publish, ancla con asterisco; el bundle salió limpio **de casualidad**, eran dos
+`.md`).
+
+**Las dos deudas que cierra si se mide y funciona:**
+- **D-586** — su mitad restante (el árbol compartido, no el índice).
+- **La regla 82** — el **paso ⓪** que S83 acaba de agregar pasaría de **puerta** a
+  **red**: el ancla dejaría de depender de que nadie toque el árbol.
+
+**Lo que hay que medir, concretamente (es una tarde, no un arco):** ¿`eas update`
+corre desde un worktree? ¿toma bien el `gitCommitHash` del sha en detached? ¿el
+`projectId` y las credenciales resuelven fuera del árbol principal? **Y el dato que
+S83 dejó servido:** un worktree nuevo **necesita `pnpm install` propio** (787 MB,
+minutos — medido en A1), así que el costo de tener un árbol dedicado a publicar
+**está medido y es bajo**.
+
+**Por qué vale la pena y no es higiene:** las dos deudas que cierra **no producen
+errores visibles — producen anclas que mienten**. Un ancla con asterisco no rompe
+nada hoy; rompe la trazabilidad del día que alguien pregunte *qué corría en ese
+OTA*. **Es exactamente la clase de defecto que la casa decidió no acumular.**
+
 ## 3 · LAS OTRAS FICHAS S83 CON DISPARO PROPIO
 
 | | qué espera |
