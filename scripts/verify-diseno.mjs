@@ -1077,6 +1077,9 @@ const FIXTURES = {
   // regla existe para atrapar.
   R20: [{ path: '(fixture)', src: 'style={{ backgroundColor: theme.status.warning }}' }],
   R17: { index: "export { PiezaFantasma } from './components/PiezaFantasma'", galeria: '' },
+  // S83-B7 · el ancla prueba SOLO el brazo de la entrada ausente. El de
+  // __DEV__ va en EXTRAS_BRAZOS: ensanchar este string encendía los dos y
+  // ninguno quedaba probado por separado — medido, no supuesto.
   R18: { cuenta: '<CeldaNavegacion titulo="Preferencias" onPress={() => router.push("/cuenta/preferencias")} />' },
   // el pleno que ignora a sus hermanos: exactamente mi defecto de r11
   // la marca anidada adentro de la placa: el defecto que se ve como layout
@@ -1169,6 +1172,47 @@ const EXTRAS_R16 = [
       'const darkOficio: Theme = { ...darkTheme,\n  bg: { ...darkTheme.bg, base: palette.tapizDarkOficio },\n}',
   }],
 ];
+/** LOS BRAZOS QUE EL CENSO DESTAPÓ (S83-B7, vía incremental de B4).
+ *  El censo por instrumentación midió 42 brazos y encontró 8 sin rojo
+ *  propio: no porque nadie los escribiera, sino porque **un fixture solo
+ *  puede recorrer UN camino** y estos son excluyentes con el camino que
+ *  el ancla ya prueba. Cuatro de los ocho son GUARDS DE FUENTE —el "sin
+ *  fuente no hay verificación" de L-192—, que por construcción no se
+ *  encienden nunca cuando el fixture trae la fuente: la defensa contra el
+ *  silencio vivía sin que nadie hubiera comprobado que suena.
+ *
+ *  El refactor genérico (fixtures por brazo como DEFAULT, con nombres
+ *  declarados y cobertura exigida) queda CANDIDATO con su costo medido:
+ *  21 funciones, ~42 sitios, más el runner. Esto es la vía incremental. */
+const EXTRAS_BRAZOS = [
+  // ── R14: los tres guards, en el orden en que la función los alcanza ──
+  ['R14·sin la fuente (hogar/index.tsx ausente)', r14, [{ path: 'x/OTRO.tsx', src: '' }]],
+  ['R14·constantes ausentes en el hogar', r14, [{ path: 'x/hogar/index.tsx', src: 'const NADA = 1;' }]],
+  ['R14·spacing fuera de la tabla espejada', r14, [
+    { path: 'x/hogar/index.tsx', src: 'const RESPIRO_BANDA = spacing[99];\nconst SOLAPE_RECO = spacing[98];' },
+  ]],
+  // ── R16: el guard de fuente que nació decorativo EN B3, escrito por mí ──
+  ['R16·sin los tokens del tapiz en palette', r16, { palette: '', temas: '' }],
+  // ── R22: los tres estados previos al que el ancla prueba ──
+  // el uso EXISTE (viene importado) pero la declaración NO, y queda FUERA
+  // de la placa: así enciende ESE brazo y nada más. Con el caso anterior
+  // —sin función y sin usos— encendía dos, y matar uno dejaba al otro
+  // produciendo el rojo: el mismo falso-verde que arruinó mi censo v1.
+  ['R22·MarcaElegido desapareció', r22, { filtro: '<MarcaElegido />\n<View style={{ width: 30 }} />' }],
+  ['R22·MarcaElegido no se monta', r22, { filtro: 'function MarcaElegido() {}\n<View style={{ width: 30 }} />' }],
+  ['R22·la placa cambió de forma (sin width: 30)', r22, {
+    filtro: 'function MarcaElegido() {}\n<View><MarcaElegido /></View>',
+  }],
+  // ── R18: la entrada VIVE (no dispara su otro brazo) y hay __DEV__ ──
+  ['R18·la Cuenta usa __DEV__', r18, { cuenta: 'router.push("/gallery")\nif (__DEV__) {}' }],
+];
+for (const [nombre, regla, fx] of EXTRAS_BRAZOS) {
+  if (regla(fx).fallos.length === 0) {
+    console.error(`AUTO-PRUEBA ✗ ${nombre} no salió roja — BRAZO DECORATIVO (L-192)`);
+    decorativas++;
+  }
+}
+
 const EXTRAS_R26 = [
   ['R26·brazo darkOficio (sin pisar control)', {
     temas:

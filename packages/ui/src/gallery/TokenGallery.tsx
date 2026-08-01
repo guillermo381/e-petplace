@@ -350,6 +350,101 @@ function EjemploFichaVacuna() {
 }
 
 
+// ── EL AGUA EN LA CASA VERDE (S83-B9) — lámina de gate. Las tres
+// variantes sobre el FONDO REAL del prestador (light0 en claro ·
+// tapizDarkOficio #080D0E en oscuro), montadas con la PIEZA REAL: sus
+// props de gate tienen default = producción, así que lo que se firma es
+// lo que corre. NO se enciende en apps/prestador: eso es de C, después.
+function AguaCasaVerde() {
+  const { theme } = useTheme()
+  const marco = {
+    height: 168,
+    flex: 1,
+    minWidth: 150,
+    borderRadius: radius.md,
+    overflow: 'hidden' as const,
+    backgroundColor: theme.bg.base,
+  }
+  const pie = { padding: spacing[2] }
+  return (
+    <View style={{ gap: spacing[3] }}>
+      <View style={{ flexDirection: 'row', gap: spacing[2], flexWrap: 'wrap' }}>
+        <View style={marco}>
+          <MarcaDeAgua />
+          <View style={pie}>
+            <Texto variante="apoyo">(a) TEÑIDA al oficio — tealDark</Texto>
+          </View>
+        </View>
+        <View style={marco}>
+          <MarcaDeAgua rampa />
+          <View style={pie}>
+            <Texto variante="apoyo">(b) LA RAMPA — lo que §15b.2 prohíbe</Texto>
+          </View>
+        </View>
+        <View style={marco}>
+          <MarcaDeAgua alfa={0.12} />
+          <View style={pie}>
+            <Texto variante="apoyo">(c) alfa 0.12 (hoy 0.06)</Texto>
+          </View>
+        </View>
+      </View>
+
+      <Texto variante="seccion">Y CONTRA QUÉ SE COMPARA: lo que las apps pintan HOY</Texto>
+      <Texto variante="apoyo">
+        CORRECCIÓN S83-B10 (el founder tenía la app abierta y veía el agua; mi censo decía que
+        nadie la encendía). `MarcaDeAgua` de packages/ui NO CORRE EN NINGÚN LADO: su prop del
+        ThemeProvider tiene default false y ninguna app la pasa. Lo que se ve son TRES inlines
+        con @override-s82c, y no difieren solo en el alfa: difieren en ANATOMÍA.
+      </Texto>
+      <View style={{ flexDirection: 'row', gap: spacing[2], flexWrap: 'wrap' }}>
+        <View style={marco}>
+          <MarcaDeAgua alfa={0.06} tamano={210} />
+          <View style={pie}>
+            <Texto variante="apoyo">HOY · Hogar del cliente — 0.06 · 210 · ENTERA, no sangra</Texto>
+          </View>
+        </View>
+        <View style={marco}>
+          <MarcaDeAgua alfa={0.04} tamano={1000} />
+          <View style={pie}>
+            <Texto variante="apoyo">HOY · ficha de mascota — 0.04 · 1000 · sangrada</Texto>
+          </View>
+        </View>
+        <View style={marco}>
+          {/* réplica del inline de apps/prestador/bienvenida-dia1.tsx:141 —
+              otra ANATOMÍA (esquina, no centrada), por eso no sale de la
+              pieza: se muestra tal como la app la escribe. */}
+          <View pointerEvents="none" style={{ position: 'absolute', right: -70, bottom: -30, opacity: 0.03 }}>
+            <Isotipo size={280} variant="tinta" />
+          </View>
+          <View style={pie}>
+            <Texto variante="apoyo">HOY · bienvenida del PRESTADOR — 0.03 · 280 · ESQUINA</Texto>
+          </View>
+        </View>
+      </View>
+      <Texto variante="apoyo">
+        LAS TRES DIVERGENCIAS QUE ESTO DESTAPA, y son decisión tuya: ① el Hogar pinta la variante
+        COMPLETA (210, silueta entera) que el JSDoc de la pieza da por MUERTA — la pieza dice que
+        rige la sangrada; ② los tres alfas son distintos (0.06 · 0.04 · 0.03); ③ la casa verde YA
+        TIENE agua y no parte de cero: es la de la bienvenida, en esquina.
+      </Texto>
+      <Texto variante="apoyo">
+        MEDIDO, y corrige la premisa de (c): sobre el verde #080D0E el agua da 1.120, y sobre el
+        magenta del cliente 1.105 — en la casa verde NO está más invisible, está apenas mejor. En
+        claro da 1.125. Si 0.06 se aprobó al filo para el cliente, acá está en la misma zona: (c)
+        se monta igual porque el ojo manda sobre el número, pero no hay evidencia de que el verde
+        lo obligue.
+      </Texto>
+    </View>
+  )
+}
+
+function AguaCasaVerdeTeñida() {
+  // (a) necesita el color del oficio, que en el tema del CLIENTE no vive:
+  // se pasa explícito el mismo tealDark que `lightOficio`/`darkOficio`
+  // ponen en accent.control (S83-B6) — sin inventar un hex.
+  return <MarcaDeAgua color={palette.tealDark} />
+}
+
 /** LÁMINA DE GATE S82-B r9 (orden founder): los candidatos de PAPEL
  *  TAPIZ pintados A SANGRE en un panel con contenido real, el agua del
  *  isotipo en sus dos alfas vivos, los dos glifos de control a 21px y la
@@ -1496,6 +1591,26 @@ function GaleriaInterna() {
             es lo que se hojea. Cuando un gate se firma, su sección
             BAJA al catálogo o muere (Ley 37) — no se queda arriba
             ocupando el lugar del siguiente. ═══════════════════════ */}
+        {/* ═══ S83-B9: el agua en la casa verde. Va PRIMERA junto al gate
+            abierto porque es decisión viva, no catálogo. ═══ */}
+        <Seccion titulo="① ⭐ GATE S83 — EL AGUA EN LA CASA VERDE · qué decide: si el papel tapiz entra al prestador y CÓMO — teñida al oficio (a), con la rampa que §15b.2 prohíbe (b), o con más alfa (c). Se mira en los DOS temas: el fondo del prestador es distinto en cada uno">
+          <PanelGateTema etiqueta="prestador CLARO — papel algodón #FAF9F7">
+            <AguaCasaVerde />
+          </PanelGateTema>
+          <ThemeProvider defaultMode="dark">
+            <PanelGateTema etiqueta="prestador OSCURO — su tapiz verde #080D0E">
+              <AguaCasaVerde />
+            </PanelGateTema>
+          </ThemeProvider>
+          <Texto variante="apoyo">
+            (a) TEÑIDA, aislada y en grande — el mecanismo es la prop `color` de Isotipo (S61-B8,
+            nacida por letra del founder para el isotipo en tealDark):
+          </Texto>
+          <View style={{ height: 168, borderRadius: radius.md, overflow: 'hidden', backgroundColor: palette.light0 }}>
+            <AguaCasaVerdeTeñida />
+          </View>
+        </Seccion>
+
         <Seccion titulo="① ⭐⭐ GATE S82 — LAS SEIS DECISIONES ABIERTAS · qué decide: el lote completo de la pasada (cada una con sus candidatos lado a lado sobre el fondo real, y en rojo qué se firma al elegir)">
           <GateS82 />
         </Seccion>
