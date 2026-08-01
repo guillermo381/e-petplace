@@ -32,10 +32,13 @@
  * MEMORIAL (Ley 8): memorial no se decora. El legacy ya lo tenía escrito
  * con otras palabras (*"memorial: intensity={0} o no renderizar"*) — se
  * conserva la decisión y se mecaniza la degradación.
- * CLARO (S83-B27): mismo criterio que `elevacion.luz`, que resuelve
- * `null` ahí porque **en claro la superficie ya existe sin ayuda**. Su
- * salvedad —que NO hay firma sobre claro y cuál es la reversa— vive en el
- * cuerpo, junto a la línea que lo hace.
+ * CLARO — **DARK-ONLY, FIRMADO POR EL FOUNDER (S83, 1-ago-2026)**. Nació
+ * como default provisorio en B27 ("el default que no inventa", porque la
+ * firma del glow había sido en oscuro) y el founder lo CONVIRTIÓ EN LETRA
+ * en B29. **No es un pendiente: es la decisión.** Que nadie lo lea como
+ * hueco y lo "arregle" pensando que falta — el criterio, además, coincide
+ * con `elevacion.luz`, que resuelve `null` en claro porque en claro la
+ * superficie ya existe sin ayuda.
  *
  * ── EL COLOR NO TIENE DEFAULT, a propósito ────────────────────────────
  * La pantalla declara de qué CAPA es su atmósfera. Un default sería la
@@ -78,20 +81,18 @@ export function Atmosfera({ color, origen = 'arriba-derecha', intensidad = 0.18 
   const { theme } = useTheme()
   // MEMORIAL: no se monta (Ley 8 — degrada sola, en la fuente).
   //
-  // CLARO: tampoco (S83-B27, acordado con C — él lo había puesto en su
-  // layout y declaró que si iba en la fuente era una línea acá; va acá,
-  // por la misma razón por la que `MarcaDeAgua` existe: una condición que
-  // cada consumidor repite es una condición que un consumidor va a
-  // olvidar). EL CRITERIO ES EL DE `elevacion.luz`, que ya resuelve
-  // `null` en claro con este porqué: **en claro la superficie ya existe
-  // sin ayuda**. Una atmósfera que acompaña a una luz que no está es
-  // adorno, y la regla Chanel lo mata antes de nacer.
-  // ⚠️ SIN FIRMA SOBRE CLARO, y por eso se declara en vez de darse por
-  // obvio: el founder firmó el glow "en negro y confirmado en la casa
-  // verde" — o sea en OSCURO. El AmbientGlow del portal viejo SÍ vivía en
-  // claro (declaraba 0.12 contra 0.22 de oscuro), así que esto NO es
-  // herencia: es el default que no inventa. Si el founder la quiere en
-  // claro, la reversa es BORRAR ESTA LÍNEA.
+  // CLARO: tampoco — **DARK-ONLY, FIRMADO (founder, S83, 1-ago-2026)**.
+  // Vive acá y no en el layout de cada app por la misma razón por la que
+  // `MarcaDeAgua` existe: una condición que cada consumidor repite es una
+  // condición que un consumidor va a olvidar (acordado con C, que la
+  // tenía en su layout).
+  // ⚠️ ESTA LÍNEA NO ES UN PENDIENTE. Nació en B27 como default
+  // provisorio —la firma del glow había sido en oscuro y no había letra
+  // sobre claro— y en B29 el founder la convirtió en DECISIÓN. Si algún
+  // día se quiere atmósfera en claro, eso ENMIENDA una firma; no es
+  // completar algo que faltaba. El dato que hacía dudar queda registrado
+  // para esa eventual mesa: el AmbientGlow del portal viejo SÍ vivía en
+  // claro, declarando 0.12 contra 0.22 de oscuro.
   if (theme.mode === 'memorial' || theme.mode === 'light') return null
   const { cx, cy } = ORIGEN[origen]
   return (
