@@ -368,6 +368,22 @@ function VerdeDelEstado({ acento, etiqueta }: { acento?: string; etiqueta: strin
   )
 }
 
+function PataPrestador() {
+  const [v, setV] = useState('baño')
+  return (
+    <SelectorSegmentado
+      etiqueta="Qué servicio"
+      proposito="eleccion"
+      segmentos={[
+        { codigo: 'baño', etiqueta: 'Baño' },
+        { codigo: 'corte', etiqueta: 'Baño y corte' },
+      ]}
+      activo={v}
+      onCambio={setV}
+    />
+  )
+}
+
 function CandidatasVerde() {
   return (
     <View style={{ gap: spacing[4] }}>
@@ -432,6 +448,41 @@ function GlowCasaVerde() {
       </View>
     </View>
   )
+}
+
+// ── S83-B19 ① LA ESCALA DEL TAPIZ VERDE. Los hexes se derivan en HSL
+// desde el ancla REAL de producción (#080D0E = "3%"), H y S fijos y L
+// escalada — el mismo eje con el que nació. No son inventados acá.
+const TAPIZ_ESCALA: ReadonlyArray<{ pct: number; hex: string; par: string }> = [
+  { pct: 3, hex: '#080D0E', par: '1.009' },
+  { pct: 4, hex: '#0B1113', par: '1.020' },
+  { pct: 5, hex: '#0D1617', par: '1.055' },
+  { pct: 6, hex: '#101A1C', par: '1.095' },
+  { pct: 8, hex: '#152325', par: '1.196' },
+]
+
+function EscalaTapiz({ conLuz }: { conLuz: boolean }) {
+  return (
+    <View style={{ flexDirection: 'row', gap: spacing[2], flexWrap: 'wrap' }}>
+      {TAPIZ_ESCALA.map((t) => (
+        <View
+          key={t.pct}
+          style={{ flex: 1, minWidth: 128, minHeight: 132, borderRadius: radius.md, overflow: 'hidden', backgroundColor: t.hex, padding: spacing[2], gap: spacing[2] }}
+        >
+          <Tarjeta elevacion="plana" luz={conLuz}>
+            <Texto variante="apoyo">tarjeta</Texto>
+          </Tarjeta>
+          <Texto variante="apoyo">{t.pct}% · par {t.par}</Texto>
+        </View>
+      ))}
+    </View>
+  )
+}
+
+// ── S83-B19 ② EL AGUA DEL CLIENTE, COPIADA. La receta que corre HOY en
+// hogar/index:966 — entera, 210, centrada, 0.06 — replicada tal cual.
+function AguaRecetaCliente({ color }: { color?: string }) {
+  return <MarcaDeAgua tamano={210} alfa={0.06} color={color} />
 }
 
 // ── EL AGUA EN LA CASA VERDE (S83-B9) — lámina de gate. Las tres
@@ -1732,6 +1783,109 @@ function GaleriaInterna() {
             ocupando el lugar del siguiente. ═══════════════════════ */}
         {/* ═══ S83-B9: el agua en la casa verde. Va PRIMERA junto al gate
             abierto porque es decisión viva, no catálogo. ═══ */}
+        <Seccion titulo="① ⭐ GATE S83 — CUÁNTO TAPIZ · qué decide: el founder gateó DOS VECES que el 3% es 'muy muy leve'. Acá está la escala con su par card/base, y el número DA VUELTA la premisa — ver el rótulo">
+          <ThemeProvider defaultMode="dark" cta="oficio">
+            <PanelGateTema etiqueta="sin glow — el par crudo">
+              <EscalaTapiz conLuz={false} />
+            </PanelGateTema>
+            <PanelGateTema etiqueta="CON la luz de la Atmosfera sobre la tarjeta">
+              <EscalaTapiz conLuz />
+            </PanelGateTema>
+          </ThemeProvider>
+          <Texto variante="apoyo">
+            ⚠️ EL NÚMERO DA VUELTA LA PREMISA, y es lo que hay que saber antes de elegir: en la casa
+            VERDE subir el tapiz MEJORA la separación (1.009 → 1.196), no la empeora. Tu recuerdo
+            —"al 8% el par daba 1.009 y borraba las tarjetas"— es del CLIENTE y NO se traslada: su
+            magenta y este verde parten de luminancias distintas respecto de la misma tarjeta. Acá
+            el 3% es el PEOR de la escala, no el más seguro.
+          </Texto>
+          <Texto variante="apoyo">
+            Y UNA PRECISIÓN HONESTA SOBRE EL GLOW: la Atmosfera NO mueve el par card/base — pinta
+            sobre los DOS por igual. Lo que separa la tarjeta es `elevacion.luz` (el glow sobre
+            ella), que es lo que muestra el segundo panel. Los dos paneles no comparan "sin/con
+            atmósfera": comparan "sin/con luz en la superficie".
+          </Texto>
+        </Seccion>
+
+        <Seccion titulo="① ⭐ GATE S83 — EL AGUA, COPIADA DEL CLIENTE · qué decide: si la receta que 'allí quedó bien' (entera, 210, centrada, 0.06) sirve tal cual en la casa verde, y en qué color">
+          <ThemeProvider defaultMode="light" cta="oficio">
+            <PanelGateTema etiqueta="prestador CLARO — la receta EXACTA del cliente">
+              <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+                <View style={{ flex: 1, height: 168, borderRadius: radius.md, overflow: 'hidden', backgroundColor: palette.light0 }}>
+                  <AguaRecetaCliente />
+                  <View style={{ padding: spacing[2] }}><Texto variante="apoyo">tal cual: text.primary</Texto></View>
+                </View>
+                <View style={{ flex: 1, height: 168, borderRadius: radius.md, overflow: 'hidden', backgroundColor: palette.light0 }}>
+                  <AguaRecetaCliente color={palette.tealDark} />
+                  <View style={{ padding: spacing[2] }}><Texto variante="apoyo">con el color de la casa</Texto></View>
+                </View>
+              </View>
+            </PanelGateTema>
+          </ThemeProvider>
+          <Texto variante="apoyo">
+            LA AMBIGÜEDAD QUE NO RESUELVO SOLA: "copiá la del cliente" y "con el color de la casa"
+            piden cosas distintas — la del cliente usa text.primary (tinta). Van las DOS; elegís
+            mirando.
+          </Texto>
+          <Texto variante="apoyo">
+            EL 210 FIJO, con su límite medido (B14): en pantalla angosta roza los bordes, que es el
+            defecto que el factor derivado existía para evitar. El equivalente sin número fijo es
+            ~0.55 del ancho — se propone, no se aplica: la receta de partida es la tuya.
+          </Texto>
+          <Texto variante="apoyo">
+            ⚠️ EL CHOQUE SIGUE EN PIE: entera IDENTIFICA. El argumento que dejó la Ley 4 intacta fue
+            que cortada no identificaba. Agua + isotipo del techo serían DOS.
+          </Texto>
+        </Seccion>
+
+        <Seccion titulo="① ⭐ GATE S83 — LA ATMOSFERA EN LA CASA MAGENTA · qué decide: el mismo glow firmado para el prestador, del lado del cliente. NO necesitó nada nuevo: la pieza pide su color y la pantalla declara su capa">
+          <ThemeProvider defaultMode="dark">
+            <PanelGateTema etiqueta="cliente OSCURO — capa cuidado (teal)">
+              <View style={{ height: 200, borderRadius: radius.md, overflow: 'hidden' }}>
+                <Atmosfera color={palette.teal} origen="arriba" />
+                <View style={{ padding: spacing[3], gap: spacing[2] }}>
+                  <Tarjeta elevacion="plana" luz><Texto variante="cuerpo">una tarjeta del cliente</Texto></Tarjeta>
+                </View>
+              </View>
+            </PanelGateTema>
+          </ThemeProvider>
+          <Texto variante="apoyo">
+            MEDIDO: no hizo falta slot ni token nuevo. `Atmosfera` pide `color` sin default a
+            propósito, así que vive en cualquier casa — la pantalla declara de qué CAPA es su
+            atmósfera. En el cliente eso es la capa del contexto; en el prestador, su oficio.
+            No hay nada que impida montarla.
+          </Texto>
+        </Seccion>
+
+        <Seccion titulo="① ⭐ GATE S83 — LA PATA EN EL PRESTADOR · qué decide: la marca de selección del cliente sobre el segmentado REAL del prestador, en teal. Sus dos límites van declarados, no son míos">
+          <ThemeProvider defaultMode="light" cta="oficio">
+            <PanelGateTema etiqueta="prestador CLARO — con la pata (proposito='eleccion')">
+              <PataPrestador />
+            </PanelGateTema>
+          </ThemeProvider>
+          <ThemeProvider defaultMode="dark" cta="oficio">
+            <PanelGateTema etiqueta="prestador OSCURO">
+              <PataPrestador />
+            </PanelGateTema>
+          </ThemeProvider>
+          <Texto variante="apoyo">
+            LÍMITE ①: en TEAL, jamás magenta (§15b.1). Mecanizado — `accent.marcaEleccion` pasa a
+            ser SLOT (el séptimo) y R27 lo vigila junto a `control` y `active`: el magenta no puede
+            entrar por esta puerta ni por olvido.
+          </Texto>
+          <Texto variante="apoyo">
+            LÍMITE ②: EL FILTRO DE OFICIOS CONSERVA SU LÍNEA VIAJERA y no se toca — el censo S82 ya
+            lo declaró: cada opción es un oficio y su glifo YA porta huella, así que la pata en
+            todas no señalaría a ninguna. Unificarlo es firma tuya, no arrastre de esta.
+          </Texto>
+          <Texto variante="apoyo">
+            LO QUE FALTA PARA QUE CORRA, declarado: hoy los segmentados del prestador no pasan
+            `proposito` (grep en cero) y por eso corren en 'vista', marcando con el negro suave que
+            viste. Ponerles `proposito="eleccion"` es de C, en sus pantallas — acá está montado
+            sobre la pieza real para que se firme antes de aplicarlo.
+          </Texto>
+        </Seccion>
+
         <Seccion titulo="① ⭐ GATE S83 — CUÁL VERDE PARA EL ESTADO ACTIVO · lo FIRMADO: en el prestador el focus NO es magenta, va en verde que ilumine (arbitra D-598: gana §15b.1). Lo que se decide acá es el REGISTRO, y la medición dice que ninguno solo sirve en los dos temas — el focus es GRÁFICA (mín 3:1), no texto">
           {/* cta="oficio" NO ES DECORACIÓN: sin él la lámina resuelve el
               tema del CLIENTE y el rótulo miente — pintaba papelTapiz

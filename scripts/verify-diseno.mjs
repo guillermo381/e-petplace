@@ -716,7 +716,7 @@ const FUENTES_R16 = {
  *  Un guard que aceptara cualquiera de los dos en cualquier tema dejaría
  *  pasar justo el error que la medición encontró.
  *
- *  ☠️ CONDICIÓN DE MUERTE: la misma de R16 y R26 — muere el día que los
+ *  ☠️ CONDICIÓN DE MUERTE: la misma de R16 (R26 ya se retiró) — muere el día que los
  *  slots dejen de resolverse por herencia y pasen a obligación de TIPO
  *  (tsc rojo si falta). La retira la sesión que haga ese cambio,
  *  produciendo primero el rojo del tsc y recién después borrando la
@@ -730,8 +730,8 @@ function r27(fuentes) {
   // ENSANCHA a los dos slots en vez de nacer una R28 gemela — dos reglas
   // para la misma física es la copia que L-175 prohíbe, un piso arriba.
   const ESPERADO = {
-    lightOficio: { control: 'tealDark', active: 'tealDark' },
-    darkOficio: { control: 'teal', active: 'teal' },
+    lightOficio: { control: 'tealDark', active: 'tealDark', marcaEleccion: 'tealDark' },
+    darkOficio: { control: 'teal', active: 'teal', marcaEleccion: 'teal' },
   };
   for (const [casa, slots] of Object.entries(ESPERADO)) {
     const bloque = new RegExp(`const ${casa}[\\s\\S]*?\\n\\}`).exec(temas)?.[0] ?? '';
@@ -747,7 +747,7 @@ function r27(fuentes) {
         fallos.push(`R27: ${casa} pisa accent.${slot} a palette.${m[1]} y se esperaba palette.${token} — es GRÁFICA y necesita sus DOS registros (el puro reprueba en claro: 1.46 · tealDark en oscuro pasa por poco: 3.37)`);
     }
   }
-  return { fallos, info: fallos.length === 0 ? 'estado y elección del oficio: tealDark en claro · teal puro en oscuro' : `${fallos.length} fallo(s)` };
+  return { fallos, info: fallos.length === 0 ? 'estado, elección y PATA del oficio: tealDark en claro · teal puro en oscuro' : `${fallos.length} fallo(s)` };
 }
 const FUENTES_R27 = { temas: readFileSync('packages/ui/src/themes/index.ts', 'utf8') };
 
