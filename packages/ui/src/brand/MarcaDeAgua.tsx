@@ -63,6 +63,7 @@ export function MarcaDeAgua({
   color,
   rampa = false,
   alfa,
+  tamano,
 }: {
   /** Override del color de la tinta. Default: `theme.text.primary`.
    *  Mecanismo S61-B8 (la prop `color` de `Isotipo`, nacida por letra del
@@ -75,12 +76,17 @@ export function MarcaDeAgua({
   rampa?: boolean
   /** Override del alfa. Default: `opacity.marcaDeAgua` (0.06, firmado). */
   alfa?: number
+  /** Tamaño FIJO en px. Default: derivado de la pantalla (×1.5, sangra).
+   *  Existe para que la galería pueda montar las anatomías que HOY corren
+   *  inline en las apps —la del Hogar es 210 y NO sangra— y compararlas
+   *  contra la pieza. Sin esto el gate compara contra un fantasma. */
+  tamano?: number
 } = {}) {
   const { theme } = useTheme()
   const { width } = useWindowDimensions()
   // Memorial: la pieza no se monta (Ley 8 — degrada sola, en la fuente).
   if (theme.mode === 'memorial') return null
-  const tamano = Math.round(width * FACTOR_SANGRADA)
+  const lado = tamano ?? Math.round(width * FACTOR_SANGRADA)
   return (
     <View
       pointerEvents="none"
@@ -100,9 +106,9 @@ export function MarcaDeAgua({
       }}
     >
       {rampa ? (
-        <Isotipo size={tamano} variant="gradiente" />
+        <Isotipo size={lado} variant="gradiente" />
       ) : (
-        <Isotipo size={tamano} variant="tinta" color={color ?? theme.text.primary} />
+        <Isotipo size={lado} variant="tinta" color={color ?? theme.text.primary} />
       )}
     </View>
   )

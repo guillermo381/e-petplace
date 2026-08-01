@@ -387,13 +387,46 @@ function AguaCasaVerde() {
             <Texto variante="apoyo">(c) alfa 0.12 (hoy 0.06)</Texto>
           </View>
         </View>
+      </View>
+
+      <Texto variante="seccion">Y CONTRA QUÉ SE COMPARA: lo que las apps pintan HOY</Texto>
+      <Texto variante="apoyo">
+        CORRECCIÓN S83-B10 (el founder tenía la app abierta y veía el agua; mi censo decía que
+        nadie la encendía). `MarcaDeAgua` de packages/ui NO CORRE EN NINGÚN LADO: su prop del
+        ThemeProvider tiene default false y ninguna app la pasa. Lo que se ve son TRES inlines
+        con @override-s82c, y no difieren solo en el alfa: difieren en ANATOMÍA.
+      </Texto>
+      <View style={{ flexDirection: 'row', gap: spacing[2], flexWrap: 'wrap' }}>
         <View style={marco}>
-          <MarcaDeAgua />
+          <MarcaDeAgua alfa={0.06} tamano={210} />
           <View style={pie}>
-            <Texto variante="apoyo">— HOY, para comparar (tinta, 0.06)</Texto>
+            <Texto variante="apoyo">HOY · Hogar del cliente — 0.06 · 210 · ENTERA, no sangra</Texto>
+          </View>
+        </View>
+        <View style={marco}>
+          <MarcaDeAgua alfa={0.04} tamano={1000} />
+          <View style={pie}>
+            <Texto variante="apoyo">HOY · ficha de mascota — 0.04 · 1000 · sangrada</Texto>
+          </View>
+        </View>
+        <View style={marco}>
+          {/* réplica del inline de apps/prestador/bienvenida-dia1.tsx:141 —
+              otra ANATOMÍA (esquina, no centrada), por eso no sale de la
+              pieza: se muestra tal como la app la escribe. */}
+          <View pointerEvents="none" style={{ position: 'absolute', right: -70, bottom: -30, opacity: 0.03 }}>
+            <Isotipo size={280} variant="tinta" />
+          </View>
+          <View style={pie}>
+            <Texto variante="apoyo">HOY · bienvenida del PRESTADOR — 0.03 · 280 · ESQUINA</Texto>
           </View>
         </View>
       </View>
+      <Texto variante="apoyo">
+        LAS TRES DIVERGENCIAS QUE ESTO DESTAPA, y son decisión tuya: ① el Hogar pinta la variante
+        COMPLETA (210, silueta entera) que el JSDoc de la pieza da por MUERTA — la pieza dice que
+        rige la sangrada; ② los tres alfas son distintos (0.06 · 0.04 · 0.03); ③ la casa verde YA
+        TIENE agua y no parte de cero: es la de la bienvenida, en esquina.
+      </Texto>
       <Texto variante="apoyo">
         MEDIDO, y corrige la premisa de (c): sobre el verde #080D0E el agua da 1.120, y sobre el
         magenta del cliente 1.105 — en la casa verde NO está más invisible, está apenas mejor. En
