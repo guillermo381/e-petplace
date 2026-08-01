@@ -144,7 +144,18 @@ export const palette = {
    *  firmado del prestador. No muerde; se declara para que nadie lo
    *  descubra después. A esa dilución además es papel, no marca: S52% a
    *  L6.5% sobre negro no identifica nada. Reversa: `palette.dark0`. */
-  tapizDarkOficio: '#080D0E',  // S82-B r33: 3% del verde de su oficio (las dos casas)
+  /** S83-B25 — 8%, FIRMADO por el founder tras gatear DOS VECES que el 3%
+   *  "no comunica" / "es muy muy leve". Derivado en HSL desde el ancla del
+   *  3% (H190 S27%, L escalada) — el mismo eje con el que nació.
+   *  ⚠️ EL MIEDO DEL CLIENTE NO APLICA ACÁ, y por eso el 8% no repite su
+   *  historia: allá el 8% dio par card/base 1.009 y borró las tarjetas
+   *  (revert fa03ce8); acá el par MEJORA al subir — 1.009 al 3% → 1.199 al
+   *  8% — porque este verde y aquel magenta parten de luminancias distintas
+   *  respecto de la MISMA tarjeta. Medido, no supuesto.
+   *  AA sin novedad: los textos secundario y terciario son ALPHA sobre el
+   *  fondo, así que suben y bajan CON él (tertiary 3.22 → 3.21, mín 3).
+   *  Reversa: `'#080D0E'`. */
+  tapizDarkOficio: '#152325',
   tapizDark: '#0D050D',  // S82-B r33: 3% — al 8% el par es 1.009 y con tarjetas VIVAS eso las borra en toda la app
   /** S82-B r19 — LA ELEVACIÓN DEL OSCURO SE EXPRESA COMO LUMINOSIDAD,
    *  no como sombra (la convención del tema oscuro). Era #0D0D12 y daba
