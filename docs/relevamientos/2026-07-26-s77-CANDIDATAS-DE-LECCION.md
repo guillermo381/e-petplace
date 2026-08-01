@@ -1,6 +1,6 @@
 # LAS CANDIDATAS DE LECCIÓN — inventario para la firma del founder (S77, ampliado S82)
 
-> **CATORCE candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **Las candidatas 10 a 14 entraron en S82** — el nombre de un token es su rol · su inversa (el nombre que envejeció) · la ausencia con tipos · el defecto que vive porque el DATO DE PRUEBA no lo alcanza · y el lector que se apoya solo en la RLS y por eso nadie puede auditarlo leyendo — el inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
+> **QUINCE candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **Las candidatas 10 a 14 entraron en S82** — el nombre de un token es su rol · su inversa (el nombre que envejeció) · la ausencia con tipos · el defecto que vive porque el DATO DE PRUEBA no lo alcanza · y el lector que se apoya solo en la RLS y por eso nadie puede auditarlo leyendo. **La 15 entró en S83** — una regla con auto-prueba puede tener BRAZOS que no pueden salir rojos (L-192 aplicada a sí misma), y es la única que llega con su costo medido de antemano. El inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
 
 > **NINGUNA ESTÁ FIRMADA. La firma es del founder.** Este documento no decide:
 > junta lo que hoy vive disperso entre la letra, las deudas y los cierres de
@@ -272,6 +272,49 @@ nunca lo alcanza.**
 **puertas de lectura > 1 · lector sin filtro propio = LECTOR
 AMBIGUO**, con cinco casos censados en D-587.*
 
+
+### 15 · UNA REGLA CON AUTO-PRUEBA PUEDE TENER BRAZOS QUE NO PUEDEN SALIR ROJOS
+
+**El texto propuesto:**
+
+> **La unidad que se auto-prueba no es la REGLA: es el BRAZO.** Una regla
+> con varios brazos y una sola auto-prueba declara verde sobre los brazos
+> que nunca ejercitó — y un brazo que no puede salir rojo **no vigila
+> nada**: es decorado con forma de guard. **L-192 escondida un piso más
+> abajo**, y peor que la original, porque arriba hay un fixture que dice
+> que sí se probó.
+
+**El origen (S83-B4, censo de B).** El lint tenía **40 brazos** repartidos
+en sus reglas; **8 salieron DECORATIVOS** — no podían producir rojo con
+ningún input. Y los 8 caían en **dos familias** distintas, lo que es el
+dato que convierte el hallazgo en ley: no era un descuido puntual repetido
+ocho veces, eran **dos formas sistemáticas** de escribir un brazo que no
+vigila. *(Los tres números son de B; esta mesa no los re-midió — se citan
+como suyos, no como verificados por A.)*
+
+**Por qué merece ley y no solo ocho curas.** El modo de falla es
+**exactamente el que L-192 existe para matar, con una capa de maquillaje
+encima**: la regla tiene fixture, el fixture pasa, el runner dice verde —
+y un quinto del vigilante está apagado. Quien audita ve "auto-prueba: N
+reglas encendieron" y **no tiene forma de saber que el conteo es de reglas
+y no de brazos**. La casa ya había tropezado con esto de a uno (B dejó
+escrito en su propio commit: *"probado que no es decorativo: desactivado
+el brazo de los hexes, la auto-prueba grita BRAZO DECORATIVO"*); lo que
+S83 agrega es la **medición del conjunto**, que es la que muestra que es
+clase y no anécdota.
+
+**Su costo, declarado — y por eso es candidata y no orden.** Llevarla a
+ley cuesta **~40 sitios** (un fixture por brazo, no por regla) **más
+trabajo de runner** (el reporte tiene que contar y exhibir BRAZOS, si no
+la ley es inauditable desde su propia salida). No es gratis, y esa es
+justamente la decisión que le toca al founder: **si no se paga el runner,
+la ley nace sin forma de verificarse a sí misma** — que es el defecto que
+viene a corregir.
+
+**Su hermana:** L-192 (una verificación cuyo modo de falla es el silencio
+no es una verificación). Ésta es su aplicación recursiva: **el guard del
+guard.**
+
 ---
 
 ## Nota sobre el conteo
@@ -283,5 +326,8 @@ AMBIGUO**, con cinco casos censados en D-587.*
 > **RE-MEDIDO S82 (31-jul-2026): son CATORCE.** La decimocuarta —*un lector que se apoya solo en la RLS no se puede auditar leyendo*— entró en r17: la sospecha era fuga, la medición la desmintió **y encontró un defecto peor de ver** (la cuenta de doble papel), con su rojo producido y cinco hermanos censados en D-587. Es hermana de la #8 en otro momento del trabajo, y la #13 explica por qué sobrevivió.
 >
 > **RE-MEDIDO S82 (30-jul-2026): eran TRECE.** Entraron la décima —*un token se nombra por su ROL*, del trabajo de B sobre el tema— y la undécima —*el nombre que envejeció falla al BUSCARLO*, del canto de veterinaria de C. **Son INVERSAS y por eso van separadas:** una falla al usar el token, la otra al no encontrarlo (y ésa produce duplicados, que es peor porque no se ve). La duodécima —*la ausencia tiene tipos*— entró al inventario en r11 con su quinto tipo; su texto completo vive en `MODELO_PRODUCTO` y acá figura para que se firme con las demás. La decimotercera —*un defecto vive invisible si el dato de prueba no lo alcanza*— entró en r14 con sus cuatro casos y su contraprueba del mismo día (la familia de cuatro hizo visibles dos caminos en una corrida). El conteo se corrige acá y en el título en el MISMO acto (L-141: un contador que envejece miente igual que una ley sin escribir). **Las nueve de S77 siguen SIN FIRMA**, ninguna cerrada: este documento acumula, no vence.
+
+> **RE-MEDIDO S83 (31-jul-2026): son QUINCE.** La decimoquinta —*una regla con auto-prueba puede tener brazos que no pueden salir rojos*— entra del censo de B en S83-B4: **40 brazos, 8 decorativos, en DOS familias**. Es **L-192 aplicada a sí misma** (el guard del guard) y la única de esta lista que llega **con su costo medido de antemano** (~40 sitios + trabajo de runner), porque sin el runner la ley no puede verificarse desde su propia salida. Los números son de B y se citan como suyos: **A no los re-midió**. El conteo se corrige acá y en el título en el MISMO acto (L-141).
+>
 
 Si alguna otra candidata quedó fuera, es porque no encontré su fuente. **Pasame el literal y entra**: el criterio de este documento es que nada figure sin dónde leerlo.
