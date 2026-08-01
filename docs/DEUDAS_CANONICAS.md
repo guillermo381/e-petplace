@@ -3137,3 +3137,35 @@ quotePath=false  → docs/DISEÑO_EXPERIENCIA.md
 **SU FAMILIA, y es la que ordena la cura: D-590 y D-599.** Las tres son **la misma pregunta — qué está dentro del corpus del gate**: D-599 (la galería fuera del corpus, en silencio) · D-590 (el fill del CTA sobre fondo, sin barrido) · ésta (la gráfica en `tertiary`). **Y comparten la causa raíz que ninguna nombra sola: el corpus de pares GRÁFICOS de `verify-contrast` es MANUAL** — los pares 3:1 se agregan a mano (`:168-175`), así que **ningún glifo nuevo entra solo.** **Curar ésta con un par agregado a mano deja el hueco abierto para el próximo glifo.**
 
 > **☠️ CONDICIÓN DE MUERTE:** se retira cuando **la gráfica en `text.tertiary` rinda ≥3:1 en los tres temas** —por token o por forma, es decisión de arte— **y el barrido sistemático de pares gráficos exista**, de modo que el siguiente glifo entre solo. **Las dos mitades:** sin el barrido, la cura es puntual y la clase sobrevive. **Quién la retira:** B (la gráfica vive en primitivas de `packages/ui`) + quien cierre el barrido de D-590. **Leer D-590 y D-599 antes de tocar ésta: las tres se cierran juntas o ninguna cierra del todo.** Origen: S83-A22 (censo de A sobre el hallazgo de B).
+
+#### D-607 — LA LISTA LOCAL: una pista declara pendiente lo que ya está en `main`, porque nadie actualiza su lista 🟠
+🟠 **DECLARADO TRES VECES EN S83 (dos en mensajes de merge de A, la tercera produciendo una alarma en el paso ⓪ de una veda).** Una pista lleva su propia lista de *"pendientes de merge"* y **esa lista no tiene quién la actualice**: cuando la mesa mergea, el trabajo entra a `main` **sin que nada se lo diga a la pista de origen**. El resultado medido: **B declaró 11 commits como pendientes en el momento exacto en que los 11 estaban en `main`.**
+
+**LA CLASE — el cuarto estado, y es el que faltaba al principio de la cadena:**
+
+> **El estado de una rama respecto de SÍ MISMA no dice nada sobre si su trabajo llegó.**
+
+La regla 84 distinguía **commiteado · publicado · en el teléfono**. **Falta el primero: "en mi rama".** La cadena completa es **en mi rama → commiteado → publicado → en el teléfono**, y **ninguno implica al siguiente**. *(Enmienda depositada en `CONTRATO_TRABAJO` regla 84, S83.)*
+
+**POR QUÉ NO SE ARREGLA CON DISCIPLINA, que es lo que la vuelve deuda y no descuido:** la pista **no tiene forma de enterarse**. El merge ocurre en otro árbol, por otra mano, y **git no notifica hacia atrás**: `s83-b` sigue apuntando al mismo sha después de que `main` lo absorbió. **Lo único que cambia es una relación —ser ancestro de `origin/main`— y esa relación hay que ir a preguntarla.** Pedirle a la pista que "se acuerde" es pedirle que adivine un evento que no vio.
+
+**LO GRAVE NO ES EL CONTEO — ES DÓNDE APARECE.** Las dos primeras veces costaron ruido en un reporte. **La tercera llegó al paso ⓪ de una veda**, o sea al momento en que la casa está decidiendo si es seguro bundlear: ahí un *"tengo 11 pendientes"* falso **no es un dato incómodo, es una alarma** — y una alarma falsa en una veda **gasta la ventana de publicación, que es el recurso escaso**. Es la misma forma de D-604 (*la instrucción falsa*): **el dato no rompe nada, hace que alguien actúe mal.**
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando **toda declaración de pendientes se saque de `git merge-base --is-ancestor <sha> origin/main`** —o del equivalente `git rev-list --count origin/main..<rama>`— **y no de una lista propia**. **Verificación exigible, y es de una línea:** una pista que reporta N pendientes tiene que poder mostrar el comando que devolvió N; **si el número no tiene comando, es memoria**. **Quién la retira:** cada pista en su propio reporte — no hace falta herramienta nueva, hace falta que el número tenga procedencia (misma exigencia que la candidata **#17** para los números de contraste: *un número sin procedencia declarada no es un dato*). Origen: S83 (tres declaraciones de A; la tercera, alarma en veda).
+
+#### D-608 — `git diff --stat` ENTRE PUNTAS parece un preview del merge y no lo es: frenó DOS merges legítimos en un día 🟠
+🟠 **MEDIDO DOS VECES EN S83, las dos por A, las dos a punto de frenar un merge correcto.**
+
+**El hecho:** `git diff --stat main <rama>` compara **las dos PUNTAS**, no lo que el merge haría. Si la otra rama no tiene tus commits recientes, **los muestra como BORRADOS** — con signo menos y conteo de líneas, exactamente igual que si el otro los estuviera eliminando.
+
+**Los dos casos, con su literal:**
+1. **A12 (C15):** el diff mostraba `docs/` y `packages/ui` con borrados; **parecía que C pisaba trabajo de A y de B.** Los dos commits tocaban **solo `apps/prestador`**.
+2. **A24 (C25):** el diff mostraba **`docs/DEUDAS_CANONICAS.md` con −44 y el doc de arranque con −41** — o sea, **parecía que C borraba el censo de `text.tertiary` que A acababa de depositar minutos antes.** Los tres commits tocaban **un archivo cada uno**, los tres en `apps/prestador/veterinaria`.
+
+**POR QUÉ ENGAÑA TAN BIEN, y por eso merece ficha en vez de "acordate":** el output **no tiene ninguna marca de que sea una comparación de puntas**. Se lee idéntico a un preview de merge, **usa el vocabulario del daño** (`-44 líneas` en un archivo que acabás de escribir) y **aparece justo en el momento de máxima cautela** — cuando alguien está por mergear y está buscando razones para frenar. **La lectura correcta y la catastrófica producen el mismo texto.**
+
+**LA VERIFICACIÓN CORRECTA, que es la que salvó los dos merges:** **`git show --name-only --pretty="" <sha>` por CADA commit** — eso dice qué toca cada uno, sin depender de qué tiene o no tiene la otra rama. *(Y para el contenido, `git show <sha> -- <ruta>`.)* **La diferencia de método es exacta: el diff entre puntas responde "en qué difieren las dos ramas"; la pregunta real es "qué hace este commit".**
+
+**Su hermana es la candidata #16** (*un grep por la prop mide quién la pasa, no qué se renderiza*): **las dos son el instrumento contestando una pregunta distinta de la que uno cree estar haciendo** — y en las dos el resultado es plausible, no vacío, que es lo que las hace pasar.
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando **la verificación previa a un merge se haga por `git show --name-only` POR COMMIT** y esté escrito como paso — hoy es criterio que A aplicó por haber tropezado, no letra. **Candidata de forma, sin firma (regla 80):** *antes de mergear, se lee qué toca cada commit; el diff entre puntas no es un preview del merge y no se usa como tal*. **Quién la retira:** la mesa, si decide que esto sube a la regla 84 (es el mismo espíritu del eslabón ② — verificar por contenido y no por apariencia). Origen: S83-A12 y S83-A24 (dos incidentes propios, ambos atajados).
