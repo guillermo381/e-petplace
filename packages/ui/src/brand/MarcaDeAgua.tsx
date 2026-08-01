@@ -6,9 +6,10 @@
  *
  * Es FONDO, no contenido: `pointerEvents="none"`, posición absoluta que
  * cubre a su padre, isotipo en tinta al `opacity.marcaDeAgua` (0.06 —
- * el número FIRMADO del Hogar; ver el token). Centrado y CORTADO por
- * los bordes a propósito: un isotipo que se sale del marco se lee como
- * textura del papel, no como logo puesto ahí.
+ * el número FIRMADO del Hogar; ver el token). Centrado y ENTERO: el
+ * founder firmó en S83-B22 la receta que corre en el Hogar, contra las
+ * tres variantes que cortaban ("la idea es que se vea, suave, en marca
+ * de agua, pero no cortado"). Ver `FACTOR_ENTERA`.
  *
  * POR QUÉ NACE EN packages/ui Y NO POR PANTALLA: hasta hoy vivía
  * copiada en dos pantallas del cliente y **ya se había separado** —
@@ -17,10 +18,16 @@
  * número viva una sola vez.
  *
  * MEMORIAL LA APAGA (Ley 8: memorial no se decora — el papel tapiz es
- * ornamento y memorial es sobriedad). El tema oscuro NO la recibe
- * todavía: el tinte del fondo se encendió SOLO en claro (voto (a)
- * ratificado por el founder en r9 §3), y un agua sin su tinte sería la
- * mitad de la pieza.
+ * ornamento y memorial es sobriedad). CORRECCIÓN S83 (la prosa decía "el
+ * tema oscuro NO la recibe todavía" y era falso: el único `return null`
+ * es el de memorial). El oscuro SÍ la recibe, y desde S82-B r33 tiene su
+ * tinte en las dos casas — la premisa de aquella nota venció.
+ *
+ * ⚠️ LEY 4 — LA RESOLUCIÓN DE S82-B r15 QUEDA EN DUDA POR LA FIRMA NUEVA.
+ * Lo que sigue es el argumento de entonces, que se apoyaba en la variante
+ * SANGRADA; con el agua ENTERA su premisa ("cortada no identifica") ya no
+ * se cumple, y por eso la Ley 4 vuelve a la mesa. Se conserva el texto
+ * porque explica QUÉ se está reabriendo:
  *
  * ✅ LEY 4 — RESUELTA SIN ENMIENDA (firma founder, S82-B r15). El literal
  * (que trajo A) dice: el isotipo está FUERA de la contabilidad de dosis
@@ -41,14 +48,28 @@ import { Isotipo } from './Isotipo'
 import { opacity } from '../tokens/opacity'
 import { useTheme } from '../ThemeProvider'
 
-/** SANGRADA — FIRMADA por el founder en galería (S82-B r15). El isotipo
- *  se sobredimensiona al 150% del ancho de pantalla para que la silueta
- *  SALGA por los cuatro bordes: sin silueta cerrada no identifica, y por
- *  eso se lee TEXTURA y no marca. Se deriva de la PANTALLA y no es un
- *  número fijo — en un teléfono angosto tiene que sangrar igual.
- *  LA VARIANTE COMPLETA MURIÓ con su trabajo hecho (Ley 37): existió
- *  para que el gate pudiera comparar, y la comparación ya ocurrió. */
-const FACTOR_SANGRADA = 1.5
+/** ENTERA — FIRMA DEL FOUNDER (S83-B22), que ENMIENDA la de S82-B r15.
+ *  Su letra: *"no puedes copiar cómo quedó en cliente? Allí quedó bien"*,
+ *  y antes, sobre las tres sangradas: *"todos cortan el isotipo; la idea
+ *  es que se vea, suave, en marca de agua, pero no cortado"*.
+ *
+ *  LA SANGRADA MUERE con su trabajo hecho (Ley 37) y esta nota conserva
+ *  su porqué, porque la ENMIENDA arrastra un argumento: la sangrada
+ *  existía para que la silueta NO cerrara —"sin silueta cerrada no
+ *  identifica, y por eso se lee textura y no marca"—, y ése fue el
+ *  argumento que dejó la LEY 4 INTACTA. Una silueta ENTERA sí identifica.
+ *  ⚠️ **La Ley 4 (un isotipo por pantalla) vuelve a la mesa**: agua +
+ *  isotipo del techo son DOS. Es firma del founder, no de esta pieza.
+ *
+ *  EL NÚMERO: la receta que corre en el Hogar es `size 210` FIJO. Se
+ *  conserva su RESULTADO y se cura su robustez —lo único que la orden
+ *  autorizó a proponer—: 210 en una pantalla de 390 hace que el isotipo
+ *  ocupe el **78 %** del ancho, y ese mismo 210 en una de 320 ocupa el
+ *  **96 %**, que es rozar. El factor derivado que reproduce el 210 EXACTO
+ *  a 390 px es **0.536** (210 = 390 × 0.536), y mantiene ese 78 % en
+ *  cualquier ancho. Es ajuste de robustez, no de diseño: en el teléfono
+ *  del gate se ve idéntico. */
+const FACTOR_ENTERA = 0.536
 
 /** LAS TRES PROPS DEL GATE (S83-B9) — **todas opcionales y con default
  *  EXACTAMENTE igual al comportamiento de producción**: montadas sin
@@ -76,17 +97,18 @@ export function MarcaDeAgua({
   rampa?: boolean
   /** Override del alfa. Default: `opacity.marcaDeAgua` (0.06, firmado). */
   alfa?: number
-  /** Tamaño FIJO en px. Default: derivado de la pantalla (×1.5, sangra).
-   *  Existe para que la galería pueda montar las anatomías que HOY corren
-   *  inline en las apps —la del Hogar es 210 y NO sangra— y compararlas
-   *  contra la pieza. Sin esto el gate compara contra un fantasma. */
+  /** Tamaño FIJO en px. Default: derivado de la pantalla (`FACTOR_ENTERA`
+   *  0.536), que reproduce el 210 del Hogar a 390 px y lo preserva en
+   *  cualquier ancho. Existe para montar en galería las anatomías que
+   *  corren inline en las apps y compararlas contra la pieza — sin esto
+   *  el gate compara contra un fantasma. */
   tamano?: number
 } = {}) {
   const { theme } = useTheme()
   const { width } = useWindowDimensions()
   // Memorial: la pieza no se monta (Ley 8 — degrada sola, en la fuente).
   if (theme.mode === 'memorial') return null
-  const lado = tamano ?? Math.round(width * FACTOR_SANGRADA)
+  const lado = tamano ?? Math.round(width * FACTOR_ENTERA)
   return (
     <View
       pointerEvents="none"
@@ -98,9 +120,11 @@ export function MarcaDeAgua({
         right: 0,
         alignItems: 'center',
         justifyContent: 'center',
-        // La sangrada desborda a propósito: sin overflow visible el
-        // recorte lo hace el padre, que es exactamente lo que se busca
-        // (los cuatro bordes cortan la silueta).
+        // El recorte se CONSERVA como red, no como intención: la firma
+        // nueva pide que NO corte y el factor 0.536 lo garantiza en
+        // cualquier ancho. Queda por si algún consumidor pasa un `tamano`
+        // mayor que su contenedor — ahí el padre recorta en vez de que la
+        // silueta se derrame sobre el contenido.
         overflow: 'hidden',
         opacity: alfa ?? opacity.marcaDeAgua,
       }}
