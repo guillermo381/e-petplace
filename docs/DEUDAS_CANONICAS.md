@@ -3040,3 +3040,39 @@ quotePath=false  → docs/DISEÑO_EXPERIENCIA.md
 > **☠️ CONDICIÓN DE MUERTE (la ficha se cierra; LA LEY QUE DEJA, no):** **toda lámina de gate DECLARA sobre qué tema monta, y ese tema se verifica contra el THEME RESUELTO, no contra el rótulo.** Es decir: el rótulo deja de ser la fuente y pasa a ser **lo verificado** — se lee del `theme` que la pantalla está usando, o se compara contra él. **Un rótulo escrito a mano al lado de un color es, por construcción, una afirmación sin verificación** (L-192: su modo de falla es el silencio, y acá el silencio duró tres gates). **Quién la retira:** la ley entra cuando se firme; hoy es **CANDIDATA** (regla 80 — se escribe después del resultado, y el resultado es que los tres gates hay que volver a correrlos). **Lo que queda pendiente y no lo cierra el merge: los TRES GATES SE RE-CORREN.** Origen: S83 (hallazgo de B, causa raíz de C).
 
 > **📌 CRUCE DE TERRITORIO DECLARADO Y BIEN APLICADO (S83-A17) — C tocó `packages/ui`, que es de B.** `e4fcf96` modifica `ThemeProvider.tsx` desde la pista C. **No es una violación de 76(d): es 76(d) funcionando.** La regla pide que el cruce **se DIGA, no que no se haga**, y C hizo las tres cosas que lo vuelven legítimo: ① tocó **la causa raíz**, no el síntoma —el síntoma vivía en su territorio, la causa en el ajeno, y curar el síntoma habría dejado el defecto vivo para la próxima lámina—; ② **lo declaró en el commit**; ③ **dejó la salida escrita con su costo: *"si B prefiere otra forma, se revierte en una línea"*** (verificado en el literal del commit). **Un cruce con reversión de una línea declarada no le quita a B la decisión — se la conserva.** Es el precedente que conviene citar la próxima vez que una pista encuentre la causa raíz del otro lado de la frontera.
+
+#### D-603 — `accent.marcaEleccion` resuelve HOY idéntico a `accent.control` en las CINCO: redundancia declarada, no error ⚪
+⚪ **DECLARADA POR B (S83-B20) y VERIFICADA por A en las cinco resoluciones, una por una:**
+
+| tema | `accent.control` | `accent.marcaEleccion` | |
+|---|---|---|---|
+| light | `palette.magentaDark` | `palette.magentaDark` | idénticos |
+| dark | `palette.violetText` | `palette.violetText` | idénticos |
+| memorial | `palette.textMemorialDark` | `palette.textMemorialDark` | idénticos |
+| lightOficio | `palette.tealDark` | `palette.tealDark` | idénticos |
+| darkOficio | `palette.teal` | `palette.teal` | idénticos |
+
+**CINCO DE CINCO. No hay una sola resolución donde el slot aporte un valor distinto.**
+
+**POR QUÉ SE CONSERVA IGUAL, y es una decisión razonable: son CONCEPTOS distintos que hoy coinciden por casualidad histórica, no por definición.** `control` viste **la letra** (el acento funcional de la casa: qué está activo, qué se puede tocar); `marcaEleccion` es **la marca** — la pata que pisa lo elegido, que pertenece a la familia del isotipo y no al sistema de controles. **Colapsarlos hoy sería barato y ataría dos cosas que pueden querer separarse mañana** (el día que la pata quiera un color de marca que el control no debe tener, o al revés).
+
+**Y POR QUÉ IGUAL ES DEUDA, que es la parte que no se puede omitir:** **mientras coincidan, un cambio en uno que no viaje al otro es DIVERGENCIA POR ACCIDENTE.** Nadie va a notar que se separaron — se van a ver casi iguales, y "casi iguales" es exactamente el estado en el que el chevron del cliente vivió tres sitios sin que nadie lo viera (**D-600**: *dos de tres coinciden, un vistazo lo aprueba*). **El riesgo no es que el slot exista: es que su igualdad es invisible y su ruptura también.**
+
+**Mitigación parcial que YA existe:** `R27` vigila `control`, `active` y `marcaEleccion` **juntos** en las dos casas de oficio (`verify-diseno.mjs:705+`, con su rojo producido). Eso cubre que el prestador no herede magenta por ninguna de las tres puertas — **pero no vigila que los tres sigan valiendo lo mismo entre sí**, que es otra pregunta.
+
+> **☠️ CONDICIÓN DE MUERTE — con sus DOS salidas, y las dos son legítimas:** ① **si el founder decide que LA PATA SIEMPRE SIGUE AL CONTROL**, el campo se borra y `MarcaEleccion` lee `accent.control` — la redundancia desaparece de raíz; ② **si en algún tema la pata toma un valor propio**, la deuda muere sola: el slot pasa a estar justificado por un caso vivo y deja de ser redundante. **Lo que no puede quedar es el estado de hoy indefinidamente** — cinco coincidencias sin decisión son una divergencia esperando. **Quién la retira:** el founder (① es decisión de marca) o el primer tema que necesite ② . Origen: S83-B20 (declarado por B), verificado en las cinco por A.
+
+#### D-604 — COMENTARIOS QUE CITAN GUARDS RETIRADOS: la instrucción falsa ✅ el caso curado, 🟠 la práctica sin ley
+🟠 **B lo destapó DOS VECES en el mismo día (S83), y su caso concreto ya está curado — lo que queda sin cerrar es la PRÁCTICA.**
+
+**El caso, medido en las dos puntas:** al retirarse **R26** (S83-B17, jubilada por su propio rojo), quedaron **dos comentarios en `packages/ui/src/themes/index.ts` (:83 y :114) que decían textual *"Lo vigila R26 de verify:diseno, con su rojo producido"*** — sobre una regla que **ya no existía**. **✅ Curado en `050c398`:** re-medido tras el merge, **cero menciones de R26 en `packages/` y `apps/`**; las 5 que quedan viven en el propio lint y son legítimas (la lápida y las referencias históricas: *"se retiró"*, *"hermana de R26"*).
+
+**LA CLASE, y por qué merece ficha aunque el caso esté cerrado: un comentario que manda a leer una regla inexistente NO ES PROSA VIEJA — ES UNA INSTRUCCIÓN FALSA.** La diferencia es de naturaleza:
+- Prosa vieja **describe mal** algo que existe. Cuesta una relectura.
+- Una instrucción falsa **manda a verificar contra algo que no está**. Quien la sigue busca R26, no la encuentra, y **queda con dos lecturas igual de plausibles: "me equivoqué de nombre" o "el guard se rompió"** — y ninguna de las dos es la verdad, que es que la regla se retiró a propósito.
+
+**Es la familia de D-597 y D-600 —el JSDoc que declara muerta una variante viva, el JSDoc que promete fuente única con cuatro copias— en su forma más barata de producir y más cara de detectar:** producirla cuesta **cero** (basta retirar un guard y no mirar quién lo citaba); detectarla **no la caza ningún gate**, porque **un comentario nunca rompe un build**. Sobrevive hasta que alguien la lee y le cree.
+
+**Y tiene un agravante propio: aparece justo cuando la casa hace lo correcto.** Retirar un guard que ya no sirve es higiene sana (*"un guard que sobrevive a su propia razón es basura que nadie se anima a tocar"*, propuesta S82). **El acto virtuoso es el que siembra las instrucciones falsas** — por eso la cura tiene que ser parte del acto, no una pasada posterior.
+
+> **☠️ CONDICIÓN DE MUERTE — la CANDIDATA que deja, sin firma (regla 80):** **cuando un guard se retira, su lápida incluye el GREP DE SUS MENCIONES.** Forma exigible propuesta: el commit que retira una regla **corre `grep -rn "<Rnn>"` sobre `packages/`, `apps/` y `scripts/`** y **declara el resultado en su mensaje** — cero menciones huérfanas, o las que curó. **Cuesta un comando y cierra la clase entera**, porque el único momento en que alguien sabe con certeza que un guard murió es el momento en que lo mata. *(El precedente ya existe y salió bien: B mató R26 con lápida escrita en el script Y curó los dos comentarios en el mismo arco — lo que falta es que sea ley, no criterio.)* **Quién la retira:** la mesa, cuando firme la candidata. Origen: S83-B (dos hallazgos propios en el día), medido y re-medido por A.
