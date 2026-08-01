@@ -17,12 +17,20 @@
  * sobre su censo).
  */
 import type { ReactNode } from 'react'
-import { KeyboardAvoidingView, Platform } from 'react-native'
+import { KeyboardAvoidingView } from 'react-native'
 
 export function EvitaTeclado({ children }: { children: ReactNode }) {
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      // S83-B36 — `padding` EN LAS DOS PLATAFORMAS. `height` encoge el
+      // CONTENEDOR contando con que la ventana se achique, y bajo
+      // edge-to-edge (SDK 57) la ventana YA NO SE ACHICA: el contenedor
+      // se encoge contra nada y el campo enfocado queda debajo del
+      // teclado. Es la misma familia de L-193 (la premisa heredada que
+      // nadie fechó — `adjustResize` es letra muerta bajo edge-to-edge).
+      // `padding` no depende de eso: empuja el contenido con el inset del
+      // teclado, que sí llega.
+      behavior="padding"
       style={{ flex: 1 }}
     >
       {children}
