@@ -380,9 +380,9 @@ const BASELINE_R12 = new Set([
   // el founder), y el barrido las cazó en su PRIMERA corrida — media hora
   // después del commit. Antes/después, mismo medidor:
   //     fill accent.cta/bg.base ... 3.37 → 2.79 → ✅ CURADO en B31 (10.50)
-  //     capaText.comunidad/capaBg.comunidad .... 5.22 → 4.35  (mín 4.5)
-  //     capaText.comunidadAmplia/capaBg... ..... 4.71 → 3.87  (mín 4.5)
-  //     status.dangerText/status.dangerBg ...... 5.48 → 4.43  (mín 4.5)
+  //     capaText.comunidad/capaBg ... 5.22 → 4.35 → ✅ 4.90 al 5% (B32)
+  //     capaText.comunidadAmplia .... 4.71 → 3.87 → ⚠️ 4.40 al 5%, falta 0.10
+  //     status.dangerText/dangerBg .. 5.48 → 4.43 → ✅ 5.06 al 5% (B32)
   //
   // LA CAUSA, medida: `capaBg` y `statusBg` son rgba con ALPHA y se
   // componen sobre `bg.base`. Aclarar el fondo aclara el tinte, y el
@@ -402,9 +402,7 @@ const BASELINE_R12 = new Set([
   // que es el único slot de acento del oficio que no tiene), y subir
   // violetText/pinkDark/dangerText del oscuro, que es tanda propia con su
   // re-medición. NO SE ELIGE ACÁ.
-  'darkOficio·texto·capaText.comunidad/capaBg.comunidad',
   'darkOficio·texto·capaText.comunidadAmplia/capaBg.comunidadAmplia',
-  'darkOficio·texto·status.dangerText/status.dangerBg',
   // ═══ S83-B30 · HEREDADAS DEL CLIENTE, que el barrido nuevo hizo
   // visibles pero NO nacieron hoy:
   // · el ORO contra papel (1.55) es EXENCIÓN FIRMADA — E1 lo midió y el
@@ -457,9 +455,13 @@ const BASELINE_R12 = new Set([
  *  "baseline-founder". Un número que mezcla lo decidido con lo que hay que
  *  decidir esconde justo lo que hay que mirar. */
 const REGRESION_B25 = new Set([
-  'darkOficio·texto·capaText.comunidad/capaBg.comunidad',
+  // S83-B32 — DE TRES A UNA. El founder bajó el tapiz al 5% ("al 8% es muy
+  // pesado", en dispositivo) y BAJAR EL FONDO CURÓ DOS SOLO, sin tocar un
+  // token de texto: comunidad 4.35 → 4.90 ✓ · dangerText 4.43 → 5.06 ✓.
+  // Es la contracara exacta de la causa: los tintes son alpha sobre
+  // `bg.base`, así que oscurecer el fondo oscurece el tinte y el texto
+  // claro recupera contraste. La que queda está a 0.10 del mínimo.
   'darkOficio·texto·capaText.comunidadAmplia/capaBg.comunidadAmplia',
-  'darkOficio·texto·status.dangerText/status.dangerBg',
 ]);
 function r12(pares) {
   const fallos = [];
