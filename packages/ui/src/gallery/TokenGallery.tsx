@@ -6,7 +6,7 @@
  */
 
 import { Pressable, ScrollView, Text, View } from 'react-native'
-import Svg, { Path } from 'react-native-svg'
+import Svg, { Path, Defs, RadialGradient, Stop, Rect } from 'react-native-svg'
 
 import { useState } from 'react'
 
@@ -350,6 +350,101 @@ function EjemploFichaVacuna() {
 }
 
 
+// ── ① LA HUELLA DEL TAB (S83-B11) — el choque de DOS letras firmadas.
+// La barra es la PIEZA REAL con su prop de gate; el teal no es un slot
+// todavía: la galería MUESTRA, la firma decide.
+function HuellaDelTab() {
+  const [tab, setTab] = useState('a')
+  return (
+    <View style={{ gap: spacing[4] }}>
+      <View style={{ gap: spacing[1] }}>
+        <Texto variante="apoyo">HOY — magenta #FF00AF (accent.active)</Texto>
+        <BarraTabs items={ICONOS_TABS} activo={tab} onCambiar={setTab} estadoPorHuella />
+      </View>
+      <View style={{ gap: spacing[1] }}>
+        <Texto variante="apoyo">CANDIDATA — tealDark del oficio (sería un SEXTO slot)</Texto>
+        <BarraTabs items={ICONOS_TABS} activo={tab} onCambiar={setTab} estadoPorHuella acento={palette.tealDark} />
+      </View>
+    </View>
+  )
+}
+
+// ── ② EL GLOW (S83-B11, cruce armado por C) — las tres capas sobre las
+// Tarjetas PLANAS del prestador en oscuro, que son las de D-589 (par
+// 1.009: a efectos prácticos el mismo color que el fondo).
+//
+// EL BLOB es composición LOCAL de galería a propósito: es un candidato
+// SIN FIRMA y la Ley 11 pide gate antes de que una pieza nazca en ui. Si
+// el founder lo firma, nace ahí con su método completo. Forma 2 de S83-B8
+// (RadialGradient de react-native-svg — CERO deps nuevas; el degradado ES
+// el difuminado, no hace falta blur).
+function BlobAtmosferico({ color, x = '50%', y = '18%' }: { color: string; x?: string; y?: string }) {
+  return (
+    <View pointerEvents="none" style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}>
+      <Svg width="100%" height="100%">
+        <Defs>
+          <RadialGradient id="blob" cx={x} cy={y} r="55%">
+            <Stop offset="0" stopColor={color} stopOpacity={0.22} />
+            <Stop offset="0.55" stopColor={color} stopOpacity={0.07} />
+            <Stop offset="1" stopColor={color} stopOpacity={0} />
+          </RadialGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100%" height="100%" fill="url(#blob)" />
+      </Svg>
+    </View>
+  )
+}
+
+function TarjetasPlanasD589({ conGlow = false }: { conGlow?: boolean }) {
+  return (
+    <View style={{ gap: spacing[2] }}>
+      {['Hoy · la jornada', 'Mascotas', 'La dirección de la sede'].map((t) => (
+        <View
+          key={t}
+          style={conGlow ? { boxShadow: `0 0 24px ${palette.tealDark}55` } : undefined}
+        >
+          <Tarjeta elevacion="plana">
+            <Texto variante="cuerpo">{t}</Texto>
+            <Texto variante="apoyo">par superficie/fondo 1.009 — D-589</Texto>
+          </Tarjeta>
+        </View>
+      ))}
+    </View>
+  )
+}
+
+function GlowCasaVerde() {
+  const { theme } = useTheme()
+  const marco = {
+    flex: 1,
+    minWidth: 210,
+    minHeight: 260,
+    borderRadius: radius.md,
+    overflow: 'hidden' as const,
+    backgroundColor: theme.bg.base,
+    padding: spacing[3],
+    gap: spacing[2],
+  }
+  return (
+    <View style={{ flexDirection: 'row', gap: spacing[2], flexWrap: 'wrap' }}>
+      <View style={marco}>
+        <Texto variante="apoyo">(a) HOY — fondo 3% + halo</Texto>
+        <TarjetasPlanasD589 />
+      </View>
+      <View style={marco}>
+        <BlobAtmosferico color={palette.teal} />
+        <Texto variante="apoyo">(b) + BLOB radial por capa</Texto>
+        <TarjetasPlanasD589 />
+      </View>
+      <View style={marco}>
+        <BlobAtmosferico color={palette.teal} />
+        <Texto variante="apoyo">(c) + blob Y glow en las planas</Texto>
+        <TarjetasPlanasD589 conGlow />
+      </View>
+    </View>
+  )
+}
+
 // ── EL AGUA EN LA CASA VERDE (S83-B9) — lámina de gate. Las tres
 // variantes sobre el FONDO REAL del prestador (light0 en claro ·
 // tapizDarkOficio #080D0E en oscuro), montadas con la PIEZA REAL: sus
@@ -422,10 +517,25 @@ function AguaCasaVerde() {
         </View>
       </View>
       <Texto variante="apoyo">
-        LAS TRES DIVERGENCIAS QUE ESTO DESTAPA, y son decisión tuya: ① el Hogar pinta la variante
-        COMPLETA (210, silueta entera) que el JSDoc de la pieza da por MUERTA — la pieza dice que
-        rige la sangrada; ② los tres alfas son distintos (0.06 · 0.04 · 0.03); ③ la casa verde YA
-        TIENE agua y no parte de cero: es la de la bienvenida, en esquina.
+        LAS TRES DIVERGENCIAS QUE ESTO DESTAPA, y son decisión tuya: ① los tres alfas son
+        distintos (0.06 · 0.04 · 0.03); ② las tres anatomías también (entera · sangrada ·
+        esquina); ③ la casa verde YA TIENE agua y no parte de cero: es la de la bienvenida.
+      </Texto>
+      <Texto variante="seccion">LA CONTRADICCIÓN QUE SE FIRMA ACÁ — y es la primera vez</Texto>
+      <Texto variante="apoyo">
+        El JSDoc de MarcaDeAgua declara que la variante COMPLETA "murió con su trabajo hecho
+        (Ley 37)" y que rige la SANGRADA al 150% — firmada por vos en S82-B r15 mirando las dos.
+        Y el Hogar, la pantalla que estás mirando, pinta la COMPLETA: size 210, silueta entera,
+        sin overflow. La letra y la pantalla dicen cosas distintas, y ninguna de las dos está mal
+        por sí sola: lo que falta es la firma que las reconcilie.
+      </Texto>
+      <Texto variante="apoyo">
+        POR QUÉ IMPORTA MÁS DE LO QUE PARECE: el argumento que dejó la Ley 4 INTACTA fue que el
+        agua "no es un isotipo" porque cortada por los cuatro bordes no identifica — sin silueta
+        cerrada, sin escala legible. Ese argumento se apoya en la SANGRADA. La completa del Hogar
+        tiene silueta cerrada. Elegir la anatomía es, de paso, decidir si ese argumento sigue en
+        pie o si la Ley 4 vuelve a la mesa. Lo que se firma acá vale para el ECOSISTEMA: cliente y
+        prestador, las tres pantallas, una sola anatomía.
       </Texto>
       <Texto variante="apoyo">
         MEDIDO, y corrige la premisa de (c): sobre el verde #080D0E el agua da 1.120, y sobre el
@@ -1593,6 +1703,47 @@ function GaleriaInterna() {
             ocupando el lugar del siguiente. ═══════════════════════ */}
         {/* ═══ S83-B9: el agua en la casa verde. Va PRIMERA junto al gate
             abierto porque es decisión viva, no catálogo. ═══ */}
+        <Seccion titulo="① ⭐ GATE S83 — LA HUELLA DEL TAB · qué se arbitra: DOS LETRAS FIRMADAS QUE CHOCAN. S72 dice que accent.active (magenta) es RESERVA DE MARCA en las dos apps y que verlo en la tab activa del prestador NO es desvío. §15b.1 dice: UN acento de oficio (tealDark) para TODO estado y control funcional, y el magenta vive SOLO en la marca. La tab activa: ¿es marca o es estado? No es elegir un color — es decidir cuál de las dos letras rige">
+          <PanelGateTema etiqueta="prestador CLARO">
+            <HuellaDelTab />
+          </PanelGateTema>
+          <ThemeProvider defaultMode="dark">
+            <PanelGateTema etiqueta="prestador OSCURO">
+              <HuellaDelTab />
+            </PanelGateTema>
+          </ThemeProvider>
+          <Texto variante="apoyo">
+            SI GANA EL TEAL, el camino es un SEXTO SLOT (accent.active por casa, mismo mecanismo
+            que accent.control en S83-B6) — no está agregado: la galería muestra, la firma decide.
+            Y arrastra: accent.active también viste el focus de Campo y el estado de otros
+            controles, así que la firma alcanza más que la barra.
+          </Texto>
+        </Seccion>
+
+        <Seccion titulo="① ⭐ GATE S83 — EL GLOW EN LA CASA VERDE · qué decide: cómo se separa la superficie del fondo cuando YA SE GATEÓ que el fondo al 3% NO COMUNICA y el halo NO ALCANZA. Las tres capas sobre las Tarjetas planas de D-589 (par 1.009: a efectos prácticos, el mismo color que el fondo)">
+          <ThemeProvider defaultMode="dark">
+            <PanelGateTema etiqueta="prestador OSCURO — donde vive el problema">
+              <GlowCasaVerde />
+            </PanelGateTema>
+          </ThemeProvider>
+          <Texto variante="apoyo">
+            EL BLOB es la forma 2 del relevamiento S83-B8: RadialGradient de react-native-svg, CERO
+            dependencias nuevas — el degradado ES el difuminado, no hace falta blur ni Skia. Es el
+            port honesto del AmbientGlow del portal viejo (blur 80px, alfa 0.16–0.22, color por
+            token de CAPA) sin traer su paleta muerta.
+          </Texto>
+          <Texto variante="apoyo">
+            LO QUE LA FIRMA TIENE QUE SABER, declarado: (1) la Ley 7 vigente dice que el glow es
+            SEMÁNTICO —reservado a "en vivo/en curso", dark only— y el blob es ATMÓSFERA; si gana,
+            se enmienda esa ley o el efecto nace con nombre propio, porque son dos trabajos. (2) El
+            blob NO toca A6 (gobierna controles; esto es fondo), pero el glow de (c) SÍ rodea la
+            pieza y ahí el argumento que salvó al halo —"no rodea, luego no es caja"— NO lo cubre.
+            (3) A favor: E11 nació de "la luminancia está agotada por los dos lados", y un blob no
+            vive en esa restricción — agrega luz desde un tercer plano. Es su propio corolario:
+            cuando un canal se agota, se cambia de canal.
+          </Texto>
+        </Seccion>
+
         <Seccion titulo="① ⭐ GATE S83 — EL AGUA EN LA CASA VERDE · qué decide: si el papel tapiz entra al prestador y CÓMO — teñida al oficio (a), con la rampa que §15b.2 prohíbe (b), o con más alfa (c). Se mira en los DOS temas: el fondo del prestador es distinto en cada uno">
           <PanelGateTema etiqueta="prestador CLARO — papel algodón #FAF9F7">
             <AguaCasaVerde />
