@@ -912,16 +912,22 @@ dispositivo: CLAUDE.md raíz · dirección de arte e iconografía:
   los GATES (autorización/routing) — el error jamás se disfraza de
   vacío, y la denegación jamás se fabrica desde un dato ilegible.
 - **S78 (26-27 Jul 2026) — LA GRAMÁTICA "ESTÁ ADENTRO / ESPERA" (en uso,
-  tres consumidores; letra en `DISEÑO_EXPERIENCIA` §15b.0bis).** En las
-  listas de estado del prestador: **lo que ESTÁ es superficie apoyada con
-  `elevacion.reposo`; lo que ESPERA es contorno** — la Hoja del miembro,
-  las franjas de turnos y la agenda de recepción hablan la misma. Su
-  anatomía portadora es `TarjetaEstado`, que **vive LOCAL en
-  `apps/prestador` (NO está en el índice de esta skill a propósito)**: su
-  promoción a `packages/ui` está declarada en la nota S78 de D-535 y se
-  coordina — quien la necesite en otra superficie NO la copia (L-175: se
-  lee el registry; si no puede darlo, se ENSANCHA). Pasó el gate global
-  del founder (26-jul) sin gate por-anatomía propio. **Y una alerta de
+  **CUATRO superficies · CINCO usos**; letra en `DISEÑO_EXPERIENCIA`
+  §15b.0bis).** En las listas de estado del prestador: **lo que ESTÁ es
+  superficie apoyada con `elevacion.reposo`; lo que ESPERA es contorno** —
+  la Hoja del miembro (`negocio/equipo`), las franjas de turnos
+  (`seccion-horarios`, **2 usos**), la agenda de recepción
+  (`agenda-recepcion`) y **la captura de la sede (`seccion-sede`)** hablan
+  la misma. Su anatomía portadora es `TarjetaEstado`, **PROMOVIDA a
+  `packages/ui` en S83-B1 (`62daadf`) y consumiendo `elevacion.halo` desde
+  `5996043` — el local del prestador murió (Ley 37), y la pieza ENTRA al
+  índice de esta skill.** *(Corrección fechada S83-A3: esta entrada decía
+  "tres consumidores" y "vive LOCAL en apps/prestador". Las dos quedaron
+  falsas: la cuarta superficie entró en **S79-B3 (`430b250`, 27-jul)**, un
+  día después de escribirse esta línea, y la promoción se hizo en S83. Los
+  números salen de `grep` sobre el árbol, no de la prosa anterior — L-141.
+  La galería aporta 3 usos más y no cuenta: es herramienta, L-161.)* Pasó
+  el gate global del founder (26-jul) sin gate por-anatomía propio. **Y una alerta de
   gobernanza medida: `iconos-tabs.tsx` + `iconos-oficio.tsx` copian
   geometría del registry de `Icono` porque el contrato no expone trazo y
   huella por separado (D-546)** — hasta que esa prop exista, todo glifo

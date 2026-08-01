@@ -589,14 +589,25 @@ horarios: esa deuda ES su letra.
 > **La gramática:** en las listas de estado del prestador, **lo que ESTÁ
 > (adentro, activo, rigiendo) es superficie apoyada con `elevacion.reposo`;
 > lo que ESPERA (pausado, por llegar, sin regir) es contorno.** Una sola
-> distinción visual para un solo significado — la misma en sus TRES
-> consumidores de S78: la Hoja del miembro (chips), la lista de franjas de
-> turnos (activa/pausada) y la agenda de recepción (llegó/esperando).
+> distinción visual para un solo significado — la misma en sus **CUATRO
+> superficies (CINCO usos), re-medidas en S83-A3** contra el árbol: la Hoja
+> del miembro (`negocio/equipo.tsx`, 1) · la lista de franjas de turnos
+> (`seccion-horarios.tsx`, **2**) · la agenda de recepción
+> (`agenda-recepcion.tsx`, 1) · **la captura de la sede
+> (`seccion-sede.tsx`, 1)**. *(Corrección fechada S83-A3: esta nota decía
+> TRES y nombraba solo las de S78. `seccion-sede` entró en **S79-B3
+> (`430b250`, 27-jul)** — UN DÍA después de que se escribiera esta línea, y
+> nadie la volvió a contar. El número no se dedujo: sale de `grep -rln` +
+> conteo de instancias sobre el árbol. La galería suma 3 usos más y NO
+> cuenta: es herramienta, no superficie del founder — L-161.)*
 > **Anatomía portadora: `TarjetaEstado`** (S78-B, roles checkbox/radio/
-> button + modo estático), que **hoy vive LOCAL en
-> `apps/prestador/src/components/tarjeta-estado.tsx`** — su promoción a
-> `packages/ui` está declarada (nota S78 en D-535: se coordina, no se hace
-> de arrastre). Es pariente de la regla Chanel del marco (Ley 20: la
+> button + modo estático), **PROMOVIDA a `packages/ui` en S83-B1
+> (`62daadf`) y consumiendo `elevacion.halo` desde `5996043`** — el local
+> `apps/prestador/src/components/tarjeta-estado.tsx` **murió** (Ley 37).
+> *(Corrección fechada S83-A3: esta línea decía "hoy vive LOCAL en
+> apps/prestador" y quedó falsa con el merge; la promoción que la nota S78
+> de D-535 pedía coordinar, se hizo.)*
+> Es pariente de la regla Chanel del marco (Ley 20: la
 > superficie que gana elevación pierde el hairline) aplicada a ESTADO.
 > **Estado de firma:** pasó el gate global del founder (26-jul, dentro de
 > Hoja+turnos+recepción); no tiene gate por-anatomía propio — si el diseño
