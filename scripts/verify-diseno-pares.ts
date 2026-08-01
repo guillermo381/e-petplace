@@ -16,7 +16,7 @@
  * Correr suelto: pnpm exec tsx scripts/verify-diseno-pares.ts
  */
 
-import { lightTheme, darkTheme, memorialTheme } from '../packages/ui/src/themes'
+import { lightTheme, darkTheme, memorialTheme, getTheme } from '../packages/ui/src/themes'
 
 type RGBA = { r: number; g: number; b: number; a: number }
 
@@ -63,17 +63,28 @@ function contraste(fgRaw: string, bgRaw: string, base: string): number {
 }
 
 export interface ParMedido {
-  tema: 'light' | 'dark'
-  clase: 'texto' | 'canto' | 'superficie'
+  tema: 'light' | 'dark' | 'lightOficio' | 'darkOficio'
+  clase: 'texto' | 'canto' | 'superficie' | 'fill'
   nombre: string
   ratio: number
   minimo: number
 }
 
 const pares: ParMedido[] = []
-const temas = { light: lightTheme, dark: darkTheme } as const
+/** S83-B30 — LAS DOS CASAS. Hasta hoy el barrido sistemático medía SOLO
+ *  el tema del cliente, así que la casa del prestador —que tiene su
+ *  propio `bg.base`, su propio CTA y sus propios acentos desde S83— no
+ *  entraba a NINGÚN gate. El defecto que lo destapó: el tapiz al 8%
+ *  (firmado, B25) tiró el fill del CTA del prestador de 3.37 a 2.79 y
+ *  ningún gate lo vio, porque el par no existía en ningún corpus. */
+const temas = {
+  light: lightTheme,
+  dark: darkTheme,
+  lightOficio: getTheme('light', 'oficio'),
+  darkOficio: getTheme('dark', 'oficio'),
+} as const
 
-for (const [tema, t] of Object.entries(temas) as ['light' | 'dark', typeof lightTheme][]) {
+for (const [tema, t] of Object.entries(temas) as ['light' | 'dark' | 'lightOficio' | 'darkOficio', typeof lightTheme][]) {
   const base = t.bg.base
   const texto = (nombre: string, fg: string, bg: string) =>
     pares.push({ tema, clase: 'texto', nombre, ratio: contraste(fg, bg, base), minimo: 4.5 })
@@ -127,6 +138,24 @@ for (const [tema, t] of Object.entries(temas) as ['light' | 'dark', typeof light
   // El fill del chip entidad (Ley 21 controlLleno) como bloque sobre fondo.
   if ('controlLleno' in t.accent)
     canto('accent.controlLleno/bg.card', (t.accent as Record<string, string>).controlLleno, t.bg.card)
+
+  // ── S83-B30 · LA CLASE QUE FALTABA: **FILL SOBRE FONDO** (3:1) ──
+  // El gate medía el LABEL sobre el fill (¿se lee lo que dice?) y nunca
+  // el FILL sobre el fondo (¿se ve el botón?). Son dos preguntas y la
+  // casa solo tenía guard para una — es la causa raíz compartida de
+  // D-590 (el CTA sin barrido), D-606 (la gráfica en tertiary) y D-599
+  // (la galería fuera del corpus): **los pares no-textuales se agregaban
+  // A MANO, así que ningún elemento nuevo entraba solo.** Acá entran por
+  // enumeración de los slots, no por lista.
+  const fill = (nombre: string, f: string, fondo: string) =>
+    pares.push({ tema, clase: 'fill', nombre, ratio: contraste(f, fondo, base), minimo: 3 })
+  for (const slot of ['cta', 'active', 'control', 'marcaEleccion'] as const) {
+    if (slot in t.accent) {
+      const v = (t.accent as Record<string, string>)[slot]
+      fill(`accent.${slot}/bg.base`, v, t.bg.base)
+      fill(`accent.${slot}/bg.card`, v, t.bg.card)
+    }
+  }
 }
 
 // ── R15 (S82-B r6): el volcado de TOKENS del tema del cliente —

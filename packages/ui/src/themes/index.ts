@@ -133,7 +133,19 @@ const darkOficio: Theme = {
   // oscuro pasa por poco (3.37, margen 0.37) y no "ilumina". El par da
   // 5.51 en claro y 12.70 en oscuro. Es la regla de dos registros de la
   // Ley 2 y §15b.2 aplicada al estado, no una excepción nueva.
-  accent: { ...darkTheme.accent, cta: palette.tealDark, ctaTexto: palette.textDark0, ctaElevado: false, control: palette.teal, active: palette.teal, marcaEleccion: palette.teal },
+  // S83-B31 — EL CTA GANA SUS DOS REGISTROS (firma del founder: "el 8% se
+  // sostiene y se paga"). En OSCURO el fill pasa a teal PURO y su label a
+  // TINTA. NO ES UN PARCHE del tapiz: es §15b.2 —sobre superficie oscura
+  // manda el hex puro; `tealDark` es literalmente "la variante AA para
+  // light"— aplicada al ÚLTIMO slot de acento del oficio que seguía con
+  // un solo registro (control, active y marcaEleccion ya los tenían).
+  // Y es la gramática que el cliente ya usa con el oro: fill claro +
+  // label tinta (E1).
+  // MEDIDO: fill 2.79 → 10.50 (mín 3) · label textDark0 sobre teal daba
+  // 1.34 ✗, en tinta da 11.01 ✓. El CLARO no se toca: ahí tealDark rinde
+  // 5.51 y el puro REPRUEBA (1.46) — por eso son dos registros y no un
+  // color. Reversa: `cta: palette.tealDark, ctaTexto: palette.textDark0`.
+  accent: { ...darkTheme.accent, cta: palette.teal, ctaTexto: palette.textLight0, ctaElevado: false, control: palette.teal, active: palette.teal, marcaEleccion: palette.teal },
 }
 
 /** El default del producto es CLARO (B1 §7.3). Dark es opt-in. Memorial es automático (M6). */
