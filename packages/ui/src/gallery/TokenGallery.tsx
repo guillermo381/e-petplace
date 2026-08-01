@@ -350,21 +350,29 @@ function EjemploFichaVacuna() {
 }
 
 
-// ── ① LA HUELLA DEL TAB (S83-B11) — el choque de DOS letras firmadas.
-// La barra es la PIEZA REAL con su prop de gate; el teal no es un slot
-// todavía: la galería MUESTRA, la firma decide.
-function HuellaDelTab() {
+// ── EL VERDE DEL ESTADO ACTIVO (S83-B13) — el founder ya FIRMÓ que en
+// el prestador el focus va en verde (arbitra D-598 a favor de §15b.1).
+// Lo que queda abierto es CUÁL verde, y la medición dice que ninguno solo
+// sirve en los dos temas. Las tres candidatas sobre el CAMPO REAL y la
+// BARRA REAL, en los dos temas del prestador.
+function VerdeDelEstado({ acento, etiqueta }: { acento?: string; etiqueta: string }) {
   const [tab, setTab] = useState('a')
+  const [txt, setTxt] = useState('')
+  return (
+    <View style={{ gap: spacing[2] }}>
+      <Texto variante="apoyo">{etiqueta}</Texto>
+      <Campo label="Nombre del negocio" value={txt} onChangeText={setTxt} placeholder="tocá para enfocar" />
+      <BarraTabs items={ICONOS_TABS} activo={tab} onCambiar={setTab} estadoPorHuella acento={acento} />
+    </View>
+  )
+}
+
+function CandidatasVerde() {
   return (
     <View style={{ gap: spacing[4] }}>
-      <View style={{ gap: spacing[1] }}>
-        <Texto variante="apoyo">HOY — magenta #FF00AF (accent.active)</Texto>
-        <BarraTabs items={ICONOS_TABS} activo={tab} onCambiar={setTab} estadoPorHuella />
-      </View>
-      <View style={{ gap: spacing[1] }}>
-        <Texto variante="apoyo">CANDIDATA — tealDark del oficio (sería un SEXTO slot)</Texto>
-        <BarraTabs items={ICONOS_TABS} activo={tab} onCambiar={setTab} estadoPorHuella acento={palette.tealDark} />
-      </View>
+      <VerdeDelEstado acento={palette.tealDark} etiqueta="(a) tealDark #0A7268 — claro 5.51 · OSCURO 3.37 (pasa por poco, no ilumina)" />
+      <VerdeDelEstado acento={palette.teal} etiqueta="(b) teal PURO #28E8DA — CLARO 1.46 (REPRUEBA el 3:1) · oscuro 12.70" />
+      <VerdeDelEstado etiqueta="(c) EL PAR de dos registros — lo que el slot resuelve hoy: 5.51 en claro · 12.70 en oscuro" />
     </View>
   )
 }
@@ -1711,20 +1719,26 @@ function GaleriaInterna() {
             ocupando el lugar del siguiente. ═══════════════════════ */}
         {/* ═══ S83-B9: el agua en la casa verde. Va PRIMERA junto al gate
             abierto porque es decisión viva, no catálogo. ═══ */}
-        <Seccion titulo="① ⭐ GATE S83 — LA HUELLA DEL TAB · qué se arbitra: DOS LETRAS FIRMADAS QUE CHOCAN. S72 dice que accent.active (magenta) es RESERVA DE MARCA en las dos apps y que verlo en la tab activa del prestador NO es desvío. §15b.1 dice: UN acento de oficio (tealDark) para TODO estado y control funcional, y el magenta vive SOLO en la marca. La tab activa: ¿es marca o es estado? No es elegir un color — es decidir cuál de las dos letras rige">
-          <PanelGateTema etiqueta="prestador CLARO">
-            <HuellaDelTab />
+        <Seccion titulo="① ⭐ GATE S83 — CUÁL VERDE PARA EL ESTADO ACTIVO · lo FIRMADO: en el prestador el focus NO es magenta, va en verde que ilumine (arbitra D-598: gana §15b.1). Lo que se decide acá es el REGISTRO, y la medición dice que ninguno solo sirve en los dos temas — el focus es GRÁFICA (mín 3:1), no texto">
+          <PanelGateTema etiqueta="prestador CLARO — papel #FAF9F7">
+            <CandidatasVerde />
           </PanelGateTema>
-          <ThemeProvider defaultMode="dark">
-            <PanelGateTema etiqueta="prestador OSCURO">
-              <HuellaDelTab />
+          <ThemeProvider defaultMode="dark" cta="oficio">
+            <PanelGateTema etiqueta="prestador OSCURO — su tapiz verde #080D0E">
+              <CandidatasVerde />
             </PanelGateTema>
           </ThemeProvider>
           <Texto variante="apoyo">
-            SI GANA EL TEAL, el camino es un SEXTO SLOT (accent.active por casa, mismo mecanismo
-            que accent.control en S83-B6) — no está agregado: la galería muestra, la firma decide.
-            Y arrastra: accent.active también viste el focus de Campo y el estado de otros
-            controles, así que la firma alcanza más que la barra.
+            (c) NO trae un color nuevo: es la regla de dos registros que la Ley 2 y §15b.2 ya
+            tienen — hex PURO sobre superficie oscura, variante *Dark sobre clara. El SLOT lo
+            resuelve solo, porque se declara por TEMA. Está aplicado: lo que corre hoy es (c).
+          </Texto>
+          <Texto variante="apoyo">
+            EL ALCANCE DE LA FIRMA, medido antes de tocar — accent.active lo consumen CUATRO
+            piezas y las cuatro son estado o control funcional, así que ninguna frena: focus de
+            Campo (:97) · borde de CampoFecha con su Hoja abierta (:257) · outline de foco del
+            Boton en web, que es accesibilidad (:274) · huella y pill de la tab (BarraTabs
+            :115/:149). El founder firmó sobre el focus; el slot mueve las cuatro.
           </Texto>
         </Seccion>
 
