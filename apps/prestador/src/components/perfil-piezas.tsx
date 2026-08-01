@@ -1,6 +1,7 @@
 /**
  * PIEZAS DEL PERFIL v2 (S83-C10 · S83-C13) — las anatomías locales de la
- * pantalla de verificación `/perfil-v2`.
+ * pantalla `cuenta/perfil` (nacieron con su ruta de verificación
+ * `/perfil-v2`, que murió al pasar la pantalla a producción — S83-C30).
  *
  * ☠️ EL CLON MURIÓ EN C13, y lo mató su propia condición de muerte.
  * C10 declaró el hueco: no existía encabezado de sección que DESPLEGARA
