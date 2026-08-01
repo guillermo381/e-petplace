@@ -98,6 +98,45 @@ la pantalla real**, que es donde la regla 80 dice que se firman:
 - **El glow de la casa verde** — montado en la galería como candidato; hoy
   es el `boxShadow` artesanal de **D-599**.
 
+## 2bis · EL CHEVRON DIVERGENTE DEL CLIENTE — *lo único con síntoma visible que hoy no le toca a nadie*
+
+**D-600, la pata de `apps/cliente`.** S83-B12 unificó el chevron dentro de
+`packages/ui` (nace `chevron.ts`) y quedaron **tres paths sueltos en `apps/`**.
+Dos son del prestador y tienen dueño (C). **El tercero no tiene dueño y es el
+único que ya se ve mal.**
+
+**La distinción que hay que llevarse, porque ordena el trabajo:**
+
+> **Duplicar es DEUDA. Divergir es DEFECTO.**
+
+- Los dos del prestador (`(tabs)/index.tsx:1177` · `prepara-espacio.tsx:54`)
+  son **byte-idénticos** al canónico. Costo **futuro**: el día que el trazo
+  cambie quedan viejos. **Síntoma hoy: cero.**
+- El del cliente (`(tabs)/hogar/index.tsx:184`, forma `'navega'`) usa
+  **`M9 5l7 7-7 7`** contra el canónico **`M9 18l6-6-6-6`**. **No es otro
+  string: es otra geometría** — 7 unidades arrancando en `y=5` contra 6
+  arrancando en `y=18`. **Dos flechas de tamaño y proporción distintos
+  haciendo el mismo trabajo en dos apps de la misma casa, hoy, en pantalla.**
+
+**Por qué nadie lo vio hasta ahora, y conviene tenerlo presente al barrer:**
+el mismo archivo del cliente **acierta los otros dos trazos** (`'revela'` y
+`'arriba'` son byte-idénticos al canónico). **Dos de tres coinciden**, así que
+el bloque parece el mismo sistema; solo la comparación literal del tercero lo
+destapa. **Un vistazo lo aprueba.**
+
+**Lo que hace falta para que se pueda retirar: que `apps/cliente` tenga dueño
+en el reparto de S84.** Es el ejemplo vivo de por qué el reparto se decide
+antes de repartir trabajo — y de por qué §1bis (fichas por territorio, no por
+pista) resuelve la clase: con dueño-por-territorio esta ficha se habría
+resuelto sola contra quien tocara `apps/cliente`, sin esperar a que alguien la
+adopte.
+
+**Y la cura, con su trampa dicha:** se retira **consumiendo la PIEZA** que
+porta el chevron (`CeldaNavegacion` / `FilaCita` / `PieRevelar`), **jamás
+importando `CHEVRON` desde la pantalla** — eso movería el problema de sitio en
+vez de cerrarlo: el trazo es un detalle de la anatomía, no un token que las
+pantallas deban conocer.
+
 ## 3 · LAS OTRAS FICHAS S83 CON DISPARO PROPIO
 
 | | qué espera |
