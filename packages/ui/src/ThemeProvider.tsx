@@ -74,9 +74,16 @@ export function ThemeProvider({
    *  Encendida acá, el agua queda detrás de TODO el árbol de la app en
    *  UN solo lugar: cero pantalla tocada, cero copia que se
    *  desincronice (el modo de fallo ya ocurrido: 0.06 vs 0.04).
-   *  DEFAULT false a propósito — el prestador no la recibe (su fondo se
-   *  queda en papel algodón, r8 §5) y la galería no se contamina en sus
-   *  paneles anidados. */
+   *  DEFAULT false a propósito, y desde S83-B27 el porqué es OTRO: la
+   *  razón vieja ("el prestador no la recibe — su fondo se queda en papel
+   *  algodón, r8 §5") QUEDÓ FALSA por dos firmas del founder. (a) El agua
+   *  SÍ va al prestador: "no puedes copiar cómo quedó en cliente? Allí
+   *  quedó bien" (S83-B22), y por eso la pieza tiene hoy la receta del
+   *  Hogar como default. (b) El prestador tampoco se queda en papel: en
+   *  oscuro tiene su tapiz verde propio, hoy al 8% (S83-B25).
+   *  LO QUE SIGUE SIENDO CIERTO, y es lo único que el default sostiene:
+   *  encenderla es de la APP, no de la pieza —ninguna la enciende
+   *  todavía— y la galería no debe contaminar sus paneles anidados. */
   marcaDeAgua?: boolean
 }) {
   const [modeInterno, setMode] = useState<ThemeMode>(defaultMode)
