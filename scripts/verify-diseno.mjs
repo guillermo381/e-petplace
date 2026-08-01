@@ -730,8 +730,8 @@ function r27(fuentes) {
   // ENSANCHA a los dos slots en vez de nacer una R28 gemela — dos reglas
   // para la misma física es la copia que L-175 prohíbe, un piso arriba.
   const ESPERADO = {
-    lightOficio: { control: 'tealDark', active: 'tealDark' },
-    darkOficio: { control: 'teal', active: 'teal' },
+    lightOficio: { control: 'tealDark', active: 'tealDark', marcaEleccion: 'tealDark' },
+    darkOficio: { control: 'teal', active: 'teal', marcaEleccion: 'teal' },
   };
   for (const [casa, slots] of Object.entries(ESPERADO)) {
     const bloque = new RegExp(`const ${casa}[\\s\\S]*?\\n\\}`).exec(temas)?.[0] ?? '';
@@ -747,7 +747,7 @@ function r27(fuentes) {
         fallos.push(`R27: ${casa} pisa accent.${slot} a palette.${m[1]} y se esperaba palette.${token} — es GRÁFICA y necesita sus DOS registros (el puro reprueba en claro: 1.46 · tealDark en oscuro pasa por poco: 3.37)`);
     }
   }
-  return { fallos, info: fallos.length === 0 ? 'estado y elección del oficio: tealDark en claro · teal puro en oscuro' : `${fallos.length} fallo(s)` };
+  return { fallos, info: fallos.length === 0 ? 'estado, elección y PATA del oficio: tealDark en claro · teal puro en oscuro' : `${fallos.length} fallo(s)` };
 }
 const FUENTES_R27 = { temas: readFileSync('packages/ui/src/themes/index.ts', 'utf8') };
 

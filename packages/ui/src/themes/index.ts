@@ -30,8 +30,8 @@ export type Theme = TemaAncho<typeof lightTheme> | TemaAncho<typeof darkTheme> |
 /** ⭐ LOS SLOTS — el número que antes NO EXISTÍA (S82-B r30).
  *  Un SLOT no es "un campo que cambia entre temas" (eso son casi todos:
  *  es lo que un tema ES). Un slot es un campo que un tema DERIVADO PISA
- *  para separar las dos casas — `lightOficio`/`darkOficio`. **Son SEIS**
- *  (cuatro hasta S83-B6, cinco hasta B13), y hasta r30 había que abrir los tres
+ *  para separar las dos casas — `lightOficio`/`darkOficio`. **Son SIETE**
+ *  (cuatro hasta S83-B6; cinco en B13; seis y siete en B19), y hasta r30 había que abrir los tres
  *  archivos y comparar para saber cuáles:
  *    1. `bg.base`           — el fondo: el tapiz es del cliente
  *    2. `accent.cta`        — oro el cliente · tealDark el oficio
@@ -41,9 +41,11 @@ export type Theme = TemaAncho<typeof lightTheme> | TemaAncho<typeof darkTheme> |
  *       el verde del oficio EN SUS DOS REGISTROS (S83-B6, ensanchado a
  *       dos registros en B17 por la misma medición que movió `active`).
  *    6. `accent.active`     — el acento de ESTADO ACTIVO: pink el cliente
- *       · el VERDE del oficio, EN SUS DOS REGISTROS (S83-B13). Apareció
- *       el sexto y se agregó acá, como la lista mandaba.
- *  Si aparece un séptimo, se agrega ACÁ: la lista es el contrato. */
+ *       · el VERDE del oficio, EN SUS DOS REGISTROS (S83-B13).
+ *    7. `accent.marcaEleccion` — el color de LA PATA. Nació fuera del
+ *       slot (B9) porque su color no estaba firmado; el founder lo firmó
+ *       en B19 con su límite: "en teal, jamás magenta".
+ *  Si aparece un octavo, se agrega ACÁ: la lista es el contrato. */
 export type SlotDeTema =
   | 'bg.base'
   | 'accent.cta'
@@ -51,6 +53,7 @@ export type SlotDeTema =
   | 'accent.ctaElevado'
   | 'accent.control'
   | 'accent.active'
+  | 'accent.marcaEleccion'
 export type ThemeMode = 'light' | 'dark' | 'memorial'
 export type ServiceKey = keyof typeof lightTheme.services
 export type StatusKey = 'success' | 'warning' | 'danger' | 'info'
@@ -74,6 +77,10 @@ const lightOficio: Theme = {
   bg: { ...lightTheme.bg, base: palette.light0 },
   // S82-B: el prestador NO recibe la elevación del CTA (su teal no
   // tiene el problema del oro contra papel — sería arrastre).
+  // S83-B19 ④ — LA PATA VIAJA AL PRESTADOR, EN TEAL. En B9 la dejé FUERA
+  // del slot a propósito (su color no estaba firmado y arrastrarla habría
+  // sido decidir por el founder). Ahora lo pidió, con su límite dicho:
+  // "en teal, JAMÁS magenta" (§15b.1). Dos registros como sus hermanos.
   // S83-B6 — EL QUINTO SLOT: `accent.control` es el acento de ELECCIÓN
   // (§15b.1: UN acento de oficio para TODO estado y control funcional del
   // prestador; el magenta vive SOLO en la marca). Sin esta línea el
@@ -97,7 +104,7 @@ const lightOficio: Theme = {
   // oscuro pasa por poco (3.37, margen 0.37) y no "ilumina". El par da
   // 5.51 en claro y 12.70 en oscuro. Es la regla de dos registros de la
   // Ley 2 y §15b.2 aplicada al estado, no una excepción nueva.
-  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, control: palette.tealDark, active: palette.tealDark },
+  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, control: palette.tealDark, active: palette.tealDark, marcaEleccion: palette.tealDark },
 }
 const darkOficio: Theme = {
   ...darkTheme,
@@ -128,7 +135,7 @@ const darkOficio: Theme = {
   // oscuro pasa por poco (3.37, margen 0.37) y no "ilumina". El par da
   // 5.51 en claro y 12.70 en oscuro. Es la regla de dos registros de la
   // Ley 2 y §15b.2 aplicada al estado, no una excepción nueva.
-  accent: { ...darkTheme.accent, cta: palette.tealDark, ctaTexto: palette.textDark0, ctaElevado: false, control: palette.teal, active: palette.teal },
+  accent: { ...darkTheme.accent, cta: palette.tealDark, ctaTexto: palette.textDark0, ctaElevado: false, control: palette.teal, active: palette.teal, marcaEleccion: palette.teal },
 }
 
 /** El default del producto es CLARO (B1 §7.3). Dark es opt-in. Memorial es automático (M6). */
