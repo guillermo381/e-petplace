@@ -1720,9 +1720,17 @@ function GaleriaInterna() {
         {/* ═══ S83-B9: el agua en la casa verde. Va PRIMERA junto al gate
             abierto porque es decisión viva, no catálogo. ═══ */}
         <Seccion titulo="① ⭐ GATE S83 — CUÁL VERDE PARA EL ESTADO ACTIVO · lo FIRMADO: en el prestador el focus NO es magenta, va en verde que ilumine (arbitra D-598: gana §15b.1). Lo que se decide acá es el REGISTRO, y la medición dice que ninguno solo sirve en los dos temas — el focus es GRÁFICA (mín 3:1), no texto">
+          {/* cta="oficio" NO ES DECORACIÓN: sin él la lámina resuelve el
+              tema del CLIENTE y el rótulo miente — pintaba papelTapiz
+              magenta donde dice papel algodón, y tapizDark donde dice el
+              verde del oficio. Defecto mío, cazado por el founder en
+              dispositivo (S83-B14): una lámina de gate que pinta la casa
+              equivocada no es una lámina de gate. */}
+          <ThemeProvider defaultMode="light" cta="oficio">
           <PanelGateTema etiqueta="prestador CLARO — papel #FAF9F7">
             <CandidatasVerde />
           </PanelGateTema>
+          </ThemeProvider>
           <ThemeProvider defaultMode="dark" cta="oficio">
             <PanelGateTema etiqueta="prestador OSCURO — su tapiz verde #080D0E">
               <CandidatasVerde />
@@ -1743,7 +1751,7 @@ function GaleriaInterna() {
         </Seccion>
 
         <Seccion titulo="① ⭐ GATE S83 — EL GLOW EN LA CASA VERDE · qué decide: cómo se separa la superficie del fondo cuando YA SE GATEÓ que el fondo al 3% NO COMUNICA y el halo NO ALCANZA. Las tres capas sobre las Tarjetas planas de D-589 (par 1.009: a efectos prácticos, el mismo color que el fondo)">
-          <ThemeProvider defaultMode="dark">
+          <ThemeProvider defaultMode="dark" cta="oficio">
             <PanelGateTema etiqueta="prestador OSCURO — donde vive el problema">
               <GlowCasaVerde />
             </PanelGateTema>
@@ -1767,10 +1775,18 @@ function GaleriaInterna() {
         </Seccion>
 
         <Seccion titulo="① ⭐ GATE S83 — EL AGUA EN LA CASA VERDE · qué decide: si el papel tapiz entra al prestador y CÓMO — teñida al oficio (a), con la rampa que §15b.2 prohíbe (b), o con más alfa (c). Se mira en los DOS temas: el fondo del prestador es distinto en cada uno">
+          {/* cta="oficio" NO ES DECORACIÓN: sin él la lámina resuelve el
+              tema del CLIENTE y el rótulo miente — pintaba papelTapiz
+              magenta donde dice papel algodón, y tapizDark donde dice el
+              verde del oficio. Defecto mío, cazado por el founder en
+              dispositivo (S83-B14): una lámina de gate que pinta la casa
+              equivocada no es una lámina de gate. */}
+          <ThemeProvider defaultMode="light" cta="oficio">
           <PanelGateTema etiqueta="prestador CLARO — papel algodón #FAF9F7">
             <AguaCasaVerde />
           </PanelGateTema>
-          <ThemeProvider defaultMode="dark">
+          </ThemeProvider>
+          <ThemeProvider defaultMode="dark" cta="oficio">
             <PanelGateTema etiqueta="prestador OSCURO — su tapiz verde #080D0E">
               <AguaCasaVerde />
             </PanelGateTema>
