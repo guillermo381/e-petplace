@@ -25,6 +25,9 @@ type ThemeContextValue = {
   theme: Theme
   mode: ThemeMode
   setMode: (mode: ThemeMode) => void
+  /** El ancla vigente — para que un provider ANIDADO pueda heredarla.
+   *  Ver el porqué en el JSDoc de la prop `cta`. */
+  cta: CtaAncla
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
@@ -34,7 +37,7 @@ export function ThemeProvider({
   mode: modeControlado,
   defaultMode = 'light',
   memorial = false,
-  cta = 'tinta',
+  cta: ctaProp,
   marcaDeAgua = false,
 }: {
   children: ReactNode
@@ -44,10 +47,27 @@ export function ThemeProvider({
   defaultMode?: ThemeMode
   memorial?: boolean
   /** S63 — enmienda Ley 21 FIRMADA: el ANCLA del CTA primario.
-   *  'tinta' (default) = el de siempre (cliente). 'oficio' = tealDark
-   *  en light Y dark (raíz del PRESTADOR — lo cablea la B).
-   *  MEMORIAL SIEMPRE tinta, gane quien gane esta prop: memorial no
-   *  se celebra. */
+   *  'tinta' = el de siempre (cliente). 'oficio' = tealDark en light Y
+   *  dark (raíz del PRESTADOR). MEMORIAL SIEMPRE tinta, gane quien gane
+   *  esta prop: memorial no se celebra.
+   *
+   *  ⚠️ SIN PROP, SE HEREDA DEL PROVIDER PADRE — y el default 'tinta'
+   *  solo rige cuando NO hay padre (S83-C19). Antes era un default
+   *  DURO, y esa dureza tenía un modo de falla silencioso: **todo
+   *  provider anidado descartaba el ancla de su casa y volvía al
+   *  cliente.** Lo cobró la galería del PRESTADOR — `TokenGallery`
+   *  monta su propio provider (con razón: necesita `setMode` vivo para
+   *  su toggle) y ahí se perdía `cta="oficio"` del raíz: el founder vio
+   *  papel tapiz rosa, selectores magenta y focus magenta mientras los
+   *  labels decían verde. **Son 78 `<ThemeProvider>` en ese archivo y
+   *  UNO solo pasaba la prop** — repetirla 77 veces habría curado el
+   *  síntoma y dejado viva la trampa para el siguiente.
+   *  El alcance del cambio es exactamente el defecto: un anidado sin
+   *  prop dentro del prestador pasa a 'oficio'; el que la declara y el
+   *  que no tiene padre (`PantallaCaidaRaiz`, autosuficiente) no se
+   *  mueven, y memorial sigue forzado en `getTheme`.
+   *  Es la misma doctrina que ya rige en los slots: **las garantías
+   *  viven en la FUENTE, no en la disciplina de cada pantalla.** */
   cta?: CtaAncla
   /** S82-B r10 (orden founder: el agua "VA EN TODAS LAS PANTALLAS —
    *  nace como pieza del fondo compartido, NO override por pantalla").
@@ -63,9 +83,15 @@ export function ThemeProvider({
   const mode = modeControlado ?? modeInterno
   const effectiveMode: ThemeMode = memorial ? 'memorial' : mode
 
+  // S83-C19 — LA HERENCIA DEL ANCLA: prop > padre > 'tinta'. Se lee el
+  // contexto ANTES de crear el propio (un provider anidado ve al padre;
+  // el raíz no ve a nadie y cae al default de siempre).
+  const padre = useContext(ThemeContext)
+  const ctaEfectivo: CtaAncla = ctaProp ?? padre?.cta ?? 'tinta'
+
   const value = useMemo<ThemeContextValue>(
-    () => ({ theme: getTheme(effectiveMode, cta), mode: effectiveMode, setMode }),
-    [effectiveMode, cta],
+    () => ({ theme: getTheme(effectiveMode, ctaEfectivo), mode: effectiveMode, setMode, cta: ctaEfectivo }),
+    [effectiveMode, ctaEfectivo],
   )
 
   return (
