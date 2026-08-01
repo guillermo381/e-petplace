@@ -3196,7 +3196,7 @@ La regla 84 distinguía **commiteado · publicado · en el teléfono**. **Falta 
 >
 > **Y la lección de segundo orden, que es la incómoda: una cura escrita sin ejercitar su propio modo de falla hereda el defecto que ataca.** D-607 se escribió mirando el problema desde afuera; **bastó usarla una vez en serio para que fallara igual que aquello que corregía.** Es hermana de la candidata **#17** (*razonar el efecto no es medirlo*) aplicada al método: **razonar que un comando verifica no es haberlo visto fallar.**
 
-#### D-611 — LA ASIMETRÍA DEL TINTE: FIRMADA POR EL FOUNDER, **SIN CONSTRUIR EN MAIN** ⚪ FIRMA REGISTRADA, código pendiente
+#### D-611 — LA ASIMETRÍA DEL TINTE ✅ CERRADA S83 — construida por B33/B34, con las TRES mitades verificadas por sabotaje
 ⚪ **REGISTRADA CON UN FRENO: la firma llegó a la mesa, el código NO está en `main`, y la ficha lo dice en vez de darlo por hecho.**
 
 **LA FIRMA (founder, S83):** el prestador **gana papel verde en claro** —deja de estar exento del tinte— y **el glow va a las DOS casas**. Con eso, la letra de S82 que decía *"el prestador NO recibe tinte. Es fondo del cliente"* **queda derogada**, y **R16 tendría que enmendarse**.
@@ -3210,3 +3210,19 @@ La regla 84 distinguía **commiteado · publicado · en el teléfono**. **Falta 
 **POR QUÉ SE REGISTRA ASÍ Y NO COMO "R16 ENMENDADA":** escribir en el canon que *"la letra de S82 ya no rige"* mientras el guard que la implementa **sigue armado y el código dice lo opuesto** sería **exactamente D-604 — la instrucción falsa**: mandaría a construir contra una regla que va a abortar el commit, y quien lo intente quedaría con dos lecturas plausibles (*"la ficha miente"* o *"el guard se rompió"*), **ninguna de las dos verdadera**. Y sería **D-602** en su forma de canon: **un rótulo que declara un estado que la pantalla no tiene.** **La firma es real; lo que no existe todavía es su construcción — y la diferencia entre las dos cosas es justamente lo que esta casa dejó de tolerar.**
 
 > **☠️ CONDICIÓN DE MUERTE:** se retira cuando **la construcción llegue a `main` y R16 se enmiende EN EL MISMO ACTO** — el guard y la letra se mueven juntos o el lint aborta el trabajo que la firma autorizó. **Las tres mitades exigibles:** ① `lightOficio` deja de pisar `bg.base` a `light0` · ② **R16 enmendada**, con su rojo re-producido bajo la letra nueva (una regla que cambia de criterio sin volver a salir roja es un guard decorativo — candidata #15) · ③ el glow disponible en claro, con su par medido **del medidor** (candidata #17). **Quién la retira:** B (es `packages/ui` + el lint). **Hasta entonces, R16 RIGE** — y este registro existe para que nadie construya contra ella creyendo que ya cayó. Origen: S83-A33 (firma reportada por la mesa, estado medido por A **antes** de escribirla).
+
+> **✅ D-611 CERRADA S83-A35 — y cerrada por SABOTAJE, no por lectura del diff.** La ficha exigía tres mitades y **las tres se verificaron rompiendo el código a propósito y midiendo el exit real**, no leyendo el commit de quien construyó (L-153: la vara no la declara quien construye; acá, tampoco quien mergea sin probar).
+>
+> | mitad | sabotaje aplicado | resultado |
+> |---|---|---|
+> | ① el brazo CLARO | `lightOficio` vuelve a pisar `light0` | **exit 1** · *"papelTapiz está ENCENDIDO y lightOficio NO pisa bg.base a papelTapizOficio"* |
+> | ② el brazo OSCURO | `darkOficio` vuelve a pisar `dark0` | **exit 1** · *"tapizDark está ENCENDIDO y darkOficio NO pisa bg.base a tapizDarkOficio"* |
+> | ③ el brazo NUEVO | los dos tapices con el MISMO hex (`#FAF2F5`) | **exit 1** · *"papelTapiz y papelTapizOficio son el MISMO hex — la separación es de nombre y no de color"* |
+>
+> **Verde de control antes de empezar (exit 0) y árbol LIMPIO verificado después de cada restauración** — los backups se restauraron por copia, **no con `git checkout <ruta>`** (D-593: la checklist de la regla 85 prohíbe esa forma sobre trabajo vivo).
+>
+> **LO CONSTRUIDO:** `palette.papelTapizOficio` (`#F4F8F6`) · `lightOficio.bg.base` → `papelTapizOficio` · el **octavo slot `accent.atmosfera`** (`pink` en light y dark, `textMemorialDark` en memorial) · y **R16 enmendada EN EL MISMO ACTO**, que era la mitad ② de la condición de muerte.
+>
+> **LO QUE B AGREGÓ SIN QUE NADIE SE LO PIDIERA, y es lo mejor del cierre: el TERCER brazo.** La ficha pedía que R16 se enmendara; **no pedía un guard contra la trampa que la enmienda habilita.** Separar dos casas por NOMBRE dándoles el MISMO VALOR habría pasado el guard viejo en verde — *"la separación es de nombre y no de color"*. **Es la candidata #15 aplicada por quien construía, sin que se la citaran:** una regla que cambia de criterio y no gana el brazo de su nuevo modo de falla queda decorativa. **La deuda se cierra mejor de como se abrió.**
+>
+> **Y de paso se curó lo que esta mesa había declarado al mergear (D-604 en potencia):** el JSDoc de `lightOficio` seguía citando la letra derogada (*"el prestador NO recibe tinte"*) sin marca — quien greppeara el comentario en vez del valor leía **lo contrario de lo que rige**. Queda marcado **DEROGADO con su fecha**, con la letra vieja conservada como historia y **lo que R16 exige HOY escrito debajo**. *(Cruce a `packages/ui` —territorio de B— por orden expresa de la mesa: 76(d) declarado, y es solo comentario: cero código tocado.)*

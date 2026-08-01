@@ -80,12 +80,26 @@ export type CtaAncla = 'tinta' | 'oficio'
 // (light) · textDark0 #F0EEF8 / tealDark = 5.05 (dark).
 const lightOficio: Theme = {
   ...lightTheme,
-  // S82-B r10 — LA SEPARACIÓN DEL FONDO (orden founder r8 §5 y r9 §4,
-  // firmada dos veces: "el prestador NO recibe tinte. Es fondo del
-  // cliente"). El tapiz se encendió en el tema del cliente; acá el
-  // prestador se queda en PAPEL ALGODÓN. El guard R16 de verify:diseno
-  // EXIGE esta línea mientras `papelTapiz !== light0` — su rojo fue
-  // producido antes de escribirla (exit 1, r9).
+  // ⚠️ DEROGADO EL 1-AGO-2026 (S83-B33/B34, firma del founder) — LO DE
+  // ABAJO ES HISTORIA, NO LA REGLA VIGENTE. Se conserva porque explica
+  // de dónde vienen los nombres, y se marca porque quien lea el
+  // comentario sin leer el valor entiende lo CONTRARIO de lo que rige:
+  // hoy `bg.base` NO es `light0` — es `papelTapizOficio`, y el prestador
+  // SÍ recibe tinte (el suyo). *(Marca puesta en S83-A35 por orden de la
+  // mesa: es la clase D-604 —la instrucción falsa— y acá todavía era
+  // potencial, no consumada.)*
+  //
+  //   ~~S82-B r10 — LA SEPARACIÓN DEL FONDO (orden founder r8 §5 y r9 §4,
+  //   firmada dos veces: "el prestador NO recibe tinte. Es fondo del
+  //   cliente"). El tapiz se encendió en el tema del cliente; acá el
+  //   prestador se queda en PAPEL ALGODÓN. El guard R16 de verify:diseno
+  //   EXIGE esta línea mientras `papelTapiz !== light0` — su rojo fue
+  //   producido antes de escribirla (exit 1, r9).~~
+  //
+  // LO QUE R16 EXIGE HOY (verificado por sabotaje en S83-A35, las TRES
+  // mitades en exit 1): que `lightOficio` pise `papelTapizOficio` · que
+  // `darkOficio` pise `tapizDarkOficio` · y que los dos tapices NO sean
+  // el mismo hex — "la separación es de nombre y no de color".
   // S83-B33 — EL PAPEL VERDE. Hasta hoy esta línea pisaba a `light0`
   // (papel NEUTRO) porque la letra de S82 decía que el prestador no
   // recibía tinte; el founder la enmendó: un tinte por casa en LOS DOS
