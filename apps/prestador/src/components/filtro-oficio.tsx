@@ -20,7 +20,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text } from 'react-native';
 import Animated, {
   Easing,
   cubicBezier,
@@ -60,7 +60,19 @@ function Segmento({
       onPressIn={() => setPresionado(true)}
       onPressOut={() => setPresionado(false)}
       onLayout={(e) => onLayout(e.nativeEvent.layout.x, e.nativeEvent.layout.width)}
-      style={{ flex: 1 }}
+      /* ☠️ D-576 (S83-C21) — ACÁ VIVÍA `flex: 1`, y era la causa.
+         En RN `flex:1` = grow 1 · shrink 1 · basis 0%: los cinco
+         segmentos se repartían el ancho en PARTES IGUALES (~70dp en un
+         teléfono). Adentro entran glifo 21 + gap 6 + etiqueta, y las
+         etiquetas reales son "Todos · Paseos · Estética ·
+         Adiestramiento · Veterinaria": ninguna entra. Como el contenido
+         no encoge (flexShrink default 0 en los hijos) y el row está
+         centrado, se DERRAMABA por los dos lados — y el glifo del
+         vecino caía sobre "Estética", que es la foto del founder.
+         La cura no es achicar: es dejar de repartir. Cada segmento
+         ocupa lo que MIDE y la fila scrollea (la tira que D-576 ya
+         preveía). */
+      style={{ paddingHorizontal: spacing[2] }}
     >
       <Animated.View
         style={{
@@ -144,10 +156,20 @@ export function FiltroOficio({
   const colorLinea = segmentos.find((s) => s.codigo === activo)?.capaAa ?? theme.text.primary;
 
   return (
-    <View
+    /* D-576: LA TIRA. El scroll horizontal es la mitad que faltaba —
+       sin él, quitar `flex:1` deja los segmentos a su ancho real y el
+       quinto se sale de pantalla sin forma de alcanzarlo.
+       `contentContainerStyle` lleva el layout (la fila + su relative)
+       para que la LÍNEA VIAJERA siga midiendo contra el CONTENIDO: su
+       `x` de onLayout y su `translateX` viven en el mismo sistema de
+       coordenadas, así que el viaje sigue exacto aunque la tira esté
+       corrida. Sin barra: la casa no pinta scrollbars. */
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
       accessibilityRole="tablist"
       accessibilityLabel={t('agenda.filtroEtiqueta')}
-      style={{ flexDirection: 'row', position: 'relative', paddingBottom: spacing[1] }}
+      contentContainerStyle={{ flexDirection: 'row', position: 'relative', paddingBottom: spacing[1] }}
     >
       {segmentos.map((s) => {
         const esActivo = s.codigo === activo;
@@ -194,6 +216,6 @@ export function FiltroOficio({
           estiloLinea,
         ]}
       />
-    </View>
+    </ScrollView>
   );
 }
