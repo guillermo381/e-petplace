@@ -54,7 +54,8 @@ export interface CampoProps
   > {
   /** Obligatorio: es el label visible Y el accessibilityLabel. */
   label: string
-  /** Helper bajo el campo (text.tertiary). `error` lo reemplaza en el MISMO slot. */
+  /** Helper bajo el campo (`text.secondary` desde S83-B26 — ver la nota
+   *  en su render). `error` lo reemplaza en el MISMO slot. */
   ayuda?: string
   /** Mensaje de error (dangerText) — anunciado con liveRegion polite. */
   error?: string
@@ -199,7 +200,20 @@ export function Campo({
               fontFamily: typography.family.sans.regular,
               fontSize: typography.size.sm,
               lineHeight: LINEA_MENSAJE,
-              color: error ? theme.status.dangerText : theme.text.tertiary,
+                            // S83-B26 (D-605, salida ②): el helper migra de
+              // `text.tertiary` a `text.secondary`. EL PORQUÉ, que es el
+              // que decidió la ficha: la exención de `tertiary` se firmó
+              // para un ROL —el tab inactivo, espec B3.7— y un helper NO
+              // es placeholder ni está apagado: **es la instrucción de
+              // cómo llenar el campo, el texto que uno lee justo cuando
+              // no sabe qué poner**. Medido contra el theme resuelto, no
+              // a mano: `tertiary` da 2.18 en LIGHT (el tema por defecto
+              // del producto) contra un mínimo de 3:1 — dos de los tres
+              // temas por debajo. `secondary` YA vive en el corpus del
+              // gate (`verify-contrast.ts:97`) y pasa en los tres.
+              // MÁXIMO ALCANCE POR SITIO: no es una pantalla — lo hereda
+              // CADA `Campo` de la casa, en las dos apps.
+              color: error ? theme.status.dangerText : theme.text.secondary,
               marginTop: spacing[1],
             }}
           >
