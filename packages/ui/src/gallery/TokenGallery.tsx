@@ -1553,6 +1553,14 @@ function EjemploCeldaNavegacion({ registro }: { registro?: 'capa' | 'aa' | 'tint
       <CeldaNavegacion icono="veterinaria" titulo="Agregar carnet" registro={registro} onPress={() => {}} />
       <Separador />
       <CeldaNavegacion icono="refugio" titulo="Mascotas" registro={registro} onPress={() => {}} />
+      <Separador />
+      {/* S83-B12 — EL ESTADO NUEVO: encabezado de sección que DESPLIEGA.
+          El criterio es E14, ya firmado: información despliega ⌄/⌃, acción
+          con formulario lleva ›. Se monta para que el estado exista donde
+          se puede mirar; la prop sin muestra es una prop que nadie firma. */}
+      <CeldaNavegacion icono="veterinaria" titulo="Sus vacunas" detalle="8 aplicadas" direccion="abajo" registro={registro} onPress={() => {}} />
+      <Separador />
+      <CeldaNavegacion icono="veterinaria" titulo="Sus vacunas" detalle="desplegado — el mismo control pliega" direccion="arriba" registro={registro} onPress={() => {}} />
     </View>
   )
 }

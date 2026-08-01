@@ -32,6 +32,7 @@ import Svg, { Path } from 'react-native-svg'
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
 import { radius } from '../tokens/radius'
+import { CHEVRON } from './chevron'
 import { useTheme } from '../ThemeProvider'
 import { useTraduccionUi } from '../i18n'
 import { AvatarMascota } from './AvatarMascota'
@@ -126,7 +127,7 @@ function AccionFicha({ accion }: { accion: FichaMascotaHogarAccion }) {
             {accion.etiqueta}
           </Text>
           <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" aria-hidden>
-            <Path d="M9 18l6-6-6-6" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+            <Path d={CHEVRON.derecha} stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
           </Svg>
         </Animated.View>
       </Pressable>

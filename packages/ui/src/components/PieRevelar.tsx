@@ -43,6 +43,7 @@ import Animated from 'react-native-reanimated'
 
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
+import { CHEVRON } from './chevron'
 import { useTheme } from '../ThemeProvider'
 import { useTraduccionUi } from '../i18n'
 import { usePresionado } from './usePresionado'
@@ -64,7 +65,8 @@ export function PieRevelar({ n, onPress, revelado = false }: PieRevelarProps) {
 
   const etiqueta = revelado ? t('pieRevelar.ocultar') : t('pieRevelar.ver', { n })
   // el chevron canónico de CeldaNavegacion, girado: ⌄ revela · ⌃ pliega
-  const d = revelado ? 'M6 15l6-6 6 6' : 'M6 9l6 6 6-6'
+  // E14: revelar despliega ⌄, plegar recoge ⌃ — de la tabla única.
+  const d = CHEVRON[revelado ? 'arriba' : 'abajo']
 
   return (
     <View style={{ alignItems: 'center' }}>
