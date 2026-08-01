@@ -56,6 +56,15 @@ type Comun = {
    *  DECLARE a propósito (verify:diseno lo censa). El borde de TINTE se
    *  conserva (semántico). La sombra JAMÁS se anima (jank nativo). */
   elevacion?: TarjetaElevacion
+  /** LA LUZ DE LA ATMÓSFERA (S83-B16, firma founder). La superficie que
+   *  flota dentro de una `Atmosfera` recibe su luz: `elevacion.luz`, un
+   *  glow difuso sin desplazamiento. NO es un nivel de elevación —es otro
+   *  CANAL, como el halo— y por eso es prop y no valor de `elevacion`.
+   *  Se resuelve a `null` en claro y en memorial, así que pasarlo ahí no
+   *  hace nada: la degradación vive en el token, no en la pantalla.
+   *  Su caso: las Tarjetas PLANAS del prestador en oscuro (D-589, par
+   *  1.009) — la cura por la vía de la LUZ y no la del fondo. */
+  luz?: boolean
   /** normal 12 (default) · amplio 16 · ninguno (imagen edge-to-edge). */
   relleno?: TarjetaRelleno
 }
@@ -77,7 +86,7 @@ const RELLENO: Record<TarjetaRelleno, number> = {
 }
 
 export function Tarjeta(props: TarjetaProps) {
-  const { children, tinte = 'ninguno', elevacion = 'reposo', relleno = 'normal' } = props
+  const { children, tinte = 'ninguno', elevacion = 'reposo', relleno = 'normal', luz = false } = props
   const { theme } = useTheme()
   // S63 (D-401): el clon muere — la física vive en LA primitiva
   const { handlers, estiloPresionado } = usePresionado(0.99)
@@ -101,6 +110,7 @@ export function Tarjeta(props: TarjetaProps) {
     : elevacion === 'md' ? 'elevada'
     : elevacion
 
+  const superficieSombra = nivel !== null ? theme.elevacion[nivel] : ''
   const superficie: ViewStyle = {
     backgroundColor: tt.fondo,
     borderRadius: radius.lg,  // 16 fijo — decisión B1: cards 16
@@ -130,6 +140,13 @@ export function Tarjeta(props: TarjetaProps) {
     //    que es lo que volvería ilegible al tinte.
     ...(nivel !== null && tinte === 'ninguno' && theme.elevacion.halo !== null
       ? { borderTopWidth: 1, borderTopColor: theme.elevacion.halo }
+      : null),
+    // LA LUZ (S83-B16): explícita por prop —a diferencia del halo, que va
+    // con la elevación— porque no toda superficie vive dentro de una
+    // Atmosfera. Convive con el nivel: una PLANA con luz es exactamente
+    // el caso de D-589, y por eso no exige `nivel !== null`.
+    ...(luz && theme.elevacion.luz !== null
+      ? { boxShadow: [superficieSombra, theme.elevacion.luz].filter(Boolean).join(', ') }
       : null),
   }
 

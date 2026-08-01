@@ -37,6 +37,12 @@ export type ElevacionNivel = 'reposo' | 'elevada'
 export type ElevacionTokens = Readonly<Record<ElevacionNivel, string>> & {
   /** El canto de luz. `null` en claro: ahí la sombra ya separa. */
   readonly halo: string | null
+  /** LA LUZ DE LA SUPERFICIE (S83-B16, firma founder). Tampoco es un
+   *  nivel: es el complemento de `Atmosfera` sobre las superficies que
+   *  viven dentro de ella. `null` donde no aplica — en CLARO la sombra ya
+   *  separa (mismo criterio que el halo) y en MEMORIAL la luz de color es
+   *  celebración, que la Ley 8 apaga. */
+  readonly luz: string | null
 }
 
 /** EL HALO — FIRMADO POR EL FOUNDER (S82, gate ③) EN SU FORMA DIRECCIONAL.
@@ -80,12 +86,19 @@ export const elevacion = {
     // en claro la sombra SÍ separa (papel sobre papel): el halo no hace falta
     // y agregarlo sería adorno — la regla Chanel lo mata antes de nacer.
     halo: null,
+    luz: null,  // idem: en claro la superficie ya existe sin ayuda
   },
   dark: {
     // contacto mínimo: la elevación real la dice bg.card (paso de luminancia)
     reposo:  '0 1px 2px rgba(0,0,0,0.45)',
     elevada: '0 2px 6px rgba(0,0,0,0.55)',
     halo: 'rgba(255,255,255,0.14)',
+    // EL GLOW DE LA SUPERFICIE — el teal del oficio al 33%, difuso y sin
+    // desplazamiento (0 0): no es sombra, es luz que la Atmosfera deja
+    // sobre lo que flota en ella. El par 1.009 del prestador oscuro
+    // (D-589) no se cura moviendo el fondo sino cambiando de CANAL: es el
+    // mismo corolario que parió el halo, un paso más allá.
+    luz: '0 0 24px rgba(40,232,218,0.33)',
   },
   memorial: {
     // conserva la elevación; superficies oscuras → resuelve como dark
@@ -95,5 +108,8 @@ export const elevacion = {
     // su par card/base mide 1.100. El halo es ESTÁTICO —no se anima, no
     // rebota—, así que la ley de memorial (nada se mueve) no lo toca.
     halo: 'rgba(255,255,255,0.14)',
+    // La luz SÍ se apaga: separar es necesidad, iluminar de color es
+    // celebración, y memorial no celebra (Ley 8).
+    luz: null,
   },
 } as const satisfies Record<'light' | 'dark' | 'memorial', ElevacionTokens>
