@@ -32,6 +32,8 @@ import { Pressable, Text, View } from 'react-native'
 import Animated, { cubicBezier } from 'react-native-reanimated'
 import Svg, { Path } from 'react-native-svg'
 
+import { CHEVRON, type DireccionChevron } from './chevron'
+
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
 import { motion } from '../tokens/motion'
@@ -55,9 +57,24 @@ export interface CeldaNavegacionProps {
   /** S58 (patrón Hogar v2): false = ACCIÓN dentro del grupo (ej.
    *  "Agregar mascota") — misma anatomía, sin chevron de entrada. */
   chevron?: boolean
+  /** HACIA DÓNDE apunta el chevron (S83-B12). Default `'derecha'`: la
+   *  celda nació para ENTRAR y sus 46 consumidores esperan `›`.
+   *
+   *  EL CRITERIO ES E14, YA FIRMADO: información DESPLIEGA (`'abajo'`
+   *  revela · `'arriba'` pliega, en el lugar) · acción LLEVA (`'derecha'`
+   *  navega, o abre el formulario que la resuelve). Con `'abajo'`/
+   *  `'arriba'` esta celda pasa a ser ENCABEZADO DE SECCIÓN QUE
+   *  DESPLIEGA — el hueco que C midió: `PieRevelar` tiene el direccional
+   *  pero es PIE, y `FilaCita` tiene el vocabulario pero es de DOMINIO.
+   *
+   *  ☠️ CONDICIÓN DE MUERTE DEL CLON: la anatomía local que C construyó
+   *  en su pantalla **se retira y consume esta prop** — para eso existe.
+   *  Mientras ese clon viva, hay dos encabezados que despliegan y uno
+   *  solo es de la casa. */
+  direccion?: DireccionChevron
 }
 
-export function CeldaNavegacion({ icono, titulo, detalle, onPress, registro = 'capa', chevron = true }: CeldaNavegacionProps) {
+export function CeldaNavegacion({ icono, titulo, detalle, onPress, registro = 'capa', chevron = true, direccion = 'derecha' }: CeldaNavegacionProps) {
   const { theme } = useTheme()
   const [presionada, setPresionada] = useState(false)
 
@@ -114,11 +131,13 @@ export function CeldaNavegacion({ icono, titulo, detalle, onPress, registro = 'c
           ) : null}
         </View>
 
-        {/* chevron de entrada — affordance decorativa (el canal semántico es el rol) */}
+        {/* El chevron: affordance decorativa (el canal semántico es el
+            rol). El path sale de la TABLA ÚNICA, jamás de un literal —
+            era una de las cuatro copias del mismo trazo (L-175). */}
         {chevron ? (
           <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" aria-hidden>
             <Path
-              d="M9 18l6-6-6-6"
+              d={CHEVRON[direccion]}
               stroke={theme.text.tertiary}
               strokeWidth={2}
               strokeLinecap="round"

@@ -42,6 +42,7 @@ import type { ReactNode } from 'react'
 import { View } from 'react-native'
 import Svg, { Path } from 'react-native-svg'
 
+import { CHEVRON, type DireccionChevron } from './chevron'
 import { useTheme } from '../ThemeProvider'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
@@ -98,7 +99,7 @@ export interface FilaCitaProps {
    * matar. La tercera no es un agregado mío: es la letra que ya estaba
    * firmada, y sin ella la pieza no podría cumplirla.
    */
-  direccion: 'derecha' | 'abajo' | 'arriba'
+  direccion: DireccionChevron
   /** Slot de DATOS (insignias/chips) — jamás de craft. */
   fin?: ReactNode
   /** Las acciones DE ESTA cita — viven adentro de SU tarjeta (B14 ①).
@@ -107,16 +108,9 @@ export interface FilaCitaProps {
   onPress: () => void
 }
 
-/** Los TRES paths del chevron, copiados VERBATIM de sus dueños
- *  (CeldaNavegacion para `›`, PieRevelar para `⌄`/`⌃`). Están acá como
- *  tabla y no re-dibujados a ojo: si algún día el trazo cambia, cambia
- *  en un lugar y esta tabla es lo que hace visible que son tres estados
- *  del MISMO glifo y no tres íconos. */
-const CHEVRON: Record<FilaCitaProps['direccion'], string> = {
-  derecha: 'M9 18l6-6-6-6',
-  abajo: 'M6 9l6 6 6-6',
-  arriba: 'M6 15l6-6 6 6',
-}
+/* El mapa que vivía acá SUBIÓ a `./chevron` (S83-B12). Su JSDoc decía
+ * "si algún día el trazo cambia, cambia en un lugar" — y no ocurría: el
+ * mismo trazo estaba en CUATRO sitios. Ahora la intención es cierta. */
 
 export function FilaCita({
   oficio,
