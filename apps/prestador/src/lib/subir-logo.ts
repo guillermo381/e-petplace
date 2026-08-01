@@ -27,7 +27,7 @@ const BUCKET = 'avatars';
 // 44s); el techo se dice ANTES del round-trip, con voz honesta.
 const MAX_BYTES = 5 * 1024 * 1024;
 
-export type CausaSubidaLogo = 'sin_sesion' | 'lectura' | 'archivo_grande' | 'red' | 'servidor';
+export type CausaSubidaLogo = 'sin_sesion' | 'lectura' | 'archivo_grande' | 'formato_no_png' | 'red' | 'servidor';
 
 /** El formato se detecta por los BYTES (magic numbers), jamás por una
  *  extensión inventada: la galería entrega el archivo ORIGINAL (alpha
@@ -87,6 +87,30 @@ export async function subirLogoNegocio(input: {
       return { ok: false, causa: 'archivo_grande', mensaje: 'El logo supera el máximo de 5MB.' };
     }
     const { contentType, extension } = formatoDeBytes(bytes);
+    /* ④ S83-C34 — SOLO PNG, y el porqué es del founder: *"poder quitar
+       el fondo"*. Un logo con fondo opaco es un rectángulo pegado sobre
+       el muro del oficio — exactamente lo caricaturesco que
+       DIRECCION_ARTE §7 rechaza. El JPEG **no puede** llevar
+       transparencia: no es que la pierda al comprimir, es que el formato
+       no la tiene. Por eso el rebote es de FORMATO y no de calidad.
+
+       ⚠️ EL SVG NO ENTRA, Y SE MIDIÓ ANTES DE PROMETERLO (la orden lo
+       pedía "si el pipeline lo soporta"): no lo soporta. `LogoNegocio`
+       pinta con `expo-image`, que rasteriza mapas de bits — un SVG
+       subido se guardaría bien y se vería ROTO al pintar. Aceptarlo
+       sería mover el fallo del momento de subir al momento de mirar,
+       que es peor. Su día llega cuando la pieza sepa dibujar vectores.
+
+       El WEBP TAMBIÉN lleva alpha y aun así queda afuera: la orden dice
+       PNG, y una excepción que el founder no firmó no se cuela por ser
+       técnicamente defendible. Si algún día entra, entra por su firma.
+
+       Se rebota ANTES de subir: un archivo que no vamos a mostrar no
+       ocupa el bucket. */
+    if (contentType !== 'image/png') {
+      console.error(`[subir-logo] formato_no_png · detectado=${contentType}`);
+      return { ok: false, causa: 'formato_no_png', mensaje: `El logo tiene que ser PNG (llegó ${extension}).` };
+    }
     path = `${userId}/logo-negocio-${Date.now()}.${extension}`;
     const { error } = await getClient()
       .storage.from(BUCKET)
