@@ -50,7 +50,32 @@ import { useTheme } from '../ThemeProvider'
  *  para que el gate pudiera comparar, y la comparación ya ocurrió. */
 const FACTOR_SANGRADA = 1.5
 
-export function MarcaDeAgua() {
+/** LAS TRES PROPS DEL GATE (S83-B9) — **todas opcionales y con default
+ *  EXACTAMENTE igual al comportamiento de producción**: montadas sin
+ *  pasar nada, la pieza es byte por byte la de hoy. Nacen porque el gate
+ *  de la casa verde tiene que hacerse sobre LA PIEZA REAL y no sobre un
+ *  clon de galería — un clon se desincroniza, que es la razón por la que
+ *  esta pieza existe (ver arriba: 0.06 contra 0.04, hallazgo r8).
+ *  ☠️ MUERTE: cuando el founder firme, la variante ganadora se vuelve el
+ *  default y **las props que nadie use se borran en el mismo acto** — la
+ *  API de una lámina no sobrevive a su lámina (Ley 37). */
+export function MarcaDeAgua({
+  color,
+  rampa = false,
+  alfa,
+}: {
+  /** Override del color de la tinta. Default: `theme.text.primary`.
+   *  Mecanismo S61-B8 (la prop `color` de `Isotipo`, nacida por letra del
+   *  founder para el isotipo en tealDark). */
+  color?: string
+  /** `true` = la RAMPA del isotipo. Default false = tinta plana, que es
+   *  lo que rige. **Es la variante que §15b.2 prohíbe en el prestador**
+   *  ("cero gradiente en toda la app"): se monta para que el founder VEA
+   *  lo que esa letra prohibió antes de decidir si lo sostiene. */
+  rampa?: boolean
+  /** Override del alfa. Default: `opacity.marcaDeAgua` (0.06, firmado). */
+  alfa?: number
+} = {}) {
   const { theme } = useTheme()
   const { width } = useWindowDimensions()
   // Memorial: la pieza no se monta (Ley 8 — degrada sola, en la fuente).
@@ -71,10 +96,14 @@ export function MarcaDeAgua() {
         // recorte lo hace el padre, que es exactamente lo que se busca
         // (los cuatro bordes cortan la silueta).
         overflow: 'hidden',
-        opacity: opacity.marcaDeAgua,
+        opacity: alfa ?? opacity.marcaDeAgua,
       }}
     >
-      <Isotipo size={tamano} variant="tinta" color={theme.text.primary} />
+      {rampa ? (
+        <Isotipo size={tamano} variant="gradiente" />
+      ) : (
+        <Isotipo size={tamano} variant="tinta" color={color ?? theme.text.primary} />
+      )}
     </View>
   )
 }
