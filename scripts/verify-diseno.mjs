@@ -613,21 +613,72 @@ function r14(archivos) {
  *  TIENE que pisar `bg.base` a `light0`**. Hoy pasa en verde por el
  *  apagado (papelTapiz === light0) — y cuando el color llegue, el lint
  *  exige su separación en el MISMO acto. Patrón del guard de la vitrina
- *  (S78): el orden nombra el artefacto que abre. */
+ *  (S78): el orden nombra el artefacto que abre.
+ *
+ *  ENSANCHADA S83-B3 — LA MITAD OSCURA (orden founder: "R16 ve la mitad
+ *  oscura"). El defecto era de la propia regla y es el que ella existe
+ *  para cerrar, un tema más allá: vigilaba `lightOficio` y **nada miraba
+ *  `darkOficio`**, así que borrar la línea del tapiz oscuro dejaba al
+ *  prestador heredando el tinte MAGENTA del cliente con el lint EN VERDE.
+ *  Cobró dos veces el 31-jul: dos lecturas distintas salieron de consultar
+ *  una regla que veía medio mundo.
+ *
+ *  LA SIMETRÍA NO ES LITERAL, y ahí está el cuidado: en CLARO el prestador
+ *  se separa QUEDÁNDOSE en el papel neutro (`light0`); en OSCURO se separa
+ *  TENIENDO EL SUYO (`tapizDarkOficio`, el verde de su oficio) — "un tinte
+ *  por casa, misma gramática" (r29, enmienda del founder). Por eso la
+ *  mitad oscura no exige el neutro: exige SU token, y un `darkOficio` que
+ *  pisara `bg.base` a `tapizDark` (el del cliente) sale ROJO igual.
+ *
+ *  TERCER BRAZO, no pedido pero del mismo silencio: si los dos tapices
+ *  apuntaran al MISMO hex, la separación sería de nombre y no de color —
+ *  verde de lint, una sola casa en pantalla. La letra dice "un tinte por
+ *  casa"; el brazo la hace exigible.
+ *
+ *  ☠️ CONDICIÓN DE MUERTE: esta regla existe porque los temas de oficio se
+ *  arman por SPREAD (`...darkTheme`) y heredan en silencio lo que no pisan
+ *  — un olvido no rompe nada, y ese es el modo de falla. **Muere el día
+ *  que `bg.base` de los temas de oficio deje de venir por herencia y pase
+ *  a ser obligación de TIPO** (que el tsc se ponga rojo si falta), porque
+ *  ahí el compilador cubre lo que hoy cubre el lint. **La retira la sesión
+ *  que haga ese cambio estructural, y con el mismo criterio que rige acá:
+ *  produciendo primero el rojo del tsc y recién entonces borrando la
+ *  regla** — jamás al revés. Si en cambio el founder revirtiera "un tinte
+ *  por casa", la regla no muere: cambia de letra (cae el tercer brazo). */
 function r16(fuentes) {
   const pal = fuentes.palette ?? '';
   const temas = fuentes.temas ?? '';
-  const luz = pal.match(/\blight0:\s*'(#[0-9A-Fa-f]{6})'/);
-  const tapiz = pal.match(/\bpapelTapiz:\s*'(#[0-9A-Fa-f]{6})'/);
-  if (!luz || !tapiz)
-    return { fallos: ['R16: no se pudo leer light0/papelTapiz de palette.ts — sin los valores no hay verificación (L-192)'], info: 'SIN FUENTE' };
-  const encendido = luz[1].toUpperCase() !== tapiz[1].toUpperCase();
-  // La separación: lightOficio (el tema del prestador) pisando bg.base.
+  const hex = (nombre) => pal.match(new RegExp(`\\b${nombre}:\\s*'(#[0-9A-Fa-f]{6})'`));
+  const luz = hex('light0');
+  const tapiz = hex('papelTapiz');
+  const oscuro = hex('dark0');
+  const tapizD = hex('tapizDark');
+  const tapizDO = hex('tapizDarkOficio');
+  if (!luz || !tapiz || !oscuro || !tapizD || !tapizDO)
+    return {
+      fallos: ['R16: no se pudo leer light0/papelTapiz/dark0/tapizDark/tapizDarkOficio de palette.ts — sin los valores no hay verificación (L-192)'],
+      info: 'SIN FUENTE',
+    };
+  const igual = (a, b) => a[1].toUpperCase() === b[1].toUpperCase();
+  const fallos = [];
+
+  // ── MITAD CLARA: el prestador se separa QUEDÁNDOSE en el papel neutro ──
+  const encendido = !igual(luz, tapiz);
   const separado = /const lightOficio[\s\S]*?\bbg:\s*\{[^}]*\bbase:\s*palette\.light0/.test(temas);
-  const fallos = encendido && !separado
-    ? [`R16: papelTapiz (${tapiz[1]}) está ENCENDIDO y lightOficio NO pisa bg.base a light0 — el prestador estaría recibiendo el tinte del cliente (orden founder S82 r8/r9 punto 5)`]
-    : [];
-  return { fallos, info: `tapiz=${encendido ? 'ENCENDIDO ' + tapiz[1] : 'apagado (=light0)'} · separación-prestador=${separado ? 'construida' : 'no construida'}` };
+  if (encendido && !separado)
+    fallos.push(`R16: papelTapiz (${tapiz[1]}) está ENCENDIDO y lightOficio NO pisa bg.base a light0 — el prestador estaría recibiendo el tinte del cliente (orden founder S82 r8/r9 punto 5)`);
+
+  // ── MITAD OSCURA: el prestador se separa TENIENDO EL SUYO ──
+  const encendidoOsc = !igual(oscuro, tapizD);
+  const separadoOsc = /const darkOficio[\s\S]*?\bbg:\s*\{[^}]*\bbase:\s*palette\.tapizDarkOficio/.test(temas);
+  if (encendidoOsc && !separadoOsc)
+    fallos.push(`R16: tapizDark (${tapizD[1]}) está ENCENDIDO y darkOficio NO pisa bg.base a tapizDarkOficio — el prestador estaría recibiendo el tinte MAGENTA del cliente en oscuro (S82-B r29: un tinte por casa)`);
+  if (encendidoOsc && separadoOsc && igual(tapizD, tapizDO))
+    fallos.push(`R16: tapizDark y tapizDarkOficio son el MISMO hex (${tapizD[1]}) — la separación es de nombre y no de color: las dos casas se verían iguales (S82-B r29)`);
+
+  const claro = `claro[tapiz=${encendido ? 'ENCENDIDO ' + tapiz[1] : 'apagado (=light0)'} · separación=${separado ? 'construida' : 'no construida'}]`;
+  const osc = `oscuro[tapiz=${encendidoOsc ? 'ENCENDIDO ' + tapizD[1] : 'apagado (=dark0)'} · separación=${separadoOsc ? 'construida ' + tapizDO[1] : 'no construida'}]`;
+  return { fallos, info: `${claro} · ${osc}` };
 }
 const FUENTES_R16 = {
   palette: readFileSync('packages/ui/src/tokens/palette.ts', 'utf8'),
@@ -985,7 +1036,17 @@ const FIXTURES = {
   // el pleno que ignora a sus hermanos: exactamente mi defecto de r11
   // la marca anidada adentro de la placa: el defecto que se ve como layout
   R22: { filtro: 'function MarcaElegido() {}\n<View style={{ width: 30 }}><MarcaElegido /></View>' },
-  R16: { palette: "light0: '#FAF9F7',\npapelTapiz: '#FAF2F5',", temas: 'const lightOficio: Theme = { ...lightTheme }' },
+  // S83-B3 · el fixture trae la MITAD CLARA SANA a propósito, para que el
+  // rojo solo pueda venir de la oscura — el precedente de R24, dos entradas
+  // más abajo: una prueba que pasa por el motivo equivocado no prueba la
+  // regla que dice probar. (El brazo claro y el de los hexes iguales tienen
+  // su rojo en EXTRAS_R16: ningún fixture único puede encender los tres.)
+  R16: {
+    palette: "light0: '#FAF9F7',\npapelTapiz: '#FAF2F5',\ndark0: '#050508',\ntapizDark: '#0D050D',\ntapizDarkOficio: '#080D0E',",
+    temas:
+      'const lightOficio: Theme = { ...lightTheme,\n  bg: { ...lightTheme.bg, base: palette.light0 },\n}\n' +
+      'const darkOficio: Theme = { ...darkTheme }',
+  },
   // el pie a mano en una pantalla de explorar que NO está en el baseline
   // el fixture trae los CUATRO oficios para que el ancla NO sea lo que
   // lo pone rojo: lo que tiene que salir roja es la copia, y una prueba
@@ -1034,6 +1095,35 @@ for (const [nombre, fixture] of Object.entries(FIXTURES)) {
     decorativas++;
   }
 }
+/** AUTO-PRUEBA EXTRA DE R16 (S83-B3) — el mecanismo genérico corre UN
+ *  fixture por regla, y R16 tiene TRES brazos cuyas condiciones son
+ *  MUTUAMENTE EXCLUYENTES (el de "no separado" y el de "separado con el
+ *  mismo hex" no pueden ser ciertos a la vez): ningún fixture único puede
+ *  encenderlos todos. El genérico cubre el brazo que la orden pidió —la
+ *  mitad oscura sin separar—; estos dos cubren los otros, para que ningún
+ *  brazo quede sin su rojo. Un brazo sin prueba es una regla decorativa
+ *  adentro de una regla viva, que es L-192 escondida un piso más abajo. */
+const EXTRAS_R16 = [
+  ['R16·brazo claro (tinte encendido, lightOficio sin pisar)', {
+    palette: "light0: '#FAF9F7',\npapelTapiz: '#FAF2F5',\ndark0: '#050508',\ntapizDark: '#0D050D',\ntapizDarkOficio: '#080D0E',",
+    temas:
+      'const lightOficio: Theme = { ...lightTheme }\n' +
+      'const darkOficio: Theme = { ...darkTheme,\n  bg: { ...darkTheme.bg, base: palette.tapizDarkOficio },\n}',
+  }],
+  ['R16·brazo hexes (las dos casas con el mismo tapiz)', {
+    palette: "light0: '#FAF9F7',\npapelTapiz: '#FAF2F5',\ndark0: '#050508',\ntapizDark: '#0D050D',\ntapizDarkOficio: '#0D050D',",
+    temas:
+      'const lightOficio: Theme = { ...lightTheme,\n  bg: { ...lightTheme.bg, base: palette.light0 },\n}\n' +
+      'const darkOficio: Theme = { ...darkTheme,\n  bg: { ...darkTheme.bg, base: palette.tapizDarkOficio },\n}',
+  }],
+];
+for (const [nombre, fx] of EXTRAS_R16) {
+  if (r16(fx).fallos.length === 0) {
+    console.error(`AUTO-PRUEBA ✗ ${nombre} no salió roja — BRAZO DECORATIVO (L-192)`);
+    decorativas++;
+  }
+}
+
 if (decorativas > 0) {
   console.error(`\nverify:diseno — ${decorativas} regla(s) decorativa(s): el lint se declara inválido`);
   process.exit(1);
