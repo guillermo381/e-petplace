@@ -529,6 +529,28 @@ export default function Cuenta() {
             <Boton variante="ghost" etiqueta={t('miCuenta.eliminarCuenta')} bloque onPress={() => setEliminarAbierta(true)} />
           </View>
 
+          {/* ── S83-C10 · LA ENTRADA A LA PANTALLA DE VERIFICACIÓN.
+              Sin esto, `/perfil-v2` sería alcanzable solo por URL — que
+              es exactamente el estado de `/gallery` en esta app, y es
+              L-161 al pie de la letra: una superficie de gate que el
+              founder no puede alcanzar NO es un gate. El precedente y su
+              forma salen del cliente (D-580, `cuenta/index.tsx`), letra
+              incluida: los textos van LITERALES, fuera del riel i18n,
+              porque es herramienta de sesión con fecha de retiro y las
+              keys sobrevivirían a la deuda.
+              ⚠️ DEUDA DE RETIRO: esta celda —y la ruta— salen cuando la
+              pantalla se firme y reemplace a `cuenta/perfil`, o antes
+              del soft launch si no se firmó. NO lleva `__DEV__`: en un
+              APK de preview `__DEV__` es false y la entrada
+              desaparecería justo donde tiene que existir. ── */}
+          <CeldaNavegacion
+            icono="cuenta"
+            titulo="Perfil v2 (en revisión)"
+            detalle="pantalla de verificación — datos falsos, nada se guarda"
+            registro="aa"
+            onPress={() => router.push('/perfil-v2')}
+          />
+
           {/* ── S74-B · EL MARCADOR RENDERIZADO (L-160/L-161): el
               [update] era SOLO console.log — logcat-only, inalcanzable
               para el founder sin cable (hallazgo del gate S74). La
