@@ -36,6 +36,7 @@ import {
   FilaDato,
   Hoja,
   Insignia,
+  MarcaDeAgua,
   SelectorOpcion,
   Tarjeta,
   Texto,
@@ -279,6 +280,7 @@ export default function CierreGrooming() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       {/* S74-B D-498: propagación del patrón EvitaTeclado (gateado en el
           path vet) — nota al fondo + CTA + ScrollView pelado. */}
       {/* S81-C: el Encabezado sale del scroll — fijo, como en el durante

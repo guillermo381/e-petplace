@@ -26,6 +26,7 @@ import {
   Hoja,
   Insignia,
   MapaRecorrido,
+  MarcaDeAgua,
   SelectorOpcion,
   Tarjeta,
   Texto,
@@ -652,6 +653,7 @@ export default function Durante() {
     // S59-B1 (safe area): el Encabezado ya absorbe y PINTA el inset superior
     // — el SafeAreaView top lo duplicaba (doble banda de papel arriba).
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <View style={{ paddingHorizontal: spacing[4], paddingTop: spacing[2] }}>
         <Encabezado variante="navegacion" titulo={t('cita.enCursoTitulo')} atras onAtras={() => router.back()} />
       </View>

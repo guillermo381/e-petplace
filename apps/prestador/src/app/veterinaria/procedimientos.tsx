@@ -30,6 +30,7 @@ import {
   Hoja,
   Insignia,
   Interruptor,
+  MarcaDeAgua,
   Separador,
   SliderPrecio,
   Tarjeta,
@@ -179,6 +180,7 @@ export default function ProcedimientosVeterinaria() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado
         variante="navegacion"
         titulo={t('procedimientosVet.titulo')}

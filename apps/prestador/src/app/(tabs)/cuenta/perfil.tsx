@@ -61,6 +61,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  MarcaDeAgua,
   Separador,
   Texto,
   capturarConCamara,
@@ -412,6 +413,7 @@ export default function PerfilV2() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       {/* ② FIRMADO: el rastro. Vive FUERA del scroll — se pega al tope
           cuando el espejo se fue, y ya no se elige. */}
       {rastroVisible && prestador !== null && <RastroNegocio nombre={prestador.nombre_comercial} visible />}

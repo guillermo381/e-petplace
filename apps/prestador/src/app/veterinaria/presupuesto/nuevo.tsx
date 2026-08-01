@@ -23,6 +23,7 @@ import {
   Campo,
   Celda,
   Encabezado,
+  MarcaDeAgua,
   Separador,
   Tarjeta,
   Texto,
@@ -175,6 +176,7 @@ export default function NuevoPresupuesto() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('presupuesto.titulo')} atras onAtras={() => router.back()} />
       <EvitaTeclado>
       <ScrollView

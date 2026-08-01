@@ -32,7 +32,7 @@ import {
   typography,
   useAviso,
   useTheme,
-EvitaTeclado, } from '@epetplace/ui';
+EvitaTeclado, MarcaDeAgua, } from '@epetplace/ui';
 import {
   crearCuentaComercialInicial,
   obtenerPaisesParaRegistro,
@@ -163,6 +163,7 @@ export default function NuevaCuentaComercial() {
   if (paises === 'cargando') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
         <Encabezado variante="navegacion" titulo={t('cuenta.nuevaTitulo')} atras onAtras={() => router.back()} />
         <View style={{ padding: spacing[5] }}>
           <EsqueletoGrupo>
@@ -178,6 +179,7 @@ export default function NuevaCuentaComercial() {
   if (paises === 'error') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
         <Encabezado variante="navegacion" titulo={t('cuenta.nuevaTitulo')} atras onAtras={() => router.back()} />
         <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
           <EstadoVacio
@@ -191,6 +193,7 @@ export default function NuevaCuentaComercial() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('cuenta.nuevaTitulo')} atras onAtras={() => router.back()} />
       <EvitaTeclado>
       <ScrollView

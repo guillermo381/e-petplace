@@ -36,6 +36,7 @@ import {
   Hoja,
   Icono,
   LogoNegocio,
+  MarcaDeAgua,
   Separador,
   Tarjeta,
   Texto,
@@ -285,6 +286,7 @@ export default function Cuenta() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}>
         {/* EL HEADER CD (S61-B12, D-370): la identidad sobre el MURO —
             navegación mono + engranaje en vidrio · dos columnas con el

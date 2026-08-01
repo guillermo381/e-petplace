@@ -53,6 +53,7 @@ import {
   Insignia,
   Interruptor,
   LogoNegocio,
+  MarcaDeAgua,
   SelectorOpcion,
   Separador,
   Tarjeta,
@@ -452,6 +453,7 @@ export default function EquipoNegocioPantalla() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('equipo.titulo')} atras onAtras={() => router.back()} />
       <ScrollView contentContainerStyle={{ padding: spacing[4], gap: spacing[5], paddingBottom: insets.bottom + spacing[8] }}>
         {pantalla.estado === 'cargando' && (

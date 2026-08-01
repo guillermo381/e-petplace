@@ -14,7 +14,7 @@ import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Campo, Encabezado, Entrada, spacing, useAviso, useTheme, EvitaTeclado } from '@epetplace/ui';
+import { Boton, Campo, Encabezado, Entrada, EvitaTeclado, MarcaDeAgua, spacing, useAviso, useTheme } from '@epetplace/ui';
 import { iniciarSesion } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -54,6 +54,7 @@ export default function Login() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('login.titulo')} atras onAtras={() => router.back()} />
       <EvitaTeclado>
       <ScrollView

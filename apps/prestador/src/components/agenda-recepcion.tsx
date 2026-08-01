@@ -45,6 +45,7 @@ import {
   EstadoVacio,
   Esqueleto,
   EsqueletoGrupo,
+  MarcaDeAgua,
   PieRevelar,
   SelectorOpcion,
   SelectorSegmentado,
@@ -260,6 +261,7 @@ export function AgendaRecepcion({
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + spacing[4],

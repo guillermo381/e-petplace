@@ -40,6 +40,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   EvitaTeclado,
+  MarcaDeAgua,
   Texto,
   spacing,
   useAviso,
@@ -121,6 +122,7 @@ export default function NombreYAcceso() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo="Nombre y acceso" atras onAtras={() => router.back()} />
 
       {estado === 'cargando' && (

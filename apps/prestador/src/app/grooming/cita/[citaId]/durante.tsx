@@ -28,6 +28,7 @@ import {
   EsqueletoGrupo,
   EvidenciaFoto,
   Hoja,
+  MarcaDeAgua,
   SelectorOpcion,
   Tarjeta,
   Texto,
@@ -548,6 +549,7 @@ export default function DuranteGrooming() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <View style={{ paddingHorizontal: spacing[4] }}>
         <Encabezado
           variante="navegacion"

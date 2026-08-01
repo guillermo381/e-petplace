@@ -27,6 +27,7 @@ import { Redirect, useFocusEffect, useRouter } from 'expo-router';
 import {
   CeldaNavegacion,
   Icono,
+  MarcaDeAgua,
   Separador,
   Tarjeta,
   Texto,
@@ -262,6 +263,7 @@ export default function Negocio() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}>
         {/* B2 §15b.2: el techo de tinta — el dato de trabajo es la plata
             real esperando liquidación; sin eventos, la fecha del día */}

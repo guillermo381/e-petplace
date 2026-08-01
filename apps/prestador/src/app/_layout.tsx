@@ -91,18 +91,41 @@ export default function RootLayout() {
         {/* S63 arte — enmienda Ley 21 FIRMADA: el CTA del prestador ancla
             al oficio (accent.cta = tealDark en light Y dark; memorial
             SIEMPRE tinta, resuelto en getTheme — imposible de saltear). */}
-        {/* S83-C28 ② — EL AGUA, ENCENDIDA. La prop existía desde S82-B r10
-            con default false y NADIE la prendía del lado prestador: la
-            pieza estaba construida y su superficie no existía. Acá el agua
-            queda detrás de TODO el árbol en UN solo lugar — cero pantalla
-            tocada, cero copia que se desincronice (el modo de falla que
-            ese mismo commit declara: 0.06 vs 0.04).
-            ⚠️ NOTA A B — PROSA VENCIDA, no la toco por territorio: el
-            JSDoc de `marcaDeAgua` sigue diciendo "el prestador no la
-            recibe (su fondo se queda en papel algodón)". Eso era S82; el
-            founder firmó el agua en la casa verde en S83 (B9). La línea
-            manda lo contrario de lo que hoy rige. */}
-        <EpetThemeProvider mode={colorScheme === 'dark' ? 'dark' : 'light'} cta="oficio" marcaDeAgua>
+        {/* ⑦ S83-C33 — EL AGUA SE VA DE ACÁ, Y EL PORQUÉ ESTÁ MEDIDO.
+            En C28 la encendí en el provider: es el diseño de la pieza
+            (UN mount, cero copia que se desincronice). NO SE VEÍA, y B
+            midió la primera causa —73 superficies del prestador pintan su
+            propio `bg.base` y la tapan—. Al medir la cura aparecieron DOS
+            hechos que descartan las dos salidas obvias:
+
+            ① QUITAR ESOS 73 FONDOS NO DESCUBRE EL AGUA: DESCUBRE GRIS. El
+               navegador pinta `colors.background` en DOS capas propias
+               —`contentStyle` por escena y `nativeContainerStyle` del
+               ScreenStack (NativeStackView.native.js:221 y :252)— y el
+               tema por default de expo-router lo tiene en
+               `rgb(242, 242, 242)`. Esas capas viven ENTRE el provider y
+               las pantallas: el agua queda debajo igual.
+            ② HACERLAS TRANSPARENTES SE PUEDE (expo-router exporta su
+               `ThemeProvider`) PERO ROMPE LA TRANSICIÓN FIRMADA: con las
+               escenas transparentes, el `slide_from_right` de S80-B12
+               deja ver la pantalla de abajo a través de la que entra.
+               Cambiar craft firmado para descubrir una textura es mal
+               negocio.
+            Y subir el agua de plano —la otra opción de la mesa— la pone
+            SOBRE el contenido: contradice el contrato de la propia pieza
+            ("es FONDO, no contenido") y tiñe texto y Hojas.
+
+            ⇒ RIGE LA ANATOMÍA QUE EL FOUNDER YA FIRMÓ: el agua DENTRO de
+            la pantalla, encima de su fondo y debajo del contenido —
+            exactamente como corre en el Hogar del cliente, que es lo que
+            él miró cuando dijo "allí quedó bien". Son 61 montas en 54
+            archivos; el precio es real y se declara: la pieza vuelve a
+            tener N consumidores, que es lo que su JSDoc quería evitar.
+            ☠️ MUERTE DE ESTA NOTA: el día que las pantallas dejen de
+            pintar su propio fondo Y el navegador deje de pintar el suyo
+            sin costo de transición, la prop vuelve acá y las 61 montas
+            mueren de una. */}
+        <EpetThemeProvider mode={colorScheme === 'dark' ? 'dark' : 'light'} cta="oficio">
           <AvisoProvider>
             {/* S83-C28 ① — LA ATMOSFERA, en el LAYOUT y no por pantalla:
                 es la misma casa que el AmbientGlow del portal viejo

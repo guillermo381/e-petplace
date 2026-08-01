@@ -27,6 +27,7 @@ import {
   EstadoVacio,
   Hoja,
   Insignia,
+  MarcaDeAgua,
   Separador,
   Tarjeta,
   Texto,
@@ -177,6 +178,7 @@ export default function VerificacionVeterinaria() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado
         variante="navegacion"
         titulo={t('verificacionVet.titulo')}

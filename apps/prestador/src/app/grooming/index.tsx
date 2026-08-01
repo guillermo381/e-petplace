@@ -28,6 +28,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  MarcaDeAgua,
   Separador,
   Tarjeta,
   Texto,
@@ -137,6 +138,7 @@ export default function OfertaGrooming() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('ofertaGrooming.titulo')} atras onAtras={() => router.back()} />
 
       {pantalla.estado === 'cargando' && (

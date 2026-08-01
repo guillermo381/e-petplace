@@ -35,6 +35,7 @@ import {
   Esqueleto,
   Icono,
   Insignia,
+  MarcaDeAgua,
   SelectorOpcion,
   SelectorSegmentado,
   Separador,
@@ -432,6 +433,7 @@ export default function ConsultaVeterinaria() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('consulta.titulo')} atras onAtras={() => router.back()} />
       {/* S73-B 🔴: el teclado tapaba el campo (edge-to-edge anula
           adjustResize) — receta de la Hoja vía EvitaTeclado. */}

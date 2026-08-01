@@ -24,6 +24,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   Insignia,
+  MarcaDeAgua,
   Separador,
   Tarjeta,
   Texto,
@@ -68,6 +69,7 @@ export default function CuentaComercial() {
   if (cuenta === 'cargando') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
         <Encabezado variante="navegacion" titulo={t('cuenta.titulo')} atras onAtras={() => router.back()} />
         <View style={{ padding: spacing[5], gap: spacing[4] }}>
           <EsqueletoGrupo>
@@ -85,6 +87,7 @@ export default function CuentaComercial() {
   if (cuenta === 'error') {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
         <Encabezado variante="navegacion" titulo={t('cuenta.titulo')} atras onAtras={() => router.back()} />
         <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
           <EstadoVacio
@@ -109,6 +112,7 @@ export default function CuentaComercial() {
   if (cuenta === null) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
         <Encabezado variante="navegacion" titulo={t('cuenta.titulo')} atras onAtras={() => router.back()} />
         <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
           <EstadoVacio
@@ -143,6 +147,7 @@ export default function CuentaComercial() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('cuenta.titulo')} atras onAtras={() => router.back()} />
       <ScrollView contentContainerStyle={{ padding: spacing[5], paddingBottom: insets.bottom + spacing[8], gap: spacing[6] }}>
         {/* el estado preside */}

@@ -27,6 +27,7 @@ import {
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
+  MarcaDeAgua,
   SelectorEspecie,
   SelectorSegmentado,
   spacing,
@@ -171,6 +172,7 @@ export default function AltaMostrador() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('mostrador.nuevaTitulo')} atras onAtras={() => router.back()} />
       <EvitaTeclado>
       <ScrollView

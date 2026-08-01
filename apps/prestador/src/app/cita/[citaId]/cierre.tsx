@@ -24,6 +24,7 @@ import {
   Hoja,
   Insignia,
   MapaRecorrido,
+  MarcaDeAgua,
   Tarjeta,
   Texto,
   spacing,
@@ -199,6 +200,7 @@ export default function Cierre() {
     // S59-B1 (safe area): el Encabezado ya absorbe y PINTA el inset superior
     // — el SafeAreaView top lo duplicaba (doble banda de papel arriba).
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       {/* S74-B D-498: propagación del patrón EvitaTeclado (gateado en el
           path vet) — la anatomía exacta del bug de la dosis: nota al
           fondo + CTA + ScrollView pelado. */}

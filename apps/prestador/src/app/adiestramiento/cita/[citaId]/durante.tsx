@@ -43,6 +43,7 @@ import {
   EsqueletoGrupo,
   Hoja,
   Interruptor,
+  MarcaDeAgua,
   SelectorOpcion,
   Separador,
   Tarjeta,
@@ -488,6 +489,7 @@ export default function DuranteAdiestramiento() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <View style={{ paddingHorizontal: spacing[4], paddingTop: spacing[2] }}>
         <Encabezado
           variante="navegacion"

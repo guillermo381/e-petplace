@@ -31,6 +31,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  MarcaDeAgua,
   SelectorEspecie,
   Separador,
   Tarjeta,
@@ -224,6 +225,7 @@ export default function AutorizarMostrador() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('autorizar.titulo')} atras onAtras={() => router.back()} />
       <EvitaTeclado>
       <ScrollView

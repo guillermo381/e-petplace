@@ -29,6 +29,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  MarcaDeAgua,
   SelectorOpcion,
   SelectorSegmentado,
   Texto,
@@ -254,6 +255,7 @@ export default function AtencionMostrador() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('atencionMostrador.titulo')} atras onAtras={() => router.back()} />
       <EvitaTeclado>
       <ScrollView

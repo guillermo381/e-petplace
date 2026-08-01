@@ -24,6 +24,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   Insignia,
+  MarcaDeAgua,
   Separador,
   Tarjeta,
   Texto,
@@ -114,6 +115,7 @@ export default function DiaGrooming() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[4] }}>
         <Encabezado
           variante="navegacion"

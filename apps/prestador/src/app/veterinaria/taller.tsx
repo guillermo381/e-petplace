@@ -43,6 +43,7 @@ import {
   Hoja,
   HojaScroll,
   Interruptor,
+  MarcaDeAgua,
   SelectorOpcion,
   Separador,
   SliderPrecio,
@@ -512,6 +513,7 @@ export default function TallerVeterinaria() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('tallerVeterinaria.titulo')} atras onAtras={alAtras} />
 
       {pantalla.estado === 'cargando' && (

@@ -28,6 +28,7 @@ import {
   Celda,
   Encabezado,
   EstadoVacio,
+  MarcaDeAgua,
   Separador,
   Tarjeta,
   Texto,
@@ -115,6 +116,7 @@ export default function Mostrador() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('mostrador.buscarTitulo')} atras onAtras={() => router.back()} />
       <EvitaTeclado>
       <ScrollView

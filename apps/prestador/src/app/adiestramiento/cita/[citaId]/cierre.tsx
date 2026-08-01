@@ -26,6 +26,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   Insignia,
+  MarcaDeAgua,
   Separador,
   Tarjeta,
   Texto,
@@ -183,6 +184,7 @@ export default function CierreAdiestramiento() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <View style={{ paddingHorizontal: spacing[4], paddingTop: spacing[2] }}>
         <Encabezado
           variante="navegacion"

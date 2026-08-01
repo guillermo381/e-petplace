@@ -36,6 +36,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  MarcaDeAgua,
   Separador,
   Tarjeta,
   Texto,
@@ -157,6 +158,7 @@ export default function Liquidaciones() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
+      <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('cobros.titulo')} atras onAtras={() => router.back()} />
 
       {pantalla.estado === 'cargando' && (
