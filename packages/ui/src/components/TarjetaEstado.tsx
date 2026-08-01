@@ -77,6 +77,24 @@ export function TarjetaEstado({
     ...(encendido
       ? { boxShadow: theme.elevacion.reposo }
       : { borderWidth: theme.border.width, borderColor: theme.border.default }),
+    // EL HALO (S82 E11, firmado) llega a esta anatomía con la MISMA
+    // condición que `Tarjeta` — la elevación, y nada más: en oscuro la
+    // sombra no puede separar (negro sobre negro es física) y el paso de
+    // luminancia está cerrado por los dos lados. Medido acá: card/base
+    // 1.037 en dark y 1.100 en memorial — el ESTÁ casi no despegaba del
+    // fondo, que es la mitad de la gramática viviendo a ciegas.
+    //
+    // ENTRA EN "ESTÁ", JAMÁS EN "ESPERA", y no hace falta criterio nuevo
+    // para lograrlo: el halo va con la elevación, y acá solo el encendido
+    // la tiene. Por eso las dos gramáticas no pelean — el contorno del
+    // ESPERA nunca recibe un segundo borde encima.
+    //
+    // Ley 20 intacta: el halo NO es el hairline de marco que esa ley
+    // mata. Es DIRECCIONAL —solo arriba, donde pegaría la luz— y una
+    // caja necesita cuatro lados. El ESTÁ sigue sin borde.
+    ...(encendido && theme.elevacion.halo !== null
+      ? { borderTopWidth: 1, borderTopColor: theme.elevacion.halo }
+      : null),
   }
   if (onPress === undefined) {
     return (
