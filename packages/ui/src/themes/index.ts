@@ -30,8 +30,8 @@ export type Theme = TemaAncho<typeof lightTheme> | TemaAncho<typeof darkTheme> |
 /** ⭐ LOS SLOTS — el número que antes NO EXISTÍA (S82-B r30).
  *  Un SLOT no es "un campo que cambia entre temas" (eso son casi todos:
  *  es lo que un tema ES). Un slot es un campo que un tema DERIVADO PISA
- *  para separar las dos casas — `lightOficio`/`darkOficio`. **Son SIETE**
- *  (cuatro hasta S83-B6; cinco en B13; seis y siete en B19), y hasta r30 había que abrir los tres
+ *  para separar las dos casas — `lightOficio`/`darkOficio`. **Son OCHO**
+ *  (cuatro hasta S83-B6; cinco en B13; seis y siete en B19; ocho en B34), y hasta r30 había que abrir los tres
  *  archivos y comparar para saber cuáles:
  *    1. `bg.base`           — el fondo: el tapiz es del cliente
  *    2. `accent.cta`        — oro el cliente · tealDark el oficio
@@ -45,7 +45,18 @@ export type Theme = TemaAncho<typeof lightTheme> | TemaAncho<typeof darkTheme> |
  *    7. `accent.marcaEleccion` — el color de LA PATA. Nació fuera del
  *       slot (B9) porque su color no estaba firmado; el founder lo firmó
  *       en B19 con su límite: "en teal, jamás magenta".
- *  Si aparece un octavo, se agrega ACÁ: la lista es el contrato. */
+ *    8. `accent.atmosfera`  — el color de la LUZ DE AMBIENTE (S83-B34):
+ *       magenta el cliente · el verde del oficio. Nace como slot porque
+ *       `accent.primary` —el candidato de la orden, que C ya usaba en el
+ *       layout del prestador— **es el MISMO teal en las dos casas**
+ *       (tealDark en claro, teal puro en oscuro) y por lo tanto NO las
+ *       distingue: con él, la atmósfera del cliente saldría verde.
+ *       *(Corrección de una medición propia: primero reporté que era
+ *       `text.primary`. Era falso — hay DOS `primary` en el tema y el
+ *       grep tomó el de texto. `accent.primary` sí es el teal, así que
+ *       lo que C montó en el prestador está BIEN; lo que falla es
+ *       reusarlo del otro lado.)*
+ *  Si aparece un noveno, se agrega ACÁ: la lista es el contrato. */
 export type SlotDeTema =
   | 'bg.base'
   | 'accent.cta'
@@ -54,6 +65,7 @@ export type SlotDeTema =
   | 'accent.control'
   | 'accent.active'
   | 'accent.marcaEleccion'
+  | 'accent.atmosfera'
 export type ThemeMode = 'light' | 'dark' | 'memorial'
 export type ServiceKey = keyof typeof lightTheme.services
 export type StatusKey = 'success' | 'warning' | 'danger' | 'info'
@@ -74,7 +86,12 @@ const lightOficio: Theme = {
   // prestador se queda en PAPEL ALGODÓN. El guard R16 de verify:diseno
   // EXIGE esta línea mientras `papelTapiz !== light0` — su rojo fue
   // producido antes de escribirla (exit 1, r9).
-  bg: { ...lightTheme.bg, base: palette.light0 },
+  // S83-B33 — EL PAPEL VERDE. Hasta hoy esta línea pisaba a `light0`
+  // (papel NEUTRO) porque la letra de S82 decía que el prestador no
+  // recibía tinte; el founder la enmendó: un tinte por casa en LOS DOS
+  // temas. Su método es el del cliente, reproducido: teal puro al 3%
+  // sobre light0, igual que su magenta al 3%.
+  bg: { ...lightTheme.bg, base: palette.papelTapizOficio },
   // S82-B: el prestador NO recibe la elevación del CTA (su teal no
   // tiene el problema del oro contra papel — sería arrastre).
   // S83-B19 ④ — LA PATA VIAJA AL PRESTADOR, EN TEAL. En B9 la dejé FUERA
@@ -103,7 +120,7 @@ const lightOficio: Theme = {
   // oscuro pasa por poco (3.37, margen 0.37) y no "ilumina". El par da
   // 5.51 en claro y 12.70 en oscuro. Es la regla de dos registros de la
   // Ley 2 y §15b.2 aplicada al estado, no una excepción nueva.
-  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, control: palette.tealDark, active: palette.tealDark, marcaEleccion: palette.tealDark },
+  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, control: palette.tealDark, active: palette.tealDark, marcaEleccion: palette.tealDark, atmosfera: palette.tealDark },
 }
 const darkOficio: Theme = {
   ...darkTheme,
@@ -145,7 +162,7 @@ const darkOficio: Theme = {
   // 1.34 ✗, en tinta da 11.01 ✓. El CLARO no se toca: ahí tealDark rinde
   // 5.51 y el puro REPRUEBA (1.46) — por eso son dos registros y no un
   // color. Reversa: `cta: palette.tealDark, ctaTexto: palette.textDark0`.
-  accent: { ...darkTheme.accent, cta: palette.teal, ctaTexto: palette.textLight0, ctaElevado: false, control: palette.teal, active: palette.teal, marcaEleccion: palette.teal },
+  accent: { ...darkTheme.accent, cta: palette.teal, ctaTexto: palette.textLight0, ctaElevado: false, control: palette.teal, active: palette.teal, marcaEleccion: palette.teal, atmosfera: palette.teal },
 }
 
 /** El default del producto es CLARO (B1 §7.3). Dark es opt-in. Memorial es automático (M6). */

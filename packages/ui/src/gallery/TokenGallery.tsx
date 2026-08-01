@@ -450,6 +450,32 @@ function GlowCasaVerde() {
   )
 }
 
+// ── S83-B33 · LA ESCALA DEL PAPEL VERDE (claro). Los hexes salen del
+// MISMO método verificado del cliente: su #FAF2F5 es exactamente pink
+// puro al 3% sobre light0, así que éstos son teal puro sobre light0.
+const PAPEL_ESCALA: ReadonlyArray<{ pct: number; hex: string; cta: string }> = [
+  { pct: 2, hex: '#F6F9F6', cta: '5.46' },
+  { pct: 3, hex: '#F4F8F6', cta: '5.42' },
+  { pct: 4, hex: '#F2F8F6', cta: '5.40' },
+  { pct: 5, hex: '#F0F8F6', cta: '5.38' },
+]
+
+function EscalaPapelVerde() {
+  return (
+    <View style={{ flexDirection: 'row', gap: spacing[2], flexWrap: 'wrap' }}>
+      {PAPEL_ESCALA.map((t) => (
+        <View
+          key={t.pct}
+          style={{ flex: 1, minWidth: 130, minHeight: 128, borderRadius: radius.md, overflow: 'hidden', backgroundColor: t.hex, padding: spacing[2], gap: spacing[2] }}
+        >
+          <Tarjeta elevacion="reposo"><Texto variante="apoyo">tarjeta</Texto></Tarjeta>
+          <Texto variante="apoyo">{t.pct}% · CTA {t.cta}</Texto>
+        </View>
+      ))}
+    </View>
+  )
+}
+
 // ── S83-B19 ① LA ESCALA DEL TAPIZ VERDE. Los hexes se derivan en HSL
 // desde el ancla REAL de producción (#080D0E = "3%"), H y S fijos y L
 // escalada — el mismo eje con el que nació. No son inventados acá.
@@ -1786,6 +1812,25 @@ function GaleriaInterna() {
             ocupando el lugar del siguiente. ═══════════════════════ */}
         {/* ═══ S83-B9: el agua en la casa verde. Va PRIMERA junto al gate
             abierto porque es decisión viva, no catálogo. ═══ */}
+        <Seccion titulo="① ⭐ GATE S83 — CUÁNTO PAPEL VERDE EN CLARO · qué decide: el nivel del tinte del prestador en el tema claro. ES ENMIENDA DE LA LETRA DE S82 (que decía que el prestador NO recibe tinte), firmada por el founder en S83: un tinte por casa en LOS DOS temas. Hoy corre el 3%">
+          <ThemeProvider defaultMode="light" cta="oficio">
+            <PanelGateTema etiqueta="prestador CLARO — el papel verde">
+              <EscalaPapelVerde />
+            </PanelGateTema>
+          </ThemeProvider>
+          <Texto variante="apoyo">
+            EL MÉTODO ES EL DEL CLIENTE, reproducido y verificado: su papelTapiz #FAF2F5 es
+            EXACTAMENTE pink puro al 3% sobre light0. Éstos son teal puro sobre light0 — mismo hex
+            de marca, misma dosis, mismo orden. No es un verde elegido a ojo.
+          </Texto>
+          <Texto variante="apoyo">
+            LO QUE EL FONDO ARRASTRA, medido antes de encenderlo (la lección del 8% oscuro): el CTA
+            del prestador en claro baja de 5.51 a 5.42 al 3% — sigue muy por encima del mínimo 3, y
+            CERO pares nuevos caen. A diferencia del oscuro, acá el fondo se aclara poco y los
+            tintes con alpha casi no se mueven.
+          </Texto>
+        </Seccion>
+
         <Seccion titulo="① ⭐ GATE S83 — CUÁNTO TAPIZ · qué decide: el founder gateó DOS VECES que el 3% es 'muy muy leve'. Acá está la escala con su par card/base, y el número DA VUELTA la premisa — ver el rótulo">
           <ThemeProvider defaultMode="dark" cta="oficio">
             <PanelGateTema etiqueta="sin glow — el par crudo">

@@ -714,19 +714,29 @@ function r16(fuentes) {
   const oscuro = hex('dark0');
   const tapizD = hex('tapizDark');
   const tapizDO = hex('tapizDarkOficio');
-  if (!luz || !tapiz || !oscuro || !tapizD || !tapizDO)
+  const papelOf = hex('papelTapizOficio');
+  if (!luz || !tapiz || !oscuro || !tapizD || !tapizDO || !papelOf)
     return {
-      fallos: ['R16: no se pudo leer light0/papelTapiz/dark0/tapizDark/tapizDarkOficio de palette.ts — sin los valores no hay verificación (L-192)'],
+      fallos: ['R16: no se pudo leer light0/papelTapiz/papelTapizOficio/dark0/tapizDark/tapizDarkOficio de palette.ts — sin los valores no hay verificación (L-192)'],
       info: 'SIN FUENTE',
     };
   const igual = (a, b) => a[1].toUpperCase() === b[1].toUpperCase();
   const fallos = [];
 
-  // ── MITAD CLARA: el prestador se separa QUEDÁNDOSE en el papel neutro ──
+  // ── MITAD CLARA: el prestador tiene EL SUYO ──
+  // S83-B33 — LA LETRA CAMBIÓ Y LA REGLA CON ELLA. Hasta hoy esta mitad
+  // exigía que lightOficio se quedara en el papel NEUTRO (`light0`),
+  // porque S82 firmó "el prestador NO recibe tinte, es fondo del
+  // cliente". El founder ENMENDÓ esa letra en S83: un tinte por casa en
+  // LOS DOS temas. Así que ahora la regla es SIMÉTRICA con la oscura —
+  // el prestador se separa TENIENDO EL SUYO, no quedándose en el neutro.
+  const papelOficio = hex('papelTapizOficio');
   const encendido = !igual(luz, tapiz);
-  const separado = /const lightOficio[\s\S]*?\bbg:\s*\{[^}]*\bbase:\s*palette\.light0/.test(temas);
+  const separado = /const lightOficio[\s\S]*?\bbg:\s*\{[^}]*\bbase:\s*palette\.papelTapizOficio/.test(temas);
   if (encendido && !separado)
-    fallos.push(`R16: papelTapiz (${tapiz[1]}) está ENCENDIDO y lightOficio NO pisa bg.base a light0 — el prestador estaría recibiendo el tinte del cliente (orden founder S82 r8/r9 punto 5)`);
+    fallos.push(`R16: papelTapiz (${tapiz[1]}) está ENCENDIDO y lightOficio NO pisa bg.base a papelTapizOficio — el prestador estaría recibiendo el tinte MAGENTA del cliente en claro (S83-B33: un tinte por casa en los DOS temas)`);
+  if (papelOficio && encendido && separado && igual(tapiz, papelOficio))
+    fallos.push(`R16: papelTapiz y papelTapizOficio son el MISMO hex (${tapiz[1]}) — la separación es de nombre y no de color, en claro`);
 
   // ── MITAD OSCURA: el prestador se separa TENIENDO EL SUYO ──
   const encendidoOsc = !igual(oscuro, tapizD);
@@ -736,7 +746,7 @@ function r16(fuentes) {
   if (encendidoOsc && separadoOsc && igual(tapizD, tapizDO))
     fallos.push(`R16: tapizDark y tapizDarkOficio son el MISMO hex (${tapizD[1]}) — la separación es de nombre y no de color: las dos casas se verían iguales (S82-B r29)`);
 
-  const claro = `claro[tapiz=${encendido ? 'ENCENDIDO ' + tapiz[1] : 'apagado (=light0)'} · separación=${separado ? 'construida' : 'no construida'}]`;
+  const claro = `claro[tapiz=${encendido ? 'ENCENDIDO ' + tapiz[1] : 'apagado (=light0)'} · separación=${separado ? 'construida ' + (papelOficio ? papelOficio[1] : '') : 'no construida'}]`;
   const osc = `oscuro[tapiz=${encendidoOsc ? 'ENCENDIDO ' + tapizD[1] : 'apagado (=dark0)'} · separación=${separadoOsc ? 'construida ' + tapizDO[1] : 'no construida'}]`;
   return { fallos, info: `${claro} · ${osc}` };
 }
@@ -1180,7 +1190,7 @@ const FIXTURES = {
       'const darkOficio: Theme = {\n  accent: { ...darkTheme.accent, active: palette.teal },\n}',
   },
   R16: {
-    palette: "light0: '#FAF9F7',\npapelTapiz: '#FAF2F5',\ndark0: '#050508',\ntapizDark: '#0D050D',\ntapizDarkOficio: '#080D0E',",
+    palette: "light0: '#FAF9F7',\npapelTapiz: '#FAF2F5',\npapelTapizOficio: '#F4F8F6',\ndark0: '#050508',\ntapizDark: '#0D050D',\ntapizDarkOficio: '#080D0E',",
     temas:
       'const lightOficio: Theme = { ...lightTheme,\n  bg: { ...lightTheme.bg, base: palette.light0 },\n}\n' +
       'const darkOficio: Theme = { ...darkTheme }',
@@ -1243,7 +1253,7 @@ for (const [nombre, fixture] of Object.entries(FIXTURES)) {
  *  adentro de una regla viva, que es L-192 escondida un piso más abajo. */
 const EXTRAS_R16 = [
   ['R16·brazo claro (tinte encendido, lightOficio sin pisar)', {
-    palette: "light0: '#FAF9F7',\npapelTapiz: '#FAF2F5',\ndark0: '#050508',\ntapizDark: '#0D050D',\ntapizDarkOficio: '#080D0E',",
+    palette: "light0: '#FAF9F7',\npapelTapiz: '#FAF2F5',\npapelTapizOficio: '#F4F8F6',\ndark0: '#050508',\ntapizDark: '#0D050D',\ntapizDarkOficio: '#080D0E',",
     temas:
       'const lightOficio: Theme = { ...lightTheme }\n' +
       'const darkOficio: Theme = { ...darkTheme,\n  bg: { ...darkTheme.bg, base: palette.tapizDarkOficio },\n}',
