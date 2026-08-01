@@ -716,7 +716,7 @@ const FUENTES_R16 = {
  *  Un guard que aceptara cualquiera de los dos en cualquier tema dejaría
  *  pasar justo el error que la medición encontró.
  *
- *  ☠️ CONDICIÓN DE MUERTE: la misma de R16 y R26 — muere el día que los
+ *  ☠️ CONDICIÓN DE MUERTE: la misma de R16 (R26 ya se retiró) — muere el día que los
  *  slots dejen de resolverse por herencia y pasen a obligación de TIPO
  *  (tsc rojo si falta). La retira la sesión que haga ese cambio,
  *  produciendo primero el rojo del tsc y recién después borrando la

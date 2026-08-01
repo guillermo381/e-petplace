@@ -85,9 +85,8 @@ const lightOficio: Theme = {
   // (§15b.1: UN acento de oficio para TODO estado y control funcional del
   // prestador; el magenta vive SOLO en la marca). Sin esta línea el
   // prestador elegía en MAGENTA por herencia — la letra al revés, y en
-  // silencio. NO arrastra la PATA: su color lo firma el founder y hoy
-  // vive aparte, en `accent.marcaEleccion` (su nota está en los temas).
-  // Lo vigila R26 de verify:diseno, con su rojo producido.
+  // silencio. Lo vigila R27 junto a `active` y `marcaEleccion` — los tres
+  // son la misma física y por eso los cubre UNA regla, no tres.
   // S83-B13 — EL SEXTO SLOT: `accent.active` es el acento de ESTADO
   // ACTIVO (focus del Campo y de CampoFecha, outline de foco del Boton,
   // huella/pill de la tab). FIRMA DEL FOUNDER en dispositivo sobre el
@@ -116,9 +115,8 @@ const darkOficio: Theme = {
   // (§15b.1: UN acento de oficio para TODO estado y control funcional del
   // prestador; el magenta vive SOLO en la marca). Sin esta línea el
   // prestador elegía en MAGENTA por herencia — la letra al revés, y en
-  // silencio. NO arrastra la PATA: su color lo firma el founder y hoy
-  // vive aparte, en `accent.marcaEleccion` (su nota está en los temas).
-  // Lo vigila R26 de verify:diseno, con su rojo producido.
+  // silencio. Lo vigila R27 junto a `active` y `marcaEleccion` — los tres
+  // son la misma física y por eso los cubre UNA regla, no tres.
   // S83-B13 — EL SEXTO SLOT: `accent.active` es el acento de ESTADO
   // ACTIVO (focus del Campo y de CampoFecha, outline de foco del Boton,
   // huella/pill de la tab). FIRMA DEL FOUNDER en dispositivo sobre el

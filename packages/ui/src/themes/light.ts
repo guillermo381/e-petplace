@@ -110,16 +110,19 @@ export const lightTheme = {
     // ACCIÓN sigue en tinta (CTA primario intacto). El prestador no lo
     // usa: su oficio es tealDark (§15b).
     control:       palette.magentaDark,
-    /** LA PATA DE LA ELECCIÓN — DELIBERADAMENTE FUERA DEL SLOT (S83-B6).
-     *  `accent.control` pasa a resolverse POR CASA (cliente magenta ·
-     *  prestador teal); la PATA no viaja con él porque **su color es
-     *  decisión del founder y todavía no la firmó** — el freno de la
-     *  orden. Hoy vale exactamente lo que valía `control` antes del
-     *  quinto slot, en las tres casas, así que el cambio de la letra NO
-     *  arrastra la marca. ☠️ MUERE cuando el founder firme el color de
-     *  la pata en el prestador: si dice teal, este campo se borra y la
-     *  pata vuelve a leer `accent.control`; si dice magenta, se queda y
-     *  esta nota pasa a ser su letra. */
+    /** LA PATA — SLOT PROPIO (S83-B19/B20, FIRMA DEL FOUNDER: "lo que
+     *  quiero comunicar con la pata es: este es el seleccionado").
+     *  Es marca de SELECCIÓN, no de marca: por eso en el prestador toma
+     *  su verde y no el magenta (§15b.1), en los DOS registros como sus
+     *  hermanos `control` y `active`.
+     *  ⚠️ REDUNDANCIA MEDIDA Y DECLARADA: hoy resuelve IDÉNTICO a
+     *  `accent.control` en las CINCO resoluciones (los tres temas base y
+     *  las dos casas de oficio). Se conserva como slot propio porque son
+     *  conceptos distintos —`control` viste la LETRA del segmento, esto
+     *  viste la PATA— y el día que diverjan ya está el lugar; pero
+     *  mientras coincidan, un cambio en uno que no viaje al otro es una
+     *  divergencia por accidente. Si el founder decide que la pata SIEMPRE
+     *  sigue al control, este campo se borra y la pata lee `control`. */
     marcaEleccion: palette.magentaDark,
     // S82-B r12 — el fondo del Boton `sinCaja` (el paso sobre el papel tapiz):
     // el secundario sin borde necesita un canal, y el borde ya no está.
