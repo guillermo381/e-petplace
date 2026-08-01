@@ -6,7 +6,7 @@
   "scripts": {
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
-    "lint": "turbo run lint",
+    "_comentario_lint": "S83-B7: `pnpm lint` MURIÓ y no se reemplaza. Corría `turbo run lint` → `expo lint` en las dos apps → ESLint NO está instalado (cero binario en node_modules/.bin, cero eslint.config.* en el repo): salía en exit 1 SIEMPRE, o sea nunca corrió. EL GATE REAL DE ESTA CASA ES OTRO y sí funciona: el hook `.githooks/pre-commit` (core.hooksPath) corre `verify:diseno` + `tsc` del paquete tocado y ABORTA el commit en rojo. EL PORQUÉ DEL RENAME, medido: 51 commits dicen 'lint verde' y ninguno hablaba de ESLint — usaban 'lint' para nombrar verify:diseno. Un nombre que designa a la vez el gate que corre y el que no existe es cómo se lee mal la historia. EL NOMBRE ÚNICO ES `verify:diseno`. Si algún día se quiere ESLint de verdad, nace con su propio nombre y su primera pasada roja absorbida — no reviviendo esta línea.",
     "dev:prestador": "pnpm --filter prestador start",
     "dev:cliente": "pnpm --filter cliente start",
     "verify:contrast": "tsx scripts/verify-contrast.ts",
