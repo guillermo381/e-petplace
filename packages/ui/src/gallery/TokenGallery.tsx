@@ -453,12 +453,12 @@ function GlowCasaVerde() {
 // ── S83-B19 ① LA ESCALA DEL TAPIZ VERDE. Los hexes se derivan en HSL
 // desde el ancla REAL de producción (#080D0E = "3%"), H y S fijos y L
 // escalada — el mismo eje con el que nació. No son inventados acá.
-const TAPIZ_ESCALA: ReadonlyArray<{ pct: number; hex: string; par: string }> = [
-  { pct: 3, hex: '#080D0E', par: '1.009' },
-  { pct: 4, hex: '#0B1113', par: '1.020' },
-  { pct: 5, hex: '#0D1617', par: '1.055' },
-  { pct: 6, hex: '#101A1C', par: '1.095' },
-  { pct: 8, hex: '#152325', par: '1.196' },
+const TAPIZ_ESCALA: ReadonlyArray<{ pct: number; hex: string; par: string; atm: string; luz: string }> = [
+  { pct: 3, hex: '#080D0E', par: '1.009', atm: '1.008', luz: '2.30' },
+  { pct: 4, hex: '#0B1113', par: '1.019', atm: '1.038', luz: '2.24' },
+  { pct: 5, hex: '#0D1617', par: '1.056', atm: '1.096', luz: '2.16' },
+  { pct: 6, hex: '#101A1C', par: '1.095', atm: '1.149', luz: '2.08' },
+  { pct: 8, hex: '#152325', par: '1.199', atm: '1.277', luz: '1.90' },
 ]
 
 function EscalaTapiz({ conLuz }: { conLuz: boolean }) {
@@ -472,7 +472,8 @@ function EscalaTapiz({ conLuz }: { conLuz: boolean }) {
           <Tarjeta elevacion="plana" luz={conLuz}>
             <Texto variante="apoyo">tarjeta</Texto>
           </Tarjeta>
-          <Texto variante="apoyo">{t.pct}% · par {t.par}</Texto>
+          <Texto variante="apoyo">{t.pct}% · crudo {t.par}</Texto>
+          <Texto variante="apoyo">+atm {t.atm} · +luz {t.luz}</Texto>
         </View>
       ))}
     </View>
@@ -510,12 +511,14 @@ function AguaCasaVerde() {
   const pie = { padding: spacing[2] }
   return (
     <View style={{ gap: spacing[3] }}>
-      <Texto variante="seccion">LA CUARTA — ENTERA, que es lo que el founder pidió</Texto>
+      <Texto variante="seccion">✅ FIRMADA Y APLICADA — la receta del Hogar es el DEFAULT de la pieza</Texto>
       <Texto variante="apoyo">
-        Veredicto sobre las tres de abajo: NINGUNA — "todos cortan el isotipo; la idea es que se
-        vea, suave, en marca de agua, pero no cortado". Ésta no corta: el tamaño se DERIVA del
-        ancho (factor 0.55) en vez de ser fijo, así entra entera en cualquier teléfono — el 210
-        del Hogar es fijo y en pantalla angosta roza. Los tres alfas, para que el ojo elija.
+        FIRMADO (S83-B22): "no puedes copiar cómo quedó en cliente? Allí quedó bien". La receta del
+        Hogar —entera, centrada, 0.06— ES AHORA EL DEFAULT de MarcaDeAgua; no hay que pasarle nada.
+        Lo único que cambió respecto del Hogar es la ROBUSTEZ, que es lo que la orden autorizó a
+        proponer: su 210 es FIJO y en una pantalla de 320 el isotipo ocupa el 96% del ancho (roza).
+        El factor 0.536 reproduce ese 210 EXACTO a 390 px y mantiene el mismo 78% en cualquier
+        ancho. En el teléfono del gate se ve idéntico.
       </Texto>
       <View style={{ flexDirection: 'row', gap: spacing[2], flexWrap: 'wrap' }}>
         {[0.08, 0.1, 0.12].map((a) => (
@@ -1800,10 +1803,25 @@ function GaleriaInterna() {
             el 3% es el PEOR de la escala, no el más seguro.
           </Texto>
           <Texto variante="apoyo">
-            Y UNA PRECISIÓN HONESTA SOBRE EL GLOW: la Atmosfera NO mueve el par card/base — pinta
-            sobre los DOS por igual. Lo que separa la tarjeta es `elevacion.luz` (el glow sobre
-            ella), que es lo que muestra el segundo panel. Los dos paneles no comparan "sin/con
-            atmósfera": comparan "sin/con luz en la superficie".
+            LOS TRES NÚMEROS, y CORRIJO lo que dije en B19 ("la Atmosfera no mueve el par"): sí lo
+            mueve, y midiéndolo bien la dirección importa. CRUDO = card contra base. +ATM = los dos
+            con la Atmosfera encima en su núcleo (alfa .18): al 3% BAJA a 1.008 —cuando ya son casi
+            idénticos, el glow los acerca más— y del 4% en adelante SUBE. +LUZ = la tarjeta con
+            `elevacion.luz`: 2.30 al 3%, y es de lejos lo que MÁS separa.
+          </Texto>
+          <Texto variante="apoyo">
+            LO QUE ESO DECIDE, y son DOS preguntas distintas que conviene no mezclar: si lo que
+            querés es PRESENCIA DE COLOR, subí sin miedo — acá el par mejora al subir, al revés que
+            en el cliente. Si lo que querés es que LAS TARJETAS SE SEPAREN, eso ya lo resolvió la
+            luz: al 3% con luz (2.30) separa MÁS que el 8% crudo (1.199). El tapiz no tiene que
+            cargar con ese trabajo.
+          </Texto>
+          <Texto variante="apoyo">
+            ③ ¿PIDE RE-MEDIR AA? Medido, y la respuesta tranquiliza: NO de forma significativa.
+            text.primary 17.03 → 14.08 · text.secondary 7.45 → 6.70 · text.tertiary 3.22 → 3.21
+            (mín 3). El terciario apenas se mueve porque secondary y tertiary son ALPHA sobre el
+            fondo, no colores fijos: suben y bajan CON él. El riesgo real no está en la escala —
+            está en que tertiary ya vive a 0.22 del mínimo HOY, con tapiz o sin él.
           </Texto>
         </Seccion>
 
