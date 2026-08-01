@@ -71,6 +71,7 @@ export function BarraTabs({
   activo,
   onCambiar,
   estadoPorHuella = false,
+  acento,
 }: {
   /** 3 a 5 tabs. */
   items: BarraTabsItem[]
@@ -81,10 +82,20 @@ export function BarraTabs({
    *  (sin recuadros, sin pills). La huella activa hereda el rol de
    *  accent.active: sigue siendo EL elemento activo de la vista. */
   estadoPorHuella?: boolean
+  /** PROP DE GATE (S83-B11) — override del acento de la tab activa.
+   *  Default: `accent.active` (el magenta), que es lo que corre.
+   *  Existe SOLO para que la lámina pueda montar la BARRA REAL con el
+   *  teal del oficio al lado de la de hoy: el choque S72-vs-§15b.1 se
+   *  arbitra mirando la pieza, no un clon.
+   *  ☠️ MUERTE: con la firma del founder. Si gana el teal, el camino es
+   *  un SEXTO SLOT en el tema (`accent.active` por casa, como
+   *  `accent.control` en S83-B6) y esta prop se borra en ese mismo acto;
+   *  si gana el magenta, se borra igual. En ningún escenario sobrevive. */
+  acento?: string
 }) {
   const { theme } = useTheme()
   const insets = useSafeAreaInsets()
-  const accentActive = 'active' in theme.accent ? theme.accent.active : theme.accent.primary
+  const accentActive = acento ?? ('active' in theme.accent ? theme.accent.active : theme.accent.primary)
 
   return (
     <View
