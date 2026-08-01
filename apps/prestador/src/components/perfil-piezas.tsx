@@ -1,43 +1,42 @@
 /**
- * PIEZAS DEL PERFIL v2 (S83-C10) — las TRES anatomías locales de la
+ * PIEZAS DEL PERFIL v2 (S83-C10 · S83-C13) — las anatomías locales de la
  * pantalla de verificación `/perfil-v2`.
  *
- * ⚠️ POR QUÉ VIVEN ACÁ Y NO EN `packages/ui` — declarado, no improvisado.
- * La orden C10 manda construir con piezas de `packages/ui` y FRENAR si
- * una falta. **Falta una, y es la del despliegue.** Medido:
- *   · `CeldaNavegacion` tiene `chevron?: boolean` — prendido/apagado, y
- *     su glifo es SIEMPRE `›`. No sabe decir ⌄/⌃ (E14 exige que la
- *     información despliegue y la acción lleve).
- *   · `PieRevelar` SÍ tiene el chevron direccional, pero es un PIE:
- *     centrado, sin glifo, etiqueta "Ver {n} más". No es un encabezado.
- *   · `FilaCita` tiene exactamente el prop que falta —
- *     `direccion: 'derecha' | 'abajo' | 'arriba'`, S82 E15 — pero es
- *     componente de DOMINIO: exige oficio y mascota.
+ * ☠️ EL CLON MURIÓ EN C13, y lo mató su propia condición de muerte.
+ * C10 declaró el hueco: no existía encabezado de sección que DESPLEGARA
+ * (⌄/⌃) y propuso ensanchar `CeldaNavegacion` con el `direccion` que
+ * `FilaCita` ya tenía. **B lo construyó** (S83-B12): la prop existe, y
+ * el trazo se fue a la tabla ÚNICA `packages/ui/components/chevron.ts`
+ * — el mapa que este archivo tenía copiado era la quinta copia que
+ * L-175 prohíbe. `SeccionDesplegable` deja de dibujar su chevron y su
+ * fila: **compone `CeldaNavegacion`**. Con el mapa local muere también
+ * la constante (Ley 37: lo que sale de la UI sale del código).
  *
- * LA CURA COORDINADA que se propone (territorio de B, 76(d)):
- * `CeldaNavegacion` gana `direccion` con el MISMO vocabulario y el
- * MISMO mapa de paths que `FilaCita` ya usa — se ENSANCHA la pieza que
- * existe, jamás se copia (L-175). Mientras eso no pase, esto vive local
- * con el patrón declarado de la casa: `TarjetaEstado` vivió local desde
- * S78 y se promovió en S83-B1; `GateRoto`/`PantallaCaida` viven locales
- * hoy con su promoción coordinada (skill §S79). No es inline en una
- * pantalla: es UNA anatomía nombrada, con tokens, reusable.
+ * DOS CONSECUENCIAS DECLARADAS DE CONSUMIR LA PIEZA DE LA CASA:
+ *  · el `resumen` pasa de MONO a SANS secundario — lo decide `detalle`
+ *    de la pieza, y **la pieza tiene razón**: "sin descripción" o "solo
+ *    whatsapp" son ESTADOS, no metadata de máquina (Ley 3 reserva el
+ *    mono para fechas, horas, IDs). El mono era mi elección y era la
+ *    que estaba corrida.
+ *  · se pierde `accessibilityState={{ expanded }}` — la pieza anuncia
+ *    rol `button` y no el estado de despliegue. **Se declara como hueco
+ *    de a11y, no se parchea local** (sería reabrir el clon por otra
+ *    puerta): candidata de enmienda para B, una línea en la pieza.
  *
- * Cero hex crudo, cero sombra artesanal: todo sale de tokens (Ley 1/20).
- * El muro y su vidrio se consumen de `techo-oficio` — la frontera del
- * muro es una sola verdad y no se redibuja (§15b.2).
+ * Lo que SIGUE local, con su porqué: `EspejoNegocio` y `RastroNegocio`
+ * son composición de ESTA pantalla sobre el muro del oficio, y
+ * `SelectorPais` es su disparador de Hoja. Cero hex crudo, cero sombra
+ * artesanal (Ley 1/20); el muro y su vidrio se consumen de
+ * `techo-oficio` — la frontera del muro es una sola verdad (§15b.2).
  */
 
-import { useState, type ReactNode } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import Animated, { cubicBezier } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  Icono,
+  CeldaNavegacion,
   LogoNegocio,
   Texto,
-  motion,
   palette,
   radius,
   spacing,
@@ -45,94 +44,144 @@ import {
   useTheme,
   type IconoNombre,
 } from '@epetplace/ui';
+import type { ReactNode } from 'react';
 
 import { CURVA_OFICIO, VIDRIO_OFICIO, useMuroOficio } from '@/components/techo-oficio';
 
-/** El mismo mapa de `FilaCita` (S82 E15) — cuando `CeldaNavegacion` gane
- *  su `direccion`, esta constante muere con la pieza (Ley 37). */
-const CHEVRON = {
-  derecha: 'M9 18l6-6-6-6',
-  abajo: 'M6 9l6 6 6-6',
-  arriba: 'M6 15l6-6 6 6',
-} as const;
-
 /**
- * SECCIÓN DESPLEGABLE — encabezado + panel que se abre en su lugar.
+ * SECCIÓN DESPLEGABLE — el encabezado de la casa + el panel que abre.
  *
- * E14 en su forma exigible: esto DESPLIEGA información, así que su
- * chevron mira ⌄ cerrado y ⌃ abierto, y GIRA (firma founder S73 sobre
- * PieRevelar). Lo que NAVEGA a otra pantalla no usa esta pieza: usa
- * `CeldaNavegacion`, que lleva `›`.
- *
- * `resumen` es el trabajo de densidad (§15b.3): cerrada, la sección
- * sigue diciendo su estado — dato de máquina en mono (Ley 3). Con
- * `pendiente`, ese resumen habla en la voz de lo que falta.
+ * E14 por la pieza, no a mano: `direccion='abajo'` cerrada · `'arriba'`
+ * abierta. Lo que NAVEGA usa la MISMA celda con su `'derecha'` — el
+ * contraste de la ley se lee en una sola pantalla, con un solo
+ * componente.
  */
 export function SeccionDesplegable({
   icono,
   titulo,
   resumen,
-  pendiente = false,
   abierta,
   onAlternar,
   children,
 }: {
   icono?: IconoNombre;
   titulo: string;
-  /** El estado de la sección con la sección CERRADA. Mono, corto. */
+  /** El estado con la sección CERRADA — el trabajo de densidad (§15b.3). */
   resumen: string;
-  /** El resumen dice lo que FALTA (voz de atención, jamás error). */
-  pendiente?: boolean;
   abierta: boolean;
   onAlternar: () => void;
   children: ReactNode;
 }) {
-  const { theme } = useTheme();
-  const [presionada, setPresionada] = useState(false);
-
   return (
     <View>
-      <Pressable
+      <CeldaNavegacion
+        icono={icono}
+        titulo={titulo}
+        detalle={resumen}
+        registro="aa"
+        direccion={abierta ? 'arriba' : 'abajo'}
         onPress={onAlternar}
-        onPressIn={() => setPresionada(true)}
-        onPressOut={() => setPresionada(false)}
-        accessibilityRole="button"
-        accessibilityState={{ expanded: abierta }}
-        accessibilityLabel={`${titulo}, ${resumen}`}
-      >
-        <Animated.View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: spacing[3],
-            minHeight: 56,
-            paddingVertical: spacing[2],
-            transform: [{ scale: presionada ? 0.99 : 1 }],
-            transitionProperty: 'transform',
-            transitionDuration: motion.duration.fast,
-            transitionTimingFunction: cubicBezier(...motion.easing.spring.bezier),
-          }}
-        >
-          {icono !== undefined && <Icono nombre={icono} tamano={24} registro="aa" />}
-          <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-            <Texto variante="seccion">{titulo}</Texto>
-            <Texto variante="dato" color={pendiente ? 'danger' : 'secondary'} numberOfLines={1}>
-              {resumen}
-            </Texto>
-          </View>
-          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" aria-hidden>
-            <Path
-              d={abierta ? CHEVRON.arriba : CHEVRON.abajo}
-              stroke={theme.text.tertiary}
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </Svg>
-        </Animated.View>
-      </Pressable>
+      />
       {abierta && <View style={{ paddingBottom: spacing[4], gap: spacing[2] }}>{children}</View>}
     </View>
+  );
+}
+
+/**
+ * SELECTOR DE PAÍS — el disparador del indicativo: bandera + prefijo.
+ *
+ * ⚠️ POR QUÉ ES UNA PIEZA Y NO UN `Boton` (el defecto que el founder
+ * reportó en dispositivo, S83-C13 ①): la bandera venía DENTRO de la
+ * `etiqueta` del botón, que es `string` — un solo `<Text>` con dos
+ * fuentes adentro. **El emoji de bandera no lo dibuja DM Sans ni
+ * JetBrains Mono** (la app carga esas dos y ninguna trae banderas): lo
+ * resuelve la fuente de emoji del sistema, con SU ascendente y SU
+ * descendente. En una corrida de texto única, RN maquetó la línea con
+ * las métricas de la fuente base y el emoji quedó fuera de la línea
+ * base — no era un problema de espaciado.
+ *
+ * LA CURA ES DE ALINEACIÓN REAL, no un margen a ojo, y son tres cosas
+ * juntas — ninguna alcanza sola:
+ *  ① DOS nodos de texto hermanos en una fila con `alignItems:'center'`:
+ *    se alinean por CONTENEDOR, no por línea base — la línea base es
+ *    justamente lo que no comparten.
+ *  ② `lineHeight` EXPLÍCITO e IGUAL en los dos: sin él cada nodo pide
+ *    el alto que su fuente quiera y el centro del contenedor se corre.
+ *  ③ `includeFontPadding:false` (Android): por default Android agrega
+ *    el padding métrico de la fuente arriba y abajo, y es asimétrico
+ *    entre la fuente de emoji y la de texto — es el que más desplaza,
+ *    y en iOS es no-op.
+ *
+ * Y EL BORDE QUE PIDE LA ORDEN — el prefijo más largo contra el más
+ * corto (`+593`/`+591` de 4 contra `+1` de 2): el prefijo va en MONO
+ * con `minWidth`, así el disparador NO cambia de ancho al cambiar de
+ * país y la bandera no se corre de lugar entre una elección y otra.
+ */
+export function SelectorPais({
+  bandera,
+  prefijo,
+  onPress,
+}: {
+  /** Ya resuelta por la pantalla (emoji o las dos letras). */
+  bandera: string;
+  prefijo: string;
+  onPress: () => void;
+}) {
+  const { theme } = useTheme();
+  // el alto de línea COMPARTIDO: el mismo número para los dos nodos
+  const linea = Math.round(typography.size.base * typography.leading.normal);
+
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`País del número, ${prefijo}`}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center', // ① por contenedor, jamás por línea base
+        gap: spacing[2],
+        minHeight: 44,
+        paddingHorizontal: spacing[3],
+        borderRadius: radius.md,
+        backgroundColor: theme.bg.hundido,
+      }}
+    >
+      <Text
+        allowFontScaling={false}
+        style={{
+          fontSize: typography.size.md,
+          lineHeight: linea, // ②
+          includeFontPadding: false, // ③ (Android; no-op en iOS)
+          textAlignVertical: 'center',
+          color: theme.text.primary,
+        }}
+      >
+        {bandera}
+      </Text>
+      <Text
+        style={{
+          fontFamily: typography.family.mono.regular,
+          fontSize: typography.size.base,
+          lineHeight: linea, // ② el MISMO alto
+          includeFontPadding: false, // ③
+          textAlignVertical: 'center',
+          // el borde de la orden: +1 (2 chars) y +593 (4) no cambian el ancho
+          minWidth: 44,
+          color: theme.text.primary,
+        }}
+      >
+        {prefijo}
+      </Text>
+      <Svg width={14} height={14} viewBox="0 0 24 24" fill="none" aria-hidden>
+        <Path
+          d="M6 9l6 6 6-6"
+          stroke={theme.text.tertiary}
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </Svg>
+    </Pressable>
   );
 }
 

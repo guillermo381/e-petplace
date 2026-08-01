@@ -1,39 +1,37 @@
 /**
- * PERFIL v2 — PANTALLA DE VERIFICACIÓN (S83-C10). NO ES PRODUCCIÓN.
+ * PERFIL v2 — PANTALLA DE VERIFICACIÓN (S83-C10 · las CUATRO FIRMAS en
+ * C13). Sigue en ruta de verificación: `cuenta/perfil` está viva.
  *
- * ① Vive donde el founder la alcanza y NO reemplaza nada: el molde es
- *    `(tabs)/gallery` — ruta registrada en el layout SIN botón de tab.
- *    `cuenta/perfil` sigue intacta y funcionando hasta la firma.
- *    ⚠️ CORRECCIÓN AL MOLDE, medida: en el prestador `/gallery` está
- *    "viva por URL" y NO tiene entrada (el cliente sí la tiene, D-580 —
- *    `cuenta/index.tsx:148`). Copiar el molde al pie de la letra habría
- *    dejado esta pantalla INALCANZABLE, que es L-161 exacta. Por eso se
- *    agrega su entrada al pie de Cuenta, con su deuda de retiro.
+ * ═════ LAS CUATRO FIRMAS DEL FOUNDER EN DISPOSITIVO (S83-C13) ═════
+ * ① LA BANDERA VA — emoji unicode desde `codigo_iso2`; su Android las
+ *    dibuja. El defecto que reportó (no alineaba con el número) tenía
+ *    causa de MÉTRICA y se curó en `SelectorPais`, no con un margen.
+ * ② EL ESPEJO DEJA RASTRO — gate (a′) CERRADO: la fila compacta se pega
+ *    al tope cuando el espejo se fue. Ya no se elige.
+ * ③ AL ENTRAR SE ABRE LA PRIMERA INCOMPLETA — gate (d) CERRADO. Con la
+ *    regla que ya rige: si TODO está completo, no se abre NINGUNA (la
+ *    puerta no inventa trabajo que no hay — Ley 23).
+ * ④ "TU CUENTA" — gate (c) CERRADO.
+ * Los cuatro rótulos de gate MURIERON con sus controles (Ley 37): ya no
+ * se decide nada acá, y una pantalla que pregunta lo ya contestado
+ * miente sobre su propio estado.
  *
- * ② DATOS FALSOS PERO HONESTOS — del literal de la lámina v2, que salió
- *    de la DB viva: `foto_url` NULL ⇒ el monograma REAL (PA) ·
- *    `descripcion`/`telefono`/`email_contacto`/`sitio_web` NULL ·
- *    `whatsapp = 593999000333` es el ÚNICO cargado. CERO fetch, CERO
- *    wrappers, CERO escrituras: nada de acá toca la DB.
+ * ⑤ EL FOCUS (D-598) LLEGA POR TOKEN: `Campo` resuelve su borde de foco
+ *    de `theme.accent.*`. Cuando B publique el sexto slot, esta pantalla
+ *    NO cambia una línea — por eso no hay un solo color de foco acá.
  *
- * ③ Piezas de `packages/ui` en todo lo que existe. LA QUE FALTA está
- *    declarada en `components/perfil-piezas.tsx`: no hay encabezado de
- *    sección que despliegue (⌄/⌃). La cura propuesta es ensanchar
- *    `CeldaNavegacion` con el `direccion` que `FilaCita` ya tiene.
+ * ① LA RUTA: molde de la galería (registrada, sin botón de tab). Su
+ *    entrada vive al pie de Cuenta — `/gallery` del prestador es
+ *    alcanzable solo por URL, y eso es L-161 exacta.
+ * ② DATOS FALSOS PERO HONESTOS, del literal de la DB viva: `foto_url`
+ *    NULL ⇒ el monograma REAL (PA) · `descripcion`/`telefono`/
+ *    `email_contacto`/`sitio_web` NULL · `whatsapp` el ÚNICO cargado.
+ *    CERO fetch, CERO wrappers, CERO escrituras.
  *
- * ④ FIRMADO Y NO SE REDISCUTE: el orden de las cuatro secciones ·
- *    desplegables ⌄/⌃ (E14) · pantalla desde arriba y todo scrolleable ·
- *    el espejo presidiendo · densidad de herramienta.
- *
- * ⑤/⑥ LOS GATES SE JUEGAN CON EL DEDO: (a′) el rastro · (d) qué abre al
- *    entrar · (c) el rótulo de lo personal · y el toggle de BANDERA, que
- *    en el teléfono del founder dice la verdad de una vez.
- *
- * VOZ: los textos van LITERALES, fuera del riel i18n — precedente
- * EXACTO de la entrada a la galería del cliente: *"es una herramienta de
- * sesión con fecha de retiro, y meterle keys al diccionario dejaría
- * basura que sobrevive a la deuda"*. Cuando la pantalla se firme y pase
- * a producción, su copy entra al lote de strings con su gate.
+ * VOZ: textos LITERALES fuera del riel i18n — precedente exacto de la
+ * entrada a la galería del cliente (herramienta de sesión con fecha de
+ * retiro; las keys sobrevivirían a la deuda). El copy entra al lote
+ * cuando la pantalla se firme y pase a producción.
  */
 
 import { useState } from 'react';
@@ -48,21 +46,19 @@ import {
   EvitaTeclado,
   Hoja,
   HojaScroll,
-  SelectorOpcion,
   Separador,
   Texto,
   spacing,
   useTheme,
 } from '@epetplace/ui';
 
-import { EspejoNegocio, RastroNegocio, SeccionDesplegable } from '@/components/perfil-piezas';
+import { EspejoNegocio, RastroNegocio, SeccionDesplegable, SelectorPais } from '@/components/perfil-piezas';
 import { useBarraEstadoClara } from '@/components/techo-oficio';
 
 /* ─────────────────────────────────────────────────────────────────────
-   cat_paises — las 23 filas MEDIDAS contra el proyecto vivo
-   (zyltipqscdsdsxnjclhp). EC es el único `activo`; los 22 restantes
-   viajan con su prefijo real y su voz honesta. El `formato` es el
-   `formato_telefono` de la propia fila EC — no una regex escrita acá.
+   cat_paises — las 23 filas MEDIDAS contra el proyecto vivo. EC es el
+   único `activo`; los 22 restantes viajan con su prefijo real y su voz
+   honesta. `formato` es el `formato_telefono` de la propia fila EC.
    ───────────────────────────────────────────────────────────────────── */
 type Pais = { iso: string; nombre: string; pre: string; activo: boolean; formato?: string };
 const PAISES: Pais[] = [
@@ -91,18 +87,31 @@ const PAISES: Pais[] = [
   { iso: 'VE', nombre: 'Venezuela', pre: '+58', activo: false },
 ];
 
-/** ⑥ La bandera SALE del `codigo_iso2` — el mismo cálculo que haría la
- *  app real: cada letra a su indicador regional. El GLIFO lo pone la
- *  fuente del SISTEMA (la app carga solo DM Sans y JetBrains Mono, y
- *  ninguna trae banderas): iOS las dibuja, Android históricamente
- *  muestra las dos letras. El toggle deja que el teléfono lo conteste. */
-const banderaEmoji = (iso: string): string =>
+/** ① FIRMADA: la bandera sale del `codigo_iso2` — cada letra a su
+ *  indicador regional. El toggle de C10 murió con el gate: el Android
+ *  del founder las dibuja, y lo que quedaba por resolver era la
+ *  alineación (curada en `SelectorPais`). */
+const bandera = (iso: string): string =>
   String.fromCodePoint(...[...iso].map((c) => (c.codePointAt(0) ?? 0) + 127397));
 
 type Seccion = 'portada' | 'contacto' | 'donde';
-type ModoApertura = 'cerradas' | 'incompleta';
 
-const ROTULOS_PERSONAL = ['Tus datos personales', 'Vos', 'Tu cuenta'] as const;
+/* ── los datos, falsos pero honestos (sin fetch) ── */
+const NOMBRE = 'Paseos Andres';
+const LOGO_URL = null; // prestadores.foto_url = NULL, medido
+const DESCRIPCION_INICIAL = ''; // NULL en DB
+const TEL_INICIAL = ''; // NULL en DB
+const WA_INICIAL = '999000333'; // el ÚNICO cargado
+
+/** ③ "INCOMPLETA" con la regla que ya rige: una sección está incompleta
+ *  cuando le falta el dato que la hace servir para algo. `donde` no
+ *  entra: su dirección y su radio existen. Si NINGUNA está incompleta
+ *  devuelve null — y entonces no se abre ninguna. */
+function primeraIncompleta(descripcion: string, tel: string, wa: string): Seccion | null {
+  if (descripcion.trim().length === 0) return 'portada';
+  if (tel.trim().length === 0 || wa.trim().length === 0) return 'contacto';
+  return null;
+}
 
 export default function PerfilV2() {
   const router = useRouter();
@@ -110,41 +119,35 @@ export default function PerfilV2() {
   const insets = useSafeAreaInsets();
   useBarraEstadoClara();
 
-  /* ── los datos, falsos pero honestos (② — sin fetch) ── */
-  const NOMBRE = 'Paseos Andres';
-  const LOGO_URL = null; // prestadores.foto_url = NULL, medido
-  const [descripcion, setDescripcion] = useState(''); // NULL en DB
-  const [telNegocio, setTelNegocio] = useState(''); // NULL en DB
-  const [whatsapp, setWhatsapp] = useState('999000333'); // el ÚNICO cargado
-  const [emailContacto, setEmailContacto] = useState(''); // NULL en DB
-  const [sitioWeb, setSitioWeb] = useState(''); // NULL en DB
+  const [descripcion, setDescripcion] = useState(DESCRIPCION_INICIAL);
+  const [telNegocio, setTelNegocio] = useState(TEL_INICIAL);
+  const [whatsapp, setWhatsapp] = useState(WA_INICIAL);
+  const [emailContacto, setEmailContacto] = useState('');
+  const [sitioWeb, setSitioWeb] = useState('');
 
-  /* ── estado de la pantalla ── */
-  const [abierta, setAbierta] = useState<Seccion | null>(null);
-  const [modoApertura, setModoApertura] = useState<ModoApertura>('cerradas');
-  const [conRastro, setConRastro] = useState(true);
+  /* ③ el estado inicial ES la primera incompleta — se computa UNA vez,
+     al montar: si se recalculara en cada tecla, la sección se cerraría
+     sola en el momento en que terminás de completarla. */
+  const [abierta, setAbierta] = useState<Seccion | null>(() =>
+    primeraIncompleta(DESCRIPCION_INICIAL, TEL_INICIAL, WA_INICIAL),
+  );
   const [rastroVisible, setRastroVisible] = useState(false);
-  const [rotuloPersonal, setRotuloPersonal] = useState<string>(ROTULOS_PERSONAL[0]);
-  const [banderaReal, setBanderaReal] = useState(true);
   const [paisDe, setPaisDe] = useState<'telNegocio' | 'whatsapp' | null>(null);
   const [paisTel, setPaisTel] = useState('EC');
   const [paisWa, setPaisWa] = useState('EC');
 
-  const pintarBandera = (iso: string) => (banderaReal ? banderaEmoji(iso) : iso);
-
   /* ── la validación EN VIVO, contra el formato del catálogo ── */
-  function estadoTelefono(valor: string, iso: string): { e164: string; ok: boolean; voz: string } | null {
+  function estadoTelefono(valor: string, iso: string): { ok: boolean; voz: string } | null {
     const crudo = valor.replace(/[\s-]/g, '');
     if (crudo.length === 0) return null;
     const pais = PAISES.find((p) => p.iso === iso);
     if (pais === undefined) return null;
     const e164 = `${pais.pre}${crudo}`;
     if (pais.formato === undefined) {
-      return { e164, ok: true, voz: `${pais.nombre} no declara formato en el catálogo — no lo validamos.` };
+      return { ok: true, voz: `${pais.nombre} no declara formato en el catálogo — no lo validamos.` };
     }
     const ok = new RegExp(pais.formato).test(e164);
     return {
-      e164,
       ok,
       voz: ok
         ? `se guarda ${e164}`
@@ -154,11 +157,12 @@ export default function PerfilV2() {
   const vTel = estadoTelefono(telNegocio, paisTel);
   const vWa = estadoTelefono(whatsapp, paisWa);
 
-  /* ── los resúmenes: la densidad de herramienta (⑤) ── */
+  /* ── los resúmenes: la densidad de herramienta ── */
   const hayTel = telNegocio.trim().length > 0;
   const hayWa = whatsapp.trim().length > 0;
-  const resumenContacto = hayTel && hayWa ? 'teléfono · whatsapp' : hayTel ? 'solo teléfono' : hayWa ? 'solo whatsapp' : 'sin contacto';
-  const resumenPortada = descripcion.trim().length > 0 ? 'con descripción' : 'sin descripción';
+  const resumenContacto =
+    hayTel && hayWa ? 'Teléfono y WhatsApp' : hayTel ? 'Solo teléfono' : hayWa ? 'Solo WhatsApp' : 'Sin contacto';
+  const resumenPortada = descripcion.trim().length > 0 ? 'Con descripción' : 'Sin descripción';
 
   /* ── el vacío honesto: UNA línea con la consecuencia ── */
   const vacio =
@@ -170,21 +174,15 @@ export default function PerfilV2() {
           ? 'Las familias pueden llamarte. Te falta el WhatsApp.'
           : 'Una familia que te encuentra hoy no tiene cómo escribirte: no cargaste teléfono, correo ni sitio. Tu WhatsApp sí está.';
 
-  function alternar(s: Seccion) {
-    setAbierta((a) => (a === s ? null : s));
-  }
-  function aplicarApertura(modo: ModoApertura) {
-    setModoApertura(modo);
-    if (modo === 'cerradas') setAbierta(null);
-    else setAbierta(descripcion.trim().length === 0 ? 'portada' : hayTel && hayWa ? null : 'contacto');
-  }
-
+  const alternar = (s: Seccion) => setAbierta((a) => (a === s ? null : s));
+  const prefijoDe = (iso: string) => PAISES.find((p) => p.iso === iso)?.pre ?? '';
   const isoDe = paisDe === 'whatsapp' ? paisWa : paisTel;
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      {/* ② el rastro (gate a′) — sobre el scroll, no dentro */}
-      {conRastro && rastroVisible && <RastroNegocio nombre={NOMBRE} visible />}
+      {/* ② FIRMADO: el rastro. Vive FUERA del scroll — se pega al tope
+          cuando el espejo se fue, y ya no se elige. */}
+      {rastroVisible && <RastroNegocio nombre={NOMBRE} visible />}
 
       <EvitaTeclado>
         <ScrollView
@@ -193,7 +191,7 @@ export default function PerfilV2() {
           scrollEventThrottle={16}
           onScroll={(e) => setRastroVisible(e.nativeEvent.contentOffset.y > 150)}
         >
-          {/* ① ② EL ESPEJO — a sangre, arriba, y se va con el scroll */}
+          {/* EL ESPEJO — a sangre, arriba, y se va con el scroll */}
           <EspejoNegocio
             nombre={NOMBRE}
             logoUrl={LOGO_URL}
@@ -204,68 +202,11 @@ export default function PerfilV2() {
           />
 
           <View style={{ paddingHorizontal: spacing[5], paddingTop: spacing[4] }}>
-            {/* ⑤ LOS GATES, primeros y jugables con el dedo */}
-            <View style={{ gap: spacing[3], paddingBottom: spacing[4] }}>
-              <Texto variante="seccion">Gates abiertos</Texto>
-
-              <View style={{ gap: spacing[1] }}>
-                <Texto variante="apoyo">
-                  (a′) El espejo scrollea — eso ya lo firmaste. ¿Deja un rastro pegado al tope, o se va del todo?
-                </Texto>
-                <SelectorOpcion
-                  etiqueta="El rastro"
-                  etiquetaVisible={false}
-                  acento="oficio"
-                  opciones={[
-                    { codigo: 'si', etiqueta: 'Deja rastro' },
-                    { codigo: 'no', etiqueta: 'Se va del todo' },
-                  ]}
-                  seleccionada={conRastro ? 'si' : 'no'}
-                  onSelect={(c) => setConRastro(c === 'si')}
-                />
-              </View>
-
-              <View style={{ gap: spacing[1] }}>
-                <Texto variante="apoyo">(d) Al entrar: ¿todas cerradas, o se abre sola la primera incompleta?</Texto>
-                <SelectorOpcion
-                  etiqueta="Qué abre al entrar"
-                  etiquetaVisible={false}
-                  acento="oficio"
-                  opciones={[
-                    { codigo: 'cerradas', etiqueta: 'Todas cerradas' },
-                    { codigo: 'incompleta', etiqueta: 'La incompleta' },
-                  ]}
-                  seleccionada={modoApertura}
-                  onSelect={(c) => aplicarApertura(c === 'incompleta' ? 'incompleta' : 'cerradas')}
-                />
-              </View>
-
-              <View style={{ gap: spacing[1] }}>
-                <Texto variante="apoyo">
-                  (⑥) La bandera: tu teléfono contesta si el emoji se dibuja o salen las dos letras.
-                </Texto>
-                <SelectorOpcion
-                  etiqueta="La bandera"
-                  etiquetaVisible={false}
-                  acento="oficio"
-                  opciones={[
-                    { codigo: 'emoji', etiqueta: 'Bandera' },
-                    { codigo: 'letras', etiqueta: 'Dos letras' },
-                  ]}
-                  seleccionada={banderaReal ? 'emoji' : 'letras'}
-                  onSelect={(c) => setBanderaReal(c === 'emoji')}
-                />
-              </View>
-            </View>
-
-            <Separador />
-
             {/* ── LAS CUATRO SECCIONES, en el orden firmado ── */}
             <SeccionDesplegable
               icono="negocio"
               titulo="Tu portada"
               resumen={resumenPortada}
-              pendiente={descripcion.trim().length === 0}
               abierta={abierta === 'portada'}
               onAlternar={() => alternar('portada')}
             >
@@ -284,27 +225,23 @@ export default function PerfilV2() {
             <SeccionDesplegable
               titulo="Cómo te contactan"
               resumen={resumenContacto}
-              pendiente={!(hayTel && hayWa)}
               abierta={abierta === 'contacto'}
               onAlternar={() => alternar('contacto')}
             >
-              {/* ④ SIN GLIFO, y es decisión declarada: el registry NO
-                  tiene glifo de contacto/teléfono/correo/sitio (32
-                  nombres, medido). Antes que prestar uno que miente, la
-                  sección va sin glifo — un glifo nuevo se pide con su
-                  gate por ícono a 21px (§6b), no se improvisa. */}
+              {/* SIN GLIFO, decisión declarada: el registry no tiene
+                  contacto/telefono/correo/sitio (medido). Antes que
+                  prestar uno que miente, ninguno — el glifo se pide con
+                  su gate por ícono a 21px (§6b). */}
               <Texto variante="apoyo">
                 Son datos del negocio y los ven las familias. Tu teléfono personal vive en Cuenta.
               </Texto>
 
               <View style={{ flexDirection: 'row', gap: spacing[2], alignItems: 'flex-end' }}>
-                <View style={{ flex: 0 }}>
-                  <Boton
-                    variante="compacto"
-                    etiqueta={`${pintarBandera(paisTel)}  ${PAISES.find((p) => p.iso === paisTel)?.pre ?? ''}`}
-                    onPress={() => setPaisDe('telNegocio')}
-                  />
-                </View>
+                <SelectorPais
+                  bandera={bandera(paisTel)}
+                  prefijo={prefijoDe(paisTel)}
+                  onPress={() => setPaisDe('telNegocio')}
+                />
                 <View style={{ flex: 1 }}>
                   <Campo
                     label="Teléfono del negocio"
@@ -319,13 +256,11 @@ export default function PerfilV2() {
               </View>
 
               <View style={{ flexDirection: 'row', gap: spacing[2], alignItems: 'flex-end' }}>
-                <View style={{ flex: 0 }}>
-                  <Boton
-                    variante="compacto"
-                    etiqueta={`${pintarBandera(paisWa)}  ${PAISES.find((p) => p.iso === paisWa)?.pre ?? ''}`}
-                    onPress={() => setPaisDe('whatsapp')}
-                  />
-                </View>
+                <SelectorPais
+                  bandera={bandera(paisWa)}
+                  prefijo={prefijoDe(paisWa)}
+                  onPress={() => setPaisDe('whatsapp')}
+                />
                 <View style={{ flex: 1 }}>
                   <Campo
                     label="WhatsApp"
@@ -361,7 +296,7 @@ export default function PerfilV2() {
             <SeccionDesplegable
               icono="ubicacion"
               titulo="Dónde atendés"
-              resumen="quito · 5 km"
+              resumen="Quito · 5 km"
               abierta={abierta === 'donde'}
               onAlternar={() => alternar('donde')}
             >
@@ -386,35 +321,20 @@ export default function PerfilV2() {
 
             <Separador />
 
-            {/* ④ LO PERSONAL: NAVEGA ⇒ `CeldaNavegacion` con su `›`.
-                El contraste de E14 se ve en una sola pantalla: las tres
-                de arriba despliegan ⌄, ésta lleva ›. */}
+            {/* ④ FIRMADO: "Tu cuenta". Y el contraste de E14 con UN solo
+                componente: las tres de arriba son la MISMA celda con
+                'abajo'/'arriba'; ésta NAVEGA y lleva su 'derecha'. */}
             <CeldaNavegacion
               icono="cuenta"
-              titulo={rotuloPersonal}
+              titulo="Tu cuenta"
               detalle="Tu nombre, tu teléfono y tu correo de ingreso. No los ven las familias."
               registro="aa"
               onPress={() => undefined}
             />
 
-            <View style={{ gap: spacing[1], paddingTop: spacing[3] }}>
-              <Texto variante="apoyo">(c) El rótulo de esa fila cuando aterrice en Cuenta:</Texto>
-              <SelectorOpcion
-                etiqueta="El rótulo"
-                etiquetaVisible={false}
-                acento="oficio"
-                disposicion="grilla"
-                opciones={ROTULOS_PERSONAL.map((r) => ({ codigo: r, etiqueta: r }))}
-                seleccionada={rotuloPersonal}
-                onSelect={(c) => setRotuloPersonal(c)}
-              />
-            </View>
-
             <View style={{ paddingTop: spacing[5], gap: spacing[3] }}>
               <Boton etiqueta="Guardar" bloque onPress={() => undefined} />
-              <Texto variante="dato">
-                pantalla de verificación · datos falsos · nada se guarda
-              </Texto>
+              <Texto variante="dato">pantalla de verificación · datos falsos · nada se guarda</Texto>
               <Boton variante="compacto" etiqueta="Volver" onPress={() => router.back()} />
             </View>
           </View>
@@ -434,11 +354,10 @@ export default function PerfilV2() {
             <View key={p.iso}>
               {i > 0 ? <Separador /> : null}
               {/* Ley 23 — la puerta no ofrece lo que va a rechazar: el
-                  país apagado NO es tocable (no es un tap que "no hace
-                  nada"), y lo dice con voz honesta en su subtítulo. */}
+                  país apagado NO es tocable, y lo dice en su subtítulo. */}
               {p.activo ? (
                 <Celda
-                  titulo={`${pintarBandera(p.iso)}  ${p.nombre}`}
+                  titulo={`${bandera(p.iso)}  ${p.nombre}`}
                   metadataMono={p.pre}
                   interactiva
                   accessibilityRole="button"
@@ -450,11 +369,7 @@ export default function PerfilV2() {
                   fin={p.iso === isoDe ? <Texto variante="dato">elegido</Texto> : undefined}
                 />
               ) : (
-                <Celda
-                  titulo={`${pintarBandera(p.iso)}  ${p.nombre}`}
-                  subtitulo="todavía no"
-                  metadataMono={p.pre}
-                />
+                <Celda titulo={`${bandera(p.iso)}  ${p.nombre}`} subtitulo="todavía no" metadataMono={p.pre} />
               )}
             </View>
           ))}
