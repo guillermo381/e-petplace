@@ -30,15 +30,23 @@ export type Theme = TemaAncho<typeof lightTheme> | TemaAncho<typeof darkTheme> |
 /** ⭐ LOS SLOTS — el número que antes NO EXISTÍA (S82-B r30).
  *  Un SLOT no es "un campo que cambia entre temas" (eso son casi todos:
  *  es lo que un tema ES). Un slot es un campo que un tema DERIVADO PISA
- *  para separar las dos casas — `lightOficio`/`darkOficio`. **Son
- *  CUATRO**, y hasta hoy había que abrir los tres archivos y comparar
- *  para saber cuáles:
+ *  para separar las dos casas — `lightOficio`/`darkOficio`. **Son CINCO**
+ *  (eran cuatro hasta S83-B6), y hasta r30 había que abrir los tres
+ *  archivos y comparar para saber cuáles:
  *    1. `bg.base`           — el fondo: el tapiz es del cliente
  *    2. `accent.cta`        — oro el cliente · tealDark el oficio
  *    3. `accent.ctaTexto`   — el par del anterior
  *    4. `accent.ctaElevado` — el relieve del CTA, solo del cliente
- *  Si aparece un quinto, se agrega ACÁ: la lista es el contrato. */
-export type SlotDeTema = 'bg.base' | 'accent.cta' | 'accent.ctaTexto' | 'accent.ctaElevado' 
+ *    5. `accent.control`    — el acento de ELECCIÓN: magenta el cliente ·
+ *       tealDark el oficio (S83-B6). Apareció el quinto y se agregó acá,
+ *       como la nota de r30 mandaba: la lista ES el contrato.
+ *  Si aparece un sexto, se agrega ACÁ: la lista es el contrato. */
+export type SlotDeTema =
+  | 'bg.base'
+  | 'accent.cta'
+  | 'accent.ctaTexto'
+  | 'accent.ctaElevado'
+  | 'accent.control'
 export type ThemeMode = 'light' | 'dark' | 'memorial'
 export type ServiceKey = keyof typeof lightTheme.services
 export type StatusKey = 'success' | 'warning' | 'danger' | 'info'
@@ -62,7 +70,14 @@ const lightOficio: Theme = {
   bg: { ...lightTheme.bg, base: palette.light0 },
   // S82-B: el prestador NO recibe la elevación del CTA (su teal no
   // tiene el problema del oro contra papel — sería arrastre).
-  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false },
+  // S83-B6 — EL QUINTO SLOT: `accent.control` es el acento de ELECCIÓN
+  // (§15b.1: UN acento de oficio para TODO estado y control funcional del
+  // prestador; el magenta vive SOLO en la marca). Sin esta línea el
+  // prestador elegía en MAGENTA por herencia — la letra al revés, y en
+  // silencio. NO arrastra la PATA: su color lo firma el founder y hoy
+  // vive aparte, en `accent.marcaEleccion` (su nota está en los temas).
+  // Lo vigila R26 de verify:diseno, con su rojo producido.
+  accent: { ...lightTheme.accent, cta: palette.tealDark, ctaTexto: palette.light0, ctaElevado: false, control: palette.tealDark },
 }
 const darkOficio: Theme = {
   ...darkTheme,
@@ -70,7 +85,14 @@ const darkOficio: Theme = {
   // del tapiz — tiene EL SUYO. Un tinte por casa, misma gramática: el
   // cliente en magenta, el prestador en el verde de SU oficio.
   bg: { ...darkTheme.bg, base: palette.tapizDarkOficio },
-  accent: { ...darkTheme.accent, cta: palette.tealDark, ctaTexto: palette.textDark0, ctaElevado: false },
+  // S83-B6 — EL QUINTO SLOT: `accent.control` es el acento de ELECCIÓN
+  // (§15b.1: UN acento de oficio para TODO estado y control funcional del
+  // prestador; el magenta vive SOLO en la marca). Sin esta línea el
+  // prestador elegía en MAGENTA por herencia — la letra al revés, y en
+  // silencio. NO arrastra la PATA: su color lo firma el founder y hoy
+  // vive aparte, en `accent.marcaEleccion` (su nota está en los temas).
+  // Lo vigila R26 de verify:diseno, con su rojo producido.
+  accent: { ...darkTheme.accent, cta: palette.tealDark, ctaTexto: palette.textDark0, ctaElevado: false, control: palette.tealDark },
 }
 
 /** El default del producto es CLARO (B1 §7.3). Dark es opt-in. Memorial es automático (M6). */

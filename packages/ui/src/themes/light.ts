@@ -110,6 +110,17 @@ export const lightTheme = {
     // ACCIÓN sigue en tinta (CTA primario intacto). El prestador no lo
     // usa: su oficio es tealDark (§15b).
     control:       palette.magentaDark,
+    /** LA PATA DE LA ELECCIÓN — DELIBERADAMENTE FUERA DEL SLOT (S83-B6).
+     *  `accent.control` pasa a resolverse POR CASA (cliente magenta ·
+     *  prestador teal); la PATA no viaja con él porque **su color es
+     *  decisión del founder y todavía no la firmó** — el freno de la
+     *  orden. Hoy vale exactamente lo que valía `control` antes del
+     *  quinto slot, en las tres casas, así que el cambio de la letra NO
+     *  arrastra la marca. ☠️ MUERE cuando el founder firme el color de
+     *  la pata en el prestador: si dice teal, este campo se borra y la
+     *  pata vuelve a leer `accent.control`; si dice magenta, se queda y
+     *  esta nota pasa a ser su letra. */
+    marcaEleccion: palette.magentaDark,
     // S82-B r12 — el fondo del Boton `sinCaja` (el paso sobre el papel tapiz):
     // el secundario sin borde necesita un canal, y el borde ya no está.
     sinCaja:      palette.sinCajaLight,

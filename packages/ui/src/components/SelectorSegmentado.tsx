@@ -251,7 +251,7 @@ export function SelectorSegmentado({
                 superficie que se desliza a propósito — si viajara con el
                 deslizamiento, una marca que se APOYA saldría patinando, y
                 el −14° de apoyo dejaría de significar lo que significa. */}
-            {eligiendo && esActivo ? <MarcaEleccion color={theme.accent.control} /> : null}
+            {eligiendo && esActivo ? <MarcaEleccion color={theme.accent.marcaEleccion} /> : null}
           </Pressable>
         )
       })}
