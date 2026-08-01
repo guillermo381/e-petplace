@@ -34,6 +34,7 @@ import {
   Texto,
   spacing,
   useAviso,
+  TarjetaEstado,
 } from '@epetplace/ui';
 import {
   buscarLugares,
@@ -44,7 +45,6 @@ import {
 } from '@epetplace/api';
 
 import { guardarSede, type SedeLeida } from '@/lib/sede';
-import { TarjetaEstado } from '@/components/tarjeta-estado';
 import { useTraduccion } from '@/i18n';
 
 const RADIOS_KM = [5, 10, 15, 20, 30] as const;

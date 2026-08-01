@@ -56,6 +56,7 @@ import {
   typography,
   useAviso,
   useTheme,
+  TarjetaEstado,
 } from '@epetplace/ui';
 import {
   actualizarFranjaHorario,
@@ -77,7 +78,6 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
-import { TarjetaEstado } from '@/components/tarjeta-estado';
 
 export interface DraftFranja {
   key: string;

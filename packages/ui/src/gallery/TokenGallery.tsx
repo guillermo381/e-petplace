@@ -34,6 +34,7 @@ import { CampoFecha, type CampoFechaValor } from '../components/CampoFecha'
 import { SelectorAvatar, type SelectorAvatarFoto } from '../components/SelectorAvatar'
 import { SelectorOpcion } from '../components/SelectorOpcion'
 import { SelectorSegmentado } from '../components/SelectorSegmentado'
+import { TarjetaEstado } from '../components/TarjetaEstado'
 import { SliderPrecio } from '../components/SliderPrecio'
 import { VozComision } from '../components/VozComision'
 import { Interruptor } from '../components/Interruptor'
@@ -1195,6 +1196,71 @@ function EjemploSelectorSegmentado() {
   )
 }
 
+// ── TarjetaEstado (§15b.0bis, promovida S83-B1): la gramática
+// "ESTÁ / ESPERA". Lo que ESTÁ es superficie apoyada; lo que ESPERA es
+// contorno. Los tres roles + el modo estático, que son los cuatro usos
+// vivos del prestador. Estado propio por panel. ──
+function EjemploTarjetaEstado() {
+  const { theme } = useTheme()
+  const [alterna, setAlterna] = useState(true)
+  const [elegida, setElegida] = useState('ana')
+  return (
+    <View style={{ gap: spacing[3] }}>
+      <TarjetaEstado
+        encendido={alterna}
+        etiqueta="Paseo"
+        onPress={() => setAlterna((v) => !v)}
+      >
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontFamily: sans.regular, fontSize: typography.size.base, color: theme.text.primary }}>
+            Paseo
+          </Text>
+          <Text style={{ fontFamily: sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+            rol checkbox — alterna algo
+          </Text>
+        </View>
+      </TarjetaEstado>
+
+      {[
+        { id: 'ana', nombre: 'Ana' },
+        { id: 'beto', nombre: 'Beto' },
+      ].map((p) => (
+        <TarjetaEstado
+          key={p.id}
+          encendido={elegida === p.id}
+          rol="radio"
+          etiqueta={p.nombre}
+          onPress={() => setElegida(p.id)}
+        >
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontFamily: sans.regular, fontSize: typography.size.base, color: theme.text.primary }}>
+              {p.nombre}
+            </Text>
+            <Text style={{ fontFamily: sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+              rol radio — elige entre pares
+            </Text>
+          </View>
+        </TarjetaEstado>
+      ))}
+
+      <TarjetaEstado encendido={false} etiqueta="Llegó a las 10:30">
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontFamily: sans.regular, fontSize: typography.size.base, color: theme.text.primary }}>
+            Esperando
+          </Text>
+          <Text style={{ fontFamily: sans.regular, fontSize: typography.size.sm, color: theme.text.secondary }}>
+            ESTÁTICA (sin onPress) — un toque que no hace nada es promesa rota
+          </Text>
+        </View>
+      </TarjetaEstado>
+
+      <Text style={{ fontFamily: sans.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>
+        Tocá de verdad: lo que ESTÁ se apoya (superficie + elevacion.reposo, sin borde — Ley 20); lo que ESPERA es contorno.
+      </Text>
+    </View>
+  )
+}
+
 // ── SliderPrecio (S58, comp. 31): pasos discretos, acento por registro,
 // thumb apoyado (elevacion.reposo). Estado propio por panel. ──
 function EjemploSliderPrecio({ registro }: { registro?: 'capa' | 'aa' | 'tinta' }) {
@@ -1456,6 +1522,15 @@ function GaleriaInterna() {
             agregados del founder. Baja de "espera firma" a MUESTRA. */}
         <Seccion titulo="LA ELECCIÓN EXCLUYENTE — FIRMADA (S82): SelectorSegmentado con la letra en magenta y LA PATA pisando la elegida">
           <EleccionExcluyente />
+        </Seccion>
+
+        {/* PROMOVIDA S83-B1 desde apps/prestador (Ley 11: cuatro
+            superficies vivas). Pasó el gate global del founder el
+            26-jul dentro de Hoja+turnos+recepción; no tiene gate
+            por-anatomía propio, y por eso entra a la galería: para
+            que pueda tenerlo. */}
+        <Seccion titulo="TarjetaEstado — la gramática ESTÁ / ESPERA (§15b.0bis): lo que está adentro se apoya, lo que espera es contorno">
+          <EjemploTarjetaEstado />
         </Seccion>
 
         {/* Lo rechazado NO se borra: se marca con su fecha de gate, para

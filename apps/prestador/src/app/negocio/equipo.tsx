@@ -62,6 +62,7 @@ import {
   spacing,
   useAviso,
   useTheme,
+  TarjetaEstado,
 } from '@epetplace/ui';
 import {
   actualizarExponePersonas,
@@ -88,7 +89,6 @@ import {
 import { verificarSesion } from '@/lib/api';
 import { useTraduccion } from '@/i18n';
 import { ControlEstado, IconoOficio } from '@/components/iconos-oficio';
-import { TarjetaEstado } from '@/components/tarjeta-estado';
 
 type Pantalla =
   | { estado: 'cargando' }
@@ -123,9 +123,10 @@ const RUTA_TALLER = {
 const oficioDestino = (chips: ChipEmpleado[]): OficioChip | null =>
   ORDEN_OFICIOS.find((o) => chips.some((c) => c.oficio === o)) ?? null;
 
-// La anatomía on/off firmada acá se EXTRAJO a `components/tarjeta-estado`
-// cuando el selector de Jornadas (S78-B turnos) se volvió su segundo
-// consumidor — una sola definición, cero clones (Ley 19 en espíritu).
+// La anatomía on/off firmada acá se EXTRAJO cuando el selector de
+// Jornadas (S78-B turnos) se volvió su segundo consumidor — una sola
+// definición, cero clones (Ley 19 en espíritu). Con cuatro superficies
+// vivas PROMOVIÓ a `@epetplace/ui` como `TarjetaEstado` (S83-B1).
 
 export default function EquipoNegocioPantalla() {
   const router = useRouter();

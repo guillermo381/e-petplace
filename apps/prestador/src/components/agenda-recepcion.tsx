@@ -53,6 +53,7 @@ import {
   spacing,
   useAviso,
   useTheme,
+  TarjetaEstado,
 } from '@epetplace/ui';
 import {
   obtenerJornadaRecepcion,
@@ -63,7 +64,6 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
-import { TarjetaEstado } from '@/components/tarjeta-estado';
 
 // Helpers de fecha COPIADOS VERBATIM de (tabs)/index.tsx (D-312 /
 // hallazgo S55: jamás Date(iso) ni toISOString — corren el día en

@@ -33,6 +33,11 @@ export {
   type TarjetaElevacion,
   type TarjetaRelleno,
 } from './components/Tarjeta'
+export {
+  TarjetaEstado,
+  type TarjetaEstadoProps,
+  type TarjetaEstadoRol,
+} from './components/TarjetaEstado'
 export { Campo, type CampoProps } from './components/Campo'
 export {
   CampoFecha,
