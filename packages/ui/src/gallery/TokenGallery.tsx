@@ -5,8 +5,8 @@
  * los 3 temas con toggle, isotipo en variantes y las dos cards de dosis.
  */
 
-import { Pressable, ScrollView, Text, View } from 'react-native'
-import Svg, { Path, Defs, RadialGradient, Stop, Rect } from 'react-native-svg'
+import { Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native'
+import Svg, { Path } from 'react-native-svg'
 
 import { useState } from 'react'
 
@@ -17,6 +17,7 @@ import { radius } from '../tokens/radius'
 import { ThemeProvider, useTheme } from '../ThemeProvider'
 import { Isotipo } from '../brand/Isotipo'
 import { MarcaDeAgua } from '../brand/MarcaDeAgua'
+import { Atmosfera } from '../brand/Atmosfera'
 import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
 import { Campo } from '../components/Campo'
@@ -386,32 +387,12 @@ function CandidatasVerde() {
 // el founder lo firma, nace ahí con su método completo. Forma 2 de S83-B8
 // (RadialGradient de react-native-svg — CERO deps nuevas; el degradado ES
 // el difuminado, no hace falta blur).
-function BlobAtmosferico({ color, x = '50%', y = '18%' }: { color: string; x?: string; y?: string }) {
-  return (
-    <View pointerEvents="none" style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0 }}>
-      <Svg width="100%" height="100%">
-        <Defs>
-          <RadialGradient id="blob" cx={x} cy={y} r="55%">
-            <Stop offset="0" stopColor={color} stopOpacity={0.22} />
-            <Stop offset="0.55" stopColor={color} stopOpacity={0.07} />
-            <Stop offset="1" stopColor={color} stopOpacity={0} />
-          </RadialGradient>
-        </Defs>
-        <Rect x="0" y="0" width="100%" height="100%" fill="url(#blob)" />
-      </Svg>
-    </View>
-  )
-}
-
 function TarjetasPlanasD589({ conGlow = false }: { conGlow?: boolean }) {
   return (
     <View style={{ gap: spacing[2] }}>
       {['Hoy · la jornada', 'Mascotas', 'La dirección de la sede'].map((t) => (
-        <View
-          key={t}
-          style={conGlow ? { boxShadow: `0 0 24px ${palette.tealDark}55` } : undefined}
-        >
-          <Tarjeta elevacion="plana">
+        <View key={t}>
+          <Tarjeta elevacion="plana" luz={conGlow}>
             <Texto variante="cuerpo">{t}</Texto>
             <Texto variante="apoyo">par superficie/fondo 1.009 — D-589</Texto>
           </Tarjeta>
@@ -440,12 +421,12 @@ function GlowCasaVerde() {
         <TarjetasPlanasD589 />
       </View>
       <View style={marco}>
-        <BlobAtmosferico color={palette.teal} />
+        <Atmosfera color={palette.teal} origen="arriba" />
         <Texto variante="apoyo">(b) + BLOB radial por capa</Texto>
         <TarjetasPlanasD589 />
       </View>
       <View style={marco}>
-        <BlobAtmosferico color={palette.teal} />
+        <Atmosfera color={palette.teal} origen="arriba" />
         <Texto variante="apoyo">(c) + blob Y glow en las planas</Texto>
         <TarjetasPlanasD589 conGlow />
       </View>
@@ -458,6 +439,13 @@ function GlowCasaVerde() {
 // tapizDarkOficio #080D0E en oscuro), montadas con la PIEZA REAL: sus
 // props de gate tienen default = producción, así que lo que se firma es
 // lo que corre. NO se enciende en apps/prestador: eso es de C, después.
+// La CUARTA anatomía (S83-B14/B17): entera, derivada del ancho — la única
+// opción que cumple "que se vea, no cortado" sin volver a un número fijo.
+function MarcaDeAguaEntera({ alfa }: { alfa: number }) {
+  const { width } = useWindowDimensions()
+  return <MarcaDeAgua alfa={alfa} tamano={Math.round(width * 0.55)} />
+}
+
 function AguaCasaVerde() {
   const { theme } = useTheme()
   const marco = {
@@ -471,6 +459,31 @@ function AguaCasaVerde() {
   const pie = { padding: spacing[2] }
   return (
     <View style={{ gap: spacing[3] }}>
+      <Texto variante="seccion">LA CUARTA — ENTERA, que es lo que el founder pidió</Texto>
+      <Texto variante="apoyo">
+        Veredicto sobre las tres de abajo: NINGUNA — "todos cortan el isotipo; la idea es que se
+        vea, suave, en marca de agua, pero no cortado". Ésta no corta: el tamaño se DERIVA del
+        ancho (factor 0.55) en vez de ser fijo, así entra entera en cualquier teléfono — el 210
+        del Hogar es fijo y en pantalla angosta roza. Los tres alfas, para que el ojo elija.
+      </Texto>
+      <View style={{ flexDirection: 'row', gap: spacing[2], flexWrap: 'wrap' }}>
+        {[0.08, 0.1, 0.12].map((a) => (
+          <View key={a} style={marco}>
+            <MarcaDeAguaEntera alfa={a} />
+            <View style={pie}>
+              <Texto variante="apoyo">alfa {a} — {a === 0.08 ? '1.176' : a === 0.1 ? '1.240' : '1.314'} en oscuro</Texto>
+            </View>
+          </View>
+        ))}
+      </View>
+      <Texto variante="apoyo">
+        ⚠️ EL CHOQUE QUE ESTO ABRE, y es firma tuya: el argumento que dejó la LEY 4 INTACTA fue que
+        el agua "no es un isotipo" porque cortada NO IDENTIFICA. Una silueta ENTERA sí identifica.
+        Si el agua entera gana, una pantalla con agua + isotipo en el techo son DOS isotipos y la
+        Ley 4 (uno por pantalla) vuelve a la mesa.
+      </Texto>
+
+      <Texto variante="seccion">Las tres que el veredicto descartó — quedan para el cotejo</Texto>
       <View style={{ flexDirection: 'row', gap: spacing[2], flexWrap: 'wrap' }}>
         <View style={marco}>
           <MarcaDeAgua />
@@ -1727,12 +1740,12 @@ function GaleriaInterna() {
               dispositivo (S83-B14): una lámina de gate que pinta la casa
               equivocada no es una lámina de gate. */}
           <ThemeProvider defaultMode="light" cta="oficio">
-          <PanelGateTema etiqueta="prestador CLARO — papel #FAF9F7">
+          <PanelGateTema etiqueta="prestador CLARO — papel #FAF9F7 · montada sobre la casa VERDE (las anteriores estaban sobre el fondo del CLIENTE)">
             <CandidatasVerde />
           </PanelGateTema>
           </ThemeProvider>
           <ThemeProvider defaultMode="dark" cta="oficio">
-            <PanelGateTema etiqueta="prestador OSCURO — su tapiz verde #080D0E">
+            <PanelGateTema etiqueta="prestador OSCURO — su tapiz verde #080D0E · sobre la casa VERDE (antes: fondo del cliente)">
               <CandidatasVerde />
             </PanelGateTema>
           </ThemeProvider>
@@ -1752,7 +1765,7 @@ function GaleriaInterna() {
 
         <Seccion titulo="① ⭐ GATE S83 — EL GLOW EN LA CASA VERDE · qué decide: cómo se separa la superficie del fondo cuando YA SE GATEÓ que el fondo al 3% NO COMUNICA y el halo NO ALCANZA. Las tres capas sobre las Tarjetas planas de D-589 (par 1.009: a efectos prácticos, el mismo color que el fondo)">
           <ThemeProvider defaultMode="dark" cta="oficio">
-            <PanelGateTema etiqueta="prestador OSCURO — donde vive el problema">
+            <PanelGateTema etiqueta="prestador OSCURO — donde vive el problema · sobre la casa VERDE (antes: fondo del cliente)">
               <GlowCasaVerde />
             </PanelGateTema>
           </ThemeProvider>
@@ -1782,12 +1795,12 @@ function GaleriaInterna() {
               dispositivo (S83-B14): una lámina de gate que pinta la casa
               equivocada no es una lámina de gate. */}
           <ThemeProvider defaultMode="light" cta="oficio">
-          <PanelGateTema etiqueta="prestador CLARO — papel algodón #FAF9F7">
+          <PanelGateTema etiqueta="prestador CLARO — papel algodón #FAF9F7 · montada sobre la casa VERDE (las anteriores estaban sobre el fondo del CLIENTE)">
             <AguaCasaVerde />
           </PanelGateTema>
           </ThemeProvider>
           <ThemeProvider defaultMode="dark" cta="oficio">
-            <PanelGateTema etiqueta="prestador OSCURO — su tapiz verde #080D0E">
+            <PanelGateTema etiqueta="prestador OSCURO — su tapiz verde #080D0E · sobre la casa VERDE (antes: fondo del cliente)">
               <AguaCasaVerde />
             </PanelGateTema>
           </ThemeProvider>

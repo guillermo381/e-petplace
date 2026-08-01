@@ -38,7 +38,8 @@ export type Theme = TemaAncho<typeof lightTheme> | TemaAncho<typeof darkTheme> |
  *    3. `accent.ctaTexto`   — el par del anterior
  *    4. `accent.ctaElevado` — el relieve del CTA, solo del cliente
  *    5. `accent.control`    — el acento de ELECCIÓN: magenta el cliente ·
- *       tealDark el oficio (S83-B6).
+ *       el verde del oficio EN SUS DOS REGISTROS (S83-B6, ensanchado a
+ *       dos registros en B17 por la misma medición que movió `active`).
  *    6. `accent.active`     — el acento de ESTADO ACTIVO: pink el cliente
  *       · el VERDE del oficio, EN SUS DOS REGISTROS (S83-B13). Apareció
  *       el sexto y se agregó acá, como la lista mandaba.
@@ -127,7 +128,7 @@ const darkOficio: Theme = {
   // oscuro pasa por poco (3.37, margen 0.37) y no "ilumina". El par da
   // 5.51 en claro y 12.70 en oscuro. Es la regla de dos registros de la
   // Ley 2 y §15b.2 aplicada al estado, no una excepción nueva.
-  accent: { ...darkTheme.accent, cta: palette.tealDark, ctaTexto: palette.textDark0, ctaElevado: false, control: palette.tealDark, active: palette.teal },
+  accent: { ...darkTheme.accent, cta: palette.tealDark, ctaTexto: palette.textDark0, ctaElevado: false, control: palette.teal, active: palette.teal },
 }
 
 /** El default del producto es CLARO (B1 §7.3). Dark es opt-in. Memorial es automático (M6). */
