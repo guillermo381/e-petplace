@@ -11,7 +11,11 @@
  * ③ AL ENTRAR SE ABRE LA PRIMERA INCOMPLETA — gate (d) CERRADO. Con la
  *    regla que ya rige: si TODO está completo, no se abre NINGUNA (la
  *    puerta no inventa trabajo que no hay — Ley 23).
- * ④ "TU CUENTA" — gate (c) CERRADO.
+ * ④ EL RÓTULO DE LO PERSONAL — gate (c) cerrado con "Tu cuenta" y
+ *    ENMENDADO en C18 por la firma del tercer verbo: "Tu cuenta" pasó a
+ *    ser el nombre de la TAB, así que la celda repetía a su contenedor.
+ *    Hoy dice "Nombre y acceso" — provisional hasta el seccionado de
+ *    Cuenta (S84).
  * Los cuatro rótulos de gate MURIERON con sus controles (Ley 37): ya no
  * se decide nada acá, y una pantalla que pregunta lo ya contestado
  * miente sobre su propio estado.
@@ -321,13 +325,25 @@ export default function PerfilV2() {
 
             <Separador />
 
-            {/* ④ FIRMADO: "Tu cuenta". Y el contraste de E14 con UN solo
-                componente: las tres de arriba son la MISMA celda con
-                'abajo'/'arriba'; ésta NAVEGA y lleva su 'derecha'. */}
+            {/* ④ EL RÓTULO, ENMENDADO POR LA FIRMA DEL TERCER VERBO
+                (S83-C18). El gate (c) había elegido "Tu cuenta" — y con
+                CUENTA firmada como verbo, ése pasó a ser el nombre de la
+                TAB: la celda repetía el rótulo de su propio contenedor y
+                no decía nada de su contenido.
+                **"Nombre y acceso"** dice lo que hay adentro, medido
+                contra el contenido real (nombre · correo de ingreso ·
+                cambiar clave · cambiar correo): uno es identidad y tres
+                son acceso, así que el rótulo nombra los dos ejes y
+                ninguno de más. Cumple 17.6 —el label rotula, el detalle
+                demuestra— y deja de competir con la tab.
+                ⚠️ PROVISIONAL DECLARADO: el definitivo se firma con el
+                seccionado de Cuenta en S84, donde este bloque va a tener
+                vecinos (plata, preferencias) y el rótulo se elige contra
+                ellos, no solo. */}
             <CeldaNavegacion
               icono="cuenta"
-              titulo="Tu cuenta"
-              detalle="Tu nombre, tu teléfono y tu correo de ingreso. No los ven las familias."
+              titulo="Nombre y acceso"
+              detalle="Tu nombre, tu correo de ingreso y tu contraseña. No los ven las familias."
               registro="aa"
               onPress={() => undefined}
             />
