@@ -159,7 +159,16 @@ export function FichaPrestador({
   /** LOS EXTREMOS CLONADOS: [última, ...reales, primera]. Es la técnica y
    *  su costo — la firma lo cobró sabiendo que son 2-3× por el
    *  reposicionamiento. Lo que NO se paga con esto es la verdad del
-   *  punto: ver `indiceReal`. */
+   *  punto: ver `indiceReal`.
+   *
+   *  ✅ EL FRENO DEL TIRÓN, CERRADO POR EL OJO (firma founder en
+   *  dispositivo, group d139b9c0 / APK 1.0.3): **no tironea en Android**.
+   *  Se registra porque al construirlo declaré que NO PODÍA afirmarlo —el
+   *  tirón es observable en dispositivo y no medible desde el repo—, y una
+   *  incertidumbre declarada que se cierra tiene que decir QUIÉN la cerró.
+   *  La cerró el único que podía (L-153). **La variante paginada (a) queda
+   *  descartada de verdad**: no dejó código vivo que retirar —el circular
+   *  la reemplazó en el mismo commit— y su historia vive en `8813cbc`. */
   const tira = cicla ? [posiciones[N - 1], ...posiciones, posiciones[0]] : posiciones
   /** EL ÍNDICE REAL A PARTIR DEL VISUAL. Con extremos clonados los dos se
    *  separan, y el punto tiene que marcar el REAL — un carrusel que
