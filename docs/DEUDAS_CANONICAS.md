@@ -3261,3 +3261,61 @@ La regla 84 distinguía **commiteado · publicado · en el teléfono**. **Falta 
 **⚠️ Y LA PRIMERA DECISIÓN NO ES DE DISEÑO: ES UN CHOQUE DE MODELO YA FICHADO — D-173 🟡 ALTA, abierta desde S21.** El TDR de Portal Sellers declara como principio fundacional *"para el comprador, el seller es e-PetPlace; el comprador nunca ve ni interactúa con el seller directamente"*, y **esta página hace exactamente lo contrario con el prestador**: le da cara, nombre, biografía y URL propia. D-173 lo llama **"decisión de modelo bloqueante"** y sigue sin resolverse. **Construir la vitrina como cara pública del prestador ES tomar partido en ese choque — conviene que sea a propósito y con firma, no como consecuencia de haber empezado a dibujar.**
 
 > **☠️ CONDICIÓN DE MUERTE:** se retira cuando ① **la decisión esté anclada en `MODELO_PRODUCTO` y `EPETPLACE`** (la deuda que S20 se auto-declaró), ② **exista esquema de slug firmado** con su regla de rename, y ③ **las insignias tengan modelo de dato**. **Precondición de las tres: el arbitraje de D-173** — sin eso, cualquier diseño puede quedar del lado equivocado de un principio fundacional. **Quién la retira:** el founder (D-173 y el slug son decisión de modelo/marca; el anclaje documental es de quien toque los docs maestros). Origen: S83-A37 (relevamiento por pregunta del founder).
+
+### Ley de S83 — LA REGLA DE LAS PIEZAS (firmada founder, 1-ago-2026)
+
+> **Una pieza nace donde tiene su primer consumidor; se promueve cuando aparece
+> el segundo.** Nacer pública sin consumidores es **un camino muerto paralelo al
+> que corre**.
+>
+> **Lo que NO es opcional: toda pieza local nace con su CONDICIÓN DE MUERTE
+> escrita en términos de HECHO OBSERVABLE, no de evento futuro incierto.**
+> *"Cuando `AvatarMascota` gane encuadre"* **nunca ocurrió**; *"cuando aparezca
+> un segundo consumidor"* **se verifica con un grep**.
+>
+> **Y una pieza local del lado DEMANDA no se promueve por parecerse: se mide si
+> el otro lado tiene el problema.**
+
+**LOS CASOS QUE LA PRODUJERON, los cuatro medidos en S83:**
+
+| pieza | qué pasó | qué enseña |
+|---|---|---|
+| **`TarjetaEstado`** | nació **local** en S78 y se promovió en S83 **al cuarto consumidor** (no al tercero: la nota de S78 decía "tres" y **eran cuatro** — la cuarta entró un día después y nadie volvió a contar) | el umbral funciona **si alguien lo mide**; citado de memoria, envejece |
+| **`MarcaDeAgua`** | nació **pública** y terminó con **CUATRO implementaciones inline** y **cero consumidores de la pieza** — más un JSDoc que declaraba muerta una variante que el Hogar estaba pintando | **nacer pública no crea consumidores: crea un camino paralelo** (D-597) |
+| **`EncuadreFoto`** | local **con condición de muerte NO CUMPLIBLE** (*"cuando AvatarMascota gane encuadre"*) | una condición que depende de un evento que puede no ocurrir **no es condición: es un deseo** |
+| **`corte-agenda` · `CabezalOficio`** | promociones **CANCELADAS por medición**: codifican gramática del lado **demanda**, y el prestador **no está de ese lado** (consumo medido: 4 y 5 del cliente, **0** del prestador) | **parecerse no es necesitar** |
+
+> **☠️ ESTA REGLA NO TIENE CONDICIÓN DE MUERTE — es ley, no deuda.** Su
+> verificación es continua: **toda pieza local nueva se revisa contra ella al
+> nacer** (¿tiene consumidor? ¿su condición de muerte es un hecho observable?), y
+> **toda promoción se revisa contra su segunda mitad** (¿el otro lado tiene el
+> problema, o solo se parece?). Origen: S83, firma del founder sobre los cuatro
+> casos de arriba.
+
+> **➕ ENMIENDA S83-A42 A D-609 — EL CUARTO CASO, Y LOS TRES PASOS FIRMADOS.**
+>
+> **El cuarto incidente, declarado por el founder:** **órdenes a pistas dentro de
+> mensajes dirigidos al founder — cuatro veces.** Es de la misma clase que los
+> otros tres: **un paso del protocolo cuyo dueño es la mesa y que nadie escribió
+> como paso.** Su daño propio: **la pista no sabe si el mensaje es para ella**, y
+> el destinatario real (el founder) **recibe trabajo que no le toca** — el ruido
+> viaja en las dos direcciones a la vez.
+>
+> **LOS TRES PASOS DE LA MESA, AHORA FIRMADOS POR EL FOUNDER (1-ago-2026) — dejan
+> de ser propuesta:**
+> 1. **La confirmación se REENVÍA literal, con su hora — jamás se resume.** Una
+>    confirmación sin hora no es una confirmación: es un recuerdo.
+> 2. **La mesa no ordena trabajo a una pista congelada.** Si necesita que
+>    trabaje, **LEVANTA la veda primero y lo dice** — **un levantamiento tácito no
+>    existe**.
+> 3. **El cierre de veda se anuncia a TODAS las pistas congeladas**, no solo a
+>    quien publicó — **el que congela es el que descongela**.
+>
+> **Y el cuarto, que sale del incidente nuevo:** **cada mensaje declara su
+> destinatario**; una orden a una pista no viaja dentro de un mensaje al founder.
+>
+> **☠️ CONDICIÓN DE MUERTE ACTUALIZADA:** la ficha se retira cuando **los cuatro
+> pasos estén escritos en la regla 82**, con la misma forma que ya tienen los de
+> quien publica. **Firmados ≠ depositados:** hoy están firmados y viven en esta
+> ficha; **la regla 82 todavía no los tiene**. **Quién la retira:** quien toque
+> `CONTRATO_TRABAJO` con la firma del founder delante.
