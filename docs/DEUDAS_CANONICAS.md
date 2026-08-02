@@ -3319,3 +3319,160 @@ La regla 84 distinguía **commiteado · publicado · en el teléfono**. **Falta 
 > quien publica. **Firmados ≠ depositados:** hoy están firmados y viven en esta
 > ficha; **la regla 82 todavía no los tiene**. **Quién la retira:** quien toque
 > `CONTRATO_TRABAJO` con la firma del founder delante.
+
+---
+
+#### D-613 — LA REGLA 28 ESTÁ CABLEADA COMO GUARD EN LA DB, Y CONTRADICE LA ADJUDICACIÓN DE E.164 🔴 BLOQUEANTE
+
+**Qué se midió (S84-A1, todo con literal contra la DB viva):**
+
+La mesa adjudicó (1-ago-2026) que el teléfono y el whatsapp del prestador se
+guardan **enteros, con su `+`**. Al aplicar la migración que instala ese guard,
+**rebotó contra dos guards que ya existían y prohíben exactamente lo contrario**:
+
+```
+prestadores_telefono_sin_plus   CHECK (telefono IS NULL OR telefono !~ '^\+')
+prestadores_whatsapp_sin_plus   CHECK (whatsapp IS NULL OR whatsapp !~ '^\+')
+```
+
+Son **la regla 28 del CONTRATO** (*"Persistencia E.164 sin '+' para teléfonos"*)
+cableada en la fuente. **No es una convención suelta: es un guard duro.**
+
+**La regla 28 tiene TRES cuerpos vivos, y hay que moverlos juntos o ninguno:**
+
+| dónde | qué dice |
+|---|---|
+| `CONTRATO_TRABAJO` regla 28 | la letra |
+| los dos CHECK de `prestadores` | el guard |
+| `perfil.tsx:144` `normalizarTelefono` | `.replace(/^\+/, '')` — **tira el `+` justo antes de guardar**, citando la regla |
+
+**LO QUE VUELVE LA ENMIENDA FÁCIL, y es el dato que la decide:** la regla 28
+**ya está rota de facto en la tabla de más volumen**. En `profiles.telefono`,
+de 24 filas con dato, **15 guardan con `+`** y 9 sin él. La adjudicación de la
+mesa no rompe una convención sana: **regulariza en la dirección en la que la
+casa ya venía yendo sola.**
+
+**Y el trabajo es más chico de lo que parece:** la pantalla del perfil **ya
+valida E.164 CON `+`** (los `formato` de `PAISES` son regex del tipo
+`^\+593\d{8,9}$`). La máquina entera existe; lo único que hace la casa es
+**tirar el `+` en el último paso**. Quitar ese `.replace` es una línea.
+
+**Lo que NO se hizo, y por qué:** dropear los dos guards es **derogar la regla
+28 en la fuente**. No se hace de prepo — es el aprendizaje central de S83 (dos
+letras firmadas que se contradicen son peores que una equivocada). **La
+migración quedó escrita, verificada y FUERA de `supabase/migrations/`**
+(`docs/relevamientos/2026-08-01-s84a-PROPUESTA-migracion-telefono-e164.sql`),
+para que ningún `db push` la corra por inercia.
+
+**Lo que la firma tiene que decidir — son DOS cosas, no una:**
+1. **Se deroga la regla 28** (y entonces los ~10 tablas con teléfono quedan bajo
+   la convención nueva), **o `prestadores` es una EXCEPCIÓN declarada** (y
+   entonces la casa tiene dos convenciones **a propósito**, escrito).
+2. **Quién barre las otras columnas.** Hay teléfono en `profiles` (+
+   `telefono_codigo_pais`, que ya existe ahí), `refugios`, `criaderos`,
+   `seller_perfil`, `direcciones_guardadas`, `solicitudes_adopcion`. **La
+   licencia del founder es nominal y acotada a `prestadores.telefono/whatsapp`
+   — ninguna otra se toca sin mandato propio.**
+
+> **☠️ CONDICIÓN DE MUERTE:** la ficha se retira cuando **los tres cuerpos digan
+> lo mismo**: la regla 28 enmendada (o su excepción escrita), los dos CHECK
+> reemplazados, y `normalizarTelefono` sin el `.replace`. **Verificable por
+> sabotaje:** escribir `+593999000558` en `prestadores.whatsapp` debe ENTRAR, y
+> `593987654321` debe REBOTAR. Mientras uno de los tres diga lo contrario, la
+> ficha sigue abierta — **aunque los otros dos ya estén.**
+
+**Cómo se destapó, que es lo que vale guardar:** el freno **no lo encontró la
+lectura** — lo encontró **el control positivo de la auto-prueba**. La orden
+exigía que el guard nuevo pudiera salir rojo; para probarlo hacía falta también
+un caso que ENTRARA, y ese intento fue el que chocó contra el guard viejo.
+**La exigencia de que el guard gritara es la que hizo gritar al que ya estaba.**
+Sin control positivo, el rojo del guard nuevo habría "probado" algo sobre un
+constraint que no era el suyo.
+
+---
+
+#### D-614 — UNA MIGRACIÓN DE S82 ESTÁ APLICADA PERO **NO REGISTRADA** EN EL HISTORIAL 🟠
+
+**Medido (S84-A1):** `supabase migration list --linked` muestra
+`20260731130000_s82_oferta_adiestramiento_publica` como **local sin remoto**. Y
+sin embargo `to_regprocedure('public.obtener_oferta_adiestramiento_publica()')`
+**devuelve no-nulo**: la función EXISTE.
+
+**El diagnóstico, con las dos mitades medidas:** la función se aplicó por
+`db query` y **su versión nunca entró a `supabase_migrations.schema_migrations`**
+(conteo literal: `0`). No es que falte aplicar — **falta REGISTRAR**.
+
+**Por qué importa y no es cosmético:** el historial es lo que hace que
+`db push` sea seguro. Con esta fila ausente, **el próximo `db push` de cualquier
+pista va a intentar re-aplicarla**. Hoy eso es inocuo porque su cuerpo es
+`CREATE OR REPLACE`, pero **esa inocuidad es una propiedad de este archivo, no
+del mecanismo** — y nadie la va a volver a verificar antes de pushear.
+
+**Choca con el canon de S82**, que declara sus migraciones *"aplicadas y
+registradas"*. **Esta está aplicada y NO registrada.** Se declara sin corregir:
+reparar el historial de otra sesión es un acto que adjudica la mesa, y
+**registrarla en silencio escondería el hueco en vez de cerrarlo** — que es
+justo lo que haría invisible al próximo caso.
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando `migration list --linked` muestre
+> `20260731130000` con **remoto no vacío** — es decir, cuando alguien con
+> mandato corra el `repair` correspondiente. **Verificación de un comando, sin
+> interpretación.** Si en cambio se decide que la migración no debe existir, la
+> ficha muere igual, pero **borrando el archivo Y la función** — no dejando una
+> a medias.
+
+---
+
+#### D-615 — EL CATÁLOGO DE PAÍSES TIENE DOS FUENTES: una tabla que nadie lee y una copia a mano que sí 🟠
+
+**Medido (S84-A1), respondiendo la pregunta de la orden *"¿esa tabla existe y es
+única, o hay dos?"*:**
+
+**En la DB es UNA:** `cat_paises`, con `prefijo_telefono` y `formato_telefono`,
+y hasta con **una RPC dedicada** — `get_paises_para_telefono()`, que devuelve
+exactamente `(codigo_iso2, nombre, prefijo_telefono, formato_telefono)` ordenada
+por `activo`.
+
+**Y esa RPC no tiene UN SOLO consumidor** en `apps/` ni en `packages/` (grep
+literal). Es **motor sin puerta**: se construyó para esto y nunca se cableó. La
+única RPC de países que sí se consume es `get_paises_activos` (vía
+`obtenerPaisesActivos`), que **no expone el prefijo** — sirve para agrupar
+catálogos, no para teléfonos.
+
+**En el código hay una SEGUNDA fuente:** el array `PAISES` de
+`apps/prestador/src/app/(tabs)/cuenta/perfil.tsx:103-127` — **23 países
+hardcodeados con su prefijo y su regex de formato**. Es el que la pantalla usa
+de verdad.
+
+**LA COMPARACIÓN, HECHA DE VERDAD Y NO POR CONTEO:** los dos tienen 23 filas y 9
+con formato, **y eso no prueba nada** (dos conteos iguales no son dos listas
+iguales — candidata #17). Extraídas ambas y diffeadas fila por fila
+(`codigo_iso2|nombre|prefijo`): **IDÉNTICAS byte a byte**.
+
+**Entonces el problema no es que estén mal: es que están bien por casualidad
+mantenida.** El propio comentario del código dice que se midió contra el
+proyecto vivo *"9 de 23"* — o sea que alguien las sincronizó **a mano, una vez**.
+**Nada las compara hoy**, y una fila nueva en `cat_paises` (o un cambio de
+prefijo) las separa sin que ningún gate diga nada. **Su modo de falla es el
+silencio** (L-192), y el síntoma llegaría como *"a este usuario no le valida el
+teléfono"*, meses después y sin rastro.
+
+**Dónde se toca:** es el consumidor natural de D-613 — cuando el teléfono pase a
+E.164 con `+`, la partición del prefijo para pintar el selector se hace **contra
+esta tabla, con el prefijo MÁS LARGO primero**. *Esa lógica ya existe escrita en
+`normalizar_telefono` (`ORDER BY length(...) DESC`), y ahí sí está en la DB: se
+espeja, no se inventa.*
+
+**El borde que la partición NO puede resolver, y hay que saberlo antes de
+prometerla:** `+1` pertenece a **tres** países del catálogo (US, CA, PR — y `DO`
+también lo declara). **El prefijo NO determina el país.** Cualquier UI que
+"detecte el país desde el número" va a acertar por defecto y errar en silencio en
+esos cuatro. La elección del país es **del usuario**, y el prefijo solo la
+acompaña.
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando **el array `PAISES` no exista**
+> (Ley 37) y la pantalla lea de `get_paises_para_telefono()`. **Verificable por
+> grep:** `grep -c "iso: 'AR'" apps/prestador` en cero. Si en cambio se decide
+> que la copia en código es deliberada (por costo de arranque o por offline),
+> **muere igual — pero escribiendo esa razón y un guard que compare las dos
+> fuentes**; lo que no puede seguir es que coincidan sin que nadie lo verifique.
