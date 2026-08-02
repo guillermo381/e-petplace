@@ -96,6 +96,19 @@ export default function Login() {
             deshabilitado={!puedeEnviar}
             onPress={() => void entrar()}
           />
+          {/* S84-C23 ② — LA SALIDA DE QUIEN NO PUEDE ENTRAR, y su lugar
+              es ÉSTE por definición: recuperar la usa alguien que está
+              mirando este login sin poder pasarlo. Ponerla en Cuenta la
+              haría alcanzable solo por quien ya no la necesita.
+              Va como `ghost` y debajo del CTA: es la salida del camino
+              triste, no una alternativa al primario (Ley 5 — un solo
+              sólido por superficie). */}
+          <Boton
+            variante="ghost"
+            etiqueta={t('login.olvide')}
+            bloque
+            onPress={() => router.push('/recuperar')}
+          />
           {/* S80-B1 (D-509 ①): la entrada al registro — espejo del par
               primario+ghost de la bienvenida. El empleado al que le
               dijeron "registrate" llega acá por "Ingresar" y encuentra

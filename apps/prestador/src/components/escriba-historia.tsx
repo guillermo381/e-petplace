@@ -73,12 +73,22 @@ export function EscribaHistoria({
     setError(null);
   }
 
-  async function escribir() {
+  /**
+   * @param modo S84-C20 — 'alternativa' es lo que hace que "Probar otra"
+   * cumpla lo que promete. Sin él el motor MEJORA el borrador anterior, y
+   * tocar el botón dos veces daba evoluciones del mismo texto en vez de
+   * caminos distintos: el botón decía "otra" y entregaba "la misma, un
+   * poco mejor".
+   * El default del motor sigue siendo 'mejorar', así que la llamada normal
+   * —la primera, la que compone— NO pasa nada y no cambió.
+   */
+  async function escribir(modo?: 'alternativa') {
     setPensando(true);
     setError(null);
     const r = await escribirPresencia({
       hechos,
       respuestas: [porQue, queSepan, experiencia],
+      modo,
       /* ③ EL PREVIO ES LA ÚLTIMA PROPUESTA SI YA HAY UNA — y este era un
          BUG que la medición destapó: al tocar "probá otra" se mandaba la
          historia VIEJA, así que el escriba re-mejoraba el punto de
@@ -203,7 +213,7 @@ export function EscribaHistoria({
                 etiqueta={t('perfilNegocio.iaOtra')}
                 bloque
                 cargando={pensando}
-                onPress={() => void escribir()}
+                onPress={() => void escribir('alternativa')}
               />
               {/* DESCARTAR es un camino de primera clase y por eso está
                   escrito: sin él, cerrar la Hoja sería la única salida y

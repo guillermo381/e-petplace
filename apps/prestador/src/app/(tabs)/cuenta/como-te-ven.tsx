@@ -194,6 +194,25 @@ export default function ComoTeVen() {
           ciudad={prestador.ciudad}
           portadas={portadas}
           servicios={servicios}
+          /* S84-C23 — LA ZONA, y NUNCA la sede.
+             `MiPrestador` trae `lat`/`lon` —la coordenada EXACTA— a un
+             tipeo de distancia, y pasarlas compilaría y se vería MEJOR
+             en pantalla: un mapa centrado en el negocio parece más
+             correcto que uno desplazado. Ese es justo el peligro — el
+             defecto sería invisible al ojo y solo legible en el código.
+             Y acá pesa doble por lo que ESTA pantalla es: el espejo
+             muestra lo que ve la familia. Con la sede exacta, el
+             prestador creería que la familia ve su ubicación real
+             cuando la vista fue angostada para que NO (D-624) — el
+             espejo pasaría de mostrar la verdad a certificar una
+             mentira.
+             A las expuso por el camino (a): la fila propia lee la MISMA
+             derivación que la familia, así que las dos no pueden
+             divergir. Las tres viajan juntas; si falta una, la pieza no
+             monta el bloque. */
+          zonaLat={prestador.zona_lat}
+          zonaLon={prestador.zona_lon}
+          zonaRadioM={prestador.zona_radio_m}
           oficio={undefined}
           historia={prestador.descripcion}
           /* CON handler ⇒ la invitación con su CTA. Hoy lleva a la

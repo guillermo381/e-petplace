@@ -35,6 +35,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
   Campo,
+  CeldaNavegacion,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
@@ -181,6 +182,19 @@ export default function NombreYAcceso() {
               onChangeText={() => undefined}
               ayuda={t('miCuenta.emailAyuda')}
               deshabilitado
+            />
+
+            {/* S84-C23 — LA PUERTA QUE ESTE ARCHIVO PROMETIA. Su JSDoc
+                decia: 'cambiar contrasena y cambiar correo NO existen
+                todavia... cuando el arco exista, entran aca'. El arco
+                existe, asi que entra — y el JSDoc de arriba queda con una
+                mitad cumplida y la otra (cambiar correo) todavia no. */}
+            <CeldaNavegacion
+              icono="cuenta"
+              titulo={t('seguridad.titulo')}
+              detalle={t('seguridad.ayuda')}
+              registro="aa"
+              onPress={() => router.push('/cuenta/seguridad')}
             />
 
             <View style={{ paddingTop: spacing[4] }}>
