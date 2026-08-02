@@ -3531,3 +3531,52 @@ sin ese censo es tocar algo cuyo alcance no conozco.**
 > **La ficha se retira solo con las dos.** Cerrarla con (a) sería declarar sano
 > un bucket que sigue abierto — y es el error que este proyecto ya nombró:
 > *cura de sitio en lugar de cura de causa* (L-185).
+
+---
+
+#### D-617 — CUATRO OTAs PUBLICADOS EN RUNTIME 1.0.3, Y NO EXISTE NINGUNA BUILD EAS QUE LOS RECIBA 🔴
+
+**Medido (S84-A3, al verificar el publish — no se buscaba, apareció):**
+
+| | |
+|---|---|
+| OTAs recientes del canal `preview` | `7848147c` · `19f8b87c` · `0992f545` · `f0815c7a` — **los cuatro en runtime 1.0.3** |
+| build EAS más nueva del prestador | **`987a0047`, runtime 1.0.2**, 16-jul-2026 |
+| builds en runtime 1.0.3 | **CERO** |
+
+**Un OTA solo lo recibe una APK con su MISMO runtime.** Con la build más nueva
+en 1.0.2, **estos cuatro updates no llegan a ninguna APK distribuida por EAS.**
+
+**La única que podría recibirlos es la APK 1.0.3 LOCAL** que el founder
+construyó en S78 (`eas build --local`, instalada por `adb` — la cuota de EAS
+había rebotado). El canon lo declara: *"apps/prestador declara version 1.0.3 con
+BUILD NATIVA PENDIENTE"*.
+
+**Por qué esto es 🔴 y no una nota operativa:** el gate del founder sobre todo
+el craft del Perfil —S83-H, S83-I, S83-J y ahora S84— **depende de que ese
+teléfono siga teniendo instalada una APK local de hace dos semanas**. Si la
+reinstaló desde EAS por cualquier motivo, está en **1.0.2** y **no ve nada de
+S83 ni de S84** — y lo vería como *"el cambio no llegó"*, no como *"mi APK es
+vieja"*. **El modo de falla es un founder mirando una pantalla sin cambios y una
+mesa creyendo que publicó.** Es L-138 en su forma más cara: el gate empieza
+confirmando el binario.
+
+**Lo que NO está medido, y por eso la ficha no dice más:** qué APK tiene hoy
+instalada el founder. **No es medible desde acá** — se pregunta o se lee del pie
+de Cuenta (el marcador de L-160 enmendada renderiza `update {8 chars} · canal`,
+o `bundle embebido` honesto).
+
+**Y el precedente exacto ya está escrito en el canon**, de S78: *"el primer OTA
+sobre la build 1.0.3 exige publicar contra runtime 1.0.3 — NADIE publica contra
+1.0.2 para esa APK"*. Se cumplió al pie. **Lo que nadie volvió a mirar es la
+otra mitad: que del lado de EAS no naciera nunca la build 1.0.3**, y que por lo
+tanto el canal quedara sirviendo a **un solo teléfono**.
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando **exista una build EAS en runtime
+> 1.0.3** (`build:list` la muestra FINISHED) **y el founder confirme desde el pie
+> de Cuenta** que su `updateId` coincide con el group vigente. **Las dos mitades:**
+> la build sola no prueba que la tenga instalada, y su palabra sola no prueba que
+> el canal pueda volver a alcanzarlo mañana.
+> **Si en cambio se decide bajar `version` a 1.0.2**, la ficha muere igual —
+> pero entonces **hay que re-publicar los cuatro OTAs contra 1.0.2**, porque los
+> ya emitidos quedan huérfanos: nadie los reclama.
