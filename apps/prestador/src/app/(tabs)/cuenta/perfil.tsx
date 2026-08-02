@@ -139,10 +139,63 @@ const bandera = (iso: string): string =>
 
 type Seccion = 'portada' | 'contacto' | 'donde';
 
-/** E.164 sin '+' (regla 28) — la MISMA normalización que traía
- *  `cuenta/perfil`: la regla no cambia porque la pantalla se rediseñe. */
+/** **E.164 ENTERO, con su '+'** — regla 28 del CONTRATO **ENMENDADA el
+ *  2-ago-2026** (firma founder + arquitecto).
+ *
+ *  LO QUE MURIÓ ACÁ: `.replace(/^\+/, '')`. Esta línea le quitaba el '+'
+ *  al número **justo antes de guardarlo**, y era la tercera pata de una
+ *  regla que vivía en tres cuerpos a la vez (la letra del CONTRATO, dos
+ *  CHECK en la DB, y esta función). Los otros dos ya cambiaron.
+ *
+ *  POR QUÉ SE DEROGÓ — **por incompleta, no por equivocada**: "E.164 sin
+ *  '+'" funciona si el país vive en otro lado, y en `prestadores` esa
+ *  columna nunca se construyó. El número quedaba sin saber de dónde era.
+ *  Palabra del founder: *un WhatsApp de otro país es normal, no
+ *  excepcional.*
+ *
+ *  La ironía que vale registrar: **esta pantalla ya validaba CON '+'**
+ *  (los `formato` de PAISES son `^\+593\d{8,9}$`). Validaba una cosa y
+ *  guardaba otra; lo único que faltaba era dejar de tirarlo.
+ *
+ *  Lo que SÍ sigue: espacios y guiones se limpian — son del display. */
 function normalizarTelefono(v: string): string {
-  return v.trim().replace(/^\+/, '').replace(/[\s-]/g, '');
+  return v.trim().replace(/[\s-]/g, '');
+}
+
+/** COMPONE el E.164 que se guarda: el prefijo del país elegido + lo que
+ *  el usuario tipeó. **No es una vuelta de tuerca: es lo que la pantalla
+ *  YA le promete al usuario** — `estadoTelefono` calcula este mismo
+ *  `${pais.pre}${crudo}` y su voz dice literalmente *"se guarda +593…"*.
+ *  Lo que faltaba era que el guardado hiciera lo que la voz decía.
+ *
+ *  Vacío devuelve vacío: el campo es OPCIONAL y un prefijo suelto no es
+ *  un teléfono (guardar "+593" sería inventar un número que nadie dio). */
+function componerE164(valor: string, iso: string): string {
+  const crudo = normalizarTelefono(valor);
+  if (crudo.length === 0) return '';
+  if (crudo.startsWith('+')) return crudo; // ya vino entero: no se toca
+  const pais = PAISES.find((p) => p.iso === iso);
+  return pais === undefined ? crudo : `${pais.pre}${crudo}`;
+}
+
+/** PARTE un E.164 guardado para pintar el selector — **es LECTURA, no
+ *  columna**: el país no se persiste por separado, se deriva al mostrar.
+ *  Prefijo MÁS LARGO primero (`+593` antes que `+59`/`+5`), el mismo
+ *  criterio que `normalizar_telefono` ya usa en la DB (`ORDER BY
+ *  length(...) DESC`) — se espeja, no se inventa.
+ *
+ *  ⚠️ DOS BORDES DECLARADOS:
+ *  · **El prefijo NO determina el país**: `+1` es US, CA, PR y DO. Se
+ *    elige el primero del catálogo, y para pintar alcanza (el prefijo es
+ *    correcto aunque el país no lo sea). Nunca se escribe esa elección.
+ *  · **Un valor SIN '+' no se parte** — devuelve null y el número entra
+ *    crudo al campo. Es el legado de la regla 28: ponerle un país sería
+ *    inferirlo, y eso es justo lo que P21 prohíbe. */
+function partirE164(v: string): { iso: string; numero: string } | null {
+  if (!v.startsWith('+')) return null;
+  const candidatos = PAISES.filter((p) => v.startsWith(p.pre)).sort((a, b) => b.pre.length - a.pre.length);
+  const pais = candidatos[0];
+  return pais === undefined ? null : { iso: pais.iso, numero: v.slice(pais.pre.length) };
 }
 
 /** ③ "INCOMPLETA" con la regla que ya rige: una sección está incompleta
@@ -216,8 +269,17 @@ export default function PerfilV2() {
         setPrestador(p);
         setLogoPath(p.foto_url);
         setDescripcion(desc);
-        setTelNegocio(tel);
-        setWhatsapp(wa);
+        /* S84-A1bis — LA PARTICIÓN AL CARGAR, que es lectura y no columna.
+           El campo muestra el número SIN prefijo (el indicativo ya vive a
+           su izquierda, firma de C): si volcáramos el E.164 entero, la
+           línea diría "+593 +593987654321". Un valor legado sin '+' NO se
+           parte y entra crudo — ponerle país sería inferirlo (P21). */
+        const pTel = partirE164(tel);
+        const pWa = partirE164(wa);
+        setTelNegocio(pTel ? pTel.numero : tel);
+        setWhatsapp(pWa ? pWa.numero : wa);
+        if (pTel) setPaisTel(pTel.iso);
+        if (pWa) setPaisWa(pWa.iso);
         setEmailContacto(p.email_contacto ?? '');
         setSitioWeb(p.sitio_web ?? '');
         // ⑥ solo la PRIMERA vez que llegan datos — los focos siguientes
@@ -317,8 +379,11 @@ export default function PerfilV2() {
     setGuardando(true);
     const r = await actualizarPerfilPrestador({
       descripcion,
-      telefono: normalizarTelefono(telNegocio),
-      whatsapp: normalizarTelefono(whatsapp),
+      // S84-A1bis: se guarda el E.164 ENTERO — el prefijo del país elegido
+      // + lo tipeado. Es EXACTAMENTE lo que la voz de `estadoTelefono` le
+      // viene prometiendo al usuario ("se guarda +593…").
+      telefono: componerE164(telNegocio, paisTel),
+      whatsapp: componerE164(whatsapp, paisWa),
       email_contacto: emailContacto.trim(),
       // ④ la normalización vive en el GUARDADO, no en el tipeo: mientras
       // escribís, el campo dice lo que va a guardar (`ayuda`) sin

@@ -140,10 +140,30 @@ bucket público o URL firmada con su renovación. **No lo elijo yo.**
 
 ## 4 · LA TABLA — la adjudicación se sostiene, con dos precedentes que hay que nombrar
 
-**La casa ya resolvió "galería" DOS veces, y con jsonb, no con tabla:**
-`refugios.fotos_galeria` y `productos.imagenes`.
+**La casa ya resolvió "galería" TRES veces, y con jsonb, no con tabla:**
+`refugios.fotos_galeria`, `productos.imagenes` y **`prestadores.fotos_galeria`**.
 
-**Y las dos están muertas: `refugios` tiene 0 filas y `productos` tiene 0 filas.**
+**Y las tres están muertas:**
+
+| columna | filas de la tabla | con datos | lectores en el repo |
+|---|---|---|---|
+| `refugios.fotos_galeria` | 0 | 0 | 0 |
+| `productos.imagenes` | 0 | 0 | 0 |
+| **`prestadores.fotos_galeria`** | **7** | **0** | **0** |
+
+> **⚠️ EL TERCERO ES EL GRAVE, Y NO LO HABÍA CENSADO — lo midió B.**
+> `prestadores.fotos_galeria` **vive en la MISMA TABLA donde va la galería
+> nueva.** Los otros dos están en tablas vacías de dominios que no tocamos; éste
+> está en la fila que el prestador edita todos los días, **con 7 filas reales
+> detrás y cero datos adentro**.
+>
+> **Si `prestador_fotos` nace y esta columna sigue ahí, cualquiera que abra
+> `prestadores` va a ver una columna que se llama "fotos_galeria" y no es la
+> galería.** No es un duplicado lejano: es un homónimo en el mismo lugar. **La
+> Ley 37 aplica: muere con la migración que crea la tabla, no "después".**
+>
+> *(Confirmado contra la DB al recibirlo, no citado del reporte — L-166.)*
+
 Son esquema del legado sin un solo consumidor. **No compiten como precedente
 vivo**, y por eso la adjudicación de la mesa (tabla, orden mínimo = portada) no
 tiene que discutir con ellas.

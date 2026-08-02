@@ -3322,7 +3322,7 @@ La regla 84 distinguía **commiteado · publicado · en el teléfono**. **Falta 
 
 ---
 
-#### D-613 — LA REGLA 28 ESTÁ CABLEADA COMO GUARD EN LA DB, Y CONTRADICE LA ADJUDICACIÓN DE E.164 🔴 BLOQUEANTE
+#### D-613 — LA REGLA 28 ESTÁ CABLEADA COMO GUARD EN LA DB, Y CONTRADICE LA ADJUDICACIÓN DE E.164 ✅ CERRADA (2-ago-2026)
 
 **Qué se midió (S84-A1, todo con literal contra la DB viva):**
 
@@ -3610,3 +3610,130 @@ tanto el canal quedara sirviendo a **un solo teléfono**.
 > **Condición de muerte ACTUALIZADA:** la mitad ① (confirmación del founder)
 > **está pagada y no se vuelve a pedir**. Queda **solo** la build EAS en runtime
 > 1.0.3, FINISHED en `build:list`. **Quien la retira:** quien corra esa build.
+
+> **✅ D-613 CERRADA — 2-ago-2026, firma del founder + firma del arquitecto sobre la derogación.**
+>
+> **Palabra del founder:** *un WhatsApp de otro país es normal, no excepcional —
+> restringirlo no tiene sentido.*
+>
+> **LA CORRECCIÓN DEL REGISTRO, QUE VA ESCRITA PORQUE CAMBIA LO QUE SE APRENDE:
+> la regla 28 se deroga POR INCOMPLETA, NO POR EQUIVOCADA.** *"E.164 sin `+`"*
+> **funciona si el país vive en otro lado** — y en `profiles` esa mitad existe
+> (`telefono_codigo_pais`). **En `prestadores` esa columna nunca se construyó.**
+> La regla era coherente con una mitad que nadie hizo, y sin ella el número
+> guardado **no sabe de dónde es**. *Derogar culpando al criterio anterior
+> enseñaría lo contrario de lo que pasó.*
+>
+> **LOS TRES CUERPOS, MOVIDOS JUNTOS** (que era la condición de muerte):
+>
+> | cuerpo | antes | ahora |
+> |---|---|---|
+> | `CONTRATO_TRABAJO` regla 28 | *"E.164 sin '+'"* | **E.164 ENTERO**, con el texto viejo conservado y su porqué · **v1.25** |
+> | los CHECK de `prestadores` | `*_sin_plus` (`!~ '^\+'`) | **DROPeados** · nacen `chk_prestadores_*_e164` |
+> | `perfil.tsx:144` | `.replace(/^\+/, '')` | **muerto** — y la pantalla ahora **compone** el E.164 |
+>
+> **VERIFICADO POR SABOTAJE, con su par discriminador** (mismo dato, veredicto
+> invertido antes y después):
+> · **antes** — `+573208408790` **REBOTABA** contra `prestadores_whatsapp_sin_plus`.
+> · **después** — `593987654321` · `3208408790` · `+0593999000` · `+593 99900055`
+>   **rebotan los cuatro** contra `chk_prestadores_whatsapp_e164`; y el **control
+>   positivo** `+573208408790` · `+593999000558` · `''` **entran los tres**.
+> *El control positivo no es adorno: fue el que destapó el guard viejo en S84-A1,
+> y sin él cuatro rojos de un guard que rebota todo se verían idénticos.*
+>
+> **LA IRONÍA QUE VALE GUARDAR:** la pantalla **ya validaba con `+`** (los
+> `formato` de `PAISES` son `^\+593\d{8,9}$`) y su voz **ya le prometía al
+> usuario** *"se guarda +593987654321"*. **Validaba una cosa y guardaba otra**;
+> lo único que faltaba era dejar de tirarle el `+` en el último paso. La
+> superficie estaba en lo correcto desde antes de la firma.
+>
+> **Lo que NO cierra con esta ficha, y tiene número propio:** el barrido de las
+> otras seis tablas (**D-618**) y el borde de las cinco filas legado (**D-619**).
+
+---
+
+#### D-618 — LAS OTRAS SEIS TABLAS CON TELÉFONO SIGUEN BAJO LA CONVENCIÓN VIEJA 🟠
+
+**La derogación de la regla 28 es de la LETRA. El barrido es trabajo con su
+propio gate** — y así se firmó, explícitamente.
+
+**Las seis, medidas** (`information_schema.columns`): `profiles` (`telefono` +
+`telefono_codigo_pais` + `telefono_tipo`) · `refugios` (`telefono`, `whatsapp`)
+· `criaderos` · `seller_perfil` (`telefono`, `whatsapp`) ·
+`direcciones_guardadas` · `solicitudes_adopcion`.
+
+**`profiles` es el caso interesante y NO es el más urgente, sino el que enseña
+por qué:** es **la única que tiene la mitad que a `prestadores` le faltaba** —
+`telefono_codigo_pais` existe. **Ahí la regla 28 sí estaba completa.** Y aun
+así, **de sus 24 filas con dato, 15 ya guardan con `+`** (medido S84-A1): la
+convención se rompió sola, en la tabla que sí tenía cómo sostenerla.
+
+**Lo que eso significa para el barrido, y por qué no se hace de prepo:** en
+`profiles` hay que decidir si `telefono_codigo_pais` **muere** (E.164 entero,
+como prestadores) o si **manda** y las 15 filas con `+` son las que están mal.
+**Son dos direcciones opuestas y ninguna es obvia** — la columna tiene
+consumidores que este censo no midió.
+
+**Hasta entonces la casa tiene dos convenciones A PROPÓSITO y por escrito**
+(declarado en la regla 28 enmendada), que es distinto de tenerlas por descuido.
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando las seis tablas tengan **guard de
+> formato explícito** —el que sea, pero declarado— **y su decisión escrita** en
+> el caso de `profiles` (si `telefono_codigo_pais` vive o muere).
+> **Verificable:** `pg_constraint` sobre las seis, y cero columnas de indicativo
+> sin dueño declarado. **No se retira barriendo cinco y dejando `profiles`
+> "para después"** — es la que tiene el conflicto de verdad.
+
+---
+
+#### D-619 — CINCO FILAS QUEDARON CON NÚMERO PRE-E.164, Y SU PERFIL NO VA A GUARDAR HASTA CURARLAS 🟠
+
+**Qué pasó (S84-A1bis):** el guard nuevo nació **`NOT VALID`** — rige para todo
+INSERT/UPDATE pero **no reescribe el pasado**. Es lo que hizo posible cumplir la
+orden *"la fila CO queda como está hasta que su dueño lo confirme"*.
+
+**Las cinco, con su dueño medido** (no son "data de prueba" indistinta):
+
+| id | negocio | whatsapp | origen |
+|---|---|---|---|
+| `2052f109` | **Satori Latam sas** | `573208408790` | wizard — **REAL, del founder** |
+| `d73347ba` | **Carlos** | `593987654321` | wizard — **REAL** |
+| `de300000` | Paseos Andres | `3208408790` | **SEED demo** — sin indicativo |
+| `de580000` | Wizard | `593999000558` | SEED |
+| `de680000` | Clínica Aurora | `593999000668` | SEED |
+
+**EL BORDE, declarado para que nadie lo descubra solo:** Postgres **revalida el
+CHECK al UPDATE de la fila**. Cualquiera de esos cinco que abra su perfil y
+guarde **va a rebotar** hasta que su número traiga el `+`. **No es un daño
+silencioso** —el wrapper lo dice tipado: *"El número tiene que incluir el país
+(por ejemplo +593 …)"*— **pero es fricción real, y le toca al founder en su
+propio negocio.**
+
+**Por qué NO se vació ni se promovió, teniendo licencia para lo primero:**
+vaciar **destruye** (y al medir con nombre resultó que Satori y Carlos son
+reales, no data de prueba); promover **transforma con una hipótesis**.
+`NOT VALID` es la única de las tres que **no destruye y no inventa**.
+
+**La observación que quedó como dato y NO como cura:** `573208408790` (Satori) y
+`3208408790` (el seed) son **el mismo número salvo el `57`**. Es tentador
+deducir que al seed le falta el indicativo colombiano — **y ahí es exactamente
+donde P21 dice que no**. La orden fue explícita: la fila CO queda.
+
+**Las dos salidas, medidas:**
+**(a)** **el dueño re-guarda** eligiendo su país — la pantalla ya compone el
+E.164 y su voz ya dice *"se guarda +57…"*. Cero código. Es la única que
+**confirma** el país en vez de suponerlo.
+**(b)** **promoción mecánica contra `cat_paises`**: anteponer `+` solo si el
+número **ya empieza con un prefijo del catálogo** (greedy por el más largo, el
+mismo criterio de `normalizar_telefono`). Cura cuatro de las cinco **sin
+inferir nada** — y **la del seed cae sola** del lado de "no se toca", porque
+`3208…` no matchea ningún prefijo. *Es barata y honesta, pero sigue siendo una
+transformación de datos: pide firma.*
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando **las cinco filas pasen el
+> CHECK** y el constraint pueda pasar a `VALIDATE CONSTRAINT` sin abortar.
+> **Verificable de un comando:** `ALTER TABLE prestadores VALIDATE CONSTRAINT
+> chk_prestadores_whatsapp_e164` — si corre, la ficha muere; si aborta, dice
+> cuántas faltan. **Ese `VALIDATE` es parte de la cura, no un chequeo aparte:**
+> mientras el constraint siga `NOT VALID`, la tabla admite pasado ilegal y nadie
+> se entera.
