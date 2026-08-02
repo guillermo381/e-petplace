@@ -209,12 +209,23 @@ export const prestadorEs = {
     portadaAyuda: 'Lo primero que lee una familia. Dos o tres líneas alcanzan.',
     descripcionLabel: 'Descripción',
     descripcionEjemplo: 'Paseos tranquilos por el norte de Quito, grupos chicos y reporte con fotos.',
-    // ⚠️ FRENO — migrada VERBATIM, no reescrita (ver el commit)
-    contactoAyuda: 'Son datos del negocio y los ven las familias. Tu teléfono personal vive en Cuenta.',
+    /* ⚠️ ATADA A D-173 (S84-C7, adjudicación del founder). La frase vieja
+       —'los ven las familias'— prometía PRESENTE sobre un futuro: hoy
+       NINGUNA de las cuatro columnas de contacto está en
+       v_prestadores_publicos (D-601), así que ninguna familia las ve.
+       La nueva habla de lo que el dato ES y de para qué se carga, sin
+       prometer un efecto que todavía no ocurre.
+       ☠️ CUANDO EL FOUNDER FIRME D-173 —y la vitrina publique estos
+       cuatro campos— esta cadena y correoOk vuelven a ser CANDIDATAS de
+       reescritura: ahí sí se va a poder decir que las familias las ven.
+       La nota va atada a D-173 y no suelta, para que la reescritura
+       tenga disparo y no dependa de que alguien se acuerde. */
+    contactoAyuda: 'Son los datos con los que te van a contactar. Cárgalos ahora para que estén listos.',
     correoLabel: 'Correo de contacto',
     correoEjemplo: 'hola@paseosandres.ec',
-    // ⚠️ FRENO — migrada VERBATIM, no reescrita
-    correoOk: 'Las familias te escriben acá.',
+    // ⚠️ ATADA A D-173 — ver contactoAyuda. 'Guardado.' dice lo único
+    // que hoy es cierto: que el dato quedó.
+    correoOk: 'Guardado.',
     correoMal: 'Un correo lleva un @ y un punto después: hola@tunegocio.ec',
     sitioLabel: 'Sitio web',
     sitioEjemplo: 'paseosandres.ec',

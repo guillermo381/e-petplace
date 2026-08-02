@@ -173,10 +173,11 @@ export const prestadorEn = {
     portadaAyuda: 'The first thing a family reads. Two or three lines are enough.',
     descripcionLabel: 'Description',
     descripcionEjemplo: 'Calm walks around north Quito, small groups and a report with photos.',
-    contactoAyuda: "These are your business details and families see them. Your personal phone lives in Account.",
+    // ⚠️ Tied to D-173 — see es.ts
+    contactoAyuda: "These are the details people will use to reach you. Add them now so they're ready.",
     correoLabel: 'Contact email',
     correoEjemplo: 'hello@yourbusiness.com',
-    correoOk: 'Families write to you here.',
+    correoOk: 'Saved.',
     correoMal: 'An email needs an @ and a dot after it: hello@yourbusiness.com',
     sitioLabel: 'Website',
     sitioEjemplo: 'yourbusiness.com',
