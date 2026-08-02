@@ -4241,3 +4241,63 @@ envejeció**.
 > evidencia que cerró las dos fichas. **Se retira cuando alguien la haya leído y
 > el canon de S84 esté escrito** — borrarla ahora sería repetir el error de
 > origen, que fue quedarse sin rastro.
+
+---
+
+#### D-627 — EL CONTENIDO DE USUARIO EN DOS IDIOMAS: cuándo se traduce y qué pasa cuando divergen 🟠
+
+**Medición de C (S84), y el encuadre que trae es lo importante: NO es "falta una
+columna `descripcion_en`".**
+
+**① EL PATRÓN NO EXISTE EN LA CASA.** Cero pares `*_es`/`*_en` en toda la DB. **El
+bilingüe vive entero en el riel i18n**, donde las cadenas son **NUESTRAS** —
+escritas por nosotros, versionadas, con su `Espejo<D>` exigiendo paridad al
+typecheck. **Guardar contenido de USUARIO en dos idiomas sería un patrón nuevo,
+no una columna más.**
+
+**② NINGUNO DE LOS DOS TIENE LECTOR — ni el `en` ni el `es`.** No existe
+superficie que muestre la descripción de un prestador **a una familia**. Hoy el
+único que la ve es **el prestador mirándose en el espejo**. *El escriba ya
+produce `es` + `en`; el `en` no tiene a dónde ir.*
+
+**③ Y ESTO ES LO QUE LA VUELVE DAÑINA, no solo prematura:**
+
+> El prestador acepta el borrador **y después edita** — que es el caso ESPERADO,
+> para eso están las dos puertas (§5: *el prestador edita y APRUEBA*).
+> **El `es` cambia. El `en` queda viejo. Y NADIE SE ENTERA:**
+> · él no lee su propia pantalla en inglés,
+> · el espejo le muestra el `es`,
+> · **y la familia angloparlante ve una versión que él nunca escribió y que no
+>   puede corregir** — porque no sabe que existe.
+
+**Es un modo de falla silencioso con la agravante de que el afectado no es quien
+puede arreglarlo.** No es un dato desactualizado: es **una voz puesta en boca de
+alguien**, que es exactamente lo que `MODELO_PRESENCIA` §5 protege cuando dice
+que *el autor es él*.
+
+### LAS DOS DECISIONES, escritas y SIN RESOLVER
+
+**(a) CUÁNDO SE RE-TRADUCE.** Tres caminos, ninguno gratis:
+· **re-generar en cada guardado** — el `en` nunca envejece, pero cada edición de
+  una coma cuesta una llamada al modelo;
+· **marcar vencido** — barato, pero necesita superficie que lo diga y alguien que
+  actúe;
+· **traducir al leer** — siempre fresco, latencia y costo en el camino del
+  lector, y sin control del prestador sobre lo que sale.
+
+**(b) SI EL BILINGÜE DE CONTENIDO DE USUARIO ES DE LA CASA — porque hoy NO lo
+es.** El riel i18n traduce lo nuestro. **Que el producto se haga cargo de
+traducir lo que escribe un usuario es una promesa distinta**, y arrastra: quién
+responde por una traducción mala, qué pasa si el prestador no está de acuerdo,
+y si se puede desactivar.
+
+> **☠️ CONDICIÓN DE MUERTE — con su disparo, que es lo que la mantiene honesta:**
+> se retira cuando **exista la primera superficie que muestre una ficha pública a
+> alguien en inglés**, y con ella las dos decisiones (a) y (b) tomadas.
+> **ANTES DE ESO, LA COLUMNA NACERÍA SIN LECTOR Y CON UNA MENTIRA DORMIDA** — y
+> la mentira empieza a correr desde el primer guardado, no desde el primer
+> lector. **Quién la retira:** quien construya esa superficie.
+>
+> *Nota de alcance: el escriba SIGUE devolviendo `es` + `en` (§5 lo manda: "es+en
+> de nacimiento"). Lo que esta ficha frena no es generarlo — es PERSISTIRLO sin
+> haber decidido su ciclo de vida.*
