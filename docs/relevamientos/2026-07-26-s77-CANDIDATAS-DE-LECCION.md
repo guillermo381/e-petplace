@@ -1,6 +1,6 @@
 # LAS CANDIDATAS DE LECCIÓN — inventario para la firma del founder (S77, ampliado S82)
 
-> **VEINTE candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **Las candidatas 10 a 14 entraron en S82** — el nombre de un token es su rol · su inversa (el nombre que envejeció) · la ausencia con tipos · el defecto que vive porque el DATO DE PRUEBA no lo alcanza · y el lector que se apoya solo en la RLS y por eso nadie puede auditarlo leyendo. **Las 15, 16 y 17 entraron en S83, y son PARIENTES: las tres son L-192 mudada de lugar** — una regla con auto-prueba puede tener BRAZOS que no salen rojos (el guard del guard) · un grep por la PROP mide quién la pasa, no qué se RENDERIZA (L-192 en la búsqueda) · **razonar el efecto de un token no es medirlo** (L-192 en la medición: el modo de falla es *un número plausible*). **Las tres describen instrumentos que devuelven algo y no verifican nada** — y la 17 cobró tres veces en un solo turno, una de ellas contra la mesa que la estaba escribiendo. El inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
+> **VEINTIUNA candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **Las candidatas 10 a 14 entraron en S82** — el nombre de un token es su rol · su inversa (el nombre que envejeció) · la ausencia con tipos · el defecto que vive porque el DATO DE PRUEBA no lo alcanza · y el lector que se apoya solo en la RLS y por eso nadie puede auditarlo leyendo. **Las 15, 16 y 17 entraron en S83, y son PARIENTES: las tres son L-192 mudada de lugar** — una regla con auto-prueba puede tener BRAZOS que no salen rojos (el guard del guard) · un grep por la PROP mide quién la pasa, no qué se RENDERIZA (L-192 en la búsqueda) · **razonar el efecto de un token no es medirlo** (L-192 en la medición: el modo de falla es *un número plausible*). **Las tres describen instrumentos que devuelven algo y no verifican nada** — y la 17 cobró tres veces en un solo turno, una de ellas contra la mesa que la estaba escribiendo. El inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
 
 > **NINGUNA ESTÁ FIRMADA. La firma es del founder.** Este documento no decide:
 > junta lo que hoy vive disperso entre la letra, las deudas y los cierres de
@@ -13,7 +13,7 @@
 
 ---
 
-## Las veinte
+## Las veintiuna
 
 ### 1 · (d) — EL ORDEN NOMBRA EL ARTEFACTO QUE ABRE, JAMÁS EL ARCHIVO DONDE SE LO ESPERA
 **Origen:** S75 (canon, línea 44). **Sin firma desde entonces.**
@@ -434,7 +434,7 @@ fue de quien la estaba escribiendo.*
 > **RE-MEDIDO S83 (31-jul-2026, segunda entrada del día): son DIECISÉIS.** La decimosexta —*un grep por la prop mide quién la pasa, no qué se renderiza*— nace de la **autocorrección de B** en B9/B10: el censo por prop de la marca de agua devolvió cero consumidores, y el censo por RENDER encontró **tres aguas inline con tres anatomías distintas** (hoy D-597). Es **L-192 mudada al método de medición**: la verificación corre, sale limpia, y su limpieza no prueba nada porque la pregunta estaba mal hecha. Hermana de L-170 (el instrumento decide qué puede aparecer) y de la #13 (allá el hueco lo abre el dato, acá la consulta). El conteo se corrige acá y en el título en el MISMO acto (L-141).
 >
 
-> **RE-MEDIDO S83 (1-ago-2026): son VEINTE.** La decimoséptima —*razonar el efecto de un token no es medirlo*— entra con **TRES casos del mismo turno**: los dos de B (la `Atmosfera` que "no movía el par" y sí lo movía en direcciones opuestas · el cálculo con hexes inventados sobre valores `rgba` con alpha) **y uno de esta mesa**, que calculó `text.tertiary` a mano sobre un `#FAF9F7` que **ya no es el fondo** (`bg.base` es `papelTapiz` desde S82-B r10): 2.279 a mano contra **2.18** del medidor. Su modo de falla es **un número plausible** que después se cita como si fuera medición. Hermana de la #16 (el instrumento decide qué podés ver) y de L-166. El conteo se corrige acá y en el título en el MISMO acto (L-141).
+> **RE-MEDIDO S83 (1-ago-2026): son VEINTIUNA.** La decimoséptima —*razonar el efecto de un token no es medirlo*— entra con **TRES casos del mismo turno**: los dos de B (la `Atmosfera` que "no movía el par" y sí lo movía en direcciones opuestas · el cálculo con hexes inventados sobre valores `rgba` con alpha) **y uno de esta mesa**, que calculó `text.tertiary` a mano sobre un `#FAF9F7` que **ya no es el fondo** (`bg.base` es `papelTapiz` desde S82-B r10): 2.279 a mano contra **2.18** del medidor. Su modo de falla es **un número plausible** que después se cita como si fuera medición. Hermana de la #16 (el instrumento decide qué podés ver) y de L-166. El conteo se corrige acá y en el título en el MISMO acto (L-141).
 >
 
 Si alguna otra candidata quedó fuera, es porque no encontré su fuente. **Pasame el literal y entra**: el criterio de este documento es que nada figure sin dónde leerlo.
@@ -637,3 +637,43 @@ condición de muerte **atada al arco de equipo** (D-512), no suelta.
 **⚠️ SIN FIRMA (regla 80).** No rige. **Que nazca con un caso vivo es lo que
 permite firmarla sabiendo qué cuesta aplicarla** — y el costo medido es una
 ficha, no un barrido.
+
+---
+
+### 21 · EL MENSAJE DE UN GUARD ES PARTE DEL GUARD
+
+**Origen: S84-A23, y lo pagó esta misma sesión.**
+
+> **Un guard puede verificar UNA cosa y su mensaje afirmar OTRA.** Cuando salta,
+> nadie relee su condición: **se lee el mensaje y se concluye lo que el mensaje
+> dice.**
+>
+> **LA PRUEBA, en una pregunta:** *si este guard salta, ¿el texto que imprime
+> describe exactamente lo que la condición comprobó — o describe la causa que yo
+> supuse cuando lo escribí?*
+
+**EL CASO, entero:** un cinturón preguntaba `count(*) WHERE whatsapp =
+'3208408790'` y exigía `= 1`, con el mensaje ***"la fila sin indicativo fue
+tocada"***. **Verificaba la existencia de un valor; decía que verificaba un
+cambio.** El founder curó esa fila desde la app —legítimo—, el literal dejó de
+existir, el guard saltó, y su mensaje **indujo la conclusión de que la migración
+había escrito ahí. Nunca la tocó.**
+
+**Costo medido:** una ficha 🔴 abierta contra una causa inexistente, un turno de
+forense, y **una migración retirada de `migrations/` por miedo a un fantasma que
+había fabricado el propio guard**.
+
+**Por qué es más peligroso que un guard roto:** un guard roto da verde y algún
+día alguien lo descubre. **Éste dio ROJO —o sea funcionó— y aun así mintió sobre
+por qué.** El rojo compra credibilidad: nadie audita un guard que acaba de
+saltar.
+
+**Su familia:** cierra el arco de #15 (brazos que no pueden salir rojos), #17
+(razonar no es medir) y #18 (el exit tras el pipe). Las cuatro son fallas de
+INSTRUMENTO, no de código — **y ésta es la única en la que el instrumento
+funcionó y aun así llevó a la conclusión equivocada.**
+
+**La cura, que ya se aplicó:** el guard nuevo compara contra **la traza**, y su
+mensaje dice literalmente lo que compara — *"N filas NO alcanzadas cambiaron"*.
+
+**⚠️ SIN FIRMA (regla 80).**

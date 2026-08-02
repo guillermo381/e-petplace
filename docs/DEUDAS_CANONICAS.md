@@ -3889,7 +3889,7 @@ ropa.**
 
 ---
 
-#### D-622 — UNA FILA DE SEED CAMBIÓ DURANTE UN INTENTO DE MIGRACIÓN QUE ABORTÓ 🟡 EXPLICACIÓN PROBABLE (S84, no confirmada)
+#### D-622 — UNA FILA DE SEED CAMBIÓ DURANTE UN INTENTO DE MIGRACIÓN QUE ABORTÓ ✅ CERRADA S84-A23 — la causa era MI PROPIO GUARD
 
 **Lo que está MEDIDO (y solo esto):**
 
@@ -4189,3 +4189,55 @@ envejeció**.
 > **☠️ CONDICIÓN ACTUALIZADA:** se retira cuando **(b) corra con su traza legible
 > y el comportamiento sea el esperado** — o antes, si alguien ata aquel
 > `updated_at` a una sesión de app con evidencia.
+
+> **✅ D-619 y D-622 CIERRAN JUNTAS — S84-A23 (`20260803000000_s84_promocion_e164`).**
+> Y cierran como la mesa pidió: **con medición, no con hipótesis.**
+>
+> ### El resultado de (b), leído de la traza
+>
+> | prestador | antes | después | alcanzada | país |
+> |---|---|---|---|---|
+> | Carlos | `593987654321` | `+593987654321` | ✅ | EC |
+> | Clínica Aurora | `593999000668` | `+593999000668` | ✅ | EC |
+> | **Satori Latam** | `573208408790` | **`+573208408790`** | ✅ | **CO** |
+> | Wizard | `593999000558` | `+593999000558` | ✅ | EC |
+> | Paseos Andres | `+573208408790` | `+573208408790` | ❌ | — *(ya estaba)* |
+>
+> **El país sale del PROPIO NÚMERO en cada caso** — CO para Satori, EC para los
+> otros tres. Ninguno del `country_code`, que las siete filas tienen en `EC`:
+> **si hubiera derivado de ahí, Satori habría quedado en `+593`. P21 intacta.**
+>
+> **`ALTER TABLE … VALIDATE CONSTRAINT` corrió en verde en los dos constraints**
+> (`convalidated = true`). **No queda pasado ilegal: D-619 muere de un comando**,
+> como su ficha exigía.
+>
+> ### 🔴 Y LA CAUSA DE D-622, QUE NO ERA LA QUE YO CREÍA
+>
+> **No fue la migración. Fue MI PROPIO CINTURÓN, correcto pero mal redactado.**
+> Preguntaba:
+> ```sql
+> SELECT count(*) WHERE whatsapp = '3208408790';  IF <> 1 THEN
+>   RAISE 'la fila sin indicativo FUE TOCADA'
+> ```
+> **Verificaba la EXISTENCIA DE UN VALOR y su mensaje decía que verificaba un
+> CAMBIO.** Cuando el founder curó esa fila desde la app —cosa perfectamente
+> legítima, y que la firma de A20 confirma—, el literal dejó de existir, el guard
+> gritó, **y su mensaje me hizo concluir que la migración había escrito ahí.
+> Nunca la tocó.**
+>
+> **La prueba de que no la tocaba está en esta misma corrida:** con el guard
+> corregido —que compara contra la traza en vez de contra un literal— la fila
+> quedó `alcanzada=false` y `antes == después`. **El predicado nunca la alcanzó,
+> ni antes ni ahora.**
+>
+> > **UN GUARD CORRECTO CON UN MENSAJE QUE INDUCE LA CONCLUSIÓN EQUIVOCADA CUESTA
+> > LO MISMO QUE UN GUARD ROTO.** Éste costó una ficha 🔴, un turno, y una
+> > migración retirada de `migrations/` por miedo a un fantasma que había
+> > fabricado yo. *El mensaje de un guard es parte del guard, no su decoración:
+> > es lo único que alguien va a leer cuando salte.* → **candidata #21**.
+>
+> ### Lo que queda vivo, declarado
+> **La tabla `public._traza_promocion_e164` NO se borra en este acto:** es la
+> evidencia que cerró las dos fichas. **Se retira cuando alguien la haya leído y
+> el canon de S84 esté escrito** — borrarla ahora sería repetir el error de
+> origen, que fue quedarse sin rastro.
