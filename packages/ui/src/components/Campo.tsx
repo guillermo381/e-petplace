@@ -4,6 +4,16 @@
  * ═══════════════════════════════════════════════════════════════════
  * REGLA EMIL RECTORA: nada se anima mientras el usuario tipea —
  * jamás labels flotantes, jamás layout shift al enfocar o errar.
+ *
+ * ENMIENDA S83-B1 — LA PROTECCIÓN NO SE RETIRA, SUBE UN NIVEL.
+ * El pie de altura reservada es el instrumento de esa promesa, y sigue
+ * siendo el DEFAULT. Lo que la enmienda reconoce es que el pie pertenece
+ * al CONTROL, y un control puede estar compuesto por más de una pieza: en
+ * una fila (indicativo + número) el pie de UNO de los hijos corre al otro
+ * hacia abajo por su alto exacto. Con `sinPie`, el hijo deja de reservarlo
+ * y el pie lo monta el COMPUESTO, para los dos — misma promesa, un piso
+ * más arriba. Sin ese pie del compuesto la promesa se pierde, y por eso
+ * `sinPie` no viaja solo: viaja con `PieDeCampo` y con su guard (R29).
  * ═══════════════════════════════════════════════════════════════════
  *
  * Consecuencias de diseño:
@@ -40,6 +50,75 @@ const BORDE = 1.5
 const ALTO = 48                                  // md — target táctil
 const LINEA_MENSAJE = typography.size.sm * typography.leading.normal  // slot reservado
 
+/** El alto EXACTO que el pie reserva: 13 × 1.6 + 4 = **24.8 px**. Es el
+ *  delta que un hermano alineado a `flex-end` recibe hacia abajo cuando su
+ *  vecino es un `Campo` — medido, no estimado. Se exporta porque un
+ *  compuesto puede necesitar el número, y derivarlo a mano en la pantalla
+ *  es exactamente cómo se fabrican los márgenes a ojo.
+ *  ⚠️ NO es constante universal: si el mensaje ENVUELVE a dos líneas, el
+ *  pie crece y el delta con él. Por eso la cura correcta es `sinPie` (que
+ *  lo elimina) y no "igualar el alto" en el consumidor — igualar acierta
+ *  en reposo y falla justo cuando aparece el error. */
+export const ALTO_PIE_CAMPO = LINEA_MENSAJE + spacing[1]
+
+export interface PieDeCampoProps {
+  /** Helper. `error` lo reemplaza en el MISMO slot. */
+  ayuda?: string
+  /** Mensaje de error (dangerText) — anunciado con liveRegion polite. */
+  error?: string
+}
+
+/**
+ * PieDeCampo — el pie de un control de formulario: altura RESERVADA y el
+ * mensaje adentro. Vive acá (no en archivo propio) por el precedente de
+ * `HojaScroll` dentro de `Hoja`: es la anatomía DE `Campo`, no una pieza
+ * con vida propia.
+ *
+ * POR QUÉ EXISTE COMO PIEZA (S83-B1): esta anatomía estaba COPIADA byte
+ * por byte en `Campo` y `CampoFecha` —comentario de D-605 incluido— y el
+ * compuesto que necesita montarla iba a ser la tercera copia. Se ensancha,
+ * no se copia (L-175). Precedente medido el mismo día: en B36 la expresión
+ * del teclado vivía duplicada en dos archivos y curar uno dejaba el otro
+ * roto; acá se cura de raíz antes de que pase.
+ */
+export function PieDeCampo({ ayuda, error }: PieDeCampoProps) {
+  const { theme } = useTheme()
+  const mensaje = error ?? ayuda
+
+  return (
+    // Slot de altura RESERVADA: error reemplaza a ayuda, nada empuja el layout
+    <View style={{ minHeight: ALTO_PIE_CAMPO, justifyContent: 'flex-end' }}>
+      {mensaje ? (
+        <Text
+          accessibilityLiveRegion={error ? 'polite' : 'none'}
+          style={{
+            fontFamily: typography.family.sans.regular,
+            fontSize: typography.size.sm,
+            lineHeight: LINEA_MENSAJE,
+            // S83-B26 (D-605, salida ②): el helper migra de
+            // `text.tertiary` a `text.secondary`. EL PORQUÉ, que es el
+            // que decidió la ficha: la exención de `tertiary` se firmó
+            // para un ROL —el tab inactivo, espec B3.7— y un helper NO
+            // es placeholder ni está apagado: **es la instrucción de
+            // cómo llenar el campo, el texto que uno lee justo cuando
+            // no sabe qué poner**. Medido contra el theme resuelto, no
+            // a mano: `tertiary` da 2.18 en LIGHT (el tema por defecto
+            // del producto) contra un mínimo de 3:1 — dos de los tres
+            // temas por debajo. `secondary` YA vive en el corpus del
+            // gate (`verify-contrast.ts:97`) y pasa en los tres.
+            // MÁXIMO ALCANCE POR SITIO: no es una pantalla — lo hereda
+            // CADA `Campo` de la casa, en las dos apps.
+            color: error ? theme.status.dangerText : theme.text.secondary,
+            marginTop: spacing[1],
+          }}
+        >
+          {mensaje}
+        </Text>
+      ) : null}
+    </View>
+  )
+}
+
 export interface CampoProps
   extends Omit<
     TextInputProps,
@@ -70,6 +149,21 @@ export interface CampoProps
    *  {false}` queda para la excepción DECLARADA con dueño (patrón del
    *  flip de Tarjeta). */
   sinCaja?: boolean
+  /** S83-B1 — NO reserva el pie: lo monta el CONTROL COMPUESTO que lo
+   *  contiene, con `PieDeCampo`, para todos sus hijos a la vez.
+   *
+   *  CUÁNDO: SOLO dentro de una fila donde este `Campo` tiene hermanos
+   *  (indicativo + número). Fuera de esa fila, `sinPie` no arregla nada y
+   *  rompe la promesa rectora: el mensaje empujaría el layout al aparecer.
+   *
+   *  ⚠️ EL MODO DE FALLA, dicho porque es silencioso: con `sinPie` este
+   *  `Campo` sigue PINTANDO su borde de error —eso no se delega— pero deja
+   *  de RENDERIZAR el texto. Si el compuesto no monta `PieDeCampo`, el
+   *  usuario ve un borde rojo sin una palabra que explique por qué. Por eso
+   *  `verify:diseno` R29 exige que las dos cosas vivan en el mismo archivo:
+   *  una verificación cuyo modo de falla es el silencio no es una
+   *  verificación (L-192). */
+  sinPie?: boolean
   /** Password con toggle ver/ocultar integrado (ocupa el slot iconoDer). */
   secure?: boolean
   /** Líneas visibles — alto FIJO, no auto-grow. */
@@ -84,6 +178,7 @@ export function Campo({
   error,
   deshabilitado = false,
   sinCaja = true,
+  sinPie = false,
   secure = false,
   multilinea,
   iconoIzq,
@@ -108,8 +203,6 @@ export function Campo({
   const altoCampo = multilinea
     ? multilinea * Math.round(typography.size.base * typography.leading.normal) + spacing[3] * 2
     : ALTO
-
-  const mensaje = error ?? ayuda
 
   return (
     <View style={{ opacity: deshabilitado ? opacity.disabled : 1 }}>
@@ -191,36 +284,7 @@ export function Campo({
         ) : null}
       </Animated.View>
 
-      {/* Slot de altura RESERVADA: error reemplaza a ayuda, nada empuja el layout */}
-      <View style={{ minHeight: LINEA_MENSAJE + spacing[1], justifyContent: 'flex-end' }}>
-        {mensaje ? (
-          <Text
-            accessibilityLiveRegion={error ? 'polite' : 'none'}
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.sm,
-              lineHeight: LINEA_MENSAJE,
-                            // S83-B26 (D-605, salida ②): el helper migra de
-              // `text.tertiary` a `text.secondary`. EL PORQUÉ, que es el
-              // que decidió la ficha: la exención de `tertiary` se firmó
-              // para un ROL —el tab inactivo, espec B3.7— y un helper NO
-              // es placeholder ni está apagado: **es la instrucción de
-              // cómo llenar el campo, el texto que uno lee justo cuando
-              // no sabe qué poner**. Medido contra el theme resuelto, no
-              // a mano: `tertiary` da 2.18 en LIGHT (el tema por defecto
-              // del producto) contra un mínimo de 3:1 — dos de los tres
-              // temas por debajo. `secondary` YA vive en el corpus del
-              // gate (`verify-contrast.ts:97`) y pasa en los tres.
-              // MÁXIMO ALCANCE POR SITIO: no es una pantalla — lo hereda
-              // CADA `Campo` de la casa, en las dos apps.
-              color: error ? theme.status.dangerText : theme.text.secondary,
-              marginTop: spacing[1],
-            }}
-          >
-            {mensaje}
-          </Text>
-        ) : null}
-      </View>
+      {sinPie ? null : <PieDeCampo ayuda={ayuda} error={error} />}
     </View>
   )
 }
