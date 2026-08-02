@@ -191,24 +191,74 @@ function componerE164(valor: string, iso: string): string {
   return pais === undefined ? crudo : `${pais.pre}${crudo}`;
 }
 
-/** PARTE un E.164 guardado para pintar el selector — **es LECTURA, no
- *  columna**: el país no se persiste por separado, se deriva al mostrar.
+/** PARTE un E.164 para pintar el selector — **es LECTURA, no columna**: el
+ *  país no se persiste por separado, se deriva al mostrar.
+ *
+ *  ── S84-A9 (a′) — AHORA TAMBIÉN PARTE VALORES LEGADOS SIN '+' ────────
+ *  **Firma del founder (2-ago-2026), con la distinción que la habilita:**
+ *  *P21 prohíbe DERIVAR el país del `country_code`; no prohíbe OFRECERLE
+ *  al dueño lo que su propio número ya dice. Proponer no es deducir — la
+ *  confirmación sigue siendo del dueño.*
+ *
+ *  **El caso que lo obligó, medido:** el WhatsApp de Satori valía
+ *  `573208408790` (E.164 sin '+', regla 28 derogada). La versión anterior
+ *  devolvía `null`, el campo quedaba con el indicativo ADENTRO y el
+ *  selector caía en el default EC ⇒ elegir el país correcto (CO) componía
+ *  **`+57573208408790`**, con el 57 DUPLICADO, y el Guardar rebotaba.
+ *  **La salida "que el dueño confirme" se mordía la cola: no había forma
+ *  de confirmar desde una pantalla que no dejaba guardar.**
+ *
+ *  `propuesto: true` marca que el país **se dedujo del número y no venía
+ *  con su '+'** — la superficie puede señalarlo si quiere; el dato viaja
+ *  para que la decisión de mostrarlo sea suya, no de esta función.
+ *
  *  Prefijo MÁS LARGO primero (`+593` antes que `+59`/`+5`), el mismo
  *  criterio que `normalizar_telefono` ya usa en la DB (`ORDER BY
  *  length(...) DESC`) — se espeja, no se inventa.
  *
- *  ⚠️ DOS BORDES DECLARADOS:
- *  · **El prefijo NO determina el país**: `+1` es US, CA, PR y DO. Se
- *    elige el primero del catálogo, y para pintar alcanza (el prefijo es
- *    correcto aunque el país no lo sea). Nunca se escribe esa elección.
- *  · **Un valor SIN '+' no se parte** — devuelve null y el número entra
- *    crudo al campo. Es el legado de la regla 28: ponerle un país sería
- *    inferirlo, y eso es justo lo que P21 prohíbe. */
-function partirE164(v: string): { iso: string; numero: string } | null {
-  if (!v.startsWith('+')) return null;
-  const candidatos = PAISES.filter((p) => v.startsWith(p.pre)).sort((a, b) => b.pre.length - a.pre.length);
-  const pais = candidatos[0];
-  return pais === undefined ? null : { iso: pais.iso, numero: v.slice(pais.pre.length) };
+ *  ⚠️ EL BORDE QUE SOBREVIVE: **el prefijo NO determina el país** — `+1`
+ *  es US, CA, PR y DO. Cuando el valor ya trae su '+', se elige el primero
+ *  del catálogo y para pintar alcanza (el prefijo es correcto aunque el
+ *  país no lo sea); nunca se escribe esa elección. Cuando NO lo trae —o
+ *  sea cuando es una PROPUESTA— la vara sube: ver el guard adentro. */
+function partirE164(v: string): { iso: string; numero: string; propuesto: boolean } | null {
+  const crudo = v.trim().replace(/[\s-]/g, '');
+  if (crudo.length === 0) return null;
+  const traeMas = crudo.startsWith('+');
+  const digitos = traeMas ? crudo.slice(1) : crudo;
+
+  const candidatos = PAISES
+    .filter((p) => digitos.startsWith(p.pre.slice(1)))
+    .sort((a, b) => b.pre.length - a.pre.length);
+
+  for (const pais of candidatos) {
+    const numero = digitos.slice(pais.pre.length - 1);
+    if (numero.length === 0) continue;
+    /* ⚠️ EL GUARD QUE EVITA EL FALSO POSITIVO — y es la diferencia entre
+       proponer y adivinar. Un número NACIONAL puede empezar por casualidad
+       con los dígitos de un prefijo (`+1` es el caso obvio: cualquier
+       número local que arranque en 1). Por eso, cuando el país DECLARA su
+       formato, **la propuesta solo se ofrece si el E.164 resultante lo
+       cumple**. Si no cumple, no se propone nada y el valor entra crudo —
+       como antes de esta enmienda.
+       Los 14 países sin `formato_telefono` declarado no se pueden
+       verificar así; ahí la propuesta se ofrece igual y es MÁS DÉBIL. Se
+       declara en vez de inventarles una regex (L-180: un valor sugerido
+       derivado de un supuesto no declarado fabrica dato inventado). */
+    if (!traeMas) {
+      // ES UNA PROPUESTA ⇒ la vara es más alta: solo se propone un país que
+      // DECLARA su formato y cuyo E.164 resultante lo CUMPLE.
+      // Sin esto la función proponía cualquier cosa: medido, `1234567`
+      // —un nacional que arranca en 1— salía propuesto como República
+      // Dominicana, porque DO comparte el `+1` y NO declara formato, así
+      // que no había nada que lo desmintiera. **Un país sin formato no se
+      // propone**: inventarle una regex sería el dato inventado de L-180.
+      if (pais.formato === undefined) continue;
+      if (!new RegExp(pais.formato).test(`${pais.pre}${numero}`)) continue;
+    }
+    return { iso: pais.iso, numero, propuesto: !traeMas };
+  }
+  return null;
 }
 
 /** ③ "INCOMPLETA" con la regla que ya rige: una sección está incompleta

@@ -864,3 +864,17 @@ export {
   type FotoGaleria,
   type CodigoErrorGaleria,
 } from './wrappers/galeria-prestador';
+
+// ── EL ESCRIBA DE LA PRESENCIA (S84-A10) ─────────────────────────────
+// Puerta única sobre la Edge Function `escribir-presencia`. Los SEIS
+// códigos viajan TIPADOS: el mapeo a voz es contrato, no cosmética.
+// `faltan_respuestas` dispara las dos preguntas de §5 — y NO es
+// validación de formulario: es el MOTOR imponiendo la letra, así que la
+// conducta del botón no depende de que la pantalla la recuerde.
+export {
+  escribirPresencia,
+  type InputEscribirPresencia,
+  type BorradorPresencia,
+  type HechoPresencia,
+  type CodigoErrorPresencia,
+} from './wrappers/presencia';
