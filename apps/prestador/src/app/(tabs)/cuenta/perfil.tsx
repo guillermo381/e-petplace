@@ -92,6 +92,7 @@ import { borrarBytesFotoGaleria, resolverUrlFotoGaleria, subirFotoGaleria } from
 import { SeccionSede } from '@/components/seccion-sede';
 import { leerSede } from '@/lib/sede';
 import { ControlTelefono, EspejoNegocio, SeccionDesplegable } from '@/components/perfil-piezas';
+import { EscribaHistoria } from '@/components/escriba-historia';
 import { useBarraEstadoClara } from '@/components/techo-oficio';
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -790,6 +791,29 @@ export default function PerfilV2() {
                 onChangeText={setDescripcion}
                 multilinea={3}
               />
+
+              {/* EL ESCRIBA (§5) — junto a la historia, que es lo que
+                  ayuda a escribir. LOS HECHOS son lo que el sistema YA
+                  sabe, etiquetados: hoy solo van los DECLARADOS que esta
+                  pantalla tiene en la mano (ciudad y radio). No se manda
+                  nada como `verificado` porque nada de acá lo está — y
+                  `verificado` la function lo CITA en vez de
+                  parafrasearlo, así que etiquetarlo mal sería ponerle
+                  comillas a algo que nadie verificó. */}
+              {prestador !== null && (
+                <EscribaHistoria
+                  historiaActual={descripcion}
+                  hechos={[
+                    ...(prestador.ciudad !== null && prestador.ciudad.length > 0
+                      ? [{ etiqueta: 'declarado' as const, texto: `Atiende en ${prestador.ciudad}` }]
+                      : []),
+                    ...(prestador.radio_cobertura_km !== null
+                      ? [{ etiqueta: 'declarado' as const, texto: `Cubre hasta ${prestador.radio_cobertura_km} km` }]
+                      : []),
+                  ]}
+                  onAceptar={setDescripcion}
+                />
+              )}
             {/* ═══ S84-C12 · LAS FOTOS ═══
                 TIRA HORIZONTAL Y NO GRILLA: en un teléfono la grilla
                 obliga a achicar cada foto hasta que ninguna se ve, y la

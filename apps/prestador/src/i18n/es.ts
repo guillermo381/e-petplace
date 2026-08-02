@@ -257,6 +257,21 @@ export const prestadorEs = {
     espejoPie: 'Así se va a ver tu ficha en la app.',
 
     // ── S84-C12 · las fotos de la vitrina ──
+    // ── S84-C15 · el escriba (MODELO_PRESENCIA §5) ──
+    iaEscribir: 'Ayúdame a escribirla',
+    iaMejorar: 'Ayúdame a mejorarla',
+    iaHojaTitulo: 'Tu historia',
+    iaIntroEscribir: 'Contame dos cosas y armo un primer borrador con lo que ya sé de tu negocio. Vos decidís si lo usás.',
+    iaIntroMejorar: 'Contame dos cosas y mejoro lo que ya escribiste. No se cambia nada hasta que vos digas.',
+    iaPorQue: '¿Por qué haces esto?',
+    iaQueSepan: '¿Qué quieres que sepan de tu lugar?',
+    iaComponer: 'Escribir el borrador',
+    iaLoTuyo: 'lo que escribiste',
+    iaPropuesta: 'la propuesta',
+    iaUsar: 'Usar esta versión',
+    iaOtra: 'Probar otra',
+    iaDescartar: 'Descartar',
+
     espacioTitulo: 'Tu espacio',
     fotoAdelante: 'Mover adelante',
     fotoAtras: 'Mover atrás',
