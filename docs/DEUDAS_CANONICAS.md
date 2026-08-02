@@ -3889,7 +3889,7 @@ ropa.**
 
 ---
 
-#### D-622 — UNA FILA DE SEED CAMBIÓ DURANTE UN INTENTO DE MIGRACIÓN QUE ABORTÓ, Y NO SÉ POR QUÉ 🔴
+#### D-622 — UNA FILA DE SEED CAMBIÓ DURANTE UN INTENTO DE MIGRACIÓN QUE ABORTÓ 🟡 EXPLICACIÓN PROBABLE (S84, no confirmada)
 
 **Lo que está MEDIDO (y solo esto):**
 
@@ -4138,3 +4138,54 @@ envejeció**.
 > con el conteo de cuántas eran de cada clase. **Escrita como "cuando exista el
 > barrido", no como "cuando alguien revise"** — porque si se escribiera de la
 > segunda forma sería su propio caso.
+
+> **➕ ENMIENDA S84-A20 — LA FIRMA DEL TELÉFONO EN DISPOSITIVO CAMBIA TRES FICHAS.**
+>
+> **Palabra del founder (2-ago-2026, group `d139b9c0`, ancla `2758030`):**
+> *"EL TELÉFONO E.164 — FIRMADO. Se guarda con Colombia y persiste."*
+>
+> ### **D-613 ✅ VALIDADA EN DISPOSITIVO**
+> La derogación de la regla 28 **ya no descansa solo en fixtures**: un número
+> colombiano se guardó con su `+` desde la app y persistió. **Y (a′) quedó
+> probada con dato real** — no con el `curl` de una prueba.
+>
+> ### **D-619 — el estado real, medido, es MEJOR de lo que la ficha decía**
+> **Una de las cinco filas ya pasa el CHECK**, y no por (b): **la curó su dueño
+> desde la pantalla**, que es exactamente la salida (a) firmada.
+>
+> | | |
+> |---|---|
+> | ✅ pasa | `Paseos Andres` → `+573208408790` |
+> | 🔴 falta | `Satori Latam` `573208408790` · `Carlos` `593987654321` · `Clínica Aurora` `593999000668` · `Wizard` `593999000558` |
+>
+> **⚠️ Y OJO CON LO QUE LA FIRMA NO DICE: el founder NO probó desde Satori.** La
+> fila que se curó es la del prestador DEMO (`demo-prestador@epetplace.dev`), que
+> es la cuenta con la que gatea. **Satori sigue sin poder editar su perfil** — el
+> bloqueo que motivó todo esto **sigue vivo para su propio negocio**. *Se dice
+> porque "el teléfono funciona" y "el perfil de Satori se desbloqueó" son dos
+> cosas distintas, y solo la primera está firmada.*
+>
+> ### **D-622 — de "no sé por qué" a EXPLICACIÓN PROBABLE**
+> **Lo nuevo, medido:** la fila alterada pertenece a
+> `demo-prestador@epetplace.dev`, **la cuenta con la que el founder gatea**; y
+> **volvió a cambiar hoy** (`22:54:15`), esta vez con causa conocida — la firma
+> declara que guardó desde la app. **El valor `+573208408790` es exactamente el
+> que `componerE164` produce** con el campo en `3208408790` y país CO.
+>
+> ⇒ **La explicación probable es que el cambio de aquel turno también fue el
+> founder probando el OTA, no la migración.** Encaja en cuenta, valor y patrón.
+>
+> **LO QUE SIGUE SIN CONFIRMARSE, y por eso la ficha baja a 🟡 en vez de
+> cerrarse:** no hay rastro directo que ate aquel `updated_at` a una sesión de
+> app. **Es una hipótesis fuerte, no una medición** — y esta sesión ya nombró
+> tres veces que una causa plausible sin medición es peor que la incógnita
+> (candidata #17).
+>
+> **Consecuencia práctica, que es lo que importa:** **(b) deja de estar bloqueada
+> por un fantasma.** Si el próximo intento corre con la traza en tabla real (el
+> instrumento que la ficha ya describe) y la fila no se mueve sola, la
+> explicación queda confirmada y ambas fichas cierran juntas.
+>
+> **☠️ CONDICIÓN ACTUALIZADA:** se retira cuando **(b) corra con su traza legible
+> y el comportamiento sea el esperado** — o antes, si alguien ata aquel
+> `updated_at` a una sesión de app con evidencia.
