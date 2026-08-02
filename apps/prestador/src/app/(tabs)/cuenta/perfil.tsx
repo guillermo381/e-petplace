@@ -803,14 +803,23 @@ export default function PerfilV2() {
               {prestador !== null && (
                 <EscribaHistoria
                   historiaActual={descripcion}
-                  hechos={[
-                    ...(prestador.ciudad !== null && prestador.ciudad.length > 0
+                  hechos={
+                    /* ③ S84-C18 — EL RADIO SALIÓ, y el criterio es del
+                       founder: es PARÁMETRO DE OPERACIÓN, no razón para
+                       elegir. Una familia no decide por cuántos km
+                       cubrís; decide por quién sos y dónde estás. Meterlo
+                       en el material del escriba lo empujaba a escribir
+                       logística en una historia.
+                       QUEDA LA CIUDAD, y nada más de acá.
+                       ⚠️ NADA VIAJA COMO `verificado` — la function lo
+                       CITA en vez de parafrasearlo, así que etiquetar mal
+                       sería ponerle comillas a algo que nadie verificó.
+                       ☠️ Cuando A habilite credenciales verificadas,
+                       entran ACÁ con su etiqueta propia. */
+                    prestador.ciudad !== null && prestador.ciudad.length > 0
                       ? [{ etiqueta: 'declarado' as const, texto: `Atiende en ${prestador.ciudad}` }]
-                      : []),
-                    ...(prestador.radio_cobertura_km !== null
-                      ? [{ etiqueta: 'declarado' as const, texto: `Cubre hasta ${prestador.radio_cobertura_km} km` }]
-                      : []),
-                  ]}
+                      : []
+                  }
                   onAceptar={setDescripcion}
                 />
               )}
