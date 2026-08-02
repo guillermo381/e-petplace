@@ -132,6 +132,11 @@ export {
   type FotoCapturada,
   type ResultadoCaptura,
   type OpcionesCaptura,
+  // S84-B14 — la gemela de VIDEO (el clip de la vitrina). Angosta a
+  // propósito: ver el porqué de gemela-y-no-prop en su archivo.
+  capturarVideoDeGaleria,
+  type VideoCapturado,
+  type ResultadoCapturaVideo,
 } from './components/capturaFoto'
 // S61-B10 (L-137 3ª enmienda): la frontera dual-forma de lectura de
 // archivos locales — de TODAS las apps, jamás cura local por-caller
