@@ -519,6 +519,26 @@ function AguaRecetaCliente({ color }: { color?: string }) {
 // lo que corre. NO se enciende en apps/prestador: eso es de C, después.
 // La CUARTA anatomía (S83-B14/B17): entera, derivada del ancho — la única
 // opción que cumple "que se vea, no cortado" sin volver a un número fijo.
+/** S84-B3 — un panel del agua sobre el FONDO REAL de la casa que lo
+ *  envuelve. No pinta un hex: toma `theme.bg.base`, que en el prestador
+ *  resuelve a `tapizDarkOficio`/`papelTapizOficio` por los ocho slots. La
+ *  lámina vieja de S83 pintaba `palette.light0` a mano — correcto cuando
+ *  el prestador NO tenía tinte claro, falso desde B33. */
+function AguaAlfa({ alfa, rotulo, ratio }: { alfa: number; rotulo: string; ratio: string }) {
+  const { theme } = useTheme()
+  return (
+    <View style={{ flex: 1, gap: spacing[1] }}>
+      <View style={{ height: 190, borderRadius: radius.md, overflow: 'hidden', backgroundColor: theme.bg.base, justifyContent: 'flex-end' }}>
+        <MarcaDeAgua alfa={alfa} />
+      </View>
+      <Texto variante="apoyo">{rotulo}</Texto>
+      <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary }}>
+        {ratio}
+      </Text>
+    </View>
+  )
+}
+
 function MarcaDeAguaEntera({ alfa }: { alfa: number }) {
   const { width } = useWindowDimensions()
   return <MarcaDeAgua alfa={alfa} tamano={Math.round(width * 0.55)} />
@@ -1870,7 +1890,68 @@ function GaleriaInterna() {
           </Texto>
         </Seccion>
 
-        <Seccion titulo="① ⭐ GATE S83 — EL AGUA, COPIADA DEL CLIENTE · qué decide: si la receta que 'allí quedó bien' (entera, 210, centrada, 0.06) sirve tal cual en la casa verde, y en qué color">
+        <Seccion titulo="① ⭐ GATE S84 — CUÁNTO SE NOTA EL AGUA · qué decide: UN SOLO ALFA para las DOS casas (firma founder: 'se nota demasiado; baja en cliente y en prestador, un poco más sutil'). ENMIENDA la firma de B22 ('copiá cómo quedó en cliente, allí quedó bien'), que puso el 0.06 que corre hoy. Los cuatro fondos son los REALES y los números son compuestos, no a ojo">
+          <ThemeProvider defaultMode="dark" cta="oficio">
+            <PanelGateTema etiqueta="① PRESTADOR OSCURO — tapiz 5% (#0D1617)">
+              <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+                <AguaAlfa alfa={0.045} rotulo="0.045" ratio="1.106 · 10 pasos" />
+                <AguaAlfa alfa={0.035} rotulo="0.035" ratio="1.081 · 8 pasos" />
+                <AguaAlfa alfa={0.03} rotulo="0.03" ratio="1.061 · 7 pasos" />
+              </View>
+            </PanelGateTema>
+          </ThemeProvider>
+
+          <ThemeProvider defaultMode="light" cta="oficio">
+            <PanelGateTema etiqueta="② PRESTADOR CLARO — papel verde 3% (#F4F8F6)">
+              <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+                <AguaAlfa alfa={0.045} rotulo="0.045" ratio="1.092 · 10 pasos" />
+                <AguaAlfa alfa={0.035} rotulo="0.035" ratio="1.073 · 8 pasos" />
+                <AguaAlfa alfa={0.03} rotulo="0.03" ratio="1.061 · 7 pasos" />
+              </View>
+            </PanelGateTema>
+          </ThemeProvider>
+
+          <ThemeProvider defaultMode="dark">
+            <PanelGateTema etiqueta="③ CLIENTE OSCURO — tapiz 3% (#0D050D)">
+              <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+                <AguaAlfa alfa={0.045} rotulo="0.045" ratio="1.070 · 11 pasos" />
+                <AguaAlfa alfa={0.035} rotulo="0.035" ratio="1.053 · 8 pasos" />
+                <AguaAlfa alfa={0.03} rotulo="0.03" ratio="1.046 · 7 pasos" />
+              </View>
+            </PanelGateTema>
+          </ThemeProvider>
+
+          <ThemeProvider defaultMode="light">
+            <PanelGateTema etiqueta="④ CLIENTE CLARO — papel magenta 3% (#FAF2F5). ES DONDE VIVE LA FIRMA QUE SE ENMIENDA">
+              <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+                <AguaAlfa alfa={0.045} rotulo="0.045" ratio="1.093 · 10 pasos" />
+                <AguaAlfa alfa={0.035} rotulo="0.035" ratio="1.073 · 8 pasos" />
+                <AguaAlfa alfa={0.03} rotulo="0.03" ratio="1.057 · 7 pasos" />
+              </View>
+            </PanelGateTema>
+          </ThemeProvider>
+
+          <Texto variante="apoyo">
+            SUTIL NO ES AUSENTE — el piso, medido: el agua deja de existir en 8 bits cuando el color
+            compuesto redondea al del fondo, y eso pasa por DEBAJO de α 0.003 en los cuatro fondos.
+            Los tres candidatos van de 7 a 11 pasos de 255: ninguno se acerca al piso. El más bajo
+            (0.03) sigue siendo 10 veces el umbral de existencia.
+          </Texto>
+          <Texto variante="apoyo">
+            LO QUE UN SOLO VALOR NO PUEDE ARREGLAR, dicho antes de elegir: los dos tapices oscuros
+            están a % distinto (prestador 5%, cliente 3%), así que el MISMO alfa aterriza sobre
+            luminancias distintas y el agua siempre va a leerse un poco más en el prestador oscuro
+            (a 0.045: 1.106 contra 1.070). Es consecuencia de un valor único, no defecto del valor
+            elegido — y con 3 milésimas de diferencia entre los dos claros, es el único eje donde se
+            nota.
+          </Texto>
+          <Texto variante="apoyo">
+            EL DEFAULT SIGUE EN 0.06 hasta tu elección. La lámina pasa el alfa por prop; la pieza no
+            se tocó.
+          </Texto>
+        </Seccion>
+
+        <Seccion titulo="① ⭐ GATE S83 — EL AGUA, COPIADA DEL CLIENTE (SUPERSEDED por la de arriba: su fondo es palette.light0 pintado a mano, que dejó de ser el fondo real del prestador cuando nació papelTapizOficio en B33) · qué decidió: si la receta del cliente servía en la casa verde, y en qué color">
           <ThemeProvider defaultMode="light" cta="oficio">
             <PanelGateTema etiqueta="prestador CLARO — la receta EXACTA del cliente">
               <View style={{ flexDirection: 'row', gap: spacing[2] }}>
