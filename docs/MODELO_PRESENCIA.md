@@ -145,6 +145,31 @@ para operar (la presencia es palanca, no peaje).
   onboardeados** — porque hoy se diseñaría la voz del prestador sin haber
   conocido a ninguno, y el v1 compuesto es honesto justamente porque no la
   adivina. Los primeros reales enseñan qué agregar.
+
+  > **⚠️ ENMIENDA — 2-ago-2026, decisión del founder: EL ESCRIBA (§5) SE
+  > ADELANTA.** *No deroga el disparo del arco completo: le saca §5 de adentro.*
+  >
+  > **La razón, y se sostiene: el disparo original tenía una dependencia
+  > circular.** El arco esperaba a los primeros prestadores reales; pero **sin
+  > descripción no hay vitrina, y sin vitrina no hay pitch de captación — y el
+  > pitch es lo que trae a esos prestadores.** Esperar a que lleguen para
+  > construir lo que sirve para que lleguen es esperar para siempre.
+  >
+  > **Lo que NO cambia, y es la mitad que el disparo protegía:** el argumento
+  > original —*"hoy se diseñaría la voz del prestador sin haber conocido a
+  > ninguno"*— **sigue siendo cierto y sigue rigiendo sobre ②③**. Por eso se
+  > adelanta **solo el escriba**, que es precisamente la pieza que **no adivina
+  > la voz: la recoge**. §5 no inventa un tono de prestador — le pregunta al
+  > prestador y redacta lo que él contestó. *Adelantar una pieza que escucha no
+  > contradice una regla que existe para no adivinar.*
+  >
+  > **Y el muro que lo hace seguro está en el código, no en la confianza:** sin
+  > respuestas humanas la function **rebota** (`faltan_respuestas`) en vez de
+  > escribir un genérico. Si los primeros prestadores reales enseñan otra cosa,
+  > enseñarán sobre borradores que ellos mismos dictaron.
+  >
+  > **Se escribe acá, con fecha, y no de callado** — un disparo que se adelanta
+  > sin dejar rastro convierte la letra en decoración.
 - **La monetización: dispara cuando el sello haya ganado significado**
   (§7.5) — jamás antes.
 - Letra fina de cada pieza: ciclo M1-M5 completo, vara cruzada, gate
