@@ -257,6 +257,14 @@ export const prestadorEs = {
     espejoPie: 'Así se va a ver tu ficha en la app.',
 
     // ── S84-C12 · las fotos de la vitrina ──
+    espacioTitulo: 'Tu espacio',
+    fotoAdelante: 'Mover adelante',
+    fotoAtras: 'Mover atrás',
+    borradorTitulo: 'Tenés cambios sin guardar',
+    borradorVoz: 'El espejo muestra lo que ya está guardado. Si querés verlos ahí, guardalos primero.',
+    borradorGuardarYVer: 'Guardar y ver',
+    borradorVerIgual: 'Ver lo guardado',
+
     fotosTitulo: 'Fotos de tu espacio',
     fotosAyuda: 'La primera es tu portada. Tocá una foto para cambiarla de lugar o borrarla.',
     fotoAgregar: 'Agregar',
@@ -267,7 +275,6 @@ export const prestadorEs = {
     fotoA11y: 'Foto {{n}}',
     fotoHojaTitulo: 'Esta foto',
     fotoHacerPortada: 'Hacer portada',
-    fotoMover: 'Mover una posición adelante',
     fotoBorrar: 'Borrar',
 
     clipTitulo: 'Tu clip',

@@ -251,6 +251,7 @@ export default function PerfilV2() {
      el índice ES el orden y `[0]` ES la portada: no hay estado de
      portada aparte porque no hay dato de portada aparte. */
   const [fotos, setFotos] = useState<FotoGaleria[]>([]);
+  const [borradorAbierto, setBorradorAbierto] = useState(false);
   const [fotoTocada, setFotoTocada] = useState<number | null>(null);
   const [subiendoFoto, setSubiendoFoto] = useState(false);
 
@@ -295,7 +296,7 @@ export default function PerfilV2() {
     await recargarFotos(prestador.id);
   }
 
-  async function accionSobreFoto(accion: 'portada' | 'mover' | 'borrar') {
+  async function accionSobreFoto(accion: 'portada' | 'adelante' | 'atras' | 'borrar') {
     if (fotoTocada === null || prestador === null) return;
     const foto = fotos[fotoTocada];
     const i = fotoTocada;
@@ -305,18 +306,21 @@ export default function PerfilV2() {
     if (accion === 'portada') {
       const r = await marcarComoPortada(prestador.id, foto.id);
       if (!r.ok) mostrar({ variante: 'error', texto: r.mensaje });
-    } else if (accion === 'mover') {
-      /* "Mover" = UN paso hacia el frente, y es la traducción honesta
-         del arrastre a un teléfono: el drag-and-drop dentro de un
-         ScrollView horizontal pelea con el gesto del propio scroll, y
-         resolverlo bien es una pieza de gestos, no una prop.
-         Un paso por toque es entendible sin explicación y llega a
-         cualquier posición repitiéndolo. La ÚLTIMA no se puede mover
-         más adelante que la primera: si ya está en 0 la acción no se
-         ofrece (ver la Hoja). */
+    } else if (accion === 'adelante' || accion === 'atras') {
+      /* MOVER, EN LAS DOS DIRECCIONES (S84-C13 ③).
+         El argumento contra el ARRASTRE sigue en pie y no se reabre: el
+         drag dentro de un ScrollView horizontal pelea con el gesto del
+         propio scroll, y resolverlo bien es una pieza de gestos.
+         Pero UN SOLO SENTIDO estaba mal, y el founder tenía razón:
+         para retroceder una posición había que dar la vuelta entera —
+         nueve toques para deshacer uno. Con las dos direcciones, mover
+         cuesta lo mismo en los dos sentidos y deshacer es un toque.
+         EN LOS EXTREMOS NO SE OFRECE LA IMPOSIBLE (Ley 23, ver la
+         Hoja): la primera no va atrás, la última no va adelante. */
+      const j = accion === 'atras' ? i - 1 : i + 1;
       const orden = fotos.map((f) => f.id);
-      const tmp = orden[i - 1] as string;
-      orden[i - 1] = orden[i] as string;
+      const tmp = orden[j] as string;
+      orden[j] = orden[i] as string;
       orden[i] = tmp;
       const r = await reordenarFotosGaleria(prestador.id, orden);
       if (!r.ok) mostrar({ variante: 'error', texto: r.mensaje });
@@ -459,8 +463,9 @@ export default function PerfilV2() {
     mostrar({ variante: 'exito', texto: t('miCuenta.logoQuitado') });
   }
 
-  async function guardar() {
-    if (guardando) return;
+  async function guardar(opciones?: { volver?: boolean }): Promise<boolean> {
+    const volver = opciones?.volver ?? true;
+    if (guardando) return false;
     /* ④ Ley 23 — la puerta no ofrece lo que va a rechazar: si un dato está
        mal formado, el Guardar lo DICE y abre la sección donde vive, en vez
        de mandar basura al motor. Los tres se miran juntos para que el
@@ -474,7 +479,7 @@ export default function PerfilV2() {
     if (malos.length > 0) {
       setAbierta('contacto');
       mostrar({ texto: t('perfilNegocio.revisaAntesDeGuardar', { campos: malos.join(t('perfilNegocio.unionY')) }), variante: 'error' });
-      return;
+      return false;
     }
     setGuardando(true);
     const r = await actualizarPerfilPrestador({
@@ -493,10 +498,13 @@ export default function PerfilV2() {
     setGuardando(false);
     if (!r.ok) {
       mostrar({ texto: r.mensaje, variante: 'error' });
-      return;
+      return false;
     }
     mostrar({ texto: t('miCuenta.perfilGuardado'), variante: 'exito' });
-    router.back();
+    // el Guardar de la pantalla vuelve; el de la Hoja del borrador NO —
+    // su destino es el espejo, y volver primero seria un rebote visible.
+    if (volver) router.back();
+    return true;
   }
   const [paisDe, setPaisDe] = useState<'telNegocio' | 'whatsapp' | null>(null);
   const [paisTel, setPaisTel] = useState(PAIS_DEFAULT);
@@ -623,6 +631,26 @@ export default function PerfilV2() {
   const ciudad = (prestador?.ciudad ?? '').trim();
   const vozTipoCiudad = ciudad.length === 0 ? null : ciudad.charAt(0).toUpperCase() + ciudad.slice(1);
 
+  /* ④ S84-C13 — EL BORRADOR, Y LA MEDICIÓN QUE CAMBIÓ EL DIAGNÓSTICO.
+     La hipótesis era "lectura vieja en el espejo". **Medido: no lo es.**
+     `como-te-ven` usa `useFocusEffect`, así que RELEE en cada foco, y
+     las fotos PERSISTEN al subirlas (`agregarFotoGaleria` escribe en el
+     acto). O sea: la portada ya se ve sin guardar nada, y no hay cache
+     que invalidar.
+     Lo que el founder no vio fue **su HISTORIA** —y los contactos—,
+     porque ésos sí son borrador hasta el Guardar: viajan juntos en
+     `actualizarPerfilPrestador`. El espejo estaba diciendo la verdad.
+     ⇒ NO SE TOCA LA REGLA (el espejo muestra lo PERSISTIDO). Lo que
+     faltaba es lo otro que la regla pide: **que ofrezca guardar**. Y se
+     ofrece en la PUERTA, no adentro, porque el borrador vive acá — el
+     espejo es otra pantalla y lee de la DB; enterarlo del borrador
+     sería pasarle un estado que no le pertenece. */
+  const hayBorrador =
+    prestador !== null &&
+    (descripcion !== (prestador.descripcion ?? '') ||
+      emailContacto !== (prestador.email_contacto ?? '') ||
+      sitioWeb !== (prestador.sitio_web ?? ''));
+
   const alternar = (s: Seccion) => setAbierta((a) => (a === s ? null : s));
   const prefijoDe = (iso: string) => PAISES.find((p) => p.iso === iso)?.pre ?? '';
   const isoDe = paisDe === 'whatsapp' ? paisWa : paisTel;
@@ -699,7 +727,7 @@ export default function PerfilV2() {
             {/* ── LAS CUATRO SECCIONES, en el orden firmado ── */}
             <SeccionDesplegable
               icono="negocio"
-              titulo={t('perfilNegocio.portadaTitulo')}
+              titulo={t('perfilNegocio.espacioTitulo')}
               resumen={resumenPortada}
               abierta={abierta === 'portada'}
               onAlternar={() => alternar('portada')}
@@ -712,6 +740,108 @@ export default function PerfilV2() {
                 onChangeText={setDescripcion}
                 multilinea={3}
               />
+            {/* ═══ S84-C12 · LAS FOTOS ═══
+                TIRA HORIZONTAL Y NO GRILLA: en un teléfono la grilla
+                obliga a achicar cada foto hasta que ninguna se ve, y la
+                vitrina es justamente el lugar donde la foto TIENE que
+                verse. La tira deja una grande y sugiere que hay más con
+                el corte del borde — el mismo recurso del rail del
+                cliente.
+                LA PORTADA VA PRIMERA Y MARCADA, y la marca no inventa un
+                estado: **el orden ES la portada** (`[0]` de la lista
+                ordenada). Dibuja el hecho que ya existe.
+                ⚠️ LAS FLECHAS DE FLUVI NO VIAJAN: son idioma de mouse.
+                Acá la foto se TOCA y ella ofrece lo que se le puede
+                hacer — y "Hacer portada" NO aparece en la que ya lo es
+                (Ley 23: la puerta no ofrece lo que va a rechazar). */}
+            <View style={{ paddingVertical: spacing[4], gap: spacing[2] }}>
+              <Texto variante="seccion">{t('perfilNegocio.fotosTitulo')}</Texto>
+              <Texto variante="apoyo">{t('perfilNegocio.fotosAyuda')}</Texto>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ gap: spacing[3], paddingRight: spacing[5] }}
+                style={{ marginHorizontal: -spacing[5], paddingHorizontal: spacing[5] }}
+              >
+                {fotos.map((f, i) => (
+                  <Pressable
+                    key={f.id}
+                    onPress={() => setFotoTocada(i)}
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      i === 0 ? t('perfilNegocio.fotoPortadaA11y') : t('perfilNegocio.fotoA11y', { n: i + 1 })
+                    }
+                    style={{
+                      width: 132,
+                      height: 132,
+                      borderRadius: radius.md,
+                      backgroundColor: theme.bg.overlay,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <Image source={{ uri: resolverUrlFotoGaleria(f.url) }} style={{ width: '100%', height: '100%' }} />
+                    {i === 0 && (
+                      <View
+                        style={{
+                          position: 'absolute',
+                          left: spacing[2],
+                          bottom: spacing[2],
+                          paddingHorizontal: spacing[2],
+                          paddingVertical: spacing[1],
+                          borderRadius: radius.sm,
+                          backgroundColor: theme.bg.base,
+                        }}
+                      >
+                        <Texto variante="dato">{t('perfilNegocio.fotoPortadaMarca')}</Texto>
+                      </View>
+                    )}
+                  </Pressable>
+                ))}
+                {/* el "agregar" vive AL FINAL DE LA TIRA y no como botón
+                    aparte: agregar es la continuación de mirar, no otro
+                    trabajo. */}
+                <Pressable
+                  onPress={() => void agregarFoto()}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('perfilNegocio.fotoAgregar')}
+                  style={{
+                    width: 132,
+                    height: 132,
+                    borderRadius: radius.md,
+                    borderWidth: 1.5,
+                    borderColor: theme.border.subtle,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: spacing[2],
+                  }}
+                >
+                  <Texto variante="apoyo">
+                    {subiendoFoto ? t('perfilNegocio.fotoSubiendo') : t('perfilNegocio.fotoAgregar')}
+                  </Texto>
+                </Pressable>
+              </ScrollView>
+            </View>
+
+            <Separador />
+
+            {/* EL CLIP — SU LUGAR, SIN SU MÓDULO.
+                Tiene lugar PROPIO y no entra a la galería de fotos: es
+                UNO y es de otra naturaleza (se reproduce, no se mira).
+                Meterlo entre las fotos lo volvería "una más" y obligaría
+                a explicar cuál de todas se reproduce.
+                VACÍO HONESTO: no se dibuja un play que no reproduce
+                (Ley 23) — `expo-video` es NATIVO y exige build.
+                CRUZA CON D-617: no hay build EAS 1.0.3 y sin ella no se
+                recluta, así que las dos viajan en el MISMO TREN
+                (precedente D-456: el tren se aprovecha, no se arma para
+                un solo pasajero). */}
+            <View style={{ paddingVertical: spacing[4], gap: spacing[2] }}>
+              <Texto variante="seccion">{t('perfilNegocio.clipTitulo')}</Texto>
+              <Texto variante="apoyo">{t('perfilNegocio.clipVacio')}</Texto>
+            </View>
+
+            <Separador />
+
             </SeccionDesplegable>
 
             <Separador />
@@ -879,108 +1009,6 @@ export default function PerfilV2() {
                 portada** — una sola verdad en vez de dos que se pueden
                 contradecir). Es motor y es de A. ── */}
 
-            {/* ═══ S84-C12 · LAS FOTOS ═══
-                TIRA HORIZONTAL Y NO GRILLA: en un teléfono la grilla
-                obliga a achicar cada foto hasta que ninguna se ve, y la
-                vitrina es justamente el lugar donde la foto TIENE que
-                verse. La tira deja una grande y sugiere que hay más con
-                el corte del borde — el mismo recurso del rail del
-                cliente.
-                LA PORTADA VA PRIMERA Y MARCADA, y la marca no inventa un
-                estado: **el orden ES la portada** (`[0]` de la lista
-                ordenada). Dibuja el hecho que ya existe.
-                ⚠️ LAS FLECHAS DE FLUVI NO VIAJAN: son idioma de mouse.
-                Acá la foto se TOCA y ella ofrece lo que se le puede
-                hacer — y "Hacer portada" NO aparece en la que ya lo es
-                (Ley 23: la puerta no ofrece lo que va a rechazar). */}
-            <View style={{ paddingVertical: spacing[4], gap: spacing[2] }}>
-              <Texto variante="seccion">{t('perfilNegocio.fotosTitulo')}</Texto>
-              <Texto variante="apoyo">{t('perfilNegocio.fotosAyuda')}</Texto>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ gap: spacing[3], paddingRight: spacing[5] }}
-                style={{ marginHorizontal: -spacing[5], paddingHorizontal: spacing[5] }}
-              >
-                {fotos.map((f, i) => (
-                  <Pressable
-                    key={f.id}
-                    onPress={() => setFotoTocada(i)}
-                    accessibilityRole="button"
-                    accessibilityLabel={
-                      i === 0 ? t('perfilNegocio.fotoPortadaA11y') : t('perfilNegocio.fotoA11y', { n: i + 1 })
-                    }
-                    style={{
-                      width: 132,
-                      height: 132,
-                      borderRadius: radius.md,
-                      backgroundColor: theme.bg.overlay,
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <Image source={{ uri: resolverUrlFotoGaleria(f.url) }} style={{ width: '100%', height: '100%' }} />
-                    {i === 0 && (
-                      <View
-                        style={{
-                          position: 'absolute',
-                          left: spacing[2],
-                          bottom: spacing[2],
-                          paddingHorizontal: spacing[2],
-                          paddingVertical: spacing[1],
-                          borderRadius: radius.sm,
-                          backgroundColor: theme.bg.base,
-                        }}
-                      >
-                        <Texto variante="dato">{t('perfilNegocio.fotoPortadaMarca')}</Texto>
-                      </View>
-                    )}
-                  </Pressable>
-                ))}
-                {/* el "agregar" vive AL FINAL DE LA TIRA y no como botón
-                    aparte: agregar es la continuación de mirar, no otro
-                    trabajo. */}
-                <Pressable
-                  onPress={() => void agregarFoto()}
-                  accessibilityRole="button"
-                  accessibilityLabel={t('perfilNegocio.fotoAgregar')}
-                  style={{
-                    width: 132,
-                    height: 132,
-                    borderRadius: radius.md,
-                    borderWidth: 1.5,
-                    borderColor: theme.border.subtle,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: spacing[2],
-                  }}
-                >
-                  <Texto variante="apoyo">
-                    {subiendoFoto ? t('perfilNegocio.fotoSubiendo') : t('perfilNegocio.fotoAgregar')}
-                  </Texto>
-                </Pressable>
-              </ScrollView>
-            </View>
-
-            <Separador />
-
-            {/* EL CLIP — SU LUGAR, SIN SU MÓDULO.
-                Tiene lugar PROPIO y no entra a la galería de fotos: es
-                UNO y es de otra naturaleza (se reproduce, no se mira).
-                Meterlo entre las fotos lo volvería "una más" y obligaría
-                a explicar cuál de todas se reproduce.
-                VACÍO HONESTO: no se dibuja un play que no reproduce
-                (Ley 23) — `expo-video` es NATIVO y exige build.
-                CRUZA CON D-617: no hay build EAS 1.0.3 y sin ella no se
-                recluta, así que las dos viajan en el MISMO TREN
-                (precedente D-456: el tren se aprovecha, no se arma para
-                un solo pasajero). */}
-            <View style={{ paddingVertical: spacing[4], gap: spacing[2] }}>
-              <Texto variante="seccion">{t('perfilNegocio.clipTitulo')}</Texto>
-              <Texto variante="apoyo">{t('perfilNegocio.clipVacio')}</Texto>
-            </View>
-
-            <Separador />
-
             {/* ═══ EL CONTRATO DEL ESPEJO — PEDIDO A B, escrito ACÁ ═══
                 Vive en el código y no en el chat A PROPÓSITO: en S82 hubo
                 cuatro bloqueos por acuerdos que vivían en la conversación
@@ -1042,7 +1070,7 @@ export default function PerfilV2() {
                    ficha no existía; B la construyó (`828b2ae`) y ahora
                    esto es lo que el contrato de arriba prometía: UNA
                    línea. La ruta monta la pieza y no dibuja nada. */
-                onPress={() => router.push('/cuenta/como-te-ven')}
+                onPress={() => (hayBorrador ? setBorradorAbierto(true) : router.push('/cuenta/como-te-ven'))}
               />
               <Texto variante="apoyo">{t('perfilNegocio.verComoTeVenNota')}</Texto>
             </View>
@@ -1137,8 +1165,11 @@ export default function PerfilV2() {
           Reemplaza a las flechas de Fluvi, que son idioma de mouse. Las
           acciones son las mismas; lo que cambia es que en un teléfono se
           TOCA la cosa y ella ofrece lo que se le puede hacer.
-          LAS DOS QUE NO SE OFRECEN EN LA PRIMERA (Ley 23): "hacer
-          portada" —ya lo es— y "mover adelante" —no hay adelante—. */}
+          LO QUE NO SE OFRECE, POR EXTREMO (Ley 23 — la puerta no ofrece
+          lo que va a rechazar): en la PRIMERA no van "hacer portada"
+          —ya lo es— ni "atrás" —no hay atrás—; en la ÚLTIMA no va
+          "adelante". Con una sola foto la Hoja queda con "Borrar" y
+          nada más, que es exactamente lo único que se le puede hacer. */}
       <Hoja
         visible={fotoTocada !== null}
         onCerrar={() => setFotoTocada(null)}
@@ -1146,7 +1177,7 @@ export default function PerfilV2() {
         altura="contenido"
       >
         <View style={{ paddingBottom: insets.bottom }}>
-          {fotoTocada !== 0 && (
+          {fotoTocada !== null && fotoTocada !== 0 && (
             <>
               <Celda
                 interactiva
@@ -1158,8 +1189,19 @@ export default function PerfilV2() {
               <Celda
                 interactiva
                 accessibilityRole="button"
-                titulo={t('perfilNegocio.fotoMover')}
-                onPress={() => void accionSobreFoto('mover')}
+                titulo={t('perfilNegocio.fotoAtras')}
+                onPress={() => void accionSobreFoto('atras')}
+              />
+              <Separador />
+            </>
+          )}
+          {fotoTocada !== null && fotoTocada < fotos.length - 1 && (
+            <>
+              <Celda
+                interactiva
+                accessibilityRole="button"
+                titulo={t('perfilNegocio.fotoAdelante')}
+                onPress={() => void accionSobreFoto('adelante')}
               />
               <Separador />
             </>
@@ -1169,6 +1211,44 @@ export default function PerfilV2() {
             accessibilityRole="button"
             titulo={t('perfilNegocio.fotoBorrar')}
             onPress={() => void accionSobreFoto('borrar')}
+          />
+        </View>
+      </Hoja>
+
+      {/* ④ LA HOJA DEL BORRADOR — la puerta ofrece guardar.
+          DOS CAMINOS Y NINGUNO MIENTE: "Guardar y ver" hace lo que dice,
+          y "Ver lo guardado" también — nombra exactamente lo que el
+          espejo va a mostrar, en vez de un "Ver igual" que dejaría al
+          founder buscando un cambio que no está. */}
+      <Hoja
+        visible={borradorAbierto}
+        onCerrar={() => setBorradorAbierto(false)}
+        titulo={t('perfilNegocio.borradorTitulo')}
+        altura="contenido"
+      >
+        <View style={{ paddingBottom: insets.bottom, gap: spacing[3] }}>
+          <Texto variante="cuerpo">{t('perfilNegocio.borradorVoz')}</Texto>
+          <Boton
+            etiqueta={t('perfilNegocio.borradorGuardarYVer')}
+            bloque
+            cargando={guardando}
+            onPress={() => {
+              void (async () => {
+                const ok = await guardar({ volver: false });
+                if (!ok) return;
+                setBorradorAbierto(false);
+                router.push('/cuenta/como-te-ven');
+              })();
+            }}
+          />
+          <Boton
+            variante="secundario"
+            etiqueta={t('perfilNegocio.borradorVerIgual')}
+            bloque
+            onPress={() => {
+              setBorradorAbierto(false);
+              router.push('/cuenta/como-te-ven');
+            }}
           />
         </View>
       </Hoja>

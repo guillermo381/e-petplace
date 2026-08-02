@@ -209,6 +209,14 @@ export const prestadorEn = {
     espejoPie: 'This is how your card will look in the app.',
 
     // ── S84-C12 · Espejo de es.ts ──
+    espacioTitulo: 'Your place',
+    fotoAdelante: 'Move forward',
+    fotoAtras: 'Move back',
+    borradorTitulo: 'You have unsaved changes',
+    borradorVoz: 'The preview shows what is already saved. To see them there, save them first.',
+    borradorGuardarYVer: 'Save and view',
+    borradorVerIgual: 'View what is saved',
+
     fotosTitulo: 'Photos of your place',
     fotosAyuda: 'The first one is your cover. Tap a photo to move or delete it.',
     fotoAgregar: 'Add',
@@ -219,7 +227,6 @@ export const prestadorEn = {
     fotoA11y: 'Photo {{n}}',
     fotoHojaTitulo: 'This photo',
     fotoHacerPortada: 'Make it the cover',
-    fotoMover: 'Move one position forward',
     fotoBorrar: 'Delete',
 
     clipTitulo: 'Your clip',
