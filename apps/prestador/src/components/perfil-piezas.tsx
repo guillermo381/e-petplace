@@ -300,6 +300,7 @@ export function EspejoNegocio({
   tipo,
   vacio,
   etiquetaLogo,
+  rotuloEspejo,
   onEditarLogo,
 }: {
   nombre: string;
@@ -321,6 +322,8 @@ export function EspejoNegocio({
    *  su propio idioma se vuelve imposible de reusar (Ley 3 aplicada al
    *  copy: el vocabulario es de quien lo dice, no de quien lo pinta). */
   etiquetaLogo: { agregar: string; cambiar: string };
+  /** ⑥ el rótulo del espejo, YA traducido por la pantalla. */
+  rotuloEspejo: string;
   onEditarLogo: () => void;
 }) {
   const insets = useSafeAreaInsets();
@@ -352,14 +355,14 @@ export function EspejoNegocio({
           color: palette.light0,
         }}
       >
-        Así te ven tus clientes
+        {rotuloEspejo}
       </Text>
 
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
         <Pressable
           onPress={onEditarLogo}
           accessibilityRole="button"
-          accessibilityLabel={logoUrl === null ? 'Agregar el logo del negocio' : 'Cambiar el logo del negocio'}
+          accessibilityLabel={logoUrl === null ? etiquetaLogo.agregar : etiquetaLogo.cambiar}
         >
           <LogoNegocio nombre={nombre} logoUrl={logoUrl} tamano={76} superficie="muro" />
         </Pressable>

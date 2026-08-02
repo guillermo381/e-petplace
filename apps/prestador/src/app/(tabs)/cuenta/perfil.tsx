@@ -275,7 +275,7 @@ export default function PerfilV2() {
               : // ④ el rebote de formato DIRIGE y dice el porqué (17.4):
                 // sin el motivo, "elegí otro" se lee como capricho.
                 sub.causa === 'formato_no_png'
-                ? 'El logo tiene que ser un PNG. Es el formato que guarda el fondo transparente, para que tu marca no salga dentro de un rectángulo.'
+                ? t('perfilNegocio.logoNoPng')
                 : t('miCuenta.logoErrorSubida'),
       });
       return;
@@ -304,14 +304,14 @@ export default function PerfilV2() {
        de mandar basura al motor. Los tres se miran juntos para que el
        usuario no descubra el segundo error después de arreglar el primero. */
     const malos = [
-      estadoTelefono(telNegocio, paisTel)?.ok === false ? 'el teléfono' : null,
-      estadoTelefono(whatsapp, paisWa)?.ok === false ? 'el WhatsApp' : null,
-      estadoEmail(emailContacto)?.ok === false ? 'el correo' : null,
-      estadoSitio(sitioWeb)?.ok === false ? 'el sitio web' : null,
+      estadoTelefono(telNegocio, paisTel)?.ok === false ? t('perfilNegocio.campoTelefono') : null,
+      estadoTelefono(whatsapp, paisWa)?.ok === false ? t('perfilNegocio.campoWhatsapp') : null,
+      estadoEmail(emailContacto)?.ok === false ? t('perfilNegocio.campoCorreo') : null,
+      estadoSitio(sitioWeb)?.ok === false ? t('perfilNegocio.campoSitio') : null,
     ].filter((x): x is string => x !== null);
     if (malos.length > 0) {
       setAbierta('contacto');
-      mostrar({ texto: `Revisá ${malos.join(' y ')} antes de guardar.`, variante: 'error' });
+      mostrar({ texto: t('perfilNegocio.revisaAntesDeGuardar', { campos: malos.join(t('perfilNegocio.unionY')) }), variante: 'error' });
       return;
     }
     setGuardando(true);
@@ -348,17 +348,17 @@ export default function PerfilV2() {
     if (pais === undefined) return null;
     const e164 = `${pais.pre}${crudo}`;
     if (pais.formato === undefined) {
-      return { ok: true, voz: `Se guarda ${e164}. No verificamos el largo: ${pais.nombre} no declara su formato.` };
+      return { ok: true, voz: t('perfilNegocio.telSinFormato', { e164, pais: pais.nombre }) };
     }
     const ok = new RegExp(pais.formato).test(e164);
-    if (ok) return { ok, voz: `se guarda ${e164}` };
+    if (ok) return { ok, voz: t('perfilNegocio.telSeGuarda', { e164 }) };
     // El error DIRIGE (17.4): dice cuántos dígitos van y cuántos faltan,
     // derivado del formato REAL del país — jamás del de Ecuador.
     const rango = /\\d\{(\d+)(?:,(\d+))?\}/.exec(pais.formato);
     const min = rango?.[1];
     const max = rango?.[2];
-    const cuantos = min === undefined ? 'los dígitos que le corresponden' : max === undefined ? `${min} dígitos` : `${min} o ${max} dígitos`;
-    return { ok, voz: `Un número de ${pais.nombre} lleva ${cuantos} después de ${pais.pre}. Van ${crudo.length}.` };
+    const cuantos = min === undefined ? t('perfilNegocio.telDigitosSinDato') : max === undefined ? t('perfilNegocio.telDigitos', { min }) : t('perfilNegocio.telDigitosRango', { min, max });
+    return { ok, voz: t('perfilNegocio.telLargoMal', { pais: pais.nombre, cuantos, pre: pais.pre, van: crudo.length }) };
   }
 
   /* ── ④ CORREO Y SITIO WEB — validación real (defecto del founder).
@@ -369,10 +369,15 @@ export default function PerfilV2() {
      (adenda del founder). Pedirle el esquema al usuario es pedirle que
      hable como la máquina (17.2). */
   function estadoEmail(v: string): { ok: boolean; voz: string } | null {
-    const t = v.trim();
-    if (t.length === 0) return null;
-    const ok = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(t);
-    return { ok, voz: ok ? 'Las familias te escriben acá.' : 'Un correo lleva un @ y un punto después: hola@tunegocio.ec' };
+    /* ⚠️ La local se llama `crudo` y NO `t`: el hook de traducción TAMBIÉN
+       se llama `t`, y una local con ese nombre lo TAPA dentro de la
+       función. Mientras el copy era literal el choque era invisible;
+       migrarlo al riel lo destapó — y el typecheck lo cazó, que es
+       exactamente para lo que sirve. */
+    const crudo = v.trim();
+    if (crudo.length === 0) return null;
+    const ok = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(crudo);
+    return { ok, voz: ok ? t('perfilNegocio.correoOk') : t('perfilNegocio.correoMal') };
   }
   /** Normaliza el sitio: sin esquema le pone `https://`. `www.` es
    *  legal con o sin él — no lo agregamos ni lo sacamos. */
@@ -382,15 +387,15 @@ export default function PerfilV2() {
     return /^https?:\/\//i.test(t) ? t : `https://${t}`;
   }
   function estadoSitio(v: string): { ok: boolean; voz: string } | null {
-    const t = v.trim();
-    if (t.length === 0) return null;
-    const sinEsquema = t.replace(/^https?:\/\//i, '');
+    const crudo = v.trim();
+    if (crudo.length === 0) return null;
+    const sinEsquema = crudo.replace(/^https?:\/\//i, '');
     // dominio con AL MENOS un punto y un TLD de 2+; el resto de la ruta
     // (que puede o no venir) no se valida: no es asunto nuestro.
     const ok = /^[^\s/?#.]+(\.[^\s/?#.]+)*\.[a-z]{2,}(\/\S*)?$/i.test(sinEsquema);
     return {
       ok,
-      voz: ok ? `Se guarda ${normalizarSitio(t)}` : 'Escribí el dominio, como tunegocio.ec o www.tunegocio.ec',
+      voz: ok ? t('perfilNegocio.sitioSeGuarda', { url: normalizarSitio(crudo) }) : t('perfilNegocio.sitioMal'),
     };
   }
   const vEmail = estadoEmail(emailContacto);
@@ -483,8 +488,8 @@ export default function PerfilV2() {
       {pantalla === 'error' && (
         <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
           <EstadoVacio
-            titulo="No pudimos cargar tu perfil"
-            descripcion="Prueba de nuevo en un momento."
+            titulo={t('perfilNegocio.errorTitulo')}
+            descripcion={t('perfilNegocio.errorDetalle')}
             accion={
               <Boton
                 variante="secundario"
@@ -512,12 +517,13 @@ export default function PerfilV2() {
             tipo={vozTipoCiudad}
             vacio={vacio}
             etiquetaLogo={{ agregar: t('miCuenta.logoAgregar'), cambiar: t('miCuenta.logoCambiar') }}
+            rotuloEspejo={t('perfilNegocio.espejoRotulo')}
             /* Anti doble-disparo: mientras una imagen viaja, el tap NO
                abre otra Hoja — y lo DICE en vez de no hacer nada, que se
                leería como que el toque no registró (Ley 13). */
             onEditarLogo={() => {
               if (subiendoLogo) {
-                mostrar({ variante: 'neutro', texto: 'Estamos subiendo tu logo…' });
+                mostrar({ variante: 'neutro', texto: t('perfilNegocio.logoSubiendo') });
                 return;
               }
               setHojaLogo(true);
@@ -533,10 +539,10 @@ export default function PerfilV2() {
               abierta={abierta === 'portada'}
               onAlternar={() => alternar('portada')}
             >
-              <Texto variante="apoyo">Lo primero que lee una familia. Dos o tres líneas alcanzan.</Texto>
+              <Texto variante="apoyo">{t('perfilNegocio.portadaAyuda')}</Texto>
               <Campo
-                label="Descripción"
-                placeholder="Paseos tranquilos por el norte de Quito, grupos chicos y reporte con fotos."
+                label={t('perfilNegocio.descripcionLabel')}
+                placeholder={t('perfilNegocio.descripcionEjemplo')}
                 value={descripcion}
                 onChangeText={setDescripcion}
                 multilinea={3}
@@ -545,22 +551,20 @@ export default function PerfilV2() {
 
             <Separador />
 
-            {/* ② S84-C4 — ESTA SECCIÓN SIGUE SIN GLIFO, y ahora con
-                su medición al lado para que nadie la "iguale" prestando
-                uno que miente. El registry tiene 33 glifos y NINGUNO
-                nombra contacto/teléfono/correo/sitio (medido hoy). Los
-                vecinos más cercanos dicen otra cosa: "compartir" es
-                compartir, "ayuda" es soporte, "nombre" es identidad.
-                Ley 12 pide glifo porque los tres headers VARÍAN entre sí
-                — y por eso la salida NO es quitarle el glifo a los otros
-                dos: igualar hacia abajo cumple la simetría y rompe
-                justo lo que la ley busca (que el ojo separe secciones
-                que significan cosas distintas).
-                ⇒ SE IGUALA HACIA ARRIBA, y el artefacto que lo abre
-                tiene nombre (L-171): un glifo "contacto" de B con su
-                gate POR ÍCONO a 21px (§6b). Hasta entonces la asimetría
-                es el estado honesto, no un olvido. */}
+            {/* ② S84-C6 — EL GLIFO LLEGÓ Y LA ASIMETRÍA TERMINÓ.
+                La nota que vivía acá describía un hueco —"el registry no
+                tiene contacto"— y ese hueco ya no existe: B lo construyó
+                (`6db553e`) después de que se pidiera con su artefacto
+                nombrado. **Se borra en vez de dejarla contando historia
+                vieja**: un comentario que describe algo que ya no pasa
+                miente con más autoridad que el código, porque parece
+                documentación.
+                ⚠️ EL DIBUJO LO FIRMA EL FOUNDER: B entregó DOS
+                candidatos a 21px (`contacto` y `contactoOndas`) y la API
+                es idéntica. Consumo el base; si firma el otro, es UNA
+                palabra acá y nada más. */}
             <SeccionDesplegable
+              icono="contacto"
               titulo={t('perfilNegocio.contactoTitulo')}
               resumen={resumenContacto}
               abierta={abierta === 'contacto'}
@@ -571,7 +575,7 @@ export default function PerfilV2() {
                   prestar uno que miente, ninguno — el glifo se pide con
                   su gate por ícono a 21px (§6b). */}
               <Texto variante="apoyo">
-                Son datos del negocio y los ven las familias. Tu teléfono personal vive en Cuenta.
+                {t('perfilNegocio.contactoAyuda')}
               </Texto>
 
               {/* ③ S83-C34 — LA HIPÓTESIS DEL FOUNDER ERA LA CAUSA, y se
@@ -619,8 +623,8 @@ export default function PerfilV2() {
               />
 
               <Campo
-                label="Correo de contacto"
-                placeholder="hola@paseosandres.ec"
+                label={t('perfilNegocio.correoLabel')}
+                placeholder={t('perfilNegocio.correoEjemplo')}
                 value={emailContacto}
                 onChangeText={setEmailContacto}
                 keyboardType="email-address"
@@ -629,8 +633,8 @@ export default function PerfilV2() {
                 error={vEmail?.ok === false ? vEmail.voz : undefined}
               />
               <Campo
-                label="Sitio web"
-                placeholder="paseosandres.ec"
+                label={t('perfilNegocio.sitioLabel')}
+                placeholder={t('perfilNegocio.sitioEjemplo')}
                 value={sitioWeb}
                 onChangeText={setSitioWeb}
                 autoCapitalize="none"
@@ -740,11 +744,10 @@ export default function PerfilV2() {
           ninguna se va a rechazar. Lo que las distingue ahora es si
           VALIDAN, y eso se dice en el subtítulo de las que no — el dato
           honesto ocupa el lugar donde antes vivía el "todavía no". */}
-      <Hoja visible={paisDe !== null} onCerrar={() => setPaisDe(null)} titulo="País del número">
+      <Hoja visible={paisDe !== null} onCerrar={() => setPaisDe(null)} titulo={t('perfilNegocio.paisHojaTitulo')}>
         <View style={{ paddingBottom: spacing[2] }}>
           <Texto variante="apoyo">
-            El indicativo es un dato aparte del número. Podés elegir cualquiera: operar en un país y tener la línea de
-            otro es normal.
+            {t('perfilNegocio.paisHojaAyuda')}
           </Texto>
         </View>
         <HojaScroll>
@@ -753,7 +756,7 @@ export default function PerfilV2() {
               {i > 0 ? <Separador /> : null}
               <Celda
                 titulo={`${bandera(p.iso)}  ${p.nombre}`}
-                subtitulo={p.formato === undefined ? 'no verificamos el largo' : undefined}
+                subtitulo={p.formato === undefined ? t('perfilNegocio.paisSinFormato') : undefined}
                 metadataMono={p.pre}
                 interactiva
                 accessibilityRole="button"
@@ -762,7 +765,7 @@ export default function PerfilV2() {
                   else setPaisTel(p.iso);
                   setPaisDe(null);
                 }}
-                fin={p.iso === isoDe ? <Texto variante="dato">elegido</Texto> : undefined}
+                fin={p.iso === isoDe ? <Texto variante="dato">{t('perfilNegocio.paisElegido')}</Texto> : undefined}
               />
             </View>
           ))}
@@ -772,7 +775,7 @@ export default function PerfilV2() {
       {/* ③ LA HOJA DEL LOGO — cámara y galería PARES (patrón
           SelectorAvatar); "Quitar" SOLO cuando hay logo: la puerta no
           ofrece lo que no existe (Ley 23). */}
-      <Hoja visible={hojaLogo} onCerrar={() => setHojaLogo(false)} titulo="El logo de tu negocio" altura="contenido">
+      <Hoja visible={hojaLogo} onCerrar={() => setHojaLogo(false)} titulo={t('perfilNegocio.logoHojaTitulo')} altura="contenido">
         <View style={{ paddingBottom: insets.bottom, gap: spacing[2] }}>
           {/* ④ ☠️ "TOMAR FOTO" MURIÓ, y es CONSECUENCIA del PNG, no una
               decisión aparte: la cámara entrega JPEG de nacimiento, así
@@ -782,8 +785,7 @@ export default function PerfilV2() {
               pasa tu diseñador, no algo que se fotografía. */}
           <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[2] }}>
             <Texto variante="apoyo">
-              Tiene que ser un PNG: es el formato que guarda el fondo transparente, para que tu marca no salga dentro de
-              un rectángulo.
+              {t('perfilNegocio.logoHojaAyuda')}
             </Texto>
           </View>
           <Celda
