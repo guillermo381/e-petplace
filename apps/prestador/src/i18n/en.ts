@@ -163,6 +163,27 @@ export const prestadorEn = {
     diaLibre: 'Free',
     diaBloqueado: 'On vacation',
   },
+  // ⑥ S84-C3 — LA VITRINA DEL NEGOCIO · Espejo de es.ts (el tipo
+  // `Espejo<D>` del riel EXIGE la paridad: una key faltante rompe el
+  // typecheck, no se descubre en pantalla).
+  perfilNegocio: {
+    contactoTelefono: 'Phone',
+    contactoWhatsapp: 'WhatsApp',
+    contactoCorreo: 'Email',
+    contactoSitio: 'Website',
+    contactoNinguno: 'No contact details',
+    contactoVacio: "You haven't added any way to reach you yet.",
+    portadaCon: 'With description',
+    portadaSin: 'No description',
+    telefonoLabel: 'Business phone',
+    telefonoEjemplo: '99 123 4567',
+    whatsappLabel: 'WhatsApp',
+    whatsappEjemplo: '99 900 0333',
+    sedeGuardaAparte: 'This section saves on its own: each change is stored when you confirm it below.',
+    seguridadTitulo: 'Security',
+    seguridadDetalle: "Your name, your sign-in email and your password. Families don't see them.",
+  },
+
   // La tab Cuenta del prestador (letra P17, S57-B) · LOTE S57, GATE PENDIENTE · Espejo de es.ts
   miCuenta: {
     titulo: 'Your account',

@@ -35,8 +35,11 @@ import { Pressable, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  Boton,
+  Campo,
   CeldaNavegacion,
   LogoNegocio,
+  PieDeCampo,
   Texto,
   palette,
   radius,
@@ -84,6 +87,84 @@ export function SeccionDesplegable({
         onPress={onAlternar}
       />
       {abierta && <View style={{ paddingBottom: spacing[4], gap: spacing[2] }}>{children}</View>}
+    </View>
+  );
+}
+
+/**
+ * CONTROL DE TELÉFONO — el indicativo y el número son UNA cosa, y por
+ * fin se componen como una (S84-C3 ③).
+ *
+ * POR QUÉ NACE, y por qué acá y no en `packages/ui`: hasta hoy la
+ * pantalla armaba a mano la fila `SelectorPais + Campo` DOS veces
+ * (teléfono y WhatsApp) — la misma anatomía copiada, que es cómo
+ * empiezan los clones que L-175 persigue. Nace como pieza LOCAL porque
+ * tiene exactamente **dos consumidores y los dos viven en esta app**:
+ * promoverla ahora sería inventar un contrato para un solo cliente.
+ * ☠️ Su día en `packages/ui` llega con el TERCER consumidor —o con el
+ * primero del lado cliente—, y ahí la promueve B.
+ *
+ * LA CURA DE LA DESALINEACIÓN, con la pieza de B (S83-B1, `4ba9d81`):
+ * el `Campo` viaja con `sinPie` y el pie lo pone el CONTROL, UNO para
+ * el par. El defecto era exactamente ése: `Campo` reserva su pie
+ * SIEMPRE (`ALTO_PIE_CAMPO` = 24.8 px) y con `alignItems:'flex-end'`
+ * el hermano se alineaba contra el borde de abajo DEL PIE, no de la
+ * caja. Ahora es **caja contra caja**, y el número no sale de acá: sale
+ * del token de B.
+ *
+ * ⚠️ MI CURA ANTERIOR (S83-C34 ③) ERA INSUFICIENTE Y SE DECLARA: saqué
+ * la ayuda del `Campo` creyendo que eso bajaba su alto, y NO lo bajaba
+ * —el slot seguía reservado—, así que el desnivel quedó igual y encima
+ * agregué un hueco. Verifiqué contra la construcción y no contra la
+ * caja; el número de B es el que lo cierra.
+ *
+ * UN SOLO MENSAJE PARA EL PAR: el indicativo y el número no pueden
+ * fallar por separado —lo que se valida es el E.164 que forman juntos—,
+ * así que dos pies dirían dos veces lo mismo o, peor, se contradirían.
+ */
+export function ControlTelefono({
+  label,
+  placeholder,
+  valor,
+  onCambio,
+  bandera,
+  prefijo,
+  onElegirPais,
+  ayuda,
+  error,
+}: {
+  label: string;
+  /** SIN prefijo (firma de la orden): el indicativo ya está a la
+   *  izquierda, y repetirlo en el ejemplo enseña a escribirlo dos
+   *  veces. Un elemento, un trabajo (17.6). */
+  placeholder: string;
+  valor: string;
+  onCambio: (v: string) => void;
+  bandera: string;
+  prefijo: string;
+  onElegirPais: () => void;
+  ayuda?: string;
+  error?: string;
+}) {
+  return (
+    <View>
+      <View style={{ flexDirection: 'row', gap: spacing[2], alignItems: 'flex-end' }}>
+        <SelectorPais bandera={bandera} prefijo={prefijo} onPress={onElegirPais} />
+        <View style={{ flex: 1 }}>
+          <Campo
+            label={label}
+            placeholder={placeholder}
+            value={valor}
+            onChangeText={onCambio}
+            keyboardType="phone-pad"
+            sinPie
+            error={error}
+          />
+        </View>
+      </View>
+      {/* EL PIE DEL PAR — uno solo, y del CONTROL: es el que habla del
+          E.164 completo, que ninguna de las dos piezas tiene sola. */}
+      <PieDeCampo ayuda={ayuda} error={error} />
     </View>
   );
 }
@@ -217,17 +298,29 @@ export function EspejoNegocio({
   nombre,
   logoUrl,
   tipo,
-  visible,
   vacio,
+  etiquetaLogo,
   onEditarLogo,
 }: {
   nombre: string;
   logoUrl: string | null;
-  /** La voz del tipo + ciudad, ya compuesta por la pantalla. */
-  tipo: string;
-  visible: boolean;
+  /** ① S84-C3 — La voz del oficio + ciudad, compuesta por la pantalla
+   *  DESDE EL DATO. **`null` = no se pinta la línea**, y eso es la
+   *  firma de este arreglo: antes llegaba el literal
+   *  `"paseador · quito"` clavado, así que un veterinario de Guayaquil
+   *  leía en "Así te ven tus clientes" que era paseador de Quito.
+   *  L-139 en el peor lugar posible — la única pieza que promete
+   *  mostrar la verdad era la que inventaba. Y el nulo NO se rellena
+   *  con "Sin oficio": un rótulo que dice que falta un dato es ruido en
+   *  una vista que existe para mostrar cómo te ven. */
+  tipo: string | null;
   /** La consecuencia del hueco, en UNA línea. null = nada que decir. */
   vacio: string | null;
+  /** ⑥ La voz llega YA TRADUCIDA de la pantalla: esta pieza no tiene
+   *  `t` y no va a tenerlo — un componente de composición que resuelve
+   *  su propio idioma se vuelve imposible de reusar (Ley 3 aplicada al
+   *  copy: el vocabulario es de quien lo dice, no de quien lo pinta). */
+  etiquetaLogo: { agregar: string; cambiar: string };
   onEditarLogo: () => void;
 }) {
   const insets = useSafeAreaInsets();
@@ -289,54 +382,57 @@ export function EspejoNegocio({
           >
             {nombre}
           </Text>
-          <Text
-            numberOfLines={1}
-            style={{
-              fontFamily: typography.family.mono.regular,
-              fontSize: typography.size.sm,
-              color: palette.light0,
-            }}
-          >
-            {tipo}
-          </Text>
-
-          {/* ④ EL CTA VISIBLE — el defecto del founder era de AFFORDANCE:
-              el logo se tocaba y nada lo decía, así que para quien no
-              adivina el tap, el logo no se podía cambiar.
-              ⚠️ LA VOZ NO DICE "AJUSTAR" A PROPÓSITO (Ley 23 · 17.1): el
-              editor de zoom y encuadre TODAVÍA NO EXISTE de este lado —
-              vive en `apps/cliente/EncuadreFoto` y su promoción es de B.
-              Un botón que dijera "Ajustar" prometería una pantalla que no
-              abre. Dice lo que HOY pasa al tocarlo, y pasará a "Ajustar
-              logo" el día que el editor llegue. */}
-          <Pressable
-            onPress={onEditarLogo}
-            accessibilityRole="button"
-            style={{ alignSelf: 'flex-start', minHeight: 44, justifyContent: 'center' }}
-          >
+          {/* ① EL NULO NO SE PINTA: sin oficio o sin ciudad, la línea no
+              nace. Ver el porqué en la prop `tipo`. */}
+          {tipo !== null && (
             <Text
+              numberOfLines={1}
               style={{
-                fontFamily: typography.family.sans.medium,
+                fontFamily: typography.family.sans.regular,
                 fontSize: typography.size.sm,
                 color: palette.light0,
-                textDecorationLine: 'underline',
               }}
             >
-              {logoUrl === null ? 'Agregar logo' : 'Cambiar logo'}
+              {tipo}
             </Text>
-          </Pressable>
+          )}
+
+          {/* ② EL CTA DEL LOGO — `Boton compacto`, que es lo que la casa
+              YA tenía (la pantalla vieja lo usaba; S76-B1).
+              ⚠️ SE CORRIGE MI PROPIA INVENCIÓN de C34: había puesto un
+              texto SUBRAYADO, que es idioma web y no está en el
+              diccionario — y Ley 22c dice que un comando con consecuencia
+              viste de botón. Me inventé una anatomía teniendo la de la
+              casa a mano; el subrayado muere con su trabajo hecho.
+              LA VOZ NO DICE "AJUSTAR" A PROPÓSITO (Ley 23 · 17.1): el
+              editor de zoom y encuadre no existe de este lado —vive en
+              `apps/cliente/EncuadreFoto` y su promoción es de B—, y un
+              botón que lo dijera prometería una pantalla que no abre. */}
+          <View style={{ alignSelf: 'flex-start' }}>
+            <Boton
+              variante="compacto"
+              etiqueta={logoUrl === null ? etiquetaLogo.agregar : etiquetaLogo.cambiar}
+              onPress={onEditarLogo}
+            />
+          </View>
         </View>
       </View>
 
-      <Text
-        style={{
-          fontFamily: typography.family.sans.regular,
-          fontSize: typography.size.base,
-          color: palette.light0,
-        }}
-      >
-        {visible ? 'Visible para las familias' : 'Todavía no visible'}
-      </Text>
+      {/* ① ☠️ ACÁ VIVÍA LA INSIGNIA DE VISIBILIDAD, y se retira SIN
+          reemplazo (orden explícita).
+          EL PORQUÉ: llegaba `visible` clavado en `true`, así que el
+          espejo decía "Visible para las familias" SIEMPRE — estuviera o
+          no. La pantalla vieja sí lo computaba
+          (`cuenta.estado === 'activa' && hayOferta && hayFranja`, con
+          `null` honesto si una pata no cargaba) y **el cableado de C30
+          perdió ese cómputo**: el mismo patrón que ya me costó el logo y
+          la alineación — porté la composición y no porté el dato.
+          NO SE REEMPLAZA POR TEXTO porque afirmar lo contrario tampoco
+          se puede: el cómputo pide dos lecturas más y NO existe una
+          frontera única que lo resuelva (medido: las portadas lo tienen
+          re-implementado). Entre mentir que sí, mentir que no, y CALLAR,
+          la única honesta es callar — L-139.
+          ☠️ Vuelve cuando exista el cómputo compartido (ficha de A). */}
 
       {vacio !== null && (
         <View style={{ backgroundColor: VIDRIO_OFICIO, borderRadius: radius.md, padding: spacing[3] }}>
