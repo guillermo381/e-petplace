@@ -3534,7 +3534,7 @@ sin ese censo es tocar algo cuyo alcance no conozco.**
 
 ---
 
-#### D-617 — CUATRO OTAs PUBLICADOS EN RUNTIME 1.0.3, Y NO EXISTE NINGUNA BUILD EAS QUE LOS RECIBA 🔴
+#### D-617 — CUATRO OTAs PUBLICADOS EN RUNTIME 1.0.3, Y NO EXISTE NINGUNA BUILD EAS QUE LOS RECIBA 🔴 (mitad ① PAGADA)
 
 **Medido (S84-A3, al verificar el publish — no se buscaba, apareció):**
 
@@ -3580,3 +3580,33 @@ tanto el canal quedara sirviendo a **un solo teléfono**.
 > **Si en cambio se decide bajar `version` a 1.0.2**, la ficha muere igual —
 > pero entonces **hay que re-publicar los cuatro OTAs contra 1.0.2**, porque los
 > ya emitidos quedan huérfanos: nadie los reclama.
+
+> **➕ ENMIENDA S84-A3 — LA MITAD ① QUEDA PAGADA. La ficha NO se cierra.**
+>
+> **Palabra del founder (2-ago-2026):** confirma **1.0.3 en dispositivo**, y
+> reporta el `updateId` **`019fc317`** — que es **el de este mismo bundle**
+> (`7848147c`: android `019fc317-ea14-7623…` / ios `019fc317-ea14-7b69…`).
+>
+> **Qué prueba exactamente, y no más:** su APK 1.0.3 local existe, está
+> instalada, **y el canal `preview` la alcanza en vivo**. Eso responde la
+> pregunta que la ficha declaraba no medible desde acá, **y de paso baja el
+> riesgo retroactivo**: el gate del craft del Perfil no estuvo ciego por
+> runtime — el teléfono que lo miró sí podía recibir. *(Que haya visto los
+> tres OTAs anteriores es probable —los cuatro son 1.0.3— pero **no está
+> medido**: lo medido es este `updateId`, hoy.)*
+>
+> **LO QUE SIGUE ABIERTO ES LA MITAD QUE IMPORTA, y su alcance es mayor que el
+> que la ficha le daba al nacer.** El riesgo no era *"el founder no ve"* — eso
+> quedó descartado. El riesgo es que **el canal sirve a UN SOLO dispositivo**:
+> el que tiene esa APK construida a mano. **Cualquier segundo teléfono queda
+> fuera** — un tester, un prestador de la cohorte del reclutamiento, o **el
+> propio founder si reinstala desde EAS**, porque ahí lo que hay es 1.0.2.
+>
+> **Y eso cruza con el norte de la sesión:** S79 declaró que *"al cierre, el
+> founder sale a reclutar"*. **Reclutar significa un segundo teléfono**, y hoy
+> no hay build que darle. La ficha deja de ser un detalle de publicación y pasa
+> a ser **una precondición del reclutamiento**.
+>
+> **Condición de muerte ACTUALIZADA:** la mitad ① (confirmación del founder)
+> **está pagada y no se vuelve a pedir**. Queda **solo** la build EAS en runtime
+> 1.0.3, FINISHED en `build:list`. **Quien la retira:** quien corra esa build.
