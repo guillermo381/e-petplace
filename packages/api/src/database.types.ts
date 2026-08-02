@@ -38,6 +38,42 @@ export type Database = {
         }
         Relationships: []
       }
+      _traza_promocion_e164: {
+        Row: {
+          alcanzada: boolean | null
+          col: string | null
+          id: string | null
+          momento: string | null
+          nombre: string | null
+          pais: string | null
+          propuesto: string | null
+          valor_antes: string | null
+          valor_despues: string | null
+        }
+        Insert: {
+          alcanzada?: boolean | null
+          col?: string | null
+          id?: string | null
+          momento?: string | null
+          nombre?: string | null
+          pais?: string | null
+          propuesto?: string | null
+          valor_antes?: string | null
+          valor_despues?: string | null
+        }
+        Update: {
+          alcanzada?: boolean | null
+          col?: string | null
+          id?: string | null
+          momento?: string | null
+          nombre?: string | null
+          pais?: string | null
+          propuesto?: string | null
+          valor_antes?: string | null
+          valor_despues?: string | null
+        }
+        Relationships: []
+      }
       accion_destructiva_pendiente: {
         Row: {
           codueños_pendientes_snapshot: Json
@@ -16153,8 +16189,6 @@ export type Database = {
           descripcion: string | null
           foto_url: string | null
           id: string | null
-          lat: number | null
-          lon: number | null
           nombre_comercial: string | null
           radio_cobertura_km: number | null
           sector: string | null
@@ -16163,6 +16197,9 @@ export type Database = {
           total_citas: number | null
           total_resenas: number | null
           user_id: string | null
+          zona_lat: number | null
+          zona_lon: number | null
+          zona_radio_m: number | null
         }
         Relationships: [
           {
