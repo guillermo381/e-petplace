@@ -140,10 +140,55 @@ export type MiPrestador = Pick<
   // writer propio abajo; el flip a encendido lo gatea el trigger MECANICO
   // de A7 (rebota `aviso_reasignacion_no_existe` hasta que el aviso exista).
   | 'expone_personas'
->;
+> & {
+  /* ── S84-A26 · LA ZONA, LEÍDA DE LA MISMA VISTA QUE VE LA FAMILIA ──
+     Estas TRES no salen de `prestadores`: salen de `v_prestadores_publicos`,
+     y por eso el tipo es una intersección y no un `Pick` más largo.
+
+     **EL PORQUÉ ES DE PRODUCTO, no de tipos** (pedido de C, firmado): el
+     espejo muestra LO QUE VE LA FAMILIA. Si el wrapper le pasara la sede
+     EXACTA, el prestador creería que la familia ve su ubicación real —
+     justo lo que la vista dejó de exponer en D-624. **El espejo pasaría de
+     mostrar la verdad a CERTIFICAR UNA MENTIRA.**
+
+     Y se leen DE LA VISTA en vez de recalcular la fórmula sobre la fila
+     propia, aunque recalcular sea más barato: **dos derivaciones del mismo
+     dato se separan un día y nadie se entera.** Mismo criterio que la
+     portada derivada del orden — una sola verdad en vez de dos que pueden
+     contradecirse.
+
+     ⚠️ NULL LEGÍTIMO EN DOS CASOS, y los dos son la verdad:
+       · el prestador NO tiene coordenadas cargadas;
+       · el prestador **no está `activo`** ⇒ no está en la vista. Medido:
+         Carlos (`en_revision`) queda fuera. **Y está bien: la familia
+         tampoco lo ve.** El espejo de un negocio que no se muestra no
+         debería inventarle una zona. */
+  zona_lat: number | null;
+  zona_lon: number | null;
+  zona_radio_m: number | null;
+};
 
 const COLUMNAS_MI_PRESTADOR =
   'id, nombre_comercial, tipo, country_code, cuenta_comercial_id, direccion, ciudad, sector, lat, lon, radio_cobertura_km, grooming_extra_pelaje_largo, grooming_recargo_domicilio, descripcion, telefono, whatsapp, email_contacto, sitio_web, estado, foto_url, clip_url, expone_personas';
+
+/** Lee la zona de `v_prestadores_publicos` para UN id — la MISMA fuente que
+ *  ve la familia. Si la fila no está en la vista (negocio no activo) o no
+ *  tiene coordenadas, las tres vuelven null, que es la verdad y no un
+ *  fallo: por eso esta función no devuelve error. */
+async function leerZona(
+  prestadorId: string,
+): Promise<{ zona_lat: number | null; zona_lon: number | null; zona_radio_m: number | null }> {
+  const { data } = await getClient()
+    .from('v_prestadores_publicos')
+    .select('zona_lat, zona_lon, zona_radio_m')
+    .eq('id', prestadorId)
+    .maybeSingle();
+  return {
+    zona_lat: data?.zona_lat ?? null,
+    zona_lon: data?.zona_lon ?? null,
+    zona_radio_m: data?.zona_radio_m ?? null,
+  };
+}
 
 /**
  * El negocio del user logueado — por TITULARIDAD o por VÍNCULO ACTIVO
@@ -165,7 +210,7 @@ export async function obtenerMiPrestador(): Promise<
     .maybeSingle();
 
   if (error) return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
-  if (data !== null) return { ok: true, data };
+  if (data !== null) return { ok: true, data: { ...data, ...(await leerZona(data.id)) } };
 
   // (2) Vínculo activo. No es titular: ¿es empleado activo de alguien?
   const { data: vinculos, error: errorVinculo } = await getClient()
@@ -197,7 +242,7 @@ export async function obtenerMiPrestador(): Promise<
   // no está 'activo' (el borde declarado arriba). `sin_prestador` es la
   // voz honesta — no hay negocio que mostrarle todavía.
   if (fila === null) return { ok: false, codigo: 'sin_prestador', mensaje: MENSAJES.sin_prestador };
-  return { ok: true, data: fila };
+  return { ok: true, data: { ...fila, ...(await leerZona(fila.id)) } };
 }
 
 // ── S60-B2 (hunk aditivo): edición ACOTADA del perfil de la entidad ─────────
