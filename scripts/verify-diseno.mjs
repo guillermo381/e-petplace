@@ -822,6 +822,45 @@ function r27(fuentes) {
 const FUENTES_R27 = { temas: readFileSync('packages/ui/src/themes/index.ts', 'utf8') };
 
 
+/** R29 · `sinPie` NO VIAJA SOLO (S83-B1). La enmienda de la letra de
+ *  `Campo` dice que la protección contra el layout shift **no se retira,
+ *  sube un nivel**: el hijo deja de reservar el pie y lo monta el CONTROL
+ *  COMPUESTO, para todos sus hijos. Si el compuesto no lo monta, la
+ *  protección no subió: se perdió.
+ *
+ *  Y SE PIERDE EN SILENCIO, que es lo que la hace regla y no comentario:
+ *  con `sinPie` el `Campo` sigue pintando su borde de error —eso no se
+ *  delega— pero deja de renderizar el texto. El resultado es un borde
+ *  rojo sin una palabra que lo explique: la pantalla parece funcionar, el
+ *  tsc está verde, y el usuario no sabe qué corregir. Una verificación
+ *  cuyo modo de falla es el silencio no es una verificación (L-192).
+ *
+ *  ALCANCE HONESTO, declarado para que nadie la lea como más fuerte de lo
+ *  que es: verifica que las dos piezas VIVAN EN EL MISMO ARCHIVO, no que
+ *  el pie reciba el MISMO `ayuda`/`error` que el campo. Es un piso, no una
+ *  prueba — y cubre el modo de falla real, que es olvidarse del pie
+ *  entero, no pasarle el mensaje equivocado.
+ *
+ *  ☠️ CONDICIÓN DE MUERTE: el día que ningún archivo de `apps/` use
+ *  `sinPie` (el compuesto se retiró o `Campo` cambió de anatomía), la
+ *  regla no tiene nada que vigilar y se retira con lápida. La retira quien
+ *  mida cero usos, no quien la encuentre molesta. */
+function r29(archivos) {
+  const fallos = [];
+  let compuestos = 0;
+  for (const { path, src } of archivos) {
+    const limpio = sinComentarios(src);
+    if (!/\bsinPie\b/.test(limpio)) continue;
+    compuestos++;
+    if (!/\bPieDeCampo\b/.test(limpio)) {
+      fallos.push(
+        `${path} usa \`sinPie\` y NO monta PieDeCampo — el borde de error queda SIN su mensaje: el control compuesto tiene que montar el pie de sus hijos (S83-B1, L-192)`,
+      );
+    }
+  }
+  return { fallos, info: `${compuestos} control(es) compuesto(s) con sinPie · ${fallos.length} sin su pie` };
+}
+
 /** R17 · LA GALERÍA NO ENVEJECE (S82-B r16, orden founder: "toda pieza
  *  exportada desde packages/ui tiene que aparecer en la galería. Una
  *  exportación nueva sin entrada = rojo"). El modo de fallo es el que YA
@@ -852,13 +891,26 @@ const EXENTOS_R17 = new Set([
   // exportan para que el consumidor CALCULE el aire que la pata invade
   // en vez de estimarlo — mirarlos en una galería no diría nada.
   'PATA', 'MONTA',
+  // S83-B1, misma clase: `ALTO_PIE_CAMPO` es el alto exacto que el pie
+  // reserva (24.8) — un compuesto lo usa para CALCULAR, no para mirarlo.
+  // Se declara aunque hoy el parseo no lo alcance (SCREAMING_CASE no pasa
+  // el filtro de identificador): el día que el filtro se ensanche, la
+  // declaración ya está y nadie tiene que re-decidir por qué está exento.
+  'ALTO_PIE_CAMPO',
 ]);
 /** VACÍO desde S82-B r17: las NUEVE ganaron su entrada en la misma
  *  tanda que la regla las enumeró — importadas, jamás reimplementadas.
  *  De vacío no se sube: toda exportación nueva es roja el primer día. */
 const SIN_ENTRADA_R17 = new Set([]);
 function r17(fuentes) {
-  const idx = fuentes.index ?? '';
+  // S83-B1 — LOS COMENTARIOS SE SACAN ANTES DE PARSEAR. El bloque se
+  // parte por comas, así que un `//` DENTRO de las llaves se pega al
+  // nombre que le sigue y ese nombre deja de parecer identificador:
+  // escapaba del gate SIN decir nada, que es el modo de falla que este
+  // lint existe para no tener (L-192). Es la misma trampa que L-170 ya
+  // había cobrado en un censo de SQL: un censo por texto lee los
+  // comentarios como código. Medido al curarlo: escapaba exactamente 1.
+  const idx = (fuentes.index ?? '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
   const gal = fuentes.galeria ?? '';
   const nombres = new Set();
   for (const m of idx.matchAll(/export\s*\{([^}]+)\}/g)) {
@@ -1156,6 +1208,7 @@ const FIXTURES = {
   R4: [{ path: '(fixture)', src: "style={{ shadowColor: '#000000', shadowOpacity: 0.5 }}\nstyle={{ boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}" }],
   R5: [{ path: '(fixture)', src: 'style={{ backgroundColor: theme.accent.cta }}\n<ThemeProvider cta="oficio">' }],
   R6: [{ path: '(fixture)', src: '<KeyboardAvoidingView behavior="padding">' }],
+  R29: [{ path: '(fixture)', src: '<Campo label="Tel" sinPie />' }],
   R7: [{ path: '(fixture)', src: Array(BASELINE_FADEIN + 1).fill('entering={FadeInDown}').join('\n') }],
   R8: [{ path: '(fixture)', src: '<Entrada><EstadoVacio titulo="x" /></Entrada>\n<Animated.View entering={FadeIn}><EstadoVacio titulo="y" /></Animated.View>' }],
   R10: [{ path: 'apps/cliente/src/app/otra-pantalla.tsx', src: '/** @override-s82c — copia ilegal */' }],
@@ -1211,7 +1264,7 @@ const FIXTURES = {
     },
   ],
 };
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R22: r22, R24: r24, R25: r25, R27: r27 };
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R22: r22, R24: r24, R25: r25, R27: r27, R29: r29 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -1376,6 +1429,7 @@ corridas.push([
 corridas.push(['R24 (el pie de reserva no se copia)', r24(apps)]);
 corridas.push(['R25 (la pata no se reinventa)', r25([...apps, ...ui])]);
 corridas.push(['R27 (el pink no enfoca en el prestador)', r27(FUENTES_R27)]);
+corridas.push(['R29 (sinPie no viaja solo)', r29(apps)]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,
