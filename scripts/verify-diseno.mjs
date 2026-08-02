@@ -961,21 +961,36 @@ const FUENTES_R17 = {
  *      donde se la necesita — L-161, la misma lección del marcador).
  *  El día que el founder firme el retiro, esta regla se BORRA en el
  *  mismo acto (y su borrado queda en el commit de la firma). */
-const CUENTA_CLIENTE = 'apps/cliente/src/app/(tabs)/cuenta/index.tsx';
-function r18(fuentes) {
-  const src = fuentes.cuenta ?? '';
+// S84-B8 ② — LAS DOS CASAS. Hasta hoy R18 miraba SOLO la del cliente y
+// el propio código de la entrada del prestador declaraba el hueco: "R18
+// mira SOLO la Cuenta del cliente… esta entrada queda SIN guard". Una
+// entrada de gate que puede desaparecer sin que nadie se entere es el
+// modo de falla de siempre — y con la galería especializada en láminas
+// (enmienda de método 2-ago) importa MÁS, no menos: es el único camino
+// del founder a lo que tiene que firmar.
+const CUENTAS_GALERIA = [
+  'apps/cliente/src/app/(tabs)/cuenta/index.tsx',
+  'apps/prestador/src/app/(tabs)/cuenta/index.tsx',
+];
+function r18(casas) {
   const fallos = [];
-  if (!/router\.push\(['"]\/gallery['"]\)/.test(sinComentarios(src))) {
-    fallos.push(
-      `${CUENTA_CLIENTE} — LA ENTRADA A /gallery DESAPARECIÓ. D-580 (enmienda founder S82): queda VISIBLE hasta el gate de producción; su retiro exige FIRMA EXPLÍCITA, y con la firma se borra esta regla en el mismo acto.`,
-    );
+  for (const { ruta, src } of casas) {
+    const limpio = sinComentarios(src ?? '');
+    if (!/router\.push\(['"]\/gallery['"]\)/.test(limpio)) {
+      fallos.push(
+        `${ruta} — LA ENTRADA A /gallery DESAPARECIÓ. D-580 (enmienda founder S82): queda VISIBLE hasta el gate de producción; su retiro exige FIRMA EXPLÍCITA, y con la firma se borra esta regla en el mismo acto.`,
+      );
+    }
+    if (/__DEV__/.test(limpio)) {
+      fallos.push(
+        `${ruta} — la Cuenta usa __DEV__: la entrada a la galería NO se esconde ahí (el gate corre sobre el APK preview, donde __DEV__ es false — L-161).`,
+      );
+    }
   }
-  if (/__DEV__/.test(sinComentarios(src))) {
-    fallos.push(
-      `${CUENTA_CLIENTE} — la Cuenta usa __DEV__: la entrada a la galería NO se esconde ahí (el gate corre sobre el APK preview, donde __DEV__ es false — L-161).`,
-    );
-  }
-  return { fallos, info: fallos.length === 0 ? 'entrada viva y sin __DEV__' : `${fallos.length} fallo(s)` };
+  // ANCLA: sin casas que mirar la regla informaría "0 fallos" sin haber
+  // abierto un archivo — verde sin verificación (L-192).
+  fallos.push(...ancla('R18', casas.length, 2, 'Cuenta(s) de galería vigiladas'));
+  return { fallos, info: fallos.length === 0 ? `${casas.length} entradas vivas y sin __DEV__` : `${fallos.length} fallo(s)` };
 }
 
 /* ☠️ R19 SE RETIRÓ EN S82-C r38, Y SU PROPIA REGLA DICTÓ EL RETIRO.
@@ -1224,7 +1239,7 @@ const FIXTURES = {
   // S83-B7 · el ancla prueba SOLO el brazo de la entrada ausente. El de
   // __DEV__ va en EXTRAS_BRAZOS: ensanchar este string encendía los dos y
   // ninguno quedaba probado por separado — medido, no supuesto.
-  R18: { cuenta: '<CeldaNavegacion titulo="Preferencias" onPress={() => router.push("/cuenta/preferencias")} />' },
+  R18: [{ ruta: '(fixture)', src: '<CeldaNavegacion titulo="Preferencias" onPress={() => router.push("/cuenta/preferencias")} />' }, { ruta: '(fixture2)', src: 'router.push("/gallery")' }],
   // el pleno que ignora a sus hermanos: exactamente mi defecto de r11
   // la marca anidada adentro de la placa: el defecto que se ve como layout
   R22: { filtro: 'function MarcaElegido() {}\n<View style={{ width: 30 }}><MarcaElegido /></View>' },
@@ -1350,7 +1365,7 @@ const EXTRAS_BRAZOS = [
     filtro: 'function MarcaElegido() {}\n<View><MarcaElegido /></View>',
   }],
   // ── R18: la entrada VIVE (no dispara su otro brazo) y hay __DEV__ ──
-  ['R18·la Cuenta usa __DEV__', r18, { cuenta: 'router.push("/gallery")\nif (__DEV__) {}' }],
+  ['R18·la Cuenta usa __DEV__', r18, [{ ruta: '(fixture)', src: 'router.push("/gallery")\nif (__DEV__) {}' }, { ruta: '(fixture2)', src: 'router.push("/gallery")' }]],
 ];
 for (const [nombre, regla, fx] of EXTRAS_BRAZOS) {
   if (regla(fx).fallos.length === 0) {
@@ -1421,7 +1436,7 @@ corridas.push(['R13 (A6: control contorneado, cliente)', r13(apps)]);
 corridas.push(['R16 (papel tapiz: el prestador no recibe tinte)', r16(FUENTES_R16)]);
 corridas.push(['R17 (la galería no envejece)', r17(FUENTES_R17)]);
 corridas.push(['R20 (la familia alerta no se rellena)', r20([...apps, ...ui])]);
-corridas.push(['R18 (D-580: la entrada a la galería NO desaparece)', r18({ cuenta: readFileSync(CUENTA_CLIENTE, 'utf8') })]);
+corridas.push(['R18 (D-580: la entrada a la galería NO desaparece, en LAS DOS casas)', r18(CUENTAS_GALERIA.map((ruta) => ({ ruta, src: readFileSync(ruta, 'utf8') })))]);
 corridas.push([
   'R22 (la marca del elegido no se mete en la placa)',
   r22({ filtro: readFileSync(PIEZA_R22, 'utf8') }),

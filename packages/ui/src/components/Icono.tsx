@@ -53,6 +53,27 @@ export type IconoNombre =
   // VACUNA (sustitución genérica, Ley 12: el mismo caso de lápiz/compartir
   // en r7 y de la vacuna en r10). Gate por ícono a 21px PENDIENTE.
   | 'bitacora'
+  // ── S84-B4/B5: CONTACTO — FIRMADO (founder, S84-B5: el GLOBO).
+  //    Nace porque la sección "Cómo te contactan" del perfil quedó SIN
+  //    glifo mientras sus hermanas tienen el suyo — y las dos salidas
+  //    baratas están cerradas por ley: prestar `compartir` es la
+  //    sustitución genérica que la Ley 12 prohíbe, y quitarles el glifo
+  //    a las hermanas cumple la simetría rompiendo la misma ley (los
+  //    headers que significan cosas distintas tienen que separarse).
+  //    EL CRITERIO DEL DIBUJO: la sección agrupa CUATRO canales
+  //    (teléfono · WhatsApp · correo · sitio), así que el objeto no
+  //    puede ser ninguno de los cuatro — un auricular nombra uno y deja
+  //    tres afuera. El globo nombra el ACTO, no el canal.
+  //
+  //    ☠️ EL CANDIDATO B —`contactoOndas`, tres arcos saliendo de un
+  //    punto— MURIÓ EN SU GATE, y se registra en vez de borrarse en
+  //    silencio. Su porqué, que es la letra: **§1 manda dibujar el
+  //    OBJETO del oficio, y el globo es un objeto mientras que "el
+  //    alcance" es una idea.** Su riesgo medido lo acompañaba y quedó
+  //    confirmado como acierto de haberlo declarado: a 21px compartía
+  //    familia visual con `ayuda` (círculo con rayos). Nadie lo revive
+  //    sin volver a pasar por §1.
+  | 'contacto'
 export type IconoRegistro = 'capa' | 'aa' | 'tinta'
 
 const TRAZO = 1.9
@@ -366,6 +387,35 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
     </>
   ),
 
+  // ── CONTACTO · CANDIDATO A — EL GLOBO (S84-B4) ─────────────────────
+  // Nombra EL ACTO de contactar, no el canal: en un globo caben una
+  // llamada, un WhatsApp, un correo y un mensaje del sitio, y ninguno
+  // de los cuatro queda afuera. La huella va ADENTRO — quien escribe
+  // es la familia, y escribe por su mascota (regla madre §1).
+  // POR QUÉ NO ES UNA TARJETA DE DATOS, que era el candidato obvio: el
+  // idioma "rectángulo con líneas cortas adentro" YA ESTÁ OCUPADO TRES
+  // VECES en este mismo registry (`presupuesto`, `bitacora` y, de
+  // cerca, `caso`). A 21px una cuarta sería indistinguible, y un glifo
+  // que se confunde con otro derrota exactamente a la Ley 12 que este
+  // glifo existe para cumplir.
+  contacto: ({ tinta, huella }) => (
+    <>
+      <Path
+        d="M6.5 4.5h11A2.5 2.5 0 0 1 20 7v6a2.5 2.5 0 0 1-2.5 2.5h-6l-3.6 3v-3H6.5A2.5 2.5 0 0 1 4 13V7a2.5 2.5 0 0 1 2.5-2.5Z"
+        {...trazo(tinta)}
+      />
+      <Huella color={huella} x={7.7} y={5.7} escala={0.36} />
+    </>
+  ),
+
+  // ☠️ CONTACTO · CANDIDATO B (EL ALCANCE) MURIÓ EN SU GATE (S84-B5).
+  // Tres arcos saliendo de un punto, con la huella de origen. La razón
+  // de la firma es de LEY y por eso queda escrita: §1 manda dibujar el
+  // OBJETO del oficio — el globo es un objeto, "el alcance" es una
+  // idea. Su código se va (Ley 37: lo que muere, muere con su
+  // maquinaria) y su porqué se queda, para que nadie lo re-proponga
+  // creyendo que nunca se miró.
+
   // ── GLIFOS DE CONTROL (S82-B r7) ───────────────────────────────────
   // SIN HUELLA, y el criterio VIAJÓ CON LA REFERENCIA (no lo inventa
   // esta sesión — literal del archivo del founder): *"Trazo 1.9, sin
@@ -445,6 +495,15 @@ export function Icono({
     hoy: cuidado, preferencias: cuidado, ayuda: cuidado, ubicacion: cuidado,
     training: cuidado, hotel: cuidado, guarderia: cuidado, vacaciones: cuidado,
     negocio: ocre, pagos: ocre,
+    // S84-B4 — CONTACTO va a COMUNIDAD, y la elección es de taxonomía,
+    // no de gusto: Ley 10 reparte por lo que la cosa ES, y contactar es
+    // el vínculo entre la familia y el negocio (misma capa que `familia`
+    // y `equipo`, que son los otros dos vínculos entre personas). NO va
+    // a `ocre` con `negocio` aunque comparta pantalla con él: ocre es la
+    // capa del CONSUMO —el negocio como comercio—, y un canal de
+    // contacto no vende nada. Los dos candidatos comparten capa: lo que
+    // el founder elige a 21px es el DIBUJO, no el color.
+    contacto: comunidad,
     prime: comunidad, primeCorona: comunidad,
     // LOTE S71-B2 (firma founder): caso = historia clínica (familia de
     // carnet/vet) · presupuesto = plata del cuidado (familia pagos/negocio)

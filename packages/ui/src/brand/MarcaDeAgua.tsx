@@ -5,7 +5,7 @@
  * fondo compartido, NO override por pantalla").
  *
  * Es FONDO, no contenido: `pointerEvents="none"`, posición absoluta que
- * cubre a su padre, isotipo en tinta al `opacity.marcaDeAgua` (0.06 —
+ * cubre a su padre, isotipo en tinta al `opacity.marcaDeAgua` (0.045 —
  * el número FIRMADO del Hogar; ver el token). Centrado y ENTERO: el
  * founder firmó en S83-B22 la receta que corre en el Hogar, contra las
  * tres variantes que cortaban ("la idea es que se vea, suave, en marca
@@ -95,7 +95,9 @@ export function MarcaDeAgua({
    *  ("cero gradiente en toda la app"): se monta para que el founder VEA
    *  lo que esa letra prohibió antes de decidir si lo sostiene. */
   rampa?: boolean
-  /** Override del alfa. Default: `opacity.marcaDeAgua` (0.06, firmado). */
+  /** Override del alfa. Default: `opacity.marcaDeAgua` (**0.045**, firmado
+   *  founder 2-ago-2026 S84-B6; enmienda el 0.06 de S83-B22 — el porqué y
+   *  la reserva de 0.040 viven en el token, no acá). */
   alfa?: number
   /** Tamaño FIJO en px. Default: derivado de la pantalla (`FACTOR_ENTERA`
    *  0.536), que reproduce el 210 del Hogar a 390 px y lo preserva en
