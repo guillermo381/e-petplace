@@ -45,7 +45,7 @@
  * botón es del consumidor (en el espejo, "Ver cómo te ven").
  */
 
-import { useState, type ReactNode } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { Image, ScrollView, Text, View } from 'react-native'
 
 import { Boton } from './Boton'
@@ -138,6 +138,7 @@ export function FichaPrestador({
   const { theme } = useTheme()
   const [ancho, setAncho] = useState(0)
   const [activa, setActiva] = useState(0)
+  const riel = useRef<ScrollView>(null)
 
   // LAS POSICIONES DEL CARRUSEL: las fotos en su orden + el clip al
   // final si hay póster. Una lista sola, porque el clip es "una posición
@@ -150,6 +151,22 @@ export function FichaPrestador({
       : []),
   ]
   const conPortada = posiciones.length > 0
+  const N = posiciones.length
+  /** CIRCULAR (S84-B13, firma founder tras usarlo: "le falta"). Con UNA
+   *  sola posición NO cicla y no monta puntos — un ciclo de uno es un
+   *  salto sobre sí mismo, y una tira de un punto informa cero. */
+  const cicla = N > 1
+  /** LOS EXTREMOS CLONADOS: [última, ...reales, primera]. Es la técnica y
+   *  su costo — la firma lo cobró sabiendo que son 2-3× por el
+   *  reposicionamiento. Lo que NO se paga con esto es la verdad del
+   *  punto: ver `indiceReal`. */
+  const tira = cicla ? [posiciones[N - 1], ...posiciones, posiciones[0]] : posiciones
+  /** EL ÍNDICE REAL A PARTIR DEL VISUAL. Con extremos clonados los dos se
+   *  separan, y el punto tiene que marcar el REAL — un carrusel que
+   *  miente sobre en qué foto estás es peor que uno que frena. El módulo
+   *  lo resuelve INCLUSO parado sobre un clon, así que el punto es
+   *  correcto ANTES del reposicionamiento y no parpadea al saltar. */
+  const indiceReal = (visual: number) => (cicla ? ((visual - 1) % N + N) % N : visual)
   const montaVacio = !conPortada && onAgregarFotos !== undefined
   // LA LÍNEA COMPUESTA: se arma con lo que EXISTE. Con los dos, van
   // separados por el punto medio; con uno, va ese solo; sin ninguno, la
@@ -160,23 +177,46 @@ export function FichaPrestador({
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       {conPortada ? (
-        <View onLayout={(e) => setAncho(e.nativeEvent.layout.width)}>
+        <View
+          onLayout={(e) => {
+            const w = e.nativeEvent.layout.width
+            if (w === ancho) return
+            setAncho(w)
+            // Arranca en la primera REAL (visual 1), no en el clon de la
+            // última. Sin animación: nadie tiene que VER el arranque.
+            if (cicla && w > 0) requestAnimationFrame(() => riel.current?.scrollTo({ x: w, animated: false }))
+          }}
+        >
           {/* EL ANCHO SE MIDE, no se toma de la ventana: la pieza también
               vive dentro de cajas más angostas (la galería la monta con
               borde), y un carrusel paginado contra el ancho equivocado
               para SIEMPRE entre dos fotos. */}
           <ScrollView
+            ref={riel}
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
-            scrollEnabled={posiciones.length > 1}
-            onScroll={(e) =>
-              ancho > 0 && setActiva(Math.round(e.nativeEvent.contentOffset.x / ancho))
-            }
+            scrollEnabled={cicla}
+            // EL PUNTO SIGUE AL DEDO: se actualiza en onScroll, no al
+            // final — si esperara al momentum, el punto llegaría tarde.
+            onScroll={(e) => {
+              if (ancho <= 0) return
+              setActiva(indiceReal(Math.round(e.nativeEvent.contentOffset.x / ancho)))
+            }}
+            // EL SALTO VA EN momentum-end Y NO EN onScroll, y es LA
+            // decisión que separa un ciclo limpio de uno con tirón:
+            // reposicionar en medio del gesto pelea contra el scroll del
+            // usuario. Acá el dedo ya soltó y la inercia terminó.
+            onMomentumScrollEnd={(e) => {
+              if (!cicla || ancho <= 0) return
+              const v = Math.round(e.nativeEvent.contentOffset.x / ancho)
+              if (v === 0) riel.current?.scrollTo({ x: ancho * N, animated: false })
+              else if (v === N + 1) riel.current?.scrollTo({ x: ancho, animated: false })
+            }}
             scrollEventThrottle={16}
             style={{ height: ALTO_PORTADA }}
           >
-            {posiciones.map((pos, i) => (
+            {tira.map((pos, i) => (
               <View key={`${pos.url}-${i}`} style={{ width: ancho, height: ALTO_PORTADA }}>
                 <Image
                   source={{ uri: pos.url }}
@@ -186,7 +226,7 @@ export function FichaPrestador({
                   accessibilityLabel={
                     pos.esClip
                       ? `Video de ${nombre ?? 'el negocio'}`
-                      : `Foto ${i + 1} de ${nombre ?? 'el negocio'}`
+                      : `Foto ${indiceReal(i) + 1} de ${N}, ${nombre ?? 'el negocio'}`
                   }
                 />
                 {pos.esClip ? (
@@ -223,7 +263,7 @@ export function FichaPrestador({
             ))}
           </ScrollView>
 
-          {posiciones.length > 1 ? (
+          {cicla ? (
             <View
               pointerEvents="none"
               style={{
