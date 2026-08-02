@@ -32,9 +32,41 @@
 
 import { execSync } from 'node:child_process'
 
+/** EL ANCLA — CONTRA QUÉ ÁRBOL SE MIDIÓ (S84-B12).
+ *
+ *  El verdicto impreso curó el éxito silencioso; esto cura la otra
+ *  mitad, que costó más: un instrumento CORRECTO sobre un árbol VIEJO
+ *  da un número creíble y falso, y **no hay forma de verlo desde adentro
+ *  de la medición**. Yo reporté "el carrusel nace dormido, la columna no
+ *  tiene lectores" con la rama 40 commits atrás de main, donde esa
+ *  columna ya estaba muerta y su reemplazo tenía lector vivo. El grep
+ *  era correcto. El árbol no.
+ *
+ *  Por eso el ancla se IMPRIME arriba de todo: un verdicto sin ancla
+ *  dice si el código pasa, no CUÁL código pasó. */
+function ancla() {
+  const git = (c) => { try { return execSync(c, { stdio: 'pipe' }).toString().trim() } catch { return '?' } }
+  const rama = git('git rev-parse --abbrev-ref HEAD')
+  const head = git('git rev-parse --short HEAD')
+  const sucio = git('git status --porcelain')
+  const atras = (ref) => { const n = git(`git rev-list --count HEAD..${ref}`); return n === '?' || n === '0' ? null : n }
+  const partes = [`rama ${rama}`, `HEAD ${head}`, sucio === '' ? 'árbol limpio' : `⚠️ ${sucio.split('\n').length} archivo(s) sin commitear`]
+  for (const ref of ['main', 'origin/main']) {
+    const n = atras(ref)
+    if (n !== null) partes.push(`⚠️ ${n} commits DETRÁS de ${ref}`)
+  }
+  console.log(`ancla · ${partes.join(' · ')}`)
+  // Las refs son LOCALES: `origin/main` puede estar viejo sin `git fetch`.
+  // Decirlo es parte del ancla — si no, el ancla miente igual que el
+  // número que vino a proteger.
+  console.log('        (refs locales — sin fetch, `origin/main` puede estar atrasado)\n')
+}
+
 const PAQUETES = ['packages/ui', 'apps/cliente', 'apps/prestador']
 const pedidos = process.argv.slice(2)
 const objetivo = pedidos.length > 0 ? pedidos : PAQUETES
+
+ancla()
 
 let fallos = 0
 const linea = (ok, que, detalle) => {

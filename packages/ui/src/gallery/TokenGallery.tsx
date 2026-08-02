@@ -1041,7 +1041,7 @@ function EjemploSetBPrima() {
   // El lote 1 firmado (DIRECCION_ARTE §6) — cada ícono a su tamaño de
   // diseño (28) Y la fila de 21px (§2.9: el gate del founder corre acá;
   // si a 21 la huella no se lee, se simplifica el ícono).
-  const LOTE: IconoNombre[] = ['paseo', 'veterinaria', 'grooming', 'refugio', 'despensa', 'coach']
+  const LOTE: IconoNombre[] = ['paseo', 'veterinaria', 'grooming', 'refugio', 'despensa', 'ia']
   // LOTE 3 (S58, D-361 — gate founder POR ÍCONO en la fila de 21px):
   const LOTE3: IconoNombre[] = [
     'hogar', 'explorar', 'cuenta', 'hoy', 'negocio', 'carnet', 'familia',

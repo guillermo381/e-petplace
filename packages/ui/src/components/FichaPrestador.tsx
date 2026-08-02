@@ -45,15 +45,17 @@
  * botón es del consumidor (en el espejo, "Ver cómo te ven").
  */
 
-import type { ReactNode } from 'react'
-import { Image, View } from 'react-native'
+import { useState, type ReactNode } from 'react'
+import { Image, ScrollView, Text, View } from 'react-native'
 
 import { Boton } from './Boton'
 import { Insignia } from './Insignia'
 import { LogoNegocio } from './LogoNegocio'
 import { Texto } from './Texto'
+import { opacity } from '../tokens/opacity'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
+import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
 
 /** Alto de la portada. Sangra a los lados: la pieza NO le pone padding
@@ -63,6 +65,11 @@ const ALTO_PORTADA = 176
  *  que ata la identidad a su fondo en vez de apilar dos bloques sueltos. */
 const MONTA_FIRMA = 28
 const LADO_FIRMA = 72
+/** Diámetro del punto de paginación. */
+const PUNTO = 10
+/** Velo del ▶ sobre el póster del clip. Tinta con alfa: se define ACÁ y
+ *  no se recibe — la app jamás pasa un color crudo (Ley 1). */
+const VELO_CLIP = 'rgba(29,26,46,0.55)'
 
 export interface FichaPrestadorProps {
   /** `nombre_comercial`. Sin él no se pinta el título ni el monograma. */
@@ -70,8 +77,23 @@ export interface FichaPrestadorProps {
   /** Logo YA RESUELTO (`resolverUrlLogoNegocio(prestadores.foto_url)`).
    *  Sin él, `LogoNegocio` cae a su monograma honesto — jamás a huella. */
   logoUrl?: string | null
-  /** Portadas ya resueltas. Vacío o ausente = el estado vacío de abajo. */
+  /** Portadas YA RESUELTAS (la pieza no toca storage), **en el orden que
+   *  manda `prestador_fotos.orden`** — o sea `[0]` ES la portada y no hay
+   *  que preguntarla (contrato de `listarFotosGaleria`, S84-A). Vacío o
+   *  ausente = el estado vacío de abajo.
+   *  Con más de una, se pagina: ver `CARRUSEL` abajo. */
   portadas?: string[]
+  /** EL LUGAR DEL CLIP (S84-B11) — su póster ya resuelto. Entra al
+   *  carrusel como UNA POSICIÓN MÁS, al final, y su punto de paginación
+   *  lleva el ▶ en vez de un punto (referencia Fluvi).
+   *  ⚠️ EL ▶ ESTÁ APAGADO A PROPÓSITO y no es un olvido: reproducir video
+   *  exige módulo nativo, así que el play LLEGA CON LA BUILD. Lo que se
+   *  reserva hoy es el LUGAR — que la composición no cambie el día que
+   *  el clip funcione. Y hay una razón más para no apurarlo, medida por
+   *  A: **el clip todavía no tiene casa** — `adiestramiento-clips` es
+   *  privado y de otro dominio, y una vitrina PÚBLICA necesita bucket
+   *  propio con su techo. Esa decisión no es de esta pieza. */
+  clipPoster?: string | null
   /** `prestadores.ciudad`. */
   ciudad?: string | null
   /** EL OFICIO — hoy NADIE lo pasa, y la línea igual lo acepta.
@@ -105,6 +127,7 @@ export function FichaPrestador({
   nombre,
   logoUrl,
   portadas,
+  clipPoster,
   ciudad,
   oficio,
   historia,
@@ -113,8 +136,20 @@ export function FichaPrestador({
   pie,
 }: FichaPrestadorProps = {}) {
   const { theme } = useTheme()
+  const [ancho, setAncho] = useState(0)
+  const [activa, setActiva] = useState(0)
 
-  const conPortada = portadas !== undefined && portadas.length > 0
+  // LAS POSICIONES DEL CARRUSEL: las fotos en su orden + el clip al
+  // final si hay póster. Una lista sola, porque el clip es "una posición
+  // más" y no un caso aparte — tratarlo aparte es cómo nacen dos
+  // composiciones para la misma tira.
+  const posiciones: { url: string; esClip: boolean }[] = [
+    ...(portadas ?? []).map((url) => ({ url, esClip: false })),
+    ...(clipPoster !== null && clipPoster !== undefined && clipPoster !== ''
+      ? [{ url: clipPoster, esClip: true }]
+      : []),
+  ]
+  const conPortada = posiciones.length > 0
   const montaVacio = !conPortada && onAgregarFotos !== undefined
   // LA LÍNEA COMPUESTA: se arma con lo que EXISTE. Con los dos, van
   // separados por el punto medio; con uno, va ese solo; sin ninguno, la
@@ -125,13 +160,107 @@ export function FichaPrestador({
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       {conPortada ? (
-        <Image
-          source={{ uri: portadas[0] }}
-          style={{ width: '100%', height: ALTO_PORTADA }}
-          resizeMode="cover"
-          accessibilityRole="image"
-          accessibilityLabel={nombre ? `Portada de ${nombre}` : 'Portada del negocio'}
-        />
+        <View onLayout={(e) => setAncho(e.nativeEvent.layout.width)}>
+          {/* EL ANCHO SE MIDE, no se toma de la ventana: la pieza también
+              vive dentro de cajas más angostas (la galería la monta con
+              borde), y un carrusel paginado contra el ancho equivocado
+              para SIEMPRE entre dos fotos. */}
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            scrollEnabled={posiciones.length > 1}
+            onScroll={(e) =>
+              ancho > 0 && setActiva(Math.round(e.nativeEvent.contentOffset.x / ancho))
+            }
+            scrollEventThrottle={16}
+            style={{ height: ALTO_PORTADA }}
+          >
+            {posiciones.map((pos, i) => (
+              <View key={`${pos.url}-${i}`} style={{ width: ancho, height: ALTO_PORTADA }}>
+                <Image
+                  source={{ uri: pos.url }}
+                  style={{ width: ancho, height: ALTO_PORTADA }}
+                  resizeMode="cover"
+                  accessibilityRole="image"
+                  accessibilityLabel={
+                    pos.esClip
+                      ? `Video de ${nombre ?? 'el negocio'}`
+                      : `Foto ${i + 1} de ${nombre ?? 'el negocio'}`
+                  }
+                />
+                {pos.esClip ? (
+                  // El ▶ de la lámina: MARCA el lugar, no reproduce. Sin
+                  // `accessibilityRole="button"` a propósito — prometer un
+                  // control que no hace nada es peor que no tenerlo.
+                  <View
+                    pointerEvents="none"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: radius.full,
+                        backgroundColor: VELO_CLIP,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Text style={{ color: theme.text.onGradient, fontSize: typography.size.lg }}>▶</Text>
+                    </View>
+                  </View>
+                ) : null}
+              </View>
+            ))}
+          </ScrollView>
+
+          {posiciones.length > 1 ? (
+            <View
+              pointerEvents="none"
+              style={{
+                position: 'absolute',
+                bottom: spacing[3],
+                left: 0,
+                right: 0,
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: spacing[1.5],
+              }}
+            >
+              {posiciones.map((pos, i) => (
+                <View
+                  key={`punto-${i}`}
+                  style={{
+                    width: PUNTO,
+                    height: PUNTO,
+                    borderRadius: radius.full,
+                    backgroundColor: theme.text.onGradient,
+                    opacity: i === activa ? 1 : opacity.disabled,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {/* El punto del CLIP lleva el ▶ (referencia Fluvi): la
+                      tira dice CUÁNTAS posiciones hay Y cuál es el video,
+                      sin tener que llegar hasta él para enterarse. */}
+                  {pos.esClip ? (
+                    <Text style={{ color: theme.bg.base, fontSize: PUNTO * 0.7, lineHeight: PUNTO }}>▶</Text>
+                  ) : null}
+                </View>
+              ))}
+            </View>
+          ) : null}
+        </View>
       ) : montaVacio ? (
         <View
           style={{
