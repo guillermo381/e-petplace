@@ -21,6 +21,7 @@ import { Atmosfera } from '../brand/Atmosfera'
 import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
 import { Campo, PieDeCampo } from '../components/Campo'
+import { FichaPrestador } from '../components/FichaPrestador'
 import { Celda } from '../components/Celda'
 import { Separador } from '../components/Separador'
 import { Insignia } from '../components/Insignia'
@@ -2777,6 +2778,47 @@ function GaleriaInterna() {
         </Seccion>
 
         {/* Campo — B3.3 */}
+        {/* S84-B7 — LA FICHA DEL PRESTADOR. Va a la galería como CATÁLOGO,
+            no como ruta de verificación: la enmienda de método (2-ago-2026)
+            manda que lo nuevo viaje DIRECTO a su lugar —y esta pieza ya va
+            a la vitrina de C—, pero R17 sigue exigiendo que toda pieza
+            exportada se pueda MIRAR. Son dos reglas distintas y ninguna
+            derogó a la otra: una dice dónde se verifica, la otra que nada
+            exportado quede sin poder firmarse. */}
+        <Seccion titulo="FichaPrestador — la vitrina del negocio, UNA sola vez (cliente + espejo). Los tres casos: completo · sin fotos · sin historia">
+          <View style={{ gap: spacing[5] }}>
+            <View style={{ borderRadius: radius.md, overflow: 'hidden', borderWidth: 1, borderColor: theme.border.default }}>
+              <FichaPrestador
+                nombre="Paseos Andrés"
+                ciudad="Quito"
+                historia="Paseos tranquilos por el norte, grupos chicos y reporte con fotos."
+                servicios={['Paseo', 'Guardería']}
+                pie={<Texto variante="apoyo">así se va a ver tu ficha en la app</Texto>}
+              />
+            </View>
+            <Texto variante="apoyo">
+              SIN FOTOS · con handler = EL ESPEJO: una invitación con su CTA, jamás cuatro tarjetas de
+              ausencia.
+            </Texto>
+            <View style={{ borderRadius: radius.md, overflow: 'hidden', borderWidth: 1, borderColor: theme.border.default }}>
+              <FichaPrestador
+                nombre="Clínica Aurora"
+                ciudad="Quito"
+                historia="Atención general y vacunación."
+                servicios={['Consulta']}
+                onAgregarFotos={() => undefined}
+              />
+            </View>
+            <Texto variante="apoyo">
+              SIN HISTORIA y SIN FOTOS · sin handler = LA FAMILIA: la portada NO se monta y la línea de
+              historia NO se pinta. Si ahí no vería nada, ahí no hay nada — jamás un "Sin oficio".
+            </Texto>
+            <View style={{ borderRadius: radius.md, overflow: 'hidden', borderWidth: 1, borderColor: theme.border.default }}>
+              <FichaPrestador nombre="Satori" ciudad="Guayaquil" servicios={['Grooming']} />
+            </View>
+          </View>
+        </Seccion>
+
         <Seccion titulo="Campo — tocá para ver el foco (nada se anima al tipear)">
           <View style={{ backgroundColor: theme.bg.card, borderRadius: radius.md, borderWidth: 1, borderColor: theme.border.default, padding: spacing[5] }}>
             <Campo label="Nombre de la mascota" placeholder="ej: Zeus" />
