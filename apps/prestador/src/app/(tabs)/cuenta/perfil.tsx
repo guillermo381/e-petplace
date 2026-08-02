@@ -66,6 +66,7 @@ import {
   Texto,
   capturarConCamara,
   capturarDeGaleria,
+  capturarVideoDeGaleria,
   radius,
   spacing,
   useAviso,
@@ -89,6 +90,7 @@ import { useTraduccion } from '@/i18n';
 // que faltaba era el cable.
 import { quitarLogoNegocio, subirLogoNegocio } from '@/lib/subir-logo';
 import { borrarBytesFotoGaleria, resolverUrlFotoGaleria, subirFotoGaleria } from '@/lib/subir-galeria';
+import { quitarClipVitrina, subirClipVitrina } from '@/lib/subir-clip-vitrina';
 import { SeccionSede } from '@/components/seccion-sede';
 import { leerSede } from '@/lib/sede';
 import { ControlTelefono, EspejoNegocio, SeccionDesplegable } from '@/components/perfil-piezas';
@@ -142,6 +144,10 @@ const PAISES: Pais[] = [
 
 /** El default del selector — el país donde opera la mayoría. NO es un
  *  techo: cualquiera de los 23 se elige (② arriba). */
+/** El techo del bucket de clips (A, S84): 10 MB. Vive acá porque el
+ *  rebote tiene que decirse ANTES del round-trip. */
+const MAX_CLIP_BYTES = 10 * 1024 * 1024;
+
 const PAIS_DEFAULT = 'EC';
 
 /** ① FIRMADA: la bandera sale del `codigo_iso2` — cada letra a su
@@ -303,6 +309,70 @@ export default function PerfilV2() {
      portada aparte porque no hay dato de portada aparte. */
   const [fotos, setFotos] = useState<FotoGaleria[]>([]);
   const [borradorAbierto, setBorradorAbierto] = useState(false);
+  /* S84-C19 — EL CLIP. `clip_url` ya viaja en `MiPrestador`, así que el
+     estado sale del MISMO fetch que todo lo demás: cero lectura nueva. */
+  const [clipPath, setClipPath] = useState<string | null>(null);
+  const [subiendoClip, setSubiendoClip] = useState(false);
+
+  async function agregarClip() {
+    if (subiendoClip) return;
+    const cap = await capturarVideoDeGaleria();
+    if (cap.tipo === 'cancelada') return;
+    if (cap.tipo === 'permiso_denegado') {
+      mostrar({ variante: 'error', texto: t('miCuenta.logoPermisoCamara') });
+      return;
+    }
+
+    /* ① NO SE VALIDA DURACIÓN, y es regla de la mesa con su porqué:
+       `duracionMs` puede ser null, y **null significa "no sé", no "dura
+       poco"**. Rebotar por un dato ausente le negaría al prestador subir
+       algo perfectamente válido por una limitación NUESTRA. Los ≤30 s se
+       validan cuando exista el módulo (D-617).
+
+       ② SÍ SE USA `bytes`, y se rebota ANTES de subir: es la diferencia
+       entre un aviso y un error. Dejarlo fallar arriba le haría esperar
+       la subida entera de un archivo que el bucket iba a rechazar.
+       ⚠️ Y EL NULL SE HONRA EN LAS DOS DIRECCIONES: si no sé el tamaño,
+       tampoco afirmo que entra — dejo subir y que el bucket decida, pero
+       la voz del error LO DICE en vez de callarlo. Un rechazo del
+       servidor sin explicación se lee como falla nuestra. */
+    if (cap.video.bytes !== null && cap.video.bytes > MAX_CLIP_BYTES) {
+      mostrar({ variante: 'error', texto: t('perfilNegocio.clipMuyGrande') });
+      return;
+    }
+    const tamanoDesconocido = cap.video.bytes === null;
+
+    setSubiendoClip(true);
+    const r = await subirClipVitrina({ uri: cap.video.uri });
+    setSubiendoClip(false);
+    if (!r.ok) {
+      mostrar({
+        variante: 'error',
+        texto:
+          r.causa === 'formato_no_video'
+            ? t('perfilNegocio.clipNoVideo')
+            : r.causa === 'archivo_grande'
+              ? // el rebote del bucket cuando NO pudimos medir antes: se
+                // dice que no se pudo saber, en vez de un error mudo.
+                tamanoDesconocido
+                ? t('perfilNegocio.clipGrandeSinMedir')
+                : t('perfilNegocio.clipMuyGrande')
+              : t('miCuenta.logoErrorSubida'),
+      });
+      return;
+    }
+    setClipPath(r.path);
+    mostrar({ variante: 'exito', texto: t('perfilNegocio.clipGuardado') });
+  }
+
+  async function quitarClip() {
+    const r = await quitarClipVitrina();
+    if (!r.ok) {
+      mostrar({ variante: 'error', texto: r.mensaje ?? t('miCuenta.logoErrorSubida') });
+      return;
+    }
+    setClipPath(null);
+  }
   const [fotoTocada, setFotoTocada] = useState<number | null>(null);
   const [subiendoFoto, setSubiendoFoto] = useState(false);
 
@@ -422,6 +492,7 @@ export default function PerfilV2() {
         const wa = p.whatsapp ?? '';
         setPrestador(p);
         setLogoPath(p.foto_url);
+        setClipPath(p.clip_url);
         setDescripcion(desc);
         /* S84-A1bis — LA PARTICIÓN AL CARGAR, que es lectura y no columna.
            El campo muestra el número SIN prefijo (el indicativo ya vive a
@@ -803,14 +874,23 @@ export default function PerfilV2() {
               {prestador !== null && (
                 <EscribaHistoria
                   historiaActual={descripcion}
-                  hechos={[
-                    ...(prestador.ciudad !== null && prestador.ciudad.length > 0
+                  hechos={
+                    /* ③ S84-C18 — EL RADIO SALIÓ, y el criterio es del
+                       founder: es PARÁMETRO DE OPERACIÓN, no razón para
+                       elegir. Una familia no decide por cuántos km
+                       cubrís; decide por quién sos y dónde estás. Meterlo
+                       en el material del escriba lo empujaba a escribir
+                       logística en una historia.
+                       QUEDA LA CIUDAD, y nada más de acá.
+                       ⚠️ NADA VIAJA COMO `verificado` — la function lo
+                       CITA en vez de parafrasearlo, así que etiquetar mal
+                       sería ponerle comillas a algo que nadie verificó.
+                       ☠️ Cuando A habilite credenciales verificadas,
+                       entran ACÁ con su etiqueta propia. */
+                    prestador.ciudad !== null && prestador.ciudad.length > 0
                       ? [{ etiqueta: 'declarado' as const, texto: `Atiende en ${prestador.ciudad}` }]
-                      : []),
-                    ...(prestador.radio_cobertura_km !== null
-                      ? [{ etiqueta: 'declarado' as const, texto: `Cubre hasta ${prestador.radio_cobertura_km} km` }]
-                      : []),
-                  ]}
+                      : []
+                  }
                   onAceptar={setDescripcion}
                 />
               )}
@@ -911,6 +991,39 @@ export default function PerfilV2() {
                 un solo pasajero). */}
             <View style={{ paddingVertical: spacing[4], gap: spacing[2] }}>
               <Texto variante="seccion">{t('perfilNegocio.clipTitulo')}</Texto>
+              {/* S84-C19 — EL CONTROL, con la captura de B (`d943295`).
+                  LA CADENA DE ARRIBA NO SE TOCÓ: se escribió en C17 para
+                  servir antes y después del botón, y ésa era su prueba.
+                  Que ahora exista el control y siga sirviendo es la
+                  demostración de que el copy estaba bien escrito.
+                  ⚠️ REPRODUCIR SIGUE SIN EXISTIR (D-617): el clip cargado
+                  se DICE, y no se dibuja ningún control que prometa
+                  reproducción (Ley 23). El ▶ vive en el punto del
+                  carrusel de la ficha, que es de B, y llega con la
+                  build — no acá. */}
+              {clipPath === null ? (
+                <View style={{ alignSelf: 'flex-start' }}>
+                  <Boton
+                    variante="compacto"
+                    etiqueta={t('perfilNegocio.clipAgregar')}
+                    cargando={subiendoClip}
+                    onPress={() => void agregarClip()}
+                  />
+                </View>
+              ) : (
+                <>
+                  <Texto variante="apoyo">{t('perfilNegocio.clipCargado')}</Texto>
+                  <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+                    <Boton
+                      variante="compacto"
+                      etiqueta={t('perfilNegocio.clipCambiar')}
+                      cargando={subiendoClip}
+                      onPress={() => void agregarClip()}
+                    />
+                    <Boton variante="ghost" etiqueta={t('perfilNegocio.clipQuitar')} onPress={() => void quitarClip()} />
+                  </View>
+                </>
+              )}
               <Texto variante="apoyo">{t('perfilNegocio.clipVacio')}</Texto>
             </View>
 

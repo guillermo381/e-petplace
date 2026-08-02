@@ -265,6 +265,8 @@ export const prestadorEs = {
     iaIntroMejorar: 'Contame dos cosas y mejoro lo que ya escribiste. No se cambia nada hasta que vos digas.',
     iaPorQue: '¿Por qué haces esto?',
     iaQueSepan: '¿Qué quieres que sepan de tu lugar?',
+    iaExperiencia: 'Cuéntanos sobre tu experiencia',
+
     iaComponer: 'Escribir el borrador',
     iaLoTuyo: 'lo que escribiste',
     iaPropuesta: 'la propuesta',
@@ -293,7 +295,26 @@ export const prestadorEs = {
     fotoBorrar: 'Borrar',
 
     clipTitulo: 'Tu clip',
-    clipVacio: 'Un video corto de tu espacio. Todavía no está disponible: llega con la próxima versión de la app.',
+    /* ⚠️ ESTA CADENA NO DECLARA ESTADO, Y ES A PROPÓSITO (S84-C17).
+       La anterior decía 'todavía no está disponible: llega con la próxima
+       versión' — nació VERDADERA (no existían ni la columna ni el lib) y
+       se volvió falsa sin que nadie la tocara, en cuanto A entregó
+       `subirClipVitrina`. Además desalentaba: le decía al prestador que
+       no se moleste.
+       Ahora dice QUÉ ES y PARA QUÉ SIRVE — dos cosas que no envejecen.
+       LA PRUEBA de que está bien escrita: sirve IGUAL antes y después de
+       que exista el botón. Cuando B entregue la captura de video, se
+       agrega el control y **esta línea no se toca**. */
+    clipAgregar: 'Agregar clip',
+    clipCambiar: 'Cambiar clip',
+    clipQuitar: 'Quitar',
+    clipCargado: 'Tu clip ya está cargado. Se va a ver en tu ficha con la próxima versión de la app.',
+    clipGuardado: 'Listo — tu clip quedó guardado.',
+    clipNoVideo: 'El archivo no es un video.',
+    clipMuyGrande: 'El clip supera el máximo de 10 MB.',
+    clipGrandeSinMedir: 'El clip pesa más de 10 MB. No pudimos saberlo antes de subirlo — probá con uno más corto.',
+
+    clipVacio: 'Un video corto de tu espacio: lo que una foto no alcanza a mostrar.',
     verComoTeVen: 'Ver cómo te ven',
     verComoTeVenNota: 'Así te va a ver una familia que te encuentra. Todavía estamos armando el directorio.',
 

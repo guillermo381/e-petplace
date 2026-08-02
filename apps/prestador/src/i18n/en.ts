@@ -217,6 +217,8 @@ export const prestadorEn = {
     iaIntroMejorar: "Tell me two things and I'll improve what you wrote. Nothing changes until you say so.",
     iaPorQue: 'Why do you do this?',
     iaQueSepan: 'What do you want people to know about your place?',
+    iaExperiencia: 'Tell us about your experience',
+
     iaComponer: 'Write the draft',
     iaLoTuyo: 'what you wrote',
     iaPropuesta: 'the draft',
@@ -245,7 +247,16 @@ export const prestadorEn = {
     fotoBorrar: 'Delete',
 
     clipTitulo: 'Your clip',
-    clipVacio: "A short video of your place. Not available yet: it arrives with the next version of the app.",
+    clipAgregar: 'Add clip',
+    clipCambiar: 'Change clip',
+    clipQuitar: 'Remove',
+    clipCargado: 'Your clip is saved. It will show on your card with the next version of the app.',
+    clipGuardado: 'Done — your clip is saved.',
+    clipNoVideo: 'That file is not a video.',
+    clipMuyGrande: 'The clip is over the 10 MB limit.',
+    clipGrandeSinMedir: "The clip is over 10 MB. We couldn't tell before uploading — try a shorter one.",
+
+    clipVacio: 'A short video of your place: what a photo cannot show.',
     verComoTeVen: 'See how they see you',
     verComoTeVenNota: "This is how a family who finds you will see you. We're still building the directory.",
 

@@ -58,6 +58,7 @@ export function EscribaHistoria({
   const [abierta, setAbierta] = useState(false);
   const [porQue, setPorQue] = useState('');
   const [queSepan, setQueSepan] = useState('');
+  const [experiencia, setExperiencia] = useState('');
   const [pensando, setPensando] = useState(false);
   const [propuesta, setPropuesta] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -77,9 +78,13 @@ export function EscribaHistoria({
     setError(null);
     const r = await escribirPresencia({
       hechos,
-      respuestas: [porQue, queSepan],
-      // si hay historia, el escriba MEJORA en vez de crear de cero (§5)
-      borradorPrevio: tieneHistoria ? historiaActual : undefined,
+      respuestas: [porQue, queSepan, experiencia],
+      /* ③ EL PREVIO ES LA ÚLTIMA PROPUESTA SI YA HAY UNA — y este era un
+         BUG que la medición destapó: al tocar "probá otra" se mandaba la
+         historia VIEJA, así que el escriba re-mejoraba el punto de
+         partida en vez del borrador recién hecho. El founder habría
+         visto variaciones del mismo original en vez de una evolución. */
+      borradorPrevio: propuesta ?? (tieneHistoria ? historiaActual : undefined),
       intento,
     });
     setPensando(false);
@@ -139,6 +144,17 @@ export function EscribaHistoria({
                 onChangeText={setQueSepan}
                 multilinea={3}
               />
+              {/* ① S84-C16 — LA TERCERA, del gate del founder. Las otras
+                  dos preguntan por el PORQUÉ y por el LUGAR; ésta trae lo
+                  único que ninguna de las dos alcanza: el oficio de quien
+                  lo hace. Sin ella el borrador puede hablar bien de un
+                  lugar sin decir nunca por qué confiarle una mascota. */}
+              <Campo
+                label={t('perfilNegocio.iaExperiencia')}
+                value={experiencia}
+                onChangeText={setExperiencia}
+                multilinea={3}
+              />
               {error !== null && <Texto variante="apoyo" color="danger">{error}</Texto>}
               <Boton
                 etiqueta={t('perfilNegocio.iaComponer')}
@@ -159,9 +175,19 @@ export function EscribaHistoria({
                   <Texto variante="cuerpo" color="secondary">{historiaActual}</Texto>
                 </View>
               )}
+              {/* ② S84-C16 — LA PROPUESTA SE LEE COMO FRASE, no como
+                  párrafo. El motor lo acorta (A); la superficie lo
+                  ACOMPAÑA: `voz` es el registro de lo humano en tamaño
+                  grande —DM Sans light— y a esa escala una frase se lee
+                  como una declaración, mientras un párrafo se rompe.
+                  **Y ése es el punto de la variante, no un adorno:** si
+                  el texto vuelve largo, la propia composición lo va a
+                  hacer evidente en vez de disimularlo. Un `cuerpo` chico
+                  aguanta cualquier largo — y por eso escondía el
+                  defecto que el founder terminó cazando en pantalla. */}
               <View style={{ gap: spacing[1] }}>
                 <Texto variante="dato">{t('perfilNegocio.iaPropuesta')}</Texto>
-                <Texto variante="cuerpo">{propuesta}</Texto>
+                <Texto variante="voz">{propuesta}</Texto>
               </View>
               {error !== null && <Texto variante="apoyo" color="danger">{error}</Texto>}
               <Boton
