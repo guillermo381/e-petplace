@@ -209,6 +209,29 @@ export const prestadorEn = {
     espejoPie: 'This is how your card will look in the app.',
 
     // ── S84-C12 · Espejo de es.ts ──
+    // ── S84-C15 · Espejo de es.ts ──
+    iaEscribir: 'Help me write it',
+    iaMejorar: 'Help me improve it',
+    iaHojaTitulo: 'Your story',
+    iaIntroEscribir: "Tell me two things and I'll draft one using what I already know about your business. You decide whether to use it.",
+    iaIntroMejorar: "Tell me two things and I'll improve what you wrote. Nothing changes until you say so.",
+    iaPorQue: 'Why do you do this?',
+    iaQueSepan: 'What do you want people to know about your place?',
+    iaComponer: 'Write the draft',
+    iaLoTuyo: 'what you wrote',
+    iaPropuesta: 'the draft',
+    iaUsar: 'Use this version',
+    iaOtra: 'Try another',
+    iaDescartar: 'Discard',
+
+    espacioTitulo: 'Your place',
+    fotoAdelante: 'Move forward',
+    fotoAtras: 'Move back',
+    borradorTitulo: 'You have unsaved changes',
+    borradorVoz: 'The preview shows what is already saved. To see them there, save them first.',
+    borradorGuardarYVer: 'Save and view',
+    borradorVerIgual: 'View what is saved',
+
     fotosTitulo: 'Photos of your place',
     fotosAyuda: 'The first one is your cover. Tap a photo to move or delete it.',
     fotoAgregar: 'Add',
@@ -219,7 +242,6 @@ export const prestadorEn = {
     fotoA11y: 'Photo {{n}}',
     fotoHojaTitulo: 'This photo',
     fotoHacerPortada: 'Make it the cover',
-    fotoMover: 'Move one position forward',
     fotoBorrar: 'Delete',
 
     clipTitulo: 'Your clip',
