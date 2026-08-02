@@ -3889,7 +3889,7 @@ ropa.**
 
 ---
 
-#### D-622 — UNA FILA DE SEED CAMBIÓ DURANTE UN INTENTO DE MIGRACIÓN QUE ABORTÓ, Y NO SÉ POR QUÉ 🔴
+#### D-622 — UNA FILA DE SEED CAMBIÓ DURANTE UN INTENTO DE MIGRACIÓN QUE ABORTÓ ✅ CERRADA S84-A23 — la causa era MI PROPIO GUARD
 
 **Lo que está MEDIDO (y solo esto):**
 
@@ -4138,3 +4138,166 @@ envejeció**.
 > con el conteo de cuántas eran de cada clase. **Escrita como "cuando exista el
 > barrido", no como "cuando alguien revise"** — porque si se escribiera de la
 > segunda forma sería su propio caso.
+
+> **➕ ENMIENDA S84-A20 — LA FIRMA DEL TELÉFONO EN DISPOSITIVO CAMBIA TRES FICHAS.**
+>
+> **Palabra del founder (2-ago-2026, group `d139b9c0`, ancla `2758030`):**
+> *"EL TELÉFONO E.164 — FIRMADO. Se guarda con Colombia y persiste."*
+>
+> ### **D-613 ✅ VALIDADA EN DISPOSITIVO**
+> La derogación de la regla 28 **ya no descansa solo en fixtures**: un número
+> colombiano se guardó con su `+` desde la app y persistió. **Y (a′) quedó
+> probada con dato real** — no con el `curl` de una prueba.
+>
+> ### **D-619 — el estado real, medido, es MEJOR de lo que la ficha decía**
+> **Una de las cinco filas ya pasa el CHECK**, y no por (b): **la curó su dueño
+> desde la pantalla**, que es exactamente la salida (a) firmada.
+>
+> | | |
+> |---|---|
+> | ✅ pasa | `Paseos Andres` → `+573208408790` |
+> | 🔴 falta | `Satori Latam` `573208408790` · `Carlos` `593987654321` · `Clínica Aurora` `593999000668` · `Wizard` `593999000558` |
+>
+> **⚠️ Y OJO CON LO QUE LA FIRMA NO DICE: el founder NO probó desde Satori.** La
+> fila que se curó es la del prestador DEMO (`demo-prestador@epetplace.dev`), que
+> es la cuenta con la que gatea. **Satori sigue sin poder editar su perfil** — el
+> bloqueo que motivó todo esto **sigue vivo para su propio negocio**. *Se dice
+> porque "el teléfono funciona" y "el perfil de Satori se desbloqueó" son dos
+> cosas distintas, y solo la primera está firmada.*
+>
+> ### **D-622 — de "no sé por qué" a EXPLICACIÓN PROBABLE**
+> **Lo nuevo, medido:** la fila alterada pertenece a
+> `demo-prestador@epetplace.dev`, **la cuenta con la que el founder gatea**; y
+> **volvió a cambiar hoy** (`22:54:15`), esta vez con causa conocida — la firma
+> declara que guardó desde la app. **El valor `+573208408790` es exactamente el
+> que `componerE164` produce** con el campo en `3208408790` y país CO.
+>
+> ⇒ **La explicación probable es que el cambio de aquel turno también fue el
+> founder probando el OTA, no la migración.** Encaja en cuenta, valor y patrón.
+>
+> **LO QUE SIGUE SIN CONFIRMARSE, y por eso la ficha baja a 🟡 en vez de
+> cerrarse:** no hay rastro directo que ate aquel `updated_at` a una sesión de
+> app. **Es una hipótesis fuerte, no una medición** — y esta sesión ya nombró
+> tres veces que una causa plausible sin medición es peor que la incógnita
+> (candidata #17).
+>
+> **Consecuencia práctica, que es lo que importa:** **(b) deja de estar bloqueada
+> por un fantasma.** Si el próximo intento corre con la traza en tabla real (el
+> instrumento que la ficha ya describe) y la fila no se mueve sola, la
+> explicación queda confirmada y ambas fichas cierran juntas.
+>
+> **☠️ CONDICIÓN ACTUALIZADA:** se retira cuando **(b) corra con su traza legible
+> y el comportamiento sea el esperado** — o antes, si alguien ata aquel
+> `updated_at` a una sesión de app con evidencia.
+
+> **✅ D-619 y D-622 CIERRAN JUNTAS — S84-A23 (`20260803000000_s84_promocion_e164`).**
+> Y cierran como la mesa pidió: **con medición, no con hipótesis.**
+>
+> ### El resultado de (b), leído de la traza
+>
+> | prestador | antes | después | alcanzada | país |
+> |---|---|---|---|---|
+> | Carlos | `593987654321` | `+593987654321` | ✅ | EC |
+> | Clínica Aurora | `593999000668` | `+593999000668` | ✅ | EC |
+> | **Satori Latam** | `573208408790` | **`+573208408790`** | ✅ | **CO** |
+> | Wizard | `593999000558` | `+593999000558` | ✅ | EC |
+> | Paseos Andres | `+573208408790` | `+573208408790` | ❌ | — *(ya estaba)* |
+>
+> **El país sale del PROPIO NÚMERO en cada caso** — CO para Satori, EC para los
+> otros tres. Ninguno del `country_code`, que las siete filas tienen en `EC`:
+> **si hubiera derivado de ahí, Satori habría quedado en `+593`. P21 intacta.**
+>
+> **`ALTER TABLE … VALIDATE CONSTRAINT` corrió en verde en los dos constraints**
+> (`convalidated = true`). **No queda pasado ilegal: D-619 muere de un comando**,
+> como su ficha exigía.
+>
+> ### 🔴 Y LA CAUSA DE D-622, QUE NO ERA LA QUE YO CREÍA
+>
+> **No fue la migración. Fue MI PROPIO CINTURÓN, correcto pero mal redactado.**
+> Preguntaba:
+> ```sql
+> SELECT count(*) WHERE whatsapp = '3208408790';  IF <> 1 THEN
+>   RAISE 'la fila sin indicativo FUE TOCADA'
+> ```
+> **Verificaba la EXISTENCIA DE UN VALOR y su mensaje decía que verificaba un
+> CAMBIO.** Cuando el founder curó esa fila desde la app —cosa perfectamente
+> legítima, y que la firma de A20 confirma—, el literal dejó de existir, el guard
+> gritó, **y su mensaje me hizo concluir que la migración había escrito ahí.
+> Nunca la tocó.**
+>
+> **La prueba de que no la tocaba está en esta misma corrida:** con el guard
+> corregido —que compara contra la traza en vez de contra un literal— la fila
+> quedó `alcanzada=false` y `antes == después`. **El predicado nunca la alcanzó,
+> ni antes ni ahora.**
+>
+> > **UN GUARD CORRECTO CON UN MENSAJE QUE INDUCE LA CONCLUSIÓN EQUIVOCADA CUESTA
+> > LO MISMO QUE UN GUARD ROTO.** Éste costó una ficha 🔴, un turno, y una
+> > migración retirada de `migrations/` por miedo a un fantasma que había
+> > fabricado yo. *El mensaje de un guard es parte del guard, no su decoración:
+> > es lo único que alguien va a leer cuando salte.* → **candidata #21**.
+>
+> ### Lo que queda vivo, declarado
+> **La tabla `public._traza_promocion_e164` NO se borra en este acto:** es la
+> evidencia que cerró las dos fichas. **Se retira cuando alguien la haya leído y
+> el canon de S84 esté escrito** — borrarla ahora sería repetir el error de
+> origen, que fue quedarse sin rastro.
+
+---
+
+#### D-627 — EL CONTENIDO DE USUARIO EN DOS IDIOMAS: cuándo se traduce y qué pasa cuando divergen 🟠
+
+**Medición de C (S84), y el encuadre que trae es lo importante: NO es "falta una
+columna `descripcion_en`".**
+
+**① EL PATRÓN NO EXISTE EN LA CASA.** Cero pares `*_es`/`*_en` en toda la DB. **El
+bilingüe vive entero en el riel i18n**, donde las cadenas son **NUESTRAS** —
+escritas por nosotros, versionadas, con su `Espejo<D>` exigiendo paridad al
+typecheck. **Guardar contenido de USUARIO en dos idiomas sería un patrón nuevo,
+no una columna más.**
+
+**② NINGUNO DE LOS DOS TIENE LECTOR — ni el `en` ni el `es`.** No existe
+superficie que muestre la descripción de un prestador **a una familia**. Hoy el
+único que la ve es **el prestador mirándose en el espejo**. *El escriba ya
+produce `es` + `en`; el `en` no tiene a dónde ir.*
+
+**③ Y ESTO ES LO QUE LA VUELVE DAÑINA, no solo prematura:**
+
+> El prestador acepta el borrador **y después edita** — que es el caso ESPERADO,
+> para eso están las dos puertas (§5: *el prestador edita y APRUEBA*).
+> **El `es` cambia. El `en` queda viejo. Y NADIE SE ENTERA:**
+> · él no lee su propia pantalla en inglés,
+> · el espejo le muestra el `es`,
+> · **y la familia angloparlante ve una versión que él nunca escribió y que no
+>   puede corregir** — porque no sabe que existe.
+
+**Es un modo de falla silencioso con la agravante de que el afectado no es quien
+puede arreglarlo.** No es un dato desactualizado: es **una voz puesta en boca de
+alguien**, que es exactamente lo que `MODELO_PRESENCIA` §5 protege cuando dice
+que *el autor es él*.
+
+### LAS DOS DECISIONES, escritas y SIN RESOLVER
+
+**(a) CUÁNDO SE RE-TRADUCE.** Tres caminos, ninguno gratis:
+· **re-generar en cada guardado** — el `en` nunca envejece, pero cada edición de
+  una coma cuesta una llamada al modelo;
+· **marcar vencido** — barato, pero necesita superficie que lo diga y alguien que
+  actúe;
+· **traducir al leer** — siempre fresco, latencia y costo en el camino del
+  lector, y sin control del prestador sobre lo que sale.
+
+**(b) SI EL BILINGÜE DE CONTENIDO DE USUARIO ES DE LA CASA — porque hoy NO lo
+es.** El riel i18n traduce lo nuestro. **Que el producto se haga cargo de
+traducir lo que escribe un usuario es una promesa distinta**, y arrastra: quién
+responde por una traducción mala, qué pasa si el prestador no está de acuerdo,
+y si se puede desactivar.
+
+> **☠️ CONDICIÓN DE MUERTE — con su disparo, que es lo que la mantiene honesta:**
+> se retira cuando **exista la primera superficie que muestre una ficha pública a
+> alguien en inglés**, y con ella las dos decisiones (a) y (b) tomadas.
+> **ANTES DE ESO, LA COLUMNA NACERÍA SIN LECTOR Y CON UNA MENTIRA DORMIDA** — y
+> la mentira empieza a correr desde el primer guardado, no desde el primer
+> lector. **Quién la retira:** quien construya esa superficie.
+>
+> *Nota de alcance: el escriba SIGUE devolviendo `es` + `en` (§5 lo manda: "es+en
+> de nacimiento"). Lo que esta ficha frena no es generarlo — es PERSISTIRLO sin
+> haber decidido su ciclo de vida.*
