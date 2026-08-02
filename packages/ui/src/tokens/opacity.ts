@@ -30,10 +30,16 @@ export const opacity = {
    *  va a leerse un poco más en el prestador oscuro (1.106 contra
    *  1.070). Es de la FORMA elegida, no del número.
    *
-   *  RESERVA MEDIDA Y NO APLICADA: **0.040** da 0.093 = **−38%**, también
-   *  dentro del rango del founder. Si en el teléfono 0.045 sigue
-   *  pareciendo presente, ése es el escalón siguiente y no hay que
-   *  volver a medir nada.
+   *  ☠️ LA RESERVA MURIÓ CON SU CONDICIÓN CUMPLIDA (firma founder en
+   *  dispositivo, group d139b9c0 sobre la APK 1.0.3): **0.045 quedó**.
+   *  La reserva era 0.040 (0.093 = −38%, también dentro del rango) y su
+   *  condición era *"si en el teléfono 0.045 sigue pareciendo presente"*
+   *  — el ojo dijo que no. **No se retira el NÚMERO, se retira su
+   *  vigencia**: queda escrito para que quien alguna vez quiera bajar
+   *  más no repita la medición, pero YA NO ES UNA OPCIÓN PENDIENTE.
+   *  Y la enmienda de B22 cierra donde tenía que cerrar: se firmó sobre
+   *  PANTALLA, no sobre mis números. Los números sirvieron para elegir
+   *  QUÉ mirar — no para decidir.
    *
    *  UN número, una vez: mientras el agua viva copiada por pantalla se
    *  va a volver a separar (ya lo hizo — 0.06 contra 0.04, hallazgo r8). */

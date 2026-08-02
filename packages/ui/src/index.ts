@@ -61,6 +61,8 @@ export { FilaDato, type FilaDatoProps } from './components/FilaDato'
 export { PieRevelar, type PieRevelarProps } from './components/PieRevelar'
 export { LogoNegocio, type LogoNegocioProps } from './components/LogoNegocio'
 // S84-B7 — la vitrina del negocio, UNA sola vez (cliente + espejo).
+// S84-B16 — la ZONA (círculo sin pin, no interactivo). Variante .web.
+export { MapaZona, type MapaZonaProps } from './components/MapaZona'
 export { FichaPrestador, type FichaPrestadorProps, RADIO_PORTADA_EN_TARJETA } from './components/FichaPrestador'
 // FilaCita — S80-B12 Parte 3 (dominio: la fila de cita con su canto ADENTRO;
 // cero API de color/posición/alfa — el molde de "cero genéricos")
