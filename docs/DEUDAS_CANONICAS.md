@@ -3841,3 +3841,48 @@ que ya sabías; un censo por patrón mide lo que hay.* — hermana de la candida
 > **Y el `57` sigue sin deducirse**, aunque `573208408790` y `3208408790` sean el
 > mismo número salvo el indicativo. **La firma de (a) es justamente la que hace
 > que no haga falta deducirlo: se le pregunta al dueño.**
+
+---
+
+#### D-621 — LAS 39 COLUMNAS DE `prestadores` TIENEN GRANTS PARA `anon` 🟠
+
+**Medido (S84-A6, al ir a conceder `SELECT (clip_url)`):**
+
+| | |
+|---|---|
+| columnas de `prestadores` | **39** |
+| columnas con algún grant para `anon` | **39 — todas** |
+| grants de **TABLA** para `anon` | **7** |
+
+**No es un descuido por columna: es de TABLA.** `GRANT … ON prestadores TO anon`
+concede sobre todo lo presente **y todo lo futuro** — por eso `clip_url` nació
+con `anon:SELECT/INSERT/UPDATE` sin que nadie lo escribiera.
+
+**La RLS es lo único que hoy lo sostiene.** Es la familia exacta de L-140 (*"toda
+función nacía con EXECUTE para anon"*), un piso más abajo: allá era EXECUTE,
+acá es el privilegio de tabla. **Un grant no es un permiso efectivo mientras la
+RLS lo tape — pero es una segunda puerta que nadie está mirando**, y una policy
+mal escrita mañana la abre sin que ningún gate lo note.
+
+**LO QUE ESTA SESIÓN NO HIZO, Y ES DECISIÓN:** `20260802180000` **NO le revocó
+nada a `anon`**. Revocar solo `clip_url` de un grant de TABLA sería **cura de
+sitio sobre un problema de causa** (L-185) y dejaría la tabla igual de abierta,
+con una excepción que nadie sabría explicar en seis meses.
+
+**LO QUE SÍ SE APRENDIÓ, y corrige una afirmación propia:** S84-A5 declaró que
+`clip_url` *"nació sin grant"*. **Falso, y lo destapó medirlo.** Lo que la
+columna no tenía era **`authenticated:SELECT`**, que en esta tabla se concede
+**por columna con lista explícita**. *La regla de la casa sí operó* — la prueba
+es que las únicas tres columnas sin ese SELECT son `clip_url`, `direccion_envio`
+y `proposito`, **y las dos últimas están así a propósito desde S79** (se sirven
+por RPC). **Afirmar sobre un privilegio sin medirlo es la candidata #17 con otra
+ropa.**
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando `anon` **no tenga grants de tabla
+> sobre `prestadores`** — con su censo de consumidores hecho antes, incluido el
+> **portal legado, que comparte esta DB**. **Verificable de una query:** cero
+> filas en `information_schema.role_table_grants` para `grantee='anon'`.
+> **No se retira revocando por columna:** eso deja el grant de tabla vivo y solo
+> mueve el bulto. **Disparo natural:** la próxima migración que toque privilegios
+> de `prestadores`, o el saneo de `avatars` (D-616 (b)) — son el mismo trabajo de
+> higiene y conviene que caigan juntos.

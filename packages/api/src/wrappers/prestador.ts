@@ -131,6 +131,11 @@ export type MiPrestador = Pick<
   | 'sitio_web'
   | 'estado'
   | 'foto_url'
+  // S84-A6 (hunk aditivo): el CLIP de la vitrina — UNO solo, PATH en el
+  // bucket `prestador-galeria` (CHECK `..._es_path` en la tabla). Ganó
+  // `SELECT (clip_url)` en `20260802180000`: hasta esa migración la
+  // columna existía y NO era legible por `authenticated`.
+  | 'clip_url'
   // S78-B (LETRA_VITRINA): el estado del toggle — la escritura tiene su
   // writer propio abajo; el flip a encendido lo gatea el trigger MECANICO
   // de A7 (rebota `aviso_reasignacion_no_existe` hasta que el aviso exista).
@@ -138,7 +143,7 @@ export type MiPrestador = Pick<
 >;
 
 const COLUMNAS_MI_PRESTADOR =
-  'id, nombre_comercial, tipo, country_code, cuenta_comercial_id, direccion, ciudad, sector, lat, lon, radio_cobertura_km, grooming_extra_pelaje_largo, grooming_recargo_domicilio, descripcion, telefono, whatsapp, email_contacto, sitio_web, estado, foto_url, expone_personas';
+  'id, nombre_comercial, tipo, country_code, cuenta_comercial_id, direccion, ciudad, sector, lat, lon, radio_cobertura_km, grooming_extra_pelaje_largo, grooming_recargo_domicilio, descripcion, telefono, whatsapp, email_contacto, sitio_web, estado, foto_url, clip_url, expone_personas';
 
 /**
  * El negocio del user logueado — por TITULARIDAD o por VÍNCULO ACTIVO
@@ -217,6 +222,12 @@ export interface InputActualizarPerfilPrestador {
   whatsapp?: string;
   email_contacto?: string;
   sitio_web?: string;
+  /** S84-A6: el PATH del CLIP en `prestador-galeria`. '' ⇒ NULL honesto
+   *  (quitar el clip). UNO solo por negocio — por eso es columna y no
+   *  tabla. **La duración ≤30 s NO se valida acá**: ver la nota en
+   *  `subir-clip.ts` — sin módulo de video no es medible, y prometer un
+   *  techo que no se comprueba sería peor que declararlo. */
+  clip_url?: string;
   /** S76-B1 (D-505): el PATH del logo en el bucket `avatars` — la firma
    *  gana productor. '' ⇒ NULL honesto (quitar el logo). El trigger
    *  D-389 NO protege esta columna (relevado S74-A, vara E7): esta
@@ -277,6 +288,8 @@ export async function actualizarPerfilPrestador(
   if (emailContacto !== undefined) payload.email_contacto = emailContacto;
   if (sitioWeb !== undefined) payload.sitio_web = sitioWeb;
   if (fotoUrl !== undefined) payload.foto_url = fotoUrl;
+  const clipUrl = aNull(input.clip_url);
+  if (clipUrl !== undefined) payload.clip_url = clipUrl;
 
   // ── la sede (S79-T4.1) ────────────────────────────────────────────
   const direccionSede = aNull(input.direccion);
