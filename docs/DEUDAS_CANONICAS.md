@@ -3737,3 +3737,79 @@ transformación de datos: pide firma.*
 > cuántas faltan. **Ese `VALIDATE` es parte de la cura, no un chequeo aparte:**
 > mientras el constraint siga `NOT VALID`, la tabla admite pasado ilegal y nadie
 > se entera.
+
+> **➕ ENMIENDA S84-A4 A D-619 — SUBE DE PRIORIDAD, y las dos salidas con su costo.**
+>
+> **El motivo es del founder, no técnico: una de las cinco filas es SU negocio**
+> (`2052f109` · Satori Latam sas) y con el CHECK `NOT VALID` **su perfil no
+> guarda** hasta que el número traiga el `+`.
+>
+> **LA SALIDA HONESTA ES (a), Y ES UNA PANTALLA, NO UNA MIGRACIÓN.**
+>
+> **(a) EL DUEÑO CONFIRMA SU PROPIO NÚMERO — costo: CERO CÓDIGO.**
+> La pantalla **ya hace todo lo necesario**: `partirE164` no parte un valor sin
+> `+` (lo deja crudo en el campo), el selector de país está ahí, `estadoTelefono`
+> valida en vivo y su voz dice *"se guarda +57…"* antes de tocar Guardar. **El
+> dueño abre Perfil → elige su país → guarda. Se acabó.**
+> **Es la única de las dos que CONFIRMA el país en vez de suponerlo** — y para la
+> fila de Satori eso importa de verdad: su número es colombiano en un negocio con
+> `country_code='EC'`, o sea **el caso exacto que P21 existe para proteger**.
+> *Cinco personas, un toque cada una.*
+>
+> **(b) PROMOCIÓN MECÁNICA CONTRA `cat_paises` — costo: ~15 líneas de migración.**
+> Anteponer `+` **solo si el número ya empieza con un prefijo del catálogo**,
+> greedy por el más largo (el mismo criterio que `normalizar_telefono` ya usa en
+> la DB — se espeja, no se inventa). **Cura 4 de 5 sin inferir nada**, porque el
+> indicativo ya está en el número; **y la del seed cae sola** del lado de "no se
+> toca": `3208…` no matchea ningún prefijo del catálogo.
+> **Su costo real no son las líneas: es que sigue siendo una transformación de
+> datos de otro.** Y para la fila que más importa —Satori— **acierta por
+> construcción pero nadie se lo preguntó**.
+>
+> **⚠️ LO QUE NINGUNA DE LAS DOS HACE, y se repite porque el número lo invita:**
+> **el `57` del seed NO se deduce.** `573208408790` (Satori) y `3208408790` (el
+> seed) son el mismo número salvo el indicativo — **y esa coincidencia es
+> exactamente el tipo de evidencia que P21 declara insuficiente**. La fila del
+> seed queda como está.
+>
+> **Recomendación, con su porqué:** **(a)**. No porque (b) sea peligrosa —es
+> honesta y barata— sino porque **el problema no es de datos, es de un dato que
+> nunca se pidió**. Son cinco filas, dos de ellas reales, y una es del founder:
+> **el camino más corto y el más correcto son el mismo**.
+
+---
+
+#### D-620 — CUATRO IMPLEMENTACIONES DE "GALERÍA" EN JSONB, LAS CUATRO SIN UN SOLO DATO 🟢
+
+**Censadas contra la DB viva (S84-A4). Son CUATRO, no tres** — `criaderos`
+apareció al preguntarle a `information_schema` en vez de a la lista:
+
+| columna | filas de la tabla | con datos | lectores |
+|---|---|---|---|
+| ~~`prestadores.fotos_galeria`~~ | 7 | 0 | 0 | **☠️ MUERTA en `20260802140000`** |
+| `refugios.fotos_galeria` | 0 | 0 | 0 | viva |
+| `criaderos.fotos_galeria` | 0 | 0 | 0 | viva |
+| `productos.imagenes` | 0 | 0 | 0 | viva |
+
+**La de `prestadores` murió con la migración que creó `prestador_fotos`** —
+Ley 37, y la razón de la mesa: **un homónimo muerto en la misma tabla donde nace
+el bueno no se difiere**. Quien abriera `prestadores` mañana vería una columna
+llamada "fotos_galeria" que no es la galería.
+
+**LAS OTRAS TRES NO SE TOCAN, y es a propósito:** están en tablas **vacías** de
+dominios que esta sesión no abrió (refugios, criaderos, tienda). Matarlas sería
+barrer territorio ajeno por prolijidad. **Lo que sí se hace es nombrarlas**, para
+que quien construya la galería de refugios o de productos **encuentre esta ficha
+antes que la columna** y no cree la quinta.
+
+**El hallazgo de método que deja, y vale más que la ficha:** el censo de S84-A2
+dijo "dos" porque preguntó por **nombres que ya conocía**. El de A4 dijo "cuatro"
+porque preguntó `information_schema` por **patrón**. *Un censo por lista mide lo
+que ya sabías; un censo por patrón mide lo que hay.* — hermana de la candidata
+#16 (el grep por la prop).
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando las tres restantes **no existan**
+> —o cuando alguna gane un consumidor real y deje de ser esquema muerto—.
+> **Verificable de una query:** cero filas en `information_schema.columns` para
+> ese patrón, fuera de las que tengan lector declarado. **Disparo natural:** la
+> primera galería de refugio o de producto que alguien construya.

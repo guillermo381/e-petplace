@@ -11630,6 +11630,45 @@ export type Database = {
           },
         ]
       }
+      prestador_fotos: {
+        Row: {
+          creado_en: string
+          id: string
+          orden: number
+          prestador_id: string
+          url: string
+        }
+        Insert: {
+          creado_en?: string
+          id?: string
+          orden: number
+          prestador_id: string
+          url: string
+        }
+        Update: {
+          creado_en?: string
+          id?: string
+          orden?: number
+          prestador_id?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prestador_fotos_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prestador_fotos_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prestador_horarios: {
         Row: {
           activo: boolean
@@ -12087,6 +12126,7 @@ export type Database = {
           aprobado_por: string | null
           calificacion_promedio: number | null
           ciudad: string | null
+          clip_url: string | null
           country_code: string
           created_at: string
           cuenta_comercial_id: string
@@ -12097,7 +12137,6 @@ export type Database = {
           estado: string
           expone_personas: boolean
           foto_url: string | null
-          fotos_galeria: Json | null
           grooming_extra_pelaje_largo: number | null
           grooming_recargo_domicilio: number | null
           id: string
@@ -12128,6 +12167,7 @@ export type Database = {
           aprobado_por?: string | null
           calificacion_promedio?: number | null
           ciudad?: string | null
+          clip_url?: string | null
           country_code?: string
           created_at?: string
           cuenta_comercial_id: string
@@ -12138,7 +12178,6 @@ export type Database = {
           estado?: string
           expone_personas?: boolean
           foto_url?: string | null
-          fotos_galeria?: Json | null
           grooming_extra_pelaje_largo?: number | null
           grooming_recargo_domicilio?: number | null
           id?: string
@@ -12169,6 +12208,7 @@ export type Database = {
           aprobado_por?: string | null
           calificacion_promedio?: number | null
           ciudad?: string | null
+          clip_url?: string | null
           country_code?: string
           created_at?: string
           cuenta_comercial_id?: string
@@ -12179,7 +12219,6 @@ export type Database = {
           estado?: string
           expone_personas?: boolean
           foto_url?: string | null
-          fotos_galeria?: Json | null
           grooming_extra_pelaje_largo?: number | null
           grooming_recargo_domicilio?: number | null
           id?: string

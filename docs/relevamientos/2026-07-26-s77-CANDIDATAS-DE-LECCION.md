@@ -1,6 +1,6 @@
 # LAS CANDIDATAS DE LECCIÓN — inventario para la firma del founder (S77, ampliado S82)
 
-> **DIECISIETE candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **Las candidatas 10 a 14 entraron en S82** — el nombre de un token es su rol · su inversa (el nombre que envejeció) · la ausencia con tipos · el defecto que vive porque el DATO DE PRUEBA no lo alcanza · y el lector que se apoya solo en la RLS y por eso nadie puede auditarlo leyendo. **Las 15, 16 y 17 entraron en S83, y son PARIENTES: las tres son L-192 mudada de lugar** — una regla con auto-prueba puede tener BRAZOS que no salen rojos (el guard del guard) · un grep por la PROP mide quién la pasa, no qué se RENDERIZA (L-192 en la búsqueda) · **razonar el efecto de un token no es medirlo** (L-192 en la medición: el modo de falla es *un número plausible*). **Las tres describen instrumentos que devuelven algo y no verifican nada** — y la 17 cobró tres veces en un solo turno, una de ellas contra la mesa que la estaba escribiendo. El inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
+> **DIECIOCHO candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **Las candidatas 10 a 14 entraron en S82** — el nombre de un token es su rol · su inversa (el nombre que envejeció) · la ausencia con tipos · el defecto que vive porque el DATO DE PRUEBA no lo alcanza · y el lector que se apoya solo en la RLS y por eso nadie puede auditarlo leyendo. **Las 15, 16 y 17 entraron en S83, y son PARIENTES: las tres son L-192 mudada de lugar** — una regla con auto-prueba puede tener BRAZOS que no salen rojos (el guard del guard) · un grep por la PROP mide quién la pasa, no qué se RENDERIZA (L-192 en la búsqueda) · **razonar el efecto de un token no es medirlo** (L-192 en la medición: el modo de falla es *un número plausible*). **Las tres describen instrumentos que devuelven algo y no verifican nada** — y la 17 cobró tres veces en un solo turno, una de ellas contra la mesa que la estaba escribiendo. El inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
 
 > **NINGUNA ESTÁ FIRMADA. La firma es del founder.** Este documento no decide:
 > junta lo que hoy vive disperso entre la letra, las deudas y los cierres de
@@ -13,7 +13,7 @@
 
 ---
 
-## Las diecisiete
+## Las dieciocho
 
 ### 1 · (d) — EL ORDEN NOMBRA EL ARTEFACTO QUE ABRE, JAMÁS EL ARCHIVO DONDE SE LO ESPERA
 **Origen:** S75 (canon, línea 44). **Sin firma desde entonces.**
@@ -434,7 +434,71 @@ fue de quien la estaba escribiendo.*
 > **RE-MEDIDO S83 (31-jul-2026, segunda entrada del día): son DIECISÉIS.** La decimosexta —*un grep por la prop mide quién la pasa, no qué se renderiza*— nace de la **autocorrección de B** en B9/B10: el censo por prop de la marca de agua devolvió cero consumidores, y el censo por RENDER encontró **tres aguas inline con tres anatomías distintas** (hoy D-597). Es **L-192 mudada al método de medición**: la verificación corre, sale limpia, y su limpieza no prueba nada porque la pregunta estaba mal hecha. Hermana de L-170 (el instrumento decide qué puede aparecer) y de la #13 (allá el hueco lo abre el dato, acá la consulta). El conteo se corrige acá y en el título en el MISMO acto (L-141).
 >
 
-> **RE-MEDIDO S83 (1-ago-2026): son DIECISIETE.** La decimoséptima —*razonar el efecto de un token no es medirlo*— entra con **TRES casos del mismo turno**: los dos de B (la `Atmosfera` que "no movía el par" y sí lo movía en direcciones opuestas · el cálculo con hexes inventados sobre valores `rgba` con alpha) **y uno de esta mesa**, que calculó `text.tertiary` a mano sobre un `#FAF9F7` que **ya no es el fondo** (`bg.base` es `papelTapiz` desde S82-B r10): 2.279 a mano contra **2.18** del medidor. Su modo de falla es **un número plausible** que después se cita como si fuera medición. Hermana de la #16 (el instrumento decide qué podés ver) y de L-166. El conteo se corrige acá y en el título en el MISMO acto (L-141).
+> **RE-MEDIDO S83 (1-ago-2026): son DIECIOCHO.** La decimoséptima —*razonar el efecto de un token no es medirlo*— entra con **TRES casos del mismo turno**: los dos de B (la `Atmosfera` que "no movía el par" y sí lo movía en direcciones opuestas · el cálculo con hexes inventados sobre valores `rgba` con alpha) **y uno de esta mesa**, que calculó `text.tertiary` a mano sobre un `#FAF9F7` que **ya no es el fondo** (`bg.base` es `papelTapiz` desde S82-B r10): 2.279 a mano contra **2.18** del medidor. Su modo de falla es **un número plausible** que después se cita como si fuera medición. Hermana de la #16 (el instrumento decide qué podés ver) y de L-166. El conteo se corrige acá y en el título en el MISMO acto (L-141).
 >
 
 Si alguna otra candidata quedó fuera, es porque no encontré su fuente. **Pasame el literal y entra**: el criterio de este documento es que nada figure sin dónde leerlo.
+
+---
+
+### 18 · UN EXIT CODE LEÍDO DESPUÉS DE UN PIPE NO ES EL EXIT DE TU COMANDO
+
+**Origen (S84, 2-ago-2026): DOS PISTAS INDEPENDIENTES, EL MISMO DÍA.** A con
+`verify:i18n` (`${PIPESTATUS[0]}` tras un pipe, que en zsh además se llama
+`pipestatus` y es 1-indexed ⇒ salió **vacío**) y B con el `tsc`. **Las dos lo
+cazaron solas y las dos lo declararon.**
+
+**L-191 ya existe** —*"el exit code se lee del comando, jamás del pipe"*— **y no
+alcanzó.** Ése es el dato que vuelve candidata a la lección, no el error: **una
+regla que depende de que quien la conoce se acuerde ya falló dos veces en un
+día.**
+
+**SU MODO DE FALLA ES UN `EXIT=0` CREÍBLE.** No rompe nada, no se ve, y **se cita
+después como verificación**. Es la misma familia que la #17 (*razonar el efecto
+de un token no es medirlo*) y la #16 (*el grep por la prop*): **salidas
+plausibles que ningún gate caza**, porque el gate solo mira si algo explotó.
+
+---
+
+#### EL BRAZO DE LINT — medido, y lo que la medición dice es que el obvio NO sirve
+
+**El brazo obvio (grepear `$?`/`PIPESTATUS` en scripts) CAZA CERO CASOS. Medido:**
+`git grep '$?\|PIPESTATUS'` sobre `*.sh`, `*.mjs`, `*.ts` y `package.json` da
+**cero matches** (hay 8 `.sh` en el repo). **Y no es que estemos limpios: es que
+el error NO VIVE EN UN ARCHIVO.** Vive en el comando que una pista escribe en su
+turno, que no queda versionado en ningún lado que un lint pueda leer.
+**Escribir ese brazo sería un guard decorativo** — exactamente lo que la
+candidata #15 condena.
+
+**EL BRAZO QUE SÍ EXISTE ATACA LA CAUSA: que no haga falta leer el exit.**
+Si todo verify **imprime su veredicto en stdout**, pipear deja de ser peligroso —
+el veredicto viaja en el texto. **Y eso ya es casi cierto, pero no del todo:**
+
+> **79 verify en `scripts/`. OCHO no imprimen línea de veredicto**
+> (`verify-alcanzabilidad` · `verify-frontera-caida` · `verify-gallery` ·
+> `verify-gestos-cliente` · `verify-moneda` · `verify-tabs-s51` ·
+> `verify-verdad-firme` · `verify-diseno-pares.ts`).
+> **TRES de esos ocho tampoco llaman `process.exit`** (`verify-gallery`,
+> `verify-tabs-s51`, `verify-diseno-pares`): dependen de que un `throw` los
+> mate. En esos, **"pasó" y "no encontró nada que revisar" son
+> indistinguibles**, con o sin pipe.
+
+**Costo:** ~25 líneas de brazo (`verify-diseno.mjs` ya tiene la forma: censar
+archivos y contar) + **8 scripts a curar**, una línea cada uno.
+
+**Lo que el brazo NO cubre, declarado:** un `tsc` o un `eas` pipeado siguen sin
+veredicto propio — son de afuera. Para esos la única defensa sigue siendo la
+regla. **El brazo baja la superficie, no la elimina.**
+
+---
+
+**⚠️ SIN FIRMA (regla 80).** No rige. Y lo que hay que firmar son **dos cosas
+distintas**: (1) la lección como texto, (2) **el brazo, que es lo que la vuelve
+mecánica** — porque la lección sola es lo que ya falló dos veces.
+
+**Y una observación que le toca a esta mesa:** el caso de A no fue leer mal un
+exit *en vez* del veredicto — **`verify-i18n` SÍ imprimió `VERIFICACIÓN
+COMPLETA: 0 fallos` y A lo vio**. El error fue **agregarle una segunda lectura
+peor y darle prioridad**. *Cuando el comando ya dice su veredicto en texto, ir a
+buscar el exit code es redundante — y si lo leés mal, degradás una verificación
+que estaba bien.*

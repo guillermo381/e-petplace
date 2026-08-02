@@ -460,9 +460,24 @@ Origen: S54 (el freno de la Sesión A ante el backfill-por-referencia y el patch
 **Y el argumento de la casa que lo respalda — es una vara que SUBE, no que baja.** `DIRECTIVA_CRAFT_CLIENTE` §10 dice que las láminas son **CRITERIO, no evidencia**, y su razón es exacta: *"nada de esto se vio en un teléfono real"*. **Una pantalla real montada con piezas de `packages/ui` SÍ es evidencia** — corre en el dispositivo, usa los tokens vivos, respeta los temas y hereda el comportamiento de las primitivas. Cambiar lámina por UI real **no relaja el estándar: lo endurece**, porque lo que se firma pasa a ser lo que existe.
 
 **LO QUE LA LÁMINA PROTEGÍA Y HAY QUE PRESERVAR — las tres cláusulas no son opcionales:**
-1. **La UI sin cablear vive en RUTA DE VERIFICACIÓN**, no suelta en el árbol de navegación del producto.
+1. **LO NUEVO VIAJA DIRECTO A SU LUGAR.** *(ENMENDADA — ver abajo.)*
 2. **NO reemplaza la pantalla viva.** Convive con ella; la vieja sigue sirviendo al usuario hasta la firma.
 3. **NO se cablea hasta la firma en dispositivo.** Cablear antes es exactamente el gasto que esta enmienda viene a evitar: se paga el trabajo de datos sobre una composición que puede no sobrevivir al gate.
+
+> **⚠️ ENMIENDA A LA CLÁUSULA 1 — 2-ago-2026, firma del founder.** *No la deroga: la reduce a su alcance real.*
+>
+> **Texto anterior, conservado con su fecha (31-jul-2026):** *"La UI sin cablear vive en RUTA DE VERIFICACIÓN, no suelta en el árbol de navegación del producto."*
+>
+> **Lo que rige desde hoy: LO NUEVO VIAJA DIRECTO A SU LUGAR.** La ruta de verificación queda para **dos casos**:
+> **(1)** cuando **no está claro qué va a ser** la pieza · **(2)** cuando el cambio **pone en riesgo algo que ya funciona**.
+>
+> **El porqué, con la letra del founder:** *una pieza NUEVA no puede romper lo que ya está bien, así que aislarla solo cuesta dos pasos — y encima se ve peor: fuera de su contexto no se nota cómo va a quedar.*
+>
+> **Y el argumento que la cierra: el aislamiento no ahorraba nada.** *La galería viaja en el OTA igual; el preview nunca fue más barato, solo más lejos.* La cláusula 1 se escribió creyendo proteger un riesgo de despliegue que **no existe**: lo que está en el bundle está en el bundle, esté en su pantalla o en una ruta aparte. Lo único que agregaba era **distancia entre lo que se mira y lo que se va a firmar** — que es justo lo que la enmienda de la lámina vino a eliminar. *(Es la misma lección aplicada un nivel más adentro: se firma lo que existe, en el lugar donde va a existir.)*
+>
+> **Los dos casos que sobreviven tienen en común lo que la cláusula sí protegía:** cuando la forma final está abierta, o cuando hay algo vivo que puede romperse, **la distancia deja de ser costo y pasa a ser resguardo**. Fuera de esos dos, es ceremonia.
+>
+> **LO QUE NO CAMBIA, y se dice explícito porque es lo que más se confunde: la cláusula 3 sigue viva entera.** *No se cablea hasta la firma en dispositivo.* **Protege otra cosa** —el gasto de datos sobre una composición no firmada— y esta enmienda no la toca. **Que la pieza viaje a su lugar no significa que llegue conectada.**
 
 **LO QUE SOBREVIVE DEL INSTRUMENTO (no muere entero):** la lámina HTML **sigue sirviendo para comparar VARIANTES DE UN TOKEN barato** — la galería del agua, la del glow, la de la huella. Ahí es el instrumento correcto: la pregunta es *"¿cuál de estos tres?"*, la respuesta no depende del contexto de una pantalla, y montar tres variantes en HTML cuesta minutos. **La frontera es: variantes de un token → lámina · composición de una pantalla → UI real.**
 
