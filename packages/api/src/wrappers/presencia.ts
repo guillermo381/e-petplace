@@ -80,6 +80,13 @@ export interface InputEscribirPresencia {
   borradorPrevio?: string;
   /** 1-based. El tope vive en el MOTOR: mandarlo mal no lo levanta. */
   intento?: number;
+  /** ④ S84-A14/A19 — **"probar otra" NO es "mejorar"**, y el motor sabe la
+   *  diferencia: con `alternativa` escribe uno DISTINTO en vez de retocar
+   *  el anterior. Default `mejorar`, así que quien no lo manda no cambia
+   *  de comportamiento.
+   *  *Faltaba acá: la function lo soportaba entero y el wrapper no lo
+   *  reenviaba — el botón de C prometía variedad y recibía continuidad.* */
+  modo?: 'mejorar' | 'alternativa';
 }
 
 /** El borrador nace bilingüe (§5 + DEFINICION_SOFTLAUNCH). */
@@ -111,6 +118,7 @@ export async function escribirPresencia(
       respuestas,
       borradorPrevio: input.borradorPrevio,
       intento: input.intento,
+      modo: input.modo,
     },
   });
 

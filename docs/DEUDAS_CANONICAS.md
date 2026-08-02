@@ -4002,7 +4002,7 @@ donde una promesa vencida no es un detalle: es la primera impresión.
 
 ---
 
-#### D-624 — `v_prestadores_publicos` EXPONE `lat`/`lon` EXACTAS A CUALQUIER AUTENTICADO 🔴
+#### D-624 — `v_prestadores_publicos` EXPONÍA `lat`/`lon` EXACTAS A CUALQUIER AUTENTICADO ✅ CERRADA S84-A19
 
 **Medido (S84-A18), y es un hueco VIVO — no una feature futura:**
 
@@ -4049,3 +4049,92 @@ heredados que nadie acotó), y **no debería estar ahí**.
 > zona, no su fecha:** si la zona nace indexada geográficamente, buscar por mapa
 > después es una consulta; si nace como dos `numeric` sueltos, es un rediseño.
 > *Quien escriba la vista lo tiene en cuenta o lo paga dos veces.*
+
+> **✅ D-624 CERRADA — S84-A19 (`20260802220000_s84_zona_aproximada`).**
+>
+> La vista **ya no expone `lat`/`lon`**. En su lugar salen `zona_lat` ·
+> `zona_lon` · `zona_radio_m` (500), con el centro **desplazado dentro del
+> radio y ESTABLE POR `id`** (`hashtext`, jamás `random()` — un ofuscado que
+> varía no ofusca: promedia).
+>
+> **Medido tras aplicar** — desplazamientos distintos y estables por prestador:
+> Satori 145 m · Paseos Shyris 17 m · Los Shyris 363 m *(componente de latitud;
+> el resto va en longitud según el ángulo)*. Grants finales: `authenticated` =
+> **SELECT y nada más**; `anon` **cero**.
+>
+> **DOS COSAS QUE EL CINTURÓN CAZÓ Y NO ESTABAN PREVISTAS:**
+>
+> **① La vista recién creada NACIÓ con SEIS privilegios de escritura** que esta
+> migración no concedió — vienen de los **DEFAULT PRIVILEGES** del esquema. **Es
+> D-621 un piso más arriba: allá lo hereda una columna, acá un objeto entero.**
+> Sin el `REVOKE ... FROM authenticated`, *"recrear la vista para angostarla"* la
+> habría dejado igual de ancha, y el `GRANT SELECT` habría parecido suficiente.
+> **La ficha D-621 gana este caso como evidencia: el problema no es de
+> `prestadores`, es del esquema.**
+>
+> **② La primera auto-prueba abortó por FRÁGIL, no por un bug real:** buscaba la
+> segunda lectura con `WHERE zona_lat = a1` — comparar floats por igualdad no
+> encontraba la fila, `a2` quedaba NULL y el test denunciaba una inestabilidad
+> inexistente. **Anclada al `id`, pasa.** *Un test frágil que grita en falso
+> cuesta lo mismo que uno mudo: hace desconfiar de código sano.*
+>
+> **LO QUE NO CIERRA CON ESTA FICHA, y se declara:** la **entrega de la
+> dirección exacta post-pago** no existe. Mientras no exista, **nadie del lado
+> cliente la tiene** — que es el estado correcto, no un hueco. Y el **norte de
+> búsqueda desde el mapa** queda anotado sin construir: `zona_lat`/`zona_lon`
+> son numéricos indexables, así que el día que llegue es **indexar, no
+> rediseñar**.
+
+---
+
+#### D-625 — LA FICHA NO EXPONÍA COORDENADAS POR ACCIDENTE, NO POR DISEÑO ⚪ REGISTRO
+
+**Medición de C (S84-A19bis), registrada literal porque su valor está en el
+matiz:** ninguna superficie de C lee `v_prestadores_publicos` — el espejo y la
+vitrina leen `obtenerMiPrestador` (la fila propia), y a `FichaPrestador` se le
+pasa `ciudad`, **nunca `lat`/`lon`**.
+
+> **PERO LA RAZÓN NO ES UNA PROTECCIÓN: es que la PIEZA no tiene esa prop.**
+> **El diseño angosto tapó por accidente lo que la vista exponía de más.**
+
+**Por qué esto merece número aunque no haya nada que arreglar:** el día que
+alguien agregue un `lat`/`lon` a `FichaPrestador` —para dibujar el mapa de la
+zona, por ejemplo— **la "protección" desaparece sin que ningún guard se entere**,
+porque nunca hubo guard. **Si esto no se nombra, la próxima vez alguien va a
+citar el hecho como si fuera una defensa** y a construir encima.
+
+*Es de la familia de la candidata #15 (brazos que no pueden salir rojos) y de
+#19 (el árbol viejo): **algo que parece verificado y solo está sin ejercitar.***
+
+> **☠️ CONDICIÓN DE MUERTE:** muere **cuando la protección sea real** — o sea
+> cuando la vista no tenga nada exacto que exponer (**ya se cumplió en D-624**)
+> **y** eso esté escrito donde se construye la ficha. **Se registra como ⚪:** no
+> hay trabajo pendiente, hay una afirmación que no debe repetirse mal.
+
+---
+
+#### D-626 — LAS CONDICIONES DE MUERTE QUE PIDEN QUE ALGUIEN MIDA ENVEJECEN CALLADAS 🟠
+
+**Vara propuesta por B (S84-A19bis), sin firma (regla 80):**
+
+> Las condiciones que dicen **"cuando exista X"** se cumplen solas — el hecho
+> ocurre y la ficha queda observablemente muerta.
+> Las que dicen **"cuando alguien mida Y"** dependen de que alguien **decida
+> mirar**, y **son las que envejecen calladas**.
+
+**Y la consecuencia que B agrega, que es lo que la vuelve accionable:** si esa
+vara se firma, **su primera aplicación es releer las condiciones YA EXISTENTES**,
+no solo exigírsela a las nuevas. *Una vara que solo mira hacia adelante deja
+intacto exactamente el conjunto que la motivó.*
+
+**Su relación con lo que esta sesión ya vio:** es la misma familia de la
+candidata #20 (el copy sin lápida) y de la consecuencia de los frenos — **todas
+son cosas correctas al escribirse que nadie vuelve a leer**. La diferencia es
+que acá el objeto que envejece **es el instrumento con el que medimos si algo
+envejeció**.
+
+> **☠️ CONDICIÓN DE MUERTE — y sí, la ironía es deliberada:** se retira cuando
+> **la vara esté firmada Y el barrido de las condiciones existentes esté hecho**,
+> con el conteo de cuántas eran de cada clase. **Escrita como "cuando exista el
+> barrido", no como "cuando alguien revise"** — porque si se escribiera de la
+> segunda forma sería su propio caso.
