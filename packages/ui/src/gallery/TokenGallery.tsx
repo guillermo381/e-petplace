@@ -560,7 +560,7 @@ function AguaCasaVerde() {
       <Texto variante="seccion">✅ FIRMADA Y APLICADA — la receta del Hogar es el DEFAULT de la pieza</Texto>
       <Texto variante="apoyo">
         FIRMADO (S83-B22): "no puedes copiar cómo quedó en cliente? Allí quedó bien". La receta del
-        Hogar —entera, centrada, 0.06— ES AHORA EL DEFAULT de MarcaDeAgua; no hay que pasarle nada.
+        Hogar —entera, centrada— ES EL DEFAULT de MarcaDeAgua. Su ALFA se enmendó a 0.045 en S84-B6 (firma founder: "que se vea 25 a 40% menos").
         Lo único que cambió respecto del Hogar es la ROBUSTEZ, que es lo que la orden autorizó a
         proponer: su 210 es FIJO y en una pantalla de 320 el isotipo ocupa el 96% del ancho (roza).
         El factor 0.536 reproduce ese 210 EXACTO a 390 px y mantiene el mismo 78% en cualquier
@@ -1058,12 +1058,9 @@ function EjemploSetBPrima() {
     // S82-B r10: LA VACUNA con su glifo propio (la fila del perfil
     // pintaba `veterinaria` — sustitución genérica que Ley 12 prohíbe).
     'vacuna', 'bitacora',
-    // S84-B4: CONTACTO en DOS CANDIDATOS (precedente prime/primeCorona —
-    // el founder elige a 21px y el perdedor MUERE en el mismo acto).
-    // Van PEGADOS a `ayuda` en esta fila a propósito: el riesgo medido
-    // del candidato B es que a 21px se lea como el círculo con rayos, y
-    // un riesgo declarado se mira, no se describe.
-    'contacto', 'contactoOndas',
+    // S84-B5: CONTACTO — FIRMADO (el globo). Su candidato rival murió en
+    // el gate; el porqué vive en el registry, no acá.
+    'contacto',
   ]
   return (
     <View style={{ gap: spacing[4] }}>
@@ -1952,8 +1949,10 @@ function GaleriaInterna() {
             nota.
           </Texto>
           <Texto variante="apoyo">
-            EL DEFAULT SIGUE EN 0.06 hasta tu elección. La lámina pasa el alfa por prop; la pieza no
-            se tocó.
+            FIRMADO: 0.045 (−28% de exceso sobre 1.000, dentro del rango pedido) y YA ES EL DEFAULT.
+            La lámina se conserva porque su comparación ES el registro de la decisión — y porque la
+            RESERVA medida y no aplicada, 0.040 (−38%), es el escalón siguiente si a 0.045 el agua
+            todavía se nota.
           </Texto>
         </Seccion>
 
