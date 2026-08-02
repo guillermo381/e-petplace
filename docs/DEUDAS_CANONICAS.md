@@ -4301,3 +4301,68 @@ y si se puede desactivar.
 > *Nota de alcance: el escriba SIGUE devolviendo `es` + `en` (§5 lo manda: "es+en
 > de nacimiento"). Lo que esta ficha frena no es generarlo — es PERSISTIRLO sin
 > haber decidido su ciclo de vida.*
+
+---
+
+#### D-628 — EL CORREO DE RECUPERACIÓN LLEGA EN INGLÉS Y DE UN REMITENTE AJENO 🟠
+
+**Estado conocido, declarado al construir — no descubierto después.**
+
+El motor de recuperación por código está **cableado y funcionando** (S84-A27).
+Lo que **no** se tocó son las plantillas de correo: **el founder las revisa TODAS
+en S86**, que queda nombrada como la sesión de NOTIFICACIONES.
+
+**⇒ Hasta entonces, el correo sale con las plantillas por defecto de Supabase:
+en inglés y desde `noreply@mail.app.supabase.io`.** *(Inferencia sobre config
+remota no medible desde el repo — se verifica en el dashboard en dos minutos.)*
+
+**POR QUÉ NO ES COSMÉTICO, y es lo que obliga a decirlo en la pantalla:** el
+techo del servicio por defecto es **2-3 correos por hora**. Un prestador que
+recibe un correo en inglés de un remitente que no reconoce **va a creer que no le
+llegó** — y va a pedir otro, **gastando el cupo que le queda**. *El silencio no
+es neutral acá: produce el gasto.*
+
+**LA CADENA QUE TIENE QUE ESTAR EN LA PANTALLA** (texto propuesto; la monta C):
+> *"Te mandamos un código. Puede llegar en inglés y a veces cae en spam — lo
+> estamos traduciendo."*
+
+**Y esa cadena NACE CON SU LÁPIDA**, por la regla que C propuso en la candidata
+#20: **declara el estado de NUESTRA construcción, no del dato del usuario.** La
+prueba de #20 aplicada: *¿deja de ser verdad cuando el usuario hace algo, o
+cuando nosotros entregamos algo?* — **cuando nosotros entregamos la plantilla.**
+Necesita lápida.
+
+> **☠️ CONDICIÓN DE MUERTE — ATADA A S86, no suelta:** se retira **en el mismo
+> acto en que las plantillas se traduzcan y el remitente se configure**. **Quien
+> toque las plantillas borra esta cadena**, o la pantalla va a seguir
+> disculpándose por un problema que ya no existe — que es exactamente el caso del
+> clip que fundó la regla. **Verificable por grep:** el literal no existe.
+
+---
+
+#### D-629 — LA CARPETA DE S86 · NOTIFICACIONES 📋 ÍNDICE
+
+**S86 queda nombrada por el founder como la sesión de NOTIFICACIONES: correos, el
+motor de disparo, y WhatsApp como canal nuevo.** Esta ficha existe para que lo ya
+sabido **no se re-descubra** — no es deuda, es el índice de entrada.
+
+**① `MODELO_NOTIFICACIONES` v0 (S73) SIGUE SIN MOTOR DE DISPARO.** El modelo está
+escrito desde S73; **lo que no existe es lo que decide cuándo sale un aviso.**
+
+**② CONSECUENCIA YA FIRMADA, y es la que desbloquea producto:** la **vitrina por
+persona no se enciende en un negocio real** hasta que exista el aviso de
+reasignación (`LETRA_VITRINA_S78` §3). *No es una preferencia: el trigger
+`trg_prestadores_gate_vitrina` lo verifica mecánicamente y rebota
+`aviso_reasignacion_no_existe` — el día que el aviso exista, **el gate se abre
+solo**.* **S86 la desbloquea.**
+
+**③ LAS PLANTILLAS DE CORREO, todas juntas** — con **D-628** adentro: la de
+recuperación ya tiene motor esperándola, y su cadena de disculpa muere ahí.
+
+**④ D-623** — `salaEspera.empleadoDetalle`, la cadena que envejece con el arco de
+equipo. *No es de S86 por tema, sino porque es de la misma clase que ③: copy que
+declara nuestro estado y que nadie va a volver a leer.*
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira **cuando S86 cierre**, con sus cuatro
+> puntos atendidos o re-adjudicados con fecha. **Es un índice: no se cierra
+> parcialmente sin decir qué quedó afuera.**

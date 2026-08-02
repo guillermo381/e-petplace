@@ -878,3 +878,17 @@ export {
   type HechoPresencia,
   type CodigoErrorPresencia,
 } from './wrappers/presencia';
+
+// ── SEGURIDAD (S84-A27) ──────────────────────────────────────────────
+// Cambiar contraseña con RE-AUTENTICACIÓN (Supabase no pide la actual y
+// `secure_password_change` está en false) · recuperar por CÓDIGO de 6
+// dígitos (cero link, cero scheme — el enlace queda para S85 con la
+// build). `pedirCodigoRecuperacion` devuelve ok EXISTA O NO la cuenta:
+// confirmarlo convertiría el formulario en un censo de usuarios.
+export {
+  cambiarContrasena,
+  pedirCodigoRecuperacion,
+  canjearCodigoRecuperacion,
+  segundosDeEspera,
+  type CodigoErrorSeguridad,
+} from './wrappers/seguridad';
