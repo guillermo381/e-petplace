@@ -3886,3 +3886,52 @@ ropa.**
 > mueve el bulto. **Disparo natural:** la próxima migración que toque privilegios
 > de `prestadores`, o el saneo de `avatars` (D-616 (b)) — son el mismo trabajo de
 > higiene y conviene que caigan juntos.
+
+---
+
+#### D-622 — UNA FILA DE SEED CAMBIÓ DURANTE UN INTENTO DE MIGRACIÓN QUE ABORTÓ, Y NO SÉ POR QUÉ 🔴
+
+**Lo que está MEDIDO (y solo esto):**
+
+1. `de300000…` (seed «Paseos Andres») tenía `whatsapp = '3208408790'` — verificado
+   varias veces durante S84-A1bis y A8.
+2. Tras correr el intento de la migración (b) (`20260802200000`), pasó a valer
+   **`'+573208408790'`**.
+3. Su `updated_at` quedó en **18:54:18**, la hora exacta de esa corrida.
+4. **La migración ABORTÓ** — su propio cinturón la frenó (*"la fila sin
+   indicativo fue tocada"*), y las otras cuatro filas **no se promovieron**, lo
+   que prueba que el `ROLLBACK` sí ocurrió para ellas.
+5. **El predicado de (b), corrido AHORA contra ese valor, NO lo alcanza:**
+   `'3208408790' ~ ('^' || prefijo)` devuelve **cero países**. Tampoco hay
+   prefijos nulos o vacíos que pudieran degradar el regex a `'^'` (medido).
+
+**(3) y (5) son incompatibles.** Si el predicado no puede alcanzar esa fila, (b)
+no pudo escribirla; si `updated_at` marca su hora, algo la escribió entonces.
+**No tengo una explicación que sostenga las dos, y no voy a inventar una: una
+causa plausible sin medición es exactamente la candidata #17.**
+
+**Lo que SÍ se hizo:** la fila **fue restaurada** a `3208408790` (su valor
+documentado en dos reversas), con el procedimiento completo — DROP del CHECK,
+UPDATE, re-ADD `NOT VALID` —, y verificada después.
+
+**Lo que NO se hizo, y es la decisión:** **(b) NO se aplicó y salió de
+`supabase/migrations/`.** Vive como propuesta en
+`docs/relevamientos/2026-08-02-s84a-PROPUESTA-promocion-e164.sql`. **Una
+migración que escribe datos y cuyo comportamiento no entiendo no se aplica**,
+por barata que parezca — y menos sobre las cinco filas que incluyen el negocio
+del founder.
+
+**Lo que el incidente sí deja probado, y conviene no perderlo:** el cinturón
+**hizo su trabajo**. La migración no se declaró buena sola: se frenó a sí misma
+verificando que la fila del seed siguiera intacta — una verificación que parecía
+redundante cuando la escribí (*"el WHERE ya la excluye"*) y que resultó ser la
+única que vio el problema. **Es L-192 al derecho: la verificación que sobra es
+la que caza lo que nadie previó.**
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando **se explique la discrepancia
+> entre (3) y (5) con una medición**, no con una hipótesis. Caminos sugeridos:
+> correr (b) contra una copia con `RAISE NOTICE` de `_promocion` fila por fila
+> (el bloque ② ya lo imprime — **sus NOTICE no se leyeron: `db query` no los
+> devuelve, y ese es probablemente el hilo**), o reproducir el intento con la
+> fila del seed aislada. **Hasta entonces (b) no se aplica**, y D-619 sigue
+> abierta con ella.

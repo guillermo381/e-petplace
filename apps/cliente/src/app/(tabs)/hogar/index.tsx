@@ -1202,7 +1202,7 @@ export default function Hogar() {
                 del isotipo NO — A5 la reserva a marca). Memorial: plano. */}
             {esMemorial ? (
               <View style={{ width: 42, height: 42, borderRadius: 999, backgroundColor: theme.bg.overlay, alignItems: 'center', justifyContent: 'center' }}>
-                <Icono nombre="coach" tamano={22} registro="tinta" tinta={theme.text.secondary} />
+                <Icono nombre="ia" tamano={22} registro="tinta" tinta={theme.text.secondary} />
               </View>
             ) : (
               <LinearGradient
@@ -1211,7 +1211,7 @@ export default function Hogar() {
                 end={{ x: 1, y: 1 }}
                 style={{ width: 42, height: 42, borderRadius: 999, alignItems: 'center', justifyContent: 'center' }}
               >
-                <Icono nombre="coach" tamano={22} registro="tinta" tinta={theme.text.onGradient} />
+                <Icono nombre="ia" tamano={22} registro="tinta" tinta={theme.text.onGradient} />
               </LinearGradient>
             )}
           </Animated.View>

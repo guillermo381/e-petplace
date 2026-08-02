@@ -26,7 +26,17 @@ import { useTheme } from '../ThemeProvider'
 import { Huella } from '../brand/Huella'
 
 export type IconoNombre =
-  | 'paseo' | 'veterinaria' | 'grooming' | 'refugio' | 'despensa' | 'coach'
+  | 'paseo' | 'veterinaria' | 'grooming' | 'refugio' | 'despensa'
+  // ☠️ 'coach' MURIÓ COMO NOMBRE (S84-B11) — RENAME a 'ia', firmado.
+  //    El dibujo NO cambió una línea: son las mismas tres chispas de
+  //    CHISPA. Lo que cambió es qué nombra. El código decía que este
+  //    glifo ES la marca de la IA ("Sin huella: el destello ES la marca
+  //    de la IA", S53) y a la vez se llamaba como UNA PANTALLA. Con el
+  //    botón "mejorar con IA" el equívoco se volvía visible: montar
+  //    `nombre="coach"` en una acción que no es el Coach.
+  //    NO SE HIZO ALIAS Y ES LA DECISIÓN: dos nombres para un dibujo es
+  //    no decidir cuál es el correcto, y deja al siguiente eligiendo.
+  | 'ia'
   // ── LOTE 3 (S58, D-361 — gate founder POR ÍCONO pendiente) ──
   | 'hogar' | 'explorar' | 'cuenta' | 'hoy' | 'negocio'
   | 'carnet' | 'familia' | 'preferencias' | 'pagos' | 'ayuda' | 'ubicacion'
@@ -149,9 +159,13 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
     </>
   ),
 
-  // El destello del Coach — trío de chispas de Kaxo, re-tokenizado a
-  // magenta (§5.1). Sin huella: el destello ES la marca de la IA.
-  coach: ({ huella }) => (
+  // El destello — trío de chispas de Kaxo, re-tokenizado a magenta
+  // (§5.1). Sin huella: el destello ES la marca de la IA, y por eso este
+  // glifo NO obedece la ley de §1 (objeto en trazo + huella): las chispas
+  // van RELLENAS y sin huella. Es excepción FIRMADA en S53, no descuido —
+  // y es la razón por la que en S84-B10 NO nació un segundo glifo de
+  // destellos: habrían sido dos marcas de IA con dos anatomías.
+  ia: ({ huella }) => (
     <>
       <G transform="translate(2.16 6.84) scale(0.57)">
         <Path d={CHISPA} fill={huella} />
@@ -487,7 +501,14 @@ export function Icono({
     grooming: { pura: theme.status.warning, aa: theme.status.warningText },
     refugio: { pura: esCapa ? theme.capa.comunidad : colorTinta, aa: 'capaText' in theme ? theme.capaText.comunidad : colorTinta },
     despensa: { pura: theme.status.warning, aa: theme.status.warningText },
-    coach: { pura: esCapa ? theme.capa.comunidad : colorTinta, aa: 'capaText' in theme ? theme.capaText.comunidad : colorTinta },
+    // ⚠️ CAPA `comunidad` = MAGENTA en las dos casas (es token de capa,
+    // no slot). En el prestador eso choca de frente con §15b.1 ("el
+    // magenta vive SOLO en la marca") SALVO que el destello CUENTE como
+    // marca — que es justo lo que §5.1 dice de él. LA PREGUNTA NO SE
+    // RESUELVE ACÁ y se declara: la firma el founder VIENDO el botón.
+    // Mientras tanto el consumidor monta `registro="tinta"` con color
+    // explícito (lo que el Hogar ya hace), y la pregunta no se dispara.
+    ia: { pura: esCapa ? theme.capa.comunidad : colorTinta, aa: 'capaText' in theme ? theme.capaText.comunidad : colorTinta },
     // ── LOTE 3 (S58, D-361): capas por concepto — el founder poda/ajusta en gate ──
     hogar: comunidad, familia: comunidad, equipo: comunidad,
     explorar: comunidadAmplia,
