@@ -47,7 +47,7 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Image, Pressable, ScrollView, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -66,16 +66,29 @@ import {
   Texto,
   capturarConCamara,
   capturarDeGaleria,
+  radius,
   spacing,
   useAviso,
   useTheme,
 } from '@epetplace/ui';
-import { actualizarPerfilPrestador, obtenerMiPrestador, resolverUrlLogoNegocio, type MiPrestador } from '@epetplace/api';
+import {
+  actualizarPerfilPrestador,
+  agregarFotoGaleria,
+  borrarFotoGaleria,
+  listarFotosGaleria,
+  marcarComoPortada,
+  obtenerMiPrestador,
+  reordenarFotosGaleria,
+  resolverUrlLogoNegocio,
+  type FotoGaleria,
+  type MiPrestador,
+} from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 // ③ S83-C33 — el pipeline del logo YA EXISTÍA ENTERO (S76-B1/D-505). Lo
 // que faltaba era el cable.
 import { quitarLogoNegocio, subirLogoNegocio } from '@/lib/subir-logo';
+import { borrarBytesFotoGaleria, resolverUrlFotoGaleria, subirFotoGaleria } from '@/lib/subir-galeria';
 import { SeccionSede } from '@/components/seccion-sede';
 import { leerSede } from '@/lib/sede';
 import { ControlTelefono, EspejoNegocio, SeccionDesplegable } from '@/components/perfil-piezas';
@@ -234,6 +247,92 @@ export default function PerfilV2() {
   // ③ la Hoja del logo y su estado de subida
   const [hojaLogo, setHojaLogo] = useState(false);
   const [subiendoLogo, setSubiendoLogo] = useState(false);
+  /* S84-C12 — LAS FOTOS. `fotos` viene YA ORDENADA del wrapper, así que
+     el índice ES el orden y `[0]` ES la portada: no hay estado de
+     portada aparte porque no hay dato de portada aparte. */
+  const [fotos, setFotos] = useState<FotoGaleria[]>([]);
+  const [fotoTocada, setFotoTocada] = useState<number | null>(null);
+  const [subiendoFoto, setSubiendoFoto] = useState(false);
+
+  async function recargarFotos(prestadorId: string) {
+    const r = await listarFotosGaleria(prestadorId);
+    if (r.ok) setFotos(r.data);
+    // el fallo NO vacía la tira: una lista que se borra sola al fallar
+    // una lectura le diría al prestador que perdió sus fotos.
+  }
+
+  async function agregarFoto() {
+    if (subiendoFoto || prestador === null) return;
+    const cap = await capturarDeGaleria({ calidad: 0.9 });
+    if (cap.tipo === 'cancelada') return;
+    if (cap.tipo === 'permiso_denegado') {
+      mostrar({ variante: 'error', texto: t('miCuenta.logoPermisoCamara') });
+      return;
+    }
+    setSubiendoFoto(true);
+    const sub = await subirFotoGaleria({ uri: cap.foto.uri });
+    if (!sub.ok) {
+      setSubiendoFoto(false);
+      mostrar({
+        variante: 'error',
+        texto:
+          sub.causa === 'red'
+            ? t('miCuenta.logoErrorRed')
+            : sub.causa === 'archivo_grande'
+              ? t('perfilNegocio.fotoMuyGrande')
+              : t('miCuenta.logoErrorSubida'),
+      });
+      return;
+    }
+    // PASO 2: la fila. Si falla, los bytes quedan huérfanos y se dice —
+    // jamás se pinta una foto que la tabla no tiene.
+    const fila = await agregarFotoGaleria(prestador.id, sub.path);
+    setSubiendoFoto(false);
+    if (!fila.ok) {
+      mostrar({ variante: 'error', texto: fila.mensaje });
+      return;
+    }
+    await recargarFotos(prestador.id);
+  }
+
+  async function accionSobreFoto(accion: 'portada' | 'mover' | 'borrar') {
+    if (fotoTocada === null || prestador === null) return;
+    const foto = fotos[fotoTocada];
+    const i = fotoTocada;
+    setFotoTocada(null);
+    if (foto === undefined) return;
+
+    if (accion === 'portada') {
+      const r = await marcarComoPortada(prestador.id, foto.id);
+      if (!r.ok) mostrar({ variante: 'error', texto: r.mensaje });
+    } else if (accion === 'mover') {
+      /* "Mover" = UN paso hacia el frente, y es la traducción honesta
+         del arrastre a un teléfono: el drag-and-drop dentro de un
+         ScrollView horizontal pelea con el gesto del propio scroll, y
+         resolverlo bien es una pieza de gestos, no una prop.
+         Un paso por toque es entendible sin explicación y llega a
+         cualquier posición repitiéndolo. La ÚLTIMA no se puede mover
+         más adelante que la primera: si ya está en 0 la acción no se
+         ofrece (ver la Hoja). */
+      const orden = fotos.map((f) => f.id);
+      const tmp = orden[i - 1] as string;
+      orden[i - 1] = orden[i] as string;
+      orden[i] = tmp;
+      const r = await reordenarFotosGaleria(prestador.id, orden);
+      if (!r.ok) mostrar({ variante: 'error', texto: r.mensaje });
+    } else {
+      const r = await borrarFotoGaleria(prestador.id, foto.id);
+      if (!r.ok) {
+        mostrar({ variante: 'error', texto: r.mensaje });
+        return;
+      }
+      // fila primero, bytes después (el orden lo fijó A y su porqué está
+      // en el lib): un huérfano es feo e invisible; una fila sin archivo
+      // se VE, porque la vitrina intenta pintarla.
+      if (r.data.path !== null) await borrarBytesFotoGaleria(r.data.path);
+    }
+    await recargarFotos(prestador.id);
+  }
 
   /* ⑥ S83-C33 — LA APERTURA SE CALCULA UNA VEZ, AL MONTAR.
      El comentario viejo decía "una vez, cuando llegan los datos" y era
@@ -289,6 +388,7 @@ export default function PerfilV2() {
           const hay = [tel, wa, p.email_contacto ?? '', p.sitio_web ?? ''].filter((v) => v.trim().length > 0);
           setAbierta(primeraIncompleta(desc, hay));
         }
+        void recargarFotos(p.id);
         setPantalla('listo');
       })();
       return () => {
@@ -779,6 +879,90 @@ export default function PerfilV2() {
                 portada** — una sola verdad en vez de dos que se pueden
                 contradecir). Es motor y es de A. ── */}
 
+            {/* ═══ S84-C12 · LAS FOTOS ═══
+                TIRA HORIZONTAL Y NO GRILLA: en un teléfono la grilla
+                obliga a achicar cada foto hasta que ninguna se ve, y la
+                vitrina es justamente el lugar donde la foto TIENE que
+                verse. La tira deja una grande y sugiere que hay más con
+                el corte del borde — el mismo recurso del rail del
+                cliente.
+                LA PORTADA VA PRIMERA Y MARCADA, y la marca no inventa un
+                estado: **el orden ES la portada** (`[0]` de la lista
+                ordenada). Dibuja el hecho que ya existe.
+                ⚠️ LAS FLECHAS DE FLUVI NO VIAJAN: son idioma de mouse.
+                Acá la foto se TOCA y ella ofrece lo que se le puede
+                hacer — y "Hacer portada" NO aparece en la que ya lo es
+                (Ley 23: la puerta no ofrece lo que va a rechazar). */}
+            <View style={{ paddingVertical: spacing[4], gap: spacing[2] }}>
+              <Texto variante="seccion">{t('perfilNegocio.fotosTitulo')}</Texto>
+              <Texto variante="apoyo">{t('perfilNegocio.fotosAyuda')}</Texto>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ gap: spacing[3], paddingRight: spacing[5] }}
+                style={{ marginHorizontal: -spacing[5], paddingHorizontal: spacing[5] }}
+              >
+                {fotos.map((f, i) => (
+                  <Pressable
+                    key={f.id}
+                    onPress={() => setFotoTocada(i)}
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      i === 0 ? t('perfilNegocio.fotoPortadaA11y') : t('perfilNegocio.fotoA11y', { n: i + 1 })
+                    }
+                    style={{
+                      width: 132,
+                      height: 132,
+                      borderRadius: radius.md,
+                      backgroundColor: theme.bg.overlay,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <Image source={{ uri: resolverUrlFotoGaleria(f.url) }} style={{ width: '100%', height: '100%' }} />
+                    {i === 0 && (
+                      <View
+                        style={{
+                          position: 'absolute',
+                          left: spacing[2],
+                          bottom: spacing[2],
+                          paddingHorizontal: spacing[2],
+                          paddingVertical: spacing[1],
+                          borderRadius: radius.sm,
+                          backgroundColor: theme.bg.base,
+                        }}
+                      >
+                        <Texto variante="dato">{t('perfilNegocio.fotoPortadaMarca')}</Texto>
+                      </View>
+                    )}
+                  </Pressable>
+                ))}
+                {/* el "agregar" vive AL FINAL DE LA TIRA y no como botón
+                    aparte: agregar es la continuación de mirar, no otro
+                    trabajo. */}
+                <Pressable
+                  onPress={() => void agregarFoto()}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('perfilNegocio.fotoAgregar')}
+                  style={{
+                    width: 132,
+                    height: 132,
+                    borderRadius: radius.md,
+                    borderWidth: 1.5,
+                    borderColor: theme.border.subtle,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: spacing[2],
+                  }}
+                >
+                  <Texto variante="apoyo">
+                    {subiendoFoto ? t('perfilNegocio.fotoSubiendo') : t('perfilNegocio.fotoAgregar')}
+                  </Texto>
+                </Pressable>
+              </ScrollView>
+            </View>
+
+            <Separador />
+
             {/* EL CLIP — SU LUGAR, SIN SU MÓDULO.
                 Tiene lugar PROPIO y no entra a la galería de fotos: es
                 UNO y es de otra naturaleza (se reproduce, no se mira).
@@ -947,6 +1131,46 @@ export default function PerfilV2() {
             </View>
           ))}
         </HojaScroll>
+      </Hoja>
+
+      {/* ═══ S84-C12 · LA HOJA DE LA FOTO ═══
+          Reemplaza a las flechas de Fluvi, que son idioma de mouse. Las
+          acciones son las mismas; lo que cambia es que en un teléfono se
+          TOCA la cosa y ella ofrece lo que se le puede hacer.
+          LAS DOS QUE NO SE OFRECEN EN LA PRIMERA (Ley 23): "hacer
+          portada" —ya lo es— y "mover adelante" —no hay adelante—. */}
+      <Hoja
+        visible={fotoTocada !== null}
+        onCerrar={() => setFotoTocada(null)}
+        titulo={t('perfilNegocio.fotoHojaTitulo')}
+        altura="contenido"
+      >
+        <View style={{ paddingBottom: insets.bottom }}>
+          {fotoTocada !== 0 && (
+            <>
+              <Celda
+                interactiva
+                accessibilityRole="button"
+                titulo={t('perfilNegocio.fotoHacerPortada')}
+                onPress={() => void accionSobreFoto('portada')}
+              />
+              <Separador />
+              <Celda
+                interactiva
+                accessibilityRole="button"
+                titulo={t('perfilNegocio.fotoMover')}
+                onPress={() => void accionSobreFoto('mover')}
+              />
+              <Separador />
+            </>
+          )}
+          <Celda
+            interactiva
+            accessibilityRole="button"
+            titulo={t('perfilNegocio.fotoBorrar')}
+            onPress={() => void accionSobreFoto('borrar')}
+          />
+        </View>
       </Hoja>
 
       {/* ③ LA HOJA DEL LOGO — cámara y galería PARES (patrón

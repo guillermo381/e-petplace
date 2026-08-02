@@ -27,21 +27,18 @@
  * una ficha con su invitación adentro y creería que la familia también
  * la ve. El pie dice que esto es un anticipo, no la vitrina.
  *
- * HUECOS DECLARADOS (L-139 — se dicen, no se rellenan):
- * · `portadas` va sin datos: el pipeline múltiple es de A (S84-A5). La
- *   tabla YA existe (`prestador_fotos`: id · prestador_id · url · orden
- *   · creado_en, portada = MIN(orden), con UNIQUE que hace inexpresable
- *   "dos portadas"). Falta subir, reordenar y borrar.
+ * LO QUE YA LLEGA (S84-C12, con el pipeline de A):
+ * · `portadas` — de `listarFotosGaleria`, que devuelve ORDENADAS: la
+ *   portada es `[0]` y no se pregunta aparte, porque el orden y la
+ *   portada son el MISMO dato.
+ * · `servicios` — en VOZ DE FAMILIA, con los cuatro lectores de oferta
+ *   que `cuenta/index` ya usa y su mismo criterio de "activo".
+ *
+ * HUECO QUE QUEDA (L-139 — se dice, no se rellena):
  * · `oficio` va `undefined` A PROPÓSITO: `prestadores.tipo` es el eje
  *   MUERTO D-487 y sus valores no siguen a los servicios que el negocio
  *   ofrece hoy. La línea de la pieza lo acepta el día que tenga fuente
  *   viva, sin tocar ni esta ruta ni la pieza.
- * · `servicios` va sin datos y es el hueco que MÁS se nota: la familia
- *   sí los vería. Resolverlos pide los CUATRO lectores de oferta que
- *   `cuenta/index` ya usa para su voz de oficio — es una lectura de más
- *   en una pantalla que hoy no la hace. **Entra con el pipeline**, en el
- *   mismo lote que las fotos, para no pagar dos veces el viaje.
- *   Mientras tanto la ficha muestra de menos, jamás de más.
  */
 
 import { useCallback, useState } from 'react';
@@ -60,7 +57,17 @@ import {
   spacing,
   useTheme,
 } from '@epetplace/ui';
-import { obtenerMiPrestador, resolverUrlLogoNegocio, type MiPrestador } from '@epetplace/api';
+import {
+  listarFotosGaleria,
+  obtenerMiPrestador,
+  obtenerMundoVeterinariaPropio,
+  obtenerOfertaAdiestramientoPropia,
+  obtenerOfertasGroomingPropias,
+  obtenerOfertasPaseoPropias,
+  resolverUrlLogoNegocio,
+  type MiPrestador,
+} from '@epetplace/api';
+import { resolverUrlFotoGaleria } from '@/lib/subir-galeria';
 
 import { useTraduccion } from '@/i18n';
 
@@ -72,6 +79,8 @@ export default function ComoTeVen() {
 
   const [estado, setEstado] = useState<'cargando' | 'listo' | 'error'>('cargando');
   const [prestador, setPrestador] = useState<MiPrestador | null>(null);
+  const [portadas, setPortadas] = useState<string[]>([]);
+  const [servicios, setServicios] = useState<string[]>([]);
 
   useFocusEffect(
     useCallback(() => {
@@ -86,6 +95,38 @@ export default function ComoTeVen() {
         }
         setPrestador(r.data);
         setEstado('listo');
+
+        /* S84-C12 — LAS FOTOS Y LOS SERVICIOS, en la carga SECUNDARIA.
+           Van DESPUÉS de pintar la ficha y no antes: la identidad ya se
+           puede mostrar con el primer viaje, y hacerla esperar cinco
+           lecturas más sería el mismo defecto que D-531 curó en el
+           header de Cuenta —contenido secundario tomando de rehén al
+           principal—. Si alguna falla, la ficha muestra de menos.
+
+           LOS CUATRO LECTORES son EXACTAMENTE los que `cuenta/index` ya
+           usa para su voz de oficio, con el MISMO criterio de "activo".
+           No se toca ningún wrapper: leer no es escribir, y esto es
+           composición. */
+        const [rFotos, rPaseo, rGrooming, rAdiestramiento, rVet] = await Promise.all([
+          listarFotosGaleria(r.data.id),
+          obtenerOfertasPaseoPropias(r.data.id),
+          obtenerOfertasGroomingPropias(r.data.id),
+          obtenerOfertaAdiestramientoPropia(r.data.id),
+          obtenerMundoVeterinariaPropio(r.data.id),
+        ]);
+        if (!vigente) return;
+        if (rFotos.ok) setPortadas(rFotos.data.map((f) => resolverUrlFotoGaleria(f.url)));
+        /* VOZ DE FAMILIA, JAMÁS EL ENUM (Ley 3 · aviso de B: la pieza no
+           traduce códigos de motor). El orden es FIJO y no por lo que
+           tenga cargado: si se ordenara por presencia, la misma ficha
+           cambiaría de forma al activar un oficio. */
+        const voces: string[] = [];
+        if (rPaseo.ok && rPaseo.data.some((o) => o.activo)) voces.push(t('miCuenta.oficioPaseos'));
+        if (rGrooming.ok && rGrooming.data.some((o) => o.activo)) voces.push(t('miCuenta.oficioEstetica'));
+        if (rAdiestramiento.ok && (rAdiestramiento.data.oferta?.activo ?? false))
+          voces.push(t('miCuenta.oficioAdiestramiento'));
+        if (rVet.ok && rVet.data.servicios.some((s) => s.activo)) voces.push(t('miCuenta.oficioVeterinaria'));
+        setServicios(voces);
       })();
       return () => {
         vigente = false;
@@ -151,6 +192,8 @@ export default function ComoTeVen() {
              `seller_perfil`, otra tabla y otro actor. */
           logoUrl={resolverUrlLogoNegocio(prestador.foto_url)}
           ciudad={prestador.ciudad}
+          portadas={portadas}
+          servicios={servicios}
           oficio={undefined}
           historia={prestador.descripcion}
           /* CON handler ⇒ la invitación con su CTA. Hoy lleva a la

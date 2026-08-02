@@ -256,6 +256,20 @@ export const prestadorEs = {
     // ── S84-C8bis · la vitrina en su lugar ──
     espejoPie: 'Así se va a ver tu ficha en la app.',
 
+    // ── S84-C12 · las fotos de la vitrina ──
+    fotosTitulo: 'Fotos de tu espacio',
+    fotosAyuda: 'La primera es tu portada. Tocá una foto para cambiarla de lugar o borrarla.',
+    fotoAgregar: 'Agregar',
+    fotoSubiendo: 'Subiendo…',
+    fotoMuyGrande: 'La foto supera el máximo de 10 MB.',
+    fotoPortadaMarca: 'portada',
+    fotoPortadaA11y: 'Foto de portada',
+    fotoA11y: 'Foto {{n}}',
+    fotoHojaTitulo: 'Esta foto',
+    fotoHacerPortada: 'Hacer portada',
+    fotoMover: 'Mover una posición adelante',
+    fotoBorrar: 'Borrar',
+
     clipTitulo: 'Tu clip',
     clipVacio: 'Un video corto de tu espacio. Todavía no está disponible: llega con la próxima versión de la app.',
     verComoTeVen: 'Ver cómo te ven',

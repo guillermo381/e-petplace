@@ -208,6 +208,20 @@ export const prestadorEn = {
     // ── S84-C8bis · Espejo de es.ts ──
     espejoPie: 'This is how your card will look in the app.',
 
+    // ── S84-C12 · Espejo de es.ts ──
+    fotosTitulo: 'Photos of your place',
+    fotosAyuda: 'The first one is your cover. Tap a photo to move or delete it.',
+    fotoAgregar: 'Add',
+    fotoSubiendo: 'Uploading…',
+    fotoMuyGrande: 'The photo is over the 10 MB limit.',
+    fotoPortadaMarca: 'cover',
+    fotoPortadaA11y: 'Cover photo',
+    fotoA11y: 'Photo {{n}}',
+    fotoHojaTitulo: 'This photo',
+    fotoHacerPortada: 'Make it the cover',
+    fotoMover: 'Move one position forward',
+    fotoBorrar: 'Delete',
+
     clipTitulo: 'Your clip',
     clipVacio: "A short video of your place. Not available yet: it arrives with the next version of the app.",
     verComoTeVen: 'See how they see you',
