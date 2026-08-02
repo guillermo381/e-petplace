@@ -65,6 +65,8 @@ export const prestadorEn = {
     email: 'Email',
     emailPlaceholder: 'e.g. ana@mail.com',
     password: 'Password',
+    olvide: 'I forgot my password',
+
     entrar: 'Sign in',
     // S80-B1: the entry to /registro
     crearCuenta: 'First time? Create your account',
@@ -281,6 +283,38 @@ export const prestadorEn = {
   },
 
   // La tab Cuenta del prestador (letra P17, S57-B) · LOTE S57, GATE PENDIENTE · Espejo de es.ts
+  // ── S84-C23 · Espejo de es.ts ──
+  seguridad: {
+    titulo: 'Security',
+    ayuda: 'Change the password you use to sign in.',
+    actual: 'Your current password',
+    nueva: 'New password',
+    largoMinimo: 'At least 8 characters.',
+    cambiar: 'Change password',
+    listo: 'Done — your password has been changed.',
+    soloGoogle:
+      "You sign in to e-PetPlace with Google, so you don't have a password yet. You can create one from recovery: we'll send a code to your email.",
+    irARecuperar: 'Create a password',
+    esperaConNumero: 'You tried several times in a row. Wait {{s}} seconds and try again.',
+    esperaSinNumero: 'You tried several times in a row. Wait a moment and try again.',
+  },
+  recuperar: {
+    titulo: 'Recover your password',
+    ayudaPedir: "Type the email you sign in with and we'll send you a 6-digit code.",
+    email: 'Your email',
+    pedir: 'Send the code',
+    siTieneCuenta: 'If {{email}} has an account, we just sent it a 6-digit code.',
+    avisoCorreo: "The email may arrive in English and from an address that isn't ours. If you don't see it, check spam.",
+    codigo: 'The 6-digit code',
+    nueva: 'New password',
+    largoMinimo: 'At least 8 characters.',
+    cambiar: 'Change password and sign in',
+    otroCodigo: 'Send another code',
+    listo: 'Done — you can sign in now.',
+    esperaConNumero: 'You requested several codes in a row. Wait {{s}} seconds and try again.',
+    esperaSinNumero: 'You requested several codes in a row. Wait a moment and try again.',
+  },
+
   miCuenta: {
     titulo: 'Your account',
     perfil: 'Your profile',

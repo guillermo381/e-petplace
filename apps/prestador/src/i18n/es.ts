@@ -75,6 +75,8 @@ export const prestadorEs = {
     email: 'Email',
     emailPlaceholder: 'ej: ana@correo.com',
     password: 'Contraseña',
+    olvide: 'Olvidé mi contraseña',
+
     entrar: 'Entrar',
     // LOTE S80, GATE PENDIENTE
     crearCuenta: '¿Primera vez? Crear tu cuenta',
@@ -343,6 +345,41 @@ export const prestadorEs = {
 
   // Voces calcadas de la Cuenta v1 del cliente (aprobadas S55/S56);
   // eliminarVoz con la verdad P17 §4 del lado del negocio.
+  // ── S84-C23 · seguridad y recuperación ──
+  seguridad: {
+    titulo: 'Seguridad',
+    ayuda: 'Cambia la contraseña con la que entras a la app.',
+    actual: 'Tu contraseña actual',
+    nueva: 'La nueva contraseña',
+    largoMinimo: 'Al menos 8 caracteres.',
+    cambiar: 'Cambiar contraseña',
+    listo: 'Listo — tu contraseña quedó cambiada.',
+    // la voz de las ocho cuentas solo-Google: NO dice "no coincide"
+    soloGoogle:
+      'Entras a e-PetPlace con Google, así que todavía no tienes una contraseña propia. Puedes crear una desde recuperar: te enviamos un código a tu correo.',
+    irARecuperar: 'Crear una contraseña',
+    esperaConNumero: 'Probaste varias veces seguidas. Espera {{s}} segundos y vuelve a intentar.',
+    esperaSinNumero: 'Probaste varias veces seguidas. Espera un momento y vuelve a intentar.',
+  },
+  recuperar: {
+    titulo: 'Recuperar tu contraseña',
+    ayudaPedir: 'Escribe el correo con el que entras y te enviamos un código de 6 dígitos.',
+    email: 'Tu correo',
+    pedir: 'Enviar el código',
+    // la MISMA frase exista o no la cuenta
+    siTieneCuenta: 'Si {{email}} tiene una cuenta, ya le enviamos un código de 6 dígitos.',
+    // D-628 — se retira cuando S86 ponga plantilla y remitente propios
+    avisoCorreo: 'El correo puede llegar en inglés y desde una dirección que no es la nuestra. Si no lo ves, revisa spam.',
+    codigo: 'El código de 6 dígitos',
+    nueva: 'La nueva contraseña',
+    largoMinimo: 'Al menos 8 caracteres.',
+    cambiar: 'Cambiar contraseña y entrar',
+    otroCodigo: 'Enviar otro código',
+    listo: 'Listo — ya puedes entrar.',
+    esperaConNumero: 'Pediste varios códigos seguidos. Espera {{s}} segundos y vuelve a intentar.',
+    esperaSinNumero: 'Pediste varios códigos seguidos. Espera un momento y vuelve a intentar.',
+  },
+
   miCuenta: {
     titulo: 'Tu cuenta',
     perfil: 'Tu perfil',
