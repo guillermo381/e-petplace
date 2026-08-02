@@ -845,3 +845,18 @@ export {
   type BuscarLugaresInput,
   type ResolverLugarInput,
 } from './wrappers/lugares';
+
+// ── LA GALERÍA DEL PRESTADOR (S84-A5) ────────────────────────────────
+// La portada es el ORDEN MÍNIMO: `listarFotosGaleria` devuelve ordenado,
+// así que la portada es `[0]` y no se pregunta. `borrarFotoGaleria`
+// devuelve el path para que la app borre los BYTES (la frontera de
+// archivos es de la app, L-137).
+export {
+  listarFotosGaleria,
+  agregarFotoGaleria,
+  marcarComoPortada,
+  reordenarFotosGaleria,
+  borrarFotoGaleria,
+  type FotoGaleria,
+  type CodigoErrorGaleria,
+} from './wrappers/galeria-prestador';

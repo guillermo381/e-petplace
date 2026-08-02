@@ -17807,6 +17807,10 @@ export type Database = {
         Args: { p_archivo_url?: string; p_mascota_id: string; p_vacunas: Json }
         Returns: Json
       }
+      reordenar_fotos_prestador: {
+        Args: { p_ids: string[]; p_prestador_id: string }
+        Returns: undefined
+      }
       reservar_salida_paquete: {
         Args: {
           p_fecha: string

@@ -3813,3 +3813,31 @@ que ya sabías; un censo por patrón mide lo que hay.* — hermana de la candida
 > **Verificable de una query:** cero filas en `information_schema.columns` para
 > ese patrón, fuera de las que tengan lector declarado. **Disparo natural:** la
 > primera galería de refugio o de producto que alguien construya.
+
+> **➕ ENMIENDA S84-A5 A D-619 — FIRMADA LA SALIDA (a). La ficha queda ABIERTA.**
+>
+> **Firma del founder (2-ago-2026): gana (a) — el dueño cura su propia fila
+> desde la pantalla, en el próximo OTA.** Cero código, cero inferencia.
+> **(b) NO se ejecuta**, y su descripción queda en la ficha solo como registro de
+> lo que se evaluó.
+>
+> **Lo que hace falta ya está construido y verificado en esta misma sesión:**
+> `partirE164` deja crudo en el campo lo que no trae `+`, el selector de país
+> está montado, `estadoTelefono` valida en vivo y su voz dice *"se guarda +57…"*
+> **antes** de tocar Guardar, y `componerE164` arma el E.164 al guardar. **El
+> camino existe entero: falta que alguien lo camine.**
+>
+> **☠️ CONDICIÓN DE MUERTE ACTUALIZADA — es una sola y es observable:** las cinco
+> filas pasan el CHECK cuando sus dueños re-guarden. **Se verifica de un
+> comando**, y ese comando es parte de la cura:
+> `ALTER TABLE prestadores VALIDATE CONSTRAINT chk_prestadores_whatsapp_e164`
+> — si corre, la ficha muere; si aborta, **dice cuántas faltan**. Mientras siga
+> `NOT VALID`, la tabla admite pasado ilegal y nadie se entera.
+>
+> **La fila que manda el reloj es `2052f109` (Satori Latam):** es del founder, y
+> hasta que la cure **su perfil no guarda**. Las otras cuatro son tres seeds y un
+> prestador de wizard.
+>
+> **Y el `57` sigue sin deducirse**, aunque `573208408790` y `3208408790` sean el
+> mismo número salvo el indicativo. **La firma de (a) es justamente la que hace
+> que no haga falta deducirlo: se le pregunta al dueño.**
