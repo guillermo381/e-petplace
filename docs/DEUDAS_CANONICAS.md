@@ -3319,3 +3319,525 @@ La regla 84 distinguía **commiteado · publicado · en el teléfono**. **Falta 
 > quien publica. **Firmados ≠ depositados:** hoy están firmados y viven en esta
 > ficha; **la regla 82 todavía no los tiene**. **Quién la retira:** quien toque
 > `CONTRATO_TRABAJO` con la firma del founder delante.
+
+---
+
+#### D-613 — LA REGLA 28 ESTÁ CABLEADA COMO GUARD EN LA DB, Y CONTRADICE LA ADJUDICACIÓN DE E.164 ✅ CERRADA (2-ago-2026)
+
+**Qué se midió (S84-A1, todo con literal contra la DB viva):**
+
+La mesa adjudicó (1-ago-2026) que el teléfono y el whatsapp del prestador se
+guardan **enteros, con su `+`**. Al aplicar la migración que instala ese guard,
+**rebotó contra dos guards que ya existían y prohíben exactamente lo contrario**:
+
+```
+prestadores_telefono_sin_plus   CHECK (telefono IS NULL OR telefono !~ '^\+')
+prestadores_whatsapp_sin_plus   CHECK (whatsapp IS NULL OR whatsapp !~ '^\+')
+```
+
+Son **la regla 28 del CONTRATO** (*"Persistencia E.164 sin '+' para teléfonos"*)
+cableada en la fuente. **No es una convención suelta: es un guard duro.**
+
+**La regla 28 tiene TRES cuerpos vivos, y hay que moverlos juntos o ninguno:**
+
+| dónde | qué dice |
+|---|---|
+| `CONTRATO_TRABAJO` regla 28 | la letra |
+| los dos CHECK de `prestadores` | el guard |
+| `perfil.tsx:144` `normalizarTelefono` | `.replace(/^\+/, '')` — **tira el `+` justo antes de guardar**, citando la regla |
+
+**LO QUE VUELVE LA ENMIENDA FÁCIL, y es el dato que la decide:** la regla 28
+**ya está rota de facto en la tabla de más volumen**. En `profiles.telefono`,
+de 24 filas con dato, **15 guardan con `+`** y 9 sin él. La adjudicación de la
+mesa no rompe una convención sana: **regulariza en la dirección en la que la
+casa ya venía yendo sola.**
+
+**Y el trabajo es más chico de lo que parece:** la pantalla del perfil **ya
+valida E.164 CON `+`** (los `formato` de `PAISES` son regex del tipo
+`^\+593\d{8,9}$`). La máquina entera existe; lo único que hace la casa es
+**tirar el `+` en el último paso**. Quitar ese `.replace` es una línea.
+
+**Lo que NO se hizo, y por qué:** dropear los dos guards es **derogar la regla
+28 en la fuente**. No se hace de prepo — es el aprendizaje central de S83 (dos
+letras firmadas que se contradicen son peores que una equivocada). **La
+migración quedó escrita, verificada y FUERA de `supabase/migrations/`**
+(`docs/relevamientos/2026-08-01-s84a-PROPUESTA-migracion-telefono-e164.sql`),
+para que ningún `db push` la corra por inercia.
+
+**Lo que la firma tiene que decidir — son DOS cosas, no una:**
+1. **Se deroga la regla 28** (y entonces los ~10 tablas con teléfono quedan bajo
+   la convención nueva), **o `prestadores` es una EXCEPCIÓN declarada** (y
+   entonces la casa tiene dos convenciones **a propósito**, escrito).
+2. **Quién barre las otras columnas.** Hay teléfono en `profiles` (+
+   `telefono_codigo_pais`, que ya existe ahí), `refugios`, `criaderos`,
+   `seller_perfil`, `direcciones_guardadas`, `solicitudes_adopcion`. **La
+   licencia del founder es nominal y acotada a `prestadores.telefono/whatsapp`
+   — ninguna otra se toca sin mandato propio.**
+
+> **☠️ CONDICIÓN DE MUERTE:** la ficha se retira cuando **los tres cuerpos digan
+> lo mismo**: la regla 28 enmendada (o su excepción escrita), los dos CHECK
+> reemplazados, y `normalizarTelefono` sin el `.replace`. **Verificable por
+> sabotaje:** escribir `+593999000558` en `prestadores.whatsapp` debe ENTRAR, y
+> `593987654321` debe REBOTAR. Mientras uno de los tres diga lo contrario, la
+> ficha sigue abierta — **aunque los otros dos ya estén.**
+
+**Cómo se destapó, que es lo que vale guardar:** el freno **no lo encontró la
+lectura** — lo encontró **el control positivo de la auto-prueba**. La orden
+exigía que el guard nuevo pudiera salir rojo; para probarlo hacía falta también
+un caso que ENTRARA, y ese intento fue el que chocó contra el guard viejo.
+**La exigencia de que el guard gritara es la que hizo gritar al que ya estaba.**
+Sin control positivo, el rojo del guard nuevo habría "probado" algo sobre un
+constraint que no era el suyo.
+
+---
+
+#### D-614 — UNA MIGRACIÓN DE S82 ESTÁ APLICADA PERO **NO REGISTRADA** EN EL HISTORIAL 🟠
+
+**Medido (S84-A1):** `supabase migration list --linked` muestra
+`20260731130000_s82_oferta_adiestramiento_publica` como **local sin remoto**. Y
+sin embargo `to_regprocedure('public.obtener_oferta_adiestramiento_publica()')`
+**devuelve no-nulo**: la función EXISTE.
+
+**El diagnóstico, con las dos mitades medidas:** la función se aplicó por
+`db query` y **su versión nunca entró a `supabase_migrations.schema_migrations`**
+(conteo literal: `0`). No es que falte aplicar — **falta REGISTRAR**.
+
+**Por qué importa y no es cosmético:** el historial es lo que hace que
+`db push` sea seguro. Con esta fila ausente, **el próximo `db push` de cualquier
+pista va a intentar re-aplicarla**. Hoy eso es inocuo porque su cuerpo es
+`CREATE OR REPLACE`, pero **esa inocuidad es una propiedad de este archivo, no
+del mecanismo** — y nadie la va a volver a verificar antes de pushear.
+
+**Choca con el canon de S82**, que declara sus migraciones *"aplicadas y
+registradas"*. **Esta está aplicada y NO registrada.** Se declara sin corregir:
+reparar el historial de otra sesión es un acto que adjudica la mesa, y
+**registrarla en silencio escondería el hueco en vez de cerrarlo** — que es
+justo lo que haría invisible al próximo caso.
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando `migration list --linked` muestre
+> `20260731130000` con **remoto no vacío** — es decir, cuando alguien con
+> mandato corra el `repair` correspondiente. **Verificación de un comando, sin
+> interpretación.** Si en cambio se decide que la migración no debe existir, la
+> ficha muere igual, pero **borrando el archivo Y la función** — no dejando una
+> a medias.
+
+---
+
+#### D-615 — EL CATÁLOGO DE PAÍSES TIENE DOS FUENTES: una tabla que nadie lee y una copia a mano que sí 🟠
+
+**Medido (S84-A1), respondiendo la pregunta de la orden *"¿esa tabla existe y es
+única, o hay dos?"*:**
+
+**En la DB es UNA:** `cat_paises`, con `prefijo_telefono` y `formato_telefono`,
+y hasta con **una RPC dedicada** — `get_paises_para_telefono()`, que devuelve
+exactamente `(codigo_iso2, nombre, prefijo_telefono, formato_telefono)` ordenada
+por `activo`.
+
+**Y esa RPC no tiene UN SOLO consumidor** en `apps/` ni en `packages/` (grep
+literal). Es **motor sin puerta**: se construyó para esto y nunca se cableó. La
+única RPC de países que sí se consume es `get_paises_activos` (vía
+`obtenerPaisesActivos`), que **no expone el prefijo** — sirve para agrupar
+catálogos, no para teléfonos.
+
+**En el código hay una SEGUNDA fuente:** el array `PAISES` de
+`apps/prestador/src/app/(tabs)/cuenta/perfil.tsx:103-127` — **23 países
+hardcodeados con su prefijo y su regex de formato**. Es el que la pantalla usa
+de verdad.
+
+**LA COMPARACIÓN, HECHA DE VERDAD Y NO POR CONTEO:** los dos tienen 23 filas y 9
+con formato, **y eso no prueba nada** (dos conteos iguales no son dos listas
+iguales — candidata #17). Extraídas ambas y diffeadas fila por fila
+(`codigo_iso2|nombre|prefijo`): **IDÉNTICAS byte a byte**.
+
+**Entonces el problema no es que estén mal: es que están bien por casualidad
+mantenida.** El propio comentario del código dice que se midió contra el
+proyecto vivo *"9 de 23"* — o sea que alguien las sincronizó **a mano, una vez**.
+**Nada las compara hoy**, y una fila nueva en `cat_paises` (o un cambio de
+prefijo) las separa sin que ningún gate diga nada. **Su modo de falla es el
+silencio** (L-192), y el síntoma llegaría como *"a este usuario no le valida el
+teléfono"*, meses después y sin rastro.
+
+**Dónde se toca:** es el consumidor natural de D-613 — cuando el teléfono pase a
+E.164 con `+`, la partición del prefijo para pintar el selector se hace **contra
+esta tabla, con el prefijo MÁS LARGO primero**. *Esa lógica ya existe escrita en
+`normalizar_telefono` (`ORDER BY length(...) DESC`), y ahí sí está en la DB: se
+espeja, no se inventa.*
+
+**El borde que la partición NO puede resolver, y hay que saberlo antes de
+prometerla:** `+1` pertenece a **tres** países del catálogo (US, CA, PR — y `DO`
+también lo declara). **El prefijo NO determina el país.** Cualquier UI que
+"detecte el país desde el número" va a acertar por defecto y errar en silencio en
+esos cuatro. La elección del país es **del usuario**, y el prefijo solo la
+acompaña.
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando **el array `PAISES` no exista**
+> (Ley 37) y la pantalla lea de `get_paises_para_telefono()`. **Verificable por
+> grep:** `grep -c "iso: 'AR'" apps/prestador` en cero. Si en cambio se decide
+> que la copia en código es deliberada (por costo de arranque o por offline),
+> **muere igual — pero escribiendo esa razón y un guard que compare las dos
+> fuentes**; lo que no puede seguir es que coincidan sin que nadie lo verifique.
+
+---
+
+#### D-616 — EL BUCKET `avatars`: INSERT sin carpeta propia, sin techo y sin DELETE 🔴
+
+**Medido (S84-A2, literal de `pg_policies` y `storage.buckets`):**
+
+```
+INSERT  "Avatar upload"  WITH CHECK (bucket_id='avatars' AND auth.role()='authenticated')
+SELECT  "Avatar read"    USING      (bucket_id='avatars')
+UPDATE  "Avatar update"  USING      (bucket_id='avatars' AND auth.uid()::text = (storage.foldername(name))[1])
+                                     ↑ el UPDATE valida carpeta. El INSERT NO.
+file_size_limit: NULL · allowed_mime_types: NULL · public: true
+```
+
+**Las tres cosas, en orden de gravedad:**
+
+**① El INSERT no valida carpeta propia.** Cualquier autenticado puede **crear**
+objetos dentro de la carpeta de otro usuario. El UPDATE sí lo valida — o sea que
+**la protección existe, está escrita, y le falta a la mitad que crea.**
+
+**② No hay policy de DELETE.** Censados los ocho buckets: **seis de ocho la
+tienen**; `avatars` no. Es el único bucket de imagen que **no sabe borrar**.
+
+**③ Ni techo de tamaño ni lista de mime a nivel bucket.** Todo el control vive
+en el cliente (`MAX_BYTES` y los magic numbers de `subir-logo.ts`). Un cliente
+modificado sube cualquier cosa, de cualquier tamaño.
+
+**Por qué se vuelve 🔴 ahora y no antes** — el disparo es de producto, no de
+seguridad: con **UN logo** por prestador, ② es un huérfano tolerado a propósito
+(clase D-303) y ① es un daño visible y reversible (te pisan el logo, se nota, se
+re-sube). **Con una galería de N fotos en la vitrina pública, ① pasa a permitir
+que un tercero inyecte imágenes en el escaparate de otro negocio** — la
+superficie exacta que el cliente mira para decidir. **La feature no crea el
+agujero: le cambia la consecuencia.**
+
+**Lo que NO se midió, y por eso la cura recomendada no lo toca:** quiénes
+consumen `avatars` hoy. Hay **10 objetos vivos** ahí y el bucket lo comparten el
+logo del negocio, los avatares de perfil y lo que el **portal legado** guarde
+(la DB es la misma — hallazgo S49). **Reemplazar la policy INSERT en caliente
+sin ese censo es tocar algo cuyo alcance no conozco.**
+
+> **☠️ CONDICIÓN DE MUERTE — en dos mitades, y la primera NO espera a la
+> segunda:**
+> **(a)** la galería nace en **bucket propio** (`prestador-galeria`), con las 4
+> policies y el techo desde el minuto uno. **Verificable:** el bucket existe con
+> `file_size_limit` y `allowed_mime_types` no nulos, y `DELETE` entre sus
+> policies. *Esta mitad no requiere censar nada vivo: es todo nuevo.*
+> **(b)** `avatars` se sanea —INSERT por carpeta, DELETE, techo, mime— **después
+> del censo de consumidores**, incluido el portal legado. **Verificable por
+> sabotaje:** un usuario A intenta escribir en la carpeta de B y **rebota**.
+>
+> **La ficha se retira solo con las dos.** Cerrarla con (a) sería declarar sano
+> un bucket que sigue abierto — y es el error que este proyecto ya nombró:
+> *cura de sitio en lugar de cura de causa* (L-185).
+
+---
+
+#### D-617 — CUATRO OTAs PUBLICADOS EN RUNTIME 1.0.3, Y NO EXISTE NINGUNA BUILD EAS QUE LOS RECIBA 🔴 (mitad ① PAGADA)
+
+**Medido (S84-A3, al verificar el publish — no se buscaba, apareció):**
+
+| | |
+|---|---|
+| OTAs recientes del canal `preview` | `7848147c` · `19f8b87c` · `0992f545` · `f0815c7a` — **los cuatro en runtime 1.0.3** |
+| build EAS más nueva del prestador | **`987a0047`, runtime 1.0.2**, 16-jul-2026 |
+| builds en runtime 1.0.3 | **CERO** |
+
+**Un OTA solo lo recibe una APK con su MISMO runtime.** Con la build más nueva
+en 1.0.2, **estos cuatro updates no llegan a ninguna APK distribuida por EAS.**
+
+**La única que podría recibirlos es la APK 1.0.3 LOCAL** que el founder
+construyó en S78 (`eas build --local`, instalada por `adb` — la cuota de EAS
+había rebotado). El canon lo declara: *"apps/prestador declara version 1.0.3 con
+BUILD NATIVA PENDIENTE"*.
+
+**Por qué esto es 🔴 y no una nota operativa:** el gate del founder sobre todo
+el craft del Perfil —S83-H, S83-I, S83-J y ahora S84— **depende de que ese
+teléfono siga teniendo instalada una APK local de hace dos semanas**. Si la
+reinstaló desde EAS por cualquier motivo, está en **1.0.2** y **no ve nada de
+S83 ni de S84** — y lo vería como *"el cambio no llegó"*, no como *"mi APK es
+vieja"*. **El modo de falla es un founder mirando una pantalla sin cambios y una
+mesa creyendo que publicó.** Es L-138 en su forma más cara: el gate empieza
+confirmando el binario.
+
+**Lo que NO está medido, y por eso la ficha no dice más:** qué APK tiene hoy
+instalada el founder. **No es medible desde acá** — se pregunta o se lee del pie
+de Cuenta (el marcador de L-160 enmendada renderiza `update {8 chars} · canal`,
+o `bundle embebido` honesto).
+
+**Y el precedente exacto ya está escrito en el canon**, de S78: *"el primer OTA
+sobre la build 1.0.3 exige publicar contra runtime 1.0.3 — NADIE publica contra
+1.0.2 para esa APK"*. Se cumplió al pie. **Lo que nadie volvió a mirar es la
+otra mitad: que del lado de EAS no naciera nunca la build 1.0.3**, y que por lo
+tanto el canal quedara sirviendo a **un solo teléfono**.
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando **exista una build EAS en runtime
+> 1.0.3** (`build:list` la muestra FINISHED) **y el founder confirme desde el pie
+> de Cuenta** que su `updateId` coincide con el group vigente. **Las dos mitades:**
+> la build sola no prueba que la tenga instalada, y su palabra sola no prueba que
+> el canal pueda volver a alcanzarlo mañana.
+> **Si en cambio se decide bajar `version` a 1.0.2**, la ficha muere igual —
+> pero entonces **hay que re-publicar los cuatro OTAs contra 1.0.2**, porque los
+> ya emitidos quedan huérfanos: nadie los reclama.
+
+> **➕ ENMIENDA S84-A3 — LA MITAD ① QUEDA PAGADA. La ficha NO se cierra.**
+>
+> **Palabra del founder (2-ago-2026):** confirma **1.0.3 en dispositivo**, y
+> reporta el `updateId` **`019fc317`** — que es **el de este mismo bundle**
+> (`7848147c`: android `019fc317-ea14-7623…` / ios `019fc317-ea14-7b69…`).
+>
+> **Qué prueba exactamente, y no más:** su APK 1.0.3 local existe, está
+> instalada, **y el canal `preview` la alcanza en vivo**. Eso responde la
+> pregunta que la ficha declaraba no medible desde acá, **y de paso baja el
+> riesgo retroactivo**: el gate del craft del Perfil no estuvo ciego por
+> runtime — el teléfono que lo miró sí podía recibir. *(Que haya visto los
+> tres OTAs anteriores es probable —los cuatro son 1.0.3— pero **no está
+> medido**: lo medido es este `updateId`, hoy.)*
+>
+> **LO QUE SIGUE ABIERTO ES LA MITAD QUE IMPORTA, y su alcance es mayor que el
+> que la ficha le daba al nacer.** El riesgo no era *"el founder no ve"* — eso
+> quedó descartado. El riesgo es que **el canal sirve a UN SOLO dispositivo**:
+> el que tiene esa APK construida a mano. **Cualquier segundo teléfono queda
+> fuera** — un tester, un prestador de la cohorte del reclutamiento, o **el
+> propio founder si reinstala desde EAS**, porque ahí lo que hay es 1.0.2.
+>
+> **Y eso cruza con el norte de la sesión:** S79 declaró que *"al cierre, el
+> founder sale a reclutar"*. **Reclutar significa un segundo teléfono**, y hoy
+> no hay build que darle. La ficha deja de ser un detalle de publicación y pasa
+> a ser **una precondición del reclutamiento**.
+>
+> **Condición de muerte ACTUALIZADA:** la mitad ① (confirmación del founder)
+> **está pagada y no se vuelve a pedir**. Queda **solo** la build EAS en runtime
+> 1.0.3, FINISHED en `build:list`. **Quien la retira:** quien corra esa build.
+
+> **✅ D-613 CERRADA — 2-ago-2026, firma del founder + firma del arquitecto sobre la derogación.**
+>
+> **Palabra del founder:** *un WhatsApp de otro país es normal, no excepcional —
+> restringirlo no tiene sentido.*
+>
+> **LA CORRECCIÓN DEL REGISTRO, QUE VA ESCRITA PORQUE CAMBIA LO QUE SE APRENDE:
+> la regla 28 se deroga POR INCOMPLETA, NO POR EQUIVOCADA.** *"E.164 sin `+`"*
+> **funciona si el país vive en otro lado** — y en `profiles` esa mitad existe
+> (`telefono_codigo_pais`). **En `prestadores` esa columna nunca se construyó.**
+> La regla era coherente con una mitad que nadie hizo, y sin ella el número
+> guardado **no sabe de dónde es**. *Derogar culpando al criterio anterior
+> enseñaría lo contrario de lo que pasó.*
+>
+> **LOS TRES CUERPOS, MOVIDOS JUNTOS** (que era la condición de muerte):
+>
+> | cuerpo | antes | ahora |
+> |---|---|---|
+> | `CONTRATO_TRABAJO` regla 28 | *"E.164 sin '+'"* | **E.164 ENTERO**, con el texto viejo conservado y su porqué · **v1.25** |
+> | los CHECK de `prestadores` | `*_sin_plus` (`!~ '^\+'`) | **DROPeados** · nacen `chk_prestadores_*_e164` |
+> | `perfil.tsx:144` | `.replace(/^\+/, '')` | **muerto** — y la pantalla ahora **compone** el E.164 |
+>
+> **VERIFICADO POR SABOTAJE, con su par discriminador** (mismo dato, veredicto
+> invertido antes y después):
+> · **antes** — `+573208408790` **REBOTABA** contra `prestadores_whatsapp_sin_plus`.
+> · **después** — `593987654321` · `3208408790` · `+0593999000` · `+593 99900055`
+>   **rebotan los cuatro** contra `chk_prestadores_whatsapp_e164`; y el **control
+>   positivo** `+573208408790` · `+593999000558` · `''` **entran los tres**.
+> *El control positivo no es adorno: fue el que destapó el guard viejo en S84-A1,
+> y sin él cuatro rojos de un guard que rebota todo se verían idénticos.*
+>
+> **LA IRONÍA QUE VALE GUARDAR:** la pantalla **ya validaba con `+`** (los
+> `formato` de `PAISES` son `^\+593\d{8,9}$`) y su voz **ya le prometía al
+> usuario** *"se guarda +593987654321"*. **Validaba una cosa y guardaba otra**;
+> lo único que faltaba era dejar de tirarle el `+` en el último paso. La
+> superficie estaba en lo correcto desde antes de la firma.
+>
+> **Lo que NO cierra con esta ficha, y tiene número propio:** el barrido de las
+> otras seis tablas (**D-618**) y el borde de las cinco filas legado (**D-619**).
+
+---
+
+#### D-618 — LAS OTRAS SEIS TABLAS CON TELÉFONO SIGUEN BAJO LA CONVENCIÓN VIEJA 🟠
+
+**La derogación de la regla 28 es de la LETRA. El barrido es trabajo con su
+propio gate** — y así se firmó, explícitamente.
+
+**Las seis, medidas** (`information_schema.columns`): `profiles` (`telefono` +
+`telefono_codigo_pais` + `telefono_tipo`) · `refugios` (`telefono`, `whatsapp`)
+· `criaderos` · `seller_perfil` (`telefono`, `whatsapp`) ·
+`direcciones_guardadas` · `solicitudes_adopcion`.
+
+**`profiles` es el caso interesante y NO es el más urgente, sino el que enseña
+por qué:** es **la única que tiene la mitad que a `prestadores` le faltaba** —
+`telefono_codigo_pais` existe. **Ahí la regla 28 sí estaba completa.** Y aun
+así, **de sus 24 filas con dato, 15 ya guardan con `+`** (medido S84-A1): la
+convención se rompió sola, en la tabla que sí tenía cómo sostenerla.
+
+**Lo que eso significa para el barrido, y por qué no se hace de prepo:** en
+`profiles` hay que decidir si `telefono_codigo_pais` **muere** (E.164 entero,
+como prestadores) o si **manda** y las 15 filas con `+` son las que están mal.
+**Son dos direcciones opuestas y ninguna es obvia** — la columna tiene
+consumidores que este censo no midió.
+
+**Hasta entonces la casa tiene dos convenciones A PROPÓSITO y por escrito**
+(declarado en la regla 28 enmendada), que es distinto de tenerlas por descuido.
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando las seis tablas tengan **guard de
+> formato explícito** —el que sea, pero declarado— **y su decisión escrita** en
+> el caso de `profiles` (si `telefono_codigo_pais` vive o muere).
+> **Verificable:** `pg_constraint` sobre las seis, y cero columnas de indicativo
+> sin dueño declarado. **No se retira barriendo cinco y dejando `profiles`
+> "para después"** — es la que tiene el conflicto de verdad.
+
+---
+
+#### D-619 — CINCO FILAS QUEDARON CON NÚMERO PRE-E.164, Y SU PERFIL NO VA A GUARDAR HASTA CURARLAS 🟠
+
+**Qué pasó (S84-A1bis):** el guard nuevo nació **`NOT VALID`** — rige para todo
+INSERT/UPDATE pero **no reescribe el pasado**. Es lo que hizo posible cumplir la
+orden *"la fila CO queda como está hasta que su dueño lo confirme"*.
+
+**Las cinco, con su dueño medido** (no son "data de prueba" indistinta):
+
+| id | negocio | whatsapp | origen |
+|---|---|---|---|
+| `2052f109` | **Satori Latam sas** | `573208408790` | wizard — **REAL, del founder** |
+| `d73347ba` | **Carlos** | `593987654321` | wizard — **REAL** |
+| `de300000` | Paseos Andres | `3208408790` | **SEED demo** — sin indicativo |
+| `de580000` | Wizard | `593999000558` | SEED |
+| `de680000` | Clínica Aurora | `593999000668` | SEED |
+
+**EL BORDE, declarado para que nadie lo descubra solo:** Postgres **revalida el
+CHECK al UPDATE de la fila**. Cualquiera de esos cinco que abra su perfil y
+guarde **va a rebotar** hasta que su número traiga el `+`. **No es un daño
+silencioso** —el wrapper lo dice tipado: *"El número tiene que incluir el país
+(por ejemplo +593 …)"*— **pero es fricción real, y le toca al founder en su
+propio negocio.**
+
+**Por qué NO se vació ni se promovió, teniendo licencia para lo primero:**
+vaciar **destruye** (y al medir con nombre resultó que Satori y Carlos son
+reales, no data de prueba); promover **transforma con una hipótesis**.
+`NOT VALID` es la única de las tres que **no destruye y no inventa**.
+
+**La observación que quedó como dato y NO como cura:** `573208408790` (Satori) y
+`3208408790` (el seed) son **el mismo número salvo el `57`**. Es tentador
+deducir que al seed le falta el indicativo colombiano — **y ahí es exactamente
+donde P21 dice que no**. La orden fue explícita: la fila CO queda.
+
+**Las dos salidas, medidas:**
+**(a)** **el dueño re-guarda** eligiendo su país — la pantalla ya compone el
+E.164 y su voz ya dice *"se guarda +57…"*. Cero código. Es la única que
+**confirma** el país en vez de suponerlo.
+**(b)** **promoción mecánica contra `cat_paises`**: anteponer `+` solo si el
+número **ya empieza con un prefijo del catálogo** (greedy por el más largo, el
+mismo criterio de `normalizar_telefono`). Cura cuatro de las cinco **sin
+inferir nada** — y **la del seed cae sola** del lado de "no se toca", porque
+`3208…` no matchea ningún prefijo. *Es barata y honesta, pero sigue siendo una
+transformación de datos: pide firma.*
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando **las cinco filas pasen el
+> CHECK** y el constraint pueda pasar a `VALIDATE CONSTRAINT` sin abortar.
+> **Verificable de un comando:** `ALTER TABLE prestadores VALIDATE CONSTRAINT
+> chk_prestadores_whatsapp_e164` — si corre, la ficha muere; si aborta, dice
+> cuántas faltan. **Ese `VALIDATE` es parte de la cura, no un chequeo aparte:**
+> mientras el constraint siga `NOT VALID`, la tabla admite pasado ilegal y nadie
+> se entera.
+
+> **➕ ENMIENDA S84-A4 A D-619 — SUBE DE PRIORIDAD, y las dos salidas con su costo.**
+>
+> **El motivo es del founder, no técnico: una de las cinco filas es SU negocio**
+> (`2052f109` · Satori Latam sas) y con el CHECK `NOT VALID` **su perfil no
+> guarda** hasta que el número traiga el `+`.
+>
+> **LA SALIDA HONESTA ES (a), Y ES UNA PANTALLA, NO UNA MIGRACIÓN.**
+>
+> **(a) EL DUEÑO CONFIRMA SU PROPIO NÚMERO — costo: CERO CÓDIGO.**
+> La pantalla **ya hace todo lo necesario**: `partirE164` no parte un valor sin
+> `+` (lo deja crudo en el campo), el selector de país está ahí, `estadoTelefono`
+> valida en vivo y su voz dice *"se guarda +57…"* antes de tocar Guardar. **El
+> dueño abre Perfil → elige su país → guarda. Se acabó.**
+> **Es la única de las dos que CONFIRMA el país en vez de suponerlo** — y para la
+> fila de Satori eso importa de verdad: su número es colombiano en un negocio con
+> `country_code='EC'`, o sea **el caso exacto que P21 existe para proteger**.
+> *Cinco personas, un toque cada una.*
+>
+> **(b) PROMOCIÓN MECÁNICA CONTRA `cat_paises` — costo: ~15 líneas de migración.**
+> Anteponer `+` **solo si el número ya empieza con un prefijo del catálogo**,
+> greedy por el más largo (el mismo criterio que `normalizar_telefono` ya usa en
+> la DB — se espeja, no se inventa). **Cura 4 de 5 sin inferir nada**, porque el
+> indicativo ya está en el número; **y la del seed cae sola** del lado de "no se
+> toca": `3208…` no matchea ningún prefijo del catálogo.
+> **Su costo real no son las líneas: es que sigue siendo una transformación de
+> datos de otro.** Y para la fila que más importa —Satori— **acierta por
+> construcción pero nadie se lo preguntó**.
+>
+> **⚠️ LO QUE NINGUNA DE LAS DOS HACE, y se repite porque el número lo invita:**
+> **el `57` del seed NO se deduce.** `573208408790` (Satori) y `3208408790` (el
+> seed) son el mismo número salvo el indicativo — **y esa coincidencia es
+> exactamente el tipo de evidencia que P21 declara insuficiente**. La fila del
+> seed queda como está.
+>
+> **Recomendación, con su porqué:** **(a)**. No porque (b) sea peligrosa —es
+> honesta y barata— sino porque **el problema no es de datos, es de un dato que
+> nunca se pidió**. Son cinco filas, dos de ellas reales, y una es del founder:
+> **el camino más corto y el más correcto son el mismo**.
+
+---
+
+#### D-620 — CUATRO IMPLEMENTACIONES DE "GALERÍA" EN JSONB, LAS CUATRO SIN UN SOLO DATO 🟢
+
+**Censadas contra la DB viva (S84-A4). Son CUATRO, no tres** — `criaderos`
+apareció al preguntarle a `information_schema` en vez de a la lista:
+
+| columna | filas de la tabla | con datos | lectores |
+|---|---|---|---|
+| ~~`prestadores.fotos_galeria`~~ | 7 | 0 | 0 | **☠️ MUERTA en `20260802140000`** |
+| `refugios.fotos_galeria` | 0 | 0 | 0 | viva |
+| `criaderos.fotos_galeria` | 0 | 0 | 0 | viva |
+| `productos.imagenes` | 0 | 0 | 0 | viva |
+
+**La de `prestadores` murió con la migración que creó `prestador_fotos`** —
+Ley 37, y la razón de la mesa: **un homónimo muerto en la misma tabla donde nace
+el bueno no se difiere**. Quien abriera `prestadores` mañana vería una columna
+llamada "fotos_galeria" que no es la galería.
+
+**LAS OTRAS TRES NO SE TOCAN, y es a propósito:** están en tablas **vacías** de
+dominios que esta sesión no abrió (refugios, criaderos, tienda). Matarlas sería
+barrer territorio ajeno por prolijidad. **Lo que sí se hace es nombrarlas**, para
+que quien construya la galería de refugios o de productos **encuentre esta ficha
+antes que la columna** y no cree la quinta.
+
+**El hallazgo de método que deja, y vale más que la ficha:** el censo de S84-A2
+dijo "dos" porque preguntó por **nombres que ya conocía**. El de A4 dijo "cuatro"
+porque preguntó `information_schema` por **patrón**. *Un censo por lista mide lo
+que ya sabías; un censo por patrón mide lo que hay.* — hermana de la candidata
+#16 (el grep por la prop).
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando las tres restantes **no existan**
+> —o cuando alguna gane un consumidor real y deje de ser esquema muerto—.
+> **Verificable de una query:** cero filas en `information_schema.columns` para
+> ese patrón, fuera de las que tengan lector declarado. **Disparo natural:** la
+> primera galería de refugio o de producto que alguien construya.
+
+> **➕ ENMIENDA S84-A5 A D-619 — FIRMADA LA SALIDA (a). La ficha queda ABIERTA.**
+>
+> **Firma del founder (2-ago-2026): gana (a) — el dueño cura su propia fila
+> desde la pantalla, en el próximo OTA.** Cero código, cero inferencia.
+> **(b) NO se ejecuta**, y su descripción queda en la ficha solo como registro de
+> lo que se evaluó.
+>
+> **Lo que hace falta ya está construido y verificado en esta misma sesión:**
+> `partirE164` deja crudo en el campo lo que no trae `+`, el selector de país
+> está montado, `estadoTelefono` valida en vivo y su voz dice *"se guarda +57…"*
+> **antes** de tocar Guardar, y `componerE164` arma el E.164 al guardar. **El
+> camino existe entero: falta que alguien lo camine.**
+>
+> **☠️ CONDICIÓN DE MUERTE ACTUALIZADA — es una sola y es observable:** las cinco
+> filas pasan el CHECK cuando sus dueños re-guarden. **Se verifica de un
+> comando**, y ese comando es parte de la cura:
+> `ALTER TABLE prestadores VALIDATE CONSTRAINT chk_prestadores_whatsapp_e164`
+> — si corre, la ficha muere; si aborta, **dice cuántas faltan**. Mientras siga
+> `NOT VALID`, la tabla admite pasado ilegal y nadie se entera.
+>
+> **La fila que manda el reloj es `2052f109` (Satori Latam):** es del founder, y
+> hasta que la cure **su perfil no guarda**. Las otras cuatro son tres seeds y un
+> prestador de wizard.
+>
+> **Y el `57` sigue sin deducirse**, aunque `573208408790` y `3208408790` sean el
+> mismo número salvo el indicativo. **La firma de (a) es justamente la que hace
+> que no haga falta deducirlo: se le pregunta al dueño.**

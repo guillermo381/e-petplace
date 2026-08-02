@@ -43,16 +43,48 @@ export type CodigoErrorPrestador = (typeof CODIGOS_ERROR_PRESTADOR)[number];
 export type CodigoErrorPerfilPrestador =
   | CodigoErrorPrestador
   | 'coordenadas_invalidas'
-  | 'radio_invalido';
+  | 'radio_invalido'
+  // S84-A1bis: el teléfono mal formado REBOTA TIPADO. El CHECK de la DB
+  // (`chk_prestadores_*_e164`) es la RED, jamás la voz: un constraint
+  // crudo llega a la pantalla como ruido de motor.
+  | 'telefono_invalido';
 
 const MENSAJES: Record<CodigoErrorPerfilPrestador | 'error_desconocido' | 'datos_inconsistentes', string> = {
   sin_sesion:            'No hay sesión activa.',
   sin_prestador:         'Tu usuario no tiene un prestador asociado.',
   coordenadas_invalidas: 'La ubicación no es válida. Buscá la dirección de nuevo.',
   radio_invalido:        'El radio de cobertura no es válido.',
+  // dice QUÉ falta, no "es inválido": el caso real es un número sin país.
+  telefono_invalido:     'El número tiene que incluir el país (por ejemplo +593 …).',
   datos_inconsistentes:  'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:     'Ocurrió un error inesperado. Probá de nuevo.',
 };
+
+/**
+ * E.164 ENTERO, con su '+' — **regla 28 del CONTRATO, enmendada el
+ * 2-ago-2026** (firma founder + arquitecto). El país viaja DENTRO del
+ * número: no hay columna de indicativo que pueda contradecirlo, y
+ * derivarlo del `country_code` del perfil está PROHIBIDO (P21 — el caso
+ * canónico es un negocio en EC con línea CO).
+ *
+ * La regla vieja ("E.164 sin '+'") se derogó **por incompleta, no por
+ * equivocada**: funcionaba si el país vivía en otro lado, y en
+ * `prestadores` esa columna nunca se construyó.
+ *
+ * Espejo EXACTO del CHECK de la DB (`^\+[1-9][0-9]{6,14}$`): '+' obligatorio,
+ * primer dígito ≠ 0, 7 a 15 dígitos. **Si los dos divergen, gana la DB y
+ * el usuario ve un error de motor** — por eso se escriben juntos y con el
+ * literal a la vista.
+ */
+const E164 = /^\+[1-9][0-9]{6,14}$/;
+
+/** El campo es OPCIONAL: vacío pasa. Lo que se exige es que si HAY valor,
+ *  sea E.164 — nunca se completa ni se corrige un número a medias. */
+function telefonoValido(v: string | null | undefined): boolean {
+  if (v === undefined || v === null) return true;
+  const limpio = v.trim();
+  return limpio.length === 0 || E164.test(limpio);
+}
 
 // S58-B (hunk aditivo): country_code entra al contrato — la fuente ya
 // era clara (fees.ts lo lee de la MISMA tabla); las zonas del taller
@@ -175,8 +207,13 @@ export async function obtenerMiPrestador(): Promise<
 export interface InputActualizarPerfilPrestador {
   /** '' o solo espacios ⇒ NULL honesto en DB. */
   descripcion?: string;
-  /** E.164 sin '+' (regla 28) — el display con '+' es del frontend. */
+  /** **E.164 ENTERO, con su '+'** — regla 28 ENMENDADA (S84-A1bis,
+   *  2-ago-2026). Vacío es legal; con valor, `telefonoValido` o rebota
+   *  `telefono_invalido`. Ya NO se le quita el '+' al guardar: el país
+   *  vive dentro del número. */
   telefono?: string;
+  /** Mismo contrato que `telefono`. Ojo: la columna es NOT NULL en DB,
+   *  así que su vacío es `''` y no NULL (relevado). */
   whatsapp?: string;
   email_contacto?: string;
   sitio_web?: string;
@@ -217,6 +254,15 @@ export async function actualizarPerfilPrestador(
 ): Promise<ResultadoWrapper<null, CodigoErrorPerfilPrestador>> {
   const uid = await uidActual();
   if (!uid) return { ok: false, codigo: 'sin_sesion', mensaje: MENSAJES.sin_sesion };
+
+  /* S84-A1bis — LA PUERTA NO OFRECE LO QUE VA A RECHAZAR (Ley 23): los dos
+     números se miran ANTES de armar el payload, y JUNTOS, para que quien
+     tenga los dos mal no descubra el segundo después de arreglar el
+     primero. El CHECK de la DB queda como red de último recurso: si esto
+     no estuviera, el rebote llegaría como constraint crudo. */
+  if (!telefonoValido(input.telefono) || !telefonoValido(input.whatsapp)) {
+    return { ok: false, codigo: 'telefono_invalido', mensaje: MENSAJES.telefono_invalido };
+  }
 
   const payload: Partial<Database['public']['Tables']['prestadores']['Update']> = {};
   const descripcion = aNull(input.descripcion);

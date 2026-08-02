@@ -1,6 +1,6 @@
 # Contrato de trabajo — Guillermo (founder e-PetPlace) ↔ Claude
 
-> **Versión:** v1.24 (con enmiendas S14 + S15 + S16 + S19 + S21 + S42 + S48 + S54 + S59 + S68 + S71 + S79 + S80 + S81 + S82 + S83)
+> **Versión:** v1.25 (con enmiendas S14 + S15 + S16 + S19 + S21 + S42 + S48 + S54 + S59 + S68 + S71 + S79 + S80 + S81 + S82 + S83 + S84)
 > **Última actualización:** 1 Ago 2026 — Sesión 83: **ENMIENDA A LA REGLA 84 — SON CUATRO ESTADOS, y el que faltaba es el PRIMERO: «en mi rama». El estado de una rama respecto de SÍ MISMA no dice nada sobre si su trabajo llegó** (se verifica con `merge-base --is-ancestor` contra `origin/main`, jamás con una lista propia; evidencia: 11 commits declarados pendientes estando los 11 en main — D-607). + **ENMIENDA A LA REGLA 82 — nace el PASO ⓪ de la veda: quien publica pide la congelación NOMBRANDO a quiénes espera y no bundlea sin confirmación AL MOMENTO** (una congelación de hace tres turnos no es una congelación; evidencia: el incidente C17). + **ENMIENDA A LA REGLA 80 — muere la lámina HTML como instrumento de diseño de PANTALLA; el ciclo es `UI real sin cablear → gate en dispositivo → cableado`** (la lámina sobrevive solo para comparar variantes de un token barato). Sesión 82. Reglas **84** (los CUATRO eslabones del cierre: pathspec obligatorio · `cat-file`+`merge-base` por CONTENIDO · group publicado · y lo que consumís sigue vigente) y **85** (worktree por pista = la PRIMERA decisión de una sesión paralela, pendiente). **El arranque de la sesión del prestador vive en `docs/relevamientos/2026-07-31-s82-acta-del-metodo.md` §5** y el censo de enmiendas de ley de S82 en `…-s82-censo-de-enmiendas.md` — se REFERENCIAN, no se copian.
 > **Audiencia:** Claude (web y code) en toda sesión futura. Cualquier dev que se sume al proyecto.
 
@@ -80,7 +80,15 @@ Ambos viven actualizados al cierre de cada sesión grande.
 25. **Datos fiscales SOLO en `cuentas_comerciales`.** Las tablas operativas (prestadores, seller_perfil, criaderos, refugios) NO duplican RUC, razón social, datos bancarios. Siempre JOIN.
 26. **Strings centralizados** en `<feature>/strings.ts` o equivalente. Sin literales en JSX cuando se puede evitar.
 27. **Tono tuteo neutro** en todo el portal-prestadores. Sin voseo, sin "usted".
-28. **Persistencia E.164 sin '+' para teléfonos.** Ejemplo: `'593991234567'`. Display con '+' es responsabilidad del frontend.
+28. **Persistencia E.164 ENTERO, con su `+`.** Ejemplo: `'+593991234567'`. El campo es opcional (vacío legal); lo que se exige es que **si hay valor, sea E.164**. **El país viaja DENTRO del número** — no hay columna de indicativo que pueda contradecirlo, y **está prohibido derivar el país del `country_code` del perfil** (P21: el teléfono no implica país; el caso canónico es el founder, que opera en EC con línea CO).
+
+    > **⚠️ ENMENDADA el 2-ago-2026** (firma del founder + firma del arquitecto sobre la derogación). **Texto anterior, conservado como registro:** *"Persistencia E.164 sin '+' para teléfonos. Ejemplo: `'593991234567'`. Display con '+' es responsabilidad del frontend."*
+    >
+    > **Se deroga por INCOMPLETA, no por equivocada — y la distinción importa.** *"E.164 sin `+`"* funciona **si el país vive en otro lado**. En `profiles` esa mitad existe (`telefono_codigo_pais`); **en `prestadores` nunca se construyó**. La regla era coherente con una mitad que nadie hizo, y sin ella el número guardado **no sabe de dónde es**.
+    >
+    > **Palabra del founder:** *un WhatsApp de otro país es normal, no excepcional — restringirlo no tiene sentido.*
+    >
+    > **Alcance de esta enmienda: la LETRA.** El guard quedó reemplazado en `prestadores` (S84-A1bis). **Las otras seis tablas con teléfono** —`profiles`, `refugios`, `criaderos`, `seller_perfil`, `direcciones_guardadas`, `solicitudes_adopcion`— **NO se barrieron**: ese es trabajo con su propio gate (**D-618**). Hasta entonces la casa tiene dos convenciones **a propósito y por escrito**, que es distinto de tenerlas por descuido.
 
 ### Modelo de dominio (refinado en Sesión 10)
 
@@ -452,9 +460,24 @@ Origen: S54 (el freno de la Sesión A ante el backfill-por-referencia y el patch
 **Y el argumento de la casa que lo respalda — es una vara que SUBE, no que baja.** `DIRECTIVA_CRAFT_CLIENTE` §10 dice que las láminas son **CRITERIO, no evidencia**, y su razón es exacta: *"nada de esto se vio en un teléfono real"*. **Una pantalla real montada con piezas de `packages/ui` SÍ es evidencia** — corre en el dispositivo, usa los tokens vivos, respeta los temas y hereda el comportamiento de las primitivas. Cambiar lámina por UI real **no relaja el estándar: lo endurece**, porque lo que se firma pasa a ser lo que existe.
 
 **LO QUE LA LÁMINA PROTEGÍA Y HAY QUE PRESERVAR — las tres cláusulas no son opcionales:**
-1. **La UI sin cablear vive en RUTA DE VERIFICACIÓN**, no suelta en el árbol de navegación del producto.
+1. **LO NUEVO VIAJA DIRECTO A SU LUGAR.** *(ENMENDADA — ver abajo.)*
 2. **NO reemplaza la pantalla viva.** Convive con ella; la vieja sigue sirviendo al usuario hasta la firma.
 3. **NO se cablea hasta la firma en dispositivo.** Cablear antes es exactamente el gasto que esta enmienda viene a evitar: se paga el trabajo de datos sobre una composición que puede no sobrevivir al gate.
+
+> **⚠️ ENMIENDA A LA CLÁUSULA 1 — 2-ago-2026, firma del founder.** *No la deroga: la reduce a su alcance real.*
+>
+> **Texto anterior, conservado con su fecha (31-jul-2026):** *"La UI sin cablear vive en RUTA DE VERIFICACIÓN, no suelta en el árbol de navegación del producto."*
+>
+> **Lo que rige desde hoy: LO NUEVO VIAJA DIRECTO A SU LUGAR.** La ruta de verificación queda para **dos casos**:
+> **(1)** cuando **no está claro qué va a ser** la pieza · **(2)** cuando el cambio **pone en riesgo algo que ya funciona**.
+>
+> **El porqué, con la letra del founder:** *una pieza NUEVA no puede romper lo que ya está bien, así que aislarla solo cuesta dos pasos — y encima se ve peor: fuera de su contexto no se nota cómo va a quedar.*
+>
+> **Y el argumento que la cierra: el aislamiento no ahorraba nada.** *La galería viaja en el OTA igual; el preview nunca fue más barato, solo más lejos.* La cláusula 1 se escribió creyendo proteger un riesgo de despliegue que **no existe**: lo que está en el bundle está en el bundle, esté en su pantalla o en una ruta aparte. Lo único que agregaba era **distancia entre lo que se mira y lo que se va a firmar** — que es justo lo que la enmienda de la lámina vino a eliminar. *(Es la misma lección aplicada un nivel más adentro: se firma lo que existe, en el lugar donde va a existir.)*
+>
+> **Los dos casos que sobreviven tienen en común lo que la cláusula sí protegía:** cuando la forma final está abierta, o cuando hay algo vivo que puede romperse, **la distancia deja de ser costo y pasa a ser resguardo**. Fuera de esos dos, es ceremonia.
+>
+> **LO QUE NO CAMBIA, y se dice explícito porque es lo que más se confunde: la cláusula 3 sigue viva entera.** *No se cablea hasta la firma en dispositivo.* **Protege otra cosa** —el gasto de datos sobre una composición no firmada— y esta enmienda no la toca. **Que la pieza viaje a su lugar no significa que llegue conectada.**
 
 **LO QUE SOBREVIVE DEL INSTRUMENTO (no muere entero):** la lámina HTML **sigue sirviendo para comparar VARIANTES DE UN TOKEN barato** — la galería del agua, la del glow, la de la huella. Ahí es el instrumento correcto: la pregunta es *"¿cuál de estos tres?"*, la respuesta no depende del contexto de una pantalla, y montar tres variantes en HTML cuesta minutos. **La frontera es: variantes de un token → lámina · composición de una pantalla → UI real.**
 
