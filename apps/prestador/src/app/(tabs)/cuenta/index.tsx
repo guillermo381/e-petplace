@@ -570,11 +570,21 @@ export default function Cuenta() {
               y su copy no pertenece al lote de strings. ── */}
           <CeldaNavegacion
             icono="preferencias"
-            titulo="Galería de tokens"
-            detalle="herramienta de sesión — no es pantalla de producto"
+            /* S84-C9 (Ley 17.2 — los nombres van del lado del usuario).
+               El founder no la encontraba, y B midió que no estaba
+               escondida: **estaba nombrada en NUESTRO idioma**. "Galería
+               de tokens" es vocabulario de quien construye, y su
+               subtítulo —"no es pantalla de producto"— le decía
+               literalmente que eso no era para él. La entrada existía y
+               el copy la cerraba.
+               El nombre nuevo dice QUÉ HAY y QUÉ SE ESPERA DE ÉL: son
+               láminas, son de gate, y las tiene que firmar. */
+            titulo="Láminas de gate · para firmar"
+            detalle="lo que espera tu ojo esta sesión"
             registro="aa"
             onPress={() => router.push('/gallery')}
           />
+
 
           {/* ── S74-B · EL MARCADOR RENDERIZADO (L-160/L-161): el
               [update] era SOLO console.log — logcat-only, inalcanzable

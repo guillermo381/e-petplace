@@ -47,7 +47,7 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Image, Pressable, ScrollView, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -66,16 +66,29 @@ import {
   Texto,
   capturarConCamara,
   capturarDeGaleria,
+  radius,
   spacing,
   useAviso,
   useTheme,
 } from '@epetplace/ui';
-import { actualizarPerfilPrestador, obtenerMiPrestador, resolverUrlLogoNegocio, type MiPrestador } from '@epetplace/api';
+import {
+  actualizarPerfilPrestador,
+  agregarFotoGaleria,
+  borrarFotoGaleria,
+  listarFotosGaleria,
+  marcarComoPortada,
+  obtenerMiPrestador,
+  reordenarFotosGaleria,
+  resolverUrlLogoNegocio,
+  type FotoGaleria,
+  type MiPrestador,
+} from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 // ③ S83-C33 — el pipeline del logo YA EXISTÍA ENTERO (S76-B1/D-505). Lo
 // que faltaba era el cable.
 import { quitarLogoNegocio, subirLogoNegocio } from '@/lib/subir-logo';
+import { borrarBytesFotoGaleria, resolverUrlFotoGaleria, subirFotoGaleria } from '@/lib/subir-galeria';
 import { SeccionSede } from '@/components/seccion-sede';
 import { leerSede } from '@/lib/sede';
 import { ControlTelefono, EspejoNegocio, SeccionDesplegable } from '@/components/perfil-piezas';
@@ -234,6 +247,92 @@ export default function PerfilV2() {
   // ③ la Hoja del logo y su estado de subida
   const [hojaLogo, setHojaLogo] = useState(false);
   const [subiendoLogo, setSubiendoLogo] = useState(false);
+  /* S84-C12 — LAS FOTOS. `fotos` viene YA ORDENADA del wrapper, así que
+     el índice ES el orden y `[0]` ES la portada: no hay estado de
+     portada aparte porque no hay dato de portada aparte. */
+  const [fotos, setFotos] = useState<FotoGaleria[]>([]);
+  const [fotoTocada, setFotoTocada] = useState<number | null>(null);
+  const [subiendoFoto, setSubiendoFoto] = useState(false);
+
+  async function recargarFotos(prestadorId: string) {
+    const r = await listarFotosGaleria(prestadorId);
+    if (r.ok) setFotos(r.data);
+    // el fallo NO vacía la tira: una lista que se borra sola al fallar
+    // una lectura le diría al prestador que perdió sus fotos.
+  }
+
+  async function agregarFoto() {
+    if (subiendoFoto || prestador === null) return;
+    const cap = await capturarDeGaleria({ calidad: 0.9 });
+    if (cap.tipo === 'cancelada') return;
+    if (cap.tipo === 'permiso_denegado') {
+      mostrar({ variante: 'error', texto: t('miCuenta.logoPermisoCamara') });
+      return;
+    }
+    setSubiendoFoto(true);
+    const sub = await subirFotoGaleria({ uri: cap.foto.uri });
+    if (!sub.ok) {
+      setSubiendoFoto(false);
+      mostrar({
+        variante: 'error',
+        texto:
+          sub.causa === 'red'
+            ? t('miCuenta.logoErrorRed')
+            : sub.causa === 'archivo_grande'
+              ? t('perfilNegocio.fotoMuyGrande')
+              : t('miCuenta.logoErrorSubida'),
+      });
+      return;
+    }
+    // PASO 2: la fila. Si falla, los bytes quedan huérfanos y se dice —
+    // jamás se pinta una foto que la tabla no tiene.
+    const fila = await agregarFotoGaleria(prestador.id, sub.path);
+    setSubiendoFoto(false);
+    if (!fila.ok) {
+      mostrar({ variante: 'error', texto: fila.mensaje });
+      return;
+    }
+    await recargarFotos(prestador.id);
+  }
+
+  async function accionSobreFoto(accion: 'portada' | 'mover' | 'borrar') {
+    if (fotoTocada === null || prestador === null) return;
+    const foto = fotos[fotoTocada];
+    const i = fotoTocada;
+    setFotoTocada(null);
+    if (foto === undefined) return;
+
+    if (accion === 'portada') {
+      const r = await marcarComoPortada(prestador.id, foto.id);
+      if (!r.ok) mostrar({ variante: 'error', texto: r.mensaje });
+    } else if (accion === 'mover') {
+      /* "Mover" = UN paso hacia el frente, y es la traducción honesta
+         del arrastre a un teléfono: el drag-and-drop dentro de un
+         ScrollView horizontal pelea con el gesto del propio scroll, y
+         resolverlo bien es una pieza de gestos, no una prop.
+         Un paso por toque es entendible sin explicación y llega a
+         cualquier posición repitiéndolo. La ÚLTIMA no se puede mover
+         más adelante que la primera: si ya está en 0 la acción no se
+         ofrece (ver la Hoja). */
+      const orden = fotos.map((f) => f.id);
+      const tmp = orden[i - 1] as string;
+      orden[i - 1] = orden[i] as string;
+      orden[i] = tmp;
+      const r = await reordenarFotosGaleria(prestador.id, orden);
+      if (!r.ok) mostrar({ variante: 'error', texto: r.mensaje });
+    } else {
+      const r = await borrarFotoGaleria(prestador.id, foto.id);
+      if (!r.ok) {
+        mostrar({ variante: 'error', texto: r.mensaje });
+        return;
+      }
+      // fila primero, bytes después (el orden lo fijó A y su porqué está
+      // en el lib): un huérfano es feo e invisible; una fila sin archivo
+      // se VE, porque la vitrina intenta pintarla.
+      if (r.data.path !== null) await borrarBytesFotoGaleria(r.data.path);
+    }
+    await recargarFotos(prestador.id);
+  }
 
   /* ⑥ S83-C33 — LA APERTURA SE CALCULA UNA VEZ, AL MONTAR.
      El comentario viejo decía "una vez, cuando llegan los datos" y era
@@ -289,6 +388,7 @@ export default function PerfilV2() {
           const hay = [tel, wa, p.email_contacto ?? '', p.sitio_web ?? ''].filter((v) => v.trim().length > 0);
           setAbierta(primeraIncompleta(desc, hay));
         }
+        void recargarFotos(p.id);
         setPantalla('listo');
       })();
       return () => {
@@ -337,7 +437,7 @@ export default function PerfilV2() {
               : // ④ el rebote de formato DIRIGE y dice el porqué (17.4):
                 // sin el motivo, "elegí otro" se lee como capricho.
                 sub.causa === 'formato_no_png'
-                ? 'El logo tiene que ser un PNG. Es el formato que guarda el fondo transparente, para que tu marca no salga dentro de un rectángulo.'
+                ? t('perfilNegocio.logoNoPng')
                 : t('miCuenta.logoErrorSubida'),
       });
       return;
@@ -366,14 +466,14 @@ export default function PerfilV2() {
        de mandar basura al motor. Los tres se miran juntos para que el
        usuario no descubra el segundo error después de arreglar el primero. */
     const malos = [
-      estadoTelefono(telNegocio, paisTel)?.ok === false ? 'el teléfono' : null,
-      estadoTelefono(whatsapp, paisWa)?.ok === false ? 'el WhatsApp' : null,
-      estadoEmail(emailContacto)?.ok === false ? 'el correo' : null,
-      estadoSitio(sitioWeb)?.ok === false ? 'el sitio web' : null,
+      estadoTelefono(telNegocio, paisTel)?.ok === false ? t('perfilNegocio.campoTelefono') : null,
+      estadoTelefono(whatsapp, paisWa)?.ok === false ? t('perfilNegocio.campoWhatsapp') : null,
+      estadoEmail(emailContacto)?.ok === false ? t('perfilNegocio.campoCorreo') : null,
+      estadoSitio(sitioWeb)?.ok === false ? t('perfilNegocio.campoSitio') : null,
     ].filter((x): x is string => x !== null);
     if (malos.length > 0) {
       setAbierta('contacto');
-      mostrar({ texto: `Revisá ${malos.join(' y ')} antes de guardar.`, variante: 'error' });
+      mostrar({ texto: t('perfilNegocio.revisaAntesDeGuardar', { campos: malos.join(t('perfilNegocio.unionY')) }), variante: 'error' });
       return;
     }
     setGuardando(true);
@@ -413,17 +513,17 @@ export default function PerfilV2() {
     if (pais === undefined) return null;
     const e164 = `${pais.pre}${crudo}`;
     if (pais.formato === undefined) {
-      return { ok: true, voz: `Se guarda ${e164}. No verificamos el largo: ${pais.nombre} no declara su formato.` };
+      return { ok: true, voz: t('perfilNegocio.telSinFormato', { e164, pais: pais.nombre }) };
     }
     const ok = new RegExp(pais.formato).test(e164);
-    if (ok) return { ok, voz: `se guarda ${e164}` };
+    if (ok) return { ok, voz: t('perfilNegocio.telSeGuarda', { e164 }) };
     // El error DIRIGE (17.4): dice cuántos dígitos van y cuántos faltan,
     // derivado del formato REAL del país — jamás del de Ecuador.
     const rango = /\\d\{(\d+)(?:,(\d+))?\}/.exec(pais.formato);
     const min = rango?.[1];
     const max = rango?.[2];
-    const cuantos = min === undefined ? 'los dígitos que le corresponden' : max === undefined ? `${min} dígitos` : `${min} o ${max} dígitos`;
-    return { ok, voz: `Un número de ${pais.nombre} lleva ${cuantos} después de ${pais.pre}. Van ${crudo.length}.` };
+    const cuantos = min === undefined ? t('perfilNegocio.telDigitosSinDato') : max === undefined ? t('perfilNegocio.telDigitos', { min }) : t('perfilNegocio.telDigitosRango', { min, max });
+    return { ok, voz: t('perfilNegocio.telLargoMal', { pais: pais.nombre, cuantos, pre: pais.pre, van: crudo.length }) };
   }
 
   /* ── ④ CORREO Y SITIO WEB — validación real (defecto del founder).
@@ -434,10 +534,15 @@ export default function PerfilV2() {
      (adenda del founder). Pedirle el esquema al usuario es pedirle que
      hable como la máquina (17.2). */
   function estadoEmail(v: string): { ok: boolean; voz: string } | null {
-    const t = v.trim();
-    if (t.length === 0) return null;
-    const ok = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(t);
-    return { ok, voz: ok ? 'Las familias te escriben acá.' : 'Un correo lleva un @ y un punto después: hola@tunegocio.ec' };
+    /* ⚠️ La local se llama `crudo` y NO `t`: el hook de traducción TAMBIÉN
+       se llama `t`, y una local con ese nombre lo TAPA dentro de la
+       función. Mientras el copy era literal el choque era invisible;
+       migrarlo al riel lo destapó — y el typecheck lo cazó, que es
+       exactamente para lo que sirve. */
+    const crudo = v.trim();
+    if (crudo.length === 0) return null;
+    const ok = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(crudo);
+    return { ok, voz: ok ? t('perfilNegocio.correoOk') : t('perfilNegocio.correoMal') };
   }
   /** Normaliza el sitio: sin esquema le pone `https://`. `www.` es
    *  legal con o sin él — no lo agregamos ni lo sacamos. */
@@ -447,15 +552,15 @@ export default function PerfilV2() {
     return /^https?:\/\//i.test(t) ? t : `https://${t}`;
   }
   function estadoSitio(v: string): { ok: boolean; voz: string } | null {
-    const t = v.trim();
-    if (t.length === 0) return null;
-    const sinEsquema = t.replace(/^https?:\/\//i, '');
+    const crudo = v.trim();
+    if (crudo.length === 0) return null;
+    const sinEsquema = crudo.replace(/^https?:\/\//i, '');
     // dominio con AL MENOS un punto y un TLD de 2+; el resto de la ruta
     // (que puede o no venir) no se valida: no es asunto nuestro.
     const ok = /^[^\s/?#.]+(\.[^\s/?#.]+)*\.[a-z]{2,}(\/\S*)?$/i.test(sinEsquema);
     return {
       ok,
-      voz: ok ? `Se guarda ${normalizarSitio(t)}` : 'Escribí el dominio, como tunegocio.ec o www.tunegocio.ec',
+      voz: ok ? t('perfilNegocio.sitioSeGuarda', { url: normalizarSitio(crudo) }) : t('perfilNegocio.sitioMal'),
     };
   }
   const vEmail = estadoEmail(emailContacto);
@@ -548,8 +653,8 @@ export default function PerfilV2() {
       {pantalla === 'error' && (
         <View style={{ flex: 1, justifyContent: 'center', padding: spacing[5] }}>
           <EstadoVacio
-            titulo="No pudimos cargar tu perfil"
-            descripcion="Prueba de nuevo en un momento."
+            titulo={t('perfilNegocio.errorTitulo')}
+            descripcion={t('perfilNegocio.errorDetalle')}
             accion={
               <Boton
                 variante="secundario"
@@ -577,12 +682,13 @@ export default function PerfilV2() {
             tipo={vozTipoCiudad}
             vacio={vacio}
             etiquetaLogo={{ agregar: t('miCuenta.logoAgregar'), cambiar: t('miCuenta.logoCambiar') }}
+            rotuloEspejo={t('perfilNegocio.espejoRotulo')}
             /* Anti doble-disparo: mientras una imagen viaja, el tap NO
                abre otra Hoja — y lo DICE en vez de no hacer nada, que se
                leería como que el toque no registró (Ley 13). */
             onEditarLogo={() => {
               if (subiendoLogo) {
-                mostrar({ variante: 'neutro', texto: 'Estamos subiendo tu logo…' });
+                mostrar({ variante: 'neutro', texto: t('perfilNegocio.logoSubiendo') });
                 return;
               }
               setHojaLogo(true);
@@ -593,15 +699,15 @@ export default function PerfilV2() {
             {/* ── LAS CUATRO SECCIONES, en el orden firmado ── */}
             <SeccionDesplegable
               icono="negocio"
-              titulo="Tu portada"
+              titulo={t('perfilNegocio.portadaTitulo')}
               resumen={resumenPortada}
               abierta={abierta === 'portada'}
               onAlternar={() => alternar('portada')}
             >
-              <Texto variante="apoyo">Lo primero que lee una familia. Dos o tres líneas alcanzan.</Texto>
+              <Texto variante="apoyo">{t('perfilNegocio.portadaAyuda')}</Texto>
               <Campo
-                label="Descripción"
-                placeholder="Paseos tranquilos por el norte de Quito, grupos chicos y reporte con fotos."
+                label={t('perfilNegocio.descripcionLabel')}
+                placeholder={t('perfilNegocio.descripcionEjemplo')}
                 value={descripcion}
                 onChangeText={setDescripcion}
                 multilinea={3}
@@ -610,8 +716,21 @@ export default function PerfilV2() {
 
             <Separador />
 
+            {/* ② S84-C6 — EL GLIFO LLEGÓ Y LA ASIMETRÍA TERMINÓ.
+                La nota que vivía acá describía un hueco —"el registry no
+                tiene contacto"— y ese hueco ya no existe: B lo construyó
+                (`6db553e`) después de que se pidiera con su artefacto
+                nombrado. **Se borra en vez de dejarla contando historia
+                vieja**: un comentario que describe algo que ya no pasa
+                miente con más autoridad que el código, porque parece
+                documentación.
+                ⚠️ EL DIBUJO LO FIRMA EL FOUNDER: B entregó DOS
+                candidatos a 21px (`contacto` y `contactoOndas`) y la API
+                es idéntica. Consumo el base; si firma el otro, es UNA
+                palabra acá y nada más. */}
             <SeccionDesplegable
-              titulo="Cómo te contactan"
+              icono="contacto"
+              titulo={t('perfilNegocio.contactoTitulo')}
               resumen={resumenContacto}
               abierta={abierta === 'contacto'}
               onAlternar={() => alternar('contacto')}
@@ -621,7 +740,7 @@ export default function PerfilV2() {
                   prestar uno que miente, ninguno — el glifo se pide con
                   su gate por ícono a 21px (§6b). */}
               <Texto variante="apoyo">
-                Son datos del negocio y los ven las familias. Tu teléfono personal vive en Cuenta.
+                {t('perfilNegocio.contactoAyuda')}
               </Texto>
 
               {/* ③ S83-C34 — LA HIPÓTESIS DEL FOUNDER ERA LA CAUSA, y se
@@ -669,8 +788,8 @@ export default function PerfilV2() {
               />
 
               <Campo
-                label="Correo de contacto"
-                placeholder="hola@paseosandres.ec"
+                label={t('perfilNegocio.correoLabel')}
+                placeholder={t('perfilNegocio.correoEjemplo')}
                 value={emailContacto}
                 onChangeText={setEmailContacto}
                 keyboardType="email-address"
@@ -679,8 +798,8 @@ export default function PerfilV2() {
                 error={vEmail?.ok === false ? vEmail.voz : undefined}
               />
               <Campo
-                label="Sitio web"
-                placeholder="paseosandres.ec"
+                label={t('perfilNegocio.sitioLabel')}
+                placeholder={t('perfilNegocio.sitioEjemplo')}
                 value={sitioWeb}
                 onChangeText={setSitioWeb}
                 autoCapitalize="none"
@@ -700,7 +819,7 @@ export default function PerfilV2() {
                 reales). El resumen de la cabecera sale del dato. */}
             <SeccionDesplegable
               icono="ubicacion"
-              titulo="Dónde atendés"
+              titulo={t('perfilNegocio.dondeTitulo')}
               resumen={
                 prestador === null
                   ? ''
@@ -731,6 +850,202 @@ export default function PerfilV2() {
               <Texto variante="apoyo">{t('perfilNegocio.sedeGuardaAparte')}</Texto>
               {prestador !== null && <SeccionSede sede={leerSede(prestador)} />}
             </SeccionDesplegable>
+
+            <Separador />
+
+            {/* ═══ S84-C8bis · LA VITRINA, EN SU LUGAR ═══
+                La orden original mandaba UI real sin cablear en ruta de
+                verificación; la enmienda del founder (2-ago) reduce ese
+                vehículo a dos casos —pieza indefinida, o riesgo sobre
+                algo que ya funciona— y ninguno aplica acá. La vitrina se
+                construye DONDE VA. Lo que sigue vigente es la otra
+                cláusula: **no se cablea hasta la firma en dispositivo**.
+
+                ⚠️ FRENO EJECUTADO — POR ESO NO ESTÁN LA PORTADA NI LAS
+                FOTOS. La orden lo previó ("si algún bloque no se sostiene
+                sin la tabla de A, dejá su hueco declarado y seguí"), y
+                los dos bloques de imagen no se sostienen: no existe tabla
+                de fotos del prestador (medido: cero tablas) y el pipeline
+                sube UN archivo, sin orden ni borrado.
+                Y acá el costo de ponerlos igual sería REAL, no teórico:
+                la portada va A SANGRE ARRIBA, o sea que reemplazaría el
+                muro del espejo que YA pasó su gate. Cambiar una
+                composición firmada por una invitación vacía permanente
+                deja la pantalla PEOR que hoy hasta que exista el motor —
+                y "peor mientras tanto" no es un precio que se paga sin
+                que el founder lo elija.
+                ☠️ Los dos huecos mueren con la tabla de fotos (modelo
+                medido en Fluvi: **portada = ORDEN MÍNIMO, sin columna de
+                portada** — una sola verdad en vez de dos que se pueden
+                contradecir). Es motor y es de A. ── */}
+
+            {/* ═══ S84-C12 · LAS FOTOS ═══
+                TIRA HORIZONTAL Y NO GRILLA: en un teléfono la grilla
+                obliga a achicar cada foto hasta que ninguna se ve, y la
+                vitrina es justamente el lugar donde la foto TIENE que
+                verse. La tira deja una grande y sugiere que hay más con
+                el corte del borde — el mismo recurso del rail del
+                cliente.
+                LA PORTADA VA PRIMERA Y MARCADA, y la marca no inventa un
+                estado: **el orden ES la portada** (`[0]` de la lista
+                ordenada). Dibuja el hecho que ya existe.
+                ⚠️ LAS FLECHAS DE FLUVI NO VIAJAN: son idioma de mouse.
+                Acá la foto se TOCA y ella ofrece lo que se le puede
+                hacer — y "Hacer portada" NO aparece en la que ya lo es
+                (Ley 23: la puerta no ofrece lo que va a rechazar). */}
+            <View style={{ paddingVertical: spacing[4], gap: spacing[2] }}>
+              <Texto variante="seccion">{t('perfilNegocio.fotosTitulo')}</Texto>
+              <Texto variante="apoyo">{t('perfilNegocio.fotosAyuda')}</Texto>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ gap: spacing[3], paddingRight: spacing[5] }}
+                style={{ marginHorizontal: -spacing[5], paddingHorizontal: spacing[5] }}
+              >
+                {fotos.map((f, i) => (
+                  <Pressable
+                    key={f.id}
+                    onPress={() => setFotoTocada(i)}
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      i === 0 ? t('perfilNegocio.fotoPortadaA11y') : t('perfilNegocio.fotoA11y', { n: i + 1 })
+                    }
+                    style={{
+                      width: 132,
+                      height: 132,
+                      borderRadius: radius.md,
+                      backgroundColor: theme.bg.overlay,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <Image source={{ uri: resolverUrlFotoGaleria(f.url) }} style={{ width: '100%', height: '100%' }} />
+                    {i === 0 && (
+                      <View
+                        style={{
+                          position: 'absolute',
+                          left: spacing[2],
+                          bottom: spacing[2],
+                          paddingHorizontal: spacing[2],
+                          paddingVertical: spacing[1],
+                          borderRadius: radius.sm,
+                          backgroundColor: theme.bg.base,
+                        }}
+                      >
+                        <Texto variante="dato">{t('perfilNegocio.fotoPortadaMarca')}</Texto>
+                      </View>
+                    )}
+                  </Pressable>
+                ))}
+                {/* el "agregar" vive AL FINAL DE LA TIRA y no como botón
+                    aparte: agregar es la continuación de mirar, no otro
+                    trabajo. */}
+                <Pressable
+                  onPress={() => void agregarFoto()}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('perfilNegocio.fotoAgregar')}
+                  style={{
+                    width: 132,
+                    height: 132,
+                    borderRadius: radius.md,
+                    borderWidth: 1.5,
+                    borderColor: theme.border.subtle,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: spacing[2],
+                  }}
+                >
+                  <Texto variante="apoyo">
+                    {subiendoFoto ? t('perfilNegocio.fotoSubiendo') : t('perfilNegocio.fotoAgregar')}
+                  </Texto>
+                </Pressable>
+              </ScrollView>
+            </View>
+
+            <Separador />
+
+            {/* EL CLIP — SU LUGAR, SIN SU MÓDULO.
+                Tiene lugar PROPIO y no entra a la galería de fotos: es
+                UNO y es de otra naturaleza (se reproduce, no se mira).
+                Meterlo entre las fotos lo volvería "una más" y obligaría
+                a explicar cuál de todas se reproduce.
+                VACÍO HONESTO: no se dibuja un play que no reproduce
+                (Ley 23) — `expo-video` es NATIVO y exige build.
+                CRUZA CON D-617: no hay build EAS 1.0.3 y sin ella no se
+                recluta, así que las dos viajan en el MISMO TREN
+                (precedente D-456: el tren se aprovecha, no se arma para
+                un solo pasajero). */}
+            <View style={{ paddingVertical: spacing[4], gap: spacing[2] }}>
+              <Texto variante="seccion">{t('perfilNegocio.clipTitulo')}</Texto>
+              <Texto variante="apoyo">{t('perfilNegocio.clipVacio')}</Texto>
+            </View>
+
+            <Separador />
+
+            {/* ═══ EL CONTRATO DEL ESPEJO — PEDIDO A B, escrito ACÁ ═══
+                Vive en el código y no en el chat A PROPÓSITO: en S82 hubo
+                cuatro bloqueos por acuerdos que vivían en la conversación
+                y nadie podía citar. Esto es lo que voy a montar, y si B
+                construye otra cosa el diff lo va a decir.
+
+                LA PIEZA: `FichaPrestador` en packages/ui — la ficha
+                pública, UNA, con DOS consumidores: el cliente (que hoy
+                pinta prestadores con `Celda` genérica) y este espejo.
+                Ése es el punto entero: **un solo dibujo, una sola
+                verdad**. La copia a mano es lo que ya hizo mentir a esta
+                pantalla dos veces.
+
+                LOS DATOS QUE PUEDE PEDIR — medidos, no supuestos:
+                · `v_prestadores_publicos` expone 18 columnas, y las que
+                  sirven para una ficha son: `nombre_comercial`,
+                  `descripcion`, `foto_url` (el LOGO), `ciudad`,
+                  `sector`, `calificacion_promedio`, `total_resenas`,
+                  `servicios` (jsonb).
+                · `prestador_fotos` (A, S84): `id · prestador_id · url ·
+                  orden · creado_en`. **La portada es MIN(orden)** — no
+                  hay columna de portada y el UNIQUE hace inexpresable
+                  "dos portadas".
+                · ⚠️ NO expone NINGUNO de los cuatro datos de contacto
+                  (D-601). La ficha no puede pintar teléfono, WhatsApp,
+                  correo ni sitio: hoy no son públicos. Atado a D-173.
+                · ⚠️ `tipo` NO se usa: eje muerto D-487.
+
+                LO QUE ESTE ESPEJO NECESITA ADEMÁS, y es lo único que lo
+                diferencia del consumidor cliente: poder rendirse con el
+                prestador PROPIO —que puede estar incompleto— sin que la
+                pieza se rompa. Un vacío en la ficha del cliente no
+                existe (si no está completo, no se lista); acá SÍ, y es
+                justamente lo que el prestador tiene que ver para saber
+                qué le falta. La pieza necesita tolerar nulos y decirlos.
+
+                CUANDO LLEGUE: el botón de abajo deja de avisar y hace
+                `router.push` a una ruta a pantalla completa que monta la
+                pieza. Es una línea acá y ~20 en la ruta nueva. ── */}
+
+            {/* VER CÓMO TE VEN — la PUERTA, no un panel.
+                ⚠️ NO PINTO UNA FICHA PROPIA, y el porqué está medido en
+                esta misma pantalla: una copia a mano de la ficha es
+                exactamente lo que hizo que el espejo mintiera DOS veces
+                (el oficio inventado y la visibilidad clavada en "sí").
+                La ficha la construye B como `FichaPrestador` en
+                packages/ui y acá se MONTA — un solo dibujo, una sola
+                verdad, y el día que cambie cambia en los dos lados.
+                Hasta que su API llegue vive la puerta con su anticipo: el
+                botón dice qué va a pasar y la nota dice que el directorio
+                todavía se arma, que es la verdad medida (D-601 — la
+                vista pública no expone los datos de contacto). */}
+            <View style={{ paddingVertical: spacing[4], gap: spacing[2] }}>
+              <Boton
+                variante="secundario"
+                bloque
+                etiqueta={t('perfilNegocio.verComoTeVen')}
+                /* S84-C11 — LA PUERTA YA ABRE. Era un aviso porque la
+                   ficha no existía; B la construyó (`828b2ae`) y ahora
+                   esto es lo que el contrato de arriba prometía: UNA
+                   línea. La ruta monta la pieza y no dibuja nada. */
+                onPress={() => router.push('/cuenta/como-te-ven')}
+              />
+              <Texto variante="apoyo">{t('perfilNegocio.verComoTeVenNota')}</Texto>
+            </View>
 
             <Separador />
 
@@ -790,11 +1105,10 @@ export default function PerfilV2() {
           ninguna se va a rechazar. Lo que las distingue ahora es si
           VALIDAN, y eso se dice en el subtítulo de las que no — el dato
           honesto ocupa el lugar donde antes vivía el "todavía no". */}
-      <Hoja visible={paisDe !== null} onCerrar={() => setPaisDe(null)} titulo="País del número">
+      <Hoja visible={paisDe !== null} onCerrar={() => setPaisDe(null)} titulo={t('perfilNegocio.paisHojaTitulo')}>
         <View style={{ paddingBottom: spacing[2] }}>
           <Texto variante="apoyo">
-            El indicativo es un dato aparte del número. Podés elegir cualquiera: operar en un país y tener la línea de
-            otro es normal.
+            {t('perfilNegocio.paisHojaAyuda')}
           </Texto>
         </View>
         <HojaScroll>
@@ -803,7 +1117,7 @@ export default function PerfilV2() {
               {i > 0 ? <Separador /> : null}
               <Celda
                 titulo={`${bandera(p.iso)}  ${p.nombre}`}
-                subtitulo={p.formato === undefined ? 'no verificamos el largo' : undefined}
+                subtitulo={p.formato === undefined ? t('perfilNegocio.paisSinFormato') : undefined}
                 metadataMono={p.pre}
                 interactiva
                 accessibilityRole="button"
@@ -812,17 +1126,57 @@ export default function PerfilV2() {
                   else setPaisTel(p.iso);
                   setPaisDe(null);
                 }}
-                fin={p.iso === isoDe ? <Texto variante="dato">elegido</Texto> : undefined}
+                fin={p.iso === isoDe ? <Texto variante="dato">{t('perfilNegocio.paisElegido')}</Texto> : undefined}
               />
             </View>
           ))}
         </HojaScroll>
       </Hoja>
 
+      {/* ═══ S84-C12 · LA HOJA DE LA FOTO ═══
+          Reemplaza a las flechas de Fluvi, que son idioma de mouse. Las
+          acciones son las mismas; lo que cambia es que en un teléfono se
+          TOCA la cosa y ella ofrece lo que se le puede hacer.
+          LAS DOS QUE NO SE OFRECEN EN LA PRIMERA (Ley 23): "hacer
+          portada" —ya lo es— y "mover adelante" —no hay adelante—. */}
+      <Hoja
+        visible={fotoTocada !== null}
+        onCerrar={() => setFotoTocada(null)}
+        titulo={t('perfilNegocio.fotoHojaTitulo')}
+        altura="contenido"
+      >
+        <View style={{ paddingBottom: insets.bottom }}>
+          {fotoTocada !== 0 && (
+            <>
+              <Celda
+                interactiva
+                accessibilityRole="button"
+                titulo={t('perfilNegocio.fotoHacerPortada')}
+                onPress={() => void accionSobreFoto('portada')}
+              />
+              <Separador />
+              <Celda
+                interactiva
+                accessibilityRole="button"
+                titulo={t('perfilNegocio.fotoMover')}
+                onPress={() => void accionSobreFoto('mover')}
+              />
+              <Separador />
+            </>
+          )}
+          <Celda
+            interactiva
+            accessibilityRole="button"
+            titulo={t('perfilNegocio.fotoBorrar')}
+            onPress={() => void accionSobreFoto('borrar')}
+          />
+        </View>
+      </Hoja>
+
       {/* ③ LA HOJA DEL LOGO — cámara y galería PARES (patrón
           SelectorAvatar); "Quitar" SOLO cuando hay logo: la puerta no
           ofrece lo que no existe (Ley 23). */}
-      <Hoja visible={hojaLogo} onCerrar={() => setHojaLogo(false)} titulo="El logo de tu negocio" altura="contenido">
+      <Hoja visible={hojaLogo} onCerrar={() => setHojaLogo(false)} titulo={t('perfilNegocio.logoHojaTitulo')} altura="contenido">
         <View style={{ paddingBottom: insets.bottom, gap: spacing[2] }}>
           {/* ④ ☠️ "TOMAR FOTO" MURIÓ, y es CONSECUENCIA del PNG, no una
               decisión aparte: la cámara entrega JPEG de nacimiento, así
@@ -832,8 +1186,7 @@ export default function PerfilV2() {
               pasa tu diseñador, no algo que se fotografía. */}
           <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[2] }}>
             <Texto variante="apoyo">
-              Tiene que ser un PNG: es el formato que guarda el fondo transparente, para que tu marca no salga dentro de
-              un rectángulo.
+              {t('perfilNegocio.logoHojaAyuda')}
             </Texto>
           </View>
           <Celda

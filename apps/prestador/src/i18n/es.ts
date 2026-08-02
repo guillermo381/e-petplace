@@ -203,6 +203,81 @@ export const prestadorEs = {
      en su propio lote, con su gate es/en. */
   perfilNegocio: {
     // el resumen de contacto: NOMBRA lo cargado, en orden fijo
+    // ── S84-C5: el resto del literal de la vitrina ──
+    errorTitulo: 'No pudimos cargar tu perfil',
+    errorDetalle: 'Prueba de nuevo en un momento.',
+    portadaAyuda: 'Lo primero que lee una familia. Dos o tres líneas alcanzan.',
+    descripcionLabel: 'Descripción',
+    descripcionEjemplo: 'Paseos tranquilos por el norte de Quito, grupos chicos y reporte con fotos.',
+    /* ⚠️ ATADA A D-173 (S84-C7, adjudicación del founder). La frase vieja
+       —'los ven las familias'— prometía PRESENTE sobre un futuro: hoy
+       NINGUNA de las cuatro columnas de contacto está en
+       v_prestadores_publicos (D-601), así que ninguna familia las ve.
+       La nueva habla de lo que el dato ES y de para qué se carga, sin
+       prometer un efecto que todavía no ocurre.
+       ☠️ CUANDO EL FOUNDER FIRME D-173 —y la vitrina publique estos
+       cuatro campos— esta cadena y correoOk vuelven a ser CANDIDATAS de
+       reescritura: ahí sí se va a poder decir que las familias las ven.
+       La nota va atada a D-173 y no suelta, para que la reescritura
+       tenga disparo y no dependa de que alguien se acuerde. */
+    contactoAyuda: 'Son los datos con los que te van a contactar. Cárgalos ahora para que estén listos.',
+    correoLabel: 'Correo de contacto',
+    correoEjemplo: 'hola@paseosandres.ec',
+    // ⚠️ ATADA A D-173 — ver contactoAyuda. 'Guardado.' dice lo único
+    // que hoy es cierto: que el dato quedó.
+    correoOk: 'Guardado.',
+    correoMal: 'Un correo lleva un @ y un punto después: hola@tunegocio.ec',
+    sitioLabel: 'Sitio web',
+    sitioEjemplo: 'paseosandres.ec',
+    sitioSeGuarda: 'Se guarda {{url}}',
+    sitioMal: 'Escribe el dominio, como tunegocio.ec o www.tunegocio.ec',
+    telSeGuarda: 'se guarda {{e164}}',
+    telSinFormato: 'Se guarda {{e164}}. No verificamos el largo: {{pais}} no declara su formato.',
+    telLargoMal: 'Un número de {{pais}} lleva {{cuantos}} después de {{pre}}. Van {{van}}.',
+    telDigitos: '{{min}} dígitos',
+    telDigitosRango: '{{min}} o {{max}} dígitos',
+    telDigitosSinDato: 'los dígitos que le corresponden',
+    campoTelefono: 'el teléfono',
+    campoWhatsapp: 'el WhatsApp',
+    campoCorreo: 'el correo',
+    campoSitio: 'el sitio web',
+    unionY: ' y ',
+    revisaAntesDeGuardar: 'Revisa {{campos}} antes de guardar.',
+    paisHojaTitulo: 'País del número',
+    paisHojaAyuda: 'El indicativo es un dato aparte del número. Puedes elegir cualquiera: operar en un país y tener la línea de otro es normal.',
+    paisSinFormato: 'no verificamos el largo',
+    paisElegido: 'elegido',
+    logoHojaTitulo: 'El logo de tu negocio',
+    logoHojaAyuda: 'Tiene que ser un PNG: es el formato que guarda el fondo transparente, para que tu marca no salga dentro de un rectángulo.',
+    logoNoPng: 'El logo tiene que ser un PNG. Es el formato que guarda el fondo transparente, para que tu marca no salga dentro de un rectángulo.',
+    logoSubiendo: 'Estamos subiendo tu logo…',
+    espejoRotulo: 'Así te ven tus clientes',
+
+    // ── S84-C8bis · la vitrina en su lugar ──
+    espejoPie: 'Así se va a ver tu ficha en la app.',
+
+    // ── S84-C12 · las fotos de la vitrina ──
+    fotosTitulo: 'Fotos de tu espacio',
+    fotosAyuda: 'La primera es tu portada. Tocá una foto para cambiarla de lugar o borrarla.',
+    fotoAgregar: 'Agregar',
+    fotoSubiendo: 'Subiendo…',
+    fotoMuyGrande: 'La foto supera el máximo de 10 MB.',
+    fotoPortadaMarca: 'portada',
+    fotoPortadaA11y: 'Foto de portada',
+    fotoA11y: 'Foto {{n}}',
+    fotoHojaTitulo: 'Esta foto',
+    fotoHacerPortada: 'Hacer portada',
+    fotoMover: 'Mover una posición adelante',
+    fotoBorrar: 'Borrar',
+
+    clipTitulo: 'Tu clip',
+    clipVacio: 'Un video corto de tu espacio. Todavía no está disponible: llega con la próxima versión de la app.',
+    verComoTeVen: 'Ver cómo te ven',
+    verComoTeVenNota: 'Así te va a ver una familia que te encuentra. Todavía estamos armando el directorio.',
+
+    portadaTitulo: 'Tu portada',
+    contactoTitulo: 'Cómo te contactan',
+    dondeTitulo: 'Dónde atiendes',
     contactoTelefono: 'Teléfono',
     contactoWhatsapp: 'WhatsApp',
     contactoCorreo: 'Correo',
