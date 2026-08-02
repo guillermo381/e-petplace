@@ -4,10 +4,26 @@
  * Consumidores: EvidenciaFoto (evidencia), SelectorAvatar (identidad) y
  * —desde S84-B14— el CLIP de la vitrina.
  *
- * EL NOMBRE DEL ARCHIVO QUEDÓ CORTO (dice "Foto" y ya hace video). No se
- * renombra en esta tanda y se declara: el rename toca imports de tres
- * consumidores y no compra nada hoy. Los EXPORTS sí dicen la verdad, que
- * es lo que se lee al usarlos.
+ * EL NOMBRE DEL ARCHIVO QUEDÓ CORTO (dice "Foto" y ya hace video), y el
+ * diferimiento va con su costo MEDIDO y su condición, no con un "después":
+ *
+ * NO ES EL CASO DE `coach`→`ia`, aunque se parezca. Ahí la mentira estaba
+ * en la SUPERFICIE QUE SE CONSUME —cada montaje escribía `nombre="coach"`
+ * en algo que no era el Coach—, así que el costo de no renombrar lo pagaba
+ * cada consumidor. Acá los EXPORTS ya dicen la verdad y las apps importan
+ * del PAQUETE: nadie fuera de packages/ui escribe este nombre para usar la
+ * pieza. La mentira solo se ve abriendo el árbol de archivos.
+ *
+ * COSTO REAL, medido y no estimado (S84): 3 imports + **7 menciones en
+ * prosa**, y TRES de esas viven en `apps/` (carnet · perfil del cliente ·
+ * verificación del prestador), que no es mi territorio. Renombrar sin
+ * arrastrarlas deja prosa apuntando a un archivo que ya no existe — el
+ * defecto exacto que esta casa cura cada vez que aparece.
+ *
+ * ☠️ CONDICIÓN: el rename viaja con la próxima tanda que YA toque esos
+ * archivos de `apps/` por otra razón, para que el objeto y su prosa vayan
+ * en el MISMO acto. No espera a "un tercer consumidor de video": esa
+ * condición no mejora con el tiempo — el archivo solo hace más video.
  *
  * Cero módulos nativos nuevos (L-134): expo-image-picker ya instalado.
  * El recorte cuadrado usa el editor nativo del picker (allowsEditing +
