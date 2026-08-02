@@ -50,6 +50,10 @@ export {
   actualizarPerfilPrestador,
   actualizarExponePersonas,
   resolverUrlLogoNegocio,
+  // S84-A7: la gemela de la galería (fotos Y clip — mismo bucket público).
+  // Vive al lado de la del logo a propósito: dos resolvedores de URL en dos
+  // casas es como nacen las divergencias silenciosas.
+  resolverUrlGaleriaPrestador,
   type InputActualizarPerfilPrestador,
   type MiPrestador,
   type CodigoErrorPrestador,

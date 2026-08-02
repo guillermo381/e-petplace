@@ -407,6 +407,32 @@ export function resolverUrlLogoNegocio(path: string | null): string | null {
   return getClient().storage.from(BUCKET_LOGOS).getPublicUrl(path).data.publicUrl;
 }
 
+// ── S84-A7: LA GEMELA DE LA GALERÍA, al lado de la del logo ────────────────
+// C la tenía en su lib y **pidió bien que viviera acá**: dos resolvedores de
+// URL en dos casas es como nacen las divergencias silenciosas — el día que uno
+// cambie de bucket, de forma de firma o de manejo del null, el otro sigue igual
+// y nadie se entera hasta que una foto sale rota. **Misma casa, misma forma, y
+// una sola cosa que mantener.**
+//
+// `prestador-galeria` nació PÚBLICO (S84-A4) por la misma razón que `avatars`:
+// la vitrina es pública y una URL firmada efímera sería fricción sin secreto
+// que proteger. Por eso esto es síncrono e infalible, igual que su gemela.
+//
+// Sirve para las fotos Y para el clip: **los dos viven en el mismo bucket**, y
+// lo que se persiste en ambos casos es el PATH (CHECK `..._es_path` en la tabla
+// y en la columna). Un resolvedor por tipo de archivo sería la misma
+// duplicación que esto viene a cerrar.
+
+const BUCKET_GALERIA = 'prestador-galeria';
+
+/** URL pública de una foto de galería o del clip, a partir del PATH
+ *  persistido (`prestador_fotos.url` / `prestadores.clip_url`).
+ *  null entra, null sale — la superficie decide su vacío honesto. */
+export function resolverUrlGaleriaPrestador(path: string | null): string | null {
+  if (path === null || path.length === 0) return null;
+  return getClient().storage.from(BUCKET_GALERIA).getPublicUrl(path).data.publicUrl;
+}
+
 /** S78-B — el writer del toggle de vitrina (LETRA_VITRINA A1bis). El
  *  FLIP a encendido lo intercepta el trigger mecánico de A7: mientras
  *  `notificar_reasignacion_cita` no exista, rebota
