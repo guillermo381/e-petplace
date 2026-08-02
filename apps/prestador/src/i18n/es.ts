@@ -305,6 +305,15 @@ export const prestadorEs = {
        LA PRUEBA de que está bien escrita: sirve IGUAL antes y después de
        que exista el botón. Cuando B entregue la captura de video, se
        agrega el control y **esta línea no se toca**. */
+    clipAgregar: 'Agregar clip',
+    clipCambiar: 'Cambiar clip',
+    clipQuitar: 'Quitar',
+    clipCargado: 'Tu clip ya está cargado. Se va a ver en tu ficha con la próxima versión de la app.',
+    clipGuardado: 'Listo — tu clip quedó guardado.',
+    clipNoVideo: 'El archivo no es un video.',
+    clipMuyGrande: 'El clip supera el máximo de 10 MB.',
+    clipGrandeSinMedir: 'El clip pesa más de 10 MB. No pudimos saberlo antes de subirlo — probá con uno más corto.',
+
     clipVacio: 'Un video corto de tu espacio: lo que una foto no alcanza a mostrar.',
     verComoTeVen: 'Ver cómo te ven',
     verComoTeVenNota: 'Así te va a ver una familia que te encuentra. Todavía estamos armando el directorio.',
