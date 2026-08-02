@@ -51,6 +51,7 @@ import { Image, ScrollView, Text, View } from 'react-native'
 import { Boton } from './Boton'
 import { Insignia } from './Insignia'
 import { LogoNegocio } from './LogoNegocio'
+import { MapaZona } from './MapaZona'
 import { Texto } from './Texto'
 import { opacity } from '../tokens/opacity'
 import { radius } from '../tokens/radius'
@@ -94,6 +95,13 @@ export interface FichaPrestadorProps {
    *  privado y de otro dominio, y una vitrina PÚBLICA necesita bucket
    *  propio con su techo. Esa decisión no es de esta pieza. */
   clipPoster?: string | null
+  /** LA ZONA (S84-B16, motor D-624): centro DESPLAZADO dentro del radio y
+   *  estable por id — **jamás la coordenada exacta**. Las tres van juntas:
+   *  si falta cualquiera, el bloque NO SE MONTA, misma regla que el resto
+   *  de la pieza. Si alguien ofrece la sede exacta por acá, es DEFECTO. */
+  zonaLat?: number | null
+  zonaLon?: number | null
+  zonaRadioM?: number | null
   /** `prestadores.ciudad`. */
   ciudad?: string | null
   /** EL OFICIO — hoy NADIE lo pasa, y la línea igual lo acepta.
@@ -128,6 +136,9 @@ export function FichaPrestador({
   logoUrl,
   portadas,
   clipPoster,
+  zonaLat,
+  zonaLon,
+  zonaRadioM,
   ciudad,
   oficio,
   historia,
@@ -337,6 +348,10 @@ export function FichaPrestador({
         {linea !== '' ? <Texto variante="apoyo">{linea}</Texto> : null}
         {historia !== null && historia !== undefined && historia !== '' ? (
           <Texto variante="cuerpo">{historia}</Texto>
+        ) : null}
+
+        {zonaLat !== null && zonaLat !== undefined && zonaLon !== null && zonaLon !== undefined && zonaRadioM !== null && zonaRadioM !== undefined ? (
+          <MapaZona lat={zonaLat} lon={zonaLon} radioM={zonaRadioM} />
         ) : null}
 
         {servicios !== undefined && servicios.length > 0 ? (

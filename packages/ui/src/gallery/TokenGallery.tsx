@@ -22,6 +22,7 @@ import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
 import { Campo, PieDeCampo } from '../components/Campo'
 import { FichaPrestador } from '../components/FichaPrestador'
+import { MapaZona } from '../components/MapaZona'
 import { Celda } from '../components/Celda'
 import { Separador } from '../components/Separador'
 import { Insignia } from '../components/Insignia'
@@ -2855,9 +2856,18 @@ function GaleriaInterna() {
                 ciudad="Quito"
                 historia="Paseos tranquilos por el norte, grupos chicos y reporte con fotos."
                 servicios={['Paseo', 'Guardería']}
+                zonaLat={-0.1807}
+                zonaLon={-78.4678}
+                zonaRadioM={500}
                 pie={<Texto variante="apoyo">así se va a ver tu ficha en la app</Texto>}
               />
             </View>
+            <Texto variante="apoyo">
+              LA ZONA (S84-B16): círculo de 500 m, SIN PIN y SIN interacción. El centro viene DESPLAZADO
+              del motor (D-624) — un pin diría "acá está", que es lo único que la zona no afirma. En web
+              se ve el placeholder; el círculo se ve en el teléfono.
+            </Texto>
+            <MapaZona lat={-0.1807} lon={-78.4678} radioM={500} />
             <Texto variante="apoyo">
               SIN FOTOS · con handler = EL ESPEJO: una invitación con su CTA, jamás cuatro tarjetas de
               ausencia.
