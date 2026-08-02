@@ -295,7 +295,17 @@ export const prestadorEs = {
     fotoBorrar: 'Borrar',
 
     clipTitulo: 'Tu clip',
-    clipVacio: 'Un video corto de tu espacio. Todavía no está disponible: llega con la próxima versión de la app.',
+    /* ⚠️ ESTA CADENA NO DECLARA ESTADO, Y ES A PROPÓSITO (S84-C17).
+       La anterior decía 'todavía no está disponible: llega con la próxima
+       versión' — nació VERDADERA (no existían ni la columna ni el lib) y
+       se volvió falsa sin que nadie la tocara, en cuanto A entregó
+       `subirClipVitrina`. Además desalentaba: le decía al prestador que
+       no se moleste.
+       Ahora dice QUÉ ES y PARA QUÉ SIRVE — dos cosas que no envejecen.
+       LA PRUEBA de que está bien escrita: sirve IGUAL antes y después de
+       que exista el botón. Cuando B entregue la captura de video, se
+       agrega el control y **esta línea no se toca**. */
+    clipVacio: 'Un video corto de tu espacio: lo que una foto no alcanza a mostrar.',
     verComoTeVen: 'Ver cómo te ven',
     verComoTeVenNota: 'Así te va a ver una familia que te encuentra. Todavía estamos armando el directorio.',
 

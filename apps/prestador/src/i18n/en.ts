@@ -247,7 +247,7 @@ export const prestadorEn = {
     fotoBorrar: 'Delete',
 
     clipTitulo: 'Your clip',
-    clipVacio: "A short video of your place. Not available yet: it arrives with the next version of the app.",
+    clipVacio: 'A short video of your place: what a photo cannot show.',
     verComoTeVen: 'See how they see you',
     verComoTeVenNota: "This is how a family who finds you will see you. We're still building the directory.",
 
