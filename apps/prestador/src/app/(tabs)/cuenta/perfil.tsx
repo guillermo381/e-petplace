@@ -528,7 +528,7 @@ export default function PerfilV2() {
             {/* ── LAS CUATRO SECCIONES, en el orden firmado ── */}
             <SeccionDesplegable
               icono="negocio"
-              titulo="Tu portada"
+              titulo={t('perfilNegocio.portadaTitulo')}
               resumen={resumenPortada}
               abierta={abierta === 'portada'}
               onAlternar={() => alternar('portada')}
@@ -545,8 +545,23 @@ export default function PerfilV2() {
 
             <Separador />
 
+            {/* ② S84-C4 — ESTA SECCIÓN SIGUE SIN GLIFO, y ahora con
+                su medición al lado para que nadie la "iguale" prestando
+                uno que miente. El registry tiene 33 glifos y NINGUNO
+                nombra contacto/teléfono/correo/sitio (medido hoy). Los
+                vecinos más cercanos dicen otra cosa: "compartir" es
+                compartir, "ayuda" es soporte, "nombre" es identidad.
+                Ley 12 pide glifo porque los tres headers VARÍAN entre sí
+                — y por eso la salida NO es quitarle el glifo a los otros
+                dos: igualar hacia abajo cumple la simetría y rompe
+                justo lo que la ley busca (que el ojo separe secciones
+                que significan cosas distintas).
+                ⇒ SE IGUALA HACIA ARRIBA, y el artefacto que lo abre
+                tiene nombre (L-171): un glifo "contacto" de B con su
+                gate POR ÍCONO a 21px (§6b). Hasta entonces la asimetría
+                es el estado honesto, no un olvido. */}
             <SeccionDesplegable
-              titulo="Cómo te contactan"
+              titulo={t('perfilNegocio.contactoTitulo')}
               resumen={resumenContacto}
               abierta={abierta === 'contacto'}
               onAlternar={() => alternar('contacto')}
@@ -635,7 +650,7 @@ export default function PerfilV2() {
                 reales). El resumen de la cabecera sale del dato. */}
             <SeccionDesplegable
               icono="ubicacion"
-              titulo="Dónde atendés"
+              titulo={t('perfilNegocio.dondeTitulo')}
               resumen={
                 prestador === null
                   ? ''

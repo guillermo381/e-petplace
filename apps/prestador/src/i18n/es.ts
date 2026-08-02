@@ -203,6 +203,9 @@ export const prestadorEs = {
      en su propio lote, con su gate es/en. */
   perfilNegocio: {
     // el resumen de contacto: NOMBRA lo cargado, en orden fijo
+    portadaTitulo: 'Tu portada',
+    contactoTitulo: 'Cómo te contactan',
+    dondeTitulo: 'Dónde atiendes',
     contactoTelefono: 'Teléfono',
     contactoWhatsapp: 'WhatsApp',
     contactoCorreo: 'Correo',

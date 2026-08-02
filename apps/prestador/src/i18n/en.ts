@@ -167,6 +167,9 @@ export const prestadorEn = {
   // `Espejo<D>` del riel EXIGE la paridad: una key faltante rompe el
   // typecheck, no se descubre en pantalla).
   perfilNegocio: {
+    portadaTitulo: 'Your storefront',
+    contactoTitulo: 'How they reach you',
+    dondeTitulo: 'Where you work',
     contactoTelefono: 'Phone',
     contactoWhatsapp: 'WhatsApp',
     contactoCorreo: 'Email',
