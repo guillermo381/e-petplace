@@ -1058,6 +1058,12 @@ function EjemploSetBPrima() {
     // S82-B r10: LA VACUNA con su glifo propio (la fila del perfil
     // pintaba `veterinaria` — sustitución genérica que Ley 12 prohíbe).
     'vacuna', 'bitacora',
+    // S84-B4: CONTACTO en DOS CANDIDATOS (precedente prime/primeCorona —
+    // el founder elige a 21px y el perdedor MUERE en el mismo acto).
+    // Van PEGADOS a `ayuda` en esta fila a propósito: el riesgo medido
+    // del candidato B es que a 21px se lea como el círculo con rayos, y
+    // un riesgo declarado se mira, no se describe.
+    'contacto', 'contactoOndas',
   ]
   return (
     <View style={{ gap: spacing[4] }}>
