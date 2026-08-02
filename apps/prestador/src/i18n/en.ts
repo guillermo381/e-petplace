@@ -206,11 +206,12 @@ export const prestadorEn = {
     espejoRotulo: 'This is how your clients see you',
 
     // ── S84-C8bis · Espejo de es.ts ──
+    espejoPie: 'This is how your card will look in the app.',
+
     clipTitulo: 'Your clip',
     clipVacio: "A short video of your place. Not available yet: it arrives with the next version of the app.",
     verComoTeVen: 'See how they see you',
     verComoTeVenNota: "This is how a family who finds you will see you. We're still building the directory.",
-    verComoTeVenAun: "It's not ready yet",
 
     portadaTitulo: 'Your storefront',
     contactoTitulo: 'How they reach you',

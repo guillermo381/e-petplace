@@ -732,6 +732,46 @@ export default function PerfilV2() {
 
             <Separador />
 
+            {/* ═══ EL CONTRATO DEL ESPEJO — PEDIDO A B, escrito ACÁ ═══
+                Vive en el código y no en el chat A PROPÓSITO: en S82 hubo
+                cuatro bloqueos por acuerdos que vivían en la conversación
+                y nadie podía citar. Esto es lo que voy a montar, y si B
+                construye otra cosa el diff lo va a decir.
+
+                LA PIEZA: `FichaPrestador` en packages/ui — la ficha
+                pública, UNA, con DOS consumidores: el cliente (que hoy
+                pinta prestadores con `Celda` genérica) y este espejo.
+                Ése es el punto entero: **un solo dibujo, una sola
+                verdad**. La copia a mano es lo que ya hizo mentir a esta
+                pantalla dos veces.
+
+                LOS DATOS QUE PUEDE PEDIR — medidos, no supuestos:
+                · `v_prestadores_publicos` expone 18 columnas, y las que
+                  sirven para una ficha son: `nombre_comercial`,
+                  `descripcion`, `foto_url` (el LOGO), `ciudad`,
+                  `sector`, `calificacion_promedio`, `total_resenas`,
+                  `servicios` (jsonb).
+                · `prestador_fotos` (A, S84): `id · prestador_id · url ·
+                  orden · creado_en`. **La portada es MIN(orden)** — no
+                  hay columna de portada y el UNIQUE hace inexpresable
+                  "dos portadas".
+                · ⚠️ NO expone NINGUNO de los cuatro datos de contacto
+                  (D-601). La ficha no puede pintar teléfono, WhatsApp,
+                  correo ni sitio: hoy no son públicos. Atado a D-173.
+                · ⚠️ `tipo` NO se usa: eje muerto D-487.
+
+                LO QUE ESTE ESPEJO NECESITA ADEMÁS, y es lo único que lo
+                diferencia del consumidor cliente: poder rendirse con el
+                prestador PROPIO —que puede estar incompleto— sin que la
+                pieza se rompa. Un vacío en la ficha del cliente no
+                existe (si no está completo, no se lista); acá SÍ, y es
+                justamente lo que el prestador tiene que ver para saber
+                qué le falta. La pieza necesita tolerar nulos y decirlos.
+
+                CUANDO LLEGUE: el botón de abajo deja de avisar y hace
+                `router.push` a una ruta a pantalla completa que monta la
+                pieza. Es una línea acá y ~20 en la ruta nueva. ── */}
+
             {/* VER CÓMO TE VEN — la PUERTA, no un panel.
                 ⚠️ NO PINTO UNA FICHA PROPIA, y el porqué está medido en
                 esta misma pantalla: una copia a mano de la ficha es
@@ -749,7 +789,11 @@ export default function PerfilV2() {
                 variante="secundario"
                 bloque
                 etiqueta={t('perfilNegocio.verComoTeVen')}
-                onPress={() => mostrar({ texto: t('perfilNegocio.verComoTeVenAun'), variante: 'neutro' })}
+                /* S84-C11 — LA PUERTA YA ABRE. Era un aviso porque la
+                   ficha no existía; B la construyó (`828b2ae`) y ahora
+                   esto es lo que el contrato de arriba prometía: UNA
+                   línea. La ruta monta la pieza y no dibuja nada. */
+                onPress={() => router.push('/cuenta/como-te-ven')}
               />
               <Texto variante="apoyo">{t('perfilNegocio.verComoTeVenNota')}</Texto>
             </View>
