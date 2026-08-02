@@ -265,6 +265,8 @@ export const prestadorEs = {
     iaIntroMejorar: 'Contame dos cosas y mejoro lo que ya escribiste. No se cambia nada hasta que vos digas.',
     iaPorQue: '¿Por qué haces esto?',
     iaQueSepan: '¿Qué quieres que sepan de tu lugar?',
+    iaExperiencia: 'Cuéntanos sobre tu experiencia',
+
     iaComponer: 'Escribir el borrador',
     iaLoTuyo: 'lo que escribiste',
     iaPropuesta: 'la propuesta',

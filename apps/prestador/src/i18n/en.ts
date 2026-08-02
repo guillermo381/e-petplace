@@ -217,6 +217,8 @@ export const prestadorEn = {
     iaIntroMejorar: "Tell me two things and I'll improve what you wrote. Nothing changes until you say so.",
     iaPorQue: 'Why do you do this?',
     iaQueSepan: 'What do you want people to know about your place?',
+    iaExperiencia: 'Tell us about your experience',
+
     iaComponer: 'Write the draft',
     iaLoTuyo: 'what you wrote',
     iaPropuesta: 'the draft',
