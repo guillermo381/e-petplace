@@ -193,6 +193,36 @@ export const prestadorEs = {
     diaBloqueado: 'De vacaciones',
   },
   // La tab Cuenta del prestador (letra P17, S57-B) · LOTE S57, GATE PENDIENTE.
+  /* ⑥ S84-C3 — LA VITRINA DEL NEGOCIO. Namespace NUEVO, y nace con las
+     cadenas que ESTE lote tocó — ni una más: migrar el resto del copy
+     de la pantalla en el mismo commit volvería ilegible el diff entre
+     "lo que cambió de significado" y "lo que solo cambió de casa".
+     ⚠️ DEUDA DECLARADA Y ACOTADA: el resto del literal de
+     `cuenta/perfil` (los labels de portada, los rótulos de sección y
+     los textos de las dos Hojas) SIGUE fuera del riel. Entra completo
+     en su propio lote, con su gate es/en. */
+  perfilNegocio: {
+    // el resumen de contacto: NOMBRA lo cargado, en orden fijo
+    contactoTelefono: 'Teléfono',
+    contactoWhatsapp: 'WhatsApp',
+    contactoCorreo: 'Correo',
+    contactoSitio: 'Sitio',
+    contactoNinguno: 'Sin datos de contacto',
+    // el vacío: habla de lo que el dato ES, no de un efecto que hoy no
+    // ocurre — `v_prestadores_publicos` todavía no expone ninguno (D-601)
+    contactoVacio: 'Todavía no cargaste ninguna forma de contacto.',
+    portadaCon: 'Con descripción',
+    portadaSin: 'Sin descripción',
+    telefonoLabel: 'Teléfono del negocio',
+    // sin prefijo: el indicativo ya está a la izquierda
+    telefonoEjemplo: '99 123 4567',
+    whatsappLabel: 'WhatsApp',
+    whatsappEjemplo: '99 900 0333',
+    sedeGuardaAparte: 'Esta sección se guarda sola: cada cambio queda al confirmarlo acá abajo.',
+    seguridadTitulo: 'Seguridad',
+    seguridadDetalle: 'Tu nombre, tu correo de ingreso y tu contraseña. No los ven las familias.',
+  },
+
   // Voces calcadas de la Cuenta v1 del cliente (aprobadas S55/S56);
   // eliminarVoz con la verdad P17 §4 del lado del negocio.
   miCuenta: {

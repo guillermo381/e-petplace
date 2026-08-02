@@ -78,7 +78,7 @@ import { useTraduccion } from '@/i18n';
 import { quitarLogoNegocio, subirLogoNegocio } from '@/lib/subir-logo';
 import { SeccionSede } from '@/components/seccion-sede';
 import { leerSede } from '@/lib/sede';
-import { EspejoNegocio, SeccionDesplegable, SelectorPais } from '@/components/perfil-piezas';
+import { ControlTelefono, EspejoNegocio, SeccionDesplegable } from '@/components/perfil-piezas';
 import { useBarraEstadoClara } from '@/components/techo-oficio';
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -149,9 +149,15 @@ function normalizarTelefono(v: string): string {
  *  cuando le falta el dato que la hace servir para algo. `donde` no
  *  entra: su dirección y su radio existen. Si NINGUNA está incompleta
  *  devuelve null — y entonces no se abre ninguna. */
-function primeraIncompleta(descripcion: string, tel: string, wa: string): Seccion | null {
+function primeraIncompleta(descripcion: string, contacto: string[]): Seccion | null {
   if (descripcion.trim().length === 0) return 'portada';
-  if (tel.trim().length === 0 || wa.trim().length === 0) return 'contacto';
+  /* ⑤ b5 S84-C3 — LOS CUATRO, y con el criterio corregido: antes exigía
+     teléfono Y WhatsApp, así que un negocio con los cuatro campos menos
+     el WhatsApp nacía con la sección abierta como si le faltara todo.
+     La regla que ya rige es "incompleta = le falta el dato que la hace
+     servir para algo", y para CONTACTO ese dato es **cualquiera de los
+     cuatro**: con uno solo, una familia ya tiene por dónde. */
+  if (contacto.length === 0) return 'contacto';
   return null;
 }
 
@@ -218,7 +224,8 @@ export default function PerfilV2() {
         // refrescan el contenido y NO tocan lo que el dedo dejó abierto.
         if (!yaAbrio.current) {
           yaAbrio.current = true;
-          setAbierta(primeraIncompleta(desc, tel, wa));
+          const hay = [tel, wa, p.email_contacto ?? '', p.sitio_web ?? ''].filter((v) => v.trim().length > 0);
+          setAbierta(primeraIncompleta(desc, hay));
         }
         setPantalla('listo');
       })();
@@ -391,22 +398,60 @@ export default function PerfilV2() {
   const vTel = estadoTelefono(telNegocio, paisTel);
   const vWa = estadoTelefono(whatsapp, paisWa);
 
-  /* ── los resúmenes: la densidad de herramienta ── */
-  const hayTel = telNegocio.trim().length > 0;
-  const hayWa = whatsapp.trim().length > 0;
-  const resumenContacto =
-    hayTel && hayWa ? 'Teléfono y WhatsApp' : hayTel ? 'Solo teléfono' : hayWa ? 'Solo WhatsApp' : 'Sin contacto';
-  const resumenPortada = descripcion.trim().length > 0 ? 'Con descripción' : 'Sin descripción';
+  /* ── ④ S84-C3 — EL RESUMEN Y EL VACÍO CUENTAN LOS CUATRO CAMPOS ──
+     Antes miraban DOS (teléfono y WhatsApp) y hablaban de cuatro: con
+     correo y sitio cargados la sección igual decía "Sin contacto", y la
+     línea del vacío llegaba a contradecirse sola —"no tiene cómo
+     escribirte… tu WhatsApp sí está"—, que es decir que no hay camino y
+     nombrar el camino en la misma frase.
 
-  /* ── el vacío honesto: UNA línea con la consecuencia ── */
-  const vacio =
-    hayTel && hayWa
-      ? null
-      : !hayTel && !hayWa
-        ? 'Una familia que te encuentra hoy no tiene cómo escribirte.'
-        : hayTel
-          ? 'Las familias pueden llamarte. Te falta el WhatsApp.'
-          : 'Una familia que te encuentra hoy no tiene cómo escribirte: no cargaste teléfono, correo ni sitio. Tu WhatsApp sí está.';
+     EL RESUMEN NOMBRA LO QUE HAY, en orden fijo, y no cuenta ni enumera
+     lo que falta: "Teléfono · Correo" dice más que "2 de 4" y mucho más
+     que "faltan WhatsApp y sitio" — el resumen de una sección cerrada
+     describe el ESTADO, no la tarea (§15b.3). El orden es fijo a
+     propósito: si se ordenara por lo cargado, la misma sección cambiaría
+     de forma al completarse y el ojo perdería su ancla. */
+  const cargados = [
+    { hay: telNegocio.trim().length > 0, voz: t('perfilNegocio.contactoTelefono') },
+    { hay: whatsapp.trim().length > 0, voz: t('perfilNegocio.contactoWhatsapp') },
+    { hay: emailContacto.trim().length > 0, voz: t('perfilNegocio.contactoCorreo') },
+    { hay: sitioWeb.trim().length > 0, voz: t('perfilNegocio.contactoSitio') },
+  ];
+  const nombresCargados = cargados.filter((c) => c.hay).map((c) => c.voz);
+  const resumenContacto =
+    nombresCargados.length === 0 ? t('perfilNegocio.contactoNinguno') : nombresCargados.join(' · ');
+  const resumenPortada =
+    descripcion.trim().length > 0 ? t('perfilNegocio.portadaCon') : t('perfilNegocio.portadaSin');
+
+  /* ── el vacío honesto: UNA línea, y solo cuando NO hay NINGUNO ──
+     ⚠️ EL COPY NO PROMETE QUE LAS FAMILIAS YA LO VEN, y eso lo decidió
+     la medición (D-601): `v_prestadores_publicos` expone 18 columnas y
+     NINGUNA de las cuatro está entre ellas. Decir "así te encuentran"
+     sería vender una vitrina que todavía no publica estos datos. La
+     línea habla de lo que el dato ES —tu forma de contacto— y no de un
+     efecto que hoy no ocurre. */
+  const vacio = nombresCargados.length === 0 ? t('perfilNegocio.contactoVacio') : null;
+
+  /* ── ① S84-C3 — LA VOZ DEL ESPEJO, con un FRENO declarado ──
+     La orden pedía "tipo y ciudad desde MiPrestador". La ciudad entra;
+     **el OFICIO no, y lo decide la fuente por encima de la directiva**:
+     `prestadores.tipo` es el EJE MUERTO de D-487, cuya letra dice
+     textual *"ninguna lógica nueva debe leerla"*. Pintarlo acá sería
+     estrenar un lector nuevo sobre una columna que el canon ya condenó
+     — y encima con riesgo real de mentir: sus dos valores vivos
+     (`paseador` ×4, `clinica_veterinaria` ×3) NO se actualizan con los
+     servicios que el negocio ofrece hoy, así que un paseador que agregó
+     grooming seguiría anunciándose por su fila legacy.
+     El oficio de verdad se compone de los SERVICIOS OFRECIDOS, que es
+     otra lectura y otra decisión de producto (un negocio puede tener
+     varios). **Hasta que tenga fuente viva, la mitad del oficio no se
+     pinta** — que es exactamente la regla que la propia orden fijó para
+     el dato faltante.
+     ☠️ MUERTE: cuando exista el lector de oficios ofrecidos, esta voz
+     pasa a `oficio · ciudad` sin tocar el espejo (ya acepta la línea
+     compuesta). */
+  const ciudad = (prestador?.ciudad ?? '').trim();
+  const vozTipoCiudad = ciudad.length === 0 ? null : ciudad.charAt(0).toUpperCase() + ciudad.slice(1);
 
   const alternar = (s: Seccion) => setAbierta((a) => (a === s ? null : s));
   const prefijoDe = (iso: string) => PAISES.find((p) => p.iso === iso)?.pre ?? '';
@@ -462,11 +507,11 @@ export default function PerfilV2() {
               eran su único consumidor, y un listener de scroll que no
               alimenta nada es costo por turno de frame sin dueño. */}
           <EspejoNegocio
-            nombre={prestador?.nombre_comercial ?? ""}
+            nombre={prestador?.nombre_comercial ?? ''}
             logoUrl={resolverUrlLogoNegocio(logoPath)}
-            tipo="paseador · quito"
-            visible
+            tipo={vozTipoCiudad}
             vacio={vacio}
+            etiquetaLogo={{ agregar: t('miCuenta.logoAgregar'), cambiar: t('miCuenta.logoCambiar') }}
             /* Anti doble-disparo: mientras una imagen viaja, el tap NO
                abre otra Hoja — y lo DICE en vez de no hacer nada, que se
                leería como que el toque no registró (Ley 13). */
@@ -531,53 +576,32 @@ export default function PerfilV2() {
                   igual anatomía —label + caja— y sus pies coinciden solos.
                   Es la misma regla del glifo (Ley 12): lo que describe al
                   grupo no cuelga de uno de sus miembros. */}
-              <View style={{ gap: spacing[1] }}>
-                <View style={{ flexDirection: 'row', gap: spacing[2], alignItems: 'flex-end' }}>
-                  <SelectorPais
-                    bandera={bandera(paisTel)}
-                    prefijo={prefijoDe(paisTel)}
-                    onPress={() => setPaisDe('telNegocio')}
-                  />
-                  <View style={{ flex: 1 }}>
-                    <Campo
-                      label="Teléfono del negocio"
-                      placeholder="99 123 4567"
-                      value={telNegocio}
-                      onChangeText={setTelNegocio}
-                      keyboardType="phone-pad"
-                    />
-                  </View>
-                </View>
-                {vTel !== null && (
-                  <Texto variante="apoyo" color={vTel.ok ? undefined : 'danger'}>
-                    {vTel.voz}
-                  </Texto>
-                )}
-              </View>
+              {/* ③ LOS DOS CONSUMIDORES de la pieza local: la anatomía
+                  vive UNA vez y acá solo se dice qué dato lleva cada
+                  una. El pie es del CONTROL y es uno por par. */}
+              <ControlTelefono
+                label={t('perfilNegocio.telefonoLabel')}
+                placeholder={t('perfilNegocio.telefonoEjemplo')}
+                valor={telNegocio}
+                onCambio={setTelNegocio}
+                bandera={bandera(paisTel)}
+                prefijo={prefijoDe(paisTel)}
+                onElegirPais={() => setPaisDe('telNegocio')}
+                ayuda={vTel?.ok === true ? vTel.voz : undefined}
+                error={vTel?.ok === false ? vTel.voz : undefined}
+              />
 
-              <View style={{ gap: spacing[1] }}>
-                <View style={{ flexDirection: 'row', gap: spacing[2], alignItems: 'flex-end' }}>
-                  <SelectorPais
-                    bandera={bandera(paisWa)}
-                    prefijo={prefijoDe(paisWa)}
-                    onPress={() => setPaisDe('whatsapp')}
-                  />
-                  <View style={{ flex: 1 }}>
-                    <Campo
-                      label="WhatsApp"
-                      placeholder="99 900 0333"
-                      value={whatsapp}
-                      onChangeText={setWhatsapp}
-                      keyboardType="phone-pad"
-                    />
-                  </View>
-                </View>
-                {vWa !== null && (
-                  <Texto variante="apoyo" color={vWa.ok ? undefined : 'danger'}>
-                    {vWa.voz}
-                  </Texto>
-                )}
-              </View>
+              <ControlTelefono
+                label={t('perfilNegocio.whatsappLabel')}
+                placeholder={t('perfilNegocio.whatsappEjemplo')}
+                valor={whatsapp}
+                onCambio={setWhatsapp}
+                bandera={bandera(paisWa)}
+                prefijo={prefijoDe(paisWa)}
+                onElegirPais={() => setPaisDe('whatsapp')}
+                ayuda={vWa?.ok === true ? vWa.voz : undefined}
+                error={vWa?.ok === false ? vWa.voz : undefined}
+              />
 
               <Campo
                 label="Correo de contacto"
@@ -622,6 +646,24 @@ export default function PerfilV2() {
               abierta={abierta === 'donde'}
               onAlternar={() => alternar('donde')}
             >
+              {/* ⑦ S84-C3 — LOS DOS GUARDAR, DICHOS. Medido el costo de
+                  unificar y NO es barato (el número, en el reporte):
+                  `SeccionSede` no tiene UNA escritura sino DOS
+                  —`guardarSede({tipo:'direccion'})` con su botón y
+                  `{tipo:'radio'}` que guarda SOLO al mover el control—,
+                  y unificarlas exige subir cinco estados de un
+                  componente de 246 líneas (incluidas las coordenadas que
+                  trae Places) o ensanchar el wrapper, que es de A.
+                  Peor: el Guardar de arriba pasaría a hacer DOS
+                  escrituras que pueden fallar por separado — una
+                  dirección guardada con un radio que no, sin forma de
+                  decirlo en un solo aviso. **Entre dos guardados
+                  honestos y uno que puede mentir a medias, gana la
+                  honestidad** — y lo que se cura hoy es que el usuario
+                  no tenga que descubrirlo: la sección DICE que se guarda
+                  sola. Ley 17.4/23: la promesa se declara, no se
+                  adivina. */}
+              <Texto variante="apoyo">{t('perfilNegocio.sedeGuardaAparte')}</Texto>
               {prestador !== null && <SeccionSede sede={leerSede(prestador)} />}
             </SeccionDesplegable>
 
@@ -642,15 +684,25 @@ export default function PerfilV2() {
                 seccionado de Cuenta en S84, donde este bloque va a tener
                 vecinos (plata, preferencias) y el rótulo se elige contra
                 ellos, no solo. */}
+            {/* ⑤ S84-C3 — "SEGURIDAD", y su condición de muerte escrita.
+                El rótulo anterior ("Nombre y acceso") describía el
+                contenido de la pantalla; éste describe su LUGAR EN LA
+                CASA — y esa es la diferencia que importa ahora que el
+                Perfil pasa a ser LA VITRINA: todo lo demás de esta
+                pantalla es lo que las familias ven, y esto es lo único
+                que no lo es. El subtítulo nombra las tres cosas que hay
+                adentro para que el rótulo no tenga que hacer dos
+                trabajos (17.6).
+                ☠️ MUERTE: esta celda **se retira de la vitrina** cuando
+                exista `Cuenta → Seguridad` como sección propia (el
+                seccionado de S84). No es una pantalla que muere: es una
+                PUERTA prestada — lo personal está de paso acá porque su
+                casa todavía no se construyó, y una vitrina que aloja lo
+                que nadie ve es una contradicción con fecha. */}
             <CeldaNavegacion
               icono="cuenta"
-              titulo="Nombre y acceso"
-              /* ⑤ EL DETALLE, CORREGIDO (S83-C33): decía "tu nombre, tu
-                 teléfono y tu correo" mientras la sección de arriba dice
-                 "tu teléfono personal vive en Cuenta". Dos frases que no
-                 podían ser ciertas a la vez, y el teléfono se fue de allá
-                 — el detalle ahora nombra lo que hay: nombre y correo. */
-              detalle="Tu nombre y tu correo de ingreso. No los ven las familias."
+              titulo={t('perfilNegocio.seguridadTitulo')}
+              detalle={t('perfilNegocio.seguridadDetalle')}
               registro="aa"
               onPress={() => router.push('/cuenta/identidad')}
             />
