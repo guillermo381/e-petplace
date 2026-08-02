@@ -20,7 +20,7 @@ import { MarcaDeAgua } from '../brand/MarcaDeAgua'
 import { Atmosfera } from '../brand/Atmosfera'
 import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
-import { Campo } from '../components/Campo'
+import { Campo, PieDeCampo } from '../components/Campo'
 import { Celda } from '../components/Celda'
 import { Separador } from '../components/Separador'
 import { Insignia } from '../components/Insignia'
@@ -2704,6 +2704,58 @@ function GaleriaInterna() {
               iconoIzq={<View style={{ width: 16, height: 16, borderRadius: radius.full, borderWidth: 2, borderColor: theme.text.tertiary }} />}
             />
             <Campo label="Notas (multilínea, alto fijo)" placeholder="Observaciones del paseo…" multilinea={3} />
+          </View>
+
+          {/* S83-B1 — EL PIE, Y POR QUÉ UN CONTROL COMPUESTO LO SUBE UN NIVEL.
+              El pie de altura reservada es la promesa rectora de Campo y NO se
+              retira. Lo que se ve acá es su costo cuando el control tiene más
+              de una pieza: el hermano se corre 24.8 px (13×1.6 + 4) porque
+              `flex-end` alinea por el BORDE DE ABAJO, y abajo del Campo está
+              el pie. Los dos casos, con la misma fila y el mismo dato. */}
+          <View style={{ marginTop: spacing[5], gap: spacing[4] }}>
+            <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary }}>
+              el pie en un control compuesto · el delta es 24.8 px
+            </Text>
+
+            <View style={{ backgroundColor: theme.bg.card, borderRadius: radius.md, borderWidth: 1, borderColor: theme.border.default, padding: spacing[5], gap: spacing[5] }}>
+              <View>
+                <Texto variante="apoyo">ANTES — cada hijo con su pie: el indicativo cae 24.8 abajo del número</Texto>
+                <View style={{ flexDirection: 'row', gap: spacing[2], alignItems: 'flex-end' }}>
+                  <View style={{ minHeight: 44, paddingHorizontal: spacing[3], borderRadius: radius.md, backgroundColor: theme.bg.overlay, justifyContent: 'center' }}>
+                    <Text style={{ fontFamily: mono.regular, fontSize: typography.size.base, color: theme.text.primary }}>+593</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Campo label="Teléfono" placeholder="99 123 4567" ayuda="Así te escriben las familias" />
+                  </View>
+                </View>
+              </View>
+
+              <View>
+                <Texto variante="apoyo">DESPUÉS — `sinPie` en el hijo, UN `PieDeCampo` para los dos: alineados</Texto>
+                <View style={{ flexDirection: 'row', gap: spacing[2], alignItems: 'flex-end' }}>
+                  <View style={{ minHeight: 44, paddingHorizontal: spacing[3], borderRadius: radius.md, backgroundColor: theme.bg.overlay, justifyContent: 'center' }}>
+                    <Text style={{ fontFamily: mono.regular, fontSize: typography.size.base, color: theme.text.primary }}>+593</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Campo label="Teléfono" placeholder="99 123 4567" sinPie />
+                  </View>
+                </View>
+                <PieDeCampo ayuda="Así te escriben las familias" />
+              </View>
+
+              <View>
+                <Texto variante="apoyo">Y el pie sigue diciendo el error del compuesto — la promesa no se perdió</Texto>
+                <View style={{ flexDirection: 'row', gap: spacing[2], alignItems: 'flex-end' }}>
+                  <View style={{ minHeight: 44, paddingHorizontal: spacing[3], borderRadius: radius.md, backgroundColor: theme.bg.overlay, justifyContent: 'center' }}>
+                    <Text style={{ fontFamily: mono.regular, fontSize: typography.size.base, color: theme.text.primary }}>+593</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Campo label="Teléfono" defaultValue="99 12" sinPie error="x" />
+                  </View>
+                </View>
+                <PieDeCampo error="Faltan dígitos para un número de Ecuador" />
+              </View>
+            </View>
           </View>
 
           {/* Tercer ensamble del sistema: Campo + Boton dentro de Tarjeta */}

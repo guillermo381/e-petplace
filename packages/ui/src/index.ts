@@ -38,7 +38,15 @@ export {
   type TarjetaEstadoProps,
   type TarjetaEstadoRol,
 } from './components/TarjetaEstado'
-export { Campo, type CampoProps } from './components/Campo'
+// S83-B1 — el pie como pieza: lo monta el CONTROL COMPUESTO cuando un
+// `Campo` viaja con hermanos en una fila (`sinPie`). Vive dentro de
+// Campo.tsx por el precedente de HojaScroll: es SU anatomía.
+// ⚠️ EL COMENTARIO VA ACÁ, FUERA DE LAS LLAVES, y no es estilo: R17 parte
+// el bloque por comas y un comentario ADENTRO se pega al nombre que le
+// sigue, que entonces deja de parecer un identificador y ESCAPA del gate
+// en silencio (medido: PieDeCampo era el único que escapaba). R17 se
+// endureció en la misma tanda, pero la forma correcta se conserva igual.
+export { Campo, type CampoProps, PieDeCampo, type PieDeCampoProps, ALTO_PIE_CAMPO } from './components/Campo'
 export {
   CampoFecha,
   type CampoFechaProps,
