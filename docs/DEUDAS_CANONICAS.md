@@ -3476,3 +3476,58 @@ acompaña.
 > que la copia en código es deliberada (por costo de arranque o por offline),
 > **muere igual — pero escribiendo esa razón y un guard que compare las dos
 > fuentes**; lo que no puede seguir es que coincidan sin que nadie lo verifique.
+
+---
+
+#### D-616 — EL BUCKET `avatars`: INSERT sin carpeta propia, sin techo y sin DELETE 🔴
+
+**Medido (S84-A2, literal de `pg_policies` y `storage.buckets`):**
+
+```
+INSERT  "Avatar upload"  WITH CHECK (bucket_id='avatars' AND auth.role()='authenticated')
+SELECT  "Avatar read"    USING      (bucket_id='avatars')
+UPDATE  "Avatar update"  USING      (bucket_id='avatars' AND auth.uid()::text = (storage.foldername(name))[1])
+                                     ↑ el UPDATE valida carpeta. El INSERT NO.
+file_size_limit: NULL · allowed_mime_types: NULL · public: true
+```
+
+**Las tres cosas, en orden de gravedad:**
+
+**① El INSERT no valida carpeta propia.** Cualquier autenticado puede **crear**
+objetos dentro de la carpeta de otro usuario. El UPDATE sí lo valida — o sea que
+**la protección existe, está escrita, y le falta a la mitad que crea.**
+
+**② No hay policy de DELETE.** Censados los ocho buckets: **seis de ocho la
+tienen**; `avatars` no. Es el único bucket de imagen que **no sabe borrar**.
+
+**③ Ni techo de tamaño ni lista de mime a nivel bucket.** Todo el control vive
+en el cliente (`MAX_BYTES` y los magic numbers de `subir-logo.ts`). Un cliente
+modificado sube cualquier cosa, de cualquier tamaño.
+
+**Por qué se vuelve 🔴 ahora y no antes** — el disparo es de producto, no de
+seguridad: con **UN logo** por prestador, ② es un huérfano tolerado a propósito
+(clase D-303) y ① es un daño visible y reversible (te pisan el logo, se nota, se
+re-sube). **Con una galería de N fotos en la vitrina pública, ① pasa a permitir
+que un tercero inyecte imágenes en el escaparate de otro negocio** — la
+superficie exacta que el cliente mira para decidir. **La feature no crea el
+agujero: le cambia la consecuencia.**
+
+**Lo que NO se midió, y por eso la cura recomendada no lo toca:** quiénes
+consumen `avatars` hoy. Hay **10 objetos vivos** ahí y el bucket lo comparten el
+logo del negocio, los avatares de perfil y lo que el **portal legado** guarde
+(la DB es la misma — hallazgo S49). **Reemplazar la policy INSERT en caliente
+sin ese censo es tocar algo cuyo alcance no conozco.**
+
+> **☠️ CONDICIÓN DE MUERTE — en dos mitades, y la primera NO espera a la
+> segunda:**
+> **(a)** la galería nace en **bucket propio** (`prestador-galeria`), con las 4
+> policies y el techo desde el minuto uno. **Verificable:** el bucket existe con
+> `file_size_limit` y `allowed_mime_types` no nulos, y `DELETE` entre sus
+> policies. *Esta mitad no requiere censar nada vivo: es todo nuevo.*
+> **(b)** `avatars` se sanea —INSERT por carpeta, DELETE, techo, mime— **después
+> del censo de consumidores**, incluido el portal legado. **Verificable por
+> sabotaje:** un usuario A intenta escribir en la carpeta de B y **rebota**.
+>
+> **La ficha se retira solo con las dos.** Cerrarla con (a) sería declarar sano
+> un bucket que sigue abierto — y es el error que este proyecto ya nombró:
+> *cura de sitio en lugar de cura de causa* (L-185).
