@@ -1,6 +1,6 @@
 # LAS CANDIDATAS DE LECCIÓN — inventario para la firma del founder (S77, ampliado S82)
 
-> **DIECINUEVE candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **Las candidatas 10 a 14 entraron en S82** — el nombre de un token es su rol · su inversa (el nombre que envejeció) · la ausencia con tipos · el defecto que vive porque el DATO DE PRUEBA no lo alcanza · y el lector que se apoya solo en la RLS y por eso nadie puede auditarlo leyendo. **Las 15, 16 y 17 entraron en S83, y son PARIENTES: las tres son L-192 mudada de lugar** — una regla con auto-prueba puede tener BRAZOS que no salen rojos (el guard del guard) · un grep por la PROP mide quién la pasa, no qué se RENDERIZA (L-192 en la búsqueda) · **razonar el efecto de un token no es medirlo** (L-192 en la medición: el modo de falla es *un número plausible*). **Las tres describen instrumentos que devuelven algo y no verifican nada** — y la 17 cobró tres veces en un solo turno, una de ellas contra la mesa que la estaba escribiendo. El inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
+> **VEINTE candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **Las candidatas 10 a 14 entraron en S82** — el nombre de un token es su rol · su inversa (el nombre que envejeció) · la ausencia con tipos · el defecto que vive porque el DATO DE PRUEBA no lo alcanza · y el lector que se apoya solo en la RLS y por eso nadie puede auditarlo leyendo. **Las 15, 16 y 17 entraron en S83, y son PARIENTES: las tres son L-192 mudada de lugar** — una regla con auto-prueba puede tener BRAZOS que no salen rojos (el guard del guard) · un grep por la PROP mide quién la pasa, no qué se RENDERIZA (L-192 en la búsqueda) · **razonar el efecto de un token no es medirlo** (L-192 en la medición: el modo de falla es *un número plausible*). **Las tres describen instrumentos que devuelven algo y no verifican nada** — y la 17 cobró tres veces en un solo turno, una de ellas contra la mesa que la estaba escribiendo. El inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
 
 > **NINGUNA ESTÁ FIRMADA. La firma es del founder.** Este documento no decide:
 > junta lo que hoy vive disperso entre la letra, las deudas y los cierres de
@@ -13,7 +13,7 @@
 
 ---
 
-## Las diecinueve
+## Las veinte
 
 ### 1 · (d) — EL ORDEN NOMBRA EL ARTEFACTO QUE ABRE, JAMÁS EL ARCHIVO DONDE SE LO ESPERA
 **Origen:** S75 (canon, línea 44). **Sin firma desde entonces.**
@@ -434,7 +434,7 @@ fue de quien la estaba escribiendo.*
 > **RE-MEDIDO S83 (31-jul-2026, segunda entrada del día): son DIECISÉIS.** La decimosexta —*un grep por la prop mide quién la pasa, no qué se renderiza*— nace de la **autocorrección de B** en B9/B10: el censo por prop de la marca de agua devolvió cero consumidores, y el censo por RENDER encontró **tres aguas inline con tres anatomías distintas** (hoy D-597). Es **L-192 mudada al método de medición**: la verificación corre, sale limpia, y su limpieza no prueba nada porque la pregunta estaba mal hecha. Hermana de L-170 (el instrumento decide qué puede aparecer) y de la #13 (allá el hueco lo abre el dato, acá la consulta). El conteo se corrige acá y en el título en el MISMO acto (L-141).
 >
 
-> **RE-MEDIDO S83 (1-ago-2026): son DIECINUEVE.** La decimoséptima —*razonar el efecto de un token no es medirlo*— entra con **TRES casos del mismo turno**: los dos de B (la `Atmosfera` que "no movía el par" y sí lo movía en direcciones opuestas · el cálculo con hexes inventados sobre valores `rgba` con alpha) **y uno de esta mesa**, que calculó `text.tertiary` a mano sobre un `#FAF9F7` que **ya no es el fondo** (`bg.base` es `papelTapiz` desde S82-B r10): 2.279 a mano contra **2.18** del medidor. Su modo de falla es **un número plausible** que después se cita como si fuera medición. Hermana de la #16 (el instrumento decide qué podés ver) y de L-166. El conteo se corrige acá y en el título en el MISMO acto (L-141).
+> **RE-MEDIDO S83 (1-ago-2026): son VEINTE.** La decimoséptima —*razonar el efecto de un token no es medirlo*— entra con **TRES casos del mismo turno**: los dos de B (la `Atmosfera` que "no movía el par" y sí lo movía en direcciones opuestas · el cálculo con hexes inventados sobre valores `rgba` con alpha) **y uno de esta mesa**, que calculó `text.tertiary` a mano sobre un `#FAF9F7` que **ya no es el fondo** (`bg.base` es `papelTapiz` desde S82-B r10): 2.279 a mano contra **2.18** del medidor. Su modo de falla es **un número plausible** que después se cita como si fuera medición. Hermana de la #16 (el instrumento decide qué podés ver) y de L-166. El conteo se corrige acá y en el título en el MISMO acto (L-141).
 >
 
 Si alguna otra candidata quedó fuera, es porque no encontré su fuente. **Pasame el literal y entra**: el criterio de este documento es que nada figure sin dónde leerlo.
@@ -595,3 +595,45 @@ sabiendo qué va a fallar solo cazan lo que ya sabía.
 **⚠️ SIN FIRMA (regla 80).** Ni la candidata de B ni sus dos consecuencias
 rigen. **Lo que SÍ rige es el mecanismo** — `verdicto.mjs` con su ancla, firmado
 por la mesa y ya mergeado.
+
+---
+
+### 20 · UNA CADENA QUE DECLARA EL ESTADO DE NUESTRA CONSTRUCCIÓN NACE CON SU LÁPIDA
+
+**Origen: C (S84), con el caso que la pagó.**
+
+> **UNA CADENA QUE DECLARA EL ESTADO DE NUESTRA CONSTRUCCIÓN NACE CON SU
+> CONDICIÓN DE MUERTE ESCRITA AL LADO**, como las lápidas de piezas.
+>
+> **NO aplica** a las que declaran el estado del **DATO DEL USUARIO** (*"Todavía
+> no cargaste tu teléfono"*): ésas **se computan del dato**, son verdaderas cada
+> vez que se muestran y **se corrigen solas**. No envejecen nunca.
+>
+> **LA PRUEBA, en una pregunta:** *¿esta línea deja de ser verdad cuando el
+> usuario hace algo, o cuando NOSOTROS entregamos algo?* **Si es lo segundo,
+> necesita lápida.**
+
+**LA DISTINCIÓN ES LO QUE LA VUELVE APLICABLE, y por eso va pegada a la regla.**
+Sin ella, "todo copy con 'todavía' lleva lápida" sería un barrido de cientos de
+strings y moriría de costo. Con ella, el conjunto se achica a las que **dependen
+de nuestra entrega** — que son pocas y son justamente las que envejecen.
+
+**ORIGEN, con su caso:** el clip de la vitrina decía *"llega con la próxima
+versión"*. **Era verdad al escribirla** y dejó de serlo cuando A entregó
+`subirClipVitrina`. **Nadie volvió a leerla.** Un copy honesto que nadie re-lee
+se convierte en uno que miente — y **ése además desalentaba el uso** de algo que
+ya funcionaba.
+
+**Su familia:** es la hermana en COPY de lo que las lápidas de piezas ya
+resuelven en CÓDIGO, y prima de #19 (el árbol viejo): en los dos casos **el
+artefacto es correcto y el mundo se movió debajo**. La diferencia es que un
+número viejo se re-corre; **una cadena vieja se sigue mostrando**.
+
+**CASO DE ESTRENO, encontrado por el barrido de C y registrado sin curar:**
+`i18n/es.ts:63` — `salaEspera.empleadoDetalle`. **Misma clase, peor
+consecuencia: la lee alguien RECIÉN INVITADO.** Ficha **D-623**, con su
+condición de muerte **atada al arco de equipo** (D-512), no suelta.
+
+**⚠️ SIN FIRMA (regla 80).** No rige. **Que nazca con un caso vivo es lo que
+permite firmarla sabiendo qué cuesta aplicarla** — y el costo medido es una
+ficha, no un barrido.

@@ -3973,3 +3973,79 @@ la que caza lo que nadie previó.**
 > **Lo que el próximo que abra la ficha NO debería tener que re-descubrir:** que
 > el instrumento existía, que estaba bien escrito, y que el canal no lo
 > transportaba. **Ese es el hilo entero.**
+
+---
+
+#### D-623 — UN COPY QUE PROMETÍA UNA ENTREGA NUESTRA, SIN LÁPIDA 🟠
+
+**Origen: barrido de C (S84), caso de estreno de la candidata #20.**
+
+`apps/prestador/src/i18n/es.ts:63` — `salaEspera.empleadoDetalle`:
+> *"Tu acceso al día a día del negocio todavía no está disponible en la app"*
+
+**HOY ES VERDAD.** El arco de equipo está construido y desconectado (D-512), así
+que un empleado invitado efectivamente no opera. **El día que ese arco se
+habilite, esta línea miente** — y nadie va a volver a leerla, porque nada la ata
+a lo que la vuelve falsa.
+
+**Por qué esta pesa más que el caso que fundó la regla:** el del clip
+(*"llega con la próxima versión"*) lo leía un prestador ya adentro. **Ésta la lee
+alguien RECIÉN INVITADO, en su primer contacto con el producto** — el momento
+donde una promesa vencida no es un detalle: es la primera impresión.
+
+> **☠️ CONDICIÓN DE MUERTE — ATADA, no suelta:** se retira **en el mismo acto en
+> que el arco de equipo habilite el acceso del empleado** (hoy D-512/D-514). No
+> es *"revisar el copy algún día"*: **quien conecte la puerta cambia esta línea,
+> o la puerta abre con un cartel que dice que está cerrada.**
+> **Verificable por grep:** el literal no existe, o cambió junto con el commit
+> que habilita el acceso. **Quién la retira:** la pista que cierre D-512.
+
+---
+
+#### D-624 — `v_prestadores_publicos` EXPONE `lat`/`lon` EXACTAS A CUALQUIER AUTENTICADO 🔴
+
+**Medido (S84-A18), y es un hueco VIVO — no una feature futura:**
+
+| | |
+|---|---|
+| columnas geo de la vista | **`sector` · `lat` · `lon`** — coordenadas **exactas**, sin aproximar |
+| filas con coordenadas reales | **3 de 6** |
+| grants | **`authenticated`: SELECT** *(y también INSERT/UPDATE/DELETE/TRUNCATE — ver abajo)* |
+| `anon` | **no tiene grants** ✅ |
+| consumidores en las apps | **NINGUNO** — solo aparece en comentarios |
+
+**LA GRAVEDAD, dicha con precisión y sin inflarla:** **no hay una fuga en curso**
+—ninguna pantalla pide esas columnas— **pero hay una puerta abierta**: cualquier
+usuario con sesión válida puede pedir `select lat, lon from
+v_prestadores_publicos` y recibir **la dirección exacta de la casa** de tres
+prestadores. **La diferencia entre "viaja" y "está disponible" importa para el
+diagnóstico; no cambia que hay que cerrarla.**
+
+**Y choca de frente con la firma de S84-A18:** *la coordenada exacta NO viaja al
+teléfono; la zona sale YA APROXIMADA de la base.* Construir el círculo de ~500 m
+**sobre una vista que sigue sirviendo el punto exacto sería privacidad
+decorativa** — el mismo error que la orden vino a prevenir, pero un piso más
+abajo y sin que la pantalla lo delate.
+
+**HALLAZGO ADICIONAL, de la misma medición:** la vista tiene grants de
+**INSERT · UPDATE · DELETE · TRUNCATE** para `authenticated`. Sobre una vista
+`security_invoker` la RLS de la tabla base sigue mandando, así que **no es
+escritura efectiva** — pero es la misma familia de D-621 (privilegios anchos
+heredados que nadie acotó), y **no debería estar ahí**.
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando la vista **no exponga `lat`/`lon`
+> exactas** — reemplazadas por la zona aproximada (centro desplazado de forma
+> **estable por prestador**, derivado del `id` y jamás de `random()`, para que
+> dos lecturas no trianguleen el punto real) **o eliminadas hasta que la zona
+> exista**. **Verificable de una query:** `information_schema.columns` sobre la
+> vista, cero `lat`/`lon`.
+> **⚠️ ESTO SE CURA ANTES DE DIBUJAR EL CÍRCULO, no después:** un mapa de zona
+> encima de una vista que sirve el punto exacto es peor que no tener mapa —
+> promete privacidad que no existe. **Quién la retira:** la pista que construya
+> la zona, con el modelo firmado antes de escribir la vista.
+>
+> **📌 NORTE DECLARADO Y NO CONSTRUIDO (founder, S84-A18): BÚSQUEDA DESDE EL
+> MAPA.** No se construye ahora. **Se anota acá porque decide la FORMA de la
+> zona, no su fecha:** si la zona nace indexada geográficamente, buscar por mapa
+> después es una consulta; si nace como dos `numeric` sueltos, es un rediseño.
+> *Quien escriba la vista lo tiene en cuenta o lo paga dos veces.*
