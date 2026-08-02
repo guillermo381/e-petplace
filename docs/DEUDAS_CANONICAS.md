@@ -3935,3 +3935,41 @@ la que caza lo que nadie previó.**
 > devuelve, y ese es probablemente el hilo**), o reproducir el intento con la
 > fila del seed aislada. **Hasta entonces (b) no se aplica**, y D-619 sigue
 > abierta con ella.
+
+> **➕ ENMIENDA S84-A12 A D-622 — EL HILO, CON SU INSTRUMENTO. No solo que los
+> `RAISE NOTICE` no se leyeron: CÓMO leerlos.**
+>
+> **El problema, dicho con precisión:** `npx supabase db query --linked --file`
+> devuelve **filas**, no el canal de mensajes de Postgres. Un `RAISE NOTICE`
+> escrito adentro de un `DO $$ … $$` **se ejecuta y se pierde** — no falla, no
+> avisa, simplemente no llega. **El bloque ② de (b) imprimía la tabla
+> `_promocion` fila por fila y nadie lo vio nunca.**
+>
+> **Es L-192 aplicada al INSTRUMENTO en vez de al guard: una traza cuyo modo de
+> falla es no aparecer no es una traza.** Y es más traicionera que un guard mudo,
+> porque uno la escribe convencido de que dejó rastro.
+>
+> **CÓMO SE LEEN — tres caminos, en orden de preferencia:**
+>
+> **(1) NO usar `RAISE NOTICE`: DEVOLVER FILAS.** Es el que sirve en este
+> entorno sin instalar nada. En vez del `DO $$ … RAISE NOTICE … $$`, dejar la
+> tabla temporal viva y terminar el archivo con un `SELECT * FROM _promocion;`
+> — `db query` **sí** devuelve eso. *La traza deja de ser un mensaje y pasa a ser
+> un resultado, que es lo único que este canal transporta.*
+> ⚠️ Con `BEGIN/COMMIT` en el archivo, el `SELECT` va **antes** del `COMMIT` y la
+> temp table se dropea sola al cerrar la sesión.
+>
+> **(2) Volcar a una tabla real y consultarla después** — cuando hace falta ver
+> el rastro **aunque la transacción aborte**. Los `NOTICE` y las temp tables se
+> pierden con el `ROLLBACK`; una tabla normal escrita por una función
+> `SECURITY DEFINER` con su propia transacción, no. **Es el camino que D-622
+> necesita**, justamente porque lo que hay que auditar es una corrida **que
+> abortó**.
+>
+> **(3) `psql` directo**, que sí imprime el canal de mensajes — pero exige la
+> connection string con password de DB, que este entorno no tiene a mano. **Se
+> lista para no re-descubrirlo, no porque sea el atajo.**
+>
+> **Lo que el próximo que abra la ficha NO debería tener que re-descubrir:** que
+> el instrumento existía, que estaba bien escrito, y que el canal no lo
+> transportaba. **Ese es el hilo entero.**

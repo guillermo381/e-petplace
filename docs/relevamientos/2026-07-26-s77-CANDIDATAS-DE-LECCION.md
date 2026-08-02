@@ -1,6 +1,6 @@
 # LAS CANDIDATAS DE LECCIÓN — inventario para la firma del founder (S77, ampliado S82)
 
-> **DIECIOCHO candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **Las candidatas 10 a 14 entraron en S82** — el nombre de un token es su rol · su inversa (el nombre que envejeció) · la ausencia con tipos · el defecto que vive porque el DATO DE PRUEBA no lo alcanza · y el lector que se apoya solo en la RLS y por eso nadie puede auditarlo leyendo. **Las 15, 16 y 17 entraron en S83, y son PARIENTES: las tres son L-192 mudada de lugar** — una regla con auto-prueba puede tener BRAZOS que no salen rojos (el guard del guard) · un grep por la PROP mide quién la pasa, no qué se RENDERIZA (L-192 en la búsqueda) · **razonar el efecto de un token no es medirlo** (L-192 en la medición: el modo de falla es *un número plausible*). **Las tres describen instrumentos que devuelven algo y no verifican nada** — y la 17 cobró tres veces en un solo turno, una de ellas contra la mesa que la estaba escribiendo. El inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
+> **DIECINUEVE candidatas.** La novena (L-169) se depositó en S77 con su texto: estuvo nombrada en el canon sin existir — ver su nota de procedencia. **Las candidatas 10 a 14 entraron en S82** — el nombre de un token es su rol · su inversa (el nombre que envejeció) · la ausencia con tipos · el defecto que vive porque el DATO DE PRUEBA no lo alcanza · y el lector que se apoya solo en la RLS y por eso nadie puede auditarlo leyendo. **Las 15, 16 y 17 entraron en S83, y son PARIENTES: las tres son L-192 mudada de lugar** — una regla con auto-prueba puede tener BRAZOS que no salen rojos (el guard del guard) · un grep por la PROP mide quién la pasa, no qué se RENDERIZA (L-192 en la búsqueda) · **razonar el efecto de un token no es medirlo** (L-192 en la medición: el modo de falla es *un número plausible*). **Las tres describen instrumentos que devuelven algo y no verifican nada** — y la 17 cobró tres veces en un solo turno, una de ellas contra la mesa que la estaba escribiendo. El inventario sigue vivo: este documento es la casa de lo que no tiene ley todavía.
 
 > **NINGUNA ESTÁ FIRMADA. La firma es del founder.** Este documento no decide:
 > junta lo que hoy vive disperso entre la letra, las deudas y los cierres de
@@ -13,7 +13,7 @@
 
 ---
 
-## Las dieciocho
+## Las diecinueve
 
 ### 1 · (d) — EL ORDEN NOMBRA EL ARTEFACTO QUE ABRE, JAMÁS EL ARCHIVO DONDE SE LO ESPERA
 **Origen:** S75 (canon, línea 44). **Sin firma desde entonces.**
@@ -434,7 +434,7 @@ fue de quien la estaba escribiendo.*
 > **RE-MEDIDO S83 (31-jul-2026, segunda entrada del día): son DIECISÉIS.** La decimosexta —*un grep por la prop mide quién la pasa, no qué se renderiza*— nace de la **autocorrección de B** en B9/B10: el censo por prop de la marca de agua devolvió cero consumidores, y el censo por RENDER encontró **tres aguas inline con tres anatomías distintas** (hoy D-597). Es **L-192 mudada al método de medición**: la verificación corre, sale limpia, y su limpieza no prueba nada porque la pregunta estaba mal hecha. Hermana de L-170 (el instrumento decide qué puede aparecer) y de la #13 (allá el hueco lo abre el dato, acá la consulta). El conteo se corrige acá y en el título en el MISMO acto (L-141).
 >
 
-> **RE-MEDIDO S83 (1-ago-2026): son DIECIOCHO.** La decimoséptima —*razonar el efecto de un token no es medirlo*— entra con **TRES casos del mismo turno**: los dos de B (la `Atmosfera` que "no movía el par" y sí lo movía en direcciones opuestas · el cálculo con hexes inventados sobre valores `rgba` con alpha) **y uno de esta mesa**, que calculó `text.tertiary` a mano sobre un `#FAF9F7` que **ya no es el fondo** (`bg.base` es `papelTapiz` desde S82-B r10): 2.279 a mano contra **2.18** del medidor. Su modo de falla es **un número plausible** que después se cita como si fuera medición. Hermana de la #16 (el instrumento decide qué podés ver) y de L-166. El conteo se corrige acá y en el título en el MISMO acto (L-141).
+> **RE-MEDIDO S83 (1-ago-2026): son DIECINUEVE.** La decimoséptima —*razonar el efecto de un token no es medirlo*— entra con **TRES casos del mismo turno**: los dos de B (la `Atmosfera` que "no movía el par" y sí lo movía en direcciones opuestas · el cálculo con hexes inventados sobre valores `rgba` con alpha) **y uno de esta mesa**, que calculó `text.tertiary` a mano sobre un `#FAF9F7` que **ya no es el fondo** (`bg.base` es `papelTapiz` desde S82-B r10): 2.279 a mano contra **2.18** del medidor. Su modo de falla es **un número plausible** que después se cita como si fuera medición. Hermana de la #16 (el instrumento decide qué podés ver) y de L-166. El conteo se corrige acá y en el título en el MISMO acto (L-141).
 >
 
 Si alguna otra candidata quedó fuera, es porque no encontré su fuente. **Pasame el literal y entra**: el criterio de este documento es que nada figure sin dónde leerlo.
@@ -502,3 +502,96 @@ COMPLETA: 0 fallos` y A lo vio**. El error fue **agregarle una segunda lectura
 peor y darle prioridad**. *Cuando el comando ya dice su veredicto en texto, ir a
 buscar el exit code es redundante — y si lo leés mal, degradás una verificación
 que estaba bien.*
+
+---
+
+### 19 · UN INSTRUMENTO CORRECTO SOBRE UN ÁRBOL VIEJO DA UN NÚMERO CREÍBLE Y FALSO
+
+**Origen: S84-B12 (`8519597`), 2-ago-2026.** Depositada **LITERAL** — el texto de
+abajo es de B, sin resumir, porque el caso que la funda es suyo y contarlo en
+tercera persona le sacaría lo que la hace útil.
+
+> EL VEREDICTO IMPRESO curó que un éxito no dijera nada. Esto cura lo que
+> costó más caro: **un instrumento CORRECTO sobre un árbol VIEJO da un
+> número creíble y falso, y no hay forma de verlo desde adentro de la
+> medición.** El grep está bien escrito, corre, devuelve cero, y el cero
+> es verdad — de un árbol que ya no existe.
+>
+> MI CASO, que es el que lo paga: reporté "el carrusel nace dormido, la
+> columna no tiene lectores" con la rama 40 commits atrás de main, donde
+> esa columna ya estaba muerta y su reemplazo tenía lector vivo, dos
+> migraciones y wrapper. Nada de lo que corrí estaba mal. El árbol sí.
+>
+> LA CURA ES LA MISMA FORMA que la del veredicto: se IMPRIME arriba de
+> todo, antes de cualquier resultado — rama, HEAD, si el árbol está
+> sucio, y cuántos commits lo llevan main y origin/main. Un verdicto sin
+> ancla dice si el código pasa, no CUÁL código pasó.
+>
+> Y EL ANCLA DICE SU PROPIA LIMITACIÓN, que es lo que la vuelve
+> confiable: las refs son LOCALES. Sin `git fetch`, `origin/main` puede
+> estar tan viejo como el árbol que vino a denunciar. Se imprime esa
+> línea porque un ancla que se calla su punto ciego miente igual que el
+> número que protege.
+>
+> SE ESTRENÓ CAZANDO SU PROPIO CASO: la primera corrida, la de este
+> commit, avisó "1 commits DETRÁS de main". No hubo que acordarse de
+> mirar.
+>
+> TOMADO POR INICIATIVA PROPIA Y LO DECLARO: la orden pedía traer el
+> mecanismo con su costo, no ejecutarlo. Lo hice porque son ~15 líneas en
+> mi propio archivo y porque una lección sin mecanismo es un
+> recordatorio — que es exactamente lo que L-191 ya era cuando falló dos
+> veces el mismo día. Si la mesa quería solo la propuesta, se revierte
+> con un commit.
+
+**EL MECANISMO QUEDA — firma de la mesa (2-ago-2026):** `scripts/verdicto.mjs`
+imprime el ancla arriba de todo y **declara que sus refs son locales**.
+
+---
+
+#### LA CONSECUENCIA QUE SU LETRA ABRE, y trasciende el método *(mesa, 2-ago-2026)*
+
+> **LOS FRENOS SON EL INSTRUMENTO MÁS CARO DE AUDITAR.** Un dato viejo que dice
+> **"sí"** se descubre al chocar; uno que dice **"no se puede"** **no se
+> descubre nunca**, porque **nadie verifica por qué algo NO se hizo**.
+>
+> **S84 tuvo once frenos: diez correctos, y uno que casi congela trabajo bueno.**
+>
+> **La cura no es frenar menos — es que todo freno declare CONTRA QUÉ MIDIÓ.**
+
+**Por qué esto es más grande que la candidata que lo abre:** el ancla de B
+protege un **número**. Esta consecuencia protege una **omisión** — y la omisión
+no deja rastro. Un reporte que dice *"cero lectores"* se puede re-correr; un
+freno que dijo *"no se puede, medí y no da"* **se archiva como prudencia** y
+nadie vuelve. **El costo de un freno equivocado se paga en trabajo que no se
+hizo, que es exactamente el que ningún gate cuenta.**
+
+*Ejemplo vivo de esta misma sesión, del lado bueno: el freno de S84-A4 sobre
+`fotos_galeria` se disparó con un `git grep` que la encontraba en dos
+migraciones. **Si se hubiera archivado ahí, habría frenado contra un fantasma**
+— la definición VIVA del trigger no la nombraba (cero funciones). Lo que salvó
+al freno de ser un falso "no se puede" fue declarar contra qué se midió y volver
+a medir contra el objeto.*
+
+---
+
+#### Y EL HALLAZGO HERMANO *(S84-A9b, la mesa lo suma acá porque es el mismo eje)*
+
+> **La verificación que parece REDUNDANTE al escribirla es la que caza lo que
+> nadie previó.**
+
+**El caso, medido:** el cinturón de la promoción mecánica verificaba que la fila
+del seed siguiera intacta. **Al escribirlo parecía sobrar** — *"el `WHERE` ya la
+excluye, esto no puede fallar"*. Fue **la única verificación que vio el
+problema**: la fila cambió, la migración se frenó a sí misma, y el incidente
+quedó como **D-622** en vez de como un dato alterado que nadie habría notado.
+
+**La relación con las tres anteriores (#15, #17, #18) es directa:** todas son
+**modos de falla silenciosos**. Ésta es su contracara operativa — **la única
+defensa contra un silencio es una verificación que no dependa de haber previsto
+la causa.** Por eso las que "sobran" son las que valen: las que uno escribe
+sabiendo qué va a fallar solo cazan lo que ya sabía.
+
+**⚠️ SIN FIRMA (regla 80).** Ni la candidata de B ni sus dos consecuencias
+rigen. **Lo que SÍ rige es el mecanismo** — `verdicto.mjs` con su ancla, firmado
+por la mesa y ya mergeado.
