@@ -688,6 +688,74 @@ export default function PerfilV2() {
 
             <Separador />
 
+            {/* ═══ S84-C8bis · LA VITRINA, EN SU LUGAR ═══
+                La orden original mandaba UI real sin cablear en ruta de
+                verificación; la enmienda del founder (2-ago) reduce ese
+                vehículo a dos casos —pieza indefinida, o riesgo sobre
+                algo que ya funciona— y ninguno aplica acá. La vitrina se
+                construye DONDE VA. Lo que sigue vigente es la otra
+                cláusula: **no se cablea hasta la firma en dispositivo**.
+
+                ⚠️ FRENO EJECUTADO — POR ESO NO ESTÁN LA PORTADA NI LAS
+                FOTOS. La orden lo previó ("si algún bloque no se sostiene
+                sin la tabla de A, dejá su hueco declarado y seguí"), y
+                los dos bloques de imagen no se sostienen: no existe tabla
+                de fotos del prestador (medido: cero tablas) y el pipeline
+                sube UN archivo, sin orden ni borrado.
+                Y acá el costo de ponerlos igual sería REAL, no teórico:
+                la portada va A SANGRE ARRIBA, o sea que reemplazaría el
+                muro del espejo que YA pasó su gate. Cambiar una
+                composición firmada por una invitación vacía permanente
+                deja la pantalla PEOR que hoy hasta que exista el motor —
+                y "peor mientras tanto" no es un precio que se paga sin
+                que el founder lo elija.
+                ☠️ Los dos huecos mueren con la tabla de fotos (modelo
+                medido en Fluvi: **portada = ORDEN MÍNIMO, sin columna de
+                portada** — una sola verdad en vez de dos que se pueden
+                contradecir). Es motor y es de A. ── */}
+
+            {/* EL CLIP — SU LUGAR, SIN SU MÓDULO.
+                Tiene lugar PROPIO y no entra a la galería de fotos: es
+                UNO y es de otra naturaleza (se reproduce, no se mira).
+                Meterlo entre las fotos lo volvería "una más" y obligaría
+                a explicar cuál de todas se reproduce.
+                VACÍO HONESTO: no se dibuja un play que no reproduce
+                (Ley 23) — `expo-video` es NATIVO y exige build.
+                CRUZA CON D-617: no hay build EAS 1.0.3 y sin ella no se
+                recluta, así que las dos viajan en el MISMO TREN
+                (precedente D-456: el tren se aprovecha, no se arma para
+                un solo pasajero). */}
+            <View style={{ paddingVertical: spacing[4], gap: spacing[2] }}>
+              <Texto variante="seccion">{t('perfilNegocio.clipTitulo')}</Texto>
+              <Texto variante="apoyo">{t('perfilNegocio.clipVacio')}</Texto>
+            </View>
+
+            <Separador />
+
+            {/* VER CÓMO TE VEN — la PUERTA, no un panel.
+                ⚠️ NO PINTO UNA FICHA PROPIA, y el porqué está medido en
+                esta misma pantalla: una copia a mano de la ficha es
+                exactamente lo que hizo que el espejo mintiera DOS veces
+                (el oficio inventado y la visibilidad clavada en "sí").
+                La ficha la construye B como `FichaPrestador` en
+                packages/ui y acá se MONTA — un solo dibujo, una sola
+                verdad, y el día que cambie cambia en los dos lados.
+                Hasta que su API llegue vive la puerta con su anticipo: el
+                botón dice qué va a pasar y la nota dice que el directorio
+                todavía se arma, que es la verdad medida (D-601 — la
+                vista pública no expone los datos de contacto). */}
+            <View style={{ paddingVertical: spacing[4], gap: spacing[2] }}>
+              <Boton
+                variante="secundario"
+                bloque
+                etiqueta={t('perfilNegocio.verComoTeVen')}
+                onPress={() => mostrar({ texto: t('perfilNegocio.verComoTeVenAun'), variante: 'neutro' })}
+              />
+              <Texto variante="apoyo">{t('perfilNegocio.verComoTeVenNota')}</Texto>
+            </View>
+
+            <Separador />
+
             {/* ④ EL RÓTULO, ENMENDADO POR LA FIRMA DEL TERCER VERBO
                 (S83-C18). El gate (c) había elegido "Tu cuenta" — y con
                 CUENTA firmada como verbo, ése pasó a ser el nombre de la

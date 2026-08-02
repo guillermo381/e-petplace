@@ -253,6 +253,13 @@ export const prestadorEs = {
     logoSubiendo: 'Estamos subiendo tu logo…',
     espejoRotulo: 'Así te ven tus clientes',
 
+    // ── S84-C8bis · la vitrina en su lugar ──
+    clipTitulo: 'Tu clip',
+    clipVacio: 'Un video corto de tu espacio. Todavía no está disponible: llega con la próxima versión de la app.',
+    verComoTeVen: 'Ver cómo te ven',
+    verComoTeVenNota: 'Así te va a ver una familia que te encuentra. Todavía estamos armando el directorio.',
+    verComoTeVenAun: 'Todavía no está lista',
+
     portadaTitulo: 'Tu portada',
     contactoTitulo: 'Cómo te contactan',
     dondeTitulo: 'Dónde atiendes',
