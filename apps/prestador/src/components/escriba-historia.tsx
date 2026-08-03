@@ -125,9 +125,21 @@ export function EscribaHistoria({
           ☠️ CANDIDATA PARA B, sin apuro y sin consumidor todavía: si
           algún día un `Boton` necesita glifo, es una prop en la pieza —
           jamás una fila compuesta en cada pantalla. */}
+      {/* ② S84-C25 — EL OCRE, con UNA palabra. B lo firmó (`e33e6ad`) y
+          el glifo seguía en `tinta`: ese registro pinta con el color que
+          le pasan, así que **la capa no se leía nunca**. Con `aa` toma
+          los dos registros medidos —ochreDark 5.72 en claro, ochre 9.73
+          en oscuro— y el color pasa a resolverse por TEMA en vez de por
+          esta línea.
+          EL DESTELLO SE VISTE DEL COMERCIO, ni marca ni control (firma
+          del founder). El oro se cayó midiendo: 1.59 sobre papel verde.
+          ⚠️ LOS DOS DEL HOGAR DEL CLIENTE NO SE TOCAN: uno vive SOBRE EL
+          GRADIENTE, y ahí la tinta no es un override — es la respuesta
+          correcta, porque sobre una superficie de marca el color
+          funcional no tiene contraste que ganar. */}
       <CeldaNavegacion
         icono="ia"
-        registro="tinta"
+        registro="aa"
         titulo={tieneHistoria ? t('perfilNegocio.iaMejorar') : t('perfilNegocio.iaEscribir')}
         onPress={() => setAbierta(true)}
       />
