@@ -846,7 +846,17 @@ export default function PerfilV2() {
           />
 
           <View style={{ paddingHorizontal: spacing[5], paddingTop: spacing[4] }}>
-            {/* ── LAS CUATRO SECCIONES, en el orden firmado ── */}
+            {/* ── LAS CUATRO SECCIONES, en el orden firmado ──
+                ① S84-C29 — EL GRUPO SE SEPARA CON AIRE, NO CON LÍNEA.
+                Al pasar cada sección a Tarjeta (ver `perfil-piezas`), los
+                `Separador` que iban ENTRE secciones quedaron dibujando una
+                frontera donde el borde de la tarjeta ya la dice: dos
+                señales para el mismo trabajo. Es la pasada de remoción de
+                la Ley 16 — y no es cosmética, porque una línea entre dos
+                superficies elevadas se lee como que algo las une.
+                Los `Separador` de ADENTRO de una sección no se tocan: ahí
+                sí separan cosas distintas dentro de una misma caja. */}
+            <View style={{ gap: spacing[3] }}>
             <SeccionDesplegable
               icono="negocio"
               titulo={t('perfilNegocio.espacioTitulo')}
@@ -1031,8 +1041,6 @@ export default function PerfilV2() {
 
             </SeccionDesplegable>
 
-            <Separador />
-
             {/* ② S84-C6 — EL GLIFO LLEGÓ Y LA ASIMETRÍA TERMINÓ.
                 La nota que vivía acá describía un hueco —"el registry no
                 tiene contacto"— y ese hueco ya no existe: B lo construyó
@@ -1126,8 +1134,6 @@ export default function PerfilV2() {
               />
             </SeccionDesplegable>
 
-            <Separador />
-
             {/* S83-C30 ② — "Dónde atendés" deja de ser dato falso: consume
                 `SeccionSede`, la MISMA pieza compartida que traía la
                 pantalla vieja (Places + radio, con sus escrituras propias
@@ -1184,6 +1190,7 @@ export default function PerfilV2() {
               )}
               {prestador !== null && <SeccionSede sede={leerSede(prestador)} />}
             </SeccionDesplegable>
+            </View>
 
             <Separador />
 

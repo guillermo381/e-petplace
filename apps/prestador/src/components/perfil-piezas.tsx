@@ -78,7 +78,30 @@ export function SeccionDesplegable({
   children: ReactNode;
 }) {
   return (
-    <View>
+    /* ① S84-C29 — LA SECCIÓN ENTERA ES **UNA** TARJETA, encabezado
+       incluido.
+       C24 había puesto el fondo blanco SOLO en el panel abierto, y el
+       founder cazó lo que faltaba: el encabezado —que es el control que
+       se ve SIEMPRE, abierto o cerrado— seguía cayendo sobre el papel.
+       Con el acordeón de una-a-la-vez, eso dejaba tres botones desnudos
+       y un único panel blanco colgando del segundo.
+
+       **POR QUÉ UNA Y NO DOS.** La otra lectura era anidar: darle su
+       propia tarjeta al encabezado y dejar la del panel adentro. Se
+       descarta MIDIENDO, no por gusto: `elevacion="reposo"` es una
+       SOMBRA, y dos sombras pegadas dibujan un borde donde no hay
+       frontera — el contenido de una sección no es otra cosa que su
+       encabezado, es lo mismo desplegado. Ley 20/Chanel: la presencia
+       se dice con UNA superficie apoyada, no con dos.
+       **Y el pedido se cumple igual: el fondo blanco de adentro NO se
+       fue** — el contenido sigue sobre blanco. Lo que se fue es la
+       costura entre dos blancos que eran el mismo.
+
+       `relleno="ninguno"` porque el padding ya lo traen las piezas
+       (`CeldaNavegacion` el suyo, el panel el de abajo); sin eso el
+       encabezado quedaba con doble aire y la fila se desalineaba de sus
+       hermanas de la casa. Cero valor crudo: todo sale de tokens. */
+    <Tarjeta elevacion="reposo" relleno="ninguno">
       <CeldaNavegacion
         icono={icono}
         titulo={titulo}
@@ -87,24 +110,12 @@ export function SeccionDesplegable({
         direccion={abierta ? 'arriba' : 'abajo'}
         onPress={onAlternar}
       />
-      {/* ④ S84-C24 — EL PANEL ABIERTO VA SOBRE TARJETA (firma founder:
-          "fondo blanco, como sus hermanas"). Antes el contenido caía
-          directo sobre el papel de la pantalla, así que una sección
-          desplegada no se distinguía del resto del scroll — y son
-          justamente las tres que MÁS contenido tienen (Tu espacio, Cómo
-          te contactan, Dónde atiendes).
-          `elevacion="reposo"` es el nivel que ya rige en la casa desde
-          S81 (69 pantallas); acá no se elige un número, se consume el de
-          la casa. Y el radio y el padding los pone la pieza: esta fila
-          no tiene ni un valor crudo. */}
       {abierta && (
-        <View style={{ paddingBottom: spacing[4] }}>
-          <Tarjeta elevacion="reposo">
-            <View style={{ gap: spacing[2] }}>{children}</View>
-          </Tarjeta>
+        <View style={{ paddingHorizontal: spacing[3], paddingBottom: spacing[3], gap: spacing[2] }}>
+          {children}
         </View>
       )}
-    </View>
+    </Tarjeta>
   );
 }
 

@@ -352,8 +352,8 @@ export const prestadorEs = {
   // eliminarVoz con la verdad P17 §4 del lado del negocio.
   // ── S84-C23 · seguridad y recuperación ──
   seguridad: {
-    titulo: 'Seguridad',
-    ayuda: 'Cambia la contraseña con la que entras a la app.',
+    titulo: 'Contraseña',
+    ayuda: 'La clave con la que entras a la app.',
     actual: 'Tu contraseña actual',
     nueva: 'La nueva contraseña',
     largoMinimo: 'Al menos 8 caracteres.',

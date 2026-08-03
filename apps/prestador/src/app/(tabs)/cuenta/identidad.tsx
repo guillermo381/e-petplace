@@ -131,7 +131,26 @@ export default function NombreYAcceso() {
        movimiento que hay que mirar.
        ☠️ Vuelve a tener fondo y agua con el veredicto, gane quien gane. */
     <View style={{ flex: 1 }}>
-      <Encabezado variante="navegacion" titulo="Nombre y acceso" atras onAtras={() => router.back()} />
+      {/* ③ S84-C29 — EL TÍTULO SE LLAMA COMO LA PUERTA QUE LO ABRE, y
+          además DEJA DE ESTAR HARDCODEADO.
+          Dos defectos en una línea, los dos medidos:
+          · La celda del Perfil pasó a decir "Seguridad" en C3 ⑤ y **esta
+            pantalla se quedó con el rótulo viejo**: se tocaba "Seguridad"
+            y se aterrizaba en "Nombre y acceso". Es media renombrada, y
+            17.3 lo prohíbe — una acción, un nombre, todo el flujo.
+          · El literal estaba EN ESPAÑOL fuera del riel: en inglés esta
+            pantalla quedaba en español, y el `Espejo<D>` no puede cazar
+            lo que nunca entró al diccionario.
+          Y con esto se deshace el anidado que el founder cazó: antes el
+          camino decía Seguridad › Seguridad. Ahora dice **Seguridad ›
+          Contraseña** — el contenedor y su contenido dejan de compartir
+          nombre (la misma regla que mató "Tu cuenta" como celda). */}
+      <Encabezado
+        variante="navegacion"
+        titulo={t('perfilNegocio.seguridadTitulo')}
+        atras
+        onAtras={() => router.back()}
+      />
 
       {estado === 'cargando' && (
         <View style={{ padding: spacing[5] }}>

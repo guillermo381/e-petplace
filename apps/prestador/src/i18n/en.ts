@@ -290,8 +290,8 @@ export const prestadorEn = {
   // La tab Cuenta del prestador (letra P17, S57-B) · LOTE S57, GATE PENDIENTE · Espejo de es.ts
   // ── S84-C23 · Espejo de es.ts ──
   seguridad: {
-    titulo: 'Security',
-    ayuda: 'Change the password you use to sign in.',
+    titulo: 'Password',
+    ayuda: 'The password you use to sign in.',
     actual: 'Your current password',
     nueva: 'New password',
     largoMinimo: 'At least 8 characters.',
