@@ -40,6 +40,7 @@ import {
   CeldaNavegacion,
   LogoNegocio,
   PieDeCampo,
+  Tarjeta,
   Texto,
   palette,
   radius,
@@ -86,7 +87,23 @@ export function SeccionDesplegable({
         direccion={abierta ? 'arriba' : 'abajo'}
         onPress={onAlternar}
       />
-      {abierta && <View style={{ paddingBottom: spacing[4], gap: spacing[2] }}>{children}</View>}
+      {/* ④ S84-C24 — EL PANEL ABIERTO VA SOBRE TARJETA (firma founder:
+          "fondo blanco, como sus hermanas"). Antes el contenido caía
+          directo sobre el papel de la pantalla, así que una sección
+          desplegada no se distinguía del resto del scroll — y son
+          justamente las tres que MÁS contenido tienen (Tu espacio, Cómo
+          te contactan, Dónde atiendes).
+          `elevacion="reposo"` es el nivel que ya rige en la casa desde
+          S81 (69 pantallas); acá no se elige un número, se consume el de
+          la casa. Y el radio y el padding los pone la pieza: esta fila
+          no tiene ni un valor crudo. */}
+      {abierta && (
+        <View style={{ paddingBottom: spacing[4] }}>
+          <Tarjeta elevacion="reposo">
+            <View style={{ gap: spacing[2] }}>{children}</View>
+          </Tarjeta>
+        </View>
+      )}
     </View>
   );
 }

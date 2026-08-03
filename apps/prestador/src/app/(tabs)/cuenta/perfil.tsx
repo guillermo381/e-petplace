@@ -1165,6 +1165,23 @@ export default function PerfilV2() {
                   sola. Ley 17.4/23: la promesa se declara, no se
                   adivina. */}
               <Texto variante="apoyo">{t('perfilNegocio.sedeGuardaAparte')}</Texto>
+              {/* ① S84-C24 — POR QUE FALTA EL MAPA, dicho DONDE SE CURA.
+                  Medido: el negocio esta activo y en la vista, y el
+                  lector si trae la zona — lo que falta es la SEDE. Sin
+                  coordenadas, la zona derivada es null (3 de 6 de la
+                  vista estan asi, y son exactamente los tres sin
+                  coordenadas), y entonces la ficha no monta el mapa.
+                  NO ES DEFECTO: la familia tampoco lo veria. Pero un
+                  bloque que desaparece sin explicacion se lee como roto,
+                  y en el ESPEJO duele mas porque el prestador va ahi
+                  justamente a ver que le falta.
+                  El aviso NO va en el espejo —seria una prop inventada en
+                  la pieza de B— sino aca, pegado al control que lo
+                  arregla: el mensaje vive junto a la cura, no junto al
+                  hueco. */}
+              {prestador !== null && prestador.lat === null && (
+                <Texto variante="apoyo" color="danger">{t('perfilNegocio.zonaSinDireccion')}</Texto>
+              )}
               {prestador !== null && <SeccionSede sede={leerSede(prestador)} />}
             </SeccionDesplegable>
 

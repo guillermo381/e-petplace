@@ -338,6 +338,8 @@ export const prestadorEs = {
     telefonoEjemplo: '99 123 4567',
     whatsappLabel: 'WhatsApp',
     whatsappEjemplo: '99 900 0333',
+    zonaSinDireccion: 'Sin tu dirección no aparece el mapa de tu zona en la ficha. Cárgala acá abajo.',
+
     sedeGuardaAparte: 'Esta sección se guarda sola: cada cambio queda al confirmarlo acá abajo.',
     seguridadTitulo: 'Seguridad',
     seguridadDetalle: 'Tu nombre, tu correo de ingreso y tu contraseña. No los ven las familias.',
