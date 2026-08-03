@@ -324,6 +324,61 @@ exponía de más.**
 
 ---
 
+## 4bis · 🔴 UNA LISTA DE CIERRE QUE DIJO DE MÁS — el caso, en S85, y lo pagué yo
+
+**§2 de esta acta ya lo nombraba** (*"una lista de cierre que dice TODO ADENTRO
+cuando falta algo es el dato que después nadie vuelve a verificar"*). **En S85 la
+misma pista lo volvió a hacer, y en la dirección peor: no faltaba algo — SOBRABA.**
+
+**El mensaje de A al founder anunciando el OTA `8adb8257` decía que traía
+*"Datos con vidas, familias y su estado"* y *"cohorte y emblema"*.**
+
+**MEDIDO después, contra el árbol:**
+
+| lo anunciado | lo que mide |
+|---|---|
+| **Datos** | **NO viaja.** No existe `cuenta/datos.tsx` — se difirió al lote siguiente |
+| **cohorte** | **NO existe.** `information_schema`: **0 columnas** `cohorte` en `prestadores` |
+| **emblema** | **viajan DOS CANDIDATOS a la galería** (B10), para el gate — no el emblema puesto |
+
+> ### **DE DÓNDE SALIÓ LA LISTA, que es lo único que la explica: DE MI PROPIO MENSAJE DE COMMIT.**
+> **Escribí el `--message` del bundle desde el encuadre de la conversación y
+> después leí mi propio mensaje como si fuera el inventario.** *Nunca medí
+> `git log 9247ea8..5ed4c46`.* **Un rango de 21 commits estaba a un comando de
+> distancia.**
+
+**Por qué es peor que decir de menos, y es la mitad que §2 no tenía:** una lista
+que **omite** algo produce una sorpresa —alguien busca y no está—. Una lista que
+**sobra** manda al founder **a buscar una pantalla que no existe**, y cuando no
+la encuentre va a concluir **que el update no entró**. *El error no se
+manifiesta como "falta esto": se manifiesta como una duda sobre todo el
+bundle.*
+
+### ⚠️ Y LA MEDICIÓN AGREGÓ UN MATIZ QUE NINGUNA DE LAS DOS LISTAS TENÍA
+
+**El OTA anterior (`2c48233f`, ancla `9247ea8`) NUNCA FUE GATEADO.** ⇒ hay dos
+cosas distintas y **conviene no confundirlas al anunciar**:
+
+- **lo que ESTE bundle agrega** — `Tu día` con la rueda · `Semana` retirada · el
+  tope del cupo desde el catálogo · la flecha a la derecha · el tinte revertido ·
+  el escudo de Seguridad · los dos emblemas candidatos;
+- **lo que el founder va a VER POR PRIMERA VEZ** — todo lo anterior **más** lo
+  del bundle sin gatear: D-595, Cuenta cuatro puertas, documentos tres capas, el
+  nombre atómico, D-633.
+
+> **Un anuncio de OTA que lista solo el delta es correcto y le sirve a la mesa;
+> el founder necesita el ACUMULADO desde su último gate.** *Los dos son
+> verdaderos y responden preguntas distintas — decir cuál se está dando es parte
+> del anuncio.*
+
+**LA REGLA QUE SALE:** **el contenido de un bundle se lee del RANGO
+(`git log <ancla-anterior>..<ancla>`), jamás del mensaje que uno mismo escribió.**
+*Un `--message` es una etiqueta que redacta una persona; el rango es el hecho.*
+**Y si el bundle anterior no fue gateado, el anuncio al founder lo dice y suma su
+contenido.**
+
+---
+
 ## 5 · EL BUNDLE DE CIERRE — publicado
 
 **group `e8409694-90b7-4f53-8e68-a830120cad60` · ancla `bef0897` ·
