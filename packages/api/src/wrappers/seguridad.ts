@@ -48,10 +48,30 @@ const CODIGOS_ERROR_SEGURIDAD = [
 ] as const;
 export type CodigoErrorSeguridad = (typeof CODIGOS_ERROR_SEGURIDAD)[number];
 
-/** `minimum_password_length = 6` en la config medida. Se espeja acá para
- *  decirlo ANTES del round-trip (Ley 23), no para reemplazar al servidor:
- *  si los dos divergen, gana el servidor y el usuario ve su error. */
-const MIN_LARGO = 6;
+/** EL MOTOR CUMPLE LO QUE LA PANTALLA PROMETE (orden de mesa, S85).
+ *
+ *  Las dos superficies —`cuenta/seguridad` y `recuperar`— dicen **"Al
+ *  menos 8 caracteres"** en es y en (`largoMinimo`, ×2 en cada idioma).
+ *  El wrapper exigía **6**, así que una clave de 7 pasaba: la pantalla
+ *  pedía una cosa y el motor aceptaba otra. *Una promesa que el motor no
+ *  sostiene no es una validación laxa: es una pantalla que miente hacia
+ *  el lado cómodo, que es el que nadie reporta.*
+ *
+ *  ⚠️ **YA NO ESPEJA LA CONFIG DEL SERVIDOR — la EXCEDE, y a propósito.**
+ *  `minimum_password_length` del panel de Supabase sigue en **6**
+ *  (medido). Exceder es seguro en esta dirección: todo lo que el cliente
+ *  acepta (≥8) el servidor también. La dirección peligrosa sería la
+ *  inversa —cliente laxo, servidor estricto—, y ésa no ocurre.
+ *  Alinear el panel a 8 es un toggle de la visita admin (D-634).
+ *
+ *  Se valida acá para decirlo ANTES del round-trip (Ley 23), no para
+ *  reemplazar al servidor: si los dos divergen, gana el servidor y el
+ *  usuario ve su error.
+ *
+ *  El número viaja INTERPOLADO al mensaje de abajo a propósito: el texto
+ *  del rebote es parte del guard, y un guard que dice "6" mientras exige
+ *  "8" es el defecto que la candidata #21 nombra. */
+const MIN_LARGO = 8;
 
 const MENSAJES: Record<CodigoErrorSeguridad, string> = {
   sin_sesion:                   'No hay sesión activa.',

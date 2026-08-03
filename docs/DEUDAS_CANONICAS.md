@@ -4549,3 +4549,102 @@ para tenerlos; pero eso es sembrar catálogo, y es firma.*
 > **Verificable por grep:** cero arrays de países literales en `apps/`.
 > **No se retira cableando dos y dejando una** — la que quede se vuelve la que
 > nadie compara, que es exactamente D-615 con menos testigos.
+
+> ### ➕ ENMIENDA S85-A2 — EL CUADRO DE ESTA FICHA ESTABA MAL MEDIDO, EN LAS DOS COLUMNAS
+>
+> **Re-medido contra el árbol vivo de `main` (`0694bd6`) y contra la DB. La ficha
+> no se borra: se corrige, y se deja lo que decía para que se vea qué falló.**
+>
+> | # | dónde | decía | **mide** |
+> |---|---|---|---|
+> | 1 | `cat_paises` (DB) | 23 | **23** ✅ |
+> | 2 | `PAISES` en `cuenta/perfil.tsx` | 23 | **NO EXISTE** — la pantalla `importa` de `lib/paises.ts` desde C33 |
+> | 3 | `lib/paises.ts` | **30** | **23** |
+>
+> **① EL "30" ERA UN GREP QUE CONTABA LA UNIDAD EQUIVOCADA.** `grep -c "iso"`
+> sobre ese archivo da **30** — porque cuenta LÍNEAS que contienen la subcadena
+> `iso`, y el archivo la usa en el `type Pais`, en `codigo_iso2` y en su prosa.
+> **Las entradas del array son 23** (`grep -o "iso: *'[^']*'" | wc -l`).
+> *Es la candidata #16 con otra ropa: el grep midió quién nombra la cosa, no
+> cuántas cosas hay.* **Y el número era plausible**, que es lo que lo volvió
+> creíble — igual que el barrido case-sensitive de C: *un barrido que devuelve 0
+> se desconfía solo; uno que devuelve 30 se cree.*
+>
+> **② LAS TRES COPIAS SON DOS.** La segunda murió en la propia C33 — la mudanza
+> que la ficha describe en su primer párrafo. **La ficha contó la consecuencia de
+> la cura que ella misma narraba.**
+>
+> **③ ⚠️ Y LOS SIETE PAÍSES QUE "EL CATÁLOGO NO TIENE" NO EXISTEN.** Diffeado
+> fila por fila (`iso|nombre|prefijo|formato`), los dos conjuntos ISO son
+> **IDÉNTICOS**. *Lo que se leía como "una copia que ya divergió" era una copia
+> fiel contada mal.* **Consecuencia para la cura: NO hay catálogo que sembrar, y
+> por lo tanto NO hay firma que esperar.** La decisión que la ficha dejaba
+> abierta —*"que los siete faltantes entren a `cat_paises`"*— **se cae por falta
+> de objeto.**
+>
+> ### 🔴 PERO SÍ HAY UNA DIVERGENCIA REAL, Y ES LA QUE NADIE ESTABA MIRANDO
+>
+> **UNA fila difiere, y en el campo que valida:**
+>
+> | | `cat_paises` | `lib/paises.ts` |
+> |---|---|---|
+> | **PE · Perú** | `^\+51\d{7,9}$` | `^\+51\d{9}$` |
+>
+> **La app es MÁS ESTRICTA que la fuente:** un teléfono peruano de 7 u 8 dígitos
+> que la DB acepta, **la app lo rebota**. Las otras 22 filas coinciden en los
+> cuatro campos.
+>
+> > **Y esto es lo que la ficha existía para encontrar, encontrado por el camino
+> > equivocado.** La tesis —*dos implementaciones del mismo dato se separan un día
+> > y nadie se entera*— **es correcta y ya ocurrió**. Lo que estaba mal era la
+> > evidencia: se citó una divergencia de VOLUMEN que no existe, y se pasó por
+> > alto una de CONTENIDO que sí. *Una ficha con la tesis correcta y la medición
+> > equivocada es más peligrosa que una sin ficha: la tesis la vuelve creíble y la
+> > medición manda a curar donde no duele.*
+>
+> **⇒ LA CONDICIÓN DE MUERTE SE ENMIENDA, y queda más barata de lo que decía:**
+> se retira cuando `lib/paises.ts` **consuma `get_paises_para_telefono()`** —el
+> lector que ya existe y sigue sin un solo consumidor (medido S85-A2: cero
+> ocurrencias fuera de `database.types.ts`)— y quede **cero array de países
+> literal en `apps/`**. **Ya no espera firma de catálogo: es cableado.**
+
+---
+
+#### D-634 — `minimum_password_length` DEL PANEL SIGUE EN 6 MIENTRAS EL CLIENTE EXIGE 8 ⚪ REGISTRO
+
+**Origen: orden de mesa S85, ejecutada en `packages/api/src/wrappers/seguridad.ts`
+(`MIN_LARGO` 6 → 8).**
+
+**El porqué del cambio:** las dos superficies de contraseña —`cuenta/seguridad` y
+`recuperar`— prometen **"Al menos 8 caracteres"** en es y en; el wrapper exigía
+**6**. Una clave de 7 pasaba: *la pantalla pedía una cosa y el motor aceptaba
+otra, hacia el lado cómodo — que es el que nadie reporta.*
+
+**LO QUE QUEDA, y es sólo esto:** `minimum_password_length` en el panel de
+Supabase **sigue en 6**. **NO es un hueco de seguridad y conviene decir por qué,
+para que nadie lo escale de más:** el cliente **excede** al servidor, y en esa
+dirección no hay agujero — todo lo que el cliente acepta (≥8), el servidor
+también. *La dirección peligrosa es la inversa —cliente laxo, servidor
+estricto—, y ésa no ocurre.*
+
+**Lo que sí queda expuesto es el camino que NO pasa por el wrapper:** cualquier
+escritura directa contra Supabase Auth (o un cliente futuro) sigue pudiendo
+crear claves de 6.
+
+### ⚠️ LA COSTURA QUE ESTE CAMBIO ABRE — medida, y NO curada porque el copy no se toca
+
+**`registro.tsx` promete `passwordAyuda: "Al menos 6 caracteres"` / "At least 6
+characters"** (es.ts:93 · en.ts:82) **y NO pasa por este wrapper**: usa
+`registrarse` de `auth.ts`, que no valida largo.
+
+⇒ **La casa pasa a pedir 8 para cambiar y recuperar, y 6 para registrarse.**
+*Alguien se registra con seis caracteres y el día que quiere cambiarla se entera
+de que hacen falta ocho.* **No es un break y no bloquea nada** — es una costura,
+y se registra en vez de barrerla sola: unificar es decisión de producto (¿sube
+registro a 8, o baja la promesa de las otras dos?), no un `sed`.
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando **el panel diga 8** (toggle de la
+> visita admin de S86, junto con la plantilla del correo de D-628) **y** la mesa
+> decida qué hace `registro` con su promesa de 6. **Verificable en dos lugares,
+> ninguno interpretable:** la config del panel, y `grep passwordAyuda` en los dos
+> diccionarios.
