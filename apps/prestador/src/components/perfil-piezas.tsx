@@ -428,8 +428,33 @@ export function EspejoNegocio({
             </Text>
           )}
 
-          {/* ⚠️ ② S84-C30 — FRENO: `acento` NO SE MONTA ACÁ, Y NO ES
-              PREFERENCIA — ES EL MISMO HEX.
+          {/* ② S84-C32 — EL FRENO SE LEVANTA: B entregó la prop
+              (`ec31f5d`) y el botón vuelve a ser legible.
+              `superficie="muro"` NO es un color nuevo: es la tabla que
+              invierte el par YA MEDIDO — papel pleno #FAF9F7 sobre el
+              muro = **5.51 en claro · 9.61 en oscuro**. Mi 2.92 muere
+              acá.
+              Y B no inventó vocabulario: `LogoNegocio` —la pieza que
+              está tres líneas arriba, en este mismo bloque— ya tenía
+              `superficie: 'clara'|'muro'` con esa semántica exacta. La
+              casa había contestado y faltaba ensanchar la respuesta
+              (L-175), no abrir una segunda.
+
+              ⚠️ DIVERGENCIA DECLARADA, y es de UNA PALABRA revertirla:
+              **la mesa dijo `compacto` y monté `acento`.** El porqué es
+              medición del código de B, no gusto: sobre el muro la tabla
+              **reescribe la entrada entera y no copia el `borde`**, así
+              que `compacto` PIERDE su contorno ahí — que era lo único
+              que lo distinguía. Sobre el muro `compacto` y `acento`
+              quedan idénticos salvo el PESO.
+              Con eso, elegir `compacto` sería vestir con dos anatomías
+              distintas **el mismo trabajo**: "cambiar el clip" (que
+              quedó en `acento` en C30) y "cambiar el logo" son la misma
+              acción sobre la misma pantalla. Un trabajo, un componente.
+              Si preferís `compacto`, es una palabra.
+
+              ── historia, que explica de dónde viene esto ──
+              C30 FRENÓ ACÁ, y no era preferencia — era EL MISMO HEX.
               La orden decía montarlo en el clip y en el logo. En el clip
               entró; acá NO, porque este botón **no vive sobre papel: vive
               sobre EL MURO**, y el muro es la única superficie de la app
@@ -480,7 +505,8 @@ export function EspejoNegocio({
               botón que lo dijera prometería una pantalla que no abre. */}
           <View style={{ alignSelf: 'flex-start' }}>
             <Boton
-              variante="compacto"
+              variante="acento"
+              superficie="muro"
               etiqueta={logoUrl === null ? etiquetaLogo.agregar : etiquetaLogo.cambiar}
               onPress={onEditarLogo}
             />
