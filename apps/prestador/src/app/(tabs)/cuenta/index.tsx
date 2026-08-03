@@ -305,7 +305,19 @@ export default function Cuenta() {
   const lugares = [
     { etiqueta: t('miCuenta.perfil'), ruta: '/cuenta/perfil' as const, icono: 'cuenta' as const },
     { etiqueta: t('miCuenta.negocio'), ruta: '/cuenta-comercial' as const, icono: 'negocio' as const },
-    { etiqueta: t('seguridad.tituloPantalla'), ruta: '/cuenta/seguridad' as const, icono: 'preferencias' as const },
+    /* ⭐ S85-C6 — EL ESCUDO (salida (a) firmada por la mesa). Reusa
+       `seguros`, que ES el escudo del registry ("la vida protegida").
+       ⚠️ LA COLISIÓN DE METÁFORA SE DECLARA, no se esconde: ese glifo
+       tiene consumidor VIVO como SERVICIO en el cliente
+       (`explorar/index.tsx:106`, la fila "próximamente Seguros"). El
+       atenuante que lo hace aceptable está MEDIDO y es el que firmó la
+       mesa: viven en apps distintas y **ningún usuario ve los dos** — un
+       prestador no entra a Explorar del cliente. Pedir un segundo escudo
+       habría producido dos dibujos casi iguales, que es peor que un
+       dibujo con dos usos declarados.
+       ☠️ Su nota en el registry la escribe B (territorio suyo); acá solo
+       se consume. */
+    { etiqueta: t('seguridad.tituloPantalla'), ruta: '/cuenta/seguridad' as const, icono: 'seguros' as const },
     { etiqueta: t('miCuenta.preferencias'), ruta: '/cuenta/preferencias' as const, icono: 'preferencias' as const },
   ];
 
