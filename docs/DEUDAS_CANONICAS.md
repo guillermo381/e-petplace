@@ -4951,6 +4951,74 @@ importa: **doce de veinticuatro** reglas del lint estaban en esa condición.*
 
 ---
 
+#### D-639 — EL EXPEDIENTE SE CONCEDE ENTERO O NADA: hoy el motor da MÁS de lo que la ley firmada permite 🔴 CURA DE PRIVACIDAD, no feature
+
+> ## ⚠️ ESTO **NO** ES UNA PIEZA DE LA PANTALLA DATOS. ES UN ESTRECHAMIENTO.
+>
+> **Corresponde igual aunque Datos no se construyera nunca** — y por eso tiene
+> ficha propia y prioridad propia, en vez de vivir adentro del lote.
+
+**MEDIDO (S85-A, contra la DB viva).** `eventos_mascota` tiene **UNA sola**
+policy de SELECT:
+
+```sql
+USING ( user_acceso_clinico_a_mascota(mascota_id) )
+```
+
+**Y esa función es BINARIA** — leída entera: dueño · admin · o cuenta comercial
+con acceso vigente (caducidad perezosa de 6 meses + gate de capacidad clínica).
+Devuelve `true` o `false` **para toda la mascota**.
+
+> ### **NO EXISTE UN ESTADO INTERMEDIO. Hoy un prestador ve TODO el expediente o NADA.**
+
+### ⇒ EL NIVEL ③ DE `A3.5bis` NO ES UN LECTOR QUE FALTA
+
+**`A3.5bis` (firmada 3-ago) manda tres niveles:** el piso (identidad + alertas) ·
+el detalle (quien lo hizo o quien lo necesita) · **la existencia** (*los demás
+ven **que existe y quién lo hizo**, no el contenido*).
+
+**Una policy concede o niega FILAS ENTERAS.** *"Esta fila sí, pero sin su
+contenido"* **no es algo que un `USING` sepa decir.**
+
+> **Y acá está el hallazgo, que invierte el signo del trabajo:** con el acceso
+> vigente, **el nivel ② ya está concedido a todos los que pasan el gate.**
+> **El sistema está MÁS ABIERTO que la ley que se acaba de firmar, no más
+> cerrado.** *A3.5bis no describe un hueco que llenar: describe un
+> estrechamiento del motor actual.*
+
+### LA FORMA — (α), adjudicada por la mesa
+
+**RPC `SECURITY DEFINER` que devuelve el expediente YA MODULADO:** contenido para
+②, `{existe, quién, cuándo}` para ③. **Patrón `obtener_jornada_recepcion`**
+(S78): un lector que modula por rol adentro.
+
+**Por qué NO (β)** —partir la tabla o una vista con columnas nulificadas—:
+**cada lector nuevo tendría que acordarse de usarla.** *El modo de falla es
+olvidarse, y olvidarse se ve exactamente igual que estar bien.*
+
+### 🔴 SU GATE ES OBLIGATORIO Y NO PUEDE SER VISUAL
+
+> **FIXTURE con DOS prestadores y UN aporte de cada uno, midiendo que el segundo
+> ve la EXISTENCIA y NO el CONTENIDO.**
+
+**El porqué, y es la razón de que esta línea esté en negrita:**
+
+> **SU ERROR SE VE IDÉNTICO AL ACIERTO.** *Una pantalla que muestra de más
+> **funciona perfecto**: se ve completa, no rebota, no tiene estados vacíos.*
+> **El gate no puede ser "se ve bien"** — es la familia de las candidatas #15-#22
+> (*todas producen salidas creíbles, ninguna rompe un build*), y de las peores,
+> porque acá lo que se filtra es el expediente de una mascota ajena.
+
+**Cruce declarado:** es **D-464** con nombre nuevo y alcance medido — aquella
+decía *"gate de rol en RLS"*; ésta mide **por qué la RLS no alcanza**.
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando **exista la RPC modulada** **y**
+> su **fixture de dos prestadores pase con el rojo PRODUCIDO** (sin la cura, el
+> segundo VE el contenido; con ella, no). **No se retira con una pantalla que se
+> ve bien.**
+
+---
+
 #### D-638 — EL DEFAULT DE `max_citas_por_slot` NO PUEDE SER POR OFICIO MIENTRAS LAS FRANJAS SEAN UNIVERSALES 🟠
 
 > ### LA REGLA QUE GOBIERNA ESTE EJE, firmada (3-ago-2026)

@@ -433,6 +433,29 @@ sea de ayer.
 > *Dejar en "activo" a una mascota que murió la semana pasada es la clase de
 > honestidad rota que ninguna regla de fechas justifica.*
 
+### ➕ EL EJE DE LA LISTA CAMBIA — decisión de producto (mesa, 3-ago-2026)
+
+**La lista de vidas de DATOS incluye a las mascotas con CITA FUTURA aunque
+tengan CERO atenciones cerradas.**
+
+**Eso cambia el eje del lector a propósito**, y conviene decirlo con las dos
+frases al lado porque es lo que se pierde al implementar:
+
+> ### **DATOS contesta *"a quiénes cuido"*, NO *"a quiénes facturé"*.**
+
+*El lector de hoy (`obtenerMascotasAtendidas`) mira `evento_atencion` cerrada
+con calidad — o sea, el eje de lo EJECUTADO.* **Una mascota que llega mañana no
+existe para ese eje.**
+
+**Y por eso el corte viejo rompía el propósito de la pantalla:** *si la mascota
+que llega mañana no aparece, **el prestador no puede prepararse para
+atenderla** — que es exactamente para lo que la pantalla existe.* **Una mascota
+que llega mañana ya es del prestador.**
+
+> **Consecuencia declarada:** el lector deja de ser "historial" y pasa a ser
+> "cartera". *Su nombre y su JSDoc tienen que decirlo, o el próximo que lo lea
+> va a creer que se le coló una fila sin atenciones y la va a "arreglar".*
+
 ### ⚠️ HISTÓRICO ES **MEMORIA**, NO BASURA — y esto es lo que hay que construir bien
 
 > **Nada desaparece nunca, y la ficha se abre igual.**
