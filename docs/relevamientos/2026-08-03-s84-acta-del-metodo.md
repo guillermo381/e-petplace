@@ -219,11 +219,36 @@ exponía de más.**
 
 ---
 
-## 5 · LO QUE FALTA PARA CERRAR ESTA ACTA
+## 5 · EL BUNDLE DE CIERRE — publicado
+
+**group `e8409694-90b7-4f53-8e68-a830120cad60` · ancla `bef0897` ·
+`isGitWorkingTreeDirty = None`.** Runtime 1.0.3.
+
+**OCHO OTAs en S84, los ocho con ancla limpia.** *Ninguno salió con árbol sucio —
+la veda con su paso ⓪ funcionó las ocho veces, y las tres pistas la sostuvieron.*
+
+---
+
+## 6 · LO QUE FALTA PARA CERRAR ESTA ACTA
 
 - **El último lote de C y su gate.**
 - El **censo de enmiendas** (`…-s84-censo-de-enmiendas.md`) y el **estado
   medido** (`…-s84-estado-medido.md`).
+### ⏳ LA PASADA DEL FOUNDER — cuatro firmas pendientes
+
+**El acta NO se cierra hasta esa pasada.** Lo que espera su firma sobre el bundle
+`e8409694`:
+
+| | |
+|---|---|
+| **el glifo `documento`** | dos candidatos, viajan **sin consumidor** para que haya qué elegir |
+| **el acento** | |
+| **el muro** | |
+| **`documentos`** | la pantalla del eje ①, primera vez en dispositivo |
+
+*Hasta esa pasada, lo construido en S84 está **publicado**, no **firmado** — y son
+dos estados distintos (regla 84, el cuarto eslabón).*
+
 ### ⚠️ EL BURN-DOWN — decidido, no arrastrado
 
 **La mesa decidió en S84: NO se mide acá.** Se declara por **tercera sesión
