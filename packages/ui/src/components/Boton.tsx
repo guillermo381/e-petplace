@@ -27,6 +27,8 @@ import {
   type ViewStyle,
 } from 'react-native'
 import Animated from 'react-native-reanimated'
+import Svg, { Path } from 'react-native-svg'
+import { CHEVRON } from './chevron'
 
 import { usePresionado } from './usePresionado'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -90,6 +92,26 @@ export interface BotonProps {
    *  en un solo tema no encuentra. §15b.2 ya lo decía —"sobre el muro el
    *  acento funcional es PAPEL"— y hasta hoy la pieza no sabía cumplirlo. */
   superficie?: 'clara' | 'muro'
+  /** DÓNDE VA LA FLECHA DE `acento` — **INSTRUMENTO DE GATE, NO API
+   *  PERMANENTE** (S85-B3). Solo tiene efecto en `variante="acento"`.
+   *
+   *  POR QUÉ EXISTE: el founder rebotó el `acento` por afordancia y pidió
+   *  «flecha justo en frente del label». Su literal se lee sin ambigüedad
+   *  como DELANTE —y por eso es el default—, pero *"en frente"* también
+   *  puede leerse como *enfrentada*, o sea DETRÁS, que además es la
+   *  convención más común para "esto lleva a otro lado". **Esa ambigüedad
+   *  no la resuelve una lectura: la resuelve su dedo**, y para eso las dos
+   *  posiciones tienen que poder montarse en la galería SOBRE EL BOTÓN
+   *  REAL — una galería que muestra un botón que no es EL botón hace
+   *  firmar algo que no corre (la regla dura de R17).
+   *
+   *  ☠️ CONDICIÓN DE MUERTE, escrita al nacer y con el precedente fresco:
+   *  el día que el founder firme una de las dos, **esta prop se BORRA en
+   *  el mismo commit de la firma** y la posición ganadora queda fija en la
+   *  variante. Es exactamente lo que acaba de pasar con `documentoSello`:
+   *  un candidato perdedor que sobrevive a su gate se vuelve una opción
+   *  que alguien va a creer disponible. La retira quien lea la firma. */
+  flecha?: 'delante' | 'detras'
   variante?: BotonVariante
   tamaño?: BotonTamaño
   /** Full-width. */
@@ -134,6 +156,7 @@ export function Boton({
   etiqueta,
   onPress,
   superficie = 'clara',
+  flecha = 'delante',
   variante = 'primario',
   tamaño = 'md',
   bloque = false,
@@ -283,9 +306,70 @@ export function Boton({
     ...(bloque ? { alignSelf: 'stretch' as const } : { alignSelf: 'flex-start' as const }),
   }
 
+  /* LA FLECHA DE `acento` (S85-B3) — REBOTE DEL FOUNDER EN SU GATE:
+     «creo que no del todo — yo lo sé, pero no sé si cualquier persona lo
+     sepa». El diagnóstico es de AFORDANCIA, no de color: sin caja ni
+     contorno, lo único que decía "esto se toca" era el PESO, y el peso lo
+     lee quien ya sabe que ahí hay un control. Su propuesta —flecha pegada
+     al label— es la que se monta acá.
+
+     POR QUÉ VIVE EN LA VARIANTE Y NO EN UNA PROP DE USO: si fuera opt-in,
+     la afordancia volvería a ser una decisión por pantalla y el defecto
+     reaparecería en el próximo `acento` que alguien monte sin acordarse.
+     Y —la razón que terminó de decidir la anatomía— así los CUATRO usos
+     vivos la reciben SIN TOCAR UNA LÍNEA de `apps/prestador`, que es
+     territorio de otra pista.
+
+     POR QUÉ LA FLECHA NO MIENTE, medido uno por uno y no supuesto: E14
+     (FIRMADA) dice que la acción LLEVA cuando «navega a otra pantalla, O
+     ABRE EL FORMULARIO QUE LA RESUELVE». Los cuatro consumidores caen ahí
+     — `cuenta-comercial:248` hace router.push · el logo de
+     `perfil-piezas:508` abre una Hoja · los dos del clip abren el picker
+     del sistema. NINGUNO ejecuta en el lugar.
+
+     ⚠️ EL CASO QUE NO EXISTE HOY, declarado en vez de resuelto: un
+     `acento` que EJECUTE en el lugar tendría una flecha mentirosa. No le
+     construyo escotilla porque no tiene un solo consumidor, y una prop
+     sin consumidor DECORA — la misma regla con la que esta casa retira
+     guards. El día que aparezca, se construye CON su caso en la mano;
+     hasta entonces la condición es: si tu `acento` ejecuta en el lugar,
+     no es `acento`.
+
+     Geometría: `CHEVRON.derecha` de la casa (S83-B12) a 20px y trazo 2,
+     los mismos números que `CeldaNavegacion` y `PieRevelar` — jamás un
+     path ni una escala nuevos (L-175). El color sale de `c.texto`, o sea
+     del MISMO slot que el label: la flecha es parte del control, no un
+     adorno con vida propia, y sobre el muro invierte con él. */
+  const flechaAcento =
+    variante === 'acento' ? (
+      <View
+        style={[
+          mostrarSpinner ? { opacity: 0 } : null,
+          /* EL "JUSTO" DEL FOUNDER, hecho número: la flecha va PEGADA al
+             label, no a distancia de ícono. El contenedor separa todo con
+             `spacing[2]`; acá se neutraliza la mitad para dejar
+             `spacing[1]` efectivo entre flecha y palabra. */
+          flecha === 'delante'
+            ? { marginRight: -(spacing[2] - spacing[1]) }
+            : { marginLeft: -(spacing[2] - spacing[1]) },
+        ]}
+      >
+        <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" aria-hidden>
+          <Path
+            d={CHEVRON.derecha}
+            stroke={c.texto}
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </Svg>
+      </View>
+    ) : null
+
   const contenido = (
     <>
       {iconoIzq ? <View style={mostrarSpinner ? { opacity: 0 } : null}>{iconoIzq}</View> : null}
+      {flecha === 'delante' ? flechaAcento : null}
       {/* El label queda montado invisible durante loading: preserva el ancho
           exacto — cero layout shift (equivale a medir y fijar minWidth). */}
       <Text
@@ -302,6 +386,7 @@ export function Boton({
       >
         {etiqueta}
       </Text>
+      {flecha === 'detras' ? flechaAcento : null}
       {mostrarSpinner ? (
         <View style={{ position: 'absolute', alignSelf: 'center' }}>
           <ActivityIndicator size="small" color={c.texto} />

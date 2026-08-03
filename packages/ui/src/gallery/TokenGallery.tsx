@@ -759,6 +759,32 @@ function LoRechazado() {
         </View>
       </View>
 
+      {/* ── LA FLECHA DE `acento` · LAS DOS POSICIONES, A UN GATE (S85-B3) ──
+          El founder rebotó el `acento` en su pasada: «creo que no del
+          todo — yo lo sé, pero no sé si cualquier persona lo sepa», y
+          propuso la flecha pegada al label. Lo que su literal NO cierra es
+          de qué lado: *"en frente"* se lee DELANTE (y por eso es el
+          default) pero también puede leerse *enfrentada*, o sea DETRÁS,
+          que es la convención más común para "lleva a otro lado".
+          Se montan LAS DOS, sobre el BOTÓN REAL, para que la firma sea de
+          su dedo y no de una lámina. Al firmar, la perdedora y la prop
+          `flecha` se borran EN EL MISMO COMMIT. */}
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="apoyo">
+          LA FLECHA DEL ACENTO — dos posiciones, sin firma. Arriba el literal del founder («justo en
+          frente del label»); abajo la convención. La de arriba es el default hasta que su dedo diga.
+          Los cuatro usos vivos llevan o abren el formulario que resuelve (E14): la flecha no miente
+          en ninguno.
+        </Texto>
+        <Boton variante="acento" flecha="delante" etiqueta="Agregar clip" onPress={() => {}} />
+        <Boton variante="acento" flecha="detras" etiqueta="Agregar clip" onPress={() => {}} />
+        <Texto variante="apoyo">Y sobre el MURO, que es donde vive el del logo (perfil-piezas):</Texto>
+        <View style={{ backgroundColor: palette.tealDark, padding: spacing[4], borderRadius: radius.suave, gap: spacing[2] }}>
+          <Boton variante="acento" superficie="muro" flecha="delante" etiqueta="Cambiar logo" onPress={() => {}} />
+          <Boton variante="acento" superficie="muro" flecha="detras" etiqueta="Cambiar logo" onPress={() => {}} />
+        </View>
+      </View>
+
       <Rechazado
         fecha="29-jul-2026"
         razon="EL CONTORNO COMO ACCIÓN. `Boton secundario` y `compacto` siguen con borde y siguen VIVOS en decenas de pantallas: su muerte ANCHA es D-483 con mecánica al-tocarse (migra por craft, jamás por barrida). `sinCaja` es el reemplazo firmado — se ve arriba, con su sombra."
