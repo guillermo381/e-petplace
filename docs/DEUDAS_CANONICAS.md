@@ -4668,6 +4668,25 @@ para tenerlos; pero eso es sembrar catálogo, y es firma.*
 > > equivocada es más peligrosa que una sin ficha: la tesis la vuelve creíble y la
 > > medición manda a curar donde no duele.*
 >
+> ### ➕ NOTA S85 — EL PEDIDO A C SE RE-MIDE CONTRA EL ARCHIVO VIGENTE
+>
+> **La mitad de A está entregada** (`obtenerPaisesDelMundo()` en
+> `wrappers/paises.ts` — ensanchado, no clonado: ese archivo **ya existía desde
+> S58** y el censo de esta ficha nunca lo contó). **La mitad de C está pedida**
+> en `docs/relevamientos/2026-08-03-s85a-PEDIDO-a-C-paises.md`, y la mesa la
+> ruteó **DENTRO del lote Cuenta — mismo archivo, flete único.**
+>
+> **⚠️ Y por eso el pedido lleva su propia advertencia:** sus ocho sitios y su
+> diff **están medidos contra `main` en el momento de escribirlo**, y el lote
+> Cuenta **está tocando `lib/paises.ts` ahora mismo**. *Un pedido entre pistas es
+> una medición con destinatario — y hereda el mismo modo de falla: describe bien
+> un archivo que ya cambió.*
+>
+> > **Es la regla #22 aplicada a un pedido en vez de a una orden: quien lo
+> > ejecuta RE-MIDE antes, y si el cuadro cambió, frena y lo trae.** *La regla
+> > no es de la mesa hacia las pistas: es de quien mide hacia quien ejecuta,
+> > vaya en la dirección que vaya.*
+
 > **⇒ LA CONDICIÓN DE MUERTE SE ENMIENDA, y queda más barata de lo que decía:**
 > se retira cuando `lib/paises.ts` **consuma `get_paises_para_telefono()`** —el
 > lector que ya existe y sigue sin un solo consumidor (medido S85-A2: cero
