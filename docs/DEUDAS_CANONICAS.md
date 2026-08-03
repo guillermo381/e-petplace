@@ -4369,7 +4369,7 @@ declara nuestro estado y que nadie va a volver a leer.*
 
 ---
 
-#### D-630 — EL BURN-DOWN DE LA REGLA 81: TERCERA SESIÓN SEGUIDA SIN MEDIRSE 🟠
+#### D-630 — EL BURN-DOWN DE LA REGLA 81: TERCERA SESIÓN SEGUIDA SIN MEDIRSE 🟠 (condición FIRMADA por el founder, S84)
 
 **Decisión de la mesa (S84): NO se mide en S84.** Se declara — y se declara con
 su agravante escrito, que es lo que esta ficha existe para no dejar mudo:
@@ -4419,3 +4419,16 @@ del prestador y sabe leer sus piezas. Cuenta los dos ejes y los imprime.
 > interpretable. **Si S85 cierra sin él, la ficha NO se re-declara: se escala** —
 > cuatro declaraciones sin pago dejan de ser una deuda de trabajo y pasan a ser
 > una de gobierno, y eso es de la mesa, no de la pista.
+
+> **✅ CONDICIÓN FIRMADA POR EL FOUNDER (S84-A31), ENTERA — incluido el
+> escalamiento.** No se firma solo el *quién/cuándo/forma*: **se firma que la
+> cuarta vez cambia de naturaleza.**
+>
+> > **CUATRO DECLARACIONES SIN PAGO DEJAN DE SER DEUDA DE TRABAJO Y PASAN A SER
+> > DE GOBIERNO.**
+>
+> **Y eso es lo que la vuelve distinta de las tres declaraciones anteriores:**
+> las tres decían *"falta medirlo"* y se heredaban igual. **Ésta dice qué pasa si
+> vuelve a faltar** — y lo que pasa **no es otra fila en el acta: es que el
+> problema cambia de dueño.** *Una deuda que la pista no puede pagar en tres
+> intentos deja de ser suya.*
