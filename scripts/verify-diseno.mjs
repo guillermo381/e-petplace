@@ -78,9 +78,14 @@ function ancla(nombre, encontrado, minimo, queEs) {
 
 /** R1 · 7bis sobre SelectorOpcion: naturaleza legal; entidad y
  *  naturaleza EXCLUYENTES (entidad ES relleno por espec S73). */
+/** S85-B1 · EL LABEL DECÍA "implícita" Y EL BUCKET ERA "todo lo demás":
+ *  un `naturaleza="seFija"` ESCRITO A MANO se contaba como heredado. El
+ *  número era correcto y la palabra no — y en un censo de 59 casos eso
+ *  borra justo la distinción que el censo existe para tener (qué se
+ *  declaró vs qué se heredó del default). Se parte en dos conteos. */
 function r1(archivos) {
   const fallos = [];
-  let existe = 0, entidad = 0, implicita = 0;
+  let existe = 0, entidad = 0, seFijaDeclarada = 0, sinNaturaleza = 0;
   for (const { path, src } of archivos) {
     for (const m of src.matchAll(/<SelectorOpcion\b/g)) {
       const fin = src.indexOf('/>', m.index);
@@ -94,10 +99,14 @@ function r1(archivos) {
         fallos.push(`${path}:${linea} — entidad y naturaleza son excluyentes`);
       if (esEntidad) entidad++;
       else if (nat?.[1] === 'existe') existe++;
-      else implicita++;
+      else if (nat?.[1] === 'seFija') seFijaDeclarada++;
+      else sinNaturaleza++;
     }
   }
-  return { fallos, info: `existe=${existe} · entidad=${entidad} · seFija-implícita=${implicita}` };
+  return {
+    fallos,
+    info: `existe=${existe} · entidad=${entidad} · seFija-declarada=${seFijaDeclarada} · sin-naturaleza=${sinNaturaleza}`,
+  };
 }
 
 /** R2 · Ley 1 (cero hex crudos en apps) — RATCHET: baseline 4, medido POR
@@ -207,16 +216,25 @@ function r5(archivos) {
 /** R6 · La regla del teclado (§15b / D-498) sobre EvitaTeclado (S82-B):
  *  el portador es UNO y vive en ui — `KeyboardAvoidingView` crudo en
  *  apps = fallo. DURA EN 0 (medido: el barrido D-498 dejó apps limpias). */
+/*  S85-B1 · DECÍA "N crudos" Y CONTABA ARCHIVOS: el `break` cortaba
+ *  después del primero, así que una pantalla con tres portadores crudos
+ *  reportaba "1 crudo" y curar uno la dejaba en verde aparente. Ahora
+ *  cuenta OCURRENCIAS y las reporta todas — el número y la palabra
+ *  vuelven a decir lo mismo, y el segundo caso de un archivo deja de
+ *  esconderse detrás del primero. */
 function r6(archivos) {
   const fallos = [];
+  let archivosConCrudo = 0;
   for (const { path, src } of archivos) {
-    for (const m of sinComentarios(src).matchAll(/\bKeyboardAvoidingView\b/g)) {
-      fallos.push(`${path}:${lineaDe(sinComentarios(src), m.index)} — KeyboardAvoidingView crudo (D-498): la casa tiene UNA — EvitaTeclado`);
-      void m;
-      break;
+    const limpio = sinComentarios(src);
+    let enArchivo = 0;
+    for (const m of limpio.matchAll(/\bKeyboardAvoidingView\b/g)) {
+      enArchivo++;
+      fallos.push(`${path}:${lineaDe(limpio, m.index)} — KeyboardAvoidingView crudo (D-498): la casa tiene UNA — EvitaTeclado`);
     }
+    if (enArchivo > 0) archivosConCrudo++;
   }
-  return { fallos, info: `${fallos.length} crudos` };
+  return { fallos, info: `${fallos.length} ocurrencia(s) en ${archivosConCrudo} archivo(s)` };
 }
 
 /** R7 · §5 LA ENTRADA sobre Entrada (S82-B): la entrada firmada tiene UN
@@ -250,16 +268,26 @@ function r7(archivos) {
  *  View plano; la zona de la vida decide su envoltorio por estado —
  *  monta en vacío = aparece QUIETA). Solo baja — de 0 no se sube. */
 const BASELINE_VACIO_ENTERING = 0;
+/*  S85-B1 · EL RESUMEN ANULABA UN BRAZO CUANDO EL OTRO DISPARABA. El
+ *  info derivaba `en-Entrada` de `fallos.length` con una condición que
+ *  lo mandaba a 0 apenas el brazo del `entering` pasaba su baseline:
+ *  medido, DOS violaciones reales de EstadoVacio-en-Entrada se
+ *  reportaban como `en-Entrada=0`. Los fallos SÍ se listaban —el rojo
+ *  nunca se perdió—, pero quien leyera el resumen buscaría el defecto
+ *  en el brazo equivocado. Los dos brazos cuentan aparte, cada uno lo
+ *  suyo. */
 function r8(archivos) {
   const fallos = [];
-  let entering = 0;
+  let enEntrada = 0, entering = 0;
   const porArchivo = [];
   for (const { path, src } of archivos) {
     for (const m of src.matchAll(/<Entrada\b/g)) {
       const cierre = src.indexOf('</Entrada>', m.index);
       const bloque = src.slice(m.index, cierre === -1 ? m.index + 2000 : cierre);
-      if (/<EstadoVacio\b/.test(bloque))
+      if (/<EstadoVacio\b/.test(bloque)) {
+        enEntrada++;
         fallos.push(`${path}:${lineaDe(src, m.index)} — EstadoVacio dentro de Entrada (Ley 13): el vacío JAMÁS se anima (veto L-c, S81)`);
+      }
     }
     for (const m of src.matchAll(/<Animated\.View\b[^>]*entering=/g)) {
       const cierre = src.indexOf('</Animated.View>', m.index);
@@ -269,7 +297,7 @@ function r8(archivos) {
   }
   if (entering > BASELINE_VACIO_ENTERING)
     fallos.push(`Ley 13: ${entering} EstadoVacio bajo entering= (baseline ${BASELINE_VACIO_ENTERING}) — el vacío JAMÁS se anima:\n    ${porArchivo.join('\n    ')}`);
-  return { fallos, info: `en-Entrada=${fallos.length > 0 && entering <= BASELINE_VACIO_ENTERING ? fallos.length : 0} · bajo-entering=${entering}/${BASELINE_VACIO_ENTERING}${entering < BASELINE_VACIO_ENTERING ? ' — BAJÓ: actualizar baseline' : ''}` };
+  return { fallos, info: `en-Entrada=${enEntrada} · bajo-entering=${entering}/${BASELINE_VACIO_ENTERING}${entering < BASELINE_VACIO_ENTERING ? ' — BAJÓ: actualizar baseline' : ''}` };
 }
 
 /** R9 · Ley 17.5 sobre EstadoVacio — INFORMATIVA DECLARADA, y el porqué
@@ -635,7 +663,15 @@ function r13(archivos) {
     }
     total += enArchivo;
   }
-  return { fallos, info: `${total}/${sumaBaseline} contorneados (baseline nominal: FiltroVida de C — se resuelve en su gate)${total < sumaBaseline ? ' — BAJÓ: actualizar baseline' : ''}` };
+  // S85-B1 · EL INFO ANUNCIABA COMO PENDIENTE UN TRABAJO CERRADO. Con el
+  // baseline ya vacío desde S82-B r5, seguía imprimiendo en cada corrida
+  // "(baseline nominal: FiltroVida de C — se resuelve en su gate)": nombraba
+  // trabajo abierto que estaba curado Y se lo atribuía a otra pista. Es la
+  // clase de dato que no se descubre chocando —nadie verifica por qué algo
+  // NO se hizo—, así que el info dice el estado real y el histórico queda
+  // arriba, en la nota del baseline, que es donde se lee al decidir.
+  const nota = sumaBaseline === 0 ? 'DURA EN 0 desde S82-B r5' : `baseline ${sumaBaseline}`;
+  return { fallos, info: `${total} contorneados (${nota})${total < sumaBaseline ? ' — BAJÓ: actualizar baseline' : ''}` };
 }
 
 /** R14 · LA TARJETA NO TAPA EL SALUDO (S82-C r4, defecto 2 del gate
@@ -972,18 +1008,55 @@ const CUENTAS_GALERIA = [
   'apps/cliente/src/app/(tabs)/cuenta/index.tsx',
   'apps/prestador/src/app/(tabs)/cuenta/index.tsx',
 ];
+/* S85-B1 · EL MENSAJE GRITABA UNA CAUSA QUE EL PREDICADO NO MEDÍA — la
+ *  forma exacta del freno falso de S84. El brazo `__DEV__` preguntaba
+ *  `/__DEV__/.test(archivo entero)` y respondía "la entrada a la galería
+ *  NO se esconde ahí": medido con la entrada PRESENTE en las dos casas y
+ *  un `__DEV__` ajeno (un console.log), salía ROJO acusando de esconder
+ *  una entrada que estaba a la vista.
+ *
+ *  SE CURAN LAS DOS PUNTAS, y por qué las dos: bajar solo el mensaje
+ *  dejaría el guard sin nombrar nunca el defecto real de D-580; subir
+ *  solo el predicado cambiaría una red gruesa por un parser —y un
+ *  parser que no matchea pasa en VERDE, que es el modo de falla que
+ *  L-192 existe para matar. Entonces:
+ *   ① BRAZO PRECISO: si el `__DEV__` ENVUELVE la entrada, el mensaje
+ *     dice eso, que es el defecto que D-580 prohíbe.
+ *   ② BRAZO GRUESO: si hay `__DEV__` y no se pudo probar que envuelve,
+ *     sigue siendo ROJO —la red no se afloja— pero el mensaje DECLARA
+ *     que no probó la relación, en vez de afirmarla.
+ *  La detección de ① es TEXTUAL y por eso es la que puede fallar; su
+ *  falla cae siempre en ②, nunca en verde. */
+const RE_ENTRADA_GALERIA = /router\.push\(['"]\/gallery['"]\)/;
+/** ¿ese `__DEV__` envuelve a la entrada? Heurística declarada: cubre las
+ *  dos formas con las que se esconde algo en esta casa —`__DEV__ && …` en
+ *  JSX y `if (__DEV__) { … }`— exigiendo que entre el guard y la entrada
+ *  no se haya cerrado ninguna llave. No pretende ser un parser. */
+function devEnvuelve(limpio, iDev, iEntrada) {
+  if (iEntrada === -1 || iEntrada <= iDev) return false;
+  const entre = limpio.slice(iDev + '__DEV__'.length, iEntrada);
+  if (/\}/.test(entre)) return false;
+  return /^\s*&&/.test(entre) || /^\s*\)\s*\{/.test(entre);
+}
 function r18(casas) {
   const fallos = [];
   for (const { ruta, src } of casas) {
     const limpio = sinComentarios(src ?? '');
-    if (!/router\.push\(['"]\/gallery['"]\)/.test(limpio)) {
+    if (!RE_ENTRADA_GALERIA.test(limpio)) {
       fallos.push(
         `${ruta} — LA ENTRADA A /gallery DESAPARECIÓ. D-580 (enmienda founder S82): queda VISIBLE hasta el gate de producción; su retiro exige FIRMA EXPLÍCITA, y con la firma se borra esta regla en el mismo acto.`,
       );
     }
-    if (/__DEV__/.test(limpio)) {
+    const iEntrada = limpio.search(RE_ENTRADA_GALERIA);
+    const devs = [...limpio.matchAll(/__DEV__/g)];
+    const envuelto = devs.some((d) => devEnvuelve(limpio, d.index, iEntrada));
+    if (envuelto) {
       fallos.push(
-        `${ruta} — la Cuenta usa __DEV__: la entrada a la galería NO se esconde ahí (el gate corre sobre el APK preview, donde __DEV__ es false — L-161).`,
+        `${ruta} — LA ENTRADA A /gallery ESTÁ DETRÁS DE __DEV__. El gate corre sobre el APK preview, donde __DEV__ es false: ahí la entrada muere justo donde se la necesita (L-161, la misma lección del marcador).`,
+      );
+    } else if (devs.length > 0) {
+      fallos.push(
+        `${ruta} — hay ${devs.length} uso(s) de __DEV__ en la Cuenta de la galería. Este guard NO probó que alcancen a la entrada (su análisis es textual): se declara ROJO por precaución, porque la Cuenta que lleva al gate se mantiene sin ramas que el APK preview no ejecuta. Si el uso es legítimo, la decisión es de mesa y se declara acá — no se afloja el guard en silencio.`,
       );
     }
   }
@@ -992,6 +1065,29 @@ function r18(casas) {
   fallos.push(...ancla('R18', casas.length, 2, 'Cuenta(s) de galería vigiladas'));
   return { fallos, info: fallos.length === 0 ? `${casas.length} entradas vivas y sin __DEV__` : `${fallos.length} fallo(s)` };
 }
+
+/* ☠️ R23 SE RETIRÓ EN S82-B (`d1e0e36`) Y SE FUE SIN LÁPIDA — ésta se le
+ *  pone en S85-B, tres sesiones después, porque un hueco de numeración sin
+ *  declarar es una pregunta que cada lector nuevo tiene que volver a
+ *  investigar. (Lo fue: el reporte de apertura de S85 la trajo como "ni
+ *  lápida ni mención"; la causa estaba en el historial, no en el archivo.)
+ *
+ *  QUÉ VIGILABA: que la huella de MARCA —la rellena en hex de capa— no
+ *  viviera adentro de la placa del glifo. Nació en `ed92c43` (S82-B r23)
+ *  con su rojo producido contra el archivo real.
+ *
+ *  POR QUÉ SE FUE: la enmienda de C dejó su premisa vieja (la marca del
+ *  elegido pasó a ser `accent.control`, no un hex de capa) y **R22 la
+ *  cubría entera y mejor** — ancla a `MarcaElegido` POR NOMBRE, exige que
+ *  exista, que se monte y que no caiga dentro de la placa: todo lo de R23
+ *  más lo que R23 no veía (que la pieza desaparezca). Dos reglas para la
+ *  misma física es la copia que L-175 prohíbe, un piso arriba.
+ *
+ *  LO QUE DEJA COMO REGISTRO: no quedó alcance huérfano, y el retiro fue
+ *  la propia ley de la casa aplicada a quien la escribió — un guard que
+ *  sobrevive a su razón es basura que nadie se anima a tocar.
+ *  (R28 nunca existió: se declinó al nacer, en el header de R27.
+ *  SIGUIENTE NÚMERO LIBRE: **R30**.) */
 
 /* ☠️ R19 SE RETIRÓ EN S82-C r38, Y SU PROPIA REGLA DICTÓ EL RETIRO.
  *  Vigilaba que el relleno pleno se computara contra el número de
@@ -1128,8 +1224,13 @@ function r22(fuentes) {
  *  paso siguiente (D-586: el índice es compartido). Cuando adopten la
  *  pieza, el conteo baja y el lint PIDE bajar el baseline: un guard que
  *  sobrevive a su propia razón es basura que nadie se anima a tocar. */
+// S85-B1 · SOLO-BAJA EJECUTADO, la mitad. `explorar/adiestramiento/index.tsx`
+// ADOPTÓ la pieza y sale de la lista: medido hoy, 0 copias a mano y 2
+// `PieReserva`. El lint venía pidiendo esta baja desde que C la curó
+// ("1/2 — BAJÓ: actualizar baseline") y el pedido se estaba imprimiendo
+// sin que nadie lo cobrara. Queda UNA, con dueño y con su condición de
+// muerte intacta (D-586: el índice es compartido; la cura es de C).
 const BASELINE_R24 = {
-  'apps/cliente/src/app/(tabs)/explorar/adiestramiento/index.tsx': 1,
   'apps/cliente/src/app/(tabs)/explorar/adiestramiento/confirmar-programa.tsx': 1,
 };
 const OFICIOS_R24 = ['paseo', 'veterinaria', 'grooming', 'adiestramiento'];
@@ -1164,7 +1265,7 @@ function r24(archivos) {
   fallos.push(...ancla('R24', vistos.length, OFICIOS_R24.length, `pantalla(s) de reserva (faltan: ${OFICIOS_R24.filter((o) => !vistos.includes(o)).join(', ') || 'ninguna'})`));
   return {
     fallos,
-    info: `${total}/${sumaBaseline} pies a mano en ${corpus} archivos de explorar/ · oficios anclados=${vistos.length}/4 (baseline: los dos de adiestramiento, de C)${total < sumaBaseline ? ' — BAJÓ: actualizar baseline' : ''}`,
+    info: `${total}/${sumaBaseline} pies a mano en ${corpus} archivos de explorar/ · oficios anclados=${vistos.length}/4 (baseline: confirmar-programa de adiestramiento, de C)${total < sumaBaseline ? ' — BAJÓ: actualizar baseline' : ''}`,
   };
 }
 
@@ -1365,7 +1466,13 @@ const EXTRAS_BRAZOS = [
     filtro: 'function MarcaElegido() {}\n<View><MarcaElegido /></View>',
   }],
   // ── R18: la entrada VIVE (no dispara su otro brazo) y hay __DEV__ ──
-  ['R18·la Cuenta usa __DEV__', r18, [{ ruta: '(fixture)', src: 'router.push("/gallery")\nif (__DEV__) {}' }, { ruta: '(fixture2)', src: 'router.push("/gallery")' }]],
+  // S85-B1 · los DOS brazos de __DEV__ tienen su rojo por separado, y el
+  // orden importa: en el GRUESO el `__DEV__` va DESPUÉS de la entrada, así
+  // que no puede envolverla ni encender el preciso. Un fixture que
+  // encendiera los dos no probaría ninguno (el precedente de R16/R24).
+  ['R18·__DEV__ ajeno, sin envolver (brazo grueso)', r18, [{ ruta: '(fixture)', src: 'router.push("/gallery")\nif (__DEV__) console.log("nada que ver")' }, { ruta: '(fixture2)', src: 'router.push("/gallery")' }]],
+  ['R18·__DEV__ ENVUELVE la entrada — if (brazo preciso)', r18, [{ ruta: '(fixture)', src: 'if (__DEV__) { router.push("/gallery") }' }, { ruta: '(fixture2)', src: 'router.push("/gallery")' }]],
+  ['R18·__DEV__ ENVUELVE la entrada — && en JSX (brazo preciso)', r18, [{ ruta: '(fixture)', src: '{__DEV__ && <Celda onPress={() => router.push("/gallery")} />}' }, { ruta: '(fixture2)', src: 'router.push("/gallery")' }]],
 ];
 for (const [nombre, regla, fx] of EXTRAS_BRAZOS) {
   if (regla(fx).fallos.length === 0) {
