@@ -32,6 +32,7 @@ import { usePresionado } from './usePresionado'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import { typography } from '../tokens/typography'
+import { palette } from '../tokens/palette'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { motion } from '../tokens/motion'
@@ -54,7 +55,7 @@ import { useTheme } from '../ThemeProvider'
 // (bienvenida del cliente); si el founder la firma, muere el contorno
 // del secundario y la enmienda a la Ley 22 pasa por la MESA. Hasta esa
 // firma, código nuevo sigue usando 'secundario'.
-export type BotonVariante = 'primario' | 'marca' | 'secundario' | 'ghost' | 'destructivo' | 'compacto' | 'sinCaja'
+export type BotonVariante = 'primario' | 'marca' | 'secundario' | 'ghost' | 'destructivo' | 'compacto' | 'sinCaja' | 'acento'
 export type BotonTamaño = 'sm' | 'md' | 'lg'
 
 // md 48 = default: target táctil. sm 36 compensa con hitSlop (target efectivo 44).
@@ -68,6 +69,27 @@ export interface BotonProps {
   /** Obligatoria: un botón sin etiqueta no existe (a11y). */
   etiqueta: string
   onPress?: () => void
+  /** SOBRE QUÉ SUPERFICIE vive — el MATERIAL, no el color (S84-B19).
+   *  Mismo vocabulario y mismos valores que `LogoNegocio.superficie`: la
+   *  casa ya había resuelto "esta pieza puede vivir sobre el muro" y se
+   *  ENSANCHA su respuesta en vez de inventar otra (L-175).
+   *
+   *  POR QUÉ PROP Y NO VARIANTE HERMANA: la superficie es ORTOGONAL a la
+   *  jerarquía. Un primario, un acento y un ghost pueden todos vivir
+   *  sobre el muro; como variantes serían `primarioMuro`, `acentoMuro`,
+   *  `ghostMuro`… — la unión se multiplica por dos y cada una repite su
+   *  propia jerarquía. Como prop, cruza una sola vez. Y no vuelve
+   *  ambigua ninguna otra prop (criterio de B14): no cambia lo que
+   *  `variante` SIGNIFICA, cambia la paleta de la que resuelve.
+   *
+   *  ⚠️ POR QUÉ HACÍA FALTA, con el número que lo prueba: sobre el muro,
+   *  `accent.cta` del oficio y el muro son **EL MISMO HEX**
+   *  (palette.tealDark #0A7268) ⇒ **contraste 1.00, invisible**. Y en
+   *  oscuro NO desaparece (6.57 sobre tealDarkNoche): invisible en dos
+   *  temas de tres y legible en el otro es justo el defecto que un gate
+   *  en un solo tema no encuentra. §15b.2 ya lo decía —"sobre el muro el
+   *  acento funcional es PAPEL"— y hasta hoy la pieza no sabía cumplirlo. */
+  superficie?: 'clara' | 'muro'
   variante?: BotonVariante
   tamaño?: BotonTamaño
   /** Full-width. */
@@ -111,6 +133,7 @@ export interface BotonProps {
 export function Boton({
   etiqueta,
   onPress,
+  superficie = 'clara',
   variante = 'primario',
   tamaño = 'md',
   bloque = false,
@@ -154,6 +177,12 @@ export function Boton({
   const varianteEfectiva: BotonVariante =
     variante === 'marca' && !esMarca ? 'primario' : variante
 
+  // EL MURO NO SALE DEL TEMA (vive en `techo-oficio` de la app), así que
+  // sus colores se resuelven ACÁ y no por slot: papel PLENO sobre el
+  // muro da 5.51 — el par que TechoOficio ya usa y §15b.2 firmó. El
+  // sólido invierte (papel de fondo, muro de tinta) para que el primario
+  // siga leyéndose como primario sin usar el teal prohibido.
+  const sobreMuro = superficie === 'muro'
   const colores: Record<BotonVariante, { fondo: string; texto: string; borde?: string }> = {
     // S63 — enmienda Ley 21 FIRMADA: el primario ancla al SLOT accent.cta
     // (default tinta = idéntico al de siempre; el raíz del prestador lo
@@ -176,7 +205,48 @@ export function Boton({
     sinCaja:     { fondo: theme.accent.sinCaja, texto: theme.text.primary },
     destructivo: { fondo: theme.status.dangerBg, texto: theme.status.dangerText },
     compacto:    { fondo: 'transparent', texto: theme.text.primary, borde: theme.border.default },
+    // ── ACENTO (S84-B18) — EL COMANDO QUE NO COMPITE CON LA FOTO ──────
+    // Nace de un rechazo del founder con su razón: un botón SÓLIDO al
+    // lado de una foto compite con la foto, y la vitrina existe para
+    // mostrar la foto. Sin superficie ni borde; la presencia la da EL
+    // COLOR DEL CTA + el peso.
+    //
+    // POR QUÉ NINGUNA DE LAS SIETE SERVÍA (censo de C, verificado acá):
+    //  · `ghost` es la ÚNICA sin superficie, pero su texto va en
+    //    `text.primary` — no cumple la Ley 22c (un comando con
+    //    consecuencia se NOTA) y la casa ya lo tiene tomado como
+    //    terciario.
+    //  · `marca` es transparente pero su texto es `onGradient`: solo
+    //    vive sobre el gradiente.
+    //  · `compacto` es transparente CON borde — y el contorno
+    //    transparente como acción está muerto desde la 19.7.
+    //  · `sinCaja` NO ES SIN CAJA: tiene `accent.sinCaja`, un slot
+    //    propio que S82-B r12 le dio JUSTAMENTE para darle presencia de
+    //    superficie. Su nombre quedó viejo (ver la nota de abajo).
+    //
+    // Y POR QUÉ NO PODÍA RESOLVERSE EN LA PANTALLA: R5 prohíbe
+    // `accent.cta` fuera del _layout raíz, y `TextoColor` no tiene
+    // registro de CTA (primary|secondary|tertiary|danger|success).
+    // Pintarlo desde el consumidor era rojo de lint POR CONSTRUCCIÓN —
+    // el hueco estaba acá, no allá.
+    acento:      { fondo: 'transparent', texto: theme.accent.cta },
   }
+
+  // Sobre el muro TODA variante resuelve del par medido: las que traen
+  // superficie invierten (papel/muro), las sin caja van en papel pleno.
+  // Es una tabla y no un parche por variante: si mañana nace otra, cae
+  // acá sola.
+  if (sobreMuro) {
+    const papel = palette.light0
+    const muro = theme.mode === 'dark' ? palette.tealDarkNoche : palette.tealDark
+    for (const k of Object.keys(colores) as BotonVariante[]) {
+      const traeSuperficie = colores[k].fondo !== 'transparent'
+      colores[k] = traeSuperficie
+        ? { fondo: papel, texto: muro }
+        : { fondo: 'transparent', texto: papel }
+    }
+  }
+
   const c = colores[varianteEfectiva]
 
   // B3.1c — constraint del gradiente v2: la exención WCAG de la cola del
@@ -221,7 +291,10 @@ export function Boton({
       <Text
         numberOfLines={1}
         style={{
-          fontFamily: typography.family.sans.medium,
+          // EL PESO ES LO QUE SEPARA A LAS DOS SIN CAJA: `acento` manda
+          // (bold + color de CTA), `ghost` recede (medium + tinta). Sin
+          // superficie que las distinga, el peso ES la jerarquía.
+          fontFamily: variante === 'acento' ? typography.family.sans.bold : typography.family.sans.medium,
           fontSize: t.fontSize,
           color: c.texto,
           opacity: mostrarSpinner ? 0 : 1,

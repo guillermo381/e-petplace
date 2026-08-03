@@ -86,6 +86,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { PAISES, PAIS_DEFAULT, bandera, type Pais } from '@/lib/paises';
 // ③ S83-C33 — el pipeline del logo YA EXISTÍA ENTERO (S76-B1/D-505). Lo
 // que faltaba era el cable.
 import { quitarLogoNegocio, subirLogoNegocio } from '@/lib/subir-logo';
@@ -115,47 +116,17 @@ import { useBarraEstadoClara } from '@/components/techo-oficio';
 
    ⚠️ COLOMBIA VALIDA — es el caso del founder, y no queda exento.
    ───────────────────────────────────────────────────────────────────── */
-type Pais = { iso: string; nombre: string; pre: string; formato?: string };
-const PAISES: Pais[] = [
-  { iso: 'AR', nombre: 'Argentina', pre: '+54', formato: '^\\+54\\d{10,11}$' },
-  { iso: 'BO', nombre: 'Bolivia', pre: '+591' },
-  { iso: 'BR', nombre: 'Brasil', pre: '+55' },
-  { iso: 'CA', nombre: 'Canadá', pre: '+1', formato: '^\\+1\\d{10}$' },
-  { iso: 'CL', nombre: 'Chile', pre: '+56', formato: '^\\+56\\d{9}$' },
-  { iso: 'CO', nombre: 'Colombia', pre: '+57', formato: '^\\+57\\d{7,10}$' },
-  { iso: 'CR', nombre: 'Costa Rica', pre: '+506' },
-  { iso: 'CU', nombre: 'Cuba', pre: '+53' },
-  { iso: 'DO', nombre: 'República Dominicana', pre: '+1' },
-  { iso: 'EC', nombre: 'Ecuador', pre: '+593', formato: '^\\+593\\d{8,9}$' },
-  { iso: 'ES', nombre: 'España', pre: '+34', formato: '^\\+34\\d{9}$' },
-  { iso: 'GT', nombre: 'Guatemala', pre: '+502' },
-  { iso: 'HN', nombre: 'Honduras', pre: '+504' },
-  { iso: 'MX', nombre: 'México', pre: '+52', formato: '^\\+52\\d{10}$' },
-  { iso: 'NI', nombre: 'Nicaragua', pre: '+505' },
-  { iso: 'PA', nombre: 'Panamá', pre: '+507' },
-  { iso: 'PE', nombre: 'Perú', pre: '+51', formato: '^\\+51\\d{7,9}$' },
-  { iso: 'PR', nombre: 'Puerto Rico', pre: '+1' },
-  { iso: 'PY', nombre: 'Paraguay', pre: '+595' },
-  { iso: 'SV', nombre: 'El Salvador', pre: '+503' },
-  { iso: 'US', nombre: 'Estados Unidos', pre: '+1', formato: '^\\+1\\d{10}$' },
-  { iso: 'UY', nombre: 'Uruguay', pre: '+598' },
-  { iso: 'VE', nombre: 'Venezuela', pre: '+58' },
-];
+/* ☠️ S84-C33 — LOS 23 SE MUDARON a `lib/paises.ts`. La pantalla de
+   documentos necesitaba la MISMA lista, y copiarla habría dejado dos
+   fuentes que se desincronizan al primer país nuevo (L-175). Acá queda
+   el import; el porqué de cada campo viaja con la lista. */
 
-/** El default del selector — el país donde opera la mayoría. NO es un
- *  techo: cualquiera de los 23 se elige (② arriba). */
 /** El techo del bucket de clips (A, S84): 10 MB. Vive acá porque el
  *  rebote tiene que decirse ANTES del round-trip. */
 const MAX_CLIP_BYTES = 10 * 1024 * 1024;
 
-const PAIS_DEFAULT = 'EC';
 
-/** ① FIRMADA: la bandera sale del `codigo_iso2` — cada letra a su
- *  indicador regional. El toggle de C10 murió con el gate: el Android
- *  del founder las dibuja, y lo que quedaba por resolver era la
- *  alineación (curada en `SelectorPais`). */
-const bandera = (iso: string): string =>
-  String.fromCodePoint(...[...iso].map((c) => (c.codePointAt(0) ?? 0) + 127397));
+
 
 type Seccion = 'portada' | 'contacto' | 'donde';
 
@@ -846,7 +817,17 @@ export default function PerfilV2() {
           />
 
           <View style={{ paddingHorizontal: spacing[5], paddingTop: spacing[4] }}>
-            {/* ── LAS CUATRO SECCIONES, en el orden firmado ── */}
+            {/* ── LAS CUATRO SECCIONES, en el orden firmado ──
+                ① S84-C29 — EL GRUPO SE SEPARA CON AIRE, NO CON LÍNEA.
+                Al pasar cada sección a Tarjeta (ver `perfil-piezas`), los
+                `Separador` que iban ENTRE secciones quedaron dibujando una
+                frontera donde el borde de la tarjeta ya la dice: dos
+                señales para el mismo trabajo. Es la pasada de remoción de
+                la Ley 16 — y no es cosmética, porque una línea entre dos
+                superficies elevadas se lee como que algo las une.
+                Los `Separador` de ADENTRO de una sección no se tocan: ahí
+                sí separan cosas distintas dentro de una misma caja. */}
+            <View style={{ gap: spacing[3] }}>
             <SeccionDesplegable
               icono="negocio"
               titulo={t('perfilNegocio.espacioTitulo')}
@@ -991,7 +972,26 @@ export default function PerfilV2() {
                 un solo pasajero). */}
             <View style={{ paddingVertical: spacing[4], gap: spacing[2] }}>
               <Texto variante="seccion">{t('perfilNegocio.clipTitulo')}</Texto>
-              {/* S84-C19 — EL CONTROL, con la captura de B (`d943295`).
+              {/* ② S84-C30 — `Boton acento`, la variante que B construyó
+                  (`da2f7e9`) sobre el pedido de C29.
+                  EL FOUNDER TENÍA RAZÓN Y YO FIRMÉ MAL DOS VECES: en C34
+                  puse subrayado (idioma web, fuera del diccionario) y la
+                  corrección me llevó a `compacto`, que es peor por otro
+                  motivo — **un botón con caja al lado de una foto compite
+                  con la foto**, y la foto es lo que la vitrina viene a
+                  mostrar. `acento` resuelve las dos: sin caja (no
+                  compite) y en `accent.cta` con peso bold (se nota, que
+                  es lo que 22c pedía y el subrayado no daba).
+                  ⚠️ EL PESO ES LA JERARQUÍA, no el color: `acento` manda
+                  y `ghost` recede — por eso "Quitar" NO se toca. Dos
+                  comandos sin caja al lado sin diferencia de peso serían
+                  dos primarios, y el destructivo ganaría la mitad de la
+                  atención de la fila.
+                  Cero prop de color: el slot lo resuelve por casa (verde
+                  del oficio acá, oro en el cliente). R5 sigue intacta —
+                  esta pantalla no nombra `accent.cta` en ningún lado.
+
+                  S84-C19 — EL CONTROL, con la captura de B (`d943295`).
                   LA CADENA DE ARRIBA NO SE TOCÓ: se escribió en C17 para
                   servir antes y después del botón, y ésa era su prueba.
                   Que ahora exista el control y siga sirviendo es la
@@ -1004,7 +1004,7 @@ export default function PerfilV2() {
               {clipPath === null ? (
                 <View style={{ alignSelf: 'flex-start' }}>
                   <Boton
-                    variante="compacto"
+                    variante="acento"
                     etiqueta={t('perfilNegocio.clipAgregar')}
                     cargando={subiendoClip}
                     onPress={() => void agregarClip()}
@@ -1015,7 +1015,7 @@ export default function PerfilV2() {
                   <Texto variante="apoyo">{t('perfilNegocio.clipCargado')}</Texto>
                   <View style={{ flexDirection: 'row', gap: spacing[2] }}>
                     <Boton
-                      variante="compacto"
+                      variante="acento"
                       etiqueta={t('perfilNegocio.clipCambiar')}
                       cargando={subiendoClip}
                       onPress={() => void agregarClip()}
@@ -1030,8 +1030,6 @@ export default function PerfilV2() {
             <Separador />
 
             </SeccionDesplegable>
-
-            <Separador />
 
             {/* ② S84-C6 — EL GLIFO LLEGÓ Y LA ASIMETRÍA TERMINÓ.
                 La nota que vivía acá describía un hueco —"el registry no
@@ -1126,8 +1124,6 @@ export default function PerfilV2() {
               />
             </SeccionDesplegable>
 
-            <Separador />
-
             {/* S83-C30 ② — "Dónde atendés" deja de ser dato falso: consume
                 `SeccionSede`, la MISMA pieza compartida que traía la
                 pantalla vieja (Places + radio, con sus escrituras propias
@@ -1184,6 +1180,7 @@ export default function PerfilV2() {
               )}
               {prestador !== null && <SeccionSede sede={leerSede(prestador)} />}
             </SeccionDesplegable>
+            </View>
 
             <Separador />
 
@@ -1316,6 +1313,36 @@ export default function PerfilV2() {
               detalle={t('perfilNegocio.cuentaComercialDetalle')}
               registro="aa"
               onPress={() => router.push('/cuenta-comercial')}
+            />
+
+            {/* ③ S84-C33 — LA PUERTA QUE NO EXISTÍA PARA TRES OFICIOS.
+                Medido en C29 ④: los TRES llamadores a documentos estaban
+                gateados a veterinaria, así que un paseador, un groomer o
+                un adiestrador tenía CERO caminos — no escondidos:
+                inexistentes.
+                VA EN LA VITRINA y no en ajustes porque **el sello es lo
+                que la familia lee para confiar**: no es configuración de
+                la cuenta, es parte de lo que te muestra. Un sello que
+                solo puede ganarse un oficio no es un sello de
+                plataforma. */}
+            {/* ⚠️ SIN GLIFO, Y DECLARADO — no es olvido. El registry NO
+                tiene `documento` (medido: 32 nombres, ninguno). Los dos
+                candidatos a mano fallan por ley, no por gusto:
+                · `carnet` es el CARNET DE VACUNAS de la mascota — su
+                  huella b′ sobre la cédula de una persona diría que el
+                  documento es del animal.
+                · `cuenta` lo usa la celda VECINA (Seguridad), y dos
+                  celdas pegadas con el mismo glifo es Ley 12 directa —
+                  el precedente exacto ya lo cazó el founder en S73.
+                `icono` es opcional desde S73, así que la celda vive sin
+                él en vez de mentir con uno prestado.
+                📣 PEDIDO A B: `documento` al registry (lote b′). Su
+                consumidor existe y es éste. */}
+            <CeldaNavegacion
+              titulo={t('perfilNegocio.documentosTitulo')}
+              detalle={t('perfilNegocio.documentosDetalle')}
+              registro="aa"
+              onPress={() => router.push('/cuenta/documentos')}
             />
 
             {/* ⑤ S84-C3 — "SEGURIDAD", y su condición de muerte escrita.

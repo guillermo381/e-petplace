@@ -765,6 +765,19 @@ export {
 } from './wrappers/handshake-mostrador';
 export {
   ESTADOS_DOCUMENTO,
+  // ⚠️ S84-C33 — LOS TRES DEL EJE ① LOS AGREGA C, Y LO DECLARA (76(d):
+  // este archivo es de A). NO es una decisión: es la omisión del re-export
+  // de símbolos que A **acaba de escribir para destrabarme** (`d820ba3`,
+  // asunto literal: "C destrabada") y que sin esta línea no cruzan la
+  // puerta única. Cero lógica agregada — tres nombres a la lista.
+  // LA ALTERNATIVA ERA PEOR Y POR ESO NO SE TOMÓ: re-implementar
+  // `documentoDeFigura` del lado de la app clonaría la regla fiscal
+  // (`persona_natural` → cédula) en un segundo cuerpo, y el día que la
+  // regla cambie una de las dos copias queda vieja en silencio. La
+  // función existe justamente para que esa regla viva UNA vez.
+  TIPOS_DOCUMENTO_FIGURA,
+  TIPOS_DOCUMENTO_OFICIO_VET,
+  documentoDeFigura,
   TIPOS_DOCUMENTO_VERIFICACION,
   obtenerDocumentosVerificacion,
   registrarDocumentoVerificacion,

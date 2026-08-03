@@ -78,7 +78,30 @@ export function SeccionDesplegable({
   children: ReactNode;
 }) {
   return (
-    <View>
+    /* ① S84-C29 — LA SECCIÓN ENTERA ES **UNA** TARJETA, encabezado
+       incluido.
+       C24 había puesto el fondo blanco SOLO en el panel abierto, y el
+       founder cazó lo que faltaba: el encabezado —que es el control que
+       se ve SIEMPRE, abierto o cerrado— seguía cayendo sobre el papel.
+       Con el acordeón de una-a-la-vez, eso dejaba tres botones desnudos
+       y un único panel blanco colgando del segundo.
+
+       **POR QUÉ UNA Y NO DOS.** La otra lectura era anidar: darle su
+       propia tarjeta al encabezado y dejar la del panel adentro. Se
+       descarta MIDIENDO, no por gusto: `elevacion="reposo"` es una
+       SOMBRA, y dos sombras pegadas dibujan un borde donde no hay
+       frontera — el contenido de una sección no es otra cosa que su
+       encabezado, es lo mismo desplegado. Ley 20/Chanel: la presencia
+       se dice con UNA superficie apoyada, no con dos.
+       **Y el pedido se cumple igual: el fondo blanco de adentro NO se
+       fue** — el contenido sigue sobre blanco. Lo que se fue es la
+       costura entre dos blancos que eran el mismo.
+
+       `relleno="ninguno"` porque el padding ya lo traen las piezas
+       (`CeldaNavegacion` el suyo, el panel el de abajo); sin eso el
+       encabezado quedaba con doble aire y la fila se desalineaba de sus
+       hermanas de la casa. Cero valor crudo: todo sale de tokens. */
+    <Tarjeta elevacion="reposo" relleno="ninguno">
       <CeldaNavegacion
         icono={icono}
         titulo={titulo}
@@ -87,24 +110,12 @@ export function SeccionDesplegable({
         direccion={abierta ? 'arriba' : 'abajo'}
         onPress={onAlternar}
       />
-      {/* ④ S84-C24 — EL PANEL ABIERTO VA SOBRE TARJETA (firma founder:
-          "fondo blanco, como sus hermanas"). Antes el contenido caía
-          directo sobre el papel de la pantalla, así que una sección
-          desplegada no se distinguía del resto del scroll — y son
-          justamente las tres que MÁS contenido tienen (Tu espacio, Cómo
-          te contactan, Dónde atiendes).
-          `elevacion="reposo"` es el nivel que ya rige en la casa desde
-          S81 (69 pantallas); acá no se elige un número, se consume el de
-          la casa. Y el radio y el padding los pone la pieza: esta fila
-          no tiene ni un valor crudo. */}
       {abierta && (
-        <View style={{ paddingBottom: spacing[4] }}>
-          <Tarjeta elevacion="reposo">
-            <View style={{ gap: spacing[2] }}>{children}</View>
-          </Tarjeta>
+        <View style={{ paddingHorizontal: spacing[3], paddingBottom: spacing[3], gap: spacing[2] }}>
+          {children}
         </View>
       )}
-    </View>
+    </Tarjeta>
   );
 }
 
@@ -417,7 +428,71 @@ export function EspejoNegocio({
             </Text>
           )}
 
-          {/* ② EL CTA DEL LOGO — `Boton compacto`, que es lo que la casa
+          {/* ② S84-C32 — EL FRENO SE LEVANTA: B entregó la prop
+              (`ec31f5d`) y el botón vuelve a ser legible.
+              `superficie="muro"` NO es un color nuevo: es la tabla que
+              invierte el par YA MEDIDO — papel pleno #FAF9F7 sobre el
+              muro = **5.51 en claro · 9.61 en oscuro**. Mi 2.92 muere
+              acá.
+              Y B no inventó vocabulario: `LogoNegocio` —la pieza que
+              está tres líneas arriba, en este mismo bloque— ya tenía
+              `superficie: 'clara'|'muro'` con esa semántica exacta. La
+              casa había contestado y faltaba ensanchar la respuesta
+              (L-175), no abrir una segunda.
+
+              ⚠️ DIVERGENCIA DECLARADA, y es de UNA PALABRA revertirla:
+              **la mesa dijo `compacto` y monté `acento`.** El porqué es
+              medición del código de B, no gusto: sobre el muro la tabla
+              **reescribe la entrada entera y no copia el `borde`**, así
+              que `compacto` PIERDE su contorno ahí — que era lo único
+              que lo distinguía. Sobre el muro `compacto` y `acento`
+              quedan idénticos salvo el PESO.
+              Con eso, elegir `compacto` sería vestir con dos anatomías
+              distintas **el mismo trabajo**: "cambiar el clip" (que
+              quedó en `acento` en C30) y "cambiar el logo" son la misma
+              acción sobre la misma pantalla. Un trabajo, un componente.
+              Si preferís `compacto`, es una palabra.
+
+              ── historia, que explica de dónde viene esto ──
+              C30 FRENÓ ACÁ, y no era preferencia — era EL MISMO HEX.
+              La orden decía montarlo en el clip y en el logo. En el clip
+              entró; acá NO, porque este botón **no vive sobre papel: vive
+              sobre EL MURO**, y el muro es la única superficie de la app
+              que no sale del tema.
+
+              MEDIDO, no supuesto:
+              · `lightOficio.accent.cta` = `palette.tealDark` = **#0A7268**
+                (`themes/index.ts:137`).
+              · el muro en claro y en memorial = `palette.tealDark` =
+                **#0A7268** (`techo-oficio.ts:45`).
+              **Contraste 1.00.** El texto y el fondo son el mismo color:
+              el botón desaparecería por completo. En oscuro no
+              desaparece (teal puro sobre `tealDarkNoche` = 6.57), y eso
+              lo vuelve peor, no mejor: **invisible en dos temas de tres
+              y legible en el otro** es la clase de defecto que un gate
+              en un solo tema no encuentra.
+              Y §15b.2 ya lo tenía escrito antes de esta medición: sobre
+              el muro el acento funcional es PAPEL, y el teal queda
+              PROHIBIDO ahí.
+
+              ⚠️ LO QUE LA MEDICIÓN DESTAPÓ DE PASO, y es mío: el
+              `compacto` que hay hoy **también cruza la frontera que este
+              archivo declara doce líneas más arriba** (una pieza que
+              resuelve su color de `theme.*` no puede vestir el muro).
+              Su texto es `text.primary` #1D1A2E sobre #0A7268 = **2.92**,
+              bajo el 4.5 de AA. Lo escribí en C34 sin medirlo.
+              **No lo cambio en este commit y digo por qué:** la cura no
+              es elegir otra variante —**ninguna de las ocho sirve**,
+              todas resuelven de `theme.*`— sino que `Boton` sepa vestir
+              el muro (papel PLENO = #FAF9F7 sobre #0A7268 = **5.51**,
+              que es el par que la casa ya midió y usa en `TechoOficio`).
+              **Eso es de B**, y va como pedido con estos números. Dejar
+              el `compacto` es conservar el estado que el founder ya vio;
+              cambiarlo a ojo sería mi tercer error de anatomía en el
+              mismo botón.
+
+              ── historia, que explica el estado de hoy ──
+              EL CTA DEL LOGO — `Boton compacto`, que es lo que la casa
               YA tenía (la pantalla vieja lo usaba; S76-B1).
               ⚠️ SE CORRIGE MI PROPIA INVENCIÓN de C34: había puesto un
               texto SUBRAYADO, que es idioma web y no está en el
@@ -430,7 +505,8 @@ export function EspejoNegocio({
               botón que lo dijera prometería una pantalla que no abre. */}
           <View style={{ alignSelf: 'flex-start' }}>
             <Boton
-              variante="compacto"
+              variante="acento"
+              superficie="muro"
               etiqueta={logoUrl === null ? etiquetaLogo.agregar : etiquetaLogo.cambiar}
               onPress={onEditarLogo}
             />

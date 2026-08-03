@@ -208,7 +208,68 @@ gestionar).
 **Los documentos** — **no tienen pantalla propia**: viven dentro de
 `veterinaria/verificacion.tsx`. La consecuencia que la mesa encuadró y
 es mayor que la ubicación: **un paseador o un groomer no tiene dónde
-subir los suyos** ⇒ **D-630**, sin fecha, letra antes que pantalla.
+subir los suyos** ⇒ **~~D-630~~ D-632** (ver la corrección de número
+abajo), sin fecha, letra antes que pantalla.
+
+### ENMIENDA S84-C29 ④ — EL NÚMERO ESTABA OCUPADO, y el conteo lo dice
+
+**Esta acta reservó `D-630` para los documentos. `D-630` ya existe y es
+otra cosa:** *"EL BURN-DOWN DE LA REGLA 81"* (`DEUDAS_CANONICAS.md:4372`,
+firmada por el founder en S84). **Gana el archivo canónico**, no esta
+acta: una mención en un relevamiento no reserva un número.
+
+Medido por grep sobre `DEUDAS_CANONICAS.md` —**jamás de memoria**, que es
+exactamente cómo se produjo el choque— el último ocupado es **D-631**
+(`keyboardShouldPersistTaps` en siete pantallas más, la que A abrió con
+mi alcance). **El libre es D-632.**
+
+**LA MEDICIÓN QUE LA FICHA NECESITA — tres llamadores, los tres gateados
+al mismo oficio:**
+- `sala-espera.tsx:215` — dentro de `{esVet && (…)}`
+- `veterinaria/index.tsx:212` y `:255` — dentro del mundo vet, al que se
+  entra por `negocio.tsx:298` (`mundoVeterinaria`)
+
+⇒ **un prestador NO veterinario tiene CERO caminos a subir documentos.**
+No es que estén escondidos: **no existen para él.**
+
+**Y por qué eso es más grave que una pantalla mal ubicada:** el sello de
+verificación es de PLATAFORMA — es lo que una familia lee para confiar.
+**Un sello que solo puede ganarse un oficio no es un sello de
+plataforma**, es una credencial de veterinarios con nombre de sello. Un
+paseador con antecedentes limpios y un groomer con su certificado no
+tienen cómo probarlo, y la familia no tiene cómo distinguirlos de quien
+no los tiene.
+
+**LA PANTALLA NO SE MUEVE (orden de la mesa, y la comparto):** el hueco
+no es de ubicación sino de LETRA — qué documento pide cada oficio, quién
+lo aprueba y qué sello otorga. Mover `verificacion.tsx` a un lugar común
+sin esa letra le daría a un paseador un formulario que pide credencial
+médica. **Letra antes que pantalla.**
+
+**EL NOMBRE DEL DOCUMENTO — FIRMA DE LA MESA (S84-C32), y entra al
+literal porque es lo primero que se pierde entre sesiones:**
+
+**Viene del CATÁLOGO. No se hardcodea.** La regla *persona_natural →
+cédula · las otras tres → RUC* es verdadera **en Ecuador y el nombre no
+viaja**: en Colombia una persona jurídica tiene **NIT**, no RUC. Y como
+el país del documento **SE ELIGE** (firmado en C31), la pantalla va a
+estar en EC mostrando un documento de otro país — hardcodear "RUC" la
+hace mentir **apenas alguien elija Colombia**.
+
+**Y LA SALIDA SI EL CATÁLOGO NO LLEGA A TIEMPO — que es la parte que
+importa, porque es la que se improvisa mal bajo presión:** *no* se
+hardcodea igual "por ahora". **La pantalla NO LO NOMBRA** y dice **"tu
+identificación fiscal"** — genérico y **verdadero en los dos países**,
+en vez de específico y falso en uno. Es Ley 13 y L-139 en la misma
+frase: **el dato que no se tiene no se rellena con el que suena bien.**
+
+*Lo medido que sostiene esto: `obtenerPaisesParaRegistro()` ya devuelve
+`tiposFiscales` **y** `mascaraPorTipo` por país (`cat_paises.mascara_id_fiscal`)
+— la VALIDACIÓN del número no hay que inventarla. Lo que **no** trae hoy
+es el NOMBRE, y ése es el hueco exacto del ensanche de A.*
+
+*(Territorio: el número y la ficha son de A — `DEUDAS_CANONICAS.md` es
+suyo. Esto es el literal para que lo deposite, no la ficha.)*
 
 **El censo del voseo** — ~20 cadenas con "todavía no / aún no" en el
 prestador, y **la gran mayoría NO tiene el defecto** (son estado del dato
