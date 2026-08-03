@@ -76,6 +76,40 @@ en el contrato):*
 4. **Una confirmación que sobrevive a una escritura NO CONFIRMA NADA.** Si
    alguien —incluida A— escribe después de recibirlas, **se descartan y se
    re-pide**. *En S84 pasó tres veces y las tres se re-pidió.*
+
+   > **➕ AFINACIÓN S85 — CÓMO SE DECIDE UNA EXCEPCIÓN.** *Es donde esta regla se
+   > rompe sin que nadie lo note, porque se rompe con un argumento verdadero.*
+   >
+   > **El caso:** C declaró cierre 12:32:26 y **A escribió 12:33:14** — un commit
+   > **solo de `docs/`**, cero código bundleable, incapaz de alterar nada de lo
+   > que C había confirmado sobre su trabajo. **La tentación de eximirlo era
+   > fuerte y el argumento era cierto.**
+   >
+   > **No se eximió, y el criterio es lo que vale guardar:**
+   >
+   > > ### **LA PRUEBA NO ES *"¿mi escritura fue inocua?"*. ES *"¿EXIMIRLA AHORRA ALGO?"*.**
+   >
+   > **Por qué la primera pregunta es la trampa:** *toda* escritura propia parece
+   > inocua **desde adentro** — quien la hizo sabe qué tocó. Contestarla convierte
+   > una regla **mecánica** (¿hubo un commit después? sí/no) en una **de juicio**
+   > (¿importaba?). *Y una regla que depende del criterio de quien la aplica no la
+   > puede verificar nadie más — que es exactamente lo que esta regla existe para
+   > no necesitar.*
+   >
+   > **Por qué la segunda la resuelve sin discutir el fondo:** re-pedirle a B **ya
+   > era obligatorio** (su confirmación estaba vencida por escrituras de C). Las
+   > dos preguntas viajaban **en el mismo mensaje** ⇒ **el costo de ser estricta
+   > era CERO.** *La excepción habría sido gratis para A y cara para la regla.*
+   >
+   > **EL COROLARIO OPERATIVO, que es lo que vuelve barata la disciplina:** cuando
+   > haya que re-pedir a UNA pista, **se re-pide a TODAS en el mismo mensaje.**
+   > Ahí la pregunta *"¿esta escritura cuenta?"* **deja de tener consecuencia
+   > práctica — y con eso deja de tener quien la haga.**
+   >
+   > *(Y el borde honesto: si alguna vez re-pedir SÍ costara —una pista fuera de
+   > línea, un cierre con hora—, la decisión vuelve a la mesa **declarando el
+   > costo**, no al criterio de quien escribió.)*
+
 5. **LA VEDA NO SE LEVANTA SOLA POR URGENCIA.** *(aporte de C, S84.)* Si la mesa
    necesita que una pista trabaje durante una veda, **la levanta explícitamente y
    lo declara** — y **después se RE-PIDE congelación**. **Un levantamiento tácito
