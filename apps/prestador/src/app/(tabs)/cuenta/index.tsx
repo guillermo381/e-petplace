@@ -279,8 +279,19 @@ export default function Cuenta() {
 
   // S58 (D-361 levantado): cada entrada con su ícono b′ del registry —
   // el perfil comparte la chapita 'cuenta' (decisión del lote ea7e8e4)
+  /* ① S84-C34 — LO PERSONAL VUELVE A SU CASA, y la lápida que el Perfil
+     tenía escrita se cumple sola.
+     `Tus datos` y `Seguridad` vivían de paso en el Perfil porque no
+     tenían dónde; con el Perfil convertido en VITRINA esa mezcla dejó de
+     ser transitoria y pasó a ser contradicción: **la familia no ve tu
+     nombre ni tu correo**, así que no tienen nada que hacer en lo que la
+     familia mira. Es el tercer verbo al pie — CUENTA es lo tuyo.
+     ⚠️ Y `Seguridad` entra DIRECTO, sin escala: antes el camino era
+     Perfil → Nombre y acceso → Seguridad, dos puertas para una cosa. */
   const lugares = [
     { etiqueta: t('miCuenta.perfil'), ruta: '/cuenta/perfil' as const, icono: 'cuenta' as const },
+    { etiqueta: t('miCuenta.tusDatos'), ruta: '/cuenta/identidad' as const, icono: 'cuenta' as const },
+    { etiqueta: t('seguridad.titulo'), ruta: '/cuenta/seguridad' as const, icono: 'preferencias' as const },
     { etiqueta: t('miCuenta.preferencias'), ruta: '/cuenta/preferencias' as const, icono: 'preferencias' as const },
   ];
 
