@@ -89,6 +89,12 @@ export interface DraftFranja {
   horaInicio: string;
   horaFin: string;
   cupo: number;
+  /** ⭐ S85-C9 — EL TECHO DEL OFICIO (`tipos_servicio.cupo_techo`, vía
+   *  `FranjaHorario.cupoTechoMaximo` de A). Viaja CON la franja y no como
+   *  constante de pantalla: el número tiene autor en el catálogo, y el
+   *  `max={4}` escrito a mano que vivía acá quedó viejo el día que A subió
+   *  el techo a 10 — sin que nada fallara. */
+  cupoTecho: number;
   activo: boolean;
   quitar: boolean;
   baseCupo: number | null;
@@ -126,6 +132,7 @@ export function draftDesdeFranja(f: FranjaHorario, servicioId: string | null = n
     horaInicio: f.horaInicio,
     horaFin: f.horaFin,
     cupo: f.maxCitasPorSlot,
+    cupoTecho: f.cupoTechoMaximo,
     activo: f.activo,
     quitar: false,
     baseCupo: f.maxCitasPorSlot,
@@ -441,6 +448,24 @@ export function SeccionHorarios({
   const [desdeSel, setDesdeSel] = useState<string | null>(null);
   const [hastaSel, setHastaSel] = useState<string | null>(null);
   const [cupoSel, setCupoSel] = useState(CUPO_NUEVA_FRANJA);
+  /**
+   * ⭐ S85-C9 — EL TECHO DEL OFICIO, del catálogo y no de la pantalla.
+   * Sale de `cupoTechoMaximo` (A), que baja de `tipos_servicio.cupo_techo`.
+   * Es UNO por oficio, así que se toma de la primera franja que lo traiga.
+   *
+   * ☠️ MURIÓ el `max={4}` escrito a mano. Ese número **quedó viejo sin que
+   * nada fallara** el día que A subió el techo a 10: el motor aceptaba diez
+   * y la pantalla seguía cortando en cuatro. Un tope con autor en el
+   * catálogo no puede envejecer así.
+   *
+   * ⚠️ **EL BORDE, firmado: si el techo no llega, vale 1 — y las franjas
+   * llegan igual.** La pantalla JAMÁS se cae por no poder calcular una
+   * AYUDA: un fallo de lo accesorio no tumba lo principal. Y se toma el
+   * mayor contra el valor actual para que un techo caído no deje un
+   * stepper por debajo de lo que la franja YA declara (mostraría 3 con
+   * tope 1, que es un control mintiendo sobre su propio valor).
+   */
+  const techoDelOficio = franjas?.find((f) => f.cupoTecho > 0)?.cupoTecho ?? 1;
   const contadorNuevas = useRef(0);
 
   // ── S78-B TURNOS: las personas con chip de ESTE oficio ──
@@ -487,6 +512,7 @@ export function SeccionHorarios({
         horaInicio: fp.horaInicio,
         horaFin: fp.horaFin,
         cupo: fp.cupo,
+        cupoTecho: techoDelOficio,
         activo: true,
         quitar: false,
         baseCupo: null,
@@ -615,6 +641,11 @@ export function SeccionHorarios({
   const vozMascotas = oficio !== 'paseo';
   const vozCupoTitulo = vozMascotas ? t('tallerGrooming.cupo') : t('horarios.cupo');
   const vozCupoAyuda = vozMascotas ? t('tallerGrooming.cupoAyuda') : t('horarios.cupoAyuda');
+  /** ⭐ S85-C9 — LA VOZ DEL TECHO (letra de A). Dice de QUIÉN es el límite:
+   *  del NEGOCIO, no de esta franja — sin esa mitad, un stepper que se
+   *  frena en 10 se lee como un tope de la franja que estás editando y el
+   *  prestador cree que otra franja podría más. */
+  const vozTecho = t('horarios.cupoTecho', { n: techoDelOficio });
   const vozCupo = (cupo: number): string =>
     cupo === 1
       ? vozMascotas
@@ -797,6 +828,7 @@ export function SeccionHorarios({
           horaInicio: desdeSel,
           horaFin: hastaSel,
           cupo: cupoSel,
+          cupoTecho: techoDelOficio,
           activo: true,
           quitar: false,
           baseCupo: null,
@@ -1108,11 +1140,13 @@ export function SeccionHorarios({
                     registro="oficio"
                     valor={cupoSel}
                     min={1}
-                    max={4}
+                    max={Math.max(techoDelOficio, cupoSel)}
                     onCambio={setCupoSel}
                   />
                 </View>
                 <Texto variante="apoyo">{vozCupoAyuda}</Texto>
+            <Texto variante="apoyo">{vozTecho}</Texto>
+                <Texto variante="apoyo">{vozTecho}</Texto>
                 <Boton
                   variante="primario"
                   etiqueta={t('taller.listo')}
@@ -1251,7 +1285,7 @@ export function SeccionHorarios({
                 registro="oficio"
                 valor={cupoSel}
                 min={1}
-                max={4}
+                max={Math.max(techoDelOficio, cupoSel)}
                 onCambio={setCupoSel}
               />
             </View>

@@ -1328,6 +1328,7 @@ export const prestadorEs = {
     hasta: 'Hasta',
     horaElegir: 'Elige la hora',
     cupo: 'Paseos simultáneos',
+    cupoTecho: 'Hasta {{n}} en simultáneo — es el máximo de tu negocio, no de esta franja.',
     cupoAyuda: 'Cuántos paseos puedes atender a la vez en esta franja.',
     pausar: 'Pausar',
     reactivar: 'Reactivar',
