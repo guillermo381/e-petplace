@@ -311,6 +311,27 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
     </>
   ),
   // El escudo — la vida protegida (verde vital, como insurance).
+  //
+  // ⚖️ COLISIÓN DECLARADA Y ACEPTADA (firma de mesa, S85): ESTE MISMO
+  // DIBUJO tiene DOS usos en DOS apps — el SERVICIO DE SEGUROS en el
+  // cliente y la SEGURIDAD DE LA CUENTA en el prestador. Se declara acá,
+  // en el registry, porque es el único lugar donde alguien que vaya a
+  // dibujar el próximo glifo lo va a leer.
+  //
+  // POR QUÉ NO ROMPE LA LEY 12, que es lo que hay que poder contestar: la
+  // Ley 12 pide que el glifo separe cosas que significan distinto DENTRO
+  // DE UNA MISMA UNIDAD DE BARRIDO — una fila, un menú, una hilera. Estos
+  // dos usos NO comparten pantalla ni app: nadie ve nunca los dos juntos,
+  // así que no hay nada que el ojo tenga que separar. La colisión es de
+  // NOMBRE en el registry, no de lectura en el producto.
+  //
+  // ⚠️ LO QUE ESTO NO AUTORIZA, y por eso se escribe: no habilita reusar
+  // un glifo por parecido temático dentro de una misma app. Si algún día
+  // el cliente monta "Seguridad de la cuenta" —o el prestador vende
+  // seguros—, los dos usos caen en la misma casa, y ahí SÍ hace falta un
+  // segundo dibujo: el escudo se queda con el que llegó primero y el otro
+  // pasa por §6b (hoja de contacto, 2-3 variantes, gate POR ÍCONO a 21px).
+  // Ese día esta nota es la que dice cuál es cuál.
   seguros: ({ tinta, huella }) => (
     <>
       <Path d="M12 3.4 19 6v5.4c0 4.5-2.9 8-7 9.6-4.1-1.6-7-5.1-7-9.6V6Z" {...trazo(tinta)} />

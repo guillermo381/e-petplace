@@ -214,6 +214,12 @@ export { PieReserva, type PieReservaProps } from './components/PieReserva'
 // pantalla, y su promoción estaba escrita como trabajo de B post-gate.
 // Cada casa las viste con su tema SIN replumbar nada: todo lo cromático
 // ya resolvía de slots, y `accent.control` se resuelve por casa (R27).
+// SelectorDia — S85-B8: LA RUEDA DE DÍAS (D3), promovida del cliente por
+// la Regla de las Piezas (segundo consumidor: el bloque «Tu día» de la
+// portada del prestador). Su FÍSICA ESTÁ FIRMADA y no se recalibra —
+// los números salieron de un gate en dispositivo y viajaron verbatim.
+export { SelectorDia, type SelectorDiaProps, type DiaOpcion } from './components/SelectorDia'
+
 export {
   FiltroPills,
   type FiltroPillsProps,

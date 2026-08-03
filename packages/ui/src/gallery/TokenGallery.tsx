@@ -50,6 +50,7 @@ import { FilaCita } from '../components/FilaCita'
 import { PieRevelar } from '../components/PieRevelar'
 import { PieReserva } from '../components/PieReserva'
 import { FiltroPills, FiltroMascotas } from '../components/FiltroPills'
+import { SelectorDia } from '../components/SelectorDia'
 import { MarcaEleccion } from '../brand/MarcaEleccion'
 import { HeroMarca } from '../components/HeroMarca'
 import { LineaDeVida, LineaDeVidaNodo, type LineaDeVidaItem } from '../components/LineaDeVida'
@@ -2361,6 +2362,41 @@ function GaleriaInterna() {
             (R22 lo mecaniza: los glifos b′ ya llevan huella, y adentro sería una huella entre
             huellas) · apoyada sobre el canto, con el aire reservado por quien la porta. El COLOR es
             del consumidor: la pieza no elige dosis desde adentro (Ley 4).
+          </Texto>
+        </Seccion>
+
+        <Seccion titulo="SelectorDia (66) — la RUEDA de días D3 (S85, promovida)">
+          {/* Promovida del cliente por la Regla de las Piezas: segundo
+              consumidor, el bloque «Tu día» del prestador. SU FÍSICA ESTÁ
+              FIRMADA y no se recalibra — ítem 66 · paso 76 · escalas
+              1.16/.94/.84/.78 · opacidades 1/.62/.34/.18 · 520ms con la
+              curva de la casa. Lo que hay que mirar acá es el GESTO: se
+              arrastra, y al soltar el imán la deja en un día, jamás entre
+              dos. Escala, opacidad y acento siguen AL DEDO (worklet), no
+              al estado de React. */}
+          <SelectorDia
+            dias={[
+              { iso: '2026-08-03', dia: 'lun', numero: '3' },
+              { iso: '2026-08-04', dia: 'mar', numero: '4' },
+              { iso: '2026-08-05', dia: 'mié', numero: '5' },
+              { iso: '2026-08-06', dia: 'jue', numero: '6' },
+              { iso: '2026-08-07', dia: 'vie', numero: '7' },
+              { iso: '2026-08-08', dia: 'sáb', numero: '8' },
+            ]}
+            elegido="2026-08-05"
+            cerrados={new Set(['2026-08-08'])}
+            etiquetaCerrado="cerrado"
+            onElegir={() => {}}
+          />
+          <View style={{ height: spacing[3] }} />
+          <Texto variante="apoyo">
+            ⚠️ GATE ABIERTO, en LAS DOS casas: el color de la SUPERFICIE del día —el &quot;techo&quot; de
+            la rueda— nunca se firmó en el prestador, porque hasta hoy la rueda no vivía ahí. Resuelve
+            de `bg.card` como en el cliente, y el acento del número de `accent.control`, que ya se
+            resuelve por casa (magenta en el cliente, verde en el prestador). El sábado va CERRADO a
+            propósito: el día cerrado SE PUEDE TOCAR — un día apagado y mudo era el bug que este
+            cableado vino a curar, y su estado se DICE para el lector de pantalla, que no ve
+            opacidades.
           </Texto>
         </Seccion>
 
