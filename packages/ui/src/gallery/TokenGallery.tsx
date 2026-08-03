@@ -744,6 +744,21 @@ function LoRechazado() {
         </View>
       </Rechazado>
 
+      {/* S84-B18 — LAS DOS SIN CAJA, JUNTAS, que es la única forma de ver
+          lo que las separa: no hay superficie que las distinga, así que
+          la jerarquía la dice EL PESO y EL COLOR. `acento` manda
+          (accent.cta + bold), `ghost` recede (tinta + medium). */}
+      <View style={{ gap: spacing[2] }}>
+        <Texto variante="apoyo">
+          Las dos SIN superficie ni borde — acento MANDA, ghost RECEDE. Nació porque un botón sólido al
+          lado de una foto compite con la foto (rechazo del founder, vitrina).
+        </Texto>
+        <View style={{ flexDirection: "row", gap: spacing[2] }}>
+          <View style={{ flex: 1 }}><Boton variante="acento" etiqueta="acento" bloque onPress={() => {}} /></View>
+          <View style={{ flex: 1 }}><Boton variante="ghost" etiqueta="ghost" bloque onPress={() => {}} /></View>
+        </View>
+      </View>
+
       <Rechazado
         fecha="29-jul-2026"
         razon="EL CONTORNO COMO ACCIÓN. `Boton secundario` y `compacto` siguen con borde y siguen VIVOS en decenas de pantallas: su muerte ANCHA es D-483 con mecánica al-tocarse (migra por craft, jamás por barrida). `sinCaja` es el reemplazo firmado — se ve arriba, con su sombra."

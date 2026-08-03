@@ -54,7 +54,7 @@ import { useTheme } from '../ThemeProvider'
 // (bienvenida del cliente); si el founder la firma, muere el contorno
 // del secundario y la enmienda a la Ley 22 pasa por la MESA. Hasta esa
 // firma, código nuevo sigue usando 'secundario'.
-export type BotonVariante = 'primario' | 'marca' | 'secundario' | 'ghost' | 'destructivo' | 'compacto' | 'sinCaja'
+export type BotonVariante = 'primario' | 'marca' | 'secundario' | 'ghost' | 'destructivo' | 'compacto' | 'sinCaja' | 'acento'
 export type BotonTamaño = 'sm' | 'md' | 'lg'
 
 // md 48 = default: target táctil. sm 36 compensa con hitSlop (target efectivo 44).
@@ -176,6 +176,31 @@ export function Boton({
     sinCaja:     { fondo: theme.accent.sinCaja, texto: theme.text.primary },
     destructivo: { fondo: theme.status.dangerBg, texto: theme.status.dangerText },
     compacto:    { fondo: 'transparent', texto: theme.text.primary, borde: theme.border.default },
+    // ── ACENTO (S84-B18) — EL COMANDO QUE NO COMPITE CON LA FOTO ──────
+    // Nace de un rechazo del founder con su razón: un botón SÓLIDO al
+    // lado de una foto compite con la foto, y la vitrina existe para
+    // mostrar la foto. Sin superficie ni borde; la presencia la da EL
+    // COLOR DEL CTA + el peso.
+    //
+    // POR QUÉ NINGUNA DE LAS SIETE SERVÍA (censo de C, verificado acá):
+    //  · `ghost` es la ÚNICA sin superficie, pero su texto va en
+    //    `text.primary` — no cumple la Ley 22c (un comando con
+    //    consecuencia se NOTA) y la casa ya lo tiene tomado como
+    //    terciario.
+    //  · `marca` es transparente pero su texto es `onGradient`: solo
+    //    vive sobre el gradiente.
+    //  · `compacto` es transparente CON borde — y el contorno
+    //    transparente como acción está muerto desde la 19.7.
+    //  · `sinCaja` NO ES SIN CAJA: tiene `accent.sinCaja`, un slot
+    //    propio que S82-B r12 le dio JUSTAMENTE para darle presencia de
+    //    superficie. Su nombre quedó viejo (ver la nota de abajo).
+    //
+    // Y POR QUÉ NO PODÍA RESOLVERSE EN LA PANTALLA: R5 prohíbe
+    // `accent.cta` fuera del _layout raíz, y `TextoColor` no tiene
+    // registro de CTA (primary|secondary|tertiary|danger|success).
+    // Pintarlo desde el consumidor era rojo de lint POR CONSTRUCCIÓN —
+    // el hueco estaba acá, no allá.
+    acento:      { fondo: 'transparent', texto: theme.accent.cta },
   }
   const c = colores[varianteEfectiva]
 
@@ -221,7 +246,10 @@ export function Boton({
       <Text
         numberOfLines={1}
         style={{
-          fontFamily: typography.family.sans.medium,
+          // EL PESO ES LO QUE SEPARA A LAS DOS SIN CAJA: `acento` manda
+          // (bold + color de CTA), `ghost` recede (medium + tinta). Sin
+          // superficie que las distinga, el peso ES la jerarquía.
+          fontFamily: variante === 'acento' ? typography.family.sans.bold : typography.family.sans.medium,
           fontSize: t.fontSize,
           color: c.texto,
           opacity: mostrarSpinner ? 0 : 1,
