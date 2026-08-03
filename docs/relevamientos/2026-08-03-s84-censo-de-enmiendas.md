@@ -1,23 +1,36 @@
 # S84 · CENSO DE ENMIENDAS DE LEY 
 
-> # ⚠️ S84 ESTÁ **PUBLICADA, NO FIRMADA**
+> # ✅ S84 **FIRMADA** — el gate cerró al **100%** (founder, 3-ago-2026)
 >
-> **LA PASADA DE GATE NO SE HIZO.** El founder paró la sesión antes, y se difiere
-> a S85 con contexto fresco. **Nueve OTAs esperan un ojo.**
+> **La pasada que S84 dejó pendiente SE HIZO.** Los nueve OTAs tuvieron su ojo.
 >
-> **Nada de lo de abajo se hereda como hecho.** Regla 80 al pie: *la ley se
-> escribe después del resultado firmado.* Lo que quedó sin ver:
+> **Todo firmado, con UNA excepción — y va nombrada arriba de todo, porque una
+> firma "al 100%" con un rebote adentro es exactamente el dato que después nadie
+> vuelve a verificar:**
 >
-> · **los tres glifos** (fiscal · bancario · documento) — el **candidato A está
->   elegido**, el **dibujo a 21px no**
-> · **`Boton` acento** y **`Boton superficie="muro"`**
-> · **Datos comerciales**, el aviso de revisión, **Cuenta reordenada**
-> · **la cura de Places**
-> · **la pantalla de documentos** del eje ①
-> · 🔴 **LA RECUPERACIÓN POR CÓDIGO — nunca se probó contra un correo real.**
->   Si `verifyOtp` no da sesión utilizable, **el camino se cae y el reparto vuelve
->   a la mesa**. *Es lo único de S84 que puede REVERTIR una decisión, no solo
->   pedir un retoque.*
+> · 🔴 **`Boton` acento — REBOTADO.** Cura ordenada a B: **la flecha en el
+>   label**. **El re-gate viaja con el próximo publish.** Hasta entonces el
+>   acento está *publicado y rebotado* — que no es lo mismo que *pendiente de
+>   mirar*, y confundirlos lo archivaría como visto.
+>
+> **Firmados en esta pasada:** los **tres glifos a 21px** (*"no les vi ningún
+> problema"*, mirados entre sí — B retira `documentoSello` citando esta firma) ·
+> **`superficie="muro"`** · **Datos comerciales**, el aviso de revisión y
+> **Cuenta reordenada** · **la cura de Places** · **la pantalla de documentos**
+> del eje ①.
+>
+> ---
+>
+> ### ⚠️ LO QUE LA FIRMA DEL GATE **NO** ALCANZA — y se lee aparte
+>
+> **El gate mira PANTALLAS.** La recuperación por código **no se cae por diseño
+> de pantalla: se cae por el correo.** El founder lo probó en campo y **el mail
+> no trae código — trae un LINK que redirige al portal de prestadores ANTIGUO**,
+> con remitente genérico de Supabase.
+>
+> *Un gate visual verde sobre un camino que no llega es la peor combinación
+> posible: se archiva como resuelto.* **Ficha D-628**; la cura es de **S86**
+> (plantilla con token + redirect + SMTP propio). **Hoy no se cura nada.**
 
 
 > **Para qué existe:** que nadie construya contra letra que ya no rige.
