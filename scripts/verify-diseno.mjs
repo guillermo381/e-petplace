@@ -37,10 +37,62 @@ function archivosTsx(dir) {
   return out;
 }
 
+const MINIMOS_CORPUS = { apps: 100, cliente: 45, ui: 38 };
+
 const leer = (fs) => fs.map((p) => ({ path: p, src: readFileSync(p, 'utf8') }));
 const apps = leer(RAICES.flatMap(archivosTsx));
 const ui = leer(RAICES_UI.flatMap(archivosTsx));
 
+/** El ancla del corpus, ejecutada (su porqué y su alcance, arriba). Corre
+ *  ANTES que cualquier regla: si el corpus se derrumbó, el lint entero se
+ *  declara inválido en vez de imprimir doce ceros tranquilizadores. */
+{
+  const cliente = apps.filter((a) => /apps\/cliente\//.test(a.path)).length;
+  const medido = { apps: apps.length, cliente, ui: ui.length };
+  const rotos = Object.entries(MINIMOS_CORPUS).filter(([k, min]) => medido[k] < min);
+  if (rotos.length > 0) {
+    for (const [k, min] of rotos) {
+      console.error(
+        `CORPUS ✗ ${k}: esperaba al menos ${min} archivo(s) y encontró ${medido[k]}. Las reglas de AUSENCIA que leen este corpus (R1·R2·R3·R4·R5·R6·R7·R8·R10·R13·R20·R29) pasarían en VERDE sin verificar nada: su silencio dejaría de significar "no hay violaciones" y pasaría a significar "no miré" (L-192, tercera capa).`,
+      );
+    }
+    console.error(`\nverify:diseno — corpus roto: el lint se declara inválido`);
+    process.exit(1);
+  }
+}
+
+/** EL ANCLA DEL CORPUS — LA TERCERA CAPA DE L-192, RESUELTA UNA VEZ
+ *  (S85-B5, pedido de mesa: "los 12 guards sin ancla()").
+ *
+ *  EL HUECO MEDIDO: DOCE reglas de AUSENCIA (R1·R2·R3·R4·R5·R6·R7·R8·
+ *  R10·R13·R20·R29) pasaban en VERDE con corpus 0 — probado dándoles `[]`
+ *  y leyendo su salida: "0 artesanales", "0 crudos", "0 fugas". El
+ *  silencio de una regla de ausencia significa "no hay violaciones" SOLO
+ *  si hubo algo que mirar.
+ *
+ *  POR QUÉ UN ANCLA Y NO DOCE, que es la decisión de diseño: las doce
+ *  comparten EL MISMO corpus y EL MISMO modo de falla. Doce `ancla()`
+ *  copiadas serían doce sitios donde el mínimo puede quedar viejo por
+ *  separado — la copia que L-175 prohíbe, un piso más arriba, y
+ *  exactamente el argumento con el que esta casa retiró R26. El corpus se
+ *  ancla UNA VEZ, en su origen, antes de que ninguna regla corra.
+ *
+ *  LOS MÍNIMOS, elegidos contra lo medido (apps 154 · cliente 72 · ui 57)
+ *  con margen para que el trabajo normal —borrar pantallas, mover
+ *  archivos— no fabrique rojos: se fija ~2/3. No son un objetivo ni una
+ *  cuota: son el piso bajo el cual el verde deja de significar algo.
+ *
+ *  ⚠️ SU ALCANCE, DECLARADO PARA QUE NADIE LA LEA MÁS FUERTE DE LO QUE
+ *  ES: ancla los corpus que las doce comparten, NO los sub-corpus que
+ *  cada regla se filtra adentro. R13 mira solo `apps/cliente/` y por eso
+ *  su casa está anclada aparte; pero una regla futura que filtre por una
+ *  carpeta más chica vuelve a tener el hueco, y esa ancla es SUYA. Las
+ *  reglas con corpus propio (R11 diccionarios · R17 exports · R18 Cuentas
+ *  · R24 explorar/ · R25 la primitiva) ya traen la suya y no se tocan.
+ *
+ *  ☠️ CONDICIÓN DE MUERTE: ninguna propia — muere con el lint. Lo que sí
+ *  cambia es el mínimo, y lo cambia quien MIDA, en el commit que mueva el
+ *  corpus de verdad. Bajarlo para que pase un rojo es desarmar el guard. */
 /** L-170 mecanizada: un censo NO lee comentarios como código — el
  *  primer disparo real del ratchet R2 fue un hex en PROSA (el
  *  comentario de C en bienvenida-dia1:110). Se despojan // y ／* *／
