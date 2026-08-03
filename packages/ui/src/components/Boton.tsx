@@ -32,6 +32,7 @@ import { usePresionado } from './usePresionado'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import { typography } from '../tokens/typography'
+import { palette } from '../tokens/palette'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { motion } from '../tokens/motion'
@@ -68,6 +69,27 @@ export interface BotonProps {
   /** Obligatoria: un botón sin etiqueta no existe (a11y). */
   etiqueta: string
   onPress?: () => void
+  /** SOBRE QUÉ SUPERFICIE vive — el MATERIAL, no el color (S84-B19).
+   *  Mismo vocabulario y mismos valores que `LogoNegocio.superficie`: la
+   *  casa ya había resuelto "esta pieza puede vivir sobre el muro" y se
+   *  ENSANCHA su respuesta en vez de inventar otra (L-175).
+   *
+   *  POR QUÉ PROP Y NO VARIANTE HERMANA: la superficie es ORTOGONAL a la
+   *  jerarquía. Un primario, un acento y un ghost pueden todos vivir
+   *  sobre el muro; como variantes serían `primarioMuro`, `acentoMuro`,
+   *  `ghostMuro`… — la unión se multiplica por dos y cada una repite su
+   *  propia jerarquía. Como prop, cruza una sola vez. Y no vuelve
+   *  ambigua ninguna otra prop (criterio de B14): no cambia lo que
+   *  `variante` SIGNIFICA, cambia la paleta de la que resuelve.
+   *
+   *  ⚠️ POR QUÉ HACÍA FALTA, con el número que lo prueba: sobre el muro,
+   *  `accent.cta` del oficio y el muro son **EL MISMO HEX**
+   *  (palette.tealDark #0A7268) ⇒ **contraste 1.00, invisible**. Y en
+   *  oscuro NO desaparece (6.57 sobre tealDarkNoche): invisible en dos
+   *  temas de tres y legible en el otro es justo el defecto que un gate
+   *  en un solo tema no encuentra. §15b.2 ya lo decía —"sobre el muro el
+   *  acento funcional es PAPEL"— y hasta hoy la pieza no sabía cumplirlo. */
+  superficie?: 'clara' | 'muro'
   variante?: BotonVariante
   tamaño?: BotonTamaño
   /** Full-width. */
@@ -111,6 +133,7 @@ export interface BotonProps {
 export function Boton({
   etiqueta,
   onPress,
+  superficie = 'clara',
   variante = 'primario',
   tamaño = 'md',
   bloque = false,
@@ -154,6 +177,12 @@ export function Boton({
   const varianteEfectiva: BotonVariante =
     variante === 'marca' && !esMarca ? 'primario' : variante
 
+  // EL MURO NO SALE DEL TEMA (vive en `techo-oficio` de la app), así que
+  // sus colores se resuelven ACÁ y no por slot: papel PLENO sobre el
+  // muro da 5.51 — el par que TechoOficio ya usa y §15b.2 firmó. El
+  // sólido invierte (papel de fondo, muro de tinta) para que el primario
+  // siga leyéndose como primario sin usar el teal prohibido.
+  const sobreMuro = superficie === 'muro'
   const colores: Record<BotonVariante, { fondo: string; texto: string; borde?: string }> = {
     // S63 — enmienda Ley 21 FIRMADA: el primario ancla al SLOT accent.cta
     // (default tinta = idéntico al de siempre; el raíz del prestador lo
@@ -202,6 +231,22 @@ export function Boton({
     // el hueco estaba acá, no allá.
     acento:      { fondo: 'transparent', texto: theme.accent.cta },
   }
+
+  // Sobre el muro TODA variante resuelve del par medido: las que traen
+  // superficie invierten (papel/muro), las sin caja van en papel pleno.
+  // Es una tabla y no un parche por variante: si mañana nace otra, cae
+  // acá sola.
+  if (sobreMuro) {
+    const papel = palette.light0
+    const muro = theme.mode === 'dark' ? palette.tealDarkNoche : palette.tealDark
+    for (const k of Object.keys(colores) as BotonVariante[]) {
+      const traeSuperficie = colores[k].fondo !== 'transparent'
+      colores[k] = traeSuperficie
+        ? { fondo: papel, texto: muro }
+        : { fondo: 'transparent', texto: papel }
+    }
+  }
+
   const c = colores[varianteEfectiva]
 
   // B3.1c — constraint del gradiente v2: la exención WCAG de la cola del
