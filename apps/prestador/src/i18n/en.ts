@@ -280,6 +280,9 @@ export const prestadorEn = {
     zonaSinDireccion: 'Without your address, the area map does not show on your card. Add it below.',
 
     sedeGuardaAparte: 'This section saves on its own: each change is stored when you confirm it below.',
+    cuentaComercialTitulo: 'Your business account',
+    cuentaComercialDetalle: 'The details you get paid with.',
+
     seguridadTitulo: 'Security',
     seguridadDetalle: "Your name, your sign-in email and your password. Families don't see them.",
   },

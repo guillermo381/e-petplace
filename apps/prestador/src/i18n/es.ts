@@ -341,6 +341,9 @@ export const prestadorEs = {
     zonaSinDireccion: 'Sin tu dirección no aparece el mapa de tu zona en la ficha. Cárgala acá abajo.',
 
     sedeGuardaAparte: 'Esta sección se guarda sola: cada cambio queda al confirmarlo acá abajo.',
+    cuentaComercialTitulo: 'Tu cuenta comercial',
+    cuentaComercialDetalle: 'Los datos con los que cobras por la app.',
+
     seguridadTitulo: 'Seguridad',
     seguridadDetalle: 'Tu nombre, tu correo de ingreso y tu contraseña. No los ven las familias.',
   },

@@ -1296,6 +1296,28 @@ export default function PerfilV2() {
                 seccionado de Cuenta en S84, donde este bloque va a tener
                 vecinos (plata, preferencias) y el rótulo se elige contra
                 ellos, no solo. */}
+            {/* ⑤ S84-C26 — LA ENTRADA A CUENTA COMERCIAL, y solo la
+                ENTRADA. Las tres pantallas se quedan donde están: tienen
+                tres llamadores vivos (liquidaciones · sala de espera ·
+                negocio) y mudarlas los rompería a los tres.
+                ⚠️ Y LAS TRES ENTRADAS VIEJAS NO SE RETIRAN — no son
+                duplicados sino CONTEXTOS: desde liquidaciones se entra a
+                cobrar, desde la sala a entrar, desde negocio a
+                gestionar. Retirarlas "para no repetir" dejaría a cada
+                uno de esos tres momentos sin su camino, que es el error
+                inverso y más caro. Un destino con varias puertas no es
+                redundancia: es que varias cosas llevan ahí.
+                ACÁ la puerta existe porque la cuenta comercial ES parte
+                de la vitrina — sin ella el negocio no cobra, y eso el
+                prestador lo busca donde arma su negocio. */}
+            <CeldaNavegacion
+              icono="pagos"
+              titulo={t('perfilNegocio.cuentaComercialTitulo')}
+              detalle={t('perfilNegocio.cuentaComercialDetalle')}
+              registro="aa"
+              onPress={() => router.push('/cuenta-comercial')}
+            />
+
             {/* ⑤ S84-C3 — "SEGURIDAD", y su condición de muerte escrita.
                 El rótulo anterior ("Nombre y acceso") describía el
                 contenido de la pantalla; éste describe su LUGAR EN LA
