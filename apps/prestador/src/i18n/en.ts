@@ -283,8 +283,8 @@ export const prestadorEn = {
     cuentaComercialTitulo: 'Your business account',
     cuentaComercialDetalle: 'The details you get paid with.',
 
-    documentosTitulo: 'Your ID',
-    documentosDetalle: 'The document that gets you verified with families.',
+    datosComercialesTitulo: 'Business details',
+    datosComercialesDetalle: 'Your tax details, your payout account and your ID.',
     seguridadTitulo: 'Security',
     seguridadDetalle: "Your name, your sign-in email and your password. Families don't see them.",
   },
@@ -355,6 +355,7 @@ export const prestadorEn = {
   miCuenta: {
     titulo: 'Your account',
     perfil: 'Your profile',
+    tusDatos: 'Your details',
     preferencias: 'Preferences',
     // S61-B12: el header CD de la portada (D-370) · LOTE S61, GATE PENDIENTE
     // S79-B (T2-B3): `oficioAmbos` died (Ley 37) — the trade voice is the
@@ -616,7 +617,13 @@ export const prestadorEn = {
   },
   // Business account — S54-B (wizard B2.3, MODELO_FINANCIERO §6.5)
   cuenta: {
-    titulo: 'Business account',
+    titulo: 'Business details',
+    avisoRevision:
+      'We review these details one by one. Someone from our team looks at them and, once verified, your profile shows the badge families see. In the meantime you keep working as usual.',
+    bancariosSinDeclarar: 'Not stated',
+    documentos: 'Documents',
+    documentosResumen: 'Your ID',
+    documentosCargando: 'Loading…',
     error: "We couldn't load your business account.",
     reintentar: 'Retry',
     invitacionTitulo: 'To get paid through the app',

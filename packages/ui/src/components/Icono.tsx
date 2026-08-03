@@ -93,6 +93,16 @@ export type IconoNombre =
   //    EL OBJETO ES IDENTIFICACIÓN (cédula · RUC · NIT), no una carpeta
   //    ni un archivo genérico. GATE POR ÍCONO A 21px PENDIENTE (§2.9).
   | 'documento' | 'documentoSello'
+  // ── S84-B21: FISCAL y BANCARIO — las otras dos secciones de "Datos
+  //    comerciales". Nacen JUNTAS y con `documento` porque el founder
+  //    decidió que llevan glifo las TRES o ninguna: ponérselo a una sola
+  //    la jerarquiza sin que nadie lo haya decidido.
+  //    CENSO PREVIO (la orden lo pidió y encontró algo): `liquidaciones`
+  //    NO EXISTE · `cuenta` es una PERSONA · `presupuesto` es documento
+  //    con esquina doblada · y **`pagos` es un BILLETE** — un rectángulo
+  //    ancho, o sea el idioma que estos dos tenían que esquivar.
+  //    GATE POR ÍCONO A 21px PENDIENTE (§2.9).
+  | 'fiscal' | 'bancario'
 export type IconoRegistro = 'capa' | 'aa' | 'tinta'
 
 const TRAZO = 1.9
@@ -410,6 +420,43 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
     </>
   ),
 
+  // ── FISCAL — LA FACTURA CON BORDE DENTADO (S84-B21) ────────────────
+  // El objeto fiscal de la región no es "un papel": es LA FACTURA — el
+  // RUC y el NIT existen para emitirla. Y el BORDE DENTADO es todo el
+  // trabajo, igual que el retrato en `documento`: el idioma "rectángulo
+  // con renglones" ya está ocupado CINCO veces en este registry
+  // (`presupuesto`, `bitacora`, `caso`, `pagos` —que es un billete— y
+  // el propio `documento`). Sin el dentado sería la sexta y a 21px no se
+  // distinguiría de ninguna. Es el mismo descarte que hice en B4 con la
+  // tarjeta de contacto y en B20 con la cédula lisa.
+  fiscal: ({ tinta, huella }) => (
+    <>
+      <Path
+        d="M6.2 3.4h11.6v15.9l-1.9-1.4-1.9 1.4-1.9-1.4-1.9 1.4-1.9-1.4-1.9 1.4V3.4Z"
+        {...trazo(tinta)}
+      />
+      <Path d="M9.2 7.6h5.6M9.2 11.2h5.6" {...trazo(tinta)} />
+      <Huella color={huella} x={3.1} y={13.4} escala={0.26} />
+    </>
+  ),
+
+  // ── BANCARIO — EL EDIFICIO CON COLUMNAS (S84-B21) ──────────────────
+  // La otra salida obvia era una TARJETA, y se cae por lo mismo que todo
+  // lo demás: una tarjeta es un rectángulo ancho y **`pagos` ya ES un
+  // rectángulo ancho con marcas** — a 21px serían el mismo dibujo, y
+  // encima vecinos temáticos, que es la peor colisión posible (Ley 12
+  // existe para que el ojo SEPARE cosas que significan distinto).
+  // El edificio con frontón y columnas no tiene un solo pariente en el
+  // registry: cero rectángulos horizontales, cero círculos grandes.
+  bancario: ({ tinta, huella }) => (
+    <>
+      <Path d="M3.6 9.2 12 4.4l8.4 4.8" {...trazo(tinta)} />
+      <Path d="M5.8 9.2v7.4M10 9.2v7.4M14 9.2v7.4M18.2 9.2v7.4" {...trazo(tinta)} />
+      <Path d="M3.6 19.6h16.8" {...trazo(tinta)} />
+      <Huella color={huella} x={9.4} y={11.2} escala={0.24} />
+    </>
+  ),
+
   // ── DOCUMENTO · CANDIDATO A — LA CÉDULA CON RETRATO (S84-B20) ──────
   // Rectángulo con un RETRATO (el círculo chico) y dos renglones. El
   // retrato es todo el trabajo: es lo que separa una IDENTIFICACIÓN de un
@@ -603,6 +650,12 @@ export function Icono({
     // identidades del producto. No va a `ocre`/CONSUMO aunque el trámite
     // sea comercial: el documento no vende, acredita.
     documento: identidad, documentoSello: identidad,
+    // Las tres secciones de "Datos comerciales" comparten CAPA a
+    // propósito: son la identidad del negocio ante el Estado y ante el
+    // banco, y tres hermanas de la misma pantalla que divergieran de
+    // color dirían que son de dominios distintos. Que no diverjan es la
+    // decisión, no el default.
+    fiscal: identidad, bancario: identidad,
     prime: comunidad, primeCorona: comunidad,
     // LOTE S71-B2 (firma founder): caso = historia clínica (familia de
     // carnet/vet) · presupuesto = plata del cuidado (familia pagos/negocio)

@@ -321,18 +321,19 @@ export default function Negocio() {
           <View style={{ gap: spacing[3] }}>
             <Texto variante="seccion">{t('negocio.cobros')}</Texto>
             <Tarjeta relleno="ninguno">
-              {/* S59-B2 (Ley 19.1): entrar a una sección viste
-                  CeldaNavegacion — la Celda plana navegaba sin chevron.
-                  Ícono 'negocio' para la cuenta comercial = STAND-IN
-                  declarado (no hay glifo propio en el registry — pedido
-                  a la A, precedente L-141 del 'hoy'-como-calendario). */}
-              <CeldaNavegacion
-                icono="negocio"
-                registro="aa"
-                titulo={t('negocio.cuentaComercial')}
-                detalle={detalleCuenta}
-                onPress={() => router.push('/cuenta-comercial')}
-              />
+              {/* ☠️ S84-C34 ③ — ACÁ VIVÍA LA ENTRADA A LA CUENTA COMERCIAL,
+                  y se retira por firma del founder: *no es normal tenerlo
+                  en dos lugares*. Con "Datos comerciales" en el Perfil,
+                  ésta era la segunda puerta al mismo sitio.
+                  ⚠️ MEDIDO ANTES DE SACARLA, porque las otras dos
+                  entradas NO alcanzan: `liquidaciones:210` solo se dibuja
+                  si `faltaCuentaActiva` y `sala-espera:205` solo antes de
+                  activarse — **las dos están gateadas a "todavía no
+                  tenés cuenta activa"**. Ésta era la única permanente, y
+                  por eso sacarla sin el Perfil habría dejado al prestador
+                  YA ACTIVO sin ninguna forma de editar sus datos.
+                  Las otras dos NO se tocan: son contextos, no duplicados
+                  (cobrar · entrar). */}
               <Separador />
               {/* S55-B (B1): la vista completa existe — la celda navega;
                   el peldaño 0 de la pantalla educa cuando el ledger está vacío */}

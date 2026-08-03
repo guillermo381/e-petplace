@@ -50,6 +50,7 @@ import {
 
 import { leerSede, type SedeLeida } from '@/lib/sede';
 import { SeccionSede } from '@/components/seccion-sede';
+import { usePedirEspacio } from '@/lib/pedir-espacio';
 import { useTraduccion } from '@/i18n';
 
 type Pantalla =
@@ -72,6 +73,10 @@ export default function SalaEspera() {
   const insets = useSafeAreaInsets();
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [saliendo, setSaliendo] = useState(false);
+  /* ⑤ S84-C34 — el scroll que trae a la vista las opciones de Places.
+     Acá la sede se carga POR PRIMERA VEZ, así que es la pantalla donde
+     el defecto más costaba. */
+  const espacio = usePedirEspacio();
 
   useFocusEffect(
     useCallback(() => {
@@ -147,6 +152,9 @@ export default function SalaEspera() {
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <MarcaDeAgua />
       <ScrollView
+        ref={espacio.ref}
+        onScroll={espacio.onScroll}
+        scrollEventThrottle={espacio.scrollEventThrottle}
         contentContainerStyle={{
           paddingTop: insets.top + spacing[8],
           paddingBottom: insets.bottom + spacing[8],
@@ -221,7 +229,7 @@ export default function SalaEspera() {
         </Entrada>
 
         {/* ── mismos campos, misma pieza: la sede ── */}
-        <SeccionSede sede={sede} />
+        <SeccionSede sede={sede} onPedirEspacio={espacio.pedirEspacio} />
 
         {/* ── QUÉ PASA DESPUÉS ── */}
         <View style={{ gap: spacing[2] }}>

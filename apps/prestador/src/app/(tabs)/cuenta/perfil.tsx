@@ -87,6 +87,7 @@ import {
 
 import { useTraduccion } from '@/i18n';
 import { PAISES, PAIS_DEFAULT, bandera, type Pais } from '@/lib/paises';
+import { usePedirEspacio } from '@/lib/pedir-espacio';
 // ③ S83-C33 — el pipeline del logo YA EXISTÍA ENTERO (S76-B1/D-505). Lo
 // que faltaba era el cable.
 import { quitarLogoNegocio, subirLogoNegocio } from '@/lib/subir-logo';
@@ -441,6 +442,8 @@ export default function PerfilV2() {
      cada vez que la pantalla recupera el foco. Después de eso, quien
      manda es el dedo. */
   const [abierta, setAbierta] = useState<Seccion | null>(null);
+  /* ⑤ S84-C34 — el scroll que trae a la vista las opciones de Places. */
+  const espacio = usePedirEspacio();
   const yaAbrio = useRef(false);
 
   /* ── EL CABLEADO (S83-C30 ②): los cuatro wrappers que ya existían y ya
@@ -790,6 +793,9 @@ export default function PerfilV2() {
       {pantalla === 'listo' && (
       <EvitaTeclado>
         <ScrollView
+          ref={espacio.ref}
+          onScroll={espacio.onScroll}
+          scrollEventThrottle={espacio.scrollEventThrottle}
           contentContainerStyle={{ paddingBottom: insets.bottom + spacing[8] }}
           keyboardShouldPersistTaps="handled"
         >
@@ -1178,7 +1184,9 @@ export default function PerfilV2() {
               {prestador !== null && prestador.lat === null && (
                 <Texto variante="apoyo" color="danger">{t('perfilNegocio.zonaSinDireccion')}</Texto>
               )}
-              {prestador !== null && <SeccionSede sede={leerSede(prestador)} />}
+              {prestador !== null && (
+                <SeccionSede sede={leerSede(prestador)} onPedirEspacio={espacio.pedirEspacio} />
+              )}
             </SeccionDesplegable>
             </View>
 
@@ -1315,58 +1323,38 @@ export default function PerfilV2() {
               onPress={() => router.push('/cuenta-comercial')}
             />
 
-            {/* ③ S84-C33 — LA PUERTA QUE NO EXISTÍA PARA TRES OFICIOS.
-                Medido en C29 ④: los TRES llamadores a documentos estaban
-                gateados a veterinaria, así que un paseador, un groomer o
-                un adiestrador tenía CERO caminos — no escondidos:
-                inexistentes.
-                VA EN LA VITRINA y no en ajustes porque **el sello es lo
-                que la familia lee para confiar**: no es configuración de
-                la cuenta, es parte de lo que te muestra. Un sello que
-                solo puede ganarse un oficio no es un sello de
-                plataforma. */}
-            {/* ⚠️ SIN GLIFO, Y DECLARADO — no es olvido. El registry NO
-                tiene `documento` (medido: 32 nombres, ninguno). Los dos
-                candidatos a mano fallan por ley, no por gusto:
-                · `carnet` es el CARNET DE VACUNAS de la mascota — su
-                  huella b′ sobre la cédula de una persona diría que el
-                  documento es del animal.
-                · `cuenta` lo usa la celda VECINA (Seguridad), y dos
-                  celdas pegadas con el mismo glifo es Ley 12 directa —
-                  el precedente exacto ya lo cazó el founder en S73.
-                `icono` es opcional desde S73, así que la celda vive sin
-                él en vez de mentir con uno prestado.
-                📣 PEDIDO A B: `documento` al registry (lote b′). Su
-                consumidor existe y es éste. */}
+            {/* ②③ S84-C34 — UNA SOLA PUERTA A LOS DATOS COMERCIALES.
+                Acá había DOS celdas —cuenta comercial y documentos— y
+                ahora hay una: la pantalla de `/cuenta-comercial` se llama
+                **Datos comerciales** y absorbió las tres secciones
+                hermanas (fiscales · bancarios · documentos).
+                ☠️ CON ELLO MUERE `cuenta/documentos.tsx`, la pantalla que
+                C33 creó dos rondas atrás. **El camino que abrió NO se
+                pierde** —que era todo su punto: los tres oficios no vet
+                seguían sin poder verificarse— sino que se muda adentro.
+                Ley 37: lo que sale de la UI sale del código.
+                Y ES LA ÚNICA PUERTA CON EDICIÓN: la de Negocio se retiró
+                (firma del founder: *no es normal tenerlo en dos
+                lugares*), y las de liquidaciones y sala de espera
+                sobreviven porque están gateadas a "todavía no tenés
+                cuenta activa" — son contextos, no duplicados. */}
             <CeldaNavegacion
-              titulo={t('perfilNegocio.documentosTitulo')}
-              detalle={t('perfilNegocio.documentosDetalle')}
+              icono="negocio"
+              titulo={t('perfilNegocio.datosComercialesTitulo')}
+              detalle={t('perfilNegocio.datosComercialesDetalle')}
               registro="aa"
-              onPress={() => router.push('/cuenta/documentos')}
+              onPress={() => router.push('/cuenta-comercial')}
             />
 
-            {/* ⑤ S84-C3 — "SEGURIDAD", y su condición de muerte escrita.
-                El rótulo anterior ("Nombre y acceso") describía el
-                contenido de la pantalla; éste describe su LUGAR EN LA
-                CASA — y esa es la diferencia que importa ahora que el
-                Perfil pasa a ser LA VITRINA: todo lo demás de esta
-                pantalla es lo que las familias ven, y esto es lo único
-                que no lo es. El subtítulo nombra las tres cosas que hay
-                adentro para que el rótulo no tenga que hacer dos
-                trabajos (17.6).
-                ☠️ MUERTE: esta celda **se retira de la vitrina** cuando
-                exista `Cuenta → Seguridad` como sección propia (el
-                seccionado de S84). No es una pantalla que muere: es una
-                PUERTA prestada — lo personal está de paso acá porque su
-                casa todavía no se construyó, y una vitrina que aloja lo
-                que nadie ve es una contradicción con fecha. */}
-            <CeldaNavegacion
-              icono="cuenta"
-              titulo={t('perfilNegocio.seguridadTitulo')}
-              detalle={t('perfilNegocio.seguridadDetalle')}
-              registro="aa"
-              onPress={() => router.push('/cuenta/identidad')}
-            />
+            {/* ☠️ S84-C34 ① — ACÁ VIVÍA "SEGURIDAD", Y SU LÁPIDA SE
+                CUMPLIÓ. La celda decía textualmente que se retiraba de la
+                vitrina "cuando exista Cuenta → Seguridad como sección
+                propia". Existe: el índice de Cuenta ahora lleva `Tus
+                datos` y `Seguridad`, las dos DIRECTAS.
+                Se va con ella el doble acceso que el founder cazó —
+                Perfil → Nombre y acceso → Seguridad eran dos puertas para
+                una cosa— y la vitrina queda con SOLO lo que la familia
+                ve. Ley 37: lo que sale de la UI sale del código. */}
 
             <View style={{ paddingTop: spacing[5], gap: spacing[3] }}>
               <Boton

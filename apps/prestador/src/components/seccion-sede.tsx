@@ -49,7 +49,43 @@ import { useTraduccion } from '@/i18n';
 
 const RADIOS_KM = [5, 10, 15, 20, 30] as const;
 
-export function SeccionSede({ sede }: { sede: SedeLeida }) {
+export function SeccionSede({
+  sede,
+  onPedirEspacio,
+}: {
+  sede: SedeLeida;
+  /**
+   * ⑤ S84-C34 — LA LISTA PIDE SU LUGAR (🔴 Places bajo el teclado).
+   *
+   * EL DEFECTO, medido: las predicciones nacen **INLINE y 350 ms DESPUÉS**
+   * del foco. El auto-scroll del `ScrollView` ya ocurrió con el campo, y
+   * `EvitaTeclado` empuja el CONTENEDOR pero **no mueve el scroll** — así
+   * que la lista aparece justo debajo del campo, o sea dentro del área que
+   * el teclado tapa. El founder la encontró porque sabía que estaba;
+   * cualquier otro concluye que el buscador no funciona.
+   *
+   * POR QUÉ ESTA FORMA Y NO LA DE LOS PRECEDENTES: la casa resuelve
+   * "apareció algo y hay que verlo" con scroll medido (`veterinaria/
+   * taller:348`, `carnet:279`), pero los dos miden un hijo DIRECTO de su
+   * ScrollView. Esta pieza vive tres niveles adentro, así que su `onLayout`
+   * daría una `y` relativa al padre inmediato — **no al scroll**. Copiar
+   * la receta habría scrolleado a una coordenada equivocada.
+   *
+   * LA VUELTA: la lista **no necesita saber dónde está, solo cuánto
+   * ocupa**. Mide su propio alto —que sí es suyo— y pide ese scroll
+   * RELATIVO. El campo sube exactamente lo que la lista ocupa, y la lista
+   * queda donde estaba el campo: arriba del teclado, que es donde el dedo
+   * ya está.
+   *
+   * ⚠️ SU LÍMITE, DECLARADO: si abajo no queda contenido suficiente, RN
+   * clampea y la lista entra PARCIAL — pero **la primera opción siempre
+   * queda visible**, que es lo que hoy no pasa.
+   *
+   * Opcional a propósito: una pantalla que no lo pase se comporta como
+   * hoy en vez de romperse.
+   */
+  onPedirEspacio?: (alto: number) => void;
+}) {
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
 
@@ -70,6 +106,10 @@ export function SeccionSede({ sede }: { sede: SedeLeida }) {
       : null,
   );
   const [predicciones, setPredicciones] = useState<PrediccionLugar[]>([]);
+  /** Una sola vez POR APARICIÓN: `onLayout` dispara en cada relayout, y
+   *  pedir scroll en cada uno movería la pantalla bajo el dedo mientras
+   *  se tipea. Se rearma cuando la lista se vacía. */
+  const espacioPedido = useRef(false);
   const sesionRef = useRef<string>(crearSesionLugares());
   const placesApagado = useRef(false);
   const resolviendo = useRef(false);
@@ -79,10 +119,12 @@ export function SeccionSede({ sede }: { sede: SedeLeida }) {
     const texto = direccion.trim();
     if (lugar && texto === lugar.direccion) {
       setPredicciones([]);
+      espacioPedido.current = false;
       return;
     }
     if (texto.length < 3) {
       setPredicciones([]);
+      espacioPedido.current = false;
       return;
     }
     const timer = setTimeout(() => {
@@ -92,6 +134,7 @@ export function SeccionSede({ sede }: { sede: SedeLeida }) {
           if (r.codigo === 'sin_configuracion') placesApagado.current = true;
           // red/google mientras se tipea: silencio — se sigue a mano.
           setPredicciones([]);
+          espacioPedido.current = false;
           return;
         }
         setPredicciones(r.data.slice(0, 5));
@@ -104,6 +147,7 @@ export function SeccionSede({ sede }: { sede: SedeLeida }) {
     if (resolviendo.current) return;
     resolviendo.current = true;
     setPredicciones([]);
+    espacioPedido.current = false;
     const r = await resolverLugar({ placeId: p.placeId, sesion: sesionRef.current });
     // la sesión CERRÓ con Details — la próxima búsqueda abre una nueva.
     sesionRef.current = crearSesionLugares();
@@ -190,7 +234,14 @@ export function SeccionSede({ sede }: { sede: SedeLeida }) {
         autoCapitalize="sentences"
       />
       {predicciones.length > 0 ? (
-        <View>
+        <View
+          onLayout={(e) => {
+            const alto = e.nativeEvent.layout.height;
+            if (espacioPedido.current || alto <= 0) return;
+            espacioPedido.current = true;
+            onPedirEspacio?.(alto);
+          }}
+        >
           {predicciones.map((p, i) => (
             <View key={p.placeId}>
               {i > 0 ? <Separador /> : null}

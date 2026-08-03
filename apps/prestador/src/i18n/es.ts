@@ -344,8 +344,8 @@ export const prestadorEs = {
     cuentaComercialTitulo: 'Tu cuenta comercial',
     cuentaComercialDetalle: 'Los datos con los que cobras por la app.',
 
-    documentosTitulo: 'Tu identificación',
-    documentosDetalle: 'El documento que te deja verificado ante las familias.',
+    datosComercialesTitulo: 'Datos comerciales',
+    datosComercialesDetalle: 'Tus datos fiscales, tu cuenta de cobro y tu identificación.',
     seguridadTitulo: 'Seguridad',
     seguridadDetalle: 'Tu nombre, tu correo de ingreso y tu contraseña. No los ven las familias.',
   },
@@ -420,6 +420,7 @@ export const prestadorEs = {
   miCuenta: {
     titulo: 'Tu cuenta',
     perfil: 'Tu perfil',
+    tusDatos: 'Tus datos',
     preferencias: 'Preferencias',
     // S61-B12: el header CD de la portada (D-370) · LOTE S61, GATE PENDIENTE
     // S79-B (T2-B3): `oficioAmbos` MURIÓ (Ley 37) — la voz de oficio es la
@@ -729,7 +730,16 @@ export const prestadorEs = {
   },
   // Cuenta comercial — S54-B (wizard B2.3, MODELO_FINANCIERO §6.5)
   cuenta: {
-    titulo: 'Cuenta comercial',
+    /* ② S84-C34 — FIRMA DEL FOUNDER: "Datos comerciales". El rótulo
+       viejo nombraba UNA de las tres cosas que hay adentro (la cuenta) y
+       ahora hay tres hermanas — fiscales, bancarios y documentos. */
+    titulo: 'Datos comerciales',
+    avisoRevision:
+      'Revisamos estos datos uno por uno. Los mira alguien de nuestro equipo y, cuando quedan verificados, tu perfil muestra el sello que las familias ven. Mientras tanto sigues trabajando con normalidad.',
+    bancariosSinDeclarar: 'Sin declarar',
+    documentos: 'Documentos',
+    documentosResumen: 'Tu identificación',
+    documentosCargando: 'Cargando…',
     error: 'No pudimos cargar tu cuenta comercial.',
     reintentar: 'Reintentar',
     // peldaño 0 — invitación que educa (solo alcanzable sin cuenta creada)
