@@ -341,7 +341,6 @@ export const prestadorEn = {
   },
   seguridad: {
     tituloPantalla: 'Security',
-    nadieLoVe: 'This information is yours. Families never see it.',
     errorTitulo: "We couldn't load your details",
     errorCuerpo: 'Try again in a moment.',
     titulo: 'Password',

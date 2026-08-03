@@ -428,7 +428,6 @@ export const prestadorEs = {
      *  SECCIÓN de la clave adentro — el contenedor y su contenido dejan de
      *  compartir nombre (la misma regla que mató "Tu cuenta" como celda). */
     tituloPantalla: 'Seguridad',
-    nadieLoVe: 'Estos datos son tuyos. No los ven las familias.',
     errorTitulo: 'No pudimos cargar tus datos',
     errorCuerpo: 'Prueba de nuevo en un momento.',
     titulo: 'Contraseña',

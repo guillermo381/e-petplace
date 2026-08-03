@@ -1,6 +1,29 @@
 /**
- * Cuenta · SEGURIDAD — lo tuyo ante la plataforma (S85-C2, firma del
- * founder sobre el censo de Cuenta).
+ * Cuenta · SEGURIDAD — LA CONTRASEÑA, y nada más (S85-C5, gate del
+ * founder 3-ago).
+ *
+ * ☠️ **EL NOMBRE DE LA PERSONA SALIÓ DE ACÁ.** Palabra del founder en el
+ * gate: no le ve valor — el nombre que importa es el del NEGOCIO, y ése
+ * ya vive en dos lugares que sí se miran (la portada del muro, donde se
+ * edita, y Datos comerciales, donde se exhibe).
+ *
+ * ⚠️ **LA CONSECUENCIA, MEDIDA Y DECLARADA — no es un efecto lateral que
+ * alguien descubra después.** Con esto, `profiles.nombre` **deja de tener
+ * superficie de edición en TODA la app del prestador**: el censo da dos
+ * llamadores de `actualizarMiPerfil` y el otro es `apps/cliente`, que un
+ * prestador no usa. Es la pregunta del acta de C —*"¿quién más la
+ * alcanza?"*— contestada al derecho: **nadie**.
+ * Y lo que eso significa en concreto, porque el canon lo midió en S81:
+ * `handle_new_user` siembra el nombre desde el local-part del correo
+ * cuando no hay metadata, así que **un prestador con el nombre sembrado
+ * mal no tiene hoy cómo corregirlo desde la app**. No es un defecto de
+ * esta pantalla: es el precio de la decisión, y se escribe para que el
+ * día que alguien lo reporte no se investigue como bug.
+ * ☠️ Si vuelve, vuelve con su letra — no de contrabando acá.
+ *
+ * Historia previa (S85-C2): esta pantalla absorbió a `cuenta/identidad`,
+ * que mezclaba nombre + correo + clave. De esa fusión sobrevive el
+ * correo, que NO es edición sino la respuesta a *"¿con qué entro?"*.
  *
  * ☠️ **ABSORBE A `cuenta/identidad.tsx`, QUE MUERE (Ley 37).** Eran dos
  * pantallas para una sola idea, y el censo lo midió con su literal:
@@ -53,7 +76,6 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
-  actualizarMiPerfil,
   cambiarContrasena,
   obtenerMiPerfil,
   segundosDeEspera,
@@ -68,11 +90,9 @@ export default function Seguridad() {
   const { mostrar } = useAviso();
   const { t } = useTraduccion();
 
-  // ── lo heredado de `identidad`: la persona ──
+  /** Solo para el correo: es lectura, no edición. */
   const [estado, setEstado] = useState<'cargando' | 'listo' | 'error'>('cargando');
-  const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState<string | null>(null);
-  const [guardando, setGuardando] = useState(false);
 
   // ── la clave ──
   const [actual, setActual] = useState('');
@@ -96,7 +116,6 @@ export default function Seguridad() {
           setEstado('error');
           return;
         }
-        setNombre(r.data.nombre ?? '');
         setEmail(r.data.email);
         setEstado('listo');
       })();
@@ -105,21 +124,6 @@ export default function Seguridad() {
       };
     }, []),
   );
-
-  async function guardarNombre() {
-    if (guardando) return;
-    setGuardando(true);
-    /* SOLO el nombre: el teléfono se fue de esta pantalla en S83-C33 (es
-       del negocio y vive en contacto) y por eso no puede pisarlo. El
-       wrapper lo sigue aceptando — es campo opcional. */
-    const r = await actualizarMiPerfil({ nombre });
-    setGuardando(false);
-    if (!r.ok) {
-      mostrar({ texto: r.mensaje, variante: 'error' });
-      return;
-    }
-    mostrar({ texto: t('miCuenta.perfilGuardado'), variante: 'exito' });
-  }
 
   async function cambiarClave() {
     if (cambiando) return;
@@ -228,17 +232,10 @@ export default function Seguridad() {
             }}
             keyboardShouldPersistTaps="handled"
           >
-            {/* ── QUIÉN SOS ── */}
-            <Texto variante="apoyo">{t('seguridad.nadieLoVe')}</Texto>
-
-            <Campo
-              label={t('miCuenta.nombreLabel')}
-              value={nombre}
-              onChangeText={setNombre}
-              autoCapitalize="words"
-            />
-            {/* La firma: el read-only DICE SU PORQUÉ. Un campo gris sin
-                explicación se lee como error del producto. */}
+            {/* EL CORREO, SOLO-LECTURA — y NO es un resto del nombre que se
+                fue: contesta la pregunta que trae a alguien a esta pantalla,
+                *"¿con qué correo entro?"*. Su ayuda DICE SU PORQUÉ; un campo
+                gris sin explicación se lee como error del producto. */}
             <Campo
               label={t('miCuenta.emailLabel')}
               value={email ?? ''}
@@ -246,25 +243,11 @@ export default function Seguridad() {
               ayuda={t('miCuenta.emailAyuda')}
               deshabilitado
             />
-            <View style={{ paddingTop: spacing[2] }}>
-              <Boton
-                etiqueta={t('miCuenta.guardar')}
-                bloque
-                cargando={guardando}
-                onPress={() => void guardarNombre()}
-              />
-            </View>
 
-            <View style={{ paddingVertical: spacing[5] }}>
+            <View style={{ paddingVertical: spacing[4] }}>
               <Separador />
             </View>
 
-            {/* ── TU CONTRASEÑA ──
-                Vive ACÁ y no en pantalla aparte porque es la misma
-                pregunta ("quién sos ante la plataforma") con otra
-                respuesta. Su gemela —recuperar— vive en el LOGIN, y esa
-                separación no es de composición: es de estado. **Quien
-                puede entrar cambia; quien no puede, recupera.** */}
             <Texto variante="seccion">{t('seguridad.titulo')}</Texto>
             {/* PIDE LA ACTUAL, y no es fricción de formulario: el wrapper
                 RE-AUTENTICA con ella antes de escribir. Un teléfono
