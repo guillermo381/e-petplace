@@ -276,6 +276,13 @@ export const prestadorEs = {
     iaOtra: 'Probar otra',
     iaDescartar: 'Descartar',
 
+    nombreEditar: 'Cambiar el nombre de tu negocio',
+    nombreHojaTitulo: 'El nombre de tu negocio',
+    /** Dice DÓNDE se ve: el mismo nombre viaja a la vitrina y al
+     *  documento fiscal, y eso es lo que vuelve entendible el cambio. */
+    nombreAyuda: 'Es el que ven las familias y el que figura en tus datos comerciales. Se cambia en los dos a la vez.',
+    nombreLabel: 'Nombre de tu negocio',
+    nombreGuardado: 'Listo — cambiamos el nombre de tu negocio.',
     espacioTitulo: 'Tu espacio',
     fotoAdelante: 'Mover adelante',
     fotoAtras: 'Mover atrás',
@@ -409,6 +416,7 @@ export const prestadorEs = {
       'Cursos, especializaciones y todo lo que quieras mostrar. No hacen falta para trabajar: suman a tu perfil.',
     tipoTituloProfesional: 'Título profesional',
     tipoRegistroSenescyt: 'Registro SENESCYT',
+    tipoPermisoFuncionamiento: 'Permiso de funcionamiento',
     tipoCertificacion: 'Certificación o acreditación',
     /** El vacío de una capa que NO bloquea: invita sin urgencia (17.5). */
     capaSinDocumentos: 'Todavía no subiste ninguno.',

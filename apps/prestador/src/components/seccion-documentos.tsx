@@ -20,18 +20,16 @@
  *     `20260803160000` de A: antes lo más cercano era `otro`, que sirve
  *     para guardar el archivo y no para saber qué es.
  *
- * ⚠️ **FRENO DECLARADO — `permiso_funcionamiento` NO SE OFRECE, y no es
- * olvido.** La letra lo nombra en el eje ② ("clínica/negocio → permisos")
- * y el CHECK de la DB lo acepta. **Pero el LECTOR no lo devuelve:**
- * `obtenerDocumentosVerificacion` filtra con
- * `.in('tipo', TIPOS_DOCUMENTO_VERIFICACION)` y ese arreglo **no lo
- * nombra** (`TIPOS_DOCUMENTO_OFICIO_VET = ['titulo_profesional',
- * 'registro_senescyt']`). Dibujar su control haría que el documento
- * **suba bien y desaparezca de la pantalla** — un tragadero silencioso, y
- * el propio JSDoc del wrapper ya lo advierte: *"un tipo que la DB acepta
- * y ese arreglo no nombra es INVISIBLE para la app entera"*.
- * **Es `packages/api` ⇒ territorio de A, y está PEDIDO (§6: se declara y
- * se pide, no se clona).** Entra el día que el arreglo lo nombre.
+ * ✅ **EL FRENO DE `permiso_funcionamiento` SE LEVANTÓ (S85-A10), y la
+ * nota se reescribe en vez de dejarse.** Decía "NO SE OFRECE" y **hoy se
+ * ofrece**: es la candidata #20 en carne — *una cadena que declara
+ * NUESTRO estado envejece sola*, y esta cabecera es exactamente eso.
+ * Lo que el freno midió, conservado porque explica la forma: la letra lo
+ * nombraba en el eje ② y el CHECK de la DB lo aceptaba, **pero el lector
+ * lo filtraba** (`.in('tipo', TIPOS_DOCUMENTO_VERIFICACION)`), así que el
+ * documento **habría subido bien y desaparecido de la pantalla**. A lo
+ * sumó al arreglo con su medición: **le da PANTALLA, no PODER** — el gate
+ * vive en SQL y no lee esa constante.
  *
  * ⚠️ **P21 EN LAS TRES CAPAS: el país se DECLARA POR DOCUMENTO.** No hay
  * un país "de la sección": mi cédula puede ser ecuatoriana y mi título
@@ -73,9 +71,16 @@ import { useTraduccion } from '@/i18n';
 import { bandera, nombreDePais } from '@/lib/paises';
 import { subirDocumentoVerificacion } from '@/lib/subir-documento';
 
-/** Los del eje ② que la app PUEDE mostrar hoy. `permiso_funcionamiento`
- *  queda afuera por el freno de la cabecera — no por criterio. */
-const LEGALES_VET = ['titulo_profesional', 'registro_senescyt'] as const;
+/** Los del eje ② — LOS TRES. `permiso_funcionamiento` entró en S85-A10
+ *  al arreglo del lector (era el freno de C: la DB lo aceptaba y el
+ *  lector lo filtraba, así que el documento subía y desaparecía).
+ *  ⚠️ **Le da PANTALLA, no PODER**, y está medido por A: el gate vive en
+ *  SQL (`_trg_ps_verificacion_profesional` compara contra
+ *  `('titulo_profesional','registro_senescyt')` literales) y **no lee
+ *  esta constante**. Es `LETRA_PERFIL_S79` §6 al pie: la credencial de la
+ *  PERSONA gatea la oferta médica, el permiso del establecimiento **se
+ *  recolecta**. */
+const LEGALES_VET = ['titulo_profesional', 'registro_senescyt', 'permiso_funcionamiento'] as const;
 
 export function SeccionDocumentos({
   prestadorId,
@@ -153,6 +158,8 @@ export function SeccionDocumentos({
         return t('documentos.tipoTituloProfesional');
       case 'registro_senescyt':
         return t('documentos.tipoRegistroSenescyt');
+      case 'permiso_funcionamiento':
+        return t('documentos.tipoPermisoFuncionamiento');
       case 'certificacion':
         return t('documentos.tipoCertificacion');
       default:

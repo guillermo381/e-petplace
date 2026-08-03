@@ -32,6 +32,7 @@
  */
 
 import { Pressable, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -46,6 +47,7 @@ import {
   radius,
   spacing,
   typography,
+  usePresionado,
   useTheme,
   type IconoNombre,
 } from '@epetplace/ui';
@@ -330,6 +332,8 @@ export function EspejoNegocio({
   etiquetaLogo,
   rotuloEspejo,
   onEditarLogo,
+  onEditarNombre,
+  etiquetaNombre,
 }: {
   nombre: string;
   logoUrl: string | null;
@@ -353,9 +357,16 @@ export function EspejoNegocio({
   /** ⑥ el rótulo del espejo, YA traducido por la pantalla. */
   rotuloEspejo: string;
   onEditarLogo: () => void;
+  /** ⭐ S85-C4 — EL TAP SOBRE EL NOMBRE. Vive en el ESPEJO y no en un
+   *  formulario porque acá es donde el prestador mira su vitrina: se toca
+   *  lo que se quiere cambiar, igual que el logo tres líneas abajo. */
+  onEditarNombre: () => void;
+  /** La voz del tocable — la pieza no la inventa (Ley 3). */
+  etiquetaNombre: string;
 }) {
   const insets = useSafeAreaInsets();
   const muro = useMuroOficio();
+  const presionNombre = usePresionado(0.97);
 
   return (
     <View
@@ -402,17 +413,43 @@ export function EspejoNegocio({
             medido). Papel PLENO y tipografía por token, como
             `TechoOficio` — jamás opacidad (regla §15b.2). */}
         <View style={{ flex: 1, minWidth: 0, gap: spacing[1] }}>
-          <Text
-            accessibilityRole="header"
-            numberOfLines={2}
-            style={{
-              fontFamily: typography.family.sans.light,
-              fontSize: typography.size.xl,
-              color: palette.light0,
-            }}
+          {/* ⭐ S85-C4 — EL NOMBRE SE TOCA PARA EDITARLO.
+              Se conserva `accessibilityRole="header"` en el Text y el rol
+              de BOTÓN va en el Pressable: son dos cosas distintas —el
+              nombre sigue siendo el encabezado de la ficha, y además hay
+              una acción sobre él. Colapsarlos le quitaría el header al
+              lector de pantalla.
+              ⚠️ SIN CAJA Y SIN GLIFO, a propósito: el muro ya tiene su
+              único acento y este bloque es la firma de la pantalla — un
+              botón alrededor del nombre competiría con el logo, que es
+              exactamente lo que el founder rechazó en C34 sobre el botón
+              del logo ("un botón con caja al lado de una foto compite con
+              la foto"). La affordance la da el `pressed` de la casa. */}
+          <Pressable
+            {...presionNombre.handlers}
+            onPress={onEditarNombre}
+            accessibilityRole="button"
+            accessibilityLabel={etiquetaNombre}
           >
-            {nombre}
-          </Text>
+            {/* La receta ÚNICA de la casa (`usePresionado` 0.97, D-401):
+                "todo tocable que NO sea un componente con pressed propio
+                responde al dedo por esta vía — jamás una receta artesanal
+                por pantalla". 0.97 porque es un CONTROL, no una
+                superficie. */}
+            <Animated.View style={presionNombre.estiloPresionado}>
+              <Text
+                accessibilityRole="header"
+                numberOfLines={2}
+                style={{
+                  fontFamily: typography.family.sans.light,
+                  fontSize: typography.size.xl,
+                  color: palette.light0,
+                }}
+              >
+                {nombre}
+              </Text>
+            </Animated.View>
+          </Pressable>
           {/* ① EL NULO NO SE PINTA: sin oficio o sin ciudad, la línea no
               nace. Ver el porqué en la prop `tipo`. */}
           {tipo !== null && (

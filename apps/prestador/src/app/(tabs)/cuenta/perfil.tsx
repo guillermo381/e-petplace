@@ -73,6 +73,7 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
+  actualizarNombreComercial,
   actualizarPerfilPrestador,
   agregarFotoGaleria,
   borrarFotoGaleria,
@@ -301,6 +302,15 @@ export default function PerfilV2() {
      estado sale del MISMO fetch que todo lo demás: cero lectura nueva. */
   const [clipPath, setClipPath] = useState<string | null>(null);
   const [subiendoClip, setSubiendoClip] = useState(false);
+  /* ⭐ S85-C4 — LA EDICIÓN DEL NOMBRE. Hoja y no campo inline: el nombre
+     vive en el ESPEJO (el muro), y un input sobre el muro pelearía con la
+     frontera D-535 —`Campo` resuelve su color de `theme.*` y el muro no
+     está en la escala del tema—. La Hoja lo saca a superficie de tema,
+     donde las piezas de la casa sí visten. */
+  const [hojaNombre, setHojaNombre] = useState(false);
+  const [nombreBorrador, setNombreBorrador] = useState('');
+  const [guardandoNombre, setGuardandoNombre] = useState(false);
+  const [reboteNombre, setReboteNombre] = useState<string | null>(null);
 
   async function agregarClip() {
     if (subiendoClip) return;
@@ -641,6 +651,48 @@ export default function PerfilV2() {
     if (volver) router.back();
     return true;
   }
+  /**
+   * ⭐ S85-C4 — UN NOMBRE, DOS CASAS, UNA TRANSACCIÓN.
+   *
+   * Llama a `actualizarNombreComercial`, que adentro escribe
+   * `prestadores` **Y** `cuentas_comerciales` en una sola transacción del
+   * server. **La atomicidad es el punto y no un detalle:** dos UPDATE
+   * desde acá pueden fallar por separado, y el resultado —la portada con
+   * el nombre nuevo y el documento fiscal con el viejo— *no da error, no
+   * rompe nada y nadie lo descubre*, porque cada pantalla lee su propia
+   * columna y las dos se ven correctas.
+   *
+   * ⚠️ **Y POR ESO NO EXISTE NI VA A EXISTIR UN GEMELO DEL LADO FISCAL**
+   * — la advertencia está escrita en el propio wrapper y la repito acá
+   * porque es donde alguien tendría la tentación: si algún día aparece un
+   * "editar nombre" en Datos comerciales, vuelve a existir el camino que
+   * escribe UNA sola columna, y la divergencia que esta pieza vuelve
+   * inexpresable pasa a ser expresable **por la puerta de al lado**. En
+   * fiscal el nombre se EXHIBE; se edita acá.
+   *
+   * Los rebotes viajan TIPADOS (los seis códigos del wrapper) y se
+   * muestran EN LA HOJA, no en un toast: son de permiso —quién puede
+   * cambiar el nombre— y hay que poder releerlos.
+   */
+  async function guardarNombre() {
+    if (guardandoNombre) return;
+    setReboteNombre(null);
+    setGuardandoNombre(true);
+    const r = await actualizarNombreComercial(nombreBorrador);
+    setGuardandoNombre(false);
+    if (!r.ok) {
+      setReboteNombre(r.mensaje);
+      return;
+    }
+    /* El nombre que se pinta sale del SERVER, no del input: el wrapper
+       trae `data.nombre` (trimeado adentro de la RPC) y su guard de shape
+       ya rechazó cualquier otra forma. Hacer eco del texto tipeado
+       pintaría como guardado algo que no sabemos que se guardó. */
+    setPrestador((p) => (p === null ? p : { ...p, nombre_comercial: r.data.nombre }));
+    setHojaNombre(false);
+    mostrar({ variante: 'exito', texto: t('perfilNegocio.nombreGuardado') });
+  }
+
   const [paisDe, setPaisDe] = useState<'telNegocio' | 'whatsapp' | null>(null);
   const [paisTel, setPaisTel] = useState(PAIS_DEFAULT);
   const [paisWa, setPaisWa] = useState(PAIS_DEFAULT);
@@ -859,6 +911,12 @@ export default function PerfilV2() {
                 return;
               }
               setHojaLogo(true);
+            }}
+            etiquetaNombre={t('perfilNegocio.nombreEditar')}
+            onEditarNombre={() => {
+              setNombreBorrador(prestador?.nombre_comercial ?? '');
+              setReboteNombre(null);
+              setHojaNombre(true);
             }}
           />
 
@@ -1377,6 +1435,46 @@ export default function PerfilV2() {
         </ScrollView>
       </EvitaTeclado>
       )}
+
+      {/* ⭐ S85-C4 — LA HOJA DEL NOMBRE DEL NEGOCIO.
+          Un solo campo y un solo botón: es UN dato. El rebote vive ACÁ y
+          no en un toast porque los seis códigos del wrapper son de
+          PERMISO (titular · owner de la cuenta · cuenta inexistente) y
+          esos hay que poder releerlos — un toast se va justo cuando el
+          prestador está tratando de entender por qué no puede. */}
+      <Hoja
+        visible={hojaNombre}
+        onCerrar={() => setHojaNombre(false)}
+        titulo={t('perfilNegocio.nombreHojaTitulo')}
+        altura="contenido"
+      >
+        <View style={{ gap: spacing[3], paddingBottom: spacing[2] }}>
+          {/* Dice DÓNDE se ve, que es lo que vuelve entendible el cambio:
+              el mismo nombre viaja a la vitrina y al documento fiscal. */}
+          <Texto variante="apoyo">{t('perfilNegocio.nombreAyuda')}</Texto>
+          <Campo
+            label={t('perfilNegocio.nombreLabel')}
+            value={nombreBorrador}
+            onChangeText={setNombreBorrador}
+            autoCapitalize="words"
+          />
+          {reboteNombre !== null && (
+            <Texto variante="apoyo" color="danger">
+              {reboteNombre}
+            </Texto>
+          )}
+          <Boton
+            etiqueta={t('miCuenta.guardar')}
+            bloque
+            cargando={guardandoNombre}
+            /* Ley 23: vacío no se ofrece. Las dos columnas son NOT NULL,
+               así que vaciarlo no es una opción que exista — y el rebote
+               del server lo diría igual, pero después del viaje. */
+            deshabilitado={nombreBorrador.trim().length === 0}
+            onPress={() => void guardarNombre()}
+          />
+        </View>
+      </Hoja>
 
       {/* ── ② La Hoja del país: LAS 23 SE ELIGEN ──
           Murió el par tocable/apagado: ninguna fila está apagada, porque
