@@ -211,7 +211,13 @@ S84 depositó **cuatro** (#18 · #19 · #20 · #21) sobre las tres de S83
 instrumento funcionó** y aun así llevó a la conclusión falsa. Las otras seis son
 instrumentos que miden mal; **ésta mide bien y cuenta mal.**
 
-### ➕ CANDIDATA #22 (S85) — UNA ORDEN QUE NACE DE UNA MEDICIÓN DECLARA SU ANCLA
+### ✅ #22 — **FIRMADA POR LA MESA (S85) COMO REGLA DE TRABAJO**, no candidata
+
+> **Toda orden que nazca de una medición declara su ancla; la pista re-mide
+> antes de ejecutar.**
+>
+> *Es la primera de la serie #15-#22 que se firma — y se firmó el mismo día en
+> que se depositó, porque la mesa la pagó dos veces mientras la escribíamos.*
 
 **Depositada en S85, sobre S84, porque es la vuelta de tuerca de #19 (*un
 instrumento correcto sobre un árbol viejo*) aplicada a las ÓRDENES en vez de a

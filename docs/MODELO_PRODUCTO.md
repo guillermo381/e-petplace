@@ -176,6 +176,42 @@ La meta no es competir con VetterPro, ni con IDEXX, ni con Rover, ni con Mercado
 
 Es ambicioso. Si no apuntamos a la luna, no llegamos lejos.
 
+### El seller se oculta; el prestador se muestra (FIRMADA, 3-ago-2026)
+
+> **"El vendedor de productos se oculta detrás de e-PetPlace; el prestador se
+> muestra — su nombre y su cara son parte de lo que la familia elige."**
+> — firma del founder
+
+**Esto cierra una asimetría que estuvo abierta desde S21** (D-173): el TDR de
+Portal Sellers declara *"para el comprador, el seller es e-PetPlace; nunca ve ni
+interactúa con el seller directamente"*, mientras `PORTAL_PRESTADOR` §4.5 le da
+al prestador graduado una página pública con su foto y su biografía. **Se leían
+como contradicción y son dos leyes distintas, cada una correcta en su dominio.**
+
+**El eje que las separa, y es el que hay que aplicar cuando aparezca el próximo
+caso:** *¿la familia está eligiendo **el qué** o **el quién**?*
+
+- **Un producto es fungible.** Quién lo despacha no cambia lo que llega a la
+  puerta, y hacer elegir bodega **exporta complejidad** sin darle nada a cambio.
+  Ahí e-PetPlace responde por el producto — y esconder al seller no es ocultarlo,
+  es **hacerse cargo**.
+- **Un servicio de cuidado NO es fungible.** *No es "un paseo": es que **esta
+  persona** camine con tu perro.* El nombre y la cara **son el producto**, no su
+  empaque. Esconderlos dejaría a la familia eligiendo un servicio genérico —
+  exactamente lo que `EL NORTE` niega: *"no es donde reservás una cita; es donde
+  tu mascota es cuidada"*.
+
+**Y hay un corolario que no es de marca sino de modelo:** el expediente lo
+alimenta el ecosistema, y **un aporte al expediente tiene autor**. *"El vet no
+atendió una consulta — adoptó un caso"* no se puede decir de un actor anónimo.
+**La identidad visible del prestador es la condición de que su aporte sea
+atribuible**, y la atribución es lo que hace que el expediente valga.
+
+> **Lo que esta firma NO decide, y se dice para que nadie lo dé por resuelto:**
+> el **slug** de la página pública y las **insignias** siguen abiertos. *Dejan de
+> estar bloqueados por la pregunta de modelo —ya contestada— y pasan a ser
+> decisiones de diseño con su propio disparo.*
+
 ---
 
 ## 2.5 Lo que e-PetPlace NO es

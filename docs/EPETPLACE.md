@@ -229,6 +229,24 @@ Sin excepciones. e-PetPlace lo gestiona, pero el dueño puede exportar, transfer
 
 El prestador usa e-PetPlace porque captura clientes y le simplifica operación, pero su valor real es lo que aporta al expediente.
 
+> **ADDENDUM (firma founder, 3-ago-2026) — y no es un detalle de marca: es lo
+> que hace que P3 funcione.**
+>
+> **"El vendedor de productos se oculta detrás de e-PetPlace; el prestador se
+> muestra — su nombre y su cara son parte de lo que la familia elige."**
+>
+> **La asimetría con el seller es DELIBERADA** (cierra D-173, abierta desde
+> S21). El eje: *la familia elige **el qué** en un producto y **el quién** en un
+> servicio de cuidado.* Un producto es fungible y e-PetPlace responde por él;
+> **una persona que cuida a tu mascota no lo es.**
+>
+> **Y es la condición de este mismo principio:** si el prestador aporta al
+> expediente, ese aporte **tiene autor**. Un contribuyente anónimo no puede
+> "adoptar un caso" — la identidad visible es lo que vuelve su aporte
+> atribuible, y la atribución es lo que hace que el expediente valga.
+> *(Desarrollo completo en `MODELO_PRODUCTO` §2, "El seller se oculta; el
+> prestador se muestra".)*
+
 ### P4 — Sin sponsoreo en recomendaciones clínicas
 
 Nunca un fabricante paga para que se recomiende su medicación o alimento por encima de otro. Las recomendaciones clínicas y nutricionales son neutrales basadas en data de la mascota y consenso veterinario.

@@ -735,6 +735,37 @@ Origen: S21 lectura fría PORTAL_PRESTADOR.md (hallazgo C3). Prioridad: 🟢 BAJ
 Detectado en S21 lectura fría con cruzado contra TDR Portal Sellers v3 (hallazgo D1). TDR Sellers declara principio fundacional: "para el comprador, el seller es e-PetPlace. El comprador nunca ve ni interactúa con el seller directamente". PORTAL_PRESTADOR.md sección 4.5 declara que cada prestador graduado recibe "página web pública dentro del dominio de e-PetPlace" con foto, biografía, identidad propia del prestador. Los dos modelos son **opuestos**: en sellers la identidad del actor interno se oculta; en prestadores la identidad del actor se exhibe. ¿Por qué la asimetría? ¿Es decisión consciente o drift documental entre ecosistemas? Si es consciente, anclar la justificación en MODELO_PRODUCTO.md. Si no, decidir cuál modelo aplica.
 Origen: S21 lectura fría PORTAL_PRESTADOR.md (hallazgo D1) cruzado con TDR Portal Sellers v3. Prioridad: 🟡 ALTA — decisión de modelo bloqueante para coherencia entre PORTAL_PRESTADOR.md y PORTAL_SELLER.md futuro. Disparo: antes de redactar PORTAL_SELLER.md o cuando MediaLab tenga primera versión del checkout unificado.
 
+> ## ✅ CERRADA POR FIRMA DEL FOUNDER (3-ago-2026) — **la asimetría era DELIBERADA**
+>
+> > **"El vendedor de productos se oculta detrás de e-PetPlace; el prestador se
+> > muestra — su nombre y su cara son parte de lo que la familia elige."**
+>
+> **La pregunta de la ficha era binaria —*¿decisión consciente o drift
+> documental?*— y la respuesta es la primera.** No había que elegir un modelo:
+> había que escribir por qué son dos.
+>
+> **El eje, para cuando aparezca el próximo caso:** *¿la familia elige **el qué**
+> o **el quién**?* Un producto es fungible y hacer elegir bodega **exporta
+> complejidad**; e-PetPlace responde por él, y esconder al seller **no es
+> ocultarlo, es hacerse cargo**. Un servicio de cuidado **no es fungible**: *no
+> es "un paseo", es que **esta persona** camine con tu perro.* El nombre y la
+> cara **son el producto**, no su empaque.
+>
+> **Y el corolario que la vuelve estructural y no de marca:** un aporte al
+> expediente **tiene autor**. *"El vet no atendió una consulta — adoptó un caso"*
+> **no se puede decir de un actor anónimo.** La identidad visible es la condición
+> de que el aporte sea atribuible, y la atribución es lo que hace que el
+> expediente valga.
+>
+> **ANCLADA EN DOS DOCS MAESTROS**, no solo acá: `MODELO_PRODUCTO` §2 (*"El
+> seller se oculta; el prestador se muestra"*, con su desarrollo) y `EPETPLACE`
+> P3 (addendum — es la condición de ese principio, no un detalle suyo).
+>
+> ⚠️ **QUEDAN VIVAS SUS HERMANAS, y ahora SIN BLOQUEO:** el **slug** de la página
+> pública y las **insignias**. *Dejan de esperar una decisión de modelo —ya
+> tomada— y pasan a ser decisiones de diseño con su propio disparo.* **Se dice
+> para que el cierre de ésta no se lea como que todo el tema cerró.**
+
 #### D-174 — Modelo de reseñas para prestadores (calificación numérica vs cualitativa)
 Detectado en S21 lectura fría (hallazgo D2). PORTAL_PRESTADOR.md menciona reseñas en secciones 2.6, 3.6, 4.6, 6.6.5, 7.3.3 pero NO define el modelo concreto (¿1-5 estrellas o cualitativo?, ¿moderación previa o post-hoc?, ¿quién modera?, ¿qué pasa con reseñas negativas? — solo declara que se atienden con presencia). El principio "reputación honrada, no jerarquizada" (sección 2.7) parece chocar con "1-5 estrellas" del TDR Sellers (que sí usa numérico para productos). Decisión de modelo necesaria: el sistema de reseñas de prestadores **no es** el de productos, pero su shape concreto está pendiente.
 Origen: S21 lectura fría PORTAL_PRESTADOR.md (hallazgo D2). Prioridad: 🟡 ALTA — decisión de modelo bloqueante antes de F1 real (primera reseña aparece como momento narrativo 7.3.3). Disparo: antes de soft launch real o cuando aparezca primera reseña.
@@ -4338,6 +4369,41 @@ Necesita lápida.
 > disculpándose por un problema que ya no existe — que es exactamente el caso del
 > clip que fundó la regla. **Verificable por grep:** el literal no existe.
 
+### 🔴 ENMIENDA S85 — DATO DE CAMPO DEL FOUNDER: **NO ES "EL CORREO EN INGLÉS". EL CORREO NO TRAE EL CÓDIGO.**
+
+**Medido en dispositivo por el founder (3-ago), no inferido:**
+
+> **El mail NO trae un código: trae un LINK, y el link redirige al PORTAL DE
+> PRESTADORES ANTIGUO.** Remitente genérico de Supabase.
+
+**Esto cambia la gravedad y hay que decirlo sin suavizar:** esta ficha nació
+🟠 como *"un problema de idioma y remitente"* — algo que hace dudar al usuario.
+**Lo medido es que el camino no llega**: la pantalla pide un código que **nunca
+va a existir**, y quien siga el link **aterriza en un producto que no es éste**.
+
+> ### ⚠️ Y LO QUE LO VUELVE EL CASO MÁS INSTRUCTIVO DE S85
+>
+> **El gate del founder cerró al 100% el mismo día — y esto no lo tocó.** Porque
+> **el gate mira PANTALLAS**, y la pantalla de recuperación **está bien**: pide
+> el código, valida, rebota con voz. *Lo que falla vive del otro lado del correo,
+> donde ningún gate visual llega.*
+>
+> **Un verde de gate sobre un camino que no llega es peor que un rojo:** se
+> archiva como resuelto y nadie vuelve. *Por eso el banner de las tres actas de
+> S84 lleva esta excepción escrita al lado de la firma, y no en una nota al pie.*
+
+**⚠️ Y HAY UNA CONSECUENCIA QUE TOCA UNA DECISIÓN YA TOMADA:** el estado medido
+de S84 declaraba que `verifyOtp('recovery')` era *"lo único que puede REVERTIR
+una decisión, no solo pedir un retoque"* — porque si no daba sesión utilizable,
+**el camino del código se caía y el reparto volvía a la mesa**. **Todavía no se
+sabe si `verifyOtp` funciona: no se pudo probar, porque nunca llegó un código
+que canjear.** *La pregunta sigue abierta y ahora se sabe POR QUÉ no se pudo
+contestar.*
+
+**LA CURA ES DE S86, ENTERA — hoy no se cura nada** (decisión de mesa): plantilla
+con el token del código + redirect al destino correcto + SMTP propio. **Las tres
+son config remota**, no repo.
+
 ---
 
 #### D-629 — LA CARPETA DE S86 · NOTIFICACIONES 📋 ÍNDICE
@@ -4643,8 +4709,146 @@ de que hacen falta ocho.* **No es un break y no bloquea nada** — es una costur
 y se registra en vez de barrerla sola: unificar es decisión de producto (¿sube
 registro a 8, o baja la promesa de las otras dos?), no un `sed`.
 
+> ### ✅ LA ASIMETRÍA **QUEDA** — firma del founder (3-ago), y por eso no se unifica
+>
+> **`registro` sigue prometiendo 6; `seguridad` y `recuperar` exigen 8. Es
+> deliberado: estamos en etapa de PRUEBAS**, y bajar la fricción de la puerta de
+> entrada mientras se recluta vale más que la simetría.
+>
+> > **⚠️ NADIE LA "UNIFICA" DE OFICIO.** *Es exactamente la clase de inconsistencia
+> > que alguien encuentra con un grep, ve como un descuido de dos líneas y
+> > empareja de paso — y estaría deshaciendo una decisión.* Por eso la firma va
+> > acá adentro y no solo en el acta: **la ficha es lo que se lee cuando aparece
+> > el grep.**
+>
+> **Lo que NO cambia con esta firma:** el motor sigue cumpliendo lo que cada
+> pantalla promete. *La asimetría legal es que dos superficies pidan distinto; la
+> ilegal era que UNA pidiera 8 y su motor aceptara 7.*
+
 > **☠️ CONDICIÓN DE MUERTE:** se retira cuando **el panel diga 8** (toggle de la
-> visita admin de S86, junto con la plantilla del correo de D-628) **y** la mesa
-> decida qué hace `registro` con su promesa de 6. **Verificable en dos lugares,
-> ninguno interpretable:** la config del panel, y `grep passwordAyuda` en los dos
-> diccionarios.
+> visita admin de S86, junto con la plantilla del correo de D-628). **Verificable
+> en un solo lugar y sin interpretación:** la config del panel. *La pata de
+> `registro` YA NO forma parte de la condición — quedó decidida, no pendiente.*
+
+---
+
+#### D-635 — E.164 ENTERO EN `profiles`: LA LEY ESTÁ FIRMADA, LA EJECUCIÓN ESPERA TERRITORIO CLIENTE 🟠
+
+**Firma del founder (3-ago-2026): la regla 28 queda derogada PARA TODA LA CASA.**
+El teléfono se guarda **E.164 entero, con su `+`**. `prestadores` migró en S84;
+**`profiles` no**, y esta ficha existe para que ese "no" no se lea como olvido.
+
+### LO MEDIDO (S85-A, contra la DB viva)
+
+| `profiles` · 145 filas | |
+|---|---|
+| con teléfono | **24** |
+| **ya en E.164 con `+`** | **15** |
+| en formato viejo | **9** |
+| con `telefono_codigo_pais` | **14 en total — y CERO de las nueve** |
+| **CHECK sobre `telefono`** | **ninguno** |
+
+> ### ⚠️ LA PREMISA CON QUE S84 CERRÓ LA DEROGACIÓN ERA FALSA PARA `profiles`
+>
+> El censo de S84 argumentó que *"E.164 sin `+` funciona **si el país vive en
+> otro lado**, y en `profiles` esa mitad existe (`telefono_codigo_pais`)"*.
+> **La columna existe. El dato no.** Es NULL en las nueve filas que la
+> necesitarían — **la otra mitad existía como columna y no como dato.**
+>
+> *Y por eso el backfill no se pudo hacer solo: no había de dónde sacar el país
+> sin inventarlo.* `country_code` dice `EC` en las nueve, y derivar de ahí es
+> justo lo que P21 prohíbe — el caso canónico ya nos mordió dos veces.
+
+### EL BACKFILL: **CERRADO POR DECISIÓN**, no pendiente
+
+**Se preguntó y el founder contestó (3-ago), textual:**
+
+- *"Los 8 teléfonos de tus usuarios de prueba: dejarlos como están. De acuerdo"*
+  ⇒ **las ocho QUEDAN.** Son números de teclado (`12345678` ×4, `09876543`,
+  `987654321`, `987655412`, `0991234567`).
+- *"3208408790 este es correcto"* ⇒ **la novena se corrigió** a
+  `+573208408790` (migración `20260803180000`): le faltaban **un dígito Y el
+  país**.
+
+> **☠️ NADIE REPARA LAS OCHO DE OFICIO.** *Están en formato viejo por decisión
+> escrita, no por deuda — y un barrido bienintencionado que las "arregle" estaría
+> deshaciendo una firma.*
+
+### 🔴 LO QUE SIGUE ABIERTO — y por qué no lo cerré yo
+
+**El guard de `actualizarMiPerfil` todavía exige el formato VIEJO** (`^\d{7,15}$`,
+que **rebota el `+`**). Endurecerlo está escrito, medido, y **rompe
+`apps/cliente` el mismo día**:
+
+`apps/cliente/(tabs)/cuenta/perfil.tsx:118` manda `telefono` **crudo desde un
+`Campo` sin `+`, sin prefijo y sin selector de país — y lo manda SIEMPRE**, no
+solo cuando se edita.
+
+> **El daño no es "no se puede cargar un teléfono nuevo": es que alguien que
+> solo cambia su NOMBRE no puede guardar** hasta arreglar un teléfono que no
+> tocó. *Un guard correcto puesto solo bloquea una pantalla entera por un campo
+> que nadie estaba editando.*
+
+**⇒ SON TRES CUERPOS Y SE MUEVEN JUNTOS:** el guard (`packages/api`) · **la
+captura del cliente** (`apps/cliente`) · el backfill (ya cerrado). *Es la
+condición de D-613 aplicada en la dirección incómoda: la que pide esperar.*
+
+**ADJUDICACIÓN DE MESA (S85): `apps/cliente` queda FUERA del reparto** — S85 es
+del prestador. **La ejecución es de la primera sesión con territorio cliente.**
+
+> **Y el estado actual de `miPerfil.ts` es EL CORRECTO hasta entonces**, con su
+> JSDoc diciendo la verdad incómoda: *el guard exige el formato viejo, la ley ya
+> no es ésa, y acá está el porqué.* **Nadie lo endurece suelto.** *Un comentario
+> que dice "esto está viejo y sé por qué" vale más que uno que promete la ley
+> nueva sobre un código que la rebota.*
+
+### El censo de lectores, para que la cura no se olvide de ninguno
+
+`miPerfil.ts` (lee y escribe) · `recepcion.ts:69` (lee) · y **tres RPC
+`SECURITY DEFINER`**: `buscar_cliente_por_telefono` · `crear_alta_asistida_pendiente`
+· `obtener_contacto_reserva_cita`. **Ninguno normaliza el formato.**
+
+> **⚠️ Y la columna YA tiene 15 de 24 con `+`.** Entraron por caminos que no
+> pasan por el wrapper. *El guard no protege un formato: cuida una puerta
+> mientras quince filas entraron por la ventana.* **La cura real es la
+> normalización en la frontera, no el guard.**
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando **el guard acepte E.164 entero**
+> **y** la captura del cliente lo produzca. **Verificable por grep:** cero
+> `^\\d{7,15}$` en `packages/api`. *No se retira endureciendo solo el guard —
+> eso rompe una pantalla viva y sería peor que la deuda.*
+
+---
+
+#### D-636 — DOCE REGLAS DE AUSENCIA SIN `ancla()`, Y SU VECTOR ES ANGOSTO ⚪ (nace y probablemente muere en S85)
+
+**Origen: literal de B (S85), sobre `scripts/verify-diseno.mjs`.**
+
+**Las doce:** `R1 · R2 · R3 · R4 · R5 · R6 · R7 · R8 · R10 · R13 · R20 · R29`.
+
+**Qué las une:** son **reglas de AUSENCIA** —dicen *"no encontré violaciones"*—
+y **no declaran su `ancla()`**, la tercera capa de L-192. Sin ancla, una regla de
+ausencia **da exactamente el mismo verde cuando no hay nada que mirar**: la
+carpeta se renombró, el archivo se reestructuró, la clave que vigila cambió de
+nombre. *La regla sigue en su lugar, sigue corriendo, y ya no verifica nada.*
+
+### ⚠️ EL VECTOR ES ANGOSTO, y se dice para que la ficha no se lea de más
+
+**La raíz del corpus existe** y el lint la recorre entera; el modo de falla real
+es **que el código se MUDE dentro de esa raíz** sin que nadie lo note. *No es que
+hoy estén mudas: es que si mañana lo estuvieran, seguirían dando verde.*
+
+> **Es exactamente la candidata #19 —*un instrumento correcto sobre un árbol
+> viejo*— con la particularidad de que acá el árbol no envejece afuera: envejece
+> adentro.**
+
+**B ya la está curando.** *Esta ficha existe por la regla de la casa —lo que se
+encuentra se registra, aunque se cure en la misma sesión— y porque el número
+importa: **doce de veinticuatro** reglas del lint estaban en esa condición.*
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando **las doce declaren su `ancla()`**
+> y el guard estructural del lint lo exija (una regla sin ancla ⇒ el lint entero
+> falla, el mismo criterio que ya rige para FIXTURES vs INFORMATIVAS).
+> **Verificable por grep**, sin interpretación. **Nace y muere en S85 si B
+> cierra** — y si no cierra, se hereda con el número medido, no con "faltan
+> algunas".
