@@ -93,6 +93,10 @@ export type IconoNombre =
   //    EL OBJETO ES IDENTIFICACIÓN (cédula · RUC · NIT), no una carpeta
   //    ni un archivo genérico. GATE POR ÍCONO A 21px PENDIENTE (§2.9).
   | 'documento'
+  // S85-B10 — EMBLEMA DE COHORTE en DOS candidatos. El censo mató a la
+  //   medalla (círculo ocupado ×3), al laurel (colisiona con `equipo`) y
+  //   al podio (LOYALTY §3 prohíbe el ranking). GATE POR ÍCONO A 21px.
+  | 'emblemaBanderin' | 'emblemaCinta'
   // ── S84-B21: FISCAL y BANCARIO — las otras dos secciones de "Datos
   //    comerciales". Nacen JUNTAS y con `documento` porque el founder
   //    decidió que llevan glifo las TRES o ninguna: ponérselo a una sola
@@ -310,6 +314,68 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       <Huella color={huella} x={9.5} y={7.4} escala={0.3} />
     </>
   ),
+  // ── EMBLEMA DE COHORTE (fundador / pionero) · S85-B10, DOS CANDIDATOS ──
+  //
+  // EL CENSO DE IDIOMAS, PRIMERO — y esta vez mató a los dos candidatos
+  // obvios ANTES de que existieran, uno por idioma y el otro por LEY:
+  //
+  //  ☠️ LA MEDALLA / ROSETA (el candidato que cualquiera dibuja primero)
+  //     cae por idioma: «círculo centrado» ya está ocupado TRES veces —
+  //     `ayuda` (r 8.4 + 4 rayos) · `preferencias` (r 4.4 + 8 rayos) ·
+  //     `hoy` (r 4.6 + 8 rayos). Sería la CUARTA, y a 21px un disco es un
+  //     disco. Es el mismo idioma ocupado que hundió a `contactoOndas` y
+  //     a `documentoSello`: tercera y cuarta vez que el censo cobra.
+  //
+  //  ☠️ EL LAUREL cae por una colisión que NADIE habría visto sin medir:
+  //     `equipo` YA ES dos ramas curvas simétricas que suben desde abajo
+  //     (`M6.2 4.4c3.6 1.5 4.2 5.4 1.2 8.8` + su espejo). Un laurel es
+  //     exactamente eso. A 21px serían el mismo dibujo — y encima vecinos
+  //     temáticos (equipo/pertenencia), que es la peor colisión posible.
+  //
+  //  ☠️ EL PODIO / EL «1º» cae por LEY, no por dibujo: MODELO_LOYALTY §3
+  //     prohíbe la voz del desempeño —niveles, rankings, puntajes—, y un
+  //     podio ES un ranking dibujado. Que un glifo muera por una ley de
+  //     producto y no por geometría vale registrarlo: el censo de idiomas
+  //     no habría dicho una palabra de éste.
+  //
+  // LO QUE QUEDA, Y EL CRITERIO QUE LOS ELIGE: pertenencia y LLEGADA
+  // TEMPRANA, jamás mérito comparado. La cohorte fundadora no ganó una
+  // competencia — estuvo antes. Los dos candidatos dicen eso sin ranking.
+  // Comparten capa (COMUNIDAD): lo que el founder elige a 21px es el
+  // DIBUJO, no el color.
+  //
+  // CANDIDATO A — EL BANDERÍN PLANTADO. El objeto del acto (§1: se dibuja
+  // el OBJETO, no la idea): plantar bandera es llegar primero y quedarse.
+  // La huella va al PIE del asta — quien plantó es la mascota, no un
+  // logro abstracto.
+  // ⚠️ SU RIESGO, declarado: a 21px un banderín puede leerse como
+  // «reportar» o «marcar» (la bandera es el idioma universal del flag).
+  // Se monta al lado de `hoy` y `ubicacion` para ver si compite.
+  emblemaBanderin: ({ tinta, huella }) => (
+    <>
+      <Path d="M7.6 3.6v17" {...trazo(tinta)} />
+      <Path d="M7.6 4.6h10l-2.9 3.3 2.9 3.3h-10Z" {...trazo(tinta)} />
+      <Huella color={huella} x={12.6} y={14.4} escala={0.34} />
+    </>
+  ),
+
+  // CANDIDATO B — LA CINTA, SIN EL DISCO. Es el movimiento que ya salvó a
+  // `documento` (el retrato) y a `bancario` (las columnas): se toma el
+  // objeto obvio y se le QUITA la parte que colisiona. En una escarapela
+  // lo que choca es el disco; las colas de la cinta no chocan con nada
+  // del registry. Nudo arriba, dos colas divergentes con su muesca.
+  // ⚠️ SU RIESGO, declarado: sin el disco puede perder el significado de
+  // «distinción» y leerse como un marcador o un separador. Es el riesgo
+  // inverso al de A —A se confunde, B se vacía— y por eso van los dos.
+  emblemaCinta: ({ tinta, huella }) => (
+    <>
+      <Path d="M9.4 3.8h5.2v2.8H9.4Z" {...trazo(tinta)} />
+      <Path d="M10.4 6.6 8.2 15.4l2.9-1.4" {...trazo(tinta)} />
+      <Path d="M13.6 6.6l2.2 8.8-2.9-1.4" {...trazo(tinta)} />
+      <Huella color={huella} x={9.4} y={17.4} escala={0.32} />
+    </>
+  ),
+
   // El escudo — la vida protegida (verde vital, como insurance).
   //
   // ⚖️ COLISIÓN DECLARADA Y ACEPTADA (firma de mesa, S85): ESTE MISMO
@@ -682,6 +748,14 @@ export function Icono({
     // decisión, no el default.
     fiscal: identidad, bancario: identidad,
     prime: comunidad, primeCorona: comunidad,
+    // S85-B10 — EL EMBLEMA DE COHORTE va a COMUNIDAD, y es taxonomía
+    // (Ley 10), no gusto: pertenecer a la cohorte fundadora es un VÍNCULO
+    // con el producto y su gente — la misma capa que `familia`, `equipo`
+    // y `contacto`, que son los otros vínculos. NO va a `identidad`
+    // aunque se parezca a una credencial: no acredita QUIÉN ES el
+    // negocio ante nadie, dice DESDE CUÁNDO pertenece. Los dos candidatos
+    // comparten capa a propósito: lo que se elige a 21px es el DIBUJO.
+    emblemaBanderin: comunidad, emblemaCinta: comunidad,
     // LOTE S71-B2 (firma founder): caso = historia clínica (familia de
     // carnet/vet) · presupuesto = plata del cuidado (familia pagos/negocio)
     caso: identidad, presupuesto: ocre,

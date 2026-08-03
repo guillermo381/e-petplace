@@ -1114,6 +1114,12 @@ function EjemploSetBPrima() {
     // el 3-ago y el founder firmó los vigentes. Su lápida vive en el
     // registry, que es donde se lee al dibujar el próximo.
     'documento', 'fiscal', 'bancario',
+    // S85-B10: EL EMBLEMA DE COHORTE, dos candidatos. Van pegados a
+    // `prime`/`primeCorona` y a `equipo` A PROPÓSITO: son sus vecinos de
+    // significado (pertenencia) y el laurel murió justamente por
+    // colisionar con `equipo` — a 21px hay que ver que estos DOS no
+    // repitan ese error, ni entre sí ni con sus vecinos.
+    'emblemaBanderin', 'emblemaCinta',
   ]
   return (
     <View style={{ gap: spacing[4] }}>
