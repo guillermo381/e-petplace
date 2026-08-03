@@ -153,6 +153,15 @@ export default function SalaEspera() {
           paddingHorizontal: spacing[5],
           gap: spacing[6],
         }}
+        /* S84-C28 — SIN ESTO, EL PRIMER TAP NO ELIGE. El default de
+           `keyboardShouldPersistTaps` es `'never'`: con el teclado
+           arriba, tocar una predicción de Places SOLO cierra el teclado
+           y el tap NO llega a la `Celda`. Había que tocar dos veces, y
+           la primera se lee como que el buscador no responde.
+           El Perfil ya lo tiene en `'handled'` — acá faltaba, y ésta es
+           la pantalla donde el prestador nuevo carga su sede POR
+           PRIMERA VEZ. */
+        keyboardShouldPersistTaps="handled"
       >
         {/* el marco: la voz del landing, reusada tal cual (aprobada) */}
         {/* §5 firmada (S81) */}
