@@ -5,7 +5,10 @@ import { useColorScheme } from 'react-native';
 // y el raíz no tenía ninguno: gesture-handler TIRA en Android/iOS y la
 // web no lo exige (el smoke fue verde — Ley 9 confirmada por el camino).
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { DefaultTheme, Stack, ThemeProvider as TemaNavegador } from 'expo-router';
+// S85-C3: `DefaultTheme` y `ThemeProvider` salieron con el experimento del
+// fondo transparente — eran sus dos únicos consumidores (Ley 37: lo que sale
+// de la UI sale del código, imports incluidos). Su lápida está abajo.
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Updates from 'expo-updates';
@@ -159,59 +162,59 @@ export default function RootLayout() {
                 configurables acá; la física la pone la plataforma. Si la
                 mesa exige la curva exacta, es JS-stack (otro navegador,
                 decisión aparte). Cero API experimental. */}
-            {/* ⑦ S83-C38 — EL EXPERIMENTO DE DOS ARCHIVOS (medición, no
-                cura). La pregunta que decide si se barren 71 pantallas:
-                con las escenas del navegador TRANSPARENTES, ¿el agua y el
-                glow del provider se ven desde una sola monta, y a qué
-                precio en la transición?
+            {/* ☠️ S85-C3 — AQUÍ VIVÍA EL EXPERIMENTO DEL FONDO
+                TRANSPARENTE (S83-C38). **REVERTIDO, con lápida** (orden de
+                la mesa; Ley 37).
 
-                POR QUÉ ACÁ: el navegador pinta `colors.background` en DOS
-                capas propias (`contentStyle` por escena y
-                `nativeContainerStyle` del ScreenStack) y su tema por
-                default lo tiene en `rgb(242,242,242)`. Esas capas viven
-                ENTRE el provider —donde están el agua y la Atmosfera— y
-                las pantallas: mientras pinten, quitar el fondo de una
-                pantalla descubre GRIS, no agua. En transparente, deja de
-                haber capa y se ve lo del provider.
+                QUÉ ERA: `TemaNavegador` pisaba `colors.background` a
+                `'transparent'` para medir si, con las escenas del
+                navegador sin fondo propio, el agua y el glow del provider
+                se veían **desde una sola monta** — la pregunta que decidía
+                si se barrían **71 pantallas** y morían **65 montas** del
+                agua.
 
-                ⚠️ LO QUE ESTE EXPERIMENTO EXISTE PARA MEDIR, y es el
-                riesgo que yo mismo declaré: la fuente instalada aplica el
-                fondo opaco SALVO en `transparentModal` — o sea, para el
-                navegador la opacidad por escena ES la definición de
-                `card`. Si eso significa que el `slide_from_right` firmado
-                en S80-B12 deja ver la pantalla de abajo mientras entra,
-                la cura de las 71 pantallas NO va y esto se revierte con
-                dos líneas. **Una sola pantalla viaja sin fondo
-                (`cuenta/identidad`) — el resto conserva el suyo, así que
-                el precio del experimento está acotado a ella.**
-                ☠️ MUERTE: este bloque se va con el veredicto — si el
-                slide está limpio, el fondo se resuelve acá para siempre y
-                las 65 montas del agua mueren; si no, vuelve el default y
-                el agua se queda donde está.
+                POR QUÉ SE REVIERTE Y NO SE MUDA: el experimento tenía
+                **UNA sola pantalla de prueba, `cuenta/identidad`**, que
+                era la única que viajaba sin fondo propio. Esa pantalla
+                **murió** en S85-C2 (su contenido vive en
+                `cuenta/seguridad`, con su fondo). ⇒ **quedaba un pisado de
+                tema global sin nada que midiera nada**: cero pantallas
+                transparentes, cero veredicto posible, y un `transparent`
+                vivo en el tema del navegador de toda la app. *Un
+                experimento que no puede producir su veredicto no es una
+                medición pendiente: es código muerto con nombre de
+                medición* — y ésa es exactamente la clase que la Ley 37
+                manda retirar.
 
-                ⚠️ **S85-C2 — EL EXPERIMENTO QUEDÓ HUÉRFANO Y SE DECLARA
-                EN VEZ DE RESOLVERSE SOLO.** Su ÚNICA pantalla de prueba
-                era `cuenta/identidad`, y esa pantalla **murió** en la
-                reestructura de Cuenta (su contenido está en
-                `cuenta/seguridad`). ⇒ **hoy no queda NINGUNA pantalla sin
-                fondo: el experimento ya no puede producir su veredicto**,
-                aunque el `background: 'transparent'` de abajo siga puesto.
-                **No lo re-alojo ni lo revierto por mi cuenta**, y las dos
-                razones son del mismo tipo: mudarlo a `seguridad` haría
-                que la pantalla que el founder está por gatear se vea
-                distinta de sus hermanas —ruido justo en el gate—, y
-                revertirlo tiraría una medición pendiente que nadie
-                decidió tirar. **Va a la mesa con sus dos salidas.** */}
-            <TemaNavegador
-              value={{
-                ...DefaultTheme,
-                colors: { ...DefaultTheme.colors, background: 'transparent' },
-              }}
-            >
-              <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
-                <Stack.Screen name="(tabs)" />
-              </Stack>
-            </TemaNavegador>
+                ⚠️ **LA MEDICIÓN NO SE TIRA, y por eso esto es lápida y no
+                borrado mudo.** Lo aprendido queda escrito y es lo único
+                que hacía falta guardar:
+                 · el navegador pinta `colors.background` en **DOS** capas
+                   propias (`contentStyle` por escena y
+                   `nativeContainerStyle` del ScreenStack), con default
+                   `rgb(242,242,242)`;
+                 · esas capas viven **ENTRE** el provider —donde están el
+                   agua y la Atmosfera— y las pantallas, así que mientras
+                   pinten, **quitarle el fondo a una pantalla descubre
+                   GRIS, no agua**;
+                 · el riesgo que el experimento existía para medir sigue
+                   **SIN MEDIR**: la fuente instalada aplica el fondo opaco
+                   salvo en `transparentModal`, o sea que para el navegador
+                   la opacidad por escena **es la definición de `card`** —
+                   y si eso hace que el `slide_from_right` firmado en
+                   S80-B12 deje ver la pantalla de abajo mientras entra,
+                   la cura de las 71 pantallas **no va**.
+
+                ☠️ **CUÁNDO SE RE-CORRE:** cuando **una pantalla lo pida**
+                — es decir, cuando exista una que necesite viajar sin fondo
+                propio y sirva de sujeto. Ahí se vuelve a poner el
+                `transparent`, se mira el slide, y **recién entonces** se
+                decide el barrido. **No se re-corre por calendario ni
+                "cuando alguien tenga tiempo"**: sin sujeto, volvería a ser
+                esto mismo. */}
+            <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+              <Stack.Screen name="(tabs)" />
+            </Stack>
           </AvisoProvider>
         </EpetThemeProvider>
       </ProveedorI18n>
