@@ -4432,3 +4432,46 @@ del prestador y sabe leer sus piezas. Cuenta los dos ejes y los imprime.
 > vuelve a faltar** — y lo que pasa **no es otra fila en el acta: es que el
 > problema cambia de dueño.** *Una deuda que la pista no puede pagar en tres
 > intentos deja de ser suya.*
+
+---
+
+#### D-631 — `keyboardShouldPersistTaps` FALTA EN SIETE PANTALLAS MÁS — y el criterio para NO barrerlas todas ⚪ REGISTRO
+
+**Origen: hallazgo de C (S84), sobre `sala-espera`.** El default de React Native
+es `'never'`, así que **el primer tap sobre una lista que aparece con el teclado
+arriba solo cierra el teclado, sin elegir** — hay que tocar dos veces.
+
+**Medido, y el contraste explica por qué solo una duele hoy:**
+
+| pantalla | flag | monta lista bajo teclado |
+|---|---|---|
+| `sala-espera.tsx` | **0** | **sí** — 3 `SeccionSede` en 3 `ScrollView` |
+| `cuenta/perfil.tsx` | `'handled'` (:823) | sí — **por eso ahí funciona** |
+| los 4 `durante` · los 2 `cierre` · `adiestramiento/taller` | **0** | **no** |
+
+**LA GRAVEDAD DE `sala-espera` NO ES LA MISMA QUE LA DE LAS OTRAS SIETE, y por eso
+no son el mismo problema:** en un campo común, el tap perdido **cierra el teclado
+y ya** — se percibe como incomodidad. Sobre una predicción de Places **se percibe
+como que el buscador NO FUNCIONA**. *Quien no conoce el default de RN no concluye
+"tengo que tocar dos veces": concluye que está roto.* Y **es la pantalla donde el
+prestador nuevo carga su sede por primera vez.**
+
+### ⚠️ EL CRITERIO, que es lo que esta ficha existe para guardar
+
+> **NO es "todas las pantallas con `ScrollView`".**
+> **Es: las que montan una LISTA sobre la que hay que TOCAR con el teclado
+> arriba.**
+> **Hoy es UNA SOLA.**
+
+**Por qué se escribe antes de que alguien barra:** el flag es inofensivo y el
+grep es fácil, así que **el barrido tonto es tentador** — poner `'handled'` en las
+siete "por las dudas". *Y eso convertiría un hallazgo preciso en siete cambios
+sin síntoma, siete líneas que nadie puede justificar leyendo, y un lote más grande
+para el mismo gate.* **El criterio existe para que el día que se barra, se barra
+lo que duele.**
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira **cuando alguna de las siete monte una
+> lista bajo el teclado** — ahí deja de ser registro y pasa a ser cura, con este
+> criterio decidiéndolo. **Si ninguna lo hace nunca, la ficha muere sin
+> trabajo**, que es el desenlace correcto. *`sala-espera` no entra en esta
+> condición: se cura en S84 y por eso no es deuda.*
