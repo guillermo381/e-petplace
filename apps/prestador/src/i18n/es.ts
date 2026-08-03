@@ -130,7 +130,6 @@ export const prestadorEs = {
     datoCompleta: 'Jornada completa.',
     datoPorCoordinar: 'Día atendido · {{n}} por coordinar',
     datoLibreConSemana: 'Hoy libre · {{n}} esta semana',
-    datoSemana: '{{n}} citas esta semana',
     // El pie de revelar (candidato a diccionario 19.6): el número EN la
     // etiqueta — jamás un 'Ver más' mudo. Compartida por las dos secciones.
     verLasN: 'Ver las {{n}}',
@@ -159,7 +158,6 @@ export const prestadorEs = {
     // fila (reposo, jamás acento); la reserva in-app no marca · LOTE S70, GATE PENDIENTE
     origenMostrador: 'Mostrador',
     // S70-B2-v2: jornada V2 (Por coordinar · Ya atendidas · vacío v2b) · LOTE S70, GATE PENDIENTE
-    vacioVerSemana: 'Ver tu semana',
     // S79-B (T2-B4) · §2.5 el módulo aspiracional sobrio — texto, no banner.
     // N=15 vive acá y se edita al crecer la cohorte · LOTE S79, GATE PENDIENTE
     aspiracional:
@@ -176,9 +174,6 @@ export const prestadorEs = {
     // la semana (D-317, S57-B1) · LOTE S57, GATE PENDIENTE
     tuDia: 'Tu día',
     diaCerrado: 'Cerrado',
-    vistaEtiqueta: 'Agenda',
-    vistaHoy: 'Hoy',
-    vistaSemana: 'Semana',
     // S61-B5: el filtro por oficio (solo con ≥2 oficios activos) · LOTE S61, GATE PENDIENTE
     filtroEtiqueta: 'Ver por servicio',
     filtroTodos: 'Todos',
@@ -192,8 +187,6 @@ export const prestadorEs = {
     salidaNombresDos: '{{a}} y {{b}}',
     salidaNombresVarios: '{{a}}, {{b}} y {{n}} más',
     salidaDe: 'salida de {{n}}',
-    diaHoy: 'Hoy',
-    diaLibre: 'Libre',
     diaBloqueado: 'De vacaciones',
   },
   // La tab Cuenta del prestador (letra P17, S57-B) · LOTE S57, GATE PENDIENTE.

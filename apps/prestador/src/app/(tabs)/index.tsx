@@ -86,7 +86,7 @@ import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 import { verificarSesion } from '@/lib/api';
 import { vozCitaVet } from '@/lib/voz-cita-vet';
 import { vozOficio } from '@/lib/voz-oficio';
-import { TechoOficio, ToggleTecho, VeloBarraEstadoOficio } from '@/components/techo-oficio';
+import { TechoOficio, VeloBarraEstadoOficio } from '@/components/techo-oficio';
 import { AgendaRecepcion } from '@/components/agenda-recepcion';
 import { FiltroOficio, type FiltroOficioValor } from '@/components/filtro-oficio';
 import { FirmaPrestador } from '@/components/firma-prestador';
@@ -191,7 +191,7 @@ type FormaDelDia =
   | { clave: 'completa' }
   | { clave: 'porCoordinar'; n: number }
   | { clave: 'libreConSemana'; n: number }
-  | { clave: 'semana'; n: number };
+
 
 /**
  * La hora de cierre — E1/E2/E3 de la vara cruzada.
@@ -218,7 +218,6 @@ function horaDeCierre(pendientes: CitaAgendaPaseo[]): string | null {
 }
 
 function formaDelDia(args: {
-  vista: 'hoy' | 'semana';
   /** El día SIN filtrar (guard S61-B12). */
   citasHoySin: CitaAgendaPaseo[];
   /** Todo el rango hoy..hoy+6, sin filtrar. */
@@ -227,13 +226,11 @@ function formaDelDia(args: {
   /** D-439 — ya en memoria; "Jornada completa." lo exige en cero (E4). */
   porCoordinar: number;
 }): FormaDelDia {
-  const { vista, citasHoySin, citasRango, esAtendida, porCoordinar } = args;
-
-  // La vista manda: un techo que dice "Te quedan 2" mientras mirás los
-  // 7 días sería mentira de contexto.
-  if (vista === 'semana') {
-    return citasRango.length > 0 ? { clave: 'semana', n: citasRango.length } : { clave: 'omitida' };
-  }
+  /* ⚠️ `citasRango` SOBREVIVE a la muerte de la vista Semana, y por poco
+     no lo hace: alimenta la voz `libreConSemana` del TECHO ("hoy libre,
+     pero la semana tiene N"), que es OTRA cosa que la vista. Retirarlo
+     con ella habría matado una voz viva por asociación de nombre. */
+  const { citasHoySin, citasRango, esAtendida, porCoordinar } = args;
 
   // E6(b), declarado: `en_curso` NO está en `esAtendida` — la cita que
   // corre SUMA a "Te quedan". No terminó.
@@ -507,8 +504,6 @@ export default function Hoy() {
   const insets = useSafeAreaInsets();
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [refrescando, setRefrescando] = useState(false);
-  // D-317: el segmento Hoy/Semana. 'semana' = los próximos 7 días.
-  const [vista, setVista] = useState<'hoy' | 'semana'>('hoy');
   /* ⭐ S85-C7 — EL DÍA ELEGIDO (la rueda D3 de B, `0b229a6`).
      `null` = todavía no se eligió ⇒ manda el día base. Se resuelve a
      `desde` abajo; no se inicializa con `useState(desde)` porque `desde`
@@ -820,9 +815,23 @@ export default function Hoy() {
   const isoCerrados = new Set(
     dias7.filter((iso) => {
       const [a, m, d] = iso.slice(0, 10).split('-').map(Number);
-      return a && m && d ? cerrados.has(new Date(a, m - 1, d).getDay()) : false;
+      const cierreSemanal = a && m && d ? cerrados.has(new Date(a, m - 1, d).getDay()) : false;
+      /* ⭐ S85-C8 — LAS VACACIONES ENTRAN ACÁ, y es lo que se CONSERVA de
+         la vista Semana al retirarla: ella marcaba los días bloqueados con
+         su insignia, y ése era el único lugar donde el bloqueo se veía.
+         Son DOS ejes distintos con dos fuentes distintas —el cierre
+         semanal es recurrente (`dia_semana`), las vacaciones son un RANGO
+         DE FECHAS (`prestador_bloqueos`)— y para el dedo significan lo
+         mismo: ese día no trabajo. Se unen para apagar; la DISTINCIÓN se
+         dice abajo, en el día elegido. */
+      return cierreSemanal || (pantalla.estado === 'listo' && diaBloqueado(iso, pantalla.bloqueos));
     }),
   );
+  /** ¿El día que estoy mirando está bloqueado por vacaciones? La rueda lo
+   *  apaga; ACÁ se dice POR QUÉ — que es la mitad que la unión de arriba
+   *  no puede decir con una sola etiqueta. */
+  const diaVistaBloqueado =
+    diaVista !== null && pantalla.estado === 'listo' && diaBloqueado(diaVista, pantalla.bloqueos);
   /** El día corto por idioma. **Copiado del cliente**, que ya lo hace en
    *  sus dos pantallas de reserva (`explorar/paseo` y `explorar/grooming`)
    *  con esta misma receta — el riel no tiene helper de día CORTO y
@@ -891,7 +900,7 @@ export default function Hoy() {
   // cuando tiene algo cierto que decir.
   const forma: FormaDelDia =
     pantalla.estado === 'listo'
-      ? formaDelDia({ vista, citasHoySin, citasRango: citas, esAtendida, porCoordinar: porCoordinar.length })
+      ? formaDelDia({ citasHoySin, citasRango: citas, esAtendida, porCoordinar: porCoordinar.length })
       : { clave: 'omitida' };
 
   const textoJornada: string | undefined =
@@ -909,9 +918,7 @@ export default function Hoy() {
                 ? t('agenda.datoCompleta')
                 : forma.clave === 'porCoordinar'
                   ? t('agenda.datoPorCoordinar', { n: forma.n })
-                  : forma.clave === 'libreConSemana'
-                    ? t('agenda.datoLibreConSemana', { n: forma.n })
-                    : t('agenda.datoSemana', { n: forma.n });
+                  : t('agenda.datoLibreConSemana', { n: forma.n });
 
   // E5 — la mecánica del Hogar del cliente, VERBATIM: primer nombre; sin
   // nombre, el saludo va SOLO (jamás inventado).
@@ -923,19 +930,6 @@ export default function Hoy() {
 
   // ── La semana: 7 días desde hoy — citas firmes por día + estado del
   // día (bloqueado por vacaciones / libre). Cero métricas, solo verdad.
-  const dias =
-    desde === null || pantalla.estado !== 'listo'
-      ? []
-      : Array.from({ length: 7 }, (_, i) => {
-          const iso = sumarDias(desde, i);
-          return {
-            iso,
-            esHoy: i === 0,
-            bloqueado: diaBloqueado(iso, pantalla.bloqueos),
-            citas: citasVisibles.filter((c) => c.fecha === iso),
-          };
-        });
-
   const esPrimera = (mascotaId: string) =>
     pantalla.estado === 'listo' && !pantalla.atendidas.has(mascotaId);
 
@@ -972,25 +966,16 @@ export default function Hoy() {
             CHANEL (Ley 16): MURIÓ la fecha del techo. El sistema
             operativo ya la muestra, y ocupaba el único renglón de dato
             con algo que no ayuda a trabajar; su lugar lo toma la forma
-            del día. La vista Semana rotula cada día por su nombre — no
-            se pierde orientación en ningún lado. */}
+            del día. ☠️ S85-C8: esta nota decía "la vista Semana rotula cada
+            día por su nombre — no se pierde orientación en ningún lado", y
+            esa vista MURIÓ. Hoy la orientación la da LA RUEDA, que rotula
+            cada día con su nombre corto y su número. La nota se corrige en
+            vez de dejarse: una prosa que cita una vista retirada manda a
+            buscar algo que no existe. */}
         <TechoOficio
           titulo={saludo}
           dato={negocio}
           jornada={textoJornada}
-          pie={
-            pantalla.estado === 'listo' ? (
-              <ToggleTecho
-                etiqueta={t('agenda.vistaEtiqueta')}
-                opciones={[
-                  { codigo: 'hoy' as const, etiqueta: t('agenda.vistaHoy') },
-                  { codigo: 'semana' as const, etiqueta: t('agenda.vistaSemana') },
-                ]}
-                activo={vista}
-                onCambio={setVista}
-              />
-            ) : undefined
-          }
         />
 
         <View style={{ padding: spacing[4], gap: spacing[4] }}>
@@ -1019,7 +1004,7 @@ export default function Hoy() {
             da el camino. Regla de existencia: solo mientras el espacio NO
             es reservable (servicios+horarios); preparado el espacio, el
             bloque entero muere solo. ── */}
-        {pantalla.estado === 'listo' && vista === 'hoy' && pantalla.preparacion !== null && (
+        {pantalla.estado === 'listo' && pantalla.preparacion !== null && (
           <View style={{ gap: spacing[4] }}>
             <FirmaPrestador
               nombre={pantalla.nombreComercial}
@@ -1053,7 +1038,7 @@ export default function Hoy() {
 
         {/* ── Zona 1 — ahora / lo siguiente (PRESIDE: encima de todo
             control e INMUNE al filtro — guard estructural S61-B12) ── */}
-        {pantalla.estado === 'listo' && vista === 'hoy' && vistaEsHoy && destacada && (
+        {pantalla.estado === 'listo' && vistaEsHoy && destacada && (
           <View style={{ gap: spacing[2] }}>
             {/* S52-P7: etiqueta humanizada — sentence case, sin eyebrow */}
             <Texto variante="seccion">
@@ -1125,9 +1110,14 @@ export default function Hoy() {
             con la rueda eligiendo día, la vista Semana pasa a solaparse
             con ella. No la retiro —nadie lo decidió— pero es candidata
             declarada para el gate. */}
-        {pantalla.estado === 'listo' && vista === 'hoy' && desde !== null && (
+        {pantalla.estado === 'listo' && desde !== null && (
           <View style={{ gap: spacing[3] }}>
             <Texto variante="seccion">{t('agenda.tuDia')}</Texto>
+            {diaVistaBloqueado && (
+              <View style={{ flexDirection: 'row' }}>
+                <Insignia estado="info" etiqueta={t('agenda.diaBloqueado')} tamaño="sm" />
+              </View>
+            )}
             <SelectorDia
               dias={dias7.map((iso) => ({
                 iso,
@@ -1148,18 +1138,13 @@ export default function Hoy() {
           </View>
         )}
 
-        {/* los chips SIN la rueda: en Semana el filtro por oficio sigue
-            sirviendo, y ahí no hay día que elegir. */}
-        {pantalla.estado === 'listo' && vista === 'semana' && conFiltro && oficiosActivos !== null && (
-          <FiltroOficio activo={filtroOficio} onCambio={setFiltroOficio} oficios={oficiosActivos} />
-        )}
 
         {/* ── M1 (S69-B): la entrada del MOSTRADOR — solo para negocio con
             oficio vet activo. Boton primario = accent.cta teal (cta="oficio"
             en la raíz). El walk-in registra EN EL MOMENTO. Glifo en el CTA:
             diferido (Icono no tiene variante on-cta; iría mal-color sobre
             el relleno teal — declarado). ── */}
-        {pantalla.estado === 'listo' && vista === 'hoy' && oficiosActivos?.vet && (
+        {pantalla.estado === 'listo' && oficiosActivos?.vet && (
           <Boton
             variante="primario"
             bloque
@@ -1168,7 +1153,7 @@ export default function Hoy() {
           />
         )}
 
-        {pantalla.estado === 'listo' && vista === 'hoy' && citasHoy.length === 0 && (
+        {pantalla.estado === 'listo' && citasHoy.length === 0 && (
           // S52-P7b: registro sereno — el día vacío se dice en el
           // flujo, sin display que grite (dosis baja). S61-B5: el vacío
           // POR FILTRO dice su verdad (hay jornada, no de este servicio).
@@ -1182,14 +1167,14 @@ export default function Hoy() {
             // preside la firma + "Prepara tu espacio".
             <View style={{ gap: spacing[3] }}>
               <EstadoVacio registro="seccion" titulo={t('agenda.vacio')} descripcion={t('agenda.vacioDetalle')} />
-              <Boton variante="compacto" etiqueta={t('agenda.vacioVerSemana')} onPress={() => setVista('semana')} />
+
             </View>
           ) : null
         )}
 
         {/* ── Zona 2 — el día (B14 ①: una tarjeta = una cita; los
             Separadores entre citas murieron con la Tarjeta compartida) ── */}
-        {pantalla.estado === 'listo' && vista === 'hoy' && restoItems.length > 0 && (
+        {pantalla.estado === 'listo' && restoItems.length > 0 && (
           <View style={{ gap: spacing[3] }}>
             {restoItems.map((item) => (
               <View key={item.tipo === 'cita' ? item.cita.id : item.clave}>
@@ -1220,7 +1205,7 @@ export default function Hoy() {
             coordinar la fecha. El gate correcto no es el oficio: es que HAYA
             citas por coordinar — el propio lector ya devuelve vacío cuando no
             corresponde (corre con cuenta comercial, sin mirar oficio). ── */}
-        {pantalla.estado === 'listo' && vista === 'hoy' && porCoordinar.length > 0 && (
+        {pantalla.estado === 'listo' && porCoordinar.length > 0 && (
           <View style={{ gap: spacing[2] }}>
             <Texto variante="seccion">
               {t('agenda.porCoordinarTitulo')}
@@ -1313,7 +1298,7 @@ export default function Hoy() {
 
         {/* ── S70-B2-v2: YA ATENDIDAS — lo pasado del día, plegado por
             default (acordeón). Lo que sigue vive arriba. ── */}
-        {pantalla.estado === 'listo' && vista === 'hoy' && atendidasItems.length > 0 && (
+        {pantalla.estado === 'listo' && atendidasItems.length > 0 && (
           <View style={{ gap: spacing[2] }}>
             {/* S71-B1 (E7) — MURIÓ la Celda-como-encabezado: una celda
                 promete navegar a algún lado, y esto pliega en su lugar.
@@ -1353,49 +1338,30 @@ export default function Hoy() {
             confirmadas de un día bloqueado SIGUEN — el bloqueo jamás las
             toca (P14/P16). El día sin nada es "Libre": verdad de
             planificación, no métrica en cero. ── */}
-        {pantalla.estado === 'listo' && vista === 'semana' && (
-          <View style={{ gap: spacing[5] }}>
-            {dias.map((dia) => (
-              <View key={dia.iso} style={{ gap: spacing[2] }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
-                  <Text
-                    accessibilityRole="header"
-                    style={{
-                      fontFamily: typography.family.sans.medium,
-                      fontSize: typography.size.base,
-                      color: theme.text.primary,
-                    }}
-                  >
-                    {dia.esHoy ? t('agenda.diaHoy') : fechaDiaSemanaHumana(dia.iso, idioma as IdiomaSoportado)}
-                  </Text>
-                  {dia.bloqueado && <Insignia estado="info" etiqueta={t('agenda.diaBloqueado')} tamaño="sm" />}
-                </View>
-                {dia.citas.length > 0 ? (
-                  <View style={{ gap: spacing[3] }}>
-                    {agruparSalidas(dia.citas, sinAgruparIds).map((item) => (
-                      <View key={item.tipo === 'cita' ? item.cita.id : item.clave}>
-                        {item.tipo === 'cita' ? (
-                          <FilaCita cita={item.cita} enVivo={false} oficio={oficioDe(item.cita)} fotoUrl={item.cita.mascota?.foto_url ? urlsFotos.get(item.cita.mascota.foto_url) : undefined} />
-                        ) : (
-                          <FilaSalida
-                            citas={item.citas}
-                            abierta={salidasAbiertas.has(item.clave)}
-                            onToggle={() => toggleSalida(item.clave)}
-                            urlsFotos={urlsFotos}
-                          />
-                        )}
-                      </View>
-                    ))}
-                  </View>
-                ) : dia.bloqueado ? null : (
-                  <Texto variante="apoyo">
-                    {t('agenda.diaLibre')}
-                  </Texto>
-                )}
-              </View>
-            ))}
-          </View>
-        )}
+        {/* ☠️ S85-C8 — ACÁ VIVÍA LA VISTA SEMANA, y muere con su lápida
+            (orden de la mesa; Ley 37).
+
+            POR QUÉ: la rueda hace su elección y mejor. Un toggle Hoy/Semana
+            MÁS una rueda de días son **dos controles para la misma
+            decisión** — la mezcla que este rediseño vino a matar.
+
+            ⚠️ QUÉ MOSTRABA QUE LA RUEDA NO, declarado ANTES de retirarla
+            porque eso era la condición de la orden:
+             · **el bloqueo por vacaciones**, con su insignia por día. **SE
+               CONSERVA**: las vacaciones entran a los apagados de la rueda
+               (ver `isoCerrados`) y el día elegido dice POR QUÉ está
+               bloqueado (la insignia de arriba). *Nada se pierde acá.*
+             · **el barrido de los SIETE días de una sola mirada** — ver la
+               semana entera sin tocar nada. **ESO SÍ SE PIERDE, y a
+               propósito**: es exactamente lo que la mesa decidió que la
+               rueda reemplaza. Se dice para que quede como decisión y no
+               como descuido.
+             · **la voz "libre" por día vacío** — se pierde como voz DE LA
+               SEMANA; el día elegido conserva su propio vacío.
+
+            ☠️ Y con la vista se van: el toggle del techo, el parámetro
+            `vista` de `formaDelDia` con su rama 'semana', el arreglo `dias`
+            y el botón "ver la semana" del vacío. */}
 
         {/* ── Zona 3 — novedades: hueco estructural (ver arriba) ── */}
         {novedadesZona3 !== null ? null : null}
@@ -1407,7 +1373,7 @@ export default function Hoy() {
         {/* ── S79-B (T2-B4) · §2.5 EL MÓDULO ASPIRACIONAL — texto sobrio
             al pie, no banner, sin acción. Los 15 SON la comunidad (decisión
             founder); la sección Comunidad sigue oculta por letra §2.6. ── */}
-        {pantalla.estado === 'listo' && vista === 'hoy' && (
+        {pantalla.estado === 'listo' && (
           <Texto variante="apoyo">{t('agenda.aspiracional')}</Texto>
         )}
         </View>

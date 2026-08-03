@@ -111,7 +111,6 @@ export const prestadorEn = {
     datoCompleta: 'Day complete.',
     datoPorCoordinar: 'Day done · {{n}} to schedule',
     datoLibreConSemana: 'Free today · {{n}} this week',
-    datoSemana: '{{n}} appointments this week',
     verLasN: 'See all {{n}}',
     vacio: 'No appointments today',
     vacioDetalle: 'When a family books with you, it will show up here.',
@@ -133,7 +132,6 @@ export const prestadorEn = {
     // S70-B1: el origen releído · LOTE S70 · Espejo de es.ts
     origenMostrador: 'Walk-in',
     // S70-B2-v2 · Espejo de es.ts
-    vacioVerSemana: 'See your week',
     // S79-B (T2-B4) · §2.5 the sober aspirational module · LOTE S79
     aspiracional:
       'You are part of a curated group of 15 providers in Ecuador. e-PetPlace is not trying to fill up — it chooses well. Thank you for joining at the beginning.',
@@ -147,9 +145,6 @@ export const prestadorEn = {
     // la semana (D-317, S57-B1) · LOTE S57, GATE PENDIENTE · Espejo de es.ts
     tuDia: 'Your day',
     diaCerrado: 'Closed',
-    vistaEtiqueta: 'Agenda',
-    vistaHoy: 'Today',
-    vistaSemana: 'Week',
     // S61-B5: el filtro por oficio (solo con ≥2 oficios activos) · LOTE S61, GATE PENDIENTE
     filtroEtiqueta: 'View by service',
     filtroTodos: 'All',
@@ -163,8 +158,6 @@ export const prestadorEn = {
     salidaNombresDos: '{{a}} and {{b}}',
     salidaNombresVarios: '{{a}}, {{b}} and {{n}} more',
     salidaDe: 'group of {{n}}',
-    diaHoy: 'Today',
-    diaLibre: 'Free',
     diaBloqueado: 'On vacation',
   },
   // ⑥ S84-C3 — LA VITRINA DEL NEGOCIO · Espejo de es.ts (el tipo

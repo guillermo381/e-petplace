@@ -333,6 +333,29 @@ const resumenDeBorrador = (fs: DraftFranja[]): FranjaResumen[] =>
       activo: f.activo,
     }));
 
+/**
+ * ⭐ S85-C8 — CON CUÁNTOS NACE UNA FRANJA NUEVA. **FIRMA DEL FOUNDER
+ * (3-ago): TRES.**
+ *
+ * **El número tiene AUTOR, y por eso está acá y no suelto en un
+ * `useState`:** hasta hoy era un `1` sin firma, y ese 1 produjo el
+ * defecto que el founder encontró en campo — cada franja nueva nacía con
+ * capacidad efectiva 1, así que **la primera reserva agotaba el cupo y el
+ * slot desaparecía de la agenda del cliente** (medido por A: la mitad de
+ * las 24 franjas de Paseos Andres en 1).
+ *
+ * ⚠️ **TRES NO ES EL MÁXIMO — es la EXPECTATIVA.** El techo de plataforma
+ * está en 10 (`tipos_servicio.cupo_techo`, migración `20260803220000`), y
+ * son dos cosas distintas: *el techo dice hasta dónde se puede; esto dice
+ * con cuánto empieza alguien que no declaró nada*. Nacer en el techo
+ * habría afirmado que un paseador saca diez perros a la vez.
+ *
+ * ☠️ Y NO ALCANZA A LO VIEJO: las franjas que ya están en 1 **no las mueve
+ * este default** — solo rige para las que nazcan. Las existentes se suben
+ * a mano o por backfill con su letra.
+ */
+const CUPO_NUEVA_FRANJA = 3;
+
 export function SeccionHorarios({
   franjas,
   onCambio,
@@ -417,7 +440,7 @@ export function SeccionHorarios({
   const [vistaNueva, setVistaNueva] = useState<'form' | 'desde' | 'hasta'>('form');
   const [desdeSel, setDesdeSel] = useState<string | null>(null);
   const [hastaSel, setHastaSel] = useState<string | null>(null);
-  const [cupoSel, setCupoSel] = useState(1);
+  const [cupoSel, setCupoSel] = useState(CUPO_NUEVA_FRANJA);
   const contadorNuevas = useRef(0);
 
   // ── S78-B TURNOS: las personas con chip de ESTE oficio ──
@@ -958,7 +981,7 @@ export function SeccionHorarios({
           setVistaNueva('form');
           setDesdeSel(null);
           setHastaSel(null);
-          setCupoSel(1);
+          setCupoSel(CUPO_NUEVA_FRANJA);
           // D-386: la réplica arranca con TODAS las ofertas marcadas —
           // desmarcar es el gesto raro, no el común
           setOfertasSel(ofertas.map((o) => o.id));
