@@ -6,7 +6,8 @@ comentario explica qué— queda AFUERA a propósito. Acá viven los
 **argumentos**, las **curas descartadas** y las **mediciones que no
 dejaron rastro en ningún commit**.
 
-Rama `s83-c` · último commit `60575f3` · 17 commits de S84.
+Rama `s83-c` · **enmendada al cierre de S84** (§7 y §8 cubren C33 · C34 ·
+C35; §5 quedó DEROGADA porque su pendiente se curó).
 
 ---
 
@@ -292,7 +293,16 @@ porque la sede nunca se capturó.**
 
 ---
 
-## 5. EL PENDIENTE VIVO — las opciones de Places bajo el teclado
+## 5. ~~EL PENDIENTE VIVO~~ — PLACES BAJO EL TECLADO · **CURADO EN C34 ⑤**
+
+> ⚠️ **ESTA SECCIÓN SE ENMIENDA EN SU TÍTULO Y NO SOLO AL PIE, a propósito.**
+> Decía "EL PENDIENTE VIVO" y **el pendiente ya no vive**: la cura entró en
+> `a26f2ed`. Un acta que sigue anunciando roto lo que está arreglado manda
+> a la próxima instancia a curar dos veces — y es el mismo defecto que este
+> documento existe para no tener. Lo de abajo se conserva **como el rastro
+> de la medición**, que sigue siendo el porqué de la forma que tomó la cura.
+> **Lo que SÍ queda pendiente es su GATE en dispositivo** (ver §7).
+
 
 **Lo que sé, medido, para que la próxima instancia no arranque de cero:**
 
@@ -422,3 +432,172 @@ teclado:**
 
 *Depositada por C al cierre de S84. Nada de acá está firmado: son
 argumentos, mediciones y frenos. Lo que rige sigue siendo el canon.*
+
+
+---
+
+## 7. LAS ÚLTIMAS TRES RONDAS (C33 · C34 · C35) — enmienda de cierre
+
+*Lo anterior quedó depositado hasta C33. Esto cubre lo que vino después,
+con el mismo criterio: solo lo que **no se reconstruye leyendo el repo**.*
+
+### El freno que más valió: `identidad.tsx` no estaba vacía
+
+La orden de ① era puentearla — la celda del Perfil directo a Seguridad —
+y venía con su propio salvavidas escrito: *"NO la borres sin decirme qué
+había"*. **Había el NOMBRE DE LA PERSONA**, editable y escribiendo en DB,
+más el correo de ingreso.
+
+Y el dato que convierte eso en riesgo real: **su único llamador era la
+celda que se iba** (medido, un solo `router.push('/cuenta/identidad')` en
+toda la app). Puentear sin más no la dejaba vacía: **la dejaba
+inalcanzable, con el nombre de la persona sin ningún lugar donde
+editarse** — un dato que se pierde sin que nada falle ni avise.
+
+*La lección que dejo escrita: "¿queda vacía?" es la pregunta equivocada.
+La pregunta es **"¿quién más la alcanza?"** — una pantalla con contenido
+vivo y un solo llamador es más frágil que una vacía, porque la vacía se
+nota.*
+
+### La cadena del botón del logo — tres errores míos sobre el MISMO botón
+
+Vale escribirla entera porque el patrón importa más que el botón:
+
+1. **C34/S83** — puse un **subrayado**. Idioma web, fuera del diccionario.
+   Me lo corrigieron.
+2. **La corrección me llevó a `compacto`** — y el founder lo rechazó con
+   una razón mejor que la mía: **un botón con caja al lado de una foto
+   compite con la foto**, que es lo que la vitrina viene a mostrar.
+3. **Y `compacto` estaba mal por un tercer motivo que nadie había visto,
+   incluido yo, que escribí la nota:** ese botón vive **sobre el muro**, y
+   su texto daba **2.92** contra él — bajo el 4.5 de AA. *Lo escribí en
+   C34 sin medirlo.*
+
+**Los números de toda la cadena, para que no haya que re-medirlos:**
+
+| qué | contra el muro | veredicto |
+|---|---|---|
+| `acento` (`accent.cta` = `tealDark` **#0A7268**) | **1.00** | el muro ES ese hex — invisible |
+| `acento` en oscuro (teal puro sobre `tealDarkNoche`) | 6.57 | legible **y por eso peor**: falla en 2 temas de 3 |
+| `compacto` (`text.primary` #1D1A2E) | **2.92** | bajo AA — lo que había |
+| papel PLENO #FAF9F7 (la cura) | **5.51** claro · **9.61** oscuro | el par que la casa ya usaba |
+
+*Lo que aprendí y no está en ningún diff: **una anatomía puede estar mal
+por más de un motivo a la vez**, y arreglar el que te señalaron no prueba
+nada sobre los otros. El subrayado, la competencia con la foto y el
+contraste eran tres defectos distintos en un botón de cuatro líneas.*
+
+### Mi peor error de método de estas rondas: pedí lo que ya existía
+
+Al frenar el logo escribí que **ninguna de las ocho variantes servía** y
+que hacía falta que `Boton` supiera vestir el muro. Era correcto. **Lo que
+no vi es que la casa ya tenía el VOCABULARIO para decirlo** —
+`LogoNegocio.superficie: 'clara' | 'muro'`— **y esa pieza estaba montada
+TRES LÍNEAS más arriba, en el bloque que yo estaba editando.**
+
+B no inventó nada: ensanchó la respuesta existente. **Yo pedí una
+respuesta nueva teniendo la vieja delante de los ojos.**
+
+*L-175 dice "se ensancha, jamás se copia". Le falta la mitad que me
+cobró: **antes de pedir, se mira si la casa ya contestó** — y el lugar más
+probable donde ya contestó es el archivo que tenés abierto.*
+
+### El número que reservé y no era mío (D-630 → D-632)
+
+Mi acta reservó `D-630` para la deuda de documentos. **A tomó ese número
+para el burn-down de la regla 81**, y lo escribió en `DEUDAS_CANONICAS`,
+que es el archivo canónico.
+
+**Gana el canónico, y la regla que deja es corta: una mención en un
+relevamiento NO reserva un número.** El libre se verifica por grep en el
+archivo de deudas, en el momento de usarlo — nunca desde la memoria de lo
+que uno mismo escribió. *Es L-166 aplicada contra mi propio texto.*
+
+### Los descartes de glifo, con su razón
+
+La celda de documentos nació **sin glifo a propósito** y quedó registrado
+por qué los dos candidatos obvios fallaban **por ley, no por gusto**:
+
+- **`carnet`** es el carnet de vacunas **de la mascota** — su huella b′
+  sobre una cédula diría que **el documento es del animal**.
+- **`cuenta`** lo usaba **la celda vecina** (Seguridad): dos celdas
+  pegadas con el mismo glifo es Ley 12 directa, el precedente que el
+  founder ya cazó en S73.
+
+Y después la adenda del founder corrigió el encuadre entero, que es lo
+que vale guardar: **con documentos convertido en una de tres hermanas, el
+glifo dejó de ser una decisión sobre una celda y pasó a ser sobre TRES.**
+*Ponérselo a una sola las jerarquiza sin que nadie lo haya decidido* — lo
+contrario de lo que la unificación buscaba. De ahí salió el pedido de
+`fiscal` y `bancario`, que no existían.
+
+### Lo que medí en estas rondas y no está en ningún commit
+
+- **Los tres llamadores de cuenta comercial, con su GATE** — y el gate es
+  todo el hallazgo: `liquidaciones:210` solo se dibuja si
+  `faltaCuentaActiva`; `sala-espera:205` solo antes de activarse. **Los
+  dos están gateados a "todavía no tenés cuenta activa"**, así que el de
+  Negocio era **el único permanente**. Sacarlo sin la puerta del Perfil
+  habría dejado al prestador **ya activo** sin ninguna forma de editar sus
+  datos. *Contar puertas no alcanza: hay que leer cuándo se dibuja cada
+  una.*
+- **El catálogo fiscal: 1 de 23 países** declara nombre y máscara (solo
+  EC). Por eso el genérico *"tu identificación fiscal"* no es un plan B —
+  **es el camino que va a recorrer casi todo el mundo.**
+- **`obtenerPaisesParaRegistro()` filtra `.eq('activo', true)`** y por eso
+  **no sirve** para el país EMISOR de un documento: con esa lista, el caso
+  canónico de P21 —el profesional colombiano operando en Quito— sería
+  **imposible de declarar**. La lista de emisores es más ancha que la de
+  operación, y ésa es la razón de que `lib/paises.ts` exista.
+- **`identidad.tsx` tenía su título hardcodeado en español** fuera del
+  riel: en inglés esa pantalla quedaba en castellano, y el `Espejo<D>` no
+  puede cazar lo que nunca entró al diccionario.
+
+### Una nota de herramienta que me costó una verificación
+
+Encadené checks con `&&` después de `grep -c`. **Un `grep -c` que
+devuelve 0 sale con exit 1**, así que la cadena se cortó **justo en el
+resultado que probaba que algo se había retirado bien** — y el reporte
+quedó a medias sin que nada dijera "falló".
+
+*Es la familia de L-191: el exit code se lee del comando, y **un cero
+legítimo no es un fallo**. En verificaciones de ausencia, los checks van
+sueltos.*
+
+---
+
+## 8. LO QUE QUEDA SIN GATE — para mi próxima instancia
+
+**El founder cerró S84 sin la pasada de gate: se difiere a S85.** Así que
+**nada de lo construido desde C29 se vio en dispositivo.** Lo digo con esa
+crudeza porque el riesgo real no es que falle: es que la próxima instancia
+lo lea como firmado.
+
+**Sin gate, por orden de riesgo:**
+
+1. **🔴 Places (C34 ⑤) — el más incierto, y es el que más importa.** La
+   cura es un scroll RELATIVO por el alto de la lista. **Su límite está
+   declarado y no medido**: si abajo no queda contenido, RN clampea y la
+   lista entra parcial. **En el Perfil hay contenido de sobra; en la SALA
+   DE ESPERA no lo verifiqué** — y ésa es justo la pantalla donde el
+   prestador carga su sede por primera vez. *Si falla en algún lado, va a
+   ser ahí.*
+2. **🟠 Datos comerciales con sus tres hermanas.** Cambió una pantalla que
+   ya funcionaba. El acordeón, el aviso y los tres glifos a 21px no los
+   vio nadie.
+3. **🟠 El aviso de revisión.** Es texto FIRMADO por el founder, pero
+   firmado **en el chat, no en pantalla** — y él mismo escribió que *"se
+   firma en pantalla"*. Su firma real es la pasada de S85.
+4. **🟡 El reordenamiento de Cuenta** (Tus datos · Seguridad directas).
+5. **🟡 El logo sobre el muro** y el clip en `acento`.
+
+**Y lo que NO se puede verificar leyendo:** los tres glifos nuevos
+(`fiscal` · `bancario` · `documento`) **a 21px, en la fila, al lado de sus
+vecinos** — que es el gate que DIRECCION_ARTE §2.9 exige y que ninguna
+lectura reemplaza. `documentoSello` quedó **sin consumidor a propósito**:
+existe para que el founder pueda comparar los dos candidatos con el dedo.
+
+**Lo que le dejo dicho a quien siga, en una línea:** *lo construido en
+estas tres rondas está medido contra el código y contra las leyes, y **no
+está medido contra un teléfono**. Las dos cosas son verdad al mismo
+tiempo, y la segunda es la que falta.*
