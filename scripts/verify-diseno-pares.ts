@@ -17,6 +17,9 @@
  */
 
 import { lightTheme, darkTheme, memorialTheme, getTheme } from '../packages/ui/src/themes'
+// S84-B19: el COLOR del muro es un token de palette; lo que vive en la
+// app es su aplicación, no su valor — por eso se puede medir desde acá.
+import { palette } from '../packages/ui/src/tokens/palette'
 
 type RGBA = { r: number; g: number; b: number; a: number }
 
@@ -156,6 +159,47 @@ for (const [tema, t] of Object.entries(temas) as ['light' | 'dark' | 'lightOfici
       fill(`accent.${slot}/bg.card`, v, t.bg.card)
     }
   }
+
+  // ── S84-B19 · EL MURO ENTRA AL CORPUS ────────────────────────────────
+  // EL HUECO, con el número que lo prueba: el muro del oficio es la ÚNICA
+  // superficie del producto que NO SALE DEL TEMA — vive en
+  // `apps/prestador/components/techo-oficio`, o sea en una app. Todo este
+  // barrido enumera slots del tema, así que el muro era INVISIBLE para el
+  // gate: `accent.cta` del oficio y el muro son EL MISMO HEX
+  // (palette.tealDark) ⇒ **contraste 1.00, y pasaba en VERDE** porque
+  // nadie medía ese par.
+  //
+  // Es la misma familia que cacé en S83 cuando `verify:contrast` no
+  // medía los temas de oficio: allá era una CASA ciega, acá una
+  // SUPERFICIE ciega. La cura es la misma — que entre al corpus.
+  //
+  // SE PUEDE MEDIR SIN CRUZAR TERRITORIO porque el COLOR del muro es un
+  // token de `palette` (tealDark / tealDarkNoche); lo que vive en la app
+  // es su APLICACIÓN, no su valor.
+  //
+  // ⚠️ LO QUE ESTO NO PRUEBA, dicho para que nadie lo lea de más: mide
+  // los NÚMEROS de lo que podría pintarse sobre el muro; NO prueba que
+  // ninguna pantalla pinte ahí el color prohibido. Eso exigiría ver el
+  // código que monta sobre el muro, y el muro se recibe por prop. Lo que
+  // cambia es que el 1.00 ahora SE VE en vez de no existir.
+  // El muro oscurece en los DOS temas oscuros (D-407): mi primera
+  // versión preguntaba `tema === 'dark'` y dejaba a darkOficio con el
+  // muro claro — el mismo error de ALCANCE que esta regla vino a cerrar,
+  // un piso más abajo. Lo cazaron los números al leerlos.
+  const muro = tema.startsWith('dark') ? palette.tealDarkNoche : palette.tealDark
+  const sobreMuro = (nombre: string, fg: string, minimo: number) =>
+    pares.push({ tema, clase: minimo >= 4.5 ? 'texto' : 'fill', nombre: `${nombre}/MURO`, ratio: contraste(fg, muro, muro), minimo })
+  // El par FIRMADO de §15b.2: sobre el muro el acento funcional es PAPEL.
+  sobreMuro('papel pleno (light0)', palette.light0, 4.5)
+  // Los que NO deben usarse ahí — entran para que su número EXISTA:
+  // LOS VEDADOS ENTRAN COMO INFORMATIVOS (mínimo 0), y la distinción es
+  // la que vuelve honesta a la regla: NO son regresiones que alguien deba
+  // curar — son colores que §15b.2 ya PROHIBIÓ sobre el muro, y se miden
+  // para que su número EXISTA en vez de no aparecer. Marcarlos como fallo
+  // pondría roja a R12 contra código correcto; exigirles 4.5 sería
+  // pedirles que sirvan justo donde están vedados.
+  sobreMuro('accent.cta (VEDADO §15b.2 — informativo)', (t.accent as Record<string, string>).cta, 0)
+  sobreMuro('text.primary (VEDADO — informativo)', t.text.primary, 0)
 }
 
 // ── R15 (S82-B r6): el volcado de TOKENS del tema del cliente —
