@@ -526,25 +526,6 @@ function AguaRecetaCliente({ color }: { color?: string }) {
  *  resuelve a `tapizDarkOficio`/`papelTapizOficio` por los ocho slots. La
  *  lámina vieja de S83 pintaba `palette.light0` a mano — correcto cuando
  *  el prestador NO tenía tinte claro, falso desde B33. */
-/** S84-B15 — el destello del escriba, en sus cuatro colores, sobre el
- *  fondo REAL de la casa que lo envuelve. Se monta el GLIFO SOLO porque
- *  lo que se decide es su color: el botón real es una `CeldaNavegacion`
- *  y su composición no está en discusión. */
-function DestelloColor({ color, rotulo, num }: { color?: string; rotulo: string; num: string }) {
-  const { theme } = useTheme()
-  return (
-    <View style={{ flex: 1, alignItems: 'center', gap: spacing[1] }}>
-      <View style={{ height: 44, justifyContent: 'center' }}>
-        <Icono nombre="ia" tamano={22} registro={color === undefined ? 'capa' : 'tinta'} tinta={color} />
-      </View>
-      <Texto variante="apoyo">{rotulo}</Texto>
-      <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary }}>
-        {num}
-      </Text>
-    </View>
-  )
-}
-
 function AguaAlfa({ alfa, rotulo, ratio }: { alfa: number; rotulo: string; ratio: string }) {
   const { theme } = useTheme()
   return (
@@ -1914,48 +1895,23 @@ function GaleriaInterna() {
           </Texto>
         </Seccion>
 
-        <Seccion titulo="① ⭐ GATE S84 — EL COLOR DEL DESTELLO · qué decide: NO solo el color. Con la elección se firma QUÉ ES el destello — si es MARCA (§5.1: 'el destello ES la marca de la IA' ⇒ el magenta es legal en el prestador por §15b.1) o si es CONTROL FUNCIONAL (⇒ va en el verde del oficio). El oro/ocre que pediste no contesta esa pregunta: la muda al color de la otra casa">
-          <ThemeProvider defaultMode="light" cta="oficio">
-            <PanelGateTema etiqueta="PRESTADOR CLARO — papel verde #F4F8F6 · mínimo 3.0 (el glifo es GRÁFICA, no texto)">
-              <View style={{ flexDirection: 'row', gap: spacing[2] }}>
-                <DestelloColor rotulo="① magenta de capa" num="5.28 ✓" />
-                <DestelloColor color={palette.tealDark} rotulo="② teal del oficio" num="5.42 ✓" />
-                <DestelloColor color={palette.ctaOro} rotulo="③ oro #FCBC1D" num="1.59 ✗ REPRUEBA" />
-                <DestelloColor color={palette.ochreDark} rotulo="④ ocre AA" num="5.72 ✓" />
-              </View>
-            </PanelGateTema>
-          </ThemeProvider>
+        {/* ☠️ LA LÁMINA DEL DESTELLO MURIÓ CON SU FIRMA (S84-B17) — y con
+            ella muere la LÁMINA COMO INSTRUMENTO, incluso para variantes
+            de token, que era lo último que le quedaba después de la
+            enmienda de método de S83.
 
-          <ThemeProvider defaultMode="dark" cta="oficio">
-            <PanelGateTema etiqueta="PRESTADOR OSCURO — tapiz #0D1617">
-              <View style={{ flexDirection: 'row', gap: spacing[2] }}>
-                <DestelloColor rotulo="① magenta de capa" num="5.13 ✓" />
-                <DestelloColor color={palette.teal} rotulo="② teal del oficio" num="11.93 ✓" />
-                <DestelloColor color={palette.ctaOro} rotulo="③ oro #FCBC1D" num="10.79 ✓" />
-                <DestelloColor color={palette.ochre} rotulo="④ ocre" num="9.73 ✓" />
-              </View>
-            </PanelGateTema>
-          </ThemeProvider>
+            LA RAZÓN, MEDIDA EN ESTA MISMA SESIÓN Y NO SUPUESTA: la galería
+            viaja en el OTA igual que todo lo demás, así que nunca fue más
+            barata — solo más LEJOS. Y el founder no llega a ella: su
+            entrada es la última fila de una pantalla de 641 líneas y se
+            llama con vocabulario nuestro. Un instrumento de gate al que el
+            gate no llega no es un instrumento.
 
-          <Texto variante="apoyo">
-            ⚠️ EL ORO NO SOBREVIVE AL CLARO, y es lo que sospechabas: nació contra el papel del CLIENTE
-            (#FAF2F5) como RELLENO de CTA con label en tinta encima. Acá es TINTA sobre papel verde, que
-            es el trabajo inverso — 1.59 contra un mínimo de 3. En oscuro pasa holgado (10.79). Un color
-            que solo sirve en un tema no es una opción: es media opción.
-          </Texto>
-          <Texto variante="apoyo">
-            POR ESO ENTRA ④, que NO estaba en tu lista y es tu propia palabra: el OCRE ya tiene sus DOS
-            registros en la casa (ochre / ochreDark) y pasa en los dos temas — 5.72 y 9.73. Es lo que
-            usan «negocio» y «pagos». Si lo que querías era "oro/ocre", ésta es la versión que existe.
-          </Texto>
-          <Texto variante="apoyo">
-            ⚠️ Y EL CHOQUE QUE NO RESUELVE NINGÚN COLOR, declarado: el ocre es la capa del CONSUMO — la
-            misma que descarté para «contacto» con "un canal de contacto no vende nada". Un destello de
-            IA tampoco vende. Elegir ④ es decir que el destello NO es marca NI control, sino que se
-            viste del comercio; es defendible, pero es una tercera respuesta a la pregunta de fondo y
-            conviene firmarla sabiendo eso.
-          </Texto>
-        </Seccion>
+            LO QUE COSTÓ CADA DESCARTE vive en el registry, junto al color
+            firmado: el oro con su 1.59 en claro, y el magenta y el teal
+            con la pregunta que cada uno contestaba. Acá queda solo el
+            puntero, para que nadie vuelva a montar las cuatro creyendo
+            que la comparación falta. */}
 
         <Seccion titulo="① ⭐ GATE S84 — CUÁNTO SE NOTA EL AGUA · qué decide: UN SOLO ALFA para las DOS casas (firma founder: 'se nota demasiado; baja en cliente y en prestador, un poco más sutil'). ENMIENDA la firma de B22 ('copiá cómo quedó en cliente, allí quedó bien'), que puso el 0.06 que corre hoy. Los cuatro fondos son los REALES y los números son compuestos, no a ojo">
           <ThemeProvider defaultMode="dark" cta="oficio">

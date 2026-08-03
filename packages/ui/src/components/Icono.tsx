@@ -501,14 +501,31 @@ export function Icono({
     grooming: { pura: theme.status.warning, aa: theme.status.warningText },
     refugio: { pura: esCapa ? theme.capa.comunidad : colorTinta, aa: 'capaText' in theme ? theme.capaText.comunidad : colorTinta },
     despensa: { pura: theme.status.warning, aa: theme.status.warningText },
-    // ⚠️ CAPA `comunidad` = MAGENTA en las dos casas (es token de capa,
-    // no slot). En el prestador eso choca de frente con §15b.1 ("el
-    // magenta vive SOLO en la marca") SALVO que el destello CUENTE como
-    // marca — que es justo lo que §5.1 dice de él. LA PREGUNTA NO SE
-    // RESUELVE ACÁ y se declara: la firma el founder VIENDO el botón.
-    // Mientras tanto el consumidor monta `registro="tinta"` con color
-    // explícito (lo que el Hogar ya hace), y la pregunta no se dispara.
-    ia: { pura: esCapa ? theme.capa.comunidad : colorTinta, aa: 'capaText' in theme ? theme.capaText.comunidad : colorTinta },
+    // ✅ OCRE — FIRMADO (founder, S84-B17), y con esta firma se cierra la
+    // pregunta que el glifo arrastraba desde que nació: **QUÉ ES el
+    // destello**. No es marca (habría quedado en magenta por §5.1) ni
+    // control funcional (habría ido al verde del oficio): **se viste del
+    // COMERCIO**. Es una tercera respuesta, y es del founder.
+    //
+    // LO QUE COSTÓ CADA DESCARTE, registrado porque medirlo fue el trabajo
+    // y borrarlo dejaría la firma sin su porqué:
+    //  · ORO #FCBC1D — CAÍDO POR MEDICIÓN, no por gusto: **1.59 sobre el
+    //    papel verde del prestador**, contra un mínimo de 3 (el glifo es
+    //    gráfica, no texto). En oscuro pasaba holgado (10.79). La causa es
+    //    de origen: el oro nació como RELLENO de CTA contra el papel del
+    //    cliente, con label en tinta encima; acá se le pedía ser TINTA
+    //    sobre papel, el trabajo inverso. Un color que sirve en un solo
+    //    tema es media opción.
+    //  · MAGENTA de capa (5.28 / 5.13) — contestaba "el destello es
+    //    MARCA", que es lo que §5.1 implica y lo que §15b.1 permitiría.
+    //  · TEAL del oficio (5.42 / 11.93) — contestaba "es CONTROL
+    //    FUNCIONAL". Las dos pasaban de sobra: no se cayeron por número.
+    //
+    // ⚠️ Y EL ROCE QUE LA FIRMA ACEPTA, dicho para que no se descubra
+    // después: el ocre es la capa del CONSUMO — la misma que descarté
+    // para `contacto` con "un canal de contacto no vende nada". Un
+    // destello de IA tampoco vende. La firma dice que igual se viste así.
+    ia: ocre,
     // ── LOTE 3 (S58, D-361): capas por concepto — el founder poda/ajusta en gate ──
     hogar: comunidad, familia: comunidad, equipo: comunidad,
     explorar: comunidadAmplia,
