@@ -406,6 +406,49 @@ procedencia sobrevive aunque el contenido no viaje.**
 
 ---
 
+#### A3.5ter — ACTIVO / HISTÓRICO en la lista de vidas (FIRMADA, 3-ago-2026)
+
+> **Literal del founder sobre el corte propuesto: *"está perfecto ese corte"*.**
+> **Es letra, no orden de construcción.**
+
+**El corte, y no hay un tercer estado:**
+
+| estado | condición |
+|---|---|
+| **ACTIVO** | tiene una **cita futura agendada** **O** una **atención en los últimos 6 meses** |
+| **HISTÓRICO** | **todo lo demás** |
+
+**La transición es AUTOMÁTICA. Nadie archiva a mano.**
+
+> *Un archivado manual sería una tarea administrativa que el prestador no pidió
+> —y que se olvida—, y su resultado sería una lista que dice "activo" sobre
+> mascotas que nadie ve hace años.* **El corte se DERIVA, así que no puede
+> quedar viejo.**
+
+**MEMORIAL siempre va a HISTÓRICO, sin importar la fecha.** Aunque la atención
+sea de ayer.
+
+> **No es una excepción al corte: es que el motor de esa mascota se apaga
+> entero** — la misma simetría que `MODELO_LOYALTY` §7.1 aplica al otro lado.
+> *Dejar en "activo" a una mascota que murió la semana pasada es la clase de
+> honestidad rota que ninguna regla de fechas justifica.*
+
+### ⚠️ HISTÓRICO ES **MEMORIA**, NO BASURA — y esto es lo que hay que construir bien
+
+> **Nada desaparece nunca, y la ficha se abre igual.**
+
+*El riesgo de todo corte por actividad es que la superficie lo lea como
+"archivado" y lo trate como descarte: colapsado, sin acceso, o peor, con voz de
+limpieza.* **Acá no.** El histórico es **el sedimento del oficio del prestador**
+— *las vidas que cuidó siguen siendo las vidas que cuidó.*
+
+**Y se apoya en una ley firmada:** `EL NORTE` — *"en e-PetPlace tu mascota no
+tiene un expediente; tiene una vida documentada"*. **Una vida documentada no
+caduca a los seis meses de inactividad.** El corte ordena la lista; **no
+jerarquiza a las mascotas.**
+
+---
+
 #### A3.10 — QUÉ HABILITA CONSTRUIR
 
 Con esta letra firmada, **P3 puede entrar a M1 (boceto)** con mecanismo

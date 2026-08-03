@@ -193,6 +193,25 @@ export interface FranjaHorarioServicio {
   duracionSlotMinutos: number;
   maxCitasPorSlot: number;
   activo: boolean;
+  /**
+   * EL TOPE que la plataforma permite para `maxCitasPorSlot` — **gemelo exacto
+   * de `FranjaHorario.cupoTechoMaximo`, y viaja acá por la misma razón:** las
+   * dos formas de franja las consume **la misma sección** (`seccion-horarios`,
+   * los cuatro talleres), así que **un campo que existe en una y no en la otra
+   * no es un detalle de tipos: rompe las cuatro pantallas.**
+   *
+   * *Es exactamente el patrón que el método nombra —el motor se adelanta a su
+   * wrapper— y acá se pagó en el mismo turno: nació en `FranjaHorario` y dejó
+   * `tsc apps/prestador` en rojo con 6 errores hasta que su gemela lo tuvo.*
+   *
+   * ⚠️ **Hoy vale lo mismo en las dos**: el mayor `cupo_techo` entre los
+   * oficios ACTIVOS del prestador. **Bajo (d) —franjas por servicio— esta
+   * forma podría afinarlo al techo de SU servicio**, que es un dato que ella sí
+   * tiene y la universal no. *No se hace ahora porque hoy hay CERO franjas por
+   * servicio vivas (`modo_horarios` = 'universal' en todos), y afinar un camino
+   * que nadie recorre es construir a ciegas.*
+   */
+  cupoTechoMaximo: number;
 }
 
 const SELECT_FRANJA_SERVICIO =
@@ -211,8 +230,9 @@ function mapearFranjaServicio(fila: {
   duracion_slot_minutos: number;
   max_citas_por_slot: number | null;
   activo: boolean;
-}): FranjaHorarioServicio {
+}, cupoTechoMaximo: number): FranjaHorarioServicio {
   return {
+    cupoTechoMaximo,
     id: fila.id,
     servicioId: fila.servicio_id ?? '',
     diaSemana: fila.dia_semana,
@@ -271,7 +291,8 @@ export async function obtenerFranjasDeServicios(
 
   if (error) return normalizarError(error.message);
   if (!Array.isArray(data)) return falla('datos_inconsistentes');
-  return { ok: true, data: data.map(mapearFranjaServicio) };
+  const techo = await techoMaximoDeServicios(prestadorId);
+  return { ok: true, data: data.map((f) => mapearFranjaServicio(f, techo)) };
 }
 
 export interface InputCrearFranjaServicio {
@@ -353,5 +374,5 @@ export async function crearFranjaServicio(
 
   if (error) return normalizarError(error.message);
   if (data === null) return falla('error_desconocido');
-  return { ok: true, data: mapearFranjaServicio(data) };
+  return { ok: true, data: mapearFranjaServicio(data, techoCrear) };
 }
