@@ -320,13 +320,31 @@ export const prestadorEn = {
     sinCuentaTitulo: 'First, your payout account',
     sinCuentaCuerpo: 'There you tell us what legal figure you work under, and with that we know which document to ask for.',
     sinCuentaAccion: 'Create my payout account',
+    capaBase: 'Your ID',
+    capaLegales: 'Permits and credentials for your trade',
+    capaLegalesAyuda:
+      'Attach them so the team can review them. We let you know once they are verified.',
+    capaOpcionales: 'Certifications and accreditations',
+    capaOpcionalesAyuda:
+      "Courses, specializations and anything you want to show. They aren't required to work: they add to your profile.",
+    tipoTituloProfesional: 'Professional degree',
+    tipoRegistroSenescyt: 'SENESCYT registration',
+    tipoCertificacion: 'Certification or accreditation',
+    capaSinDocumentos: "You haven't uploaded any yet.",
+    capaLegalesSoloVet: 'We ask for these when you offer veterinary services.',
   },
   seguridad: {
+    tituloPantalla: 'Security',
+    nadieLoVe: 'This information is yours. Families never see it.',
+    errorTitulo: "We couldn't load your details",
+    errorCuerpo: 'Try again in a moment.',
     titulo: 'Password',
     ayuda: 'The password you use to sign in.',
     actual: 'Your current password',
     nueva: 'New password',
     largoMinimo: 'At least 8 characters.',
+    confirmar: 'Repeat the new password',
+    noCoinciden: "The two passwords don't match. Please type them again.",
     cambiar: 'Change password',
     listo: 'Done — your password has been changed.',
     soloGoogle:
@@ -355,7 +373,7 @@ export const prestadorEn = {
   miCuenta: {
     titulo: 'Your account',
     perfil: 'Your profile',
-    tusDatos: 'Your details',
+    negocio: 'Your business',
     preferencias: 'Preferences',
     // S61-B12: el header CD de la portada (D-370) · LOTE S61, GATE PENDIENTE
     // S79-B (T2-B3): `oficioAmbos` died (Ley 37) — the trade voice is the
@@ -618,6 +636,7 @@ export const prestadorEn = {
   // Business account — S54-B (wizard B2.3, MODELO_FINANCIERO §6.5)
   cuenta: {
     titulo: 'Business details',
+    bancariosNota: "We'll deposit what you earn from your services into this account.",
     avisoRevision:
       'We review these details one by one. Someone from our team looks at them and, once verified, your profile shows the badge families see. In the meantime you keep working as usual.',
     bancariosSinDeclarar: 'Not stated',

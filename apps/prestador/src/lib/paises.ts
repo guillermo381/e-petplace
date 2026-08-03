@@ -1,63 +1,31 @@
 /**
- * LOS PAÍSES DE LA APP DEL PRESTADOR (S84-C33) — UNA lista, dos usos.
+ * LOS HELPERS DE PAÍS DEL PRESTADOR — **la lista ya no vive acá** (S85-C2,
+ * mitad de C de D-633; pedido de A en
+ * `docs/relevamientos/2026-08-03-s85a-PEDIDO-a-C-paises.md`).
  *
- * ☠️ NACE POR MUDANZA, NO POR INVENCIÓN. Los 23 vivían como `const` local
- * dentro de `cuenta/perfil.tsx`, y la pantalla de documentos necesitaba
- * exactamente la misma lista para preguntar **qué país emitió** el
- * documento. Copiarla habría sido el clon de 23 filas que L-175 persigue
- * —y el peor tipo: el día que se agregue un país, uno de los dos
- * selectores queda viejo y nadie se entera—. Se mueve y los dos la
- * consumen.
+ * ☠️ **MURIÓ `PAISES` — los 23 literales.** Su reemplazo es
+ * `obtenerPaisesDelMundo()` de `@epetplace/api`, que cablea
+ * `get_paises_para_telefono()` sobre `cat_paises`. **La copia no era
+ * inofensiva y hay número:** el `formato` de **Perú** divergía —
+ * `cat_paises` acepta `^\+51\d{7,9}$` y esta copia exigía `^\+51\d{9}$`—,
+ * o sea que **la app rebotaba números peruanos que la fuente aceptaba**.
+ * *Ése es el costo real de una copia que nadie compara.*
  *
- * ⚠️ POR QUÉ NO SALE DE `obtenerPaisesParaRegistro()`, que es la pregunta
- * obvia y tiene respuesta MEDIDA: ese lector filtra `.eq('activo', true)`
- * —los países habilitados para ABRIR una cuenta comercial, hoy solo EC—
- * y **el país que EMITIÓ un documento no tiene por qué ser uno de ésos**.
- * El caso canónico es el que P21 ya nombró: *un profesional colombiano
- * operando en Quito tiene documento colombiano*. Con el lector de
- * registro, ese caso real sería IMPOSIBLE de declarar. La lista de
- * emisores es más ancha que la de operación, y por eso son dos cosas.
+ * ⚠️ **LO QUE CAMBIA PARA QUIEN CONSUMA: la lista es ASÍNCRONA.** No es un
+ * cambio de import — es un cambio de FORMA. Quien la necesite la carga y
+ * la tiene en estado; los helpers de acá pasan a recibirla en vez de
+ * cerrar sobre ella. *Un helper que se trae su propia copia para no
+ * cambiar de firma es la misma deuda con otro nombre.*
  *
- * `pre` y `formato` son del teléfono y no le sirven a documentos; se
- * conservan acá porque son de la misma fila y partirla en dos tablas por
- * consumidor sería el mismo error al revés.
+ * LO QUE SÍ SE QUEDA, y por qué cada uno:
+ *  · `PAIS_DEFAULT` — es UN código ISO, no una lista: no hay nada que
+ *    diverger. Sigue siendo el default del selector de TELÉFONO, jamás de
+ *    documentos (ahí el país se DECLARA — P21).
+ *  · `bandera` — es aritmética sobre el ISO, sin lista de por medio.
+ *  · `nombreDePais` — necesita la lista, así que **la recibe**.
  */
 
-export type Pais = { iso: string; nombre: string; pre: string; formato?: string };
-
-/* `formato` sale de `formato_telefono` de `cat_paises`, MEDIDO contra el
-   proyecto vivo: **9 de 23 lo declaran, 14 no.** Los nueve validan de
-   verdad; los catorce se eligen y lo DICEN — *"el que no lo tenga
-   declarado, no valida (no inventes uno)"*. Inventar una regex por país
-   sería exactamente el dato inventado de L-180: números plausibles,
-   typecheck verde, el significado mal.
-
-   ⚠️ COLOMBIA VALIDA — es el caso del founder, y no queda exento. */
-export const PAISES: Pais[] = [
-  { iso: 'AR', nombre: 'Argentina', pre: '+54', formato: '^\\+54\\d{10,11}$' },
-  { iso: 'BO', nombre: 'Bolivia', pre: '+591' },
-  { iso: 'BR', nombre: 'Brasil', pre: '+55' },
-  { iso: 'CA', nombre: 'Canadá', pre: '+1', formato: '^\\+1\\d{10}$' },
-  { iso: 'CL', nombre: 'Chile', pre: '+56', formato: '^\\+56\\d{9}$' },
-  { iso: 'CO', nombre: 'Colombia', pre: '+57', formato: '^\\+57\\d{7,10}$' },
-  { iso: 'CR', nombre: 'Costa Rica', pre: '+506' },
-  { iso: 'CU', nombre: 'Cuba', pre: '+53' },
-  { iso: 'DO', nombre: 'República Dominicana', pre: '+1' },
-  { iso: 'EC', nombre: 'Ecuador', pre: '+593', formato: '^\\+593\\d{8,9}$' },
-  { iso: 'ES', nombre: 'España', pre: '+34', formato: '^\\+34\\d{9}$' },
-  { iso: 'GT', nombre: 'Guatemala', pre: '+502' },
-  { iso: 'HN', nombre: 'Honduras', pre: '+504' },
-  { iso: 'MX', nombre: 'México', pre: '+52', formato: '^\\+52\\d{10}$' },
-  { iso: 'NI', nombre: 'Nicaragua', pre: '+505' },
-  { iso: 'PA', nombre: 'Panamá', pre: '+507' },
-  { iso: 'PE', nombre: 'Perú', pre: '+51', formato: '^\\+51\\d{9}$' },
-  { iso: 'PR', nombre: 'Puerto Rico', pre: '+1' },
-  { iso: 'PY', nombre: 'Paraguay', pre: '+595' },
-  { iso: 'SV', nombre: 'El Salvador', pre: '+503' },
-  { iso: 'US', nombre: 'Estados Unidos', pre: '+1', formato: '^\\+1\\d{10}$' },
-  { iso: 'UY', nombre: 'Uruguay', pre: '+598' },
-  { iso: 'VE', nombre: 'Venezuela', pre: '+58' },
-];
+import type { PaisDelMundo } from '@epetplace/api';
 
 /** El default del selector de TELÉFONO — el país donde opera la mayoría.
  *  NO es un techo: cualquiera de los 23 se elige.
@@ -67,12 +35,22 @@ export const PAISES: Pais[] = [
 export const PAIS_DEFAULT = 'EC';
 
 /** La bandera sale del `codigo_iso2` — cada letra a su indicador
- *  regional (FIRMADA S83-C10; el Android del founder las dibuja). */
+ *  regional (FIRMADA S83-C10; el Android del founder las dibuja).
+ *  Sin lista de por medio: por eso sobrevivió a la mudanza. */
 export const bandera = (iso: string): string =>
   String.fromCodePoint(...[...iso].map((c) => (c.codePointAt(0) ?? 0) + 127397));
 
 /** El nombre humano del país, o su ISO si no está en la lista — un país
  *  guardado que no reconocemos se DICE por su código en vez de
- *  desaparecer (Ley 13: el dato existe, la voz lo admite). */
-export const nombrePais = (iso: string): string =>
-  PAISES.find((p) => p.iso === iso)?.nombre ?? iso;
+ *  desaparecer (Ley 13: el dato existe, la voz lo admite).
+ *
+ *  **Recibe la lista** (antes cerraba sobre la copia): con el catálogo
+ *  async, un helper que resuelve solo tendría que guardarse una copia — y
+ *  esa copia es justamente lo que D-633 vino a matar. */
+export const nombreDePais = (paises: PaisDelMundo[], iso: string): string =>
+  paises.find((p) => p.codigo === iso)?.nombre ?? iso;
+
+/** El país de un ISO dentro de la lista cargada, o `undefined`. Existe
+ *  para que los consumidores no repitan el `.find` con otro criterio. */
+export const paisDe = (paises: PaisDelMundo[], iso: string): PaisDelMundo | undefined =>
+  paises.find((p) => p.codigo === iso);

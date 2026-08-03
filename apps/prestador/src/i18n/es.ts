@@ -353,42 +353,86 @@ export const prestadorEs = {
   // Voces calcadas de la Cuenta v1 del cliente (aprobadas S55/S56);
   // eliminarVoz con la verdad P17 §4 del lado del negocio.
   // ── S84-C23 · seguridad y recuperación ──
+  /* ⚠️ S85-C2 — ESTE BLOQUE ESTABA EN VOSEO Y EL RESTO DE LA APP EN TUTEO.
+     Medido al tocarlo: 8 cadenas voseantes ("sos", "decís", "Elegí",
+     "Probá", "Subí", "subís", "dijiste"→ok, "trabajás") contra `seguridad`
+     y `cuenta`, que son tuteo. **Regla 27 está FIRMADA** (tuteo neutro en
+     todo el portal) y L-148 la ratifica, así que esto no es preferencia:
+     era incumplimiento. Se unifica ACÁ porque la sección se reestructura
+     entera — dejar media sección en cada acento sería peor que las dos.
+     ☠️ Va al lote de strings de S85 para el gate del founder. */
   documentos: {
     titulo: 'Tu identificación',
-    porQue: 'Con tu documento verificado, las familias ven que sos quien decís ser. Lo revisa una persona de e-PetPlace y no lo ve nadie más.',
+    porQue:
+      'Con tu documento verificado, las familias ven que eres quien dices ser. Lo revisa una persona de e-PetPlace y no lo ve nadie más.',
     generico: 'Tu identificación fiscal',
     paisLabel: '¿Qué país lo emitió?',
     paisSinDeclarar: 'Todavía no lo dijiste.',
     paisNoDeclarado: 'País sin declarar',
     paisHojaTitulo: 'País que emitió el documento',
-    faltaPais: 'Elegí el país que lo emitió para poder subirlo.',
+    faltaPais: 'Elige el país que lo emitió para poder subirlo.',
     subir: 'Subir el documento',
     subirDeNuevo: 'Subir otro',
-    capturaHojaTitulo: '¿Cómo lo subís?',
+    capturaHojaTitulo: '¿Cómo lo subes?',
     camara: 'Tomar una foto',
     galeria: 'Elegir de la galería',
     subido: 'Listo — lo recibimos y lo vamos a revisar.',
     enRevision: 'Lo estamos revisando. Te avisamos apenas tengamos respuesta.',
     aprobado: 'Verificado.',
-    rechazado: 'No pudimos validarlo. Probá con una foto más clara del documento completo.',
-    vencido: 'Venció. Subí uno vigente.',
+    rechazado: 'No pudimos validarlo. Prueba con una foto más clara del documento completo.',
+    vencido: 'Venció. Sube uno vigente.',
     insigniaVerificado: 'Verificado',
     insigniaEnRevision: 'En revisión',
     permisoCamara: 'Necesitamos permiso para usar la cámara.',
-    errorRed: 'Revisá tu conexión y probá de nuevo.',
-    errorSubida: 'No pudimos subir el documento. Probá de nuevo.',
+    errorRed: 'Revisa tu conexión y prueba de nuevo.',
+    errorSubida: 'No pudimos subir el documento. Prueba de nuevo.',
     errorTitulo: 'No pudimos cargar tus documentos',
-    errorCuerpo: 'Puede ser la conexión. Probá de nuevo.',
+    errorCuerpo: 'Puede ser la conexión. Prueba de nuevo.',
     sinCuentaTitulo: 'Primero, tu cuenta de cobro',
-    sinCuentaCuerpo: 'Ahí nos decís bajo qué figura trabajás, y con eso sabemos qué documento pedirte.',
+    sinCuentaCuerpo:
+      'Ahí nos dices bajo qué figura trabajas, y con eso sabemos qué documento pedirte.',
     sinCuentaAccion: 'Crear mi cuenta de cobro',
+    /* ── S85-C2 · LAS TRES CAPAS (firma del founder) ──
+       Los rótulos dicen QUÉ ES CADA CAPA y, sobre todo, QUÉ HACE CADA UNA
+       CON TU TIEMPO: la base habilita, la legal se recolecta, la opcional
+       suma. Un prestador que no distingue eso sube todo o no sube nada. */
+    capaBase: 'Tu identificación',
+    capaLegales: 'Permisos y títulos de tu oficio',
+    /* ⚠️ EL COPY NO PROMETE ENCENDIDO, y es firma: la activación de un
+       servicio médico la hace el equipo desde el portal admin. Decir
+       "sube esto y se activa" sería prometer un acto que esta app no
+       ejecuta — y el prestador quedaría esperando algo que nadie disparó. */
+    capaLegalesAyuda:
+      'Adjúntalos para que el equipo los revise. Nosotros te avisamos cuando queden verificados.',
+    capaOpcionales: 'Certificaciones y acreditaciones',
+    capaOpcionalesAyuda:
+      'Cursos, especializaciones y todo lo que quieras mostrar. No hacen falta para trabajar: suman a tu perfil.',
+    tipoTituloProfesional: 'Título profesional',
+    tipoRegistroSenescyt: 'Registro SENESCYT',
+    tipoCertificacion: 'Certificación o acreditación',
+    /** El vacío de una capa que NO bloquea: invita sin urgencia (17.5). */
+    capaSinDocumentos: 'Todavía no subiste ninguno.',
+    /** El eje ② solo aplica a veterinaria (LETRA_VERIFICACION §1). */
+    capaLegalesSoloVet: 'Los pedimos cuando ofreces servicios veterinarios.',
   },
   seguridad: {
+    /** El título de la PANTALLA. Distinto de `titulo`, que rotula la
+     *  SECCIÓN de la clave adentro — el contenedor y su contenido dejan de
+     *  compartir nombre (la misma regla que mató "Tu cuenta" como celda). */
+    tituloPantalla: 'Seguridad',
+    nadieLoVe: 'Estos datos son tuyos. No los ven las familias.',
+    errorTitulo: 'No pudimos cargar tus datos',
+    errorCuerpo: 'Prueba de nuevo en un momento.',
     titulo: 'Contraseña',
     ayuda: 'La clave con la que entras a la app.',
     actual: 'Tu contraseña actual',
     nueva: 'La nueva contraseña',
     largoMinimo: 'Al menos 8 caracteres.',
+    confirmar: 'Repite la nueva contraseña',
+    /** El ÚNICO error de esta pantalla que el servidor no puede cazar:
+     *  para él las dos son válidas. Por eso la voz no culpa a nadie —
+     *  describe el hecho y deja claro qué corregir (17.4). */
+    noCoinciden: 'Las dos contraseñas no coinciden. Escríbelas de nuevo.',
     cambiar: 'Cambiar contraseña',
     listo: 'Listo — tu contraseña quedó cambiada.',
     // la voz de las ocho cuentas solo-Google: NO dice "no coincide"
@@ -420,7 +464,8 @@ export const prestadorEs = {
   miCuenta: {
     titulo: 'Tu cuenta',
     perfil: 'Tu perfil',
-    tusDatos: 'Tus datos',
+    /** S85-C2: la puerta NUEVA de la raíz — lo que solo ve el equipo. */
+    negocio: 'Tu negocio',
     preferencias: 'Preferencias',
     // S61-B12: el header CD de la portada (D-370) · LOTE S61, GATE PENDIENTE
     // S79-B (T2-B3): `oficioAmbos` MURIÓ (Ley 37) — la voz de oficio es la
@@ -734,6 +779,11 @@ export const prestadorEs = {
        viejo nombraba UNA de las tres cosas que hay adentro (la cuenta) y
        ahora hay tres hermanas — fiscales, bancarios y documentos. */
     titulo: 'Datos comerciales',
+    /** S85-C2 (firma del founder): la cuenta bancaria dice PARA QUÉ es.
+     *  Sin esta línea, un campo de banco en una pantalla de verificación
+     *  se lee como un dato más que pedimos — y no lo es: es por dónde
+     *  cobra. */
+    bancariosNota: 'En esta cuenta te depositaremos el valor de tus servicios.',
     avisoRevision:
       'Revisamos estos datos uno por uno. Los mira alguien de nuestro equipo y, cuando quedan verificados, tu perfil muestra el sello que las familias ven. Mientras tanto sigues trabajando con normalidad.',
     bancariosSinDeclarar: 'Sin declarar',

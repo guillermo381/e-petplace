@@ -79,14 +79,16 @@ import {
   listarFotosGaleria,
   marcarComoPortada,
   obtenerMiPrestador,
+  obtenerPaisesDelMundo,
   reordenarFotosGaleria,
   resolverUrlLogoNegocio,
   type FotoGaleria,
   type MiPrestador,
+  type PaisDelMundo,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
-import { PAISES, PAIS_DEFAULT, bandera, type Pais } from '@/lib/paises';
+import { PAIS_DEFAULT, bandera, paisDe as buscarPais } from '@/lib/paises';
 import { usePedirEspacio } from '@/lib/pedir-espacio';
 // ③ S83-C33 — el pipeline del logo YA EXISTÍA ENTERO (S76-B1/D-505). Lo
 // que faltaba era el cable.
@@ -162,12 +164,16 @@ function normalizarTelefono(v: string): string {
  *
  *  Vacío devuelve vacío: el campo es OPCIONAL y un prefijo suelto no es
  *  un teléfono (guardar "+593" sería inventar un número que nadie dio). */
-function componerE164(valor: string, iso: string): string {
+function componerE164(paises: PaisDelMundo[], valor: string, iso: string): string {
   const crudo = normalizarTelefono(valor);
   if (crudo.length === 0) return '';
   if (crudo.startsWith('+')) return crudo; // ya vino entero: no se toca
-  const pais = PAISES.find((p) => p.iso === iso);
-  return pais === undefined ? crudo : `${pais.pre}${crudo}`;
+  const pais = buscarPais(paises, iso);
+  /* S85-C2 (D-633): `prefijo` es NULLABLE en el catálogo — la copia local
+     lo tenía requerido y por eso nunca hubo que pensarlo. Un país sin
+     prefijo declarado no puede componer un E.164, así que se devuelve lo
+     crudo en vez de concatenar `null`. */
+  return pais?.prefijo == null ? crudo : `${pais.prefijo}${crudo}`;
 }
 
 /** PARTE un E.164 para pintar el selector — **es LECTURA, no columna**: el
@@ -200,18 +206,25 @@ function componerE164(valor: string, iso: string): string {
  *  del catálogo y para pintar alcanza (el prefijo es correcto aunque el
  *  país no lo sea); nunca se escribe esa elección. Cuando NO lo trae —o
  *  sea cuando es una PROPUESTA— la vara sube: ver el guard adentro. */
-function partirE164(v: string): { iso: string; numero: string; propuesto: boolean } | null {
+function partirE164(
+  paises: PaisDelMundo[],
+  v: string,
+): { iso: string; numero: string; propuesto: boolean } | null {
   const crudo = v.trim().replace(/[\s-]/g, '');
   if (crudo.length === 0) return null;
   const traeMas = crudo.startsWith('+');
   const digitos = traeMas ? crudo.slice(1) : crudo;
 
-  const candidatos = PAISES
-    .filter((p) => digitos.startsWith(p.pre.slice(1)))
-    .sort((a, b) => b.pre.length - a.pre.length);
+  /* S85-C2 (D-633): se descartan los que no declaran prefijo — sin él no
+     hay nada contra qué partir. Antes era imposible: la copia local lo
+     tenía requerido. */
+  const candidatos = paises
+    .filter((p): p is PaisDelMundo & { prefijo: string } => p.prefijo !== null)
+    .filter((p) => digitos.startsWith(p.prefijo.slice(1)))
+    .sort((a, b) => b.prefijo.length - a.prefijo.length);
 
   for (const pais of candidatos) {
-    const numero = digitos.slice(pais.pre.length - 1);
+    const numero = digitos.slice(pais.prefijo.length - 1);
     if (numero.length === 0) continue;
     /* ⚠️ EL GUARD QUE EVITA EL FALSO POSITIVO — y es la diferencia entre
        proponer y adivinar. Un número NACIONAL puede empezar por casualidad
@@ -232,10 +245,10 @@ function partirE164(v: string): { iso: string; numero: string; propuesto: boolea
       // Dominicana, porque DO comparte el `+1` y NO declara formato, así
       // que no había nada que lo desmintiera. **Un país sin formato no se
       // propone**: inventarle una regex sería el dato inventado de L-180.
-      if (pais.formato === undefined) continue;
-      if (!new RegExp(pais.formato).test(`${pais.pre}${numero}`)) continue;
+      if (pais.formato === null) continue;
+      if (!new RegExp(pais.formato).test(`${pais.prefijo}${numero}`)) continue;
     }
-    return { iso: pais.iso, numero, propuesto: !traeMas };
+    return { iso: pais.codigo, numero, propuesto: !traeMas };
   }
   return null;
 }
@@ -265,6 +278,9 @@ export default function PerfilV2() {
   useBarraEstadoClara();
 
   const [pantalla, setPantalla] = useState<'cargando' | 'listo' | 'error'>('cargando');
+  /** S85-C2 (D-633): el catálogo VIVO. Llega con el mismo await que
+   *  destraba la pantalla, así que para el primer render ya está. */
+  const [paises, setPaises] = useState<PaisDelMundo[]>([]);
   const [prestador, setPrestador] = useState<MiPrestador | null>(null);
   const [logoPath, setLogoPath] = useState<string | null>(null);
   const [descripcion, setDescripcion] = useState('');
@@ -452,13 +468,36 @@ export default function PerfilV2() {
     useCallback(() => {
       let vigente = true;
       void (async () => {
-        const r = await obtenerMiPrestador();
+        /* ── S85-C2 · D-633 — LA LISTA DE PAÍSES VIAJA ACÁ, y la elección
+           de DÓNDE es la decisión entera del cableado.
+
+           El pedido de A ofrecía tres salidas para el problema de que
+           `partirE164` corre en render y la lista es async: (a) mostrar el
+           número crudo mientras llega · (b) un Esqueleto en la fila del
+           teléfono · (c) dejar la copia local como fallback.
+
+           **Ninguna de las tres hace falta, y la razón es de esta pantalla
+           en particular:** el formulario no se monta hasta
+           `pantalla === 'listo'`. Cargando el catálogo en ESTE mismo await
+           —antes del `setPantalla('listo')` de abajo— la lista **ya está
+           cuando el primer render ocurre**. Cero destello, cero esqueleto
+           nuevo, y la copia local muere entera (que es lo que (c) no
+           lograba: su costo escrito era que la copia sobrevive y vuelve a
+           ser la que nadie compara).
+
+           ⚠️ Y EL FALLO DEL CATÁLOGO **SÍ TUMBA LA PANTALLA**, a
+           propósito: sin países no se puede componer un E.164 ni nombrar
+           un prefijo, así que el formulario de contacto guardaría mal o
+           no guardaría. Es Ley 13 — antes de dibujar un teléfono que no
+           sabe de dónde es, se dice que no se pudo cargar. */
+        const [r, rPaises] = await Promise.all([obtenerMiPrestador(), obtenerPaisesDelMundo()]);
         if (!vigente) return;
-        if (!r.ok) {
+        if (!r.ok || !rPaises.ok) {
           // Ley 13: el fallo dice fallo, jamás se disfraza de vacío.
           setPantalla('error');
           return;
         }
+        setPaises(rPaises.data);
         const p = r.data;
         const desc = p.descripcion ?? '';
         const tel = p.telefono ?? '';
@@ -473,8 +512,8 @@ export default function PerfilV2() {
            su izquierda, firma de C): si volcáramos el E.164 entero, la
            línea diría "+593 +593987654321". Un valor legado sin '+' NO se
            parte y entra crudo — ponerle país sería inferirlo (P21). */
-        const pTel = partirE164(tel);
-        const pWa = partirE164(wa);
+        const pTel = partirE164(rPaises.data, tel);
+        const pWa = partirE164(rPaises.data, wa);
         setTelNegocio(pTel ? pTel.numero : tel);
         setWhatsapp(pWa ? pWa.numero : wa);
         if (pTel) setPaisTel(pTel.iso);
@@ -583,8 +622,8 @@ export default function PerfilV2() {
       // S84-A1bis: se guarda el E.164 ENTERO — el prefijo del país elegido
       // + lo tipeado. Es EXACTAMENTE lo que la voz de `estadoTelefono` le
       // viene prometiendo al usuario ("se guarda +593…").
-      telefono: componerE164(telNegocio, paisTel),
-      whatsapp: componerE164(whatsapp, paisWa),
+      telefono: componerE164(paises, telNegocio, paisTel),
+      whatsapp: componerE164(paises, whatsapp, paisWa),
       email_contacto: emailContacto.trim(),
       // ④ la normalización vive en el GUARDADO, no en el tipeo: mientras
       // escribís, el campo dice lo que va a guardar (`ayuda`) sin
@@ -613,10 +652,11 @@ export default function PerfilV2() {
   function estadoTelefono(valor: string, iso: string): { ok: boolean; voz: string } | null {
     const crudo = valor.replace(/[\s-]/g, '');
     if (crudo.length === 0) return null;
-    const pais = PAISES.find((p) => p.iso === iso);
-    if (pais === undefined) return null;
-    const e164 = `${pais.pre}${crudo}`;
-    if (pais.formato === undefined) {
+    const pais = buscarPais(paises, iso);
+    // S85-C2: sin país o sin prefijo declarado no hay E.164 que prometer.
+    if (pais?.prefijo == null) return null;
+    const e164 = `${pais.prefijo}${crudo}`;
+    if (pais.formato === null) {
       return { ok: true, voz: t('perfilNegocio.telSinFormato', { e164, pais: pais.nombre }) };
     }
     const ok = new RegExp(pais.formato).test(e164);
@@ -627,7 +667,7 @@ export default function PerfilV2() {
     const min = rango?.[1];
     const max = rango?.[2];
     const cuantos = min === undefined ? t('perfilNegocio.telDigitosSinDato') : max === undefined ? t('perfilNegocio.telDigitos', { min }) : t('perfilNegocio.telDigitosRango', { min, max });
-    return { ok, voz: t('perfilNegocio.telLargoMal', { pais: pais.nombre, cuantos, pre: pais.pre, van: crudo.length }) };
+    return { ok, voz: t('perfilNegocio.telLargoMal', { pais: pais.nombre, cuantos, pre: pais.prefijo, van: crudo.length }) };
   }
 
   /* ── ④ CORREO Y SITIO WEB — validación real (defecto del founder).
@@ -748,7 +788,7 @@ export default function PerfilV2() {
       sitioWeb !== (prestador.sitio_web ?? ''));
 
   const alternar = (s: Seccion) => setAbierta((a) => (a === s ? null : s));
-  const prefijoDe = (iso: string) => PAISES.find((p) => p.iso === iso)?.pre ?? '';
+  const prefijoDe = (iso: string) => buscarPais(paises, iso)?.prefijo ?? '';
   const isoDe = paisDe === 'whatsapp' ? paisWa : paisTel;
 
   return (
@@ -1301,60 +1341,29 @@ export default function PerfilV2() {
                 seccionado de Cuenta en S84, donde este bloque va a tener
                 vecinos (plata, preferencias) y el rótulo se elige contra
                 ellos, no solo. */}
-            {/* ⑤ S84-C26 — LA ENTRADA A CUENTA COMERCIAL, y solo la
-                ENTRADA. Las tres pantallas se quedan donde están: tienen
-                tres llamadores vivos (liquidaciones · sala de espera ·
-                negocio) y mudarlas los rompería a los tres.
-                ⚠️ Y LAS TRES ENTRADAS VIEJAS NO SE RETIRAN — no son
-                duplicados sino CONTEXTOS: desde liquidaciones se entra a
-                cobrar, desde la sala a entrar, desde negocio a
-                gestionar. Retirarlas "para no repetir" dejaría a cada
-                uno de esos tres momentos sin su camino, que es el error
-                inverso y más caro. Un destino con varias puertas no es
-                redundancia: es que varias cosas llevan ahí.
-                ACÁ la puerta existe porque la cuenta comercial ES parte
-                de la vitrina — sin ella el negocio no cobra, y eso el
-                prestador lo busca donde arma su negocio. */}
-            <CeldaNavegacion
-              icono="pagos"
-              titulo={t('perfilNegocio.cuentaComercialTitulo')}
-              detalle={t('perfilNegocio.cuentaComercialDetalle')}
-              registro="aa"
-              onPress={() => router.push('/cuenta-comercial')}
-            />
+            {/* ☠️ S85-C2 — LAS DOS CELDAS COMERCIALES MUERTAS, y con ellas
+                las FILAS DESNUDAS #3 y #4 del censo (las únicas dos de esta
+                pantalla que caían sobre el papel sin superficie).
 
-            {/* ②③ S84-C34 — UNA SOLA PUERTA A LOS DATOS COMERCIALES.
-                Acá había DOS celdas —cuenta comercial y documentos— y
-                ahora hay una: la pantalla de `/cuenta-comercial` se llama
-                **Datos comerciales** y absorbió las tres secciones
-                hermanas (fiscales · bancarios · documentos).
-                ☠️ CON ELLO MUERE `cuenta/documentos.tsx`, la pantalla que
-                C33 creó dos rondas atrás. **El camino que abrió NO se
-                pierde** —que era todo su punto: los tres oficios no vet
-                seguían sin poder verificarse— sino que se muda adentro.
-                Ley 37: lo que sale de la UI sale del código.
-                Y ES LA ÚNICA PUERTA CON EDICIÓN: la de Negocio se retiró
-                (firma del founder: *no es normal tenerlo en dos
-                lugares*), y las de liquidaciones y sala de espera
-                sobreviven porque están gateadas a "todavía no tenés
-                cuenta activa" — son contextos, no duplicados. */}
-            <CeldaNavegacion
-              icono="negocio"
-              titulo={t('perfilNegocio.datosComercialesTitulo')}
-              detalle={t('perfilNegocio.datosComercialesDetalle')}
-              registro="aa"
-              onPress={() => router.push('/cuenta-comercial')}
-            />
+                **La firma que las mata: Tu perfil es SOLO VITRINA.** Lo que
+                queda acá es lo que la familia ve — Tu espacio · Cómo te
+                contactan · Dónde atendés · Ver cómo te ven. La cuenta
+                comercial y los datos fiscales no los ve nadie más que el
+                equipo, así que no tienen nada que hacer en el espejo.
 
-            {/* ☠️ S84-C34 ① — ACÁ VIVÍA "SEGURIDAD", Y SU LÁPIDA SE
-                CUMPLIÓ. La celda decía textualmente que se retiraba de la
-                vitrina "cuando exista Cuenta → Seguridad como sección
-                propia". Existe: el índice de Cuenta ahora lleva `Tus
-                datos` y `Seguridad`, las dos DIRECTAS.
-                Se va con ella el doble acceso que el founder cazó —
-                Perfil → Nombre y acceso → Seguridad eran dos puertas para
-                una cosa— y la vitrina queda con SOLO lo que la familia
-                ve. Ley 37: lo que sale de la UI sale del código. */}
+                ⚠️ Y ERAN DOS CELDAS AL MISMO DESTINO: `perfil:1318` y
+                `perfil:1341` hacían las dos `router.push('/cuenta-comercial')`
+                — el comentario de C34 decía "acá había DOS celdas y ahora
+                hay una" y había dos. Su reemplazo es UNA puerta en la RAÍZ
+                de Cuenta ("Tu negocio"), que es donde el prestador la
+                busca: al lado de lo suyo, no adentro de su vitrina.
+
+                LAS DOS PUERTAS GATEADAS NO SE TOCAN (medido en el censo y
+                ratificado por el acta de C): `liquidaciones:210` se dibuja
+                solo con `faltaCuentaActiva` y `sala-espera:213` solo antes
+                de activarse. **Son contextos, no duplicados** — retirarlas
+                dejaría a esos dos momentos sin camino. Ley 37 se aplica a
+                lo que sale de la UI, y ellas no salen. ── */}
 
             <View style={{ paddingTop: spacing[5], gap: spacing[3] }}>
               <Boton
@@ -1381,21 +1390,21 @@ export default function PerfilV2() {
           </Texto>
         </View>
         <HojaScroll>
-          {PAISES.map((p, i) => (
-            <View key={p.iso}>
+          {paises.map((p, i) => (
+            <View key={p.codigo}>
               {i > 0 ? <Separador /> : null}
               <Celda
-                titulo={`${bandera(p.iso)}  ${p.nombre}`}
-                subtitulo={p.formato === undefined ? t('perfilNegocio.paisSinFormato') : undefined}
-                metadataMono={p.pre}
+                titulo={`${bandera(p.codigo)}  ${p.nombre}`}
+                subtitulo={p.formato === null ? t('perfilNegocio.paisSinFormato') : undefined}
+                metadataMono={p.prefijo ?? undefined}
                 interactiva
                 accessibilityRole="button"
                 onPress={() => {
-                  if (paisDe === 'whatsapp') setPaisWa(p.iso);
-                  else setPaisTel(p.iso);
+                  if (paisDe === 'whatsapp') setPaisWa(p.codigo);
+                  else setPaisTel(p.codigo);
                   setPaisDe(null);
                 }}
-                fin={p.iso === isoDe ? <Texto variante="dato">{t('perfilNegocio.paisElegido')}</Texto> : undefined}
+                fin={p.codigo === isoDe ? <Texto variante="dato">{t('perfilNegocio.paisElegido')}</Texto> : undefined}
               />
             </View>
           ))}

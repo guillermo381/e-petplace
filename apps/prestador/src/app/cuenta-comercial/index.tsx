@@ -208,6 +208,14 @@ export default function CuentaComercial() {
         >
           <Celda titulo={t('cuenta.razonSocial')} subtitulo={cuenta.razonSocial} />
           <Separador />
+          {/* SOLO-LECTURA, y es la mitad de una firma cuya otra mitad
+              está FRENADA — ver el reporte de S85-C2: el nombre del
+              negocio vive en DOS columnas (`cuentas_comerciales` y
+              `prestadores`), nacen iguales del alta y **hoy no hay
+              escritor para ninguna**. Acá se EXHIBE, que es lo que la
+              firma pide; hacerlo editable desde la portada del muro
+              exige que A ensanche la whitelist y que la mesa decida si
+              el acto escribe UNA columna o las DOS. */}
           <Celda titulo={t('cuenta.nombreComercial')} subtitulo={cuenta.nombreComercial} />
           <Separador />
           <Celda titulo={t('cuenta.identificacion')} metadataMono={cuenta.identificacionFiscal} />
@@ -223,6 +231,12 @@ export default function CuentaComercial() {
         >
           {bancarios === null ? (
             <View style={{ gap: spacing[3] }}>
+              {/* ⭐ S85-C2 (firma del founder): la cuenta dice PARA QUÉ es.
+                  Va PRIMERO y en las DOS ramas —con datos y sin ellos—
+                  porque es la razón de existir de la sección: sin esta
+                  línea, pedir un banco adentro de una pantalla de
+                  verificación se lee como un dato más que exigimos. */}
+              <Texto variante="cuerpo" color="secondary">{t('cuenta.bancariosNota')}</Texto>
               <Texto variante="cuerpo" color="secondary">{t('cuenta.bancariosFaltan')}</Texto>
               <Texto variante="apoyo" color="tertiary">{t('cuenta.bancariosEducacion')}</Texto>
               {puedeEditarBancarios ? (
@@ -236,6 +250,7 @@ export default function CuentaComercial() {
             </View>
           ) : (
             <View style={{ gap: spacing[3] }}>
+              <Texto variante="apoyo">{t('cuenta.bancariosNota')}</Texto>
               <Celda
                 titulo={bancarios.bancoNombre}
                 subtitulo={bancarios.tipoCuenta === 'corriente' ? t('cuenta.tipoCorriente') : t('cuenta.tipoAhorros')}

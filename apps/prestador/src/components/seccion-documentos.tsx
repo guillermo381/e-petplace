@@ -1,21 +1,45 @@
 /**
- * SECCIÓN DOCUMENTOS — el eje ① de la verificación, dentro de Datos
- * comerciales (S84-C34 ②).
+ * SECCIÓN DOCUMENTOS — LAS TRES CAPAS (S85-C2, firma del founder), dentro
+ * de Datos comerciales.
  *
- * ☠️ NACE DE UNA MUDANZA, y el costo está declarado y aceptado: en C33
- * esto era la pantalla `cuenta/documentos`. Con la firma de ② los datos
- * comerciales se unifican en TRES secciones hermanas y una pantalla
- * suelta habría sido la cuarta puerta al mismo lugar. **Muere el cromo
- * (encabezado, scroll, estados de carga propios); el cuerpo viaja
- * entero.** Ley 37: lo que sale de la UI sale del código.
+ * ═══════ POR QUÉ TRES Y NO UNA LISTA ═══════
+ * Las tres capas **no se distinguen por importancia sino por QUÉ HACEN CON
+ * TU TIEMPO**, y por eso el rótulo de cada una lo dice:
  *
- * LO QUE NO CAMBIÓ AL MUDARSE, porque era lo que valía:
- *  · la FIGURA sale de `tipoFiscal` — Ley 23, no se pregunta.
- *  · el DOCUMENTO sale de `documentoDeFigura()` — la regla fiscal vive
- *    UNA vez, en el wrapper.
- *  · el NOMBRE sale del catálogo del país ELEGIDO, y **el genérico es el
- *    camino habitual**: solo EC declara nombres (1 de 23 — medido).
- *  · el PAÍS se DECLARA y arranca vacío (P21).
+ *  ① **BASE — tu identificación.** Cédula o RUC según la FIGURA, que ya
+ *     está declarada (`tipo_fiscal`): la puerta no pregunta lo que sabe
+ *     (Ley 23). Es la que el equipo mira primero.
+ *  ② **LEGALES POR OFICIO** — hoy solo veterinaria (`LETRA_VERIFICACION`
+ *     §1: el eje ② va ENCIMA del ①, no lo reemplaza). Se **adjuntan para
+ *     revisión**, y el copy **no promete encendido**: la activación de un
+ *     servicio médico la hace el equipo desde el portal admin. *Decir
+ *     "subilo y se activa" dejaría al prestador esperando un acto que
+ *     esta app no ejecuta.*
+ *  ③ **OPCIONALES — certificaciones y acreditaciones.** No gatean nada y
+ *     lo dicen. Su tipo (`certificacion`) nació en la migración
+ *     `20260803160000` de A: antes lo más cercano era `otro`, que sirve
+ *     para guardar el archivo y no para saber qué es.
+ *
+ * ⚠️ **FRENO DECLARADO — `permiso_funcionamiento` NO SE OFRECE, y no es
+ * olvido.** La letra lo nombra en el eje ② ("clínica/negocio → permisos")
+ * y el CHECK de la DB lo acepta. **Pero el LECTOR no lo devuelve:**
+ * `obtenerDocumentosVerificacion` filtra con
+ * `.in('tipo', TIPOS_DOCUMENTO_VERIFICACION)` y ese arreglo **no lo
+ * nombra** (`TIPOS_DOCUMENTO_OFICIO_VET = ['titulo_profesional',
+ * 'registro_senescyt']`). Dibujar su control haría que el documento
+ * **suba bien y desaparezca de la pantalla** — un tragadero silencioso, y
+ * el propio JSDoc del wrapper ya lo advierte: *"un tipo que la DB acepta
+ * y ese arreglo no nombra es INVISIBLE para la app entera"*.
+ * **Es `packages/api` ⇒ territorio de A, y está PEDIDO (§6: se declara y
+ * se pide, no se clona).** Entra el día que el arreglo lo nombre.
+ *
+ * ⚠️ **P21 EN LAS TRES CAPAS: el país se DECLARA POR DOCUMENTO.** No hay
+ * un país "de la sección": mi cédula puede ser ecuatoriana y mi título
+ * colombiano — es el caso canónico que la letra usa. Por eso cada fila
+ * lleva su propio selector y **ninguno arranca preseleccionado**.
+ *
+ * S85-C2 (D-633): la lista de países sale de `obtenerPaisesDelMundo()` —
+ * la copia local murió. Ver `lib/paises.ts`.
  */
 
 import { useCallback, useState } from 'react';
@@ -36,14 +60,22 @@ import { useFocusEffect } from 'expo-router';
 import {
   documentoDeFigura,
   obtenerDocumentosVerificacion,
+  obtenerMundoVeterinariaPropio,
+  obtenerPaisesDelMundo,
   obtenerPaisesParaRegistro,
   type DocumentoVerificacion,
+  type PaisDelMundo,
+  type TipoDocumentoVerificacion,
   type TipoFiscal,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
-import { PAISES, bandera, nombrePais } from '@/lib/paises';
+import { bandera, nombreDePais } from '@/lib/paises';
 import { subirDocumentoVerificacion } from '@/lib/subir-documento';
+
+/** Los del eje ② que la app PUEDE mostrar hoy. `permiso_funcionamiento`
+ *  queda afuera por el freno de la cabecera — no por criterio. */
+const LEGALES_VET = ['titulo_profesional', 'registro_senescyt'] as const;
 
 export function SeccionDocumentos({
   prestadorId,
@@ -55,12 +87,173 @@ export function SeccionDocumentos({
   tipoFiscal: TipoFiscal;
 }) {
   const { t } = useTraduccion();
-  const { mostrar } = useAviso();
 
-  const [documento, setDocumento] = useState<DocumentoVerificacion | null>(null);
+  const [docs, setDocs] = useState<DocumentoVerificacion[]>([]);
+  const [paises, setPaises] = useState<PaisDelMundo[]>([]);
   const [nombrePorPais, setNombrePorPais] = useState<
     Record<string, Partial<Record<TipoFiscal, string>>>
   >({});
+  /** El eje ② solo aplica a veterinaria (LETRA_VERIFICACION §1). Se LEE en
+   *  vez de suponerse: un paseador no tiene por qué ver "Registro
+   *  SENESCYT" en su pantalla. */
+  const [esVet, setEsVet] = useState(false);
+  const [intento, setIntento] = useState(0);
+
+  const tipoBase = documentoDeFigura(tipoFiscal);
+
+  useFocusEffect(
+    useCallback(() => {
+      let vigente = true;
+      void (async () => {
+        const [rDocs, rPaisesReg, rPaises, rVet] = await Promise.all([
+          obtenerDocumentosVerificacion(prestadorId),
+          obtenerPaisesParaRegistro(),
+          obtenerPaisesDelMundo(),
+          obtenerMundoVeterinariaPropio(prestadorId),
+        ]);
+        if (!vigente) return;
+        /* Un fallo NO borra lo que había en pantalla ni tumba la sección:
+           cada lectura degrada sola. */
+        if (rDocs.ok) setDocs(rDocs.data);
+        if (rPaises.ok) setPaises(rPaises.data);
+        if (rVet.ok) setEsVet(rVet.data.servicios.some((s) => s.activo));
+        /* si el catálogo fiscal falla, la sección NO se cae: se queda sin
+           nombres específicos y usa el genérico, que es verdadero igual. */
+        if (rPaisesReg.ok) {
+          const m: Record<string, Partial<Record<TipoFiscal, string>>> = {};
+          for (const p of rPaisesReg.data) m[p.codigoIso2] = p.nombrePorTipo;
+          setNombrePorPais(m);
+        }
+      })();
+      return () => {
+        vigente = false;
+      };
+    }, [prestadorId, intento]),
+  );
+
+  const recargar = (): void => setIntento((n) => n + 1);
+
+  /**
+   * EL NOMBRE DEL DOCUMENTO BASE — del CATÁLOGO, con el genérico como
+   * CAMINO HABITUAL. Se lee al derecho a propósito: *si este país declaró
+   * cómo se llama, se dice; si no —que es lo normal, 22 de 23— se dice
+   * "tu identificación fiscal"*, genérico y **verdadero en los 23** en vez
+   * de específico y falso en 22. Hardcodear "RUC" haría mentir a la
+   * pantalla apenas alguien elija Colombia, donde una persona jurídica
+   * tiene NIT.
+   */
+  const nombreBase = (pais: string | null): string =>
+    pais === null
+      ? t('documentos.generico')
+      : (nombrePorPais[pais]?.[tipoFiscal] ?? t('documentos.generico'));
+
+  const vozTipo = (tipo: TipoDocumentoVerificacion): string => {
+    switch (tipo) {
+      case 'titulo_profesional':
+        return t('documentos.tipoTituloProfesional');
+      case 'registro_senescyt':
+        return t('documentos.tipoRegistroSenescyt');
+      case 'certificacion':
+        return t('documentos.tipoCertificacion');
+      default:
+        return t('documentos.generico');
+    }
+  };
+
+  return (
+    <View style={{ gap: spacing[5] }}>
+      {/* ── ① LA BASE ── */}
+      <View style={{ gap: spacing[3] }}>
+        <Texto variante="seccion">{t('documentos.capaBase')}</Texto>
+        <FilaDocumento
+          prestadorId={prestadorId}
+          tipo={tipoBase}
+          paises={paises}
+          docs={docs}
+          onSubido={recargar}
+          nombreDe={nombreBase}
+        />
+      </View>
+
+      {/* ── ② LOS LEGALES DEL OFICIO — hoy solo veterinaria ── */}
+      <View style={{ gap: spacing[3] }}>
+        <Texto variante="seccion">{t('documentos.capaLegales')}</Texto>
+        {esVet ? (
+          <>
+            <Texto variante="apoyo">{t('documentos.capaLegalesAyuda')}</Texto>
+            {LEGALES_VET.map((tipo, i) => (
+              <View key={tipo} style={{ gap: spacing[3] }}>
+                {i > 0 ? <Separador /> : null}
+                <FilaDocumento
+                  prestadorId={prestadorId}
+                  tipo={tipo}
+                  paises={paises}
+                  docs={docs}
+                  onSubido={recargar}
+                  nombreDe={() => vozTipo(tipo)}
+                />
+              </View>
+            ))}
+          </>
+        ) : (
+          /* Ley 13 + 17.5: no se dibuja un control que no le toca, y se
+             dice POR QUÉ no está en vez de dejar el hueco mudo. */
+          <Texto variante="apoyo">{t('documentos.capaLegalesSoloVet')}</Texto>
+        )}
+      </View>
+
+      {/* ── ③ LOS OPCIONALES — no gatean nada, y varios son legales ── */}
+      <View style={{ gap: spacing[3] }}>
+        <Texto variante="seccion">{t('documentos.capaOpcionales')}</Texto>
+        <Texto variante="apoyo">{t('documentos.capaOpcionalesAyuda')}</Texto>
+        <FilaDocumento
+          prestadorId={prestadorId}
+          tipo="certificacion"
+          paises={paises}
+          docs={docs}
+          onSubido={recargar}
+          nombreDe={() => vozTipo('certificacion')}
+          /** La única capa donde varios documentos son la norma: un
+           *  prestador puede tener tres cursos. Las otras dos tienen UNO
+           *  vigente por tipo. */
+          varios
+        />
+      </View>
+    </View>
+  );
+}
+
+/**
+ * UNA FILA DE DOCUMENTO — su país, su estado y su subida.
+ *
+ * Nace como pieza LOCAL y no en `packages/ui` porque tiene **exactamente
+ * tres consumidores y los tres viven en este archivo**: promoverla ahora
+ * sería inventar un contrato para un solo cliente (mismo criterio que
+ * `ControlTelefono` en `perfil-piezas`). Su día llega con el primer
+ * consumidor de otra pantalla.
+ */
+function FilaDocumento({
+  prestadorId,
+  tipo,
+  paises,
+  docs,
+  onSubido,
+  nombreDe,
+  varios = false,
+}: {
+  prestadorId: string;
+  tipo: TipoDocumentoVerificacion;
+  paises: PaisDelMundo[];
+  docs: DocumentoVerificacion[];
+  onSubido: () => void;
+  /** El nombre humano del documento, que puede depender del país (la
+   *  base) o no (los otros dos). */
+  nombreDe: (pais: string | null) => string;
+  varios?: boolean;
+}) {
+  const { t } = useTraduccion();
+  const { mostrar } = useAviso();
+
   /** ⚠️ ARRANCA SIN DECLARAR (P21): preseleccionar el país del negocio
    *  sería declarar por el prestador justo en el dato más caro de
    *  inventar. `countryCode` está a mano y NO se toca. */
@@ -68,50 +261,12 @@ export function SeccionDocumentos({
   const [hojaPais, setHojaPais] = useState(false);
   const [hojaCaptura, setHojaCaptura] = useState(false);
   const [subiendo, setSubiendo] = useState(false);
-  const [intento, setIntento] = useState(0);
 
-  const tipo = documentoDeFigura(tipoFiscal);
-
-  useFocusEffect(
-    useCallback(() => {
-      let vigente = true;
-      void (async () => {
-        const [docs, paises] = await Promise.all([
-          obtenerDocumentosVerificacion(prestadorId),
-          obtenerPaisesParaRegistro(),
-        ]);
-        if (!vigente) return;
-        /* el vigente es el primero: el lector ordena del más reciente al
-           más viejo. Un fallo NO borra lo que había en pantalla. */
-        if (docs.ok) setDocumento(docs.data.find((d) => d.tipo === tipo) ?? null);
-        /* si el catálogo falla, la sección NO se cae: se queda sin
-           nombres específicos y usa el genérico, que es verdadero igual.
-           Un fallo de catálogo no puede bloquear una subida. */
-        if (paises.ok) {
-          const m: Record<string, Partial<Record<TipoFiscal, string>>> = {};
-          for (const p of paises.data) m[p.codigoIso2] = p.nombrePorTipo;
-          setNombrePorPais(m);
-        }
-      })();
-      return () => {
-        vigente = false;
-      };
-    }, [prestadorId, tipo, intento]),
-  );
-
-  /**
-   * EL NOMBRE — del CATÁLOGO, con el genérico como CAMINO HABITUAL.
-   * Se lee al derecho a propósito: *si este país declaró cómo se llama,
-   * se dice; si no —que es lo normal, 22 de 23— se dice "tu
-   * identificación fiscal"*, que es genérico y **verdadero en los 23** en
-   * vez de específico y falso en 22.
-   * Hardcodear "RUC" habría hecho mentir a la pantalla apenas alguien
-   * elija Colombia, donde una persona jurídica tiene NIT.
-   */
-  const vozDocumento =
-    pais === null
-      ? t('documentos.generico')
-      : (nombrePorPais[pais]?.[tipoFiscal] ?? t('documentos.generico'));
+  /* el lector ordena del más reciente al más viejo: el vigente es el
+     primero de su tipo. */
+  const mios = docs.filter((d) => d.tipo === tipo);
+  const vigente = mios[0] ?? null;
+  const nombre = nombreDe(pais);
 
   async function capturar(camara: boolean) {
     if (pais === null) return;
@@ -129,7 +284,7 @@ export function SeccionDocumentos({
       uri: r.foto.uri,
       prestadorId,
       tipo,
-      nombre: vozDocumento,
+      nombre,
       paisEmisor: pais,
     });
     setSubiendo(false);
@@ -141,7 +296,7 @@ export function SeccionDocumentos({
       return;
     }
     mostrar({ variante: 'exito', texto: t('documentos.subido') });
-    setIntento((n) => n + 1);
+    onSubido();
   }
 
   /** El estado en voz de quien espera — no el enum. */
@@ -164,8 +319,6 @@ export function SeccionDocumentos({
 
   return (
     <View style={{ gap: spacing[3] }}>
-      <Texto variante="seccion">{vozDocumento}</Texto>
-
       {/* EL PAÍS SE ELIGE — jamás se deriva del negocio (P21). Va ARRIBA
           del botón: es el que decide cómo se llama el documento, así que
           preguntarlo después sería pedir que suba algo que todavía no
@@ -173,49 +326,51 @@ export function SeccionDocumentos({
       <Celda
         titulo={t('documentos.paisLabel')}
         subtitulo={pais === null ? t('documentos.paisSinDeclarar') : undefined}
-        fin={pais === null ? undefined : `${bandera(pais)}  ${nombrePais(pais)}`}
+        fin={pais === null ? undefined : `${bandera(pais)}  ${nombreDePais(paises, pais)}`}
         interactiva
         accessibilityRole="button"
         onPress={() => setHojaPais(true)}
       />
 
-      {documento !== null && (
-        <>
-          <Separador />
-          <View style={{ gap: spacing[2] }}>
-            <View style={{ flexDirection: 'row' }}>
-              {/* 'alDia' para lo resuelto, 'info' para lo que espera. NO
-                  se usa 'atencion' en el rechazo: el motivo ya se dice en
-                  texto abajo, y una insignia de alarma encima repetiría
-                  el mismo dato con más volumen (Chanel). */}
-              <Insignia
-                etiqueta={
-                  documento.estado === 'aprobado'
-                    ? t('documentos.insigniaVerificado')
-                    : t('documentos.insigniaEnRevision')
-                }
-                estado={documento.estado === 'aprobado' ? 'alDia' : 'info'}
-              />
-            </View>
-            <Texto variante="apoyo">{vozEstado(documento)}</Texto>
-            {/* null es la verdad de los documentos previos a S84: no se
-                preguntó. Se DICE en vez de dibujar un país inventado. */}
-            <Texto variante="dato">
-              {documento.paisEmisor === null
-                ? t('documentos.paisNoDeclarado')
-                : nombrePais(documento.paisEmisor)}
-            </Texto>
+      {/* LO YA SUBIDO. En la capa de VARIOS se listan todos: una
+          certificación no reemplaza a otra. En las otras dos, el vigente
+          es uno. */}
+      {(varios ? mios : vigente === null ? [] : [vigente]).map((doc) => (
+        <View key={doc.id} style={{ gap: spacing[2] }}>
+          <View style={{ flexDirection: 'row' }}>
+            {/* 'alDia' para lo resuelto, 'info' para lo que espera. NO se
+                usa 'atencion' en el rechazo: el motivo ya se dice en texto
+                abajo, y una insignia de alarma encima repetiría el mismo
+                dato con más volumen (Chanel). */}
+            <Insignia
+              etiqueta={
+                doc.estado === 'aprobado'
+                  ? t('documentos.insigniaVerificado')
+                  : t('documentos.insigniaEnRevision')
+              }
+              estado={doc.estado === 'aprobado' ? 'alDia' : 'info'}
+            />
           </View>
-        </>
-      )}
+          <Texto variante="apoyo">{vozEstado(doc)}</Texto>
+          {/* null es la verdad de los documentos previos a S84: no se
+              preguntó. Se DICE en vez de dibujar un país inventado. */}
+          <Texto variante="dato">
+            {doc.paisEmisor === null
+              ? t('documentos.paisNoDeclarado')
+              : nombreDePais(paises, doc.paisEmisor)}
+          </Texto>
+        </View>
+      ))}
 
-      {/* EL BOTÓN APAGADO DICE QUÉ FALTA, SIEMPRE (patrón de la casa
-          desde S73-B): sin país no se sube —el documento quedaría sin
-          saber quién lo emitió, que es justo lo que el admin necesita
-          para verificarlo— y en vez de un control muerto que no explica
-          nada, la línea de abajo lo dice. Ley 23. */}
+      {varios && mios.length === 0 && <Texto variante="apoyo">{t('documentos.capaSinDocumentos')}</Texto>}
+
+      {/* EL BOTÓN APAGADO DICE QUÉ FALTA, SIEMPRE (patrón de la casa desde
+          S73-B): sin país no se sube —el documento quedaría sin saber
+          quién lo emitió, que es justo lo que el admin necesita para
+          verificarlo— y en vez de un control muerto que no explica nada,
+          la línea de abajo lo dice. Ley 23. */}
       <Boton
-        etiqueta={documento === null ? t('documentos.subir') : t('documentos.subirDeNuevo')}
+        etiqueta={mios.length === 0 ? t('documentos.subir') : t('documentos.subirDeNuevo')}
         bloque
         cargando={subiendo}
         deshabilitado={pais === null}
@@ -223,25 +378,21 @@ export function SeccionDocumentos({
       />
       {pais === null && <Texto variante="apoyo">{t('documentos.faltaPais')}</Texto>}
 
-      {/* LOS 23 — la lista es más ancha que la de registro a propósito:
-          un profesional colombiano en Quito tiene documento colombiano, y
-          con la lista de países ACTIVOS ese caso real sería imposible de
-          declarar (ver `lib/paises.ts`). */}
-      <Hoja
-        visible={hojaPais}
-        onCerrar={() => setHojaPais(false)}
-        titulo={t('documentos.paisHojaTitulo')}
-      >
+      {/* LOS 23 DEL CATÁLOGO — la lista es más ancha que la de registro a
+          propósito: un profesional colombiano en Quito tiene documento
+          colombiano, y con la lista de países ACTIVOS ese caso real sería
+          imposible de declarar. S85-C2: sale del motor, no de una copia. */}
+      <Hoja visible={hojaPais} onCerrar={() => setHojaPais(false)} titulo={t('documentos.paisHojaTitulo')}>
         <View>
-          {PAISES.map((p, i) => (
-            <View key={p.iso}>
+          {paises.map((p, i) => (
+            <View key={p.codigo}>
               {i > 0 ? <Separador /> : null}
               <Celda
-                titulo={`${bandera(p.iso)}  ${p.nombre}`}
+                titulo={`${bandera(p.codigo)}  ${p.nombre}`}
                 interactiva
                 accessibilityRole="button"
                 onPress={() => {
-                  setPais(p.iso);
+                  setPais(p.codigo);
                   setHojaPais(false);
                 }}
               />

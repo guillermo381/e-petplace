@@ -187,7 +187,21 @@ export default function RootLayout() {
                 ☠️ MUERTE: este bloque se va con el veredicto — si el
                 slide está limpio, el fondo se resuelve acá para siempre y
                 las 65 montas del agua mueren; si no, vuelve el default y
-                el agua se queda donde está. */}
+                el agua se queda donde está.
+
+                ⚠️ **S85-C2 — EL EXPERIMENTO QUEDÓ HUÉRFANO Y SE DECLARA
+                EN VEZ DE RESOLVERSE SOLO.** Su ÚNICA pantalla de prueba
+                era `cuenta/identidad`, y esa pantalla **murió** en la
+                reestructura de Cuenta (su contenido está en
+                `cuenta/seguridad`). ⇒ **hoy no queda NINGUNA pantalla sin
+                fondo: el experimento ya no puede producir su veredicto**,
+                aunque el `background: 'transparent'` de abajo siga puesto.
+                **No lo re-alojo ni lo revierto por mi cuenta**, y las dos
+                razones son del mismo tipo: mudarlo a `seguridad` haría
+                que la pantalla que el founder está por gatear se vea
+                distinta de sus hermanas —ruido justo en el gate—, y
+                revertirlo tiraría una medición pendiente que nadie
+                decidió tirar. **Va a la mesa con sus dos salidas.** */}
             <TemaNavegador
               value={{
                 ...DefaultTheme,

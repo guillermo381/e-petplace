@@ -279,19 +279,33 @@ export default function Cuenta() {
 
   // S58 (D-361 levantado): cada entrada con su ícono b′ del registry —
   // el perfil comparte la chapita 'cuenta' (decisión del lote ea7e8e4)
-  /* ① S84-C34 — LO PERSONAL VUELVE A SU CASA, y la lápida que el Perfil
-     tenía escrita se cumple sola.
-     `Tus datos` y `Seguridad` vivían de paso en el Perfil porque no
-     tenían dónde; con el Perfil convertido en VITRINA esa mezcla dejó de
-     ser transitoria y pasó a ser contradicción: **la familia no ve tu
-     nombre ni tu correo**, así que no tienen nada que hacer en lo que la
-     familia mira. Es el tercer verbo al pie — CUENTA es lo tuyo.
-     ⚠️ Y `Seguridad` entra DIRECTO, sin escala: antes el camino era
-     Perfil → Nombre y acceso → Seguridad, dos puertas para una cosa. */
+  /* ═══ S85-C2 · LAS CUATRO PUERTAS (firma del founder sobre el censo) ═══
+     El índice pasa de cuatro entradas confusas a cuatro que se distinguen
+     por AUDIENCIA, que es el eje que faltaba:
+
+       · **Tu perfil** — lo que la familia VE. Vitrina y nada más.
+       · **Tu negocio** — lo que solo ve el EQUIPO (fiscal · cobro ·
+         documentos). Puerta NUEVA en la raíz, no un rename del perfil.
+       · **Seguridad** — lo que no ve NADIE: tu nombre y tu clave.
+       · **Preferencias** — sin cambios.
+
+     ☠️ QUÉ MURIÓ Y POR QUÉ, medido en el censo:
+      · **`Tus datos`** llevaba a una pantalla titulada "Seguridad" — se
+        tocaba una cosa y se aterrizaba en otra (17.3). Hoy la celda y la
+        pantalla se llaman IGUAL.
+      · **La celda `Contraseña`** era la SEGUNDA puerta a lo mismo (la
+        otra vivía dentro de la pantalla de identidad). **Puerta única.**
+      · **`/cuenta/identidad`** dejó de existir: su contenido está adentro
+        de Seguridad, entero.
+
+     ⚠️ `Tu negocio` NO es un rename de `Tu perfil`: son dos destinos
+     distintos que antes compartían pantalla. Su régimen de acceso queda
+     INTACTO —la cuenta comercial es owner-only por RLS y esta puerta no
+     lo toca—; lo único que cambia es dónde se la busca. */
   const lugares = [
     { etiqueta: t('miCuenta.perfil'), ruta: '/cuenta/perfil' as const, icono: 'cuenta' as const },
-    { etiqueta: t('miCuenta.tusDatos'), ruta: '/cuenta/identidad' as const, icono: 'cuenta' as const },
-    { etiqueta: t('seguridad.titulo'), ruta: '/cuenta/seguridad' as const, icono: 'preferencias' as const },
+    { etiqueta: t('miCuenta.negocio'), ruta: '/cuenta-comercial' as const, icono: 'negocio' as const },
+    { etiqueta: t('seguridad.tituloPantalla'), ruta: '/cuenta/seguridad' as const, icono: 'preferencias' as const },
     { etiqueta: t('miCuenta.preferencias'), ruta: '/cuenta/preferencias' as const, icono: 'preferencias' as const },
   ];
 
@@ -579,22 +593,30 @@ export default function Cuenta() {
               Los textos van LITERALES fuera del riel i18n — igual que su
               hermana del cliente: la galería no es pantalla de producto
               y su copy no pertenece al lote de strings. ── */}
-          <CeldaNavegacion
-            icono="preferencias"
-            /* S84-C9 (Ley 17.2 — los nombres van del lado del usuario).
-               El founder no la encontraba, y B midió que no estaba
-               escondida: **estaba nombrada en NUESTRO idioma**. "Galería
-               de tokens" es vocabulario de quien construye, y su
-               subtítulo —"no es pantalla de producto"— le decía
-               literalmente que eso no era para él. La entrada existía y
-               el copy la cerraba.
-               El nombre nuevo dice QUÉ HAY y QUÉ SE ESPERA DE ÉL: son
-               láminas, son de gate, y las tiene que firmar. */
-            titulo="Láminas de gate · para firmar"
-            detalle="lo que espera tu ojo esta sesión"
-            registro="aa"
-            onPress={() => router.push('/gallery')}
-          />
+          {/* ⭐ S85-C2 — LA FILA DESNUDA #1 SE VISTE. El censo la midió
+              como la única fila del índice que caía sobre el papel
+              mientras sus cuatro hermanas vivían en una `Tarjeta` — y una
+              fila sin superficie al lado de cuatro con superficie no se
+              lee como "distinta", se lee como suelta. Ahora tiene su
+              propia Tarjeta: sigue SEPARADA de las cuatro (no es una
+              puerta del producto), pero deja de estar desvestida. */}
+          <Tarjeta relleno="ninguno" elevacion="reposo">
+            <CeldaNavegacion
+              icono="preferencias"
+              /* S84-C9 (Ley 17.2 — los nombres van del lado del usuario).
+                 El founder no la encontraba, y B midió que no estaba
+                 escondida: **estaba nombrada en NUESTRO idioma**. "Galería
+                 de tokens" es vocabulario de quien construye, y su
+                 subtítulo —"no es pantalla de producto"— le decía
+                 literalmente que eso no era para él. El nombre nuevo dice
+                 QUÉ HAY y QUÉ SE ESPERA DE ÉL: son láminas, son de gate, y
+                 las tiene que firmar. */
+              titulo="Láminas de gate · para firmar"
+              detalle="lo que espera tu ojo esta sesión"
+              registro="aa"
+              onPress={() => router.push('/gallery')}
+            />
+          </Tarjeta>
 
 
           {/* ── S74-B · EL MARCADOR RENDERIZADO (L-160/L-161): el

@@ -35,14 +35,12 @@ import {
   useTheme,
 } from '@epetplace/ui';
 import {
-  obtenerMiCuentaComercial,
   obtenerMiPrestador,
   obtenerMundoVeterinariaPropio,
   obtenerOfertaAdiestramientoPropia,
   obtenerOfertasGroomingPropias,
   obtenerOfertasPaseoPropias,
   obtenerResumenPendienteLiquidar,
-  type MiCuentaComercial,
   type MundoAdiestramientoPropio,
   type MundoVeterinariaPropio,
   type OfertaGroomingPropia,
@@ -70,7 +68,10 @@ function hoyLocalISO(): string {
  *  que una lectura nueva que se agregue sin su bloque rompe el typecheck en
  *  vez de quedar muda. */
 type BloqueNegocio =
-  | 'cuenta'
+  /* ☠️ S85-C2: murió `'cuenta'` — su lectura se retiró con `detalleCuenta`.
+     El vocabulario es CERRADO a propósito, así que dejarlo habría sido un
+     miembro que ninguna lectura puede producir: letra muerta con forma de
+     contrato. */
   | 'liquidaciones'
   | 'paseo'
   | 'grooming'
@@ -89,8 +90,6 @@ export default function Negocio() {
 
   // el estado real de los cobros — null mientras carga o si falla la
   // lectura: la fila degrada a su detalle por hito, jamás inventa
-  const [cuenta, setCuenta] = useState<MiCuentaComercial | null>(null);
-  const [cuentaCargada, setCuentaCargada] = useState(false);
   const [pendientes, setPendientes] = useState<ResumenPendienteLiquidar | null>(null);
   // B1a: el resumen VIVO del mundo Paseo — null mientras carga/falla:
   // la tarjeta degrada a su invitación, jamás inventa
@@ -124,17 +123,12 @@ export default function Negocio() {
     useCallback(() => {
       let vigente = true;
       void (async () => {
-        const [rCuenta, rPendientes, rPrestador] = await Promise.all([
-          obtenerMiCuentaComercial(),
+        const [rPendientes, rPrestador] = await Promise.all([
           obtenerResumenPendienteLiquidar(),
           obtenerMiPrestador(),
         ]);
         if (!vigente) return;
         const caidos = new Set<BloqueNegocio>();
-        if (rCuenta.ok) {
-          setCuenta(rCuenta.data);
-          setCuentaCargada(true);
-        } else caidos.add('cuenta');
         if (rPendientes.ok) setPendientes(rPendientes.data);
         else caidos.add('liquidaciones');
         if (rPrestador.ok) {
@@ -177,20 +171,15 @@ export default function Negocio() {
   const fallo = (b: BloqueNegocio): string | null =>
     cargado && fallos.has(b) ? t('negocio.bloqueNoCargo') : null;
 
-  // detalle honesto de la Celda de cuenta: el estado real cuando se
-  // pudo leer; el hito de siempre mientras tanto
-  const detalleCuenta = fallo('cuenta') ?? (!cuentaCargada
-    ? t('negocio.cuentaComercialDetalle')
-    : cuenta === null
-      ? t('negocio.cuentaComercialDetalle')
-      : cuenta.estado === 'pendiente_validacion'
-        ? t('cuenta.estadoEnRevision')
-        : cuenta.estado === 'activa'
-          ? t('cuenta.estadoActiva')
-          : cuenta.estado === 'suspendida'
-            ? t('cuenta.estadoSuspendida')
-            : t('cuenta.estadoCerrada'));
-
+  /* ☠️ S85-C2 — MURIÓ `detalleCuenta` (Ley 37). C34 retiró de acá la celda
+     de cuenta comercial (firma del founder: *no es normal tenerlo en dos
+     lugares*) y **dejó viva toda su cadena de alimentación**: el censo de
+     S85-C midió `grep detalleCuenta` = UNA sola ocurrencia, su propia
+     definición. Con ella se van `cuenta`, `cuentaCargada` y la lectura
+     `obtenerMiCuentaComercial()` del arranque — **un viaje de red por
+     carga de Negocio que alimentaba código que nadie renderizaba.**
+     *Retirar una celda no es retirar su dato: eso es lo que la Ley 37
+     exige y lo que aquella tanda no cerró.* */
   // liquidaciones: peldaño 1 SOLO con eventos reales; 0 conserva el hito
   const detalleLiquidaciones =
     fallo('liquidaciones') ??
