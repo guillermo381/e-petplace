@@ -243,6 +243,36 @@ ordenó a A *"commiteá tus 5 archivos sueltos"* — **ya estaban commiteados**
 > medición. *Es #21 en su forma más cara: el instrumento funcionó, y lo que
 > falló fue el momento en que se leyó.*
 
+### ➕ EL TERCER CASO, y afila la regla: **REENVIAR una medición ajena**
+
+**Mismo día, mismas horas.** La mesa adjudicó *"`tsc apps/prestador` en rojo"* y
+ordenó frenar por eso. **Al re-medir: exit real 0, cero errores `TS`.** La mesa
+**retiró la adjudicación** y declaró de dónde venía: **del reporte de B, tomado
+como hecho establecido y reenviado como cuadro** — cuando era una medición sobre
+un **árbol en vuelo**.
+
+> **Y esto no es el mismo error dos veces: es una variante más peligrosa.** En
+> los dos primeros casos la mesa medía y su medición envejecía. **Acá la mesa no
+> midió: transportó.** *Una medición ajena reenviada sin su ancla llega con la
+> autoridad de dos —quien la hizo y quien la reenvía— y con el respaldo de
+> ninguno, porque el segundo no puede sostenerla y el primero ya no está en la
+> conversación.*
+
+**⇒ LA REGLA GANA SU SEGUNDA MITAD:** *quien reenvía una medición ajena reenvía
+**su ancla y su hora**, o la re-mide y la firma como propia.* **No hay tercera
+opción**: una medición sin dueño no se puede auditar.
+
+**⚠️ Y EL SUB-CASO QUE CASI LA CONVIERTE EN DAÑO REAL, que es lo que lo vuelve
+digno del acta:** al ir a confirmar el rojo, A leyó el exit **después de un pipe
+a `tail`** — que es **siempre 0**. *Habría "confirmado" un verde con un
+instrumento incapaz de ver el rojo, y le habría devuelto a la mesa una segunda
+medición falsa **que parecía independiente**.* Se re-corrió sin pipe.
+
+> **Es la candidata #18 y #22 chocando en el mismo turno:** una medición ajena
+> sin ancla, a punto de ser "verificada" por un instrumento ciego. **El
+> resultado habría sido una falsedad con dos testigos** — exactamente la clase
+> de dato que después nadie vuelve a mirar.
+
 **LA CURA, en dos mitades que se necesitan:**
 1. **La mesa declara el ancla de la medición que motiva la orden** (*"medido en
    `<sha>`"*). Sin eso, la orden es una foto sin fecha.
