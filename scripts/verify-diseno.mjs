@@ -389,7 +389,12 @@ function r9(archivos) {
  *  en su primer día esta regla cobró una fuga REAL — la propia
  *  extracción de CantoCurva salió sin declarar su casa y el lint la
  *  paró (exit 1). El guard no es decorativo. */
-const CASA_OVERRIDE_S82C = /apps\/cliente\/src\/(app\/\(tabs\)\/hogar\/(index|mascota\/\[mascotaId\])|components\/(canto-curva|filtro-pills|reserva-piezas|detalle-cita))\.tsx$/;
+// S85-B7 · `filtro-pills` SALE DE LA LISTA DE CASAS: se promovió a
+// `packages/ui` y su marcador `@override-s82c` se fue con él — ya no es
+// un override local, es una pieza de la casa. Dejar su nombre acá sería
+// declarar como casa de override algo que dejó de serlo, que es la misma
+// clase de mentira que R13 tenía en su info.
+const CASA_OVERRIDE_S82C = /apps\/cliente\/src\/(app\/\(tabs\)\/hogar\/(index|mascota\/\[mascotaId\])|components\/(canto-curva|reserva-piezas|detalle-cita))\.tsx$/;
 function r10(archivos) {
   const fallos = [];
   for (const { path, src } of archivos) {
@@ -1217,66 +1222,35 @@ function r20(archivos) {
 
 
 
-/** R22 · LA MARCA DEL ELEGIDO NO SE METE ADENTRO DE LA PLACA
- *  (S82-C r19 — enmienda de Ley 6 firmada; §5 de
- *  `docs/relevamientos/2026-07-30-s82-C-ENMIENDA-ley6-para-A.md`).
+/* ☠️ R22 SE RETIRÓ EN S85-B7, POR SU CONDICIÓN ② — la que estaba
+ *  escrita al nacer y nombraba este día con todas las letras:
+ *  «`FiltroPills` se promueve a `packages/ui` con el invariante metido
+ *  en el CONTRATO del componente — la marca como slot que no se puede
+ *  anidar. Ahí el guard es redundante y lo retira B en el commit de la
+ *  promoción.» La promoción ocurrió; el retiro va en el mismo commit,
+ *  como su propia letra ordenaba.
  *
- *  POR QUÉ MERECE GUARD, que es el único criterio (L-192): **el defecto
- *  se ve como una decisión de layout, no como un cambio de ley.** Mover
- *  la huella adentro de la placa no rompe el build, no cambia ningún
- *  color, no toca ninguna ley escrita — y sin embargo devuelve el
- *  producto al caso que S80 midió: los glifos b′ CONTIENEN una huella
- *  (Ley 12), así que adentro de la placa la marca queda como una huella
- *  entre huellas y deja de señalar. Lo único que la hace legible es
- *  ESCALA y AISLAMIENTO — 13px, sola, fuera de la placa.
+ *  QUÉ VIGILABA: que `MarcaElegido` existiera, se montara, y que su
+ *  render NO cayera dentro del bloque de la placa del glifo. El defecto
+ *  merecía guard porque SE VE COMO LAYOUT y no como cambio de ley: mover
+ *  la huella adentro de la placa no rompe el build ni cambia un color, y
+ *  sin embargo devuelve el producto al caso que S80 midió — los glifos
+ *  b′ ya CONTIENEN una huella (Ley 12), así que adentro la marca es una
+ *  huella entre huellas y deja de señalar.
  *
- *  QUÉ VIGILA: que `MarcaElegido` exista y se monte (no puede
- *  desaparecer en silencio) y que su render NO caiga dentro del bloque
- *  de la placa del glifo. Es HERMANA del label, jamás hija de la placa.
+ *  POR QUÉ EL RETIRO NO DEJA ALCANCE HUÉRFANO, que es lo único que
+ *  importa al retirar: el invariante dejó de depender de que alguien lo
+ *  respete y pasó a ser IMPOSIBLE DE ROMPER DESDE AFUERA. En la pieza
+ *  promovida la marca no es un slot que el consumidor pueda anidar: es
+ *  estructura interna, hermana del label, y el consumidor no la toca. Un
+ *  guard que vigila lo que el tipo ya garantiza es decoración — el mismo
+ *  criterio con el que esta casa retiró R19, R21, R23 y R26.
  *
- *  ☠️ CONDICIÓN DE MUERTE, escrita al nacer: esta regla se retira el día
- *  que ocurra cualquiera de las dos —
- *   ① el founder FIRMA un diseño donde la marca viva adentro de la placa
- *     (eso enmienda §5 de la enmienda: la regla queda equivocada y se
- *     borra EN EL MISMO COMMIT de la firma, no después);
- *   ② `FiltroPills` se promueve a `packages/ui` con el invariante
- *     metido en el CONTRATO del componente — la marca como slot que no
- *     se puede anidar. Ahí el guard es redundante y lo retira B en el
- *     commit de la promoción.
- *  Un guard que sobrevive a su razón es basura que después nadie se
- *  anima a tocar. */
-const PIEZA_R22 = 'apps/cliente/src/components/filtro-pills.tsx';
-function r22(fuentes) {
-  const src = fuentes.filtro ?? '';
-  const limpio = sinComentarios(src);
-  const fallos = [];
-  if (!/function\s+MarcaElegido\b/.test(limpio)) {
-    fallos.push(
-      `${PIEZA_R22} — MarcaElegido DESAPARECIÓ. La marca del elegido tiene nombre propio porque la ley que la gobierna se ve como layout; sin el nombre no hay nada que vigilar.`,
-    );
-  }
-  const usos = [...limpio.matchAll(/<MarcaElegido\b/g)];
-  if (usos.length === 0) {
-    fallos.push(`${PIEZA_R22} — MarcaElegido no se monta: el chip elegido se quedó sin marca.`);
-  }
-  // el bloque de la PLACA: desde su ancho declarado hasta su cierre
-  const abre = limpio.indexOf('width: 30');
-  if (abre === -1) {
-    fallos.push(
-      `${PIEZA_R22} — no se encontró la placa del glifo (width: 30): la regla quedó vigilando un fantasma. Si la placa cambió de forma, se re-ancla la regla EN EL MISMO COMMIT.`,
-    );
-  } else {
-    const cierra = limpio.indexOf('</View>', abre);
-    const dentro = cierra === -1 ? limpio.slice(abre) : limpio.slice(abre, cierra);
-    if (/<MarcaElegido\b/.test(dentro)) {
-      fallos.push(
-        `${PIEZA_R22} — LA MARCA QUEDÓ ADENTRO DE LA PLACA. Los glifos b′ ya contienen una huella (Ley 12): adentro, la marca es una huella entre huellas y deja de señalar — el caso exacto que S80 midió. Es HERMANA del label, jamás hija de la placa.`,
-      );
-    }
-  }
-  return { fallos, info: fallos.length === 0 ? 'marca viva y fuera de la placa' : `${fallos.length} fallo(s)` };
-}
-
+ *  LO QUE SIGUE VIGILADO, para que nadie crea que la ley se fue con el
+ *  guard: R25 sigue cazando la pata RE-DIBUJADA en cualquier archivo, y
+ *  las tres condiciones de la marca viven escritas en la primitiva
+ *  `MarcaEleccion`. La ley no se retira: se retira su vigilancia
+ *  redundante. */
 
 /** R24 · EL PIE DE RESERVA NO SE COPIA (S82-B r35 — la regla que la
  *  extracción necesitaba para servir de algo).
@@ -1372,7 +1346,12 @@ function r24(archivos) {
  *  `filtro-pills` (de C, byte-equivalente a la primitiva). Cuando C la
  *  adopte, el conteo baja y el lint PIDE bajar el baseline. */
 const CASA_PATA = 'packages/ui/src/brand/MarcaEleccion.tsx';
-const BASELINE_R25 = { 'apps/cliente/src/components/filtro-pills.tsx': 1 };
+// ✅ VACÍO desde S85-B7 (solo-baja EJECUTADO): el `MarcaElegido` local
+// murió con la promoción de `FiltroPills` a `packages/ui` — la pieza
+// adoptó la primitiva canónica `MarcaEleccion` en vez de su clon
+// byte-equivalente. El lint venía pidiendo esta baja en cuanto el conteo
+// cayera. DE VACÍO NO SE SUBE: toda pata re-dibujada es roja el primer día.
+const BASELINE_R25 = {};
 function r25(archivos) {
   const fallos = [];
   let total = 0;
@@ -1392,7 +1371,7 @@ function r25(archivos) {
   fallos.push(...ancla('R25', casa, 1, `−14° en la propia primitiva (${CASA_PATA})`));
   return {
     fallos,
-    info: `${total}/${sumaBaseline} patas re-dibujadas (baseline: el MarcaElegido de filtro-pills, de C)${total < sumaBaseline ? ' — BAJÓ: actualizar baseline' : ''}`,
+    info: `${total} patas re-dibujadas${sumaBaseline === 0 ? ' (DURA EN 0 desde S85-B7: el clon local murió con la promoción)' : ` (baseline ${sumaBaseline})`}${total < sumaBaseline ? ' — BAJÓ: actualizar baseline' : ''}`,
   };
 }
 
@@ -1424,7 +1403,6 @@ const FIXTURES = {
   R18: [{ ruta: '(fixture)', src: '<CeldaNavegacion titulo="Preferencias" onPress={() => router.push("/cuenta/preferencias")} />' }, { ruta: '(fixture2)', src: 'router.push("/gallery")' }],
   // el pleno que ignora a sus hermanos: exactamente mi defecto de r11
   // la marca anidada adentro de la placa: el defecto que se ve como layout
-  R22: { filtro: 'function MarcaElegido() {}\n<View style={{ width: 30 }}><MarcaElegido /></View>' },
   // S83-B3 · el fixture trae la MITAD CLARA SANA a propósito, para que el
   // rojo solo pueda venir de la oscura — el precedente de R24, dos entradas
   // más abajo: una prueba que pasa por el motivo equivocado no prueba la
@@ -1461,7 +1439,7 @@ const FIXTURES = {
     },
   ],
 };
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R22: r22, R24: r24, R25: r25, R27: r27, R29: r29 };
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -1536,16 +1514,6 @@ const EXTRAS_BRAZOS = [
   ]],
   // ── R16: el guard de fuente que nació decorativo EN B3, escrito por mí ──
   ['R16·sin los tokens del tapiz en palette', r16, { palette: '', temas: '' }],
-  // ── R22: los tres estados previos al que el ancla prueba ──
-  // el uso EXISTE (viene importado) pero la declaración NO, y queda FUERA
-  // de la placa: así enciende ESE brazo y nada más. Con el caso anterior
-  // —sin función y sin usos— encendía dos, y matar uno dejaba al otro
-  // produciendo el rojo: el mismo falso-verde que arruinó mi censo v1.
-  ['R22·MarcaElegido desapareció', r22, { filtro: '<MarcaElegido />\n<View style={{ width: 30 }} />' }],
-  ['R22·MarcaElegido no se monta', r22, { filtro: 'function MarcaElegido() {}\n<View style={{ width: 30 }} />' }],
-  ['R22·la placa cambió de forma (sin width: 30)', r22, {
-    filtro: 'function MarcaElegido() {}\n<View><MarcaElegido /></View>',
-  }],
   // ── R18: la entrada VIVE (no dispara su otro brazo) y hay __DEV__ ──
   // S85-B1 · los DOS brazos de __DEV__ tienen su rojo por separado, y el
   // orden importa: en el GRUESO el `__DEV__` va DESPUÉS de la entrada, así
@@ -1625,10 +1593,6 @@ corridas.push(['R16 (papel tapiz: el prestador no recibe tinte)', r16(FUENTES_R1
 corridas.push(['R17 (la galería no envejece)', r17(FUENTES_R17)]);
 corridas.push(['R20 (la familia alerta no se rellena)', r20([...apps, ...ui])]);
 corridas.push(['R18 (D-580: la entrada a la galería NO desaparece, en LAS DOS casas)', r18(CUENTAS_GALERIA.map((ruta) => ({ ruta, src: readFileSync(ruta, 'utf8') })))]);
-corridas.push([
-  'R22 (la marca del elegido no se mete en la placa)',
-  r22({ filtro: readFileSync(PIEZA_R22, 'utf8') }),
-]);
 corridas.push(['R24 (el pie de reserva no se copia)', r24(apps)]);
 corridas.push(['R25 (la pata no se reinventa)', r25([...apps, ...ui])]);
 corridas.push(['R27 (el pink no enfoca en el prestador)', r27(FUENTES_R27)]);

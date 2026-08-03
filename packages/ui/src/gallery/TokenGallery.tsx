@@ -49,6 +49,7 @@ import { LogoNegocio } from '../components/LogoNegocio'
 import { FilaCita } from '../components/FilaCita'
 import { PieRevelar } from '../components/PieRevelar'
 import { PieReserva } from '../components/PieReserva'
+import { FiltroPills, FiltroMascotas } from '../components/FiltroPills'
 import { MarcaEleccion } from '../brand/MarcaEleccion'
 import { HeroMarca } from '../components/HeroMarca'
 import { LineaDeVida, LineaDeVidaNodo, type LineaDeVidaItem } from '../components/LineaDeVida'
@@ -2360,6 +2361,44 @@ function GaleriaInterna() {
             (R22 lo mecaniza: los glifos b′ ya llevan huella, y adentro sería una huella entre
             huellas) · apoyada sobre el canto, con el aire reservado por quien la porta. El COLOR es
             del consumidor: la pieza no elige dosis desde adentro (Ley 4).
+          </Texto>
+        </Seccion>
+
+        <Seccion titulo="FiltroPills · FiltroMascotas (64-65) — los chips con PATA (S85, promovidos)">
+          {/* Promovidos del cliente por la Regla de las Piezas: apareció el
+              segundo consumidor (la portada del prestador). Se montan LOS
+              DOS porque la pata es lo que comparten y es lo que hay que
+              mirar: aparece SOLO en la elegida, sobre el CANTO y JAMÁS
+              adentro de la placa del glifo. El aire de arriba está
+              reservado por la pieza — un ScrollView recorta a sus bordes y
+              la pata MONTA. */}
+          <View style={{ gap: spacing[4] }}>
+            <FiltroPills
+              opciones={[
+                { codigo: 'todo', etiqueta: 'Todo', icono: null, capa: null },
+                { codigo: 'salud', etiqueta: 'Salud', icono: 'veterinaria', capa: 'identidad' },
+                { codigo: 'cuidado', etiqueta: 'Paseos', icono: 'paseo', capa: 'cuidado' },
+              ]}
+              activo="salud"
+              onCambio={() => {}}
+            />
+            <FiltroMascotas
+              mascotas={[
+                { id: '1', nombre: 'Thor' },
+                { id: '2', nombre: 'Zeus' },
+              ]}
+              elegida="1"
+              onElegir={() => {}}
+            />
+          </View>
+          <View style={{ height: spacing[3] }} />
+          <Texto variante="apoyo">
+            El elegido NO se rellena: se HUNDE (pierde la elevación, baja a `bg.hundido`, se achica) y
+            la pata lo pisa. Dos marcas para un mismo estado serían el tercer peso que no informa. La
+            pata es la primitiva `MarcaEleccion`, no un dibujo propio — y su color sale de
+            `accent.control`, o sea que cada casa la viste con su acento: magenta en el cliente, verde
+            en el prestador. En memorial el slot de hundido no da paso (una sola superficie a
+            propósito): ahí el estado lo cargan la elevación perdida y la escala.
           </Texto>
         </Seccion>
 

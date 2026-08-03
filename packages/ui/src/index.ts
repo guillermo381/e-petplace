@@ -206,3 +206,18 @@ export { MarcaEleccion, PATA, MONTA, type MarcaEleccionProps } from './brand/Mar
 // DOMINIO. Sube porque sus dos copias a mano habían perdido el PRECIO
 // entero (la causa del founder: lo que se copia, diverge).
 export { PieReserva, type PieReservaProps } from './components/PieReserva'
+
+// FiltroPills · FiltroMascotas — S85-B7: LOS CHIPS DE FILTRO CON PATA,
+// promovidos del cliente por la Regla de las Piezas (apareció el segundo
+// consumidor: la portada del prestador). Eran override LOCAL declarado —
+// R10 vigilaba su marcador para que nadie los generalizara desde una
+// pantalla, y su promoción estaba escrita como trabajo de B post-gate.
+// Cada casa las viste con su tema SIN replumbar nada: todo lo cromático
+// ya resolvía de slots, y `accent.control` se resuelve por casa (R27).
+export {
+  FiltroPills,
+  type FiltroPillsProps,
+  FiltroMascotas,
+  type FiltroMascotasProps,
+  type OpcionFiltro,
+} from './components/FiltroPills'
