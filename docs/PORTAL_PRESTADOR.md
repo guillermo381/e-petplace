@@ -185,6 +185,27 @@ este orden:**
 **"Plata" es SIEMPRE `$ del día`** — es el único de los tres que no se traduce,
 porque el dinero no tiene dialecto de oficio.
 
+### ⚠️ QUÉ ES "$ DEL DÍA" — decisión de la mesa, escrita para que nadie la reinterprete
+
+> ### **PLATA = EL VALOR *AGENDADO* DEL DÍA. NO lo devengado, NO lo cobrado.**
+
+**La pregunta que contesta es *"¿cuánto vale mi jornada?"*, no *"¿cuánto llevo
+cobrado?"*.** Se computa sobre **las citas VIVAS del día** — las canceladas
+quedan afuera.
+
+**Por qué agendado y no devengado, que es la lectura que alguien va a "corregir"
+creyendo que arregla un error:** el devengo nace **al CERRAR con calidad**
+(`MODELO_FINANCIERO`, Decisión R). ⇒ **un número devengado estaría en $0 toda la
+mañana** y solo se llenaría al final del día. *Una portada que dice cero mientras
+el prestador trabaja no le informa nada: le informa a las 6 de la tarde, cuando
+ya no le sirve para nada.*
+
+**Y la honestidad que eso obliga:** el número **es una expectativa, no una
+liquidación**. La plata que el prestador va a *cobrar* vive en **Liquidaciones**,
+que lee el ledger. *Son dos números distintos con la misma unidad, y por eso
+tienen que vivir en dos lugares distintos — meter el devengado en la portada
+haría que el prestador crea que ya cobró.*
+
 ### Por qué el esqueleto es fijo y la unidad no
 
 **Si los tres huecos cambiaran de oficio en oficio, no serían una portada:
