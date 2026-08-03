@@ -2796,6 +2796,43 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 
 > **CANDIDATA DE LECCIÓN S76 (PROPUESTA, SIN número — a la lista de firmas): "UNA MIGRACIÓN NO ESTÁ COMPLETA HASTA GEN:TYPES."** Toda migración que crea/cambia función, tabla o RPC deja el reflejo TS (`packages/api/src/database.types.ts`) desactualizado hasta correr `pnpm --filter @epetplace/api gen:types`; el motor y el tipo divergen en silencio hasta entonces (el typecheck pasa con el tipo viejo). Es hermana de L-160 (el marcador prueba qué corre) aplicada al contrato TS. **Esta sesión NO disparó caso** — B regeneró completo en `7d3eb78` (A verificó en el cierre: `gen:types` produjo 0 diff, la función nueva del flip ya estaba en los tipos). Se registra como candidata para que el día que una migración cierre sin regenerar, el hueco tenga nombre. Origen: S76 (verificación de cierre A).
 
+> ### ➕ PRECEDENTE S85 — CUÁNDO SE SALTA EL HOOK, y su condición
+>
+> **El caso:** A fue a commitear **dos archivos SQL** (una migración ya aplicada
+> + su reversa) y el hook la frenó con `verify:diseno` **en rojo por piezas EN
+> VUELO de B** (`FiltroPills`/`FiltroMascotas` sin galería). **Salteó el gate y
+> lo declaró en el mensaje del commit.**
+>
+> **La mesa lo registró como bien decidido, y el argumento es el que hay que
+> guardar — no la decisión:**
+>
+> > **Bloquear ese commit habría dejado una migración YA APLICADA EN LA DB sin
+> > su archivo versionado en el repo.** *La DB y el repo divergiendo en
+> > silencio es peor que un rojo ajeno visible* — el rojo lo ve todo el mundo en
+> > la próxima corrida; la divergencia no la ve nadie hasta que alguien intente
+> > reconstruir el schema.
+>
+> ### LA CONDICIÓN, en dos mitades que no se separan
+>
+> **① SOLO para commits SIN un solo `.tsx`.** *El lint mira `.tsx` de `apps/` y
+> `packages/ui`; un commit que no aporta ninguno **no puede producir ni curar**
+> ese rojo.* **Con un `.tsx` adentro el salto deja de ser legítimo**, porque ahí
+> ya no se puede afirmar que el rojo es ajeno.
+>
+> **② SE DECLARA SIEMPRE**, con `SALTAR_GATE="<por qué>"`, y el motivo **queda
+> en el mensaje del commit** — no en la memoria de quien lo hizo.
+>
+> **Por qué la ② no es burocracia:** el hook existe porque *"el aviso que no
+> frena, no frena"*. **Un salto silencioso lo devuelve a ser un aviso** — y
+> peor, uno que ya nadie puede auditar, porque no deja rastro de haber ocurrido.
+> *Un gate que se puede saltar sin decirlo no es un gate: es una sugerencia con
+> pasos extra.*
+>
+> **⚠️ Y lo que este precedente NO autoriza:** saltarlo *"porque el rojo no es
+> mío"* **sin la condición ①**. La frase suena igual y la situación no lo es —
+> quien commitea `.tsx` con el lint en rojo **está agregando al rojo**, aunque
+> su hunk sea inocente.
+
 ---
 
 #### D-585 — El caso clínico no llega a la cita: MOTOR ENTERO, SUPERFICIE AUSENTE 🟠 (diagnóstico S82-A r11, SIN cura)

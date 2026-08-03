@@ -165,6 +165,53 @@ Tras la bienvenida, el prestador entra al home del portal. Tres elementos visibl
 
 Arriba, no como header anónimo sino como firma del prestador en el sistema: nombre comercial, tipo de servicio, ciudad, foto. Limpio, sobrio. El prestador se ve representado dignamente desde el primer segundo. No es navbar con avatar de 30 píxeles. Es presencia visible.
 
+#### 2.4bis · LA LEY DE LOS TRES NÚMEROS DE LA PORTADA (FIRMADA, 3-ago-2026)
+
+**La portada del prestador tiene TRES huecos, siempre los mismos, siempre en
+este orden:**
+
+> ### **CARGA · PLATA · VIDAS**
+
+**El esqueleto no cambia entre oficios. Lo que cambia es la UNIDAD** — y ésa
+**habla el idioma del oficio**, no el del motor.
+
+| oficio | **carga** | **plata** | **vidas** |
+|---|---|---|---|
+| **paseo** | tiempo en ruta *(ej. "6h 15m en ruta")* | **$ del día** | **tutores** |
+| **veterinaria** | consultas del día | **$ del día** | **pacientes** |
+| **grooming** | turnos del día | **$ del día** | **mascotas** |
+| **adiestramiento** | sesiones del día | **$ del día** | **alumnos** |
+
+**"Plata" es SIEMPRE `$ del día`** — es el único de los tres que no se traduce,
+porque el dinero no tiene dialecto de oficio.
+
+### Por qué el esqueleto es fijo y la unidad no
+
+**Si los tres huecos cambiaran de oficio en oficio, no serían una portada:
+serían cuatro portadas** que hay que firmar, mantener y volver a mirar por
+separado. *Un esqueleto fijo se firma UNA vez y baja a los cuatro* — es la misma
+economía que `DISEÑO_EXPERIENCIA` §15b.5(b) aplica al resumen por servicio.
+
+**Y si la unidad fuera fija, mentiría.** *Un paseador no cuenta "consultas" y un
+vet no cuenta "tutores".* Peor: **contar paseos en vez de tiempo en ruta
+describiría mal su día** — dos salidas de tres horas y seis de veinte minutos
+dan el mismo "6" y son jornadas distintas. **La carga del paseador es TIEMPO, y
+por eso es la única fila cuya unidad no es un conteo.**
+
+> **La regla que se lleva de acá quien vaya a agregar el quinto oficio: el hueco
+> ya está decidido; lo único que hay que decidir es CÓMO LLAMA ESE OFICIO A LO
+> QUE CUENTA.** *Si la respuesta no sale sola en la voz del prestador, la unidad
+> está mal elegida — no el esqueleto.*
+
+**⚠️ VIDAS NO ES UN CONTADOR DE TRANSACCIONES.** Es el tercer hueco a propósito
+y cuenta **a quién se cuidó**, no cuántas veces. *Un vet que atendió tres veces
+a la misma mascota tuvo tres consultas y UN paciente* — y ésa es justamente la
+distinción que `EL NORTE` defiende: **el sujeto es la mascota, no la
+transacción.** Colapsar vidas en carga borraría la única de las tres columnas
+que habla del producto y no del negocio.
+
+---
+
 **Segunda presencia — conocé a Zeus (la mascota demo).**
 
 Una mascota demo con bio-expediente armado completo. Etiquetada claramente como mascota de ejemplo (etiqueta visible: *"Mascota de ejemplo — explorá libremente"*). El prestador puede entrar a su perfil, ver su timeline, ver eventos pasados, ver sus 5 dimensiones de identidad, ver casos clínicos si los tiene, ver handshakes recibidos de otros prestadores. **Antes de tener clientes reales, el prestador entiende qué es el producto vivo viéndolo funcionar.**
@@ -517,6 +564,43 @@ Esta página es **activo real del prestador**. Es valor tangible que la graduaci
 Esta decisión genera deuda documental en `EPETPLACE.md` y `MODELO_PRODUCTO.md` para anclar el alcance técnico y de modelo en el resto de la documentación maestra.
 
 **Dashboard con sofisticación narrativa.** El home del prestador graduado evoluciona hacia un dashboard más rico — no en cantidad de métricas, sino en **profundidad temporal de las existentes** (sección 4.5).
+
+### 4.4bis El EMBLEMA DE COHORTE — se ve en su página pública (FIRMADA, 3-ago-2026)
+
+> **Firma del founder: el emblema de cohorte SE VE EN LA PÁGINA PÚBLICA del
+> prestador.** No es una medalla interna que solo él mira: **es parte de lo que
+> la familia lee cuando lo elige.**
+
+**Su forma:** `fundador` | `pionero` **+ el año**.
+
+**Y su ley de dato, que es lo que lo vuelve creíble:**
+
+> ### **SE ESTAMPA AL ALTA Y NO LO EDITA NADIE — ni el prestador, ni el admin.**
+
+*Un emblema que alguien puede escribirse deja de ser un emblema y pasa a ser un
+campo de texto.* Su valor entero es que **no se puede fabricar**: quien llegó
+primero llegó primero, y eso ya ocurrió. **Por eso el dato es inmutable en el
+motor** —protegido por trigger, igual que las columnas de gobierno de
+`prestadores` (familia D-389)— **y no por disciplina de pantalla.**
+
+**Se expone en DOS lectores, y los dos hacen falta:** el del prestador (para que
+lo vea) **y el público de la vitrina** (para que lo vea la familia). *Exponerlo
+solo del lado propio lo convertiría en una felicitación privada, que es
+exactamente lo que la firma dice que NO es.*
+
+**Y cierra el círculo con la ley del prestador visible** (`MODELO_PRODUCTO` §2 ·
+`EPETPLACE` P3, firmadas el mismo día): **el prestador se muestra porque la
+familia elige el QUIÉN.** El emblema es parte de ese quién — *no dice qué hace,
+dice desde cuándo está.*
+
+**⚠️ LO QUE ESTA FIRMA NO DECIDE:** **quién es `fundador` y quién `pionero`**
+(¿por orden de alta, por fecha de corte, por mano del admin?) **y qué año se
+estampa** (¿el del alta o el de la cohorte del programa? — *no son lo mismo
+apenas alguien entre en enero*). **Sin esa regla el modelo no se construye:**
+una columna fija que nadie sabe llenar la llena la primera alta real con lo que
+reciba, y eso es dato inventado (L-180).
+
+---
 
 ### 4.5 El dashboard del graduado — sofisticación narrativa
 
