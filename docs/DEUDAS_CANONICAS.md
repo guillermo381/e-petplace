@@ -4911,6 +4911,68 @@ importa: **doce de veinticuatro** reglas del lint estaban en esa condición.*
 
 ---
 
+#### D-638 — EL DEFAULT DE `max_citas_por_slot` NO PUEDE SER POR OFICIO MIENTRAS LAS FRANJAS SEAN UNIVERSALES 🟠
+
+> ### LA REGLA QUE GOBIERNA ESTE EJE, firmada (3-ago-2026)
+>
+> **LA PLATAFORMA PONE EL *PERMISO* (`tipos_servicio.cupo_techo`).
+> EL PRESTADOR PONE SU *LÍMITE* (`prestador_horarios.max_citas_por_slot`).
+> EL SISTEMA RESPETA EL *MENOR* DE LOS DOS** — `LEAST(...)`, en
+> `_inicios_disponibles_prestador`.
+>
+> *Subir el techo no pone a nadie en el techo: deja de recortarlo.*
+
+**EL PEDIDO QUE ESTA FICHA FRENÓ (S85):** *"las franjas de paseo pasan a 10 por
+default"*.
+
+### 🔴 NO ES EJECUTABLE: **no existe "la franja de paseo"**
+
+**Medido:** **56 de 56 franjas tienen `servicio_id IS NULL`** y
+`prestadores.modo_horarios` tiene **un solo valor vivo: `'universal'`**. **Una
+franja no es de un oficio — sirve a TODOS los del prestador.**
+
+**El motor no se rompe, y conviene saber por qué antes de discutir:** el `LEAST`
+protege. Una franja universal en 10 le da capacidad 10 al paseo y **sigue dando
+1** a consulta, grooming o vacunación (su `cupo_techo` es `NULL`). *Paseos Andres
+ofrece cuatro oficios y Satori cinco: ninguno se rompe.*
+
+> **El problema no es el motor: es EL TALLER.** Ese número **se le muestra al
+> prestador**. Una clínica que además pasea vería **"10"** en las franjas con las
+> que vacuna. *El motor haría lo correcto y la pantalla mentiría* — y el
+> prestador corregiría hacia abajo un número que nunca lo afectó.
+
+### Y EL DATO **NO PERMITE** DISTINGUIR UN `1` HEREDADO DE UN `1` DECLARADO
+
+`prestador_horarios` es: `id · prestador_id · servicio_id · dia_semana ·
+hora_inicio · hora_fin · duracion_slot_minutos · max_citas_por_slot · activo ·
+empleado_id`. **Sin `created_at`, sin `updated_at`**, y con `DEFAULT 1`.
+⇒ **byte-idénticos, sin rastro que los separe.**
+
+### LA ADJUDICACIÓN — salida (c), y las dos que quedan SIN EJECUTAR
+
+**(c) ELEGIDA:** cero código, cero backfill, **el default queda en 1**. Las **12
+franjas de Paseos Andres** las sube **el founder desde el taller** (es su
+cuenta). **Las 11 de Satori y Los Shyris NO se tocan.**
+
+> **Y el precedente vale más que el caso:** son prestadores de prueba, **pero
+> nadie decide la capacidad de un negocio ajeno desde la consola.** *Un backfill
+> que "mejora" un número que su dueño no pidió es indistinguible de uno que lo
+> rompe — desde afuera nunca se sabe cuál de los dos fue.*
+
+**Las dos que quedan, con su literal, para que se decidan y no se improvisen:**
+
+| | qué | qué deja mal |
+|---|---|---|
+| **(a)** | `ALTER COLUMN max_citas_por_slot SET DEFAULT 10` | **toda franja nueva de TODO oficio nace en 10** — el vet ve "10" en su taller. **Semánticamente falso**, aunque el `LEAST` lo vuelva inofensivo |
+| **(d)** | franjas **por servicio** (`servicio_id`) ⇒ el default se resuelve por oficio | **es D-386** — grande. **Y es la única que hace la frase ejecutable de verdad** |
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando **(a) o (d) se firmen**, o cuando
+> **el segundo prestador real** cargue sus franjas y muestre si el `1` heredado
+> le duele. **No se retira ejecutando (b)** —backfillear los `1`— *porque eso es
+> exactamente pisar un dato que no se puede distinguir de una decisión.*
+
+---
+
 #### D-637 — `profiles.nombre` NO TIENE SUPERFICIE DE EDICIÓN EN LA APP DEL PRESTADOR ⚪ REGISTRO (consecuencia ACEPTADA, no defecto)
 
 **Origen: hallazgo de C al cerrar el lote Cuenta (S85).** La pantalla
