@@ -92,26 +92,6 @@ export interface BotonProps {
    *  en un solo tema no encuentra. §15b.2 ya lo decía —"sobre el muro el
    *  acento funcional es PAPEL"— y hasta hoy la pieza no sabía cumplirlo. */
   superficie?: 'clara' | 'muro'
-  /** DÓNDE VA LA FLECHA DE `acento` — **INSTRUMENTO DE GATE, NO API
-   *  PERMANENTE** (S85-B3). Solo tiene efecto en `variante="acento"`.
-   *
-   *  POR QUÉ EXISTE: el founder rebotó el `acento` por afordancia y pidió
-   *  «flecha justo en frente del label». Su literal se lee sin ambigüedad
-   *  como DELANTE —y por eso es el default—, pero *"en frente"* también
-   *  puede leerse como *enfrentada*, o sea DETRÁS, que además es la
-   *  convención más común para "esto lleva a otro lado". **Esa ambigüedad
-   *  no la resuelve una lectura: la resuelve su dedo**, y para eso las dos
-   *  posiciones tienen que poder montarse en la galería SOBRE EL BOTÓN
-   *  REAL — una galería que muestra un botón que no es EL botón hace
-   *  firmar algo que no corre (la regla dura de R17).
-   *
-   *  ☠️ CONDICIÓN DE MUERTE, escrita al nacer y con el precedente fresco:
-   *  el día que el founder firme una de las dos, **esta prop se BORRA en
-   *  el mismo commit de la firma** y la posición ganadora queda fija en la
-   *  variante. Es exactamente lo que acaba de pasar con `documentoSello`:
-   *  un candidato perdedor que sobrevive a su gate se vuelve una opción
-   *  que alguien va a creer disponible. La retira quien lea la firma. */
-  flecha?: 'delante' | 'detras'
   variante?: BotonVariante
   tamaño?: BotonTamaño
   /** Full-width. */
@@ -156,7 +136,6 @@ export function Boton({
   etiqueta,
   onPress,
   superficie = 'clara',
-  flecha = 'delante',
   variante = 'primario',
   tamaño = 'md',
   bloque = false,
@@ -335,6 +314,26 @@ export function Boton({
      hasta entonces la condición es: si tu `acento` ejecuta en el lugar,
      no es `acento`.
 
+     ✅ POSICIÓN FIRMADA (founder, 3-ago): **A LA DERECHA del label.** Su
+     literal del rebote decía «justo en frente», que se leía DELANTE —y
+     así se montó el default— pero también *enfrentada*; las dos se
+     montaron en la galería sobre el botón real y su dedo eligió la
+     derecha, que además es la convención de "esto lleva a otro lado".
+     Con la firma, la prop `flecha` y la posición perdedora se BORRARON en
+     el mismo commit, como estaba declarado al nacer: un candidato
+     perdedor que sobrevive a su gate se vuelve una opción que alguien va
+     a creer disponible (precedente `documentoSello`, misma sesión).
+
+     LA EXCEPCIÓN QUE EL FOUNDER MIDIÓ EN PANTALLA: reportó que en
+     «cambiar ícono» la flecha salía a la IZQUIERDA y pidió alinearla. Es
+     el botón del LOGO (`miCuenta.logoCambiar` — "Cambiar el logo", el
+     único *cambiar-algo* en `acento` y el único sobre el MURO); no existe
+     el literal "cambiar ícono" en el repo, así que la atribución es
+     lectura mía y queda declarada. No necesitó cura propia: su flecha
+     izquierda ERA el default viejo, y fijar la posición lo alinea con los
+     otros tres solo — verificado: ningún consumidor pasa `iconoIzq` ni
+     nada que pinte a la izquierda.
+
      Geometría: `CHEVRON.derecha` de la casa (S83-B12) a 20px y trazo 2,
      los mismos números que `CeldaNavegacion` y `PieRevelar` — jamás un
      path ni una escala nuevos (L-175). El color sale de `c.texto`, o sea
@@ -348,10 +347,8 @@ export function Boton({
           /* EL "JUSTO" DEL FOUNDER, hecho número: la flecha va PEGADA al
              label, no a distancia de ícono. El contenedor separa todo con
              `spacing[2]`; acá se neutraliza la mitad para dejar
-             `spacing[1]` efectivo entre flecha y palabra. */
-          flecha === 'delante'
-            ? { marginRight: -(spacing[2] - spacing[1]) }
-            : { marginLeft: -(spacing[2] - spacing[1]) },
+             `spacing[1]` efectivo entre palabra y flecha. */
+          { marginLeft: -(spacing[2] - spacing[1]) },
         ]}
       >
         <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -369,7 +366,6 @@ export function Boton({
   const contenido = (
     <>
       {iconoIzq ? <View style={mostrarSpinner ? { opacity: 0 } : null}>{iconoIzq}</View> : null}
-      {flecha === 'delante' ? flechaAcento : null}
       {/* El label queda montado invisible durante loading: preserva el ancho
           exacto — cero layout shift (equivale a medir y fijar minWidth). */}
       <Text
@@ -386,7 +382,7 @@ export function Boton({
       >
         {etiqueta}
       </Text>
-      {flecha === 'detras' ? flechaAcento : null}
+      {flechaAcento}
       {mostrarSpinner ? (
         <View style={{ position: 'absolute', alignSelf: 'center' }}>
           <ActivityIndicator size="small" color={c.texto} />

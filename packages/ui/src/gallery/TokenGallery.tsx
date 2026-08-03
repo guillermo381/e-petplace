@@ -759,29 +759,26 @@ function LoRechazado() {
         </View>
       </View>
 
-      {/* ── LA FLECHA DE `acento` · LAS DOS POSICIONES, A UN GATE (S85-B3) ──
-          El founder rebotó el `acento` en su pasada: «creo que no del
-          todo — yo lo sé, pero no sé si cualquier persona lo sepa», y
-          propuso la flecha pegada al label. Lo que su literal NO cierra es
-          de qué lado: *"en frente"* se lee DELANTE (y por eso es el
-          default) pero también puede leerse *enfrentada*, o sea DETRÁS,
-          que es la convención más común para "lleva a otro lado".
-          Se montan LAS DOS, sobre el BOTÓN REAL, para que la firma sea de
-          su dedo y no de una lámina. Al firmar, la perdedora y la prop
-          `flecha` se borran EN EL MISMO COMMIT. */}
+      {/* ── LA FLECHA DE `acento` · FIRMADA A LA DERECHA (founder, 3-ago) ──
+          Nació del rebote del `acento` («creo que no del todo — yo lo sé,
+          pero no sé si cualquier persona lo sepa»): el problema era de
+          AFORDANCIA, no de color. Su propuesta fue la flecha pegada al
+          label; lo que su literal no cerraba era de qué lado, así que las
+          DOS posiciones se montaron acá sobre el botón real y su dedo
+          eligió LA DERECHA. Con la firma, la perdedora y la prop `flecha`
+          se borraron EN EL MISMO COMMIT — un candidato perdedor que
+          sobrevive a su gate se vuelve una opción que alguien va a creer
+          disponible. Queda la anatomía firmada, sin alternativas. */}
       <View style={{ gap: spacing[2] }}>
         <Texto variante="apoyo">
-          LA FLECHA DEL ACENTO — dos posiciones, sin firma. Arriba el literal del founder («justo en
-          frente del label»); abajo la convención. La de arriba es el default hasta que su dedo diga.
-          Los cuatro usos vivos llevan o abren el formulario que resuelve (E14): la flecha no miente
-          en ninguno.
+          LA FLECHA DEL ACENTO — firmada A LA DERECHA. La flecha es de la VARIANTE, no una prop: los
+          cuatro usos vivos la reciben sin decidir nada. Y no miente en ninguno — los cuatro navegan
+          o abren el formulario que los resuelve (E14).
         </Texto>
-        <Boton variante="acento" flecha="delante" etiqueta="Agregar clip" onPress={() => {}} />
-        <Boton variante="acento" flecha="detras" etiqueta="Agregar clip" onPress={() => {}} />
+        <Boton variante="acento" etiqueta="Agregar clip" onPress={() => {}} />
         <Texto variante="apoyo">Y sobre el MURO, que es donde vive el del logo (perfil-piezas):</Texto>
-        <View style={{ backgroundColor: palette.tealDark, padding: spacing[4], borderRadius: radius.suave, gap: spacing[2] }}>
-          <Boton variante="acento" superficie="muro" flecha="delante" etiqueta="Cambiar logo" onPress={() => {}} />
-          <Boton variante="acento" superficie="muro" flecha="detras" etiqueta="Cambiar logo" onPress={() => {}} />
+        <View style={{ backgroundColor: palette.tealDark, padding: spacing[4], borderRadius: radius.suave }}>
+          <Boton variante="acento" superficie="muro" etiqueta="Cambiar el logo" onPress={() => {}} />
         </View>
       </View>
 

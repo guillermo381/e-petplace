@@ -148,7 +148,7 @@ export const darkTheme = {
     identidad:       palette.verdeVitalAlpha15,
     cuidado:         palette.tealAlpha15,
     comunidad:       palette.pinkAlpha09,
-    comunidadAmplia: palette.violetAlpha12,  // S85-B4: .15 → .12, cura del par de darkOficio (4.40 → 4.54)
+    comunidadAmplia: palette.violetAlpha15,  // S85-B6: revertido a .15 — el founder no percibe el tinte en ningún tema
   },
 
   status: {

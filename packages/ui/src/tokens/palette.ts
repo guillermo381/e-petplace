@@ -296,20 +296,19 @@ export const palette = {
   pinkBorderSuave:   'rgba(255,0,175,.21)',   // border comunidad dark (paridad perceptual)
   verdeAlpha15:      'rgba(144,255,139,.15)',
   verdeAlpha10:      'rgba(144,255,139,.10)',
-  // S85-B4 · BAJA DE .15 A .12 — y el NOMBRE baja con el valor, que es la
-  // mitad que suele olvidarse: un `violetAlpha15` conteniendo .12 es un
-  // token que miente sobre sí mismo, y el que lo lea al elegir tinte va a
-  // elegir mal. La cura del par `darkOficio · capaText.comunidadAmplia /
-  // capaBg.comunidadAmplia`, que medía 4.40 contra un mínimo de 4.5.
-  // POR QUÉ ESTA PERILLA Y NO EL TAPIZ: el comentario de R12 ofrecía
-  // "volver el tapiz al 3%", pero ese tapiz es `tapizDark` (el del
-  // CLIENTE) y el par que falla cuelga de `tapizDarkOficio` — la salida
-  // documentada movía una perilla que no gobierna el par. Medidas las
-  // tres, ésta es la de radio más angosto: UN consumidor, 2 pares se
-  // mueven y los DOS hacia arriba (el del cliente también, 4.83 → 4.99),
-  // cero empeoran, cero pasan a reprobar. No toca ningún color firmado.
-  // El tinte de capa queda más sutil: eso es lo que el gate mira.
-  violetAlpha12:     'rgba(158,58,255,.12)',
+  // ⏪ S85-B6 · REVERTIDO A .15 POR FIRMA DEL FOUNDER, y el porqué vale
+  // más que el valor: S85-B4 lo bajó a .12 para curar el par
+  // `darkOficio · capaText.comunidadAmplia / capaBg.comunidadAmplia`
+  // (4.40 → 4.54, mínimo 4.5). En dispositivo el veredicto fue, literal:
+  // «el tinte verde no se ve o no se percibe, ni en claro ni en oscuro».
+  // UN AJUSTE IMPERCEPTIBLE NO PAGA SU COSTO — y el costo era real: un
+  // token menos legible en su nombre, un tinte de capa más débil, y una
+  // cura que el ojo no registra. El par vuelve a 4.40 y queda como
+  // REGRESIÓN ABIERTA DECLARADA en R12, que es lo honesto: un número bajo
+  // mínimo que nadie percibe sigue siendo un número bajo mínimo, y la
+  // decisión de qué hacer con él es del founder, no del lint.
+  // El rename volvió con el valor: `violetAlpha15` contiene .15 otra vez.
+  violetAlpha15:     'rgba(158,58,255,.15)',
   coralAlpha15:      'rgba(255,92,92,.15)',
   ochreAlpha15:      'rgba(232,181,71,.15)',
   creamAlpha06:      'rgba(250,246,232,.06)',

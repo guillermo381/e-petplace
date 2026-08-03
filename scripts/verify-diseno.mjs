@@ -474,23 +474,30 @@ const BASELINE_R12 = new Set([
   // cada corrida, no exentas — `EXENTAS_R12` es para lo que la casa
   // decidió; esto es lo que hay que decidir.
   //
-  // ✅ S85-B4 — LA CUARTA Y ÚLTIMA, CURADA. El set queda VACÍO de la
-  // regresión del tapiz: las cuatro murieron (dos al 5% en B32, el CTA en
-  // B31, y ésta hoy). Se saca de acá EN EL MISMO COMMIT que la cura —
-  // dejarla sería anunciar como pendiente un trabajo cerrado, que es
-  // exactamente el defecto de R13 que esta misma sesión curó.
+  // ⏪ S85-B6 — VUELVE, Y VUELVE CON MÁS INFORMACIÓN QUE ANTES.
+  // S85-B4 la curó bajando `violetAlpha15` a .12 (par 4.40 → 4.54). El
+  // founder la REVIRTIÓ en dispositivo, literal: «el tinte verde no se ve
+  // o no se percibe, ni en claro ni en oscuro». Un ajuste imperceptible
+  // no paga su costo, así que el par vuelve a 4.40 y vuelve acá.
   //
-  // Y LA NOTA QUE NO SE PIERDE, porque es la que corrigió el menú: las
-  // dos salidas que este comentario documentaba («volver el tapiz al 3%»
-  // o «sostener el 8% y pagar sus cuatro curas») apuntaban a `tapizDark`,
-  // que es el tapiz del CLIENTE — y el par que quedaba fallando cuelga de
-  // `tapizDarkOficio`. La salida documentada movía una perilla que NO
-  // gobierna el par. Medidas las tres perillas reales, ganó la de radio
-  // más angosto: `violetAlpha15` → `violetAlpha12` (UN consumidor; 2
-  // pares se mueven y los dos hacia arriba; cero empeoran; ningún color
-  // firmado tocado). El CTA a teal puro y la tanda de textos de capa del
-  // oscuro NO se ejecutaron: siguen disponibles y ya no son necesarias
-  // para este par.
+  // LO QUE LA VUELTA DEJA MEDIDO, y por eso el menú de este par ya no es
+  // el que era: (a) el comentario original ofrecía "volver el tapiz al
+  // 3%" — esa salida apuntaba a `tapizDark`, el tapiz del CLIENTE, y este
+  // par cuelga de `tapizDarkOficio`: MOVÍA UNA PERILLA QUE NO LO
+  // GOBIERNA. (b) La perilla del tinte (`violetAlpha`) SÍ lo gobierna y
+  // alcanza, pero su efecto es INVISIBLE — probado en dispositivo, no
+  // deducido. (c) Quedan las dos caras: `tapizDarkOficio` un paso más
+  // oscuro (#0B1213 → par 4.54; 19 pares mejoran, ninguno pasa a
+  // reprobar) que toca un valor atado a "un tinte por casa", y la tanda
+  // de los textos de capa del oscuro, que es cara y con gate propio.
+  //
+  // ⚠️ SE QUEDA VISIBLE EN CADA CORRIDA A PROPÓSITO: un número bajo
+  // mínimo que nadie percibe SIGUE SIENDO un número bajo mínimo. Que el
+  // founder no vea el tinte es dato sobre la CURA, no sobre el defecto —
+  // el texto de capa sobre su tinte mide 4.40 contra un piso AA de 4.5, y
+  // quien lo lea con menos vista que él lo va a sufrir igual. Qué hacer
+  // con eso es decisión suya; esconderlo no es una de las opciones.
+  'darkOficio·texto·capaText.comunidadAmplia/capaBg.comunidadAmplia',
   // ═══ S83-B30 · HEREDADAS DEL CLIENTE, que el barrido nuevo hizo
   // visibles pero NO nacieron hoy:
   // · el ORO contra papel (1.55) es EXENCIÓN FIRMADA — E1 lo midió y el
@@ -542,19 +549,29 @@ const BASELINE_R12 = new Set([
  *  no por herencia: se cuentan aparte para que el info no las disfrace de
  *  "baseline-founder". Un número que mezcla lo decidido con lo que hay que
  *  decidir esconde justo lo que hay que mirar. */
-/* ✅ VACÍO desde S85-B4 — LA REGRESIÓN DEL TAPIZ MURIÓ ENTERA.
- *  Historia, que se conserva porque explica cómo se cerró cada una y no
- *  todas cedieron a lo mismo: nacieron CUATRO en S83-B30 (el tapiz al 8%,
- *  firmado, cazadas media hora después del commit). El founder bajó a 5%
- *  ("al 8% es muy pesado", en dispositivo) y eso curó DOS SOLO, sin tocar
- *  un token de texto — la contracara exacta de la causa: los tintes son
- *  alpha sobre `bg.base`, así que oscurecer el fondo oscurece el tinte y
- *  el texto claro recupera contraste. La tercera (el CTA) cayó en B31. La
- *  CUARTA resistió a las dos bajadas de tapiz porque colgaba de OTRO
- *  fondo —`tapizDarkOficio`, el del prestador— y se curó en S85-B4 por el
- *  tinte y no por el fondo: `violetAlpha15` → `violetAlpha12`.
- *  DE VACÍO NO SE SUBE: un par que vuelva a caer es rojo, no baseline. */
-const REGRESION_B25 = new Set([]);
+/** LA REGRESIÓN DEL TAPIZ — QUEDA UNA, Y VOLVIÓ POR FIRMA.
+ *  Nacieron CUATRO en S83-B30 (el tapiz al 8%, firmado, cazadas media
+ *  hora después del commit). El founder bajó a 5% ("al 8% es muy pesado",
+ *  en dispositivo) y eso curó DOS SOLO, sin tocar un token de texto — la
+ *  contracara exacta de la causa: los tintes son alpha sobre `bg.base`,
+ *  así que oscurecer el fondo oscurece el tinte y el texto claro recupera
+ *  contraste. La tercera (el CTA) cayó en B31.
+ *
+ *  LA CUARTA resistió a las dos bajadas de tapiz porque cuelga de OTRO
+ *  fondo: `tapizDarkOficio`, el del prestador. S85-B4 la curó por el
+ *  TINTE (`violetAlpha15` → .12) y el founder REVIRTIÓ esa cura en
+ *  dispositivo: «el tinte verde no se ve o no se percibe, ni en claro ni
+ *  en oscuro». Así que vuelve a estar abierta, y con una información que
+ *  antes no existía: **la perilla del tinte alcanza pero es invisible**,
+ *  medido en pantalla y no deducido.
+ *
+ *  ⚠️ Se cuenta APARTE de `BASELINE_R12` a propósito: `EXENTAS` es lo que
+ *  la casa decidió y `BASELINE` lo heredado; esto es LO QUE HAY QUE
+ *  DECIDIR, y un número que mezcla las tres esconde justo lo que hay que
+ *  mirar. */
+const REGRESION_B25 = new Set([
+  'darkOficio·texto·capaText.comunidadAmplia/capaBg.comunidadAmplia',
+]);
 function r12(pares) {
   const fallos = [];
   let exentas = 0, enBaseline = 0, bajaron = 0, regresion = 0;
