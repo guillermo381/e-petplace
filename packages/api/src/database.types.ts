@@ -1603,6 +1603,7 @@ export type Database = {
           mascara_id_fiscal: Json
           moneda_default: string
           nombre: string
+          nombre_id_fiscal: Json
           orden: number
           prefijo_telefono: string
           tipos_fiscales_soportados: string[]
@@ -1617,6 +1618,7 @@ export type Database = {
           mascara_id_fiscal?: Json
           moneda_default: string
           nombre: string
+          nombre_id_fiscal?: Json
           orden?: number
           prefijo_telefono: string
           tipos_fiscales_soportados?: string[]
@@ -1631,6 +1633,7 @@ export type Database = {
           mascara_id_fiscal?: Json
           moneda_default?: string
           nombre?: string
+          nombre_id_fiscal?: Json
           orden?: number
           prefijo_telefono?: string
           tipos_fiscales_soportados?: string[]
@@ -11451,6 +11454,7 @@ export type Database = {
           id: string
           nombre: string
           notas_revision: string | null
+          pais_emisor: string | null
           prestador_id: string
           revisado_en: string | null
           revisado_por: string | null
@@ -11465,6 +11469,7 @@ export type Database = {
           id?: string
           nombre: string
           notas_revision?: string | null
+          pais_emisor?: string | null
           prestador_id: string
           revisado_en?: string | null
           revisado_por?: string | null
@@ -11479,6 +11484,7 @@ export type Database = {
           id?: string
           nombre?: string
           notas_revision?: string | null
+          pais_emisor?: string | null
           prestador_id?: string
           revisado_en?: string | null
           revisado_por?: string | null

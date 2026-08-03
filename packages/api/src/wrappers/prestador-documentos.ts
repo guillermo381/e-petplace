@@ -17,8 +17,66 @@
 import { getClient } from '../client';
 import type { ResultadoWrapper } from '../resultado';
 
-export const TIPOS_DOCUMENTO_VERIFICACION = ['titulo_profesional', 'registro_senescyt'] as const;
+/* ── S84-A32 · LA VERIFICACIÓN PASA A SER DE PLATAFORMA ────────────────
+   `LETRA_VERIFICACION_S85` (firmada 2-ago) parte la verificación en DOS
+   EJES QUE NO SE MEZCLAN:
+
+     ① POR FIGURA JURÍDICA — LOS CUATRO OFICIOS
+        `persona_natural` → **cédula** · las otras tres → **RUC**
+     ② POR OFICIO — solo veterinaria, ENCIMA del ①
+        título profesional · registro SENESCYT
+
+   **El ② no reemplaza al ①: se suma.** Una clínica constituida como
+   empresa presenta RUC (①) **y** sus documentos de vet (②).
+
+   ⚠️ CORRECCIÓN DE UNA MEDICIÓN PROPIA, declarada: al escribir la letra
+   se dijo que este wrapper era "genérico". **Lo era en la DB —el ciclo de
+   revisión no menciona vet— pero NO acá:** `TIPOS_DOCUMENTO_VERIFICACION`
+   listaba solo los dos de veterinaria, y `obtenerDocumentosVerificacion`
+   filtraba por ellos. *El motor servía a los cuatro oficios y el wrapper
+   servía a uno.* **Eso es lo que este hunk ensancha.**
+
+   Y LO QUE **NO** SE TOCÓ, con su razón: el trigger
+   `_trg_ps_verificacion_profesional`. Al medirlo resultó **no ser un
+   disparador de verificación sino un GUARD DE BLOQUEO** — impide activar
+   un servicio médico sin documento aprobado. **Es de la capa ②, que la
+   orden excluye explícitamente**, y además chocaría con §5 (*sin
+   verificación el prestador opera igual*) si se lo ensanchara a los
+   cuatro oficios. **Ensanchar el llamador no toca el ciclo; ensanchar ese
+   trigger sí habría sido otra cosa.** */
+
+/** Los del eje ① — TODOS los oficios. La cédula y el RUC ya existían en
+ *  el CHECK de la tabla desde antes de esta letra: el esquema se adelantó. */
+export const TIPOS_DOCUMENTO_FIGURA = ['cedula', 'ruc'] as const;
+
+/** Los del eje ② — solo veterinaria, encima del ①. */
+export const TIPOS_DOCUMENTO_OFICIO_VET = ['titulo_profesional', 'registro_senescyt'] as const;
+
+export const TIPOS_DOCUMENTO_VERIFICACION = [
+  ...TIPOS_DOCUMENTO_FIGURA,
+  ...TIPOS_DOCUMENTO_OFICIO_VET,
+] as const;
 export type TipoDocumentoVerificacion = (typeof TIPOS_DOCUMENTO_VERIFICACION)[number];
+
+/**
+ * QUÉ DOCUMENTO PIDE EL EJE ① — se decide por lo que el negocio **TIENE**,
+ * no por cómo se llama (firma del founder sobre el cuarteto fiscal).
+ *
+ * `persona_natural` es la ÚNICA que va con cédula. Las otras tres tienen
+ * RUC: `persona_natural_obligada` porque está obligada a llevar
+ * contabilidad, `persona_juridica` porque es el caso "empresa", y
+ * `entidad_sin_fines_lucro` porque también lo tiene — **y son los
+ * refugios**, que EL NORTE nombra como actor del ecosistema.
+ *
+ * **La puerta no pregunta lo que ya sabe (Ley 23):** la figura sale de
+ * `cuentas_comerciales.tipo_fiscal`, que es NOT NULL y ya está poblada.
+ * *Volver a preguntarla abriría la puerta a que las dos respuestas se
+ * contradigan — y ese día ninguna es la verdad, porque nada dice cuál
+ * gana.*
+ */
+export function documentoDeFigura(tipoFiscal: string): 'cedula' | 'ruc' {
+  return tipoFiscal === 'persona_natural' ? 'cedula' : 'ruc';
+}
 
 export const ESTADOS_DOCUMENTO = ['pendiente', 'aprobado', 'rechazado', 'vencido'] as const;
 export type EstadoDocumento = (typeof ESTADOS_DOCUMENTO)[number];
@@ -32,6 +90,12 @@ export interface DocumentoVerificacion {
   archivoPath: string;
   notasRevision: string | null;
   createdAt: string;
+  /** ISO-3166-1 alfa-2 del país que EMITIÓ el documento. **null = no
+   *  declarado**, jamás "el del negocio": derivarlo de `country_code` está
+   *  prohibido (P21 — un vet colombiano en Quito tiene tarjeta
+   *  colombiana). Los 9 documentos previos a S84 lo tienen en null, que
+   *  es la verdad: no se preguntó. */
+  paisEmisor: string | null;
 }
 
 const CODIGOS = ['sin_sesion', 'sin_datos'] as const;
@@ -45,7 +109,7 @@ const MENSAJES: Record<CodigoErrorDocumentos | 'error_desconocido' | 'datos_inco
 };
 
 function esTipoVerificacion(v: unknown): v is TipoDocumentoVerificacion {
-  return v === 'titulo_profesional' || v === 'registro_senescyt';
+  return (TIPOS_DOCUMENTO_VERIFICACION as readonly string[]).includes(v as string);
 }
 
 function esEstado(v: unknown): v is EstadoDocumento {
@@ -59,7 +123,7 @@ export async function obtenerDocumentosVerificacion(
 ): Promise<ResultadoWrapper<DocumentoVerificacion[], CodigoErrorDocumentos>> {
   const { data, error } = await getClient()
     .from('prestador_documentos')
-    .select('id, tipo, nombre, estado, archivo_url, notas_revision, created_at')
+    .select('id, tipo, nombre, estado, archivo_url, notas_revision, created_at, pais_emisor')
     .eq('prestador_id', prestadorId)
     .in('tipo', [...TIPOS_DOCUMENTO_VERIFICACION])
     .order('created_at', { ascending: false });
@@ -74,6 +138,7 @@ export async function obtenerDocumentosVerificacion(
     docs.push({
       id: f.id,
       tipo: f.tipo,
+      paisEmisor: typeof f.pais_emisor === 'string' ? f.pais_emisor : null,
       nombre: f.nombre,
       estado: f.estado,
       archivoPath: f.archivo_url,
@@ -120,6 +185,12 @@ export interface RegistrarDocumentoInput {
   nombre: string;
   /** El PATH ya subido dentro del bucket 'prestador-documentos'. */
   archivoPath: string;
+  /** ISO-3166-1 alfa-2 del país que EMITIÓ el documento. **Se DECLARA:**
+   *  la pantalla lo pregunta y este wrapper lo pasa tal cual.
+   *  **Omitirlo guarda null (no declarado) — jamás el `country_code` del
+   *  negocio.** Un vet colombiano en Quito tiene tarjeta colombiana, y
+   *  derivarlo sería el mismo error que el teléfono ya nos cobró (P21). */
+  paisEmisor?: string;
 }
 
 /** Registra un documento subido — nace 'pendiente' (el default de DB es
@@ -134,8 +205,10 @@ export async function registrarDocumentoVerificacion(
       tipo: input.tipo,
       nombre: input.nombre,
       archivo_url: input.archivoPath,
+      // sin país ⇒ null explícito, que es "no declarado" y no un default.
+      pais_emisor: input.paisEmisor ?? null,
     })
-    .select('id, tipo, nombre, estado, archivo_url, notas_revision, created_at')
+    .select('id, tipo, nombre, estado, archivo_url, notas_revision, created_at, pais_emisor')
     .single();
 
   if (error || data === null) {
@@ -154,6 +227,7 @@ export async function registrarDocumentoVerificacion(
       archivoPath: data.archivo_url,
       notasRevision: data.notas_revision,
       createdAt: data.created_at,
+      paisEmisor: typeof data.pais_emisor === 'string' ? data.pais_emisor : null,
     },
   };
 }

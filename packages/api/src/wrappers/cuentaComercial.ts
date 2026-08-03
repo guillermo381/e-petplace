@@ -155,6 +155,24 @@ export interface PaisRegistro {
   tiposFiscales: TipoFiscal[];
   /** Máscara regex por tipo fiscal (fuente: cat_paises.mascara_id_fiscal). */
   mascaraPorTipo: Partial<Record<TipoFiscal, string>>;
+  /**
+   * S84-A32bis — **EL NOMBRE VISIBLE del documento fiscal, por figura**
+   * (fuente: `cat_paises.nombre_id_fiscal`, misma forma que la máscara).
+   *
+   * **NO se hardcodea, y la razón es medible: en Colombia una persona
+   * jurídica no tiene RUC, tiene NIT.** Como el país del documento SE
+   * ELIGE, la pantalla puede estar en EC mostrando uno de otro país —
+   * hardcodear *"RUC"* la haría mentir apenas alguien elija Colombia.
+   * *Es el mismo caso que el teléfono ya cobró en S84.*
+   *
+   * ⚠️ **VACÍO ES EL CASO NORMAL, no el borde:** de los 23 países del
+   * catálogo **solo EC declara datos fiscales** (medido: 1 de 23 con
+   * máscara y con tipos). ⇒ **la superficie NECESITA el genérico**
+   * —*"tu identificación fiscal"*— **como camino habitual fuera de
+   * Ecuador**, no como plan B. *Genérico y verdadero le gana a específico
+   * y falso, y acá además es lo que va a pasar casi siempre.*
+   */
+  nombrePorTipo: Partial<Record<TipoFiscal, string>>;
 }
 
 /** Países ACTIVOS para registro (hoy: EC). Fuente cat_paises — la misma
@@ -164,7 +182,7 @@ export async function obtenerPaisesParaRegistro(): Promise<
 > {
   const { data, error } = await getClient()
     .from('cat_paises')
-    .select('codigo_iso2, nombre, moneda_default, tipos_fiscales_soportados, mascara_id_fiscal, orden')
+    .select('codigo_iso2, nombre, moneda_default, tipos_fiscales_soportados, mascara_id_fiscal, nombre_id_fiscal, orden')
     .eq('activo', true)
     .order('orden', { ascending: true });
 
@@ -182,12 +200,23 @@ export async function obtenerPaisesParaRegistro(): Promise<
         if (typeof m === 'string' && m.length > 0) mascaraPorTipo[t] = m;
       }
     }
+    // misma forma que la máscara: mismo jsonb keyed por figura, misma
+    // lectura defensiva. Se espeja a propósito — dos estructuras para el
+    // mismo eje es como nacen las divergencias.
+    const nombrePorTipo: Partial<Record<TipoFiscal, string>> = {};
+    if (typeof p.nombre_id_fiscal === 'object' && p.nombre_id_fiscal !== null && !Array.isArray(p.nombre_id_fiscal)) {
+      for (const t of tiposFiscales) {
+        const n = (p.nombre_id_fiscal as Record<string, unknown>)[t];
+        if (typeof n === 'string' && n.length > 0) nombrePorTipo[t] = n;
+      }
+    }
     return {
       codigoIso2: p.codigo_iso2,
       nombre: p.nombre,
       moneda: p.moneda_default,
       tiposFiscales,
       mascaraPorTipo,
+      nombrePorTipo,
     };
   });
 
