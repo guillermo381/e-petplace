@@ -1,5 +1,25 @@
 #!/bin/sh
 # Deja el RASTRO del escape dentro del mensaje (S82-B r28): un gate
 # salteado sin rastro es peor que no tener gate — parece verde.
-[ -n "$SALTAR_GATE" ] && printf '\n[GATE SALTEADO] %s\n' "$SALTAR_GATE" >> "$1"
+#
+# S85-B9 · EL RASTRO AHORA LLEVA SU ANCLA, Y LA ESCRIBE `pre-commit`, no
+# esta línea. El porqué del cambio de dueño: el motivo lo tipea un humano,
+# pero el ANCLA (HEAD · árbol · lo que el lint dio EN ESE INSTANTE) hay
+# que MEDIRLA, y quien puede medirla es el hook que corre antes. Git los
+# ejecuta en ese orden —`pre-commit` y después `prepare-commit-msg`—, así
+# que el de arriba mide y deja el archivo, y este solo lo transcribe.
+#
+# FALLBACK DECLARADO: si el archivo no está (alguien exportó SALTAR_GATE
+# sin que `pre-commit` corriera — el caso de `--no-verify`, que no ejecuta
+# NINGÚN hook), se escribe el motivo pelado. Un rastro sin ancla es peor
+# que uno con ancla y mejor que ninguno; lo que no se hace es inventar el
+# ancla que no se midió.
+ANCLA="$(git rev-parse --git-dir)/GATE_SALTEADO_ANCLA"
+if [ -f "$ANCLA" ]; then
+  printf '\n' >> "$1"
+  cat "$ANCLA" >> "$1"
+  rm -f "$ANCLA"
+elif [ -n "$SALTAR_GATE" ]; then
+  printf '\n[GATE SALTEADO] %s\n[GATE SALTEADO · SIN ANCLA] el pre-commit no corrió (¿--no-verify?): no hay medición de contra qué árbol se saltó.\n' "$SALTAR_GATE" >> "$1"
+fi
 exit 0

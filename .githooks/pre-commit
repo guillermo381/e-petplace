@@ -24,9 +24,66 @@ set -e
 RAIZ=$(git rev-parse --show-toplevel)
 cd "$RAIZ"
 
+# ─────────────────────────────────────────────────────────────────────
+# EL SALTO DECLARA CONTRA QUÉ MIDIÓ (S85-B9 — propuesta de B, aceptada
+# por la mesa).
+#
+# QUÉ LO PARIÓ, con su número: CUATRO commits de C salieron con
+# SALTAR_GATE por un R17 en rojo que en `main` NO EXISTÍA — medido
+# después: exit 0, árbol limpio, la entrada de galería había entrado en
+# el mismo commit que la creó. No se pudo reconstruir qué vio C, y ESE es
+# el defecto: el motivo decía POR QUÉ se saltaba, pero nada decía CONTRA
+# QUÉ ÁRBOL se había medido el rojo.
+#
+# ES EL HALLAZGO DE S84 EN SU FORMA MÁS CARA: un dato viejo que dice "sí"
+# se descubre al chocar; uno que dice "NO SE PUEDE" no se descubre nunca,
+# porque nadie verifica por qué algo NO se hizo. Cuatro gates saltados es
+# el precio de no poder verificarlo.
+#
+# POR QUÉ EL HOOK MIDE EN VEZ DE PEDIR UN SHA, que es la decisión de
+# diseño: pedir `GATE_ROJO_EN=<sha>` reproduce la enfermedad — otro dato
+# tipeado a mano, que puede estar viejo o mal, y que nadie verifica. Acá
+# el salto se AUTO-INSTRUMENTA: el hook estampa el HEAD real, si el árbol
+# estaba sucio, y **corre el lint y anota lo que dio EN ESE INSTANTE**.
+#
+# LA CONSECUENCIA QUE LO VUELVE ÚTIL: si alguien salta diciendo "el lint
+# está en rojo" y la medición dice VERDE, esa contradicción queda escrita
+# en el mensaje del commit para siempre. Un "no se puede" falso deja de
+# ser invisible y pasa a ser la línea siguiente.
+#
+# ALCANCE HONESTO: mide `verify:diseno` (0.5s — barato, por eso se corre
+# aunque estemos saltando). NO mide los tsc: son ~3s por app y un hook
+# lento se saltea por costumbre, que es cómo volvimos acá la primera vez.
+# Si el rojo era de tsc, el registro lo dice y no lo disimula.
+# ─────────────────────────────────────────────────────────────────────
+ANCLA_SALTO="$(git rev-parse --git-dir)/GATE_SALTEADO_ANCLA"
+rm -f "$ANCLA_SALTO"   # nunca heredar el rastro de un intento anterior
+
 if [ -n "$SALTAR_GATE" ]; then
+  HEAD_CORTO=$(git rev-parse --short HEAD 2>/dev/null || echo "sin-HEAD")
+  if [ -n "$(git status --porcelain)" ]; then
+    ESTADO_ARBOL="SUCIO ($(git status --porcelain | wc -l | tr -d ' ') archivo(s))"
+  else
+    ESTADO_ARBOL="limpio"
+  fi
+  if node scripts/verify-diseno.mjs >/dev/null 2>&1; then
+    MEDIDO="VERDE"
+  else
+    MEDIDO="ROJO"
+  fi
+
   echo "⚠️  GATE SALTEADO A PROPÓSITO — motivo: $SALTAR_GATE"
-  echo "   (queda escrito en el mensaje del commit)"
+  echo "   medido AHORA · HEAD $HEAD_CORTO · árbol $ESTADO_ARBOL · verify:diseno $MEDIDO"
+  if [ "$MEDIDO" = "VERDE" ]; then
+    echo ""
+    echo "   ⚠️  OJO: el lint da VERDE en este árbol. Si saltás porque lo viste"
+    echo "       rojo, lo que viste era otro árbol (o otro gate: los tsc no se"
+    echo "       miden acá). Esto NO te frena — queda escrito en el commit."
+  fi
+  echo "   (todo esto queda escrito en el mensaje del commit)"
+
+  printf '[GATE SALTEADO] %s\n[GATE SALTEADO · medido al saltar] HEAD %s · árbol %s · verify:diseno %s\n' \
+    "$SALTAR_GATE" "$HEAD_CORTO" "$ESTADO_ARBOL" "$MEDIDO" > "$ANCLA_SALTO"
   exit 0
 fi
 
