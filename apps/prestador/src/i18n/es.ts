@@ -174,6 +174,8 @@ export const prestadorEs = {
     yaAtendidas: 'Ya atendidas ({{n}})',
     acordeonOcultar: 'Ocultar',
     // la semana (D-317, S57-B1) · LOTE S57, GATE PENDIENTE
+    tuDia: 'Tu día',
+    diaCerrado: 'Cerrado',
     vistaEtiqueta: 'Agenda',
     vistaHoy: 'Hoy',
     vistaSemana: 'Semana',

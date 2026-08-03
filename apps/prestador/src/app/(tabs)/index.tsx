@@ -37,6 +37,7 @@ import {
   FilaCita as FilaCitaUi,
   CeldaNavegacion,
   CitaEnVivo,
+  SelectorDia,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -55,6 +56,7 @@ import {
 import {
   obtenerBloqueosPrestador,
   obtenerCitasAdiestramientoDelDia,
+  obtenerDiasCerrados,
   obtenerCitasGroomingDelDia,
   obtenerCitasPaseoDelDia,
   obtenerCitasVetDelDia,
@@ -507,6 +509,22 @@ export default function Hoy() {
   const [refrescando, setRefrescando] = useState(false);
   // D-317: el segmento Hoy/Semana. 'semana' = los próximos 7 días.
   const [vista, setVista] = useState<'hoy' | 'semana'>('hoy');
+  /* ⭐ S85-C7 — EL DÍA ELEGIDO (la rueda D3 de B, `0b229a6`).
+     `null` = todavía no se eligió ⇒ manda el día base. Se resuelve a
+     `desde` abajo; no se inicializa con `useState(desde)` porque `desde`
+     llega DESPUÉS del fetch y el estado nacería con un valor viejo. */
+  const [diaElegido, setDiaElegido] = useState<string | null>(null);
+  /** Los días que el negocio declaró cerrados — la rueda los apaga y la
+   *  pantalla los CONTESTA (el día cerrado se toca, no se deshabilita:
+   *  decisión firmada dentro de la pieza). */
+  /** ⚠️ SON DÍAS DE LA **SEMANA** (0..6), no fechas — `DiaCerrado` es
+   *  `{dia_semana, motivo}` y el cierre es RECURRENTE, no puntual. La
+   *  rueda pide fechas ISO, así que la conversión se hace al pintar
+   *  (abajo). Guardar el 0..6 y convertir al final es lo correcto: si
+   *  guardara fechas, el lunes que viene estarían viejas.
+   *  Convención `0=Domingo..6=Sábado` — regla 32 del contrato, la misma
+   *  que `prestador_horarios.dia_semana`. */
+  const [cerrados, setCerrados] = useState<Set<number>>(new Set());
   // S61-B5: el filtro por oficio — vista del día, JAMÁS persiste.
   const [filtroOficio, setFiltroOficio] = useState<FiltroOficioValor>('todos');
   // D-385: salidas expandidas (por clave de bloque) — vista, jamás persiste.
@@ -570,7 +588,10 @@ export default function Hoy() {
     // UN fetch cubre las dos vistas (S57-B1): rango hoy..hoy+6 — la vista
     // Hoy filtra por `desde`; la Semana agrupa el rango entero.
     const desde = hoyLocal();
-    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, cuentaR, perfilR] = await Promise.all([
+    /* S85-C7: `rCerrados` entra AL FINAL del arreglo y del destructuring —
+       insertarlo en el medio corre todas las posiciones y el typecheck lo
+       cazó en el acto (once tuplas desalineadas). Al final, nada se mueve. */
+    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, cuentaR, perfilR, rCerrados] = await Promise.all([
       obtenerCitasPaseoDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: sumarDias(desde, 6) }),
       // S60-B1: la jornada es UNA — las citas de grooming entran a la
       // misma lista con su tipo (el subtítulo ya lo dice) y su ruta.
@@ -599,7 +620,16 @@ export default function Hoy() {
       // degrada a ir solo (el techo orienta, no bloquea — Ley 13 aplica
       // al CUERPO, que tiene su propio camino de error).
       obtenerMiPerfil(),
+      // S85-C7: los días cerrados para la rueda. Su fallo NO tumba la
+      // jornada — sin el dato la rueda no apaga NINGUNO, que es la verdad
+      // honesta ("no sabemos") y no una promesa de apertura.
+      obtenerDiasCerrados(prestador.data.id),
     ]);
+    /* S85-C7 · los cerrados se guardan APARTE del estado de pantalla, y
+       ANTES del rebote de las citas: su fallo no cambia la jornada — solo
+       deja la rueda sin días apagados, que es el nulo honesto ("no
+       sabemos") y no una promesa de apertura. */
+    setCerrados(rCerrados.ok ? new Set(rCerrados.data.map((d) => d.dia_semana)) : new Set());
     if (!r.ok) {
       setPantalla({ estado: 'error', mensaje: r.mensaje });
       return;
@@ -766,10 +796,46 @@ export default function Hoy() {
       .length >= 2;
   const citasVisibles =
     !conFiltro || filtroOficio === 'todos' ? citas : citas.filter((c) => oficioDe(c) === filtroOficio);
-  const citasHoy = desde === null ? [] : citasVisibles.filter((c) => c.fecha === desde);
+  /* S85-C7: la vista opera sobre EL DÍA ELEGIDO, no sobre el día base.
+     El fetch ya trae hoy..hoy+6, así que elegir otro día es un FILTRO —
+     cero viaje nuevo. */
+  const diaVista = diaElegido ?? desde;
+  const citasHoy = diaVista === null ? [] : citasVisibles.filter((c) => c.fecha === diaVista);
   // S61-B12: el día SIN filtrar — la Zona 1 es INMUNE al filtro por
   // GUARD ESTRUCTURAL (se computa de acá, jamás de la lista filtrada)
-  const citasHoySin = desde === null ? [] : citas.filter((c) => c.fecha === desde);
+  const citasHoySin = diaVista === null ? [] : citas.filter((c) => c.fecha === diaVista);
+  /** ⚠️ EL VIVO ES DE HOY, Y SOLO DE HOY. La Zona 1 dice "ahora" — y
+   *  "ahora" no existe en el jueves. Si la rueda está parada en otro día,
+   *  el hero no se monta: mostrarlo ahí afirmaría que algo está corriendo
+   *  en un día que todavía no llegó.
+   *  ⚠️ Esto NO toca la inmunidad al filtro por OFICIO (guard estructural
+   *  S61-B12): son dos ejes distintos y el de oficio sigue intacto. */
+  const vistaEsHoy = diaVista !== null && diaVista === desde;
+  /** Los SIETE del rango que el fetch ya trajo — la rueda no inventa días
+   *  que no estén cargados. */
+  const dias7 = desde === null ? [] : Array.from({ length: 7 }, (_, i) => sumarDias(desde, i));
+  /** De días de la semana a FECHAS, que es lo que la rueda entiende. Se
+   *  computa acá y no se guarda: el cierre es recurrente y una fecha
+   *  guardada envejece sola. */
+  const isoCerrados = new Set(
+    dias7.filter((iso) => {
+      const [a, m, d] = iso.slice(0, 10).split('-').map(Number);
+      return a && m && d ? cerrados.has(new Date(a, m - 1, d).getDay()) : false;
+    }),
+  );
+  /** El día corto por idioma. **Copiado del cliente**, que ya lo hace en
+   *  sus dos pantallas de reserva (`explorar/paseo` y `explorar/grooming`)
+   *  con esta misma receta — el riel no tiene helper de día CORTO y
+   *  duplicar la forma del vecino es más honesto que inventar una tercera
+   *  (L-175: se lee lo que hay antes de crear).
+   *  ☠️ Su día en `packages/i18n` llega con el TERCER consumidor. */
+  const diaCorto = (iso: string): string => {
+    const [a, m, d] = iso.slice(0, 10).split('-').map(Number);
+    if (!a || !m || !d) return iso.slice(8, 10);
+    return new Intl.DateTimeFormat(idioma === 'es' ? 'es' : 'en', { weekday: 'short' })
+      .format(new Date(a, m - 1, d))
+      .replace('.', '');
+  };
   // el vacío FILTRADO se dice distinto: hay jornada, no de este servicio
   const hoyVacioPorFiltro =
     citasHoy.length === 0 && conFiltro && filtroOficio !== 'todos' && citasHoySin.length > 0;
@@ -987,7 +1053,7 @@ export default function Hoy() {
 
         {/* ── Zona 1 — ahora / lo siguiente (PRESIDE: encima de todo
             control e INMUNE al filtro — guard estructural S61-B12) ── */}
-        {pantalla.estado === 'listo' && vista === 'hoy' && destacada && (
+        {pantalla.estado === 'listo' && vista === 'hoy' && vistaEsHoy && destacada && (
           <View style={{ gap: spacing[2] }}>
             {/* S52-P7: etiqueta humanizada — sentence case, sin eyebrow */}
             <Texto variante="seccion">
@@ -1041,9 +1107,50 @@ export default function Hoy() {
           </View>
         )}
 
-        {/* S61-B12: el filtro por oficio RE-VESTIDO (íconos b′, huella
-            AA en el activo) — DEBAJO de la Zona 1, solo con 2 oficios */}
-        {pantalla.estado === 'listo' && conFiltro && oficiosActivos !== null && (
+        {/* ⭐ S85-C7 · TU DÍA — la rueda D3 y los chips, juntos.
+            LA RUEDA ES DE B (`SelectorDia`, `0b229a6`) y se MONTA, no se
+            re-dibuja: su escala, su opacidad y el acento del número viven
+            en un WORKLET, así que el color viaja con el dedo. **Si eso se
+            atara a estado de React llegaría tarde y la rueda dejaría de
+            sentirse rueda** — es comportamiento, no estilo (advertencia de
+            B, y por eso acá solo se le pasan datos).
+
+            ⚠️ CERO FETCH NUEVO: el rango `hoy..hoy+6` ya se trae de una
+            sola vez desde S57-B1, así que elegir otro día es un FILTRO
+            sobre lo que ya está en memoria. La rueda no pide nada.
+
+            SOLO EN LA VISTA HOY: en Semana el rango entero ya está a la
+            vista, y montar las dos sería dos controles para el mismo
+            trabajo. ⚠️ **Y ahí queda una pregunta que NO resuelvo yo:**
+            con la rueda eligiendo día, la vista Semana pasa a solaparse
+            con ella. No la retiro —nadie lo decidió— pero es candidata
+            declarada para el gate. */}
+        {pantalla.estado === 'listo' && vista === 'hoy' && desde !== null && (
+          <View style={{ gap: spacing[3] }}>
+            <Texto variante="seccion">{t('agenda.tuDia')}</Texto>
+            <SelectorDia
+              dias={dias7.map((iso) => ({
+                iso,
+                // el precedente de la casa, copiado del cliente (dos
+                // consumidores ya lo hacen así): día corto por Intl según
+                // idioma + el número del propio ISO.
+                dia: diaCorto(iso),
+                numero: iso.slice(8, 10),
+              }))}
+              elegido={diaVista ?? desde}
+              cerrados={isoCerrados}
+              etiquetaCerrado={t('agenda.diaCerrado')}
+              onElegir={setDiaElegido}
+            />
+            {pantalla.estado === 'listo' && conFiltro && oficiosActivos !== null && (
+              <FiltroOficio activo={filtroOficio} onCambio={setFiltroOficio} oficios={oficiosActivos} />
+            )}
+          </View>
+        )}
+
+        {/* los chips SIN la rueda: en Semana el filtro por oficio sigue
+            sirviendo, y ahí no hay día que elegir. */}
+        {pantalla.estado === 'listo' && vista === 'semana' && conFiltro && oficiosActivos !== null && (
           <FiltroOficio activo={filtroOficio} onCambio={setFiltroOficio} oficios={oficiosActivos} />
         )}
 

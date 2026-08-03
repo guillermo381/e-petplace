@@ -145,6 +145,8 @@ export const prestadorEn = {
     yaAtendidas: 'Already seen ({{n}})',
     acordeonOcultar: 'Hide',
     // la semana (D-317, S57-B1) · LOTE S57, GATE PENDIENTE · Espejo de es.ts
+    tuDia: 'Your day',
+    diaCerrado: 'Closed',
     vistaEtiqueta: 'Agenda',
     vistaHoy: 'Today',
     vistaSemana: 'Week',
