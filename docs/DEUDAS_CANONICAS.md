@@ -4971,6 +4971,78 @@ cuenta). **Las 11 de Satori y Los Shyris NO se tocan.**
 > le duele. **No se retira ejecutando (b)** —backfillear los `1`— *porque eso es
 > exactamente pisar un dato que no se puede distinguir de una decisión.*
 
+### 🔴 ENMIENDA S85 — EL FRENO REAL NO ERA EL CUPO: ERAN **CUATRO `> 4` HARDCODEADOS** EN LA PUERTA ÚNICA
+
+**Encontrados al cablear el tope (medidos, no supuestos):**
+
+| dónde | función |
+|---|---|
+| `configuracionPaseo.ts` | `crearFranjaHorario` · `actualizarFranjaHorario` · `editarFranjaHorario` |
+| `horarios-modo.ts` | la creación de franja **por servicio** |
+
+**Los cuatro rebotaban `cupo_invalido` con `maxCitasPorSlot > 4`.**
+
+> **⇒ Con el techo del paseo en 10, el founder habría subido su franja y el
+> wrapper lo habría rebotado — con un código tipado, creíble y equivocado.**
+> *El motor permitía y la puerta única no.*
+>
+> **Y es la lección que trasciende al caso:** un número de PLATAFORMA copiado
+> dentro de un wrapper **es letra muerta el día que la plataforma cambia**, y su
+> modo de falla es de los peores — **no revienta: rebota bien**. Un `4` que
+> alguien escribió cuando el techo era 4 sobrevive intacto al cambio del techo,
+> y nadie lo audita porque *el rebote se ve correcto*.
+
+**CURADOS los cuatro (S85-A):** el tope **se PREGUNTA al catálogo**
+(`techoMaximoDe` / `techoMaximoDeServicios`), no se recuerda. **Cero `> 4` vivos
+— verificable por grep** (`maxCitasPorSlot > 4` en `packages/` y `apps/`: 0).
+
+**⚠️ Dos cuerpos del mismo cálculo, declarado y no escondido:** viven en dos
+wrappers y no hay dónde compartirlos sin crear un módulo para tres líneas. **Su
+condición de unificación es (d)**: cuando las franjas sean por servicio, el
+techo sale del servicio de la franja y **los dos desaparecen juntos**.
+
+### ➕ (A) CABLEADA — `FranjaHorario.cupoTechoMaximo`, **y es un PALIATIVO**
+
+`obtenerFranjasHorario` devuelve el **mayor `cupo_techo` entre los oficios
+ACTIVOS** del prestador. **Sin lector nuevo** (el cálculo es interno).
+
+**Las dos condiciones de la mesa, escritas donde se leen:**
+
+1. **El control lo DICE, no lo esconde** — *con franjas universales el tope es
+   del PRESTADOR, no de la franja*. Un control que muestre 10 sin aclararlo
+   **miente para tres de los cuatro oficios** de Paseos Andres.
+2. **Es un PALIATIVO, con esa palabra.** *La respuesta buena es **(d)**: franjas
+   por servicio.* Ahí la pregunta tiene respuesta única y el campo deja de
+   existir.
+
+**Y un fallo del techo NO tumba las franjas:** cae a `1` (el default exclusivo
+del motor, jamás un número inventado). *El techo es una AYUDA de la superficie;
+las franjas son EL DATO — caer entero por no poder calcular una ayuda le sacaría
+al prestador su horario para no poder decirle su tope.*
+
+### ✅ CERRADA la pregunta de las ventanas `00:00–23:30`
+
+**Literal del founder (3-ago):** *"para poder revisar eliminé las franjas
+anteriores y creé una de todos los días todo el día"*. ⇒ **son INTENCIONALES y
+de prueba. NO se curan.** *El motor no está ofertando de madrugada por defecto:
+está ofertando lo que el founder configuró a propósito para poder probar.*
+
+> **⚠️ Y el listado de 12 franjas que se le pasó al founder QUEDÓ OBSOLETO** —
+> él rehízo su taller después. *Se dice acá porque una lista de trabajo que
+> sobrevive a su objeto es exactamente la clase de dato que alguien vuelve a
+> ejecutar sin re-medir* (regla #22).
+
+### ⚠️ EL ESCENARIO DEL PRÓXIMO GATE — advertencia de C, registrada por pedido de la mesa
+
+> **NINGÚN default arregla las franjas que YA están en 1.** Las sube el
+> prestador a mano.
+>
+> **⇒ Si el slot vuelve a desaparecer después de estas curas, es POR LO VIEJO,
+> no porque la cura falle.**
+
+*Esta distinción tiene que estar escrita **antes** del gate: un síntoma que
+reaparece se lee como "no funcionó" — y manda a revertir la cura correcta.*
+
 ---
 
 #### D-637 — `profiles.nombre` NO TIENE SUPERFICIE DE EDICIÓN EN LA APP DEL PRESTADOR ⚪ REGISTRO (consecuencia ACEPTADA, no defecto)

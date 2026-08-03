@@ -97,6 +97,34 @@ export interface FranjaHorario {
   duracionSlotMinutos: number;
   maxCitasPorSlot: number;
   activo: boolean;
+  /**
+   * EL TOPE que la plataforma permite para `maxCitasPorSlot` — **el mayor
+   * `cupo_techo` entre los oficios ACTIVOS de este prestador** (S85, D-638).
+   *
+   * ⚠️ **ES UNA PROPIEDAD DEL PRESTADOR, NO DE LA FRANJA — y viaja repetida en
+   * cada fila solo por transporte.** Las 56 franjas vivas son UNIVERSALES
+   * (`servicio_id IS NULL`, `modo_horarios='universal'`), así que **una franja
+   * no sabe de qué oficio es** y la pregunta *"¿cuál es el tope de esta
+   * franja?"* no tiene respuesta única: la de Paseos Andres sirve a paseo
+   * (techo 10), grooming (1), grooming_completo (1) y adiestramiento (1).
+   *
+   * **⇒ LA SUPERFICIE TIENE QUE DECIRLO, no esconderlo** (condición de la
+   * mesa): *con franjas universales el tope es del PRESTADOR, no de la
+   * franja.* Un control que muestre 10 sin esa aclaración **miente para tres
+   * de los cuatro oficios** de ese prestador — el `LEAST` del motor les seguirá
+   * dando 1.
+   *
+   * ☠️ **ES UN PALIATIVO DE D-638, y se dice con esa palabra para que nadie lo
+   * lea como la solución final.** **La respuesta buena es (D): franjas POR
+   * SERVICIO** — ahí la pregunta tiene respuesta única y este campo deja de
+   * existir. *Mientras tanto, esto es lo más cerca de la verdad que el dato
+   * universal permite, y por eso se acepta: sin él la app hardcodea el número,
+   * que envejece con el próximo cambio de techo.*
+   *
+   * `1` cuando el prestador no tiene oficios activos con techo declarado — que
+   * es el default correcto (exclusivo), no un fallback inventado.
+   */
+  cupoTechoMaximo: number;
 }
 
 function aHoraCorta(v: string): string {
@@ -297,6 +325,32 @@ export async function actualizarOfertaPaseo(
 
 const SELECT_FRANJA = 'id, dia_semana, hora_inicio, hora_fin, duracion_slot_minutos, max_citas_por_slot, activo';
 
+/**
+ * EL TOPE DEL PRESTADOR — el mayor `cupo_techo` entre sus oficios ACTIVOS.
+ *
+ * Interno a propósito: **no es un lector nuevo de la puerta única**, es el
+ * cálculo que `FranjaHorario.cupoTechoMaximo` necesita, en UN solo lugar. *Si
+ * viviera copiado en los cuatro sitios que devuelven una franja, el día que el
+ * criterio cambie (D-638 → franjas por servicio) quedarían tres viejos.*
+ *
+ * Devuelve `1` si falla o si no hay oficios con techo: es el default exclusivo
+ * del motor, no un número inventado.
+ */
+async function techoMaximoDe(prestadorId: string): Promise<number> {
+  const { data, error } = await getClient()
+    .from('prestador_servicios')
+    .select('tipo_servicio, tipos_servicio!inner(cupo_techo)')
+    .eq('prestador_id', prestadorId)
+    .eq('activo', true);
+  if (error || !Array.isArray(data)) return 1;
+  let max = 1;
+  for (const fila of data) {
+    const v = (fila as { tipos_servicio?: { cupo_techo?: number | null } | null }).tipos_servicio?.cupo_techo;
+    if (typeof v === 'number' && v > max) max = v;
+  }
+  return max;
+}
+
 function mapearFranja(fila: {
   id: string;
   dia_semana: number;
@@ -305,9 +359,10 @@ function mapearFranja(fila: {
   duracion_slot_minutos: number;
   max_citas_por_slot: number | null;
   activo: boolean;
-}): FranjaHorario {
+}, cupoTechoMaximo: number): FranjaHorario {
   return {
     id: fila.id,
+    cupoTechoMaximo,
     diaSemana: fila.dia_semana,
     horaInicio: aHoraCorta(fila.hora_inicio),
     horaFin: aHoraCorta(fila.hora_fin),
@@ -333,17 +388,35 @@ export async function obtenerFranjasHorario(
   const personaId = await resolverPersonaDeFranja(prestadorId, empleadoId);
   if (personaId === null) return falla(empleadoId === undefined ? 'error_desconocido' : 'empleado_invalido');
 
-  const { data, error } = await getClient()
-    .from('prestador_horarios')
-    .select(SELECT_FRANJA)
-    .eq('prestador_id', prestadorId)
-    .is('servicio_id', null)
-    .eq('empleado_id', personaId)
-    .order('dia_semana', { ascending: true })
-    .order('hora_inicio', { ascending: true });
+  /* Dos consultas y NO un join: PostgREST no puede saltar
+     prestador_horarios → prestador_servicios → tipos_servicio en un solo
+     select (no hay FK entre la franja universal y el tipo — justamente
+     porque la franja no es de un oficio, que es D-638 entero). El techo se
+     resuelve aparte y se reparte a las filas. */
+  /* En paralelo y NO por join: PostgREST no puede saltar
+     prestador_horarios → prestador_servicios → tipos_servicio en un solo
+     select — no hay FK entre la franja universal y el tipo, justamente
+     porque la franja NO es de un oficio (D-638 entero en una línea).
 
-  if (error || !Array.isArray(data)) return falla('error_desconocido');
-  return { ok: true, data: data.map(mapearFranja) };
+     ⚠️ Y UN FALLO DEL TECHO NO TUMBA LAS FRANJAS: `techoMaximoDe` cae a 1 en
+     vez de propagar el error. El techo es una AYUDA de la superficie (cuánto
+     puede pedir); las franjas son EL DATO. *Caer entero por no poder calcular
+     una ayuda le sacaría al prestador su horario para no poder decirle su
+     tope.* */
+  const [franjas, cupoTechoMaximo] = await Promise.all([
+    getClient()
+      .from('prestador_horarios')
+      .select(SELECT_FRANJA)
+      .eq('prestador_id', prestadorId)
+      .is('servicio_id', null)
+      .eq('empleado_id', personaId)
+      .order('dia_semana', { ascending: true })
+      .order('hora_inicio', { ascending: true }),
+    techoMaximoDe(prestadorId),
+  ]);
+
+  if (franjas.error || !Array.isArray(franjas.data)) return falla('error_desconocido');
+  return { ok: true, data: franjas.data.map((f) => mapearFranja(f, cupoTechoMaximo)) };
 }
 
 export interface InputCrearFranja {
@@ -382,7 +455,12 @@ export async function crearFranjaHorario(
   }
   if (!HORA_RE.test(input.horaInicio) || !HORA_RE.test(input.horaFin)) return falla('rango_horario_invalido');
   if (input.horaFin <= input.horaInicio) return falla('rango_horario_invalido');
-  if (!Number.isInteger(input.maxCitasPorSlot) || input.maxCitasPorSlot < 1 || input.maxCitasPorSlot > 4) {
+  /* ☠️ EL `> 4` HARDCODEADO MUERE ACÁ TAMBIÉN (S85). Eran CUATRO guards con el
+     mismo número copiado; con `cupo_techo` del paseo en 10, los cuatro habrían
+     rebotado `cupo_invalido` sobre un valor que el motor acepta. El tope se
+     PREGUNTA al catálogo, no se recuerda. */
+  const techoCrear = await techoMaximoDe(input.prestadorId);
+  if (!Number.isInteger(input.maxCitasPorSlot) || input.maxCitasPorSlot < 1 || input.maxCitasPorSlot > techoCrear) {
     return falla('cupo_invalido');
   }
 
@@ -420,7 +498,7 @@ export async function crearFranjaHorario(
     .single();
 
   if (error || data === null) return falla('error_desconocido');
-  return { ok: true, data: mapearFranja(data) };
+  return { ok: true, data: mapearFranja(data, techoCrear) };
 }
 
 export interface InputActualizarFranja {
@@ -435,9 +513,27 @@ export async function actualizarFranjaHorario(
 ): Promise<ResultadoWrapper<FranjaHorario, CodigoErrorConfiguracionPaseo>> {
   if ((await uidActual()) === null) return falla('sin_sesion');
 
+  /* ☠️ ACÁ VIVÍA UN `> 4` HARDCODEADO, y era el freno REAL del caso del
+     founder — más que el cupo de las franjas.
+     Con `cupo_techo` del paseo en 10 (firma del 3-ago), este guard **habría
+     rebotado `cupo_invalido` al intentar subir a 5..10**: el motor permitía y
+     la puerta única no. *Un número de plataforma copiado en un wrapper es
+     letra muerta el día que la plataforma cambia — y su modo de falla es el
+     peor, porque el rebote llega tipado y creíble.*
+     Ahora el tope se PREGUNTA, no se recuerda. */
+  const franjaPrevia = await getClient()
+    .from('prestador_horarios')
+    .select('prestador_id')
+    .eq('id', input.id)
+    .maybeSingle();
+  if (franjaPrevia.error) return falla('error_desconocido');
+  if (franjaPrevia.data === null) return falla('no_encontrada');
+
+  const techo = await techoMaximoDe(franjaPrevia.data.prestador_id);
+
   if (
     input.maxCitasPorSlot !== undefined &&
-    (!Number.isInteger(input.maxCitasPorSlot) || input.maxCitasPorSlot < 1 || input.maxCitasPorSlot > 4)
+    (!Number.isInteger(input.maxCitasPorSlot) || input.maxCitasPorSlot < 1 || input.maxCitasPorSlot > techo)
   ) {
     return falla('cupo_invalido');
   }
@@ -455,7 +551,7 @@ export async function actualizarFranjaHorario(
 
   if (error) return falla('error_desconocido');
   if (data === null) return falla('no_encontrada');
-  return { ok: true, data: mapearFranja(data) };
+  return { ok: true, data: mapearFranja(data, techo) };
 }
 
 export interface InputEditarFranja {
@@ -489,9 +585,14 @@ export async function editarFranjaHorario(
 
   if (!HORA_RE.test(input.horaInicio) || !HORA_RE.test(input.horaFin)) return falla('rango_horario_invalido');
   if (input.horaFin <= input.horaInicio) return falla('rango_horario_invalido');
+  /* ☠️ EL `> 4` HARDCODEADO MUERE ACÁ TAMBIÉN (S85). Eran CUATRO guards con el
+     mismo número copiado; con `cupo_techo` del paseo en 10, los cuatro habrían
+     rebotado `cupo_invalido` sobre un valor que el motor acepta. El tope se
+     PREGUNTA al catálogo, no se recuerda. */
+  const techoEditar = await techoMaximoDe(input.prestadorId);
   if (
     input.maxCitasPorSlot !== undefined &&
-    (!Number.isInteger(input.maxCitasPorSlot) || input.maxCitasPorSlot < 1 || input.maxCitasPorSlot > 4)
+    (!Number.isInteger(input.maxCitasPorSlot) || input.maxCitasPorSlot < 1 || input.maxCitasPorSlot > techoEditar)
   ) {
     return falla('cupo_invalido');
   }
@@ -537,7 +638,7 @@ export async function editarFranjaHorario(
 
   if (error) return falla('error_desconocido');
   if (data === null) return falla('no_encontrada');
-  return { ok: true, data: mapearFranja(data) };
+  return { ok: true, data: mapearFranja(data, techoEditar) };
 }
 
 /**

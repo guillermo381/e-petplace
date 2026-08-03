@@ -228,6 +228,27 @@ function mapearFranjaServicio(fila: {
  * Las franjas POR SERVICIO de las ofertas dadas, DE UNA PERSONA.
  * S78-A2: `empleadoId` ausente = el titular (contrato V0).
  */
+/** El tope del prestador — gemelo declarado del de `configuracionPaseo`.
+ *  ⚠️ **Dos cuerpos del MISMO cálculo, y se declara en vez de esconderse:**
+ *  viven en wrappers distintos y no hay dónde compartirlo sin crear un módulo
+ *  para tres líneas. **Su condición de unificación es D-638 (d):** cuando las
+ *  franjas sean POR SERVICIO, el techo sale del servicio de la franja y los dos
+ *  desaparecen juntos. Hasta entonces, si uno cambia el otro también. */
+async function techoMaximoDeServicios(prestadorId: string): Promise<number> {
+  const { data, error } = await getClient()
+    .from('prestador_servicios')
+    .select('tipo_servicio, tipos_servicio!inner(cupo_techo)')
+    .eq('prestador_id', prestadorId)
+    .eq('activo', true);
+  if (error || !Array.isArray(data)) return 1;
+  let max = 1;
+  for (const fila of data) {
+    const v = (fila as { tipos_servicio?: { cupo_techo?: number | null } | null }).tipos_servicio?.cupo_techo;
+    if (typeof v === 'number' && v > max) max = v;
+  }
+  return max;
+}
+
 export async function obtenerFranjasDeServicios(
   prestadorId: string,
   servicioIds: string[],
@@ -287,7 +308,12 @@ export async function crearFranjaServicio(
   }
   if (!HORA_RE.test(input.horaInicio) || !HORA_RE.test(input.horaFin)) return falla('rango_horario_invalido');
   if (input.horaFin <= input.horaInicio) return falla('rango_horario_invalido');
-  if (!Number.isInteger(input.maxCitasPorSlot) || input.maxCitasPorSlot < 1 || input.maxCitasPorSlot > 4) {
+  /* ☠️ EL `> 4` HARDCODEADO MUERE ACÁ TAMBIÉN (S85). Eran CUATRO guards con el
+     mismo número copiado; con `cupo_techo` del paseo en 10, los cuatro habrían
+     rebotado `cupo_invalido` sobre un valor que el motor acepta. El tope se
+     PREGUNTA al catálogo, no se recuerda. */
+  const techoCrear = await techoMaximoDeServicios(input.prestadorId);
+  if (!Number.isInteger(input.maxCitasPorSlot) || input.maxCitasPorSlot < 1 || input.maxCitasPorSlot > techoCrear) {
     return falla('cupo_invalido');
   }
 
