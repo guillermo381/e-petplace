@@ -259,6 +259,87 @@ porque la sede nunca se capturó.**
   parecen y tienen curas distintas — uno es de scroll automático y el
   otro de alto disponible.
 
+### ENMIENDA S84-C28 (2-ago) — el founder lo confirmó en dispositivo, y la medición encontró el patrón de la casa
+
+**CÓMO SE ENCUADRA, y es lo que importa para el 1-oct: no es defecto
+nuevo — vive desde S79, cuando Places entró.** Nadie lo encontró porque
+**nadie tenía motivo para llegar**: la sede se cargaba una vez, sin nada
+que la recompensara. **Lo destapó el mapa** — recién con la vitrina
+mostrando la zona alguien tuvo razón para escribir una dirección de
+verdad. *Un defecto de entrada solo aparece cuando algo le da valor a la
+entrada; hasta entonces el camino existe y nadie lo camina.*
+**El founder lo encontró porque sabía que estaba ahí. Cualquier otro
+concluye que el buscador no funciona.**
+
+**① DÓNDE VIVE — dos consumidores, ninguno en Hoja, y NO son iguales:**
+  · `cuenta/perfil.tsx:1185` — dentro de `EvitaTeclado` > `ScrollView`
+    (`keyboardShouldPersistTaps="handled"`), y además dentro de la
+    CUARTA `SeccionDesplegable`. El acordeón abre **una a la vez**
+    (`setAbierta((a) => (a === s ? null : s))`), así que con "Dónde
+    atendés" abierta las otras están plegadas.
+  · `sala-espera.tsx:215` — `ScrollView` **SIN `EvitaTeclado` y SIN
+    `keyboardShouldPersistTaps`**. Ver ⚠️ abajo: ahí hay DOS defectos
+    más, y uno es peor que este.
+  · **Ninguno es Hoja** ⇒ el borde de Hoja que la propuesta temía no
+    existe. *(El gemelo del cliente sí vive en Hoja a veces —
+    `direccion-hogar-form` en el checkout— pero son dos archivos
+    gemelos, no una pieza compartida: curar acá no lo toca.)*
+
+**② EL ESPACIO — NO ES MEDIBLE DESDE EL REPO, y digo por qué no bloquea.**
+Depende del alto del teclado del dispositivo. **Pero la cura de ③ no
+necesita ese número**: no acomoda la lista en el hueco que sobra — lleva
+el campo arriba y le entrega a la lista *todo* el alto restante. Si la
+lista de 5 no entra entera, entra la primera opción y el resto scrollea,
+que es exactamente lo que hoy no pasa.
+
+**③ SÍ EXISTE PATRÓN EN LA CASA — Y NO ES OVERLAY. Esto contradice la
+propuesta, y por eso lo levanto antes de construir.** La casa resuelve
+"algo apareció y hay que verlo" con **scroll medido**, dos veces, una en
+cada app, con la MISMA receta (`onLayout` → `posiciones.current` →
+`scrollTo({ y: Math.max(0, y - spacing[4]) })`):
+  · `apps/prestador/src/app/veterinaria/taller.tsx:348` — el ancla del
+    lápiz, `animated: false`.
+  · `apps/cliente/src/app/carnet.tsx:279` — la ficha rechazada por
+    `item_invalido`, `animated: true`.
+De los 27 `position:'absolute'` de las dos apps, **ninguno es un menú
+flotante**: son techos, filtros, encuadre de foto y el ícono animado.
+**Un overlay sobre un campo sería el primero de la casa** — y L-175 dice
+que antes de pedir pieza nueva se lee lo que hay.
+
+**⇒ EL FRENO NO DISPARA: la cura no pide pieza de overlay en
+`packages/ui`.** Lo único que cruza frontera es plumbing propio: el
+`ScrollView` lo tiene la PANTALLA y el campo lo tiene `SeccionSede`, así
+que la pieza necesita **una prop para pedir vista** y los dos
+consumidores se la pasan. Cero componente nuevo, cero `absolute`, cero
+`zIndex`, cero costo de B.
+
+**DESCARTADAS, con su porqué:**
+  · **Empujar con `KeyboardAvoidingView`** — descartada porque **ya está
+    puesta y es justamente lo que no alcanza**: `EvitaTeclado` ES un KAV,
+    y B ya le dio su vuelta de tuerca en S83-B36 (`height`→`padding`, por
+    L-193: bajo edge-to-edge SDK 57 la ventana no se achica). No hay una
+    segunda vuelta ahí: el KAV corre el CONTENEDOR, y el problema es que
+    **nadie mueve el SCROLL** cuando la lista nace 350 ms después.
+  · **Overlay anclado al campo creciendo hacia arriba** — funciona en
+    teoría, pero: (a) sería el primer menú flotante de la casa; (b)
+    `absolute` dentro de `ScrollView` en Android pelea con los hermanos
+    posteriores y obliga a `zIndex`/`elevation`; (c) **taparía justo el
+    texto que explica** — arriba del campo en el Perfil están el título
+    de sección, "se guarda aparte" y el aviso de dirección faltante, que
+    no es contenido pasivo sino la voz que dice qué hacer; (d) el scroll
+    medido no tapa nada y ya está probado dos veces.
+
+**⚠️ Y EL HALLAZGO QUE NO BUSCABA — `sala-espera.tsx` tiene DOS defectos
+propios, y el primero explica "el buscador no funciona" MEJOR que el
+teclado:**
+  · **sin `keyboardShouldPersistTaps`** el default es `'never'`: con el
+    teclado arriba, **el primer tap sobre una predicción solo cierra el
+    teclado y NO elige**. Hay que tocar dos veces. En el Perfil está en
+    `'handled'` y no pasa. *Es de una línea.*
+  · **sin `EvitaTeclado`**, el teclado tapa peor que en el Perfil.
+  · **Y es la pantalla donde MÁS duele**: la sala de espera es donde el
+    prestador nuevo carga su sede por primera vez.
+
 ---
 
 ## 6. LO QUE QUEDA ESPERANDO A OTROS
