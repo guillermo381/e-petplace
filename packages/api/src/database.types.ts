@@ -16620,6 +16620,7 @@ export type Database = {
           success: boolean
         }[]
       }
+      actualizar_nombre_comercial: { Args: { p_nombre: string }; Returns: Json }
       agregar_incidencia_atencion: {
         Args: {
           p_atencion_id: string

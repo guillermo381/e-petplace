@@ -50,7 +50,22 @@ import type { ResultadoWrapper } from '../resultado';
 export const TIPOS_DOCUMENTO_FIGURA = ['cedula', 'ruc'] as const;
 
 /** Los del eje ② — solo veterinaria, encima del ①. */
-export const TIPOS_DOCUMENTO_OFICIO_VET = ['titulo_profesional', 'registro_senescyt'] as const;
+export const TIPOS_DOCUMENTO_OFICIO_VET = [
+  'titulo_profesional',
+  'registro_senescyt',
+  /* S85 (pedido de C): el PERMISO DEL ESTABLECIMIENTO entra al eje ②.
+     ⚠️ Y NO GATEA — es coherente con la letra, no una excepción a ella:
+     `LETRA_PERFIL_S79` §6 dice que **la credencial de la PERSONA gatea la
+     oferta médica** y que el permiso del establecimiento (AGROCALIDAD,
+     funcionamiento) **se RECOLECTA**.
+     Lo que lo vuelve seguro no es la intención sino la MEDICIÓN: el gate vive
+     en SQL —`_trg_ps_verificacion_profesional` compara contra
+     `('titulo_profesional','registro_senescyt')` literales— y **no lee esta
+     constante**; y en TS este arreglo **solo compone la unión**, no se usa como
+     predicado en ningún lado (censado antes de tocarlo).
+     ⇒ agregarlo acá le da PANTALLA, no PODER. */
+  'permiso_funcionamiento',
+] as const;
 
 /**
  * LA TERCERA CAPA — opcionales (S85, firma del founder). Migración

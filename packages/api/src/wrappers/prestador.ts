@@ -525,3 +525,86 @@ export async function puedeEncenderVitrina(): Promise<ResultadoWrapper<boolean, 
   if (error) return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
   return { ok: true, data: data === true };
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// S85-A · EL NOMBRE COMERCIAL — UN NOMBRE, DOS CASAS
+//
+// Firma: *"la portada edita el nombre; el fiscal lo exhibe."*
+// Adjudicación de mesa (S85): gana la salida (a) de C — **el acto escribe LAS
+// DOS columnas, nunca una sola.**
+//
+// ⚠️ POR QUÉ VIVE ACÁ Y NO EN `cuentaComercial.ts`, que es la duda razonable
+// porque toca su tabla: **el editor es la PORTADA**, y la portada es del
+// prestador. *El wrapper vive donde vive su llamador; que además escriba en la
+// casa fiscal es implementación, y por eso está escondida en una RPC y no
+// repartida en dos llamadas desde la pantalla.*
+//
+// ⚠️ NO HAY UN `actualizarNombreComercial` EN `cuentaComercial.ts` Y NO DEBE
+// HABERLO. Si alguien agrega uno "para el lado fiscal", vuelve a existir el
+// camino que escribe UNA sola columna — y la divergencia que esta pieza vuelve
+// inexpresable pasa a ser expresable otra vez, por la puerta de al lado.
+// ─────────────────────────────────────────────────────────────────────────
+
+const CODIGOS_NOMBRE = [
+  'sin_sesion',
+  'nombre_vacio',
+  'no_es_titular',
+  'sin_cuenta_comercial',
+  'no_es_owner_de_la_cuenta',
+  'error_desconocido',
+] as const;
+export type CodigoErrorNombreComercial = (typeof CODIGOS_NOMBRE)[number];
+
+const MENSAJES_NOMBRE: Record<CodigoErrorNombreComercial, string> = {
+  sin_sesion:               'No hay sesión activa.',
+  // NO dice "inválido": las dos columnas son NOT NULL, así que vaciarlo no es
+  // una opción que exista. Se dice qué hacer, no qué se hizo mal.
+  nombre_vacio:             'El nombre de tu negocio no puede quedar vacío.',
+  no_es_titular:            'Solo el titular del negocio puede cambiar su nombre.',
+  // estado REAL del alta, no teórico: la cuenta puede no existir todavía.
+  sin_cuenta_comercial:     'Todavía no tienes una cuenta comercial. Créala antes de cambiar el nombre.',
+  no_es_owner_de_la_cuenta: 'Solo quien es titular de la cuenta comercial puede cambiar el nombre.',
+  error_desconocido:        'Ocurrió un error inesperado. Prueba de nuevo.',
+};
+
+/**
+ * Cambia el nombre comercial en **`prestadores` Y `cuentas_comerciales`**, en
+ * una sola transacción del server (RPC `actualizar_nombre_comercial`).
+ *
+ * **La atomicidad es el punto, no un detalle:** dos UPDATE desde acá **pueden
+ * fallar por separado**, y el resultado —la portada con el nombre nuevo y el
+ * documento fiscal con el viejo— **no da error, no rompe nada y nadie lo
+ * descubre**, porque cada pantalla lee su propia columna y las dos se ven
+ * correctas. *Una transacción lo vuelve inexpresable.*
+ *
+ * Medido al construir: las 7 filas vivas **coincidían**. Esto no repara una
+ * divergencia — **impide la primera**.
+ */
+export async function actualizarNombreComercial(
+  nombre: string,
+): Promise<ResultadoWrapper<{ nombre: string }, CodigoErrorNombreComercial>> {
+  const { data, error } = await getClient().rpc('actualizar_nombre_comercial', {
+    p_nombre: nombre,
+  });
+
+  if (error) {
+    /* Normalizado por `startsWith` y no por igualdad: la RPC levanta
+       `RAISE EXCEPTION '<codigo>'` y PostgREST puede envolverlo con detalle
+       (L-115). Un `===` acá haría caer TODO al genérico y la pantalla diría
+       "error inesperado" sobre un rebote perfectamente explicable. */
+    const raw = error.message ?? '';
+    const codigo =
+      CODIGOS_NOMBRE.find((c) => c !== 'error_desconocido' && raw.startsWith(c)) ??
+      (raw.startsWith('auth_required') ? 'sin_sesion' : 'error_desconocido');
+    return { ok: false, codigo, mensaje: MENSAJES_NOMBRE[codigo] };
+  }
+
+  /* Guard de shape contra el RETURNS real (`jsonb` con ok/nombre) — L-124.
+     Si el server devuelve otra cosa, NO se inventa el eco del input: eso
+     pintaría como guardado algo que no sabemos que se guardó. */
+  const d = data as { ok?: unknown; nombre?: unknown } | null;
+  if (d === null || typeof d.nombre !== 'string') {
+    return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES_NOMBRE.error_desconocido };
+  }
+  return { ok: true, data: { nombre: d.nombre } };
+}

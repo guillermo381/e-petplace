@@ -60,6 +60,8 @@ export {
   // S79-T4.1: los códigos del camino de escritura de la sede.
   type CodigoErrorPerfilPrestador,
   // S79-T4.6: la ceremonia del primer ingreso (mata el puente AsyncStorage de B).
+  actualizarNombreComercial,
+  type CodigoErrorNombreComercial,
   registrarPrimerIngreso,
   type PrimerIngreso,
   // S78-A8 (pedido de B): el lector del gate de la vitrina.
