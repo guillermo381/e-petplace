@@ -103,6 +103,34 @@ dice así en vez de sumar un total que no medí.*
 > declara**, en vez de heredar un número que nadie contó.* **Ésta es la línea que
 > hay que actualizar al cerrar.**
 
+### ⚠️ Y UN CASO GEMELO EN LA OTRA DIRECCIÓN: LA LISTA DE CIERRE
+
+**Frase de B (S84), y va al acta por pedido de la mesa:**
+
+> **UNA LISTA DE CIERRE QUE DICE "TODO ADENTRO" CUANDO FALTA ALGO ES EL DATO QUE
+> DESPUÉS NADIE VUELVE A VERIFICAR.**
+
+**El caso, y lo pagué yo:** el pedido de congelación del bundle de cierre decía
+*"lo de B ya en main"*. **Era falso** — el glifo `documento` estaba afuera, cero
+ocurrencias en el ancla. **Lo verificó B por contenido; yo lo había afirmado sin
+medirlo.**
+
+**Y es la contracara exacta del hallazgo de los frenos.** Los frenos dicen *"no
+se puede"* y **nadie verifica por qué algo NO se hizo**. Una lista de cierre dice
+*"está todo"* y **nadie vuelve a verificar un inventario que ya se dio por
+completo**. *Las dos se archivan como resueltas — una como prudencia, la otra
+como cierre— y las dos dejan de mirarse.*
+
+**Lo que lo vuelve peor que un error de conteo:** un cierre es **el momento en
+que la sesión deja de mirar**. Un ítem que se declaró adentro y no lo está **no
+tiene una segunda oportunidad de ser notado**: la sesión siguiente lee el acta,
+no el árbol.
+
+*Es la candidata #17 aplicada a mi propio inventario: afirmé sin medir, y lo que
+afirmé era justo lo que nadie iba a re-chequear.*
+
+---
+
 ### 🔴 EL ÚNICO FALSO — y lo fabricó una verificación que funcionaba
 
 **D-622.** Un cinturón preguntaba `count(*) WHERE whatsapp = '3208408790'` y
