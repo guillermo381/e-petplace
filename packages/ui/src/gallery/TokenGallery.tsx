@@ -1081,7 +1081,11 @@ function EjemploSetBPrima() {
     // S84-B20: DOCUMENTO en dos candidatos. Van pegados a `carnet` y
     // `cuenta` a propósito: son los dos prestados que fallaron por ley, y
     // a 21px hay que ver que el nuevo NO se confunda con ninguno.
-    'documento', 'documentoSello',
+    // S84-B21: los TRES de "Datos comerciales" JUNTOS y en orden de
+    // pantalla — lo que hay que ver a 21px no es que cada uno se
+    // entienda, sino que los tres SE DISTINGAN ENTRE SÍ. Y quedan
+    // pegados a 'pagos' y 'presupuesto', que son sus vecinos de idioma.
+    'documento', 'documentoSello', 'fiscal', 'bancario',
   ]
   return (
     <View style={{ gap: spacing[4] }}>
