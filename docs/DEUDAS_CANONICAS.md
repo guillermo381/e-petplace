@@ -2948,7 +2948,46 @@ quotePath=false  → docs/DISEÑO_EXPERIENCIA.md
 
 > **☠️ CONDICIÓN DE MUERTE:** se retira cuando el hook lea las rutas sin escapes — la cura es de una línea y hay dos formas, las dos legales: `git -c core.quotePath=false diff --cached --name-only` dentro del propio script, o `-z` con `read -d ''` (que además vuelve inmune el bucle a nombres con espacios, hueco vecino que hoy nadie probó). **Verificación exigible: su rojo producido al revés** — un commit de `docs/DISEÑO_EXPERIENCIA.md` con `TERRITORIO="docs"` tiene que pasar, y uno con `TERRITORIO="packages"` tiene que seguir abortando. Sin las dos mitades no está curado (L-192). **Quién la retira:** la pista dueña del hook (B, que lo construyó en S82-B r28). Origen: S83-A3 (rojo producido contra un commit propio y legítimo).
 
-#### D-595 — El GPS asume UN paseo por vez, y el oficio real es SIMULTÁNEO 🔴 CONTRA UNA VERDAD DE PRODUCTO
+#### D-595 — El GPS asume UN paseo por vez, y el oficio real es SIMULTÁNEO ☠️ **CERRADA (S85)** — verificada en campo por el founder
+
+> ## ☠️ CERRADA — 3-ago-2026, gate de campo del founder
+>
+> **Su literal, y es exactamente la condición de muerte que la ficha pedía:**
+>
+> > *"lo dejé al cerrar la otra en 104 y ya va en 159, sigue funcionando"*
+>
+> **Dos paseos simultáneos del mismo paseador, y el track de cada uno leído
+> correcto y SEPARADO en el teléfono.** *Cerrar uno ya no apaga la captura del
+> otro* — que era el segundo defecto, el que la ficha original **no nombraba** y
+> apareció al medir.
+>
+> **L-153 al pie: la vara no la declara quien construye.** El número lo contó el
+> founder en su aparato, no un fixture.
+>
+> ### ⚠️ EL HALLAZGO QUE LA ACOMPAÑA, y vale más que el cierre
+>
+> > **LA SIMULTANEIDAD NUNCA HABÍA TENIDO GATE DE CAMPO — Y LOS DOS BUGS SE
+> > TAPABAN MUTUAMENTE.**
+>
+> **El de capacidad de franjas** (`max_citas_por_slot=1` ⇒ el slot desaparece al
+> primer reserva) **hacía imposible reservar dos paseos a la vez.** Sin dos
+> paseos a la vez, **el bug del GPS no podía manifestarse**. Y al revés: quien
+> hubiera curado el GPS primero **no habría podido probarlo**, porque la agenda
+> no le dejaba crear el caso.
+>
+> *Cada uno era la razón por la que el otro no se veía.* **Se curaron los dos, y
+> ninguno de los dos se podía cerrar sin el otro.**
+>
+> **Lo que esto enseña sobre las condiciones de muerte:** esta ficha exigía *"un
+> seed de dos paseos simultáneos"* **y tenía razón en exigirlo** — pero el seed
+> era imposible de fabricar por la app mientras el otro bug viviera. *Una
+> condición de muerte puede estar bien escrita y ser inalcanzable por una causa
+> que la ficha no conoce.* **⇒ cuando una condición no se cumple durante varias
+> sesiones, la pregunta no es solo "¿quién la paga?" sino "¿se puede
+> cumplir?".*** Es la hermana operativa de D-630, que se destrabó cambiando la
+> FORMA de su condición y no su dueño.
+
+#### D-595 — El GPS asume UN paseo por vez, y el oficio real es SIMULTÁNEO 🔴 CONTRA UNA VERDAD DE PRODUCTO (texto original, conservado)
 🔴 **ALTA — abierta por el gate del founder sobre el lote S81 (S83), y no es un bug de borde: choca con cómo funciona el oficio.** **La verdad de producto, declarada por el founder en el gate:** *"varios paseos simultáneos es lo natural del oficio"* — un paseador saca tres perros de tres familias en la misma salida, y eso **no es una excepción: es el caso normal**, el que sostiene su economía. El motor de la casa **ya lo sabe** desde S67-V0: la ocupación se calcula por PERSONA y el paseo tiene `cupo_techo` 4 (`tipos_servicio`), justamente para permitirlo — y S59 registró la salida grupal como hallazgo de gate (hoy **D-385**, la fila única con pila de caras).
 
 **Lo que no lo sabe es la captura de GPS.** El track se arma alrededor de UNA atención en curso: la sesión de captura, su buffer y su cierre están escritos para un `atencion_id`, así que **dos paseos vivos a la vez no tienen dos tracks — tienen uno, o se pisan.** Es la clase de D-512 al revés: acá el MOTOR entiende el caso y **la superficie/captura no**.

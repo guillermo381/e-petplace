@@ -360,6 +360,52 @@ quedó descartado por lo contrario: es acumulación sin propósito.
 2. **Degrada visualmente** — `DIRECCION_ARTE` Ley 8: la huella pasa a tinta,
    jamás color. Y §8.5: **cero push, cero comercial, cero recordatorio.**
 
+#### A3.5bis — LA REGLA DE ALCANCE (FIRMADA por el founder, 3-ago-2026)
+
+> **Es la ley que faltaba para la pantalla Datos.** A3.1 dice que el ACTO decide
+> qué se muestra y el ROL qué se puede mostrar; **A3.5 dice qué no ve NADIE.**
+> Faltaba el medio: **qué ve un prestador sobre el aporte de OTRO prestador.**
+
+**Los tres niveles, y no hay un cuarto:**
+
+| nivel | quién | qué ve |
+|---|---|---|
+| **① EL PISO — todos** | **todo prestador con acceso** | **identidad** y **alertas de seguridad** |
+| **② EL DETALLE** | **quien lo hizo** · **quien lo necesita para atender** | el **contenido** del aporte |
+| **③ LA EXISTENCIA** | **los demás** | **que existe y quién lo hizo** — **no el contenido** |
+
+### Por qué el ③ no es "no ver", y es la mitad que se pierde al implementar
+
+**El tercero es el que hace que esta ley no sea un permiso más.** *La opción
+cómoda sería binaria —lo ves o no lo ves—, y estaría mal en las dos
+direcciones:*
+
+- **Ocultar que el aporte EXISTE** deja al prestador atendiendo **contra un
+  expediente que le miente por omisión**: no sabría que hay algo que no está
+  viendo, y por lo tanto **no sabría que tiene que preguntar**.
+- **Mostrar el contenido a todos** convierte el expediente en un tablón — y
+  rompe lo que A3.5 protege.
+
+> **Ver que existe y quién lo hizo NO es una versión degradada de ver el
+> contenido: es un dato distinto y suficiente.** *Le dice al prestador a quién
+> pedirle lo que le falta* — y eso es exactamente el handshake entre prestadores
+> que `EL NORTE` promete, en vez de un muro mudo.
+
+**Y se apoya en una ley que ya rige:** **A3.6 — la procedencia se muestra
+SIEMPRE.** *El "quién lo hizo" del nivel ③ no es una concesión nueva: es la
+procedencia, que nunca estuvo en discusión.* Lo que ③ agrega es que **la
+procedencia sobrevive aunque el contenido no viaje.**
+
+### Lo que esta regla NO decide
+
+1. **Qué cuenta como *"lo necesita para atender"*** — hoy lo resuelve la matriz
+   `oficio × eje` de **A3.3** (el vet ve el eje 3 COMPLETO, el resto DESTILADO).
+   *Esta regla no la reemplaza: le pone el piso y el borde.*
+2. **La cara de la revocación** (D-465) y **el `oficio` en el otorgamiento**
+   (D-463) siguen como estaban.
+
+---
+
 #### A3.10 — QUÉ HABILITA CONSTRUIR
 
 Con esta letra firmada, **P3 puede entrar a M1 (boceto)** con mecanismo
