@@ -97,6 +97,12 @@ trae el hallazgo, con o sin condición de freno explícita en la orden.
 medida** (B14, B16)—. **No los censé uno por uno: son de su territorio.** *Se
 dice así en vez de sumar un total que no medí.*
 
+> **⚠️ EL "ONCE" NO ERA UNA MEDICIÓN — lo declara la propia mesa (S84-A30):** era
+> su número, no un censo. **Se le pidió el suyo a C y a B.** *Si llegan, el total
+> del acta es medido; si no llegan, **el acta dice NUEVE —los censados— y lo
+> declara**, en vez de heredar un número que nadie contó.* **Ésta es la línea que
+> hay que actualizar al cerrar.**
+
 ### 🔴 EL ÚNICO FALSO — y lo fabricó una verificación que funcionaba
 
 **D-622.** Un cinturón preguntaba `count(*) WHERE whatsapp = '3208408790'` y
@@ -149,7 +155,8 @@ instrumentos que miden mal; **ésta mide bien y cuenta mal.**
 
 > **⚠️ HUECO DECLARADO — la candidata del BARRIDO CASE-SENSITIVE NO EXISTE.** La
 > mesa la nombró en su lista al pedir esta acta, y **el grep en el archivo da
-> cero**. **No la invento acá:** o la deposita quien la midió (parece de C), o se
+> cero**. *(**Resuelto S84-A30:** la mesa declara que la nombró sin verificar —
+> es de C y se la pidió. **El hueco era de la lista, no del archivo.**)* **No la invento acá:** o la deposita quien la midió (parece de C), o se
 > cae. *Es exactamente el caso de L-169 en S77 — una lección citada como
 > existente que nunca se escribió—, y por eso se declara en vez de completarse.*
 
@@ -189,6 +196,15 @@ exponía de más.**
 - **El último lote de C y su gate.**
 - El **censo de enmiendas** (`…-s84-censo-de-enmiendas.md`) y el **estado
   medido** (`…-s84-estado-medido.md`).
-- **El burn-down de la regla 81** — declarado pendiente, no medido todavía. *Si
-  S84 cierra sin él, es la tercera sesión seguida* (S82 y S83 tampoco lo
-  tuvieron).
+### ⚠️ EL BURN-DOWN — decidido, no arrastrado
+
+**La mesa decidió en S84: NO se mide acá.** Se declara por **tercera sesión
+seguida**, con su agravante escrito y **con condición nueva** — porque la vieja
+estaba redactada en la forma que la candidata de B señala como la que nunca se
+cumple (*"cuando alguien mida"*), y no se cumplió tres veces.
+
+**Lo que cambia: deja de ser un conteo a mano y nace como SCRIPT**
+(`scripts/burn-down.mjs`), con **quién** (la pista A de S85) y **cuándo** (su
+PRIMERA tarea, antes de cualquier orden de construcción). *Un conteo manual de 54
+pantallas × 2 ejes compite contra construir y pierde siempre; un comando, no.*
+**Ficha D-630**, y si S85 cierra sin él **no se re-declara: se escala.**

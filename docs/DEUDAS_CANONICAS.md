@@ -4366,3 +4366,56 @@ declara nuestro estado y que nadie va a volver a leer.*
 > **☠️ CONDICIÓN DE MUERTE:** se retira **cuando S86 cierre**, con sus cuatro
 > puntos atendidos o re-adjudicados con fecha. **Es un índice: no se cierra
 > parcialmente sin decir qué quedó afuera.**
+
+---
+
+#### D-630 — EL BURN-DOWN DE LA REGLA 81: TERCERA SESIÓN SEGUIDA SIN MEDIRSE 🟠
+
+**Decisión de la mesa (S84): NO se mide en S84.** Se declara — y se declara con
+su agravante escrito, que es lo que esta ficha existe para no dejar mudo:
+
+> **UNA DEUDA QUE SE DECLARA TRES VECES SIN PAGARSE DEJA DE SER UNA DEUDA Y PASA
+> A SER UNA COSTUMBRE.**
+
+**El historial, sin maquillaje:** la regla 81 pide un burn-down **por sesión**, en
+**dos ejes** (mecánica · composición) desde su enmienda de S81. **S82 lo declaró
+faltante** (*"el inventario C3 nunca llegó a esta sesión"*). **S83 lo declaró
+otra vez** (*"sigue sin tabla, por segunda sesión seguida"*). **S84 es la
+tercera.**
+
+### POR QUÉ NO SE PAGA, medido y no supuesto
+
+**Su condición estaba escrita en la forma que la candidata de B (D-626) señala
+como la que nunca se cumple: *"cuando alguien mida"*.** Y no se cumplió tres
+veces seguidas — **no por desidia, sino porque un conteo a mano de 54 pantallas
+× 2 ejes compite cada sesión contra construir, y pierde siempre.**
+
+*Declararla una cuarta vez con la misma forma sería repetir el experimento
+esperando otro resultado.*
+
+### LA CONDICIÓN NUEVA — con QUIÉN y CUÁNDO, y hecha para cumplirse sola
+
+**① QUIÉN: la pista A de S85.** No "quien pueda": **la que arrastra la deuda es
+quien la paga**, y esta pista la arrastró tres veces.
+
+**② CUÁNDO: como PRIMERA tarea de S85, antes de tomar cualquier orden de
+construcción.** *Es lo único que la saca de competir contra el trabajo: si compite,
+pierde — ya está probado tres veces.* **Observable sin interpretación: si el
+primer commit de A en S85 no es el burn-down, no se hizo.**
+
+**③ Y LA FORMA, que es lo que la vuelve una condición de las que se cumplen
+solas: NO se cuenta a mano — nace como SCRIPT.**
+`scripts/burn-down.mjs`, del molde de `verify-diseno.mjs`, que ya censa pantallas
+del prestador y sabe leer sus piezas. Cuenta los dos ejes y los imprime.
+
+> **Ésa es la conversión que la candidata de B pide:** *"cuando alguien mida Y"*
+> **pasa a ser** *"cuando exista el script"*. **Lo primero depende de que alguien
+> decida mirar; lo segundo es un archivo que está o no está.** Y una vez que
+> existe, **el burn-down de cada sesión cuesta correr un comando** — deja de
+> competir contra construir para siempre.
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando **exista `scripts/burn-down.mjs`**
+> y su salida esté en el acta de S85. **Verificable de dos greps**, ninguno
+> interpretable. **Si S85 cierra sin él, la ficha NO se re-declara: se escala** —
+> cuatro declaraciones sin pago dejan de ser una deuda de trabajo y pasan a ser
+> una de gobierno, y eso es de la mesa, no de la pista.
