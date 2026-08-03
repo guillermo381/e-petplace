@@ -4908,3 +4908,53 @@ importa: **doce de veinticuatro** reglas del lint estaban en esa condición.*
 > **Verificable por grep**, sin interpretación. **Nace y muere en S85 si B
 > cierra** — y si no cierra, se hereda con el número medido, no con "faltan
 > algunas".
+
+---
+
+#### D-637 — `profiles.nombre` NO TIENE SUPERFICIE DE EDICIÓN EN LA APP DEL PRESTADOR ⚪ REGISTRO (consecuencia ACEPTADA, no defecto)
+
+**Origen: hallazgo de C al cerrar el lote Cuenta (S85).** La pantalla
+`cuenta/identidad` —la única del prestador que escribía `profiles.nombre` vía
+`actualizarMiPerfil`— **murió en el lote** (`d2a1fea`), cuando lo personal se
+reordenó en la IA de cuatro puertas.
+
+> **⇒ Desde la app del prestador, un nombre personal mal sembrado NO SE PUEDE
+> CORREGIR.**
+
+### POR QUÉ ESTO NO ES UN BUG, y por qué igual tiene ficha
+
+**LA MESA LO ACEPTA COMO PRECIO DE LA DECISIÓN.** El lote reordenó Cuenta por
+**audiencia**, y `profiles` es la persona-usuaria, no el negocio: *meter la
+edición del nombre personal adentro de la puerta del negocio habría sido
+devolver la mezcla de registros que `LETRA_PERFIL_S79` §1 existe para impedir.*
+
+**Y hay un dato que lo vuelve más que teórico:** `handle_new_user` siembra
+`nombre` desde el **local-part del correo** cuando la metadata no trae nada
+(medido en S81: **los 6 activos de entonces tenían username-como-nombre**). ⇒ el
+caso *"mi nombre dice `guillo381`"* **es el caso normal, no el raro** — y hoy el
+prestador no tiene dónde arreglarlo.
+
+### DÓNDE VIVE LA CORRECCIÓN, que es lo que esta ficha existe para no perder
+
+| camino | estado |
+|---|---|
+| **la app del CLIENTE** | `(tabs)/cuenta/perfil.tsx` **sí** escribe `nombre` — misma persona, mismo `profiles`, otra app |
+| **el admin** | por `service_role`/DEFINER, uno por uno |
+| la app del prestador | **no existe, y es la decisión** |
+
+> **La consecuencia fina, que es la que muerde:** *un prestador que NO es
+> también dueño de mascota en el ecosistema **no tiene ninguna app donde
+> corregirse el nombre**.* Hoy no duele —los prestadores vivos son cuentas del
+> founder— pero **duele el día que un prestador reclutado lo pida**, y ahí la
+> respuesta no puede ser "no se puede": es admin, o es una superficie nueva.
+
+**⚠️ Y NO SE CURA CLONANDO EL CAMPO.** Meter un `Campo` de nombre en la puerta
+del negocio deshace la decisión de audiencia que el lote acaba de firmar. *Si
+alguna vez hace falta, es una puerta PERSONAL propia, con su letra* — la misma
+distinción que separa la sede (registro 2) de la persona (registro 3).
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando **un prestador real pida
+> corregirse el nombre** y la mesa decida su camino (admin · app del cliente ·
+> superficie personal nueva). **Si nadie lo pide nunca, la ficha muere sin
+> trabajo** — que es el desenlace correcto. *No se retira construyendo la
+> pantalla por las dudas.*
