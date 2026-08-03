@@ -296,7 +296,20 @@ export const palette = {
   pinkBorderSuave:   'rgba(255,0,175,.21)',   // border comunidad dark (paridad perceptual)
   verdeAlpha15:      'rgba(144,255,139,.15)',
   verdeAlpha10:      'rgba(144,255,139,.10)',
-  violetAlpha15:     'rgba(158,58,255,.15)',
+  // S85-B4 · BAJA DE .15 A .12 — y el NOMBRE baja con el valor, que es la
+  // mitad que suele olvidarse: un `violetAlpha15` conteniendo .12 es un
+  // token que miente sobre sí mismo, y el que lo lea al elegir tinte va a
+  // elegir mal. La cura del par `darkOficio · capaText.comunidadAmplia /
+  // capaBg.comunidadAmplia`, que medía 4.40 contra un mínimo de 4.5.
+  // POR QUÉ ESTA PERILLA Y NO EL TAPIZ: el comentario de R12 ofrecía
+  // "volver el tapiz al 3%", pero ese tapiz es `tapizDark` (el del
+  // CLIENTE) y el par que falla cuelga de `tapizDarkOficio` — la salida
+  // documentada movía una perilla que no gobierna el par. Medidas las
+  // tres, ésta es la de radio más angosto: UN consumidor, 2 pares se
+  // mueven y los DOS hacia arriba (el del cliente también, 4.83 → 4.99),
+  // cero empeoran, cero pasan a reprobar. No toca ningún color firmado.
+  // El tinte de capa queda más sutil: eso es lo que el gate mira.
+  violetAlpha12:     'rgba(158,58,255,.12)',
   coralAlpha15:      'rgba(255,92,92,.15)',
   ochreAlpha15:      'rgba(232,181,71,.15)',
   creamAlpha06:      'rgba(250,246,232,.06)',
