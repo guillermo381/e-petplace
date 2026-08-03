@@ -84,6 +84,15 @@ export type IconoNombre =
   //    familia visual con `ayuda` (círculo con rayos). Nadie lo revive
   //    sin volver a pasar por §1.
   | 'contacto'
+  // ── S84-B20: DOCUMENTO, en DOS CANDIDATOS (molde prime/primeCorona: el
+  //    founder elige a 21px y el perdedor muere con su lápida).
+  //    Nace porque la pantalla de documentos vive SIN ícono y los dos
+  //    prestados fallan POR LEY: `carnet` es el de vacunas de la MASCOTA
+  //    —su huella sobre una cédula diría que el documento es del animal—
+  //    y `cuenta` lo usa la celda vecina (Ley 12 directa).
+  //    EL OBJETO ES IDENTIFICACIÓN (cédula · RUC · NIT), no una carpeta
+  //    ni un archivo genérico. GATE POR ÍCONO A 21px PENDIENTE (§2.9).
+  | 'documento' | 'documentoSello'
 export type IconoRegistro = 'capa' | 'aa' | 'tinta'
 
 const TRAZO = 1.9
@@ -401,6 +410,52 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
     </>
   ),
 
+  // ── DOCUMENTO · CANDIDATO A — LA CÉDULA CON RETRATO (S84-B20) ──────
+  // Rectángulo con un RETRATO (el círculo chico) y dos renglones. El
+  // retrato es todo el trabajo: es lo que separa una IDENTIFICACIÓN de un
+  // documento cualquiera, y es lo que la distingue del idioma
+  // "rectángulo con renglones" que este registry YA tiene ocupado TRES
+  // VECES (`presupuesto` con su esquina doblada, `bitacora` con su lomo
+  // y, de cerca, `caso`). Sin el retrato sería la cuarta y a 21px no se
+  // distinguiría de ninguna — el mismo descarte que mató a la tarjeta de
+  // contacto en B4.
+  //
+  // ⚠️ LA HUELLA NO ES EL RETRATO, Y ES DELIBERADO: ponerla ahí diría
+  // exactamente lo que la orden señala como defecto de `carnet` — que el
+  // documento es del animal. Va CHICA Y AL COSTADO, como en `bitacora`:
+  // presencia del set, no sujeto del documento.
+  documento: ({ tinta, huella }) => (
+    <>
+      <Path
+        d="M4.4 5.6h15.2a1.5 1.5 0 0 1 1.5 1.5v9.8a1.5 1.5 0 0 1-1.5 1.5H4.4a1.5 1.5 0 0 1-1.5-1.5V7.1a1.5 1.5 0 0 1 1.5-1.5Z"
+        {...trazo(tinta)}
+      />
+      <Circle cx={8.6} cy={10.6} r={2.1} {...trazo(tinta)} />
+      <Path d="M13.4 9.9h4.4M13.4 13.1h4.4" {...trazo(tinta)} />
+      <Huella color={huella} x={4.6} y={12.6} escala={0.26} />
+    </>
+  ),
+
+  // ── DOCUMENTO · CANDIDATO B — EL SELLO (S84-B20) ───────────────────
+  // Un sello sobre una hoja. Nombra otra cosa que A: no la identidad,
+  // sino la VALIDACIÓN — y tiene un argumento que A no tiene, porque
+  // estos documentos EXISTEN PARA SER VERIFICADOS (el veredicto de admin
+  // de §14.2). La hoja se insinúa detrás; el sello es el sujeto.
+  //
+  // SU RIESGO, declarado: a 21px un sello circular con muescas puede
+  // leerse como el círculo de `ayuda` o el de `preferencias`. Es el
+  // mismo riesgo que hundió al candidato B de `contacto`, y por eso va
+  // otra vez a la fila de 21px al lado de sus vecinos.
+  documentoSello: ({ tinta, huella }) => (
+    <>
+      <Path d="M7.4 4.6h6.8l4.4 4.4v9.9a1.5 1.5 0 0 1-1.5 1.5H7.4a1.5 1.5 0 0 1-1.5-1.5V6.1a1.5 1.5 0 0 1 1.5-1.5Z" {...trazo(tinta)} />
+      <Path d="M14.2 4.6v4.4h4.4" {...trazo(tinta)} />
+      <Circle cx={11.4} cy={14.4} r={3.4} {...trazo(tinta)} />
+      <Path d="M9.9 14.4l1.1 1.1 2.1-2.2" {...trazo(tinta)} />
+      <Huella color={huella} x={2.2} y={13.2} escala={0.26} />
+    </>
+  ),
+
   // ── CONTACTO · CANDIDATO A — EL GLOBO (S84-B4) ─────────────────────
   // Nombra EL ACTO de contactar, no el canal: en un globo caben una
   // llamada, un WhatsApp, un correo y un mensaje del sitio, y ninguno
@@ -542,6 +597,12 @@ export function Icono({
     // contacto no vende nada. Los dos candidatos comparten capa: lo que
     // el founder elige a 21px es el DIBUJO, no el color.
     contacto: comunidad,
+    // DOCUMENTO va a IDENTIDAD y la elección es de taxonomía (Ley 10):
+    // una cédula, un RUC o un NIT son QUIÉN ES el negocio ante el Estado
+    // — el mismo eje que `cuenta` y `carnet`, que son las otras dos
+    // identidades del producto. No va a `ocre`/CONSUMO aunque el trámite
+    // sea comercial: el documento no vende, acredita.
+    documento: identidad, documentoSello: identidad,
     prime: comunidad, primeCorona: comunidad,
     // LOTE S71-B2 (firma founder): caso = historia clínica (familia de
     // carnet/vet) · presupuesto = plata del cuidado (familia pagos/negocio)
