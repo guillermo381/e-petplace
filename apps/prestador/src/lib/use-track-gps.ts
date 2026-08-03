@@ -1,6 +1,15 @@
 /**
  * useTrackGps — el orquestador de la captura del recorrido (S44-B4.3;
- * curas S62; S63-B: D-292 — GPS BACKGROUND).
+ * curas S62; S63-B: D-292 — GPS BACKGROUND; S85-C: D-595 — N PASEOS).
+ *
+ * ⚠️ **S85-C · D-595 — ESTE HOOK YA NO ES DUEÑO DE "LA" SESIÓN: es dueño
+ * de LA SUYA.** Todas las llamadas al módulo viajan con su
+ * `eventoAtencionId`, y ésa es la cura entera del lado del hook: antes
+ * `iniciarSesionTrack` / `puntosSesionActual` / `flushFinalTrack` /
+ * `detenerCapturaFondo` hablaban de un singleton, así que montar el
+ * Durante de un segundo paseo PISABA al primero y terminar cualquiera
+ * apagaba la captura de todos. **El detalle del reparto vive en
+ * `track-gps-fondo.ts`; acá solo importa que nada se llame sin id.**
  *
  * El buffer/throttle/flush viven en track-gps-fondo.ts (estado de módulo,
  * compartido con la tarea de background). Este hook decide el MODO y
@@ -33,7 +42,6 @@ import type { PuntoGpsPaseo } from '@epetplace/api';
 
 import {
   aceptarPunto,
-  detenerCapturaFondo,
   flushFinalTrack,
   flushTrack,
   iniciarCapturaFondo,
@@ -41,6 +49,7 @@ import {
   puntosSesionActual,
   sesionDetenidaPorServer,
   suscribirTrack,
+  terminarSesionTrack,
 } from './track-gps-fondo';
 import { useTraduccion } from '@/i18n';
 
@@ -90,8 +99,10 @@ export interface UseTrackGps {
   pedirFondo: () => Promise<boolean>;
   /** Vacía el buffer y devuelve el total real del server + pendientes. */
   flushFinal: () => Promise<ResultadoFlushFinal>;
-  /** Apaga TODA la captura (watcher + servicio de fondo). Lo llama la
-   *  pantalla cuando el paseo TERMINÓ — navegar no apaga el fondo. */
+  /** Cierra la captura DE ESTE PASEO (watcher local + su sesión). Lo llama
+   *  la pantalla cuando el paseo TERMINÓ — navegar no lo apaga.
+   *  D-595: el servicio de fondo se apaga **solo si no queda ningún otro
+   *  paseo vivo** — terminar uno ya no deja mudo al hermano. */
   detenerTrack: () => Promise<void>;
   /** Re-pide el permiso / re-arranca el watcher (cards de estado). */
   reintentarPermiso: () => void;
@@ -131,22 +142,31 @@ export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): 
     fakeRef.current = null;
   }, []);
 
-  const flushFinal = useCallback(async (): Promise<ResultadoFlushFinal> => flushFinalTrack(), []);
+  const flushFinal = useCallback(
+    async (): Promise<ResultadoFlushFinal> => flushFinalTrack(eventoAtencionId),
+    [eventoAtencionId],
+  );
 
+  /* D-595 ②: TERMINAR ESTE PASEO NO APAGA EL DE AL LADO.
+     Antes llamaba a `detenerCapturaFondo()`, que hacía
+     `stopLocationUpdatesAsync` a secas — y como el registro del SO es UNO
+     para todos los paseos, cortaba la captura de los hermanos vivos sin
+     que nada fallara ni avisara. `terminarSesionTrack` saca SOLO esta
+     sesión y apaga el servicio únicamente si con ella se fueron todas. */
   const detenerTrack = useCallback(async () => {
     detenerLocal();
-    await detenerCapturaFondo();
+    await terminarSesionTrack(eventoAtencionId);
     setEstado('inactivo');
-  }, [detenerLocal]);
+  }, [detenerLocal, eventoAtencionId]);
 
   const arrancarFondo = useCallback(async () => {
-    await iniciarCapturaFondo({
+    await iniciarCapturaFondo(eventoAtencionId, {
       titulo: tRef.current('cita.fondoNotificacionTitulo'),
       cuerpo: tRef.current('cita.fondoNotificacionCuerpo'),
     });
     setModo('fondo');
     setFondoPedible(false);
-  }, []);
+  }, [eventoAtencionId]);
 
   const pedirFondo = useCallback(async (): Promise<boolean> => {
     const permiso = await Location.requestBackgroundPermissionsAsync().catch(() => null);
@@ -160,17 +180,22 @@ export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): 
   }, []);
 
   useEffect(() => {
+    /* D-595 ①: `iniciarSesionTrack` YA NO PISA. Antes, montar este Durante
+       con un id distinto al de la sesión viva reasignaba el singleton y el
+       OTRO paseo perdía sesión y buffer en silencio — el mecanismo exacto
+       de los "~2 puntos que coinciden con los ratos en que sacó el
+       teléfono". Ahora cada paseo tiene su entrada en el mapa. */
     iniciarSesionTrack(eventoAtencionId, puntosInicialesRef.current);
-    if (sesionDetenidaPorServer()) {
+    if (sesionDetenidaPorServer(eventoAtencionId)) {
       setEstado('inactivo');
       return;
     }
     // Remontaje a mitad de paseo: los puntos de la sesión viva siembran
     // el estado local (el mapa no arranca vacío con el fondo corriendo).
-    setPuntosSesion(puntosSesionActual());
+    setPuntosSesion(puntosSesionActual(eventoAtencionId));
 
     let cancelado = false;
-    const desuscribir = suscribirTrack({
+    const desuscribir = suscribirTrack(eventoAtencionId, {
       onPunto: (p) => {
         if (cancelado) return;
         setPuntosSesion((prev) => [...prev, p]);
@@ -196,7 +221,7 @@ export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): 
           paso += 1;
           aceptarPunto(-0.185 + Math.sin(paso / 8) * 0.0012, -78.481 + paso * 0.00012);
         }, FAKE_PERIOD_MS);
-        intervalRef.current = setInterval(() => void flushTrack(), FLUSH_PERIOD_MS);
+        intervalRef.current = setInterval(() => void flushTrack(eventoAtencionId), FLUSH_PERIOD_MS);
         return;
       }
 
@@ -247,7 +272,7 @@ export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): 
           { accuracy: Location.Accuracy.High, timeInterval: INTERVALO_MS, distanceInterval: 0 },
           (pos) => aceptarPunto(pos.coords.latitude, pos.coords.longitude),
         );
-        intervalRef.current = setInterval(() => void flushTrack(), FLUSH_PERIOD_MS);
+        intervalRef.current = setInterval(() => void flushTrack(eventoAtencionId), FLUSH_PERIOD_MS);
         setModo('pantalla');
         if (aproximadoRef.current) setEstado('aproximado');
       } catch {
@@ -264,7 +289,9 @@ export function useTrackGps(eventoAtencionId: string, puntosIniciales: number): 
       // micro-hueco del vuelo declarado en S62). D-292: el servicio de
       // FONDO NO se apaga acá — navegar no termina el paseo; lo apagan
       // Terminar (detenerTrack) o el hard-stop del server.
-      void flushTrack();
+      // D-595: y se flushea SOLO LO PROPIO — con dos paseos vivos, soltar
+      // una pantalla no tiene por qué forzar el flush del hermano.
+      void flushTrack(eventoAtencionId);
     };
   }, [eventoAtencionId, intento, arrancarFondo, detenerLocal]);
 

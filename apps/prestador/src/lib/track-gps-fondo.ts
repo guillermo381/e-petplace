@@ -1,5 +1,6 @@
 /**
- * track-gps-fondo.ts — LA SESIÓN DE TRACK del paseo (S63-B, D-292).
+ * track-gps-fondo.ts — LAS SESIONES DE TRACK del paseo (S63-B, D-292;
+ * S85-C: D-595 — VARIOS PASEOS A LA VEZ).
  *
  * El buffer, el throttle y el flush que vivían dentro de use-track-gps
  * suben a ESTE módulo (estado de módulo, no de React): así los alimentan
@@ -7,20 +8,60 @@
  * expo-task-manager — y sobreviven a que la pantalla del Durante se
  * desmonte mientras el paseo sigue con el teléfono en el bolsillo.
  *
- * Contrato heredado VERBATIM de las curas S62 (nada se relaja):
+ * ═══════ S85-C · D-595 — DE UN SINGLETON A UN MAPA ═══════
+ *
+ * **La verdad de producto (founder, gate S83): varios paseos simultáneos
+ * NO son un borde — son el caso normal del oficio.** El motor lo sabe
+ * desde S67-V0 (ocupación por PERSONA, `cupo_techo` 4 en el paseo); la
+ * captura no lo sabía.
+ *
+ * **EL DEFECTO ①, medido y reproducido por el founder en campo:** había
+ * UNA `sesion` de módulo, y `aceptarPunto` no recibía id — tomaba *"la
+ * que estuviera puesta"*. Abrir el Durante del segundo paseo PISABA la
+ * sesión del primero (y perdía su buffer sin flushear, en silencio). El
+ * campo del founder: un paseo cerró con **~830 puntos** y el otro con
+ * **~2 — y esos 2 coinciden con los ratos en que sacó el teléfono**, o
+ * sea con los ratos en que ESA pantalla estuvo montada y volvió a pisar
+ * la sesión. *La captura de fondo alimentaba a uno solo porque solo
+ * existía uno.*
+ *
+ * **EL DEFECTO ②, la otra mitad y por eso se curan JUNTOS:** hay **UN
+ * registro de ubicación en el SO** (`TAREA_TRACK_GPS`), así que apagarlo
+ * al Terminar apagaba la captura de TODOS los paseos vivos. Curar solo
+ * ① habría dejado que el segundo paseo se muriera en cuanto el primero
+ * terminara — que es justo la mitad del recorrido de campo.
+ *
+ * **LO QUE RIGE AHORA:**
+ *   · `sesiones: Map<atencionId, SesionTrack>` — **nadie pisa a nadie**.
+ *   · un punto del fondo se **REPARTE a TODAS las sesiones activas**;
+ *     cada una conserva su propio throttle, buffer, total y flush.
+ *   · `terminarSesionTrack(id)` saca UNA del mapa y **apaga el servicio
+ *     del SO SOLO si no queda ninguna**.
+ *   · el hard-stop del server marca **solo la sesión que rebotó** — un
+ *     `atencion_no_en_curso` de una atención ya no calla a las otras.
+ *   · `oyentes: Map<atencionId, OyenteTrack>` — dos Durante montados
+ *     reciben cada uno LO SUYO (antes el segundo tapaba al primero).
+ *
+ * **UNA SOLA SUSCRIPCIÓN DE GPS PARA N TRACKS, y es a propósito:** el
+ * aparato tiene una antena. Pedir N suscripciones no daría N recorridos
+ * distintos — daría el mismo recorrido N veces, con N veces la batería.
+ * *El paseador camina UNA vez; lo que se reparte es su recorrido.*
+ *
+ * Contrato heredado VERBATIM de las curas S62 (nada se relaja, y ahora
+ * rige POR SESIÓN):
  *   · punto aceptado cada ≥5s
  *   · flush al juntar 12 puntos O cada 60s — el reloj se revisa EN CADA
  *     PUNTO (en background los timers de JS no son confiables; el que
  *     dispara es el punto que llega, no un setInterval)
  *   · error de red → lote reinyectado al buffer
- *   · atencion_no_en_curso → hard-stop (server mandó): se apaga también
- *     el servicio de background y se avisa al oyente
+ *   · atencion_no_en_curso → hard-stop (server mandó) DE ESA SESIÓN
  *   · flushFinal devuelve total real + pendientes (la pantalla declara)
  *
- * HEADLESS (el servicio sobrevive a la app muerta): la sesión activa se
- * persiste en AsyncStorage; si la tarea despierta sin estado de módulo,
- * lo restaura de disco — y si no hay nada, apaga el servicio huérfano.
- * Best-effort declarado: el camino primario es la app viva en bolsillo.
+ * HEADLESS (el servicio sobrevive a la app muerta): las sesiones activas
+ * se persisten en AsyncStorage como LISTA de ids; si la tarea despierta
+ * sin estado de módulo, las restaura todas de disco — y si no hay
+ * ninguna, apaga el servicio huérfano. Best-effort declarado: el camino
+ * primario es la app viva en bolsillo.
  *
  * IMPORTANTE: este módulo se importa desde el _layout raíz — la tarea
  * tiene que estar definida en global scope en TODO arranque del proceso
@@ -58,18 +99,44 @@ interface SesionTrack {
   total: number;
 }
 
-let sesion: SesionTrack | null = null;
-let oyente: OyenteTrack | null = null;
+/** D-595: EL MAPA. Antes era `let sesion: SesionTrack | null` y ahí vivía
+ *  el defecto entero — una variable que solo puede tener un valor obliga
+ *  a que el segundo paseo pise al primero. */
+const sesiones = new Map<string, SesionTrack>();
+/** D-595: un oyente POR SESIÓN. Antes era un slot único y el segundo
+ *  Durante montado tapaba al primero. */
+const oyentes = new Map<string, OyenteTrack>();
+
+/** Las que todavía capturan: existen en el mapa y el server no las frenó. */
+function sesionesActivas(): SesionTrack[] {
+  return [...sesiones.values()].filter((s) => !s.detenidaPorServer);
+}
+
+/** La lista de ids que el camino headless necesita para resucitar. Se
+ *  reescribe ENTERA en cada cambio: una lista parcial reviviría media
+ *  captura, que es peor que ninguna. */
+async function persistirSesiones(): Promise<void> {
+  const ids = sesionesActivas().map((s) => s.eventoAtencionId);
+  if (ids.length === 0) {
+    await AsyncStorage.removeItem(STORAGE_SESION).catch(() => {});
+    return;
+  }
+  await AsyncStorage.setItem(STORAGE_SESION, JSON.stringify({ ids })).catch(() => {});
+}
 
 /** Idempotente: el remontaje del Durante ADOPTA la sesión viva del mismo
  *  paseo (los puntos sin flushear siguen ahí). El total de DB que trae la
- *  pantalla solo asciende — un flush previo puede saber más que el load. */
+ *  pantalla solo asciende — un flush previo puede saber más que el load.
+ *
+ *  D-595: y ahora **NO TOCA a las otras**. Antes, un id distinto
+ *  reasignaba la variable y el paseo anterior perdía sesión y buffer. */
 export function iniciarSesionTrack(eventoAtencionId: string, totalInicial: number): void {
-  if (sesion?.eventoAtencionId === eventoAtencionId) {
-    sesion.total = Math.max(sesion.total, totalInicial);
+  const viva = sesiones.get(eventoAtencionId);
+  if (viva) {
+    viva.total = Math.max(viva.total, totalInicial);
     return;
   }
-  sesion = {
+  sesiones.set(eventoAtencionId, {
     eventoAtencionId,
     buffer: [],
     puntosSesion: [],
@@ -78,55 +145,79 @@ export function iniciarSesionTrack(eventoAtencionId: string, totalInicial: numbe
     flushing: false,
     detenidaPorServer: false,
     total: totalInicial,
-  };
+  });
 }
 
-export function suscribirTrack(o: OyenteTrack): () => void {
-  oyente = o;
+export function suscribirTrack(eventoAtencionId: string, o: OyenteTrack): () => void {
+  oyentes.set(eventoAtencionId, o);
   return () => {
-    if (oyente === o) oyente = null;
+    if (oyentes.get(eventoAtencionId) === o) oyentes.delete(eventoAtencionId);
   };
 }
 
-export function puntosSesionActual(): PuntoGpsPaseo[] {
-  return sesion ? [...sesion.puntosSesion] : [];
+export function puntosSesionActual(eventoAtencionId: string): PuntoGpsPaseo[] {
+  const s = sesiones.get(eventoAtencionId);
+  return s ? [...s.puntosSesion] : [];
 }
 
-export function sesionDetenidaPorServer(): boolean {
-  return sesion?.detenidaPorServer ?? false;
+export function sesionDetenidaPorServer(eventoAtencionId: string): boolean {
+  return sesiones.get(eventoAtencionId)?.detenidaPorServer ?? false;
 }
 
+/**
+ * EL REPARTO (D-595 ①). Un punto del aparato entra a **todas** las
+ * sesiones activas. Cada una decide sola si lo acepta: el throttle de
+ * 5 s es POR SESIÓN, así que dos paseos arrancados con segundos de
+ * diferencia conservan cada uno su propia cadencia y su propio buffer.
+ *
+ * *No se filtra por "cuál está en pantalla": ésa era la pregunta que
+ * fabricaba el defecto.*
+ */
 export function aceptarPunto(lat: number, lng: number): void {
-  const s = sesion;
-  if (!s || s.detenidaPorServer) return;
   const ahora = Date.now();
-  if (ahora - s.lastT < INTERVALO_MS) return;
-  s.lastT = ahora;
-  const punto: PuntoGpsPaseo = { lat, lng, t: new Date(ahora).toISOString() };
-  s.buffer.push(punto);
-  s.puntosSesion.push(punto);
-  oyente?.onPunto?.(punto);
-  if (s.buffer.length >= MAX_BUFFER || ahora - s.lastFlushT >= FLUSH_PERIOD_MS) void flushTrack();
+  for (const s of sesionesActivas()) {
+    if (ahora - s.lastT < INTERVALO_MS) continue;
+    s.lastT = ahora;
+    const punto: PuntoGpsPaseo = { lat, lng, t: new Date(ahora).toISOString() };
+    s.buffer.push(punto);
+    s.puntosSesion.push(punto);
+    oyentes.get(s.eventoAtencionId)?.onPunto?.(punto);
+    if (s.buffer.length >= MAX_BUFFER || ahora - s.lastFlushT >= FLUSH_PERIOD_MS) {
+      void flushSesion(s);
+    }
+  }
 }
 
-export async function flushTrack(): Promise<void> {
-  const s = sesion;
-  if (!s || s.flushing || s.buffer.length === 0) return;
+/** El flush de UNA sesión. Su contrato es el de S62, intacto — lo único
+ *  que cambia es que el hard-stop del server ya NO apaga a las hermanas. */
+async function flushSesion(s: SesionTrack): Promise<void> {
+  if (s.flushing || s.buffer.length === 0) return;
   s.flushing = true;
   const lote = s.buffer.slice();
   s.buffer = [];
   try {
-    const r = await registrarTrackPaseo({ evento_atencion_id: s.eventoAtencionId, puntos: lote, append: true });
+    const r = await registrarTrackPaseo({
+      evento_atencion_id: s.eventoAtencionId,
+      puntos: lote,
+      append: true,
+    });
     if (r.ok) {
       s.lastFlushT = Date.now();
       s.total = r.data.puntos_total;
-      oyente?.onTotal?.(s.total);
+      oyentes.get(s.eventoAtencionId)?.onTotal?.(s.total);
       return;
     }
     if (r.codigo === 'atencion_no_en_curso' || r.codigo === 'atencion_estado_invalido') {
+      /* D-595 ②: el hard-stop es DE ESTA SESIÓN. Antes llamaba a
+         `detenerCapturaFondo()` a secas y apagaba el servicio del SO —
+         o sea que el server rebotando UNA atención dejaba mudas a las
+         otras, que seguían perfectamente en curso. Ahora se marca la
+         que rebotó, se avisa a SU oyente, y el servicio solo se apaga
+         si con ésta se acabaron todas. */
       s.detenidaPorServer = true;
-      await detenerCapturaFondo();
-      oyente?.onServerDetuvo?.();
+      await persistirSesiones();
+      await apagarServicioSiNoQuedaNadie();
+      oyentes.get(s.eventoAtencionId)?.onServerDetuvo?.();
       return;
     }
     // Transitorio: reinyectar para el próximo flush.
@@ -136,20 +227,51 @@ export async function flushTrack(): Promise<void> {
   }
 }
 
-export async function flushFinalTrack(): Promise<{ total: number; pendientes: number }> {
-  await flushTrack();
-  return { total: sesion?.total ?? 0, pendientes: sesion?.buffer.length ?? 0 };
+/** Flush de una sesión concreta, o de TODAS si no se nombra ninguna (el
+ *  reloj del fallback foreground y el flush al soltar la pantalla). */
+export async function flushTrack(eventoAtencionId?: string): Promise<void> {
+  if (eventoAtencionId !== undefined) {
+    const s = sesiones.get(eventoAtencionId);
+    if (s && !s.detenidaPorServer) await flushSesion(s);
+    return;
+  }
+  await Promise.all(sesionesActivas().map((s) => flushSesion(s)));
+}
+
+/**
+ * El cierre de UN paseo: vacía su buffer y devuelve SU total.
+ *
+ * ⚠️ **PIDE EL ID, y no es ceremonia.** La versión vieja devolvía
+ * `sesion?.total` —el singleton— así que el número con el que la
+ * pantalla decide si pedir motivo de fallo (`total < 2`, el espejo del
+ * guard de `20260715150000`) podía venir **del otro paseo**. Con dos
+ * tracks vivos, un total ajeno es exactamente el dato inventado que ese
+ * motor existe para no tener.
+ */
+export async function flushFinalTrack(
+  eventoAtencionId: string,
+): Promise<{ total: number; pendientes: number }> {
+  await flushTrack(eventoAtencionId);
+  const s = sesiones.get(eventoAtencionId);
+  return { total: s?.total ?? 0, pendientes: s?.buffer.length ?? 0 };
 }
 
 /** Arranca el servicio de ubicación en background (permiso "siempre" ya
  *  concedido). La notificación del servicio es la voz honesta del sistema:
- *  Android la exige y la familia del permiso la merece. */
-export async function iniciarCapturaFondo(notificacion: { titulo: string; cuerpo: string }): Promise<void> {
-  const s = sesion;
+ *  Android la exige y la familia del permiso la merece.
+ *
+ *  D-595: **el servicio es UNO para N paseos.** El early-return cuando ya
+ *  corre sigue siendo correcto —y ahora es la pieza que hace barato el
+ *  caso simultáneo—, pero la lista persistida se reescribe SIEMPRE, antes
+ *  del return: el segundo paseo tiene que entrar al disco aunque el
+ *  servicio ya esté arriba. */
+export async function iniciarCapturaFondo(
+  eventoAtencionId: string,
+  notificacion: { titulo: string; cuerpo: string },
+): Promise<void> {
+  const s = sesiones.get(eventoAtencionId);
   if (!s || s.detenidaPorServer) return;
-  await AsyncStorage.setItem(STORAGE_SESION, JSON.stringify({ eventoAtencionId: s.eventoAtencionId })).catch(
-    () => {},
-  );
+  await persistirSesiones();
   const yaCorre = await Location.hasStartedLocationUpdatesAsync(TAREA_TRACK_GPS).catch(() => false);
   if (yaCorre) return;
   await Location.startLocationUpdatesAsync(TAREA_TRACK_GPS, {
@@ -164,18 +286,62 @@ export async function iniciarCapturaFondo(notificacion: { titulo: string; cuerpo
       notificationTitle: notificacion.titulo,
       notificationBody: notificacion.cuerpo,
       // false: el servicio sobrevive al swipe-kill y el camino headless
-      // restaura la sesión de disco — el track no muere con la app.
+      // restaura las sesiones de disco — el track no muere con la app.
       killServiceOnDestroy: false,
     },
   });
 }
 
-/** Apaga el servicio y borra la sesión persistida. Se llama al terminar
- *  el paseo, en el hard-stop del server, y al detectar huérfanos. */
+/**
+ * **D-595 ② — TERMINAR UNO NO MATA AL OTRO.**
+ *
+ * Saca la sesión del mapa y apaga el servicio del SO **solo si con ella
+ * se fueron todas**. Antes, `detenerTrack` de un paseo llamaba derecho a
+ * `stopLocationUpdatesAsync` y el paseo hermano quedaba sin captura: no
+ * fallaba nada, no avisaba nada, y su track simplemente dejaba de crecer
+ * hasta que alguien volviera a abrir su pantalla. *Un track que se corta
+ * sin decirlo es la falla más cara de este módulo — es la que produce un
+ * `registrado` honesto en la DB sobre un recorrido que no se registró.*
+ */
+export async function terminarSesionTrack(eventoAtencionId: string): Promise<void> {
+  sesiones.delete(eventoAtencionId);
+  oyentes.delete(eventoAtencionId);
+  await persistirSesiones();
+  await apagarServicioSiNoQuedaNadie();
+}
+
+/** El apagado, con su única condición: que no quede nadie capturando. */
+async function apagarServicioSiNoQuedaNadie(): Promise<void> {
+  if (sesionesActivas().length > 0) return;
+  const corre = await Location.hasStartedLocationUpdatesAsync(TAREA_TRACK_GPS).catch(() => false);
+  if (corre) await Location.stopLocationUpdatesAsync(TAREA_TRACK_GPS).catch(() => {});
+}
+
+/** Apaga TODO y borra el disco. Queda para el huérfano headless (nadie
+ *  reclama el servicio) — **no es el camino de terminar un paseo**: ése
+ *  es `terminarSesionTrack`, que respeta a los hermanos. */
 export async function detenerCapturaFondo(): Promise<void> {
+  sesiones.clear();
   await AsyncStorage.removeItem(STORAGE_SESION).catch(() => {});
   const corre = await Location.hasStartedLocationUpdatesAsync(TAREA_TRACK_GPS).catch(() => false);
   if (corre) await Location.stopLocationUpdatesAsync(TAREA_TRACK_GPS).catch(() => {});
+}
+
+/** Lee la lista de disco. **Acepta la forma VIEJA** (`{eventoAtencionId}`,
+ *  de un solo paseo): un APK en la calle puede tener eso guardado, y
+ *  descartarlo mataría el track de un paseo en curso durante la
+ *  actualización. Se lee, se convierte, y la próxima escritura ya deja la
+ *  forma nueva. */
+function leerIdsGuardados(crudo: string | null): string[] {
+  if (crudo === null) return [];
+  try {
+    const g = JSON.parse(crudo) as { ids?: unknown; eventoAtencionId?: unknown };
+    if (Array.isArray(g.ids)) return g.ids.filter((x): x is string => typeof x === 'string');
+    if (typeof g.eventoAtencionId === 'string') return [g.eventoAtencionId];
+    return [];
+  } catch {
+    return [];
+  }
 }
 
 TaskManager.defineTask(TAREA_TRACK_GPS, async ({ data, error }) => {
@@ -185,22 +351,18 @@ TaskManager.defineTask(TAREA_TRACK_GPS, async ({ data, error }) => {
   }
   const locations = (data as { locations?: Location.LocationObject[] } | undefined)?.locations ?? [];
   if (locations.length === 0) return;
-  if (!sesion) {
+  if (sesiones.size === 0) {
     // Proceso relanzado headless: el servicio siguió vivo sin la app.
+    // D-595: se restauran TODAS las sesiones, no la última.
     const crudo = await AsyncStorage.getItem(STORAGE_SESION).catch(() => null);
-    let guardada: { eventoAtencionId?: string } | null = null;
-    try {
-      guardada = crudo ? (JSON.parse(crudo) as { eventoAtencionId?: string }) : null;
-    } catch {
-      guardada = null;
-    }
-    if (!guardada?.eventoAtencionId) {
+    const ids = leerIdsGuardados(crudo);
+    if (ids.length === 0) {
       // Servicio huérfano (nadie lo reclama): se apaga solo.
       await detenerCapturaFondo();
       return;
     }
     // total 0 provisorio: el primer flush trae el total real del server.
-    iniciarSesionTrack(guardada.eventoAtencionId, 0);
+    for (const id of ids) iniciarSesionTrack(id, 0);
   }
   for (const l of locations) aceptarPunto(l.coords.latitude, l.coords.longitude);
 });

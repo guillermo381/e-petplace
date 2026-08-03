@@ -1,0 +1,19 @@
+{
+  "//": "S85-C · D-595 — tsconfig SOLO del discriminador. Mapea los cuatro imports nativos del módulo a stubs de memoria para poder correr la lógica de reparto en node. NO lo consume ningún build: existe para que `pnpm tsx scripts/verify-track-multisesion/test.ts` pueda cargar track-gps-fondo.ts sin un teléfono.",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "baseUrl": "../..",
+    "paths": {
+      "expo-location": ["scripts/verify-track-multisesion/stubs/expo-location.ts"],
+      "expo-task-manager": ["scripts/verify-track-multisesion/stubs/expo-task-manager.ts"],
+      "@react-native-async-storage/async-storage": [
+        "scripts/verify-track-multisesion/stubs/async-storage.ts"
+      ],
+      "@epetplace/api": ["scripts/verify-track-multisesion/stubs/api.ts"]
+    }
+  }
+}
