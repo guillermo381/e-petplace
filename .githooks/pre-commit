@@ -214,15 +214,82 @@ node scripts/verify-diseno.mjs >/dev/null 2>&1 || {
   exit 1
 }
 
-for P in packages/ui apps/cliente apps/prestador; do
-  case "$CAMBIOS" in
-    *"$P"*)
-      (cd "$P" && npx tsc --noEmit >/dev/null 2>&1) || {
-        echo "✗ tsc EN ROJO en $P — el commit NO ocurre."
-        (cd "$P" && npx tsc --noEmit 2>&1 | head -5)
-        exit 1
-      }
-      ;;
-  esac
-done
+# ─────────────────────────────────────────────────────────────────────
+# ③ EL TSC MIRA A LOS CONSUMIDORES, NO SOLO A LO QUE TOCASTE
+#    (S85-B11 — hueco nombrado por A tras el incidente del día).
+#
+# ⚠️ EL DIAGNÓSTICO CORREGIDO, porque el pedido llegó con otro y la cura
+#    habría sido inútil: **el hook YA corría tsc** desde S82-B r28. El
+#    hueco no era "no corre tsc" — era que corría el tsc de lo que
+#    TOCASTE, y no el de lo que DEPENDE de lo que tocaste.
+#
+#    EL INCIDENTE, medido y no supuesto: `00d702f` tocó SOLO
+#    `packages/api` (dos wrappers) y dejó `main` con SEIS errores en
+#    `apps/prestador`. Dos cosas fallaron a la vez —
+#      · `packages/api` no estaba en la lista, así que no se chequeó; y
+#      · **chequearlo no habría alcanzado**: medido, `packages/api`
+#        typechequea VERDE por sí solo (exit 0). El tipo cambió de forma
+#        coherente PARA SÍ MISMO; la rotura solo existe desde afuera.
+#    Por eso la cura no es "agregar packages/api a la lista": es que un
+#    cambio en un paquete COMPARTIDO se verifique en QUIEN LO CONSUME.
+#    Es el patrón que el método ya nombra —*el motor se adelanta a su
+#    wrapper*— atajado una capa antes.
+#
+# EL COSTO, MEDIDO ANTES DE IMPONERLO (la mesa pidió justamente esto, y
+# el riesgo lo nombré yo: un hook lento se saltea por costumbre y
+# volvemos al mismo lugar por otra puerta):
+#      packages/ui 1.2s · apps/cliente 3.3s · apps/prestador 3.5s
+#      en SERIE 8.0s   ·   EN PARALELO 4.4s
+# Corren en paralelo: el peor caso baja de 8s a 4.4s, que es menos que
+# lo que tardaba `apps/prestador` + `apps/cliente` en serie hoy. Y el
+# caso típico NO cambia — commit de una sola app sigue costando lo suyo.
+# El gasto grande cae exactamente donde está el peligro: tocar algo que
+# otros consumen.
+# ─────────────────────────────────────────────────────────────────────
+VERIFICAR=""
+sumar() { case " $VERIFICAR " in *" $1 "*) ;; *) VERIFICAR="$VERIFICAR $1" ;; esac; }
+
+case "$CAMBIOS" in
+  *packages/api*|*packages/ui*|*packages/domain*|*packages/i18n*)
+    # PAQUETE COMPARTIDO: se verifica en sus consumidores, no en sí mismo
+    sumar packages/api; sumar packages/ui
+    sumar apps/cliente; sumar apps/prestador ;;
+esac
+case "$CAMBIOS" in *apps/cliente*) sumar apps/cliente ;; esac
+case "$CAMBIOS" in *apps/prestador*) sumar apps/prestador ;; esac
+
+if [ -n "$VERIFICAR" ]; then
+  TMPTSC=$(mktemp -d)
+  for P in $VERIFICAR; do
+    K=$(echo "$P" | tr / _)
+    ( cd "$P" && npx tsc --noEmit > "$TMPTSC/$K.log" 2>&1; echo $? > "$TMPTSC/$K.exit" ) &
+  done
+  wait || true
+  ROJOS=""
+  for P in $VERIFICAR; do
+    K=$(echo "$P" | tr / _)
+    [ "$(cat "$TMPTSC/$K.exit" 2>/dev/null || echo 1)" = "0" ] || ROJOS="$ROJOS $P"
+  done
+  if [ -n "$ROJOS" ]; then
+    echo "✗ tsc EN ROJO en:$ROJOS — el commit NO ocurre."
+    for P in $ROJOS; do
+      K=$(echo "$P" | tr / _)
+      echo "  ── $P"
+      head -4 "$TMPTSC/$K.log" | sed 's/^/     /'
+    done
+    case "$CAMBIOS" in
+      *packages/*)
+        echo ""
+        echo "  Tocaste un paquete COMPARTIDO: esto se rompió en quien lo CONSUME,"
+        echo "  no en lo que editaste. Un tipo puede quedar coherente para sí mismo"
+        echo "  y romper a sus consumidores — por eso el gate mira para abajo." ;;
+    esac
+    echo ""
+    echo "  curalo, o declaralo:  SALTAR_GATE=\"por qué\" git commit ..."
+    rm -rf "$TMPTSC"
+    exit 1
+  fi
+  rm -rf "$TMPTSC"
+  echo "── tsc verde en:$VERIFICAR"
+fi
 echo "✓ gate verde"
