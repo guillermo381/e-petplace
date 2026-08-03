@@ -127,6 +127,8 @@ const FAMILIAS = [
       'cita/[citaId]/cierre',
       'adiestramiento/cita/[citaId]/cierre',
       'grooming/cita/[citaId]/cierre',
+      // + S85 (adjudicación de mesa): el mostrador de campo entra al ciclo.
+      'veterinaria/mostrador/atencion',
     ],
   },
   {
@@ -149,7 +151,12 @@ const FAMILIAS = [
     nombre: 'CAPTURA (formulario)',
     pantallas: [
       '(tabs)/cuenta/perfil',
-      '(tabs)/cuenta/perfil-v2',
+      // '(tabs)/cuenta/perfil-v2' — BORRADA DEL CENSO (adjudicación de mesa,
+      // S85). Desapareció del árbol en S83-C30 ②, cuando la pantalla nueva
+      // reemplazó a la vieja y la vieja murió (Ley 37). No es una pantalla
+      // que falta: es una que dejó de existir a propósito. *Se deja el
+      // renglón comentado en vez de borrarlo limpio para que el próximo que
+      // compare este mapa contra el de S83 no la busque.*
       'veterinaria/mostrador/nueva',
       'cuenta-comercial/nueva',
       'cuenta-comercial/bancarios',
@@ -186,6 +193,36 @@ const FAMILIAS = [
     id: 'F9',
     nombre: 'FICHA DE ENTIDAD',
     pantallas: ['mascota/[mascotaId]'],
+  },
+  {
+    id: 'F10',
+    nombre: 'CUENTA (el lote de S85)',
+    // ADJUDICACIÓN DE MESA, S85. Las cuatro nacieron después del mapa de S83
+    // y las cuatro las toca el mismo lote.
+    //
+    // ⚠️ AGRUPADA POR LOTE, NO POR SEÑAL ESTRUCTURAL — y se declara, porque
+    // es la excepción al criterio del mapa y no una lectura suya. Las cuatro
+    // son anatómicamente distintas: `como-te-ven` es un espejo de vitrina,
+    // `identidad` y `seguridad` son captura (F5 pura), `recuperar` es una
+    // puerta (F7 pura). *Si se clasificaran por anatomía se repartirían en
+    // tres familias y ninguna decisión de composición las alcanzaría juntas
+    // — que es justo lo contrario de para qué existe el mapa.*
+    //
+    // Tiene precedente dentro del propio mapa: F8 agrupa por MADUREZ y su
+    // autor lo declaró en vez de esconderlo (*"están juntas por madurez, no
+    // por familia de uso"*). Ésta agrupa por LOTE, con la misma honestidad.
+    //
+    // ☠️ CONDICIÓN DE DISOLUCIÓN: cuando el lote de Cuenta cierre y sus
+    // pantallas tengan arquetipo firmado, **F10 se reparte** en F5/F7/F2 por
+    // anatomía. *Una familia que existe por el trabajo en curso tiene que
+    // morir cuando el trabajo termina, o el mapa deja de medir anatomía y
+    // pasa a medir el backlog.*
+    pantallas: [
+      '(tabs)/cuenta/como-te-ven',
+      '(tabs)/cuenta/identidad',
+      '(tabs)/cuenta/seguridad',
+      'recuperar',
+    ],
   },
 ];
 

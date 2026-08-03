@@ -211,6 +211,45 @@ S84 depositó **cuatro** (#18 · #19 · #20 · #21) sobre las tres de S83
 instrumento funcionó** y aun así llevó a la conclusión falsa. Las otras seis son
 instrumentos que miden mal; **ésta mide bien y cuenta mal.**
 
+### ➕ CANDIDATA #22 (S85) — UNA ORDEN QUE NACE DE UNA MEDICIÓN DECLARA SU ANCLA
+
+**Depositada en S85, sobre S84, porque es la vuelta de tuerca de #19 (*un
+instrumento correcto sobre un árbol viejo*) aplicada a las ÓRDENES en vez de a
+los instrumentos.**
+
+> **Una orden de la mesa que nace de una medición ES un instrumento — y hereda
+> el mismo modo de falla: mide bien un árbol que ya no existe.**
+
+**EL CASO QUE LA FUNDÓ:** la mesa ordenó *"cerralo AHORA"* citando una medición
+propia. **El retiro ya estaba commiteado**, y la línea que la medición
+encontraba **era la LÁPIDA, no una referencia viva** — L-170 exacta: *un censo
+lee los comentarios como código.* **B re-midió antes de ejecutar y no ejecutó
+nada.**
+
+**Y EL SEGUNDO CASO, el mismo día, para que no se lea como anécdota:** la mesa
+ordenó a A *"commiteá tus 5 archivos sueltos"* — **ya estaban commiteados**
+(`f05412b`, minutos antes). *La orden describía un árbol de hace tres turnos.*
+
+> **LO QUE HACE QUE ESTA CANDIDATA VALGA MÁS QUE LAS SIETE ANTERIORES: en las
+> otras, el que mide mal es el que paga. Acá el que mide es la MESA y el que
+> paga es la PISTA** — y la pista no tiene el contexto para dudar, porque una
+> orden llega con la autoridad de una decisión, no con la fragilidad de una
+> medición. *Es #21 en su forma más cara: el instrumento funcionó, y lo que
+> falló fue el momento en que se leyó.*
+
+**LA CURA, en dos mitades que se necesitan:**
+1. **La mesa declara el ancla de la medición que motiva la orden** (*"medido en
+   `<sha>`"*). Sin eso, la orden es una foto sin fecha.
+2. **La pista RE-MIDE antes de ejecutar** — y si el cuadro cambió, **frena y lo
+   trae**, que es exactamente lo que B hizo.
+
+*La segunda sola no alcanza: sin la primera, la pista no sabe contra qué
+comparar, y "re-medí y da distinto" no dice si cambió el árbol o si la orden
+nació mal.* **Ésa es la línea que conecta esta candidata con la consecuencia de
+los frenos: TODO FRENO DECLARA CONTRA QUÉ MIDIÓ — y ahora también toda orden.**
+
+---
+
 > **⚠️ HUECO DECLARADO — la candidata del BARRIDO CASE-SENSITIVE NO EXISTE.** La
 > mesa la nombró en su lista al pedir esta acta, y **el grep en el archivo da
 > cero**. *(**Resuelto S84-A30:** la mesa declara que la nombró sin verificar —

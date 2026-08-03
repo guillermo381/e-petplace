@@ -365,6 +365,8 @@ export {
 // ── Países activos con nombre (S58-B, curas del gate — hunk Sesión B) ───────
 export {
   obtenerPaisesActivos,
+  obtenerPaisesDelMundo,
+  type PaisDelMundo,
   type PaisActivo,
   type CodigoErrorPaises,
 } from './wrappers/paises';
