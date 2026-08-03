@@ -1,14 +1,33 @@
-# S84 · EL ESTADO MEDIDO — BORRADOR (no cerrado)
+# S84 · EL ESTADO MEDIDO 
+
+> # ⚠️ S84 ESTÁ **PUBLICADA, NO FIRMADA**
+>
+> **LA PASADA DE GATE NO SE HIZO.** El founder paró la sesión antes, y se difiere
+> a S85 con contexto fresco. **Nueve OTAs esperan un ojo.**
+>
+> **Nada de lo de abajo se hereda como hecho.** Regla 80 al pie: *la ley se
+> escribe después del resultado firmado.* Lo que quedó sin ver:
+>
+> · **los tres glifos** (fiscal · bancario · documento) — el **candidato A está
+>   elegido**, el **dibujo a 21px no**
+> · **`Boton` acento** y **`Boton superficie="muro"`**
+> · **Datos comerciales**, el aviso de revisión, **Cuenta reordenada**
+> · **la cura de Places**
+> · **la pantalla de documentos** del eje ①
+> · 🔴 **LA RECUPERACIÓN POR CÓDIGO — nunca se probó contra un correo real.**
+>   Si `verifyOtp` no da sesión utilizable, **el camino se cae y el reparto vuelve
+>   a la mesa**. *Es lo único de S84 que puede REVERTIR una decisión, no solo
+>   pedir un retoque.*
+
 
 > **Todo lo de acá salió de una medición registrada.** Donde no hay medición, se
 > declara el hueco en vez de completarlo.
-> **⚠️ BORRADOR:** falta el último lote de C y su gate.
 
 ---
 
 ## 1 · OPERATIVO
 
-**SEIS migraciones**, todas aplicadas **y registradas**:
+**OCHO migraciones**, todas aplicadas **y registradas**:
 
 | | qué |
 |---|---|
@@ -18,15 +37,23 @@
 | `20260802180000` | `GRANT SELECT (clip_url)` |
 | `20260802220000` | la zona aproximada — `lat`/`lon` fuera de la vista |
 | `20260803000000` | la promoción E.164, con su traza |
+| `20260803120000` | `pais_emisor` del documento (eje ①) |
+| `20260803140000` | `nombre_id_fiscal` en `cat_paises` |
 
 **Reversas escritas ANTES en las cuatro que lo pedían.** *La de la zona lleva un
 aviso propio: **correrla reabre un agujero de privacidad**, y por eso pide que
 D-624 vuelva a 🔴 en el mismo acto.*
 
-**CINCO OTAs de S84**, todos runtime 1.0.3, **los cinco con `dirty = None`**:
-`7848147c` · `19302cc9` · `bcb549ad` · `d139b9c0` · `d4c20a64`.
+**NUEVE OTAs de S84**, todos runtime 1.0.3, **los NUEVE con `dirty = None`**:
+`7848147c` · `19302cc9` · `bcb549ad` · `d139b9c0` · `d4c20a64` · `ff52296d` ·
+`e8409694` · `280d9b98` — y el noveno del cierre.
+*Nueve vedas, nueve anclas limpias: el paso ⓪ no falló una sola vez, y lo
+sostuvieron las TRES pistas, no la mesa sola.*
 
-**DIECISIETE fichas nuevas:** D-613 → D-629, más **D-630** (el burn-down).
+**VEINTE fichas nuevas:** D-613 → D-633 (**D-610 no existe** — hueco de S83 que
+sigue libre y no se rellena).
+
+**106 commits** en la sesión, las tres pistas.
 
 ## 2 · LO QUE CERRÓ, y con qué
 
@@ -65,7 +92,7 @@ promedio / **327 kB** de máximo; el único clip real **6.7 MB** ⇒ techo de 10
 
 ## 5 · LO QUE SIGUE VIVO — con su gravedad
 
-**🔴 D-617 — sin build EAS en runtime 1.0.3.** Los cinco OTAs de S84 **solo
+**🔴 D-617 — sin build EAS en runtime 1.0.3.** Los NUEVE OTAs de S84 **solo
 alcanzan la APK local del founder**. **Su mitad ① está pagada** (él confirmó
 `updateId` en dispositivo); **la que queda es la que importa**: el canal sirve a
 **un solo teléfono**, y **S79 declaró que al cierre el founder sale a reclutar**.
@@ -112,8 +139,11 @@ por código las SACA del callejón** en que están desde S81.
 1. **El burn-down de la regla 81** — tercera sesión sin medirse (**D-630**), ahora
    con condición que dice **quién** y **cuándo**, y **hecha script** para que deje
    de competir contra construir.
-2. **El conteo total de frenos** — **nueve censados** (los de A). Los de B y C
-   **no se censaron**; el "once" era número de la mesa, no medición.
+2. **EL CONTEO DE FRENOS, ACTUALIZADO AL CIERRE: DIECIOCHO conocidos.** Nueve de
+   A (censados uno por uno) **+ NUEVE de C** (su acta los censa con su
+   argumento). **Los de B no se censaron.** *El "once" de la mesa quedó muy
+   corto, y la diferencia importa: **no frenamos once veces, frenamos al menos
+   dieciocho, y solo UNO fue falso.***
 3. **La candidata del barrido case-sensitive NO EXISTE** — la mesa la nombró sin
    verificar; **es de C y está pedida**.
 4. **La config remota de Supabase Auth** (plantillas, idioma, remitente) **no es

@@ -1,4 +1,24 @@
-# S84 · CENSO DE ENMIENDAS DE LEY — BORRADOR (no cerrado)
+# S84 · CENSO DE ENMIENDAS DE LEY 
+
+> # ⚠️ S84 ESTÁ **PUBLICADA, NO FIRMADA**
+>
+> **LA PASADA DE GATE NO SE HIZO.** El founder paró la sesión antes, y se difiere
+> a S85 con contexto fresco. **Nueve OTAs esperan un ojo.**
+>
+> **Nada de lo de abajo se hereda como hecho.** Regla 80 al pie: *la ley se
+> escribe después del resultado firmado.* Lo que quedó sin ver:
+>
+> · **los tres glifos** (fiscal · bancario · documento) — el **candidato A está
+>   elegido**, el **dibujo a 21px no**
+> · **`Boton` acento** y **`Boton superficie="muro"`**
+> · **Datos comerciales**, el aviso de revisión, **Cuenta reordenada**
+> · **la cura de Places**
+> · **la pantalla de documentos** del eje ①
+> · 🔴 **LA RECUPERACIÓN POR CÓDIGO — nunca se probó contra un correo real.**
+>   Si `verifyOtp` no da sesión utilizable, **el camino se cae y el reparto vuelve
+>   a la mesa**. *Es lo único de S84 que puede REVERTIR una decisión, no solo
+>   pedir un retoque.*
+
 
 > **Para qué existe:** que nadie construya contra letra que ya no rige.
 > Molde: el censo de S83.

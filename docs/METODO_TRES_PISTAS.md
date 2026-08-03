@@ -1,0 +1,158 @@
+# EL MÉTODO DE TRES PISTAS — v1.0
+
+> **Por qué existe este documento, y es su justificación entera:** hasta S84 el
+> método de A/B/C vivía **en la memoria de las pistas** y en un prompt de apertura
+> que alguien reescribía a mano cada sesión. **Si las tres compactan, se
+> reconstruye de cero.**
+>
+> **El prompt de apertura debe CITAR este documento, no repetirlo.** Hoy el
+> prompt lleva el método adentro, y por eso hay que reescribirlo entero cada vez.
+>
+> **Estatuto:** destila lo que S84 probó con nueve OTAs limpios y dieciocho
+> frenos. Lo que acá es **regla** viene de reglas ya firmadas del
+> `CONTRATO_TRABAJO` (76 · 80 · 82 · 84 · 85); lo que es **práctica observada**
+> va marcado como tal.
+
+---
+
+## 1 · LOS TERRITORIOS, y por qué son ésos
+
+| pista | territorio |
+|---|---|
+| **A** | `main` · la **DB** (migraciones, RPCs) · `packages/api` · `packages/domain` · **`docs/`** · **el merge y el push** |
+| **B** | `packages/ui` · los **tokens** · el **lint** (`verify-diseno.mjs`, `verdicto.mjs`) — **exclusivo** |
+| **C** | `apps/prestador` · **el canal OTA** |
+
+**El corte no es por comodidad: es por DÓNDE VIVE LA VERDAD DE CADA COSA.**
+
+- **A tiene la DB y la puerta única** porque el motor y su wrapper **son el mismo
+  contrato**: partirlos entre dos pistas produce el patrón que S84 vio tres veces
+  —*el motor se adelanta a su wrapper*— y cada vez costó un turno.
+- **B tiene el lint en exclusiva** porque **es quien puede romperlo sin que nadie
+  lo note**: un guard es de quien lo mantiene, o se vuelve el guard de nadie.
+- **C tiene la app** porque es donde el craft se ve, y **el craft se firma sobre
+  la pantalla real** (regla 80).
+
+**Las tres tocan `packages/ui` en LECTURA. Solo B lo escribe.**
+
+---
+
+## 2 · A ES LA ESCRITORA ÚNICA, Y LA CONDUCTORA
+
+**A escribe `docs/` — nadie más.** Un acta con tres autores es tres actas.
+
+**A conduce los merges, las vedas y el publish. NADIE MÁS PUBLICA.**
+
+**Los cuatro deberes de la conducción** *(práctica probada en S83-S84, todavía no
+en el contrato):*
+
+1. **MERGEAR A DEMANDA**, sin esperar orden — con `git show --name-only --pretty=""`
+   **por commit** como paso fijo. *Nunca `git diff --stat` entre puntas: compara
+   las dos puntas y muestra como BORRADO el trabajo que la otra rama no tiene.*
+2. **ABRIR LA VEDA ELLA MISMA** cuando alguien va a publicar.
+3. **VERIFICAR EL GROUP** antes de declarar cerrado — con `update:view`, **nunca
+   `update:list`**, que no muestra el `gitCommitHash`.
+4. **ANUNCIAR EL CIERRE A TODOS**, incluida la mesa.
+
+> **El ③ y el ④ son los que más veces se perdieron**, y por la misma razón: **quien
+> publica ya terminó y se va**; la mesa está coordinando otra cosa; y **la pista
+> congelada se entera de que la veda cerró porque le llega trabajo**. **El que
+> congela es el que descongela.**
+
+---
+
+## 3 · EL PASO ⓪ DE LA VEDA — completo
+
+**Quien publica pide la congelación AL MOMENTO, nombrando a quiénes espera.**
+
+1. **Se nombra a cada pista.** Un *"congelen"* sin destinatarios no congela a
+   nadie.
+2. **Las confirmaciones se verifican POR CONTENIDO contra el ancla, no por ref.**
+   `git merge-base --is-ancestor <sha> HEAD` — **y `git fetch` antes de cualquier
+   comparación con `origin/main`**, que tiene forma de ref remoto y naturaleza de
+   dato en caché.
+3. **SE REENVÍAN TEXTUALES, jamás resumidas.** *Una confirmación sin hora no es
+   una confirmación: es un recuerdo.*
+4. **Una confirmación que sobrevive a una escritura NO CONFIRMA NADA.** Si
+   alguien —incluida A— escribe después de recibirlas, **se descartan y se
+   re-pide**. *En S84 pasó tres veces y las tres se re-pidió.*
+5. **LA VEDA NO SE LEVANTA SOLA POR URGENCIA.** *(aporte de C, S84.)* Si la mesa
+   necesita que una pista trabaje durante una veda, **la levanta explícitamente y
+   lo declara** — y **después se RE-PIDE congelación**. **Un levantamiento tácito
+   no existe.**
+6. **El cierre se declara a TODOS los congelados, incluida la mesa.**
+
+**Y el árbol de `main` se verifica limpio ANTES de bundlear, no después** — el
+ancla se lee al bundlear.
+
+---
+
+## 4 · LAS ÓRDENES A PISTAS VAN EN MENSAJES PROPIOS
+
+**Una orden a una pista dentro de un mensaje dirigido a la mesa NO LLEGA.**
+
+*Y el daño va en las dos direcciones: la pista no sabe si el mensaje es para
+ella, y el destinatario real recibe trabajo que no le toca.* **Cada mensaje
+declara su destinatario.** *(D-609, incidente 4.)*
+
+---
+
+## 5 · QUÉ REPORTA UNA PISTA
+
+> ### **HALLAZGOS, NUNCA VEREDICTOS.**
+
+Una pista mide y trae **lo que midió, con su literal**. La adjudicación es de la
+mesa. *Cuando una pista reporta un veredicto, la mesa pierde la información que
+lo produjo — y esa es justamente la que permite corregirlo.*
+
+### El freno explícito, que es lo que hace funcionar todo esto
+
+**Toda orden de construcción lleva su condición de freno:** *"si al medir el
+cuadro cambia, frená y traelo"*.
+
+**En S84 eso produjo DIECIOCHO frenos conocidos —nueve de A, nueve de C— y solo
+UNO fue falso.** *(Y el falso lo fabricó un guard que funcionaba: dio rojo y
+mintió sobre por qué.)*
+
+> **⚠️ Y SU COSTO OCULTO, que hay que conocer para usarlos bien:** un dato viejo
+> que dice **"sí"** se descubre al chocar. Uno que dice **"no se puede"** **no se
+> descubre nunca, porque nadie verifica por qué algo NO se hizo.**
+> **La cura no es frenar menos — es que TODO FRENO DECLARE CONTRA QUÉ MIDIÓ.**
+
+---
+
+## 6 · CÓMO SE PIDE ALGO DE OTRO TERRITORIO
+
+> ### **SE DECLARA Y SE PIDE. NO SE CLONA.**
+
+**Clonar es siempre más rápido y siempre peor:** dos implementaciones del mismo
+dato **se separan un día y nadie se entera**.
+
+**Los casos de S84, todos resueltos así:**
+
+| qué | quién pidió | cómo se resolvió |
+|---|---|---|
+| **el pie de `Campo`** | C | B lo subió a `packages/ui` |
+| **la variante `acento` de `Boton`** | C | B la construyó |
+| **`superficie="muro"`** | C | B la construyó |
+| **los glifos** (contacto · documento · fiscal · bancario) | C | B los dibujó, **en dos candidatos** |
+| **`resolverUrlGaleriaPrestador`** | C | A lo llevó a `packages/api`, al lado de su gemela |
+| **`modo: 'alternativa'`** | C | **C frenó** en vez de forzarlo con un cast |
+
+**Y el caso que muestra el límite:** cuando A **omitió** el re-export de tres
+símbolos que ella misma acababa de escribir *"para destrabar a C"*, **C agregó
+las tres líneas en territorio de A y LO DECLARÓ**. *Eso es correcto: no era una
+decisión de A sino una omisión, y la alternativa —clonar la regla fiscal— era
+exactamente lo que la función existía para evitar.* **Se verifica y se firma, o
+se revierte.**
+
+---
+
+## 7 · LO QUE ESTE MÉTODO NO CUBRE
+
+- **El reparto de trabajo lo hace la mesa**, sesión por sesión. Este documento
+  dice **quién puede tocar qué**, no **qué se construye**.
+- **Los gates son del founder.** Ninguna pista declara algo firmado.
+- **B y C no tienen su propio documento de método.** Lo de acá se escribió desde
+  A, con lo que A observó — *sus prácticas internas viven en sus contextos, y eso
+  es lo que una compactación se lleva.*

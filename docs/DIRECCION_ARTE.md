@@ -675,3 +675,63 @@ en slot de `Celda` (sin contenedor curvo) ni a las tallas sueltas. La letra
 exigible y su censo viven en la skill (Ley 21b) y en `DEUDAS_CANONICAS`.
 **Sigue abierto (S74):** la FUSIÓN no está resuelta por geometría — el
 material (D-506) y la sombra (D-507) siguen en su lámina.
+
+---
+
+## §11 · S84 — LO FIRMADO SOBRE PÍXELES ⚠️ **PUBLICADO, NO GATEADO**
+
+> **La pasada de gate de S84 NO SE HIZO.** Lo de abajo está **construido y
+> publicado**; el ojo del founder se difiere a S85. **Regla 80 al pie: la ley se
+> escribe después del resultado firmado** — esta sección registra **lo decidido**,
+> y marca qué falta ver.
+
+### 11.1 EL OCRE DEL DESTELLO — firmado, con su respuesta
+
+**El destello del prestador se viste del COMERCIO.** *La pregunta abierta desde
+S72 —magenta de capa vs §15b.1— se contesta por un tercer camino: no es el
+acento del cliente ni el teal del oficio, es **el color de lo comercial**.*
+
+**⚠️ Y el ORO se cayó por MEDICIÓN antes de que nadie mirara** (S84-B15) — se
+descarta con su número, no por gusto.
+
+### 11.2 `Boton` GANA `acento` Y `superficie="muro"` — **sin gate**
+
+Dos variantes pedidas por C y construidas por B. **Ninguna de las dos pasó por el
+ojo del founder.** *Se registran para que S85 sepa qué mirar, no como firmadas.*
+
+### 11.3 LOS GLIFOS NUEVOS — **candidato elegido, dibujo NO**
+
+**contacto · documento · fiscal · bancario.**
+
+| lo que SÍ está | lo que NO |
+|---|---|
+| **el candidato A elegido** en los cuatro | **el dibujo a 21px sin ver** |
+| los descartes **medidos**, no por gusto | — |
+
+**Los descartes medidos, que valen tanto como la elección:**
+- **CONTACTO** — *el candidato obvio se cayó por medición*, y ganó **EL GLOBO**;
+  el perdedor **se retira con su lápida, no en silencio**.
+- **DOCUMENTO** — *el retrato es lo que lo salva del idioma ya ocupado.*
+- **BANCARIO** — **el censo previo encontró una colisión que lo habría
+  arruinado.** *Ese censo es el patrón: se mide el idioma ocupado ANTES de
+  dibujar, no después de que dos glifos se parezcan.*
+
+> **⚠️ CÓMO SE FIRMAN, y ahorra una confusión: LOS GLIFOS VIAJAN SIN CONSUMIDOR.**
+> La celda no tiene ícono a propósito. **Se firman EN LA GALERÍA, comparando los
+> candidatos — no montados en pantalla.** *Si se los busca en la app, no
+> aparecen.*
+
+### 11.4 ☠️ LA LÁMINA MUERE ENTERA — también para variantes de token
+
+S83 la mató como instrumento de pantalla y le dejó un último trabajo: comparar
+variantes de un token barato. **S84 le retira también eso.**
+
+**La razón es medida:** **la galería viaja en el OTA igual**, así que la lámina
+**nunca fue más barata — solo más lejos**. Y el dato que cierra:
+**el founder no llega a ella.**
+
+> **UN INSTRUMENTO DE GATE AL QUE EL GATE NO LLEGA NO ES UN INSTRUMENTO.**
+
+**Evidencia de la propia sesión:** las **cuatro variantes del destello** se
+montaron en lámina **y el founder no las reportó**. *La lámina hizo su trabajo y
+nadie la miró — exactamente el modo de falla que la enmienda nombra.*

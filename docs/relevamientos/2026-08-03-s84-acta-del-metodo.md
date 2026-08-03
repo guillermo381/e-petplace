@@ -1,10 +1,27 @@
-# S84 · ACTA DEL MÉTODO — BORRADOR (no cerrada)
+# S84 · ACTA DEL MÉTODO 
+
+> # ⚠️ S84 ESTÁ **PUBLICADA, NO FIRMADA**
+>
+> **LA PASADA DE GATE NO SE HIZO.** El founder paró la sesión antes, y se difiere
+> a S85 con contexto fresco. **Nueve OTAs esperan un ojo.**
+>
+> **Nada de lo de abajo se hereda como hecho.** Regla 80 al pie: *la ley se
+> escribe después del resultado firmado.* Lo que quedó sin ver:
+>
+> · **los tres glifos** (fiscal · bancario · documento) — el **candidato A está
+>   elegido**, el **dibujo a 21px no**
+> · **`Boton` acento** y **`Boton superficie="muro"`**
+> · **Datos comerciales**, el aviso de revisión, **Cuenta reordenada**
+> · **la cura de Places**
+> · **la pantalla de documentos** del eje ①
+> · 🔴 **LA RECUPERACIÓN POR CÓDIGO — nunca se probó contra un correo real.**
+>   Si `verifyOtp` no da sesión utilizable, **el camino se cae y el reparto vuelve
+>   a la mesa**. *Es lo único de S84 que puede REVERTIR una decisión, no solo
+>   pedir un retoque.*
+
 
 > **Molde: el acta de S83.** Su compañera de censo (`…-s84-censo-de-enmiendas.md`)
 > y la de estado (`…-s84-estado-medido.md`) se escriben aparte.
->
-> **⚠️ BORRADOR: falta el último lote de C y su gate.** Lo que está acá es lo que
-> ya ocurrió; lo que falte se suma, no se reescribe.
 >
 > **Esto NO es la lista de lo construido.** Es lo que produjo el resultado y lo
 > que costó, destilado para que la sesión siguiente no lo re-descubra.

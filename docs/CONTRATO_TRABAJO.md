@@ -1,6 +1,6 @@
 # Contrato de trabajo — Guillermo (founder e-PetPlace) ↔ Claude
 
-> **Versión:** v1.25 (con enmiendas S14 + S15 + S16 + S19 + S21 + S42 + S48 + S54 + S59 + S68 + S71 + S79 + S80 + S81 + S82 + S83 + S84)
+> **Versión:** v1.26 (con enmiendas S14 + S15 + S16 + S19 + S21 + S42 + S48 + S54 + S59 + S68 + S71 + S79 + S80 + S81 + S82 + S83 + S84)
 > **Última actualización:** 1 Ago 2026 — Sesión 83: **ENMIENDA A LA REGLA 84 — SON CUATRO ESTADOS, y el que faltaba es el PRIMERO: «en mi rama». El estado de una rama respecto de SÍ MISMA no dice nada sobre si su trabajo llegó** (se verifica con `merge-base --is-ancestor` contra `origin/main`, jamás con una lista propia; evidencia: 11 commits declarados pendientes estando los 11 en main — D-607). + **ENMIENDA A LA REGLA 82 — nace el PASO ⓪ de la veda: quien publica pide la congelación NOMBRANDO a quiénes espera y no bundlea sin confirmación AL MOMENTO** (una congelación de hace tres turnos no es una congelación; evidencia: el incidente C17). + **ENMIENDA A LA REGLA 80 — muere la lámina HTML como instrumento de diseño de PANTALLA; el ciclo es `UI real sin cablear → gate en dispositivo → cableado`** (la lámina sobrevive solo para comparar variantes de un token barato). Sesión 82. Reglas **84** (los CUATRO eslabones del cierre: pathspec obligatorio · `cat-file`+`merge-base` por CONTENIDO · group publicado · y lo que consumís sigue vigente) y **85** (worktree por pista = la PRIMERA decisión de una sesión paralela, pendiente). **El arranque de la sesión del prestador vive en `docs/relevamientos/2026-07-31-s82-acta-del-metodo.md` §5** y el censo de enmiendas de ley de S82 en `…-s82-censo-de-enmiendas.md` — se REFERENCIAN, no se copian.
 > **Audiencia:** Claude (web y code) en toda sesión futura. Cualquier dev que se sume al proyecto.
 
@@ -36,6 +36,27 @@ Documentación maestra del repo (organizada en S23):
 Ambos viven actualizados al cierre de cada sesión grande.
 
 ---
+
+
+> ### ➕ ENMIENDA S84 A LA REGLA 82 — EL PASO ⓪ GANA SUS DOS CLÁUSULAS QUE FALTABAN
+>
+> **① LA VEDA NO SE LEVANTA SOLA POR URGENCIA** *(aporte de C, S84).* Si la mesa
+> necesita que una pista trabaje durante una veda, **la levanta EXPLÍCITAMENTE,
+> lo declara a todos, y DESPUÉS se re-pide congelación.** **Un levantamiento
+> tácito no existe** — y la pista congelada que recibe trabajo debe responder
+> *"estoy congelada, ¿la mesa levanta la veda?"*, no ejecutarlo.
+>
+> **② UNA CONFIRMACIÓN QUE SOBREVIVE A UNA ESCRITURA NO CONFIRMA NADA.** Si
+> alguien —incluida quien publica— escribe después de recibirlas, **se descartan
+> y se re-piden.** *En S84 pasó tres veces y las tres se re-pidió; el resultado
+> fueron **nueve OTAs con ancla limpia, cero excepciones**.*
+>
+> **Y el cierre se declara a TODOS los congelados, incluida la mesa** — es el
+> paso que más veces se perdió, porque quien publica ya terminó y se va.
+>
+> **📌 El método completo de tres pistas vive en `docs/METODO_TRES_PISTAS.md`** —
+> territorios, deberes de conducción, el paso ⓪ entero, y cómo se pide algo de
+> otro territorio. **El prompt de apertura lo CITA, no lo repite.**
 
 ## Reglas del contrato
 
