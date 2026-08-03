@@ -428,7 +428,46 @@ export function EspejoNegocio({
             </Text>
           )}
 
-          {/* ② EL CTA DEL LOGO — `Boton compacto`, que es lo que la casa
+          {/* ⚠️ ② S84-C30 — FRENO: `acento` NO SE MONTA ACÁ, Y NO ES
+              PREFERENCIA — ES EL MISMO HEX.
+              La orden decía montarlo en el clip y en el logo. En el clip
+              entró; acá NO, porque este botón **no vive sobre papel: vive
+              sobre EL MURO**, y el muro es la única superficie de la app
+              que no sale del tema.
+
+              MEDIDO, no supuesto:
+              · `lightOficio.accent.cta` = `palette.tealDark` = **#0A7268**
+                (`themes/index.ts:137`).
+              · el muro en claro y en memorial = `palette.tealDark` =
+                **#0A7268** (`techo-oficio.ts:45`).
+              **Contraste 1.00.** El texto y el fondo son el mismo color:
+              el botón desaparecería por completo. En oscuro no
+              desaparece (teal puro sobre `tealDarkNoche` = 6.57), y eso
+              lo vuelve peor, no mejor: **invisible en dos temas de tres
+              y legible en el otro** es la clase de defecto que un gate
+              en un solo tema no encuentra.
+              Y §15b.2 ya lo tenía escrito antes de esta medición: sobre
+              el muro el acento funcional es PAPEL, y el teal queda
+              PROHIBIDO ahí.
+
+              ⚠️ LO QUE LA MEDICIÓN DESTAPÓ DE PASO, y es mío: el
+              `compacto` que hay hoy **también cruza la frontera que este
+              archivo declara doce líneas más arriba** (una pieza que
+              resuelve su color de `theme.*` no puede vestir el muro).
+              Su texto es `text.primary` #1D1A2E sobre #0A7268 = **2.92**,
+              bajo el 4.5 de AA. Lo escribí en C34 sin medirlo.
+              **No lo cambio en este commit y digo por qué:** la cura no
+              es elegir otra variante —**ninguna de las ocho sirve**,
+              todas resuelven de `theme.*`— sino que `Boton` sepa vestir
+              el muro (papel PLENO = #FAF9F7 sobre #0A7268 = **5.51**,
+              que es el par que la casa ya midió y usa en `TechoOficio`).
+              **Eso es de B**, y va como pedido con estos números. Dejar
+              el `compacto` es conservar el estado que el founder ya vio;
+              cambiarlo a ojo sería mi tercer error de anatomía en el
+              mismo botón.
+
+              ── historia, que explica el estado de hoy ──
+              EL CTA DEL LOGO — `Boton compacto`, que es lo que la casa
               YA tenía (la pantalla vieja lo usaba; S76-B1).
               ⚠️ SE CORRIGE MI PROPIA INVENCIÓN de C34: había puesto un
               texto SUBRAYADO, que es idioma web y no está en el

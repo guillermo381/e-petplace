@@ -1001,7 +1001,26 @@ export default function PerfilV2() {
                 un solo pasajero). */}
             <View style={{ paddingVertical: spacing[4], gap: spacing[2] }}>
               <Texto variante="seccion">{t('perfilNegocio.clipTitulo')}</Texto>
-              {/* S84-C19 — EL CONTROL, con la captura de B (`d943295`).
+              {/* ② S84-C30 — `Boton acento`, la variante que B construyó
+                  (`da2f7e9`) sobre el pedido de C29.
+                  EL FOUNDER TENÍA RAZÓN Y YO FIRMÉ MAL DOS VECES: en C34
+                  puse subrayado (idioma web, fuera del diccionario) y la
+                  corrección me llevó a `compacto`, que es peor por otro
+                  motivo — **un botón con caja al lado de una foto compite
+                  con la foto**, y la foto es lo que la vitrina viene a
+                  mostrar. `acento` resuelve las dos: sin caja (no
+                  compite) y en `accent.cta` con peso bold (se nota, que
+                  es lo que 22c pedía y el subrayado no daba).
+                  ⚠️ EL PESO ES LA JERARQUÍA, no el color: `acento` manda
+                  y `ghost` recede — por eso "Quitar" NO se toca. Dos
+                  comandos sin caja al lado sin diferencia de peso serían
+                  dos primarios, y el destructivo ganaría la mitad de la
+                  atención de la fila.
+                  Cero prop de color: el slot lo resuelve por casa (verde
+                  del oficio acá, oro en el cliente). R5 sigue intacta —
+                  esta pantalla no nombra `accent.cta` en ningún lado.
+
+                  S84-C19 — EL CONTROL, con la captura de B (`d943295`).
                   LA CADENA DE ARRIBA NO SE TOCÓ: se escribió en C17 para
                   servir antes y después del botón, y ésa era su prueba.
                   Que ahora exista el control y siga sirviendo es la
@@ -1014,7 +1033,7 @@ export default function PerfilV2() {
               {clipPath === null ? (
                 <View style={{ alignSelf: 'flex-start' }}>
                   <Boton
-                    variante="compacto"
+                    variante="acento"
                     etiqueta={t('perfilNegocio.clipAgregar')}
                     cargando={subiendoClip}
                     onPress={() => void agregarClip()}
@@ -1025,7 +1044,7 @@ export default function PerfilV2() {
                   <Texto variante="apoyo">{t('perfilNegocio.clipCargado')}</Texto>
                   <View style={{ flexDirection: 'row', gap: spacing[2] }}>
                     <Boton
-                      variante="compacto"
+                      variante="acento"
                       etiqueta={t('perfilNegocio.clipCambiar')}
                       cargando={subiendoClip}
                       onPress={() => void agregarClip()}
