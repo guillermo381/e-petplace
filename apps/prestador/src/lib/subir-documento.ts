@@ -46,6 +46,12 @@ export async function subirDocumentoVerificacion(input: {
   nombre: string;
   /** reintento post-subida: salta el paso 1. */
   storagePath?: string;
+  /** S84-C33 — ISO2 del país que EMITIÓ el documento. Se ENSANCHA en vez
+   *  de clonar el helper (L-175): el pipeline de subida es el mismo y lo
+   *  único nuevo es un campo que viaja al registro.
+   *  **Omitirlo guarda null = "no declarado"** — jamás el país del
+   *  negocio (P21). */
+  paisEmisor?: string;
 }): Promise<ResultadoSubidaDocumento> {
   let path = input.storagePath;
 
@@ -78,6 +84,7 @@ export async function subirDocumentoVerificacion(input: {
     tipo: input.tipo,
     nombre: input.nombre,
     archivoPath: path,
+    paisEmisor: input.paisEmisor,
   });
   if (!r.ok) {
     console.error(`[subir-documento] REGISTRO falló · ${r.mensaje}`);

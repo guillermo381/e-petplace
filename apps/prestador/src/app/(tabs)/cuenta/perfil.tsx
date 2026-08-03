@@ -86,6 +86,7 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { PAISES, PAIS_DEFAULT, bandera, type Pais } from '@/lib/paises';
 // ③ S83-C33 — el pipeline del logo YA EXISTÍA ENTERO (S76-B1/D-505). Lo
 // que faltaba era el cable.
 import { quitarLogoNegocio, subirLogoNegocio } from '@/lib/subir-logo';
@@ -115,47 +116,17 @@ import { useBarraEstadoClara } from '@/components/techo-oficio';
 
    ⚠️ COLOMBIA VALIDA — es el caso del founder, y no queda exento.
    ───────────────────────────────────────────────────────────────────── */
-type Pais = { iso: string; nombre: string; pre: string; formato?: string };
-const PAISES: Pais[] = [
-  { iso: 'AR', nombre: 'Argentina', pre: '+54', formato: '^\\+54\\d{10,11}$' },
-  { iso: 'BO', nombre: 'Bolivia', pre: '+591' },
-  { iso: 'BR', nombre: 'Brasil', pre: '+55' },
-  { iso: 'CA', nombre: 'Canadá', pre: '+1', formato: '^\\+1\\d{10}$' },
-  { iso: 'CL', nombre: 'Chile', pre: '+56', formato: '^\\+56\\d{9}$' },
-  { iso: 'CO', nombre: 'Colombia', pre: '+57', formato: '^\\+57\\d{7,10}$' },
-  { iso: 'CR', nombre: 'Costa Rica', pre: '+506' },
-  { iso: 'CU', nombre: 'Cuba', pre: '+53' },
-  { iso: 'DO', nombre: 'República Dominicana', pre: '+1' },
-  { iso: 'EC', nombre: 'Ecuador', pre: '+593', formato: '^\\+593\\d{8,9}$' },
-  { iso: 'ES', nombre: 'España', pre: '+34', formato: '^\\+34\\d{9}$' },
-  { iso: 'GT', nombre: 'Guatemala', pre: '+502' },
-  { iso: 'HN', nombre: 'Honduras', pre: '+504' },
-  { iso: 'MX', nombre: 'México', pre: '+52', formato: '^\\+52\\d{10}$' },
-  { iso: 'NI', nombre: 'Nicaragua', pre: '+505' },
-  { iso: 'PA', nombre: 'Panamá', pre: '+507' },
-  { iso: 'PE', nombre: 'Perú', pre: '+51', formato: '^\\+51\\d{7,9}$' },
-  { iso: 'PR', nombre: 'Puerto Rico', pre: '+1' },
-  { iso: 'PY', nombre: 'Paraguay', pre: '+595' },
-  { iso: 'SV', nombre: 'El Salvador', pre: '+503' },
-  { iso: 'US', nombre: 'Estados Unidos', pre: '+1', formato: '^\\+1\\d{10}$' },
-  { iso: 'UY', nombre: 'Uruguay', pre: '+598' },
-  { iso: 'VE', nombre: 'Venezuela', pre: '+58' },
-];
+/* ☠️ S84-C33 — LOS 23 SE MUDARON a `lib/paises.ts`. La pantalla de
+   documentos necesitaba la MISMA lista, y copiarla habría dejado dos
+   fuentes que se desincronizan al primer país nuevo (L-175). Acá queda
+   el import; el porqué de cada campo viaja con la lista. */
 
-/** El default del selector — el país donde opera la mayoría. NO es un
- *  techo: cualquiera de los 23 se elige (② arriba). */
 /** El techo del bucket de clips (A, S84): 10 MB. Vive acá porque el
  *  rebote tiene que decirse ANTES del round-trip. */
 const MAX_CLIP_BYTES = 10 * 1024 * 1024;
 
-const PAIS_DEFAULT = 'EC';
 
-/** ① FIRMADA: la bandera sale del `codigo_iso2` — cada letra a su
- *  indicador regional. El toggle de C10 murió con el gate: el Android
- *  del founder las dibuja, y lo que quedaba por resolver era la
- *  alineación (curada en `SelectorPais`). */
-const bandera = (iso: string): string =>
-  String.fromCodePoint(...[...iso].map((c) => (c.codePointAt(0) ?? 0) + 127397));
+
 
 type Seccion = 'portada' | 'contacto' | 'donde';
 
@@ -1342,6 +1313,36 @@ export default function PerfilV2() {
               detalle={t('perfilNegocio.cuentaComercialDetalle')}
               registro="aa"
               onPress={() => router.push('/cuenta-comercial')}
+            />
+
+            {/* ③ S84-C33 — LA PUERTA QUE NO EXISTÍA PARA TRES OFICIOS.
+                Medido en C29 ④: los TRES llamadores a documentos estaban
+                gateados a veterinaria, así que un paseador, un groomer o
+                un adiestrador tenía CERO caminos — no escondidos:
+                inexistentes.
+                VA EN LA VITRINA y no en ajustes porque **el sello es lo
+                que la familia lee para confiar**: no es configuración de
+                la cuenta, es parte de lo que te muestra. Un sello que
+                solo puede ganarse un oficio no es un sello de
+                plataforma. */}
+            {/* ⚠️ SIN GLIFO, Y DECLARADO — no es olvido. El registry NO
+                tiene `documento` (medido: 32 nombres, ninguno). Los dos
+                candidatos a mano fallan por ley, no por gusto:
+                · `carnet` es el CARNET DE VACUNAS de la mascota — su
+                  huella b′ sobre la cédula de una persona diría que el
+                  documento es del animal.
+                · `cuenta` lo usa la celda VECINA (Seguridad), y dos
+                  celdas pegadas con el mismo glifo es Ley 12 directa —
+                  el precedente exacto ya lo cazó el founder en S73.
+                `icono` es opcional desde S73, así que la celda vive sin
+                él en vez de mentir con uno prestado.
+                📣 PEDIDO A B: `documento` al registry (lote b′). Su
+                consumidor existe y es éste. */}
+            <CeldaNavegacion
+              titulo={t('perfilNegocio.documentosTitulo')}
+              detalle={t('perfilNegocio.documentosDetalle')}
+              registro="aa"
+              onPress={() => router.push('/cuenta/documentos')}
             />
 
             {/* ⑤ S84-C3 — "SEGURIDAD", y su condición de muerte escrita.
