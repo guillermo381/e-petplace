@@ -38,6 +38,7 @@ export default function Seguridad() {
   const [actual, setActual] = useState('');
   const [nueva, setNueva] = useState('');
   const [guardando, setGuardando] = useState(false);
+  const [listo, setListo] = useState(false);
   /** El rebote se muestra EN LA PANTALLA y no solo en un toast: los de
    *  seguridad hay que poder releerlos, y un toast se va. */
   const [rebote, setRebote] = useState<{ texto: string; salida: 'recuperar' | null } | null>(null);
@@ -45,6 +46,7 @@ export default function Seguridad() {
   async function guardar() {
     if (guardando) return;
     setRebote(null);
+    setListo(false);
     setGuardando(true);
     const r = await cambiarContrasena({ actual, nueva });
     setGuardando(false);
@@ -70,8 +72,23 @@ export default function Seguridad() {
       setRebote({ texto: r.mensaje, salida: null });
       return;
     }
-    mostrar({ variante: 'exito', texto: t('seguridad.listo'), });
-    router.back();
+    /* ③ S84-C24 — NO SE NAVEGA, y la causa está medida en el wrapper.
+       `cambiarContrasena` RE-AUTENTICA con `signInWithPassword`, y su
+       propio JSDoc lo dice: **eso RENUEVA la sesión**. Es la misma
+       persona, así que no hay pérdida real — pero la renovación dispara
+       el guard de sesión del raíz, y con un `router.back()` encima el
+       resultado era que la pantalla se iba y aterrizabas en el login.
+       Se leía como "cambié la clave y me echó", que es lo peor que puede
+       pasar justo después de tocar la seguridad de tu cuenta: parece que
+       algo salió mal cuando salió bien.
+       LA CURA ES NO IRSE: la confirmación vive ACÁ, en la misma pantalla
+       donde hiciste el trabajo, y los campos se vacían para que se vea
+       que el acto terminó. Salir lo decide el dedo, no nosotros. */
+    setActual('');
+    setNueva('');
+    setRebote(null);
+    setListo(true);
+    mostrar({ variante: 'exito', texto: t('seguridad.listo') });
   }
 
   return (
@@ -100,6 +117,8 @@ export default function Seguridad() {
             autoCapitalize="none"
             ayuda={t('seguridad.largoMinimo')}
           />
+
+          {listo && <Texto variante="apoyo" color="success">{t('seguridad.listo')}</Texto>}
 
           {rebote !== null && (
             <View style={{ gap: spacing[2], paddingTop: spacing[1] }}>

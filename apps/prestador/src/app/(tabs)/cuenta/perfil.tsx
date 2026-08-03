@@ -1165,6 +1165,23 @@ export default function PerfilV2() {
                   sola. Ley 17.4/23: la promesa se declara, no se
                   adivina. */}
               <Texto variante="apoyo">{t('perfilNegocio.sedeGuardaAparte')}</Texto>
+              {/* ① S84-C24 — POR QUE FALTA EL MAPA, dicho DONDE SE CURA.
+                  Medido: el negocio esta activo y en la vista, y el
+                  lector si trae la zona — lo que falta es la SEDE. Sin
+                  coordenadas, la zona derivada es null (3 de 6 de la
+                  vista estan asi, y son exactamente los tres sin
+                  coordenadas), y entonces la ficha no monta el mapa.
+                  NO ES DEFECTO: la familia tampoco lo veria. Pero un
+                  bloque que desaparece sin explicacion se lee como roto,
+                  y en el ESPEJO duele mas porque el prestador va ahi
+                  justamente a ver que le falta.
+                  El aviso NO va en el espejo —seria una prop inventada en
+                  la pieza de B— sino aca, pegado al control que lo
+                  arregla: el mensaje vive junto a la cura, no junto al
+                  hueco. */}
+              {prestador !== null && prestador.lat === null && (
+                <Texto variante="apoyo" color="danger">{t('perfilNegocio.zonaSinDireccion')}</Texto>
+              )}
               {prestador !== null && <SeccionSede sede={leerSede(prestador)} />}
             </SeccionDesplegable>
 
@@ -1279,6 +1296,28 @@ export default function PerfilV2() {
                 seccionado de Cuenta en S84, donde este bloque va a tener
                 vecinos (plata, preferencias) y el rótulo se elige contra
                 ellos, no solo. */}
+            {/* ⑤ S84-C26 — LA ENTRADA A CUENTA COMERCIAL, y solo la
+                ENTRADA. Las tres pantallas se quedan donde están: tienen
+                tres llamadores vivos (liquidaciones · sala de espera ·
+                negocio) y mudarlas los rompería a los tres.
+                ⚠️ Y LAS TRES ENTRADAS VIEJAS NO SE RETIRAN — no son
+                duplicados sino CONTEXTOS: desde liquidaciones se entra a
+                cobrar, desde la sala a entrar, desde negocio a
+                gestionar. Retirarlas "para no repetir" dejaría a cada
+                uno de esos tres momentos sin su camino, que es el error
+                inverso y más caro. Un destino con varias puertas no es
+                redundancia: es que varias cosas llevan ahí.
+                ACÁ la puerta existe porque la cuenta comercial ES parte
+                de la vitrina — sin ella el negocio no cobra, y eso el
+                prestador lo busca donde arma su negocio. */}
+            <CeldaNavegacion
+              icono="pagos"
+              titulo={t('perfilNegocio.cuentaComercialTitulo')}
+              detalle={t('perfilNegocio.cuentaComercialDetalle')}
+              registro="aa"
+              onPress={() => router.push('/cuenta-comercial')}
+            />
+
             {/* ⑤ S84-C3 — "SEGURIDAD", y su condición de muerte escrita.
                 El rótulo anterior ("Nombre y acceso") describía el
                 contenido de la pantalla; éste describe su LUGAR EN LA

@@ -213,6 +213,12 @@ export default function ComoTeVen() {
           zonaLat={prestador.zona_lat}
           zonaLon={prestador.zona_lon}
           zonaRadioM={prestador.zona_radio_m}
+          /* ① S84-C24 — SIN ZONA, LA PIEZA NO MONTA EL MAPA, y está
+             BIEN: la familia tampoco lo vería. La explicación NO va acá
+             —sería una prop nueva en la pieza de B, inventada por mí—
+             sino en el PERFIL, que es donde está la cura: el mapa falta
+             porque la sede nunca se capturó. El mensaje vive junto al
+             control que lo arregla, no junto al hueco. */
           oficio={undefined}
           historia={prestador.descripcion}
           /* CON handler ⇒ la invitación con su CTA. Hoy lleva a la
