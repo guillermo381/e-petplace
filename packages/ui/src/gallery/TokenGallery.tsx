@@ -1078,6 +1078,10 @@ function EjemploSetBPrima() {
     // S84-B5: CONTACTO — FIRMADO (el globo). Su candidato rival murió en
     // el gate; el porqué vive en el registry, no acá.
     'contacto',
+    // S84-B20: DOCUMENTO en dos candidatos. Van pegados a `carnet` y
+    // `cuenta` a propósito: son los dos prestados que fallaron por ley, y
+    // a 21px hay que ver que el nuevo NO se confunda con ninguno.
+    'documento', 'documentoSello',
   ]
   return (
     <View style={{ gap: spacing[4] }}>
