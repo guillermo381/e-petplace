@@ -4475,3 +4475,25 @@ lo que duele.**
 > criterio decidiéndolo. **Si ninguna lo hace nunca, la ficha muere sin
 > trabajo**, que es el desenlace correcto. *`sala-espera` no entra en esta
 > condición: se cura en S84 y por eso no es deuda.*
+
+> **➕ ENMIENDA S84 — `sala-espera` CURADA (`95dc7b6`), con su alcance declarado
+> por C para que no se lea de más.**
+>
+> **LO QUE CURA:** el síntoma que hacía **parecer roto al buscador** — el primer
+> tap sobre una predicción ya elige, en vez de solo cerrar el teclado.
+>
+> **⚠️ LO QUE **NO** CURA, y hay que decirlo porque es fácil suponerlo:** las
+> opciones que **caen bajo el teclado**. *Eso sigue abierto, con su medición en el
+> acta de C — y la medición contradijo la propuesta: la casa **no usa overlay**,
+> usa scroll medido, así que la cura que parecía obvia no aplica.*
+>
+> **Son dos problemas distintos y conviene no confundirlos:** éste hacía parecer
+> roto al buscador **incluso cuando las opciones se ven**; el otro es que a veces
+> **no se ven**. *Curar el primero no mueve el segundo — y creerlo curado sería
+> peor que saberlo abierto.*
+>
+> **EL SEGUNDO DEFECTO DE LA MISMA PANTALLA, registrado y NO tocado:**
+> `sala-espera` **monta sin `EvitaTeclado`** (verificado: 0 ocurrencias). **Es
+> otra cura y no fue pedida.** Se escribe acá **en vez de dejarlo en el aire** —
+> es exactamente lo que D-498 resolvió para el resto de la casa cuando `EvitaTeclado`
+> se promovió a `packages/ui`, y esta pantalla quedó fuera del barrido.
