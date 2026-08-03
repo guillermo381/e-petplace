@@ -4497,3 +4497,55 @@ lo que duele.**
 > otra cura y no fue pedida.** Se escribe acá **en vez de dejarlo en el aire** —
 > es exactamente lo que D-498 resolvió para el resto de la casa cuando `EvitaTeclado`
 > se promovió a `packages/ui`, y esta pantalla quedó fuera del barrido.
+
+---
+
+#### D-633 — LA LISTA DE PAÍSES YA VA POR TRES COPIAS, Y LA TERCERA **YA DIVERGE** 🟠 (agrava D-615)
+
+**Medido (S84-A33):**
+
+| # | dónde | cuántos |
+|---|---|---|
+| 1 | `cat_paises` (DB) | **23** |
+| 2 | `PAISES` en `cuenta/perfil.tsx` | **23** |
+| 3 | **`lib/paises.ts`** (S84-C33) | **30** |
+
+**D-615 registró las dos primeras y las diffeó fila por fila: eran IDÉNTICAS.**
+Su daño era el silencio —nada las comparaba—, no una divergencia real.
+
+> **La tercera cambia eso: nace con SIETE países que el catálogo no tiene.**
+> **Ya no es "tres copias que podrían divergir": es una que YA divergió.**
+
+**Y el hallazgo de C que lo motivó es CORRECTO, no discutible:**
+`obtenerPaisesParaRegistro()` filtra por `activo` — devuelve **países donde se
+puede ABRIR CUENTA** (hoy solo EC). **El país EMISOR de un documento no tiene por
+qué ser uno de ésos.** Con ese lector, **el caso canónico de P21 —el colombiano
+en Quito con documento colombiano— era imposible de declarar.** *C no copió por
+comodidad: copió porque el lector que necesitaba no existía en la puerta única.*
+
+### ⇒ SÍ DEBE VIVIR EN `packages/api`, Y NO HAY QUE CONSTRUIRLO
+
+**Son dos preguntas distintas y merecen dos lectores** — *"países donde
+operamos"* (activo, para abrir cuenta) vs *"países del mundo"* (todos, para
+declarar el origen de un documento o un teléfono).
+
+**Y el segundo YA EXISTE:** `get_paises_para_telefono()` devuelve
+`codigo_iso2 · nombre · prefijo_telefono · formato_telefono` de **los 23 sin
+filtrar por activo**, ordenados con los activos primero. **Sigue sin un solo
+consumidor** (medido en D-615).
+
+> **La cura no es escribir un lector: es CABLEAR el que ya está, y matar las tres
+> copias.** *Es la misma forma que la casa aplicó al resolvedor de URL en S84-A7:
+> dos implementaciones del mismo dato en dos casas se separan un día y nadie se
+> entera — acá ya pasó.*
+
+**LA DECISIÓN QUE QUEDA, y no la tomo yo:** el catálogo tiene 23 y C necesitaba
+30. **Cablear el lector REDUCE su lista.** *Lo coherente es que los siete
+faltantes entren a `cat_paises` —la fuente— y no que sobreviva una lista paralela
+para tenerlos; pero eso es sembrar catálogo, y es firma.*
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando **exista UN solo lector de "países
+> del mundo" en `packages/api`** y **las tres copias hayan muerto**.
+> **Verificable por grep:** cero arrays de países literales en `apps/`.
+> **No se retira cableando dos y dejando una** — la que quede se vuelve la que
+> nadie compara, que es exactamente D-615 con menos testigos.
