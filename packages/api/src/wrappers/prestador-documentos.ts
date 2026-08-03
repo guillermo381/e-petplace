@@ -52,9 +52,27 @@ export const TIPOS_DOCUMENTO_FIGURA = ['cedula', 'ruc'] as const;
 /** Los del eje ② — solo veterinaria, encima del ①. */
 export const TIPOS_DOCUMENTO_OFICIO_VET = ['titulo_profesional', 'registro_senescyt'] as const;
 
+/**
+ * LA TERCERA CAPA — opcionales (S85, firma del founder). Migración
+ * `20260803160000`: el CHECK de la tabla no tenía **ningún** tipo para una
+ * certificación o acreditación; lo más cercano era `otro`, que sirve para
+ * guardar el archivo y no para saber qué es. *Una certificación guardada
+ * como `otro` es un documento que nadie puede volver a encontrar por lo
+ * que ES.*
+ *
+ * ⚠️ **NO GATEA NADA, y por eso está aparte de los otros dos arreglos.**
+ * `LETRA_PERFIL_S79` §6: la credencial de la PERSONA gatea la oferta
+ * médica; todo lo demás **se recolecta y no bloquea**. Sumar este tipo al
+ * predicado de `_trg_ps_verificacion_profesional` sería enmienda de §6 con
+ * su propia firma — la separación en tres constantes existe justamente
+ * para que nadie los mezcle de oficio.
+ */
+export const TIPOS_DOCUMENTO_OPCIONAL = ['certificacion'] as const;
+
 export const TIPOS_DOCUMENTO_VERIFICACION = [
   ...TIPOS_DOCUMENTO_FIGURA,
   ...TIPOS_DOCUMENTO_OFICIO_VET,
+  ...TIPOS_DOCUMENTO_OPCIONAL,
 ] as const;
 export type TipoDocumentoVerificacion = (typeof TIPOS_DOCUMENTO_VERIFICACION)[number];
 

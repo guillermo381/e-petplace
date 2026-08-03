@@ -43,7 +43,22 @@ export async function obtenerMiPerfil(): Promise<ResultadoWrapper<MiPerfil, 'sin
 
 export interface InputActualizarMiPerfil {
   nombre?: string;
-  /** E.164 sin '+' — solo dígitos (regla 28). '' limpia el campo. */
+  /** Hoy: **solo dígitos, sin `+`**. `''` limpia el campo.
+   *
+   *  ☠️ **LA LEY YA NO ES ÉSTA — y el guard todavía sí (D-635).** La regla
+   *  28 quedó **derogada para toda la casa** (firma founder, 3-ago-2026):
+   *  el teléfono se guarda **E.164 entero, con su `+`**. `prestadores`
+   *  migró en S84; **`profiles` no**, y el porqué está en D-635, no en el
+   *  olvido.
+   *
+   *  *Se deja dicho acá, en el contrato, en vez de solo en la ficha: quien
+   *  lea este tipo tiene que saber que el formato que exige es el viejo, o
+   *  va a construir contra letra derogada creyendo que está en regla.*
+   *
+   *  ⚠️ Y el dato que lo vuelve urgente: **la columna ya tiene 15 filas
+   *  con `+` de 24 con teléfono** — entraron por caminos que no pasan por
+   *  este wrapper. *El guard no protege un formato: protege una puerta
+   *  mientras quince filas entraron por la ventana.* */
   telefono?: string;
   /** PATH ya subido a mascotas/{uid}/… ; null quita la foto. */
   foto_url?: string | null;
@@ -65,6 +80,17 @@ export async function actualizarMiPerfil(
   }
   if (input.telefono !== undefined) {
     const tel = input.telefono.replace(/\s/g, '');
+    /* 🔴 ESTE GUARD TODAVÍA EXIGE EL FORMATO VIEJO, A PROPÓSITO Y CON
+       FECHA — ver D-635. Endurecerlo a `^\+\d{7,15}$` está escrito y
+       medido, y **rompe `apps/cliente` el mismo día**: su pantalla de
+       perfil manda `telefono` crudo desde un `Campo` sin `+`, sin prefijo
+       y sin selector de país, **y lo manda SIEMPRE** (no solo cuando se
+       edita). Con el guard estricto, alguien que solo cambia su NOMBRE no
+       puede guardar hasta arreglar un teléfono que no tocó.
+
+       *Los tres cuerpos —guard, captura del cliente y backfill— se mueven
+       juntos o el más rápido rompe a los otros dos. Es la condición de
+       D-613, y acá aplica en la dirección incómoda: la que pide esperar.* */
     if (tel.length > 0 && !/^\d{7,15}$/.test(tel)) {
       return { ok: false, codigo: 'telefono_invalido', mensaje: 'El teléfono va con código de país y solo dígitos.' };
     }

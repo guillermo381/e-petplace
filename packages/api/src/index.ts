@@ -777,6 +777,7 @@ export {
   // función existe justamente para que esa regla viva UNA vez.
   TIPOS_DOCUMENTO_FIGURA,
   TIPOS_DOCUMENTO_OFICIO_VET,
+  TIPOS_DOCUMENTO_OPCIONAL,
   documentoDeFigura,
   TIPOS_DOCUMENTO_VERIFICACION,
   obtenerDocumentosVerificacion,
