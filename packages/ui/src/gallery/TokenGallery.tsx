@@ -1085,7 +1085,10 @@ function EjemploSetBPrima() {
     // pantalla — lo que hay que ver a 21px no es que cada uno se
     // entienda, sino que los tres SE DISTINGAN ENTRE SÍ. Y quedan
     // pegados a 'pagos' y 'presupuesto', que son sus vecinos de idioma.
-    'documento', 'documentoSello', 'fiscal', 'bancario',
+    // S85-B2: `documentoSello` (candidato B) SALE — el gate de 21px corrió
+    // el 3-ago y el founder firmó los vigentes. Su lápida vive en el
+    // registry, que es donde se lee al dibujar el próximo.
+    'documento', 'fiscal', 'bancario',
   ]
   return (
     <View style={{ gap: spacing[4] }}>
