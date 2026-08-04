@@ -99,6 +99,7 @@ import { AgendaRecepcion } from '@/components/agenda-recepcion';
 import { FiltroOficio, type FiltroOficioValor } from '@/components/filtro-oficio';
 import { FirmaPrestador } from '@/components/firma-prestador';
 import { PreparaEspacio, type EstadoTareas } from '@/components/prepara-espacio';
+import { SeccionDesplegable } from '@/components/perfil-piezas';
 import { useTraduccion } from '@/i18n';
 
 type Pantalla =
@@ -1638,10 +1639,40 @@ export default function Hoy() {
                 El header pasa a `Text` como en "Por coordinar" y en la
                 Zona 1 (Ley 18: la estructura informa), y el control de
                 revelar baja al PIE, igual que su hermana. */}
-            <Texto variante="seccion">
-              {t('agenda.yaAtendidas', { n: resto.filter(esAtendida).length })}
-            </Texto>
-            {atendidasAbierto && (
+            {/* ⭐ S85-C37 — ☠️ MURIÓ EL BOTÓN «Ver las N». Literal del founder:
+                *"las atendidas deben estar en filtro o algo, ese botón lo
+                odio"*.
+
+                **LA FORMA ELEGIDA, con las dos que descarto y por qué:**
+
+                · **(a) un chip más en la hilera de filtros** (Todos ·
+                  Paseos · Estética · Adiestramiento) — que es lo que él
+                  nombró primero. **Se descarta porque MEZCLA DOS EJES en
+                  un control:** esos chips filtran por OFICIO, y "atendidas"
+                  es ESTADO. Un control con dos ejes obliga a preguntarse
+                  qué pasa al combinarlos, y la casa ya pagó ese patrón
+                  (Ley 6: tabs ≠ filtros).
+                · **(b) disolver la sección y marcar el estado en la fila**
+                  — más simple, y **rompe §15b**: *lo que sigue preside, lo
+                  pasado se pliega*. Una jornada con ocho cerradas
+                  enterraría las dos que faltan. *El plegado no era el
+                  problema; el botón sí.*
+                · **(c) ✅ EL ENCABEZADO ES EL CONTROL** — `SeccionDesplegable`,
+                  la pieza que esta casa YA tiene para exactamente esto (la
+                  usa el perfil). El bloque deja de tener un botón al pie y
+                  pasa a plegarse desde su propio título, que es el gesto
+                  que el usuario ya intentó. **Cero pieza nueva y cero
+                  patrón nuevo** — el tercer patrón de plegado en la misma
+                  app habría sido el verdadero defecto.
+
+                Y el `resumen` de la pieza cobra su sentido acá: con la
+                sección cerrada, el conteo ES el dato (§15b.3). */}
+            <SeccionDesplegable
+              titulo={t('agenda.yaAtendidasTitulo')}
+              resumen={t('agenda.yaAtendidasResumen', { n: resto.filter(esAtendida).length })}
+              abierta={atendidasAbierto}
+              onAlternar={() => setAtendidasAbierto((v) => !v)}
+            >
               <View style={{ gap: spacing[3] }}>
                 {atendidasItems.map((item) => (
                   <View key={item.tipo === 'cita' ? item.cita.id : item.clave}>
@@ -1653,16 +1684,7 @@ export default function Hoy() {
                   </View>
                 ))}
               </View>
-            )}
-            <Boton
-              variante="compacto"
-              etiqueta={
-                atendidasAbierto
-                  ? t('agenda.acordeonOcultar')
-                  : t('agenda.verLasN', { n: resto.filter(esAtendida).length })
-              }
-              onPress={() => setAtendidasAbierto((v) => !v)}
-            />
+            </SeccionDesplegable>
           </View>
         )}
 

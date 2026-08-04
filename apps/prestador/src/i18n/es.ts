@@ -137,6 +137,8 @@ export const prestadorEs = {
     datoLibreConSemana: 'Hoy libre · {{n}} esta semana',
     // El pie de revelar (candidato a diccionario 19.6): el número EN la
     // etiqueta — jamás un 'Ver más' mudo. Compartida por las dos secciones.
+    yaAtendidasTitulo: 'Ya atendidas',
+    yaAtendidasResumen: '{{n}} del día',
     verLasN: 'Ver las {{n}}',
     vacio: 'Hoy no tienes citas',
     vacioDetalle: 'Cuando una familia agende contigo, va a aparecer acá.',
@@ -166,7 +168,12 @@ export const prestadorEs = {
     // S79-B (T2-B4) · §2.5 el módulo aspiracional sobrio — texto, no banner.
     // N=15 vive acá y se edita al crecer la cohorte · LOTE S79, GATE PENDIENTE
     aspiracional:
-      'Eres parte de un grupo curado de 15 prestadores en Ecuador. e-PetPlace no busca llenar — busca elegir bien. Gracias por sumarte al comienzo.',
+      // ☠️ S85-C37 · EL «15» SALE TAMBIÉN DE ACÁ. La firma que lo sacó de la
+      // carta del Día 1 no era de esa pantalla: era del NÚMERO. Un string de app
+      // no sostiene una promesa de escasez — caduca en el prestador 16 y nada
+      // avisa. Que sobreviviera acá después de curar la carta es la prueba de
+      // que curar UN sitio no cura una regla: el censo se hace por FRASE.
+      'Eres parte de un grupo curado de prestadores en Ecuador. e-PetPlace no busca llenar — busca elegir bien. Gracias por sumarte al comienzo.',
     porCoordinarTitulo: 'Por coordinar',
     porCoordinarCta: 'Fijar fecha',
     porCoordinarLibre: 'Procedimiento',

@@ -41,16 +41,31 @@ const trazo = (color: string) => ({
 
 type EstadoTab = { color: string; activa: boolean; colorHuella: string };
 
-/** Hoy — el sol del oficio (registry b′); activa: el día lleva su huella. */
+/**
+ * HOY — **la agenda** (registry `hoy`). ⏪ Era el SOL, y el founder firmó la
+ * agenda: *el día del prestador no es una hora del reloj, es una lista*.
+ *
+ * 🔴 **Y ES LA TERCERA VEZ QUE EL CLON COBRA EN UNA SOLA SESIÓN.** El dibujo
+ * cambió en `packages/ui/Icono.tsx` y acá siguió el viejo — sin que nada
+ * fallara, sin que ningún gate lo viera: **el founder firmó una agenda y su
+ * barra le mostraba un sol.** Ver la deuda de la cabecera: *el registry es la
+ * fuente y esto es la copia*, y una copia no se entera de que la fuente
+ * cambió. Cada cobro refuerza que la cura es el pedido a B —que `Icono`
+ * acepte el eje de la barra—, no seguir copiando mejor.
+ *
+ * La huella APARECE al activarse (marca, no estructura): acá el dibujo se
+ * sostiene solo sin ella, a diferencia de DATOS.
+ */
 export function IconoHoy({ color, activa, colorHuella }: EstadoTab) {
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24">
-      <Circle cx={12} cy={12} r={4.6} {...trazo(color)} />
       <Path
-        d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"
+        d="M6 6.4h12a1.6 1.6 0 0 1 1.6 1.6v11.4a1.6 1.6 0 0 1-1.6 1.6H6a1.6 1.6 0 0 1-1.6-1.6V8A1.6 1.6 0 0 1 6 6.4Z"
         {...trazo(color)}
       />
-      {activa ? <Huella color={colorHuella} x={9.3} y={9.5} escala={0.32} /> : null}
+      <Path d="M4.4 10.8h15.2" {...trazo(color)} />
+      <Path d="M8.6 3.4v4M15.4 3.4v4" {...trazo(color)} />
+      {activa ? <Huella color={colorHuella} x={8.4} y={12.4} escala={0.36} /> : null}
     </Svg>
   );
 }

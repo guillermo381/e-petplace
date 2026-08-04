@@ -111,6 +111,8 @@ export const prestadorEn = {
     datoCompleta: 'Day complete.',
     datoPorCoordinar: 'Day done · {{n}} to schedule',
     datoLibreConSemana: 'Free today · {{n}} this week',
+    yaAtendidasTitulo: 'Already seen',
+    yaAtendidasResumen: '{{n}} today',
     verLasN: 'See all {{n}}',
     vacio: 'No appointments today',
     vacioDetalle: 'When a family books with you, it will show up here.',
@@ -134,7 +136,7 @@ export const prestadorEn = {
     // S70-B2-v2 · Espejo de es.ts
     // S79-B (T2-B4) · §2.5 the sober aspirational module · LOTE S79
     aspiracional:
-      'You are part of a curated group of 15 providers in Ecuador. e-PetPlace is not trying to fill up — it chooses well. Thank you for joining at the beginning.',
+      'You are part of a curated group of providers in Ecuador. e-PetPlace is not trying to fill up — it chooses well. Thank you for joining at the beginning.',
     porCoordinarTitulo: 'To schedule',
     porCoordinarCta: 'Set date',
     porCoordinarLibre: 'Procedure',
