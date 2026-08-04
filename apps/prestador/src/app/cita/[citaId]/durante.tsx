@@ -23,6 +23,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EvidenciaFoto,
+  EvitaTeclado,
   Hoja,
   Insignia,
   MapaRecorrido,
@@ -351,7 +352,16 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
     terminandoRef.current = false;
   }
 
+  /* ⭐ S86-C · D-498 — LAS TRES `durante` ERAN LAS QUE FALTABAN.
+     `adjustResize` del manifest es LETRA MUERTA bajo edge-to-edge (SDK
+     57): la ventana ya no se achica, así que el campo enfocado queda
+     DEBAJO del teclado y se escribe a ciegas — el hallazgo de campo del
+     founder que parió esta pieza. La casa tiene UNA (packages/ui) y
+     estas tres pantallas no la portaban.
+     Se envuelve el ScrollView SIN re-indentar su contenido: es la forma
+     que ya usa `login.tsx` — se copia al vecino, no se reinventa. */
   return (
+    <EvitaTeclado>
     <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[5] }}>
       {/* S81-C (composición — §9.3 el estado real primero): EL MOMENTO
           VIVO preside — cronómetro y mapa son lo que está pasando. La
@@ -582,6 +592,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
         </View>
       </Hoja>
     </ScrollView>
+    </EvitaTeclado>
   );
 }
 
