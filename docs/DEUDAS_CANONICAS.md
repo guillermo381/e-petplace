@@ -2726,6 +2726,28 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 - **L-195 — VERIFICAR QUE UNA COLUMNA **EXISTE** NO ES VERIFICAR QUE ESTÉ **POBLADA** (S85, firmada por la mesa).** El caso, y lo pagué yo en el mismo turno: al diseñar la RPC de D-639 afirmé *"el «quién lo hizo» ya está en la fila; la RPC no agrega información, la quita"* — porque `eventos_mascota` **tiene** `cuenta_comercial_id`, `prestador_id` y `procedencia`. **Leí `information_schema` y me detuve ahí.** Al medir el contenido: **`cuenta_comercial_id` poblada en 3 de 177**, y **`procedencia` NULL en 134**. *La afirmación era verdadera sobre el esquema y falsa sobre el dato.* **Es la familia exacta de los datos que dicen que sí:** una columna vacía **no da error, no rompe un guard de shape y el typecheck la acepta** — el `select` la trae, el tipo la declara `string | null`, y **el problema recién aparece cuando alguien lee el `null` como significado**. *Se descubre al chocar, y el choque llega tarde: cuando la pieza ya se diseñó alrededor de ella.* **LA REGLA: toda columna sobre la que se va a APOYAR una decisión de diseño se mide con `count(col)` contra `count(*)`, no con `information_schema`.** El esquema dice qué se puede guardar; **solo el conteo dice qué se guardó.** *Y su corolario, que es lo que la hace barata: es UNA query, y va antes de la primera línea de la pieza — no después del primer fixture.* **Hermana de L-193** (la premisa heredada que nadie fechó) y de **L-084** (la doc conceptual no es fuente de verdad de schema): las tres son la misma familia — **confiar en una descripción en vez de en el objeto**. Origen: S85-A (el diseño de la RPC de D-639).
 - **L-196 — UN MÓDULO "PREPARADO-APAGADO" QUE NUNCA PASÓ POR UN COMPILADOR NO ESTÁ PREPARADO: ESTÁ ESCRITO (S85, firmada por la mesa).** El caso: `modules/sonda-manifest` (D-579, S81) se escribió como **pasajero preparado-apagado**, para viajar *"en la próxima build nativa"*. **En S85 hubo esa build, y falló:** `project ':sonda-manifest' does not specify compileSdk in build.gradle` — el módulo **jamás había pasado por Gradle**, porque los OTAs son JS y no tocan la cadena nativa. **DOCE SESIONES sin que nada lo compilara.** *El patrón "preparado-apagado" es correcto y la casa lo usa bien (el mic de D-456 llegó a destino tras cinco sesiones) — lo que falla es dar por verificado lo que solo está escrito.* **LA REGLA: todo pasajero que espera un tren futuro declara QUÉ LO VERIFICA MIENTRAS ESPERA.** Si nada lo compila, lo tipa ni lo corre, **su estado no es "listo": es "sin verificar"**, y hay que decirlo con esa palabra en su ficha. *La forma barata de cumplirla: que la deuda que lo crea nombre el primer instrumento que lo tocará — y si la respuesta es "ninguno hasta el tren", eso ya es el hallazgo.* **Hermana de L-193** (la premisa heredada que nadie fechó) **y de L-195** (la columna que existe y no está poblada): las tres son *confiar en la existencia en vez de en la verificación*. **Y su costo medido acá: un tren entero de build — 17 min de cola + 2m17s de Gradle — para descubrir una línea que un `tsc` nativo habría cazado el día que se escribió.** Origen: S85-A (el log de la build `c241c908`).
 - **L-197 — UN FALLO PUEDE DEGRADAR A *AUSENCIA*, NUNCA A UN *VALOR* QUE EL CONSUMIDOR VA A USAR COMO SI FUERA CIERTO (S85, firmada por la mesa).**
+  > **Un fallo puede degradar a AUSENCIA, nunca a un VALOR que el consumidor va a usar como si fuera cierto.**
+
+  **El caso, y lo produje yo:** `techoMaximoDe()` leía el techo del catálogo con un embed de PostgREST (`tipos_servicio!inner(cupo_techo)`) sobre una relación **sin FK declarada** — así que **fallaba SIEMPRE** — y su `catch` devolvía `return 1`. **Escribí ese `1` a propósito**, con su comentario razonado: *el techo es una ayuda, las franjas son el dato; caer entero por no poder calcular una ayuda sería desproporcionado.* **El razonamiento era bueno y el resultado, desastroso:** el taller del founder dijo **"Hasta 1 en simultáneo"** durante una sesión entera, con toda naturalidad.
+
+  ### EL COROLARIO, que es la mitad que hay que recordar
+
+  > **Un catch-all pensado para un fallo OCASIONAL que resulta ser el ÚNICO camino convierte un error VISIBLE en un dato falso CREÍBLE — y protege de verlo.**
+
+  *Si el error se hubiera propagado, el taller habría rebotado y el defecto se descubría **en el primer uso**.* **La degradación "honesta" fue la que lo escondió.** Y su plausibilidad es lo que lo vuelve caro: `1` es un techo perfectamente posible — no rompe nada, no tira error, **y el prestador lo obedece.**
+
+  ### EL CRITERIO, aplicable sin juicio
+
+  **Se pregunta qué hace el consumidor con el valor degradado:**
+  - **¿lo OMITE?** → legítimo. *Ej.: `adiestramiento-reserva` devuelve `{}` cuando no puede firmar las URLs de los clips — el clip **no se muestra**. Omite, no inventa.*
+  - **¿lo USA como dato?** → **prohibido.** *Ahí va un error tipado, o un valor IMPOSIBLE que signifique "no sé"* — la cura aplicada: **`0`, que no es un techo posible**, y la superficie lo distingue de `1` (*"sé, y es uno"*).
+
+  > **La prueba en una línea: la URL que no aparece SE NOTA; el techo que dice 1 SE OBEDECE.**
+
+  **Y su mitad de superficie, sin la cual la ley no cierra:** *"no sé" y un valor válido **no pueden compartir representación**. Colapsarlos es el defecto; separarlos es la cura. **Un `console.error` NO alcanza** — un log en producción no tiene testigo, y deja el dato igual de creíble con una línea que nadie va a leer.
+
+  **Hermana de L-192** (la verificación cuyo modo de falla es el silencio) **y de D-622** (el guard que habla y dice la razón equivocada). Origen: S85-A (el techo del cupo; el barrido que la generalizó).
+
 - **L-198 — UN TEXTO QUE EXPLICA UN PORQUÉ **VENCE CON EL PORQUÉ**, Y SE CAMBIA EN EL MISMO COMMIT (S85, firmada por la mesa — síntesis de método de la sesión).**
 
   > ### ➕ **EN LA DIRECCIÓN DEL REPORTE DE CAMPO** — *el rebote de «fundador», pedido TRES VECES y no ejecutado* *(S85, hallazgo de B + registro de la mesa)*
@@ -2999,28 +3021,6 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
   >
   > **Los que NO tienen guard —comentarios, láminas, contadores, actas— se descubren de casualidad, o porque el FOUNDER choca con ellos.** *Y ése es el peor canal posible: llega tarde, llega como desconfianza del producto, y llega con el costo ya pagado.*
 
-
-  > **Un fallo puede degradar a AUSENCIA, nunca a un VALOR que el consumidor va a usar como si fuera cierto.**
-
-  **El caso, y lo produje yo:** `techoMaximoDe()` leía el techo del catálogo con un embed de PostgREST (`tipos_servicio!inner(cupo_techo)`) sobre una relación **sin FK declarada** — así que **fallaba SIEMPRE** — y su `catch` devolvía `return 1`. **Escribí ese `1` a propósito**, con su comentario razonado: *el techo es una ayuda, las franjas son el dato; caer entero por no poder calcular una ayuda sería desproporcionado.* **El razonamiento era bueno y el resultado, desastroso:** el taller del founder dijo **"Hasta 1 en simultáneo"** durante una sesión entera, con toda naturalidad.
-
-  ### EL COROLARIO, que es la mitad que hay que recordar
-
-  > **Un catch-all pensado para un fallo OCASIONAL que resulta ser el ÚNICO camino convierte un error VISIBLE en un dato falso CREÍBLE — y protege de verlo.**
-
-  *Si el error se hubiera propagado, el taller habría rebotado y el defecto se descubría **en el primer uso**.* **La degradación "honesta" fue la que lo escondió.** Y su plausibilidad es lo que lo vuelve caro: `1` es un techo perfectamente posible — no rompe nada, no tira error, **y el prestador lo obedece.**
-
-  ### EL CRITERIO, aplicable sin juicio
-
-  **Se pregunta qué hace el consumidor con el valor degradado:**
-  - **¿lo OMITE?** → legítimo. *Ej.: `adiestramiento-reserva` devuelve `{}` cuando no puede firmar las URLs de los clips — el clip **no se muestra**. Omite, no inventa.*
-  - **¿lo USA como dato?** → **prohibido.** *Ahí va un error tipado, o un valor IMPOSIBLE que signifique "no sé"* — la cura aplicada: **`0`, que no es un techo posible**, y la superficie lo distingue de `1` (*"sé, y es uno"*).
-
-  > **La prueba en una línea: la URL que no aparece SE NOTA; el techo que dice 1 SE OBEDECE.**
-
-  **Y su mitad de superficie, sin la cual la ley no cierra:** *"no sé" y un valor válido **no pueden compartir representación**. Colapsarlos es el defecto; separarlos es la cura. **Un `console.error` NO alcanza** — un log en producción no tiene testigo, y deja el dato igual de creíble con una línea que nadie va a leer.
-
-  **Hermana de L-192** (la verificación cuyo modo de falla es el silencio) **y de D-622** (el guard que habla y dice la razón equivocada). Origen: S85-A (el techo del cupo; el barrido que la generalizó).
 
 - **L-192 — UNA VERIFICACIÓN CUYO MODO DE FALLA ES EL SILENCIO NO ES UNA VERIFICACIÓN. Todo chequeo tiene que poder salir ROJO — si no se puede producir su falla, no existe.** (Letra founder, S81 — la generalización de tres instancias del MISMO día: ① el typecheck encadenado con `| tail` que se leyó verde con el fallo adentro — el caso L-191 · ② el guard `git status --porcelain && echo "porcelain=0"` que imprimió su verde con el árbol SUCIO — `status` sale 0 siempre, el `echo` era decorativo; **la cura canónica: `test -z "$(git status --porcelain)"`**, que SÍ sale rojo · ③ la declaración de rango hecha DESPUÉS del push — una verificación post-acto no puede frenar nada: su rojo llega tarde, que es otra forma de silencio.) La prueba de fuego de todo guard nuevo: producirle la falla UNA vez y verla salir roja. Origen: S81 (los tres incidentes + la orden founder "una lección, no tres").
 - **L-191 — EL EXIT CODE SE LEE DEL COMANDO, JAMÁS DEL PIPE.** En un pipeline el shell reporta el exit del ÚLTIMO comando: `comando | tail` devuelve el 0 de `tail` aunque el comando haya fallado — y un `| head` puede además matar al productor por SIGPIPE. Un comando de medición o verificación que viaja por pipe puede LEERSE VERDE ESTANDO ROJO. La regla: el veredicto se toma del exit code DEL COMANDO (corrida separada, o `pipefail` explícito) — jamás de una salida truncada que "se ve bien". Origen: S81 (el typecheck de `@epetplace/domain`: su fallo quedó invisible en la corrida encadenada con `| tail` y solo apareció al correrlo SOLO — el diagnóstico costó una corrida extra que la regla ahorra). Hermana de L-063 (éxito de ejecución ≠ corrección) en la capa del shell.
@@ -5716,7 +5716,46 @@ reaparece se lee como "no funcionó" — y manda a revertir la cura correcta.*
 
 ---
 
-#### D-637 — `profiles.nombre` NO TIENE SUPERFICIE DE EDICIÓN EN LA APP DEL PRESTADOR ⚪ REGISTRO (consecuencia ACEPTADA, no defecto)
+#### D-637 — `profiles.nombre` NO TIENE SUPERFICIE DE EDICIÓN EN LA APP DEL PRESTADOR 🟠 **RECLASIFICADA S85** — dejó de ser consecuencia aceptada y es un CALLEJÓN
+
+> ### ⚠️ ENMIENDA S85 — **la premisa que la hacía tolerable SE CAYÓ el mismo día**
+>
+> **Esta ficha nació ⚪ «consecuencia ACEPTADA»** con un supuesto que no estaba
+> escrito pero la sostenía entero: ***el nombre siempre tiene algo***. Con el
+> sembrado del correo, `profiles.nombre` **nunca podía estar vacío** — feo, sí;
+> pero había un valor, y no poder editarlo era una incomodidad.
+>
+> **La firma del founder del 3-ago (salida (d+e), migración `20260804130000`)
+> cambió eso: un alta sin metadata deja `nombre` en `NULL`.**
+>
+> **⇒ y ahí las dos piezas se combinan en algo que ninguna era sola:**
+>
+> | antes | ahora |
+> |---|---|
+> | nace con un slug feo · **no se puede editar** | nace **VACÍO** · **no se puede editar** |
+> | *incomodidad* | ***callejón: el dato no existe y no hay puerta para crearlo desde adentro*** |
+>
+> **Ninguna de las dos decisiones está mal, y por eso importa decirlo:** *sembrar
+> `NULL` es correcto —un vacío se nota, un slug se obedece— y retirar la
+> pantalla de identidad también lo fue.* **Lo que nadie miró es la
+> INTERSECCIÓN**, que es donde vive el defecto. *Es la forma de S85 otra vez:
+> **no rompe nada** — la app funciona, no tira error, y simplemente hay una
+> persona sin nombre que no tiene cómo ponérselo.*
+>
+> **SE MIRA JUNTO CON LA VOZ, no después:** las **5 superficies** que pintan
+> `profiles.nombre` ahora pueden recibir `null`. Los **2 wrappers ya devuelven
+> `?? null`** (`familia.ts:87` · `miPerfil.ts:36`) ⇒ **el motor está cubierto y
+> lo que falta es VOZ** — *un ausente no se rellena; la superficie dice lo que
+> sabe*. **La voz sin la puerta deja al usuario mirando un hueco honesto que no
+> puede cerrar.**
+>
+> ☠️ **CONDICIÓN DE MUERTE ENMENDADA:** existe **un camino desde la app del
+> prestador para escribir el propio nombre** — *no "la pantalla vuelve": puede
+> resolverse en cualquier superficie, pero tiene que existir una.*
+> **DISPARO: S86, junto con las 5 superficies.** *Las dos se miran juntas por
+> orden de la mesa.*
+
+*(Texto original de la ficha, conservado — nació correcto para su premisa:)*
 
 **Origen: hallazgo de C al cerrar el lote Cuenta (S85).** La pantalla
 `cuenta/identidad` —la única del prestador que escribía `profiles.nombre` vía
