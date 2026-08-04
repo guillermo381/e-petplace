@@ -497,6 +497,14 @@ export const prestadorEn = {
     notificaciones: 'Notifications',
     notifPronto: "Soon — when business notifications reach your phone, you'll decide which ones here.",
     eliminarCuenta: 'Delete account',
+    // S86-C · D-649. The final state carries the work: "ready" without WHEN
+    // leaves the provider waiting for a change that won't come until reopen.
+    buscarUpdate: 'Check for updates',
+    updBuscando: 'Checking…',
+    updAlDia: "You're on the latest version.",
+    updDescargando: 'Downloading the update…',
+    updDescargado: 'Ready. It applies the next time you open the app.',
+    updNoSePudo: "We couldn't check for a new version.",
     eliminarVoz:
       "It will live here, done right. First we need to properly resolve what happens to your paid appointments, your active plans and your pending payouts — a business with commitments isn't deleted lightly.",
     entendido: 'Got it',

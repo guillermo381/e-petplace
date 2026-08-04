@@ -39,7 +39,17 @@ SplashScreen.preventAutoHideAsync();
 // distingue el OTA aplicado del bundle embebido del APK (el punto exacto
 // de L-138: confirmar que NO corre el embedded viejo). Guardado: en dev/
 // Expo Go / web `updateId` es null — el marcador lo dice honesto.
-console.log('[bundle] prestador S79-B');
+/* ☠️ S86-C · MURIÓ `console.log('[bundle] prestador S79-B')` (Ley 37,
+   firmado). **Medido hoy en el emulador: con el OTA de S86 ya aplicado,
+   el log seguía diciendo `S79-B`** — la línea no se toca desde esa
+   sesión, SIETE atrás. Dejó de rotular y pasó a DESINFORMAR, que es
+   peor que no estar: quien lo leyera creería estar corriendo un bundle
+   de hace siete sesiones.
+   Lo reemplaza el marcador de RUNTIME de acá abajo, que dice más, mejor
+   y **se actualiza solo** — nadie tiene que acordarse de editarlo.
+   ⚠️ Hallazgo que NO es mío y va a la mesa: `apps/cliente` tiene el
+   mismo defecto con `[bundle] cliente S73` (TRECE sesiones) y esa app
+   no tiene dueño declarado en S86. */
 
 // S79-B (voto de mesa, APP-WIDE): todo crash de render sin frontera más
 // cercana termina en una superficie que habla — jamás en blanco. La
