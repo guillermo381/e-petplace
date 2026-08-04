@@ -36,9 +36,11 @@ import {
 } from '@epetplace/ui';
 import {
   obtenerDetalleMascotaPrestador,
+  obtenerExpedienteModulado,
   obtenerMiPrestador,
   obtenerUmbralesMomentoVital,
   resolverUrlFoto,
+  type AporteExpediente,
   type DetalleMascotaPrestador,
   type UmbralesEspecie,
 } from '@epetplace/api';
@@ -48,6 +50,7 @@ import { fechaCortaMono } from '@epetplace/i18n';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTraduccion } from '@/i18n';
+import { vozAporte, vozDetalleAjeno } from '@/lib/voz-aporte';
 
 function esEspecie(v: string | null): v is AvatarMascotaEspecie {
   return v !== null;
@@ -68,6 +71,10 @@ export default function DetalleMascota() {
   // S74-B recepción v1 (E5 de la vara): la ETAPA se computa client-side —
   // umbrales del catálogo + fecha de nacimiento; cero motor nuevo.
   const [umbrales, setUmbrales] = useState<UmbralesEspecie | 'error' | null>(null);
+  /* S85-C28 · el expediente MODULADO (A3.5bis). `'error'` se distingue de la
+     lista vacía a propósito: "no pudimos leer" y "todavía no hay aportes" son
+     dos hechos y no comparten representación (Ley 13). */
+  const [expediente, setExpediente] = useState<AporteExpediente[] | 'error' | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -90,6 +97,12 @@ export default function DetalleMascota() {
           return;
         }
         setDetalle(r.data);
+        /* Carga SECUNDARIA: va después de pintar la ficha. Si falla, la
+           identidad y el historial siguen en pie — el expediente tiene su
+           propio camino de error y no toma de rehén al resto (patrón D-531). */
+        void obtenerExpedienteModulado(mascotaId).then((e) => {
+          if (vigente) setExpediente(e.ok ? e.data : 'error');
+        });
         if (r.data.mascota.especie !== null) {
           void obtenerUmbralesMomentoVital(r.data.mascota.especie).then((u) => {
             // E4 GENERALIZADA: el error del catálogo JAMÁS se pinta como
@@ -281,6 +294,64 @@ export default function DetalleMascota() {
             </Tarjeta>
           )}
         </View>
+
+        {/* ═══ S85-C28 · EL EXPEDIENTE MODULADO (`BIO_EXPEDIENTE` A3.5bis) ═══
+
+            **La superficie NO DECIDE NADA: pinta el nivel que llega.** El
+            reparto lo hace la RPC —`detalle` · `existencia` · `familia`— y
+            la pantalla que se pusiera a deducirlo estaría adivinando un
+            PERMISO, que es la peor cosa que puede adivinar una vista.
+
+            ⭐ EL NIVEL ③ ES LA MITAD QUE SE PIERDE AL IMPLEMENTAR. La
+            opción cómoda —ocultar lo que no se puede ver— está mal en las
+            dos direcciones: **esconder que el aporte EXISTE deja al
+            prestador atendiendo contra un expediente que le miente por
+            omisión** (no sabría que hay algo, así que no sabría que tiene
+            que preguntar), y mostrar el contenido a todos convierte el
+            expediente en un tablón.
+            *Ver que existe y quién lo hizo no es una versión degradada de
+            ver el contenido: es un dato distinto y suficiente.*
+
+            ⚠️ Y NO SE DIBUJA «Pedir el detalle» (Ley 23): el canal entre
+            prestadores NO EXISTE todavía. La ley que lo habilita está
+            depositada (A3.5bis-b) y es precondición de encendido de S86.
+            Un botón que no puede entregar es la puerta ofreciendo lo que
+            va a rechazar; la voz habilita el handshake NOMBRANDO a quién
+            buscar, que es lo que sí podemos cumplir hoy. */}
+        {expediente !== null && (
+          <View style={{ gap: spacing[3] }}>
+            <Texto variante="seccion">{t('expediente.titulo')}</Texto>
+            {expediente === 'error' ? (
+              // Ley 13: el fallo dice fallo. JAMÁS se degrada a "sin aportes"
+              // — un expediente vacío por un error de red es la mentira más
+              // cara de esta pantalla.
+              <Texto variante="apoyo">{t('expediente.error')}</Texto>
+            ) : expediente.length === 0 ? (
+              <Texto variante="apoyo">{t('expediente.vacio')}</Texto>
+            ) : (
+              <Tarjeta relleno="ninguno">
+                {expediente.map((a, i) => (
+                  <View key={a.id}>
+                    {i > 0 ? <Separador /> : null}
+                    <Celda
+                      titulo={vozAporte(a.tipo, t)}
+                      /* LA FRASE SOLO EN `'existencia'`. En `'familia'`
+                         `autor` es null y significa **"no aplica"** —lo
+                         declaró el dueño, no un prestador— y esas filas
+                         llegan con su contenido entero: aplicarles el
+                         template imprimiría «El detalle lo tiene null»
+                         sobre algo que se está viendo completo. En
+                         `'detalle'` el contenido es propio y la frase
+                         sobraría. */
+                      subtitulo={a.nivel === 'existencia' ? vozDetalleAjeno(a.autor, t) : undefined}
+                      metadataMono={fechaCortaMono(a.fechaEvento.slice(0, 10), idioma)}
+                    />
+                  </View>
+                ))}
+              </Tarjeta>
+            )}
+          </View>
+        )}
 
         {/* ── identidad (progresiva; las 5 dimensiones son D-110) ── */}
         {datosIdentidad.length > 0 ? (

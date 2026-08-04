@@ -240,6 +240,25 @@ export const prestadorEs = {
     vidasAlumno1: '1 alumno',
     vidasAlumnos: '{{n}} alumnos',
   },
+  expediente: {
+    // ⭐ S85-C28 · EL EXPEDIENTE MODULADO (BIO_EXPEDIENTE A3.5bis).
+    titulo: 'Su expediente',
+    // Ley 3: el código del evento jamás se muestra. Cerrado + genérico digno.
+    aportePaseo: 'Paseo',
+    aporteGrooming: 'Estética',
+    aporteAdiestramiento: 'Sesión de adiestramiento',
+    aporteVacuna: 'Vacuna',
+    aporteConsulta: 'Consulta',
+    aporteMomento: 'Momento de cuidado',
+    // ⭐ LA VOZ DEL NIVEL ③ (firmada por la mesa). Enuncia dónde VIVE el
+    // detalle, no lo que el lector no puede: ése es el dato que habilita
+    // el handshake. Nunca "sin detalle" ni "no tienes acceso".
+    detalleLoTiene: 'El detalle lo tiene {{prestador}}.',
+    // Autor desconocido (negocio borrado): "no sé quién" ≠ "no aplica".
+    detalleLoTieneOtro: 'El detalle lo tiene otro prestador.',
+    vacio: 'Todavía no hay aportes en su expediente.',
+    error: 'No pudimos leer el expediente',
+  },
   perfilNegocio: {
     // el resumen de contacto: NOMBRA lo cargado, en orden fijo
     // ── S84-C5: el resto del literal de la vitrina ──

@@ -190,6 +190,19 @@ export const prestadorEn = {
     vidasAlumno1: '1 student',
     vidasAlumnos: '{{n}} students',
   },
+  expediente: {
+    titulo: 'Their record',
+    aportePaseo: 'Walk',
+    aporteGrooming: 'Grooming',
+    aporteAdiestramiento: 'Training session',
+    aporteVacuna: 'Vaccine',
+    aporteConsulta: 'Consultation',
+    aporteMomento: 'Care moment',
+    detalleLoTiene: '{{prestador}} has the details.',
+    detalleLoTieneOtro: 'Another provider has the details.',
+    vacio: 'No entries in their record yet.',
+    error: "We couldn't load the record",
+  },
   perfilNegocio: {
     // ── S84-C5 · Espejo de es.ts ──
     errorTitulo: "We couldn't load your profile",
