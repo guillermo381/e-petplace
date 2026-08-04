@@ -231,6 +231,30 @@ dato **se separan un día y nadie se entera**.
 | **`resolverUrlGaleriaPrestador`** | C | A lo llevó a `packages/api`, al lado de su gemela |
 | **`modo: 'alternativa'`** | C | **C frenó** en vez de forzarlo con un cast |
 
+### ➕ LA EXCEPCIÓN LEGÍTIMA — **se comparte la FORMA, jamás la VOZ** *(aporte de C, S85, firmada)*
+
+**Se escribe porque sin ella el próximo importa el archivo creyendo que hace lo
+correcto** — y tendría de su lado la regla de arriba.
+
+**El caso:** el cliente y el prestador tienen un diccionario de voz para el mismo
+hecho. **Compartir el archivo parecería lo obvio** (un dato, una fuente). **Y
+sería un error:** el dueño lee **«Recibió la vacuna»** y el prestador lee **el
+hecho profesional**. *Son el mismo evento contado a dos audiencias distintas.*
+
+> ### **LO QUE SE COMPARTE ES LA FORMA (la pieza, el tipo, el contrato). LA VOZ ES DE CADA CASA.**
+>
+> *Clonar una pieza duplica una implementación; **compartir una voz duplica una
+> audiencia** — y ésa no se puede deduplicar, porque nunca fue una.*
+
+**La prueba, para no tener que discutirlo cada vez:** *¿el texto cambia según
+QUIÉN lo lee?* **Si sí, no es infraestructura: es voz, y no se comparte.** *La
+Ley 3 lo dice desde S45 —el diccionario vive adentro del componente— y esto es
+su versión entre pistas.*
+
+**⚠️ Y lo que la excepción NO autoriza:** clonar **la pieza** porque la voz
+difiere. *La forma sigue siendo una — se ensancha con una prop de voz, no con un
+segundo archivo.* **La excepción es sobre el TEXTO, no sobre el componente.**
+
 **Y el caso que muestra el límite:** cuando A **omitió** el re-export de tres
 símbolos que ella misma acababa de escribir *"para destrabar a C"*, **C agregó
 las tres líneas en territorio de A y LO DECLARÓ**. *Eso es correcto: no era una
