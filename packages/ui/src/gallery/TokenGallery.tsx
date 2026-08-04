@@ -1892,6 +1892,52 @@ function GaleriaInterna() {
             es lo que se hojea. Cuando un gate se firma, su sección
             BAJA al catálogo o muere (Ley 37) — no se queda arriba
             ocupando el lugar del siguiente. ═══════════════════════ */}
+        {/* ═══ S85-B13 · LOS GLIFOS QUE ESPERAN SU OJO. Suben acá por el
+            defecto que el founder encontró con el cuerpo: los dos emblemas
+            estaban al FINAL de «Iconografía b′» —una sección de CATÁLOGO—,
+            tres paneles de tema abajo, y no los halló. Es la regla de esta
+            misma página aplicada a sí misma: *lo que espera decisión va
+            arriba; el catálogo es lo que se hojea*. Siguen existiendo en
+            su fila del set b′; acá están para decidir, allá para consultar. ═══ */}
+        <Seccion titulo="① ⭐ GATE S85 — LOS GLIFOS, A 21px CONTRA SUS VECINOS · qué decide: (a) que la AGENDA de «Hoy» ya no se confunda con «Preferencias» —la cura que él firmó— y (b) cuál de los dos EMBLEMAS de cohorte. A 21px no se mira si cada uno se entiende: se mira si se SEPARAN">
+          <View style={{ gap: spacing[4] }}>
+            <Texto variante="apoyo">
+              (a) LA CURA DE LA BARRA DE TABS. Antes los dos eran círculo con rayos y solo cambiaba
+              la cuenta — a 21px, el mismo dibujo. Ahora «Hoy» es una AGENDA: lo que la saca del
+              idioma «rectángulo» (ocupado 5 veces) son las dos anillas, y la huella entra como el
+              día marcado. Se miran JUNTOS porque juntos viven en la barra.
+            </Texto>
+            <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
+              <Icono nombre="hoy" tamano={21} />
+              <Icono nombre="preferencias" tamano={21} />
+              <Icono nombre="negocio" tamano={21} />
+              <Icono nombre="cuenta" tamano={21} />
+            </View>
+            <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
+              <Icono nombre="hoy" tamano={28} />
+              <Icono nombre="preferencias" tamano={28} />
+            </View>
+            <Texto variante="apoyo">
+              (b) LOS DOS EMBLEMAS DE COHORTE, contra sus vecinos de significado. El laurel murió por
+              colisionar con `equipo`; la medalla, por el círculo ya ocupado 3 veces; el podio, por
+              LOYALTY §3 (un podio es un ranking dibujado). Lo que queda dice PERTENENCIA y llegada
+              temprana, jamás mérito comparado. A: el banderín plantado — riesgo, leerse como
+              «reportar». B: la cinta sin el disco — riesgo, vaciarse de significado.
+            </Texto>
+            <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
+              <Icono nombre="emblemaBanderin" tamano={21} />
+              <Icono nombre="emblemaCinta" tamano={21} />
+              <Icono nombre="equipo" tamano={21} />
+              <Icono nombre="prime" tamano={21} />
+              <Icono nombre="primeCorona" tamano={21} />
+            </View>
+            <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
+              <Icono nombre="emblemaBanderin" tamano={28} />
+              <Icono nombre="emblemaCinta" tamano={28} />
+            </View>
+          </View>
+        </Seccion>
+
         {/* ═══ S83-B9: el agua en la casa verde. Va PRIMERA junto al gate
             abierto porque es decisión viva, no catálogo. ═══ */}
         <Seccion titulo="① ⭐ GATE S83 — CUÁNTO PAPEL VERDE EN CLARO · qué decide: el nivel del tinte del prestador en el tema claro. ES ENMIENDA DE LA LETRA DE S82 (que decía que el prestador NO recibe tinte), firmada por el founder en S83: un tinte por casa en LOS DOS temas. Hoy corre el 3%">

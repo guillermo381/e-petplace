@@ -218,8 +218,26 @@ export const palette = {
    *  teal puro al 3% sobre light0. Mismo hex de marca, misma dosis, mismo
    *  orden — no un verde elegido a ojo.
    *  La escala 2/3/4/5% va a galería para su gate: el founder elige el
-   *  nivel mirando, como hizo con el oscuro. Reversa: `light0`. */
-  papelTapizOficio: '#F4F8F6',
+   *  nivel mirando, como hizo con el oscuro. Reversa: `light0`.
+   *
+   *  ✅ GATE CORRIDO Y FIRMADO (founder, 3-ago, sobre la lámina): «llevala
+   *  al 5». Pasa de 3% (#F4F8F6) a **5% (#F0F8F6)** — el hex EXACTO de la
+   *  escala que él miró, no uno recalculado acá. Reversa del gate: #F4F8F6.
+   *
+   *  ⚠️ LO QUE LA SUBIDA CUESTA, medido ANTES de commitear porque la mesa
+   *  puso freno: **ningún par cae** (bajo mínimo 7 → 7, cero pasan a
+   *  reprobar) pero **18 pares empeoran** — el tinte se composita sobre
+   *  `bg.base`, así que subirlo sube el fondo y el texto de capa pierde.
+   *  Los TRES que quedan al filo en `lightOficio`, para que quien toque
+   *  esto después sepa contra qué se está apoyando:
+   *      text.secondary/bg.overlay ............ 4.66 (margen 0.16)
+   *      capaText.comunidad/capaBg.comunidad .. 4.60 (margen 0.10)
+   *      status.dangerText/status.dangerBg .... 4.57 (margen 0.07)  ← el filo
+   *  A 6% cualquiera de los tres cae. Si algún día se pide más verde, NO
+   *  es mover este número: es la tanda de los textos de capa del claro,
+   *  con su re-medición. El margen de 0.07 es el techo real de esta
+   *  perilla, y está acá escrito para que no se descubra chocando. */
+  papelTapizOficio: '#F0F8F6',
   papelTapiz: '#FAF2F5',  // S82-B r10 ENCENDIDO (orden founder): pink 3% sobre papel algodón
   /** Los candidatos del gate (S82-B r9) — pink puro compositado sobre
    *  papel algodón al 2/3/4/5%: mezcla de DOS tokens FIRMADOS, jamás

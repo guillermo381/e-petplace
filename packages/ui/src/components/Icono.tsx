@@ -228,11 +228,41 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
     </>
   ),
   // El sol del oficio — el día de trabajo con la mascota adentro.
+  // ⏪ S85-B12 · EL SOL MURIÓ, ENTRA LA AGENDA — cura firmada por el
+  //    founder EN DISPOSITIVO: «`preferencias` y `hoy` se confunden en la
+  //    barra de tabs… el hoy lo podés dejar con un icono de agenda».
+  //
+  //    EL DEFECTO, medido antes de que él lo reportara y confirmado por
+  //    él después: los dos eran EL MISMO IDIOMA — círculo r≈4.5 con rayos
+  //    radiales (`preferencias` 8 rayos = engranaje · `hoy` 8 rayos =
+  //    sol). A 21px la única diferencia era la cuenta de rayos, y viven
+  //    UNO AL LADO DEL OTRO en la barra de tabs del prestador: la unidad
+  //    de barrido donde la Ley 12 exige que el ojo separe. Es el caso más
+  //    caro de esa ley porque el usuario los ve juntos todos los días.
+  //
+  //    NO NACE UN NOMBRE NUEVO, y es la decisión: `hoy` sigue siendo
+  //    `hoy`. Lo que cambió es su DIBUJO, no lo que nombra — un alias o
+  //    un `hoyAgenda` habría dejado dos nombres para una sola cosa, que
+  //    es no decidir cuál es el correcto (el argumento que mató al alias
+  //    de `coach`→`ia`). Cero consumidores tocados.
+  //
+  //    EL CENSO, porque un calendario es un RECTÁNGULO y ese idioma está
+  //    ocupado CINCO VECES (`presupuesto` · `bitacora` · `caso` · `pagos`
+  //    · `documento`): lo que lo saca del idioma son LAS DOS ANILLAS de
+  //    arriba. Es el mismo movimiento que salvó a `documento` (el
+  //    retrato) y a `bancario` (las columnas) — no se busca otro objeto,
+  //    se busca el rasgo que lo saca del idioma. Sin anillas sería la
+  //    sexta hoja rectangular; con anillas no se parece a ninguna.
+  //
+  //    Y LA HUELLA ENTRA COMO EL DÍA MARCADO, que es lo que hace que el
+  //    glifo cumpla la regla madre sin decorarse: en una agenda el día
+  //    marcado es EL que importa, y acá el que importa es la mascota.
   hoy: ({ tinta, huella }) => (
     <>
-      <Circle cx={12} cy={12} r={4.6} {...trazo(tinta)} />
-      <Path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6" {...trazo(tinta)} />
-      <Huella color={huella} x={9.3} y={9.5} escala={0.32} />
+      <Path d="M6 6.4h12a1.6 1.6 0 0 1 1.6 1.6v11.4a1.6 1.6 0 0 1-1.6 1.6H6a1.6 1.6 0 0 1-1.6-1.6V8A1.6 1.6 0 0 1 6 6.4Z" {...trazo(tinta)} />
+      <Path d="M4.4 10.8h15.2" {...trazo(tinta)} />
+      <Path d="M8.6 3.4v4M15.4 3.4v4" {...trazo(tinta)} />
+      <Huella color={huella} x={8.4} y={12.4} escala={0.36} />
     </>
   ),
   // El maletín del oficio lleva su huella (tab Negocio).
