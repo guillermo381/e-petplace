@@ -111,6 +111,7 @@ export const uiEn = {
   },
   // S63 — ClipSesion (training short clip; LOTE S63, founder gate pending)
   cohorte: {
+    desde: 'Since',
     fundador: 'Founding provider',
     pionero: 'Pioneer provider',
   },

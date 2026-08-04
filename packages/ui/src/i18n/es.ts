@@ -138,6 +138,7 @@ export const uiEs = {
      el que divergió no se entera. Una sola composición, imposible de
      partir. */
   cohorte: {
+    desde: 'Desde',
     fundador: 'Prestador fundador',
     pionero: 'Prestador pionero',
   },

@@ -1951,7 +1951,13 @@ function GaleriaInterna() {
               era `flexWrap`. Ahora el nombre cede y el emblema se queda en su línea.
             </Texto>
             <Texto variante="apoyo">
-              (b) ⭐ LA INSIGNIA DE COHORTE — reemplaza a los dos glifos que él rechazó («no me gusta
+              (b) ⭐ LA INSIGNIA DE COHORTE — ☠️ SIN LA PALABRA «FUNDADOR», que el founder pidió
+              retirar TRES veces: «no quede como que los estoy reconociendo como fundadores». Lo que
+              murió no es una palabra, es un ACTO DE HABLA — «Prestador fundador» no describe, OTORGA.
+              La que queda es de TIEMPO y no de mérito («Desde 2026»), y en el techo no queda
+              ninguna: la escarapela sola (abajo, sobre el muro). La etiqueta sigue viva como
+              accessibilityLabel — un emblema mudo al ojo puede serlo al lector solo si no significa
+              nada, y éste significa. — reemplaza a los dos glifos que él rechazó («no me gusta
               ninguno, puede que tengamos que no usar glifo para esto, ya que es especial»). El
               diagnóstico era de PIEZA: un glifo de línea a 21px no puede portar PERTENENCIA — un
               glifo dice de qué ES algo, la cohorte dice QUIÉN ES alguien. Es la anatomía de la
@@ -1980,7 +1986,7 @@ function GaleriaInterna() {
             </Texto>
             <View style={{ backgroundColor: palette.tealDark, padding: spacing[4], borderRadius: radius.suave, flexDirection: 'row', gap: spacing[3], alignItems: 'center', flexWrap: 'wrap' }}>
               <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: palette.light0 }}>Clínica Aurora</Text>
-              <Insignia distincion="cohorte" superficie="muro" cohorte="pionero" cohorteAnio={2027} />
+              <Insignia distincion="cohorte" superficie="muro" cohorte="pionero" cohorteAnio={2027} soloEmblema />
             </View>
           </View>
         </Seccion>

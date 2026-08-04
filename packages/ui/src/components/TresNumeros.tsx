@@ -57,7 +57,7 @@ export function TresNumeros({ columnas }: TresNumerosProps) {
         flexDirection: 'row',
         borderRadius: radius.suave,
         backgroundColor: palette.vidrioOficio,
-        paddingVertical: spacing[3],
+        paddingVertical: spacing[2.5],
         paddingHorizontal: spacing[2],
       }}
     >
@@ -73,7 +73,16 @@ export function TresNumeros({ columnas }: TresNumerosProps) {
                 numberOfLines={1}
                 style={{
                   fontFamily: typography.family.sans.medium,
-                  fontSize: typography.size.xl,
+                  /* 🔴 S85-B28 · ERA `xl` (28) — EXACTAMENTE el mismo
+                     cuerpo que `Texto variante="titulo"`, o sea que el
+                     número competía de igual a igual con EL NOMBRE DEL
+                     NEGOCIO, que es la identidad de la pantalla. El
+                     founder lo dijo sin ambigüedad: «muy grandes, no están
+                     proporcionales». Baja a `md` (18): sigue siendo lo más
+                     grande del bloque —manda dentro de su caja— y deja de
+                     disputarle la pantalla al nombre. La jerarquía no es
+                     el tamaño absoluto: es la distancia al vecino. */
+                  fontSize: typography.size.md,
                   color: palette.light0,
                   fontVariant: ['tabular-nums'],
                 }}

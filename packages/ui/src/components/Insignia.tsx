@@ -115,6 +115,23 @@ export type InsigniaProps =
       cohorteAnio: number
       etiqueta?: never
       tamaño?: InsigniaTamaño
+      /** ☠️ S85-B28 · SOLO EL EMBLEMA, SIN PALABRA. Firma del founder tras
+       *  pedirlo TRES VECES: «te he pedido tres veces que no dejes
+       *  fundador… **no quede como que los estoy reconociendo como
+       *  fundadores**».
+       *
+       *  LO QUE MURIÓ NO ES UNA PALABRA, ES UN ACTO DE HABLA. «Prestador
+       *  fundador» no describe un hecho: OTORGA un reconocimiento, y el
+       *  producto no quiere estar otorgando nada — quiere decir desde
+       *  cuándo alguien está. Por eso la salida no fue buscar sinónimos:
+       *  **la palabra que queda es de TIEMPO, no de mérito** («Desde
+       *  2026»), y en el techo no queda ninguna: la escarapela sola.
+       *
+       *  ⚠️ Y LA ETIQUETA NO DESAPARECE DEL TODO — sigue viva como
+       *  `accessibilityLabel`. Un emblema mudo para el ojo puede ser mudo
+       *  para el lector de pantalla solo si no significa nada, y éste
+       *  significa. La voz completa vive en el modal (de C). */
+      soloEmblema?: boolean
       /** S85-B24 · LA ÚNICA FAMILIA TOCABLE, y la excepción se explica
        *  porque la cabecera de esta pieza dice lo contrario en mayúsculas:
        *  «NO ES INTERACTIVA — jamás Pressable. Un badge que se toca es un
@@ -211,7 +228,7 @@ export function Insignia(props: InsigniaProps) {
      ahí la palabra es de dominio y la pieza no la conoce. */
   const etiqueta =
     'distincion' in props && props.distincion
-      ? `${traducir(`cohorte.${props.cohorte}`)} · ${props.cohorteAnio}`
+      ? `${traducir('cohorte.desde')} ${props.cohorteAnio}`
       : (props as { etiqueta: string }).etiqueta
   const t = TAMAÑOS[tamaño]
   const capaTexto = 'capaText' in theme ? theme.capaText : theme.capa
@@ -249,7 +266,7 @@ export function Insignia(props: InsigniaProps) {
           justifyContent: 'center',
           height: t.alto,
           paddingLeft: spacing[1.5],
-          paddingRight: spacing[3],
+          paddingRight: props.soloEmblema ? spacing[1.5] : spacing[3],
           borderRadius: radius.full,
           // MEMORIAL no tiene `capaBg` — y su ausencia es la ley, no un
           // hueco: memorial tiene UNA superficie a propósito (Ley 8:
@@ -268,6 +285,7 @@ export function Insignia(props: InsigniaProps) {
         }}
       >
         <Escarapela color={sobreMuro ? muro : capaTexto.comunidad} lado={t.alto - 6} />
+        {props.soloEmblema ? null : (
         <Text
           style={{
             fontFamily: typography.family.sans.bold,
@@ -277,6 +295,7 @@ export function Insignia(props: InsigniaProps) {
         >
           {etiqueta}
         </Text>
+        )}
       </Contenedor>
     )
   }

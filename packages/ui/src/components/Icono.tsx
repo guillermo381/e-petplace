@@ -321,10 +321,18 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
      receta ya existe y es la de `IconoMascotas`. */
   negocio: ({ huella }) => (
     <>
-      {/* LA HUELLA ES EL SUJETO — no lleva objeto al lado. Es el único
-          glifo del registry, junto con la tab de Datos que la soltó, en
-          el que la primitiva ES el ícono. */}
-      <Huella color={huella} x={8.7} y={10.7} escala={0.4} />
+      {/* 🔴 S85-B28 · LA HUELLA COMO SUJETO, y acá está la regresión que
+          esto cura: al sacar el maletín dejé la huella en su posición de
+          MARCA (x 8.7, escala 0.4) — que era su lugar ADENTRO del objeto,
+          chica y al costado. Sola, en una caja de 24, se lee como nada: el
+          founder reportó que «Tu espacio perdió el glifo». Y lo peor es
+          que la receta correcta la escribí YO en el commit que lo rompió
+          («la receta ya existe: es la de IconoMascotas») y no la apliqué
+          al glifo del registry — solo la documenté para el wrapper. Una
+          receta escrita y no aplicada es exactamente lo mismo que no
+          tenerla. Ahora la huella es el ÍCONO: centrada y grande, los
+          mismos números que `IconoMascotas`. */}
+      <Huella color={huella} x={2} y={2} escala={0.84} />
     </>
   ),
   // La jeringa protege; la huella verde es la vida cuidada (carnet).
