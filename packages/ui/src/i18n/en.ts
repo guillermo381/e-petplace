@@ -110,6 +110,10 @@ export const uiEn = {
     cancelado: 'Cancelled',
   },
   // S63 — ClipSesion (training short clip; LOTE S63, founder gate pending)
+  cohorte: {
+    fundador: 'Founding provider',
+    pionero: 'Pioneer provider',
+  },
   clipSesion: {
     reproducir: 'Play the clip',
     cargando: 'Loading the clip',

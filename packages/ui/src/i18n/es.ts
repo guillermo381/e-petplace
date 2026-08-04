@@ -129,6 +129,18 @@ export const uiEs = {
   },
   // S63 — ClipSesion (el clip corto del adiestramiento; LOTE S63,
   // gate founder pendiente)
+  /* S85-B21 · LA COHORTE — la voz vive ACÁ y no en cada app, y es firma
+     de mesa con su argumento: el motor selló la REGLA en un trigger
+     (fundador ≤ 2027-03-30, después pionero) precisamente para que nadie
+     la re-derive. Dejar la mitad PRESENTACIONAL repartida en dos apps la
+     re-deriva un piso más arriba — y dos consumidores componiendo la
+     misma frase no divergen el primer día: divergen el mes que viene, y
+     el que divergió no se entera. Una sola composición, imposible de
+     partir. */
+  cohorte: {
+    fundador: 'Prestador fundador',
+    pionero: 'Prestador pionero',
+  },
   clipSesion: {
     reproducir: 'Reproducir el clip',
     cargando: 'Cargando el clip',

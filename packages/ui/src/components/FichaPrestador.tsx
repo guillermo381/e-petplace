@@ -49,6 +49,7 @@ import { useRef, useState, type ReactNode } from 'react'
 import { Image, ScrollView, Text, View } from 'react-native'
 
 import { Boton } from './Boton'
+import { useTraduccionUi } from '../i18n'
 import { ClipSesion } from './ClipSesion'
 import { Insignia } from './Insignia'
 import { LogoNegocio } from './LogoNegocio'
@@ -76,19 +77,34 @@ const PUNTO = 10
 export interface FichaPrestadorProps {
   /** `nombre_comercial`. Sin él no se pinta el título ni el monograma. */
   nombre?: string | null
-  /** S85-B17 · LA INSIGNIA DE COHORTE, junto al nombre (firma de mesa).
-   *  Recibe la ETIQUETA YA ARMADA ("Prestador fundador · 2026"), no un
-   *  booleano: el año es DATO y esta pieza no lo fabrica — el mismo
-   *  contrato que `Insignia.etiqueta`, que también exige la palabra desde
-   *  afuera. `null`/ausente = no hay distinción y no se monta nada: un
-   *  negocio sin cohorte no ve un hueco.
+  /** S85-B17/B21 · LA INSIGNIA DE COHORTE, junto al nombre (firma de mesa).
+   *
+   *  RECIBE EL DATO CRUDO, NO LA ETIQUETA — y el cambio de contrato es
+   *  firma de mesa con su argumento: el motor selló la REGLA en un trigger
+   *  (fundador ≤ 2027-03-30, después pionero) precisamente para que nadie
+   *  la re-derive. Si cada app compusiera la frase, la mitad presentacional
+   *  quedaría re-derivada un piso más arriba — y dos consumidores armando
+   *  la misma frase NO divergen el primer día: divergen el mes que viene, y
+   *  el que divergió no se entera. Es la enfermedad del pie de reserva y de
+   *  la pata, cazada esta vez ANTES del segundo consumidor.
+   *
+   *  La etiqueta la arma la pieza con el riel de idioma de `packages/ui`,
+   *  que es donde `ClipSesion` y `LineaDeVida` ya guardan su voz.
+   *
+   *  Los DOS tienen que venir: sin año no hay etiqueta, y un «Prestador
+   *  fundador» sin año diría menos de lo que el dato sabe. Ausente o
+   *  incompleto = no se monta nada — un negocio sin cohorte no ve un hueco
+   *  donde otro tiene una distinción.
    *
    *  POR QUÉ JUNTO AL NOMBRE Y NO SOBRE LA FOTO (el porqué de la mesa,
    *  escrito acá porque es donde se lee al mover algo): sobre la foto una
    *  pastilla habla del estado de HOY —ése es el precedente «Al día»— y la
    *  cohorte es un hecho FIJO. Y esta ficha es la vitrina pública: el
    *  nombre siempre está, la foto puede faltar. */
-  cohorte?: string | null
+  cohorte?: 'fundador' | 'pionero' | null
+  /** El año del alta (`cohorte_anio`). Va aparte del código porque son dos
+   *  datos y la pieza los junta — no porque la app tenga que juntarlos. */
+  cohorteAnio?: number | null
   /** Logo YA RESUELTO (`resolverUrlLogoNegocio(prestadores.foto_url)`).
    *  Sin él, `LogoNegocio` cae a su monograma honesto — jamás a huella. */
   logoUrl?: string | null
@@ -159,6 +175,7 @@ export interface FichaPrestadorProps {
 export function FichaPrestador({
   nombre,
   cohorte,
+  cohorteAnio,
   logoUrl,
   portadas,
   clipUri,
@@ -173,6 +190,13 @@ export function FichaPrestador({
   pie,
 }: FichaPrestadorProps = {}) {
   const { theme } = useTheme()
+  const { t } = useTraduccionUi()
+  /* LA ETIQUETA SE ARMA ACÁ, UNA VEZ. Los dos datos o ninguno: sin año la
+     insignia no se monta (ver la nota del contrato). */
+  const etiquetaCohorte =
+    cohorte !== null && cohorte !== undefined && cohorteAnio !== null && cohorteAnio !== undefined
+      ? `${t(`cohorte.${cohorte}`)} · ${cohorteAnio}`
+      : null
   const [ancho, setAncho] = useState(0)
   const [activa, setActiva] = useState(0)
   const riel = useRef<ScrollView>(null)
@@ -358,8 +382,8 @@ export function FichaPrestador({
         {nombre ? (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2], flexWrap: 'wrap' }}>
             <Texto variante="titulo">{nombre}</Texto>
-            {cohorte !== null && cohorte !== undefined && cohorte !== '' ? (
-              <Insignia distincion="cohorte" etiqueta={cohorte} tamaño="sm" />
+            {etiquetaCohorte !== null ? (
+              <Insignia distincion="cohorte" etiqueta={etiquetaCohorte} tamaño="sm" />
             ) : null}
           </View>
         ) : null}
