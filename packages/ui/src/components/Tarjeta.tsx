@@ -119,8 +119,28 @@ export function Tarjeta(props: TarjetaProps) {
     // REGLA CHANEL DEL MARCO (D-358): la superficie que gana elevación
     // PIERDE el hairline — borde + sombra = decir lo mismo dos veces.
     // El borde de TINTE no es hairline (es semántico de capa/status): se conserva.
+    //
+    // ⚖️ ENMIENDA S86 (firma de mesa): la regla rige **CUANDO LA SOMBRA
+    // LO DICE**. En CLARO, sobre papel algodón, no lo dice — medido:
+    //
+    //     card #FFFFFF vs base #FAF9F7  →  1.052
+    //     (dark 1.037 · memorial 1.100, las dos ya documentadas acá abajo
+    //      y las dos CURADAS con el halo. Claro quedó SIN cura porque se
+    //      dio por hecho que la sombra separaba, y es el peor de los tres
+    //      después de memorial.)
+    //
+    // ⇒ en claro la superficie en reposo RECUPERA su hairline. La regla
+    // no muere: gana su condición — **el límite lo pone el CONTRASTE, no
+    // el catálogo de recursos.** En oscuro y memorial no cambia nada: ahí
+    // el tercer canal ya es el halo.
+    //
+    // Y usa `border.default` (#E3E0EF → 1.234 vs base), NO `subtle`:
+    // `subtle` es rgba(0,0,0,.05) y sobre blanco da **1.064** — un
+    // hairline que no se ve no es un hairline, es una línea en el código.
     ...(nivel === null || tinte !== 'ninguno'
       ? { borderWidth: theme.border.width, borderColor: tt.borde }
+      : theme.mode === 'light'
+      ? { borderWidth: theme.border.width, borderColor: theme.border.default }
       : null),
     // Ley 6 intacta: la sombra JAMÁS se anima
     ...(nivel !== null ? { boxShadow: theme.elevacion[nivel] } : null),
