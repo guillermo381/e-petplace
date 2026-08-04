@@ -167,6 +167,30 @@ bundle.*
    > después** — las venció ella misma. **La primera mitad protege de un juicio
    > propio; la segunda protege a las otras dos de gastar una confirmación en un
    > ancla que ya sabías que ibas a mover.**
+   >
+   > **➕ EL TEST DE EXENCIÓN MEDIBLE — REGISTRADO Y ACEPTADO POR LA MESA (S85,
+   > segunda veda del día). NO ablanda la regla: le da un juez.**
+   >
+   > **El caso:** A escribió `docs/` **después** de las dos confirmaciones ⇒ por
+   > la letra de arriba, vencidas. **A no las dio por válidas: midió si la regla
+   > discriminaba**, y trajo las dos mediciones:
+   >
+   > 1. **`git diff <última confirmación>..<ancla> -- apps packages` = VACÍO.**
+   >    *El ancla se movió; **la carga del bundle no**.*
+   > 2. **El commit ERA la resolución del WIP que la propia confirmación de C
+   >    nombraba como condición** para poder bundlear.
+   >
+   > **⇒ Exento, declarado, y con las dos mediciones en el reporte.**
+   >
+   > **LA FORMA DEL TEST, para que no se use de excusa:** *(a)* **se corre y se
+   > publica el resultado** — no se afirma · *(b)* **el diff tiene que ser
+   > VACÍO sobre `apps` y `packages`**, no "chico" · *(c)* **quien lo invoca lo
+   > declara en el mismo mensaje del hash**, jamás después.
+   >
+   > **Por qué merece existir en vez de re-pedir siempre:** una re-confirmación
+   > que **no puede cambiar el bundle** es un rito, **y un guard que no
+   > discrimina es decorativo** (L-192). *Pero el rito es barato y el test
+   > exige medir: **ante la duda o sin las tres condiciones, se re-pide**.*
 
 5. **LA VEDA NO SE LEVANTA SOLA POR URGENCIA.** *(aporte de C, S84.)* Si la mesa
    necesita que una pista trabaje durante una veda, **la levanta explícitamente y

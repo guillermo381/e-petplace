@@ -566,6 +566,48 @@ bocetos v2 (también firmados).
    > entra, acceso.** El discriminador es medible: **si la familia no lo
    > ve y no configura la oferta, es Cuenta**."*
 
+   > ### ENMIENDA S85 — **EL CUARTO VERBO, y el reparto de CUATRO TABS**
+   > **(firma del founder sobre el gate de `019fcabf`, 3-ago-2026.)**
+   >
+   > > **HOY se ACCIONA · NEGOCIO se CONFIGURA · DATOS se CONSULTA ·
+   > > CUENTA es QUIÉN SOS.**
+   >
+   > **«Gestionar» se estaba partiendo solo.** *Configurar la oferta y
+   > consultar cómo va son dos cosas distintas que compartían casa* —
+   > **NEGOCIO queda solo con el TALLER (lo que se configura)** y
+   > **DATOS se lleva la información del NEGOCIO** (equipo y
+   > estadísticas se mudan desde Negocio, y entran las tablas y
+   > gráficas del founder). *`DATOS` no es tab nueva: es `mascotas`
+   > renombrada — la key sigue siendo `mascotas` a propósito
+   > (`i18n/es.ts:18`, S85-C25).*
+   >
+   > #### ⚠️ EL VERBO NO ES EL ÚNICO CRITERIO — y esto existe para que el choque no vuelva
+   >
+   > **`Cobros` QUEDA EN CUENTA** (firma del mismo día: *"Cobros. OK,
+   > dejémoslo en cuenta"*). **El punto 2 del ALCANCE de abajo se
+   > sostiene y NO se enmienda.**
+   >
+   > **El porqué, que es la regla y no la excepción:** ***el verbo
+   > describe la ACCIÓN; no dice de QUIÉN es la cosa.*** **Cobros se
+   > consulta — y aun así es suya**: es la plata **personal** del
+   > prestador (cuánto le pagan y cuándo), y eso vive donde viven su
+   > identidad y su acceso.
+   >
+   > **⇒ EL ORDEN EN QUE SE APLICAN, porque aplicarlos al revés produce
+   > el choque:**
+   > **① ¿de QUIÉN es?** — de la persona ⇒ **CUENTA**; del negocio ⇒
+   > sigue. **② ¿qué se HACE con eso?** — se configura ⇒ **NEGOCIO**; se
+   > consulta ⇒ **DATOS**; se acciona hoy ⇒ **HOY**.
+   > *La pertenencia decide ANTES que el verbo. El verbo reparte lo que
+   > ya se sabe del negocio.*
+   >
+   > **Registro de por qué se escribe así:** las dos letras firmadas
+   > chocaron de verdad (§15b.0 mandaba `Cobros` a CUENTA; la firma del
+   > cuarto verbo lo mandaba a DATOS) y **el founder resolvió con un
+   > tercer argumento que no estaba en ninguna de las dos columnas**.
+   > *Una disyuntiva bien planteada puede seguir siendo una disyuntiva
+   > falsa.*
+
    Los tres verbos quedan: **HOY hace · NEGOCIO ofrece · CUENTA es tu
    relación con nosotros.** Lo que distingue a este de los otros dos no es
    solo el contenido — es que **su discriminador se puede CORRER**:
@@ -616,6 +658,57 @@ publicados, jamás la sesión que construyó** (L-153).
    celda lleva ese nombre: **la celda de C13 pasa a ser la sección
    IDENTIDAD.** Un contenedor y su contenido no comparten nombre — si lo
    comparten, el usuario no sabe si entró o sigue afuera.
+
+### 15b.0 · LA CONSOLIDACIÓN DE TABS (S86) — el plan, y LO QUE FALTA MEDIR
+
+**El diseño firmado son CUATRO superficies:**
+
+| tab | qué lleva | estado |
+|---|---|---|
+| **HOY** | techo · en curso · Tu día · Necesita tu atención · la línea de la semana | ✅ **CERRADA — no crece más** |
+| **DATOS** | las vidas **+ el negocio en números**: equipo y estadísticas (mudados) + tablas y gráficas | 🔨 S86 |
+| **NEGOCIO** | **solo el taller** — lo que se CONFIGURA | 🔨 S86 (la mudanza lo vacía) |
+| **CUENTA** | identidad · acceso · **COBROS** | ✅ **no se muda** |
+
+> #### ⚠️ FRENO DE A — **la premisa de "cinco tabs" no se sostiene contra el árbol**
+>
+> **Medido en `apps/prestador/src/app/(tabs)/_layout.tsx` (HEAD `a20776d`),
+> la barra tiene CUATRO items y ya son los cuatro del diseño:**
+> `index` (Hoy) · `mascotas` (**Datos**) · `negocio` · `cuenta`.
+> *`gallery` está **explícitamente fuera de la barra**, viva por URL.*
+>
+> **NO EXISTE una tab «Servicios» ni una tab «Ingresos»** — no hay
+> `servicios.tsx` ni `ingresos.tsx` en ninguna ruta del árbol.
+>
+> **Lo que sí existe con esos nombres, medido:**
+> - **«Servicios»** son **títulos de sección adentro de pantallas**
+>   (`serviciosTitulo` ×4 en `i18n`), y **los TALLERES son rutas sueltas
+>   por oficio** — `paseo/taller` · `grooming/taller` ·
+>   `veterinaria/taller` · `adiestramiento/taller` — **a las que NO se
+>   entra desde `negocio.tsx`**: se entra desde el índice de cada oficio.
+> - **«Ingresos»** es **`/liquidaciones`**, una ruta suelta **enlazada
+>   desde Negocio** (`negocio.tsx` → `push('/liquidaciones')`), más
+>   `cuenta-comercial/*`.
+>
+> **⇒ La consolidación no es «fusionar cinco tabs en cuatro»: la barra ya
+> tiene cuatro.** Lo que hay que resolver es **de dónde cuelgan seis
+> destinos sueltos** que hoy salen de Negocio o de los oficios —
+> `liquidaciones` · `equipo` · `estadisticas` · `resenas` ·
+> `casos-heredados` · `veterinaria/movimiento` — **más los cuatro
+> talleres, que no cuelgan de Negocio pese a ser "lo que se configura".**
+>
+> **Se trae medido y NO se resuelve** (orden de la mesa). *La pregunta
+> que el reparto de cuatro todavía no contesta: si NEGOCIO es «solo el
+> taller», **¿los cuatro talleres pasan a colgar de Negocio**, o Negocio
+> es una portada que enumera oficios y el taller sigue viviendo en el
+> suyo?* **Eso es composición, y se firma sobre píxeles (regla 80).**
+>
+> **Y un dato del reparto que no es de composición sino de PERMISO, para
+> que no sorprenda al construir:** **la tab NEGOCIO solo se monta si
+> `sesion.esGestor`** (`_layout.tsx`) — *un no-gestor ve TRES tabs, no
+> cuatro.* **Hoy es inerte** (solo el titular llega, y el titular es
+> gestor), **pero el día que la puerta abra, el diseño de cuatro tiene un
+> caso de tres que nadie nombró.**
 
 **LO QUE LA FIRMA *NO* DECIDE — queda a S84, SIN FIRMA (regla 80):**
 
