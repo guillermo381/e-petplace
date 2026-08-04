@@ -185,6 +185,41 @@ este orden:**
 **"Plata" es SIEMPRE `$ del día`** — es el único de los tres que no se traduce,
 porque el dinero no tiene dialecto de oficio.
 
+### ✅ QUIÉN VE LA PLATA — **FIRMA DEL FOUNDER (3-ago-2026)**
+
+> **Literal: *"Sí confirmo"* — LA RECEPCIÓN NO VE EL DINERO DEL DÍA EN LA
+> PORTADA. EL TITULAR SÍ.**
+
+**Esta firma RECONCILIA dos letras que se contradecían**, y por eso vive acá y no
+en un acta: **§2.4bis** pone PLATA en la portada; **`S72-P1a`** (posición de mesa
+firmada) dice *"el pulso del negocio va en NEGOCIO, **jamás en HOY**"*, con su
+razón fuerte — *la app es MULTI-ACTOR y el mostrador vive en HOY; plata sin gate
+= la recepción ve los ingresos*.
+
+**Las dos se conservan enteras.** La forma es la que `BIO_EXPEDIENTE` A3.5bis
+firmó el mismo día para el expediente:
+
+> ### **No se esconde que existe — se modula qué se ve.**
+
+**Y su consecuencia de construcción, que es donde esto se rompe si se lee de
+menos:** **el gate vive en el SERVIDOR** (`obtener_plata_del_dia`, RPC DEFINER
+con su contra-caso: *un no-titular no recibe ni la clave*). **Una autorización
+que decide el cliente es decorativa** — regla de la propia A3.5bis, y un wrapper
+es cliente.
+
+**⚠️ Lo que ese gate NO cierra, declarado para que nadie lo archive de más:**
+`evento_cita_servicio.precio` **sigue siendo legible por la RLS** para quien ve
+la cita. **La RPC es la puerta del TOTAL, no la del DATO.** *Lo que esta firma
+protege no es el dato crudo: es no ponerle el total del negocio en la cara —
+sumar 200 filas a mano no es leer un número grande al abrir la app.* Cerrarlo de
+verdad es **privilegio por columna** (D-641bis/D-639 familia), y es **la única
+que convierte la decisión de producto en defensa real**.
+
+**El administrador NO entra todavía, y no es un olvido:** su motor no existe
+(D-513/D-517). Cuando exista, cae en la rama del titular con una línea.
+
+---
+
 ### ⚠️ QUÉ ES "$ DEL DÍA" — decisión de la mesa, escrita para que nadie la reinterprete
 
 > ### **PLATA = EL VALOR *AGENDADO* DEL DÍA. NO lo devengado, NO lo cobrado.**
