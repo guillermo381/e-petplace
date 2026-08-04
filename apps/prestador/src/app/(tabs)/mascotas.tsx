@@ -98,7 +98,7 @@ import { SeccionDesplegable } from '@/components/perfil-piezas';
 import { useGateGestor } from '@/lib/gate-gestor';
 import { montoCorto } from '@/lib/formato-techo';
 
-import { fechaCortaMono } from '@epetplace/i18n';
+import { diaSemanaCorto, fechaCortaMono } from '@epetplace/i18n';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTraduccion } from '@/i18n';
@@ -119,19 +119,6 @@ function sumarDias(iso: string, dias: number): string {
   return new Intl.DateTimeFormat('en-CA').format(new Date(a ?? 0, (m ?? 1) - 1, (d ?? 1) + dias));
 }
 
-/* 🔴 CUARTA COPIA, y lo declaro porque el disparo YA SONÓ: el HOY dice en
-   su propio comentario *"su día en `packages/i18n` llega con el TERCER
-   consumidor"* — el cliente lo tiene en dos pantallas de reserva, el HOY
-   es la tercera y ésta la cuarta. **La condición de promoción se cumplió
-   y nadie la cobró.** No lo subo yo: `packages/i18n` no es territorio
-   declarado de C en S86. Va a la mesa como hallazgo, no como veredicto. */
-function diaCortoDe(iso: string, idioma: string): string {
-  const [a, m, d] = iso.slice(0, 10).split('-').map(Number);
-  if (!a || !m || !d) return iso.slice(8, 10);
-  return new Intl.DateTimeFormat(idioma === 'es' ? 'es' : 'en', { weekday: 'short' })
-    .format(new Date(a, m - 1, d))
-    .replace('.', '');
-}
 
 
 export default function Mascotas() {
@@ -272,7 +259,7 @@ export default function Mascotas() {
     return Array.from({ length: 7 }, (_, i) => {
       const iso = sumarDias(datos.semana.desde, i);
       return {
-        etiqueta: diaCortoDe(iso, idioma),
+        etiqueta: diaSemanaCorto(iso, idioma),
         tramos: porFecha.get(iso) ?? [],
         // El motor trae la semana ISO ENTERA ⇒ hay días > `hasta`. Son
         // agenda, no jornada cumplida: se dibujan tenues (aviso de A).
