@@ -420,6 +420,58 @@ atiende.**
 > **La prueba, en una línea:** *¿el aporte tiene otro prestador del otro lado?*
 > **Si no lo tiene, la modulación no aplica.**
 
+### 🚪 A3.5bis-b — LA PUERTA DEL NIVEL ③ (decisión del founder, 3-ago-2026 · LEY DEPOSITADA, **NO construida**)
+
+> **Literal del founder:** *"si es de un caso clínico, el vet tratante puede
+> solicitar al pet parent permiso para ver lo que los vets anteriores tenían en
+> su historia clínica"*
+
+**⇒ EL NIVEL ③ DEJA DE SER UN TECHO PERMANENTE Y PASA A SER EL *DEFAULT*, CON UNA
+PUERTA.**
+
+### Y LA PUERTA LA ABRE **EL DUEÑO**, NO EL PRESTADOR
+
+**Es la mitad que hace coherente todo lo demás:** *el expediente es de la
+mascota* ⇒ **quien decide compartirlo es su familia, no el negocio que lo
+escribió.** *El vet que redactó la nota no es su dueño: es su autor.* **Pedir
+no es acceder** — el prestador solicita, la familia concede.
+
+> ### ⚠️ ES LA MITAD QUE VUELVE **HONESTO** AL NIVEL ③
+>
+> **Sin esta puerta, el producto le dice al vet *"hay algo y no podés verlo"* y
+> no le da ningún camino** — *un muro con cartel*. **Y eso es exactamente lo que
+> A3.5bis vino a evitar en el otro sentido:** ocultar que el aporte EXISTE deja
+> al prestador atendiendo contra un expediente que le miente por omisión.
+> *Mostrar que existe sin dar cómo pedirlo lo deja sabiendo que le falta algo y
+> sin nada que hacer con esa información —* **que es peor que no saberlo, porque
+> ahora es su problema y no tiene herramienta.**
+
+### ⏳ LAS PREGUNTAS ABIERTAS — son del founder y de la mesa, y NO se aproximan
+
+1. **¿El permiso es sobre TODO el expediente, sobre UN aporte, o sobre un
+   PERÍODO / CASO?** *El literal dice "lo que los vets anteriores tenían en su
+   historia clínica", que sugiere caso o período — pero sugerir no es firmar.*
+2. **¿Es permanente o VENCE?** *La casa ya tiene el riel: la caducidad perezosa
+   de 6 meses de `user_acceso_clinico_a_mascota`. Puede ser el mismo — pero
+   reusar un riel es una decisión, no un default.*
+3. **¿El dueño puede REVOCARLO?** *(cruza con D-465, la cara de la revocación,
+   que sigue sin UI.)*
+4. **¿El prestador que escribió la nota se ENTERA de que otro la leyó?** *A3.8
+   ya firmó que **el dueño ve quién vio**; esto pregunta por el AUTOR, que es
+   otro actor y no está resuelto.*
+
+### 🔴 PRECONDICIÓN DE ENCENDIDO, NO DE CONSTRUCCIÓN
+
+**El canal del pedido y de la respuesta es `MODELO_NOTIFICACIONES`, que NO
+EXISTE.** ⇒ **misma forma que la vitrina por persona (S78):** se puede
+construir el motor; **encenderlo exige el aviso.**
+
+> *Un permiso que se pide por un canal que no existe es un botón que manda una
+> carta a ninguna parte.* **Y la asimetría lo agrava: el vet que pide se entera
+> de que pidió; la familia que tiene que contestar, no.**
+
+---
+
 ### Lo que esta regla NO decide
 
 1. **Qué cuenta como *"lo necesita para atender"*** — hoy lo resuelve la matriz
