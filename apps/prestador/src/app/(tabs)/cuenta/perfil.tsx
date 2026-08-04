@@ -55,6 +55,7 @@ import {
   Campo,
   Celda,
   CeldaNavegacion,
+  ClipSesion,
   EvitaTeclado,
   Hoja,
   HojaScroll,
@@ -1068,12 +1069,40 @@ export default function PerfilV2() {
                 UNO y es de otra naturaleza (se reproduce, no se mira).
                 Meterlo entre las fotos lo volvería "una más" y obligaría
                 a explicar cuál de todas se reproduce.
-                VACÍO HONESTO: no se dibuja un play que no reproduce
-                (Ley 23) — `expo-video` es NATIVO y exige build.
-                CRUZA CON D-617: no hay build EAS 1.0.3 y sin ella no se
-                recluta, así que las dos viajan en el MISMO TREN
-                (precedente D-456: el tren se aprovecha, no se arma para
-                un solo pasajero). */}
+                ⭐ S85-C21 — EL CLIP SE REPRODUCE ACÁ. **El tren llegó.**
+
+                Lo que decía esta nota hasta hoy —*"no se dibuja un play
+                que no reproduce (Ley 23); `expo-video` es NATIVO y exige
+                build; cruza con D-617, viajan en el mismo tren"*— era
+                CORRECTO cuando se escribió y quedó VIEJO sin que nada
+                fallara: la build 1.0.3 existe, `expo-video ~57.0.1` viaja
+                en las dos apps y en `packages/ui`, y `ClipSesion` ya
+                tiene dos consumidores vivos en esta misma app.
+
+                ☠️ SE REESCRIBE EN VEZ DE DEJARLA: **una abstención que
+                sobrevive a su causa se lee como decisión vigente**, y hoy
+                esta sesión lo pagó dos veces —una acá y otra en el taller,
+                donde un comentario mío se volvió PREMISA de la cura de
+                otra pista—. Un comentario viejo tiene más autoridad que el
+                código, porque parece documentación.
+
+                LO QUE COSTÓ NO SABERLO: el founder subió su clip, la app
+                dijo que subió —y era verdad, `clip_url` guarda bien— y
+                después no lo encontró en ningún lado. **No falló nada: la
+                mitad que muestra nunca se había construido.**
+
+                CERO PIEZA NUEVA: `ClipSesion` (34) pide SOLO `uri`, dibuja
+                su propio reposo y monta el video al TAP. `duracionSegundos`
+                y `descripcion` se OMITEN a propósito — son opcionales, y
+                el clip de vitrina **no conoce su duración** (`subir-clip-
+                vitrina.ts` declara que esta capa no puede medirla).
+                Rellenarla sería el verosímil-falso de L-139.
+
+                ⚠️ Y LO QUE NO SE HIZO, declarado: la ficha pública sigue
+                SIN clip. `FichaPrestador.clipPoster` pide un PÓSTER-IMAGEN
+                y **nada en el sistema lo produce** — pasarle este mismo
+                path compila, no rebota y pinta NADA. Es de B y está
+                pedido; acá no se clona ni se cablea a medias. */}
             <View style={{ paddingVertical: spacing[4], gap: spacing[2] }}>
               <Texto variante="seccion">{t('perfilNegocio.clipTitulo')}</Texto>
               {/* ② S84-C30 — `Boton acento`, la variante que B construyó
@@ -1116,7 +1145,15 @@ export default function PerfilV2() {
                 </View>
               ) : (
                 <>
-                  <Texto variante="apoyo">{t('perfilNegocio.clipCargado')}</Texto>
+                  {/* EL CLIP MISMO, arriba de sus comandos: lo que el
+                      prestador subió preside, y los botones lo sirven.
+                      Al revés, "Cambiar/Quitar" pesarían más que la cosa
+                      que cambian o quitan.
+                      ☠️ Y MUERE `clipCargado` ("Ya tienes un clip"): era
+                      la voz que SUPLÍA al clip cuando no se podía mostrar.
+                      Con el clip en pantalla, decirlo además es contarle
+                      lo que está viendo — Ley 37. */}
+                  <ClipSesion uri={resolverUrlFotoGaleria(clipPath)} />
                   <View style={{ flexDirection: 'row', gap: spacing[2] }}>
                     <Boton
                       variante="acento"

@@ -312,7 +312,6 @@ export const prestadorEs = {
     clipAgregar: 'Agregar clip',
     clipCambiar: 'Cambiar clip',
     clipQuitar: 'Quitar',
-    clipCargado: 'Tu clip ya está cargado. Se va a ver en tu ficha con la próxima versión de la app.',
     clipGuardado: 'Listo — tu clip quedó guardado.',
     clipNoVideo: 'El archivo no es un video.',
     clipMuyGrande: 'El clip supera el máximo de 10 MB.',

@@ -252,7 +252,6 @@ export const prestadorEn = {
     clipAgregar: 'Add clip',
     clipCambiar: 'Change clip',
     clipQuitar: 'Remove',
-    clipCargado: 'Your clip is saved. It will show on your card with the next version of the app.',
     clipGuardado: 'Done — your clip is saved.',
     clipNoVideo: 'That file is not a video.',
     clipMuyGrande: 'The clip is over the 10 MB limit.',
