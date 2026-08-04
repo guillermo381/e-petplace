@@ -1375,6 +1375,90 @@ function r25(archivos) {
   };
 }
 
+/** R30 · EL GLIFO RE-DIBUJADO (S86-B — la mitad de D-645 que ninguna
+ *  promoción tuvo, y D-546 mecanizada).
+ *
+ *  EL DEFECTO QUE VIGILA, con su costo medido: tres archivos de apps
+ *  copiaban geometría del registry de `Icono` porque la pieza no exponía
+ *  el color de la huella ni el eje de la barra. La skill lo declaraba
+ *  desde S78 —*"todo glifo nuevo del prestador nace con este riesgo"*— y
+ *  la cabecera del clon del prestador lo cobró TRES VECES en una sola
+ *  sesión (S85). **El día que la pieza ganó las props, los clones
+ *  murieron; lo que faltaba es que nadie pueda fundar el cuarto.**
+ *
+ *  ⚠️ POR QUÉ ESTA REGLA Y NO "UN SVG CON TRAZO 1.9 + UNA HUELLA": lo
+ *  medí y da SEIS archivos, casi todos legítimos —el Hogar y el perfil
+ *  usan la huella como CARA de mascota y el 1.9 en otro control del mismo
+ *  archivo—. **Una regla que grita donde no hay delito se desactiva sola
+ *  en la cabeza de quien la lee** (la lección literal de R25). El delito
+ *  no es dibujar: es dibujar LO QUE EL REGISTRY YA TIENE. Por eso compara
+ *  contra el registry vivo — si un glifo no existe ahí, esto calla.
+ *
+ *  ⚠️ SU LÍMITE, MEDIDO Y DECLARADO EN VEZ DE DESCUBIERTO DESPUÉS: el
+ *  umbral de 18 chars existe para que paths triviales (chevrones, checks)
+ *  no coincidan por casualidad, y tiene un costo real — **un glifo cuyos
+ *  paths sean TODOS cortos es invisible para esta regla**. Caso vivo al
+ *  escribirla: `compartir` (tres paths de 8, 17 y 15 chars) viajaba
+ *  concatenado en un solo `d=` del perfil de mascota y R30 no lo veía. Se
+ *  curó el SITIO (hoy monta `<Icono>`), no el umbral: bajarlo compra
+ *  ruido, no cobertura. Quien encuentre el segundo caso, que cure el
+ *  sitio igual — o que cambie el eje de comparación, no el número.
+ *
+ *  BASELINE: **{} — DURA EN 0**, y nace así porque el único hit real de
+ *  su primer día se curó en el mismo commit (el lápiz del perfil, al que
+ *  además le faltaba el bisel). De vacío no se sube: todo glifo
+ *  re-dibujado es rojo el primer día. */
+const CASA_REGISTRY = 'packages/ui/src/components/Icono.tsx';
+const MIN_PATH_R30 = 18;
+const BASELINE_R30 = {};
+const pathsDe = (src) => [...sinComentarios(src).matchAll(/d="([^"]+)"/g)];
+function r30(archivos) {
+  const fallos = [];
+  const esRegistry = (p) => p.replace(/\\/g, '/').endsWith('components/Icono.tsx');
+  const registry = archivos.find((a) => esRegistry(a.path));
+  // El SET del registry: paths largos, del CÓDIGO (no de las lápidas —
+  // L-170: un censo lee los comentarios como código si se lo permitís).
+  const delSet = new Set(
+    registry ? pathsDe(registry.src).map((m) => m[1].replace(/\s+/g, ' ').trim()).filter((d) => d.length >= MIN_PATH_R30) : [],
+  );
+  let copias = 0;
+  for (const { path, src } of archivos) {
+    if (esRegistry(path) || !path.replace(/\\/g, '/').startsWith('apps/')) continue;
+    let n = 0;
+    for (const m of pathsDe(src)) {
+      const d = m[1].replace(/\s+/g, ' ').trim();
+      if (!delSet.has(d)) continue;
+      n++;
+      copias++;
+      if (n > (BASELINE_R30[path] ?? 0))
+        fallos.push(
+          `${path}:${lineaDe(src, m.index)} — GLIFO RE-DIBUJADO: este path existe BYTE-IDÉNTICO en el registry de \`Icono\`. Montá <Icono nombre="…"> — la pieza acepta \`tinta\` (trazo), \`huella\` (color independiente, D-546) y \`activa\` (el eje de la barra: la huella de ESTRUCTURA recolorea, la de MARCA aparece — ley 6, resuelta ADENTRO). Un dibujo con dos fuentes diverge en silencio: nada falla cuando una se actualiza y la otra no.`,
+        );
+    }
+  }
+  // ANCLA: si el registry se renombra, se parte o cambia de forma, el SET
+  // queda vacío y la regla pasaría en VERDE sin comparar contra nada —
+  // su silencio significaría "no miré", no "no hay copias" (L-192).
+  fallos.push(...ancla('R30', delSet.size, 30, `paths de ≥${MIN_PATH_R30} chars en el registry (${CASA_REGISTRY})`));
+  return {
+    fallos,
+    info: `${copias} glifo(s) re-dibujado(s) · ${delSet.size} paths del registry vigilados${copias === 0 ? ' (DURA EN 0 desde S86-B: los tres clones murieron)' : ''}`,
+  };
+}
+
+/** Fixture de R30 — sintético a propósito: 34 paths largos distintos
+ *  para pasar el ancla, y UN archivo de apps que copia el primero. Si el
+ *  ancla fuera lo que lo pone rojo, la prueba pasaría por el motivo
+ *  equivocado y no probaría la regla que dice probar (precedente R24). */
+const PATHS_R30 = Array.from(
+  { length: 34 },
+  (_, i) => `M4.4 ${5 + i}.2h15.2a1.5 1.5 0 0 1 1.5 1.5v9.8a1.5 1.5 0 0 1-1.5 1.5Z`,
+);
+const FIXTURE_R30 = [
+  { path: CASA_REGISTRY, src: PATHS_R30.map((d) => `<Path d="${d}" />`).join('\n') },
+  { path: 'apps/cliente/src/(fixture)/GlifoCopiado.tsx', src: `<Path d="${PATHS_R30[0]}" />` },
+];
+
 // ── L-192: LA AUTO-PRUEBA — cada regla con modo de fallo DEBE salir
 //    roja contra su fixture sintético, en CADA corrida. ──
 const FIXTURES = {
@@ -1431,6 +1515,7 @@ const FIXTURES = {
     { path: 'packages/ui/src/brand/MarcaEleccion.tsx', src: "transform: [{ rotate: '-14deg' }]" },
     { path: 'apps/cliente/src/(fixture)/OtraPata.tsx', src: "transform: [{ rotate: '-14deg' }]" },
   ],
+  R30: FIXTURE_R30,
   R24: [
     ...OFICIOS_R24.map((o) => ({ path: `apps/cliente/src/app/(tabs)/explorar/${o}/index.tsx`, src: '' })),
     {
@@ -1439,7 +1524,7 @@ const FIXTURES = {
     },
   ],
 };
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29 };
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -1522,6 +1607,12 @@ const EXTRAS_BRAZOS = [
   ['R18·__DEV__ ajeno, sin envolver (brazo grueso)', r18, [{ ruta: '(fixture)', src: 'router.push("/gallery")\nif (__DEV__) console.log("nada que ver")' }, { ruta: '(fixture2)', src: 'router.push("/gallery")' }]],
   ['R18·__DEV__ ENVUELVE la entrada — if (brazo preciso)', r18, [{ ruta: '(fixture)', src: 'if (__DEV__) { router.push("/gallery") }' }, { ruta: '(fixture2)', src: 'router.push("/gallery")' }]],
   ['R18·__DEV__ ENVUELVE la entrada — && en JSX (brazo preciso)', r18, [{ ruta: '(fixture)', src: '{__DEV__ && <Celda onPress={() => router.push("/gallery")} />}' }, { ruta: '(fixture2)', src: 'router.push("/gallery")' }]],
+  // ── R30: el ANCLA, que es el guard de fuente de esta regla. Sin
+  //    registry el SET queda vacío, ningún path matchea y la regla pasaría
+  //    en VERDE habiendo comparado contra NADA. Su fixture principal trae
+  //    el registry lleno a propósito, así que este brazo no se enciende
+  //    ahí: sin esta línea, el guard nacería decorativo (el caso de R16).
+  ['R30·sin el registry (el SET vacío no verifica nada)', r30, [{ path: 'apps/cliente/src/(fixture)/X.tsx', src: '<Path d="M4.4 5.2h15.2a1.5 1.5 0 0 1 1.5 1.5v9.8Z" />' }]],
 ];
 for (const [nombre, regla, fx] of EXTRAS_BRAZOS) {
   if (regla(fx).fallos.length === 0) {
@@ -1595,6 +1686,7 @@ corridas.push(['R20 (la familia alerta no se rellena)', r20([...apps, ...ui])]);
 corridas.push(['R18 (D-580: la entrada a la galería NO desaparece, en LAS DOS casas)', r18(CUENTAS_GALERIA.map((ruta) => ({ ruta, src: readFileSync(ruta, 'utf8') })))]);
 corridas.push(['R24 (el pie de reserva no se copia)', r24(apps)]);
 corridas.push(['R25 (la pata no se reinventa)', r25([...apps, ...ui])]);
+corridas.push(['R30 (el glifo no se re-dibuja: apps contra el registry)', r30([...apps, ...ui])]);
 corridas.push(['R27 (el pink no enfoca en el prestador)', r27(FUENTES_R27)]);
 corridas.push(['R29 (sinPie no viaja solo)', r29(apps)]);
 

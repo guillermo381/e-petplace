@@ -515,9 +515,13 @@ export default function PerfilDeMascota() {
                     }
                     style={{ width: 38, height: 38, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}
                   >
-                    <Svg width={20} height={20} viewBox="0 0 24 24">
-                      <Path d="M15.5 4.5 19.5 8.5 8 20H4v-4z" stroke={sobreMarca} strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                    </Svg>
+                    {/* S86-B · del registry (D-645). Estaba dibujado a mano
+                        ACÁ, en un archivo que ya importaba `Icono` — y le
+                        faltaba el CORTE DEL BISEL que el registry declara
+                        imprescindible: «sin él, a 21px la punta se lee como un
+                        triángulo mudo». La copia no envejeció mal: nació
+                        incompleta. */}
+                    <Icono nombre="lapiz" tamano={20} tinta={sobreMarca} />
                   </Pressable>
                   <Pressable
                     accessibilityRole="button"
@@ -525,9 +529,14 @@ export default function PerfilDeMascota() {
                     onPress={() => void Share.share({ message: t('perfil.compartirMensaje', { nombre: mascota.nombre }) })}
                     style={{ width: 38, height: 38, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}
                   >
-                    <Svg width={20} height={20} viewBox="0 0 24 24">
-                      <Path d="M12 15V4M8 7.6 12 3.6l4 4M5 14v5.5h14V14" stroke={sobreMarca} strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                    </Svg>
+                    {/* S86-B · del registry (D-645). ⚠️ Y ES EL CASO QUE
+                        MIDE EL LÍMITE DEL VIGILANTE: acá los TRES paths del
+                        glifo viajaban CONCATENADOS en un solo `d=`, así que
+                        R30 no podía verlo — sus tres paths sueltos quedan por
+                        debajo del umbral de 18 chars que la regla usa para no
+                        cazar chevrones por casualidad. Se curó el sitio en vez
+                        de aflojar el umbral: bajarlo compra ruido, no cobertura. */}
+                    <Icono nombre="compartir" tamano={20} tinta={sobreMarca} />
                   </Pressable>
                 </View>
               </View>

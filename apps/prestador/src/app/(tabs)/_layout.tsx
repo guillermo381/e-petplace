@@ -25,6 +25,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  Icono,
   spacing,
   useTheme,
   type BarraTabsItem,
@@ -42,8 +43,17 @@ import {
 import { apiLista } from '@/lib/api';
 import { esRegistroReciente } from '@/lib/registro-reciente';
 import { BienvenidaPrestador } from '@/components/bienvenida';
-import { IconoCuenta, IconoHoy, IconoMascotas, IconoNegocio } from '@/components/iconos-tabs';
 import { useTraduccion } from '@/i18n';
+
+/* ☠️ S86-B · `@/components/iconos-tabs` MURIÓ — LA BARRA CONSUME EL
+ * REGISTRY (D-645 / D-546, el pedido que su propia cabecera dejaba
+ * escrito: *"la cura es un pedido a B, no un refactor local: que
+ * `Icono` acepte el eje de la barra"*). Los cuatro glifos de acá
+ * estaban byte-idénticos al registry — **y eso no probaba que el clon
+ * funcionara: probaba que alguien lo había vuelto a copiar a mano**,
+ * tres veces en una sola sesión (S85). Ahora `Icono` resuelve la ley 6
+ * adentro: la huella de ESTRUCTURA (`negocio` la pata, `mascotas` la
+ * gráfica) recolorea; la de MARCA (`hoy`, `cuenta`) aparece. */
 
 type EstadoSesionRaiz =
   | 'verificando'
@@ -298,12 +308,41 @@ export default function TabsLayout() {
   // aparece siempre. Cuando la puerta abra, el profesional/recepción entra
   // sin el tab, sin un candado que explicar.
   const items: BarraTabsItem[] = [
-    { key: 'index', etiqueta: t('tabs.hoy'), icono: IconoHoy },
-    { key: 'mascotas', etiqueta: t('tabs.mascotas'), icono: IconoMascotas },
+    {
+      key: 'index',
+      etiqueta: t('tabs.hoy'),
+      icono: ({ color, activa, colorHuella }) => (
+        <Icono nombre="hoy" tinta={color} huella={colorHuella} activa={activa} />
+      ),
+    },
+    {
+      // La tab se llama «Datos» y su glifo es `datos` — la gráfica.
+      // (La ruta sigue siendo `mascotas`: el nombre de archivo no es
+      // el nombre del glifo, y renombrar rutas no es de esta tanda.)
+      key: 'mascotas',
+      etiqueta: t('tabs.mascotas'),
+      icono: ({ color, activa, colorHuella }) => (
+        <Icono nombre="datos" tinta={color} huella={colorHuella} activa={activa} />
+      ),
+    },
     ...(sesion.esGestor
-      ? [{ key: 'negocio', etiqueta: t('tabs.negocio'), icono: IconoNegocio } as BarraTabsItem]
+      ? [
+          {
+            key: 'negocio',
+            etiqueta: t('tabs.negocio'),
+            icono: ({ color, activa, colorHuella }) => (
+              <Icono nombre="negocio" tinta={color} huella={colorHuella} activa={activa} />
+            ),
+          } as BarraTabsItem,
+        ]
       : []),
-    { key: 'cuenta', etiqueta: t('tabs.cuenta'), icono: IconoCuenta },
+    {
+      key: 'cuenta',
+      etiqueta: t('tabs.cuenta'),
+      icono: ({ color, activa, colorHuella }) => (
+        <Icono nombre="cuenta" tinta={color} huella={colorHuella} activa={activa} />
+      ),
+    },
   ];
 
   return (

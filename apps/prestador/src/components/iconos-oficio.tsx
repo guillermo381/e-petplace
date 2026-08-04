@@ -1,104 +1,65 @@
 /**
- * Íconos de OFICIO para la Hoja del miembro (S78-B) — LENGUAJE b′.
+ * El glifo de OFICIO de la Hoja del miembro (S78-B) + el control de
+ * estado de la tarjeta de servicio.
  *
- * Geometría COPIADA LITERAL del set FIRMADO en `packages/ui/Icono.tsx`
- * (`veterinaria` :72 · `grooming` :82 · `paseo` :63 · `training` :221) y la
- * primitiva `Huella` IMPORTADA — nadie la redibuja (DIRECCION_ARTE Ley 2).
- * PRECEDENTE DECLARADO: `iconos-tabs.tsx` de este mismo app hizo exactamente
- * esto en S58, y antes `IconoCuenta` viajó igual desde el cliente (S57).
+ * ☠️ S86-B · LOS CUATRO DIBUJANTES CLONADOS MURIERON — `IconoOficio`
+ * CONSUME EL REGISTRY (D-546, cerrada; D-645).
  *
- * POR QUÉ LOCAL Y NO `<Icono>`: la composición firmada en el gate S78 pide
- * **trazo y huella en colores INDEPENDIENTES** (encendido: trazo
- * `text.primary` + huella en el teal del oficio · apagado: los dos en
- * `text.tertiary`). `Icono` resuelve el color de la huella ADENTRO por
- * `registro`, y sus tres registros dan: hex puro de capa (arcoíris),
- * funcional AA (arcoíris) o el MISMO color del trazo. Ninguno produce
- * "trazo tinta + huella teal", y el arcoíris de capas contradice §15b.1
- * (el prestador tiene UN acento: el teal del oficio).
+ * **Su razón de existir se cumplió y por eso el clon se retira.** La
+ * cabecera anterior declaraba el porqué con precisión: la composición
+ * firmada en el gate S78 pide *trazo y huella en colores
+ * INDEPENDIENTES* (trazo `text.primary` + huella en el teal del
+ * oficio), y ninguno de los tres `registro` de `Icono` podía
+ * producirla — daban arcoíris de capa, arcoíris AA, o los dos del
+ * mismo color. **La deuda estaba bien diagnosticada; lo que faltaba
+ * era la prop.** Hoy `Icono` acepta `huella` como gemela de `tinta`,
+ * así que la composición sale del registry sin redibujar nada.
  *
- * ⇒ DEUDA DECLARADA, no escondida: esto es el CUARTO componente local de
- * glifos sobre el muro de `packages/ui` (familia D-535). La cura de raíz es
- * una prop de huella en `Icono` — territorio de A, pedida y NO tocada acá.
- *
- * El CONTROL DE ESTADO no es un glifo b′ (no es objeto de oficio + huella):
- * es una affordance de selección, y la casa no tenía una circular. Nace acá
- * con la composición que la pidió.
+ * ⚠️ ESTE ARCHIVO NO MUERE ENTERO, Y ES DELIBERADO: `ControlEstado` no
+ * es un glifo b′ (no es objeto de oficio + huella) sino una affordance
+ * de selección, y **no tiene gemelo en el registry** — matar el archivo
+ * por simetría se habría llevado una pieza viva que nadie clonó. Lo que
+ * muere es la copia, no el módulo.
  */
 
 import Svg, { Circle, Path } from 'react-native-svg';
-import { Huella } from '@epetplace/ui';
+import { Icono, type IconoNombre } from '@epetplace/ui';
 
 import type { OficioChip } from '@epetplace/api';
-
-const trazo = (color: string) => ({
-  stroke: color,
-  strokeWidth: 1.9,
-  strokeLinecap: 'round' as const,
-  strokeLinejoin: 'round' as const,
-  fill: 'none' as const,
-});
 
 type Pincel = {
   /** Color del objeto del oficio. */
   color: string;
-  /** Color de la huella — INDEPENDIENTE del trazo (esa es la razón de este módulo). */
+  /** Color de la huella — INDEPENDIENTE del trazo (la prop `huella` de `Icono`). */
   colorHuella: string;
   tamano?: number;
 };
 
-/** El estetoscopio ESCUCHA a la huella (registry :72). */
-function IconoVeterinaria({ color, colorHuella, tamano = 27 }: Pincel) {
-  return (
-    <Svg width={tamano} height={tamano} viewBox="0 0 24 24">
-      <Path d="M7.2 3v3.5a4.8 4.8 0 0 0 9.6 0V3" {...trazo(color)} />
-      <Path d="M12 11.3v2.1c0 2.8-1 4.8-3.1 4.8" {...trazo(color)} />
-      <Circle cx={6.6} cy={18.2} r={2.3} {...trazo(color)} />
-      <Huella color={colorHuella} x={12.6} y={12.4} escala={0.46} />
-    </Svg>
-  );
-}
-
-/** Las tijeras trabajan; la huella espera al costado (registry :82). */
-function IconoGrooming({ color, colorHuella, tamano = 27 }: Pincel) {
-  return (
-    <Svg width={tamano} height={tamano} viewBox="0 0 24 24">
-      <Path d="M11.8 4.6 6.4 14.2" {...trazo(color)} />
-      <Path d="M6.8 4.6l5.4 9.6" {...trazo(color)} />
-      <Circle cx={5.2} cy={16.6} r={2.4} {...trazo(color)} />
-      <Circle cx={13.4} cy={16.6} r={2.4} {...trazo(color)} />
-      <Huella color={colorHuella} x={13.8} y={9.2} escala={0.42} />
-    </Svg>
-  );
-}
-
-/** La correa cae hasta la huella — la mascota tirando (registry :63). */
-function IconoPaseo({ color, colorHuella, tamano = 27 }: Pincel) {
-  return (
-    <Svg width={tamano} height={tamano} viewBox="0 0 24 24">
-      <Circle cx={17} cy={5.4} r={2.5} {...trazo(color)} />
-      <Path d="M16.7 7.8c1.1 3.4-2.7 4.6-5.8 5.4" {...trazo(color)} />
-      <Huella color={colorHuella} x={1.6} y={12.2} escala={0.47} />
-    </Svg>
-  );
-}
-
-/** El silbato del adiestrador (registry :221 — el que MATÓ la estrella). */
-function IconoAdiestramiento({ color, colorHuella, tamano = 27 }: Pincel) {
-  return (
-    <Svg width={tamano} height={tamano} viewBox="0 0 24 24">
-      <Circle cx={9} cy={14.2} r={4.6} {...trazo(color)} />
-      <Path d="M9.6 9.6h9.2a1.2 1.2 0 0 1 1.2 1.2v2l-5.6 1.6" {...trazo(color)} />
-      <Huella color={colorHuella} x={6.5} y={11.6} escala={0.32} />
-    </Svg>
-  );
-}
+/** Los cuatro oficios y su glifo del set b′. El adiestramiento se dice
+ *  `training` en el registry — el mapa vive acá, en la frontera, y no
+ *  se resuelve con un cast. */
+const GLIFO_DE_OFICIO: Record<OficioChip, IconoNombre> = {
+  veterinaria: 'veterinaria',
+  grooming: 'grooming',
+  paseo: 'paseo',
+  adiestramiento: 'training',
+};
 
 /** El glifo del oficio, PELADO (sin contenedor) — 27px por la composición firmada. */
-export function IconoOficio({ oficio, ...pincel }: Pincel & { oficio: OficioChip }) {
-  if (oficio === 'veterinaria') return <IconoVeterinaria {...pincel} />;
-  if (oficio === 'grooming') return <IconoGrooming {...pincel} />;
-  if (oficio === 'paseo') return <IconoPaseo {...pincel} />;
-  return <IconoAdiestramiento {...pincel} />;
+export function IconoOficio({
+  oficio,
+  color,
+  colorHuella,
+  tamano = 27,
+}: Pincel & { oficio: OficioChip }) {
+  return (
+    <Icono
+      nombre={GLIFO_DE_OFICIO[oficio]}
+      tamano={tamano}
+      tinta={color}
+      huella={colorHuella}
+    />
+  );
 }
 
 /**
