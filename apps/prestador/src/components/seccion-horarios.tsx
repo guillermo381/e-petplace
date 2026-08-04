@@ -511,15 +511,52 @@ export function SeccionHorarios({
    *
    * **LO QUE RIGE AHORA:** con techo CONOCIDO, el `max` ES el techo y
    * restringe de verdad. Con techo desconocido **no se inventa un
-   * número ni se bloquea**: el control deja subir y **el servidor sigue
-   * siendo la autoridad** (corolario de Ley 23 — la puerta es cortesía,
-   * no validación). Preferir "no sé, pasá" antes que "no sé, no podés"
-   * es lo que evita que un dato ausente se disfrace de regla.
+   * número**: el tope sale de lo que el servidor YA ACEPTÓ — ver
+   * `topeCupo`.
    */
   const techoDelOficio = franjas.find((f) => f.cupoTecho > 0)?.cupoTecho ?? 1;
   /** ¿Lo sabemos de verdad, o estamos en el fallback? La diferencia decide
    *  si el tope RESTRINGE o solo acompaña — ver el `max` del stepper. */
   const techoConocido = franjas.some((f) => f.cupoTecho > 0);
+  /**
+   * ⭐ S85-C19 — EL TOPE, UNA SOLA VEZ, Y CON LOS DOS ESTADOS SEPARADOS.
+   *
+   * 🔴 **NACE DE UN DEFECTO MÍO QUE NO ERA DE CÓDIGO SINO DE PALABRA:** el
+   * comentario de arriba decía *"con techo desconocido el control deja
+   * subir"* y **el código capeaba en `Math.max(3, cupoBase)`**. Los dos
+   * sitios del stepper hacían lo mismo, así que la contradicción no
+   * producía síntoma: *un comentario que miente no rompe nada, y por eso
+   * sobrevive*. **Y la mentira se propagó fuera de mi territorio** — A29
+   * escribió su cura del techo dando por cierto que acá "el control deja
+   * subir" (su literal), o sea que diseñó el contrato del `0` contra un
+   * comportamiento que esta pantalla no tenía. *El comentario equivocado
+   * de una pista se convierte en premisa de otra.*
+   *
+   * **CON TECHO CONOCIDO** el tope ES el techo — con el piso de `cupoBase`
+   * que firmó C17, para que un valor real por encima del techo se VEA en
+   * vez de ser aplastado.
+   *
+   * **CON TECHO DESCONOCIDO (`0` = "no sé", contrato de A29)** el tope sale
+   * de **lo que el servidor ya aceptó**: el mayor `baseCupo` entre las
+   * franjas guardadas, junto al default firmado y al valor de apertura.
+   * **Ningún número inventado** (L-180): cada uno de los tres tiene autor
+   * —el server, la firma del founder, la franja misma— y ninguno sale de
+   * suponer cuánto "debería" permitir la plataforma.
+   *
+   * ⚠️ **SU LÍMITE, DECLARADO:** si la lectura del techo falla Y el
+   * prestador quiere MÁS de lo que tuvo nunca, el `+` se detiene sin
+   * decir por qué. Es una degradación acotada a una doble condición rara,
+   * y **la alternativa era peor**: una voz de error sobre una AYUDA
+   * accesoria, o un tope inventado. No se le pone voz a propósito —
+   * `vozTecho` calla cuando no sabe, que es su regla (L-180).
+   */
+  const cupoMayorGuardado = franjas.reduce(
+    (m, f) => (typeof f.baseCupo === 'number' && f.baseCupo > m ? f.baseCupo : m),
+    0,
+  );
+  const topeCupo = techoConocido
+    ? Math.max(techoDelOficio, cupoBase)
+    : Math.max(CUPO_NUEVA_FRANJA, cupoMayorGuardado, cupoBase);
   /**
    * ⭐ S85-C15 — EL SERVICIO EXCLUSIVO (firma de la mesa, por adelantado).
    *
@@ -546,21 +583,16 @@ export function SeccionHorarios({
    */
   const servicioExclusivo = techoConocido && techoDelOficio <= 1 && cupoBase <= 1;
 
-  /* ☠️ SONDA TEMPORAL — S85-C16, el bug del cupo en su TERCERA vuelta.
-     Las dos mediciones anteriores apuntaron a lugares CORRECTOS que no
-     eran (el `> 4` del wrapper · el trinquete del Math.max), y el motor
-     ya está probado en 10 por la query de A. **Lo que falta saber es qué
-     valor LLEGA, no cuál sale** — y eso no se lee en el código.
-     Imprime los tres números que deciden el `max` del stepper.
-     ☠️ MUERE con el veredicto: apenas se sepa dónde se pierde el 10, esta
-     línea se retira en el mismo commit de la cura. No sobrevive al
-     diagnóstico — una sonda que se queda es ruido con nombre de
-     instrumento. */
-  if (__DEV__) {
-    console.log(
-      `[cupo] franjas=${franjas.length} · cupoTecho de c/u=[${franjas.map((f) => f.cupoTecho).join(',')}] · techoConocido=${techoConocido} · techoDelOficio=${techoDelOficio} · cupoSel=${cupoSel}`,
-    );
-  }
+  /* ☠️ LÁPIDA — LA SONDA DEL CUPO (S85-C16) MURIÓ ACÁ, CON SU DIAGNÓSTICO
+     CUMPLIDO. Imprimía los tres números que deciden el `max` porque el 10
+     del motor llegaba como 1 a la pantalla y las dos mediciones previas
+     habían apuntado a lugares correctos que no eran. **El punto de pérdida
+     lo encontró A29 y era el tramo del medio**: `prestador_servicios` no
+     tiene FK a `tipos_servicio`, el embed fallaba SIEMPRE, y un
+     `return 1` lo convertía en un techo legal y creíble.
+     Se retira en el mismo commit que honra el contrato nuevo, que es la
+     condición con la que nació. *Una sonda que sobrevive a su diagnóstico
+     es ruido con nombre de instrumento.* */
   const contadorNuevas = useRef(0);
 
   // ── S78-B TURNOS: las personas con chip de ESTE oficio ──
@@ -1248,7 +1280,7 @@ export function SeccionHorarios({
                       registro="oficio"
                       valor={cupoSel}
                       min={1}
-                      max={Math.max(techoConocido ? techoDelOficio : CUPO_NUEVA_FRANJA, cupoBase)}
+                      max={topeCupo}
                       onCambio={setCupoSel}
                     />
                   )}
@@ -1396,7 +1428,7 @@ export function SeccionHorarios({
                   registro="oficio"
                   valor={cupoSel}
                   min={1}
-                  max={Math.max(techoConocido ? techoDelOficio : CUPO_NUEVA_FRANJA, cupoBase)}
+                  max={topeCupo}
                   onCambio={setCupoSel}
                 />
               )}
