@@ -1,6 +1,6 @@
 # DIRECCION_ARTE — El lenguaje visual propio de e-PetPlace
 
-> **Versión: v1.5 — S85 (3 Ago 2026).** Enmienda v1.5, **DOS firmas sobre
+> **Versión: v1.6 — S85 (3-4 Ago 2026).** Enmienda v1.6: nacen **6bis LA INSIGNIA DE COHORTE** (tercera familia `distincion`; eje TIEMPO y no mérito; el «N» no se muestra), **6ter EL GLOW** (solo la tarjeta EN CURSO — aplicar la Ley 7 donde ya significa «en vivo», no enmendarla) y **6quater EL PAPEL AL 5%** *con su verificador dentro de la firma*. Previa v1.5 — S85 (3 Ago 2026). Enmienda v1.5, **DOS firmas sobre
 > §2, ninguna deroga nada**: **(a) la ley 4 SE ACOTA** — sigue rigiendo en
 > la iconografía de CONTENIDO (humanos = manos u objetos) y **se
 > excepciona donde el humano es SUJETO y no objeto**, hoy la tab Cuenta
@@ -232,6 +232,32 @@ punto decorativo.**
    > MARCA. *Si al montarlos alguno pide recolorear, es señal de que su
    > huella dejó de ser marca, y eso es una decisión que se declara — no
    > un ajuste.*
+6bis. **LA INSIGNIA DE COHORTE — TERCERA FAMILIA (S85, firmada por la mesa).**
+   La `Insignia` tenía dos familias (estado · conteo) y nace la tercera:
+   **`distincion`** — *pastilla PLENA con la palabra entera*.
+   > **No comparte forma con las otras dos A PROPÓSITO: estado y conteo dicen
+   > **cómo está** algo; la distinción dice **a qué pertenece alguien**.**
+   **Y su eje es el TIEMPO, jamás el mérito** (`"Desde 2026"`, no
+   `"Prestador fundador"`): *un hecho verificable **no otorga nada** y **no
+   puede envejecer mal***. **El «N» de orden NO se muestra** — *un «N»
+   convierte una pertenencia en un PUESTO*, y quien lee un número alto recibe
+   lo contrario de lo que el emblema existe para dar (misma tesis que
+   `MODELO_LOYALTY` §2/§3: progreso visible, **moneda invisible**).
+
+6ter. **EL GLOW — SOLO en la tarjeta del servicio EN CURSO (S85, firma founder).**
+   **No es enmienda de la Ley 7: es aplicarla donde ya significa *"en vivo"*.**
+   > **Un glow repartido pierde su significado. Su valor entero es que aparece
+   > en UN lugar** — el mismo criterio con que `CitaEnVivo` reservó su pill
+   > desde S44. *Un efecto que marca "esto está pasando ahora" deja de marcar
+   > nada apenas marca dos cosas.*
+
+6quater. **EL PAPEL TAPIZ DEL OFICIO: 5% (S85, firma founder — subió de 3%).**
+   **Y el número vino CON su verificador, que es parte de la firma:** *B re-mide
+   `R12` y `R16` antes de commitear, y **si algo cae bajo el mínimo, FRENA**.*
+   > **Es lo contrario del `cupo_techo` en 4 y del `> 4` del wrapper** — dos
+   > números que entraron **sin verificador** y sobrevivieron a su premisa.
+   > *Un número firmado sin quién lo verifica es una premisa esperando vencer.*
+
 7. **Dosis del prestador:** el mismo lenguaje, con la huella en el color
    funcional AA de su capa (no hex puro) o en tinta cuando la vista ya
    porta su único acento — la sobriedad es aplicación, no otro idioma.

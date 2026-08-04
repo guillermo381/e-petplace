@@ -241,6 +241,40 @@ irreversible y público.
    responder "¿por qué me llegó esto?", que es la pregunta que siempre
    llega.
 
+## 10bis. LO QUE S85 LE DEJÓ COMO PRECONDICIÓN — cuatro consumidores que ESPERAN este motor
+
+> **Se deposita acá, en el doc del motor, y no en cada ficha suelta: son cuatro
+> piezas construidas o firmadas que NO PUEDEN FUNCIONAR hasta que este arco
+> exista.** *Una precondición escrita en cuatro lugares distintos no se lee como
+> una precondición: se lee como cuatro pendientes sin relación.*
+
+| # | quién espera | qué le falta | estado |
+|---|---|---|---|
+| ① | **el permiso del dueño sobre el expediente clínico** (`BIO_EXPEDIENTE` A3.5bis-b, **salida (c) FIRMADA**: *el vet tratante SOLICITA al pet parent*) | **el canal para pedirlo** | **LETRA SIN MOTOR** |
+| ② | **el aviso de reasignación de cita** (`notificar_reasignacion_cita`) | la función **no existe** | **abre el gate de la VITRINA por diseño** — el trigger la busca y se abre solo |
+| ③ | **la alerta al admin por documentos** | ningún canal avisa que hay un documento esperando veredicto | el ciclo de admin existe; **el aviso no** |
+| ④ | **el correo de recuperar contraseña** | **HOY LLEVA AL PORTAL VIEJO** | *la recuperación por código funciona; el correo apunta a otro lado* |
+
+> ### ⚠️ EL ② MERECE SU LÍNEA, porque no es una tarea más
+> **`notificar_reasignacion_cita` no es «un aviso»: es la LLAVE MECÁNICA del gate
+> de la vitrina.** El trigger `trg_prestadores_gate_vitrina` pregunta por su
+> existencia con `to_regprocedure` y **rebota hablado** mientras no exista.
+> *Construirla ABRE el gate SOLA* — **es el precedente vivo de L-171: el orden
+> nombra el ARTEFACTO que abre, no el archivo donde se lo espera.**
+
+> ### 🔴 Y EL ④ ES DE OTRA CLASE — no es un hueco, es una FUGA DE PRODUCTO
+> *Un usuario que pide recuperar su contraseña recibe un correo que lo saca del
+> producto nuevo y lo deposita en el portal viejo.* **No falla: funciona, y lleva
+> al lugar equivocado** — la familia de S85 (L-194 → L-199) aplicada a un correo.
+
+**⇒ EL ORDEN QUE ESTO IMPLICA, y por eso está acá:** *las capas 1-3 de §2
+(intención · destinatario · consentimiento) **no esperan a Meta** —eso ya estaba
+escrito— y ahora tienen **cuatro consumidores nombrados esperándolas**.* **Un
+motor sin consumidores se pospone sin costo; con cuatro, posponerlo tiene una
+lista.**
+
+---
+
 ## 11. Los verticales — FORMA, no contenido (§0)
 
 Lo que cada uno le exigirá al motor. Su catálogo se escribe cuando exista.

@@ -16,7 +16,8 @@ description: >-
 
 # epetplace-design-system — el sistema es exigible, no sugerido
 
-Fuente de verdad: `packages/ui` (tokens v4 + 41 componentes + 3 temas).
+Fuente de verdad: `packages/ui` (tokens v4 + **48 componentes** + 3 temas).
+*(Contador RE-MEDIDO S85 contra el objeto — L-141: 53 `.tsx` en `src/components/` menos las variantes `.web` y la infra. La cifra anterior decía 41 y venía de S82.)*
 Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 `@epetplace/ui`, no existe en el producto.
 
@@ -874,7 +875,28 @@ comprar es lo último, y lo que compra combina con TODO.*
 //     stroke={theme.text.primary} strokeWidth={1.75} strokeLinecap="round" /></Svg>
 ```
 
-## 3. ÍNDICE — los 41 componentes (import de `@epetplace/ui`)
+## 3. ÍNDICE — los componentes (import de `@epetplace/ui`)
+
+> **➕ LAS PIEZAS DE S85 (el rediseño del prestador) — al índice con su regla:**
+>
+> | Export | Cuándo |
+> |---|---|
+> | `TresNumeros` | **La portada del prestador**: los tres números del día. Fijo en su ESQUELETO, variable en su UNIDAD — la tabla la dicta el oficio. **El «$ del día» es AGENDADO, no cobrado**, y su hueco HABLA cuando el rol no puede verlo (`PORTAL_PRESTADOR` §2.4bis) |
+> | `Insignia` **`distincion`** | **Tercera familia de la Insignia**: pastilla PLENA con la palabra entera, para COHORTE. *No es estado ni conteo — es pertenencia*, y por eso no comparte forma con las otras dos. **El eje es TIEMPO, no mérito** (`"Desde 2026"`): un hecho verificable no otorga nada y no puede envejecer mal |
+> | `SelectorDia` | elección de día sobre una tira |
+> | `FiltroPills` | filtro del CLIENTE — el estado lo marca **la huella, solo en la elegida** (§2 ley 6, enmienda S82) |
+> | `FichaPrestador` | ficha de entidad del prestador |
+> | `ClipSesion` (**vitrina**) | el clip como **SUPERFICIE, no como video**: autoplay · loop · ancho completo · **sin controles**. *Un reproductor con controles pide decidir si mirar; una superficie que ya se está moviendo no pide nada* |
+>
+> **⚠️ Y la ley que gobierna a las tres del glifo (`DIRECCION_ARTE` v1.5, ley 6):**
+> ***la huella que es ESTRUCTURA se RECOLOREA; la que es MARCA APARECE.*** Se
+> contesta ANTES de dibujar: *¿la huella está en reposo?* **sí ⇒ recoloreá · no
+> ⇒ que aparezca. Nunca las dos.**
+>
+> **⚠️ D-645 (S85) rige sobre toda promoción futura:** *una promoción **no** es
+> una migración* — subir una pieza a `packages/ui` **deja el código viejo VIVO y
+> nada lo señala**. **Cuatro cobros en un día, los cuatro cazados por el founder
+> mirando, ninguno por un guard.**
 
 | Export | Cuándo |
 |---|---|
