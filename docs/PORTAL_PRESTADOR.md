@@ -189,6 +189,14 @@ porque el dinero no tiene dialecto de oficio.
 
 > **Literal: *"Sí confirmo"* — LA RECEPCIÓN NO VE EL DINERO DEL DÍA EN LA
 > PORTADA. EL TITULAR SÍ.**
+>
+> **⚠️ Y SU ALCANCE REAL, medido por C: NO es "la recepción" — es TODO
+> NO-TITULAR.** El gate es `titular OR admin`, así que **un veterinario con
+> chips que no es titular tampoco ve la plata**, y esa portada es suya también.
+> *Se dice con precisión porque "la recepción" se lee como "el rol que no
+> atiende", y un vet empleado sí atiende — pero la plata del negocio no es
+> suya.* **Es coherente con la razón de S72-P1a: no es sobre el oficio, es
+> sobre de quién es el negocio.**
 
 **Esta firma RECONCILIA dos letras que se contradecían**, y por eso vive acá y no
 en un acta: **§2.4bis** pone PLATA en la portada; **`S72-P1a`** (posición de mesa
@@ -233,20 +241,31 @@ que convierte la decisión de producto en defensa real**.
 > **Y *"sin datos"* es peor todavía: suena a que el sistema falló**, y manda a
 > alguien a buscar un defecto que no existe.
 
-**Es la hermana del asterisco de `sinPrecio`, y conviene verlas juntas porque
-son la misma ley con dos objetos:**
+### ⚠️ SON **TRES** ESTADOS, NO DOS — enmienda de C, firmada por la mesa
 
-| caso | el total dice lo que sabe **y declara lo que le falta** |
-|---|---|
-| `sinPrecio > 0` | lo que falta es **un dato** |
-| `visible: false` | lo que falta es **un permiso** |
+| estado | qué falta | qué dice |
+|---|---|---|
+| **`visible: false`** | un **PERMISO** | *"Solo el titular ve los ingresos"* |
+| **`sinPrecio > 0`** | un **DATO** | el total **con su asterisco**: dice lo que sabe y declara lo que le falta |
+| **lectura fallida** | **nada — no se pudo leer** | *"No pudimos leer tu día"* (o su equivalente) **y un reintento** |
 
-*En los dos, callar produce un número creíble y equivocado* (L-197). **La
-diferencia es que acá no falta información: sobra audiencia** — y decirlo así
-además **respeta al que lo lee**: la recepción no está viendo un error, está
-viendo un límite que alguien decidió.
+> ### **LOS DOS ÚLTIMOS NO SE COLAPSAN, y ésta es la razón:**
+> **decirle al TITULAR *"solo el titular ve los ingresos"* por un fallo de red es
+> mentirle sobre su propio permiso.** *Le informa de una restricción que no
+> existe, sobre una pantalla que es suya* — y peor: **no le da nada que hacer.**
+> Un fallo tiene reintento; un permiso, no. **Colapsarlos convierte un problema
+> transitorio en un límite permanente a los ojos de quien lo lee.**
 
-*C escribe la línea; el criterio queda firmado acá.*
+*Es L-197 en su forma de superficie: **"no sé" y un valor válido no pueden
+compartir representación** — y acá hay DOS clases de "no sé" que tampoco pueden
+compartirla entre sí.* **El wrapper ya las distingue** (`obtenerPlataDelDia`
+devuelve `ok:false` en el fallo, **jamás `visible:false`**); lo que esta enmienda
+fija es que **la superficie también tiene que hacerlo**.
+
+**Es la hermana del asterisco, y las tres juntas son una sola ley:** *el número
+dice lo que sabe y declara lo que le falta.* **La diferencia es qué falta.**
+
+*C escribe las líneas; el criterio queda firmado acá.*
 
 ---
 
