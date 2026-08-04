@@ -437,7 +437,8 @@ export function EspejoNegocio({
                 responde al dedo por esta vía — jamás una receta artesanal
                 por pantalla". 0.97 porque es un CONTROL, no una
                 superficie. */}
-            {/* ⭐ S85-C11 — EL GLIFO DEL LÁPIZ, y por qué existe.
+            {/* ⭐ S85-C11 — EL GLIFO DEL LÁPIZ · ENMENDADO EN S85-C13 por
+                el gate: *"quedó MUY PEGADO al nombre y en el mismo color"*.
                 Construí este tap SIN affordance a propósito, apoyado en el
                 precedente del logo (*"un botón con caja al lado de una foto
                 compite con la foto"*), y **lo declaré al gate como el riesgo
@@ -453,7 +454,7 @@ export function EspejoNegocio({
             <Animated.View
               style={[
                 presionNombre.estiloPresionado,
-                { flexDirection: 'row', alignItems: 'center', gap: spacing[2] },
+                { flexDirection: 'row', alignItems: 'center', gap: spacing[3] },
               ]}
             >
               <Text
@@ -468,7 +469,32 @@ export function EspejoNegocio({
               >
                 {nombre}
               </Text>
-              <Icono nombre="lapiz" registro="tinta" tinta={palette.light0} tamano={18} />
+              {/* ⭐ S85-C13 — SEPARACIÓN Y OTRO REGISTRO, con el patrón que
+                  la casa YA tiene medido sobre el muro: el ENGRANAJE de
+                  `cuenta/index` es un glifo de papel dentro de un círculo de
+                  VIDRIO. Se reusa entero — no se inventa un color.
+                  ⚠️ Y no es capricho de coherencia: **sobre el muro el
+                  acento funcional es PAPEL** (regla S61-B12, medida) — teal
+                  puro da 3.77 y está prohibido ahí. Así que "otro color"
+                  sobre el muro no se resuelve con otro tinte sino con otra
+                  SUPERFICIE: el vidrio separa, da contorno y dice "control"
+                  sin pedirle una caja al muro ni romper el par medido
+                  (papel sobre vidrio = 7.37 ✓).
+                  La separación viene del `gap` de la fila (spacing[3]) más
+                  el propio aire del círculo: el lápiz deja de tocar la
+                  última letra del nombre. */}
+              <View
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: radius.full,
+                  backgroundColor: VIDRIO_OFICIO,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Icono nombre="lapiz" registro="tinta" tinta={palette.light0} tamano={17} />
+              </View>
             </Animated.View>
           </Pressable>
           {/* ① EL NULO NO SE PINTA: sin oficio o sin ciudad, la línea no
