@@ -156,6 +156,10 @@ export const memorialTheme = {
   border: {
     width:   1,
     default: 'rgba(143,166,142,.18)',
+    /** S86-B · mismo rol, misma familia serena, un paso de alfa. SIN
+     *  consumidor hoy (en memorial separa el halo, como en dark) — y acá
+     *  además rige la Ley 8: memorial no gana señales, las degrada. */
+    presente: 'rgba(143,166,142,.30)',
     subtle:  'rgba(232,220,200,.06)',
     accent:  'rgba(143,166,142,.28)',
     brand:   'rgba(201,160,160,.30)',
