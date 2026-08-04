@@ -2784,6 +2784,68 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
   > receta se cobra en el mismo commit que la enuncia, **sobre todos sus
   > casos** — o nace declarada como aplicada a UNO.* **La receta a medias es
   > peor que la ausencia**, porque la ausencia se nota.
+
+  > ### ➕ **LA TERCERA DIRECCIÓN — y ésta corrige a LA MESA** *(hallazgo de B, S85)*
+  >
+  > > ### **UN REPORTE DE CAMPO ENVEJECE MIENTRAS VIAJA.**
+  >
+  > **El caso, medido:** **el gate del founder corrió sobre un OTA ANTERIOR A
+  > TRES COMMITS.** *Sus tres reportes de glifos **eran correctos cuando los
+  > tomó y falsos cuando llegaron**.* **La mesa los reenvió como defectos vivos
+  > sin declarar contra qué ancla se habían medido.**
+  >
+  > **Es la regla #22 aplicada al reporte de campo** — *toda orden que nace de
+  > una medición declara su ancla* — **con el agravante de que acá el que mide
+  > es el founder y no puede saber que su ancla envejeció**: él mira una
+  > pantalla, no un árbol de git.
+  >
+  > **⇒ LAS TRES DIRECCIONES DE L-198 quedan completas, y son el mismo defecto
+  > con distinto vector:**
+  > **①** *hacia adelante* — el texto **vence con el porqué** ·
+  > **②** *hacia atrás, al leer* — el literal se **traduce** a la causa que uno
+  > ya tenía ·
+  > **③** *en tránsito* — el reporte **envejece mientras viaja**.
+  > *En las tres hay un texto correcto en su momento que **deja de serlo sin
+  > que nada avise**.*
+  >
+  > #### ✅ CURA DERIVABLE — barata, y la mitad ya existe
+  >
+  > > **TODO REPORTE DE GATE LLEVA EL HASH DEL OTA SOBRE EL QUE SE MIRÓ.**
+  >
+  > **El founder ya lo confirma en el pie de Cuenta** (L-160 enmendada) —
+  > *la pieza que faltaba no es medirlo: es que **ese hash VIAJE con el
+  > reporte**.* **Un reporte con hash se puede fechar contra el árbol en una
+  > línea** (`git merge-base --is-ancestor`); **sin hash, no hay forma de saber
+  > si describe el presente**, y el que lo recibe **no tiene manera de
+  > sospecharlo** — porque un reporte viejo **describe algo que existió**.
+  >
+  > *Hermana directa de D-617, que murió el mismo día: **el marcador en pantalla
+  > nació para probar que un OTA LLEGÓ, y resulta que también sirve para fechar
+  > lo que se vio en él**.*
+
+  > ### ➕ **EL CENSO SE HACE POR FRASE, NO POR PANTALLA** *(hallazgo de C, S85 — corrige a la mesa Y a ella misma)*
+  >
+  > > ### **CURAR UN SITIO NO CURA UNA REGLA.**
+  >
+  > **El caso, y C lo declara contra sí misma:** el *"uno de los **15**"*
+  > **sobrevivió a su propio barrido** — *C lo curó **por PANTALLA**, y la firma
+  > era del **NÚMERO**.* **Lo cazó el founder mirando, no un grep.**
+  >
+  > **Por qué el barrido por pantalla se siente completo y no lo es:** *quien
+  > barre una pantalla la termina y la tacha* — **el criterio de completitud es
+  > la pantalla, y la regla vivía en otra unidad.** *La misma frase en otra
+  > superficie no está "pendiente": **está fuera del alcance que uno declaró**,
+  > y por eso no aparece como faltante.*
+  >
+  > **⇒ LA REGLA: un censo se declara en la UNIDAD DE LA FIRMA.** *Si la firma
+  > es sobre un número, se censa el número; si es sobre una pantalla, la
+  > pantalla.* **Declarar la unidad equivocada produce un barrido que termina
+  > verde y deja viva exactamente la cosa que se firmó.**
+  >
+  > *Y su parentesco cierra el cuadro: es **la misma forma que el hallazgo de B**
+  > (la receta aplicada al wrapper y no al glifo) — **alcance declarado más
+  > angosto que la regla**, una vez por pieza y otra por pantalla. **Dos pistas
+  > distintas, el mismo día, el mismo defecto.***
 - **L-199 — EL ROJO SE PRODUCE **ANTES**, O LA CURA QUEDA SIN EVIDENCIA PARA SIEMPRE (S85, firmada por la mesa).**
 
   > ### **EL "ANTES" NO SE PUEDE RECONSTRUIR DESPUÉS.**
