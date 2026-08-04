@@ -44,6 +44,23 @@ export interface ClipSesionProps {
   duracionSegundos?: number | null
   /** Descripción corta del adiestrador (a11y + pie opcional). */
   descripcion?: string | null
+  /** EL MARCO, no el significado (S85-B20). Cambia cómo se ENCUADRA el
+   *  mismo clip; la máquina poster→video→error, el "jamás autoplay" y los
+   *  controles nativos son idénticos en los dos.
+   *   · `tarjeta` (default) — como nació: 16/9, radio suave, y su pie con
+   *     duración y descripción. Es el clip DENTRO de un contenido.
+   *   · `lamina` — a sangre: llena a su padre, sin radio y SIN PIE. Es el
+   *     clip COMO contenido, una posición del carrusel de la vitrina.
+   *
+   *  POR QUÉ PROP Y NO PIEZA NUEVA: la alternativa era que
+   *  `FichaPrestador` copiara la máquina del video, y eso es exactamente
+   *  la copia que esta casa persigue (el pie de reserva ya costó un
+   *  precio perdido por copiar). Lo que cambia entre los dos usos es el
+   *  MARCO —aspecto, radio, pie—, no lo que la pieza hace ni lo que
+   *  significa: el criterio de B14 para decidir prop-vs-variante.
+   *
+   *  El default deja a los dos consumidores existentes byte-idénticos. */
+  encuadre?: 'tarjeta' | 'lamina'
 }
 
 function duracionMono(segundos: number): string {
@@ -108,23 +125,29 @@ function ClipVideo({ uri, onError }: { uri: string; onError: () => void }) {
   )
 }
 
-export function ClipSesion({ uri, duracionSegundos, descripcion }: ClipSesionProps) {
+export function ClipSesion({ uri, duracionSegundos, descripcion, encuadre = 'tarjeta' }: ClipSesionProps) {
   const { theme } = useTheme()
   const { t } = useTraduccionUi()
   const [fase, setFase] = useState<'poster' | 'video' | 'error'>('poster')
 
   const alError = useCallback(() => setFase('error'), [])
 
+  const esLamina = encuadre === 'lamina'
+
   return (
-    <View style={{ gap: spacing[1] }}>
+    <View style={esLamina ? { flex: 1 } : { gap: spacing[1] }}>
       <View
-        style={{
-          width: '100%',
-          aspectRatio: 16 / 9,
-          borderRadius: radius.suave,
-          overflow: 'hidden',
-          backgroundColor: theme.bg.overlay,
-        }}
+        style={
+          esLamina
+            ? { flex: 1, overflow: 'hidden', backgroundColor: theme.bg.overlay }
+            : {
+                width: '100%',
+                aspectRatio: 16 / 9,
+                borderRadius: radius.suave,
+                overflow: 'hidden',
+                backgroundColor: theme.bg.overlay,
+              }
+        }
       >
         {fase === 'video' ? (
           <ClipVideo uri={uri} onError={alError} />
@@ -207,7 +230,11 @@ export function ClipSesion({ uri, duracionSegundos, descripcion }: ClipSesionPro
           </Pressable>
         )}
       </View>
-      {descripcion !== null && descripcion !== undefined && descripcion.length > 0 ? (
+      {/* EL PIE NO EXISTE EN `lamina`: una lámina del carrusel es una
+          posición a sangre, y un texto colgando debajo la partiría. La
+          descripción sigue viajando al a11y del poster (arriba), así que
+          no se pierde información — cambia de canal. */}
+      {!esLamina && descripcion !== null && descripcion !== undefined && descripcion.length > 0 ? (
         <Text
           style={{
             fontFamily: typography.family.sans.regular,

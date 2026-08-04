@@ -3488,6 +3488,16 @@ function GaleriaInterna() {
             <ThemeProvider defaultMode="memorial">
               <PanelTema etiqueta="memorial — degrada solo (tokens); la reproducción sigue siendo un acto del usuario">
                 <ClipSesion uri="https://example.invalid/clip.mp4" duracionSegundos={18} />
+                <Texto variante="apoyo">
+                  ENCUADRE `lamina` (S85-B20) — el mismo clip a sangre, sin radio y SIN PIE: es una
+                  POSICIÓN del carrusel de la vitrina, no un clip dentro de un contenido. Cambia el
+                  MARCO, no la máquina: mismo poster→video→error, mismo jamás-autoplay, mismos
+                  controles nativos. Nació porque `FichaPrestador` pedía un PÓSTER-IMAGEN que nada
+                  en el sistema produce — el contrato compilaba y pintaba nada.
+                </Texto>
+                <View style={{ height: 180 }}>
+                  <ClipSesion uri="https://example.invalid/clip.mp4" encuadre="lamina" />
+                </View>
               </PanelTema>
             </ThemeProvider>
           </View>

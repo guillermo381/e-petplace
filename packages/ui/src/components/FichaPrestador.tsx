@@ -49,6 +49,7 @@ import { useRef, useState, type ReactNode } from 'react'
 import { Image, ScrollView, Text, View } from 'react-native'
 
 import { Boton } from './Boton'
+import { ClipSesion } from './ClipSesion'
 import { Insignia } from './Insignia'
 import { LogoNegocio } from './LogoNegocio'
 import { MapaZona } from './MapaZona'
@@ -56,7 +57,6 @@ import { Texto } from './Texto'
 import { opacity } from '../tokens/opacity'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
-import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
 
 /** Alto de la portada. Sangra a los lados: la pieza NO le pone padding
@@ -68,9 +68,10 @@ const MONTA_FIRMA = 28
 const LADO_FIRMA = 72
 /** Diámetro del punto de paginación. */
 const PUNTO = 10
-/** Velo del ▶ sobre el póster del clip. Tinta con alfa: se define ACÁ y
- *  no se recibe — la app jamás pasa un color crudo (Ley 1). */
-const VELO_CLIP = 'rgba(29,26,46,0.55)'
+/* ☠️ VELO_CLIP y el import de `typography` SE RETIRAN (S85-B20): eran la
+ *  maquinaria del ▶ decorativo sobre el póster, y el póster nunca existió.
+ *  Los cazó el tsc al quedar huérfanos — que es la señal de que la cosa
+ *  murió ENTERA y no a medias (Ley 37: nada queda "por si acaso"). */
 
 export interface FichaPrestadorProps {
   /** `nombre_comercial`. Sin él no se pinta el título ni el monograma. */
@@ -107,7 +108,18 @@ export interface FichaPrestadorProps {
    *  A: **el clip todavía no tiene casa** — `adiestramiento-clips` es
    *  privado y de otro dominio, y una vitrina PÚBLICA necesita bucket
    *  propio con su techo. Esa decisión no es de esta pieza. */
-  clipPoster?: string | null
+  /** ⏪ S85-B20 · ERA `clipPoster` Y PEDÍA LO QUE NADIE PRODUCE. La ficha
+   *  esperaba una IMAGEN FIJA del clip para pintar su posición del
+   *  carrusel — y el censo de C midió que **NADA en el sistema genera
+   *  pósters: cero**. Cablearlo de la forma obvia compilaba y pintaba
+   *  NADA: un `<Image>` con la uri de un video. Es la clase de contrato
+   *  que se ve sano hasta que alguien lo usa.
+   *
+   *  AHORA RECIBE EL CLIP MISMO. La posición monta `ClipSesion` en su
+   *  encuadre `lamina` — la misma máquina poster→video→error, el mismo
+   *  "jamás autoplay", los mismos controles nativos. C le pasa el uri y
+   *  nada más. */
+  clipUri?: string | null
   /** LA ZONA (S84-B16, motor D-624): centro DESPLAZADO dentro del radio y
    *  estable por id — **jamás la coordenada exacta**. Las tres van juntas:
    *  si falta cualquiera, el bloque NO SE MONTA, misma regla que el resto
@@ -149,7 +161,7 @@ export function FichaPrestador({
   cohorte,
   logoUrl,
   portadas,
-  clipPoster,
+  clipUri,
   zonaLat,
   zonaLon,
   zonaRadioM,
@@ -171,8 +183,8 @@ export function FichaPrestador({
   // composiciones para la misma tira.
   const posiciones: { url: string; esClip: boolean }[] = [
     ...(portadas ?? []).map((url) => ({ url, esClip: false })),
-    ...(clipPoster !== null && clipPoster !== undefined && clipPoster !== ''
-      ? [{ url: clipPoster, esClip: true }]
+    ...(clipUri !== null && clipUri !== undefined && clipUri !== ''
+      ? [{ url: clipUri, esClip: true }]
       : []),
   ]
   const conPortada = posiciones.length > 0
@@ -252,47 +264,28 @@ export function FichaPrestador({
           >
             {tira.map((pos, i) => (
               <View key={`${pos.url}-${i}`} style={{ width: ancho, height: ALTO_PORTADA }}>
-                <Image
-                  source={{ uri: pos.url }}
-                  style={{ width: ancho, height: ALTO_PORTADA }}
-                  resizeMode="cover"
-                  accessibilityRole="image"
-                  accessibilityLabel={
-                    pos.esClip
-                      ? `Video de ${nombre ?? 'el negocio'}`
-                      : `Foto ${indiceReal(i) + 1} de ${N}, ${nombre ?? 'el negocio'}`
-                  }
-                />
                 {pos.esClip ? (
-                  // El ▶ de la lámina: MARCA el lugar, no reproduce. Sin
-                  // `accessibilityRole="button"` a propósito — prometer un
-                  // control que no hace nada es peor que no tenerlo.
-                  <View
-                    pointerEvents="none"
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: radius.full,
-                        backgroundColor: VELO_CLIP,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <Text style={{ color: theme.text.onGradient, fontSize: typography.size.lg }}>▶</Text>
-                    </View>
-                  </View>
-                ) : null}
+                  /* ☠️ ACÁ VIVÍA UNA `<Image>` CON EL PÓSTER Y UN ▶ QUE NO
+                     REPRODUCÍA. Las dos mitades eran el mismo defecto: el
+                     póster no existía (nada en el sistema lo genera) y el
+                     ▶ estaba declarado como decorativo —"MARCA el lugar,
+                     no reproduce"— con el argumento correcto de que
+                     prometer un control muerto es peor que no tenerlo.
+                     Ahora la posición monta el CLIP, así que el control
+                     hace lo que dice: `ClipSesion` trae su propio play,
+                     su máquina poster→video→error y el "jamás autoplay".
+                     El ▶ decorativo MUERE con su razón cumplida (Ley 37)
+                     — dejarlo sería un segundo play que no es el play. */
+                  <ClipSesion uri={pos.url} encuadre="lamina" descripcion={nombre ?? undefined} />
+                ) : (
+                  <Image
+                    source={{ uri: pos.url }}
+                    style={{ width: ancho, height: ALTO_PORTADA }}
+                    resizeMode="cover"
+                    accessibilityRole="image"
+                    accessibilityLabel={`Foto ${indiceReal(i) + 1} de ${N}, ${nombre ?? 'el negocio'}`}
+                  />
+                )}
               </View>
             ))}
           </ScrollView>
