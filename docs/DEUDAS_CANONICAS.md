@@ -5351,11 +5351,54 @@ ese "a quién" ya no exista.*
 **⚠️ ESTATUTO: CANDIDATA A LEY, SIN FIRMA (regla 80).** *Un texto propuesto no
 rige.* **Lo que rige hoy es la ficha**, con su condición de muerte.
 
+### ➕ LA OTRA MITAD — **el diagnóstico de B, que explica la PROPAGACIÓN**
+
+> ### **EL PRIMER CLON SE VUELVE LA AUTORIZACIÓN DEL SEGUNDO.**
+
+**Nadie copió a escondidas — y eso es lo grave.** *Verificado con el literal
+(HEAD `37d78d6`):* **`iconos-oficio.tsx:4`** cita el mismo precedente y con la
+**misma frase** que **`iconos-tabs.tsx:4`** — *«Geometría **COPIADA LITERAL** del
+set FIRMADO en `packages/ui/Icono.tsx`»*. **El segundo clon nació citando al
+primero, y quedó EN REGLA.**
+
+> **Es la misma forma que dos letras firmadas que se contradicen** —*cualquiera
+> cita la que le conviene y está «en regla»*— **solo que acá lo que se hereda es
+> UNA COPIA en vez de una ley.** *Un precedente no necesita ser correcto para
+> autorizar: solo necesita existir y estar escrito.*
+
+#### ⚠️ Y SU COROLARIO, que es el que desarma la defensa fácil
+
+> **Tres copias correctas NO prueban que el sistema funcione: prueban que quien
+> copia es cuidadoso.**
+
+**El modo de falla sigue intacto** — *una copia mal hecha **no rompe nada**, se
+ve bien, y dice otra cosa.* **La calidad de las copias existentes es evidencia
+sobre las PERSONAS, no sobre el mecanismo**, y por eso *"pero salieron bien"* no
+cierra esta ficha.
+
+### ✅ ALCANCE PARA S86 — **firmado por la mesa**
+
+**`Icono` acepta LOS DOS EJES** —*el color del trazo*, y *la huella que
+**aparece** o **recolorea** según sea **MARCA** o **ESTRUCTURA*** (la regla
+firmada en `DIRECCION_ARTE` v1.5)— **y los TRES clones mueren contra él.**
+
+> **LOS TRES, NO DOS — y la razón es el argumento entero:** *el tercero prueba
+> que **el hueco es del REGISTRY, no de quien copia**.* **Dos clones se explican
+> por descuido; tres se explican porque la pieza no ofrecía lo que hacía falta.**
+
+*Nota de medición de A, para que el barrido no salga corto: el `grep` del literal
+«COPIADA LITERAL» sobre `apps` y `packages` devuelve **DOS archivos**
+(`iconos-oficio.tsx`, `iconos-tabs.tsx`). **El tercero lo cuenta B y su ubicación
+es suya de nombrar** — se declara así en vez de bajar el número a dos: **un censo
+por frase no encuentra lo que no lleva la frase** (es la lección de C del mismo
+día, aplicada acá).*
+
 ☠️ **CONDICIÓN DE MUERTE:** existe un mecanismo que **falla en rojo** cuando una
 pieza promovida convive con el código que reemplaza — **y se le produjo la falla
 una vez** (L-192: si no se le puede producir el rojo, no existe).
+**+ los tres clones muertos contra un `Icono` que acepta los dos ejes.**
 **DISPARO: la próxima promoción a `packages/ui`.** Origen: S85-C (los cuatro
-cobros del día, todos por gate del founder).
+cobros del día, todos por gate del founder) **+ S85-B** (la propagación).
 
 ---
 
