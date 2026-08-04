@@ -512,6 +512,22 @@ export function SeccionHorarios({
    * founder está acá por error; no decide si este estado existe.*
    */
   const servicioExclusivo = techoConocido && techoDelOficio <= 1;
+
+  /* ☠️ SONDA TEMPORAL — S85-C16, el bug del cupo en su TERCERA vuelta.
+     Las dos mediciones anteriores apuntaron a lugares CORRECTOS que no
+     eran (el `> 4` del wrapper · el trinquete del Math.max), y el motor
+     ya está probado en 10 por la query de A. **Lo que falta saber es qué
+     valor LLEGA, no cuál sale** — y eso no se lee en el código.
+     Imprime los tres números que deciden el `max` del stepper.
+     ☠️ MUERE con el veredicto: apenas se sepa dónde se pierde el 10, esta
+     línea se retira en el mismo commit de la cura. No sobrevive al
+     diagnóstico — una sonda que se queda es ruido con nombre de
+     instrumento. */
+  if (__DEV__) {
+    console.log(
+      `[cupo] franjas=${franjas.length} · cupoTecho de c/u=[${franjas.map((f) => f.cupoTecho).join(',')}] · techoConocido=${techoConocido} · techoDelOficio=${techoDelOficio} · cupoSel=${cupoSel}`,
+    );
+  }
   const contadorNuevas = useRef(0);
 
   // ── S78-B TURNOS: las personas con chip de ESTE oficio ──
