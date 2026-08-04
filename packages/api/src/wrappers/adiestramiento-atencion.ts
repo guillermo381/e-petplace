@@ -140,7 +140,7 @@ export async function obtenerCitasAdiestramientoDelDia(
   const { data, error } = await getClient()
     .from('evento_cita_servicio')
     .select(
-      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
+      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, precio, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
     )
     .eq('prestador_id', input.prestador_id)
     .gte('fecha', input.fecha)
@@ -175,7 +175,7 @@ export async function obtenerCitaAdiestramientoPorId(
   const { data, error } = await getClient()
     .from('evento_cita_servicio')
     .select(
-      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, sesion_numero, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en), matricula:programas_contratados(n_sesiones, programa:prestador_programas(nombre, nivel))',
+      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, precio, sesion_numero, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en), matricula:programas_contratados(n_sesiones, programa:prestador_programas(nombre, nivel))',
     )
     .eq('id', citaId)
     .eq('tipo.categoria', 'adiestramiento')

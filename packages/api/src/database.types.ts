@@ -17559,6 +17559,10 @@ export type Database = {
           vacuna_codigo: string
         }[]
       }
+      obtener_plata_del_dia: {
+        Args: { p_fecha: string; p_prestador_id: string }
+        Returns: Json
+      }
       obtener_resumen_actividad_prestador: {
         Args: {
           p_desde: string

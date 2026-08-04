@@ -910,3 +910,9 @@ export {
   segundosDeEspera,
   type CodigoErrorSeguridad,
 } from './wrappers/seguridad';
+
+export {
+  obtenerPlataDelDia,
+  type PlataDelDia,
+  type CodigoErrorPortada,
+} from './wrappers/portadaPrestador';

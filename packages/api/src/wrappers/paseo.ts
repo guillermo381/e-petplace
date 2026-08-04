@@ -269,7 +269,12 @@ export type CitaAgendaPaseo = Pick<
   // duracion_minutos (S57-B1): el SNAPSHOT de la cita (S55-B2, NOT NULL) —
   // la duración REAL vendida, no el default del catálogo (una de 120'
   // se pintaba como 30' con duracion_default_minutos).
-  'id' | 'fecha' | 'hora' | 'estado' | 'tipo_servicio' | 'suscripcion_servicio_id' | 'duracion_minutos'
+  // precio (S85): el UNITARIO EFECTIVO ya congelado en la fila. Viaja al
+  // techo compacto de la portada (§2.4bis — PLATA = valor AGENDADO del día).
+  // ⚠️ **`null` NO vale 0**: son 2 de 88 citas vivas, todas del 7-jul y
+  // anteriores al snapshot de precio. Un 0 se sumaría y mentiría por omisión
+  // con un número redondo (L-197) — el consumidor las cuenta aparte y LO DICE.
+  'id' | 'fecha' | 'hora' | 'estado' | 'tipo_servicio' | 'suscripcion_servicio_id' | 'duracion_minutos' | 'precio'
 > & {
   mascota: MascotaAgenda | null;
   tipo: Pick<
@@ -359,7 +364,7 @@ export async function obtenerCitasPaseoDelDia(
   const { data, error } = await getClient()
     .from('evento_cita_servicio')
     .select(
-      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, direccion_snapshot, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
+      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, precio, direccion_snapshot, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
     )
     .eq('prestador_id', input.prestador_id)
     .gte('fecha', input.fecha)
@@ -406,7 +411,7 @@ export async function obtenerCitaPaseoPorId(
   const { data, error } = await getClient()
     .from('evento_cita_servicio')
     .select(
-      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, direccion_snapshot, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
+      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, precio, direccion_snapshot, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
     )
     .eq('id', citaId)
     .eq('tipo.categoria', 'paseo')
