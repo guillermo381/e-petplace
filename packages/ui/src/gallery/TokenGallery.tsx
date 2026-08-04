@@ -1946,6 +1946,11 @@ function GaleriaInterna() {
               <Icono nombre="mes" tamano={28} />
             </View>
             <Texto variante="apoyo">
+              ⚠️ Y el caso que lo rompía: con un NOMBRE LARGO la insignia se caía al renglón de
+              abajo — que es exactamente donde el founder dijo que «se ve raro». No era ubicación,
+              era `flexWrap`. Ahora el nombre cede y el emblema se queda en su línea.
+            </Texto>
+            <Texto variante="apoyo">
               (b) ⭐ LA INSIGNIA DE COHORTE — reemplaza a los dos glifos que él rechazó («no me gusta
               ninguno, puede que tengamos que no usar glifo para esto, ya que es especial»). El
               diagnóstico era de PIEZA: un glifo de línea a 21px no puede portar PERTENENCIA — un

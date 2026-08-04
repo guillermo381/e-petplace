@@ -389,7 +389,16 @@ export function FichaPrestador({
              que el nombre no dependa de un vecino que puede faltar — el
              `flex: 1` con `flexShrink` lo hace ceder por sí mismo, haya o
              no insignia al lado. */
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2], flexWrap: 'wrap' }}>
+          /* ⚠️ S85-B27 · SIN `flexWrap`, y es una CURA no un detalle: el
+             founder reportó que el emblema «se ve raro DEBAJO del nombre».
+             No era la ubicación —la mesa la firmó junto al nombre— era el
+             WRAP: con un nombre largo la insignia se caía al renglón
+             siguiente y aterrizaba justo donde él dijo que se veía mal.
+             Un layout que se ve bien con nombres cortos y se rompe con los
+             largos es el mismo error del ▶ y del renglón sin insignia:
+             probado en UNA configuración. Ahora el nombre CEDE
+             (`flexShrink`) y el emblema se queda en su línea. */
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
             <View style={{ flexShrink: 1 }}>
               <Texto variante="titulo">{nombre}</Texto>
             </View>

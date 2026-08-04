@@ -26,6 +26,9 @@
  */
 
 import { Pressable, Text, View } from 'react-native'
+import Svg, { Circle, Path } from 'react-native-svg'
+
+import { Huella } from '../brand/Huella'
 
 import { typography } from '../tokens/typography'
 import { radius } from '../tokens/radius'
@@ -151,6 +154,52 @@ export type InsigniaProps =
       superficie?: 'clara' | 'muro'
     }
 
+
+/** LA ESCARAPELA — el peso gráfico del emblema (S85-B27).
+ *
+ *  NACE DE UN REBOTE EN DISPOSITIVO: «no creaste el emblema que habíamos
+ *  hablado… y se ve raro debajo del nombre del negocio». Una pastilla de
+ *  texto no era un emblema: decía la palabra correcta sin ser la cosa.
+ *  Su referencia fue una escarapela con cinta — DIRECCIÓN, no artefacto:
+ *  no se copia la imagen, se toma qué tiene que pesar.
+ *
+ *  ⚠️ Y ESTO REABRE ALGO QUE EL CENSO HABÍA MATADO, con su porqué medido:
+ *  la roseta cayó como GLIFO porque a 21px «círculo centrado» ya está
+ *  ocupado tres veces (`ayuda`, `preferencias` y el `hoy` de entonces) y
+ *  a ese tamaño un disco es un disco. **Acá no es un glifo de 21px: es
+ *  una pieza de VITRINA con su tamaño.** El argumento que la hundió NO
+ *  aplica — y además `hoy` dejó de ser un sol, así que el idioma está
+ *  menos poblado que cuando se midió. Se reabre por medición, no por
+ *  insistencia.
+ *
+ *  ANATOMÍA: disco con canto DENTADO (lo que la separa de un círculo
+ *  liso), la huella adentro —la cohorte es de quien cuida mascotas— y dos
+ *  colas de cinta. La huella va DENTRO del disco y no al lado: acá el
+ *  disco no es una placa de glifo (R22 gobierna las placas de la fila de
+ *  filtros), es el cuerpo del emblema. */
+const DIENTES = 12
+function Escarapela({ color, lado }: { color: string; lado: number }) {
+  const r = 8.6
+  const dientes = Array.from({ length: DIENTES }, (_, i) => {
+    const a = (i * 2 * Math.PI) / DIENTES
+    const x1 = 12 + Math.cos(a) * r
+    const y1 = 10 + Math.sin(a) * r
+    const x2 = 12 + Math.cos(a) * (r + 2.2)
+    const y2 = 10 + Math.sin(a) * (r + 2.2)
+    return `M${x1.toFixed(1)} ${y1.toFixed(1)}L${x2.toFixed(1)} ${y2.toFixed(1)}`
+  }).join('')
+  return (
+    <Svg width={lado} height={lado} viewBox="0 0 24 24" aria-hidden>
+      {/* las colas van PRIMERO: quedan detrás del disco */}
+      <Path d="M9.2 17.4 7.4 23.4l2.9-1.5 2 1.5-1-5.4" fill="none" stroke={color} strokeWidth={1.6} strokeLinejoin="round" strokeLinecap="round" />
+      <Path d="M14.8 17.4l1.8 6-2.9-1.5-2 1.5 1-5.4" fill="none" stroke={color} strokeWidth={1.6} strokeLinejoin="round" strokeLinecap="round" />
+      <Path d={dientes} stroke={color} strokeWidth={1.5} strokeLinecap="round" />
+      <Circle cx={12} cy={10} r={r} fill="none" stroke={color} strokeWidth={1.7} />
+      <Huella color={color} x={8.6} y={6.6} escala={0.29} />
+    </Svg>
+  )
+}
+
 export function Insignia(props: InsigniaProps) {
   const { tamaño = 'md' } = props
   const { theme } = useTheme()
@@ -194,9 +243,13 @@ export function Insignia(props: InsigniaProps) {
           : { accessibilityRole: 'text' as const })}
         accessibilityLabel={etiqueta}
         style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: spacing[1.5],
           justifyContent: 'center',
           height: t.alto,
-          paddingHorizontal: spacing[3],
+          paddingLeft: spacing[1.5],
+          paddingRight: spacing[3],
           borderRadius: radius.full,
           // MEMORIAL no tiene `capaBg` — y su ausencia es la ley, no un
           // hueco: memorial tiene UNA superficie a propósito (Ley 8:
@@ -214,6 +267,7 @@ export function Insignia(props: InsigniaProps) {
           alignSelf: 'flex-start',
         }}
       >
+        <Escarapela color={sobreMuro ? muro : capaTexto.comunidad} lado={t.alto - 6} />
         <Text
           style={{
             fontFamily: typography.family.sans.bold,
