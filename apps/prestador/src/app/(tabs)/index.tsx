@@ -147,7 +147,11 @@ type Pantalla =
       /** S85-C23: la cohorte del negocio, en CÓDIGO. La voz la arma la
        *  PIEZA (`Insignia`, contrato de B en vuelo) — la casa NO compone
        *  la frase. Viajan crudos y esperan su línea. */
-      cohorte: string | null;
+      /* La UNIÓN, no `string`: la escribí como `string` en C23 —cuando el
+         wrapper todavía era ancho— y quedó vieja el día que A la estrechó
+         (A38). Un tipo más ancho que su fuente no falla: solo deja de
+         avisar. */
+      cohorte: 'fundador' | 'pionero' | null;
       cohorteAnio: number | null;
     };
 
@@ -1174,6 +1178,10 @@ export default function Hoy() {
              techo ya tenía. `null` = sin citas hoy: el bloque NO EXISTE,
              y la forma del día sigue diciendo lo que hay que decir. */
           pie={techo === null ? undefined : <TresNumeros {...techo} />}
+          /* S85-C27 — CRUDOS: la pieza compone y el techo pone la regla
+             del muro. Esta pantalla solo pasa lo que el wrapper trajo. */
+          cohorte={pantalla.estado === 'listo' ? pantalla.cohorte : null}
+          cohorteAnio={pantalla.estado === 'listo' ? pantalla.cohorteAnio : null}
         />
 
         <View style={{ padding: spacing[4], gap: spacing[4] }}>

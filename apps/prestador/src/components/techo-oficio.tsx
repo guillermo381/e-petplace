@@ -27,7 +27,7 @@ import Animated, { cubicBezier } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { setStatusBarStyle } from 'expo-status-bar';
-import { Isotipo, motion, palette, radius, spacing, typography, useTheme } from '@epetplace/ui';
+import { Insignia, Isotipo, motion, palette, radius, spacing, typography, useTheme } from '@epetplace/ui';
 
 /** La curva orgánica del techo (patrón Hogar v2) — una sola verdad. */
 export const CURVA_OFICIO = { izquierda: 44, derecha: 26 };
@@ -240,42 +240,36 @@ export function TechoOficio({
   dato,
   jornada,
   pie,
+  cohorte,
+  cohorteAnio,
 }: {
   titulo: string;
   dato: string;
   jornada?: string;
   pie?: ReactNode;
-  /* ⏳ S85-C23 — HUECO RESERVADO: LA INSIGNIA DE COHORTE.
-     No hay prop todavía **a propósito**: un prop declarado que el
-     componente no renderiza compila, deja al caller creyendo que pasó
-     algo, y no hace nada — el patrón exacto que esta sesión pagó cuatro
-     veces. Se declara la decisión, no la firma.
-
-     LO QUE YA ESTÁ DECIDIDO, que es lo caro: la insignia se monta ACÁ
-     ADENTRO, y `superficie="muro"` NO ES OPCIONAL — sin ella
-     `capaText.comunidad` da 1.03 de contraste en claro, invisible
-     (medido por B). Montarla en la pantalla obligaría a cada consumidor
-     a acordarse de una prop cuyo olvido no rompe nada y no se ve.
-     *La regla del muro vive con el muro.*
-
-     LO QUE FALTA, medido (S85-C26): **`Insignia` sigue pidiendo
-     `etiqueta` YA ARMADA.** La composición que B firmó vive DENTRO de
-     `FichaPrestador` —`useTraduccionUi()` + las keys `cohorte.*` del
-     i18n de `ui`— y ese diccionario **no se alcanza desde la app**.
-
-     ⇒ El espejo (`como-te-ven`) YA cerró, porque monta la Ficha y le
-     pasa los dos campos crudos. **Este techo monta `Insignia` DIRECTO**,
-     así que para dibujarla tendría que componer la frase acá — con MI
-     diccionario, en dos lenguas, al lado del de `ui`. *Es exactamente lo
-     que la mesa prohibió: la misma frase en dos diccionarios se
-     desincroniza sin que nada falle.*
-
-     PEDIDO A B, y es el MISMO argumento que él ya aceptó para la Ficha:
-     que `Insignia` reciba `cohorte` + `cohorteAnio` y componga adentro.
-     Hoy la receta existe pero vive un piso más arriba, así que solo
-     sirve a un consumidor; bajarla la vuelve compartida y este techo es
-     su segundo caso. Los dos campos crudos ya viajan en el estado de la
-     portada: acá es una línea el día que llegue. */
+  /**
+   * ⭐ S85-C27 — LA COHORTE, CRUDA. `Insignia` compone la frase en las
+   * dos lenguas (B `9449bf5`); **esta casa no arma la etiqueta**. Armarla
+   * acá pondría la misma frase en dos diccionarios, y dos diccionarios se
+   * desincronizan sin que nada falle.
+   *
+   * ⚠️ **SE MONTA ACÁ ADENTRO Y NO EN LA PANTALLA, y no es comodidad:**
+   * `superficie="muro"` **no es opcional en este techo** — sin ella
+   * `capaText.comunidad` da **1.03 de contraste en claro**, o sea
+   * invisible (medido por B). Si la pieza viviera en la pantalla, cada
+   * consumidor tendría que acordarse de una prop **cuyo olvido no rompe
+   * nada y no se ve**. *La regla del muro vive con el muro:* acá es
+   * imposible olvidarla.
+   *
+   * ⚠️ **EL GUARD DE NULOS ES DE ESTA CASA, y es correcto que lo sea:**
+   * `Insignia` pide los dos campos NO nulos —*los dos datos o ninguno*—
+   * y `MiPrestador` los da nullable. **No es un catálogo duplicado** (eso
+   * sería repetir `'fundador' | 'pionero'`): es saber si mi fuente trae
+   * el dato, que es responsabilidad de quien la lee. Incompleto = la
+   * insignia **no se monta**, jamás un hueco ni una frase a medias.
+   */
+  cohorte?: 'fundador' | 'pionero' | null;
+  cohorteAnio?: number | null;
 }) {
   const insets = useSafeAreaInsets();
   const muro = useMuroOficio();
@@ -329,6 +323,9 @@ export function TechoOficio({
             >
               {dato}
             </Text>
+            {cohorte !== null && cohorte !== undefined && cohorteAnio !== null && cohorteAnio !== undefined && (
+              <Insignia distincion="cohorte" superficie="muro" cohorte={cohorte} cohorteAnio={cohorteAnio} tamaño="sm" />
+            )}
           </View>
         </View>
       </View>
