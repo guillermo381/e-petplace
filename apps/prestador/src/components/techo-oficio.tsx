@@ -258,12 +258,24 @@ export function TechoOficio({
      a acordarse de una prop cuyo olvido no rompe nada y no se ve.
      *La regla del muro vive con el muro.*
 
-     LO QUE FALTA: la línea de B. Hoy `Insignia` pide `etiqueta` YA
-     ARMADA; B lo está cambiando para que la pieza reciba el código y el
-     año y arme la frase con el i18n de `ui`. Componerla en esta casa
-     habría andado y habría sido el error: dos casas armando la misma
-     frase con dos diccionarios se desincronizan sin que nada falle.
-     Los dos campos crudos ya viajan en el estado de la portada. */
+     LO QUE FALTA, medido (S85-C26): **`Insignia` sigue pidiendo
+     `etiqueta` YA ARMADA.** La composición que B firmó vive DENTRO de
+     `FichaPrestador` —`useTraduccionUi()` + las keys `cohorte.*` del
+     i18n de `ui`— y ese diccionario **no se alcanza desde la app**.
+
+     ⇒ El espejo (`como-te-ven`) YA cerró, porque monta la Ficha y le
+     pasa los dos campos crudos. **Este techo monta `Insignia` DIRECTO**,
+     así que para dibujarla tendría que componer la frase acá — con MI
+     diccionario, en dos lenguas, al lado del de `ui`. *Es exactamente lo
+     que la mesa prohibió: la misma frase en dos diccionarios se
+     desincroniza sin que nada falle.*
+
+     PEDIDO A B, y es el MISMO argumento que él ya aceptó para la Ficha:
+     que `Insignia` reciba `cohorte` + `cohorteAnio` y componga adentro.
+     Hoy la receta existe pero vive un piso más arriba, así que solo
+     sirve a un consumidor; bajarla la vuelve compartida y este techo es
+     su segundo caso. Los dos campos crudos ya viajan en el estado de la
+     portada: acá es una línea el día que llegue. */
 }) {
   const insets = useSafeAreaInsets();
   const muro = useMuroOficio();

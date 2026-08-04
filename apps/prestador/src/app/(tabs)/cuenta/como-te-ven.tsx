@@ -193,20 +193,18 @@ export default function ComoTeVen() {
           logoUrl={resolverUrlLogoNegocio(prestador.foto_url)}
           ciudad={prestador.ciudad}
           portadas={portadas}
-          /* ⏳ S85-C23 · LA COHORTE ESPERA LA LÍNEA DE B, y se declara en
-             vez de cablearse con lo que hay. El contrato de `FichaPrestador`
-             HOY pide `cohorte: string` como ETIQUETA YA ARMADA, y B lo está
-             cambiando ahora para que la pieza reciba el código + el año y
-             arme la frase con el i18n de `ui`.
-             Componer la etiqueta acá habría funcionado y habría sido el
-             error: dos casas armando la misma frase con dos diccionarios
-             distintos se desincronizan sin que nada falle —el defecto que
-             esta sesión pagó tres veces—. Y pasar el código crudo al
-             contrato viejo pintaría `fundador` en la vitrina: un código a
-             la vista del usuario (Ley 3).
-             ⇒ No se monta a medias. Los dos campos crudos ya viajan en
-             `prestador` (`cohorte` · `cohorte_anio`), así que cuando la
-             línea llegue esto es UNA línea. */
+          /* S85-C26 — LA COHORTE, CRUDA. La pieza compone la frase en las
+             dos lenguas (con el i18n de `ui`) y decide si se monta: los
+             dos datos o ninguno. Esta casa NO arma la etiqueta ni
+             pregunta si hay dato — hacerlo pondría la MISMA frase en dos
+             diccionarios, que se desincronizan sin que nada falle.
+             ⚠️ Y no se castea: `MiPrestador.cohorte` ya llega ESTRECHADA
+             a su unión (A38) — el `Pick` era más ancho que el CHECK de su
+             propia tabla, y estrecharlo copió lo que la DB garantiza. Con
+             un `as` acá, el día que la cohorte gane un tercer valor la
+             pieza lo recibiría sin que nada avise. */
+          cohorte={prestador.cohorte}
+          cohorteAnio={prestador.cohorte_anio}
           /* ⭐ S85-C22 — EL CLIP LLEGA AL ESPEJO, y con él cierra la
              segunda mitad del bug del founder: subía el clip, la app
              decía que subió —era verdad— y no aparecía **ni donde lo
