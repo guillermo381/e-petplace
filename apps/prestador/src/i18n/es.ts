@@ -613,7 +613,13 @@ export const prestadorEs = {
     oficioEstetica: 'Estética',
     oficioAdiestramiento: 'Adiestramiento',
     oficioVeterinaria: 'Veterinaria',
-    fundador: 'Prestador fundador',
+    /* ☠️ S85-C39 · `fundador: 'Prestador fundador'` MURIÓ en sus dos
+       consumidores. Repetía el acto de habla que el founder acaba de
+       rechazar: OTORGABA UN RECONOCIMIENTO en vez de decir un hecho.
+       El eje de tiempo dice lo mismo sin condecorar a nadie — y el año
+       SALE DEL DATO (`cohorte_anio`), jamás horneado: un 2026 escrito a
+       mano sería el «15» otra vez, con otra ropa. */
+    desde: 'Desde {{anio}}',
     hitoOferta: 'oferta activa',
     hitoAgenda: 'agenda {{n}} días',
     hitoDomicilio: 'a domicilio',

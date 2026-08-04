@@ -467,7 +467,7 @@ export const prestadorEn = {
     oficioEstetica: 'Grooming',
     oficioAdiestramiento: 'Training',
     oficioVeterinaria: 'Veterinary care',
-    fundador: 'Founding provider',
+    desde: 'Since {{anio}}',
     hitoOferta: 'active offer',
     hitoAgenda: '{{n}}-day schedule',
     hitoDomicilio: 'home visits',

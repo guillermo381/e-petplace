@@ -149,6 +149,9 @@ type Identidad = {
    *  La lectura ya viene en `obtenerMiPrestador`; lo que faltaba era
    *  que esta pantalla lo mirara. */
   logoPath: string | null;
+  /** S85-C39: el año de la cohorte, para la placa. `null` = la placa no se
+   *  monta — el año sale del DATO y jamás se hornea. */
+  cohorteAnio: number | null;
 };
 
 /** Lo que sale de las lecturas de oferta y agenda. Llega DESPUÉS y
@@ -221,6 +224,7 @@ export default function Cuenta() {
           nombre: prestador.data.nombre_comercial,
           ciudad: prestador.data.ciudad,
           logoPath: prestador.data.foto_url,
+          cohorteAnio: prestador.data.cohorte_anio,
         });
 
         // ── y recién ahora lo secundario, con su propio estado ──
@@ -490,11 +494,20 @@ export default function Cuenta() {
                     {[vozDelOficio, identidad.ciudad].filter((x): x is string => x !== null).join(' · ')}
                   </Text>
                 )}
-                {/* el badge fundador: PILL de vidrio con papel (informa
-                    = píldora, Ley 21; el programa es D-398) — desde
-                    S81-C es LA PLACA: gana el brillo §8.5 (el único
-                    sitio del censo), la firma física de §2.2 traducida
-                    al portal. */}
+                {/* LA PLACA: pill de vidrio con papel (informa = píldora,
+                    Ley 21; el programa es D-398) — desde S81-C gana el
+                    brillo §8.5, la firma física de §2.2 traducida al portal.
+
+                    ⏪ S85-C39 · DECÍA «Prestador fundador» Y AHORA DICE EL
+                    AÑO. Firma del founder: ahí la app **otorgaba un
+                    reconocimiento** en vez de decir un hecho — el mismo acto
+                    de habla que rechazó en el emblema. *«Desde 2026» dice lo
+                    mismo sin condecorar a nadie.*
+                    ⚠️ **EL AÑO SALE DEL DATO** (`cohorte_anio`), jamás
+                    horneado: un 2026 escrito a mano sería el «15» otra vez
+                    con otra ropa. **Sin año la placa NO SE MONTA** — regla de
+                    existencia, igual que la insignia del techo. */}
+                {identidad.cohorteAnio !== null && (
                 <View
                   style={{
                     alignSelf: 'flex-start',
@@ -507,9 +520,10 @@ export default function Cuenta() {
                 >
                   <BrilloDePlaca />
                   <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.xs, color: palette.light0 }}>
-                    {t('miCuenta.fundador')}
+                    {t('miCuenta.desde', { anio: identidad.cohorteAnio })}
                   </Text>
                 </View>
+                )}
               </View>
             </View>
           )}

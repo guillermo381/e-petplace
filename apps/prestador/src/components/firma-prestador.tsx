@@ -23,12 +23,21 @@ export function FirmaPrestador({
   vozOficio,
   ciudad,
   logoUrl,
+  cohorteAnio,
 }: {
   nombre: string;
   /** null = sin oficio activo — la línea se omite (jamás se inventa). */
   vozOficio: string | null;
   ciudad: string | null;
   logoUrl: string | null;
+  /** S85-C39 · el año de la cohorte. ⏪ Acá decía «Prestador fundador», y el
+   *  founder lo rechazó por el ACTO DE HABLA: la firma del negocio OTORGABA
+   *  un reconocimiento en vez de decir un hecho. El eje de tiempo dice lo
+   *  mismo sin condecorar.
+   *  ⚠️ Llega como PROP y no se lee acá: esta pieza no consulta, compone —
+   *  y el año sale del dato (`cohorte_anio`), jamás horneado. `null` = la
+   *  placa no se monta (regla de existencia). */
+  cohorteAnio: number | null;
 }) {
   const { theme } = useTheme();
   const { t } = useTraduccion();
@@ -41,6 +50,11 @@ export function FirmaPrestador({
         <View style={{ flex: 1, gap: spacing[1.5] }}>
           <Texto variante="titulo">{nombre}</Texto>
           {sub.length > 0 ? <Texto variante="apoyo">{sub}</Texto> : null}
+          {/* ⚠️ SIN AÑO LA PLACA NO SE MONTA. El primer intento puso
+              `?? 0` y habría pintado «Desde 0»: un valor legal,
+              creíble y falso — el defecto de esta sesión en
+              miniatura. Un dato ausente no tiene relleno. */}
+          {cohorteAnio !== null && (
           <View
             style={{
               alignSelf: 'flex-start',
@@ -57,9 +71,10 @@ export function FirmaPrestador({
                 color: theme.text.secondary,
               }}
             >
-              {t('miCuenta.fundador')}
+              {t('miCuenta.desde', { anio: cohorteAnio })}
             </Text>
           </View>
+          )}
         </View>
       </View>
     </Tarjeta>

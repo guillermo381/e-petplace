@@ -1364,6 +1364,7 @@ export default function Hoy() {
         {pantalla.estado === 'listo' && pantalla.preparacion !== null && (
           <View style={{ gap: spacing[4] }}>
             <FirmaPrestador
+              cohorteAnio={pantalla.estado === 'listo' ? pantalla.cohorteAnio : null}
               nombre={pantalla.nombreComercial}
               vozOficio={vozOficio(pantalla.oficios, t)}
               ciudad={pantalla.ciudad}
