@@ -1114,12 +1114,6 @@ function EjemploSetBPrima() {
     // el 3-ago y el founder firmó los vigentes. Su lápida vive en el
     // registry, que es donde se lee al dibujar el próximo.
     'documento', 'fiscal', 'bancario',
-    // S85-B10: EL EMBLEMA DE COHORTE, dos candidatos. Van pegados a
-    // `prime`/`primeCorona` y a `equipo` A PROPÓSITO: son sus vecinos de
-    // significado (pertenencia) y el laurel murió justamente por
-    // colisionar con `equipo` — a 21px hay que ver que estos DOS no
-    // repitan ese error, ni entre sí ni con sus vecinos.
-    'emblemaBanderin', 'emblemaCinta',
   ]
   return (
     <View style={{ gap: spacing[4] }}>
@@ -1893,13 +1887,13 @@ function GaleriaInterna() {
             BAJA al catálogo o muere (Ley 37) — no se queda arriba
             ocupando el lugar del siguiente. ═══════════════════════ */}
         {/* ═══ S85-B13 · LOS GLIFOS QUE ESPERAN SU OJO. Suben acá por el
-            defecto que el founder encontró con el cuerpo: los dos emblemas
+            defecto que el founder encontró con el cuerpo: la insignia de cohorte
             estaban al FINAL de «Iconografía b′» —una sección de CATÁLOGO—,
             tres paneles de tema abajo, y no los halló. Es la regla de esta
             misma página aplicada a sí misma: *lo que espera decisión va
             arriba; el catálogo es lo que se hojea*. Siguen existiendo en
             su fila del set b′; acá están para decidir, allá para consultar. ═══ */}
-        <Seccion titulo="① ⭐ GATE S85 — LOS GLIFOS, A 21px CONTRA SUS VECINOS · qué decide: (a) que la AGENDA de «Hoy» ya no se confunda con «Preferencias» —la cura que él firmó— y (b) cuál de los dos EMBLEMAS de cohorte. A 21px no se mira si cada uno se entiende: se mira si se SEPARAN">
+        <Seccion titulo="① ⭐ GATE S85 — LOS GLIFOS, A 21px CONTRA SUS VECINOS · qué decide: (a) que la AGENDA de «Hoy» ya no se confunda con «Preferencias» —la cura que él firmó— y (b) LA INSIGNIA de cohorte, que reemplaza a los dos glifos rechazados — se mira que se separe de sus dos hermanas (estado y capa) y que se lea como distinción, no como estado">
           <View style={{ gap: spacing[4] }}>
             <Texto variante="apoyo">
               (a) LA CURA DE LA BARRA DE TABS. Antes los dos eran círculo con rayos y solo cambiaba
@@ -1918,22 +1912,36 @@ function GaleriaInterna() {
               <Icono nombre="preferencias" tamano={28} />
             </View>
             <Texto variante="apoyo">
-              (b) LOS DOS EMBLEMAS DE COHORTE, contra sus vecinos de significado. El laurel murió por
-              colisionar con `equipo`; la medalla, por el círculo ya ocupado 3 veces; el podio, por
-              LOYALTY §3 (un podio es un ranking dibujado). Lo que queda dice PERTENENCIA y llegada
-              temprana, jamás mérito comparado. A: el banderín plantado — riesgo, leerse como
-              «reportar». B: la cinta sin el disco — riesgo, vaciarse de significado.
+              (b) ⭐ LA INSIGNIA DE COHORTE — reemplaza a los dos glifos que él rechazó («no me gusta
+              ninguno, puede que tengamos que no usar glifo para esto, ya que es especial»). El
+              diagnóstico era de PIEZA: un glifo de línea a 21px no puede portar PERTENENCIA — un
+              glifo dice de qué ES algo, la cohorte dice QUIÉN ES alguien. Es la anatomía de la
+              pastilla «Al día» que él mismo señaló, con vocabulario propio: familia `distincion`,
+              capa COMUNIDAD (pertenecer es un vínculo, no una credencial).
             </Texto>
-            <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
-              <Icono nombre="emblemaBanderin" tamano={21} />
-              <Icono nombre="emblemaCinta" tamano={21} />
-              <Icono nombre="equipo" tamano={21} />
-              <Icono nombre="prime" tamano={21} />
-              <Icono nombre="primeCorona" tamano={21} />
+            <View style={{ flexDirection: 'row', gap: spacing[3], alignItems: 'center', flexWrap: 'wrap' }}>
+              <Insignia distincion="cohorte" etiqueta="Prestador fundador · 2026" />
+              <Insignia distincion="cohorte" etiqueta="Prestador fundador · 2026" tamaño="sm" />
             </View>
-            <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
-              <Icono nombre="emblemaBanderin" tamano={28} />
-              <Icono nombre="emblemaCinta" tamano={28} />
+            <Texto variante="apoyo">
+              Y al lado sus dos hermanas de la misma pieza, para ver que las TRES se separen: la de
+              ESTADO (transitoria, se gana y se pierde) y la de CAPA (clasifica un dominio, dibuja
+              punto). Si la distinción no se distingue de un estado, falló.
+            </Texto>
+            <View style={{ flexDirection: 'row', gap: spacing[3], alignItems: 'center', flexWrap: 'wrap' }}>
+              <Insignia distincion="cohorte" etiqueta="Prestador fundador · 2026" />
+              <Insignia estado="alDia" etiqueta="Al día" />
+              <Insignia capa="comunidad" etiqueta="Comunidad" />
+            </View>
+            <Texto variante="apoyo">
+              Y SOBRE EL MURO, que es donde va a vivir de verdad (junto al nombre, en el techo). El
+              tratamiento de capa NO sirve ahí: `capaText.comunidad` sobre el muro da 1.03 en claro —
+              invisible, la misma trampa que cazó a `Boton` en S84. Sobre el muro INVIERTE (fondo
+              papel, texto del muro), que es el par firmado por §15b.2: 5.51 claro · 9.61 oscuro.
+            </Texto>
+            <View style={{ backgroundColor: palette.tealDark, padding: spacing[4], borderRadius: radius.suave, flexDirection: 'row', gap: spacing[3], alignItems: 'center', flexWrap: 'wrap' }}>
+              <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: palette.light0 }}>Clínica Aurora</Text>
+              <Insignia distincion="cohorte" superficie="muro" etiqueta="Prestador fundador · 2026" />
             </View>
           </View>
         </Seccion>

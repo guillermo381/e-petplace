@@ -81,6 +81,7 @@ export {
   type InsigniaProps,
   type InsigniaEstado,
   type InsigniaCapa,
+  type InsigniaDistincion,
   type InsigniaTamaño,
 } from './components/Insignia'
 export { Encabezado, type EncabezadoProps } from './components/Encabezado'
