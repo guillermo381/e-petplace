@@ -1168,7 +1168,7 @@ export default function Hoy() {
         (c) =>
           !idsNucleo.has(c.id) &&
           !sinAgruparIds.has(c.id) &&
-          clavesNucleo.has(claveBloque(c) ?? ' '),
+          clavesNucleo.has(claveBloque(c) ?? '\0'),
       )
     : [];
   /* Orden cronológico: con N vivas simultáneas, el orden de `filter` es el de
