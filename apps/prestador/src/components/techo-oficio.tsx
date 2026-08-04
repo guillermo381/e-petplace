@@ -245,6 +245,25 @@ export function TechoOficio({
   dato: string;
   jornada?: string;
   pie?: ReactNode;
+  /* ⏳ S85-C23 — HUECO RESERVADO: LA INSIGNIA DE COHORTE.
+     No hay prop todavía **a propósito**: un prop declarado que el
+     componente no renderiza compila, deja al caller creyendo que pasó
+     algo, y no hace nada — el patrón exacto que esta sesión pagó cuatro
+     veces. Se declara la decisión, no la firma.
+
+     LO QUE YA ESTÁ DECIDIDO, que es lo caro: la insignia se monta ACÁ
+     ADENTRO, y `superficie="muro"` NO ES OPCIONAL — sin ella
+     `capaText.comunidad` da 1.03 de contraste en claro, invisible
+     (medido por B). Montarla en la pantalla obligaría a cada consumidor
+     a acordarse de una prop cuyo olvido no rompe nada y no se ve.
+     *La regla del muro vive con el muro.*
+
+     LO QUE FALTA: la línea de B. Hoy `Insignia` pide `etiqueta` YA
+     ARMADA; B lo está cambiando para que la pieza reciba el código y el
+     año y arme la frase con el i18n de `ui`. Componerla en esta casa
+     habría andado y habría sido el error: dos casas armando la misma
+     frase con dos diccionarios se desincronizan sin que nada falle.
+     Los dos campos crudos ya viajan en el estado de la portada. */
 }) {
   const insets = useSafeAreaInsets();
   const muro = useMuroOficio();
@@ -279,17 +298,26 @@ export function TechoOficio({
           >
             {titulo}
           </Text>
-          {/* papel PLENO (regla S61): sobre el muro la opacidad muere */}
-          <Text
-            numberOfLines={1}
-            style={{
-              fontFamily: typography.family.sans.regular,
-              fontSize: typography.size.sm,
-              color: palette.light0,
-            }}
-          >
-            {dato}
-          </Text>
+          {/* papel PLENO (regla S61): sobre el muro la opacidad muere.
+              La insignia va JUNTO AL NOMBRE DEL NEGOCIO —no al saludo—
+              porque la cohorte es del negocio, no de la persona. El
+              nombre cede ancho (`flexShrink`) para que la distinción no
+              se corte: entre truncar el nombre propio y truncar una
+              insignia de dos palabras, se trunca el que el prestador ya
+              conoce de memoria. */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+            <Text
+              numberOfLines={1}
+              style={{
+                flexShrink: 1,
+                fontFamily: typography.family.sans.regular,
+                fontSize: typography.size.sm,
+                color: palette.light0,
+              }}
+            >
+              {dato}
+            </Text>
+          </View>
         </View>
       </View>
       {/* La forma del día — su propio aire, papel pleno, DM Sans entera. */}
@@ -305,6 +333,67 @@ export function TechoOficio({
         </Text>
       )}
       {pie}
+    </View>
+  );
+}
+
+/**
+ * ⭐ S85-C23 — LOS TRES NÚMEROS DEL TECHO (`PORTAL_PRESTADOR` §2.4bis).
+ *
+ * **CARGA · PLATA · VIDAS**, siempre los tres, siempre en ese orden. Vive
+ * ACÁ y no en la portada porque **las reglas del muro viven acá**: papel
+ * PLENO (sobre el muro la opacidad muere, regla S61) y cero acento —
+ * ponerlo en la pantalla obligaría a repetir esas reglas y a que alguien
+ * las mantenga en dos lugares.
+ *
+ * ── POR QUÉ UNA LÍNEA POR COLUMNA, Y NO valor-arriba/unidad-abajo ────
+ * Porque **la unidad NO siempre es una unidad**: cuando PLATA no es
+ * visible, ese hueco dice una FRASE (un permiso), no un número con
+ * rótulo. Un layout de "valor + unidad" obligaría a inventar un valor
+ * para el caso sin valor — y el vacío se lee como CERO, que es
+ * justamente lo que §2.4bis prohíbe.
+ *
+ * ⚠️ `numberOfLines={2}`: la frase del permiso es más larga que un
+ * número, y en un tercio de ancho estiraría la columna. **Por eso la voz
+ * visible es corta y la completa viaja en `accessibilityLabel`** — la
+ * posición del hueco ya aporta "los ingresos". *Tres columnas donde una
+ * tiene tres renglones y las otras uno se lee como algo roto, y un techo
+ * que parece roto no orienta.*
+ */
+export function TresNumeros({
+  carga,
+  plata,
+  vidas,
+  plataDetalle,
+}: {
+  carga: string;
+  plata: string;
+  vidas: string;
+  /** La voz COMPLETA cuando la visible se acortó (permiso / fallo). */
+  plataDetalle?: string;
+}) {
+  const celda = (texto: string, detalle?: string) => (
+    <View style={{ flex: 1 }}>
+      <Text
+        numberOfLines={2}
+        accessibilityLabel={detalle}
+        style={{
+          fontFamily: typography.family.sans.medium,
+          fontSize: typography.size.sm,
+          // papel PLENO — sobre el muro la opacidad muere (regla S61)
+          color: palette.light0,
+        }}
+      >
+        {texto}
+      </Text>
+    </View>
+  );
+
+  return (
+    <View style={{ flexDirection: 'row', gap: spacing[3], alignItems: 'flex-start' }}>
+      {celda(carga)}
+      {celda(plata, plataDetalle)}
+      {celda(vidas)}
     </View>
   );
 }

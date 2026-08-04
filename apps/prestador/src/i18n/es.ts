@@ -198,6 +198,43 @@ export const prestadorEs = {
      `cuenta/perfil` (los labels de portada, los rótulos de sección y
      los textos de las dos Hojas) SIGUE fuera del riel. Entra completo
      en su propio lote, con su gate es/en. */
+  techo: {
+    // ⭐ S85-C23 · LOS TRES NÚMEROS DE LA PORTADA (PORTAL_PRESTADOR §2.4bis).
+    // La UNIDAD habla el idioma del oficio; el esqueleto no cambia nunca.
+    cohorteFundador: 'Prestador fundador',
+    cohortePionero: 'Prestador pionero',
+    cargaTiempo: '{{texto}} en ruta',
+    cargaCita1: '1 cita',
+    cargaCitas: '{{n}} citas',
+    cargaTurno1: '1 turno',
+    cargaTurnos: '{{n}} turnos',
+    cargaConsulta1: '1 consulta',
+    cargaConsultas: '{{n}} consultas',
+    cargaSesion1: '1 sesión',
+    cargaSesiones: '{{n}} sesiones',
+    // PLATA = el valor AGENDADO del día (jamás lo devengado ni lo cobrado).
+    plata: '{{monto}}',
+    // El total dice lo que sabe Y declara lo que le falta: un número redondo
+    // que oculta citas no se puede desconfiar.
+    plataParcial: '{{monto}} · {{n}} sin precio',
+    // El hueco habla del PERMISO, no del dato. Ni vacío (se lee como cero) ni
+    // "sin datos" (suena a sistema roto): no falta información, sobra audiencia.
+    // VISIBLE corta + COMPLETA en accessibilityLabel: en un tercio de ancho
+    // la frase entera estiraría la columna a tres renglones y el techo se
+    // leería roto. La posición del hueco ya aporta "los ingresos".
+    plataSoloTitular: 'Solo el titular',
+    plataSoloTitularDetalle: 'Solo el titular ve los ingresos',
+    plataNoSePudo: 'Ingresos no disponibles',
+    plataNoSePudoDetalle: 'No pudimos leer los ingresos de hoy',
+    vidasTutor1: '1 tutor',
+    vidasTutores: '{{n}} tutores',
+    vidasPaciente1: '1 paciente',
+    vidasPacientes: '{{n}} pacientes',
+    vidasMascota1: '1 mascota',
+    vidasMascotas: '{{n}} mascotas',
+    vidasAlumno1: '1 alumno',
+    vidasAlumnos: '{{n}} alumnos',
+  },
   perfilNegocio: {
     // el resumen de contacto: NOMBRA lo cargado, en orden fijo
     // ── S84-C5: el resto del literal de la vitrina ──

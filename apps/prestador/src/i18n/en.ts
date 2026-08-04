@@ -163,6 +163,33 @@ export const prestadorEn = {
   // ⑥ S84-C3 — LA VITRINA DEL NEGOCIO · Espejo de es.ts (el tipo
   // `Espejo<D>` del riel EXIGE la paridad: una key faltante rompe el
   // typecheck, no se descubre en pantalla).
+  techo: {
+    cohorteFundador: 'Founding provider',
+    cohortePionero: 'Pioneer provider',
+    cargaTiempo: '{{texto}} on the road',
+    cargaCita1: '1 appointment',
+    cargaCitas: '{{n}} appointments',
+    cargaTurno1: '1 grooming',
+    cargaTurnos: '{{n}} groomings',
+    cargaConsulta1: '1 consultation',
+    cargaConsultas: '{{n}} consultations',
+    cargaSesion1: '1 session',
+    cargaSesiones: '{{n}} sessions',
+    plata: '{{monto}}',
+    plataParcial: '{{monto}} · {{n}} with no price',
+    plataSoloTitular: 'Owner only',
+    plataSoloTitularDetalle: 'Only the owner sees earnings',
+    plataNoSePudo: 'Earnings unavailable',
+    plataNoSePudoDetalle: "We couldn't load today's earnings",
+    vidasTutor1: '1 owner',
+    vidasTutores: '{{n}} owners',
+    vidasPaciente1: '1 patient',
+    vidasPacientes: '{{n}} patients',
+    vidasMascota1: '1 pet',
+    vidasMascotas: '{{n}} pets',
+    vidasAlumno1: '1 student',
+    vidasAlumnos: '{{n}} students',
+  },
   perfilNegocio: {
     // ── S84-C5 · Espejo de es.ts ──
     errorTitulo: "We couldn't load your profile",

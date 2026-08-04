@@ -56,6 +56,7 @@ import { fechaCortaMono } from '@epetplace/i18n';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTraduccion } from '@/i18n';
+import { montoCorto } from '@/lib/formato-techo';
 
 /**
  * Los códigos médicos del catálogo vivo (`tipos_servicio.es_medico = true`,
@@ -82,10 +83,16 @@ type Pantalla =
       faltaCuentaActiva: boolean;
     };
 
-// mismo formato que el checkout del dueño (S54-A): plata chica en mono
-function monto(valor: number): string {
-  return `$${valor.toFixed(2)}`;
-}
+/* mismo formato que el checkout del dueño (S54-A): plata chica en mono.
+   ☠️ S85-C23 — EL HELPER LOCAL MURIÓ ACÁ y se fue a `lib/formato-techo`.
+   No es limpieza: el techo de la portada necesitaba el MISMO formato, y
+   copiarlo habría dejado dos copias de una regla de plata. Una regla
+   escrita en dos lugares se deroga en una sola —lo que costó la
+   abstención duplicada de C22, el mismo día—, y acá el residuo sería
+   peor: dos formatos de dinero que divergen sin que nada falle.
+   La deuda de la MONEDA (D-448, el `$` asumido) viaja con él, declarada
+   en un solo sitio en vez de dos. */
+const monto = montoCorto;
 
 
 export default function Liquidaciones() {

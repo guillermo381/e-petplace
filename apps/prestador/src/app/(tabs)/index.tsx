@@ -72,6 +72,8 @@ import {
   obtenerMiPrestador,
   obtenerTitularId,
   obtenerMundoVeterinariaPropio,
+  obtenerPlataDelDia,
+  type PlataDelDia,
   obtenerOfertaAdiestramientoPropia,
   obtenerOfertasGroomingPropias,
   obtenerOfertasPaseoPropias,
@@ -86,7 +88,8 @@ import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 import { verificarSesion } from '@/lib/api';
 import { vozCitaVet } from '@/lib/voz-cita-vet';
 import { vozOficio } from '@/lib/voz-oficio';
-import { TechoOficio, VeloBarraEstadoOficio } from '@/components/techo-oficio';
+import { duracionCorta, montoCorto } from '@/lib/formato-techo';
+import { TechoOficio, TresNumeros, VeloBarraEstadoOficio } from '@/components/techo-oficio';
 import { AgendaRecepcion } from '@/components/agenda-recepcion';
 import { FiltroOficio, type FiltroOficioValor } from '@/components/filtro-oficio';
 import { FirmaPrestador } from '@/components/firma-prestador';
@@ -134,7 +137,84 @@ type Pantalla =
        *  null = el espacio YA está preparado (servicios+horarios) — el
        *  módulo entero NO existe (regla de existencia del boceto M1). */
       preparacion: EstadoTareas | null;
+      /** S85-C23 (§2.4bis): PLATA del techo. `null` = la lectura FALLÓ —
+       *  distinto de `visible:false`, que es un PERMISO negado y tiene voz
+       *  propia. Colapsarlos haría que un fallo de red se leyera como
+       *  "no te toca ver esto", que es mentirle al titular sobre su
+       *  propio negocio (L-197: el fallo degrada a ausencia, jamás a un
+       *  valor que el consumidor use como cierto). */
+      plata: PlataDelDia | null;
+      /** S85-C23: la cohorte del negocio, en CÓDIGO. La voz la arma la
+       *  PIEZA (`Insignia`, contrato de B en vuelo) — la casa NO compone
+       *  la frase. Viajan crudos y esperan su línea. */
+      cohorte: string | null;
+      cohorteAnio: number | null;
     };
+
+/**
+ * ⭐ S85-C23 — LOS TRES NÚMEROS DEL TECHO (`PORTAL_PRESTADOR` §2.4bis).
+ *
+ * **CARGA · PLATA · VIDAS**, siempre los tres, siempre en ese orden. El
+ * esqueleto no cambia entre oficios; **la UNIDAD sí**, y habla el idioma
+ * del oficio en vez del idioma del motor.
+ *
+ * ── LA REGLA DE LA UNIDAD (firmada por la mesa, 3-ago) ───────────────
+ * **UN oficio** → la unidad de su fila en la tabla de §2.4bis.
+ * **DOS O MÁS** → unidad genérica: `citas` y `mascotas`.
+ * **EXCEPCIÓN — si PASEO está entre los activos, CARGA sigue siendo
+ * TIEMPO.** No por deferencia al paseo: porque **el tiempo es la única
+ * unidad que SUMA BIEN al mezclar**. Un paseo de 3 h y una consulta de
+ * 20 min son 3 h 20 m de jornada, y eso es cierto en cualquier
+ * combinación; *"4 citas" con un paseo de tres horas adentro* es
+ * exactamente el error que §2.4bis argumenta (*dos salidas de tres horas
+ * y seis de veinte minutos dan el mismo 6 y son jornadas distintas*).
+ * **El conteo es la simplificación aceptable; el tiempo es la unidad
+ * honesta — donde el tiempo está disponible, gana.**
+ *
+ * VIDAS no lleva excepción: multi-oficio cuenta **mascotas**. *Perder la
+ * distinción de familias es barato; perder la jornada real no.*
+ *
+ * ── POR QUÉ SE COMPUTA DEL DÍA SIN FILTRAR ───────────────────────────
+ * De `citasHoySin`, nunca de la lista filtrada: **el filtro por oficio
+ * JAMÁS miente el conteo del techo** (guard estructural S61-B12, la
+ * misma regla que ya protege a la forma del día).
+ *
+ * ── VIDAS: DISTINTAS, NO FILAS ───────────────────────────────────────
+ * Tres perros de la misma casa son **UN tutor**; dos citas de la misma
+ * mascota son **UNA mascota**. Contar filas daría un número más alto,
+ * plausible y falso — la clase de defecto que no rompe nada.
+ * Una cita sin mascota legible **no suma y no inventa**: no hay un
+ * "desconocido" que contar.
+ */
+type UnidadCarga = 'tiempo' | 'citas' | 'turnos' | 'consultas' | 'sesiones';
+type UnidadVidas = 'tutores' | 'pacientes' | 'mascotas' | 'alumnos';
+
+function unidadesDelTecho(oficios: {
+  paseo: boolean;
+  grooming: boolean;
+  adiestramiento: boolean;
+  vet: boolean;
+}): { carga: UnidadCarga; vidas: UnidadVidas } {
+  const activos = [oficios.paseo, oficios.grooming, oficios.adiestramiento, oficios.vet].filter(Boolean).length;
+  // LA EXCEPCIÓN va PRIMERO: con paseo entre los activos el tiempo gana,
+  // haya uno o cuatro oficios. Ponerla después del conteo la volvería
+  // inalcanzable para el caso que existe para cubrir.
+  if (oficios.paseo) return { carga: 'tiempo', vidas: activos > 1 ? 'mascotas' : 'tutores' };
+  if (activos > 1) return { carga: 'citas', vidas: 'mascotas' };
+  if (oficios.vet) return { carga: 'consultas', vidas: 'pacientes' };
+  if (oficios.adiestramiento) return { carga: 'sesiones', vidas: 'alumnos' };
+  // grooming, o CERO oficios activos: el bloque no se monta sin citas, y
+  // sin oficios tampoco hay citas. 'turnos' es el único resto posible.
+  return { carga: 'turnos', vidas: 'mascotas' };
+}
+
+/** Minutos de la jornada. El snapshot de la cita manda (`duracion_minutos`
+ *  es la duración REAL vendida); el default del catálogo es el respaldo
+ *  para filas viejas. Cero honesto si ninguno de los dos existe — jamás
+ *  un promedio inventado. */
+function minutosDeJornada(citas: CitaAgendaPaseo[]): number {
+  return citas.reduce((m, c) => m + (c.duracion_minutos ?? c.tipo.duracion_default_minutos ?? 0), 0);
+}
 
 /** El oficio de una fila — decide ruta, ícono y filtro. */
 type OficioCita = 'paseo' | 'grooming' | 'adiestramiento' | 'vet';
@@ -586,7 +666,7 @@ export default function Hoy() {
     /* S85-C7: `rCerrados` entra AL FINAL del arreglo y del destructuring —
        insertarlo en el medio corre todas las posiciones y el typecheck lo
        cazó en el acto (once tuplas desalineadas). Al final, nada se mueve. */
-    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, cuentaR, perfilR, rCerrados] = await Promise.all([
+    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, cuentaR, perfilR, rCerrados, rPlata] = await Promise.all([
       obtenerCitasPaseoDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: sumarDias(desde, 6) }),
       // S60-B1: la jornada es UNA — las citas de grooming entran a la
       // misma lista con su tipo (el subtítulo ya lo dice) y su ruta.
@@ -619,6 +699,17 @@ export default function Hoy() {
       // jornada — sin el dato la rueda no apaga NINGUNO, que es la verdad
       // honesta ("no sabemos") y no una promesa de apertura.
       obtenerDiasCerrados(prestador.data.id),
+      /* S85-C23 · PLATA del techo compacto (§2.4bis). Va AL FINAL del
+         array a propósito: insertar un lector en el medio desalinea el
+         destructuring de arriba y el tsc lo caza, pero recién después de
+         que uno se pregunta por qué `perfilR` trae bloqueos. Es un costo
+         de dos minutos que se evita con una regla de una línea.
+         ⚠️ El día es `desde` —hoy— y NO el rango de 7 días de las citas:
+         el techo habla de LA JORNADA, no de la semana. Los dos leen del
+         mismo fetch y responden preguntas distintas.
+         Su fallo NO tumba la jornada (Ley 13 aplica al CUERPO): el techo
+         orienta. Sin dato, el hueco lo dice — ver `bloquePlata`. */
+      obtenerPlataDelDia(prestador.data.id, desde),
     ]);
     /* S85-C7 · los cerrados se guardan APARTE del estado de pantalla, y
        ANTES del rebote de las citas: su fallo no cambia la jornada — solo
@@ -736,6 +827,9 @@ export default function Hoy() {
       ciudad: prestador.data.ciudad,
       logoPath: prestador.data.foto_url,
       preparacion,
+      plata: rPlata.ok ? rPlata.data : null,
+      cohorte: prestador.data.cohorte,
+      cohorteAnio: prestador.data.cohorte_anio,
       groomingIds: new Set(rg.data.map((c) => c.id)),
       adiestramientoIds: new Set(ra.data.map((c) => c.id)),
       vetIds: new Set(rv.data.map((c) => c.id)),
@@ -928,6 +1022,106 @@ export default function Hoy() {
     : t('agenda.saludoSinNombre');
   const negocio = pantalla.estado === 'listo' ? pantalla.nombreComercial : '';
 
+  /* ── ⭐ S85-C23 · LOS TRES NÚMEROS (§2.4bis) ────────────────────────
+     Ver la cabecera de `unidadesDelTecho` para la regla de la unidad.
+
+     ⚠️ REGLA DE EXISTENCIA: sin citas hoy, el bloque NO SE MONTA. Un
+     techo que dijera "0 · $0 · 0" pintaría el día libre como fracaso, y
+     §15b ya lo prohíbe para el prestador (*vacío ≠ negocio muerto*). La
+     forma del día YA dice lo que hay que decir cuando no hay nada. */
+  const techo = ((): { carga: string; plata: string; vidas: string; plataDetalle?: string } | null => {
+    if (pantalla.estado !== 'listo' || citasHoySin.length === 0) return null;
+    const u = unidadesDelTecho(pantalla.oficios);
+
+    /* ① CARGA — tiempo si hay paseo; conteo si no.
+       ⚠️ KEYS LITERALES, jamás `t(\`techo.carga_${u.carga}\`)`: una key
+       armada por concatenación **anula la garantía del riel** (el
+       diccionario está tipado justo para que una key inexistente rompa el
+       typecheck) y obliga a un cast que apaga esa alarma. El switch es
+       más largo y es el único que se verifica solo. */
+    const n = citasHoySin.length;
+    const carga =
+      u.carga === 'tiempo'
+        ? t('techo.cargaTiempo', { texto: duracionCorta(minutosDeJornada(citasHoySin)) })
+        : u.carga === 'citas'
+          ? n === 1
+            ? t('techo.cargaCita1')
+            : t('techo.cargaCitas', { n })
+          : u.carga === 'turnos'
+            ? n === 1
+              ? t('techo.cargaTurno1')
+              : t('techo.cargaTurnos', { n })
+            : u.carga === 'consultas'
+              ? n === 1
+                ? t('techo.cargaConsulta1')
+                : t('techo.cargaConsultas', { n })
+              : n === 1
+                ? t('techo.cargaSesion1')
+                : t('techo.cargaSesiones', { n });
+
+    // ② PLATA — las DOS voces firmadas, y un tercer estado que NO se
+    //    colapsa con ellas: la lectura que falló.
+    const p = pantalla.plata;
+    const plata =
+      p === null
+        ? /* Ley 13: el fallo dice fallo. NO se disfraza de "no te toca"
+             (sería mentirle al titular sobre su permiso) ni de vacío
+             (se leería como cero). */
+          t('techo.plataNoSePudo')
+        : !p.visible
+          ? /* EL HUECO HABLA DEL PERMISO, NO DEL DATO (§2.4bis, firmada).
+               Ni vacío —se lee como CERO, y la recepción concluiría que el
+               negocio no facturó— ni "sin datos" —suena a sistema roto y
+               manda a buscar un defecto que no existe—.
+               No falta información: SOBRA AUDIENCIA. */
+            t('techo.plataSoloTitular')
+          : /* El total dice lo que sabe Y declara lo que le falta. El
+               asterisco es DEFENSA: hoy `sinPrecio` da 0 —2 citas de 88,
+               todas del 7-jul y anteriores al snapshot— así que este
+               camino casi nunca se pinta. Existe para no mentir el día
+               que falle, no porque falle. */
+            (p.sinPrecio ?? 0) > 0
+            ? t('techo.plataParcial', { monto: montoCorto(p.total ?? 0), n: p.sinPrecio ?? 0 })
+            : t('techo.plata', { monto: montoCorto(p.total ?? 0) });
+
+    // ③ VIDAS — DISTINTAS, no filas. Tutores = familias; el resto,
+    //    mascotas. Sin mascota legible no suma (no hay "desconocido").
+    const llaves = new Set(
+      citasHoySin
+        .map((c) => (u.vidas === 'tutores' ? c.mascota?.familia_id : c.mascota?.id))
+        .filter((k): k is string => typeof k === 'string' && k.length > 0),
+    );
+    const v = llaves.size;
+    const vidas =
+      u.vidas === 'tutores'
+        ? v === 1
+          ? t('techo.vidasTutor1')
+          : t('techo.vidasTutores', { n: v })
+        : u.vidas === 'pacientes'
+          ? v === 1
+            ? t('techo.vidasPaciente1')
+            : t('techo.vidasPacientes', { n: v })
+          : u.vidas === 'alumnos'
+            ? v === 1
+              ? t('techo.vidasAlumno1')
+              : t('techo.vidasAlumnos', { n: v })
+            : v === 1
+              ? t('techo.vidasMascota1')
+              : t('techo.vidasMascotas', { n: v });
+
+    /* La voz COMPLETA para lector de pantalla en los dos casos donde la
+       visible se acortó. Cuando PLATA es un monto no hay detalle: el
+       número se lee entero y agregar una glosa sería ruido. */
+    const plataDetalle =
+      p === null
+        ? t('techo.plataNoSePudoDetalle')
+        : !p.visible
+          ? t('techo.plataSoloTitularDetalle')
+          : undefined;
+
+    return { carga, plata, vidas, plataDetalle };
+  })();
+
   // ── La semana: 7 días desde hoy — citas firmes por día + estado del
   // día (bloqueado por vacaciones / libre). Cero métricas, solo verdad.
   const esPrimera = (mascotaId: string) =>
@@ -976,6 +1170,10 @@ export default function Hoy() {
           titulo={saludo}
           dato={negocio}
           jornada={textoJornada}
+          /* ⭐ S85-C23 — LOS TRES NÚMEROS (§2.4bis), en el slot que el
+             techo ya tenía. `null` = sin citas hoy: el bloque NO EXISTE,
+             y la forma del día sigue diciendo lo que hay que decir. */
+          pie={techo === null ? undefined : <TresNumeros {...techo} />}
         />
 
         <View style={{ padding: spacing[4], gap: spacing[4] }}>
