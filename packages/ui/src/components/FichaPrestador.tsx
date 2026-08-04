@@ -131,7 +131,7 @@ export interface FichaPrestadorProps {
    *  que se ve sano hasta que alguien lo usa.
    *
    *  AHORA RECIBE EL CLIP MISMO. La posición monta `ClipSesion` en su
-   *  encuadre `lamina` — la misma máquina poster→video→error, el mismo
+   *  encuadre `vitrina` — la misma máquina poster→video→error, el mismo
    *  "jamás autoplay", los mismos controles nativos. C le pasa el uri y
    *  nada más. */
   clipUri?: string | null
@@ -298,7 +298,7 @@ export function FichaPrestador({
                      su máquina poster→video→error y el "jamás autoplay".
                      El ▶ decorativo MUERE con su razón cumplida (Ley 37)
                      — dejarlo sería un segundo play que no es el play. */
-                  <ClipSesion uri={pos.url} encuadre="lamina" descripcion={nombre ?? undefined} />
+                  <ClipSesion uri={pos.url} encuadre="vitrina" descripcion={nombre ?? undefined} />
                 ) : (
                   <Image
                     source={{ uri: pos.url }}

@@ -208,6 +208,11 @@ export { MarcaEleccion, PATA, MONTA, type MarcaEleccionProps } from './brand/Mar
 // entero (la causa del founder: lo que se copia, diverge).
 export { PieReserva, type PieReservaProps } from './components/PieReserva'
 
+// TresNumeros — S85-B26: el bloque de cifras del techo del oficio. Sube a
+// la casa porque su anatomía es de sistema (el vidrio del muro, el papel
+// pleno, el rótulo que se apaga sin opacidad) y la resolvía la app.
+export { TresNumeros, type TresNumerosProps, type ColumnaTecho } from './components/TresNumeros'
+
 // FiltroPills · FiltroMascotas — S85-B7: LOS CHIPS DE FILTRO CON PATA,
 // promovidos del cliente por la Regla de las Piezas (apareció el segundo
 // consumidor: la portada del prestador). Eran override LOCAL declarado —

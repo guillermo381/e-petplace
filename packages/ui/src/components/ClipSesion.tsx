@@ -49,8 +49,25 @@ export interface ClipSesionProps {
    *  controles nativos son idénticos en los dos.
    *   · `tarjeta` (default) — como nació: 16/9, radio suave, y su pie con
    *     duración y descripción. Es el clip DENTRO de un contenido.
-   *   · `lamina` — a sangre: llena a su padre, sin radio y SIN PIE. Es el
-   *     clip COMO contenido, una posición del carrusel de la vitrina.
+   *   · `vitrina` — a sangre y **EN BUCLE AUTOMÁTICO, SIN CONTROLES**.
+   *     Llena a su padre, sin radio y sin pie.
+   *
+   *  ⏪ `vitrina` SE LLAMABA `lamina` Y SOLO CAMBIABA EL MARCO (S85-B20).
+   *  El gate del founder lo corrigió y el cambio es de NATURALEZA, no de
+   *  encuadre: **«es espacio de PUBLICIDAD, no de reproducción»**. Un clip
+   *  que pide play compite con el resto de la ficha por una decisión que
+   *  la familia no vino a tomar; uno que corre solo AMBIENTA. Por eso el
+   *  nombre cambió con el comportamiento: `lamina` describía el marco y
+   *  ya no alcanza para lo que la cosa hace. Tenía UN consumidor y nació
+   *  hoy, así que renombrar costó dos líneas — en un mes hubiera costado
+   *  una deuda.
+   *
+   *  ⚠️ LO QUE `vitrina` APAGA A PROPÓSITO, para que nadie lo lea como
+   *  descuido: sin controles nativos, sin fase de poster (el video nace
+   *  corriendo) y **sin sonido implícito** — un autoplay que suena en una
+   *  vitrina es de las cosas que hacen cerrar la app. Y NO hereda el
+   *  «jamás autoplay» de `tarjeta`, que sigue rigiendo allá: ahí el play
+   *  es la consecuencia de un gesto, acá el clip es el fondo.
    *
    *  POR QUÉ PROP Y NO PIEZA NUEVA: la alternativa era que
    *  `FichaPrestador` copiara la máquina del video, y eso es exactamente
@@ -60,7 +77,7 @@ export interface ClipSesionProps {
    *  significa: el criterio de B14 para decidir prop-vs-variante.
    *
    *  El default deja a los dos consumidores existentes byte-idénticos. */
-  encuadre?: 'tarjeta' | 'lamina'
+  encuadre?: 'tarjeta' | 'vitrina'
 }
 
 function duracionMono(segundos: number): string {
@@ -73,11 +90,18 @@ function duracionMono(segundos: number): string {
  *  automático — el play es la consecuencia del gesto que lo montó).
  *  Mientras carga, la voz honesta encima (estática, sin shimmer —
  *  Ley 13); el reemplazo al video es directo. */
-function ClipVideo({ uri, onError }: { uri: string; onError: () => void }) {
+function ClipVideo({ uri, onError, vitrina = false }: { uri: string; onError: () => void; vitrina?: boolean }) {
   const { theme } = useTheme()
   const { t } = useTraduccionUi()
   const [cargando, setCargando] = useState(true)
   const player = useVideoPlayer(uri, (p) => {
+    if (vitrina) {
+      // BUCLE Y MUDO: es ambiente, no reproducción. El mute no es una
+      // preferencia — un autoplay con sonido en una vitrina hace cerrar
+      // la app, y acá el usuario nunca pidió que sonara.
+      p.loop = true
+      p.muted = true
+    }
     p.play()
   })
   useEffect(() => {
@@ -93,8 +117,8 @@ function ClipVideo({ uri, onError }: { uri: string; onError: () => void }) {
     <View style={{ flex: 1 }}>
       <VideoView
         player={player}
-        nativeControls
-        contentFit="contain"
+        nativeControls={!vitrina}
+        contentFit={vitrina ? 'cover' : 'contain'}
         style={{ width: '100%', height: '100%' }}
       />
       {cargando ? (
@@ -128,17 +152,19 @@ function ClipVideo({ uri, onError }: { uri: string; onError: () => void }) {
 export function ClipSesion({ uri, duracionSegundos, descripcion, encuadre = 'tarjeta' }: ClipSesionProps) {
   const { theme } = useTheme()
   const { t } = useTraduccionUi()
-  const [fase, setFase] = useState<'poster' | 'video' | 'error'>('poster')
+  const esVitrina = encuadre === 'vitrina'
+  /* En vitrina el video NACE corriendo: no hay poster que tocar porque no
+     hay decisión que tomar. En tarjeta arranca en poster — ahí el play es
+     la consecuencia del gesto que lo montó. */
+  const [fase, setFase] = useState<'poster' | 'video' | 'error'>(esVitrina ? 'video' : 'poster')
 
   const alError = useCallback(() => setFase('error'), [])
 
-  const esLamina = encuadre === 'lamina'
-
   return (
-    <View style={esLamina ? { flex: 1 } : { gap: spacing[1] }}>
+    <View style={esVitrina ? { flex: 1 } : { gap: spacing[1] }}>
       <View
         style={
-          esLamina
+          esVitrina
             ? { flex: 1, overflow: 'hidden', backgroundColor: theme.bg.overlay }
             : {
                 width: '100%',
@@ -150,7 +176,7 @@ export function ClipSesion({ uri, duracionSegundos, descripcion, encuadre = 'tar
         }
       >
         {fase === 'video' ? (
-          <ClipVideo uri={uri} onError={alError} />
+          <ClipVideo uri={uri} onError={alError} vitrina={esVitrina} />
         ) : fase === 'error' ? (
           <View
             style={{
@@ -234,7 +260,7 @@ export function ClipSesion({ uri, duracionSegundos, descripcion, encuadre = 'tar
           posición a sangre, y un texto colgando debajo la partiría. La
           descripción sigue viajando al a11y del poster (arriba), así que
           no se pierde información — cambia de canal. */}
-      {!esLamina && descripcion !== null && descripcion !== undefined && descripcion.length > 0 ? (
+      {!esVitrina && descripcion !== null && descripcion !== undefined && descripcion.length > 0 ? (
         <Text
           style={{
             fontFamily: typography.family.sans.regular,

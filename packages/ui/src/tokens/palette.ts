@@ -330,6 +330,15 @@ export const palette = {
   coralAlpha15:      'rgba(255,92,92,.15)',
   ochreAlpha15:      'rgba(232,181,71,.15)',
   creamAlpha06:      'rgba(250,246,232,.06)',
+  /** S85-B26 · EL VIDRIO SOBRE EL MURO — la superficie de un bloque que
+   *  se apoya en el techo del oficio. Sube a token desde
+   *  `apps/prestador/techo-oficio` (donde nació como `VIDRIO_OFICIO`)
+   *  porque ahora lo necesita una pieza de `packages/ui`, y dos copias
+   *  del mismo valor se separan un día. Su medición viaja con él: papel
+   *  pleno encima da **7.37 AA**, y sobre el muro NOCHE el contraste solo
+   *  sube. Es vidrio OSCURO y no claro a propósito — sobre el muro
+   *  aclarar no separa, oscurecer sí. */
+  vidrioOficio:      'rgba(0,0,0,0.18)',
   terracottaAlpha14: 'rgba(217,119,87,.14)',
   sageAlpha14:       'rgba(143,166,142,.14)',
   roseAlpha14:       'rgba(201,160,160,.14)',

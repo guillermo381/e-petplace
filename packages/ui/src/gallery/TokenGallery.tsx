@@ -51,6 +51,7 @@ import { PieRevelar } from '../components/PieRevelar'
 import { PieReserva } from '../components/PieReserva'
 import { FiltroPills, FiltroMascotas } from '../components/FiltroPills'
 import { SelectorDia } from '../components/SelectorDia'
+import { TresNumeros } from '../components/TresNumeros'
 import { MarcaEleccion } from '../brand/MarcaEleccion'
 import { HeroMarca } from '../components/HeroMarca'
 import { LineaDeVida, LineaDeVidaNodo, type LineaDeVidaItem } from '../components/LineaDeVida'
@@ -1994,6 +1995,35 @@ function GaleriaInterna() {
             de las abiertas, que es exactamente lo que la segunda mitad de
             la regla prohíbe. Se queda en la sección de `Boton`, que es su
             casa de catálogo. ═══ */}
+        <Seccion titulo="② ⭐ GATE S85 — LOS TRES NÚMEROS DEL TECHO · qué decide: la anatomía que el founder describió (tres columnas centradas, valor grande arriba, rótulo abajo en mayúsculas pequeñas) Y el caso que la complica — la columna que NO tiene número">
+          <View style={{ backgroundColor: palette.tealDark, padding: spacing[4], borderRadius: radius.suave, gap: spacing[4] }}>
+            <TresNumeros
+              columnas={[
+                { valor: '6', rotulo: 'Carga' },
+                { valor: '$ 148', rotulo: 'Hoy' },
+                { valor: '12', rotulo: 'Vidas' },
+              ]}
+            />
+            <TresNumeros
+              columnas={[
+                { valor: '6', rotulo: 'Carga' },
+                { frase: 'Los ingresos los ve el titular', detalle: 'No tenés permiso para ver los ingresos del negocio' },
+                { valor: '12', rotulo: 'Vidas' },
+              ]}
+            />
+          </View>
+          <View style={{ height: spacing[3] }} />
+          <Texto variante="apoyo">
+            EL SEGUNDO BLOQUE ES EL QUE IMPORTA. C había resuelto esto con UNA línea por columna, y su
+            razón está documentada: cuando la plata no es visible, ese hueco dice UNA FRASE (un
+            permiso), no un número con rótulo — y un layout valor+rótulo obligaría a inventar un
+            valor, que se lee como CERO. La pieza acepta las dos formas y el TIPO hace imposible
+            pasar un valor vacío: si no hay número, no hay campo donde ponerlo. ⚠️ El rótulo se
+            «apaga» con ESCALA y MAYÚSCULAS, no con opacidad: sobre el muro la opacidad muere (regla
+            S61, medida por C en este mismo techo).
+          </Texto>
+        </Seccion>
+
         <Seccion titulo="② ⭐ GATE S85 — LA RUEDA D3 EN LA CASA VERDE · qué decide: el COLOR DE LA SUPERFICIE del día (el «techo» de la rueda) en el prestador. Nunca se firmó porque hasta S85 la rueda no vivía acá: resuelve de `bg.card` como en el cliente. Su FÍSICA no se toca — está firmada y viajó verbatim">
           {/* Promovida del cliente por la Regla de las Piezas: segundo
               consumidor, el bloque «Tu día» del prestador. SU FÍSICA ESTÁ
@@ -3499,14 +3529,17 @@ function GaleriaInterna() {
               <PanelTema etiqueta="memorial — degrada solo (tokens); la reproducción sigue siendo un acto del usuario">
                 <ClipSesion uri="https://example.invalid/clip.mp4" duracionSegundos={18} />
                 <Texto variante="apoyo">
-                  ENCUADRE `lamina` (S85-B20) — el mismo clip a sangre, sin radio y SIN PIE: es una
-                  POSICIÓN del carrusel de la vitrina, no un clip dentro de un contenido. Cambia el
-                  MARCO, no la máquina: mismo poster→video→error, mismo jamás-autoplay, mismos
-                  controles nativos. Nació porque `FichaPrestador` pedía un PÓSTER-IMAGEN que nada
-                  en el sistema produce — el contrato compilaba y pintaba nada.
+                  ⭐ ENCUADRE `vitrina` (S85-B25, firma del founder) — a sangre, EN BUCLE
+                  AUTOMÁTICO, SIN CONTROLES y MUDO. Su literal: «es espacio de PUBLICIDAD, no de
+                  reproducción». Un clip que pide play compite por una decisión que la familia no
+                  vino a tomar; uno que corre solo AMBIENTA. Se llamaba `lamina` y solo cambiaba el
+                  marco: el cambio es de NATURALEZA, así que el nombre cambió con él. El mute no es
+                  preferencia — un autoplay con sonido en una vitrina hace cerrar la app. En
+                  `tarjeta` el «jamás autoplay» sigue rigiendo: ahí el play es consecuencia de un
+                  gesto.
                 </Texto>
                 <View style={{ height: 180 }}>
-                  <ClipSesion uri="https://example.invalid/clip.mp4" encuadre="lamina" />
+                  <ClipSesion uri="https://example.invalid/clip.mp4" encuadre="vitrina" />
                 </View>
               </PanelTema>
             </ThemeProvider>
