@@ -2774,6 +2774,40 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 
   **Hermana de #21** (el mensaje es parte del guard) y **de #23** (el comentario le habla a la próxima pista): **L-198 es su generalización — los tres son el mismo defecto con distinto destinatario.** Origen: S85 (el caso de B; los cinco cobros de la sesión).
 
+  ### ➕ LA FRONTERA DE B — hasta dónde llega el arreglo *(aporte de B, S85, firmada)*
+
+  **Se deposita ACÁ y no aparte porque contesta la pregunta que L-198 abre y no
+  cierra:** *si el texto y el hecho se mueven juntos, **¿hasta dónde se mueven?***
+  **Y se escribe con su frontera explícita PARA QUE NO SE CITE AL REVÉS** — leída
+  a medias, L-198 se usa para justificar tocar de más *"por coherencia"*.
+
+  > **El radio CORTO y el radio LARGO son los dos errores.**
+  > **Lo que los separa NO es el tamaño del radio: es que la pregunta se conteste
+  > MIDIENDO, no imaginando.**
+
+  | pregunta | cómo se contesta | qué produce |
+  |---|---|---|
+  | *"¿quién más necesita esto **hoy**?"* | **se MIDE** | el radio correcto — *en S85 dio **dos** (la ficha y el techo), **y por eso la composición bajó a la casa*** |
+  | *"¿quién podría necesitarlo **algún día**?"* | **se IMAGINA** | **la prop que decora** |
+
+  ### 🔎 LA SEÑAL CONCRETA DE QUE UNO SE PASÓ DE LARGO
+
+  > **Si al listar los consumidores el número es CERO, NO es alcance corto: es
+  > una PIEZA SIN DUEÑO.** *Y la casa ya lo sabe: **una pieza sin consumidor es
+  > deuda*** — D-583 (los tokens `warm` con su condición de muerte), el `Boton`
+  > con prop `icono` que B declaró candidata **y no construyó**, `documentoSello`
+  > retirado apenas corrió su gate.
+
+  **⚠️ Y EL DATO QUE ORDENA LA FRONTERA, medido sobre la propia sesión: LOS TRES
+  CASOS DE HOY FALLARON MIDIENDO POCO, NO IMAGINANDO POCO.** *El techo que
+  devolvía 1, el `cupoTechoMaximo` sin su gemela, el `> 4` en cuatro guards —
+  ninguno fue por falta de visión de futuro: **fue por no contar los consumidores
+  que ya existían**.*
+
+  > **Por eso la frontera no dice "sé generoso" ni "sé austero": dice CONTÁ.**
+  > *El radio no es una virtud de carácter — es el resultado de un censo, y un
+  > censo se corre en un minuto.*
+
   > **Un fallo puede degradar a AUSENCIA, nunca a un VALOR que el consumidor va a usar como si fuera cierto.**
 
   **El caso, y lo produje yo:** `techoMaximoDe()` leía el techo del catálogo con un embed de PostgREST (`tipos_servicio!inner(cupo_techo)`) sobre una relación **sin FK declarada** — así que **fallaba SIEMPRE** — y su `catch` devolvía `return 1`. **Escribí ese `1` a propósito**, con su comentario razonado: *el techo es una ayuda, las franjas son el dato; caer entero por no poder calcular una ayuda sería desproporcionado.* **El razonamiento era bueno y el resultado, desastroso:** el taller del founder dijo **"Hasta 1 en simultáneo"** durante una sesión entera, con toda naturalidad.
