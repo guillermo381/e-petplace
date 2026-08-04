@@ -449,6 +449,33 @@ export function SeccionHorarios({
   const [hastaSel, setHastaSel] = useState<string | null>(null);
   const [cupoSel, setCupoSel] = useState(CUPO_NUEVA_FRANJA);
   /**
+   * ⭐ S85-C17 — EL CUPO CON EL QUE SE ABRIÓ, y es lo que distingue esta
+   * cura de las dos anteriores.
+   *
+   * **El defecto del founder, con su literal:** *"en la franja, antes de
+   * entrar a editar dice 4; le doy clic y está en 1, como si hubiera dos
+   * datos diferentes"*. **No son dos datos.** La lista pinta `f.cupo`
+   * crudo (4); el stepper pinta `Math.min(Math.max(valor,min),max)` — y
+   * con el techo llegando en 1, **el componente CLAMPEA el 4 a 1**.
+   *
+   * **Y lo reabrí yo.** En C9 el `max` era `Math.max(techo, cupoSel)`,
+   * puesto exactamente para esto; en C10 lo saqué porque producía el
+   * TRINQUETE. Los dos defectos eran reales — cambié uno por el otro.
+   *
+   * **La distinción que faltaba: `cupoSel` SE MUEVE mientras editás, y
+   * `cupoBase` NO.** Atar el tope al valor en edición hace que el tope
+   * persiga al dedo (trinquete); atarlo al valor con el que la franja se
+   * abrió lo deja FIJO durante toda la edición — el 4 se ve, no se puede
+   * inventar un 5, y el trinquete no vuelve.
+   *
+   * ⚠️ Con techo roto esto deja guardar un valor que el server va a
+   * rebotar, y es a propósito: **entre mentir sobre el valor que el
+   * prestador YA tiene y dejar que el server diga que no, gana el
+   * server** (corolario de Ley 23 — la puerta es cortesía, la autoridad
+   * es del motor). Y desde `98f8038` ese rebote dice el número correcto.
+   */
+  const [cupoBase, setCupoBase] = useState(CUPO_NUEVA_FRANJA);
+  /**
    * ⭐ S85-C9 — EL TECHO DEL OFICIO, del catálogo y no de la pantalla.
    * Sale de `cupoTechoMaximo` (A), que baja de `tipos_servicio.cupo_techo`.
    * Es UNO por oficio, así que se toma de la primera franja que lo traiga.
@@ -510,8 +537,14 @@ export function SeccionHorarios({
    * paseo tienen `cupo_techo` NULL, o sea exclusivos por diseño— y el
    * stepper degenerado no puede quedar para ellos. *La query decide si el
    * founder está acá por error; no decide si este estado existe.*
+   *
+   * ⚠️ **Y EXIGE `cupoBase <= 1` (S85-C17), que no es redundante:** si el
+   * techo dijera 1 pero la franja YA declara 4, retirar el control
+   * ESCONDERÍA ese 4 — la misma mentira que el clamp, con otra cara. Con
+   * un valor real por encima del techo el control se queda y muestra la
+   * verdad; que el server decida si la acepta.
    */
-  const servicioExclusivo = techoConocido && techoDelOficio <= 1;
+  const servicioExclusivo = techoConocido && techoDelOficio <= 1 && cupoBase <= 1;
 
   /* ☠️ SONDA TEMPORAL — S85-C16, el bug del cupo en su TERCERA vuelta.
      Las dos mediciones anteriores apuntaron a lugares CORRECTOS que no
@@ -1084,6 +1117,7 @@ export function SeccionHorarios({
           setDesdeSel(null);
           setHastaSel(null);
           setCupoSel(CUPO_NUEVA_FRANJA);
+          setCupoBase(CUPO_NUEVA_FRANJA);
           // D-386: la réplica arranca con TODAS las ofertas marcadas —
           // desmarcar es el gesto raro, no el común
           setOfertasSel(ofertas.map((o) => o.id));
@@ -1117,6 +1151,7 @@ export function SeccionHorarios({
                 onPress={() => {
                   setHojaGrupo(miembros.map((x) => x.key));
                   setCupoSel(f.cupo);
+                  setCupoBase(f.cupo);
                   setDesdeEdit(f.horaInicio);
                   setHastaEdit(f.horaFin);
                   setVistaGrupo('form');
@@ -1213,7 +1248,7 @@ export function SeccionHorarios({
                       registro="oficio"
                       valor={cupoSel}
                       min={1}
-                      max={techoConocido ? techoDelOficio : Math.max(cupoSel + 1, CUPO_NUEVA_FRANJA)}
+                      max={Math.max(techoConocido ? techoDelOficio : CUPO_NUEVA_FRANJA, cupoBase)}
                       onCambio={setCupoSel}
                     />
                   )}
@@ -1361,7 +1396,7 @@ export function SeccionHorarios({
                   registro="oficio"
                   valor={cupoSel}
                   min={1}
-                  max={techoConocido ? techoDelOficio : Math.max(cupoSel + 1, CUPO_NUEVA_FRANJA)}
+                  max={Math.max(techoConocido ? techoDelOficio : CUPO_NUEVA_FRANJA, cupoBase)}
                   onCambio={setCupoSel}
                 />
               )}
