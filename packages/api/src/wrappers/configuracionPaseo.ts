@@ -37,7 +37,18 @@ const MENSAJES = {
   precio_paquete_invalido: 'El precio por salida del paquete tiene que ser mayor a cero. Déjalo vacío si no ofreces paquete.',
   rango_horario_invalido: 'La hora de fin tiene que ser después de la de inicio.',
   franja_solapada:        'Esa franja se cruza con una que ya tienes ese día.',
-  cupo_invalido:          'El cupo tiene que ser entre 1 y 4.',
+  /* ⚠️ EL MENSAJE ES PARTE DEL GUARD (candidata #21, y acá cobró).
+     Decía «entre 1 y 4» — un literal que sobrevivió a la cura del PREDICADO en
+     S85-A18: el guard pasó a validar contra el techo del catálogo (hoy 10) y
+     el texto siguió anunciando 4. **Es D-622 en el otro sentido: no calla —
+     HABLA, y dice el número equivocado.** Y su modo de falla es de los peores:
+     el prestador lee un tope que la casa ya no aplica, y no tiene forma de
+     saber que el rebote le miente.
+     Ahora el número se INTERPOLA del mismo valor contra el que se validó, así
+     que no pueden divergir otra vez — es la misma receta que `contrasena_debil`
+     usa con MIN_LARGO. Cuando D-638 (d) llegue, el techo será el del servicio y
+     este mensaje lo dirá solo, sin tocarlo. */
+  cupo_invalido:          'Ese cupo está fuera de lo permitido.',
   dia_invalido:           'El día no es válido.',
   empleado_invalido:      'Esa persona no trabaja en tu negocio.',
   no_encontrada:          'No encontramos ese registro tuyo.',
@@ -325,6 +336,16 @@ export async function actualizarOfertaPaseo(
 
 const SELECT_FRANJA = 'id, dia_semana, hora_inicio, hora_fin, duracion_slot_minutos, max_citas_por_slot, activo';
 
+/** El mensaje de `cupo_invalido`, con el TECHO REAL adentro. Se construye en
+ *  vez de vivir en `MENSAJES` porque **su número no es una constante**: sale
+ *  del catálogo, y un texto fijo volvería a divergir del predicado el día que
+ *  el catálogo cambie — que es exactamente lo que acaba de pasar. */
+function mensajeCupoInvalido(techo: number): string {
+  return techo <= 1
+    ? 'Este horario admite una sola cita a la vez.'
+    : `El cupo tiene que ser entre 1 y ${techo}.`;
+}
+
 /**
  * EL TOPE DEL PRESTADOR — el mayor `cupo_techo` entre sus oficios ACTIVOS.
  *
@@ -461,7 +482,7 @@ export async function crearFranjaHorario(
      PREGUNTA al catálogo, no se recuerda. */
   const techoCrear = await techoMaximoDe(input.prestadorId);
   if (!Number.isInteger(input.maxCitasPorSlot) || input.maxCitasPorSlot < 1 || input.maxCitasPorSlot > techoCrear) {
-    return falla('cupo_invalido');
+    return { ok: false, codigo: 'cupo_invalido', mensaje: mensajeCupoInvalido(techoCrear) };
   }
 
   const personaId = await resolverPersonaDeFranja(input.prestadorId, input.empleadoId);
@@ -533,9 +554,8 @@ export async function actualizarFranjaHorario(
 
   if (
     input.maxCitasPorSlot !== undefined &&
-    (!Number.isInteger(input.maxCitasPorSlot) || input.maxCitasPorSlot < 1 || input.maxCitasPorSlot > techo)
-  ) {
-    return falla('cupo_invalido');
+    (!Number.isInteger(input.maxCitasPorSlot) || input.maxCitasPorSlot < 1 || input.maxCitasPorSlot > techo)) {
+    return { ok: false, codigo: 'cupo_invalido', mensaje: mensajeCupoInvalido(techo) };
   }
 
   const cambios: UpdateFranja = {};
@@ -592,9 +612,8 @@ export async function editarFranjaHorario(
   const techoEditar = await techoMaximoDe(input.prestadorId);
   if (
     input.maxCitasPorSlot !== undefined &&
-    (!Number.isInteger(input.maxCitasPorSlot) || input.maxCitasPorSlot < 1 || input.maxCitasPorSlot > techoEditar)
-  ) {
-    return falla('cupo_invalido');
+    (!Number.isInteger(input.maxCitasPorSlot) || input.maxCitasPorSlot < 1 || input.maxCitasPorSlot > techoEditar)) {
+    return { ok: false, codigo: 'cupo_invalido', mensaje: mensajeCupoInvalido(techoEditar) };
   }
 
   const { data: fila, error: errFila } = await getClient()

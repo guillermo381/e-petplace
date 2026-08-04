@@ -37,7 +37,18 @@ const MENSAJES = {
   franja_solapada:               'Esa franja se cruza con una que ya tienes ese día.',
   rango_horario_invalido:        'La hora de fin tiene que ser después de la de inicio.',
   dia_invalido:                  'El día no es válido.',
-  cupo_invalido:                 'El cupo tiene que ser entre 1 y 4.',
+  /* ⚠️ EL MENSAJE ES PARTE DEL GUARD (candidata #21, y acá cobró).
+     Decía «entre 1 y 4» — un literal que sobrevivió a la cura del PREDICADO en
+     S85-A18: el guard pasó a validar contra el techo del catálogo (hoy 10) y
+     el texto siguió anunciando 4. **Es D-622 en el otro sentido: no calla —
+     HABLA, y dice el número equivocado.** Y su modo de falla es de los peores:
+     el prestador lee un tope que la casa ya no aplica, y no tiene forma de
+     saber que el rebote le miente.
+     Ahora el número se INTERPOLA del mismo valor contra el que se validó, así
+     que no pueden divergir otra vez — es la misma receta que `contrasena_debil`
+     usa con MIN_LARGO. Cuando D-638 (d) llegue, el techo será el del servicio y
+     este mensaje lo dirá solo, sin tocarlo. */
+  cupo_invalido:                 'Ese cupo está fuera de lo permitido.',
   empleado_invalido:             'Esa persona no trabaja en tu negocio.',
   // S68-B8: los errores tipados de la conversión (RPC A9) con voz propia
   sin_franjas_generales:         'No tienes franjas generales para convertir.',
@@ -248,6 +259,16 @@ function mapearFranjaServicio(fila: {
  * Las franjas POR SERVICIO de las ofertas dadas, DE UNA PERSONA.
  * S78-A2: `empleadoId` ausente = el titular (contrato V0).
  */
+/** El mensaje de `cupo_invalido`, con el TECHO REAL adentro. Se construye en
+ *  vez de vivir en `MENSAJES` porque **su número no es una constante**: sale
+ *  del catálogo, y un texto fijo volvería a divergir del predicado el día que
+ *  el catálogo cambie — que es exactamente lo que acaba de pasar. */
+function mensajeCupoInvalido(techo: number): string {
+  return techo <= 1
+    ? 'Este horario admite una sola cita a la vez.'
+    : `El cupo tiene que ser entre 1 y ${techo}.`;
+}
+
 /** El tope del prestador — gemelo declarado del de `configuracionPaseo`.
  *  ⚠️ **Dos cuerpos del MISMO cálculo, y se declara en vez de esconderse:**
  *  viven en wrappers distintos y no hay dónde compartirlo sin crear un módulo
@@ -335,7 +356,7 @@ export async function crearFranjaServicio(
      PREGUNTA al catálogo, no se recuerda. */
   const techoCrear = await techoMaximoDeServicios(input.prestadorId);
   if (!Number.isInteger(input.maxCitasPorSlot) || input.maxCitasPorSlot < 1 || input.maxCitasPorSlot > techoCrear) {
-    return falla('cupo_invalido');
+    return { ok: false, codigo: 'cupo_invalido', mensaje: mensajeCupoInvalido(techoCrear) };
   }
 
   const personaId = await resolverPersonaDeFranja(input.prestadorId, input.empleadoId);
