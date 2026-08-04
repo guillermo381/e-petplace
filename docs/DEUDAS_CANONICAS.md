@@ -2774,6 +2774,35 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 
   **Hermana de #21** (el mensaje es parte del guard) y **de #23** (el comentario le habla a la próxima pista): **L-198 es su generalización — los tres son el mismo defecto con distinto destinatario.** Origen: S85 (el caso de B; los cinco cobros de la sesión).
 
+  ### ➕ EL COROLARIO DE C — su contracara *(aporte de C, S85, firmada)*
+
+  > ### **NO CONFÍES EN QUE ALGUIEN LO LEA — NI SIQUIERA VOS.**
+
+  **L-198 dice que el texto y el hecho se mueven juntos, y pone la carga sobre
+  quien deposita. Este corolario dice hasta dónde llega esa carga: NO alcanza
+  con escribirlo.**
+
+  **El caso, y es el más incómodo de toda la serie: C cayó en la trampa que su
+  propio comentario advertía TRES LÍNEAS MÁS ARRIBA.** *No era un texto viejo
+  —estaba vigente—, no era ajeno —lo había escrito ella—, y no estaba lejos
+  —tres líneas—.* **Se leyó igual que si no existiera.**
+
+  > **⇒ LO QUE HACE BARATA A UNA REGLA NO ES ESCRIBIRLA: ES QUE ALGO LA
+  > VIGILE.** *Un texto es una nota para un lector futuro que puede estar
+  > apurado, cansado, o ser uno mismo diez minutos después.* **Un guard no
+  > depende de que alguien lea.**
+
+  **Y esto NO deroga L-198 — la completa, y conviene decirlo porque leídas a
+  medias se contradicen:** *seguí escribiendo el porqué* **(sin él, el censo del
+  próximo no sirve)**, *pero* **no lo cuentes como defensa**. **La prueba, en
+  una pregunta:** *si esto se rompe, ¿algo se pone rojo?* **Si la respuesta es
+  "alguien va a leer el comentario", no hay defensa: hay una esperanza.**
+
+  *Evidencia de la propia sesión, y por eso el corolario no es teórico: **de los
+  cinco casos de L-198, los cinco se descubrieron por un rojo mecánico o por el
+  founder chocando** — **ninguno porque alguien leyera el texto que lo
+  advertía.***
+
   ### ➕ LA FRONTERA DE B — hasta dónde llega el arreglo *(aporte de B, S85, firmada)*
 
   **Se deposita ACÁ y no aparte porque contesta la pregunta que L-198 abre y no
