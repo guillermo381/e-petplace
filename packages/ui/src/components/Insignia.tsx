@@ -31,6 +31,7 @@ import { typography } from '../tokens/typography'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { palette } from '../tokens/palette'
+import { useTraduccionUi } from '../i18n'
 import { useTheme } from '../ThemeProvider'
 
 export type InsigniaEstado = 'alDia' | 'atencion' | 'proximo' | 'info'
@@ -88,7 +89,28 @@ export type InsigniaProps =
       estado?: never
       capa?: never
       soloPunto?: never
-      etiqueta: string
+      /** ⏬ S85-B22 · RECIBE EL DATO CRUDO, NO LA ETIQUETA — y es el mismo
+       *  argumento de B21 aplicado un piso más abajo, que es donde tenía
+       *  que estar desde el principio.
+       *
+       *  EN B21 la composición bajó de las APPS a `FichaPrestador`. Pero
+       *  el techo del prestador monta `Insignia` DIRECTO, sin pasar por la
+       *  ficha — así que componer ahí obligaba a armar la frase en la app,
+       *  en dos lenguas, al lado del diccionario de `ui`. O sea: la misma
+       *  enfermedad que B21 curó, esperando en la puerta de al lado.
+       *  El hallazgo es de C.
+       *
+       *  Ahora la frase se arma UNA VEZ, acá, donde vive la insignia. La
+       *  ficha DELEGA: le pasa los dos datos crudos y no compone nada.
+       *  Es la Regla de las Piezas en su forma exacta — la receta ya
+       *  existía y servía a un consumidor; el techo es el segundo.
+       *
+       *  LOS DOS O NINGUNO: sin año no hay insignia. Un «Prestador
+       *  fundador» sin año dice menos de lo que el dato sabe, y la pieza
+       *  no completa lo que no le dieron. */
+      cohorte: 'fundador' | 'pionero'
+      cohorteAnio: number
+      etiqueta?: never
       tamaño?: InsigniaTamaño
       /** SOBRE QUÉ SUPERFICIE vive — mismo vocabulario y mismos valores
        *  que `Boton.superficie` y `LogoNegocio.superficie`: la casa ya
@@ -109,8 +131,18 @@ export type InsigniaProps =
     }
 
 export function Insignia(props: InsigniaProps) {
-  const { etiqueta, tamaño = 'md' } = props
+  const { tamaño = 'md' } = props
   const { theme } = useTheme()
+  // `t` ya es el TAMAÑO en esta pieza (viene de arriba): el traductor entra
+  // con su nombre entero para que no haya dos `t` en el mismo cuerpo.
+  const { t: traducir } = useTraduccionUi()
+  /* La etiqueta de `distincion` NO viene: se arma acá (ver el contrato).
+     Para las otras dos familias sigue siendo la que pasa el consumidor —
+     ahí la palabra es de dominio y la pieza no la conoce. */
+  const etiqueta =
+    'distincion' in props && props.distincion
+      ? `${traducir(`cohorte.${props.cohorte}`)} · ${props.cohorteAnio}`
+      : (props as { etiqueta: string }).etiqueta
   const t = TAMAÑOS[tamaño]
   const capaTexto = 'capaText' in theme ? theme.capaText : theme.capa
 

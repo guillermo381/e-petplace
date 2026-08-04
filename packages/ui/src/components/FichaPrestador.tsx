@@ -49,7 +49,6 @@ import { useRef, useState, type ReactNode } from 'react'
 import { Image, ScrollView, Text, View } from 'react-native'
 
 import { Boton } from './Boton'
-import { useTraduccionUi } from '../i18n'
 import { ClipSesion } from './ClipSesion'
 import { Insignia } from './Insignia'
 import { LogoNegocio } from './LogoNegocio'
@@ -190,13 +189,12 @@ export function FichaPrestador({
   pie,
 }: FichaPrestadorProps = {}) {
   const { theme } = useTheme()
-  const { t } = useTraduccionUi()
-  /* LA ETIQUETA SE ARMA ACÁ, UNA VEZ. Los dos datos o ninguno: sin año la
-     insignia no se monta (ver la nota del contrato). */
-  const etiquetaCohorte =
+  /* ⏬ S85-B22 · LA COMPOSICIÓN BAJÓ A `Insignia` y esta ficha DELEGA.
+     Acá solo se decide SI hay insignia (los dos datos o ninguno); la
+     frase la arma la pieza que la porta, que es la que también monta el
+     techo del prestador sin pasar por acá. */
+  const hayCohorte =
     cohorte !== null && cohorte !== undefined && cohorteAnio !== null && cohorteAnio !== undefined
-      ? `${t(`cohorte.${cohorte}`)} · ${cohorteAnio}`
-      : null
   const [ancho, setAncho] = useState(0)
   const [activa, setActiva] = useState(0)
   const riel = useRef<ScrollView>(null)
@@ -382,8 +380,8 @@ export function FichaPrestador({
         {nombre ? (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2], flexWrap: 'wrap' }}>
             <Texto variante="titulo">{nombre}</Texto>
-            {etiquetaCohorte !== null ? (
-              <Insignia distincion="cohorte" etiqueta={etiquetaCohorte} tamaño="sm" />
+            {hayCohorte ? (
+              <Insignia distincion="cohorte" cohorte={cohorte} cohorteAnio={cohorteAnio} tamaño="sm" />
             ) : null}
           </View>
         ) : null}

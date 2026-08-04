@@ -1944,8 +1944,8 @@ function GaleriaInterna() {
               capa COMUNIDAD (pertenecer es un vínculo, no una credencial).
             </Texto>
             <View style={{ flexDirection: 'row', gap: spacing[3], alignItems: 'center', flexWrap: 'wrap' }}>
-              <Insignia distincion="cohorte" etiqueta="Prestador fundador · 2026" />
-              <Insignia distincion="cohorte" etiqueta="Prestador fundador · 2026" tamaño="sm" />
+              <Insignia distincion="cohorte" cohorte="fundador" cohorteAnio={2026} />
+              <Insignia distincion="cohorte" cohorte="fundador" cohorteAnio={2026} tamaño="sm" />
             </View>
             <Texto variante="apoyo">
               Y al lado sus dos hermanas de la misma pieza, para ver que las TRES se separen: la de
@@ -1953,7 +1953,7 @@ function GaleriaInterna() {
               punto). Si la distinción no se distingue de un estado, falló.
             </Texto>
             <View style={{ flexDirection: 'row', gap: spacing[3], alignItems: 'center', flexWrap: 'wrap' }}>
-              <Insignia distincion="cohorte" etiqueta="Prestador fundador · 2026" />
+              <Insignia distincion="cohorte" cohorte="fundador" cohorteAnio={2026} />
               <Insignia estado="alDia" etiqueta="Al día" />
               <Insignia capa="comunidad" etiqueta="Comunidad" />
             </View>
@@ -1965,7 +1965,7 @@ function GaleriaInterna() {
             </Texto>
             <View style={{ backgroundColor: palette.tealDark, padding: spacing[4], borderRadius: radius.suave, flexDirection: 'row', gap: spacing[3], alignItems: 'center', flexWrap: 'wrap' }}>
               <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: palette.light0 }}>Clínica Aurora</Text>
-              <Insignia distincion="cohorte" superficie="muro" etiqueta="Prestador fundador · 2026" />
+              <Insignia distincion="cohorte" superficie="muro" cohorte="pionero" cohorteAnio={2027} />
             </View>
           </View>
         </Seccion>
