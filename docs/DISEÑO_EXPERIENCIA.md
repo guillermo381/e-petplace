@@ -697,11 +697,25 @@ publicados, jamás la sesión que construyó** (L-153).
 > `casos-heredados` · `veterinaria/movimiento` — **más los cuatro
 > talleres, que no cuelgan de Negocio pese a ser "lo que se configura".**
 >
-> **Se trae medido y NO se resuelve** (orden de la mesa). *La pregunta
-> que el reparto de cuatro todavía no contesta: si NEGOCIO es «solo el
-> taller», **¿los cuatro talleres pasan a colgar de Negocio**, o Negocio
-> es una portada que enumera oficios y el taller sigue viviendo en el
-> suyo?* **Eso es composición, y se firma sobre píxeles (regla 80).**
+> **⇒ LA CONSOLIDACIÓN NO ES FUSIONAR TABS. ES REPARTIR DIEZ DESTINOS
+> SUELTOS** *(freno de A aceptado por la mesa)*.
+>
+> #### ✅ Y LA PREGUNTA LA CONTESTÓ LA MESA — **NEGOCIO es una PORTADA que enumera OFICIOS, y cada taller cuelga de ahí**
+>
+> **El porqué, medido:** hoy **se entra al taller desde el índice de cada
+> oficio** — `adiestramiento/index.tsx:119` · `veterinaria/index.tsx:268`
+> — **y eso obliga al prestador a saber dónde buscar.**
+>
+> > ***«Lo que se configura» tiene que tener UNA PUERTA.***
+>
+> *Un verbo sin puerta es una intención: si NEGOCIO es el verbo
+> «configurar» y los cuatro talleres viven cada uno en su oficio, **el
+> verbo no gobierna ninguna pantalla** — nombra una tab que no lleva a lo
+> que dice.*
+>
+> **Lo que esto NO decide** (regla 80, se firma sobre píxeles): la forma
+> de esa portada, si los oficios se enumeran todos o solo los activos, y
+> el destino de los otros seis sueltos.
 >
 > **Y un dato del reparto que no es de composición sino de PERMISO, para
 > que no sorprenda al construir:** **la tab NEGOCIO solo se monta si

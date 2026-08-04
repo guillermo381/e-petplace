@@ -2727,6 +2727,63 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 - **L-196 — UN MÓDULO "PREPARADO-APAGADO" QUE NUNCA PASÓ POR UN COMPILADOR NO ESTÁ PREPARADO: ESTÁ ESCRITO (S85, firmada por la mesa).** El caso: `modules/sonda-manifest` (D-579, S81) se escribió como **pasajero preparado-apagado**, para viajar *"en la próxima build nativa"*. **En S85 hubo esa build, y falló:** `project ':sonda-manifest' does not specify compileSdk in build.gradle` — el módulo **jamás había pasado por Gradle**, porque los OTAs son JS y no tocan la cadena nativa. **DOCE SESIONES sin que nada lo compilara.** *El patrón "preparado-apagado" es correcto y la casa lo usa bien (el mic de D-456 llegó a destino tras cinco sesiones) — lo que falla es dar por verificado lo que solo está escrito.* **LA REGLA: todo pasajero que espera un tren futuro declara QUÉ LO VERIFICA MIENTRAS ESPERA.** Si nada lo compila, lo tipa ni lo corre, **su estado no es "listo": es "sin verificar"**, y hay que decirlo con esa palabra en su ficha. *La forma barata de cumplirla: que la deuda que lo crea nombre el primer instrumento que lo tocará — y si la respuesta es "ninguno hasta el tren", eso ya es el hallazgo.* **Hermana de L-193** (la premisa heredada que nadie fechó) **y de L-195** (la columna que existe y no está poblada): las tres son *confiar en la existencia en vez de en la verificación*. **Y su costo medido acá: un tren entero de build — 17 min de cola + 2m17s de Gradle — para descubrir una línea que un `tsc` nativo habría cazado el día que se escribió.** Origen: S85-A (el log de la build `c241c908`).
 - **L-197 — UN FALLO PUEDE DEGRADAR A *AUSENCIA*, NUNCA A UN *VALOR* QUE EL CONSUMIDOR VA A USAR COMO SI FUERA CIERTO (S85, firmada por la mesa).**
 - **L-198 — UN TEXTO QUE EXPLICA UN PORQUÉ **VENCE CON EL PORQUÉ**, Y SE CAMBIA EN EL MISMO COMMIT (S85, firmada por la mesa — síntesis de método de la sesión).**
+
+  > ### ➕ **EN LA DIRECCIÓN DEL REPORTE DE CAMPO** — *el rebote de «fundador», pedido TRES VECES y no ejecutado* *(S85, hallazgo de B + registro de la mesa)*
+  >
+  > > ### **TRADUCIR UN LITERAL A LA CAUSA QUE UNO YA TENÍA EN LA CABEZA.**
+  >
+  > **El caso:** el founder pidió **tres veces** algo sobre *"fundador"*. **La
+  > mesa lo leyó como cambio de PIEZA** —la insignia, su tamaño, su lugar— **y
+  > era de PALABRA.** *Tres pedidos, cero ejecuciones, y ninguna de las tres
+  > veces nadie dijo "no entendí".*
+  >
+  > **⇒ L-198 tiene DOS direcciones, y hasta hoy solo estaba escrita una:**
+  > *(i)* **hacia adelante** — un texto que explica un porqué **vence con el
+  > porqué**; *(ii)* **hacia atrás, desde el campo** — **un reporte literal se
+  > traduce a la causa que el que escucha ya tenía en la cabeza**, y la
+  > traducción **se siente como comprensión**. *Es el mismo defecto: el texto
+  > está, y no se lee — una vez porque nadie vuelve a él, otra porque se lo
+  > sustituye al leerlo.*
+  >
+  > #### 🔎 POR QUÉ SOBREVIVIÓ A TRES PEDIDOS — el diagnóstico de B, que es el que vale
+  >
+  > **No era una palabra mal elegida: era un ACTO DE HABLA.** *"Prestador
+  > fundador" **no describe un hecho — OTORGA un reconocimiento**.*
+  >
+  > **⇒ buscar sinónimos habría fallado igual**, y por eso los tres intentos no
+  > llegaban: *se buscaba una palabra mejor para la misma cosa, cuando la cosa
+  > era el problema.* **La cura fue CAMBIAR DE EJE: de MÉRITO a TIEMPO —
+  > `"Desde 2026"`.** Un hecho verificable no otorga nada, **y no puede
+  > envejecer mal.**
+  >
+  > **Y su frase, que es la que duele y por eso se deposita textual:**
+  >
+  > > ***No falló el juicio: falló que nadie lo cobró.***
+  >
+  > *Las tres veces hubo un juicio correcto del founder; lo que faltó fue el
+  > mecanismo que convierte un pedido repetido en una fila.* **Un pedido que se
+  > repite es un dato sobre el mecanismo, no sobre el pedido** — hermana directa
+  > de la regla de S63: *toda aprobación founder de UI gana fila o tanda EN EL
+  > MOMENTO*.
+
+  > ### ➕ **EL CIERRE DE LA SERIE L-194 → L-199** *(hallazgo de B, S85)*
+  >
+  > > ### **UNA RECETA ESCRITA Y NO APLICADA ES EXACTAMENTE LO MISMO QUE NO TENERLA — Y ENCIMA DA LA SENSACIÓN DE ESTAR CUBIERTO.**
+  >
+  > **El caso, y es el más limpio de las seis:** **B escribió la receta correcta
+  > en el MISMO COMMIT que la rompió** — *la aplicó al wrapper y no al glifo.*
+  >
+  > **Por qué cierra la serie:** las seis lecciones de S85 comparten que **nada
+  > se rompe** (un número viejo que rebota bien, una columna vacía que el
+  > typecheck acepta, un catch que devuelve un valor legal). **Ésta agrega la
+  > capa de arriba: el texto que las previene puede estar escrito, ser correcto,
+  > y no aplicarse** — *y su presencia produce exactamente la confianza que
+  > justifica no volver a mirar.*
+  >
+  > **⇒ el corolario operativo, que es lo único que la vuelve accionable:** *una
+  > receta se cobra en el mismo commit que la enuncia, **sobre todos sus
+  > casos** — o nace declarada como aplicada a UNO.* **La receta a medias es
+  > peor que la ausencia**, porque la ausencia se nota.
 - **L-199 — EL ROJO SE PRODUCE **ANTES**, O LA CURA QUEDA SIN EVIDENCIA PARA SIEMPRE (S85, firmada por la mesa).**
 
   > ### **EL "ANTES" NO SE PUEDE RECONSTRUIR DESPUÉS.**
@@ -3777,9 +3834,30 @@ sin ese censo es tocar algo cuyo alcance no conozco.**
 
 ---
 
-#### D-617 — CUATRO OTAs PUBLICADOS EN RUNTIME 1.0.3, Y NO EXISTE NINGUNA BUILD EAS QUE LOS RECIBA 🔴 (mitad ① PAGADA)
+#### D-617 — CUATRO OTAs PUBLICADOS EN RUNTIME 1.0.3, Y NO EXISTE NINGUNA BUILD EAS QUE LOS RECIBA ☠️ **MUERTA S85** — las DOS mitades pagadas
+
+> ## ☠️ RETIRADA (3-ago-2026, confirmación del founder EN DISPOSITIVO)
+>
+> | mitad | qué exigía | cómo se pagó |
+> |---|---|---|
+> | **①** | que exista una build EAS en runtime 1.0.3 | **build `c2483ed7` FINISHED**, APK instalada |
+> | **②** | **que el founder VEA su `updateId`** en el pie de Cuenta | **`019fcaf0` confirmado por él en pantalla** |
+>
+> **La mitad ② era la que no podía pagar ninguna pista, y por diseño:** *A puede
+> publicar y puede leer el canal; **lo único que prueba que un OTA LLEGÓ es una
+> persona mirando su teléfono**.* **Por eso la ficha nació partida** — y por eso
+> vivió tres sesiones con la ① ya pagada.
+>
+> **Lo que deja escrito, y sobrevive a la ficha:** *un OTA publicado, un canal
+> verde y un `update:view` correcto **no son evidencia de recepción**.* **La
+> cadena `publicado → firmado` tiene un eslabón que no es de software** (regla
+> 84, el cuarto eslabón: *"commiteado", "publicado" y "en el teléfono" son TRES
+> estados distintos*). **El marcador en pantalla (L-160 enmendada, S74) es la
+> herramienta que hace ese eslabón verificable en segundos** — sin él, esta
+> mitad no tenía cómo pagarse.
 
 > ### ➕ S85 — SE INTENTÓ LA BUILD Y **FALLÓ**. Las dos mitades siguen abiertas.
+> *(Registro histórico del intento fallido; superado por el retiro de arriba.)*
 >
 > **Build `c241c908`, ancla `e11e429`, runtime 1.0.3: `errored`.** Y la corrección
 > de acta que corresponde: **un acta previa de esta sesión dijo *"la build ya está
@@ -5114,6 +5192,42 @@ importa: **doce de veinticuatro** reglas del lint estaban en esa condición.*
 > **Verificable por grep**, sin interpretación. **Nace y muere en S85 si B
 > cierra** — y si no cierra, se hereda con el número medido, no con "faltan
 > algunas".
+
+---
+
+#### D-643 — LA BARRA DE **TRES** TABS NUNCA SE DISEÑÓ: si NEGOCIO no se monta, el empleado no tiene dónde configurar nada ⚪ HUECO DE DISEÑO (declarado, no defecto)
+
+**Medido en `apps/prestador/src/app/(tabs)/_layout.tsx` (HEAD `d4d0bd2`):** la
+tab **NEGOCIO solo se monta si `sesion.esGestor`**. **Un no-gestor ve TRES tabs**
+— Hoy · Datos · Cuenta.
+
+**El comportamiento es CORRECTO y está razonado en el propio archivo:** *la
+gestión (plata, equipo) es de quien puede TOCARLA; HOY, Datos y Cuenta las ve
+todo el equipo (operan / se identifican).* **Y la forma elegida es la buena:** el
+tab **no aparece**, en vez de aparecer con un candado que haya que explicar.
+
+> **EL HUECO NO ES EL PERMISO — ES QUE LA BARRA DE TRES NUNCA SE DISEÑÓ.** *El
+> reparto firmado en S85 es de CUATRO superficies con cuatro verbos (HOY acciona
+> · NEGOCIO configura · DATOS consulta · CUENTA quién sos).* **Al empleado le
+> falta un verbo entero**, y nadie miró cómo queda esa casa con tres.
+
+**HOY ES INERTE, y esa es la razón de que sea ⚪ y no 🟠:** solo el titular llega
+al portal, y **el titular siempre es gestor** ⇒ **el tab aparece siempre**. *El
+caso existe en el código y no existe en la vida.*
+
+**⚠️ Y por eso mismo es de la familia de S85 (L-194 → L-199): NO ROMPE NADA.** Un
+no-gestor entraría a una app que funciona perfecto y **le falta una casa** —
+*sin error, sin candado, sin explicación*. **Se descubre el día que entre una
+persona real, no antes.**
+
+☠️ **CONDICIÓN DE MUERTE:** **la barra de tres tiene un diseño mirado y firmado**
+— no "el empleado puede entrar". *Muere con píxeles, no con permisos.*
+
+**DISPARO: el día que se abra la puerta del empleado** (hoy cerrada: solo el
+titular llega). **Se declara AHORA, con la puerta cerrada, a propósito** — *un
+hueco encontrado el día que entra el primer empleado real es un incidente; el
+mismo hueco declarado hoy es una tarea.* Origen: S85-A (freno sobre el plan de
+consolidación) → declarado por la mesa.
 
 ---
 
