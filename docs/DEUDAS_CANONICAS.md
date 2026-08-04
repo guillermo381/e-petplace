@@ -5007,6 +5007,54 @@ importa: **doce de veinticuatro** reglas del lint estaban en esa condición.*
 
 ---
 
+#### D-641 — `apps/cliente` NUNCA SE BUILDEÓ CONTRA LOS CAMBIOS DE `packages/api` DE S85 ⚪ REGISTRO (se prueba antes de buildear, no después)
+
+**Medido al evaluar una APK de cliente que el founder pidió (S85-A):**
+
+| | |
+|---|---|
+| build del cliente más nueva | **FINISHED · runtime 1.0.2 · 16-jul · ancla `0aecb12`** |
+| último OTA del canal `preview` del cliente | **runtime 1.0.2** (`f55d65c9`, S82) |
+| **¿alinean?** | ✅ **SÍ** — la APK del founder **recibe** los OTAs del cliente |
+
+> **⚠️ NO ES D-617 NI SU FAMILIA, y conviene decirlo primero para que nadie la
+> escale:** aquélla registra *OTAs en un runtime que ninguna build recibe*. **Acá
+> el runtime coincide y el último OTA ya llegó.** *El cliente no publicó después
+> de S82 porque S83–S85 fueron del prestador.*
+
+### LO QUE SÍ QUEDA ABIERTO
+
+**S85 tocó `packages/api`** —`prestador.ts`, `configuracionPaseo.ts`,
+`horarios-modo.ts`, `paseo.ts`, `miPerfil.ts`, `paises.ts`, tipos regenerados—
+**y `apps/cliente` lo consume.**
+
+**Su `tsc` está en 0** (medido en cada commit de la sesión) ⇒ **compila**. **Pero
+ninguna APK de cliente se ejecutó nunca contra esos cambios** — *y compilar no es
+correr.* Es L-114 en su forma de siempre: **build TS verde ≠ contrato real.**
+
+### POR QUÉ NO SE BUILDEÓ, y es la parte de método que vale guardar
+
+**`apps/cliente` está FUERA del reparto de S85** (declarado por la mesa al
+adjudicar D-635).
+
+> **Un artefacto entregado sin quien responda por él es peor que no entregarlo.**
+> *Si la APK sale y algo se ve mal, **no hay pista con ese territorio para
+> curarlo** — el founder queda con un binario que nadie puede atender.* **Es la
+> misma forma del freno de C con el botón de IA: un glifo firmado sin conducta es
+> una promesa que no se puede cumplir.**
+
+**Y el costo de disparar mal era bajo pero no nulo:** sin dependencia nativa
+nueva, la build habría salido en **1.0.2** y **convive** con la actual — *el
+riesgo no era romper el canal, era entregar sin dueño.*
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando **la primera sesión con territorio
+> cliente corra la app contra el `packages/api` de S85 y recién entonces
+> buildee**. **El orden importa y es la ficha entera:** *probar ANTES de
+> buildear* — al revés, el defecto se descubre en un artefacto ya instalado, que
+> es justo lo que un OTA evita y una APK no.
+
+---
+
 #### D-640 — `titular.ts`: TRES LECTORES DONDE "NO HAY" Y "NO PUDE LEER" COMPARTEN VALOR 🟡
 
 **Encontrados por el barrido de L-197 (S85).** `obtenerTitularId` y sus dos
