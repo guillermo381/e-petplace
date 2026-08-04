@@ -426,8 +426,32 @@ en la superficie de compra.
 > regla 76). Construcción estructural: S57, Sesión B (commits `09f7d73`
 > + `4676158`). Pulido: pasada de acabados.
 
-**(1) La estructura (firmada — v1.1).** La app del prestador tiene
-CUATRO tabs: **Hoy · Mascotas · Negocio · Cuenta**. La decisión de S57
+**(1) La estructura (firmada — v1.2, S85).** La app del prestador tiene
+CUATRO tabs: **Hoy · DATOS · Negocio · Cuenta**.
+
+> ### ➕ ENMIENDA S85 — `Mascotas` PASA A LLAMARSE **DATOS**, y NO es una tab nueva
+>
+> **Firmada por la mesa (3-ago-2026).** *DATOS es **Mascotas creciendo y
+> renombrándose**: la pantalla ya existía, gana el estado activo/histórico
+> (`BIO_EXPEDIENTE` A3.5ter), las familias y la trayectoria, y cambia de
+> nombre porque **dejó de contener solo mascotas**.*
+>
+> **⚠️ SIGUEN SIENDO CUATRO. Nadie agrega una quinta**, y se dice con esta
+> claridad porque *"nace DATOS"* se lee como *"nace una tab"* — y esta misma
+> letra ya se equivocó una vez en la dirección contraria: **la v1.0 sacó a
+> Mascotas de la barra "por error de redacción, no por decisión"**. *Dos
+> versiones seguidas discutiendo cuántas tabs hay es señal de que el número
+> importa más de lo que parece: cada tab es un cuarto del pulgar del
+> prestador.*
+>
+> **Y el porqué del rename, que es lo que lo justifica y no la moda:** la
+> pantalla pasó de listar **a quiénes atendí** a contestar **a quiénes
+> cuido** (el cambio de eje firmado en A3.5ter — *cartera, no historial*).
+> **"Mascotas" describía su contenido viejo**; con familias y trayectoria
+> adentro, el nombre habría quedado más chico que la pantalla.
+>
+> *Lo que NO cambia: su lugar en la barra, su posición y su historia. Es la
+> misma tab.* La decisión de S57
 fue UNA sola: separar Cuenta de Negocio — Mascotas conserva el lugar
 que ya tenía (la v1.0 de esta letra la sacó de la barra por error de
 redacción del arquitecto, no por decisión; corregido con firma del
