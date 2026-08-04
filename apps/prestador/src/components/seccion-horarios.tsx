@@ -1105,21 +1105,39 @@ export function SeccionHorarios({
 
       {/* D-386 (S62): LA ELECCIÓN — universal o por servicio, jamás
           mezcla (letra founder S60; el guard de DB la respalda). La
-          explica dice la verdad del modo vigente. */}
-      <SelectorOpcion
-        etiqueta={t('horarios.modoEtiqueta')}
-        acento="oficio"
-        solitario
-        opciones={[
-          { codigo: 'universal', etiqueta: t('horarios.modoUniversal') },
-          { codigo: 'por_servicio', etiqueta: t('horarios.modoPorServicio') },
-        ]}
-        seleccionada={modo}
-        onSelect={(codigo) => void tocarModo(codigo === 'por_servicio' ? 'por_servicio' : 'universal')}
-      />
-      <Texto variante="apoyo">
-        {modo === 'universal' ? t('horarios.modoExplicaUniversal') : t('horarios.modoExplicaPorServicio')}
-      </Texto>
+          explica dice la verdad del modo vigente.
+
+          ══ S86-B · ④ DE LA PROPUESTA DE PAREDES — ESTE BLOQUE GANA SU
+          SUPERFICIE, y es el único del cuerpo que la ganó. El criterio
+          firmado: *merece superficie lo que el prestador puede TOCAR
+          como una unidad*. Acá hay UNA decisión con consecuencias reales
+          —cambiar el modo CONVIERTE franjas— y su explicación vive
+          adentro porque explica ESA decisión, no la pantalla.
+
+          ⚠️ Y ES LA ÚNICA QUE NO CHOCA: los otros dos candidatos de la
+          propuesta (la lista de personas y la de franjas) ya son
+          superficie A NIVEL DE FILA — `TarjetaEstado`, la gramática
+          firmada en S78. Envolverlas sería la caja dentro de la caja que
+          la propia propuesta prohíbe en su ⑦. Acá abajo NO hay ninguna
+          superficie previa: son chips y prosa sobre el fondo. ══ */}
+      <Tarjeta>
+        <View style={{ gap: spacing[2] }}>
+          <SelectorOpcion
+            etiqueta={t('horarios.modoEtiqueta')}
+            acento="oficio"
+            solitario
+            opciones={[
+              { codigo: 'universal', etiqueta: t('horarios.modoUniversal') },
+              { codigo: 'por_servicio', etiqueta: t('horarios.modoPorServicio') },
+            ]}
+            seleccionada={modo}
+            onSelect={(codigo) => void tocarModo(codigo === 'por_servicio' ? 'por_servicio' : 'universal')}
+          />
+          <Texto variante="apoyo">
+            {modo === 'universal' ? t('horarios.modoExplicaUniversal') : t('horarios.modoExplicaPorServicio')}
+          </Texto>
+        </View>
+      </Tarjeta>
       <Texto variante="apoyo">{t('taller.horariosExplica')}</Texto>
       <SelectorOpcion
         etiqueta={t('taller.dias')}
