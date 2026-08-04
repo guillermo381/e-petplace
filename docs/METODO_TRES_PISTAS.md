@@ -54,6 +54,22 @@ en el contrato):*
    `update:list`**, que no muestra el `gitCommitHash`. **Y CORRER EL GUARD
    (§3bis): el group prueba QUÉ GUARDASTE; el guard prueba QUÉ SE SIRVE.
    Sin su verde, el publish NO se declara cerrado** *(firma de mesa, S86).*
+
+   > **➕ S86 — ESTA LÍNEA GANÓ LA DISCUSIÓN, y queda registrado porque el
+   > registro es lo único que evita repetirla.** `CONTRATO_TRABAJO` regla 84
+   > eslabón ③ mandaba `eas update:list`; **este deber lo prohibía.** Dos letras
+   > firmadas contradiciéndose es peor que una equivocada —*cualquiera cita la
+   > que le conviene y está «en regla»*—. **La mesa firmó a favor de acá, y el
+   > criterio vale más que el caso:**
+   >
+   > > ### **UNA ORDEN QUE MANDA UN INSTRUMENTO CIEGO AL DATO QUE ELLA MISMA EXIGE SE CORRIGE POR EL INSTRUMENTO.**
+   >
+   > *No se ablanda la exigencia para que el instrumento alcance.* **`update:list`
+   > no muestra el `gitCommitHash` — que es exactamente lo que el eslabón
+   > verifica.** El contrato quedó enmendado el **4-ago-2026**, **con su versión
+   > vieja declarada al lado y no borrada**: quien encuentre un reporte anterior
+   > citando `update:list` tiene que poder ver que citaba la letra vigente de su
+   > día, y no concluir que se equivocó.
 4. **ANUNCIAR EL CIERRE A TODOS**, incluida la mesa — **y a cada congelada EN
    MENSAJE PROPIO** *(enmienda S85: §4 vale también para el cierre. Una orden
    que no llega **se nota** cuando el trabajo no aparece; **un cierre que no

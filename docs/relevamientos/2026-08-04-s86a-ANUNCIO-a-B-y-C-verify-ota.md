@@ -103,20 +103,28 @@ medir**, jamás verde ⇒ **una caída de EAS puede frenar un cierre.** A propó
 
 ---
 
-## ⚠️ LO QUE ESTE ANUNCIO **NO** RESUELVE — a la mesa
+## ✅ LA DIVERGENCIA QUE ESTE ANUNCIO DECLARÓ — **RESUELTA EL MISMO DÍA**
 
-**Una divergencia entre dos letras firmadas, encontrada al enganchar y dejada
-declarada en vez de arreglada por mano propia:**
+**Se encontró al enganchar el guard, se declaró sin arreglarla por mano propia, y
+la mesa la firmó horas después.** *Queda acá con su historia porque el anuncio
+salió nombrándola: quien lo lea tiene que ver cómo terminó, no quedarse con la
+pregunta.*
 
-| dice | dónde |
-|---|---|
-| verificar el group con **`eas update:list`** | `CONTRATO_TRABAJO`, regla 84 eslabón ③ |
-| verificar el group con **`update:view`**, y **`update:list` PROHIBIDO** *(no muestra el `gitCommitHash`)* | `METODO_TRES_PISTAS` §2 deber ③ |
+| decía | dónde | estado |
+|---|---|---|
+| verificar el group con **`eas update:list`** | `CONTRATO_TRABAJO`, regla 84 eslabón ③ | ☠️ **enmendado el 4-ago-2026** — la versión vieja queda **declarada al lado, no borrada** |
+| verificar el group con **`update:view`**, y **`update:list` PROHIBIDO** *(no muestra el `gitCommitHash`)* | `METODO_TRES_PISTAS` §2 deber ③ | ✅ **GANA — es la letra vigente** |
 
-**No se tocó porque resolverlo es decidir sobre letra firmada que esta enmienda
-no tenía mandato de mover.** Queda nombrada en los dos documentos para que la
-próxima sesión **no la descubra chocando**: *dos letras firmadas que se
-contradicen son peores que una equivocada — cualquiera cita la que le conviene y
-está «en regla».*
+> ### **UNA ORDEN QUE MANDA UN INSTRUMENTO CIEGO AL DATO QUE ELLA MISMA EXIGE SE CORRIGE POR EL INSTRUMENTO.**
+>
+> *No se ablanda la exigencia para que el instrumento alcance: se cambia el
+> instrumento.* **`update:list` no muestra el `gitCommitHash` — que es
+> exactamente lo que el eslabón verifica.**
+
+**⇒ PARA LAS DOS PISTAS, lo único operativo de esta sección:** si en algún
+reporte propio quedó `update:list` como forma de verificar un group, **está
+vencido**. La forma vigente es **`update:view` desde `apps/<app>/`**. *Y un
+reporte viejo que lo cite no estaba equivocado: citaba la letra de su día — por
+eso la versión anterior quedó escrita con su fecha en vez de borrada.*
 
 *Depositado por A, S86.*
