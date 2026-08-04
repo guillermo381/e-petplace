@@ -82,22 +82,38 @@ apps/cliente/src/components/direccion-hogar-form.tsx              4x   ← falso
 
 **Destinatario: pista C.** Cuatro firmas de mesa, todas en tu territorio.
 
-### ① LAS TRES `durante` — prioridad, y por qué ésas
+### ① EL TECLADO — ⚠️ **ESTA SECCIÓN QUEDÓ CORREGIDA POR EL ENSANCHE DE B. LA LISTA DE ABAJO ES LA QUE VALE.**
+
+> **Se conserva la corrección visible en vez de reescribirla en silencio,
+> porque el error es instructivo:** A midió `<Campo` **por texto**; B midió
+> **qué piezas de `packages/ui` abren teclado** (`Campo`, `SliderPrecio`, +
+> `TextInput` crudo) **y resolvió las anfitrionas**. *La lista de A tenía
+> archivos que NO están en deuda y le faltaban otros que sí.*
+>
+> **☠️ MUERE la recomendación de A de priorizar las tres `durante`:** **NO
+> figuran en la medición fina** — con el instrumento de B, `M2` da **4 en
+> pantallas del prestador** y **6 rutas con deuda propia** en total.
+
+**LO QUE VALE (burn-down con el M2 ensanchado, corrido tras el merge de B):**
 
 ```
-apps/prestador/src/app/adiestramiento/cita/[citaId]/durante.tsx   1x
-apps/prestador/src/app/cita/[citaId]/durante.tsx                  1x
-apps/prestador/src/app/grooming/cita/[citaId]/durante.tsx         1x
+🔴 apps/prestador/src/app/grooming/taller.tsx
+🔴 apps/prestador/src/app/negocio/equipo.tsx
+🔴 apps/prestador/src/app/paseo/taller.tsx
+🔴 apps/prestador/src/app/vacaciones.tsx
+🔴 apps/cliente/src/app/(tabs)/hogar/bitacora.tsx      ← sin dueño en S86
+🔴 apps/cliente/src/app/carnet.tsx                     ← sin dueño en S86
+·  apps/prestador/src/components/escriba-historia.tsx — su anfitriona porta la pieza
+·  apps/prestador/src/components/perfil-piezas.tsx    — su anfitriona porta la pieza
 ```
-**Es donde vive la mayoría y la única pantalla que se REPITE** *(el DURANTE,
-`SOFTLAUNCH` §1)* — y donde alguien escribe **con el teclado arriba, de pie, en
-la calle**. **`negocio/equipo` (2x) y `vacaciones` (1x) quedan detrás**, no
-afuera.
 
-**Y dos de tus componentes, con su veredicto ya medido para que no gastes el
-turno:** `escriba-historia` **NO es fallo** (su única anfitriona porta la pieza);
-`perfil-piezas` **sí lo es en dos de sus tres anfitrionas** —
-`components/seccion-documentos.tsx` y `app/cuenta-comercial/index.tsx`.
+> **➕ Y una divergencia declarada, no resuelta:** A había medido
+> `perfil-piezas` como **mixto** (2 de sus 3 anfitrionas sin la pieza:
+> `components/seccion-documentos.tsx` y `app/cuenta-comercial/index.tsx`); **B
+> lo resuelve como cubierto.** *No se arbitra acá: el instrumento es de B y su
+> resolución de anfitrionas es más fina, pero las dos anfitrionas que A nombró
+> están medidas por path.* **Si el ensanche las da por cubiertas por
+> transitividad, vale B; si no las miró, es un hueco.** A la mesa.
 
 ### ② LA MUDANZA — dos destinos firmados, con su porqué
 
