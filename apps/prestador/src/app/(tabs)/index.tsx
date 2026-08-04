@@ -72,7 +72,10 @@ import {
   obtenerMiPrestador,
   obtenerTitularId,
   obtenerMundoVeterinariaPropio,
+  obtenerAtencionesAbiertas,
   obtenerPlataDelDia,
+  obtenerPresupuestosPrestador,
+  obtenerSolicitudesMostrador,
   type PlataDelDia,
   obtenerOfertaAdiestramientoPropia,
   obtenerOfertasGroomingPropias,
@@ -144,6 +147,11 @@ type Pantalla =
        *  propio negocio (L-197: el fallo degrada a ausencia, jamás a un
        *  valor que el consumidor use como cierto). */
       plata: PlataDelDia | null;
+      /* S85-C30 · «Necesita tu atención». Cada fuente trae su CONTEO, y
+         `null` = no se pudo leer — distinto de 0, que es "no hay nada que
+         atender". Colapsarlos diría "estás al día" por un fallo de red
+         (L-197, y sobre trabajo pendiente eso cuesta plata). */
+      atencion: { coordinar: number; presupuestos: number | null; handshakes: number | null; abiertas: number | null; abiertaCitaId: string | null };
       /** S85-C23: la cohorte del negocio, en CÓDIGO. La voz la arma la
        *  PIEZA (`Insignia`, contrato de B en vuelo) — la casa NO compone
        *  la frase. Viajan crudos y esperan su línea. */
@@ -670,7 +678,7 @@ export default function Hoy() {
     /* S85-C7: `rCerrados` entra AL FINAL del arreglo y del destructuring —
        insertarlo en el medio corre todas las posiciones y el typecheck lo
        cazó en el acto (once tuplas desalineadas). Al final, nada se mueve. */
-    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, cuentaR, perfilR, rCerrados, rPlata] = await Promise.all([
+    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, cuentaR, perfilR, rCerrados, rPlata, rPresup, rSolic, rAbiertas] = await Promise.all([
       obtenerCitasPaseoDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: sumarDias(desde, 6) }),
       // S60-B1: la jornada es UNA — las citas de grooming entran a la
       // misma lista con su tipo (el subtítulo ya lo dice) y su ruta.
@@ -714,6 +722,33 @@ export default function Hoy() {
          Su fallo NO tumba la jornada (Ley 13 aplica al CUERPO): el techo
          orienta. Sin dato, el hueco lo dice — ver `bloquePlata`. */
       obtenerPlataDelDia(prestador.data.id, desde),
+      /* ⚠️ AL FINAL, Y ESTA VEZ ME LO COBRÓ A MÍ: los inserté en el medio
+         y desalineé el destructuring — el `tsc` cazó `rPlata is possibly
+         null`, que no nombra la causa. El comentario de C23 tres líneas
+         arriba ADVERTÍA exactamente esto. Una regla escrita no es una regla
+         seguida; lo que la hace barata es que el compilador la vigile. */
+      /* S85-C30 · presupuestos del negocio. Se filtra 'enviado' ACÁ y no en
+         el wrapper: el lector es de propósito general (lo consume el mundo
+         vet entero) y angostarlo por un consumidor rompería a los otros. */
+      prestador.data.cuenta_comercial_id !== null
+        ? obtenerPresupuestosPrestador(prestador.data.cuenta_comercial_id)
+        : Promise.resolve(null),
+      /* ⚠️ EL PARÁMETRO ES `cuenta_comercial_id`, NO `prestador_id` (aviso
+         de A): con el id equivocado el lector devuelve VACÍO SIN ERROR —
+         un cero plausible que diría "no hay autorizaciones esperando"
+         cuando las hay. Familia de L-197: el fallo que no falla. */
+      prestador.data.cuenta_comercial_id !== null
+        ? obtenerSolicitudesMostrador(prestador.data.cuenta_comercial_id)
+        : Promise.resolve(null),
+      /* ⚠️ LA CUARTA FUENTE, y la que hacía al bloque incompleto: atenciones
+         SIN CERRAR. Una atención abierta de un día anterior no aparece en la
+         jornada de hoy —hoy solo trae el día— así que sin esta fila el
+         prestador no tenía dónde verla, y una atención sin cerrar es PLATA
+         SIN DEVENGAR (el devengo nace al cerrar con calidad).
+         ⚠️ Y NO es titular-only, a diferencia de la plata: un empleado ve
+         SUS pendientes. La regla no es "todo lo del negocio es del titular"
+         — es que la PLATA lo es. */
+      obtenerAtencionesAbiertas(prestador.data.id, 90),
     ]);
     /* S85-C7 · los cerrados se guardan APARTE del estado de pantalla, y
        ANTES del rebote de las citas: su fallo no cambia la jornada — solo
@@ -832,6 +867,25 @@ export default function Hoy() {
       logoPath: prestador.data.foto_url,
       preparacion,
       plata: rPlata.ok ? rPlata.data : null,
+      atencion: {
+        coordinar: porCoordinar.length,
+        /* ⚠️ SOLO 'enviado' — y el 'vencido' YA viene resuelto perezoso por
+           el propio wrapper sobre `vence_en`, así que un presupuesto muerto
+           no infla el contador. Aprobado y rechazado tampoco: ya tuvieron
+           su respuesta y no necesitan NADA de mí. */
+        presupuestos: rPresup === null ? null : rPresup.ok ? rPresup.data.filter((p) => p.estado === 'enviado').length : null,
+        /* ⚠️ SOLO 'pendiente' (aviso de A): el lector trae también
+           'autorizada' —y 'expirada', que el server deriva perezoso—. Una
+           solicitud RESPONDIDA no necesita atención, y contarla infla el
+           bloque con trabajo ya hecho: el prestador iría a mirar algo que
+           ya está resuelto y dejaría de confiar en el número. */
+        handshakes: rSolic === null ? null : rSolic.ok ? rSolic.data.filter((s) => s.estado === 'pendiente').length : null,
+        abiertas: rAbiertas.ok ? rAbiertas.data.length : null,
+        /* La MÁS VIEJA — el lector ya ordena por antigüedad, así que es la
+           [0]. La fila lleva ahí y no a un listado: *el prestador no quiere
+           ver sus pendientes, quiere cerrar el que más duele.* */
+        abiertaCitaId: rAbiertas.ok ? (rAbiertas.data[0]?.citaId ?? null) : null,
+      },
       cohorte: prestador.data.cohorte,
       cohorteAnio: prestador.data.cohorte_anio,
       groomingIds: new Set(rg.data.map((c) => c.id)),
@@ -1026,6 +1080,58 @@ export default function Hoy() {
     : t('agenda.saludoSinNombre');
   const negocio = pantalla.estado === 'listo' ? pantalla.nombreComercial : '';
 
+  /* S85-C30 · las filas de «Necesita tu atención», en orden de urgencia:
+     lo que ya tiene un compromiso con la familia va primero.
+     ⚠️ `null` (no se pudo leer) NO produce fila y TAMPOCO produce un cero:
+     simplemente no se afirma nada sobre esa fuente. Un 0 pintado sería
+     "no hay nada que atender", que es lo contrario de "no pude mirar". */
+  const atencionItems: { clave: string; icono: 'mes' | 'presupuesto' | 'familia' | 'caso'; titulo: string; onPress: () => void }[] = [];
+  if (pantalla.estado === 'listo') {
+    const a = pantalla.atencion;
+    if (a.coordinar > 0) {
+      atencionItems.push({
+        clave: 'coordinar',
+        icono: 'mes',
+        titulo: a.coordinar === 1 ? t('atencion.coordinar1') : t('atencion.coordinarN', { n: a.coordinar }),
+        // La bandeja YA existe y vive más abajo en esta misma portada: el
+        // bloque no la duplica, la ANUNCIA. Por eso lleva a la pantalla de
+        // coordinar de la primera, que es lo que el prestador va a hacer.
+        onPress: () =>
+          router.push({ pathname: '/veterinaria/coordinar/[citaId]', params: { citaId: pantalla.porCoordinar[0].citaId } }),
+      });
+    }
+    if (a.presupuestos !== null && a.presupuestos > 0) {
+      atencionItems.push({
+        clave: 'presupuestos',
+        icono: 'presupuesto',
+        titulo: a.presupuestos === 1 ? t('atencion.presupuesto1') : t('atencion.presupuestoN', { n: a.presupuestos }),
+        onPress: () => router.push('/veterinaria/movimiento'),
+      });
+    }
+    if (a.handshakes !== null && a.handshakes > 0) {
+      atencionItems.push({
+        clave: 'handshakes',
+        icono: 'familia',
+        titulo: a.handshakes === 1 ? t('atencion.handshake1') : t('atencion.handshakeN', { n: a.handshakes }),
+        onPress: () => router.push('/veterinaria/mostrador'),
+      });
+    }
+    /* LO VIEJO PRIMERO ya viene del lector (ordena por antigüedad): la fila
+       no re-ordena nada, solo cuenta. */
+    if (a.abiertas !== null && a.abiertas > 0 && a.abiertaCitaId !== null) {
+      atencionItems.push({
+        clave: 'abiertas',
+        icono: 'caso',
+        titulo: a.abiertas === 1 ? t('atencion.abierta1') : t('atencion.abiertaN', { n: a.abiertas }),
+        /* Lleva a la MÁS VIEJA. Si su cita no viaja (atención suelta sin
+           cita), la fila NO se monta: una celda con chevron que no navega
+           es un final mudo (Ley 23). */
+        onPress: () =>
+          router.push({ pathname: '/cita/[citaId]', params: { citaId: a.abiertaCitaId as string } }),
+      });
+    }
+  }
+
   /* ── ⭐ S85-C23 · LOS TRES NÚMEROS (§2.4bis) ────────────────────────
      Ver la cabecera de `unidadesDelTecho` para la regla de la unidad.
 
@@ -1202,6 +1308,45 @@ export default function Hoy() {
               </View>
             </EsqueletoGrupo>
           </Tarjeta>
+        )}
+
+        {/* ═══ S85-C30 · «NECESITA TU ATENCIÓN» ══════════════════════════
+
+            El espejo de "Ponte al día" del cliente, del lado del prestador
+            (S72-P1b). **OPERACIÓN, JAMÁS MÉTRICAS**: lo que espera una
+            respuesta SUYA. El pulso del negocio vive en NEGOCIO —§15b y el
+            argumento de privacidad de S72-P1a—, y este bloque no lo toca.
+
+            ⚠️ REGLA DE EXISTENCIA: si no hay nada esperando, **el bloque no
+            se monta**. Un "Necesita tu atención: 0" convierte estar al día
+            en un renglón vacío que hay que leer para descartar. *La firma
+            es la DESAPARICIÓN*, igual que en Ponte al día.
+
+            ⚠️ Y UNA FUENTE QUE NO PUDO LEERSE **NO CUENTA COMO CERO**: su
+            fila no se pinta, pero tampoco se afirma que no hay nada. Decir
+            "estás al día" por un fallo de red es, acá, esconder trabajo
+            pendiente — y sobre presupuestos sin responder eso es plata.
+
+            LAS CUATRO FUENTES, completas: citas por coordinar ·
+            presupuestos sin respuesta · autorizaciones esperando ·
+            **atenciones sin cerrar**. ⏪ Mientras la cuarta no existió, acá
+            vivía su declaración de hueco —*"este bloque no debería viajar
+            en un OTA sin ella"*—, y el porqué era real: **una atención
+            abierta de un día anterior no aparece en la jornada de hoy**, y
+            una atención sin cerrar es PLATA SIN DEVENGAR. Llegó (A46), la
+            fila existe, y el texto se mueve con su porqué (L-198). */}
+        {pantalla.estado === 'listo' && (atencionItems.length > 0) && (
+          <View style={{ gap: spacing[3] }}>
+            <Texto variante="seccion">{t('atencion.titulo')}</Texto>
+            <Tarjeta relleno="ninguno">
+              {atencionItems.map((it, i) => (
+                <View key={it.clave}>
+                  {i > 0 ? <Separador /> : null}
+                  <CeldaNavegacion icono={it.icono} titulo={it.titulo} registro="aa" onPress={it.onPress} />
+                </View>
+              ))}
+            </Tarjeta>
+          </View>
         )}
 
         {/* ── S79-B (T2-B1/B3): EL MODO PREPARACIÓN — §2.4 primera y

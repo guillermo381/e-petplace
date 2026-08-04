@@ -274,6 +274,26 @@ export const prestadorEs = {
     sinMiembros: 'Su familia no tiene miembros activos.',
     error: 'No pudimos leer quién cuida a esta mascota',
   },
+  atencion: {
+    // ⭐ S85-C30 · «NECESITA TU ATENCIÓN» — el espejo de "Ponte al día" del
+    // cliente, en la portada del prestador (S72-P1b). OPERACIÓN, no métricas:
+    // lo que espera una respuesta SUYA.
+    titulo: 'Necesita tu atención',
+    coordinar1: '1 cita sin fecha',
+    coordinarN: '{{n}} citas sin fecha',
+    coordinarPie: 'Aprobadas, esperando que coordines el día.',
+    presupuesto1: '1 presupuesto sin respuesta',
+    presupuestoN: '{{n}} presupuestos sin respuesta',
+    presupuestoPie: 'Enviados y todavía sin aprobar ni rechazar.',
+    handshake1: '1 autorización esperando',
+    handshakeN: '{{n}} autorizaciones esperando',
+    handshakePie: 'La familia todavía no respondió.',
+    // ⚠️ Una atención sin cerrar es PLATA SIN DEVENGAR: el devengo nace al
+    // cerrar con calidad. Por eso esta fila existe y no es un recordatorio.
+    abierta1: '1 atención sin cerrar',
+    abiertaN: '{{n}} atenciones sin cerrar',
+    abiertaPie: 'El cobro se registra al cerrarlas.',
+  },
   perfilNegocio: {
     // el resumen de contacto: NOMBRA lo cargado, en orden fijo
     // ── S84-C5: el resto del literal de la vitrina ──

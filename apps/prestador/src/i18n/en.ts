@@ -211,6 +211,21 @@ export const prestadorEn = {
     sinMiembros: 'Their family has no active members.',
     error: "We couldn't load who cares for this pet",
   },
+  atencion: {
+    titulo: 'Needs your attention',
+    coordinar1: '1 appointment with no date',
+    coordinarN: '{{n}} appointments with no date',
+    coordinarPie: 'Approved, waiting for you to set the day.',
+    presupuesto1: '1 quote with no reply',
+    presupuestoN: '{{n}} quotes with no reply',
+    presupuestoPie: 'Sent and still neither approved nor declined.',
+    handshake1: '1 authorization waiting',
+    handshakeN: '{{n}} authorizations waiting',
+    handshakePie: "The family hasn't replied yet.",
+    abierta1: '1 unclosed visit',
+    abiertaN: '{{n}} unclosed visits',
+    abiertaPie: 'Payment is recorded when you close them.',
+  },
   perfilNegocio: {
     // ── S84-C5 · Espejo de es.ts ──
     errorTitulo: "We couldn't load your profile",
