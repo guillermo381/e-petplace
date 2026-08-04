@@ -731,7 +731,9 @@ Origen: S21 lectura fría PORTAL_PRESTADOR.md (hallazgo C2). Prioridad: 🟢 BAJ
 Detectado en S21 lectura fría (hallazgo C3). PORTAL_PRESTADOR.md usa indistintamente "equipo dedicado del founder", "equipo dedicado", "equipo de e-PetPlace", "persona dedicada del equipo", "el equipo". El lector frío entiende que es el mismo grupo, pero no hay definición formal en ningún documento maestro de qué es ese equipo, qué roles tiene, qué permisos, qué notificaciones recibe. Probablemente parte de PORTAL_ADMIN.md cuando se redacte.
 Origen: S21 lectura fría PORTAL_PRESTADOR.md (hallazgo C3). Prioridad: 🟢 BAJA. Disparo: cuando se redacte PORTAL_ADMIN.md o cuando un dev necesite implementar acciones del "equipo" en el sistema.
 
-#### D-173 — Marca unificada e-PetPlace vs página pública del prestador (coherencia con TDR Portal Sellers)
+#### D-173 — Marca unificada e-PetPlace vs página pública del prestador ☠️ **MUERTA S85** — la letra se depositó y el eje quedó firmado
+
+> **☠️ RETIRADA (S85).** Llevaba **cuatro meses sostenida por ACUMULACIÓN y no por firma** — la única del canon en esa condición. **Cerró cuando su letra entró a `MODELO_PRODUCTO` §2 y a `EPETPLACE` P3 con su literal:** *el **prestador se MUESTRA** (tiene página pública, nombre y cara); el **seller se OCULTA** (vende bajo la marca e-PetPlace).* **No es una preferencia de marca: son dos modelos de negocio distintos** — el que cuida construye reputación propia, el que despacha no. *Lo que la mantenía viva no era una duda: era que **nadie la había escrito donde se lee al construir**.*
 Detectado en S21 lectura fría con cruzado contra TDR Portal Sellers v3 (hallazgo D1). TDR Sellers declara principio fundacional: "para el comprador, el seller es e-PetPlace. El comprador nunca ve ni interactúa con el seller directamente". PORTAL_PRESTADOR.md sección 4.5 declara que cada prestador graduado recibe "página web pública dentro del dominio de e-PetPlace" con foto, biografía, identidad propia del prestador. Los dos modelos son **opuestos**: en sellers la identidad del actor interno se oculta; en prestadores la identidad del actor se exhibe. ¿Por qué la asimetría? ¿Es decisión consciente o drift documental entre ecosistemas? Si es consciente, anclar la justificación en MODELO_PRODUCTO.md. Si no, decidir cuál modelo aplica.
 Origen: S21 lectura fría PORTAL_PRESTADOR.md (hallazgo D1) cruzado con TDR Portal Sellers v3. Prioridad: 🟡 ALTA — decisión de modelo bloqueante para coherencia entre PORTAL_PRESTADOR.md y PORTAL_SELLER.md futuro. Disparo: antes de redactar PORTAL_SELLER.md o cuando MediaLab tenga primera versión del checkout unificado.
 
@@ -4862,7 +4864,13 @@ declara nuestro estado y que nadie va a volver a leer.*
 
 ---
 
-#### D-630 — EL BURN-DOWN DE LA REGLA 81: TERCERA SESIÓN SEGUIDA SIN MEDIRSE 🟠 (condición FIRMADA por el founder, S84)
+#### D-630 — EL BURN-DOWN DE LA REGLA 81 ☠️ **PAGADA S85** — el script existe y corrió tres veces
+
+> **☠️ RETIRADA (S85).** `scripts/burn-down.mjs` **existe, corre en un comando y se corrió TRES veces en el día**. Salida de cierre: **`COMPOSICIÓN 10/57 (18%) · MECÁNICA 7/57 con deuda · DERIVA +0/-1`** contra la línea base S83-A15 de **7/54 (13%)**.
+>
+> **Su condición era verificable de dos greps y se cumplió: el PRIMER commit de A en S85 fue el script** — *que es exactamente lo que su escalamiento firmado pedía tras tres sesiones de declararse sin medirse.*
+>
+> **⚠️ Lo que la ficha deja vivo y NO es deuda suya:** el 18% **subestima** a S85 porque la lista BASE mide piezas de S82/S83 y S85 construyó con otras. **Re-basar es decisión de la mesa** y cuando la tome, la base **se re-declara con su fecha, no se corrige hacia atrás**.
 
 **Decisión de la mesa (S84): NO se mide en S84.** Se declara — y se declara con
 su agravante escrito, que es lo que esta ficha existe para no dejar mudo:
@@ -4994,6 +5002,22 @@ lo que duele.**
 ---
 
 #### D-633 — LA LISTA DE PAÍSES YA VA POR TRES COPIAS, Y LA TERCERA **YA DIVERGE** 🟠 (agrava D-615)
+
+> **⚠️ NOTA DE CIERRE S85 — SIGUE VIVA, y se declara porque una lista de cierre la dio por muerta.**
+> **Medido al cerrar (HEAD del cierre):** el literal `+593` aparece en **CUATRO
+> sitios** — `apps/prestador/(tabs)/cuenta/perfil.tsx` ·
+> `apps/prestador/components/perfil-piezas.tsx` ·
+> `packages/api/wrappers/prestador.ts` · `packages/ui/gallery/TokenGallery.tsx`.
+> **Lo que S85 hizo fue ENSANCHAR `paises.ts`** (`obtenerPaisesDelMundo()` sobre
+> `get_paises_para_telefono()`) **en vez de clonar** — *que es la disciplina
+> correcta y **no es la condición de muerte**: la ficha muere cuando las copias
+> DESAPAREZCAN, no cuando deje de nacer una nueva.*
+>
+> **Y una corrección de método sobre mi propia medición, porque casi la mato mal:**
+> un primer `grep` la dio por resuelta y **había matcheado un COMENTARIO** en
+> `packages/domain/src/index.ts:2` que menciona *«paises/servicios»*. **Es L-170
+> literal — un censo por texto lee los comentarios como código** — y es la razón
+> por la que esta nota trae el literal de las cuatro rutas y no un conteo.
 
 **Medido (S84-A33):**
 
@@ -5640,7 +5664,15 @@ refactor de contrato.
 
 ---
 
-#### D-639 — EL EXPEDIENTE SE CONCEDE ENTERO O NADA: hoy el motor da MÁS de lo que la ley firmada permite 🔴 CURA DE PRIVACIDAD, no feature
+#### D-639 — EL EXPEDIENTE SE CONCEDE ENTERO O NADA ☠️ **CURADA S85** — con su rojo producido ANTES
+
+> **☠️ RETIRADA (S85).** Migración `20260804050000` + `obtenerExpedienteModulado`: **tres niveles de aporte** (`detalle` · `existencia` · `familia`), y **una fila sin nivel válido se DESCARTA, jamás se degrada a un default** (L-197).
+>
+> **EL PAR MEDIDO POR EL CAMINO REAL, y es lo que la cierra (L-199):**
+> **ANTES — 85 filas vistas, 84 CON su contenido.** **DESPUÉS — 85 filas, 0 contenidos, 85 autores; 16 propias con detalle, 10 de familia con contenido intacto, 112 en total.**
+> *Sin ese «antes» medido, la cura habría sido una afirmación: «ahora está bien» **sin nada que diga que antes no lo estaba**.*
+>
+> **⚠️ LO QUE NO CIERRA, declarado y heredado a S86:** esta cura implementa **«quien lo hizo»**, NO **«quien lo necesita para atender»** — eso espera la matriz `oficio × eje` de A3.3. **Se declara en vez de aproximarse:** *aproximar un permiso produce algo que parece cumplir la ley, concede de más en los bordes que nadie enumeró, y como su error se ve como el acierto, **nadie lo audita después**.*
 
 > ## ⚠️ ESTO **NO** ES UNA PIEZA DE LA PANTALLA DATOS. ES UN ESTRECHAMIENTO.
 >
