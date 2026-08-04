@@ -5325,6 +5325,209 @@ importa: **doce de veinticuatro** reglas del lint estaban en esa condición.*
 
 ---
 
+#### D-648 — EL MOSTRADOR ESTAMPA LA HORA EN **UTC**: un walk-in de la tarde nace mañana 🔴
+
+**EL LITERAL, medido el 4-ago-2026 contra motor vivo:**
+`registrar_atencion_mostrador` cierra su INSERT con
+`COALESCE(p_fecha, current_date), COALESCE(p_hora, localtime)` — y la
+base corre en **UTC**:
+
+```
+current_setting('TimeZone')            → UTC
+localtime                              → 15:26      ← lo que se estampa
+(now() at 'America/Guayaquil')::time   → 10:26      ← la hora real
+pg_db_role_setting con TimeZone        → 0 filas    ← NINGÚN rol lo pisa
+```
+
+**No es un artefacto de la sesión de medición: no hay override para
+ningún rol, así que la app entra igual.**
+
+### EL DISCRIMINADOR ESTÁ EN LOS DATOS, NO EN EL RAZONAMIENTO
+
+La única cita nacida en el mostrador (`metadata->>'origen'='mostrador'`)
+se creó **20:20 hora de Guayaquil** y quedó escrita con
+**`hora = 01:20` y `fecha` del DÍA SIGUIENTE**. Medido:
+`con_dia_corrido = 1 de 1`.
+
+> **Toda atención registrada después de las 19:00 locales nace en la
+> agenda de mañana.**
+
+### POR QUÉ ES 🔴 Y NO UN REDONDEO
+
+`obtener_jornada_recepcion` lee **por día** (`p_fecha`). Una atención
+que se corrió de día **desaparece de la jornada en la que ocurrió** — y
+no deja rastro de haberse ido: aparece, correctamente formada, en otro
+día. *Es la familia de S85 otra vez: no rompe nada, renderiza perfecto,
+y la superficie no tiene cómo saber que miente.*
+
+**Y lo que lo vuelve peor que un bug de display: el dato queda
+ESCRITO.** Curar la función no arregla las filas ya nacidas torcidas.
+
+### LA CURA, con su parte incómoda
+
+1. `current_date`/`localtime` → `(now() AT TIME ZONE 'America/Guayaquil')`
+   en la puerta. Es lo que hace el resto de la casa desde S57 y lo que
+   ya aplican los lectores nuevos de S86 (`20260804160000`).
+2. **Y decidir qué hacer con lo escrito.** Hoy es UNA fila y se puede
+   mirar de a una; con cohorte real deja de serlo.
+3. Hereda **D-320** (tz hardcodeada). *La cura correcta de fondo es la
+   zona del NEGOCIO, no una constante — pero ese arco es más grande que
+   este defecto y no se le cuelga acá.*
+
+☠️ **CONDICIÓN DE MUERTE:** una atención de mostrador registrada después
+de las 19:00 locales queda con la fecha y la hora locales — verificable
+comparando `fecha`/`hora` contra `created_at AT TIME ZONE 'America/Guayaquil'`
+en la fila recién nacida.
+**DISPARO: antes del primer negocio real que atienda de tarde.**
+Origen: S86-A (relevamiento del mostrador).
+
+---
+
+#### D-647 — UN ROJO DE `tsc` QUE DEPENDE DE UN ARCHIVO **GENERADO Y GITIGNOREADO**: tres pistas, tres mediciones, dos veredictos 🟠
+
+**Hermana de [[D-646]] — misma familia: un rojo de ENTORNO que acusa al
+código. Se registran juntas a propósito.**
+
+**EL SÍNTOMA:** `apps/prestador/src/components/animated-icon.web.tsx(5,21):
+error TS2307: Cannot find module './animated-icon.module.css'`.
+
+**LO QUE LO VUELVE UNA DEUDA Y NO UN ERROR: las mediciones se
+contradecían.** B midió `main` **VERDE**; C midió su worktree **ROJO**
+teniendo `node_modules`. **Las dos eran ciertas** — y ninguna declaraba
+sobre qué árbol corría.
+
+### LA CAUSA RAÍZ, con literal
+
+`apps/prestador/expo-env.d.ts` contiene una sola línea útil —
+`/// <reference types="expo/types" />`— y de ahí sale la declaración de
+`*.module.css` (`node_modules/expo/types/global.d.ts:4`, el ÚNICO lugar
+de todo `node_modules` que la declara).
+
+**Ese archivo está GITIGNOREADO** (`apps/prestador/.gitignore:10`, y el
+propio archivo lo dice: *"should be in your git ignore"*). Medido:
+
+| árbol | `expo-env.d.ts` | `tsc` |
+|---|---|---|
+| `e-petplace` (mesa) | **existe** | verde |
+| los tres worktrees de S86 | **NO existe** | **rojo** |
+
+⇒ **el typecheck depende de un archivo que el repo no versiona y que
+solo aparece cuando alguien corrió Expo en ese árbol.** No es
+reproducible por clonar: es reproducible por haber trabajado ahí antes.
+
+### LA CURA PROPUESTA — y por qué NO es la obvia
+
+**La obvia sería declarar `*.module.css` en un `.d.ts` propio. NO se
+hace:** `expo/types/global.d.ts` **ya la declara**, y agregar una
+segunda es fabricar un clon que puede chocar en el árbol que sí tiene
+`expo-env.d.ts` — D-645 otra vez.
+
+**La cura es un archivo TRACKEADO con la misma REFERENCIA**, no con una
+copia de la declaración:
+
+```
+apps/prestador/types/expo.d.ts   (1 línea, versionada)
+/// <reference types="expo/types" />
+```
+
+**PROBADA, con su contra-caso** (4-ago, worktree `pista/s86-a`):
+
+| | resultado |
+|---|---|
+| sin el archivo | `tsc` **exit 2** — el TS2307 |
+| con el archivo | `tsc` **exit 0** |
+| con el archivo **Y** `expo-env.d.ts` (el árbol de la mesa) | `tsc` **exit 0** — no chocan |
+
+*El contra-caso es la mitad que importa: sin él, la cura podría romper
+el único árbol donde hoy funciona.*
+
+**NO EJECUTADA — `apps/prestador` es territorio de C.** A la probó en su
+worktree y **borró los archivos de prueba**; la aplica quien tenga el
+territorio. `apps/cliente` no importa `.module.css` hoy, pero tampoco
+tiene `expo-env.d.ts`: el mismo hueco lo espera al primer import.
+
+☠️ **CONDICIÓN DE MUERTE:** `tsc --noEmit` da exit 0 en un worktree
+**recién creado** (sin haber corrido Expo nunca en él), con
+`node_modules` instalado. Verificable en una línea.
+**DISPARO: ya — muerde a toda pista nueva.** Origen: S86-A.
+
+---
+
+#### D-646 — EL GATE DEL COMMIT NO DISTINGUE «EL LINT ENCONTRÓ ALGO» DE «EL LINT NO PUDO CORRER» 🟠
+
+**Hermana de [[D-647]]. Y es la candidata #21 de S84 cobrada por primera
+vez: *el mensaje de un guard es parte del guard*.**
+
+**EL LITERAL (4-ago-2026, worktree `pista/s86-a`, commit de un archivo
+HTML en `docs/laminas/`):**
+
+```
+✗ verify:diseno EN ROJO — el commit NO ocurre.
+                                     ← acá el hook imprime las líneas «✗»
+  curalo, o declaralo:  SALTAR_GATE="por qué" git commit ...
+```
+
+**La lista de líneas `✗` salió VACÍA. Y corrido a mano, un minuto
+después, `verify:diseno` dio exit 0 y VERDE en 22 reglas.**
+
+### LA CAUSA, medida y no supuesta
+
+`.githooks/pre-commit:209` corre `node scripts/verify-diseno.mjs`. Ese
+script, en su regla R12, hace `execSync('pnpm exec tsx …')`. **En un
+worktree recién creado no hay `node_modules`** ⇒ el subproceso muere ⇒
+el script sale ≠ 0 ⇒ el hook lo reporta como **rojo del lint**.
+
+Forense del árbol: `node_modules` en ese worktree tiene fecha de
+creación **10:15:30** — *lo creó el propio diagnóstico, un minuto
+DESPUÉS del commit que falló a las 10:14*. De ahí la contradicción.
+
+### POR QUÉ IMPORTA MÁS DE LO QUE PARECE
+
+> **Son dos hechos distintos y el guard los dice con la misma frase:**
+> *«tu código viola una regla»* y *«no pude ejecutar la verificación»*.
+> **Solo el primero es sobre tu código.**
+
+**Y su diagnóstico refuerza el engaño en vez de romperlo:** imprime
+`grep "✗"`, que ante un script muerto sale **vacío** — o sea, el hook
+afirma que hay rojo y a continuación muestra cero motivos, **y esa
+contradicción no lo hace dudar**.
+
+*El hook ya razona sobre esta familia en sus propios comentarios —
+S85-B9 le agregó auto-instrumentación al SALTO justamente porque «nadie
+verifica por qué algo NO se hizo». Le falta aplicarse el mismo criterio
+a sí mismo: el salto se auto-mide, el rojo no.*
+
+**Cruce con [[D-647]]:** las dos hacen que una pista nueva reciba, en su
+primer commit, **dos rojos falsos seguidos** — uno del lint sin deps y
+otro del `tsc` sin `expo-env.d.ts`. Ninguno es de su código. **Es el
+costo de arranque de la regla 85 que nadie presupuestó.**
+
+### LA CURA PROPUESTA
+
+**Separar los dos hechos, que es todo lo que hace falta:**
+
+1. Capturar salida y exit por separado; si el exit ≠ 0 **y no hay
+   ninguna línea `✗`**, el hook dice *«verify:diseno NO PUDO CORRER»*
+   con las últimas líneas de stderr — jamás *«EN ROJO»*.
+2. **Pre-chequeo barato y hablado:** si no existe `node_modules` en la
+   raíz, decirlo antes de correr nada (*«este árbol no tiene
+   dependencias: corré `pnpm install`»*). Cuesta un `[ -d ]`.
+3. Que el script mismo distinga: R12 debería reportar
+   **`no-pudo-medir`** en vez de morir — hoy un subproceso caído se
+   vuelve indistinguible de una regla violada.
+
+**NO EJECUTADA: se propone y espera la mesa.** *El territorio del hook
+es de A, pero tocar el gate del commit mientras tres pistas commitean
+es un cambio que se anuncia antes de hacerse.*
+
+☠️ **CONDICIÓN DE MUERTE:** en un árbol sin `node_modules`, el hook
+imprime «no pudo correr» (o el pre-chequeo) y **jamás** «EN ROJO».
+Verificable moviendo `node_modules` y commiteando.
+**DISPARO: ya — le pasa a toda pista nueva.** Origen: S86-A, cobrada por
+la propia precondición que A reportó al crear los worktrees.
+
+---
+
 #### D-645 — **UNA PROMOCIÓN NO ES UNA MIGRACIÓN**: nada en el árbol relaciona una pieza nueva con el código que debería reemplazar 🟠 (candidata a LEY, sin firma · pedido a B)
 
 **Hallazgo de C, S85 — y es el que EXPLICA LOS CUATRO COBROS DEL DÍA.**
