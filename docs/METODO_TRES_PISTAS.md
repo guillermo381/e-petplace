@@ -43,7 +43,7 @@
 
 **A conduce los merges, las vedas y el publish. NADIE MÁS PUBLICA.**
 
-**Los cuatro deberes de la conducción** *(práctica probada en S83-S84, todavía no
+**Los CINCO deberes de la conducción** *(práctica probada en S83-S84, todavía no
 en el contrato):*
 
 1. **MERGEAR A DEMANDA**, sin esperar orden — con `git show --name-only --pretty=""`
@@ -52,12 +52,49 @@ en el contrato):*
 2. **ABRIR LA VEDA ELLA MISMA** cuando alguien va a publicar.
 3. **VERIFICAR EL GROUP** antes de declarar cerrado — con `update:view`, **nunca
    `update:list`**, que no muestra el `gitCommitHash`.
-4. **ANUNCIAR EL CIERRE A TODOS**, incluida la mesa.
+4. **ANUNCIAR EL CIERRE A TODOS**, incluida la mesa — **y a cada congelada EN
+   MENSAJE PROPIO** *(enmienda S85: §4 vale también para el cierre. Una orden
+   que no llega **se nota** cuando el trabajo no aparece; **un cierre que no
+   llega no se nota nunca**, porque su síntoma es una pista quieta esperando
+   permiso, y el silencio se parece demasiado a la obediencia).*
+5. **DECIR QUÉ TRAE EL BUNDLE — leído del RANGO, y declarando cuál lista se
+   está dando.** *(enmienda S85, de un caso propio.)*
 
-> **El ③ y el ④ son los que más veces se perdieron**, y por la misma razón: **quien
-> publica ya terminó y se va**; la mesa está coordinando otra cosa; y **la pista
-> congelada se entera de que la veda cerró porque le llega trabajo**. **El que
-> congela es el que descongela.**
+### ⑤ · LAS DOS LISTAS DE UN PUBLISH, y por qué hay que decir cuál se da
+
+> ### **EL CONTENIDO DE UN BUNDLE SE LEE DEL RANGO —`git log <ancla-anterior>..<ancla>`— JAMÁS DEL MENSAJE QUE UNO MISMO ESCRIBIÓ.**
+>
+> *Un `--message` es una etiqueta que redacta una persona; el rango es el hecho.*
+> **El caso que la fundó (S85):** A escribió el `--message` desde el encuadre de
+> la conversación y **después leyó su propio mensaje como si fuera el
+> inventario** — anunció al founder dos cosas que no viajaban (una pantalla que
+> no existía y una columna que no existía). *El rango estaba a un comando.*
+
+**Y hay DOS listas verdaderas, que contestan preguntas distintas:**
+
+| lista | qué es | para quién |
+|---|---|---|
+| **el DELTA** | `<ancla-anterior>..<ancla>` | **la mesa** — qué se agregó desde el último publish |
+| **el ACUMULADO** | **desde el último bundle GATEADO** | **el founder** — qué va a ver por primera vez |
+
+> **Los dos son correctos y no son intercambiables.** *Si el bundle anterior no
+> se gateó, el delta le esconde al founder la mitad de lo que va a encontrar; y
+> el acumulado le repite a la mesa cosas que ya conocía.*
+>
+> **⇒ EL ANUNCIO DICE CUÁL ESTÁ DANDO.** Una lista sin ese rótulo obliga a cada
+> lector a suponer el corte — y **los dos van a suponer el suyo.**
+
+**Por qué decir DE MÁS es peor que decir de menos, y es lo que este deber
+protege:** una lista que **omite** produce una sorpresa —alguien busca y no
+está—. Una lista que **sobra** manda al founder **a buscar algo que no existe**,
+y cuando no lo encuentre **va a concluir que el update no entró**. *El error no
+se manifiesta como "falta esto": se manifiesta como una duda sobre todo el
+bundle.*
+
+> **El ③, el ④ y el ⑤ son los que más veces se perdieron**, y por la misma razón:
+> **quien publica ya terminó y se va**; la mesa está coordinando otra cosa; y **la
+> pista congelada se entera de que la veda cerró porque le llega trabajo**. **El
+> que congela es el que descongela.**
 
 ---
 
