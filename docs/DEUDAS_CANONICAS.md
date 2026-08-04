@@ -5426,7 +5426,7 @@ cobros del día, todos por gate del founder) **+ S85-B** (la propagación).
 
 ---
 
-#### D-644 — UNA MIGRACIÓN DE S82 VIVE EN EL REPO Y NO EN LA DB: divergencia silenciosa entre el código y el remoto 🟠
+#### D-644 — UNA MIGRACIÓN DE S82 VIVE EN EL REPO Y NO EN LA DB: divergencia silenciosa entre el código y el remoto ☠️ **PAGADA (S86-A, 4-ago-2026)**
 
 **EL LITERAL:** `supabase/migrations/20260731130000_s82_oferta_adiestramiento_publica.sql`
 **existe en el árbol y NO está en `supabase_migrations.schema_migrations`.**
@@ -5474,6 +5474,44 @@ del sistema: la próxima sesión se lo encuentra igual.**
 anteriores** — verificable en una línea, sin interpretación.
 **DISPARO: la primera migración de S86** *(se la va a encontrar sí o sí)*.
 Origen: S85-A (freno al aplicar `20260804110000`).
+
+### ☠️ PAGADA — S86-A, 4-ago-2026 10:14 -05 · ancla `2ccc050` · OK del founder
+
+**La respuesta fue la SALIDA (1), y se contestó MIDIENDO, no suponiendo.** *La
+deuda misma exigía no dar por cierto que el DDL estuviera aplicado — así que se
+verificó antes de asentar nada:*
+
+| lo medido | resultado |
+|---|---|
+| `to_regprocedure('obtener_oferta_adiestramiento_publica()')` | **existe** |
+| `prosecdef` | **DEFINER** — como prescribe el archivo |
+| `proacl` | `postgres=X \| authenticated=X \| service_role=X` — **`anon` ausente**, exactamente lo que el bloque L-140 de la migración verifica al pie |
+| `schema_migrations` where version=`20260731130000` | **0 filas** (la divergencia) |
+
+⇒ **el DDL vivía y el registro no lo sabía**: la cura es **registrar la
+versión, jamás correr el SQL** — correrlo habría sido aplicar DDL de S82 dentro
+de una sesión que no lo midió, que es lo que la propia deuda advertía.
+
+**El acto:** `supabase migration repair --status applied 20260731130000` — **una
+fila**, `s82_oferta_adiestramiento_publica`. **Cero DDL ejecutado.**
+
+**CONDICIÓN DE MUERTE CUMPLIDA, verbatim y en una línea:**
+
+```
+$ supabase db push --dry-run --linked
+Remote database is up to date.
+```
+
+> **Por qué esto cierra la clase y no solo el caso:** *el arrastre era la peor
+> consecuencia — cada `db push` futuro iba a querer aplicarla **como efecto
+> colateral de otra cosa**.* **Ese efecto colateral ya no existe**, y la primera
+> migración de S86 va a nacer sin encontrársela.
+
+**Lo que NO se tocó, declarado:** el archivo `20260731130000_*.sql` **queda en el
+árbol tal cual** — ahora describe algo que el registro confirma. *Y el caveat que
+la propia migración anota sobre el lector de grooming (lectura por RLS que no
+replica el gate 7.13) sigue vivo y sin tocar: es de otro territorio, y esta
+deuda nunca fue sobre eso.*
 
 ---
 
