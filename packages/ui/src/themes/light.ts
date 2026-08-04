@@ -232,6 +232,12 @@ export const lightTheme = {
   border: {
     width:   1,
     default: palette.light4,
+    /** S86-B (firma de mesa) · EL BORDE DE LO PRESENTE — nombrado por ROL
+     *  y no por color, porque lo que define no es "más oscuro": es *el
+     *  límite de la superficie que ESTÁ*, frente a `default`, que es el
+     *  de la que ESPERA. En oscuro el mismo rol se cumpliría con un valor
+     *  MÁS CLARO. */
+    presente: palette.light5,
     subtle:  'rgba(0,0,0,.05)',
     accent:  palette.tealBorderL,
     brand:   palette.pinkBorderL,

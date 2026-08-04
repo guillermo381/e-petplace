@@ -190,6 +190,17 @@ export const palette = {
    *  Valor: el fondo base — un hueco hacia el fondo ES lo que hunde. */
   hundidoDark: '#050508',
   dark4: '#222230',   // bordes visibles / separadores
+  /** S86-B · el hermano oscuro de `light5`. ⚠️ NACE SIN CONSUMIDOR Y SE
+   *  DECLARA: en oscuro la gramática ESTÁ/ESPERA ya se separa por el
+   *  HALO (E11), igual que el hairline de `Tarjeta` — que también se
+   *  enmendó SOLO en claro. Existe para que el día que alguien lo
+   *  necesite no invente un hex, y su condición de muerte es la de la
+   *  casa: si al 1-oct sigue en cero consumidores, muere (precedente
+   *  D-583, los tokens `warm`).
+   *  ⚠️ Y OJO CON EL EJE: acá "más presente" es más CLARO, no más
+   *  oscuro — sobre fondo negro la separación se compra subiendo. El eje
+   *  es el CONTRASTE, que es la letra literal de la firma del hairline. */
+  dark5: '#33334A',   // borde de lo PRESENTE en oscuro — SIN consumidor hoy
 
   // ── Fondos light (§7.3 B1 — DEFAULT del producto) ──
   light0: '#FAF9F7',  // fondo base — PAPEL ALGODÓN (D-360 firmado S58; era lavanda #F5F4FA).
@@ -264,6 +275,16 @@ export const palette = {
    *  el TAPIZ (el fondo real del cliente): 1.23 · texto tinta 12.49. */
   sinCajaLight: '#E0DBE9',
   light4: '#E3E0EF',  // bordes visibles / separadores
+  /** S86-B · EL BORDE DE LO PRESENTE — un paso MÁS de presencia que
+   *  `light4`, para el único caso donde dos bordes tienen que
+   *  distinguirse ENTRE SÍ: la gramática ESTÁ/ESPERA de `TarjetaEstado`.
+   *  Medido vs los dos fondos claros: **1.693** sobre papel algodón
+   *  (#FAF9F7) y **1.663** sobre el tapiz del oficio (#F4F8F6) — contra
+   *  el 1.234/1.212 de `light4`, o sea ~1.4×.
+   *  Se eligió sobre #B8B2CE (1.938), que separaba más y empezaba a
+   *  leerse como MARCO: la Ley 20 mata el marco, y lo que acá hace falta
+   *  es jerarquía entre dos límites, no encerrar. */
+  light5: '#C4BFD8',  // borde de lo PRESENTE (ver border.presente)
 
   // ── Tinta (S58, depósito prestador) — superficie del TECHO del
   // prestador (dosis baja: el techo es tinta, no gradiente). Pariente

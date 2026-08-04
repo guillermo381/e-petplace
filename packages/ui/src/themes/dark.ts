@@ -193,6 +193,10 @@ export const darkTheme = {
   border: {
     width:   1,
     default: palette.dark4,
+    /** S86-B · el rol existe en los tres temas por tipo; en OSCURO no
+     *  tiene consumidor y es deliberado — acá la gramática ESTÁ/ESPERA
+     *  la separa el HALO (E11). Ver la nota de `palette.dark5`. */
+    presente: palette.dark5,
     subtle:  'rgba(255,255,255,.05)',
     accent:  palette.tealBorder,
     brand:   palette.pinkBorder,

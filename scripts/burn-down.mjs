@@ -73,6 +73,82 @@ function pantallas(dir) {
 const sinComentarios = (src) =>
   src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
 
+// ═════════════════════════════════════════════════════════════════════════
+// M2 · EL ENSANCHE (S86-B, firma de mesa) — «doce reales contra cinco
+// medidos, y salía VERDE igual».
+//
+// EL INSTRUMENTO MEDÍA DE MENOS POR DOS CAUSAS DISTINTAS, y hacen falta
+// las dos curas: una sola dejaba el guard mintiendo con otro número.
+//
+//  ① EL ALCANCE — medía UNA CARPETA (`apps/prestador/src/app`) mientras la
+//    letra de D-498 dice «que eso no pase en NINGÚN campo». El cliente
+//    entero y los dos `src/components` eran invisibles: 5 de 10.
+//
+//  ② EL DETECTOR — `/<Campo[\s/>]/` **no puede ver `<SliderPrecio`**, y
+//    SliderPrecio ABRE TECLADO desde la enmienda S68 (tap en el valor →
+//    edición numérica con teclado decimal). Los dos talleres que lo montan
+//    quedaban fuera por construcción.
+//
+// ⚠️ Y LA TRAMPA QUE LA MEDICIÓN EVITÓ, que es lo que vale guardar: el «12»
+// de la mesa se reproduce contando `Campo` + `CampoFecha` — pero
+// **`CampoFecha` NO abre teclado** (su Hoja es un selector JS puro, cero
+// TextInput). Medido contra el objeto: los ÚNICOS componentes de
+// `packages/ui` que montan `TextInput` son **`Campo` y `SliderPrecio`**.
+// El total coincide en 12 por casualidad y la LISTA es distinta en dos
+// archivos. *Un número correcto con la lista equivocada manda a curar
+// pantallas sanas y deja las rotas.*
+//
+// ⇒ POR ESO EL SET SE DERIVA Y NO SE ESCRIBE: se lee `packages/ui` y se
+//   pregunta quién monta `TextInput`. El día que nazca la tercera pieza
+//   con teclado, este detector la incluye SOLO — «una lista hay que
+//   mantenerla, la regla no».
+// ═════════════════════════════════════════════════════════════════════════
+const DIR_UI = 'packages/ui/src/components';
+
+/** Las piezas de la casa que montan un TextInput — DERIVADAS del objeto. */
+function piezasQueAbrenTeclado() {
+  if (!existsSync(DIR_UI)) return [];
+  return readdirSync(DIR_UI)
+    .filter((f) => f.endsWith('.tsx') && !f.endsWith('.web.tsx'))
+    .filter((f) => /\bTextInput\b/.test(sinComentarios(readFileSync(join(DIR_UI, f), 'utf8'))))
+    .map((f) => f.replace(/\.tsx$/, ''))
+    .sort();
+}
+
+const PIEZAS_TECLADO = piezasQueAbrenTeclado();
+
+/** `<Campo …` | `<SliderPrecio …` | el `<TextInput` crudo de la app. */
+const RE_ABRE_TECLADO = new RegExp(
+  `<(?:${[...PIEZAS_TECLADO, 'TextInput'].join('|')})[\\s/>]`,
+);
+
+// Las DOS raíces del ensanche. `src/components` entra al barrido a
+// propósito: una pieza local puede montar su propio scroll.
+const RAICES_M2 = ['apps/prestador/src', 'apps/cliente/src'];
+
+/** EL DISCRIMINADOR, medido por C y firmado — y por qué NO es una lista de
+ *  paths: los tres falsos positivos de A son archivos **con anfitriona**
+ *  (un componente montado dentro de una pantalla que ya porta la pieza);
+ *  los reales son archivos de **RUTA** con su propio scroll de nivel
+ *  superior. La señal estructural de «soy una ruta» en expo-router es
+ *  vivir bajo `src/app/` y exportar default. Una lista hay que mantenerla;
+ *  esto se mantiene solo. */
+const esRutaDePantalla = (path, src) =>
+  /[/\\]src[/\\]app[/\\]/.test(path) && /export\s+default/.test(src);
+
+function corpusM2() {
+  const out = { rutas: [], componentes: [] };
+  for (const raiz of RAICES_M2) {
+    if (!existsSync(raiz)) continue;
+    for (const p of pantallas(raiz)) {
+      const src = sinComentarios(readFileSync(p, 'utf8'));
+      if (!RE_ABRE_TECLADO.test(src) || /EvitaTeclado/.test(src)) continue;
+      (esRutaDePantalla(p, src) ? out.rutas : out.componentes).push(p);
+    }
+  }
+  return out;
+}
+
 // ─────────────────────────────────────────────────────────────────────────
 // LAS NUEVE FAMILIAS — datos, no heurística.
 //
@@ -289,9 +365,20 @@ const MARCAS_MECANICAS = [
   },
   {
     id: 'M2',
-    nombre: 'Campo sin EvitaTeclado',
+    nombre: 'campo que abre teclado, sin EvitaTeclado',
     ley: 'D-498 / §15b la regla del teclado — letra founder: "que eso no pase en NINGÚN campo"',
-    detecta: (src) => /<Campo[\s/>]/.test(src) && !/EvitaTeclado/.test(src),
+    // S86-B: el detector ya no nombra `Campo` — pregunta por las piezas
+    // que MONTAN TextInput, derivadas de packages/ui (ver el bloque de
+    // arriba). Sigue corriendo sobre el corpus general para no romper el
+    // denominador del eje; su alcance REAL lo reporta `alcancePropio`.
+    detecta: (src) => RE_ABRE_TECLADO.test(src) && !/EvitaTeclado/.test(src),
+    /** EL ENSANCHE, reportado APARTE y no fundido en el denominador: el
+     *  eje mecánico se compara contra una línea base de S83 medida sobre
+     *  `apps/prestador/src/app`, y cambiarle el corpus haría que el
+     *  porcentaje midiera otra cosa con el mismo nombre — el defecto que
+     *  la cabecera del corpus advierte. Así el número de M2 dice la
+     *  verdad entera SIN corromper la serie. */
+    alcancePropio: corpusM2,
   },
   {
     id: 'M3',
@@ -364,6 +451,38 @@ function autoPrueba() {
   for (const m of MARCAS_MECANICAS) {
     if (m.detecta(limpio)) mudos.push(`marca ${m.id}: dispara sobre un archivo LIMPIO — falso positivo constante.`);
   }
+
+  // ── S86-B · LOS BRAZOS DEL M2 ENSANCHADO ────────────────────────────
+  // El fixture genérico de M2 usa `<Campo>`, que YA disparaba antes del
+  // ensanche: con él solo, las dos curas nuevas podrían romperse sin que
+  // la auto-prueba se entere. Cada una gana su rojo propio.
+
+  // ① EL ANCLA DEL SET DERIVADO. Si `packages/ui` se mueve de lugar o
+  //    `TextInput` se envuelve en otra pieza, el set queda vacío, el
+  //    regex se degrada a solo-TextInput y M2 pasaría en VERDE habiendo
+  //    mirado media casa. Es el modo de falla exacto de L-192: silencio.
+  if (PIEZAS_TECLADO.length < 2) {
+    mudos.push(
+      `M2·ANCLA: el set de piezas que abren teclado se derivó de ${DIR_UI} y trajo ` +
+        `${PIEZAS_TECLADO.length} (${PIEZAS_TECLADO.join(', ') || 'ninguna'}). Se esperan al menos 2 ` +
+        `(Campo y SliderPrecio, medidos en S86). Con el set vacío el detector no verifica nada.`,
+    );
+  }
+
+  // ② EL BRAZO QUE EL ENSANCHE ABRIÓ: si el derivado dejara de ver
+  //    SliderPrecio, volveríamos al defecto original —los dos talleres
+  //    invisibles— con el mismo número en pantalla.
+  if (!MARCAS_MECANICAS.find((m) => m.id === 'M2').detecta('<SliderPrecio valor={v} />')) {
+    mudos.push('M2·brazo SliderPrecio: no dispara — el ensanche S86 quedó decorativo.');
+  }
+
+  // ③ EL DISCRIMINADOR, en sus dos direcciones. Sin esto puede invertirse
+  //    (contar componentes y perder rutas) sin que nada se ponga rojo.
+  if (!esRutaDePantalla('apps/cliente/src/app/carnet.tsx', 'export default function P(){}'))
+    mudos.push('M2·discriminador: una RUTA con export default no se reconoce como ruta.');
+  if (esRutaDePantalla('apps/cliente/src/components/x.tsx', 'export default function P(){}'))
+    mudos.push('M2·discriminador: un COMPONENTE se está contando como ruta — los falsos positivos vuelven.');
+
   return mudos;
 }
 
@@ -510,6 +629,17 @@ function main() {
     console.log(`       ${m.ley}`);
     if (rs.length > 0 && rs.length <= 12) for (const r of rs) console.log(`       · ${r}`);
     else if (rs.length > 12) console.log(`       · (${rs.length} pantallas — corré con --detalle)`);
+    // ── S86-B · el alcance ENSANCHADO de M2, con su denominador dicho ──
+    if (m.alcancePropio) {
+      const { rutas, componentes } = m.alcancePropio();
+      console.log(`       ── ALCANCE REAL (${RAICES_M2.join(' + ')}):`);
+      console.log(`          ${rutas.length} RUTAS con deuda propia  ·  ${componentes.length} componentes con anfitriona`);
+      console.log(`          piezas que abren teclado, DERIVADAS de ${DIR_UI}: ${PIEZAS_TECLADO.join(', ')} (+ TextInput crudo)`);
+      for (const r of rutas) console.log(`          🔴 ${r}`);
+      for (const c of componentes) console.log(`          ·  ${c} — su anfitriona porta la pieza`);
+      console.log(`          ⚠️ el número de arriba (${rs.length}) es el del corpus de la SERIE`);
+      console.log(`             (${RAIZ}); el de acá es el de la LETRA ("ningún campo").`);
+    }
     console.log('');
   }
 

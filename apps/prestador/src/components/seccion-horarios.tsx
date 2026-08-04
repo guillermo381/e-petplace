@@ -1105,56 +1105,95 @@ export function SeccionHorarios({
 
       {/* D-386 (S62): LA ELECCIÓN — universal o por servicio, jamás
           mezcla (letra founder S60; el guard de DB la respalda). La
-          explica dice la verdad del modo vigente. */}
-      <SelectorOpcion
-        etiqueta={t('horarios.modoEtiqueta')}
-        acento="oficio"
-        solitario
-        opciones={[
-          { codigo: 'universal', etiqueta: t('horarios.modoUniversal') },
-          { codigo: 'por_servicio', etiqueta: t('horarios.modoPorServicio') },
-        ]}
-        seleccionada={modo}
-        onSelect={(codigo) => void tocarModo(codigo === 'por_servicio' ? 'por_servicio' : 'universal')}
-      />
-      <Texto variante="apoyo">
-        {modo === 'universal' ? t('horarios.modoExplicaUniversal') : t('horarios.modoExplicaPorServicio')}
-      </Texto>
+          explica dice la verdad del modo vigente.
+
+          ══ S86-B · ④ DE LA PROPUESTA DE PAREDES — ESTE BLOQUE GANA SU
+          SUPERFICIE, y es el único del cuerpo que la ganó. El criterio
+          firmado: *merece superficie lo que el prestador puede TOCAR
+          como una unidad*. Acá hay UNA decisión con consecuencias reales
+          —cambiar el modo CONVIERTE franjas— y su explicación vive
+          adentro porque explica ESA decisión, no la pantalla.
+
+          ⚠️ Y ES LA ÚNICA QUE NO CHOCA: los otros dos candidatos de la
+          propuesta (la lista de personas y la de franjas) ya son
+          superficie A NIVEL DE FILA — `TarjetaEstado`, la gramática
+          firmada en S78. Envolverlas sería la caja dentro de la caja que
+          la propia propuesta prohíbe en su ⑦. Acá abajo NO hay ninguna
+          superficie previa: son chips y prosa sobre el fondo. ══ */}
+      <Tarjeta>
+        <View style={{ gap: spacing[2] }}>
+          <SelectorOpcion
+            etiqueta={t('horarios.modoEtiqueta')}
+            acento="oficio"
+            solitario
+            opciones={[
+              { codigo: 'universal', etiqueta: t('horarios.modoUniversal') },
+              { codigo: 'por_servicio', etiqueta: t('horarios.modoPorServicio') },
+            ]}
+            seleccionada={modo}
+            onSelect={(codigo) => void tocarModo(codigo === 'por_servicio' ? 'por_servicio' : 'universal')}
+          />
+          <Texto variante="apoyo">
+            {modo === 'universal' ? t('horarios.modoExplicaUniversal') : t('horarios.modoExplicaPorServicio')}
+          </Texto>
+        </View>
+      </Tarjeta>
       <Texto variante="apoyo">{t('taller.horariosExplica')}</Texto>
-      <SelectorOpcion
-        etiqueta={t('taller.dias')}
-        disposicion="fila"
-        acento="oficio"
-        multiple
-        opciones={ORDEN_DISPLAY.map((dia) => ({ codigo: String(dia), etiqueta: letraDia(dia) }))}
-        seleccionadas={diasSel.map(String)}
-        onSelect={(codigo) => {
-          const dia = Number.parseInt(codigo, 10);
-          setDiasSel((prev) => (prev.includes(dia) ? prev.filter((x) => x !== dia) : [...prev, dia]));
-        }}
-      />
-      <Boton
-        variante="ghost"
-        etiqueta={t('taller.todaLaSemana')}
-        onPress={() => setDiasSel([...ORDEN_DISPLAY])}
-      />
-      <Boton
-        variante="secundario"
-        etiqueta={t('horarios.agregarFranja')}
-        bloque
-        deshabilitado={diasSel.length === 0}
-        onPress={() => {
-          setCreandoFranja(true);
-          setVistaNueva('form');
-          setDesdeSel(null);
-          setHastaSel(null);
-          setCupoSel(CUPO_NUEVA_FRANJA);
-          setCupoBase(CUPO_NUEVA_FRANJA);
-          // D-386: la réplica arranca con TODAS las ofertas marcadas —
-          // desmarcar es el gesto raro, no el común
-          setOfertasSel(ofertas.map((o) => o.id));
-        }}
-      />
+
+      {/* ══ S86-B · ⑤ LA QUINTA SUPERFICIE — EL COMPOSITOR DE FRANJA
+          (firma de mesa; nació como pregunta abierta de B y la mesa la
+          contestó). Cumple el criterio al pie: **se toca como UNA
+          unidad** — elegís días, elegís el rango, agregás. Los tres
+          gestos son un solo trabajo y hoy flotaban sueltos sobre el
+          fondo, cada uno a la misma altura visual que la prosa de al
+          lado.
+
+          POR QUÉ NO VIVE DENTRO DE ④, que era la otra salida: lo haría
+          **hijo de una decisión distinta**. El modo de horarios se
+          configura UNA VEZ; una franja se compone MUCHAS. Anidarlos diría
+          que componer franjas es parte de elegir el modo, y no lo es.
+
+          El texto de ayuda queda AFUERA (⑥): explica la pantalla, no esta
+          unidad — el mismo corte que separa ④ de su explica, que sí vive
+          adentro porque explica ESA decisión. ══ */}
+      <Tarjeta>
+        <View style={{ gap: spacing[2] }}>
+          <SelectorOpcion
+            etiqueta={t('taller.dias')}
+            disposicion="fila"
+            acento="oficio"
+            multiple
+            opciones={ORDEN_DISPLAY.map((dia) => ({ codigo: String(dia), etiqueta: letraDia(dia) }))}
+            seleccionadas={diasSel.map(String)}
+            onSelect={(codigo) => {
+              const dia = Number.parseInt(codigo, 10);
+              setDiasSel((prev) => (prev.includes(dia) ? prev.filter((x) => x !== dia) : [...prev, dia]));
+            }}
+          />
+          <Boton
+            variante="ghost"
+            etiqueta={t('taller.todaLaSemana')}
+            onPress={() => setDiasSel([...ORDEN_DISPLAY])}
+          />
+          <Boton
+            variante="secundario"
+            etiqueta={t('horarios.agregarFranja')}
+            bloque
+            deshabilitado={diasSel.length === 0}
+            onPress={() => {
+              setCreandoFranja(true);
+              setVistaNueva('form');
+              setDesdeSel(null);
+              setHastaSel(null);
+              setCupoSel(CUPO_NUEVA_FRANJA);
+              setCupoBase(CUPO_NUEVA_FRANJA);
+              // D-386: la réplica arranca con TODAS las ofertas marcadas —
+              // desmarcar es el gesto raro, no el común
+              setOfertasSel(ofertas.map((o) => o.id));
+            }}
+          />
+        </View>
+      </Tarjeta>
       {grupos.length === 0 ? (
         <Texto variante="apoyo">{t('taller.sinFranjas')}</Texto>
       ) : (
