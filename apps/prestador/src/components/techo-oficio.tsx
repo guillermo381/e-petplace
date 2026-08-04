@@ -261,6 +261,29 @@ export function TechoOficio({
    * nada y no se ve**. *La regla del muro vive con el muro:* acá es
    * imposible olvidarla.
    *
+   * 🔴 **DEUDA DECLARADA (S85, gate del founder): LA JERARQUÍA DEL TECHO
+   * NO PUEDE DEPENDER DE UN DATO OPCIONAL.**
+   *
+   * El founder pidió el nombre del negocio *"más chico"* y después firmó
+   * el resultado —pero **el `fontSize` nunca cambió**: sigue en `sm`, igual
+   * que antes (medido contra su ancla anterior `0419cc8`; los tokens de
+   * tipografía y el `Isotipo`, intactos). *Lo que cambió es la
+   * COMPOSICIÓN:* el nombre dejó de ser lo único de su renglón —ahora lo
+   * comparte con esta insignia— y arriba de los tres números. **Pesa menos
+   * sin haber encogido.**
+   *
+   * ⇒ **La mejora que le gusta depende de que la insignia SE MONTE.** Un
+   * prestador **sin cohorte** recupera el renglón entero y **vuelve a la
+   * queja original sin que nadie sepa por qué** — porque lo que se
+   * "arregló" no existe como cambio.
+   *
+   * **Hoy el caso no está vivo** (todos los prestadores tienen cohorte) y
+   * **nace el día que alguien entre después de marzo 2027**, cuando la
+   * ventana fundacional cierre. **Dueño: B**, junto con el rehecho del
+   * bloque de los tres números — el renglón del nombre tiene que
+   * sostenerse solo, con o sin insignia. *Si necesita decisión de diseño,
+   * va a la mesa.*
+   *
    * ⚠️ **EL GUARD DE NULOS ES DE ESTA CASA, y es correcto que lo sea:**
    * `Insignia` pide los dos campos NO nulos —*los dos datos o ninguno*—
    * y `MiPrestador` los da nullable. **No es un catálogo duplicado** (eso
