@@ -5301,6 +5301,57 @@ importa: **doce de veinticuatro** reglas del lint estaban en esa condición.*
 
 ---
 
+#### D-644 — UNA MIGRACIÓN DE S82 VIVE EN EL REPO Y NO EN LA DB: divergencia silenciosa entre el código y el remoto 🟠
+
+**EL LITERAL:** `supabase/migrations/20260731130000_s82_oferta_adiestramiento_publica.sql`
+**existe en el árbol y NO está en `supabase_migrations.schema_migrations`.**
+
+**Cómo apareció, y es parte del hallazgo:** **no la encontró un censo — la
+encontró un `db push` que quiso arrastrarla** (S85-A, al aplicar el
+endurecimiento de `handle_new_user`):
+
+> `Found local migration files to be inserted before the last migration on
+> remote database. Rerun the command with --include-all flag`
+
+**Medido contra `schema_migrations` (versiones ≥ `20260731000000`):** están
+todas desde `20260802120000` en adelante; **la `20260731130000` NO figura.**
+
+### POR QUÉ ES 🟠 Y NO UN TRÁMITE
+
+> **Una migración que vive en el repo y no en remoto es una DIVERGENCIA
+> SILENCIOSA entre el código y la DB.**
+
+**Y su modo de falla es el de toda S85 (L-194 → L-199): NO ROMPE NADA.** *El
+repo se lee completo, el archivo está ahí con su DDL, y cualquiera que audite
+"¿esto está aplicado?" leyendo el árbol **va a decir que sí**.* **Solo la DB
+sabe que no**, y nadie le pregunta.
+
+**⚠️ SU PEOR CONSECUENCIA NO ES LA FALTANTE — ES EL ARRASTRE:** *cada `db push`
+futuro va a querer aplicarla **como efecto colateral de otra cosa**.* En S85 se
+frenó a propósito (**se aplicó la migración propia con `db query --file` y se
+registró explícitamente, en vez de usar `--include-all`**), *porque aplicar DDL
+de S82 sin medirla, dentro de un commit de endurecimiento, es exactamente la
+clase de cambio que nadie audita después.* **Pero el freno es de la pista, no
+del sistema: la próxima sesión se lo encuentra igual.**
+
+### LO QUE HAY QUE DECIDIR — no es "aplicarla"
+
+**Son tres preguntas y ninguna se contesta desde el árbol:**
+1. **¿su DDL ya está en la DB por otra vía?** *(aplicado a mano en S82 y no
+   registrado — pasa)* ⇒ la cura es **registrar la versión**, no correr el SQL.
+2. **¿no está y hace falta?** ⇒ se aplica **medida y con reversa**, como
+   cualquier migración.
+3. **¿no está y ya no hace falta?** ⇒ **el archivo se retira del árbol**, con su
+   lápida — *un archivo que nadie va a aplicar nunca es peor que no tenerlo:
+   frena todo `push` futuro y miente sobre el estado.*
+
+☠️ **CONDICIÓN DE MUERTE:** `db push` corre **sin proponer migraciones
+anteriores** — verificable en una línea, sin interpretación.
+**DISPARO: la primera migración de S86** *(se la va a encontrar sí o sí)*.
+Origen: S85-A (freno al aplicar `20260804110000`).
+
+---
+
 #### D-643 — LA BARRA DE **TRES** TABS NUNCA SE DISEÑÓ: si NEGOCIO no se monta, el empleado no tiene dónde configurar nada ⚪ HUECO DE DISEÑO (declarado, no defecto)
 
 **Medido en `apps/prestador/src/app/(tabs)/_layout.tsx` (HEAD `d4d0bd2`):** la
@@ -5754,6 +5805,39 @@ reaparece se lee como "no funcionó" — y manda a revertir la cura correcta.*
 > resolverse en cualquier superficie, pero tiene que existir una.*
 > **DISPARO: S86, junto con las 5 superficies.** *Las dos se miran juntas por
 > orden de la mesa.*
+>
+> #### 🔎 EL COTEJO CON C ANGOSTA ESTO — y corrige a A, que escribió "callejón" sin el literal
+>
+> **Las 5 superficies, con su literal** (`grep` sobre `apps/*/src`, HEAD
+> `df38204`) — **y no son cinco de una casa: son 3 + 2 de casas distintas:**
+>
+> | app | archivo | qué hace | dueño en S85 |
+> |---|---|---|---|
+> | prestador | `bienvenida-dia1.tsx` | pinta | **C** |
+> | prestador | `(tabs)/index.tsx` | pinta | **C** |
+> | prestador | `(tabs)/cuenta/seguridad.tsx` | lo toca | **C** |
+> | cliente | `(tabs)/hogar/index.tsx:573` | **pinta** (el saludo, QW1 S53) | 🔴 **NADIE** |
+> | cliente | `(tabs)/cuenta/perfil.tsx:70,119` | **LEE Y ESCRIBE** | 🔴 **NADIE** |
+>
+> **⇒ LA CORRECCIÓN, y es de A sobre su propia enmienda: `apps/cliente` YA TIENE
+> superficie de edición del nombre** (`perfil.tsx` lo lee con `?? ''` y lo manda
+> al guardar). **Es la MISMA columna.**
+>
+> **El callejón sigue existiendo, pero es MÁS ANGOSTO de lo que esta ficha
+> decía:**
+> - **prestador que TAMBIÉN es pet parent** → puede curarse el nombre **desde la
+>   otra app**. *Feo, cruzado, pero hay camino.*
+> - **prestador SIN cuenta de cliente** → **sin salida.** *Y es el caso normal
+>   de la cohorte que se recluta.*
+>
+> **⚠️ Y LO QUE NO TIENE DUEÑO EN ESTA SESIÓN, declarado en vez de darlo por
+> cubierto (regla 76 / §1 del método):** **las DOS superficies del cliente.**
+> *C mide tres y son las tres del prestador — el cotejo cierra exacto.* **Las
+> del cliente quedan sin tocar y sin asignar**, y una de ellas **pinta un saludo
+> que con `NULL` va a quedar sin nombre**. *Darlas por cubiertas porque "los
+> wrappers devuelven `?? null`" sería confundir motor con voz.*
+> **Cruza con D-641** (`apps/cliente` nunca se corrió contra el `packages/api`
+> de S85): **es la misma frontera, y ahora tiene un segundo motivo.**
 
 *(Texto original de la ficha, conservado — nació correcto para su premisa:)*
 
