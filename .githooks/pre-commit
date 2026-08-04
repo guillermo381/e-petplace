@@ -280,9 +280,15 @@ if [ -n "$VERIFICAR" ]; then
     case "$CAMBIOS" in
       *packages/*)
         echo ""
-        echo "  Tocaste un paquete COMPARTIDO: esto se rompió en quien lo CONSUME,"
-        echo "  no en lo que editaste. Un tipo puede quedar coherente para sí mismo"
-        echo "  y romper a sus consumidores — por eso el gate mira para abajo." ;;
+        echo "  Tocaste un paquete COMPARTIDO, así que el gate miró a sus CONSUMIDORES:"
+        echo "  un tipo puede quedar coherente para sí mismo y romper a quien lo usa."
+        echo ""
+        echo "  ⚠️ PERO ESTE GUARD NO SABE SI LO ROMPISTE VOS. Mide el ÁRBOL, no tu"
+        echo "     cambio, así que un consumidor que YA estaba rojo —el WIP de otra"
+        echo "     pista, un archivo sin trackear— sale igual acá y no es tuyo."
+        echo "     Antes de buscar en lo que editaste: mirá si el rojo ya existía"
+        echo "     (git stash -u && tsc, o preguntá en la mesa). Si es ajeno, esto"
+        echo "     se declara con SALTAR_GATE y el motivo lo dice." ;;
     esac
     echo ""
     echo "  curalo, o declaralo:  SALTAR_GATE=\"por qué\" git commit ..."
