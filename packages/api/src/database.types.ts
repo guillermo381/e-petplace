@@ -16420,6 +16420,7 @@ export type Database = {
         Returns: boolean
       }
       _direccion_hogar_snapshot: { Args: { p_user_id: string }; Returns: Json }
+      _estados_cita_contables: { Args: never; Returns: string[] }
       _familia_tiene_miembros_vigentes: {
         Args: { p_familia_id: string }
         Returns: boolean
@@ -16857,6 +16858,18 @@ export type Database = {
         }
         Returns: Json
       }
+      crear_cita_negocio: {
+        Args: {
+          p_empleado_id?: string
+          p_fecha: string
+          p_hora: string
+          p_mascota_id: string
+          p_precio?: number
+          p_prestador_id: string
+          p_tipo_servicio: string
+        }
+        Returns: Json
+      }
       crear_cuenta_comercial_inicial: {
         Args: {
           p_country_code: string
@@ -17216,6 +17229,7 @@ export type Database = {
         }
         Returns: Json
       }
+      hoy_local: { Args: never; Returns: string }
       iniciar_atencion_adiestramiento: {
         Args: { p_cita_id: string; p_empleado_id?: string }
         Returns: Json
@@ -17368,6 +17382,10 @@ export type Database = {
           telefono: string
           telefono_codigo_pais: string
         }[]
+      }
+      obtener_datos_negocio: {
+        Args: { p_hasta?: string; p_prestador_id: string }
+        Returns: Json
       }
       obtener_dias_cerrados: {
         Args: { p_prestador_id: string }
@@ -17583,6 +17601,19 @@ export type Database = {
           empleado_id: string
           nombre: string
           tiene_jornada: boolean
+        }[]
+      }
+      obtener_pizarra: {
+        Args: { p_prestador_id: string }
+        Returns: {
+          cita_id: string
+          fecha: string
+          hora: string
+          mascota_especie: string
+          mascota_id: string
+          mascota_nombre: string
+          servicio_voz: string
+          tipo_servicio: string
         }[]
       }
       obtener_plan_vacunal: {
@@ -18050,6 +18081,7 @@ export type Database = {
         Returns: string
       }
       test_sb1_transversales_genericas: { Args: never; Returns: Json }
+      tomar_cita: { Args: { p_cita_id: string }; Returns: Json }
       use_beta_invite: {
         Args: { p_beta_id: string; p_user_id: string }
         Returns: undefined
@@ -18112,6 +18144,13 @@ export type Database = {
         Returns: {
           disponible: boolean
           mensaje: string
+        }[]
+      }
+      verificar_reloj_para_dia: {
+        Args: never
+        Returns: {
+          motivo: string
+          proname: string
         }[]
       }
       wizard_crear_cuenta_y_rol: {

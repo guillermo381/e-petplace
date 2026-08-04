@@ -245,6 +245,17 @@ export {
   type CodigoErrorPreferencias,
 } from './wrappers/preferencias';
 export {
+  obtenerDatosNegocio,
+  type DatosNegocio,
+  type DatosNegocioSemana,
+  type DatosNegocioDia,
+  type DatosNegocioMix,
+  type DatosNegocioMixItem,
+  type DatosNegocioTrayectoria,
+  type DatosNegocioPlata,
+  type CodigoErrorDatosNegocio,
+} from './wrappers/datosNegocio';
+export {
   obtenerMisPagos,
   type PagoDelDueno,
   type CodigoErrorPagos,

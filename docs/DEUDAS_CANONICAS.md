@@ -2980,6 +2980,41 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
   > **Por eso la frontera no dice "sé generoso" ni "sé austero": dice CONTÁ.**
   > *El radio no es una virtud de carácter — es el resultado de un censo, y un
   > censo se corre en un minuto.*
+- **L-200 — UN REPORTE DE PROGRESO ES UNA AFIRMACIÓN SOBRE UN HECHO, Y SE VERIFICA ANTES DE EMITIRLO (S86, firmada por la mesa — caso propio de A).**
+
+  > ### **«ESTÁ CORRIENDO» ES UNA MEDICIÓN, NO UNA INTENCIÓN.**
+  > *Lanzar el comando y reportar que corre son dos cosas distintas — y entre las dos cabe un comando que murió al instante.*
+
+  **EL CASO, y es de A:** A lanzó una captura de `logcat` y le dijo al
+  founder **«la captura está corriendo — abrí la app ahora»**. **No estaba
+  corriendo:** usó `timeout`, que **no existe en macOS**; el proceso murió
+  al instante y el archivo quedó con **una línea de error**. *El founder
+  gastó una ventana con el teléfono en la mano contra una captura que no
+  existía.*
+
+  **POR QUÉ ES DE LA FAMILIA L-198 y no un descuido suelto:** el texto
+  («está corriendo») **describía un hecho que nunca se verificó**, y su
+  modo de falla es **el silencio** — un comando en background no avisa que
+  murió, y quien lo lanzó ya siguió con otra cosa. *Es L-192 aplicada al
+  REPORTE en vez de al chequeo: **una afirmación cuyo modo de falla es que
+  nadie la mire no es una afirmación, es una esperanza.***
+
+  **LA REGLA, en dos mitades porque la primera sola no alcanza:**
+  ① **antes de pedirle a un humano que actúe contra un instrumento, se
+  verifica que el instrumento está vivo** —una línea de salida, un PID, un
+  archivo que crece—; ② **y si el reporte ya salió falso, se corrige
+  NOMBRANDO qué se afirmó y qué era cierto**, jamás se deja envejecer.
+
+  **EL ATENUANTE QUE NO SALVA, y se escribe porque es el que tienta:** la
+  evidencia **no se perdió** —`logcat` tiene buffer y A recuperó 37 638
+  líneas—. *Pero eso fue suerte del instrumento, no diseño del reporte:
+  con un buffer más corto, la ventana se perdía entera.*
+  Origen: S86-A. Hermana de **L-191** (el exit se lee del comando, jamás
+  del pipe) — *las dos son lo mismo: **confiar en la forma del comando en
+  vez de en su resultado**.* Y de [[L-198]], que la mesa cobró el mismo día
+  en su tercera dirección: **reenviar las reglas de una interfaz en vez de
+  la interfaz.**
+
 - **L-199 — EL ROJO SE PRODUCE **ANTES**, O LA CURA QUEDA SIN EVIDENCIA PARA SIEMPRE (S85, firmada por la mesa).**
 
   > ### **EL "ANTES" NO SE PUEDE RECONSTRUIR DESPUÉS.**
@@ -5325,7 +5360,86 @@ importa: **doce de veinticuatro** reglas del lint estaban en esa condición.*
 
 ---
 
-#### D-649 — NO HAY FORMA DE FORZAR LA BÚSQUEDA DE UPDATE DESDE LA APP: cuando un OTA no baja, el único recurso es reinstalar 🟠
+#### D-650 — ☠️ EL GPS DEL PASEO IMPIDE QUE LLEGUEN LAS ACTUALIZACIONES: el prestador que trabaja es el que no se actualiza 🔴
+
+**Medido de punta a punta el 4-ago-2026 sobre el teléfono del founder
+(`R5CY201ZDVL`), con `adb` y el log en la mano.** *El caso es el valor:
+se dio por resuelto DOS veces con una hipótesis cierta pero incompleta,
+y solo el aparato real lo cerró.*
+
+### SON DOS MITADES, Y UNA SOLA NO EXPLICA NADA
+
+**① El proceso NO MUERE aunque cierres desde recientes.**
+
+| medido | valor |
+|---|---|
+| PID antes de los dos cierres del founder | **19224** |
+| PID después de los dos cierres | **19224** — *idéntico, mismo `starttime` (18364 jiffies)* |
+| antigüedad del proceso | **≈ 5 h 45 min** — arrancó a **183 s del boot** |
+| `epetplace-track-paseo` (tarea headless de D-292) | **105 disparos en ~2 min de log**, cada ~5 s, «to keep JS timers alive» |
+
+**La memoria subió de 222 MB a 469 MB ⇒ la Activity SÍ se recreó.** *Y ahí
+está la trampa: **recrear la Activity no es relanzar el proceso**, y
+`expo-updates` chequea en el arranque del PROCESO.* **Cerrar desde
+recientes se siente como reiniciar y no lo es.**
+
+**② Cuando por fin hay cold start, el primero SOLO DESCARGA.**
+
+Proceso nuevo **14665**, `14:50:42.567 → 14:50:57.262` — quince segundos:
+
+```
+StartStartup → Check → CheckCompleteAvailable (isUpdateAvailable=TRUE)
+→ Download → 65/65 assets, failedAssetCount=0 → DownloadComplete → EndStartup
+ErrorRecovery: remote load status changed: NEW_UPDATE_LOADED
+```
+
+**El chequeo NUNCA estuvo roto: consulta, encuentra, baja completo, cero
+errores de firma/red/política.** Y aun así **el marcador de ESE arranque
+seguía diciendo `019fcb21`** (el bundle de S85), porque expo-updates
+lanza el viejo mientras baja el nuevo. **Hace falta OTRO arranque.**
+
+### ⇒ EL PRESTADOR QUE TRABAJA NECESITA **ANDROID → AJUSTES → FORZAR DETENCIÓN**, DOS VECES
+
+**Y NO ERA UN ESTADO RARO — CONFIRMADO POR EL FOUNDER: había sesiones de
+paseo EN CURSO.** *No hay tarea huérfana; no hay segundo defecto.*
+**Terminar los paseos fue lo que liberó el proceso y aplicó `019fcda7`.**
+
+> ### **LA FUNCIÓN QUE HACE QUE EL PASEO SE REGISTRE ES LA MISMA QUE IMPIDE QUE LAS ACTUALIZACIONES LLEGUEN — y ocurre en el USO NORMAL, no en un borde.**
+>
+> *Cuanto más usa la app un prestador, menos actualizaciones recibe.*
+
+**POR QUÉ NADIE LO VIO ANTES, y es lo que lo vuelve caro:** **no rompe
+nada.** El publish sale verde, `update:view` muestra el group, el
+servidor sirve el update correcto —`verify-ota` lo probó VERDE ese mismo
+día— y el aparato sigue con el bundle viejo **sin un solo error en
+ningún lado**. **Es la familia de S85 (L-194 → L-199) en su forma más
+cara: todo funciona y el resultado es falso.**
+
+**LA RECONCILIACIÓN CON EL EMULADOR, que es donde se cayó la primera
+hipótesis:** en `emulator-5554` el mismo APK tomó el update en dos
+reinicios. **La diferencia no era el aparato: era `am force-stop`** —
+que garantiza matar el proceso— **contra cerrar desde recientes**, que
+con el GPS activo no lo mata. *Mismo binario, misma config, mismo canal.*
+
+☠️ **CONDICIÓN DE MUERTE:** un prestador con un paseo en curso recibe un
+OTA **sin** pasar por Ajustes de Android. **Hoy la única cura diseñada es
+[[D-649]]** (el chequeo desde Cuenta) — *y por esto D-649 dejó de ser
+conveniencia*. **La cura de raíz —que la tarea de background no pinche el
+chequeo— no está diseñada y no se inventa acá.**
+Origen: S86-A. Hermana de [[D-649]] y de [[D-292]] (el GPS en background,
+cuya construcción es la causa).
+
+---
+
+#### D-649 — NO HAY FORMA DE FORZAR LA BÚSQUEDA DE UPDATE DESDE LA APP: cuando un OTA no baja, el único recurso es reinstalar 🔴
+
+> **➕ S86 — SUBE DE 🟠 A 🔴 Y SU ARGUMENTO CAMBIÓ, firmado por la mesa.**
+> *No es «no hay forma de forzar la búsqueda»: es que **el usuario que
+> pasea necesita entrar a Ajustes de Android DOS VECES para
+> actualizarse**.* La evidencia entera está en [[D-650]] — **medida en el
+> aparato del founder, con paseos reales en curso.** *Deja de ser una
+> comodidad del diagnóstico y pasa a ser **la única salida diseñada** para
+> un prestador que usa la app como se espera que la use.*
 
 **Nace del incidente del 4-ago-2026**, y su valor está en cómo se
 descartó todo lo demás antes de llegar acá.

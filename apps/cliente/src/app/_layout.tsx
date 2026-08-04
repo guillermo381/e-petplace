@@ -39,7 +39,12 @@ export { PantallaCaidaRaiz as ErrorBoundary } from '@/components/pantalla-caida'
 // republicar); `isEmbeddedLaunch` distingue el OTA aplicado del bundle
 // embebido del APK (el punto exacto de L-138). En dev/Expo Go/web
 // `updateId` es null — el marcador lo dice honesto, no miente.
-console.log('[bundle] cliente S73');
+// ☠️ S86 — EL MARCADOR ESTÁTICO `[bundle] cliente S<n>` MURIÓ (Ley 37).
+// Decía `S73` — TRECE sesiones sin tocarse— y por eso rotulaba como S73
+// bundles de S86. Ya no informaba: DESINFORMABA. Su gemelo del prestador
+// se midió en dispositivo el 4-ago: con el OTA de S86 aplicado seguía
+// diciendo `S79-B`. La línea de abajo dice lo mismo mejor y SE ACTUALIZA
+// SOLA — que es exactamente lo que a ésta le faltaba (L-160).
 console.log(
   `[update] id=${Updates.updateId ?? 'ninguno (embedded/dev)'} · ` +
     `embedded=${Updates.isEmbeddedLaunch} · canal=${Updates.channel ?? 'ninguno'}`,
