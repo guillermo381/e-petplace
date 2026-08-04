@@ -916,3 +916,10 @@ export {
   type PlataDelDia,
   type CodigoErrorPortada,
 } from './wrappers/portadaPrestador';
+
+export {
+  obtenerExpedienteModulado,
+  type AporteExpediente,
+  type NivelAporte,
+  type CodigoErrorExpediente,
+} from './wrappers/expedienteModulado';

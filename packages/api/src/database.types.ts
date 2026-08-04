@@ -17378,6 +17378,20 @@ export type Database = {
           nombre: string
         }[]
       }
+      obtener_expediente_modulado: {
+        Args: { p_mascota_id: string }
+        Returns: {
+          autor: string
+          datos: Json
+          eje_jtbd: string
+          fecha_evento: string
+          id: string
+          nivel: string
+          prestador_id: string
+          procedencia: string
+          tipo: string
+        }[]
+      }
       obtener_groomers_disponibles: {
         Args: {
           p_fecha: string

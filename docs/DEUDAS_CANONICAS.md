@@ -2727,6 +2727,28 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 - **L-196 — UN MÓDULO "PREPARADO-APAGADO" QUE NUNCA PASÓ POR UN COMPILADOR NO ESTÁ PREPARADO: ESTÁ ESCRITO (S85, firmada por la mesa).** El caso: `modules/sonda-manifest` (D-579, S81) se escribió como **pasajero preparado-apagado**, para viajar *"en la próxima build nativa"*. **En S85 hubo esa build, y falló:** `project ':sonda-manifest' does not specify compileSdk in build.gradle` — el módulo **jamás había pasado por Gradle**, porque los OTAs son JS y no tocan la cadena nativa. **DOCE SESIONES sin que nada lo compilara.** *El patrón "preparado-apagado" es correcto y la casa lo usa bien (el mic de D-456 llegó a destino tras cinco sesiones) — lo que falla es dar por verificado lo que solo está escrito.* **LA REGLA: todo pasajero que espera un tren futuro declara QUÉ LO VERIFICA MIENTRAS ESPERA.** Si nada lo compila, lo tipa ni lo corre, **su estado no es "listo": es "sin verificar"**, y hay que decirlo con esa palabra en su ficha. *La forma barata de cumplirla: que la deuda que lo crea nombre el primer instrumento que lo tocará — y si la respuesta es "ninguno hasta el tren", eso ya es el hallazgo.* **Hermana de L-193** (la premisa heredada que nadie fechó) **y de L-195** (la columna que existe y no está poblada): las tres son *confiar en la existencia en vez de en la verificación*. **Y su costo medido acá: un tren entero de build — 17 min de cola + 2m17s de Gradle — para descubrir una línea que un `tsc` nativo habría cazado el día que se escribió.** Origen: S85-A (el log de la build `c241c908`).
 - **L-197 — UN FALLO PUEDE DEGRADAR A *AUSENCIA*, NUNCA A UN *VALOR* QUE EL CONSUMIDOR VA A USAR COMO SI FUERA CIERTO (S85, firmada por la mesa).**
 - **L-198 — UN TEXTO QUE EXPLICA UN PORQUÉ **VENCE CON EL PORQUÉ**, Y SE CAMBIA EN EL MISMO COMMIT (S85, firmada por la mesa — síntesis de método de la sesión).**
+- **L-199 — EL ROJO SE PRODUCE **ANTES**, O LA CURA QUEDA SIN EVIDENCIA PARA SIEMPRE (S85, firmada por la mesa).**
+
+  > ### **EL "ANTES" NO SE PUEDE RECONSTRUIR DESPUÉS.**
+  > **Una vez curado, nadie puede probar que estaba roto — solo confiar en que alguien lo verificó.**
+
+  **Vale para TODA cura de privacidad y de permisos, no solo para el caso que la fundó.** *Un bug funcional deja rastro —un test que falla, un error en el log, un usuario que reclama—; **una fuga de permisos no deja ninguno**: el sistema funciona igual de bien mostrando de más.*
+
+  **EL CASO (D-639, S85):** antes de escribir la RPC se corrió el par por el camino real con JWT — **85 filas vistas, 84 CON su contenido**. Después: **85 filas, 0 contenidos, 85 autores**. *Sin ese "antes" medido, la cura habría sido una afirmación: "ahora está bien" **sin nada que diga que antes no lo estaba**.*
+
+  ### ⚠️ Y LO QUE LO VUELVE URGENTE Y NO PROLIJIDAD
+
+  **El error de una cura de permisos SE VE IDÉNTICO AL ACIERTO.** *Una pantalla que muestra de más funciona perfecto: completa, sin rebotes, sin vacíos.* **Un gate visual diría "se ve bien" — y tendría razón.** ⇒ **el gate NO puede ser mirar**, y lo único que queda es el par medido.
+
+  *Si D-639 hubiera salido con esa firma, el defecto sobrevivía indefinidamente —con datos clínicos reales de por medio— y su descubrimiento habría dependido de que alguien leyera el código por otra razón.*
+
+  **LA REGLA OPERATIVA:** toda cura de permisos, RLS o visibilidad **corre su fixture ANTES de la cura y guarda el número**. *El fixture no es la verificación de la cura: es la única prueba de que había algo que curar.* **Hermana de L-192** (una verificación cuyo modo de falla es el silencio) — **acá el silencio es del defecto, no del instrumento.**
+
+  ### ➕ SU COROLARIO, del alcance de la misma cura
+
+  > **UNA MODULACIÓN APROXIMADA ES UNA FUGA CON FORMA DE LEY.**
+
+  **D-639 v1 implementa *"quien lo hizo"* y NO *"quien lo necesita para atender"*, que espera la matriz `oficio × eje` de A3.3 — y se DECLARA en vez de aproximarse.** *Aproximar un permiso produce algo que parece cumplir la ley y concede de más en los bordes que nadie enumeró; y como su error se ve como el acierto, **nadie lo audita después**.* Origen: S85-A (D-639, el par medido).
 
   > **Un porqué viejo se lee con la misma autoridad que uno vigente, y nadie puede distinguirlos leyendo.**
 
