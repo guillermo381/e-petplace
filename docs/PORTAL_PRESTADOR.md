@@ -187,16 +187,24 @@ porque el dinero no tiene dialecto de oficio.
 
 ### ✅ QUIÉN VE LA PLATA — **FIRMA DEL FOUNDER (3-ago-2026)**
 
-> **Literal: *"Sí confirmo"* — LA RECEPCIÓN NO VE EL DINERO DEL DÍA EN LA
-> PORTADA. EL TITULAR SÍ.**
+> ### **LA PLATA DEL DÍA LA VE **SOLO EL TITULAR** (y el admin).**
 >
-> **⚠️ Y SU ALCANCE REAL, medido por C: NO es "la recepción" — es TODO
-> NO-TITULAR.** El gate es `titular OR admin`, así que **un veterinario con
-> chips que no es titular tampoco ve la plata**, y esa portada es suya también.
-> *Se dice con precisión porque "la recepción" se lee como "el rol que no
-> atiende", y un vet empleado sí atiende — pero la plata del negocio no es
-> suya.* **Es coherente con la razón de S72-P1a: no es sobre el oficio, es
-> sobre de quién es el negocio.**
+> **NINGÚN EMPLEADO, sin importar su oficio ni sus chips:** ni recepción, ni un
+> **vet empleado**, ni un **groomer empleado**.
+>
+> *Literales del founder: **"Sí confirmo"** (3-ago) sobre el criterio, y
+> **"Confirmo"** (3-ago) sobre este alcance corregido.*
+>
+> **EL PORQUÉ, en una línea:** **la plata del negocio no es del que atiende — es
+> del que lo tiene.** *No es una jerarquía de oficios: es de quién es el
+> negocio.* Por eso el predicado es `titular OR admin` y no una lista de roles.
+>
+> **⚠️ Nota de L-198, y va acá porque es el caso limpio:** la primera redacción
+> decía *"la recepción"* — **un SUBCONJUNTO de lo que el motor siempre hizo**.
+> El gate nunca miró el oficio. *La letra describía el caso que el founder tenía
+> en la cabeza; el motor era más ancho.* **Ahora dicen lo mismo** — y el desfase
+> lo encontró C midiendo, no un guard: **ningún instrumento puede ver una letra
+> que describe de menos.**
 
 **Esta firma RECONCILIA dos letras que se contradecían**, y por eso vive acá y no
 en un acta: **§2.4bis** pone PLATA en la portada; **`S72-P1a`** (posición de mesa

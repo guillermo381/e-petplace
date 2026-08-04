@@ -155,9 +155,29 @@ export type MiPrestador = Pick<
      toda columna nueva nace SIN grant (§3bis). **Y viaja también en
      `v_prestadores_publicos`**, porque el emblema se ve en la página
      pública — es parte de lo que la familia lee al elegir. */
-  | 'cohorte'
   | 'cohorte_anio'
 > & {
+  /**
+   * EL EMBLEMA, **ESTRECHADO A SU UNIÓN** (pedido de C, S85).
+   *
+   * Sale del `Pick` a propósito: Supabase **no lee los CHECK**, así que el tipo
+   * generado lo da como `string | null` y la pieza de `packages/ui` pide
+   * `'fundador' | 'pionero' | null`. **Acá se declara la unión que la DB YA
+   * GARANTIZA** (`chk_prestadores_cohorte`), en el mismo bloque de intersección
+   * donde vive la zona (S84-A26).
+   *
+   * ⚠️ **POR QUÉ NO UN CAST EN LA PANTALLA** —y C tenía razón en no hacerlo—:
+   * un `as` **aceptaría en silencio un código futuro que la unión no cubre**.
+   * *El día que la cohorte gane un tercer valor, el cast lo dejaría pasar y la
+   * pieza recibiría algo que no sabe pintar; la unión declarada rompe el
+   * typecheck, que es exactamente lo que uno quiere que pase.*
+   *
+   * **Estrechar acá COPIA lo que la DB garantiza — y eso es una duplicación
+   * declarada, no un descuido:** si el CHECK gana un valor, esta unión hay que
+   * moverla en el MISMO commit (L-198). *La alternativa era que cada consumidor
+   * lo estrechara por su cuenta, que es la misma copia repartida en N casas.*
+   */
+  cohorte: 'fundador' | 'pionero' | null;
   /* ── S84-A26 · LA ZONA, LEÍDA DE LA MISMA VISTA QUE VE LA FAMILIA ──
      Estas TRES no salen de `prestadores`: salen de `v_prestadores_publicos`,
      y por eso el tipo es una intersección y no un `Pick` más largo.
@@ -192,6 +212,15 @@ const COLUMNAS_MI_PRESTADOR =
  *  ve la familia. Si la fila no está en la vista (negocio no activo) o no
  *  tiene coordenadas, las tres vuelven null, que es la verdad y no un
  *  fallo: por eso esta función no devuelve error. */
+/** Estrecha `cohorte` de `string | null` (lo que Supabase genera, porque **no
+ *  lee los CHECK**) a su unión real. **Se valida en RUNTIME y no con un cast**:
+ *  un `as` daría por buena cualquier cadena, y el día que la DB gane un tercer
+ *  valor la pieza de `ui` recibiría algo que no sabe pintar. *Un valor fuera de
+ *  la unión cae a `null` — que es "no sé", no un emblema inventado* (L-197). */
+function estrecharCohorte(v: unknown): 'fundador' | 'pionero' | null {
+  return v === 'fundador' || v === 'pionero' ? v : null;
+}
+
 async function leerZona(
   prestadorId: string,
 ): Promise<{ zona_lat: number | null; zona_lon: number | null; zona_radio_m: number | null }> {
@@ -227,7 +256,9 @@ export async function obtenerMiPrestador(): Promise<
     .maybeSingle();
 
   if (error) return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
-  if (data !== null) return { ok: true, data: { ...data, ...(await leerZona(data.id)) } };
+  if (data !== null) {
+    return { ok: true, data: { ...data, cohorte: estrecharCohorte(data.cohorte), ...(await leerZona(data.id)) } };
+  }
 
   // (2) Vínculo activo. No es titular: ¿es empleado activo de alguien?
   const { data: vinculos, error: errorVinculo } = await getClient()
@@ -259,7 +290,7 @@ export async function obtenerMiPrestador(): Promise<
   // no está 'activo' (el borde declarado arriba). `sin_prestador` es la
   // voz honesta — no hay negocio que mostrarle todavía.
   if (fila === null) return { ok: false, codigo: 'sin_prestador', mensaje: MENSAJES.sin_prestador };
-  return { ok: true, data: { ...fila, ...(await leerZona(fila.id)) } };
+  return { ok: true, data: { ...fila, cohorte: estrecharCohorte(fila.cohorte), ...(await leerZona(fila.id)) } };
 }
 
 // ── S60-B2 (hunk aditivo): edición ACOTADA del perfil de la entidad ─────────
