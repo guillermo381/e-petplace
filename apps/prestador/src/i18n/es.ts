@@ -135,6 +135,18 @@ export const prestadorEs = {
     datoCompleta: 'Jornada completa.',
     datoPorCoordinar: 'Día atendido · {{n}} por coordinar',
     datoLibreConSemana: 'Hoy libre · {{n}} esta semana',
+    /* ⭐ S86-C · UN DÍA PASADO HABLA EN PASADO (cruce 2, firma de mesa).
+       Con la rueda llegando a hoy-3, las voces de arriba prometían futuro
+       sobre un día vencido: *"Te quedan 2 · terminas 16:30"* de un martes
+       que ya pasó. **Lo pendiente de un día vencido no es agenda: es plata
+       sin devengar** (el devengo nace al cerrar con calidad), y cada una
+       es puerta a su cita — las filas de abajo ya navegan a ella.
+       Un día pasado SIN citas no dice nada: la línea se omite (jamás
+       "Hoy libre" sobre un día que no es hoy). */
+    datoPasadoPendiente1: 'Quedó 1 sin cerrar',
+    datoPasadoPendientes: 'Quedaron {{n}} sin cerrar',
+    datoPasadoCerrado1: 'Día cerrado · 1 atención',
+    datoPasadoCerradoN: 'Día cerrado · {{n}} atenciones',
     // El pie de revelar (candidato a diccionario 19.6): el número EN la
     // etiqueta — jamás un 'Ver más' mudo. Compartida por las dos secciones.
     yaAtendidasTitulo: 'Ya atendidas',
@@ -148,6 +160,11 @@ export const prestadorEs = {
     enCurso: 'En vivo',
     // Zona 1 — lo siguiente preside
     ahora: 'Ahora',
+    /* ⭐ S86-C · LA PERTENENCIA DEL VIVO (firma ②). Parado en otro día, lo
+       que corre AHORA sigue a la vista — pero el rótulo dice de qué día es.
+       El argumento de S85-C7 (*"ahora" no existe en el jueves*) sigue
+       siendo cierto: se honra con RÓTULO, no escondiendo lo vivo. */
+    ahoraHoy: 'Ahora · hoy',
     loSiguiente: 'Lo siguiente',
     primeraVez: 'Primera vez',
     conocerMascota: 'Conocer a {{nombre}}',
@@ -233,6 +250,18 @@ export const prestadorEs = {
     cargaSesiones: 'sesiones',
     // PLATA = el valor AGENDADO del día (jamás lo devengado ni lo cobrado).
     plataDelDia: 'del día',
+    /* ⭐ S86-C · LA PLATA SIGUE AL DÍA EN VISTA (cruce 1, firma de mesa).
+       Antes CARGA y VIDAS eran del día elegido y PLATA era de hoy, fijo:
+       parado en el jueves, el techo mezclaba dos días en un solo bloque.
+       Un número plausible y falso — ningún typecheck lo ve. Ahora sigue al
+       día, **y el rótulo dice cuál** (sin eso, el número correcto seguiría
+       leyéndose como el de hoy). */
+    plataDelDiaOtro: 'del {{dia}}',
+    /* El cuarto estado de la columna: entre que el dedo cambia de día y el
+       servidor contesta. NO se conserva el valor anterior con el rótulo
+       nuevo — sería exactamente la mentira que este cruce vino a curar. */
+    plataCargando: 'Calculando',
+    plataCargandoDetalle: 'Calculando los ingresos del día',
     // El total dice lo que sabe Y declara lo que le falta: un número redondo
     // que oculta citas no se puede desconfiar.
     plataParcial: '{{n}} sin precio',
@@ -244,7 +273,9 @@ export const prestadorEs = {
     plataSoloTitular: 'Solo el titular',
     plataSoloTitularDetalle: 'Solo el titular ve los ingresos',
     plataNoSePudo: 'Ingresos no disponibles',
-    plataNoSePudoDetalle: 'No pudimos leer los ingresos de hoy',
+    /* ⏪ S86-C: decía "de hoy". Con la plata siguiendo al día en vista, ese
+       "hoy" pasó a ser falso en nueve de cada diez días de la rueda. */
+    plataNoSePudoDetalle: 'No pudimos leer los ingresos del día',
     vidasTutor1: 'tutor',
     vidasTutores: 'tutores',
     vidasPaciente1: 'paciente',

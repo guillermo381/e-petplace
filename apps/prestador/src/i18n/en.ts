@@ -111,6 +111,11 @@ export const prestadorEn = {
     datoCompleta: 'Day complete.',
     datoPorCoordinar: 'Day done · {{n}} to schedule',
     datoLibreConSemana: 'Free today · {{n}} this week',
+    // S86-C · a past day speaks in the past — never promises a future.
+    datoPasadoPendiente1: '1 left open',
+    datoPasadoPendientes: '{{n}} left open',
+    datoPasadoCerrado1: 'Day closed · 1 appointment',
+    datoPasadoCerradoN: 'Day closed · {{n}} appointments',
     yaAtendidasTitulo: 'Already seen',
     yaAtendidasResumen: '{{n}} today',
     verLasN: 'See all {{n}}',
@@ -120,6 +125,8 @@ export const prestadorEn = {
     // S59-B3 single state voice (MODELO_PASEO §7) · LOTE S59, GATE PENDIENTE
     enCurso: 'Live',
     ahora: 'Now',
+    // S86-C · the live hero declares which day it belongs to.
+    ahoraHoy: 'Now · today',
     loSiguiente: 'Up next',
     primeraVez: 'First time',
     conocerMascota: 'Meet {{nombre}}',
@@ -182,11 +189,17 @@ export const prestadorEn = {
     cargaSesion1: 'session',
     cargaSesiones: 'sessions',
     plataDelDia: 'today',
+    // S86-C · money follows the day in view — and the label says which day.
+    plataDelDiaOtro: '{{dia}}',
+    plataCargando: 'Calculating',
+    plataCargandoDetalle: "Calculating the day's earnings",
     plataParcial: '{{n}} with no price',
     plataSoloTitular: 'Owner only',
     plataSoloTitularDetalle: 'Only the owner sees earnings',
     plataNoSePudo: 'Earnings unavailable',
-    plataNoSePudoDetalle: "We couldn't load today's earnings",
+    // ⏪ S86-C: said "today's". With money following the day in view, that
+    // "today" became false on nine out of ten days of the wheel.
+    plataNoSePudoDetalle: "We couldn't load the day's earnings",
     vidasTutor1: 'owner',
     vidasTutores: 'owners',
     vidasPaciente1: 'patient',

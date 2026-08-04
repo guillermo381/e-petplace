@@ -25,7 +25,7 @@
 // no_show; 'pendiente' y el futuro bloqueo temporal jamás se pintan).
 // ─────────────────────────────────────────────────────────────────────
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
@@ -111,9 +111,19 @@ type Pantalla =
   | { estado: 'recepcion'; prestadorId: string; cuentaComercialId: string | null; titularId: string | null }
   | {
       estado: 'listo';
-      /** El día base del fetch (fecha local al cargar) — ancla de la semana. */
+      /* ⭐ S86-C · `desde` y `hoy` SE SEPARAN, y es la cura que habilita el
+         resto. Hasta acá `desde` hacía DOS trabajos —el inicio del rango del
+         fetch **y** "hoy"— y mientras los dos coincidían nadie lo notaba.
+         Con la rueda llegando a hoy-3 dejan de coincidir, y `vistaEsHoy` se
+         habría roto EN SILENCIO: el hero del vivo montándose tres días atrás.
+         *No es un rename: es que dos conceptos distintos compartían nombre.* */
+      /** Inicio del rango del fetch = hoy − 3. NO es "hoy". */
       desde: string;
-      /** El rango completo hoy..hoy+6 (la vista Hoy filtra por `desde`). */
+      /** HOY, fecha local del dispositivo. La única verdad de "ahora". */
+      hoy: string;
+      /** S86-C: para releer la plata cuando cambia el día en vista. */
+      prestadorId: string;
+      /** El rango completo hoy−3..hoy+6 (la vista filtra por el día elegido). */
       citas: CitaAgendaPaseo[];
       /** ids de las citas de GROOMING (S60-B1) — deciden la RUTA del tap. */
       groomingIds: Set<string>;
@@ -143,13 +153,12 @@ type Pantalla =
        *  null = el espacio YA está preparado (servicios+horarios) — el
        *  módulo entero NO existe (regla de existencia del boceto M1). */
       preparacion: EstadoTareas | null;
-      /** S85-C23 (§2.4bis): PLATA del techo. `null` = la lectura FALLÓ —
-       *  distinto de `visible:false`, que es un PERMISO negado y tiene voz
-       *  propia. Colapsarlos haría que un fallo de red se leyera como
-       *  "no te toca ver esto", que es mentirle al titular sobre su
-       *  propio negocio (L-197: el fallo degrada a ausencia, jamás a un
-       *  valor que el consumidor use como cierto). */
-      plata: PlataDelDia | null;
+      /* ⏪ S86-C · `plata` SALIÓ DE ACÁ y vive en su propio estado, con el DÍA
+         que le corresponde. Vivía en `pantalla` porque se leía UNA vez, con el
+         fetch; ahora se relee cada vez que cambia el día en vista, y guardarla
+         acá obligaría a re-armar el estado entero por un solo campo — y, peor,
+         dejaría el valor viejo visible con el día nuevo durante la relectura.
+         Su nota de L-197 (fallo ≠ permiso negado) viaja con ella. */
       /* S85-C30 · «Necesita tu atención». Cada fuente trae su CONTEO, y
          `null` = no se pudo leer — distinto de 0, que es "no hay nada que
          atender". Colapsarlos diría "estás al día" por un fallo de red
@@ -243,6 +252,17 @@ type NovedadZona3 = { tipo: 'cancelacion' | 'reagenda' | 'mensaje'; citaId: stri
 const novedadesZona3: NovedadZona3 = null;
 // ═══════════════════════════════════════════════════════════════
 
+/* ⭐ S86-C · EL RANGO DE LA RUEDA (firma ① del founder: «hasta 3 días hacia
+   atrás»). Los DOS lados en constantes y no en literales sueltos: el rango
+   se usa en el fetch, en la rueda y en el cómputo de `dias`, y tres números
+   sueltos se desincronizan en cuanto uno cambie.
+   ⚠️ Medido antes de construir: los CUATRO lectores de citas usan rango
+   inclusivo puro (`.gte(fecha).lte(fecha_hasta)`) **sin clamp a hoy**, y
+   `obtener_plata_del_dia` filtra por `c.fecha = p_fecha` sin tope superior
+   ni inferior. El pasado no necesitó nada del motor. */
+const DIAS_ATRAS = 3;
+const DIAS_ADELANTE = 6;
+
 // Fecha local del dispositivo, YYYY-MM-DD (en-CA da ese formato).
 function hoyLocal(): string {
   return new Intl.DateTimeFormat('en-CA').format(new Date());
@@ -286,6 +306,12 @@ type FormaDelDia =
   | { clave: 'completa' }
   | { clave: 'porCoordinar'; n: number }
   | { clave: 'libreConSemana'; n: number }
+  /* ⭐ S86-C · LAS DOS VOCES DEL PASADO (cruce 2). Un día vencido no promete:
+     lo que quedó sin cerrar **es plata sin devengar** (el devengo nace al
+     cerrar con calidad), y cada una es puerta a su cita — las filas de la
+     Zona 2 ya navegan ahí, así que la voz nombra y la lista lleva. */
+  | { clave: 'pasadoPendientes'; n: number }
+  | { clave: 'pasadoCerrado'; n: number }
 
 
 /**
@@ -320,16 +346,30 @@ function formaDelDia(args: {
   esAtendida: (c: CitaAgendaPaseo) => boolean;
   /** D-439 — ya en memoria; "Jornada completa." lo exige en cero (E4). */
   porCoordinar: number;
+  /** S86-C: ¿el día en vista ya pasó? Decide TIEMPO VERBAL, nada más. */
+  esPasado: boolean;
 }): FormaDelDia {
   /* ⚠️ `citasRango` SOBREVIVE a la muerte de la vista Semana, y por poco
      no lo hace: alimenta la voz `libreConSemana` del TECHO ("hoy libre,
      pero la semana tiene N"), que es OTRA cosa que la vista. Retirarlo
      con ella habría matado una voz viva por asociación de nombre. */
-  const { citasHoySin, citasRango, esAtendida, porCoordinar } = args;
+  const { citasHoySin, citasRango, esAtendida, porCoordinar, esPasado } = args;
 
   // E6(b), declarado: `en_curso` NO está en `esAtendida` — la cita que
   // corre SUMA a "Te quedan". No terminó.
   const pendientes = citasHoySin.filter((c) => !esAtendida(c));
+
+  /* ⭐ S86-C · EL PASADO SE RESUELVE PRIMERO Y SALE. Va antes que todo lo
+     demás porque las ramas de abajo están escritas en futuro ("Te quedan",
+     "terminas", "Hoy libre") y sobre un día vencido **todas mienten**.
+     ⚠️ Y el día pasado SIN citas no dice nada: `omitida`. La rama
+     `libreConSemana` diría *"Hoy libre"* sobre un día que no es hoy, y la
+     regla de siempre —jamás una métrica en cero— también aplica al ayer. */
+  if (esPasado) {
+    if (pendientes.length > 0) return { clave: 'pasadoPendientes', n: pendientes.length };
+    if (citasHoySin.length > 0) return { clave: 'pasadoCerrado', n: citasHoySin.length };
+    return { clave: 'omitida' };
+  }
 
   if (pendientes.length > 0) {
     const hora = horaDeCierre(pendientes);
@@ -615,6 +655,16 @@ export default function Hoy() {
    *  Convención `0=Domingo..6=Sábado` — regla 32 del contrato, la misma
    *  que `prestador_horarios.dia_semana`. */
   const [cerrados, setCerrados] = useState<Set<number>>(new Set());
+  /* ⭐ S86-C · LA PLATA DEL DÍA EN VISTA (cruce 1, firma de mesa).
+     **Guarda SU día adentro, y ésa es la pieza que hace que esto funcione:**
+     sin el día, el consumidor no puede distinguir *"la plata del día que
+     estoy mirando"* de *"la plata de un día que ya dejé atrás"* — y esa
+     confusión ES el defecto que este cruce vino a curar. Con el día
+     adentro, mostrar un total viejo bajo un rótulo nuevo se vuelve
+     inexpresable: el techo compara y dice «Calculando».
+     · `null` = nunca se leyó · `{dia, valor:null}` = la lectura de ESE día
+     FALLÓ (L-197: el fallo no degrada a permiso negado ni a cero). */
+  const [plata, setPlata] = useState<{ dia: string; valor: PlataDelDia | null } | null>(null);
   // S61-B5: el filtro por oficio — vista del día, JAMÁS persiste.
   const [filtroOficio, setFiltroOficio] = useState<FiltroOficioValor>('todos');
   // D-385: salidas expandidas (por clave de bloque) — vista, jamás persiste.
@@ -675,22 +725,26 @@ export default function Hoy() {
         return;
       }
     }
-    // UN fetch cubre las dos vistas (S57-B1): rango hoy..hoy+6 — la vista
-    // Hoy filtra por `desde`; la Semana agrupa el rango entero.
-    const desde = hoyLocal();
+    /* UN fetch cubre el rango entero (S57-B1). ⭐ S86-C: el rango pasa a
+       hoy−3..hoy+6 — DIEZ días en el MISMO viaje, no diez viajes. Elegir un
+       día sigue siendo un filtro sobre memoria, y la rueda sigue sin pedir
+       nada. Lo único que cambió es dónde EMPIEZA. */
+    const hoy = hoyLocal();
+    const desde = sumarDias(hoy, -DIAS_ATRAS);
+    const hasta = sumarDias(hoy, DIAS_ADELANTE);
     /* S85-C7: `rCerrados` entra AL FINAL del arreglo y del destructuring —
        insertarlo en el medio corre todas las posiciones y el typecheck lo
        cazó en el acto (once tuplas desalineadas). Al final, nada se mueve. */
-    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, cuentaR, perfilR, rCerrados, rPlata, rPresup, rSolic, rAbiertas] = await Promise.all([
-      obtenerCitasPaseoDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: sumarDias(desde, 6) }),
+    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, cuentaR, perfilR, rCerrados, rPresup, rSolic, rAbiertas] = await Promise.all([
+      obtenerCitasPaseoDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: hasta }),
       // S60-B1: la jornada es UNA — las citas de grooming entran a la
       // misma lista con su tipo (el subtítulo ya lo dice) y su ruta.
-      obtenerCitasGroomingDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: sumarDias(desde, 6) }),
+      obtenerCitasGroomingDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: hasta }),
       // S63-B: las sesiones de adiestramiento — tercera pata de la MISMA jornada.
-      obtenerCitasAdiestramientoDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: sumarDias(desde, 6) }),
+      obtenerCitasAdiestramientoDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: hasta }),
       // S69-B (M0): las citas de veterinaria — CUARTA pata de la MISMA
       // jornada (mostrador + reserva). El discriminador es es_medico.
-      obtenerCitasVetDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: sumarDias(desde, 6) }),
+      obtenerCitasVetDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: hasta }),
       // vacaciones (solo lectura): los días bloqueados se pintan como tales
       obtenerBloqueosPrestador(prestador.data.id),
       // la señal "Primera vez" de la Zona 1 (solo lo REAL): mascota
@@ -714,17 +768,15 @@ export default function Hoy() {
       // jornada — sin el dato la rueda no apaga NINGUNO, que es la verdad
       // honesta ("no sabemos") y no una promesa de apertura.
       obtenerDiasCerrados(prestador.data.id),
-      /* S85-C23 · PLATA del techo compacto (§2.4bis). Va AL FINAL del
-         array a propósito: insertar un lector en el medio desalinea el
-         destructuring de arriba y el tsc lo caza, pero recién después de
-         que uno se pregunta por qué `perfilR` trae bloqueos. Es un costo
-         de dos minutos que se evita con una regla de una línea.
-         ⚠️ El día es `desde` —hoy— y NO el rango de 7 días de las citas:
-         el techo habla de LA JORNADA, no de la semana. Los dos leen del
-         mismo fetch y responden preguntas distintas.
-         Su fallo NO tumba la jornada (Ley 13 aplica al CUERPO): el techo
-         orienta. Sin dato, el hueco lo dice — ver `bloquePlata`. */
-      obtenerPlataDelDia(prestador.data.id, desde),
+      /* ⏪ S86-C · ACÁ VIVÍA `obtenerPlataDelDia(prestador.data.id, desde)`, y
+         se va del fetch único con su razón: **el techo mezclaba dos días.**
+         CARGA y VIDAS se computan del día EN VISTA, y la plata se leía UNA
+         vez con `desde`. Mientras la rueda solo iba hacia adelante el defecto
+         ya existía —parado en el jueves, plata de hoy— y era invisible porque
+         nadie compara tres números entre sí.
+         Ahora la plata se relee POR DÍA en su propio efecto (ver `plata`).
+         ⚠️ Y `desde` ya ni siquiera es hoy: dejarla acá habría convertido un
+         número equivocado en uno equivocado Y viejo. */
       /* ⚠️ AL FINAL, Y ESTA VEZ ME LO COBRÓ A MÍ: los inserté en el medio
          y desalineé el destructuring — el `tsc` cazó `rPlata is possibly
          null`, que no nombra la causa. El comentario de C23 tres líneas
@@ -862,6 +914,8 @@ export default function Hoy() {
     setPantalla({
       estado: 'listo',
       desde,
+      hoy,
+      prestadorId: prestador.data.id,
       citas,
       porCoordinar,
       nombre: perfilR.ok ? perfilR.data.nombre : null,
@@ -869,7 +923,6 @@ export default function Hoy() {
       ciudad: prestador.data.ciudad,
       logoPath: prestador.data.foto_url,
       preparacion,
-      plata: rPlata.ok ? rPlata.data : null,
       atencion: {
         coordinar: porCoordinar.length,
         /* ⚠️ SOLO 'enviado' — y el 'vencido' YA viene resuelto perezoso por
@@ -923,6 +976,9 @@ export default function Hoy() {
   // El fetch trae el rango hoy..hoy+6; la vista Hoy opera sobre el día base.
   const citas = pantalla.estado === 'listo' ? pantalla.citas : [];
   const desde = pantalla.estado === 'listo' ? pantalla.desde : null;
+  /* ⭐ S86-C · HOY, aparte del inicio del rango. Todo lo que pregunta
+     "¿esto es ahora?" lee ACÁ; `desde` quedó solo para armar el rango. */
+  const hoy = pantalla.estado === 'listo' ? pantalla.hoy : null;
   const groomingIds = pantalla.estado === 'listo' ? pantalla.groomingIds : new Set<string>();
   const adiestramientoIds = pantalla.estado === 'listo' ? pantalla.adiestramientoIds : new Set<string>();
   const vetIds = pantalla.estado === 'listo' ? pantalla.vetIds : new Set<string>();
@@ -947,28 +1003,86 @@ export default function Hoy() {
   const citasVisibles =
     !conFiltro || filtroOficio === 'todos' ? citas : citas.filter((c) => oficioDe(c) === filtroOficio);
   /* S85-C7: la vista opera sobre EL DÍA ELEGIDO, no sobre el día base.
-     El fetch ya trae hoy..hoy+6, así que elegir otro día es un FILTRO —
-     cero viaje nuevo. */
-  const diaVista = diaElegido ?? desde;
+     El fetch ya trae el rango entero, así que elegir otro día es un FILTRO —
+     cero viaje nuevo (la plata es la única excepción, y por gate de servidor).
+     ⭐ S86-C: el default es **HOY**, jamás `desde`. Con el rango arrancando
+     tres días atrás, caer en `desde` abriría la portada parada en el pasado. */
+  const diaVista = diaElegido ?? hoy;
   const citasHoy = diaVista === null ? [] : citasVisibles.filter((c) => c.fecha === diaVista);
   // S61-B12: el día SIN filtrar — la Zona 1 es INMUNE al filtro por
   // GUARD ESTRUCTURAL (se computa de acá, jamás de la lista filtrada)
   const citasHoySin = diaVista === null ? [] : citas.filter((c) => c.fecha === diaVista);
-  /** ⚠️ EL VIVO ES DE HOY, Y SOLO DE HOY. La Zona 1 dice "ahora" — y
-   *  "ahora" no existe en el jueves. Si la rueda está parada en otro día,
-   *  el hero no se monta: mostrarlo ahí afirmaría que algo está corriendo
-   *  en un día que todavía no llegó.
-   *  ⚠️ Esto NO toca la inmunidad al filtro por OFICIO (guard estructural
-   *  S61-B12): son dos ejes distintos y el de oficio sigue intacto. */
-  const vistaEsHoy = diaVista !== null && diaVista === desde;
-  /** Los SIETE del rango que el fetch ya trajo — la rueda no inventa días
-   *  que no estén cargados. */
-  const dias7 = desde === null ? [] : Array.from({ length: 7 }, (_, i) => sumarDias(desde, i));
+  /* ⭐ S86-C · EL FUTURO NO APAGA LO VIVO (firma ② del founder).
+   *
+   *  ⏪ ACÁ DECÍA, y se conserva porque su argumento sigue siendo cierto:
+   *  *"EL VIVO ES DE HOY, Y SOLO DE HOY. La Zona 1 dice «ahora» — y «ahora»
+   *  no existe en el jueves. Si la rueda está parada en otro día, el hero no
+   *  se monta: mostrarlo ahí afirmaría que algo está corriendo en un día que
+   *  todavía no llegó."* (S85-C7.)
+   *
+   *  **LO QUE CAMBIA, y por qué no es una contradicción:** S85 tenía razón en
+   *  el RIESGO y se equivocó en la CURA. El riesgo era *afirmar que algo corre
+   *  en el jueves*; la cura fue **esconder lo vivo**, y eso resuelve el riesgo
+   *  destruyendo el dato — un paseo en curso desaparecía de la pantalla porque
+   *  el prestador miró la agenda de mañana.
+   *  **La firma nueva pide que lo vivo se VEA; el argumento viejo se honra con
+   *  RÓTULO** (`agenda.ahoraHoy` → «Ahora · hoy»): la pantalla dice de qué día
+   *  es en vez de callarse. *Un rótulo cuesta cuatro palabras; esconder algo
+   *  que está pasando cuesta un paseo sin vigilar.*
+   *
+   *  ⚠️ Y lo que la firma NO toca: «Lo siguiente» **queda exclusivo de hoy**.
+   *  En otro día la primera cita YA está en la lista de abajo — subirla al
+   *  hero no diría nada nuevo (L-c), y "lo siguiente" de un jueves no es lo
+   *  siguiente de nadie.
+   *  ⚠️ Nada de esto toca la inmunidad al filtro por OFICIO (guard estructural
+   *  S61-B12): son ejes distintos y el de oficio sigue intacto. */
+  const vistaEsHoy = diaVista !== null && diaVista === hoy;
+  /** ¿El día en vista ya pasó? Comparación de ISO YYYY-MM-DD, que ordena
+   *  lexicográficamente — cero Date, cero huso (D-312). */
+  const vistaEsPasado = diaVista !== null && hoy !== null && diaVista < hoy;
+  /** Los DIEZ del rango que el fetch ya trajo (hoy−3..hoy+6) — la rueda no
+   *  inventa días que no estén cargados. */
+  const dias = desde === null
+    ? []
+    : Array.from({ length: DIAS_ATRAS + DIAS_ADELANTE + 1 }, (_, i) => sumarDias(desde, i));
+
+  /* ⭐ S86-C · LA RELECTURA DE LA PLATA (cruce 1). Un efecto propio y no
+     parte de `cargar`: cambiar de día NO recarga la jornada —los diez días
+     ya están en memoria— y lo ÚNICO que hay que volver a preguntarle al
+     servidor es el total.
+     ⚠️ **Y hay que preguntárselo, aunque el dato para sumarlo esté acá.**
+     Cada cita trae su `precio`: sumar `citasHoySin` sería una línea. Sería
+     también entregarle el ingreso del negocio a cualquiera que pueda ver la
+     lista — el gate de §2.4bis vive en el SERVIDOR justamente porque *una
+     autorización que decide el cliente es decorativa*, y `precio` sigue
+     siendo legible por RLS para quien ve la cita (D-641: ésta es la puerta
+     del TOTAL, no la del dato). **La línea barata rompe el gate entero.** */
+  useEffect(() => {
+    if (pantalla.estado !== 'listo' || diaVista === null) return;
+    const prestadorId = pantalla.prestadorId;
+    const dia = diaVista;
+    let vigente = true;
+    void obtenerPlataDelDia(prestadorId, dia).then((r) => {
+      /* El dedo pasa tres días mientras una respuesta viaja. Sin este guard
+         una lectura vieja pisa a la nueva, y el techo mostraría el total de
+         un día que el usuario ya dejó atrás **con el rótulo del día actual**
+         — el mismo error que este cruce cura, entrando por atrás. */
+      if (!vigente) return;
+      setPlata({ dia, valor: r.ok ? r.data : null });
+    });
+    return () => {
+      vigente = false;
+    };
+    /* `pantalla` entero en deps a propósito: su identidad cambia con cada
+       `cargar`, así que el refresco en foco vuelve a leer la plata como lo
+       hacía cuando viajaba en el fetch único. `plata` NO va en deps — sería
+       un lazo. */
+  }, [pantalla, diaVista]);
   /** De días de la semana a FECHAS, que es lo que la rueda entiende. Se
    *  computa acá y no se guarda: el cierre es recurrente y una fecha
    *  guardada envejece sola. */
   const isoCerrados = new Set(
-    dias7.filter((iso) => {
+    dias.filter((iso) => {
       const [a, m, d] = iso.slice(0, 10).split('-').map(Number);
       const cierreSemanal = a && m && d ? cerrados.has(new Date(a, m - 1, d).getDay()) : false;
       /* ⭐ S85-C8 — LAS VACACIONES ENTRAN ACÁ, y es lo que se CONSERVA de
@@ -1007,36 +1121,66 @@ export default function Hoy() {
   // ── Zona 1: la destacada — en_curso (Ley 7: UNA con CitaEnVivo) o,
   // si no hay nada corriendo, la PRÓXIMA cita aún no cerrada del día.
   // S61-B12: sobre el día SIN FILTRAR — el vivo preside SIEMPRE.
-  const enCurso = citasHoySin.filter((c) => c.atencion?.estado === 'en_curso');
-  const enVivo = enCurso.length
-    ? enCurso.reduce((a, b) => ((b.atencion?.iniciada_en ?? '') > (a.atencion?.iniciada_en ?? '') ? b : a))
-    : undefined;
+  /* ⭐ S86-C · LO VIVO SE COMPUTA DE **HOY**, no del día en vista — y ése es
+     el cambio que hace verdadera a la firma ②. Antes salía de `citasHoySin`
+     (el día elegido), así que mover la rueda al jueves no "apagaba" el hero:
+     lo dejaba **buscando citas en curso el jueves**, donde por definición no
+     hay ninguna. "Ahora" es una propiedad del reloj, no del día que mira el
+     dedo.
+     ⚠️ Una atención en curso de un día ANTERIOR (alguien no cerró) NO entra
+     acá a propósito: no está corriendo, está sin cerrar — y tiene su lugar en
+     «Necesita tu atención» (`abiertas`) y su voz en la forma del día. */
+  const citasDeHoySin = hoy === null ? [] : citas.filter((c) => c.fecha === hoy);
+  /* ⭐ S86-C · TODAS LAS VIVAS, no una (firma ③ · §7.5 del diccionario).
+     ⏪ Acá había un `reduce` por `iniciada_en` máximo que dejaba UNA. Y el
+     detalle que la medición corrigió: la que sobrevivía no era "la primera"
+     sino **la última en arrancar** — las otras caían a la Zona 2 con su
+     insignia «En vivo» pero sin anillo ni pill.
+     §7.5 ya lo permitía desde S81 (*N citas vivas REALES simultáneas = N
+     celdas*) y el Hogar del cliente ya lo hace así. No es enmienda de la
+     Ley 7: es aplicar su cláusula donde el caso existe. */
+  const enCurso = citasDeHoySin.filter((c) => c.atencion?.estado === 'en_curso');
+  const hayVivo = enCurso.length > 0;
+  /* «Lo siguiente» SOLO en hoy (firma ②): en otro día la primera cita ya
+     está en la lista de abajo y subirla no diría nada nuevo (L-c). */
   const proxima =
-    enVivo === undefined
-      ? citasHoySin.find((c) => {
+    vistaEsHoy && !hayVivo
+      ? citasDeHoySin.find((c) => {
           const ef = estadoEfectivo(c);
           return ef === 'confirmada' || ef === 'terminada';
         })
       : undefined;
-  const destacada = enVivo ?? proxima;
-  // D-385: la SALIDA de la destacada preside ENTERA — las compañeras de
-  // bloque (paseo, misma fecha+hora+duración) suben con ella a la Zona 1
-  // (sobre el día SIN filtrar: el guard estructural cubre a la salida).
-  const claveDestacada =
-    destacada && !sinAgruparIds.has(destacada.id) ? claveBloque(destacada) : null;
-  const salidaDestacada =
-    destacada === undefined
-      ? []
-      : claveDestacada === null
-        ? [destacada]
-        : [
-            destacada,
-            ...citasHoySin.filter(
-              (c) => c.id !== destacada.id && !sinAgruparIds.has(c.id) && claveBloque(c) === claveDestacada,
-            ),
-          ];
-  const idsDestacados = new Set(salidaDestacada.map((c) => c.id));
-  const resto = citasHoy.filter((c) => !idsDestacados.has(c.id));
+  const nucleo: CitaAgendaPaseo[] = hayVivo ? enCurso : proxima ? [proxima] : [];
+  /* D-385: la SALIDA del núcleo preside ENTERA — las compañeras de bloque
+     (paseo, misma fecha+hora+duración) suben con él.
+     ⚠️ SOLO EN HOY: una compañera NO viva es una cita de hoy como cualquier
+     otra, y subirla mientras se mira el jueves rompería «solo lo vivo
+     sobrevive». Fuera de hoy la Zona 1 es exactamente `enCurso`. */
+  const clavesNucleo = new Set(
+    nucleo
+      .filter((c) => !sinAgruparIds.has(c.id))
+      .map((c) => claveBloque(c))
+      .filter((k): k is string => k !== null),
+  );
+  const idsNucleo = new Set(nucleo.map((c) => c.id));
+  const companeras = vistaEsHoy
+    ? citasDeHoySin.filter(
+        (c) =>
+          !idsNucleo.has(c.id) &&
+          !sinAgruparIds.has(c.id) &&
+          clavesNucleo.has(claveBloque(c) ?? ' '),
+      )
+    : [];
+  /* Orden cronológico: con N vivas simultáneas, el orden de `filter` es el de
+     la lista y no dice nada. La hora sí. */
+  const zona1 = [...nucleo, ...companeras].sort((a, b) =>
+    (a.hora ?? '').localeCompare(b.hora ?? ''),
+  );
+  const idsZona1 = new Set(zona1.map((c) => c.id));
+  const esViva = (c: CitaAgendaPaseo) => idsNucleo.has(c.id) && hayVivo;
+  /* `resto` sale del día EN VISTA. Fuera de hoy, `idsZona1` son citas de hoy
+     que no están en esta lista — el filtro no saca nada, que es lo correcto. */
+  const resto = citasHoy.filter((c) => !idsZona1.has(c.id));
   // S70-B2-v2: lo pasado se pliega — "Ya atendidas" son las cerradas del día
   // (completada / no_show / cerrada). Lo que sigue vive arriba.
   const esAtendida = (c: CitaAgendaPaseo): boolean => {
@@ -1055,7 +1199,13 @@ export default function Hoy() {
   // cuando tiene algo cierto que decir.
   const forma: FormaDelDia =
     pantalla.estado === 'listo'
-      ? formaDelDia({ citasHoySin, citasRango: citas, esAtendida, porCoordinar: porCoordinar.length })
+      ? formaDelDia({
+          citasHoySin,
+          citasRango: citas,
+          esAtendida,
+          porCoordinar: porCoordinar.length,
+          esPasado: vistaEsPasado,
+        })
       : { clave: 'omitida' };
 
   const textoJornada: string | undefined =
@@ -1073,7 +1223,16 @@ export default function Hoy() {
                 ? t('agenda.datoCompleta')
                 : forma.clave === 'porCoordinar'
                   ? t('agenda.datoPorCoordinar', { n: forma.n })
-                  : t('agenda.datoLibreConSemana', { n: forma.n });
+                  : /* S86-C · las dos del pasado */
+                    forma.clave === 'pasadoPendientes'
+                    ? forma.n === 1
+                      ? t('agenda.datoPasadoPendiente1')
+                      : t('agenda.datoPasadoPendientes', { n: forma.n })
+                    : forma.clave === 'pasadoCerrado'
+                      ? forma.n === 1
+                        ? t('agenda.datoPasadoCerrado1')
+                        : t('agenda.datoPasadoCerradoN', { n: forma.n })
+                      : t('agenda.datoLibreConSemana', { n: forma.n });
 
   /* E5 — la mecánica del Hogar del cliente, VERBATIM: primer nombre; sin
      nombre, el saludo va SOLO (jamás inventado).
@@ -1193,26 +1352,43 @@ export default function Hoy() {
        NO tienen número son `frase`, y el tipo no deja mezclarlos.
        *Antes esa distinción vivía en mi cabeza y en un ternario; ahora vive
        en el tipo.* */
-    const p = pantalla.plata;
-    const plata: ColumnaTecho =
-      p === null
-        ? // Ley 13: el fallo dice fallo. NO se disfraza de "no te toca" (sería
-          // mentirle al titular sobre su permiso) ni de vacío (se leería como 0).
-          { frase: t('techo.plataNoSePudo'), detalle: t('techo.plataNoSePudoDetalle') }
-        : !p.visible
-          ? // EL HUECO HABLA DEL PERMISO, NO DEL DATO (§2.4bis). No falta
-            // información: SOBRA AUDIENCIA.
-            { frase: t('techo.plataSoloTitular'), detalle: t('techo.plataSoloTitularDetalle') }
-          : {
-              valor: montoCorto(p.total ?? 0),
-              /* El total dice lo que sabe Y DECLARA LO QUE LE FALTA: con citas
-                 sin precio, el rótulo deja de ser "del día" y NOMBRA el hueco.
-                 Es DEFENSA, no estado normal — hoy `sinPrecio` da 0. */
-              rotulo:
-                (p.sinPrecio ?? 0) > 0
-                  ? t('techo.plataParcial', { n: p.sinPrecio ?? 0 })
-                  : t('techo.plataDelDia'),
-            };
+    /* ⭐ S86-C · LA PLATA ES DEL DÍA EN VISTA, y la comparación de día es
+       LO PRIMERO. `plata.dia !== diaVista` = todavía no llegó la lectura de
+       ESTE día ⇒ el valor que tengo es de OTRO día y **no se muestra**.
+       Conservarlo con el rótulo nuevo sería el defecto original con mejor
+       letra: un número correcto para un día que nadie está mirando. */
+    const p = plata !== null && plata.dia === diaVista ? plata.valor : undefined;
+    const plataCol: ColumnaTecho =
+      p === undefined
+        ? { frase: t('techo.plataCargando'), detalle: t('techo.plataCargandoDetalle') }
+        : p === null
+          ? // Ley 13: el fallo dice fallo. NO se disfraza de "no te toca" (sería
+            // mentirle al titular sobre su permiso) ni de vacío (se leería como 0).
+            { frase: t('techo.plataNoSePudo'), detalle: t('techo.plataNoSePudoDetalle') }
+          : !p.visible
+            ? // EL HUECO HABLA DEL PERMISO, NO DEL DATO (§2.4bis). No falta
+              // información: SOBRA AUDIENCIA.
+              // ⚠️ Y el permiso NO depende del día: el gate del servidor es
+              // `titular OR admin` y jamás mira la fecha (medido en el body).
+              { frase: t('techo.plataSoloTitular'), detalle: t('techo.plataSoloTitularDetalle') }
+            : {
+                valor: montoCorto(p.total ?? 0),
+                /* El total dice lo que sabe Y DECLARA LO QUE LE FALTA: con citas
+                   sin precio, el rótulo NOMBRA el hueco. Esa defensa GANA sobre
+                   el día: un total parcial es más urgente que saber de cuándo es
+                   — y el día ya está dicho por la rueda, dos dedos más abajo.
+                   ⭐ S86-C: sin hueco, el rótulo dice el DÍA. «del día» a secas
+                   se leía como "hoy" pare donde pare la rueda, y en inglés lo
+                   decía literal (`plataDelDia: 'today'`). */
+                rotulo:
+                  (p.sinPrecio ?? 0) > 0
+                    ? t('techo.plataParcial', { n: p.sinPrecio ?? 0 })
+                    : vistaEsHoy || diaVista === null
+                      ? t('techo.plataDelDia')
+                      : t('techo.plataDelDiaOtro', {
+                          dia: `${diaCorto(diaVista)} ${diaVista.slice(8, 10)}`,
+                        }),
+              };
 
     /* ③ VIDAS — DISTINTAS, no filas. Tres perros de la misma casa son UN
        tutor; dos citas de la misma mascota son UNA mascota. Una cita sin
@@ -1235,7 +1411,7 @@ export default function Hoy() {
               : v === 1 ? t('techo.vidasMascota1') : t('techo.vidasMascotas'),
     };
 
-    return [carga, plata, vidas];
+    return [carga, plataCol, vidas];
   })();
 
   // ── La semana: 7 días desde hoy — citas firmes por día + estado del
@@ -1396,11 +1572,22 @@ export default function Hoy() {
 
         {/* ── Zona 1 — ahora / lo siguiente (PRESIDE: encima de todo
             control e INMUNE al filtro — guard estructural S61-B12) ── */}
-        {pantalla.estado === 'listo' && vistaEsHoy && destacada && (
+        {/* ⭐ S86-C · el gate ya NO es `vistaEsHoy`: es que la Zona 1 TENGA
+            habitantes. Lo vivo la puebla desde hoy pare donde pare la rueda;
+            «Lo siguiente» solo la puebla en hoy. La condición se mudó al
+            cómputo, que es donde vive la regla. */}
+        {pantalla.estado === 'listo' && zona1.length > 0 && (
           <View style={{ gap: spacing[2] }}>
-            {/* S52-P7: etiqueta humanizada — sentence case, sin eyebrow */}
+            {/* S52-P7: etiqueta humanizada — sentence case, sin eyebrow.
+                ⭐ S86-C: mirando otro día, el rótulo DECLARA la pertenencia
+                («Ahora · hoy»). El hero se ve; la pantalla no afirma que algo
+                corre en el jueves. */}
             <Texto variante="seccion">
-              {enVivo ? t('agenda.ahora') : t('agenda.loSiguiente')}
+              {hayVivo
+                ? vistaEsHoy
+                  ? t('agenda.ahora')
+                  : t('agenda.ahoraHoy')
+                : t('agenda.loSiguiente')}
             </Texto>
             {/* S59-B2 (Ley 19.1): el "Antes" a un tap es NAVEGACIÓN al
                 expediente — viste CeldaNavegacion DENTRO de la tarjeta del
@@ -1413,13 +1600,14 @@ export default function Hoy() {
                 canto de punta a punta y su "Conocer" ADENTRO; el vivo
                 real envuelve SU tarjeta con CitaEnVivo. */}
             <View style={{ gap: spacing[3] }}>
-              {salidaDestacada.map((c) => {
-                const esViva = enVivo?.id === c.id;
+              {zona1.map((c) => {
+                // S86-C (§7.5): CADA viva lleva su CitaEnVivo — no una.
+                const viva = esViva(c);
                 const mascota = c.mascota;
                 const card = (
                   <FilaCita
                     cita={c}
-                    enVivo={esViva}
+                    enVivo={viva}
                     oficio={oficioDe(c)}
                     fotoUrl={mascota?.foto_url ? urlsFotos.get(mascota.foto_url) : undefined}
                     acciones={
@@ -1442,7 +1630,7 @@ export default function Hoy() {
                 );
                 return (
                   <View key={c.id}>
-                    {esViva ? <CitaEnVivo capa="cuidado">{card}</CitaEnVivo> : card}
+                    {viva ? <CitaEnVivo capa="cuidado">{card}</CitaEnVivo> : card}
                   </View>
                 );
               })}
@@ -1477,7 +1665,7 @@ export default function Hoy() {
               </View>
             )}
             <SelectorDia
-              dias={dias7.map((iso) => ({
+              dias={dias.map((iso) => ({
                 iso,
                 // el precedente de la casa, copiado del cliente (dos
                 // consumidores ya lo hacen así): día corto por Intl según
@@ -1485,7 +1673,9 @@ export default function Hoy() {
                 dia: diaCorto(iso),
                 numero: iso.slice(8, 10),
               }))}
-              elegido={diaVista ?? desde}
+              // S86-C: el fallback es HOY (el default de la rueda), jamás
+              // `desde`, que ahora es tres días atrás.
+              elegido={diaVista ?? hoy ?? ''}
               cerrados={isoCerrados}
               etiquetaCerrado={t('agenda.diaCerrado')}
               onElegir={setDiaElegido}
