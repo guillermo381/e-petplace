@@ -51,7 +51,9 @@ en el contrato):*
    las dos puntas y muestra como BORRADO el trabajo que la otra rama no tiene.*
 2. **ABRIR LA VEDA ELLA MISMA** cuando alguien va a publicar.
 3. **VERIFICAR EL GROUP** antes de declarar cerrado — con `update:view`, **nunca
-   `update:list`**, que no muestra el `gitCommitHash`.
+   `update:list`**, que no muestra el `gitCommitHash`. **Y CORRER EL GUARD
+   (§3bis): el group prueba QUÉ GUARDASTE; el guard prueba QUÉ SE SIRVE.
+   Sin su verde, el publish NO se declara cerrado** *(firma de mesa, S86).*
 4. **ANUNCIAR EL CIERRE A TODOS**, incluida la mesa — **y a cada congelada EN
    MENSAJE PROPIO** *(enmienda S85: §4 vale también para el cierre. Una orden
    que no llega **se nota** cuando el trabajo no aparece; **un cierre que no
@@ -200,6 +202,72 @@ bundle.*
 
 **Y el árbol de `main` se verifica limpio ANTES de bundlear, no después** — el
 ancla se lee al bundlear.
+
+---
+
+## 3bis · LA SEGUNDA MITAD DEL PASO ⓪ — el guard del destino *(firmada por la mesa, S86)*
+
+> ### **EL PASO ⓪ VERIFICABA EL ANCLA; LE FALTABA VERIFICAR EL DESTINO.**
+>
+> *Un ancla limpia sobre un runtime que ningún binario tiene es un OTA perfecto
+> que no le llega a nadie.*
+
+**Las dos mitades corren en momentos distintos, y decirlo evita el malentendido
+obvio:** la de arriba corre **ANTES** del bundling —congela el árbol, fija el
+ancla—; ésta corre **DESPUÉS del publish**, porque necesita el `updateId` que
+el publish recién produce. **Es un mismo paso ⓪ con dos relojes.**
+
+```
+node scripts/verify-ota.mjs --app <prestador|cliente> --update <updateId>
+```
+
+**QUÉ LO PARIÓ, con su fecha:** el 4-ago-2026 el OTA del prestador salió con
+**todo verde** —12 hashes ancestros de `origin/main`, árbol limpio,
+`update:list` leído después del publish mostrando el group propio como cabeza—
+**y el founder no vio nada.** Ninguna verificación del paso ⓪ podía fallar,
+porque **ninguna preguntaba lo único que importa: qué le responde el servidor a
+un aparato que pregunta como aparato.**
+
+> **`update:list` describe LO QUE GUARDASTE. El guard mide LO QUE SE SIRVE.**
+> *Son dos cosas distintas y solo la segunda llega al teléfono.*
+
+**LOS TRES CASOS** *(el fixture con su rojo producido ANTES —L-199— vive en
+`docs/relevamientos/2026-08-04-s86a-FIXTURE-verify-ota.md`)*:
+
+| | qué mide | qué hace |
+|---|---|---|
+| **①** | el id servido ≠ el id publicado | **ROJO** — y dice **QUÉ** se sirve en su lugar |
+| **②** | el runtime publicado no tiene NINGUNA build `finished` | **ROJO** — el caso literal de la letra |
+| **③** | runtimes **huérfanos**: tienen binario y NO reciben este lote | **AVISA, NO FRENA** |
+
+**El ③ avisa por letra de mesa, y su porqué está probado por el propio aviso:**
+el prestador tiene **cuatro** runtimes con binario instalable —`1.0.0` · `1.0.1`
+· `1.0.2` · `1.0.3`— y **el `1.0.2` recibe todavía el update del 26-jul.** *Por
+eso «si su APK fuera 1.0.2 no le llegaría» sonaba tan bien: era cierto,
+comprobable, y le faltaba que además le llegaría algo de hace nueve días.*
+**Callar ese dato es lo que hizo creíble el diagnóstico equivocado.**
+
+### EL COSTO QUE ESTE ENGANCHE ACEPTA, declarado de antemano
+
+**Por L-197, si el guard NO PUEDE MEDIR sale ROJO, jamás verde** — un fallo
+degrada a **ausencia**, nunca a un valor que el consumidor use como cierto.
+**Enganchado, eso significa que una caída de EAS frena un cierre.**
+
+> **Se acepta a propósito, y se escribe acá para que el primer rojo de
+> infraestructura no lo deslegitime.** *Un guard que ante la duda dice «verde»
+> es exactamente el guard que no hubiera atrapado el 4-ago.* **El escape existe,
+> es explícito y es ruidoso: `--sin-builds` saltea la mitad ② y lo dice en
+> pantalla** — y quien lo use lo declara en el mismo mensaje del ancla.
+
+**Y una trampa medida, que es L-191 y la casa ya la tenía escrita:** el exit se
+lee **del comando**, jamás de un pipe. *La primera corrida de este mismo fixture
+leyó `$?` después de un `| tail` y devolvió `EXIT=0` sobre una salida que decía
+«EN ROJO» — el guard estaba bien y la medición mentía.*
+
+**Su hermana, y lo que NO cubre:** el guard prueba que el update **se sirve**;
+**que el aparato pueda IR A BUSCARLO es `D-649`** — hoy no hay forma de forzar
+la búsqueda desde la app, y reinstalar (la única salida) **borra la evidencia de
+por qué no bajó.**
 
 ---
 
