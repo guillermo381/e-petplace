@@ -136,6 +136,30 @@ const RAICES_M2 = ['apps/prestador/src', 'apps/cliente/src'];
 const esRutaDePantalla = (path, src) =>
   /[/\\]src[/\\]app[/\\]/.test(path) && /export\s+default/.test(src);
 
+// ⚠️⚠️ EL HUECO DE ESTE DISCRIMINADOR, MEDIDO Y DECLARADO — no está
+// cubierto, y se escribe acá para que el número de abajo no se lea como
+// cobertura total (que es exactamente el defecto que este ensanche vino
+// a curar, un piso más arriba).
+//
+// EL CASO REAL, medido archivo por archivo: `perfil-piezas.tsx` monta un
+// `<Campo>` y se clasifica como "componente con anfitriona" ⇒ NO se
+// cuenta. Pero tiene TRES anfitrionas y solo UNA porta la pieza:
+//   · `(tabs)/cuenta/perfil.tsx`      → CON EvitaTeclado   ✅ cubierta
+//   · `cuenta-comercial/index.tsx`    → SIN EvitaTeclado   🔴 descubierta
+//   · `seccion-documentos.tsx`        → SIN, y es otro componente
+// Y `cuenta-comercial/index.tsx` TAMPOCO aparece entre las rutas, porque
+// no monta `<Campo>` él mismo: lo monta a través del componente.
+//
+// ⇒ ESTE GUARD MIRA EL ARCHIVO, NO EL ÁRBOL DE MONTAJE. Cubre los dos
+//   extremos limpios (la ruta que monta su campo · el componente cuyas
+//   anfitrionas están todas cubiertas) y **se le escapa el MIXTO**.
+//
+// LA CURA DE VERDAD es evaluar por árbol —un `<Campo>` está cubierto si
+// TODAS las pantallas raíz que lo alcanzan portan la pieza—, y exige
+// resolver imports transitivamente. Es trabajo propio, no un ajuste de
+// regex. **Hasta que exista, el número de rutas es un PISO, no un
+// total**, y esta nota es lo que impide leerlo como si lo fuera.
+
 function corpusM2() {
   const out = { rutas: [], componentes: [] };
   for (const raiz of RAICES_M2) {
