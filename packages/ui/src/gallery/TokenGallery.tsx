@@ -1114,6 +1114,9 @@ function EjemploSetBPrima() {
     // el 3-ago y el founder firmó los vigentes. Su lápida vive en el
     // registry, que es donde se lee al dibujar el próximo.
     'documento', 'fiscal', 'bancario',
+    // S85-B18: la VENTANA TEMPORAL. Van pegados a `hoy` a propósito — es
+    // su hermana mayor y la que define el idioma de la familia.
+    'semana', 'mes',
   ]
   return (
     <View style={{ gap: spacing[4] }}>
@@ -1910,6 +1913,27 @@ function GaleriaInterna() {
             <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
               <Icono nombre="hoy" tamano={28} />
               <Icono nombre="preferencias" tamano={28} />
+            </View>
+            <Texto variante="apoyo">
+              (a bis) ⭐ LA FAMILIA DE LA VENTANA TEMPORAL — `hoy · semana · mes`, que comparten el
+              CUERPO (calendario con anillas) y varían LO MARCADO adentro: el día, la semana, el mes.
+              Paga el pedido que la hilera «todos · semana · mes» tenía abierto desde S82. El censo
+              encontró media familia ya resuelta: `todos` se dice con la Huella (la hilera hermana
+              del Hogar ya lo hace) y `hoy` ya era el calendario. ⚠️ SE SEPARAN CONTANDO BARRAS, y
+              contar a 21px es lo que puede fallar: si no se distinguen, `mes` cambia de marca (una
+              grilla de puntos), no engordan las barras.
+            </Texto>
+            <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
+              <Icono nombre="hoy" tamano={21} />
+              <Icono nombre="semana" tamano={21} />
+              <Icono nombre="mes" tamano={21} />
+              <Icono nombre="presupuesto" tamano={21} />
+              <Icono nombre="bitacora" tamano={21} />
+            </View>
+            <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
+              <Icono nombre="hoy" tamano={28} />
+              <Icono nombre="semana" tamano={28} />
+              <Icono nombre="mes" tamano={28} />
             </View>
             <Texto variante="apoyo">
               (b) ⭐ LA INSIGNIA DE COHORTE — reemplaza a los dos glifos que él rechazó («no me gusta

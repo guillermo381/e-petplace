@@ -103,6 +103,12 @@ export type IconoNombre =
   //    ancho, o sea el idioma que estos dos tenían que esquivar.
   //    GATE POR ÍCONO A 21px PENDIENTE (§2.9).
   | 'fiscal' | 'bancario'
+  // S85-B18 — LA VENTANA TEMPORAL: `semana` y `mes`. Solo DOS porque el
+  //   censo encontró la otra mitad resuelta: `hoy` ya es el calendario y
+  //   `todos` ya se dice con la Huella (hilera hermana del Hogar).
+  //   GATE A 21px: se separan CONTANDO barras, y contar a 21px es lo que
+  //   puede fallar.
+  | 'semana' | 'mes'
 export type IconoRegistro = 'capa' | 'aa' | 'tinta'
 
 const TRAZO = 1.9
@@ -364,6 +370,62 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
   //    que el propio founder dio: la pastilla «Al día» del cliente. El
   //    dibujo de los dos candidatos vive en `03ee595` si alguna vez hace
   //    falta un glifo de esta familia; su riesgo medido también.
+
+
+  // ── LA FAMILIA DE LA VENTANA TEMPORAL · semana · mes (S85-B18) ──────
+  //
+  // EL PEDIDO venía desde S82-C: la hilera «todos · semana · mes» de los
+  // hubs es la única del producto SIN glifo, y su propio código declaraba
+  // el hueco («EL SET NO EXISTE… si un set necesita el MISMO glifo
+  // repetido por fila, lo que falta es un set POR TIPO»). Nace ahora
+  // porque con la promoción de `FiltroPills` el pedido dejó de cruzar
+  // frontera: registry y pieza viven en la misma casa.
+  //
+  // EL CENSO ENCONTRÓ QUE LA CASA YA HABÍA RESUELTO LA MITAD, y por eso
+  // nacen DOS y no cuatro (L-175: se lee el registry y se ENSANCHA):
+  //  · `hoy` YA ES el calendario con el día marcado — la agenda de S85-B12.
+  //    La familia ya tenía su primer miembro y él define el idioma.
+  //  · `todos` YA SE RESUELVE con la Huella: la hilera hermana del Hogar
+  //    (`hogar/index:1662`) monta `icono: 'huella'` para su chip «todo».
+  //    No es una ventana temporal: es la AUSENCIA de ventana, y la casa
+  //    ya eligió cómo se dice. Copiar esa decisión habría sido inventarla
+  //    de nuevo.
+  //
+  // EL EJE DE LA FAMILIA, que es lo que la Ley 12 pide: los tres comparten
+  // el CUERPO (calendario con sus dos anillas) y varía LO MARCADO ADENTRO
+  // — el día · la semana · el mes. El glifo marca lo que VARÍA dentro de
+  // la unidad de barrido, y acá lo que varía es el TRAMO. Compartir el
+  // cuerpo no es colisión: es lo que los hace leerse como familia.
+  //
+  // ⚠️ EL RIESGO, declarado y es EL del gate a 21px: `semana` (una barra)
+  // y `mes` (tres) se separan CONTANDO, y contar a 21px es exactamente lo
+  // que puede fallar. Si a ese tamaño no se distinguen, la salida no es
+  // engordar las barras: es que `mes` cambie de marca (una grilla de
+  // puntos en vez de filas). Se monta la fila de 21px con `hoy` al lado
+  // para que la comparación sea entre los TRES, no de a uno.
+  // ⚠️ SEGUNDO RIESGO: sin las anillas, tres barras horizontales dentro de
+  // un rectángulo son el idioma de `presupuesto`/`bitacora` — ocupado.
+  // Las anillas son lo único que los mantiene calendario, igual que en
+  // `hoy`. Nadie las saca "para simplificar".
+  semana: ({ tinta, huella }) => (
+    <>
+      <Path d="M6 6.4h12a1.6 1.6 0 0 1 1.6 1.6v11.4a1.6 1.6 0 0 1-1.6 1.6H6a1.6 1.6 0 0 1-1.6-1.6V8A1.6 1.6 0 0 1 6 6.4Z" {...trazo(tinta)} />
+      <Path d="M4.4 10.8h15.2" {...trazo(tinta)} />
+      <Path d="M8.6 3.4v4M15.4 3.4v4" {...trazo(tinta)} />
+      <Path d="M7.4 14.6h9.2" {...trazo(tinta)} />
+      <Huella color={huella} x={1.8} y={16.4} escala={0.28} />
+    </>
+  ),
+
+  mes: ({ tinta, huella }) => (
+    <>
+      <Path d="M6 6.4h12a1.6 1.6 0 0 1 1.6 1.6v11.4a1.6 1.6 0 0 1-1.6 1.6H6a1.6 1.6 0 0 1-1.6-1.6V8A1.6 1.6 0 0 1 6 6.4Z" {...trazo(tinta)} />
+      <Path d="M4.4 10.8h15.2" {...trazo(tinta)} />
+      <Path d="M8.6 3.4v4M15.4 3.4v4" {...trazo(tinta)} />
+      <Path d="M7.4 13.2h9.2M7.4 15.8h9.2M7.4 18.4h9.2" {...trazo(tinta)} />
+      <Huella color={huella} x={1.8} y={16.4} escala={0.28} />
+    </>
+  ),
 
   // El escudo — la vida protegida (verde vital, como insurance).
   //
@@ -736,6 +798,9 @@ export function Icono({
     // color dirían que son de dominios distintos. Que no diverjan es la
     // decisión, no el default.
     fiscal: identidad, bancario: identidad,
+    // S85-B18 — la ventana temporal comparte capa con `hoy`, que es su
+    // hermana mayor: son el MISMO eje (cuándo), no dominios distintos.
+    semana: cuidado, mes: cuidado,
     prime: comunidad, primeCorona: comunidad,
     // LOTE S71-B2 (firma founder): caso = historia clínica (familia de
     // carnet/vet) · presupuesto = plata del cuidado (familia pagos/negocio)
