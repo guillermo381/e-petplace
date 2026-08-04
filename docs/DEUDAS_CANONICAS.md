@@ -2726,6 +2726,31 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 - **L-195 — VERIFICAR QUE UNA COLUMNA **EXISTE** NO ES VERIFICAR QUE ESTÉ **POBLADA** (S85, firmada por la mesa).** El caso, y lo pagué yo en el mismo turno: al diseñar la RPC de D-639 afirmé *"el «quién lo hizo» ya está en la fila; la RPC no agrega información, la quita"* — porque `eventos_mascota` **tiene** `cuenta_comercial_id`, `prestador_id` y `procedencia`. **Leí `information_schema` y me detuve ahí.** Al medir el contenido: **`cuenta_comercial_id` poblada en 3 de 177**, y **`procedencia` NULL en 134**. *La afirmación era verdadera sobre el esquema y falsa sobre el dato.* **Es la familia exacta de los datos que dicen que sí:** una columna vacía **no da error, no rompe un guard de shape y el typecheck la acepta** — el `select` la trae, el tipo la declara `string | null`, y **el problema recién aparece cuando alguien lee el `null` como significado**. *Se descubre al chocar, y el choque llega tarde: cuando la pieza ya se diseñó alrededor de ella.* **LA REGLA: toda columna sobre la que se va a APOYAR una decisión de diseño se mide con `count(col)` contra `count(*)`, no con `information_schema`.** El esquema dice qué se puede guardar; **solo el conteo dice qué se guardó.** *Y su corolario, que es lo que la hace barata: es UNA query, y va antes de la primera línea de la pieza — no después del primer fixture.* **Hermana de L-193** (la premisa heredada que nadie fechó) y de **L-084** (la doc conceptual no es fuente de verdad de schema): las tres son la misma familia — **confiar en una descripción en vez de en el objeto**. Origen: S85-A (el diseño de la RPC de D-639).
 - **L-196 — UN MÓDULO "PREPARADO-APAGADO" QUE NUNCA PASÓ POR UN COMPILADOR NO ESTÁ PREPARADO: ESTÁ ESCRITO (S85, firmada por la mesa).** El caso: `modules/sonda-manifest` (D-579, S81) se escribió como **pasajero preparado-apagado**, para viajar *"en la próxima build nativa"*. **En S85 hubo esa build, y falló:** `project ':sonda-manifest' does not specify compileSdk in build.gradle` — el módulo **jamás había pasado por Gradle**, porque los OTAs son JS y no tocan la cadena nativa. **DOCE SESIONES sin que nada lo compilara.** *El patrón "preparado-apagado" es correcto y la casa lo usa bien (el mic de D-456 llegó a destino tras cinco sesiones) — lo que falla es dar por verificado lo que solo está escrito.* **LA REGLA: todo pasajero que espera un tren futuro declara QUÉ LO VERIFICA MIENTRAS ESPERA.** Si nada lo compila, lo tipa ni lo corre, **su estado no es "listo": es "sin verificar"**, y hay que decirlo con esa palabra en su ficha. *La forma barata de cumplirla: que la deuda que lo crea nombre el primer instrumento que lo tocará — y si la respuesta es "ninguno hasta el tren", eso ya es el hallazgo.* **Hermana de L-193** (la premisa heredada que nadie fechó) **y de L-195** (la columna que existe y no está poblada): las tres son *confiar en la existencia en vez de en la verificación*. **Y su costo medido acá: un tren entero de build — 17 min de cola + 2m17s de Gradle — para descubrir una línea que un `tsc` nativo habría cazado el día que se escribió.** Origen: S85-A (el log de la build `c241c908`).
 - **L-197 — UN FALLO PUEDE DEGRADAR A *AUSENCIA*, NUNCA A UN *VALOR* QUE EL CONSUMIDOR VA A USAR COMO SI FUERA CIERTO (S85, firmada por la mesa).**
+- **L-198 — UN TEXTO QUE EXPLICA UN PORQUÉ **VENCE CON EL PORQUÉ**, Y SE CAMBIA EN EL MISMO COMMIT (S85, firmada por la mesa — síntesis de método de la sesión).**
+
+  > **Un porqué viejo se lee con la misma autoridad que uno vigente, y nadie puede distinguirlos leyendo.**
+
+  **El caso que la fundó es de B** (`e7e58df`, el `▶` del carrusel): *"la ficha pedía un póster que nadie produce"* — **el texto sobrevivió a la razón que lo había hecho verdadero.** *Y la sesión entera lo pagó en cinco formas distintas antes de nombrarlo:*
+
+  | dónde vivía el porqué viejo | quién lo pagó |
+  |---|---|
+  | el **mensaje** de un guard (`'entre 1 y 4'` con el predicado ya en 10) | A |
+  | un **comentario** que describía un comportamiento inexistente (#23) | C → **A construyó un contrato contra él** |
+  | un **copy** que declaraba nuestro estado (`clipVacio`) | C |
+  | una **ficha** que pedía un artefacto que nadie produce (el `▶`) | B |
+  | un **acta** que decía *"la build ya está corriendo"* | A |
+
+  **⇒ LA REGLA:** cuando cambia el hecho, **el texto que lo explica se mueve EN EL MISMO COMMIT** — mensaje, comentario, JSDoc, ficha, acta y copy. *Es la 28 y D-613 (**los cuerpos se mueven juntos**) extendidas de las columnas a la PROSA.*
+
+  ### ⚠️ EL COROLARIO, que es lo que la vuelve urgente y no una buena práctica
+
+  > **Los desfases que se cazaron hoy se cazaron porque algo MECÁNICO se puso rojo.** *El techo saltó cuando el founder no pudo subir su cupo; el rojo de tipos lo trajo `tsc`; la lista de cierre la cazó un grep.*
+  >
+  > **Los que NO tienen guard —comentarios, láminas, contadores, actas— se descubren de casualidad, o porque el FOUNDER choca con ellos.** *Y ése es el peor canal posible: llega tarde, llega como desconfianza del producto, y llega con el costo ya pagado.*
+
+  **Por eso la carga está sobre QUIEN DEPOSITA, no sobre quien mide** (aporte de B): *escribir el porqué al construir es lo que hace que el censo del próximo sirva.* La alternativa —*"desconfiá de todo texto"*— es impagable: **volvería inútil la única capa que explica las decisiones.**
+
+  **Hermana de #21** (el mensaje es parte del guard) y **de #23** (el comentario le habla a la próxima pista): **L-198 es su generalización — los tres son el mismo defecto con distinto destinatario.** Origen: S85 (el caso de B; los cinco cobros de la sesión).
 
   > **Un fallo puede degradar a AUSENCIA, nunca a un VALOR que el consumidor va a usar como si fuera cierto.**
 
