@@ -8,18 +8,46 @@
 
 import { Tabs } from 'expo-router';
 import { StackActions } from 'expo-router/react-navigation';
-import { BarraTabs, type BarraTabsItem } from '@epetplace/ui';
+import { BarraTabs, Icono, type BarraTabsItem } from '@epetplace/ui';
 
-import { IconoCuenta, IconoExplorar, IconoHogar } from '@/components/iconos-tabs';
 import { useTraduccion } from '@/i18n';
+
+/* ☠️ S86-B · `@/components/iconos-tabs` MURIÓ — LA BARRA CONSUME EL
+ * REGISTRY (D-645 / D-546). Los tres glifos de esta barra vivían
+ * copiados a mano, y **los tres habían divergido del set firmado**:
+ * la casa (dos paths donde el registry tiene uno), la brújula (r 8.8
+ * contra 8.4, huella en otra posición y escala) y la CHAPITA DE
+ * COLLAR — que el registry había reemplazado por la persona
+ * (cabeza + hombros) en S85-B23 por orden del founder, *"algo que
+ * realmente parezca cuenta"*. **Esa firma nunca llegó al cliente**,
+ * y nada falló: una copia no se entera de que la fuente cambió.
+ * Ahora hay UNA fuente, y `Icono` resuelve la ley 6 adentro. */
 
 export default function TabsLayout() {
   const { t } = useTraduccion();
 
   const items: BarraTabsItem[] = [
-    { key: 'hogar', etiqueta: t('tabs.hogar'), icono: IconoHogar },
-    { key: 'explorar', etiqueta: t('tabs.explorar'), icono: IconoExplorar },
-    { key: 'cuenta', etiqueta: t('tabs.cuenta'), icono: IconoCuenta },
+    {
+      key: 'hogar',
+      etiqueta: t('tabs.hogar'),
+      icono: ({ color, activa, colorHuella }) => (
+        <Icono nombre="hogar" tinta={color} huella={colorHuella} activa={activa} />
+      ),
+    },
+    {
+      key: 'explorar',
+      etiqueta: t('tabs.explorar'),
+      icono: ({ color, activa, colorHuella }) => (
+        <Icono nombre="explorar" tinta={color} huella={colorHuella} activa={activa} />
+      ),
+    },
+    {
+      key: 'cuenta',
+      etiqueta: t('tabs.cuenta'),
+      icono: ({ color, activa, colorHuella }) => (
+        <Icono nombre="cuenta" tinta={color} huella={colorHuella} activa={activa} />
+      ),
+    },
   ];
 
   return (

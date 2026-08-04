@@ -118,6 +118,82 @@ const TRAZO = 1.9
 
 type Pincel = { tinta: string; huella: string }
 
+/* ═══ S86-B · LOS DOS EJES QUE FALTABAN — D-546 y D-645 ══════════════
+ *
+ * EL HUECO, declarado desde S78 en la propia skill: *"`iconos-tabs.tsx`
+ * + `iconos-oficio.tsx` copian geometría del registry porque el contrato
+ * no expone trazo y huella por separado (D-546) — hasta que esa prop
+ * exista, todo glifo nuevo del prestador nace con este riesgo."* Tres
+ * archivos vivían de copiar este dibujo, y su costo se midió: **los tres
+ * glifos de la barra del CLIENTE divergieron los tres** (la casa, la
+ * brújula y la chapita) mientras el registry evolucionaba sin ellos.
+ *
+ * ⚠️ Y ES EL DATO QUE ORDENA LA CURA: los siete del prestador estaban
+ * BYTE-IDÉNTICOS. No porque el clon funcione — porque C los volvió a
+ * copiar A MANO en S85, y su propia cabecera lo dice ("la tercera vez que
+ * el clon cobra en una sola sesión"). **Un clon no falla por existir:
+ * falla por envejecer, y solo no envejece mientras alguien lo esté
+ * mirando.** El cliente no tuvo quien lo mirara.
+ *
+ * ── EJE 1 · EL COLOR DE LA HUELLA, INDEPENDIENTE DEL TRAZO ──────────
+ * `tinta` ya existía (override del trazo). Lo que no existía era su
+ * gemelo: los tres registros resuelven la huella ADENTRO y ninguno
+ * produce "trazo en tinta + huella en el teal del oficio", que es la
+ * composición firmada en el gate S78 y la razón literal por la que
+ * `iconos-oficio` nació local. Nace `huella`, simétrica de `tinta`.
+ *
+ * ── EJE 2 · EL ESTADO DE LA HUELLA, DECLARADO POR EL REGISTRY ───────
+ * La ley 6 de DIRECCION_ARTE (v1.5, firmada): ***la huella que es
+ * ESTRUCTURA se RECOLOREA; la que es MARCA APARECE. Nunca las dos.***
+ *
+ * **DÓNDE SE CONTESTA ESA PREGUNTA ES LA DECISIÓN DE DISEÑO DE ESTA
+ * ENMIENDA, y se declara porque diverge de cómo se pidió.** La orden
+ * pedía TRES ESTADOS EN LA PROP (`'presente' | 'aparece' | 'recolorea'`),
+ * con el argumento correcto de que un boolean aplana la distinción. El
+ * argumento se respeta entero; lo que cambia es quién lo responde:
+ *
+ *   · Con el modo EN LA PROP, la pantalla elige — y puede elegir mal.
+ *     `modoHuella="aparece"` sobre `negocio` (que ES una huella y nada
+ *     más) **borra el glifo entero en reposo**: compila, no rompe nada,
+ *     y la tab queda vacía. Es el modo de falla que esta casa nombró
+ *     como el más caro (L-192: falla que produce una salida creíble).
+ *   · Con el modo EN EL REGISTRY, la pregunta se contesta UNA VEZ, al
+ *     lado del dibujo — que es literalmente lo que la ley 6 manda
+ *     ("se contesta ANTES de dibujar") — y **ninguna pantalla puede
+ *     romperla**. Precedente exacto de la casa: `FilaCita` con su canto
+ *     de capa ("CERO API de color/posición/alfa: ninguna pantalla puede
+ *     romper la ley").
+ *
+ * **LOS TRES ESTADOS SIGUEN SIENDO TRES y siguen siendo distinguibles
+ * por tipo** — no se aplanó nada: `activa` sin definir = PRESENTE (todo
+ * el producto fuera de una barra) · `activa` definida + huella de MARCA
+ * = APARECE · `activa` definida + huella de ESTRUCTURA = RECOLOREA. El
+ * boolean que la orden vetaba era el que decidía el COMPORTAMIENTO; éste
+ * solo transporta el ESTADO, y el comportamiento lo dicta el registry.
+ *
+ * ⇒ Es un desvío de la letra de la orden, a favor de su argumento. Lo
+ *   adjudica la mesa: revertir a `modoHuella` es mecánico (una prop, un
+ *   switch) y esta nota dice contra qué se cambió. */
+
+/** Glifos cuya huella ES EL DIBUJO — si no se pinta, no queda glifo.
+ *  Se recolorean al activarse (ley 6); jamás desaparecen en reposo.
+ *  Medido uno por uno contra su dibujante, no supuesto:
+ *   · `negocio` — la pata sola, sin objeto que la sostenga (S85-B28: su
+ *     regresión fue exactamente ésta, la huella tratada como marca).
+ *   · `datos`   — la huella es LA BARRA MÁS ALTA de la gráfica; sin ella
+ *     la gráfica pierde su barra y el dibujo dice otra cosa (S85-B23).
+ *   · `ia`      — las tres chispas se pintan con el color de huella y no
+ *     hay trazo debajo: es el único glifo del set sin objeto (§5.1).
+ *  `familia` NO entra y es el borde que prueba la regla: tiene DOS
+ *  huellas, pero la grande va en TINTA (hace de objeto) y solo la chica
+ *  porta la capa — el glifo sobrevive sin ella, así que su huella es
+ *  marca. */
+const HUELLA_ES_ESTRUCTURA: ReadonlySet<IconoNombre> = new Set([
+  'negocio',
+  'datos',
+  'ia',
+])
+
 const trazo = (color: string) => ({
   stroke: color,
   strokeWidth: TRAZO,
@@ -777,6 +853,8 @@ export function Icono({
   tamano = 24,
   registro = 'capa',
   tinta,
+  huella,
+  activa,
 }: {
   nombre: IconoNombre
   /** Tamaño de render; el diseño vive en la grilla 24 (gate también a 21 — §2.9). */
@@ -785,6 +863,18 @@ export function Icono({
   registro?: IconoRegistro
   /** Override del color de trazo (default: text.primary del tema). */
   tinta?: string
+  /** Override del color de la HUELLA, independiente de `tinta` (S86-B,
+   *  D-546). Es lo que permite "trazo en tinta + huella en el teal del
+   *  oficio" — la composición firmada en el gate S78 que ningún
+   *  `registro` podía producir, y por la que nació `iconos-oficio`.
+   *  Sin él, la huella la sigue resolviendo el registro por su capa. */
+  huella?: string
+  /** ESTADO de la barra de tabs (S86-B). Sin definir = el glifo vive
+   *  PRESENTE, como en todo el resto del producto. Definido, la ley 6
+   *  decide qué hace la huella **según el registry, no según quien
+   *  monta**: la de MARCA aparece al activarse, la de ESTRUCTURA
+   *  recolorea. Ver `HUELLA_ES_ESTRUCTURA` arriba. */
+  activa?: boolean
 }) {
   const { theme } = useTheme()
   const esMemorial = theme.mode === 'memorial'
@@ -882,17 +972,35 @@ export function Icono({
   }
 
   // §2.8 memorial: la huella a tinta secundaria, el trazo se conserva.
-  const colorHuella = esMemorial
-    ? theme.text.secondary
-    : registro === 'tinta'
-      ? colorTinta
-      : registro === 'aa'
-        ? porConcepto[nombre].aa
-        : porConcepto[nombre].pura
+  // El override explícito GANA sobre memorial a propósito: quien lo pasa
+  // (la barra de tabs) ya degradó el color por tema antes de entregarlo.
+  const colorHuella =
+    huella ??
+    (esMemorial
+      ? theme.text.secondary
+      : registro === 'tinta'
+        ? colorTinta
+        : registro === 'aa'
+          ? porConcepto[nombre].aa
+          : porConcepto[nombre].pura)
+
+  /* LEY 6 aplicada — y el registry es quien la contesta (ver arriba).
+   * `activa === undefined` ⇒ el glifo vive PRESENTE: es todo el producto
+   * fuera de una barra de tabs, y por eso es el default silencioso. */
+  const huellaFinal =
+    activa === undefined
+      ? colorHuella
+      : HUELLA_ES_ESTRUCTURA.has(nombre)
+        ? // ESTRUCTURA: nunca desaparece — en reposo toma el color del
+          // trazo, que es lo que hacía la pata a mano en la barra viva.
+          (activa ? colorHuella : colorTinta)
+        : // MARCA: aparece al activarse. 'none' y no un color de fondo:
+          // el glifo se sostiene solo sin ella (por eso es marca).
+          (activa ? colorHuella : 'none')
 
   return (
     <Svg width={tamano} height={tamano} viewBox="0 0 24 24">
-      {DIBUJANTES[nombre]({ tinta: colorTinta, huella: colorHuella })}
+      {DIBUJANTES[nombre]({ tinta: colorTinta, huella: huellaFinal })}
     </Svg>
   )
 }
