@@ -39,6 +39,7 @@ import {
   Boton,
   Campo,
   CeldaNavegacion,
+  Icono,
   LogoNegocio,
   PieDeCampo,
   Tarjeta,
@@ -436,11 +437,30 @@ export function EspejoNegocio({
                 responde al dedo por esta vía — jamás una receta artesanal
                 por pantalla". 0.97 porque es un CONTROL, no una
                 superficie. */}
-            <Animated.View style={presionNombre.estiloPresionado}>
+            {/* ⭐ S85-C11 — EL GLIFO DEL LÁPIZ, y por qué existe.
+                Construí este tap SIN affordance a propósito, apoyado en el
+                precedente del logo (*"un botón con caja al lado de una foto
+                compite con la foto"*), y **lo declaré al gate como el riesgo
+                que solo el dedo podía confirmar**. El dedo lo confirmó: el
+                founder no lo encontró — *"no se me ocurre tocarlo"*.
+                **El precedente sigue siendo cierto; lo que no se sostenía
+                era concluir de ahí que CERO affordance alcanza.** Un glifo
+                no es una caja: no encierra, no compite por superficie, y
+                dice "esto se toca" sin pedirle marco al muro.
+                Materiales ya medidos de esta pantalla: `registro="tinta"` +
+                papel PLENO, la misma receta del engranaje del muro en
+                `cuenta/index` — cero token nuevo, cero par WCAG nuevo. */}
+            <Animated.View
+              style={[
+                presionNombre.estiloPresionado,
+                { flexDirection: 'row', alignItems: 'center', gap: spacing[2] },
+              ]}
+            >
               <Text
                 accessibilityRole="header"
                 numberOfLines={2}
                 style={{
+                  flexShrink: 1,
                   fontFamily: typography.family.sans.light,
                   fontSize: typography.size.xl,
                   color: palette.light0,
@@ -448,6 +468,7 @@ export function EspejoNegocio({
               >
                 {nombre}
               </Text>
+              <Icono nombre="lapiz" registro="tinta" tinta={palette.light0} tamano={18} />
             </Animated.View>
           </Pressable>
           {/* ① EL NULO NO SE PINTA: sin oficio o sin ciudad, la línea no

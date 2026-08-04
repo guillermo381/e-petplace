@@ -561,15 +561,19 @@ export default function Cuenta() {
             ))}
           </Tarjeta>
 
-          {/* ── Sesión y cuenta (la sesión se MUDÓ desde Negocio) ── */}
-          <View style={{ gap: spacing[3] }}>
-            <Texto variante="seccion">{t('sesion.titulo')}</Texto>
-            <Boton variante="secundario" etiqueta={t('sesion.cerrarSesion')} bloque onPress={() => setSalirAbierta(true)} />
-            <Boton variante="ghost" etiqueta={t('miCuenta.eliminarCuenta')} bloque onPress={() => setEliminarAbierta(true)} />
-          </View>
-
-          
-
+          {/* ⭐ S85-C11 — LA GALERÍA SUBE, ARRIBA DE "Sesión y cuenta".
+              El founder no encontró los dos emblemas, y la medición dijo
+              que NO era alcanzabilidad: la entrada estaba viva y sin
+              `__DEV__`. **Estaba ENTERRADA** — quedaba DEBAJO de "cerrar
+              sesión" y "eliminar cuenta", o sea después del bloque que
+              cualquiera lee como el final de la pantalla. *Una puerta
+              después del final no es una puerta.*
+              Es L-161 en su tercera forma: primero no existía (S83), después
+              estaba nombrada en nuestro idioma (S84-C9), y ahora estaba
+              puesta donde nadie sigue leyendo. **Las tres veces el gate era
+              inalcanzable por una razón distinta.**
+              El pie queda SOLO con el marcador de update, que es lo único
+              que pertenece al final. */}
           {/* ── S83-C15 · LA PUERTA DE LA GALERÍA (decisión founder).
               El prestador NUNCA la tuvo: `/gallery` está registrada en
               el layout pero vive SOLO por URL (medido en C10) — y con
@@ -629,6 +633,17 @@ export default function Cuenta() {
               onPress={() => router.push('/gallery')}
             />
           </Tarjeta>
+
+          {/* ── Sesión y cuenta (la sesión se MUDÓ desde Negocio) ── */}
+          <View style={{ gap: spacing[3] }}>
+            <Texto variante="seccion">{t('sesion.titulo')}</Texto>
+            <Boton variante="secundario" etiqueta={t('sesion.cerrarSesion')} bloque onPress={() => setSalirAbierta(true)} />
+            <Boton variante="ghost" etiqueta={t('miCuenta.eliminarCuenta')} bloque onPress={() => setEliminarAbierta(true)} />
+          </View>
+
+          
+
+
 
 
           {/* ── S74-B · EL MARCADOR RENDERIZADO (L-160/L-161): el
