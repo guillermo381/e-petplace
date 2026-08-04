@@ -1938,9 +1938,97 @@ function GaleriaInterna() {
           </View>
         </Seccion>
 
+        {/* ═══ S85-B14 · LAS DOS PROMOVIDAS SUBEN A LA ZONA DE GATE, por
+            la misma regla que movió a los emblemas y por aprobación de la
+            mesa: **esperan decisión, no son catálogo**. La rueda porque su
+            techo en la casa verde nunca se firmó (hasta S85 no vivía acá) y
+            los chips porque nunca se vieron en el prestador. Cuando el
+            founder firme, BAJAN al catálogo — no se quedan arriba ocupando
+            el lugar del siguiente.
+
+            ⚠️ LA FLECHA DEL `acento` NO SUBE, y es la misma regla aplicada
+            al revés: **ya está firmada**. El founder la vio en pantalla
+            —reportó que en «cambiar ícono» salía a la izquierda— y eligió
+            la derecha. Subirla sería poner una decisión CERRADA en la zona
+            de las abiertas, que es exactamente lo que la segunda mitad de
+            la regla prohíbe. Se queda en la sección de `Boton`, que es su
+            casa de catálogo. ═══ */}
+        <Seccion titulo="② ⭐ GATE S85 — LA RUEDA D3 EN LA CASA VERDE · qué decide: el COLOR DE LA SUPERFICIE del día (el «techo» de la rueda) en el prestador. Nunca se firmó porque hasta S85 la rueda no vivía acá: resuelve de `bg.card` como en el cliente. Su FÍSICA no se toca — está firmada y viajó verbatim">
+          {/* Promovida del cliente por la Regla de las Piezas: segundo
+              consumidor, el bloque «Tu día» del prestador. SU FÍSICA ESTÁ
+              FIRMADA y no se recalibra — ítem 66 · paso 76 · escalas
+              1.16/.94/.84/.78 · opacidades 1/.62/.34/.18 · 520ms con la
+              curva de la casa. Lo que hay que mirar acá es el GESTO: se
+              arrastra, y al soltar el imán la deja en un día, jamás entre
+              dos. Escala, opacidad y acento siguen AL DEDO (worklet), no
+              al estado de React. */}
+          <SelectorDia
+            dias={[
+              { iso: '2026-08-03', dia: 'lun', numero: '3' },
+              { iso: '2026-08-04', dia: 'mar', numero: '4' },
+              { iso: '2026-08-05', dia: 'mié', numero: '5' },
+              { iso: '2026-08-06', dia: 'jue', numero: '6' },
+              { iso: '2026-08-07', dia: 'vie', numero: '7' },
+              { iso: '2026-08-08', dia: 'sáb', numero: '8' },
+            ]}
+            elegido="2026-08-05"
+            cerrados={new Set(['2026-08-08'])}
+            etiquetaCerrado="cerrado"
+            onElegir={() => {}}
+          />
+          <View style={{ height: spacing[3] }} />
+          <Texto variante="apoyo">
+            ⚠️ GATE ABIERTO, en LAS DOS casas: el color de la SUPERFICIE del día —el &quot;techo&quot; de
+            la rueda— nunca se firmó en el prestador, porque hasta hoy la rueda no vivía ahí. Resuelve
+            de `bg.card` como en el cliente, y el acento del número de `accent.control`, que ya se
+            resuelve por casa (magenta en el cliente, verde en el prestador). El sábado va CERRADO a
+            propósito: el día cerrado SE PUEDE TOCAR — un día apagado y mudo era el bug que este
+            cableado vino a curar, y su estado se DICE para el lector de pantalla, que no ve
+            opacidades.
+          </Texto>
+        </Seccion>
+
+        <Seccion titulo="② ⭐ GATE S85 — LOS CHIPS CON PATA EN LA CASA VERDE · qué decide: cómo se ven en el prestador, donde NUNCA se vieron (nacieron en el cliente y subieron en S85). La pata sale en `accent.control`, que acá es VERDE y allá magenta — el mismo dibujo con otro acento">
+          {/* Promovidos del cliente por la Regla de las Piezas: apareció el
+              segundo consumidor (la portada del prestador). Se montan LOS
+              DOS porque la pata es lo que comparten y es lo que hay que
+              mirar: aparece SOLO en la elegida, sobre el CANTO y JAMÁS
+              adentro de la placa del glifo. El aire de arriba está
+              reservado por la pieza — un ScrollView recorta a sus bordes y
+              la pata MONTA. */}
+          <View style={{ gap: spacing[4] }}>
+            <FiltroPills
+              opciones={[
+                { codigo: 'todo', etiqueta: 'Todo', icono: null, capa: null },
+                { codigo: 'salud', etiqueta: 'Salud', icono: 'veterinaria', capa: 'identidad' },
+                { codigo: 'cuidado', etiqueta: 'Paseos', icono: 'paseo', capa: 'cuidado' },
+              ]}
+              activo="salud"
+              onCambio={() => {}}
+            />
+            <FiltroMascotas
+              mascotas={[
+                { id: '1', nombre: 'Thor' },
+                { id: '2', nombre: 'Zeus' },
+              ]}
+              elegida="1"
+              onElegir={() => {}}
+            />
+          </View>
+          <View style={{ height: spacing[3] }} />
+          <Texto variante="apoyo">
+            El elegido NO se rellena: se HUNDE (pierde la elevación, baja a `bg.hundido`, se achica) y
+            la pata lo pisa. Dos marcas para un mismo estado serían el tercer peso que no informa. La
+            pata es la primitiva `MarcaEleccion`, no un dibujo propio — y su color sale de
+            `accent.control`, o sea que cada casa la viste con su acento: magenta en el cliente, verde
+            en el prestador. En memorial el slot de hundido no da paso (una sola superficie a
+            propósito): ahí el estado lo cargan la elevación perdida y la escala.
+          </Texto>
+        </Seccion>
+
         {/* ═══ S83-B9: el agua en la casa verde. Va PRIMERA junto al gate
             abierto porque es decisión viva, no catálogo. ═══ */}
-        <Seccion titulo="① ⭐ GATE S83 — CUÁNTO PAPEL VERDE EN CLARO · qué decide: el nivel del tinte del prestador en el tema claro. ES ENMIENDA DE LA LETRA DE S82 (que decía que el prestador NO recibe tinte), firmada por el founder en S83: un tinte por casa en LOS DOS temas. Hoy corre el 3%">
+        <Seccion titulo="✅ FIRMADO S85 (3-ago: «llevala al 5») — CUÁNTO PAPEL VERDE EN CLARO · YA NO ESPERA DECISIÓN: corre el 5% (#F0F8F6). Queda como registro de la escala y de su techo — a 6% cae status.dangerText, que hoy pasa con margen 0.07. Baja al catálogo en la próxima pasada">
           <ThemeProvider defaultMode="light" cta="oficio">
             <PanelGateTema etiqueta="prestador CLARO — el papel verde">
               <EscalaPapelVerde />
@@ -2417,79 +2505,8 @@ function GaleriaInterna() {
           </Texto>
         </Seccion>
 
-        <Seccion titulo="SelectorDia (66) — la RUEDA de días D3 (S85, promovida)">
-          {/* Promovida del cliente por la Regla de las Piezas: segundo
-              consumidor, el bloque «Tu día» del prestador. SU FÍSICA ESTÁ
-              FIRMADA y no se recalibra — ítem 66 · paso 76 · escalas
-              1.16/.94/.84/.78 · opacidades 1/.62/.34/.18 · 520ms con la
-              curva de la casa. Lo que hay que mirar acá es el GESTO: se
-              arrastra, y al soltar el imán la deja en un día, jamás entre
-              dos. Escala, opacidad y acento siguen AL DEDO (worklet), no
-              al estado de React. */}
-          <SelectorDia
-            dias={[
-              { iso: '2026-08-03', dia: 'lun', numero: '3' },
-              { iso: '2026-08-04', dia: 'mar', numero: '4' },
-              { iso: '2026-08-05', dia: 'mié', numero: '5' },
-              { iso: '2026-08-06', dia: 'jue', numero: '6' },
-              { iso: '2026-08-07', dia: 'vie', numero: '7' },
-              { iso: '2026-08-08', dia: 'sáb', numero: '8' },
-            ]}
-            elegido="2026-08-05"
-            cerrados={new Set(['2026-08-08'])}
-            etiquetaCerrado="cerrado"
-            onElegir={() => {}}
-          />
-          <View style={{ height: spacing[3] }} />
-          <Texto variante="apoyo">
-            ⚠️ GATE ABIERTO, en LAS DOS casas: el color de la SUPERFICIE del día —el &quot;techo&quot; de
-            la rueda— nunca se firmó en el prestador, porque hasta hoy la rueda no vivía ahí. Resuelve
-            de `bg.card` como en el cliente, y el acento del número de `accent.control`, que ya se
-            resuelve por casa (magenta en el cliente, verde en el prestador). El sábado va CERRADO a
-            propósito: el día cerrado SE PUEDE TOCAR — un día apagado y mudo era el bug que este
-            cableado vino a curar, y su estado se DICE para el lector de pantalla, que no ve
-            opacidades.
-          </Texto>
-        </Seccion>
-
-        <Seccion titulo="FiltroPills · FiltroMascotas (64-65) — los chips con PATA (S85, promovidos)">
-          {/* Promovidos del cliente por la Regla de las Piezas: apareció el
-              segundo consumidor (la portada del prestador). Se montan LOS
-              DOS porque la pata es lo que comparten y es lo que hay que
-              mirar: aparece SOLO en la elegida, sobre el CANTO y JAMÁS
-              adentro de la placa del glifo. El aire de arriba está
-              reservado por la pieza — un ScrollView recorta a sus bordes y
-              la pata MONTA. */}
-          <View style={{ gap: spacing[4] }}>
-            <FiltroPills
-              opciones={[
-                { codigo: 'todo', etiqueta: 'Todo', icono: null, capa: null },
-                { codigo: 'salud', etiqueta: 'Salud', icono: 'veterinaria', capa: 'identidad' },
-                { codigo: 'cuidado', etiqueta: 'Paseos', icono: 'paseo', capa: 'cuidado' },
-              ]}
-              activo="salud"
-              onCambio={() => {}}
-            />
-            <FiltroMascotas
-              mascotas={[
-                { id: '1', nombre: 'Thor' },
-                { id: '2', nombre: 'Zeus' },
-              ]}
-              elegida="1"
-              onElegir={() => {}}
-            />
-          </View>
-          <View style={{ height: spacing[3] }} />
-          <Texto variante="apoyo">
-            El elegido NO se rellena: se HUNDE (pierde la elevación, baja a `bg.hundido`, se achica) y
-            la pata lo pisa. Dos marcas para un mismo estado serían el tercer peso que no informa. La
-            pata es la primitiva `MarcaEleccion`, no un dibujo propio — y su color sale de
-            `accent.control`, o sea que cada casa la viste con su acento: magenta en el cliente, verde
-            en el prestador. En memorial el slot de hundido no da paso (una sola superficie a
-            propósito): ahí el estado lo cargan la elevación perdida y la escala.
-          </Texto>
-        </Seccion>
-
+        
+        
         <Seccion titulo="PieReserva (63) — el pie fijo de una reserva (S82, dominio)">
           {/* Los DOS estados que el contrato distingue, montados juntos
               porque la diferencia es la decisión: CON precio (paseo,
