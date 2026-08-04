@@ -493,6 +493,25 @@ export function SeccionHorarios({
   /** ¿Lo sabemos de verdad, o estamos en el fallback? La diferencia decide
    *  si el tope RESTRINGE o solo acompaña — ver el `max` del stepper. */
   const techoConocido = franjas.some((f) => f.cupoTecho > 0);
+  /**
+   * ⭐ S85-C15 — EL SERVICIO EXCLUSIVO (firma de la mesa, por adelantado).
+   *
+   * Techo 1 = la plataforma NO permite dos a la vez para este oficio. Y con
+   * `min=1, max=1` el stepper queda **sin recorrido** — un estado que el
+   * PROPIO componente llama inválido: `StepperCantidad` avisa en dev
+   * *"min ≥ max — un rango sin recorrido no es un stepper"*.
+   *
+   * **Un `+` que nunca va a poder subir es la puerta ofreciendo lo que va a
+   * rechazar (Ley 23).** Acá no hay nada que elegir: hay algo que decir.
+   *
+   * ⚠️ Y NO ESPERA A LA QUERY del caso del founder, por la razón que la
+   * mesa firmó: **aunque su techo resulte mal por dato, otros prestadores
+   * van a caer en este estado LEGÍTIMAMENTE** —los 25 tipos que no son
+   * paseo tienen `cupo_techo` NULL, o sea exclusivos por diseño— y el
+   * stepper degenerado no puede quedar para ellos. *La query decide si el
+   * founder está acá por error; no decide si este estado existe.*
+   */
+  const servicioExclusivo = techoConocido && techoDelOficio <= 1;
   const contadorNuevas = useRef(0);
 
   // ── S78-B TURNOS: las personas con chip de ESTE oficio ──
@@ -678,7 +697,7 @@ export function SeccionHorarios({
    *  simultáneo" sería una regla inventada de la peor clase: suena
    *  específica y sale de no haber podido leer nada (L-180). Sin dato, la
    *  línea no nace. */
-  const vozTecho = techoConocido ? t('horarios.cupoTecho', { n: techoDelOficio }) : null;
+  const vozTecho = techoConocido && !servicioExclusivo ? t('horarios.cupoTecho', { n: techoDelOficio }) : null;
   const vozCupo = (cupo: number): string =>
     cupo === 1
       ? vozMascotas
@@ -1170,17 +1189,20 @@ export function SeccionHorarios({
                   >
                     {vozCupoTitulo}
                   </Text>
-                  <StepperCantidad
-                    etiqueta={vozCupoTitulo}
-                    registro="oficio"
-                    valor={cupoSel}
-                    min={1}
-                    max={techoConocido ? techoDelOficio : Math.max(cupoSel + 1, CUPO_NUEVA_FRANJA)}
-                    onCambio={setCupoSel}
-                  />
+                  {servicioExclusivo ? (
+                    <Texto variante="apoyo">{t('horarios.cupoExclusivo')}</Texto>
+                  ) : (
+                    <StepperCantidad
+                      etiqueta={vozCupoTitulo}
+                      registro="oficio"
+                      valor={cupoSel}
+                      min={1}
+                      max={techoConocido ? techoDelOficio : Math.max(cupoSel + 1, CUPO_NUEVA_FRANJA)}
+                      onCambio={setCupoSel}
+                    />
+                  )}
                 </View>
                 <Texto variante="apoyo">{vozCupoAyuda}</Texto>
-            {vozTecho !== null && <Texto variante="apoyo">{vozTecho}</Texto>}
                 {vozTecho !== null && <Texto variante="apoyo">{vozTecho}</Texto>}
                 <Boton
                   variante="primario"
@@ -1315,14 +1337,18 @@ export function SeccionHorarios({
               >
                 {vozCupoTitulo}
               </Text>
-              <StepperCantidad
-                etiqueta={vozCupoTitulo}
-                registro="oficio"
-                valor={cupoSel}
-                min={1}
-                max={techoConocido ? techoDelOficio : Math.max(cupoSel + 1, CUPO_NUEVA_FRANJA)}
-                onCambio={setCupoSel}
-              />
+              {servicioExclusivo ? (
+                <Texto variante="apoyo">{t('horarios.cupoExclusivo')}</Texto>
+              ) : (
+                <StepperCantidad
+                  etiqueta={vozCupoTitulo}
+                  registro="oficio"
+                  valor={cupoSel}
+                  min={1}
+                  max={techoConocido ? techoDelOficio : Math.max(cupoSel + 1, CUPO_NUEVA_FRANJA)}
+                  onCambio={setCupoSel}
+                />
+              )}
             </View>
             <Texto variante="apoyo">{vozCupoAyuda}</Texto>
             <Boton

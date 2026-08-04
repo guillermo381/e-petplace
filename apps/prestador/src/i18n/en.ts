@@ -1121,6 +1121,7 @@ export const prestadorEn = {
     hasta: 'To',
     horaElegir: 'Pick the time',
     cupo: 'Simultaneous walks',
+    cupoExclusivo: 'This service is one at a time.',
     cupoTecho: "Up to {{n}} at once — that's your business maximum, not this slot's.",
     cupoAyuda: 'How many walks you can handle at once in this window.',
     pausar: 'Pause',
