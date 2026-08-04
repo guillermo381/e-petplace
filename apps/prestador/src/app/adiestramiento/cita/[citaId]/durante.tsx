@@ -41,6 +41,7 @@ import {
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
+  EvitaTeclado,
   Hoja,
   Interruptor,
   MarcaDeAgua,
@@ -219,7 +220,16 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
   const sugeridos = datos.vocabulario.filter((o) => sugeridosSet.has(o.codigo));
   const resto = datos.vocabulario.filter((o) => !sugeridosSet.has(o.codigo));
 
+  /* ⭐ S86-C · D-498 — LAS TRES `durante` ERAN LAS QUE FALTABAN.
+     `adjustResize` del manifest es LETRA MUERTA bajo edge-to-edge (SDK
+     57): la ventana ya no se achica, así que el campo enfocado queda
+     DEBAJO del teclado y se escribe a ciegas — el hallazgo de campo del
+     founder que parió esta pieza. La casa tiene UNA (packages/ui) y
+     estas tres pantallas no la portaban.
+     Se envuelve el ScrollView SIN re-indentar su contenido: es la forma
+     que ya usa `login.tsx` — se copia al vecino, no se reinventa. */
   return (
+    <EvitaTeclado>
     <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[5] }}>
       {/* Contexto del programa — jamás score (§6) */}
       {datos.sesionKN !== null && (
@@ -423,6 +433,7 @@ function DuranteCargado({ datos, citaId }: { datos: DatosListos; citaId: string 
         </View>
       </Hoja>
     </ScrollView>
+    </EvitaTeclado>
   );
 }
 

@@ -352,22 +352,18 @@ export default function Negocio() {
             </Tarjeta>
           </View>
 
-          {/* ── S74-B: EQUIPO despierta de "en preparación" (LETRA_EQUIPO
-              §14; la sección dormida murió con su único habitante — Ley
-              37). La celda se dibuja para quien opera; la PANTALLA gatea
-              por rol con voz digna (E3 de la vara, decisión declarada:
-              gatear la celda costaría un request por visita — D-497 — y
-              hoy cero empleados activos sin rol, §14.3). ── */}
-          <Tarjeta relleno="ninguno">
-            <CeldaNavegacion
-              icono="equipo"
-              registro="aa"
-              titulo={t('negocio.equipo')}
-              detalle={t('negocio.equipoDetalle')}
-              onPress={() => router.push('/negocio/equipo')}
-            />
-          </Tarjeta>
-
+          {/* ☠️ S86-C · ACÁ VIVÍA LA ENTRADA A EQUIPO, y SE MUDÓ A DATOS
+              (firma del founder: *DATOS consulta · NEGOCIO configura*).
+              Se retira en el MISMO commit que la construye allá — una
+              mudanza que deja el origen puesto es una COPIA, y dos puertas
+              a la misma pantalla envejecen distinto.
+              ⏪ Su nota decía que la celda se dibujaba para quien opera y
+              que la PANTALLA gateaba por rol (S74-B). Eso NO cambió: la
+              pantalla `/negocio/equipo` sigue igual y sigue siendo el
+              destino. Lo que cambió es DESDE DÓNDE se llega.
+              ⚠️ Y en DATOS la sección gatea por `esDueno` DEL LECTOR: este
+              tab tiene gate de gestor y aquél NO, así que mudarla sin su
+              gate habría ensanchado la audiencia (🔴 medida en S85-C32). */}
           {/* ── S79-B (T2-B5) · "SE DESPIERTA CON EL USO" — los tres mudos
               del audit ganan sección + voz + disparo (§2.6: la navegación
               muestra el módulo; el detalle NOMBRA qué lo despierta).
@@ -375,31 +371,28 @@ export default function Negocio() {
               Glifos: 'caso' es propio; 'negocio' y 'refugio' son STAND-IN
               declarados (sin glifo de estadísticas/reseñas en el registry;
               L-175 — el pedido nace si el founder lo firma). ── */}
+          {/* ☠️ S86-C · DE LOS TRES «SE DESPIERTA CON EL USO», DOS SE
+              MUDARON A DATOS (firma de mesa) y queda ESTADÍSTICAS solo:
+               · **RESEÑAS** — una reseña no se CONFIGURA: es evidencia
+                 sobre el negocio. Cae del lado «consulta».
+               · **CASOS HEREDADOS** — el caso es del PET PARENT. Tenerlo
+                 en NEGOCIO afirmaba algo falso contra letra firmada, y
+                 ése es el argumento que lo mueve: no es acomodo, es que
+                 acá decía una cosa que no es.
+              ⏳ **ESTADÍSTICAS SE QUEDA, y es a propósito**: muere junto
+              con el dashboard que la reemplaza (firma ①), jamás antes —
+              retirarla hoy dejaría un hueco donde hay una promesa
+              honesta. Su celda es el único habitante que le queda a esta
+              sección; cuando se vaya, la sección se va con ella (Ley 37). */}
           <View style={{ gap: spacing[3] }}>
             <Texto variante="seccion">{t('negocio.despiertaSeccion')}</Texto>
             <Tarjeta relleno="ninguno">
-              <CeldaNavegacion
-                icono="caso"
-                registro="aa"
-                titulo={t('negocio.casosHeredados')}
-                detalle={t('negocio.casosHeredadosDetalle')}
-                onPress={() => router.push('/negocio/casos-heredados')}
-              />
-              <Separador />
               <CeldaNavegacion
                 icono="negocio"
                 registro="aa"
                 titulo={t('negocio.estadisticas')}
                 detalle={t('negocio.estadisticasDetalle')}
                 onPress={() => router.push('/negocio/estadisticas')}
-              />
-              <Separador />
-              <CeldaNavegacion
-                icono="refugio"
-                registro="aa"
-                titulo={t('negocio.resenas')}
-                detalle={t('negocio.resenasDetalle')}
-                onPress={() => router.push('/negocio/resenas')}
               />
             </Tarjeta>
           </View>

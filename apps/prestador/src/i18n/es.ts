@@ -852,6 +852,24 @@ export const prestadorEs = {
     atenciones: '{{n}} atenciones',
     error: 'No pudimos cargar las mascotas',
     errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
+    /* ⭐ S86-C · «Tu equipo» baja de NEGOCIO a DATOS. El resumen cuenta
+       ACTIVAS —"¿con cuánta gente cuento?"— y jamás inventa avisos: la
+       lámina muestra «1 aviso» y ese lector NO existe todavía, así que el
+       resumen dice lo que sabe y nada más. */
+    equipoTitulo: 'Tu equipo',
+    equipoResumen1: '1 persona',
+    equipoResumen: '{{n}} personas',
+    equipoInactiva: 'Ya no atiende',
+    equipoGestionar: 'Gestionar el equipo',
+    /* ⭐ S86-C · las dos franjas que bajaron de NEGOCIO con su voz
+       VERBATIM — una mudanza no es una oportunidad de reescribir voz.
+       Siguen «en preparación» porque siguen sin lector, y ése es el dato
+       honesto: el detalle NOMBRA qué las despierta. */
+    despiertaSeccion: 'Se despierta con el uso',
+    resenas: 'Reseñas',
+    resenasDetalle: 'Se despierta con tu primera reseña real.',
+    casosHeredados: 'Casos que te confíen',
+    casosHeredadosDetalle: 'Se despierta con el primer caso que un colega te derive.',
   },
   detalleMascota: {
     // señales de cuidado (solo lo REAL del expediente)
@@ -921,17 +939,21 @@ export const prestadorEs = {
     // S56-B TAREA 2 (D-341) · LOTE S56, GATE PENDIENTE
     vacaciones: 'Vacaciones',
     vacacionesDetalle: 'Marca los días en que no paseas.',
-    equipo: 'Equipo',
-    equipoDetalle: 'Roles, invitaciones y tu firma',
+    /* ☠️ S86-C · MURIERON `equipo` y `equipoDetalle` de este namespace: su
+       celda se mudó a DATOS y el censo dio CERO consumidores. Una key
+       huérfana no rompe nada — solo espera a que alguien la lea y crea que
+       rige (Ley 37). La voz nueva vive en `mascotas.equipo*`, que es donde
+       está su pantalla. */
     // S79-B (T2-B5) · los tres mudos ganan sección + voz + disparo (§2.6):
     // el detalle NOMBRA qué despierta a cada uno · LOTE S79, GATE PENDIENTE
+    /* ☠️ S86-C · MURIERON acá `resenas`, `resenasDetalle`, `casosHeredados`
+       y `casosHeredadosDetalle`: sus celdas se mudaron a DATOS y el censo
+       dio CERO consumidores (Ley 37). La voz viajó VERBATIM a `mascotas.*`.
+       `despiertaSeccion` SOBREVIVE: estadísticas sigue siendo su habitante
+       hasta que el dashboard la reemplace, y ahí se va con ella. */
     despiertaSeccion: 'Se despierta con el uso',
-    casosHeredados: 'Casos que te confíen',
-    casosHeredadosDetalle: 'Se despierta con el primer caso que un colega te derive.',
     estadisticas: 'Estadísticas',
     estadisticasDetalle: 'Se despiertan con tus primeras atenciones.',
-    resenas: 'Reseñas',
-    resenasDetalle: 'Se despierta con tu primera reseña real.',
     cobros: 'Cobros',
     cuentaComercial: 'Cuenta comercial',
     liquidaciones: 'Liquidaciones',

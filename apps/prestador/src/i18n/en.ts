@@ -649,6 +649,18 @@ export const prestadorEn = {
     atenciones: '{{n}} visits',
     error: "We couldn't load the pets",
     errorDetalle: 'Check your connection and try again.',
+    // S86-C · "Your team" moves from BUSINESS to DATA.
+    equipoTitulo: 'Your team',
+    equipoResumen1: '1 person',
+    equipoResumen: '{{n}} people',
+    equipoInactiva: 'No longer working',
+    equipoGestionar: 'Manage the team',
+    // S86-C · the two strips that came down from BUSINESS, voice VERBATIM.
+    despiertaSeccion: 'Wakes up as you work',
+    resenas: 'Reviews',
+    resenasDetalle: 'Wakes up with your first real review.',
+    casosHeredados: 'Cases entrusted to you',
+    casosHeredadosDetalle: 'Wakes up with the first case a colleague refers to you.',
   },
   detalleMascota: {
     condicionCronica: 'Chronic condition',
@@ -706,16 +718,14 @@ export const prestadorEn = {
     // S56-B TAREA 2 (D-341) · LOTE S56 · Espejo de es.ts
     vacaciones: 'Time off',
     vacacionesDetalle: "Mark the days you're not walking.",
-    equipo: 'Team',
-    equipoDetalle: 'Roles, invitations, and your signature',
+    // ☠️ S86-C · `equipo`/`equipoDetalle` died here: the cell moved to DATA
+    // and the census found zero consumers (Ley 37). New voice: `mascotas.equipo*`.
     // S79-B (T2-B5) · the three mute modules gain section + voice + trigger (§2.6)
+    // ☠️ S86-C · `resenas*`/`casosHeredados*` died here (cells moved to DATA,
+    // census = zero consumers). Voice moved VERBATIM to `mascotas.*`.
     despiertaSeccion: 'Wakes up as you work',
-    casosHeredados: 'Cases entrusted to you',
-    casosHeredadosDetalle: 'Wakes up with the first case a colleague refers to you.',
     estadisticas: 'Statistics',
     estadisticasDetalle: 'They wake up with your first appointments.',
-    resenas: 'Reviews',
-    resenasDetalle: 'Wakes up with your first real review.',
     cobros: 'Payments',
     cuentaComercial: 'Business account',
     liquidaciones: 'Payouts',
