@@ -132,8 +132,12 @@ export interface FranjaHorario {
    * universal permite, y por eso se acepta: sin él la app hardcodea el número,
    * que envejece con el próximo cambio de techo.*
    *
-   * `1` cuando el prestador no tiene oficios activos con techo declarado — que
-   * es el default correcto (exclusivo), no un fallback inventado.
+   * **`1`** = sé el techo y es uno (sin ofertas activas, o todas exclusivas).
+   * **`0`** = **NO SÉ** — la lectura del techo falló. **No es un techo: es la
+   * ausencia de uno.** La superficie lo trata distinto de `1` (con `0` el
+   * control deja subir y el servidor decide, Ley 23). *Nunca se colapsan los
+   * dos en el mismo número: fue exactamente ese colapso el que hizo que el
+   * taller dijera "Hasta 1" durante toda una sesión.*
    */
   cupoTechoMaximo: number;
 }
@@ -358,16 +362,50 @@ function mensajeCupoInvalido(techo: number): string {
  * del motor, no un número inventado.
  */
 async function techoMaximoDe(prestadorId: string): Promise<number> {
-  const { data, error } = await getClient()
+  /* DOS CONSULTAS, NO UN EMBED — y el porqué es una medición, no un estilo.
+     La versión anterior usaba `tipos_servicio!inner(cupo_techo)`, y
+     **`prestador_servicios` NO tiene FK a `tipos_servicio`** (medido: su única
+     FK es a `prestadores`; `tipo_servicio` es texto libre contra
+     `tipos_servicio.codigo` desde V0). Sin FK, PostgREST **no puede resolver el
+     embed** ⇒ el `select` devolvía error SIEMPRE.
+
+     ☠️ Y LA PARTE QUE COSTÓ CARO NO FUE EL EMBED: fue el `return 1` que lo
+     tragaba. Estaba escrito a propósito, como degradación "honesta" —*el techo
+     es una ayuda, las franjas son el dato*—. **Pero un catch-all pensado para un
+     fallo OCASIONAL se volvió el ÚNICO camino**, y devolvía un valor legítimo y
+     plausible: no rompía nada, no tiraba error, y el taller mostraba
+     "Hasta 1 en simultáneo" con toda naturalidad. **Convirtió un error visible
+     en un dato falso creíble** — L-192 en su forma más cara.
+
+     ⇒ **UN FALLO DE LECTURA DEL TECHO NO PUEDE DEVOLVER UN TECHO.** Devuelve
+     `0`, que significa **"no sé"** y no es un techo posible. La superficie ya
+     distingue los dos estados (`cupoTecho: 0` de C): con `0` el control **deja
+     subir** y **el servidor sigue siendo la autoridad** (Ley 23 — la puerta no
+     promete lo que no puede sostener, pero tampoco prohíbe por no saber). */
+  const cliente = getClient();
+
+  const ofertas = await cliente
     .from('prestador_servicios')
-    .select('tipo_servicio, tipos_servicio!inner(cupo_techo)')
+    .select('tipo_servicio')
     .eq('prestador_id', prestadorId)
     .eq('activo', true);
-  if (error || !Array.isArray(data)) return 1;
+  if (ofertas.error || !Array.isArray(ofertas.data)) return 0;
+
+  const codigos = [...new Set(ofertas.data.map((o) => o.tipo_servicio).filter((c): c is string => typeof c === 'string'))];
+  /* Sin ofertas activas NO es un fallo: es un prestador sin oferta, y su techo
+     REAL es 1 (exclusivo). Se distingue del `0` a propósito — uno es "no sé",
+     el otro es "sé, y es uno". */
+  if (codigos.length === 0) return 1;
+
+  const techos = await cliente
+    .from('tipos_servicio')
+    .select('codigo, cupo_techo')
+    .in('codigo', codigos);
+  if (techos.error || !Array.isArray(techos.data)) return 0;
+
   let max = 1;
-  for (const fila of data) {
-    const v = (fila as { tipos_servicio?: { cupo_techo?: number | null } | null }).tipos_servicio?.cupo_techo;
-    if (typeof v === 'number' && v > max) max = v;
+  for (const t of techos.data) {
+    if (typeof t.cupo_techo === 'number' && t.cupo_techo > max) max = t.cupo_techo;
   }
   return max;
 }
