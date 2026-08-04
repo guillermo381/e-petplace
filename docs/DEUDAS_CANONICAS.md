@@ -2725,6 +2725,29 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 - **L-194 — UN NÚMERO DE PLATAFORMA COPIADO DENTRO DE UN WRAPPER ES LETRA MUERTA QUE **REBOTA BIEN** (S85, firmada por la mesa).** El caso: `tipos_servicio.cupo_techo` del paseo subió de 4 a 10 por firma del founder, y **CUATRO guards de `packages/api` seguían diciendo `maxCitasPorSlot > 4`** (`crearFranjaHorario` · `actualizarFranjaHorario` · `editarFranjaHorario` · la creación por servicio de `horarios-modo`). **El motor permitía y la puerta única no** — el prestador habría subido su franja y el wrapper lo habría rebotado con `cupo_invalido`. **LO QUE LA VUELVE PEOR QUE UN VALOR VIEJO CUALQUIERA es su modo de falla: NO REVIENTA — REBOTA BIEN.** Un `4` escrito cuando el techo era 4 **sobrevive intacto al cambio del techo**, devuelve un código tipado, con su mensaje, por su camino previsto — *y nadie audita un rebote que se ve correcto*. Es la familia del guard de D-622 (dio rojo y mintió sobre por qué) y la de L-193 (la premisa que nadie fechó), pero con un agravante propio: **acá el instrumento no solo funciona — funciona en el sentido de las buenas prácticas**, porque validar en la puerta es lo correcto. Lo incorrecto es *de dónde salió el número*. **LA REGLA:** **el tope se PREGUNTA al catálogo, jamás se recuerda.** Todo límite cuyo dueño es una tabla de plataforma (`tipos_servicio`, `cat_*`, `fee_configs`) se lee de ahí en el momento de validar; un literal es legal **solo** si la regla es del wrapper y no de la plataforma, y entonces se declara con esa palabra. **Verificable por grep**: un número de catálogo escrito en `packages/api` es un hallazgo, no un estilo. **➕ ENMIENDA S85, y la pagué en el commit que la depositó:** **UN GUARD TIENE DOS CUERPOS —EL PREDICADO Y SU VOZ— Y SE CURAN JUNTOS.** *En el mismo commit donde escribí esta lección curé los cuatro predicados **y dejé el literal del mensaje**: `'El cupo tiene que ser entre 1 y 4.'` El guard pasó a validar contra 10 y el texto siguió anunciando 4.* **Es D-622 invertida —aquél callaba lo que verificaba; éste habla y dice el número equivocado**— y su modo de falla es peor de lo que parece: **el prestador lee un tope que la casa ya no aplica y no tiene forma de saber que el rebote le miente.** *Una respuesta tipada, con voz de producto, por el camino previsto: todo correcto menos el hecho.* **La regla original decía que un número de plataforma copiado en un wrapper es letra muerta; no decía que el número TAMBIÉN vive en el mensaje.** ⇒ **la cura interpola el mismo valor contra el que se validó** (receta de `contrasena_debil` con `MIN_LARGO`), y **el literal muerto se neutraliza** — *un texto sin consumidor pero con un número adentro es exactamente lo que vuelve a mentir cuando alguien lo re-cablea, que es cómo nació este defecto.* **Es la 28 y D-613 aplicadas a un rebote en vez de a una columna: los cuerpos se mueven juntos.** Origen: S85-A (los cuatro guards, encontrados al cablear `cupoTechoMaximo`; la enmienda, encontrada por C).
 - **L-195 — VERIFICAR QUE UNA COLUMNA **EXISTE** NO ES VERIFICAR QUE ESTÉ **POBLADA** (S85, firmada por la mesa).** El caso, y lo pagué yo en el mismo turno: al diseñar la RPC de D-639 afirmé *"el «quién lo hizo» ya está en la fila; la RPC no agrega información, la quita"* — porque `eventos_mascota` **tiene** `cuenta_comercial_id`, `prestador_id` y `procedencia`. **Leí `information_schema` y me detuve ahí.** Al medir el contenido: **`cuenta_comercial_id` poblada en 3 de 177**, y **`procedencia` NULL en 134**. *La afirmación era verdadera sobre el esquema y falsa sobre el dato.* **Es la familia exacta de los datos que dicen que sí:** una columna vacía **no da error, no rompe un guard de shape y el typecheck la acepta** — el `select` la trae, el tipo la declara `string | null`, y **el problema recién aparece cuando alguien lee el `null` como significado**. *Se descubre al chocar, y el choque llega tarde: cuando la pieza ya se diseñó alrededor de ella.* **LA REGLA: toda columna sobre la que se va a APOYAR una decisión de diseño se mide con `count(col)` contra `count(*)`, no con `information_schema`.** El esquema dice qué se puede guardar; **solo el conteo dice qué se guardó.** *Y su corolario, que es lo que la hace barata: es UNA query, y va antes de la primera línea de la pieza — no después del primer fixture.* **Hermana de L-193** (la premisa heredada que nadie fechó) y de **L-084** (la doc conceptual no es fuente de verdad de schema): las tres son la misma familia — **confiar en una descripción en vez de en el objeto**. Origen: S85-A (el diseño de la RPC de D-639).
 - **L-196 — UN MÓDULO "PREPARADO-APAGADO" QUE NUNCA PASÓ POR UN COMPILADOR NO ESTÁ PREPARADO: ESTÁ ESCRITO (S85, firmada por la mesa).** El caso: `modules/sonda-manifest` (D-579, S81) se escribió como **pasajero preparado-apagado**, para viajar *"en la próxima build nativa"*. **En S85 hubo esa build, y falló:** `project ':sonda-manifest' does not specify compileSdk in build.gradle` — el módulo **jamás había pasado por Gradle**, porque los OTAs son JS y no tocan la cadena nativa. **DOCE SESIONES sin que nada lo compilara.** *El patrón "preparado-apagado" es correcto y la casa lo usa bien (el mic de D-456 llegó a destino tras cinco sesiones) — lo que falla es dar por verificado lo que solo está escrito.* **LA REGLA: todo pasajero que espera un tren futuro declara QUÉ LO VERIFICA MIENTRAS ESPERA.** Si nada lo compila, lo tipa ni lo corre, **su estado no es "listo": es "sin verificar"**, y hay que decirlo con esa palabra en su ficha. *La forma barata de cumplirla: que la deuda que lo crea nombre el primer instrumento que lo tocará — y si la respuesta es "ninguno hasta el tren", eso ya es el hallazgo.* **Hermana de L-193** (la premisa heredada que nadie fechó) **y de L-195** (la columna que existe y no está poblada): las tres son *confiar en la existencia en vez de en la verificación*. **Y su costo medido acá: un tren entero de build — 17 min de cola + 2m17s de Gradle — para descubrir una línea que un `tsc` nativo habría cazado el día que se escribió.** Origen: S85-A (el log de la build `c241c908`).
+- **L-197 — UN FALLO PUEDE DEGRADAR A *AUSENCIA*, NUNCA A UN *VALOR* QUE EL CONSUMIDOR VA A USAR COMO SI FUERA CIERTO (S85, firmada por la mesa).**
+
+  > **Un fallo puede degradar a AUSENCIA, nunca a un VALOR que el consumidor va a usar como si fuera cierto.**
+
+  **El caso, y lo produje yo:** `techoMaximoDe()` leía el techo del catálogo con un embed de PostgREST (`tipos_servicio!inner(cupo_techo)`) sobre una relación **sin FK declarada** — así que **fallaba SIEMPRE** — y su `catch` devolvía `return 1`. **Escribí ese `1` a propósito**, con su comentario razonado: *el techo es una ayuda, las franjas son el dato; caer entero por no poder calcular una ayuda sería desproporcionado.* **El razonamiento era bueno y el resultado, desastroso:** el taller del founder dijo **"Hasta 1 en simultáneo"** durante una sesión entera, con toda naturalidad.
+
+  ### EL COROLARIO, que es la mitad que hay que recordar
+
+  > **Un catch-all pensado para un fallo OCASIONAL que resulta ser el ÚNICO camino convierte un error VISIBLE en un dato falso CREÍBLE — y protege de verlo.**
+
+  *Si el error se hubiera propagado, el taller habría rebotado y el defecto se descubría **en el primer uso**.* **La degradación "honesta" fue la que lo escondió.** Y su plausibilidad es lo que lo vuelve caro: `1` es un techo perfectamente posible — no rompe nada, no tira error, **y el prestador lo obedece.**
+
+  ### EL CRITERIO, aplicable sin juicio
+
+  **Se pregunta qué hace el consumidor con el valor degradado:**
+  - **¿lo OMITE?** → legítimo. *Ej.: `adiestramiento-reserva` devuelve `{}` cuando no puede firmar las URLs de los clips — el clip **no se muestra**. Omite, no inventa.*
+  - **¿lo USA como dato?** → **prohibido.** *Ahí va un error tipado, o un valor IMPOSIBLE que signifique "no sé"* — la cura aplicada: **`0`, que no es un techo posible**, y la superficie lo distingue de `1` (*"sé, y es uno"*).
+
+  > **La prueba en una línea: la URL que no aparece SE NOTA; el techo que dice 1 SE OBEDECE.**
+
+  **Y su mitad de superficie, sin la cual la ley no cierra:** *"no sé" y un valor válido **no pueden compartir representación**. Colapsarlos es el defecto; separarlos es la cura. **Un `console.error` NO alcanza** — un log en producción no tiene testigo, y deja el dato igual de creíble con una línea que nadie va a leer.
+
+  **Hermana de L-192** (la verificación cuyo modo de falla es el silencio) **y de D-622** (el guard que habla y dice la razón equivocada). Origen: S85-A (el techo del cupo; el barrido que la generalizó).
 
 - **L-192 — UNA VERIFICACIÓN CUYO MODO DE FALLA ES EL SILENCIO NO ES UNA VERIFICACIÓN. Todo chequeo tiene que poder salir ROJO — si no se puede producir su falla, no existe.** (Letra founder, S81 — la generalización de tres instancias del MISMO día: ① el typecheck encadenado con `| tail` que se leyó verde con el fallo adentro — el caso L-191 · ② el guard `git status --porcelain && echo "porcelain=0"` que imprimió su verde con el árbol SUCIO — `status` sale 0 siempre, el `echo` era decorativo; **la cura canónica: `test -z "$(git status --porcelain)"`**, que SÍ sale rojo · ③ la declaración de rango hecha DESPUÉS del push — una verificación post-acto no puede frenar nada: su rojo llega tarde, que es otra forma de silencio.) La prueba de fuego de todo guard nuevo: producirle la falla UNA vez y verla salir roja. Origen: S81 (los tres incidentes + la orden founder "una lección, no tres").
 - **L-191 — EL EXIT CODE SE LEE DEL COMANDO, JAMÁS DEL PIPE.** En un pipeline el shell reporta el exit del ÚLTIMO comando: `comando | tail` devuelve el 0 de `tail` aunque el comando haya fallado — y un `| head` puede además matar al productor por SIGPIPE. Un comando de medición o verificación que viaja por pipe puede LEERSE VERDE ESTANDO ROJO. La regla: el veredicto se toma del exit code DEL COMANDO (corrida separada, o `pipefail` explícito) — jamás de una salida truncada que "se ve bien". Origen: S81 (el typecheck de `@epetplace/domain`: su fallo quedó invisible en la corrida encadenada con `| tail` y solo apareció al correrlo SOLO — el diagnóstico costó una corrida extra que la regla ahorra). Hermana de L-063 (éxito de ejecución ≠ corrección) en la capa del shell.
@@ -4981,6 +5004,44 @@ importa: **doce de veinticuatro** reglas del lint estaban en esa condición.*
 > **Verificable por grep**, sin interpretación. **Nace y muere en S85 si B
 > cierra** — y si no cierra, se hereda con el número medido, no con "faltan
 > algunas".
+
+---
+
+#### D-640 — `titular.ts`: TRES LECTORES DONDE "NO HAY" Y "NO PUDE LEER" COMPARTEN VALOR 🟡
+
+**Encontrados por el barrido de L-197 (S85).** `obtenerTitularId` y sus dos
+hermanas hacen `if (error || data === null) return null;` — **un solo `null` para
+dos hechos distintos:** *"este negocio no tiene titular activo"* y *"la consulta
+falló"*.
+
+**Por qué es de la familia de L-197 y a la vez MENOS grave que el caso que la
+fundó — y la distinción es el criterio, no una atenuante:**
+
+| | el techo (curado) | éstos |
+|---|---|---|
+| qué devuelve al fallar | **`1`, un techo válido** | **`null`** |
+| qué hace el consumidor | **lo obedece** | **rompe el camino** |
+| se ve | **no** | **sí** |
+
+> **Un `null` degrada a AUSENCIA: la pantalla no encuentra titular y lo dice.**
+> *Sigue siendo ambiguo —nadie puede distinguir un negocio sin titular de una
+> consulta caída— pero **no fabrica un dato que alguien va a usar como cierto**.*
+
+**Y hay un antecedente que muestra que el ambiguo también cobra:** la cura A25 de
+S75 nació porque `obtenerTitularId` daba `null` para un empleado y la consulta
+vet no abría — *el `null` era correcto y el diagnóstico costó un turno, porque
+nadie podía saber si era ausencia o fallo.*
+
+**NO SE CURAN ACÁ, y el porqué:** la cura es cambiar la firma a
+`ResultadoWrapper` y **eso toca a sus consumidores**. Meterlo en el commit que
+destrababa el taller del founder habría mezclado una cura urgente con un
+refactor de contrato.
+
+> **☠️ CONDICIÓN DE MUERTE:** se retira cuando **los tres devuelvan un resultado
+> que distinga ausencia de fallo**. **Verificable por grep:** cero
+> `if (error || data === null) return null` en `titular.ts`. *No se retira
+> agregando un `console.error` — L-197 lo descarta explícitamente: un log en
+> producción no tiene testigo.*
 
 ---
 
