@@ -27,7 +27,9 @@ import Animated, { cubicBezier } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { setStatusBarStyle } from 'expo-status-bar';
-import { Insignia, Isotipo, motion, palette, radius, spacing, typography, useTheme } from '@epetplace/ui';
+import { Boton, Hoja, Insignia, Isotipo, Texto, motion, palette, radius, spacing, typography, useTheme } from '@epetplace/ui';
+
+import { useTraduccion } from '@/i18n';
 
 /** La curva orgánica del techo (patrón Hogar v2) — una sola verdad. */
 export const CURVA_OFICIO = { izquierda: 44, derecha: 26 };
@@ -46,7 +48,11 @@ export function useMuroOficio(): string {
 }
 /** El vidrio OSCURO sobre el muro (AA verificado: papel 7.37 — sobre
  *  el par noche el contraste solo SUBE). */
-export const VIDRIO_OFICIO = 'rgba(0,0,0,0.18)';
+/* S85-C34 · EL VIDRIO SALE DEL TOKEN. Era un literal acá y B lo promovió a
+   `palette.vidrioOficio` con el mismo valor — dos fuentes para un material
+   es lo mismo que dos fuentes para un dibujo: divergen sin que nada falle.
+   Se conserva el nombre exportado porque tiene consumidores en esta casa. */
+export const VIDRIO_OFICIO = palette.vidrioOficio;
 
 /**
  * Sobre el MURO los íconos de la barra de estado son CLAROS — el muro
@@ -296,7 +302,12 @@ export function TechoOficio({
 }) {
   const insets = useSafeAreaInsets();
   const muro = useMuroOficio();
+  const { t } = useTraduccion();
   useBarraEstadoClara();
+  /* S85-C34 · EL MODAL DEL EMBLEMA. Vive acá, con la insignia: la Hoja no
+     necesita nada de la pantalla y sacarla afuera obligaría a cablear un
+     estado que solo esta pieza usa. */
+  const [emblemaAbierto, setEmblemaAbierto] = useState(false);
 
   return (
     <View
@@ -347,7 +358,14 @@ export function TechoOficio({
               {dato}
             </Text>
             {cohorte !== null && cohorte !== undefined && cohorteAnio !== null && cohorteAnio !== undefined && (
-              <Insignia distincion="cohorte" superficie="muro" cohorte={cohorte} cohorteAnio={cohorteAnio} tamaño="sm" />
+              <Insignia
+                distincion="cohorte"
+                superficie="muro"
+                cohorte={cohorte}
+                cohorteAnio={cohorteAnio}
+                tamaño="sm"
+                onPress={() => setEmblemaAbierto(true)}
+              />
             )}
           </View>
         </View>
@@ -365,67 +383,52 @@ export function TechoOficio({
         </Text>
       )}
       {pie}
+
+      {/* ⭐ S85-C34 · EL MODAL DEL EMBLEMA (`PORTAL_PRESTADOR` §2.3).
+
+          **NO es una glosa de la insignia** (*"la cohorte fundadora es…"*):
+          es **LA BIENVENIDA DEVUELTA**. El prestador toca su emblema y
+          vuelve a leer **por qué fue elegido**, con la firma de quien lo
+          eligió. *Explicar qué significa un badge sería contarle una regla
+          del producto; esto le devuelve una decisión sobre él.*
+
+          ⚠️ **SIN EL "N"** (firma del founder): un número horneado en una
+          app **envejece sin avisar** — y la app ya tiene el caso, porque
+          `dia1.eleccion` dice *"uno de los 15"*. *"Uno de los prestadores
+          que dan forma"* dice lo mismo y no caduca.
+
+          ⚠️ **LA FIRMA VA CON NOMBRE PROPIO, jamás "el equipo":** un
+          reconocimiento firmado por una institución **deja de ser una
+          elección**. Y no se escribe una segunda — `dia1.firmaNombre` /
+          `dia1.firmaRol` ya existen: la firma del founder vive UNA vez.
+
+          Modulado por cohorte: la pieza ya sabe cuál es, así que la voz
+          del fundador y la del pionero no necesitan un condicional afuera. */}
+      <Hoja visible={emblemaAbierto} onCerrar={() => setEmblemaAbierto(false)} titulo={t('emblema.titulo')}>
+        <View style={{ gap: spacing[4] }}>
+          <Texto variante="cuerpo">
+            {cohorte === 'pionero' ? t('emblema.cuerpoPionero') : t('emblema.cuerpoFundador')}
+          </Texto>
+          <View style={{ gap: 2 }}>
+            <Texto variante="cuerpo">{t('dia1.firmaNombre')}</Texto>
+            <Texto variante="apoyo">{t('dia1.firmaRol')}</Texto>
+          </View>
+          <View style={{ alignSelf: 'flex-start' }}>
+            <Boton variante="secundario" etiqueta={t('emblema.cerrar')} onPress={() => setEmblemaAbierto(false)} />
+          </View>
+        </View>
+      </Hoja>
     </View>
   );
 }
 
-/**
- * ⭐ S85-C23 — LOS TRES NÚMEROS DEL TECHO (`PORTAL_PRESTADOR` §2.4bis).
- *
- * **CARGA · PLATA · VIDAS**, siempre los tres, siempre en ese orden. Vive
- * ACÁ y no en la portada porque **las reglas del muro viven acá**: papel
- * PLENO (sobre el muro la opacidad muere, regla S61) y cero acento —
- * ponerlo en la pantalla obligaría a repetir esas reglas y a que alguien
- * las mantenga en dos lugares.
- *
- * ── POR QUÉ UNA LÍNEA POR COLUMNA, Y NO valor-arriba/unidad-abajo ────
- * Porque **la unidad NO siempre es una unidad**: cuando PLATA no es
- * visible, ese hueco dice una FRASE (un permiso), no un número con
- * rótulo. Un layout de "valor + unidad" obligaría a inventar un valor
- * para el caso sin valor — y el vacío se lee como CERO, que es
- * justamente lo que §2.4bis prohíbe.
- *
- * ⚠️ `numberOfLines={2}`: la frase del permiso es más larga que un
- * número, y en un tercio de ancho estiraría la columna. **Por eso la voz
- * visible es corta y la completa viaja en `accessibilityLabel`** — la
- * posición del hueco ya aporta "los ingresos". *Tres columnas donde una
- * tiene tres renglones y las otras uno se lee como algo roto, y un techo
- * que parece roto no orienta.*
- */
-export function TresNumeros({
-  carga,
-  plata,
-  vidas,
-  plataDetalle,
-}: {
-  carga: string;
-  plata: string;
-  vidas: string;
-  /** La voz COMPLETA cuando la visible se acortó (permiso / fallo). */
-  plataDetalle?: string;
-}) {
-  const celda = (texto: string, detalle?: string) => (
-    <View style={{ flex: 1 }}>
-      <Text
-        numberOfLines={2}
-        accessibilityLabel={detalle}
-        style={{
-          fontFamily: typography.family.sans.medium,
-          fontSize: typography.size.sm,
-          // papel PLENO — sobre el muro la opacidad muere (regla S61)
-          color: palette.light0,
-        }}
-      >
-        {texto}
-      </Text>
-    </View>
-  );
+/* ☠️ ACÁ VIVÍA `TresNumeros` (S85-C23) — MURIÓ AL SUBIR A packages/ui
+   (B, S85-B26). Ley 37: una pieza local con una gemela en la casa no es
+   una pieza, es una copia esperando divergir.
+   Y LO QUE SE GANÓ NO ES ORDEN, ES UN TIPO: el contrato de B distingue
+   `{valor, rotulo}` de `{frase}`, así que **la diferencia entre "una
+   cifra" y "un permiso que se explica" dejó de vivir en un ternario mío
+   y pasó a vivir en el tipo** — no se puede mezclar mal. Y exige la
+   TUPLA de tres, o sea que "siempre los tres, siempre en ese orden" ya
+   no es una nota: es una firma que el compilador verifica. */
 
-  return (
-    <View style={{ flexDirection: 'row', gap: spacing[3], alignItems: 'flex-start' }}>
-      {celda(carga)}
-      {celda(plata, plataDetalle)}
-      {celda(vidas)}
-    </View>
-  );
-}

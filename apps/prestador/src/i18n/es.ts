@@ -208,20 +208,23 @@ export const prestadorEs = {
     // La UNIDAD habla el idioma del oficio; el esqueleto no cambia nunca.
     cohorteFundador: 'Prestador fundador',
     cohortePionero: 'Prestador pionero',
-    cargaTiempo: '{{texto}} en ruta',
-    cargaCita1: '1 cita',
-    cargaCitas: '{{n}} citas',
-    cargaTurno1: '1 turno',
-    cargaTurnos: '{{n}} turnos',
-    cargaConsulta1: '1 consulta',
-    cargaConsultas: '{{n}} consultas',
-    cargaSesion1: '1 sesión',
-    cargaSesiones: '{{n}} sesiones',
+    // ⭐ RÓTULOS SUELTOS (S85-C34): el contrato de B separa VALOR de RÓTULO, así
+    // que la unidad deja de ser una frase. El número puede pesar y la unidad
+    // acompañar, que es lo que un techo necesita para leerse de un vistazo.
+    cargaEnRuta: 'en ruta',
+    cargaCita1: 'cita',
+    cargaCitas: 'citas',
+    cargaTurno1: 'turno',
+    cargaTurnos: 'turnos',
+    cargaConsulta1: 'consulta',
+    cargaConsultas: 'consultas',
+    cargaSesion1: 'sesión',
+    cargaSesiones: 'sesiones',
     // PLATA = el valor AGENDADO del día (jamás lo devengado ni lo cobrado).
-    plata: '{{monto}}',
+    plataDelDia: 'del día',
     // El total dice lo que sabe Y declara lo que le falta: un número redondo
     // que oculta citas no se puede desconfiar.
-    plataParcial: '{{monto}} · {{n}} sin precio',
+    plataParcial: '{{n}} sin precio',
     // El hueco habla del PERMISO, no del dato. Ni vacío (se lee como cero) ni
     // "sin datos" (suena a sistema roto): no falta información, sobra audiencia.
     // VISIBLE corta + COMPLETA en accessibilityLabel: en un tercio de ancho
@@ -231,14 +234,14 @@ export const prestadorEs = {
     plataSoloTitularDetalle: 'Solo el titular ve los ingresos',
     plataNoSePudo: 'Ingresos no disponibles',
     plataNoSePudoDetalle: 'No pudimos leer los ingresos de hoy',
-    vidasTutor1: '1 tutor',
-    vidasTutores: '{{n}} tutores',
-    vidasPaciente1: '1 paciente',
-    vidasPacientes: '{{n}} pacientes',
-    vidasMascota1: '1 mascota',
-    vidasMascotas: '{{n}} mascotas',
-    vidasAlumno1: '1 alumno',
-    vidasAlumnos: '{{n}} alumnos',
+    vidasTutor1: 'tutor',
+    vidasTutores: 'tutores',
+    vidasPaciente1: 'paciente',
+    vidasPacientes: 'pacientes',
+    vidasMascota1: 'mascota',
+    vidasMascotas: 'mascotas',
+    vidasAlumno1: 'alumno',
+    vidasAlumnos: 'alumnos',
   },
   expediente: {
     // ⭐ S85-C28 · EL EXPEDIENTE MODULADO (BIO_EXPEDIENTE A3.5bis).
