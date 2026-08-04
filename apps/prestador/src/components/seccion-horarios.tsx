@@ -460,12 +460,39 @@ export function SeccionHorarios({
    *
    * ⚠️ **EL BORDE, firmado: si el techo no llega, vale 1 — y las franjas
    * llegan igual.** La pantalla JAMÁS se cae por no poder calcular una
-   * AYUDA: un fallo de lo accesorio no tumba lo principal. Y se toma el
-   * mayor contra el valor actual para que un techo caído no deje un
-   * stepper por debajo de lo que la franja YA declara (mostraría 3 con
-   * tope 1, que es un control mintiendo sobre su propio valor).
+   * AYUDA: un fallo de lo accesorio no tumba lo principal.
+   *
+   * 🔴 **PERO EL BORDE, TAL COMO LO ESCRIBÍ, PRODUJO UN BUG DE CAMPO — y
+   * la cura de acá es de DOS piezas porque el defecto era de dos.**
+   * Literal del founder: *"deja disminuir pero no aumentar. Lo bajé a 3 y
+   * me dejó, lo traté de subir a 4 y no me dejó."*
+   *
+   * **① LA CIRCULARIDAD, que es la causa raíz y es mía:** los drafts
+   * NUEVOS heredaban `cupoTecho: techoDelOficio` — o sea que el techo se
+   * derivaba de los mismos drafts que venía a limitar. Si el primero
+   * nacía con el fallback, **todos quedaban en 1 para siempre, y el
+   * cómputo se confirmaba a sí mismo**. Ahora un draft nuevo declara
+   * `cupoTecho: 0` = *todavía no sé*, y el techo sale SOLO de franjas que
+   * lo traen del wrapper.
+   *
+   * **② EL `Math.max(techo, cupoSel)`, que convertía lo anterior en una
+   * TRINQUETE:** con techo 1, `max` pasaba a valer el valor vigente, así
+   * que el stepper **nunca podía subir y siempre podía bajar**. Yo lo puse
+   * para que un techo caído no dejara un tope por debajo del valor real —
+   * el problema es que la cura hacía que el tope SIGUIERA al valor.
+   * *Un tope que se mueve con el dato no es un tope: es un trinquete.*
+   *
+   * **LO QUE RIGE AHORA:** con techo CONOCIDO, el `max` ES el techo y
+   * restringe de verdad. Con techo desconocido **no se inventa un
+   * número ni se bloquea**: el control deja subir y **el servidor sigue
+   * siendo la autoridad** (corolario de Ley 23 — la puerta es cortesía,
+   * no validación). Preferir "no sé, pasá" antes que "no sé, no podés"
+   * es lo que evita que un dato ausente se disfrace de regla.
    */
-  const techoDelOficio = franjas?.find((f) => f.cupoTecho > 0)?.cupoTecho ?? 1;
+  const techoDelOficio = franjas.find((f) => f.cupoTecho > 0)?.cupoTecho ?? 1;
+  /** ¿Lo sabemos de verdad, o estamos en el fallback? La diferencia decide
+   *  si el tope RESTRINGE o solo acompaña — ver el `max` del stepper. */
+  const techoConocido = franjas.some((f) => f.cupoTecho > 0);
   const contadorNuevas = useRef(0);
 
   // ── S78-B TURNOS: las personas con chip de ESTE oficio ──
@@ -512,7 +539,9 @@ export function SeccionHorarios({
         horaInicio: fp.horaInicio,
         horaFin: fp.horaFin,
         cupo: fp.cupo,
-        cupoTecho: techoDelOficio,
+        // 0 = TODAVÍA NO SÉ. Ver la nota de `techoDelOficio`: heredar acá el
+        // fallback era la circularidad que produjo el bug de campo.
+        cupoTecho: 0,
         activo: true,
         quitar: false,
         baseCupo: null,
@@ -645,7 +674,11 @@ export function SeccionHorarios({
    *  del NEGOCIO, no de esta franja — sin esa mitad, un stepper que se
    *  frena en 10 se lee como un tope de la franja que estás editando y el
    *  prestador cree que otra franja podría más. */
-  const vozTecho = t('horarios.cupoTecho', { n: techoDelOficio });
+  /** ⚠️ SOLO SE DICE SI SE SABE. Con el techo en fallback, "Hasta 1 en
+   *  simultáneo" sería una regla inventada de la peor clase: suena
+   *  específica y sale de no haber podido leer nada (L-180). Sin dato, la
+   *  línea no nace. */
+  const vozTecho = techoConocido ? t('horarios.cupoTecho', { n: techoDelOficio }) : null;
   const vozCupo = (cupo: number): string =>
     cupo === 1
       ? vozMascotas
@@ -828,7 +861,9 @@ export function SeccionHorarios({
           horaInicio: desdeSel,
           horaFin: hastaSel,
           cupo: cupoSel,
-          cupoTecho: techoDelOficio,
+          // 0 = TODAVÍA NO SÉ. Ver la nota de `techoDelOficio`: heredar acá el
+        // fallback era la circularidad que produjo el bug de campo.
+        cupoTecho: 0,
           activo: true,
           quitar: false,
           baseCupo: null,
@@ -1140,13 +1175,13 @@ export function SeccionHorarios({
                     registro="oficio"
                     valor={cupoSel}
                     min={1}
-                    max={Math.max(techoDelOficio, cupoSel)}
+                    max={techoConocido ? techoDelOficio : Math.max(cupoSel + 1, CUPO_NUEVA_FRANJA)}
                     onCambio={setCupoSel}
                   />
                 </View>
                 <Texto variante="apoyo">{vozCupoAyuda}</Texto>
-            <Texto variante="apoyo">{vozTecho}</Texto>
-                <Texto variante="apoyo">{vozTecho}</Texto>
+            {vozTecho !== null && <Texto variante="apoyo">{vozTecho}</Texto>}
+                {vozTecho !== null && <Texto variante="apoyo">{vozTecho}</Texto>}
                 <Boton
                   variante="primario"
                   etiqueta={t('taller.listo')}
@@ -1285,7 +1320,7 @@ export function SeccionHorarios({
                 registro="oficio"
                 valor={cupoSel}
                 min={1}
-                max={Math.max(techoDelOficio, cupoSel)}
+                max={techoConocido ? techoDelOficio : Math.max(cupoSel + 1, CUPO_NUEVA_FRANJA)}
                 onCambio={setCupoSel}
               />
             </View>
