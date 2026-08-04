@@ -103,6 +103,9 @@ export type IconoNombre =
   //    ancho, o sea el idioma que estos dos tenían que esquivar.
   //    GATE POR ÍCONO A 21px PENDIENTE (§2.9).
   | 'fiscal' | 'bancario'
+  // S85-B23 — los tres del gate de la barra: `datos` NACE (gráfica) ·
+  //   `negocio` y `cuenta` cambian de DIBUJO sin cambiar de nombre.
+  | 'datos'
   // S85-B18 — LA VENTANA TEMPORAL: `semana` y `mes`. Solo DOS porque el
   //   censo encontró la otra mitad resuelta: `hoy` ya es el calendario y
   //   `todos` ya se dice con la Huella (hilera hermana del Hogar).
@@ -220,13 +223,48 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       <Huella color={huella} x={9.2} y={12.6} escala={0.3} />
     </>
   ),
-  // La chapita de collar — la identidad colgada (tab Cuenta y perfil;
-  // la figura humana del boceto S57 quedó PROHIBIDA §2.4).
+  /* S85-B23 · DATOS — «un símbolo con una gráfica» (founder, gate de
+     019fcabf: «hoy es paw y no dice lo que la pantalla es»).
+     CENSO: el idioma GRÁFICA estaba LIBRE — cero glifos de barras o
+     curva en el registry (`pagos` es un billete, `presupuesto` un
+     documento, `BarrasSemana` es componente y no glifo).
+     LA HUELLA ES LA BARRA MÁS ALTA, y no un adorno al costado: la
+     pantalla responde «a quiénes cuido», así que lo que la gráfica mide
+     ES la mascota. Cumple la regla madre sin agregarle un objeto más. */
+  datos: ({ tinta, huella }) => (
+    <>
+      <Path d="M4.4 20.2h15.2" {...trazo(tinta)} />
+      <Path d="M7.6 20.2v-5.4M12 20.2v-8.6" {...trazo(tinta)} />
+      <Huella color={huella} x={14.4} y={5.2} escala={0.42} />
+    </>
+  ),
+
+  /* ⏪ S85-B23 · LA CHAPITA DE COLLAR MURIÓ, ENTRA LA PERSONA. Literal
+     del founder: «algo que realmente parezca cuenta» — el actual no se
+     entiende, y midiendo se ve por qué: eran DOS CÍRCULOS APILADOS
+     (cabeza + chapa), que a 21px no leen "collar" ni leen "persona": no
+     leen nada. Y de paso eran BYTE-IDÉNTICOS a `prime`, o sea que el
+     registry tenía dos nombres para un dibujo.
+
+     ⚠️⚠️ ESTO ENMIENDA UNA FIRMA SUYA, Y SE DECLARA EN VEZ DE COLARSE:
+     §2.4 (S53) dice, del propio founder, «humanos = manos u objetos», y
+     el comentario que estaba acá decía literalmente «la figura humana
+     del boceto S57 quedó PROHIBIDA §2.4». Hoy pide una persona. **Gana
+     la firma más nueva** —es su producto y su ojo— pero la anterior NO
+     se borra en silencio: dos letras firmadas que se contradicen son
+     peores que una equivocada, porque cualquiera cita la que le conviene
+     y queda "en regla". Que la mesa enmiende §2.4 o acote su alcance
+     (p. ej. "humanos como ILUSTRACIÓN, no como glifo de identidad").
+     Hasta entonces, esta nota es el puente entre las dos.
+
+     LA FORMA: cabeza + HOMBROS (arco), que es el avatar universal — no
+     dos círculos. Y la huella va al costado, chica: la cuenta es de una
+     PERSONA, pero la persona está acá por su mascota. */
   cuenta: ({ tinta, huella }) => (
     <>
-      <Circle cx={12} cy={5.6} r={1.9} {...trazo(tinta)} />
-      <Circle cx={12} cy={13.6} r={6.6} {...trazo(tinta)} />
-      <Huella color={huella} x={8.9} y={10.6} escala={0.38} />
+      <Circle cx={12} cy={8.2} r={3.4} {...trazo(tinta)} />
+      <Path d="M5.2 20.4a6.8 6.8 0 0 1 13.6 0" {...trazo(tinta)} />
+      <Huella color={huella} x={16.4} y={3.2} escala={0.3} />
     </>
   ),
   // El sol del oficio — el día de trabajo con la mascota adentro.
@@ -268,10 +306,24 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
     </>
   ),
   // El maletín del oficio lleva su huella (tab Negocio).
-  negocio: ({ tinta, huella }) => (
+  /* ⏪ S85-B23 · EL MALETÍN MURIÓ, ENTRA LA PATA. Literal del founder:
+     «**el negocio son mascotas**». Un maletín es el objeto de una oficina
+     y este negocio no lo es.
+     ⚠️ EL FRENO QUE CORRÍ ANTES DE DIBUJAR, porque en aislado esto era
+     FATAL: la tab «Datos» ES `mascotas` y su glifo ERA la pata — dos
+     tabs vecinas con el mismo dibujo es la Ley 12 en su peor forma. Se
+     disuelve porque la misma orden MUEVE la pata: Datos gana la gráfica
+     y la suelta. En aislado hubiera sido colisión; junto es una mudanza.
+     ⚠️ Y LA SEGUNDA MITAD, para quien monte el wrapper de la tab: la
+     barra marca el tab activo CON UNA HUELLA. Un glifo que YA es huella
+     no puede recibir otra encima —sería huella entre huellas, R22— así
+     que **la pata se RECOLOREA al activarse** en vez de acumular. La
+     receta ya existe y es la de `IconoMascotas`. */
+  negocio: ({ huella }) => (
     <>
-      <Path d="M4.4 8.6h15.2V18a1.5 1.5 0 0 1-1.5 1.5H5.9A1.5 1.5 0 0 1 4.4 18Z" {...trazo(tinta)} />
-      <Path d="M9.4 8.6V6.9a1.9 1.9 0 0 1 1.9-1.9h1.4a1.9 1.9 0 0 1 1.9 1.9v1.7" {...trazo(tinta)} />
+      {/* LA HUELLA ES EL SUJETO — no lleva objeto al lado. Es el único
+          glifo del registry, junto con la tab de Datos que la soltó, en
+          el que la primitiva ES el ícono. */}
       <Huella color={huella} x={8.7} y={10.7} escala={0.4} />
     </>
   ),
@@ -798,6 +850,9 @@ export function Icono({
     // color dirían que son de dominios distintos. Que no diverjan es la
     // decisión, no el default.
     fiscal: identidad, bancario: identidad,
+    // `datos` responde "a quiénes cuido" — es la mascota contada, capa
+    // identidad como `cuenta` y `carnet`.
+    datos: identidad,
     // S85-B18 — la ventana temporal comparte capa con `hoy`, que es su
     // hermana mayor: son el MISMO eje (cuándo), no dominios distintos.
     semana: cuidado, mes: cuidado,

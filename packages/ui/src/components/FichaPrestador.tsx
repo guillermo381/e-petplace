@@ -378,8 +378,21 @@ export function FichaPrestador({
             aparte — separarlos la convertiría en un dato más de la ficha
             y deja de leerse como parte de quién ES el negocio. */}
         {nombre ? (
+          /* ⚠️ S85-B24 · EL RENGLÓN SE SOSTIENE CON O SIN INSIGNIA, y esto
+             es una cura, no un detalle: hasta hoy la jerarquía del nombre
+             DEPENDÍA de que la insignia estuviera montada — compartían fila
+             y la insignia le cedía ancho. Un prestador SIN cohorte volvía
+             al defecto que el founder ya había reportado: el nombre solo en
+             su renglón, demasiado pesado.
+             Es la misma clase de error que el ▶ decorativo: algo que se ve
+             bien SOLO en la configuración en la que se lo miró. La cura es
+             que el nombre no dependa de un vecino que puede faltar — el
+             `flex: 1` con `flexShrink` lo hace ceder por sí mismo, haya o
+             no insignia al lado. */
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2], flexWrap: 'wrap' }}>
-            <Texto variante="titulo">{nombre}</Texto>
+            <View style={{ flexShrink: 1 }}>
+              <Texto variante="titulo">{nombre}</Texto>
+            </View>
             {hayCohorte ? (
               <Insignia distincion="cohorte" cohorte={cohorte} cohorteAnio={cohorteAnio} tamaño="sm" />
             ) : null}

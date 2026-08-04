@@ -25,7 +25,7 @@
  * el color jamás es el único canal (TS lo fuerza).
  */
 
-import { Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 
 import { typography } from '../tokens/typography'
 import { radius } from '../tokens/radius'
@@ -112,6 +112,27 @@ export type InsigniaProps =
       cohorteAnio: number
       etiqueta?: never
       tamaño?: InsigniaTamaño
+      /** S85-B24 · LA ÚNICA FAMILIA TOCABLE, y la excepción se explica
+       *  porque la cabecera de esta pieza dice lo contrario en mayúsculas:
+       *  «NO ES INTERACTIVA — jamás Pressable. Un badge que se toca es un
+       *  botón disfrazado».
+       *
+       *  ESA REGLA SIGUE RIGIENDO, y esto no la rompe: lo que prohíbe es
+       *  un badge que dispara una ACCIÓN —ahí el badge es un botón mal
+       *  vestido y le corresponde ser `Boton`. El emblema no acciona:
+       *  ABRE SU PROPIA EXPLICACIÓN. Es la diferencia entre un control y
+       *  una nota al pie tocable; el usuario no cambia nada del sistema
+       *  tocándola, se entera de qué es.
+       *
+       *  POR QUÉ ADENTRO Y NO ENVOLVIÉNDOLA DESDE AFUERA (pedido de C):
+       *  envolver deja el ÁREA TÁCTIL, el tamaño mínimo y el foco FUERA de
+       *  la pieza — o sea que cada consumidor los re-decide, y el que se
+       *  olvide entrega una pastilla de 22px de alto como blanco táctil.
+       *  Adentro, el target y el rol viajan con la insignia.
+       *
+       *  Sin `onPress` sigue siendo un `View` con `role="text"`: no nace
+       *  un control donde no hay a dónde ir. */
+      onPress?: () => void
       /** SOBRE QUÉ SUPERFICIE vive — mismo vocabulario y mismos valores
        *  que `Boton.superficie` y `LogoNegocio.superficie`: la casa ya
        *  resolvió "esta pieza puede vivir sobre el muro" y se ENSANCHA su
@@ -152,13 +173,25 @@ export function Insignia(props: InsigniaProps) {
   //    sabía decir hasta hoy.
   if ('distincion' in props && props.distincion) {
     const sobreMuro = props.superficie === 'muro'
+    const alTocar = props.onPress
     // El muro NO sale del tema: vive en la app (`techo-oficio`). Su color
     // sí es token, así que la pieza puede resolverlo sin cruzar frontera
     // — el mismo camino que abrió `Boton` en S84-B19.
     const muro = theme.mode === 'dark' ? palette.tealDarkNoche : palette.tealDark
+    const Contenedor = alTocar ? Pressable : View
     return (
-      <View
-        accessibilityRole="text"
+      <Contenedor
+        {...(alTocar
+          ? {
+              onPress: alTocar,
+              accessibilityRole: 'button' as const,
+              /* El target de 44 lo pone la PIEZA: la pastilla mide 22-26
+                 de alto y un blanco de ese tamaño es de los que se fallan.
+                 `hitSlop` en vez de crecer — la insignia no puede engordar
+                 sin romper la fila que comparte con el nombre. */
+              hitSlop: { top: 10, bottom: 10, left: 8, right: 8 },
+            }
+          : { accessibilityRole: 'text' as const })}
         accessibilityLabel={etiqueta}
         style={{
           justifyContent: 'center',
@@ -190,7 +223,7 @@ export function Insignia(props: InsigniaProps) {
         >
           {etiqueta}
         </Text>
-      </View>
+      </Contenedor>
     )
   }
 

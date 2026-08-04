@@ -1906,10 +1906,19 @@ function GaleriaInterna() {
             </Texto>
             <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
               <Icono nombre="hoy" tamano={21} />
-              <Icono nombre="preferencias" tamano={21} />
+              <Icono nombre="datos" tamano={21} />
               <Icono nombre="negocio" tamano={21} />
               <Icono nombre="cuenta" tamano={21} />
+              <Icono nombre="preferencias" tamano={21} />
             </View>
+            <Texto variante="apoyo">
+              ⭐ LA BARRA ENTERA A 21px (S85-B23) — los cuatro tabs en su orden real, más
+              `preferencias` al final porque es con quien `hoy` se confundía. Los TRES cambios
+              firmados: DATOS gana una GRÁFICA (era la pata y no decía lo que la pantalla es) ·
+              NEGOCIO gana LA PATA («el negocio son mascotas») · CUENTA pasa de dos círculos
+              apilados a una PERSONA. La pata se MUDA de Datos a Negocio: en aislado habrían sido
+              dos tabs con el mismo dibujo, juntos es una mudanza.
+            </Texto>
             <View style={{ flexDirection: 'row', gap: spacing[5], alignItems: 'center' }}>
               <Icono nombre="hoy" tamano={28} />
               <Icono nombre="preferencias" tamano={28} />
