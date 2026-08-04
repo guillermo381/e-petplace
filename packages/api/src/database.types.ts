@@ -12169,6 +12169,8 @@ export type Database = {
           calificacion_promedio: number | null
           ciudad: string | null
           clip_url: string | null
+          cohorte: string | null
+          cohorte_anio: number | null
           country_code: string
           created_at: string
           cuenta_comercial_id: string
@@ -12210,6 +12212,8 @@ export type Database = {
           calificacion_promedio?: number | null
           ciudad?: string | null
           clip_url?: string | null
+          cohorte?: string | null
+          cohorte_anio?: number | null
           country_code?: string
           created_at?: string
           cuenta_comercial_id: string
@@ -12251,6 +12255,8 @@ export type Database = {
           calificacion_promedio?: number | null
           ciudad?: string | null
           clip_url?: string | null
+          cohorte?: string | null
+          cohorte_anio?: number | null
           country_code?: string
           created_at?: string
           cuenta_comercial_id?: string
@@ -16191,6 +16197,8 @@ export type Database = {
           acepta_telemedicina: boolean | null
           calificacion_promedio: number | null
           ciudad: string | null
+          cohorte: string | null
+          cohorte_anio: number | null
           country_code: string | null
           descripcion: string | null
           foto_url: string | null

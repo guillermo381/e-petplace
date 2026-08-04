@@ -140,6 +140,23 @@ export type MiPrestador = Pick<
   // writer propio abajo; el flip a encendido lo gatea el trigger MECANICO
   // de A7 (rebota `aviso_reasignacion_no_existe` hasta que el aviso exista).
   | 'expone_personas'
+  /* ── S85 · EL EMBLEMA DE COHORTE ──────────────────────────────────────
+     `'fundador' | 'pionero'` + el año del alta. **Firma del founder
+     (3-ago-2026):** ventana fundacional hasta el **30-mar-2027 inclusive**;
+     el 1-oct es el LANZAMIENTO OFICIAL, **no** el inicio de la ventana —
+     **las altas previas también son fundadoras** (§4.4bis).
+
+     **Se ESTAMPA al alta por trigger e INMUTABLE en el motor: ni el
+     prestador ni el admin lo editan.** *Un emblema que alguien con permisos
+     puede escribirse deja de ser un emblema y pasa a ser un campo de texto.*
+     Corregirlo exige una migración — un acto versionado, no un click.
+
+     Ganó su `GRANT SELECT` por columna en `20260804030000`: en `prestadores`
+     toda columna nueva nace SIN grant (§3bis). **Y viaja también en
+     `v_prestadores_publicos`**, porque el emblema se ve en la página
+     pública — es parte de lo que la familia lee al elegir. */
+  | 'cohorte'
+  | 'cohorte_anio'
 > & {
   /* ── S84-A26 · LA ZONA, LEÍDA DE LA MISMA VISTA QUE VE LA FAMILIA ──
      Estas TRES no salen de `prestadores`: salen de `v_prestadores_publicos`,
@@ -169,7 +186,7 @@ export type MiPrestador = Pick<
 };
 
 const COLUMNAS_MI_PRESTADOR =
-  'id, nombre_comercial, tipo, country_code, cuenta_comercial_id, direccion, ciudad, sector, lat, lon, radio_cobertura_km, grooming_extra_pelaje_largo, grooming_recargo_domicilio, descripcion, telefono, whatsapp, email_contacto, sitio_web, estado, foto_url, clip_url, expone_personas';
+  'id, nombre_comercial, tipo, country_code, cuenta_comercial_id, direccion, ciudad, sector, lat, lon, radio_cobertura_km, grooming_extra_pelaje_largo, grooming_recargo_domicilio, descripcion, telefono, whatsapp, email_contacto, sitio_web, estado, foto_url, clip_url, expone_personas, cohorte, cohorte_anio';
 
 /** Lee la zona de `v_prestadores_publicos` para UN id — la MISMA fuente que
  *  ve la familia. Si la fila no está en la vista (negocio no activo) o no

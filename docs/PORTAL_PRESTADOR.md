@@ -289,6 +289,39 @@ por eso es la única fila cuya unidad no es un conteo.**
 > QUE CUENTA.** *Si la respuesta no sale sola en la voz del prestador, la unidad
 > está mal elegida — no el esqueleto.*
 
+### ⚠️ EL PRESTADOR MULTI-OFICIO — firmada por la mesa (3-ago-2026)
+
+**La tabla de arriba supone UN oficio. La mayoría de los prestadores reales
+tienen varios** (medido: Paseos Andres ofrece cuatro; Satori, cinco).
+
+| cuántos oficios activos | qué unidad usa |
+|---|---|
+| **uno** | **la suya** — la de su fila en la tabla |
+| **dos o más** | **la GENÉRICA: `citas` y `mascotas`** |
+
+**Por qué genérica y no la del oficio dominante:** *elegir un oficio para nombrar
+el día de alguien que hace cuatro es inventar una jerarquía que el prestador no
+declaró.* **"Turnos" para quien además pasea describe mal su jornada**, y el
+error es del tipo que no se ve: **el número es correcto y la palabra miente.**
+
+### ⚠️ LA EXCEPCIÓN, y es la que hay que entender para no "simplificarla"
+
+> **Con PASEO activo, CARGA sigue siendo TIEMPO — aunque haya otros oficios.**
+
+**Su razón es aritmética, no de estilo: el TIEMPO SUMA BIEN AL MEZCLAR y el
+CONTEO NO.** *Dos consultas de 20 minutos y un paseo de tres horas son "3 citas"
+—un número que no describe nada— y son **3h 40m en ruta y en consulta**, que sí.*
+
+**Y el caso que lo vuelve concreto:** un paseo de 300' y una vacunación de 10'
+pesan **igual** en un conteo y **treinta veces distinto** en el día real. *La
+carga es lo único de los tres números que pretende describir el ESFUERZO; un
+conteo mezclado deja de hacerlo y nadie lo nota, porque sigue siendo un número
+plausible.*
+
+**PLATA y VIDAS no tienen excepción**: el dinero no tiene dialecto, y las vidas
+se cuentan igual en todos los oficios *(salvo el paseo, que cuenta **tutores** —
+ver `familia_id` en `MascotaAgenda`)*.
+
 **⚠️ VIDAS NO ES UN CONTADOR DE TRANSACCIONES.** Es el tercer hueco a propósito
 y cuenta **a quién se cuidó**, no cuántas veces. *Un vet que atendió tres veces
 a la misma mascota tuvo tres consultas y UN paciente* — y ésa es justamente la
