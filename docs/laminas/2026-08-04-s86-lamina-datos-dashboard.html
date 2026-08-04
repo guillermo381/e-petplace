@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lámina S86 · DATOS con dashboard — FIRMADA (founder, 4-ago-2026)</title>
+<style>
+  :root{
+    --papel:#F2F5F0; --tinta:#16332D; --muted:#6E7D76;
+    --teal:#0F5E56; --oro:#E0A414; --menta:#8FCDB8;
+    --crema:#FBF3DC; --ambar:#8A6508; --ambar-oscuro:#5C4404;
+    --hairline:#E4E9E4;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI",Roboto,sans-serif;background:#E7ECE6;padding:32px 16px;color:var(--tinta)}
+  .meta{max-width:760px;margin:0 auto 20px;font-size:13px;color:var(--muted);line-height:1.6}
+  .meta strong{color:var(--tinta);font-weight:500}
+  .grid{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+  .panel{background:var(--papel);border-radius:16px;padding:18px 16px}
+  .card{background:#fff;border-radius:12px}
+  h1{font-size:22px;font-weight:500;margin-bottom:2px}
+  .eyebrow{font-size:12px;letter-spacing:.08em;color:var(--muted);margin-bottom:14px}
+  .kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:16px}
+  .kpi{background:#fff;border-radius:12px;padding:10px;cursor:pointer}
+  .kpi .n{font-size:22px;font-weight:500}
+  .kpi .l{font-size:12px;color:var(--muted);line-height:1.35}
+  .kpi .d{font-size:11px;color:var(--muted);margin-top:2px}
+  .leg{display:flex;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--muted);margin-bottom:6px}
+  .leg span{display:inline-flex;align-items:center;gap:4px}
+  .sw{width:9px;height:9px;border-radius:2px;display:inline-block}
+  .aviso{background:var(--crema);border-radius:12px;padding:12px;margin-bottom:16px;font-size:13px;color:var(--ambar-oscuro)}
+  .aviso .t{font-size:12px;letter-spacing:.08em;color:var(--ambar);margin-bottom:6px}
+  .aviso p{margin-bottom:4px}
+  .aviso span{color:var(--ambar)}
+  .sec{background:#fff;border-radius:12px;margin-bottom:8px;overflow:hidden}
+  .sec-h{display:flex;align-items:center;gap:10px;padding:12px;cursor:pointer}
+  .sec-h .tt{font-size:14px;font-weight:500}
+  .sec-h .st{font-size:12px;color:var(--muted)}
+  .sec-h .glifo{width:22px;text-align:center;color:var(--teal);font-size:16px}
+  .sec-h .ch{color:var(--muted);font-size:13px;transition:transform .18s}
+  .sec-b{border-top:.5px solid var(--hairline);padding:10px 12px;font-size:13px;display:none}
+  .sec.open .sec-b{display:block}
+  .sec.open .ch{transform:rotate(180deg)}
+  .link{color:var(--teal)}
+  .warn{color:#A87A08}
+  .notas{max-width:760px;margin:24px auto 0;font-size:13px;color:var(--muted);line-height:1.7}
+  .notas strong{color:var(--tinta);font-weight:500}
+</style>
+</head>
+<body>
+
+<div class="meta">
+  <strong>Lámina S86 · Tab DATOS del prestador (vista del dueño) — FIRMADA por el founder el 4-ago-2026 en mesa.</strong><br>
+  Depósito: docs/laminas/. La lámina es CRITERIO, no evidencia (§10): el producto es React Native — sombras por
+  elevation/tokens, motion por Reanimated. La firma que cierra construcción es el ojo del founder en dispositivo (L-153).
+  Números de utilería; los lectores reales los da el motor. Todo número de plata hereda el asterisco firmado en S85:
+  suma lo que sabe y declara lo que le falta.
+</div>
+
+<div class="grid">
+
+<div class="panel">
+  <h1>Datos</h1>
+  <p class="eyebrow">TU SEMANA</p>
+
+  <div class="kpis">
+    <div class="kpi"><p class="n" style="color:var(--teal)">24</p><p class="l">atenciones</p><p class="d" style="color:var(--teal)">+4 vs anterior</p></div>
+    <div class="kpi"><p class="n">3</p><p class="l">vidas nuevas</p><p class="d">2 familias</p></div>
+    <div class="kpi"><p class="n">$312</p><p class="l">esta semana</p><p class="d">$1.240 el mes</p></div>
+  </div>
+
+  <div class="card" style="padding:12px;margin-bottom:16px">
+    <p style="font-size:13px;font-weight:500;margin-bottom:8px">Día por día</p>
+    <div class="leg">
+      <span><span class="sw" style="background:var(--teal)"></span>Consultas 11</span>
+      <span><span class="sw" style="background:var(--oro)"></span>Paseos 9</span>
+      <span><span class="sw" style="background:var(--menta)"></span>Estética 4</span>
+    </div>
+    <div style="position:relative;width:100%;height:150px">
+      <canvas id="chSemana" role="img" aria-label="Barras apiladas de atenciones por día, lunes a domingo, por servicio">Atenciones por día: L 3, M 4, X 2, J 5, V 6, S 3, D 1.</canvas>
+    </div>
+  </div>
+
+  <div class="card" style="padding:12px;display:flex;align-items:center;gap:14px">
+    <div style="position:relative;width:88px;height:88px;flex:none">
+      <canvas id="chMix" role="img" aria-label="Dona del mix de servicios del mes">Mix del mes: consultas 46%, paseos 38%, estética 16%.</canvas>
+    </div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.7">
+      <p style="font-size:13px;font-weight:500;color:var(--tinta)">El mix del mes</p>
+      <span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px"><span class="sw" style="background:var(--teal)"></span>Consultas 46%</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px"><span class="sw" style="background:var(--oro)"></span>Paseos 38%</span>
+      <span style="display:inline-flex;align-items:center;gap:4px"><span class="sw" style="background:var(--menta)"></span>Estética 16%</span>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="aviso">
+    <p class="t">PIDE TU OJO · 2</p>
+    <p>Antirrábica de Zeus vencida hace 2 meses <span>→ su ficha</span></p>
+    <p>Falta el registro profesional de Andrés <span>→ equipo</span></p>
+  </div>
+
+  <p class="eyebrow" style="margin-bottom:8px">TUS SECCIONES</p>
+
+  <div class="sec open">
+    <div class="sec-h"><span class="glifo">🐾</span>
+      <div style="flex:1"><p class="tt">Las vidas que cuidás</p><p class="st">3 activas · 1 con vacuna vencida</p></div>
+      <span class="ch">▾</span></div>
+    <div class="sec-b">
+      <p style="margin-bottom:6px">Thor <span style="color:var(--muted)">· bulldog · hace 2 días</span></p>
+      <p style="margin-bottom:6px">Zeus <span class="warn">· vacuna vencida</span></p>
+      <p class="link">Ver las 3 →</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><span class="glifo">⌂</span>
+      <div style="flex:1"><p class="tt">Las familias</p><p class="st">2 · la última llegó hoy</p></div>
+      <span class="ch">▾</span></div>
+    <div class="sec-b"><p class="link">Familia Páez · Familia Salgado →</p></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><span class="glifo">$</span>
+      <div style="flex:1"><p class="tt">La plata</p><p class="st">$1.240 este mes · liquidación 15 ago</p></div>
+      <span class="ch">▾</span></div>
+    <div class="sec-b"><p class="link">Ver el detalle →</p></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><span class="glifo">⚇</span>
+      <div style="flex:1"><p class="tt">Tu equipo</p><p class="st">2 personas · <span class="warn">1 aviso</span></p></div>
+      <span class="ch">▾</span></div>
+    <div class="sec-b"><p class="link">Mónica · Andrés →</p></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><span class="glifo">↝</span>
+      <div style="flex:1"><p class="tt">Tu trayectoria</p><p class="st">Desde marzo · 214 atenciones · 12 familias</p></div>
+      <span class="ch">▾</span></div>
+    <div class="sec-b"><p style="color:var(--muted)">Hechos, jamás score — la franja cuenta lo que pasó (§2.7).</p></div>
+  </div>
+</div>
+
+</div>
+
+<div class="notas">
+  <strong>Las decisiones firmadas de esta lámina:</strong>
+  ① Los tres números presiden y son PUERTAS: atenciones → vidas · vidas nuevas → familias · plata → plata.
+  ② La gráfica de la semana va apilada por servicio; el teal lleva consultas, el oro es acento de dato — jamás de CTA.
+  ③ «Pide tu ojo» junta en una franja lo que vivía regado; cada línea es una puerta.
+  ④ Las secciones se pliegan pero NUNCA se callan: cada una muestra su resumen sin abrirse.
+  ⑤ La trayectoria dice hechos, jamás score (§2.7). El motor de loyalty no asoma acá (MODELO_LOYALTY §3).
+  ⑥ Todo número de plata hereda el asterisco de S85: suma lo que sabe y declara lo que le falta.
+  <br><br>
+  <strong>Glifos de esta lámina = placeholders.</strong> En producto rigen los glifos del registry de packages/ui
+  (Icono), jamás caracteres unicode ni clones (D-645).
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+new Chart(document.getElementById('chSemana'),{type:'bar',
+ data:{labels:['L','M','X','J','V','S','D'],datasets:[
+  {label:'Consultas',data:[2,2,1,2,2,1,1],backgroundColor:'#0F5E56',stack:'s',borderRadius:3,barThickness:16},
+  {label:'Paseos',data:[1,1,1,2,2,2,0],backgroundColor:'#E0A414',stack:'s',borderRadius:3,barThickness:16},
+  {label:'Estética',data:[0,1,0,1,2,0,0],backgroundColor:'#8FCDB8',stack:'s',borderRadius:3,barThickness:16}]},
+ options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+  scales:{x:{grid:{display:false},ticks:{color:'#6E7D76',font:{size:11}}},
+   y:{grid:{color:'#E4E9E4'},ticks:{color:'#6E7D76',font:{size:11},stepSize:2},border:{display:false}}}}});
+new Chart(document.getElementById('chMix'),{type:'doughnut',
+ data:{labels:['Consultas','Paseos','Estética'],datasets:[{data:[46,38,16],
+  backgroundColor:['#0F5E56','#E0A414','#8FCDB8'],borderColor:'#ffffff',borderWidth:2}]},
+ options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false}}}});
+document.querySelectorAll('.sec-h').forEach(function(h){
+ h.addEventListener('click',function(){h.parentElement.classList.toggle('open');});});
+</script>
+</body>
+</html>
