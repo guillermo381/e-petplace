@@ -496,6 +496,43 @@ jerarquiza a las mascotas.**
 
 ---
 
+#### A3.5quater — EL ALCANCE DE **DATOS**: lo que la pantalla NO tiene, y a propósito (FIRMADA, 3-ago-2026)
+
+**Medido por C y firmado por la mesa: de las cinco franjas que el diseño de
+DATOS enumeraba, TRES ya tenían casa con letra firmada.**
+
+| franja | dónde vive | por qué |
+|---|---|---|
+| **① las vidas** | **DATOS** *(la tab, antes `Mascotas`)* | es su contenido |
+| **② la familia** | **el DETALLE de cada mascota** | *"quién cuida a esta vida"* — no es una lista de la tab |
+| **③ la plata** | **NEGOCIO** | §15b + S72-P1a |
+| **④ el equipo** | **NEGOCIO** | íd. |
+| **⑤ la trayectoria** | **NEGOCIO** | íd. |
+
+> ### **DATOS NO TIENE plata, equipo ni trayectoria — Y ESO SE ESCRIBE, no se deja implícito.**
+>
+> *Una pantalla que "todavía no tiene" algo invita a completarla; una que **no lo
+> tiene a propósito** tiene que decirlo, o el próximo lo agrega creyendo que
+> cierra un hueco.* **Es §15b al pie: `HOY` acciona, `NEGOCIO` gestiona, y DATOS
+> es la tercera cosa — el expediente.** Meter la plata acá repetiría el error que
+> S72-P1a ya resolvió una vez.
+
+### ⚠️ LA FAMILIA CAMBIA DE FORMA, Y ESO ACHICA EL TRABAJO
+
+**No es una franja de la tab: es parte del detalle de UNA mascota.**
+
+**⇒ el lector que hay que construir es POR MASCOTA, no por prestador.** *Es más
+angosto que el pedido original —«las familias del prestador»— y además es más
+honesto: **el prestador no tiene una relación con «las familias»; tiene una
+relación con cada vida que cuida**, y la familia aparece como respuesta a
+"¿quién cuida a ésta?".*
+
+**Se caen, por lo tanto, dos lectores que estaban pedidos:** *el de trayectoria
+del prestador* y *el de familias del prestador*. **Se declaran caídos con su
+razón** — un pedido retirado sin porqué vuelve solo a la siguiente sesión.
+
+---
+
 #### A3.10 — QUÉ HABILITA CONSTRUIR
 
 Con esta letra firmada, **P3 puede entrar a M1 (boceto)** con mecanismo
