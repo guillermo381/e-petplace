@@ -370,6 +370,17 @@ export const prestadorEn = {
     esperaSinNumero: 'You requested several codes in a row. Wait a moment and try again.',
   },
 
+  /** S85-C12 — las piezas de DATOS que no esperan motor. */
+  datos: {
+    equipoTitulo: 'Your team',
+    equipoNoCargo: "We couldn't load your team. Please try again.",
+    plataTitulo: 'Your money',
+    plataNoCargo: "We couldn't load your payments. Please try again.",
+    plataHito: 'Once you start charging through the app, what you earn shows up here.',
+    plataUno: 'You have 1 service charged, awaiting payout.',
+    plataVarios: 'You have {{n}} services charged, awaiting payout.',
+    verLiquidaciones: 'See your payouts',
+  },
   miCuenta: {
     titulo: 'Your account',
     perfil: 'Your profile',

@@ -463,6 +463,17 @@ export const prestadorEs = {
     esperaSinNumero: 'Pediste varios códigos seguidos. Espera un momento y vuelve a intentar.',
   },
 
+  /** S85-C12 — las piezas de DATOS que no esperan motor. */
+  datos: {
+    equipoTitulo: 'Tu equipo',
+    equipoNoCargo: 'No pudimos cargar tu equipo. Prueba de nuevo.',
+    plataTitulo: 'Tu plata',
+    plataNoCargo: 'No pudimos cargar tus cobros. Prueba de nuevo.',
+    plataHito: 'Cuando cobres por la app, lo que te toca aparece acá.',
+    plataUno: 'Tienes 1 servicio cobrado esperando liquidación.',
+    plataVarios: 'Tienes {{n}} servicios cobrados esperando liquidación.',
+    verLiquidaciones: 'Ver tus liquidaciones',
+  },
   miCuenta: {
     titulo: 'Tu cuenta',
     perfil: 'Tu perfil',
