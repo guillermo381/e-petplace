@@ -446,12 +446,62 @@ no es acceder** — el prestador solicita, la familia concede.
 > sin nada que hacer con esa información —* **que es peor que no saberlo, porque
 > ahora es su problema y no tiene herramienta.**
 
-### ⏳ LAS PREGUNTAS ABIERTAS — son del founder y de la mesa, y NO se aproximan
+### ✅ EL ALCANCE — FIRMADO (founder, 3-ago): *"pueden ser las dos opciones"*
 
-1. **¿El permiso es sobre TODO el expediente, sobre UN aporte, o sobre un
-   PERÍODO / CASO?** *El literal dice "lo que los vets anteriores tenían en su
-   historia clínica", que sugiere caso o período — pero sugerir no es firmar.*
-2. **¿Es permanente o VENCE?** *La casa ya tiene el riel: la caducidad perezosa
+**POR CASO CLÍNICO **y** POR MASCOTA ENTERA.** ⇒ **el alcance es un ATRIBUTO del
+permiso, no una decisión de diseño cerrada.** *Quien pide elige cuál; la familia
+concede ese.*
+
+### 🔴 LA CONSECUENCIA QUE HAY QUE VER AHORA Y NO DESPUÉS
+
+> ### **SIN LA PIEZA DE ABAJO, "POR CASO" **COLAPSA A "POR MASCOTA" SIN QUE NADIE LO NOTE.**
+> *Un permiso pedido **para la otitis** que en la implementación abre el
+> expediente entero **funciona, se ve bien y concede de más**.* **Es L-199 al
+> pie: el error se ve idéntico al acierto** — y L-198bis: *una modulación
+> aproximada es una fuga con forma de ley.*
+
+### EL CUADRO MEDIDO (S85-A) — la entidad existe; el hilo NO llega al evento
+
+**✅ Lo que SÍ hay, y es más de lo esperado:** `caso_clinico` es entidad de
+primera clase (**2 casos vivos**) con **cinco tablas de su familia** y
+`caso_clinico_id` en **ocho**: `evento_cita_servicio` ·
+`evento_historia_clinica_registrada` (**3/4 poblados**) ·
+`evento_examen_diagnostico` (1) · `evento_medicacion_prescrita` (4) ·
+`evento_alergia_diagnosticada` · `evento_condicion_cronica_diagnosticada` ·
+`evento_intervencion_permanente` · `presupuesto`.
+
+**🔴 Dónde se corta:**
+
+```
+eventos_mascota.caso_clinico_id  →  NO EXISTE     eventos_mascota → 177 filas
+```
+
+**`caso_clinico_id` vive en las tablas TIPADAS (las hijas), no en el PADRE** — y
+**`eventos_mascota` es exactamente lo que lee `obtener_expediente_modulado`.**
+⇒ *desde donde el permiso tiene que aplicarse, el caso es invisible.*
+
+### ✅ LA FORMA, FIRMADA — (c): **el permiso se ancla al CASO, y el CASO enumera sus eventos**
+
+**Invierte el sentido de la pregunta**, y ahí está su valor: no *"¿de qué caso es
+este evento?"* —que hoy no se puede contestar desde el padre— sino **"¿qué
+eventos tiene este caso?"**, que **sí se contesta hoy** con las ocho hijas.
+
+> **Describe lo que pasó en vez de derivarlo.** *Un caso clínico ya sabe cuáles
+> son sus eventos: fue el que los produjo.*
+
+**Las dos descartadas, con su razón, para que no vuelvan solas:**
+
+| | por qué NO |
+|---|---|
+| **(a)** subir `caso_clinico_id` a `eventos_mascota` | obliga a decidir **qué significa un `caso_clinico_id` en la foto de un paseo** — y la mayoría de los 177 eventos no son clínicos |
+| **(b)** que la RPC resuelva por JOIN a las ocho | **el modo de falla es olvidarse de sumar la próxima tabla tipada** — y olvidarse se ve exactamente igual que estar bien |
+
+**CONSTRUCCIÓN: S86**, con el motor de notificaciones. **Hoy solo letra.**
+
+---
+
+### ⏳ LAS PREGUNTAS QUE SIGUEN ABIERTAS — del founder y de la mesa, y NO se aproximan
+1. **¿Es permanente o VENCE?** *La casa ya tiene el riel: la caducidad perezosa
    de 6 meses de `user_acceso_clinico_a_mascota`. Puede ser el mismo — pero
    reusar un riel es una decisión, no un default.*
 3. **¿El dueño puede REVOCARLO?** *(cruza con D-465, la cara de la revocación,
