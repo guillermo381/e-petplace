@@ -10,7 +10,7 @@ import type { prestadorEs } from './es';
 export const prestadorEn = {
   tabs: {
     hoy: 'Today',
-    mascotas: 'Pets',
+    mascotas: 'Data',
     negocio: 'Business',
     // la tab Cuenta (letra P17, S57-B) · LOTE S57, GATE PENDIENTE · Espejo de es.ts
     cuenta: 'Account',
@@ -581,7 +581,7 @@ export const prestadorEn = {
     parteEnviadoMono: 'report sent',
   },
   mascotas: {
-    titulo: 'Pets',
+    titulo: 'Data',
     vacio: 'The lives you care for will live here',
     vacioDetalle: 'With your first closed visit, the pet joins your history with their record.',
     unaAtencion: '1 visit',

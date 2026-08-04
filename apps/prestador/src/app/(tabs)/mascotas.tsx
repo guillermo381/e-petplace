@@ -1,10 +1,49 @@
 /**
- * MASCOTAS v1 — las vidas que cuidás (S51-B3.3, DISEÑO_EXPERIENCIA
- * §14): historial de mascotas ATENDIDAS (derivado de atenciones
- * cerradas con calidad — relevamiento S51: cerrar la atención no
- * promueve la cita, el derivador honesto es la atención) con acceso
- * directo al detalle icónico. Sin mascotas atendidas: EstadoVacio "en
- * preparación, jamás fracasado" (§2.6 del alma). Dosis baja (test 7).
+ * ⭐ **DATOS** — las vidas que cuidás (ex "Mascotas", S51-B3.3;
+ * `DISEÑO_EXPERIENCIA` §14). Historial de mascotas ATENDIDAS —derivado
+ * de atenciones cerradas con calidad; el relevamiento S51 midió que
+ * cerrar la atención no promueve la cita, así que el derivador honesto
+ * es la ATENCIÓN— con acceso directo al detalle icónico. Sin mascotas:
+ * EstadoVacio *en preparación, jamás fracasado* (§2.6). Dosis baja.
+ *
+ * ═══════ S85-C25 · LA TAB SE LLAMA DATOS, Y NO CAMBIÓ DE CONTENIDO ═══
+ *
+ * **Su eje firmado es *"a quiénes cuido"*, y esta pantalla ya lo era.**
+ * El renombre no le agrega nada: le pone el nombre que ya merecía —el
+ * founder lo pidió con esas palabras—. **Solo cambió la etiqueta
+ * visible**; el archivo y la ruta siguen en `mascotas` porque renombrar
+ * la ruta toca el `_layout` y no le aporta NADA a quien la usa.
+ *
+ * ── ⚠️ LAS TRES FRANJAS QUE **NO** VIVEN ACÁ, Y ES A PROPÓSITO ───────
+ * El plan de DATOS traía cinco franjas. **Tres ya tenían casa**, y la
+ * medición lo encontró antes de construir:
+ *
+ * | franja | vive en |
+ * |---|---|
+ * | ③ **la plata** | NEGOCIO → *Cobros* → `/liquidaciones` |
+ * | ④ **el equipo** | NEGOCIO → `/negocio/equipo` |
+ * | ⑤ **la trayectoria** | NEGOCIO → `/negocio/estadisticas` |
+ *
+ * **Y no es un accidente de layout: hay letra que las pone ahí.**
+ * `§15b` (*HOY acciona / NEGOCIO gestiona*) y sobre todo el argumento de
+ * privacidad de **S72-P1a**: *plata donde no hay gate por rol = la
+ * recepción ve los ingresos*. **Traerlas acá reabriría el agujero que
+ * ese argumento cerró.** *La mesa no quiere dos tabs contestando la
+ * misma pregunta.*
+ *
+ * ☠️ **Y MURIÓ `components/datos-piezas.tsx`** (S85-C12: `BloqueEquipo`
+ * y `BloquePlata`), construido para dos de esas franjas. **Nacieron
+ * sueltos —sin pantalla— y ahí está la lección: un bloque sin superficie
+ * NO CHOCA CON NADA, así que nadie descubre que su lugar ya estaba
+ * ocupado.** *Es el mecanismo de esta sesión en su forma más barata de
+ * pagar: se retiró antes de que un usuario viera la duplicación.*
+ *
+ * ── ② LA FAMILIA: NO ES UNA FRANJA DE ACÁ (firmado) ──────────────────
+ * La pregunta es *"quién cuida a ESTA vida"*, no *"qué familias tengo"*
+ * — **el sujeto del producto es la MASCOTA, no el hogar** (EL NORTE).
+ * ⇒ no le falta un bloque a esta tab: **le falta un dato a la ficha**.
+ * El lector pedido a A es por MASCOTA, no por prestador — más angosto
+ * que la primera versión del pedido.
  */
 
 import { useCallback, useState } from 'react';

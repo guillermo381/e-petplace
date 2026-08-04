@@ -10,7 +10,12 @@
 export const prestadorEs = {
   tabs: {
     hoy: 'Hoy',
-    mascotas: 'Mascotas',
+    // S85-C25 — LA TAB SE LLAMA **DATOS** (firma de la mesa): la pantalla
+    // creció hasta su eje —"a quiénes cuido"— y el founder lo pidió con
+    // esas palabras. ⚠️ LA KEY SIGUE SIENDO `mascotas` A PROPÓSITO:
+    // renombrarla toca la ruta y el _layout sin aportarle NADA al que la
+    // usa. Si algún día parece un resto, no lo es — es esta decisión.
+    mascotas: 'Datos',
     negocio: 'Negocio',
     // la tab Cuenta (letra P17, S57-B) · LOTE S57, GATE PENDIENTE
     cuenta: 'Cuenta',
@@ -717,7 +722,8 @@ export const prestadorEs = {
     parteEnviadoMono: 'parte enviado',
   },
   mascotas: {
-    titulo: 'Mascotas',
+    // ver la nota de `tabs.mascotas`: el nombre visible es DATOS, la key no.
+    titulo: 'Datos',
     // §2.6: vacío = en preparación, jamás fracasado (voz aprobada S51):
     vacio: 'Las vidas que cuides van a vivir acá',
     vacioDetalle: 'Con tu primera atención cerrada, la mascota entra a tu historial con su expediente.',
