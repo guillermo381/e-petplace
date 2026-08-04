@@ -396,6 +396,30 @@ SIEMPRE.** *El "quién lo hizo" del nivel ③ no es una concesión nueva: es la
 procedencia, que nunca estuvo en discusión.* Lo que ③ agrega es que **la
 procedencia sobrevive aunque el contenido no viaje.**
 
+### ⚠️ SU FRONTERA — esta ley gobierna aportes **ENTRE PRESTADORES** (enmienda S85)
+
+**Decisión de mesa, y se escribe porque su ausencia es lo que produce una RPC
+que decide sola.**
+
+> **Los tres niveles gobiernan lo que UN PRESTADOR aportó y OTRO PRESTADOR
+> lee.** **Lo que la FAMILIA declaró sobre su propia mascota queda AFUERA de la
+> modulación: es del expediente, y lo ve quien tiene acceso.**
+
+**Medido (S85-A, sobre `eventos_mascota`):** **32 eventos** con procedencia
+`declarado_por_familia` y **cero `prestador_id`**. *No son "de otro prestador":
+son del dueño.*
+
+**Por qué la frontera tiene que estar en la letra y no en el criterio de quien
+implementa:** sin ella, una RPC que aplica los tres niveles a TODO **le
+escondería a un prestador lo que la familia declaró de su propia mascota** —
+peso, alergias, el carnet que ella misma cargó. *Y lo haría en silencio, con la
+apariencia de estar cumpliendo la ley.* **El nivel ③ existe para proteger el
+aporte de un colega, no para poner un muro entre el prestador y el dueño al que
+atiende.**
+
+> **La prueba, en una línea:** *¿el aporte tiene otro prestador del otro lado?*
+> **Si no lo tiene, la modulación no aplica.**
+
 ### Lo que esta regla NO decide
 
 1. **Qué cuenta como *"lo necesita para atender"*** — hoy lo resuelve la matriz

@@ -2723,6 +2723,7 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 
 - **L-193 — LA PREMISA HEREDADA QUE NADIE FECHÓ (hermana de L-192; cobró TRES veces en un día).** L-192 es sobre chequeos que no fallan; ésta es sobre premisas que nadie verificó: una herencia de implementación (un default de template, un límite copiado, un "el legado ya lo hace") se comporta como decisión firmada sin que NADIE la haya firmado — y nadie la mira porque parece letra. Los tres cobros de S81: ① **el límite 05:00–22:00 de la grilla de horarios** — herencia de S55 que su propio comentario confesaba ("heredada de /horarios S55-B") y que bloqueó al founder como si fuera regla de producto (C5 midió: cero letra lo firmó) · ② **el `adjustResize` del manifest** — default de template que SDK 57 edge-to-edge dejó LETRA MUERTA (el JSDoc de EvitaTeclado lo midió; nadie lo había decidido ni re-mirado al subir de SDK) · ③ **el Firebase "del legado" que NO EXISTÍA** — "el admin opera notificaciones" se leyó como "hay push" durante horas y una decisión de founder se tomó sobre esa premisa, hasta que la búsqueda en los seis repos dio CERO. La regla: **toda premisa heredada se FECHA con su origen y su firma, o se re-mide antes de construir sobre ella** — "¿quién decidió esto y cuándo?" sin respuesta = medición obligatoria (es L-174/L-166 apuntando al pasado propio). Origen: S81 (los tres cobros, letra founder).
 - **L-194 — UN NÚMERO DE PLATAFORMA COPIADO DENTRO DE UN WRAPPER ES LETRA MUERTA QUE **REBOTA BIEN** (S85, firmada por la mesa).** El caso: `tipos_servicio.cupo_techo` del paseo subió de 4 a 10 por firma del founder, y **CUATRO guards de `packages/api` seguían diciendo `maxCitasPorSlot > 4`** (`crearFranjaHorario` · `actualizarFranjaHorario` · `editarFranjaHorario` · la creación por servicio de `horarios-modo`). **El motor permitía y la puerta única no** — el prestador habría subido su franja y el wrapper lo habría rebotado con `cupo_invalido`. **LO QUE LA VUELVE PEOR QUE UN VALOR VIEJO CUALQUIERA es su modo de falla: NO REVIENTA — REBOTA BIEN.** Un `4` escrito cuando el techo era 4 **sobrevive intacto al cambio del techo**, devuelve un código tipado, con su mensaje, por su camino previsto — *y nadie audita un rebote que se ve correcto*. Es la familia del guard de D-622 (dio rojo y mintió sobre por qué) y la de L-193 (la premisa que nadie fechó), pero con un agravante propio: **acá el instrumento no solo funciona — funciona en el sentido de las buenas prácticas**, porque validar en la puerta es lo correcto. Lo incorrecto es *de dónde salió el número*. **LA REGLA:** **el tope se PREGUNTA al catálogo, jamás se recuerda.** Todo límite cuyo dueño es una tabla de plataforma (`tipos_servicio`, `cat_*`, `fee_configs`) se lee de ahí en el momento de validar; un literal es legal **solo** si la regla es del wrapper y no de la plataforma, y entonces se declara con esa palabra. **Verificable por grep**: un número de catálogo escrito en `packages/api` es un hallazgo, no un estilo. Origen: S85-A (los cuatro guards, encontrados al cablear `cupoTechoMaximo`).
+- **L-195 — VERIFICAR QUE UNA COLUMNA **EXISTE** NO ES VERIFICAR QUE ESTÉ **POBLADA** (S85, firmada por la mesa).** El caso, y lo pagué yo en el mismo turno: al diseñar la RPC de D-639 afirmé *"el «quién lo hizo» ya está en la fila; la RPC no agrega información, la quita"* — porque `eventos_mascota` **tiene** `cuenta_comercial_id`, `prestador_id` y `procedencia`. **Leí `information_schema` y me detuve ahí.** Al medir el contenido: **`cuenta_comercial_id` poblada en 3 de 177**, y **`procedencia` NULL en 134**. *La afirmación era verdadera sobre el esquema y falsa sobre el dato.* **Es la familia exacta de los datos que dicen que sí:** una columna vacía **no da error, no rompe un guard de shape y el typecheck la acepta** — el `select` la trae, el tipo la declara `string | null`, y **el problema recién aparece cuando alguien lee el `null` como significado**. *Se descubre al chocar, y el choque llega tarde: cuando la pieza ya se diseñó alrededor de ella.* **LA REGLA: toda columna sobre la que se va a APOYAR una decisión de diseño se mide con `count(col)` contra `count(*)`, no con `information_schema`.** El esquema dice qué se puede guardar; **solo el conteo dice qué se guardó.** *Y su corolario, que es lo que la hace barata: es UNA query, y va antes de la primera línea de la pieza — no después del primer fixture.* **Hermana de L-193** (la premisa heredada que nadie fechó) y de **L-084** (la doc conceptual no es fuente de verdad de schema): las tres son la misma familia — **confiar en una descripción en vez de en el objeto**. Origen: S85-A (el diseño de la RPC de D-639).
 
 - **L-192 — UNA VERIFICACIÓN CUYO MODO DE FALLA ES EL SILENCIO NO ES UNA VERIFICACIÓN. Todo chequeo tiene que poder salir ROJO — si no se puede producir su falla, no existe.** (Letra founder, S81 — la generalización de tres instancias del MISMO día: ① el typecheck encadenado con `| tail` que se leyó verde con el fallo adentro — el caso L-191 · ② el guard `git status --porcelain && echo "porcelain=0"` que imprimió su verde con el árbol SUCIO — `status` sale 0 siempre, el `echo` era decorativo; **la cura canónica: `test -z "$(git status --porcelain)"`**, que SÍ sale rojo · ③ la declaración de rango hecha DESPUÉS del push — una verificación post-acto no puede frenar nada: su rojo llega tarde, que es otra forma de silencio.) La prueba de fuego de todo guard nuevo: producirle la falla UNA vez y verla salir roja. Origen: S81 (los tres incidentes + la orden founder "una lección, no tres").
 - **L-191 — EL EXIT CODE SE LEE DEL COMANDO, JAMÁS DEL PIPE.** En un pipeline el shell reporta el exit del ÚLTIMO comando: `comando | tail` devuelve el 0 de `tail` aunque el comando haya fallado — y un `| head` puede además matar al productor por SIGPIPE. Un comando de medición o verificación que viaja por pipe puede LEERSE VERDE ESTANDO ROJO. La regla: el veredicto se toma del exit code DEL COMANDO (corrida separada, o `pipefail` explícito) — jamás de una salida truncada que "se ve bien". Origen: S81 (el typecheck de `@epetplace/domain`: su fallo quedó invisible en la corrida encadenada con `| tail` y solo apareció al correrlo SOLO — el diagnóstico costó una corrida extra que la regla ahorra). Hermana de L-063 (éxito de ejecución ≠ corrección) en la capa del shell.
@@ -5011,6 +5012,32 @@ olvidarse, y olvidarse se ve exactamente igual que estar bien.*
 
 **Cruce declarado:** es **D-464** con nombre nuevo y alcance medido — aquella
 decía *"gate de rol en RLS"*; ésta mide **por qué la RLS no alcanza**.
+
+### 🔴 MEDICIÓN S85 — EL EJE DE LA **ATRIBUCIÓN** Y EL EJE DEL **ACCESO** NO COINCIDEN EN LOS DATOS
+
+**Contadas las 177 filas de `eventos_mascota`:**
+
+| columna | poblada |
+|---|---|
+| `prestador_id` | **131 / 177** |
+| **`cuenta_comercial_id`** | **3 / 177** |
+| `procedencia` | 43 / 177 (**134 en NULL**) |
+
+> **El acceso se concede por CUENTA COMERCIAL** (`mascota_acceso_prestador.cuenta_comercial_id`,
+> y así lo lee `user_acceso_clinico_a_mascota`). **Pero el aporte está atribuido
+> por PRESTADOR.** *Son dos ejes distintos, y el que gobierna el permiso está
+> vacío en el 98% de las filas.*
+
+**⇒ EL *"quién lo hizo"* DEL NIVEL ③ SE RESUELVE POR `prestador_id`.** Resolverlo
+por `cuenta_comercial_id` —que es el eje "natural", porque es el del permiso—
+**dejaría 174 de 177 aportes sin autor**, y el nivel ③ degradaría a *"existe
+algo, de alguien"*: **la mitad inútil del nivel**, porque *lo que lo vuelve un
+dato suficiente es justamente que dice **a quién preguntarle**.*
+
+**Y los 134 con `procedencia` NULL NO se infieren.** Rige `A3.6` tal cual está
+escrita: **"origen no registrado"**. *Derivar la procedencia de que exista un
+`prestador_id` sería fabricar un dato de trazabilidad — la clase de invención
+que L-139 prohíbe, y en el campo donde más caro sale.*
 
 > **☠️ CONDICIÓN DE MUERTE:** se retira cuando **exista la RPC modulada** **y**
 > su **fixture de dos prestadores pase con el rojo PRODUCIDO** (sin la cura, el
