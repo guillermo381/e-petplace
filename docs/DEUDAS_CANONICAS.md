@@ -5117,6 +5117,71 @@ importa: **doce de veinticuatro** reglas del lint estaban en esa condición.*
 
 ---
 
+#### D-642 — LA JERARQUÍA DEL TECHO DEPENDE DE UN DATO OPCIONAL: sin cohorte, el renglón del nombre vuelve a la queja original 🟡
+
+**Origen: S85-C31 (`530ae90`), tras el gate del founder sobre `019fc9d5`.**
+**Dueño: B**, junto con el rehecho del bloque de los tres números.
+
+> **EL LITERAL VIVE EN EL CÓDIGO Y NO SE MUEVE:**
+> **`apps/prestador/src/components/techo-oficio.tsx:261`** — al lado de la
+> insignia que produce el problema, en el archivo que habría que tocar para
+> curarlo. *Esta ficha es un PUNTERO, no una copia.*
+
+**Qué pasó, medido contra el ancla anterior `0419cc8`:** el founder pidió el
+nombre del negocio *"más chico"* y después **firmó el resultado** — pero **el
+`fontSize` nunca cambió**: sigue en `sm`, igual que antes. Los tokens de
+tipografía y el `Isotipo`, intactos; el diff del techo **no toca una sola medida
+de texto**.
+
+**Lo que cambió es la COMPOSICIÓN:** el nombre dejó de ser lo único de su
+renglón —ahora lo comparte con la insignia de cohorte— y quedó arriba de los tres
+números. ***Pesa menos sin haber encogido.***
+
+### LA CONSECUENCIA, que es la deuda
+
+> **La mejora que el founder firmó DEPENDE DE QUE LA INSIGNIA SE MONTE.** Un
+> prestador **sin cohorte** recupera el renglón entero y **vuelve a la queja
+> original — y nadie va a saber por qué**, porque lo que se "arregló" **no existe
+> como cambio**: quien audite buscando el token nuevo no va a encontrar nada.
+
+**Hoy el caso NO ESTÁ VIVO** (todos los prestadores tienen cohorte). **Nace el
+día que alguien entre después de la ventana fundacional**, que el founder fijó en
+**30 de marzo de 2027**.
+
+**⚠️ Nota de severidad, declarada y no resuelta en silencio:** **C la escribió
+🔴 en su comentario**; la ficha la registra **🟡** por una sola razón — *no puede
+manifestarse durante ocho meses*. **La divergencia se deja visible a propósito:
+si la mesa prefiere el 🔴 de C, se enmienda acá y el comentario ya coincide.**
+
+### POR QUÉ GANA FICHA SI SU PROPIO AUTOR ARGUMENTÓ DEJARLA EN EL CÓDIGO
+
+**El argumento de C es bueno y se conserva:** *"se registra ACÁ porque es donde
+se va a leer"* — al lado de lo que hay que tocar. **La ficha no lo contradice:
+lo indexa.**
+
+> **El hallazgo que la justifica es otro: una deuda sin número NO APARECE EN
+> NINGUNA CONSULTA DE DEUDAS.** *El canon ya distinguió las dos clases —«los
+> pedidos viajan por mano del founder; las deudas se encuentran solas» (S74)—* y
+> **ésta hoy no se encuentra sola**: su disparo está a ocho meses, y para
+> entonces nadie va a estar leyendo `techo-oficio.tsx` por esta razón.
+>
+> **Y su propio caso es el argumento más fuerte:** *esta deuda existe porque un
+> texto describía algo que no estaba.* **S85 pagó seis veces la misma familia**
+> (L-194 → L-199): **el texto no se lee, o se lee tarde.** *Confiar en que un
+> comentario a ocho meses vista va a ser leído es exactamente la premisa que
+> esta sesión falsó seis veces.*
+
+☠️ **CONDICIÓN DE MUERTE:** el renglón del nombre **se sostiene solo, con o sin
+insignia** — verificable montando el techo con `cohorte = null`. *No muere
+"cuando se rehaga TresNumeros": muere cuando ese caso se vea bien.*
+
+**DISPARO: el rehecho del bloque de los tres números** (rebotado en el gate de
+`019fcabf`, cura en vuelo de B) **o marzo 2027 — lo que llegue primero.** *El
+rehecho es la oportunidad barata; marzo 2027 es la fecha en que deja de ser
+opcional.*
+
+---
+
 #### D-641 — `apps/cliente` NUNCA SE BUILDEÓ CONTRA LOS CAMBIOS DE `packages/api` DE S85 ⚪ REGISTRO (se prueba antes de buildear, no después)
 
 **Medido al evaluar una APK de cliente que el founder pidió (S85-A):**
