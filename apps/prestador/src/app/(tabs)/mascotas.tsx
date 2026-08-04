@@ -76,6 +76,7 @@ import {
   MarcaDeAgua,
   Separador,
   Tarjeta,
+  Texto,
   spacing,
   useTheme,
   type AvatarMascotaEspecie,
@@ -90,6 +91,7 @@ import {
 } from '@epetplace/api';
 
 import { SeccionDesplegable } from '@/components/perfil-piezas';
+import { useGateGestor } from '@/lib/gate-gestor';
 
 import { fechaCortaMono } from '@epetplace/i18n';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -135,6 +137,19 @@ export default function Mascotas() {
        tiene motor (D-513 v2)— y se anota para el día que lo tenga. */
   const [equipo, setEquipo] = useState<EquipoNegocio | null>(null);
   const [equipoAbierto, setEquipoAbierto] = useState(false);
+  /* ⭐ S86-C · el gate de las DOS franjas que llegan sin datos (reseñas y
+     casos heredados). Es el MISMO predicado que gatea el tab NEGOCIO
+     (`dueño|administrador`), y por eso mudarlas con él es el CAMBIO NULO:
+     ve exactamente la misma gente que las veía ayer.
+     ⚠️ **Esto NO contesta la pregunta de permiso de reseñas** —quién ve la
+     reputación completa— que la mesa dejó declarada y abierta. Solo se
+     niega a ensancharla POR ACCIDENTE mientras se decide: mudarlas sin
+     gate habría respondido «todos» sin que nadie lo firmara.
+     ☠️ Y cuando cada una gane su LECTOR, el gate se muda ADENTRO del
+     lector (como `esDueno` en equipo y `visible:false` en la plata) y
+     este gate de pantalla muere: un gate de cliente es decorativo en
+     cuanto hay un dato que proteger. */
+  const { gate } = useGateGestor();
 
   useFocusEffect(
     useCallback(() => {
@@ -292,6 +307,41 @@ export default function Mascotas() {
               />
             </View>
           </SeccionDesplegable>
+        )}
+
+        {/* ⭐ S86-C · LAS DOS QUE LLEGAN SIN DATOS. Vienen de NEGOCIO por
+            firma de mesa, y el argumento de cada una es distinto:
+             · **Reseñas** — una reseña no se CONFIGURA: es evidencia sobre
+               el negocio, y cae del lado «consulta».
+             · **Casos heredados** — el caso es del PET PARENT. Tenerlo en
+               NEGOCIO afirmaba algo falso contra letra firmada.
+            ⚠️ Las DOS pantallas destino siguen siendo `EstadoVacio` en
+            preparación (medido: cero lectores). Se mudan con su voz
+            intacta — el «se despierta con el uso» sigue siendo la verdad.
+            ☠️ Mueren de acá el día que tengan lector: ahí dejan de ser
+            promesas y pasan a ser secciones con su resumen (decisión ④). */}
+        {gate === 'permitido' && (
+          <View style={{ gap: spacing[3] }}>
+            <Texto variante="seccion">{t('mascotas.despiertaSeccion')}</Texto>
+            <Tarjeta relleno="ninguno">
+              <CeldaNavegacion
+                icono="refugio"
+                registro="aa"
+                titulo={t('mascotas.resenas')}
+                detalle={t('mascotas.resenasDetalle')}
+                onPress={() => router.push('/negocio/resenas')}
+              />
+              <Separador />
+              {/* Glifo 'caso' — propio del registry, no stand-in. */}
+              <CeldaNavegacion
+                icono="caso"
+                registro="aa"
+                titulo={t('mascotas.casosHeredados')}
+                detalle={t('mascotas.casosHeredadosDetalle')}
+                onPress={() => router.push('/negocio/casos-heredados')}
+              />
+            </Tarjeta>
+          </View>
         )}
       </ScrollView>
     </View>
