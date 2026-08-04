@@ -258,7 +258,29 @@ export async function obtenerIncidenciasPaseo(): Promise<
 
 export type MascotaAgenda = Pick<
   Database['public']['Tables']['mascotas']['Row'],
-  'id' | 'nombre' | 'especie' | 'foto_url'
+  // familia_id (S85): **la llave de VIDAS del paseador**, y el paseo es el
+  // ÚNICO oficio que la necesita — su tercer número cuenta **TUTORES**, no
+  // mascotas (`PORTAL_PRESTADOR` §2.4bis: la unidad habla el idioma del
+  // oficio; vet cuenta pacientes, grooming mascotas, paseo tutores).
+  //
+  // ⚠️ **POR QUÉ NO SE PUEDE RESOLVER CONTANDO MASCOTAS:** un paseador saca
+  // tres perros de la MISMA familia en una salida — eso es UN tutor y TRES
+  // mascotas. **Contar mascotas y llamarlas tutores da un número más alto,
+  // plausible y falso**, que es la clase de dato que nadie audita porque se ve
+  // bien. *Es la misma familia de L-197: el error no rompe nada, se obedece.*
+  //
+  // El embed lo resuelve solo — `mascotas.familia_id` SÍ tiene su FK, así que
+  // no es el caso del techo (D-641 familia): acá no hay relación que declarar.
+  //
+  // ⚠️ **VIAJA EN LOS CUATRO OFICIOS aunque SOLO el paseo lo use, y es una
+  // decisión, no un descuido:** `MascotaAgenda` es UN tipo compartido por los
+  // cuatro lectores del día. La alternativa —hacerlo opcional y poblarlo solo
+  // en paseo— dejaría un `familia_id: null` que significa **dos cosas
+  // distintas**: *"esta mascota no tiene familia"* y *"este oficio no lo
+  // pidió"*. **Es exactamente la ambigüedad que L-197 prohíbe**, y la que
+  // acabo de curar en el techo. *Un campo de más en tres selects cuesta nada;
+  // un null con dos significados cuesta un turno de forense.*
+  'id' | 'nombre' | 'especie' | 'foto_url' | 'familia_id'
 >;
 
 export type CitaAgendaPaseo = Pick<
@@ -364,7 +386,7 @@ export async function obtenerCitasPaseoDelDia(
   const { data, error } = await getClient()
     .from('evento_cita_servicio')
     .select(
-      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, precio, direccion_snapshot, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
+      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, precio, direccion_snapshot, mascota:mascotas(id, nombre, especie, foto_url, familia_id), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
     )
     .eq('prestador_id', input.prestador_id)
     .gte('fecha', input.fecha)
@@ -411,7 +433,7 @@ export async function obtenerCitaPaseoPorId(
   const { data, error } = await getClient()
     .from('evento_cita_servicio')
     .select(
-      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, precio, direccion_snapshot, mascota:mascotas(id, nombre, especie, foto_url), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
+      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, precio, direccion_snapshot, mascota:mascotas(id, nombre, especie, foto_url, familia_id), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
     )
     .eq('id', citaId)
     .eq('tipo.categoria', 'paseo')

@@ -218,6 +218,36 @@ que convierte la decisión de producto en defensa real**.
 **El administrador NO entra todavía, y no es un olvido:** su motor no existe
 (D-513/D-517). Cuando exista, cae en la rama del titular con una línea.
 
+### 🗣️ LA VOZ DEL HUECO — firmada por la mesa (3-ago-2026)
+
+**Cuando PLATA no es visible, el hueco NO SE DEJA VACÍO.**
+
+> ### **EL HUECO HABLA DEL *PERMISO*, NO DEL *DATO*.**
+> *"Solo el titular ve los ingresos"* — o su equivalente en la voz del producto.
+
+**Ni vacío ni *"sin datos"*, y el porqué es una lectura, no una preferencia:**
+
+> **Un vacío se lee como CERO.** *La recepcionista abriría su portada, vería el
+> tercer número en blanco y concluiría **que el negocio no facturó hoy*** — un
+> dato falso sobre el estado del negocio, fabricado por una ausencia.
+> **Y *"sin datos"* es peor todavía: suena a que el sistema falló**, y manda a
+> alguien a buscar un defecto que no existe.
+
+**Es la hermana del asterisco de `sinPrecio`, y conviene verlas juntas porque
+son la misma ley con dos objetos:**
+
+| caso | el total dice lo que sabe **y declara lo que le falta** |
+|---|---|
+| `sinPrecio > 0` | lo que falta es **un dato** |
+| `visible: false` | lo que falta es **un permiso** |
+
+*En los dos, callar produce un número creíble y equivocado* (L-197). **La
+diferencia es que acá no falta información: sobra audiencia** — y decirlo así
+además **respeta al que lo lee**: la recepción no está viendo un error, está
+viendo un límite que alguien decidió.
+
+*C escribe la línea; el criterio queda firmado acá.*
+
 ---
 
 ### ⚠️ QUÉ ES "$ DEL DÍA" — decisión de la mesa, escrita para que nadie la reinterprete
