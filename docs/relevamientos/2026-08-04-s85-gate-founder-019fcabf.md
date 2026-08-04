@@ -37,7 +37,11 @@
 
 ### ② **NEGOCIO CONFIGURA · DATOS CONSULTA** — y NEGOCIO queda solo con el taller
 
-**Cobros, equipo y estadísticas se mudan a DATOS en S86.**
+**~~Cobros~~, equipo y estadísticas se mudan a DATOS en S86.**
+
+> **⚠️ ACOTADA EL MISMO DÍA POR EL FOUNDER — ver §2: `Cobros` QUEDA EN CUENTA.**
+> A DATOS se mudan **equipo y estadísticas**. *Se tacha en su propio depósito en
+> vez de reescribirse: la firma se acotó, y quien la lea tiene que ver dónde.*
 
 **Medido contra el árbol (`apps/prestador/src/app/(tabs)/negocio.tsx`, HEAD
 `530ae90`):** las tres piezas **están hoy en NEGOCIO** — `:311` cobros · `:363`
@@ -61,7 +65,49 @@ a quien la usa.
 
 ---
 
-## 🔴 2 · CHOQUE DE LETRAS FIRMADAS — **NO lo resuelve esta mesa**
+## ✅ 2 · CHOQUE DE LETRAS FIRMADAS — **RESUELTO POR EL FOUNDER (3-ago-2026)**
+
+> ### **`"Cobros. OK, dejémoslo en cuenta"`**
+
+**⇒ `Cobros` QUEDA EN CUENTA. `DISEÑO_EXPERIENCIA` §15b.0 (S83) SE SOSTIENE Y NO
+SE ENMIENDA.** *Lo que se acota es la firma de HOY:* **a DATOS se mudan EQUIPO y
+ESTADÍSTICAS — Cobros no.**
+
+### El porqué, que es lo que hay que guardar
+
+**`Cobros` es la plata PERSONAL del prestador** — *cuánto le pagan y cuándo* — y
+eso vive donde viven **su identidad y su acceso**. **DATOS se lleva la
+información del NEGOCIO.**
+
+> **Y acá está la parte que corrige a la mesa, incluida esta:** *el verbo
+> «consultar» NO ALCANZA para mudarla.* **Cobros se consulta — y aun así es
+> suya.** *Un verbo describe la ACCIÓN; no dice de QUIÉN es la cosa.* **Los dos
+> criterios no compiten en el mismo eje**, y por eso la disyuntiva estaba mal
+> planteada de origen: se preguntó *"¿se consulta o se configura?"* cuando la
+> pregunta que decide es ***"¿de quién es?"***.
+
+**Lo que esto le agrega a §15b.0 sin enmendarla:** su discriminador corrible
+(*"¿la familia lo ve?"* → `v_prestadores_publicos`) **sigue siendo el juez para
+entrar a CUENTA**, y hoy gana un segundo criterio de reparto **entre NEGOCIO y
+DATOS**: *el verbo reparte lo del negocio; la PERTENENCIA decide antes si la
+pieza es del negocio o de la persona.*
+
+### La lectura de método, porque el choque fue real y sirve
+
+**Ninguna de las dos letras estaba equivocada** — *el verbo nuevo creó una pieza
+con dos casas legales, y el founder la mandó a la vieja.* **La firma de hoy no se
+deroga: se acota, y se acota en su propio depósito** *(esta sección)*, no en un
+mensaje. *Una firma que se corrige en el chat es una letra que rige en dos
+versiones.*
+
+---
+
+## ~~🔴~~ 2bis · EL REGISTRO DEL CHOQUE — conservado a propósito
+
+*Lo que sigue es el planteo tal como se registró antes de la firma. **Se conserva
+entero**: sin él, la resolución de arriba parece obvia, y no lo era — de hecho
+el argumento que ganó (**la pertenencia**) no estaba en ninguna de las dos
+columnas.*
 
 **La firma ② manda `Cobros` a DATOS. Una firma anterior lo manda a CUENTA.**
 
@@ -87,15 +133,20 @@ a quien la usa.
 > ninguno de los dos lados; hay una pieza que dejó de tener un solo lugar
 > legal.*
 
-**⇒ Se registra sin resolver, por el precedente que esta misma sesión fijó
+**⇒ Se registró sin resolver, por el precedente que esta misma sesión fijó
 (freno #6, §2.4bis vs `S72-P1a`): dos letras firmadas que se contradicen las
 arbitra el founder, no la mesa.** Y por la razón de forma que el canon ya
 escribió: ***dos letras firmadas que se contradicen son peores que una
 equivocada — cualquiera cita la que le conviene y está «en regla».***
 
-**Qué desbloquea la respuesta:** la mudanza de S86. **Equipo y estadísticas no
-están en disputa** — ninguna letra anterior las reclama, y las dos son consulta
-pura. **La disputa es de UNA pieza.**
+**La respuesta llegó el mismo día y está en §2.** *El registro se conserva por su
+valor de método:* **la tabla de arriba enumera los dos argumentos disponibles, y
+el founder resolvió con UN TERCERO que no estaba en ninguna columna** — la
+pertenencia. ***Una disyuntiva bien planteada puede seguir siendo una disyuntiva
+falsa***, y quedarse dentro de las opciones ofrecidas era la salida equivocada.
+
+**Equipo y estadísticas nunca estuvieron en disputa** — ninguna letra anterior
+las reclama. **La disputa era de UNA pieza, y la perdió el verbo nuevo.**
 
 ---
 

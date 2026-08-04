@@ -1,6 +1,16 @@
 # DIRECCION_ARTE — El lenguaje visual propio de e-PetPlace
 
-> **Versión: v1.4 — S81 (29 Jul 2026).** Enmienda v1.4 (C-S81, ACTO 1
+> **Versión: v1.5 — S85 (3 Ago 2026).** Enmienda v1.5, **DOS firmas sobre
+> §2, ninguna deroga nada**: **(a) la ley 4 SE ACOTA** — sigue rigiendo en
+> la iconografía de CONTENIDO (humanos = manos u objetos) y **se
+> excepciona donde el humano es SUJETO y no objeto**, hoy la tab Cuenta
+> (*"el de cuenta no sé, una persona, algo que realmente parezca cuenta"*,
+> founder 3-ago); el discriminador es **sujeto vs objeto**, no "barra de
+> tabs". **(b) la ley 6 gana la REGLA GENERAL que estaba abajo de sus dos
+> casos** (derivada por C, firmada por la mesa): **la huella que es
+> ESTRUCTURA se recolorea; la que es MARCA aparece** — con eso el
+> veredicto de S80 y la firma de S82 dejan de necesitar reconciliación:
+> eran dos mecanismos distintos sin nombre. Previa v1.4 (C-S81, ACTO 1
 > del brief — depósito ordenado por §0 de `DIRECTIVA_CRAFT_CLIENTE`):
 > nace **§9bis EL BLOQUE A DEL LADO CLIENTE** — migración con estatuto
 > real por ítem: A6 SIN CAJA ✅ · A4 la luz de la esquina ✅ · A5 la
@@ -83,6 +93,41 @@ punto decorativo.**
 4. **Cero figuras humanas.** Los oficios se dicen con sus objetos. Si un
    concepto exige presencia humana, se dice con una MANO — y una mano
    entra al set solo con craft que pase el gate del founder.
+
+   > **ENMIENDA S85 — LA LEY SE ACOTA, NO SE DEROGA (firma del founder,
+   > 3-ago-2026, sobre el gate de `019fcabf`; frontera transportada por
+   > B y C).** Literal del founder:
+   >
+   > > *"el de cuenta no sé, una persona, algo que realmente parezca
+   > > cuenta"*
+   >
+   > **DÓNDE SIGUE RIGIENDO — intacta, y es la mayoría del set:** la
+   > **iconografía de CONTENIDO** (oficios, servicios, conceptos del
+   > expediente). Ahí un humano se dice con **manos u objetos**, sin
+   > excepción. *Un glifo de veterinaria con una persona adentro dice
+   > "gente" cuando tiene que decir "cuidado de tu mascota".*
+   >
+   > **DÓNDE SE EXCEPCIONA — la BARRA DE TABS, y solo por su
+   > semántica:** en la tab **Cuenta**, la persona **no es el objeto de
+   > una acción — es el usuario mismo**. *Ahí una mano u objeto no
+   > sustituye a la figura: la esquiva.* La placa de collar de S53 era
+   > un objeto **del perro** puesto a nombrar **a la persona** — decía
+   > "tu mascota" en el lugar donde el usuario busca "yo".
+   >
+   > **EL DISCRIMINADOR, para que la excepción no se ensanche sola:**
+   > **¿el humano es SUJETO o es OBJETO?** Si el glifo nombra **a quien
+   > mira** (su cuenta, su sesión, su identidad) → **la figura es
+   > legal**. Si nombra **a alguien sobre quien se actúa** (el cliente,
+   > el paseador, el equipo) → **rige la ley 4 original: manos u
+   > objetos**. *La excepción es de SUJETO, no de barra de tabs — hoy
+   > coinciden, y el día que dejen de coincidir manda el sujeto.*
+   >
+   > **Lo que NO concede esta enmienda:** ni emojis ni librerías
+   > externas (ley 5, intacta) · ni la escala de la huella (ley 3) · ni
+   > el gate a 21px (ley 9, y una figura humana es **el caso más duro**
+   > de esa ley: se empasta antes que un objeto). **La figura entra con
+   > craft que pase el gate del founder POR ÍCONO**, exactamente como
+   > la mano — la excepción abre una puerta, no la cruza.
 5. **Cero emojis, cero librerías de íconos externas** (hereda Ley 12).
 6. **Estado activo en tabs:** la tab activa se marca porque su huella
    APARECE (en reposo, el ícono de tab va solo en trazo). La huella es el
@@ -148,6 +193,45 @@ punto decorativo.**
    > CLIENTE y su maquinaria (vive intacta en el prestador) · el relleno
    > pleno del chip sin glifo, que había nacido como sustituto — **dos
    > marcas para un mismo estado es el tercer peso que no informa**.
+
+   > ### ENMIENDA S85 — LA REGLA GENERAL QUE ESTABA ABAJO DE LAS DOS
+   > **(derivada por C, FIRMADA por la mesa, 3-ago-2026.)**
+   >
+   > > **LA HUELLA QUE ES *ESTRUCTURA* SE RECOLOREA. LA QUE ES *MARCA*
+   > > APARECE.**
+   >
+   > **No es una tercera regla: es la que explica a las otras dos**, y
+   > por eso se escribe acá y no como ley aparte.
+   >
+   > - **ESTRUCTURA** = la huella está **siempre**, porque es identidad
+   >   del glifo (ley 2: todo b′ lleva UNA huella rellena). **Está en
+   >   todos los hermanos** ⇒ su presencia no puede señalar a ninguno, y
+   >   el estado se marca **cambiándole el color**. *Caso vivo: el filtro
+   >   de OFICIO del prestador.*
+   > - **MARCA** = la huella **se agrega para decir el estado**. En
+   >   reposo no está ⇒ su **aparición** ES la señal. *Casos vivos: las
+   >   tabs (ley 6) y `FiltroPills` del cliente.*
+   >
+   > **POR QUÉ IMPORTA MÁS DE LO QUE PARECE:** el veredicto de S80
+   > —*"la huella sola no leía"*— y la firma de S82 —*"la huella marca
+   > por presencia"*— **parecían contradecirse durante dos sesiones**, y
+   > la enmienda de arriba tuvo que argumentar largo para reconciliarlas.
+   > **Con esta regla no hay nada que reconciliar: eran dos mecanismos
+   > distintos y nadie los había nombrado.** *Una regla que convierte una
+   > excepción explicada en un caso previsto vale más que la excepción.*
+   >
+   > **CÓMO SE USA — es un DISCRIMINADOR, se contesta antes de dibujar:**
+   > *"¿la huella está en reposo?"* **Sí ⇒ recoloreá. No ⇒ que
+   > aparezca.** *Nunca las dos: dos marcas para un mismo estado es el
+   > tercer peso que no informa (misma razón que mató al relleno pleno,
+   > tres líneas más arriba).*
+   >
+   > **CONSECUENCIA A VERIFICAR, no verdicto:** los tres glifos rebotados
+   > en el gate de `019fcabf` (**Datos · Negocio · Cuenta**) se rehacen
+   > **contra este discriminador** — viven en tabs, donde la huella es
+   > MARCA. *Si al montarlos alguno pide recolorear, es señal de que su
+   > huella dejó de ser marca, y eso es una decisión que se declara — no
+   > un ajuste.*
 7. **Dosis del prestador:** el mismo lenguaje, con la huella en el color
    funcional AA de su capa (no hex puro) o en tinta cuando la vista ya
    porta su único acento — la sobriedad es aplicación, no otro idioma.
@@ -592,6 +676,26 @@ literal remitía al acta hermana que no existe) — **y NO SE
 RECONSTRUYE**: nace cuando su literal llegue (protocolo D-434/D-435).
 
 ## Historial
+
+- **v1.5 (S85-A, 3 Ago 2026 — DOS firmas sobre §2):**
+  **(a) LEY 4 ACOTADA, no derogada** (firma del founder sobre el gate de
+  `019fcabf`; frontera transportada por B y C). Sigue rigiendo en la
+  **iconografía de CONTENIDO**; se excepciona **donde el humano es
+  SUJETO** — la tab Cuenta, *"una persona, algo que realmente parezca
+  cuenta"*. El discriminador firmado es **sujeto vs objeto**, no "barra
+  de tabs": *hoy coinciden, y el día que dejen de coincidir manda el
+  sujeto*. La placa de collar de S53 muere con su diagnóstico escrito —
+  **era un objeto DEL PERRO puesto a nombrar A LA PERSONA**. No concede
+  nada más: ley 5, ley 3 y el gate a 21px de la ley 9 quedan intactos, y
+  **la figura entra POR ÍCONO con gate del founder**, igual que la mano.
+  **(b) LEY 6 gana su REGLA GENERAL** (derivada por C, firmada por la
+  mesa): ***la huella que es ESTRUCTURA se recolorea; la que es MARCA
+  aparece***. No es una tercera regla — **es la que explica a las otras
+  dos**: el veredicto de S80 (*"la huella sola no leía"*) y la firma de
+  S82 (*"marca por presencia"*) **parecieron contradecirse durante dos
+  sesiones y eran dos MECANISMOS distintos que nadie había nombrado**.
+  Queda como discriminador corrible antes de dibujar: *¿la huella está
+  en reposo?* → sí recoloreá, no que aparezca; **nunca las dos**.
 
 - **v1.4 (C-S81, 29 Jul 2026 — depósito, no firma nueva):** nace
   **§9bis EL BLOQUE A DEL LADO CLIENTE** — la migración que §0 de
