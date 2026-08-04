@@ -4,11 +4,20 @@
  * ficha clínica. LA VISIBILIDAD PARCIAL MANDA (relevada S51 en RLS
  * viva): identidad ✓ (mascotas_select_prestador_con_acceso), señales
  * de cuidado ✓ (perfil_vigente/vacunas vía user_tiene_acceso_a_mascota),
- * historial SOLO con este prestador ✓ — y la FAMILIA HUMANA NO
- * (policies familia/familia_miembro/profiles son solo-miembro): su
- * lugar nace cuando exista el canal interno (B5), sin datos de
- * contacto directos (§6.4.5 del alma). Las 5 dimensiones de identidad
- * personal son D-110 (sin UI aún) — no se inventan.
+ * historial SOLO con este prestador ✓ — y la FAMILIA HUMANA **YA SÍ**
+ * (S85-C29). ⏪ Esta nota decía que su lugar nacía *"cuando exista el
+ * canal interno (B5)"*, y era verdad hasta hoy: las policies de
+ * `familia`/`familia_miembro`/`profiles` son solo-miembro, así que por
+ * RLS no se alcanzaba. **A la abrió por RPC ANGOSTA** (A45) — nombres y
+ * rol, nada más—, que es otra puerta y no el canal. *El porqué venció y
+ * el texto se mueve con él (L-198): un porqué viejo se lee con la misma
+ * autoridad que uno vigente.*
+ * **Lo que NO cambió y sigue rigiendo: cero datos de contacto por esta
+ * vía** (§6.4.5). El teléfono y el correo tienen su propio lector
+ * gateado, en el detalle de la CITA — *un dato de contacto que viaja de
+ * paso es el que nadie recuerda haber concedido.*
+ * Las 5 dimensiones de identidad personal son D-110 (sin UI aún) — no se
+ * inventan.
  *
  * Dosis baja (test 7): un acento, sin gradiente. Solo lo REAL (L-139).
  */
@@ -37,11 +46,13 @@ import {
 import {
   obtenerDetalleMascotaPrestador,
   obtenerExpedienteModulado,
+  obtenerFamiliaDeMascota,
   obtenerMiPrestador,
   obtenerUmbralesMomentoVital,
   resolverUrlFoto,
   type AporteExpediente,
   type DetalleMascotaPrestador,
+  type FamiliaDeMascota,
   type UmbralesEspecie,
 } from '@epetplace/api';
 import { calcularMomentoVital, edadEnMeses } from '@epetplace/domain';
@@ -75,6 +86,11 @@ export default function DetalleMascota() {
      lista vacía a propósito: "no pudimos leer" y "todavía no hay aportes" son
      dos hechos y no comparten representación (Ley 13). */
   const [expediente, setExpediente] = useState<AporteExpediente[] | 'error' | null>(null);
+  /* S85-C29 · quién cuida a ESTA vida (A45). `'error'` es su propio estado:
+     un fallo llega como `ok:false` y JAMÁS como `familia:null` — degradarlo
+     diría "esta mascota no tiene familia" cuando la verdad es "no pude
+     leerla", y es lo más caro que puede decir esta pantalla. */
+  const [familia, setFamilia] = useState<FamiliaDeMascota | 'error' | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -102,6 +118,9 @@ export default function DetalleMascota() {
            propio camino de error y no toma de rehén al resto (patrón D-531). */
         void obtenerExpedienteModulado(mascotaId).then((e) => {
           if (vigente) setExpediente(e.ok ? e.data : 'error');
+        });
+        void obtenerFamiliaDeMascota(mascotaId).then((f) => {
+          if (vigente) setFamilia(f.ok ? f.data : 'error');
         });
         if (r.data.mascota.especie !== null) {
           void obtenerUmbralesMomentoVital(r.data.mascota.especie).then((u) => {
@@ -345,6 +364,50 @@ export default function DetalleMascota() {
                          sobraría. */
                       subtitulo={a.nivel === 'existencia' ? vozDetalleAjeno(a.autor, t) : undefined}
                       metadataMono={fechaCortaMono(a.fechaEvento.slice(0, 10), idioma)}
+                    />
+                  </View>
+                ))}
+              </Tarjeta>
+            )}
+          </View>
+        )}
+
+        {/* ═══ S85-C29 · QUIÉN CUIDA A ESTA VIDA (A3.5quater) ═══════════
+
+            **La pregunta es por ESTA mascota, no por el hogar** — el
+            sujeto del producto es la MASCOTA (EL NORTE). Por eso el
+            lector es por mascota y no por prestador: *no le falta un
+            bloque a la tab Datos; le faltaba un dato a esta ficha.*
+
+            ⚠️ TRES HECHOS, TRES VOCES, y la cuarta vez que esta ley cobra
+            hoy: `familia: null` (**no tiene familia** — las legadas del
+            modelo viejo) · lista **vacía** (tiene familia, sin miembros
+            vigentes) · **`'error'`** (no pudimos leer). *Un fallo llega
+            como `ok:false` y JAMÁS como `familia:null`: degradarlo diría
+            "esta mascota no tiene familia" cuando la verdad es "no pude
+            leerla", y sobre una vida ajena eso no es un bug de UI.*
+
+            EL ROL SE PINTA EN VOZ aunque hoy haya UNO SOLO
+            (`adulto_titular`): el día que exista `familiar_autorizado`
+            esta superficie ya lo distingue **sin tocar el motor**. Y el
+            desconocido cae al genérico digno, jamás al código (Ley 3). */}
+        {familia !== null && (
+          <View style={{ gap: spacing[3] }}>
+            <Texto variante="seccion">{t('quienCuida.titulo', { nombre: mascota.nombre })}</Texto>
+            {familia === 'error' ? (
+              <Texto variante="apoyo">{t('quienCuida.error')}</Texto>
+            ) : familia.familia === null ? (
+              <Texto variante="apoyo">{t('quienCuida.sinFamilia')}</Texto>
+            ) : familia.miembros.length === 0 ? (
+              <Texto variante="apoyo">{t('quienCuida.sinMiembros')}</Texto>
+            ) : (
+              <Tarjeta relleno="ninguno">
+                {familia.miembros.map((m, i) => (
+                  <View key={`${m.nombre}-${i}`}>
+                    {i > 0 ? <Separador /> : null}
+                    <Celda
+                      titulo={m.nombre}
+                      subtitulo={m.rol === 'adulto_titular' ? t('quienCuida.rolTitular') : t('quienCuida.rolMiembro')}
                     />
                   </View>
                 ))}

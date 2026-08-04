@@ -259,6 +259,21 @@ export const prestadorEs = {
     vacio: 'Todavía no hay aportes en su expediente.',
     error: 'No pudimos leer el expediente',
   },
+  quienCuida: {
+    // ⭐ S85-C29 · «QUIÉN CUIDA A ESTA VIDA» (A3.5quater). El eje del
+    // producto es la MASCOTA, no el hogar: la pregunta es por ESTA vida.
+    titulo: 'Quién cuida a {{nombre}}',
+    // Ley 3: el rol del motor jamás se muestra. Cerrado + genérico digno.
+    rolTitular: 'Titular',
+    rolMiembro: 'De la familia',
+    // TRES hechos, TRES voces (L-197): sin familia ≠ familia sin vigentes
+    // ≠ no pudimos leer. Colapsarlos haría que un fallo de red se lea como
+    // "esta mascota no tiene a nadie", que es lo más caro que puede decir
+    // esta pantalla.
+    sinFamilia: 'Todavía no tiene una familia registrada.',
+    sinMiembros: 'Su familia no tiene miembros activos.',
+    error: 'No pudimos leer quién cuida a esta mascota',
+  },
   perfilNegocio: {
     // el resumen de contacto: NOMBRA lo cargado, en orden fijo
     // ── S84-C5: el resto del literal de la vitrina ──

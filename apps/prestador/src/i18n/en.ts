@@ -203,6 +203,14 @@ export const prestadorEn = {
     vacio: 'No entries in their record yet.',
     error: "We couldn't load the record",
   },
+  quienCuida: {
+    titulo: 'Who cares for {{nombre}}',
+    rolTitular: 'Primary carer',
+    rolMiembro: 'Family member',
+    sinFamilia: "They don't have a registered family yet.",
+    sinMiembros: 'Their family has no active members.',
+    error: "We couldn't load who cares for this pet",
+  },
   perfilNegocio: {
     // ── S84-C5 · Espejo de es.ts ──
     errorTitulo: "We couldn't load your profile",
