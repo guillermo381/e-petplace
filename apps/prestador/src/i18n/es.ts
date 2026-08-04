@@ -676,6 +676,10 @@ export const prestadorEs = {
     notificaciones: 'Notificaciones',
     notifPronto: 'Pronto — cuando las notificaciones del negocio lleguen al teléfono, acá vas a decidir cuáles.',
     eliminarCuenta: 'Eliminar cuenta',
+    /* ⭐ S86-C · «El movimiento» baja de NEGOCIO con su voz VERBATIM: es
+       plata de la cuenta comercial, no configuración del oficio. */
+    movimiento: 'El movimiento',
+    movimientoDetalle: 'Los presupuestos que armaste y en qué quedaron.',
     /* ⭐ S86-C · D-649. La voz del estado final es la que carga el trabajo:
        decir «lista» sin decir CUÁNDO la ve deja al prestador esperando un
        cambio que no va a llegar hasta que cierre y abra.
@@ -872,6 +876,43 @@ export const prestadorEs = {
     equipoResumen: '{{n}} personas',
     equipoInactiva: 'Ya no atiende',
     equipoGestionar: 'Gestionar el equipo',
+    /* ⭐ S86-C · EL DASHBOARD (lámina firmada). Voz TUTEO NEUTRO.
+       ⚠️ Ningún rótulo compara con otros prestadores ni puntúa (§2.7):
+       la trayectoria dice HECHOS. Y todo número de plata declara lo que
+       le falta — el asterisco de S85. */
+    tuSemana: 'Tu semana',
+    kpiAtenciones: 'atenciones',
+    kpiAtencionesA11y: '{{n}} atenciones esta semana. Ver las vidas que cuidas.',
+    // El delta compara la MISMA porción de la semana anterior.
+    kpiDelta: '{{signo}}{{n}} vs. la anterior',
+    kpiVidasNuevas: 'vidas nuevas',
+    kpiFamilia1: '1 familia',
+    kpiFamilias: '{{n}} familias',
+    kpiSemana: 'esta semana',
+    kpiMes: '{{monto}} el mes',
+    kpiPlataParcial: '{{n}} sin precio',
+    kpiPlataA11y: 'Ingresos de la semana. Ver el detalle.',
+    // El hueco habla del PERMISO, no del dato: no falta información,
+    // sobra audiencia.
+    kpiPlataSoloTitular: 'Solo el titular ve los ingresos',
+    diaPorDia: 'Día por día',
+    graficaA11y: 'Atenciones por día de la semana, por servicio. {{n}} en total.',
+    mixDelMes: 'El mix del mes',
+    mixFila: '{{servicio}} · {{pct}}%',
+    // Ley 3: el código de motor jamás se pinta. Genérico digno.
+    servicioSinVoz: 'Otro servicio',
+    vidasTitulo: 'Las vidas que cuidas',
+    vidasResumen1: '1 vida',
+    vidasResumen: '{{n}} vidas',
+    plataTitulo: 'La plata',
+    plataResumen: '{{monto}} este mes',
+    plataResumenParcial: '{{monto}} este mes · {{n}} sin precio',
+    plataDetalle: 'Ver el detalle',
+    trayectoriaTitulo: 'Tu trayectoria',
+    trayectoriaResumen: 'Desde {{desde}} · {{n}} atenciones',
+    trayectoriaAtenciones: '{{n}} atenciones cerradas',
+    trayectoriaFamilia1: '1 familia servida',
+    trayectoriaFamilias: '{{n}} familias servidas',
     /* ⭐ S86-C · las dos franjas que bajaron de NEGOCIO con su voz
        VERBATIM — una mudanza no es una oportunidad de reescribir voz.
        Siguen «en preparación» porque siguen sin lector, y ése es el dato
@@ -962,17 +1003,16 @@ export const prestadorEs = {
        dio CERO consumidores (Ley 37). La voz viajó VERBATIM a `mascotas.*`.
        `despiertaSeccion` SOBREVIVE: estadísticas sigue siendo su habitante
        hasta que el dashboard la reemplace, y ahí se va con ella. */
-    despiertaSeccion: 'Se despierta con el uso',
-    estadisticas: 'Estadísticas',
-    estadisticasDetalle: 'Se despiertan con tus primeras atenciones.',
+    /* ☠️ S86-C · MURIERON las voces de ESTADÍSTICAS (celda, sección y
+       pantalla): el dashboard de DATOS las reemplazó con datos reales y
+       la promesa cumplió su trabajo (Ley 37). Censo corrido: CERO
+       consumidores de las cinco. */
     cobros: 'Cobros',
     cuentaComercial: 'Cuenta comercial',
     liquidaciones: 'Liquidaciones',
     // honesto en términos de hitos — JAMÁS "$0" (§2.6):
     liquidacionesDetalle: 'Se despierta cuando empieces a cobrar por la app.',
     // S70-B2-v2: entrada a "El movimiento" (presupuestos del negocio, D-440)
-    movimiento: 'El movimiento',
-    movimientoDetalle: 'Los presupuestos que armaste y en qué quedaron.',
     // S54-B: la verdad del dinero cuando el ledger tiene eventos propios
     liquidacionesPendientes: 'Tienes {{cantidad}} servicios cobrados esperando liquidación.',
     liquidacionesPendientesUno: 'Tienes 1 servicio cobrado esperando liquidación.',
@@ -2418,10 +2458,6 @@ export const prestadorEs = {
     casosTitulo: 'Los casos que otros prestadores te confíen',
     casosCuerpo:
       'Cuando un colega te derive el caso clínico de una mascota, su historia llega acá con el consentimiento de la familia.',
-    estadisticasNav: 'Estadísticas',
-    estadisticasTitulo: 'Tus números van a vivir acá',
-    estadisticasCuerpo:
-      'Con tus primeras atenciones cerradas, esta sección cuenta tu mes: mascotas atendidas, citas, continuidad. Sin compararte con nadie.',
     resenasNav: 'Reseñas',
     resenasTitulo: 'Lo que las familias digan de ti',
     resenasCuerpo: 'Cuando una familia deje su primera reseña, va a vivir acá.',

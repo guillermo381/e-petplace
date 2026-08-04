@@ -497,6 +497,9 @@ export const prestadorEn = {
     notificaciones: 'Notifications',
     notifPronto: "Soon — when business notifications reach your phone, you'll decide which ones here.",
     eliminarCuenta: 'Delete account',
+    // S86-C · "Activity" comes down from BUSINESS, voice VERBATIM.
+    movimiento: 'Activity',
+    movimientoDetalle: 'The quotes you built and how they turned out.',
     // S86-C · D-649. The final state carries the work: "ready" without WHEN
     // leaves the provider waiting for a change that won't come until reopen.
     buscarUpdate: 'Check for updates',
@@ -663,6 +666,36 @@ export const prestadorEn = {
     equipoResumen: '{{n}} people',
     equipoInactiva: 'No longer working',
     equipoGestionar: 'Manage the team',
+    // S86-C · the dashboard. Facts, never a score (§2.7).
+    tuSemana: 'Your week',
+    kpiAtenciones: 'visits',
+    kpiAtencionesA11y: '{{n}} visits this week. See the lives you care for.',
+    kpiDelta: '{{signo}}{{n}} vs. last week',
+    kpiVidasNuevas: 'new lives',
+    kpiFamilia1: '1 family',
+    kpiFamilias: '{{n}} families',
+    kpiSemana: 'this week',
+    kpiMes: '{{monto}} this month',
+    kpiPlataParcial: '{{n}} with no price',
+    kpiPlataA11y: "This week's earnings. See the detail.",
+    kpiPlataSoloTitular: 'Only the owner sees earnings',
+    diaPorDia: 'Day by day',
+    graficaA11y: 'Visits per day of the week, by service. {{n}} in total.',
+    mixDelMes: "This month's mix",
+    mixFila: '{{servicio}} · {{pct}}%',
+    servicioSinVoz: 'Other service',
+    vidasTitulo: 'The lives you care for',
+    vidasResumen1: '1 life',
+    vidasResumen: '{{n}} lives',
+    plataTitulo: 'Earnings',
+    plataResumen: '{{monto}} this month',
+    plataResumenParcial: '{{monto}} this month · {{n}} with no price',
+    plataDetalle: 'See the detail',
+    trayectoriaTitulo: 'Your track record',
+    trayectoriaResumen: 'Since {{desde}} · {{n}} visits',
+    trayectoriaAtenciones: '{{n}} closed visits',
+    trayectoriaFamilia1: '1 family served',
+    trayectoriaFamilias: '{{n}} families served',
     // S86-C · the two strips that came down from BUSINESS, voice VERBATIM.
     despiertaSeccion: 'Wakes up as you work',
     resenas: 'Reviews',
@@ -731,16 +764,13 @@ export const prestadorEn = {
     // S79-B (T2-B5) · the three mute modules gain section + voice + trigger (§2.6)
     // ☠️ S86-C · `resenas*`/`casosHeredados*` died here (cells moved to DATA,
     // census = zero consumers). Voice moved VERBATIM to `mascotas.*`.
-    despiertaSeccion: 'Wakes up as you work',
-    estadisticas: 'Statistics',
-    estadisticasDetalle: 'They wake up with your first appointments.',
+    // ☠️ S86-C · Statistics voices died (cell, section and screen): the
+    // DATA dashboard replaced them with real data. Census: zero consumers.
     cobros: 'Payments',
     cuentaComercial: 'Business account',
     liquidaciones: 'Payouts',
     liquidacionesDetalle: 'Wakes up when you start getting paid through the app.',
     // S70-B2-v2 · Espejo de es.ts
-    movimiento: 'Activity',
-    movimientoDetalle: 'The quotes you built and how they turned out.',
     liquidacionesPendientes: 'You have {{cantidad}} paid services awaiting payout.',
     liquidacionesPendientesUno: 'You have 1 paid service awaiting payout.',
     cuentaComercialDetalle: "You'll need it before charging — it arrives with the payments cycle.",
@@ -2026,10 +2056,6 @@ export const prestadorEn = {
     casosTitulo: 'The cases other providers entrust to you',
     casosCuerpo:
       'When a colleague refers a pet’s clinical case to you, its history arrives here with the family’s consent.',
-    estadisticasNav: 'Statistics',
-    estadisticasTitulo: 'Your numbers will live here',
-    estadisticasCuerpo:
-      'Once your first appointments are closed, this section tells your month: pets cared for, appointments, continuity. Never compared to anyone.',
     resenasNav: 'Reviews',
     resenasTitulo: 'What families say about you',
     resenasCuerpo: 'When a family leaves their first review, it will live here.',
