@@ -2238,11 +2238,31 @@ export const prestadorEs = {
   // S79-B (T2-B2) · LA BIENVENIDA DIGITAL DEL DÍA 1 (§2.3) — carta, no
   // banner. `firmaNombre`: LITERAL DEL FOUNDER (27-jul-2026): el pie de la
   // carta es "Guillermo Suárez / founder, e-PetPlace" — el pendiente de
-  // T2 quedó pagado. `eleccion`: N=15 vive acá · LOTE S79, GATE PENDIENTE
+  // T2 quedó pagado.
+  //
+  // ☠️ S85-C35 · «N=15 vive acá · LOTE S79, GATE PENDIENTE» MURIÓ, y las
+  // DOS mitades de esa nota se resolvieron el mismo día:
+  //   · EL N SALIÓ (firma del founder). La carta decía "uno de los 15
+  //     prestadores" y el modal del emblema —misma frase, otra pantalla—
+  //     decía "uno de los prestadores": la MISMA promesa con dos verdades,
+  //     y la de la carta caducaba en el prestador 16 SIN QUE NADA AVISARA.
+  //     El "número chico y conocido" que §2.3 pide para el Momento
+  //     Fundacional se conserva, pero EN EL CANAL DONDE ES VERDAD Y TIENE
+  //     FECHA: la comunicación personal del founder con los primeros.
+  //     *Un string de app no puede sostener una promesa de escasez.*
+  //   · EL GATE SE RESOLVIÓ SIN LLEGAR A CORRER, y eso se registra en vez
+  //     de borrarse: esperó SEIS sesiones, y esta pantalla es de las más
+  //     difíciles de gatear que tiene la app —`registrar_primer_ingreso`
+  //     es idempotente y estampa en DB, así que la carta se ve UNA VEZ por
+  //     titular y después es inalcanzable, en cualquier dispositivo—.
+  //     El founder decidió sobre el LITERAL, sin haberlo visto en pantalla.
+  //     *No es un atajo: es que su alcance es de un solo uso POR DISEÑO*
+  //     (L-161 en su forma más incómoda), y esperar el gate habría dejado
+  //     el N vivo indefinidamente.
   dia1: {
     saludoNombre: 'Hola, {{nombre}}.',
     saludoSinNombre: 'Hola.',
-    eleccion: 'Te elegimos para ser uno de los 15 prestadores que dan forma a e-PetPlace en Ecuador.',
+    eleccion: 'Te elegimos para ser uno de los prestadores que dan forma a e-PetPlace en Ecuador.',
     // S81-C: el SEGUNDO nombre de la carta — GATE PENDIENTE lote S81
     casaConNegocio: 'Y {{negocio}} entra contigo: fue tu decisión traer tu casa al ecosistema.',
     casaSinNegocio: 'Y tu casa entra contigo: fue tu decisión traerla al ecosistema.',

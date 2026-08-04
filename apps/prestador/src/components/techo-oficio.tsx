@@ -393,9 +393,15 @@ export function TechoOficio({
           del producto; esto le devuelve una decisión sobre él.*
 
           ⚠️ **SIN EL "N"** (firma del founder): un número horneado en una
-          app **envejece sin avisar** — y la app ya tiene el caso, porque
-          `dia1.eleccion` dice *"uno de los 15"*. *"Uno de los prestadores
-          que dan forma"* dice lo mismo y no caduca.
+          app **envejece sin avisar**. ⏪ Esta nota decía que la app *"ya
+          tiene el caso, porque `dia1.eleccion` dice uno de los 15"* — y
+          **ese era el argumento, no un ejemplo**: la misma frase vivía en
+          dos pantallas con dos verdades. **El founder resolvió la
+          divergencia sacando el N también de la carta** (S85-C35), así que
+          hoy las dos superficies dicen lo mismo y ninguna caduca.
+          *Se corrige acá porque el texto citaba un estado del árbol que
+          este mismo commit cambió: un argumento que describe algo que ya
+          no pasa se lee como advertencia vigente* (L-198).
 
           ⚠️ **LA FIRMA VA CON NOMBRE PROPIO, jamás "el equipo":** un
           reconocimiento firmado por una institución **deja de ser una
