@@ -62,7 +62,7 @@
  */
 
 import { useCallback, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   AvatarMascota,
@@ -82,16 +82,21 @@ import {
   type AvatarMascotaEspecie,
 } from '@epetplace/ui';
 import {
+  obtenerDatosNegocio,
   obtenerEquipoNegocio,
   obtenerMascotasAtendidas,
   obtenerMiPrestador,
   resolverUrlsFotos,
+  type DatosNegocio,
   type EquipoNegocio,
   type MascotaAtendida,
 } from '@epetplace/api';
 
+import { BarrasApiladas, type CapaGrafica, type DiaBarra } from '@/components/barras-apiladas';
+
 import { SeccionDesplegable } from '@/components/perfil-piezas';
 import { useGateGestor } from '@/lib/gate-gestor';
+import { montoCorto } from '@/lib/formato-techo';
 
 import { fechaCortaMono } from '@epetplace/i18n';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -105,6 +110,27 @@ type Pantalla =
 
 function esEspecie(v: string | null): v is AvatarMascotaEspecie {
   return v !== null;
+}
+
+/* Suma días en fecha LOCAL por partes literales — jamás `new Date(iso)`
+   ni `toISOString`, que corren el día en UTC-5 (D-312). */
+function sumarDias(iso: string, dias: number): string {
+  const [a, m, d] = iso.slice(0, 10).split('-').map(Number);
+  return new Intl.DateTimeFormat('en-CA').format(new Date(a ?? 0, (m ?? 1) - 1, (d ?? 1) + dias));
+}
+
+/* 🔴 CUARTA COPIA, y lo declaro porque el disparo YA SONÓ: el HOY dice en
+   su propio comentario *"su día en `packages/i18n` llega con el TERCER
+   consumidor"* — el cliente lo tiene en dos pantallas de reserva, el HOY
+   es la tercera y ésta la cuarta. **La condición de promoción se cumplió
+   y nadie la cobró.** No lo subo yo: `packages/i18n` no es territorio
+   declarado de C en S86. Va a la mesa como hallazgo, no como veredicto. */
+function diaCortoDe(iso: string, idioma: string): string {
+  const [a, m, d] = iso.slice(0, 10).split('-').map(Number);
+  if (!a || !m || !d) return iso.slice(8, 10);
+  return new Intl.DateTimeFormat(idioma === 'es' ? 'es' : 'en', { weekday: 'short' })
+    .format(new Date(a, m - 1, d))
+    .replace('.', '');
 }
 
 
@@ -136,7 +162,10 @@ export default function Mascotas() {
        y `esDueno` es dueño-only. **Hoy es inerte** —el administrador no
        tiene motor (D-513 v2)— y se anota para el día que lo tenga. */
   const [equipo, setEquipo] = useState<EquipoNegocio | null>(null);
-  const [equipoAbierto, setEquipoAbierto] = useState(false);
+  /* ⏪ S86-C: `equipoAbierto` propio MURIÓ — con cuatro secciones, un
+     booleano por sección deja abrir todas a la vez y la portada se
+     convierte en la lista larga que el plegado vino a evitar. Todas
+     comparten `abierta` (acordeón de una). */
   /* ⭐ S86-C · el gate de las DOS franjas que llegan sin datos (reseñas y
      casos heredados). Es el MISMO predicado que gatea el tab NEGOCIO
      (`dueño|administrador`), y por eso mudarlas con él es el CAMBIO NULO:
@@ -150,6 +179,17 @@ export default function Mascotas() {
      este gate de pantalla muere: un gate de cliente es decorativo en
      cuanto hay un dato que proteger. */
   const { gate } = useGateGestor();
+  /* ⭐ S86-C · EL DASHBOARD. `null` = no se pudo leer, y NO se disfraza:
+     sin dato el bloque NO SE MONTA (§2.6 — jamás métricas en cero, y un
+     cero fabricado no se distingue de un dato real). El cuerpo de la tab
+     —las vidas— tiene su propio camino de error y no depende de esto. */
+  const [datos, setDatos] = useState<DatosNegocio | null>(null);
+  /* «Las vidas» abre por default: es el CUERPO de la tab, no una franja
+     más. Plegarla de entrada dejaría la portada mostrando solo números
+     sobre una lista que nadie pidió esconder. Acordeón de una sola
+     abierta — así los tres números pueden LLEVAR a su sección (①). */
+  const [abierta, setAbierta] = useState<string | null>('vidas');
+  const alternar = (k: string) => setAbierta((a) => (a === k ? null : k));
 
   useFocusEffect(
     useCallback(() => {
@@ -166,14 +206,19 @@ export default function Mascotas() {
            Su fallo NO tumba la pantalla — la sección simplemente no se
            monta (Ley 13 aplica al CUERPO, y el cuerpo de esta tab son
            las vidas). */
-        const [r, eq] = await Promise.all([
+        const [r, eq, dn] = await Promise.all([
           obtenerMascotasAtendidas(prestador.data.id),
           prestador.data.cuenta_comercial_id !== null
             ? obtenerEquipoNegocio(prestador.data.cuenta_comercial_id)
             : Promise.resolve(null),
+          /* ⚠️ SIN `hasta`: el día del negocio lo resuelve el MOTOR en su
+             zona. Pasárselo desde el dispositivo sería volver a meter el
+             huso del teléfono en un número del negocio (D-648). */
+          obtenerDatosNegocio(prestador.data.id),
         ]);
         if (!vigente) return;
         setEquipo(eq !== null && eq.ok ? eq.data : null);
+        setDatos(dn.ok ? dn.data : null);
         if (!r.ok) {
           setPantalla({ estado: 'error' });
           return;
@@ -188,6 +233,54 @@ export default function Mascotas() {
     }, []),
   );
 
+  /* ⭐ S86-C · LA ESCALA DE SERIES, y su choque DECLARADO con Ley 10.
+     La lámina firma «apilada POR SERVICIO». **Ley 10 colapsa los oficios
+     en DOS colores** (SALUD = identidad · CUIDADO = paseo+grooming+
+     adiestramiento juntos, medido en `FilaCita`), porque el CANTO dice
+     CATEGORÍA a propósito: cerrada, tope 5.
+     ⇒ Con la paleta del canto, un apilado por servicio pintaría dos
+     series del mismo color y sería **ilegible**, que es peor que
+     desobedecer una ley escrita para otro registro.
+     LO QUE HAGO: uso los cuatro hexes del REGISTRO GRÁFICA como ESCALA
+     DE SERIES, asignados por orden del mix (estable: el motor ya ordena
+     por atenciones desc). **Acá el color significa "qué serie", NO "qué
+     categoría"** — es otro registro, el mismo que `BarrasSemana` usa.
+     ⚠️ SE NOMBRA PARA EL GATE, no se cierra sola: si el founder quiere
+     que la gráfica hable el idioma del canto, la salida es apilar por
+     CATEGORÍA (dos series) y la leyenda cambia con ella. */
+  const ESCALA: CapaGrafica[] = ['cuidado', 'identidad', 'comunidad', 'comunidadAmplia'];
+  const capaDe = new Map<string, CapaGrafica>(
+    (datos?.mix.items ?? []).map((it, i) => [it.servicio, ESCALA[i % ESCALA.length]!]),
+  );
+  /** La voz de un servicio. `servicioVoz` es nullable de verdad (③ del
+   *  wrapper) y el código de motor JAMÁS se pinta (Ley 3): sin voz, se
+   *  dice «Otro servicio» — genérico digno, no un slug. */
+  const vozServicio = (v: string | null) => v ?? t('mascotas.servicioSinVoz');
+
+  /* La semana ISO completa, con los días que el motor NO emitió puestos
+     en cero por la SUPERFICIE — el motor no fabrica ceros a propósito
+     (un cero fabricado no se distingue de un dato real), así que
+     completarla es trabajo de acá. */
+  const dias: DiaBarra[] = (() => {
+    if (datos === null) return [];
+    const porFecha = new Map<string, { clave: string; capa: CapaGrafica; valor: number }[]>();
+    for (const d of datos.diaPorDia) {
+      const arr = porFecha.get(d.fecha) ?? [];
+      arr.push({ clave: d.servicio, capa: capaDe.get(d.servicio) ?? 'cuidado', valor: d.atenciones });
+      porFecha.set(d.fecha, arr);
+    }
+    return Array.from({ length: 7 }, (_, i) => {
+      const iso = sumarDias(datos.semana.desde, i);
+      return {
+        etiqueta: diaCortoDe(iso, idioma),
+        tramos: porFecha.get(iso) ?? [],
+        // El motor trae la semana ISO ENTERA ⇒ hay días > `hasta`. Son
+        // agenda, no jornada cumplida: se dibujan tenues (aviso de A).
+        futuro: iso > datos.hasta,
+      };
+    });
+  })();
+
   return (
     // S59-B1 (safe area): el Encabezado ya absorbe y PINTA el inset superior
     // — el SafeAreaView top lo duplicaba (doble banda de papel arriba).
@@ -195,6 +288,172 @@ export default function Mascotas() {
       <MarcaDeAgua />
       <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[4] }}>
         <Encabezado variante="portada" saludo={t('mascotas.titulo')} />
+
+        {/* ═══ ⭐ S86-C · EL DASHBOARD (lámina firmada 4-ago) ═══════════
+            ⚠️ REGLA DE EXISTENCIA: sin `datos` el bloque NO SE MONTA. No
+            hay esqueleto ni ceros — §2.6 prohíbe la métrica en cero para
+            el prestador, y un cero fabricado no se distingue de un dato
+            real. El cuerpo de la tab (las vidas) tiene su propio camino
+            de error y no depende de esto.
+
+            ☠️ «PIDE TU OJO» NO SE DIBUJA, y es decisión firmada: sus dos
+            líneas (vacuna vencida · registro profesional faltante) NO
+            TIENEN LECTOR. **El lugar queda; el texto inventado no** — una
+            sección que fabrica su contenido es peor que una que no está,
+            porque la primera se cree. Nace cuando A entregue sus fuentes.
+            Lo mismo con el «1 aviso» del resumen de equipo. */}
+        {datos !== null && (
+          <View style={{ gap: spacing[4] }}>
+            <Texto variante="seccion">{t('mascotas.tuSemana')}</Texto>
+
+            {/* ① LOS TRES NÚMEROS PRESIDEN Y SON PUERTAS.
+                ⚠️ DOS de las tres tienen destino; la del medio NO, y se
+                declara en vez de inventarse: la lámina manda «vidas
+                nuevas → familias», pero **la letra firmada de esta misma
+                pantalla dice que LA FAMILIA NO ES UNA FRANJA DE ACÁ** (el
+                sujeto del producto es la MASCOTA, no el hogar — EL NORTE).
+                No existe superficie de familias, y fabricarle una sería
+                construir una feature para honrar una flecha. Va al gate. */}
+            <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('mascotas.kpiAtencionesA11y', { n: datos.semana.atenciones })}
+                onPress={() => setAbierta('vidas')}
+                style={{ flex: 1 }}
+              >
+                <Tarjeta elevacion="reposo">
+                  <Texto variante="titulo">{String(datos.semana.atenciones)}</Texto>
+                  <Texto variante="dato">{t('mascotas.kpiAtenciones')}</Texto>
+                  {/* El delta compara la MISMA porción de la semana previa
+                      (el motor lo resuelve y manda `diasTranscurridos`).
+                      Cero no se pinta: «+0» es ruido, no información. */}
+                  {datos.semana.delta !== 0 && (
+                    <Texto variante="apoyo">
+                      {t('mascotas.kpiDelta', {
+                        signo: datos.semana.delta > 0 ? '+' : '−',
+                        n: Math.abs(datos.semana.delta),
+                      })}
+                    </Texto>
+                  )}
+                </Tarjeta>
+              </Pressable>
+
+              <View style={{ flex: 1 }}>
+                <Tarjeta elevacion="reposo">
+                  <Texto variante="titulo">{String(datos.semana.vidasNuevas)}</Texto>
+                  <Texto variante="dato">{t('mascotas.kpiVidasNuevas')}</Texto>
+                  {datos.semana.familiasNuevas > 0 && (
+                    <Texto variante="apoyo">
+                      {datos.semana.familiasNuevas === 1
+                        ? t('mascotas.kpiFamilia1')
+                        : t('mascotas.kpiFamilias', { n: datos.semana.familiasNuevas })}
+                    </Texto>
+                  )}
+                </Tarjeta>
+              </View>
+
+              {/* ② LA PLATA: unión discriminada, NO se aplana. Con
+                  `visible:false` la tarjeta habla del PERMISO, no del
+                  dato — no falta información, sobra audiencia. */}
+              <View style={{ flex: 1 }}>
+                {datos.plata.visible ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('mascotas.kpiPlataA11y')}
+                    onPress={() => setAbierta('plata')}
+                  >
+                    <Tarjeta elevacion="reposo">
+                      <Texto variante="titulo">{montoCorto(datos.plata.semana)}</Texto>
+                      <Texto variante="dato">{t('mascotas.kpiSemana')}</Texto>
+                      {/* ⑥ EL ASTERISCO DE S85: el número dice lo que sabe
+                          Y declara lo que le falta. Con citas sin precio el
+                          total es PARCIAL y lo nombra — un número redondo
+                          que esconde citas no se puede desconfiar. */}
+                      <Texto variante="apoyo">
+                        {datos.plata.sinPrecioSemana > 0
+                          ? t('mascotas.kpiPlataParcial', { n: datos.plata.sinPrecioSemana })
+                          : t('mascotas.kpiMes', { monto: montoCorto(datos.plata.mes) })}
+                      </Texto>
+                    </Tarjeta>
+                  </Pressable>
+                ) : (
+                  <Tarjeta elevacion="reposo">
+                    <Texto variante="dato">{t('mascotas.kpiPlataSoloTitular')}</Texto>
+                  </Tarjeta>
+                )}
+              </View>
+            </View>
+
+            {/* ② DÍA POR DÍA — apilada por servicio. La leyenda va ARRIBA
+                y con la voz del servicio: sin ella los colores no dicen
+                nada, y el color es el único canal de la barra. */}
+            {datos.diaPorDia.length > 0 && (
+              <Tarjeta elevacion="reposo">
+                <View style={{ gap: spacing[3] }}>
+                  <Texto variante="cuerpo">{t('mascotas.diaPorDia')}</Texto>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[3] }}>
+                    {datos.mix.items.map((it) => (
+                      <View
+                        key={it.servicio}
+                        style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1.5] }}
+                      >
+                        <View
+                          style={{
+                            width: 9,
+                            height: 9,
+                            borderRadius: 2,
+                            backgroundColor: theme.capa[capaDe.get(it.servicio) ?? 'cuidado'],
+                          }}
+                        />
+                        <Texto variante="dato">{vozServicio(it.servicioVoz)}</Texto>
+                      </View>
+                    ))}
+                  </View>
+                  <BarrasApiladas
+                    dias={dias}
+                    etiqueta={t('mascotas.graficaA11y', { n: datos.semana.atenciones })}
+                  />
+                </View>
+              </Tarjeta>
+            )}
+
+            {/* ① EL MIX DEL MES. El motor sirve CUENTAS y TOTAL, jamás
+                porcentajes — el % lo hace UNA superficie (ésta) para que
+                dos no redondeen distinto sobre el mismo dato.
+                ⚠️ La lámina lo dibuja como DONA. Acá va como barra
+                proporcional: una dona en RN sin librería es trazado a
+                mano, y la barra dice EXACTAMENTE lo mismo con la pieza
+                que esta pantalla ya tiene. Se declara para el gate. */}
+            {datos.mix.total > 0 && (
+              <Tarjeta elevacion="reposo">
+                <View style={{ gap: spacing[3] }}>
+                  <Texto variante="cuerpo">{t('mascotas.mixDelMes')}</Texto>
+                  <View style={{ flexDirection: 'row', height: 10, borderRadius: 5, overflow: 'hidden' }}>
+                    {datos.mix.items.map((it) => (
+                      <View
+                        key={it.servicio}
+                        style={{
+                          width: `${(it.atenciones / datos.mix.total) * 100}%`,
+                          backgroundColor: theme.capa[capaDe.get(it.servicio) ?? 'cuidado'],
+                        }}
+                      />
+                    ))}
+                  </View>
+                  <View style={{ gap: spacing[1] }}>
+                    {datos.mix.items.map((it) => (
+                      <Texto key={it.servicio} variante="dato">
+                        {t('mascotas.mixFila', {
+                          servicio: vozServicio(it.servicioVoz),
+                          pct: Math.round((it.atenciones / datos.mix.total) * 100),
+                        })}
+                      </Texto>
+                    ))}
+                  </View>
+                </View>
+              </Tarjeta>
+            )}
+          </View>
+        )}
 
         {pantalla.estado === 'cargando' && (
           <Tarjeta elevacion="plana">
@@ -227,7 +486,20 @@ export default function Mascotas() {
           <EstadoVacio titulo={t('mascotas.vacio')} descripcion={t('mascotas.vacioDetalle')} />
         )}
 
+        {/* ④ «LAS VIDAS QUE CUIDÁS» — la lista de siempre, ahora con la
+            forma de la lámina: se pliega y NUNCA se calla (su resumen es
+            el conteo). Es el destino del primer número. */}
         {pantalla.estado === 'listo' && pantalla.mascotas.length > 0 && (
+          <SeccionDesplegable
+            titulo={t('mascotas.vidasTitulo')}
+            resumen={
+              pantalla.mascotas.length === 1
+                ? t('mascotas.vidasResumen1')
+                : t('mascotas.vidasResumen', { n: pantalla.mascotas.length })
+            }
+            abierta={abierta === 'vidas'}
+            onAlternar={() => alternar('vidas')}
+          >
           <Tarjeta elevacion="sm" relleno="ninguno">
             {pantalla.mascotas.map((m, i) => (
               <View key={m.mascota_id}>
@@ -251,6 +523,64 @@ export default function Mascotas() {
               </View>
             ))}
           </Tarjeta>
+          </SeccionDesplegable>
+        )}
+
+        {/* ④ LA PLATA — su propia sección, destino del tercer número.
+            ⚠️ Existe SOLO con `plata.visible`: la unión discriminada del
+            wrapper ya dice que sin permiso las claves NO EXISTEN, así que
+            acá no hay nada que esconder — la sección simplemente no es.
+            ⑥ El resumen lleva el asterisco: declara lo que le falta. */}
+        {datos !== null && datos.plata.visible && (
+          <SeccionDesplegable
+            titulo={t('mascotas.plataTitulo')}
+            resumen={
+              datos.plata.sinPrecioMes > 0
+                ? t('mascotas.plataResumenParcial', {
+                    monto: montoCorto(datos.plata.mes),
+                    n: datos.plata.sinPrecioMes,
+                  })
+                : t('mascotas.plataResumen', { monto: montoCorto(datos.plata.mes) })
+            }
+            abierta={abierta === 'plata'}
+            onAlternar={() => alternar('plata')}
+          >
+            <CeldaNavegacion
+              icono="negocio"
+              registro="aa"
+              titulo={t('mascotas.plataDetalle')}
+              onPress={() => router.push('/negocio/liquidaciones')}
+            />
+          </SeccionDesplegable>
+        )}
+
+        {/* ⑤ TU TRAYECTORIA — HECHOS, JAMÁS SCORE (§2.7 · MODELO_LOYALTY
+            §3): desde cuándo, cuántas atenciones, cuántas familias. Sin
+            barras, sin niveles, sin comparación con nadie.
+            ⚠️ `desde === null` es NULL HONESTO del motor —nunca atendió—
+            y ahí la sección NO se monta: una trayectoria de cero no es
+            una trayectoria, es una métrica en cero (§2.6). */}
+        {datos !== null && datos.trayectoria.desde !== null && (
+          <SeccionDesplegable
+            titulo={t('mascotas.trayectoriaTitulo')}
+            resumen={t('mascotas.trayectoriaResumen', {
+              desde: fechaCortaMono(datos.trayectoria.desde, idioma),
+              n: datos.trayectoria.atenciones,
+            })}
+            abierta={abierta === 'trayectoria'}
+            onAlternar={() => alternar('trayectoria')}
+          >
+            <View style={{ gap: spacing[1] }}>
+              <Texto variante="cuerpo">
+                {t('mascotas.trayectoriaAtenciones', { n: datos.trayectoria.atenciones })}
+              </Texto>
+              <Texto variante="cuerpo">
+                {datos.trayectoria.familiasServidas === 1
+                  ? t('mascotas.trayectoriaFamilia1')
+                  : t('mascotas.trayectoriaFamilias', { n: datos.trayectoria.familiasServidas })}
+              </Texto>
+            </View>
+          </SeccionDesplegable>
         )}
 
         {/* ⭐ S86-C · «TU EQUIPO» — la primera franja de la mudanza, en la
@@ -273,8 +603,8 @@ export default function Mascotas() {
                 ? t('mascotas.equipoResumen1')
                 : t('mascotas.equipoResumen', { n: equipo.miembros.filter((m) => m.activo).length })
             }
-            abierta={equipoAbierto}
-            onAlternar={() => setEquipoAbierto((v) => !v)}
+            abierta={abierta === 'equipo'}
+            onAlternar={() => alternar('equipo')}
           >
             <View style={{ gap: spacing[3] }}>
               <Tarjeta elevacion="sm" relleno="ninguno">

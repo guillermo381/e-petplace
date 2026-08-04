@@ -872,6 +872,43 @@ export const prestadorEs = {
     equipoResumen: '{{n}} personas',
     equipoInactiva: 'Ya no atiende',
     equipoGestionar: 'Gestionar el equipo',
+    /* ⭐ S86-C · EL DASHBOARD (lámina firmada). Voz TUTEO NEUTRO.
+       ⚠️ Ningún rótulo compara con otros prestadores ni puntúa (§2.7):
+       la trayectoria dice HECHOS. Y todo número de plata declara lo que
+       le falta — el asterisco de S85. */
+    tuSemana: 'Tu semana',
+    kpiAtenciones: 'atenciones',
+    kpiAtencionesA11y: '{{n}} atenciones esta semana. Ver las vidas que cuidas.',
+    // El delta compara la MISMA porción de la semana anterior.
+    kpiDelta: '{{signo}}{{n}} vs. la anterior',
+    kpiVidasNuevas: 'vidas nuevas',
+    kpiFamilia1: '1 familia',
+    kpiFamilias: '{{n}} familias',
+    kpiSemana: 'esta semana',
+    kpiMes: '{{monto}} el mes',
+    kpiPlataParcial: '{{n}} sin precio',
+    kpiPlataA11y: 'Ingresos de la semana. Ver el detalle.',
+    // El hueco habla del PERMISO, no del dato: no falta información,
+    // sobra audiencia.
+    kpiPlataSoloTitular: 'Solo el titular ve los ingresos',
+    diaPorDia: 'Día por día',
+    graficaA11y: 'Atenciones por día de la semana, por servicio. {{n}} en total.',
+    mixDelMes: 'El mix del mes',
+    mixFila: '{{servicio}} · {{pct}}%',
+    // Ley 3: el código de motor jamás se pinta. Genérico digno.
+    servicioSinVoz: 'Otro servicio',
+    vidasTitulo: 'Las vidas que cuidas',
+    vidasResumen1: '1 vida',
+    vidasResumen: '{{n}} vidas',
+    plataTitulo: 'La plata',
+    plataResumen: '{{monto}} este mes',
+    plataResumenParcial: '{{monto}} este mes · {{n}} sin precio',
+    plataDetalle: 'Ver el detalle',
+    trayectoriaTitulo: 'Tu trayectoria',
+    trayectoriaResumen: 'Desde {{desde}} · {{n}} atenciones',
+    trayectoriaAtenciones: '{{n}} atenciones cerradas',
+    trayectoriaFamilia1: '1 familia servida',
+    trayectoriaFamilias: '{{n}} familias servidas',
     /* ⭐ S86-C · las dos franjas que bajaron de NEGOCIO con su voz
        VERBATIM — una mudanza no es una oportunidad de reescribir voz.
        Siguen «en preparación» porque siguen sin lector, y ése es el dato
