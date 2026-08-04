@@ -2760,6 +2760,29 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
   >
   > > ***No falló el juicio: falló que nadie lo cobró.***
   >
+  > #### ✅ LA FRONTERA DE LA PALABRA — **firmada por el founder (3-ago-2026)**
+  >
+  > **«Fundador» MUERE en `miCuenta.fundador`** (Cuenta + la firma del negocio)
+  > **y SOBREVIVE en el login.**
+  >
+  > > **Es LEGÍTIMA cuando habla del GRUPO antes de que alguien entre.**
+  > > **Es ILEGÍTIMA cuando se la aplica a una PERSONA que ya está.**
+  >
+  > **Por qué la misma palabra vale en un lado y no en el otro, y no es
+  > inconsistencia:** en el login *"prestadores fundadores"* **describe una
+  > cohorte que se recluta** — es **descripción de un grupo**, y el que lee
+  > todavía no pertenece. En Cuenta *"Prestador fundador"* **se le aplica a
+  > alguien que ya entró**: ahí deja de describir y **otorga**.
+  >
+  > **⇒ el discriminador, corrible sin juicio: ¿el que lee YA ESTÁ ADENTRO?**
+  > *Afuera ⇒ la palabra describe al grupo y es legítima. Adentro ⇒ le
+  > reconoce algo a él, y ahí va el eje del TIEMPO (`"Desde 2026"`), no el
+  > del mérito.*
+  >
+  > *Y esto es lo que un barrido por sinónimos no podía encontrar: **la palabra
+  > nunca fue el problema — el problema era a QUIÉN se la aplicaba**.*
+  > **Ejecuta C.**
+  >
   > *Las tres veces hubo un juicio correcto del founder; lo que faltó fue el
   > mecanismo que convierte un pedido repetido en una fila.* **Un pedido que se
   > repite es un dato sobre el mecanismo, no sobre el pedido** — hermana directa
