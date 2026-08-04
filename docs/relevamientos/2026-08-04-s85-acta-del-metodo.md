@@ -175,5 +175,53 @@ tenía la disciplina escrita y la había exigido a las otras dos ese día.
 
 ---
 
+---
+
+## 8 · EL HALLAZGO DE C: **la superficie que no se puede gatear**
+
+**Registrado por orden de la mesa. Es un hallazgo, no una ley.**
+
+> **La superficie más difícil de mirar era la que llevaba la promesa que más
+> caducaba.**
+
+**El caso:** el *"uno de los **15** prestadores"* de la carta del Día 1 **vivió
+desde S79 sin gatearse una sola vez** — y la razón no es que nadie se acordara:
+**la carta se muestra UNA VEZ POR CUENTA, en el primer ingreso.** Su alcance es
+**de un solo uso POR DISEÑO** (`registrar_primer_ingreso`, la ceremonia §2.3).
+
+⇒ **Nadie podía gatearla.** *Todos los titulares vivos ya la consumieron; para
+volver a verla hay que borrar el hecho de haberla visto.*
+
+### Lo que esto obliga a cambiar de criterio
+
+**«Esperemos al gate» es una respuesta válida SOLO donde el gate puede ocurrir.**
+*Acá, esperar el gate habría dejado el 15 vivo indefinidamente* — **no por
+desidia, sino por construcción.**
+
+> **Y la frase que lo cierra, de C: *lo que la vuelve especial es lo que la
+> vuelve irrepetible*.** **La ceremonia del primer ingreso vale porque pasa una
+> vez** — *y esa misma propiedad la saca del alcance de toda verificación
+> ordinaria.* **No es un defecto del diseño de la ceremonia: es su costo, y hasta
+> hoy no estaba declarado.**
+
+**Es la familia de S85 en su forma más incómoda** (L-194 → L-199): *no rompe
+nada, renderiza perfecto, y le miente a una persona real* — **con el agravante de
+que la única persona a la que le miente es la que jamás va a volver a verla para
+avisar.**
+
+### Consecuencia práctica, ya pedida por C
+
+**Poner `primer_ingreso_en` en NULL en una cuenta de prueba de titular** — *una
+línea, reversible, **sin tocar la cuenta del founder***— para que la carta sea
+mirable alguna vez. **Va después del OTA, no antes.**
+
+> **Criterio derivable, sin firmar:** *toda superficie de un solo uso necesita un
+> camino declarado para volver a verla, o nace fuera del alcance de todo gate.*
+> **Hermana de L-161** (*toda superficie de GATE se verifica ALCANZABLE antes de
+> publicarse*) — **con la vuelta de tuerca de que acá lo inalcanzable no es el
+> instrumento sino la pantalla misma.**
+
+---
+
 *Depositada por A, S85. Nada de acá está firmado: son mediciones, frenos y
 argumentos. Lo que rige sigue siendo el canon.*
