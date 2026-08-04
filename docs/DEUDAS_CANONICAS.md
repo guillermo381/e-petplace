@@ -2822,6 +2822,27 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
   > *Hermana directa de D-617, que murió el mismo día: **el marcador en pantalla
   > nació para probar que un OTA LLEGÓ, y resulta que también sirve para fechar
   > lo que se vio en él**.*
+  >
+  > #### 🔴 SEGUNDO CASO, EN EL MISMO TURNO — **y lo cobró la MESA** *(atribución suya, S85)*
+  >
+  > **La mesa reenvió el cierre de B con el hash de C38** (`e9891fe`), en el
+  > mismo turno en que se depositaban ① y ②. **Medido antes de bundlear:**
+  > `8c729af` (23:19:41) es **B**; `e9891fe` (23:26:28) es **C**.
+  >
+  > **La causa, declarada por la mesa: reenviar DOS reportes de pistas distintas
+  > y mezclar sus anclas AL RESUMIRLOS.** *No se perdió información en el
+  > camino: se perdió **al comprimir dos en uno**.*
+  >
+  > **⇒ lo que agrega sobre ③, y por eso vale como caso separado:** *no hace
+  > falta que pase tiempo para que un reporte se degrade — **alcanza con que se
+  > resuma junto a otro***. **El vector no es solo el reloj: es la
+  > CONSOLIDACIÓN.** *Un ancla pertenece a UN reporte; dos reportes resumidos
+  > en un párrafo tienen dos anclas y ningún dueño visible.*
+  >
+  > **El bundle no corrió riesgo** (los dos eran ancestros, verificado antes de
+  > publicar) **y aun así se registra** — *porque el error no fue de bundle:
+  > fue de atribución, y una atribución equivocada manda el cierre de la veda a
+  > la pista que no lo pidió.*
 
   > ### ➕ **EL CENSO SE HACE POR FRASE, NO POR PANTALLA** *(hallazgo de C, S85 — corrige a la mesa Y a ella misma)*
   >
@@ -2846,49 +2867,6 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
   > (la receta aplicada al wrapper y no al glifo) — **alcance declarado más
   > angosto que la regla**, una vez por pieza y otra por pantalla. **Dos pistas
   > distintas, el mismo día, el mismo defecto.***
-- **L-199 — EL ROJO SE PRODUCE **ANTES**, O LA CURA QUEDA SIN EVIDENCIA PARA SIEMPRE (S85, firmada por la mesa).**
-
-  > ### **EL "ANTES" NO SE PUEDE RECONSTRUIR DESPUÉS.**
-  > **Una vez curado, nadie puede probar que estaba roto — solo confiar en que alguien lo verificó.**
-
-  **Vale para TODA cura de privacidad y de permisos, no solo para el caso que la fundó.** *Un bug funcional deja rastro —un test que falla, un error en el log, un usuario que reclama—; **una fuga de permisos no deja ninguno**: el sistema funciona igual de bien mostrando de más.*
-
-  **EL CASO (D-639, S85):** antes de escribir la RPC se corrió el par por el camino real con JWT — **85 filas vistas, 84 CON su contenido**. Después: **85 filas, 0 contenidos, 85 autores**. *Sin ese "antes" medido, la cura habría sido una afirmación: "ahora está bien" **sin nada que diga que antes no lo estaba**.*
-
-  ### ⚠️ Y LO QUE LO VUELVE URGENTE Y NO PROLIJIDAD
-
-  **El error de una cura de permisos SE VE IDÉNTICO AL ACIERTO.** *Una pantalla que muestra de más funciona perfecto: completa, sin rebotes, sin vacíos.* **Un gate visual diría "se ve bien" — y tendría razón.** ⇒ **el gate NO puede ser mirar**, y lo único que queda es el par medido.
-
-  *Si D-639 hubiera salido con esa firma, el defecto sobrevivía indefinidamente —con datos clínicos reales de por medio— y su descubrimiento habría dependido de que alguien leyera el código por otra razón.*
-
-  **LA REGLA OPERATIVA:** toda cura de permisos, RLS o visibilidad **corre su fixture ANTES de la cura y guarda el número**. *El fixture no es la verificación de la cura: es la única prueba de que había algo que curar.* **Hermana de L-192** (una verificación cuyo modo de falla es el silencio) — **acá el silencio es del defecto, no del instrumento.**
-
-  ### ➕ SU COROLARIO, del alcance de la misma cura
-
-  > **UNA MODULACIÓN APROXIMADA ES UNA FUGA CON FORMA DE LEY.**
-
-  **D-639 v1 implementa *"quien lo hizo"* y NO *"quien lo necesita para atender"*, que espera la matriz `oficio × eje` de A3.3 — y se DECLARA en vez de aproximarse.** *Aproximar un permiso produce algo que parece cumplir la ley y concede de más en los bordes que nadie enumeró; y como su error se ve como el acierto, **nadie lo audita después**.* Origen: S85-A (D-639, el par medido).
-
-  > **Un porqué viejo se lee con la misma autoridad que uno vigente, y nadie puede distinguirlos leyendo.**
-
-  **El caso que la fundó es de B** (`e7e58df`, el `▶` del carrusel): *"la ficha pedía un póster que nadie produce"* — **el texto sobrevivió a la razón que lo había hecho verdadero.** *Y la sesión entera lo pagó en cinco formas distintas antes de nombrarlo:*
-
-  | dónde vivía el porqué viejo | quién lo pagó |
-  |---|---|
-  | el **mensaje** de un guard (`'entre 1 y 4'` con el predicado ya en 10) | A |
-  | un **comentario** que describía un comportamiento inexistente (#23) | C → **A construyó un contrato contra él** |
-  | un **copy** que declaraba nuestro estado (`clipVacio`) | C |
-  | una **ficha** que pedía un artefacto que nadie produce (el `▶`) | B |
-  | un **acta** que decía *"la build ya está corriendo"* | A |
-
-  **⇒ LA REGLA:** cuando cambia el hecho, **el texto que lo explica se mueve EN EL MISMO COMMIT** — mensaje, comentario, JSDoc, ficha, acta y copy. *Es la 28 y D-613 (**los cuerpos se mueven juntos**) extendidas de las columnas a la PROSA.*
-
-  ### ⚠️ EL COROLARIO, que es lo que la vuelve urgente y no una buena práctica
-
-  > **Los desfases que se cazaron hoy se cazaron porque algo MECÁNICO se puso rojo.** *El techo saltó cuando el founder no pudo subir su cupo; el rojo de tipos lo trajo `tsc`; la lista de cierre la cazó un grep.*
-  >
-  > **Los que NO tienen guard —comentarios, láminas, contadores, actas— se descubren de casualidad, o porque el FOUNDER choca con ellos.** *Y ése es el peor canal posible: llega tarde, llega como desconfianza del producto, y llega con el costo ya pagado.*
-
   **Por eso la carga está sobre QUIEN DEPOSITA, no sobre quien mide** (aporte de B): *escribir el porqué al construir es lo que hace que el censo del próximo sirva.* La alternativa —*"desconfiá de todo texto"*— es impagable: **volvería inútil la única capa que explica las decisiones.**
 
   **Hermana de #21** (el mensaje es parte del guard) y **de #23** (el comentario le habla a la próxima pista): **L-198 es su generalización — los tres son el mismo defecto con distinto destinatario.** Origen: S85 (el caso de B; los cinco cobros de la sesión).
@@ -2955,6 +2933,49 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
   > **Por eso la frontera no dice "sé generoso" ni "sé austero": dice CONTÁ.**
   > *El radio no es una virtud de carácter — es el resultado de un censo, y un
   > censo se corre en un minuto.*
+- **L-199 — EL ROJO SE PRODUCE **ANTES**, O LA CURA QUEDA SIN EVIDENCIA PARA SIEMPRE (S85, firmada por la mesa).**
+
+  > ### **EL "ANTES" NO SE PUEDE RECONSTRUIR DESPUÉS.**
+  > **Una vez curado, nadie puede probar que estaba roto — solo confiar en que alguien lo verificó.**
+
+  **Vale para TODA cura de privacidad y de permisos, no solo para el caso que la fundó.** *Un bug funcional deja rastro —un test que falla, un error en el log, un usuario que reclama—; **una fuga de permisos no deja ninguno**: el sistema funciona igual de bien mostrando de más.*
+
+  **EL CASO (D-639, S85):** antes de escribir la RPC se corrió el par por el camino real con JWT — **85 filas vistas, 84 CON su contenido**. Después: **85 filas, 0 contenidos, 85 autores**. *Sin ese "antes" medido, la cura habría sido una afirmación: "ahora está bien" **sin nada que diga que antes no lo estaba**.*
+
+  ### ⚠️ Y LO QUE LO VUELVE URGENTE Y NO PROLIJIDAD
+
+  **El error de una cura de permisos SE VE IDÉNTICO AL ACIERTO.** *Una pantalla que muestra de más funciona perfecto: completa, sin rebotes, sin vacíos.* **Un gate visual diría "se ve bien" — y tendría razón.** ⇒ **el gate NO puede ser mirar**, y lo único que queda es el par medido.
+
+  *Si D-639 hubiera salido con esa firma, el defecto sobrevivía indefinidamente —con datos clínicos reales de por medio— y su descubrimiento habría dependido de que alguien leyera el código por otra razón.*
+
+  **LA REGLA OPERATIVA:** toda cura de permisos, RLS o visibilidad **corre su fixture ANTES de la cura y guarda el número**. *El fixture no es la verificación de la cura: es la única prueba de que había algo que curar.* **Hermana de L-192** (una verificación cuyo modo de falla es el silencio) — **acá el silencio es del defecto, no del instrumento.**
+
+  ### ➕ SU COROLARIO, del alcance de la misma cura
+
+  > **UNA MODULACIÓN APROXIMADA ES UNA FUGA CON FORMA DE LEY.**
+
+  **D-639 v1 implementa *"quien lo hizo"* y NO *"quien lo necesita para atender"*, que espera la matriz `oficio × eje` de A3.3 — y se DECLARA en vez de aproximarse.** *Aproximar un permiso produce algo que parece cumplir la ley y concede de más en los bordes que nadie enumeró; y como su error se ve como el acierto, **nadie lo audita después**.* Origen: S85-A (D-639, el par medido).
+
+  > **Un porqué viejo se lee con la misma autoridad que uno vigente, y nadie puede distinguirlos leyendo.**
+
+  **El caso que la fundó es de B** (`e7e58df`, el `▶` del carrusel): *"la ficha pedía un póster que nadie produce"* — **el texto sobrevivió a la razón que lo había hecho verdadero.** *Y la sesión entera lo pagó en cinco formas distintas antes de nombrarlo:*
+
+  | dónde vivía el porqué viejo | quién lo pagó |
+  |---|---|
+  | el **mensaje** de un guard (`'entre 1 y 4'` con el predicado ya en 10) | A |
+  | un **comentario** que describía un comportamiento inexistente (#23) | C → **A construyó un contrato contra él** |
+  | un **copy** que declaraba nuestro estado (`clipVacio`) | C |
+  | una **ficha** que pedía un artefacto que nadie produce (el `▶`) | B |
+  | un **acta** que decía *"la build ya está corriendo"* | A |
+
+  **⇒ LA REGLA:** cuando cambia el hecho, **el texto que lo explica se mueve EN EL MISMO COMMIT** — mensaje, comentario, JSDoc, ficha, acta y copy. *Es la 28 y D-613 (**los cuerpos se mueven juntos**) extendidas de las columnas a la PROSA.*
+
+  ### ⚠️ EL COROLARIO, que es lo que la vuelve urgente y no una buena práctica
+
+  > **Los desfases que se cazaron hoy se cazaron porque algo MECÁNICO se puso rojo.** *El techo saltó cuando el founder no pudo subir su cupo; el rojo de tipos lo trajo `tsc`; la lista de cierre la cazó un grep.*
+  >
+  > **Los que NO tienen guard —comentarios, láminas, contadores, actas— se descubren de casualidad, o porque el FOUNDER choca con ellos.** *Y ése es el peor canal posible: llega tarde, llega como desconfianza del producto, y llega con el costo ya pagado.*
+
 
   > **Un fallo puede degradar a AUSENCIA, nunca a un VALOR que el consumidor va a usar como si fuera cierto.**
 
