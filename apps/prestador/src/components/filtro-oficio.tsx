@@ -1,97 +1,44 @@
 /**
- * FILTRO POR OFICIO del HOY (S61-B5 → S80-B15, LA LÍNEA VIAJERA —
- * firmada por el founder).
+ * FILTRO POR OFICIO del HOY — hoy es un ADAPTADOR de `FiltroPills`
+ * (`packages/ui`, S85-B7), no una hilera propia.
  *
- * LA ENMIENDA DE LEY (frontera, no debilitamiento): en TABS la huella
- * marca el estado (Ley 6 §2.6, intacta); en FILTROS la huella está
- * SIEMPRE (es identidad del glifo) y **el estado lo marca UNA LÍNEA
- * QUE VIAJA** entre opciones — no recuadro, no pill; una línea que
- * viaja cumple §9.6 por construcción (se ve de dónde viene y a dónde
- * llega). El porqué: el filtro tiene "todos" como estado legal y sus
- * opciones aparecen según la oferta — la posición es lo que el ojo
- * pide, y la huella sola no leía (veredicto founder en dispositivo).
+ * ═══ ⏪ S85-C40 · MURIÓ LA LÍNEA VIAJERA, Y ERA UNA FIRMA ════════════
  *
- * B14 ②: LAS CUATRO CON ETIQUETA — "Todos" era texto y los oficios
- * glifos sueltos: nada comparable. Ahora todos hablan igual (glifo con
- * huella + etiqueta; "Todos" sin glifo porque no es un oficio).
+ * Hasta hoy este archivo dibujaba a mano **221 líneas**: texto plano con
+ * glifo al lado y **una línea que viajaba** bajo el elegido, con su
+ * `useSharedValue` y su física. **Estaba firmada por el founder**
+ * (S80-B15) y su argumento era bueno: *el filtro tiene "todos" como
+ * estado legal y sus opciones aparecen según la oferta — la posición es
+ * lo que el ojo pide, y la huella sola no leía*.
  *
- * Física: motion.duration.fast + bezier de la casa; memorial =
- * reemplazo directo, la línea no viaja (Ley 8).
+ * **Gana la firma más nueva** — los chips con pata que el founder aprobó
+ * en la galería (⭐ GATE S85): **pastilla con fondo propio**, el elegido
+ * **se hunde** (pierde elevación, baja a `bg.hundido`, se achica) y **la
+ * pata lo PISA desde arriba** (`MarcaEleccion` con `accent.control`).
+ * **Pero la anterior NO se borra en silencio:** dos letras firmadas que
+ * se contradicen son peores que una equivocada, porque cualquiera cita
+ * la que le conviene y queda "en regla". *Lo que la nueva resuelve y la
+ * vieja no: la marca de elección es LA MISMA en toda la casa — la pata
+ * pisa lo elegido en los filtros, en los selectores y acá.*
+ *
+ * 🔴 **Y ES EL MISMO MECANISMO QUE COBRÓ CON LOS GLIFOS DE LA BARRA, LA
+ * CUARTA VEZ EN LA SESIÓN: la pieza promovida no llegó al consumidor.**
+ * B construyó `FiltroPills` y esta pantalla siguió con su hilera local —
+ * **sin que nada fallara**: el filtro filtraba, el typecheck pasaba, el
+ * gate de diseño pasaba. *Lo vio el founder comparando su pantalla con
+ * la galería.* Una promoción no es una migración, y **nada en el árbol
+ * relaciona una pieza nueva con el código que debería reemplazar**.
+ *
+ * ⇒ **Lo que queda acá es lo único que ES de esta pantalla:** qué
+ * oficios tienen oferta activa, su voz y su capa. **El dibujo es de la
+ * pieza.**
  */
 
-import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, Text } from 'react-native';
-import Animated, {
-  Easing,
-  cubicBezier,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
-import { motion, radius, spacing, typography, useTheme } from '@epetplace/ui';
+import { FiltroPills, type OpcionFiltro } from '@epetplace/ui';
 
-import { IconoOficio } from '@/components/iconos-oficio';
 import { useTraduccion } from '@/i18n';
 
 export type FiltroOficioValor = 'todos' | 'paseo' | 'grooming' | 'adiestramiento' | 'vet';
-
-const FISICA = { duration: motion.duration.fast, easing: Easing.bezier(0.32, 0.72, 0, 1) };
-
-function Segmento({
-  esActivo,
-  onPress,
-  accessibilityLabel,
-  onLayout,
-  children,
-}: {
-  esActivo: boolean;
-  onPress: () => void;
-  accessibilityLabel: string;
-  onLayout: (x: number, ancho: number) => void;
-  children: React.ReactNode;
-}) {
-  const [presionado, setPresionado] = useState(false);
-  return (
-    <Pressable
-      accessibilityRole="tab"
-      accessibilityState={{ selected: esActivo }}
-      accessibilityLabel={accessibilityLabel}
-      onPress={onPress}
-      onPressIn={() => setPresionado(true)}
-      onPressOut={() => setPresionado(false)}
-      onLayout={(e) => onLayout(e.nativeEvent.layout.x, e.nativeEvent.layout.width)}
-      /* ☠️ D-576 (S83-C21) — ACÁ VIVÍA `flex: 1`, y era la causa.
-         En RN `flex:1` = grow 1 · shrink 1 · basis 0%: los cinco
-         segmentos se repartían el ancho en PARTES IGUALES (~70dp en un
-         teléfono). Adentro entran glifo 21 + gap 6 + etiqueta, y las
-         etiquetas reales son "Todos · Paseos · Estética ·
-         Adiestramiento · Veterinaria": ninguna entra. Como el contenido
-         no encoge (flexShrink default 0 en los hijos) y el row está
-         centrado, se DERRAMABA por los dos lados — y el glifo del
-         vecino caía sobre "Estética", que es la foto del founder.
-         La cura no es achicar: es dejar de repartir. Cada segmento
-         ocupa lo que MIDE y la fila scrollea (la tira que D-576 ya
-         preveía). */
-      style={{ paddingHorizontal: spacing[2] }}
-    >
-      <Animated.View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: spacing[1.5],
-          minHeight: 44,
-          transform: [{ scale: presionado ? 0.99 : 1 }],
-          transitionProperty: 'transform',
-          transitionDuration: motion.duration.fast,
-          transitionTimingFunction: cubicBezier(...motion.easing.spring.bezier),
-        }}
-      >
-        {children}
-      </Animated.View>
-    </Pressable>
-  );
-}
 
 export function FiltroOficio({
   activo,
@@ -103,119 +50,33 @@ export function FiltroOficio({
   /** S63-B: solo los oficios con oferta ACTIVA ganan segmento. S69-B: +vet. */
   oficios: { paseo: boolean; grooming: boolean; adiestramiento: boolean; vet: boolean };
 }) {
-  const { theme } = useTheme();
   const { t } = useTraduccion();
-  const esMemorial = theme.mode === 'memorial';
-  // Guard espejo del registry de Icono: memorial no porta capaText.
-  const aa = 'capaText' in theme ? theme.capaText : null;
 
-  const segmentos: {
-    codigo: FiltroOficioValor;
-    etiqueta: string;
-    oficio: 'paseo' | 'grooming' | 'adiestramiento' | 'veterinaria' | null;
-    /** El AA de su capa — la huella (SIEMPRE) y la línea cuando preside. */
-    capaAa: string;
-  }[] = [
-    { codigo: 'todos', etiqueta: t('agenda.filtroTodos'), oficio: null, capaAa: theme.text.primary },
+  /* LAS CUATRO CON ETIQUETA (B14 ②, que sobrevive al cambio de pieza):
+     "Todos" era texto y los oficios glifos sueltos — nada comparable.
+     Todos hablan igual; "Todos" va SIN glifo porque no es un oficio, y
+     ése es el único caso de `icono: null` acá.
+
+     LA CAPA sale de la taxonomía firmada (Ley 10), no del color que el
+     archivo viejo tenía a mano: paseo · estética · adiestramiento son
+     CUIDADO; veterinaria es la que cambia de capa. *El local pintaba
+     grooming con `status.warningText` —un color de ESTADO para una
+     categoría—, y eso muere con el dibujo.* */
+  const opciones: OpcionFiltro<FiltroOficioValor>[] = [
+    { codigo: 'todos', etiqueta: t('agenda.filtroTodos'), icono: null, capa: null },
     ...(oficios.paseo
-      ? [{ codigo: 'paseo' as const, etiqueta: t('agenda.filtroPaseos'), oficio: 'paseo' as const, capaAa: aa !== null ? aa.cuidado : theme.text.secondary }]
+      ? [{ codigo: 'paseo' as const, etiqueta: t('agenda.filtroPaseos'), icono: 'paseo' as const, capa: 'cuidado' as const }]
       : []),
     ...(oficios.grooming
-      ? [{ codigo: 'grooming' as const, etiqueta: t('agenda.filtroEstetica'), oficio: 'grooming' as const, capaAa: theme.status.warningText }]
+      ? [{ codigo: 'grooming' as const, etiqueta: t('agenda.filtroEstetica'), icono: 'grooming' as const, capa: 'cuidado' as const }]
       : []),
     ...(oficios.adiestramiento
-      ? [{ codigo: 'adiestramiento' as const, etiqueta: t('agenda.filtroAdiestramiento'), oficio: 'adiestramiento' as const, capaAa: aa !== null ? aa.cuidado : theme.text.secondary }]
+      ? [{ codigo: 'adiestramiento' as const, etiqueta: t('agenda.filtroAdiestramiento'), icono: 'training' as const, capa: 'cuidado' as const }]
       : []),
     ...(oficios.vet
-      ? [{ codigo: 'vet' as const, etiqueta: t('agenda.filtroVeterinaria'), oficio: 'veterinaria' as const, capaAa: aa !== null ? aa.identidad : theme.text.secondary }]
+      ? [{ codigo: 'vet' as const, etiqueta: t('agenda.filtroVeterinaria'), icono: 'veterinaria' as const, capa: 'identidad' as const }]
       : []),
   ];
 
-  // LA LÍNEA VIAJERA — posición/ancho por onLayout de cada segmento;
-  // el primer posicionamiento no viaja (no hay origen que mostrar).
-  const [marcos, setMarcos] = useState<Record<string, { x: number; ancho: number }>>({});
-  const lineaX = useSharedValue(0);
-  const lineaAncho = useSharedValue(0);
-  useEffect(() => {
-    const marco = marcos[activo];
-    if (!marco) return;
-    if (lineaAncho.value === 0 || esMemorial) {
-      // primer render o memorial: reemplazo directo, sin viaje
-      lineaX.value = marco.x;
-      lineaAncho.value = marco.ancho;
-      return;
-    }
-    lineaX.value = withTiming(marco.x, FISICA);
-    lineaAncho.value = withTiming(marco.ancho, FISICA);
-  }, [activo, marcos, esMemorial, lineaX, lineaAncho]);
-  const estiloLinea = useAnimatedStyle(() => ({
-    transform: [{ translateX: lineaX.value }],
-    width: lineaAncho.value,
-  }));
-
-  const colorLinea = segmentos.find((s) => s.codigo === activo)?.capaAa ?? theme.text.primary;
-
-  return (
-    /* D-576: LA TIRA. El scroll horizontal es la mitad que faltaba —
-       sin él, quitar `flex:1` deja los segmentos a su ancho real y el
-       quinto se sale de pantalla sin forma de alcanzarlo.
-       `contentContainerStyle` lleva el layout (la fila + su relative)
-       para que la LÍNEA VIAJERA siga midiendo contra el CONTENIDO: su
-       `x` de onLayout y su `translateX` viven en el mismo sistema de
-       coordenadas, así que el viaje sigue exacto aunque la tira esté
-       corrida. Sin barra: la casa no pinta scrollbars. */
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      accessibilityRole="tablist"
-      accessibilityLabel={t('agenda.filtroEtiqueta')}
-      contentContainerStyle={{ flexDirection: 'row', position: 'relative', paddingBottom: spacing[1] }}
-    >
-      {segmentos.map((s) => {
-        const esActivo = s.codigo === activo;
-        return (
-          <Segmento
-            key={s.codigo}
-            esActivo={esActivo}
-            onPress={() => onCambio(s.codigo)}
-            accessibilityLabel={s.etiqueta}
-            onLayout={(x, ancho) =>
-              setMarcos((m) =>
-                m[s.codigo]?.x === x && m[s.codigo]?.ancho === ancho ? m : { ...m, [s.codigo]: { x, ancho } },
-              )
-            }
-          >
-            {s.oficio !== null && (
-              // B15: la huella SIEMPRE — es identidad del glifo, no estado.
-              <IconoOficio oficio={s.oficio} tamano={21} color={esActivo ? theme.text.primary : theme.text.secondary} colorHuella={s.capaAa} />
-            )}
-            <Text
-              numberOfLines={1}
-              style={{
-                fontFamily: esActivo ? typography.family.sans.medium : typography.family.sans.regular,
-                fontSize: typography.size.sm,
-                color: esActivo ? theme.text.primary : theme.text.secondary,
-              }}
-            >
-              {s.etiqueta}
-            </Text>
-          </Segmento>
-        );
-      })}
-      <Animated.View
-        pointerEvents="none"
-        style={[
-          {
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            height: 2,
-            borderRadius: radius.full,
-            backgroundColor: colorLinea,
-          },
-          estiloLinea,
-        ]}
-      />
-    </ScrollView>
-  );
+  return <FiltroPills opciones={opciones} activo={activo} onCambio={onCambio} />;
 }
