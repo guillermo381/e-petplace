@@ -649,6 +649,12 @@ export const prestadorEn = {
     atenciones: '{{n}} visits',
     error: "We couldn't load the pets",
     errorDetalle: 'Check your connection and try again.',
+    // S86-C · "Your team" moves from BUSINESS to DATA.
+    equipoTitulo: 'Your team',
+    equipoResumen1: '1 person',
+    equipoResumen: '{{n}} people',
+    equipoInactiva: 'No longer working',
+    equipoGestionar: 'Manage the team',
   },
   detalleMascota: {
     condicionCronica: 'Chronic condition',
@@ -706,8 +712,8 @@ export const prestadorEn = {
     // S56-B TAREA 2 (D-341) · LOTE S56 · Espejo de es.ts
     vacaciones: 'Time off',
     vacacionesDetalle: "Mark the days you're not walking.",
-    equipo: 'Team',
-    equipoDetalle: 'Roles, invitations, and your signature',
+    // ☠️ S86-C · `equipo`/`equipoDetalle` died here: the cell moved to DATA
+    // and the census found zero consumers (Ley 37). New voice: `mascotas.equipo*`.
     // S79-B (T2-B5) · the three mute modules gain section + voice + trigger (§2.6)
     despiertaSeccion: 'Wakes up as you work',
     casosHeredados: 'Cases entrusted to you',

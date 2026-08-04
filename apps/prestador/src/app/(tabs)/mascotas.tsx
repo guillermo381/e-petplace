@@ -72,6 +72,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  CeldaNavegacion,
   MarcaDeAgua,
   Separador,
   Tarjeta,
@@ -79,7 +80,16 @@ import {
   useTheme,
   type AvatarMascotaEspecie,
 } from '@epetplace/ui';
-import { obtenerMascotasAtendidas, obtenerMiPrestador, resolverUrlsFotos, type MascotaAtendida } from '@epetplace/api';
+import {
+  obtenerEquipoNegocio,
+  obtenerMascotasAtendidas,
+  obtenerMiPrestador,
+  resolverUrlsFotos,
+  type EquipoNegocio,
+  type MascotaAtendida,
+} from '@epetplace/api';
+
+import { SeccionDesplegable } from '@/components/perfil-piezas';
 
 import { fechaCortaMono } from '@epetplace/i18n';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -103,6 +113,28 @@ export default function Mascotas() {
   const insets = useSafeAreaInsets();
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [urlsFotos, setUrlsFotos] = useState<Map<string, string>>(new Map());
+  /* ⭐ S86-C · LA MUDANZA DE «TU EQUIPO» — primera franja que baja de
+     NEGOCIO a DATOS (firma del founder: *DATOS consulta · NEGOCIO
+     configura*).
+
+     ⚠️ **EL GATE VIAJA CON EL LECTOR, y ésa era la 🔴 que esta pantalla
+     tenía escrita desde S85-C32:** el tab NEGOCIO gatea por `esGestor`
+     (`_layout`), y **este tab NO tiene gate**. Mudar la franja tal cual
+     habría ensanchado la audiencia sin que nadie lo notara.
+     La salida NO es re-decidir el permiso acá —una autorización que
+     resuelve el cliente es decorativa— sino usar la que el lector YA
+     trae: `esDueno` lo deriva el servidor de una policy dueño-only
+     (`empleado_roles`), igual que `visible:false` en la plata. Sin
+     `esDueno`, la sección **no se monta**.
+     · Medido, y se declara: el gate del RPC (`obtener_empleados_cuenta`)
+       es MEMBRESÍA (`_user_opera_cuenta_comercial`) — más ancho que el
+       del tab. Por eso el gate de la SECCIÓN es `esDueno` y no el hecho
+       de que el lector conteste.
+     · Delta declarado: el tab NEGOCIO admite `['dueño','administrador']`
+       y `esDueno` es dueño-only. **Hoy es inerte** —el administrador no
+       tiene motor (D-513 v2)— y se anota para el día que lo tenga. */
+  const [equipo, setEquipo] = useState<EquipoNegocio | null>(null);
+  const [equipoAbierto, setEquipoAbierto] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -114,8 +146,19 @@ export default function Mascotas() {
           setPantalla({ estado: 'error' });
           return;
         }
-        const r = await obtenerMascotasAtendidas(prestador.data.id);
+        /* El equipo va EN PARALELO con las vidas: son dos preguntas
+           independientes y encadenarlas sumaría un viaje a la portada.
+           Su fallo NO tumba la pantalla — la sección simplemente no se
+           monta (Ley 13 aplica al CUERPO, y el cuerpo de esta tab son
+           las vidas). */
+        const [r, eq] = await Promise.all([
+          obtenerMascotasAtendidas(prestador.data.id),
+          prestador.data.cuenta_comercial_id !== null
+            ? obtenerEquipoNegocio(prestador.data.cuenta_comercial_id)
+            : Promise.resolve(null),
+        ]);
         if (!vigente) return;
+        setEquipo(eq !== null && eq.ok ? eq.data : null);
         if (!r.ok) {
           setPantalla({ estado: 'error' });
           return;
@@ -193,6 +236,62 @@ export default function Mascotas() {
               </View>
             ))}
           </Tarjeta>
+        )}
+
+        {/* ⭐ S86-C · «TU EQUIPO» — la primera franja de la mudanza, en la
+            forma que firmó la lámina (decisión ④): la sección se PLIEGA
+            pero NUNCA se calla — su resumen se lee sin abrirla.
+            ⚠️ Regla de existencia: sin `esDueno` NO se monta (el gate del
+            lector, arriba). Y `equipo === null` cubre los dos casos que no
+            deben inventar nada: negocio sin cuenta comercial, y lectura
+            caída — ninguno se disfraza de "equipo vacío". */}
+        {equipo !== null && equipo.esDueno && equipo.miembros.length > 0 && (
+          <SeccionDesplegable
+            icono="equipo"
+            titulo={t('mascotas.equipoTitulo')}
+            /* El resumen cuenta ACTIVAS, que es la pregunta real ("¿con
+               cuánta gente cuento?"). Las inactivas existen en la lista de
+               adentro; sumarlas acá inflaría el número con gente que ya no
+               atiende. */
+            resumen={
+              equipo.miembros.filter((m) => m.activo).length === 1
+                ? t('mascotas.equipoResumen1')
+                : t('mascotas.equipoResumen', { n: equipo.miembros.filter((m) => m.activo).length })
+            }
+            abierta={equipoAbierto}
+            onAlternar={() => setEquipoAbierto((v) => !v)}
+          >
+            <View style={{ gap: spacing[3] }}>
+              <Tarjeta elevacion="sm" relleno="ninguno">
+                {equipo.miembros.map((m, i) => (
+                  <View key={m.empleadoId}>
+                    {i > 0 && <Separador />}
+                    {/* ⚠️ El subtítulo dice SOLO lo inactivo. Los oficios
+                        vienen del lector como CÓDIGOS (`OficioChip` es un
+                        union de strings, medido) y pintarlos crudos rompe la
+                        Ley 3; darles voz acá sería fabricar un diccionario
+                        que ya existe en otra casa. La lista de nombres es lo
+                        que la lámina pide, y el detalle vive un tap más
+                        adentro. */}
+                    <Celda
+                      titulo={m.nombre}
+                      subtitulo={m.activo ? undefined : t('mascotas.equipoInactiva')}
+                    />
+                  </View>
+                ))}
+              </Tarjeta>
+              {/* La gestión sigue viviendo en su pantalla: DATOS consulta,
+                  y el camino a CONFIGURAR se ofrece, no se duplica. La ruta
+                  conserva su nombre (`/negocio/equipo`) — renombrarla no le
+                  aporta nada a quien la usa y sí toca el árbol entero. */}
+              <CeldaNavegacion
+                icono="equipo"
+                registro="aa"
+                titulo={t('mascotas.equipoGestionar')}
+                onPress={() => router.push('/negocio/equipo')}
+              />
+            </View>
+          </SeccionDesplegable>
         )}
       </ScrollView>
     </View>
