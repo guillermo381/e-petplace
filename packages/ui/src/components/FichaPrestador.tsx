@@ -75,6 +75,19 @@ const VELO_CLIP = 'rgba(29,26,46,0.55)'
 export interface FichaPrestadorProps {
   /** `nombre_comercial`. Sin él no se pinta el título ni el monograma. */
   nombre?: string | null
+  /** S85-B17 · LA INSIGNIA DE COHORTE, junto al nombre (firma de mesa).
+   *  Recibe la ETIQUETA YA ARMADA ("Prestador fundador · 2026"), no un
+   *  booleano: el año es DATO y esta pieza no lo fabrica — el mismo
+   *  contrato que `Insignia.etiqueta`, que también exige la palabra desde
+   *  afuera. `null`/ausente = no hay distinción y no se monta nada: un
+   *  negocio sin cohorte no ve un hueco.
+   *
+   *  POR QUÉ JUNTO AL NOMBRE Y NO SOBRE LA FOTO (el porqué de la mesa,
+   *  escrito acá porque es donde se lee al mover algo): sobre la foto una
+   *  pastilla habla del estado de HOY —ése es el precedente «Al día»— y la
+   *  cohorte es un hecho FIJO. Y esta ficha es la vitrina pública: el
+   *  nombre siempre está, la foto puede faltar. */
+  cohorte?: string | null
   /** Logo YA RESUELTO (`resolverUrlLogoNegocio(prestadores.foto_url)`).
    *  Sin él, `LogoNegocio` cae a su monograma honesto — jamás a huella. */
   logoUrl?: string | null
@@ -133,6 +146,7 @@ export interface FichaPrestadorProps {
 
 export function FichaPrestador({
   nombre,
+  cohorte,
   logoUrl,
   portadas,
   clipPoster,
@@ -344,7 +358,18 @@ export function FichaPrestador({
           </View>
         ) : null}
 
-        {nombre ? <Texto variante="titulo">{nombre}</Texto> : null}
+        {/* El nombre y su distinción viven en la MISMA fila y envuelven
+            juntos: la insignia es hermana del nombre, no un renglón
+            aparte — separarlos la convertiría en un dato más de la ficha
+            y deja de leerse como parte de quién ES el negocio. */}
+        {nombre ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2], flexWrap: 'wrap' }}>
+            <Texto variante="titulo">{nombre}</Texto>
+            {cohorte !== null && cohorte !== undefined && cohorte !== '' ? (
+              <Insignia distincion="cohorte" etiqueta={cohorte} tamaño="sm" />
+            ) : null}
+          </View>
+        ) : null}
         {linea !== '' ? <Texto variante="apoyo">{linea}</Texto> : null}
         {historia !== null && historia !== undefined && historia !== '' ? (
           <Texto variante="cuerpo">{historia}</Texto>

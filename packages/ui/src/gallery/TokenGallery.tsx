@@ -3010,6 +3010,7 @@ function GaleriaInterna() {
             <View style={{ borderRadius: radius.md, overflow: 'hidden', borderWidth: 1, borderColor: theme.border.default }}>
               <FichaPrestador
                 nombre="Paseos Andrés"
+                cohorte="Prestador fundador · 2026"
                 ciudad="Quito"
                 historia="Paseos tranquilos por el norte, grupos chicos y reporte con fotos."
                 servicios={['Paseo', 'Guardería']}
