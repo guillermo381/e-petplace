@@ -146,6 +146,27 @@ bundle.*
    > *(Y el borde honesto: si alguna vez re-pedir SÍ costara —una pista fuera de
    > línea, un cierre con hora—, la decisión vuelve a la mesa **declarando el
    > costo**, no al criterio de quien escribió.)*
+   >
+   > **➕ SU LÍMITE (firmado S85):** el corolario **NO aplica cuando una pista YA
+   > DECLARÓ su posición y la midió.** *Existe para que nadie tenga que juzgar si
+   > una escritura cuenta; usarlo para sobrescribir una declaración explícita
+   > sería usarlo contra su propósito — dejaría de evitar el juicio propio y
+   > pasaría a imponerlo sobre el ajeno.* **El caso:** al borrar el stub, C
+   > declaró que un archivo sin trackear que nunca fue suyo no es escritura sobre
+   > su territorio **y lo midió** (`git log -- app.json` vacío); B pidió
+   > re-confirmación si el borrado ocurría después de su hora. **Se respetó lo
+   > que cada una declaró** — más preciso que aplicarles la misma regla a las dos.
+   >
+   > **➕ Y LA SEGUNDA MITAD, que es la que faltaba (firmada S85):**
+   >
+   > > ### **QUIEN FIJA UN ANCLA DECLARA SI VA A SEGUIR ESCRIBIENDO, O NO LO FIJA TODAVÍA.**
+   >
+   > *La afinación de arriba contesta **"¿eximir ahorra algo?"** y no contestaba
+   > **"¿avisaste que ibas a escribir?"**.* **El caso, y lo pagó A:** pidió
+   > confirmaciones, las dos pistas las dieron, **y A commiteó tres minutos
+   > después** — las venció ella misma. **La primera mitad protege de un juicio
+   > propio; la segunda protege a las otras dos de gastar una confirmación en un
+   > ancla que ya sabías que ibas a mover.**
 
 5. **LA VEDA NO SE LEVANTA SOLA POR URGENCIA.** *(aporte de C, S84.)* Si la mesa
    necesita que una pista trabaje durante una veda, **la levanta explícitamente y
