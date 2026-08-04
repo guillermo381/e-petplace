@@ -226,6 +226,12 @@ export const prestadorEn = {
     abiertaN: '{{n}} unclosed visits',
     abiertaPie: 'Payment is recorded when you close them.',
   },
+  emblema: {
+    titulo: 'Your place in e-PetPlace',
+    cuerpoFundador: 'We chose you as one of the providers shaping e-PetPlace in Ecuador.',
+    cuerpoPionero: "You're one of the first e-PetPlace providers in your city.",
+    cerrar: 'Close',
+  },
   perfilNegocio: {
     // ── S84-C5 · Espejo de es.ts ──
     errorTitulo: "We couldn't load your profile",

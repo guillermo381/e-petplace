@@ -294,6 +294,22 @@ export const prestadorEs = {
     abiertaN: '{{n}} atenciones sin cerrar',
     abiertaPie: 'El cobro se registra al cerrarlas.',
   },
+  emblema: {
+    // ⭐ S85-C32 · EL MODAL DEL EMBLEMA (PORTAL_PRESTADOR §2.3, firma founder).
+    // NO es una glosa de la insignia ("la cohorte fundadora es…"): es LA
+    // BIENVENIDA DEVUELTA. El prestador toca su emblema y vuelve a leer POR
+    // QUÉ fue elegido, con la firma de quien lo eligió.
+    titulo: 'Tu lugar en e-PetPlace',
+    // SIN N (firma del founder): un número horneado en una app envejece sin
+    // avisar. "Uno de los prestadores que dan forma" dice lo mismo y no caduca.
+    // ⚠️ `dia1.eleccion` SÍ lleva el 15 — divergencia declarada a la mesa.
+    cuerpoFundador: 'Te elegimos para ser uno de los prestadores que dan forma a e-PetPlace en Ecuador.',
+    cuerpoPionero: 'Eres uno de los primeros prestadores de e-PetPlace en tu ciudad.',
+    // LA FIRMA VA CON NOMBRE PROPIO, jamás "el equipo": un reconocimiento
+    // firmado por una institución deja de ser una elección. Reusa las keys
+    // de `dia1` — la firma del founder vive UNA vez en la app.
+    cerrar: 'Cerrar',
+  },
   perfilNegocio: {
     // el resumen de contacto: NOMBRA lo cargado, en orden fijo
     // ── S84-C5: el resto del literal de la vitrina ──

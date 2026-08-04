@@ -14,22 +14,37 @@
  * visible**; el archivo y la ruta siguen en `mascotas` porque renombrar
  * la ruta toca el `_layout` y no le aporta NADA a quien la usa.
  *
- * ── ⚠️ LAS TRES FRANJAS QUE **NO** VIVEN ACÁ, Y ES A PROPÓSITO ───────
- * El plan de DATOS traía cinco franjas. **Tres ya tenían casa**, y la
- * medición lo encontró antes de construir:
+ * ── ⏪ LAS TRES FRANJAS: LO QUE DECÍA ACÁ QUEDÓ DEROGADO (S85-C32) ────
  *
- * | franja | vive en |
- * |---|---|
- * | ③ **la plata** | NEGOCIO → *Cobros* → `/liquidaciones` |
- * | ④ **el equipo** | NEGOCIO → `/negocio/equipo` |
- * | ⑤ **la trayectoria** | NEGOCIO → `/negocio/estadisticas` |
+ * **Hasta el gate de hoy esta nota decía que la plata, el equipo y la
+ * trayectoria NO vivían acá "a propósito"**, porque ya tenían casa en
+ * NEGOCIO y §15b las ponía ahí. **Era correcto y duró una sesión.**
  *
- * **Y no es un accidente de layout: hay letra que las pone ahí.**
- * `§15b` (*HOY acciona / NEGOCIO gestiona*) y sobre todo el argumento de
- * privacidad de **S72-P1a**: *plata donde no hay gate por rol = la
- * recepción ve los ingresos*. **Traerlas acá reabriría el agujero que
- * ese argumento cerró.** *La mesa no quiere dos tabs contestando la
- * misma pregunta.*
+ * **FIRMA DEL FOUNDER (S86): NEGOCIO QUEDA SOLO CON EL TALLER.** Cobros,
+ * equipo y estadísticas **se mudan acá**, y la frontera pasa a ser una
+ * sola pregunta, mucho más limpia que la anterior:
+ *
+ * > **DATOS = todo lo que se CONSULTA · NEGOCIO = todo lo que se CONFIGURA.**
+ *
+ * *Eso disuelve el choque que la mesa planteó —"si Datos gana gráficas, dos
+ * tabs contestan lo mismo"—: ya no se reparten por TEMA (que era lo que las
+ * hacía chocar) sino por VERBO.*
+ *
+ * ⚠️ **Y SE DEROGA EN ESTE ARCHIVO, no solo en un acta:** la nota vieja
+ * afirmaba con tabla y argumento que esas franjas **no vienen**. Quien la
+ * leyera en S86 encontraría una regla que ya no rige, escrita con más
+ * autoridad que el plan. *Un porqué vencido se lee igual que uno vigente*
+ * (L-198).
+ *
+ * 🔴 **LO QUE LA MUDANZA TIENE QUE RESOLVER, MEDIDO Y NO OPINADO: EL GATE
+ * NO VIAJA CON LA PANTALLA.** El tab NEGOCIO está gateado por
+ * `sesion.esGestor` (`(tabs)/_layout.tsx`); **este tab NO tiene gate.**
+ * ⇒ mover *Cobros* acá tal cual **pondría los ingresos frente a quien hoy
+ * no los ve** — exactamente el agujero que S72-P1a cerró.
+ * **No lo bloquea, y la salida ya está probada en esta misma sesión:** el
+ * gate se mueve al LECTOR, como hizo `obtenerPlataDelDia` con su
+ * `visible:false`. *Cada pieza que se mude tiene que traer su propio gate,
+ * o queda expuesta —* y eso se verifica lector por lector, no tab por tab.
  *
  * ☠️ **Y MURIÓ `components/datos-piezas.tsx`** (S85-C12: `BloqueEquipo`
  * y `BloquePlata`), construido para dos de esas franjas. **Nacieron
