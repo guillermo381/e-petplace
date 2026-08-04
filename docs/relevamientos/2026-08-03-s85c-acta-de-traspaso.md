@@ -266,5 +266,47 @@ medida: el engranaje del muro.
 
 ---
 
-*Depositada por C al cierre de S85. Nada de acá está firmado: son commits,
-mediciones y pendientes. Lo que rige sigue siendo el canon.*
+## 8 · ✍️ EL ASTERISCO DE PLATA — CRITERIO FIRMADO, CÓDIGO INEXISTENTE
+
+**Se deposita acá porque es exactamente lo que esta acta existe para no
+perder:** una decisión de la mesa que **todavía no tiene consumidor**. Si C se
+compacta antes de montar el techo, esto se evapora — y el techo se construye
+otra vez con la duda ya resuelta.
+
+**FIRMA DE LA MESA (3-ago-2026), verbatim:**
+
+> *"El total muestra lo que sabe y declara lo que le falta — jamás un número
+> redondo que oculta citas."*
+
+⇒ Cuando alguna cita viva del día **no tenga `precio`**, el `$ del día` **suma
+las que sí lo tienen y lo DICE**. Lo prohibido no es el número incompleto: es
+el número incompleto **que se presenta como completo**. *Un total redondo que
+esconde dos citas es peor que un total con asterisco, porque el primero no se
+puede desconfiar.*
+
+**DATO DE A (medición suya, en su territorio — se cita, no se re-mide):** de
+**88 citas, solo 2 sin precio**, ambas del **7-jul**, sueltas y **anteriores al
+snapshot de precio**. En cualquier día de hoy el hueco da **0**.
+
+> ⇒ **EL ASTERISCO ES DEFENSA, NO ESTADO NORMAL.** Se construye para no mentir
+> el día que falle, no porque hoy falle.
+
+### ⚠️ Y LO QUE ESO TRAE, DECLARADO AL DEPOSITARLO
+
+**Una defensa que nunca dispara es una defensa que nadie vio funcionar.** Con
+el hueco en 0 todos los días, el camino del asterisco **no se alcanza en el
+aparato del founder** — y esta misma sesión pagó dos veces por instrumentos que
+no podían ser mirados donde importaba (**L-161**: toda superficie de gate se
+verifica ALCANZABLE; y la sonda `__DEV__` que, por construcción, no podía
+hablar en el teléfono).
+
+**No es objeción al criterio —que es correcto—, es su condición de calidad:**
+al montarlo, el camino con hueco tiene que poder **verse al menos una vez**
+(fixture, o el 7-jul que ya existe en la data). *Si nace y nadie lo ve andar,
+lo que tenemos no es una defensa: es una rama que creemos que funciona.*
+
+---
+
+*Depositada por C al cierre de S85. Nada de acá está firmado salvo lo que se
+cita como firmado en §8: el resto son commits, mediciones y pendientes. Lo que
+rige sigue siendo el canon.*
