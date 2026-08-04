@@ -1075,8 +1075,31 @@ export default function Hoy() {
                   ? t('agenda.datoPorCoordinar', { n: forma.n })
                   : t('agenda.datoLibreConSemana', { n: forma.n });
 
-  // E5 — la mecánica del Hogar del cliente, VERBATIM: primer nombre; sin
-  // nombre, el saludo va SOLO (jamás inventado).
+  /* E5 — la mecánica del Hogar del cliente, VERBATIM: primer nombre; sin
+     nombre, el saludo va SOLO (jamás inventado).
+
+     ═══ LA ESTRUCTURA ESTÁ FIRMADA (gate S85) ═══════════════════════════
+     Literal del founder: *"debe saludar por el nombre, y abajo pequeño el
+     nombre del negocio"* — que es exactamente lo que hace. **No se toca la
+     composición.**
+
+     🔴 **LO QUE FALLA ES EL DATO, y su forma es la del día:** el founder vio
+     *«Hola, demo-prestador»*. `profiles.nombre` se siembra con el LOCAL-PART
+     DEL CORREO cuando la metadata no trae nombre (`handle_new_user`,
+     D-637), así que `demo-prestador@…` produce ese saludo.
+     **Y no hay nada que pueda cazarlo:** el saludo recibe un `string`, y
+     `'demo-prestador'` es tan válido como `'Guillermo'`. *Un dato sembrado
+     que dice "sí" — la misma familia del techo que devolvía `1`: un valor
+     legal que el consumidor obedece.*
+     **A cura el dato.** Y se descartó la salida barata —adivinar si un
+     nombre "parece un slug"—: una heurística que se equivoca le quita el
+     nombre a alguien que sí se llama así.
+
+     🔴 **DEUDA CON DUEÑO (b), firmada en el gate: LA SUPERFICIE DE EDICIÓN
+     DEL NOMBRE PERSONAL VUELVE AL PRESTADOR.** Hoy **nadie puede
+     corregirse el nombre desde esta app** — así que limpiar el dato cura
+     el presente y deja al prestador sin manera de arreglarlo la próxima
+     vez. *Necesaria, no urgente*; es de esta casa (pantalla), no de A. */
   const nombrePerfil = pantalla.estado === 'listo' ? pantalla.nombre : null;
   const saludo = nombrePerfil
     ? t('agenda.saludoNombre', { nombre: nombrePerfil.trim().split(' ')[0] })
