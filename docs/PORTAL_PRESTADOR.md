@@ -145,6 +145,46 @@ Una pantalla completa, no popup. Lectura corta (30-45 segundos máximo). Estruct
 
 - **Saludo por nombre.** El prestador se llama X, no "estimado usuario".
 - **Reconocimiento de la elección.** *"Te elegimos para ser uno de los N prestadores que dan forma a e-PetPlace en Ecuador."* En Momento Fundacional, N es un número chico y conocido. En Momento Pionero, N es contexto de cohorte ("uno de los primeros N en tu ciudad"). En Momento Establecido, el reconocimiento se transforma en "uno de los prestadores que cumplen los estándares de e-PetPlace en tu ciudad".
+
+  > #### ⚠️ ENMIENDA S85 — **EL N SALE DE LA APP. LA FRONTERA, firmada por el founder (3-ago-2026).**
+  >
+  > **El número ya no viaja en la carta del Día 1.** *La carta decía "uno de
+  > los 15 prestadores" y el modal del emblema —**la misma frase, otra
+  > pantalla**— decía "uno de los prestadores": **la misma promesa con dos
+  > verdades**, y la de la carta **caducaba en el prestador 16 sin que nada
+  > avisara**.* La carta queda **alineada con el emblema**.
+  >
+  > **DÓNDE SIGUE VIVO EL N — y por eso esto NO es una poda de voz:**
+  >
+  > | | el N | por qué ahí es legítimo |
+  > |---|---|---|
+  > | **la comunicación PERSONAL del founder** (§2.2, la carta física, el mensaje directo) | ✅ **VIVE** | **tiene fecha y tiene autor** — se dijo un día, lo dijo alguien, y quien lo lee sabe las dos cosas |
+  > | **una string de producto** | ❌ **SALE** | **no tiene ninguna de las dos** — se muestra igual el día 1 y el día 400, sin que nadie lo haya vuelto a afirmar |
+  >
+  > **LA REGLA, y es `L-198` aplicada a la VOZ DE PRODUCTO:** *un texto que
+  > explica un porqué **vence con el porqué***. **Un número fijo en una
+  > string es un porqué con fecha de vencimiento que nadie va a auditar** —
+  > *nadie abre un archivo de traducciones a preguntarse si el 15 sigue
+  > siendo 15.*
+  >
+  > **⚠️ Y su agravante, que es lo que la hace una regla y no una
+  > corrección:** el N estuvo **desde S79 sin gatearse nunca** — *no
+  > sobrevivió a una revisión: **sobrevivió a la ausencia de revisión**.* Es
+  > la familia que S85 pagó seis veces (**L-194 → L-199**): **no rompe
+  > nada.** Un string con un número viejo **renderiza perfecto, pasa el
+  > typecheck, pasa el lint y le miente a una persona real.**
+  >
+  > **LO QUE ESTA ENMIENDA NO TOCA:** el reconocimiento **sigue siendo por
+  > cohorte** (fundador / pionero / establecido leen textos distintos — eso
+  > es identidad, no aritmética) · la **firma con nombre propio del
+  > founder** (§2.3, abajo) · la carta **física** de §2.2. *Lo que sale es
+  > **la cifra**, no la pertenencia.*
+  >
+  > **Hermana de la firma del modal del emblema (`019fcabf`, mismo día):**
+  > ahí se decidió que **el emblema tampoco lleva su «N» de orden** — *un
+  > «N» convierte una pertenencia en un puesto*. **Las dos firmas son la
+  > misma tesis leída en dos superficies: la pertenencia se dice, el
+  > número se calla.**
 - **Devolución del propósito.** Si el prestador respondió la pregunta de propósito en la aplicación, su respuesta vuelve aparecer aquí. *"Vos nos dijiste: '[su respuesta]'. Acá te ayudamos a vivirlo todos los días."* Esto cierra un círculo emocional. El prestador encuentra sus propias palabras en el lugar al que llega.
 - **Firma.** En Momento Fundacional: nombre completo del founder + "founder, e-PetPlace". En Momentos posteriores: firma se transforma a "el equipo de e-PetPlace" pero mantiene tono humano.
 - **Una sola acción visible.** "Entrar a mi espacio."
