@@ -930,3 +930,9 @@ export {
   type MiembroDeFamilia,
   type CodigoErrorFamiliaMascota,
 } from './wrappers/familiaDeMascota';
+
+export {
+  obtenerAtencionesAbiertas,
+  type AtencionAbierta,
+  type CodigoErrorAtencionesAbiertas,
+} from './wrappers/atencionesAbiertas';

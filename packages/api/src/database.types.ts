@@ -17314,6 +17314,19 @@ export type Database = {
         Args: { p_familia_servicio: string; p_mascota_id: string }
         Returns: Json
       }
+      obtener_atenciones_abiertas: {
+        Args: { p_dias_atras?: number; p_prestador_id: string }
+        Returns: {
+          atencion_id: string
+          cita_id: string
+          dias_abierta: number
+          iniciada_en: string
+          mascota_id: string
+          mascota_nombre: string
+          precio: number
+          tipo_servicio: string
+        }[]
+      }
       obtener_casos_activos_mascota: {
         Args: { p_cuenta_comercial_id: string; p_mascota_id: string }
         Returns: {
