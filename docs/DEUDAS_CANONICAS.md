@@ -5301,6 +5301,64 @@ importa: **doce de veinticuatro** reglas del lint estaban en esa condición.*
 
 ---
 
+#### D-645 — **UNA PROMOCIÓN NO ES UNA MIGRACIÓN**: nada en el árbol relaciona una pieza nueva con el código que debería reemplazar 🟠 (candidata a LEY, sin firma · pedido a B)
+
+**Hallazgo de C, S85 — y es el que EXPLICA LOS CUATRO COBROS DEL DÍA.**
+
+> ### **Promover una pieza a `packages/ui` deja al viejo código VIVO, y nada lo señala.**
+
+**El eje, y por eso merece nombre propio:** *cuando una pieza sube a la casa, el
+acto tiene DOS mitades* — **① la pieza nueva existe** y **② los consumidores
+viejos mueren**. **El árbol registra la ① y NO SABE NADA DE LA ②.** *No hay
+import roto, no hay tipo huérfano, no hay referencia colgando: **el código viejo
+sigue compilando perfecto porque nunca dependió del nuevo**.*
+
+### LOS CUATRO COBROS, todos del mismo día
+
+| | qué quedó vivo | cómo se cazó |
+|---|---|---|
+| ① | **los tres glifos de la barra** — el clon del registry | **el founder mirando** |
+| ② | **los chips del HOY** — la línea viajera que la pieza nueva reemplaza | **el founder mirando** |
+| ③ | *(los otros dos del mismo eje, en el gate de `019fcabf`)* | **el founder mirando** |
+
+> **⚠️ LOS CUATRO LOS CAZÓ EL FOUNDER COMPARANDO SU PANTALLA CON LA GALERÍA. NI
+> UNO LO CAZÓ UN GUARD.** *Y no es que los guards fallaran: **no existe ninguno
+> que pueda ver esto**, porque no hay nada roto que ver.*
+
+### POR QUÉ NO SE CIERRA CON DISCIPLINA — el argumento de C, y es el que decide
+
+**«Acordate de borrar el viejo» ya es la regla, y falló cuatro veces en un día,
+con las tres pistas atentas y el tema fresco.**
+
+> **Una regla que depende de que alguien se acuerde, en el momento exacto en que
+> está ocupado haciendo otra cosa, no es una regla: es una esperanza.**
+> *(Es L-198 en su corolario más duro: si la respuesta a "¿si esto se rompe,
+> algo se pone rojo?" es "alguien va a acordarse", no hay defensa.)*
+
+**⇒ SE CIERRA CON ALGO QUE LO VIGILE.** *Qué exactamente es de B —es su casa— y
+esta ficha NO lo prescribe.* **Lo que sí declara es la forma del problema para
+que el mecanismo se diseñe contra ella:** *el guard tiene que poder decir
+**«esta pieza nueva tiene consumidores viejos que hacen lo mismo»**, y eso es
+una relación que hoy **no está escrita en ningún lado** — ni en el import, ni en
+el tipo, ni en el nombre.*
+
+**PEDIDO A B, declarado y no clonado (§6 del método):** *el mecanismo de
+vigilancia vive en `packages/ui` y su lint — territorio de B.* **A no lo
+construye; lo pide con su literal.** *Una vía posible (sin firmar, para no
+prescribir): que la promoción declare a QUIÉN reemplaza, y el guard verifique que
+ese "a quién" ya no exista.*
+
+**⚠️ ESTATUTO: CANDIDATA A LEY, SIN FIRMA (regla 80).** *Un texto propuesto no
+rige.* **Lo que rige hoy es la ficha**, con su condición de muerte.
+
+☠️ **CONDICIÓN DE MUERTE:** existe un mecanismo que **falla en rojo** cuando una
+pieza promovida convive con el código que reemplaza — **y se le produjo la falla
+una vez** (L-192: si no se le puede producir el rojo, no existe).
+**DISPARO: la próxima promoción a `packages/ui`.** Origen: S85-C (los cuatro
+cobros del día, todos por gate del founder).
+
+---
+
 #### D-644 — UNA MIGRACIÓN DE S82 VIVE EN EL REPO Y NO EN LA DB: divergencia silenciosa entre el código y el remoto 🟠
 
 **EL LITERAL:** `supabase/migrations/20260731130000_s82_oferta_adiestramiento_publica.sql`
