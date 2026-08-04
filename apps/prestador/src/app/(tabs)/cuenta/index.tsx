@@ -178,6 +178,39 @@ export default function Cuenta() {
   const [salirAbierta, setSalirAbierta] = useState(false);
   const [cerrando, setCerrando] = useState(false);
   const [eliminarAbierta, setEliminarAbierta] = useState(false);
+  /* ⭐ S86-C · D-649 — BUSCAR ACTUALIZACIONES A MANO.
+     LO QUE LO OBLIGA (D-650, medido por A): el GPS del paseo mantiene VIVO
+     el proceso ⇒ nunca hay cold start ⇒ `expo-updates` nunca busca. Y el
+     primer cold start SOLO descarga (aplica en el siguiente). Resultado:
+     **un prestador que pasea puede quedarse indefinidamente sin
+     actualizaciones**, y su única salida hoy es Ajustes de Android →
+     Forzar detención, DOS VECES. Pasa en el uso NORMAL, no en un borde.
+     ⚠️ `noSePudo` NO es `alDia`, y ésa es la mitad que importa (L-197): si
+     la consulta falla, decir "estás al día" es afirmar sobre algo que no
+     se pudo mirar — y acá esa mentira deja al prestador exactamente donde
+     estaba, creyendo que no. El fallo degrada a AUSENCIA de respuesta. */
+  const [upd, setUpd] = useState<
+    'reposo' | 'buscando' | 'alDia' | 'descargando' | 'descargado' | 'noSePudo'
+  >('reposo');
+
+  async function buscarActualizacion() {
+    setUpd('buscando');
+    try {
+      const r = await Updates.checkForUpdateAsync();
+      if (!r.isAvailable) {
+        setUpd('alDia');
+        return;
+      }
+      setUpd('descargando');
+      await Updates.fetchUpdateAsync();
+      setUpd('descargado');
+    } catch {
+      /* Un solo catch para las DOS llamadas a propósito: al prestador le da
+         igual cuál de las dos falló —no puede hacer nada distinto— y
+         partirlo en dos voces sería precisión sin consecuencia. */
+      setUpd('noSePudo');
+    }
+  }
   // la identidad del header CD (S61-B12): datos REALES o nada
   const [identidad, setIdentidad] = useState<Identidad | null>(null);
   const [negocio, setNegocio] = useState<Negocio | null>(null);
@@ -676,6 +709,47 @@ export default function Cuenta() {
               ? `update ${Updates.updateId.slice(0, 8)} · ${Updates.channel ?? 'sin canal'}`
               : 'bundle embebido / dev'}
           </Texto>
+
+          {/* ⭐ S86-C · D-649 — el botón vive PEGADO al marcador de arriba a
+              propósito: el id que se lee ahí es exactamente lo que este
+              botón cambia, y juntos contestan la pregunta entera («¿qué
+              estoy corriendo?» / «¿hay algo más nuevo?»).
+
+              ⚠️ REGLA DE EXISTENCIA (Ley 23 — la puerta no ofrece lo que va
+              a rechazar): sin `Updates.isEnabled` —dev, Expo Go, web— la
+              consulta SIEMPRE tira, así que el control NO EXISTE ahí. Un
+              botón que solo sabe fallar es peor que ninguno.
+
+              ⚠️ Y NO SE OFRECE «aplicar ahora» (`reloadAsync`), que sería
+              lo obvio: recargar el bundle MATA la pantalla viva, y el caso
+              que parió esta deuda es justamente el prestador PASEANDO con
+              el GPS corriendo. La cura no puede tener como efecto perder la
+              atención en curso. Por eso el estado final DICE lo que hay que
+              hacer —se aplica al volver a abrir— en vez de hacerlo. */}
+          {Updates.isEnabled && (
+            <View style={{ gap: spacing[2], alignItems: 'flex-start' }}>
+              <Boton
+                variante="secundario"
+                tamaño="sm"
+                etiqueta={t('miCuenta.buscarUpdate')}
+                cargando={upd === 'buscando' || upd === 'descargando'}
+                onPress={() => void buscarActualizacion()}
+              />
+              {upd !== 'reposo' && (
+                <Texto variante="apoyo">
+                  {upd === 'buscando'
+                    ? t('miCuenta.updBuscando')
+                    : upd === 'alDia'
+                      ? t('miCuenta.updAlDia')
+                      : upd === 'descargando'
+                        ? t('miCuenta.updDescargando')
+                        : upd === 'descargado'
+                          ? t('miCuenta.updDescargado')
+                          : t('miCuenta.updNoSePudo')}
+                </Texto>
+              )}
+            </View>
+          )}
         </View>
       </ScrollView>
 

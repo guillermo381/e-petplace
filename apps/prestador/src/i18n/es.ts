@@ -676,6 +676,17 @@ export const prestadorEs = {
     notificaciones: 'Notificaciones',
     notifPronto: 'Pronto — cuando las notificaciones del negocio lleguen al teléfono, acá vas a decidir cuáles.',
     eliminarCuenta: 'Eliminar cuenta',
+    /* ⭐ S86-C · D-649. La voz del estado final es la que carga el trabajo:
+       decir «lista» sin decir CUÁNDO la ve deja al prestador esperando un
+       cambio que no va a llegar hasta que cierre y abra.
+       ⚠️ `updNoSePudo` jamás dice «estás al día» — es lo contrario de lo
+       que sabemos (L-197). */
+    buscarUpdate: 'Buscar actualizaciones',
+    updBuscando: 'Buscando…',
+    updAlDia: 'Ya tienes la última versión.',
+    updDescargando: 'Descargando la actualización…',
+    updDescargado: 'Lista. Se aplica la próxima vez que abras la app.',
+    updNoSePudo: 'No pudimos consultar si hay una versión nueva.',
     eliminarVoz:
       'Va a estar acá, con todas las de la ley. Antes tenemos que resolver bien qué pasa con tus citas ya pagadas, tus planes vivos y tu saldo por liquidar — un negocio con compromisos no se borra a la ligera.',
     entendido: 'Entendido',
