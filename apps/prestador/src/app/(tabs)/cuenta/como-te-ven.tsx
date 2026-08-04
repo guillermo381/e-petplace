@@ -193,6 +193,36 @@ export default function ComoTeVen() {
           logoUrl={resolverUrlLogoNegocio(prestador.foto_url)}
           ciudad={prestador.ciudad}
           portadas={portadas}
+          /* ⭐ S85-C22 — EL CLIP LLEGA AL ESPEJO, y con él cierra la
+             segunda mitad del bug del founder: subía el clip, la app
+             decía que subió —era verdad— y no aparecía **ni donde lo
+             subió ni acá**. La primera mitad la cerró C21; ésta esperaba
+             a que la ficha dejara de pedir lo imposible.
+
+             ⏪ HASTA `e7e58df` LA FICHA PEDÍA `clipPoster`: una IMAGEN
+             FIJA que **nada en el sistema produce** (censo: cero). Pasarle
+             este mismo path habría COMPILADO, no habría rebotado y no
+             habría pintado NADA —un `<Image>` con la uri de un video—, y
+             el bug habría quedado "cableado" y vivo. Por eso no se cableó
+             a medias y se pidió a B: **la mitad que falta se declara, no
+             se improvisa con la prop que había**.
+
+             `resolverUrlFotoGaleria` y no un resolvedor propio: el clip
+             vive en el MISMO bucket que las fotos (`prestador-galeria`,
+             público) y ya se resuelve dos líneas más arriba. Dos
+             resolvedores para un bucket es la fuente doble que se
+             desincroniza sola.
+
+             ⚠️ `''` CUENTA COMO AUSENTE: `clip_url` es texto y el
+             "sin clip" del wrapper viaja como cadena vacía (`aNull` la
+             convierte al escribir, pero un valor legado puede llegar
+             así). Pasar `''` haría montar una posición de carrusel con un
+             video que no existe — un hueco que se ve como falla. */
+          clipUri={
+            prestador.clip_url !== null && prestador.clip_url !== ''
+              ? resolverUrlFotoGaleria(prestador.clip_url)
+              : null
+          }
           servicios={servicios}
           /* S84-C23 — LA ZONA, y NUNCA la sede.
              `MiPrestador` trae `lat`/`lon` —la coordenada EXACTA— a un

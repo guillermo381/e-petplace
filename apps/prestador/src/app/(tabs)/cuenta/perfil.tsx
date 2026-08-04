@@ -1098,11 +1098,14 @@ export default function PerfilV2() {
                 vitrina.ts` declara que esta capa no puede medirla).
                 Rellenarla sería el verosímil-falso de L-139.
 
-                ⚠️ Y LO QUE NO SE HIZO, declarado: la ficha pública sigue
-                SIN clip. `FichaPrestador.clipPoster` pide un PÓSTER-IMAGEN
-                y **nada en el sistema lo produce** — pasarle este mismo
-                path compila, no rebota y pinta NADA. Es de B y está
-                pedido; acá no se clona ni se cablea a medias. */}
+                ✅ Y LA FICHA PÚBLICA YA LO MUESTRA (`como-te-ven`, C22):
+                la nota que vivía acá decía que `FichaPrestador` pedía un
+                `clipPoster` —una imagen fija que nada produce— y **duró
+                un commit**: B lo curó (`e7e58df`, la prop es `clipUri`) y
+                el espejo se cableó. *Se corrige en vez de dejarla: era
+                verdad al escribirla y hoy nombra una prop que ya no
+                existe.* Que haya envejecido tan rápido es el argumento,
+                no la excepción. */}
             <View style={{ paddingVertical: spacing[4], gap: spacing[2] }}>
               <Texto variante="seccion">{t('perfilNegocio.clipTitulo')}</Texto>
               {/* ② S84-C30 — `Boton acento`, la variante que B construyó
@@ -1129,11 +1132,19 @@ export default function PerfilV2() {
                   servir antes y después del botón, y ésa era su prueba.
                   Que ahora exista el control y siga sirviendo es la
                   demostración de que el copy estaba bien escrito.
-                  ⚠️ REPRODUCIR SIGUE SIN EXISTIR (D-617): el clip cargado
-                  se DICE, y no se dibuja ningún control que prometa
-                  reproducción (Ley 23). El ▶ vive en el punto del
-                  carrusel de la ficha, que es de B, y llega con la
-                  build — no acá. */}
+                  ☠️ ACÁ VIVÍA LA SEGUNDA COPIA DE LA ABSTENCIÓN, y es el
+                  hallazgo que se lleva este commit: decía *"REPRODUCIR
+                  SIGUE SIN EXISTIR (D-617) … el ▶ llega con la build — no
+                  acá"* **tres líneas arriba del reproductor que C21 ya
+                  había montado**.
+                  C21 reescribió la justificación de la sección y NO VIO
+                  que la misma decisión estaba argumentada DOS VECES en el
+                  mismo bloque. ⇒ **una decisión escrita en dos lugares se
+                  deroga en uno solo**, y la copia que sobrevive no parece
+                  un resto: parece la regla. Es la #23 cobrando en el
+                  archivo donde se la acababa de nombrar, el mismo día.
+                  *Por eso la cura de un comentario viejo no es editarlo:
+                  es buscar sus copias.* */}
               {clipPath === null ? (
                 <View style={{ alignSelf: 'flex-start' }}>
                   <Boton
