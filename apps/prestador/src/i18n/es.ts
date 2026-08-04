@@ -676,6 +676,10 @@ export const prestadorEs = {
     notificaciones: 'Notificaciones',
     notifPronto: 'Pronto — cuando las notificaciones del negocio lleguen al teléfono, acá vas a decidir cuáles.',
     eliminarCuenta: 'Eliminar cuenta',
+    /* ⭐ S86-C · «El movimiento» baja de NEGOCIO con su voz VERBATIM: es
+       plata de la cuenta comercial, no configuración del oficio. */
+    movimiento: 'El movimiento',
+    movimientoDetalle: 'Los presupuestos que armaste y en qué quedaron.',
     /* ⭐ S86-C · D-649. La voz del estado final es la que carga el trabajo:
        decir «lista» sin decir CUÁNDO la ve deja al prestador esperando un
        cambio que no va a llegar hasta que cierre y abra.
@@ -999,17 +1003,16 @@ export const prestadorEs = {
        dio CERO consumidores (Ley 37). La voz viajó VERBATIM a `mascotas.*`.
        `despiertaSeccion` SOBREVIVE: estadísticas sigue siendo su habitante
        hasta que el dashboard la reemplace, y ahí se va con ella. */
-    despiertaSeccion: 'Se despierta con el uso',
-    estadisticas: 'Estadísticas',
-    estadisticasDetalle: 'Se despiertan con tus primeras atenciones.',
+    /* ☠️ S86-C · MURIERON las voces de ESTADÍSTICAS (celda, sección y
+       pantalla): el dashboard de DATOS las reemplazó con datos reales y
+       la promesa cumplió su trabajo (Ley 37). Censo corrido: CERO
+       consumidores de las cinco. */
     cobros: 'Cobros',
     cuentaComercial: 'Cuenta comercial',
     liquidaciones: 'Liquidaciones',
     // honesto en términos de hitos — JAMÁS "$0" (§2.6):
     liquidacionesDetalle: 'Se despierta cuando empieces a cobrar por la app.',
     // S70-B2-v2: entrada a "El movimiento" (presupuestos del negocio, D-440)
-    movimiento: 'El movimiento',
-    movimientoDetalle: 'Los presupuestos que armaste y en qué quedaron.',
     // S54-B: la verdad del dinero cuando el ledger tiene eventos propios
     liquidacionesPendientes: 'Tienes {{cantidad}} servicios cobrados esperando liquidación.',
     liquidacionesPendientesUno: 'Tienes 1 servicio cobrado esperando liquidación.',
@@ -2455,10 +2458,6 @@ export const prestadorEs = {
     casosTitulo: 'Los casos que otros prestadores te confíen',
     casosCuerpo:
       'Cuando un colega te derive el caso clínico de una mascota, su historia llega acá con el consentimiento de la familia.',
-    estadisticasNav: 'Estadísticas',
-    estadisticasTitulo: 'Tus números van a vivir acá',
-    estadisticasCuerpo:
-      'Con tus primeras atenciones cerradas, esta sección cuenta tu mes: mascotas atendidas, citas, continuidad. Sin compararte con nadie.',
     resenasNav: 'Reseñas',
     resenasTitulo: 'Lo que las familias digan de ti',
     resenasCuerpo: 'Cuando una familia deje su primera reseña, va a vivir acá.',

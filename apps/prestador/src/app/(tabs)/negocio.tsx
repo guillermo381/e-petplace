@@ -333,22 +333,19 @@ export default function Negocio() {
                 detalle={detalleLiquidaciones}
                 onPress={() => router.push('/liquidaciones')}
               />
-              {/* S70-B2-v2: "El movimiento" — los presupuestos del negocio
-                  (D-440) MIGRAN a NEGOCIO (la ley "HOY acciona, NEGOCIO
-                  gestiona"). Solo con oficio vet activo (los presupuestos
-                  son clínicos). */}
-              {serviciosVet.length > 0 && (
-                <>
-                  <Separador />
-                  <CeldaNavegacion
-                    icono="pagos"
-                    registro="aa"
-                    titulo={t('negocio.movimiento')}
-                    detalle={t('negocio.movimientoDetalle')}
-                    onPress={() => router.push('/veterinaria/movimiento')}
-                  />
-                </>
-              )}
+              {/* ☠️ S86-C · «EL MOVIMIENTO» SE MUDÓ A CUENTA (firma de mesa):
+                  es PLATA DE LA CUENTA COMERCIAL, no configuración del
+                  oficio. ⏪ Su nota de S70-B2-v2 decía que migraba ACÁ por
+                  «HOY acciona, NEGOCIO gestiona» — cierto entonces, vencido
+                  ahora: la frontera pasó a *DATOS consulta · NEGOCIO
+                  configura*, y un ledger no se configura.
+                  ⚠️ SUS DOS GATES VIAJARON CON ELLA: el de rol (el del tab,
+                  vía `useGateGestor`) y **el de oficio vet** que vivía acá
+                  (`serviciosVet.length > 0`) — los presupuestos son
+                  clínicos. Perder el segundo habría ofrecido la pantalla a
+                  negocios sin nada que mostrar.
+                  ⚠️ Y NO SE PARTIÓ: «Lo que te espera» en HOY sigue
+                  apuntando al mismo destino — dos vistas, una fuente. */}
             </Tarjeta>
           </View>
 
@@ -384,18 +381,16 @@ export default function Negocio() {
               retirarla hoy dejaría un hueco donde hay una promesa
               honesta. Su celda es el único habitante que le queda a esta
               sección; cuando se vaya, la sección se va con ella (Ley 37). */}
-          <View style={{ gap: spacing[3] }}>
-            <Texto variante="seccion">{t('negocio.despiertaSeccion')}</Texto>
-            <Tarjeta relleno="ninguno">
-              <CeldaNavegacion
-                icono="negocio"
-                registro="aa"
-                titulo={t('negocio.estadisticas')}
-                detalle={t('negocio.estadisticasDetalle')}
-                onPress={() => router.push('/negocio/estadisticas')}
-              />
-            </Tarjeta>
-          </View>
+          {/* ☠️ S86-C · MURIÓ LA SECCIÓN «SE DESPIERTA CON EL USO» ENTERA,
+              con su último habitante: **ESTADÍSTICAS**.
+              La firma decía que muere EN EL MISMO COMMIT que el dashboard
+              que la reemplaza — y el dashboard existe: DATOS ya tiene la
+              semana, el día por día, el mix y la trayectoria sobre datos
+              REALES. La promesa honesta («se despierta con el uso») cumplió
+              su trabajo el día que lo despertado apareció (Ley 37).
+              ⚠️ Se retira TAMBIÉN la sección, no solo la celda: era su
+              único habitante, y un encabezado sin filas es un rótulo que
+              promete una lista vacía. */}
 
         </View>
       </ScrollView>

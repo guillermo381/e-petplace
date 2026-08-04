@@ -497,6 +497,9 @@ export const prestadorEn = {
     notificaciones: 'Notifications',
     notifPronto: "Soon — when business notifications reach your phone, you'll decide which ones here.",
     eliminarCuenta: 'Delete account',
+    // S86-C · "Activity" comes down from BUSINESS, voice VERBATIM.
+    movimiento: 'Activity',
+    movimientoDetalle: 'The quotes you built and how they turned out.',
     // S86-C · D-649. The final state carries the work: "ready" without WHEN
     // leaves the provider waiting for a change that won't come until reopen.
     buscarUpdate: 'Check for updates',
@@ -761,16 +764,13 @@ export const prestadorEn = {
     // S79-B (T2-B5) · the three mute modules gain section + voice + trigger (§2.6)
     // ☠️ S86-C · `resenas*`/`casosHeredados*` died here (cells moved to DATA,
     // census = zero consumers). Voice moved VERBATIM to `mascotas.*`.
-    despiertaSeccion: 'Wakes up as you work',
-    estadisticas: 'Statistics',
-    estadisticasDetalle: 'They wake up with your first appointments.',
+    // ☠️ S86-C · Statistics voices died (cell, section and screen): the
+    // DATA dashboard replaced them with real data. Census: zero consumers.
     cobros: 'Payments',
     cuentaComercial: 'Business account',
     liquidaciones: 'Payouts',
     liquidacionesDetalle: 'Wakes up when you start getting paid through the app.',
     // S70-B2-v2 · Espejo de es.ts
-    movimiento: 'Activity',
-    movimientoDetalle: 'The quotes you built and how they turned out.',
     liquidacionesPendientes: 'You have {{cantidad}} paid services awaiting payout.',
     liquidacionesPendientesUno: 'You have 1 paid service awaiting payout.',
     cuentaComercialDetalle: "You'll need it before charging — it arrives with the payments cycle.",
@@ -2056,10 +2056,6 @@ export const prestadorEn = {
     casosTitulo: 'The cases other providers entrust to you',
     casosCuerpo:
       'When a colleague refers a pet’s clinical case to you, its history arrives here with the family’s consent.',
-    estadisticasNav: 'Statistics',
-    estadisticasTitulo: 'Your numbers will live here',
-    estadisticasCuerpo:
-      'Once your first appointments are closed, this section tells your month: pets cared for, appointments, continuity. Never compared to anyone.',
     resenasNav: 'Reviews',
     resenasTitulo: 'What families say about you',
     resenasCuerpo: 'When a family leaves their first review, it will live here.',

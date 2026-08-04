@@ -549,7 +549,13 @@ export default function Mascotas() {
               icono="negocio"
               registro="aa"
               titulo={t('mascotas.plataDetalle')}
-              onPress={() => router.push('/negocio/liquidaciones')}
+              /* ⏪ S86-C: apuntaba a `/negocio/liquidaciones`, QUE NO EXISTE
+                 — la ruta real es `/liquidaciones`, en la RAÍZ. Lo escribí
+                 por analogía con las otras celdas de Negocio y nadie lo vio:
+                 **un enlace a una ruta inexistente no rompe nada hasta que
+                 alguien lo toca**, así que typecheck, lint y gate salieron
+                 verdes sobre un camino muerto. Es la familia de la sesión. */
+              onPress={() => router.push('/liquidaciones')}
             />
           </SeccionDesplegable>
         )}

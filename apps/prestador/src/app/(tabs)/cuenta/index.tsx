@@ -67,6 +67,7 @@ import {
   useMuroOficio,
 } from '@/components/techo-oficio';
 import { vozOficio } from '@/lib/voz-oficio';
+import { useGateGestor } from '@/lib/gate-gestor';
 import { useTraduccion } from '@/i18n';
 
 // El lado del slot de identidad del header CD (S61-B12, firmado).
@@ -164,6 +165,11 @@ type Identidad = {
 type Negocio = {
   vozOficio: string | null;
   hitos: string[];
+  /* S86-C · el oficio vet, para «El movimiento». Ya se computaba acá
+     (`vetActivo`) y se usaba solo para la voz y los hitos; ahora también
+     GATEA — los presupuestos son clínicos, y esa condición viajó con la
+     celda desde NEGOCIO. Cero query nueva. */
+  vet: boolean;
 };
 
 
@@ -189,6 +195,9 @@ export default function Cuenta() {
      la consulta falla, decir "estás al día" es afirmar sobre algo que no
      se pudo mirar — y acá esa mentira deja al prestador exactamente donde
      estaba, creyendo que no. El fallo degrada a AUSENCIA de respuesta. */
+  /* S86-C · el gate de «El movimiento» (abajo): mismo predicado que gatea
+     el tab NEGOCIO, de donde baja — cambio nulo de audiencia. */
+  const { gate } = useGateGestor();
   const [upd, setUpd] = useState<
     'reposo' | 'buscando' | 'alDia' | 'descargando' | 'descargado' | 'noSePudo'
   >('reposo');
@@ -293,6 +302,7 @@ export default function Cuenta() {
             t,
           ),
           hitos,
+          vet: vetActivo,
         });
       })();
       return () => {
@@ -607,6 +617,40 @@ export default function Cuenta() {
               </View>
             ))}
           </Tarjeta>
+
+          {/* ⭐ S86-C · «EL MOVIMIENTO» BAJA DE NEGOCIO A CUENTA (firma de
+              mesa): es PLATA DE LA CUENTA COMERCIAL, no configuración del
+              oficio. Y NO SE PARTE — «Lo que te espera» en HOY sigue
+              apuntando al mismo destino: *dos vistas, una fuente*. Esa
+              entrada del HOY queda intacta a propósito.
+
+              ⚠️ **DIVERGENCIA MEDIDA CON LA ORDEN, y se declara en vez de
+              maquillarse:** la orden dice «a CUENTA, al lado de Cobros,
+              con el gate de Cobros». **Cobros/Liquidaciones NO está en
+              Cuenta** — su celda vive en NEGOCIO y empuja a `/liquidaciones`
+              (raíz). Medido, no supuesto. ⇒ el movimiento llega SOLO, y
+              «el gate de Cobros» se honra por su PREDICADO, que es el que
+              gatea el tab NEGOCIO donde Cobros vive hoy: `useGateGestor`
+              (`dueño|administrador`). Así ve exactamente la misma gente
+              que lo veía ayer — cambio nulo de audiencia.
+              Si la mesa quería a los dos juntos, falta mover Liquidaciones,
+              y eso NO se hizo porque la misma orden dijo no moverla. */}
+          {/* ⚠️ DOS gates, no uno — el segundo viajó con la celda y casi se
+              pierde: en NEGOCIO estaba dentro de `serviciosVet.length > 0`.
+              Los presupuestos son CLÍNICOS: sin oficio vet la pantalla
+              destino no tiene nada que mostrar, y ofrecerla sería una
+              puerta que no rechaza pero tampoco lleva (Ley 23). */}
+          {gate === 'permitido' && (negocio?.vet ?? false) && (
+            <Tarjeta relleno="ninguno" elevacion="reposo">
+              <CeldaNavegacion
+                icono="presupuesto"
+                registro="aa"
+                titulo={t('miCuenta.movimiento')}
+                detalle={t('miCuenta.movimientoDetalle')}
+                onPress={() => router.push('/veterinaria/movimiento')}
+              />
+            </Tarjeta>
+          )}
 
           {/* ⭐ S85-C11 — LA GALERÍA SUBE, ARRIBA DE "Sesión y cuenta".
               El founder no encontró los dos emblemas, y la medición dijo
