@@ -251,7 +251,22 @@ const SENALES_EXTENSION = [
   { nombre: 'Atmosfera', origen: 'S83-B16 (la luz)', re: /<Atmosfera[\s/>]/ },
   { nombre: 'Boton variante="acento"', origen: 'S84-B', re: /variante=["']acento["']/ },
   { nombre: 'superficie="muro"', origen: 'S84-B', re: /superficie=["']muro["']/ },
+  // ── S85 ──
+  { nombre: 'TresNumeros', origen: 'S85-B (el techo compacto, §2.4bis)', re: /<TresNumeros[\s/>]/ },
+  { nombre: 'FiltroPills', origen: 'S85-B', re: /<FiltroPills[\s/>]/ },
+  { nombre: 'SelectorDia', origen: 'S85-B (la rueda)', re: /<SelectorDia[\s/>]/ },
 ];
+
+/* ⚠️ LA LISTA **BASE** ENVEJECE, Y HAY QUE VERLO AL LEER EL NÚMERO.
+   Mide las piezas de S82/S83 — que es lo correcto para comparar contra la línea
+   base 7/54 —, **pero la app siguió construyendo con piezas de S84 y S85**. En
+   S85 se rediseñaron pantallas enteras (DATOS, el techo, «Necesita tu
+   atención») **con piezas que la BASE no nombra**, así que el porcentaje de
+   arriba SUBESTIMA lo que pasó.
+   **Esto NO se cura moviendo piezas de EXTENSIÓN a BASE**: eso rompería la
+   comparabilidad, que es lo único que hace útil a la serie. **Re-basar es
+   decisión de la mesa**, y cuando la tome, la línea base se re-declara con su
+   fecha — no se corrige hacia atrás. */
 
 // ⚠️ LAS QUE **NO** SON SEÑAL, y por qué — el hallazgo que le da forma al eje
 // mecánico. Se escriben acá para que nadie las agregue "porque faltan":
@@ -310,6 +325,9 @@ const FIXTURES_SENAL = {
   Atmosfera: '<Atmosfera>{x}</Atmosfera>',
   'Boton variante="acento"': '<Boton variante="acento" />',
   'superficie="muro"': '<Boton superficie="muro" />',
+  TresNumeros: '<TresNumeros carga={c} />',
+  FiltroPills: '<FiltroPills opciones={o} />',
+  SelectorDia: '<SelectorDia dia={d} />',
 };
 
 const FIXTURES_MECANICA = {
