@@ -164,8 +164,12 @@ export const prestadorEn = {
   // `Espejo<D>` del riel EXIGE la paridad: una key faltante rompe el
   // typecheck, no se descubre en pantalla).
   techo: {
-    cohorteFundador: 'Founding provider',
-    cohortePionero: 'Pioneer provider',
+    /* ☠️ S85-C36 · `cohorteFundador` / `cohortePionero` MURIERON. Eran MI
+       traducción del código de cohorte, escrita cuando esta casa componía la
+       etiqueta. B se llevó la composición a la pieza (`Insignia` con su propio
+       i18n) y estas quedaron SIN UN SOLO CONSUMIDOR — verificado por grep.
+       Ley 37. *Una key huérfana no rompe nada: solo espera a que alguien la
+       lea y crea que rige.* */
     cargaEnRuta: 'on the road',
     cargaCita1: 'appointment',
     cargaCitas: 'appointments',

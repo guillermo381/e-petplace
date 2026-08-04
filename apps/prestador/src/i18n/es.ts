@@ -206,8 +206,12 @@ export const prestadorEs = {
   techo: {
     // ⭐ S85-C23 · LOS TRES NÚMEROS DE LA PORTADA (PORTAL_PRESTADOR §2.4bis).
     // La UNIDAD habla el idioma del oficio; el esqueleto no cambia nunca.
-    cohorteFundador: 'Prestador fundador',
-    cohortePionero: 'Prestador pionero',
+    /* ☠️ S85-C36 · `cohorteFundador` / `cohortePionero` MURIERON. Eran MI
+       traducción del código de cohorte, escrita cuando esta casa componía la
+       etiqueta. B se llevó la composición a la pieza (`Insignia` con su propio
+       i18n) y estas quedaron SIN UN SOLO CONSUMIDOR — verificado por grep.
+       Ley 37. *Una key huérfana no rompe nada: solo espera a que alguien la
+       lea y crea que rige.* */
     // ⭐ RÓTULOS SUELTOS (S85-C34): el contrato de B separa VALOR de RÓTULO, así
     // que la unidad deja de ser una frase. El número puede pesar y la unidad
     // acompañar, que es lo que un techo necesita para leerse de un vistazo.
