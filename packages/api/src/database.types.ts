@@ -17392,6 +17392,10 @@ export type Database = {
           tipo: string
         }[]
       }
+      obtener_familia_de_mascota: {
+        Args: { p_mascota_id: string }
+        Returns: Json
+      }
       obtener_groomers_disponibles: {
         Args: {
           p_fecha: string

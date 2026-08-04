@@ -923,3 +923,10 @@ export {
   type NivelAporte,
   type CodigoErrorExpediente,
 } from './wrappers/expedienteModulado';
+
+export {
+  obtenerFamiliaDeMascota,
+  type FamiliaDeMascota,
+  type MiembroDeFamilia,
+  type CodigoErrorFamiliaMascota,
+} from './wrappers/familiaDeMascota';
