@@ -5325,6 +5325,59 @@ importa: **doce de veinticuatro** reglas del lint estaban en esa condición.*
 
 ---
 
+#### D-649 — NO HAY FORMA DE FORZAR LA BÚSQUEDA DE UPDATE DESDE LA APP: cuando un OTA no baja, el único recurso es reinstalar 🟠
+
+**Nace del incidente del 4-ago-2026**, y su valor está en cómo se
+descartó todo lo demás antes de llegar acá.
+
+**EL CASO:** el OTA del prestador (`019fcda7-…`) se publicó con el ancla
+verificada y **el founder no lo vio**. Medido, en este orden:
+
+| lo medido | resultado |
+|---|---|
+| runtime de la APK | **1.0.3** — el mismo del publish ⇒ **no era desajuste de runtime** |
+| channel de la build | `preview`, mapeado al branch `preview` — **único branch del proyecto** |
+| cabeza del branch | **el update publicado** |
+| lo que el servidor le responde a un aparato *(preguntado con las cabeceras del cliente de updates)* | **`019fcda7-…` — el publicado** |
+| lo que corría en el aparato | `019fcb21-…` = **3-ago 23:56**, el group de S85 |
+| el cliente, misma app store de updates, mismo ancla, 66 s después | **entró** |
+
+⇒ **el publish estaba sano de punta a punta y el aparato no lo tomó.**
+
+### POR QUÉ ES DEUDA Y NO UN INCIDENTE
+
+**Con todo verde, no hubo NINGUNA acción disponible desde la app.** Las
+salidas que quedaron son todas de afuera: abrir y esperar con red,
+`adb logcat` con cable, o reinstalar el APK — *y reinstalar borra la
+evidencia de por qué no bajó.*
+
+> **Un producto que se actualiza solo necesita una manera de que el
+> usuario pregunte «¿hay algo nuevo?» — y de que el sistema le
+> conteste.** Hoy la única respuesta posible es cerrar la app y confiar.
+
+### LA CURA
+
+`Updates.checkForUpdateAsync()` + `fetchUpdateAsync()` + `reloadAsync()`
+detrás de un control en **Cuenta**, al lado del pie que ya muestra el
+`updateId` (L-160 enmendada). Con las tres voces honestas: *estás al
+día* · *bajando…* · *no pude comprobar* — **y la tercera JAMÁS
+disfrazada de la primera** (L-197: un fallo degrada a ausencia, nunca a
+un valor que el usuario lea como cierto).
+
+**Cero build nueva** — `expo-updates` ya está instalado y el pie ya lo
+consume. Viaja por OTA.
+
+☠️ **CONDICIÓN DE MUERTE:** desde Cuenta, con un update publicado y sin
+aplicar, el prestador puede traerlo y verlo sin reinstalar nada.
+**DISPARO: cuando el prestador tenga superficie libre** (orden de la
+mesa: se registra ahora, se construye después).
+Origen: S86-A, incidente del OTA que no bajó. Hermana de
+`scripts/verify-ota.mjs`, que cubre la otra mitad — **el guard prueba
+que el update SE SIRVE; esta deuda es que el aparato pueda IR A
+BUSCARLO.**
+
+---
+
 #### D-648 — EL MOSTRADOR ESTAMPA LA HORA EN **UTC**: un walk-in de la tarde nace mañana 🔴
 
 **EL LITERAL, medido el 4-ago-2026 contra motor vivo:**
