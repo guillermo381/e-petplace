@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────
-// M2 — ¿QUIÉN ESTÁ EN EL MOSTRADOR? (/veterinaria/mostrador, S69-B).
+// M2 — ¿QUIÉN ESTÁ EN EL MOSTRADOR? (/mostrador, S69-B).
 // UN campo, DOS fuentes en una lista: lo que la clínica ya puede ver
 // (RLS) por nombre de mascota, y el buscador de alta asistida por email.
 // Dosis baja (§15b).
@@ -106,7 +106,7 @@ export default function Mostrador() {
   }, [q, t]);
 
   function irANueva() {
-    router.push({ pathname: '/veterinaria/mostrador/nueva', params: q.trim().length > 0 ? { q: q.trim() } : {} });
+    router.push({ pathname: '/mostrador/nueva', params: q.trim().length > 0 ? { q: q.trim() } : {} });
   }
 
   // La rama 'registrado' narrada a const (el narrowing por propiedad anidada
@@ -142,7 +142,7 @@ export default function Mostrador() {
                   accessibilityRole="button"
                   onPress={() =>
                     router.push({
-                      pathname: '/veterinaria/mostrador/atencion',
+                      pathname: '/mostrador/atencion',
                       params: { mascotaId: m.mascota_id, nombre: m.nombre },
                     })
                   }
@@ -172,7 +172,7 @@ export default function Mostrador() {
               onPress={() => {
                 const contacto = q.trim();
                 router.push({
-                  pathname: '/veterinaria/mostrador/autorizar',
+                  pathname: '/mostrador/autorizar',
                   params: {
                     userId: registrado.user_id,
                     nombre: registrado.nombre ?? '',

@@ -1,6 +1,6 @@
 // ─────────────────────────────────────────────────────────────────────
 // EL HANDSHAKE — la autorización de la familia en el mostrador
-// (/veterinaria/mostrador/autorizar, S70). La clínica halló un cliente
+// (/mostrador/autorizar, S70). La clínica halló un cliente
 // REGISTRADO (cuenta real de pet-parent); para atender o sumar una
 // mascota necesita el sí de la familia — un toque, por mascota. Dosis
 // baja (§15b). Espejo del alta fantasma (nueva.tsx), pero acá NO se
@@ -167,7 +167,7 @@ export default function AutorizarMostrador() {
         if (estado === 'autorizada') {
           detener(id);
           router.replace({
-            pathname: '/veterinaria/mostrador/atencion',
+            pathname: '/mostrador/atencion',
             params: { mascotaId: r.data.mascotaId ?? '', nombre: espera.mascotaNombre },
           });
         } else if (estado === 'rechazada') {

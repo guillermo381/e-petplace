@@ -47,6 +47,9 @@ import {
   obtenerIniciosVet,
   obtenerMiPrestador,
   obtenerMundoVeterinariaPropio,
+  obtenerOfertaAdiestramientoPropia,
+  obtenerOfertasGroomingPropias,
+  obtenerOfertasPaseoPropias,
   puedoAtenderClinico,
   registrarAtencionMostrador,
   registrarCobroPresencial,
@@ -61,9 +64,14 @@ import { EvitaTeclado } from '@/components/evita-teclado';
 import { verificarSesion } from '@/lib/api';
 import { vozErrorVet } from '@/lib/voz-error-vet';
 import { diaSemanaCorto } from '@epetplace/i18n';
+import { REGLA_OFICIO, type OficioMostrador } from '@/lib/oficio-mostrador';
 import { useTraduccion } from '@/i18n';
 
-type ServicioActivo = { codigo: string; nombre: string; precio: number };
+/* ⭐ S86-C · el servicio del menú YA SABE de qué oficio es. Sin eso, la
+   pantalla tendría que deducirlo, y deducir el oficio de un código de
+   servicio es exactamente el acoplamiento que la tabla de reglas vino a
+   evitar. */
+type ServicioActivo = { codigo: string; nombre: string; precio: number; oficio: OficioMostrador };
 
 
 export default function AtencionMostrador() {
@@ -124,6 +132,14 @@ export default function AtencionMostrador() {
      pedirle nada a A: faltaba la superficie. */
   const A_LA_PIZARRA = '__pizarra__';
   const [personas, setPersonas] = useState<EmpleadoCuenta[] | null>(null);
+  /* S86-C · qué OTROS oficios tiene activos el negocio — para poder decir
+     con precisión cuál todavía no puede registrarse acá (ver el bloque
+     del menú). */
+  const [otrosOficios, setOtrosOficios] = useState<{ paseo: boolean; grooming: boolean; adiestramiento: boolean }>({
+    paseo: false,
+    grooming: false,
+    adiestramiento: false,
+  });
   const [tratante, setTratante] = useState<string | undefined>(undefined);
 
   /* ⭐ S86-C · ① LOS DOS VERBOS, HONESTOS AL MOTOR (lámina firmada).
@@ -162,7 +178,7 @@ export default function AtencionMostrador() {
         setCarga({ fase: 'error' });
         return;
       }
-      const [mundo, cat, vac, detalle, firma, gente] = await Promise.all([
+      const [mundo, cat, vac, detalle, firma, gente, ofPaseo, ofGrooming, ofAdi] = await Promise.all([
         obtenerMundoVeterinariaPropio(pr.data.id),
         obtenerCatalogoVeterinaria(),
         obtenerCatalogoVacunas(),
@@ -180,6 +196,17 @@ export default function AtencionMostrador() {
         pr.data.cuenta_comercial_id !== null
           ? obtenerEmpleadosCuenta(pr.data.cuenta_comercial_id)
           : Promise.resolve(null),
+        /* ⭐ S86-C · LOS OTROS TRES MENÚS, **AL FINAL DEL ARREGLO** — y no
+           es capricho: los puse en el medio y desalineé el destructuring
+           entero (`gente` pasó a recibir las ofertas de paseo). El tsc lo
+           cazó, pero el archivo del HOY ya tenía la advertencia escrita y
+           yo la leí después de pagarla. Al final, nada se mueve.
+           Se REUSAN los lectores que el HOY ya consume — no nace ninguno
+           (L-175). Su fallo NO tumba la pantalla: ese oficio no aporta
+           servicios, y si el menú queda vacío la superficie lo DICE. */
+        obtenerOfertasPaseoPropias(pr.data.id),
+        obtenerOfertasGroomingPropias(pr.data.id),
+        obtenerOfertaAdiestramientoPropia(pr.data.id),
       ]);
       if (!vigente) return;
       // Un fallo de CUALQUIERA pasa a error — antes: mundo caído se
@@ -204,9 +231,38 @@ export default function AtencionMostrador() {
         });
       }
       const nombres = new Map<string, string>(cat.data.map((c) => [c.codigo, c.nombre]));
+      /* ⭐ S86-C · EL MENÚ, Y EL LÍMITE QUE LA MEDICIÓN ENCONTRÓ.
+         La ventanilla ya NO es clínica (se mudó fuera de `veterinaria/`)
+         y el menú tenía que ser la unión de los oficios activos.
+         🔴 **NO SE PUDO, y la causa es de CONTRATO, no de pantalla:**
+         `registrar_atencion_mostrador` pide un `tipo_servicio_codigo`, y
+         **las ofertas no-vet no exponen el suyo** — medido:
+          · `OfertaPaseoPropia` se indexa por `duracionMinutos` y no trae
+            código; el catálogo tiene `paseo_30min`/`paseo_60min` pero el
+            menú canónico llega a 300' y **no existe código para 120',
+            180', 240' ni 300'**. Mapear duración→código inventaría una
+            correspondencia que la DB no tiene.
+          · `OfertaAdiestramientoPropia` tampoco trae `tipoServicio`.
+         Forzarlo con el código genérico haría que un paseo de tres horas
+         y uno de treinta minutos se registren IGUAL — un dato plausible
+         y falso, que es la clase de defecto que esta sesión persigue.
+         ⇒ Se aplica la salida que la propia orden autoriza: **el oficio
+         sin menú resuelto DICE que no está disponible todavía**, jamás
+         una pantalla vacía sin explicación (L-197). Los oficios activos
+         del negocio se guardan para poder decirlo con precisión. */
       const activos: ServicioActivo[] = mundo.data.servicios
         .filter((s) => s.activo)
-        .map((s) => ({ codigo: s.tipoServicio, nombre: nombres.get(s.tipoServicio) ?? s.tipoServicio, precio: s.precio }));
+        .map((s) => ({
+          codigo: s.tipoServicio,
+          nombre: nombres.get(s.tipoServicio) ?? s.tipoServicio,
+          precio: s.precio,
+          oficio: 'veterinaria' as const,
+        }));
+      setOtrosOficios({
+        paseo: ofPaseo.ok && ofPaseo.data.some((o) => o.activo),
+        grooming: ofGrooming.ok && ofGrooming.data.some((o) => o.activo),
+        adiestramiento: ofAdi.ok && (ofAdi.data.oferta?.activo ?? false),
+      });
       setCarga({ fase: 'listo', prestadorId: pr.data.id, servicios: activos });
     })();
     return () => {
@@ -494,6 +550,14 @@ export default function AtencionMostrador() {
                   ? t('atencionMostrador.verboAhoraDetalle')
                   : t('atencionMostrador.verboAgendarDetalle')}
               </Texto>
+              {/* ⭐ S86-C · EL OFICIO SIN MENÚ LO DICE (orden de la mesa,
+                  L-197: la ausencia se declara, jamás se disfraza de «no
+                  hay nada»). El negocio tiene el oficio ACTIVO y aun así
+                  no puede registrarlo acá — eso es una limitación nuestra
+                  y se dice como tal, no como si no tuviera servicios. */}
+              {(otrosOficios.paseo || otrosOficios.grooming || otrosOficios.adiestramiento) && (
+                <Texto variante="apoyo">{t('atencionMostrador.oficioSinMenu')}</Texto>
+              )}
               {servicios !== null && (
                 <SelectorOpcion
                   etiqueta={t('atencionMostrador.servicioLabel')}

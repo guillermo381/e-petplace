@@ -1742,6 +1742,8 @@ export const prestadorEn = {
     aLaPizarra: 'To the board',
     sinPersonas: "We couldn't load your team. This visit will be left with no assignee, on the board.",
     // S86-C ① · the two verbs — one REGISTERS a fact, the other RESERVES.
+    // S86-C · an active trade that can't be registered here yet.
+    oficioSinMenu: 'For now the counter only records veterinary visits. Your other services are coming.',
     verboLabel: 'What are you doing?',
     verboAhora: 'See them now',
     verboAgendar: 'Schedule',

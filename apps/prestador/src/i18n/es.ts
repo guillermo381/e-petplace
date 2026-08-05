@@ -2101,6 +2101,9 @@ export const prestadorEs = {
     /* ⭐ S86-C ① · LOS DOS VERBOS. Honestos al motor: uno REGISTRA un
        hecho, el otro RESERVA capacidad. La RPC se elige por el verbo, así
        que la cita futura no tiene por dónde viajar por el registro. */
+    /* ⭐ S86-C · el oficio activo que TODAVÍA no se puede registrar acá.
+       Se dice como limitación nuestra, no como «no tenés servicios». */
+    oficioSinMenu: 'Por ahora el mostrador solo registra atenciones de veterinaria. Tus otros servicios llegan pronto.',
     verboLabel: '¿Qué vas a hacer?',
     verboAhora: 'Atender ahora',
     verboAgendar: 'Agendar',

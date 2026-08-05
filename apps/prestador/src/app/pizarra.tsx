@@ -3,7 +3,7 @@
  * (lámina firmada del 4-ago). Superficie del PRESTADOR EMPLEADO.
  *
  * QUÉ ES: lo que el mostrador mandó a la pizarra a propósito (el chip de
- * `veterinaria/mostrador/atencion.tsx`) más lo que nació sin tratante.
+ * `mostrador/atencion.tsx`) más lo que nació sin tratante.
  * `obtener_pizarra` ya filtra por ESPECIALIDAD con el predicado extraído
  * en S78 — acá no se inventa ningún filtro.
  *

@@ -1023,6 +1023,11 @@ export default function Hoy() {
   // S61-B5 (S63-B: tercer oficio): con ≥2 oficios activos nace el
   // filtro; con uno, el control no existe (cero UI muerta).
   const oficiosActivos = pantalla.estado === 'listo' ? pantalla.oficios : null;
+  /* S86-C · ¿tiene ALGÚN oficio activo? Es la condición de la ventanilla
+     (y la de su menú): sin oficios no hay nada que registrar. */
+  const conAlgunOficio =
+    oficiosActivos !== null &&
+    (oficiosActivos.paseo || oficiosActivos.grooming || oficiosActivos.adiestramiento || oficiosActivos.vet);
   const conFiltro =
     oficiosActivos !== null &&
     [oficiosActivos.paseo, oficiosActivos.grooming, oficiosActivos.adiestramiento, oficiosActivos.vet].filter(Boolean)
@@ -1314,7 +1319,7 @@ export default function Hoy() {
         clave: 'handshakes',
         icono: 'familia',
         titulo: a.handshakes === 1 ? t('atencion.handshake1') : t('atencion.handshakeN', { n: a.handshakes }),
-        onPress: () => router.push('/veterinaria/mostrador'),
+        onPress: () => router.push('/mostrador'),
       });
     }
     /* LO VIEJO PRIMERO ya viene del lector (ordena por antigüedad): la fila
@@ -1769,12 +1774,21 @@ export default function Hoy() {
             en la raíz). El walk-in registra EN EL MOMENTO. Glifo en el CTA:
             diferido (Icono no tiene variante on-cta; iría mal-color sobre
             el relleno teal — declarado). ── */}
-        {pantalla.estado === 'listo' && oficiosActivos?.vet && (
+        {/* ⭐ S86-C (firma del founder) · LA VENTANILLA NO ES CLÍNICA.
+            ⏪ Gateaba en `oficiosActivos?.vet`, y ése era el motivo por el
+            que el founder —que está en Paseos Andrés— no la encontraba:
+            recibir a quien llega, darle de alta y agendarle es operación
+            de NEGOCIO. Nació en veterinaria porque ahí estaba el caso
+            vivo, no porque le perteneciera.
+            Ahora abre con CUALQUIER oficio activo. Sin ninguno no se
+            monta: no habría menú que ofrecer, y una ventanilla sin
+            servicios es una puerta a una pantalla vacía. */}
+        {pantalla.estado === 'listo' && conAlgunOficio && (
           <Boton
             variante="primario"
             bloque
             etiqueta={t('mostrador.registrarAtencion')}
-            onPress={() => router.push('/veterinaria/mostrador')}
+            onPress={() => router.push('/mostrador')}
           />
         )}
 
