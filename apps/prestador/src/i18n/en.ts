@@ -203,6 +203,11 @@ export const prestadorEn = {
     // ⏪ S86-C: said "today's". With money following the day in view, that
     // "today" became false on nine out of ten days of the wheel.
     plataNoSePudoDetalle: "We couldn't load the day's earnings",
+    // S87-C (LÁMINA BARRA DE TRES §1) · the non-manager's column: their work,
+    // where the owner sees money. One form for 1 and N. · LOTE S87
+    suDia: 'yours',
+    suDiaNoSePudo: 'Your day unavailable',
+    suDiaNoSePudoDetalle: "We couldn't confirm which appointments are yours",
     vidasTutor1: 'owner',
     vidasTutores: 'owners',
     vidasPaciente1: 'patient',
@@ -2086,6 +2091,11 @@ export const prestadorEn = {
     titulo: 'We could not confirm your place in the business',
     detalle: 'The business data contradicts itself and we prefer not to guess. It is on our side — try again.',
     reintentar: 'Try again',
+    volver: 'Go back',
+  },
+  // S87-C (LÁMINA BARRA DE TRES §3) · the door that speaks · LOTE S87
+  gateAjeno: {
+    titulo: 'This section belongs to whoever manages the business.',
     volver: 'Go back',
   },
   // S79-B (T3-B3) · the waiting room — the pending provider's frame · LOTE S79

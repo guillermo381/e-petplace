@@ -58,8 +58,12 @@ import { useTraduccion } from '@/i18n';
 type EstadoSesionRaiz =
   | 'verificando'
   // S75-B: 'ok' pasa a portar esGestor — el gate del tab NEGOCIO lee de
-  // acá (resuelto UNA vez en el guard, jamás por pantalla). Hoy inerte:
-  // el único que llega es el titular, y el titular siempre es gestor.
+  // acá (resuelto UNA vez en el guard, jamás por pantalla).
+  // ⭐ S87-C — ACÁ DECÍA «Hoy inerte: el único que llega es el titular».
+  // ERA VERDAD EN S75 y dejó de serlo sin que nada se pusiera rojo: la
+  // puerta (R1) resuelve por titularidad O VÍNCULO ACTIVO, y D-651 midió
+  // CINCO personas activas no-titulares. `esGestor=false` es el camino
+  // NORMAL de esta rama, no un caso teórico.
   | { ok: true; esGestor: boolean; ceremonia: 'consultada' | 'resuelta-para-este-usuario' | 'no-gestor' }
   // S79-B (T2-B2, §2.3; T4-B1): primer ingreso del GESTOR según el MOTOR
   // (`registrar_primer_ingreso`, LETRA_PERFIL §4) → la carta preside
@@ -304,9 +308,20 @@ export default function TabsLayout() {
   // S75-B: el tab NEGOCIO gatea por AUSENCIA (Ley 23) — la gestión (oferta,
   // plata, equipo) es de quien puede TOCARLA (dueño/administrador). HOY y
   // Mascotas y Cuenta las ve todo el equipo (operan / se identifican).
-  // INERTE hoy: solo el titular llega, y el titular es gestor → el tab
-  // aparece siempre. Cuando la puerta abra, el profesional/recepción entra
-  // sin el tab, sin un candado que explicar.
+  /* ⭐ S87-C · LA BARRA DE TRES ES DISEÑO, Y ACÁ ESTABA LA PREMISA CADUCADA.
+     ACÁ DECÍA: «INERTE hoy: solo el titular llega, y el titular es gestor →
+     el tab aparece siempre. Cuando la puerta abra, …».
+     **La puerta YA abrió — en S75, en el mismo commit que escribió esto**,
+     y el comentario siguió diciendo lo contrario dos sesiones. D-651 lo
+     midió: CINCO personas activas no-titulares ven esta barra, y su diseño
+     no existía porque el archivo decía que no hacía falta.
+     ☠️ Es L-193 en su forma limpia: **un comentario no es un guard.** La
+     premisa caducó por un INSERT en otra tabla y ningún typecheck, lint ni
+     gate podía verlo.
+     HOY la barra de tres está FIRMADA (`docs/laminas/LAMINA_BARRA_DE_TRES.md`):
+     `Hoy · Datos · Cuenta` es la casa del no-gestor, no el descarte de la
+     del titular. La ausencia del tab NO se explica ni se insinúa (§2); lo
+     que sí habla es la RUTA cuando alguien navega a ella (§3, GateAjeno). */
   const items: BarraTabsItem[] = [
     {
       key: 'index',

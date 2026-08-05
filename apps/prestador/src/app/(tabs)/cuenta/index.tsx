@@ -351,7 +351,23 @@ export default function Cuenta() {
      lo toca—; lo único que cambia es dónde se la busca. */
   const lugares = [
     { etiqueta: t('miCuenta.perfil'), ruta: '/cuenta/perfil' as const, icono: 'cuenta' as const },
-    { etiqueta: t('miCuenta.negocio'), ruta: '/cuenta-comercial' as const, icono: 'negocio' as const },
+    /* ⭐ S87-C (LÁMINA §4.2) — LA CELDA SE GATEA, y el caso vale registrarlo
+       porque NO fue "nadie sabía del gate": este archivo YA lo tenía en la
+       mano (`useGateGestor` arriba, aplicado 40 líneas abajo a «El
+       movimiento») y esta fila igual salía incondicional. Medido con dedo
+       en S87: el profesional (`gestor=false`) llegaba a «Business details»
+       —la identidad FISCAL del negocio— y hasta al wizard de alta, por una
+       celda visible en la primera tarjeta de Cuenta. Cero deep link.
+       ⚠️ ES CURA DE SUPERFICIE PURA, y la lámina lo dice con letra: el
+       servidor ya está acotado (el CHECK ata la fila a `auth.uid()`), así
+       que esto NO cura D-656 — cerrar la puerta que no debía estar abierta
+       y dejar de quemar a quien la cruzó son dos cosas, y la segunda es
+       contrato.
+       `=== 'permitido'` y no `!== 'denegado'`: Ley 23, ante la duda se
+       cierra — mismo predicado exacto que su vecina de abajo. */
+    ...(gate === 'permitido'
+      ? [{ etiqueta: t('miCuenta.negocio'), ruta: '/cuenta-comercial' as const, icono: 'negocio' as const }]
+      : []),
     /* ⭐ S85-C6 — EL ESCUDO (salida (a) firmada por la mesa). Reusa
        `seguros`, que ES el escudo del registry ("la vida protegida").
        ⚠️ LA COLISIÓN DE METÁFORA SE DECLARA, no se esconde: ese glifo

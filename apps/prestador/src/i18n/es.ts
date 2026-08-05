@@ -281,6 +281,15 @@ export const prestadorEs = {
     /* ⏪ S86-C: decía "de hoy". Con la plata siguiendo al día en vista, ese
        "hoy" pasó a ser falso en nueve de cada diez días de la rueda. */
     plataNoSePudoDetalle: 'No pudimos leer los ingresos del día',
+    /* ⭐ S87-C (LÁMINA BARRA DE TRES §1) — LA COLUMNA DEL NO-GESTOR.
+       Donde el titular ve la plata, quien no la administra ve SU TRABAJO.
+       El rótulo dice «a tu cargo» y NO «citas» a secas: la columna de la
+       izquierda ya cuenta las del NEGOCIO, y dos números con el mismo
+       rótulo se leerían como un error de la app. UNA sola forma para 1 y
+       para N — no es un sustantivo que pluralice. · LOTE S87, GATE PENDIENTE */
+    suDia: 'a tu cargo',
+    suDiaNoSePudo: 'Tu día no disponible',
+    suDiaNoSePudoDetalle: 'No pudimos confirmar cuáles citas son tuyas',
     vidasTutor1: 'tutor',
     vidasTutores: 'tutores',
     vidasPaciente1: 'paciente',
@@ -2504,6 +2513,16 @@ export const prestadorEs = {
     titulo: 'No pudimos confirmar tu lugar en el negocio',
     detalle: 'Los datos del negocio se contradicen y preferimos no adivinar. Es un problema nuestro — prueba de nuevo.',
     reintentar: 'Reintentar',
+    volver: 'Volver',
+  },
+  // S87-C (LÁMINA BARRA DE TRES §3) · LA PUERTA QUE HABLA — el no-gestor que
+  // llega a una ruta de gestión por deep link. El TÍTULO es el literal
+  // FIRMADO por el founder en la lámina; no se adorna ni se le agrega
+  // detalle: la frase ya dice de quién es la sección, y una explicación
+  // extra convertiría una respuesta en una disculpa. SIN reintento (ver
+  // components/gate-ajeno.tsx) · LOTE S87, GATE PENDIENTE
+  gateAjeno: {
+    titulo: 'Esta sección es de quien administra el negocio.',
     volver: 'Volver',
   },
   // S79-B (T3-B3) · LA SALA DE ESPERA — el marco del pendiente (la voz
