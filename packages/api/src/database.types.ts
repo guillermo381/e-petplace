@@ -1509,6 +1509,30 @@ export type Database = {
         }
         Relationships: []
       }
+      cat_notificacion_canales: {
+        Row: {
+          codigo: string
+          descripcion: string
+          es_piso: boolean
+          exige_evidencia: boolean
+          orden: number
+        }
+        Insert: {
+          codigo: string
+          descripcion: string
+          es_piso?: boolean
+          exige_evidencia?: boolean
+          orden: number
+        }
+        Update: {
+          codigo?: string
+          descripcion?: string
+          es_piso?: boolean
+          exige_evidencia?: boolean
+          orden?: number
+        }
+        Relationships: []
+      }
       cat_notificacion_categorias: {
         Row: {
           apagable_existencia: boolean
@@ -15305,6 +15329,48 @@ export type Database = {
       }
       user_notificacion_prefs: {
         Row: {
+          canal: string
+          categoria: string
+          evidencia: Json | null
+          habilitada: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          canal: string
+          categoria: string
+          evidencia?: Json | null
+          habilitada: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          canal?: string
+          categoria?: string
+          evidencia?: Json | null
+          habilitada?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_notificacion_prefs_canal_fkey"
+            columns: ["canal"]
+            isOneToOne: false
+            referencedRelation: "cat_notificacion_canales"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "user_notificacion_prefs_categoria_fkey"
+            columns: ["categoria"]
+            isOneToOne: false
+            referencedRelation: "cat_notificacion_categorias"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
+      user_notificacion_prefs_legacy: {
+        Row: {
           habilitada: boolean
           tipo: string
           updated_at: string
@@ -17788,6 +17854,10 @@ export type Database = {
         Returns: undefined
       }
       pausar_atencion: { Args: { p_atencion_id: string }; Returns: Json }
+      preferencia_efectiva: {
+        Args: { p_canal: string; p_categoria: string; p_user_id: string }
+        Returns: boolean
+      }
       puede_encender_vitrina: { Args: never; Returns: boolean }
       quitar_estado_pelaje_grooming: {
         Args: { p_grooming_id: string; p_momento: string }

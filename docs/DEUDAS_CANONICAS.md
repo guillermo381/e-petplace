@@ -6801,3 +6801,72 @@ va a dar `403` contra todo y no servir para nada.**
 
 **Origen: S86-C (el incidente) + S87-A (el experimento, el cierre y las dos
 acotaciones).**
+
+---
+
+#### D-656 — 🟠 UN TOQUE ACCIDENTAL AL WIZARD DE CUENTA COMERCIAL QUEMA A LA PERSONA PARA SIEMPRE
+
+**Ficha propia por adjudicación del founder (S87): NO viaja con el lote de
+roles.** *Quema a cualquier usuario, con o sin rol — es contrato, no superficie.*
+
+### EL LITERAL
+
+`crear_cuenta_comercial_inicial` (SECURITY DEFINER, `proacl` =
+`authenticated=X`, sin `anon`) tiene **cuatro guardas y ninguna de rol**:
+
+```
+A)   auth.uid() IS NULL              → 'Sesión no válida…'
+B)   el profile existe
+B.2) el user YA tiene cuenta         → 'Ya tienes una cuenta comercial
+                                        registrada. No puedes crear otra
+                                        desde este flujo.'
+G)   razón social / nombre comercial no vacíos
+```
+
+Medido: `gatea_por_rol = false` · `mira_empleados = false` ·
+`mira_prestadores = false`. Y la policy de INSERT tampoco mira rol:
+`CHECK ((owner_profile_id = auth.uid()) AND (estado = 'pendiente_validacion'))`.
+
+### LO QUE **NO** ES, y hay que decirlo primero
+
+**No hay escalación de privilegio.** El `CHECK` ata la fila a `auth.uid()`: un
+no-gestor solo puede crear **su propia** cuenta, en `pendiente_validacion`, **sin
+ninguna relación con el negocio donde trabaja**. No toca `prestadores` ni
+`prestador_empleados`.
+
+> **Y hay una razón de producto para que el servidor NO gatee por rol: este es el
+> camino de AUTO-SERVICIO.** *La persona que abre su primer negocio todavía no es
+> gestor de nada* — un gate por rol cerraría la puerta legítima. **El servidor no
+> está flojo: está correctamente acotado a "vos sobre vos mismo".**
+
+### LO QUE SÍ ES — y por eso es contrato
+
+**`B.2` es de una sola vez y no tiene vuelta.** Quien complete el wizard por
+curiosidad —o porque una celda se lo ofreció, que es lo que C midió— **queda
+permanentemente bloqueado del flujo legítimo**: el día que abra su negocio de
+verdad, el motor le contesta *"ya tienes una cuenta comercial registrada"*.
+
+> ### **UNA PUERTA QUE NO DEBÍA OFRECÉRSELE LE CONSUME SU ÚNICO INTENTO.**
+> *Y no hay camino de corrección desde el producto: la cáscara vacía queda, y
+> queda para siempre.*
+
+### DIRECCIÓN DE CURA — PROPUESTA, A LA FIRMA DEL FOUNDER
+
+**`B.2` distingue una `pendiente_validacion` SIN USO: la cáscara vacía se retoma
+o se reemplaza, no bloquea.** *Una cuenta que nunca se validó ni se usó no es una
+cuenta: es un formulario a medio llenar.*
+
+### ALCANCE, y qué NO cura esta ficha
+
+**La celda incondicional** de `cuenta/index.tsx:352-369` —que ofrece la puerta a
+un no-gestor, mientras `:643` sí gatea "El movimiento"— **es superficie pura y
+viaja con el lote de roles/barra de tres**, como C propuso. **Son dos cosas:**
+*cerrar la puerta que no debía estar abierta* (superficie) **y** *dejar de quemar
+a quien la cruzó* (esta ficha). **Curar solo la primera deja quemados a los que
+ya pasaron.**
+
+> **☠️ DISPARO: antes del soft launch.** **NO se construye en S87** salvo que el
+> founder lo suba de prioridad.
+
+**Origen: S87-C (la puerta abierta, capturas `s87c-b2/b3/b4`) + S87-A (el literal
+del servidor y la lectura de producto).**
