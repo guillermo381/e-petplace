@@ -3110,6 +3110,17 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
   > **⇒ CADA FILA DE UN CENSO DE CONSUMIDORES LLEVA SU CAMINO** (tab → celda → pantalla) **o lleva su IMPEDIMENTO NOMBRADO** (*«requiere rol X»*, *«sin entrada desde ninguna pantalla»*). **Un censo con filas sin camino ni impedimento está incompleto, aunque los paths sean todos correctos.**
   >
   > *Es L-192 aplicada al CENSO: su modo de falla es el silencio — nadie verifica por qué una fila NO se pudo mirar.* Y cruza con el hallazgo del mismo día: **un censo también puede omitir en silencio por el LADO DEL INSTRUMENTO** (`grep` saltea un fuente con un byte NUL — ver `scripts/verify-fuentes-legibles.mjs` y su forense). **Las dos mitades de un censo mentiroso: lo que el instrumento no lee, y lo que el dedo no alcanza.**
+  >
+  > **➕ SU CASO CANÓNICO — LAS CUATRO SUPERFICIES INALCANZABLES DEL PRESTADOR (S86, al acta por firma de mesa).** *El censo de roles buscó, por primera vez, no «¿existe el archivo?» sino «¿qué dedo llega?» — y encontró **cuatro paths correctos con CERO camino para el founder**:*
+  >
+  > | superficie | por qué NADIE la alcanza |
+  > |---|---|
+  > | **la rama `administrador` de TODOS los gates** | **cero portadores en la DB** — nunca corrió ([[D-652]]) |
+  > | **el diseño de la barra de TRES** | se muestra a 5 personas **y el founder no es una de ellas**: su cuenta es titular ([[D-651]]) |
+  > | **`AgendaRecepcion`** (el HOY de recepción) | exige **otro rol** — 1 sola fila viva, en Aurora |
+  > | **`GateRoto`** | exige un dato **contradictorio** (`rol=false` + `titular=null`) |
+  >
+  > **LO QUE PRUEBA, y por eso es el caso y no un ejemplo:** las cuatro habrían pasado un censo de paths **como cobertura**. *Tres de ellas están BIEN CONSTRUIDAS —el problema no es su código, es que **nadie con un dedo puede confirmarlo**—* y la cuarta (`GateRoto`) solo se puede ver **rompiendo datos a mano**. ⇒ **«construido» y «verificado» se separan en el ROL, no en el archivo**, y un censo que no declara el rol no puede notar la diferencia.
 - **L-162** — **Toda captura M3 de una pantalla con campo de texto se toma DOS VECES — sin teclado y CON el teclado arriba y el campo enfocado. Un formulario sin captura de teclado no está verificado.** Origen: D-498 — el teclado que tapó la dosis sobrevivió a M3 y llegó a la mano del founder porque el mecanismo nunca miró el estado real de uso. Nota operativa: la captura CON teclado exige dispositivo/emulador — el render web no tiene teclado blando (límite declarado del harness actual). Firmada founder S73.
 > **⚠️ LAS CANDIDATAS SIN FIRMA (S74 — la mesa se equivocó DOS VECES subiendo letra a firmada; se listan juntas para que nadie repita):** **(a) L-164** — abajo, es la única con número asignado, y su número **NO implica firma** · **(b) la regla del ÁRBOL LIMPIO antes de publicar** (*ninguna sesión publica con archivos sin commitear, propios o ajenos: el bundling no distingue territorios; el ancla se declara sin asterisco*) — **SIN número**, vive en `docs/relevamientos/2026-07-22-s74a-incidente-arbol-sucio-publish.md` · **(c) "declarar un atajo no lo vuelve inocuo"** (origen B) — **SIN número**, vive en el reporte de B · **(d) S75 — "EL ORDEN EN PIEDRA NOMBRA EL ARTEFACTO QUE ABRE, JAMÁS EL ARCHIVO DONDE SE LO ESPERA"** — **SIN número**. Origen: el cruce A6 de S75 probó que la puerta del arco de equipo no era `_layout.tsx` (el archivo del guard) sino R1 (el resolvedor), y un commit de wrapper (`3591db2`) la abrió sin que nadie llamara a abrirla; el brief numeró el archivo (ítem 6) como interruptor cuando el interruptor era el resolvedor (ítem 4). Es L-163 aplicada a esta sesión: si la regla vieja no se corrige, S76 la lee y repite la inversión · **(e) S75 — "LA VENTANA DE PUBLISH CONGELA BILATERALMENTE, Y EL ANCLA SE LEE AL MOMENTO DE BUNDLEAR, JAMÁS DE UN REPORTE PREVIO"** — **ABSORBIDA por L-166 (S76), no borrada** (sin número propio). Origen: en la ventana de publish A→B, la sesión que NO declara también queda congelada desde la declaración de la otra (la directiva de arranque la escribía como si congelara solo a quien declara); y el ancla + el estado del árbol se leen al momento de bundlear (`git status --porcelain` + `rev-parse HEAD`), nunca de un reporte de un turno anterior — misma disciplina que el group vigente (nunca de memoria) · **(f) S75 — "EL PUBLISH SE REPORTA GROUP + ANCLA EN EL MISMO TURNO EN QUE SE EJECUTA, SIEMPRE, AUNQUE NADIE LO PIDA"** — **ABSORBIDA por L-166 (S76), no borrada** (sin número propio). Es L-154 al revés: así como no se declara un group de memoria, un OTA que YA está en el teléfono del founder y que la mesa no sabe que existe es igual de peligroso; el reporte del group + ancla es parte del acto de publicar, no un paso posterior opcional. Cruza con (d): las tres son de la misma sesión y tocan la disciplina operativa del publish y del orden.
 >
@@ -5369,6 +5380,104 @@ importa: **doce de veinticuatro** reglas del lint estaban en esa condición.*
 > **Verificable por grep**, sin interpretación. **Nace y muere en S85 si B
 > cierra** — y si no cierra, se hereda con el número medido, no con "faltan
 > algunas".
+
+---
+
+#### D-652 — «ADMINISTRADOR» ES UN ROL SIN UN SOLO PORTADOR: la rama existe, nunca corrió, y se declara NO PROBADA 🟠
+
+**Medido contra la DB el 4-ago-2026** (censo de roles, S86): **CERO filas
+con `rol='administrador'` en todo el sistema.** Las 12 filas de empleado
+activas son **7 titulares** (su fila `dueño`), **4 con chips** y **1 de
+recepción**.
+
+**⇒ TODO predicado `['dueño','administrador']` del código se resuelve HOY
+enteramente por el brazo `dueño`.** *La rama `administrador` de cada gate
+—el del tab NEGOCIO, el de `useGateGestor`, el de la plata en el
+servidor— **nunca se ejecutó en producción**.*
+
+### NO SE BORRA — Y ESO ES LA DECISIÓN, NO UN OLVIDO
+
+**Firma de mesa (S86): el founder la quiere, con su definición —
+*administrador = dueño MENOS el alta de administradores*.** La rama se
+conserva. **Lo que se declara es su ESTATUTO: NO PROBADA.**
+
+> ### **UNA RAMA QUE NUNCA CORRIÓ NO ES CÓDIGO QUE FUNCIONA: ES CÓDIGO QUE NADIE VIO FALLAR.**
+> *Y su modo de falla es el silencio: el día que se cree el primer
+> administrador, cada uno de esos gates se ejecuta **por primera vez** —
+> en producción, con un humano adelante.*
+
+☠️ **CONDICIÓN DE MUERTE: se crea un administrador REAL y se camina con
+él el censo entero** (los cuatro tabs, la plata, equipo, «El
+movimiento»). **Esa es su primera prueba y hoy no existe.**
+**⚠️ Y su trampa declarada:** el alta de administradores **no tiene
+superficie** — el toggle no se ofrece hasta que su motor exista
+(D-513/D-517), así que **crear el primero es hoy un acto de SQL**.
+Origen: S86-A, censo de roles. Cruza con [[D-513]] y [[D-517]].
+
+---
+
+#### D-651 — 🔴 CINCO PERSONAS VEN HOY UNA BARRA DE TRES TABS QUE NUNCA SE DISEÑÓ — y el código declara, por escrito, que eso es imposible
+
+**PRIMERA ORDEN DE S87 (firma de mesa).**
+
+**EL LITERAL, y es lo que hace el caso:** `apps/prestador/src/app/(tabs)/_layout.tsx:305-311`
+dice textual —
+
+> *«**INERTE hoy: solo el titular llega**, y el titular es gestor → el tab
+> aparece siempre. Cuando la puerta abra, el profesional/recepción entra
+> sin el tab, sin un candado que explicar.»*
+
+**Y LA DB DICE OTRA COSA:** **cinco filas activas NO titulares** en
+negocios `activo` —4 con chips (Aurora ×2, Los Shyris, Paseos Andres) y
+**1 de recepción**—, y la puerta (`obtenerMiPrestador`, R1) **resuelve por
+titularidad O VÍNCULO ACTIVO desde S75**. **Esas cinco personas ven la
+barra de tres.** *El diseño de esa barra no existe: nadie lo hizo, porque
+el archivo decía que no hacía falta.*
+
+### EL CASO, QUE ES LO QUE VALE GUARDAR
+
+> ### **EL COMENTARIO DECÍA LA VERDAD CUANDO SE ESCRIBIÓ, Y DEJÓ DE DECIRLA SIN QUE NADA SE PUSIERA ROJO.**
+>
+> En S75 era **exacto** (había 0 empleados activos no-titulares — está
+> medido en el acta). **La premisa caducó sola, por un INSERT en otra
+> tabla**, y ningún typecheck, lint ni gate podía verlo: **un comentario
+> no es un guard.**
+
+**Es [[L-193]] en su forma más limpia** —la premisa heredada que nadie
+fechó— **y hermana de [[D-650]]**: las dos son *«esto no puede pasar»*
+escrito por alguien que tenía razón **en el momento de escribirlo**.
+
+### LA CURA, EN DOS MITADES
+
+**① El diseño**: la barra de tres necesita existir como decisión —hoy es
+un `.filter()` sin lámina. **② El guard**, que es la parte generalizable:
+
+> ### **UNA CONDICIÓN QUE EL CÓDIGO DECLARA «INERTE» SE MIDE CONTRA EL MOTOR, NO SE DESCRIBE. SI LA PREMISA CADUCA, ROJO.**
+>
+> **Forma propuesta** (a la mesa, el instrumento es de B): las premisas
+> inertes se declaran en un registro con **su consulta**
+> —*«esta rama es inerte MIENTRAS `SELECT count(*) … = 0`»*— y un guard
+> la corre. **El día que el count deje de ser cero, sale rojo y nombra
+> qué se volvió alcanzable.** *Precedente vivo: el trigger de la vitrina
+> (S78) ya hace esto —verifica `to_regprocedure` y se abre solo—; lo que
+> falta es la versión del lado del código.*
+
+☠️ **CONDICIÓN DE MUERTE:** o la barra de tres tiene diseño firmado, o el
+tab NEGOCIO deja de esconderse. **Y el guard existe.**
+**⚠️ El founder NO PUEDE GATEARLA CON SU DEDO** — su cuenta es titular:
+ver `L-161` y las cuatro superficies inalcanzables del censo.
+Origen: S86-A, censo de roles (`docs/relevamientos/2026-08-04-s86a-CENSO-DE-ROLES-prestador.md`).
+
+> **➕ Y SU HERMANA CHICA, que se escribe acá porque se lee junto: OCULTO ≠ CERRADO.**
+> `<Tabs.Screen name="negocio" />` **se declara SIEMPRE** (`:380`); **solo
+> el ítem de la barra es condicional** (`:327`). **La ruta sigue montada:
+> un deep link o un `router.push` la abre para cualquiera.** *Lo que
+> protege NO es la barra: es el `useGateGestor` de adentro
+> (`negocio.tsx:247` → `Redirect`).* **Está bien construido — y lo que
+> falta es que no dependa de que alguien lo recuerde**: hoy nada impide
+> que la próxima pantalla gateada se esconda de la barra **y se olvide el
+> gate de ruta**, y el síntoma sería una pantalla de gestión abierta por
+> URL, sin error, sin rojo y sin nadie mirando.
 
 ---
 
