@@ -2329,8 +2329,10 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 
 #### D-654 — 🔴 EL MOSTRADOR ES VETERINARIO POR CONSTRUCCIÓN: el camino de paseos llega entero hasta la puerta y la puerta no abre
 
-**FRENO DECLARADO (S86-A): no se construyó. La mesa pidió elegir entre
-dos vías y LA MEDICIÓN DESCARTA LAS DOS** — el bloqueo no es de wrapper.
+**NACIÓ COMO FRENO (S86-A) Y CIERRA CON RUMBO FIRMADO.** *La mesa pidió
+elegir entre dos vías; la medición descartó las dos —el bloqueo no era
+de wrapper— y sobre esa medición la mesa firmó las TRES decisiones de
+abajo.* **S87 arranca construyendo: acá no queda nada que re-decidir.**
 
 ### LO MEDIDO, en el orden en que descarta
 
@@ -2379,24 +2381,56 @@ que el gate `es_medico` se abra, un paseo de 3 h puede registrarse como
 de 30 min **sin un solo error** — dato plausible y falso, la familia de
 S85.* **Se cura junto con el resto, jamás después.**
 
-### LA FORMA HONESTA, y por qué es (b) y no (a)
+### ✅ LAS TRES FIRMAS DE LA MESA (S86) — S87 ARRANCA CONSTRUYENDO, NO RE-DECIDIENDO
 
-> ### **LA DURACIÓN ES DONDE VIVE LA VERDAD HOY. EL CÓDIGO, PARA PASEO, NO DISTINGUE NADA.**
+**① EL GATE `es_medico` SE ABRE. Y no entra como excepción.**
+*El walk-in nació vet **porque ahí estaba el caso vivo**, igual que el
+mostrador entero.* **La firma del founder —el mostrador es de TODOS los
+oficios— lo alcanza.** `VETERINARIA` §7 **no los prohíbe: no los
+contempló**, y una omisión no es una prohibición.
+
+**② LA VÍA ES (b): LA DURACIÓN.** La letra queda así:
+
+> ### **PARA PASEO, EL CÓDIGO NO DISTINGUE NADA — 7 OFERTAS VIVAS CON EL GENÉRICO Y LA VERDAD EN `duracion_minutos`.**
+> ### **UN IDENTIFICADOR QUE NO IDENTIFICA NO SE ENSANCHA: SE DEJA DE USAR COMO IDENTIFICADOR.**
+
+**Los `paseo_Nmin` quedan DECLARADOS COMO TAXONOMÍA MUERTA** (cero
+ofertas, cero consumidores). **Su jubilación se decide aparte** — no se
+cuelga de este lote, y **tampoco se les agregan hermanos**: crear
+`paseo_120min`…`paseo_300min` sería agrandar una forma muerta para
+decir lo que otra columna ya dice.
+
+**③ EL `LIMIT 1` SE CURA EN EL MISMO LOTE, JAMÁS DESPUÉS.**
+
+> ### **ABRIR EL GATE SIN CURARLO SERÍA ENCENDER EL DEFECTO.**
 >
-> *Un identificador que no identifica no se ensancha: se deja de usar
-> como identificador.* **(b) —que el registro acepte la duración— es lo
-> único que no inventa un dato.**
+> *Hoy el `LIMIT 1` es inofensivo porque el gate no deja pasar ningún
+> oficio con duraciones múltiples. **El mismo acto que lo vuelve
+> alcanzable es el que lo vuelve peligroso**: con el genérico y cuatro
+> duraciones activas elige arbitrario, y un paseo de 3 h se registraría
+> como de 30 min **sin un solo error**.* **Los dos cambios son UN
+> cambio, y el orden no admite ser partido en dos tandas.**
+
+### EL LOTE DE S87, en el orden en que se construye
+
+1. **`registrar_atencion_mostrador`** — el gate deja de preguntar
+   `es_medico` y pasa a contemplar los cuatro oficios.
+2. **La resolución de la oferta pasa a `(tipo_servicio, duracion_minutos)`**
+   — muere el `LIMIT 1`; la duración deja de ser derivada y pasa a ser
+   **parámetro**.
+3. **El wrapper y la superficie** reciben la duración elegida *(la
+   pieza que C ya tiene: el menú llega a 300')*.
 
 ☠️ **CONDICIÓN DE MUERTE:** desde el mostrador de un paseador se
-registra una atención de 180' y la fila nace con `duracion_minutos =
-180`. **Precondiciones, y son DECISIÓN DE MESA, no transcripción:**
-① **abrir el gate `es_medico`** —o darle al mostrador un predicado que
-contemple los cuatro oficios— y ② **resolver la oferta por
-`(tipo_servicio, duracion_minutos)`**, matando el `LIMIT 1`.
-**DECLARADO PARA S87 con su causa.** *Lo que SÍ está listo y no se
-pierde: el camino entero desde Paseos Andrés —entrada, búsqueda, alta,
-handshake— llega limpio hasta la puerta, sin una sola pantalla vet
-(mudanza de C, S86).*
+registra una atención de **180'** y la fila nace con
+`duracion_minutos = 180` — **verificado por el camino real, con el par
+antes/después** (L-199: el rojo se produce ANTES; hoy ese registro
+rebota `tipo_no_medico`, y ése es el «antes» que hay que capturar
+**antes de abrir el gate**).
+
+*Lo que SÍ está listo y no se pierde: el camino entero desde Paseos
+Andrés —entrada, búsqueda, alta, handshake— llega limpio hasta la
+puerta, sin una sola pantalla vet (mudanza de C, S86).*
 Origen: S86-A, medición para C. Hermana de [[D-653]] (dos puertas del
 mismo acto que no se pusieron de acuerdo).
 
