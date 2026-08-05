@@ -6840,6 +6840,28 @@ No era el lote: era la cuenta de arranques.
 > *Los assets compartidos con un lote sano no estaban podridos — nunca lo
 > estuvieron; el aparato no llegaba a pedirlos.*
 
+### DEPÓSITO OPERATIVO — el emulador exige DNS explícito, y sus dos trampas
+
+```
+emulator ... -dns-server 8.8.8.8,1.1.1.1 -no-snapshot-load
+```
+
+**Sin el flag:** OTA que muere a 64/65 + `UnknownHostException`. **No parece DNS,
+y ya costó un arco entero.** El `-no-snapshot-load` no es adorno: sin él el
+emulador levanta del snapshot y **no toma el DNS nuevo**.
+
+**Y las dos lecciones de C, que son las que evitan que esto vuelva:**
+
+1. **El lanzamiento del emulador está DESACOPLADO del turno** — quien lo levantó
+   no es necesariamente quien está depurando. *La configuración de arranque no se
+   hereda con el problema.*
+2. **⚠️ EL FLAG NO PERSISTE.** Un relanzamiento normal —el de cualquier día,
+   hecho por cualquiera— **reintroduce este incidente sin avisar**, y con el
+   mismo síntoma que no parece DNS.
+
+> **Por eso esto vive acá y no en la memoria de C:** *un remedio que hay que
+> recordar aplicar en cada arranque es un incidente con fecha futura.*
+
 **LO QUE NO SE MUEVE:** la CLASE sigue abierta y el disparo intacto. **El paso ⓪
 sigue sin medir que los bytes bajen** — que la causa de ESTE incidente fuera
 ambiental no le devuelve al método una verificación que nunca tuvo. *Un

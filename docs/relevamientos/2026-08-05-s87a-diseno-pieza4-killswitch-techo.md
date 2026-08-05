@@ -41,7 +41,7 @@ persona puede estar bajo su techo y el sistema estar mandando cien mil.*
 | **(a) en LA PUERTA** (no se registra la intención) | **se pierde el rastro**: no queda registro de qué habría salido durante el apagón |
 | **(b) en EL DESPACHO** (se registra, no se entrega) | la intención queda con su motivo; **la auditoría sobrevive al apagón** |
 
-### ⇒ **VA EN EL DESPACHO. (b).**
+### ⇒ **VA EN EL DESPACHO. (b). — ✅ RATIFICADO POR EL FOUNDER (S87)**
 
 **El porqué, y es el mismo argumento que ordenó todo este lote:** §10.6 existe
 para poder contestar *"¿por qué me llegó esto?"* — y su gemela, que nadie
@@ -115,21 +115,27 @@ chico y visible el primer día, que es lo que uno quiere que pase.*
 | **(b) se descarta todo** | se pierden avisos legítimos, incluidos los no apagables |
 | **(c) sale lo vigente, se descarta lo vencido** | pide saber qué es "vencido" **por categoría** |
 
-**Mi lectura, sin firmar:** **(c)**, y el criterio de vencimiento **cuelga de la
-categoría** — un `cita_recordatorio` de una cita que ya ocurrió no tiene sentido;
-un `plan_renovacion_fallida` sigue siendo urgente seis horas después. *Es la
-misma pregunta que §5.1 ya contestó para el memorial: **hay avisos que envejecen
-y avisos que no**, y el catálogo es donde eso se declara.*
+### ✅ FIRMADA POR EL FOUNDER (S87): **(c) — SOLO LO VIGENTE**
 
-**No lo decido acá.** Es producto, y toca lo que una familia recibe.
+**Cada aviso retenido SE RE-EVALÚA al re-encender**, y el vencimiento **cuelga
+de la categoría**: un `cita_recordatorio` de una cita que ya ocurrió no tiene
+sentido; un `plan_renovacion_fallida` sigue siendo urgente seis horas después.
+
+> **Es la lógica de §5.1 GENERALIZADA.** *El memorial ya había contestado esta
+> misma pregunta para un caso: **hay avisos que envejecen y avisos que no**.* La
+> firma la saca del caso y la vuelve regla — y el catálogo es donde cada
+> categoría declara de cuál es.
+>
+> **Consecuencia de forma:** re-encender **no es un `UPDATE` de un flag**. Es
+> volver a pasar la cola por la puerta. *Un re-encendido que solo suelta lo
+> acumulado es la opción (a) con otro nombre.*
 
 ---
 
 ## 5. Lo que ④ le pide a la mesa antes de construirse
 
-1. **Firma de que el kill switch va en el DESPACHO** (§1) — es la decisión que
-   cambia la forma de todo lo demás.
-2. **El criterio de la cola al re-encender** (§4).
+1. ~~**Firma de que el kill switch va en el DESPACHO** (§1).~~ ✅ **RATIFICADA.**
+2. ~~**El criterio de la cola al re-encender** (§4).~~ ✅ **FIRMADA** — solo lo vigente.
 3. **Los valores iniciales del fusible.** Propuesta: **global 500/24 h** —
    holgado para la operación real de hoy (11 avisos posibles sobre una base de
    6 prestadores y ~10 familias) y **absurdamente bajo para un bug**, que es la
@@ -140,3 +146,23 @@ y avisos que no**, y el catálogo es donde eso se declara.*
 > despachador rechazando por kill switch sobre intenciones que nunca iban a
 > salir. **Es la última pieza que se puede probar sin riesgo — y por eso
 > conviene que sea la primera que se construya cuando el Lote 2 abra.**
+
+
+---
+
+## 6. RATIFICACIONES DE MESA (S87) — al acta
+
+- **El kill switch en el DESPACHO** — *el rastro contesta «¿por qué no me
+  llegó?» el día que más se pregunta.*
+- **Mano y fusible separados** — *un producto con kill switch y sin techo duro
+  está protegido solo mientras alguien esté despierto.*
+- **Techo duro ≠ gate 5** — persona vs sistema. *Una persona puede estar bajo su
+  techo y el sistema mandando cien mil.*
+
+## 7. ORDEN DE APERTURA DEL LOTE 2 — firmado (S87)
+
+**④ PRIMERO** (se construye y se prueba entera en sombra: la última pieza sin
+riesgo, y por eso la primera) → **correo** como primer transporte (no necesita
+build) → **push** cuando la build exista.
+
+**Camino crítico real: ④ y D-657.**
