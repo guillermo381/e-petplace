@@ -19,7 +19,11 @@ export const prestadorEn = {
   bienvenida: {
     paraPrestadores: 'for providers',
     // S61-B13: 'El oficio' → 'El arte' (letra founder)
-    titular: 'The art of caring, with the tools it deserves.',
+    // S87-C: el ES pasó a segunda persona («mereces», firma founder) — el
+    // espejo dice LO MISMO o los dos idiomas cuentan frases distintas.
+    // «it deserves» hablaba del arte; «you deserve» habla de la persona.
+    // Decisión de espejo DECLARADA (la firma nombró solo el ES).
+    titular: 'The art of caring, with the tools you deserve.',
     subtitulo: 'Welcome to the curated group of founding providers.',
     ingresar: 'Sign in',
     solicitarAcceso: 'New provider? Request access',

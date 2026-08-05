@@ -24,7 +24,10 @@ export const prestadorEs = {
   bienvenida: {
     paraPrestadores: 'para prestadores',
     // S61-B13: 'El oficio' → 'El arte' (letra founder)
-    titular: 'El arte de cuidar, con las herramientas que merece.',
+    // ⭐ S87-C (firma founder, L-148): «que merece» → «que mereces». La
+    // tercera persona dejaba al lector afuera de su propia bienvenida —
+    // el producto tutea, y el titular ahora le habla A LA PERSONA.
+    titular: 'El arte de cuidar, con las herramientas que mereces.',
     subtitulo: 'Bienvenido al grupo curado de prestadores fundadores.',
     ingresar: 'Ingresar',
     solicitarAcceso: '¿Eres prestador nuevo? Solicitar acceso',
