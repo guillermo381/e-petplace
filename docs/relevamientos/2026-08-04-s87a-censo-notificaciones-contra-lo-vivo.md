@@ -381,3 +381,34 @@ modo `CheckError`.
 
 Discriminación **en curso** (emulador vs CDN) con el aparato del founder. **Esta
 acta no la cierra ni le adjudica causa.**
+
+
+---
+
+## 6. RETIRO FORMAL DE UN 🔴 QUE ENTRÓ AL CANON POR ERROR *(S87)*
+
+**El 🔴 «el HOY de recepción no carga» SE RETIRA. No era del producto: era de
+mi fixture.**
+
+**La causa, con su literal:** `obtener_jornada_recepcion` gatea con
+`empleado_tiene_rol(...)`, que hace **JOIN con `empleado_roles`** — una tabla
+que mi seed por SQL nunca tocó. Las cinco cuentas vivas tienen su fila ahí
+(`recepcion` en todas, `profesional` además en las clínicas); **las dos que yo
+sembré tenían cero.** Es la fila que el login real concede
+(`aceptar_invitacion_pendiente_login`, S76-A2bis): **membresía, no identidad.**
+
+**Par discriminador:** antes `42501 :: sin_acceso` → después de sembrar los roles
+espejando el patrón vivo, **`OK`**.
+
+**Re-medido por C con captura y hora (23:13):** *«Your day at the door» carga,
+con vacío honesto.*
+
+> **Se retira con el mismo peso con el que entró, y por eso está acá y no en una
+> nota al pie:** *un rojo que entra al canon por error acusa al producto de un
+> defecto que no tiene, y sobrevive a quien lo escribió.* **Si se hubiera
+> numerado, hoy habría una ficha 🔴 contra una función sana.**
+
+**Lo que deja como ley (firmada por el founder):** *una cuenta sembrada por SQL
+no está creada hasta que el camino real la concede* — **tokens (identidad) y
+`empleado_roles` (membresía) son dos capas del mismo hueco**, y las dos se
+saltearon en el mismo seed.

@@ -3312,7 +3312,24 @@ Origen: S86-A, medición para C.
   > | **la rama `administrador` de TODOS los gates** | **cero portadores en la DB** — nunca corrió ([[D-652]]) |
   > | **el diseño de la barra de TRES** | se muestra a 5 personas **y el founder no es una de ellas**: su cuenta es titular ([[D-651]]) |
   > | **`AgendaRecepcion`** (el HOY de recepción) | exige **otro rol** — 1 sola fila viva, en Aurora |
-  > | **`GateRoto`** | exige un dato **contradictorio** (`rol=false` + `titular=null`) |
+  > | **`GateRoto`** | ~~exige un dato **contradictorio** (`rol=false` + `titular=null`)~~ — **⚠️ ENMENDADA S87: esa condición YA NO RIGE** |
+
+  > **ENMIENDA S87 (medición de C, literal en `lib/gate-gestor.ts:71-85`):** la
+  > condición que esta fila describe **la angostó S80-B3**. Hoy `titular = null`
+  > NO basta: se consulta la propia fila (`miFila`) y **con fila el veredicto es
+  > *denegado*, no *roto*** — 'roto' quedó para **sin fila o lectura caída**.
+  > *La ficha describía una condición vieja: el caso que nombra ya no se puede
+  > producir por ese camino.*
+  >
+  > **C NO la produjo, y eso es lo correcto:** alcanzarla hoy exige **romper
+  > datos a mano**, y eso no se hace sin orden de mesa. **`roto` se prueba el
+  > día que haya esa orden, no antes** — un rojo fabricado a mano sobre datos
+  > vivos cuesta más que el verde que compra.
+  >
+  > *La lección del caso NO cambia:* «construido» y «verificado» se separan en
+  > el ROL. **Lo que cambia es que una de las cuatro ya no es alcanzable ni
+  > rompiendo lo que la ficha decía** — y una ficha que describe una condición
+  > superada manda a buscar por donde ya no se pasa.
   >
   > **LO QUE PRUEBA, y por eso es el caso y no un ejemplo:** las cuatro habrían pasado un censo de paths **como cobertura**. *Tres de ellas están BIEN CONSTRUIDAS —el problema no es su código, es que **nadie con un dedo puede confirmarlo**—* y la cuarta (`GateRoto`) solo se puede ver **rompiendo datos a mano**. ⇒ **«construido» y «verificado» se separan en el ROL, no en el archivo**, y un censo que no declara el rol no puede notar la diferencia.
 - **L-162** — **Toda captura M3 de una pantalla con campo de texto se toma DOS VECES — sin teclado y CON el teclado arriba y el campo enfocado. Un formulario sin captura de teclado no está verificado.** Origen: D-498 — el teclado que tapó la dosis sobrevivió a M3 y llegó a la mano del founder porque el mecanismo nunca miró el estado real de uso. Nota operativa: la captura CON teclado exige dispositivo/emulador — el render web no tiene teclado blando (límite declarado del harness actual). Firmada founder S73.
@@ -6805,6 +6822,28 @@ S87-A bajó por `curl` los **65** assets del manifiesto servido: **65/65 dieron
 **⇒ Y de ahí sale el requisito del instrumento, no de la intuición: cualquier
 sonda de descarga tiene que pedir COMO CLIENTE —con sus credenciales/firma—, o
 va a dar `403` contra todo y no servir para nada.**
+
+### ⚠️ ENMIENDA S87 — LA CAUSA APARECIÓ, Y EL CDN QUEDA SIN CARGO
+
+**Literal de C:** el emulador **no resolvía `assets.eascdn.net`** — era **DNS**.
+Los 64 assets que bajaban estaban **en caché**; el que faltaba vivía justo ahí.
+**Determinístico 3/3**, y **curado con `-dns-server`** (ver el depósito operativo
+del acta de sesión). El segundo modo, `UnknownHostException`, es el mismo dedo
+señalando: **no parecía DNS, y costó un arco entero.**
+
+**Y el lado del aparato del founder se re-lee contra la propia letra de D-650:**
+*el primer arranque frío SOLO DESCARGA* ⇒ **un solo reinicio nunca alcanzaba.**
+No era el lote: era la cuenta de arranques.
+
+> **⇒ EL CDN QUEDA SIN CARGO, y las dos acotaciones de arriba dejan de ser
+> sospechas y pasan a ser lo que siempre fueron: hechos que no explicaban nada.**
+> *Los assets compartidos con un lote sano no estaban podridos — nunca lo
+> estuvieron; el aparato no llegaba a pedirlos.*
+
+**LO QUE NO SE MUEVE:** la CLASE sigue abierta y el disparo intacto. **El paso ⓪
+sigue sin medir que los bytes bajen** — que la causa de ESTE incidente fuera
+ambiental no le devuelve al método una verificación que nunca tuvo. *Un
+diagnóstico que absuelve al lote no absuelve al instrumento que faltaba.*
 
 ### ADJUDICACIÓN
 
