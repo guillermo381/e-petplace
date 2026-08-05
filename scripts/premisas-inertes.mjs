@@ -31,6 +31,28 @@
  * escribe como **espejo de la puerta real** (L-167: se mide por el camino
  * que usa la pantalla, jamás por la defensa que uno supone) y devuelve
  * UNA fila con UNA columna `n`.
+ *
+ * ── EL ENSANCHE DE S88, declarado y no contrabandeado ─────────────────
+ * El registro nació midiendo **el motor** (`sql`). `P3` mide **un número
+ * que el canon afirma contra el objeto que lo desmiente**, y eso no cabe
+ * en una consulta: hay que leer un archivo. Entra por `medir` — una
+ * función JS que devuelve `{ n, detalle }` — en vez de `sql`.
+ *
+ * **POR QUÉ ES LA MISMA LEY Y NO OTRA COSA**, que es lo que había que
+ * decidir antes de tocar nada: el defecto es idéntico —*un texto de la
+ * casa fue cierto, dejó de serlo, y nada se puso rojo*—; lo único que
+ * cambia es **CUÁL ES LA FUENTE**. P1/P2 se contestan contra la DB
+ * porque su verdad vive ahí; P3 se contesta contra `supabase/migrations`
+ * porque la suya vive ahí. La ley general que las cubre a las tres:
+ *
+ *   ► UNA AFIRMACIÓN QUE LA CASA DA POR CIERTA SE MIDE CONTRA SU FUENTE,
+ *     O CADUCA SIN QUE NADIE SE ENTERE.
+ *
+ * **Y EL INVARIANTE NO SE TOCÓ:** `medir` devuelve igual un `n`, y
+ * `inerte ⟺ n === 0`. Para P3 ese `n` es **la divergencia** entre lo
+ * declarado y lo real — cero es «el canon dice la verdad». Si el
+ * invariante se hubiera aflojado para que P3 entrara, el ensanche habría
+ * costado más de lo que resuelve.
  */
 
 /** LAS PREMISAS VIGILADAS. Cada una: qué declara · dónde lo declara ·
@@ -161,6 +183,63 @@ export const PREMISAS = [
     },
     siCaduca:
       'nace el primer administrador y TODA rama `[dueño, administrador]` del código se ejecuta por primera vez en producción — sin haber corrido nunca (D-652)',
+  },
+  {
+    id: 'P3',
+    ficha: 'L-141',
+    titulo: 'el canon dice la verdad sobre cuántas migraciones hay',
+    desde: 'S82 (la última vez que se re-midió)',
+    /** EL ANCLA NO INCLUYE EL NÚMERO, y es deliberado: el día que la mesa
+     *  corrija el contador, el literal cambia — si el ancla llevara el
+     *  «138», la CURA dispararía el brazo ① («el literal ya no está») y el
+     *  guard castigaría exactamente lo que vino a pedir. Se ancla la parte
+     *  ESTABLE de la frase. */
+    sitios: [
+      {
+        archivo: 'CLAUDE.md',
+        literal: 'migraciones** aplicadas y en el historial remoto',
+        consecuencia:
+          'la fila de inventario de `supabase/` — el número que toda sesión lee al abrir, y que ya decayó TRES veces (77 → 138, y el 9 de S47 antes)',
+      },
+    ],
+    inerteMientras: {
+      explicacion: 'la divergencia entre lo que el canon DECLARA y lo que el objeto TIENE',
+      /** POR QUÉ SE MIDE EL HISTORIAL REMOTO Y NO LOS ARCHIVOS DEL ÁRBOL:
+       *  la propia frase del canon dice «aplicadas y **en el historial
+       *  remoto**». Y hay una razón operativa que pesa más: **una pista
+       *  atrasada tiene menos archivos que `main`** —medido hoy: 143 en
+       *  esta rama contra 157 en `origin/main`— así que contar el árbol
+       *  haría que el guard denunciara «el canon miente» cuando lo que
+       *  pasa es que la rama está vieja. *Un instrumento correcto sobre un
+       *  árbol viejo da un número creíble y falso* (S84-B12).
+       *  **MEDIDO HOY, y por eso las dos lecturas no compiten:** los 157
+       *  del historial reconcilian **1:1** con los 157 `.sql` de
+       *  `origin/main` — cero huérfanas en las dos direcciones. Si algún
+       *  día divergen, esa divergencia es un hallazgo por sí sola. */
+      medir: ({ dbQuery, leer }) => {
+        const canon = leer('CLAUDE.md');
+        // EL PARSER DECLARA SU PROPIA TRAMPA: `**N migraciones**` aparece
+        // NUEVE veces en el canon — ocho son conteos POR SESIÓN («8
+        // migraciones aplicadas y registradas»). Se ancla en la frase
+        // completa de la fila de inventario, y si no matchea EXACTAMENTE
+        // una vez, esto no adivina: lanza, y el guard lo convierte en
+        // «no se pudo medir» (ROJO, jamás un número de consuelo).
+        const m = canon.match(/\*\*(\d+) migraciones\*\* aplicadas y en el historial remoto/g);
+        if (!m || m.length !== 1)
+          throw new Error(
+            `el canon no declara su contador de forma legible: ${m?.length ?? 0} coincidencias (esperaba 1). ` +
+              `Si la frase se reescribió, el ancla de esta premisa hay que actualizarla.`,
+          );
+        const declarado = Number(m[0].match(/(\d+)/)[1]);
+        const real = dbQuery('select count(*)::int as n from supabase_migrations.schema_migrations')[0].n;
+        return {
+          n: Math.abs(real - declarado),
+          detalle: [{ declarado_en_el_canon: declarado, en_el_historial_remoto: real }],
+        };
+      },
+    },
+    siCaduca:
+      'toda sesión que abra leyendo el canon arranca con un inventario falso — y este contador ya decayó TRES veces, que es precisamente por qué deja de confiarse a la prosa',
   },
 ];
 

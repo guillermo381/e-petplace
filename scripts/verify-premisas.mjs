@@ -154,16 +154,34 @@ export function verificarClasificacion(ocurrencias, premisas, exentas) {
  *    inerte    → la premisa se sostiene (n = 0)
  *    caducada  → ROJO, y nombra qué se volvió alcanzable
  *    sin-medir → ROJO por L-197 (jamás verde) */
-export function evaluarPremisa(premisa, correr) {
+export function evaluarPremisa(premisa, { correr, leer }) {
+  const { sql, medir } = premisa.inerteMientras;
+  let n, detalle = null;
+
+  // DOS FUENTES, UN INVARIANTE (el porqué, en el header del registro):
+  // `sql` mide el MOTOR · `medir` mide EL OBJETO. Las dos devuelven un
+  // `n`, y en las dos `inerte ⟺ n === 0`.
+  if (medir) {
+    try {
+      const r = medir({ dbQuery: correr, leer });
+      n = r?.n;
+      detalle = r?.detalle ?? null;
+    } catch (e) {
+      return { estado: 'sin-medir', porque: String(e.message ?? e).slice(0, 220) };
+    }
+    if (typeof n !== 'number')
+      return { estado: 'sin-medir', porque: `«medir» no devolvió un «n» numérico (devolvió ${JSON.stringify(n)?.slice(0, 120)})` };
+    return n === 0 ? { estado: 'inerte', n } : { estado: 'caducada', n, detalle };
+  }
+
   let filas;
-  try { filas = correr(premisa.inerteMientras.sql); } catch (e) {
+  try { filas = correr(sql); } catch (e) {
     return { estado: 'sin-medir', porque: String(e.message ?? e).slice(0, 180) };
   }
-  const n = filas?.[0]?.n;
+  n = filas?.[0]?.n;
   if (typeof n !== 'number')
     return { estado: 'sin-medir', porque: `la consulta no devolvió una columna «n» numérica (devolvió ${JSON.stringify(filas)?.slice(0, 120)})` };
   if (n === 0) return { estado: 'inerte', n };
-  let detalle = null;
   if (premisa.inerteMientras.detalle) {
     try { detalle = correr(premisa.inerteMientras.detalle); } catch { detalle = null; }
   }
@@ -201,15 +219,28 @@ function autoPrueba() {
       [], [{ archivo: 'a.tsx', literal: 'Completamente INERTE', razon: 'movimiento' }],
     ).fallos.length === 0,
   );
+  const conSql = (correr) => evaluarPremisa(premisaFalsa, { correr, leer: () => '' });
   // ③ la premisa caducó
-  debeFallar('③·premisa caducada', evaluarPremisa(premisaFalsa, () => [{ n: 3 }]).estado === 'caducada');
+  debeFallar('③·premisa caducada', conSql(() => [{ n: 3 }]).estado === 'caducada');
   // ③ la consulta explota → sin-medir, JAMÁS inerte (L-197)
-  debeFallar('③·error → sin-medir', evaluarPremisa(premisaFalsa, () => { throw new Error('sin red'); }).estado === 'sin-medir');
+  debeFallar('③·error → sin-medir', conSql(() => { throw new Error('sin red'); }).estado === 'sin-medir');
   // ③ la consulta devuelve basura → sin-medir, JAMÁS inerte
-  debeFallar('③·forma inesperada → sin-medir', evaluarPremisa(premisaFalsa, () => [{ otra: 0 }]).estado === 'sin-medir');
+  debeFallar('③·forma inesperada → sin-medir', conSql(() => [{ otra: 0 }]).estado === 'sin-medir');
   // ③ contra-caso: n=0 es inerte de verdad (si esto fallara, el guard
   //    sería rojo permanente, que es la otra forma de ser decorativo)
-  debeFallar('③·contra-caso: n=0 es inerte', evaluarPremisa(premisaFalsa, () => [{ n: 0 }]).estado === 'inerte');
+  debeFallar('③·contra-caso: n=0 es inerte', conSql(() => [{ n: 0 }]).estado === 'inerte');
+
+  // ③bis LA RAMA `medir` (S88 — el ensanche de P3). Mismos cuatro modos:
+  //      si esta rama no se auto-probara, el ensanche habría entrado sin
+  //      la red que el resto del guard sí tiene.
+  const conMedir = (fn) => evaluarPremisa(
+    { ...premisaFalsa, inerteMientras: { medir: fn } },
+    { correr: () => [{ n: 0 }], leer: () => 'texto cualquiera' },
+  );
+  debeFallar('③bis·medir caducada', conMedir(() => ({ n: 19 })).estado === 'caducada');
+  debeFallar('③bis·medir lanza → sin-medir', conMedir(() => { throw new Error('no pude leer el canon'); }).estado === 'sin-medir');
+  debeFallar('③bis·medir sin n → sin-medir', conMedir(() => ({ detalle: [] })).estado === 'sin-medir');
+  debeFallar('③bis·contra-caso: n=0 es inerte', conMedir(() => ({ n: 0 })).estado === 'inerte');
 
   return rotos;
 }
@@ -269,7 +300,7 @@ if (SIN_MOTOR) {
   console.log('    en el mismo mensaje del ancla.');
 } else {
   for (const p of PREMISAS) {
-    const r = evaluarPremisa(p, (sql) => dbQuery(sql));
+    const r = evaluarPremisa(p, { correr: (sql) => dbQuery(sql), leer });
     const cabecera = `${p.id} (${p.ficha}) «${p.titulo}»`;
     if (r.estado === 'inerte') {
       console.log(`✓ ③ ${cabecera} — SIGUE INERTE (${p.inerteMientras.explicacion}: 0)`);
