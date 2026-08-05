@@ -375,6 +375,17 @@ export {
   type CodigoErrorModoHorarios,
 } from './wrappers/horarios-modo';
 
+// ── S88-A · LA PUERTA DEL VERBO ASIGNAR (motor 20260805240000) ─────────────
+// Cierra el «motor sin puerta» de S77: el tercer brazo de
+// `cita_update_prestador` vivía sin un solo escritor. `dar_de_baja_empleado`
+// produce las citas sin persona; ésta es la única vía de volver a ruteárselas.
+export {
+  asignarCitaAPersona,
+  puedoAsignarCitas,
+  type CitaAsignada,
+  type CodigoAsignacionCita,
+} from './wrappers/asignacionCita';
+
 // ── Zonas de cobertura del prestador (S58-A, D-331 — v1 DECLARATIVA) ────────
 export {
   obtenerCatalogoCiudades,

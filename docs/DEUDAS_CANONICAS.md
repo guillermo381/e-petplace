@@ -7366,12 +7366,50 @@ firma pide que el número sea uno solo, y dos pantallas todavía dicen otro.*
 > punta** con el flujo curado. **El arco del reset NO cierra antes** — el
 > dashboard funcionando no es el arco: es su primera mitad.
 
+---
+
+### ✅ EL «DESPUÉS» ENTERO — los pares de C sobre el bundle `019fd3db`
+
+**C corrió las cuatro patas en dispositivo, con hora y captura** (los literales
+y las imágenes viven en su acta; acá va el veredicto, que es lo que gobierna).
+
+| # | pata | veredicto |
+|---|---|---|
+| ① | el código **se verifica UNA vez** | ✅ |
+| ② | **la voz dice la verdad** — «esa ya es tu contraseña», jamás el largo | ✅ |
+| ③ | **reintento con el MISMO código PASA** | ✅ ← *el corazón de ①: el token dejó de quemarse* |
+| ④ | **abandono sin sesión** — el `cerrarSesion` del desmontaje verificado | ✅ |
+
+**Quinto verde, no pedido:** la cura del **voseo** viva en pantalla (`packages/api`
+dejó de hablar con acento — D-539 cobrando bien esta vez).
+
+**Higiene declarada por C:** fixtures restaurados · **clave canónica intacta**.
+
+> **La pata ③ es la que prueba la cura, y conviene decir por qué:** las otras
+> tres verifican que algo *anda*; ③ verifica que **el defecto ya no puede
+> ocurrir**. Reintentar con el mismo código era, antes, la acción que dejaba a
+> la persona afuera. *Que ahora pase es el «antes/después» del arco entero.*
+>
+> **Y la pata ④ cierra la sesión fantasma** que C misma había fotografiado —
+> el hallazgo se volvió su propio par.
+
+### 📍 ESTADO DE LA FICHA
+
+**CURADA Y VERIFICADA EN DISPOSITIVO** (arquitectura de A + pantalla de C) ·
+**CIERRE CONDICIONADO AL DEDO DEL FOUNDER DE PUNTA A PUNTA**, que corre sobre
+el bundle que lleve las cajas.
+
+*No se declara cerrada con cuatro verdes de C: la condición de muerte escrita
+arriba pide el dedo del founder, y **una ficha que afirma un gate que no
+ocurrió es el dato falso que esta casa caza en el código** — la lección que
+esta misma sesión pagó y no se va a pagar dos veces.*
+
 **Origen: S88 (gate del reset, prueba real del founder) + medición A del literal
-de GoTrue.**
+de GoTrue + los pares de C en dispositivo.**
 
 ---
 
-#### D-660 — ✅ **CURADA Y GATEADA en su mitad de MOTOR** (S88, 5-ago-2026) · 🟠 su mitad de SUPERFICIE sigue abierta · 🟠 su mitad de SUPERFICIE sigue abierta
+#### D-660 — ✅ **CURADA Y GATEADA en su mitad de MOTOR** (S88, 5-ago-2026) · 🟠 su mitad de SUPERFICIE sigue abierta
 
 > ## ✅ RE-GATE DEL FOUNDER: **VERDE, LOS CUATRO PASOS** (5-ago, sobre `019fd3db`)
 >
@@ -7582,3 +7620,52 @@ silencio.*
 > cierre queda condicionado a este censo y sus curas).
 
 **Origen: S88 (gate del admin del founder + censo con dedos de A).**
+
+---
+
+#### D-661 — 🟠 LA PUERTA DEL VERBO ASIGNAR TIENE UN HUECO AL LADO: EL PROFESIONAL SE AUTO-RUTEA POR RLS DIRECTA
+
+**Hallado al construir la puerta (S88-A), midiendo QUÉ permitía la RLS que la
+puerta iba a duplicar.** No lo introdujo esta sesión: vive desde S77.
+
+**El literal** — tercer brazo de `cita_update_prestador` (policy `w`):
+
+```sql
+EXISTS (SELECT 1 FROM prestador_empleados pe
+        JOIN prestador_empleado_servicios pes ON pes.empleado_id = pe.id
+        JOIN prestador_servicios ps          ON ps.id = pes.servicio_id
+        WHERE pe.user_id = auth.uid() AND pe.activo
+          AND pe.prestador_id = cita.prestador_id
+          AND ps.tipo_servicio = cita.tipo_servicio
+          AND cita.empleado_id IS NULL)          ← la cita sin persona
+```
+
+**Lo que eso concede:** cualquier empleado activo **con el chip del oficio**
+puede hacer `UPDATE` sobre una cita sin persona **por PostgREST directo** — y
+ponerse a sí mismo. Es exactamente lo que `asignar_cita_a_persona` **rebota**
+con `rol_sin_asignacion`.
+
+> ### **LA PUERTA REBOTA AL PROFESIONAL Y LA PARED DE AL LADO LO DEJA PASAR.**
+> *Es la figura inversa del «motor sin puerta» que esta misma sesión cerró: ahí
+> faltaba el camino y sobraba el permiso; acá el camino existe y el permiso
+> sigue siendo más ancho que él.*
+
+**Por qué NO se cierra en el mismo acto, con su literal:** el brazo se escribió
+en S77 para que **las citas despegadas «pasaran a ser de la clínica»** y
+alguien pudiera retomarlas — era la única vía cuando no había puerta. Cerrarlo
+hoy es una **decisión de producto**, no una cura: *¿el veterinario que ve una
+cita huérfana de su oficio puede tomarla, o tiene que pedírsela a la
+recepción?* **La mesa firma; A ejecuta en una línea** (el brazo se borra, o se
+acota a que la persona se ponga **a sí misma** y nada más).
+
+**Lo que hace que hoy NO sangre, medido:** citas con `empleado_id IS NULL` = **0**.
+El hueco es real y **no tiene por dónde ejercerse todavía** — el primer
+`dar_de_baja_empleado` de un negocio con citas futuras lo abre. *Cero no es
+«no puede»: es «no hay».*
+
+> **☠️ DISPARO:** la primera baja real de un empleado con agenda futura, **o**
+> el lote de superficie de §4ter — lo que llegue primero.
+> **☠️ CONDICIÓN DE MUERTE:** el brazo y la puerta conceden **lo mismo**, con
+> la firma de la mesa escrita al lado.
+
+**Origen: S88-A (construcción de la puerta del verbo asignar).**

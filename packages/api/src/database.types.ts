@@ -16950,6 +16950,10 @@ export type Database = {
         Args: { p_presupuesto_id: string }
         Returns: Json
       }
+      asignar_cita_a_persona: {
+        Args: { p_cita_id: string; p_empleado_id: string }
+        Returns: Json
+      }
       asociar_a_caso: {
         Args: { p_caso_id: string; p_cita_id: string }
         Returns: Json
@@ -17289,6 +17293,10 @@ export type Database = {
       email_status_para_invitacion: {
         Args: { p_email: string }
         Returns: string
+      }
+      empleado_puede_asignar_citas: {
+        Args: { p_prestador_id: string }
+        Returns: boolean
       }
       empleado_tiene_capacidad_clinica:
         | { Args: { p_prestador_id: string }; Returns: boolean }
