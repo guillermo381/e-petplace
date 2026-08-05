@@ -7119,3 +7119,43 @@ murió**: esa es la cláusula que hay que mirar al escribir la cura).
 
 **Origen: S87-A (medición pedida por el founder sobre el freno de la
 clasificación de `sistema`).**
+
+---
+
+#### D-658 — 🔴 POR RPC DIRECTO, UNA MASCOTA EN MEMORIAL ES RESERVABLE EN LOS CUATRO OFICIOS — la frontera vive solo en TS
+
+**Hallazgo de S88-A al construir D-657, numerado por orden del founder.**
+
+### EL LITERAL
+
+`_mascota_elegible_servicio(p_mascota_id, tipo_servicio)` — el guard
+`mascota_no_elegible` de las puertas de reserva — **mira ESPECIE (§1bis) y no
+consulta `estado_vida`** (medido: `prosrc ilike '%estado_vida%'` = `false`).
+
+La regla de producto existe desde S63 y vive en **`packages/domain`**
+(`mascotasElegibles`: *memorial/perdida NO reservan*, 10/10 con fixture en los
+cuatro oficios). **Es una frontera de UI: cualquier caller que no pase por ella
+—RPC directo, un wrapper nuevo, un bug de pantalla— reserva para una mascota en
+memorial y el motor lo acepta.**
+
+> **Es la clase D-657 en la puerta de las reservas nuevas.** D-657 era el cobro
+> RECURRENTE que no miraba `estado_vida`; esto es el cobro NUEVO. *La casa ya
+> firmó el principio dos veces en un día: el motor consulta `estado_vida` — en
+> la renovación, en el contratar. Faltan las puertas de reserva suelta.*
+
+### LA CURA, y por qué es UNA línea y no cuatro
+
+**`estado_vida` entra a `_mascota_elegible_servicio`** — el helper es la puerta
+única de la elegibilidad y los cuatro oficios ya lo llaman. *Curarlo a él cura
+las cuatro puertas en el mismo acto; curar puerta por puerta sería repetir
+cuatro veces lo que el helper existe para decir una.*
+
+**Con su par obligatorio (L-199):** memorial → `mascota_no_elegible` en las
+cuatro puertas · activa → reserva normal. Y el contra-caso que D-657 enseñó:
+**el fixture fabrica el memorial**, porque hoy todas las mascotas vivas están
+`activa` y un gate sin a quién cortar corre verde sin probar nada.
+
+> **☠️ DISPARO: antes del soft launch.** Hoy lo tapa la frontera TS en las
+> pantallas reales; lo destapa el primer caller que no pase por ella.
+
+**Origen: S88-A (medición al construir D-657).**

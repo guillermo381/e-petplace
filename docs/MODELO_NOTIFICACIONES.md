@@ -609,6 +609,15 @@ administración fuera del consentimiento.
 > el día que se discuta, se discuta contra una letra que ya sabía que esto
 > podía pasar — y no como si fuera una idea nueva.*
 
+### FIRMA S88 — EL SILENCIO DE LA LIBERACIÓN QUEDA (founder, 5-ago-2026)
+
+Cuando el memorial libera el saldo de un plan (D-657), **el aviso de esa
+liberación NACE descartado por el gate 1 — y así queda**: *la familia ve el
+crédito cuando ella vuelva; un aviso de plata en duelo es la app hablando
+cuando prometió callar.* **La nota declarada en la migración
+`20260805120000` es la letra vigente.** El rastro queda en la sombra como
+`descartada_memorial` — la liberación ocurre; solo su anuncio calla.
+
 ### Candidatas registradas por el censo S87 (no rigen)
 
 - **`update:view` en salida humana no imprime `gitCommitHash`** — solo con
