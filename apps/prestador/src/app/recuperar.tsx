@@ -41,16 +41,20 @@
  * ☠️ MUERTE: cuando S86 ponga plantilla y remitente propios, esta línea
  * se retira — y su condición está atada a D-628, no suelta.
  *
- * ⏭️ Las CAJAS POR DÍGITO llegan por lámina (pieza de B en packages/ui):
- * el `Campo` plano del código es EL PUENTE, no la decisión — se enchufa
- * la pieza nueva acá sin tocar la máquina de pasos.
+ * Las CAJAS POR DÍGITO (`CampoCodigo`, S88-B — lámina firmada): un solo
+ * TextInput invisible, las cajas son presentación. La pieza NO sabe
+ * cuánto mide un código (su prop `largo` es obligatoria a propósito):
+ * el 8 lo declara ESTA pantalla, que es quien promete «8 dígitos» en su
+ * propia voz. Y `valor.length === largo` es de la pantalla: el botón de
+ * verificar no se ofrece hasta que el código esté completo (Ley 23 — la
+ * puerta no ofrece lo que el servidor va a rechazar).
  */
 
 import { useEffect, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Boton, Campo, Encabezado, EvitaTeclado, MarcaDeAgua, Texto, spacing, useAviso, useTheme } from '@epetplace/ui';
+import { Boton, Campo, CampoCodigo, Encabezado, EvitaTeclado, MarcaDeAgua, Texto, spacing, useAviso, useTheme } from '@epetplace/ui';
 import {
   MIN_LARGO_CONTRASENA,
   cerrarSesion,
@@ -61,6 +65,13 @@ import {
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+
+/** El largo del código de recuperación. LO DECLARA LA PANTALLA (la prop
+ *  de CampoCodigo es obligatoria a propósito) y sus voces dicen el mismo
+ *  número. Medido en dispositivo (par S87): el proveedor emite 8; es
+ *  config del server (otp_length) — si A la exporta algún día, este
+ *  número y las tres voces se cuelgan de ahí. */
+const LARGO_CODIGO = 8;
 
 export default function Recuperar() {
   const router = useRouter();
@@ -184,16 +195,29 @@ export default function Recuperar() {
                   crea que no llegó. */}
               <Texto variante="apoyo">{t('recuperar.avisoCorreo')}</Texto>
 
-              <Campo
-                label={t('recuperar.codigo')}
-                value={codigo}
-                onChangeText={setCodigo}
-                keyboardType="number-pad"
-                autoCapitalize="none"
+              {/* Las cajas por dígito (S88-B). El rebote viaja por su
+                  prop `error` — PieDeCampo lo anuncia (liveRegion) y las
+                  cajas se pintan danger sin gritar: la anatomía de B, no
+                  una línea suelta abajo. */}
+              <CampoCodigo
+                largo={LARGO_CODIGO}
+                valor={codigo}
+                onCambio={setCodigo}
+                etiqueta={t('recuperar.codigo')}
+                error={rebote ?? undefined}
+                deshabilitado={trabajando}
               />
-              {rebote !== null && <Texto variante="apoyo" color="danger">{rebote}</Texto>}
               <View style={{ paddingTop: spacing[4], gap: spacing[2] }}>
-                <Boton etiqueta={t('recuperar.verificar')} bloque cargando={trabajando} onPress={() => void verificar()} />
+                {/* `valor.length === largo` es de la pantalla (contrato de
+                    la pieza): un código incompleto NO se ofrece a verificar
+                    — el server lo va a rechazar seguro (Ley 23). */}
+                <Boton
+                  etiqueta={t('recuperar.verificar')}
+                  bloque
+                  cargando={trabajando}
+                  deshabilitado={codigo.length !== LARGO_CODIGO}
+                  onPress={() => void verificar()}
+                />
                 {/* Pedir otro NO vuelve al paso anterior: el correo ya
                     está bien y volver le haría re-tipearlo. */}
                 <Boton
