@@ -7159,3 +7159,85 @@ cuatro puertas · activa → reserva normal. Y el contra-caso que D-657 enseñó
 > pantallas reales; lo destapa el primer caller que no pase por ella.
 
 **Origen: S88-A (medición al construir D-657).**
+
+---
+
+#### D-659 — 🔴 EL RESET QUEMA EL CÓDIGO ANTES DE VALIDAR LA CLAVE, Y EL REBOTE MIENTE SOBRE POR QUÉ
+
+**Cazado por el founder en prueba real (5-ago-2026), gate del reset.** El
+dashboard quedó bien —el correo llega en español, de `avisos@`, con el código—
+y el flujo de la app tiene **dos defectos que se potencian**.
+
+### ① EL ORDEN — el token se consume antes de saber si la clave sirve
+
+**El literal** (`packages/api/src/wrappers/seguridad.ts`,
+`canjearCodigoRecuperacion`):
+
+```
+1. if (input.nueva.length < MIN_LARGO)  → rebota local
+2. verifyOtp({ type:'recovery' })       ← EL TOKEN SE QUEMA ACÁ
+3. updateUser({ password })             ← y ACÁ recién se sabe si la clave sirve
+```
+
+**Cuando el paso 3 rebota, el paso 2 ya ocurrió: el código quedó gastado.** El
+reintento —que es la reacción natural de cualquiera— encuentra
+«código inválido o vencido», y **la persona queda afuera con un correo que ya
+usó**. *El wrapper hace las dos cosas «en el mismo acto», que es lo que su
+propio JSDoc promete — y ese acto único es exactamente el defecto.*
+
+**LA CURA DE DISEÑO (firma del founder): el canje y la clave SE SEPARAN.** El
+token se verifica **una vez**; los reintentos de contraseña **no lo re-tocan**.
+En el wrapper eso es partir la función en dos —`verificarCodigoRecuperacion` y
+`establecerContrasenaConSesion`— porque `verifyOtp` **deja sesión**: la segunda
+no necesita el token, necesita la sesión que la primera dejó.
+
+### ② EL MENSAJE MIENTE — y la causa es un `regex` de tres palabras
+
+El founder vio *«al menos 8 caracteres»* sobre **`Luis123..`, que tiene NUEVE**.
+La regla local no fue: `9 < 8` es falso. **Medido contra GoTrue con cuatro
+candidatas —`Luis123..`, `12345678`, `abcdefgh`, `Abcdefg1`— las CUATRO se
+aceptan: no hay política de complejidad.** El rebote venía de otro lado:
+
+```
+error_code : same_password
+msg        : "New password should be different from the old password."
+             ─────────────── ^^^^^^^^^ ───────────────
+regex del wrapper: /at least|should be|weak/i   →  MATCHEA
+mapeo resultante : contrasena_debil → «tiene que tener al menos 8 caracteres»
+```
+
+> ### **La contraseña no era débil: era LA MISMA. Y el mensaje le habló de su largo.**
+>
+> *Es la familia del guard que grita otra cosa (S84: «un guard preguntaba por
+> la existencia de un valor y su mensaje decía que verificaba un cambio»).*
+> **Acá el mecanismo es más fino y más peligroso: el mapeo por `regex` sobre
+> texto humano ajeno.** `should be` es una construcción tan común en inglés
+> que capturar por ella es capturar cualquier cosa — **y el proveedor puede
+> reescribir sus mensajes sin avisar** (la trampa exacta de D-565, ahora contra
+> texto de GoTrue en vez de texto propio).
+
+**La cura:** mapear por **`error_code` de GoTrue** (`same_password`,
+`weak_password`), que es el campo estable — jamás por el literal humano. Y nace
+la voz que falta: **«Esa ya es tu contraseña. Elegí una distinta.»**
+
+### ③ LA CONSECUENCIA CONJUNTA, que es peor que las dos sumadas
+
+*La persona pone la contraseña que ya tenía —el error más común del mundo—, el
+sistema le dice que es corta, ella prueba otra… y el código ya no existe.*
+**El defecto ② produce el reintento que el defecto ① castiga.**
+
+### ALCANCE Y ADJUDICACIÓN
+
+- **El wrapper es de A** (`packages/api`): partir en dos + mapear por `error_code`.
+- **La pantalla es de C** (`apps/prestador/src/app/recuperar.tsx` — **el único
+  consumidor vivo, medido**; el cliente no tiene esta pantalla todavía).
+- **Viaja con lámina:** el founder pidió el código en **cajas por dígito**, que
+  además **resuelve ① por diseño** — paso 1 el código se verifica, paso 2 la
+  contraseña se elige con las reglas visibles. La mesa la dibuja; C construye.
+
+> **☠️ CONDICIÓN DE MUERTE:** el founder cambia una contraseña **de punta a
+> punta** con el flujo curado. **El arco del reset NO cierra antes** — el
+> dashboard funcionando no es el arco: es su primera mitad.
+
+**Origen: S88 (gate del reset, prueba real del founder) + medición A del literal
+de GoTrue.**

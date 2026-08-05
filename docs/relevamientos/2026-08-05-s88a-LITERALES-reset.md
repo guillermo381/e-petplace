@@ -85,3 +85,32 @@ Tu código para cambiar la contraseña — e-PetPlace
 
 *Si el paso 2 llega viejo (inglés/remitente Supabase), el template no guardó o
 el SMTP no aplicó — se re-mira el dashboard, no el código: el wrapper no cambió.*
+
+
+---
+
+## 5. GATE DEL RESET — resultado mixto (founder, 5-ago)
+
+**✅ EL DASHBOARD FUNCIONA.** El correo llega **en español, de
+`avisos@avisos.epetplace.com`, con el código**. ⇒ **D-628 muere y el remitente
+ajeno también.** Esta mitad del arco está cerrada.
+
+**🔴 EL FLUJO DE LA APP NO.** Dos defectos que se potencian —
+ficha **[[D-659]]** con sus literales:
+1. el código **se quema antes** de saber si la clave sirve;
+2. el rebote de *«esa ya es tu contraseña»* se muestra como *«al menos 8
+   caracteres»* — un `regex` sobre texto humano de GoTrue (`should be`).
+
+**⇒ El arco del reset NO cierra hasta que el founder cambie una contraseña de
+punta a punta con el flujo curado.** *El dashboard funcionando no es el arco:
+es su primera mitad.*
+
+### Los dos registros para el LOTE DE PLANTILLAS
+
+- **El template de §2 queda FIRMADO COMO INTERINO** — funciona y se ve bien;
+  no es el definitivo.
+- **El definitivo lleva el código en TEXTO GRANDE COPIABLE**, con la nota
+  **«tocá el código para copiarlo»**. *Se descarta el botón de copiar real:
+  **los clientes de correo no ejecutan JS** — un botón que no copia es peor que
+  no tenerlo.* (El pedido de **cajas por dígito** es de la PANTALLA, no del
+  correo: va a la lámina de `recuperar.tsx`.)
