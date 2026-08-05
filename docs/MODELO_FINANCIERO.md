@@ -50,6 +50,27 @@ La v2.6 firma la plata del PAQUETE DE SALIDAS (el bono anclado al prestador — 
 1. **Decisión T — el paquete cobra UN pago al comprarse** (simulado y declarado hasta Kushki real). El pago JAMÁS toca el ledger (variante (b) intacta): cada salida devenga sola al cerrar, al **precio unitario efectivo** (total pagado ÷ N salidas) de su paquete de ORIGEN (FIFO).
 2. **Dos cierres legales devengan:** `cierre_con_calidad` (Decisión R) y `cierre_no_show` (NUEVO — reserva confirmada no cumplida sin cancelación ≥2 h: el paseador devenga igual, su franja se bloqueó de verdad). No hay tercera vía.
 3. **Salidas vencidas = breakage DECLARADO:** revenue de plataforma con `tipo_evento` propio, sin payout. El rollover (renovar antes del vencimiento) es transferencia de saldo, sin evento económico.
+> ### ⚠️ ENMIENDA S87 — LA CLÁUSULA NO RIGE EN MEMORIAL *(firma del founder, 5-ago-2026)*
+   >
+   > **Criterio del founder, verbatim en su forma corta:** *la regla fue escrita
+   > para quien **eligió** no usar — **una familia en duelo no eligió nada**.*
+   >
+   > ⇒ **Cuando la mascota entra en memorial (`estado_vida <> 'activa'`), «lo que
+   > el cliente no usa lo pierde el cliente» DEJA DE REGIR** sobre el saldo ligado
+   > a esa mascota. Lo no consumido se libera; no se devenga como capacidad
+   > comprometida ni como flexibilidad no usada.
+   >
+   > **Por qué la enmienda existe y no es un detalle:** aplicarle a una familia en
+   > duelo la misma cláusula que a quien decidió no pasear **convierte una regla
+   > justa en un cobro por una ausencia que nadie quiso**. *Es el mismo criterio con
+   > el que S87 firmó `saldo_pagado` para `plan_renovacion_fallida`: **el daño manda
+   > sobre la coherencia formal de la regla**.*
+   >
+   > **Hermana obligatoria: [[D-657]]** — hoy el motor de planes **renueva y cobra
+   > sin mirar `estado_vida`**, y desde S87 el motor de avisos **calla** lo de esa
+   > mascota. *Sin esta enmienda y sin esa cura, el silencio del duelo vuelve
+   > silencioso el cobro.* **Su construcción es precondición del Lote 2.**
+
    > **ENMIENDA FIRMADA S80, DIFERIDA AL SOFT LAUNCH (gemela de P16(e); la letra madre en POLITICAS):** cuando dispare, **lo vencido pasa de revenue de plataforma a PAYOUT DEL PRESTADOR** — la regla del founder: el prestador cobra la capacidad que comprometió; solo su propio incumplimiento le corta el cobro. **EL ARGUMENTO DEL DESCUENTO (el porqué, al canon):** paquete de 10 a $80 (suelto $10), la familia usa 6 → el paseador devenga $48, MENOS que los $60 que habría cobrado sin paquete, y la plataforma se queda $32 — **el paseador financió el descuento y la plataforma cobró la flexibilidad que él descontó.** **EL ACOPLAMIENTO, medido S80:** `vencer_paquetes_salidas` existe y NADIE la corre (4 jobs en `cron.job`, ninguno la llama; cero `bono_breakage` en la historia; el aviso de P16(e) codeado ADENTRO, jamás enviado) ⇒ **encender el cron ES encender el breakage: el reloj y esta enmienda son el MISMO ACTO.**
 4. **Regla transversal de comisión visible:** toda superficie donde el prestador ponga precio muestra el NETO descontando la comisión vigente, LEÍDA de `fee_configs` — jamás hardcodeada.
 

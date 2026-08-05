@@ -7002,12 +7002,27 @@ primer memorial de una familia con plan* — y ese día no avisa.
 correcto callando. **No se inventa en el Lote 1** (orden del founder S87): un
 gate de avisos no puede ni debe frenar un cobro.
 
-Direcciones, **sin firmar, para la mesa**:
-- (a) la transición a memorial **pausa o cancela** las suscripciones de esa
-  mascota (y libera lo no consumido según P14 / `MODELO_FINANCIERO`);
-- (b) la renovación consulta `estado_vida` y **no renueva** un plan de mascota
-  no activa;
-- (c) las dos: (b) como red del motor, (a) como acto del producto.
+**✅ DIRECCIÓN (c) FIRMADA POR EL FOUNDER (5-ago-2026) — LAS DOS:**
+- **(a) EL ACTO DEL PRODUCTO:** la transición a memorial **pausa o cancela** las
+  suscripciones de esa mascota, **liberando lo no consumido** según P14 /
+  `MODELO_FINANCIERO`.
+- **(b) EL FUSIBLE DEL MOTOR:** la renovación **consulta `estado_vida`** y **no
+  renueva** un plan de mascota no activa.
+
+> **Por qué las dos y no una:** (b) sola deja el plan vivo pero sin cobrar — un
+> limbo que nadie cierra. (a) sola depende de que el acto de producto se ejecute
+> siempre y bien. **Juntas, una es la decisión y la otra el fusible** — la misma
+> forma que S87 firmó para el kill switch y el techo duro.
+
+**✅ Y LA CLÁUSULA DE S80 QUEDA ENMENDADA** (firma del founder, misma fecha), **en
+sus DOS casas — `POLITICAS_EPETPLACE` P16 y `MODELO_FINANCIERO` §2** —, no solo
+acá: *la regla fue escrita para quien **eligió** no usar; **una familia en duelo
+no eligió nada**.* **Enmendar solo la ficha habría dejado la letra madre
+diciendo lo contrario, y cualquiera podría citar la que le conviene** (mismo
+precedente que el magenta de S83 y la plata de P1 en S83).
+
+**La cura es del MOTOR DE PLANES** — el de avisos hace lo correcto callando —
+y su construcción se ordena como **precondición del Lote 2**.
 
 **Cruza con:** el gate 1 de la puerta de S87 · `MODELO_LOYALTY` §7 (memorial
 apaga estructuralmente) · P14 y la regla de la plata firmada en S80 (*"lo que el

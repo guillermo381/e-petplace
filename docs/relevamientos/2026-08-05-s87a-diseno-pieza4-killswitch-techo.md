@@ -136,10 +136,9 @@ sentido; un `plan_renovacion_fallida` sigue siendo urgente seis horas después.
 
 1. ~~**Firma de que el kill switch va en el DESPACHO** (§1).~~ ✅ **RATIFICADA.**
 2. ~~**El criterio de la cola al re-encender** (§4).~~ ✅ **FIRMADA** — solo lo vigente.
-3. **Los valores iniciales del fusible.** Propuesta: **global 500/24 h** —
-   holgado para la operación real de hoy (11 avisos posibles sobre una base de
-   6 prestadores y ~10 familias) y **absurdamente bajo para un bug**, que es la
-   única forma de que salte antes de que duela.
+3. ~~**Los valores iniciales del fusible.**~~ ✅ **FIRMADO: global 500/24 h.**
+   Holgado para la operación real de hoy y **absurdamente bajo para un bug**,
+   que es la única forma de que salte antes de que duela. **Su gobierno, en §8.**
 
 > **Y una nota de orden que vale para todo el Lote 2:** ④ **no depende del
 > transporte**. Se puede construir y probar entero **en sombra**, con el
@@ -166,3 +165,26 @@ riesgo, y por eso la primera) → **correo** como primer transporte (no necesita
 build) → **push** cuando la build exista.
 
 **Camino crítico real: ④ y D-657.**
+
+
+---
+
+## 8. EL GOBIERNO DEL FUSIBLE — firmado (founder, 5-ago-2026)
+
+**Valor inicial: `global 500 / 24 h`.**
+
+- **El techo SIGUE AL USO MEDIDO, jamás lo anticipa.** Cuando el **pico real de
+  7 días** llegue a **~⅓ del techo**, se sube manteniendo **~10× sobre el pico
+  observado**.
+- **Revisión en cada corte:** soft launch, y después **trimestral — alineada a
+  la revisión de rate cards de Meta que §7 ya tiene agendada.** *Un fusible que
+  se revisa en su propia agenda se olvida; enganchado a una revisión que ya
+  existe, no.*
+- **Cuando WhatsApp encienda: SUB-TECHO PROPIO DEL CANAL, más bajo.**
+  > **El global protege la CONFIANZA; el de WhatsApp además protege la PLATA.**
+  > *Son dos daños distintos y por eso son dos números — Ecuador cuesta ~17×
+  > Colombia en utility (§7), así que el mismo volumen que en push es ruido, en
+  > WhatsApp es factura.*
+- **Toda suba es FIRMA DEL FOUNDER CON EL DATO ADELANTE, jamás preventiva.**
+  *Un techo que sube "porque se viene un pico" es un techo que ya no protege:
+  protegía justamente de lo que nadie previó.*
