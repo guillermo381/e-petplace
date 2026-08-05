@@ -2327,6 +2327,81 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 
 ---
 
+#### D-654 — 🔴 EL MOSTRADOR ES VETERINARIO POR CONSTRUCCIÓN: el camino de paseos llega entero hasta la puerta y la puerta no abre
+
+**FRENO DECLARADO (S86-A): no se construyó. La mesa pidió elegir entre
+dos vías y LA MEDICIÓN DESCARTA LAS DOS** — el bloqueo no es de wrapper.
+
+### LO MEDIDO, en el orden en que descarta
+
+**① EL BLOQUEO QUE MANDA, y es anterior al de contrato:**
+
+```sql
+IF NOT EXISTS (SELECT 1 FROM tipos_servicio
+               WHERE codigo = p_tipo_servicio_codigo AND es_medico = true)
+  THEN RAISE EXCEPTION 'tipo_no_medico';
+```
+
+**`registrar_atencion_mostrador` está gateado a `es_medico = true`.**
+`paseo` y `adiestramiento` **rebotan cualquiera sea el código que se le
+pase** ⇒ **ni exponer `tipo_servicio` ni aceptar la duración
+desbloquean nada.** *Es coherente con su letra —VETERINARIA §7, el
+walk-in v1 nació vet— pero esa letra no dice qué pasa con los otros
+oficios: no los prohíbe, no los contempla.*
+
+**② LA PREGUNTA QUE LA MESA PIDIÓ CONTESTAR — ¿existen los códigos largos? NO.**
+
+| código | duración | ofertas VIVAS |
+|---|---|---|
+| `paseo` *(genérico)* | 30 | **7 ofertas activas, con duraciones 30 · 60 · 120 · 180 · 240** |
+| `paseo_30min` | 30 | **0** |
+| `paseo_60min` | 60 | **0** |
+| 120' · 180' · 240' · 300' | — | **NO EXISTEN** |
+
+**③ Y ESO DESCARTA LA VÍA (a) POR SÍ SOLO:** *toda* oferta viva de paseo
+guarda el **genérico `paseo`**, con la verdad en `duracion_minutos`.
+**Exponer `tipo_servicio` devolvería `paseo` para la de 30' y para la de
+240' igual** — que es **exactamente el genérico forzado que la orden
+prohíbe**. *La taxonomía `paseo_Nmin` existe, tiene CERO consumidores, y
+crear cuatro más sería agrandar una segunda forma de decir lo que
+`duracion_minutos` ya dice.*
+
+**④ Y UN DEFECTO LATENTE QUE APARECIÓ AL MEDIR, dentro del propio RPC:**
+
+```sql
+SELECT duracion_minutos FROM prestador_servicios
+WHERE prestador_id = … AND tipo_servicio = p_tipo_servicio_codigo AND activo LIMIT 1
+```
+
+**Con el genérico `paseo` y CUATRO duraciones activas en el mismo
+negocio (Paseos Andrés), el `LIMIT 1` elige una ARBITRARIA.** *El día
+que el gate `es_medico` se abra, un paseo de 3 h puede registrarse como
+de 30 min **sin un solo error** — dato plausible y falso, la familia de
+S85.* **Se cura junto con el resto, jamás después.**
+
+### LA FORMA HONESTA, y por qué es (b) y no (a)
+
+> ### **LA DURACIÓN ES DONDE VIVE LA VERDAD HOY. EL CÓDIGO, PARA PASEO, NO DISTINGUE NADA.**
+>
+> *Un identificador que no identifica no se ensancha: se deja de usar
+> como identificador.* **(b) —que el registro acepte la duración— es lo
+> único que no inventa un dato.**
+
+☠️ **CONDICIÓN DE MUERTE:** desde el mostrador de un paseador se
+registra una atención de 180' y la fila nace con `duracion_minutos =
+180`. **Precondiciones, y son DECISIÓN DE MESA, no transcripción:**
+① **abrir el gate `es_medico`** —o darle al mostrador un predicado que
+contemple los cuatro oficios— y ② **resolver la oferta por
+`(tipo_servicio, duracion_minutos)`**, matando el `LIMIT 1`.
+**DECLARADO PARA S87 con su causa.** *Lo que SÍ está listo y no se
+pierde: el camino entero desde Paseos Andrés —entrada, búsqueda, alta,
+handshake— llega limpio hasta la puerta, sin una sola pantalla vet
+(mudanza de C, S86).*
+Origen: S86-A, medición para C. Hermana de [[D-653]] (dos puertas del
+mismo acto que no se pusieron de acuerdo).
+
+---
+
 #### D-653 — DOS PUERTAS DEL MISMO ACTO CON PREDICADOS DISTINTOS: el mostrador va a poder CREAR una cita que no puede LEER 🟡
 
 **Medido el 4-ago-2026 contra el motor** (pregunta de C sobre si
