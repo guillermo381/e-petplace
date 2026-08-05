@@ -10,13 +10,19 @@
 
 | | |
 |---|---|
-| `main` | **`c237be3`** · pusheado · `porcelain 0` |
+| `main` | **se lee del objeto al abrir: `git rev-parse HEAD`** · pusheado · `porcelain 0` |
 | **PRESTADOR** | group `07723211-ba1c-4ac2-aa37-d81aa1108956` · android **`019fd3db-0d0b-7682-99b3-f2ad27a087a5`** · runtime **1.0.3** |
 | **CLIENTE** | group `2905648d-195b-4818-8186-6cc9c851ed54` · android **`019fd3db-c9bc-79af-8a03-b390d37123d8`** · runtime **1.0.2** |
 | ancla común de los dos publishes | **`3660973`** |
 | typechecks | `api` · `ui` · `cliente` · `prestador` **verdes** |
 | residuo de fixtures | **0** |
 | `verify-ota` | **VERDE en las dos**, `EXIT=0` leído del comando |
+
+> **Por qué `main` va como regla y no como hash:** la primera versión de esta
+> fila decía `c237be3`, y **el commit de este mismo depósito lo movió** — el
+> archivo nombraba un puntero que su propia existencia invalidaba. *Los grupos
+> y anclas de OTA de arriba SÍ van en literal: son hechos de lo publicado, y
+> esos no se mueven.*
 
 **Migraciones aplicadas hoy:** `20260804230000` → `20260805230000` (catálogo,
 contrato, puerta, lector, tipos, las 7 migradas, puerta trasera, ④ kill switch,
@@ -111,6 +117,10 @@ sea solo para mirar. Y el ancla se lee al bundlear, jamás de un reporte previo.
   mudar el agujero a una casa más grande.*
 - **La ficha falsa no tiene typecheck:** un acta que afirma un gate inexistente
   sobrevive a quien la escribió y se lee como hecho.
+- **La ley del depósito:** los **hechos** no se tocan; los **punteros al
+  presente** se escriben como **regla, no como literal**. *La clase de dato que
+  envejece solo no se deposita en literal* — la parió la primera fila de este
+  archivo (ver el recuadro de §1).
 - **El espejo:** ***curar el permiso no cura la pregunta.*** La RLS de
   `cuentas_comerciales` se abrió en la tanda ⑤ y `obtenerMiCuentaComercial`
   siguió preguntando por `owner_profile_id` — **la puerta se abrió y el
