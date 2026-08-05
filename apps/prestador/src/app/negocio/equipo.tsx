@@ -378,7 +378,7 @@ export default function EquipoNegocioPantalla() {
             ? t('equipo.rebSinCuenta')
             : r.codigo === 'email_es_prestador'
               ? t('equipo.rebOtroPrestador')
-              : r.codigo === 'no_es_dueno'
+              : r.codigo === 'no_gestiona'  // D-660: el rename lo forzó el motor
                 ? t('equipo.rebNoDueno')
                 : t('equipo.errorInvitar'),
       );

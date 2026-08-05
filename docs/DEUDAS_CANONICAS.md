@@ -3369,7 +3369,7 @@ Origen: S86-A, medición para C.
   >
   > | superficie | por qué NADIE la alcanza |
   > |---|---|
-  > | **la rama `administrador` de TODOS los gates** | **cero portadores en la DB** — nunca corrió ([[D-652]]) |
+  > | ~~**la rama `administrador` de TODOS los gates**~~ | ~~cero portadores~~ → ✅ **CORRIÓ (S88)**: dos portadores reales y dedo del founder ([[D-652]] cerrada) |
   > | **el diseño de la barra de TRES** | se muestra a 5 personas **y el founder no es una de ellas**: su cuenta es titular ([[D-651]]) |
   > | **`AgendaRecepcion`** (el HOY de recepción) | exige **otro rol** — 1 sola fila viva, en Aurora |
   > | **`GateRoto`** | ~~exige un dato **contradictorio** (`rol=false` + `titular=null`)~~ — **⚠️ ENMENDADA S87: esa condición YA NO RIGE** |
@@ -5654,7 +5654,33 @@ importa: **doce de veinticuatro** reglas del lint estaban en esa condición.*
 
 ---
 
-#### D-652 — «ADMINISTRADOR» ES UN ROL SIN UN SOLO PORTADOR: la rama existe, nunca corrió, y se declara NO PROBADA 🟠
+#### D-652 — ✅ **CERRADA (S88, 5-ago-2026)** — la rama corrió, con dos portadores reales y su dedo
+
+> **Cerrada como quedó enmendada por el founder:** la rama corrió (el primer
+> `administrador` de la historia nació el 5-ago), y su cierre estaba
+> **condicionado al censo de [[D-660]] y sus curas** — que se hicieron enteras
+> y se gatearon.
+>
+> **LA TRAMPA QUE ESTA FICHA NOMBRABA, y cómo se pagó:** *crear el primer admin
+> es un acto de SQL* — por eso el rol nunca había corrido. Se sembraron **dos**
+> cuentas y la segunda es la que vale:
+>
+> | cuenta | para qué |
+> |---|---|
+> | `+s88admin` | admin de plataforma **Y** de negocio — sirvió para el arco, **y su bifrontalidad falseó el primer censo** |
+> | **`+s88rolpuro`** | **administrador de negocio SIN fila en `admin_users`** — el rol solo, que es lo que la ficha pedía |
+>
+> **La segunda existe por una lección de la primera:** *el censo de D-660 dio
+> TODO VERDE con la cuenta bifronte y era falso.* **Una cuenta que es dos cosas
+> no prueba ninguna.**
+>
+> **El dedo del founder, sobre el rol puro:** creó un empleado, editó un
+> servicio y un horario con persistencia verificada, y **no pudo nombrar
+> administrador**. *La rama dejó de ser código sin portadores.*
+
+**El texto original, conservado como historia:**
+
+#### (histórico) D-652 — «ADMINISTRADOR» ES UN ROL SIN UN SOLO PORTADOR 🟠
 
 **Medido contra la DB el 4-ago-2026** (censo de roles, S86): **CERO filas
 con `rol='administrador'` en todo el sistema.** Las 12 filas de empleado
@@ -7010,7 +7036,30 @@ del servidor y la lectura de producto).**
 
 ---
 
-#### D-657 — 🔴 EL PLAN SE SIGUE COBRANDO DESPUÉS DEL MEMORIAL, Y EL MOTOR DE AVISOS ESTÁ POR VOLVER ESE COBRO SILENCIOSO
+#### D-657 — ✅ **CURADA (S88, 5-ago-2026)** — el plan deja de cobrarse después del memorial
+
+> **Dirección (c) construida entera** (migración `20260805120000`): **(a)** el
+> trigger `trg_mascotas_memorial_planes` — la transición a memorial cancela las
+> suscripciones de esa mascota, cancela sus citas firmes y **libera lo no
+> consumido** (P14, motivo `liberacion_memorial_clausula_s80_no_rige`) ·
+> **(b)** `cerrar_y_renovar_planes` consulta `estado_vida` y no renueva ·
+> **(b-bis)** `contratar_plan_paseo` tampoco acepta una mascota no activa.
+>
+> **El ANTES, medido antes de curar:** `renovados=1` + **29 citas firmes nuevas
+> agendadas para una mascota fallecida** — peor que esta ficha: no solo cobraba,
+> llenaba la agenda del paseador con paseos que no iban a ocurrir.
+>
+> **El fixture, 4/4** (`2026-08-05-s88a-FIXTURE-d657.sql`): acto → `cancelada`,
+> crédito $96, aviso nacido `descartada_memorial` (el rastro ES el punto — la
+> liberación ocurre, su aviso calla con el mismo respeto que todo lo demás) ·
+> fusible → `vencidos=1` con el motivo de la enmienda · discriminador → mascota
+> activa **renueva** · contratar → `mascota_no_elegible`.
+>
+> **⇒ La precondición del Lote 2 que esta ficha sostenía queda LEVANTADA.**
+
+**El texto original, conservado como historia:**
+
+#### (histórico) D-657 — 🔴 EL PLAN SE SIGUE COBRANDO DESPUÉS DEL MEMORIAL, Y EL MOTOR DE AVISOS ESTÁ POR VOLVER ESE COBRO SILENCIOSO
 
 **Hallazgo de S87-A, y lo destapó una verificación que pidió el founder sobre un
 freno anterior.** *Ninguna sesión lo había cruzado porque hay que mirar dos
@@ -7096,3 +7145,376 @@ murió**: esa es la cláusula que hay que mirar al escribir la cura).
 
 **Origen: S87-A (medición pedida por el founder sobre el freno de la
 clasificación de `sistema`).**
+
+---
+
+#### D-658 — 🔴 POR RPC DIRECTO, UNA MASCOTA EN MEMORIAL ES RESERVABLE EN LOS CUATRO OFICIOS — la frontera vive solo en TS
+
+**Hallazgo de S88-A al construir D-657, numerado por orden del founder.**
+
+### EL LITERAL
+
+`_mascota_elegible_servicio(p_mascota_id, tipo_servicio)` — el guard
+`mascota_no_elegible` de las puertas de reserva — **mira ESPECIE (§1bis) y no
+consulta `estado_vida`** (medido: `prosrc ilike '%estado_vida%'` = `false`).
+
+La regla de producto existe desde S63 y vive en **`packages/domain`**
+(`mascotasElegibles`: *memorial/perdida NO reservan*, 10/10 con fixture en los
+cuatro oficios). **Es una frontera de UI: cualquier caller que no pase por ella
+—RPC directo, un wrapper nuevo, un bug de pantalla— reserva para una mascota en
+memorial y el motor lo acepta.**
+
+> **Es la clase D-657 en la puerta de las reservas nuevas.** D-657 era el cobro
+> RECURRENTE que no miraba `estado_vida`; esto es el cobro NUEVO. *La casa ya
+> firmó el principio dos veces en un día: el motor consulta `estado_vida` — en
+> la renovación, en el contratar. Faltan las puertas de reserva suelta.*
+
+### LA CURA, y por qué es UNA línea y no cuatro
+
+**`estado_vida` entra a `_mascota_elegible_servicio`** — el helper es la puerta
+única de la elegibilidad y los cuatro oficios ya lo llaman. *Curarlo a él cura
+las cuatro puertas en el mismo acto; curar puerta por puerta sería repetir
+cuatro veces lo que el helper existe para decir una.*
+
+**Con su par obligatorio (L-199):** memorial → `mascota_no_elegible` en las
+cuatro puertas · activa → reserva normal. Y el contra-caso que D-657 enseñó:
+**el fixture fabrica el memorial**, porque hoy todas las mascotas vivas están
+`activa` y un gate sin a quién cortar corre verde sin probar nada.
+
+> **☠️ DISPARO: antes del soft launch.** Hoy lo tapa la frontera TS en las
+> pantallas reales; lo destapa el primer caller que no pase por ella.
+
+**Origen: S88-A (medición al construir D-657).**
+
+---
+
+#### D-659 — 🔴 EL RESET QUEMA EL CÓDIGO ANTES DE VALIDAR LA CLAVE, Y EL REBOTE MIENTE SOBRE POR QUÉ
+
+**Cazado por el founder en prueba real (5-ago-2026), gate del reset.** El
+dashboard quedó bien —el correo llega en español, de `avisos@`, con el código—
+y el flujo de la app tiene **dos defectos que se potencian**.
+
+### ① EL ORDEN — el token se consume antes de saber si la clave sirve
+
+**El literal** (`packages/api/src/wrappers/seguridad.ts`,
+`canjearCodigoRecuperacion`):
+
+```
+1. if (input.nueva.length < MIN_LARGO)  → rebota local
+2. verifyOtp({ type:'recovery' })       ← EL TOKEN SE QUEMA ACÁ
+3. updateUser({ password })             ← y ACÁ recién se sabe si la clave sirve
+```
+
+**Cuando el paso 3 rebota, el paso 2 ya ocurrió: el código quedó gastado.** El
+reintento —que es la reacción natural de cualquiera— encuentra
+«código inválido o vencido», y **la persona queda afuera con un correo que ya
+usó**. *El wrapper hace las dos cosas «en el mismo acto», que es lo que su
+propio JSDoc promete — y ese acto único es exactamente el defecto.*
+
+**LA CURA DE DISEÑO (firma del founder): el canje y la clave SE SEPARAN.** El
+token se verifica **una vez**; los reintentos de contraseña **no lo re-tocan**.
+En el wrapper eso es partir la función en dos —`verificarCodigoRecuperacion` y
+`establecerContrasenaConSesion`— porque `verifyOtp` **deja sesión**: la segunda
+no necesita el token, necesita la sesión que la primera dejó.
+
+### ② EL MENSAJE MIENTE — y la causa es un `regex` de tres palabras
+
+El founder vio *«al menos 8 caracteres»* sobre **`Luis123..`, que tiene NUEVE**.
+La regla local no fue: `9 < 8` es falso. **Medido contra GoTrue con cuatro
+candidatas —`Luis123..`, `12345678`, `abcdefgh`, `Abcdefg1`— las CUATRO se
+aceptan: no hay política de complejidad.** El rebote venía de otro lado:
+
+```
+error_code : same_password
+msg        : "New password should be different from the old password."
+             ─────────────── ^^^^^^^^^ ───────────────
+regex del wrapper: /at least|should be|weak/i   →  MATCHEA
+mapeo resultante : contrasena_debil → «tiene que tener al menos 8 caracteres»
+```
+
+> ### **La contraseña no era débil: era LA MISMA. Y el mensaje le habló de su largo.**
+>
+> *Es la familia del guard que grita otra cosa (S84: «un guard preguntaba por
+> la existencia de un valor y su mensaje decía que verificaba un cambio»).*
+> **Acá el mecanismo es más fino y más peligroso: el mapeo por `regex` sobre
+> texto humano ajeno.** `should be` es una construcción tan común en inglés
+> que capturar por ella es capturar cualquier cosa — **y el proveedor puede
+> reescribir sus mensajes sin avisar** (la trampa exacta de D-565, ahora contra
+> texto de GoTrue en vez de texto propio).
+
+**La cura:** mapear por **`error_code` de GoTrue** (`same_password`,
+`weak_password`), que es el campo estable — jamás por el literal humano. Y nace
+la voz que falta: **«Esa ya es tu contraseña. Elegí una distinta.»**
+
+### ③ LA CONSECUENCIA CONJUNTA, que es peor que las dos sumadas
+
+*La persona pone la contraseña que ya tenía —el error más común del mundo—, el
+sistema le dice que es corta, ella prueba otra… y el código ya no existe.*
+**El defecto ② produce el reintento que el defecto ① castiga.**
+
+### ✅ LA MITAD DE ARQUITECTURA — CURADA (S88-A)
+
+**El wrapper se partió en dos** (`packages/api/src/wrappers/seguridad.ts`):
+
+| función | qué hace |
+|---|---|
+| `verificarCodigoRecuperacion({email, codigo})` | **paso 1** — `verifyOtp` UNA vez; **deja sesión** |
+| `establecerContrasenaNueva({nueva})` | **paso 2** — sobre esa sesión. **Reintentos libres: no re-toca el token** |
+| `canjearCodigoRecuperacion` | **camino viejo**, conservado solo para que `recuperar.tsx` compile. Hereda la cura del traductor, **NO la de orden**. **Muere con el lote de la pantalla.** |
+
+**Y el traductor mapea por `code` estable.** El par, sobre la MISMA respuesta
+real de GoTrue (`code: same_password · msg: "New password should be different
+from the old password."`):
+
+```
+ANTES (regex sobre texto humano) → contrasena_debil → «al menos 8 caracteres»   ← la mentira
+AHORA (code estable)             → contrasena_igual → «tiene que ser distinta de la actual»
+```
+
+**La voz correcta YA EXISTÍA en `MENSAJES` y nadie la usaba: el `regex` la
+pisaba.** *No hubo que escribir la verdad — hubo que dejar de taparla.*
+
+### ③ LA TERCERA PATA — la sesión fantasma, fotografiada por C
+
+**`verifyOtp` deja sesión, y cuando el paso 2 rebotaba esa sesión quedaba
+viva:** C reinició la app y **entró logueada, sin haber cambiado la
+contraseña**. *No es un cuarto bug: es la MISMA sesión que la cura convierte en
+su herramienta* — la partición la usa a propósito (paso 2 se apoya en ella).
+**Pero la pantalla tiene que saber que existe:** si la persona abandona el
+flujo, queda adentro. **Eso es de C, y va en la lámina de cajas por dígito.**
+
+### DOS HALLAZGOS MÁS, del par de C — viajan en esta ficha
+
+1. **La voz promete «6 dígitos» y el código real tiene 8.**
+   `apps/prestador/src/i18n/es.ts:626` — `codigo: 'El código de 6 dígitos'`.
+   *Un formulario que pide seis para un dato de ocho rechaza lo correcto.*
+2. **`packages/api` VOSEA:** `MENSAJES.codigo_invalido` termina en
+   **«Pedí uno nuevo»**, y `demasiados_intentos` dice **«Esperá»**.
+   **Es D-539 cobrando de nuevo** — el paquete compartido no tiene capa de
+   idioma y habla con acento. *La voz de producto es tuteo (L-148).*
+
+### ⚖️ ✅ LA REGLA ÚNICA DE CLAVE — FIRMADA (founder, S88): **8 EN TODOS LADOS**
+
+**El número vive en UN lugar:** `MIN_LARGO_CONTRASENA = 8`, exportado desde
+`seguridad.ts`. **Hecho en S88-A:**
+
+- `seguridad.ts` — la constante, y el alias local histórico apunta a ella.
+- `auth.ts` — el mensaje del **registro** interpolaba **6** a mano y ahora
+  importa el número. *Ese era el peor de los dos: `registrarse` **no valida
+  largo localmente** —hereda el del servidor— así que su mensaje era una
+  promesa sin guard detrás.*
+
+**Pendiente, y NO es mío:**
+
+| qué | dónde | de quién |
+|---|---|---|
+| `passwordAyuda: 'Al menos 6 caracteres'` | `apps/prestador/src/i18n/es.ts:98` | **C** |
+| `passwordAyuda: 'Al menos 6 caracteres'` | `apps/cliente/src/i18n/es.ts:52` | **la pista del cliente** |
+| `minimum_password_length` → **8** | panel de Supabase | **founder** (D-634 o antes: es un clic) |
+
+*Mientras el panel siga en 6 no hay bug —el cliente excede al servidor— pero la
+firma pide que el número sea uno solo, y dos pantallas todavía dicen otro.*
+
+### ALCANCE Y ADJUDICACIÓN
+
+- ~~**El wrapper es de A**~~ ✅ **HECHO — arriba.**
+- **El wrapper es de A** (`packages/api`): partir en dos + mapear por `error_code`.
+- **La pantalla es de C** (`apps/prestador/src/app/recuperar.tsx` — **el único
+  consumidor vivo, medido**; el cliente no tiene esta pantalla todavía).
+- **Viaja con lámina:** el founder pidió el código en **cajas por dígito**, que
+  además **resuelve ① por diseño** — paso 1 el código se verifica, paso 2 la
+  contraseña se elige con las reglas visibles. La mesa la dibuja; C construye.
+
+> **☠️ CONDICIÓN DE MUERTE:** el founder cambia una contraseña **de punta a
+> punta** con el flujo curado. **El arco del reset NO cierra antes** — el
+> dashboard funcionando no es el arco: es su primera mitad.
+
+**Origen: S88 (gate del reset, prueba real del founder) + medición A del literal
+de GoTrue.**
+
+---
+
+#### D-660 — ✅ **CURADA Y GATEADA en su mitad de MOTOR** (S88, 5-ago-2026) · 🟠 su mitad de SUPERFICIE sigue abierta
+
+> **RE-GATE DEL FOUNDER: VERDE con el rol puro.** Creó un empleado, editó un
+> servicio y un horario **con persistencia verificada**, y **el camino de
+> nombrar administrador sigue cerrado a su dedo**.
+>
+> **El límite intocable quedó probado en las DOS direcciones:** por
+> **predicados** (el cinturón lee que `empleado_roles` no usa el helper) y por
+> **dedo** (el founder no pudo). *Una sola de las dos habría sido media prueba:
+> el predicado no sabe si alguien lo alcanza, y el dedo no sabe si mañana
+> alguien lo abre.*
+>
+> **🟠 LO QUE SIGUE ABIERTO, con dueño:** la mitad de **SUPERFICIE** — §4ter de
+> `LAMINA_BARRA_DE_TRES` (el home por rol + la consolidada). **La mesa dibuja
+> la lámina; C construye.** *El motor ya está listo debajo: hoy el admin puede
+> todo lo que la letra le promete y la pantalla todavía lo manda al mostrador.*
+
+**El texto original, conservado como historia:**
+
+#### (histórico) D-660 — 🔴 EL ROL `administrador` NO PUEDE ESCRIBIR NADA DEL NEGOCIO
+
+**Censo con dedos pedido por el founder (S88), sobre el primer admin real.**
+La letra de S74 dice **«administrador = dueño menos crear admins»**. **Medido:
+no puede escribir NADA.**
+
+### EL CENSO, con su discriminador
+
+**⚠️ La primera corrida dio TODO VERDE y era falsa.** `+s88admin` es admin de
+**PLATAFORMA** (`admin_users`) **y** administrador de **negocio** a la vez, y
+las policies dicen `user_id = auth.uid() OR is_admin()` — *medí el poder de
+`is_admin()`, no el del rol.* **Re-corrido apagando la pata de plataforma:**
+
+| superficie | con `is_admin()` | **administrador PURO** |
+|---|---|---|
+| `prestador_servicios` | 9 filas | **0 filas** |
+| `prestador_horarios` | 21 filas | **0 filas** |
+| identidad (`prestadores`) | 1 fila | **0 filas** |
+| vitrina (`expone_personas`) | 1 fila | **0 filas** |
+| `cuentas_comerciales` | 1 fila | **0 filas** |
+| `crear_empleado_directo` | pasa | **pasa — ver abajo** |
+| `dar_de_baja_empleado` | pasa | rebota |
+
+> ### **LA LECTURA ES PERFECTA Y LA ESCRITURA ES CERO.**
+> El admin **ve** el equipo (7), los servicios (9), los horarios (21), el
+> negocio, la cuenta y las invitaciones (10) — **y no puede tocar una sola
+> fila.** *No es una puerta cerrada: son todas.*
+
+### ⚠️ DOS TRAMPAS DE MEDICIÓN, y las dos me mordieron
+
+1. **`UPDATE` bajo RLS que no matchea NO FALLA: afecta CERO.** La primera
+   pasada leyó «PASA» donde había 0 filas. **Se cuenta `ROW_COUNT`, jamás la
+   ausencia de excepción.** *Es la clase D-654 en el instrumento de medir.*
+2. **Una cuenta que es dos cosas a la vez no discrimina** — y yo mismo lo había
+   advertido al sembrarla. **El censo válido apaga la otra pata.**
+
+### `crear_empleado_directo` — el caso que INVIERTE el diagnóstico del founder
+
+**Pasa el gate, y por eso hay que mirarlo dos veces.** Su literal:
+
+```sql
+IF NOT EXISTS (SELECT 1 FROM prestadores
+               WHERE id = p_prestador_id AND user_id = v_dueño_user_id) THEN
+  RETURN jsonb_build_object('ok', false, 'mensaje', 'No sos dueño de este prestador');
+END IF;
+```
+
+**Gatea por titularidad — y NO LEVANTA EXCEPCIÓN: devuelve `{ok:false}`.**
+⇒ mi `PERFORM` no rebotó *porque el rechazo no es un rebote*. **Es la clase
+D-511 exacta:** un RPC que devuelve el fallo como dato y un caller que solo
+mira excepciones **lee ÉXITO sobre un rechazo**.
+
+> **⇒ El founder tenía razón y la causa es peor de lo que parecía:** el admin
+> no puede crear empleados **y el motor lo dice de una forma que un caller
+> descuidado no oye.** *Además el mensaje tutea mal y dice «dueño» donde la
+> letra ya tiene tres roles.*
+
+### EL PATRÓN, que es lo que trasciende
+
+**Todos los gates del camino de gestión se escribieron cuando «prestador =
+titular» era verdad.** Ninguno vio nunca un admin: **es la premisa caducada de
+D-651, un piso más abajo — en el motor y no en la superficie.**
+
+### ✅ PIEZA 1 DEL LOTE — EL HELPER, CONSTRUIDO (S88-A, `20260805150000`)
+
+```sql
+user_gestiona_prestador(prestador) =
+     titular de esa fila
+  OR empleado_tiene_rol(prestador, ['administrador'])   ← la letra de S74, por fin con motor
+  OR is_admin()                                         ← el admin de plataforma, que ya pasaba
+```
+
+**Par adentro de la migración, y ABORTA si no discrimina** (L-199):
+
+```
+admin=true | profesional=false | recepcion=false | titular=true
+```
+
+*El par apaga la pata de plataforma del admin de prueba antes de medir* —
+sin eso da todo verde y no prueba nada (la trampa que este mismo censo pagó).
+
+**El límite intocable vive EN EL COMMENT del helper**, no en un acta aparte:
+*crear/quitar administradores es del TITULAR; este helper NO cubre ese acto —
+quien lo escriba compara `user_id` a propósito.*
+
+### EL CENSO DE SITIOS — 18 policies + 16 RPCs, clasificados
+
+**Migran al helper (gestión del negocio):** `prestador_servicios` ·
+`prestador_horarios` · `prestador_servicio_tallas` · `prestador_programas` ·
+`prestador_especialidades` · `prestador_zonas` · `prestador_bloqueos` ·
+`prestador_documentos` · `prestadores` (UPDATE) · `cuentas_comerciales` ·
+`empleado_invitaciones` · `prestador_empleados` (crear/actualizar) · y los RPC
+`actualizar_nombre_comercial` · `crear_empleado_directo` · `dar_de_baja_empleado`
+· `elegir_modo_horarios` · `convertir_horarios_a_por_servicio` ·
+`email_status_para_invitacion`.
+
+**NO migran, y el porqué de cada clase:**
+
+| sitio | por qué NO |
+|---|---|
+| `prestadores` INSERT · `crear_prestador_inicial` | **auto-servicio**: se crea el propio negocio. No hay a quién administrar todavía |
+| `empleados_self_actualiza` · `empleados_accept_invitation` | **son de la persona sobre SÍ MISMA** (el handshake). Abrirlos dejaría a un admin aceptando invitaciones ajenas |
+| crear/quitar `administrador` | **el límite intocable** (letra S74) |
+| `obtener_jornada_recepcion` | **ya gatea por rol** — no compara `user_id` a mano |
+| `obtener_plata_del_dia` · `obtener_datos_negocio` · `obtener_atenciones_abiertas` · `contar_citas_despegables` | ya tienen `is_admin()`; **su gate es de LECTURA y el founder firmó que el admin ve todo** ⇒ migran solo si se mide que hoy rebotan |
+| `buscar_cliente_por_*` · `obtener_expediente_modulado` | **el regex los pescó de más**: su gate es de acceso a mascota, no de titularidad |
+
+### ✅ EL LOTE DE MOTOR, CERRADO (S88-A) — cinco tandas
+
+| tanda | qué |
+|---|---|
+| helper | `user_gestiona_prestador` + censo clasificado |
+| ① | `crear_empleado_directo` — gate al helper, **rechazo hablado por código**, muere «No sos dueño» |
+| ② | servicios y horarios |
+| ③ | las seis mecánicas (tallas · programas · especialidades · zonas · bloqueos · documentos) |
+| ④ | equipo · **④bis** el trigger que el censo no vio · **④ter** acotar invitaciones |
+| ⑤ | identidad y cuenta · **⑤bis** los RPC y el resolvedor |
+
+**LOS DOS EJEMPLOS CANÓNICOS DEL LOTE:**
+- **La partición por verbo:** `prestador_own_profile` era `FOR ALL`; `SELECT`/
+  `UPDATE` al helper y **`DELETE` se queda en el titular**. *Migrarlo entero le
+  daba a un administrador la capacidad de borrar la empresa.*
+- **El resolvedor que no adivina:** `prestador_que_gestiono()` **rebota** si
+  alguien gestiona dos negocios (medido: 0 de 8 hoy). *Elegir en silencio sería
+  escribir en el negocio equivocado.*
+
+### ✅ VERIFICADO CON EL ROL PURO — la cuenta sin pata de plataforma
+
+`guillo381+s88rolpuro@gmail.com` · **cero filas en `admin_users`**, que es su
+razón de existir: *el censo de esta misma ficha pagó la trampa de la cuenta
+bifronte, y el dedo del founder no la re-paga.*
+
+```
+is_admin = FALSE          ← el discriminador
+gestiona = true
+servicios = 9  ·  horarios = 21      ← escribía 0/0
+crea_empleado = true
+CREA_ADMIN = REBOTE                  ← el límite intocable, intacto
+```
+
+**Los tres dedos:** login real · el motor con sus claims · y **el límite
+probado en la dirección que importa**.
+
+### ⏳ LO QUE QUEDA SIN PROBAR, escrito (no en la memoria)
+
+Cuatro tablas **vacías para Aurora** — `zonas`, `tallas`, `programas`,
+`bloqueos` — cuya policy migró pero **ningún fixture pudo ejercer**: *un fixture
+no puede probar una policy sobre una tabla sin filas.* **Se prueban el día que
+tengan filas reales.**
+
+### LA CURA, ordenada por lote (no al pasar)
+
+Un helper único —`user_gestiona_prestador(prestador)` = titular **OR**
+`empleado_tiene_rol(prestador,['administrador'])`— y las policies/RPC lo
+consultan **en vez de comparar `user_id` a mano**. *Curar sitio por sitio
+garantiza olvidar uno; y el que se olvide no va a fallar: va a dar 0 filas en
+silencio.*
+
+> **☠️ EL LÍMITE INTOCABLE, escrito:** **crear y quitar administradores es del
+> TITULAR.** Es lo único que el helper NO debe abrir (letra S74).
+> **☠️ DISPARO:** el lote de roles. **D-652 no cierra hasta que esto se cure**
+> (enmienda del founder: la rama corrió con el primer admin real el 5-ago; su
+> cierre queda condicionado a este censo y sus curas).
+
+**Origen: S88 (gate del admin del founder + censo con dedos de A).**

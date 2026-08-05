@@ -5,6 +5,8 @@
 // SOLO vía startsWith de códigos conocidos (regla 35 / L-115).
 
 import { getClient } from '../client';
+// El largo mínimo vive en UN lugar (firma founder S88): seguridad.ts.
+import { MIN_LARGO_CONTRASENA } from './seguridad';
 import type { ResultadoWrapper } from '../resultado';
 
 const CODIGOS_ERROR_AUTH = [
@@ -25,7 +27,7 @@ const MENSAJES_ERROR_AUTH: Record<
   email_ya_registrado:   'Ese email ya tiene cuenta. Probá iniciar sesión.',
   credenciales_invalidas: 'El email o la contraseña no coinciden.',
   email_invalido:        'Ese email no parece válido.',
-  password_debil:        'La contraseña necesita al menos 6 caracteres.',
+  password_debil:        `La contraseña necesita al menos ${MIN_LARGO_CONTRASENA} caracteres.`,
   email_no_confirmado:   'Falta confirmar tu email. Revisá tu correo.',
   sin_sesion:            'No hay una sesión activa.',
   datos_inconsistentes:  'La respuesta del servidor no tiene la forma esperada.',

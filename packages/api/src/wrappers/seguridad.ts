@@ -58,11 +58,12 @@ export type CodigoErrorSeguridad = (typeof CODIGOS_ERROR_SEGURIDAD)[number];
  *  el lado cómodo, que es el que nadie reporta.*
  *
  *  ⚠️ **YA NO ESPEJA LA CONFIG DEL SERVIDOR — la EXCEDE, y a propósito.**
- *  `minimum_password_length` del panel de Supabase sigue en **6**
- *  (medido). Exceder es seguro en esta dirección: todo lo que el cliente
- *  acepta (≥8) el servidor también. La dirección peligrosa sería la
- *  inversa —cliente laxo, servidor estricto—, y ésa no ocurre.
- *  Alinear el panel a 8 es un toggle de la visita admin (D-634).
+ *  ✅ **FIRMA FOUNDER S88 — 8 EN TODOS LADOS.** El número vive acá, UNA vez
+ *  (`MIN_LARGO_CONTRASENA`), y todo lo que lo diga lo importa. El panel de
+ *  Supabase (`minimum_password_length`, medido en **6**) se alinea a 8 —
+ *  toggle de la visita admin, D-634.
+ *  Mientras el panel siga en 6 no hay bug: el cliente EXCEDE al servidor y esa
+ *  dirección es segura. La peligrosa es la inversa, y no ocurre.
  *
  *  Se valida acá para decirlo ANTES del round-trip (Ley 23), no para
  *  reemplazar al servidor: si los dos divergen, gana el servidor y el
@@ -71,7 +72,10 @@ export type CodigoErrorSeguridad = (typeof CODIGOS_ERROR_SEGURIDAD)[number];
  *  El número viaja INTERPOLADO al mensaje de abajo a propósito: el texto
  *  del rebote es parte del guard, y un guard que dice "6" mientras exige
  *  "8" es el defecto que la candidata #21 nombra. */
-const MIN_LARGO = 8;
+export const MIN_LARGO_CONTRASENA = 8;
+
+/** Alias local histórico — el número vive UNA vez (firma founder S88). */
+const MIN_LARGO = MIN_LARGO_CONTRASENA;
 
 const MENSAJES: Record<CodigoErrorSeguridad, string> = {
   sin_sesion:                   'No hay sesión activa.',
@@ -212,7 +216,22 @@ export async function pedirCodigoRecuperacion(input: {
 }
 
 /**
- * Canjea el código y **establece la contraseña nueva en el mismo acto**.
+ * PASO 1 — verifica el código. **UNA sola vez, y deja SESIÓN.**
+ *
+ * ⚠️ **PARTIDO EN DOS POR D-659** (bug cazado por el founder en prueba real).
+ * Antes esto y el cambio de clave eran «el mismo acto», y ese acto único ERA
+ * el defecto: `verifyOtp` quemaba el token y recién después se sabía si la
+ * clave servía. Cuando la clave rebotaba, el reintento —la reacción natural de
+ * cualquiera— encontraba el código gastado y la persona quedaba afuera con un
+ * correo que ya había usado.
+ *
+ * **La sesión que deja este paso es la que autoriza el paso 2**, y por eso los
+ * reintentos de contraseña ya no re-tocan el token. *El hallazgo de la sesión
+ * fantasma, vuelto cura.*
+ */
+
+/**
+ * (histórico) Canjea el código y establece la contraseña en el mismo acto.
  *
  * `verifyOtp({ type: 'recovery' })` **devuelve sesión** — por eso el
  * `updateUser` de abajo funciona sin más pasos.
@@ -226,6 +245,71 @@ export async function pedirCodigoRecuperacion(input: {
  * acertó el formato — y el remedio del usuario es el mismo en los dos
  * casos: pedir uno nuevo.
  */
+export async function verificarCodigoRecuperacion(input: {
+  email: string;
+  codigo: string;
+}): Promise<ResultadoWrapper<null, CodigoErrorSeguridad>> {
+  const { error } = await getClient().auth.verifyOtp({
+    email: input.email.trim(),
+    token: input.codigo.trim(),
+    type: 'recovery',
+  });
+  if (error) {
+    if (esRateLimit(error.message, error.status)) {
+      return { ok: false, codigo: 'demasiados_intentos', mensaje: MENSAJES.demasiados_intentos };
+    }
+    return { ok: false, codigo: 'codigo_invalido', mensaje: MENSAJES.codigo_invalido };
+  }
+  return { ok: true, data: null };
+}
+
+/**
+ * PASO 2 — la contraseña, sobre la sesión que dejó el paso 1.
+ *
+ * **Se puede reintentar todas las veces que haga falta: NO vuelve a tocar el
+ * token.** Ése es el punto de la partición (D-659).
+ */
+export async function establecerContrasenaNueva(input: {
+  nueva: string;
+}): Promise<ResultadoWrapper<null, CodigoErrorSeguridad>> {
+  if (input.nueva.length < MIN_LARGO) {
+    return { ok: false, codigo: 'contrasena_debil', mensaje: MENSAJES.contrasena_debil };
+  }
+
+  const { error } = await getClient().auth.updateUser({ password: input.nueva });
+  if (error) {
+    // ⚠️ D-659: se mapea por `code` ESTABLE, jamás por el literal humano.
+    // El bug medido: el regex `/at least|should be|weak/` capturaba
+    // "New password should be different from the old password" y lo mostraba
+    // como «al menos 8 caracteres» — la contraseña no era débil, era LA MISMA.
+    // `should be` es tan común en inglés que capturar por ella captura
+    // cualquier cosa, y el proveedor reescribe sus mensajes sin avisar.
+    const codigoGoTrue = (error as { code?: string }).code;
+    if (codigoGoTrue === 'same_password') {
+      return { ok: false, codigo: 'contrasena_igual', mensaje: MENSAJES.contrasena_igual };
+    }
+    if (codigoGoTrue === 'weak_password') {
+      return { ok: false, codigo: 'contrasena_debil', mensaje: MENSAJES.contrasena_debil };
+    }
+    if (esRateLimit(error.message, error.status)) {
+      return { ok: false, codigo: 'demasiados_intentos', mensaje: MENSAJES.demasiados_intentos };
+    }
+    return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
+  }
+  return { ok: true, data: null };
+}
+
+/**
+ * ⚠️ **CAMINO VIEJO — QUEMA EL CÓDIGO SI LA CLAVE REBOTA (D-659).**
+ *
+ * Se conserva SOLO para que `recuperar.tsx` siga compilando hasta que C lo
+ * migre a los dos pasos. **No se usa en superficie nueva.** Hoy compone las
+ * dos funciones, así que hereda la cura del traductor de errores — pero
+ * **no la cura de orden**: si el paso 2 rebota, el token ya se gastó, que es
+ * exactamente el defecto que la partición existe para arreglar.
+ *
+ * **Muere con el lote de la pantalla.**
+ */
 export async function canjearCodigoRecuperacion(input: {
   email: string;
   codigo: string;
@@ -234,28 +318,9 @@ export async function canjearCodigoRecuperacion(input: {
   if (input.nueva.length < MIN_LARGO) {
     return { ok: false, codigo: 'contrasena_debil', mensaje: MENSAJES.contrasena_debil };
   }
-
-  const { error: errorOtp } = await getClient().auth.verifyOtp({
-    email: input.email.trim(),
-    token: input.codigo.trim(),
-    type: 'recovery',
-  });
-  if (errorOtp) {
-    if (esRateLimit(errorOtp.message, errorOtp.status)) {
-      return { ok: false, codigo: 'demasiados_intentos', mensaje: MENSAJES.demasiados_intentos };
-    }
-    return { ok: false, codigo: 'codigo_invalido', mensaje: MENSAJES.codigo_invalido };
-  }
-
-  // La sesión que dejó `verifyOtp` es la que autoriza este cambio.
-  const { error } = await getClient().auth.updateUser({ password: input.nueva });
-  if (error) {
-    if (/at least|should be|weak/i.test(error.message)) {
-      return { ok: false, codigo: 'contrasena_debil', mensaje: MENSAJES.contrasena_debil };
-    }
-    return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
-  }
-  return { ok: true, data: null };
+  const verificado = await verificarCodigoRecuperacion(input);
+  if (!verificado.ok) return verificado;
+  return establecerContrasenaNueva({ nueva: input.nueva });
 }
 
 /** Expuesto para que la superficie pueda decir CUÁNTO FALTA cuando el

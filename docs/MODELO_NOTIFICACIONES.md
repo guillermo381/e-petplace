@@ -426,6 +426,16 @@ de respaldo declarada** y una sola entrega por intención. **Prohibido el
 disparo múltiple**: el mismo aviso por tres canales es ruido, y en
 WhatsApp además es plata.
 
+> **ENMIENDA §7 FIRMADA (founder, S88 — nacida del gate del primer envío):**
+> **el canal elegido es el primero habilitado CON TRANSPORTE VIVO.** La
+> «disponibilidad del canal» dejó de ser prosa: es la columna
+> `transporte_vivo` del catálogo de canales. *Antes la selección elegía push a
+> ciegas —push no tiene transporte— y la intención quedaba encolada esperando
+> un tren que no existe.* El día que la build de push llegue, push vuelve a
+> ganar **con el UPDATE de una fila**, sin tocar la puerta. Par probado:
+> push sin tren → email · push con tren → push · sin trenes → `in_app` (el
+> piso: jamás se pierde).
+
 ## 8. Volumen — el problema que traen los sellers
 
 Un prestador con 5 citas al día y un seller con 200 pedidos no pueden
@@ -608,6 +618,15 @@ administración fuera del consentimiento.
 > **La reserva queda fechada; el mecanismo NO EXISTE.** *Se escribe acá para que
 > el día que se discuta, se discuta contra una letra que ya sabía que esto
 > podía pasar — y no como si fuera una idea nueva.*
+
+### FIRMA S88 — EL SILENCIO DE LA LIBERACIÓN QUEDA (founder, 5-ago-2026)
+
+Cuando el memorial libera el saldo de un plan (D-657), **el aviso de esa
+liberación NACE descartado por el gate 1 — y así queda**: *la familia ve el
+crédito cuando ella vuelva; un aviso de plata en duelo es la app hablando
+cuando prometió callar.* **La nota declarada en la migración
+`20260805120000` es la letra vigente.** El rastro queda en la sombra como
+`descartada_memorial` — la liberación ocurre; solo su anuncio calla.
 
 ### Candidatas registradas por el censo S87 (no rigen)
 

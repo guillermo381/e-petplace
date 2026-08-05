@@ -33,15 +33,29 @@ encima («Owner only»).** Eso muere.
 | rol | qué muestra el techo |
 |---|---|
 | **profesional** (con chips) | **sus citas de hoy** |
-| **recepción** (sin chips) | **el movimiento de la puerta** — ✅ **YA CUMPLIDO POR DISEÑO EXISTENTE** |
+| **recepción** (sin chips) | ~~el movimiento de la puerta~~ → **la misma posición consolidada que el dueño** (letra founder, abajo) |
 
-> **DECISIÓN DE MESA (S88):** **`AgendaRecepcion` ES el movimiento de la
-> puerta.** No hace falta construirle un techo: la superficie que S78 ya
-> construyó *es* lo que esta fila pide. ⇒ **el techo de tres números queda SOLO
-> para el profesional.**
+> ### ☠️ **REVOCADA POR LETRA DEL FOUNDER (5-ago-2026, gate de la barra)**
 >
-> *Media lámina se cumplió sin escribir una línea — y solo se supo mirando lo
-> que ya existía en vez de leer la fila como un pedido nuevo.*
+> **La letra nueva, verbatim:** *«la recepción ve exactamente la misma posición
+> consolidada que el dueño; no puede atender; solo puede asignar las citas que
+> no tienen prestador agendado.»*
+>
+> ⇒ **NO es «lo que ya existe alcanza».** Es **lote de construcción propio**, y
+> la mesa lo dibuja antes de que se toque una línea.
+>
+> **Lo que dice de la recepción, y es más que una pantalla:** ve **todo** —
+> misma posición consolidada que el dueño— y **hace poco**: no atiende, solo
+> **asigna lo que no tiene prestador**. *Ver completo y poder poco no es una
+> limitación: es la definición del mostrador.*
+>
+> **La lectura revocada, conservada a propósito:** *«`AgendaRecepcion` ES el
+> movimiento de la puerta; media lámina cumplida sin escribir una línea»*
+> (decisión de mesa del mismo día, antes del gate). **Se conserva marcada y no
+> se borra:** quien lea tiene que ver que hubo una lectura anterior y por qué
+> cayó. *Se cayó porque miró la superficie que existía y no preguntó qué PUEDE
+> hacer ese actor — y la respuesta era ninguna de las dos cosas que la fila
+> suponía.*
 
 **Y la razón que hay que conservar aunque el diseño evolucione:**
 
@@ -170,6 +184,32 @@ traen. Typechecks `api`/`cliente`/`prestador` verdes.
 > se separan en el ROL.** *Un censo de paths habría dado cobertura sobre las
 > cuatro superficies inalcanzables y ninguna estaba confirmada por un dedo.*
 > **Ningún ítem de §4 se declara hecho sin la cuenta que lo alcanza.**
+
+---
+
+## 4ter. ENMIENDA S88 — EL HOME SE DEFINE POR ROL *(letra founder, gate del admin)*
+
+**Hallazgo del gate:** el admin **cae en la pantalla de recepción** — el desvío
+del home lo trata como mostrador.
+
+> **La letra:** **el home se define POR ROL.**
+> · **dueño y ADMINISTRADOR ven lo mismo** — el HOY del gestor.
+> · **recepción ve la consolidada, con su verbo: ASIGNAR.**
+
+*El admin no es un mostrador con más permisos: es el dueño menos una cosa
+(crear admins). Mandarlo a la pantalla de recepción no es un desvío mal
+configurado — es el producto diciéndole quién cree que es.*
+
+**⚠️ Y su motor NO EXISTE todavía: ver [[D-660]]** — el rol `administrador`
+tiene lectura perfecta y **escritura cero**. *Mandarlo al HOY del gestor sin
+curar D-660 le muestra una casa donde no puede tocar nada.* **Las dos van en el
+mismo lote.**
+
+## 5bis. LÁMINAS HERMANAS
+
+- **`LAMINA_MOSTRADOR_ORDEN.md`** — el orden de la pantalla del mostrador
+  (fecha → botón → filtros → lista). **Aplica a TODOS los roles**, por eso vive
+  aparte y no como sección de ésta.
 
 ---
 

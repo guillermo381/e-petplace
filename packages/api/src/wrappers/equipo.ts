@@ -300,29 +300,34 @@ export async function desvincularEmpleado(empleadoId: string): R<ResultadoBaja> 
   return { ok: true, data: { citasDespegadas: Number.isFinite(n) ? n : 0 } };
 }
 
-/** Los rebotes SUAVES de `crear_empleado_directo` — el RPC devuelve
- *  `{ok:false, mensaje:'<literal>'}` SIN campo código (estilo portal
- *  legado). CURA D-508 (S74-B): antes este wrapper solo miraba el error
- *  de PostgREST y los 4 rebotes viajaban como ÉXITO — el founder vio
- *  "éxito" de un rebote en campo. DECLARADO (tensión regla 35): el
- *  motor no da código, así que el mapeo es por el LITERAL del mensaje —
- *  única discriminación posible sin tocar motor; la enmienda del RPC
- *  (campo `codigo` o RAISE tipado, patrón de la casa) es pedido a A y
- *  viaja con D-509. Literales verificados contra `prosrc` vivo (L-141). */
+/** Los rebotes de `crear_empleado_directo`, **mapeados por CÓDIGO** desde
+ *  S88 (D-660). Historia, porque explica por qué existía el mapeo por literal:
+ *  el RPC devolvía `{ok:false, mensaje:'<literal humano>'}` SIN código (estilo
+ *  portal legado) y este wrapper solo miraba el error de PostgREST — los cuatro
+ *  rebotes viajaban como ÉXITO y el founder vio "éxito" de un rebote en campo
+ *  (D-508, S74-B). La cura de entonces mapeó por el LITERAL del mensaje, con
+ *  la tensión de la regla 35 DECLARADA y la enmienda pedida a A.
+ *
+ *  **S88 la pagó:** el motor devuelve `codigo` estable y **ya no manda voz
+ *  humana** (era voz de producto adentro de la DB — D-539). La voz vive acá,
+ *  donde el idioma existe. */
 export type CodigoInvitar =
-  | 'no_es_dueno'
+  // D-660: deja de ser "no sos dueño" — el ADMINISTRADOR también gestiona.
+  | 'no_gestiona'
   | 'email_sin_cuenta'
   | 'email_es_prestador'
   | 'ya_es_empleado'
   | 'rebote_desconocido'
   | 'error_escritura';
 
-export const REBOTES_INVITAR: ReadonlyArray<{ literal: string; codigo: CodigoInvitar }> = [
-  { literal: 'No sos dueño de este prestador', codigo: 'no_es_dueno' },
-  { literal: 'El email no existe en la plataforma', codigo: 'email_sin_cuenta' },
-  { literal: 'Este email pertenece a otro prestador', codigo: 'email_es_prestador' },
-  { literal: 'Esta persona ya es empleado de este prestador', codigo: 'ya_es_empleado' },
-];
+/** Los códigos que el motor devuelve hoy (`prosrc` vivo, L-141). El mapeo por
+ *  literal MURIÓ: retocar una voz ya no rompe nada en silencio. */
+export const CODIGOS_INVITAR_MOTOR = [
+  'no_gestiona',
+  'email_sin_cuenta',
+  'email_es_prestador',
+  'ya_es_empleado',
+] as const;
 
 /** Invitar SIN rol (camino v1 ratificado por E4: el CHECK de
  *  `empleado_invitaciones.rol` solo admite 'empleado'). El rol se asigna
@@ -352,18 +357,18 @@ export async function invitarEmpleado(
   // El jsonb SE LEE (cura D-508): ok:false = rebote suave tipificado.
   const fila = (typeof data === 'object' && data !== null ? data : {}) as {
     ok?: boolean;
-    mensaje?: string;
+    codigo?: string;
     empleado_id?: string;
   };
   if (fila.ok !== true || typeof fila.empleado_id !== 'string') {
-    const mensaje = typeof fila.mensaje === 'string' ? fila.mensaje : '';
-    const rebote = REBOTES_INVITAR.find((r) => mensaje.startsWith(r.literal));
+    // D-660: por CÓDIGO. El motor ya no manda voz — un código que no
+    // reconocemos cae a `rebote_desconocido` y la pantalla lo dice honesto,
+    // en vez de repetir un literal ajeno que además venía en voseo.
+    const codigo = CODIGOS_INVITAR_MOTOR.find((c) => c === fila.codigo);
     return {
       ok: false,
-      codigo: rebote?.codigo ?? 'rebote_desconocido',
-      // el mensaje del motor queda de fallback (jamás mudo — Ley 13);
-      // la voz humana la pone la pantalla por código (Ley 3).
-      mensaje: mensaje.length > 0 ? mensaje : 'La invitación no se pudo crear.',
+      codigo: codigo ?? 'rebote_desconocido',
+      mensaje: 'La invitación no se pudo crear.',
     };
   }
   return { ok: true, data: { empleadoId: fila.empleado_id } };

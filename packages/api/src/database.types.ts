@@ -1516,6 +1516,7 @@ export type Database = {
           es_piso: boolean
           exige_evidencia: boolean
           orden: number
+          transporte_vivo: boolean
         }
         Insert: {
           codigo: string
@@ -1523,6 +1524,7 @@ export type Database = {
           es_piso?: boolean
           exige_evidencia?: boolean
           orden: number
+          transporte_vivo?: boolean
         }
         Update: {
           codigo?: string
@@ -1530,6 +1532,7 @@ export type Database = {
           es_piso?: boolean
           exige_evidencia?: boolean
           orden?: number
+          transporte_vivo?: boolean
         }
         Relationships: []
       }
@@ -1543,6 +1546,7 @@ export type Database = {
           orden: number
           techo_max: number
           techo_ventana_horas: number
+          vigencia_horas: number | null
         }
         Insert: {
           apagable_existencia: boolean
@@ -1553,6 +1557,7 @@ export type Database = {
           orden: number
           techo_max?: number
           techo_ventana_horas?: number
+          vigencia_horas?: number | null
         }
         Update: {
           apagable_existencia?: boolean
@@ -1563,6 +1568,7 @@ export type Database = {
           orden?: number
           techo_max?: number
           techo_ventana_horas?: number
+          vigencia_horas?: number | null
         }
         Relationships: []
       }
@@ -10573,6 +10579,39 @@ export type Database = {
           },
         ]
       }
+      notificacion_config: {
+        Row: {
+          alcance: string
+          apagado_en: string | null
+          apagado_por: string | null
+          despacho_activo: boolean
+          motivo: string | null
+          techo_duro_max: number
+          techo_duro_ventana_horas: number
+          updated_at: string
+        }
+        Insert: {
+          alcance: string
+          apagado_en?: string | null
+          apagado_por?: string | null
+          despacho_activo?: boolean
+          motivo?: string | null
+          techo_duro_max?: number
+          techo_duro_ventana_horas?: number
+          updated_at?: string
+        }
+        Update: {
+          alcance?: string
+          apagado_en?: string | null
+          apagado_por?: string | null
+          despacho_activo?: boolean
+          motivo?: string | null
+          techo_duro_max?: number
+          techo_duro_ventana_horas?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notificacion_intencion: {
         Row: {
           categoria: string
@@ -17240,6 +17279,7 @@ export type Database = {
         Args: { p_evento_id: string; p_motivo: string }
         Returns: undefined
       }
+      despachar_notificaciones: { Args: { p_seco?: boolean }; Returns: Json }
       eje_de_tipo_servicio: {
         Args: { p_tipo_servicio: string }
         Returns: string
@@ -17958,6 +17998,7 @@ export type Database = {
         Args: { p_canal: string; p_categoria: string; p_user_id: string }
         Returns: boolean
       }
+      prestador_que_gestiono: { Args: never; Returns: string }
       puede_encender_vitrina: { Args: never; Returns: boolean }
       quitar_estado_pelaje_grooming: {
         Args: { p_grooming_id: string; p_momento: string }
@@ -18332,6 +18373,10 @@ export type Database = {
       }
       user_es_familiar_adulto_de_mascota: {
         Args: { p_mascota_id: string }
+        Returns: boolean
+      }
+      user_gestiona_prestador: {
+        Args: { p_prestador_id: string }
         Returns: boolean
       }
       user_has_feature: {
