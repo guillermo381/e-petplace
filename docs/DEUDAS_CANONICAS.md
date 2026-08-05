@@ -435,9 +435,25 @@ El botón "Cancelar" en `InvitacionCard` llama `cancelarInvitacion(id)` que solo
 Origen: S11. Prioridad: 🟢.
 Criterio de disparo: si en testing aparecen empleados huérfanos en DB.
 
-#### D-103 — Ampliar CHECK `notificaciones.tipo` con `prestador_en_revision`
+#### D-103 — ✅ **PAGADA (S87, 4-ago-2026)** — `prestador_en_revision` existe, con su categoría
 S12 usa `tipo='sistema'` + `datos.evento='prestador_en_revision'` para el evento A3 porque no hay tipo específico en el CHECK. Agregarlo permite mejor categorización y filtrado por tipo en frontend.
 Origen: S12. Prioridad: 🟢.
+
+> **PAGADA POR EL CATÁLOGO DE S87, setenta y cinco sesiones después — y la nota
+> que importa es POR QUÉ pudo pagarse:** cuando D-103 se escribió, agregar un
+> tipo era **ampliar un CHECK** — tocar una restricción viva de una tabla
+> escrita por siete funciones. Con `cat_notificacion_tipos` pasó a ser **una
+> fila con su categoría**. *La deuda no se abarató por prioridad: se abarató
+> porque cambió la estructura debajo.*
+>
+> **Cómo se encontró:** el censo de tipo-por-parámetro de S87 midió los seis
+> valores que le llegan a `_notificar_dueño_prestador`, y el sexto era
+> `sistema` — **con el comentario del propio código nombrando a D-103 al lado**.
+> *La deuda estaba citada en el lugar exacto donde dolía, y hacía falta leer
+> ese lugar para verla.*
+>
+> `prestador_en_revision` → `operacion`, séptimo habitante de la familia del
+> ciclo del prestador. Migración `20260805060000`.
 
 #### D-105 — Realtime DELETE de notificaciones no propaga a UI
 Detectado en runtime test de D-004 (S12, 11 May 2026): cuando se borra notif en DB, la fila desaparece de la lista solo después de refrescar la página. El INSERT realtime sí funciona. Probablemente la suscripción en frontend solo escucha eventos INSERT, no DELETE. No es bloqueante para D-004 porque la operación DELETE de notif es rara en operación real (usuario marca como leída, no borra). Si en futuro se agrega cron de auto-cleanup, se vuelve visible.
@@ -3296,7 +3312,24 @@ Origen: S86-A, medición para C.
   > | **la rama `administrador` de TODOS los gates** | **cero portadores en la DB** — nunca corrió ([[D-652]]) |
   > | **el diseño de la barra de TRES** | se muestra a 5 personas **y el founder no es una de ellas**: su cuenta es titular ([[D-651]]) |
   > | **`AgendaRecepcion`** (el HOY de recepción) | exige **otro rol** — 1 sola fila viva, en Aurora |
-  > | **`GateRoto`** | exige un dato **contradictorio** (`rol=false` + `titular=null`) |
+  > | **`GateRoto`** | ~~exige un dato **contradictorio** (`rol=false` + `titular=null`)~~ — **⚠️ ENMENDADA S87: esa condición YA NO RIGE** |
+
+  > **ENMIENDA S87 (medición de C, literal en `lib/gate-gestor.ts:71-85`):** la
+  > condición que esta fila describe **la angostó S80-B3**. Hoy `titular = null`
+  > NO basta: se consulta la propia fila (`miFila`) y **con fila el veredicto es
+  > *denegado*, no *roto*** — 'roto' quedó para **sin fila o lectura caída**.
+  > *La ficha describía una condición vieja: el caso que nombra ya no se puede
+  > producir por ese camino.*
+  >
+  > **C NO la produjo, y eso es lo correcto:** alcanzarla hoy exige **romper
+  > datos a mano**, y eso no se hace sin orden de mesa. **`roto` se prueba el
+  > día que haya esa orden, no antes** — un rojo fabricado a mano sobre datos
+  > vivos cuesta más que el verde que compra.
+  >
+  > *La lección del caso NO cambia:* «construido» y «verificado» se separan en
+  > el ROL. **Lo que cambia es que una de las cuatro ya no es alcanzable ni
+  > rompiendo lo que la ficha decía** — y una ficha que describe una condición
+  > superada manda a buscar por donde ya no se pasa.
   >
   > **LO QUE PRUEBA, y por eso es el caso y no un ejemplo:** las cuatro habrían pasado un censo de paths **como cobertura**. *Tres de ellas están BIEN CONSTRUIDAS —el problema no es su código, es que **nadie con un dedo puede confirmarlo**—* y la cuarta (`GateRoto`) solo se puede ver **rompiendo datos a mano**. ⇒ **«construido» y «verificado» se separan en el ROL, no en el archivo**, y un censo que no declara el rol no puede notar la diferencia.
 - **L-162** — **Toda captura M3 de una pantalla con campo de texto se toma DOS VECES — sin teclado y CON el teclado arriba y el campo enfocado. Un formulario sin captura de teclado no está verificado.** Origen: D-498 — el teclado que tapó la dosis sobrevivió a M3 y llegó a la mano del founder porque el mecanismo nunca miró el estado real de uso. Nota operativa: la captura CON teclado exige dispositivo/emulador — el render web no tiene teclado blando (límite declarado del harness actual). Firmada founder S73.
@@ -6726,3 +6759,280 @@ distinción que separa la sede (registro 2) de la persona (registro 3).
 > superficie personal nueva). **Si nadie lo pide nunca, la ficha muere sin
 > trabajo** — que es el desenlace correcto. *No se retira construyendo la
 > pantalla por las dudas.*
+
+---
+
+#### D-655 — 🟠 EL PASO ⓪ MIDE QUÉ SE SIRVE; NADIE MIDE QUÉ BAJA — la última milla de los assets
+
+**Nace CERRADA en su incidente y ABIERTA en su clase.** *El caso se resolvió; el
+hueco que lo dejó pasar sigue exactamente donde estaba.*
+
+### EL LITERAL (C, 4-ago-2026)
+
+`DownloadError` al aplicar **`019fcfc1`** — **`0.9846` de progreso, 64 de 65
+assets**, atascado en `d5435ef51f3ec81bff48d5fb18f54470`; segundo modo observado:
+`CheckError`. **Cinco arranques fríos en el emulador**, y después **el aparato
+físico del founder tampoco lo tomó**: **dos aparatos, dos redes**. Mientras tanto
+`verify-ota` daba **VERDE** — sirve lo publicado, build `finished`.
+
+### EL EXPERIMENTO Y SU CIERRE
+
+Re-publish del **mismo lote desde el mismo ancla `9e83b6d`** (S87-A): group
+**`8afe85b3-02a6-4a24-a903-10a0aa6c2201`**, android
+**`019fcffc-8fb8-7ca3-8dcb-6fc4aa96d5c1`**, `Commit 9e83b6d9e4d…` exacto,
+`verify-ota` verde en ① y ②. **El aparato del founder lo aplicó tras forzar
+detención ×2 — confirmado por él.** ⇒ **el incidente cierra.**
+
+### LAS DOS ACOTACIONES, que son lo que impide cantar victoria
+
+1. **Los assets NO se volvieron a subir.** El publish imprimió textual
+   `✔ Uploading assets skipped - no new assets found`: el update nuevo apunta a
+   **los mismos objetos almacenados** que el que fallaba.
+2. **Al menos un asset de ese lote (`iHF0fG8…`) es el MISMO objeto que sirve el
+   lote 1.0.2** que el teléfono del founder corrió sin problema.
+
+> **⇒ Lo que el verde prueba es MENOS de lo que parece.** Si los objetos son los
+> mismos y uno de ellos está compartido con un lote sano, **lo que se curó no fue
+> el contenido**: fue el *registro del update* o el estado del cliente. **La
+> causa raíz no está identificada, y esta ficha existe para no fingir que sí.**
+
+### LA CLASE — y es lo que trasciende al incidente
+
+> ### **EL PASO ⓪ VERIFICA QUE EL UPDATE **SE SIRVA**. NADIE VERIFICA QUE **LLEGUE**.**
+
+`verify-ota` (S86, `METODO_TRES_PISTAS` §3bis) mide lo que el servidor responde a
+quien pregunta como aparato. **No mide que los bytes bajen.** Un OTA con 64 de 65
+assets **no falla el gate: falla el arranque** — y el verde es honesto sobre lo
+que mide y **mudo sobre lo que falta**. *Es la familia de L-192 corrida una capa:
+no es un guard que miente, es un guard cuyo silencio se lee como cobertura.*
+Hermana declarada de **D-649** (no hay forma de forzar que el aparato vaya a
+buscar) — **D-649 es "no puede ir"; ésta es "fue y no pudo traer".**
+
+### UNA SONDA QUE SE PROBÓ Y SE RETIRA (para que nadie la repita)
+
+S87-A bajó por `curl` los **65** assets del manifiesto servido: **65/65 dieron
+`403`**. **No es evidencia de nada.** El control lo desarmó: el asset del lote
+**1.0.2 que el teléfono SÍ corrió** también da `403`.
+
+> **`403` es lo que recibe un `curl`, no lo que recibe un aparato.** *Un rojo
+> creíble que no distingue el caso bueno del malo es el guard decorativo de
+> L-192.* **Lo salvó el control, no el ingenio: se corrió el caso sano ANTES de
+> reportar el enfermo.**
+
+**⇒ Y de ahí sale el requisito del instrumento, no de la intuición: cualquier
+sonda de descarga tiene que pedir COMO CLIENTE —con sus credenciales/firma—, o
+va a dar `403` contra todo y no servir para nada.**
+
+### ⚠️ ENMIENDA S87 — LA CAUSA APARECIÓ, Y EL CDN QUEDA SIN CARGO
+
+**Literal de C:** el emulador **no resolvía `assets.eascdn.net`** — era **DNS**.
+Los 64 assets que bajaban estaban **en caché**; el que faltaba vivía justo ahí.
+**Determinístico 3/3**, y **curado con `-dns-server`** (ver el depósito operativo
+del acta de sesión). El segundo modo, `UnknownHostException`, es el mismo dedo
+señalando: **no parecía DNS, y costó un arco entero.**
+
+**Y el lado del aparato del founder se re-lee contra la propia letra de D-650:**
+*el primer arranque frío SOLO DESCARGA* ⇒ **un solo reinicio nunca alcanzaba.**
+No era el lote: era la cuenta de arranques.
+
+> **⇒ EL CDN QUEDA SIN CARGO, y las dos acotaciones de arriba dejan de ser
+> sospechas y pasan a ser lo que siempre fueron: hechos que no explicaban nada.**
+> *Los assets compartidos con un lote sano no estaban podridos — nunca lo
+> estuvieron; el aparato no llegaba a pedirlos.*
+
+### DEPÓSITO OPERATIVO — el emulador exige DNS explícito, y sus dos trampas
+
+```
+emulator ... -dns-server 8.8.8.8,1.1.1.1 -no-snapshot-load
+```
+
+**Sin el flag:** OTA que muere a 64/65 + `UnknownHostException`. **No parece DNS,
+y ya costó un arco entero.** El `-no-snapshot-load` no es adorno: sin él el
+emulador levanta del snapshot y **no toma el DNS nuevo**.
+
+**Y las dos lecciones de C, que son las que evitan que esto vuelva:**
+
+1. **El lanzamiento del emulador está DESACOPLADO del turno** — quien lo levantó
+   no es necesariamente quien está depurando. *La configuración de arranque no se
+   hereda con el problema.*
+2. **⚠️ EL FLAG NO PERSISTE.** Un relanzamiento normal —el de cualquier día,
+   hecho por cualquiera— **reintroduce este incidente sin avisar**, y con el
+   mismo síntoma que no parece DNS.
+
+> **Por eso esto vive acá y no en la memoria de C:** *un remedio que hay que
+> recordar aplicar en cada arranque es un incidente con fecha futura.*
+
+**LO QUE NO SE MUEVE:** la CLASE sigue abierta y el disparo intacto. **El paso ⓪
+sigue sin medir que los bytes bajen** — que la causa de ESTE incidente fuera
+ambiental no le devuelve al método una verificación que nunca tuvo. *Un
+diagnóstico que absuelve al lote no absuelve al instrumento que faltaba.*
+
+### ADJUDICACIÓN
+
+**El instrumento candidato es de B.** No se construye ahora.
+
+> **☠️ CRITERIO DE DISPARO (firmado por la mesa, S87):** **la próxima vez que un
+> aparato no tome un update con `verify-ota` en verde.** *Hasta entonces la ficha
+> es memoria, no trabajo* — un incidente cerrado con causa raíz desconocida no
+> justifica construir el instrumento, pero el segundo sí lo vuelve obligatorio.
+
+**Origen: S86-C (el incidente) + S87-A (el experimento, el cierre y las dos
+acotaciones).**
+
+---
+
+#### D-656 — 🟠 UN TOQUE ACCIDENTAL AL WIZARD DE CUENTA COMERCIAL QUEMA A LA PERSONA PARA SIEMPRE
+
+**Ficha propia por adjudicación del founder (S87): NO viaja con el lote de
+roles.** *Quema a cualquier usuario, con o sin rol — es contrato, no superficie.*
+
+### EL LITERAL
+
+`crear_cuenta_comercial_inicial` (SECURITY DEFINER, `proacl` =
+`authenticated=X`, sin `anon`) tiene **cuatro guardas y ninguna de rol**:
+
+```
+A)   auth.uid() IS NULL              → 'Sesión no válida…'
+B)   el profile existe
+B.2) el user YA tiene cuenta         → 'Ya tienes una cuenta comercial
+                                        registrada. No puedes crear otra
+                                        desde este flujo.'
+G)   razón social / nombre comercial no vacíos
+```
+
+Medido: `gatea_por_rol = false` · `mira_empleados = false` ·
+`mira_prestadores = false`. Y la policy de INSERT tampoco mira rol:
+`CHECK ((owner_profile_id = auth.uid()) AND (estado = 'pendiente_validacion'))`.
+
+### LO QUE **NO** ES, y hay que decirlo primero
+
+**No hay escalación de privilegio.** El `CHECK` ata la fila a `auth.uid()`: un
+no-gestor solo puede crear **su propia** cuenta, en `pendiente_validacion`, **sin
+ninguna relación con el negocio donde trabaja**. No toca `prestadores` ni
+`prestador_empleados`.
+
+> **Y hay una razón de producto para que el servidor NO gatee por rol: este es el
+> camino de AUTO-SERVICIO.** *La persona que abre su primer negocio todavía no es
+> gestor de nada* — un gate por rol cerraría la puerta legítima. **El servidor no
+> está flojo: está correctamente acotado a "vos sobre vos mismo".**
+
+### LO QUE SÍ ES — y por eso es contrato
+
+**`B.2` es de una sola vez y no tiene vuelta.** Quien complete el wizard por
+curiosidad —o porque una celda se lo ofreció, que es lo que C midió— **queda
+permanentemente bloqueado del flujo legítimo**: el día que abra su negocio de
+verdad, el motor le contesta *"ya tienes una cuenta comercial registrada"*.
+
+> ### **UNA PUERTA QUE NO DEBÍA OFRECÉRSELE LE CONSUME SU ÚNICO INTENTO.**
+> *Y no hay camino de corrección desde el producto: la cáscara vacía queda, y
+> queda para siempre.*
+
+### DIRECCIÓN DE CURA — ✅ **FIRMADA POR EL FOUNDER (4-ago-2026), OPCIÓN 1**
+
+**`B.2` distingue una `pendiente_validacion` SIN USO: la cáscara vacía se retoma
+o se reemplaza, JAMÁS bloquea el flujo legítimo.** *Una cuenta que nunca se
+validó ni se usó no es una cuenta: es un formulario a medio llenar.*
+
+### ALCANCE, y qué NO cura esta ficha
+
+**La celda incondicional** de `cuenta/index.tsx:352-369` —que ofrece la puerta a
+un no-gestor, mientras `:643` sí gatea "El movimiento"— **es superficie pura y
+viaja con el lote de roles/barra de tres**, como C propuso. **Son dos cosas:**
+*cerrar la puerta que no debía estar abierta* (superficie) **y** *dejar de quemar
+a quien la cruzó* (esta ficha). **Curar solo la primera deja quemados a los que
+ya pasaron.**
+
+> **☠️ DISPARO: antes del soft launch.** **NO se construye en S87** salvo que el
+> founder lo suba de prioridad.
+
+**Origen: S87-C (la puerta abierta, capturas `s87c-b2/b3/b4`) + S87-A (el literal
+del servidor y la lectura de producto).**
+
+---
+
+#### D-657 — 🔴 EL PLAN SE SIGUE COBRANDO DESPUÉS DEL MEMORIAL, Y EL MOTOR DE AVISOS ESTÁ POR VOLVER ESE COBRO SILENCIOSO
+
+**Hallazgo de S87-A, y lo destapó una verificación que pidió el founder sobre un
+freno anterior.** *Ninguna sesión lo había cruzado porque hay que mirar dos
+motores a la vez: el que cobra y el que avisa.*
+
+### EL LITERAL
+
+```
+cerrar_y_renovar_planes     · consulta estado_vida = FALSE · menciona mascota = FALSE
+vencer_paquetes_salidas     · consulta estado_vida = FALSE
+vencer_programas_adiestramiento · consulta estado_vida = FALSE
+suscripciones_servicio      · TIENE la columna mascota_id
+cron `cerrar-renovar-planes`· 0 8 * * *  (vivo, todos los días)
+```
+
+**El vínculo existe y NO SE CONSULTA.** `suscripciones_servicio.mascota_id` está
+ahí; el motor de renovación nunca lo mira. **La renovación no sabe de qué
+mascota es el plan que renueva.**
+
+### POR QUÉ ES 🔴 Y NO 🟠 — la conjunción es el daño
+
+Por separado, cada mitad es tolerable. **Juntas producen la peor combinación
+posible:**
+
+| | |
+|---|---|
+| el motor de PLANES | **renueva y cobra igual** aunque la mascota esté en memorial |
+| el motor de AVISOS (S87) | **calla** todo lo de esa mascota — §5.1, y está bien que calle |
+
+> ### **⇒ EL SILENCIO DEL DUELO VUELVE SILENCIOSO EL COBRO.**
+> *Una familia que acaba de perder a su mascota sigue pagando el plan de esa
+> mascota, todos los meses, y **deja de recibir el aviso que se lo diría**.*
+>
+> **Y el filo que lo vuelve urgente: el gate del memorial —que es correcto— es
+> lo que APAGA LA ÚNICA SEÑAL.** Antes de S87 el cobro era silencioso por
+> omisión; después es silencioso **por diseño**. *Curar bien una cosa empeoró
+> otra, y solo se ve mirando las dos.*
+
+### EXPOSICIÓN HOY, medida
+
+`suscripciones_servicio` activas = **1** · de mascotas no activas = **0** ·
+bonos vivos = **3** · todas las mascotas están `activa`.
+**Nadie está siendo cobrado mal hoy.** *El mecanismo está armado y esperando el
+primer memorial de una familia con plan* — y ese día no avisa.
+
+### DÓNDE VIVE LA CURA — y dónde NO
+
+**Es del MOTOR DE PLANES, no del de avisos.** El motor de avisos hace lo
+correcto callando. **No se inventa en el Lote 1** (orden del founder S87): un
+gate de avisos no puede ni debe frenar un cobro.
+
+**✅ DIRECCIÓN (c) FIRMADA POR EL FOUNDER (5-ago-2026) — LAS DOS:**
+- **(a) EL ACTO DEL PRODUCTO:** la transición a memorial **pausa o cancela** las
+  suscripciones de esa mascota, **liberando lo no consumido** según P14 /
+  `MODELO_FINANCIERO`.
+- **(b) EL FUSIBLE DEL MOTOR:** la renovación **consulta `estado_vida`** y **no
+  renueva** un plan de mascota no activa.
+
+> **Por qué las dos y no una:** (b) sola deja el plan vivo pero sin cobrar — un
+> limbo que nadie cierra. (a) sola depende de que el acto de producto se ejecute
+> siempre y bien. **Juntas, una es la decisión y la otra el fusible** — la misma
+> forma que S87 firmó para el kill switch y el techo duro.
+
+**✅ Y LA CLÁUSULA DE S80 QUEDA ENMENDADA** (firma del founder, misma fecha), **en
+sus DOS casas — `POLITICAS_EPETPLACE` P16 y `MODELO_FINANCIERO` §2** —, no solo
+acá: *la regla fue escrita para quien **eligió** no usar; **una familia en duelo
+no eligió nada**.* **Enmendar solo la ficha habría dejado la letra madre
+diciendo lo contrario, y cualquiera podría citar la que le conviene** (mismo
+precedente que el magenta de S83 y la plata de P1 en S83).
+
+**La cura es del MOTOR DE PLANES** — el de avisos hace lo correcto callando —
+y su construcción se ordena como **precondición del Lote 2**.
+
+**Cruza con:** el gate 1 de la puerta de S87 · `MODELO_LOYALTY` §7 (memorial
+apaga estructuralmente) · P14 y la regla de la plata firmada en S80 (*"lo que el
+cliente no usa lo pierde el cliente"* — **que NO puede regir cuando la mascota
+murió**: esa es la cláusula que hay que mirar al escribir la cura).
+
+> **☠️ DISPARO: antes del soft launch, y ANTES de encender el primer transporte
+> del Lote 2.** *Mientras todo es in-app y nadie recibe nada, el daño es
+> teórico. El día que el motor entregue de verdad, esta ficha pasa a ser una
+> familia en duelo recibiendo un cobro y ningún aviso.*
+
+**Origen: S87-A (medición pedida por el founder sobre el freno de la
+clasificación de `sistema`).**

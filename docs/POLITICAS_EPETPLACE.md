@@ -394,6 +394,27 @@ agenda real); lo nunca comprometido que el dueño dejó vencer se declara
 como lo que es — ingreso de plataforma por flexibilidad no usada, avisado
 en la superficie de compra.
 
+> ### ⚠️ ENMIENDA S87 — LA CLÁUSULA NO RIGE EN MEMORIAL *(firma del founder, 5-ago-2026)*
+>
+> **Criterio del founder, verbatim en su forma corta:** *la regla fue escrita
+> para quien **eligió** no usar — **una familia en duelo no eligió nada**.*
+>
+> ⇒ **Cuando la mascota entra en memorial (`estado_vida <> 'activa'`), «lo que
+> el cliente no usa lo pierde el cliente» DEJA DE REGIR** sobre el saldo ligado
+> a esa mascota. Lo no consumido se libera; no se devenga como capacidad
+> comprometida ni como flexibilidad no usada.
+>
+> **Por qué la enmienda existe y no es un detalle:** aplicarle a una familia en
+> duelo la misma cláusula que a quien decidió no pasear **convierte una regla
+> justa en un cobro por una ausencia que nadie quiso**. *Es el mismo criterio con
+> el que S87 firmó `saldo_pagado` para `plan_renovacion_fallida`: **el daño manda
+> sobre la coherencia formal de la regla**.*
+>
+> **Hermana obligatoria: [[D-657]]** — hoy el motor de planes **renueva y cobra
+> sin mirar `estado_vida`**, y desde S87 el motor de avisos **calla** lo de esa
+> mascota. *Sin esta enmienda y sin esa cura, el silencio del duelo vuelve
+> silencioso el cobro.* **Su construcción es precondición del Lote 2.**
+
 > **ENMIENDA FIRMADA S80 — DIFERIDA AL SOFT LAUNCH (decisión founder).**
 > **LA REGLA, verbatim del founder:** *"El prestador cobra la capacidad
 > que comprometió. Lo que el cliente no usa, lo pierde el cliente y lo

@@ -1,6 +1,12 @@
 # MODELO_NOTIFICACIONES — El motor de alcanzar a alguien
 
-> **Versión: v0 SEMILLA — S73 (21 Jul 2026). SIN FECHA DE CONSTRUCCIÓN;
+> **Versión: v1 — S87 (4 Ago 2026). ENMENDADO CONTRA LO VIVO.** La v0 se
+> escribió sobre un mundo que se supuso vacío; **el censo de S87 midió que no lo
+> estaba**. Lo que cambia está en **§0bis** (lo medido) y marcado `ENMIENDA S87`
+> donde toca. **Nada del diseño se cayó: lo que se cayó fue la premisa de que no
+> había nada construido — y eso reordena el trabajo, no lo reescribe.**
+>
+> **Versión previa: v0 SEMILLA — S73 (21 Jul 2026). SIN FECHA DE CONSTRUCCIÓN;
 > disparos en §13.** Escrito por la mesa como deuda declarada de S73.
 > **Contrastes obligatorios:** `MODELO_PRODUCTO` §8 (éticos no
 > negociables), `MODELO_LOYALTY` §7 (el patrón de límites en piedra y el
@@ -27,6 +33,116 @@
 > sin alarma y **sin camino ofrecido** (el camino es de la escalada, §7.2).
 > **Es un consumidor de las capas 1–3 de este doc — no puede existir antes
 > que ellas**, y se declara acá para que no se descubra en campo.
+
+---
+
+## 0bis. LO MEDIDO — el censo de S87 contra la DB viva *(ENMIENDA S87)*
+
+> **Acta completa con su literal:
+> `docs/relevamientos/2026-08-04-s87a-censo-notificaciones-contra-lo-vivo.md`.**
+> Acá va lo que cambia decisiones; el detalle no se copia, se referencia.
+
+### ⚠️ LA PREMISA MADRE DE LA v0 ERA FALSA
+
+La v0 decía *"D-475 🔴 — las tres capas en CERO"*. **No están en cero: están
+construidas a medias, sin gates y sin transporte.**
+
+| capa (§2) | lo que se midió |
+|---|---|
+| ① **INTENCIÓN** | **EXISTE A MEDIAS Y SIN GATES.** **Siete funciones DEFINER vivas** insertan en `notificaciones`: `_notificar_dueño_prestador` · `_trg_completar_pendiente_registro` · `cerrar_y_renovar_planes` · `cleanup_pendientes_vencidos` · `fijar_fecha_procedimiento` · `vencer_paquetes_salidas` · `vencer_programas_adiestramiento`. **Ninguna consulta ninguno de los cinco gates de §5.** |
+| ② **DESTINATARIO** | **PARCIAL.** `notificaciones.rol_destino` es `text` NOT NULL **sin catálogo**; no cuelga de `empleado_tiene_rol`. |
+| ③ **CONSENTIMIENTO** | **EXISTE MAL** — ver §6 `ENMIENDA S87`. |
+| ④ **TRANSPORTE** | **CERO, y sin vehículo:** `pg_net` **no está instalada** ⇒ la DB no puede hacer una llamada saliente. |
+
+**26 filas en `notificaciones`. En la era monorepo, TODAS `canal='in_app'`,
+`enviada=false`, `enviada_en` NULL.** Las `enviada=true`/`push` son del
+**2026-05-02**, legado del portal viejo. **`push_tokens`: 0 filas y CERO
+funciones la tocan.** **Y cero consumidores:** `from('notificaciones')` sigue en
+**0 hits** en `apps/` y `packages/`.
+
+> ### ⇒ EL SISTEMA YA ESTÁ EN UN MODO SOMBRA — PERO ACCIDENTAL.
+> **Escribe intenciones que nadie lee ni entrega.** Es el §10.2 de este doc
+> ocurriendo sin haber sido declarado y sin que nadie mire el registro.
+> **La diferencia entre esto y el modo sombra del §10.2 no es técnica: es que
+> nadie lo sabía.**
+>
+> ### Y LA CONSECUENCIA QUE ORDENA EL TRABAJO:
+> **si se conecta un transporte a lo que YA está escrito, sale sin un solo gate.**
+> Memorial, menores, rol, consentimiento y techo **no se consultan hoy**.
+> **⇒ Los gates de §5 y la cura de §6 son PRECONDICIÓN del motor, no trabajo que
+> lo acompaña.** *(Adjudicado por el founder, S87.)*
+
+### LO QUE SIGUE CIERTO, y conviene decirlo
+
+- **§4 la ley de la pantalla bloqueada** — intacta, y **hoy no la viola nadie
+  porque nadie envía**. Se aplica **antes** del primer envío.
+- **§7 push primero / email segundo** — ratificado: **cero productor de email en
+  todo el stack** (D-508 re-corrida en S87: 2 hits, ninguno productor).
+- **§13 *"el schema: se releva lo vivo antes — verificar, no asumir"*** — **es la
+  línea que salvó al doc. Cobró hoy.**
+
+### LO QUE CADUCÓ
+
+- **"las tres capas en CERO"** (encabezado v0 + D-475). *La cita de S72 sigue
+  siendo verdadera sobre el CONSUMO; lo que caducó es leer cero consumo como
+  cero motor.*
+- **"D-137 confirmada en CERO"** — hay filas `vacuna_vencida` y
+  `cita_recordatorio` (legado). El productor sigue sin existir; **el dato no**.
+- **§14 "capas 1-3 disparan con S74/S75"** — no dispararon. **Trece sesiones.**
+- **§7 "un token muerto se retira"** — presupone tokens. **No hay ninguno.**
+
+### LO QUE NO EXISTE, nombrado
+
+Transporte entero · los **cinco gates de §5** · el **catálogo de categorías de
+§3** (`tipo` es `text` libre con CHECK `length > 0`) · la **unidad (persona,
+categoría, canal) de §6** · idempotencia · kill switch · techo duro · auditoría
+de entrega · **`notificar_reasignacion_cita(uuid,uuid)`** (medido `null`; el
+trigger `trg_prestadores_gate_vitrina` la busca con `to_regprocedure` y
+**construirla abre el gate sola** — L-171) · **los módulos nativos de push en el
+binario** ⇒ **una build**.
+
+### 🔴 EL BINARIO NO PUEDE RECIBIR PUSH — y ordena todo el arco
+
+El guard de D-574 contra el APK **1.0.3** del prestador (`versionName`
+confirmado por `aapt2`): **✗ falta `google_app_id` · ✗ falta el listener
+`MESSAGING_EVENT`**. Sin `POST_NOTIFICATIONS`, sin `firebase-messaging`.
+
+**La cronología lo explica y es L-196 en su forma limpia:** el APK se construyó
+**Jul 28 18:07**; `expo-notifications` entró **Jul 29** (`35f3f4a`) y los
+`google-services.json` **Jul 29** (`9d040fe`). **El binario es ~17 h ANTERIOR a
+la preparación entera.**
+
+**Trampa medida aparte:** `app.config.ts` pone `googleServicesFile`
+**condicional** a `process.env.GOOGLE_SERVICES_JSON` ⇒ **una build sin esa env
+var sale sin FCM y en silencio.** *El guard existe exactamente para eso; correrlo
+es obligatorio en el tren.*
+
+**Firebase:** proyecto `e-petplace-7854e`, los dos json existen y son coherentes.
+**NO medible desde el repo, y no se da por hecho:** la llave FCM V1 en EAS y la
+env var de archivo.
+
+> **⇒ PUSH EXIGE BUILD NATIVA. Propuesta de mesa registrada: la build de push
+> corta runtime nuevo, con el bump en el MISMO rango que la build, jamás antes**
+> (hoy `runtime 1.0.2` nombra dos conjuntos nativos distintos entre las apps).
+
+### El correo de recuperación — **la config NO está en el repo** *(§10bis ④)*
+
+`resetPasswordForEmail(input.email.trim())` **sin `redirectTo`**, y **cero**
+`redirectTo`/`emailRedirectTo` en todo el monorepo. `supabase/config.toml` es la
+plantilla **local** del CLI (`site_url = "http://127.0.0.1:3000"`) y **no
+gobierna el proyecto remoto**. ⇒ **el destino lo pone el Site URL del dashboard.**
+
+> **La cura son DOS piezas, no una:** el Site URL del proyecto **y** un
+> `redirectTo` explícito en el wrapper. *Hoy el producto no declara su propio
+> destino — si alguien "arregla el correo" tocando el repo, no mueve nada.*
+
+### La corriente de §2 — **no es una corriente**
+
+El sedimento es **`eventos_mascota` (188 filas)**; sus **5 triggers**
+(`auto_log_atencion` · `procedencia_clinica` · `propagar_estado_vida` ·
+`update_ultimo` · `validar_profundidad`) **no producen intención**, y la tabla
+**no está** en la publicación `supabase_realtime` (`notificaciones` sí — al revés
+de lo que el motor necesita). **⇒ el enganche se fabrica.**
 
 ---
 
@@ -83,7 +199,7 @@ transporte a un motor ya probado.
 | `relacional` | mensajes, respuesta a una solicitud | utility | sí, por canal |
 | `resumen` | digests (§8) | utility | sí, opt-in |
 | `comercial` | promos, ofertas, novedades | **marketing** | sí — **OPT-IN, apagado por defecto** |
-| `saldo_pagado` *(ENMIENDA S80 — A LA FIRMA)* | saldo pagado que vence: paquetes, planes (el aviso de P16(e)) | utility | **NO en existencia** — sí en canal |
+| `saldo_pagado` *(**FIRMADA por el founder, 4-ago-2026** — nació S80)* | saldo pagado que vence: paquetes, planes (el aviso de P16(e)) | utility | **NO en existencia** — sí en canal |
 
 Dos categorías **no se apagan** porque su ausencia daña a la mascota o a
 la cuenta — pero **el canal siempre se elige**: nadie está obligado a
@@ -101,6 +217,50 @@ por dónde llega.
 `comercial` **jamás viaja en el mismo mensaje** que otra categoría. Un
 recordatorio de vacuna con un cupón adentro es P11 roto: la alerta existe
 por la mascota, no por el cupón.
+
+### ENMIENDA S87 — LAS CATEGORÍAS NO EXISTEN EN EL SCHEMA, y por eso los defectos
+
+**Medido — y con una corrección al propio censo, hecha al construir (S87):**
+
+| tabla | su CHECK | lectura |
+|---|---|---|
+| `notificaciones.tipo` | **CHECK cerrado de 26 valores** | vocabulario **CERRADO**, sin categoría |
+| `user_notificacion_prefs.tipo` | `length(btrim(tipo)) > 0` | vocabulario **ABIERTO** |
+
+> **⚠️ CORRECCIÓN AL CENSO.** La primera redacción de esta enmienda decía que
+> **las dos** eran vocabulario abierto. **Es falso para `notificaciones`**, que
+> tiene un CHECK cerrado de 26 valores. *El hallazgo de D era correcto y era
+> sobre `user_notificacion_prefs`; la generalización a las dos tablas fue mía.*
+> **La corrección no salva el diseño — lo agranda:** el catálogo tiene que cubrir
+> **26 tipos**, no 10.
+
+**Lo que NO cambia, y es lo que importa:** **las siete categorías no existen en
+ninguna parte del schema.** *Un vocabulario cerrado sin categoría no sirve más
+que uno abierto para lo que los gates necesitan preguntar* — un CHECK dice qué
+valores se admiten, jamás qué son. **10 tipos con filas vivas; la superficie
+cubre 5.**
+
+> **⇒ EL CATÁLOGO DE TIPOS → CATEGORÍA ES LA PRIMERA PIEZA DEL LOTE, y no por
+> prolijidad: es lo que los gates estructurales de §5 CONSUMEN.** *Sin él, §5 no
+> se puede escribir — un gate no puede preguntar "¿esta categoría es apagable?"
+> si la categoría no es un dato.*
+
+**Mapeo firmado de los tipos vivos** *(las tres dudas que D declaró, resueltas
+acá — es lo que una enmienda existe para hacer)*:
+
+| tipo vivo | categoría | por qué |
+|---|---|---|
+| `cita_confirmada` · `cita_recordatorio` · `cita_completada` · `alta_asistida_completada_por_cliente` · `pedido_estado` | `operacion` | son el estado de algo que la persona contrató |
+| `vacuna_vencida` | **`salud_seguridad`** | es sobre el cuerpo de la mascota, no sobre una transacción |
+| `promocion` | **`comercial`** | y por lo tanto **OPT-IN, apagado por defecto** |
+| `documento_aprobado` · `prestador_aprobado` | **`operacion`** | *duda de D resuelta:* son el resultado de un trámite que el prestador **inició** — `relacional` es respuesta de una persona a otra, esto es estado de un proceso propio |
+| `sistema` | **`seguridad_cuenta`** | *duda de D resuelta:* es de la persona-cuenta, no de la mascota — **y es la categoría que sobrevive al memorial (§5.1)**, así que clasificarla mal sería silenciar avisos de cuenta en el peor momento |
+
+> **El criterio que deja el mapeo, para el tipo N+1:** **la categoría la decide de
+> QUIÉN es el hecho** (la cuenta · el cuerpo de la mascota · el proceso
+> contratado · otra persona · el negocio), **jamás quién lo mira**. *Dos avisos
+> del lado prestador pueden ser de categorías distintas; que compartan audiencia
+> no los hermana.*
 
 ## 4. LA LEY DE LA PANTALLA BLOQUEADA (en piedra)
 
@@ -135,11 +295,34 @@ UI):
    intención ya encolada y no enviada MUERE — la cola se purga. Un
    recordatorio de vacuna que llega el día después es la peor falla
    imaginable de este producto.
+   > **Candidata S87 — la excepción INVITADA:** el «Homenaje» de §13bis ① es la
+   > única puerta contemplada a este silencio, y **solo abre con opt-in
+   > explícito de la familia**. No rige: es letra a diseñar.
 2. **MENORES (P5).** Un evento con `aportado_por_menor` no genera
    intención. Ninguna notificación se dirige a un menor.
 3. **ROL Y ACCESO** (§2 capa 2).
 4. **CONSENTIMIENTO** (§6).
 5. **TECHO DE FRECUENCIA** (§8).
+
+### ENMIENDA S87 — CÓMO SE ESCRIBEN LOS GATES 1 Y 2 CONTRA LO VIVO
+
+**Medido al construir, y corrige lo que este §5 deja suponer:**
+
+- **`memorial` NO ES UN VALOR.** `mascotas.estado_vida` tiene
+  `CHECK (activa | perdida | fallecida)`. **El producto ya define memorial como
+  `estado_vida <> 'activa'`** — literal vivo en `adiestramiento-antes.ts:195` y
+  `grooming-atencion.ts:397`. ⇒ **el gate 1 se escribe
+  `estado_vida IS DISTINCT FROM 'activa'`**, y con eso **`perdida` queda adentro
+  del silencio**, que es lo correcto: *a una familia que perdió a su mascota
+  tampoco se le manda un recordatorio de vacuna.*
+  > **Si el gate se hubiera escrito contra `= 'memorial'` habría corrido verde y
+  > no habría apagado nada** — la letra muerta silenciosa que L-192 nombra.
+  > **Hoy las mascotas vivas son todas `activa`: el gate no tendría a quién
+  > cortar, y el fixture tiene que FABRICAR el caso** (L-199).
+- **`aportado_por_menor` vive en UNA sola tabla: `evento_bitacora_familia`.** No
+  es una propiedad del evento genérico. ⇒ el gate 2 resuelve **por el evento
+  origen**, y para los tipos cuyo origen no es la bitácora **el gate no aplica y
+  se dice** — jamás se finge que evaluó.
 
 ## 6. El consentimiento — por (categoría × canal), con evidencia
 
@@ -161,6 +344,54 @@ UI):
   se dice qué NO se puede apagar y **por qué**, jamás un toggle muerto que
   el usuario toca y no obedece (Ley 23: la puerta no ofrece lo que va a
   rechazar).
+
+### ENMIENDA S87 — LOS TRES CHOQUES DEL CONTRATO VIVO
+
+**El contrato B4 vivo** (`user_notificacion_prefs` + `wrappers/preferencias.ts`)
+**no puede expresar lo que esta sección exige, y mientras tanto hace dos cosas
+incorrectas en silencio.** Los tres van **EN** el lote del motor, no detrás.
+
+**① LA UNIDAD ES INEXPRESABLE.** La PK es **`(user_id, tipo)`** — **sin canal**.
+*"Quiero las citas por push pero no por WhatsApp"* —la frase que esta misma
+sección declara legítima— **no se puede guardar.** El wrapper la espeja:
+`guardarPreferenciaNotificacion(tipos[], habilitada)` **tampoco tiene canal**.
+⇒ **migración + ensanche de contrato, puerta única, en el mismo lote.**
+
+**② `promocion` NACE ENCENDIDA.** El contrato vivo es *"fila ausente =
+habilitada"* **sin distinguir categoría** ⇒ lo `comercial` está ON por defecto,
+contra §3, contra este §6 y contra §12.3.
+
+**③ `vacuna_vencida` SE PUEDE APAGAR.** La superficie escribe `habilitada=false`
+sobre una categoría que §3 declara **no apagable**.
+
+> ### LOS DOS DEFECTOS SON SIMÉTRICOS, y por eso son el mismo defecto
+> **Uno enciende lo que debe nacer apagado; el otro apaga lo que no se puede
+> apagar. Los dos sobreviven porque el contrato no sabe qué es una categoría.**
+> *No son dos bugs: son dos caras de la ausencia de §3 en el schema.*
+>
+> **Y son de la clase D-654: código que funciona y hace lo incorrecto en
+> silencio.** Ningún typecheck, lint ni gate los ve — **producen salidas
+> creíbles**. ⇒ **encender el motor sin curarlos ENCIENDE EL DEFECTO.**
+
+### LA LETRA DE SALUD — FIRMADA POR EL FOUNDER (S87)
+
+> ## **«Elige por dónde le llegan, no si le llegan.»**
+
+Es la forma corta de la regla de §3 para `salud_seguridad` y `seguridad_cuenta`,
+y **resuelve el ③ sin ambigüedad**: el apagado de **EXISTENCIA** no se ofrece; el
+de **CANAL**, siempre.
+
+**Se honra en DOS lugares, y hacen falta los dos** *(la lección de D-654: una
+autorización que decide el cliente es decorativa)*:
+
+1. **En el motor** — el contrato **no acepta** `habilitada=false` sobre una
+   categoría no apagable. Rebota **hablado**, con código estable.
+2. **En la superficie** — esa fila **no dibuja** el toggle de existencia; dibuja
+   los de canal, y **dice por qué** (Ley 23: la puerta no ofrece lo que va a
+   rechazar).
+
+*Solo el ① sería un motor que se defiende de su propia pantalla; solo el ② sería
+una promesa que cualquier caller rompe.*
 
 ## 7. Los transportes — y sus verdades incómodas
 
@@ -318,6 +549,78 @@ Lo que cada uno le exigirá al motor. Su catálogo se escribe cuando exista.
 - El schema: se releva lo vivo antes (D-475 declara tres capas en cero —
   **verificar, no asumir**).
 
+## 13bis. LO QUE SIGUE SIN FIRMA, y no se cuenta como firmado *(ENMIENDA S87)*
+
+- **`saldo_pagado` — ✅ FIRMADA (founder, 4-ago-2026). Ya no se le cuenta la
+  edad.** Entra al catálogo: **son SIETE categorías.** Cruza con P16(e) y
+  `MODELO_FINANCIERO` Decisión T — **esas dos siguen sin firma** y describen el
+  mismo aviso; la categoría existe, **el aviso todavía no**.
+- **La build de push corta runtime nuevo**, con el bump **en el mismo rango que
+  la build, jamás antes** — **propuesta de mesa registrada, sin firma.**
+
+### DOS REGISTROS DEL GATE DE SOMBRA (S87) — CANDIDATAS, SIN CONSTRUCCIÓN
+
+#### ① «HOMENAJE» — la excepción INVITADA al silencio del memorial
+
+**Candidata de letra, nacida en el gate de la sesión de sombra (founder, S87).**
+No toca S87 ni ningún lote en curso; **nace como letra a diseñar, con mesa
+propia y gate del founder.**
+
+**La idea:** una fecha de homenaje —Día de los Muertos como caso canónico— en la
+que la familia **elige recibir** un recuerdo de su mascota. Forma exigida desde
+ya, para que el día que se diseñe no se discuta el piso:
+
+- **OPT-IN EXPLÍCITO POR FAMILIA, CON EVIDENCIA** — patrón de §6 (el mismo que
+  WhatsApp): se guarda quién, cuándo, por qué método y **el texto exacto que se
+  mostró**. *Nadie recibe un homenaje que no pidió.*
+- **ANUAL**, no una cadencia.
+- **CATEGORÍA PROPIA**, jamás `comercial` — y **jamás con contenido comercial
+  adentro** (§3: `comercial` no viaja con otra categoría; acá ni siquiera se
+  toca).
+
+> **EL ESPÍRITU, que es lo que hay que conservar aunque el diseño cambie:**
+> **el silencio del memorial es respeto — y un homenaje ACEPTADO también lo es.**
+> *§5.1 apaga todo porque nadie pidió nada; esta excepción existe solo donde
+> alguien pidió, y por eso no la contradice: la completa.*
+
+**Y el borde que hay que resolver cuando se diseñe, declarado ahora:** la regla
+de la transición (§5.1) **purga la cola** al entrar en memorial. Un homenaje
+anual **no puede vivir en esa cola** — o se purga solo. Nace de otra parte, y
+eso es diseño, no detalle.
+
+#### ② RESERVA DEL FOUNDER sobre `comercial` — con la respuesta de mesa al lado
+
+**Registrada el 5-ago-2026.** El founder **no firma «nunca»** para un envío de
+administración fuera del consentimiento.
+
+**La respuesta de mesa, en el mismo lugar y con la misma fecha:**
+
+- **No se construye puerta trasera.** Un mecanismo que exista «por si acaso» se
+  usa el día que alguien tenga apuro, y para entonces nadie recuerda la reserva.
+- **Lo urgente-para-todos YA VIAJA:** `seguridad_cuenta` y `salud_seguridad` son
+  no apagables por diseño. *Si algo es de verdad urgente para todos, ya tiene
+  categoría — y si no la tiene, la pregunta correcta es cuál es, no cómo saltear
+  el consentimiento.*
+- **Si el día llega, abre con mesa propia** y **declarando el choque** contra la
+  letra firmada hoy (§3/§6/§12.3: `comercial` es opt-in, apagado por defecto,
+  y siempre porta su salida).
+
+> **La reserva queda fechada; el mecanismo NO EXISTE.** *Se escribe acá para que
+> el día que se discuta, se discuta contra una letra que ya sabía que esto
+> podía pasar — y no como si fuera una idea nueva.*
+
+### Candidatas registradas por el censo S87 (no rigen)
+
+- **`update:view` en salida humana no imprime `gitCommitHash`** — solo con
+  `--json`. Quien corra el deber ③ del método al pie **puede creer que falló**.
+- **Tercera pieza de la regla 85:** `supabase/.temp` **no viaja con el worktree**,
+  y sin él `db query --linked` rebota `LegacyProjectNotLinkedError`. Hoy la regla
+  nombra `node_modules` y `.env.local` — **son tres.**
+- **Una cuenta sembrada por SQL no está creada hasta que alguien la LOGUEA.**
+  Origen S87: dos cuentas con filas impecables en SQL **no entraban** (GoTrue
+  devolvía `500` por columnas de token en `NULL` donde espera `''`). *L-192 en un
+  seed: el modo de falla era el silencio de un `INSERT` exitoso.*
+
 ## 14. Disparos
 
 - **La letra existe desde hoy** — ese era su punto: que el día del
@@ -332,6 +635,21 @@ Lo que cada uno le exigirá al motor. Su catálogo se escribe cuando exista.
 
 ## Historial
 
+- **v1 (S87, 4 Ago 2026) — ENMENDADO CONTRA LO VIVO.** El censo midió que la
+  premisa madre de la v0 era falsa: **las tres capas no estaban en cero**. Siete
+  DEFINER vivas ya escriben intenciones sin ninguno de los cinco gates de §5, y
+  nadie las lee ⇒ **el sistema estaba en un modo sombra accidental**. Entra
+  **§0bis** con lo medido; **§3** gana el mapeo firmado de los 10 tipos vivos a
+  categoría (con las tres dudas de D resueltas y el criterio para el tipo N+1);
+  **§6** gana los **tres choques del contrato** y **la letra de salud firmada por
+  el founder** (*«elige por dónde le llegan, no si le llegan»*) con su exigencia
+  de honrarse en motor **y** superficie; nace **§13bis** con lo que sigue sin
+  firma (`saldo_pagado` a la firma desde S80) y las candidatas del censo.
+  **Adjudicación del founder que ordena el arco: los gates de §5 y la cura de §6
+  son PRECONDICIÓN del motor, no trabajo que lo acompaña** — encender sobre lo
+  que hoy escribe sin consultar §5 enciende el defecto. **Y push exige build
+  nativa: el binario 1.0.3 es anterior a su propia preparación** (L-196).
+  *Nada del diseño de la v0 se cayó — se cayó la premisa de que no había nada.*
 - **v0 (S73, 21 Jul 2026):** semilla escrita por la mesa como deuda
   declarada de S73. Motor diseñado vertical-proof por pedido del founder
   ("pensá en todo": despensa/sellers, refugios, criaderos) con el límite
