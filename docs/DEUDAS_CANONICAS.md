@@ -2114,7 +2114,67 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 
 > **Seis decisiones de mesa S72, con la evidencia del relevamiento S72-A0/B0.** Es el mapa de lo que sigue al cierre del vet — cada una con su disparo. No son bugs: son frentes de producto adjudicados. **Horizonte declarado que NO entra:** hospitalización, inventario, laboratorio (post-softlaunch); telemedicina sigue en el destino (decisión S48 intacta, fuera de `MODELO_VETERINARIA` v1).
 
-#### D-475 — M1 · Recordatorios al dueño 🔴
+#### D-475 — M1 · Recordatorios al dueño 🟠 — **REESCRITA S88 (5-ago-2026)**
+
+> ## ESTADO REAL HOY: **motor completo en sombra · puerta única · transporte pendiente.**
+>
+> **Fuentes:** el censo `2026-08-04-s87a-censo-notificaciones-contra-lo-vivo.md`
+> y el acta `2026-08-05-s87a-acta-de-cierre.md`. **Esta ficha se lee ANTES que
+> el texto original de abajo, que se conserva como historia y NO describe el
+> presente.**
+
+### Lo que EXISTE (Lote 1, S87)
+
+| capa (§2 de `MODELO_NOTIFICACIONES`) | estado |
+|---|---|
+| ① **INTENCIÓN** | ✅ **puerta única** `registrar_intencion_notificacion` con **los cinco gates de §5**; **cero productores directos** — la puerta trasera está cerrada con trigger |
+| ② **DESTINATARIO** | ✅ resuelve por familia / vínculo de prestador, y **descarta con motivo** cuando no hay vínculo |
+| ③ **CONSENTIMIENTO** | ✅ unidad **(persona, categoría, canal)**; el default lo dice la **categoría**; la letra de salud vive en un **trigger** |
+| ④ **TRANSPORTE** | 🔴 **CERO. Es lo único que falta**, y es el Lote 2 |
+
+**Piezas vivas:** 7 categorías · **37 tipos**, **todos `en_sombra`** · el lector
+`leer_sombra_notificaciones` (tres preguntas por fila) · idempotencia por
+`clave_dedup` · auditoría con `evento_id` · las descartadas **se conservan con su
+motivo**.
+
+### ⚠️ LAS DOS AFIRMACIONES DE ESTA FICHA QUE YA NO SON CIERTAS
+
+1. **«son TRES capas y hay CERO de las tres»** — falso desde el censo de S87:
+   **siete DEFINER vivas ya escribían intenciones** (sin gates, y nadie las leía).
+2. **«construidas a medias y sin gates»** — la corrección de S87, **y tampoco es
+   cierta hoy**: los cinco gates existen, corren y cortan con su rojo producido.
+
+> *Dos correcciones en dos días es el precio de una ficha que describe un
+> sistema en movimiento.* **Por eso el estado real va arriba y con fecha.**
+
+### Lo que sigue siendo VERDAD del texto original
+
+- **`push_tokens` = 0 filas**, y **cero código la toca**. *No hay tokens que
+  retirar todavía.*
+- **Hoy el vet sigue sin poder tocar al dueño por ningún canal** — porque **nada
+  sale**. La diferencia con S72 es que ahora **el motor sabe exactamente qué
+  mandaría y a quién**, y lo dice.
+- La nota de coherencia con `MODELO_VETERINARIA` §9 (la letra corrió más rápido
+  que el motor) **sigue en pie**.
+
+### Lo que caducó del texto original
+
+- **«D-137 confirmada en CERO»** — hay filas `vacuna_vencida` y
+  `cita_recordatorio` (legado 2026-05). El **productor** sigue sin existir.
+- **«Precondición: D-445 + un lector de `notificaciones`»** — el lector **existe**
+  (de sombra), y el centro de lectura del dueño es otro trabajo.
+- **«Disparo: el arco siguiente al cierre del vet»** — **ocurrió: fue S87.**
+
+> **☠️ CONDICIÓN DE MUERTE:** esta ficha se cierra cuando **el primer transporte
+> entregue un aviso real con gate del founder** (Lote 2). *Hasta entonces
+> describe un motor que existe y calla — que no es lo mismo que un motor que
+> falta.*
+
+---
+
+*(Texto original de S72, conservado como historia. **No describe el presente**;
+sus dos afirmaciones caducadas están señaladas arriba.)*
+
 🔴 ALTA. **No es "falta el motor": son TRES capas y hay CERO de las tres.** Evidencia (S72-A0/B0): `from('notificaciones')` = **0 hits** en apps y packages (nadie LEE la tabla) · `push_tokens` existe y **cero** líneas de app la tocan (`getExpoPushToken` = 0 hits) · **no hay RPC** que le permita al prestador disparar nada al dueño. **D-137 confirmada en CERO** (ningún productor escribe `vacuna_vencida` ni `cita_recordatorio`; los 4 cron vivos son otros). **Hoy el vet NO PUEDE TOCAR AL DUEÑO POR NINGÚN CANAL.** **Nota de coherencia:** `MODELO_VETERINARIA` §9 ya vendió "recordatorios" DENTRO del candado gratis-para-siempre, y D-137 los difirió a F2 — la letra corrió más rápido que el motor. **Precondición:** D-445 (letra del centro de notificaciones) + un lector de `notificaciones`. **Disparo: el arco siguiente al cierre del vet.** Origen: S72 (backlog de mercado).
 
 #### D-476 — M2 · Desparasitación 🟠

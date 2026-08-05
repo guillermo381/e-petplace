@@ -296,7 +296,15 @@ export type CitaAgendaPaseo = Pick<
   // ⚠️ **`null` NO vale 0**: son 2 de 88 citas vivas, todas del 7-jul y
   // anteriores al snapshot de precio. Un 0 se sumaría y mentiría por omisión
   // con un número redondo (L-197) — el consumidor las cuenta aparte y LO DICE.
-  'id' | 'fecha' | 'hora' | 'estado' | 'tipo_servicio' | 'suscripcion_servicio_id' | 'duracion_minutos' | 'precio'
+  // empleado_id (S88, freno 1b de C): QUIÉN atiende esta cita. El dato estaba
+  // ESTAMPADO desde S78 (81/81 citas, cero huérfanas) y NINGÚN select lo
+  // exponía — el motor sabía y la app no podía preguntar.
+  // Lo consume el techo del PROFESIONAL (LAMINA_BARRA_DE_TRES §1): "sus citas
+  // de hoy". ⚠️ `null` NO significa "de nadie": significa DEL NEGOCIO — la
+  // cita despegada por §11(a) de LETRA_EDICION_VINCULO. Un consumidor que lea
+  // null como "no es mía" hace invisible justo lo que la sección "Del negocio"
+  // existe para mostrar (el atrape D-552, dos veces en la casa).
+  'id' | 'fecha' | 'hora' | 'estado' | 'tipo_servicio' | 'suscripcion_servicio_id' | 'duracion_minutos' | 'precio' | 'empleado_id'
 > & {
   mascota: MascotaAgenda | null;
   tipo: Pick<
@@ -386,7 +394,7 @@ export async function obtenerCitasPaseoDelDia(
   const { data, error } = await getClient()
     .from('evento_cita_servicio')
     .select(
-      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, precio, direccion_snapshot, mascota:mascotas(id, nombre, especie, foto_url, familia_id), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
+      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, precio, empleado_id, direccion_snapshot, mascota:mascotas(id, nombre, especie, foto_url, familia_id), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
     )
     .eq('prestador_id', input.prestador_id)
     .gte('fecha', input.fecha)
@@ -433,7 +441,7 @@ export async function obtenerCitaPaseoPorId(
   const { data, error } = await getClient()
     .from('evento_cita_servicio')
     .select(
-      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, precio, direccion_snapshot, mascota:mascotas(id, nombre, especie, foto_url, familia_id), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
+      'id, fecha, hora, estado, tipo_servicio, suscripcion_servicio_id, duracion_minutos, precio, empleado_id, direccion_snapshot, mascota:mascotas(id, nombre, especie, foto_url, familia_id), tipo:tipos_servicio!inner(nombre, duracion_default_minutos), atencion:evento_atencion(estado, iniciada_en)',
     )
     .eq('id', citaId)
     .eq('tipo.categoria', 'paseo')

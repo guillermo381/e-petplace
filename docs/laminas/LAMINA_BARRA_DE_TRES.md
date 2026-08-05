@@ -33,7 +33,15 @@ encima («Owner only»).** Eso muere.
 | rol | qué muestra el techo |
 |---|---|
 | **profesional** (con chips) | **sus citas de hoy** |
-| **recepción** (sin chips) | **el movimiento de la puerta** |
+| **recepción** (sin chips) | **el movimiento de la puerta** — ✅ **YA CUMPLIDO POR DISEÑO EXISTENTE** |
+
+> **DECISIÓN DE MESA (S88):** **`AgendaRecepcion` ES el movimiento de la
+> puerta.** No hace falta construirle un techo: la superficie que S78 ya
+> construyó *es* lo que esta fila pide. ⇒ **el techo de tres números queda SOLO
+> para el profesional.**
+>
+> *Media lámina se cumplió sin escribir una línea — y solo se supo mirando lo
+> que ya existía en vez de leer la fila como un pedido nuevo.*
 
 **Y la razón que hay que conservar aunque el diseño evolucione:**
 
@@ -98,10 +106,53 @@ navegó** el candado habla, porque preguntó algo concreto y merece respuesta.
    `auth.uid()`; no hay escalación). **Ojo: esto NO cura [[D-656]]** —
    *cerrar la puerta que no debía estar abierta y dejar de quemar a quien la
    cruzó son dos cosas, y la segunda es contrato.*
-3. **La quinta voz:** el empleado de negocio **inactivo**. Medido S87: existe
-   **1 caso vivo** — vínculo activo con fila de `prestadores` NO legible
-   (`estado='activo' OR user_id=auth.uid() OR is_admin()`), así que
-   `empleadoTitulo`/`empleadoDetalle` **es alcanzable de verdad**, no teórica.
+3. ~~**La quinta voz:** el empleado de negocio inactivo.~~
+   ### ☠️ **RETIRADA DEL LOTE (S88) — no tiene caso vivo**
+
+   **Lo medido, y corrige a esta misma lámina:** el conteo que fundaba esta fila
+   —*"1 caso vivo"*— **contó empleados activos de negocio no activo SIN FILTRAR
+   TITULARIDAD**. Re-medido bajo RLS con sus claims reales:
+
+   ```
+   el único caso ES EL TITULAR de ese negocio (es_titular = true)
+   el embed prestadores(nombre_comercial) le devuelve "Carlos", NO null
+   empleados activos NO titulares de negocio no activo  →  0
+   ```
+
+   La policy `prestador_own_profile` (`user_id = auth.uid()`) le da su fila
+   **aunque el negocio esté `en_revision`**. ⇒ **`empleadoTitulo`/`empleadoDetalle`
+   NO es alcanzable hoy por ningún camino.**
+
+   > **Sin caso vivo no se construye: sería letra muerta con cara de cobertura.**
+   > *Es la misma clase que el censo de contenedores de S87 — un conteo que mide
+   > una cosa y se reporta como otra, y esta vez lo cometió la pista que pedía
+   > medir para no construir a ciegas.*
+
+   **ENTRA EN SU LUGAR, y como MEDICIÓN antes que construcción:** *¿qué ve hoy un
+   **titular de negocio `en_revision`**?* Es el caso que **sí existe**. Primero
+   por código (qué rama pinta `obtenerMiPrestador` con ese estado) — **sin tocar
+   la cuenta de Carlos, que es una persona real**; si el código no alcanza, se
+   siembra un titular de prueba `+s88` declarado como fixture. **Si hay voz que
+   curar, se diseña con el caso vivo adelante.**
+
+---
+
+## 4bis. LO QUE YA ESTÁ LISTO PARA §1 *(S88)*
+
+**El lector del profesional YA TRAE `empleado_id`.** Freno 1b de C resuelto: el
+dato estaba **estampado desde S78** (medido hoy: **112 de 112 citas**, cero sin
+persona, 4 personas distintas) y **ningún `select` lo exponía** — el motor sabía
+y la app no podía preguntar.
+
+**Ensanchado por puerta única:** `CitaAgendaPaseo` gana `empleado_id`, y los
+**siete selects** de los cuatro oficios (los del día **y** los de detalle) lo
+traen. Typechecks `api`/`cliente`/`prestador` verdes.
+
+> **⚠️ Y la trampa escrita en el tipo, para que no se lea mal:** **`null` NO
+> significa «de nadie»: significa DEL NEGOCIO** — la cita despegada por §11(a).
+> *Un consumidor que lea `null` como «no es mía» hace invisible justo lo que la
+> sección «Del negocio» existe para mostrar* (el atrape D-552, ya dos veces en
+> la casa). **Hoy son 0 filas, así que el borde no se ve — y por eso se declara.**
 
 ---
 
