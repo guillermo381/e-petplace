@@ -7371,6 +7371,50 @@ mira excepciones **lee ÉXITO sobre un rechazo**.
 titular» era verdad.** Ninguno vio nunca un admin: **es la premisa caducada de
 D-651, un piso más abajo — en el motor y no en la superficie.**
 
+### ✅ PIEZA 1 DEL LOTE — EL HELPER, CONSTRUIDO (S88-A, `20260805150000`)
+
+```sql
+user_gestiona_prestador(prestador) =
+     titular de esa fila
+  OR empleado_tiene_rol(prestador, ['administrador'])   ← la letra de S74, por fin con motor
+  OR is_admin()                                         ← el admin de plataforma, que ya pasaba
+```
+
+**Par adentro de la migración, y ABORTA si no discrimina** (L-199):
+
+```
+admin=true | profesional=false | recepcion=false | titular=true
+```
+
+*El par apaga la pata de plataforma del admin de prueba antes de medir* —
+sin eso da todo verde y no prueba nada (la trampa que este mismo censo pagó).
+
+**El límite intocable vive EN EL COMMENT del helper**, no en un acta aparte:
+*crear/quitar administradores es del TITULAR; este helper NO cubre ese acto —
+quien lo escriba compara `user_id` a propósito.*
+
+### EL CENSO DE SITIOS — 18 policies + 16 RPCs, clasificados
+
+**Migran al helper (gestión del negocio):** `prestador_servicios` ·
+`prestador_horarios` · `prestador_servicio_tallas` · `prestador_programas` ·
+`prestador_especialidades` · `prestador_zonas` · `prestador_bloqueos` ·
+`prestador_documentos` · `prestadores` (UPDATE) · `cuentas_comerciales` ·
+`empleado_invitaciones` · `prestador_empleados` (crear/actualizar) · y los RPC
+`actualizar_nombre_comercial` · `crear_empleado_directo` · `dar_de_baja_empleado`
+· `elegir_modo_horarios` · `convertir_horarios_a_por_servicio` ·
+`email_status_para_invitacion`.
+
+**NO migran, y el porqué de cada clase:**
+
+| sitio | por qué NO |
+|---|---|
+| `prestadores` INSERT · `crear_prestador_inicial` | **auto-servicio**: se crea el propio negocio. No hay a quién administrar todavía |
+| `empleados_self_actualiza` · `empleados_accept_invitation` | **son de la persona sobre SÍ MISMA** (el handshake). Abrirlos dejaría a un admin aceptando invitaciones ajenas |
+| crear/quitar `administrador` | **el límite intocable** (letra S74) |
+| `obtener_jornada_recepcion` | **ya gatea por rol** — no compara `user_id` a mano |
+| `obtener_plata_del_dia` · `obtener_datos_negocio` · `obtener_atenciones_abiertas` · `contar_citas_despegables` | ya tienen `is_admin()`; **su gate es de LECTURA y el founder firmó que el admin ve todo** ⇒ migran solo si se mide que hoy rebotan |
+| `buscar_cliente_por_*` · `obtener_expediente_modulado` | **el regex los pescó de más**: su gate es de acceso a mascota, no de titularidad |
+
 ### LA CURA, ordenada por lote (no al pasar)
 
 Un helper único —`user_gestiona_prestador(prestador)` = titular **OR**
