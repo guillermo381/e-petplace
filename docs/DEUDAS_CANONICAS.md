@@ -3369,7 +3369,7 @@ Origen: S86-A, medición para C.
   >
   > | superficie | por qué NADIE la alcanza |
   > |---|---|
-  > | **la rama `administrador` de TODOS los gates** | **cero portadores en la DB** — nunca corrió ([[D-652]]) |
+  > | ~~**la rama `administrador` de TODOS los gates**~~ | ~~cero portadores~~ → ✅ **CORRIÓ (S88)**: dos portadores reales y dedo del founder ([[D-652]] cerrada) |
   > | **el diseño de la barra de TRES** | se muestra a 5 personas **y el founder no es una de ellas**: su cuenta es titular ([[D-651]]) |
   > | **`AgendaRecepcion`** (el HOY de recepción) | exige **otro rol** — 1 sola fila viva, en Aurora |
   > | **`GateRoto`** | ~~exige un dato **contradictorio** (`rol=false` + `titular=null`)~~ — **⚠️ ENMENDADA S87: esa condición YA NO RIGE** |
@@ -5654,7 +5654,33 @@ importa: **doce de veinticuatro** reglas del lint estaban en esa condición.*
 
 ---
 
-#### D-652 — «ADMINISTRADOR» ES UN ROL SIN UN SOLO PORTADOR: la rama existe, nunca corrió, y se declara NO PROBADA 🟠
+#### D-652 — ✅ **CERRADA (S88, 5-ago-2026)** — la rama corrió, con dos portadores reales y su dedo
+
+> **Cerrada como quedó enmendada por el founder:** la rama corrió (el primer
+> `administrador` de la historia nació el 5-ago), y su cierre estaba
+> **condicionado al censo de [[D-660]] y sus curas** — que se hicieron enteras
+> y se gatearon.
+>
+> **LA TRAMPA QUE ESTA FICHA NOMBRABA, y cómo se pagó:** *crear el primer admin
+> es un acto de SQL* — por eso el rol nunca había corrido. Se sembraron **dos**
+> cuentas y la segunda es la que vale:
+>
+> | cuenta | para qué |
+> |---|---|
+> | `+s88admin` | admin de plataforma **Y** de negocio — sirvió para el arco, **y su bifrontalidad falseó el primer censo** |
+> | **`+s88rolpuro`** | **administrador de negocio SIN fila en `admin_users`** — el rol solo, que es lo que la ficha pedía |
+>
+> **La segunda existe por una lección de la primera:** *el censo de D-660 dio
+> TODO VERDE con la cuenta bifronte y era falso.* **Una cuenta que es dos cosas
+> no prueba ninguna.**
+>
+> **El dedo del founder, sobre el rol puro:** creó un empleado, editó un
+> servicio y un horario con persistencia verificada, y **no pudo nombrar
+> administrador**. *La rama dejó de ser código sin portadores.*
+
+**El texto original, conservado como historia:**
+
+#### (histórico) D-652 — «ADMINISTRADOR» ES UN ROL SIN UN SOLO PORTADOR 🟠
 
 **Medido contra la DB el 4-ago-2026** (censo de roles, S86): **CERO filas
 con `rol='administrador'` en todo el sistema.** Las 12 filas de empleado
@@ -7308,7 +7334,26 @@ de GoTrue.**
 
 ---
 
-#### D-660 — 🔴 EL ROL `administrador` NO PUEDE ESCRIBIR NADA DEL NEGOCIO — la letra firmada no tiene motor
+#### D-660 — ✅ **CURADA Y GATEADA en su mitad de MOTOR** (S88, 5-ago-2026) · 🟠 su mitad de SUPERFICIE sigue abierta
+
+> **RE-GATE DEL FOUNDER: VERDE con el rol puro.** Creó un empleado, editó un
+> servicio y un horario **con persistencia verificada**, y **el camino de
+> nombrar administrador sigue cerrado a su dedo**.
+>
+> **El límite intocable quedó probado en las DOS direcciones:** por
+> **predicados** (el cinturón lee que `empleado_roles` no usa el helper) y por
+> **dedo** (el founder no pudo). *Una sola de las dos habría sido media prueba:
+> el predicado no sabe si alguien lo alcanza, y el dedo no sabe si mañana
+> alguien lo abre.*
+>
+> **🟠 LO QUE SIGUE ABIERTO, con dueño:** la mitad de **SUPERFICIE** — §4ter de
+> `LAMINA_BARRA_DE_TRES` (el home por rol + la consolidada). **La mesa dibuja
+> la lámina; C construye.** *El motor ya está listo debajo: hoy el admin puede
+> todo lo que la letra le promete y la pantalla todavía lo manda al mostrador.*
+
+**El texto original, conservado como historia:**
+
+#### (histórico) D-660 — 🔴 EL ROL `administrador` NO PUEDE ESCRIBIR NADA DEL NEGOCIO
 
 **Censo con dedos pedido por el founder (S88), sobre el primer admin real.**
 La letra de S74 dice **«administrador = dueño menos crear admins»**. **Medido:
