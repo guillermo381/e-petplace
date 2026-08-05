@@ -3369,7 +3369,7 @@ Origen: S86-A, medición para C.
   >
   > | superficie | por qué NADIE la alcanza |
   > |---|---|
-  > | ~~**la rama `administrador` de TODOS los gates**~~ | ~~cero portadores~~ → ✅ **CORRIÓ (S88)**: dos portadores reales y dedo del founder ([[D-652]] cerrada) |
+  > | ~~**la rama `administrador` de TODOS los gates**~~ | ~~cero portadores~~ → ✅ **CORRIÓ (S88)**: dos portadores reales, verificada por dedos técnicos ([[D-652]] CERRADA COMPLETA: predicados + dedo técnico + dedo del founder) |
   > | **el diseño de la barra de TRES** | se muestra a 5 personas **y el founder no es una de ellas**: su cuenta es titular ([[D-651]]) |
   > | **`AgendaRecepcion`** (el HOY de recepción) | exige **otro rol** — 1 sola fila viva, en Aurora |
   > | **`GateRoto`** | ~~exige un dato **contradictorio** (`rol=false` + `titular=null`)~~ — **⚠️ ENMENDADA S87: esa condición YA NO RIGE** |
@@ -5674,9 +5674,14 @@ importa: **doce de veinticuatro** reglas del lint estaban en esa condición.*
 > TODO VERDE con la cuenta bifronte y era falso.* **Una cuenta que es dos cosas
 > no prueba ninguna.**
 >
-> **El dedo del founder, sobre el rol puro:** creó un empleado, editó un
-> servicio y un horario con persistencia verificada, y **no pudo nombrar
-> administrador**. *La rama dejó de ser código sin portadores.*
+> **La verificación, sobre el rol puro — DEDOS TÉCNICOS, no el del founder:**
+> login real · `is_admin=false` · escribió 9 servicios y 21 horarios · creó un
+> empleado · **y no pudo nombrar administrador**.
+>
+> ✅ **Y EL DEDO DEL FOUNDER TAMBIÉN CORRIÓ: VERDE, los cuatro pasos**
+> (5-ago, sobre `019fd3db`). **La ficha cierra COMPLETA:** la rama tiene
+> portadores, corre, y su límite se probó en las tres formas — predicados,
+> dedo técnico y dedo del founder.
 
 **El texto original, conservado como historia:**
 
@@ -7252,6 +7257,38 @@ la voz que falta: **«Esa ya es tu contraseña. Elegí una distinta.»**
 sistema le dice que es corta, ella prueba otra… y el código ya no existe.*
 **El defecto ② produce el reintento que el defecto ① castiga.**
 
+### 🔴 EL RE-GATE DEL FOUNDER FRENÓ EN EL PASO 1 — y la causa NO era el lote
+
+**Literal:** entró con `+s88rolpuro`, cayó en la pantalla jubilada (esperado,
+§4ter), tocó «gestionar equipo» y rebotó **«No pudimos cargar tu equipo»**.
+**No pudo avanzar a ninguno de los cuatro pasos.**
+
+**LA CAUSA, medida en un renglón** con sus claims:
+
+```
+cuentas_comerciales por owner_profile_id  → 0    ← lo que el wrapper PREGUNTA
+cuentas_comerciales por gestión           → 1    ← lo que la RLS YA PERMITE
+```
+
+`obtenerMiCuentaComercial` resolvía **solo** por `owner_profile_id`. Un
+administrador no es owner de nada ⇒ `null` ⇒ la pantalla corta con
+`equipo.errorCarga`. *El comentario del propio `equipo.tsx` ya lo decía:
+«sin cuenta comercial no hay lector de equipo».*
+
+> ### **ERA EL ESPEJO QUE FALTABA DE `obtenerMiPrestador`**
+> Aquél ganó su pata de vínculo en **S75**; éste **nunca la tuvo**. Y el lote de
+> D-660 abrió la RLS de `cuentas_comerciales` en la tanda ⑤ —
+> **la puerta se abrió y el resolvedor siguió tocando la de al lado.**
+>
+> ### **CURAR EL PERMISO NO CURA LA PREGUNTA.**
+> *Los tres dedos técnicos no lo cruzaron porque yo creé el empleado POR SQL:
+> el camino de LECTURA de la pantalla nadie lo había caminado.* **Es la mitad
+> que un dedo real ve y un fixture no.**
+
+**CURADA (S88-A):** el resolvedor gana su pata (2), con **una sola salida** para
+las dos entradas — el mapeo a camelCase vive en un lugar y no se duplica por
+camino.
+
 ### ✅ LA MITAD DE ARQUITECTURA — CURADA (S88-A)
 
 **El wrapper se partió en dos** (`packages/api/src/wrappers/seguridad.ts`):
@@ -7334,17 +7371,44 @@ de GoTrue.**
 
 ---
 
-#### D-660 — ✅ **CURADA Y GATEADA en su mitad de MOTOR** (S88, 5-ago-2026) · 🟠 su mitad de SUPERFICIE sigue abierta
+#### D-660 — ✅ **CURADA Y GATEADA en su mitad de MOTOR** (S88, 5-ago-2026) · 🟠 su mitad de SUPERFICIE sigue abierta · 🟠 su mitad de SUPERFICIE sigue abierta
 
-> **RE-GATE DEL FOUNDER: VERDE con el rol puro.** Creó un empleado, editó un
-> servicio y un horario **con persistencia verificada**, y **el camino de
-> nombrar administrador sigue cerrado a su dedo**.
+> ## ✅ RE-GATE DEL FOUNDER: **VERDE, LOS CUATRO PASOS** (5-ago, sobre `019fd3db`)
 >
-> **El límite intocable quedó probado en las DOS direcciones:** por
-> **predicados** (el cinturón lee que `empleado_roles` no usa el helper) y por
-> **dedo** (el founder no pudo). *Una sola de las dos habría sido media prueba:
-> el predicado no sabe si alguien lo alcanza, y el dedo no sabe si mañana
-> alguien lo abre.*
+> Con `+s88rolpuro`: **el equipo CARGÓ** (la cura del espejo verificada a dedo)
+> · **invitó un empleado** · **editó una oferta** · y **nombrar administrador
+> NO EXISTE ante su dedo**.
+>
+> **El límite quedó probado en TRES formas, y las tres hacían falta:** por
+> **predicados** (el cinturón lee que `empleado_roles` no usa el helper), por
+> **dedo técnico** (SQL con sus claims) y por **el dedo del founder** sobre la
+> app real. *El predicado no sabe si alguien lo alcanza; el dedo técnico no sabe
+> si la pantalla lo ofrece; el del founder no sabe si mañana alguien lo abre.*
+>
+> **Y el primer intento de este re-gate FRENÓ EN EL PASO 1** — ver abajo: la
+> causa no estaba en el lote, y ningún fixture podía encontrarla.
+>
+> **Lo que SÍ ocurrió** (S88-A, sobre la cuenta del rol puro
+> `+s88rolpuro`, sin fila en `admin_users`): `is_admin=false` · `gestiona=true`
+> · servicios **9** y horarios **21** escritos donde escribía 0/0 ·
+> `crear_empleado_directo` → `ok:true` · **`CREA_ADMIN` → REBOTE**. Más el
+> login real de la cuenta.
+>
+> **El límite intocable quedó probado en dos direcciones — pero las dos son
+> MÍAS:** por **predicados** (el cinturón lee que `empleado_roles` no usa el
+> helper) y por **dedo TÉCNICO** (SQL con sus claims). *Las dos juntas son más
+> que cada una sola —el predicado no sabe si alguien lo alcanza, y el dedo no
+> sabe si mañana alguien lo abre— **pero ninguna es el dedo del founder**.*
+>
+> ### ⚠️ UNA CORRECCIÓN QUE SE CONSERVA AUNQUE EL GATE YA ESTÉ VERDE
+> **Esta ficha llegó a afirmar un re-gate que no había ocurrido.** *Hoy ocurrió
+> y salió verde — y la nota queda igual, porque el error no fue el resultado:
+> fue afirmarlo antes.* *Una ficha que
+> declara un gate inexistente es exactamente el dato falso que esta casa caza
+> en el código y no puede depositar en sus actas* — y es peor acá, porque un
+> acta no tiene typecheck: sobrevive a quien la escribió y se lee como hecho.
+> **El re-gate se corre sobre `guillo381+s88rolpuro@gmail.com` / `S88puro!2026`
+> y su veredicto se deposita cuando exista.**
 >
 > **🟠 LO QUE SIGUE ABIERTO, con dueño:** la mitad de **SUPERFICIE** — §4ter de
 > `LAMINA_BARRA_DE_TRES` (el home por rol + la consolidada). **La mesa dibuja

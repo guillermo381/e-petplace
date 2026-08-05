@@ -8,7 +8,7 @@ import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Boton, Campo, Encabezado, Entrada, spacing, useAviso, useTheme, EvitaTeclado } from '@epetplace/ui';
-import { registrarse, type CodigoErrorAuth } from '@epetplace/api';
+import { MIN_LARGO_CONTRASENA, registrarse, type CodigoErrorAuth } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 
@@ -83,7 +83,7 @@ export default function Registro() {
         />
         <Campo
           label={t('registro.passwordLabel')}
-          ayuda={t('registro.passwordAyuda')}
+          ayuda={t('registro.passwordAyuda', { n: MIN_LARGO_CONTRASENA })}
           value={password}
           onChangeText={setPassword}
           error={errores.password}

@@ -299,29 +299,18 @@ export async function establecerContrasenaNueva(input: {
   return { ok: true, data: null };
 }
 
-/**
- * ⚠️ **CAMINO VIEJO — QUEMA EL CÓDIGO SI LA CLAVE REBOTA (D-659).**
- *
- * Se conserva SOLO para que `recuperar.tsx` siga compilando hasta que C lo
- * migre a los dos pasos. **No se usa en superficie nueva.** Hoy compone las
- * dos funciones, así que hereda la cura del traductor de errores — pero
- * **no la cura de orden**: si el paso 2 rebota, el token ya se gastó, que es
- * exactamente el defecto que la partición existe para arreglar.
- *
- * **Muere con el lote de la pantalla.**
- */
-export async function canjearCodigoRecuperacion(input: {
-  email: string;
-  codigo: string;
-  nueva: string;
-}): Promise<ResultadoWrapper<null, CodigoErrorSeguridad>> {
-  if (input.nueva.length < MIN_LARGO) {
-    return { ok: false, codigo: 'contrasena_debil', mensaje: MENSAJES.contrasena_debil };
-  }
-  const verificado = await verificarCodigoRecuperacion(input);
-  if (!verificado.ok) return verificado;
-  return establecerContrasenaNueva({ nueva: input.nueva });
-}
+// ☠️ `canjearCodigoRecuperacion` MURIÓ ACÁ (S88).
+//
+// Su lápida decía «muere con el lote de la pantalla», y el lote llegó: C
+// construyó el reset en dos pasos sobre `verificarCodigoRecuperacion` +
+// `establecerContrasenaNueva`, y el camino viejo quedó con CERO consumidores
+// (medido antes de borrar, no supuesto).
+//
+// **Se mata en vez de dejarse:** hacía las dos cosas «en el mismo acto» y ese
+// acto único ERA el defecto — si la clave rebotaba, el token ya estaba quemado
+// y el reintento encontraba el correo gastado. *Un camino muerto que quema
+// tokens no es código inerte: es una trampa esperando al próximo que lo
+// importe porque el autocompletado se lo ofreció.*
 
 /** Expuesto para que la superficie pueda decir CUÁNTO FALTA cuando el
  *  rebote es de rate limit. Se exporta la función, no un número: el dato
