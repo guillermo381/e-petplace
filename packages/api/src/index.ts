@@ -928,7 +928,6 @@ export {
 export {
   cambiarContrasena,
   pedirCodigoRecuperacion,
-  canjearCodigoRecuperacion,
   verificarCodigoRecuperacion,
   MIN_LARGO_CONTRASENA,
   establecerContrasenaNueva,

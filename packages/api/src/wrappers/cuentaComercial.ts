@@ -116,29 +116,62 @@ export async function obtenerMiCuentaComercial(): Promise<
   const uid = await uidActual();
   if (!uid) return errorGenerico('sin_sesion');
 
-  const { data, error } = await getClient()
+  const COLUMNAS =
+    'id, estado, tipo_fiscal, identificacion_fiscal, razon_social, nombre_comercial, country_code, moneda, datos_bancarios';
+
+  // (1) POR OWNER — el camino de siempre, byte por byte: quien la creó recibe
+  // exactamente la misma fila que antes.
+  const propia = await getClient()
     .from('cuentas_comerciales')
-    .select(
-      'id, estado, tipo_fiscal, identificacion_fiscal, razon_social, nombre_comercial, country_code, moneda, datos_bancarios',
-    )
+    .select(COLUMNAS)
     .eq('owner_profile_id', uid)
     .maybeSingle();
+  if (propia.error) return errorGenerico('error_desconocido');
 
-  if (error) return errorGenerico('error_desconocido');
-  if (data === null) return { ok: true, data: null };
+  let fila = propia.data;
 
+  // (2) POR GESTIÓN — D-660. **Era el ESPEJO QUE FALTABA de
+  // `obtenerMiPrestador`**: aquél ganó su pata de vínculo en S75 y éste nunca
+  // la tuvo. Un administrador no es `owner_profile_id` de nada, así que (1) le
+  // devolvía `null` y la pantalla de equipo mostraba «No pudimos cargar tu
+  // equipo» — el re-gate del founder frenó exactamente ahí.
+  //
+  // ⚠️ LO QUE ESTE CASO ENSEÑA, y por eso vive acá: la RLS de
+  // `cuentas_comerciales` YA permitía esta lectura desde la tanda ⑤ del lote.
+  // **La puerta se abrió y el resolvedor siguió tocando la de al lado.**
+  // *Curar el permiso no cura la pregunta.*
+  //
+  // La consulta no nombra al usuario: la RLS de `prestadores` ya devuelve solo
+  // los negocios que esta persona gestiona. `limit(1)` es honesto mientras
+  // nadie gestione dos — el día que ocurra, el resolvedor del motor
+  // (`prestador_que_gestiono`) rebota hablado y esto se alinea con él.
+  if (fila === null) {
+    const porGestion = await getClient()
+      .from('prestadores')
+      .select(`cuenta:cuentas_comerciales!inner(${COLUMNAS})`)
+      .not('cuenta_comercial_id', 'is', null)
+      .limit(1);
+    if (porGestion.error) return errorGenerico('error_desconocido');
+    const anidada = porGestion.data?.[0]?.cuenta;
+    fila = (Array.isArray(anidada) ? anidada[0] : anidada) ?? null;
+  }
+
+  if (fila === null) return { ok: true, data: null };
+
+  // UNA sola salida para las dos entradas: el mapeo a camelCase vive en un
+  // solo lugar y no se duplica por camino.
   return {
     ok: true,
     data: {
-      id: data.id,
-      estado: data.estado,
-      tipoFiscal: data.tipo_fiscal,
-      identificacionFiscal: data.identificacion_fiscal,
-      razonSocial: data.razon_social,
-      nombreComercial: data.nombre_comercial,
-      countryCode: data.country_code,
-      moneda: data.moneda,
-      datosBancarios: derivarResumenBancario(data.datos_bancarios),
+      id: fila.id,
+      estado: fila.estado,
+      tipoFiscal: fila.tipo_fiscal,
+      identificacionFiscal: fila.identificacion_fiscal,
+      razonSocial: fila.razon_social,
+      nombreComercial: fila.nombre_comercial,
+      countryCode: fila.country_code,
+      moneda: fila.moneda,
+      datosBancarios: derivarResumenBancario(fila.datos_bancarios),
     },
   };
 }

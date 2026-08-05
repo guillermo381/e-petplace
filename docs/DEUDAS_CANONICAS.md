@@ -7257,6 +7257,38 @@ la voz que falta: **«Esa ya es tu contraseña. Elegí una distinta.»**
 sistema le dice que es corta, ella prueba otra… y el código ya no existe.*
 **El defecto ② produce el reintento que el defecto ① castiga.**
 
+### 🔴 EL RE-GATE DEL FOUNDER FRENÓ EN EL PASO 1 — y la causa NO era el lote
+
+**Literal:** entró con `+s88rolpuro`, cayó en la pantalla jubilada (esperado,
+§4ter), tocó «gestionar equipo» y rebotó **«No pudimos cargar tu equipo»**.
+**No pudo avanzar a ninguno de los cuatro pasos.**
+
+**LA CAUSA, medida en un renglón** con sus claims:
+
+```
+cuentas_comerciales por owner_profile_id  → 0    ← lo que el wrapper PREGUNTA
+cuentas_comerciales por gestión           → 1    ← lo que la RLS YA PERMITE
+```
+
+`obtenerMiCuentaComercial` resolvía **solo** por `owner_profile_id`. Un
+administrador no es owner de nada ⇒ `null` ⇒ la pantalla corta con
+`equipo.errorCarga`. *El comentario del propio `equipo.tsx` ya lo decía:
+«sin cuenta comercial no hay lector de equipo».*
+
+> ### **ERA EL ESPEJO QUE FALTABA DE `obtenerMiPrestador`**
+> Aquél ganó su pata de vínculo en **S75**; éste **nunca la tuvo**. Y el lote de
+> D-660 abrió la RLS de `cuentas_comerciales` en la tanda ⑤ —
+> **la puerta se abrió y el resolvedor siguió tocando la de al lado.**
+>
+> ### **CURAR EL PERMISO NO CURA LA PREGUNTA.**
+> *Los tres dedos técnicos no lo cruzaron porque yo creé el empleado POR SQL:
+> el camino de LECTURA de la pantalla nadie lo había caminado.* **Es la mitad
+> que un dedo real ve y un fixture no.**
+
+**CURADA (S88-A):** el resolvedor gana su pata (2), con **una sola salida** para
+las dos entradas — el mapeo a camelCase vive en un lugar y no se duplica por
+camino.
+
 ### ✅ LA MITAD DE ARQUITECTURA — CURADA (S88-A)
 
 **El wrapper se partió en dos** (`packages/api/src/wrappers/seguridad.ts`):
@@ -7339,7 +7371,7 @@ de GoTrue.**
 
 ---
 
-#### D-660 — ✅ **CURADA en su mitad de MOTOR, verificada por predicados y dedos técnicos** (S88, 5-ago-2026) · ⏳ **re-gate founder PENDIENTE** · 🟠 su mitad de SUPERFICIE sigue abierta
+#### D-660 — ✅ **CURADA en su mitad de MOTOR, verificada por predicados y dedos técnicos** (S88, 5-ago-2026) · ⏳ **re-gate founder FRENADO EN PASO 1** (causa curada, espera bundle) · 🟠 su mitad de SUPERFICIE sigue abierta
 
 > **GATEADA POR PREDICADOS Y POR DEDOS TÉCNICOS. ⏳ EL RE-GATE DEL FOUNDER
 > ESTÁ PENDIENTE.**
