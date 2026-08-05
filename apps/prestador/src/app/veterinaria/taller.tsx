@@ -30,7 +30,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
@@ -79,6 +79,7 @@ import {
 import { EvitaTeclado } from '@/components/evita-teclado';
 import { useTraduccion } from '@/i18n';
 import { useGateGestor } from '@/lib/gate-gestor';
+import { GateAjeno } from '@/components/gate-ajeno';
 import { GateRoto } from '@/components/gate-roto';
 import { vozErrorVet } from '@/lib/voz-error-vet';
 import {
@@ -174,8 +175,10 @@ function modalidadDeItem(item: ItemMenuVeterinaria): {
 
 export default function TallerVeterinaria() {
   const router = useRouter();
-  // S75-B: gate de rol de RUTA (inerte hasta la puerta — solo el titular
-  // llega hoy; post-puerta rebota al no-gestor que deep-linkee al taller).
+  // S75-B: gate de rol de RUTA.
+  // ⭐ S87-C — ACÁ DECÍA «inerte hasta la puerta — solo el titular llega
+  // hoy». La puerta abrió en S75 y D-651 midió cinco no-titulares: este
+  // gate CORRE. Y ya no «rebota»: contesta (§3 de la lámina, GateAjeno).
   const { gate, reintentarGate } = useGateGestor();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
@@ -505,7 +508,8 @@ export default function TallerVeterinaria() {
   };
 
   // Ley 23: al no-gestor confirmado NO se le ofrece el taller (ausencia).
-  if (gate === 'denegado') return <Redirect href="/(tabs)/negocio" />;
+  /* ⭐ S87-C (LÁMINA §3) — el rebote mudo muere: la puerta contesta. */
+  if (gate === 'denegado') return <GateAjeno />;
   // S79-B: datos del gate CONTRADICTORIOS (rol=false + titular=null) —
   // jamás expulsión muda: la superficie habla y reintenta (el blanco del
   // gate del founder nacía acá).

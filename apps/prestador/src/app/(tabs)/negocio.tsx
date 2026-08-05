@@ -23,7 +23,7 @@
 import { useCallback, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Redirect, useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import {
   CeldaNavegacion,
   Icono,
@@ -51,6 +51,7 @@ import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { useTraduccion } from '@/i18n';
 import { useGateGestor } from '@/lib/gate-gestor';
+import { GateAjeno } from '@/components/gate-ajeno';
 import { GateRoto } from '@/components/gate-roto';
 import { TechoOficio, VeloBarraEstadoOficio } from '@/components/techo-oficio';
 
@@ -82,8 +83,11 @@ export default function Negocio() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   // S75-B: la pantalla NEGOCIO cierra la ausencia del tab también ante
-  // deep-link — el tab se oculta del bar (layout) y la ruta rebota acá
-  // (inerte hasta la puerta; el gate de ESCRITURA es del server, D-513).
+  // deep-link — el tab se oculta del bar (layout) y la ruta responde acá
+  // (el gate de ESCRITURA es del server, D-513).
+  // ⭐ S87-C — ACÁ DECÍA «inerte hasta la puerta». La puerta abrió en S75:
+  // este gate CORRE de verdad para las cinco personas de D-651. Y desde
+  // esta sesión ya no expulsa mudo (§3 de la lámina).
   const { gate, reintentarGate } = useGateGestor();
   const { theme } = useTheme();
   const { t, idioma } = useTraduccion();
@@ -243,8 +247,15 @@ export default function Negocio() {
             precio: `$${Math.min(...serviciosVet.map((s) => s.precio)).toFixed(2)}`,
           }));
 
-  // Ley 23: al no-gestor confirmado NO se le ofrece NEGOCIO (ausencia).
-  if (gate === 'denegado') return <Redirect href="/(tabs)" />;
+  /* ⭐ S87-C (LÁMINA §3) — EL REBOTE MUDO MUERE. Acá decía
+     `<Redirect href="/(tabs)" />`: al no-gestor que llegaba por deep link
+     lo mandaba a Hoy SIN UNA PALABRA, y §3 lo prohíbe con literal
+     («un rebote silencioso a Hoy deja a la persona creyendo que tocó mal»).
+     ⚠️ La AUSENCIA de Ley 23 sigue intacta y no se confunde con esto: el
+     tab NO se ofrece en la barra —eso es §2, y ahí no hay nada que
+     explicar—. Esto es la otra mitad: cuando alguien YA preguntó por una
+     ruta concreta, se le contesta. */
+  if (gate === 'denegado') return <GateAjeno />;
   // S79-B: datos del gate CONTRADICTORIOS (rol=false + titular=null) —
   // jamás expulsión muda: la superficie habla y reintenta (el blanco del
   // gate del founder nacía acá).

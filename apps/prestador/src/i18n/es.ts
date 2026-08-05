@@ -2506,6 +2506,16 @@ export const prestadorEs = {
     reintentar: 'Reintentar',
     volver: 'Volver',
   },
+  // S87-C (LÁMINA BARRA DE TRES §3) · LA PUERTA QUE HABLA — el no-gestor que
+  // llega a una ruta de gestión por deep link. El TÍTULO es el literal
+  // FIRMADO por el founder en la lámina; no se adorna ni se le agrega
+  // detalle: la frase ya dice de quién es la sección, y una explicación
+  // extra convertiría una respuesta en una disculpa. SIN reintento (ver
+  // components/gate-ajeno.tsx) · LOTE S87, GATE PENDIENTE
+  gateAjeno: {
+    titulo: 'Esta sección es de quien administra el negocio.',
+    volver: 'Volver',
+  },
   // S79-B (T3-B3) · LA SALA DE ESPERA — el marco del pendiente (la voz
   // del encabezado se REUSA de `bienvenida`, aprobada) · LOTE S79, GATE PENDIENTE
   salaEspera: {

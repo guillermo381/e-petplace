@@ -2088,6 +2088,11 @@ export const prestadorEn = {
     reintentar: 'Try again',
     volver: 'Go back',
   },
+  // S87-C (LÁMINA BARRA DE TRES §3) · the door that speaks · LOTE S87
+  gateAjeno: {
+    titulo: 'This section belongs to whoever manages the business.',
+    volver: 'Go back',
+  },
   // S79-B (T3-B3) · the waiting room — the pending provider's frame · LOTE S79
   salaEspera: {
     marco: 'Your space is under review. Meanwhile, you can leave everything ready on your side.',
