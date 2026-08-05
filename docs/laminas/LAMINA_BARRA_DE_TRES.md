@@ -187,6 +187,24 @@ traen. Typechecks `api`/`cliente`/`prestador` verdes.
 
 ---
 
+## 4ter. ENMIENDA S88 — EL HOME SE DEFINE POR ROL *(letra founder, gate del admin)*
+
+**Hallazgo del gate:** el admin **cae en la pantalla de recepción** — el desvío
+del home lo trata como mostrador.
+
+> **La letra:** **el home se define POR ROL.**
+> · **dueño y ADMINISTRADOR ven lo mismo** — el HOY del gestor.
+> · **recepción ve la consolidada, con su verbo: ASIGNAR.**
+
+*El admin no es un mostrador con más permisos: es el dueño menos una cosa
+(crear admins). Mandarlo a la pantalla de recepción no es un desvío mal
+configurado — es el producto diciéndole quién cree que es.*
+
+**⚠️ Y su motor NO EXISTE todavía: ver [[D-660]]** — el rol `administrador`
+tiene lectura perfecta y **escritura cero**. *Mandarlo al HOY del gestor sin
+curar D-660 le muestra una casa donde no puede tocar nada.* **Las dos van en el
+mismo lote.**
+
 ## 5bis. LÁMINAS HERMANAS
 
 - **`LAMINA_MOSTRADOR_ORDEN.md`** — el orden de la pantalla del mostrador

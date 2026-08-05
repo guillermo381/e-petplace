@@ -7241,3 +7241,84 @@ sistema le dice que es corta, ella prueba otra… y el código ya no existe.*
 
 **Origen: S88 (gate del reset, prueba real del founder) + medición A del literal
 de GoTrue.**
+
+---
+
+#### D-660 — 🔴 EL ROL `administrador` NO PUEDE ESCRIBIR NADA DEL NEGOCIO — la letra firmada no tiene motor
+
+**Censo con dedos pedido por el founder (S88), sobre el primer admin real.**
+La letra de S74 dice **«administrador = dueño menos crear admins»**. **Medido:
+no puede escribir NADA.**
+
+### EL CENSO, con su discriminador
+
+**⚠️ La primera corrida dio TODO VERDE y era falsa.** `+s88admin` es admin de
+**PLATAFORMA** (`admin_users`) **y** administrador de **negocio** a la vez, y
+las policies dicen `user_id = auth.uid() OR is_admin()` — *medí el poder de
+`is_admin()`, no el del rol.* **Re-corrido apagando la pata de plataforma:**
+
+| superficie | con `is_admin()` | **administrador PURO** |
+|---|---|---|
+| `prestador_servicios` | 9 filas | **0 filas** |
+| `prestador_horarios` | 21 filas | **0 filas** |
+| identidad (`prestadores`) | 1 fila | **0 filas** |
+| vitrina (`expone_personas`) | 1 fila | **0 filas** |
+| `cuentas_comerciales` | 1 fila | **0 filas** |
+| `crear_empleado_directo` | pasa | **pasa — ver abajo** |
+| `dar_de_baja_empleado` | pasa | rebota |
+
+> ### **LA LECTURA ES PERFECTA Y LA ESCRITURA ES CERO.**
+> El admin **ve** el equipo (7), los servicios (9), los horarios (21), el
+> negocio, la cuenta y las invitaciones (10) — **y no puede tocar una sola
+> fila.** *No es una puerta cerrada: son todas.*
+
+### ⚠️ DOS TRAMPAS DE MEDICIÓN, y las dos me mordieron
+
+1. **`UPDATE` bajo RLS que no matchea NO FALLA: afecta CERO.** La primera
+   pasada leyó «PASA» donde había 0 filas. **Se cuenta `ROW_COUNT`, jamás la
+   ausencia de excepción.** *Es la clase D-654 en el instrumento de medir.*
+2. **Una cuenta que es dos cosas a la vez no discrimina** — y yo mismo lo había
+   advertido al sembrarla. **El censo válido apaga la otra pata.**
+
+### `crear_empleado_directo` — el caso que INVIERTE el diagnóstico del founder
+
+**Pasa el gate, y por eso hay que mirarlo dos veces.** Su literal:
+
+```sql
+IF NOT EXISTS (SELECT 1 FROM prestadores
+               WHERE id = p_prestador_id AND user_id = v_dueño_user_id) THEN
+  RETURN jsonb_build_object('ok', false, 'mensaje', 'No sos dueño de este prestador');
+END IF;
+```
+
+**Gatea por titularidad — y NO LEVANTA EXCEPCIÓN: devuelve `{ok:false}`.**
+⇒ mi `PERFORM` no rebotó *porque el rechazo no es un rebote*. **Es la clase
+D-511 exacta:** un RPC que devuelve el fallo como dato y un caller que solo
+mira excepciones **lee ÉXITO sobre un rechazo**.
+
+> **⇒ El founder tenía razón y la causa es peor de lo que parecía:** el admin
+> no puede crear empleados **y el motor lo dice de una forma que un caller
+> descuidado no oye.** *Además el mensaje tutea mal y dice «dueño» donde la
+> letra ya tiene tres roles.*
+
+### EL PATRÓN, que es lo que trasciende
+
+**Todos los gates del camino de gestión se escribieron cuando «prestador =
+titular» era verdad.** Ninguno vio nunca un admin: **es la premisa caducada de
+D-651, un piso más abajo — en el motor y no en la superficie.**
+
+### LA CURA, ordenada por lote (no al pasar)
+
+Un helper único —`user_gestiona_prestador(prestador)` = titular **OR**
+`empleado_tiene_rol(prestador,['administrador'])`— y las policies/RPC lo
+consultan **en vez de comparar `user_id` a mano**. *Curar sitio por sitio
+garantiza olvidar uno; y el que se olvide no va a fallar: va a dar 0 filas en
+silencio.*
+
+> **☠️ EL LÍMITE INTOCABLE, escrito:** **crear y quitar administradores es del
+> TITULAR.** Es lo único que el helper NO debe abrir (letra S74).
+> **☠️ DISPARO:** el lote de roles. **D-652 no cierra hasta que esto se cure**
+> (enmienda del founder: la rama corrió con el primer admin real el 5-ago; su
+> cierre queda condicionado a este censo y sus curas).
+
+**Origen: S88 (gate del admin del founder + censo con dedos de A).**
