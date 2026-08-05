@@ -42,7 +42,9 @@ import {
   obtenerCatalogoVacunas,
   obtenerCatalogoVeterinaria,
   obtenerDetalleMascotaPrestador,
+  crearCitaNegocio,
   obtenerEmpleadosCuenta,
+  obtenerIniciosVet,
   obtenerMiPrestador,
   obtenerMundoVeterinariaPropio,
   puedoAtenderClinico,
@@ -62,10 +64,21 @@ import { useTraduccion } from '@/i18n';
 
 type ServicioActivo = { codigo: string; nombre: string; precio: number };
 
+/* 🔴 QUINTA COPIA del día corto — el HOY ya declaró que su lugar es
+   `packages/i18n` "con el TERCER consumidor" y la condición sigue sin
+   cobrarse (D-645). No lo subo: i18n no es territorio de C en S86. */
+function diaCortoDe(iso: string, idioma: string): string {
+  const [a, m, d] = iso.slice(0, 10).split('-').map(Number);
+  if (!a || !m || !d) return iso.slice(8, 10);
+  return new Intl.DateTimeFormat(idioma === 'es' ? 'es' : 'en', { weekday: 'short' })
+    .format(new Date(a, m - 1, d))
+    .replace('.', '');
+}
+
 export default function AtencionMostrador() {
   const router = useRouter();
   const { theme } = useTheme();
-  const { t } = useTraduccion();
+  const { t, idioma } = useTraduccion();
   const { mostrar } = useAviso();
   const insets = useSafeAreaInsets();
   const { mascotaId = '', nombre = '' } = useLocalSearchParams<{ mascotaId?: string; nombre?: string }>();
@@ -121,6 +134,32 @@ export default function AtencionMostrador() {
   const A_LA_PIZARRA = '__pizarra__';
   const [personas, setPersonas] = useState<EmpleadoCuenta[] | null>(null);
   const [tratante, setTratante] = useState<string | undefined>(undefined);
+
+  /* ⭐ S86-C · ① LOS DOS VERBOS, HONESTOS AL MOTOR (lámina firmada).
+     «Atender ahora» REGISTRA un hecho (`registrar_atencion_mostrador`).
+     «Agendar» RESERVA capacidad con cupo y grilla (`crear_cita_negocio`).
+
+     ⚠️ POR QUÉ VIVEN EN LA MISMA PANTALLA Y NO EN DOS: acá ya están la
+     mascota, el servicio, el precio y el tratante — los CUATRO son
+     comunes. Agendar solo AGREGA fecha y hora. Partirlo en dos pantallas
+     habría duplicado esos cuatro y, con ellos, la oportunidad de que se
+     separen.
+     ⚠️ Y LA FRONTERA DE ① QUEDA ESTRUCTURAL, no de disciplina: la RPC se
+     elige POR EL VERBO, así que **la cita futura no tiene por dónde
+     viajar por el registro**. El guard `el_mostrador_registra_no_reserva`
+     existe y ahora tiene voz, pero la superficie hace imposible llegar
+     ahí — que es lo que la firma pide: *hacer imposible, no confiar en
+     el rebote*. */
+  const [verbo, setVerbo] = useState<'ahora' | 'agendar'>('ahora');
+  const [fecha, setFecha] = useState<string | undefined>(undefined);
+  const [hora, setHora] = useState<string | undefined>(undefined);
+  /* `null` = la grilla NO SE PUDO LEER (D-653: el acceso a la mascota
+     puede caducar entre que se la encuentra y que se la agenda). Es
+     DISTINTO de `[]` = «ese día no tiene horas libres», y por eso son
+     dos estados y no uno: una grilla vacía por caducidad se lee como
+     «no hay horarios» y manda a probar otro día para siempre. */
+  const [horas, setHoras] = useState<string[] | null>(null);
+  const [cargandoHoras, setCargandoHoras] = useState(false);
 
   useEffect(() => {
     let vigente = true;
@@ -194,6 +233,40 @@ export default function AtencionMostrador() {
     if (s) setPrecio(String(s.precio));
   }
 
+  /* Los DÍAS que ofrece «Agendar»: hoy + 13. Fechas LOCALES por partes
+     literales — jamás `new Date(iso)` ni `toISOString` (D-312). */
+  const dias = useMemo(() => {
+    const f = new Intl.DateTimeFormat('en-CA');
+    const hoy = f.format(new Date());
+    const [a, m, d] = hoy.split('-').map(Number);
+    return Array.from({ length: 14 }, (_, i) =>
+      f.format(new Date(a ?? 0, (m ?? 1) - 1, (d ?? 1) + i)),
+    );
+  }, []);
+
+  /* La grilla se relee cuando cambia el DÍA o el SERVICIO — la duración
+     del servicio decide qué inicios entran, así que una hora elegida
+     antes de cambiar de servicio puede dejar de existir: se limpia. */
+  useEffect(() => {
+    if (verbo !== 'agendar' || fecha === undefined || servicioCodigo === undefined) {
+      setHoras(null);
+      return;
+    }
+    let vigente = true;
+    setCargandoHoras(true);
+    setHora(undefined);
+    void obtenerIniciosVet({ fecha, tipo_servicio: servicioCodigo, mascota_id: mascotaId }).then((r) => {
+      if (!vigente) return;
+      setCargandoHoras(false);
+      // ⚠️ D-653: el fallo NO degrada a lista vacía. `null` es «no se
+      // pudo» y tiene su propia voz abajo.
+      setHoras(r.ok ? r.data : null);
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [verbo, fecha, servicioCodigo, mascotaId]);
+
   const precioNum = Number(precio.replace(',', '.'));
   /* S86-C ② — la elección de tratante se OFRECE solo si hay a quién
      elegir. Sin personas legibles no se exige (la ventanilla no se
@@ -207,6 +280,9 @@ export default function AtencionMostrador() {
     // ⚠️ La elección es OBLIGATORIA cuando se ofrece: así «sin tratante»
     // deja de ser el default silencioso y pasa a ser un toque deliberado.
     (!ofreceTratante || tratante !== undefined) &&
+    // Agendar exige día Y hora de la grilla real (Ley 23: la puerta no
+    // ofrece lo que va a rechazar).
+    (verbo === 'ahora' || (fecha !== undefined && hora !== undefined)) &&
     !ocupado;
 
   async function registrar() {
@@ -217,6 +293,54 @@ export default function AtencionMostrador() {
       return;
     }
     setOcupado(true);
+
+    /* ⭐ ① LA BIFURCACIÓN DE LOS DOS VERBOS. `crear_cita_negocio` para lo
+       futuro, `registrar_atencion_mostrador` para el hecho de ahora — y
+       nunca al revés. */
+    if (verbo === 'agendar' && fecha !== undefined && hora !== undefined) {
+      const ra = await crearCitaNegocio({
+        prestadorId,
+        mascotaId,
+        tipoServicio: servicioCodigo,
+        fecha,
+        hora,
+        // «A la pizarra» = sin empleado, igual que en el registro. Es el
+        // camino que dispara el cupo (`sin_quien_la_tome`).
+        empleadoId: tratante === A_LA_PIZARRA ? null : tratante,
+        precio: precioNum,
+      });
+      setOcupado(false);
+      if (!ra.ok) {
+        /* ⚠️ SLOT_OCUPADO Y SIN_QUIEN_LA_TOME SE DICEN DISTINTO — es la
+           distinción que el motor declara y que aplanarla rompe:
+           «esa hora ya no está» manda a MOVER LA HORA; «no queda nadie
+           que pueda tomarla» es un problema DE GENTE, y mover la hora no
+           lo arregla. Colapsarlas deja al mostrador probando horarios
+           para siempre contra un problema de agenda del equipo. */
+        mostrar({
+          variante: 'error',
+          texto:
+            ra.codigo === 'sin_quien_la_tome'
+              ? t('atencionMostrador.sinQuienLaTome')
+              : ra.codigo === 'slot_ocupado'
+                ? t('atencionMostrador.slotOcupado')
+                : t('atencionMostrador.noSePudoAgendar'),
+        });
+        return;
+      }
+      /* La cita futura NO entra a la fase de cobro: no hubo atención, y
+         cobrar algo que todavía no pasó es la palanca que el motor cierra
+         con su gate temporal. Se avisa y se vuelve. */
+      mostrar({
+        variante: 'exito',
+        texto: ra.data.aLaPizarra
+          ? t('atencionMostrador.agendadaPizarra')
+          : t('atencionMostrador.agendada'),
+      });
+      router.back();
+      return;
+    }
+
     const r = await registrarAtencionMostrador({
       prestadorId,
       mascotaId,
@@ -355,6 +479,30 @@ export default function AtencionMostrador() {
             />
           ) : (
             <>
+              {/* ⭐ ① LOS DOS VERBOS — arriba de todo porque cambian lo que
+                  significa el resto del formulario: el mismo servicio y el
+                  mismo precio son un HECHO o una RESERVA según cuál esté
+                  elegido. */}
+              <SelectorSegmentado
+                etiqueta={t('atencionMostrador.verboLabel')}
+                segmentos={[
+                  { codigo: 'ahora', etiqueta: t('atencionMostrador.verboAhora') },
+                  { codigo: 'agendar', etiqueta: t('atencionMostrador.verboAgendar') },
+                ]}
+                activo={verbo}
+                /* `trabajo="eleccion"` y no el default `'vista'`: esto NO
+                   cambia de vista, ELIGE QUÉ SE VA A HACER. Y no es
+                   cosmético — cambia la semántica de accesibilidad de
+                   tablist/tab a radiogroup/radio, que es lo que un lector
+                   de pantalla necesita anunciar acá. */
+                proposito="eleccion"
+                onCambio={(v: string) => setVerbo(v === 'agendar' ? 'agendar' : 'ahora')}
+              />
+              <Texto variante="apoyo">
+                {verbo === 'ahora'
+                  ? t('atencionMostrador.verboAhoraDetalle')
+                  : t('atencionMostrador.verboAgendarDetalle')}
+              </Texto>
               {servicios !== null && (
                 <SelectorOpcion
                   etiqueta={t('atencionMostrador.servicioLabel')}
@@ -389,6 +537,53 @@ export default function AtencionMostrador() {
                   eligió: la cita va a la pizarra y la pantalla lo avisa. */}
               {!ofreceTratante && (
                 <Texto variante="apoyo">{t('atencionMostrador.sinPersonas')}</Texto>
+              )}
+
+              {/* ⭐ AGENDAR · el DÍA y la HORA. La grilla sale de inicios
+                  REALES (`obtenerIniciosVet`) — la puerta no ofrece lo que
+                  va a rechazar (Ley 23). */}
+              {verbo === 'agendar' && (
+                <>
+                  <SelectorOpcion
+                    etiqueta={t('atencionMostrador.diaLabel')}
+                    disposicion="tira"
+                    opciones={dias.map((d) => ({
+                      codigo: d,
+                      etiqueta: `${diaCortoDe(d, idioma)} ${d.slice(8, 10)}`,
+                    }))}
+                    seleccionada={fecha}
+                    onSelect={setFecha}
+                  />
+                  {fecha !== undefined && servicioCodigo !== undefined && (
+                    <>
+                      {cargandoHoras && <Texto variante="apoyo">{t('atencionMostrador.buscandoHoras')}</Texto>}
+                      {/* ⚠️ D-653 — LOS TRES ESTADOS NO SE COLAPSAN:
+                          · `null` = NO SE PUDO LEER (el acceso a la
+                            mascota puede caducar entre encontrarla y
+                            agendarla). **Se DICE.** Mostrar una grilla
+                            vacía acá se leería como «no hay horarios» y
+                            mandaría a probar otro día para siempre,
+                            contra un problema que no es de agenda.
+                          · `[]` = ese día no tiene inicios libres.
+                          · con horas = la grilla. */}
+                      {!cargandoHoras && horas === null && (
+                        <Texto variante="apoyo">{t('atencionMostrador.horasNoSePudo')}</Texto>
+                      )}
+                      {!cargandoHoras && horas !== null && horas.length === 0 && (
+                        <Texto variante="apoyo">{t('atencionMostrador.sinHoras')}</Texto>
+                      )}
+                      {!cargandoHoras && horas !== null && horas.length > 0 && (
+                        <SelectorOpcion
+                          etiqueta={t('atencionMostrador.horaLabel')}
+                          disposicion="grilla"
+                          opciones={horas.map((h) => ({ codigo: h, etiqueta: h }))}
+                          seleccionada={hora}
+                          onSelect={setHora}
+                        />
+                      )}
+                    </>
+                  )}
+                </>
               )}
               <Campo
                 label={t('atencionMostrador.precioLabel')}
