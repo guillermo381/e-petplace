@@ -158,6 +158,23 @@ export function evaluarPremisa(premisa, { correr, leer }) {
   const { sql, medir } = premisa.inerteMientras;
   let n, detalle = null;
 
+  // ── EL ALCANCE SE MIDE ANTES QUE NADA (orden de mesa, S88).
+  //    Y si NO SE PUEDE MEDIR, la premisa entera sale «sin-medir» — no es
+  //    exceso de celo: si no puedo decir cuántas filas dejé afuera, el
+  //    número que reporte es un número que no puedo defender, y ése es
+  //    exactamente el que alguien va a copiar al acta.
+  let excluidas = null;
+  if (premisa.alcance?.sql) {
+    try {
+      excluidas = correr(premisa.alcance.sql)?.[0]?.n;
+    } catch (e) {
+      return { estado: 'sin-medir', porque: `no se pudo medir el ALCANCE: ${String(e.message ?? e).slice(0, 140)}` };
+    }
+    if (typeof excluidas !== 'number')
+      return { estado: 'sin-medir', porque: 'la consulta de ALCANCE no devolvió una columna «n» numérica' };
+  }
+  const con = (r) => ({ ...r, excluidas });
+
   // DOS FUENTES, UN INVARIANTE (el porqué, en el header del registro):
   // `sql` mide el MOTOR · `medir` mide EL OBJETO. Las dos devuelven un
   // `n`, y en las dos `inerte ⟺ n === 0`.
@@ -171,7 +188,7 @@ export function evaluarPremisa(premisa, { correr, leer }) {
     }
     if (typeof n !== 'number')
       return { estado: 'sin-medir', porque: `«medir» no devolvió un «n» numérico (devolvió ${JSON.stringify(n)?.slice(0, 120)})` };
-    return n === 0 ? { estado: 'inerte', n } : { estado: 'caducada', n, detalle };
+    return n === 0 ? con({ estado: 'inerte', n }) : con({ estado: 'caducada', n, detalle });
   }
 
   let filas;
@@ -181,11 +198,11 @@ export function evaluarPremisa(premisa, { correr, leer }) {
   n = filas?.[0]?.n;
   if (typeof n !== 'number')
     return { estado: 'sin-medir', porque: `la consulta no devolvió una columna «n» numérica (devolvió ${JSON.stringify(filas)?.slice(0, 120)})` };
-  if (n === 0) return { estado: 'inerte', n };
+  if (n === 0) return con({ estado: 'inerte', n });
   if (premisa.inerteMientras.detalle) {
     try { detalle = correr(premisa.inerteMientras.detalle); } catch { detalle = null; }
   }
-  return { estado: 'caducada', n, detalle };
+  return con({ estado: 'caducada', n, detalle });
 }
 
 /* ── LA AUTO-PRUEBA (L-192 · L-199) ────────────────────────────────────
@@ -241,6 +258,39 @@ function autoPrueba() {
   debeFallar('③bis·medir lanza → sin-medir', conMedir(() => { throw new Error('no pude leer el canon'); }).estado === 'sin-medir');
   debeFallar('③bis·medir sin n → sin-medir', conMedir(() => ({ detalle: [] })).estado === 'sin-medir');
   debeFallar('③bis·contra-caso: n=0 es inerte', conMedir(() => ({ n: 0 })).estado === 'inerte');
+
+  // ③ter EL ALCANCE (S88): si no se puede medir QUÉ SE DEJÓ AFUERA, el
+  //      número reportado no se puede defender ⇒ sin-medir, jamás un
+  //      verde ni un rojo con un alcance inventado.
+  //     ⚠️ EL FIXTURE DISCRIMINA POR CONSULTA, y hay que hacerlo así: si
+  //     el `correr` fallara para TODAS, la premisa saldría «sin-medir»
+  //     por el camino del `sql` y el fixture pasaría verde sin haber
+  //     probado NADA del alcance. Acá solo revienta la del alcance, y
+  //     la principal contesta bien — así el rojo solo puede venir del
+  //     brazo que se está probando.
+  const conAlcance = {
+    ...premisaFalsa,
+    inerteMientras: { sql: 'SQL_PRINCIPAL', detalle: null },
+    alcance: { texto: 'fixture', sql: 'SQL_ALCANCE' },
+  };
+  const salvoAlcance = (respuestaAlcance) => (q) => {
+    if (q === 'SQL_ALCANCE') return respuestaAlcance();
+    return [{ n: 0 }]; // la principal SIEMPRE contesta bien
+  };
+  debeFallar(
+    '③ter·alcance no medible → sin-medir',
+    evaluarPremisa(conAlcance, { correr: salvoAlcance(() => { throw new Error('sin red'); }), leer: () => '' }).estado === 'sin-medir',
+  );
+  debeFallar(
+    '③ter·alcance sin n → sin-medir',
+    evaluarPremisa(conAlcance, { correr: salvoAlcance(() => [{ otra: 1 }]), leer: () => '' }).estado === 'sin-medir',
+  );
+  // contra-caso: con alcance medible, la premisa se evalúa normal Y lo
+  // reporta (si esto fallara, el alcance sería un freno permanente)
+  {
+    const r = evaluarPremisa(conAlcance, { correr: salvoAlcance(() => [{ n: 2 }]), leer: () => '' });
+    debeFallar('③ter·contra-caso: alcance medido no frena', r.estado === 'inerte' && r.excluidas === 2);
+  }
 
   return rotos;
 }
@@ -302,8 +352,14 @@ if (SIN_MOTOR) {
   for (const p of PREMISAS) {
     const r = evaluarPremisa(p, { correr: (sql) => dbQuery(sql), leer });
     const cabecera = `${p.id} (${p.ficha}) «${p.titulo}»`;
+    // EL ALCANCE SE IMPRIME EN VERDE Y EN ROJO. Un guard declara qué dejó
+    // afuera SIEMPRE — si solo lo dijera al fallar, el verde seguiría
+    // siendo un número sin defensa.
+    const lineaAlcance = p.alcance
+      ? `\n      alcance · ${p.alcance.texto} — HOY excluye ${r.excluidas} fila(s)`
+      : '';
     if (r.estado === 'inerte') {
-      console.log(`✓ ③ ${cabecera} — SIGUE INERTE (${p.inerteMientras.explicacion}: 0)`);
+      console.log(`✓ ③ ${cabecera} — SIGUE INERTE (${p.inerteMientras.explicacion}: 0)${lineaAlcance}`);
     } else if (r.estado === 'sin-medir') {
       rojo(
         `③ ${cabecera} — NO SE PUDO MEDIR: ${r.porque}\n` +
@@ -313,7 +369,7 @@ if (SIN_MOTOR) {
       );
     } else {
       rojo(
-        `③ ${cabecera} — LA PREMISA CADUCÓ: ${r.n} (${p.inerteMientras.explicacion})\n` +
+        `③ ${cabecera} — LA PREMISA CADUCÓ: ${r.n} (${p.inerteMientras.explicacion})${lineaAlcance}\n` +
           `      QUÉ SE VOLVIÓ ALCANZABLE: ${p.siCaduca}` +
           (r.detalle ? `\n      dónde: ${r.detalle.map((d) => JSON.stringify(d)).join('  ')}` : '') +
           `\n      LOS SITIOS QUE LO DECLARABAN IMPOSIBLE:\n` +

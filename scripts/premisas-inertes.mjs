@@ -111,9 +111,37 @@ export const PREMISAS = [
         consecuencia: 'la voz «Tu acceso al día a día todavía no está disponible» se escribió para el empleado que espera la puerta — y la puerta abrió: HALLAZGO, no veredicto (¿la sigue viendo alguien?)',
       },
     ],
+    /** EL ALCANCE, QUE SE IMPRIME SIEMPRE — verde o rojo (orden de mesa,
+     *  S88). Un guard que no declara qué dejó afuera reporta un número
+     *  que no puede defender.
+     *
+     *  QUÉ LO PARIÓ, y es un caso limpio: la corrida del 5-ago dio **7**
+     *  donde el canon cita «5 vivas», y el reporte lo trajo como posible
+     *  deriva orgánica. No lo era: **A sembró dos cuentas de prueba en
+     *  S87** —`+s87prof` y `+s87recep`, las dos en Aurora, las dos del
+     *  5-ago— y su acta ya declaraba *«todo recuento de acá en más las
+     *  excluye o miente»*. **El instrumento vio bien y el número decía de
+     *  más.** ⇒ se excluyen, y la exclusión SE DICE.
+     *
+     *  Y por qué el conteo de excluidas se MIDE en vez de escribirse:
+     *  «excluye las de prueba» envejece igual que cualquier prosa. Si
+     *  mañana hay tres, la línea lo dice sola. */
+    alcance: {
+      texto: 'excluye las cuentas de prueba cuyo correo lleva «+s87» (sembradas por A en S87, con su regla declarada en acta)',
+      sql: `
+        select count(distinct pe.user_id)::int as n
+          from prestador_empleados pe
+          join prestadores p on p.id = pe.prestador_id
+          join auth.users u on u.id = pe.user_id
+         where pe.activo
+           and p.estado = 'activo'
+           and not exists (select 1 from prestadores t where t.user_id = pe.user_id)
+           and u.email like '%+s87%'
+      `,
+    },
     inerteMientras: {
       explicacion:
-        'CERO personas llegan al portal por vínculo activo — es decir, todo el que entra es titular de algún negocio',
+        'CERO personas REALES llegan al portal por vínculo activo — es decir, todo el que entra es titular de algún negocio',
       /** ESPEJO DE `obtenerMiPrestador` (packages/api, R1 desde S75), leído
        *  al escribir esta consulta y no de memoria:
        *    (1) `prestadores.user_id = uid`            → entra como TITULAR
@@ -128,9 +156,11 @@ export const PREMISAS = [
         select count(distinct pe.user_id)::int as n
           from prestador_empleados pe
           join prestadores p on p.id = pe.prestador_id
+          join auth.users u on u.id = pe.user_id
          where pe.activo
            and p.estado = 'activo'
            and not exists (select 1 from prestadores t where t.user_id = pe.user_id)
+           and u.email not like '%+s87%'   -- alcance declarado arriba
       `,
       /** Qué NOMBRAR cuando esté en rojo. Sin datos personales a propósito:
        *  el guard tiene que decir QUÉ se volvió alcanzable, no quién es. */
@@ -141,9 +171,11 @@ export const PREMISAS = [
                                where s.empleado_id = pe.id) > 0 then 1 else 0 end)::int as con_chips
           from prestador_empleados pe
           join prestadores p on p.id = pe.prestador_id
+          join auth.users u on u.id = pe.user_id
          where pe.activo
            and p.estado = 'activo'
            and not exists (select 1 from prestadores t where t.user_id = pe.user_id)
+           and u.email not like '%+s87%'   -- mismo alcance que la consulta de arriba
          group by 1 order by 1
       `,
     },
