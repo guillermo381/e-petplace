@@ -296,6 +296,11 @@ const CODIGOS_ATENCION_MOSTRADOR = [
   'servicio_no_activo',
   'precio_invalido',
   'country_invalido',
+  // S86-A · LA FRONTERA, y le faltaba su código: sin esto colapsaba en
+  // `error_desconocido` y la superficie no podía DECIR la regla que el
+  // motor está aplicando. El mostrador REGISTRA lo que ya pasó; no
+  // reserva a futuro (VETERINARIA §7, walk-in v1).
+  'el_mostrador_registra_no_reserva',
   'datos_inconsistentes',
 ] as const;
 export type CodigoAtencionMostrador = (typeof CODIGOS_ATENCION_MOSTRADOR)[number];
@@ -310,6 +315,12 @@ const MENSAJES_ATENCION: Record<CodigoAtencionMostrador | 'error_desconocido', s
   servicio_no_activo: 'Ese servicio no está activo en tu consultorio.',
   precio_invalido: 'El precio no es válido.',
   country_invalido: 'El país no es válido.',
+  // S86-A · LA FRONTERA, dicha: el mostrador REGISTRA lo que ya pasó, no
+  // reserva a futuro (VETERINARIA §7, walk-in v1). Sin código propio
+  // colapsaba en `error_desconocido` y la superficie no podía decir la
+  // regla que el motor le está aplicando.
+  el_mostrador_registra_no_reserva:
+    'El mostrador registra atenciones que ya pasaron. Para agendar a futuro, usá la agenda.',
   datos_inconsistentes: 'La respuesta del servidor no tiene la forma esperada.',
   // Último recurso — solo lo verdaderamente desconocido cae acá (Ley 13: la
   // lista de arriba cubre CADA código que la RPC levanta).
@@ -321,6 +332,7 @@ function falloAtencion(raw: string): ResultadoWrapper<string, CodigoAtencionMost
   if (raw.startsWith('auth_required') || raw.startsWith('no_access_to_prestador')) c = 'acceso_denegado';
   else if (raw.startsWith('prestador_sin_cuenta')) c = 'prestador_sin_cuenta';
   else if (raw.startsWith('sin_acceso_mascota')) c = 'sin_acceso_mascota';
+  else if (raw.startsWith('el_mostrador_registra_no_reserva')) c = 'el_mostrador_registra_no_reserva';
   else if (raw.startsWith('tipo_no_medico')) c = 'tipo_no_medico';
   else if (raw.startsWith('servicio_no_activo')) c = 'servicio_no_activo';
   else if (raw.startsWith('precio_invalido')) c = 'precio_invalido';

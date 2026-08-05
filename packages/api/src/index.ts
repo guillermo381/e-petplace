@@ -245,6 +245,17 @@ export {
   type CodigoErrorPreferencias,
 } from './wrappers/preferencias';
 export {
+  obtenerPizarra,
+  tomarCita,
+  crearCitaNegocio,
+  type CitaDePizarra,
+  type CitaTomada,
+  type CitaDeNegocioCreada,
+  type CodigoErrorPizarra,
+  type CodigoErrorTomarCita,
+  type CodigoErrorCrearCitaNegocio,
+} from './wrappers/pizarra';
+export {
   obtenerDatosNegocio,
   type DatosNegocio,
   type DatosNegocioSemana,
