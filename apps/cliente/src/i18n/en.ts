@@ -49,7 +49,8 @@ export const clienteEn = {
     emailLabel: 'Email',
     emailPlaceholder: 'e.g. ana@mail.com',
     passwordLabel: 'Password',
-    passwordAyuda: 'At least 6 characters',
+    // S88-D: n = MIN_LARGO_CONTRASENA (single signed rule — see es.ts).
+    passwordAyuda: 'At least {{n}} characters',
     crearMiCuenta: 'Create my account',
     correoConfirmacion: 'We sent you an email to confirm your account.',
   },

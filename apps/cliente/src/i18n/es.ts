@@ -49,7 +49,10 @@ export const clienteEs = {
     emailLabel: 'Email',
     emailPlaceholder: 'ej: ana@correo.com',
     passwordLabel: 'Contraseña',
-    passwordAyuda: 'Al menos 6 caracteres',
+    // S88-D: el largo viene de MIN_LARGO_CONTRASENA (seguridad.ts, la
+    // regla única firmada) — la pantalla lo pasa como {{n}}; un número
+    // escrito acá ya mintió una vez (decía 6 con la regla en 8).
+    passwordAyuda: 'Al menos {{n}} caracteres',
     crearMiCuenta: 'Crear mi cuenta',
     correoConfirmacion: 'Te mandamos un correo para confirmar tu cuenta.',
   },
