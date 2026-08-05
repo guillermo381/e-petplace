@@ -7010,7 +7010,30 @@ del servidor y la lectura de producto).**
 
 ---
 
-#### D-657 — 🔴 EL PLAN SE SIGUE COBRANDO DESPUÉS DEL MEMORIAL, Y EL MOTOR DE AVISOS ESTÁ POR VOLVER ESE COBRO SILENCIOSO
+#### D-657 — ✅ **CURADA (S88, 5-ago-2026)** — el plan deja de cobrarse después del memorial
+
+> **Dirección (c) construida entera** (migración `20260805120000`): **(a)** el
+> trigger `trg_mascotas_memorial_planes` — la transición a memorial cancela las
+> suscripciones de esa mascota, cancela sus citas firmes y **libera lo no
+> consumido** (P14, motivo `liberacion_memorial_clausula_s80_no_rige`) ·
+> **(b)** `cerrar_y_renovar_planes` consulta `estado_vida` y no renueva ·
+> **(b-bis)** `contratar_plan_paseo` tampoco acepta una mascota no activa.
+>
+> **El ANTES, medido antes de curar:** `renovados=1` + **29 citas firmes nuevas
+> agendadas para una mascota fallecida** — peor que esta ficha: no solo cobraba,
+> llenaba la agenda del paseador con paseos que no iban a ocurrir.
+>
+> **El fixture, 4/4** (`2026-08-05-s88a-FIXTURE-d657.sql`): acto → `cancelada`,
+> crédito $96, aviso nacido `descartada_memorial` (el rastro ES el punto — la
+> liberación ocurre, su aviso calla con el mismo respeto que todo lo demás) ·
+> fusible → `vencidos=1` con el motivo de la enmienda · discriminador → mascota
+> activa **renueva** · contratar → `mascota_no_elegible`.
+>
+> **⇒ La precondición del Lote 2 que esta ficha sostenía queda LEVANTADA.**
+
+**El texto original, conservado como historia:**
+
+#### (histórico) D-657 — 🔴 EL PLAN SE SIGUE COBRANDO DESPUÉS DEL MEMORIAL, Y EL MOTOR DE AVISOS ESTÁ POR VOLVER ESE COBRO SILENCIOSO
 
 **Hallazgo de S87-A, y lo destapó una verificación que pidió el founder sobre un
 freno anterior.** *Ninguna sesión lo había cruzado porque hay que mirar dos
