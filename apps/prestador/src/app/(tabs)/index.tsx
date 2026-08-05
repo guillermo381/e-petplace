@@ -227,8 +227,14 @@ function unidadesDelTecho(oficios: {
   if (activos > 1) return { carga: 'citas', vidas: 'mascotas' };
   if (oficios.vet) return { carga: 'consultas', vidas: 'pacientes' };
   if (oficios.adiestramiento) return { carga: 'sesiones', vidas: 'alumnos' };
-  // grooming, o CERO oficios activos: el bloque no se monta sin citas, y
-  // sin oficios tampoco hay citas. 'turnos' es el único resto posible.
+  /* grooming, o CERO oficios activos.
+     ⏪ S86-C: esta nota decía *"el bloque no se monta sin citas, y sin
+     oficios tampoco hay citas"* — **vencida**: desde la cura firmada el
+     bloque SE MONTA SIEMPRE, así que este caso ahora SÍ se alcanza (un
+     negocio recién creado, sin oficios y sin citas, lee «0 turnos»).
+     'turnos' sigue siendo el resto correcto; lo que cambió es que dejó
+     de ser inalcanzable. Se corrige acá y no solo en el acta: un porqué
+     vencido se lee igual que uno vigente (L-198). */
   return { carga: 'turnos', vidas: 'mascotas' };
 }
 
@@ -1320,12 +1326,35 @@ export default function Hoy() {
   /* ── ⭐ S85-C23 · LOS TRES NÚMEROS (§2.4bis) ────────────────────────
      Ver la cabecera de `unidadesDelTecho` para la regla de la unidad.
 
-     ⚠️ REGLA DE EXISTENCIA: sin citas hoy, el bloque NO SE MONTA. Un
-     techo que dijera "0 · $0 · 0" pintaría el día libre como fracaso, y
-     §15b ya lo prohíbe para el prestador (*vacío ≠ negocio muerto*). La
-     forma del día YA dice lo que hay que decir cuando no hay nada. */
+     ⭐ S86-C · EL BLOQUE SIEMPRE SE MONTA — CURA FIRMADA POR EL FOUNDER
+     EN DISPOSITIVO, y es la que cierra una regresión que NO EXISTÍA.
+
+     ⏪ ACÁ DECÍA: *"REGLA DE EXISTENCIA: sin citas hoy, el bloque NO SE
+     MONTA. Un techo que dijera «0 · $0 · 0» pintaría el día libre como
+     fracaso, y §15b ya lo prohíbe (vacío ≠ negocio muerto)."* (S85-C23.)
+
+     **POR QUÉ SE DEROGA, con el síntoma que lo destapó:** con la rueda
+     de días, desmontar el bloque hace **saltar el layout cada vez que se
+     pasa por un día vacío** — la pantalla se reacomoda sola y el founder
+     lo leyó como *"se va el hoy"*. Se buscó una regresión en la Zona 1
+     durante una ronda entera; **el síntoma reportado y el defecto real
+     eran dos pantallas del mismo scroll.** Las tres hipótesis eran
+     falsas porque no había defecto que explicar ahí.
+
+     > **LA LEY QUE LO REEMPLAZA (firma del founder): CERO ES UN DATO,
+     > AUSENCIA ES UN VACÍO.** *«No hubo atenciones» es INFORMACIÓN;
+     > desmontar el bloque la esconde y encima hace saltar el layout.*
+
+     Es la hermana visual de L-197: un FALLO degrada a ausencia, pero un
+     CERO MEDIDO no es una ausencia y no se dibuja como tal. Y §15b sigue
+     intacta —*vacío ≠ negocio muerto*— porque quien dice que el día está
+     libre es la FORMA DEL DÍA, con su voz; el techo solo cuenta.
+     ⚠️ Medido antes de derogar: `duracionCorta(0)` da `"0m"`, no cadena
+     vacía — el techo en cero se lee, no queda en blanco. */
   const techo = ((): [ColumnaTecho, ColumnaTecho, ColumnaTecho] | null => {
-    if (pantalla.estado !== 'listo' || citasHoySin.length === 0) return null;
+    // Solo se omite mientras NO HAY VERDAD (cargando/error): ahí no se
+    // sabe si es cero o si no se pudo leer, y eso sí es una ausencia.
+    if (pantalla.estado !== 'listo') return null;
     const u = unidadesDelTecho(pantalla.oficios);
     const n = citasHoySin.length;
 
@@ -1463,8 +1492,12 @@ export default function Hoy() {
           dato={negocio}
           jornada={textoJornada}
           /* ⭐ S85-C23 — LOS TRES NÚMEROS (§2.4bis), en el slot que el
-             techo ya tenía. `null` = sin citas hoy: el bloque NO EXISTE,
-             y la forma del día sigue diciendo lo que hay que decir. */
+             techo ya tenía.
+             ⏪ S86-C: decía *"`null` = sin citas hoy: el bloque NO
+             EXISTE"*. Vencido — con la cura firmada el bloque se monta
+             SIEMPRE que haya verdad. Hoy `null` significa otra cosa:
+             cargando o error, o sea que **todavía no se sabe si es cero
+             o si no se pudo leer**. Eso sí es una ausencia. */
           pie={techo === null ? undefined : <TresNumeros columnas={techo} />}
           /* S85-C27 — CRUDOS: la pieza compone y el techo pone la regla
              del muro. Esta pantalla solo pasa lo que el wrapper trajo. */
