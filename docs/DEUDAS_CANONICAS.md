@@ -6726,3 +6726,78 @@ distinción que separa la sede (registro 2) de la persona (registro 3).
 > superficie personal nueva). **Si nadie lo pide nunca, la ficha muere sin
 > trabajo** — que es el desenlace correcto. *No se retira construyendo la
 > pantalla por las dudas.*
+
+---
+
+#### D-655 — 🟠 EL PASO ⓪ MIDE QUÉ SE SIRVE; NADIE MIDE QUÉ BAJA — la última milla de los assets
+
+**Nace CERRADA en su incidente y ABIERTA en su clase.** *El caso se resolvió; el
+hueco que lo dejó pasar sigue exactamente donde estaba.*
+
+### EL LITERAL (C, 4-ago-2026)
+
+`DownloadError` al aplicar **`019fcfc1`** — **`0.9846` de progreso, 64 de 65
+assets**, atascado en `d5435ef51f3ec81bff48d5fb18f54470`; segundo modo observado:
+`CheckError`. **Cinco arranques fríos en el emulador**, y después **el aparato
+físico del founder tampoco lo tomó**: **dos aparatos, dos redes**. Mientras tanto
+`verify-ota` daba **VERDE** — sirve lo publicado, build `finished`.
+
+### EL EXPERIMENTO Y SU CIERRE
+
+Re-publish del **mismo lote desde el mismo ancla `9e83b6d`** (S87-A): group
+**`8afe85b3-02a6-4a24-a903-10a0aa6c2201`**, android
+**`019fcffc-8fb8-7ca3-8dcb-6fc4aa96d5c1`**, `Commit 9e83b6d9e4d…` exacto,
+`verify-ota` verde en ① y ②. **El aparato del founder lo aplicó tras forzar
+detención ×2 — confirmado por él.** ⇒ **el incidente cierra.**
+
+### LAS DOS ACOTACIONES, que son lo que impide cantar victoria
+
+1. **Los assets NO se volvieron a subir.** El publish imprimió textual
+   `✔ Uploading assets skipped - no new assets found`: el update nuevo apunta a
+   **los mismos objetos almacenados** que el que fallaba.
+2. **Al menos un asset de ese lote (`iHF0fG8…`) es el MISMO objeto que sirve el
+   lote 1.0.2** que el teléfono del founder corrió sin problema.
+
+> **⇒ Lo que el verde prueba es MENOS de lo que parece.** Si los objetos son los
+> mismos y uno de ellos está compartido con un lote sano, **lo que se curó no fue
+> el contenido**: fue el *registro del update* o el estado del cliente. **La
+> causa raíz no está identificada, y esta ficha existe para no fingir que sí.**
+
+### LA CLASE — y es lo que trasciende al incidente
+
+> ### **EL PASO ⓪ VERIFICA QUE EL UPDATE **SE SIRVA**. NADIE VERIFICA QUE **LLEGUE**.**
+
+`verify-ota` (S86, `METODO_TRES_PISTAS` §3bis) mide lo que el servidor responde a
+quien pregunta como aparato. **No mide que los bytes bajen.** Un OTA con 64 de 65
+assets **no falla el gate: falla el arranque** — y el verde es honesto sobre lo
+que mide y **mudo sobre lo que falta**. *Es la familia de L-192 corrida una capa:
+no es un guard que miente, es un guard cuyo silencio se lee como cobertura.*
+Hermana declarada de **D-649** (no hay forma de forzar que el aparato vaya a
+buscar) — **D-649 es "no puede ir"; ésta es "fue y no pudo traer".**
+
+### UNA SONDA QUE SE PROBÓ Y SE RETIRA (para que nadie la repita)
+
+S87-A bajó por `curl` los **65** assets del manifiesto servido: **65/65 dieron
+`403`**. **No es evidencia de nada.** El control lo desarmó: el asset del lote
+**1.0.2 que el teléfono SÍ corrió** también da `403`.
+
+> **`403` es lo que recibe un `curl`, no lo que recibe un aparato.** *Un rojo
+> creíble que no distingue el caso bueno del malo es el guard decorativo de
+> L-192.* **Lo salvó el control, no el ingenio: se corrió el caso sano ANTES de
+> reportar el enfermo.**
+
+**⇒ Y de ahí sale el requisito del instrumento, no de la intuición: cualquier
+sonda de descarga tiene que pedir COMO CLIENTE —con sus credenciales/firma—, o
+va a dar `403` contra todo y no servir para nada.**
+
+### ADJUDICACIÓN
+
+**El instrumento candidato es de B.** No se construye ahora.
+
+> **☠️ CRITERIO DE DISPARO (firmado por la mesa, S87):** **la próxima vez que un
+> aparato no tome un update con `verify-ota` en verde.** *Hasta entonces la ficha
+> es memoria, no trabajo* — un incidente cerrado con causa raíz desconocida no
+> justifica construir el instrumento, pero el segundo sí lo vuelve obligatorio.
+
+**Origen: S86-C (el incidente) + S87-A (el experimento, el cierre y las dos
+acotaciones).**
