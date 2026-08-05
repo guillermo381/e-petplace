@@ -17998,6 +17998,7 @@ export type Database = {
         Args: { p_canal: string; p_categoria: string; p_user_id: string }
         Returns: boolean
       }
+      prestador_que_gestiono: { Args: never; Returns: string }
       puede_encender_vitrina: { Args: never; Returns: boolean }
       quitar_estado_pelaje_grooming: {
         Args: { p_grooming_id: string; p_momento: string }
@@ -18372,6 +18373,10 @@ export type Database = {
       }
       user_es_familiar_adulto_de_mascota: {
         Args: { p_mascota_id: string }
+        Returns: boolean
+      }
+      user_gestiona_prestador: {
+        Args: { p_prestador_id: string }
         Returns: boolean
       }
       user_has_feature: {
