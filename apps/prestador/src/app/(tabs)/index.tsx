@@ -89,7 +89,7 @@ import {
   type CitaAgendaPaseo,
   type CitaPorCoordinar,
 } from '@epetplace/api';
-import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
+import { diaSemanaCorto, fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 
 import { verificarSesion } from '@/lib/api';
 import { vozCitaVet } from '@/lib/voz-cita-vet';
@@ -311,6 +311,8 @@ function estadoEfectivo(cita: CitaAgendaPaseo): string | null {
 // de un vistazo y el copy vive entero en el riel i18n.
 type FormaDelDia =
   | { clave: 'omitida' }
+  /** S86-C · el día sin citas DICE que no hubo — jamás se calla. */
+  | { clave: 'sinCitas' }
   | { clave: 'quedan'; n: number; hora: string }
   | { clave: 'queda1'; hora: string }
   | { clave: 'quedanSinHora'; n: number }
@@ -380,7 +382,9 @@ function formaDelDia(args: {
   if (esPasado) {
     if (pendientes.length > 0) return { clave: 'pasadoPendientes', n: pendientes.length };
     if (citasHoySin.length > 0) return { clave: 'pasadoCerrado', n: citasHoySin.length };
-    return { clave: 'omitida' };
+    // El pasado vacío TAMBIÉN habla (S86-C, gate): antes se omitía y el
+    // header saltaba igual.
+    return { clave: 'sinCitas' };
   }
 
   if (pendientes.length > 0) {
@@ -401,8 +405,12 @@ function formaDelDia(args: {
   const semana = citasRango.length;
   if (semana > 0) return { clave: 'libreConSemana', n: semana };
 
-  // 0 en todo el rango → la línea se omite. JAMÁS "0 citas" (métrica en cero).
-  return { clave: 'omitida' };
+  /* ⭐ S86-C (gate) · ANTES DEVOLVÍA `omitida` Y EL HEADER SALTABA.
+     Es L-201 en su versión chica: los días con citas dicen «Te quedan 3»
+     o «Día cerrado · 5 atenciones», y el día sin nada **no decía nada**
+     — así que el header cambiaba de alto al pasar la rueda por ahí.
+     «No hubo citas» es INFORMACIÓN, no ausencia: se dice. */
+  return { clave: 'sinCitas' };
 }
 // ═══════════════════════════════════════════════════════════════════════
 
@@ -1015,6 +1023,11 @@ export default function Hoy() {
   // S61-B5 (S63-B: tercer oficio): con ≥2 oficios activos nace el
   // filtro; con uno, el control no existe (cero UI muerta).
   const oficiosActivos = pantalla.estado === 'listo' ? pantalla.oficios : null;
+  /* S86-C · ¿tiene ALGÚN oficio activo? Es la condición de la ventanilla
+     (y la de su menú): sin oficios no hay nada que registrar. */
+  const conAlgunOficio =
+    oficiosActivos !== null &&
+    (oficiosActivos.paseo || oficiosActivos.grooming || oficiosActivos.adiestramiento || oficiosActivos.vet);
   const conFiltro =
     oficiosActivos !== null &&
     [oficiosActivos.paseo, oficiosActivos.grooming, oficiosActivos.adiestramiento, oficiosActivos.vet].filter(Boolean)
@@ -1120,19 +1133,6 @@ export default function Hoy() {
    *  no puede decir con una sola etiqueta. */
   const diaVistaBloqueado =
     diaVista !== null && pantalla.estado === 'listo' && diaBloqueado(diaVista, pantalla.bloqueos);
-  /** El día corto por idioma. **Copiado del cliente**, que ya lo hace en
-   *  sus dos pantallas de reserva (`explorar/paseo` y `explorar/grooming`)
-   *  con esta misma receta — el riel no tiene helper de día CORTO y
-   *  duplicar la forma del vecino es más honesto que inventar una tercera
-   *  (L-175: se lee lo que hay antes de crear).
-   *  ☠️ Su día en `packages/i18n` llega con el TERCER consumidor. */
-  const diaCorto = (iso: string): string => {
-    const [a, m, d] = iso.slice(0, 10).split('-').map(Number);
-    if (!a || !m || !d) return iso.slice(8, 10);
-    return new Intl.DateTimeFormat(idioma === 'es' ? 'es' : 'en', { weekday: 'short' })
-      .format(new Date(a, m - 1, d))
-      .replace('.', '');
-  };
   // el vacío FILTRADO se dice distinto: hay jornada, no de este servicio
   const hoyVacioPorFiltro =
     citasHoy.length === 0 && conFiltro && filtroOficio !== 'todos' && citasHoySin.length > 0;
@@ -1247,7 +1247,9 @@ export default function Hoy() {
                     ? forma.n === 1
                       ? t('agenda.datoPasadoPendiente1')
                       : t('agenda.datoPasadoPendientes', { n: forma.n })
-                    : forma.clave === 'pasadoCerrado'
+                    : forma.clave === 'sinCitas'
+                      ? t('agenda.datoSinCitas')
+                      : forma.clave === 'pasadoCerrado'
                       ? forma.n === 1
                         ? t('agenda.datoPasadoCerrado1')
                         : t('agenda.datoPasadoCerradoN', { n: forma.n })
@@ -1317,7 +1319,7 @@ export default function Hoy() {
         clave: 'handshakes',
         icono: 'familia',
         titulo: a.handshakes === 1 ? t('atencion.handshake1') : t('atencion.handshakeN', { n: a.handshakes }),
-        onPress: () => router.push('/veterinaria/mostrador'),
+        onPress: () => router.push('/mostrador'),
       });
     }
     /* LO VIEJO PRIMERO ya viene del lector (ordena por antigüedad): la fila
@@ -1428,7 +1430,7 @@ export default function Hoy() {
                     : vistaEsHoy || diaVista === null
                       ? t('techo.plataDelDia')
                       : t('techo.plataDelDiaOtro', {
-                          dia: `${diaCorto(diaVista)} ${diaVista.slice(8, 10)}`,
+                          dia: `${diaSemanaCorto(diaVista, idioma)} ${diaVista.slice(8, 10)}`,
                         }),
               };
 
@@ -1586,16 +1588,25 @@ export default function Hoy() {
             Meterla ahí le cambiaría el significado al bloque.
             ⚠️ Regla de existencia: sin nada por tomar NO se monta. Y con
             `null` —no se pudo leer— tampoco: no se afirma que no hay. */}
-        {pantalla.estado === 'listo' && pantalla.pizarra !== null && pantalla.pizarra > 0 && (
+        {pantalla.estado === 'listo' && pantalla.pizarra !== null && (
           <Tarjeta relleno="ninguno">
             <CeldaNavegacion
               icono="caso"
               registro="aa"
               titulo={t('pizarra.entrada')}
+              /* ⭐ S86-C (gate ④): la entrada se monta AUNQUE ESTÉ VACÍA.
+                 Medido: los 7 negocios tienen 0 citas sin tratante, así
+                 que gatear en `> 0` la volvía INALCANZABLE — el founder
+                 no podía ni ver que existe. El vacío se dice acá y la
+                 pantalla lo repite adentro (L-201: cero es un dato).
+                 ⚠️ `null` sigue sin montar: eso NO es cero, es «no se
+                 pudo leer» o «no sos del equipo». */
               detalle={
-                pantalla.pizarra === 1
-                  ? t('pizarra.entradaUna')
-                  : t('pizarra.entradaN', { n: pantalla.pizarra })
+                pantalla.pizarra === 0
+                  ? t('pizarra.entradaVacia')
+                  : pantalla.pizarra === 1
+                    ? t('pizarra.entradaUna')
+                    : t('pizarra.entradaN', { n: pantalla.pizarra })
               }
               onPress={() => router.push('/pizarra')}
             />
@@ -1741,7 +1752,7 @@ export default function Hoy() {
                 // el precedente de la casa, copiado del cliente (dos
                 // consumidores ya lo hacen así): día corto por Intl según
                 // idioma + el número del propio ISO.
-                dia: diaCorto(iso),
+                dia: diaSemanaCorto(iso, idioma),
                 numero: iso.slice(8, 10),
               }))}
               // S86-C: el fallback es HOY (el default de la rueda), jamás
@@ -1763,12 +1774,21 @@ export default function Hoy() {
             en la raíz). El walk-in registra EN EL MOMENTO. Glifo en el CTA:
             diferido (Icono no tiene variante on-cta; iría mal-color sobre
             el relleno teal — declarado). ── */}
-        {pantalla.estado === 'listo' && oficiosActivos?.vet && (
+        {/* ⭐ S86-C (firma del founder) · LA VENTANILLA NO ES CLÍNICA.
+            ⏪ Gateaba en `oficiosActivos?.vet`, y ése era el motivo por el
+            que el founder —que está en Paseos Andrés— no la encontraba:
+            recibir a quien llega, darle de alta y agendarle es operación
+            de NEGOCIO. Nació en veterinaria porque ahí estaba el caso
+            vivo, no porque le perteneciera.
+            Ahora abre con CUALQUIER oficio activo. Sin ninguno no se
+            monta: no habría menú que ofrecer, y una ventanilla sin
+            servicios es una puerta a una pantalla vacía. */}
+        {pantalla.estado === 'listo' && conAlgunOficio && (
           <Boton
             variante="primario"
             bloque
             etiqueta={t('mostrador.registrarAtencion')}
-            onPress={() => router.push('/veterinaria/mostrador')}
+            onPress={() => router.push('/mostrador')}
           />
         )}
 

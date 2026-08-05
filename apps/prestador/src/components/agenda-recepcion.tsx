@@ -339,7 +339,7 @@ export function AgendaRecepcion({
               variante="primario"
               bloque
               etiqueta={t('recepcion.registrarAtencion')}
-              onPress={() => router.push('/veterinaria/mostrador')}
+              onPress={() => router.push('/mostrador')}
             />
 
             {/* ── [3] EL DÍA · Hoy / Adelante ── */}

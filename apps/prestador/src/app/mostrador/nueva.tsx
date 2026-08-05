@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────
-// M3 — EL ALTA MÍNIMA FANTASMA del mostrador (/veterinaria/mostrador/
+// M3 — EL ALTA MÍNIMA FANTASMA del mostrador (/mostrador/
 // nueva, S69-B). Espejo del alta de mascota del cliente (hogar/agregar),
 // del lado clínica. Dosis baja (§15b).
 //
@@ -135,7 +135,7 @@ export default function AltaMostrador() {
     if (busqueda.ok && busqueda.data.existe === 'registrado') {
       setEnviando(false);
       router.replace({
-        pathname: '/veterinaria/mostrador/autorizar',
+        pathname: '/mostrador/autorizar',
         params: {
           userId: busqueda.data.user_id,
           nombre: busqueda.data.nombre ?? '',

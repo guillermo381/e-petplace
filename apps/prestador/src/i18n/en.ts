@@ -110,6 +110,8 @@ export const prestadorEn = {
     datoQueda1SinHora: '1 to go',
     datoCompleta: 'Day complete.',
     datoPorCoordinar: 'Day done · {{n}} to schedule',
+    // S86-C (gate) · a day with no appointments SAYS so.
+    datoSinCitas: 'No appointments on record',
     datoLibreConSemana: 'Free today · {{n}} this week',
     // S86-C · a past day speaks in the past — never promises a future.
     datoPasadoPendiente1: '1 left open',
@@ -725,6 +727,7 @@ export const prestadorEn = {
     hoy: 'Today',
     manana: 'Tomorrow',
     entrada: 'The board',
+    entradaVacia: 'Nothing to take',
     entradaUna: '1 appointment to take',
     entradaN: '{{n}} appointments to take',
   },
@@ -1738,6 +1741,25 @@ export const prestadorEn = {
     tratanteLabel: 'Who sees them?',
     aLaPizarra: 'To the board',
     sinPersonas: "We couldn't load your team. This visit will be left with no assignee, on the board.",
+    // S86-C ① · the two verbs — one REGISTERS a fact, the other RESERVES.
+    // S86-C · an active trade that can't be registered here yet.
+    oficioSinMenu: 'For now the counter only records veterinary visits. Your other services are coming.',
+    verboLabel: 'What are you doing?',
+    verboAhora: 'See them now',
+    verboAgendar: 'Schedule',
+    verboAhoraDetalle: 'Records the visit of whoever is here.',
+    verboAgendarDetalle: 'Books a future slot, with capacity and grid.',
+    diaLabel: 'Which day?',
+    horaLabel: 'What time?',
+    buscandoHoras: 'Looking for open times…',
+    sinHoras: 'That day has no open times for this service.',
+    // D-653 — NOT "no times": we couldn't look.
+    horasNoSePudo: "We couldn't check the open times. Search for the pet again and try once more.",
+    agendada: 'Appointment scheduled.',
+    agendadaPizarra: 'Scheduled, on the board until someone takes it.',
+    slotOcupado: 'That time is no longer available. Try another.',
+    sinQuienLaTome: 'The time is free, but nobody is left who can take it. Assign someone or try another time.',
+    noSePudoAgendar: "We couldn't schedule the appointment. Try again.",
     precioLabel: 'Price',
     registrarAtencion: 'Register visit',
     cobroTitulo: 'Payment',

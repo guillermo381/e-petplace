@@ -134,6 +134,9 @@ export const prestadorEs = {
     datoQueda1SinHora: 'Te queda 1',
     datoCompleta: 'Jornada completa.',
     datoPorCoordinar: 'Día atendido · {{n}} por coordinar',
+    // ⭐ S86-C (gate) · el día sin citas DICE que no hubo — antes se
+    // callaba y el header saltaba (L-201, escala chica).
+    datoSinCitas: 'Sin citas registradas',
     datoLibreConSemana: 'Hoy libre · {{n}} esta semana',
     /* ⭐ S86-C · UN DÍA PASADO HABLA EN PASADO (cruce 2, firma de mesa).
        Con la rueda llegando a hoy-3, las voces de arriba prometían futuro
@@ -953,6 +956,7 @@ export const prestadorEs = {
     manana: 'Mañana',
     // la entrada desde el HOY — solo con algo por tomar
     entrada: 'La pizarra',
+    entradaVacia: 'Nada por tomar',
     entradaUna: '1 cita por tomar',
     entradaN: '{{n}} citas por tomar',
   },
@@ -2094,6 +2098,32 @@ export const prestadorEs = {
     tratanteLabel: '¿Quién la atiende?',
     aLaPizarra: 'A la pizarra',
     sinPersonas: 'No pudimos cargar a tu equipo. La atención va a quedar sin tratante, en la pizarra.',
+    /* ⭐ S86-C ① · LOS DOS VERBOS. Honestos al motor: uno REGISTRA un
+       hecho, el otro RESERVA capacidad. La RPC se elige por el verbo, así
+       que la cita futura no tiene por dónde viajar por el registro. */
+    /* ⭐ S86-C · el oficio activo que TODAVÍA no se puede registrar acá.
+       Se dice como limitación nuestra, no como «no tenés servicios». */
+    oficioSinMenu: 'Por ahora el mostrador solo registra atenciones de veterinaria. Tus otros servicios llegan pronto.',
+    verboLabel: '¿Qué vas a hacer?',
+    verboAhora: 'Atender ahora',
+    verboAgendar: 'Agendar',
+    verboAhoraDetalle: 'Registra la atención de quien está acá.',
+    verboAgendarDetalle: 'Reserva un turno futuro, con cupo y grilla.',
+    diaLabel: '¿Qué día?',
+    horaLabel: '¿A qué hora?',
+    buscandoHoras: 'Buscando horas libres…',
+    sinHoras: 'Ese día no tiene horas libres para este servicio.',
+    /* ⚠️ D-653 — NO es «no hay horarios»: es que no se pudo mirar. El
+       acceso a la mascota puede caducar entre encontrarla y agendarla, y
+       una grilla vacía mandaría a probar otro día para siempre. */
+    horasNoSePudo: 'No pudimos ver las horas libres. Volvé a buscar a la mascota y probá de nuevo.',
+    agendada: 'Cita agendada.',
+    agendadaPizarra: 'Cita agendada, en la pizarra hasta que alguien la tome.',
+    /* ⚠️ Las DOS verdades del motor, dichas distinto: mover la hora no
+       arregla un problema de gente. */
+    slotOcupado: 'Esa hora ya no está disponible. Prueba otra.',
+    sinQuienLaTome: 'La hora está libre, pero no queda nadie que pueda tomarla. Asigna a alguien o prueba otra hora.',
+    noSePudoAgendar: 'No pudimos agendar la cita. Prueba de nuevo.',
     precioLabel: 'Precio',
     registrarAtencion: 'Registrar atención',
     cobroTitulo: 'Cobro',
