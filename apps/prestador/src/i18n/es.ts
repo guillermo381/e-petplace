@@ -2058,6 +2058,12 @@ export const prestadorEs = {
     // «revisá tu conexión» queda RESERVADO a errores de red (S47) — acá
     // la causa puede ser otra; la voz dirige sin diagnosticar de más.
     errorCargaDetalle: 'Vuelve a intentarlo en un momento.',
+    /* ⭐ S86-C ② · el tratante en el mostrador. «A la pizarra» tiene el
+       MISMO peso que una persona: no es un «ninguno» ni un escape —
+       dejar la cita sin tratante es una elección de quien recibe. */
+    tratanteLabel: '¿Quién la atiende?',
+    aLaPizarra: 'A la pizarra',
+    sinPersonas: 'No pudimos cargar a tu equipo. La atención va a quedar sin tratante, en la pizarra.',
     precioLabel: 'Precio',
     registrarAtencion: 'Registrar atención',
     cobroTitulo: 'Cobro',

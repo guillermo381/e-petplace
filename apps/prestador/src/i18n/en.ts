@@ -1711,6 +1711,11 @@ export const prestadorEn = {
     sinServiciosCta: 'Activate services',
     errorCarga: "We couldn't load your clinic.",
     errorCargaDetalle: 'Try again in a moment.',
+    // S86-C ② · the treating person at the counter. "To the board" has the
+    // SAME weight as a person — it is a choice, not a fallback.
+    tratanteLabel: 'Who sees them?',
+    aLaPizarra: 'To the board',
+    sinPersonas: "We couldn't load your team. This visit will be left with no assignee, on the board.",
     precioLabel: 'Price',
     registrarAtencion: 'Register visit',
     cobroTitulo: 'Payment',

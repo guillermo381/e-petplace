@@ -42,6 +42,7 @@ import {
   obtenerCatalogoVacunas,
   obtenerCatalogoVeterinaria,
   obtenerDetalleMascotaPrestador,
+  obtenerEmpleadosCuenta,
   obtenerMiPrestador,
   obtenerMundoVeterinariaPropio,
   puedoAtenderClinico,
@@ -49,6 +50,7 @@ import {
   registrarCobroPresencial,
   registrarVacunaMostrador,
   resolverUrlFoto,
+  type EmpleadoCuenta,
   type MedioCobro,
   type VacunaCatalogo,
 } from '@epetplace/api';
@@ -104,6 +106,21 @@ export default function AtencionMostrador() {
   const [vacunaSel, setVacunaSel] = useState<string | undefined>(undefined);
   const [vacunaLibre, setVacunaLibre] = useState('');
   const OTRA = '__otra__';
+  /* ⭐ S86-C · ② «A LA PIZARRA» ES UN CHIP, NO UN ACCIDENTE (lámina
+     firmada del mostrador).
+     ⏪ LO QUE PASABA HASTA HOY, medido: esta pantalla llamaba a
+     `registrarAtencionMostrador` **sin `empleadoId` NUNCA** ⇒ TODA
+     atención de mostrador nacía sin tratante y caía a la pizarra —
+     correcto por casualidad, invisible como decisión. Nadie ELEGÍA:
+     simplemente no había dónde.
+     Ahora la elección es explícita y OBLIGATORIA (ver `puedeRegistrar`):
+     una persona, o la pizarra a propósito. *Dejar la cita sin tratante
+     es una elección de quien recibe.*
+     ⚠️ Y el wrapper YA aceptaba `empleadoId` — no hizo falta motor ni
+     pedirle nada a A: faltaba la superficie. */
+  const A_LA_PIZARRA = '__pizarra__';
+  const [personas, setPersonas] = useState<EmpleadoCuenta[] | null>(null);
+  const [tratante, setTratante] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     let vigente = true;
@@ -115,7 +132,7 @@ export default function AtencionMostrador() {
         setCarga({ fase: 'error' });
         return;
       }
-      const [mundo, cat, vac, detalle, firma] = await Promise.all([
+      const [mundo, cat, vac, detalle, firma, gente] = await Promise.all([
         obtenerMundoVeterinariaPropio(pr.data.id),
         obtenerCatalogoVeterinaria(),
         obtenerCatalogoVacunas(),
@@ -124,6 +141,15 @@ export default function AtencionMostrador() {
         // devuelve false y la firma simplemente no se ofrece (ventanilla
         // sigue entera: recibir y cobrar no piden rol).
         puedoAtenderClinico(pr.data.id),
+        /* S86-C · las personas de la cuenta — el MISMO lector que usa
+           «Fijar fecha» (se copia al vecino, no se inventa un tercero).
+           ⚠️ Su fallo NO tumba la carga, igual que la firma clínica: la
+           VENTANILLA tiene que seguir funcionando (recibir y cobrar no
+           piden rol). Sin personas, la elección no se ofrece — y la
+           pantalla lo DICE en vez de mandar a la pizarra en silencio. */
+        pr.data.cuenta_comercial_id !== null
+          ? obtenerEmpleadosCuenta(pr.data.cuenta_comercial_id)
+          : Promise.resolve(null),
       ]);
       if (!vigente) return;
       // Un fallo de CUALQUIERA pasa a error — antes: mundo caído se
@@ -136,6 +162,9 @@ export default function AtencionMostrador() {
       }
       setCatalogoVacunas(vac.data);
       setFirmaClinica(firma);
+      // null = sin cuenta o lectura caída — los dos casos son «no se puede
+      // ofrecer la elección», y ninguno se disfraza de «no hay nadie».
+      setPersonas(gente !== null && gente.ok ? gente.data.filter((g) => g.activo) : null);
       setNombreMascota(detalle.data.mascota.nombre);
       // La foto es PATH (S47): se firma por la frontera. Sin foto o si la
       // firma falla, la huella digna de AvatarMascota es la cara válida.
@@ -166,8 +195,19 @@ export default function AtencionMostrador() {
   }
 
   const precioNum = Number(precio.replace(',', '.'));
+  /* S86-C ② — la elección de tratante se OFRECE solo si hay a quién
+     elegir. Sin personas legibles no se exige (la ventanilla no se
+     bloquea por un lector caído) y la pantalla lo dice abajo. */
+  const ofreceTratante = personas !== null && personas.length > 0;
   const puedeRegistrar =
-    prestadorId !== null && servicioCodigo !== undefined && Number.isFinite(precioNum) && precioNum >= 0 && !ocupado;
+    prestadorId !== null &&
+    servicioCodigo !== undefined &&
+    Number.isFinite(precioNum) &&
+    precioNum >= 0 &&
+    // ⚠️ La elección es OBLIGATORIA cuando se ofrece: así «sin tratante»
+    // deja de ser el default silencioso y pasa a ser un toque deliberado.
+    (!ofreceTratante || tratante !== undefined) &&
+    !ocupado;
 
   async function registrar() {
     if (!puedeRegistrar || prestadorId === null || servicioCodigo === undefined) return;
@@ -182,6 +222,12 @@ export default function AtencionMostrador() {
       mascotaId,
       tipoServicioCodigo: servicioCodigo,
       precio: precioNum,
+      /* ⭐ ② EL CIRCUITO QUE ALIMENTA LA PIZARRA, en una línea: «A la
+         pizarra» ES no mandar `empleadoId`. La cita nace sin tratante y
+         cae en `obtener_pizarra` para que alguien la tome.
+         *La elección de arriba y esta ausencia son la MISMA decisión* —
+         por eso el chip existe: para que la ausencia se elija. */
+      empleadoId: tratante === A_LA_PIZARRA ? undefined : tratante,
     });
     setOcupado(false);
     if (!r.ok) {
@@ -317,6 +363,32 @@ export default function AtencionMostrador() {
                   seleccionada={servicioCodigo}
                   onSelect={elegirServicio}
                 />
+              )}
+              {/* ⭐ S86-C ② · ¿QUIÉN LA ATIENDE? — las personas y «A la
+                  pizarra», en el mismo selector y al mismo nivel: la
+                  pizarra NO es un escape ni un "ninguno", es una opción
+                  con el mismo peso que una persona.
+                  Va DESPUÉS del servicio y ANTES del precio porque
+                  responde a la pregunta del medio del flujo: qué se hace,
+                  quién lo hace, cuánto cuesta. */}
+              {ofreceTratante && personas !== null && (
+                <SelectorOpcion
+                  etiqueta={t('atencionMostrador.tratanteLabel')}
+                  disposicion="tira"
+                  opciones={[
+                    ...personas.map((p) => ({ codigo: p.empleadoId, etiqueta: p.nombre })),
+                    { codigo: A_LA_PIZARRA, etiqueta: t('atencionMostrador.aLaPizarra') },
+                  ]}
+                  seleccionada={tratante}
+                  onSelect={setTratante}
+                />
+              )}
+              {/* Ley 13 — si no se pudo leer a las personas, se DICE. El
+                  registro sigue disponible (la ventanilla no se bloquea
+                  por un lector caído), pero nadie queda creyendo que
+                  eligió: la cita va a la pizarra y la pantalla lo avisa. */}
+              {!ofreceTratante && (
+                <Texto variante="apoyo">{t('atencionMostrador.sinPersonas')}</Texto>
               )}
               <Campo
                 label={t('atencionMostrador.precioLabel')}
