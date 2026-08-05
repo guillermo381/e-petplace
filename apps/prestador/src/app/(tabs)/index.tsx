@@ -75,6 +75,7 @@ import {
   obtenerTitularId,
   obtenerMundoVeterinariaPropio,
   obtenerAtencionesAbiertas,
+  obtenerPizarra,
   obtenerPlataDelDia,
   obtenerPresupuestosPrestador,
   obtenerSolicitudesMostrador,
@@ -163,6 +164,11 @@ type Pantalla =
          `null` = no se pudo leer — distinto de 0, que es "no hay nada que
          atender". Colapsarlos diría "estás al día" por un fallo de red
          (L-197, y sobre trabajo pendiente eso cuesta plata). */
+      /* ⭐ S86-C · cuántas hay en la pizarra PARA MÍ. `null` = no se pudo
+       *  leer — distinto de 0 («no hay nada por tomar»), y por eso la
+       *  entrada no se monta en ninguno de los dos casos pero por razones
+       *  distintas (L-197). */
+      pizarra: number | null;
       atencion: { coordinar: number; presupuestos: number | null; handshakes: number | null; abiertas: number | null; abiertaCitaId: string | null };
       /** S85-C23: la cohorte del negocio, en CÓDIGO. La voz la arma la
        *  PIEZA (`Insignia`, contrato de B en vuelo) — la casa NO compone
@@ -741,7 +747,7 @@ export default function Hoy() {
     /* S85-C7: `rCerrados` entra AL FINAL del arreglo y del destructuring —
        insertarlo en el medio corre todas las posiciones y el typecheck lo
        cazó en el acto (once tuplas desalineadas). Al final, nada se mueve. */
-    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, cuentaR, perfilR, rCerrados, rPresup, rSolic, rAbiertas] = await Promise.all([
+    const [r, rg, ra, rv, bloqueos, atendidas, ofPaseo, ofGrooming, ofAdiestramiento, ofVet, cuentaR, perfilR, rCerrados, rPresup, rSolic, rAbiertas, rPizarra] = await Promise.all([
       obtenerCitasPaseoDelDia({ prestador_id: prestador.data.id, fecha: desde, fecha_hasta: hasta }),
       // S60-B1: la jornada es UNA — las citas de grooming entran a la
       // misma lista con su tipo (el subtítulo ya lo dice) y su ruta.
@@ -810,6 +816,12 @@ export default function Hoy() {
          SUS pendientes. La regla no es "todo lo del negocio es del titular"
          — es que la PLATA lo es. */
       obtenerAtencionesAbiertas(prestador.data.id, 90),
+      /* S86-C · la pizarra del que mira. El RPC ya filtra por ESPECIALIDAD
+         y por equipo, así que quien no puede tomar nada recibe vacío — no
+         hace falta gatear acá. Su fallo NO tumba la jornada: sin dato, la
+         entrada no existe. Costo declarado: +1 viaje en el arranque del
+         HOY (familia D-497). */
+      obtenerPizarra(prestador.data.id),
     ]);
     /* S85-C7 · los cerrados se guardan APARTE del estado de pantalla, y
        ANTES del rebote de las citas: su fallo no cambia la jornada — solo
@@ -929,6 +941,7 @@ export default function Hoy() {
       ciudad: prestador.data.ciudad,
       logoPath: prestador.data.foto_url,
       preparacion,
+      pizarra: rPizarra.ok ? rPizarra.data.length : null,
       atencion: {
         coordinar: porCoordinar.length,
         /* ⚠️ SOLO 'enviado' — y el 'vencido' YA viene resuelto perezoso por
@@ -1562,6 +1575,31 @@ export default function Hoy() {
               ))}
             </Tarjeta>
           </View>
+        )}
+
+        {/* ⭐ S86-C · LA ENTRADA A LA PIZARRA. Una pantalla sin puerta no
+            existe (L-161), y ésta es la del PRESTADOR EMPLEADO: su casa
+            es el HOY.
+            ⚠️ VA APARTE de «Necesita tu atención» a propósito: ese bloque
+            es lo que espera una respuesta TUYA, y una cita en la pizarra
+            **no es tuya todavía** — es una oportunidad del equipo.
+            Meterla ahí le cambiaría el significado al bloque.
+            ⚠️ Regla de existencia: sin nada por tomar NO se monta. Y con
+            `null` —no se pudo leer— tampoco: no se afirma que no hay. */}
+        {pantalla.estado === 'listo' && pantalla.pizarra !== null && pantalla.pizarra > 0 && (
+          <Tarjeta relleno="ninguno">
+            <CeldaNavegacion
+              icono="caso"
+              registro="aa"
+              titulo={t('pizarra.entrada')}
+              detalle={
+                pantalla.pizarra === 1
+                  ? t('pizarra.entradaUna')
+                  : t('pizarra.entradaN', { n: pantalla.pizarra })
+              }
+              onPress={() => router.push('/pizarra')}
+            />
+          </Tarjeta>
         )}
 
         {/* ── S79-B (T2-B1/B3): EL MODO PREPARACIÓN — §2.4 primera y
