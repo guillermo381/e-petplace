@@ -3369,7 +3369,7 @@ Origen: S86-A, medición para C.
   >
   > | superficie | por qué NADIE la alcanza |
   > |---|---|
-  > | ~~**la rama `administrador` de TODOS los gates**~~ | ~~cero portadores~~ → ✅ **CORRIÓ (S88)**: dos portadores reales y dedo del founder ([[D-652]] cerrada) |
+  > | ~~**la rama `administrador` de TODOS los gates**~~ | ~~cero portadores~~ → ✅ **CORRIÓ (S88)**: dos portadores reales, verificada por dedos técnicos ([[D-652]] cerrada; re-gate founder pendiente) |
   > | **el diseño de la barra de TRES** | se muestra a 5 personas **y el founder no es una de ellas**: su cuenta es titular ([[D-651]]) |
   > | **`AgendaRecepcion`** (el HOY de recepción) | exige **otro rol** — 1 sola fila viva, en Aurora |
   > | **`GateRoto`** | ~~exige un dato **contradictorio** (`rol=false` + `titular=null`)~~ — **⚠️ ENMENDADA S87: esa condición YA NO RIGE** |
@@ -5674,9 +5674,14 @@ importa: **doce de veinticuatro** reglas del lint estaban en esa condición.*
 > TODO VERDE con la cuenta bifronte y era falso.* **Una cuenta que es dos cosas
 > no prueba ninguna.**
 >
-> **El dedo del founder, sobre el rol puro:** creó un empleado, editó un
-> servicio y un horario con persistencia verificada, y **no pudo nombrar
-> administrador**. *La rama dejó de ser código sin portadores.*
+> **La verificación, sobre el rol puro — DEDOS TÉCNICOS, no el del founder:**
+> login real · `is_admin=false` · escribió 9 servicios y 21 horarios · creó un
+> empleado · **y no pudo nombrar administrador**.
+>
+> ⏳ **El re-gate del founder está PENDIENTE.** *Lo que cierra esta ficha es que
+> la rama YA TIENE PORTADORES y corre* —eso está probado y es lo que la ficha
+> pedía—; **el dedo del founder sobre la superficie es otra verificación, y no
+> se da por hecha.**
 
 **El texto original, conservado como historia:**
 
@@ -7334,17 +7339,30 @@ de GoTrue.**
 
 ---
 
-#### D-660 — ✅ **CURADA Y GATEADA en su mitad de MOTOR** (S88, 5-ago-2026) · 🟠 su mitad de SUPERFICIE sigue abierta
+#### D-660 — ✅ **CURADA en su mitad de MOTOR, verificada por predicados y dedos técnicos** (S88, 5-ago-2026) · ⏳ **re-gate founder PENDIENTE** · 🟠 su mitad de SUPERFICIE sigue abierta
 
-> **RE-GATE DEL FOUNDER: VERDE con el rol puro.** Creó un empleado, editó un
-> servicio y un horario **con persistencia verificada**, y **el camino de
-> nombrar administrador sigue cerrado a su dedo**.
+> **GATEADA POR PREDICADOS Y POR DEDOS TÉCNICOS. ⏳ EL RE-GATE DEL FOUNDER
+> ESTÁ PENDIENTE.**
 >
-> **El límite intocable quedó probado en las DOS direcciones:** por
-> **predicados** (el cinturón lee que `empleado_roles` no usa el helper) y por
-> **dedo** (el founder no pudo). *Una sola de las dos habría sido media prueba:
-> el predicado no sabe si alguien lo alcanza, y el dedo no sabe si mañana
-> alguien lo abre.*
+> **Lo que SÍ ocurrió** (S88-A, sobre la cuenta del rol puro
+> `+s88rolpuro`, sin fila en `admin_users`): `is_admin=false` · `gestiona=true`
+> · servicios **9** y horarios **21** escritos donde escribía 0/0 ·
+> `crear_empleado_directo` → `ok:true` · **`CREA_ADMIN` → REBOTE**. Más el
+> login real de la cuenta.
+>
+> **El límite intocable quedó probado en dos direcciones — pero las dos son
+> MÍAS:** por **predicados** (el cinturón lee que `empleado_roles` no usa el
+> helper) y por **dedo TÉCNICO** (SQL con sus claims). *Las dos juntas son más
+> que cada una sola —el predicado no sabe si alguien lo alcanza, y el dedo no
+> sabe si mañana alguien lo abre— **pero ninguna es el dedo del founder**.*
+>
+> ### ⚠️ POR QUÉ ESTA CORRECCIÓN ESTÁ ESCRITA Y NO SOLO HECHA
+> **Esta ficha llegó a afirmar un re-gate que no ocurrió.** *Una ficha que
+> declara un gate inexistente es exactamente el dato falso que esta casa caza
+> en el código y no puede depositar en sus actas* — y es peor acá, porque un
+> acta no tiene typecheck: sobrevive a quien la escribió y se lee como hecho.
+> **El re-gate se corre sobre `guillo381+s88rolpuro@gmail.com` / `S88puro!2026`
+> y su veredicto se deposita cuando exista.**
 >
 > **🟠 LO QUE SIGUE ABIERTO, con dueño:** la mitad de **SUPERFICIE** — §4ter de
 > `LAMINA_BARRA_DE_TRES` (el home por rol + la consolidada). **La mesa dibuja
