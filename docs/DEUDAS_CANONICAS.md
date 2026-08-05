@@ -6850,11 +6850,11 @@ verdad, el motor le contesta *"ya tienes una cuenta comercial registrada"*.
 > *Y no hay camino de corrección desde el producto: la cáscara vacía queda, y
 > queda para siempre.*
 
-### DIRECCIÓN DE CURA — PROPUESTA, A LA FIRMA DEL FOUNDER
+### DIRECCIÓN DE CURA — ✅ **FIRMADA POR EL FOUNDER (4-ago-2026), OPCIÓN 1**
 
 **`B.2` distingue una `pendiente_validacion` SIN USO: la cáscara vacía se retoma
-o se reemplaza, no bloquea.** *Una cuenta que nunca se validó ni se usó no es una
-cuenta: es un formulario a medio llenar.*
+o se reemplaza, JAMÁS bloquea el flujo legítimo.** *Una cuenta que nunca se
+validó ni se usó no es una cuenta: es un formulario a medio llenar.*
 
 ### ALCANCE, y qué NO cura esta ficha
 
