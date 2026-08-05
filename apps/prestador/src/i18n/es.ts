@@ -926,6 +926,36 @@ export const prestadorEs = {
     casosHeredados: 'Casos que te confíen',
     casosHeredadosDetalle: 'Se despierta con el primer caso que un colega te derive.',
   },
+  /* ⭐ S86-C · LA PIZARRA — las citas de tu especialidad sin tratante.
+     ⚠️ La voz sale de ACÁ y no del wrapper: `packages/api` no tiene capa
+     de idioma (D-539) y habla VOSEO; la voz de producto es TUTEO NEUTRO
+     (regla 27 · L-148). Se mapea el CÓDIGO, jamás se pinta `r.mensaje`. */
+  pizarra: {
+    titulo: 'La pizarra',
+    subtitulo: 'De tu especialidad · sin tratante',
+    tomar: 'Tomar',
+    esTuya: 'Tuya',
+    // La fila NO desaparece: lo dice. Decisión firmada de la lámina.
+    laTomaron: 'La tomó alguien del equipo',
+    tuya: '{{nombre}} es tuya. Ya está en tu jornada.',
+    yaTomada: 'Alguien del equipo la tomó primero.',
+    yaNoEsta: 'Esa cita ya no está.',
+    noEsTuEspecialidad: 'Esa cita es de un servicio que no atiendes.',
+    noSosDelEquipo: 'No eres parte del equipo de este negocio.',
+    noSePudo: 'No pudimos tomar la cita. Prueba de nuevo.',
+    // §2.6 — la vacía no es un fracaso: es buena noticia.
+    vacia: 'Nada por tomar — todo tiene tratante.',
+    errorTitulo: 'No pudimos leer la pizarra',
+    errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
+    // Ley 3: el código de motor jamás se pinta.
+    servicioSinVoz: 'Atención',
+    hoy: 'Hoy',
+    manana: 'Mañana',
+    // la entrada desde el HOY — solo con algo por tomar
+    entrada: 'La pizarra',
+    entradaUna: '1 cita por tomar',
+    entradaN: '{{n}} citas por tomar',
+  },
   detalleMascota: {
     // señales de cuidado (solo lo REAL del expediente)
     condicionCronica: 'Condición crónica',
