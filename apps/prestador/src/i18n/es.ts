@@ -168,7 +168,9 @@ export const prestadorEs = {
        El argumento de S85-C7 (*"ahora" no existe en el jueves*) sigue
        siendo cierto: se honra con RÓTULO, no escondiendo lo vivo. */
     ahoraHoy: 'Ahora · hoy',
-    loSiguiente: 'Lo siguiente',
+    /* ☠️ S86-C · MURIÓ `loSiguiente` — el bloque que la usaba desapareció:
+       la próxima cita es ahora la PRIMERA DE LA LÍNEA DE TIEMPO y no
+       necesita rótulo propio. Censo corrido: cero consumidores (Ley 37). */
     primeraVez: 'Primera vez',
     conocerMascota: 'Conocer a {{nombre}}',
     // estados de cita (voz de oficio, funcional)

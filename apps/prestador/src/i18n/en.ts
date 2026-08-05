@@ -129,7 +129,8 @@ export const prestadorEn = {
     ahora: 'Now',
     // S86-C · the live hero declares which day it belongs to.
     ahoraHoy: 'Now · today',
-    loSiguiente: 'Up next',
+    // ☠️ S86-C · `loSiguiente` died with its block: the next appointment is
+    // now simply the first row of the timeline. Census: zero consumers.
     primeraVez: 'First time',
     conocerMascota: 'Meet {{nombre}}',
     estadoPorCerrar: 'To close',
