@@ -49,6 +49,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  EvitaTeclado,
   Hoja,
   Insignia,
   Interruptor,
@@ -455,6 +456,12 @@ export default function EquipoNegocioPantalla() {
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <MarcaDeAgua />
       <Encabezado variante="navegacion" titulo={t('equipo.titulo')} atras onAtras={() => router.back()} />
+      {/* ⭐ S86-C · D-498 — esta pantalla abre teclado y no portaba la
+          pieza. `adjustResize` del manifest es LETRA MUERTA bajo
+          edge-to-edge (SDK 57): la ventana no se achica y el campo
+          enfocado queda DEBAJO del teclado. Envuelve al ScrollView SIN
+          re-indentar su contenido — la forma de `login.tsx`. */}
+      <EvitaTeclado>
       <ScrollView contentContainerStyle={{ padding: spacing[4], gap: spacing[5], paddingBottom: insets.bottom + spacing[8] }}>
         {pantalla.estado === 'cargando' && (
           <EsqueletoGrupo>
@@ -573,6 +580,7 @@ export default function EquipoNegocioPantalla() {
           </>
         )}
       </ScrollView>
+      </EvitaTeclado>
 
       {/* ══ S78-B · LA HOJA DEL MIEMBRO — PILA DE BLOQUES SOBRE PAPEL ══
           El monolito se rompió en el gate: cabecera SIN tarjeta · bloque

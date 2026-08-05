@@ -886,6 +886,9 @@ export const prestadorEs = {
     // El delta compara la MISMA porción de la semana anterior.
     kpiDelta: '{{signo}}{{n}} vs. la anterior',
     kpiVidasNuevas: 'vidas nuevas',
+    kpiDeltaIgual: 'igual que la anterior',
+    kpiSinFamilias: 'sin familias nuevas',
+    mixA11y: 'Reparto de atenciones del mes por servicio.',
     kpiFamilia1: '1 familia',
     kpiFamilias: '{{n}} familias',
     kpiSemana: 'esta semana',

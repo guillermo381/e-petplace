@@ -93,6 +93,7 @@ import {
 } from '@epetplace/api';
 
 import { BarrasApiladas, type CapaGrafica, type DiaBarra } from '@/components/barras-apiladas';
+import { DonaMix } from '@/components/dona-mix';
 
 import { SeccionDesplegable } from '@/components/perfil-piezas';
 import { useGateGestor } from '@/lib/gate-gestor';
@@ -301,6 +302,20 @@ export default function Mascotas() {
                 sujeto del producto es la MASCOTA, no el hogar — EL NORTE).
                 No existe superficie de familias, y fabricarle una sería
                 construir una feature para honrar una flecha. Va al gate. */}
+            {/* ⏪ S86-C (cura del gate) · ERAN TRES COLUMNAS Y SE ROMPÍA POR
+                DOS LADOS: las tarjetas no compartían altura y «$52.00» se
+                partía en dos renglones a un tercio de ancho.
+                LA CAUSA DE LA ALTURA, medida: `Tarjeta` NO acepta `style`
+                —solo `tinte`/`elevacion`/`relleno`/`luz`—, así que estira
+                el CONTENEDOR con `flex:1` pero la tarjeta se queda del alto
+                de su contenido. Igualarlas por prop exigiría ensanchar la
+                pieza, que es de B.
+                LA SALIDA, sin pedirle nada a nadie y que arregla las dos a
+                la vez: **dos arriba con estructura IDÉNTICA** (número,
+                rótulo y SIEMPRE una tercera línea ⇒ misma altura por
+                construcción, no por CSS) **y la plata a lo ANCHO abajo**,
+                donde el monto entra entero y no hay que achicarle la
+                tipografía. Era una de las dos salidas que la mesa nombró. */}
             <View style={{ flexDirection: 'row', gap: spacing[2] }}>
               <Pressable
                 accessibilityRole="button"
@@ -311,17 +326,19 @@ export default function Mascotas() {
                 <Tarjeta elevacion="reposo">
                   <Texto variante="titulo">{String(datos.semana.atenciones)}</Texto>
                   <Texto variante="dato">{t('mascotas.kpiAtenciones')}</Texto>
-                  {/* El delta compara la MISMA porción de la semana previa
-                      (el motor lo resuelve y manda `diasTranscurridos`).
-                      Cero no se pinta: «+0» es ruido, no información. */}
-                  {datos.semana.delta !== 0 && (
-                    <Texto variante="apoyo">
-                      {t('mascotas.kpiDelta', {
-                        signo: datos.semana.delta > 0 ? '+' : '−',
-                        n: Math.abs(datos.semana.delta),
-                      })}
-                    </Texto>
-                  )}
+                  {/* La tercera línea SIEMPRE existe, y nunca es relleno: el
+                      delta compara la MISMA porción de la semana previa, y
+                      «igual que la anterior» es un HECHO, no un hueco
+                      tapado. Antes se omitía en cero y ahí nacía la
+                      desigualdad de altura. */}
+                  <Texto variante="apoyo">
+                    {datos.semana.delta === 0
+                      ? t('mascotas.kpiDeltaIgual')
+                      : t('mascotas.kpiDelta', {
+                          signo: datos.semana.delta > 0 ? '+' : '−',
+                          n: Math.abs(datos.semana.delta),
+                        })}
+                  </Texto>
                 </Tarjeta>
               </Pressable>
 
@@ -329,47 +346,48 @@ export default function Mascotas() {
                 <Tarjeta elevacion="reposo">
                   <Texto variante="titulo">{String(datos.semana.vidasNuevas)}</Texto>
                   <Texto variante="dato">{t('mascotas.kpiVidasNuevas')}</Texto>
-                  {datos.semana.familiasNuevas > 0 && (
-                    <Texto variante="apoyo">
-                      {datos.semana.familiasNuevas === 1
+                  <Texto variante="apoyo">
+                    {datos.semana.familiasNuevas === 0
+                      ? t('mascotas.kpiSinFamilias')
+                      : datos.semana.familiasNuevas === 1
                         ? t('mascotas.kpiFamilia1')
                         : t('mascotas.kpiFamilias', { n: datos.semana.familiasNuevas })}
-                    </Texto>
-                  )}
+                  </Texto>
                 </Tarjeta>
               </View>
-
-              {/* ② LA PLATA: unión discriminada, NO se aplana. Con
-                  `visible:false` la tarjeta habla del PERMISO, no del
-                  dato — no falta información, sobra audiencia. */}
-              <View style={{ flex: 1 }}>
-                {datos.plata.visible ? (
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={t('mascotas.kpiPlataA11y')}
-                    onPress={() => setAbierta('plata')}
-                  >
-                    <Tarjeta elevacion="reposo">
-                      <Texto variante="titulo">{montoCorto(datos.plata.semana)}</Texto>
-                      <Texto variante="dato">{t('mascotas.kpiSemana')}</Texto>
-                      {/* ⑥ EL ASTERISCO DE S85: el número dice lo que sabe
-                          Y declara lo que le falta. Con citas sin precio el
-                          total es PARCIAL y lo nombra — un número redondo
-                          que esconde citas no se puede desconfiar. */}
-                      <Texto variante="apoyo">
-                        {datos.plata.sinPrecioSemana > 0
-                          ? t('mascotas.kpiPlataParcial', { n: datos.plata.sinPrecioSemana })
-                          : t('mascotas.kpiMes', { monto: montoCorto(datos.plata.mes) })}
-                      </Texto>
-                    </Tarjeta>
-                  </Pressable>
-                ) : (
-                  <Tarjeta elevacion="reposo">
-                    <Texto variante="dato">{t('mascotas.kpiPlataSoloTitular')}</Texto>
-                  </Tarjeta>
-                )}
-              </View>
             </View>
+
+            {/* LA PLATA, A LO ANCHO. Unión discriminada: NO se aplana. Con
+                `visible:false` la tarjeta habla del PERMISO, no del dato —
+                no falta información, sobra audiencia. */}
+            {datos.plata.visible ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('mascotas.kpiPlataA11y')}
+                onPress={() => setAbierta('plata')}
+              >
+                <Tarjeta elevacion="reposo">
+                  <View
+                    style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing[2] }}
+                  >
+                    <Texto variante="titulo">{montoCorto(datos.plata.semana)}</Texto>
+                    <Texto variante="dato">{t('mascotas.kpiSemana')}</Texto>
+                  </View>
+                  {/* ⑥ EL ASTERISCO DE S85: el número dice lo que sabe Y
+                      declara lo que le falta. Un total redondo que esconde
+                      citas no se puede desconfiar. */}
+                  <Texto variante="apoyo">
+                    {datos.plata.sinPrecioSemana > 0
+                      ? t('mascotas.kpiPlataParcial', { n: datos.plata.sinPrecioSemana })
+                      : t('mascotas.kpiMes', { monto: montoCorto(datos.plata.mes) })}
+                  </Texto>
+                </Tarjeta>
+              </Pressable>
+            ) : (
+              <Tarjeta elevacion="reposo">
+                <Texto variante="dato">{t('mascotas.kpiPlataSoloTitular')}</Texto>
+              </Tarjeta>
+            )}
 
             {/* ② DÍA POR DÍA — apilada por servicio. La leyenda va ARRIBA
                 y con la voz del servicio: sin ella los colores no dicen
@@ -404,37 +422,57 @@ export default function Mascotas() {
               </Tarjeta>
             )}
 
-            {/* ① EL MIX DEL MES. El motor sirve CUENTAS y TOTAL, jamás
-                porcentajes — el % lo hace UNA superficie (ésta) para que
-                dos no redondeen distinto sobre el mismo dato.
-                ⚠️ La lámina lo dibuja como DONA. Acá va como barra
-                proporcional: una dona en RN sin librería es trazado a
-                mano, y la barra dice EXACTAMENTE lo mismo con la pieza
-                que esta pantalla ya tiene. Se declara para el gate. */}
+            {/* ① EL MIX DEL MES — DONA, como firmó la lámina.
+                ⏪ La primera pasada lo resolvió como BARRA proporcional
+                argumentando que una dona en RN exigía librería. **Era
+                falso y el gate lo mostró:** `react-native-svg` ya vive en
+                esta app. La barra se retira con su porqué (L-198).
+                El motor sirve CUENTAS y TOTAL, jamás porcentajes — el %
+                lo hace UNA superficie (ésta) para que dos no redondeen
+                distinto sobre el mismo dato.
+                ⚠️ N=1 DIBUJA IGUAL (firma del founder): la dona muestra
+                DE QUÉ está hecho el 100%, y un solo servicio también es
+                una respuesta a esa pregunta. */}
             {datos.mix.total > 0 && (
               <Tarjeta elevacion="reposo">
                 <View style={{ gap: spacing[3] }}>
                   <Texto variante="cuerpo">{t('mascotas.mixDelMes')}</Texto>
-                  <View style={{ flexDirection: 'row', height: 10, borderRadius: 5, overflow: 'hidden' }}>
-                    {datos.mix.items.map((it) => (
-                      <View
-                        key={it.servicio}
-                        style={{
-                          width: `${(it.atenciones / datos.mix.total) * 100}%`,
-                          backgroundColor: theme.capa[capaDe.get(it.servicio) ?? 'cuidado'],
-                        }}
-                      />
-                    ))}
-                  </View>
-                  <View style={{ gap: spacing[1] }}>
-                    {datos.mix.items.map((it) => (
-                      <Texto key={it.servicio} variante="dato">
-                        {t('mascotas.mixFila', {
-                          servicio: vozServicio(it.servicioVoz),
-                          pct: Math.round((it.atenciones / datos.mix.total) * 100),
-                        })}
-                      </Texto>
-                    ))}
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[4] }}>
+                    <DonaMix
+                      total={datos.mix.total}
+                      tramos={datos.mix.items.map((it) => ({
+                        clave: it.servicio,
+                        color: theme.capa[capaDe.get(it.servicio) ?? 'cuidado'],
+                        valor: it.atenciones,
+                      }))}
+                      etiqueta={t('mascotas.mixA11y')}
+                    />
+                    {/* La leyenda vive AL LADO y no debajo: la dona sin
+                        nombres es un anillo de colores, y con N=1 es la
+                        leyenda la que dice cuál es ese 100%. */}
+                    <View style={{ flex: 1, gap: spacing[1] }}>
+                      {datos.mix.items.map((it) => (
+                        <View
+                          key={it.servicio}
+                          style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1.5] }}
+                        >
+                          <View
+                            style={{
+                              width: 9,
+                              height: 9,
+                              borderRadius: 2,
+                              backgroundColor: theme.capa[capaDe.get(it.servicio) ?? 'cuidado'],
+                            }}
+                          />
+                          <Texto variante="dato">
+                            {t('mascotas.mixFila', {
+                              servicio: vozServicio(it.servicioVoz),
+                              pct: Math.round((it.atenciones / datos.mix.total) * 100),
+                            })}
+                          </Texto>
+                        </View>
+                      ))}
+                    </View>
                   </View>
                 </View>
               </Tarjeta>

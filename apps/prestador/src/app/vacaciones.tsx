@@ -33,6 +33,7 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  EvitaTeclado,
   Hoja,
   HojaScroll,
   MarcaDeAgua,
@@ -224,7 +225,13 @@ export default function Vacaciones() {
         </View>
       )}
 
+      {/* ⭐ S86-C · D-498 — esta pantalla abre teclado y no portaba la
+          pieza. `adjustResize` del manifest es LETRA MUERTA bajo
+          edge-to-edge (SDK 57): la ventana no se achica y el campo
+          enfocado queda DEBAJO del teclado. Envuelve al ScrollView SIN
+          re-indentar su contenido — la forma de `login.tsx`. */}
       {pantalla.estado === 'listo' && pantalla.bloqueos.length > 0 && (
+        <EvitaTeclado>
         <ScrollView contentContainerStyle={{ padding: spacing[4], paddingBottom: insets.bottom + spacing[10], gap: spacing[4] }}>
           {/* la voz honesta de la promesa — la cumple el motor */}
           <Texto variante="apoyo">
@@ -260,6 +267,7 @@ export default function Vacaciones() {
 
           <Boton variante="secundario" etiqueta={t('vacaciones.agregar')} bloque onPress={abrirCreacion} />
         </ScrollView>
+        </EvitaTeclado>
       )}
 
       {/* Hoja de creación: desde → cuánto tiempo → motivo opcional */}

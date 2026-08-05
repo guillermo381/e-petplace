@@ -31,6 +31,7 @@ import {
   CeldaNavegacion,
   Esqueleto,
   EsqueletoGrupo,
+  EvitaTeclado,
   Insignia,
   MarcaDeAgua,
   Separador,
@@ -151,6 +152,12 @@ export default function SalaEspera() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <MarcaDeAgua />
+      {/* ⭐ S86-C · D-498 — esta pantalla abre teclado y no portaba la
+          pieza. `adjustResize` del manifest es LETRA MUERTA bajo
+          edge-to-edge (SDK 57): la ventana no se achica y el campo
+          enfocado queda DEBAJO del teclado. Envuelve al ScrollView SIN
+          re-indentar su contenido — la forma de `login.tsx`. */}
+      <EvitaTeclado>
       <ScrollView
         ref={espacio.ref}
         onScroll={espacio.onScroll}
@@ -255,6 +262,7 @@ export default function SalaEspera() {
           }}
         />
       </ScrollView>
+      </EvitaTeclado>
     </View>
   );
 }
