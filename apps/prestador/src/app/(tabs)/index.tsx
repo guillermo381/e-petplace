@@ -479,6 +479,7 @@ function FilaCita({
   fotoUrl,
   oficio = 'paseo',
   acciones,
+  sinHora = false,
 }: {
   cita: CitaAgendaPaseo;
   enVivo: boolean;
@@ -487,6 +488,11 @@ function FilaCita({
   oficio?: OficioCita;
   /** B14 ①: las acciones de ESTA cita — viven adentro de SU tarjeta. */
   acciones?: React.ReactNode;
+  /** ⭐ S86-C · en la LÍNEA DE TIEMPO la hora vive en la columna de la
+   *  izquierda, así que la fila no la repite: su metadata queda solo con
+   *  la duración. Repetirla sería decir dos veces lo mismo a dos
+   *  centímetros de distancia. */
+  sinHora?: boolean;
 }) {
   const router = useRouter();
   const { t } = useTraduccion();
@@ -527,7 +533,7 @@ function FilaCita({
           ? `${voz} · ${t('agenda.parteDelPlan')}`
           : voz
       }
-      metadataMono={`${hora}${dur ? ` · ${dur} min` : ''}`}
+      metadataMono={sinHora ? (dur ? `${dur} min` : undefined) : `${hora}${dur ? ` · ${dur} min` : ''}`}
       mascota={{
         nombre,
         fotoUrl,
@@ -1001,6 +1007,29 @@ export default function Hoy() {
   }
 
   // El fetch trae el rango hoy..hoy+6; la vista Hoy opera sobre el día base.
+  /* ⭐ S86-C · EL «CONOCER A {mascota}» Y LA SEÑAL «PRIMERA VEZ» EN UNA
+     SOLA FUENTE. Vivían solo en el hero de «Lo siguiente»; con ese bloque
+     muerto, **se mudan a la fila de SU cita** — si desaparecían con él se
+     perdían dos cosas que nadie pidió perder.
+     Se extrae en vez de copiarse en los dos lugares: dos JSX iguales se
+     separan un día y nadie se entera. */
+  const accionesDe = (c: CitaAgendaPaseo): React.ReactNode => {
+    const m = c.mascota;
+    if (!m) return undefined;
+    return (
+      <>
+        <Separador />
+        <CeldaNavegacion
+          icono="carnet"
+          registro="aa"
+          titulo={t('agenda.conocerMascota', { nombre: m.nombre })}
+          detalle={esPrimera(m.id) ? t('agenda.primeraVez') : undefined}
+          onPress={() => router.push({ pathname: '/mascota/[mascotaId]', params: { mascotaId: m.id } })}
+        />
+      </>
+    );
+  };
+
   const citas = pantalla.estado === 'listo' ? pantalla.citas : [];
   const desde = pantalla.estado === 'listo' ? pantalla.desde : null;
   /* ⭐ S86-C · HOY, aparte del inicio del rango. Todo lo que pregunta
@@ -1160,43 +1189,22 @@ export default function Hoy() {
      Ley 7: es aplicar su cláusula donde el caso existe. */
   const enCurso = citasDeHoySin.filter((c) => c.atencion?.estado === 'en_curso');
   const hayVivo = enCurso.length > 0;
-  /* «Lo siguiente» SOLO en hoy (firma ②): en otro día la primera cita ya
-     está en la lista de abajo y subirla no diría nada nuevo (L-c). */
-  const proxima =
-    vistaEsHoy && !hayVivo
-      ? citasDeHoySin.find((c) => {
-          const ef = estadoEfectivo(c);
-          return ef === 'confirmada' || ef === 'terminada';
-        })
-      : undefined;
-  const nucleo: CitaAgendaPaseo[] = hayVivo ? enCurso : proxima ? [proxima] : [];
-  /* D-385: la SALIDA del núcleo preside ENTERA — las compañeras de bloque
-     (paseo, misma fecha+hora+duración) suben con él.
-     ⚠️ SOLO EN HOY: una compañera NO viva es una cita de hoy como cualquier
-     otra, y subirla mientras se mira el jueves rompería «solo lo vivo
-     sobrevive». Fuera de hoy la Zona 1 es exactamente `enCurso`. */
-  const clavesNucleo = new Set(
-    nucleo
-      .filter((c) => !sinAgruparIds.has(c.id))
-      .map((c) => claveBloque(c))
-      .filter((k): k is string => k !== null),
-  );
-  const idsNucleo = new Set(nucleo.map((c) => c.id));
-  const companeras = vistaEsHoy
-    ? citasDeHoySin.filter(
-        (c) =>
-          !idsNucleo.has(c.id) &&
-          !sinAgruparIds.has(c.id) &&
-          clavesNucleo.has(claveBloque(c) ?? '\0'),
-      )
-    : [];
-  /* Orden cronológico: con N vivas simultáneas, el orden de `filter` es el de
-     la lista y no dice nada. La hora sí. */
-  const zona1 = [...nucleo, ...companeras].sort((a, b) =>
-    (a.hora ?? '').localeCompare(b.hora ?? ''),
-  );
+  /* ⭐ S86-C (firma final) · ☠️ MURIÓ «LO SIGUIENTE» COMO BLOQUE.
+     ⏪ Acá vivía `proxima` —la primera confirmada del día, promovida a un
+     hero propio— y con ella las compañeras de bloque (D-385).
+     **POR QUÉ SE VA:** la pantalla contaba el día DOS VECES con dos
+     gramáticas —un bloque arriba y una lista abajo— y las citas de las
+     21:00 aparecían ANTES que el selector que dice qué día es.
+     Ahora la próxima cita es, simplemente, **la primera de la línea**.
+     No se pierde: cambia de lugar y gana el orden que antes no tenía.
+
+     ⇒ ARRIBA DEL SELECTOR QUEDA **SOLO LO EN VIVO**. Y eso ya no es «el
+     núcleo»: es `enCurso` y nada más. Las compañeras de bloque tampoco
+     suben — una compañera NO viva es una cita del día como cualquier
+     otra y su lugar es la línea, en su hora. */
+  const zona1 = [...enCurso].sort((a, b) => (a.hora ?? '').localeCompare(b.hora ?? ''));
   const idsZona1 = new Set(zona1.map((c) => c.id));
-  const esViva = (c: CitaAgendaPaseo) => idsNucleo.has(c.id) && hayVivo;
+  const esViva = (c: CitaAgendaPaseo) => idsZona1.has(c.id);
   /* `resto` sale del día EN VISTA. Fuera de hoy, `idsZona1` son citas de hoy
      que no están en esta lista — el filtro no saca nada, que es lo correcto. */
   const resto = citasHoy.filter((c) => !idsZona1.has(c.id));
@@ -1652,30 +1660,29 @@ export default function Hoy() {
           </Tarjeta>
         )}
 
-        {/* ── Zona 1 — ahora / lo siguiente (PRESIDE: encima de todo
-            control e INMUNE al filtro — guard estructural S61-B12) ── */}
-        {/* ⭐ S86-C · el gate ya NO es `vistaEsHoy`: es que la Zona 1 TENGA
-            habitantes. Lo vivo la puebla desde hoy pare donde pare la rueda;
-            «Lo siguiente» solo la puebla en hoy. La condición se mudó al
-            cómputo, que es donde vive la regla. */}
+        {/* ── ⭐ S86-C · ARRIBA DEL SELECTOR: **SOLO LO EN VIVO** (firma
+            final del founder). Preside, e INMUNE al filtro por oficio
+            (guard estructural S61-B12).
+            ⏪ Esta zona se llamaba «ahora / lo siguiente» y tenía dos
+            habitantes; el segundo se mudó a la línea de tiempo, donde la
+            próxima cita es simplemente la primera. Lo vivo la puebla desde
+            HOY pare donde pare la rueda — por eso el gate es tener
+            habitantes y no `vistaEsHoy`. */}
         {pantalla.estado === 'listo' && zona1.length > 0 && (
           <View style={{ gap: spacing[2] }}>
             {/* S52-P7: etiqueta humanizada — sentence case, sin eyebrow.
-                ⭐ S86-C: mirando otro día, el rótulo DECLARA la pertenencia
-                («Ahora · hoy»). El hero se ve; la pantalla no afirma que algo
-                corre en el jueves. */}
+                ☠️ S86-C: murió la rama «Lo siguiente» — acá arriba SOLO vive
+                lo EN VIVO, así que el rótulo ya no tiene dos casos. Sigue
+                declarando la PERTENENCIA cuando la rueda está en otro día
+                («Ahora · hoy»): el hero se ve, y la pantalla no afirma que
+                algo corre en el jueves. */}
             <Texto variante="seccion">
-              {hayVivo
-                ? vistaEsHoy
-                  ? t('agenda.ahora')
-                  : t('agenda.ahoraHoy')
-                : t('agenda.loSiguiente')}
+              {vistaEsHoy ? t('agenda.ahora') : t('agenda.ahoraHoy')}
             </Texto>
             {/* S59-B2 (Ley 19.1): el "Antes" a un tap es NAVEGACIÓN al
-                expediente — viste CeldaNavegacion DENTRO de la tarjeta del
-                hero (el botón ghost de solo texto murió: no decía que se
-                toca ni a dónde va). Ícono 'carnet' = el expediente; la
-                señal "Primera vez" (solo si es REAL) vive en el detalle. */}
+                expediente. ⭐ S86-C: su JSX ya no vive acá — lo arma
+                `accionesDe`, que es UNA fuente para el vivo y para cada
+                fila de la línea. */}
             {/* S80-B14 ① (vigente por B15): UNA TARJETA = UNA CITA — la
                 salida ya no comparte Tarjeta (el canto moría en el medio,
                 donde no hay curva que lo justifique). Cada cita con su
@@ -1692,22 +1699,7 @@ export default function Hoy() {
                     enVivo={viva}
                     oficio={oficioDe(c)}
                     fotoUrl={mascota?.foto_url ? urlsFotos.get(mascota.foto_url) : undefined}
-                    acciones={
-                      mascota ? (
-                        <>
-                          <Separador />
-                          <CeldaNavegacion
-                            icono="carnet"
-                            registro="aa"
-                            titulo={t('agenda.conocerMascota', { nombre: mascota.nombre })}
-                            detalle={esPrimera(mascota.id) ? t('agenda.primeraVez') : undefined}
-                            onPress={() =>
-                              router.push({ pathname: '/mascota/[mascotaId]', params: { mascotaId: mascota.id } })
-                            }
-                          />
-                        </>
-                      ) : undefined
-                    }
+                    acciones={accionesDe(c)}
                   />
                 );
                 return (
@@ -1811,24 +1803,59 @@ export default function Hoy() {
           ) : null
         )}
 
-        {/* ── Zona 2 — el día (B14 ①: una tarjeta = una cita; los
-            Separadores entre citas murieron con la Tarjeta compartida) ── */}
+        {/* ⭐ S86-C (firma final) · LA LÍNEA DE TIEMPO DEL DÍA — con la HORA
+            A LA IZQUIERDA y en orden.
+            ⏪ Antes esto era «el resto» de un día que ya se había contado
+            arriba en otra gramática, y las citas de las 21:00 se leían
+            ANTES que el selector que dice qué día es. Ahora el día se
+            cuenta UNA sola vez, acá, debajo del selector y los filtros.
+            La próxima cita no necesita un bloque propio: **es la primera
+            de la línea**.
+            ⚠️ La hora vive en su COLUMNA, no dentro de la tarjeta —
+            `sinHora` se la saca a la fila para no decirla dos veces a dos
+            centímetros. Alinear las horas es lo que convierte una lista
+            en una línea de tiempo.
+            ⚠️ Y CADA FILA LLEVA SU «Conocer a {mascota}» (`accionesDe`):
+            era lo único que sostenía el bloque muerto y se muda con él,
+            no se pierde.
+            D-385 intacto: la salida grupal sigue siendo UNA fila. */}
         {pantalla.estado === 'listo' && restoItems.length > 0 && (
           <View style={{ gap: spacing[3] }}>
-            {restoItems.map((item) => (
-              <View key={item.tipo === 'cita' ? item.cita.id : item.clave}>
-                {item.tipo === 'cita' ? (
-                  <FilaCita cita={item.cita} enVivo={false} oficio={oficioDe(item.cita)} fotoUrl={item.cita.mascota?.foto_url ? urlsFotos.get(item.cita.mascota.foto_url) : undefined} />
-                ) : (
-                  <FilaSalida
-                    citas={item.citas}
-                    abierta={salidasAbiertas.has(item.clave)}
-                    onToggle={() => toggleSalida(item.clave)}
-                    urlsFotos={urlsFotos}
-                  />
-                )}
-              </View>
-            ))}
+            {restoItems.map((item) => {
+              const horaItem = item.tipo === 'cita' ? item.cita.hora : (item.citas[0]?.hora ?? null);
+              return (
+                <View
+                  key={item.tipo === 'cita' ? item.cita.id : item.clave}
+                  style={{ flexDirection: 'row', gap: spacing[2] }}
+                >
+                  {/* La columna de la hora: ancho fijo para que TODAS las
+                      filas del día queden alineadas — sin eso no hay línea
+                      de tiempo, hay una lista con la hora adelante. */}
+                  <View style={{ width: 46, paddingTop: spacing[3], alignItems: 'flex-end' }}>
+                    <Texto variante="dato">{horaItem ? horaItem.slice(0, 5) : '—'}</Texto>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    {item.tipo === 'cita' ? (
+                      <FilaCita
+                        cita={item.cita}
+                        enVivo={false}
+                        sinHora
+                        oficio={oficioDe(item.cita)}
+                        acciones={accionesDe(item.cita)}
+                        fotoUrl={item.cita.mascota?.foto_url ? urlsFotos.get(item.cita.mascota.foto_url) : undefined}
+                      />
+                    ) : (
+                      <FilaSalida
+                        citas={item.citas}
+                        abierta={salidasAbiertas.has(item.clave)}
+                        onToggle={() => toggleSalida(item.clave)}
+                        urlsFotos={urlsFotos}
+                      />
+                    )}
+                  </View>
+                </View>
+              );
+            })}
           </View>
         )}
 
