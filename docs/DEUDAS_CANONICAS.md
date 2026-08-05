@@ -7623,7 +7623,7 @@ silencio.*
 
 ---
 
-#### D-661 — 🟠 LA PUERTA DEL VERBO ASIGNAR TIENE UN HUECO AL LADO: EL PROFESIONAL SE AUTO-RUTEA POR RLS DIRECTA
+#### D-661 — ✅ **CURADA EN EL MISMO DÍA** (S88-A) · el hueco al lado de la puerta: el profesional se auto-ruteaba por RLS directa
 
 **Hallado al construir la puerta (S88-A), midiendo QUÉ permitía la RLS que la
 puerta iba a duplicar.** No lo introdujo esta sesión: vive desde S77.
@@ -7663,9 +7663,51 @@ El hueco es real y **no tiene por dónde ejercerse todavía** — el primer
 `dar_de_baja_empleado` de un negocio con citas futuras lo abre. *Cero no es
 «no puede»: es «no hay».*
 
-> **☠️ DISPARO:** la primera baja real de un empleado con agenda futura, **o**
-> el lote de superficie de §4ter — lo que llegue primero.
-> **☠️ CONDICIÓN DE MUERTE:** el brazo y la puerta conceden **lo mismo**, con
-> la firma de la mesa escrita al lado.
+### ✅ FIRMA DEL FOUNDER (5-ago-2026) Y CURA, EN EL MISMO DÍA
 
-**Origen: S88-A (construcción de la puerta del verbo asignar).**
+> **«SOLO RECEPCIÓN ASIGNA — el profesional que ve una cita huérfana se la pide
+> a quien reparte; un solo dueño del reparto, sin carreras entre dos que la
+> toman.»**
+
+**Migración `20260805250000`: el tercer brazo MUERE.** Quedan los dos legítimos
+(el titular del negocio · la persona dueña de la cita), textualmente idénticos
+a los de S77.
+
+**Lo que se midió ANTES de acotar** — porque estrechar un gate a ciegas rompe
+caminos igual que ensancharlo abre agujeros:
+
+| medición | valor |
+|---|---|
+| citas con `empleado_id IS NULL` (lo único que el brazo alcanza) | **0** de 112 |
+| wrappers con `.update()` sobre `evento_cita_servicio` | **0** — censo completo |
+
+*Toda escritura del producto sobre la cita viaja por RPC `SECURITY DEFINER`,
+que salta la RLS.* **El brazo no tenía un solo consumidor: era superficie de
+ataque sin camino.**
+
+### Y LO SEGUNDO QUE CONCEDÍA, que nadie había nombrado
+
+El brazo vivía también en el **`WITH CHECK`**, así que una persona podía
+**DESPEGARSE de su propia cita** por UPDATE directo — `USING` pasaba por el
+segundo brazo y el resultado huérfano lo validaba el tercero. *Abandonar una
+cita sin que nadie se entere no es un verbo firmado de esta casa.* **Murió con
+el mismo corte.**
+
+### EL PAR — 3/3, in-txn, ROLLBACK, residuo 0
+
+```
+CARA 1 · el profesional se auto-rutea    → filas=0 · la cita sigue huérfana  ✅
+CARA 2 · NO-REGRESIÓN: el titular escribe → filas=1                          ✅
+CARA 3 · NO-REGRESIÓN: la puerta abre     → ok=true · empleado_id escrito     ✅
+```
+
+> **Las caras 2 y 3 no son adorno: un corte de MÁS es tan defecto como el
+> agujero.** Sin ellas, «filas=0» sería indistinguible de haber dejado al
+> titular sin poder tocar sus propias citas.
+>
+> Y la cara 1 se cuenta por **`ROW_COUNT`**: *un `UPDATE` bajo RLS que no
+> matchea **no falla — afecta cero**.* Esperar una excepción habría dado un
+> verde falso.
+
+**Origen: S88-A (construcción de la puerta del verbo asignar) · firma del
+founder y cura el mismo día.**
