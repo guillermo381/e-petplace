@@ -21,6 +21,7 @@ import { Atmosfera } from '../brand/Atmosfera'
 import { Boton, type BotonVariante } from '../components/Boton'
 import { Tarjeta, type TarjetaTinte } from '../components/Tarjeta'
 import { Campo, PieDeCampo } from '../components/Campo'
+import { CampoCodigo } from '../components/CampoCodigo'
 import { FichaPrestador } from '../components/FichaPrestador'
 import { MapaZona } from '../components/MapaZona'
 import { Celda } from '../components/Celda'
@@ -1312,6 +1313,31 @@ function EjemploSelectorAvatar() {
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[8], justifyContent: 'center' }}>
       <SelectorAvatar nombre="Zeus" especie="perro" foto={sinFoto} onCambiar={setSinFoto} />
       <SelectorAvatar nombre="Zeus" especie="perro" foto={conFoto} onCambiar={setConFoto} />
+    </View>
+  )
+}
+
+function EjemploCampoCodigo({ soloVivo = false }: { soloVivo?: boolean }) {
+  // El probador VIVO tipea de verdad (tocá, tipeá, borrá, pegá el código
+  // entero); los demás son estados congelados para el par visual.
+  const [vivo, setVivo] = useState('')
+  const [conError, setConError] = useState('1234')
+  if (soloVivo) {
+    return <CampoCodigo largo={8} valor={vivo} onCambio={setVivo} etiqueta="Código de recuperación" ayuda="Te lo enviamos por correo" />
+  }
+  return (
+    <View>
+      <CampoCodigo largo={8} valor={vivo} onCambio={setVivo} etiqueta="Código de recuperación" ayuda="Te lo enviamos por correo" />
+      <CampoCodigo
+        largo={8}
+        valor={conError}
+        onCambio={setConError}
+        etiqueta="Con error"
+        error="Ese código no es válido o venció. Pedí uno nuevo."
+      />
+      {/* largo por prop: la pieza no sabe cuánto mide un código */}
+      <CampoCodigo largo={4} valor="42" onCambio={() => {}} etiqueta="Otro largo (4) — el consumidor lo declara" />
+      <CampoCodigo largo={8} valor="12345678" onCambio={() => {}} etiqueta="Deshabilitado (completo)" deshabilitado />
     </View>
   )
 }
@@ -3204,6 +3230,27 @@ function GaleriaInterna() {
               <Campo label="Notas" placeholder="Lo que su cuidador debería saber…" multilinea={3} />
               <Boton variante="primario" etiqueta="Guardar" bloque onPress={() => {}} />
             </Tarjeta>
+          </View>
+        </Seccion>
+
+        {/* CampoCodigo — S88-B, lámina firmada */}
+        <Seccion titulo="CampoCodigo — las cajas por dígito (UN input invisible: tocá y tipeá; pegá el código entero; el largo lo declara el consumidor)">
+          <View style={{ gap: spacing[4] }}>
+            <ThemeProvider defaultMode="light">
+              <PanelTema etiqueta="claro — vacío (tocá para el foco) · con dígitos · error (borde danger, sin gritar) · deshabilitado">
+                <EjemploCampoCodigo />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="dark">
+              <PanelTema etiqueta="oscuro — cajas en bg.elevated, mismo contrato">
+                <EjemploCampoCodigo soloVivo />
+              </PanelTema>
+            </ThemeProvider>
+            <ThemeProvider defaultMode="memorial">
+              <PanelTema etiqueta="memorial — sin degradación especial: no hay celebración que apagar">
+                <EjemploCampoCodigo soloVivo />
+              </PanelTema>
+            </ThemeProvider>
           </View>
         </Seccion>
 

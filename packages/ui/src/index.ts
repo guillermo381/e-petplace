@@ -47,6 +47,7 @@ export {
 // en silencio (medido: PieDeCampo era el único que escapaba). R17 se
 // endureció en la misma tanda, pero la forma correcta se conserva igual.
 export { Campo, type CampoProps, PieDeCampo, type PieDeCampoProps, ALTO_PIE_CAMPO } from './components/Campo'
+export { CampoCodigo, type CampoCodigoProps } from './components/CampoCodigo'
 export {
   CampoFecha,
   type CampoFechaProps,
