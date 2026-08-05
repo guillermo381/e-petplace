@@ -7248,13 +7248,46 @@ AHORA (code estable)             → contrasena_igual → «tiene que ser distin
 **La voz correcta YA EXISTÍA en `MENSAJES` y nadie la usaba: el `regex` la
 pisaba.** *No hubo que escribir la verdad — hubo que dejar de taparla.*
 
-### ⚖️ LA DECISIÓN QUE ESTA FICHA DEBE (mesa): 6 vs 8
+### ③ LA TERCERA PATA — la sesión fantasma, fotografiada por C
 
-Medido: el panel de Supabase tiene `minimum_password_length = **6**`; el
-wrapper y las dos pantallas exigen **8**. **Hoy no hay bug** —el cliente excede
-al servidor, y esa dirección es segura—, pero **son dos reglas para una sola
-cosa**. *Mi lectura: alinear el panel a 8 (es un toggle de la visita admin,
-D-634) y que el número viva en UN lado.* **No lo decido: es del founder.**
+**`verifyOtp` deja sesión, y cuando el paso 2 rebotaba esa sesión quedaba
+viva:** C reinició la app y **entró logueada, sin haber cambiado la
+contraseña**. *No es un cuarto bug: es la MISMA sesión que la cura convierte en
+su herramienta* — la partición la usa a propósito (paso 2 se apoya en ella).
+**Pero la pantalla tiene que saber que existe:** si la persona abandona el
+flujo, queda adentro. **Eso es de C, y va en la lámina de cajas por dígito.**
+
+### DOS HALLAZGOS MÁS, del par de C — viajan en esta ficha
+
+1. **La voz promete «6 dígitos» y el código real tiene 8.**
+   `apps/prestador/src/i18n/es.ts:626` — `codigo: 'El código de 6 dígitos'`.
+   *Un formulario que pide seis para un dato de ocho rechaza lo correcto.*
+2. **`packages/api` VOSEA:** `MENSAJES.codigo_invalido` termina en
+   **«Pedí uno nuevo»**, y `demasiados_intentos` dice **«Esperá»**.
+   **Es D-539 cobrando de nuevo** — el paquete compartido no tiene capa de
+   idioma y habla con acento. *La voz de producto es tuteo (L-148).*
+
+### ⚖️ ✅ LA REGLA ÚNICA DE CLAVE — FIRMADA (founder, S88): **8 EN TODOS LADOS**
+
+**El número vive en UN lugar:** `MIN_LARGO_CONTRASENA = 8`, exportado desde
+`seguridad.ts`. **Hecho en S88-A:**
+
+- `seguridad.ts` — la constante, y el alias local histórico apunta a ella.
+- `auth.ts` — el mensaje del **registro** interpolaba **6** a mano y ahora
+  importa el número. *Ese era el peor de los dos: `registrarse` **no valida
+  largo localmente** —hereda el del servidor— así que su mensaje era una
+  promesa sin guard detrás.*
+
+**Pendiente, y NO es mío:**
+
+| qué | dónde | de quién |
+|---|---|---|
+| `passwordAyuda: 'Al menos 6 caracteres'` | `apps/prestador/src/i18n/es.ts:98` | **C** |
+| `passwordAyuda: 'Al menos 6 caracteres'` | `apps/cliente/src/i18n/es.ts:52` | **la pista del cliente** |
+| `minimum_password_length` → **8** | panel de Supabase | **founder** (D-634 o antes: es un clic) |
+
+*Mientras el panel siga en 6 no hay bug —el cliente excede al servidor— pero la
+firma pide que el número sea uno solo, y dos pantallas todavía dicen otro.*
 
 ### ALCANCE Y ADJUDICACIÓN
 

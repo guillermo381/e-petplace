@@ -58,11 +58,12 @@ export type CodigoErrorSeguridad = (typeof CODIGOS_ERROR_SEGURIDAD)[number];
  *  el lado cómodo, que es el que nadie reporta.*
  *
  *  ⚠️ **YA NO ESPEJA LA CONFIG DEL SERVIDOR — la EXCEDE, y a propósito.**
- *  `minimum_password_length` del panel de Supabase sigue en **6**
- *  (medido). Exceder es seguro en esta dirección: todo lo que el cliente
- *  acepta (≥8) el servidor también. La dirección peligrosa sería la
- *  inversa —cliente laxo, servidor estricto—, y ésa no ocurre.
- *  Alinear el panel a 8 es un toggle de la visita admin (D-634).
+ *  ✅ **FIRMA FOUNDER S88 — 8 EN TODOS LADOS.** El número vive acá, UNA vez
+ *  (`MIN_LARGO_CONTRASENA`), y todo lo que lo diga lo importa. El panel de
+ *  Supabase (`minimum_password_length`, medido en **6**) se alinea a 8 —
+ *  toggle de la visita admin, D-634.
+ *  Mientras el panel siga en 6 no hay bug: el cliente EXCEDE al servidor y esa
+ *  dirección es segura. La peligrosa es la inversa, y no ocurre.
  *
  *  Se valida acá para decirlo ANTES del round-trip (Ley 23), no para
  *  reemplazar al servidor: si los dos divergen, gana el servidor y el
@@ -71,7 +72,10 @@ export type CodigoErrorSeguridad = (typeof CODIGOS_ERROR_SEGURIDAD)[number];
  *  El número viaja INTERPOLADO al mensaje de abajo a propósito: el texto
  *  del rebote es parte del guard, y un guard que dice "6" mientras exige
  *  "8" es el defecto que la candidata #21 nombra. */
-const MIN_LARGO = 8;
+export const MIN_LARGO_CONTRASENA = 8;
+
+/** Alias local histórico — el número vive UNA vez (firma founder S88). */
+const MIN_LARGO = MIN_LARGO_CONTRASENA;
 
 const MENSAJES: Record<CodigoErrorSeguridad, string> = {
   sin_sesion:                   'No hay sesión activa.',

@@ -930,6 +930,7 @@ export {
   pedirCodigoRecuperacion,
   canjearCodigoRecuperacion,
   verificarCodigoRecuperacion,
+  MIN_LARGO_CONTRASENA,
   establecerContrasenaNueva,
   segundosDeEspera,
   type CodigoErrorSeguridad,
