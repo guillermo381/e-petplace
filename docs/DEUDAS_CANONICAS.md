@@ -3369,7 +3369,7 @@ Origen: S86-A, medición para C.
   >
   > | superficie | por qué NADIE la alcanza |
   > |---|---|
-  > | ~~**la rama `administrador` de TODOS los gates**~~ | ~~cero portadores~~ → ✅ **CORRIÓ (S88)**: dos portadores reales, verificada por dedos técnicos ([[D-652]] cerrada; re-gate founder pendiente) |
+  > | ~~**la rama `administrador` de TODOS los gates**~~ | ~~cero portadores~~ → ✅ **CORRIÓ (S88)**: dos portadores reales, verificada por dedos técnicos ([[D-652]] CERRADA COMPLETA: predicados + dedo técnico + dedo del founder) |
   > | **el diseño de la barra de TRES** | se muestra a 5 personas **y el founder no es una de ellas**: su cuenta es titular ([[D-651]]) |
   > | **`AgendaRecepcion`** (el HOY de recepción) | exige **otro rol** — 1 sola fila viva, en Aurora |
   > | **`GateRoto`** | ~~exige un dato **contradictorio** (`rol=false` + `titular=null`)~~ — **⚠️ ENMENDADA S87: esa condición YA NO RIGE** |
@@ -5678,10 +5678,10 @@ importa: **doce de veinticuatro** reglas del lint estaban en esa condición.*
 > login real · `is_admin=false` · escribió 9 servicios y 21 horarios · creó un
 > empleado · **y no pudo nombrar administrador**.
 >
-> ⏳ **El re-gate del founder está PENDIENTE.** *Lo que cierra esta ficha es que
-> la rama YA TIENE PORTADORES y corre* —eso está probado y es lo que la ficha
-> pedía—; **el dedo del founder sobre la superficie es otra verificación, y no
-> se da por hecha.**
+> ✅ **Y EL DEDO DEL FOUNDER TAMBIÉN CORRIÓ: VERDE, los cuatro pasos**
+> (5-ago, sobre `019fd3db`). **La ficha cierra COMPLETA:** la rama tiene
+> portadores, corre, y su límite se probó en las tres formas — predicados,
+> dedo técnico y dedo del founder.
 
 **El texto original, conservado como historia:**
 
@@ -7371,10 +7371,22 @@ de GoTrue.**
 
 ---
 
-#### D-660 — ✅ **CURADA en su mitad de MOTOR, verificada por predicados y dedos técnicos** (S88, 5-ago-2026) · ⏳ **re-gate founder FRENADO EN PASO 1** (causa curada, espera bundle) · 🟠 su mitad de SUPERFICIE sigue abierta
+#### D-660 — ✅ **CURADA Y GATEADA en su mitad de MOTOR** (S88, 5-ago-2026) · 🟠 su mitad de SUPERFICIE sigue abierta · 🟠 su mitad de SUPERFICIE sigue abierta
 
-> **GATEADA POR PREDICADOS Y POR DEDOS TÉCNICOS. ⏳ EL RE-GATE DEL FOUNDER
-> ESTÁ PENDIENTE.**
+> ## ✅ RE-GATE DEL FOUNDER: **VERDE, LOS CUATRO PASOS** (5-ago, sobre `019fd3db`)
+>
+> Con `+s88rolpuro`: **el equipo CARGÓ** (la cura del espejo verificada a dedo)
+> · **invitó un empleado** · **editó una oferta** · y **nombrar administrador
+> NO EXISTE ante su dedo**.
+>
+> **El límite quedó probado en TRES formas, y las tres hacían falta:** por
+> **predicados** (el cinturón lee que `empleado_roles` no usa el helper), por
+> **dedo técnico** (SQL con sus claims) y por **el dedo del founder** sobre la
+> app real. *El predicado no sabe si alguien lo alcanza; el dedo técnico no sabe
+> si la pantalla lo ofrece; el del founder no sabe si mañana alguien lo abre.*
+>
+> **Y el primer intento de este re-gate FRENÓ EN EL PASO 1** — ver abajo: la
+> causa no estaba en el lote, y ningún fixture podía encontrarla.
 >
 > **Lo que SÍ ocurrió** (S88-A, sobre la cuenta del rol puro
 > `+s88rolpuro`, sin fila en `admin_users`): `is_admin=false` · `gestiona=true`
@@ -7388,8 +7400,10 @@ de GoTrue.**
 > que cada una sola —el predicado no sabe si alguien lo alcanza, y el dedo no
 > sabe si mañana alguien lo abre— **pero ninguna es el dedo del founder**.*
 >
-> ### ⚠️ POR QUÉ ESTA CORRECCIÓN ESTÁ ESCRITA Y NO SOLO HECHA
-> **Esta ficha llegó a afirmar un re-gate que no ocurrió.** *Una ficha que
+> ### ⚠️ UNA CORRECCIÓN QUE SE CONSERVA AUNQUE EL GATE YA ESTÉ VERDE
+> **Esta ficha llegó a afirmar un re-gate que no había ocurrido.** *Hoy ocurrió
+> y salió verde — y la nota queda igual, porque el error no fue el resultado:
+> fue afirmarlo antes.* *Una ficha que
 > declara un gate inexistente es exactamente el dato falso que esta casa caza
 > en el código y no puede depositar en sus actas* — y es peor acá, porque un
 > acta no tiene typecheck: sobrevive a quien la escribió y se lee como hecho.
