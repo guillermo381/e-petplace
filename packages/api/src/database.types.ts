@@ -1543,6 +1543,7 @@ export type Database = {
           orden: number
           techo_max: number
           techo_ventana_horas: number
+          vigencia_horas: number | null
         }
         Insert: {
           apagable_existencia: boolean
@@ -1553,6 +1554,7 @@ export type Database = {
           orden: number
           techo_max?: number
           techo_ventana_horas?: number
+          vigencia_horas?: number | null
         }
         Update: {
           apagable_existencia?: boolean
@@ -1563,6 +1565,7 @@ export type Database = {
           orden?: number
           techo_max?: number
           techo_ventana_horas?: number
+          vigencia_horas?: number | null
         }
         Relationships: []
       }
@@ -10573,6 +10576,39 @@ export type Database = {
           },
         ]
       }
+      notificacion_config: {
+        Row: {
+          alcance: string
+          apagado_en: string | null
+          apagado_por: string | null
+          despacho_activo: boolean
+          motivo: string | null
+          techo_duro_max: number
+          techo_duro_ventana_horas: number
+          updated_at: string
+        }
+        Insert: {
+          alcance: string
+          apagado_en?: string | null
+          apagado_por?: string | null
+          despacho_activo?: boolean
+          motivo?: string | null
+          techo_duro_max?: number
+          techo_duro_ventana_horas?: number
+          updated_at?: string
+        }
+        Update: {
+          alcance?: string
+          apagado_en?: string | null
+          apagado_por?: string | null
+          despacho_activo?: boolean
+          motivo?: string | null
+          techo_duro_max?: number
+          techo_duro_ventana_horas?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notificacion_intencion: {
         Row: {
           categoria: string
@@ -17240,6 +17276,7 @@ export type Database = {
         Args: { p_evento_id: string; p_motivo: string }
         Returns: undefined
       }
+      despachar_notificaciones: { Args: { p_seco?: boolean }; Returns: Json }
       eje_de_tipo_servicio: {
         Args: { p_tipo_servicio: string }
         Returns: string
