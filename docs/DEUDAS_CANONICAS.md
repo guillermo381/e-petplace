@@ -2980,6 +2980,28 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
   > **Por eso la frontera no dice "sé generoso" ni "sé austero": dice CONTÁ.**
   > *El radio no es una virtud de carácter — es el resultado de un censo, y un
   > censo se corre en un minuto.*
+- **L-201 — CERO ES UN DATO, AUSENCIA ES UN VACÍO (S86, firmada por la mesa — la hermana VISUAL de L-197).**
+
+  > ### **UN CERO MEDIDO NO SE DIBUJA COMO AUSENCIA.**
+  > *L-197 lo dice de los datos —un fallo degrada a ausencia, nunca a un valor—; **ésta lo dice del PÍXEL, y en la dirección contraria**: si el motor midió y dio cero, **el cero se muestra**. Desmontar el bloque convierte «hoy no hubo» en «acá no hay nada», y son cosas distintas.*
+
+  **EL CASO (S86):** el techo de los tres números del HOY **se desmontaba en los días sin citas**. Al pasar la rueda de días, el bloque **aparecía y desaparecía** y el layout saltaba. **Cura de C (`309a1ef`): el bloque SIEMPRE se monta; un día sin servicios muestra `0`.**
+
+  **Y el costo del defecto no fue el salto — fue lo que el salto hizo creer.**
+
+  ### ➕ LA MITAD DE MÉTODO, que es la que vale guardar
+
+  **El founder reportó una regresión: *«lo vivo desaparece al cambiar de día»*. La mesa dedicó una ronda entera a buscarla en la Zona 1 — y NO EXISTÍA.** Las tres firmas del HOY funcionaban; el gate sobre `019fce93` lo confirmó: **al mover el selector, lo vivo se queda.**
+
+  > ### **EL SÍNTOMA REPORTADO Y EL DEFECTO REAL ERAN DOS PANTALLAS DEL MISMO SCROLL.**
+
+  **Las tres hipótesis de A salieron falsas —el escape del NUL, `vistaEsHoy ? … : []`, el desacuerdo del comentario `:1575`— y salieron falsas por la MEJOR razón posible: no había defecto que explicar ahí.**
+
+  > **LA MEDICIÓN NO FALLÓ. FALLÓ LA PREMISA DE DÓNDE MIRAR.** *Y por eso el descarte valió lo que costó:* **sin él, la cura habría caído sobre código sano** — se habría "arreglado" la Zona 1, el salto habría seguido, y el HOY quedaría con una cicatriz sobre un defecto que nunca tuvo.
+
+  **⇒ LA REGLA OPERATIVA: un síntoma reportado nombra UNA PANTALLA, no una CAUSA.** *Antes de curar, se reproduce el síntoma y se confirma QUÉ se movió — porque el ojo reporta desde donde estaba mirando, y en un scroll largo eso puede ser otra zona.* **El descarte de una hipótesis con el gate en la mano no es tiempo perdido: es lo único que evita cirugía sobre lo sano.**
+  Hermana de [[L-197]] (su cara de dato) y de **L-144** (relevar antes de curar). Origen: S86 — reporte del founder, tres hipótesis descartadas, cura de C en otra zona.
+
 - **L-200 — UN REPORTE DE PROGRESO ES UNA AFIRMACIÓN SOBRE UN HECHO, Y SE VERIFICA ANTES DE EMITIRLO (S86, firmada por la mesa — caso propio de A).**
 
   > ### **«ESTÁ CORRIENDO» ES UNA MEDICIÓN, NO UNA INTENCIÓN.**
