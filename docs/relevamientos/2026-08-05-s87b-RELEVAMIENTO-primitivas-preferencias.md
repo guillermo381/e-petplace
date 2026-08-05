@@ -132,14 +132,29 @@ canal)`.** ⇒ la columna de canales **hoy no tiene dónde escribirse**.
 
 ### HALLAZGO #3 — el ancho: tres columnas de canal en un teléfono · **MEDIDO** *(pedido de mesa, 5-ago)*
 
-**MÉTODO:** la geometría sale del objeto (`SelectorOpcion.tsx` + tokens);
-el ancho del texto se midió con **la fuente real** —
-`DMSans_500Medium.ttf` de `@expo-google-fonts`, cargada en Chrome
-headless. **La medición lleva su propio discriminador**: se verifica
-`document.fonts.check()` antes de medir. *Hizo falta: la primera corrida
-midió con el fallback del sistema y dio «WhatsApp» = 56px; con la fuente
-cargada son **65px**. Números creíbles y falsos, exactamente la familia
-L-194→L-199 — por eso el chequeo quedó adentro.*
+**MÉTODO — el instrumento vive en el repo: `scripts/medir-chips-canal.mjs`**
+*(depositado por adjudicación de mesa: los bordes son de 6 y 5 píxeles, y
+las keys de voz de los canales todavía no nacen ⇒ **esto se vuelve a
+correr** cuando existan las etiquetas reales).* La geometría sale del
+objeto (`SelectorOpcion.tsx` + tokens); el ancho del texto se mide con
+**la fuente real** — `DMSans_500Medium.ttf` de `@expo-google-fonts`,
+cargada en Chrome headless.
+
+**LA MEDICIÓN LLEVA SU PROPIO DISCRIMINADOR, y no es decorativo — se
+cobró en la primera corrida:** sin `document.fonts.check()` el canvas cae
+al fallback del sistema y devuelve números **creíbles y falsos**
+(«WhatsApp» **56px** con el fallback · **65px** con DM Sans). *Se cazó
+porque el MISMO string dio dos anchos distintos entre juegos.* Es la
+familia L-194→L-199 exacta, y por eso el chequeo quedó adentro del
+script: **si la fuente no carga, sale ROJO y no mide** (L-197).
+
+> **Y una corrección que entró AL DEPOSITARLO, que vale más que el
+> script:** con el payload de la fuente corrupto, `fonts.load()` **lanza**
+> y el script moría con un stack trace de Playwright — *exit 1 correcto y
+> mensaje que no decía nada*. Ahora los dos modos de falla (lanza · o
+> `check` da false) van al **mismo rojo hablado**. **El mensaje de un
+> guard es parte del guard:** sin eso, el próximo que lo corra lee
+> «NetworkError» y va a buscar el problema en su red.
 
 **LA ARITMÉTICA, con sus términos:**
 `disponible = ancho − 40 (padding de pantalla) − 24 (Tarjeta 'normal')` ·
