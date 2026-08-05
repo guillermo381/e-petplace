@@ -130,14 +130,75 @@ ausente = habilitada»*. **La unidad de §6 es `(persona, categoría,
 canal)`.** ⇒ la columna de canales **hoy no tiene dónde escribirse**.
 *Territorio de A; se declara como precondición, no como pedido.*
 
-### HALLAZGO #3 — el ancho: tres columnas de canal en un teléfono
+### HALLAZGO #3 — el ancho: tres columnas de canal en un teléfono · **MEDIDO** *(pedido de mesa, 5-ago)*
 
-`SelectorOpcion` tiene `'fila'` (2-4 chips que llenan el ancho) y
-`'columnas'` (**dos** columnas de ancho uniforme). **Tres canales entran
-en `'fila'` por contrato** — *pero eso es aritmética de props, no una
-verificación en pantalla*: **no se midió con las tres etiquetas reales, en
-las dos apps, con el texto largo del inglés.** **Se declara sin medir** y
-es una de las cosas que la lámina tiene que ver sobre píxeles (L-143).
+**MÉTODO:** la geometría sale del objeto (`SelectorOpcion.tsx` + tokens);
+el ancho del texto se midió con **la fuente real** —
+`DMSans_500Medium.ttf` de `@expo-google-fonts`, cargada en Chrome
+headless. **La medición lleva su propio discriminador**: se verifica
+`document.fonts.check()` antes de medir. *Hizo falta: la primera corrida
+midió con el fallback del sistema y dio «WhatsApp» = 56px; con la fuente
+cargada son **65px**. Números creíbles y falsos, exactamente la familia
+L-194→L-199 — por eso el chequeo quedó adentro.*
+
+**LA ARITMÉTICA, con sus términos:**
+`disponible = ancho − 40 (padding de pantalla) − 24 (Tarjeta 'normal')` ·
+`requerido = Σtexto + 3×32 (padX del chip) + 2×8 (gap)`
+
+**① A ESCALA DE FUENTE POR DEFAULT, LOS TRES ENTRAN EN TODOS LOS ANCHOS —
+incluido 320dp.** *(«Push» 30 · «Correo» 43 · «Email» 33 · «WhatsApp» 65)*
+
+| juego | requerido | 320dp | 360dp | 393dp | 412dp | 448dp *(emulator, medido con adb)* |
+|---|---|---|---|---|---|---|
+| **es** `Push · Correo · WhatsApp` | 250px | ✓ **+6** | ✓ +46 | ✓ +79 | ✓ +98 | ✓ +134 |
+| **en** `Push · Email · WhatsApp` | 240px | ✓ +16 | ✓ +56 | ✓ +89 | ✓ +108 | ✓ +144 |
+
+> **La respuesta corta es SÍ, y la holgura de 320dp es SEIS PÍXELES.** No
+> es «entra cómodo»: es «entra».
+
+**② Y ACÁ ESTÁ EL DATO QUE CAMBIA LA CONVERSACIÓN — la escala de fuente
+del sistema.** Medido: **`allowFontScaling` NO está apagado** en
+`SelectorOpcion` (solo lo apagan `Cronometro` y una pieza del perfil), y
+**no existe `maxFontSizeMultiplier` en ningún lado del repo**. ⇒ el texto
+del chip crece con el ajuste del SO **y el padding no**.
+
+| escala | qué es | 320dp | 360dp | 393dp | 412dp |
+|---|---|---|---|---|---|
+| ×1.00 | default | ✓ | ✓ | ✓ | ✓ |
+| ×1.15 | Android «Grande» | **✗ −15** | ✓ +25 | ✓ +58 | ✓ +77 |
+| ×1.30 | Android «El más grande» *(tope del ajuste normal)* | ✗ −35 | ✓ **+5** | ✓ +38 | ✓ +57 |
+| ×1.50 | Samsung / accesibilidad | ✗ −63 | **✗ −23** | ✓ +10 | ✓ +29 |
+| ×2.00 | iOS Dynamic Type accesibilidad | ✗ | ✗ | ✗ | ✗ |
+
+*(valores del juego `es`, el más ancho de los dos cortos.)*
+
+**③ QUÉ PASA CUANDO NO ENTRA, medido en el contrato y no supuesto:**
+`disposicion='fila'` es **`flexWrap:'nowrap'`** y su etiqueta va con
+**`numberOfLines={1}`** ⇒ **trunca con elipsis. No envuelve.** Y el chip
+usa **`height: ALTO` fijo** (44) — a diferencia de `'columnas'`, que usa
+`minHeight` justamente para dejar envolver. **El canal que trunca primero
+es «WhatsApp»**, que es el más largo, es marca, y **no se puede acortar ni
+traducir.**
+
+**④ LA ALTERNATIVA YA EXISTE EN LA MISMA PIEZA, y no es un componente
+nuevo:** `disposicion='grilla'` tiene **`flexWrap:'wrap'`** y `flexGrow 0`
+⇒ los chips van a **ancho de contenido y bajan de línea** en vez de
+truncar. Pierde la retícula de tres columnas alineadas; gana que **ninguna
+etiqueta se corte a ninguna escala.**
+
+> **LO QUE ESTO NO DECIDE:** cuál de las dos disposiciones usa la lámina,
+> si se apaga el escalado (que sería empujar accesibilidad hacia atrás), o
+> si se acota con `maxFontSizeMultiplier`. **Son tres decisiones distintas
+> y las tres son de la lámina.** Lo que la medición aporta es que **la
+> pregunta no era «¿entran?» sino «¿entran cuando alguien agranda la
+> letra?»** — y ahí la respuesta cambia según el ancho.
+
+> ⚠️ **EL LÍMITE DE ESTA MEDICIÓN, declarado:** es canvas en Chrome con la
+> fuente real, **no un render de React Native en un aparato**. El
+> *shaping* de RN puede diferir en algún píxel. **Los bordes de ±6px
+> (320dp default) y +5px (360dp ×1.30) están DENTRO de ese margen de
+> error** — esos dos casos hay que verlos en pantalla antes de apoyar
+> nada en ellos (L-143).
 
 ### HALLAZGO #4 — la voz honesta de §6 no tiene keys
 
@@ -149,8 +210,8 @@ ninguna de las dos apps. *Es letra de la lámina, no de esta medición.*
 
 ## 4 · LO QUE ESTE RELEVAMIENTO **NO** MIDIÓ, declarado
 
-- **No se midió en pantalla.** Todo lo de acá es contra el código y la
-  letra. **Ningún píxel se vio.**
+- **No se midió en pantalla.** Todo lo de acá es contra el código, la
+  letra y la fuente real en canvas. **Ningún píxel de React Native se vio.**
 - **No se midió el lado prestador de la matriz** más allá de constatar que
   su vocabulario de tipos no existe.
 - **No se midió a11y de la matriz** (cómo lee un lector de pantalla una
