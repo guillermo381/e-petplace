@@ -499,6 +499,40 @@ del selector de mascota (S73). Cuando D-499 dispare (el LLENO a todos
 los selectores), no será cambio de opinión — será esta dirección
 cumpliéndose.
 
+### ➕ S86 — LA REGLA CHANEL GANA SU **CONDICIÓN** (firma founder)
+
+> ### **«BORDE + SOMBRA = DECIRLO DOS VECES» RIGE **CUANDO LA SOMBRA LO DICE**. EL LÍMITE LO PONE EL **CONTRASTE**.**
+
+**La regla era correcta y su alcance era ciego:** quitaba el hairline
+**siempre** que hubiera elevación, sin preguntar si la elevación se
+**veía**. **Medido en claro: la tarjeta `#FFFFFF` sobre el papel algodón
+`#FAF9F7` da un contraste de `1.052`** — *una sombra que no se ve no dice
+nada, y quitarle el hairline no elimina una redundancia: elimina el
+único límite que la superficie tenía.*
+
+**⇒ EN CLARO, LA SUPERFICIE EN REPOSO RECUPERA SU HAIRLINE.** En oscuro
+la regla sigue intacta: ahí la sombra **sí** habla.
+
+*(El borde de TINTE nunca fue hairline —es semántico de capa/status— y
+se conserva en los dos temas.)*
+
+### ➕ S86 — `border.presente`: JERARQUÍA **ENTRE DOS BORDES** (firma founder)
+
+**Nace para el único caso donde dos bordes tienen que distinguirse ENTRE
+SÍ: la gramática ESTÁ / ESPERA de `TarjetaEstado`.** *No es «un borde más
+fuerte»: es el segundo escalón de una escala de presencia.*
+
+| tema | valor | contraste medido |
+|---|---|---|
+| **claro** (`palette.light5` `#C4BFD8`) | — | **1.693** sobre papel algodón `#FAF9F7` · **1.663** sobre el tapiz del oficio `#F4F8F6` |
+| *comparación* (`light4`, el borde normal) | — | **1.234 / 1.212** ⇒ el presente separa **≈1.4×** |
+| **oscuro** | `palette.dark5` | — |
+| **memorial** | `rgba(143,166,142,.30)` | — |
+
+**Y lo que se DESCARTÓ, con su razón:** `#B8B2CE` (**1.938**) separaba
+más **y empezaba a leerse como MARCO**. **La Ley 20 mata el marco**, y lo
+que hace falta acá es **jerarquía entre dos límites, no encerrar**.
+
 ## 7bis. EL EJE DEL RELLENO — FIRMADO (founder, 29-jul-2026, S81)
 
 **SE RELLENA LO QUE EXISTE · SE CONTORNEA LO QUE SE FIJA** (ley 19.8

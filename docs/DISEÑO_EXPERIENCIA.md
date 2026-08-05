@@ -659,7 +659,29 @@ publicados, jamás la sesión que construyó** (L-153).
    IDENTIDAD.** Un contenedor y su contenido no comparten nombre — si lo
    comparten, el usuario no sabe si entró o sigue afuera.
 
-### 15b.0 · LA CONSOLIDACIÓN DE TABS (S86) — el plan, y LO QUE FALTA MEDIR
+### 15b.0 · LA CONSOLIDACIÓN DE TABS (S86) — **EJECUTADA**; el reparto de los diez destinos, cerrado
+
+> **✅ S86 — EL REPARTO DE LOS DIEZ DESTINOS QUEDÓ FIRMADO Y CONSTRUIDO.**
+> **El criterio, y vale más que la tabla: LA PERTENENCIA DECIDE ANTES QUE EL VERBO.**
+> *«El verbo describe la ACCIÓN; no dice de QUIÉN es la cosa.»*
+>
+> | destino | a dónde | por qué (la pertenencia) |
+> |---|---|---|
+> | `equipo` · `estadisticas` | **DATOS** | el negocio en números |
+> | **`reseñas`** | **DATOS** | tras la mudanza NEGOCIO es *«lo que se configura»*, y **una reseña no se configura**: no hay verbo de gestión posible sobre ella |
+> | **`casos-heredados`** | **DATOS** | **el caso clínico es del PET PARENT** (`MODELO_VETERINARIA` Parte I). *Lo consultás vos y no es tuyo* — ponerlo en NEGOCIO afirmaría lo que la letra niega |
+> | **`movimiento`** | **CUENTA**, con el **gate de Cobros** | plata de la cuenta comercial. **NO SE PARTE:** *«Lo que te espera» en HOY es la OPERACIÓN, el ledger es la CONSULTA — dos vistas, una fuente* |
+> | `liquidaciones` | **donde está** | — |
+> | los cuatro talleres | **NEGOCIO** | lo que se configura |
+> | **`Cobros`** | **NO se muda** | firma previa; se sostiene |
+>
+> **⚠️ `reseñas` VIAJÓ CON UN PERMISO DECLARADO Y SIN RESOLVER** *(firma:
+> se cierra en el gate por rol, no en la mudanza)*: la reputación tiene
+> dos capas (negocio · persona). **Que un no-titular vea todas las
+> reseñas del negocio es la misma pregunta que `L-198` encontró con la
+> plata del día.**
+
+**El plan original, conservado como registro:**
 
 **El diseño firmado son CUATRO superficies:**
 
@@ -742,6 +764,31 @@ servicios distintos es **legal por persona** (la ocupación protege el
 cuerpo) y el mismo alcance resuelve por **MERGE server-side atómico con
 retorno hablado + `GIST EXCLUDE` como piso**. No existe doc dedicado de
 horarios: esa deuda ES su letra.
+
+### 15b.0ter · LA LÍNEA DE TIEMPO DEL HOY (S86, construida y gateada)
+
+> ### **EL HOY DEJABA DE CONTAR EL DÍA DOS VECES.**
+
+**Lo que rige:** **arriba, SOLO LO VIVO**; **el día, ABAJO y EN ORDEN**.
+*Antes el mismo día se narraba en dos lugares con dos criterios, y el
+lector tenía que reconciliarlos.*
+
+- **☠️ MUERE «LO SIGUIENTE» COMO BLOQUE.** *No se pierde información: lo
+  siguiente es, sencillamente, **lo próximo de la línea** — un bloque
+  aparte lo duplicaba.*
+- **EL LABEL DEL DÍA SIEMPRE SE MONTA** *(y con él, el techo de los tres
+  números — ver **L-201**: **un cero medido no se dibuja como
+  ausencia**)*. **Un bloque que aparece y desaparece hace saltar el
+  layout al pasar la rueda**, y el salto se lee como un defecto de otra
+  zona.
+- **«Conocer a {mascota}» se muda con su bloque** — la acción viaja con
+  el contenido que la justifica, no con la posición.
+
+*El reparto de destinos que acompañó esta composición
+(`reseñas`/`casos-heredados` → DATOS · `movimiento` → CUENTA ·
+`liquidaciones` donde está) vive en §15b.0 · LA CONSOLIDACIÓN DE TABS.*
+
+---
 
 ## 15b.0bis — LA GRAMÁTICA "ESTÁ ADENTRO / ESPERA" (S78, anatomía en uso; firma founder por gate global)
 

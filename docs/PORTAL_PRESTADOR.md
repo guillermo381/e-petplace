@@ -3087,6 +3087,70 @@ Ese es el éxito del documento. Cumplirlo es trabajo de los meses y años que vi
 
 ---
 
+## 13bis. EL MOSTRADOR Y LA PIZARRA — LETRA S86 (firma founder)
+
+> **Fuente única de la ventanilla.** *La modulación por actor vive en
+> `BIO_EXPEDIENTE` A3; la casa del prestador en `DISEÑO_EXPERIENCIA`
+> §15b — se referencian, no se copian.*
+
+### 13bis.1 · EL MOSTRADOR ES DE TODOS LOS OFICIOS
+
+**Firma del founder (S86): la ventanilla NO es clínica.** *El walk-in
+nació vet **porque ahí estaba el caso vivo**, no porque los otros
+oficios estuvieran excluidos.* **§7 no los prohíbe: no los contempló —
+y una omisión no es una prohibición.**
+
+**Estado medido al cierre de S86:** el camino desde un paseador llega
+**limpio hasta la puerta** (entrada · búsqueda · alta · handshake), sin
+una sola pantalla vet. **Lo que NO abre todavía es el registro:
+`D-654`**, con su rumbo firmado y su orden de construcción.
+
+### 13bis.2 · EL COBRO ES POR OFICIO
+
+| oficio | cuándo se cobra |
+|---|---|
+| **veterinaria** | **al TERMINAR** |
+| **los demás** | **al INICIAR** |
+
+*El acto clínico no tiene precio cerrado hasta que ocurre; los otros
+oficios se pactan antes.*
+
+### 13bis.3 · LO CLÍNICO NO VIAJA
+
+**Lo clínico no sale de su oficio.** *Un paseador que registra una
+atención no gana ninguna superficie clínica por hacerlo* — el gate del
+CHIP (§14, ley madre S76) sigue rigiendo entero.
+
+### 13bis.4 · EL CIRCUITO MOSTRADOR ⇄ PIZARRA
+
+**Una cita puede nacer SIN tratante: eso es LA PIZARRA.** *Y lo que la
+vuelve honesta es que sea una **elección**, no un descuido:*
+
+> ### **DEJAR UNA CITA SIN TRATANTE ES UNA ELECCIÓN — Y ELEGIR ES OBLIGATORIO CUANDO SE OFRECE.**
+>
+> «A la pizarra» **dejó de ser un accidente y es un chip**: el mostrador
+> elige tratante o elige la pizarra, pero **elige**. *Una cita sin
+> tratante por omisión es indistinguible de una por decisión, y solo la
+> segunda tiene quién la mire.*
+
+**TOMAR RELLENA UN `NULL`.** *Reasignar es **inexpresable por esa
+puerta**: el `WHERE empleado_id IS NULL` del `UPDATE` lo vuelve
+imposible **por construcción, no por disciplina** — no hay SQL en esa
+función que pueda pisar a un tratante ya puesto, ni por error ni a
+propósito.*
+
+**Y CUANDO ALGUIEN LLEGA PRIMERO, LA FILA SE QUEDA Y LO DICE.** *Cero
+filas afectadas no es «no pasó nada»: es que alguien llegó antes.* **El
+rebote es tipado (`ya_tomada`) y la superficie lo dice — jamás la saca
+en silencio.**
+
+**El cupo de la pizarra sale del mismo motor que gobierna todo lo demás**
+(personas elegibles con ese inicio libre, menos las ya puestas a la
+pizarra a esa hora) y **tiene voz propia**: `sin_quien_la_tome` **no es**
+`slot_ocupado`. *La hora existe; lo que falta es gente.*
+
+---
+
 ## 14. El equipo del negocio — LETRA_EQUIPO (v3, S73→S76; enmiendas S75/S76/S78)
 
 > **⚠️ ENMIENDAS S78 (27-jul) — LAS PANTALLAS QUE ESTA LETRA DESCRIBÍA COMO

@@ -221,6 +221,22 @@ ancla se lee al bundlear.
 
 ---
 
+## 3ter · EL MERGE Y EL ANCLA — regla 86 *(CONTRATO v1.29, S86)*
+
+**El trabajo de una pista entra a `main` con `git merge --no-ff`.**
+**Prohibidos entre pistas: `rebase`, `squash`, `cherry-pick`.**
+
+> ### **UN HASH QUE UN ACTA CITA TIENE QUE SEGUIR RESOLVIENDO.**
+
+**Y el corolario que toca al publish: EL ANCLA DEL OTA ES EL COMMIT DE
+FUSIÓN, jamás el último de la pista** — *el bundle se arma desde `main`,
+así que el hash de la rama nombra un árbol que nunca se bundleó.*
+
+**La letra completa vive en `CONTRATO_TRABAJO` regla 86** — acá solo su
+consecuencia operativa. *Se referencia, no se copia.*
+
+---
+
 ## 3bis · LA SEGUNDA MITAD DEL PASO ⓪ — el guard del destino *(firmada por la mesa, S86)*
 
 > ### **EL PASO ⓪ VERIFICABA EL ANCLA; LE FALTABA VERIFICAR EL DESTINO.**
