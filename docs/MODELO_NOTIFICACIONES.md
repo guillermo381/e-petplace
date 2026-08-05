@@ -295,6 +295,9 @@ UI):
    intención ya encolada y no enviada MUERE — la cola se purga. Un
    recordatorio de vacuna que llega el día después es la peor falla
    imaginable de este producto.
+   > **Candidata S87 — la excepción INVITADA:** el «Homenaje» de §13bis ① es la
+   > única puerta contemplada a este silencio, y **solo abre con opt-in
+   > explícito de la familia**. No rige: es letra a diseñar.
 2. **MENORES (P5).** Un evento con `aportado_por_menor` no genera
    intención. Ninguna notificación se dirige a un menor.
 3. **ROL Y ACCESO** (§2 capa 2).
@@ -554,6 +557,57 @@ Lo que cada uno le exigirá al motor. Su catálogo se escribe cuando exista.
   mismo aviso; la categoría existe, **el aviso todavía no**.
 - **La build de push corta runtime nuevo**, con el bump **en el mismo rango que
   la build, jamás antes** — **propuesta de mesa registrada, sin firma.**
+
+### DOS REGISTROS DEL GATE DE SOMBRA (S87) — CANDIDATAS, SIN CONSTRUCCIÓN
+
+#### ① «HOMENAJE» — la excepción INVITADA al silencio del memorial
+
+**Candidata de letra, nacida en el gate de la sesión de sombra (founder, S87).**
+No toca S87 ni ningún lote en curso; **nace como letra a diseñar, con mesa
+propia y gate del founder.**
+
+**La idea:** una fecha de homenaje —Día de los Muertos como caso canónico— en la
+que la familia **elige recibir** un recuerdo de su mascota. Forma exigida desde
+ya, para que el día que se diseñe no se discuta el piso:
+
+- **OPT-IN EXPLÍCITO POR FAMILIA, CON EVIDENCIA** — patrón de §6 (el mismo que
+  WhatsApp): se guarda quién, cuándo, por qué método y **el texto exacto que se
+  mostró**. *Nadie recibe un homenaje que no pidió.*
+- **ANUAL**, no una cadencia.
+- **CATEGORÍA PROPIA**, jamás `comercial` — y **jamás con contenido comercial
+  adentro** (§3: `comercial` no viaja con otra categoría; acá ni siquiera se
+  toca).
+
+> **EL ESPÍRITU, que es lo que hay que conservar aunque el diseño cambie:**
+> **el silencio del memorial es respeto — y un homenaje ACEPTADO también lo es.**
+> *§5.1 apaga todo porque nadie pidió nada; esta excepción existe solo donde
+> alguien pidió, y por eso no la contradice: la completa.*
+
+**Y el borde que hay que resolver cuando se diseñe, declarado ahora:** la regla
+de la transición (§5.1) **purga la cola** al entrar en memorial. Un homenaje
+anual **no puede vivir en esa cola** — o se purga solo. Nace de otra parte, y
+eso es diseño, no detalle.
+
+#### ② RESERVA DEL FOUNDER sobre `comercial` — con la respuesta de mesa al lado
+
+**Registrada el 5-ago-2026.** El founder **no firma «nunca»** para un envío de
+administración fuera del consentimiento.
+
+**La respuesta de mesa, en el mismo lugar y con la misma fecha:**
+
+- **No se construye puerta trasera.** Un mecanismo que exista «por si acaso» se
+  usa el día que alguien tenga apuro, y para entonces nadie recuerda la reserva.
+- **Lo urgente-para-todos YA VIAJA:** `seguridad_cuenta` y `salud_seguridad` son
+  no apagables por diseño. *Si algo es de verdad urgente para todos, ya tiene
+  categoría — y si no la tiene, la pregunta correcta es cuál es, no cómo saltear
+  el consentimiento.*
+- **Si el día llega, abre con mesa propia** y **declarando el choque** contra la
+  letra firmada hoy (§3/§6/§12.3: `comercial` es opt-in, apagado por defecto,
+  y siempre porta su salida).
+
+> **La reserva queda fechada; el mecanismo NO EXISTE.** *Se escribe acá para que
+> el día que se discuta, se discuta contra una letra que ya sabía que esto
+> podía pasar — y no como si fuera una idea nueva.*
 
 ### Candidatas registradas por el censo S87 (no rigen)
 
