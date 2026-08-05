@@ -1,0 +1,296 @@
+#!/usr/bin/env node
+/**
+ * verify:premisas — EL GUARD DE LAS PREMISAS INERTES (S87-B, D-651 ②).
+ *
+ * ┌───────────────────────────────────────────────────────────────────┐
+ * │ UNA CONDICIÓN QUE EL CÓDIGO DECLARA «INERTE» SE MIDE CONTRA EL    │
+ * │ MOTOR, NO SE DESCRIBE. SI LA PREMISA CADUCA, ROJO.                │
+ * └───────────────────────────────────────────────────────────────────┘
+ *
+ * El registro (qué se vigila, con su consulta) vive en
+ * `scripts/premisas-inertes.mjs`. Acá vive el instrumento.
+ *
+ * ── LAS TRES DIRECCIONES EN LAS QUE ESTE GUARD PUEDE FALLAR, y qué hace
+ *    con cada una (acta del método S86 §8 — un guard falla igual en las
+ *    dos direcciones, y la tercera es fallar callado):
+ *
+ *   ① DECIR DE MENOS — vigilar 1 premisa cuando hay 9 escritas. Lo ataja
+ *      el BRAZO ②: **toda** ocurrencia de `inerte` en el corpus tiene que
+ *      estar clasificada (registrada o eximida con su razón). La que no
+ *      esté sale ROJA. No depende de que mi vocabulario acierte: depende
+ *      de que todo esté contado.
+ *   ② DECIR DE MÁS — gritar sobre los «inerte» de la Ley 13 (sin
+ *      movimiento), que no son premisas. Lo ataja la lista de EXENTAS,
+ *      por sitio y con razón escrita — jamás una regex laxa. *Un guard
+ *      que grita donde no pasa nada se desactiva solo.*
+ *   ③ FALLAR CALLADO — «no pude medir» degradado a «todo bien». Por
+ *      L-197 eso es ROJO, nunca verde: sin motor no hay veredicto. El
+ *      escape existe, es explícito y RUIDOSO: `--sin-motor`.
+ *      *Es exactamente el caso de `verify-fuentes-legibles`, que en S86
+ *      dio VERDE sobre CERO archivos.*
+ *
+ * ── LA AUTO-PRUEBA (L-192 mecanizada, como el lint de la casa): los
+ *    cuatro modos de falla se ejercitan con fixtures sintéticos ANTES de
+ *    medir nada real. Si alguno NO puede producir rojo, el guard entero
+ *    se declara DECORATIVO y falla. **El rojo se produce antes (L-199).**
+ *
+ * ── DÓNDE CORRE, y su límite declarado: este guard NECESITA LA DB, así
+ *    que NO va en `.githooks/pre-commit` — un hook que exige red le
+ *    niega el commit a quien esté sin conexión, y un gate así se saltea
+ *    por costumbre. Su lugar es el paso ⓪ / el cierre de sesión, al lado
+ *    de `verify-ota`. **Consecuencia honesta: una premisa escrita a las
+ *    10 se descubre recién cuando alguien corre esto.** Mirror del brazo
+ *    ② dentro de `verify:diseno` (que sí corre en cada commit) = decisión
+ *    de mesa, no de este archivo: `verify:diseno` lee `.tsx` y uno de los
+ *    sitios medidos es `.ts`, así que sería ensanchar su corpus.
+ *
+ * El exit se lee del COMANDO, jamás del pipe (L-191).
+ *
+ *   node scripts/verify-premisas.mjs
+ *   node scripts/verify-premisas.mjs --sin-motor   (ruidoso, se declara)
+ */
+
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { join } from 'node:path';
+import { execSync } from 'node:child_process';
+import { PREMISAS, EXENTAS, RAICES, PISO_OCURRENCIAS } from './premisas-inertes.mjs';
+// El canal a la DB es el de la casa (`lib-db.mjs`, D-352): solo SELECT,
+// CLI linkeado, cero secretos en el repo. Se IMPORTA, no se re-implementa
+// —copiar el helper al lado es exactamente lo que L-175 prohíbe—.
+import { dbQuery } from './lib-db.mjs';
+
+const SIN_MOTOR = process.argv.includes('--sin-motor');
+
+/* ── EL ANCLA — contra qué árbol se midió (patrón `verdicto.mjs`, S84-B12).
+ *    Un veredicto sin ancla dice si el código pasa, no CUÁL código pasó. */
+function ancla() {
+  const git = (c) => { try { return execSync(c, { stdio: 'pipe' }).toString().trim(); } catch { return '?'; } };
+  const sucio = git('git status --porcelain');
+  console.log(
+    `ancla · rama ${git('git rev-parse --abbrev-ref HEAD')} · HEAD ${git('git rev-parse --short HEAD')} · ` +
+      (sucio === '' ? 'árbol limpio' : `⚠️ ${sucio.split('\n').length} archivo(s) sin commitear`),
+  );
+}
+
+/* ── EL CORPUS ─────────────────────────────────────────────────────── */
+
+function archivosDe(dir) {
+  const out = [];
+  for (const e of readdirSync(dir)) {
+    const p = join(dir, e);
+    if (statSync(p).isDirectory()) out.push(...archivosDe(p));
+    else if (/\.tsx?$/.test(p)) out.push(p);
+  }
+  return out;
+}
+
+/** Toda ocurrencia de la palabra en el corpus, con su archivo y línea.
+ *  A propósito NO clasifica: clasificar es del brazo ②, y mezclarlo acá
+ *  volvería a meter vocabulario en la detección. */
+function ocurrenciasDeInerte(archivos, leer) {
+  const out = [];
+  for (const p of archivos) {
+    leer(p).split('\n').forEach((linea, i) => {
+      if (/\binertes?\b/i.test(linea)) out.push({ archivo: p, linea: i + 1, texto: linea.trim() });
+    });
+  }
+  return out;
+}
+
+/* ── BRAZO ① · LOS SITIOS SIGUEN AHÍ ───────────────────────────────────
+ *  El ancla de cada premisa es el LITERAL que ya está escrito en el
+ *  código (el porqué, en el header del registro). Si el literal
+ *  desapareció, este guard estaba midiendo el aire: se dice, en rojo.
+ *  «Se curó» y «se movió» se ven igual desde acá — y por eso NO se
+ *  adivina cuál fue: se pide que alguien mire. */
+export function verificarSitios(premisas, leer) {
+  const fallos = [];
+  for (const pr of premisas) {
+    for (const s of pr.sitios) {
+      let src;
+      try { src = leer(s.archivo); } catch {
+        fallos.push(`${pr.id} · el archivo ${s.archivo} NO EXISTE — el ancla de esta premisa se perdió.`);
+        continue;
+      }
+      if (!src.includes(s.literal)) {
+        fallos.push(
+          `${pr.id} · el literal «${s.literal}» ya no está en ${s.archivo} — o la premisa se curó, ` +
+            `o se movió. El guard estaba vigilando un texto que no existe: vení a mirar y actualizá el registro.`,
+        );
+      }
+    }
+  }
+  return fallos;
+}
+
+/* ── BRAZO ② · TODO «INERTE» ESTÁ CLASIFICADO ──────────────────────────
+ *  La cura de la dirección A: no alcanza con vigilar las premisas que
+ *  alguien se acordó de registrar. Toda ocurrencia tiene que estar
+ *  contada — registrada (premisa) o eximida (otra acepción, con razón).
+ *  La que no esté en ninguna de las dos es la próxima D-651. */
+export function verificarClasificacion(ocurrencias, premisas, exentas) {
+  const conocidos = [
+    ...premisas.flatMap((p) => p.sitios.map((s) => ({ ...s, clase: p.id }))),
+    ...exentas.map((e) => ({ ...e, clase: 'exenta' })),
+  ];
+  const fallos = [];
+  const clasificadas = [];
+  for (const o of ocurrencias) {
+    const m = conocidos.find((c) => c.archivo === o.archivo && o.texto.includes(c.literal));
+    if (m) clasificadas.push({ ...o, clase: m.clase });
+    else
+      fallos.push(
+        `SIN CLASIFICAR · ${o.archivo}:${o.linea} — «${o.texto.slice(0, 72)}»\n` +
+          `      Si es una PREMISA (una rama que hoy no se ejecuta), va al registro CON SU CONSULTA.\n` +
+          `      Si es la otra acepción (Ley 13 sin movimiento, sin interacción), va a EXENTAS con su razón.`,
+      );
+  }
+  return { fallos, clasificadas };
+}
+
+/* ── BRAZO ③ · LA CONSULTA ─────────────────────────────────────────────
+ *  Es el brazo por el que existe todo esto: la premisa se MIDE.
+ *  Tres salidas, y ninguna es «probablemente bien»:
+ *    inerte    → la premisa se sostiene (n = 0)
+ *    caducada  → ROJO, y nombra qué se volvió alcanzable
+ *    sin-medir → ROJO por L-197 (jamás verde) */
+export function evaluarPremisa(premisa, correr) {
+  let filas;
+  try { filas = correr(premisa.inerteMientras.sql); } catch (e) {
+    return { estado: 'sin-medir', porque: String(e.message ?? e).slice(0, 180) };
+  }
+  const n = filas?.[0]?.n;
+  if (typeof n !== 'number')
+    return { estado: 'sin-medir', porque: `la consulta no devolvió una columna «n» numérica (devolvió ${JSON.stringify(filas)?.slice(0, 120)})` };
+  if (n === 0) return { estado: 'inerte', n };
+  let detalle = null;
+  if (premisa.inerteMientras.detalle) {
+    try { detalle = correr(premisa.inerteMientras.detalle); } catch { detalle = null; }
+  }
+  return { estado: 'caducada', n, detalle };
+}
+
+/* ── LA AUTO-PRUEBA (L-192 · L-199) ────────────────────────────────────
+ *  Cada modo de falla recibe su fixture sintético y TIENE que salir rojo.
+ *  Si alguno no puede, el guard entero se declara decorativo y falla —
+ *  antes de mirar una sola línea real. */
+function autoPrueba() {
+  const rotos = [];
+  const debeFallar = (que, cond) => { if (!cond) rotos.push(que); };
+
+  const premisaFalsa = {
+    id: 'FIXTURE', sitios: [{ archivo: '(fixture)/X.tsx', literal: 'INERTE hoy: solo el titular llega' }],
+    inerteMientras: { sql: 'select 1', detalle: null },
+  };
+
+  // ① el literal desapareció del archivo
+  debeFallar('①·literal ausente', verificarSitios([premisaFalsa], () => 'archivo sin el texto').length > 0);
+  // ① el archivo entero desapareció
+  debeFallar('①·archivo ausente', verificarSitios([premisaFalsa], () => { throw new Error('ENOENT'); }).length > 0);
+  // ② una ocurrencia que no está ni registrada ni eximida
+  debeFallar(
+    '②·sin clasificar',
+    verificarClasificacion([{ archivo: 'a.tsx', linea: 1, texto: '// esta rama es inerte' }], [], []).fallos.length > 0,
+  );
+  // ② y su contra-caso: lo clasificado NO debe gritar (dirección B —
+  //    un guard que grita donde no pasa nada se desactiva solo)
+  debeFallar(
+    '②·contra-caso: lo eximido no grita',
+    verificarClasificacion(
+      [{ archivo: 'a.tsx', linea: 1, texto: '* Completamente INERTE (Ley 13)' }],
+      [], [{ archivo: 'a.tsx', literal: 'Completamente INERTE', razon: 'movimiento' }],
+    ).fallos.length === 0,
+  );
+  // ③ la premisa caducó
+  debeFallar('③·premisa caducada', evaluarPremisa(premisaFalsa, () => [{ n: 3 }]).estado === 'caducada');
+  // ③ la consulta explota → sin-medir, JAMÁS inerte (L-197)
+  debeFallar('③·error → sin-medir', evaluarPremisa(premisaFalsa, () => { throw new Error('sin red'); }).estado === 'sin-medir');
+  // ③ la consulta devuelve basura → sin-medir, JAMÁS inerte
+  debeFallar('③·forma inesperada → sin-medir', evaluarPremisa(premisaFalsa, () => [{ otra: 0 }]).estado === 'sin-medir');
+  // ③ contra-caso: n=0 es inerte de verdad (si esto fallara, el guard
+  //    sería rojo permanente, que es la otra forma de ser decorativo)
+  debeFallar('③·contra-caso: n=0 es inerte', evaluarPremisa(premisaFalsa, () => [{ n: 0 }]).estado === 'inerte');
+
+  return rotos;
+}
+
+/* ── CORRIDA ───────────────────────────────────────────────────────── */
+
+ancla();
+
+const rotos = autoPrueba();
+if (rotos.length > 0) {
+  console.error('\n✗ AUTO-PRUEBA ROTA — el guard no puede producir rojo en:');
+  for (const r of rotos) console.error(`   · ${r}`);
+  console.error('\n  Un guard que no falla cuando debe es decorativo (L-192). Se declara inválido.');
+  console.error('\nVERDICTO PREMISAS: INVÁLIDO');
+  process.exit(1);
+}
+
+const archivos = RAICES.flatMap(archivosDe);
+const leer = (p) => readFileSync(p, 'utf8');
+const ocurrencias = ocurrenciasDeInerte(archivos, leer);
+
+// EL ANCLA DEL CORPUS — el silencio de un guard de ausencia significa «no
+// hay violaciones» SOLO si hubo algo que mirar (L-192, tercera capa).
+console.log(
+  `alcance · ${archivos.length} archivo(s) .ts/.tsx en ${RAICES.join(' · ')} · ` +
+    `${ocurrencias.length} ocurrencia(s) de «inerte» · ${PREMISAS.length} premisa(s) registrada(s) · ` +
+    `${PREMISAS.reduce((a, p) => a + p.sitios.length, 0)} sitio(s) anclado(s)\n`,
+);
+if (ocurrencias.length < PISO_OCURRENCIAS) {
+  console.error(
+    `✗ CORPUS: ${ocurrencias.length} ocurrencia(s) contra un piso de ${PISO_OCURRENCIAS}. ` +
+      `El barrido se derrumbó — el verde de este guard significaría «no miré», no «no hay».`,
+  );
+  console.error('\nVERDICTO PREMISAS: INVÁLIDO');
+  process.exit(1);
+}
+
+let fallos = 0;
+const rojo = (t) => { console.error(`✗ ${t}`); fallos++; };
+
+// ① sitios
+const fallosSitio = verificarSitios(PREMISAS, leer);
+if (fallosSitio.length === 0) console.log('✓ ① los sitios anclados siguen donde el registro dice');
+else for (const f of fallosSitio) rojo(`① ${f}`);
+
+// ② clasificación
+const { fallos: fallosClase, clasificadas } = verificarClasificacion(ocurrencias, PREMISAS, EXENTAS);
+if (fallosClase.length === 0)
+  console.log(`✓ ② las ${clasificadas.length} ocurrencias están clasificadas (${PREMISAS.map((p) => p.id).join(' · ')} · exentas)`);
+else for (const f of fallosClase) rojo(`② ${f}`);
+
+// ③ el motor
+console.log('');
+if (SIN_MOTOR) {
+  console.log('⚠️  --sin-motor: LAS PREMISAS NO SE MIDIERON. Este guard existe para medirlas;');
+  console.log('    sin el brazo ③ no dice nada sobre si caducaron. Quien lo use, lo declara');
+  console.log('    en el mismo mensaje del ancla.');
+} else {
+  for (const p of PREMISAS) {
+    const r = evaluarPremisa(p, (sql) => dbQuery(sql));
+    const cabecera = `${p.id} (${p.ficha}) «${p.titulo}»`;
+    if (r.estado === 'inerte') {
+      console.log(`✓ ③ ${cabecera} — SIGUE INERTE (${p.inerteMientras.explicacion}: 0)`);
+    } else if (r.estado === 'sin-medir') {
+      rojo(
+        `③ ${cabecera} — NO SE PUDO MEDIR: ${r.porque}\n` +
+          `      Por L-197 esto es ROJO, jamás verde: un fallo degrada a AUSENCIA, nunca a un\n` +
+          `      valor que alguien vaya a usar como cierto. Si el motor está caído y hay que\n` +
+          `      seguir: --sin-motor, y se declara.`,
+      );
+    } else {
+      rojo(
+        `③ ${cabecera} — LA PREMISA CADUCÓ: ${r.n} (${p.inerteMientras.explicacion})\n` +
+          `      QUÉ SE VOLVIÓ ALCANZABLE: ${p.siCaduca}` +
+          (r.detalle ? `\n      dónde: ${r.detalle.map((d) => JSON.stringify(d)).join('  ')}` : '') +
+          `\n      LOS SITIOS QUE LO DECLARABAN IMPOSIBLE:\n` +
+          p.sitios.map((s) => `        · ${s.archivo} «${s.literal}» → ${s.consecuencia}`).join('\n'),
+      );
+    }
+  }
+}
+
+console.log(fallos === 0 ? '\nVERDICTO PREMISAS: TODO VERDE' : `\nVERDICTO PREMISAS: ${fallos} EN ROJO`);
+process.exit(fallos === 0 ? 0 : 1);
