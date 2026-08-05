@@ -147,6 +147,12 @@ type Pantalla =
        *  inventado (E5). */
       nombre: string | null;
       nombreComercial: string;
+      /** ⭐ S87-C (LÁMINA §1) — MI fila de `prestador_empleados`, para que el
+       *  techo del NO-GESTOR pueda contar SUS citas. Ya se resolvía en el
+       *  loader (gate de recepción, S78-B) y se DESCARTABA: se guarda, cero
+       *  viaje nuevo. `null` = no se pudo leer ⇒ el techo NO inventa un
+       *  número (Ley 13 / L-197: la ausencia se dice, jamás se dibuja como 0). */
+      miEmpleadoId: string | null;
       /** S79-B (T2-B1/B3): la identidad de la firma del modo preparación. */
       ciudad: string | null;
       logoPath: string | null;
@@ -952,6 +958,8 @@ export default function Hoy() {
       porCoordinar,
       nombre: perfilR.ok ? perfilR.data.nombre : null,
       nombreComercial: prestador.data.nombre_comercial,
+      // S87-C: la fila ya resuelta arriba (gate de recepción) viaja al estado.
+      miEmpleadoId: miFila,
       ciudad: prestador.data.ciudad,
       logoPath: prestador.data.foto_url,
       preparacion,
@@ -1409,6 +1417,43 @@ export default function Hoy() {
        ESTE día ⇒ el valor que tengo es de OTRO día y **no se muestra**.
        Conservarlo con el rótulo nuevo sería el defecto original con mejor
        letra: un número correcto para un día que nadie está mirando. */
+    /* ⭐ S87-C (LÁMINA §1) · SU DÍA — la columna que ocupa el slot de la plata
+       cuando el gate del servidor dice que no. Se computa acá arriba para que
+       la cadena de abajo siga leyéndose de un vistazo.
+
+       ☠️ LA TRAMPA DEL DATO, y es orden de consumo de la mesa (S88):
+       **`empleado_id === null` NO significa «de nadie»: significa DEL NEGOCIO**
+       — la cita despegada por §11(a) de `LETRA_EDICION_VINCULO`. Por eso la
+       comparación es por IGUALDAD ESTRICTA con MI fila y NUNCA `!== otro`:
+       las null quedan afuera de "a tu cargo" **porque no son suyas**, no
+       porque no existan.
+       ⚠️ Y LO QUE ESTE FILTRO NO TOCA, que es la otra mitad: **la LISTA del
+       día sigue mostrando TODAS las citas del negocio, null incluidas.** El
+       filtro vive SOLO en este número. Un consumidor que filtrara la pantalla
+       entera por `=== mia` haría invisible justo lo que la sección "Del
+       negocio" existe para mostrar — el atrape D-552, que en esta casa ya
+       apareció dos veces. Hoy son 0 filas: el borde no se ve, y por eso se
+       escribe.
+
+       Sin `miEmpleadoId` NO se inventa un número: `0` se leería como "hoy no
+       tenés nada" —una afirmación— cuando la verdad es "no pudimos saber"
+       (L-197: un fallo degrada a ausencia, jamás a un valor). */
+    /* `mia` se ata a un LOCAL a propósito, y no es estilo: dentro del closure
+       del filtro, TS no estrecha `pantalla.miEmpleadoId` — el `=== null` de
+       afuera no viaja adentro. Con la propiedad, el día que alguien mueva
+       este filtro fuera de la guarda, `null === null` daría true y **las
+       citas DEL NEGOCIO se contarían como suyas**: exactamente el defecto
+       contra el que la mesa dio la orden de consumo, entrando por la puerta
+       de atrás y sin romper el typecheck. Con el local, es inexpresable. */
+    const mia = pantalla.miEmpleadoId;
+    const suDia: ColumnaTecho =
+      mia === null
+        ? { frase: t('techo.suDiaNoSePudo'), detalle: t('techo.suDiaNoSePudoDetalle') }
+        : {
+            valor: String(citasHoySin.filter((c) => c.empleado_id === mia).length),
+            rotulo: t('techo.suDia'),
+          };
+
     const p = plata !== null && plata.dia === diaVista ? plata.valor : undefined;
     const plataCol: ColumnaTecho =
       p === undefined
@@ -1418,11 +1463,22 @@ export default function Hoy() {
             // mentirle al titular sobre su permiso) ni de vacío (se leería como 0).
             { frase: t('techo.plataNoSePudo'), detalle: t('techo.plataNoSePudoDetalle') }
           : !p.visible
-            ? // EL HUECO HABLA DEL PERMISO, NO DEL DATO (§2.4bis). No falta
-              // información: SOBRA AUDIENCIA.
-              // ⚠️ Y el permiso NO depende del día: el gate del servidor es
-              // `titular OR admin` y jamás mira la fecha (medido en el body).
-              { frase: t('techo.plataSoloTitular'), detalle: t('techo.plataSoloTitularDetalle') }
+            ? /* ⭐ S87-C (LÁMINA BARRA DE TRES §1) — EL CANDADO NO SE EXPLICA:
+                 DESAPARECE. Acá vivía «Solo el titular» / «Owner only», y la
+                 razón de su muerte es la que hay que conservar aunque el
+                 diseño evolucione: **un candado en un lugar de paso informa;
+                 un candado en la PORTADA define.** Como saludo diario le
+                 recordaba a la persona lo que NO es, en el primer renglón de
+                 su casa, y encima ocupaba el lugar de lo único que sí necesita
+                 al abrir la app.
+                 ⚠️ EL GATE NO SE TOCA — y es la mitad que se malinterpreta
+                 fácil: `p.visible` sigue siendo la palabra del SERVIDOR
+                 (`obtener_plata_del_dia`, `titular OR admin`). No recomputo el
+                 permiso en el cliente ni miro `esGestor`: **cambia lo que ocupa
+                 el slot cuando el gate dice que no**, jamás quién decide.
+                 §3 es su contracara: en una RUTA a la que alguien navegó, el
+                 candado SÍ habla (GateAjeno) — ahí preguntó algo concreto. */
+              suDia
             : {
                 valor: montoCorto(p.total ?? 0),
                 /* El total dice lo que sabe Y DECLARA LO QUE LE FALTA: con citas

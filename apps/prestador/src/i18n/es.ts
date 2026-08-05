@@ -281,6 +281,15 @@ export const prestadorEs = {
     /* ⏪ S86-C: decía "de hoy". Con la plata siguiendo al día en vista, ese
        "hoy" pasó a ser falso en nueve de cada diez días de la rueda. */
     plataNoSePudoDetalle: 'No pudimos leer los ingresos del día',
+    /* ⭐ S87-C (LÁMINA BARRA DE TRES §1) — LA COLUMNA DEL NO-GESTOR.
+       Donde el titular ve la plata, quien no la administra ve SU TRABAJO.
+       El rótulo dice «a tu cargo» y NO «citas» a secas: la columna de la
+       izquierda ya cuenta las del NEGOCIO, y dos números con el mismo
+       rótulo se leerían como un error de la app. UNA sola forma para 1 y
+       para N — no es un sustantivo que pluralice. · LOTE S87, GATE PENDIENTE */
+    suDia: 'a tu cargo',
+    suDiaNoSePudo: 'Tu día no disponible',
+    suDiaNoSePudoDetalle: 'No pudimos confirmar cuáles citas son tuyas',
     vidasTutor1: 'tutor',
     vidasTutores: 'tutores',
     vidasPaciente1: 'paciente',

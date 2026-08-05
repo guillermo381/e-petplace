@@ -203,6 +203,11 @@ export const prestadorEn = {
     // ⏪ S86-C: said "today's". With money following the day in view, that
     // "today" became false on nine out of ten days of the wheel.
     plataNoSePudoDetalle: "We couldn't load the day's earnings",
+    // S87-C (LÁMINA BARRA DE TRES §1) · the non-manager's column: their work,
+    // where the owner sees money. One form for 1 and N. · LOTE S87
+    suDia: 'yours',
+    suDiaNoSePudo: 'Your day unavailable',
+    suDiaNoSePudoDetalle: "We couldn't confirm which appointments are yours",
     vidasTutor1: 'owner',
     vidasTutores: 'owners',
     vidasPaciente1: 'patient',
