@@ -19,7 +19,11 @@ export const prestadorEn = {
   bienvenida: {
     paraPrestadores: 'for providers',
     // S61-B13: 'El oficio' → 'El arte' (letra founder)
-    titular: 'The art of caring, with the tools it deserves.',
+    // S87-C: el ES pasó a segunda persona («mereces», firma founder) — el
+    // espejo dice LO MISMO o los dos idiomas cuentan frases distintas.
+    // «it deserves» hablaba del arte; «you deserve» habla de la persona.
+    // Decisión de espejo DECLARADA (la firma nombró solo el ES).
+    titular: 'The art of caring, with the tools you deserve.',
     subtitulo: 'Welcome to the curated group of founding providers.',
     ingresar: 'Sign in',
     solicitarAcceso: 'New provider? Request access',
@@ -79,7 +83,8 @@ export const prestadorEn = {
     nombreLabel: 'Your name',
     emailLabel: 'Email',
     passwordLabel: 'Password',
-    passwordAyuda: 'At least 6 characters',
+    // S88-C: 6 → MIN_LARGO_CONTRASENA interpolated (single rule, D-659)
+    passwordAyuda: 'At least {{n}} characters',
     crearMiCuenta: 'Create my account',
     correoConfirmacion: 'We sent you an email to confirm your account.',
   },
@@ -450,14 +455,17 @@ export const prestadorEn = {
   },
   recuperar: {
     titulo: 'Recover your password',
-    ayudaPedir: "Type the email you sign in with and we'll send you a 6-digit code.",
+    // S88-C (D-659): 6 → 8 (the real code length, measured) · two-step keys
+    ayudaPedir: "Type the email you sign in with and we'll send you an 8-digit code.",
     email: 'Your email',
     pedir: 'Send the code',
-    siTieneCuenta: 'If {{email}} has an account, we just sent it a 6-digit code.',
+    siTieneCuenta: 'If {{email}} has an account, we just sent it an 8-digit code.',
     avisoCorreo: "The email may arrive in English and from an address that isn't ours. If you don't see it, check spam.",
-    codigo: 'The 6-digit code',
+    codigo: 'The 8-digit code',
+    codigoVerificado: 'Code verified. Now choose your new password.',
+    verificar: 'Verify the code',
     nueva: 'New password',
-    largoMinimo: 'At least 8 characters.',
+    largoMinimo: 'At least {{n}} characters.',
     cambiar: 'Change password and sign in',
     otroCodigo: 'Send another code',
     listo: 'Done — you can sign in now.',

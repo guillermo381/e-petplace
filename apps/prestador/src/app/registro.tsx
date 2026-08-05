@@ -26,7 +26,7 @@ import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Boton, Campo, Encabezado, Entrada, EvitaTeclado, MarcaDeAgua, spacing, Texto, useAviso, useTheme } from '@epetplace/ui';
-import { registrarse, type CodigoErrorAuth } from '@epetplace/api';
+import { MIN_LARGO_CONTRASENA, registrarse, type CodigoErrorAuth } from '@epetplace/api';
 
 import { marcarRegistroReciente } from '@/lib/registro-reciente';
 import { useTraduccion } from '@/i18n';
@@ -114,7 +114,9 @@ export default function Registro() {
           />
           <Campo
             label={t('registro.passwordLabel')}
-            ayuda={t('registro.passwordAyuda')}
+            /* S88-C (D-659): la regla se importa — acá decía «6» mientras
+               recuperar decía «8», cada pantalla con su propia verdad. */
+            ayuda={t('registro.passwordAyuda', { n: MIN_LARGO_CONTRASENA })}
             value={password}
             onChangeText={setPassword}
             error={errores.password}

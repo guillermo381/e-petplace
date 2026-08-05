@@ -24,7 +24,10 @@ export const prestadorEs = {
   bienvenida: {
     paraPrestadores: 'para prestadores',
     // S61-B13: 'El oficio' → 'El arte' (letra founder)
-    titular: 'El arte de cuidar, con las herramientas que merece.',
+    // ⭐ S87-C (firma founder, L-148): «que merece» → «que mereces». La
+    // tercera persona dejaba al lector afuera de su propia bienvenida —
+    // el producto tutea, y el titular ahora le habla A LA PERSONA.
+    titular: 'El arte de cuidar, con las herramientas que mereces.',
     subtitulo: 'Bienvenido al grupo curado de prestadores fundadores.',
     ingresar: 'Ingresar',
     solicitarAcceso: '¿Eres prestador nuevo? Solicitar acceso',
@@ -95,7 +98,10 @@ export const prestadorEs = {
     nombreLabel: 'Tu nombre',
     emailLabel: 'Email',
     passwordLabel: 'Contraseña',
-    passwordAyuda: 'Al menos 6 caracteres',
+    // ⭐ S88-C: decía «Al menos 6» mientras recuperar decía 8 — dos
+    // pantallas re-declarando la misma regla. Ahora las dos interpolan
+    // MIN_LARGO_CONTRASENA (regla única, D-659).
+    passwordAyuda: 'Al menos {{n}} caracteres',
     crearMiCuenta: 'Crear mi cuenta',
     correoConfirmacion: 'Te mandamos un correo para confirmar tu cuenta.',
   },
@@ -616,16 +622,27 @@ export const prestadorEs = {
   },
   recuperar: {
     titulo: 'Recuperar tu contraseña',
-    ayudaPedir: 'Escribe el correo con el que entras y te enviamos un código de 6 dígitos.',
+    // ⭐ S88-C (D-659): «6 dígitos» → 8. El 6 era una promesa inventada —
+    // el código real medido en dispositivo trae OCHO (par S87, captura con
+    // el rótulo y el código juntos). Literal y no interpolado: el largo es
+    // config del proveedor (otp_length) y A no exporta constante; si algún
+    // día la exporta, estas tres frases pasan a {{n}}.
+    ayudaPedir: 'Escribe el correo con el que entras y te enviamos un código de 8 dígitos.',
     email: 'Tu correo',
     pedir: 'Enviar el código',
     // la MISMA frase exista o no la cuenta
-    siTieneCuenta: 'Si {{email}} tiene una cuenta, ya le enviamos un código de 6 dígitos.',
+    siTieneCuenta: 'Si {{email}} tiene una cuenta, ya le enviamos un código de 8 dígitos.',
     // D-628 — se retira cuando S86 ponga plantilla y remitente propios
     avisoCorreo: 'El correo puede llegar en inglés y desde una dirección que no es la nuestra. Si no lo ves, revisa spam.',
-    codigo: 'El código de 6 dígitos',
+    codigo: 'El código de 8 dígitos',
+    // S88-C (D-659): el paso 2 abre diciendo que el código YA quedó atrás —
+    // sin esta frase, un rebote de clave se lee como "algo del código".
+    codigoVerificado: 'Código verificado. Ahora elige tu nueva contraseña.',
+    verificar: 'Verificar el código',
     nueva: 'La nueva contraseña',
-    largoMinimo: 'Al menos 8 caracteres.',
+    // la regla se interpola desde MIN_LARGO_CONTRASENA (regla única) —
+    // el hardcodeo parió el «6 vs 8» entre registro y recuperar.
+    largoMinimo: 'Al menos {{n}} caracteres.',
     cambiar: 'Cambiar contraseña y entrar',
     otroCodigo: 'Enviar otro código',
     listo: 'Listo — ya puedes entrar.',
