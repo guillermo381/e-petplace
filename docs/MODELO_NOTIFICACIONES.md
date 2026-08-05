@@ -199,7 +199,7 @@ transporte a un motor ya probado.
 | `relacional` | mensajes, respuesta a una solicitud | utility | sí, por canal |
 | `resumen` | digests (§8) | utility | sí, opt-in |
 | `comercial` | promos, ofertas, novedades | **marketing** | sí — **OPT-IN, apagado por defecto** |
-| `saldo_pagado` *(ENMIENDA S80 — A LA FIRMA)* | saldo pagado que vence: paquetes, planes (el aviso de P16(e)) | utility | **NO en existencia** — sí en canal |
+| `saldo_pagado` *(**FIRMADA por el founder, 4-ago-2026** — nació S80)* | saldo pagado que vence: paquetes, planes (el aviso de P16(e)) | utility | **NO en existencia** — sí en canal |
 
 Dos categorías **no se apagan** porque su ausencia daña a la mascota o a
 la cuenta — pero **el canal siempre se elige**: nadie está obligado a
@@ -220,10 +220,25 @@ por la mascota, no por el cupón.
 
 ### ENMIENDA S87 — LAS CATEGORÍAS NO EXISTEN EN EL SCHEMA, y por eso los defectos
 
-**Medido:** `notificaciones.tipo` y `user_notificacion_prefs.tipo` son `text` con
-CHECK **`length > 0`** — **vocabulario ABIERTO, sin catálogo**. Las siete
-categorías de esta tabla **no existen en ninguna parte del schema**. **10 tipos
-vivos; la superficie cubre 5.**
+**Medido — y con una corrección al propio censo, hecha al construir (S87):**
+
+| tabla | su CHECK | lectura |
+|---|---|---|
+| `notificaciones.tipo` | **CHECK cerrado de 26 valores** | vocabulario **CERRADO**, sin categoría |
+| `user_notificacion_prefs.tipo` | `length(btrim(tipo)) > 0` | vocabulario **ABIERTO** |
+
+> **⚠️ CORRECCIÓN AL CENSO.** La primera redacción de esta enmienda decía que
+> **las dos** eran vocabulario abierto. **Es falso para `notificaciones`**, que
+> tiene un CHECK cerrado de 26 valores. *El hallazgo de D era correcto y era
+> sobre `user_notificacion_prefs`; la generalización a las dos tablas fue mía.*
+> **La corrección no salva el diseño — lo agranda:** el catálogo tiene que cubrir
+> **26 tipos**, no 10.
+
+**Lo que NO cambia, y es lo que importa:** **las siete categorías no existen en
+ninguna parte del schema.** *Un vocabulario cerrado sin categoría no sirve más
+que uno abierto para lo que los gates necesitan preguntar* — un CHECK dice qué
+valores se admiten, jamás qué son. **10 tipos con filas vivas; la superficie
+cubre 5.**
 
 > **⇒ EL CATÁLOGO DE TIPOS → CATEGORÍA ES LA PRIMERA PIEZA DEL LOTE, y no por
 > prolijidad: es lo que los gates estructurales de §5 CONSUMEN.** *Sin él, §5 no
@@ -285,6 +300,26 @@ UI):
 3. **ROL Y ACCESO** (§2 capa 2).
 4. **CONSENTIMIENTO** (§6).
 5. **TECHO DE FRECUENCIA** (§8).
+
+### ENMIENDA S87 — CÓMO SE ESCRIBEN LOS GATES 1 Y 2 CONTRA LO VIVO
+
+**Medido al construir, y corrige lo que este §5 deja suponer:**
+
+- **`memorial` NO ES UN VALOR.** `mascotas.estado_vida` tiene
+  `CHECK (activa | perdida | fallecida)`. **El producto ya define memorial como
+  `estado_vida <> 'activa'`** — literal vivo en `adiestramiento-antes.ts:195` y
+  `grooming-atencion.ts:397`. ⇒ **el gate 1 se escribe
+  `estado_vida IS DISTINCT FROM 'activa'`**, y con eso **`perdida` queda adentro
+  del silencio**, que es lo correcto: *a una familia que perdió a su mascota
+  tampoco se le manda un recordatorio de vacuna.*
+  > **Si el gate se hubiera escrito contra `= 'memorial'` habría corrido verde y
+  > no habría apagado nada** — la letra muerta silenciosa que L-192 nombra.
+  > **Hoy las mascotas vivas son todas `activa`: el gate no tendría a quién
+  > cortar, y el fixture tiene que FABRICAR el caso** (L-199).
+- **`aportado_por_menor` vive en UNA sola tabla: `evento_bitacora_familia`.** No
+  es una propiedad del evento genérico. ⇒ el gate 2 resuelve **por el evento
+  origen**, y para los tipos cuyo origen no es la bitácora **el gate no aplica y
+  se dice** — jamás se finge que evaluó.
 
 ## 6. El consentimiento — por (categoría × canal), con evidencia
 
@@ -513,11 +548,10 @@ Lo que cada uno le exigirá al motor. Su catálogo se escribe cuando exista.
 
 ## 13bis. LO QUE SIGUE SIN FIRMA, y no se cuenta como firmado *(ENMIENDA S87)*
 
-- **`saldo_pagado` (§3, enmienda S80) SIGUE A LA FIRMA.** Nació en S80 y llega a
-  S87 sin la mano del founder. **Se registra su edad, no se la asciende** (L-141):
-  *una categoría propuesta hace siete sesiones sigue siendo una propuesta.* Cruza
-  con P16(e) y `MODELO_FINANCIERO` Decisión T — **las tres se firman juntas o
-  ninguna**, porque describen el mismo aviso.
+- **`saldo_pagado` — ✅ FIRMADA (founder, 4-ago-2026). Ya no se le cuenta la
+  edad.** Entra al catálogo: **son SIETE categorías.** Cruza con P16(e) y
+  `MODELO_FINANCIERO` Decisión T — **esas dos siguen sin firma** y describen el
+  mismo aviso; la categoría existe, **el aviso todavía no**.
 - **La build de push corta runtime nuevo**, con el bump **en el mismo rango que
   la build, jamás antes** — **propuesta de mesa registrada, sin firma.**
 

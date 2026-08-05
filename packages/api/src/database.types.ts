@@ -1509,6 +1509,65 @@ export type Database = {
         }
         Relationships: []
       }
+      cat_notificacion_categorias: {
+        Row: {
+          apagable_existencia: boolean
+          codigo: string
+          default_habilitada: boolean
+          descripcion: string
+          meta_categoria: string
+          orden: number
+        }
+        Insert: {
+          apagable_existencia: boolean
+          codigo: string
+          default_habilitada: boolean
+          descripcion: string
+          meta_categoria: string
+          orden: number
+        }
+        Update: {
+          apagable_existencia?: boolean
+          codigo?: string
+          default_habilitada?: boolean
+          descripcion?: string
+          meta_categoria?: string
+          orden?: number
+        }
+        Relationships: []
+      }
+      cat_notificacion_tipos: {
+        Row: {
+          activo: boolean
+          categoria: string
+          codigo: string
+          descripcion: string
+          en_sombra: boolean
+        }
+        Insert: {
+          activo?: boolean
+          categoria: string
+          codigo: string
+          descripcion: string
+          en_sombra?: boolean
+        }
+        Update: {
+          activo?: boolean
+          categoria?: string
+          codigo?: string
+          descripcion?: string
+          en_sombra?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cat_notificacion_tipos_categoria_fkey"
+            columns: ["categoria"]
+            isOneToOne: false
+            referencedRelation: "cat_notificacion_categorias"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
       cat_novedades_paseo: {
         Row: {
           activo: boolean
