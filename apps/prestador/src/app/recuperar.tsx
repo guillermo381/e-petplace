@@ -1,9 +1,19 @@
 /**
- * RECUPERAR LA CONTRASEÑA (S84-C23 ②).
+ * RECUPERAR LA CONTRASEÑA (S84-C23 ② · REESCRITA S88-C, D-659).
  *
  * VIVE FUERA DE LOS TABS, colgada del login — y esa ubicación es la
  * decisión: la usa quien NO PUDO ENTRAR. Una pantalla de recuperación
  * adentro de Cuenta sería alcanzable solo por quien ya no la necesita.
+ *
+ * ═══ POR QUÉ DOS PASOS, Y NO UN FORMULARIO (D-659, medido en dispositivo) ═══
+ * La versión de un solo paso mandaba código y clave JUNTOS: el token se
+ * quemaba en `verifyOtp` y la clave se validaba DESPUÉS — si el servidor la
+ * rechazaba, el primer rebote mentía sobre la causa, el reintento moría con
+ * «código inválido», y la persona quedaba con una SESIÓN FANTASMA que la
+ * pantalla nunca usó (par medido S87: 15:06:38 / 15:07:56 / 15:08:32).
+ * **El orden nuevo ES la cura:** el código se verifica UNA vez (paso 1) y
+ * la clave se elige y reintenta las veces que haga falta (paso 2) SIN
+ * volver a tocar el token.
  *
  * ═══ LAS REGLAS QUE NO SE ROMPEN, Y DÓNDE VIVEN ═══
  * · NUNCA se declara si un correo existe. El mismo mensaje exista o no.
@@ -15,6 +25,13 @@
  *   y el remedio del usuario es el mismo en los dos casos: pedir otro.
  * · El rate limit dice CUÁNTO FALTA cuando el servidor lo dice, y calla
  *   el número cuando no. Jamás se inventa.
+ * · LA SESIÓN DEL PASO 1 NO SE FUGA: si la persona verifica el código y
+ *   ABANDONA sin elegir clave, el desmontaje cierra la sesión (signOut).
+ *   Sin esto, "me arrepentí" deja a la persona logueada sin saberlo — la
+ *   tercera pata del par medido.
+ * · La regla del largo se IMPORTA (`MIN_LARGO_CONTRASENA`), jamás se
+ *   re-declara: el «6 vs 8» entre registro y recuperar nació de dos
+ *   pantallas hardcodeando su propia verdad.
  *
  * ⚠️ D-628 — EL CORREO LLEGA EN INGLÉS Y DESDE EL REMITENTE DE SUPABASE
  * hasta S86. **Se dice en la pantalla**, y no es cortesía: el silencio
@@ -23,14 +40,25 @@
  * intento siguiente.
  * ☠️ MUERTE: cuando S86 ponga plantilla y remitente propios, esta línea
  * se retira — y su condición está atada a D-628, no suelta.
+ *
+ * ⏭️ Las CAJAS POR DÍGITO llegan por lámina (pieza de B en packages/ui):
+ * el `Campo` plano del código es EL PUENTE, no la decisión — se enchufa
+ * la pieza nueva acá sin tocar la máquina de pasos.
  */
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Boton, Campo, Encabezado, EvitaTeclado, MarcaDeAgua, Texto, spacing, useAviso, useTheme } from '@epetplace/ui';
-import { canjearCodigoRecuperacion, pedirCodigoRecuperacion, segundosDeEspera } from '@epetplace/api';
+import {
+  MIN_LARGO_CONTRASENA,
+  cerrarSesion,
+  establecerContrasenaNueva,
+  pedirCodigoRecuperacion,
+  segundosDeEspera,
+  verificarCodigoRecuperacion,
+} from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
 
@@ -41,14 +69,29 @@ export default function Recuperar() {
   const { mostrar } = useAviso();
   const { t } = useTraduccion();
 
-  /** Dos pasos y no dos pantallas: el correo tiene que seguir visible
+  /** Tres pasos y no tres pantallas: el correo tiene que seguir visible
    *  cuando se tipea el código — es el dato que dice a dónde mirar. */
-  const [paso, setPaso] = useState<'pedir' | 'canjear'>('pedir');
+  const [paso, setPaso] = useState<'pedir' | 'codigo' | 'clave'>('pedir');
   const [email, setEmail] = useState('');
   const [codigo, setCodigo] = useState('');
   const [nueva, setNueva] = useState('');
   const [trabajando, setTrabajando] = useState(false);
   const [rebote, setRebote] = useState<string | null>(null);
+
+  /* LA SESIÓN FANTASMA, cerrada en el desmontaje: `verifyOtp` deja sesión
+     al verificar (es la que autoriza el paso 2 — el diseño, no un
+     accidente). Pero si la persona se va SIN completar, esa sesión no es
+     de nadie: quedaría logueada sin haberlo pedido. Refs y no estado:
+     el cleanup corre en el desmontaje y necesita el valor VIVO, no el de
+     la clausura del primer render. */
+  const verificadoRef = useRef(false);
+  const completadoRef = useRef(false);
+  useEffect(
+    () => () => {
+      if (verificadoRef.current && !completadoRef.current) void cerrarSesion();
+    },
+    [],
+  );
 
   /** El rate limit es el ÚNICO rebote que puede salir al pedir, y NO
    *  habla del correo: habla de quien pide. Por eso su voz nunca puede
@@ -72,22 +115,39 @@ export default function Recuperar() {
        entero. Si la pantalla se quedara acá cuando el correo no existe,
        el propio FLUJO delataría lo que el mensaje calla. La ambigüedad
        tiene que estar en el comportamiento, no solo en las palabras. */
-    setPaso('canjear');
+    setPaso('codigo');
   }
 
-  async function canjear() {
+  /** PASO 1 → 2: el token se toca UNA vez, acá y nunca más. */
+  async function verificar() {
     if (trabajando) return;
     setRebote(null);
     setTrabajando(true);
-    const r = await canjearCodigoRecuperacion({ email, codigo, nueva });
+    const r = await verificarCodigoRecuperacion({ email, codigo });
     setTrabajando(false);
     if (!r.ok) {
       setRebote(r.codigo === 'demasiados_intentos' ? vozEspera(r.mensaje) : r.mensaje);
       return;
     }
+    verificadoRef.current = true;
+    setPaso('clave');
+  }
+
+  /** PASO 2: reintentable — un rebote de clave JAMÁS vuelve al código. */
+  async function cambiar() {
+    if (trabajando) return;
+    setRebote(null);
+    setTrabajando(true);
+    const r = await establecerContrasenaNueva({ nueva });
+    setTrabajando(false);
+    if (!r.ok) {
+      setRebote(r.codigo === 'demasiados_intentos' ? vozEspera(r.mensaje) : r.mensaje);
+      return;
+    }
+    completadoRef.current = true;
     mostrar({ variante: 'exito', texto: t('recuperar.listo') });
-    // el canje deja sesión: se entra derecho, sin pedirle que vuelva a
-    // escribir la clave que acaba de elegir.
+    // la sesión del paso 1 es la que queda: se entra derecho, sin
+    // pedirle que vuelva a escribir la clave que acaba de elegir.
     router.replace('/');
   }
 
@@ -115,7 +175,7 @@ export default function Recuperar() {
                 <Boton etiqueta={t('recuperar.pedir')} bloque cargando={trabajando} onPress={() => void pedir()} />
               </View>
             </>
-          ) : (
+          ) : paso === 'codigo' ? (
             <>
               {/* LA MISMA FRASE EXISTA O NO LA CUENTA. El condicional está
                   en el "si", no en nuestro conocimiento. */}
@@ -131,17 +191,9 @@ export default function Recuperar() {
                 keyboardType="number-pad"
                 autoCapitalize="none"
               />
-              <Campo
-                label={t('recuperar.nueva')}
-                value={nueva}
-                onChangeText={setNueva}
-                secure
-                autoCapitalize="none"
-                ayuda={t('recuperar.largoMinimo')}
-              />
               {rebote !== null && <Texto variante="apoyo" color="danger">{rebote}</Texto>}
               <View style={{ paddingTop: spacing[4], gap: spacing[2] }}>
-                <Boton etiqueta={t('recuperar.cambiar')} bloque cargando={trabajando} onPress={() => void canjear()} />
+                <Boton etiqueta={t('recuperar.verificar')} bloque cargando={trabajando} onPress={() => void verificar()} />
                 {/* Pedir otro NO vuelve al paso anterior: el correo ya
                     está bien y volver le haría re-tipearlo. */}
                 <Boton
@@ -151,6 +203,27 @@ export default function Recuperar() {
                   cargando={trabajando}
                   onPress={() => void pedir()}
                 />
+              </View>
+            </>
+          ) : (
+            <>
+              {/* El código ya quedó atrás: este paso habla SOLO de la
+                  clave, y sus rebotes se resuelven acá — el token no
+                  vuelve a tocarse (D-659, el punto de la partición). */}
+              <Texto variante="cuerpo">{t('recuperar.codigoVerificado')}</Texto>
+              <Campo
+                label={t('recuperar.nueva')}
+                value={nueva}
+                onChangeText={setNueva}
+                secure
+                autoCapitalize="none"
+                /* la regla viene del wrapper — el hardcodeo «Al menos 8»
+                   murió con el «6 vs 8» de registro (regla única). */
+                ayuda={t('recuperar.largoMinimo', { n: MIN_LARGO_CONTRASENA })}
+              />
+              {rebote !== null && <Texto variante="apoyo" color="danger">{rebote}</Texto>}
+              <View style={{ paddingTop: spacing[4] }}>
+                <Boton etiqueta={t('recuperar.cambiar')} bloque cargando={trabajando} onPress={() => void cambiar()} />
               </View>
             </>
           )}
