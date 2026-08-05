@@ -6870,3 +6870,77 @@ ya pasaron.**
 
 **Origen: S87-C (la puerta abierta, capturas `s87c-b2/b3/b4`) + S87-A (el literal
 del servidor y la lectura de producto).**
+
+---
+
+#### D-657 — 🔴 EL PLAN SE SIGUE COBRANDO DESPUÉS DEL MEMORIAL, Y EL MOTOR DE AVISOS ESTÁ POR VOLVER ESE COBRO SILENCIOSO
+
+**Hallazgo de S87-A, y lo destapó una verificación que pidió el founder sobre un
+freno anterior.** *Ninguna sesión lo había cruzado porque hay que mirar dos
+motores a la vez: el que cobra y el que avisa.*
+
+### EL LITERAL
+
+```
+cerrar_y_renovar_planes     · consulta estado_vida = FALSE · menciona mascota = FALSE
+vencer_paquetes_salidas     · consulta estado_vida = FALSE
+vencer_programas_adiestramiento · consulta estado_vida = FALSE
+suscripciones_servicio      · TIENE la columna mascota_id
+cron `cerrar-renovar-planes`· 0 8 * * *  (vivo, todos los días)
+```
+
+**El vínculo existe y NO SE CONSULTA.** `suscripciones_servicio.mascota_id` está
+ahí; el motor de renovación nunca lo mira. **La renovación no sabe de qué
+mascota es el plan que renueva.**
+
+### POR QUÉ ES 🔴 Y NO 🟠 — la conjunción es el daño
+
+Por separado, cada mitad es tolerable. **Juntas producen la peor combinación
+posible:**
+
+| | |
+|---|---|
+| el motor de PLANES | **renueva y cobra igual** aunque la mascota esté en memorial |
+| el motor de AVISOS (S87) | **calla** todo lo de esa mascota — §5.1, y está bien que calle |
+
+> ### **⇒ EL SILENCIO DEL DUELO VUELVE SILENCIOSO EL COBRO.**
+> *Una familia que acaba de perder a su mascota sigue pagando el plan de esa
+> mascota, todos los meses, y **deja de recibir el aviso que se lo diría**.*
+>
+> **Y el filo que lo vuelve urgente: el gate del memorial —que es correcto— es
+> lo que APAGA LA ÚNICA SEÑAL.** Antes de S87 el cobro era silencioso por
+> omisión; después es silencioso **por diseño**. *Curar bien una cosa empeoró
+> otra, y solo se ve mirando las dos.*
+
+### EXPOSICIÓN HOY, medida
+
+`suscripciones_servicio` activas = **1** · de mascotas no activas = **0** ·
+bonos vivos = **3** · todas las mascotas están `activa`.
+**Nadie está siendo cobrado mal hoy.** *El mecanismo está armado y esperando el
+primer memorial de una familia con plan* — y ese día no avisa.
+
+### DÓNDE VIVE LA CURA — y dónde NO
+
+**Es del MOTOR DE PLANES, no del de avisos.** El motor de avisos hace lo
+correcto callando. **No se inventa en el Lote 1** (orden del founder S87): un
+gate de avisos no puede ni debe frenar un cobro.
+
+Direcciones, **sin firmar, para la mesa**:
+- (a) la transición a memorial **pausa o cancela** las suscripciones de esa
+  mascota (y libera lo no consumido según P14 / `MODELO_FINANCIERO`);
+- (b) la renovación consulta `estado_vida` y **no renueva** un plan de mascota
+  no activa;
+- (c) las dos: (b) como red del motor, (a) como acto del producto.
+
+**Cruza con:** el gate 1 de la puerta de S87 · `MODELO_LOYALTY` §7 (memorial
+apaga estructuralmente) · P14 y la regla de la plata firmada en S80 (*"lo que el
+cliente no usa lo pierde el cliente"* — **que NO puede regir cuando la mascota
+murió**: esa es la cláusula que hay que mirar al escribir la cura).
+
+> **☠️ DISPARO: antes del soft launch, y ANTES de encender el primer transporte
+> del Lote 2.** *Mientras todo es in-app y nadie recibe nada, el daño es
+> teórico. El día que el motor entregue de verdad, esta ficha pasa a ser una
+> familia en duelo recibiendo un cobro y ningún aviso.*
+
+**Origen: S87-A (medición pedida por el founder sobre el freno de la
+clasificación de `sistema`).**
