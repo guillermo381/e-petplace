@@ -7226,8 +7226,39 @@ la voz que falta: **«Esa ya es tu contraseña. Elegí una distinta.»**
 sistema le dice que es corta, ella prueba otra… y el código ya no existe.*
 **El defecto ② produce el reintento que el defecto ① castiga.**
 
+### ✅ LA MITAD DE ARQUITECTURA — CURADA (S88-A)
+
+**El wrapper se partió en dos** (`packages/api/src/wrappers/seguridad.ts`):
+
+| función | qué hace |
+|---|---|
+| `verificarCodigoRecuperacion({email, codigo})` | **paso 1** — `verifyOtp` UNA vez; **deja sesión** |
+| `establecerContrasenaNueva({nueva})` | **paso 2** — sobre esa sesión. **Reintentos libres: no re-toca el token** |
+| `canjearCodigoRecuperacion` | **camino viejo**, conservado solo para que `recuperar.tsx` compile. Hereda la cura del traductor, **NO la de orden**. **Muere con el lote de la pantalla.** |
+
+**Y el traductor mapea por `code` estable.** El par, sobre la MISMA respuesta
+real de GoTrue (`code: same_password · msg: "New password should be different
+from the old password."`):
+
+```
+ANTES (regex sobre texto humano) → contrasena_debil → «al menos 8 caracteres»   ← la mentira
+AHORA (code estable)             → contrasena_igual → «tiene que ser distinta de la actual»
+```
+
+**La voz correcta YA EXISTÍA en `MENSAJES` y nadie la usaba: el `regex` la
+pisaba.** *No hubo que escribir la verdad — hubo que dejar de taparla.*
+
+### ⚖️ LA DECISIÓN QUE ESTA FICHA DEBE (mesa): 6 vs 8
+
+Medido: el panel de Supabase tiene `minimum_password_length = **6**`; el
+wrapper y las dos pantallas exigen **8**. **Hoy no hay bug** —el cliente excede
+al servidor, y esa dirección es segura—, pero **son dos reglas para una sola
+cosa**. *Mi lectura: alinear el panel a 8 (es un toggle de la visita admin,
+D-634) y que el número viva en UN lado.* **No lo decido: es del founder.**
+
 ### ALCANCE Y ADJUDICACIÓN
 
+- ~~**El wrapper es de A**~~ ✅ **HECHO — arriba.**
 - **El wrapper es de A** (`packages/api`): partir en dos + mapear por `error_code`.
 - **La pantalla es de C** (`apps/prestador/src/app/recuperar.tsx` — **el único
   consumidor vivo, medido**; el cliente no tiene esta pantalla todavía).

@@ -929,6 +929,8 @@ export {
   cambiarContrasena,
   pedirCodigoRecuperacion,
   canjearCodigoRecuperacion,
+  verificarCodigoRecuperacion,
+  establecerContrasenaNueva,
   segundosDeEspera,
   type CodigoErrorSeguridad,
 } from './wrappers/seguridad';
