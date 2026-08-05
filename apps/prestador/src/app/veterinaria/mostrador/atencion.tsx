@@ -60,20 +60,11 @@ import {
 import { EvitaTeclado } from '@/components/evita-teclado';
 import { verificarSesion } from '@/lib/api';
 import { vozErrorVet } from '@/lib/voz-error-vet';
+import { diaSemanaCorto } from '@epetplace/i18n';
 import { useTraduccion } from '@/i18n';
 
 type ServicioActivo = { codigo: string; nombre: string; precio: number };
 
-/* 🔴 QUINTA COPIA del día corto — el HOY ya declaró que su lugar es
-   `packages/i18n` "con el TERCER consumidor" y la condición sigue sin
-   cobrarse (D-645). No lo subo: i18n no es territorio de C en S86. */
-function diaCortoDe(iso: string, idioma: string): string {
-  const [a, m, d] = iso.slice(0, 10).split('-').map(Number);
-  if (!a || !m || !d) return iso.slice(8, 10);
-  return new Intl.DateTimeFormat(idioma === 'es' ? 'es' : 'en', { weekday: 'short' })
-    .format(new Date(a, m - 1, d))
-    .replace('.', '');
-}
 
 export default function AtencionMostrador() {
   const router = useRouter();
@@ -549,7 +540,7 @@ export default function AtencionMostrador() {
                     disposicion="tira"
                     opciones={dias.map((d) => ({
                       codigo: d,
-                      etiqueta: `${diaCortoDe(d, idioma)} ${d.slice(8, 10)}`,
+                      etiqueta: `${diaSemanaCorto(d, idioma)} ${d.slice(8, 10)}`,
                     }))}
                     seleccionada={fecha}
                     onSelect={setFecha}

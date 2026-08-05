@@ -110,6 +110,8 @@ export const prestadorEn = {
     datoQueda1SinHora: '1 to go',
     datoCompleta: 'Day complete.',
     datoPorCoordinar: 'Day done · {{n}} to schedule',
+    // S86-C (gate) · a day with no appointments SAYS so.
+    datoSinCitas: 'No appointments on record',
     datoLibreConSemana: 'Free today · {{n}} this week',
     // S86-C · a past day speaks in the past — never promises a future.
     datoPasadoPendiente1: '1 left open',
@@ -725,6 +727,7 @@ export const prestadorEn = {
     hoy: 'Today',
     manana: 'Tomorrow',
     entrada: 'The board',
+    entradaVacia: 'Nothing to take',
     entradaUna: '1 appointment to take',
     entradaN: '{{n}} appointments to take',
   },

@@ -134,6 +134,9 @@ export const prestadorEs = {
     datoQueda1SinHora: 'Te queda 1',
     datoCompleta: 'Jornada completa.',
     datoPorCoordinar: 'Día atendido · {{n}} por coordinar',
+    // ⭐ S86-C (gate) · el día sin citas DICE que no hubo — antes se
+    // callaba y el header saltaba (L-201, escala chica).
+    datoSinCitas: 'Sin citas registradas',
     datoLibreConSemana: 'Hoy libre · {{n}} esta semana',
     /* ⭐ S86-C · UN DÍA PASADO HABLA EN PASADO (cruce 2, firma de mesa).
        Con la rueda llegando a hoy-3, las voces de arriba prometían futuro
@@ -953,6 +956,7 @@ export const prestadorEs = {
     manana: 'Mañana',
     // la entrada desde el HOY — solo con algo por tomar
     entrada: 'La pizarra',
+    entradaVacia: 'Nada por tomar',
     entradaUna: '1 cita por tomar',
     entradaN: '{{n}} citas por tomar',
   },
