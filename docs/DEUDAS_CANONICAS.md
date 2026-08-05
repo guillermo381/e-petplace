@@ -2313,6 +2313,53 @@ Es la **regla firmada de la Pieza 3, del lado del dueño** (1 ítem→su descrip
 #### D-539 — `packages/api` NO TIENE CAPA DE IDIOMA: el paquete compartido habla español fijo 🟠
 🟠 MEDIA-ALTA. **Hallazgo S77-A (lectura L18) — y cambia el título de lo que se venía llamando "voseo en los wrappers".** El censo se abrió buscando voseo en `packages/api` y encontró algo más grande: **el paquete no importa i18n en ningún punto** (`package.json` declara **una sola dependencia**, `@supabase/supabase-js`; **cero imports** de `@epetplace/i18n` o `i18next` en todo `src/`). **Todos sus mensajes son español literal en el código.** ⇒ **un usuario con la app en inglés recibe mensajes en español cada vez que un wrapper falla.** **EL CONTRASTE QUE LO PRUEBA DELIBERADO Y NO INEVITABLE: `packages/ui` SÍ tiene diccionario** (`packages/ui/src/i18n/es.ts` + `en.ts`) — la casa ya resolvió este patrón para un paquete compartido en S51-B1a (*"la voz del design system nace bilingüe en su paquete"*), y **`api` quedó afuera**. **EL VOSEO ES EL SÍNTOMA, NO LA ENFERMEDAD:** curar los strings a tuteo deja el problema entero en pie (seguirían siendo español fijo). **UNIVERSO MEDIDO, con su criterio declarado:** los mensajes de cara al usuario viven en **literales inline** (`mensaje: '…'`) **+ mapas de mensajes** (~51 declaraciones de mapas tipo `MENSAJES*`/`REBOTES*` entre los wrappers, con `veterinaria-oferta`, `equipo` y `veterinaria-mostrador` a la cabeza) — **y los 193 usos de `.mensaje` en las apps los RENDERIZAN** (`mostrar({texto: r.mensaje})`, `setError(r.mensaje)`), así que **el universo entero es alcanzable**: no hay mensajes muertos que descontar. **CONTEO FINO DE VOSEO: NO SE FIJA ACÁ** — los barridos crudos dan cifras que no puedo sostener (el grep sobre `.ts` toma comentarios y código, no solo strings), y **depositar un número que no puedo sostener es lo que L-166 persigue**; además el conteo dejó de ser el eje al cambiar el título. **EXCLUSIONES DECLARADAS (no se tocan, y por qué):** ① los **matchers contra literales de la DB** (`REBOTES_INVITAR`, cuyo emisor `crear_empleado_directo` **existe y está vivo** — verificado S77-A) — curarlos **rompe el mapeo**, y su cura propia es **D-509** (que el RPC devuelva código en vez de literal); ② el **error de desarrollador de `client.ts:45`** — no es voz de usuario. **CURA: la de `packages/ui`**, con su precedente escrito. Disparo: junto a D-481 (su lint tiene que barrer esta ubicación) o la primera app que se abra en inglés con un usuario real. Origen: S77-A (L18; nace del censo de voz que la mesa pidió y lo reencuadra).
 
+> **➕ ENMIENDA S86 — LA CONSECUENCIA DE PANTALLA, nombrada por C y medida por A. La deuda no cambia de tamaño: cambia de SÍNTOMA.**
+>
+> **Los wrappers de `packages/api` emiten `mensaje` en VOSEO** («*tenés*», «*poné*», «*probá*») **y la voz de producto es TUTEO NEUTRO** (decisión founder S51, regla 27 al móvil).
+>
+> > ### **CUALQUIER PANTALLA QUE PINTE `r.mensaje` HABLA CON OTRO ACENTO QUE EL RESTO DE LA APP — Y HOY NADA LO IMPIDE.**
+>
+> **Cómo lo esquivó C, y por qué es la cura correcta pero NO es un guard:** mapea el **`codigo`** a sus propias keys de i18n y **jamás pinta `r.mensaje`**. *Eso es exactamente lo que hay que hacer —el código es contrato, el mensaje es voz— **pero es una disciplina, no un mecanismo**: la próxima pantalla que haga `{r.mensaje}` compila, corre, se ve bien y habla distinto.* **Modo de falla: el silencio** (L-192) — nadie recibe un rojo, y el defecto es visible solo para quien conozca las dos voces.
+>
+> **⇒ LO QUE FALTA NO ES TRADUCIR: es que pintar `mensaje` sea IMPOSIBLE o RUIDOSO.** *Tres formas, de menor a mayor —a la mesa, ninguna firmada—:* ① un **lint** que prohíba `\.mensaje` dentro de JSX en `apps/` *(barato, es de B)* · ② **renombrar el campo** a algo que se lea como interno (`mensajeDev`), que rompe en compilación a todo consumidor *(caro y honesto)* · ③ **la capa de idioma** en el paquete, que es la deuda original y la única que sirve para un tercer idioma.
+>
+> **Origen de la enmienda:** S86 — C lo nombró al construir la Pizarra, A lo midió. *El wrapper nuevo de esa misma sesión (`pizarra.ts`) nace con el mismo defecto **a propósito y declarado**: cambiar la voz de UN wrapper mientras los otros ~40 siguen en voseo produciría dos acentos adentro de `packages/api`, que es peor que uno consistente y equivocado.*
+
+---
+
+#### D-653 — DOS PUERTAS DEL MISMO ACTO CON PREDICADOS DISTINTOS: el mostrador va a poder CREAR una cita que no puede LEER 🟡
+
+**Medido el 4-ago-2026 contra el motor** (pregunta de C sobre si
+`obtener_inicios_vet_disponibles` sirve para agendar desde el negocio).
+
+**LA RESPUESTA FUE SÍ** —`user_tiene_acceso_a_mascota` tiene rama
+explícita para *dueño o empleado activo de una cuenta con acceso
+vigente*— **y al comparar las dos puertas apareció la asimetría:**
+
+| puerta | qué exige sobre `mascota_acceso_prestador` |
+|---|---|
+| `crear_cita_negocio` (**escribe**) | `revocado_en IS NULL` **y** no expirada |
+| `obtener_inicios_vet_disponibles` → `user_tiene_acceso_a_mascota` (**lee**) | lo mismo **+ la CADUCIDAD PEREZOSA**: si la fila es `cita_automatica`, exige una cita dentro de los **6 meses** |
+
+> ### **⇒ UNA FILA `cita_automatica` CUYA ÚLTIMA CITA ENVEJEZCA MÁS DE 6 MESES DEJA AL MOSTRADOR PUDIENDO CREAR, PERO SIN PODER DIBUJAR LA GRILLA.**
+> *La superficie que ofrece el horario se apaga antes que la que lo acepta* — al revés de Ley 23, que prohíbe ofrecer lo que se va a rechazar. **Acá se rechaza lo que nunca se pudo ofrecer.**
+
+**EL NÚMERO DE HOY, y es lo que la mantiene 🟡 y no 🔴:** **8 filas vivas
+por `cita_automatica`** · **0 caducadas**. *El borde existe en el código
+y todavía no muerde — pero esas 8 filas envejecen solas, sin que nadie
+toque nada.* **Es una bomba de RELOJ, no de gatillo: su disparo es el
+paso del tiempo.**
+
+☠️ **CONDICIÓN DE MUERTE:** las dos puertas comparten predicado —el
+mismo helper, o el mismo criterio de caducidad escrito una vez—. **La
+decisión de producto que hay que tomar antes: ¿el mostrador puede
+agendarle a una mascota que hace 7 meses no pisa la clínica? Si la
+respuesta es sí, la caducidad sobra en el lector; si es no, falta en el
+escritor.** *Hoy cada puerta contesta distinto y ninguna lo declara.*
+Origen: S86-A, medición para C.
+
+---
+
 #### D-537 — LAS POLICIES QUE SE ENCIENDEN SOLAS: `*_empleado_own` sobre columnas que nadie estampa 🟠
 🟠 MEDIA-ALTA. **No es "una policy que no sirve": es un ACCESO LATENTE que un cambio inocuo enciende.** Tres tablas tienen policies que conceden a la persona sobre su propia fila — `bonos_empleado_own` (SELECT) + `bonos_empleado_update` (UPDATE) · `suscr_servicio_empleado_own` (SELECT) + `suscr_servicio_empleado_update` (UPDATE) · `estadias_empleado_own` (SELECT) + `estadias_empleado_update` (UPDATE) —, todas con el mismo predicado `empleado_id IN (SELECT id FROM prestador_empleados WHERE user_id = auth.uid() AND activo = true)`. **CENSO S77-A, medido:** `bonos` **2 filas, 2 con `empleado_id` NULL (100 %)** — su único escritor, `comprar_paquete_salidas`, **ni siquiera nombra la columna** · `suscripciones_servicio` **1 fila, 1 NULL (100 %)** — `contratar_plan_paseo` la nombra pero la fila viva quedó en NULL (y la columna ya venía registrada como muerta: **parece "el paseador del plan" y no lo es**) · `estadias` **0 filas y CERO funciones que escriban** (tabla sin productor) · `notificaciones` **no tiene la columna** (su policy cuelga de la agenda vía `evento_cita_servicio`, otro eje). **HOY LAS SEIS POLICIES SON LETRA MUERTA ESTRUCTURAL:** el predicado no puede matchear porque nadie puebla la columna. **LA DEUDA NO ES ESO — ES LO QUE PASA DESPUÉS.** El día que alguien haga que un escritor estampe `empleado_id` (por prolijidad, por un reporte, por "que quede quién lo vendió"), **estas seis policies se ACTIVAN SOLAS**: la persona pasa a poder **LEER y ESCRIBIR** bonos, suscripciones y estadías donde figure — **un acceso que nadie diseñó, encendido por un cambio que parece inocuo y que no va a pasar por ninguna revisión de permisos** porque quien lo haga estará pensando en trazabilidad, no en RLS. Es la forma inversa de D-512 (*"construido y desconectado"*): acá está **conectado y sin combustible**, y el combustible lo carga cualquiera. **Y el UPDATE es lo grave, no el SELECT:** `bonos_empleado_update` deja escribir la fila del bono —saldo, vigencia— a quien figure como empleado. **CRUCE CON EL TERCER BRAZO (§11.1) — VERIFICADO, y por eso esta deuda existe aparte:** el tercer brazo de la RLS de agenda **NO les hace falta ni las alcanza**; su problema no es que el predicado sea angosto sino que **la columna está vacía**. Ampliar el brazo en `evento_cita_servicio` no toca esto. **CURA — la decisión es de mesa, y son dos caminos opuestos:** (a) si esas policies describen un acceso QUERIDO, entonces falta que los escritores estampen la persona **y** que alguien revise qué puede hacer con esas filas; (b) si NO lo describen —que es lo que el censo sugiere: nacieron por simetría con `evento_cita_servicio`, sin caso de uso—, **se DROPean antes de que alguien las encienda sin querer**. **No se decide acá.** Disparo: **antes de cualquier tanda que toque `comprar_paquete_salidas`, `contratar_plan_paseo` o el arco de estadías** — o sea, antes de que a alguien se le ocurra estampar la columna. Origen: S77-A (censo pedido al declarar el alcance del tercer brazo; número verificado libre antes de escribir).
 
