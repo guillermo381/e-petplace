@@ -7415,6 +7415,49 @@ quien lo escriba compara `user_id` a propósito.*
 | `obtener_plata_del_dia` · `obtener_datos_negocio` · `obtener_atenciones_abiertas` · `contar_citas_despegables` | ya tienen `is_admin()`; **su gate es de LECTURA y el founder firmó que el admin ve todo** ⇒ migran solo si se mide que hoy rebotan |
 | `buscar_cliente_por_*` · `obtener_expediente_modulado` | **el regex los pescó de más**: su gate es de acceso a mascota, no de titularidad |
 
+### ✅ EL LOTE DE MOTOR, CERRADO (S88-A) — cinco tandas
+
+| tanda | qué |
+|---|---|
+| helper | `user_gestiona_prestador` + censo clasificado |
+| ① | `crear_empleado_directo` — gate al helper, **rechazo hablado por código**, muere «No sos dueño» |
+| ② | servicios y horarios |
+| ③ | las seis mecánicas (tallas · programas · especialidades · zonas · bloqueos · documentos) |
+| ④ | equipo · **④bis** el trigger que el censo no vio · **④ter** acotar invitaciones |
+| ⑤ | identidad y cuenta · **⑤bis** los RPC y el resolvedor |
+
+**LOS DOS EJEMPLOS CANÓNICOS DEL LOTE:**
+- **La partición por verbo:** `prestador_own_profile` era `FOR ALL`; `SELECT`/
+  `UPDATE` al helper y **`DELETE` se queda en el titular**. *Migrarlo entero le
+  daba a un administrador la capacidad de borrar la empresa.*
+- **El resolvedor que no adivina:** `prestador_que_gestiono()` **rebota** si
+  alguien gestiona dos negocios (medido: 0 de 8 hoy). *Elegir en silencio sería
+  escribir en el negocio equivocado.*
+
+### ✅ VERIFICADO CON EL ROL PURO — la cuenta sin pata de plataforma
+
+`guillo381+s88rolpuro@gmail.com` · **cero filas en `admin_users`**, que es su
+razón de existir: *el censo de esta misma ficha pagó la trampa de la cuenta
+bifronte, y el dedo del founder no la re-paga.*
+
+```
+is_admin = FALSE          ← el discriminador
+gestiona = true
+servicios = 9  ·  horarios = 21      ← escribía 0/0
+crea_empleado = true
+CREA_ADMIN = REBOTE                  ← el límite intocable, intacto
+```
+
+**Los tres dedos:** login real · el motor con sus claims · y **el límite
+probado en la dirección que importa**.
+
+### ⏳ LO QUE QUEDA SIN PROBAR, escrito (no en la memoria)
+
+Cuatro tablas **vacías para Aurora** — `zonas`, `tallas`, `programas`,
+`bloqueos` — cuya policy migró pero **ningún fixture pudo ejercer**: *un fixture
+no puede probar una policy sobre una tabla sin filas.* **Se prueban el día que
+tengan filas reales.**
+
 ### LA CURA, ordenada por lote (no al pasar)
 
 Un helper único —`user_gestiona_prestador(prestador)` = titular **OR**
