@@ -1541,6 +1541,8 @@ export type Database = {
           descripcion: string
           meta_categoria: string
           orden: number
+          techo_max: number
+          techo_ventana_horas: number
         }
         Insert: {
           apagable_existencia: boolean
@@ -1549,6 +1551,8 @@ export type Database = {
           descripcion: string
           meta_categoria: string
           orden: number
+          techo_max?: number
+          techo_ventana_horas?: number
         }
         Update: {
           apagable_existencia?: boolean
@@ -1557,6 +1561,8 @@ export type Database = {
           descripcion?: string
           meta_categoria?: string
           orden?: number
+          techo_max?: number
+          techo_ventana_horas?: number
         }
         Relationships: []
       }
@@ -10567,6 +10573,86 @@ export type Database = {
           },
         ]
       }
+      notificacion_intencion: {
+        Row: {
+          categoria: string
+          clave_dedup: string | null
+          created_at: string
+          datos: Json
+          destinatario_user_id: string
+          en_sombra: boolean
+          estado: string
+          evento_id: string | null
+          id: string
+          mascota_id: string | null
+          motivo: string | null
+          resuelto_como: Json | null
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          categoria: string
+          clave_dedup?: string | null
+          created_at?: string
+          datos?: Json
+          destinatario_user_id: string
+          en_sombra: boolean
+          estado?: string
+          evento_id?: string | null
+          id?: string
+          mascota_id?: string | null
+          motivo?: string | null
+          resuelto_como?: Json | null
+          tipo: string
+          updated_at?: string
+        }
+        Update: {
+          categoria?: string
+          clave_dedup?: string | null
+          created_at?: string
+          datos?: Json
+          destinatario_user_id?: string
+          en_sombra?: boolean
+          estado?: string
+          evento_id?: string | null
+          id?: string
+          mascota_id?: string | null
+          motivo?: string | null
+          resuelto_como?: Json | null
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacion_intencion_categoria_fkey"
+            columns: ["categoria"]
+            isOneToOne: false
+            referencedRelation: "cat_notificacion_categorias"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "notificacion_intencion_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: false
+            referencedRelation: "eventos_mascota"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacion_intencion_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacion_intencion_tipo_fkey"
+            columns: ["tipo"]
+            isOneToOne: false
+            referencedRelation: "cat_notificacion_tipos"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
       notificaciones: {
         Row: {
           canal: string
@@ -17392,6 +17478,20 @@ export type Database = {
         Returns: Json
       }
       is_admin: { Args: never; Returns: boolean }
+      leer_sombra_notificaciones: {
+        Args: { p_desde?: string; p_hasta?: string }
+        Returns: {
+          a_quien: string
+          canal: string
+          categoria: string
+          cuando: string
+          modo: string
+          por_que: string
+          que: string
+          resultado: string
+          sobre: string
+        }[]
+      }
       log_admin_action: {
         Args: {
           p_accion: string
@@ -17985,6 +18085,17 @@ export type Database = {
           p_nota?: string
         }
         Returns: Json
+      }
+      registrar_intencion_notificacion: {
+        Args: {
+          p_clave_dedup?: string
+          p_datos?: Json
+          p_destinatario_user_id: string
+          p_evento_id?: string
+          p_mascota_id?: string
+          p_tipo: string
+        }
+        Returns: string
       }
       registrar_llegada: { Args: { p_cita_id: string }; Returns: string }
       registrar_nota_adiestramiento: {

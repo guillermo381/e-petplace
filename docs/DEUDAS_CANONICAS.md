@@ -435,9 +435,25 @@ El botón "Cancelar" en `InvitacionCard` llama `cancelarInvitacion(id)` que solo
 Origen: S11. Prioridad: 🟢.
 Criterio de disparo: si en testing aparecen empleados huérfanos en DB.
 
-#### D-103 — Ampliar CHECK `notificaciones.tipo` con `prestador_en_revision`
+#### D-103 — ✅ **PAGADA (S87, 4-ago-2026)** — `prestador_en_revision` existe, con su categoría
 S12 usa `tipo='sistema'` + `datos.evento='prestador_en_revision'` para el evento A3 porque no hay tipo específico en el CHECK. Agregarlo permite mejor categorización y filtrado por tipo en frontend.
 Origen: S12. Prioridad: 🟢.
+
+> **PAGADA POR EL CATÁLOGO DE S87, setenta y cinco sesiones después — y la nota
+> que importa es POR QUÉ pudo pagarse:** cuando D-103 se escribió, agregar un
+> tipo era **ampliar un CHECK** — tocar una restricción viva de una tabla
+> escrita por siete funciones. Con `cat_notificacion_tipos` pasó a ser **una
+> fila con su categoría**. *La deuda no se abarató por prioridad: se abarató
+> porque cambió la estructura debajo.*
+>
+> **Cómo se encontró:** el censo de tipo-por-parámetro de S87 midió los seis
+> valores que le llegan a `_notificar_dueño_prestador`, y el sexto era
+> `sistema` — **con el comentario del propio código nombrando a D-103 al lado**.
+> *La deuda estaba citada en el lugar exacto donde dolía, y hacía falta leer
+> ese lugar para verla.*
+>
+> `prestador_en_revision` → `operacion`, séptimo habitante de la familia del
+> ciclo del prestador. Migración `20260805060000`.
 
 #### D-105 — Realtime DELETE de notificaciones no propaga a UI
 Detectado en runtime test de D-004 (S12, 11 May 2026): cuando se borra notif en DB, la fila desaparece de la lista solo después de refrescar la página. El INSERT realtime sí funciona. Probablemente la suscripción en frontend solo escucha eventos INSERT, no DELETE. No es bloqueante para D-004 porque la operación DELETE de notif es rara en operación real (usuario marca como leída, no borra). Si en futuro se agrega cron de auto-cleanup, se vuelve visible.
