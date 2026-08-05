@@ -1516,6 +1516,7 @@ export type Database = {
           es_piso: boolean
           exige_evidencia: boolean
           orden: number
+          transporte_vivo: boolean
         }
         Insert: {
           codigo: string
@@ -1523,6 +1524,7 @@ export type Database = {
           es_piso?: boolean
           exige_evidencia?: boolean
           orden: number
+          transporte_vivo?: boolean
         }
         Update: {
           codigo?: string
@@ -1530,6 +1532,7 @@ export type Database = {
           es_piso?: boolean
           exige_evidencia?: boolean
           orden?: number
+          transporte_vivo?: boolean
         }
         Relationships: []
       }
