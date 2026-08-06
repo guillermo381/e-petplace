@@ -396,3 +396,27 @@ se revierte.**
 - **B y C no tienen su propio documento de método.** Lo de acá se escribió desde
   A, con lo que A observó — *sus prácticas internas viven en sus contextos, y eso
   es lo que una compactación se lleva.*
+
+
+---
+
+## CANDIDATAS DE S88 — medidas en la sesión, a la firma de la mesa
+
+**① `supabase/.temp` es la TERCERA pieza del arranque de worktree.** Junto con
+`node_modules` y `.env.local`. *Sin ella, el CLI apunta a otro proyecto o a
+ninguno, y el error no dice eso.*
+
+**② `eas update:view` SIN `--json` no imprime `gitCommitHash`.** El eslabón ③
+del cierre exige verificar el ancla por contenido, y el instrumento que la
+letra manda **calla justo el campo que la letra pide**. *Una orden que manda un
+instrumento ciego al dato que ella misma exige se corrige POR EL INSTRUMENTO.*
+
+**③ ⚖️ YA FIRMADA COMO REGLA 87 (contrato v1.30): un aparato conectado no es un
+aparato libre.** Cada pista fija su `ANDROID_SERIAL` y no dispara intents a un
+serial que no declaró como suyo. **Costo medido en S88: dos rotaciones de
+credenciales reales, y una pista perdiendo tiempo midiendo si había roto algo.**
+
+**④ Y la que S88 pagó cinco veces, para el paso ⓪ de cualquier pista:**
+*ningún contador, ancla, hash o `functiondef` se toma de un reporte previo —
+se lee del objeto en el turno en que se usa.* **La ventana de invalidación
+puede ser de minutos.**

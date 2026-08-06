@@ -5807,7 +5807,13 @@ Origen: S86-A, censo de roles. Cruza con [[D-513]] y [[D-517]].
 
 ---
 
-#### D-651 — 🔴 CINCO PERSONAS VEN HOY UNA BARRA DE TRES TABS QUE NUNCA SE DISEÑÓ — y el código declara, por escrito, que eso es imposible
+#### D-651 — ✅ **CERRADA (S88, gate del founder)** · CINCO PERSONAS VEN HOY UNA BARRA DE TRES TABS QUE NUNCA SE DISEÑÓ — y el código declara, por escrito, que eso es imposible
+
+> **✅ CERRADA — S88.** La barra de tres dejó de ser un accidente: **§4ter le
+> dio letra firmada, motor y superficie**, y el founder la gateó en dispositivo
+> (las cuatro cuentas, sin parpadeo). *Lo que era «cinco personas ven algo que
+> nadie diseñó» pasó a ser una composición con lámina, guard y dedo.*
+
 
 **PRIMERA ORDEN DE S87 (firma de mesa).**
 
@@ -7282,7 +7288,7 @@ cuatro puertas · activa → reserva normal. Y el contra-caso que D-657 enseñó
 
 ---
 
-#### D-659 — 🔴 EL RESET QUEMA EL CÓDIGO ANTES DE VALIDAR LA CLAVE, Y EL REBOTE MIENTE SOBRE POR QUÉ
+#### D-659 — ✅ **CERRADA (S88, 6-ago-2026 — dedo del founder de punta a punta)** · el reset quemaba el código antes de validar la clave, y el rebote mentía sobre por qué
 
 **Cazado por el founder en prueba real (5-ago-2026), gate del reset.** El
 dashboard quedó bien —el correo llega en español, de `avisos@`, con el código—
@@ -8023,7 +8029,7 @@ servidor va a rechazar.
 
 ---
 
-#### D-664 — 🔴 `esDueno` DA **TRUE PARA TODOS**: LA DERIVACIÓN SE APOYA EN UNA PREMISA QUE OTRA MIGRACIÓN FALSEÓ
+#### D-664 — ✅ **CURADA Y GATEADA (S88)** · `esDueno` daba TRUE PARA TODOS: la derivación se apoyaba en una premisa que otra migración falseó
 
 **La pregunta de la mesa tenía dos ramas y la respuesta era una TERCERA.**
 
@@ -8242,7 +8248,7 @@ mezclado el veredicto de dos gates en una fila. Un fixture por dedo.*
 
 ---
 
-#### D-667 — 🔴 LA VOZ DE PRODUCTO DE LAS NOTIFICACIONES NO EXISTE — Y EL 13-AGO SALE IGUAL
+#### D-667 — 🟠 **MITAD CURADA (S88)**: la voz existe en UN lugar y 7 tipos la tienen · 🔴 quedan 10 sin firmar — «la voz de producto no existía, y el 13-ago salía igual»
 
 **Hallado auditando el contrato de la campana contra la lámina, ANTES de que C
 y D construyeran contra él.** *No es un hueco de la campana: es un hueco del
@@ -8649,7 +8655,7 @@ ancho de la voz que va a llevar.*
 
 ---
 
-#### D-672 — 🟠 EL GUARD DE LOS 20dp NO EXISTE — la lámina lo firmó y nadie lo construyó
+#### D-672 — ✅ **CERRADA POR B (S88, `8118c44` — R32)** · el guard de los 20dp que la lámina firmó y no existía
 
 **`LAMINA_ESQUINA_CAMPANA` congeló el número CON GUARD:**
 

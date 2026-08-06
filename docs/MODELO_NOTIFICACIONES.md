@@ -676,3 +676,75 @@ cuando prometió callar.* **La nota declarada en la migración
   PANTALLA BLOQUEADA (§4). Categorías alineadas a la taxonomía que Meta
   fiscaliza y cobra. Seguridad operativa (§10) por la irreversibilidad del
   envío.
+
+
+---
+
+# S88 — LO QUE ESTA SESIÓN DEJÓ EN ESTE MODELO
+
+## §3bis · LA AUDIENCIA — columna nueva del catálogo
+
+`cat_notificacion_tipos.audiencia ∈ (cliente | prestador | ambas)`.
+**No era derivable: ninguna tabla la portaba.** Sin ella, «Lo que ya pagaste»
+se dibujaba en el prestador con seis tipos **del que paga**.
+
+**Reparto: prestador 13 · cliente 18 · ambas 6.** Y la distinción que la
+gobierna, porque no todas valen igual:
+
+> **17 MEDIDAS** (el productor dice a quién le llega — es literal) ·
+> **20 RAZONADAS** (sin productor; por el hecho que cuentan).
+> ### **Un catálogo que no distingue lo medido de lo supuesto invita a tratar todo como medido.**
+
+`salud_seguridad` es **`ambas`** por pre-adjudicación de mesa.
+
+## §7ter · LA CAMPANA ES EL REGISTRO, NO EL CANAL (firma founder, 6-ago)
+
+> ### **EL CANAL ES CÓMO LE LLEGÓ; LA CAMPANA ES DÓNDE QUEDA.**
+
+Tres razones firmadas: **①** quien recibe un correo y abre la app busca ahí lo
+que le avisaron — si no está, **la campana miente por omisión** · **②** medido
+al firmar: 13 entregadas · 12 visibles · **1 invisible y creciendo** · **③** el
+modelo llama a `in_app` *«el piso que nunca se pierde»* — y **un piso que solo
+guarda lo que nadie más entregó no es piso: es descarte**.
+
+**Y lo que cambia de SIGNIFICADO, no solo de filtro:**
+
+> **«NO LEÍDO» SIGNIFICA «NO LO VISTE EN LA APP»** — lo único que la app puede
+> saber: **no sabe si abriste el correo**. *Nadie debe leerlo como «no lo
+> recibiste».*
+
+## §7quater · EL HALLAZGO DE `es_piso` — para que nadie lea el flip como fallido
+
+```sql
+WHERE ch.codigo = ANY(v_canales) AND ch.es_piso = false AND ch.transporte_vivo
+```
+
+**`in_app` está EXCLUIDO de la selección por ser el piso ⇒ `transporte_vivo` en
+`in_app` es INERTE PARA ELEGIR** — gana solo por `COALESCE`, cuando ningún otro
+canal tiene tren.
+
+> **Esto NO invalida la ley de secuencia: lo que protegía era LA PANTALLA, no
+> la selección.** *El flip no fue fallido: fue el acto que la ley pedía, sobre
+> un mecanismo que resultó ser otro.*
+
+## §9 · LA LEY DE SECUENCIA DE UN CANAL NUEVO
+
+**① el lector · ② la pieza y la pantalla · ③ el gate del founder · ④ recién ahí
+el `UPDATE` de transporte.** *Encender antes hace que el motor entregue a un
+buzón que nadie puede abrir — sin fallar, sin rebotar y sin rastro rojo.*
+
+## §10 · LA REGLA QUE GOBIERNA TODA SALIDA DE SOMBRA
+
+> **Ningún tipo sale de sombra sin su voz firmada, y la salida se verifica
+> MIRANDO LA SOMBRA DEL PRODUCTOR REAL — jamás un fixture escrito a mano.**
+> *Un fixture que rellena lo que el productor no llena prueba el tubo y no el
+> agua* (L-207).
+
+## §11 · LO QUE EL MOTOR **NO** TIENE, medido y declarado
+
+**Los tres tipos de cita —`cita_confirmada`, `cita_recordatorio`,
+`cita_solicitada`— NO TIENEN PRODUCTOR.** El founder creó una cita real y no le
+llegó nada.
+
+> ### **EL MOTOR ENTERO CONSTRUIDO, GATEADO Y VIVO — Y EL AVISO MÁS OBVIO DEL OFICIO NO EXISTE, PORQUE NADIE TOCA EL TIMBRE.**
+> **No falta voz. No falta canal. Falta el PRODUCTOR.** (D-673, encabeza S89.)
