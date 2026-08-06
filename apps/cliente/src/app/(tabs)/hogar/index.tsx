@@ -90,7 +90,7 @@ import {
   type ResumenServiciosHogar,
   obtenerVacunaPorEvento,
   obtenerSolicitudesPendientesDueno,
-  hayAvisosSinLeer,
+  hayNovedades,
   resolverUrlFoto,
   resolverUrlsFotos,
   type DetalleAtencion,
@@ -554,11 +554,13 @@ function EventoVida({
  */
 function FilaCampanaTecho({
   esMemorial,
-  avisosSinLeer,
+  conNovedades,
   onAvisos,
 }: {
   esMemorial: boolean;
-  avisosSinLeer: boolean;
+  /** Semántica S89 (nota de LAMINA_CAMPANA): novedades NO VISTAS —
+   *  la huella se apaga al VISITAR /avisos, no al leer cada aviso. */
+  conNovedades: boolean;
   onAvisos: () => void;
 }) {
   const { theme } = useTheme();
@@ -575,9 +577,9 @@ function FilaCampanaTecho({
         accessibilityRole="button"
         /* El estado viaja en el label (contrato del Badge): con huella el
            label dice «sin leer», jamás un número. */
-        accessibilityLabel={etiquetaBadge(t('avisos.titulo'), avisosSinLeer ? 1 : 0, 'huella')}
+        accessibilityLabel={etiquetaBadge(t('avisos.titulo'), conNovedades ? 1 : 0, 'huella')}
       >
-        <Badge n={avisosSinLeer ? 1 : 0} forma="huella" superficie={esMemorial ? 'clara' : 'muro'}>
+        <Badge n={conNovedades ? 1 : 0} forma="huella" superficie={esMemorial ? 'clara' : 'muro'}>
           {/* Campana EN TRAZO (ley del único relleno: el relleno es de la
               huella del Badge); papel sobre el gradiente, tinta en memorial. */}
           <Icono nombre="campana" tamano={24} tinta={esMemorial ? theme.text.primary : palette.light0} />
@@ -656,7 +658,7 @@ export default function Hogar() {
   // el badge abre la Hoja SIN depender del push).
   const [solicitudesPend, setSolicitudesPend] = useState<SolicitudPendiente[]>([]);
   // S88-D · la campana: presencia por booleano (jamás la lista acá).
-  const [avisosSinLeer, setAvisosSinLeer] = useState(false);
+  const [conNovedades, setConNovedades] = useState(false);
 
   const esMemorial = theme.mode === 'memorial';
 
@@ -764,8 +766,10 @@ export default function Hogar() {
         });
         // S88-D · la campana: el BOOLEANO, jamás la lista (lámina). Un
         // fallo cae a false — la huella ausente es ausencia, no un claim.
-        void hayAvisosSinLeer().then((h) => {
-          if (vigente) setAvisosSinLeer(h.ok ? h.data : false);
+        // S89 · contrato v2: la huella mide NOVEDADES NO VISTAS (posterior
+        // a la última visita de ESTA casa) — cada app pasa SU nombre.
+        void hayNovedades('cliente').then((h) => {
+          if (vigente) setConNovedades(h.ok ? h.data : false);
         });
         // PONTE AL DÍA: presupuestos vigentes (E7: SOLO 'enviado' — el
         // vencido perezoso jamás pide acción; lector ya ordenado venceEn ASC).
@@ -1084,7 +1088,7 @@ export default function Hogar() {
                   antes acá vivía el Isotipo solo, que se mudó adentro). */}
               <FilaCampanaTecho
                 esMemorial={esMemorial}
-                avisosSinLeer={avisosSinLeer}
+                conNovedades={conNovedades}
                 onAvisos={() => router.push('/avisos')}
               />
               {/* r4-3: la fecha en mono SOBRE el saludo (Ley 3, minúsculas) */}

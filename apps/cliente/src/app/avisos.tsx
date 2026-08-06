@@ -49,6 +49,7 @@ import { fechaCortaMono } from '@epetplace/i18n';
 import {
   marcarAvisoLeido,
   obtenerMisAvisos,
+  registrarVisitaCampana,
   type AvisoDeCampana,
 } from '@epetplace/api';
 
@@ -72,6 +73,11 @@ export default function Avisos() {
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
+      // S89 · contrato v2: ENTRAR deposita la visita de ESTA casa — la
+      // huella del techo se apaga por VISITA, no por leer (la nota de
+      // semántica de LAMINA_CAMPANA). Disparar y seguir: el fallo no
+      // bloquea la lista, y el leído por aviso queda intacto.
+      void registrarVisitaCampana('cliente');
       void (async () => {
         const r = await obtenerMisAvisos();
         if (!vigente) return;
