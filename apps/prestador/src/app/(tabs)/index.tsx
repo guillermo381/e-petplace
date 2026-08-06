@@ -45,11 +45,14 @@ import {
   Insignia,
   MarcaDeAgua,
   Separador,
+  Hoja,
   Tarjeta,
+  TarjetaEstado,
   Texto,
   TresNumeros,
   spacing,
   typography,
+  useAviso,
   useTheme,
   type AvatarMascotaEspecie,
   type ColumnaTecho,
@@ -79,6 +82,10 @@ import {
   obtenerPlataDelDia,
   obtenerPresupuestosPrestador,
   obtenerSolicitudesMostrador,
+  obtenerJornadaRecepcion,
+  registrarLlegada,
+  type CitaJornadaRecepcion,
+  type SolicitudMostrador,
   type PlataDelDia,
   obtenerOfertaAdiestramientoPropia,
   obtenerOfertasGroomingPropias,
@@ -164,6 +171,9 @@ type Pantalla =
        *  chips ⇒ 'profesional' (conservador: un falso-recepción cambiaría
        *  la voz del techo sobre un dato no confirmado). */
       rol: 'gestor' | 'recepcion' | 'profesional';
+      /** ⭐ S88-C (la banda EN LA PUERTA): las solicitudes del mostrador se
+       *  piden por CUENTA — el id viaja para el efecto de la banda. */
+      cuentaComercialId: string | null;
       /** S79-B (T2-B1/B3): la identidad de la firma del modo preparación. */
       ciudad: string | null;
       logoPath: string | null;
@@ -708,6 +718,16 @@ export default function Hoy() {
      · `null` = nunca se leyó · `{dia, valor:null}` = la lectura de ESE día
      FALLÓ (L-197: el fallo no degrada a permiso negado ni a cero). */
   const [plata, setPlata] = useState<{ dia: string; valor: PlataDelDia | null } | null>(null);
+  /* ⭐ S88-C · LA PUERTA (firma founder): null = sin pedir / no aplica ·
+     'error' = la jornada de puerta no se pudo leer (SE DICE, D-541) ·
+     datos = las citas de HOY con llegada + las solicitudes con su reloj. */
+  const [puertaDatos, setPuertaDatos] = useState<
+    { citas: CitaJornadaRecepcion[]; solicitudes: SolicitudMostrador[] } | 'error' | null
+  >(null);
+  /** La Hoja del verbo «Llegó» — lista de por-llegar de hoy. */
+  const [hojaLlegadas, setHojaLlegadas] = useState(false);
+  const [marcandoLlegada, setMarcandoLlegada] = useState<string | null>(null);
+  const { mostrar: mostrarAviso } = useAviso();
   // S61-B5: el filtro por oficio — vista del día, JAMÁS persiste.
   const [filtroOficio, setFiltroOficio] = useState<FiltroOficioValor>('todos');
   // D-385: salidas expandidas (por clave de bloque) — vista, jamás persiste.
@@ -976,6 +996,7 @@ export default function Hoy() {
       // S87-C: la fila ya resuelta arriba (gate de recepción) viaja al estado.
       miEmpleadoId: miFila,
       rol,
+      cuentaComercialId: prestador.data.cuenta_comercial_id,
       ciudad: prestador.data.ciudad,
       logoPath: prestador.data.foto_url,
       preparacion,
@@ -1163,6 +1184,68 @@ export default function Hoy() {
        hacía cuando viajaba en el fetch único. `plata` NO va en deps — sería
        un lazo. */
   }, [pantalla, diaVista]);
+
+  /* ⭐ S88-C · LA BANDA «EN LA PUERTA» (firma founder — las tres huérfanas
+     del censo vuelven al HOY): la llegada es información DEL DÍA, y el día
+     vive acá. Efecto propio con RELOJ POR MINUTO — el reloj de las
+     solicitudes lo dice el SERVER (§7bis, `segundos_restantes`) y envejece:
+     refrescar por minuto es lo que la vieja ya hacía (sondeo honesto S59,
+     jamás "tiempo real"). Solo para quien tiene la puerta (recepción y
+     gestor); el profesional ni paga el viaje. Su fallo NO tumba la jornada
+     (bloque secundario) — y NO se disfraza de puerta vacía: pinta su línea
+     de error (D-541). Costo declarado: +2 viajes por minuto en foco para
+     los roles de puerta (familia D-497). */
+  useEffect(() => {
+    if (pantalla.estado !== 'listo' || pantalla.rol === 'profesional') {
+      setPuertaDatos(null);
+      return;
+    }
+    const prestadorId = pantalla.prestadorId;
+    const cuentaId = pantalla.cuentaComercialId;
+    let vigente = true;
+    const leer = async () => {
+      const [rj, rs] = await Promise.all([
+        obtenerJornadaRecepcion(prestadorId, hoyLocal()),
+        cuentaId !== null
+          ? obtenerSolicitudesMostrador(cuentaId)
+          : Promise.resolve({ ok: true as const, data: [] as SolicitudMostrador[] }),
+      ]);
+      if (!vigente) return;
+      if (!rj.ok) {
+        setPuertaDatos('error');
+        return;
+      }
+      setPuertaDatos({ citas: rj.data, solicitudes: rs.ok ? rs.data : [] });
+    };
+    void leer();
+    const reloj = setInterval(() => void leer(), 60_000);
+    return () => {
+      vigente = false;
+      clearInterval(reloj);
+    };
+  }, [pantalla]);
+
+  /** El verbo «Llegó» (idempotente, solo hoy). El refresco es OPTIMISTA
+   *  local: el server ya registró (ok), y el reloj por minuto re-sincroniza
+   *  el literal en <60 s — el timestamp local solo alimenta el `!== null`. */
+  async function marcarLlegadaPuerta(citaId: string) {
+    if (marcandoLlegada !== null) return;
+    setMarcandoLlegada(citaId);
+    const r = await registrarLlegada(citaId);
+    setMarcandoLlegada(null);
+    if (!r.ok) {
+      mostrarAviso({
+        variante: 'error',
+        texto: r.codigo === 'cita_no_activa' ? t('recepcion.llegoNoActiva') : t('recepcion.llegoError'),
+      });
+      return;
+    }
+    setPuertaDatos((p) =>
+      p === null || p === 'error'
+        ? p
+        : { ...p, citas: p.citas.map((c) => (c.citaId === citaId ? { ...c, llegadaEn: new Date().toISOString() } : c)) },
+    );
+  }
   /** De días de la semana a FECHAS, que es lo que la rueda entiende. Se
    *  computa acá y no se guarda: el cierre es recurrente y una fecha
    *  guardada envejece sola. */
@@ -1549,10 +1632,35 @@ export default function Hoy() {
 
   /* ⏪ S88-C (LÁMINA_HOME_POR_ROL) — acá vivía el desvío
      `if (estado === 'recepcion') return <AgendaRecepcion …/>` (S78-B).
-     MUERE POR FIRMA: recepción ve la consolidada. El componente NO se
-     borra todavía — su jubilación espera el veredicto de mesa sobre las
-     huérfanas del censo (punto 7): la Puerta (llegadas), las solicitudes
-     del mostrador con reloj, y el verbo «Llegó». */
+     MUERE POR FIRMA: recepción ve la consolidada. Las tres huérfanas del
+     censo VOLVIERON como la banda EN LA PUERTA (firma founder, opción a);
+     `agenda-recepcion.tsx` se borra cuando la banda pase el dedo. */
+
+  /* ── ⭐ S88-C · LA BANDA «EN LA PUERTA» — derivaciones ──
+     La llegada es información DEL DÍA y el día vive acá. Solo para quien
+     tiene la puerta (recepción y gestor) y solo mirando HOY. Vacía NO se
+     pinta (firma: un vacío permanente arriba de la lista es ruido diario)
+     — con UNA salvedad declarada: si hay POR LLEGAR, la banda monta solo
+     el verbo, porque cuando alguien cruce la puerta el botón tiene que
+     estar ahí. El error de lectura SE DICE (D-541), jamás se disfraza de
+     puerta vacía. */
+  const conPuerta = pantalla.estado === 'listo' && pantalla.rol !== 'profesional';
+  const puerta = conPuerta && puertaDatos !== null && puertaDatos !== 'error' ? puertaDatos : null;
+  const puertaAdentro = puerta ? puerta.citas.filter((c) => c.estado === 'en_curso') : [];
+  const puertaEsperando = puerta ? puerta.citas.filter((c) => c.estado === 'confirmada' && c.llegadaEn !== null) : [];
+  const puertaPorLlegar = puerta ? puerta.citas.filter((c) => c.estado === 'confirmada' && c.llegadaEn === null) : [];
+  const puertaSolicitudes = puerta
+    ? puerta.solicitudes.filter((s) => s.estado === 'pendiente' || (s.estado === 'expirada' && s.respondidaEn === null))
+    : [];
+  const puertaError = conPuerta && puertaDatos === 'error';
+  const bandaVisible =
+    conPuerta &&
+    vistaEsHoy &&
+    (puertaError ||
+      puertaAdentro.length > 0 ||
+      puertaEsperando.length > 0 ||
+      puertaSolicitudes.length > 0 ||
+      puertaPorLlegar.length > 0);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
@@ -1851,6 +1959,76 @@ export default function Hoy() {
             {pantalla.estado === 'listo' && conFiltro && oficiosActivos !== null && (
               <FiltroOficio activo={filtroOficio} onCambio={setFiltroOficio} oficios={oficiosActivos} />
             )}
+
+            {/* ── ⭐ S88-C · EN LA PUERTA (firma founder) — arriba de la
+                lista, abajo de los filtros. Las dos caras de la puerta en
+                voz humana + las solicitudes con el reloj DEL SERVER + el
+                verbo «Llegó». El profesional no la ve; vacía no se pinta. */}
+            {bandaVisible && (
+              <View style={{ gap: spacing[2] }}>
+                <Texto variante="seccion">{t('recepcion.puerta')}</Texto>
+                {puertaError ? (
+                  <Texto variante="apoyo" color="danger">{t('recepcion.puertaError')}</Texto>
+                ) : (
+                  <>
+                    <View style={{ gap: spacing[2.5] }}>
+                      {[...puertaAdentro, ...puertaEsperando].map((c) => (
+                        <TarjetaEstado
+                          key={c.citaId}
+                          encendido
+                          etiqueta={`${c.mascotaNombre ?? t('agenda.mascotaFallback')} · ${
+                            c.estado === 'en_curso'
+                              ? c.empleadoNombre !== null
+                                ? t('recepcion.adentroCon', { nombre: c.empleadoNombre })
+                                : t('recepcion.adentro')
+                              : t('recepcion.llego')
+                          }`}
+                        >
+                          <AvatarMascota nombre={c.mascotaNombre ?? ''} tamano="sm" />
+                          <View style={{ flex: 1, gap: spacing[0.5] }}>
+                            <Texto variante="cuerpo">{c.mascotaNombre ?? t('agenda.mascotaFallback')}</Texto>
+                            <Texto variante="apoyo">
+                              {c.estado === 'en_curso'
+                                ? c.empleadoNombre !== null
+                                  ? t('recepcion.adentroCon', { nombre: c.empleadoNombre })
+                                  : t('recepcion.adentro')
+                                : t('recepcion.llego')}
+                            </Texto>
+                          </View>
+                          <Texto variante="dato">{(c.hora ?? '').slice(0, 5)}</Texto>
+                        </TarjetaEstado>
+                      ))}
+                    </View>
+                    {puertaSolicitudes.map((s) => (
+                      <Tarjeta key={s.solicitudId} tinte="warning" relleno="amplio">
+                        <View style={{ gap: spacing[1] }}>
+                          <Texto variante="seccion">
+                            {s.estado === 'expirada'
+                              ? t('recepcion.solicitudExpirada', { mascota: s.mascotaNombre ?? t('agenda.mascotaFallback') })
+                              : t('recepcion.solicitudPendiente', { mascota: s.mascotaNombre ?? t('agenda.mascotaFallback') })}
+                          </Texto>
+                          {s.estado === 'pendiente' ? (
+                            // el reloj lo dijo el SERVER; acá solo se viste
+                            <Texto variante="dato">
+                              {t('recepcion.solicitudReloj', { min: Math.max(1, Math.ceil(s.segundosRestantes / 60)) })}
+                            </Texto>
+                          ) : (
+                            <Texto variante="cuerpo">{t('recepcion.solicitudExpiradaCuerpo')}</Texto>
+                          )}
+                        </View>
+                      </Tarjeta>
+                    ))}
+                    {puertaPorLlegar.length > 0 && (
+                      <Boton
+                        variante="secundario"
+                        etiqueta={t('recepcion.marcarLlegada', { n: puertaPorLlegar.length })}
+                        onPress={() => setHojaLlegadas(true)}
+                      />
+                    )}
+                  </>
+                )}
+              </View>
+            )}
           </View>
         )}
 
@@ -2135,6 +2313,39 @@ export default function Hoy() {
         )}
         </View>
       </ScrollView>
+
+      {/* ⭐ S88-C · LA HOJA DEL VERBO «LLEGÓ» — el por-llegar de HOY, donde
+          la persona espera. Marcar mueve la fila a la cara «esperando» de
+          la banda (optimista; el reloj re-sincroniza en <60 s). La Hoja
+          queda abierta a propósito: la puerta recibe de a varios. */}
+      <Hoja visible={hojaLlegadas} onCerrar={() => setHojaLlegadas(false)} titulo={t('recepcion.porLlegar')}>
+        <View style={{ gap: spacing[2.5] }}>
+          {puertaPorLlegar.length === 0 ? (
+            <Texto variante="apoyo">{t('recepcion.nadiePorLlegar')}</Texto>
+          ) : (
+            puertaPorLlegar.map((c) => (
+              <TarjetaEstado
+                key={c.citaId}
+                encendido={false}
+                etiqueta={`${c.mascotaNombre ?? t('agenda.mascotaFallback')} · ${(c.hora ?? '').slice(0, 5)}`}
+              >
+                <AvatarMascota nombre={c.mascotaNombre ?? ''} tamano="sm" />
+                <View style={{ flex: 1, gap: spacing[0.5] }}>
+                  <Texto variante="cuerpo">{c.mascotaNombre ?? t('agenda.mascotaFallback')}</Texto>
+                  <Texto variante="dato">{(c.hora ?? '').slice(0, 5)}</Texto>
+                </View>
+                <Boton
+                  variante="compacto"
+                  etiqueta={t('recepcion.llegoCta')}
+                  cargando={marcandoLlegada === c.citaId}
+                  onPress={() => void marcarLlegadaPuerta(c.citaId)}
+                />
+              </TarjetaEstado>
+            ))
+          )}
+        </View>
+      </Hoja>
+
       {/* S59-B1: el velo de tinta — la zona de la barra de estado JAMÁS
           queda blanca, ni cuando el techo scrollea (regla del pedido). */}
       <VeloBarraEstadoOficio />

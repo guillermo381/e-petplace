@@ -1243,6 +1243,10 @@ export const prestadorEn = {
     llegoCta: 'Arrived',
     llegoError: 'We could not register the arrival. Try again.',
     llegoNoActiva: 'This appointment is no longer active.',
+    // S88-C · the AT THE DOOR band on the consolidated Today · LOTE S88
+    marcarLlegada: 'Mark arrival ({{n}} expected)',
+    nadiePorLlegar: 'No one else expected today.',
+    puertaError: "We couldn't read the door. Retrying on its own.",
     solicitudPendiente: "Authorization requested from {{mascota}}'s family",
     solicitudReloj: '{{min}} min left',
     solicitudExpirada: "{{mascota}}'s family did not respond in time",
