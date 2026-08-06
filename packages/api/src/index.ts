@@ -390,6 +390,16 @@ export {
 // Cierra el «motor sin puerta» de S77: el tercer brazo de
 // `cita_update_prestador` vivía sin un solo escritor. `dar_de_baja_empleado`
 // produce las citas sin persona; ésta es la única vía de volver a ruteárselas.
+// ── S88-A · LA CAMPANA (lámina firmada) ───────────────────────────────────
+// Hoy devuelve lista vacía y eso es CORRECTO: `in_app` no tiene transporte
+// hasta que la pantalla exista (ley de secuencia de la lámina).
+export {
+  obtenerMisAvisos,
+  marcarAvisoLeido,
+  type AvisoDeCampana,
+  type CodigoCampana,
+} from './wrappers/campana';
+
 // ── S88-A · D-664 · la posición dicha por el SERVIDOR ─────────────────────
 // Mata `esDueno = leí ≥1 fila`, que daba true para los cuatro roles.
 export {
