@@ -122,134 +122,40 @@ export function extraerConsultasDeFuente(src) {
   return { pares, rpcs, dinamicas, embedsFuera };
 }
 
+
+/** ────────────────────────────────────────────────────────────────────
+ *  ⚰️ LAS RETIRADAS — cada una con su lápida. Re-vigilar un muerto es el
+ *  desperdicio que este registro existe para evitar; borrarlo sin lápida
+ *  es cómo se lo re-vigila en tres sesiones.
+ *
+ *  ⚰️ P1 (D-651) «solo el titular llega al portal del prestador»
+ *  S75 → S87 (nace al registro) → RETIRADA S88, POR CURA DEL MUNDO.
+ *  Su vida entera fue correcta: nació midiendo 5 personas reales contra
+ *  un comentario que juraba cero, ANUNCIÓ el movimiento (5→7) sin que
+ *  nadie fuera a mirar, y murió cuando la casa hizo lo que el rojo
+ *  pedía — D-660/§4ter volvieron INTENCIONAL la llegada del no-titular
+ *  (gestión por `user_gestiona_prestador`, pantallas del lote D-651,
+ *  gate del founder), y C reescribió SIETE de los ocho sitios como
+ *  LÁPIDAS («⭐ ACÁ DECÍA…»). Las 7 personas que hoy llegan por vínculo
+ *  ya no son una premisa caducada: son el diseño. **El eje que queda
+ *  vigilado no desaparece — se MUDÓ a P2** (los caminos del rol curados
+ *  por el helper y su límite intacto): P1 vigilaba que nadie llegara
+ *  sin diseño; P2 vigila que el diseño no se pudra.
+ *  A lo escribió en el acta y queda acá porque es la tesis del
+ *  instrumento: *el censo de regresión es el único de la casa que se
+ *  pone rojo cuando el mundo mejora* — y en el cierre de S88 volvió a
+ *  verde POR LAS CURAS, no por ablandarse.
+ *  ⚠️ RESIDUO DECLARADO, con dueño: `apps/prestador/src/i18n/es.ts:66`
+ *  es el ÚNICO de los ocho que C no reescribió — la voz «Tu acceso al
+ *  día a día todavía no está disponible» y su comentario «rama inerte
+ *  hoy, muere cuando la puerta abra» siguen como en S75, y la puerta
+ *  abrió. Hallazgo entregado a C (S89); vive como EXENTA marcada abajo
+ *  para que el brazo ② no lo pierda de vista.
+ *  ──────────────────────────────────────────────────────────────────── */
+
 /** LAS PREMISAS VIGILADAS. Cada una: qué declara · dónde lo declara ·
  *  contra qué se mide · qué pasa si caduca. */
 export const PREMISAS = [
-  {
-    id: 'P1',
-    ficha: 'D-651',
-    titulo: 'solo el titular llega al portal del prestador',
-    /** El literal es de S75-B y era verdad ese día. */
-    desde: 'S75',
-    /** LOS SITIOS — OCHO, y ése es un hallazgo de esta medición: la ficha
-     *  D-651 nombra UNA línea (`_layout.tsx:305`) y la misma premisa
-     *  caducada está escrita en OCHO lugares. Se listan todos porque una
-     *  premisa que se cura en un archivo y sobrevive en siete no se curó:
-     *  quedó peor, porque ahora el repo se contradice a sí mismo. */
-    sitios: [
-      {
-        archivo: 'apps/prestador/src/app/(tabs)/_layout.tsx',
-        literal: 'Hoy inerte:',
-        consecuencia: 'el tipo `EstadoSesionRaiz` porta `esGestor` dando por hecho que el que llega siempre es gestor',
-      },
-      {
-        archivo: 'apps/prestador/src/app/(tabs)/_layout.tsx',
-        literal: 'INERTE hoy: solo el titular llega',
-        consecuencia: '🔴 LA BARRA DE TRES: el `.filter()` del tab NEGOCIO se le aplica a gente real, sobre un diseño que nadie hizo (D-651 ①)',
-      },
-      {
-        archivo: 'apps/prestador/src/app/(tabs)/negocio.tsx',
-        literal: 'inerte hasta la puerta',
-        consecuencia: 'la prosa venció; el `useGateGestor` de adentro SÍ corre y protege — lo que caducó es la explicación, no el código (L-198)',
-      },
-      {
-        archivo: 'apps/prestador/src/app/paseo/taller.tsx',
-        literal: 'inerte hasta la puerta',
-        consecuencia: 'ídem: gate de ruta VIVO, comentario vencido',
-      },
-      {
-        archivo: 'apps/prestador/src/app/grooming/taller.tsx',
-        literal: 'inerte hasta la puerta',
-        consecuencia: 'ídem: gate de ruta VIVO, comentario vencido',
-      },
-      {
-        archivo: 'apps/prestador/src/app/veterinaria/taller.tsx',
-        literal: 'inerte hasta la puerta',
-        consecuencia: 'ídem: gate de ruta VIVO, comentario vencido',
-      },
-      {
-        archivo: 'apps/prestador/src/app/adiestramiento/taller.tsx',
-        literal: 'inerte hasta la puerta',
-        consecuencia: 'ídem: gate de ruta VIVO, comentario vencido',
-      },
-      {
-        archivo: 'apps/prestador/src/i18n/es.ts',
-        literal: 'rama inerte hoy',
-        consecuencia: 'la voz «Tu acceso al día a día todavía no está disponible» se escribió para el empleado que espera la puerta — y la puerta abrió: HALLAZGO, no veredicto (¿la sigue viendo alguien?)',
-      },
-    ],
-    /** EL ALCANCE, QUE SE IMPRIME SIEMPRE — verde o rojo (orden de mesa,
-     *  S88). Un guard que no declara qué dejó afuera reporta un número
-     *  que no puede defender.
-     *
-     *  QUÉ LO PARIÓ, y es un caso limpio: la corrida del 5-ago dio **7**
-     *  donde el canon cita «5 vivas», y el reporte lo trajo como posible
-     *  deriva orgánica. No lo era: **A sembró dos cuentas de prueba en
-     *  S87** —`+s87prof` y `+s87recep`, las dos en Aurora, las dos del
-     *  5-ago— y su acta ya declaraba *«todo recuento de acá en más las
-     *  excluye o miente»*. **El instrumento vio bien y el número decía de
-     *  más.** ⇒ se excluyen, y la exclusión SE DICE.
-     *
-     *  Y por qué el conteo de excluidas se MIDE en vez de escribirse:
-     *  «excluye las de prueba» envejece igual que cualquier prosa. Si
-     *  mañana hay tres, la línea lo dice sola. */
-    alcance: {
-      texto: 'excluye las cuentas de prueba cuyo correo lleva «+s87» (sembradas por A en S87, con su regla declarada en acta)',
-      sql: `
-        select count(distinct pe.user_id)::int as n
-          from prestador_empleados pe
-          join prestadores p on p.id = pe.prestador_id
-          join auth.users u on u.id = pe.user_id
-         where pe.activo
-           and p.estado = 'activo'
-           and not exists (select 1 from prestadores t where t.user_id = pe.user_id)
-           and u.email like '%+s87%'
-      `,
-    },
-    inerteMientras: {
-      explicacion:
-        'CERO personas REALES llegan al portal por vínculo activo — es decir, todo el que entra es titular de algún negocio',
-      /** ESPEJO DE `obtenerMiPrestador` (packages/api, R1 desde S75), leído
-       *  al escribir esta consulta y no de memoria:
-       *    (1) `prestadores.user_id = uid`            → entra como TITULAR
-       *    (2) vínculo `activo` + fila legible (RLS)  → entra SIN serlo
-       *  Por eso el `NOT EXISTS` es contra `prestadores` ENTERA y no
-       *  contra el negocio de la fila: el camino (1) se evalúa global, así
-       *  que quien es titular de A y empleado de B llega como titular y NO
-       *  cuenta acá. **Medido el 4-ago-2026: las dos formas dan 5** — la
-       *  fina y la gruesa coinciden hoy; se deja la fina porque el día que
-       *  difieran, la gruesa estaría diciendo de más. */
-      sql: `
-        select count(distinct pe.user_id)::int as n
-          from prestador_empleados pe
-          join prestadores p on p.id = pe.prestador_id
-          join auth.users u on u.id = pe.user_id
-         where pe.activo
-           and p.estado = 'activo'
-           and not exists (select 1 from prestadores t where t.user_id = pe.user_id)
-           and u.email not like '%+s87%'   -- alcance declarado arriba
-      `,
-      /** Qué NOMBRAR cuando esté en rojo. Sin datos personales a propósito:
-       *  el guard tiene que decir QUÉ se volvió alcanzable, no quién es. */
-      detalle: `
-        select p.nombre_comercial as negocio,
-               count(*)::int      as personas,
-               sum(case when (select count(*) from prestador_empleado_servicios s
-                               where s.empleado_id = pe.id) > 0 then 1 else 0 end)::int as con_chips
-          from prestador_empleados pe
-          join prestadores p on p.id = pe.prestador_id
-          join auth.users u on u.id = pe.user_id
-         where pe.activo
-           and p.estado = 'activo'
-           and not exists (select 1 from prestadores t where t.user_id = pe.user_id)
-           and u.email not like '%+s87%'   -- mismo alcance que la consulta de arriba
-         group by 1 order by 1
-      `,
-    },
-    siCaduca:
-      'esas personas ENTRAN al portal, y las ocho ramas de arriba dejan de ser hipotéticas de golpe',
-  },
-
   {
     id: 'P2',
     ficha: 'D-660',
@@ -281,14 +187,11 @@ export const PREMISAS = [
      *  la regresión de un censo (la clase de P3/P4). El registro entero
      *  dejó de ser solo-inercia con P3; si el nombre del instrumento
      *  merece ensancharse, es decisión de mesa, no de esta entrada. */
-    sitios: [
-      {
-        archivo: 'apps/prestador/src/app/(tabs)/mascotas.tsx',
-        literal: '**Hoy es inerte**',
-        consecuencia:
-          '⚠️ PROSA VENCIDA POR LA MUTACIÓN: dice «el administrador no tiene motor» y desde el 5-ago tiene motor (D-660) Y portadores (D-652). Su cura viaja con el lote de superficie de C — se vigila que no sobreviva',
-      },
-    ],
+    /** SIN SITIOS DESDE EL CIERRE S88: el único («**Hoy es inerte**» en
+     *  mascotas.tsx) fue CURADO por S88-C con lápida propia — «⏪ ACÁ
+     *  DECÍA… CADUCÓ EL 5-AGO» — exactamente lo que este brazo vigilaba
+     *  que pasara. La lápida queda clasificada como EXENTA abajo. */
+    sitios: [],
     inerteMientras: {
       explicacion:
         'la suma de desviaciones contra el censo D-660: gestión sin helper + helpers en empleado_roles + trigger sin helper + gate de dueño ausente',
@@ -641,6 +544,25 @@ export const EXENTAS = [
    *  peor que uno que dice que no puede. **Queda como hallazgo a la mesa:
    *  si esta clase importa, pide su propio instrumento.** */
   { archivo: 'apps/prestador/src/app/negocio/equipo.tsx', literal: 'inertes hasta la aceptación', razon: 'CUARTA CLASE — propiedad del dato sostenida por sus lectores; no se contesta con un count (ver nota)' },
+  /** LAS LÁPIDAS DE S87-C/S88-C (cierre S88): la palabra «inerte» vive
+   *  acá SOLO como CITA del texto muerto — «ACÁ DECÍA…». Una lápida no
+   *  es una premisa: es la prueba de que la premisa se curó. Se eximen
+   *  POR SITIO, como todo en esta lista. */
+  { archivo: 'apps/prestador/src/app/(tabs)/_layout.tsx', literal: 'ACÁ DECÍA «Hoy inerte', razon: 'lápida S87-C — cita del muerto de P1' },
+  { archivo: 'apps/prestador/src/app/(tabs)/_layout.tsx', literal: 'ACÁ DECÍA: «INERTE hoy', razon: 'lápida S87-C — cita del muerto de P1 (la barra de tres)' },
+  { archivo: 'apps/prestador/src/app/(tabs)/negocio.tsx', literal: 'ACÁ DECÍA «inerte hasta la puerta', razon: 'lápida S87-C — cita del muerto de P1' },
+  { archivo: 'apps/prestador/src/app/paseo/taller.tsx', literal: 'ACÁ DECÍA «inerte hasta la puerta', razon: 'lápida S87-C — cita del muerto de P1' },
+  { archivo: 'apps/prestador/src/app/grooming/taller.tsx', literal: 'ACÁ DECÍA «inerte hasta la puerta', razon: 'lápida S87-C — cita del muerto de P1' },
+  { archivo: 'apps/prestador/src/app/veterinaria/taller.tsx', literal: 'ACÁ DECÍA «inerte hasta la puerta', razon: 'lápida S87-C — cita del muerto de P1' },
+  { archivo: 'apps/prestador/src/app/adiestramiento/taller.tsx', literal: 'ACÁ DECÍA «inerte hasta la puerta', razon: 'lápida S87-C — cita del muerto de P1' },
+  { archivo: 'apps/prestador/src/app/(tabs)/mascotas.tsx', literal: 'ACÁ DECÍA «Hoy es inerte', razon: 'lápida S88-C — la cura del sitio de P2, con su porqué adentro (CADUCÓ EL 5-AGO)' },
+  /** ⚠️ NO ES LÁPIDA Y SE DICE: el residuo del retiro de P1 — la única
+   *  prosa de las ocho que C no reescribió («rama inerte hoy, muere
+   *  cuando la puerta abra» — y la puerta abrió en S75). Se exime para
+   *  no re-vigilar un eje ya adjudicado, NO porque no sea una premisa
+   *  vencida: el hallazgo viajó a C con el cierre S88 y esta línea se
+   *  RETIRA cuando C la cure. Si en S90 sigue acá, eso también es dato. */
+  { archivo: 'apps/prestador/src/i18n/es.ts', literal: 'rama inerte hoy', razon: 'RESIDUO del retiro de P1 — prosa vencida CON DUEÑO (C, S89); se retira al curarse' },
 ];
 
 /** Las raíces que el guard barre. Si esto se achica, el guard mide menos
