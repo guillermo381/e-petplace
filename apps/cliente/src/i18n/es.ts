@@ -1096,9 +1096,13 @@ export const clienteEs = {
     notifPorqueSeguridadCuenta: 'Los avisos de tu cuenta siempre llegan. Elegís por dónde.',
     notifPorqueSaldoPagado: 'Si algo que ya pagaste está por vencer, te avisamos siempre.',
     notifPorDonde: 'Por dónde',
+    // ENMIENDA DE LÁMINA (firma founder, gate S88): «Push» NO es
+    // vocabulario del dueño — los canales se dicen en el idioma de la
+    // persona; nadie tiene que saber cómo se llama la tecnología para
+    // elegirla. WhatsApp queda como marca.
     canalInApp: 'En la app',
-    canalPush: 'Push',
-    canalEmail: 'Correo',
+    canalPush: 'En el teléfono',
+    canalEmail: 'Por correo',
     canalWhatsapp: 'WhatsApp',
     notifPermisoNegado: 'El teléfono tiene apagadas las notificaciones de e-PetPlace. Hasta que las actives en los ajustes del sistema, los avisos push no pueden llegar.',
     waConsentTitulo: 'Avisos por WhatsApp',

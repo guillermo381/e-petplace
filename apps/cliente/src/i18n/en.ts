@@ -1010,9 +1010,10 @@ export const clienteEn = {
     notifPorqueSeguridadCuenta: 'Account alerts always reach you. You choose how.',
     notifPorqueSaldoPagado: 'If something you already paid for is about to expire, we always tell you.',
     notifPorDonde: 'How they reach you',
+    // Lámina amendment (founder, S88 gate) — see es.ts.
     canalInApp: 'In the app',
-    canalPush: 'Push',
-    canalEmail: 'Email',
+    canalPush: 'On your phone',
+    canalEmail: 'By email',
     canalWhatsapp: 'WhatsApp',
     notifPermisoNegado: "Your phone has notifications turned off for e-PetPlace. Until you enable them in system settings, push alerts can't arrive.",
     waConsentTitulo: 'WhatsApp updates',
