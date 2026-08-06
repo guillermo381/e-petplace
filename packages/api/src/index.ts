@@ -251,6 +251,7 @@ export {
   type Preferencias,
   type CodigoErrorPreferencias,
   type CanalNotificacion,
+  type AudienciaNotificacion,
   type CategoriaNotificacionCatalogo,
   type CanalNotificacionCatalogo,
   type CatalogoNotificaciones,

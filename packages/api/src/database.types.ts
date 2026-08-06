@@ -1575,6 +1575,7 @@ export type Database = {
       cat_notificacion_tipos: {
         Row: {
           activo: boolean
+          audiencia: string
           categoria: string
           codigo: string
           descripcion: string
@@ -1582,6 +1583,7 @@ export type Database = {
         }
         Insert: {
           activo?: boolean
+          audiencia?: string
           categoria: string
           codigo: string
           descripcion: string
@@ -1589,6 +1591,7 @@ export type Database = {
         }
         Update: {
           activo?: boolean
+          audiencia?: string
           categoria?: string
           codigo?: string
           descripcion?: string
@@ -16833,6 +16836,15 @@ export type Database = {
           servicio_nombre: string
           tipo_servicio: string
         }[]
+      }
+      _voz_notificacion: {
+        Args: {
+          p_extra?: Json
+          p_mascota_id?: string
+          p_tipo: string
+          p_user_id: string
+        }
+        Returns: Json
       }
       abrir_caso_clinico: {
         Args: {

@@ -86,6 +86,20 @@ export interface CategoriaNotificacionCatalogo {
    *  catálogo solo-lectura, cero decisión abierta. Medido al escribir:
    *  `resumen` tiene CERO tipos — es la única fila que hoy no se pinta. */
   tieneTiposVivos: boolean;
+  /**
+   * ⚠️ **VIVOS PARA ESTA AUDIENCIA**, no vivos a secas (freno medido de C,
+   * S88). Sin el filtro, «Lo que ya pagaste» se dibujaba en el prestador con
+   * seis tipos que son **del que paga**.
+   *
+   * El dato NO era derivable —`cat_notificacion_tipos` no tenía columna de
+   * audiencia y ninguna tabla la portaba— así que **nació con este lote**:
+   * `audiencia ∈ (cliente | prestador | ambas)`, MEDIDA donde hay productor
+   * (17 tipos) y RAZONADA donde no (20), declarado en la migración.
+   *
+   * `salud_seguridad` es **`ambas`** por pre-adjudicación de mesa: es visible
+   * en el prestador, y la clasificación lo expresa sin escribir excepción.
+   */
+  tieneTiposVivosParaMi: boolean;
 }
 
 export interface CanalNotificacionCatalogo {
@@ -105,7 +119,14 @@ export interface CatalogoNotificaciones {
 
 const CANALES_CONOCIDOS: readonly CanalNotificacion[] = ['in_app', 'push', 'email', 'whatsapp'];
 
-export async function obtenerCatalogoNotificaciones(): Promise<
+export type AudienciaNotificacion = 'cliente' | 'prestador';
+
+/** @param audiencia QUIÉN mira. La pantalla la declara — el motor no la
+ *  adivina: la MISMA persona puede ser dueño de mascota Y prestador, y el
+ *  catálogo no puede decidir cuál de sus dos sombreros lleva puesto. */
+export async function obtenerCatalogoNotificaciones(
+  audiencia: AudienciaNotificacion,
+): Promise<
   ResultadoWrapper<CatalogoNotificaciones, CodigoErrorPreferencias>
 > {
   const cliente = getClient();
@@ -121,12 +142,17 @@ export async function obtenerCatalogoNotificaciones(): Promise<
     // Solo la COLUMNA categoria de los tipos ACTIVOS: la pantalla necesita
     // saber si la categoría tiene ≥1 tipo vivo, jamás la lista de tipos
     // (la campana ya estableció que la pantalla no traduce tipos).
-    cliente.from('cat_notificacion_tipos').select('categoria').eq('activo', true),
+    cliente.from('cat_notificacion_tipos').select('categoria, audiencia').eq('activo', true),
   ]);
   if (cats.error || cans.error || tipos.error) {
     return { ok: false, codigo: 'error_preferencias', mensaje: MENSAJES.error_preferencias };
   }
   const categoriasConTipos = new Set(tipos.data.map((t) => t.categoria));
+  // `ambas` cuenta para las dos: un tipo que le llega a los dos hace que la
+  // fila exista en las dos pantallas — que es exactamente lo que dice.
+  const miAudiencia = new Set(
+    tipos.data.filter((t) => t.audiencia === audiencia || t.audiencia === 'ambas').map((t) => t.categoria),
+  );
   return {
     ok: true,
     data: {
@@ -137,6 +163,7 @@ export async function obtenerCatalogoNotificaciones(): Promise<
         defaultHabilitada: c.default_habilitada,
         descripcion: c.descripcion,
         tieneTiposVivos: categoriasConTipos.has(c.codigo),
+        tieneTiposVivosParaMi: miAudiencia.has(c.codigo),
       })),
       // Un canal fuera del union conocido se angosta verificando (regla 34):
       // si el catálogo gana un canal nuevo, esta lista lo declara — la

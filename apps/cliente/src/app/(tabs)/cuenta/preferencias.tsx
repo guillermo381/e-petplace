@@ -84,7 +84,9 @@ export default function PreferenciasCuenta() {
     let vigente = true;
     void (async () => {
       const [cat, prefs, permiso] = await Promise.all([
-        obtenerCatalogoNotificaciones(),
+        // S88/A: la audiencia la DECLARA la pantalla — el motor no la adivina
+        // (la misma persona puede ser dueño de mascota Y prestador).
+        obtenerCatalogoNotificaciones('cliente'),
         obtenerPreferencias(),
         permisoPushDelSistema(),
       ]);
