@@ -80,10 +80,9 @@ import {
   borrarFotoGaleria,
   listarFotosGaleria,
   marcarComoPortada,
-  obtenerMiEmpleadoId,
+  obtenerMiPosicionEnPrestador,
   obtenerMiPrestador,
   obtenerPaisesDelMundo,
-  obtenerTitularId,
   reordenarFotosGaleria,
   resolverUrlLogoNegocio,
   type FotoGaleria,
@@ -519,26 +518,18 @@ export default function PerfilV2() {
           return;
         }
         /* ⭐ S88-C · EL GATE DE TITULARIDAD, mismo eje que el servidor.
-           La derivación de la casa (S80-B3): `obtenerTitularId` devuelve
-           null para el empleado (empleados_self le esconde la fila dueño)
-           — titular ⟺ titularId === miFila, ambos no-nulos. El fallo de
-           lectura NO abre (Ley 23) y NO se disfraza de 'ajeno' con
-           mentira: cae en 'error', que reintenta. */
-        const [titularId, miFila] = await Promise.all([
-          obtenerTitularId(r.data.id),
-          obtenerMiEmpleadoId(r.data.id),
-        ]);
+           ⏪ (D-664, mismo día): acá vivió la danza S80-B3 de dos RPCs
+           (titularId === miFila, con su coherencia a mano) — reemplazada
+           por el lector del servidor: la titularidad es un HECHO de
+           `prestadores.user_id`, dicho en UN viaje. El fallo NO abre y NO
+           fabrica 'ajeno': cae en 'error', que reintenta (Ley 23). */
+        const pos = await obtenerMiPosicionEnPrestador(r.data.id);
         if (!vigente) return;
-        if (miFila === null) {
-          // sin MI fila (el dato que la RLS sí garantiza) no se decide
-          // nada: reintento, jamás un 'ajeno' fabricado por un fallo.
+        if (!pos.ok) {
           setPantalla('error');
           return;
         }
-        if (titularId === null || titularId !== miFila) {
-          // coherente: tengo fila y NO es la del dueño (para el empleado,
-          // titularId llega null porque empleados_self le esconde esa
-          // fila — ésa ES la señal, S80-B3).
+        if (!pos.data.esTitular) {
           setPantalla('ajeno');
           return;
         }

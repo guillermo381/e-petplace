@@ -75,6 +75,7 @@ import {
   obtenerEquipoNegocio,
   obtenerJornadaEmpleado,
   obtenerMiCuentaComercial,
+  obtenerMiPosicionEnPrestador,
   obtenerMiPrestador,
   obtenerOficiosNegocio,
   quitarServiciosEmpleado,
@@ -162,6 +163,9 @@ export default function EquipoNegocioPantalla() {
   const [invOficios, setInvOficios] = useState<string[]>([]);
 
   const [prestadorId, setPrestadorId] = useState<string | null>(null);
+  /** ⭐ S88-C (D-664): GESTIÓN dicha por el servidor — null = sin
+   *  confirmar (la pantalla no llega a 'listo' sin él). */
+  const [gestiona, setGestiona] = useState<boolean | null>(null);
 
   // ── S78-B: el estado de la Hoja del miembro ──
   const [chips, setChips] = useState<ChipEmpleado[] | null>(null);
@@ -200,11 +204,21 @@ export default function EquipoNegocioPantalla() {
       setPantalla({ estado: 'error', mensaje: t('equipo.errorCarga') });
       return;
     }
-    const equipo = await obtenerEquipoNegocio(cuenta.data.id);
-    if (!equipo.ok) {
+    /* ⭐ S88-C (D-664) · LA POSICIÓN LA DICE EL SERVIDOR, y esta pantalla
+       pregunta por GESTIÓN (orden de mesa): D-660 le dio al administrador
+       poder sobre el equipo y el founder lo gateó — el admin ganó esta
+       superficie y no la pierde. Se resuelve ANTES de 'listo': cero
+       parpadeo entre solo-lectura y edición. Su fallo NO abre (Ley 23):
+       cae a error con reintento, jamás a un rol adivinado. */
+    const [equipo, posicion] = await Promise.all([
+      obtenerEquipoNegocio(cuenta.data.id),
+      obtenerMiPosicionEnPrestador(prestador.data.id),
+    ]);
+    if (!equipo.ok || !posicion.ok) {
       setPantalla({ estado: 'error', mensaje: t('equipo.errorCarga') });
       return;
     }
+    setGestiona(posicion.data.gestiona);
     setPantalla({ estado: 'listo', prestador: prestador.data, equipo: equipo.data });
 
   }, [t]);
@@ -506,7 +520,11 @@ export default function EquipoNegocioPantalla() {
               </View>
             </Tarjeta>
 
-            {pantalla.equipo.esDueno ? (
+            {/* ⏪ S88-C (D-664, 5-ago-2026): acá gateaba `equipo.esDueno` —
+                la derivación «leí ≥1 fila = dueño», que medida daba TRUE
+                PARA LOS CUATRO ROLES (la fila recepcion de A2bis se la
+                devolvía a todos). Ahora pregunta GESTIÓN al servidor. */}
+            {gestiona === true ? (
               <>
                 {/* ── EL EQUIPO ── */}
                 <View style={{ gap: spacing[3] }}>
