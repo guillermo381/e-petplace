@@ -79,6 +79,7 @@ import {
   obtenerMundoVeterinariaPropio,
   obtenerAtencionesAbiertas,
   obtenerPizarra,
+  hayAvisosSinLeer,
   obtenerPlataDelDia,
   obtenerPresupuestosPrestador,
   obtenerSolicitudesMostrador,
@@ -692,6 +693,23 @@ export default function Hoy() {
   const insets = useSafeAreaInsets();
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [refrescando, setRefrescando] = useState(false);
+  /* S88-C · LA CAMPANA: el BOOLEANO de `hayAvisosSinLeer` (jamás la
+     lista — la forma del dato hace imposible pintar un número). Refetch
+     en focus: al volver de /avisos el leído recién marcado se relee.
+     Un fallo de lectura deja `false`: la huella marca presencia solo
+     con verdad medida — sin verdad, no afirma. */
+  const [avisosSinLeer, setAvisosSinLeer] = useState(false);
+  useFocusEffect(
+    useCallback(() => {
+      let vigente = true;
+      void hayAvisosSinLeer().then((r) => {
+        if (vigente && r.ok) setAvisosSinLeer(r.data);
+      });
+      return () => {
+        vigente = false;
+      };
+    }, []),
+  );
   /* ⭐ S85-C7 — EL DÍA ELEGIDO (la rueda D3 de B, `0b229a6`).
      `null` = todavía no se eligió ⇒ manda el día base. Se resuelve a
      `desde` abajo; no se inicializa con `useState(desde)` porque `desde`
@@ -1693,6 +1711,10 @@ export default function Hoy() {
           titulo={saludo}
           dato={negocio}
           jornada={textoJornada}
+          /* S88-C · la campana del HOY (lámina): presencia por booleano,
+             destino la lista de avisos. */
+          avisosSinLeer={avisosSinLeer}
+          onAvisos={() => router.push('/avisos')}
           /* ⭐ S85-C23 — LOS TRES NÚMEROS (§2.4bis), en el slot que el
              techo ya tenía.
              ⏪ S86-C: decía *"`null` = sin citas hoy: el bloque NO

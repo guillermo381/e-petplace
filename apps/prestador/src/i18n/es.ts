@@ -729,16 +729,16 @@ export const prestadorEs = {
     notifPorqueSaludSeguridad: 'Estos avisos siempre llegan. Elegís por dónde, no si te llegan.',
     notifPorqueSeguridadCuenta: 'Los avisos de tu cuenta siempre llegan. Elegís por dónde.',
     notifPorqueSaldoPagado: 'Si algo que ya pagaste está por vencer, te avisamos siempre.',
-    /* Ejemplos POR FILA, del oficio — medidos contra `cat_notificacion_tipos`
-       (descripciones del catálogo). Banderas honestas declaradas al proponer:
-       `saldo_pagado` y `salud_seguridad` no tienen hoy tipos dirigidos al
-       prestador — su línea es la de la categoría, sin inventar tipos. */
-    notifEjOperacion: 'Ej.: una cita solicitada, tu liquidación disponible, un documento aprobado.',
-    notifEjSaludSeguridad: 'Ej.: una alerta de salud sobre una mascota.',
-    notifEjSeguridadCuenta: 'Ej.: un aviso de seguridad sobre tu cuenta.',
-    notifEjSaldoPagado: 'Ej.: algo que pagaste está por vencer.',
-    notifEjRelacional: 'Ej.: un mensaje nuevo de una familia.',
-    notifEjComercial: 'Ej.: novedades y promociones de e-PetPlace.',
+    /* ✅ Ejemplos POR FILA — FIRMADOS por el founder (6-ago-2026), sin
+       «Ej.:» (la forma ya se lee como ejemplo). `saldo_pagado` NO tiene
+       línea: la mesa firmó que esa fila NO se muestra al prestador (sus
+       seis tipos son del que PAGA) — el ocultamiento espera la audiencia
+       DERIVABLE del catálogo (freno declarado: hoy no existe columna). */
+    notifEjOperacion: 'Una cita solicitada, tu liquidación disponible, un documento aprobado.',
+    notifEjSaludSeguridad: 'Alertas de salud de las mascotas que atendés.',
+    notifEjSeguridadCuenta: 'Si alguien entra a tu cuenta o cambia tu contraseña.',
+    notifEjRelacional: 'Mensajes nuevos de las familias que atendés.',
+    notifEjComercial: 'Promociones, descuentos y novedades de e-PetPlace.',
     notifPorDonde: 'Por dónde te llegan',
     canalEnApp: 'En la app',
     canalTelefono: 'En el teléfono',
