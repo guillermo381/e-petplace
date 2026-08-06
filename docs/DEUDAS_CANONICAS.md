@@ -3214,6 +3214,18 @@ Origen: S86-A, medición para C.
   > censo se corre en un minuto.*
 ### Lecciones S88 (L-202 → L-206 — números verificados libres por grep)
 
+- **L-208 — UN `CREATE OR REPLACE` SE ARMA LEYENDO EL OBJETO VIVO, JAMÁS UNA COPIA GUARDADA (S88).**
+
+  > ### **SOBRESCRIBIR UNA FUNCIÓN ES SIEMPRE «EXITOSO»: NO HAY CONFLICTO QUE AVISE.**
+
+  **EL CASO:** el lote de voces reescribió `cerrar_y_renovar_planes` partiendo de un `pg_get_functiondef` capturado **minutos antes** — antes de que la migración de `plan_renovado` existiera. El `CREATE OR REPLACE` **hizo exactamente lo que se le pidió** y borró una voz **que ya estaba en producción**: la del único tipo fuera de sombra, el que sale solo el 13-ago.
+
+  **Lo cazó EL PAR**, no el cinturón: la sombra devolvió `asunto = NULL`. *El cinturón verificaba que las voces NUEVAS existieran — no que las viejas siguieran.*
+
+  **Es la hermana de la ley del depósito** (*los punteros al presente se leen del objeto*), aplicada al código: **un `functiondef` guardado es un puntero al presente con cara de hecho.** Y la ventana de invalidación puede ser de minutos.
+
+  **Forma exigible:** todo `CREATE OR REPLACE` de una función existente se arma con un `pg_get_functiondef` leído **en el mismo turno**, y su cinturón verifica **lo que había antes** además de lo que se agrega.
+
 - **L-207 — UN FIXTURE QUE RELLENA LO QUE EL PRODUCTOR NO LLENA PRUEBA EL TUBO Y NO EL AGUA (S88, firmada por la mesa — la más cara del día).**
 
   > ### **EL GATE MIDIÓ QUE EL MENSAJE LLEGA; NADIE MIDIÓ QUÉ MENSAJE.**
@@ -8386,3 +8398,43 @@ todas están en sombra.*
 > firmada, y la salida se verifica MIRANDO LA SOMBRA DEL PRODUCTOR REAL.**
 
 **Origen: S88-A (auditoría del contrato de la campana contra su lámina).**
+
+
+---
+
+#### D-668 — ✅ CURADO EN EL ACTO · `registro_completado_cliente` IBA AL DESTINATARIO EQUIVOCADO
+
+**Hallado escribiendo su voz** (lote S88): dos tipos distintos llegaban al
+**mismo receptor** con los **mismos datos**.
+
+```sql
+IF v_prestador_dueno_user_id IS NOT NULL THEN
+  → registro_completado_prestador   a  v_prestador_dueno_user_id   ✅
+
+IF v_pendiente.creado_por_user_id IS NOT NULL
+   AND v_pendiente.creado_por_user_id <> v_prestador_dueno_user_id THEN
+  → registro_completado_cliente     a  v_prestador_dueno_user_id   🔴 EL MISMO
+```
+
+> ### **EL GUARD SE ADAPTÓ Y EL DESTINATARIO NO.**
+> El `IF` pregunta correctamente por `creado_por_user_id` **y exige que sea
+> DISTINTO del dueño** — o sea, el autor del bloque **sabía** que eran dos
+> personas. La línea de abajo quedó copiada del bloque anterior.
+
+**El efecto medido:** el dueño del negocio recibía **dos avisos del mismo
+hecho**, y **quien hizo el alta no recibía ninguno**.
+
+**CURADO:** `p_destinatario_user_id => v_pendiente.creado_por_user_id`.
+
+> **Y lo que enseña, que es por qué esto no lo caza un typecheck:** ambas
+> variables son `uuid`, ambas existen, ambas están en scope. **El código era
+> válido en todo sentido salvo el único que importaba.** *Lo destapó tener que
+> escribir la voz: al preguntarme «¿qué le digo a esta persona?» apareció que
+> las dos personas eran la misma.*
+>
+> **Escribir la voz de un aviso es una auditoría de su destinatario.**
+
+**Las voces de los dos tipos quedan PENDIENTES a propósito** (firma de la
+mesa): se escriben cuando cada una tenga su receptor real y verificado.
+
+**Origen: S88-A (lote de voces).**
