@@ -241,8 +241,19 @@ export {
   obtenerPreferencias,
   guardarIdiomaPreferido,
   guardarPreferenciaNotificacion,
+  // S88-D (Lote 4) — la excepción §6 del método (S85): A escribió
+  // guardarPreferenciaCanal PARA la pantalla de Preferencias («es el que la
+  // pantalla va a consumir», su JSDoc) y el export quedó omitido; el lector
+  // del catálogo nace en el cruce declarado del mismo commit. Se declara: A
+  // firma o revierte.
+  guardarPreferenciaCanal,
+  obtenerCatalogoNotificaciones,
   type Preferencias,
   type CodigoErrorPreferencias,
+  type CanalNotificacion,
+  type CategoriaNotificacionCatalogo,
+  type CanalNotificacionCatalogo,
+  type CatalogoNotificaciones,
 } from './wrappers/preferencias';
 export {
   obtenerPizarra,
@@ -379,6 +390,14 @@ export {
 // Cierra el «motor sin puerta» de S77: el tercer brazo de
 // `cita_update_prestador` vivía sin un solo escritor. `dar_de_baja_empleado`
 // produce las citas sin persona; ésta es la única vía de volver a ruteárselas.
+// ── S88-A · D-664 · la posición dicha por el SERVIDOR ─────────────────────
+// Mata `esDueno = leí ≥1 fila`, que daba true para los cuatro roles.
+export {
+  obtenerMiPosicionEnPrestador,
+  type PosicionEnPrestador,
+  type CodigoPosicion,
+} from './wrappers/posicionPrestador';
+
 export {
   asignarCitaAPersona,
   obtenerPersonasParaAsignar,

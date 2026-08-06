@@ -11,6 +11,7 @@ import { Boton, Campo, Encabezado, Entrada, spacing, useAviso, useTheme, EvitaTe
 import { MIN_LARGO_CONTRASENA, registrarse, type CodigoErrorAuth } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
+import { causaNoEnvia } from '@/lib/registro-guard';
 
 export default function Registro() {
   const router = useRouter();
@@ -25,7 +26,23 @@ export default function Registro() {
   const [cargando, setCargando] = useState(false);
   const [errores, setErrores] = useState<{ email?: string; password?: string }>({});
 
-  const puedeEnviar = nombre.trim().length > 0 && email.trim().length > 0 && password.length > 0;
+  // S88-D · EL GUARD LOCAL (Ley 23): la puerta deja de ofrecer la clave
+  // corta que el server iba a rebotar. El predicado vive en lib/ para
+  // que su par discrimine contra la fuente.
+  const causa = causaNoEnvia({ nombre, email, password });
+  const puedeEnviar = causa === null;
+  // Las DOS capas del apagado (contrato de Boton, S82-B r14 + S63-B
+  // «el Confirmar apagado dice QUÉ FALTA, siempre»): la regla del largo
+  // ya es VISIBLE en la ayuda del Campo; la razón hace que el toque
+  // jamás quede muerto y se anuncia al enfocar. Cada causa su voz —
+  // una razón genérica sobre una clave corta sería el mensaje que
+  // miente (la familia de D-659 ②).
+  const razon =
+    causa === 'campos_vacios'
+      ? t('registro.razonCampos')
+      : causa === 'password_corta'
+        ? t('registro.razonPasswordCorta', { n: MIN_LARGO_CONTRASENA })
+        : undefined;
 
   async function crearCuenta() {
     if (!puedeEnviar || cargando) return;
@@ -97,6 +114,18 @@ export default function Registro() {
           bloque
           cargando={cargando}
           deshabilitado={!puedeEnviar}
+          razonDeshabilitado={razon}
+          onRazon={() => {
+            // La pantalla decide cómo se cuenta (contrato onRazon): la
+            // clave corta se señala EN SU CAMPO con la misma voz; los
+            // campos vacíos, en aviso — pintarlos de error sin que nadie
+            // los haya tocado sería decir «falla» donde hay «todavía no».
+            if (causa === 'password_corta') {
+              setErrores({ password: t('registro.razonPasswordCorta', { n: MIN_LARGO_CONTRASENA }) });
+            } else if (razon !== undefined) {
+              aviso.mostrar({ variante: 'neutro', texto: razon });
+            }
+          }}
           onPress={() => void crearCuenta()}
         />
         </Entrada>

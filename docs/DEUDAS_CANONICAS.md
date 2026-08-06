@@ -8025,7 +8025,42 @@ sigue siendo la autoridad. Las secciones que `esDueno` monta de más rebotan en
 su propio gate (D-660 los midió uno por uno). *El daño es ofrecer lo que se va
 a rechazar, no conceder lo que no corresponde.*
 
-**LA CURA — dos caminos, la mesa elige:** ① el derivado gana **su propio
+### ✅ CURADA (S88-A) — el lector del servidor
+
+**Migración `20260805270000`: `obtener_mi_posicion_en_prestador`.** Devuelve
+**TRES verdades nombradas** en un viaje, y el porqué de las tres importa:
+
+| campo | qué es | quién lo necesita |
+|---|---|---|
+| `esTitular` | hecho de `prestadores.user_id` — **no inferencia** | lo que solo el titular puede |
+| `gestiona` | titular · administrador · admin de plataforma (puerta D-660) | **`equipo.tsx`** |
+| `esMostradorOGestion` | gestión o recepción derivada (§4ter) | la plata, el reparto |
+
+> **Por qué tres y no solo `esTitular`, que es lo que se pidió:** las cuatro
+> superficies **no quieren todas la misma pregunta**. `equipo.tsx` la quiere de
+> GESTIÓN — **D-660 le dio al administrador poder sobre el equipo y el founder
+> lo gateó VERDE el mismo día**. Gatearla por `esTitular` estricto le habría
+> quitado la superficie que acababa de ganar. *Un lector que obliga a elegir
+> mal es la clase de D-664 otra vez: no fallaría — acertaría al revés en la
+> superficie equivocada.*
+
+**Par 4/4** (in-txn, ROLLBACK, residuo 0), con las dos columnas extra probando
+lo anterior:
+
+```
+                  esTitular  gestiona  mostrador
+TITULAR             true       true      true      ✅
+ADMIN               false      true      true      ✅   ← conserva `equipo`
+RECEPCIÓN           false      false     true      ✅
+PROFESIONAL         false      false     false     ✅
+```
+
+**Wrapper `obtenerMiPosicionEnPrestador`** — C cura las cuatro superficies sin
+tocar DB. *Los tres booleanos se exigen `boolean` explícito en vez de
+coercionar: un `undefined` coercionado a `false` diría «no sos titular» con
+cara de dato — el modo de falla que esta deuda existe para matar.*
+
+**El camino viejo, para la mesa:** ① el derivado gana **su propio
 lector** (un predicado del servidor que diga si gestiona, como
 `empleado_es_mostrador_o_gestion` hizo con la plata) · ② se **renombra** a lo
 que realmente mide (`esMiembroConRol`) y cada sección se gatea con el predicado
@@ -8037,3 +8072,33 @@ superficies; la ① las cura todas de una.* **Voto de A: ①.**
 > **☠️ MUERTE:** ningún gate de sección deriva un rol de «cuántas filas leí».
 
 **Origen: S88 (censo de prosa de C; medido por A con las cuatro cuentas).**
+
+
+---
+
+#### D-665 — 🟢 PREFERENCIA DECLARATIVA ≠ TRANSPORTE (registro, sin cura)
+
+**Depositado a pedido de la mesa, S88 — no es un defecto: es una distinción que
+conviene que esté escrita antes de que alguien la «arregle».**
+
+`cat_notificacion_canales.transporte_vivo` dice que **hoy solo `email` está
+vivo** (`in_app`, `push` y `whatsapp` en `false`). La pantalla de preferencias
+del cliente dibuja **los cuatro chips igual**.
+
+> ### **NO ES UNA INCOHERENCIA: SON DOS PREGUNTAS DISTINTAS.**
+> **El usuario declara POR DÓNDE QUIERE que le llegue; el motor entrega POR
+> DONDE PUEDE.** Una preferencia es una intención sobre el futuro — apagar el
+> chip de push porque hoy no hay tren le haría declarar de nuevo el día que el
+> tren llegue, y **el silencio del motor no es una decisión del usuario**.
+
+*Y el motor ya honra las dos por separado: la enmienda §7 de S88 elige el
+primer canal habilitado **con transporte vivo**, así que una preferencia sin
+tren no pierde el aviso — cae al piso.*
+
+**Si la mesa alguna vez quiere gatear los chips por transporte, es ENMIENDA DE
+LÁMINA, no cura de código.**
+
+> **☠️ MUERTE:** los cuatro canales tienen transporte, y la distinción deja de
+> tener consecuencia visible.
+
+**Origen: S88 (Lote 4 de D; distinción declarada por la mesa).**
