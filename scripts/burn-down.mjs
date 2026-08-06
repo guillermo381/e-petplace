@@ -49,6 +49,7 @@
 
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { construirArbol, cadenasHaciaSimbolo, cuerpoDe, autoPruebaArbol } from './lib-arbol-montaje.mjs';
 
 const RAIZ = 'apps/prestador/src/app';
 
@@ -136,41 +137,56 @@ const RAICES_M2 = ['apps/prestador/src', 'apps/cliente/src'];
 const esRutaDePantalla = (path, src) =>
   /[/\\]src[/\\]app[/\\]/.test(path) && /export\s+default/.test(src);
 
-// ⚠️⚠️ EL HUECO DE ESTE DISCRIMINADOR, MEDIDO Y DECLARADO — no está
-// cubierto, y se escribe acá para que el número de abajo no se lea como
-// cobertura total (que es exactamente el defecto que este ensanche vino
-// a curar, un piso más arriba).
-//
-// EL CASO REAL, medido archivo por archivo: `perfil-piezas.tsx` monta un
-// `<Campo>` y se clasifica como "componente con anfitriona" ⇒ NO se
-// cuenta. Pero tiene TRES anfitrionas y solo UNA porta la pieza:
-//   · `(tabs)/cuenta/perfil.tsx`      → CON EvitaTeclado   ✅ cubierta
-//   · `cuenta-comercial/index.tsx`    → SIN EvitaTeclado   🔴 descubierta
-//   · `seccion-documentos.tsx`        → SIN, y es otro componente
-// Y `cuenta-comercial/index.tsx` TAMPOCO aparece entre las rutas, porque
-// no monta `<Campo>` él mismo: lo monta a través del componente.
-//
-// ⇒ ESTE GUARD MIRA EL ARCHIVO, NO EL ÁRBOL DE MONTAJE. Cubre los dos
-//   extremos limpios (la ruta que monta su campo · el componente cuyas
-//   anfitrionas están todas cubiertas) y **se le escapa el MIXTO**.
-//
-// LA CURA DE VERDAD es evaluar por árbol —un `<Campo>` está cubierto si
-// TODAS las pantallas raíz que lo alcanzan portan la pieza—, y exige
-// resolver imports transitivamente. Es trabajo propio, no un ajuste de
-// regex. **Hasta que exista, el número de rutas es un PISO, no un
-// total**, y esta nota es lo que impide leerlo como si lo fuera.
+// ⚰️ LÁPIDA (S89-B): acá vivió el HUECO DECLARADO del pareo por archivo
+// («este guard mira el archivo, no el árbol de montaje — se le escapa el
+// MIXTO»). La cura es `lib-arbol-montaje.mjs`: el corpus se evalúa POR
+// SÍMBOLO sobre el grafo de imports resuelto transitivamente. Y el
+// estreno del árbol FALSÓ la medición que fundó el hueco: el «mixto» de
+// S86 (`cuenta-comercial/index.tsx` como anfitriona descubierta de
+// `perfil-piezas`) era un artefacto del pareo por ARCHIVO — esa ruta
+// importa SOLO `SeccionDesplegable`, y el `<Campo>` vive en
+// `ControlTelefono`, cuyo único camino real (perfil.tsx) porta
+// EvitaTeclado. El instrumento nuevo dice la verdad en los DOS sentidos:
+// no fabrica esa cadena, y sí encuentra las descubiertas reales.
 
+/** M2 POR ÁRBOL DE MONTAJE (S89-B) — la letra es «que eso no pase en
+ *  NINGÚN campo», así que la unidad es el SÍMBOLO que monta la pieza:
+ *   · ruta que monta pieza sin EvitaTeclado en su archivo → deuda propia;
+ *   · símbolo no-ruta → se caminan TODAS sus cadenas ruta→…→símbolo:
+ *     cubierta = algún cuerpo de la cadena porta EvitaTeclado;
+ *   · sin anfitriona alcanzada → SE DECLARA (galería, código muerto o
+ *     límite de resolución del árbol — jamás verde por omisión). */
 function corpusM2() {
-  const out = { rutas: [], componentes: [] };
-  for (const raiz of RAICES_M2) {
-    if (!existsSync(raiz)) continue;
-    for (const p of pantallas(raiz)) {
-      const src = sinComentarios(readFileSync(p, 'utf8'));
-      if (!RE_ABRE_TECLADO.test(src) || /EvitaTeclado/.test(src)) continue;
-      (esRutaDePantalla(p, src) ? out.rutas : out.componentes).push(p);
+  const arbol = construirArbol();
+  const rutas = new Set();
+  const cadenasDescubiertas = [];
+  const cubiertos = [];
+  const sinAnfitriona = [];
+  for (const [p, nodo] of arbol.archivos) {
+    if (!RAICES_M2.some((r) => p.startsWith(r))) continue;
+    for (const [nombre, s] of nodo.simbolos) {
+      if (!RE_ABRE_TECLADO.test(s.cuerpo)) continue;
+      if (/EvitaTeclado/.test(s.cuerpo)) continue; // cubierto en el sitio
+      if (nodo.esRuta && nodo.porDefecto === nombre) {
+        if (!/EvitaTeclado/.test(nodo.limpio)) rutas.add(p);
+        continue;
+      }
+      const { cadenas, sinAnfitriona: sinA } = cadenasHaciaSimbolo(arbol, p, nombre);
+      if (sinA) {
+        sinAnfitriona.push(`${p}#${nombre}`);
+        continue;
+      }
+      const descubiertas = cadenas.filter(
+        (c) => !c.some((ref) => /EvitaTeclado/.test(cuerpoDe(arbol, ref))),
+      );
+      if (descubiertas.length === 0) {
+        cubiertos.push(`${p}#${nombre} — ${cadenas.length} cadena(s), todas cubiertas`);
+      } else {
+        for (const c of descubiertas) cadenasDescubiertas.push(c.join(' ⇒ '));
+      }
     }
   }
-  return out;
+  return { rutas: [...rutas].sort(), cadenasDescubiertas, cubiertos, sinAnfitriona };
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -507,6 +523,12 @@ function autoPrueba() {
   if (esRutaDePantalla('apps/cliente/src/components/x.tsx', 'export default function P(){}'))
     mudos.push('M2·discriminador: un COMPONENTE se está contando como ruta — los falsos positivos vuelven.');
 
+  // ④ EL ÁRBOL DE MONTAJE (S89-B): el alcance real de M2 camina cadenas
+  //    sobre el grafo — si el grafo no puede probar su propia regla (el
+  //    mixto virtual + el discriminador del pareo por archivo + el
+  //    contra-caso anti-verde-vacío), nada de lo que reporte vale.
+  for (const f of autoPruebaArbol()) mudos.push(`M2·árbol: ${f}`);
+
   return mudos;
 }
 
@@ -655,12 +677,18 @@ function main() {
     else if (rs.length > 12) console.log(`       · (${rs.length} pantallas — corré con --detalle)`);
     // ── S86-B · el alcance ENSANCHADO de M2, con su denominador dicho ──
     if (m.alcancePropio) {
-      const { rutas, componentes } = m.alcancePropio();
-      console.log(`       ── ALCANCE REAL (${RAICES_M2.join(' + ')}):`);
-      console.log(`          ${rutas.length} RUTAS con deuda propia  ·  ${componentes.length} componentes con anfitriona`);
+      const { rutas, cadenasDescubiertas, cubiertos, sinAnfitriona } = m.alcancePropio();
+      console.log(`       ── ALCANCE REAL (${RAICES_M2.join(' + ')}), POR ÁRBOL DE MONTAJE (S89-B):`);
+      console.log(
+        `          ${rutas.length} RUTAS con deuda propia · ${cadenasDescubiertas.length} CADENAS descubiertas · ` +
+          `${cubiertos.length} símbolos cubiertos por su cadena · ${sinAnfitriona.length} sin anfitriona (declarados)`,
+      );
       console.log(`          piezas que abren teclado, DERIVADAS de ${DIR_UI}: ${PIEZAS_TECLADO.join(', ')} (+ TextInput crudo)`);
       for (const r of rutas) console.log(`          🔴 ${r}`);
-      for (const c of componentes) console.log(`          ·  ${c} — su anfitriona porta la pieza`);
+      for (const c of cadenasDescubiertas) console.log(`          🔴 cadena: ${c}`);
+      for (const c of cubiertos) console.log(`          ·  ${c}`);
+      for (const s of sinAnfitriona)
+        console.log(`          ⚠️ ${s} — SIN ruta que lo alcance (galería/muerto/límite del árbol: se declara, no se pinta verde)`);
       console.log(`          ⚠️ el número de arriba (${rs.length}) es el del corpus de la SERIE`);
       console.log(`             (${RAIZ}); el de acá es el de la LETRA ("ningún campo").`);
     }
