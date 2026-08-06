@@ -105,3 +105,30 @@ silencioso es exactamente el olvido que no se ve. Hoy daría: prestador ROJO
 pintar rojo el verdicto compartido por un defecto que ya viaja con pedido;
 si C lo cura y la mesa lo quiere, es una regla de diez líneas sobre la
 maquinaria de R32.
+
+---
+
+## ✅ EJECUTADO (S89, orden 2 del founder — «salta la fila: defecto vivo en producción»)
+
+La orden llegó dirigida a C con el detalle de este paquete; **se ejecutó en
+esta pista (B) por adjudicación directa del founder, con el cruce de
+territorio DECLARADO** — al momento de ejecutar, la sesión C estaba VIVA en
+su worktree (commits `96fd21e` → `b93b310`, minutos antes) avanzando su orden
+de apertura, y dos manos en un mismo árbol son una carrera: la cura se aplicó
+acá, donde no escribe nadie más. Si C también la aplica, el merge es la misma
+palabra en la misma línea — trivial para A.
+
+- **La cura:** `techo-oficio.tsx` — `superficie="muro"` en el montaje del
+  Badge + el comentario con la regla y su porqué medido (1.00 → 5.51/9.61).
+  Restaura lámina firmada: no pide gate nuevo; el ojo del founder la ve en
+  el gate único del bundle.
+- **El par que fija la regla:** nace **R33** en `verify:diseno` («la
+  superficie de la huella se declara») — en apps, todo `forma="huella"`
+  declara `superficie`; el default silencioso murió. Con fixture propio en
+  la auto-prueba (25 reglas encendieron) y **el discriminador corrido sobre
+  el montaje REAL: la versión pre-cura sale ROJA (1/1 montaje), la curada
+  VERDE (0/1)**. Condición de muerte escrita: si `Badge` vuelve `superficie`
+  obligatoria por tipo con `forma="huella"`, el tsc la cubre y R33 se retira
+  con lápida.
+- Verificación (cero dedos, regla 87): tsc ×3 verde · `verify:diseno` VERDE ·
+  `verdicto.mjs` TODO VERDE.
