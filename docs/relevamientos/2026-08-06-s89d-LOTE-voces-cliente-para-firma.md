@@ -1,5 +1,12 @@
 # S89-D · LOTE DE VOCES DEL CLIENTE — PARA FIRMA EN UNA PASADA
 
+> **☠️ SUPERSEDED (S89-D orden 4):** la pasada de firma vive en
+> **`2026-08-06-s89d-PASADA-UNICA-de-firma.md`** — consolida este
+> lote + las tres voces de cita de A + los reemplazos del acento (ya
+> firmado tuteo, 6-ago). **Nadie firma sobre este documento.** Queda
+> como registro del censo; sus decisiones ① y ② están resueltas o
+> re-presentadas allá.
+
 > **Qué es:** las voces de SUPERFICIE del cliente nacidas en S88-D
 > (campana + Preferencias), censadas contra el catálogo vivo y
 > ordenadas para que el founder firme el lote entero de una pasada.
