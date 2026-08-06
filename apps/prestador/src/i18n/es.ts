@@ -2566,7 +2566,12 @@ export const prestadorEs = {
   // extra convertiría una respuesta en una disculpa. SIN reintento (ver
   // components/gate-ajeno.tsx) · LOTE S87, GATE PENDIENTE
   gateAjeno: {
-    titulo: 'Esta sección es de quien administra el negocio.',
+    /* ⏪ S88-C (5-ago): decía «de quien administra el negocio» — y el gate es
+       de TITULARIDAD (`esTitular`), no de gestión: el admin ADMINISTRA y
+       rebota igual. Post-D-664 gestionar y ser titular son dos verdades con
+       nombre propio; el mensaje de un guard es parte del guard, y este
+       describía el predicado equivocado. Orden de mesa, 5-ago-2026. */
+    titulo: 'Esta sección es del titular del negocio.',
     volver: 'Volver',
   },
   // S79-B (T3-B3) · LA SALA DE ESPERA — el marco del pendiente (la voz

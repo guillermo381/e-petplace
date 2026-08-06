@@ -2121,7 +2121,11 @@ export const prestadorEn = {
   },
   // S87-C (LÁMINA BARRA DE TRES §3) · the door that speaks · LOTE S87
   gateAjeno: {
-    titulo: 'This section belongs to whoever manages the business.',
+    /* ⏪ S88-C (5-ago): said "whoever manages the business" — but the gate is
+       OWNERSHIP (`esTitular`), not management: the admin manages and still
+       bounces. Post-D-664 those are two named truths; a guard's message is
+       part of the guard. Mesa order, 5-ago-2026. */
+    titulo: 'This section belongs to the business owner.',
     volver: 'Go back',
   },
   // S79-B (T3-B3) · the waiting room — the pending provider's frame · LOTE S79
