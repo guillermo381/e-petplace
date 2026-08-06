@@ -27,7 +27,7 @@ import Animated, { cubicBezier } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { setStatusBarStyle } from 'expo-status-bar';
-import { Boton, Hoja, Insignia, Isotipo, Texto, motion, palette, radius, spacing, typography, useTheme } from '@epetplace/ui';
+import { Badge, Boton, Hoja, Icono, Insignia, Isotipo, Texto, motion, palette, radius, spacing, typography, useEtiquetaBadge, useTheme } from '@epetplace/ui';
 
 import { useTraduccion } from '@/i18n';
 
@@ -241,6 +241,75 @@ export function EsqueletoOficio({
  * E5 — `numberOfLines={1}` en persona Y negocio: `nombre_comercial` es
  * texto libre y largo ("Clínica Veterinaria Aurora del Valle Sur").
  */
+/** La identidad del techo — isotipo + saludo + negocio con su insignia.
+ *  Extraída de la fila del techo en S88-C para que el `gap` de la esquina
+ *  de la campana quede LEGIBLE al lado de su montaje (R32). Sin cambio de
+ *  composición: es el mismo bloque que vivía inline desde S58/S85. */
+function IdentidadDelTecho({
+  titulo,
+  dato,
+  cohorte,
+  cohorteAnio,
+  onEmblema,
+}: {
+  titulo: string;
+  dato: string;
+  cohorte?: 'fundador' | 'pionero' | null;
+  cohorteAnio?: number | null;
+  onEmblema: () => void;
+}) {
+  return (
+    <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
+      {/* enmienda §15b.2 FIRMADA en gate S58: el isotipo en blanco —
+          identidad, UNO por pantalla, fuera de la contabilidad */}
+      <Isotipo size={26} variant="blanco" />
+      <View style={{ flex: 1, gap: 2 }}>
+        <Text
+          accessibilityRole="header"
+          numberOfLines={1}
+          style={{
+            fontFamily: typography.family.sans.medium,
+            fontSize: typography.size.xl,
+            color: palette.light0,
+          }}
+        >
+          {titulo}
+        </Text>
+        {/* papel PLENO (regla S61): sobre el muro la opacidad muere.
+            La insignia va JUNTO AL NOMBRE DEL NEGOCIO —no al saludo—
+            porque la cohorte es del negocio, no de la persona. El
+            nombre cede ancho (`flexShrink`) para que la distinción no
+            se corte: entre truncar el nombre propio y truncar una
+            insignia de dos palabras, se trunca el que el prestador ya
+            conoce de memoria. */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
+          <Text
+            numberOfLines={1}
+            style={{
+              flexShrink: 1,
+              fontFamily: typography.family.sans.regular,
+              fontSize: typography.size.sm,
+              color: palette.light0,
+            }}
+          >
+            {dato}
+          </Text>
+          {cohorte !== null && cohorte !== undefined && cohorteAnio !== null && cohorteAnio !== undefined && (
+            <Insignia
+              distincion="cohorte"
+              superficie="muro"
+              cohorte={cohorte}
+              cohorteAnio={cohorteAnio}
+              tamaño="sm"
+              onPress={onEmblema}
+            />
+          )}
+        </View>
+      </View>
+    </View>
+  );
+}
+
 export function TechoOficio({
   titulo,
   dato,
@@ -248,6 +317,8 @@ export function TechoOficio({
   pie,
   cohorte,
   cohorteAnio,
+  avisosSinLeer,
+  onAvisos,
 }: {
   titulo: string;
   dato: string;
@@ -299,10 +370,19 @@ export function TechoOficio({
    */
   cohorte?: 'fundador' | 'pionero' | null;
   cohorteAnio?: number | null;
+  /** S88-C · LA CAMPANA (lámina firmada). `onAvisos` presente = la campana
+   *  se monta INLINE en la fila del techo (jamás absoluta — la esquina
+   *  firmada); ausente = el techo queda como era (negocio.tsx no la lleva:
+   *  la lámina la pone en el encabezado del HOY). `avisosSinLeer` es el
+   *  BOOLEANO de `hayAvisosSinLeer` — la huella marca PRESENCIA, jamás un
+   *  número, y la forma del dato lo hace imposible. */
+  avisosSinLeer?: boolean;
+  onAvisos?: () => void;
 }) {
   const insets = useSafeAreaInsets();
   const muro = useMuroOficio();
   const { t } = useTraduccion();
+  const etiquetaBadge = useEtiquetaBadge();
   useBarraEstadoClara();
   /* S85-C34 · EL MODAL DEL EMBLEMA. Vive acá, con la insignia: la Hoja no
      necesita nada de la pantalla y sacarla afuera obligaría a cablear un
@@ -322,53 +402,39 @@ export function TechoOficio({
         gap: spacing[4],
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[3] }}>
-        {/* enmienda §15b.2 FIRMADA en gate S58: el isotipo en blanco —
-            identidad, UNO por pantalla, fuera de la contabilidad */}
-        <Isotipo size={26} variant="blanco" />
-        <View style={{ flex: 1, gap: 2 }}>
-          <Text
-            accessibilityRole="header"
-            numberOfLines={1}
-            style={{
-              fontFamily: typography.family.sans.medium,
-              fontSize: typography.size.xl,
-              color: palette.light0,
-            }}
+      {/* S88-C · LA ESQUINA DE LA CAMPANA (lámina firmada): la campana va
+          INLINE en la fila del techo, jamás absoluta — el layout la cuenta.
+          El `gap: spacing[5]` (20dp) de esta fila es EL NÚMERO CONGELADO de
+          la lámina (10+10, los hitSlop de los dos vecinos) y R32 lo lee
+          estáticamente — la identidad se extrajo a su pieza EXACTAMENTE
+          para que este gap sea legible al lado de la campana (la primera
+          corrida de R32 no lo veía a 60 líneas: el guard tenía razón).
+          La regla de truncado no cambia: título y dato ceden ancho
+          adentro de IdentidadDelTecho. */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[5] }}>
+        <IdentidadDelTecho
+          titulo={titulo}
+          dato={dato}
+          cohorte={cohorte}
+          cohorteAnio={cohorteAnio}
+          onEmblema={() => setEmblemaAbierto(true)}
+        />
+        {onAvisos !== undefined && (
+          <Pressable
+            onPress={onAvisos}
+            hitSlop={10}
+            accessibilityRole="button"
+            /* El estado viaja en el label (contrato del Badge, mitad ②):
+               con huella el label dice «sin leer», jamás un número. */
+            accessibilityLabel={etiquetaBadge(t('avisos.titulo'), avisosSinLeer === true ? 1 : 0, 'huella')}
           >
-            {titulo}
-          </Text>
-          {/* papel PLENO (regla S61): sobre el muro la opacidad muere.
-              La insignia va JUNTO AL NOMBRE DEL NEGOCIO —no al saludo—
-              porque la cohorte es del negocio, no de la persona. El
-              nombre cede ancho (`flexShrink`) para que la distinción no
-              se corte: entre truncar el nombre propio y truncar una
-              insignia de dos palabras, se trunca el que el prestador ya
-              conoce de memoria. */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[2] }}>
-            <Text
-              numberOfLines={1}
-              style={{
-                flexShrink: 1,
-                fontFamily: typography.family.sans.regular,
-                fontSize: typography.size.sm,
-                color: palette.light0,
-              }}
-            >
-              {dato}
-            </Text>
-            {cohorte !== null && cohorte !== undefined && cohorteAnio !== null && cohorteAnio !== undefined && (
-              <Insignia
-                distincion="cohorte"
-                superficie="muro"
-                cohorte={cohorte}
-                cohorteAnio={cohorteAnio}
-                tamaño="sm"
-                onPress={() => setEmblemaAbierto(true)}
-              />
-            )}
-          </View>
-        </View>
+            <Badge n={avisosSinLeer === true ? 1 : 0} forma="huella">
+              {/* Campana EN TRAZO (ley del único relleno: el relleno es de
+                  la huella del Badge); papel pleno sobre el muro. */}
+              <Icono nombre="campana" tamano={24} tinta={palette.light0} />
+            </Badge>
+          </Pressable>
+        )}
       </View>
       {/* La forma del día — su propio aire, papel pleno, DM Sans entera. */}
       {jornada !== undefined && (
