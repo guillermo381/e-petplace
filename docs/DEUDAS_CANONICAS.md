@@ -8630,3 +8630,43 @@ territorio) o **cada app** en su composición. **La mesa adjudica.**
 > **☠️ MUERTE:** un lint verifica la separación y **rebota** si alguien la baja.
 
 **Origen: S88-A (coordinación de la pantalla de avisos).**
+
+---
+
+#### D-673 — 🔴 EL AVISO QUE UN DUEÑO ESPERA DE VERDAD NO EXISTE: los tres tipos de cita no tienen productor
+
+**Lo destapó el dedo del founder en el gate final:** programó una cita y **no le
+llegó nada**. La primera lectura fue la ley de secuencia (`in_app` sin
+transporte) — y era cierta, **pero no era toda la verdad**.
+
+**Medido:**
+
+| tipo | sombra | voz | productor |
+|---|---|---|---|
+| `cita_confirmada` | sí | 🔴 | **— SIN PRODUCTOR** |
+| `cita_recordatorio` | sí | 🔴 | **— SIN PRODUCTOR** |
+| `cita_solicitada` | sí | 🔴 | **— SIN PRODUCTOR** |
+| `procedimiento_agendado` | sí | ✅ | `fijar_fecha_procedimiento` |
+
+> ### **SACARLOS DE SOMBRA NO HARÍA NADA: NADIE LOS PRODUCE.**
+> *Acá no falta la voz — **falta el hecho**.* Y por eso no se sacó ninguno: la
+> regla de L-207 pide voz firmada, y esto está un piso más abajo.
+
+**Por qué es el más importante de los que quedan abiertos:** los tipos con
+productor son de **plata y vencimientos** — cosas que el producto le cuenta al
+dueño. *«Me confirmaron la cita» es lo que el dueño **espera**, y es el único
+aviso que pidió sin que nadie se lo ofreciera.* **El producto tiene el motor de
+notificaciones entero y no emite el aviso más obvio de su oficio.**
+
+**Lo que hay que construir** (los tres son distintos y no se resuelven juntos):
+`cita_confirmada` nace cuando el prestador confirma · `cita_recordatorio` es un
+cron con ventana · `cita_solicitada` va **al negocio**, no al dueño (su
+audiencia ya está clasificada así).
+
+> **☠️ DISPARO: antes del soft launch.** Va a **S89** junto con push y las
+> plantillas — *el mismo tren, porque un recordatorio que solo sabe salir por
+> correo es medio recordatorio.*
+> **☠️ MUERTE:** una cita confirmada produce su aviso, con su voz firmada y su
+> par leído en la sombra.
+
+**Origen: S88 (gate final del founder, por su propio uso).**

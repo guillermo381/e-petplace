@@ -44,6 +44,32 @@ pantalla no tenga que acordarse es exactamente el punto.
 
 ---
 
+## ⚖️ ENMIENDA FIRMADA (founder, 6-ago-2026) — **LA CAMPANA ES EL REGISTRO, NO EL CANAL**
+
+El punto 2 decía *«los avisos entregados por canal in_app»*. **Se enmienda: la
+campana muestra TODO lo ENTREGADO a esa persona, por el canal que sea.**
+
+> ### **EL CANAL ES CÓMO LE LLEGÓ; LA CAMPANA ES DÓNDE QUEDA.**
+
+**Las tres razones firmadas:**
+
+1. **Quien recibe un correo y abre la app busca ahí lo que le avisaron.** Si no
+   está, **la campana miente por omisión**.
+2. **Medido al firmar:** 13 entregadas · 12 visibles · **1 invisible, y la
+   brecha crecía con cada correo**. *Un aviso que salía por mail desaparecía
+   del historial del producto.*
+3. **El modelo llama a `in_app` «el piso que nunca se pierde»** — y *un piso que
+   solo guarda lo que nadie más entregó no es piso: es descarte.*
+
+### Y lo que la enmienda cambia de significado, no solo de filtro
+
+> **«NO LEÍDO» PASA A SIGNIFICAR «NO LO VISTE EN LA APP».**
+> Es lo único que la app puede saber: **no sabe si abriste el correo.**
+> *Nadie debe leerlo como «no lo recibiste» — y la voz de la pantalla no puede
+> sugerirlo.*
+
+---
+
 ## ⚖️ LA LEY DE SECUENCIA — firmada por el founder (S88), y va ANTES de construir
 
 **Medido:** `cat_notificacion_canales.transporte_vivo` está en **`false` para
@@ -80,3 +106,22 @@ probarse HOY sin encender nada.**
 
 *Es la misma forma que el gate de la vitrina (S78): el artefacto que falta está
 NOMBRADO, y el día que exista, la puerta se abre sola.*
+
+### ✅ EJECUTADA (6-ago-2026) — y un hallazgo que evita leer el flip como fallido
+
+Los cuatro pasos se cumplieron al pie, y el ④ se aplicó tras el gate VERDE del
+founder. **Pero el par del después no cerró como se esperaba, y el literal
+explica por qué:**
+
+```sql
+WHERE ch.codigo = ANY(v_canales) AND ch.es_piso = false AND ch.transporte_vivo
+```
+
+> **`in_app` está EXCLUIDO de la selección por ser el piso ⇒ `transporte_vivo`
+> en `in_app` es INERTE PARA ELEGIR** — gana solo por `COALESCE`, cuando ningún
+> otro canal tiene tren.
+>
+> ### **Esto NO invalida la ley de secuencia: lo que protegía era LA PANTALLA, no la selección.**
+> *El silencio que el founder vivió durante el gate —programó una cita y no le
+> llegó nada— fue la ley funcionando.* **Y el flip no fue fallido: fue el acto
+> que la ley pedía, sobre un mecanismo que resultó ser otro.**
