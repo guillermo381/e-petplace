@@ -3212,6 +3212,55 @@ Origen: S86-A, medición para C.
   > **Por eso la frontera no dice "sé generoso" ni "sé austero": dice CONTÁ.**
   > *El radio no es una virtud de carácter — es el resultado de un censo, y un
   > censo se corre en un minuto.*
+### Lecciones S88 (L-202 → L-206 — números verificados libres por grep)
+
+- **L-205 — UN PREDICADO COMPARTIDO SE ESCRIBE CON SU LÍMITE ADENTRO (S88, decisión de A ratificada por la mesa).**
+
+  **EL CASO:** dos verbos del mostrador —**ver la plata** y **asignar citas**— resultaron tener HOY el mismo portador (gestión, o miembro activo con cero chips). Escribir dos cuerpos idénticos es lo que esta casa ya pagó caro (*«dos cuerpos del MISMO cálculo»*); compartir uno sin decirlo es peor, porque **el próximo que necesite separarlos no va a saber si puede.**
+
+  **La forma:** nace `empleado_es_mostrador_o_gestion` con su límite escrito en el `COMMENT` y en la migración:
+
+  > *Es la forma de HOY, no una promesa. Si la letra separa los dos verbos —que es perfectamente posible: ver plata y repartir trabajo son cosas distintas— **el que se mueva gana predicado propio, y este comentario es el permiso para hacerlo sin pedir permiso.***
+
+  **Y el corolario de nombres:** los verbos **conservan los suyos** (`empleado_puede_asignar_citas` siguió existiendo y pasó a delegar), así que **ningún consumidor se entera de la unificación**. *Compartir la verdad no obliga a compartir el nombre.*
+
+- **L-206 — UN LECTOR DE PRE-FILTRO ESPEJA LA PUERTA QUE ALIMENTA, JAMÁS UNA PUERTA PARECIDA (S88).**
+
+  > ### **La lista que la Hoja ofrece tiene que ser, POR CONSTRUCCIÓN, la que la puerta acepta.**
+
+  **EL CASO, cazado antes de existir:** la Hoja de asignar necesitaba «quiénes pueden tomar esta cita». Existía `obtener_personas_que_atienden`, que parecía servir — **y no servía**: es el lector de la VITRINA, se llavea por la OFERTA y **acepta al titular POR ROL** (`pe.rol='dueño'`, el eje legacy de D-486) aunque no tenga el chip. **La puerta de asignar exige el chip a TODOS.** Alimentar la Hoja con él habría ofrecido al titular sin chip y la puerta lo habría rebotado con `persona_sin_oficio`.
+
+  **Es la clase del BOTÓN QUE REBOTA —lo que la Ley 23 prohíbe— y la habría producido el lector puesto ahí para evitarla.**
+
+  **La forma exigible:** un lector de pre-filtro **cita en su cuerpo los gates que espeja** (acá, ④ y ⑤ de `asignar_cita_a_persona`) y **se llavea por la misma entidad que la puerta** (la CITA, no el servicio). *Un lector «parecido» es peor que ninguno: el que no existe obliga a pensar; el parecido invita a confiar.*
+
+
+
+- **L-202 — UN PAR PRUEBA LO QUE SE LE PIDE PROBAR; EL DEDO REAL HACE LO QUE NADIE PIDIÓ (S88, firmada por la mesa).**
+
+  > ### **CUATRO PARES VERDES NO VIERON LO QUE EL FOUNDER ENCONTRÓ AL PRIMER INTENTO.**
+
+  **EL CASO:** el arco del reset (D-659) cerró con cuatro patas verdes en dispositivo — verificar una vez · la voz dice la verdad · reintento con el mismo código pasa · abandono sin sesión. **Las cuatro probaban el camino feliz de UNA solicitud.** El founder hizo lo que hace cualquiera que ve un rebote: **pidió otro código**. Ahí vivía el defecto — cada pedido invalida el anterior, el campo conserva el viejo, y nada lo dice.
+
+  **Lo que la lección NO dice:** que los pares sobren. Los cuatro eran correctos y cada uno cazó algo. **Dice que su cobertura es exactamente su enunciado** — un par escrito contra un defecto conocido no explora; confirma. *La exploración la hace un dedo que no sabe qué se está probando.*
+
+  **Corolario operativo:** un arco que toca un flujo con REINTENTO, REENVÍO o VUELTA ATRÁS no se declara verificado sin recorrer esos tres caminos — son los que un par escrito por quien construyó nunca elige.
+
+- **L-203 — EL REBOTE NO PUEDE RECOMENDAR LA ACCIÓN QUE GARANTIZA EL PRÓXIMO REBOTE (S88, firmada por la mesa).**
+
+  **EL CASO:** *«Ese código no es válido o ya venció. **Pedí uno nuevo.**»* — y pedir uno nuevo **invalida el anterior**, que sigue en la bandeja junto al nuevo. La persona pide otro, tipea el que tiene a mano, vuelve a fallar, y el mensaje le repite la misma recomendación. **Un bucle cerrado, escrito por el propio mensaje de error.**
+
+  > ### **Un rebote que aconseja tiene que saber qué produce su consejo.**
+  > *Es la familia de «el mensaje es parte del guard» (S84), un piso más arriba: ahí el guard mentía sobre qué midió; **acá el guard dice la verdad y aun así empuja al error** — porque calla una consecuencia que solo él conoce.*
+
+- **L-204 — LA CURA SE BARRE POR EL PATRÓN, JAMÁS POR EL SITIO QUE LO DESTAPÓ (S88, firmada por la mesa — LEY).**
+
+  > ### **CUANDO LA CAUSA DE UN DEFECTO ES UN PATRÓN, CURAR EL SITIO DEJA VIVOS A SUS HERMANOS.**
+
+  **EL CASO, que es el más limpio posible:** D-659 ② diagnosticó un mapeo de errores a ciegas y lo curó en `establecerContrasenaNueva` — mapeando por `code` estable en vez de por texto humano. **El gemelo, `verificarCodigoRecuperacion`, quedó con su catch-all intacto.** Semanas de trabajo después, ese catch-all fue lo que hizo INDIAGNOSTICABLE el freno del founder: todo error —red, 500, cualquiera— salía como «ese código no es válido». *Se curó el hermano y no el gemelo, y el gemelo cobró.*
+
+  **La forma exigible:** toda cura que nombre un PATRÓN en su diagnóstico (*«mapear por literal humano»*, *«degradar un fallo a un valor»*, *«leer de un reporte en vez del objeto»*) **declara el censo de sus otros portadores** — aunque no los cure en el acto. Un patrón nombrado sin censo es una deuda que nadie sabe que tiene.
+
 - **L-201 — CERO ES UN DATO, AUSENCIA ES UN VACÍO (S86, firmada por la mesa — la hermana VISUAL de L-197).**
 
   > ### **UN CERO MEDIDO NO SE DIBUJA COMO AUSENCIA.**
@@ -7393,11 +7442,122 @@ dejó de hablar con acento — D-539 cobrando bien esta vez).
 > **Y la pata ④ cierra la sesión fantasma** que C misma había fotografiado —
 > el hallazgo se volvió su propio par.
 
+### 🛑 EL RE-GATE DEL FOUNDER FRENÓ — la causa, medida (S88-A)
+
+**Literal del founder** sobre `019fd467` (marcador verificado por él): pidió
+código → «no es válido» · pidió uno NUEVO → mismo rebote · forzó cierre y
+reintentó → nada. **No pudo entrar.**
+
+#### Las cuatro sospechas, en orden, con su literal
+
+| # | sospecha | veredicto |
+|---|---|---|
+| ③ | **rate limit** | **DESCARTADA.** Sonda contra el endpoint real: `HTTP 403 · otp_expired`, **no 429**. El servidor responde normal |
+| ② | **regresión del bundle** | **DESCARTADA.** El swap de C es 1:1 (`Campo`→`CampoCodigo`, mismo estado `codigo`, mismo `email`, máquina de pasos intacta). Y el botón exige **exactamente 8** (`codigo.length !== LARGO_CODIGO`): si el código no midiera 8, el founder **no habría podido tocarlo** — y tocó |
+| ④ | **template/SMTP** | **DESCARTADA como causa.** `{{ .Token }}` es por construcción el token vigente. *Queda su nota para el lote de plantillas: el correo no dice que reemplaza a los anteriores* |
+| ① | **carrera de códigos** | ✅ **LA CAUSA** |
+
+#### La cronología del audit log — el literal que decide
+
+```
+00:17:46  user_recovery_requested          ┐
+00:19:07  user_recovery_requested          ├ cada uno PISA el anterior
+00:20:41  user_recovery_requested          ┘
+22:30:48  user_recovery_requested   ← y estos dos siguen
+22:20:39  user_recovery_requested   ← en la bandeja del founder
+
+  ENTRE LOS TRES: **CERO entradas `login`.**
+```
+
+**Un `verifyOtp` exitoso SIEMPRE deja un `login`** — se ve en las corridas
+verdes de C (`login → user_updated_password → user_modified`, 22:26 y 19:49).
+**No hay ninguno.** El canje nunca ocurrió.
+
+#### Los dos amplificadores, que son lo que se cura
+
+**① `pedir()` NO LIMPIA EL CAMPO** (`recuperar.tsx`, medido). Con las cajas es
+peor que con el campo de texto: al volver al paso, **las ocho cajas ya están
+llenas** con el código viejo y **el botón está habilitado** — el campo *parece
+listo*. *Con texto libre uno ve un valor y duda; ocho cajas completas se leen
+como «ya está».*
+
+**② EL MENSAJE EMPUJABA AL PRÓXIMO FRACASO.** Decía:
+*«Ese código no es válido o ya venció. **Pedí uno nuevo.**»* — y callaba el
+único dato que importaba: **pedir uno nuevo invalida el anterior**.
+
+> ### **El rebote recomendaba exactamente la acción que garantizaba el siguiente rebote.**
+
+#### Y por qué NADIE pudo diagnosticarlo: el catch-all
+
+```ts
+if (esRateLimit(...)) return 'demasiados_intentos';
+return { codigo: 'codigo_invalido', ... };   // ← TODO lo demás
+```
+
+*«No es válido» no probaba que el código fuera inválido: probaba que **algo**
+falló.* Red caída, 500 del proveedor, cualquier cosa — todo acusaba al código
+**sin haberlo mirado**.
+
+> **Es EXACTAMENTE el defecto que ② de esta misma ficha curó en
+> `establecerContrasenaNueva` — y que sobrevivió en el verificador.**
+> Se curó el hermano y no el gemelo.
+>
+> ### **Cuando la causa de un defecto es un PATRÓN, la cura se barre por el patrón — jamás por el sitio que lo destapó.**
+
+### ✅ LA MITAD DE A — CURADA EN EL ACTO (S88-A)
+
+`packages/api/src/wrappers/seguridad.ts`:
+
+1. **El traductor deja de acusar a ciegas.** Solo `otp_expired`/403 (lo que
+   GoTrue realmente dice del código) mapea a `codigo_invalido`; **el resto dice
+   que no sabe**, que es la verdad. *La mitad vencido-vs-no-coincide **no se
+   puede** partir —GoTrue usa un solo código para las dos— y no se finge.*
+2. **El mensaje nombra la causa probable:** *«Ese código ya no sirve. Si
+   pediste uno nuevo, solo funciona el del último correo — los anteriores dejan
+   de valer.»*
+3. **El voseo de D-539 barrido** en este archivo (`Pedí`/`Esperá`/`Probá`/`Usá`
+   → tuteo, L-148). *Estaba listado como hallazgo desde el par de C y no se
+   había curado.*
+
+**Par del traductor** (las tres formas de error, contra la lógica nueva):
+
+```
+código malo (medido hoy)   antes=codigo_invalido  ahora=codigo_invalido   ✅
+red caída                  antes=codigo_invalido  ahora=error_desconocido ✅
+500 del proveedor          antes=codigo_invalido  ahora=error_desconocido ✅
+```
+
+*La voz nueva viaja sin que C toque nada: la pantalla ya usa `r.mensaje`.*
+
+### ⏳ LA MITAD DE C — pedida, va en veda nueva
+
+**«PEDIR UNO NUEVO LIMPIA EL CAMPO»** (pedido literal del founder): `pedir()`
+hace `setCodigo('')`. Y el camino de reenvío merece vivir **en el paso del
+código**, no obligando a volver atrás.
+
 ### 📍 ESTADO DE LA FICHA
 
-**CURADA Y VERIFICADA EN DISPOSITIVO** (arquitectura de A + pantalla de C) ·
-**CIERRE CONDICIONADO AL DEDO DEL FOUNDER DE PUNTA A PUNTA**, que corre sobre
-el bundle que lleve las cajas.
+✅ **CERRADA — 5-ago-2026, por el dedo del founder de punta a punta.**
+
+**La re-prueba completa pasó sobre el bundle `019fd49b` (group `65522231`),
+INCLUYENDO el camino que había fallado: pedir un SEGUNDO código.** *El bucle
+está curado y el bug que el founder cazó con el dedo murió con su dedo.*
+
+**Lo que lo cerró, en dos mitades y ninguna alcanzaba sola:**
+
+| mitad | qué |
+|---|---|
+| **A** | el traductor deja de acusar a ciegas · la voz nombra la causa (*«solo funciona el del último correo»*) · el voseo barrido |
+| **C** | **pedir uno nuevo LIMPIA EL CAMPO** (`a209143`) — sin eso, ocho cajas llenas de un código MUERTO ofrecen el botón habilitado sobre algo que el servidor va a rechazar seguro |
+
+*La voz sola no alcanzaba —el campo seguía invitando al error— y el campo
+limpio sin la voz habría dejado a la persona sin saber por qué.*
+
+*Y queda dicho, porque es la lección más cara del día: **cuatro pares verdes de
+C no alcanzaron.** Sus cuatro patas probaban el camino feliz de una sola
+solicitud; el founder hizo lo que hace cualquiera —pedir otro— y ahí vivía el
+defecto. **Un par prueba lo que se le pide probar; el dedo real hace lo que
+nadie pidió.***
 
 *No se declara cerrada con cuatro verdes de C: la condición de muerte escrita
 arriba pide el dedo del founder, y **una ficha que afirma un gate que no
@@ -7711,3 +7871,169 @@ CARA 3 · NO-REGRESIÓN: la puerta abre     → ok=true · empleado_id escrito  
 
 **Origen: S88-A (construcción de la puerta del verbo asignar) · firma del
 founder y cura el mismo día.**
+
+---
+
+#### D-662 — 🔴 UNA MIGRACIÓN DE MOTOR ROMPIÓ UN BUNDLE PUBLICADO, Y NADIE LO MIDIÓ
+
+**El caso, con nombre y fecha:** `20260805000000_lote1_contrato_preferencias`
+(escrita por A, S87) cambió la clave de `user_notificacion_prefs` de
+`(user_id, tipo)` a `(user_id, categoria, canal)`. **La columna `tipo` dejó de
+existir.** El bundle del cliente que corría en ese momento la consultaba:
+
+```
+bundle S86 · packages/api/preferencias.ts:32
+  .from('user_notificacion_prefs').select('tipo, habilitada')     → 400
+```
+
+**Y el daño no se quedó donde nació.** El lector pide las dos preferencias en
+un `Promise.all` y las juzga JUNTAS:
+
+```ts
+const [pref, notifs] = await Promise.all([ …user_preferencias…, …notificacion_prefs… ]);
+if (pref.error || notifs.error) return { ok:false, … };   // ← un error mata los dos
+```
+
+`user_preferencias` **nunca se tocó** — y aun así **la sync de idioma del
+arranque (D-316) se cayó con ella**, en silencio, porque viajaba en el mismo
+resultado.
+
+> ### **EL LADO CIEGO, QUE ES LO QUE MERECE FICHA**
+> Una migración se verifica contra el **repo**: typechecks, `gen:types`,
+> fixtures. **Todo eso estuvo verde** — porque el repo ya tenía el wrapper
+> nuevo. *Lo que nadie miró fue lo que estaba CORRIENDO EN LOS TELÉFONOS.*
+>
+> **El motor y el bundle publicado son DOS versiones de la verdad, y una
+> migración mueve solo una de las dos.** El intervalo entre aplicar la
+> migración y publicar el bundle es una ventana en la que el producto vivo
+> está roto — y **hoy nada la mide**.
+
+### ⚖️ LA LEY QUE NACE (firma de mesa, S88)
+
+> **Toda migración que RENOMBRE o MUEVA columnas declara QUÉ BUNDLES VIVOS LA
+> CONSULTAN** — igual que hoy declara su veda 76(g) y su reversa.
+
+Y su corolario operativo: **si algún bundle vivo la consulta, la migración y su
+publish son UN SOLO ACTO** — o la migración espera al publish, o se aplica
+compatible-hacia-atrás (columna nueva conviviendo con la vieja) y la vieja
+muere en una segunda pasada, después del publish.
+
+*Es exactamente la forma del acoplamiento que la casa ya conoce del cron de
+`vencer_paquetes_salidas` (S80): «encender el reloj y aplicar la enmienda son
+el MISMO ACTO».*
+
+### 📍 ESTADO — el bundle vivo NO está roto (medido, 5-ago)
+
+**La cura ya viajó**, y se verificó antes de ordenar una veda que habría sido
+innecesaria:
+
+```
+6fb3f58  (4-ago 23:19)  la cura del contrato
+3660973  (5-ago 16:33)  ancla del publish del cliente
+merge-base --is-ancestor 6fb3f58 3660973  →  ✅ SÍ
+verify-ota cliente 019fd3db-c9bc          →  ✅ VERDE, es lo que el servidor sirve
+```
+
+**⇒ El cliente publicado hoy lleva la cura. Un aparato que siga roto está en un
+bundle viejo y se cura abriendo y cerrando la app dos veces — no con una
+publicación nueva.**
+
+> *El reporte que trajo este hallazgo decía «la cura está en main sin
+> publicar». **El mecanismo que describía era exacto; su conclusión no.** Se
+> midió antes de actuar y se ahorró una veda doble.* **Es L-166 en su forma
+> más útil: un dato de otro se verifica al momento de usarlo — sobre todo
+> cuando es correcto en casi todo.**
+
+> **☠️ CONDICIÓN DE MUERTE:** la ley vive en la skill `epetplace-db` **y** una
+> migración que renombre columnas rebota si no declara sus bundles. *Hasta que
+> el guard exista, esto es disciplina — y la disciplina sola ya falló una vez.*
+
+**Origen: S88 (hallazgo de la pista D, medido y acotado por A).**
+
+
+---
+
+#### D-663 — 🟡 «TU PERFIL» SE LE OFRECE A QUIEN NO PUEDE GUARDARLO
+
+**Hallazgo del gate de §4ter (founder, 5-ago).** La vitrina *Tu perfil* se
+ofrece a no-titulares.
+
+**SIN EXPOSICIÓN — medido, no supuesto** (par de 4 caras, in-txn, ROLLBACK):
+
+```
+TITULAR      lee=1 · escribe=1   → gestiona, esperado
+ADMIN        lee=1 · escribe=1   → gestiona, esperado (D-660)
+RECEPCIÓN    lee=1 · escribe=0   → ve la vitrina PÚBLICA, NO puede guardar
+PROFESIONAL  lee=1 · escribe=0   → ve la vitrina PÚBLICA, NO puede guardar
+```
+
+*El `lee=1` no es fuga: `prestadores` tiene policy pública para los activos —
+es la misma fila que ve cualquier familia en Explorar.* **El `escribe=0` es lo
+que gobierna, y se contó por `ROW_COUNT`: un `UPDATE` bajo RLS que no matchea
+no falla, afecta cero.**
+
+⇒ **Es un botón que rebota (Ley 23), no un agujero.** Cura de superficie: la
+sección se gatea con `puedoAsignarCitas`/gestión, no se ofrece a quien el
+servidor va a rechazar.
+
+> **☠️ DISPARO:** la tanda de superficie de C. **☠️ MUERTE:** la sección no se
+> monta para quien no gestiona.
+
+**Origen: S88 (gate §4ter del founder; medido por A).**
+
+---
+
+#### D-664 — 🔴 `esDueno` DA **TRUE PARA TODOS**: LA DERIVACIÓN SE APOYA EN UNA PREMISA QUE OTRA MIGRACIÓN FALSEÓ
+
+**La pregunta de la mesa tenía dos ramas y la respuesta era una TERCERA.**
+
+**Lo medido — la policy NO se ensanchó en D-660.** `empleado_roles_select`
+tiene **tres** brazos: *mis propias filas* · *las de negocios donde soy dueño* ·
+`is_admin()`. **El rol `administrador` no está en ninguno.**
+
+**Pero el derivado da `true` igual, y no solo para el admin:**
+
+```
+                   filas leídas   esDueno DERIVADO   es de verdad
+TITULAR                    13         true           titular        ✅
+ADMIN                       2         true           administrador  🔴
+RECEPCIÓN                   1         true           recepcion      🔴
+PROFESIONAL                 2         true           profesional     🔴
+```
+
+**LA CAUSA:** el wrapper pide los roles de **TODOS** los empleados del negocio
+(`.in('empleado_id', ids)`), y **`ids` incluye la fila del propio lector**. El
+primer brazo de la policy —*mis propias filas*— se la devuelve. **Todo miembro
+lee ≥1 fila.**
+
+> ### **Y LO QUE LA HACE UNA LECCIÓN, NO UN BUG SUELTO**
+> El JSDoc del derivado dice: *«la policy SELECT de `empleado_roles` es
+> dueño-only … quien lee ≥1 fila ES dueño»*. **Describe UNO de los tres brazos
+> y concluye sobre la policy entera.**
+>
+> Y era **cierto cuando se escribió**: antes de S76 un no-titular no tenía
+> filas de rol. **Lo falseó la A2bis de S76, que empezó a conceder la fila
+> `recepcion` A TODOS AL ENTRAR** — la misma ley madre (*membresía, jamás
+> identidad*) que casi arruina el gate de asignar en esta sesión.
+>
+> **Una migración correcta invalidó una premisa correcta escrita en otro
+> archivo, y nadie las cruzó.** Es L-193 (*la premisa heredada que nadie
+> fechó*) en su forma más cara: el derivado **no falla, acierta al revés**.
+
+**LO QUE NO PASA, y por eso es 🔴 de superficie y no de datos:** el SERVIDOR
+sigue siendo la autoridad. Las secciones que `esDueno` monta de más rebotan en
+su propio gate (D-660 los midió uno por uno). *El daño es ofrecer lo que se va
+a rechazar, no conceder lo que no corresponde.*
+
+**LA CURA — dos caminos, la mesa elige:** ① el derivado gana **su propio
+lector** (un predicado del servidor que diga si gestiona, como
+`empleado_es_mostrador_o_gestion` hizo con la plata) · ② se **renombra** a lo
+que realmente mide (`esMiembroConRol`) y cada sección se gatea con el predicado
+que le corresponde. *La ② es honesta pero deja el gate mal en cuatro
+superficies; la ① las cura todas de una.* **Voto de A: ①.**
+
+> **☠️ DISPARO:** la próxima tanda que toque `equipo.ts` o cualquiera de las
+> cuatro superficies (`mascotas` · `equipo` · `negocio` · `seccion-horarios`).
+> **☠️ MUERTE:** ningún gate de sección deriva un rol de «cuántas filas leí».
+
+**Origen: S88 (censo de prosa de C; medido por A con las cuatro cuentas).**

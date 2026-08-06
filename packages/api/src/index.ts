@@ -381,8 +381,10 @@ export {
 // produce las citas sin persona; ésta es la única vía de volver a ruteárselas.
 export {
   asignarCitaAPersona,
+  obtenerPersonasParaAsignar,
   puedoAsignarCitas,
   type CitaAsignada,
+  type PersonaParaAsignar,
   type CodigoAsignacionCita,
 } from './wrappers/asignacionCita';
 
