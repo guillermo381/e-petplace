@@ -150,6 +150,12 @@ export const uiEs = {
   },
   // S68-B7/B9 — SliderPrecio: la edición numérica con affordance VISIBLE
   // (letra founder B9, voseo ajustado a tuteo — precedente B5/B8)
+  // S88-B — Badge (extraído de BarraTabs; la voz del label migra al riel
+  // al tocarse — el «pendientes» estaba hardcodeado en la barra desde S43)
+  badge: {
+    pendientes: '{{etiqueta}}, {{n}} pendientes',
+    sinLeer: '{{etiqueta}}, avisos sin leer',
+  },
   sliderPrecio: {
     editarHint: 'Toca el valor para escribirlo',
   },

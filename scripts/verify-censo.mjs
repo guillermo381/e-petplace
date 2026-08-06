@@ -1,14 +1,22 @@
 #!/usr/bin/env node
 /**
- * verify:premisas — EL GUARD DE LAS PREMISAS INERTES (S87-B, D-651 ②).
+ * verify:censo — EL GUARD DE REGRESIÓN DE CENSO (S87-B → S88, D-651 ②).
  *
  * ┌───────────────────────────────────────────────────────────────────┐
- * │ UNA CONDICIÓN QUE EL CÓDIGO DECLARA «INERTE» SE MIDE CONTRA EL    │
- * │ MOTOR, NO SE DESCRIBE. SI LA PREMISA CADUCA, ROJO.                │
+ * │ LO QUE UN CENSO MIDIÓ UNA VEZ PUEDE DECAER EN SILENCIO.           │
+ * │ SE RE-MIDE CONTRA SU FUENTE, NO SE DESCRIBE. SI DIVERGE, ROJO.    │
  * └───────────────────────────────────────────────────────────────────┘
  *
- * El registro (qué se vigila, con su consulta) vive en
- * `scripts/premisas-inertes.mjs`. Acá vive el instrumento.
+ * ── LINAJE (renombrado por adjudicación de mesa, S88 — el invariante
+ *    NO cambió): nació como «verify:premisas», el guard de las PREMISAS
+ *    INERTES — ramas que el código declara inalcanzables (P1/P2). P3 (el
+ *    contador del canon) y P4 (la línea base de chips) lo ensancharon a
+ *    lo que siempre fue por debajo: **toda afirmación que la casa dio
+ *    por medida y que puede divergir sin que nada se ponga rojo**. Los
+ *    ids P1..Pn se CONSERVAN — son el linaje, y las actas ya los citan.
+ *
+ * El registro (qué se vigila, con su medición) vive en
+ * `scripts/censo-regresion.mjs`. Acá vive el instrumento.
  *
  * ── LAS TRES DIRECCIONES EN LAS QUE ESTE GUARD PUEDE FALLAR, y qué hace
  *    con cada una (acta del método S86 §8 — un guard falla igual en las
@@ -46,14 +54,14 @@
  *
  * El exit se lee del COMANDO, jamás del pipe (L-191).
  *
- *   node scripts/verify-premisas.mjs
- *   node scripts/verify-premisas.mjs --sin-motor   (ruidoso, se declara)
+ *   node scripts/verify-censo.mjs
+ *   node scripts/verify-censo.mjs --sin-motor   (ruidoso, se declara)
  */
 
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { execSync } from 'node:child_process';
-import { PREMISAS, EXENTAS, RAICES, PISO_OCURRENCIAS } from './premisas-inertes.mjs';
+import { PREMISAS, EXENTAS, RAICES, PISO_OCURRENCIAS, extraerConsultasDeFuente } from './censo-regresion.mjs';
 // El canal a la DB es el de la casa (`lib-db.mjs`, D-352): solo SELECT,
 // CLI linkeado, cero secretos en el repo. Se IMPORTA, no se re-implementa
 // —copiar el helper al lado es exactamente lo que L-175 prohíbe—.
@@ -154,7 +162,7 @@ export function verificarClasificacion(ocurrencias, premisas, exentas) {
  *    inerte    → la premisa se sostiene (n = 0)
  *    caducada  → ROJO, y nombra qué se volvió alcanzable
  *    sin-medir → ROJO por L-197 (jamás verde) */
-export function evaluarPremisa(premisa, { correr, leer }) {
+export function evaluarPremisa(premisa, { correr, leer, exec }) {
   const { sql, medir } = premisa.inerteMientras;
   let n, detalle = null;
 
@@ -180,7 +188,7 @@ export function evaluarPremisa(premisa, { correr, leer }) {
   // `n`, y en las dos `inerte ⟺ n === 0`.
   if (medir) {
     try {
-      const r = medir({ dbQuery: correr, leer });
+      const r = medir({ dbQuery: correr, leer, exec });
       n = r?.n;
       detalle = r?.detalle ?? null;
     } catch (e) {
@@ -262,6 +270,41 @@ function autoPrueba() {
   // ③ter EL ALCANCE (S88): si no se puede medir QUÉ SE DEJÓ AFUERA, el
   //      número reportado no se puede defender ⇒ sin-medir, jamás un
   //      verde ni un rojo con un alcance inventado.
+  // ③quater EL EXTRACTOR DE P5 (S88) — cada brazo con su fixture, y las
+  //         dos direcciones: que ENCUENTRE lo que consulta (A) y que NO
+  //         invente pares desde strings dinámicos (B).
+  {
+    const src = `
+      const r = await cliente.from('user_notificacion_prefs').select('tipo, habilitada').eq('user_id', uid);
+      await cliente.from('user_notificacion_prefs').upsert(x, { onConflict: 'user_id,tipo' });
+      await cliente.rpc('registrar_primer_ingreso');
+      const s = await cliente.from('otra_tabla').select(\`\${cols}\`).select('*');
+      await cliente.from('familia_miembro').select('id, familia_id, familia:familia_id (id, nombre, tipo)').eq('user_id', uid);
+    `;
+    const ex = extraerConsultasDeFuente(src);
+    const prefs = ex.pares.find((p2) => p2.tabla === 'user_notificacion_prefs');
+    debeFallar('③quater·extrae el caso fundante', !!prefs && ['tipo', 'habilitada', 'user_id'].every((c) => prefs.cols.includes(c)));
+    debeFallar('③quater·extrae la rpc', ex.rpcs.includes('registrar_primer_ingreso'));
+    const otra = ex.pares.find((p2) => p2.tabla === 'otra_tabla');
+    debeFallar('③quater·contra-caso B: * y dinámicos no fabrican pares', !!otra && otra.cols.length === 0 && ex.dinamicas >= 1);
+    // EL CASO ASESINO de la primera corrida real: el embed multi-columna.
+    // `nombre`/`tipo` viven DENTRO de `familia:familia_id (…)` y NO son
+    // columnas de familia_miembro — atribuirlas fue la dirección B viva.
+    const fm = ex.pares.find((p2) => p2.tabla === 'familia_miembro');
+    debeFallar(
+      '③quater·contra-caso B: columnas de un embed no se atribuyen a la tabla externa',
+      !!fm && fm.cols.includes('id') && fm.cols.includes('user_id') && !fm.cols.includes('nombre') && !fm.cols.includes('tipo') && ex.embedsFuera >= 1,
+    );
+  }
+  // ③quater·exec — un medir cuyo exec lanza sale sin-medir, jamás verde
+  debeFallar(
+    '③quater·exec lanza → sin-medir',
+    evaluarPremisa(
+      { ...premisaFalsa, inerteMientras: { medir: ({ exec }) => ({ n: JSON.parse(exec('eas whoami')).n }) } },
+      { correr: () => [{ n: 0 }], leer: () => '', exec: () => { throw new Error('EAS caído'); } },
+    ).estado === 'sin-medir',
+  );
+
   //     ⚠️ EL FIXTURE DISCRIMINA POR CONSULTA, y hay que hacerlo así: si
   //     el `correr` fallara para TODAS, la premisa saldría «sin-medir»
   //     por el camino del `sql` y el fixture pasaría verde sin haber
@@ -304,7 +347,7 @@ if (rotos.length > 0) {
   console.error('\n✗ AUTO-PRUEBA ROTA — el guard no puede producir rojo en:');
   for (const r of rotos) console.error(`   · ${r}`);
   console.error('\n  Un guard que no falla cuando debe es decorativo (L-192). Se declara inválido.');
-  console.error('\nVERDICTO PREMISAS: INVÁLIDO');
+  console.error('\nVERDICTO CENSO: INVÁLIDO');
   process.exit(1);
 }
 
@@ -324,7 +367,7 @@ if (ocurrencias.length < PISO_OCURRENCIAS) {
     `✗ CORPUS: ${ocurrencias.length} ocurrencia(s) contra un piso de ${PISO_OCURRENCIAS}. ` +
       `El barrido se derrumbó — el verde de este guard significaría «no miré», no «no hay».`,
   );
-  console.error('\nVERDICTO PREMISAS: INVÁLIDO');
+  console.error('\nVERDICTO CENSO: INVÁLIDO');
   process.exit(1);
 }
 
@@ -350,13 +393,20 @@ if (SIN_MOTOR) {
   console.log('    en el mismo mensaje del ancla.');
 } else {
   for (const p of PREMISAS) {
-    const r = evaluarPremisa(p, { correr: (sql) => dbQuery(sql), leer });
+    const r = evaluarPremisa(p, {
+      correr: (sql) => dbQuery(sql),
+      leer,
+      // El ensanche S88 (aprobado por mesa, para P5): git y eas-cli.
+      // ⚠️ eas-cli SIEMPRE con cwd en apps/<app>/ — desde la raíz
+      // scaffoldea un app.json stub (repro S74/S85, CLAUDE.md raíz).
+      exec: (cmd, opts = {}) => execSync(cmd, { encoding: 'utf8', stdio: 'pipe', ...opts }),
+    });
     const cabecera = `${p.id} (${p.ficha}) «${p.titulo}»`;
     // EL ALCANCE SE IMPRIME EN VERDE Y EN ROJO. Un guard declara qué dejó
     // afuera SIEMPRE — si solo lo dijera al fallar, el verde seguiría
     // siendo un número sin defensa.
     const lineaAlcance = p.alcance
-      ? `\n      alcance · ${p.alcance.texto} — HOY excluye ${r.excluidas} fila(s)`
+      ? `\n      alcance · ${p.alcance.texto}${typeof r.excluidas === 'number' ? ` — HOY excluye ${r.excluidas} fila(s)` : ''}`
       : '';
     if (r.estado === 'inerte') {
       console.log(`✓ ③ ${cabecera} — SIGUE INERTE (${p.inerteMientras.explicacion}: 0)${lineaAlcance}`);
@@ -379,5 +429,5 @@ if (SIN_MOTOR) {
   }
 }
 
-console.log(fallos === 0 ? '\nVERDICTO PREMISAS: TODO VERDE' : `\nVERDICTO PREMISAS: ${fallos} EN ROJO`);
+console.log(fallos === 0 ? '\nVERDICTO CENSO: TODO VERDE' : `\nVERDICTO CENSO: ${fallos} EN ROJO`);
 process.exit(fallos === 0 ? 0 : 1);

@@ -11,8 +11,8 @@
     "dev:cliente": "pnpm --filter cliente start",
     "verify:contrast": "tsx scripts/verify-contrast.ts",
     "verify:diseno": "node scripts/verify-diseno.mjs",
-    "_comentario_premisas": "S87-B (D-651 ②): mide contra el MOTOR las ramas que el código declara «inertes». NO va en el hook — necesita la DB, y un gate que exige red se saltea por costumbre. Su lugar es el paso ⓪ / el cierre, al lado de verify-ota. Por L-197 sale ROJO si no puede medir; el escape es --sin-motor, ruidoso y se declara.",
-    "verify:premisas": "node scripts/verify-premisas.mjs"
+    "_comentario_censo": "S87-B→S88 (D-651 ②; renombrado por mesa — nació verify:premisas, linaje en el header): REGRESIÓN DE CENSO — lo que la casa midió una vez y puede decaer en silencio se re-mide contra su fuente. NO va en el hook — necesita la DB, y un gate que exige red se saltea por costumbre. Su lugar es el paso ⓪ / el cierre, al lado de verify-ota. Por L-197 sale ROJO si no puede medir; el escape es --sin-motor, ruidoso y se declara.",
+    "verify:censo": "node scripts/verify-censo.mjs"
   },
   "devDependencies": {
     "playwright-core": "^1.61.1",

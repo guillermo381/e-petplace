@@ -53,7 +53,7 @@ import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { motion } from '../tokens/motion'
 import { useTheme } from '../ThemeProvider'
-import { Insignia } from './Insignia'
+import { Badge, useEtiquetaBadge } from './Badge'
 
 export type BarraTabsItem = {
   /** = nombre de ruta de expo-router. */
@@ -99,6 +99,7 @@ export function BarraTabs({
    *  una lámina no sobrevive a su lámina (Ley 37). */
   acento?: string
 }) {
+  const etiquetaBadge = useEtiquetaBadge()
   const { theme } = useTheme()
   const insets = useSafeAreaInsets()
   const accentActive = acento ?? ('active' in theme.accent ? theme.accent.active : theme.accent.primary)
@@ -126,7 +127,7 @@ export function BarraTabs({
             accessibilityRole="tab"
             accessibilityState={{ selected: esActivo }}
             aria-selected={esActivo}
-            accessibilityLabel={item.badge ? `${item.etiqueta}, ${item.badge} pendientes` : item.etiqueta}
+            accessibilityLabel={etiquetaBadge(item.etiqueta, item.badge ?? 0)}
             style={{
               flex: 1,
               minHeight: Math.max(56, 44),
@@ -136,14 +137,13 @@ export function BarraTabs({
               gap: 2,
             }}
           >
-            <View>
+            {/* S88-B: la anatomía del badge SUBIÓ a pieza (`Badge`) al ganar
+                su segundo consumidor (la campana) — la barra pasa a
+                consumirla: misma geometría S43, misma pill, y la voz del
+                label ahora vive en el riel (antes: hardcodeada acá). */}
+            <Badge n={item.badge ?? 0}>
               {item.icono({ color, activa: esActivo, colorHuella })}
-              {item.badge ? (
-                <View style={{ position: 'absolute', top: -6, right: -14 }}>
-                  <Insignia estado="atencion" etiqueta={String(item.badge)} tamaño="sm" />
-                </View>
-              ) : null}
-            </View>
+            </Badge>
             {/* el subrayado: opacity, jamás slide. Con estadoPorHuella
                 el pill muere — la huella del ícono ES el estado (§2.6). */}
             {estadoPorHuella ? null : (

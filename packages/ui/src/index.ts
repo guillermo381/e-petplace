@@ -48,6 +48,7 @@ export {
 // endureció en la misma tanda, pero la forma correcta se conserva igual.
 export { Campo, type CampoProps, PieDeCampo, type PieDeCampoProps, ALTO_PIE_CAMPO } from './components/Campo'
 export { CampoCodigo, type CampoCodigoProps } from './components/CampoCodigo'
+export { Badge, type BadgeProps, useEtiquetaBadge } from './components/Badge'
 export {
   CampoFecha,
   type CampoFechaProps,
