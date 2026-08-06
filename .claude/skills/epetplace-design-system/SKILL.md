@@ -16,8 +16,8 @@ description: >-
 
 # epetplace-design-system — el sistema es exigible, no sugerido
 
-Fuente de verdad: `packages/ui` (tokens v4 + **48 componentes** + 3 temas).
-*(Contador RE-MEDIDO S85 contra el objeto — L-141: 53 `.tsx` en `src/components/` menos las variantes `.web` y la infra. La cifra anterior decía 41 y venía de S82.)*
+Fuente de verdad: `packages/ui` (tokens v4 + **52 componentes** + 3 temas).
+*(Contador RE-MEDIDO S88 contra el objeto — L-141: 55 `.tsx` en `src/components/` menos las 2 variantes `.web` y la infra `capturaFoto`. El exigible es R17 del lint: `exportaciones=75 · pendientes=0`. La cifra anterior decía 48, de S85.)*
 Galería viva: tab "Tokens" (`/gallery`) en ambos apps. Si no está en
 `@epetplace/ui`, no existe en el producto.
 
@@ -877,6 +877,14 @@ comprar es lo último, y lo que compra combina con TODO.*
 
 ## 3. ÍNDICE — los componentes (import de `@epetplace/ui`)
 
+> **➕ LAS PIEZAS DE S88 — al índice con su regla:**
+>
+> | Export | Cuándo |
+> |---|---|
+> | `CampoCodigo` | **Las cajas por dígito del código de recuperación** (lámina firmada): `largo` por PROP obligatoria sin default (el código real tiene 8; la pieza no lo sabe) · UN `TextInput` invisible maneja foco/teclado/pegado — las cajas son presentación · el valor se SANEA siempre (solo dígitos, cortado a `largo`; pegar «código: 8765-4321-99» deposita 87654321) · pie = `PieDeCampo` (S83-B1) · error = borde danger sin gritar · a11y: UN solo campo · **SIN `maxLength` en el input, deliberado: trunca el CRUDO antes de sanear y mata el pegado** (cazado por smoke) |
+> | `Badge` (+`useEtiquetaBadge`) | **El contador de novedades SOBRE un ícono** — extraído de `BarraTabs` al ganar su 2º consumidor (la campana; el disparo que D-546 pedía). Geometría S43 como default, SIN props de geometría. A11y en DOS mitades: la pill se esconde del árbol y el número viaja en el label del TOCABLE, compuesto con el hook desde el riel. **`forma="huella"` (lámina de la campana): UNA huella RELLENA, JAMÁS un número — ni en el píxel ni en el label** (LOYALTY §3); color `accent.active` por casa, jamás rojo de alarma; n≤0 no dibuja nada; jamás anima |
+> | glifo `campana` | **OBJETO en trazo, `huella` sin usar A PROPÓSITO**: el par campana+novedad reparte la ley del único relleno — el objeto en TRAZO, la huella RELLENA en el `Badge` solo cuando hay avisos. NO funda «glifo de control» (§6bis sigue pendiente). Tinta en los dos registros: un aviso no pertenece a un oficio |
+>
 > **➕ LAS PIEZAS DE S85 (el rediseño del prestador) — al índice con su regla:**
 >
 > | Export | Cuándo |
