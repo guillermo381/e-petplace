@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>s89-b · demo — la cara del correo (criterio, no evidencia)</title>
+<!--
+  DEMO ESTÁTICA (S89-B orden 5) — la plantilla madre rendida con la espec
+  2026-08-06-s89b-ESPEC-cara-del-correo.md. CRITERIO para el ojo del
+  founder, no evidencia (regla de las láminas). La PLANTILLA es cada tabla
+  de 600px; el andamiaje de esta página (fondo gris, rótulos) no viaja.
+  Textos = MUESTRA en tuteo neutro; la voz real la firma el founder.
+  Territorio A: las plantillas vivas. Hex: palette.ts, fuente única.
+-->
+<style>
+  body { margin: 0; padding: 32px 16px; background: #E8E6E3; font-family: 'DM Sans', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+  .rotulo { max-width: 600px; margin: 0 auto 8px; font: 12px/16px Consolas, Menlo, monospace; color: #55524E; }
+  .separa { height: 40px; }
+</style>
+</head>
+<body>
+
+<p class="rotulo">CLARO — papel #FAF9F7 · tinta #221E19 · acento magentaDark #8E1F68 (7.84)</p>
+
+<!-- ══════════ LA PLANTILLA MADRE (claro) — esto es lo que viaja ══════════ -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;margin:0 auto;background-color:#FAF9F7;border-radius:12px;">
+  <!-- cabecera -->
+  <tr><td style="padding:28px 32px 16px 32px;">
+    <span style="font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:18px;font-weight:600;color:#221E19;">e-PetPlace</span>
+  </td></tr>
+  <tr><td style="padding:0 32px;"><div style="border-top:1px solid rgba(34,30,25,.18);font-size:0;line-height:0;">&nbsp;</div></td></tr>
+  <!-- cuerpo -->
+  <tr><td style="padding:24px 32px 0 32px;">
+    <p style="margin:0 0 12px 0;font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:22px;font-weight:500;line-height:30px;color:#221E19;">Hola, Ana.</p>
+    <p style="margin:0;font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;color:#221E19;">Pediste un c&oacute;digo para recuperar el acceso a tu cuenta. Es este:</p>
+  </td></tr>
+  <!-- el código PRESIDE -->
+  <tr><td style="padding:20px 32px 0 32px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr><td align="center" style="background-color:#FAF2F5;border:1px solid rgba(34,30,25,.18);border-radius:10px;padding:22px 16px;">
+        <span style="font-family:'JetBrains Mono','SF Mono','Roboto Mono',Consolas,Menlo,monospace;font-size:32px;font-weight:600;letter-spacing:0.12em;color:#221E19;">8472&nbsp;1903</span>
+      </td></tr>
+      <tr><td align="center" style="padding-top:10px;">
+        <span style="font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:20px;color:rgba(34,30,25,.65);">Toca el c&oacute;digo para copiarlo.</span>
+      </td></tr>
+    </table>
+  </td></tr>
+  <!-- cierre del cuerpo -->
+  <tr><td style="padding:20px 32px 0 32px;">
+    <p style="margin:0;font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;color:#221E19;">Este c&oacute;digo vence a los 15 minutos. Si no fuiste t&uacute;, puedes ignorar este correo: nada cambia sin el c&oacute;digo.</p>
+    <p style="margin:16px 0 0 0;font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;">
+      <a href="#" style="color:#8E1F68;text-decoration:underline;">&iquest;Necesitas ayuda para entrar?</a>
+    </p>
+  </td></tr>
+  <!-- pie -->
+  <tr><td style="padding:28px 32px 24px 32px;">
+    <div style="border-top:1px solid rgba(34,30,25,.18);font-size:0;line-height:0;margin-bottom:14px;">&nbsp;</div>
+    <p style="margin:0;font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:20px;color:rgba(34,30,25,.65);">
+      Este correo sali&oacute; de <span style="color:#221E19;">hola@epetplace.com</span> &middot; e-PetPlace<br>
+      Recibiste este correo porque existe una cuenta de e-PetPlace con tu direcci&oacute;n.
+    </p>
+  </td></tr>
+</table>
+<!-- ══════════ fin de la plantilla (claro) ══════════ -->
+
+<div class="separa"></div>
+<p class="rotulo">OSCURO (simulaci&oacute;n del par prefers-color-scheme) — dark0 #050508 · textDark0 #F0EEF8 (17.73) · violetText #AE59FF (5.50)</p>
+
+<!-- la MISMA plantilla con el par oscuro de la espec (simulación del media query; en el correo real este par vive en el <style> como mejora progresiva) -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;margin:0 auto;background-color:#050508;border-radius:12px;">
+  <tr><td style="padding:28px 32px 16px 32px;">
+    <span style="font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:18px;font-weight:600;color:#F0EEF8;">e-PetPlace</span>
+  </td></tr>
+  <tr><td style="padding:0 32px;"><div style="border-top:1px solid rgba(240,238,248,.18);font-size:0;line-height:0;">&nbsp;</div></td></tr>
+  <tr><td style="padding:24px 32px 0 32px;">
+    <p style="margin:0 0 12px 0;font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:22px;font-weight:500;line-height:30px;color:#F0EEF8;">Hola, Ana.</p>
+    <p style="margin:0;font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;color:#F0EEF8;">Pediste un c&oacute;digo para recuperar el acceso a tu cuenta. Es este:</p>
+  </td></tr>
+  <tr><td style="padding:20px 32px 0 32px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr><td align="center" style="background-color:#050508;border:1px solid rgba(240,238,248,.18);border-radius:10px;padding:22px 16px;">
+        <span style="font-family:'JetBrains Mono','SF Mono','Roboto Mono',Consolas,Menlo,monospace;font-size:32px;font-weight:600;letter-spacing:0.12em;color:#F0EEF8;">8472&nbsp;1903</span>
+      </td></tr>
+      <tr><td align="center" style="padding-top:10px;">
+        <span style="font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:20px;color:rgba(240,238,248,.65);">Toca el c&oacute;digo para copiarlo.</span>
+      </td></tr>
+    </table>
+  </td></tr>
+  <tr><td style="padding:20px 32px 0 32px;">
+    <p style="margin:0;font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;color:#F0EEF8;">Este c&oacute;digo vence a los 15 minutos. Si no fuiste t&uacute;, puedes ignorar este correo: nada cambia sin el c&oacute;digo.</p>
+    <p style="margin:16px 0 0 0;font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;">
+      <a href="#" style="color:#AE59FF;text-decoration:underline;">&iquest;Necesitas ayuda para entrar?</a>
+    </p>
+  </td></tr>
+  <tr><td style="padding:28px 32px 24px 32px;">
+    <div style="border-top:1px solid rgba(240,238,248,.18);font-size:0;line-height:0;margin-bottom:14px;">&nbsp;</div>
+    <p style="margin:0;font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:20px;color:rgba(240,238,248,.65);">
+      Este correo sali&oacute; de <span style="color:#F0EEF8;">hola@epetplace.com</span> &middot; e-PetPlace<br>
+      Recibiste este correo porque existe una cuenta de e-PetPlace con tu direcci&oacute;n.
+    </p>
+  </td></tr>
+</table>
+
+<div class="separa"></div>
+<p class="rotulo">qu&eacute; mira el ojo: &iquest;la cabecera dice la casa sin gritar? &middot; &iquest;el c&oacute;digo PRESIDE? &middot; &iquest;el magenta trabaja sin volverse alarma? &middot; &iquest;el pie dice remitente y porqu&eacute; sin burocracia? &middot; oro AUSENTE a prop&oacute;sito (papel 1.62 — alcance firmado)</p>
+
+</body>
+</html>
