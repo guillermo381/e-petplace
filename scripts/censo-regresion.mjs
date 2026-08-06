@@ -62,6 +62,66 @@
  * costado más de lo que resuelve.
  */
 
+/** ────────────────────────────────────────────────────────────────────
+ *  EL EXTRACTOR DE P5 — qué consulta un árbol de `packages/api`.
+ *
+ *  Vive EXPORTADO para que la auto-prueba lo ejercite con fixtures
+ *  (L-192: cada brazo produce su rojo antes de mirar dato real) y para
+ *  que el discriminador pueda correrlo contra un ancla vieja a mano.
+ *
+ *  ALCANCE v1, declarado (los límites quedan escritos, no curados —
+ *  adjudicación de mesa):
+ *    · LITERALES solamente — un nombre construido dinámicamente es
+ *      invisible; los `select(`…`)` con backtick y los trozos con `${`
+ *      se CUENTAN en `dinamicas` para que el silencio no sea «no miré».
+ *    · EMBEDS (`select('rel(a,b)')`) v1 FUERA — se descartan enteros.
+ *    · El pareo tabla↔columna es POR SEGMENTO tras cada `.from('t')` —
+ *      un archivo con varias tablas parea cada columna con la última
+ *      `.from` que la precede.
+ *  ──────────────────────────────────────────────────────────────────── */
+export function extraerConsultasDeFuente(src) {
+  const pares = [];
+  const rpcs = [];
+  let dinamicas = 0;
+  let embedsFuera = 0;
+
+  for (const m of src.matchAll(/\.select\(\s*`/g)) { void m; dinamicas++; }
+
+  const segmentos = src.split(/\.from\(\s*'/).slice(1);
+  for (const seg of segmentos) {
+    const tabla = seg.match(/^([a-zA-Z0-9_]+)'/)?.[1];
+    if (!tabla) continue;
+    const cols = new Set();
+    for (const s of seg.matchAll(/\.select\(\s*'([^']*)'/g)) {
+      // ── EMBEDS FUERA *ENTEROS* (nombre + paréntesis), ANTES del split.
+      //    El COBRO que lo parió (dirección B, cazado en la primera
+      //    corrida real): `familia:familia_id (id, nombre, tipo)` partido
+      //    por coma suelta ` nombre` sin su '(' — y el extractor lo
+      //    atribuía a la tabla EXTERNA: 6 «faltantes» que eran columnas
+      //    de embeds. Remover el embed entero pierde también su columna
+      //    FK real (decir de MENOS, declarado y contado en `embedsFuera`)
+      //    — el costo correcto: inventar roturas desactiva el guard.
+      let plano = s[1];
+      while (/[a-zA-Z0-9_:!]+\s*\([^()]*\)/.test(plano)) {
+        plano = plano.replace(/[a-zA-Z0-9_:!]+\s*\([^()]*\)/g, () => { embedsFuera++; return ''; });
+      }
+      for (let c of plano.split(',')) {
+        c = c.trim();
+        if (!c || c === '*') continue;
+        if (c.includes('${')) { dinamicas++; continue; }
+        if (c.includes('(') || c.includes(')')) continue;
+        if (c.includes(':')) c = c.split(':').pop().trim(); // alias:col → col
+        if (/^[a-z0-9_]+$/i.test(c)) cols.add(c);
+      }
+    }
+    for (const s of seg.matchAll(/\.(?:eq|neq|gt|gte|lt|lte|like|ilike|is|in|contains|order)\(\s*'([a-z0-9_]+)'/gi)) cols.add(s[1]);
+    for (const s of seg.matchAll(/onConflict:\s*'([^']+)'/g)) s[1].split(',').forEach((c) => cols.add(c.trim()));
+    pares.push({ tabla, cols: [...cols] });
+  }
+  for (const m of src.matchAll(/\.rpc\(\s*'([a-z0-9_]+)'/gi)) rpcs.push(m[1]);
+  return { pares, rpcs, dinamicas, embedsFuera };
+}
+
 /** LAS PREMISAS VIGILADAS. Cada una: qué declara · dónde lo declara ·
  *  contra qué se mide · qué pasa si caduca. */
 export const PREMISAS = [
@@ -425,6 +485,127 @@ export const PREMISAS = [
     },
     siCaduca:
       'si CRECIÓ: otra persona quedó con chips sin la fila, por el mismo camino silencioso que produjo las dos primeras. Si BAJÓ: alguien curó y la línea base de este registro quedó vieja — se actualiza acá, con su fecha',
+  },
+
+  {
+    id: 'P5',
+    ficha: 'S88-B (relevamiento 2026-08-05-s88b-RELEVAMIENTO-p5-bundle-vs-schema.md)',
+    titulo: 'ningún bundle servido consulta un objeto que el schema vivo ya no tiene',
+    desde: 'S88 (adjudicada por mesa sobre el caso vivo de preferencias)',
+    /** LA LETRA DEL ENCUADRE (firma de mesa): `verify-ota` prueba que el
+     *  update SE SIRVE; **P5 prueba que lo servido no consulta
+     *  FANTASMAS.** Son las dos mitades del mismo paso ⓪.
+     *
+     *  EL HALLAZGO DE FORMA QUE RIGE: se mide contra el SCHEMA VIVO,
+     *  jamás contra las migraciones posteriores — una tabla RECREADA con
+     *  el mismo nombre y otro contrato pasa verde en un análisis de DDL
+     *  y rompe una pantalla igual (el caso fundante: la migración
+     *  `20260805000000` movió `user_notificacion_prefs` a `_legacy` y
+     *  creó una nueva sin `tipo`; el bundle S86 anclado en `9e83b6d`
+     *  seguía pidiendo `select('tipo, habilitada')` → 400 en producción).
+     *
+     *  EL ANCLA SE LEE DE `update:view` (gitCommitHash) — JAMÁS del
+     *  `--message` (método §2-⑤: la etiqueta la redacta una persona; el
+     *  hash es el hecho). Sin hash ⇒ sin-medir, ROJO (L-197).
+     *
+     *  ALCANCE v1 (escrito, no curado — adjudicación de mesa): el
+     *  extractor de arriba con sus tres límites declarados; los aparatos
+     *  con bundle descargado-sin-aplicar (D-650) quedan FUERA — esto
+     *  mide las CABEZAS servidas por runtime, no lo que cada teléfono
+     *  todavía corre. */
+    sitios: [],
+    alcance: {
+      texto:
+        'v1: literales de packages/api del ancla (embeds y strings dinámicos FUERA, contados) · cabezas servidas del canal preview por runtime · D-650 fuera de alcance',
+    },
+    inerteMientras: {
+      explicacion:
+        'pares (tabla·columna) y RPCs que un bundle servido consulta y el schema vivo ya no tiene',
+      medir: ({ dbQuery, exec, leer }) => {
+        void leer;
+        const APPS = ['cliente', 'prestador'];
+        const porAncla = new Map(); // sha → { apps:[], runtimes:[] }
+
+        for (const app of APPS) {
+          const lista = JSON.parse(
+            exec(`npx eas-cli update:list --branch preview --limit 10 --json --non-interactive`, { cwd: `apps/${app}` }),
+          );
+          const cabezas = new Map(); // runtime → group (la más nueva)
+          for (const u of lista.currentPage ?? []) {
+            if (!cabezas.has(u.runtimeVersion)) cabezas.set(u.runtimeVersion, u.group);
+          }
+          if (cabezas.size === 0) throw new Error(`${app}: update:list no devolvió cabezas — no se puede medir`);
+          for (const [rt, group] of cabezas) {
+            const vista = JSON.parse(exec(`npx eas-cli update:view ${group} --json`, { cwd: `apps/${app}` }));
+            const hash = (Array.isArray(vista) ? vista[0] : vista)?.gitCommitHash;
+            if (!hash) throw new Error(`${app} ${group.slice(0, 8)}: sin gitCommitHash — el ancla no se lee del message (L-197)`);
+            const e = porAncla.get(hash) ?? { apps: new Set(), runtimes: new Set() };
+            e.apps.add(app); e.runtimes.add(rt);
+            porAncla.set(hash, e);
+          }
+        }
+
+        // ── extraer qué consulta cada ancla (el corpus es CHICO por la
+        //    puerta única: solo packages/api)
+        let totalPares = 0, totalDinamicas = 0, totalEmbeds = 0;
+        const faltantes = [];
+        for (const [sha, quien] of porAncla) {
+          const archivos = exec(`git grep -l "\\.from('" ${sha} -- packages/api/src`, {})
+            .trim().split('\n').filter(Boolean).map((l) => l.replace(`${sha}:`, ''));
+          const rpcArchivos = exec(`git grep -l "\\.rpc('" ${sha} -- packages/api/src || true`, {})
+            .trim().split('\n').filter(Boolean).map((l) => l.replace(`${sha}:`, ''));
+          const tablas = new Map(); // tabla → Set cols
+          const rpcs = new Set();
+          for (const f of new Set([...archivos, ...rpcArchivos])) {
+            const src = exec(`git show ${sha}:${f}`, {});
+            const r = extraerConsultasDeFuente(src);
+            totalDinamicas += r.dinamicas;
+            totalEmbeds += r.embedsFuera;
+            for (const p of r.pares) {
+              const s = tablas.get(p.tabla) ?? new Set();
+              p.cols.forEach((c) => s.add(c));
+              tablas.set(p.tabla, s);
+            }
+            r.rpcs.forEach((x) => rpcs.add(x));
+          }
+          if (tablas.size === 0 && rpcs.size === 0)
+            throw new Error(`ancla ${sha.slice(0, 8)}: el extractor no encontró NINGUNA consulta — 0 no es verde (L-192)`);
+
+          const listaTablas = [...tablas.keys()].map((t) => `'${t}'`).join(',');
+          const vivas = new Map();
+          for (const row of dbQuery(
+            `select table_name, column_name from information_schema.columns where table_schema='public' and table_name in (${listaTablas})`,
+          )) {
+            const s = vivas.get(row.table_name) ?? new Set();
+            s.add(row.column_name);
+            vivas.set(row.table_name, s);
+          }
+          const etiqueta = `${sha.slice(0, 8)} (${[...quien.apps].join('+')} · rt ${[...quien.runtimes].join(',')})`;
+          for (const [tabla, cols] of tablas) {
+            totalPares += cols.size;
+            const cv = vivas.get(tabla);
+            if (!cv) { faltantes.push({ bundle: etiqueta, tabla, falta: 'LA TABLA ENTERA' }); continue; }
+            for (const c of cols) if (!cv.has(c)) faltantes.push({ bundle: etiqueta, tabla, falta: c });
+          }
+          if (rpcs.size > 0) {
+            const listaRpcs = [...rpcs].map((r) => `'${r}'`).join(',');
+            const vivasRpc = new Set(
+              dbQuery(`select p.proname from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname in (${listaRpcs})`).map((r) => r.proname),
+            );
+            for (const r of rpcs) if (!vivasRpc.has(r)) faltantes.push({ bundle: etiqueta, rpc: r, falta: 'LA FUNCIÓN' });
+          }
+        }
+        return {
+          n: faltantes.length,
+          detalle: [
+            { anclas: porAncla.size, pares_verificados: totalPares, dinamicas_fuera_de_alcance: totalDinamicas, embeds_fuera_de_alcance: totalEmbeds },
+            ...faltantes,
+          ],
+        };
+      },
+    },
+    siCaduca:
+      'una pantalla del bundle servido recibe 400 en producción SIN que nada se ponga rojo — el publish sale verde, verify-ota sale verde, y el aparato pregunta por un fantasma. El caso fundante: preferencias del cliente, bundle 9e83b6d pidiendo `tipo`',
   },
 ];
 

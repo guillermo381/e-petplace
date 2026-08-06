@@ -61,7 +61,7 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { execSync } from 'node:child_process';
-import { PREMISAS, EXENTAS, RAICES, PISO_OCURRENCIAS } from './censo-regresion.mjs';
+import { PREMISAS, EXENTAS, RAICES, PISO_OCURRENCIAS, extraerConsultasDeFuente } from './censo-regresion.mjs';
 // El canal a la DB es el de la casa (`lib-db.mjs`, D-352): solo SELECT,
 // CLI linkeado, cero secretos en el repo. Se IMPORTA, no se re-implementa
 // —copiar el helper al lado es exactamente lo que L-175 prohíbe—.
@@ -162,7 +162,7 @@ export function verificarClasificacion(ocurrencias, premisas, exentas) {
  *    inerte    → la premisa se sostiene (n = 0)
  *    caducada  → ROJO, y nombra qué se volvió alcanzable
  *    sin-medir → ROJO por L-197 (jamás verde) */
-export function evaluarPremisa(premisa, { correr, leer }) {
+export function evaluarPremisa(premisa, { correr, leer, exec }) {
   const { sql, medir } = premisa.inerteMientras;
   let n, detalle = null;
 
@@ -188,7 +188,7 @@ export function evaluarPremisa(premisa, { correr, leer }) {
   // `n`, y en las dos `inerte ⟺ n === 0`.
   if (medir) {
     try {
-      const r = medir({ dbQuery: correr, leer });
+      const r = medir({ dbQuery: correr, leer, exec });
       n = r?.n;
       detalle = r?.detalle ?? null;
     } catch (e) {
@@ -270,6 +270,41 @@ function autoPrueba() {
   // ③ter EL ALCANCE (S88): si no se puede medir QUÉ SE DEJÓ AFUERA, el
   //      número reportado no se puede defender ⇒ sin-medir, jamás un
   //      verde ni un rojo con un alcance inventado.
+  // ③quater EL EXTRACTOR DE P5 (S88) — cada brazo con su fixture, y las
+  //         dos direcciones: que ENCUENTRE lo que consulta (A) y que NO
+  //         invente pares desde strings dinámicos (B).
+  {
+    const src = `
+      const r = await cliente.from('user_notificacion_prefs').select('tipo, habilitada').eq('user_id', uid);
+      await cliente.from('user_notificacion_prefs').upsert(x, { onConflict: 'user_id,tipo' });
+      await cliente.rpc('registrar_primer_ingreso');
+      const s = await cliente.from('otra_tabla').select(\`\${cols}\`).select('*');
+      await cliente.from('familia_miembro').select('id, familia_id, familia:familia_id (id, nombre, tipo)').eq('user_id', uid);
+    `;
+    const ex = extraerConsultasDeFuente(src);
+    const prefs = ex.pares.find((p2) => p2.tabla === 'user_notificacion_prefs');
+    debeFallar('③quater·extrae el caso fundante', !!prefs && ['tipo', 'habilitada', 'user_id'].every((c) => prefs.cols.includes(c)));
+    debeFallar('③quater·extrae la rpc', ex.rpcs.includes('registrar_primer_ingreso'));
+    const otra = ex.pares.find((p2) => p2.tabla === 'otra_tabla');
+    debeFallar('③quater·contra-caso B: * y dinámicos no fabrican pares', !!otra && otra.cols.length === 0 && ex.dinamicas >= 1);
+    // EL CASO ASESINO de la primera corrida real: el embed multi-columna.
+    // `nombre`/`tipo` viven DENTRO de `familia:familia_id (…)` y NO son
+    // columnas de familia_miembro — atribuirlas fue la dirección B viva.
+    const fm = ex.pares.find((p2) => p2.tabla === 'familia_miembro');
+    debeFallar(
+      '③quater·contra-caso B: columnas de un embed no se atribuyen a la tabla externa',
+      !!fm && fm.cols.includes('id') && fm.cols.includes('user_id') && !fm.cols.includes('nombre') && !fm.cols.includes('tipo') && ex.embedsFuera >= 1,
+    );
+  }
+  // ③quater·exec — un medir cuyo exec lanza sale sin-medir, jamás verde
+  debeFallar(
+    '③quater·exec lanza → sin-medir',
+    evaluarPremisa(
+      { ...premisaFalsa, inerteMientras: { medir: ({ exec }) => ({ n: JSON.parse(exec('eas whoami')).n }) } },
+      { correr: () => [{ n: 0 }], leer: () => '', exec: () => { throw new Error('EAS caído'); } },
+    ).estado === 'sin-medir',
+  );
+
   //     ⚠️ EL FIXTURE DISCRIMINA POR CONSULTA, y hay que hacerlo así: si
   //     el `correr` fallara para TODAS, la premisa saldría «sin-medir»
   //     por el camino del `sql` y el fixture pasaría verde sin haber
@@ -358,13 +393,20 @@ if (SIN_MOTOR) {
   console.log('    en el mismo mensaje del ancla.');
 } else {
   for (const p of PREMISAS) {
-    const r = evaluarPremisa(p, { correr: (sql) => dbQuery(sql), leer });
+    const r = evaluarPremisa(p, {
+      correr: (sql) => dbQuery(sql),
+      leer,
+      // El ensanche S88 (aprobado por mesa, para P5): git y eas-cli.
+      // ⚠️ eas-cli SIEMPRE con cwd en apps/<app>/ — desde la raíz
+      // scaffoldea un app.json stub (repro S74/S85, CLAUDE.md raíz).
+      exec: (cmd, opts = {}) => execSync(cmd, { encoding: 'utf8', stdio: 'pipe', ...opts }),
+    });
     const cabecera = `${p.id} (${p.ficha}) «${p.titulo}»`;
     // EL ALCANCE SE IMPRIME EN VERDE Y EN ROJO. Un guard declara qué dejó
     // afuera SIEMPRE — si solo lo dijera al fallar, el verde seguiría
     // siendo un número sin defensa.
     const lineaAlcance = p.alcance
-      ? `\n      alcance · ${p.alcance.texto} — HOY excluye ${r.excluidas} fila(s)`
+      ? `\n      alcance · ${p.alcance.texto}${typeof r.excluidas === 'number' ? ` — HOY excluye ${r.excluidas} fila(s)` : ''}`
       : '';
     if (r.estado === 'inerte') {
       console.log(`✓ ③ ${cabecera} — SIGUE INERTE (${p.inerteMientras.explicacion}: 0)${lineaAlcance}`);
