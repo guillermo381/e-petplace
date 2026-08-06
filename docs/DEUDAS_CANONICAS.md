@@ -8569,3 +8569,64 @@ viajado adentro del `CASE`, se habría perdido en la rama del helper y nadie lo
 habría notado hasta que un aviso no llevara a ningún lado.*
 
 **Origen: S88-A (unificación firmada por el founder).**
+
+---
+
+#### D-671 — 🟢 EL FIXTURE DE LA CAMPANA — avisos visibles para que C y D construyan
+
+**Sin esto, las dos pistas construían contra una pantalla VACÍA:** `in_app` no
+tiene transporte (ley de secuencia de la lámina), así que el lector devolvía
+**cero** — correcto, y **inútil para ver una lista, un badge o un estado leído**.
+
+**Sembrados para las tres cuentas** (`+8` · `demo-vet` · `+s87recep`), cubriendo
+los cuatro estados que la lámina nombra:
+
+```
+🔔 hay_avisos_sin_leer = true
+1. «Tu plan de paseos se renovó»              sin leer · CON destino · Thor
+2. «Te devolvimos 90.00 del programa de Thor» sin leer · CON destino · Thor
+3. «María Pérez completó su registro»         sin leer · SIN DESTINO · (sin)
+4. «Te quedan 2 salidas por usar»             LEÍDA    · CON destino · Thor
+```
+
+**Y las voces son las REALES** — salen de `_voz_notificacion`, no de textos
+inventados para la foto. *Una pantalla probada con lorem ipsum no prueba el
+ancho de la voz que va a llevar.*
+
+> **☠️ RETIRO — UN SOLO `DELETE`, y por eso no depende de que nadie recuerde
+> cuáles eran:**
+> ```sql
+> DELETE FROM notificacion_intencion WHERE clave_dedup LIKE 'fixture:s88-campana:%';
+> ```
+> **Se ejecuta cuando `in_app` gane transporte** (paso ④ de la ley de
+> secuencia): desde ese momento los avisos reales llegan solos y el fixture
+> pasaría a ser ruido indistinguible.
+
+**Origen: S88-A (coordinación de la pantalla de avisos).**
+
+---
+
+#### D-672 — 🟠 EL GUARD DE LOS 20dp NO EXISTE — la lámina lo firmó y nadie lo construyó
+
+**`LAMINA_ESQUINA_CAMPANA` congeló el número CON GUARD:**
+
+> *«separación mínima 20dp entre zonas táctiles, CON GUARD — es la única de
+> todas que produce un defecto silencioso (un toque que abre lo que no era; las
+> demás se ven)».*
+
+**Medido: no existe.** Ni en `Badge`, ni en los scripts de lint, ni en ninguna
+de las dos apps.
+
+**Por qué importa más que los otros números de esa lámina:** los demás
+—truncado, contraste, tamaño— **se ven en una captura**. Éste no. *Un toque que
+cae en la banda compartida abre el Coach en vez de la campana, y la persona
+piensa que se equivocó ella.*
+
+**Sin dueño asignado.** Candidatos: **B** (es un lint sobre UI, y es su
+territorio) o **cada app** en su composición. **La mesa adjudica.**
+
+> **☠️ DISPARO:** el lote que ponga la campana en cualquiera de los dos techos —
+> *el guard tiene que existir ANTES de que haya dos tocables juntos, no después.*
+> **☠️ MUERTE:** un lint verifica la separación y **rebota** si alguien la baja.
+
+**Origen: S88-A (coordinación de la pantalla de avisos).**
