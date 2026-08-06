@@ -3212,7 +3212,29 @@ Origen: S86-A, medición para C.
   > **Por eso la frontera no dice "sé generoso" ni "sé austero": dice CONTÁ.**
   > *El radio no es una virtud de carácter — es el resultado de un censo, y un
   > censo se corre en un minuto.*
-### Lecciones S88 (L-202 → L-204 — números verificados libres por grep)
+### Lecciones S88 (L-202 → L-206 — números verificados libres por grep)
+
+- **L-205 — UN PREDICADO COMPARTIDO SE ESCRIBE CON SU LÍMITE ADENTRO (S88, decisión de A ratificada por la mesa).**
+
+  **EL CASO:** dos verbos del mostrador —**ver la plata** y **asignar citas**— resultaron tener HOY el mismo portador (gestión, o miembro activo con cero chips). Escribir dos cuerpos idénticos es lo que esta casa ya pagó caro (*«dos cuerpos del MISMO cálculo»*); compartir uno sin decirlo es peor, porque **el próximo que necesite separarlos no va a saber si puede.**
+
+  **La forma:** nace `empleado_es_mostrador_o_gestion` con su límite escrito en el `COMMENT` y en la migración:
+
+  > *Es la forma de HOY, no una promesa. Si la letra separa los dos verbos —que es perfectamente posible: ver plata y repartir trabajo son cosas distintas— **el que se mueva gana predicado propio, y este comentario es el permiso para hacerlo sin pedir permiso.***
+
+  **Y el corolario de nombres:** los verbos **conservan los suyos** (`empleado_puede_asignar_citas` siguió existiendo y pasó a delegar), así que **ningún consumidor se entera de la unificación**. *Compartir la verdad no obliga a compartir el nombre.*
+
+- **L-206 — UN LECTOR DE PRE-FILTRO ESPEJA LA PUERTA QUE ALIMENTA, JAMÁS UNA PUERTA PARECIDA (S88).**
+
+  > ### **La lista que la Hoja ofrece tiene que ser, POR CONSTRUCCIÓN, la que la puerta acepta.**
+
+  **EL CASO, cazado antes de existir:** la Hoja de asignar necesitaba «quiénes pueden tomar esta cita». Existía `obtener_personas_que_atienden`, que parecía servir — **y no servía**: es el lector de la VITRINA, se llavea por la OFERTA y **acepta al titular POR ROL** (`pe.rol='dueño'`, el eje legacy de D-486) aunque no tenga el chip. **La puerta de asignar exige el chip a TODOS.** Alimentar la Hoja con él habría ofrecido al titular sin chip y la puerta lo habría rebotado con `persona_sin_oficio`.
+
+  **Es la clase del BOTÓN QUE REBOTA —lo que la Ley 23 prohíbe— y la habría producido el lector puesto ahí para evitarla.**
+
+  **La forma exigible:** un lector de pre-filtro **cita en su cuerpo los gates que espeja** (acá, ④ y ⑤ de `asignar_cita_a_persona`) y **se llavea por la misma entidad que la puerta** (la CITA, no el servicio). *Un lector «parecido» es peor que ninguno: el que no existe obliga a pensar; el parecido invita a confiar.*
+
+
 
 - **L-202 — UN PAR PRUEBA LO QUE SE LE PIDE PROBAR; EL DEDO REAL HACE LO QUE NADIE PIDIÓ (S88, firmada por la mesa).**
 
