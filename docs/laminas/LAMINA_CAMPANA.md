@@ -155,3 +155,38 @@ jamás un número · jamás rojo de alarma · jamás anima.
 - En superficie **clara** la pata es acento por casa: cliente pink/trazo
   tinta 4.63 ✓ · prestador tealDark/trazo tinta **2.86** — hoy sin montaje
   clara en el prestador (su campana vive en el muro); declarado, no curado.
+
+---
+
+## NOTA DE SEMÁNTICA (S89-D orden 6 — por orden de mesa; el cuerpo verbatim de arriba NO se editó)
+
+> ### **LA HUELLA = NOVEDADES NO VISTAS.**
+> La huella de la esquina deja de leerse como «hay avisos sin leer»
+> (punto 1) y pasa a encenderse por **novedades que la persona no
+> VIO**: **abrir la campana la apaga** — lo que ya viste no te
+> persigue. El **no-leído POR AVISO** (punto 2, distinguido sin
+> gritar) **no cambia**: ver la lista no es leer cada aviso. Dos
+> estados, dos verdades: *visto* apaga la huella · *leído* apaga la
+> marca de la fila.
+
+**ESTADO DEL CONTRATO — FRENO DECLARADO (contra qué se midió,
+6-ago-2026):** el mecanismo que implementa «visto» es de A y **su
+literal todavía no llegó por ninguna vía** — medido contra la DB viva
+(`pg_proc`: las cuatro funciones de campana siguen siendo las de S88 —
+`obtener_mis_avisos` · `hay_avisos_sin_leer` · `marcar_aviso_leido` ·
+`agregar_novedad_paseo`; ninguna de «vista»), contra las 8 migraciones
+nuevas de A en `origin/main` (cero menciones), contra el diff de
+`packages/api` (solo 5 líneas de tipos ajenas a la campana) y contra
+fichas/docs (grep en cero). **El consumo del cliente + su par se
+ejecutan cuando el contrato viaje como literal** (76b) — construirlos
+hoy exigiría inventar dónde persiste «visto» y qué firma lo marca, y
+eso es L-139. *Mismo tratamiento que la rama «autorización» del mapeo
+de destinos: el dato es de A, no se adivina.*
+
+**✅ FRENO RESUELTO (el mismo día, al merge — S89-A):** el literal VIAJÓ en
+`f09c48c` (main): RPCs `registrar_visita_campana()` + `hay_novedades()`
+(migración `20260806220000`, par de 6 brazos con el discriminador leído≠visto)
+· wrappers en `@epetplace/api` · el contrato en
+`docs/relevamientos/2026-08-06-s89a-CONTRATO-huella-novedades-para-C-y-D.md`.
+**El consumo del cliente + su par quedan DESBLOQUEADOS.** `hay_avisos_sin_leer`
+sigue viva solo por los bundles publicados (deprecada, entierro a mesa).
