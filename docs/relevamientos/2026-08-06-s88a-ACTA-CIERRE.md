@@ -106,18 +106,32 @@ intenciones vivas ....... 1 (la del gate del primer envío, y ahora visible en l
 residuo de fixtures ..... 0
 ```
 
-### ⏳ EL ÚLTIMO DEDO — **PENDIENTE, y el acta NO cierra hasta que pase**
+### ✅ EL ÚLTIMO DEDO — **VERDE** (6-ago-2026), en su segundo intento
 
-**Primer intento (6-ago): la campana APARECE en las dos apps y está VACÍA.**
-*La pantalla estaba bien; el mundo estaba vacío* — **yo había retirado las 12
-filas que la poblaban**, leyendo «después retiralo» como «después de verificar
-la cura» en vez de «después del dedo». Ver D-671.
+**Los avisos aparecen en las dos apps.** *S88 cierra con la verificación del
+founder adentro, no con su promesa.*
 
-**Re-sembrado y verificado por el camino real** en `demo-prestador`, `+8` y
-`+1`: badge encendido, 4 avisos, destinos resueltos, **y los dos entregados por
-correo visibles** — el par de la cura del registro, con dato.
+#### 🔴 Y el primer intento falló POR MI CULPA — con la ley que deja
 
-**Falta el dedo.**
+La campana apareció **VACÍA en las dos**. No era código: **yo había retirado,
+en la limpieza de cierre, las 12 filas que la poblaban.** La orden decía
+*«después retiralo»* y la leí como *«después de verificar la cura»*.
+
+> ### **UN ANDAMIO SE RETIRA DESPUÉS DEL ÚLTIMO **DEDO** QUE LO NECESITA, NO DESPUÉS DE LA ÚLTIMA MEDICIÓN QUE LO USA.**
+> *Mi «residuo 0» era verdad y era prematuro: dejé el motor limpio y el gate
+> sin nada que mirar. **La higiene se hizo contra el gate, no a favor.***
+
+**Y su agravante, que es la lección más fina de este cierre:**
+
+> **El verde de la superficie ERA VERDAD.** La pieza montaba, el badge existía,
+> la lista rendía su vacío honesto. **Lo vacío era el MUNDO, no la pantalla** —
+> y por eso una superficie correcta **no puede delatar un hueco de datos**.
+> *Un gate de UI mira la pantalla; nadie estaba mirando si había mundo detrás.*
+
+**Curado:** re-sembrado para las **cinco** cuentas plausibles —*no se adivina
+cuál usa: se siembra para todas*— con **dos de los cuatro entregados POR
+CORREO**, que es el par de la cura del registro hecho fixture. Verificado por
+el camino real (login HTTP + las dos RPC) **antes** de pedir el segundo dedo.
 
 **Y el mismo dedo confirmó D-673:** el founder creó una cita real y **no le
 llegó ni correo ni campana**. → *el motor entero construido, gateado y vivo, y
