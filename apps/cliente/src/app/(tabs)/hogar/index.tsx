@@ -41,6 +41,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import {
   AvatarMascota,
+  Badge,
   Boton,
   Celda,
   CeldaNavegacion,
@@ -66,8 +67,10 @@ import {
   spacing,
   typography,
   useAviso,
+  useEtiquetaBadge,
   usePresionado,
   useTheme,
+  palette,
   type IconoNombre,
   type LineaDeVidaEstadoPie,
 } from '@epetplace/ui';
@@ -87,6 +90,7 @@ import {
   type ResumenServiciosHogar,
   obtenerVacunaPorEvento,
   obtenerSolicitudesPendientesDueno,
+  hayAvisosSinLeer,
   resolverUrlFoto,
   resolverUrlsFotos,
   type DetalleAtencion,
@@ -528,6 +532,64 @@ function EventoVida({
   );
 }
 
+/**
+ * S88-D · LA ESQUINA DE LA CAMPANA (lámina firmada `LAMINA_ESQUINA_CAMPANA`):
+ * la campana va INLINE en la fila del techo, jamás absoluta — el layout la
+ * cuenta. El `gap: spacing[5]` (20dp) ES el número congelado de la lámina
+ * (10+10, los hitSlop de los dos vecinos) y R32 lo lee estáticamente: esta
+ * fila vive EXTRAÍDA (precedente de C, `IdentidadDelTecho`) para que el gap
+ * sea legible al lado del montaje — el techo del Hogar tiene absolutos (la
+ * luz de la esquina, el Coach) que a ±25 líneas pintarían rojo.
+ *
+ * EL COACH NO SE MUEVE (D-401, letra de la lámina): sigue absoluto en su
+ * esquina — acá se le RESERVA el espacio con un hueco de su tamaño (44),
+ * separado de la campana por el gap del guard. La campana queda a su
+ * IZQUIERDA, como firma la lámina.
+ *
+ * Sobre el techo saturado la huella del Badge va en PAPEL
+ * (`superficie="muro"` — la regla medida de B: el acento del tema puede
+ * ser invisible sobre su propio techo; en el cliente el gradiente lleva
+ * los íconos CLAROS desde S59). Memorial: techo plano → registro 'clara'
+ * (la huella degrada a tinta en el tema) y el trazo a tinta.
+ */
+function FilaCampanaTecho({
+  esMemorial,
+  avisosSinLeer,
+  onAvisos,
+}: {
+  esMemorial: boolean;
+  avisosSinLeer: boolean;
+  onAvisos: () => void;
+}) {
+  const { theme } = useTheme();
+  const { t } = useTraduccion();
+  const etiquetaBadge = useEtiquetaBadge();
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[5] }}>
+      <View style={{ flex: 1 }}>
+        <Isotipo size={28} variant="blanco" />
+      </View>
+      <Pressable
+        onPress={onAvisos}
+        hitSlop={10}
+        accessibilityRole="button"
+        /* El estado viaja en el label (contrato del Badge): con huella el
+           label dice «sin leer», jamás un número. */
+        accessibilityLabel={etiquetaBadge(t('avisos.titulo'), avisosSinLeer ? 1 : 0, 'huella')}
+      >
+        <Badge n={avisosSinLeer ? 1 : 0} forma="huella" superficie={esMemorial ? 'clara' : 'muro'}>
+          {/* Campana EN TRAZO (ley del único relleno: el relleno es de la
+              huella del Badge); papel sobre el gradiente, tinta en memorial. */}
+          <Icono nombre="campana" tamano={24} tinta={esMemorial ? theme.text.primary : palette.light0} />
+        </Badge>
+      </Pressable>
+      {/* El hueco del Coach — su espacio reservado (lámina); el destello
+          mismo no se mueve: sigue absoluto en su esquina (D-401). */}
+      <View style={{ width: 44, height: 44 }} />
+    </View>
+  );
+}
+
 export default function Hogar() {
   const router = useRouter();
   const { theme } = useTheme();
@@ -593,6 +655,8 @@ export default function Hogar() {
   // S70-A5: solicitudes de autorización del mostrador pendientes (poll en foco;
   // el badge abre la Hoja SIN depender del push).
   const [solicitudesPend, setSolicitudesPend] = useState<SolicitudPendiente[]>([]);
+  // S88-D · la campana: presencia por booleano (jamás la lista acá).
+  const [avisosSinLeer, setAvisosSinLeer] = useState(false);
 
   const esMemorial = theme.mode === 'memorial';
 
@@ -697,6 +761,11 @@ export default function Hogar() {
         // S70-A5: solicitudes pendientes del mostrador (poll; badge sin push)
         void obtenerSolicitudesPendientesDueno().then((s) => {
           if (vigente) setSolicitudesPend(s.ok ? s.data : []);
+        });
+        // S88-D · la campana: el BOOLEANO, jamás la lista (lámina). Un
+        // fallo cae a false — la huella ausente es ausencia, no un claim.
+        void hayAvisosSinLeer().then((h) => {
+          if (vigente) setAvisosSinLeer(h.ok ? h.data : false);
         });
         // PONTE AL DÍA: presupuestos vigentes (E7: SOLO 'enviado' — el
         // vencido perezoso jamás pide acción; lector ya ordenado venceEn ASC).
@@ -1011,7 +1080,13 @@ export default function Hogar() {
                   }}
                 />
               ) : null}
-              <Isotipo size={28} variant="blanco" />
+              {/* S88-D · la fila del techo con la campana (extraída — R32;
+                  antes acá vivía el Isotipo solo, que se mudó adentro). */}
+              <FilaCampanaTecho
+                esMemorial={esMemorial}
+                avisosSinLeer={avisosSinLeer}
+                onAvisos={() => router.push('/avisos')}
+              />
               {/* r4-3: la fecha en mono SOBRE el saludo (Ley 3, minúsculas) */}
               <Text
                 style={{

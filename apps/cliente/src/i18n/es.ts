@@ -1029,6 +1029,22 @@ export const clienteEs = {
   },
   // S55-A B3 — Cuenta v1 (ciclo §3.5 adelantado). Voz completa
   // APROBADA por founder (lote S55, es y en).
+  // S88-D · la campana del dueño (lámina firmada). El marco comparte
+  // FORMA con el del prestador (§6 del método); la voz vive en cada
+  // casa. «No tenés avisos» es el LITERAL FIRMADO de la lámina §4.
+  avisos: {
+    titulo: 'Avisos',
+    vacio: 'No tenés avisos',
+    errorCargar: 'No pudimos cargar tus avisos.',
+    /** Fallback DIGNO para una intención que nació sin voz (null honesto
+     *  del lector) — se declara genérico, no se inventa un texto. */
+    sinVozTitulo: 'Aviso',
+    noLeido: 'Sin leer',
+    momentoRecien: 'Recién',
+    momentoMin: 'Hace {{n}} min',
+    momentoHoras: 'Hace {{n}} h',
+    momentoAyer: 'Ayer',
+  },
   cuenta: {
     titulo: 'Tu cuenta',
     // S74 — entrada TEMPORAL del gate de la fusión (muere con la firma, Ley 37)
