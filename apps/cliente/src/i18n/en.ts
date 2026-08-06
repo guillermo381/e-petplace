@@ -952,11 +952,14 @@ export const clienteEn = {
     continuarSinFoto: 'Continue without a photo',
   },
   // S55-A B3 — Account v1. Voiced strings APPROVED by founder (S55 batch).
+  // «updates» es LA palabra inglesa para «avisos» — unificada por
+  // firma de la pasada única S89 (antes convivían "notices" acá y
+  // "updates" en Preferencias/WhatsApp: dos palabras, un objeto).
   avisos: {
-    titulo: 'Notices',
-    vacio: "You don't have notices",
-    errorCargar: "We couldn't load your notices.",
-    sinVozTitulo: 'Notice',
+    titulo: 'Updates',
+    vacio: "You don't have updates",
+    errorCargar: "We couldn't load your updates.",
+    sinVozTitulo: 'Update',
     noLeido: 'Unread',
     momentoRecien: 'Just now',
     momentoMin: '{{n}} min ago',
@@ -1032,7 +1035,7 @@ export const clienteEn = {
     canalPush: 'On your phone',
     canalEmail: 'By email',
     canalWhatsapp: 'WhatsApp',
-    notifPermisoNegado: "Your phone has notifications turned off for e-PetPlace. Until you enable them in system settings, push alerts can't arrive.",
+    notifPermisoNegado: "Your phone has notifications turned off for e-PetPlace. Until you turn them on in system settings, updates on your phone can't arrive.",
     waConsentTitulo: 'WhatsApp updates',
     waConsentTexto: 'I want to receive e-PetPlace updates on WhatsApp at this number. I can turn this off anytime in Preferences.',
     waConsentAceptar: 'Yes, I want them',

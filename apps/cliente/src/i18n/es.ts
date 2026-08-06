@@ -1031,10 +1031,12 @@ export const clienteEs = {
   // APROBADA por founder (lote S55, es y en).
   // S88-D · la campana del dueño (lámina firmada). El marco comparte
   // FORMA con el del prestador (§6 del método); la voz vive en cada
-  // casa. «No tenés avisos» es el LITERAL FIRMADO de la lámina §4.
+  // casa. El vacío nació como «No tenés avisos» (literal lámina §4);
+  // la PASADA ÚNICA S89 (6-ago) lo re-firmó a tuteo EN SU LUGAR —
+  // rige el acento único del founder.
   avisos: {
     titulo: 'Avisos',
-    vacio: 'No tenés avisos',
+    vacio: 'No tienes avisos',
     errorCargar: 'No pudimos cargar tus avisos.',
     /** Fallback DIGNO para una intención que nació sin voz (null honesto
      *  del lector) — se declara genérico, no se inventa un texto. */
@@ -1097,9 +1099,10 @@ export const clienteEs = {
     // ☠️ Ley 37: murieron notifVoz («Cuando las notificaciones lleguen…»
     // — la promesa se jubila: el motor existe y ya habló una vez) y los
     // grupos por tipo (notifCitas/notifCuidado/notifNovedades + detalles).
-    // Las voces nuevas son candidatas al censo de voz (L-156): las filas
-    // salen de la lámina §1, los porqués de §3 (FIRMADOS), el
-    // consentimiento de §4 (borrador a la firma).
+    // FIRMADO EN LA PASADA ÚNICA S89 (6-ago): el lote entero con el
+    // acento único (tuteo — los porqués re-firmados a «Eliges»), el
+    // consentimiento de §4 fuera de borrador, y la LEY «push» jamás
+    // de cara al cliente (patrón Ley 3: vocabulario del motor).
     notifLey: 'Elige por dónde te llegan los avisos. Algunos siempre llegan — eliges cómo.',
     notifFilaOperacion: 'Tus citas y servicios',
     notifFilaSaludSeguridad: 'Cuidado y salud',
@@ -1121,8 +1124,8 @@ export const clienteEs = {
     notifEjSaldoPagado: 'Paquetes o planes que pagaste y están por vencer o renovarse.',
     notifEjRelacional: 'Mensajes nuevos de quienes cuidan a tus mascotas.',
     notifEjComercial: 'Promociones, descuentos y novedades de e-PetPlace.',
-    notifPorqueSaludSeguridad: 'Estos avisos siempre llegan. Elegís por dónde, no si te llegan.',
-    notifPorqueSeguridadCuenta: 'Los avisos de tu cuenta siempre llegan. Elegís por dónde.',
+    notifPorqueSaludSeguridad: 'Estos avisos siempre llegan. Eliges por dónde, no si te llegan.',
+    notifPorqueSeguridadCuenta: 'Los avisos de tu cuenta siempre llegan. Eliges por dónde.',
     notifPorqueSaldoPagado: 'Si algo que ya pagaste está por vencer, te avisamos siempre.',
     notifPorDonde: 'Por dónde',
     // ENMIENDA DE LÁMINA (firma founder, gate S88): «Push» NO es
@@ -1133,7 +1136,7 @@ export const clienteEs = {
     canalPush: 'En el teléfono',
     canalEmail: 'Por correo',
     canalWhatsapp: 'WhatsApp',
-    notifPermisoNegado: 'El teléfono tiene apagadas las notificaciones de e-PetPlace. Hasta que las actives en los ajustes del sistema, los avisos push no pueden llegar.',
+    notifPermisoNegado: 'El teléfono tiene apagadas las notificaciones de e-PetPlace. Hasta que las actives en los ajustes del sistema, los avisos en el teléfono no pueden llegar.',
     waConsentTitulo: 'Avisos por WhatsApp',
     waConsentTexto: 'Quiero recibir avisos de e-PetPlace por WhatsApp en este número. Puedo desactivarlo cuando quiera desde Preferencias.',
     waConsentAceptar: 'Sí, quiero recibirlos',
