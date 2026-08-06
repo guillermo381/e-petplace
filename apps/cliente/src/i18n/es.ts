@@ -1077,13 +1077,34 @@ export const clienteEs = {
     familiaSoloTitular: 'Solo el adulto titular puede cambiar el nombre.',
     familiaInvitar: 'Invitar a alguien de tu familia',
     familiaInvitarPronto: 'Pronto',
-    // Preferencias
-    notifVoz: 'Cuando las notificaciones lleguen al teléfono, vamos a respetar esto.',
-    notifCitas: 'Tus citas',
-    notifCitasDetalle: 'Recordatorios y confirmaciones',
-    notifCuidado: 'Cuidado y salud',
-    notifCuidadoDetalle: 'Alertas del expediente, como vacunas por vencer',
-    notifNovedades: 'Novedades y promociones',
+    // Preferencias · notificaciones — LOTE 4 (S88-D, lámina firmada 5-ago).
+    // ☠️ Ley 37: murieron notifVoz («Cuando las notificaciones lleguen…»
+    // — la promesa se jubila: el motor existe y ya habló una vez) y los
+    // grupos por tipo (notifCitas/notifCuidado/notifNovedades + detalles).
+    // Las voces nuevas son candidatas al censo de voz (L-156): las filas
+    // salen de la lámina §1, los porqués de §3 (FIRMADOS), el
+    // consentimiento de §4 (borrador a la firma).
+    notifLey: 'Elige por dónde te llegan los avisos. Algunos siempre llegan — eliges cómo.',
+    notifFilaOperacion: 'Tus citas y servicios',
+    notifFilaSaludSeguridad: 'Cuidado y salud',
+    notifFilaSeguridadCuenta: 'La seguridad de tu cuenta',
+    notifFilaSaldoPagado: 'Lo que ya pagaste',
+    notifFilaRelacional: 'Mensajes y respuestas',
+    notifFilaResumen: 'Resúmenes',
+    notifFilaComercial: 'Novedades y ofertas',
+    notifPorqueSaludSeguridad: 'Estos avisos siempre llegan. Elegís por dónde, no si te llegan.',
+    notifPorqueSeguridadCuenta: 'Los avisos de tu cuenta siempre llegan. Elegís por dónde.',
+    notifPorqueSaldoPagado: 'Si algo que ya pagaste está por vencer, te avisamos siempre.',
+    notifPorDonde: 'Por dónde',
+    canalInApp: 'En la app',
+    canalPush: 'Push',
+    canalEmail: 'Correo',
+    canalWhatsapp: 'WhatsApp',
+    notifPermisoNegado: 'El teléfono tiene apagadas las notificaciones de e-PetPlace. Hasta que las actives en los ajustes del sistema, los avisos push no pueden llegar.',
+    waConsentTitulo: 'Avisos por WhatsApp',
+    waConsentTexto: 'Quiero recibir avisos de e-PetPlace por WhatsApp en este número. Puedo desactivarlo cuando quiera desde Preferencias.',
+    waConsentAceptar: 'Sí, quiero recibirlos',
+    waConsentCancelar: 'Ahora no',
     // Pagos
     pagosVacioTitulo: 'Sin pagos todavía',
     pagosVacio: 'Cuando pagues tu primer servicio, va a vivir acá.',
