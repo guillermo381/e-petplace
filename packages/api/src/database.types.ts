@@ -17780,6 +17780,10 @@ export type Database = {
           tipo_servicio: string
         }[]
       }
+      obtener_mi_posicion_en_prestador: {
+        Args: { p_prestador_id: string }
+        Returns: Json
+      }
       obtener_mis_atenciones_grooming: {
         Args: { p_desde?: string; p_hasta?: string }
         Returns: Json
