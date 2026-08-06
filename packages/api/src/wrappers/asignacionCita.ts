@@ -87,6 +87,50 @@ export async function puedoAsignarCitas(
   return { ok: true, data };
 }
 
+export interface PersonaParaAsignar {
+  empleadoId: string;
+  /** `null` honesto: la persona no tiene perfil con nombre cargado. */
+  nombre: string | null;
+  /** **Informa, NO filtra.** Una persona con chip y sin horario puede recibir
+   *  una cita YA PACTADA — la jornada gobierna la OFERTA a la familia (S78),
+   *  no el ruteo de lo que ya existe. La Hoja lo muestra para que quien
+   *  reparte decida sabiendo. */
+  tieneJornada: boolean;
+}
+
+/**
+ * Quiénes pueden TOMAR esta cita — el pre-filtro de la Hoja de asignar.
+ *
+ * ⚠️ **Espeja los gates ④ y ⑤ de la puerta byte a byte**, así que la lista que
+ * la Hoja ofrece es, por construcción, la que el servidor acepta (Ley 23).
+ *
+ * ⚠️ **NO es `obtener_personas_que_atienden`** — ése es el lector de la
+ * VITRINA: se llavea por la OFERTA y **acepta al titular POR ROL** (el eje
+ * legacy de D-486) aunque no tenga el chip. Alimentar la Hoja con él ofrecería
+ * al titular sin chip y la puerta lo rebotaría con `persona_sin_oficio`:
+ * *exactamente el botón que rebota que este lector existe para evitar.*
+ */
+export async function obtenerPersonasParaAsignar(
+  citaId: string,
+): Promise<ResultadoWrapper<PersonaParaAsignar[], CodigoAsignacionCita>> {
+  if ((await uidActual()) === null) return falla('sin_sesion');
+
+  const { data, error } = await getClient().rpc('obtener_personas_para_asignar', {
+    p_cita_id: citaId,
+  });
+
+  if (error) return normalizarError(error.message);
+  if (!Array.isArray(data)) return falla('datos_inconsistentes');
+  return {
+    ok: true,
+    data: data.map((f) => ({
+      empleadoId: f.empleado_id,
+      nombre: f.nombre,
+      tieneJornada: f.tiene_jornada,
+    })),
+  };
+}
+
 export interface CitaAsignada {
   citaId: string;
   empleadoId: string;

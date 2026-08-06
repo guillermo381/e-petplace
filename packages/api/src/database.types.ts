@@ -17294,6 +17294,10 @@ export type Database = {
         Args: { p_email: string }
         Returns: string
       }
+      empleado_es_mostrador_o_gestion: {
+        Args: { p_prestador_id: string }
+        Returns: boolean
+      }
       empleado_puede_asignar_citas: {
         Args: { p_prestador_id: string }
         Returns: boolean
@@ -17868,6 +17872,14 @@ export type Database = {
         }[]
       }
       obtener_paseo_por_cita: { Args: { p_cita_id: string }; Returns: Json }
+      obtener_personas_para_asignar: {
+        Args: { p_cita_id: string }
+        Returns: {
+          empleado_id: string
+          nombre: string
+          tiene_jornada: boolean
+        }[]
+      }
       obtener_personas_que_atienden: {
         Args: { p_prestador_id: string; p_servicio_id: string }
         Returns: {
