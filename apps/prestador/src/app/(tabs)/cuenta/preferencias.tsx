@@ -142,15 +142,17 @@ export default function PreferenciasCuenta() {
       default: return null;
     }
   }
-  /** LA LÍNEA DE EJEMPLO por fila — la voz del OFICIO (excepción §6):
-   *  medida contra el catálogo, propuesta a la firma de la mesa. `null`
-   *  honesto para una categoría sin línea (no se inventa). */
+  /** LA LÍNEA DE EJEMPLO por fila — la voz del OFICIO (excepción §6),
+   *  FIRMADA por el founder (6-ago). `null` honesto para una categoría
+   *  sin línea firmada (no se inventa). ⚠️ `saldo_pagado` no tiene línea
+   *  A PROPÓSITO: la mesa firmó que esa fila NO se muestra al prestador
+   *  (sus tipos son del que paga) — el ocultamiento DERIVADO espera la
+   *  columna de audiencia en el catálogo (freno declarado a A). */
   function vozEjemplo(codigo: string): string | null {
     switch (codigo) {
       case 'operacion': return t('miCuenta.notifEjOperacion');
       case 'salud_seguridad': return t('miCuenta.notifEjSaludSeguridad');
       case 'seguridad_cuenta': return t('miCuenta.notifEjSeguridadCuenta');
-      case 'saldo_pagado': return t('miCuenta.notifEjSaldoPagado');
       case 'relacional': return t('miCuenta.notifEjRelacional');
       case 'comercial': return t('miCuenta.notifEjComercial');
       default: return null;
