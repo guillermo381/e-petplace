@@ -709,7 +709,49 @@ export const prestadorEs = {
     emailAyuda: 'El email no se cambia desde acá todavía.',
     perfilGuardado: 'Listo — tu perfil quedó al día.',
     notificaciones: 'Notificaciones',
-    notifPronto: 'Pronto — cuando las notificaciones del negocio lleguen al teléfono, acá vas a decidir cuáles.',
+    /* ☠️ S88-C · `notifPronto` MURIÓ con la pantalla real (lámina de
+       preferencias §7): una superficie que promete un futuro deja de ser
+       honesta el día que ese futuro llega y ella sigue diciendo lo mismo. */
+    /* S88-C · LA PANTALLA DE PREFERENCIAS (lámina firmada 5-ago).
+       Los nombres de fila y las tres voces del porqué son LITERALES
+       FIRMADOS (lámina §1/§3). Los canales son los CUATRO firmados por el
+       founder en la orden de mesa S88 — «push» no es vocabulario de nadie.
+       Las líneas de ejemplo (notifEj*) son PROPUESTAS medidas contra el
+       catálogo vivo: la mesa las firma antes de que viajen. */
+    notifLey: 'Elegís por dónde te llegan, no si te llegan.',
+    notifFilaOperacion: 'Tus citas y servicios',
+    notifFilaSaludSeguridad: 'Cuidado y salud',
+    notifFilaSeguridadCuenta: 'La seguridad de tu cuenta',
+    notifFilaSaldoPagado: 'Lo que ya pagaste',
+    notifFilaRelacional: 'Mensajes y respuestas',
+    notifFilaResumen: 'Resúmenes',
+    notifFilaComercial: 'Novedades y ofertas',
+    notifPorqueSaludSeguridad: 'Estos avisos siempre llegan. Elegís por dónde, no si te llegan.',
+    notifPorqueSeguridadCuenta: 'Los avisos de tu cuenta siempre llegan. Elegís por dónde.',
+    notifPorqueSaldoPagado: 'Si algo que ya pagaste está por vencer, te avisamos siempre.',
+    /* Ejemplos POR FILA, del oficio — medidos contra `cat_notificacion_tipos`
+       (descripciones del catálogo). Banderas honestas declaradas al proponer:
+       `saldo_pagado` y `salud_seguridad` no tienen hoy tipos dirigidos al
+       prestador — su línea es la de la categoría, sin inventar tipos. */
+    notifEjOperacion: 'Ej.: una cita solicitada, tu liquidación disponible, un documento aprobado.',
+    notifEjSaludSeguridad: 'Ej.: una alerta de salud sobre una mascota.',
+    notifEjSeguridadCuenta: 'Ej.: un aviso de seguridad sobre tu cuenta.',
+    notifEjSaldoPagado: 'Ej.: algo que pagaste está por vencer.',
+    notifEjRelacional: 'Ej.: un mensaje nuevo de una familia.',
+    notifEjComercial: 'Ej.: novedades y promociones de e-PetPlace.',
+    notifPorDonde: 'Por dónde te llegan',
+    canalEnApp: 'En la app',
+    canalTelefono: 'En el teléfono',
+    canalCorreo: 'Por correo',
+    canalWhatsapp: 'WhatsApp',
+    notifPermisoNegado: 'El permiso de notificaciones del sistema está apagado — los avisos «En el teléfono» no van a llegar hasta que lo enciendas en los ajustes del teléfono.',
+    /* El momento del opt-in de WhatsApp (lámina §4). El TEXTO es el literal
+       FIRMADO por el founder (5-ago) y ES la evidencia que se guarda —
+       si cambia el texto, cambia la evidencia futura; la vieja se conserva. */
+    waConsentTitulo: 'Avisos por WhatsApp',
+    waConsentTexto: 'Quiero recibir avisos de e-PetPlace por WhatsApp en este número. Puedo desactivarlo cuando quiera desde Preferencias.',
+    waConsentAceptar: 'Quiero recibirlos',
+    waConsentCancelar: 'Ahora no',
     eliminarCuenta: 'Eliminar cuenta',
     /* ⭐ S86-C · «El movimiento» baja de NEGOCIO con su voz VERBATIM: es
        plata de la cuenta comercial, no configuración del oficio. */

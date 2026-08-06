@@ -68,6 +68,15 @@ export interface CategoriaNotificacionCatalogo {
   /** Voz del catálogo (es) — fallback de display para un código que la
    *  pantalla no conozca todavía (Ley 3: jamás un código crudo). */
   descripcion: string;
+  /** ⚠️ CRUCE DE TERRITORIO DECLARADO (pista C, S88 — pantalla de
+   *  Preferencias del prestador) · A firma o revierte. Mismo fundamento
+   *  que el cruce de D de arriba (excepción §6): la orden de mesa exige
+   *  que «la fila sin tipos vivos NO se muestra, derivado del catálogo,
+   *  no de una lista a mano» — y el dato de si una categoría tiene tipos
+   *  vivos solo vive en `cat_notificacion_tipos`. Un SELECT más de un
+   *  catálogo solo-lectura, cero decisión abierta. Medido al escribir:
+   *  `resumen` tiene CERO tipos — es la única fila que hoy no se pinta. */
+  tieneTiposVivos: boolean;
 }
 
 export interface CanalNotificacionCatalogo {
@@ -91,7 +100,7 @@ export async function obtenerCatalogoNotificaciones(): Promise<
   ResultadoWrapper<CatalogoNotificaciones, CodigoErrorPreferencias>
 > {
   const cliente = getClient();
-  const [cats, cans] = await Promise.all([
+  const [cats, cans, tipos] = await Promise.all([
     cliente
       .from('cat_notificacion_categorias')
       .select('codigo, orden, apagable_existencia, default_habilitada, descripcion')
@@ -100,10 +109,15 @@ export async function obtenerCatalogoNotificaciones(): Promise<
       .from('cat_notificacion_canales')
       .select('codigo, orden, es_piso, exige_evidencia, descripcion')
       .order('orden', { ascending: true }),
+    // Solo la COLUMNA categoria de los tipos ACTIVOS: la pantalla necesita
+    // saber si la categoría tiene ≥1 tipo vivo, jamás la lista de tipos
+    // (la campana ya estableció que la pantalla no traduce tipos).
+    cliente.from('cat_notificacion_tipos').select('categoria').eq('activo', true),
   ]);
-  if (cats.error || cans.error) {
+  if (cats.error || cans.error || tipos.error) {
     return { ok: false, codigo: 'error_preferencias', mensaje: MENSAJES.error_preferencias };
   }
+  const categoriasConTipos = new Set(tipos.data.map((t) => t.categoria));
   return {
     ok: true,
     data: {
@@ -113,6 +127,7 @@ export async function obtenerCatalogoNotificaciones(): Promise<
         apagableExistencia: c.apagable_existencia,
         defaultHabilitada: c.default_habilitada,
         descripcion: c.descripcion,
+        tieneTiposVivos: categoriasConTipos.has(c.codigo),
       })),
       // Un canal fuera del union conocido se angosta verificando (regla 34):
       // si el catálogo gana un canal nuevo, esta lista lo declara — la
