@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>s89-b · demo — historia clínica (MUESTRA, criterio no evidencia)</title>
+<!-- DEMO ESTÁTICA (S89-B orden 6) — espec: 2026-08-06-s89b-ESPEC-cara-documentos.md.
+     Datos FICTICIOS. El motor de generación es territorio A. -->
+<style>
+  body { margin:0; padding:32px 16px; background:#E8E6E3; font-family:'DM Sans',Helvetica,Arial,sans-serif; color:#221E19; }
+  .rotulo { max-width:720px; margin:0 auto 8px; font:12px/16px Consolas,Menlo,monospace; color:#55524E; }
+  .hoja { max-width:720px; margin:0 auto; background:#FFFFFF; border:1px solid rgba(34,30,25,.25); padding:48px 56px; box-sizing:border-box; }
+  .muestra { float:right; border:1px dashed rgba(34,30,25,.45); padding:4px 10px; font:11px/16px Consolas,Menlo,monospace; color:rgba(34,30,25,.65); }
+  .emisor h1 { margin:0; font-size:21px; font-weight:600; }
+  .emisor p { margin:2px 0 0 0; font-size:11px; line-height:16px; color:rgba(34,30,25,.65); }
+  .filete { border:none; border-top:2px solid #8E1F68; margin:14px 0 0 0; }
+  .doc-titulo { font-size:16px; font-weight:600; margin:22px 0 2px 0; }
+  .fechas { font-size:11px; color:rgba(34,30,25,.65); margin:0 0 18px 0; }
+  .seccion { font-size:9.5px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:rgba(34,30,25,.65); margin:18px 0 6px 0; }
+  p.cuerpo { font-size:14px; line-height:21px; margin:0; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:left; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:rgba(34,30,25,.65); font-weight:600; padding:6px 10px; border-bottom:1px solid rgba(34,30,25,.25); }
+  td { padding:7px 10px; border-bottom:1px solid rgba(34,30,25,.12); vertical-align:top; }
+  .mono { font-family:'JetBrains Mono',Consolas,Menlo,monospace; }
+  .pie { margin-top:28px; padding-top:12px; border-top:1px solid rgba(34,30,25,.25); display:flex; justify-content:space-between; align-items:flex-end; gap:16px; }
+  .pie p { margin:0; font-size:11px; line-height:17px; color:rgba(34,30,25,.65); }
+  .qr { width:64px; height:64px; border:1px solid rgba(34,30,25,.45); display:flex; align-items:center; justify-content:center; font:9px/12px Consolas,Menlo,monospace; color:rgba(34,30,25,.45); text-align:center; }
+  @media print { body { background:#FFFFFF; padding:0; } .rotulo { display:none; } .hoja { border:none; } }
+</style>
+</head>
+<body>
+<p class="rotulo">HISTORIA CL&Iacute;NICA — papel #FFFFFF · tinta 16.56 · acento magentaDark 8.25 SOLO en el filete · fondos jam&aacute;s portan informaci&oacute;n</p>
+<div class="hoja">
+  <div class="muestra">MUESTRA &middot; datos ficticios</div>
+  <div class="emisor">
+    <h1>Cl&iacute;nica Veterinaria Andina</h1>
+    <p>Av. de los Cipreses N40-12, Quito &middot; +593&nbsp;2&nbsp;300&nbsp;0000</p>
+    <p>Dra. Mar&iacute;a Salas &middot; M&eacute;dica veterinaria &middot; Reg. <span class="mono">1234-5678</span></p>
+  </div>
+  <hr class="filete">
+  <p class="doc-titulo">Historia cl&iacute;nica &mdash; consulta</p>
+  <p class="fechas">Atenci&oacute;n: 12 jul 2026 &middot; Emisi&oacute;n del documento: 6 ago 2026</p>
+
+  <p class="seccion">Paciente</p>
+  <p class="cuerpo">Luna &middot; perra &middot; mestiza &middot; 4 a&ntilde;os &middot; Familia Morales</p>
+
+  <p class="seccion">Motivo de consulta</p>
+  <p class="cuerpo">Decaimiento y ap&eacute;tito reducido desde hace dos d&iacute;as.</p>
+
+  <p class="seccion">Hallazgos</p>
+  <p class="cuerpo">Mucosas rosadas, hidrataci&oacute;n normal, abdomen sin dolor a la palpaci&oacute;n. Vitales: peso <span class="mono">18.4&nbsp;kg</span> &middot; temperatura <span class="mono">38.5&nbsp;&deg;C</span> &middot; frecuencia card&iacute;aca <span class="mono">92/min</span>.</p>
+
+  <p class="seccion">Diagn&oacute;stico</p>
+  <p class="cuerpo">Gastroenteritis leve, presunta indiscreci&oacute;n alimentaria.</p>
+
+  <p class="seccion">Tratamiento</p>
+  <table>
+    <tr><th>Medicamento</th><th>Cantidad</th><th>Posolog&iacute;a</th></tr>
+    <tr><td>Enzimax, tabletas</td><td class="mono">10</td><td class="mono">1 cada 12 h &middot; 5 d&iacute;as</td></tr>
+    <tr><td>Suero oral</td><td class="mono">2 sobres</td><td class="mono">disuelto en agua, d&iacute;a 1 y 2</td></tr>
+  </table>
+
+  <p class="seccion">Indicaciones a la familia</p>
+  <p class="cuerpo">Dieta blanda por tres d&iacute;as y agua siempre disponible. Si vuelve el decaimiento o aparece v&oacute;mito, trae a Luna a control antes de la fecha sugerida.</p>
+
+  <div class="pie">
+    <p>Folio <span class="mono">F-2026-000123</span><br>Generado en e-PetPlace &middot; este documento acompa&ntilde;a, no reemplaza, el criterio profesional.</p>
+    <div class="qr">QR<br>propuesta<br>(mesa)</div>
+  </div>
+</div>
+</body>
+</html>
