@@ -397,6 +397,8 @@ export {
 export {
   obtenerMisAvisos,
   hayAvisosSinLeer,
+  hayNovedades,
+  registrarVisitaCampana,
   marcarAvisoLeido,
   type AvisoDeCampana,
   type CodigoCampana,

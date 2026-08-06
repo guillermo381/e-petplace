@@ -97,14 +97,46 @@ export async function obtenerMisAvisos(
 }
 
 /**
- * ¿Hay algo sin leer? **Booleano a propósito** — la huella marca PRESENCIA y
- * la lámina prohíbe el número (*«el número invita a vaciarlo»*).
+ * ¿Hay algo NUEVO desde tu última visita a la campana? **Booleano a
+ * propósito** — la huella marca PRESENCIA y la lámina prohíbe el número
+ * (*«el número invita a vaciarlo»*).
+ *
+ * LETRA FOUNDER (6-ago-2026, S89): **la huella mide LO NUEVO, no lo
+ * no-leído.** Entrar a /avisos deposita la visita ({@link registrarVisitaCampana})
+ * y apaga la huella; leer un aviso puntual NO la toca — leído y visto son
+ * cosas distintas y la campana distingue las dos.
  *
  * ⚠️ Existe para que el techo NO tenga que traer la lista sólo para decidir si
- * dibuja un punto. *Y hay una razón más fina: con la lista en la mano, el
- * valor que la pantalla computaría naturalmente —`filter(!leida).length`— es
- * exactamente el que no debe pintar.* **La forma del dato hace imposible el
- * defecto.**
+ * dibuja un punto: la forma del dato hace imposible el defecto del contador.
+ */
+export async function hayNovedades(): Promise<ResultadoWrapper<boolean, CodigoCampana>> {
+  if ((await uidActual()) === null) return falla('sin_sesion');
+  const { data, error } = await getClient().rpc('hay_novedades');
+  if (error) return falla('error_desconocido');
+  if (typeof data !== 'boolean') return falla('datos_inconsistentes');
+  return { ok: true, data };
+}
+
+/**
+ * Deposita la visita a la campana. **Se llama AL ENTRAR a /avisos** — ese es
+ * el acto que la letra nombra («entrar a /avisos deposita la visita»); la
+ * huella del techo se apaga con esto, no con leer avisos.
+ */
+export async function registrarVisitaCampana(): Promise<ResultadoWrapper<null, CodigoCampana>> {
+  if ((await uidActual()) === null) return falla('sin_sesion');
+  const { error } = await getClient().rpc('registrar_visita_campana');
+  if (error) {
+    return error.message.startsWith('auth_required') ? falla('sin_sesion') : falla('error_desconocido');
+  }
+  return { ok: true, data: null };
+}
+
+/**
+ * @deprecated DESDE S89 (letra founder: la huella mide lo nuevo). Migrar a
+ * {@link hayNovedades} + {@link registrarVisitaCampana}. Queda VIVA porque los
+ * bundles publicados la llaman (D-662) — la RPC vieja no se dropea hasta que
+ * ningún bundle servido la consulte (P5 del censo lo dirá); el entierro se
+ * adjudica en mesa.
  */
 export async function hayAvisosSinLeer(): Promise<ResultadoWrapper<boolean, CodigoCampana>> {
   if ((await uidActual()) === null) return falla('sin_sesion');
