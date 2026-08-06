@@ -1810,34 +1810,34 @@ export default function Hoy() {
               etiquetaCerrado={t('agenda.diaCerrado')}
               onElegir={setDiaElegido}
             />
+            {/* ── M1 (S69-B): la entrada del MOSTRADOR. Boton primario =
+                accent.cta teal (cta="oficio" en la raíz). El walk-in
+                registra EN EL MOMENTO. Glifo en el CTA: diferido. ── */}
+            {/* ⭐ S86-C (firma del founder) · LA VENTANILLA NO ES CLÍNICA.
+                ⏪ Gateaba en `oficiosActivos?.vet` — por eso el founder, en
+                Paseos Andrés, no la encontraba. Abre con CUALQUIER oficio
+                activo; sin ninguno no se monta (puerta a pantalla vacía). */}
+            {/* ⭐ S88-C (LÁMINA_MOSTRADOR_ORDEN) — EL BOTÓN SUBE: fecha →
+                BOTÓN → filtros → lista. Vivía debajo de los filtros, y esa
+                posición decía una mentira de alcance: registrar parecía
+                algo que se hace SOBRE LO FILTRADO. No lo es — se registra
+                a quien está parado en el mostrador, y esa persona no está
+                en ninguna lista todavía. La fecha es su CONTEXTO (una
+                atención de ESTE día); los filtros acomodan lo que viene
+                abajo. Aplica a TODOS los roles: es composición de la
+                superficie, no regla de un actor. */}
+            {pantalla.estado === 'listo' && conAlgunOficio && (
+              <Boton
+                variante="primario"
+                bloque
+                etiqueta={t('mostrador.registrarAtencion')}
+                onPress={() => router.push('/mostrador')}
+              />
+            )}
             {pantalla.estado === 'listo' && conFiltro && oficiosActivos !== null && (
               <FiltroOficio activo={filtroOficio} onCambio={setFiltroOficio} oficios={oficiosActivos} />
             )}
           </View>
-        )}
-
-
-        {/* ── M1 (S69-B): la entrada del MOSTRADOR — solo para negocio con
-            oficio vet activo. Boton primario = accent.cta teal (cta="oficio"
-            en la raíz). El walk-in registra EN EL MOMENTO. Glifo en el CTA:
-            diferido (Icono no tiene variante on-cta; iría mal-color sobre
-            el relleno teal — declarado). ── */}
-        {/* ⭐ S86-C (firma del founder) · LA VENTANILLA NO ES CLÍNICA.
-            ⏪ Gateaba en `oficiosActivos?.vet`, y ése era el motivo por el
-            que el founder —que está en Paseos Andrés— no la encontraba:
-            recibir a quien llega, darle de alta y agendarle es operación
-            de NEGOCIO. Nació en veterinaria porque ahí estaba el caso
-            vivo, no porque le perteneciera.
-            Ahora abre con CUALQUIER oficio activo. Sin ninguno no se
-            monta: no habría menú que ofrecer, y una ventanilla sin
-            servicios es una puerta a una pantalla vacía. */}
-        {pantalla.estado === 'listo' && conAlgunOficio && (
-          <Boton
-            variante="primario"
-            bloque
-            etiqueta={t('mostrador.registrarAtencion')}
-            onPress={() => router.push('/mostrador')}
-          />
         )}
 
         {pantalla.estado === 'listo' && citasHoy.length === 0 && (
