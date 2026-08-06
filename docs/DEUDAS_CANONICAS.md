@@ -8120,7 +8120,7 @@ LÁMINA, no cura de código.**
 
 ---
 
-#### D-666 — 🟢 EL FIXTURE DE LA CITA SIN PERSONA (Aurora) — declarado y con fecha de retiro
+#### D-666 — ✅ RETIRADO Y RENACIDO · el fixture de la cita sin persona (Aurora)
 
 **Sembrado por A el 5-ago para el dedo de C sobre la Hoja de asignar.**
 
@@ -8143,10 +8143,31 @@ declarada de D-585).*
 `dar_de_baja_empleado` produzca correctamente el despegue. **Eso ya tiene su
 propio par** (S77, 7/7) y no se re-prueba acá.
 
-> **☠️ RETIRO:** cuando el gate de la Hoja pase, la cita vuelve a su fecha y
-> persona originales **o se declara adoptada como fixture permanente** — lo que
-> no puede es quedarse sin decidir. *Una cita futura de una mascota real que
-> nadie va a atender es dato falso esperando a que alguien lo lea.*
+### ✅ RETIRADO (5-ago) — por DECISIÓN, que era la condición escrita
+
+`83f5f31f` **cumplió su misión entera**: destapó el verbo sin ojos (D-664 en la
+pizarra) y sirvió el dedo post-cura. **Volvió a su persona y a su fecha
+original** (1-ago, titular). *Nadie tocó «Tomar» — se retira íntegra.*
+
+### 🔄 Y NACIÓ SU RELEVO, con su fecha de retiro desde el primer día
+
+El dedo del **envolver** exige una cita sin persona **abierta en el momento del
+gate**, así que la huérfana nace con la veda:
+
+```
+cita     e32091f4-88b5-4b04-91bc-9367a1c052a3
+cuándo   2026-08-08 11:30  ·  consulta_general  ·  confirmada
+estado   empleado_id = NULL
+la Hoja  ofrece 3 personas
+```
+
+> **☠️ RETIRO: con el veredicto de C sobre el envolver.** Mismo trato que la
+> anterior — *vuelve a su persona o se declara adoptada; lo que no puede es
+> quedarse sin decidir.* **Una cita futura de una mascota real que nadie va a
+> atender es dato falso esperando a que alguien lo lea.**
+
+*Y la razón de que el relevo sea OTRA cita y no la misma: reusarla habría
+mezclado el veredicto de dos gates en una fila. Un fixture por dedo.*
 
 **Origen: S88-A (pedido de la mesa para el dedo de C).**
 
