@@ -952,6 +952,17 @@ export const clienteEn = {
     continuarSinFoto: 'Continue without a photo',
   },
   // S55-A B3 — Account v1. Voiced strings APPROVED by founder (S55 batch).
+  avisos: {
+    titulo: 'Notices',
+    vacio: "You don't have notices",
+    errorCargar: "We couldn't load your notices.",
+    sinVozTitulo: 'Notice',
+    noLeido: 'Unread',
+    momentoRecien: 'Just now',
+    momentoMin: '{{n}} min ago',
+    momentoHoras: '{{n}} h ago',
+    momentoAyer: 'Yesterday',
+  },
   cuenta: {
     titulo: 'Your account',
     // S74 — temporary gate entry (dies with the founder's signature, Ley 37)
