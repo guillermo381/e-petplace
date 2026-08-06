@@ -3214,6 +3214,20 @@ Origen: S86-A, medición para C.
   > censo se corre en un minuto.*
 ### Lecciones S88 (L-202 → L-206 — números verificados libres por grep)
 
+- **L-209 — UN TIPO SE NOMBRA POR LO QUE CUENTA, Y SE LEE POR A QUIÉN LE LLEGA (S88, firmada por el founder — ley de nombres).**
+
+  > ### **CUANDO LAS DOS COSAS NO COINCIDEN, EL NOMBRE MIENTE AUNQUE EL DISEÑO ESTÉ BIEN.**
+
+  **EL CASO:** `registro_completado_cliente` **no iba al cliente** — iba al operador que hizo el alta. El diseño era **correcto** (dos audiencias del negocio, con un guard que evita notificar dos veces al mismo), y el nombre igual mandó a una pista a "curar" un destinatario que por ahí no estaba roto. *El tipo se llamaba por el SUJETO del hecho y se leía como el DESTINATARIO del aviso.*
+
+  **Renombrado a `registro_completado_operador`** (S88). **Y el costo de no haberlo hecho antes fue real, aunque el código funcionara:** el nombre es lo primero que alguien lee, y un nombre que miente cuesta una medición entera antes de que aparezca la verdad.
+
+- **L-210 — UN GUARD QUE CAZA PROSA VENCIDA NO DISTINGUE LA LETRA DE SU EPITAFIO (S88).**
+
+  **EL CASO, en su propio turno:** la unificación corrigió una doctrina escrita en el cuerpo de una función (*«el motor no compone texto…»*) y puso un guard para que no reviviera. **El guard se disparó contra el comentario NUEVO** — el que explica qué cambió, y que necesariamente **cita** la frase muerta.
+
+  **La forma exigible:** un guard contra prosa vencida apunta a un literal que **solo existía en la versión vieja** (acá: `«La voz viaja en»`, el arranque de la línea muerta), **jamás a la frase que el reemplazo va a citar**. *Documentar por qué algo murió y prohibir que reviva son dos actos que se pisan si el guard no sabe leer la diferencia.*
+
 - **L-208 — UN `CREATE OR REPLACE` SE ARMA LEYENDO EL OBJETO VIVO, JAMÁS UNA COPIA GUARDADA (S88).**
 
   > ### **SOBRESCRIBIR UNA FUNCIÓN ES SIEMPRE «EXITOSO»: NO HAY CONFLICTO QUE AVISE.**
@@ -8525,3 +8539,33 @@ condición.**
 > las seis del prestador hablan los dos idiomas.
 > **☠️ DISPARO:** el lote que saque de sombra cualquiera de los seis tipos
 > `documento_*` / `prestador_*` — *no pueden salir al aire en un solo idioma.*
+
+
+---
+
+#### D-670 — 🟢 EL FALLBACK DE VOZ INLINE, CON SU CONTADOR (S88 — unificación (b))
+
+**`_notificar_dueño_prestador` ya consulta `_voz_notificacion`**; el literal
+inline quedó como **piso**. La firma NO cambió: **cero callers tocados**, y las
+voces migran de a una.
+
+```
+CINTURÓN (mide en cada aplicación):  FALLBACK VIVO EN 6 de 6
+```
+
+> **☠️ MUERTE, y no depende de que alguien se acuerde:** el día que ese contador
+> dé **0**, ningún camino llega al `ELSE` y **los parámetros `p_titulo`/
+> `p_mensaje` se pueden borrar**. *El número lo dice solo.*
+> **☠️ DISPARO:** el lote que le dé voz bilingüe a los seis tipos
+> `documento_*` / `prestador_*` — **ninguno puede salir de sombra antes**, que
+> es la condición que D-539 ya tenía escrita.
+
+**Par 4/4** (in-txn, ROLLBACK): los seis avisos siguen existiendo · un tipo con
+voz gana el helper · uno sin voz cae al inline intacto · **`url_accion`
+sobrevive en las DOS ramas, 7 de 7.**
+
+*La cuarta cara no es adorno: `url_accion` no es voz, es DESTINO — si hubiera
+viajado adentro del `CASE`, se habría perdido en la rama del helper y nadie lo
+habría notado hasta que un aviso no llevara a ningún lado.*
+
+**Origen: S88-A (unificación firmada por el founder).**
