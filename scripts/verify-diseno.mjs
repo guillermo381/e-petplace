@@ -1173,7 +1173,10 @@ function r18(casas) {
  *  la propia ley de la casa aplicada a quien la escribió — un guard que
  *  sobrevive a su razón es basura que nadie se anima a tocar.
  *  (R28 nunca existió: se declinó al nacer, en el header de R27.
- *  SIGUIENTE NÚMERO LIBRE: **R30**.) */
+ *  SIGUIENTE NÚMERO LIBRE: **R33** — R31 NO SE TOMA: es un número que un
+ *  brief citó sin letra (protocolo A7, adjudicación de mesa S88); usarlo
+ *  ahora volvería verdadera retroactivamente una cita que nunca midió
+ *  nada. R32 nació en S88 (la esquina compartida).) */
 
 /* ☠️ R19 SE RETIRÓ EN S82-C r38, Y SU PROPIA REGLA DICTÓ EL RETIRO.
  *  Vigilaba que el relleno pleno se computara contra el número de
@@ -1516,6 +1519,14 @@ const FIXTURES = {
     { path: 'apps/cliente/src/(fixture)/OtraPata.tsx', src: "transform: [{ rotate: '-14deg' }]" },
   ],
   R30: FIXTURE_R30,
+  R32: [{
+    path: '(fixture)/esquina.tsx',
+    src: `
+      <View style={{ flexDirection: 'row', gap: spacing[2] }}>
+        <Pressable hitSlop={10}><Icono nombre="campana" tinta={t} /></Pressable>
+        <Pressable hitSlop={10}><Destello /></Pressable>
+      </View>`,
+  }],
   R24: [
     ...OFICIOS_R24.map((o) => ({ path: `apps/cliente/src/app/(tabs)/explorar/${o}/index.tsx`, src: '' })),
     {
@@ -1524,7 +1535,98 @@ const FIXTURES = {
     },
   ],
 };
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30 };
+
+/** R32 · LA ESQUINA COMPARTIDA — los 20dp de la lámina (S88-B; lámina
+ *  `LAMINA_ESQUINA_CAMPANA.md`, número CONGELADO por el founder: 20dp de
+ *  separación mínima entre zonas táctiles, CON GUARD).
+ *
+ *  POR QUÉ ESTE NÚMERO ES EL ÚNICO DE SU LÁMINA CON GUARD, y ordena la
+ *  forma de la regla: el truncado, el contraste y el tamaño SE VEN en
+ *  una captura — la separación de zonas táctiles NO. Con hitSlop 10 a
+ *  cada lado y separación 8dp hay 12dp de solape ambiguo que ninguna
+ *  captura muestra: solo aparece cuando un dedo real cae en la banda
+ *  compartida, abre lo que no era, **y la persona cree que se equivocó
+ *  ella**. Es el defecto silencioso perfecto (familia L-192).
+ *
+ *  LA LLAVE LA ESCRIBIÓ LA PROPIA LÁMINA: la campana va INLINE, jamás
+ *  absoluta — *"la separación se vuelve un gap que el guard puede
+ *  leer"*. Esta regla es la otra mitad de ese trato: si la separación
+ *  no es legible estáticamente, el guard no la da por buena — sale ROJO
+ *  pidiendo que se declare (L-197: «no pude medir» jamás degrada a
+ *  verde).
+ *
+ *  LA ARITMÉTICA, mecanizada y no copiada: el 20 de la lámina es
+ *  10+10 — los hitSlop de los DOS vecinos. La regla no fija 20: exige
+ *  gap ≥ 2 × el hitSlop MÁS GRANDE de la ventana (default 10 si no hay
+ *  ninguno declarado) — si alguien sube un hitSlop a 14, el mínimo pasa
+ *  a 28 solo, sin esperar que alguien recuerde la cuenta.
+ *
+ *  ALCANCE DECLARADO (en la salida, como los demás):
+ *   · dispara sobre archivos de apps que MONTAN el glifo `campana` —
+ *     hoy CERO (C y D construyen contra esto): el conteo se imprime
+ *     para que el silencio diga «nadie montó», no «no miré»;
+ *   · la VENTANA es ±25 líneas alrededor del montaje — pareo por
+ *     cercanía, no por árbol de montaje (el mismo límite declarado que
+ *     M2: los falsos de ventana se ven acá, no se esconden);
+ *   · NO mide punta a punta del render (eso es el gate en dispositivo
+ *     con el nombre largo y en inglés — la otra línea de la lámina).
+ *
+ *  ☠️ CONDICIÓN DE MUERTE: si la esquina gana su propia PIEZA en
+ *  packages/ui (la banda del techo con el gap adentro, estilo FilaCita
+ *  — cero API de geometría), esta regla se angosta a «las apps usan la
+ *  pieza» o se retira con lápida. */
+const VENTANA_R32 = 25;
+const GAP_MINIMO_R32 = 20; // el número congelado de la lámina (10+10)
+/** spacing keys cuyo valor alcanza N dp (los tokens legales para el gap). */
+const SPACING_R32 = { 5: 20, 6: 24, 7: 28, 8: 32, 10: 40, 12: 48, 14: 56, 16: 64, 20: 80, 24: 96, 28: 112, 32: 128 };
+function r32(archivos) {
+  const fallos = [];
+  let montajes = 0;
+  for (const { path, src } of archivos) {
+    const limpio = sinComentarios(src);
+    if (!/nombre=["']campana["']/.test(limpio)) continue;
+    const lineas = limpio.split('\n');
+    lineas.forEach((linea, i) => {
+      if (!/nombre=["']campana["']/.test(linea)) return;
+      montajes++;
+      const ventana = lineas.slice(Math.max(0, i - VENTANA_R32), i + VENTANA_R32).join('\n');
+
+      // ① INLINE, jamás absoluta — la condición que vuelve legible al resto
+      if (/position:\s*['"]absolute['"]/.test(ventana)) {
+        fallos.push(
+          `${path}:${i + 1} — la campana convive con \`position: 'absolute'\` en su ventana (±${VENTANA_R32}): la lámina la manda INLINE, jamás absoluta — el texto no sabe que un absoluto está ahí, y la separación deja de ser legible`,
+        );
+      }
+
+      // ② el mínimo REAL: 2 × el hitSlop más grande de la ventana (default 10)
+      // hitSlop en sus DOS ropas — `hitSlop: 10` (objeto de estilo/props) y
+      // `hitSlop={10}` (attr JSX). El brazo nació mirando solo la primera y
+      // el barrido por-brazo lo cazó MUDO: con la ropa JSX el mínimo se
+      // quedaba en 20 y un hitSlop de 14 pasaba sin subirlo a 28.
+      const slops = [...ventana.matchAll(/hitSlop[:=]\s*\{?\s*(\d+)/g)].map((m) => Number(m[1]));
+      const minimo = Math.max(GAP_MINIMO_R32, 2 * Math.max(10, ...(slops.length ? slops : [10])));
+
+      // ③ la separación LEGIBLE: gap por token de spacing en la ventana
+      const gaps = [...ventana.matchAll(/gap:\s*spacing\[(\d+(?:\.\d+)?)\]/g)].map((m) => SPACING_R32[m[1]] ?? 0);
+      const mayor = gaps.length ? Math.max(...gaps) : null;
+      if (mayor === null) {
+        fallos.push(
+          `${path}:${i + 1} — la campana está montada y su ventana (±${VENTANA_R32}) NO declara ningún \`gap: spacing[...]\`: la separación de zonas táctiles no es legible estáticamente, y este es el único número de su lámina que NO se ve en una captura (L-197: sin medir no hay verde — declarala como gap en la fila que la porta, spacing[5]+)`,
+        );
+      } else if (mayor < minimo) {
+        fallos.push(
+          `${path}:${i + 1} — el gap de la esquina es ${mayor}dp y el mínimo es ${minimo}dp (2 × hitSlop ${Math.max(10, ...(slops.length ? slops : [10]))}): dos zonas táctiles a menos de eso se pisan, el toque abre lo que no era y la persona cree que se equivocó ella (lámina de la esquina, número congelado)`,
+        );
+      }
+    });
+  }
+  return {
+    fallos,
+    info: `${montajes} montaje(s) de campana en apps (hoy se espera 0 — C y D construyen contra esta regla) · ventana ±${VENTANA_R32} · mínimo 2×hitSlop (piso ${GAP_MINIMO_R32})`,
+  };
+}
+
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -1689,6 +1791,7 @@ corridas.push(['R25 (la pata no se reinventa)', r25([...apps, ...ui])]);
 corridas.push(['R30 (el glifo no se re-dibuja: apps contra el registry)', r30([...apps, ...ui])]);
 corridas.push(['R27 (el pink no enfoca en el prestador)', r27(FUENTES_R27)]);
 corridas.push(['R29 (sinPie no viaja solo)', r29(apps)]);
+corridas.push(['R32 (la esquina compartida: los 20dp de la lámina)', r32(apps)]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,
