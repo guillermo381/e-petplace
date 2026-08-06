@@ -1,5 +1,12 @@
 /**
- * EL REGISTRO DE PREMISAS INERTES — el dato del guard (S87-B, D-651 ②).
+ * EL REGISTRO DE REGRESIÓN DE CENSO — el dato del guard (S87-B → S88, D-651 ②).
+ *
+ * ── LINAJE (renombrado por adjudicación de mesa, S88): nació como
+ *    «premisas-inertes» vigilando ramas declaradas inalcanzables. P3 y
+ *    P4 lo ensancharon a su clase real: **lo que un censo midió una vez
+ *    y puede decaer en silencio**. El invariante NO cambió
+ *    (verde ⟺ n === 0) y los exports conservan su nombre de nacimiento
+ *    (`PREMISAS`) — el linaje también vive en el código.
  *
  * ┌───────────────────────────────────────────────────────────────────┐
  * │ UNA CONDICIÓN QUE EL CÓDIGO DECLARA «INERTE» SE MIDE CONTRA EL    │

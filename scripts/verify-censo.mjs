@@ -1,14 +1,22 @@
 #!/usr/bin/env node
 /**
- * verify:premisas — EL GUARD DE LAS PREMISAS INERTES (S87-B, D-651 ②).
+ * verify:censo — EL GUARD DE REGRESIÓN DE CENSO (S87-B → S88, D-651 ②).
  *
  * ┌───────────────────────────────────────────────────────────────────┐
- * │ UNA CONDICIÓN QUE EL CÓDIGO DECLARA «INERTE» SE MIDE CONTRA EL    │
- * │ MOTOR, NO SE DESCRIBE. SI LA PREMISA CADUCA, ROJO.                │
+ * │ LO QUE UN CENSO MIDIÓ UNA VEZ PUEDE DECAER EN SILENCIO.           │
+ * │ SE RE-MIDE CONTRA SU FUENTE, NO SE DESCRIBE. SI DIVERGE, ROJO.    │
  * └───────────────────────────────────────────────────────────────────┘
  *
- * El registro (qué se vigila, con su consulta) vive en
- * `scripts/premisas-inertes.mjs`. Acá vive el instrumento.
+ * ── LINAJE (renombrado por adjudicación de mesa, S88 — el invariante
+ *    NO cambió): nació como «verify:premisas», el guard de las PREMISAS
+ *    INERTES — ramas que el código declara inalcanzables (P1/P2). P3 (el
+ *    contador del canon) y P4 (la línea base de chips) lo ensancharon a
+ *    lo que siempre fue por debajo: **toda afirmación que la casa dio
+ *    por medida y que puede divergir sin que nada se ponga rojo**. Los
+ *    ids P1..Pn se CONSERVAN — son el linaje, y las actas ya los citan.
+ *
+ * El registro (qué se vigila, con su medición) vive en
+ * `scripts/censo-regresion.mjs`. Acá vive el instrumento.
  *
  * ── LAS TRES DIRECCIONES EN LAS QUE ESTE GUARD PUEDE FALLAR, y qué hace
  *    con cada una (acta del método S86 §8 — un guard falla igual en las
@@ -46,14 +54,14 @@
  *
  * El exit se lee del COMANDO, jamás del pipe (L-191).
  *
- *   node scripts/verify-premisas.mjs
- *   node scripts/verify-premisas.mjs --sin-motor   (ruidoso, se declara)
+ *   node scripts/verify-censo.mjs
+ *   node scripts/verify-censo.mjs --sin-motor   (ruidoso, se declara)
  */
 
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { execSync } from 'node:child_process';
-import { PREMISAS, EXENTAS, RAICES, PISO_OCURRENCIAS } from './premisas-inertes.mjs';
+import { PREMISAS, EXENTAS, RAICES, PISO_OCURRENCIAS } from './censo-regresion.mjs';
 // El canal a la DB es el de la casa (`lib-db.mjs`, D-352): solo SELECT,
 // CLI linkeado, cero secretos en el repo. Se IMPORTA, no se re-implementa
 // —copiar el helper al lado es exactamente lo que L-175 prohíbe—.
@@ -304,7 +312,7 @@ if (rotos.length > 0) {
   console.error('\n✗ AUTO-PRUEBA ROTA — el guard no puede producir rojo en:');
   for (const r of rotos) console.error(`   · ${r}`);
   console.error('\n  Un guard que no falla cuando debe es decorativo (L-192). Se declara inválido.');
-  console.error('\nVERDICTO PREMISAS: INVÁLIDO');
+  console.error('\nVERDICTO CENSO: INVÁLIDO');
   process.exit(1);
 }
 
@@ -324,7 +332,7 @@ if (ocurrencias.length < PISO_OCURRENCIAS) {
     `✗ CORPUS: ${ocurrencias.length} ocurrencia(s) contra un piso de ${PISO_OCURRENCIAS}. ` +
       `El barrido se derrumbó — el verde de este guard significaría «no miré», no «no hay».`,
   );
-  console.error('\nVERDICTO PREMISAS: INVÁLIDO');
+  console.error('\nVERDICTO CENSO: INVÁLIDO');
   process.exit(1);
 }
 
@@ -379,5 +387,5 @@ if (SIN_MOTOR) {
   }
 }
 
-console.log(fallos === 0 ? '\nVERDICTO PREMISAS: TODO VERDE' : `\nVERDICTO PREMISAS: ${fallos} EN ROJO`);
+console.log(fallos === 0 ? '\nVERDICTO CENSO: TODO VERDE' : `\nVERDICTO CENSO: ${fallos} EN ROJO`);
 process.exit(fallos === 0 ? 0 : 1);
