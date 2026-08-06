@@ -8135,3 +8135,84 @@ propio par** (S77, 7/7) y no se re-prueba acá.
 > nadie va a atender es dato falso esperando a que alguien lo lea.*
 
 **Origen: S88-A (pedido de la mesa para el dedo de C).**
+
+---
+
+#### D-667 — 🔴 LA VOZ DE PRODUCTO DE LAS NOTIFICACIONES NO EXISTE — Y EL 13-AGO SALE IGUAL
+
+**Hallado auditando el contrato de la campana contra la lámina, ANTES de que C
+y D construyeran contra él.** *No es un hueco de la campana: es un hueco del
+motor entero, y la campana lo destapó.*
+
+### Los tres literales, que no se contradicen — se complementan mal
+
+**① El productor NO escribe voz** (`cerrar_y_renovar_planes`, el del 13-ago):
+
+```sql
+p_tipo  => 'plan_renovado',
+p_datos => jsonb_build_object('subtipo','plan_renovado',
+                              'suscripcion_servicio_id', v_susc.id)
+--          ↑ ni `titulo` ni `mensaje`
+```
+
+**② La Edge Function los busca ahí, y cae a un genérico:**
+
+```ts
+subject: (i.datos?.titulo)  ?? 'Tienes una novedad en e-PetPlace',
+text:    (i.datos?.mensaje) ?? 'Abre la app para verla.',
+```
+
+**③ El catálogo tiene `descripcion`, pero NO es voz de usuario** — es prosa de
+mesa, y se ve en cuanto se leen dos:
+
+```
+plan_renovado      «El plan se renovó y se cobró. Constancia: viaja por el
+                    canal de guardar.»              ← la mitad final es interna
+seguridad_cuenta   «Acceso y cambios de credencial. Es de la persona, no de la
+                    mascota: sobrevive al memorial (§5.1).»   ← cita una sección
+```
+
+> ### **⇒ EL 13-AGO, EL PRIMER CORREO REAL DE LA HISTORIA DEL PRODUCTO VA A DECIR:**
+> ```
+> Asunto:  Tienes una novedad en e-PetPlace
+> Cuerpo:  Abre la app para verla.
+> ```
+> **Sobre un plan que se renovó y SE COBRÓ.** Un cobro anunciado con «abre la
+> app» — a una familia que no pidió nada ese día.
+
+### Por qué nadie lo vio antes, que es la parte que enseña
+
+**El gate del primer envío pasó en VERDE** (5-ago, correo recibido por el
+founder a las 2:18 PM) **y era un verde legítimo**: probaba el kill switch, el
+transporte y la entrega. **La voz la escribí a mano en el fixture** —
+`{"titulo":"Prueba del gate del primer envío", …}` — así que el camino que el
+gate recorrió **tenía voz, y ningún camino de producción la tiene.**
+
+> **Un fixture que rellena a mano lo que el productor no llena prueba el TUBO y
+> no el AGUA.** El gate midió que el mensaje llega; nadie midió qué mensaje.
+
+*Es la familia de L-202 —el par prueba lo que se le pide probar— en su forma
+más cara: el par era correcto y su alcance también; lo que faltaba era la
+pregunta «¿y esto qué diría en producción?».*
+
+### Lo que hay que decidir (es de mesa, no de A)
+
+**Dónde viven las plantillas.** La lámina de la campana ya lo firmó de un lado:
+*«su voz humana (la misma del correo — **plantillas como dato**)»*. Las tres
+opciones, con su costo:
+
+| dónde | a favor | en contra |
+|---|---|---|
+| **el productor las escribe** en `p_datos` | cero infra nueva | **voz de producto adentro de la DB** (D-539) y sin capa de idioma |
+| **tabla de plantillas** por tipo × idioma, renderizada con `datos` | dato, versionable, bilingüe | infra nueva; el render necesita interpolación |
+| **la app las arma** desde `tipo` + `datos` | idioma resuelto donde vive | **el correo no tiene app** — el canal email quedaría sin voz |
+
+*La tercera se cae sola por el correo, y ese es el dato que ordena la decisión.*
+
+> **☠️ DISPARO: INMEDIATO — el 13-ago no espera.** Mientras no haya plantillas,
+> las salidas posibles son **(a)** que el productor escriba `titulo`/`mensaje`
+> del tipo que va a salir, **(b)** bajar el kill switch hasta tenerlas.
+> **☠️ MUERTE:** todo tipo fuera de sombra tiene voz propia, y el genérico de
+> la Edge Function deja de ser alcanzable.
+
+**Origen: S88-A (auditoría del contrato de la campana contra su lámina).**

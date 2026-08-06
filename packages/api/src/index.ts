@@ -395,6 +395,7 @@ export {
 // hasta que la pantalla exista (ley de secuencia de la lámina).
 export {
   obtenerMisAvisos,
+  hayAvisosSinLeer,
   marcarAvisoLeido,
   type AvisoDeCampana,
   type CodigoCampana,

@@ -17495,6 +17495,7 @@ export type Database = {
         }
         Returns: Json
       }
+      hay_avisos_sin_leer: { Args: never; Returns: boolean }
       hoy_local: { Args: never; Returns: string }
       iniciar_atencion_adiestramiento: {
         Args: { p_cita_id: string; p_empleado_id?: string }
@@ -17802,6 +17803,7 @@ export type Database = {
           leida: boolean
           leida_en: string
           mascota_id: string
+          mascota_nombre: string
           mensaje: string
           tiene_destino: boolean
           tipo: string

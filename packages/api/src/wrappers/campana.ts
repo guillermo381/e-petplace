@@ -48,6 +48,10 @@ export interface AvisoDeCampana {
   categoria: string;
   /** REFERENTES del hecho, para que la app arme SU ruta. */
   mascotaId: string | null;
+  /** «De qué mascota habla» (lámina §2). `null` honesto si el aviso no es de
+   *  una mascota — o si la mascota ya no existe: **el aviso no desaparece
+   *  porque su referente sí**. */
+  mascotaNombre: string | null;
   eventoId: string | null;
   /** **La lámina: «un aviso sin destino no se pinta como si lo tuviera».**
    *  Con `false`, la fila se muestra pero NO es tocable. */
@@ -82,6 +86,7 @@ export async function obtenerMisAvisos(
       tipo: f.tipo,
       categoria: f.categoria,
       mascotaId: f.mascota_id,
+      mascotaNombre: f.mascota_nombre,
       eventoId: f.evento_id,
       tieneDestino: f.tiene_destino,
       creadoEn: f.creado_en,
@@ -89,6 +94,24 @@ export async function obtenerMisAvisos(
       leidaEn: f.leida_en,
     })),
   };
+}
+
+/**
+ * ¿Hay algo sin leer? **Booleano a propósito** — la huella marca PRESENCIA y
+ * la lámina prohíbe el número (*«el número invita a vaciarlo»*).
+ *
+ * ⚠️ Existe para que el techo NO tenga que traer la lista sólo para decidir si
+ * dibuja un punto. *Y hay una razón más fina: con la lista en la mano, el
+ * valor que la pantalla computaría naturalmente —`filter(!leida).length`— es
+ * exactamente el que no debe pintar.* **La forma del dato hace imposible el
+ * defecto.**
+ */
+export async function hayAvisosSinLeer(): Promise<ResultadoWrapper<boolean, CodigoCampana>> {
+  if ((await uidActual()) === null) return falla('sin_sesion');
+  const { data, error } = await getClient().rpc('hay_avisos_sin_leer');
+  if (error) return falla('error_desconocido');
+  if (typeof data !== 'boolean') return falla('datos_inconsistentes');
+  return { ok: true, data };
 }
 
 /**
