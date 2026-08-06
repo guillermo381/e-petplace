@@ -7537,10 +7537,21 @@ código**, no obligando a volver atrás.
 
 ### 📍 ESTADO DE LA FICHA
 
-🔴 **ABIERTA — el re-gate del founder FRENÓ sobre `019fd467`.** La arquitectura
-de A y las cuatro patas de C están verdes; **el flujo completo con un dedo real
-NO**. Falta la cura de C (limpiar el campo) y una re-prueba sobre el bundle que
-la lleve.
+✅ **CERRADA — 5-ago-2026, por el dedo del founder de punta a punta.**
+
+**La re-prueba completa pasó sobre el bundle `019fd49b` (group `65522231`),
+INCLUYENDO el camino que había fallado: pedir un SEGUNDO código.** *El bucle
+está curado y el bug que el founder cazó con el dedo murió con su dedo.*
+
+**Lo que lo cerró, en dos mitades y ninguna alcanzaba sola:**
+
+| mitad | qué |
+|---|---|
+| **A** | el traductor deja de acusar a ciegas · la voz nombra la causa (*«solo funciona el del último correo»*) · el voseo barrido |
+| **C** | **pedir uno nuevo LIMPIA EL CAMPO** (`a209143`) — sin eso, ocho cajas llenas de un código MUERTO ofrecen el botón habilitado sobre algo que el servidor va a rechazar seguro |
+
+*La voz sola no alcanzaba —el campo seguía invitando al error— y el campo
+limpio sin la voz habría dejado a la persona sin saber por qué.*
 
 *Y queda dicho, porque es la lección más cara del día: **cuatro pares verdes de
 C no alcanzaron.** Sus cuatro patas probaban el camino feliz de una sola
@@ -7938,3 +7949,91 @@ publicación nueva.**
 > el guard exista, esto es disciplina — y la disciplina sola ya falló una vez.*
 
 **Origen: S88 (hallazgo de la pista D, medido y acotado por A).**
+
+
+---
+
+#### D-663 — 🟡 «TU PERFIL» SE LE OFRECE A QUIEN NO PUEDE GUARDARLO
+
+**Hallazgo del gate de §4ter (founder, 5-ago).** La vitrina *Tu perfil* se
+ofrece a no-titulares.
+
+**SIN EXPOSICIÓN — medido, no supuesto** (par de 4 caras, in-txn, ROLLBACK):
+
+```
+TITULAR      lee=1 · escribe=1   → gestiona, esperado
+ADMIN        lee=1 · escribe=1   → gestiona, esperado (D-660)
+RECEPCIÓN    lee=1 · escribe=0   → ve la vitrina PÚBLICA, NO puede guardar
+PROFESIONAL  lee=1 · escribe=0   → ve la vitrina PÚBLICA, NO puede guardar
+```
+
+*El `lee=1` no es fuga: `prestadores` tiene policy pública para los activos —
+es la misma fila que ve cualquier familia en Explorar.* **El `escribe=0` es lo
+que gobierna, y se contó por `ROW_COUNT`: un `UPDATE` bajo RLS que no matchea
+no falla, afecta cero.**
+
+⇒ **Es un botón que rebota (Ley 23), no un agujero.** Cura de superficie: la
+sección se gatea con `puedoAsignarCitas`/gestión, no se ofrece a quien el
+servidor va a rechazar.
+
+> **☠️ DISPARO:** la tanda de superficie de C. **☠️ MUERTE:** la sección no se
+> monta para quien no gestiona.
+
+**Origen: S88 (gate §4ter del founder; medido por A).**
+
+---
+
+#### D-664 — 🔴 `esDueno` DA **TRUE PARA TODOS**: LA DERIVACIÓN SE APOYA EN UNA PREMISA QUE OTRA MIGRACIÓN FALSEÓ
+
+**La pregunta de la mesa tenía dos ramas y la respuesta era una TERCERA.**
+
+**Lo medido — la policy NO se ensanchó en D-660.** `empleado_roles_select`
+tiene **tres** brazos: *mis propias filas* · *las de negocios donde soy dueño* ·
+`is_admin()`. **El rol `administrador` no está en ninguno.**
+
+**Pero el derivado da `true` igual, y no solo para el admin:**
+
+```
+                   filas leídas   esDueno DERIVADO   es de verdad
+TITULAR                    13         true           titular        ✅
+ADMIN                       2         true           administrador  🔴
+RECEPCIÓN                   1         true           recepcion      🔴
+PROFESIONAL                 2         true           profesional     🔴
+```
+
+**LA CAUSA:** el wrapper pide los roles de **TODOS** los empleados del negocio
+(`.in('empleado_id', ids)`), y **`ids` incluye la fila del propio lector**. El
+primer brazo de la policy —*mis propias filas*— se la devuelve. **Todo miembro
+lee ≥1 fila.**
+
+> ### **Y LO QUE LA HACE UNA LECCIÓN, NO UN BUG SUELTO**
+> El JSDoc del derivado dice: *«la policy SELECT de `empleado_roles` es
+> dueño-only … quien lee ≥1 fila ES dueño»*. **Describe UNO de los tres brazos
+> y concluye sobre la policy entera.**
+>
+> Y era **cierto cuando se escribió**: antes de S76 un no-titular no tenía
+> filas de rol. **Lo falseó la A2bis de S76, que empezó a conceder la fila
+> `recepcion` A TODOS AL ENTRAR** — la misma ley madre (*membresía, jamás
+> identidad*) que casi arruina el gate de asignar en esta sesión.
+>
+> **Una migración correcta invalidó una premisa correcta escrita en otro
+> archivo, y nadie las cruzó.** Es L-193 (*la premisa heredada que nadie
+> fechó*) en su forma más cara: el derivado **no falla, acierta al revés**.
+
+**LO QUE NO PASA, y por eso es 🔴 de superficie y no de datos:** el SERVIDOR
+sigue siendo la autoridad. Las secciones que `esDueno` monta de más rebotan en
+su propio gate (D-660 los midió uno por uno). *El daño es ofrecer lo que se va
+a rechazar, no conceder lo que no corresponde.*
+
+**LA CURA — dos caminos, la mesa elige:** ① el derivado gana **su propio
+lector** (un predicado del servidor que diga si gestiona, como
+`empleado_es_mostrador_o_gestion` hizo con la plata) · ② se **renombra** a lo
+que realmente mide (`esMiembroConRol`) y cada sección se gatea con el predicado
+que le corresponde. *La ② es honesta pero deja el gate mal en cuatro
+superficies; la ① las cura todas de una.* **Voto de A: ①.**
+
+> **☠️ DISPARO:** la próxima tanda que toque `equipo.ts` o cualquiera de las
+> cuatro superficies (`mascotas` · `equipo` · `negocio` · `seccion-horarios`).
+> **☠️ MUERTE:** ningún gate de sección deriva un rol de «cuántas filas leí».
+
+**Origen: S88 (censo de prosa de C; medido por A con las cuatro cuentas).**
