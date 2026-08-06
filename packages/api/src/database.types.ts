@@ -16671,6 +16671,10 @@ export type Database = {
         }
         Returns: string
       }
+      _cuenta_comercial_tiene_uso: {
+        Args: { p_cuenta_id: string }
+        Returns: boolean
+      }
       _debe_logear_atencion: {
         Args: { p_prestador_id: string; p_tipo_evento: string }
         Returns: boolean
@@ -17593,6 +17597,7 @@ export type Database = {
         Args: { p_country_code: string; p_texto: string }
         Returns: string
       }
+      notificar_recordatorios_cita: { Args: never; Returns: Json }
       obtener_adiestradores_disponibles: {
         Args: {
           p_fecha: string
