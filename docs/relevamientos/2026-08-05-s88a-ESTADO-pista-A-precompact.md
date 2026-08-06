@@ -77,10 +77,18 @@ D-657, timbre, transporte vivo, y las cinco tandas de D-660).
 | `guillo381+s87prof@gmail.com` | `S87prueba!2026` | profesional con chips |
 | `guillo381+s87recep@gmail.com` | `S87prueba!2026` | recepción, 0 chips |
 | `demo-prestador@epetplace.dev` | `S87prueba!2026` | titular de Paseos Andres |
+| **`demo-vet@epetplace.dev`** | `S87prueba!2026` | **titular de Clínica Aurora** — la pata «titular» del gate de §4ter y el negocio del fixture D-666 |
 | `guillo381+s88admin@gmail.com` | `S88admin!2026` | **⚠️ BIFRONTE**: admin de plataforma **Y** de negocio. **NO discrimina el rol** |
 | `guillo381+s88rolpuro@gmail.com` | `S88puro!2026` | **EL DISCRIMINADOR**: administrador de negocio **sin fila en `admin_users`** |
 | `guillo381+s88emp1@…` | — | invitado por el founder en su gate |
 
+> ### ⚠️ **UNA CUENTA CANÓNICA FUERA DEL REGISTRO ES UNA CREDENCIAL QUE NADIE PUEDE REPONER.**
+> *`demo-vet` —el titular de Aurora, la cuenta con la que se prueba que las
+> curas no se llevaron nada— **estuvo fuera de esta tabla hasta el 5-ago**, y
+> el hueco se descubrió el día que su clave dejó de servir.* **El registro no
+> es documentación: es la única vía de volver a entrar.** Se descubrió midiendo
+> las otras tres, no leyendo esta tabla — que es exactamente el problema.
+>
 > ### ⚠️ **TODO RECUENTO EXCLUYE `+s87` Y `+s88`, O MIENTE.**
 > *El censo de D-660 dio TODO VERDE con la bifronte y era falso: **una cuenta
 > que es dos cosas no prueba ninguna**.* Y **una cuenta sembrada por SQL no

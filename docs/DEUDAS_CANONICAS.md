@@ -3214,6 +3214,46 @@ Origen: S86-A, medición para C.
   > censo se corre en un minuto.*
 ### Lecciones S88 (L-202 → L-206 — números verificados libres por grep)
 
+- **L-209 — UN TIPO SE NOMBRA POR LO QUE CUENTA, Y SE LEE POR A QUIÉN LE LLEGA (S88, firmada por el founder — ley de nombres).**
+
+  > ### **CUANDO LAS DOS COSAS NO COINCIDEN, EL NOMBRE MIENTE AUNQUE EL DISEÑO ESTÉ BIEN.**
+
+  **EL CASO:** `registro_completado_cliente` **no iba al cliente** — iba al operador que hizo el alta. El diseño era **correcto** (dos audiencias del negocio, con un guard que evita notificar dos veces al mismo), y el nombre igual mandó a una pista a "curar" un destinatario que por ahí no estaba roto. *El tipo se llamaba por el SUJETO del hecho y se leía como el DESTINATARIO del aviso.*
+
+  **Renombrado a `registro_completado_operador`** (S88). **Y el costo de no haberlo hecho antes fue real, aunque el código funcionara:** el nombre es lo primero que alguien lee, y un nombre que miente cuesta una medición entera antes de que aparezca la verdad.
+
+- **L-210 — UN GUARD QUE CAZA PROSA VENCIDA NO DISTINGUE LA LETRA DE SU EPITAFIO (S88).**
+
+  **EL CASO, en su propio turno:** la unificación corrigió una doctrina escrita en el cuerpo de una función (*«el motor no compone texto…»*) y puso un guard para que no reviviera. **El guard se disparó contra el comentario NUEVO** — el que explica qué cambió, y que necesariamente **cita** la frase muerta.
+
+  **La forma exigible:** un guard contra prosa vencida apunta a un literal que **solo existía en la versión vieja** (acá: `«La voz viaja en»`, el arranque de la línea muerta), **jamás a la frase que el reemplazo va a citar**. *Documentar por qué algo murió y prohibir que reviva son dos actos que se pisan si el guard no sabe leer la diferencia.*
+
+- **L-208 — UN `CREATE OR REPLACE` SE ARMA LEYENDO EL OBJETO VIVO, JAMÁS UNA COPIA GUARDADA (S88).**
+
+  > ### **SOBRESCRIBIR UNA FUNCIÓN ES SIEMPRE «EXITOSO»: NO HAY CONFLICTO QUE AVISE.**
+
+  **EL CASO:** el lote de voces reescribió `cerrar_y_renovar_planes` partiendo de un `pg_get_functiondef` capturado **minutos antes** — antes de que la migración de `plan_renovado` existiera. El `CREATE OR REPLACE` **hizo exactamente lo que se le pidió** y borró una voz **que ya estaba en producción**: la del único tipo fuera de sombra, el que sale solo el 13-ago.
+
+  **Lo cazó EL PAR**, no el cinturón: la sombra devolvió `asunto = NULL`. *El cinturón verificaba que las voces NUEVAS existieran — no que las viejas siguieran.*
+
+  **Es la hermana de la ley del depósito** (*los punteros al presente se leen del objeto*), aplicada al código: **un `functiondef` guardado es un puntero al presente con cara de hecho.** Y la ventana de invalidación puede ser de minutos.
+
+  **Forma exigible:** todo `CREATE OR REPLACE` de una función existente se arma con un `pg_get_functiondef` leído **en el mismo turno**, y su cinturón verifica **lo que había antes** además de lo que se agrega.
+
+- **L-207 — UN FIXTURE QUE RELLENA LO QUE EL PRODUCTOR NO LLENA PRUEBA EL TUBO Y NO EL AGUA (S88, firmada por la mesa — la más cara del día).**
+
+  > ### **EL GATE MIDIÓ QUE EL MENSAJE LLEGA; NADIE MIDIÓ QUÉ MENSAJE.**
+
+  **EL CASO:** el gate del primer envío pasó en verde el 5-ago —correo recibido, kill switch probado, transporte confirmado— **y era un verde legítimo**. Pero el `titulo`/`mensaje` los escribió a mano el fixture. **Ningún productor real los llena**, así que el camino de producción caía al genérico de la Edge Function: *«Tienes una novedad en e-PetPlace / Abre la app para verla»* — sobre un plan que se renovó y **se cobró**.
+
+  **Es L-202 en su forma más cara:** el par era correcto **y su alcance también**; lo que faltaba era una pregunta que ningún par se hace solo.
+
+  **COROLARIO EXIGIBLE, para todo gate de un tipo que salga de sombra:**
+
+  > **La pregunta obligatoria es «¿y esto qué diría en PRODUCCIÓN?» — y se contesta MIRANDO LA SOMBRA DEL PRODUCTOR REAL, jamás un fixture escrito a mano.**
+
+  *El modo de verificación tiene que recorrer el mismo camino que el dato: si el fixture aporta un valor que en producción nadie aporta, el fixture está probando su propia generosidad.*
+
 - **L-205 — UN PREDICADO COMPARTIDO SE ESCRIBE CON SU LÍMITE ADENTRO (S88, decisión de A ratificada por la mesa).**
 
   **EL CASO:** dos verbos del mostrador —**ver la plata** y **asignar citas**— resultaron tener HOY el mismo portador (gestión, o miembro activo con cero chips). Escribir dos cuerpos idénticos es lo que esta casa ya pagó caro (*«dos cuerpos del MISMO cálculo»*); compartir uno sin decirlo es peor, porque **el próximo que necesite separarlos no va a saber si puede.**
@@ -8102,3 +8142,491 @@ LÁMINA, no cura de código.**
 > tener consecuencia visible.
 
 **Origen: S88 (Lote 4 de D; distinción declarada por la mesa).**
+
+
+---
+
+#### D-666 — ✅ RETIRADO Y RENACIDO · el fixture de la cita sin persona (Aurora)
+
+**Sembrado por A el 5-ago para el dedo de C sobre la Hoja de asignar.**
+
+```
+cita      83f5f31f-2f9e-4aa1-9509-b93b75d2050c
+cuándo    2026-08-07 10:00  ·  consulta_general  ·  confirmada
+estado    empleado_id = NULL   ← «de la clínica» (§11(a))
+la Hoja   ofrece 3 personas
+```
+
+**Por qué el fixture es legítimo, y no un atajo:** el productor real de citas
+huérfanas —`dar_de_baja_empleado`— **nunca corrió en este negocio** (medido: 0
+citas con `empleado_id IS NULL` antes de esto). Y **lo que el gate mide es la
+LISTA que la Hoja ofrece**, no la puerta por la que la fila nació. *Fabricar el
+estado de entrada de un lector es legítimo; fabricar el estado de SALIDA de una
+puerta sería el fixture que da verde sobre una puerta que no existe (la trampa
+declarada de D-585).*
+
+**Lo que este fixture NO prueba, dicho antes de que alguien lo lea de más:** que
+`dar_de_baja_empleado` produzca correctamente el despegue. **Eso ya tiene su
+propio par** (S77, 7/7) y no se re-prueba acá.
+
+### ✅ RETIRADO (5-ago) — por DECISIÓN, que era la condición escrita
+
+`83f5f31f` **cumplió su misión entera**: destapó el verbo sin ojos (D-664 en la
+pizarra) y sirvió el dedo post-cura. **Volvió a su persona y a su fecha
+original** (1-ago, titular). *Nadie tocó «Tomar» — se retira íntegra.*
+
+### 🔄 Y NACIÓ SU RELEVO, con su fecha de retiro desde el primer día
+
+El dedo del **envolver** exige una cita sin persona **abierta en el momento del
+gate**, así que la huérfana nace con la veda:
+
+```
+cita     e32091f4-88b5-4b04-91bc-9367a1c052a3
+cuándo   2026-08-08 11:30  ·  consulta_general  ·  confirmada
+estado   empleado_id = NULL
+la Hoja  ofrece 3 personas
+```
+
+> **☠️ RETIRO: con el veredicto de C sobre el envolver.** Mismo trato que la
+> anterior — *vuelve a su persona o se declara adoptada; lo que no puede es
+> quedarse sin decidir.* **Una cita futura de una mascota real que nadie va a
+> atender es dato falso esperando a que alguien lo lea.**
+
+*Y la razón de que el relevo sea OTRA cita y no la misma: reusarla habría
+mezclado el veredicto de dos gates en una fila. Un fixture por dedo.*
+
+**Origen: S88-A (pedido de la mesa para el dedo de C).**
+
+---
+
+#### D-667 — 🔴 LA VOZ DE PRODUCTO DE LAS NOTIFICACIONES NO EXISTE — Y EL 13-AGO SALE IGUAL
+
+**Hallado auditando el contrato de la campana contra la lámina, ANTES de que C
+y D construyeran contra él.** *No es un hueco de la campana: es un hueco del
+motor entero, y la campana lo destapó.*
+
+### Los tres literales, que no se contradicen — se complementan mal
+
+**① El productor NO escribe voz** (`cerrar_y_renovar_planes`, el del 13-ago):
+
+```sql
+p_tipo  => 'plan_renovado',
+p_datos => jsonb_build_object('subtipo','plan_renovado',
+                              'suscripcion_servicio_id', v_susc.id)
+--          ↑ ni `titulo` ni `mensaje`
+```
+
+**② La Edge Function los busca ahí, y cae a un genérico:**
+
+```ts
+subject: (i.datos?.titulo)  ?? 'Tienes una novedad en e-PetPlace',
+text:    (i.datos?.mensaje) ?? 'Abre la app para verla.',
+```
+
+**③ El catálogo tiene `descripcion`, pero NO es voz de usuario** — es prosa de
+mesa, y se ve en cuanto se leen dos:
+
+```
+plan_renovado      «El plan se renovó y se cobró. Constancia: viaja por el
+                    canal de guardar.»              ← la mitad final es interna
+seguridad_cuenta   «Acceso y cambios de credencial. Es de la persona, no de la
+                    mascota: sobrevive al memorial (§5.1).»   ← cita una sección
+```
+
+> ### **⇒ EL 13-AGO, EL PRIMER CORREO REAL DE LA HISTORIA DEL PRODUCTO VA A DECIR:**
+> ```
+> Asunto:  Tienes una novedad en e-PetPlace
+> Cuerpo:  Abre la app para verla.
+> ```
+> **Sobre un plan que se renovó y SE COBRÓ.** Un cobro anunciado con «abre la
+> app» — a una familia que no pidió nada ese día.
+
+### Por qué nadie lo vio antes, que es la parte que enseña
+
+**El gate del primer envío pasó en VERDE** (5-ago, correo recibido por el
+founder a las 2:18 PM) **y era un verde legítimo**: probaba el kill switch, el
+transporte y la entrega. **La voz la escribí a mano en el fixture** —
+`{"titulo":"Prueba del gate del primer envío", …}` — así que el camino que el
+gate recorrió **tenía voz, y ningún camino de producción la tiene.**
+
+> **Un fixture que rellena a mano lo que el productor no llena prueba el TUBO y
+> no el AGUA.** El gate midió que el mensaje llega; nadie midió qué mensaje.
+
+*Es la familia de L-202 —el par prueba lo que se le pide probar— en su forma
+más cara: el par era correcto y su alcance también; lo que faltaba era la
+pregunta «¿y esto qué diría en producción?».*
+
+### Lo que hay que decidir (es de mesa, no de A)
+
+**Dónde viven las plantillas.** La lámina de la campana ya lo firmó de un lado:
+*«su voz humana (la misma del correo — **plantillas como dato**)»*. Las tres
+opciones, con su costo:
+
+| dónde | a favor | en contra |
+|---|---|---|
+| **el productor las escribe** en `p_datos` | cero infra nueva | **voz de producto adentro de la DB** (D-539) y sin capa de idioma |
+| **tabla de plantillas** por tipo × idioma, renderizada con `datos` | dato, versionable, bilingüe | infra nueva; el render necesita interpolación |
+| **la app las arma** desde `tipo` + `datos` | idioma resuelto donde vive | **el correo no tiene app** — el canal email quedaría sin voz |
+
+*La tercera se cae sola por el correo, y ese es el dato que ordena la decisión.*
+
+> **☠️ DISPARO: INMEDIATO — el 13-ago no espera.** Mientras no haya plantillas,
+> las salidas posibles son **(a)** que el productor escriba `titulo`/`mensaje`
+> del tipo que va a salir, **(b)** bajar el kill switch hasta tenerlas.
+> **☠️ MUERTE:** todo tipo fuera de sombra tiene voz propia, y el genérico de
+> la Edge Function deja de ser alcanzable.
+
+### ✅ LA VOZ DE `plan_renovado` — FIRMADA Y VERIFICADA POR EL CAMINO REAL
+
+**Opción (a) firmada por el founder.** *Bajar el kill switch NO: una renovación
+cobrada sin avisar es lo que D-657 curó esta misma mañana en su otra mitad.*
+
+**Nace `_voz_notificacion(tipo, user, mascota)` — la voz en UN solo lugar.**
+Son 37 tipos: inlinearla en cada productor la disemina por nueve funciones y
+garantiza que se firmen «de a una en pánico». *Y el día que las plantillas sean
+TABLA (opción 2), cambia esta función y nada más.* Un tipo sin voz firmada
+devuelve `{}`: **no inventa.**
+
+**Verificado como la mesa lo pidió — produciendo por el CAMINO REAL y leyendo
+la SOMBRA, jamás un fixture escrito a mano:**
+
+```
+cerrar_y_renovar_planes()  →  {"renovados": 1, "errores": 0}
+
+asunto:  «Tu plan de paseos se renovó»
+cuerpo:  «Renovamos el plan de paseos de Thor por un mes más. Ya está activo
+          y el cobro se hizo con tu método habitual. Podés ver el detalle
+          en la app.»
+```
+
+**Los tres criterios firmados, verificados en el literal:** el asunto dice QUÉ
+PASÓ (jamás «novedad») · el cuerpo NOMBRA el cobro · nombra a la mascota.
+
+---
+
+### 🔴🔴 Y EL PAR DESTAPÓ ALGO QUE CAMBIA LA PREMISA DEL 13-AGO
+
+**La única suscripción activa del sistema es la de Thor, y vence el 13-ago:**
+
+```
+cf59a466   fin=2026-08-13   en 7d   renovable=FALSE   precio_mensual_plan=NULL
+```
+
+**⇒ EL 13-AGO NO SALE NINGÚN CORREO. La renovación va a FALLAR con
+`plan_no_ofrecido`** (medido corriendo el productor real: `errores:1,
+renovados:0`).
+
+> **Esto es peor que no avisar, y por la secuencia:** el 10-ago —72 h antes—
+> dispara `plan_renovacion_proxima`, cuya letra es *«El plan se renueva y se va
+> a cobrar. **No se silencia: un cobro sorpresa no se deshace.**»* Tres días
+> después el cobro **no ocurre** y **nadie lo dice**.
+> ### **Se anuncia un cobro y después hay silencio.**
+> *Y el tipo que existe para contarlo —`plan_renovacion_fallida`— está EN
+> SOMBRA y sin voz.*
+
+### ✅ (A) FIRMADA Y EJECUTADA — el dato, no el código
+
+**`prestador_servicios.precio_mensual_plan = 138.00`** en la oferta
+`de300000…a5e0`.
+
+**El valor NO se inventó: se copió de la propia fila de la suscripción** —
+`precio_mensual = 138.00` y `precio_pagado = 138.00`, y cierra con su
+aritmética: `6.00 unitario × 23 salidas L-V = 138.00`.
+
+**El porqué del hueco, declarado:** la suscripción nació sin
+`precio_mensual_plan` por una **configuración vieja de la oferta** —anterior a
+la reforma de S79 que movió el precio del plan al PERÍODO— **no por diseño**.
+*El dato faltaba; no sobraba.*
+
+### EL ENSAYO DEL 13, con el estado del 13 (in-txn · ROLLBACK)
+
+*Sólo se adelantó el reloj. La oferta ya quedó como va a estar ese día.*
+
+```
+cerrar_y_renovar_planes()   →  renovados:1 · errores:0        ✅ RENUEVA
+asunto                      →  «Tu plan de paseos se renovó»  ✅
+cuerpo                      →  «…de Thor…el cobro se hizo…»   ✅
+buzón                       →  guillo381+8@gmail.com          ✅ del founder
+```
+
+**Y la cadena de canal, cerrada hasta el final:**
+
+```
+categoría del tipo ........ operacion
+preferencias de +8 ........ email=true · push=FALSE · in_app=true
+transporte vivo ........... in_app=NO · push=NO · email=SÍ · whatsapp=NO
+despacho_activo ........... true
+⇒ EL CANAL ELEGIDO ES EMAIL, por las DOS razones a la vez
+```
+
+*El cinturón del interim (push apagado en `operacion` para las dos cuentas del
+founder) **sigue puesto y medido** — y aunque no lo estuviera, la enmienda §7
+lo mandaría a email igual: push no tiene tren.* **Dos frenos independientes
+apuntando al mismo lugar.**
+
+### Y el hueco de «anunciar y callar» **se cerró solo con (A)**
+
+`plan_renovacion_proxima` está **en sombra** ⇒ el 10-ago **no sale nada**. Y el
+13 sale la renovación **verdadera**. *No hay anuncio sin cobro porque no hay
+anuncio* — la secuencia queda coherente sin tocar nada más.
+
+### ⏳ (B) AL LOTE DE VOCES, no a hoy
+
+**`plan_renovacion_fallida` necesita su voz firmada.** *«Se anuncia un cobro y
+después silencio» es un hueco de producto aunque el 13 esté arreglado* — el día
+que `plan_renovacion_proxima` salga de sombra, su hermana tiene que poder
+hablar. **La mesa la escribe cuando el lote de voces abra.**
+
+---
+
+### 📋 EL CENSO DE LOS 37 — la tabla que la mesa pidió
+
+```
+TOTAL 37   ·   fuera de sombra: 1 (plan_renovado)   ·   con productor vivo: 14   ·   sin productor: 23
+```
+
+| tipo | sombra | voz | productor |
+|---|---|---|---|
+| **`plan_renovado`** | **NO** | ✅ | `cerrar_y_renovar_planes` |
+| `alta_asistida_completada_por_cliente` | sí | 🔴 | `_trg_completar_pendiente_registro` |
+| `alta_asistida_vencida_soporte` | sí | 🔴 | `cleanup_pendientes_vencidos` |
+| `cita_confirmada` | sí | 🔴 | `fijar_fecha_procedimiento` |
+| `paquete_vence` | sí | 🔴 | `vencer_paquetes_salidas` |
+| `plan_renovacion_fallida` | sí | 🔴 | `cerrar_y_renovar_planes` |
+| `plan_renovacion_proxima` | sí | 🔴 | `cerrar_y_renovar_planes` |
+| `plan_vencido_reembolso` | sí | 🔴 | `cerrar_y_renovar_planes` · `_trg_mascotas_memorial_planes` |
+| `procedimiento_agendado` | sí | 🔴 | `fijar_fecha_procedimiento` |
+| `programa_vence` | sí | 🔴 | `vencer_programas_adiestramiento` |
+| `programa_vencido_reembolso` | sí | 🔴 | `vencer_programas_adiestramiento` |
+| `registro_completado_cliente` | sí | 🔴 | `_trg_completar_pendiente_registro` |
+| `registro_completado_prestador` | sí | 🔴 | `_trg_completar_pendiente_registro` |
+| `sistema` | sí | 🔴 | `vencer_paquetes_salidas` · `vencer_programas_adiestramiento` |
+
+**Los 23 restantes no tienen productor: no pueden salir, y por eso no son
+mecha.** *La bomba tiene **13 mechas**, no 36 — y ninguna encendida, porque
+todas están en sombra.*
+
+> **La lectura operativa, que es el alivio y la disciplina a la vez:** el gate
+> por tipo (sacar de sombra de a uno) **ya era la contención correcta**. Lo que
+> faltaba era la regla que ahora rige: **ningún tipo sale de sombra sin su voz
+> firmada, y la salida se verifica MIRANDO LA SOMBRA DEL PRODUCTOR REAL.**
+
+**Origen: S88-A (auditoría del contrato de la campana contra su lámina).**
+
+
+---
+
+#### D-668 — ✅ CURADO EN EL ACTO · `registro_completado_cliente` IBA AL DESTINATARIO EQUIVOCADO
+
+**Hallado escribiendo su voz** (lote S88): dos tipos distintos llegaban al
+**mismo receptor** con los **mismos datos**.
+
+```sql
+IF v_prestador_dueno_user_id IS NOT NULL THEN
+  → registro_completado_prestador   a  v_prestador_dueno_user_id   ✅
+
+IF v_pendiente.creado_por_user_id IS NOT NULL
+   AND v_pendiente.creado_por_user_id <> v_prestador_dueno_user_id THEN
+  → registro_completado_cliente     a  v_prestador_dueno_user_id   🔴 EL MISMO
+```
+
+> ### **EL GUARD SE ADAPTÓ Y EL DESTINATARIO NO.**
+> El `IF` pregunta correctamente por `creado_por_user_id` **y exige que sea
+> DISTINTO del dueño** — o sea, el autor del bloque **sabía** que eran dos
+> personas. La línea de abajo quedó copiada del bloque anterior.
+
+**El efecto medido:** el dueño del negocio recibía **dos avisos del mismo
+hecho**, y **quien hizo el alta no recibía ninguno**.
+
+**CURADO:** `p_destinatario_user_id => v_pendiente.creado_por_user_id`.
+
+> **Y lo que enseña, que es por qué esto no lo caza un typecheck:** ambas
+> variables son `uuid`, ambas existen, ambas están en scope. **El código era
+> válido en todo sentido salvo el único que importaba.** *Lo destapó tener que
+> escribir la voz: al preguntarme «¿qué le digo a esta persona?» apareció que
+> las dos personas eran la misma.*
+>
+> **Escribir la voz de un aviso es una auditoría de su destinatario.**
+
+**Las voces de los dos tipos quedan PENDIENTES a propósito** (firma de la
+mesa): se escriben cuando cada una tenga su receptor real y verificado.
+
+**Origen: S88-A (lote de voces).**
+
+---
+
+#### D-669 — 🔴 EL PLAN MUERE AL PRIMER FALLO DE COBRO: NO HAY GRACIA NI REINTENTO
+
+**El literal, en el `EXCEPTION` de `cerrar_y_renovar_planes`:**
+
+```sql
+EXCEPTION WHEN OTHERS THEN
+  v_errores := v_errores + 1;
+  UPDATE suscripciones_servicio
+  SET estado = 'vencida',                    -- ← AL PRIMER FALLO
+      pago_metadata = pago_metadata || jsonb_build_object(
+        'renovacion_fallida', jsonb_build_object('error', SQLERRM, 'en', now()))
+  WHERE id = v_susc.id AND periodo_fin <= v_hoy;
+```
+
+**Cero período de gracia. Cero reintento. Un solo intento y el plan se acabó.**
+*Y las citas del período nuevo nunca nacen, porque la renovación es lo que las
+crea.*
+
+### ⚖️ LA LECTURA DE PRODUCTO DEL FOUNDER (para su gate)
+
+> ### **UNA TARJETA VENCIDA NO ES LA DECISIÓN DE UN CLIENTE DE DEJAR DE CUIDAR A SU MASCOTA.**
+> **El costo de reintentar es cero comparado con perder la relación.**
+
+**La forma firmada, a construir:** el plan **NO muere al primer fallo** —
+período de gracia · **las citas ya agendadas se respetan** · y la voz dice
+**qué queda vigente y hasta cuándo**.
+
+### Por qué la voz espera a la cura, y no al revés
+
+`plan_renovacion_fallida` **no se puede escribir hoy**: no sé qué decir porque
+no sé qué queda vigente. *Un aviso que dice «hubo un problema» sin decir qué
+sobrevive obliga a llamar — y sobre el motor de hoy, cualquier promesa de
+continuidad sería falsa.*
+
+> **Una voz que miente con buena redacción es peor que ninguna.**
+
+**La voz nace CON la cura. En el mismo lote, nunca antes.**
+
+> **☠️ DISPARO: antes del soft launch (1-oct).** *Hoy no sangra porque hay una
+> sola suscripción viva y su cobro es simulado — pero el día que el cobro sea
+> real, el primer rechazo de tarjeta borra un plan.*
+> **☠️ MUERTE:** un fallo de cobro deja el plan en gracia con sus citas en pie,
+> y `plan_renovacion_fallida` sale diciendo hasta cuándo.
+
+**Origen: S88-A (medición pedida por la mesa al frenar la voz).**
+
+
+---
+
+#### D-539 — ENMIENDA S88: el voseo de los avisos del prestador, curado · y los DOS mecanismos de voz, declarados
+
+**Curado (`20260805340000`):** cuatro literales a tuteo neutro (L-148).
+
+```
+«Ya podés operar»        → «Ya puedes operar»
+«Revisá el motivo»       → «Revisa el motivo»
+«Revisalas en tu perfil» → «Revísalas en tu perfil»   (+ la tilde que faltaba)
+«Contactá soporte»       → «Contacta a soporte»
+```
+
+> **⚠️ Y una corrección de A a su propio reporte: son CUATRO, no seis.** El
+> lote de voces dijo «las seis inline vosean»; la medición dice que las dos de
+> `documento_*` están bien. *Un número inflado en un acta es la misma clase de
+> dato falso que este canon caza en el código, y se corrige igual.*
+
+### 🟠 LO QUE **NO** SE CURÓ, y es lo que queda de esta deuda
+
+**Esas seis voces viven INLINE y son SOLO ESPAÑOL.** Pasan por
+`_notificar_dueño_prestador`, un mecanismo **distinto** de `_voz_notificacion`
+—que sí resuelve idioma por `user_preferencias`—.
+
+> ### **SON DOS MECANISMOS DE VOZ CONVIVIENDO.**
+> *Y esta casa ya sabe cómo termina eso: el día que alguien cambie el criterio
+> de la voz, va a cambiarlo en uno.* **Igual que las dos letras firmadas que se
+> contradicen: cualquiera cita la que le conviene y está «en regla».**
+
+**No se unifica hoy** porque cambiar el contrato de `_notificar_dueño_prestador`
+es un lote aparte —toca dos triggers y su firma—. **Se declara con su
+condición.**
+
+> **☠️ CONDICIÓN DE MUERTE (enmendada S88):** existe **UN** mecanismo de voz, y
+> las seis del prestador hablan los dos idiomas.
+> **☠️ DISPARO:** el lote que saque de sombra cualquiera de los seis tipos
+> `documento_*` / `prestador_*` — *no pueden salir al aire en un solo idioma.*
+
+
+---
+
+#### D-670 — 🟢 EL FALLBACK DE VOZ INLINE, CON SU CONTADOR (S88 — unificación (b))
+
+**`_notificar_dueño_prestador` ya consulta `_voz_notificacion`**; el literal
+inline quedó como **piso**. La firma NO cambió: **cero callers tocados**, y las
+voces migran de a una.
+
+```
+CINTURÓN (mide en cada aplicación):  FALLBACK VIVO EN 6 de 6
+```
+
+> **☠️ MUERTE, y no depende de que alguien se acuerde:** el día que ese contador
+> dé **0**, ningún camino llega al `ELSE` y **los parámetros `p_titulo`/
+> `p_mensaje` se pueden borrar**. *El número lo dice solo.*
+> **☠️ DISPARO:** el lote que le dé voz bilingüe a los seis tipos
+> `documento_*` / `prestador_*` — **ninguno puede salir de sombra antes**, que
+> es la condición que D-539 ya tenía escrita.
+
+**Par 4/4** (in-txn, ROLLBACK): los seis avisos siguen existiendo · un tipo con
+voz gana el helper · uno sin voz cae al inline intacto · **`url_accion`
+sobrevive en las DOS ramas, 7 de 7.**
+
+*La cuarta cara no es adorno: `url_accion` no es voz, es DESTINO — si hubiera
+viajado adentro del `CASE`, se habría perdido en la rama del helper y nadie lo
+habría notado hasta que un aviso no llevara a ningún lado.*
+
+**Origen: S88-A (unificación firmada por el founder).**
+
+---
+
+#### D-671 — 🟢 EL FIXTURE DE LA CAMPANA — avisos visibles para que C y D construyan
+
+**Sin esto, las dos pistas construían contra una pantalla VACÍA:** `in_app` no
+tiene transporte (ley de secuencia de la lámina), así que el lector devolvía
+**cero** — correcto, y **inútil para ver una lista, un badge o un estado leído**.
+
+**Sembrados para las tres cuentas** (`+8` · `demo-vet` · `+s87recep`), cubriendo
+los cuatro estados que la lámina nombra:
+
+```
+🔔 hay_avisos_sin_leer = true
+1. «Tu plan de paseos se renovó»              sin leer · CON destino · Thor
+2. «Te devolvimos 90.00 del programa de Thor» sin leer · CON destino · Thor
+3. «María Pérez completó su registro»         sin leer · SIN DESTINO · (sin)
+4. «Te quedan 2 salidas por usar»             LEÍDA    · CON destino · Thor
+```
+
+**Y las voces son las REALES** — salen de `_voz_notificacion`, no de textos
+inventados para la foto. *Una pantalla probada con lorem ipsum no prueba el
+ancho de la voz que va a llevar.*
+
+> **☠️ RETIRO — UN SOLO `DELETE`, y por eso no depende de que nadie recuerde
+> cuáles eran:**
+> ```sql
+> DELETE FROM notificacion_intencion WHERE clave_dedup LIKE 'fixture:s88-campana:%';
+> ```
+> **Se ejecuta cuando `in_app` gane transporte** (paso ④ de la ley de
+> secuencia): desde ese momento los avisos reales llegan solos y el fixture
+> pasaría a ser ruido indistinguible.
+
+**Origen: S88-A (coordinación de la pantalla de avisos).**
+
+---
+
+#### D-672 — 🟠 EL GUARD DE LOS 20dp NO EXISTE — la lámina lo firmó y nadie lo construyó
+
+**`LAMINA_ESQUINA_CAMPANA` congeló el número CON GUARD:**
+
+> *«separación mínima 20dp entre zonas táctiles, CON GUARD — es la única de
+> todas que produce un defecto silencioso (un toque que abre lo que no era; las
+> demás se ven)».*
+
+**Medido: no existe.** Ni en `Badge`, ni en los scripts de lint, ni en ninguna
+de las dos apps.
+
+**Por qué importa más que los otros números de esa lámina:** los demás
+—truncado, contraste, tamaño— **se ven en una captura**. Éste no. *Un toque que
+cae en la banda compartida abre el Coach en vez de la campana, y la persona
+piensa que se equivocó ella.*
+
+**Sin dueño asignado.** Candidatos: **B** (es un lint sobre UI, y es su
+territorio) o **cada app** en su composición. **La mesa adjudica.**
+
+> **☠️ DISPARO:** el lote que ponga la campana en cualquiera de los dos techos —
+> *el guard tiene que existir ANTES de que haya dos tocables juntos, no después.*
+> **☠️ MUERTE:** un lint verifica la separación y **rebota** si alguien la baja.
+
+**Origen: S88-A (coordinación de la pantalla de avisos).**

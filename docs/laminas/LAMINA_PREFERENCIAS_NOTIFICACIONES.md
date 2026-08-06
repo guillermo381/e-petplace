@@ -103,13 +103,19 @@ evidencia** — requisito de Meta, no gusto nuestro (§6).
 > `evidencia` **rebota `opt_in_sin_evidencia`**. La pantalla no puede saltearlo
 > ni por error.
 
-**Borrador del texto, a la firma:**
+### ✅ EL TEXTO — **FIRMADO POR EL FOUNDER (5-ago-2026)**
 
 - **es** — «Quiero recibir avisos de e-PetPlace por WhatsApp en este número. Puedo desactivarlo cuando quiera desde Preferencias.»
 - **en** — "I want to receive e-PetPlace updates on WhatsApp at this number. I can turn this off anytime in Preferences."
 
-*Se guarda ese literal, la fecha y el método. Si el texto cambia, cambia la
-evidencia futura — la vieja se conserva como fue mostrada.*
+> ### **EL TEXTO MOSTRADO ES EL QUE SE GUARDA COMO EVIDENCIA** — con su
+> **método** y su **fecha**. Requisito de Meta.
+
+*Y la consecuencia que hay que tener escrita antes de que alguien «mejore» la
+redacción: **si el texto cambia, cambia la evidencia FUTURA — la vieja se
+conserva exactamente como fue mostrada.** Una evidencia que se reescribe
+retroactivamente no es evidencia: es una afirmación sobre algo que ya no se
+puede verificar.*
 
 ---
 

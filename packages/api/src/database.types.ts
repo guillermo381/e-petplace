@@ -10623,6 +10623,7 @@ export type Database = {
           estado: string
           evento_id: string | null
           id: string
+          leida_en: string | null
           mascota_id: string | null
           motivo: string | null
           resuelto_como: Json | null
@@ -10639,6 +10640,7 @@ export type Database = {
           estado?: string
           evento_id?: string | null
           id?: string
+          leida_en?: string | null
           mascota_id?: string | null
           motivo?: string | null
           resuelto_como?: Json | null
@@ -10655,6 +10657,7 @@ export type Database = {
           estado?: string
           evento_id?: string | null
           id?: string
+          leida_en?: string | null
           mascota_id?: string | null
           motivo?: string | null
           resuelto_como?: Json | null
@@ -17492,6 +17495,7 @@ export type Database = {
         }
         Returns: Json
       }
+      hay_avisos_sin_leer: { Args: never; Returns: boolean }
       hoy_local: { Args: never; Returns: string }
       iniciar_atencion_adiestramiento: {
         Args: { p_cita_id: string; p_empleado_id?: string }
@@ -17566,6 +17570,7 @@ export type Database = {
         }
         Returns: string
       }
+      marcar_aviso_leido: { Args: { p_aviso_id: string }; Returns: Json }
       marcar_invitacion_aceptada: {
         Args: { p_invitacion_id: string }
         Returns: boolean
@@ -17787,6 +17792,23 @@ export type Database = {
       obtener_mis_atenciones_grooming: {
         Args: { p_desde?: string; p_hasta?: string }
         Returns: Json
+      }
+      obtener_mis_avisos: {
+        Args: { p_limite?: number }
+        Returns: {
+          categoria: string
+          creado_en: string
+          evento_id: string
+          id: string
+          leida: boolean
+          leida_en: string
+          mascota_id: string
+          mascota_nombre: string
+          mensaje: string
+          tiene_destino: boolean
+          tipo: string
+          titulo: string
+        }[]
       }
       obtener_nombres_negocio_por_presupuesto: {
         Args: { p_presupuesto_ids: string[] }
