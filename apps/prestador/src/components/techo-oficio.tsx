@@ -317,7 +317,7 @@ export function TechoOficio({
   pie,
   cohorte,
   cohorteAnio,
-  avisosSinLeer,
+  novedades,
   onAvisos,
 }: {
   titulo: string;
@@ -373,10 +373,13 @@ export function TechoOficio({
   /** S88-C · LA CAMPANA (lámina firmada). `onAvisos` presente = la campana
    *  se monta INLINE en la fila del techo (jamás absoluta — la esquina
    *  firmada); ausente = el techo queda como era (negocio.tsx no la lleva:
-   *  la lámina la pone en el encabezado del HOY). `avisosSinLeer` es el
-   *  BOOLEANO de `hayAvisosSinLeer` — la huella marca PRESENCIA, jamás un
-   *  número, y la forma del dato lo hace imposible. */
-  avisosSinLeer?: boolean;
+   *  la lámina la pone en el encabezado del HOY). `novedades` es el
+   *  BOOLEANO de `hayNovedades('prestador')` (S89-C, letra founder: la
+   *  huella mide LO NUEVO desde la última visita, no lo no-leído) — la
+   *  huella marca PRESENCIA, jamás un número, y la forma del dato lo
+   *  hace imposible. La semántica del techo no cambió: recibe un booleano
+   *  y dibuja presencia; QUÉ mide lo dice el contrato del wrapper. */
+  novedades?: boolean;
   onAvisos?: () => void;
 }) {
   const insets = useSafeAreaInsets();
@@ -426,7 +429,7 @@ export function TechoOficio({
             accessibilityRole="button"
             /* El estado viaja en el label (contrato del Badge, mitad ②):
                con huella el label dice «sin leer», jamás un número. */
-            accessibilityLabel={etiquetaBadge(t('avisos.titulo'), avisosSinLeer === true ? 1 : 0, 'huella')}
+            accessibilityLabel={etiquetaBadge(t('avisos.titulo'), novedades === true ? 1 : 0, 'huella')}
           >
             {/* 🔴→✓ S89 (orden 2): `superficie="muro"` NO es opcional acá —
                 sin ella la huella resuelve a `accent.active`, que en claro
@@ -440,7 +443,7 @@ export function TechoOficio({
                 Medición y pedido: 2026-08-06-s89b-PAQUETE-gate-campana.md.
                 R33 del lint fija la regla: todo `forma="huella"` en apps
                 DECLARA su superficie — el default silencioso murió. */}
-            <Badge n={avisosSinLeer === true ? 1 : 0} forma="huella" superficie="muro">
+            <Badge n={novedades === true ? 1 : 0} forma="huella" superficie="muro">
               {/* Campana EN TRAZO (ley del único relleno: el relleno es de
                   la huella del Badge); el trazo en papel sobre el muro. */}
               <Icono nombre="campana" tamano={24} tinta={palette.light0} />
