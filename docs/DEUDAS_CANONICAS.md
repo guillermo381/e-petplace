@@ -7393,11 +7393,111 @@ dejó de hablar con acento — D-539 cobrando bien esta vez).
 > **Y la pata ④ cierra la sesión fantasma** que C misma había fotografiado —
 > el hallazgo se volvió su propio par.
 
+### 🛑 EL RE-GATE DEL FOUNDER FRENÓ — la causa, medida (S88-A)
+
+**Literal del founder** sobre `019fd467` (marcador verificado por él): pidió
+código → «no es válido» · pidió uno NUEVO → mismo rebote · forzó cierre y
+reintentó → nada. **No pudo entrar.**
+
+#### Las cuatro sospechas, en orden, con su literal
+
+| # | sospecha | veredicto |
+|---|---|---|
+| ③ | **rate limit** | **DESCARTADA.** Sonda contra el endpoint real: `HTTP 403 · otp_expired`, **no 429**. El servidor responde normal |
+| ② | **regresión del bundle** | **DESCARTADA.** El swap de C es 1:1 (`Campo`→`CampoCodigo`, mismo estado `codigo`, mismo `email`, máquina de pasos intacta). Y el botón exige **exactamente 8** (`codigo.length !== LARGO_CODIGO`): si el código no midiera 8, el founder **no habría podido tocarlo** — y tocó |
+| ④ | **template/SMTP** | **DESCARTADA como causa.** `{{ .Token }}` es por construcción el token vigente. *Queda su nota para el lote de plantillas: el correo no dice que reemplaza a los anteriores* |
+| ① | **carrera de códigos** | ✅ **LA CAUSA** |
+
+#### La cronología del audit log — el literal que decide
+
+```
+00:17:46  user_recovery_requested          ┐
+00:19:07  user_recovery_requested          ├ cada uno PISA el anterior
+00:20:41  user_recovery_requested          ┘
+22:30:48  user_recovery_requested   ← y estos dos siguen
+22:20:39  user_recovery_requested   ← en la bandeja del founder
+
+  ENTRE LOS TRES: **CERO entradas `login`.**
+```
+
+**Un `verifyOtp` exitoso SIEMPRE deja un `login`** — se ve en las corridas
+verdes de C (`login → user_updated_password → user_modified`, 22:26 y 19:49).
+**No hay ninguno.** El canje nunca ocurrió.
+
+#### Los dos amplificadores, que son lo que se cura
+
+**① `pedir()` NO LIMPIA EL CAMPO** (`recuperar.tsx`, medido). Con las cajas es
+peor que con el campo de texto: al volver al paso, **las ocho cajas ya están
+llenas** con el código viejo y **el botón está habilitado** — el campo *parece
+listo*. *Con texto libre uno ve un valor y duda; ocho cajas completas se leen
+como «ya está».*
+
+**② EL MENSAJE EMPUJABA AL PRÓXIMO FRACASO.** Decía:
+*«Ese código no es válido o ya venció. **Pedí uno nuevo.**»* — y callaba el
+único dato que importaba: **pedir uno nuevo invalida el anterior**.
+
+> ### **El rebote recomendaba exactamente la acción que garantizaba el siguiente rebote.**
+
+#### Y por qué NADIE pudo diagnosticarlo: el catch-all
+
+```ts
+if (esRateLimit(...)) return 'demasiados_intentos';
+return { codigo: 'codigo_invalido', ... };   // ← TODO lo demás
+```
+
+*«No es válido» no probaba que el código fuera inválido: probaba que **algo**
+falló.* Red caída, 500 del proveedor, cualquier cosa — todo acusaba al código
+**sin haberlo mirado**.
+
+> **Es EXACTAMENTE el defecto que ② de esta misma ficha curó en
+> `establecerContrasenaNueva` — y que sobrevivió en el verificador.**
+> Se curó el hermano y no el gemelo.
+>
+> ### **Cuando la causa de un defecto es un PATRÓN, la cura se barre por el patrón — jamás por el sitio que lo destapó.**
+
+### ✅ LA MITAD DE A — CURADA EN EL ACTO (S88-A)
+
+`packages/api/src/wrappers/seguridad.ts`:
+
+1. **El traductor deja de acusar a ciegas.** Solo `otp_expired`/403 (lo que
+   GoTrue realmente dice del código) mapea a `codigo_invalido`; **el resto dice
+   que no sabe**, que es la verdad. *La mitad vencido-vs-no-coincide **no se
+   puede** partir —GoTrue usa un solo código para las dos— y no se finge.*
+2. **El mensaje nombra la causa probable:** *«Ese código ya no sirve. Si
+   pediste uno nuevo, solo funciona el del último correo — los anteriores dejan
+   de valer.»*
+3. **El voseo de D-539 barrido** en este archivo (`Pedí`/`Esperá`/`Probá`/`Usá`
+   → tuteo, L-148). *Estaba listado como hallazgo desde el par de C y no se
+   había curado.*
+
+**Par del traductor** (las tres formas de error, contra la lógica nueva):
+
+```
+código malo (medido hoy)   antes=codigo_invalido  ahora=codigo_invalido   ✅
+red caída                  antes=codigo_invalido  ahora=error_desconocido ✅
+500 del proveedor          antes=codigo_invalido  ahora=error_desconocido ✅
+```
+
+*La voz nueva viaja sin que C toque nada: la pantalla ya usa `r.mensaje`.*
+
+### ⏳ LA MITAD DE C — pedida, va en veda nueva
+
+**«PEDIR UNO NUEVO LIMPIA EL CAMPO»** (pedido literal del founder): `pedir()`
+hace `setCodigo('')`. Y el camino de reenvío merece vivir **en el paso del
+código**, no obligando a volver atrás.
+
 ### 📍 ESTADO DE LA FICHA
 
-**CURADA Y VERIFICADA EN DISPOSITIVO** (arquitectura de A + pantalla de C) ·
-**CIERRE CONDICIONADO AL DEDO DEL FOUNDER DE PUNTA A PUNTA**, que corre sobre
-el bundle que lleve las cajas.
+🔴 **ABIERTA — el re-gate del founder FRENÓ sobre `019fd467`.** La arquitectura
+de A y las cuatro patas de C están verdes; **el flujo completo con un dedo real
+NO**. Falta la cura de C (limpiar el campo) y una re-prueba sobre el bundle que
+la lleve.
+
+*Y queda dicho, porque es la lección más cara del día: **cuatro pares verdes de
+C no alcanzaron.** Sus cuatro patas probaban el camino feliz de una sola
+solicitud; el founder hizo lo que hace cualquiera —pedir otro— y ahí vivía el
+defecto. **Un par prueba lo que se le pide probar; el dedo real hace lo que
+nadie pidió.***
 
 *No se declara cerrada con cuatro verdes de C: la condición de muerte escrita
 arriba pide el dedo del founder, y **una ficha que afirma un gate que no

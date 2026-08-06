@@ -82,14 +82,24 @@ const MENSAJES: Record<CodigoErrorSeguridad, string> = {
   sin_email:                    'Tu cuenta no tiene un correo asociado.',
   // NO dice "contraseña incorrecta": no tiene ninguna. Decirle lo otro
   // la mandaría a probar claves que nunca existieron.
-  sin_contrasena:               'Tu cuenta entra con Google y todavía no tiene contraseña. Usá "Olvidé mi contraseña" para crear una.',
+  sin_contrasena:               'Tu cuenta entra con Google y todavía no tiene contraseña. Usa "Olvidé mi contraseña" para crear una.',
   contrasena_actual_incorrecta: 'La contraseña actual no coincide.',
   contrasena_debil:             `La contraseña nueva tiene que tener al menos ${MIN_LARGO} caracteres.`,
   contrasena_igual:             'La contraseña nueva tiene que ser distinta de la actual.',
-  // el código: ni "no existe" ni "venció" por separado — ver la nota abajo.
-  codigo_invalido:              'Ese código no es válido o ya venció. Pedí uno nuevo.',
-  demasiados_intentos:          'Esperá un momento antes de pedir otro código.',
-  error_desconocido:            'Ocurrió un error inesperado. Probá de nuevo.',
+  /* ⚠️ ESTE MENSAJE ALIMENTABA EL BUCLE QUE CAZÓ EL FOUNDER (S88, re-prueba
+     de D-659). Decía: «Ese código no es válido o ya venció. Pedí uno nuevo.»
+     — y CALLABA el único dato que importaba: **pedir uno nuevo invalida el
+     anterior.** La persona pide otro, el correo viejo sigue en la bandeja
+     junto al nuevo, tipea el que tiene a mano, vuelve a fallar, y el mensaje
+     le repite «pedí uno nuevo». *El rebote empujaba exactamente a la acción
+     que garantizaba el próximo fracaso.*
+     GoTrue devuelve `otp_expired` para «vencido» Y para «no coincide»: esa
+     distinción NO se puede hacer y no se finge. Lo que sí se puede decir es
+     cuál es la causa probable — y ahora se dice. */
+  codigo_invalido:
+    'Ese código ya no sirve. Si pediste uno nuevo, solo funciona el del último correo — los anteriores dejan de valer.',
+  demasiados_intentos:          'Espera un momento antes de pedir otro código.',
+  error_desconocido:            'Ocurrió un error inesperado. Prueba de nuevo.',
 };
 
 /**
@@ -258,7 +268,26 @@ export async function verificarCodigoRecuperacion(input: {
     if (esRateLimit(error.message, error.status)) {
       return { ok: false, codigo: 'demasiados_intentos', mensaje: MENSAJES.demasiados_intentos };
     }
-    return { ok: false, codigo: 'codigo_invalido', mensaje: MENSAJES.codigo_invalido };
+    /* ☠️ ACÁ VIVÍA UN CATCH-ALL, y fue lo que hizo INDIAGNOSTICABLE el freno
+       del founder (S88): **todo** lo que no era rate limit —red caída, 500 del
+       proveedor, correo mal escrito, cualquier cosa— salía como «ese código no
+       es válido». *El rebote acusaba al código sin haberlo mirado.*
+
+       Es EXACTAMENTE el defecto que D-659 ② curó en `establecerContrasenaNueva`
+       —mapear por `code` estable y no a ciegas— **y que sobrevivió acá**: se
+       curó el hermano y no el gemelo. La lección de la casa, cobrada de nuevo:
+       cuando la causa de un defecto es un PATRÓN, la cura se barre por el
+       patrón, jamás por el sitio que lo destapó.
+
+       Ahora el código se acusa SOLO cuando GoTrue lo acusa (`otp_expired`, que
+       el proveedor usa tanto para vencido como para no-coincide — esa mitad no
+       se puede partir y no se finge). Todo lo demás dice que no sabe, que es
+       la verdad. */
+    const codigoGoTrue = (error as { code?: string }).code;
+    if (codigoGoTrue === 'otp_expired' || error.status === 403) {
+      return { ok: false, codigo: 'codigo_invalido', mensaje: MENSAJES.codigo_invalido };
+    }
+    return { ok: false, codigo: 'error_desconocido', mensaje: MENSAJES.error_desconocido };
   }
   return { ok: true, data: null };
 }
