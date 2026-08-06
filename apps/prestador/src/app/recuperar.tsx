@@ -122,10 +122,21 @@ export default function Recuperar() {
       setRebote(r.codigo === 'demasiados_intentos' ? vozEspera(r.mensaje) : r.mensaje);
       return;
     }
+    /* ⭐ S88-C (D-659 🔴, literal founder): PEDIR UNO NUEVO LIMPIA EL CAMPO.
+       El reenvío emite un código NUEVO que invalida el tipeado — dejarlo
+       puesto arma el bucle: la persona ve el campo lleno, toca verificar,
+       rebota «inválido», pide otro, y el campo sigue lleno del muerto.
+       Con las cajas el amplificador es peor: OCHO llenas se leen como
+       «ya está» y el botón se ofrece habilitado sobre un código que el
+       servidor va a rechazar seguro. La voz del rebote la dice el wrapper
+       (r.mensaje); acá se corta el bucle en la raíz: campo limpio. */
+    setCodigo('');
     /* SE PASA AL SEGUNDO PASO EXISTA LA CUENTA O NO — y ése es el punto
        entero. Si la pantalla se quedara acá cuando el correo no existe,
        el propio FLUJO delataría lo que el mensaje calla. La ambigüedad
-       tiene que estar en el comportamiento, no solo en las palabras. */
+       tiene que estar en el comportamiento, no solo en las palabras.
+       (El reenvío YA vive en este mismo paso — «Enviar otro código» no
+       obliga a volver atrás, que es el otro brazo del bucle.) */
     setPaso('codigo');
   }
 
