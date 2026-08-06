@@ -434,13 +434,15 @@ export function TechoOficio({
                 la huella era INVISIBLE exactamente en su lugar firmado, y
                 el olvido no rompía nada ni se veía (la misma clase que la
                 Insignia de cohorte documenta arriba: la regla del muro
-                vive con el muro). Con la prop, papel §15b.2 (5.51 / 9.61).
+                vive con el muro). Con la prop, la pieza resuelve el color
+                firmado del muro (S89 orden 4: ORO ctaOro — claro 3.41 ·
+                noche 5.95; la pieza decide, esta pantalla no).
                 Medición y pedido: 2026-08-06-s89b-PAQUETE-gate-campana.md.
                 R33 del lint fija la regla: todo `forma="huella"` en apps
                 DECLARA su superficie — el default silencioso murió. */}
             <Badge n={avisosSinLeer === true ? 1 : 0} forma="huella" superficie="muro">
               {/* Campana EN TRAZO (ley del único relleno: el relleno es de
-                  la huella del Badge); trazo Y huella en papel sobre el muro. */}
+                  la huella del Badge); el trazo en papel sobre el muro. */}
               <Icono nombre="campana" tamano={24} tinta={palette.light0} />
             </Badge>
           </Pressable>

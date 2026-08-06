@@ -32,8 +32,8 @@ await page.waitForTimeout(4000);
 for (const tema of ['Claro', 'Oscuro', 'Memorial']) {
   await page.getByText(tema, { exact: true }).first().click();
   await page.waitForTimeout(800);
-  // ancla: la leyenda del estudio del oro (única en la página)
-  const ancla = page.getByText('estudio del ORO #FCBC1D', { exact: false }).first();
+  // ancla: la leyenda del oro (única en la página; texto post-firma S89)
+  const ancla = page.getByText('ORO #FCBC1D FIRMADO', { exact: false }).first();
   await ancla.scrollIntoViewIfNeeded();
   await page.waitForTimeout(500);
   // subir un poco para que entren el par del defecto y el 10/12/14

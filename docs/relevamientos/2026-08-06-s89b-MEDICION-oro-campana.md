@@ -1,5 +1,11 @@
 # S89-B · LA MEDICIÓN DEL ORO — enmienda ⑦ (la huella de la campana a #FCBC1D)
 
+> ⚖️ **FIRMADA (S89, orden 4 del founder) — sobre esta medición:** el oro
+> RIGE en muro claro (con la excepción §15b.2 que escribe A, precedente
+> magenta S83), muro noche y el degradado del cliente; sobre papel y en
+> memorial la huella queda como hoy — *la letra ganó al número*. El pintado
+> y el paquete final: `2026-08-06-s89b-PAQUETE-gate-campana.md`.
+
 > **Orden de apertura S89-B ①.** La enmienda ⑦ (firmada founder) manda la
 > huella de la campana a ORO `#FCBC1D`. Esto es la MEDICIÓN previa al pintado
 > — **el pintado espera su gate; este depósito es la medición**. Las tres

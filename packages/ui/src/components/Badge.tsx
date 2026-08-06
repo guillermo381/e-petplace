@@ -68,20 +68,25 @@ export interface BadgeProps {
    *    La ley del único relleno, aplicada AL PAR: el glifo que la porta
    *    va en TRAZO (la campana) y la huella va RELLENA. */
   forma?: 'contador' | 'huella'
-  /** 🔴 LA REGLA DE SUPERFICIE (S88, cura pre-gate — censo de C con el
+  /** LA REGLA DE SUPERFICIE (S88, cura pre-gate — censo de C con el
    *  dato): `accent.active` del prestador en claro es tealDark #0A7268,
    *  EL MISMO HEX del muro del techo donde la lámina manda la campana —
    *  la huella podía ser invisible exactamente en su lugar firmado.
-   *  Sobre el muro la pieza INVIERTE A PAPEL (`palette.light0`) — el
-   *  precedente exacto de `Insignia superficie="muro"` (S85) y de
-   *  `Boton` (S84-B19), con el par FIRMADO por §15b.2: papel/tealDark
-   *  5.51 en claro · papel/tealDarkNoche en oscuro — los DOS ya viven
-   *  en `verify:contrast` (cero pares nuevos).
-   *  **Y la letra del founder queda ENTERA, no rota:** «color de
-   *  acento» sobre el muro RESUELVE a papel por la regla medida de S61
-   *  (§15b.2: *sobre el muro el acento funcional es PAPEL — teal puro
-   *  3.77 prohibido*); jamás rojo — papel no lo es; el tamaño no se
-   *  toca. Mismo vocabulario que Insignia: 'clara' (default) | 'muro'.
+   *  Mismo vocabulario que Insignia: 'clara' (default) | 'muro'.
+   *
+   *  ⚖️ EL ORO, FIRMADO (S89, orden 4 — sobre la medición
+   *  `2026-08-06-s89b-MEDICION-oro-campana.md`): sobre el MURO la
+   *  huella pinta ORO `palette.ctaOro` #FCBC1D — rige en muro claro
+   *  (3.41, con la excepción §15b.2 que A escribe con el precedente
+   *  magenta S83), muro noche (5.95) y el degradado del cliente (peor
+   *  punto 3.33; el montaje del cliente pasa `superficie="muro"`).
+   *  **Sobre papel y en MEMORIAL la huella queda como antes — la letra
+   *  ganó al número:** papel 1.62 no pasa (en 'clara' sigue el acento
+   *  por casa), y memorial NO SE CELEBRA — con `superficie="muro"` en
+   *  memorial la pieza conserva papel (lo de siempre), jamás oro. Los
+   *  pares oro/muro viven en `verify:diseno` (clase fill, mín 3).
+   *  Las tres condiciones firmadas siguen intactas: jamás un número ·
+   *  jamás rojo de alarma · jamás anima.
    *  Alcance declarado: rige la forma `huella` (la campana del muro).
    *  El contador sobre el muro NO tiene consumidor hoy — la pill no
    *  cambia con esta prop, y si un día vive ahí, gana su regla con su
@@ -94,10 +99,16 @@ export interface BadgeProps {
 export function Badge({ n, forma = 'contador', superficie = 'clara', children }: BadgeProps) {
   const { theme } = useTheme()
   const accentActive = 'active' in theme.accent ? theme.accent.active : theme.accent.primary
-  // Sobre el muro, papel PLENO (la inversión §15b.2) — sobre lo claro,
-  // el acento por casa. El muro no sale del tema (vive en la app), pero
-  // su respuesta sí es token: light0, el mismo de Insignia.
-  const colorHuella = superficie === 'muro' ? palette.light0 : accentActive
+  // Sobre el muro, ORO (firma S89 orden 4; el hex sale de palette —
+  // fuente única, jamás inline) — SALVO memorial, que no se celebra:
+  // ahí conserva papel, lo de siempre. Sobre lo claro, el acento por
+  // casa (papel 1.62 no pasa el mínimo — la medición mandó).
+  const colorHuella =
+    superficie === 'muro'
+      ? theme.mode === 'memorial'
+        ? palette.light0
+        : palette.ctaOro
+      : accentActive
   return (
     <View>
       {children}

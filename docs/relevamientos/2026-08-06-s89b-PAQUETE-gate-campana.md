@@ -132,3 +132,45 @@ palabra en la misma línea — trivial para A.
   con lápida.
 - Verificación (cero dedos, regla 87): tsc ×3 verde · `verify:diseno` VERDE ·
   `verdicto.mjs` TODO VERDE.
+
+---
+
+# ⚖️ VERSIÓN FINAL (S89, orden 4) — EL ORO, FIRMADO POR EL FOUNDER
+
+**La firma, sobre la medición de este paquete:** el oro **RIGE** en **muro
+claro** (3.41 — con la excepción a §15b.2 que **A escribe** con el precedente
+magenta S83), **muro noche** (5.95) y **el degradado del cliente** (peor
+punto 3.33). Sobre **papel** (1.62, no pasa) y en **memorial** (no se celebra)
+**la huella queda como hoy** — *la letra ganó al número*.
+
+**El pintado, ejecutado por riel (no por caso):** `Badge forma="huella"` con
+`superficie="muro"` pinta `palette.ctaOro` (fuente única de hex, jamás
+inline) — salvo memorial, donde conserva papel; `superficie="clara"` conserva
+el acento por casa. R33 ya obliga la superficie explícita en apps, así que
+ningún montaje decide su color. Las tres condiciones firmadas viajan
+intactas: **jamás un número · jamás rojo de alarma · jamás anima.**
+
+**El instrumento se reforzó, no se ablandó:** los pares
+`huella-novedad oro (ctaOro)/MURO` entraron a `verify-diseno-pares` (clase
+fill, mín 3) en los cuatro temas del corpus — 3.41 claro/lightOficio · 5.95
+dark/darkOficio, **todos en verde sin excepción nueva**: si el oro o el muro
+se mueven, el número no muere en silencio. WCAG 178/0 intacto ·
+`verdicto.mjs` TODO VERDE.
+
+**Capturas re-tomadas con el oro pintado** (mismas rutas,
+`scripts/capturas/s89-b-gate-campana/seccion-campana-{claro,oscuro,memorial}.png`
+— el diff de git conserva el antes).
+
+## Lo que mira el ojo del founder en el gate único del bundle
+
+1. **El oro en las superficies firmadas** — la campana del techo del
+   prestador (claro y oscuro) y la del Hogar del cliente sobre el degradado:
+   la huella es ORO y se lee como novedad. En la galería, el par del defecto
+   y la fila del oro lo muestran lado a lado; en memorial, el toggle muestra
+   papel — no se celebra, por construcción.
+2. **El estudio 10/12/14** — el cierre formal del «tamaño mínimo legible» de
+   la lámina: 12 es la elegida de la pieza; el estudio del oro está a un
+   renglón para mirar el tamaño EN oro.
+3. **La huella del techo ya visible** — la cura de la orden 2: antes
+   invisible en claro (1.00), ahora oro 3.41; R33 impide que el olvido
+   vuelva callado.
