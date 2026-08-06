@@ -1351,6 +1351,23 @@ function EjemploBadge() {
           <Badge n={3} forma="huella"><Icono nombre="campana" tamano={21} tinta={theme.text.primary} huella={theme.text.secondary} /></Badge>
         </View>
       </View>
+
+      {/* 🔴 EL PAR DE SUPERFICIE (cura pre-gate S88): accent.active del
+          prestador en claro ES el hex del muro — sin la regla, la huella
+          desaparecía en su lugar firmado. Sobre el muro: PAPEL (§15b.2).
+          Izquierda: el DEFECTO reproducido a propósito (superficie
+          'clara' sobre el muro — la huella se funde). Derecha: la cura. */}
+      <View style={{ flexDirection: 'row', gap: spacing[4] }}>
+        {[palette.tealDark, palette.tealDarkNoche].map((muro) => (
+          <View key={muro} style={{ backgroundColor: muro, borderRadius: radius.md, padding: spacing[4], flexDirection: 'row', gap: spacing[8] }}>
+            <Badge n={3} forma="huella"><Icono nombre="campana" tinta={palette.light0} huella={palette.light0} /></Badge>
+            <Badge n={3} forma="huella" superficie="muro"><Icono nombre="campana" tinta={palette.light0} huella={palette.light0} /></Badge>
+          </View>
+        ))}
+      </View>
+      <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary }}>
+        sobre el muro (claro · noche): izquierda el defecto (acento≡muro, invisible) · derecha superficie=&quot;muro&quot; → papel §15b.2
+      </Text>
       <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary }}>
         campana sin avisos · con avisos (huella, jamás número) · a 21px (§2.9) — label: “{etiquetaBadge('Avisos', 3, 'huella')}”
       </Text>
