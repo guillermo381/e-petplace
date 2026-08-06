@@ -2452,7 +2452,10 @@ export const prestadorEs = {
     vitrinaRebote: 'Todavía no se puede encender: falta el aviso a la familia cuando una cita cambia de persona.',
     desvincularCta: 'Desvincular del negocio',
     desvincularConfirma: '{{nombre}} pierde el acceso al negocio. Lo que hizo queda en el expediente.',
-    soloDueno: 'El equipo lo administra quien es dueño del negocio.',
+    // ⏪ S88-C: decía «quien es dueño» — caducó con D-660 (el admin
+    // también gestiona, gateado 5-ago-2026). «Quien gestiona» cubre a
+    // los dos sin re-enumerar roles que el motor decide.
+    soloDueno: 'El equipo lo administra quien gestiona el negocio.',
   },
   // S79-B (T2-B1) · "PREPARA TU ESPACIO" — §2.4 tercera presencia: cada
   // tarea con su POR QUÉ en voz humana · LOTE S79, GATE PENDIENTE

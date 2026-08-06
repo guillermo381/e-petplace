@@ -84,7 +84,8 @@ export default function Negocio() {
   const router = useRouter();
   // S75-B: la pantalla NEGOCIO cierra la ausencia del tab también ante
   // deep-link — el tab se oculta del bar (layout) y la ruta responde acá
-  // (el gate de ESCRITURA es del server, D-513).
+  // (el gate de ESCRITURA es del server — hoy el helper único de D-660,
+  // ⏪ S88-C: la referencia decía D-513, cerrada el 5-ago-2026).
   // ⭐ S87-C — ACÁ DECÍA «inerte hasta la puerta». La puerta abrió en S75:
   // este gate CORRE de verdad para las cinco personas de D-651. Y desde
   // esta sesión ya no expulsa mudo (§3 de la lámina).

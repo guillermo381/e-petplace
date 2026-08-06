@@ -147,8 +147,14 @@ export default function Mascotas() {
        del tab. Por eso el gate de la SECCIÓN es `esDueno` y no el hecho
        de que el lector conteste.
      · Delta declarado: el tab NEGOCIO admite `['dueño','administrador']`
-       y `esDueno` es dueño-only. **Hoy es inerte** —el administrador no
-       tiene motor (D-513 v2)— y se anota para el día que lo tenga. */
+       y `esDueno` es dueño-only.
+       ⏪ S88-C — ACÁ DECÍA «Hoy es inerte —el administrador no tiene
+       motor (D-513 v2)—». CADUCÓ EL 5-AGO-2026: D-660 le dio el motor y
+       el founder lo gateó. **El delta dejó de ser teórico y está VIVO:**
+       el admin ve el tab y estas franjas NO se le montan (`esDueno` es
+       dueño-only). Si la derivación debe ensancharse a gestión es del
+       MOTOR (la policy de `empleado_roles` decide qué discrimina la
+       lectura) — medición pedida a A, jamás re-decidida acá. */
   const [equipo, setEquipo] = useState<EquipoNegocio | null>(null);
   /* ⏪ S86-C: `equipoAbierto` propio MURIÓ — con cuatro secciones, un
      booleano por sección deja abrir todas a la vez y la portada se

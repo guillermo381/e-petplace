@@ -150,8 +150,12 @@ export default function EquipoNegocioPantalla() {
   // RECEPCIÓN NO SE ESCRIBE DESDE LA PANTALLA (su fila la concede el RPC
   // de aceptación — migración A2bis, tanda de A); `profesional` es
   // DERIVADO (≥1 chip) y no se escribe. EL TOGGLE ADMINISTRADOR NO SE
-  // OFRECE (§5: su motor no existe — D-513 v2 + D-517 CLASE 2; gatear
-  // no es conceder, Ley 23). null en oficios = no legibles: el toggle
+  // OFRECE — ⏪ S88-C: la razón DECÍA «su motor no existe (D-513 v2)» y
+  // CADUCÓ el 5-ago-2026 (D-660 le dio motor, gateado). Lo que falta hoy
+  // es la SUPERFICIE con su letra: LETRA_ROLES_EQUIPO S74 sigue firmada
+  // —solo el TITULAR nombra administradores, con el aviso de §6— y esa
+  // pantalla no existe. Sin lámina no se dibuja.
+  // null en oficios = no legibles: el toggle
   // no se ofrece (ausencia ante la duda; el flujo de dos pasos queda).
   const [oficios, setOficios] = useState<OficioNegocio[] | null>(null);
   const [invPrestador, setInvPrestador] = useState(false);
@@ -768,10 +772,13 @@ export default function EquipoNegocioPantalla() {
                 </View>
 
                 {/* ── [4] ⟨LUGAR RESERVADO — Administrador⟩ · NO SE DIBUJA.
-                    La reserva es de ORDEN, no de píxeles: cuando su motor
-                    llegue (D-513 v2 + D-517 CLASE 2) entra acá sin
+                    La reserva es de ORDEN, no de píxeles: entra acá sin
                     reordenar nada. Cero placeholder, cero toggle apagado,
-                    cero "próximamente" — Ley 23. ── */}
+                    cero "próximamente" — Ley 23.
+                    ⏪ S88-C: decía «cuando su motor llegue (D-513 v2)» —
+                    EL MOTOR LLEGÓ (D-660, 5-ago-2026, gateado). Lo que
+                    espera ahora es la SUPERFICIE con su letra (S74: solo
+                    el titular nombra, aviso §6) y su lámina. ── */}
 
                 <Separador />
 
@@ -833,9 +840,12 @@ export default function EquipoNegocioPantalla() {
               pregunta lo que ya sabe, pero LO DICE (corolario S73).
               Toggle Prestador → chips a grano de OFICIO (§6: la
               pantalla escribe oficio, el motor guarda las ofertas).
-              EL TOGGLE ADMINISTRADOR NO SE OFRECE (§5): su motor no
-              existe (D-513 v2 + D-517 CLASE 2) y un toggle que rebota
-              al guardar es Ley 23 rota — entra cuando su motor entre.
+              EL TOGGLE ADMINISTRADOR NO SE OFRECE — ⏪ S88-C: la razón
+              vieja («su motor no existe», D-513 v2) CADUCÓ el 5-ago-2026
+              con D-660. La vigente es de LETRA: nombrar administradores
+              es del TITULAR con su aviso (S74 §6), y esa superficie no
+              tiene lámina — sin ella, dibujarlo acá re-decidiría la
+              letra desde una pantalla.
               oficios null (no legibles) u [] (sin ofertas activas):
               el toggle no se monta y el flujo de dos pasos queda
               entero (§5 regla 2 — invitar sin rol sigue siendo camino). */}

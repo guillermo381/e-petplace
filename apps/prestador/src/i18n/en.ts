@@ -2050,7 +2050,8 @@ export const prestadorEn = {
     vitrinaRebote: 'This cannot be turned on yet: the family notice for reassigned appointments does not exist.',
     desvincularCta: 'Remove from business',
     desvincularConfirma: '{{nombre}} loses access to the business. Everything they did stays in the record.',
-    soloDueno: 'The team is managed by the business owner.',
+    // S88-C: "owner" caducó con D-660 — el espejo dice lo mismo que el ES
+    soloDueno: 'The team is managed by whoever runs the business.',
   },
   // S79-B (T2-B1) · "Prepare your space" — §2.4 third presence · LOTE S79
   preparaEspacio: {

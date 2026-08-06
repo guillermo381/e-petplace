@@ -964,7 +964,9 @@ export default function Hoy() {
     // JWT vet3: titular_visible=0 con 5 franjas activas en la tabla).
     // Lectura de rol caída → sin módulo (Ley 23: la ayuda de preparación
     // no se monta ante la duda; la escritura la protege el server).
-    // NOTA para el ADMINISTRADOR futuro (D-513 v2): serviciosOk lee por
+    // ⏪ S88-C: decía «NOTA para el ADMINISTRADOR futuro (D-513 v2)» —
+    // EL FUTURO LLEGÓ el 5-ago-2026 (D-660, gateado). La nota pasa de
+    // teórica a MEDICIÓN VIVA de A: serviciosOk lee por
     // los wrappers _own del titular — a un gestor no-titular le va a
     // mentir igual; se cura cuando ese rol gane motor.
     // ⭐ S88-C: la resolución de rol se HOISTEÓ al arranque del loader
