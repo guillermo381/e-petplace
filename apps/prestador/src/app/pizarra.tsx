@@ -52,15 +52,15 @@ import {
 } from '@epetplace/ui';
 import {
   asignarCitaAPersona,
-  obtenerEmpleadosCuenta,
   obtenerMiPrestador,
+  obtenerPersonasParaAsignar,
   obtenerPizarra,
   puedoAsignarCitas,
   tomarCita,
   type CitaDePizarra,
   type CodigoAsignacionCita,
   type CodigoErrorTomarCita,
-  type EmpleadoCuenta,
+  type PersonaParaAsignar,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -98,12 +98,15 @@ export default function Pizarra() {
      cliente es decorativa). La Pizarra es LA CASA de las citas sin
      persona: el que puede tomar, toma; el que puede rutear, asigna. */
   const [puedoAsignar, setPuedoAsignar] = useState(false);
-  const [cuentaId, setCuentaId] = useState<string | null>(null);
   /** La cita cuya Hoja de asignación está abierta. */
   const [asignando, setAsignando] = useState<CitaDePizarra | null>(null);
-  /** null = sin pedir · 'error' = lectura caída (se dice, jamás «no hay
-   *  nadie») · lista = personas ACTIVAS de la cuenta. */
-  const [personas, setPersonas] = useState<EmpleadoCuenta[] | 'error' | null>(null);
+  /** ⏪ S88-C: el lector cambió a `obtenerPersonasParaAsignar` (pedido a A,
+   *  contestado en 20260805260000) — POR CITA y espejando los gates ④/⑤
+   *  byte a byte: la lista que la Hoja ofrece es la que el server acepta
+   *  (Ley 23 SIN el límite declarado que traía el lector del vecino).
+   *  null = sin pedir · 'error' = lectura caída (se dice, jamás «no hay
+   *  nadie»). Se pide POR APERTURA: la lista depende de la cita. */
+  const [personas, setPersonas] = useState<PersonaParaAsignar[] | 'error' | null>(null);
   const [personaElegida, setPersonaElegida] = useState<string | undefined>(undefined);
   const [confirmando, setConfirmando] = useState(false);
 
@@ -132,7 +135,6 @@ export default function Pizarra() {
           return;
         }
         setPuedoAsignar(pa.ok && pa.data);
-        setCuentaId(pr.data.cuenta_comercial_id);
         setPantalla({ estado: 'listo', citas: r.data });
       })();
       return () => {
@@ -203,26 +205,15 @@ export default function Pizarra() {
     mostrar({ variante: 'error', texto: vozDelRebote(r.codigo) });
   }
 
-  /** Abre la Hoja de una cita; las personas se piden UNA vez (lazy). */
+  /** Abre la Hoja de una cita; las personas se piden POR CITA (el lector
+   *  es per-cita: espeja los gates del motor, incluido el chip). */
   function abrirAsignar(cita: CitaDePizarra) {
     setPersonaElegida(undefined);
+    setPersonas(null);
     setAsignando(cita);
-    if (personas === null || personas === 'error') {
-      if (cuentaId === null) {
-        setPersonas('error');
-        return;
-      }
-      void obtenerEmpleadosCuenta(cuentaId).then((r) => {
-        /* ⚠️ LEY 23, CON SU LÍMITE DECLARADO: la lista es la MISMA del
-           tratante del mostrador (copiar al vecino) y trae a TODOS los
-           activos — el lector no expone chips, así que el filtro «con
-           chip del oficio» lo aplica EL MOTOR (freno ⑤,
-           `persona_sin_oficio`, voz tipada). Pre-filtrar acá exigiría
-           un lector con chips por persona keyed por cuenta — pedido a
-           A declarado en el reporte, jamás clonado. */
-        setPersonas(r.ok ? r.data.filter((p) => p.activo) : 'error');
-      });
-    }
+    void obtenerPersonasParaAsignar(cita.citaId).then((r) => {
+      setPersonas(r.ok ? r.data : 'error');
+    });
   }
 
   async function confirmarAsignar() {
@@ -242,8 +233,9 @@ export default function Pizarra() {
     }
     const nombre =
       personas !== null && personas !== 'error'
-        ? (personas.find((p) => p.empleadoId === personaElegida)?.nombre ?? '')
-        : '';
+        ? (personas.find((p) => p.empleadoId === personaElegida)?.nombre ??
+          t('recepcion.personaFallback'))
+        : t('recepcion.personaFallback');
     setResultados((m) => new Map(m).set(asignando.citaId, 'asignada'));
     setAsignando(null);
     mostrar({ variante: 'exito', texto: t('pizarra.asignada', { nombre }) });
@@ -404,7 +396,16 @@ export default function Pizarra() {
                 etiqueta={t('pizarra.asignarQuien')}
                 disposicion="tira"
                 acento="oficio"
-                opciones={personas.map((p) => ({ codigo: p.empleadoId, etiqueta: p.nombre }))}
+                opciones={personas.map((p) => ({
+                  codigo: p.empleadoId,
+                  /* `tieneJornada` INFORMA, no filtra (contrato del lector):
+                     una cita ya pactada puede rutearse a quien no cargó
+                     horario — se dice para que quien reparte decida
+                     sabiendo. El nombre null cae al fallback digno. */
+                  etiqueta: `${p.nombre ?? t('recepcion.personaFallback')}${
+                    p.tieneJornada ? '' : ` · ${t('pizarra.sinJornada')}`
+                  }`,
+                }))}
                 seleccionada={personaElegida}
                 onSelect={setPersonaElegida}
               />

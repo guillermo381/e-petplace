@@ -964,11 +964,10 @@ export default function Hoy() {
     // JWT vet3: titular_visible=0 con 5 franjas activas en la tabla).
     // Lectura de rol caída → sin módulo (Ley 23: la ayuda de preparación
     // no se monta ante la duda; la escritura la protege el server).
-    // ⏪ S88-C: decía «NOTA para el ADMINISTRADOR futuro (D-513 v2)» —
-    // EL FUTURO LLEGÓ el 5-ago-2026 (D-660, gateado). La nota pasa de
-    // teórica a MEDICIÓN VIVA de A: serviciosOk lee por
-    // los wrappers _own del titular — a un gestor no-titular le va a
-    // mentir igual; se cura cuando ese rol gane motor.
+    // ⏪ S88-C (2ª pasada): acá vivió una nota sobre los lectores _own
+    // «mintiéndole» al gestor no-titular — A LO MIDIÓ y NO mienten (el
+    // admin ve la fila del titular y las 21 franjas). Retirada entera:
+    // prosa que anuncia un bug inexistente cuesta atención cada lectura.
     // ⭐ S88-C: la resolución de rol se HOISTEÓ al arranque del loader
     // (LÁMINA_HOME_POR_ROL punto 1) — acá se consume, no se re-pregunta.
     let preparacion: EstadoTareas | null = null;
@@ -1571,16 +1570,15 @@ export default function Hoy() {
                  del SERVIDOR (`obtener_plata_del_dia`). Cambia lo que ocupa
                  el slot cuando el gate dice que no — jamás quién decide.
                  ⭐ S88-C (LÁMINA_HOME_POR_ROL §2/§3) — Y EL SLOT SE MODULA
-                 POR ROL: el PROFESIONAL ve su día («a tu cargo»); RECEPCIÓN
-                 y el ADMIN tienen la plata FIRMADA (excepción a L-198 /
-                 punto 2) pero el motor vivo aún dice `titular OR
-                 is_admin()` — MEDIDO en las migraciones: ninguna la
-                 ensanchó. 🛑 FRENO DECLARADO: hasta el ensanche de A, para
-                 ellos el slot dice la verdad transitoria del servidor
-                 («Solo el titular») en vez de un número que no va a llegar
-                 o un «a tu cargo» que no es su voz. Cuando A ensanche,
-                 `p.visible` se da vuelta SOLO y la plata aparece sin tocar
-                 una línea de acá. */
+                 POR ROL: el PROFESIONAL ve su día («a tu cargo»).
+                 ⏪ EL FRENO DE LA PLATA SE LEVANTÓ el 5-ago-2026: A
+                 ensanchó el gate a `empleado_es_mostrador_o_gestion`
+                 (20260805260000) — recepción y el admin YA reciben
+                 `visible=true`, exactamente como el freno predijo: sin
+                 tocar una línea de acá. Esta rama queda como la VERDAD
+                 DEL SERVER para cualquier negado residual (p. ej. un
+                 admin sembrado por SQL sin membresía) — su voz dice
+                 quién la ve, no un permiso que este cliente recompute. */
               pantalla.rol === 'profesional'
                 ? suDia
                 : { frase: t('techo.plataSoloTitular'), detalle: t('techo.plataSoloTitularDetalle') }
