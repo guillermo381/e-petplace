@@ -7248,7 +7248,21 @@ clasificación de `sistema`).**
 
 ---
 
-#### D-658 — 🔴 POR RPC DIRECTO, UNA MASCOTA EN MEMORIAL ES RESERVABLE EN LOS CUATRO OFICIOS — la frontera vive solo en TS
+#### D-658 — ✅ **CURADA (S89-A, 6-ago-2026 · migración `20260806180000`)** — memorial no reservable, y lo dice el MOTOR
+
+**EL CIERRE:** la línea firmada entró al helper único (`m.estado_vida =
+'activa'` en `_mascota_elegible_servicio`). **El hueco se reprodujo contra el
+objeto ANTES de la línea** (body viejo restaurado in-txn desde la reversa,
+ROLLBACK): `crear_bloqueo_agenda` con Zeus FALLECIDA dio **VERDE — el hold
+nació** — y el helper daba elegible en los cuatro oficios. **El par post-cura,
+completo:** fallecida rebota `mascota_no_elegible` por camino real y ×4
+oficios (paseo · grooming · consulta_general · adiestramiento) · viva elegible
+×4 y su hold nace igual que siempre. Medido antes de escribir la línea:
+`estado_vida` es NOT NULL DEFAULT 'activa' (20/20 activas) — no puede apagar
+una viva. **Precisión que el fixture cobró (L-109): el CHECK vivo admite
+`activa · perdida · fallecida` — «memorial» es la VOZ de la app para
+`fallecida`, no un valor de columna.** Reversa escrita antes
+(`2026-08-06-s89a-REVERSA-d658-memorial.sql` — revertir REABRE el hueco).
 
 **Hallazgo de S88-A al construir D-657, numerado por orden del founder.**
 
@@ -8738,3 +8752,83 @@ intención — y esa punta no la habíamos recorrido.*
 **D-673 ENCABEZA S89.**
 
 **Origen: S88 (gate final del founder, por su propio uso).**
+
+> **⚙️ AVANCE S89-A (6-ago-2026) — LOS TRES TIENEN PRODUCTOR, EN SOMBRA:**
+> · `cita_confirmada` + `cita_solicitada` nacen de la MISMA transacción en
+>   `confirmar_cita_pagada` (el pago ES la confirmación — firma founder) y en
+>   `reservar_salida_paquete`; dos audiencias, un instante (migración
+>   `20260806160000`; excluidos con porqué declarado: plan/mostrador/pizarra).
+> · `cita_recordatorio` tiene su scan + job cada 15' (`20260806170000`) con la
+>   ventana FIRMADA (dos toques, mañanas 08:00 Guayaquil, bordes de <1 día y
+>   de último momento) e idempotencia por `clave_dedup`.
+> · Verificado en la sombra del productor real (fixtures in-txn, camino real,
+>   ROLLBACK): 2+2 intenciones nacidas con destinatarios correctos · día/previo
+>   suenan · bordes en CERO · dedup en 1. Toda intención porta su referente
+>   (`mascota_id` + `mascota_nombre` — requisito de D).
+> **LO QUE FALTA PARA MATARLA:** la firma de las tres voces (lote depositado:
+> `2026-08-06-s89a-lote-voces-cita-PARA-FIRMA.md`) · la salida de sombra
+> leyendo la sombra real (L-207) · **el ojo del founder en el primer envío
+> real de cada tipo** · y el tren de push/plantillas del brief.
+
+---
+
+#### D-674 — ✅ **NACIÓ Y SE PAGÓ EN LA MISMA SESIÓN (S89-A, 6-ago-2026 · migración `20260806150000`)** · LA BOMBA DENTRO DEL ÚNICO PRODUCTOR DE CITA
+
+**El único productor "✅" de la familia cita (`procedimiento_agendado` en
+`fijar_fecha_procedimiento`) jamás había disparado — y no podía:** su rama de
+notificación referenciaba **`p_presupuesto_id`, que no es parámetro de la
+función** (firma real: `p_cita, p_fecha, p_hora, p_empleado`). plpgsql
+resuelve identificadores AL EJECUTAR, no al crear: el CREATE pasó verde en S87
+(`20260805080000`, copiado a `20260805320000`) y la bomba esperó al primer uso
+real. **Sin handler alrededor, no era "no suena el timbre": era LA RPC ENTERA
+REVENTANDO — el negocio no podía fijar la fecha del procedimiento.**
+
+**El par, por la RAMA REAL (fixture in-txn sobre presupuesto aprobado vivo,
+titular de Aurora fijando, ROLLBACK — jamás fixture del tubo, L-207):**
+pre-migración `SQLSTATE=42703 · column "p_presupuesto_id" does not exist` →
+post-migración VERDE con la intención nacida en sombra y la voz diciendo la
+fecha recién fijada. **Segundo defecto curado en el mismo sitio:** la voz leía
+`v_cita.fecha/hora` — el snapshot PRE-update, NULL por definición (el gate de
+elegibilidad exige `fecha IS NULL`); pasa a `p_fecha`/`p_hora` y el negocio a
+`v_emp_prestador` (la asignación autoritativa).
+
+**Por qué ningún gate lo vio (clase L-192):** la rama corre solo con
+`user_id` real y había CERO citas de presupuesto sin fecha — nadie la recorrió
+desde S87. **Y el atrape del atrape (L-170 en carne propia):** el cinturón de
+la migración busca el token muerto en `prosrc`, y su primera corrida ABORTÓ la
+migración entera porque **mi propio comentario del body nombraba el token** —
+prosrc lee los comentarios como código; el comentario se reescribió sin
+nombrarlo, a propósito y declarado.
+
+**La razón de ir primero (orden ① de la mesa): D-673 clona este molde para
+los tres productores. Nada se clona de un molde con bomba.**
+
+**Origen: S89-A (medición D-673, depósito
+`2026-08-06-s89a-medicion-d673-productores-de-cita.md` §3bis).**
+
+---
+
+#### D-675 — 🟡 CUATRO RPC DE CITA SON LETRA MUERTA EN LA DB — y ya confundieron un censo
+
+**Medido (S89-A, por FORMA DE LLAMADA):** `confirmar_cita_servicio` ·
+`rechazar_cita_servicio` · `completar_cita_servicio` ·
+`simular_cliente_agenda_cita` **existen en la DB con CERO llamadas desde el
+monorepo** (grep de `.rpc(` en `packages/api/src`: 0 hits en las cuatro).
+Son legado del portal viejo — de un modelo donde el prestador confirmaba; el
+vigente lo firmó S49: **el pago confirma**, y no existe paso de confirmación
+del prestador por camino real.
+
+**Por qué tiene ficha y no solo una nota:** el censo de S88 se equivocó DOS
+veces por contarlas como camino — *un dato que dice «esta función existe» se
+lee como «esta función se usa», y nadie verifica lo que no se llama.* Es la
+clase del freno falso de S84: letra muerta que produce diseños contra un
+motor que no es.
+
+**☠️ SU ENTIERRO SE ADJUDICA EN MESA, no acá** (orden ⑤ S89): el DROP exige
+relevar el portal legado que comparte la DB (precedente D-471/D-471bis — el
+legado no está desplegado, pero el barrido se hace, no se supone) y callers
+por `prosrc` (L-120/L-129).
+**☠️ MUERTE:** las cuatro DROPeadas con su relevamiento, o re-adoptadas por
+una letra que las nombre productoras.
+
+**Origen: S89-A (medición D-673 §2 — la trampa del censo, evitada y cercada).**

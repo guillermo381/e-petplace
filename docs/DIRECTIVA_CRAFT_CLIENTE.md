@@ -140,10 +140,20 @@ L-f · El CTA toma el color de la capa sobre la que actúa. Muere
 B3 · FilaCita: canto de capa + columna mono + centro. Canto 5 px, con
      degradado a 33% de alfa.
 
-## BLOQUE C — CURAS VIVAS (lado cliente)
+## BLOQUE C — LO MEDIDO Y NADA MÁS (enmendado por palabra del founder, 6-ago-2026 · S89)
 
-C1-C4 · curas en pantallas de reserva. C3 · voseo.
-⚠️ Medidas el 26-jul, ANTES de S79. Re-verificar contra fuente.
+**☠️ C1 · C2 · C4 — MUERTAS CON LÁPIDA:** su literal NO EXISTE — quedaron
+como números sin letra («curas en pantallas de reserva» no es una cura que
+alguien pueda ejecutar). **Patrón A7: un número reservado no es una
+directiva. SIN reconstrucción** — si alguna cura real reaparece, entra por
+gate propio con letra nueva, jamás citando estos números.
+
+**C3 (voseo) — SUPERADA por la medición de D (`b4b0cc8`):** la fuente ya
+dice otra cosa; la directiva no compite con lo medido.
+
+*(Texto original, conservado como registro: «C1-C4 · curas en pantallas de
+reserva. C3 · voseo. ⚠️ Medidas el 26-jul, ANTES de S79. Re-verificar contra
+fuente.»)*
 
 ## BLOQUE D — PANTALLAS
 

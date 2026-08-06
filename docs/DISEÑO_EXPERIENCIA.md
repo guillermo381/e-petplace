@@ -971,6 +971,18 @@ el portado de grooming consumen:
   4.15). Gate WCAG re-corrido completo: **163 pares / 0 fallos**
   (154→163). Consumidores barridos: HOY, Negocio y el perfil de
   Cuenta (header CD) heredan el muro.
+  **⚠️ EXCEPCIÓN FIRMADA (founder, 6-ago-2026, S89) — EL ORO SOBRE MURO
+  CLARO:** el oro **#FCBC1D** del cliente es LEGAL sobre muro claro con
+  su par medido **3.41** — pasa el piso no-textual 3:1 y NO alcanza el
+  4.5 de texto: la excepción es de REGISTRO GRÁFICO, no licencia de
+  tipografía en oro. **Alcance FIRMADO, por superficie: los MUROS y el
+  DEGRADADO del CLIENTE. PAPEL y MEMORIAL quedan EXCLUIDOS — como hoy.**
+  Las tres reglas del muro del PRESTADOR (arriba) quedan ENTERAS: esta
+  excepción no las toca. *Se escribe ACÁ, en el archivo de la letra de
+  registros, y no solo en una ficha — dos letras firmadas que se
+  contradicen son peores que una equivocada: cualquiera cita la que le
+  conviene y está «en regla» (la forma del precedente magenta S83,
+  §15b.1/D-598).*
 
 - **v1.8 (S61, 14 Jul 2026):** LA GRAMÁTICA CANÓNICA DE RESERVA
   (decisión founder S61, en piedra): **todo servicio se reserva con UNA
