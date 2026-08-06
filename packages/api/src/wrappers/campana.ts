@@ -106,12 +106,18 @@ export async function obtenerMisAvisos(
  * y apaga la huella; leer un aviso puntual NO la toca — leído y visto son
  * cosas distintas y la campana distingue las dos.
  *
+ * **LA VISITA ES POR USUARIO Y APP** (contrato v2, orden 6 S89): cada casa
+ * pasa su nombre — visitar la campana del cliente NO apaga la huella del
+ * prestador. El par del eje lo probó: visita cliente → false/true.
+ *
  * ⚠️ Existe para que el techo NO tenga que traer la lista sólo para decidir si
  * dibuja un punto: la forma del dato hace imposible el defecto del contador.
  */
-export async function hayNovedades(): Promise<ResultadoWrapper<boolean, CodigoCampana>> {
+export type AppCampana = 'cliente' | 'prestador';
+
+export async function hayNovedades(app: AppCampana): Promise<ResultadoWrapper<boolean, CodigoCampana>> {
   if ((await uidActual()) === null) return falla('sin_sesion');
-  const { data, error } = await getClient().rpc('hay_novedades');
+  const { data, error } = await getClient().rpc('hay_novedades', { p_app: app });
   if (error) return falla('error_desconocido');
   if (typeof data !== 'boolean') return falla('datos_inconsistentes');
   return { ok: true, data };
@@ -122,9 +128,9 @@ export async function hayNovedades(): Promise<ResultadoWrapper<boolean, CodigoCa
  * el acto que la letra nombra («entrar a /avisos deposita la visita»); la
  * huella del techo se apaga con esto, no con leer avisos.
  */
-export async function registrarVisitaCampana(): Promise<ResultadoWrapper<null, CodigoCampana>> {
+export async function registrarVisitaCampana(app: AppCampana): Promise<ResultadoWrapper<null, CodigoCampana>> {
   if ((await uidActual()) === null) return falla('sin_sesion');
-  const { error } = await getClient().rpc('registrar_visita_campana');
+  const { error } = await getClient().rpc('registrar_visita_campana', { p_app: app });
   if (error) {
     return error.message.startsWith('auth_required') ? falla('sin_sesion') : falla('error_desconocido');
   }

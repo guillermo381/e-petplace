@@ -1,4 +1,4 @@
-# S89-A · CONTRATO PARA C Y D — LA HUELLA MIDE LO NUEVO (letra founder, 6-ago-2026)
+# S89-A · CONTRATO PARA C Y D — LA HUELLA MIDE LO NUEVO (letra founder, 6-ago-2026) · **v2: LA VISITA ES POR USUARIO Y APP** (orden 6, mesa)
 
 **LA LETRA:** la campana registra la última visita; la huella del techo deja
 de preguntar «¿hay algo sin leer?» y pregunta **«¿hay algo POSTERIOR a tu
@@ -6,12 +6,23 @@ de preguntar «¿hay algo sin leer?» y pregunta **«¿hay algo POSTERIOR a tu
 por aviso NO cambia** — `marcarAvisoLeido` y su ley («no existe marcar
 todos») quedan intactos.
 
+**v2 (orden 6):** **la visita lleva el eje `app`** — visitar la campana del
+CLIENTE no apaga la huella del PRESTADOR: cada casa tiene su propia última
+visita. El par del eje lo probó: visita cliente → cliente `false` / prestador
+`true`. *(El v1 de este mismo doc era solo-por-usuario; las firmas de abajo
+son las vigentes — migración `20260806240000`, las 0-arg murieron con DROP
+explícito, cero sobrecargas zombis.)*
+
 ## El contrato (vivo en `@epetplace/api`, typecheck verde)
+
+```ts
+type AppCampana = 'cliente' | 'prestador';
+```
 
 | pieza | firma | cuándo se llama |
 |---|---|---|
-| `hayNovedades()` | `ResultadoWrapper<boolean, CodigoCampana>` | donde hoy se llama `hayAvisosSinLeer` (el punto del techo) — mismo shape, swap directo |
-| `registrarVisitaCampana()` | `ResultadoWrapper<null, CodigoCampana>` | **al ENTRAR a `/avisos`** (mount de la pantalla) — ese es el acto de la letra; disparar y seguir (el fallo no bloquea la lista) |
+| `hayNovedades(app)` | `(app: AppCampana) → ResultadoWrapper<boolean, CodigoCampana>` | donde hoy se llama `hayAvisosSinLeer` (el punto del techo) — **cada app pasa SU nombre** |
+| `registrarVisitaCampana(app)` | `(app: AppCampana) → ResultadoWrapper<null, CodigoCampana>` | **al ENTRAR a `/avisos`** (mount de la pantalla), con el nombre de la casa; disparar y seguir (el fallo no bloquea la lista) |
 | `hayAvisosSinLeer()` | `@deprecated` | NO usar en código nuevo — vive solo porque los bundles publicados la llaman |
 
 **La semántica que la superficie hereda gratis:** la huella se apaga al

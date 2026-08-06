@@ -401,6 +401,7 @@ export {
   registrarVisitaCampana,
   marcarAvisoLeido,
   type AvisoDeCampana,
+  type AppCampana,
   type CodigoCampana,
 } from './wrappers/campana';
 

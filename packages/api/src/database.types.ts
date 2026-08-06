@@ -10584,14 +10584,17 @@ export type Database = {
       }
       notificacion_campana_visita: {
         Row: {
+          app: string
           user_id: string
           visitada_en: string
         }
         Insert: {
+          app: string
           user_id: string
           visitada_en?: string
         }
         Update: {
+          app?: string
           user_id?: string
           visitada_en?: string
         }
@@ -17527,7 +17530,7 @@ export type Database = {
         Returns: Json
       }
       hay_avisos_sin_leer: { Args: never; Returns: boolean }
-      hay_novedades: { Args: never; Returns: boolean }
+      hay_novedades: { Args: { p_app: string }; Returns: boolean }
       hoy_local: { Args: never; Returns: string }
       iniciar_atencion_adiestramiento: {
         Args: { p_cita_id: string; p_empleado_id?: string }
@@ -18285,7 +18288,7 @@ export type Database = {
         Args: { p_archivo_url?: string; p_mascota_id: string; p_vacunas: Json }
         Returns: Json
       }
-      registrar_visita_campana: { Args: never; Returns: Json }
+      registrar_visita_campana: { Args: { p_app: string }; Returns: Json }
       reordenar_fotos_prestador: {
         Args: { p_ids: string[]; p_prestador_id: string }
         Returns: undefined
