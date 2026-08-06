@@ -110,6 +110,25 @@ PENDIENTE · 🟠 SUPERFICIE abierta** (§4ter, lote de C sobre lámina de mesa)
   concede** — tokens (identidad) y `empleado_roles` (membresía), dos capas del
   mismo hueco.
 
+**La ley del depósito — FIRMADA, rige para TODO depósito futuro:**
+
+> **Los HECHOS del depósito no se tocan. Los PUNTEROS AL PRESENTE se escriben
+> como REGLA, no como literal.**
+
+*La clase de dato que envejece solo no se deposita en literal.* El caso que la
+parió: el depósito pre-compactación abría declarando `main` en `c237be3` — y
+**el commit del propio depósito lo movió**. Un archivo que nombra un puntero
+que su propia existencia invalida. Hoy esa fila dice *«se lee del objeto al
+abrir: `git rev-parse HEAD`»*.
+
+**El corte entre las dos clases, para que nadie lo aplique de más:** un group
+de OTA, un ancla, un hash de migración, un veredicto de gate **son hechos** —
+describen algo que ocurrió y no se mueve, y van en literal o el depósito no
+sirve. `HEAD`, «la deuda más alta», «el contador de componentes» **son punteros
+al presente** — describen dónde está algo que sigue caminando. *Es la misma
+disciplina con la que esta casa lee el ancla al bundlear y jamás de un reporte
+previo, elevada del operativo al documento.*
+
 **Y la que esta acta se aplicó a sí misma:** *una ficha que afirma un gate que
 no ocurrió es el dato falso que esta casa caza en el código.* **D-660 y D-652
 se corrigieron: el dedo era técnico, no el del founder.**
