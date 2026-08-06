@@ -3214,6 +3214,20 @@ Origen: S86-A, medición para C.
   > censo se corre en un minuto.*
 ### Lecciones S88 (L-202 → L-206 — números verificados libres por grep)
 
+- **L-207 — UN FIXTURE QUE RELLENA LO QUE EL PRODUCTOR NO LLENA PRUEBA EL TUBO Y NO EL AGUA (S88, firmada por la mesa — la más cara del día).**
+
+  > ### **EL GATE MIDIÓ QUE EL MENSAJE LLEGA; NADIE MIDIÓ QUÉ MENSAJE.**
+
+  **EL CASO:** el gate del primer envío pasó en verde el 5-ago —correo recibido, kill switch probado, transporte confirmado— **y era un verde legítimo**. Pero el `titulo`/`mensaje` los escribió a mano el fixture. **Ningún productor real los llena**, así que el camino de producción caía al genérico de la Edge Function: *«Tienes una novedad en e-PetPlace / Abre la app para verla»* — sobre un plan que se renovó y **se cobró**.
+
+  **Es L-202 en su forma más cara:** el par era correcto **y su alcance también**; lo que faltaba era una pregunta que ningún par se hace solo.
+
+  **COROLARIO EXIGIBLE, para todo gate de un tipo que salga de sombra:**
+
+  > **La pregunta obligatoria es «¿y esto qué diría en PRODUCCIÓN?» — y se contesta MIRANDO LA SOMBRA DEL PRODUCTOR REAL, jamás un fixture escrito a mano.**
+
+  *El modo de verificación tiene que recorrer el mismo camino que el dato: si el fixture aporta un valor que en producción nadie aporta, el fixture está probando su propia generosidad.*
+
 - **L-205 — UN PREDICADO COMPARTIDO SE ESCRIBE CON SU LÍMITE ADENTRO (S88, decisión de A ratificada por la mesa).**
 
   **EL CASO:** dos verbos del mostrador —**ver la plata** y **asignar citas**— resultaron tener HOY el mismo portador (gestión, o miembro activo con cero chips). Escribir dos cuerpos idénticos es lo que esta casa ya pagó caro (*«dos cuerpos del MISMO cálculo»*); compartir uno sin decirlo es peor, porque **el próximo que necesite separarlos no va a saber si puede.**
@@ -8214,5 +8228,94 @@ opciones, con su costo:
 > del tipo que va a salir, **(b)** bajar el kill switch hasta tenerlas.
 > **☠️ MUERTE:** todo tipo fuera de sombra tiene voz propia, y el genérico de
 > la Edge Function deja de ser alcanzable.
+
+### ✅ LA VOZ DE `plan_renovado` — FIRMADA Y VERIFICADA POR EL CAMINO REAL
+
+**Opción (a) firmada por el founder.** *Bajar el kill switch NO: una renovación
+cobrada sin avisar es lo que D-657 curó esta misma mañana en su otra mitad.*
+
+**Nace `_voz_notificacion(tipo, user, mascota)` — la voz en UN solo lugar.**
+Son 37 tipos: inlinearla en cada productor la disemina por nueve funciones y
+garantiza que se firmen «de a una en pánico». *Y el día que las plantillas sean
+TABLA (opción 2), cambia esta función y nada más.* Un tipo sin voz firmada
+devuelve `{}`: **no inventa.**
+
+**Verificado como la mesa lo pidió — produciendo por el CAMINO REAL y leyendo
+la SOMBRA, jamás un fixture escrito a mano:**
+
+```
+cerrar_y_renovar_planes()  →  {"renovados": 1, "errores": 0}
+
+asunto:  «Tu plan de paseos se renovó»
+cuerpo:  «Renovamos el plan de paseos de Thor por un mes más. Ya está activo
+          y el cobro se hizo con tu método habitual. Podés ver el detalle
+          en la app.»
+```
+
+**Los tres criterios firmados, verificados en el literal:** el asunto dice QUÉ
+PASÓ (jamás «novedad») · el cuerpo NOMBRA el cobro · nombra a la mascota.
+
+---
+
+### 🔴🔴 Y EL PAR DESTAPÓ ALGO QUE CAMBIA LA PREMISA DEL 13-AGO
+
+**La única suscripción activa del sistema es la de Thor, y vence el 13-ago:**
+
+```
+cf59a466   fin=2026-08-13   en 7d   renovable=FALSE   precio_mensual_plan=NULL
+```
+
+**⇒ EL 13-AGO NO SALE NINGÚN CORREO. La renovación va a FALLAR con
+`plan_no_ofrecido`** (medido corriendo el productor real: `errores:1,
+renovados:0`).
+
+> **Esto es peor que no avisar, y por la secuencia:** el 10-ago —72 h antes—
+> dispara `plan_renovacion_proxima`, cuya letra es *«El plan se renueva y se va
+> a cobrar. **No se silencia: un cobro sorpresa no se deshace.**»* Tres días
+> después el cobro **no ocurre** y **nadie lo dice**.
+> ### **Se anuncia un cobro y después hay silencio.**
+> *Y el tipo que existe para contarlo —`plan_renovacion_fallida`— está EN
+> SOMBRA y sin voz.*
+
+**Se declara y NO se cura sola: es decisión de mesa** — ① poblar
+`precio_mensual_plan` de esa oferta (la renovación ocurre y el correo sale con
+su voz, ya firmada) · ② dejar que falle y **sacar de sombra
+`plan_renovacion_fallida` con su voz** · ③ cerrar el plan a propósito antes del
+13. **Lo único que no es una opción es la combinación de hoy: anunciar el cobro
+y callar el fracaso.**
+
+---
+
+### 📋 EL CENSO DE LOS 37 — la tabla que la mesa pidió
+
+```
+TOTAL 37   ·   fuera de sombra: 1 (plan_renovado)   ·   con productor vivo: 14   ·   sin productor: 23
+```
+
+| tipo | sombra | voz | productor |
+|---|---|---|---|
+| **`plan_renovado`** | **NO** | ✅ | `cerrar_y_renovar_planes` |
+| `alta_asistida_completada_por_cliente` | sí | 🔴 | `_trg_completar_pendiente_registro` |
+| `alta_asistida_vencida_soporte` | sí | 🔴 | `cleanup_pendientes_vencidos` |
+| `cita_confirmada` | sí | 🔴 | `fijar_fecha_procedimiento` |
+| `paquete_vence` | sí | 🔴 | `vencer_paquetes_salidas` |
+| `plan_renovacion_fallida` | sí | 🔴 | `cerrar_y_renovar_planes` |
+| `plan_renovacion_proxima` | sí | 🔴 | `cerrar_y_renovar_planes` |
+| `plan_vencido_reembolso` | sí | 🔴 | `cerrar_y_renovar_planes` · `_trg_mascotas_memorial_planes` |
+| `procedimiento_agendado` | sí | 🔴 | `fijar_fecha_procedimiento` |
+| `programa_vence` | sí | 🔴 | `vencer_programas_adiestramiento` |
+| `programa_vencido_reembolso` | sí | 🔴 | `vencer_programas_adiestramiento` |
+| `registro_completado_cliente` | sí | 🔴 | `_trg_completar_pendiente_registro` |
+| `registro_completado_prestador` | sí | 🔴 | `_trg_completar_pendiente_registro` |
+| `sistema` | sí | 🔴 | `vencer_paquetes_salidas` · `vencer_programas_adiestramiento` |
+
+**Los 23 restantes no tienen productor: no pueden salir, y por eso no son
+mecha.** *La bomba tiene **13 mechas**, no 36 — y ninguna encendida, porque
+todas están en sombra.*
+
+> **La lectura operativa, que es el alivio y la disciplina a la vez:** el gate
+> por tipo (sacar de sombra de a uno) **ya era la contención correcta**. Lo que
+> faltaba era la regla que ahora rige: **ningún tipo sale de sombra sin su voz
+> firmada, y la salida se verifica MIRANDO LA SOMBRA DEL PRODUCTOR REAL.**
 
 **Origen: S88-A (auditoría del contrato de la campana contra su lámina).**
