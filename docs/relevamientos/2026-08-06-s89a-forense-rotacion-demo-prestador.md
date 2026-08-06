@@ -120,6 +120,35 @@ tenía emulador vivo con la app del prestador entre 06:19 y 13:13 UTC?).
 
 ---
 
-*Depositado por la pista A, S89 · ORDEN 2. Cero mutaciones: no se revocó la
-sesión, no se rotó nada, no se tocó el teléfono del founder (regla 87; no se
-levantó emulador — `ANDROID_SERIAL` sin fijar).*
+*Depositado por la pista A, S89 · ORDEN 2. Cero mutaciones en esa pasada: no
+se revocó la sesión, no se rotó nada, no se tocó el teléfono del founder
+(regla 87; no se levantó emulador — `ANDROID_SERIAL` sin fijar).*
+
+---
+
+## 4. CIERRE DEL CASO (adenda de mesa, 6-ago-2026) — CASO MUERTO
+
+**Causa NOMBRADA — palabra del founder:** entre la 01:19 y las 08:13 local
+estaban vivos **su celular y los emuladores de su computadora**. El actor
+`okhttp` de las 06:19:57 (`9d39f9a4`, IP `157.100.134.157`) es **entorno
+propio del founder, no intruso**. Encaja con todo lo medido: la clave vigente
+al login, el flujo de Seguridad (S84) como camino, y el apagado del refresh a
+las ~13:13.
+
+**Ejecutado por orden de mesa:**
+
+1. **Sesión `9d39f9a4` REVOCADA** — `DELETE auth.sessions` con verificación:
+   0 sesiones, 0 refresh tokens (FK `ON DELETE CASCADE` medida antes de
+   borrar). *La higiene que motivó la orden: una sesión sin logout con refresh
+   vivo es un actor sin dueño en potencia, aunque el dueño real haya sido la
+   casa.* Nota operativa que queda del caso: **rotar la clave NO mata
+   sesiones** — la revocación es un acto aparte, y ahora está hecho.
+2. **La sonda es script canónico:** `scripts/sonda-credenciales.mjs` — camino
+   real, `error_code` LEÍDO, lista = copia del registro del brief (los dos se
+   actualizan en el mismo commit). Corrida post-revocación: **8/8, exit 0** —
+   la revocación no tocó la clave (huella md5 intacta).
+3. Las lecciones operativas de §3 quedan vigentes (la sonda antes de cada
+   dedo · `updated_at` no es marcador de rotación · la ventana del audit se
+   abre hasta el último `user_updated_password` real).
+
+**El caso queda MUERTO: causa nombrada, sesión revocada, sonda depositada.**
