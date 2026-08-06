@@ -392,9 +392,18 @@ export default function Pizarra() {
             ) : personas.length === 0 ? (
               <Texto variante="apoyo">{t('pizarra.asignarNadie')}</Texto>
             ) : (
+              /* ⏪ S88-C (5-ago): decía `disposicion="tira"` — la tira trunca cada
+                 chip a UNA línea (`numberOfLines=1` en toda disposición no-columna)
+                 y «Prueba Profesional S87 · no schedule» moría en «· no»: el
+                 sufijo `sinJornada` es EL dato que informa la decisión de quien
+                 reparte, y truncado la Hoja informaba a medias justo ahí.
+                 `columnas` ENVUELVE (flexWrap + sin tope de líneas) — el criterio
+                 firmado de los canales de preferencias: lo que se corta es
+                 información, no adorno. De paso muere la tira que no desplazaba
+                 dentro de la Hoja (el gesto del sheet se la comía). */
               <SelectorOpcion
                 etiqueta={t('pizarra.asignarQuien')}
-                disposicion="tira"
+                disposicion="columnas"
                 acento="oficio"
                 opciones={personas.map((p) => ({
                   codigo: p.empleadoId,
