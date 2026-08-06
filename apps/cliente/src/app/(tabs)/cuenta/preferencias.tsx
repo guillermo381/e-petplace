@@ -301,7 +301,12 @@ export default function PreferenciasCuenta() {
               // nada (Ley 23). Derivado del catálogo: el día que nazca
               // el primer tipo (hoy, el primer digest de «Resúmenes»),
               // la fila aparece sola.
-              .filter((cat) => cat.tieneTiposVivos)
+              // PARA MI AUDIENCIA, no vivos a secas (el freno de C, S88):
+              // esta pantalla declaró 'cliente' arriba — filtrar por el
+              // booleano ciego dejaría ese parámetro decorativo. Medido
+              // al curar: hoy los dos coinciden para cliente (0 filas de
+              // diferencia); el defecto era latente, no visible.
+              .filter((cat) => cat.tieneTiposVivosParaMi)
               .map((cat) => {
               const canales = catalogo.canales.map((c) => c.codigo);
               const encendida = filaEncendida({
