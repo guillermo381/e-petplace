@@ -1636,7 +1636,8 @@ export default function Hoy() {
      `if (estado === 'recepcion') return <AgendaRecepcion …/>` (S78-B).
      MUERE POR FIRMA: recepción ve la consolidada. Las tres huérfanas del
      censo VOLVIERON como la banda EN LA PUERTA (firma founder, opción a);
-     `agenda-recepcion.tsx` se borra cuando la banda pase el dedo. */
+     `agenda-recepcion.tsx` BORRADA el 5-ago-2026 — la banda pasó el dedo
+     del founder y la firma del censo se cumplió entera. */
 
   /* ── ⭐ S88-C · LA BANDA «EN LA PUERTA» — derivaciones ──
      La llegada es información DEL DÍA y el día vive acá. Solo para quien
