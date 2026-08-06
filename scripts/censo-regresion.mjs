@@ -258,60 +258,51 @@ export const PREMISAS = [
   },
   {
     id: 'P3',
-    ficha: 'L-141',
-    titulo: 'el canon dice la verdad sobre cuántas migraciones hay',
-    desde: 'S82 (la última vez que se re-midió)',
-    /** EL ANCLA NO INCLUYE EL NÚMERO, y es deliberado: el día que la mesa
-     *  corrija el contador, el literal cambia — si el ancla llevara el
-     *  «138», la CURA dispararía el brazo ① («el literal ya no está») y el
-     *  guard castigaría exactamente lo que vino a pedir. Se ancla la parte
-     *  ESTABLE de la frase. */
+    ficha: 'L-141 · cura P3 S89-A',
+    titulo: 'el canon declara el COMANDO del contador de migraciones, y ningún número congelado volvió',
+    desde: 'S89 (la cura: a la CUARTA caída — 9 → 77 → 138 → 186 — el canon dejó de escribir el número)',
+    /** LA PREMISA CAMBIÓ DE FORMA CON LA CURA (S89-A, orden 3-bis ②): el
+     *  canon ya no declara un número — declara los COMANDOS con que se
+     *  mide (local y remoto). Lo que puede decaer ahora es OTRA cosa, y
+     *  es lo que este guard vigila: (a) que la fila de inventario siga
+     *  declarando los comandos, y (b) que ningún «**N migraciones**
+     *  aplicadas…» resucite — la recaída natural de quien edita el canon
+     *  de memoria. El ancla es la frase estable de la fila nueva. */
     sitios: [
       {
         archivo: 'CLAUDE.md',
-        literal: 'migraciones** aplicadas y en el historial remoto',
+        literal: 'El contador de migraciones NO SE ESCRIBE ACÁ',
         consecuencia:
-          'la fila de inventario de `supabase/` — el número que toda sesión lee al abrir, y que ya decayó TRES veces (77 → 138, y el 9 de S47 antes)',
+          'la fila de inventario de `supabase/` — la que toda sesión lee al abrir; con la cura S89, su verdad es el COMANDO, no un número',
       },
     ],
     inerteMientras: {
-      explicacion: 'la divergencia entre lo que el canon DECLARA y lo que el objeto TIENE',
-      /** POR QUÉ SE MIDE EL HISTORIAL REMOTO Y NO LOS ARCHIVOS DEL ÁRBOL:
-       *  la propia frase del canon dice «aplicadas y **en el historial
-       *  remoto**». Y hay una razón operativa que pesa más: **una pista
-       *  atrasada tiene menos archivos que `main`** —medido hoy: 143 en
-       *  esta rama contra 157 en `origin/main`— así que contar el árbol
-       *  haría que el guard denunciara «el canon miente» cuando lo que
-       *  pasa es que la rama está vieja. *Un instrumento correcto sobre un
-       *  árbol viejo da un número creíble y falso* (S84-B12).
-       *  **MEDIDO HOY, y por eso las dos lecturas no compiten:** los 157
-       *  del historial reconcilian **1:1** con los 157 `.sql` de
-       *  `origin/main` — cero huérfanas en las dos direcciones. Si algún
-       *  día divergen, esa divergencia es un hallazgo por sí sola. */
+      explicacion: 'la fila de inventario dejó de declarar los comandos, o un número congelado resucitó',
+      /** YA NO SE COMPARA NÚMERO CONTRA HISTORIAL — no hay número que
+       *  comparar: ésa ES la cura. (El razonamiento viejo sobre pistas
+       *  atrasadas vs `origin/main` queda en el historial de git de este
+       *  archivo; la clase de fallo que cubría murió con el número.) */
       medir: ({ dbQuery, leer }) => {
+        void dbQuery;
         const canon = leer('CLAUDE.md');
-        // EL PARSER DECLARA SU PROPIA TRAMPA: `**N migraciones**` aparece
-        // NUEVE veces en el canon — ocho son conteos POR SESIÓN («8
-        // migraciones aplicadas y registradas»). Se ancla en la frase
-        // completa de la fila de inventario, y si no matchea EXACTAMENTE
-        // una vez, esto no adivina: lanza, y el guard lo convierte en
-        // «no se pudo medir» (ROJO, jamás un número de consuelo).
-        const m = canon.match(/\*\*(\d+) migraciones\*\* aplicadas y en el historial remoto/g);
-        if (!m || m.length !== 1)
-          throw new Error(
-            `el canon no declara su contador de forma legible: ${m?.length ?? 0} coincidencias (esperaba 1). ` +
-              `Si la frase se reescribió, el ancla de esta premisa hay que actualizarla.`,
-          );
-        const declarado = Number(m[0].match(/(\d+)/)[1]);
-        const real = dbQuery('select count(*)::int as n from supabase_migrations.schema_migrations')[0].n;
-        return {
-          n: Math.abs(real - declarado),
-          detalle: [{ declarado_en_el_canon: declarado, en_el_historial_remoto: real }],
-        };
+        const detalle = [];
+        let n = 0;
+        if (!canon.includes('ls supabase/migrations/*.sql')) {
+          n++; detalle.push({ falta: 'el comando LOCAL en la fila de inventario' });
+        }
+        if (!canon.includes('migration list --linked')) {
+          n++; detalle.push({ falta: 'el comando REMOTO en la fila de inventario' });
+        }
+        // la recaída: alguien vuelve a escribir «**N migraciones** aplicadas y en el historial remoto»
+        const resucitado = canon.match(/\*\*\d+ migraciones\*\* aplicadas y en el historial remoto/g);
+        if (resucitado) {
+          n += resucitado.length; detalle.push({ numero_congelado_resucitado: resucitado });
+        }
+        return { n, detalle };
       },
     },
     siCaduca:
-      'toda sesión que abra leyendo el canon arranca con un inventario falso — y este contador ya decayó TRES veces, que es precisamente por qué deja de confiarse a la prosa',
+      'toda sesión que abra leyendo el canon arranca con un inventario falso — el contador decayó CUATRO veces antes de que la cura le quitara el número a la prosa',
   },
   {
     id: 'P4',
@@ -510,6 +501,40 @@ export const PREMISAS = [
     },
     siCaduca:
       'una pantalla del bundle servido recibe 400 en producción SIN que nada se ponga rojo — el publish sale verde, verify-ota sale verde, y el aparato pregunta por un fantasma. El caso fundante: preferencias del cliente, bundle 9e83b6d pidiendo `tipo`',
+  },
+  {
+    id: 'P6',
+    ficha: 'S89-C (mapa de destinos del prestador §4 — depósito a A, sumada por orden de mesa S89)',
+    titulo: 'la firma S88 del ocultamiento de plata rige en el catálogo (saldo_pagado jamás con audiencia de prestador)',
+    desde: 'S89 (par medido por C: saldo_pagado∩prestador|ambas = 0 · salud_seguridad = 2)',
+    /** LA DERIVACIÓN QUE SE VIGILA: «saldo_pagado NO se muestra al
+     *  prestador» (firma de mesa S88) hoy se cumple porque NINGÚN tipo de
+     *  esa categoría tiene audiencia `prestador|ambas` — se cumple por
+     *  FILA AUSENTE, no por un gate. El único camino silencioso para
+     *  romper la firma es que un tipo nazca con esa audiencia, y eso no
+     *  lo ve ningún typecheck. Es la forma count(*)=0 exacta del censo.
+     *  El contra-caso viaja adentro (par de C): la MISMA consulta sobre
+     *  `salud_seguridad` da 2 — si diera 0, el instrumento dejó de
+     *  distinguir y esto lanza (L-197: ROJO, jamás verde de consuelo). */
+    sitios: [],
+    inerteMientras: {
+      explicacion: 'tipos ACTIVOS de la categoría saldo_pagado con audiencia prestador|ambas',
+      medir: ({ dbQuery }) => {
+        const n = dbQuery(
+          "select count(*)::int as n from cat_notificacion_tipos where categoria = 'saldo_pagado' and audiencia in ('prestador','ambas') and activo",
+        )[0].n;
+        const par = dbQuery(
+          "select count(*)::int as n from cat_notificacion_tipos where categoria = 'salud_seguridad' and audiencia in ('prestador','ambas') and activo",
+        )[0].n;
+        if (par === 0)
+          throw new Error(
+            'el contra-caso salud_seguridad dio 0 — el instrumento dejó de distinguir (esperaba > 0; ¿cambió el catálogo de categorías?)',
+          );
+        return { n, detalle: [{ saldo_pagado_prestador_o_ambas: n, contra_caso_salud_seguridad: par }] };
+      },
+    },
+    siCaduca:
+      'la plata del negocio le suena a quien atiende — la firma S88 se rompe por el catálogo sin que ningún gate lo vea (la campana y el correo obedecen la audiencia sin preguntar)',
   },
 ];
 
