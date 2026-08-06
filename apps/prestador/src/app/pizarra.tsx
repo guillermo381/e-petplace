@@ -39,8 +39,10 @@ import {
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
+  Hoja,
   MarcaDeAgua,
   Separador,
+  SelectorOpcion,
   Tarjeta,
   Texto,
   spacing,
@@ -49,11 +51,16 @@ import {
   type AvatarMascotaEspecie,
 } from '@epetplace/ui';
 import {
+  asignarCitaAPersona,
+  obtenerEmpleadosCuenta,
   obtenerMiPrestador,
   obtenerPizarra,
+  puedoAsignarCitas,
   tomarCita,
   type CitaDePizarra,
+  type CodigoAsignacionCita,
   type CodigoErrorTomarCita,
+  type EmpleadoCuenta,
 } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -65,8 +72,10 @@ type Pantalla =
 
 /** Estado LOCAL de cada fila tras tocarla. `tomada` NO es lo mismo que
  *  `mia`: una la tomé yo, la otra me la ganaron — y la pantalla dice
- *  cosas distintas. Colapsarlas sería el silencio que la lámina prohíbe. */
-type Resultado = 'mia' | 'tomada';
+ *  cosas distintas. Colapsarlas sería el silencio que la lámina prohíbe.
+ *  ⭐ S88-C: `asignada` = recepción la ruteó a alguien — la fila SE QUEDA
+ *  y lo dice (la decisión firmada de `ya_tomada`, mismo trato). */
+type Resultado = 'mia' | 'tomada' | 'asignada';
 
 function esEspecie(v: string | null): v is AvatarMascotaEspecie {
   return v !== null;
@@ -82,6 +91,22 @@ export default function Pizarra() {
   const [resultados, setResultados] = useState<Map<string, Resultado>>(new Map());
   const [tomando, setTomando] = useState<string | null>(null);
 
+  /* ⭐ S88-C (LÁMINA_HOME_POR_ROL punto 3/6) · EL VERBO DE RECEPCIÓN.
+     `puedoAsignar` es el espejo del predicado del motor
+     (`empleado_puede_asignar_citas`) y existe SOLO PARA PINTAR — el gate
+     vive en `asignar_cita_a_persona` (una autorización que decide el
+     cliente es decorativa). La Pizarra es LA CASA de las citas sin
+     persona: el que puede tomar, toma; el que puede rutear, asigna. */
+  const [puedoAsignar, setPuedoAsignar] = useState(false);
+  const [cuentaId, setCuentaId] = useState<string | null>(null);
+  /** La cita cuya Hoja de asignación está abierta. */
+  const [asignando, setAsignando] = useState<CitaDePizarra | null>(null);
+  /** null = sin pedir · 'error' = lectura caída (se dice, jamás «no hay
+   *  nadie») · lista = personas ACTIVAS de la cuenta. */
+  const [personas, setPersonas] = useState<EmpleadoCuenta[] | 'error' | null>(null);
+  const [personaElegida, setPersonaElegida] = useState<string | undefined>(undefined);
+  const [confirmando, setConfirmando] = useState(false);
+
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
@@ -92,7 +117,12 @@ export default function Pizarra() {
           setPantalla({ estado: 'error' });
           return;
         }
-        const r = await obtenerPizarra(pr.data.id);
+        const [r, pa] = await Promise.all([
+          obtenerPizarra(pr.data.id),
+          // el fallo del espejo NO tumba la pizarra: sin confirmación no
+          // se pinta el verbo (Ley 23 — ante la duda, ausencia).
+          puedoAsignarCitas(pr.data.id),
+        ]);
         if (!vigente) return;
         /* L-197 / Ley 13: «no pude leer» y «no hay nada» son DOS cosas.
            El wrapper ya las separa (una forma inesperada NO degrada a
@@ -101,6 +131,8 @@ export default function Pizarra() {
           setPantalla({ estado: 'error' });
           return;
         }
+        setPuedoAsignar(pa.ok && pa.data);
+        setCuentaId(pr.data.cuenta_comercial_id);
         setPantalla({ estado: 'listo', citas: r.data });
       })();
       return () => {
@@ -169,6 +201,67 @@ export default function Pizarra() {
       setResultados((m) => new Map(m).set(cita.citaId, 'tomada'));
     }
     mostrar({ variante: 'error', texto: vozDelRebote(r.codigo) });
+  }
+
+  /** Abre la Hoja de una cita; las personas se piden UNA vez (lazy). */
+  function abrirAsignar(cita: CitaDePizarra) {
+    setPersonaElegida(undefined);
+    setAsignando(cita);
+    if (personas === null || personas === 'error') {
+      if (cuentaId === null) {
+        setPersonas('error');
+        return;
+      }
+      void obtenerEmpleadosCuenta(cuentaId).then((r) => {
+        /* ⚠️ LEY 23, CON SU LÍMITE DECLARADO: la lista es la MISMA del
+           tratante del mostrador (copiar al vecino) y trae a TODOS los
+           activos — el lector no expone chips, así que el filtro «con
+           chip del oficio» lo aplica EL MOTOR (freno ⑤,
+           `persona_sin_oficio`, voz tipada). Pre-filtrar acá exigiría
+           un lector con chips por persona keyed por cuenta — pedido a
+           A declarado en el reporte, jamás clonado. */
+        setPersonas(r.ok ? r.data.filter((p) => p.activo) : 'error');
+      });
+    }
+  }
+
+  async function confirmarAsignar() {
+    if (asignando === null || personaElegida === undefined || confirmando) return;
+    setConfirmando(true);
+    const r = await asignarCitaAPersona(asignando.citaId, personaElegida);
+    setConfirmando(false);
+    if (!r.ok) {
+      mostrar({ variante: 'error', texto: vozAsignar(r.codigo) });
+      // `cita_ya_asignada` = alguien llegó antes: la fila se queda y lo
+      // dice (misma decisión firmada que `ya_tomada`).
+      if (r.codigo === 'cita_ya_asignada') {
+        setResultados((m) => new Map(m).set(asignando.citaId, 'tomada'));
+        setAsignando(null);
+      }
+      return;
+    }
+    const nombre =
+      personas !== null && personas !== 'error'
+        ? (personas.find((p) => p.empleadoId === personaElegida)?.nombre ?? '')
+        : '';
+    setResultados((m) => new Map(m).set(asignando.citaId, 'asignada'));
+    setAsignando(null);
+    mostrar({ variante: 'exito', texto: t('pizarra.asignada', { nombre }) });
+  }
+
+  /** Voz por código del verbo asignar — los tres esperables con voz
+   *  propia; el resto cae al genérico digno (Ley 3, cero códigos). */
+  function vozAsignar(codigo: CodigoAsignacionCita): string {
+    switch (codigo) {
+      case 'rol_sin_asignacion':
+        return t('pizarra.asignarSinRol');
+      case 'cita_ya_asignada':
+        return t('pizarra.laTomaron');
+      case 'persona_sin_oficio':
+        return t('pizarra.asignarSinOficio');
+      default:
+        return t('pizarra.noSePudo');
+    }
   }
 
   const citas = pantalla.estado === 'listo' ? pantalla.citas : [];
@@ -251,6 +344,19 @@ export default function Pizarra() {
                         /* La fila SE QUEDA y lo dice — nunca desaparece
                            sin explicación (decisión firmada). */
                         <Texto variante="dato">{t('pizarra.laTomaron')}</Texto>
+                      ) : res === 'asignada' ? (
+                        <Texto variante="dato">{t('pizarra.asignadaFila')}</Texto>
+                      ) : puedoAsignar ? (
+                        /* ⭐ S88-C: quien RUTEA no toma — recepción no tiene
+                           chips y «Tomar» le rebotaría seguro (Ley 23). El
+                           verbo se pinta por el espejo del motor. */
+                        <Boton
+                          variante="secundario"
+                          tamaño="sm"
+                          etiqueta={t('pizarra.asignar')}
+                          deshabilitado={asignando !== null}
+                          onPress={() => abrirAsignar(c)}
+                        />
                       ) : (
                         <Boton
                           variante="secundario"
@@ -269,6 +375,50 @@ export default function Pizarra() {
           </Tarjeta>
         )}
       </ScrollView>
+
+      {/* ⭐ S88-C · LA HOJA DEL VERBO — elegir quién atiende la huérfana.
+          El día y el servicio de la cita presiden (contexto, no adorno);
+          la lectura caída de personas SE DICE, jamás se disfraza de «no
+          hay nadie» (L-197). */}
+      <Hoja visible={asignando !== null} onCerrar={() => setAsignando(null)} titulo={t('pizarra.asignarQuien')}>
+        {asignando !== null && (
+          <View style={{ gap: spacing[3] }}>
+            <Texto variante="apoyo">
+              {`${diaEnVoz(asignando.fecha)} ${asignando.hora.slice(0, 5)} · ${
+                asignando.servicioVoz ?? t('pizarra.servicioSinVoz')
+              } · ${asignando.mascotaNombre}`}
+            </Texto>
+            {personas === null ? (
+              <EsqueletoGrupo>
+                <View style={{ gap: spacing[2] }}>
+                  <Esqueleto forma="linea" ancho="70%" />
+                  <Esqueleto forma="linea" ancho="55%" />
+                </View>
+              </EsqueletoGrupo>
+            ) : personas === 'error' ? (
+              <Texto variante="apoyo" color="danger">{t('pizarra.asignarSinPersonas')}</Texto>
+            ) : personas.length === 0 ? (
+              <Texto variante="apoyo">{t('pizarra.asignarNadie')}</Texto>
+            ) : (
+              <SelectorOpcion
+                etiqueta={t('pizarra.asignarQuien')}
+                disposicion="tira"
+                acento="oficio"
+                opciones={personas.map((p) => ({ codigo: p.empleadoId, etiqueta: p.nombre }))}
+                seleccionada={personaElegida}
+                onSelect={setPersonaElegida}
+              />
+            )}
+            <Boton
+              etiqueta={t('pizarra.asignarConfirmar')}
+              bloque
+              cargando={confirmando}
+              deshabilitado={personaElegida === undefined}
+              onPress={() => void confirmarAsignar()}
+            />
+          </View>
+        )}
+      </Hoja>
     </View>
   );
 }

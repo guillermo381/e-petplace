@@ -978,6 +978,18 @@ export const prestadorEs = {
     vacia: 'Nada por tomar — todo tiene tratante.',
     errorTitulo: 'No pudimos leer la pizarra',
     errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
+    // ⭐ S88-C (LÁMINA_HOME_POR_ROL) · EL VERBO DE RECEPCIÓN — quien
+    // rutea no toma. La Hoja elige a quién; el filtro por chip lo aplica
+    // el MOTOR (persona_sin_oficio) · LOTE S88, GATE PENDIENTE
+    asignar: 'Asignar',
+    asignarQuien: '¿Quién la atiende?',
+    asignarConfirmar: 'Asignar la cita',
+    asignadaFila: 'Asignada',
+    asignada: 'Lista — la cita es de {{nombre}}.',
+    asignarSinRol: 'No puedes asignar citas en este negocio.',
+    asignarSinOficio: 'Esa persona no atiende este servicio. Elige a alguien del oficio.',
+    asignarSinPersonas: 'No pudimos cargar a las personas del negocio. Cierra y prueba de nuevo.',
+    asignarNadie: 'No hay personas activas en el equipo todavía.',
     // Ley 3: el código de motor jamás se pinta.
     servicioSinVoz: 'Atención',
     hoy: 'Hoy',

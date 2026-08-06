@@ -96,7 +96,8 @@ import { vozCitaVet } from '@/lib/voz-cita-vet';
 import { vozOficio } from '@/lib/voz-oficio';
 import { duracionCorta, montoCorto } from '@/lib/formato-techo';
 import { TechoOficio, VeloBarraEstadoOficio } from '@/components/techo-oficio';
-import { AgendaRecepcion } from '@/components/agenda-recepcion';
+// ⏪ S88-C: el import de AgendaRecepcion salió con el desvío por rol
+// (LÁMINA_HOME_POR_ROL). El archivo vive hasta el veredicto del censo.
 import { FiltroOficio, type FiltroOficioValor } from '@/components/filtro-oficio';
 import { FirmaPrestador } from '@/components/firma-prestador';
 import { PreparaEspacio, type EstadoTareas } from '@/components/prepara-espacio';
@@ -106,10 +107,12 @@ import { useTraduccion } from '@/i18n';
 type Pantalla =
   | { estado: 'cargando' }
   | { estado: 'error'; mensaje: string }
-  // S78-B — LA PRIMERA COMPOSICIÓN POR ROL (D-521): el HOY de quien es
-  // RECEPCIÓN (miembro activo, no titular, CERO chips — la definición
-  // por AUSENCIA de la letra §1) es LA PUERTA, no la jornada de oficio.
-  | { estado: 'recepcion'; prestadorId: string; cuentaComercialId: string | null; titularId: string | null }
+  /* ⏪ S88-C (LÁMINA_HOME_POR_ROL) — ACÁ VIVÍA `estado: 'recepcion'`, el
+     desvío a `AgendaRecepcion` (S78-B, D-521). MUERE POR FIRMA: recepción
+     ve LA CONSOLIDADA con su verbo («ver completo y poder poco no es una
+     limitación — es la definición del mostrador»). El rol viaja ADENTRO
+     de 'listo' — resuelto ANTES de pintar (punto 1, el literal del
+     parpadeo): jamás una pantalla que aparece y se retracta. */
   | {
       estado: 'listo';
       /* ⭐ S86-C · `desde` y `hoy` SE SEPARAN, y es la cura que habilita el
@@ -153,6 +156,14 @@ type Pantalla =
        *  viaje nuevo. `null` = no se pudo leer ⇒ el techo NO inventa un
        *  número (Ley 13 / L-197: la ausencia se dice, jamás se dibuja como 0). */
       miEmpleadoId: string | null;
+      /** ⭐ S88-C (LÁMINA_HOME_POR_ROL) — EL ROL, resuelto ANTES de pintar.
+       *  gestor = titular O administrador (D-652: mandar al admin a
+       *  recepción es el producto diciéndole quién cree que es) ·
+       *  recepcion = activo, no gestor, CERO chips (definición por
+       *  AUSENCIA, letra §1) · profesional = el resto. Fallo de lectura de
+       *  chips ⇒ 'profesional' (conservador: un falso-recepción cambiaría
+       *  la voz del techo sobre un dato no confirmado). */
+      rol: 'gestor' | 'recepcion' | 'profesional';
       /** S79-B (T2-B1/B3): la identidad de la firma del modo preparación. */
       ciudad: string | null;
       logoPath: string | null;
@@ -729,34 +740,41 @@ export default function Hoy() {
       setPantalla({ estado: 'error', mensaje: prestador.mensaje });
       return;
     }
-    // ── S78-B · D-521, la primera composición por rol ──
-    // recepción ⟺ miembro activo, NO titular, CERO chips (§1: definida
-    // por AUSENCIA). Costo declarado: +3 viajes en todo arranque del HOY
-    // (D-497); la cura de raíz es un resolvedor de rol cacheado — pedido
-    // a A, no deducido acá. Ante CUALQUIER fallo de lectura se cae a la
-    // jornada normal: la RLS ya restringe lo que recepción puede ver, y
-    // un falso-recepción escondería la jornada del titular (peor).
+    /* ⭐ S88-C (LÁMINA_HOME_POR_ROL, punto 1) — EL ROL SE RESUELVE ACÁ,
+       ANTES de pintar, y el desvío a AgendaRecepcion MUERE por firma:
+       recepción ve LA CONSOLIDADA con su verbo. Costo declarado: los
+       mismos +3 viajes de S78 (D-497); la cura de raíz sigue siendo el
+       resolvedor cacheado, pedido a A.
+       ⏪ EL BUG QUE ESTA CONSOLIDACIÓN MATA (D-652, la tesis de la
+       lámina): el admin tiene CERO chips, así que la detección vieja
+       —«no titular + 0 chips = recepción»— lo mandaba a la puerta:
+       *mandarlo a recepción es el producto diciéndole quién cree que
+       es*. Ahora GESTOR se pregunta PRIMERO (titular O administrador) y
+       recién después la ausencia de chips dice recepción. */
     const miFila = await obtenerMiEmpleadoId(prestador.data.id);
-    // S80-B3: esTitular sale del gate de recepción y también gatea el
-    // módulo de preparación (abajo) — el titular lee su propia fila
-    // dueño, así que para él la resolución no cuesta ningún viaje nuevo.
     let esTitular = false;
+    let chipsCero: boolean | null = null; // null = fallo de lectura (no se afirma)
     if (miFila !== null) {
       const [titularFila, chipsR] = await Promise.all([
         obtenerTitularId(prestador.data.id),
         obtenerChipsEmpleado(miFila),
       ]);
       esTitular = titularFila !== null && titularFila === miFila;
-      if (!esTitular && chipsR.ok && chipsR.data.length === 0) {
-        setPantalla({
-          estado: 'recepcion',
-          prestadorId: prestador.data.id,
-          cuentaComercialId: prestador.data.cuenta_comercial_id,
-          titularId: titularFila,
-        });
-        return;
-      }
+      chipsCero = chipsR.ok ? chipsR.data.length === 0 : null;
     }
+    // el brazo admin: un solo viaje extra y SOLO para el no-titular —
+    // el mismo RPC que ya pagaba el módulo de preparación (se hoistea,
+    // no se duplica: abajo se consume `rol`).
+    let esGestor = esTitular;
+    if (!esGestor) {
+      const rolR = await empleadoTieneRol(prestador.data.id, ['dueño', 'administrador']);
+      esGestor = rolR.ok && rolR.data;
+    }
+    const rol: 'gestor' | 'recepcion' | 'profesional' = esGestor
+      ? 'gestor'
+      : chipsCero === true
+        ? 'recepcion'
+        : 'profesional';
     /* UN fetch cubre el rango entero (S57-B1). ⭐ S86-C: el rango pasa a
        hoy−3..hoy+6 — DIEZ días en el MISMO viaje, no diez viajes. Elegir un
        día sigue siendo un filtro sobre memoria, y la rueda sigue sin pedir
@@ -929,13 +947,10 @@ export default function Hoy() {
     // NOTA para el ADMINISTRADOR futuro (D-513 v2): serviciosOk lee por
     // los wrappers _own del titular — a un gestor no-titular le va a
     // mentir igual; se cura cuando ese rol gane motor.
-    let esGestor = esTitular;
-    if (!esGestor) {
-      const rolR = await empleadoTieneRol(prestador.data.id, ['dueño', 'administrador']);
-      esGestor = rolR.ok && rolR.data;
-    }
+    // ⭐ S88-C: la resolución de rol se HOISTEÓ al arranque del loader
+    // (LÁMINA_HOME_POR_ROL punto 1) — acá se consume, no se re-pregunta.
     let preparacion: EstadoTareas | null = null;
-    if (esGestor) {
+    if (rol === 'gestor') {
       const franjasR = await obtenerFranjasHorario(prestador.data.id);
       const horariosOk: boolean | null = franjasR.ok
         ? franjasR.data.some((f) => f.activo)
@@ -960,6 +975,7 @@ export default function Hoy() {
       nombreComercial: prestador.data.nombre_comercial,
       // S87-C: la fila ya resuelta arriba (gate de recepción) viaja al estado.
       miEmpleadoId: miFila,
+      rol,
       ciudad: prestador.data.ciudad,
       logoPath: prestador.data.foto_url,
       preparacion,
@@ -1464,21 +1480,25 @@ export default function Hoy() {
             { frase: t('techo.plataNoSePudo'), detalle: t('techo.plataNoSePudoDetalle') }
           : !p.visible
             ? /* ⭐ S87-C (LÁMINA BARRA DE TRES §1) — EL CANDADO NO SE EXPLICA:
-                 DESAPARECE. Acá vivía «Solo el titular» / «Owner only», y la
-                 razón de su muerte es la que hay que conservar aunque el
-                 diseño evolucione: **un candado en un lugar de paso informa;
-                 un candado en la PORTADA define.** Como saludo diario le
-                 recordaba a la persona lo que NO es, en el primer renglón de
-                 su casa, y encima ocupaba el lugar de lo único que sí necesita
-                 al abrir la app.
-                 ⚠️ EL GATE NO SE TOCA — y es la mitad que se malinterpreta
-                 fácil: `p.visible` sigue siendo la palabra del SERVIDOR
-                 (`obtener_plata_del_dia`, `titular OR admin`). No recomputo el
-                 permiso en el cliente ni miro `esGestor`: **cambia lo que ocupa
-                 el slot cuando el gate dice que no**, jamás quién decide.
-                 §3 es su contracara: en una RUTA a la que alguien navegó, el
-                 candado SÍ habla (GateAjeno) — ahí preguntó algo concreto. */
-              suDia
+                 DESAPARECE. Acá vivía «Solo el titular» / «Owner only»: un
+                 candado en un lugar de paso informa; en la PORTADA define.
+                 ⚠️ EL GATE NO SE TOCA: `p.visible` sigue siendo la palabra
+                 del SERVIDOR (`obtener_plata_del_dia`). Cambia lo que ocupa
+                 el slot cuando el gate dice que no — jamás quién decide.
+                 ⭐ S88-C (LÁMINA_HOME_POR_ROL §2/§3) — Y EL SLOT SE MODULA
+                 POR ROL: el PROFESIONAL ve su día («a tu cargo»); RECEPCIÓN
+                 y el ADMIN tienen la plata FIRMADA (excepción a L-198 /
+                 punto 2) pero el motor vivo aún dice `titular OR
+                 is_admin()` — MEDIDO en las migraciones: ninguna la
+                 ensanchó. 🛑 FRENO DECLARADO: hasta el ensanche de A, para
+                 ellos el slot dice la verdad transitoria del servidor
+                 («Solo el titular») en vez de un número que no va a llegar
+                 o un «a tu cargo» que no es su voz. Cuando A ensanche,
+                 `p.visible` se da vuelta SOLO y la plata aparece sin tocar
+                 una línea de acá. */
+              pantalla.rol === 'profesional'
+                ? suDia
+                : { frase: t('techo.plataSoloTitular'), detalle: t('techo.plataSoloTitularDetalle') }
             : {
                 valor: montoCorto(p.total ?? 0),
                 /* El total dice lo que sabe Y DECLARA LO QUE LE FALTA: con citas
@@ -1527,18 +1547,12 @@ export default function Hoy() {
   const esPrimera = (mascotaId: string) =>
     pantalla.estado === 'listo' && !pantalla.atendidas.has(mascotaId);
 
-  // S78-B: el HOY de recepción ES la Puerta — la composición entera
-  // vive en su componente; el techo del oficio no aplica (su jornada no
-  // es de oficio: es de la puerta del negocio).
-  if (pantalla.estado === 'recepcion') {
-    return (
-      <AgendaRecepcion
-        prestadorId={pantalla.prestadorId}
-        cuentaComercialId={pantalla.cuentaComercialId}
-        titularId={pantalla.titularId}
-      />
-    );
-  }
+  /* ⏪ S88-C (LÁMINA_HOME_POR_ROL) — acá vivía el desvío
+     `if (estado === 'recepcion') return <AgendaRecepcion …/>` (S78-B).
+     MUERE POR FIRMA: recepción ve la consolidada. El componente NO se
+     borra todavía — su jubilación espera el veredicto de mesa sobre las
+     huérfanas del censo (punto 7): la Puerta (llegadas), las solicitudes
+     del mostrador con reloj, y el verbo «Llegó». */
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
