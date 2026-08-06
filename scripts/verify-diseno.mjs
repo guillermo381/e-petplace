@@ -1578,6 +1578,10 @@ const FIXTURES = {
  *     archivo o un salto de import, `@epetplace/ui` incluido) y sus
  *     hitSlop NUMÉRICOS entran al mínimo. Un `hitSlop={expr}` no es
  *     legible estáticamente y NO baja el mínimo — límite declarado;
+ *   · la HUELLA-NOVEDAD del Badge NO es zona táctil (mismo Pressable,
+ *     oculta de a11y) — el gap de la lámina mide HERMANOS y la enmienda
+ *     pata-pisa (S89 orden 7: superpuesta, `right:0`) la metió entera al
+ *     glifo: ya ni asoma tinta al gap. Cero brazos nuevos.
  *   · NO mide punta a punta del render (eso es el gate en dispositivo
  *     con el nombre largo y en inglés — la otra línea de la lámina).
  *

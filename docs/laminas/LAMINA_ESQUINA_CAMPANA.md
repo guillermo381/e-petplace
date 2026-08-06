@@ -41,3 +41,22 @@ dedo real cae en la banda compartida y se abre lo que no era.
 **Y el caso peor del texto está nombrado a propósito:** `en` es más largo que
 `es` (*"Good morning, Guillermo"* vs *"Buenos días, Guillermo"*), y el título
 del prestador ya trunca a una línea compartiendo espacio con la insignia.
+
+---
+
+## ⚖️ NOTA DE ENMIENDA VECINA (S89-B, orden 7 — la pata pisa la campana)
+
+La enmienda de la LÁMINA DE LA CAMPANA (firmada en dispositivo, S89) movió la
+huella-novedad a SUPERPUESTA sobre el glifo. **Lo que le toca a ESTA lámina,
+medido:**
+
+- **El número congelado (20dp entre zonas táctiles) NO cambia** — la huella
+  no es zona táctil (vive en el mismo Pressable, oculta de a11y): el gap
+  siempre midió HERMANOS, y los hermanos siguen donde estaban.
+- **La geometría VISUAL mejora:** la posición vieja de la pata
+  (`top:-3 / right:-5`, absoluta DENTRO de la pieza) **asomaba 5dp de tinta
+  hacia el gap** — invisible para R32, porque el absoluto de la pieza no
+  afecta el layout que el guard lee. La posición superpuesta (`right: 0`)
+  la mete entera: **el gap recupera sus 20dp visuales completos.**
+- R32 queda SIN enmienda de brazos; su header gana la nota (el guard mide lo
+  táctil, y lo táctil no se movió).

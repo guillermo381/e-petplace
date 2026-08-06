@@ -1374,7 +1374,8 @@ function EjemploBadge() {
 
       {/* el estudio del MÍNIMO LEGIBLE — se firma en DISPOSITIVO (la
           condición de la lámina); acá viven las tres tallas para que el
-          gate sea una mirada: 10 · 12 (la elegida de la pieza) · 14 */}
+          gate sea una mirada: 10 · 12 · 14 — LA ELEGIDA PASÓ A 14 por la
+          enmienda pata-pisa (S89 orden 7: «apenas más grande»). */}
       <View style={{ flexDirection: 'row', gap: spacing[8], alignItems: 'flex-end' }}>
         {[10, 12, 14].map((lado) => (
           <View key={lado} style={{ alignItems: 'center', gap: spacing[1] }}>
