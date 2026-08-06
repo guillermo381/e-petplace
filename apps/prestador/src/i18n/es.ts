@@ -982,7 +982,14 @@ export const prestadorEs = {
     kpiPlataA11y: 'Ingresos de la semana. Ver el detalle.',
     // El hueco habla del PERMISO, no del dato: no falta información,
     // sobra audiencia.
-    kpiPlataSoloTitular: 'Solo el titular ve los ingresos',
+    // ⏪ S89-C — decía «Solo el titular ve los ingresos» y DESCRIBÍA DE
+    // MENOS desde 6f0738f: el motor del gemelo (obtener_datos_negocio)
+    // deja ver a titular, gestión Y mostrador — par 4/4; el único que lee
+    // este hueco es el profesional. Misma cura y MISMA VOZ que su hermano
+    // del HOY (S88-C, `hoy.plataSoloTitularDetalle`): la voz no se
+    // re-inventa. La key conserva su nombre como el hermano, con esta
+    // marca (renombrarla sola divergiría las dos casas del mismo gate).
+    kpiPlataSoloTitular: 'Los ingresos los ve quien está en el mostrador',
     diaPorDia: 'Día por día',
     graficaA11y: 'Atenciones por día de la semana, por servicio. {{n}} en total.',
     mixDelMes: 'El mix del mes',

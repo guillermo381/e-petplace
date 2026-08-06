@@ -730,7 +730,10 @@ export const prestadorEn = {
     kpiMes: '{{monto}} this month',
     kpiPlataParcial: '{{n}} with no price',
     kpiPlataA11y: "This week's earnings. See the detail.",
-    kpiPlataSoloTitular: 'Only the owner sees earnings',
+    // ⏪ S89-C — said 'Only the owner sees earnings' and UNDERSTATED since
+    // 6f0738f (owner, admin and front desk all see it). Same cure and
+    // SAME VOICE as its HOY sibling (S88-C, `hoy.plataSoloTitularDetalle`).
+    kpiPlataSoloTitular: 'Earnings are visible to whoever runs the front desk',
     diaPorDia: 'Day by day',
     graficaA11y: 'Visits per day of the week, by service. {{n}} in total.',
     mixDelMes: "This month's mix",
