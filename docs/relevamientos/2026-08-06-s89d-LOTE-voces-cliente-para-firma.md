@@ -32,9 +32,22 @@ sobreviven esta pasada.**
 **② «PUSH» EN `notifPermisoNegado`.** La enmienda de lámina firmada
 en el gate S88 mató «Push» como vocabulario del dueño (el canal se
 dice «En el teléfono»). Pero `notifPermisoNegado` todavía dice
-«…los avisos **push** no pueden llegar». **Propuesta a la firma:**
-«…los avisos en el teléfono no pueden llegar.» *(en: "…alerts on your
-phone can't arrive." en lugar de "push alerts").*
+«…los avisos **push** no pueden llegar». **El par COMPLETO propuesto
+a la firma** (espeja el vocabulario de los canales — «En el
+teléfono» / "On your phone"):
+
+> **es:** «El teléfono tiene apagadas las notificaciones de
+> e-PetPlace. Hasta que las actives en los ajustes del sistema, los
+> avisos en el teléfono no pueden llegar.»
+>
+> **en:** "Your phone has notifications turned off for e-PetPlace.
+> Until you turn them on in system settings, updates on your phone
+> can't arrive."
+
+*(La palabra "updates" del en queda atada a la decisión ③ — si el
+founder unifica en otra, este par la adopta en el mismo acto.
+"Notifications" en la primera frase se conserva: nombra el ajuste
+del SISTEMA, que sí se llama así en el teléfono.)*
 
 **③ LA PALABRA INGLESA PARA «AVISOS».** El en vivo usa DOS:
 «notices» (todo el marco `avisos.*`) y «updates» (`notifLey`,
