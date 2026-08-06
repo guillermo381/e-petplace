@@ -8102,3 +8102,36 @@ LÁMINA, no cura de código.**
 > tener consecuencia visible.
 
 **Origen: S88 (Lote 4 de D; distinción declarada por la mesa).**
+
+
+---
+
+#### D-666 — 🟢 EL FIXTURE DE LA CITA SIN PERSONA (Aurora) — declarado y con fecha de retiro
+
+**Sembrado por A el 5-ago para el dedo de C sobre la Hoja de asignar.**
+
+```
+cita      83f5f31f-2f9e-4aa1-9509-b93b75d2050c
+cuándo    2026-08-07 10:00  ·  consulta_general  ·  confirmada
+estado    empleado_id = NULL   ← «de la clínica» (§11(a))
+la Hoja   ofrece 3 personas
+```
+
+**Por qué el fixture es legítimo, y no un atajo:** el productor real de citas
+huérfanas —`dar_de_baja_empleado`— **nunca corrió en este negocio** (medido: 0
+citas con `empleado_id IS NULL` antes de esto). Y **lo que el gate mide es la
+LISTA que la Hoja ofrece**, no la puerta por la que la fila nació. *Fabricar el
+estado de entrada de un lector es legítimo; fabricar el estado de SALIDA de una
+puerta sería el fixture que da verde sobre una puerta que no existe (la trampa
+declarada de D-585).*
+
+**Lo que este fixture NO prueba, dicho antes de que alguien lo lea de más:** que
+`dar_de_baja_empleado` produzca correctamente el despegue. **Eso ya tiene su
+propio par** (S77, 7/7) y no se re-prueba acá.
+
+> **☠️ RETIRO:** cuando el gate de la Hoja pase, la cita vuelve a su fecha y
+> persona originales **o se declara adoptada como fixture permanente** — lo que
+> no puede es quedarse sin decidir. *Una cita futura de una mascota real que
+> nadie va a atender es dato falso esperando a que alguien lo lea.*
+
+**Origen: S88-A (pedido de la mesa para el dedo de C).**
