@@ -149,8 +149,9 @@ export function extraerConsultasDeFuente(src) {
  *  es el ÚNICO de los ocho que C no reescribió — la voz «Tu acceso al
  *  día a día todavía no está disponible» y su comentario «rama inerte
  *  hoy, muere cuando la puerta abra» siguen como en S75, y la puerta
- *  abrió. Hallazgo entregado a C (S89); vive como EXENTA marcada abajo
- *  para que el brazo ② no lo pierda de vista.
+ *  abrió. Hallazgo entregado a C (S89) → **CURADO S89-C**: la voz dice
+ *  el caso real (falta que el NEGOCIO esté activo, no la app), el octavo
+ *  sitio ganó su lápida, y la EXENTA que vivía abajo se retiró con él.
  *  ──────────────────────────────────────────────────────────────────── */
 
 /** LAS PREMISAS VIGILADAS. Cada una: qué declara · dónde lo declara ·
@@ -556,13 +557,11 @@ export const EXENTAS = [
   { archivo: 'apps/prestador/src/app/veterinaria/taller.tsx', literal: 'ACÁ DECÍA «inerte hasta la puerta', razon: 'lápida S87-C — cita del muerto de P1' },
   { archivo: 'apps/prestador/src/app/adiestramiento/taller.tsx', literal: 'ACÁ DECÍA «inerte hasta la puerta', razon: 'lápida S87-C — cita del muerto de P1' },
   { archivo: 'apps/prestador/src/app/(tabs)/mascotas.tsx', literal: 'ACÁ DECÍA «Hoy es inerte', razon: 'lápida S88-C — la cura del sitio de P2, con su porqué adentro (CADUCÓ EL 5-AGO)' },
-  /** ⚠️ NO ES LÁPIDA Y SE DICE: el residuo del retiro de P1 — la única
-   *  prosa de las ocho que C no reescribió («rama inerte hoy, muere
-   *  cuando la puerta abra» — y la puerta abrió en S75). Se exime para
-   *  no re-vigilar un eje ya adjudicado, NO porque no sea una premisa
-   *  vencida: el hallazgo viajó a C con el cierre S88 y esta línea se
-   *  RETIRA cuando C la cure. Si en S90 sigue acá, eso también es dato. */
-  { archivo: 'apps/prestador/src/i18n/es.ts', literal: 'rama inerte hoy', razon: 'RESIDUO del retiro de P1 — prosa vencida CON DUEÑO (C, S89); se retira al curarse' },
+  /** ⚰️ EL RESIDUO DE P1, CURADO (S89-C): acá vivía la exención de
+   *  `es.ts` («rama inerte hoy» — prosa vencida con dueño). C la curó en
+   *  S89: la voz dice el caso real (lo que falta es el NEGOCIO activo,
+   *  no la app) y la lápida se escribió SIN la palabra vigilada a
+   *  propósito — por eso esta entrada se RETIRA en vez de mutar. */
 ];
 
 /** Las raíces que el guard barre. Si esto se achica, el guard mide menos

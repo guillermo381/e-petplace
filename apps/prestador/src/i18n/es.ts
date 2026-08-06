@@ -63,12 +63,18 @@ export const prestadorEs = {
     registradoTitulo: 'Tu cuenta está lista',
     registradoDetalle:
       'Tu correo es {{email}}. Avísale a quien administra el negocio que te invite con ese correo — la invitación te aparece acá para aceptarla.',
-    // S75-B: el EMPLEADO ACTIVO esperando la puerta (rama inerte hoy, muere
-    // cuando la puerta abra). Voz honesta L-139: dice lo que ES verdad (ya
-    // sos parte) y lo que TODAVÍA no (el acceso al día a día), sin prometer.
+    // ⭐ S89-C — ACÁ DECÍA, desde S75: «el EMPLEADO ACTIVO esperando la
+    // puerta … muere cuando la puerta abra». La puerta abrió en S75 mismo
+    // (R1) y D-660/§4ter volvieron DISEÑO la llegada del no-titular — este
+    // era el último de los ocho sitios de P1 (censo de regresión) sin curar.
+    // La rama NO se retira (mesa S75: cambió de caso, no murió): hoy cubre
+    // al EMPLEADO ACTIVO de un negocio NO-'activo', y espera el lector que
+    // pueda leer ese nombre (hoy degrada a sinRol — ver _layout). La voz
+    // dejó de prometer «te avisamos»: dice el caso real — lo que falta no
+    // es la app, es que el NEGOCIO esté activo.
     empleadoTitulo: 'Ya eres parte de {{negocio}}',
     empleadoDetalle:
-      'Tu acceso al día a día del negocio todavía no está disponible en la app. Te avisamos cuando lo esté.',
+      'El negocio todavía no está activo en e-PetPlace. Cuando lo esté, entras directamente por acá.',
     reintentar: 'Probar de nuevo',
     cerrarSesion: 'Cerrar sesión',
     confirmacionCierre: '¿Cierras tu sesión? Tu trabajo queda guardado.',
@@ -107,8 +113,10 @@ export const prestadorEs = {
   },
   // S75-B1: EL HANDSHAKE — el invitado inactivo llega acá desde el raíz
   // (la sonda lo intercepta antes del "sin negocio"). Voz L-139: dice la
-  // verdad verificable, jamás promete un acceso que la puerta niega. El
-  // estado ACEPTADO reusa sesion.empleadoTitulo/Detalle (mismo mensaje).
+  // verdad verificable, jamás promete un acceso que la puerta niega.
+  // ⭐ S89-C — ACÁ DECÍA «el estado ACEPTADO reusa sesion.empleadoTitulo/
+  // Detalle»: ese estado murió (Ley 37, ver invitacion.tsx) — al aceptar,
+  // el guard re-resuelve y la persona entra. Nadie reusa esas keys.
   invitacion: {
     titulo: '{{negocio}} te sumó a su equipo',
     tituloSinNombre: 'Te sumaron a un equipo', // enmienda (b): nombre null
@@ -974,7 +982,14 @@ export const prestadorEs = {
     kpiPlataA11y: 'Ingresos de la semana. Ver el detalle.',
     // El hueco habla del PERMISO, no del dato: no falta información,
     // sobra audiencia.
-    kpiPlataSoloTitular: 'Solo el titular ve los ingresos',
+    // ⏪ S89-C — decía «Solo el titular ve los ingresos» y DESCRIBÍA DE
+    // MENOS desde 6f0738f: el motor del gemelo (obtener_datos_negocio)
+    // deja ver a titular, gestión Y mostrador — par 4/4; el único que lee
+    // este hueco es el profesional. Misma cura y MISMA VOZ que su hermano
+    // del HOY (S88-C, `hoy.plataSoloTitularDetalle`): la voz no se
+    // re-inventa. La key conserva su nombre como el hermano, con esta
+    // marca (renombrarla sola divergiría las dos casas del mismo gate).
+    kpiPlataSoloTitular: 'Los ingresos los ve quien está en el mostrador',
     diaPorDia: 'Día por día',
     graficaA11y: 'Atenciones por día de la semana, por servicio. {{n}} en total.',
     mixDelMes: 'El mix del mes',

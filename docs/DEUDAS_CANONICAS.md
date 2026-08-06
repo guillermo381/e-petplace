@@ -7067,7 +7067,27 @@ acotaciones).**
 
 ---
 
-#### D-656 — 🟠 UN TOQUE ACCIDENTAL AL WIZARD DE CUENTA COMERCIAL QUEMA A LA PERSONA PARA SIEMPRE
+#### D-656 — ✅ PAGADA (S89-C) — UN TOQUE ACCIDENTAL AL WIZARD DE CUENTA COMERCIAL QUEMA A LA PERSONA PARA SIEMPRE
+
+> **✅ PAGADA S89-C (6-ago-2026, migración `20260806120000_d656_la_cascara_vacia_se_retoma`),
+> por orden de apertura de la mesa y sobre la cura FIRMADA (opción 1).**
+> **Regla del literal primero, cumplida:** el bloqueo se REPRODUJO contra el
+> código vivo antes de curar (fixture in-txn, camino del JWT: cáscara
+> `pendiente_validacion` + `datos_bancarios '{}'` → `success=f · «Ya tienes
+> una cuenta comercial registrada…»`, residuo 0). **La forma de «SIN USO» no
+> depende del censo (L-169):** el helper `_cuenta_comercial_tiene_uso`
+> recorre EN VIVO las FKs entrantes de `cuentas_comerciales` contra
+> `pg_constraint` (hoy 21 tablas; toda FK futura entra sola). **Fixture
+> post-cura 6/6 con el par del discriminador:** la cáscara SE RETOMA (mismo
+> id, datos nuevos, `metadata.retomada_via`) · la propia identificación no
+> dispara F · con-uso REBOTA · activa REBOTA · el INSERT de siempre intacto ·
+> el duplicado ajeno REBOTA. proacl: helper sin `anon` ni `authenticated`
+> (L-140); el RPC conserva su ACL. Reversa escrita ANTES
+> (`docs/relevamientos/2026-08-06-s89c-REVERSA-d656.sql` — avisa que revertir
+> REABRE el bloqueo). `gen:types` en sync (+4 líneas, solo el helper).
+> **Lo que esta paga NO cubre (alcance declarado abajo): la celda
+> incondicional que OFRECE la puerta — superficie, viaja con el lote de
+> roles/barra de tres.**
 
 **Ficha propia por adjudicación del founder (S87): NO viaja con el lote de
 roles.** *Quema a cualquier usuario, con o sin rol — es contrato, no superficie.*

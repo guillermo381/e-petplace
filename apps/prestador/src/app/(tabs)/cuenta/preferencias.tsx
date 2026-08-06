@@ -11,9 +11,11 @@
  * · los canales en voz humana FIRMADOS por el founder (S88): «En el
  *   teléfono» · «Por correo» · «WhatsApp» · «En la app» — «push» no es
  *   vocabulario de nadie;
- * · una fila cuya categoría no tiene tipos vivos NO se muestra —
- *   derivado del catálogo (`tieneTiposVivos`), no de una lista a mano
- *   (hoy: `resumen`, medido con 0 tipos);
+ * · una fila cuya categoría no tiene tipos vivos PARA ESTA AUDIENCIA
+ *   NO se muestra — derivado del catálogo (`tieneTiposVivosParaMi`,
+ *   audiencia declarada 'prestador'), no de una lista a mano (hoy
+ *   ausentes: `resumen` con 0 tipos y `saldo_pagado` con 0 para
+ *   prestador — la firma de mesa S88 rige por DERIVACIÓN);
  * · acento «oficio» (§15b.1) y MarcaDeAgua de la casa.
  *
  * Lo que rige igual que en el cliente (lámina):
@@ -146,10 +148,20 @@ export default function PreferenciasCuenta() {
   }
   /** LA LÍNEA DE EJEMPLO por fila — la voz del OFICIO (excepción §6),
    *  FIRMADA por el founder (6-ago). `null` honesto para una categoría
-   *  sin línea firmada (no se inventa). ⚠️ `saldo_pagado` no tiene línea
-   *  A PROPÓSITO: la mesa firmó que esa fila NO se muestra al prestador
-   *  (sus tipos son del que paga) — el ocultamiento DERIVADO espera la
-   *  columna de audiencia en el catálogo (freno declarado a A). */
+   *  sin línea firmada (no se inventa).
+   *  ⭐ S89-C — ACÁ DECÍA que el ocultamiento de `saldo_pagado` «espera
+   *  la columna de audiencia (freno declarado a A)»: EL FRENO MURIÓ —
+   *  la columna llegó (`20260806010000`) y el filtro de abajo ya deriva
+   *  por `tieneTiposVivosParaMi` (A, `8b13f52`). La firma de mesa
+   *  («esa fila NO se muestra al prestador») rige por DERIVACIÓN, no
+   *  por lista — PAR medido S89-C contra el catálogo vivo:
+   *    saldo_pagado con audiencia prestador|ambas = 0  ⇒ fila AUSENTE
+   *    salud_seguridad con audiencia prestador|ambas = 2 ⇒ fila PRESENTE
+   *  (la pre-adjudicación VISIBLE de la mesa, cumplida por el dato).
+   *  `saldo_pagado` sigue sin línea A PROPÓSITO: si un tipo suyo naciera
+   *  para el prestador la fila aparecería sola — sería la FIRMA rota en
+   *  el catálogo, no acá; la premisa mecanizable quedó depositada a A
+   *  (mapa de destinos S89-C §4). */
   function vozEjemplo(codigo: string): string | null {
     switch (codigo) {
       case 'operacion': return t('miCuenta.notifEjOperacion');
