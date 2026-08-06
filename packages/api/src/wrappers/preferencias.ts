@@ -68,6 +68,15 @@ export interface CategoriaNotificacionCatalogo {
   /** Voz del catálogo (es) — fallback de display para un código que la
    *  pantalla no conozca todavía (Ley 3: jamás un código crudo). */
   descripcion: string;
+  /**
+   * Cuántos tipos VIVEN hoy en la categoría (`cat_notificacion_tipos`).
+   * Enmienda de lámina (firma founder, S88): una categoría con CERO
+   * tipos no se dibuja — un interruptor para algo que nunca va a llegar
+   * es un toggle que no controla nada (Ley 23). La fila aparece SOLA el
+   * día que su primer tipo exista: se deriva de acá, jamás de una
+   * lista a mano.
+   */
+  tiposVivos: number;
 }
 
 export interface CanalNotificacionCatalogo {
@@ -91,7 +100,7 @@ export async function obtenerCatalogoNotificaciones(): Promise<
   ResultadoWrapper<CatalogoNotificaciones, CodigoErrorPreferencias>
 > {
   const cliente = getClient();
-  const [cats, cans] = await Promise.all([
+  const [cats, cans, tipos] = await Promise.all([
     cliente
       .from('cat_notificacion_categorias')
       .select('codigo, orden, apagable_existencia, default_habilitada, descripcion')
@@ -100,10 +109,15 @@ export async function obtenerCatalogoNotificaciones(): Promise<
       .from('cat_notificacion_canales')
       .select('codigo, orden, es_piso, exige_evidencia, descripcion')
       .order('orden', { ascending: true }),
+    // El censo de habitantes por categoría — para la regla «cero tipos
+    // = la fila no se dibuja» (ver JSDoc de tiposVivos).
+    cliente.from('cat_notificacion_tipos').select('categoria'),
   ]);
-  if (cats.error || cans.error) {
+  if (cats.error || cans.error || tipos.error) {
     return { ok: false, codigo: 'error_preferencias', mensaje: MENSAJES.error_preferencias };
   }
+  const vivosPor: Record<string, number> = {};
+  for (const t of tipos.data) vivosPor[t.categoria] = (vivosPor[t.categoria] ?? 0) + 1;
   return {
     ok: true,
     data: {
@@ -113,6 +127,7 @@ export async function obtenerCatalogoNotificaciones(): Promise<
         apagableExistencia: c.apagable_existencia,
         defaultHabilitada: c.default_habilitada,
         descripcion: c.descripcion,
+        tiposVivos: vivosPor[c.codigo] ?? 0,
       })),
       // Un canal fuera del union conocido se angosta verificando (regla 34):
       // si el catálogo gana un canal nuevo, esta lista lo declara — la
