@@ -20,9 +20,10 @@
  * El exit se lee del COMANDO, jamás del pipe (L-191).
  */
 
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { execSync } from 'node:child_process';
+import { construirArbol, hitSlopsVecinos, autoPruebaArbol } from './lib-arbol-montaje.mjs';
 
 const RAICES = ['apps/cliente/src', 'apps/prestador/src'];
 const RAICES_UI = ['packages/ui/src/components', 'packages/ui/src/brand'];
@@ -1527,6 +1528,10 @@ const FIXTURES = {
         <Pressable hitSlop={10}><Destello /></Pressable>
       </View>`,
   }],
+  R33: [{
+    path: '(fixture)/campana-sin-superficie.tsx',
+    src: '<Badge n={3} forma="huella"><Icono nombre="campana" tinta={t} /></Badge>',
+  }],
   R24: [
     ...OFICIOS_R24.map((o) => ({ path: `apps/cliente/src/app/(tabs)/explorar/${o}/index.tsx`, src: '' })),
     {
@@ -1565,9 +1570,14 @@ const FIXTURES = {
  *   · dispara sobre archivos de apps que MONTAN el glifo `campana` —
  *     hoy CERO (C y D construyen contra esto): el conteo se imprime
  *     para que el silencio diga «nadie montó», no «no miré»;
- *   · la VENTANA es ±25 líneas alrededor del montaje — pareo por
- *     cercanía, no por árbol de montaje (el mismo límite declarado que
- *     M2: los falsos de ventana se ven acá, no se esconden);
+ *   · la VENTANA sigue siendo ±25 líneas para el gap y el ABSOLUTO (son
+ *     geometría de la FILA, y la convención de extraer la fila ya rige),
+ *     pero el brazo del hitSlop dejó de ser ciego al otro lado de la
+ *     extracción (S89-B): los componentes referenciados en la ventana se
+ *     RESUELVEN por el árbol de montaje (`lib-arbol-montaje.mjs` — mismo
+ *     archivo o un salto de import, `@epetplace/ui` incluido) y sus
+ *     hitSlop NUMÉRICOS entran al mínimo. Un `hitSlop={expr}` no es
+ *     legible estáticamente y NO baja el mínimo — límite declarado;
  *   · NO mide punta a punta del render (eso es el gate en dispositivo
  *     con el nombre largo y en inglés — la otra línea de la lámina).
  *
@@ -1579,6 +1589,20 @@ const VENTANA_R32 = 25;
 const GAP_MINIMO_R32 = 20; // el número congelado de la lámina (10+10)
 /** spacing keys cuyo valor alcanza N dp (los tokens legales para el gap). */
 const SPACING_R32 = { 5: 20, 6: 24, 7: 28, 8: 32, 10: 40, 12: 48, 14: 56, 16: 64, 20: 80, 24: 96, 28: 112, 32: 128 };
+
+/** El árbol de montaje para el brazo del hitSlop (S89-B) — se construye UNA
+ *  vez y SOLO tras pasar su auto-prueba: un grafo que no prueba su regla
+ *  no aporta mínimos (L-197). Si la auto-prueba falla, r32 lo dice en ROJO
+ *  en vez de medir con menos. */
+let _arbolR32 = null;
+function arbolR32() {
+  if (_arbolR32 === null) {
+    const fallas = autoPruebaArbol();
+    _arbolR32 = fallas.length > 0 ? { roto: fallas } : { arbol: construirArbol() };
+  }
+  return _arbolR32;
+}
+
 function r32(archivos) {
   const fallos = [];
   let montajes = 0;
@@ -1604,6 +1628,29 @@ function r32(archivos) {
       // el barrido por-brazo lo cazó MUDO: con la ropa JSX el mínimo se
       // quedaba en 20 y un hitSlop de 14 pasaba sin subirlo a 28.
       const slops = [...ventana.matchAll(/hitSlop[:=]\s*\{?\s*(\d+)/g)].map((m) => Number(m[1]));
+      // ②bis (S89-B) — los hitSlop que viven DENTRO de vecinos EXTRAÍDOS
+      // (p. ej. `IdentidadDelTecho`): la ventana no los veía; el árbol de
+      // montaje los resuelve. Sobre paths de fixture el árbol no tiene
+      // nodo y devuelve vacío — los fixtures no cambian de veredicto.
+      const estadoArbol = arbolR32();
+      let fuentesVecinos = [];
+      if (estadoArbol.roto !== undefined) {
+        fallos.push(
+          `${path}:${i + 1} — el árbol de montaje NO pasó su auto-prueba y el mínimo del hitSlop quedaría medido DE MENOS: ${estadoArbol.roto[0]} (L-197: no se mide con un instrumento roto)`,
+        );
+      } else if (!estadoArbol.arbol.archivos.has(path) && existsSync(path)) {
+        // EL ANCLA del brazo (L-192): un archivo REAL que el árbol no
+        // conoce = las convenciones de path divergieron y ②bis estaría
+        // devolviendo vacío para TODO — la ceguera vieja con ropa nueva.
+        // (Los paths de fixture no existen en disco y quedan fuera.)
+        fallos.push(
+          `${path}:${i + 1} — el árbol de montaje NO conoce este archivo real: el brazo del hitSlop de vecinos está midiendo DE MENOS en silencio (¿divergieron las raíces o la forma de los paths?)`,
+        );
+      } else {
+        const vecinos = hitSlopsVecinos(estadoArbol.arbol, path, ventana);
+        slops.push(...vecinos.valores);
+        fuentesVecinos = vecinos.fuentes;
+      }
       const minimo = Math.max(GAP_MINIMO_R32, 2 * Math.max(10, ...(slops.length ? slops : [10])));
 
       // ③ la separación LEGIBLE: gap por token de spacing en la ventana
@@ -1615,18 +1662,61 @@ function r32(archivos) {
         );
       } else if (mayor < minimo) {
         fallos.push(
-          `${path}:${i + 1} — el gap de la esquina es ${mayor}dp y el mínimo es ${minimo}dp (2 × hitSlop ${Math.max(10, ...(slops.length ? slops : [10]))}): dos zonas táctiles a menos de eso se pisan, el toque abre lo que no era y la persona cree que se equivocó ella (lámina de la esquina, número congelado)`,
+          `${path}:${i + 1} — el gap de la esquina es ${mayor}dp y el mínimo es ${minimo}dp (2 × hitSlop ${Math.max(10, ...(slops.length ? slops : [10]))}): dos zonas táctiles a menos de eso se pisan, el toque abre lo que no era y la persona cree que se equivocó ella (lámina de la esquina, número congelado)${fuentesVecinos.length > 0 ? ` · hitSlop resuelto por árbol: ${fuentesVecinos.join(' · ')}` : ''}`,
         );
       }
     });
   }
   return {
     fallos,
-    info: `${montajes} montaje(s) de campana en apps (hoy se espera 0 — C y D construyen contra esta regla) · ventana ±${VENTANA_R32} · mínimo 2×hitSlop (piso ${GAP_MINIMO_R32})`,
+    info: `${montajes} montaje(s) de campana en apps (las esquinas vivas de C y D) · ventana ±${VENTANA_R32} (gap/absoluto) · mínimo 2×hitSlop con vecinos EXTRAÍDOS resueltos por árbol de montaje (S89-B, piso ${GAP_MINIMO_R32})`,
   };
 }
 
-const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32 };
+/** R33 · LA SUPERFICIE DE LA HUELLA SE DECLARA (S89 — nacida del defecto
+ *  REAL que el paquete del gate censó y la orden 2 mandó curar:
+ *  `techo-oficio.tsx` montaba `forma="huella"` SIN `superficie`, y en el
+ *  prestador claro `accent.active` ES el hex del muro (tealDark ≡
+ *  tealDark, 1.00) — **la huella era invisible exactamente en su lugar
+ *  firmado, y el olvido no rompía nada ni se veía** (familia L-192; en
+ *  oscuro se salvaba de rebote, por eso ningún ojo lo vio).
+ *
+ *  LA REGLA: en APPS, todo montaje de `forma="huella"` DECLARA su
+ *  `superficie` — `"muro"` sobre el techo saturado · `"clara"` A
+ *  PROPÓSITO sobre papel. El default de la pieza queda para la galería y
+ *  los usos internos de ui (fuera de este corpus a propósito): lo que
+ *  esta regla mata es el DEFAULT SILENCIOSO en una pantalla, que es
+ *  exactamente el olvido que no se ve.
+ *
+ *  LÍMITE DECLARADO: lee el span del tag hasta su primer `>` — un
+ *  atributo con `=>` adentro lo truncaría (hoy: cero casos en los dos
+ *  montajes vivos).
+ *
+ *  ☠️ CONDICIÓN DE MUERTE: si `Badge` vuelve `superficie` OBLIGATORIA en
+ *  el tipo cuando `forma="huella"`, el tsc cubre esto y la regla se
+ *  retira con lápida. */
+function r33(archivos) {
+  const fallos = [];
+  let montajes = 0;
+  for (const { path, src } of archivos) {
+    const limpio = sinComentarios(src);
+    for (const m of limpio.matchAll(/<Badge\b[^>]*forma=["']huella["'][^>]*>/g)) {
+      montajes++;
+      if (!/\bsuperficie\s*=/.test(m[0])) {
+        const linea = limpio.slice(0, m.index).split('\n').length;
+        fallos.push(
+          `${path}:${linea} — \`forma="huella"\` SIN \`superficie\` declarada: el default 'clara' pinta accent.active, que sobre el muro claro del prestador ES el hex del muro — la huella desaparece en su lugar firmado y nada lo dice (el defecto real que la orden 2 de S89 curó; declarála: "muro" sobre el techo saturado, "clara" a propósito sobre papel)`,
+        );
+      }
+    }
+  }
+  return {
+    fallos,
+    info: `${montajes} montaje(s) de forma="huella" en apps — la superficie se DECLARA (el default silencioso mató una huella en S89)`,
+  };
+}
+
+const REGLAS = { R1: r1, R2: r2, R3: r3, R4: r4, R5: r5, R6: r6, R7: r7, R8: r8, R9: r9, R10: r10, R11: r11, R12: r12, R13: r13, R14: r14, R15: r15, R16: r16, R17: r17, R18: r18, R20: r20, R24: r24, R25: r25, R27: r27, R29: r29, R30: r30, R32: r32, R33: r33 };
 const INFORMATIVAS = new Set(['R9']); // sin modo de fallo, declarado (el porqué en su header)
 
 // ── GUARD ESTRUCTURAL (S82-B): ninguna regla escapa en silencio ──
@@ -1792,6 +1882,7 @@ corridas.push(['R30 (el glifo no se re-dibuja: apps contra el registry)', r30([.
 corridas.push(['R27 (el pink no enfoca en el prestador)', r27(FUENTES_R27)]);
 corridas.push(['R29 (sinPie no viaja solo)', r29(apps)]);
 corridas.push(['R32 (la esquina compartida: los 20dp de la lámina)', r32(apps)]);
+corridas.push(['R33 (la superficie de la huella se declara)', r33(apps)]);
 
 /** SEGUNDO GUARD ESTRUCTURAL (S82-B r35) — el hueco que encontré
  *  construyendo R24: una regla puede estar en REGLAS, tener su fixture,

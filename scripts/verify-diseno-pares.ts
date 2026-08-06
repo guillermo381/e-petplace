@@ -191,6 +191,14 @@ for (const [tema, t] of Object.entries(temas) as ['light' | 'dark' | 'lightOfici
     pares.push({ tema, clase: minimo >= 4.5 ? 'texto' : 'fill', nombre: `${nombre}/MURO`, ratio: contraste(fg, muro, muro), minimo })
   // El par FIRMADO de §15b.2: sobre el muro el acento funcional es PAPEL.
   sobreMuro('papel pleno (light0)', palette.light0, 4.5)
+  // ⚖️ EL ORO DE LA HUELLA (S89, orden 4 — firma del founder sobre la
+  // medición s89b): `Badge forma="huella"` pinta `ctaOro` sobre el muro
+  // (claro 3.41 · noche 5.95, gráfica funcional mín 3 — la excepción a
+  // §15b.2 la escribe A con el precedente magenta S83). El par entra al
+  // gate para que si el oro o el muro se mueven, el 3.41 no muera en
+  // silencio. Memorial no vive en este corpus, y ahí la pieza tampoco
+  // pinta oro (no se celebra; conserva papel) — coherente por diseño.
+  sobreMuro('huella-novedad oro (ctaOro, firma S89)', palette.ctaOro, 3)
   // Los que NO deben usarse ahí — entran para que su número EXISTA:
   // LOS VEDADOS ENTRAN COMO INFORMATIVOS (mínimo 0), y la distinción es
   // la que vuelve honesta a la regla: NO son regresiones que alguien deba

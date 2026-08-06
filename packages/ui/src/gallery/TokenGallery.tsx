@@ -1366,7 +1366,7 @@ function EjemploBadge() {
         ))}
       </View>
       <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary }}>
-        sobre el muro (claro · noche): izquierda el defecto (acento≡muro, invisible) · derecha superficie=&quot;muro&quot; → papel §15b.2
+        sobre el muro (claro · noche): izquierda el defecto (acento≡muro, invisible) · derecha superficie=&quot;muro&quot; → ORO firmado S89 (en memorial: papel — no se celebra)
       </Text>
       <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary }}>
         campana sin avisos · con avisos (huella, jamás número) · a 21px (§2.9) — label: “{etiquetaBadge('Avisos', 3, 'huella')}”
@@ -1383,6 +1383,34 @@ function EjemploBadge() {
           </View>
         ))}
       </View>
+
+      {/* ── ⚖️ EL ORO, FIRMADO (S89 orden 4, sobre la medición s89b —
+          firma del founder): sobre el MURO la huella es ORO `ctaOro`
+          (claro 3.41 · noche 5.95 · degradado del cliente peor punto
+          3.33); sobre PAPEL (1.62, NO pasa) y en MEMORIAL (no se
+          celebra) queda como antes. Las muestras de abajo son LA PIEZA
+          REAL — lo que se ve acá es lo que la pantalla pinta; con el
+          toggle en Memorial, el muro muestra PAPEL por construcción.
+          Depósito: docs/relevamientos/2026-08-06-s89b-MEDICION-oro-campana.md */}
+      <View style={{ flexDirection: 'row', gap: spacing[4], flexWrap: 'wrap' }}>
+        {([
+          ['muro claro · oro 3.41', palette.tealDark, 'muro'],
+          ['muro noche · oro 5.95', palette.tealDarkNoche, 'muro'],
+          ['papel · acento (oro 1.62 ✗ no rige)', palette.light0, 'clara'],
+        ] as const).map(([rotulo, fondo, superficie]) => (
+          <View key={rotulo} style={{ alignItems: 'center', gap: spacing[2] }}>
+            <View style={{ backgroundColor: fondo, borderRadius: radius.md, padding: spacing[4], borderWidth: 1, borderColor: theme.bg.border }}>
+              <Badge n={3} forma="huella" superficie={superficie}>
+                <Icono nombre="campana" tinta={superficie === 'muro' ? palette.light0 : palette.tinta} />
+              </Badge>
+            </View>
+            <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>{rotulo}</Text>
+          </View>
+        ))}
+      </View>
+      <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary }}>
+        el ORO #FCBC1D FIRMADO (S89 orden 4): rige en muro claro/noche y el degradado del cliente · papel y memorial quedan como hoy — la letra ganó al número
+      </Text>
     </View>
   )
 }

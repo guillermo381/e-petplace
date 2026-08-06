@@ -102,7 +102,7 @@ export const palette = {
    *  enmienda** — un color para los dos temas lo volvió innecesario.
    *  Reversa: `accent.cta` a `palette.textLight0` (claro) y
    *  `palette.textDark0` (oscuro), con sus ctaTexto. */
-  ctaOro:         '#FCBC1D',  // rgb(252,188,29) — H43 S97% L55%
+  ctaOro:         '#FCBC1D',  // rgb(252,188,29) — H43 S97% L55% · 2º consumidor S89 (firma orden 4): la huella-novedad del Badge SOBRE EL MURO (claro 3.41 · noche 5.95, pares en el gate; sobre papel 1.62 NO rige — ahí la huella sigue en acento por casa, y memorial no se celebra)
   /** S82-B r10 — CURA COORDINADA DEL TAPIZ: era #925F0C y vivía en
    *  **4.50 EXACTO** sobre su tinte SIN tapiz (el más frágil de los tres
    *  status — cualquier tinte lo tumbaba: 4.35 al 3%). Un paso más:
