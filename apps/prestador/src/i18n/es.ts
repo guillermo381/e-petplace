@@ -63,12 +63,18 @@ export const prestadorEs = {
     registradoTitulo: 'Tu cuenta está lista',
     registradoDetalle:
       'Tu correo es {{email}}. Avísale a quien administra el negocio que te invite con ese correo — la invitación te aparece acá para aceptarla.',
-    // S75-B: el EMPLEADO ACTIVO esperando la puerta (rama inerte hoy, muere
-    // cuando la puerta abra). Voz honesta L-139: dice lo que ES verdad (ya
-    // sos parte) y lo que TODAVÍA no (el acceso al día a día), sin prometer.
+    // ⭐ S89-C — ACÁ DECÍA, desde S75: «el EMPLEADO ACTIVO esperando la
+    // puerta … muere cuando la puerta abra». La puerta abrió en S75 mismo
+    // (R1) y D-660/§4ter volvieron DISEÑO la llegada del no-titular — este
+    // era el último de los ocho sitios de P1 (censo de regresión) sin curar.
+    // La rama NO se retira (mesa S75: cambió de caso, no murió): hoy cubre
+    // al EMPLEADO ACTIVO de un negocio NO-'activo', y espera el lector que
+    // pueda leer ese nombre (hoy degrada a sinRol — ver _layout). La voz
+    // dejó de prometer «te avisamos»: dice el caso real — lo que falta no
+    // es la app, es que el NEGOCIO esté activo.
     empleadoTitulo: 'Ya eres parte de {{negocio}}',
     empleadoDetalle:
-      'Tu acceso al día a día del negocio todavía no está disponible en la app. Te avisamos cuando lo esté.',
+      'El negocio todavía no está activo en e-PetPlace. Cuando lo esté, entras directamente por acá.',
     reintentar: 'Probar de nuevo',
     cerrarSesion: 'Cerrar sesión',
     confirmacionCierre: '¿Cierras tu sesión? Tu trabajo queda guardado.',
@@ -107,8 +113,10 @@ export const prestadorEs = {
   },
   // S75-B1: EL HANDSHAKE — el invitado inactivo llega acá desde el raíz
   // (la sonda lo intercepta antes del "sin negocio"). Voz L-139: dice la
-  // verdad verificable, jamás promete un acceso que la puerta niega. El
-  // estado ACEPTADO reusa sesion.empleadoTitulo/Detalle (mismo mensaje).
+  // verdad verificable, jamás promete un acceso que la puerta niega.
+  // ⭐ S89-C — ACÁ DECÍA «el estado ACEPTADO reusa sesion.empleadoTitulo/
+  // Detalle»: ese estado murió (Ley 37, ver invitacion.tsx) — al aceptar,
+  // el guard re-resuelve y la persona entra. Nadie reusa esas keys.
   invitacion: {
     titulo: '{{negocio}} te sumó a su equipo',
     tituloSinNombre: 'Te sumaron a un equipo', // enmienda (b): nombre null

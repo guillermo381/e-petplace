@@ -52,12 +52,14 @@ export const prestadorEn = {
     registradoTitulo: 'Your account is ready',
     registradoDetalle:
       'Your email is {{email}}. Let whoever runs the business know they can invite you with that email — the invitation shows up right here for you to accept.',
-    // S75-B: the ACTIVE employee waiting for the door (inert today, dies
-    // when the door opens). Honest voice L-139: says what IS true and what
-    // is NOT yet, promising nothing.
+    // ⭐ S89-C — mirror of es.ts: the door opened in S75 (R1); this branch
+    // now covers the ACTIVE employee of a business that is NOT 'activo'
+    // yet, waiting for its reader (today it degrades to sinRol). The voice
+    // stopped promising "we'll let you know": what's missing is the
+    // BUSINESS being active, not the app.
     empleadoTitulo: "You're now part of {{negocio}}",
     empleadoDetalle:
-      "Access to the day-to-day of the business isn't available in the app yet. We'll let you know when it is.",
+      "The business isn't active on e-PetPlace yet. Once it is, you'll come in right here.",
     reintentar: 'Try again',
     cerrarSesion: 'Sign out',
     confirmacionCierre: 'Signing out? Your work stays saved.',
