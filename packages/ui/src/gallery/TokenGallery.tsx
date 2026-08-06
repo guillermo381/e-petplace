@@ -1383,6 +1383,39 @@ function EjemploBadge() {
           </View>
         ))}
       </View>
+
+      {/* ── EL ESTUDIO DEL ORO (S89-B, enmienda ⑦ — MEDICIÓN SERVIDA; el
+          PINTADO espera su gate, esto es galería/instrumento y no toca
+          producto): la huella a `palette.ctaOro` sobre las cuatro
+          superficies donde vive. Ratios de `scripts/medir-oro-campana.mjs`
+          (mín 3.0 no-textual): muro claro 3.41 · muro noche 5.95 ·
+          papel 1.62 (NO PASA — el rojo se muestra A PROPÓSITO, mismo
+          precedente que el par del defecto de arriba) · memorial 10.40.
+          El depósito con las declaraciones de ley:
+          docs/relevamientos/2026-08-06-s89b-MEDICION-oro-campana.md */}
+      <View style={{ flexDirection: 'row', gap: spacing[4], flexWrap: 'wrap' }}>
+        {([
+          ['muro claro · 3.41', palette.tealDark, palette.light0],
+          ['muro noche · 5.95', palette.tealDarkNoche, palette.light0],
+          ['papel · 1.62 ✗', palette.light0, palette.tinta],
+          ['memorial · 10.40', palette.memorialDark1, palette.light0],
+        ] as const).map(([rotulo, fondo, trazo]) => (
+          <View key={rotulo} style={{ alignItems: 'center', gap: spacing[2] }}>
+            <View style={{ backgroundColor: fondo, borderRadius: radius.md, padding: spacing[4], borderWidth: 1, borderColor: theme.bg.border }}>
+              <View>
+                <Icono nombre="campana" tinta={trazo} />
+                <View style={{ position: 'absolute', top: -3, right: -5 }}>
+                  <Svg width={12} height={12} viewBox="0 0 24 24"><Huella color={palette.ctaOro} /></Svg>
+                </View>
+              </View>
+            </View>
+            <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>{rotulo}</Text>
+          </View>
+        ))}
+      </View>
+      <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary }}>
+        estudio del ORO #FCBC1D (enmienda ⑦ — medición servida, pintado espera gate) · mín 3.0 no-textual
+      </Text>
     </View>
   )
 }
