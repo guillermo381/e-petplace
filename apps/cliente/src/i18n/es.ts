@@ -1092,6 +1092,19 @@ export const clienteEs = {
     notifFilaRelacional: 'Mensajes y respuestas',
     notifFilaResumen: 'Resúmenes',
     notifFilaComercial: 'Novedades y ofertas',
+    // Los EJEMPLOS por fila (enmienda de lámina FIRMADA, gate S88 —
+    // propuestos contra el catálogo VIVO y firmados por el founder con
+    // dos cambios: seguridad dice lo que le importa a la persona, no
+    // funciones; comercial dice qué se gana al encenderla). «Resúmenes»
+    // NO tiene key a propósito: su fila no se dibuja hasta que la
+    // categoría tenga un tipo vivo (tiposVivos, Ley 23) — cuando nazca
+    // su primer digest, la fila aparece sola y su ejemplo se escribe.
+    notifEjOperacion: 'Recordatorios y confirmaciones de citas, tus pagos y pedidos.',
+    notifEjSaludSeguridad: 'Vacunas por vencer y alertas de salud de tus mascotas.',
+    notifEjSeguridadCuenta: 'Si alguien entra a tu cuenta o cambia tu contraseña.',
+    notifEjSaldoPagado: 'Paquetes o planes que pagaste y están por vencer o renovarse.',
+    notifEjRelacional: 'Mensajes nuevos de quienes cuidan a tus mascotas.',
+    notifEjComercial: 'Promociones, descuentos y novedades de e-PetPlace.',
     notifPorqueSaludSeguridad: 'Estos avisos siempre llegan. Elegís por dónde, no si te llegan.',
     notifPorqueSeguridadCuenta: 'Los avisos de tu cuenta siempre llegan. Elegís por dónde.',
     notifPorqueSaldoPagado: 'Si algo que ya pagaste está por vencer, te avisamos siempre.',

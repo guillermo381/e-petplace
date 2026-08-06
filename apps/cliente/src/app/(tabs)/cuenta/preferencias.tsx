@@ -132,6 +132,21 @@ export default function PreferenciasCuenta() {
       default: return fallback;
     }
   }
+  // El EJEMPLO por fila (enmienda de lámina firmada, gate S88): qué
+  // avisaría esta categoría, con los tipos que DE VERDAD la habitan.
+  // Sin key para un código nuevo → null y la fila va sin ejemplo (el
+  // ejemplo se escribe cuando la fila exista, no se inventa).
+  function vozEjemplo(codigo: string): string | null {
+    switch (codigo) {
+      case 'operacion': return t('cuenta.notifEjOperacion');
+      case 'salud_seguridad': return t('cuenta.notifEjSaludSeguridad');
+      case 'seguridad_cuenta': return t('cuenta.notifEjSeguridadCuenta');
+      case 'saldo_pagado': return t('cuenta.notifEjSaldoPagado');
+      case 'relacional': return t('cuenta.notifEjRelacional');
+      case 'comercial': return t('cuenta.notifEjComercial');
+      default: return null;
+    }
+  }
   // Las TRES voces del porqué — firmadas en la lámina §3.
   function vozPorque(codigo: string): string | null {
     switch (codigo) {
@@ -277,7 +292,15 @@ export default function PreferenciasCuenta() {
               accion={<Boton variante="secundario" etiqueta={t('cuenta.reintentar')} onPress={() => { setEstado('cargando'); setIntento((n) => n + 1); }} />}
             />
           ) : (
-            catalogo.categorias.map((cat) => {
+            catalogo.categorias
+              // Enmienda de lámina (firma founder, S88): una categoría
+              // con CERO tipos vivos NO se dibuja — un interruptor para
+              // algo que nunca va a llegar es un toggle que no controla
+              // nada (Ley 23). Derivado del catálogo: el día que nazca
+              // el primer tipo (hoy, el primer digest de «Resúmenes»),
+              // la fila aparece sola.
+              .filter((cat) => cat.tiposVivos > 0)
+              .map((cat) => {
               const canales = catalogo.canales.map((c) => c.codigo);
               const encendida = filaEncendida({
                 canales,
@@ -286,6 +309,7 @@ export default function PreferenciasCuenta() {
                 defaultCategoria: cat.defaultHabilitada,
               });
               const porque = cat.apagableExistencia ? null : vozPorque(cat.codigo);
+              const ejemplo = vozEjemplo(cat.codigo);
               const seleccionadas = canales.filter((canal) => {
                 const efectiva = preferenciaEfectiva({
                   persistida: persistidas[`${cat.codigo}:${canal}`],
@@ -315,6 +339,15 @@ export default function PreferenciasCuenta() {
                         />
                       ) : null}
                     </View>
+
+                    {/* El ejemplo BAJO EL TÍTULO (forma autorizada por el
+                        founder): en las no apagables el ejemplo arriba y
+                        el porqué abajo, cerrando la fila. */}
+                    {ejemplo !== null ? (
+                      <Text style={{ fontFamily: typography.family.sans.regular, fontSize: typography.size.sm, lineHeight: typography.size.sm * 1.4, color: theme.text.secondary }}>
+                        {ejemplo}
+                      </Text>
+                    ) : null}
 
                     {/* Chips de canal — grilla: ENVUELVE, no trunca
                         (lámina §6; truncar «WhatsApp» es D-576). */}
