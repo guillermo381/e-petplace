@@ -8438,3 +8438,90 @@ hecho**, y **quien hizo el alta no recibía ninguno**.
 mesa): se escriben cuando cada una tenga su receptor real y verificado.
 
 **Origen: S88-A (lote de voces).**
+
+---
+
+#### D-669 — 🔴 EL PLAN MUERE AL PRIMER FALLO DE COBRO: NO HAY GRACIA NI REINTENTO
+
+**El literal, en el `EXCEPTION` de `cerrar_y_renovar_planes`:**
+
+```sql
+EXCEPTION WHEN OTHERS THEN
+  v_errores := v_errores + 1;
+  UPDATE suscripciones_servicio
+  SET estado = 'vencida',                    -- ← AL PRIMER FALLO
+      pago_metadata = pago_metadata || jsonb_build_object(
+        'renovacion_fallida', jsonb_build_object('error', SQLERRM, 'en', now()))
+  WHERE id = v_susc.id AND periodo_fin <= v_hoy;
+```
+
+**Cero período de gracia. Cero reintento. Un solo intento y el plan se acabó.**
+*Y las citas del período nuevo nunca nacen, porque la renovación es lo que las
+crea.*
+
+### ⚖️ LA LECTURA DE PRODUCTO DEL FOUNDER (para su gate)
+
+> ### **UNA TARJETA VENCIDA NO ES LA DECISIÓN DE UN CLIENTE DE DEJAR DE CUIDAR A SU MASCOTA.**
+> **El costo de reintentar es cero comparado con perder la relación.**
+
+**La forma firmada, a construir:** el plan **NO muere al primer fallo** —
+período de gracia · **las citas ya agendadas se respetan** · y la voz dice
+**qué queda vigente y hasta cuándo**.
+
+### Por qué la voz espera a la cura, y no al revés
+
+`plan_renovacion_fallida` **no se puede escribir hoy**: no sé qué decir porque
+no sé qué queda vigente. *Un aviso que dice «hubo un problema» sin decir qué
+sobrevive obliga a llamar — y sobre el motor de hoy, cualquier promesa de
+continuidad sería falsa.*
+
+> **Una voz que miente con buena redacción es peor que ninguna.**
+
+**La voz nace CON la cura. En el mismo lote, nunca antes.**
+
+> **☠️ DISPARO: antes del soft launch (1-oct).** *Hoy no sangra porque hay una
+> sola suscripción viva y su cobro es simulado — pero el día que el cobro sea
+> real, el primer rechazo de tarjeta borra un plan.*
+> **☠️ MUERTE:** un fallo de cobro deja el plan en gracia con sus citas en pie,
+> y `plan_renovacion_fallida` sale diciendo hasta cuándo.
+
+**Origen: S88-A (medición pedida por la mesa al frenar la voz).**
+
+
+---
+
+#### D-539 — ENMIENDA S88: el voseo de los avisos del prestador, curado · y los DOS mecanismos de voz, declarados
+
+**Curado (`20260805340000`):** cuatro literales a tuteo neutro (L-148).
+
+```
+«Ya podés operar»        → «Ya puedes operar»
+«Revisá el motivo»       → «Revisa el motivo»
+«Revisalas en tu perfil» → «Revísalas en tu perfil»   (+ la tilde que faltaba)
+«Contactá soporte»       → «Contacta a soporte»
+```
+
+> **⚠️ Y una corrección de A a su propio reporte: son CUATRO, no seis.** El
+> lote de voces dijo «las seis inline vosean»; la medición dice que las dos de
+> `documento_*` están bien. *Un número inflado en un acta es la misma clase de
+> dato falso que este canon caza en el código, y se corrige igual.*
+
+### 🟠 LO QUE **NO** SE CURÓ, y es lo que queda de esta deuda
+
+**Esas seis voces viven INLINE y son SOLO ESPAÑOL.** Pasan por
+`_notificar_dueño_prestador`, un mecanismo **distinto** de `_voz_notificacion`
+—que sí resuelve idioma por `user_preferencias`—.
+
+> ### **SON DOS MECANISMOS DE VOZ CONVIVIENDO.**
+> *Y esta casa ya sabe cómo termina eso: el día que alguien cambie el criterio
+> de la voz, va a cambiarlo en uno.* **Igual que las dos letras firmadas que se
+> contradicen: cualquiera cita la que le conviene y está «en regla».**
+
+**No se unifica hoy** porque cambiar el contrato de `_notificar_dueño_prestador`
+es un lote aparte —toca dos triggers y su firma—. **Se declara con su
+condición.**
+
+> **☠️ CONDICIÓN DE MUERTE (enmendada S88):** existe **UN** mecanismo de voz, y
+> las seis del prestador hablan los dos idiomas.
+> **☠️ DISPARO:** el lote que saque de sombra cualquiera de los seis tipos
+> `documento_*` / `prestador_*` — *no pueden salir al aire en un solo idioma.*
