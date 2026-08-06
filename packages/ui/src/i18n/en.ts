@@ -125,6 +125,7 @@ export const uiEn = {
   // S88-B — Badge (extracted from BarraTabs)
   badge: {
     pendientes: '{{etiqueta}}, {{n}} pending',
+    sinLeer: '{{etiqueta}}, unread notices',
   },
   sliderPrecio: {
     editarHint: 'Tap the value to type it',

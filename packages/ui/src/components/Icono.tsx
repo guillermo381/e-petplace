@@ -112,6 +112,12 @@ export type IconoNombre =
   //   GATE A 21px: se separan CONTANDO barras, y contar a 21px es lo que
   //   puede fallar.
   | 'semana' | 'mes'
+  // S88 — LA CAMPANA (lámina firmada 5-ago). Glifo de OBJETO en trazo:
+  // su huella NO vive adentro — vive en el Badge cuando hay avisos (la
+  // ley del único relleno aplicada AL PAR: campana en trazo + huella
+  // rellena en la esquina). NO es «glifo de control»: §6bis sigue
+  // pendiente y esta entrada no la funda ni la toca.
+  | 'campana'
 export type IconoRegistro = 'capa' | 'aa' | 'tinta'
 
 const TRAZO = 1.9
@@ -553,6 +559,22 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
     </>
   ),
 
+  // ── LA CAMPANA (S88, lámina firmada) ──────────────────────────────
+  // Geometría: la campana S43 del Encabezado — probada a 21px en su
+  // gate original — re-portada al trazo 1.9 del registry (la referencia
+  // venía en 1.75; acá manda TRAZO). Domo + badajo, remates redondeados.
+  // EL `huella` QUEDA SIN USAR A PROPÓSITO y no es un olvido: el par
+  // campana+novedad reparte la ley del único relleno — el objeto va en
+  // TRAZO y la huella RELLENA aparece en el Badge SOLO cuando hay
+  // avisos sin leer (regla de existencia). Una huella fija adentro
+  // diría «siempre hay novedad», que es mentir con geometría.
+  campana: ({ tinta }) => (
+    <>
+      <Path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" {...trazo(tinta)} />
+      <Path d="M13.7 20.6a2 2 0 0 1-3.4 0" {...trazo(tinta)} />
+    </>
+  ),
+
   mes: ({ tinta, huella }) => (
     <>
       <Path d="M6 6.4h12a1.6 1.6 0 0 1 1.6 1.6v11.4a1.6 1.6 0 0 1-1.6 1.6H6a1.6 1.6 0 0 1-1.6-1.6V8A1.6 1.6 0 0 1 6 6.4Z" {...trazo(tinta)} />
@@ -969,6 +991,10 @@ export function Icono({
     // control resuelve a tinta a propósito: pedirle capa no lo tiñe.
     lapiz: { pura: colorTinta, aa: colorTinta },
     compartir: { pura: colorTinta, aa: colorTinta },
+    // S88 — la campana: OBJETO sin capa (un aviso no pertenece a un
+    // oficio) ⇒ tinta en los dos registros, como los controles — sin
+    // fundar §6bis: el criterio acá es «sin capa de la que tomar color».
+    campana: { pura: colorTinta, aa: colorTinta },
   }
 
   // §2.8 memorial: la huella a tinta secundaria, el trazo se conserva.

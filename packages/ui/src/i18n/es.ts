@@ -154,6 +154,7 @@ export const uiEs = {
   // al tocarse — el «pendientes» estaba hardcodeado en la barra desde S43)
   badge: {
     pendientes: '{{etiqueta}}, {{n}} pendientes',
+    sinLeer: '{{etiqueta}}, avisos sin leer',
   },
   sliderPrecio: {
     editarHint: 'Toca el valor para escribirlo',

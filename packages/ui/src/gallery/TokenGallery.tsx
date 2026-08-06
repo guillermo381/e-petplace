@@ -1321,6 +1321,7 @@ function EjemploSelectorAvatar() {
 function EjemploBadge() {
   const { theme } = useTheme()
   const etiquetaBadge = useEtiquetaBadge()
+  const accentActive = 'active' in theme.accent ? theme.accent.active : theme.accent.primary
   // n=0 NO dibuja nada (regla de existencia) · la pill se esconde de a11y:
   // el número viaja en el label del tocable (mostrado abajo, literal)
   const glifo = (n: number) => (
@@ -1338,6 +1339,33 @@ function EjemploBadge() {
       <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary }}>
         n=0 · n=3 · n=12 — label del tocable: “{etiquetaBadge('Avisos', 3)}”
       </Text>
+
+      {/* ── LA CAMPANA + LA HUELLA-NOVEDAD (S88, lámina firmada) ─────
+          El PAR de la ley del único relleno: campana en TRAZO, huella
+          RELLENA solo cuando hay avisos. Jamás número, jamás rojo de
+          alarma, jamás anima. */}
+      <View style={{ flexDirection: 'row', gap: spacing[8], alignItems: 'center' }}>
+        <Badge n={0} forma="huella"><Icono nombre="campana" tinta={theme.text.primary} huella={theme.text.secondary} /></Badge>
+        <Badge n={3} forma="huella"><Icono nombre="campana" tinta={theme.text.primary} huella={theme.text.secondary} /></Badge>
+        <View style={{ width: 21 }}>
+          <Badge n={3} forma="huella"><Icono nombre="campana" tamano={21} tinta={theme.text.primary} huella={theme.text.secondary} /></Badge>
+        </View>
+      </View>
+      <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, letterSpacing: typography.tracking.mono, color: theme.text.tertiary }}>
+        campana sin avisos · con avisos (huella, jamás número) · a 21px (§2.9) — label: “{etiquetaBadge('Avisos', 3, 'huella')}”
+      </Text>
+
+      {/* el estudio del MÍNIMO LEGIBLE — se firma en DISPOSITIVO (la
+          condición de la lámina); acá viven las tres tallas para que el
+          gate sea una mirada: 10 · 12 (la elegida de la pieza) · 14 */}
+      <View style={{ flexDirection: 'row', gap: spacing[8], alignItems: 'flex-end' }}>
+        {[10, 12, 14].map((lado) => (
+          <View key={lado} style={{ alignItems: 'center', gap: spacing[1] }}>
+            <Svg width={lado} height={lado} viewBox="0 0 24 24"><Huella color={accentActive} /></Svg>
+            <Text style={{ fontFamily: mono.regular, fontSize: typography.size.xs, color: theme.text.tertiary }}>{lado}</Text>
+          </View>
+        ))}
+      </View>
     </View>
   )
 }
