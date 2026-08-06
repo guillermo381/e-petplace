@@ -106,9 +106,18 @@ intenciones vivas ....... 1 (la del gate del primer envío, y ahora visible en l
 residuo de fixtures ..... 0
 ```
 
-### ⏳ LO ÚNICO QUE FALTA: EL ÚLTIMO DEDO
+### ✅ EL ÚLTIMO DEDO — **VERDE** (6-ago-2026)
 
-**Sobre el bundle `8b13f52` corre el último gate de la sesión:** la campana del
+**La campana aparece y funciona en LAS DOS APPS.** *S88 cierra con su
+verificación adentro, no con su promesa.*
+
+**Y el mismo dedo confirmó D-673:** el founder creó una cita real y **no le
+llegó ni correo ni campana**. → *el motor entero construido, gateado y vivo, y
+el aviso más obvio del oficio no existe **porque nadie toca el timbre**.*
+
+---
+
+**Lo que corrió sobre el bundle `8b13f52`:** la campana del
 CLIENTE (avisos + techo con la huella) **y el registro completo** — *un aviso
 entregado por correo tiene que aparecer también en la campana.*
 

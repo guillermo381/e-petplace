@@ -8669,4 +8669,23 @@ audiencia ya está clasificada así).
 > **☠️ MUERTE:** una cita confirmada produce su aviso, con su voz firmada y su
 > par leído en la sombra.
 
+### 🔴 LA EVIDENCIA QUE LA CONFIRMÓ — el founder, con su propio uso
+
+**En el gate final creó una cita REAL. No le llegó ni correo ni campana.**
+
+> ### **EL MOTOR ENTERO CONSTRUIDO, GATEADO Y VIVO — Y EL AVISO MÁS OBVIO DEL OFICIO NO EXISTE, PORQUE NADIE TOCA EL TIMBRE.**
+> **No falta voz. No falta canal. Falta el PRODUCTOR.**
+
+*Es la mejor evidencia que esta deuda va a tener, y conviene entender por qué:
+todo lo demás estaba verde. El kill switch probado, el transporte vivo, la
+campana en pantalla en las dos apps, la voz firmada, el canal resolviendo bien.
+**Un tablero entero en verde alrededor de un hecho que nunca ocurre.***
+
+**Y explica por qué no lo cazó ningún par:** los pares prueban que lo que se
+registra se entrega. **Ninguno pregunta si algo se registra.** *Un motor de
+notificaciones se verifica de punta a punta desde el HECHO, no desde la
+intención — y esa punta no la habíamos recorrido.*
+
+**D-673 ENCABEZA S89.**
+
 **Origen: S88 (gate final del founder, por su propio uso).**
