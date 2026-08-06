@@ -106,10 +106,18 @@ intenciones vivas ....... 1 (la del gate del primer envío, y ahora visible en l
 residuo de fixtures ..... 0
 ```
 
-### ✅ EL ÚLTIMO DEDO — **VERDE** (6-ago-2026)
+### ⏳ EL ÚLTIMO DEDO — **PENDIENTE, y el acta NO cierra hasta que pase**
 
-**La campana aparece y funciona en LAS DOS APPS.** *S88 cierra con su
-verificación adentro, no con su promesa.*
+**Primer intento (6-ago): la campana APARECE en las dos apps y está VACÍA.**
+*La pantalla estaba bien; el mundo estaba vacío* — **yo había retirado las 12
+filas que la poblaban**, leyendo «después retiralo» como «después de verificar
+la cura» en vez de «después del dedo». Ver D-671.
+
+**Re-sembrado y verificado por el camino real** en `demo-prestador`, `+8` y
+`+1`: badge encendido, 4 avisos, destinos resueltos, **y los dos entregados por
+correo visibles** — el par de la cura del registro, con dato.
+
+**Falta el dedo.**
 
 **Y el mismo dedo confirmó D-673:** el founder creó una cita real y **no le
 llegó ni correo ni campana**. → *el motor entero construido, gateado y vivo, y

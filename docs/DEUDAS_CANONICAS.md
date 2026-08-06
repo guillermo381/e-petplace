@@ -8169,6 +8169,49 @@ declarada de D-585).*
 `dar_de_baja_empleado` produzca correctamente el despegue. **Eso ya tiene su
 propio par** (S77, 7/7) y no se re-prueba acá.
 
+### 🔴 EL RETIRO SE HIZO ANTES DEL DEDO, Y VACIÓ EL GATE (S88 — error de A)
+
+**El founder abrió la campana en las dos apps y estaba VACÍA.** No era un
+defecto de código: **era que yo había retirado, en la limpieza de cierre, las
+12 filas que la poblaban.**
+
+**La orden decía «después retiralo», y la leí como «después de verificar la
+cura».** Literalmente correcto — *y el «después» que importaba era **el dedo
+del founder**, que todavía no había pasado.*
+
+> ### **UN ANDAMIO SE RETIRA DESPUÉS DEL ÚLTIMO DEDO QUE LO NECESITA, NO DESPUÉS DE LA ÚLTIMA MEDICIÓN QUE LO USA.**
+> *Mi «residuo 0» era verdad y era prematuro: dejé el motor limpio y el gate
+> sin nada que mirar. **La higiene se hizo contra el gate, no a favor.***
+
+**Y hay un agravante que no se ve solo:** el founder reportó el gate como verde
+—*«la campana aparece y funciona»*— **y era verdad de la pantalla**. La pieza
+montaba, el badge existía, la lista rendía su vacío honesto. **Lo que estaba
+vacío era el mundo, no la pantalla** — y por eso el verde de la superficie no
+alcanzó a delatar el hueco.
+
+### ✅ RE-SEMBRADO (6-ago) — para las CINCO cuentas plausibles
+
+*No se adivina cuál usa: se siembra para todas.*
+
+```
+demo-prestador · demo-vet · guillo381 · +1 · +8      4 avisos c/u
+   3 sin leer · 2 ENTREGADOS POR CORREO (el par de la cura del registro, hecho fixture)
+```
+
+**Verificado POR EL CAMINO REAL (login HTTP + las dos RPC, como llama el
+wrapper), en tres cuentas:**
+
+```
+demo-prestador  badge=true · 4 avisos · destinos a Zeus
++8              badge=true · 4 avisos · destinos a Thor
++1              badge=true · 4 avisos · destinos a Zeus
+```
+
+*Los dos avisos por correo se ven igual — que es exactamente lo que la enmienda
+«la campana es el REGISTRO» firmó, ahora probado con dato.*
+
+### ⏳ RETIRO (enmendado): **después del dedo del founder, no antes**
+
 ### ✅ RETIRADO (5-ago) — por DECISIÓN, que era la condición escrita
 
 `83f5f31f` **cumplió su misión entera**: destapó el verbo sin ojos (D-664 en la
