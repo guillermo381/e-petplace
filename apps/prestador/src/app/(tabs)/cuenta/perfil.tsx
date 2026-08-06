@@ -80,8 +80,10 @@ import {
   borrarFotoGaleria,
   listarFotosGaleria,
   marcarComoPortada,
+  obtenerMiEmpleadoId,
   obtenerMiPrestador,
   obtenerPaisesDelMundo,
+  obtenerTitularId,
   reordenarFotosGaleria,
   resolverUrlLogoNegocio,
   type FotoGaleria,
@@ -101,6 +103,7 @@ import { SeccionSede } from '@/components/seccion-sede';
 import { leerSede } from '@/lib/sede';
 import { ControlTelefono, EspejoNegocio, SeccionDesplegable } from '@/components/perfil-piezas';
 import { EscribaHistoria } from '@/components/escriba-historia';
+import { GateAjeno } from '@/components/gate-ajeno';
 import { useBarraEstadoClara } from '@/components/techo-oficio';
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -279,7 +282,14 @@ export default function PerfilV2() {
   const { t } = useTraduccion();
   useBarraEstadoClara();
 
-  const [pantalla, setPantalla] = useState<'cargando' | 'listo' | 'error'>('cargando');
+  /* ⭐ S88-C · 'ajeno' (hallazgo del gate founder): la vitrina SE OFRECÍA
+     al profesional y a recepción — el servidor rebota por TITULARIDAD
+     (RLS + carpeta de storage, medido por A) y la pantalla prometía
+     igual. Se resuelve ANTES de 'listo': cero parpadeo (el formulario no
+     se monta hasta listo). La ley del lote de la vitrina: se esconde POR
+     TITULARIDAD, no por rol — gatear por gestión dejaría pasar al admin
+     y el servidor lo seguiría rebotando. */
+  const [pantalla, setPantalla] = useState<'cargando' | 'listo' | 'error' | 'ajeno'>('cargando');
   /** S85-C2 (D-633): el catálogo VIVO. Llega con el mismo await que
    *  destraba la pantalla, así que para el primer render ya está. */
   const [paises, setPaises] = useState<PaisDelMundo[]>([]);
@@ -506,6 +516,30 @@ export default function PerfilV2() {
         if (!r.ok || !rPaises.ok) {
           // Ley 13: el fallo dice fallo, jamás se disfraza de vacío.
           setPantalla('error');
+          return;
+        }
+        /* ⭐ S88-C · EL GATE DE TITULARIDAD, mismo eje que el servidor.
+           La derivación de la casa (S80-B3): `obtenerTitularId` devuelve
+           null para el empleado (empleados_self le esconde la fila dueño)
+           — titular ⟺ titularId === miFila, ambos no-nulos. El fallo de
+           lectura NO abre (Ley 23) y NO se disfraza de 'ajeno' con
+           mentira: cae en 'error', que reintenta. */
+        const [titularId, miFila] = await Promise.all([
+          obtenerTitularId(r.data.id),
+          obtenerMiEmpleadoId(r.data.id),
+        ]);
+        if (!vigente) return;
+        if (miFila === null) {
+          // sin MI fila (el dato que la RLS sí garantiza) no se decide
+          // nada: reintento, jamás un 'ajeno' fabricado por un fallo.
+          setPantalla('error');
+          return;
+        }
+        if (titularId === null || titularId !== miFila) {
+          // coherente: tengo fila y NO es la del dueño (para el empleado,
+          // titularId llega null porque empleados_self le esconde esa
+          // fila — ésa ES la señal, S80-B3).
+          setPantalla('ajeno');
           return;
         }
         setPaises(rPaises.data);
@@ -851,6 +885,11 @@ export default function PerfilV2() {
           con el porqué vive en `perfil-piezas` (donde estaba la pieza).
           Lo que queda es el espejo de abajo, dentro del scroll: nunca
           parpadeó porque nunca dependió de cruzar un umbral. */}
+
+      {/* ⭐ S88-C · el no-titular que llegó por deep link: la puerta HABLA
+          (§3 de la lámina) — jamás rebote mudo ni vitrina que el servidor
+          va a rechazar campo por campo. */}
+      {pantalla === 'ajeno' && <GateAjeno />}
 
       {/* Ley 13: esqueleto ESTÁTICO al cargar · el fallo DICE que es fallo
           y ofrece reintentar · el contenido solo con datos confirmados. */}

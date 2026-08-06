@@ -49,7 +49,9 @@ import {
 import {
   cerrarSesion,
   obtenerFranjasHorario,
+  obtenerMiEmpleadoId,
   obtenerMiPrestador,
+  obtenerTitularId,
   obtenerMundoVeterinariaPropio,
   obtenerOfertaAdiestramientoPropia,
   obtenerOfertasGroomingPropias,
@@ -243,6 +245,9 @@ export default function Cuenta() {
   // escribió "sin promesa falsa de reintento: si no hay acceso, reintentar
   // no lo arregla".
   const [fallo, setFallo] = useState<{ reintentable: boolean } | null>(null);
+  /** ⭐ S88-C · titularidad para las celdas vitrina/cuenta-comercial —
+   *  null = sin confirmar (las celdas no se ofrecen, Ley 23). */
+  const [esTitular, setEsTitular] = useState<boolean | null>(null);
   // El reintento re-corre EL MISMO camino de carga en vez de duplicarlo:
   // el efecto de foco depende de este contador.
   const [intento, setIntento] = useState(0);
@@ -267,6 +272,20 @@ export default function Cuenta() {
           ciudad: prestador.data.ciudad,
           logoPath: prestador.data.foto_url,
           cohorteAnio: prestador.data.cohorte_anio,
+        });
+
+        /* ⭐ S88-C (hallazgo del gate founder) · TITULARIDAD para las
+           celdas de la vitrina y la cuenta comercial — el MISMO eje que
+           el servidor (RLS por `user_id` + carpeta de storage; medido
+           por A). Gatear por gestión dejaría pasar al admin y el server
+           lo seguiría rebotando. null = sin confirmar ⇒ las celdas no
+           se ofrecen (Ley 23: ante la duda, ausencia). */
+        void Promise.all([
+          obtenerTitularId(prestador.data.id),
+          obtenerMiEmpleadoId(prestador.data.id),
+        ]).then(([titularId, miFila]) => {
+          if (!vigente) return;
+          setEsTitular(titularId !== null && miFila !== null && titularId === miFila);
         });
 
         // ── y recién ahora lo secundario, con su propio estado ──
@@ -350,7 +369,13 @@ export default function Cuenta() {
      INTACTO —la cuenta comercial es owner-only por RLS y esta puerta no
      lo toca—; lo único que cambia es dónde se la busca. */
   const lugares = [
-    { etiqueta: t('miCuenta.perfil'), ruta: '/cuenta/perfil' as const, icono: 'cuenta' as const },
+    /* ⭐ S88-C (hallazgo del gate founder): LA VITRINA ES DEL TITULAR —
+       se ofrecía al profesional y a recepción y el servidor rebota por
+       TITULARIDAD (campo por campo: RLS + carpeta de storage). La ruta
+       sigue montada: `perfil.tsx` responde con GateAjeno (§3). */
+    ...(esTitular === true
+      ? [{ etiqueta: t('miCuenta.perfil'), ruta: '/cuenta/perfil' as const, icono: 'cuenta' as const }]
+      : []),
     /* ⭐ S87-C (LÁMINA §4.2) — LA CELDA SE GATEA, y el caso vale registrarlo
        porque NO fue "nadie sabía del gate": este archivo YA lo tenía en la
        mano (`useGateGestor` arriba, aplicado 40 líneas abajo a «El
@@ -364,8 +389,13 @@ export default function Cuenta() {
        y dejar de quemar a quien la cruzó son dos cosas, y la segunda es
        contrato.
        `=== 'permitido'` y no `!== 'denegado'`: Ley 23, ante la duda se
-       cierra — mismo predicado exacto que su vecina de abajo. */
-    ...(gate === 'permitido'
+       cierra — mismo predicado exacto que su vecina de abajo.
+       ⏪ S88-C — EL PREDICADO CAMBIA DE GESTIÓN A TITULARIDAD: con el
+       admin REAL (D-660, 5-ago-2026), `gate === 'permitido'` lo dejaba
+       pasar y el servidor lo rebota igual (el CHECK ata la fila a
+       `auth.uid()` — titularidad, medido por A en S87). La ley del lote
+       de la vitrina rige acá también: mismo eje que el servidor. */
+    ...(esTitular === true
       ? [{ etiqueta: t('miCuenta.negocio'), ruta: '/cuenta-comercial' as const, icono: 'negocio' as const }]
       : []),
     /* ⭐ S85-C6 — EL ESCUDO (salida (a) firmada por la mesa). Reusa

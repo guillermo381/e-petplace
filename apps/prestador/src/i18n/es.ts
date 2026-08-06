@@ -281,8 +281,12 @@ export const prestadorEs = {
     // VISIBLE corta + COMPLETA en accessibilityLabel: en un tercio de ancho
     // la frase entera estiraría la columna a tres renglones y el techo se
     // leería roto. La posición del hueco ya aporta "los ingresos".
-    plataSoloTitular: 'Solo el titular',
-    plataSoloTitularDetalle: 'Solo el titular ve los ingresos',
+    // ⏪ S88-C: decía «Solo el titular» y MENTÍA EN EL PORQUÉ desde el
+    // ensanche (admin y recepción la ven) — familia S84: un rebote que
+    // dice la verdad del resultado y miente en la razón. La verdad: la
+    // plata la ve quien está en el MOSTRADOR.
+    plataSoloTitular: 'Del mostrador',
+    plataSoloTitularDetalle: 'Los ingresos los ve quien está en el mostrador',
     plataNoSePudo: 'Ingresos no disponibles',
     /* ⏪ S86-C: decía "de hoy". Con la plata siguiendo al día en vista, ese
        "hoy" pasó a ser falso en nueve de cada diez días de la rueda. */
@@ -989,7 +993,10 @@ export const prestadorEs = {
     asignarSinRol: 'No puedes asignar citas en este negocio.',
     asignarSinOficio: 'Esa persona no atiende este servicio. Elige a alguien del oficio.',
     asignarSinPersonas: 'No pudimos cargar a las personas del negocio. Cierra y prueba de nuevo.',
-    asignarNadie: 'No hay personas activas en el equipo todavía.',
+    // ⏪ S88-C: el lector pasó a ser POR CITA (espeja el chip del oficio) —
+    // el vacío ya no dice «sin equipo»: dice la verdad nueva.
+    asignarNadie: 'Nadie del equipo atiende este servicio todavía.',
+    sinJornada: 'sin horario',
     // Ley 3: el código de motor jamás se pinta.
     servicioSinVoz: 'Atención',
     hoy: 'Hoy',
@@ -2452,7 +2459,10 @@ export const prestadorEs = {
     vitrinaRebote: 'Todavía no se puede encender: falta el aviso a la familia cuando una cita cambia de persona.',
     desvincularCta: 'Desvincular del negocio',
     desvincularConfirma: '{{nombre}} pierde el acceso al negocio. Lo que hizo queda en el expediente.',
-    soloDueno: 'El equipo lo administra quien es dueño del negocio.',
+    // ⏪ S88-C: decía «quien es dueño» — caducó con D-660 (el admin
+    // también gestiona, gateado 5-ago-2026). «Quien gestiona» cubre a
+    // los dos sin re-enumerar roles que el motor decide.
+    soloDueno: 'El equipo lo administra quien gestiona el negocio.',
   },
   // S79-B (T2-B1) · "PREPARA TU ESPACIO" — §2.4 tercera presencia: cada
   // tarea con su POR QUÉ en voz humana · LOTE S79, GATE PENDIENTE

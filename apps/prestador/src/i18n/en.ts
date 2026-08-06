@@ -202,8 +202,10 @@ export const prestadorEn = {
     plataCargando: 'Calculating',
     plataCargandoDetalle: "Calculating the day's earnings",
     plataParcial: '{{n}} with no price',
-    plataSoloTitular: 'Owner only',
-    plataSoloTitularDetalle: 'Only the owner sees earnings',
+    // S88-C: "Owner only" lied about the reason since the widening —
+    // admin and front desk see it too. The truth: the front desk's money.
+    plataSoloTitular: 'Front desk',
+    plataSoloTitularDetalle: 'Earnings are visible to whoever runs the front desk',
     plataNoSePudo: 'Earnings unavailable',
     // ⏪ S86-C: said "today's". With money following the day in view, that
     // "today" became false on nine out of ten days of the wheel.
@@ -746,7 +748,8 @@ export const prestadorEn = {
     asignarSinRol: "You can't assign appointments in this business.",
     asignarSinOficio: "That person doesn't cover this service. Pick someone from that trade.",
     asignarSinPersonas: "We couldn't load your team. Close and try again.",
-    asignarNadie: 'No active people on the team yet.',
+    asignarNadie: 'No one on the team covers this service yet.',
+    sinJornada: 'no schedule',
     servicioSinVoz: 'Visit',
     hoy: 'Today',
     manana: 'Tomorrow',
@@ -2050,7 +2053,8 @@ export const prestadorEn = {
     vitrinaRebote: 'This cannot be turned on yet: the family notice for reassigned appointments does not exist.',
     desvincularCta: 'Remove from business',
     desvincularConfirma: '{{nombre}} loses access to the business. Everything they did stays in the record.',
-    soloDueno: 'The team is managed by the business owner.',
+    // S88-C: "owner" caducó con D-660 — el espejo dice lo mismo que el ES
+    soloDueno: 'The team is managed by whoever runs the business.',
   },
   // S79-B (T2-B1) · "Prepare your space" — §2.4 third presence · LOTE S79
   preparaEspacio: {
