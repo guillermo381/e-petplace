@@ -3212,6 +3212,33 @@ Origen: S86-A, medición para C.
   > **Por eso la frontera no dice "sé generoso" ni "sé austero": dice CONTÁ.**
   > *El radio no es una virtud de carácter — es el resultado de un censo, y un
   > censo se corre en un minuto.*
+### Lecciones S88 (L-202 → L-204 — números verificados libres por grep)
+
+- **L-202 — UN PAR PRUEBA LO QUE SE LE PIDE PROBAR; EL DEDO REAL HACE LO QUE NADIE PIDIÓ (S88, firmada por la mesa).**
+
+  > ### **CUATRO PARES VERDES NO VIERON LO QUE EL FOUNDER ENCONTRÓ AL PRIMER INTENTO.**
+
+  **EL CASO:** el arco del reset (D-659) cerró con cuatro patas verdes en dispositivo — verificar una vez · la voz dice la verdad · reintento con el mismo código pasa · abandono sin sesión. **Las cuatro probaban el camino feliz de UNA solicitud.** El founder hizo lo que hace cualquiera que ve un rebote: **pidió otro código**. Ahí vivía el defecto — cada pedido invalida el anterior, el campo conserva el viejo, y nada lo dice.
+
+  **Lo que la lección NO dice:** que los pares sobren. Los cuatro eran correctos y cada uno cazó algo. **Dice que su cobertura es exactamente su enunciado** — un par escrito contra un defecto conocido no explora; confirma. *La exploración la hace un dedo que no sabe qué se está probando.*
+
+  **Corolario operativo:** un arco que toca un flujo con REINTENTO, REENVÍO o VUELTA ATRÁS no se declara verificado sin recorrer esos tres caminos — son los que un par escrito por quien construyó nunca elige.
+
+- **L-203 — EL REBOTE NO PUEDE RECOMENDAR LA ACCIÓN QUE GARANTIZA EL PRÓXIMO REBOTE (S88, firmada por la mesa).**
+
+  **EL CASO:** *«Ese código no es válido o ya venció. **Pedí uno nuevo.**»* — y pedir uno nuevo **invalida el anterior**, que sigue en la bandeja junto al nuevo. La persona pide otro, tipea el que tiene a mano, vuelve a fallar, y el mensaje le repite la misma recomendación. **Un bucle cerrado, escrito por el propio mensaje de error.**
+
+  > ### **Un rebote que aconseja tiene que saber qué produce su consejo.**
+  > *Es la familia de «el mensaje es parte del guard» (S84), un piso más arriba: ahí el guard mentía sobre qué midió; **acá el guard dice la verdad y aun así empuja al error** — porque calla una consecuencia que solo él conoce.*
+
+- **L-204 — LA CURA SE BARRE POR EL PATRÓN, JAMÁS POR EL SITIO QUE LO DESTAPÓ (S88, firmada por la mesa — LEY).**
+
+  > ### **CUANDO LA CAUSA DE UN DEFECTO ES UN PATRÓN, CURAR EL SITIO DEJA VIVOS A SUS HERMANOS.**
+
+  **EL CASO, que es el más limpio posible:** D-659 ② diagnosticó un mapeo de errores a ciegas y lo curó en `establecerContrasenaNueva` — mapeando por `code` estable en vez de por texto humano. **El gemelo, `verificarCodigoRecuperacion`, quedó con su catch-all intacto.** Semanas de trabajo después, ese catch-all fue lo que hizo INDIAGNOSTICABLE el freno del founder: todo error —red, 500, cualquiera— salía como «ese código no es válido». *Se curó el hermano y no el gemelo, y el gemelo cobró.*
+
+  **La forma exigible:** toda cura que nombre un PATRÓN en su diagnóstico (*«mapear por literal humano»*, *«degradar un fallo a un valor»*, *«leer de un reporte en vez del objeto»*) **declara el censo de sus otros portadores** — aunque no los cure en el acto. Un patrón nombrado sin censo es una deuda que nadie sabe que tiene.
+
 - **L-201 — CERO ES UN DATO, AUSENCIA ES UN VACÍO (S86, firmada por la mesa — la hermana VISUAL de L-197).**
 
   > ### **UN CERO MEDIDO NO SE DIBUJA COMO AUSENCIA.**
@@ -7811,3 +7838,81 @@ CARA 3 · NO-REGRESIÓN: la puerta abre     → ok=true · empleado_id escrito  
 
 **Origen: S88-A (construcción de la puerta del verbo asignar) · firma del
 founder y cura el mismo día.**
+
+---
+
+#### D-662 — 🔴 UNA MIGRACIÓN DE MOTOR ROMPIÓ UN BUNDLE PUBLICADO, Y NADIE LO MIDIÓ
+
+**El caso, con nombre y fecha:** `20260805000000_lote1_contrato_preferencias`
+(escrita por A, S87) cambió la clave de `user_notificacion_prefs` de
+`(user_id, tipo)` a `(user_id, categoria, canal)`. **La columna `tipo` dejó de
+existir.** El bundle del cliente que corría en ese momento la consultaba:
+
+```
+bundle S86 · packages/api/preferencias.ts:32
+  .from('user_notificacion_prefs').select('tipo, habilitada')     → 400
+```
+
+**Y el daño no se quedó donde nació.** El lector pide las dos preferencias en
+un `Promise.all` y las juzga JUNTAS:
+
+```ts
+const [pref, notifs] = await Promise.all([ …user_preferencias…, …notificacion_prefs… ]);
+if (pref.error || notifs.error) return { ok:false, … };   // ← un error mata los dos
+```
+
+`user_preferencias` **nunca se tocó** — y aun así **la sync de idioma del
+arranque (D-316) se cayó con ella**, en silencio, porque viajaba en el mismo
+resultado.
+
+> ### **EL LADO CIEGO, QUE ES LO QUE MERECE FICHA**
+> Una migración se verifica contra el **repo**: typechecks, `gen:types`,
+> fixtures. **Todo eso estuvo verde** — porque el repo ya tenía el wrapper
+> nuevo. *Lo que nadie miró fue lo que estaba CORRIENDO EN LOS TELÉFONOS.*
+>
+> **El motor y el bundle publicado son DOS versiones de la verdad, y una
+> migración mueve solo una de las dos.** El intervalo entre aplicar la
+> migración y publicar el bundle es una ventana en la que el producto vivo
+> está roto — y **hoy nada la mide**.
+
+### ⚖️ LA LEY QUE NACE (firma de mesa, S88)
+
+> **Toda migración que RENOMBRE o MUEVA columnas declara QUÉ BUNDLES VIVOS LA
+> CONSULTAN** — igual que hoy declara su veda 76(g) y su reversa.
+
+Y su corolario operativo: **si algún bundle vivo la consulta, la migración y su
+publish son UN SOLO ACTO** — o la migración espera al publish, o se aplica
+compatible-hacia-atrás (columna nueva conviviendo con la vieja) y la vieja
+muere en una segunda pasada, después del publish.
+
+*Es exactamente la forma del acoplamiento que la casa ya conoce del cron de
+`vencer_paquetes_salidas` (S80): «encender el reloj y aplicar la enmienda son
+el MISMO ACTO».*
+
+### 📍 ESTADO — el bundle vivo NO está roto (medido, 5-ago)
+
+**La cura ya viajó**, y se verificó antes de ordenar una veda que habría sido
+innecesaria:
+
+```
+6fb3f58  (4-ago 23:19)  la cura del contrato
+3660973  (5-ago 16:33)  ancla del publish del cliente
+merge-base --is-ancestor 6fb3f58 3660973  →  ✅ SÍ
+verify-ota cliente 019fd3db-c9bc          →  ✅ VERDE, es lo que el servidor sirve
+```
+
+**⇒ El cliente publicado hoy lleva la cura. Un aparato que siga roto está en un
+bundle viejo y se cura abriendo y cerrando la app dos veces — no con una
+publicación nueva.**
+
+> *El reporte que trajo este hallazgo decía «la cura está en main sin
+> publicar». **El mecanismo que describía era exacto; su conclusión no.** Se
+> midió antes de actuar y se ahorró una veda doble.* **Es L-166 en su forma
+> más útil: un dato de otro se verifica al momento de usarlo — sobre todo
+> cuando es correcto en casi todo.**
+
+> **☠️ CONDICIÓN DE MUERTE:** la ley vive en la skill `epetplace-db` **y** una
+> migración que renombre columnas rebota si no declara sus bundles. *Hasta que
+> el guard exista, esto es disciplina — y la disciplina sola ya falló una vez.*
+
+**Origen: S88 (hallazgo de la pista D, medido y acotado por A).**
