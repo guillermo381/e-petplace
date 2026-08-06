@@ -8298,12 +8298,58 @@ renovados:0`).
 > *Y el tipo que existe para contarlo —`plan_renovacion_fallida`— está EN
 > SOMBRA y sin voz.*
 
-**Se declara y NO se cura sola: es decisión de mesa** — ① poblar
-`precio_mensual_plan` de esa oferta (la renovación ocurre y el correo sale con
-su voz, ya firmada) · ② dejar que falle y **sacar de sombra
-`plan_renovacion_fallida` con su voz** · ③ cerrar el plan a propósito antes del
-13. **Lo único que no es una opción es la combinación de hoy: anunciar el cobro
-y callar el fracaso.**
+### ✅ (A) FIRMADA Y EJECUTADA — el dato, no el código
+
+**`prestador_servicios.precio_mensual_plan = 138.00`** en la oferta
+`de300000…a5e0`.
+
+**El valor NO se inventó: se copió de la propia fila de la suscripción** —
+`precio_mensual = 138.00` y `precio_pagado = 138.00`, y cierra con su
+aritmética: `6.00 unitario × 23 salidas L-V = 138.00`.
+
+**El porqué del hueco, declarado:** la suscripción nació sin
+`precio_mensual_plan` por una **configuración vieja de la oferta** —anterior a
+la reforma de S79 que movió el precio del plan al PERÍODO— **no por diseño**.
+*El dato faltaba; no sobraba.*
+
+### EL ENSAYO DEL 13, con el estado del 13 (in-txn · ROLLBACK)
+
+*Sólo se adelantó el reloj. La oferta ya quedó como va a estar ese día.*
+
+```
+cerrar_y_renovar_planes()   →  renovados:1 · errores:0        ✅ RENUEVA
+asunto                      →  «Tu plan de paseos se renovó»  ✅
+cuerpo                      →  «…de Thor…el cobro se hizo…»   ✅
+buzón                       →  guillo381+8@gmail.com          ✅ del founder
+```
+
+**Y la cadena de canal, cerrada hasta el final:**
+
+```
+categoría del tipo ........ operacion
+preferencias de +8 ........ email=true · push=FALSE · in_app=true
+transporte vivo ........... in_app=NO · push=NO · email=SÍ · whatsapp=NO
+despacho_activo ........... true
+⇒ EL CANAL ELEGIDO ES EMAIL, por las DOS razones a la vez
+```
+
+*El cinturón del interim (push apagado en `operacion` para las dos cuentas del
+founder) **sigue puesto y medido** — y aunque no lo estuviera, la enmienda §7
+lo mandaría a email igual: push no tiene tren.* **Dos frenos independientes
+apuntando al mismo lugar.**
+
+### Y el hueco de «anunciar y callar» **se cerró solo con (A)**
+
+`plan_renovacion_proxima` está **en sombra** ⇒ el 10-ago **no sale nada**. Y el
+13 sale la renovación **verdadera**. *No hay anuncio sin cobro porque no hay
+anuncio* — la secuencia queda coherente sin tocar nada más.
+
+### ⏳ (B) AL LOTE DE VOCES, no a hoy
+
+**`plan_renovacion_fallida` necesita su voz firmada.** *«Se anuncia un cobro y
+después silencio» es un hueco de producto aunque el 13 esté arreglado* — el día
+que `plan_renovacion_proxima` salga de sombra, su hermana tiene que poder
+hablar. **La mesa la escribe cuando el lote de voces abra.**
 
 ---
 
