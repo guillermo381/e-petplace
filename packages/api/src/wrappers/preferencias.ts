@@ -48,6 +48,90 @@ export interface Preferencias {
   notificaciones: Record<string, boolean>;
 }
 
+/**
+ * ⚠️ CRUCE DE TERRITORIO DECLARADO (pista D, S88 — Lote 4) · A firma o
+ * revierte. La lámina firmada exige que la pantalla LEA las 7 filas y los
+ * 4 canales del catálogo («hardcodear la lista la desincroniza del motor»),
+ * y el lector no existía. Se escribe acá y no en la app por la puerta única;
+ * se escribe por la pista D y no se clona por la excepción §6 del método
+ * (S85): es una pieza que el diseño de A ya comprometió, sin decisión
+ * abierta — un SELECT ordenado de dos catálogos solo-lectura.
+ */
+export interface CategoriaNotificacionCatalogo {
+  codigo: string;
+  orden: number;
+  /** false = «siempre llega»: la fila no dibuja interruptor de existencia. */
+  apagableExistencia: boolean;
+  /** El default que `preferencia_efectiva` usa cuando no hay fila persistida
+   *  (para todo canal salvo whatsapp, que SIEMPRE nace apagado). */
+  defaultHabilitada: boolean;
+  /** Voz del catálogo (es) — fallback de display para un código que la
+   *  pantalla no conozca todavía (Ley 3: jamás un código crudo). */
+  descripcion: string;
+}
+
+export interface CanalNotificacionCatalogo {
+  codigo: CanalNotificacion;
+  orden: number;
+  /** El piso: en categorías no apagables este canal no se puede apagar. */
+  esPiso: boolean;
+  /** Encenderlo exige evidencia de opt-in (WhatsApp, §6 — Meta). */
+  exigeEvidencia: boolean;
+  descripcion: string;
+}
+
+export interface CatalogoNotificaciones {
+  categorias: CategoriaNotificacionCatalogo[];
+  canales: CanalNotificacionCatalogo[];
+}
+
+const CANALES_CONOCIDOS: readonly CanalNotificacion[] = ['in_app', 'push', 'email', 'whatsapp'];
+
+export async function obtenerCatalogoNotificaciones(): Promise<
+  ResultadoWrapper<CatalogoNotificaciones, CodigoErrorPreferencias>
+> {
+  const cliente = getClient();
+  const [cats, cans] = await Promise.all([
+    cliente
+      .from('cat_notificacion_categorias')
+      .select('codigo, orden, apagable_existencia, default_habilitada, descripcion')
+      .order('orden', { ascending: true }),
+    cliente
+      .from('cat_notificacion_canales')
+      .select('codigo, orden, es_piso, exige_evidencia, descripcion')
+      .order('orden', { ascending: true }),
+  ]);
+  if (cats.error || cans.error) {
+    return { ok: false, codigo: 'error_preferencias', mensaje: MENSAJES.error_preferencias };
+  }
+  return {
+    ok: true,
+    data: {
+      categorias: cats.data.map((c) => ({
+        codigo: c.codigo,
+        orden: c.orden,
+        apagableExistencia: c.apagable_existencia,
+        defaultHabilitada: c.default_habilitada,
+        descripcion: c.descripcion,
+      })),
+      // Un canal fuera del union conocido se angosta verificando (regla 34):
+      // si el catálogo gana un canal nuevo, esta lista lo declara — la
+      // pantalla vieja no lo dibuja, pero tampoco revienta.
+      canales: cans.data
+        .filter((c): c is typeof c & { codigo: CanalNotificacion } =>
+          (CANALES_CONOCIDOS as readonly string[]).includes(c.codigo),
+        )
+        .map((c) => ({
+          codigo: c.codigo,
+          orden: c.orden,
+          esPiso: c.es_piso,
+          exigeEvidencia: c.exige_evidencia,
+          descripcion: c.descripcion,
+        })),
+    },
+  };
+}
+
 /** Traduce el rebote del trigger a un código estable — jamás por literal
  *  humano (la trampa medida en D-565: retocar la voz rompe el mapeo). */
 function codigoDeRebote(mensaje: string | undefined): CodigoErrorPreferencias {

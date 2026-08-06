@@ -241,8 +241,19 @@ export {
   obtenerPreferencias,
   guardarIdiomaPreferido,
   guardarPreferenciaNotificacion,
+  // S88-D (Lote 4) — la excepción §6 del método (S85): A escribió
+  // guardarPreferenciaCanal PARA la pantalla de Preferencias («es el que la
+  // pantalla va a consumir», su JSDoc) y el export quedó omitido; el lector
+  // del catálogo nace en el cruce declarado del mismo commit. Se declara: A
+  // firma o revierte.
+  guardarPreferenciaCanal,
+  obtenerCatalogoNotificaciones,
   type Preferencias,
   type CodigoErrorPreferencias,
+  type CanalNotificacion,
+  type CategoriaNotificacionCatalogo,
+  type CanalNotificacionCatalogo,
+  type CatalogoNotificaciones,
 } from './wrappers/preferencias';
 export {
   obtenerPizarra,
