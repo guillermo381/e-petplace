@@ -97,14 +97,28 @@ la pizarra con ojos · la plata al mostrador entero · el lector de posición.
 ## 6. EL ESTADO, AL CERRAR
 
 ```
-main .................... 1ee5b2a  (se lee del objeto: git rev-parse HEAD)
-PRESTADOR ............... group a03e2034 · 019fd58a-4157 · runtime 1.0.3
-CLIENTE ................. group 336be850 · 019fd58a-eaa3 · runtime 1.0.2
-ancla común ............. af864ab
+main .................... se lee del objeto: git rev-parse HEAD
+PRESTADOR ............... group a1da78d6 · 019fd59e-9744 · runtime 1.0.3
+CLIENTE ................. group 284977f5 · 019fd59d-cf70 · runtime 1.0.2
+ancla común ............. 8b13f52
 migraciones de la sesión  20260804230000 → 20260806030000
 intenciones vivas ....... 1 (la del gate del primer envío, y ahora visible en la campana)
 residuo de fixtures ..... 0
 ```
+
+### ⏳ LO ÚNICO QUE FALTA: EL ÚLTIMO DEDO
+
+**Sobre el bundle `8b13f52` corre el último gate de la sesión:** la campana del
+CLIENTE (avisos + techo con la huella) **y el registro completo** — *un aviso
+entregado por correo tiene que aparecer también en la campana.*
+
+**Y en el mismo pase viaja una cura que D destapó y que era mía:** el filtro de
+audiencia estaba **decorativo** en las dos pantallas — D curó el cliente, y el
+prestador quedaba. **L-204 en su caso más limpio: se curó el sitio y quedó el
+patrón.** *Latente hoy, visible el día que un tipo solo-cliente entre a una
+categoría que el prestador ve.*
+
+---
 
 > **Lo último que hizo esta pista fue retirar sus propios fixtures.** *Un motor
 > que se estrena tiene que quedar sin andamios, o el próximo que lo mida va a
