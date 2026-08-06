@@ -125,3 +125,30 @@ WHERE ch.codigo = ANY(v_canales) AND ch.es_piso = false AND ch.transporte_vivo
 > *El silencio que el founder vivió durante el gate —programó una cita y no le
 > llegó nada— fue la ley funcionando.* **Y el flip no fue fallido: fue el acto
 > que la ley pedía, sobre un mecanismo que resultó ser otro.**
+
+---
+
+## NOTA DE SEMÁNTICA (S89-D orden 6 — por orden de mesa; el cuerpo verbatim de arriba NO se editó)
+
+> ### **LA HUELLA = NOVEDADES NO VISTAS.**
+> La huella de la esquina deja de leerse como «hay avisos sin leer»
+> (punto 1) y pasa a encenderse por **novedades que la persona no
+> VIO**: **abrir la campana la apaga** — lo que ya viste no te
+> persigue. El **no-leído POR AVISO** (punto 2, distinguido sin
+> gritar) **no cambia**: ver la lista no es leer cada aviso. Dos
+> estados, dos verdades: *visto* apaga la huella · *leído* apaga la
+> marca de la fila.
+
+**ESTADO DEL CONTRATO — FRENO DECLARADO (contra qué se midió,
+6-ago-2026):** el mecanismo que implementa «visto» es de A y **su
+literal todavía no llegó por ninguna vía** — medido contra la DB viva
+(`pg_proc`: las cuatro funciones de campana siguen siendo las de S88 —
+`obtener_mis_avisos` · `hay_avisos_sin_leer` · `marcar_aviso_leido` ·
+`agregar_novedad_paseo`; ninguna de «vista»), contra las 8 migraciones
+nuevas de A en `origin/main` (cero menciones), contra el diff de
+`packages/api` (solo 5 líneas de tipos ajenas a la campana) y contra
+fichas/docs (grep en cero). **El consumo del cliente + su par se
+ejecutan cuando el contrato viaje como literal** (76b) — construirlos
+hoy exigiría inventar dónde persiste «visto» y qué firma lo marca, y
+eso es L-139. *Mismo tratamiento que la rama «autorización» del mapeo
+de destinos: el dato es de A, no se adivina.*

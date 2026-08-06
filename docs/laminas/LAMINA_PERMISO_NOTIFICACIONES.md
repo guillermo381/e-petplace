@@ -1,9 +1,12 @@
 # LÁMINA — EL PEDIDO DE PERMISO DE NOTIFICACIONES (cliente)
 
-> **⏳ PROPUESTA PARA EL OJO DEL FOUNDER — SIN FIRMA, CERO CONSTRUCCIÓN.**
-> Depositada por S89-D (orden 5 ③) ANTES de toda pantalla — la ley de
-> la casa. La construcción tiene su gate propio cuando la lámina se
-> firme.
+> **✅ FIRMADA POR EL FOUNDER — 6 de agosto de 2026, tal como se
+> propuso (S89-D orden 6).** Depositada por S89-D (orden 5 ③) ANTES
+> de toda pantalla — la ley de la casa. **En la COLA DE CONSTRUCCIÓN
+> DEL TREN NATIVO:** la pantalla se construye CON el tren de push
+> (token/transporte de A — §7), jamás antes; su gate propio en
+> dispositivo cuando se construya. Las voces de §3 quedan FIRMADAS
+> con la lámina.
 >
 > **La letra firmada del founder que esta lámina desarrolla:** *se
 > invita al primer arranque tras instalar o actualizar · siempre con
