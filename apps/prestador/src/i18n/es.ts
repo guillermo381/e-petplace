@@ -2607,6 +2607,23 @@ export const prestadorEs = {
   // detalle: la frase ya dice de quién es la sección, y una explicación
   // extra convertiría una respuesta en una disculpa. SIN reintento (ver
   // components/gate-ajeno.tsx) · LOTE S87, GATE PENDIENTE
+  /* S88-C · LA CAMPANA (lámina firmada 5-ago). La VOZ de cada aviso viaja
+     como DATO (la escribió quien registró la intención — la pantalla no
+     traduce tipos); estas keys son solo el marco. El vacío es el literal
+     de la lámina §4. */
+  avisos: {
+    titulo: 'Avisos',
+    vacio: 'No tenés avisos',
+    errorCargar: 'No pudimos cargar tus avisos.',
+    /** Fallback DIGNO para una intención que nació sin voz (null honesto
+     *  del lector) — se declara genérico, no se inventa un texto. */
+    sinVozTitulo: 'Aviso',
+    noLeido: 'Sin leer',
+    momentoRecien: 'Recién',
+    momentoMin: 'Hace {{n}} min',
+    momentoHoras: 'Hace {{n}} h',
+    momentoAyer: 'Ayer',
+  },
   gateAjeno: {
     /* ⏪ S88-C (5-ago): decía «de quien administra el negocio» — y el gate es
        de TITULARIDAD (`esTitular`), no de gestión: el admin ADMINISTRA y

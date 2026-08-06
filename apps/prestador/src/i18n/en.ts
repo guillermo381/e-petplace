@@ -2150,6 +2150,19 @@ export const prestadorEn = {
     volver: 'Go back',
   },
   // S87-C (LÁMINA BARRA DE TRES §3) · the door that speaks · LOTE S87
+  // S88-C · THE BELL (signed lámina, Aug 5). Each notice's VOICE travels
+  // as data — these keys are only the frame.
+  avisos: {
+    titulo: 'Notices',
+    vacio: "You don't have notices",
+    errorCargar: "We couldn't load your notices.",
+    sinVozTitulo: 'Notice',
+    noLeido: 'Unread',
+    momentoRecien: 'Just now',
+    momentoMin: '{{n}} min ago',
+    momentoHoras: '{{n}} h ago',
+    momentoAyer: 'Yesterday',
+  },
   gateAjeno: {
     /* ⏪ S88-C (5-ago): said "whoever manages the business" — but the gate is
        OWNERSHIP (`esTitular`), not management: the admin manages and still
