@@ -68,15 +68,24 @@ export interface CategoriaNotificacionCatalogo {
   /** Voz del catálogo (es) — fallback de display para un código que la
    *  pantalla no conozca todavía (Ley 3: jamás un código crudo). */
   descripcion: string;
-  /**
-   * Cuántos tipos VIVEN hoy en la categoría (`cat_notificacion_tipos`).
-   * Enmienda de lámina (firma founder, S88): una categoría con CERO
-   * tipos no se dibuja — un interruptor para algo que nunca va a llegar
-   * es un toggle que no controla nada (Ley 23). La fila aparece SOLA el
-   * día que su primer tipo exista: se deriva de acá, jamás de una
-   * lista a mano.
-   */
-  tiposVivos: number;
+  /** ✅ FIRMADO POR A (S88) — y ADJUDICADO entre dos versiones: C y D
+   *  resolvieron el mismo problema en paralelo, las dos declarándolo como
+   *  cruce. **Gana ésta, y por un dato, no por gusto: filtra `activo = true`.**
+   *  La otra contaba también los tipos INACTIVOS, o sea que dibujaba una fila
+   *  para algo que no puede llegar — exactamente lo que la Ley 23 evita.
+   *  Y se toma el BOOLEANO y no el conteo por el mismo criterio que el badge
+   *  de la campana: *la forma del dato debe ser lo que la letra autoriza*, y
+   *  nadie firmó pintar «3 tipos».
+   *
+   *  ⚠️ CRUCE DE TERRITORIO DECLARADO (pista C, S88 — pantalla de
+   *  Preferencias del prestador) · A firma o revierte. Mismo fundamento
+   *  que el cruce de D de arriba (excepción §6): la orden de mesa exige
+   *  que «la fila sin tipos vivos NO se muestra, derivado del catálogo,
+   *  no de una lista a mano» — y el dato de si una categoría tiene tipos
+   *  vivos solo vive en `cat_notificacion_tipos`. Un SELECT más de un
+   *  catálogo solo-lectura, cero decisión abierta. Medido al escribir:
+   *  `resumen` tiene CERO tipos — es la única fila que hoy no se pinta. */
+  tieneTiposVivos: boolean;
 }
 
 export interface CanalNotificacionCatalogo {
@@ -109,15 +118,15 @@ export async function obtenerCatalogoNotificaciones(): Promise<
       .from('cat_notificacion_canales')
       .select('codigo, orden, es_piso, exige_evidencia, descripcion')
       .order('orden', { ascending: true }),
-    // El censo de habitantes por categoría — para la regla «cero tipos
-    // = la fila no se dibuja» (ver JSDoc de tiposVivos).
-    cliente.from('cat_notificacion_tipos').select('categoria'),
+    // Solo la COLUMNA categoria de los tipos ACTIVOS: la pantalla necesita
+    // saber si la categoría tiene ≥1 tipo vivo, jamás la lista de tipos
+    // (la campana ya estableció que la pantalla no traduce tipos).
+    cliente.from('cat_notificacion_tipos').select('categoria').eq('activo', true),
   ]);
   if (cats.error || cans.error || tipos.error) {
     return { ok: false, codigo: 'error_preferencias', mensaje: MENSAJES.error_preferencias };
   }
-  const vivosPor: Record<string, number> = {};
-  for (const t of tipos.data) vivosPor[t.categoria] = (vivosPor[t.categoria] ?? 0) + 1;
+  const categoriasConTipos = new Set(tipos.data.map((t) => t.categoria));
   return {
     ok: true,
     data: {
@@ -127,7 +136,7 @@ export async function obtenerCatalogoNotificaciones(): Promise<
         apagableExistencia: c.apagable_existencia,
         defaultHabilitada: c.default_habilitada,
         descripcion: c.descripcion,
-        tiposVivos: vivosPor[c.codigo] ?? 0,
+        tieneTiposVivos: categoriasConTipos.has(c.codigo),
       })),
       // Un canal fuera del union conocido se angosta verificando (regla 34):
       // si el catálogo gana un canal nuevo, esta lista lo declara — la

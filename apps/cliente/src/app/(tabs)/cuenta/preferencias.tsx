@@ -299,7 +299,7 @@ export default function PreferenciasCuenta() {
               // nada (Ley 23). Derivado del catálogo: el día que nazca
               // el primer tipo (hoy, el primer digest de «Resúmenes»),
               // la fila aparece sola.
-              .filter((cat) => cat.tiposVivos > 0)
+              .filter((cat) => cat.tieneTiposVivos)
               .map((cat) => {
               const canales = catalogo.canales.map((c) => c.codigo);
               const encendida = filaEncendida({

@@ -513,7 +513,37 @@ export const prestadorEn = {
     emailAyuda: "Email can't be changed from here yet.",
     perfilGuardado: 'Done — your profile is up to date.',
     notificaciones: 'Notifications',
-    notifPronto: "Soon — when business notifications reach your phone, you'll decide which ones here.",
+    /* ☠️ S88-C · `notifPronto` DIED with the real screen (preferences
+       lámina §7). Channel names are the FOUR signed by the founder (S88):
+       "push" is nobody's vocabulary. notifEj* are PROPOSED lines measured
+       against the live catalog — the mesa signs them before they travel. */
+    notifLey: 'You choose how they reach you, not whether.',
+    notifFilaOperacion: 'Your appointments and services',
+    notifFilaSaludSeguridad: 'Care and health',
+    notifFilaSeguridadCuenta: 'Your account security',
+    notifFilaSaldoPagado: 'What you already paid',
+    notifFilaRelacional: 'Messages and replies',
+    notifFilaResumen: 'Summaries',
+    notifFilaComercial: 'News and offers',
+    notifPorqueSaludSeguridad: 'These always reach you. You choose how, not whether.',
+    notifPorqueSeguridadCuenta: 'Account alerts always reach you. You choose how.',
+    notifPorqueSaldoPagado: 'If something you already paid for is about to expire, we always tell you.',
+    notifEjOperacion: 'E.g.: a requested appointment, your payout ready, an approved document.',
+    notifEjSaludSeguridad: 'E.g.: a health alert about a pet.',
+    notifEjSeguridadCuenta: 'E.g.: a security notice about your account.',
+    notifEjSaldoPagado: 'E.g.: something you paid for is about to expire.',
+    notifEjRelacional: 'E.g.: a new message from a family.',
+    notifEjComercial: 'E.g.: e-PetPlace news and offers.',
+    notifPorDonde: 'How they reach you',
+    canalEnApp: 'In the app',
+    canalTelefono: 'On your phone',
+    canalCorreo: 'By email',
+    canalWhatsapp: 'WhatsApp',
+    notifPermisoNegado: "System notifications are off for this app — 'On your phone' alerts won't arrive until you turn them on in your phone settings.",
+    waConsentTitulo: 'WhatsApp updates',
+    waConsentTexto: 'I want to receive e-PetPlace updates on WhatsApp at this number. I can turn this off anytime in Preferences.',
+    waConsentAceptar: 'Yes, send them',
+    waConsentCancelar: 'Not now',
     eliminarCuenta: 'Delete account',
     // S86-C · "Activity" comes down from BUSINESS, voice VERBATIM.
     movimiento: 'Activity',
@@ -2120,8 +2150,25 @@ export const prestadorEn = {
     volver: 'Go back',
   },
   // S87-C (LÁMINA BARRA DE TRES §3) · the door that speaks · LOTE S87
+  // S88-C · THE BELL (signed lámina, Aug 5). Each notice's VOICE travels
+  // as data — these keys are only the frame.
+  avisos: {
+    titulo: 'Notices',
+    vacio: "You don't have notices",
+    errorCargar: "We couldn't load your notices.",
+    sinVozTitulo: 'Notice',
+    noLeido: 'Unread',
+    momentoRecien: 'Just now',
+    momentoMin: '{{n}} min ago',
+    momentoHoras: '{{n}} h ago',
+    momentoAyer: 'Yesterday',
+  },
   gateAjeno: {
-    titulo: 'This section belongs to whoever manages the business.',
+    /* ⏪ S88-C (5-ago): said "whoever manages the business" — but the gate is
+       OWNERSHIP (`esTitular`), not management: the admin manages and still
+       bounces. Post-D-664 those are two named truths; a guard's message is
+       part of the guard. Mesa order, 5-ago-2026. */
+    titulo: 'This section belongs to the business owner.',
     volver: 'Go back',
   },
   // S79-B (T3-B3) · the waiting room — the pending provider's frame · LOTE S79

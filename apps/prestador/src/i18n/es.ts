@@ -709,7 +709,49 @@ export const prestadorEs = {
     emailAyuda: 'El email no se cambia desde acá todavía.',
     perfilGuardado: 'Listo — tu perfil quedó al día.',
     notificaciones: 'Notificaciones',
-    notifPronto: 'Pronto — cuando las notificaciones del negocio lleguen al teléfono, acá vas a decidir cuáles.',
+    /* ☠️ S88-C · `notifPronto` MURIÓ con la pantalla real (lámina de
+       preferencias §7): una superficie que promete un futuro deja de ser
+       honesta el día que ese futuro llega y ella sigue diciendo lo mismo. */
+    /* S88-C · LA PANTALLA DE PREFERENCIAS (lámina firmada 5-ago).
+       Los nombres de fila y las tres voces del porqué son LITERALES
+       FIRMADOS (lámina §1/§3). Los canales son los CUATRO firmados por el
+       founder en la orden de mesa S88 — «push» no es vocabulario de nadie.
+       Las líneas de ejemplo (notifEj*) son PROPUESTAS medidas contra el
+       catálogo vivo: la mesa las firma antes de que viajen. */
+    notifLey: 'Elegís por dónde te llegan, no si te llegan.',
+    notifFilaOperacion: 'Tus citas y servicios',
+    notifFilaSaludSeguridad: 'Cuidado y salud',
+    notifFilaSeguridadCuenta: 'La seguridad de tu cuenta',
+    notifFilaSaldoPagado: 'Lo que ya pagaste',
+    notifFilaRelacional: 'Mensajes y respuestas',
+    notifFilaResumen: 'Resúmenes',
+    notifFilaComercial: 'Novedades y ofertas',
+    notifPorqueSaludSeguridad: 'Estos avisos siempre llegan. Elegís por dónde, no si te llegan.',
+    notifPorqueSeguridadCuenta: 'Los avisos de tu cuenta siempre llegan. Elegís por dónde.',
+    notifPorqueSaldoPagado: 'Si algo que ya pagaste está por vencer, te avisamos siempre.',
+    /* Ejemplos POR FILA, del oficio — medidos contra `cat_notificacion_tipos`
+       (descripciones del catálogo). Banderas honestas declaradas al proponer:
+       `saldo_pagado` y `salud_seguridad` no tienen hoy tipos dirigidos al
+       prestador — su línea es la de la categoría, sin inventar tipos. */
+    notifEjOperacion: 'Ej.: una cita solicitada, tu liquidación disponible, un documento aprobado.',
+    notifEjSaludSeguridad: 'Ej.: una alerta de salud sobre una mascota.',
+    notifEjSeguridadCuenta: 'Ej.: un aviso de seguridad sobre tu cuenta.',
+    notifEjSaldoPagado: 'Ej.: algo que pagaste está por vencer.',
+    notifEjRelacional: 'Ej.: un mensaje nuevo de una familia.',
+    notifEjComercial: 'Ej.: novedades y promociones de e-PetPlace.',
+    notifPorDonde: 'Por dónde te llegan',
+    canalEnApp: 'En la app',
+    canalTelefono: 'En el teléfono',
+    canalCorreo: 'Por correo',
+    canalWhatsapp: 'WhatsApp',
+    notifPermisoNegado: 'El permiso de notificaciones del sistema está apagado — los avisos «En el teléfono» no van a llegar hasta que lo enciendas en los ajustes del teléfono.',
+    /* El momento del opt-in de WhatsApp (lámina §4). El TEXTO es el literal
+       FIRMADO por el founder (5-ago) y ES la evidencia que se guarda —
+       si cambia el texto, cambia la evidencia futura; la vieja se conserva. */
+    waConsentTitulo: 'Avisos por WhatsApp',
+    waConsentTexto: 'Quiero recibir avisos de e-PetPlace por WhatsApp en este número. Puedo desactivarlo cuando quiera desde Preferencias.',
+    waConsentAceptar: 'Quiero recibirlos',
+    waConsentCancelar: 'Ahora no',
     eliminarCuenta: 'Eliminar cuenta',
     /* ⭐ S86-C · «El movimiento» baja de NEGOCIO con su voz VERBATIM: es
        plata de la cuenta comercial, no configuración del oficio. */
@@ -2565,8 +2607,30 @@ export const prestadorEs = {
   // detalle: la frase ya dice de quién es la sección, y una explicación
   // extra convertiría una respuesta en una disculpa. SIN reintento (ver
   // components/gate-ajeno.tsx) · LOTE S87, GATE PENDIENTE
+  /* S88-C · LA CAMPANA (lámina firmada 5-ago). La VOZ de cada aviso viaja
+     como DATO (la escribió quien registró la intención — la pantalla no
+     traduce tipos); estas keys son solo el marco. El vacío es el literal
+     de la lámina §4. */
+  avisos: {
+    titulo: 'Avisos',
+    vacio: 'No tenés avisos',
+    errorCargar: 'No pudimos cargar tus avisos.',
+    /** Fallback DIGNO para una intención que nació sin voz (null honesto
+     *  del lector) — se declara genérico, no se inventa un texto. */
+    sinVozTitulo: 'Aviso',
+    noLeido: 'Sin leer',
+    momentoRecien: 'Recién',
+    momentoMin: 'Hace {{n}} min',
+    momentoHoras: 'Hace {{n}} h',
+    momentoAyer: 'Ayer',
+  },
   gateAjeno: {
-    titulo: 'Esta sección es de quien administra el negocio.',
+    /* ⏪ S88-C (5-ago): decía «de quien administra el negocio» — y el gate es
+       de TITULARIDAD (`esTitular`), no de gestión: el admin ADMINISTRA y
+       rebota igual. Post-D-664 gestionar y ser titular son dos verdades con
+       nombre propio; el mensaje de un guard es parte del guard, y este
+       describía el predicado equivocado. Orden de mesa, 5-ago-2026. */
+    titulo: 'Esta sección es del titular del negocio.',
     volver: 'Volver',
   },
   // S79-B (T3-B3) · LA SALA DE ESPERA — el marco del pendiente (la voz
