@@ -395,6 +395,18 @@ una promesa que cualquier caller rompe.*
 
 ## 7. Los transportes — y sus verdades incómodas
 
+> ### ⚖️ LA LEY DEL VOCABULARIO — «push» JAMÁS EN SUPERFICIE (FIRMADA founder, 6-ago-2026 · S89)
+>
+> **«Push» es vocabulario de ingeniería y no aparece en NINGUNA superficie de
+> NINGUNA de las dos apps** — ni en voces, ni en preferencias, ni en rebotes,
+> ni en la lámina. La persona lee «avisos en el teléfono» (el par vivo de
+> Preferencias); el permiso del SO se pide y se explica sin la palabra.
+> Extiende a AMBAS apps lo que el lote de D ya midió en el cliente
+> (`notifPermisoNegado` sin «push»); **el grep de barrido lo deposita C** y
+> el guard que lo mecanice hereda esta letra. Y la letra hermana de la
+> lámina (misma firma): el permiso se pide **al primer arranque
+> post-install/update, con consentimiento siempre** — el tren nativo la carga.
+
 **PUSH** — gratis, instantáneo, el primero de la fila. Las tres capas de
 D-475 en cero. Verdad operativa: si el usuario negó el permiso del SO, el
 motor **tiene que saberlo** y no contarlo como entregado (null honesto,

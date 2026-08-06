@@ -242,8 +242,18 @@ devengos**: cada cita del plan devenga sola al cerrar con calidad
 >    reporte que asuma precio unitario fijo — queda prohibido asumirlo.
 >    N=0 está guardado (`plan_sin_citas`) en contratación y renovación.
 > 5. **El batch de renovación SALTEA la fila que rebota** (enmienda ②):
->    handler por fila — la suscripción vence honesta con
->    `renovacion_fallida` registrado y su notificación; el lote sigue.
+>    handler por fila — el lote sigue. **⚠️ ENMENDADA POR FIRMA (founder,
+>    6-ago-2026, S89 · D-669): el fallo YA NO vence la suscripción en el
+>    acto — abre LA VENTANA DE GRACIA: SIETE DÍAS de reintentos (el cron
+>    diario ES el reintento), con `plan_renovacion_fallida` avisado UNA
+>    vez por período y el plan ACTIVO.** La letra del founder que la
+>    funda: *«una tarjeta vencida no es la decisión de un cliente de
+>    dejar de cuidar a su mascota»*. La muerte honesta —vencida + el
+>    reembolso de los sobrantes, motivo `d669_gracia_agotada_cobro_fallido`—
+>    llega SOLO al agotarse la ventana; si el cobro sana adentro, renueva
+>    descontando el crédito y la gracia se limpia. *(La letra previa
+>    «vence honesta al primer rebote» se enmienda ACÁ, en su lugar: dos
+>    letras firmadas que se contradicen son peores que una equivocada.)*
 >    La oferta que dejó de declarar mensual NO renueva (el aviso de 72 h
 >    ya lo dice ANTES: "no va a renovarse").
 > 6. **`saltar_cita_plan` tiene significado económico explícito: mueve

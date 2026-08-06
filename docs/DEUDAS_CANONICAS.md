@@ -8557,9 +8557,10 @@ retener el crédito en metadata lo contaba DOS veces (reembolso 12 donde iba
 sobrantes siguen confirmados y la pasada que resuelve los computa frescos; la
 clave quedó informativa (`credito_en_juego`).
 
-> **⚠️ A MESA: `v_gracia_dias := 7` — PROPUESTO, SIN LETRA QUE LO FIJE**
-> (medido: POLITICAS/PASEO/FINANCIERO no tienen ventana de gracia; MODELO_PASEO
-> la difería al arco de pagos). La firma del número cierra esta ficha del todo.
+> **✅ EL NÚMERO QUEDÓ FIRMADO: 7 DÍAS (founder, 6-ago-2026 — orden 5 ②).**
+> La letra vive en MODELO_PASEO §6 punto 5 (enmendado con la firma) y el
+> objeto vivo dejó de decir «propuesto» (migración `20260806230000`). **La
+> ficha cierra del todo.**
 
 **El texto original de la deuda, conservado:**
 
