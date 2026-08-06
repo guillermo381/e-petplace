@@ -49,9 +49,8 @@ import {
 import {
   cerrarSesion,
   obtenerFranjasHorario,
-  obtenerMiEmpleadoId,
+  obtenerMiPosicionEnPrestador,
   obtenerMiPrestador,
-  obtenerTitularId,
   obtenerMundoVeterinariaPropio,
   obtenerOfertaAdiestramientoPropia,
   obtenerOfertasGroomingPropias,
@@ -280,12 +279,13 @@ export default function Cuenta() {
            por A). Gatear por gestión dejaría pasar al admin y el server
            lo seguiría rebotando. null = sin confirmar ⇒ las celdas no
            se ofrecen (Ley 23: ante la duda, ausencia). */
-        void Promise.all([
-          obtenerTitularId(prestador.data.id),
-          obtenerMiEmpleadoId(prestador.data.id),
-        ]).then(([titularId, miFila]) => {
+        /* ⏪ S88-C (D-664, 5-ago-2026): acá vivió la derivación de la casa
+           (titularId === miFila, dos RPCs) — reemplazada el MISMO día por
+           el lector del servidor: la titularidad es un HECHO de
+           `prestadores.user_id`, no una inferencia, y en UN viaje. */
+        void obtenerMiPosicionEnPrestador(prestador.data.id).then((r) => {
           if (!vigente) return;
-          setEsTitular(titularId !== null && miFila !== null && titularId === miFila);
+          setEsTitular(r.ok ? r.data.esTitular : null);
         });
 
         // ── y recién ahora lo secundario, con su propio estado ──

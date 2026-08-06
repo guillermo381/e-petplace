@@ -85,6 +85,7 @@ import {
   obtenerDatosNegocio,
   obtenerEquipoNegocio,
   obtenerMascotasAtendidas,
+  obtenerMiPosicionEnPrestador,
   obtenerMiPrestador,
   resolverUrlsFotos,
   type DatosNegocio,
@@ -153,9 +154,16 @@ export default function Mascotas() {
        el founder lo gateó. **El delta dejó de ser teórico y está VIVO:**
        el admin ve el tab y estas franjas NO se le montan (`esDueno` es
        dueño-only). Si la derivación debe ensancharse a gestión es del
-       MOTOR (la policy de `empleado_roles` decide qué discrimina la
-       lectura) — medición pedida a A, jamás re-decidida acá. */
+       MOTOR — medición pedida a A, jamás re-decidida acá.
+       ⏪ Y LA MEDICIÓN VOLVIÓ (D-664, mismo día): la derivación daba
+       TRUE PARA LOS CUATRO ROLES — peor que el delta. El gate pasó a
+       `gestiona` del servidor (obtenerMiPosicionEnPrestador) y el delta
+       se cerró: el admin que ve el tab ve la franja. */
   const [equipo, setEquipo] = useState<EquipoNegocio | null>(null);
+  /** ⭐ S88-C (D-664): GESTIÓN dicha por el servidor — reemplaza la
+   *  derivación `esDueno` («leí ≥1 fila»), que daba true para los
+   *  CUATRO roles. null = sin confirmar ⇒ las franjas no se montan. */
+  const [gestiona, setGestiona] = useState<boolean | null>(null);
   /* ⏪ S86-C: `equipoAbierto` propio MURIÓ — con cuatro secciones, un
      booleano por sección deja abrir todas a la vez y la portada se
      convierte en la lista larga que el plegado vino a evitar. Todas
@@ -200,7 +208,7 @@ export default function Mascotas() {
            Su fallo NO tumba la pantalla — la sección simplemente no se
            monta (Ley 13 aplica al CUERPO, y el cuerpo de esta tab son
            las vidas). */
-        const [r, eq, dn] = await Promise.all([
+        const [r, eq, dn, pos] = await Promise.all([
           obtenerMascotasAtendidas(prestador.data.id),
           prestador.data.cuenta_comercial_id !== null
             ? obtenerEquipoNegocio(prestador.data.cuenta_comercial_id)
@@ -209,9 +217,12 @@ export default function Mascotas() {
              zona. Pasárselo desde el dispositivo sería volver a meter el
              huso del teléfono en un número del negocio (D-648). */
           obtenerDatosNegocio(prestador.data.id),
+          obtenerMiPosicionEnPrestador(prestador.data.id),
         ]);
         if (!vigente) return;
         setEquipo(eq !== null && eq.ok ? eq.data : null);
+        // D-664: el fallo NO abre — null deja las franjas sin montar (Ley 23).
+        setGestiona(pos.ok ? pos.data.gestiona : null);
         setDatos(dn.ok ? dn.data : null);
         if (!r.ok) {
           setPantalla({ estado: 'error' });
@@ -627,7 +638,12 @@ export default function Mascotas() {
             lector, arriba). Y `equipo === null` cubre los dos casos que no
             deben inventar nada: negocio sin cuenta comercial, y lectura
             caída — ninguno se disfraza de "equipo vacío". */}
-        {equipo !== null && equipo.esDueno && equipo.miembros.length > 0 && (
+        {/* ⏪ S88-C (D-664, 5-ago-2026): gateaba `equipo.esDueno` — la
+            derivación «leí ≥1 fila» que daba true para los CUATRO roles.
+            Ahora GESTIÓN del servidor: el mismo predicado que el tab
+            NEGOCIO (dueño|administrador) — el delta declarado en la
+            cabecera se cierra: el admin que ve el tab ve la franja. */}
+        {gestiona === true && equipo !== null && equipo.miembros.length > 0 && (
           <SeccionDesplegable
             icono="equipo"
             titulo={t('mascotas.equipoTitulo')}
