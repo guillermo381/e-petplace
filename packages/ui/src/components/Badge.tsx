@@ -43,12 +43,13 @@ import { useTheme } from '../ThemeProvider'
 import { palette } from '../tokens/palette'
 import { useTraduccionUi } from '../i18n'
 
-/** El lado de la huella-novedad (forma 'huella'). 12 y no menos: la
- *  condición firmada dice «tamaño mínimo legible» y una huella chica se
- *  lee como borrón — el mínimo EXACTO se firma en dispositivo (estudio
- *  10/12/14 en la galería). Sin prop de tamaño: la geometría es de la
- *  pieza, no de cada pantalla. */
-const LADO_HUELLA = 12
+/** El lado de la huella-novedad (forma 'huella'). ⚖️ 14 por ENMIENDA DE
+ *  LÁMINA (S89 orden 7, firmada por el founder EN DISPOSITIVO sobre el
+ *  bundle 019fd7ef/019fd7f0): «apenas más grande — muy poco». 14 es el
+ *  TERCER ESCALÓN del estudio 10/12/14 ya servido en la galería (el ojo
+ *  del founder lo vio; un 13 sería un número que nadie gateó). Sin prop
+ *  de tamaño: la geometría es de la pieza, no de cada pantalla. */
+const LADO_HUELLA = 14
 
 export interface BadgeProps {
   /** Cuántas cosas esperan. `<= 0` = nada se dibuja (regla de existencia). */
@@ -116,7 +117,20 @@ export function Badge({ n, forma = 'contador', superficie = 'clara', children }:
         <View
           style={
             forma === 'huella'
-              ? { position: 'absolute', top: -3, right: -5 }
+              ? // ⚖️ LA PATA PISA LA CAMPANA (enmienda de lámina S89 orden 7,
+                // firmada en dispositivo): SUPERPUESTA al glifo, no al lado.
+                // Con lado 14 sobre el glifo de 24, la pata queda centrada en
+                // el HOMBRO derecho del domo (~62% de su área sobre el bbox
+                // del glifo) y DEJA DE ASOMAR al gap de la esquina — la
+                // posición vieja (top -3 / right -5) sacaba 5dp de tinta
+                // hacia el gap de 20dp de la lámina de la esquina, invisible
+                // para R32 (el absoluto no afecta layout). Occlusión simple
+                // v1: la pata OPACA cubre el trazo donde pisa; el FOSO (2dp
+                // de recorte del trazo bajo la pata) quedó PROPUESTO a la
+                // mesa — exige integración misma-SVG (enmienda de Icono)
+                // para vivir también sobre el degradado del cliente.
+                // Números: 2026-08-06-s89b-ENMIENDA-pata-pisa-campana.md.
+                { position: 'absolute', top: -1, right: 0 }
               : { position: 'absolute', top: -6, right: -14 }
           }
           // El aviso viaja en el label del tocable (mitad ① del contrato);

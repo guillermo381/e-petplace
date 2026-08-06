@@ -125,3 +125,33 @@ WHERE ch.codigo = ANY(v_canales) AND ch.es_piso = false AND ch.transporte_vivo
 > *El silencio que el founder vivió durante el gate —programó una cita y no le
 > llegó nada— fue la ley funcionando.* **Y el flip no fue fallido: fue el acto
 > que la ley pedía, sobre un mecanismo que resultó ser otro.**
+
+---
+
+## ⚖️ ENMIENDA FIRMADA (founder, EN DISPOSITIVO — S89, orden 7, sobre el bundle `019fd7ef`/`019fd7f0`) — **LA PATA PISA LA CAMPANA**
+
+**La firma:** la huella va **SUPERPUESTA al glifo** (no al lado) y **apenas
+más grande** («muy poco»). Las tres condiciones del punto 1 viajan intactas:
+jamás un número · jamás rojo de alarma · jamás anima.
+
+**La propuesta ejecutada por el riel (números en
+`2026-08-06-s89b-ENMIENDA-pata-pisa-campana.md`):**
+
+- **Escala: 12 → 14dp** — el tercer escalón del estudio 10/12/14 ya servido
+  en galería (el ojo del founder lo vio; 13 sería un número sin gate).
+- **Posición: `top:-1 / right:0`** (era `top:-3 / right:-5`) — la pata queda
+  centrada en el HOMBRO derecho del domo, **~62% de su área sobre el bbox del
+  glifo**, y **deja de asomar 5dp al gap de la esquina** (hallazgo lateral:
+  esa tinta saliente era invisible para R32).
+- **El solape es OCCLUSIÓN v1:** la pata opaca cubre el trazo donde pisa. El
+  contraste medido DONDE PISA: oro/muro 3.41 (claro) · 5.95 (noche) alrededor;
+  en los 2–3 cruces del trazo (1.9dp) con el borde de la pata, oro/trazo-papel
+  **1.62** — borde blando LOCAL, cuantificado.
+- **EL FOSO (propuesto, decide la mesa):** 2dp de recorte del trazo bajo la
+  pata volvería toda frontera ≥3 (oro/muro 3.41 · muro/trazo 5.51) — pero
+  exige integración misma-SVG (enmienda de `Icono`) para vivir también sobre
+  el DEGRADADO del cliente, donde un foso pintado de un sólido remendaría.
+  Si el ojo del founder pide más definición en el gate, ese es el camino.
+- En superficie **clara** la pata es acento por casa: cliente pink/trazo
+  tinta 4.63 ✓ · prestador tealDark/trazo tinta **2.86** — hoy sin montaje
+  clara en el prestador (su campana vive en el muro); declarado, no curado.
