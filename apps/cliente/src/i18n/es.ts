@@ -53,6 +53,11 @@ export const clienteEs = {
     // regla única firmada) — la pantalla lo pasa como {{n}}; un número
     // escrito acá ya mintió una vez (decía 6 con la regla en 8).
     passwordAyuda: 'Al menos {{n}} caracteres',
+    // S88-D · las razones del apagado (Boton razonDeshabilitado): una
+    // por causa — la de la clave repite la voz del wrapper
+    // (password_debil) a propósito: una sola voz para una sola regla.
+    razonCampos: 'Completá los campos para crear tu cuenta.',
+    razonPasswordCorta: 'La contraseña necesita al menos {{n}} caracteres.',
     crearMiCuenta: 'Crear mi cuenta',
     correoConfirmacion: 'Te mandamos un correo para confirmar tu cuenta.',
   },
