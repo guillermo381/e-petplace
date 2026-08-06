@@ -154,3 +154,88 @@ categoría que el prestador ve.*
 > **Lo último que hizo esta pista fue retirar sus propios fixtures.** *Un motor
 > que se estrena tiene que quedar sin andamios, o el próximo que lo mida va a
 > creer que lo que ve es producción.*
+
+---
+
+## 7. LOS TRES DEPÓSITOS DE CIERRE — en el árbol
+
+```
+2026-08-06-s88b-acta-cierre.md            136 líneas   (+ el censo curado)
+2026-08-06-s88c-ESTADO-cierre-pista-C.md  105 líneas
+2026-08-06-s88d-estado-de-cierre.md        83 líneas
+```
+
+**Los tres dicen explícitamente qué NO cerraron** — verificado, no supuesto.
+
+**Y B hizo más que depositar: devolvió el censo a VERDE**, retirando P1 con
+lápida y clasificando las ocho. *Sus tres rojos eran premisas que **esta sesión
+dio vuelta** — el censo de regresión es el único instrumento de la casa que se
+pone rojo cuando el mundo mejora, y ahora dice la verdad nueva.*
+
+**Nota operativa que B y A escribieron por separado y coinciden:** los *typed
+routes* de Expo son **artefacto local**; el rojo post-merge **no era del código
+de `main`**. *Dos pistas midiendo lo mismo desde lados distintos es la mejor
+confirmación que un diagnóstico puede tener.*
+
+---
+
+## 8. EL BARRIDO FINAL — con sus exits leídos del comando, jamás del pipe
+
+```
+verdicto.mjs ....... TODO VERDE    EXIT 0
+verify:censo ....... TODO VERDE    EXIT 0     ← estaba en 3 ROJOS; B lo curó
+verify-ota ......... VERDE ×2      EXIT 0
+credenciales ....... 8/8 HTTP 200
+```
+
+### 🔴 Y `demo-prestador` cayó una TERCERA vez — con un rastro que agrava la regla 87
+
+Al barrido final dio `invalid_credentials`, **una hora después de que yo la
+rotara y de que respondiera 200**.
+
+```
+updated_at ................ 13:13   (MI rotación — la última registrada)
+audit log, últimas 3 h .... CERO `user_updated_password` para esa cuenta
+error real ................ invalid_credentials  (LEÍDO, no supuesto)
+```
+
+> ### **LA CLAVE CAMBIÓ Y NO HAY RASTRO DE QUIÉN.**
+> *Un cambio por flujo deja `user_updated_password` en el audit log. Éste no
+> dejó nada* — o algo escribe **directo en `auth.users`**, o un aparato repite
+> una escritura vieja. **En los dos casos es exactamente lo que la regla 87
+> existe para impedir: un actor sin dueño mutando estado real.**
+
+*Y un detalle propio, que va acá porque es del mismo tipo que todo lo demás de
+esta sección: **asumí «invalid_credentials» las dos primeras veces sin leer el
+error.** La tercera lo leí — y era eso, **pero pudo no haberlo sido**. Un `400`
+no dice por qué; el `error_code` sí.*
+
+**Rotada por tercera vez y verificada en el acto: 8/8.**
+
+---
+
+## 9. RESIDUO DECLARADO
+
+```
+fixtures vivos ......... 20   (D-671, la campana — retiro en S89)
+intenciones totales .... 22
+citas huérfanas ........  0   (D-666 retirado)
+```
+
+**Los 20 quedan a propósito**, y es la ley que este cierre pagó: *un andamio se
+retira después del último **dedo** que lo necesita.*
+
+---
+
+## 10. LOS CONTADORES, RE-MEDIDOS CONTRA EL OBJETO
+
+| | decía | **mide** |
+|---|---|---|
+| migraciones | 138 | **186** |
+| componentes de `ui` | 48 | **53** |
+| deuda más alta | D-588 | **D-673** |
+| lección más alta | — | **L-210** |
+| contrato | v1.29 | **v1.30** (regla 87) |
+
+**Migraciones de la pista A en S88: 41.** *P3 denunciaba estas desviaciones
+hace tres sesiones; hoy se leyeron del objeto.*
