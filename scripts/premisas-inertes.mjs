@@ -273,6 +273,83 @@ export const PREMISAS = [
     siCaduca:
       'toda sesión que abra leyendo el canon arranca con un inventario falso — y este contador ya decayó TRES veces, que es precisamente por qué deja de confiarse a la prosa',
   },
+  {
+    id: 'P4',
+    ficha: 'S88-A',
+    titulo: 'el rol «profesional» y los chips están sincronizados (línea base conocida: 2 desincronizados)',
+    desde: 'S88 (medido por A)',
+    /** SIN SITIOS, y se declara por qué — es la primera premisa de esta
+     *  clase: no hay un comentario mintiendo en el código. La premisa
+     *  vive en una DECISIÓN DE DISEÑO del motor (la puerta de asignar
+     *  gatea por CHIP, no por rol — precisamente PORQUE A midió que el
+     *  rol no es confiable) y en el diagnóstico de A que la parió. Lo
+     *  que se vigila no es un texto: es que la desincronización que esa
+     *  decisión tolera NO CREZCA EN SILENCIO. */
+    sitios: [],
+    alcance: {
+      texto: 'excluye las cuentas de prueba «+s87» (misma regla que P1; hoy 1 con chips, CON su fila — no afecta la línea base)',
+      sql: `
+        select count(*)::int as n
+          from prestador_empleados pe
+          join auth.users u on u.id = pe.user_id
+         where pe.activo
+           and u.email like '%+s87%'
+           and exists (select 1 from prestador_empleado_servicios s where s.empleado_id = pe.id)
+      `,
+    },
+    inerteMientras: {
+      explicacion:
+        'la desviación contra la línea base CONOCIDA (2 personas con chips sin la fila «profesional» — Los Shyris ×1 chip · Paseos Andres ×6, medido 5-ago)',
+      /** LA LÍNEA BASE ES PARTE DEL REGISTRO, y la forma es la de P3:
+       *  `n` = |real − conocido|. **Hoy 2 NO es un fallo — es el estado
+       *  que la mesa conoce y con el que la puerta ya convive** (por eso
+       *  gatea por chip). Lo que este guard vigila es el DELTA:
+       *    · crece  → alguien más quedó con chips sin fila, en silencio
+       *    · baja   → alguien lo curó y esta línea base quedó VIEJA —
+       *      también es rojo, porque una línea base que nadie actualiza
+       *      es la prosa que decae (se corrige el número de acá)
+       *  Verificado al registrarla: la consulta reproduce el 2 de 5 de
+       *  A exacto (Aurora ×2 y +s87prof CON fila · Shyris y Andres SIN). */
+      lineaBase: 2,
+      medir: ({ dbQuery }) => {
+        const real = dbQuery(`
+          select count(*)::int as n
+            from prestador_empleados pe
+            join auth.users u on u.id = pe.user_id
+           where pe.activo
+             and u.email not like '%+s87%'
+             and exists (select 1 from prestador_empleado_servicios s where s.empleado_id = pe.id)
+             and not exists (select 1 from empleado_roles r
+                              where r.empleado_id = pe.id and r.rol = 'profesional')
+        `)[0].n;
+        const base = 2;
+        return {
+          n: Math.abs(real - base),
+          detalle: [
+            { desincronizados_hoy: real, linea_base_conocida: base },
+            ...(real === base
+              ? []
+              : dbQuery(`
+                  select p.nombre_comercial as negocio,
+                         (select count(*) from prestador_empleado_servicios s
+                           where s.empleado_id = pe.id)::int as chips
+                    from prestador_empleados pe
+                    join prestadores p on p.id = pe.prestador_id
+                    join auth.users u on u.id = pe.user_id
+                   where pe.activo
+                     and u.email not like '%+s87%'
+                     and exists (select 1 from prestador_empleado_servicios s where s.empleado_id = pe.id)
+                     and not exists (select 1 from empleado_roles r
+                                      where r.empleado_id = pe.id and r.rol = 'profesional')
+                   order by 1
+                `)),
+          ],
+        };
+      },
+    },
+    siCaduca:
+      'si CRECIÓ: otra persona quedó con chips sin la fila, por el mismo camino silencioso que produjo las dos primeras. Si BAJÓ: alguien curó y la línea base de este registro quedó vieja — se actualiza acá, con su fecha',
+  },
 ];
 
 /** ────────────────────────────────────────────────────────────────────
