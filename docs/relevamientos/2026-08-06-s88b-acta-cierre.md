@@ -122,6 +122,12 @@ las curas, no por ablandarse.**
 - **Clipboard real en emulador sin `cmd clipboard`**: página local vía
   `http://10.0.2.2` + `document.execCommand('copy')` con gesto
   (`navigator.clipboard` exige origen seguro) + `KEYCODE_PASTE` (279).
+- **Los typed routes de expo son ARTEFACTO LOCAL del worktree**: tras
+  mergear main, `/avisos` existía en el árbol y mi
+  `.expo/types/router.d.ts` no lo conocía — dos tsc en rojo que NO eran
+  del código de main. La cura: arrancar `expo start` unos segundos por
+  app (regenera) y re-correr `verdicto`. Un rojo de tsc post-merge se
+  diagnostica contra los tipos GENERADOS antes de culpar al merge.
 
 ## 5 · REGLA 87 — el aparato
 
