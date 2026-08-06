@@ -185,36 +185,105 @@ export const PREMISAS = [
 
   {
     id: 'P2',
-    ficha: 'D-513',
-    titulo: 'el rol «administrador» no tiene un solo portador',
-    desde: 'S75',
+    ficha: 'D-660',
+    titulo: 'los caminos del rol «administrador» están curados por el helper, y su límite intacto',
+    desde: 'S88 (la MUTACIÓN — adjudicación de mesa, 5-ago-2026)',
+    /** ⚰️ LA HISTORIA DE ESTA PREMISA ES SU PRIMERA MUERTE, y se conserva
+     *  porque el registro es lo único que evita re-vigilar un muerto:
+     *  P2 nació vigilando «el rol administrador no tiene UN portador»
+     *  (S75→S88: cero filas en los dos ejes). **Caducó el 5-ago-2026 por
+     *  el camino CORRECTO** — el founder gateó los primeros admins
+     *  (D-652) sobre el motor que A curó (D-660). No fue deriva
+     *  silenciosa: fue el evento que la premisa existía para anunciar, y
+     *  lo anunció. **La mesa adjudicó: MUTA, no se retira** — el supuesto
+     *  nuevo es lo que HOY sabemos cierto y se rompería en silencio:
+     *
+     *    ① los caminos de GESTIÓN de equipo pasan por
+     *      `user_gestiona_prestador()` (el helper de D-660) — nadie
+     *      compara `user_id` a mano de nuevo;
+     *    ② EL LÍMITE: `empleado_roles` NO usa el helper — gatea por
+     *      `dueño` a secas, A PROPÓSITO (solo el TITULAR nombra roles,
+     *      firma de LETRA_ROLES_EQUIPO_S74; A lo declaró textual en su
+     *      tanda ④: *«el límite: empleado_roles sigue gateando por
+     *      dueño, no por gestión»*). Un admin que pudiera acuñar admins
+     *      sería exactamente la fuga que este brazo vigila;
+     *    ③ el trigger de gobierno (`_prestador_empleados_protege_gobierno`,
+     *      D-526→D-660 tanda ④bis) también resuelve por el helper.
+     *
+     *  LECTURA DECLARADA A LA MESA: esto ya no es una rama «inerte» — es
+     *  la regresión de un censo (la clase de P3/P4). El registro entero
+     *  dejó de ser solo-inercia con P3; si el nombre del instrumento
+     *  merece ensancharse, es decisión de mesa, no de esta entrada. */
     sitios: [
       {
         archivo: 'apps/prestador/src/app/(tabs)/mascotas.tsx',
         literal: '**Hoy es inerte**',
         consecuencia:
-          'el delta declarado entre el tab NEGOCIO (`[dueño, administrador]`) y `esDueno` (dueño-only) es invisible mientras no exista un administrador',
+          '⚠️ PROSA VENCIDA POR LA MUTACIÓN: dice «el administrador no tiene motor» y desde el 5-ago tiene motor (D-660) Y portadores (D-652). Su cura viaja con el lote de superficie de C — se vigila que no sobreviva',
       },
     ],
     inerteMientras: {
-      explicacion: 'CERO filas con rol «administrador», en los DOS ejes que la casa usa',
-      /** LAS DOS TABLAS A PROPÓSITO: `empleado_roles` es el eje vivo (el que
-       *  lee `empleado_tiene_rol`) y `prestador_empleados.rol` es el eje
-       *  legado que todavía tiene lector (`titular.ts`, D-486). Preguntar
-       *  por uno solo sería el censo por-helper que L-173 prohíbe: se
-       *  cuenta por TABLA, y las dos suman. */
-      sql: `
-        select ( (select count(*) from empleado_roles       where rol = 'administrador')
-               + (select count(*) from prestador_empleados  where rol = 'administrador') )::int as n
-      `,
-      detalle: `
-        select 'empleado_roles' as tabla, count(*)::int as n from empleado_roles      where rol = 'administrador'
-        union all
-        select 'prestador_empleados',     count(*)::int      from prestador_empleados where rol = 'administrador'
-      `,
+      explicacion:
+        'la suma de desviaciones contra el censo D-660: gestión sin helper + helpers en empleado_roles + trigger sin helper + gate de dueño ausente',
+      /** MEDIDO AL MUTARLA (5-ago): 6/6 policies de gestión con helper ·
+       *  0 helpers en empleado_roles · 2 policies gatean por dueño ·
+       *  trigger con helper ⇒ desviación 0, VERDE.
+       *
+       *  ⚠️ EL COALESCE VA EN CADA LADO, y es un cobro propio de esta
+       *  medición: las policies INSERT no tienen `polqual`, y
+       *  `null || with_check` da NULL — mi primera sonda reportó las dos
+       *  `_crea` como «no usan helper» cuando SÍ lo usan. Un null que se
+       *  lee como veredicto es la familia L-197 en SQL. */
+      medir: ({ dbQuery }) => {
+        const DEF = `(coalesce(pg_get_expr(p.polqual, p.polrelid),'') || coalesce(pg_get_expr(p.polwithcheck, p.polrelid),''))`;
+        // ① las SEIS policies de gestión que D-660 migró, por NOMBRE — si
+        //   alguien las renombra, encontradas < 6 y esto sale ROJO
+        //   nombrando el hueco (0 encontradas jamás es verde, L-197).
+        const gestion = dbQuery(`
+          select count(*)::int as con_helper,
+                 (select count(*) from pg_policy p2 join pg_class c2 on c2.oid = p2.polrelid
+                   where c2.relname in ('prestador_empleados','empleado_invitaciones')
+                     and p2.polname ~ 'dueño')::int as encontradas
+            from pg_policy p join pg_class c on c.oid = p.polrelid
+           where c.relname in ('prestador_empleados','empleado_invitaciones')
+             and p.polname ~ 'dueño'
+             and ${DEF} ~ 'user_gestiona_prestador'
+        `)[0];
+        // ② el límite: empleado_roles SIN helper y CON gate de dueño
+        const roles = dbQuery(`
+          select (select count(*) from pg_policy p join pg_class c on c.oid = p.polrelid
+                   where c.relname = 'empleado_roles'
+                     and ${DEF} ~ 'user_gestiona_prestador')::int as con_helper,
+                 (select count(*) from pg_policy p join pg_class c on c.oid = p.polrelid
+                   where c.relname = 'empleado_roles'
+                     and ${DEF} ~ 'dueño')::int as por_dueno
+        `)[0];
+        // ③ el trigger de gobierno resuelve por el helper
+        const trigger = dbQuery(`
+          select coalesce((select (pg_get_functiondef(p.oid) ~ 'user_gestiona_prestador')::int
+            from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
+           where ns.nspname='public' and p.proname='_prestador_empleados_protege_gobierno'), 0) as n
+        `)[0].n;
+        const n =
+          (6 - Math.min(gestion.con_helper, 6)) + // gestión que perdió el helper (o se renombró)
+          roles.con_helper +                       // el límite ROTO: un helper entró a empleado_roles
+          (roles.por_dueno >= 1 ? 0 : 1) +         // el gate de dueño desapareció
+          (trigger === 1 ? 0 : 1);                 // el trigger perdió el helper (o no existe)
+        return {
+          n,
+          detalle: [
+            {
+              gestion_con_helper: `${gestion.con_helper}/6 (encontradas ${gestion.encontradas})`,
+              limite_helpers_en_empleado_roles: roles.con_helper,
+              limite_gate_dueno: roles.por_dueno,
+              trigger_gobierno_con_helper: trigger === 1,
+            },
+          ],
+        };
+      },
     },
     siCaduca:
-      'nace el primer administrador y TODA rama `[dueño, administrador]` del código se ejecuta por primera vez en producción — sin haber corrido nunca (D-652)',
+      'si gestión perdió el helper: alguien re-escribió una policy comparando user_id a mano — la clase exacta que D-660 censó y curó. Si empleado_roles GANÓ el helper: el límite se rompió y un administrador puede acuñar administradores (contra la firma S74). Las dos direcciones son silenciosas: nada rompe un build',
   },
   {
     id: 'P3',
