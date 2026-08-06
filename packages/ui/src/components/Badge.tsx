@@ -40,6 +40,7 @@ import Svg from 'react-native-svg'
 import { Insignia } from './Insignia'
 import { Huella } from '../brand/Huella'
 import { useTheme } from '../ThemeProvider'
+import { palette } from '../tokens/palette'
 import { useTraduccionUi } from '../i18n'
 
 /** El lado de la huella-novedad (forma 'huella'). 12 y no menos: la
@@ -67,13 +68,36 @@ export interface BadgeProps {
    *    La ley del único relleno, aplicada AL PAR: el glifo que la porta
    *    va en TRAZO (la campana) y la huella va RELLENA. */
   forma?: 'contador' | 'huella'
+  /** 🔴 LA REGLA DE SUPERFICIE (S88, cura pre-gate — censo de C con el
+   *  dato): `accent.active` del prestador en claro es tealDark #0A7268,
+   *  EL MISMO HEX del muro del techo donde la lámina manda la campana —
+   *  la huella podía ser invisible exactamente en su lugar firmado.
+   *  Sobre el muro la pieza INVIERTE A PAPEL (`palette.light0`) — el
+   *  precedente exacto de `Insignia superficie="muro"` (S85) y de
+   *  `Boton` (S84-B19), con el par FIRMADO por §15b.2: papel/tealDark
+   *  5.51 en claro · papel/tealDarkNoche en oscuro — los DOS ya viven
+   *  en `verify:contrast` (cero pares nuevos).
+   *  **Y la letra del founder queda ENTERA, no rota:** «color de
+   *  acento» sobre el muro RESUELVE a papel por la regla medida de S61
+   *  (§15b.2: *sobre el muro el acento funcional es PAPEL — teal puro
+   *  3.77 prohibido*); jamás rojo — papel no lo es; el tamaño no se
+   *  toca. Mismo vocabulario que Insignia: 'clara' (default) | 'muro'.
+   *  Alcance declarado: rige la forma `huella` (la campana del muro).
+   *  El contador sobre el muro NO tiene consumidor hoy — la pill no
+   *  cambia con esta prop, y si un día vive ahí, gana su regla con su
+   *  caso en la mano (una prop sin consumidor decora). */
+  superficie?: 'clara' | 'muro'
   /** El ícono (u otro ancla visual) sobre el que se posa la novedad. */
   children: ReactNode
 }
 
-export function Badge({ n, forma = 'contador', children }: BadgeProps) {
+export function Badge({ n, forma = 'contador', superficie = 'clara', children }: BadgeProps) {
   const { theme } = useTheme()
   const accentActive = 'active' in theme.accent ? theme.accent.active : theme.accent.primary
+  // Sobre el muro, papel PLENO (la inversión §15b.2) — sobre lo claro,
+  // el acento por casa. El muro no sale del tema (vive en la app), pero
+  // su respuesta sí es token: light0, el mismo de Insignia.
+  const colorHuella = superficie === 'muro' ? palette.light0 : accentActive
   return (
     <View>
       {children}
@@ -92,7 +116,7 @@ export function Badge({ n, forma = 'contador', children }: BadgeProps) {
           {forma === 'huella' ? (
             // Estática por ley (Ley 6): la novedad se dice con PRESENCIA.
             <Svg width={LADO_HUELLA} height={LADO_HUELLA} viewBox="0 0 24 24">
-              <Huella color={accentActive} />
+              <Huella color={colorHuella} />
             </Svg>
           ) : (
             <Insignia estado="atencion" etiqueta={String(n)} tamaño="sm" />
