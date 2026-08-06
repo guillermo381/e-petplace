@@ -300,7 +300,12 @@ export default function PreferenciasCuenta() {
               // La fila sin tipos vivos NO se muestra — derivado del
               // catálogo, no de una lista a mano (orden de mesa S88;
               // hoy solo `resumen`, medido con 0 tipos).
-              .filter((cat) => cat.tieneTiposVivos)
+              /* 🔴→✅ S88/A: filtraba por el booleano CIEGO y dejaba el parámetro de
+                 audiencia DECORATIVO — el defecto que D cazó en el cliente, y
+                 que acá seguía vivo. **Es L-204: se curó el sitio y quedó el
+                 patrón.** Latente hoy (los dos coinciden), visible el día que
+                 un tipo solo-cliente entre a una categoría que el prestador ve. */
+              .filter((cat) => cat.tieneTiposVivosParaMi)
               .map((cat) => {
                 const canales = catalogo.canales.map((c) => c.codigo);
                 const encendida = filaEncendida({
