@@ -8538,7 +8538,32 @@ mesa): se escriben cuando cada una tenga su receptor real y verificado.
 
 ---
 
-#### D-669 — 🔴 EL PLAN MUERE AL PRIMER FALLO DE COBRO: NO HAY GRACIA NI REINTENTO
+#### D-669 — ✅ **CURADA (S89-A, 6-ago-2026 · migración `20260806190000`) — con UN número esperando firma de mesa**
+
+**EL CIERRE:** la muerte se reprodujo contra el objeto (fixture in-txn: un
+fallo de renovación dejaba en UNA corrida `estado='vencida'` + **el crédito de
+los sobrantes EVAPORADO** — cero reembolsos — + el aviso SIN VOZ). La cura,
+con la letra del founder (*«una tarjeta vencida no es la decisión de un
+cliente de dejar de cuidar a su mascota»*): **el fallo abre GRACIA** en
+`pago_metadata` y el plan QUEDA ACTIVO — el cron diario ES el reintento; la
+muerte honesta (vencida + reembolso, motivo `d669_gracia_agotada_cobro_fallido`)
+llega SOLO al agotarse la ventana; la voz **`plan_renovacion_fallida` nació
+CON la cura** (en sombra, tuteo, al lote de firma). **El par, 4 brazos:** vive
+con gracia (reintentos=1, aviso con voz) · reintenta sin duplicar aviso ·
+muere honesta devolviendo $6 · sana en ventana cobrando 8−6=$2 y limpiando la
+gracia. **Y el par cazó un defecto de la propia cura antes de que viviera:**
+retener el crédito en metadata lo contaba DOS veces (reembolso 12 donde iba
+6) — la subtransacción por fila ya deshace el cierre fallido, así que los
+sobrantes siguen confirmados y la pasada que resuelve los computa frescos; la
+clave quedó informativa (`credito_en_juego`).
+
+> **⚠️ A MESA: `v_gracia_dias := 7` — PROPUESTO, SIN LETRA QUE LO FIJE**
+> (medido: POLITICAS/PASEO/FINANCIERO no tienen ventana de gracia; MODELO_PASEO
+> la difería al arco de pagos). La firma del número cierra esta ficha del todo.
+
+**El texto original de la deuda, conservado:**
+
+#### (era) D-669 — 🔴 EL PLAN MUERE AL PRIMER FALLO DE COBRO: NO HAY GRACIA NI REINTENTO
 
 **El literal, en el `EXCEPTION` de `cerrar_y_renovar_planes`:**
 
