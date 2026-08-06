@@ -79,7 +79,7 @@ import {
   obtenerMundoVeterinariaPropio,
   obtenerAtencionesAbiertas,
   obtenerPizarra,
-  hayAvisosSinLeer,
+  hayNovedades,
   obtenerPlataDelDia,
   obtenerPresupuestosPrestador,
   obtenerSolicitudesMostrador,
@@ -693,17 +693,20 @@ export default function Hoy() {
   const insets = useSafeAreaInsets();
   const [pantalla, setPantalla] = useState<Pantalla>({ estado: 'cargando' });
   const [refrescando, setRefrescando] = useState(false);
-  /* S88-C · LA CAMPANA: el BOOLEANO de `hayAvisosSinLeer` (jamás la
-     lista — la forma del dato hace imposible pintar un número). Refetch
-     en focus: al volver de /avisos el leído recién marcado se relee.
-     Un fallo de lectura deja `false`: la huella marca presencia solo
-     con verdad medida — sin verdad, no afirma. */
-  const [avisosSinLeer, setAvisosSinLeer] = useState(false);
+  /* S88-C · LA CAMPANA → S89-C · LA VISITA (letra founder, contrato v2
+     de A `9f72a924`): la huella mide LO NUEVO desde la última visita a
+     /avisos, no lo no-leído — el booleano es de `hayNovedades('prestador')`
+     (el asiento es por usuario Y app: visitar la campana del cliente no
+     apaga la nuestra). Jamás la lista — la forma del dato hace imposible
+     pintar un número. Refetch en focus: al volver de /avisos la visita
+     recién depositada se relee y la huella se apaga. Un fallo de lectura
+     deja `false`: la huella marca presencia solo con verdad medida. */
+  const [novedades, setNovedades] = useState(false);
   useFocusEffect(
     useCallback(() => {
       let vigente = true;
-      void hayAvisosSinLeer().then((r) => {
-        if (vigente && r.ok) setAvisosSinLeer(r.data);
+      void hayNovedades('prestador').then((r) => {
+        if (vigente && r.ok) setNovedades(r.data);
       });
       return () => {
         vigente = false;
@@ -1713,7 +1716,7 @@ export default function Hoy() {
           jornada={textoJornada}
           /* S88-C · la campana del HOY (lámina): presencia por booleano,
              destino la lista de avisos. */
-          avisosSinLeer={avisosSinLeer}
+          novedades={novedades}
           onAvisos={() => router.push('/avisos')}
           /* ⭐ S85-C23 — LOS TRES NÚMEROS (§2.4bis), en el slot que el
              techo ya tenía.
