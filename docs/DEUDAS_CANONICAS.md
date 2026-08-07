@@ -1309,7 +1309,18 @@ Paseo, grooming y veterinario deben quedar 100% activables end-to-end. Capas en 
 ✅ CERRADA (S45, migración `20260707120000_d287_especies_f1` con gate founder). Ampliada por decisión founder S45: el registro sale con EXACTAMENTE 6 familias (perro, gato, conejo, ave, pez, roedor); **hurón y cobaya quedaron desactivados** (`activo=false`, `acepta_nuevos_registros=false`, motivo por especie — cobaya se subsume en roedor para nuevos registros, P4 protege a las existentes: había 0). Perfiles de `cat_especies_perfil` creados para roedor y pez. Verificación imperativa: trigger de visibilidad con perfil nuevo ✓, alta asistida rechaza hurón ✓. Implicancia regla 69 anotada: el ModalAltaAsistida del repo viejo (D-215) ofrece cobaya/hurón que el guard ahora rechaza. Origen: S44-B2.3.
 
 #### D-288 — Set de avatares ilustrados por especie (6 F1) — dirección de arte
-🟢 MEDIA. Assets con licencia comercial verificada (LICENCIA.txt en el repo), curaduría founder/Ana María, estilo único, SVG fondo transparente, legibles a 40px. Integración: solo assets + mapeo, la API de AvatarMascota ya recibe `especie` (códigos reales de cat_especies). Evolución posterior: por raza (perro/gato) — requiere dato raza confiable + set ampliado. Disparo: founder entrega la carpeta, o a más tardar onboarding de mascotas de la app dueño. Origen: S44-B2.3 (enmienda final — las siluetas outline propias se descartaron; queda huella genérica).
+🟢 MEDIA. **⚠️ ENMENDADA S90-A (orden 10 ②, literal de mesa):** esta ficha decía «licencia comercial verificada (LICENCIA.txt en el repo)» — **ese archivo NO EXISTE ni corresponde**. Lo que rige:
+
+> «Las 106 imágenes de la galería especie/raza son GENERADAS CON IA
+> (firma founder, 7-ago-2026). No hay derechos de terceros que verificar:
+> el requisito de licencia comercial queda satisfecho POR ORIGEN, no por
+> licencia — no se licenciaron, se generaron. Publicadas en el bucket
+> público especies-razas (111 objetos: 105 razas + 6 genéricos, 739 KB
+> procesadas a 256×256 webp desde 38.3 MB de origen).»
+
+**El estado del bucket, al canon (registro S90-A):** ruta canónica del fallback: raza → `<especie>/<slug-raza>.webp` · sin raza → `<especie>/generico.webp` · sin especie → la huella genérica de `AvatarMascota`. **Reptil NO tiene genérico y su ausencia está VERIFICADA (400): es firma del founder, no olvido** (`cat_especies.reptil` sigue `activo=false`). Distribución medida contra el objeto: perro 45 · gato 21 · ave 11 · pez 11 · conejo 9 · roedor 9 + 6 genéricos = 111.
+
+*Texto original restante de la ficha:* curaduría founder/Ana María, estilo único, SVG fondo transparente, legibles a 40px. Integración: solo assets + mapeo, la API de AvatarMascota ya recibe `especie` (códigos reales de cat_especies). Evolución posterior: por raza (perro/gato) — requiere dato raza confiable + set ampliado. Disparo: founder entrega la carpeta, o a más tardar onboarding de mascotas de la app dueño. Origen: S44-B2.3 (enmienda final — las siluetas outline propias se descartaron; queda huella genérica).
 
 #### D-289 — API key de Google Maps + dev build Android ✅
 ✅ CERRADA (S46): la key S44 expuesta fue borrada de Google Cloud por el founder; la key de Maps vigente quedó re-creada y verificada VIVA (tiles funcionando en la dev build de cliente). **Remanente menor anotado (no reabre la deuda):** confirmar que la key vigente tenga entries de restricción package name + SHA-1 de AMBAS apps (prestador y cliente — L-130 enmendada: en keys de cliente Android la protección real son las restricciones) — disparo: próxima visita del founder a Google Cloud. Historial: hallazgo S44 — Google Maps REMOVIDO de Expo Go Android en SDK 53 → dev build por EAS con key por env secret, jamás en el repo; key expuesta en S44, ROTADA en S45-B0 (la vieja quedó sin borrar hasta S46); gate de tiles de MapaRecorrido cerrado en S45-B5.4. Origen: S44-B2.6.
