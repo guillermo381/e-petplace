@@ -1,48 +1,33 @@
 // ============================================================================
 // documento-carnet — EL PRIMER PAPEL DEL PRODUCTO (S89-A · orden 8 ⑤)
 //
-// El carnet de vacunas, generado SERVER-SIDE de punta a punta. Espec de B
-// (2026-08-06-s89b-ESPEC-cara-documentos.md) sobre papel de impresión:
-// tinta #221E19 (16.56) · magentaDark #8E1F68 SOLO en el filete (8.25) ·
-// el oro no rige (1.70) · B/N-safe: el color JAMÁS porta solo — la
-// PROCEDENCIA viaja fila por fila EN TEXTO, como la espec manda y la orden
-// no relaja: un carnet que miente certificación es daño real.
-//
-// DECISIÓN DE MOTOR, declarada: la espec decía «HTML→PDF server-side»; una
-// Edge Function no corre Chromium, así que el PDF se COMPONE directo con
-// pdf-lib (JS puro) siguiendo la misma espec — las demos HTML de B quedan
-// como fuente de diseño, no como paso del pipeline.
+// El carnet de vacunas, generado SERVER-SIDE de punta a punta. La CARA vive
+// en la plantilla compartida `_shared/papel.ts` desde S90-A (pasada de
+// diseño D-681 + marca de agua D-677 — el isotipo en tinta con opacidad,
+// que JAMÁS porta información). B/N-safe: la PROCEDENCIA viaja fila por
+// fila EN TEXTO — un carnet que miente certificación es daño real.
 //
 // LA PUERTA: token quemable de un solo uso (10 min), emitido por RPC
-// autenticada con el gate de acceso a la mascota (migración 20260806260000).
-// El JWT jamás viaja en la URL; esta función corre con --no-verify-jwt y EL
-// TOKEN ES LA AUTORIZACIÓN — validado y quemado en el mismo acto.
+// autenticada con el gate de acceso a la mascota (migraciones 20260806260000
+// + 20260807100000: el tipo valida contra cat_documentos_mascota). El JWT
+// jamás viaja en la URL; esta función corre con --no-verify-jwt y EL TOKEN
+// ES LA AUTORIZACIÓN — validado y quemado en el mismo acto.
 //
-// Lo que el papel exige (espec B §papeles): EMISOR (e-PetPlace, con el
-// negocio/veterinario POR FILA cuando existe) + DOS FECHAS (emisión + último
-// registro) + procedencia por fila. FOLIO/QR: decisión de mesa pendiente —
-// v1 sale sin folio, declarado. Alcance v1 declarado EN EL PAPEL: es el
-// carnet DE VACUNAS (la desparasitación no existe en el motor — D-476,
-// pregunta 6 de C a mesa).
+// Lo que el papel exige (espec B §papeles): EMISOR + DOS FECHAS (emisión +
+// último registro) + procedencia por fila. FOLIO/QR: decisión de mesa
+// pendiente — v1 sale sin folio, declarado. Alcance v1 declarado EN EL
+// PAPEL: es el carnet DE VACUNAS (la desparasitación no existe en el motor
+// — D-476).
 // ============================================================================
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { PDFDocument, StandardFonts, rgb } from 'npm:pdf-lib@1.17.1';
-
-const TINTA = rgb(0.133, 0.118, 0.098); // #221E19
-const TINTA_SUAVE = rgb(0.45, 0.42, 0.38);
-const MAGENTA = rgb(0.557, 0.122, 0.408); // #8E1F68 — SOLO el filete
-const HAIRLINE = rgb(0.82, 0.8, 0.77);
+import { MX, Papel, TINTA_65, fechaLarga } from '../_shared/papel.ts';
 
 const VOZ_PROCEDENCIA: Record<string, string> = {
   declarado_por_familia: 'Declarada por la familia',
   declarado_por_prestador: 'Registrada por el prestador',
   verificado_por_prestador: 'Verificada por el prestador',
 };
-
-function fechaLarga(d: Date): string {
-  return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`;
-}
 
 Deno.serve(async (req) => {
   const url = new URL(req.url);
@@ -108,132 +93,39 @@ Deno.serve(async (req) => {
   }
 
   // ── El papel ──────────────────────────────────────────────────────────────
-  const pdf = await PDFDocument.create();
-  const sans = await pdf.embedFont(StandardFonts.Helvetica);
-  const sansBold = await pdf.embedFont(StandardFonts.HelveticaBold);
-  const mono = await pdf.embedFont(StandardFonts.Courier);
-
-  const A4: [number, number] = [595.28, 841.89];
-  const MX = 56; // margen
-  let page = pdf.addPage(A4);
-  let y = A4[1] - 64;
-
-  const texto = (
-    s: string,
-    x: number,
-    size: number,
-    opts: { font?: typeof sans; color?: typeof TINTA } = {},
-  ) => {
-    page.drawText(s, { x, y, size, font: opts.font ?? sans, color: opts.color ?? TINTA });
-  };
-  const hairline = (yy: number) =>
-    page.drawLine({
-      start: { x: MX, y: yy },
-      end: { x: A4[0] - MX, y: yy },
-      thickness: 0.7,
-      color: HAIRLINE,
-    });
-  const nuevaPagina = () => {
-    page = pdf.addPage(A4);
-    // la banda viaja en TODA página: una hoja suelta de un carnet impreso
-    // sigue diciendo quién la emitió.
-    page.drawRectangle({ x: 0, y: A4[1] - 34, width: A4[0], height: 34, color: TINTA });
-    page.drawText('e-PetPlace', {
-      x: MX, y: A4[1] - 22, size: 12, font: sansBold, color: rgb(0.98, 0.976, 0.969),
-    });
-    page.drawText('DOCUMENTO EMITIDO', {
-      x: A4[0] - MX - 118, y: A4[1] - 21, size: 8, font: sans, color: rgb(0.98, 0.976, 0.969),
-    });
-    y = A4[1] - 34 - 30;
-  };
-
-  // ── LA MARCA DISTINTIVA (firma founder, S89 adenda ①) ───────────────────
-  // Un carnet EMITIDO por el producto no puede confundirse con el carnet
-  // escaneado que la familia subió. La marca dice el emisor, NO grita: la
-  // banda es TINTA (no color), así que **sobrevive al B/N y a la fotocopia**
-  // — la espec de B lo exige: el matiz muere impreso, el eje tinta/papel no.
-  const bandaAlto = 34;
-  page.drawRectangle({
-    x: 0,
-    y: A4[1] - bandaAlto,
-    width: A4[0],
-    height: bandaAlto,
-    color: TINTA,
-  });
-  page.drawText('e-PetPlace', {
-    x: MX,
-    y: A4[1] - 22,
-    size: 12,
-    font: sansBold,
-    color: rgb(0.98, 0.976, 0.969), // papel sobre tinta — 15.74
-  });
-  page.drawText('DOCUMENTO EMITIDO', {
-    x: A4[0] - MX - 118,
-    y: A4[1] - 21,
-    size: 8,
-    font: sans,
-    color: rgb(0.98, 0.976, 0.969),
-  });
-  y = A4[1] - bandaAlto - 30;
-
-  // El filete magenta — el ÚNICO color del papel (espec B: un solo lugar)
-  page.drawLine({
-    start: { x: MX, y: y + 14 },
-    end: { x: A4[0] - MX, y: y + 14 },
-    thickness: 2,
-    color: MAGENTA,
-  });
-  texto('Carnet de vacunas', MX, 24, { font: sansBold });
-  y -= 16;
-  texto(
+  const papel = await Papel.crear();
+  papel.cabecera('Carnet de vacunas', [
     'Documento emitido por e-PetPlace — no es el carnet físico de una clínica. La procedencia de cada registro se declara fila por fila.',
-    MX,
-    9,
-    { color: TINTA_SUAVE },
-  );
-  y -= 13;
-  // ② El alcance v1, DECLARADO en el papel (firma founder): sin
-  // desparasitaciones — el motor no las tiene (D-476). Decirlo es la
-  // diferencia entre un papel incompleto y un papel que miente.
-  texto(
+    // ② El alcance v1, DECLARADO en el papel (firma founder): sin
+    // desparasitaciones — el motor no las tiene (D-476). Decirlo es la
+    // diferencia entre un papel incompleto y un papel que miente.
     'Alcance: vacunas. Este carnet no incluye desparasitaciones.',
-    MX,
-    9,
-    { color: TINTA_SUAVE },
-  );
-  y -= 26;
+  ]);
 
-  // Identidad de la mascota
   const nac = mascota.fecha_nacimiento
-    ? fechaLarga(new Date(mascota.fecha_nacimiento + 'T00:00:00Z'))
+    ? fechaLarga(mascota.fecha_nacimiento + 'T00:00:00Z')
     : '—';
-  texto(mascota.nombre ?? '—', MX, 17, { font: sansBold });
-  y -= 15;
-  texto(
+  papel.identidad(
+    mascota.nombre ?? '—',
     `${mascota.especie ?? '—'} · ${mascota.sexo ?? '—'} · nacimiento ${nac}`,
-    MX,
-    10,
-    { color: TINTA_SUAVE },
   );
-  y -= 22;
-  hairline(y);
-  y -= 24;
 
   // Las filas — fecha · vacuna · quién · procedencia (EN TEXTO, no en color)
   const filas = vacunas ?? [];
   let ultima: string | null = null;
+  const A4w = 595.28;
   for (const v of filas) {
-    if (y < 110) nuevaPagina();
-    const f = v.fecha_aplicada ? fechaLarga(new Date(v.fecha_aplicada)) : '—';
+    papel.asegura(110);
+    const f = v.fecha_aplicada ? fechaLarga(v.fecha_aplicada) : '—';
     if (!ultima && v.fecha_aplicada) ultima = f;
-    texto(f, MX, 10, { font: mono });
-    texto(v.nombre_vacuna ?? '—', MX + 84, 11, { font: sansBold });
+    papel.texto(f, MX, 9.5, { font: papel.f.mono });
+    papel.texto(v.nombre_vacuna ?? '—', MX + 84, 10.5, { font: papel.f.sansBold });
     if (v.fecha_proxima) {
-      texto(`próxima ${fechaLarga(new Date(v.fecha_proxima))}`, A4[0] - MX - 130, 9, {
-        color: TINTA_SUAVE,
+      papel.texto(`próxima ${fechaLarga(v.fecha_proxima)}`, A4w - MX - 130, 8.5, {
+        color: TINTA_65,
       });
     }
-    y -= 13;
+    papel.y -= 13;
     const quien = v.prestador_id
       ? (negocios.get(v.prestador_id) ?? 'prestador')
       : (v.veterinario_nombre_externo || null);
@@ -242,28 +134,22 @@ Deno.serve(async (req) => {
       quien ? `aplicada por ${quien}` : null,
       v.lote ? `lote ${v.lote}` : null,
     ].filter(Boolean);
-    texto(partes.join(' · '), MX + 84, 8.5, { color: TINTA_SUAVE });
-    y -= 12;
-    hairline(y + 4);
-    y -= 12;
+    papel.texto(partes.join(' · '), MX + 84, 8.5, { color: TINTA_65 });
+    papel.y -= 12;
+    papel.hairline(papel.y + 4);
+    papel.y -= 12;
   }
   if (filas.length === 0) {
-    texto('Sin vacunas registradas todavía.', MX, 11, { color: TINTA_SUAVE });
-    y -= 20;
+    papel.texto('Sin vacunas registradas todavía.', MX, 10.5, { color: TINTA_65 });
+    papel.y -= 20;
   }
 
   // Pie: emisor + LAS DOS FECHAS (emisión · último registro). Sin folio (mesa).
-  if (y < 96) nuevaPagina();
-  y = 64;
-  hairline(y + 14);
-  texto(
-    `Emitido por e-PetPlace (hola@epetplace.com) · emisión ${fechaLarga(new Date())} · último registro ${ultima ?? '—'} · ${filas.length} vacuna(s)`,
-    MX,
-    8.5,
-    { color: TINTA_SUAVE },
+  papel.pie(
+    `Emitido por e-PetPlace (hola@epetplace.com) · emisión ${fechaLarga(new Date().toISOString())} · último registro ${ultima ?? '—'} · ${filas.length} vacuna(s)`,
   );
 
-  const bytes = await pdf.save();
+  const bytes = await papel.bytes();
   return new Response(bytes, {
     headers: {
       'Content-Type': 'application/pdf',
