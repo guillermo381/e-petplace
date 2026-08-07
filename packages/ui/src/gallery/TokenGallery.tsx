@@ -1107,7 +1107,12 @@ function EjemploSetBPrima() {
     'lapiz', 'compartir', 'descargar',
     // S82-B r10: LA VACUNA con su glifo propio (la fila del perfil
     // pintaba `veterinaria` — sustitución genérica que Ley 12 prohíbe).
-    'vacuna', 'bitacora',
+    // S90-B: `receta` va PEGADA a `vacuna` a propósito — son los dos
+    // objetos CLÍNICOS del set y el riesgo declarado de la cápsula es que
+    // se lea «medicación»; lo que hay que ver a 21px es que la cápsula y
+    // la jeringa no se confundan entre sí. Y queda a un paso de `caso`,
+    // que es el préstamo que viene a reemplazar.
+    'vacuna', 'bitacora', 'receta',
     // S84-B5: CONTACTO — FIRMADO (el globo). Su candidato rival murió en
     // el gate; el porqué vive en el registry, no acá.
     'contacto',

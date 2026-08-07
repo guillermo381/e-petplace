@@ -71,6 +71,12 @@ export type IconoNombre =
   // VACUNA (sustitución genérica, Ley 12: el mismo caso de lápiz/compartir
   // en r7 y de la vacuna en r10). Gate por ícono a 21px PENDIENTE.
   | 'bitacora'
+  // ── S90-B: LA RECETA — el catálogo de papeles pasó de 2 a 4 y el set
+  //    ofrecía TRES dibujos viables; A dejó `receta → 'caso'` como
+  //    PRÉSTAMO DECLARADO (compila y no miente) hasta que exista el
+  //    propio. Éste es el propio. Gate por ícono a 21px PENDIENTE —
+  //    entra al gate de esta familia, no aparte.
+  | 'receta'
   // ── S84-B4/B5: CONTACTO — FIRMADO (founder, S84-B5: el GLOBO).
   //    Nace porque la sección "Cómo te contactan" del perfil quedó SIN
   //    glifo mientras sus hermanas tienen el suyo — y las dos salidas
@@ -724,6 +730,51 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
     </>
   ),
 
+  // ── LA RECETA — LA CÁPSULA (S90-B) ─────────────────────────────────
+  // EL CENSO PRIMERO (§6b paso 2), porque es lo que decide el dibujo: el
+  // idioma «rectángulo» está ocupado SIETE veces en este registry —
+  // `presupuesto` (hoja con doblez) · `bitacora` (cuaderno con lomo) ·
+  // `caso` (carpeta con pestaña) · `pagos` (billete) · `documento`
+  // (retrato) · `fiscal` (dentado) · `hoy` (calendario con anillas). Una
+  // OCTAVA hoja rectangular no se distingue de ninguna a 21px, que es
+  // exactamente lo que la Ley 9 afilada mata.
+  //
+  // POR QUÉ LA CÁPSULA Y NO EL PAPEL, dicho con su conflicto a la vista:
+  // el JSDoc del catálogo de papeles (`apps/cliente/src/lib/papeles.ts`)
+  // pide «el glifo del OBJETO (el papel), jamás el del acto» — y esta
+  // decisión NO lo cumple al pie. Se toma igual por tres razones medidas:
+  //   ① El propio catálogo ya tiene una entrada que tampoco lo cumple:
+  //      `carnet_vacunas → 'carnet'`, y `carnet` NO es un papel — es la
+  //      PLACA (etiqueta con su anilla). La regla describe a `documento`,
+  //      no al catálogo entero.
+  //   ② El objeto exacto de una receta es la hoja del recetario, y esa
+  //      puerta está cerrada por saturación (arriba). Entre un octavo
+  //      rectángulo ilegible y un objeto legible, la Ley 9 decide.
+  //   ③ Lo que la receta ORDENA es la medicación, y ahí el objeto es
+  //      exacto y único en el set: nada más es una cápsula. `vacuna` es
+  //      la jeringa —otra silueta, otro eje— así que no hay colisión.
+  // ⚠️ EL RIESGO, declarado y no disimulado (§6b paso 3): puede leerse
+  // «medicación» antes que «receta». Vive mitigado por su vecindad (una
+  // LISTA de papeles rotulados por voz), pero es el riesgo real y es lo
+  // que el gate del founder tiene que mirar.
+  //
+  // ANATOMÍA PARA 21px: DOS trazos (densidad 2 — el piso del rango 2-4,
+  // igual que la jeringa después de su Chanel). Cápsula a 45° + la línea
+  // de unión de las dos mitades, que es lo que la hace cápsula y no un
+  // rombo. Cero graduaciones, cero píldoras satélite: a 21px son ruido.
+  // Grilla 24 · trazo 1.9 · aire 3.4 arriba (el más ajustado, medido).
+  // La huella baja-izquierda con el mismo gesto que `vacuna`/`bitacora`.
+  receta: ({ tinta, huella }) => (
+    <>
+      <Path
+        d="M8.15 10.85A2.9 2.9 0 0 0 12.25 14.95L18.85 8.35A2.9 2.9 0 0 0 14.75 4.25Z"
+        {...trazo(tinta)}
+      />
+      <Path d="M11.45 7.55 15.55 11.65" {...trazo(tinta)} />
+      <Huella color={huella} x={1.8} y={14.8} escala={0.3} />
+    </>
+  ),
+
   // ── FISCAL — LA FACTURA CON BORDE DENTADO (S84-B21) ────────────────
   // El objeto fiscal de la región no es "un papel": es LA FACTURA — el
   // RUC y el NIT existen para emitirla. Y el BORDE DENTADO es todo el
@@ -1019,6 +1070,10 @@ export function Icono({
     vacuna: identidad,
     // La bitácora es del expediente de la mascota — capa identidad.
     bitacora: identidad,
+    // S90-B: la receta es del expediente clínico — misma capa que
+    // `caso`, `vacuna` y `carnet`. No va a `ocre`/CONSUMO aunque nombre
+    // un medicamento: la receta no vende, indica.
+    receta: identidad,
     // GLIFOS DE CONTROL (S82-B r7): TINTA en los dos registros — un
     // control no pertenece a una capa (no hay oficio del que tomar
     // color) y su huella no se dibuja. El `registro="capa"` de un

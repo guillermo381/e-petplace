@@ -21,7 +21,7 @@
  */
 
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { execSync } from 'node:child_process';
 import { construirArbol, hitSlopsVecinos, autoPruebaArbol } from './lib-arbol-montaje.mjs';
 
@@ -602,21 +602,78 @@ function r12(pares) {
       (bajaron > 0 ? ` · ${bajaron} BAJARON: actualizar baseline` : ''),
   };
 }
+/**
+ * ⭐ S90-B · EL RESOLVEDOR DEL RUNNER — la cura de un modo de falla que NO
+ * es del lint sino de su ARRANQUE.
+ *
+ * EL CASO, medido por la pista D en esta misma sesión: `pnpm exec tsx` NO
+ * sobrevive a un worktree recién creado —o con `node_modules` prestado—
+ * porque `pnpm exec` resuelve el workspace antes de resolver el binario.
+ * D quedó **sin R12 ni R15**, que son las dos reglas de CONTRASTE: las
+ * únicas que miden accesibilidad.
+ *
+ * POR QUÉ ERA GRAVE Y NO MOLESTO: el guard hacía lo correcto —salía en
+ * ROJO, jamás en verde (L-197)— pero un rojo que solo dice «no pude»
+ * **es indistinguible de un rojo que dice «encontré un par malo»** para
+ * quien lo lee apurado. Una pista que arranca su worktree se queda sin
+ * la medición de contraste y no tiene forma barata de saber por qué.
+ *
+ * LA CURA es que el volcador SEPA CORRER, en cascada, con cada intento
+ * declarado:
+ *   ① el binario de `node_modules/.bin`, resuelto POR RUTA subiendo el
+ *      árbol — no le pregunta nada a pnpm, así que el modo de falla de D
+ *      no existe acá;
+ *   ② `pnpm exec` — el camino histórico, que sigue siendo el bueno
+ *      cuando el workspace está sano;
+ *   ③ `npx --no-install` — la última red, sin bajar nada de la red.
+ *
+ * Y SI LAS TRES CAEN, el mensaje dice LAS TRES con su error. *Todo freno
+ * declara CONTRA QUÉ MIDIÓ* — un «no pude» sin el qué-intenté manda a la
+ * siguiente pista a re-descubrir lo mismo.
+ */
+const RAIZ_REPO = resolve(dirname(new URL(import.meta.url).pathname), '..');
+
+/** Busca un binario de `node_modules/.bin` subiendo desde `desde`. */
+function binDeNodeModules(nombre, desde) {
+  let dir = desde;
+  for (let i = 0; i < 8; i++) {
+    const p = join(dir, 'node_modules', '.bin', nombre);
+    if (existsSync(p)) return p;
+    const padre = dirname(dir);
+    if (padre === dir) break;
+    dir = padre;
+  }
+  return null;
+}
+
 /** El volcador corre UNA vez por invocación; si cae, R12 y R15 fallan
  *  fuerte. Desde r6 emite { pares, tokens } (los tokens para R15). */
 function volcadorReal() {
-  try {
-    const out = execSync('pnpm exec tsx scripts/verify-diseno-pares.ts', {
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-    const dump = JSON.parse(out);
-    if (!Array.isArray(dump?.pares) || dump.pares.length === 0) throw new Error('volcador sin pares');
-    if (!Array.isArray(dump?.tokens) || dump.tokens.length === 0) throw new Error('volcador sin tokens');
-    return dump;
-  } catch (e) {
-    return { caido: String(e.message ?? e).slice(0, 120) };
+  const GUION = 'scripts/verify-diseno-pares.ts';
+  const binLocal = binDeNodeModules('tsx', RAIZ_REPO);
+  const intentos = [
+    binLocal ? { como: '.bin/tsx (por ruta)', cmd: `"${binLocal}" ${GUION}` } : null,
+    { como: 'pnpm exec', cmd: `pnpm exec tsx ${GUION}` },
+    { como: 'npx --no-install', cmd: `npx --no-install tsx ${GUION}` },
+  ].filter(Boolean);
+
+  const fallidos = [];
+  for (const intento of intentos) {
+    try {
+      const out = execSync(intento.cmd, {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+        cwd: RAIZ_REPO,
+      });
+      const dump = JSON.parse(out);
+      if (!Array.isArray(dump?.pares) || dump.pares.length === 0) throw new Error('volcador sin pares');
+      if (!Array.isArray(dump?.tokens) || dump.tokens.length === 0) throw new Error('volcador sin tokens');
+      return { ...dump, via: intento.como };
+    } catch (e) {
+      fallidos.push(`${intento.como}: ${String(e.message ?? e).slice(0, 70)}`);
+    }
   }
+  return { caido: fallidos.join(' · ') };
 }
 
 /** R15 · LA EXCLUSIÓN DE A5 (§9bis.3 FIRMADA, S82-B r6 — orden founder):
@@ -1872,7 +1929,13 @@ if ('caido' in (dump ?? {})) {
   corridas.push(['R12 (contraste dos temas)', { fallos: [`el VOLCADOR no corrió (${dump.caido}) — sin pares no hay verificación (L-192)`], info: 'VOLCADOR CAÍDO' }]);
   corridas.push(['R15 (exclusión A5)', { fallos: [`el VOLCADOR no corrió (${dump.caido}) — sin tokens no hay verificación (L-192)`], info: 'VOLCADOR CAÍDO' }]);
 } else {
-  corridas.push(['R12 (contraste dos temas: texto 4.5 · canto 3.0)', r12(dump.pares)]);
+  // S90-B: el volcador DICE POR DÓNDE corrió. No es adorno — es lo que
+  // permite ver desde el reporte que la cascada hizo falta (o que no).
+  const r12r = r12(dump.pares);
+  corridas.push([
+    'R12 (contraste dos temas: texto 4.5 · canto 3.0)',
+    { ...r12r, info: `${r12r.info ?? ''} · volcador vía ${dump.via}` },
+  ]);
   corridas.push(['R15 (A5 §9bis.3: la familia de #0F5E56 fuera del tema cliente)', r15(dump.tokens)]);
 }
 corridas.push(['R13 (A6: control contorneado, cliente)', r13(apps)]);
