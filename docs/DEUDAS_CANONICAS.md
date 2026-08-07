@@ -9097,6 +9097,23 @@ de D): en el **perfil de la mascota**, la sección de documentos pide
 
 ---
 
+#### D-684 — `pez/koi` de la galería no corresponde a su rótulo ⚪ REGISTRO
+⚪ BAJA. **La imagen publicada como `pez/koi.webp` no es un koi:** el koi es
+una carpa alargada de patrón blanco/naranja/negro, y la imagen lee como
+CÍCLIDO (cuerpo corto, iridiscencia azul/roja). **Origen: hallazgo de C al
+publicar la galería (S90)** — salió de mirar 6 de las 105, no de una
+auditoría; **las otras 99 NO están verificadas contra su rótulo**.
+**El founder la deja hoy y firma su reemplazo como deuda.**
+**Atenuante MEDIDO, y es lo que la vuelve esperable en vez de rara:** el
+archivo de origen era un **UUID crudo**
+(`21146D49-C35D-49D5-AD38-B0A7FA32A746.webp`), así que **el nombre de
+CARPETA es la única afirmación de qué es** — nada en el archivo lo respalda.
+Con imágenes **generadas por IA**, un rótulo que no corresponde al dibujo es
+**modo de falla esperable**, no anomalía.
+**Disparo: cuando se regenere cualquier imagen de la galería** — entra en
+ese mismo lote, no exige uno propio.
+Origen: S90-C (publicación de la galería especie/raza).
+
 #### D-683 — ⚪ AGRUPAR LOS PAPELES POR CATEGORÍA — con disparo por NÚMERO
 
 **Letra del founder con su umbral firmado: cuando los papeles lleguen a
