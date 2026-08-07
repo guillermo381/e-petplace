@@ -53,6 +53,14 @@ export type IconoNombre =
   //    acá: la categoría "glifo de control" es §6bis de DIRECCION_ARTE,
   //    PENDIENTE desde S78 — regla 80 (la ley va DESPUÉS del gate).
   | 'lapiz' | 'compartir'
+  // ── S89-B: DESCARGAR — nace por pedido autocontenido de D (lámina
+  //    `LAMINA_DOCUMENTOS_DEL_HOGAR.md`): las filas de papeles tienen su
+  //    `iconoCta` cableado y NO había glifo. **Prestarle `compartir` es
+  //    la sustitución genérica que la Ley 12 prohíbe** — y además serían
+  //    dos ACCIONES DISTINTAS con el mismo dibujo, que es el caso peor:
+  //    compartir MANDA el papel afuera, descargar lo TRAE al teléfono.
+  //    Gate por ícono a 21px PENDIENTE (§2.9), como sus vecinos.
+  | 'descargar'
   // ── S82-B r10: LA VACUNA gana su glifo (orden founder). Hasta hoy la
   //    fila de vacunas del perfil pintaba `veterinaria` (medido:
   //    `mascota/[mascotaId].tsx:863`) — la sustitución genérica que la
@@ -868,6 +876,32 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       <Path d="M5 14v5.5h14V14" {...trazo(tinta)} />
     </>
   ),
+  // Descargar: EL HERMANO EXACTO DE `compartir`, con la flecha invertida
+  // — la que CAE a la bandeja en vez de salir de ella. La paridad es
+  // literal y deliberada: **la bandeja es el MISMO path, byte por byte**
+  // (`M5 14v5.5h14V14`), y solo el asta y la punta se dan vuelta. Dos
+  // acciones que son la ida y la vuelta del mismo objeto tienen que
+  // leerse como pareja; si la bandeja divergiera, el par se rompería sin
+  // que nada fallara (19.9: lo que se copia diverge — acá se copia A
+  // PROPÓSITO y queda dicho, para que el día que una cambie, cambien las
+  // dos).
+  //
+  // La métrica, contra su vecino: `compartir` lleva el asta de y15 a y4
+  // con la punta en 3.6; acá el asta va de 3.6 a 13.4 con la punta en
+  // 13.4 — **la punta se detiene ANTES del borde de la bandeja (y14)**,
+  // no la penetra: la flecha *cae hacia* el papel guardado. Los brazos
+  // conservan las 4 unidades del vecino, así que a 21px la punta pesa lo
+  // mismo en los dos.
+  //
+  // Sin huella, como todo control (§6bis sigue pendiente): `huella`
+  // queda sin usar a propósito.
+  descargar: ({ tinta }) => (
+    <>
+      <Path d="M12 3.6v9.8" {...trazo(tinta)} />
+      <Path d="M8 9.4 12 13.4l4-4" {...trazo(tinta)} />
+      <Path d="M5 14v5.5h14V14" {...trazo(tinta)} />
+    </>
+  ),
 }
 
 export function Icono({
@@ -991,6 +1025,9 @@ export function Icono({
     // control resuelve a tinta a propósito: pedirle capa no lo tiñe.
     lapiz: { pura: colorTinta, aa: colorTinta },
     compartir: { pura: colorTinta, aa: colorTinta },
+    // S89-B: descargar entra a la familia de sus vecinos — mismo criterio
+    // (un control no pertenece a una capa) y misma resolución.
+    descargar: { pura: colorTinta, aa: colorTinta },
     // S88 — la campana: OBJETO sin capa (un aviso no pertenece a un
     // oficio) ⇒ tinta en los dos registros, como los controles — sin
     // fundar §6bis: el criterio acá es «sin capa de la que tomar color».
