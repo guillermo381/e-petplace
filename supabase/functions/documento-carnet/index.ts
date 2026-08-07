@@ -135,28 +135,73 @@ Deno.serve(async (req) => {
     });
   const nuevaPagina = () => {
     page = pdf.addPage(A4);
-    y = A4[1] - 64;
+    // la banda viaja en TODA página: una hoja suelta de un carnet impreso
+    // sigue diciendo quién la emitió.
+    page.drawRectangle({ x: 0, y: A4[1] - 34, width: A4[0], height: 34, color: TINTA });
+    page.drawText('e-PetPlace', {
+      x: MX, y: A4[1] - 22, size: 12, font: sansBold, color: rgb(0.98, 0.976, 0.969),
+    });
+    page.drawText('DOCUMENTO EMITIDO', {
+      x: A4[0] - MX - 118, y: A4[1] - 21, size: 8, font: sans, color: rgb(0.98, 0.976, 0.969),
+    });
+    y = A4[1] - 34 - 30;
   };
 
-  // Cabecera: wordmark + EL FILETE magenta (el único color del papel)
-  texto('e-PetPlace', MX, 15, { font: sansBold });
-  y -= 10;
+  // ── LA MARCA DISTINTIVA (firma founder, S89 adenda ①) ───────────────────
+  // Un carnet EMITIDO por el producto no puede confundirse con el carnet
+  // escaneado que la familia subió. La marca dice el emisor, NO grita: la
+  // banda es TINTA (no color), así que **sobrevive al B/N y a la fotocopia**
+  // — la espec de B lo exige: el matiz muere impreso, el eje tinta/papel no.
+  const bandaAlto = 34;
+  page.drawRectangle({
+    x: 0,
+    y: A4[1] - bandaAlto,
+    width: A4[0],
+    height: bandaAlto,
+    color: TINTA,
+  });
+  page.drawText('e-PetPlace', {
+    x: MX,
+    y: A4[1] - 22,
+    size: 12,
+    font: sansBold,
+    color: rgb(0.98, 0.976, 0.969), // papel sobre tinta — 15.74
+  });
+  page.drawText('DOCUMENTO EMITIDO', {
+    x: A4[0] - MX - 118,
+    y: A4[1] - 21,
+    size: 8,
+    font: sans,
+    color: rgb(0.98, 0.976, 0.969),
+  });
+  y = A4[1] - bandaAlto - 30;
+
+  // El filete magenta — el ÚNICO color del papel (espec B: un solo lugar)
   page.drawLine({
-    start: { x: MX, y },
-    end: { x: A4[0] - MX, y },
+    start: { x: MX, y: y + 14 },
+    end: { x: A4[0] - MX, y: y + 14 },
     thickness: 2,
     color: MAGENTA,
   });
-  y -= 34;
   texto('Carnet de vacunas', MX, 24, { font: sansBold });
   y -= 16;
   texto(
-    'Este documento cubre las vacunas registradas en e-PetPlace. La procedencia de cada registro se declara fila por fila.',
+    'Documento emitido por e-PetPlace — no es el carnet físico de una clínica. La procedencia de cada registro se declara fila por fila.',
     MX,
     9,
     { color: TINTA_SUAVE },
   );
-  y -= 30;
+  y -= 13;
+  // ② El alcance v1, DECLARADO en el papel (firma founder): sin
+  // desparasitaciones — el motor no las tiene (D-476). Decirlo es la
+  // diferencia entre un papel incompleto y un papel que miente.
+  texto(
+    'Alcance: vacunas. Este carnet no incluye desparasitaciones.',
+    MX,
+    9,
+    { color: TINTA_SUAVE },
+  );
+  y -= 26;
 
   // Identidad de la mascota
   const nac = mascota.fecha_nacimiento

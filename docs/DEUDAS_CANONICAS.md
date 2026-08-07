@@ -2177,7 +2177,31 @@ sus dos afirmaciones caducadas están señaladas arriba.)*
 
 🔴 ALTA. **No es "falta el motor": son TRES capas y hay CERO de las tres.** Evidencia (S72-A0/B0): `from('notificaciones')` = **0 hits** en apps y packages (nadie LEE la tabla) · `push_tokens` existe y **cero** líneas de app la tocan (`getExpoPushToken` = 0 hits) · **no hay RPC** que le permita al prestador disparar nada al dueño. **D-137 confirmada en CERO** (ningún productor escribe `vacuna_vencida` ni `cita_recordatorio`; los 4 cron vivos son otros). **Hoy el vet NO PUEDE TOCAR AL DUEÑO POR NINGÚN CANAL.** **Nota de coherencia:** `MODELO_VETERINARIA` §9 ya vendió "recordatorios" DENTRO del candado gratis-para-siempre, y D-137 los difirió a F2 — la letra corrió más rápido que el motor. **Precondición:** D-445 (letra del centro de notificaciones) + un lector de `notificaciones`. **Disparo: el arco siguiente al cierre del vet.** Origen: S72 (backlog de mercado).
 
-#### D-476 — M2 · Desparasitación 🟠
+#### D-476 — M2 · Desparasitación 🟠 → **ELEVADA (firma founder, 6-ago-2026 · S89): EL CARNET EMITIDO LA EXIGE**
+
+> **LA LETRA NUEVA:** el producto ya **EMITE** su carnet de vacunas (S89-A,
+> `documento-carnet` — un papel que la familia descarga, imprime y muestra en
+> otra clínica). **Sin desparasitaciones, ese papel sale incompleto contra el
+> carnet de cualquier veterinaria** — y el hueco dejó de ser interno: viaja
+> impreso.
+>
+> **v1 SALE IGUAL, y su honestidad es la condición firmada:** el papel
+> **declara su alcance en el encabezado** («Alcance: vacunas. Este carnet no
+> incluye desparasitaciones») — *la diferencia entre un papel incompleto y un
+> papel que miente es esa línea.* La línea se retira el día que el módulo
+> exista, no antes.
+>
+> **☠️ DISPARO (firmado):** antes del soft launch **si el tiempo alcanza**;
+> si no, **primera tanda post-lanzamiento** — sin negociar de nuevo.
+> **☠️ MUERTE:** una desparasitación registrada por el camino real aparece en
+> el carnet emitido, y la línea de alcance desaparece del encabezado.
+
+*(Origen de la elevación: S89-A orden 8 ⑤ — la pregunta 6 del inventario de
+C, contestada por el founder al ver el primer papel de verdad.)*
+
+**El texto original de la deuda, conservado:**
+
+#### (era) D-476 — M2 · Desparasitación 🟠
 🟠 MEDIA-ALTA. **No existe:** grep `desparasit|antiparasit|garrapata|deworm` sobre migraciones = 0; cero en i18n de ambas apps; cero tipos de evento (los únicos hits son dos columnas del vertical de criaderos, ajenas a la constelación clínica). La letra sí la promete (`MODELO_PRODUCTO` JTBD-1; la voz canónica de `DISEÑO_EXPERIENCIA` usa *"a Zeus le vence la desparasitación en 12 días"*). **Consecuencia técnica pre-declarada:** es el **SEGUNDO tipo de evento fecha-sola** → dispara la precisión de fecha en `eventos_mascota` (**D-312**, con migración y contrato regla 69). **Disparo: cuando M1 (D-475) tenga motor** — una desparasitación sin recordatorio es una fila más. Origen: S72.
 
 #### D-477 — M3 · El riel de documentos 🟠
