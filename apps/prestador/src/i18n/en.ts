@@ -541,6 +541,14 @@ export const prestadorEn = {
     canalCorreo: 'By email',
     canalWhatsapp: 'WhatsApp',
     notifPermisoNegado: "System notifications are off for this app — 'On your phone' alerts won't arrive until you turn them on in your phone settings.",
+    // ⭐ S90-B · D-680 — the house's invitation (signed lámina §3).
+    // VERBATIM from the client by table order: the voices were signed with
+    // the lámina and are not re-signed for changing house.
+    notifInvitacionTitulo: 'Updates on your phone',
+    notifInvitacionCuerpo:
+      "When something important happens — a confirmed appointment, a vaccine coming due — we let you know on your phone, even when the app is closed. You can change this anytime in Preferences.",
+    notifInvitacionSi: 'Yes, let me know',
+    notifInvitacionNo: 'Not now',
     waConsentTitulo: 'WhatsApp updates',
     waConsentTexto: 'I want to receive e-PetPlace updates on WhatsApp at this number. I can turn this off anytime in Preferences.',
     waConsentAceptar: 'Yes, send them',
@@ -2039,6 +2047,20 @@ export const prestadorEn = {
     jornadaPausadaTitulo: 'Their working hours are paused',
     jornadaCargarCta: 'Set up their schedule',
     jornadaVerCta: 'See their schedule',
+    // ⭐ S90-B · D-676 — the person's professional licence. States the fact
+    // and the date, with no scolding and no manufactured urgency. No day
+    // counter on purpose: the engine's reader counts to Sep 1 while the
+    // gate cuts on Aug 15 — the date is what both halves agree on.
+    matriculaTitulo: 'Licence number missing',
+    matriculaCuerpo:
+      'For {{nombre}} to receive appointments we need their professional licence number. From August 15, anyone without a licence on file is no longer offered to families.',
+    matriculaEtiqueta: 'Professional licence',
+    matriculaPaisEtiqueta: 'Issuing country',
+    matriculaPaisAyuda: 'Two letters — EC, CO, PE.',
+    matriculaGuardar: 'Save licence',
+    matriculaEditar: 'Edit',
+    matriculaCancelar: 'Cancel',
+    matriculaGuardada: 'Licence saved.',
     jornadaPausadaCuerpo:
       'They have hours saved, but none active. While paused they do not show up when a family looks for an appointment.',
     atiendeSeccion: 'What they provide',

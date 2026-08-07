@@ -50,6 +50,7 @@ import {
   EsqueletoGrupo,
   EstadoVacio,
   EvitaTeclado,
+  FilaDato,
   Hoja,
   Insignia,
   Interruptor,
@@ -70,8 +71,10 @@ import {
   actualizarExponePersonas,
   asignarServiciosEmpleado,
   desvincularEmpleado,
+  guardarMatriculaEmpleado,
   invitarEmpleado,
   obtenerChipsEmpleado,
+  obtenerMatriculaEmpleado,
   obtenerEquipoNegocio,
   obtenerJornadaEmpleado,
   obtenerMiCuentaComercial,
@@ -83,6 +86,7 @@ import {
   type ChipEmpleado,
   type EquipoNegocio,
   type JornadaEmpleado,
+  type MatriculaEmpleado,
   type MiembroEquipo,
   type MiPrestador,
   type OficioChip,
@@ -174,6 +178,18 @@ export default function EquipoNegocioPantalla() {
   /** El oficio cuyo apagado dejaría a la persona SIN capacidad clínica y
    *  espera el segundo toque (§4: no se ejecuta al toque, se informa). */
   const [confirmaQuitar, setConfirmaQuitar] = useState<OficioChip | null>(null);
+
+  /* ⭐ S90-B (D-676) · LA MATRÍCULA DE LA PERSONA — el estado de su bloque.
+     `null` = todavía no leída; su fallo NO tumba la Hoja (el resto del
+     miembro se sigue operando) pero TAMPOCO se disfraza de "no tiene":
+     afirmar ausencia sobre algo que no se pudo leer es exactamente lo que
+     L-197 prohíbe — por eso el bloque solo habla con dato en la mano. */
+  const [matricula, setMatricula] = useState<MatriculaEmpleado | null>(null);
+  const [editandoMat, setEditandoMat] = useState(false);
+  const [matNumero, setMatNumero] = useState('');
+  const [matPais, setMatPais] = useState('');
+  const [guardandoMat, setGuardandoMat] = useState(false);
+  const [errorMat, setErrorMat] = useState<string | null>(null);
   // EL ARRASTRE (S78-B punto 2) MIGRÓ A D-547: `MiembroEquipo.oficios`
   // viaja en el lector de equipo — el 2×N por fila que esta pantalla
   // pagaba (y declaraba) MURIÓ (A `dc08147`: "B migra cuando quiera").
@@ -238,17 +254,56 @@ export default function EquipoNegocioPantalla() {
     setConfirmaQuitar(null);
     setChips(null);
     setJornada(null);
+    setMatricula(null);
+    setEditandoMat(false);
+    setErrorMat(null);
     setMiembro(m);
     if (m.roles.includes('dueño')) return;
     setCargandoHoja(true);
-    void Promise.all([obtenerChipsEmpleado(m.empleadoId), obtenerJornadaEmpleado(m.empleadoId)]).then(
-      ([rc, rj]) => {
-        setCargandoHoja(false);
-        if (rc.ok) setChips(rc.data);
-        else setVozError(t('equipo.errorCarga'));
-        if (rj.ok) setJornada(rj.data);
-      },
-    );
+    // ⭐ S90-B: la matrícula entra al MISMO Promise.all — cero round-trip
+    // extra de latencia (la lección de D-531: una Hoja que abre con una
+    // cascada en serie ya costó 579 ms una vez).
+    void Promise.all([
+      obtenerChipsEmpleado(m.empleadoId),
+      obtenerJornadaEmpleado(m.empleadoId),
+      obtenerMatriculaEmpleado(m.empleadoId),
+    ]).then(([rc, rj, rm]) => {
+      setCargandoHoja(false);
+      if (rc.ok) setChips(rc.data);
+      else setVozError(t('equipo.errorCarga'));
+      if (rj.ok) setJornada(rj.data);
+      // Su fallo NO tumba la Hoja y NO se disfraza de "no tiene": el
+      // bloque se queda callado hasta tener el dato (L-197).
+      if (rm.ok) {
+        setMatricula(rm.data);
+        setMatNumero(rm.data.matricula ?? '');
+        // P21 AFILADA («proponer no es deducir»): el país del NEGOCIO se
+        // ofrece como punto de partida EDITABLE cuando la persona todavía
+        // no declaró el suyo. No se deriva ni se guarda solo: si el gestor
+        // no toca nada y no guarda, no se escribe nada.
+        setMatPais(
+          rm.data.paisEmisor ??
+            (pantalla.estado === 'listo' ? (pantalla.prestador.country_code ?? '') : ''),
+        );
+      }
+    });
+  }
+
+  /** ⭐ S90-B (D-676) — guarda la matrícula de ESTA persona. El país viaja
+   *  con el número: un registro profesional sin su emisor no identifica
+   *  nada. La superficie es del GESTOR (esta Hoja), no de la persona. */
+  async function guardarMatricula(empleadoId: string) {
+    setErrorMat(null);
+    setGuardandoMat(true);
+    const r = await guardarMatriculaEmpleado(empleadoId, matNumero, matPais);
+    setGuardandoMat(false);
+    if (!r.ok) {
+      setErrorMat(r.mensaje);
+      return;
+    }
+    setMatricula(r.data);
+    setEditandoMat(false);
+    mostrar({ variante: 'neutro', texto: t('equipo.matriculaGuardada') });
   }
 
   /**
@@ -707,6 +762,114 @@ export default function EquipoNegocioPantalla() {
                       ) : null}
                     </View>
                   </Tarjeta>
+                ) : null}
+
+                {/* ── ⭐ [2bis] LA MATRÍCULA — S90-B, D-676 ──
+                    HERMANA DEL BLOQUE DE JORNADA, y por eso vive acá pegada
+                    a él: las dos contestan la MISMA pregunta del gestor —
+                    «¿por qué esta persona no recibe citas?». La jornada dice
+                    que no tiene horario; ésta, que no tiene credencial.
+
+                    SOLO LO MÉDICO LA PIDE, y la regla NO se re-implementa:
+                    se lee `esMedico` de los chips, que es el mismo
+                    `tipos_servicio.es_medico` con el que el motor decide en
+                    `_empleado_matricula_ok` (cinturón: lo no-médico devuelve
+                    true sin mirar la matrícula). Se usa el chip VIVO y no el
+                    `tieneChipMedico` de la lista, porque el gestor puede
+                    encender veterinaria acá mismo y el flag de la lista
+                    quedaría viejo.
+
+                    SIN REGAÑO Y SIN URGENCIA ARTIFICIAL (letra de la orden):
+                    el tinte es `warning`, jamás `danger` — el que ya existía
+                    tiene gracia. **Y NO SE PINTA NINGÚN CONTADOR DE DÍAS**:
+                    el lector `vets_sin_matricula()` calcula su
+                    `dias_de_gracia` contra el 1-SEP mientras el gate de
+                    `_empleado_matricula_ok` corta el 15-AGO — hoy eso son 25
+                    contra 8. Publicar ese número sería decirle al titular que
+                    tiene tres semanas cuando le quedan ocho días. Va a la
+                    mesa como hallazgo; acá se dice la FECHA, que es la que
+                    las dos mitades sí comparten. ── */}
+                {chips !== null && chips.some((c) => c.esMedico) && matricula !== null ? (
+                  matricula.matricula !== null && !editandoMat ? (
+                    // CARGADA — dato exacto, voz de máquina (Ley 3): una
+                    // credencial es dato, no prosa.
+                    <View style={{ gap: spacing[2] }}>
+                      <FilaDato
+                        etiqueta={t('equipo.matriculaEtiqueta')}
+                        valor={
+                          matricula.paisEmisor !== null
+                            ? `${matricula.matricula} · ${matricula.paisEmisor}`
+                            : matricula.matricula
+                        }
+                        mono
+                      />
+                      <View style={{ alignSelf: 'flex-start' }}>
+                        <Boton
+                          variante="compacto"
+                          etiqueta={t('equipo.matriculaEditar')}
+                          onPress={() => {
+                            setMatNumero(matricula.matricula ?? '');
+                            setMatPais(matricula.paisEmisor ?? '');
+                            setErrorMat(null);
+                            setEditandoMat(true);
+                          }}
+                        />
+                      </View>
+                    </View>
+                  ) : (
+                    <Tarjeta tinte="warning" relleno="amplio">
+                      <View style={{ gap: spacing[3] }}>
+                        <Texto variante="seccion">{t('equipo.matriculaTitulo')}</Texto>
+                        <Texto variante="cuerpo">
+                          {t('equipo.matriculaCuerpo', { nombre: miembro.nombre })}
+                        </Texto>
+                        <Campo
+                          label={t('equipo.matriculaEtiqueta')}
+                          value={matNumero}
+                          onChangeText={setMatNumero}
+                          autoCapitalize="characters"
+                          error={errorMat ?? undefined}
+                        />
+                        {/* P21 · «proponer no es deducir»: se PROPONE el país
+                            del negocio como punto de partida editable —
+                            jamás se deriva ni se escribe solo. */}
+                        <Campo
+                          label={t('equipo.matriculaPaisEtiqueta')}
+                          ayuda={t('equipo.matriculaPaisAyuda')}
+                          value={matPais}
+                          onChangeText={setMatPais}
+                          autoCapitalize="characters"
+                          maxLength={2}
+                        />
+                        <Boton
+                          variante="primario"
+                          bloque
+                          cargando={guardandoMat}
+                          etiqueta={t('equipo.matriculaGuardar')}
+                          onPress={() => void guardarMatricula(miembro.empleadoId)}
+                        />
+                        {/* La salida, SOLO cuando hay a dónde volver: si la
+                            matrícula ya existía, editarla tiene que poder
+                            deshacerse sin cerrar la Hoja entera. Cuando NO
+                            existe no se ofrece — no hay estado anterior al
+                            que volver, y un «Cancelar» que no cancela nada
+                            es un control que miente. */}
+                        {matricula.matricula !== null ? (
+                          <Boton
+                            variante="sinCaja"
+                            bloque
+                            etiqueta={t('equipo.matriculaCancelar')}
+                            onPress={() => {
+                              setMatNumero(matricula.matricula ?? '');
+                              setMatPais(matricula.paisEmisor ?? '');
+                              setErrorMat(null);
+                              setEditandoMat(false);
+                            }}
+                          />
+                        ) : null}
+                      </View>
+                    </Tarjeta>
+                  )
                 ) : null}
 
                 {/* ── [3] QUÉ ATIENDE — UNA TARJETA POR SERVICIO ──
