@@ -86,6 +86,15 @@ export {
 export { resolverUrlFoto, resolverUrlsFotos } from './wrappers/fotos';
 // S89-A — el tren de push: la puerta del token del aparato
 export { registrarTokenDeAparato, type PlataformaPush, type CodigoPush } from './wrappers/push';
+// ⭐ S90-B (D-676) — la matrícula de la PERSONA. Hunk aditivo de la pista B
+// bajo regla 76(c)/(d); a ratificación de A. El motor y su gate ya existen
+// desde S89-A: lo que faltaba era el camino para CARGAR el dato.
+export {
+  obtenerMatriculaEmpleado,
+  guardarMatriculaEmpleado,
+  type MatriculaEmpleado,
+  type CodigoMatricula,
+} from './wrappers/empleado-matricula';
 // S89-A orden 8 ⑤ — los papeles del producto (carnet de vacunas v1)
 export { urlDocumento, type TipoDocumento, type CodigoDocumento } from './wrappers/documentos';
 export {

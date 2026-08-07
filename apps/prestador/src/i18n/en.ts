@@ -2047,6 +2047,19 @@ export const prestadorEn = {
     jornadaPausadaTitulo: 'Their working hours are paused',
     jornadaCargarCta: 'Set up their schedule',
     jornadaVerCta: 'See their schedule',
+    // ⭐ S90-B · D-676 — the person's professional licence. States the fact
+    // and the date, with no scolding and no manufactured urgency. No day
+    // counter on purpose: the engine's reader counts to Sep 1 while the
+    // gate cuts on Aug 15 — the date is what both halves agree on.
+    matriculaTitulo: 'Licence number missing',
+    matriculaCuerpo:
+      'For {{nombre}} to receive appointments we need their professional licence number. From August 15, anyone without a licence on file is no longer offered to families.',
+    matriculaEtiqueta: 'Professional licence',
+    matriculaPaisEtiqueta: 'Issuing country',
+    matriculaPaisAyuda: 'Two letters — EC, CO, PE.',
+    matriculaGuardar: 'Save licence',
+    matriculaEditar: 'Edit',
+    matriculaGuardada: 'Licence saved.',
     jornadaPausadaCuerpo:
       'They have hours saved, but none active. While paused they do not show up when a family looks for an appointment.',
     atiendeSeccion: 'What they provide',

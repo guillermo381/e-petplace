@@ -2475,6 +2475,21 @@ export const prestadorEs = {
     jornadaPausadaTitulo: 'Su jornada está pausada',
     jornadaCargarCta: 'Cargar su jornada',
     jornadaVerCta: 'Ver su jornada',
+    /* ⭐ S90-B · D-676 — LA MATRÍCULA DE LA PERSONA.
+       La voz dice el HECHO y la FECHA, sin regaño y sin urgencia
+       artificial: el que ya existía tiene gracia hasta el corte.
+       ⚠️ NO se nombra ningún contador de días — el lector del motor
+       (`vets_sin_matricula`) cuenta contra el 1-sep y el gate corta el
+       15-ago; la fecha es lo único que las dos mitades comparten. */
+    matriculaTitulo: 'Falta su matrícula',
+    matriculaCuerpo:
+      'Para que {{nombre}} pueda recibir citas necesitamos su matrícula profesional. Desde el 15 de agosto, quien atiende sin matrícula cargada no se ofrece a las familias.',
+    matriculaEtiqueta: 'Matrícula profesional',
+    matriculaPaisEtiqueta: 'País que la emitió',
+    matriculaPaisAyuda: 'Dos letras — EC, CO, PE.',
+    matriculaGuardar: 'Guardar matrícula',
+    matriculaEditar: 'Editar',
+    matriculaGuardada: 'Matrícula guardada.',
     jornadaPausadaCuerpo:
       'Tiene horarios cargados, pero ninguno activo. Mientras estén pausados no aparece cuando una familia busca una cita.',
     atiendeSeccion: 'Qué atiende',
