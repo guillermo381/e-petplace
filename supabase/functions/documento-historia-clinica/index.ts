@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
   const { data: consultas } = await supabase
     .from('evento_historia_clinica_registrada')
     .select(
-      'id, cita_id, prestador_id, motivo_consulta, anamnesis, peso_kg, temperatura_c, ' +
+      'id, cita_id, prestador_id, empleado_id, veterinario_user_id, motivo_consulta, anamnesis, peso_kg, temperatura_c, ' +
         'frecuencia_cardiaca, frecuencia_respiratoria, condicion_corporal, examen_fisico, ' +
         'diagnostico_principal, cie_codigo, diagnosticos_secundarios, tratamiento, indicaciones, ' +
         'requiere_hospitalizacion, requiere_cirugia, completado_en',
@@ -96,6 +96,32 @@ Deno.serve(async (req) => {
         .in('cita_id', citaIds)
         .order('orden')
     : { data: [] };
+
+  // ── ② EL MÉDICO TRATANTE (firma founder, orden 14 ②) ─────────────────────
+  // Un papel clínico lo firma una PERSONA, no un negocio. Se resuelve por
+  // empleado_id (la asignación) y, si falta, por veterinario_user_id (quien
+  // dictó). Cuando no hay ninguno de los dos, el papel dice el NEGOCIO —
+  // honesto: JAMÁS se inventa un firmante para un registro viejo.
+  const empIds = [...new Set((consultas ?? []).map((c) => c.empleado_id).filter(Boolean))];
+  const userIds = [...new Set((consultas ?? []).map((c) => c.veterinario_user_id).filter(Boolean))];
+  const profPorEmpleado = new Map<string, { nombre: string | null; matricula: string | null }>();
+  const profPorUser = new Map<string, { nombre: string | null; matricula: string | null }>();
+  if (empIds.length || userIds.length) {
+    const { data: emps } = await supabase
+      .from('prestador_empleados')
+      .select('id, user_id, nombre, matricula_profesional')
+      .or(
+        [
+          empIds.length ? `id.in.(${empIds.join(',')})` : null,
+          userIds.length ? `user_id.in.(${userIds.join(',')})` : null,
+        ].filter(Boolean).join(','),
+      );
+    for (const e of emps ?? []) {
+      const v = { nombre: e.nombre, matricula: e.matricula_profesional };
+      profPorEmpleado.set(e.id, v);
+      if (e.user_id) profPorUser.set(e.user_id, v);
+    }
+  }
 
   const prestadorIds = [...new Set((consultas ?? []).map((c) => c.prestador_id).filter(Boolean))];
   const negocios = new Map<string, string>();
@@ -198,10 +224,19 @@ Deno.serve(async (req) => {
     if (y < 150) nuevaPagina();
     // Cabecera de la consulta: fecha en mono + emisor (la procedencia del papel)
     texto(fechaLarga(c.completado_en), MX, 11, { font: mono });
-    const quien = c.prestador_id ? (negocios.get(c.prestador_id) ?? 'prestador') : null;
-    texto(quien ? `Registrada por ${quien}` : 'Registrada en e-PetPlace', MX + 96, 9, {
-      color: TINTA_SUAVE,
-    });
+    const negocio = c.prestador_id ? (negocios.get(c.prestador_id) ?? null) : null;
+    const prof =
+      (c.empleado_id ? profPorEmpleado.get(c.empleado_id) : null) ??
+      (c.veterinario_user_id ? profPorUser.get(c.veterinario_user_id) : null) ??
+      null;
+    // La firma del tratante: nombre + matrícula cuando existe. Sin persona
+    // identificada, el papel dice el negocio — y lo dice como lo que es.
+    const firma = prof?.nombre
+      ? `Atendida por ${prof.nombre}${prof.matricula ? ` · matrícula ${prof.matricula}` : ''}${negocio ? ` en ${negocio}` : ''}`
+      : negocio
+        ? `Registrada por ${negocio}`
+        : 'Registrada en e-PetPlace';
+    texto(firma, MX + 96, 9, { color: TINTA_SUAVE });
     y -= 18;
 
     parrafo('MOTIVO', c.motivo_consulta, 11);

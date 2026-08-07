@@ -2,7 +2,7 @@
   "expo": {
     "name": "prestador",
     "slug": "prestador",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "prestador",
@@ -32,7 +32,9 @@
         {
           "microphonePermission": "La app usa el micrófono para dictar la nota de la consulta.",
           "speechRecognitionPermission": "La app usa el reconocimiento de voz para convertir tu dictado en la nota de la consulta.",
-          "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
+          "androidSpeechServicePackages": [
+            "com.google.android.googlequicksearchbox"
+          ]
         }
       ],
       [
