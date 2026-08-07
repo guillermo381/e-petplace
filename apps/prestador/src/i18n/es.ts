@@ -753,6 +753,19 @@ export const prestadorEs = {
     canalCorreo: 'Por correo',
     canalWhatsapp: 'WhatsApp',
     notifPermisoNegado: 'El permiso de notificaciones del sistema está apagado — los avisos «En el teléfono» no van a llegar hasta que lo enciendas en los ajustes del teléfono.',
+    /* ⭐ S90-B · D-680 — LA INVITACIÓN DE LA CASA (lámina FIRMADA
+       `LAMINA_PERMISO_NOTIFICACIONES` §3). Los cuatro textos viajan
+       VERBATIM del cliente por orden de mesa: las voces se firmaron con la
+       lámina y NO vuelven a firmarse por cambiar de casa.
+       ⚠️ HALLAZGO A LA MESA, no enmienda: la lámina se titula «(cliente)» y
+       su §3 declara los ejemplos del cuerpo como deliberados para ESA
+       audiencia — «una vacuna por vencer» es del mundo del dueño, no del
+       prestador. No se reescribe acá (la voz es del founder); queda
+       nombrado en el reporte para que la mesa decida. */
+    notifInvitacionTitulo: 'Avisos en tu teléfono',
+    notifInvitacionCuerpo: 'Cuando pase algo importante — una cita confirmada, una vacuna por vencer — te avisamos en el teléfono, aunque la app esté cerrada. Lo cambias cuando quieras desde Preferencias.',
+    notifInvitacionSi: 'Sí, avisarme',
+    notifInvitacionNo: 'Ahora no',
     /* El momento del opt-in de WhatsApp (lámina §4). El TEXTO es el literal
        FIRMADO por el founder (5-ago) y ES la evidencia que se guarda —
        si cambia el texto, cambia la evidencia futura; la vieja se conserva. */

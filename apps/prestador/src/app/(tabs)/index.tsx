@@ -108,6 +108,7 @@ import { TechoOficio, VeloBarraEstadoOficio } from '@/components/techo-oficio';
 // (LÁMINA_HOME_POR_ROL). El archivo vive hasta el veredicto del censo.
 import { FiltroOficio, type FiltroOficioValor } from '@/components/filtro-oficio';
 import { FirmaPrestador } from '@/components/firma-prestador';
+import { InvitacionAvisos } from '@/components/invitacion-avisos';
 import { PreparaEspacio, type EstadoTareas } from '@/components/prepara-espacio';
 import { SeccionDesplegable } from '@/components/perfil-piezas';
 import { useTraduccion } from '@/i18n';
@@ -2371,6 +2372,16 @@ export default function Hoy() {
           )}
         </View>
       </Hoja>
+
+      {/* ⭐ S90-B · D-680 — LA INVITACIÓN DE LA CASA ANTES DEL ÚNICO TIRO
+          DEL SO. Va en HOY porque es la primera pantalla con sesión de
+          esta casa (el espejo del Hogar del cliente): la lámina §2 la
+          quiere DESPUÉS de sesión y con la pantalla montada, jamás sobre
+          el onboarding ni tapando el primer momento del día.
+          La pieza decide sola si aparece — las guardas de la lámina viven
+          adentro (sonda nativa, permiso ya resuelto, «ahora no» vigente,
+          una por versión NATIVA, dos noes = silencio). Acá solo se monta. */}
+      <InvitacionAvisos />
 
       {/* S59-B1: el velo de tinta — la zona de la barra de estado JAMÁS
           queda blanca, ni cuando el techo scrollea (regla del pedido). */}

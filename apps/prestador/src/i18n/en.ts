@@ -541,6 +541,14 @@ export const prestadorEn = {
     canalCorreo: 'By email',
     canalWhatsapp: 'WhatsApp',
     notifPermisoNegado: "System notifications are off for this app — 'On your phone' alerts won't arrive until you turn them on in your phone settings.",
+    // ⭐ S90-B · D-680 — the house's invitation (signed lámina §3).
+    // VERBATIM from the client by table order: the voices were signed with
+    // the lámina and are not re-signed for changing house.
+    notifInvitacionTitulo: 'Updates on your phone',
+    notifInvitacionCuerpo:
+      "When something important happens — a confirmed appointment, a vaccine coming due — we let you know on your phone, even when the app is closed. You can change this anytime in Preferences.",
+    notifInvitacionSi: 'Yes, let me know',
+    notifInvitacionNo: 'Not now',
     waConsentTitulo: 'WhatsApp updates',
     waConsentTexto: 'I want to receive e-PetPlace updates on WhatsApp at this number. I can turn this off anytime in Preferences.',
     waConsentAceptar: 'Yes, send them',
