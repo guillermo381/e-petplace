@@ -1099,7 +1099,12 @@ function EjemploSetBPrima() {
     // founder): el gate a 21px de la fila de abajo es EL gate — si la
     // punta del lápiz o la bandeja del compartir no se leen ahí, se
     // simplifican. Sin huella (son controles, no oficios).
-    'lapiz', 'compartir',
+    // S89-B: `descargar` va PEGADO a `compartir` a propósito — lo que hay
+    // que ver a 21px no es que se entienda solo, sino que **la pareja se
+    // distinga**: son la ida y la vuelta del mismo papel y comparten
+    // bandeja. Si a 21px la dirección de la flecha no se lee, el par
+    // falla y se simplifica (el gate por ícono es EL gate).
+    'lapiz', 'compartir', 'descargar',
     // S82-B r10: LA VACUNA con su glifo propio (la fila del perfil
     // pintaba `veterinaria` — sustitución genérica que Ley 12 prohíbe).
     'vacuna', 'bitacora',
