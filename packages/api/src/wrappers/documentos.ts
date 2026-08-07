@@ -97,3 +97,36 @@ export async function urlDocumento(
   if (typeof base !== 'string' || base.length === 0) return falla('error_desconocido');
   return { ok: true, data: `${base}/functions/v1/${fila.funcion}?t=${fila.token}` };
 }
+
+export interface PapelDelCatalogo {
+  codigo: string;
+  requiereRef: boolean;
+  orden: number;
+}
+
+/** El catálogo VIVO de papeles (S90, firma founder: la lista de la
+ *  superficie deriva de `cat_documentos_mascota`, jamás se enumera a mano).
+ *  Devuelve TODOS los activos en su orden — quién entra a qué lista lo
+ *  decide el consumidor con el discriminador expediente/acto del tipo. */
+export async function listarPapelesDeMascota(): Promise<
+  ResultadoWrapper<PapelDelCatalogo[], CodigoDocumento>
+> {
+  if ((await uidActual()) === null) return falla('sin_sesion');
+
+  const { data, error } = await getClient()
+    .from('cat_documentos_mascota')
+    .select('codigo, requiere_ref, orden')
+    .eq('activo', true)
+    .order('orden');
+
+  if (error) return falla('error_desconocido');
+  if (!Array.isArray(data)) return falla('datos_inconsistentes');
+  const filas: PapelDelCatalogo[] = [];
+  for (const f of data) {
+    if (typeof f?.codigo !== 'string' || typeof f?.orden !== 'number') {
+      return falla('datos_inconsistentes');
+    }
+    filas.push({ codigo: f.codigo, requiereRef: f.requiere_ref === true, orden: f.orden });
+  }
+  return { ok: true, data: filas };
+}

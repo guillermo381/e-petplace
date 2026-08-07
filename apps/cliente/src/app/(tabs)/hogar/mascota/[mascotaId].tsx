@@ -25,7 +25,7 @@
  * muerto es la remoción de la pasada.
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Linking, Platform, Pressable, ScrollView, Share, StatusBar, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -69,6 +69,7 @@ import {
   obtenerPerfilMascota,
   resolverUrlFoto,
   urlDocumento,
+  listarPapelesDeMascota,
   type ItemTimeline,
   type TipoDocumento,
   type PaseoConTrack,
@@ -85,7 +86,7 @@ import {
   type VitalesPaseos,
 } from '@epetplace/domain';
 import { FAMILIA_DE_TIPO, vozHecho } from '@/lib/voz-hecho';
-import { PAPELES_DE_MASCOTA } from '@/lib/papeles';
+import { PAPELES_DE_MASCOTA, componerPapeles } from '@/lib/papeles';
 import { CantoCurva } from '@/components/canto-curva';
 import { FilaDocumento } from '@/components/fila-documento';
 import { FiltroPills } from '@/components/filtro-pills';
@@ -251,6 +252,18 @@ export default function PerfilDeMascota() {
   /** S89-D ①: la sección de papeles nace PLEGADA — el perfil es de la
    *  mascota; sus documentos se piden, no presiden. */
   const [docsAbiertos, setDocsAbiertos] = useState(false);
+  // S90 (firma founder): la lista deriva del CATÁLOGO VIVO; arranca con el
+  // respaldo de compilación (la misma foto al día del build).
+  const [papeles, setPapeles] = useState(PAPELES_DE_MASCOTA);
+  useEffect(() => {
+    let vivo = true;
+    void listarPapelesDeMascota().then((r) => {
+      if (vivo && r.ok) setPapeles(componerPapeles(r.data));
+    });
+    return () => {
+      vivo = false;
+    };
+  }, []);
   const [fallaCarnet, setFallaCarnet] = useState<string | null>(null);
   /** UN camino para los dos papeles: el token lo emite el server con el
    *  mismo gate del expediente; acá solo se abre lo que devuelve. */
@@ -1012,7 +1025,7 @@ export default function PerfilDeMascota() {
               onPress={() => setDocsAbiertos((v) => !v)}
             />
             {docsAbiertos
-              ? PAPELES_DE_MASCOTA.map((papel) => (
+              ? papeles.map((papel) => (
                   <View key={papel.tipo}>
                     <Separador />
                     <FilaDocumento

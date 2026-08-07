@@ -62,8 +62,42 @@ const PAPELES: Record<TipoDocumentoExpediente, Omit<Papel, 'tipo'>> = {
   ficha_identidad: { claveVoz: 'FichaIdentidad', icono: 'documento' },
 };
 
-/** La lista, en el orden del catálogo. Consumidores: el perfil de la
- *  mascota (sección desplegable) y Documentos del hogar. */
+/** El RESPALDO de tiempo de compilación, en el orden del Record. Se usa
+ *  mientras el catálogo vivo no llegó (carga) o no pudo llegar (sin red):
+ *  a la fecha del build dice lo mismo que el catálogo — no es una mentira,
+ *  es la foto de compilación, y se declara. */
 export const PAPELES_DE_MASCOTA: readonly Papel[] = (
   Object.keys(PAPELES) as TipoDocumentoExpediente[]
 ).map((tipo) => ({ tipo, ...PAPELES[tipo] }));
+
+/** S90 (firma founder): LA LISTA DERIVA DEL CATÁLOGO VIVO
+ *  (`cat_documentos_mascota`, vía `listarPapelesDeMascota`) — qué papeles y
+ *  en qué orden lo dice el MOTOR; la voz y el glifo los pone este archivo
+ *  (Ley 3: la voz vive en la casa). Un código del catálogo que este bundle
+ *  no conoce se SALTEA (un bundle viejo no puede inventarle voz ni glifo a
+ *  un papel nuevo — D-662: el papel aparece con el OTA que lo conoce); los
+ *  papeles POR ACTO (certificado) no entran: son N emisiones por mascota y
+ *  un botón por tipo no sirve para seis emisiones (letra de D).
+ *
+ *  ⚠️ NOTA FIRMADA DEL DESTINO (founder, 7-ago-2026): esta lista PLANA va a
+ *  MUTAR A AGRUPADA POR CATEGORÍA — D-683 lo ata al PAPEL NÚMERO OCHO. El
+ *  catálogo HOY no tiene columna de categoría (medido S90: codigo · voz ·
+ *  funcion_edge · requiere_ref · activo · orden · created_at): la columna
+ *  nace con el agrupador, jamás antes — agrupar sin ella es inventar
+ *  categorías. Quien llegue acá el día 8: la costura es este mismo punto
+ *  (componerPapeles ya recibe el catálogo entero; agrupar es un groupBy
+ *  sobre la columna nueva, no una re-arquitectura). */
+export function componerPapeles(
+  catalogo: ReadonlyArray<{ codigo: string; orden: number }> | null,
+): readonly Papel[] {
+  if (catalogo === null) return PAPELES_DE_MASCOTA;
+  const lista: Papel[] = [];
+  for (const fila of [...catalogo].sort((a, b) => a.orden - b.orden)) {
+    const entrada = (PAPELES as Record<string, Omit<Papel, 'tipo'> | undefined>)[fila.codigo];
+    if (!entrada) continue; // acto (certificado) o papel que este bundle no conoce
+    lista.push({ tipo: fila.codigo as TipoDocumentoExpediente, ...entrada });
+  }
+  // Un catálogo vacío o sin intersección no borra los papeles del bundle:
+  // el respaldo de compilación es más verdadero que una lista vacía.
+  return lista.length > 0 ? lista : PAPELES_DE_MASCOTA;
+}

@@ -48,12 +48,13 @@ import {
   obtenerMascotasDeFamilia,
   resolverUrlFoto,
   urlDocumento,
+  listarPapelesDeMascota,
   type TipoDocumento,
 } from '@epetplace/api';
 import { Linking } from 'react-native';
 
 import { useTraduccion } from '@/i18n';
-import { PAPELES_DE_MASCOTA } from '@/lib/papeles';
+import { PAPELES_DE_MASCOTA, componerPapeles } from '@/lib/papeles';
 import { FilaDocumento } from '@/components/fila-documento';
 
 interface MascotaConFoto {
@@ -89,10 +90,32 @@ export default function DocumentosDelHogar() {
   const { mostrar } = useAviso();
 
   const [mascotas, setMascotas] = useState<MascotaConFoto[] | 'cargando' | 'error'>('cargando');
+
+
+  // S90 (firma founder): la lista deriva del CATALOGO VIVO; el estado
+
+  // arranca con el respaldo de compilacion (misma foto al dia del build).
+
+  const [papeles, setPapeles] = useState(PAPELES_DE_MASCOTA);
   const [elegida, setElegida] = useState<string | null>(null);
   /** La descarga en vuelo, por mascota+papel: dos filas distintas pueden
    *  pedirse sin que la segunda apague el spinner de la primera. */
   const [bajando, setBajando] = useState<string | null>(null);
+
+  useEffect(() => {
+
+    let vivo = true;
+
+    void listarPapelesDeMascota().then((r) => {
+
+      if (vivo && r.ok) setPapeles(componerPapeles(r.data));
+
+    });
+
+    return () => { vivo = false; };
+
+  }, []);
+
 
   useEffect(() => {
     let vigente = true;
@@ -204,7 +227,7 @@ export default function DocumentosDelHogar() {
                 <TituloBloque texto={m.nombre} />
                 <View style={{ paddingHorizontal: spacing[5] }}>
                   <Tarjeta relleno="ninguno" elevacion="reposo">
-                    {PAPELES_DE_MASCOTA.map((papel, i) => (
+                    {papeles.map((papel, i) => (
                       <View key={papel.tipo}>
                         {i > 0 ? <Separador /> : null}
                         <FilaDocumento

@@ -98,6 +98,8 @@ export {
 // S89-A orden 8 ⑤ — los papeles del producto (carnet de vacunas v1)
 export {
   urlDocumento,
+  listarPapelesDeMascota,
+  type PapelDelCatalogo,
   type TipoDocumento,
   type TipoDocumentoExpediente,
   type TipoDocumentoActo,
