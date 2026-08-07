@@ -2675,4 +2675,43 @@ export const prestadorEs = {
     resenasTitulo: 'Lo que las familias digan de ti',
     resenasCuerpo: 'Cuando una familia deje su primera reseña, va a vivir acá.',
   },
+  // ── S90-D · EL CERTIFICADO DE SALUD ─────────────────────────── LOTE S90,
+  // GATE PENDIENTE. La voz habla de LO QUE EL PROFESIONAL HACE («declarás»,
+  // «tus palabras»), jamás de lo que el sistema concluye: el motor no infiere
+  // aptitud, y la voz no puede sugerir que sí.
+  certificado: {
+    titulo: 'Certificado de salud',
+    // El límite va PRIMERO, antes de que escriba nada: quien firma tiene que
+    // saber qué está firmando.
+    limiteTitulo: 'Qué es y qué no es este papel',
+    limiteDetalle:
+      'Es una constancia de examen clínico que emites tú, bajo tu responsabilidad profesional. NO es el certificado oficial de movilización: ese lo emite la autoridad sanitaria (en Ecuador, Agrocalidad). El papel lo dice impreso.',
+    faltaMatriculaTitulo: 'Te falta tu matrícula profesional',
+    faltaMatriculaDetalle:
+      'Un certificado lo firma una persona con matrícula, no un negocio. Cárgala en tu ficha del equipo y vuelve: sin ella, el papel no diría quién firma.',
+    faltaMatriculaCorto: 'Falta tu matrícula profesional.',
+    alcanceLabel: '¿Para qué lo emites?',
+    alcance_viaje: 'Viaje',
+    alcance_hospedaje: 'Hospedaje',
+    alcance_guarderia: 'Guardería',
+    alcance_constancia: 'Constancia de atención',
+    memorialDetalle:
+      'Para {{nombre}} solo se emite una constancia de atención: viaje, hospedaje y guardería certifican algo que va a pasar.',
+    declaracionLabel: 'Tu declaración',
+    // El placeholder guía la FORMA, jamás el veredicto — un ejemplo con
+    // «apta» adentro sería ponerle las palabras en la boca por la ventana.
+    declaracionPlaceholder: 'Qué examinaste y qué concluyes, con tus palabras.',
+    declaracionAyuda: 'Esto se imprime tal cual, con tu nombre y tu matrícula debajo.',
+    faltaAlcance: 'Falta decir para qué lo emites.',
+    faltaDeclaracion: 'Falta tu declaración.',
+    emitir: 'Emitir y abrir el certificado',
+    emitidosTitulo: 'Certificados de {{nombre}}',
+    emitidoPor: '{{nombre}} · matrícula {{matricula}}',
+    abrir: 'Abrir',
+    sinPermisoTitulo: 'Emitir un certificado es un acto clínico',
+    sinPermisoDetalle: 'Lo emite quien atiende. Tu rol en este negocio no incluye la parte clínica.',
+    // La entrada desde la cita y desde el cierre de la consulta.
+    entradaTitulo: 'Emitir un certificado de salud',
+    entradaDetalle: 'Constancia de examen clínico, con tu firma.',
+  },
 } as const;
