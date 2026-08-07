@@ -99,3 +99,29 @@ no existe. Cuando el tren nativo cablee el toque-abre-dónde (mapas de C y
 D), **el deep link del correo es el MISMO** — cada tipo gana su CTA («Ver la
 cita», «Ver el plan») apuntando al lugar del hecho. *Un botón que abre la
 app y te deja en el pasillo es peor que no tener botón.*
+
+---
+
+## 6 · ENMIENDA CON LA INVESTIGACIÓN EN LA MANO (7-ago, informe `2026-08-07-s89a-INVESTIGACION-bimi-vmc.md`)
+
+Tres correcciones a lo de arriba, todas por medición:
+
+1. **`p=quarantine` ALCANZA** — Gmail no exige `p=reject`. El paso 2 queda
+   como estaba escrito, confirmado.
+2. **🔴 SENADI (Ecuador) NO está entre las oficinas de marcas que aceptan
+   los emisores de VMC** — la única latinoamericana es Brasil. Ir por VMC
+   exigiría registrar en USPTO/EUIPO: **8-18 meses. No llega al 1-oct.**
+   Costo del certificado: ~USD 1.000-1.500/año.
+3. **El CMC es la puerta realista** (~USD 650-1.400/año, sin marca
+   registrada) **pero exige 12 MESES de uso continuo del logo en el
+   dominio** — y da logo sin el tilde azul.
+
+> **LA PREGUNTA GRATIS QUE BLOQUEA TODO Y LA CONTESTA EL FOUNDER: ¿desde
+> cuándo está publicado el isotipo actual?** Sin 12 meses de uso, no hay CMC
+> tampoco — y entonces las fases gratis se hacen igual (valen por
+> entregabilidad), pero **la «E» naranja se queda hasta que ese reloj corra**.
+
+**El orden no cambia:** las fases gratis primero (rua → observar → SVG Tiny
+PS → quarantine → publicar BIMI); el certificado es **un cambio de una línea**
+el día que exista. Y una corrección de alcance honesta: **Outlook no soporta
+BIMI en ninguna forma** — en Ecuador, sin Gmail, «casi nadie lo ve».

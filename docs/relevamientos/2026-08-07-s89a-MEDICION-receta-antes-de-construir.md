@@ -72,6 +72,20 @@ clínico: es la IDENTIDAD DE QUIEN FIRMA.**
   un tipo en el CHECK, una función y un botón — **medio día una vez que la
   decisión 1 esté firmada**.
 
+## 5 · LO QUE NACE **CON** LA RECETA (anotado al arco, por firma de mesa)
+
+**`cat_documentos_mascota` — el catálogo de papeles en motor (pedido de D,
+disparo firmado): NACE CON EL TERCER PAPEL, y la receta es el tercero.**
+Hoy los dos papeles vivos (carnet · historia clínica) están enumerados a mano
+en tres lugares —el CHECK de `documento_token`, el mapa de funciones del
+wrapper y la superficie— y **con dos, enumerar es más honesto que abstraer**.
+Con el tercero deja de serlo: ahí el catálogo paga su costo y **la derivación
+de D lo consume** en vez de repetir la lista.
+
+*Cuando la decisión 1 se firme y la receta se construya, el catálogo entra en
+la MISMA migración — no después: un tercer papel enumerado a mano es la
+cuarta copia esperando divergir (19.9).*
+
 > **La única que BLOQUEA es la 1.** Las otras cuatro tienen voto y se pueden
 > construir contra el voto si la mesa prefiere velocidad — pero la matrícula
 > del profesional es dato que **no se puede inventar ni derivar**: o se
