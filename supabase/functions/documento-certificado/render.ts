@@ -18,6 +18,11 @@
 // ============================================================================
 
 import { PDFDocument, StandardFonts, rgb } from './deps.ts';
+// D-677 (S90-A orden 9 ③): la marca de agua vive en UN solo lugar — la
+// plantilla compartida. Montarla acá es exactamente lo que el punto de
+// montaje de abajo pedía; dibujarla a ojo sería el «cada uno la suya» que
+// §6 del método evita. (El verify local la resuelve con el mismo hook.)
+import { marcaDeAgua } from '../_shared/papel.ts';
 
 const TINTA = rgb(0.133, 0.118, 0.098); // #221E19 — 16.56:1 sobre blanco
 const TINTA_SUAVE = rgb(0.435, 0.427, 0.416); // #6F6D6A — 5.16:1, AA
@@ -45,6 +50,9 @@ export interface DatosCertificado {
   mascotaNacimiento: string | null; // YYYY-MM-DD
   mascotaMicrochip: string | null;
   estadoVidaAlEmitir: 'activa' | 'perdida' | 'fallecida';
+  /** El folio de ESTA emisión (orden 9, fase 1) — en MONO en el papel.
+   *  NULL honesto para emisiones anteriores al folio. */
+  folio?: string | null;
 }
 
 /** El alcance se IMPRIME: un certificado sin alcance promete todo. */
@@ -113,12 +121,11 @@ export async function componerCertificado(d: DatosCertificado): Promise<Uint8Arr
       font: sans,
       color: PAPEL,
     });
-    // ── LA MARCA DE AGUA VA ACÁ, y NO se inventa (D-677) ──────────────────
-    // El isotipo grande al centro en tinta con opacidad lo define la pista A.
-    // Este es su punto de montaje: una sola llamada, después de la banda y
-    // antes de todo contenido, para que quede DEBAJO del texto.
-    // Dibujarla a ojo desde acá sería exactamente el «cada uno la suya» que
-    // §6 del método existe para evitar.
+    // ── LA MARCA DE AGUA (D-677, montada S90-A orden 9 ③) ─────────────────
+    // Una sola llamada, después de la banda y antes de todo contenido, para
+    // que quede DEBAJO del texto. El dibujo y su opacidad viven en
+    // `_shared/papel.ts` — un solo lugar para ajustarla tras el gate impreso.
+    marcaDeAgua(page);
   };
   const nuevaPagina = () => {
     page = pdf.addPage(A4);
@@ -185,6 +192,10 @@ export async function componerCertificado(d: DatosCertificado): Promise<Uint8Arr
     color: MAGENTA,
   });
   texto('Certificado de salud', MX, 22, { font: sansBold });
+  if (d.folio) {
+    const wf = mono.widthOfTextAtSize(d.folio, 9.5);
+    texto(d.folio, A4[0] - MX - wf, 9.5, { font: mono });
+  }
   y -= 20;
   texto(`Alcance: ${VOZ_ALCANCE[d.alcance]}.`, MX, 10, { color: TINTA_SUAVE });
   y -= 22;
@@ -288,18 +299,18 @@ export async function componerCertificado(d: DatosCertificado): Promise<Uint8Arr
     { color: TINTA_SUAVE },
   );
 
-  // ── EL PIE — y el folio ausente SE DICE ─────────────────────────────────
+  // ── EL PIE — el folio identifica la emisión; la verificación pública aún no existe ──
   y = 62;
   hairline(y + 16);
   texto(
-    'Este documento se emite SIN folio de verificación: e-PetPlace todavía no tiene un mecanismo público para',
+    `El folio${d.folio ? ` ${d.folio}` : ''} identifica esta emisión. Todavía no existe un mecanismo público para comprobar su`,
     MX,
     8,
     { color: TINTA_SUAVE },
   );
   y -= 10;
   texto(
-    'comprobar su autenticidad. Quien necesite confirmarlo, que contacte al profesional o al negocio emisor.',
+    'autenticidad: quien necesite confirmarlo, que contacte al profesional o al negocio emisor.',
     MX,
     8,
     { color: TINTA_SUAVE },

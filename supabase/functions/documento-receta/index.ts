@@ -12,8 +12,9 @@
 //      («Prescrita por {profesional}, matrícula {n}, en {negocio}»). SIN
 //      firma criptográfica y SIN imagen de firma: una firma escaneada en un
 //      PDF descargable se recorta — eso es peor que ninguna firma.
-//   2. Sin folio y sin vigencia, y DECLARADO en el papel: ninguna de las dos
-//      se puede inventar.
+//   2. Sin vigencia, DECLARADO en el papel (no se inventa). El folio llegó
+//      con la orden 9 (fase 1): identifica la EMISIÓN, y el papel declara
+//      que aún no hay verificación pública (la relaja la landing, fase 2).
 //   3. La descarga el DUEÑO, con la misma puerta del expediente (la RPC).
 //   4. Un papel por consulta, no por medicamento.
 //
@@ -49,7 +50,7 @@ Deno.serve(async (req) => {
     .eq('tipo', 'receta')
     .is('usado_en', null)
     .gt('expira_en', new Date().toISOString())
-    .select('mascota_id, ref_id')
+    .select('mascota_id, ref_id, folio')
     .maybeSingle();
   if (!fila || !fila.ref_id) return new Response('token_invalido_o_vencido', { status: 410 });
 
@@ -118,10 +119,13 @@ Deno.serve(async (req) => {
   const papel = await Papel.crear();
   papel.cabecera('Receta', [
     'Documento emitido por e-PetPlace con la prescripción registrada por el profesional que atendió la consulta.',
-    // Decisión 2, DECLARADA en el papel: lo que no existe no se inventa.
-    'Se emite sin folio y sin vigencia: e-PetPlace todavía no numera recetas ni les fija plazo.',
+    // Decisión 2 enmendada por la orden 9: el folio EXISTE (fase 1); la
+    // vigencia sigue sin existir y se dice. La verificación pública espera
+    // la landing (fase 2) y hasta entonces el papel lo declara.
+    'Se emite sin vigencia: e-PetPlace no le fija plazo a esta receta.',
+    'El folio identifica esta emisión; todavía no existe un mecanismo público de verificación en línea.',
     `Alcance: la medicación prescrita en la consulta del ${fechaLarga(fechaHecho)}.`,
-  ]);
+  ], fila.folio);
 
   const nac = mascota.fecha_nacimiento
     ? fechaLarga(mascota.fecha_nacimiento + 'T00:00:00Z')
@@ -214,7 +218,7 @@ Deno.serve(async (req) => {
 
   // Pie con las DOS fechas (hecho + emisión) — y la declaración de nuevo
   papel.pie(
-    `Emitido por e-PetPlace (hola@epetplace.com) · prescripción ${fechaLarga(fechaHecho)} · emisión ${fechaLarga(new Date().toISOString())} · ${meds.length} medicamento(s) · sin folio · sin vigencia`,
+    `Emitido por e-PetPlace (hola@epetplace.com) · prescripción ${fechaLarga(fechaHecho)} · emisión ${fechaLarga(new Date().toISOString())} · folio ${fila.folio ?? '—'} · ${meds.length} medicamento(s) · sin vigencia`,
   );
 
   const bytes = await papel.bytes();

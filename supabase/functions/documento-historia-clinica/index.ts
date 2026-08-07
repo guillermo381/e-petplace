@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
     .eq('tipo', 'historia_clinica')
     .is('usado_en', null)
     .gt('expira_en', new Date().toISOString())
-    .select('mascota_id')
+    .select('mascota_id, folio')
     .maybeSingle();
   if (!fila) return new Response('token_invalido_o_vencido', { status: 410 });
 
@@ -124,7 +124,8 @@ Deno.serve(async (req) => {
   papel.cabecera('Historia clínica', [
     'Documento emitido por e-PetPlace — no reemplaza el registro de la clínica que atendió. Cada consulta declara quién la registró.',
     'Alcance: el expediente clínico completo registrado en e-PetPlace.',
-  ]);
+    'El folio identifica esta emisión; todavía no existe un mecanismo público de verificación en línea.',
+  ], fila.folio);
 
   const nac = mascota.fecha_nacimiento
     ? fechaLarga(mascota.fecha_nacimiento + 'T00:00:00Z')
@@ -238,7 +239,7 @@ Deno.serve(async (req) => {
 
   // Pie con las DOS fechas
   papel.pie(
-    `Emitido por e-PetPlace (hola@epetplace.com) · emisión ${fechaLarga(new Date().toISOString())} · última consulta ${fechaLarga(lista[0]?.completado_en ?? null)} · ${lista.length} consulta(s)`,
+    `Emitido por e-PetPlace (hola@epetplace.com) · folio ${fila.folio ?? '—'} · emisión ${fechaLarga(new Date().toISOString())} · última consulta ${fechaLarga(lista[0]?.completado_en ?? null)} · ${lista.length} consulta(s)`,
   );
 
   const bytes = await papel.bytes();

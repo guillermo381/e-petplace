@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
     .eq('tipo', 'ficha_identidad')
     .is('usado_en', null)
     .gt('expira_en', new Date().toISOString())
-    .select('mascota_id')
+    .select('mascota_id, folio')
     .maybeSingle();
   if (!fila) return new Response('token_invalido_o_vencido', { status: 410 });
 
@@ -179,7 +179,8 @@ Deno.serve(async (req) => {
     'Documento emitido por e-PetPlace con los datos de identidad del expediente. Un dato que no se conoce se declara — no se inventa.',
     // La regla del microchip: el alcance SE DECLARA EN EL ENCABEZADO.
     'Incluye el número de microchip cuando está registrado: este papel se entrega en mano, y la familia decide a quién.',
-  ]);
+    'El folio identifica esta emisión; todavía no existe un mecanismo público de verificación en línea.',
+  ], fila.folio);
 
   // La foto va arriba a la derecha, junto a la identidad — pero se DIBUJA al
   // final (misma página, misma posición): así queda ENCIMA de las hairlines
@@ -285,7 +286,7 @@ Deno.serve(async (req) => {
 
   // Pie con las DOS fechas: emisión + el último movimiento del expediente
   papel.pie(
-    `Emitido por e-PetPlace (hola@epetplace.com) · emisión ${fechaLarga(new Date().toISOString())} · los datos reflejan el expediente al momento de la emisión`,
+    `Emitido por e-PetPlace (hola@epetplace.com) · folio ${fila.folio ?? '—'} · emisión ${fechaLarga(new Date().toISOString())} · los datos reflejan el expediente al momento de la emisión`,
   );
 
   const bytes = await papel.bytes();

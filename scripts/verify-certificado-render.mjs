@@ -84,6 +84,9 @@ const { componerCertificado } = await import(
 // circular como real sería exactamente el problema de falsificación que el
 // papel todavía no puede atacar (v1 sin folio).
 const BASE = {
+  // S90-A orden 9: el folio existe (fase 1). MUESTRA en ceros a propósito —
+  // un folio verosímil en un espécimen sería el problema que ② ataca.
+  folio: 'F-2026-000000',
   declaracion:
     'Examiné a Luna en la fecha indicada. Al examen físico general no se observan signos ' +
     'compatibles con enfermedad infectocontagiosa. Mucosas rosadas, temperatura dentro de ' +

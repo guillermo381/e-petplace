@@ -57,6 +57,29 @@ export function fechaLarga(iso: string | null): string {
   return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`;
 }
 
+/** LA OPACIDAD DE LA MARCA DE AGUA — verificada en pantalla, NO en papel
+ *  todavía (orden 9 ③): si en el gate impreso no se ve, subir este número es
+ *  un ajuste de UNA línea, no un rediseño. Vive SOLO acá. */
+export const OPACIDAD_MARCA_AGUA = 0.06;
+
+/** LA MARCA DE AGUA (D-677, firma founder 7-ago): el isotipo GRANDE AL
+ *  CENTRO, EN TINTA con opacidad — jamás en color (el matiz muere impreso) y
+ *  jamás portando información. Se dibuja ANTES del contenido de la página.
+ *  Exportada para que el certificado (render de D) la monte en su punto de
+ *  montaje sin redibujarla — «cada uno la suya» es lo que §6 evita. */
+// deno-lint-ignore no-explicit-any
+export function marcaDeAgua(page: any): void {
+  const ancho = 380;
+  const escala = ancho / ISO_VW;
+  page.drawSvgPath(ISOTIPO_PATH_D, {
+    x: (A4[0] - ancho) / 2,
+    y: (A4[1] + ISO_VH * escala) / 2, // drawSvgPath: y es el tope del viewBox
+    scale: escala,
+    color: TINTA,
+    opacity: OPACIDAD_MARCA_AGUA,
+  });
+}
+
 export type Fuentes = { sans: PDFFont; sansBold: PDFFont; mono: PDFFont };
 
 /**
@@ -86,15 +109,7 @@ export class Papel {
   nuevaPagina(): void {
     this.page = this.pdf.addPage(A4);
     // La marca de agua va PRIMERO: el contenido siempre queda encima.
-    const ancho = 380;
-    const escala = ancho / ISO_VW;
-    this.page.drawSvgPath(ISOTIPO_PATH_D, {
-      x: (A4[0] - ancho) / 2,
-      y: (A4[1] + ISO_VH * escala) / 2, // drawSvgPath: y es el tope del viewBox
-      scale: escala,
-      color: TINTA,
-      opacity: 0.06,
-    });
+    marcaDeAgua(this.page);
     this.page.drawRectangle({ x: 0, y: A4[1] - BANDA_ALTO, width: A4[0], height: BANDA_ALTO, color: TINTA });
     this.page.drawText('e-PetPlace', {
       x: MX, y: A4[1] - 22, size: 12, font: this.f.sansBold, color: PAPEL,
@@ -123,8 +138,11 @@ export class Papel {
     });
   }
 
-  /** El filete magenta (único color) + título 16/600 + notas de alcance 8.5. */
-  cabecera(titulo: string, notas: string[]): void {
+  /** El filete magenta (único color) + título 16/600 + notas de alcance 8.5.
+   *  `folio`: el de ESTA emisión (orden 9), a la derecha del título, en MONO
+   *  — la voz de máquina de la casa para el dato exacto. NULL honesto: una
+   *  emisión anterior al folio no inventa uno. */
+  cabecera(titulo: string, notas: string[], folio?: string | null): void {
     this.page.drawLine({
       start: { x: MX, y: this.y + 12 },
       end: { x: A4[0] - MX, y: this.y + 12 },
@@ -132,6 +150,10 @@ export class Papel {
       color: MAGENTA,
     });
     this.texto(titulo, MX, 16, { font: this.f.sansBold });
+    if (folio) {
+      const w = this.f.mono.widthOfTextAtSize(folio, 9.5);
+      this.texto(folio, A4[0] - MX - w, 9.5, { font: this.f.mono });
+    }
     this.y -= 14;
     for (const n of notas) {
       this.texto(n, MX, 8.5, { color: TINTA_65 });
@@ -183,12 +205,30 @@ export class Papel {
     this.y -= 5;
   }
 
-  /** El pie con las DOS fechas (y lo que el papel declare). 8.5, sobre hairline. */
+  /** El pie con las DOS fechas (y lo que el papel declare). 8.5, sobre
+   *  hairline — y CORTA POR ANCHO: con el folio adentro (orden 9) una sola
+   *  línea desborda el margen, y un pie que se sale del papel es un dato
+   *  que la impresora amputa. */
   pie(s: string): void {
     this.asegura(96);
-    this.y = 64;
+    const size = 8.5;
+    const ancho = A4[0] - MX * 2;
+    const lineas: string[] = [];
+    let linea = '';
+    for (const p of s.split(' ')) {
+      const prueba = linea ? `${linea} ${p}` : p;
+      if (this.f.sans.widthOfTextAtSize(prueba, size) > ancho) {
+        lineas.push(linea);
+        linea = p;
+      } else linea = prueba;
+    }
+    if (linea) lineas.push(linea);
+    this.y = 64 + (lineas.length - 1) * 11;
     this.hairline(this.y + 14);
-    this.texto(s, MX, 8.5, { color: TINTA_65 });
+    for (const l of lineas) {
+      this.texto(l, MX, size, { color: TINTA_65 });
+      this.y -= 11;
+    }
   }
 
   bytes(): Promise<Uint8Array> {

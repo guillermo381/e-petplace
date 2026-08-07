@@ -14,10 +14,10 @@
 // ES LA AUTORIZACIÓN — validado y quemado en el mismo acto.
 //
 // Lo que el papel exige (espec B §papeles): EMISOR + DOS FECHAS (emisión +
-// último registro) + procedencia por fila. FOLIO/QR: decisión de mesa
-// pendiente — v1 sale sin folio, declarado. Alcance v1 declarado EN EL
-// PAPEL: es el carnet DE VACUNAS (la desparasitación no existe en el motor
-// — D-476).
+// último registro) + procedencia por fila + FOLIO de emisión (orden 9 fase
+// 1 — el QR espera la landing, fase 2, y este papel SÍ lo va a llevar).
+// Alcance v1 declarado EN EL PAPEL: es el carnet DE VACUNAS (la
+// desparasitación no existe en el motor — D-476).
 // ============================================================================
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
     .eq('tipo', 'carnet_vacunas')
     .is('usado_en', null)
     .gt('expira_en', new Date().toISOString())
-    .select('mascota_id')
+    .select('mascota_id, folio')
     .maybeSingle();
   if (errTok || !fila) {
     // vencido, usado o inexistente: la misma respuesta (no se le cuenta a un
@@ -100,7 +100,8 @@ Deno.serve(async (req) => {
     // desparasitaciones — el motor no las tiene (D-476). Decirlo es la
     // diferencia entre un papel incompleto y un papel que miente.
     'Alcance: vacunas. Este carnet no incluye desparasitaciones.',
-  ]);
+    'El folio identifica esta emisión; todavía no existe un mecanismo público de verificación en línea.',
+  ], fila.folio);
 
   const nac = mascota.fecha_nacimiento
     ? fechaLarga(mascota.fecha_nacimiento + 'T00:00:00Z')
@@ -144,9 +145,9 @@ Deno.serve(async (req) => {
     papel.y -= 20;
   }
 
-  // Pie: emisor + LAS DOS FECHAS (emisión · último registro). Sin folio (mesa).
+  // Pie: emisor + LAS DOS FECHAS (emisión · último registro) + el folio.
   papel.pie(
-    `Emitido por e-PetPlace (hola@epetplace.com) · emisión ${fechaLarga(new Date().toISOString())} · último registro ${ultima ?? '—'} · ${filas.length} vacuna(s)`,
+    `Emitido por e-PetPlace (hola@epetplace.com) · folio ${fila.folio ?? '—'} · emisión ${fechaLarga(new Date().toISOString())} · último registro ${ultima ?? '—'} · ${filas.length} vacuna(s)`,
   );
 
   const bytes = await papel.bytes();

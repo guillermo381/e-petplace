@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
     // Adaptación de A (declarada): D escribió `referencia_id` contra el estado
     // S89; la columna viva es `ref_id` (orden 1, 20260807100000). Solo cambia
     // el nombre — la semántica de D quedó entera.
-    .select('mascota_id, ref_id')
+    .select('mascota_id, ref_id, folio')
     .maybeSingle();
   if (!fila) return new Response('token_invalido_o_vencido', { status: 410 });
   if (!fila.ref_id) return new Response('token_sin_referencia', { status: 400 });
@@ -77,6 +77,7 @@ Deno.serve(async (req) => {
   if (!mascota) return new Response('mascota_no_encontrada', { status: 404 });
 
   const bytes = await componerCertificado({
+    folio: fila.folio,
     alcance: cert.alcance as Alcance,
     declaracion: cert.declaracion,
     fechaExamen: cert.fecha_examen,
