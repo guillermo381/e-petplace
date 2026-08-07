@@ -31,7 +31,7 @@ export interface Papel {
   tipo: TipoDocumento;
   /** Sufijo de la key i18n (`documentos.nombre<Sufijo>`) — la voz vive en
    *  el diccionario, jamás acá (Ley 3: la pieza no habla). */
-  claveVoz: 'CarnetVacunas' | 'HistoriaClinica';
+  claveVoz: 'CarnetVacunas' | 'HistoriaClinica' | 'Receta' | 'FichaIdentidad';
   /** El glifo del OBJETO (el papel), jamás el del acto. */
   icono: IconoNombre;
 }
@@ -40,6 +40,22 @@ export interface Papel {
 const PAPELES: Record<TipoDocumento, Omit<Papel, 'tipo'>> = {
   carnet_vacunas: { claveVoz: 'CarnetVacunas', icono: 'carnet' },
   historia_clinica: { claveVoz: 'HistoriaClinica', icono: 'documento' },
+  // S90-A (orden 5, aplicado por A con la firma del founder sobre las VOCES;
+  // el tripwire de arriba sonó y esto lo apaga). LOS GLIFOS SON PROVISIONALES
+  // Y SU TENSIÓN ESTÁ MEDIDA, no escondida: la lista tiene CUATRO filas y el
+  // set vivo ofrece TRES dibujos viables en esta app — presupuesto ya vive en
+  // hogar/index.tsx:931, bitacora en adiestramiento.tsx:215, documento ya es
+  // doble (acá + cuenta/index.tsx:62). El casillero no da: falta UN glifo y
+  // dibujarlo es de B (hoja de contacto pedida en el reporte S90-A orden 5).
+  //   · receta → 'caso': la carpeta clínica — la receta nace de esa consulta;
+  //     libre en el cliente, préstamo declarado.
+  //   · ficha_identidad → 'documento': el objeto EXACTO del registry
+  //     («identificación», cédula con RETRATO — y la ficha lleva foto). Que
+  //     quede VECINA de historia_clinica con el mismo dibujo es Ley 12 en su
+  //     forma vecina: PROVISIONAL A PROPÓSITO, la alternativa era mentir el
+  //     objeto. Se resuelve cuando B entregue el glifo que falta.
+  receta: { claveVoz: 'Receta', icono: 'caso' },
+  ficha_identidad: { claveVoz: 'FichaIdentidad', icono: 'documento' },
 };
 
 /** La lista, en el orden del catálogo. Consumidores: el perfil de la

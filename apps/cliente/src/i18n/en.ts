@@ -977,6 +977,9 @@ export const clienteEn = {
     ley: "Your family's papers, all in one place.",
     nombreCarnetVacunas: 'Vaccine card',
     nombreHistoriaClinica: 'Medical history',
+    // S90-A order 5 — founder-signed voices (see es.ts).
+    nombreReceta: 'Prescription',
+    nombreFichaIdentidad: 'Pet ID',
     descargar: 'Download PDF',
     vacioTitulo: 'No papers yet',
     vacioDetalle: "Once you add a pet, their documents will live here.",
