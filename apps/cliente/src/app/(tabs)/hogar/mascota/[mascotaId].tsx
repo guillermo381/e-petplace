@@ -85,7 +85,9 @@ import {
   type VitalesPaseos,
 } from '@epetplace/domain';
 import { FAMILIA_DE_TIPO, vozHecho } from '@/lib/voz-hecho';
+import { PAPELES_DE_MASCOTA } from '@/lib/papeles';
 import { CantoCurva } from '@/components/canto-curva';
+import { FilaDocumento } from '@/components/fila-documento';
 import { FiltroPills } from '@/components/filtro-pills';
 
 /** @override-s82c — SERIF LOCAL hasta la pieza de B (candidata; el
@@ -246,6 +248,9 @@ export default function PerfilDeMascota() {
   const [tallaHojaAbierta, setTallaHojaAbierta] = useState(false);
   // S89 órdenes 8⑤/10① — los papeles del producto
   const [bajandoDoc, setBajandoDoc] = useState<TipoDocumento | null>(null);
+  /** S89-D ①: la sección de papeles nace PLEGADA — el perfil es de la
+   *  mascota; sus documentos se piden, no presiden. */
+  const [docsAbiertos, setDocsAbiertos] = useState(false);
   const [fallaCarnet, setFallaCarnet] = useState<string | null>(null);
   /** UN camino para los dos papeles: el token lo emite el server con el
    *  mismo gate del expediente; acá solo se abre lo que devuelve. */
@@ -976,23 +981,43 @@ export default function PerfilDeMascota() {
             (Chanel: un gesto por sección).
             Cada papel se emite con un token de UN SOLO USO: el JWT jamás
             viaja en una URL, y un link reenviado ya no sirve. */}
+        {/* S89-D orden 7 ① (firma del founder sobre capturas): la sección
+            es DESPLEGABLE y sus papeles son FILAS con su glifo.
+            ☠️ MURIERON los dos `Boton bloque` (el botón tapiz): no
+            escalaban — con receta y certificados serían cuatro tapices
+            apilados en el perfil. La lista sale del catálogo DERIVADO
+            (`lib/papeles.ts`), jamás escrita acá. */}
         <View style={{ marginTop: spacing[8] }}>
-          <RotuloSeccion titulo={t('perfil.documentos')} cuenta={null} />
+          <Pressable
+            onPress={() => setDocsAbiertos((v) => !v)}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: docsAbiertos }}
+            accessibilityLabel={t('perfil.documentos')}
+          >
+            <RotuloSeccion
+              titulo={t('perfil.documentos')}
+              cuenta={String(PAPELES_DE_MASCOTA.length)}
+            />
+          </Pressable>
           <View style={{ paddingHorizontal: spacing[5] }}>
-            <Boton
-              etiqueta={t('perfil.descargarCarnet')}
-              variante="sinCaja"
-              bloque
-              cargando={bajandoDoc === 'carnet_vacunas'}
-              onPress={() => { void bajarDocumento('carnet_vacunas'); }}
-            />
-            <Boton
-              etiqueta={t('perfil.descargarHistoria')}
-              variante="sinCaja"
-              bloque
-              cargando={bajandoDoc === 'historia_clinica'}
-              onPress={() => { void bajarDocumento('historia_clinica'); }}
-            />
+            {docsAbiertos ? (
+              <Tarjeta relleno="ninguno" elevacion="reposo">
+                {PAPELES_DE_MASCOTA.map((papel, i) => (
+                  <View key={papel.tipo}>
+                    {i > 0 ? <Separador /> : null}
+                    <FilaDocumento
+                      icono={papel.icono}
+                      nombre={t(`documentos.nombre${papel.claveVoz}`)}
+                      apoyo={t('documentos.descargar')}
+                      cargando={bajandoDoc === papel.tipo}
+                      onPress={() => {
+                        void bajarDocumento(papel.tipo);
+                      }}
+                    />
+                  </View>
+                ))}
+              </Tarjeta>
+            ) : null}
             {/* Ley 13: el fallo DICE que es fallo, jamás silencio */}
             {fallaCarnet !== null ? (
               <View style={{ paddingTop: spacing[2] }}>

@@ -1052,6 +1052,24 @@ export const clienteEs = {
     momentoHoras: 'Hace {{n}} h',
     momentoAyer: 'Ayer',
   },
+  // S89-D orden 7 · LA CASA DE LOS PAPELES (firma del founder sobre
+  // capturas). Los nombres de papel se resuelven por `claveVoz` del
+  // catálogo derivado (`lib/papeles.ts`) — un papel nuevo sin voz rompe
+  // el typecheck, jamás sale mudo. VOCES CANDIDATAS al próximo lote.
+  documentos: {
+    titulo: 'Documentos',
+    ley: 'Los papeles de tu familia, todos acá.',
+    nombreCarnetVacunas: 'Carnet de vacunas',
+    nombreHistoriaClinica: 'Historia clínica',
+    /** El acto, bajo el nombre del papel: sostiene el affordance hasta
+     *  que exista el glifo de descarga (pedido a B — Ley 12: no se
+     *  presta un glifo que significa otra cosa). */
+    descargar: 'Descargar PDF',
+    vacioTitulo: 'Todavía no hay papeles',
+    vacioDetalle: 'Cuando agregues una mascota, sus documentos van a vivir acá.',
+    errorTitulo: 'No pudimos cargar tus documentos',
+    errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
+  },
   cuenta: {
     titulo: 'Tu cuenta',
     // S74 — entrada TEMPORAL del gate de la fusión (muere con la firma, Ley 37)
