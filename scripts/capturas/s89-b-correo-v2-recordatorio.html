@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>s89-b · demo v2 — Recordatorio de cita (MUESTRA)</title>
+<!--
+  DEMO v2 (S89-B orden 8) — GENERADA por scripts/gen-correo-demos-v2.mjs.
+  Espec: docs/relevamientos/2026-08-06-s89b-ESPEC-cara-del-correo-v2.md
+  · Los TEXTOS son SLOT (la firma dice que los textos quedan): A cablea los
+    suyos desde _voz_notificacion. Lo que el ojo juzga acá es DISEÑO.
+  · El isotipo va como data-URI SOLO ACÁ; en producción es PNG hosted en
+    dominio propio, sin query params (los clientes de correo no soportan SVG).
+  · lang="es" es REQUISITO (acta S88-A: Gmail leyó «inglés» en el gate) —
+    en producción sigue el idioma del destinatario.
+-->
+<style>
+  body { margin:0; padding:32px 16px; background:#E8E6E3; }
+  .rotulo { max-width:600px; margin:0 auto 10px; font:12px/17px Consolas,Menlo,monospace; color:#55524E; }
+  @media (prefers-color-scheme: dark) {
+    /* el par oscuro de la casa — solo lo honran los clientes que preguntan */
+    .marco { background:#050508 !important; }
+    .txt { color:#F0EEF8 !important; }
+    .txt65 { color:rgba(240,238,248,.65) !important; }
+    .caja { background:#12121A !important; border-color:rgba(240,238,248,.18) !important; }
+    .hair { border-color:rgba(240,238,248,.18) !important; }
+    .link { color:#AE59FF !important; }
+  }
+</style>
+</head>
+<body>
+<p class="rotulo">RECORDATORIO — al DUEÑO · &uacute;til y serena: EL CU&Aacute;NDO preside, la celebraci&oacute;n se dosifica</p>
+
+<!-- ═════════ LA PLANTILLA (esto es lo que viaja) ═════════ -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="marco" style="max-width:600px;margin:0 auto;background-color:#FAF9F7;border-radius:12px;">
+
+  <!-- (a) CABECERA — marca y aire. El wordmark es TEXTO: si la imagen
+       viene bloqueada, la cabecera sigue diciendo la casa (el fallback
+       no se tira, se degrada a él). -->
+  <tr><td style="padding:40px 32px 0 32px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="padding-right:10px;vertical-align:middle;">
+        <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NzEuODIgMzI0Ij4KICA8ZGVmcz4KICA8bGluZWFyR3JhZGllbnQgaWQ9IkRlZ3JhZGFkb19zaW5fbm9tYnJlXzgiIGRhdGEtbmFtZT0iRGVncmFkYWRvIHNpbiBub21icmUgOCIgeDE9IjIzNS45MSIgeTE9Ii0xLjU2IiB4Mj0iMjM1LjkxIiB5Mj0iNDcwLjI2IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2ZmMDBhZiIvPgogICAgICA8c3RvcCBvZmZzZXQ9Ii4wNiIgc3RvcC1jb2xvcj0iI2QzMmViNyIvPgogICAgICA8c3RvcCBvZmZzZXQ9Ii4yIiBzdG9wLWNvbG9yPSIjNjhhMmNkIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iLjI4IiBzdG9wLWNvbG9yPSIjMjhlOGRhIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iLjQ4IiBzdG9wLWNvbG9yPSIjOTBmZjhiIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iLjY1IiBzdG9wLWNvbG9yPSIjZmZmNjQ1Ii8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cGF0aCBmaWxsPSJ1cmwoI0RlZ3JhZGFkb19zaW5fbm9tYnJlXzgpIiBkPSJNMjEzLjA2LDMwMi45NmMtMTMuMzQsLjI4LTI2LjYyLS43NS0zOS40Ni0zLjA0LTY3LjI2LTEyLTEyMy44OC01Ny4xOC0xNDQuMjQtMTE1LjEtNC43Mi0xMy40My03LjQ3LTI3LjQ4LTguMTgtNDEuNzgtMS44NC0zNi44OCwxMC4wNS03MC4xMiwzMy40OC05My41OSwyMi4yNi0yMi4zLDUyLjI2LTMxLjEyLDgwLjI0LTIzLjYxLC4xMiwuMDMsLjIzLC4wNywuMzUsLjEtNy45Myw1LjY0LTE0Ljg4LDEyLjA5LTIwLjc2LDE5LjMxLTExLjM2LDEzLjk0LTE4LjIsMzAuNzEtMTkuMjUsNDcuMjItMS4xOSwxOC41Niw0Ljg5LDM2LjYzLDE2LjY4LDQ5LjU3LDEwLjY4LDExLjcyLDI1Ljc3LDE4Ljg4LDQxLjQsMTkuNjMsLjg5LC4wNCwxLjc4LC4wNiwyLjY3LC4wNiwxNC45NCwwLDI5LjktNS45OSw0MC40Ny0xNi4zMSwxNS40My0xNS4wOCwyMS45Ni0zOS43MywxNy4wMi02NC4zM2gwYy00LjE5LTIwLjg4LTE1LjY1LTM5Ljc4LTMyLjMzLTU0LjAxLDkuMTctMi43NCwxOS4wNC00LjcsMjkuNTMtNS44LDEuMTUtLjEyLDIuMjktLjIyLDMuNDItLjMxLDUuNzgtLjQ1LDEwLjEtNS41LDkuNjUtMTEuMjgtLjQ1LTUuNzgtNS41LTEwLjEyLTExLjI4LTkuNjUtMS4zMywuMS0yLjY3LC4yMi00LC4zNi0xNy45NCwxLjg4LTM0LjQyLDUuOTgtNDkuMDksMTIuMmwtLjEyLS4wNy0uMTYsLjA3Yy02LjAyLTIuOTYtMTIuMy01LjMyLTE4Ljc0LTcuMDUtMzUuMzMtOS40OS03Mi45MiwxLjM3LTEwMC41NSwyOS4wNkMxMi4xNCw2Mi4zMy0xLjkyLDEwMS4yMSwuMjEsMTQ0LjA4Yy44MSwxNi4zMiwzLjk2LDMyLjM2LDkuMzUsNDcuNywyMi44Myw2NC45NSw4NS43NywxMTUuNTEsMTYwLjM2LDEyOC44MiwxMi42OSwyLjI2LDI1Ljc1LDMuNDEsMzguODksMy40MSwxLjU2LDAsMy4xMi0uMDIsNC42OC0uMDUsNS44LS4xMiwxMC40LTQuOTIsMTAuMjgtMTAuNzFzLTQuOTYtMTAuMzgtMTAuNzEtMTAuMjhaTTE1OC4zOSwzNi4yOWMxOC4wOCwxMS42MiwzMC41MywyOS4xOSwzNC41LDQ4LjkzLDMuNTUsMTcuNy0uNzEsMzUuMDEtMTEuMTEsNDUuMTgtNy4wOSw2LjkzLTE3LjM2LDEwLjc4LTI3LjQ1LDEwLjI5LTkuOTctLjQ4LTIwLjAyLTUuMjYtMjYuODgtMTIuNzktNy44Ni04LjYzLTEyLjA2LTIxLjM3LTExLjI1LTM0LjA5LC43OC0xMi4xOCw1Ljk1LTI0LjcxLDE0LjU3LTM1LjI5LDcuMTktOC44MywxNi40Ni0xNi4yOSwyNy42Mi0yMi4yMlptMjczLjYzLTEuNjhDNDA0LjM5LDYuOTIsMzY2LjgtMy45NCwzMzEuNDYsNS41NWMtNi40NCwxLjczLTEyLjcyLDQuMS0xOC43NCw3LjA1bC0uMTYtLjA3LS4xMiwuMDdjLTE0LjY3LTYuMjEtMzEuMTUtMTAuMzEtNDkuMDctMTIuMTktMS4zNS0uMTQtMi42OS0uMjYtNC4wMi0uMzctNS43Ni0uNDctMTAuODMsMy44Ny0xMS4yOCw5LjY1LS40NSw1Ljc4LDMuODcsMTAuODMsOS42NSwxMS4yOCwxLjEzLC4wOSwyLjI3LC4xOSwzLjQ0LC4zMSwxMC40OCwxLjEsMjAuMzQsMy4wNiwyOS41MSw1LjgtMTYuNjgsMTQuMjItMjguMTQsMzMuMTMtMzIuMzMsNTQuMDEtNC45MywyNC42LDEuNTksNDkuMjUsMTcuMDMsNjQuMzMsMTAuNTYsMTAuMzIsMjUuNTIsMTYuMzEsNDAuNDYsMTYuMzEsLjg5LDAsMS43OC0uMDIsMi42Ni0uMDYsMTUuNjMtLjc1LDMwLjcyLTcuOTEsNDEuNC0xOS42MywxMS43OS0xMi45NCwxNy44Ny0zMS4wMSwxNi42OC00OS41Ny0xLjA1LTE2LjUyLTcuODktMzMuMjktMTkuMjQtNDcuMjItNS44OC03LjIzLTEyLjgzLTEzLjY4LTIwLjc2LTE5LjMyLC4xMi0uMDMsLjIzLS4wNywuMzUtLjEsMjcuOTgtNy41MSw1Ny45OCwxLjMxLDgwLjI0LDIzLjYxLDIzLjQzLDIzLjQ3LDM1LjMyLDU2LjcxLDMzLjQ4LDkzLjU5LS43MSwxNC4zLTMuNDcsMjguMzYtOC4xOCw0MS43OC0yMC4zNiw1Ny45Mi03Ni45NywxMDMuMTEtMTQ0LjI0LDExNS4xMS0xMi44MywyLjI5LTI2LjExLDMuMzEtMzkuNDYsMy4wNC0uMDcsMC0uMTUsMC0uMjIsMC01LjcsMC0xMC4zOCw0LjU2LTEwLjQ5LDEwLjI4LS4xMiw1LjgsNC40OCwxMC41OSwxMC4yOCwxMC43MSwxLjU2LC4wMywzLjEyLC4wNSw0LjY4LC4wNSwxMy4xNCwwLDI2LjIxLTEuMTQsMzguODktMy40MSw3NC41OS0xMy4zMSwxMzcuNTMtNjMuODcsMTYwLjM2LTEyOC44Miw1LjM5LTE1LjMzLDguNTMtMzEuMzgsOS4zNS00Ny43LDIuMTQtNDIuODgtMTEuOTMtODEuNzUtMzkuNTktMTA5LjQ4Wm0tOTAuOTYsMjMuOTFjOC42MiwxMC41NywxMy43OSwyMy4xLDE0LjU3LDM1LjI5LC44MSwxMi43Mi0zLjM5LDI1LjQ2LTExLjI1LDM0LjA5LTYuODYsNy41My0xNi45MSwxMi4zMS0yNi44OCwxMi43OS0xMC4wOSwuNDktMjAuMzUtMy4zNi0yNy40NC0xMC4yOS0xMC40LTEwLjE3LTE0LjY2LTI3LjQ4LTExLjExLTQ1LjE4LDMuOTYtMTkuNzQsMTYuNDItMzcuMzIsMzQuNDktNDguOTMsMTEuMTYsNS45MywyMC40MywxMy4zOSwyNy42MiwyMi4yM1oiLz4KPC9zdmc+Cg==" width="46" height="32" alt="e-PetPlace" style="display:block;border:0;">
+      </td>
+      <td style="vertical-align:middle;">
+        <span class="txt" style="font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:18px;font-weight:600;color:#221E19;">e-PetPlace</span>
+      </td>
+    </tr></table>
+  </td></tr>
+  <!-- el filete es MARCA, no función: magentaDark en las DOS casas.
+       §15b.1 lo permite explícitamente («el magenta vive SOLO en la
+       marca»); lo que SÍ hereda casa es el acento FUNCIONAL (CTA y
+       links), abajo. -->
+  <tr><td style="padding:16px 32px 0 32px;">
+    <div style="border-top:2px solid #8E1F68;font-size:0;line-height:0;">&nbsp;</div>
+  </td></tr>
+
+  <!-- (b) SALUDO + FRASE — SLOT de voz (A cablea el texto real) -->
+  <tr><td style="padding:28px 32px 0 32px;">
+    <p class="txt" style="margin:0 0 10px 0;font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:22px;font-weight:500;line-height:30px;color:#221E19;">Hola, Ana.</p>
+    <p class="txt" style="margin:0;font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;color:#221E19;">Te recordamos la cita de Luna.</p>
+  </td></tr>
+
+  <!-- (c) EL CORAZÓN — el bloque de detalle. Fondo = TEMPERATURA (tapiz,
+       1.05 contra el papel: no separa y no tiene que hacerlo); borde =
+       ESTRUCTURA. El contenido se lee sin la caja. -->
+  <tr><td style="padding:22px 32px 0 32px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr><td class="caja" style="background-color:#FAF2F5;border:1px solid rgba(34,30,25,.35);border-radius:12px;padding:28px;">
+        <p class="txt" style="margin:0 0 6px 0;font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:26px;font-weight:600;line-height:32px;color:#221E19;">Ma&ntilde;ana &middot; 10:30</p>
+        <p class="txt" style="margin:0 0 10px 0;font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:17px;font-weight:500;line-height:24px;color:#221E19;">Luna &middot; consulta general</p>
+        <p class="txt65" style="margin:0;font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:20px;color:rgba(34,30,25,.65);">Cl&iacute;nica Veterinaria Andina &middot; Av. de los Cipreses N40-12, Quito</p>
+      </td></tr>
+    </table>
+  </td></tr>
+
+  <!-- (d) CTA — la casa correcta en el correo correcto (oro + label textLight0 = 9.96 &middot; boundary por borde 4.04 &middot; tapiz del cliente (tinta 15.05) &middot; link magentaDark 7.84) -->
+  <tr><td style="padding:24px 32px 0 32px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="background-color:#FCBC1D;border:1px solid rgba(34,30,25,.45);border-radius:10px;">
+        <a href="#" style="display:inline-block;padding:13px 26px;font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;font-weight:600;color:#1D1A2E;text-decoration:none;">Ver la cita</a>
+      </td>
+    </tr></table>
+    <!-- redundancia de canal: si el fill muere en una inversión forzada,
+         el link sobrevive (nada informativo viaja solo en color) -->
+    <p style="margin:12px 0 0 0;font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:20px;">
+      <a class="link" href="#" style="color:#8E1F68;text-decoration:underline;">Ver la cita en e-PetPlace</a>
+    </p>
+  </td></tr>
+
+  <!-- cierre -->
+  <tr><td style="padding:20px 32px 0 32px;">
+    <p class="txt" style="margin:0;font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;color:#221E19;">Si algo cambi&oacute;, avisa a la cl&iacute;nica desde la app.</p>
+  </td></tr>
+
+  <!-- (e) PIE — marca chica, la casa firma sin volver a gritar -->
+  <tr><td style="padding:32px 32px 28px 32px;">
+    <div class="hair" style="border-top:1px solid rgba(34,30,25,.18);font-size:0;line-height:0;margin-bottom:14px;">&nbsp;</div>
+    <p class="txt65" style="margin:0 0 6px 0;font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;line-height:20px;color:rgba(34,30,25,.65);">e-PetPlace</p>
+    <p class="txt65" style="margin:0;font-family:'DM Sans',-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:20px;color:rgba(34,30,25,.65);">
+      Este correo sali&oacute; de avisos@avisos.epetplace.com<br>
+      Lo recibes porque existe una cuenta de e-PetPlace con tu direcci&oacute;n.
+    </p>
+  </td></tr>
+</table>
+<!-- ═════════ fin de la plantilla ═════════ -->
+
+<p class="rotulo" style="margin-top:14px;">MUESTRA &middot; datos ficticios &middot; los TEXTOS son slot de A (la firma es 100% de dise&ntilde;o) &middot; isotipo data-URI solo en la demo: en producci&oacute;n PNG hosted sin tracking</p>
+</body>
+</html>
