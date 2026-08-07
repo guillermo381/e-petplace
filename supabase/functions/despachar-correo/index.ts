@@ -43,12 +43,40 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 const REMITENTE = 'e-PetPlace <hola@epetplace.com>';
 
 // ── Los hex de la espec (fuente única palette.ts, transcritos por B) ────────
-const PAPEL = '#FAF9F7';
+const PAPEL_HEX = '#FAF9F7';
 const TINTA = '#221E19';
 const TINTA_65 = 'rgba(34,30,25,.65)';
 const HAIRLINE = 'rgba(34,30,25,.18)';
 const ACENTO = '#8E1F68'; // magentaDark — 7.84 sobre papel
-const TAPIZ = '#FAF2F5'; // caja del código — tinta sobre él 15.05
+const TAPIZ = '#FAF2F5'; // cliente — pink 3% · tinta sobre él 15.05
+const TAPIZ_OFICIO = '#F4F8F6'; // prestador — teal 3% (bg.base de su casa) · tinta 15.46
+const ORO = '#FCBC1D';
+const ORO_TEXTO = '#1D1A2E'; // textLight0 — el par firmado 9.96
+const TEAL_DARK = '#0A7268';
+const BORDE_CAJA = 'rgba(34,30,25,.35)';
+const BORDE_CTA = 'rgba(34,30,25,.45)';
+/** El isotipo: PNG @2x HOSTED, URL estática SIN query params (nada que
+ *  cuente aperturas). El wordmark de TEXTO queda al lado como fallback vivo:
+ *  con imágenes bloqueadas, la cabecera sigue diciendo la casa. */
+const ISOTIPO = 'https://zyltipqscdsdsxnjclhp.supabase.co/storage/v1/object/public/marca-publica/isotipo@2x.png';
+
+/** LA CASA SE HEREDA ENTERA (atrape de B al generar): si el CTA cambia de
+ *  casa, el TAPIZ del bloque también. Un correo al negocio con el tapiz rosa
+ *  del cliente sería la casa equivocada en el correo correcto.
+ *  El FILETE es marca (magentaDark en las dos casas, §15b.1); lo que hereda
+ *  casa es el acento FUNCIONAL: CTA y links. */
+type Casa = 'cliente' | 'prestador';
+const CASA = {
+  cliente:   { fill: ORO, label: ORO_TEXTO, borde: BORDE_CTA, tapiz: TAPIZ, link: ACENTO, linkDark: '#AE59FF' },
+  prestador: { fill: TEAL_DARK, label: PAPEL_HEX, borde: TEAL_DARK, tapiz: TAPIZ_OFICIO, link: TEAL_DARK, linkDark: '#28E8DA' },
+} as const;
+/** Qué casa es cada tipo — se deriva de la AUDIENCIA del catálogo, que ya
+ *  la declara; acá solo se traduce a paleta. */
+const CASA_POR_TIPO: Record<string, Casa> = {
+  cita_solicitada: 'prestador',
+  registro_completado_prestador: 'prestador',
+  registro_completado_operador: 'prestador',
+};
 const SANS = "'DM Sans', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 const MONO = "'JetBrains Mono', 'SF Mono', 'Roboto Mono', Consolas, Menlo, monospace";
 
@@ -105,69 +133,96 @@ function bloqueDetalle(d: Datos): string {
       </td></tr>`;
 }
 
-function plantillaHtml(d: Datos): string {
+function plantillaHtml(d: Datos, tipo: string, idioma: string): string {
+  const casa = CASA[CASA_POR_TIPO[tipo] ?? 'cliente'];
   const titulo = escaparHtml(d.titulo ?? 'Tienes una novedad en e-PetPlace');
   const mensaje = escaparHtml(d.mensaje ?? 'Abre la app para verla.');
+
+  // EL CORAZÓN — el bloque de detalle con la MASCOTA presidiendo a 26px
+  // (v2 de B). Solo se pinta con datos reales; jamás una caja vacía.
+  const heroe = d.mascota_nombre ?? null;
+  const cuando = [d.fecha, d.hora].filter(Boolean).join(' · ');
+  const conQuien = d.negocio ?? null;
+  const bloqueDetalle =
+    heroe || cuando || conQuien
+      ? `
+  <tr><td style="padding:22px 32px 0 32px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr><td class="caja" style="background-color:${casa.tapiz};border:1px solid ${BORDE_CAJA};border-radius:12px;padding:28px;">
+        ${heroe ? `<p class="txt" style="margin:0 0 6px 0;font-family:${SANS};font-size:26px;font-weight:600;line-height:32px;color:${TINTA};">${escaparHtml(heroe)}</p>` : ''}
+        ${cuando ? `<p class="txt" style="margin:0 0 10px 0;font-family:${SANS};font-size:17px;font-weight:500;line-height:24px;color:${TINTA};">${escaparHtml(cuando)}</p>` : ''}
+        ${conQuien ? `<p class="txt65" style="margin:0;font-family:${SANS};font-size:14px;line-height:20px;color:${TINTA_65};">${escaparHtml(conQuien)}</p>` : ''}
+      </td></tr>
+    </table>
+  </td></tr>`
+      : '';
+
+  // EL CÓDIGO — cuando el tipo lo trae (recuperación de clave). Mono 32px.
   const bloqueCodigo = d.codigo
     ? `
-      <tr><td style="padding:8px 32px 0 32px;">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-          <td align="center" class="caja-codigo" style="background:${TAPIZ};border:1px solid ${HAIRLINE};border-radius:10px;padding:20px 16px;">
-            <span class="texto codigo" style="font-family:${MONO};font-size:32px;font-weight:600;letter-spacing:0.12em;color:${TINTA};">${escaparHtml(agrupar(d.codigo))}</span>
-          </td>
-        </tr></table>
-        <p class="texto-pie" style="font-family:${SANS};font-size:14px;line-height:20px;color:${TINTA_65};text-align:center;margin:10px 0 0 0;">
-          Toca el código para copiarlo.${
-            d.codigo_vigencia_min ? ` Vale por ${escaparHtml(String(d.codigo_vigencia_min))} minutos.` : ''
-          }
-        </p>
-      </td></tr>`
+  <tr><td style="padding:22px 32px 0 32px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td align="center" class="caja" style="background-color:${casa.tapiz};border:1px solid ${BORDE_CAJA};border-radius:12px;padding:24px 16px;">
+        <span class="txt" style="font-family:${MONO};font-size:32px;font-weight:600;letter-spacing:0.12em;color:${TINTA};">${escaparHtml(agrupar(d.codigo))}</span>
+      </td>
+    </tr></table>
+    <p class="txt65" style="margin:10px 0 0 0;font-family:${SANS};font-size:14px;line-height:20px;color:${TINTA_65};text-align:center;">
+      Toca el código para copiarlo.${d.codigo_vigencia_min ? ` Vale por ${escaparHtml(String(d.codigo_vigencia_min))} minutos.` : ''}
+    </p>
+  </td></tr>`
     : '';
 
   return `<!doctype html>
-<html lang="es">
+<html lang="${idioma === 'en' ? 'en' : 'es'}">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <meta name="supported-color-schemes" content="light dark">
 <style>
-  /* Capa 1 — clientes que HONRAN prefers-color-scheme (el par de la casa).
-     Capa 2 (inversión forzada) no se pelea: el eje tinta/papel sobrevive
-     por simetría y nada informativo viaja solo en color. */
   @media (prefers-color-scheme: dark) {
-    .fondo { background: #050508 !important; }
-    .texto, .codigo { color: #F0EEF8 !important; }
-    .texto-pie { color: rgba(240,238,248,.65) !important; }
-    .caja-codigo { background: #050508 !important; border-color: rgba(240,238,248,.18) !important; }
-    .hairline { border-color: rgba(240,238,248,.18) !important; }
-    a.enlace { color: #AE59FF !important; }
+    .marco { background:#050508 !important; }
+    .txt { color:#F0EEF8 !important; }
+    .txt65 { color:rgba(240,238,248,.65) !important; }
+    .caja { background:#12121A !important; border-color:rgba(240,238,248,.18) !important; }
+    .hair { border-color:rgba(240,238,248,.18) !important; }
+    .link { color:${casa.linkDark} !important; }
   }
 </style>
 </head>
-<body class="fondo" style="margin:0;padding:0;background:${PAPEL};">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="fondo" style="background:${PAPEL};">
-<tr><td align="center" style="padding:24px 12px;">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
-  <tr><td style="padding:20px 32px 14px 32px;">
-    <span class="texto" style="font-family:${SANS};font-size:18px;font-weight:600;color:${TINTA};">e-PetPlace</span>
+<body style="margin:0;padding:24px 12px;background-color:#E8E6E3;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="marco" style="max-width:600px;margin:0 auto;background-color:${PAPEL_HEX};border-radius:12px;">
+
+  <tr><td style="padding:40px 32px 0 32px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="padding-right:10px;vertical-align:middle;">
+        <img src="${ISOTIPO}" width="46" height="32" alt="e-PetPlace" style="display:block;border:0;">
+      </td>
+      <td style="vertical-align:middle;">
+        <span class="txt" style="font-family:${SANS};font-size:18px;font-weight:600;color:${TINTA};">e-PetPlace</span>
+      </td>
+    </tr></table>
   </td></tr>
-  <tr><td style="padding:0 32px;"><div class="hairline" style="border-top:1px solid ${HAIRLINE};font-size:0;line-height:0;">&nbsp;</div></td></tr>
-  <tr><td style="padding:22px 32px 0 32px;">
-    <p class="texto" style="font-family:${SANS};font-size:22px;font-weight:500;color:${TINTA};margin:0;">${titulo}</p>
+
+  <tr><td style="padding:16px 32px 0 32px;">
+    <div style="border-top:2px solid ${ACENTO};font-size:0;line-height:0;">&nbsp;</div>
   </td></tr>
-  <tr><td style="padding:12px 32px 0 32px;">
-    <p class="texto" style="font-family:${SANS};font-size:16px;line-height:24px;color:${TINTA};margin:0;">${mensaje}</p>
+
+  <tr><td style="padding:28px 32px 0 32px;">
+    <p class="txt" style="margin:0 0 10px 0;font-family:${SANS};font-size:22px;font-weight:500;line-height:30px;color:${TINTA};">${titulo}</p>
+    <p class="txt" style="margin:0;font-family:${SANS};font-size:16px;line-height:24px;color:${TINTA};">${mensaje}</p>
   </td></tr>
-  ${bloqueDetalle(d)}
+  ${bloqueDetalle}
   ${bloqueCodigo}
-  <tr><td style="padding:28px 32px 24px 32px;">
-    <p class="texto-pie" style="font-family:${SANS};font-size:13px;line-height:20px;color:${TINTA_65};margin:0;">
-      Este aviso salió de e-PetPlace (hola@epetplace.com) porque tu cuenta lo tiene activado.
+
+  <tr><td style="padding:32px 32px 28px 32px;">
+    <div class="hair" style="border-top:1px solid ${HAIRLINE};font-size:0;line-height:0;margin-bottom:14px;">&nbsp;</div>
+    <p class="txt65" style="margin:0 0 6px 0;font-family:${SANS};font-size:13px;font-weight:600;line-height:20px;color:${TINTA_65};">e-PetPlace</p>
+    <p class="txt65" style="margin:0;font-family:${SANS};font-size:13px;line-height:20px;color:${TINTA_65};">
+      Este correo salió de hola@epetplace.com<br>
       Puedes ajustar qué te avisamos desde Preferencias, en la app.
     </p>
   </td></tr>
-</table>
-</td></tr>
 </table>
 </body>
 </html>`;
@@ -257,6 +312,14 @@ Deno.serve(async (req) => {
     }
 
     const datos = (i.datos ?? {}) as Datos;
+    // El idioma del DESTINATARIO gobierna el lang del correo (acta S88-A:
+    // Gmail leyó «inglés» sobre un correo en español y ofreció traducirlo).
+    const { data: pref } = await supabase
+      .from('user_preferencias')
+      .select('idioma')
+      .eq('user_id', i.destinatario_user_id)
+      .maybeSingle();
+    const idioma = pref?.idioma === 'en' ? 'en' : 'es';
     const r = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
@@ -264,7 +327,7 @@ Deno.serve(async (req) => {
         from: REMITENTE,
         to: [email],
         subject: datos.titulo ?? 'Tienes una novedad en e-PetPlace',
-        html: plantillaHtml(datos),
+        html: plantillaHtml(datos, i.tipo, idioma),
         text: plantillaTexto(datos),
       }),
     });
