@@ -47,10 +47,13 @@ Deno.serve(async (req) => {
     .eq('tipo', 'certificado_salud')
     .is('usado_en', null)
     .gt('expira_en', new Date().toISOString())
-    .select('mascota_id, referencia_id')
+    // Adaptación de A (declarada): D escribió `referencia_id` contra el estado
+    // S89; la columna viva es `ref_id` (orden 1, 20260807100000). Solo cambia
+    // el nombre — la semántica de D quedó entera.
+    .select('mascota_id, ref_id')
     .maybeSingle();
   if (!fila) return new Response('token_invalido_o_vencido', { status: 410 });
-  if (!fila.referencia_id) return new Response('token_sin_referencia', { status: 400 });
+  if (!fila.ref_id) return new Response('token_sin_referencia', { status: 400 });
 
   // El `.eq('mascota_id')` no es redundante con el gate de la RPC: es el
   // cinturón del lado que compone. Si alguna vez un token quedara emitido
@@ -61,7 +64,7 @@ Deno.serve(async (req) => {
       'alcance, declaracion, fecha_examen, emitido_en, emisor_nombre, emisor_matricula, ' +
         'emisor_pais, negocio_nombre, negocio_direccion, negocio_telefono, estado_vida_al_emitir',
     )
-    .eq('id', fila.referencia_id)
+    .eq('id', fila.ref_id)
     .eq('mascota_id', fila.mascota_id)
     .maybeSingle();
   if (!cert) return new Response('certificado_no_encontrado', { status: 404 });
