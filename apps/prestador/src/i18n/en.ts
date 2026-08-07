@@ -2059,6 +2059,7 @@ export const prestadorEn = {
     matriculaPaisAyuda: 'Two letters — EC, CO, PE.',
     matriculaGuardar: 'Save licence',
     matriculaEditar: 'Edit',
+    matriculaCancelar: 'Cancel',
     matriculaGuardada: 'Licence saved.',
     jornadaPausadaCuerpo:
       'They have hours saved, but none active. While paused they do not show up when a family looks for an appointment.',

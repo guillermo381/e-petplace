@@ -2489,6 +2489,7 @@ export const prestadorEs = {
     matriculaPaisAyuda: 'Dos letras — EC, CO, PE.',
     matriculaGuardar: 'Guardar matrícula',
     matriculaEditar: 'Editar',
+    matriculaCancelar: 'Cancelar',
     matriculaGuardada: 'Matrícula guardada.',
     jornadaPausadaCuerpo:
       'Tiene horarios cargados, pero ninguno activo. Mientras estén pausados no aparece cuando una familia busca una cita.',

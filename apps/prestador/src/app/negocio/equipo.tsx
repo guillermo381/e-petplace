@@ -848,6 +848,25 @@ export default function EquipoNegocioPantalla() {
                           etiqueta={t('equipo.matriculaGuardar')}
                           onPress={() => void guardarMatricula(miembro.empleadoId)}
                         />
+                        {/* La salida, SOLO cuando hay a dónde volver: si la
+                            matrícula ya existía, editarla tiene que poder
+                            deshacerse sin cerrar la Hoja entera. Cuando NO
+                            existe no se ofrece — no hay estado anterior al
+                            que volver, y un «Cancelar» que no cancela nada
+                            es un control que miente. */}
+                        {matricula.matricula !== null ? (
+                          <Boton
+                            variante="sinCaja"
+                            bloque
+                            etiqueta={t('equipo.matriculaCancelar')}
+                            onPress={() => {
+                              setMatNumero(matricula.matricula ?? '');
+                              setMatPais(matricula.paisEmisor ?? '');
+                              setErrorMat(null);
+                              setEditandoMat(false);
+                            }}
+                          />
+                        ) : null}
                       </View>
                     </Tarjeta>
                   )
