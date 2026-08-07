@@ -1202,6 +1202,36 @@ export type Database = {
           },
         ]
       }
+      cat_documentos_mascota: {
+        Row: {
+          activo: boolean
+          codigo: string
+          created_at: string
+          funcion_edge: string
+          orden: number
+          requiere_ref: boolean
+          voz: string
+        }
+        Insert: {
+          activo?: boolean
+          codigo: string
+          created_at?: string
+          funcion_edge: string
+          orden?: number
+          requiere_ref?: boolean
+          voz: string
+        }
+        Update: {
+          activo?: boolean
+          codigo?: string
+          created_at?: string
+          funcion_edge?: string
+          orden?: number
+          requiere_ref?: boolean
+          voz?: string
+        }
+        Relationships: []
+      }
       cat_ejes_jtbd: {
         Row: {
           activo: boolean
@@ -3883,6 +3913,7 @@ export type Database = {
           expira_en: string
           id: string
           mascota_id: string
+          ref_id: string | null
           tipo: string
           usado_en: string | null
           user_id: string
@@ -3892,6 +3923,7 @@ export type Database = {
           expira_en: string
           id?: string
           mascota_id: string
+          ref_id?: string | null
           tipo: string
           usado_en?: string | null
           user_id: string
@@ -3901,6 +3933,7 @@ export type Database = {
           expira_en?: string
           id?: string
           mascota_id?: string
+          ref_id?: string | null
           tipo?: string
           usado_en?: string | null
           user_id?: string
@@ -3912,6 +3945,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "mascotas"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documento_token_tipo_fkey"
+            columns: ["tipo"]
+            isOneToOne: false
+            referencedRelation: "cat_documentos_mascota"
+            referencedColumns: ["codigo"]
           },
         ]
       }
@@ -17380,7 +17420,7 @@ export type Database = {
         Returns: string
       }
       emitir_token_documento: {
-        Args: { p_mascota_id: string; p_tipo?: string }
+        Args: { p_mascota_id: string; p_ref?: string; p_tipo?: string }
         Returns: Json
       }
       empleado_es_mostrador_o_gestion: {
