@@ -8961,3 +8961,21 @@ color, y **jamás porta información**: es cariño, no dato.
 > su marca de agua y se ven bien impresos en B/N.
 
 **Origen: S89-A (orden 14 ⑤, letra del founder al ver los dos papeles).**
+
+---
+
+#### D-678 — ⚪ EL LAUNCHER DEL PRESTADOR DICE «Pro» Y LA FIRMA ES «CARE»
+
+**La firma del founder llegó con las builds ya lanzadas** (S89-A, orden 17):
+el nombre visible del prestador es **«ePetPlace CARE»**, no «ePetPlace Pro».
+Hoy el binario instalado dice «Pro».
+
+**Es deuda de BINARIO: el nombre del launcher vive en `app.json` y solo
+cambia recompilando.** Por eso **no se recompila sola** — espera a la próxima
+build nativa y viaja con cualquier otra deuda de binario que se acumule
+(la regla del tren: un build por un string es un build desperdiciado).
+
+> **☠️ DISPARO: la próxima build nativa, cualquiera sea su motivo.**
+> **☠️ MUERTE:** el launcher del prestador dice «ePetPlace CARE».
+
+**Origen: S89-A orden 17 (firma posterior al lanzamiento de las builds).**

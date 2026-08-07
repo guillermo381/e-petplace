@@ -11836,6 +11836,8 @@ export type Database = {
           foto_url: string | null
           id: string
           invitado_en: string | null
+          matricula_pais_emisor: string | null
+          matricula_profesional: string | null
           modelo_pago: string
           nombre: string
           porcentaje_comision: number | null
@@ -11854,6 +11856,8 @@ export type Database = {
           foto_url?: string | null
           id?: string
           invitado_en?: string | null
+          matricula_pais_emisor?: string | null
+          matricula_profesional?: string | null
           modelo_pago?: string
           nombre: string
           porcentaje_comision?: number | null
@@ -11872,6 +11876,8 @@ export type Database = {
           foto_url?: string | null
           id?: string
           invitado_en?: string | null
+          matricula_pais_emisor?: string | null
+          matricula_profesional?: string | null
           modelo_pago?: string
           nombre?: string
           porcentaje_comision?: number | null
@@ -16736,6 +16742,10 @@ export type Database = {
         Returns: boolean
       }
       _direccion_hogar_snapshot: { Args: { p_user_id: string }; Returns: Json }
+      _empleado_matricula_ok: {
+        Args: { p_empleado_id: string; p_tipo_servicio: string }
+        Returns: boolean
+      }
       _estados_cita_contables: { Args: never; Returns: string[] }
       _familia_tiene_miembros_vigentes: {
         Args: { p_familia_id: string }
@@ -18302,6 +18312,10 @@ export type Database = {
         }
         Returns: Json
       }
+      registrar_push_token: {
+        Args: { p_plataforma: string; p_token: string }
+        Returns: Json
+      }
       registrar_rasgo_identidad_personal: {
         Args: {
           p_descripcion?: string
@@ -18561,6 +18575,15 @@ export type Database = {
         Returns: {
           motivo: string
           proname: string
+        }[]
+      }
+      vets_sin_matricula: {
+        Args: never
+        Returns: {
+          dias_de_gracia: number
+          empleado_id: string
+          negocio: string
+          nombre: string
         }[]
       }
       wizard_crear_cuenta_y_rol: {

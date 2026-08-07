@@ -1052,6 +1052,11 @@ export const clienteEn = {
     canalPush: 'On your phone',
     canalEmail: 'By email',
     canalWhatsapp: 'WhatsApp',
+    // S89 — the house's invitation before the OS dialog (signed sheet)
+    notifInvitacionTitulo: 'Updates on your phone',
+    notifInvitacionCuerpo: "When something important happens — a confirmed appointment, a vaccine coming due — we let you know on your phone, even when the app is closed. You can change this anytime in Preferences.",
+    notifInvitacionSi: 'Yes, let me know',
+    notifInvitacionNo: 'Not now',
     notifPermisoNegado: "Your phone has notifications turned off for e-PetPlace. Until you turn them on in system settings, updates on your phone can't arrive.",
     waConsentTitulo: 'WhatsApp updates',
     waConsentTexto: 'I want to receive e-PetPlace updates on WhatsApp at this number. I can turn this off anytime in Preferences.',

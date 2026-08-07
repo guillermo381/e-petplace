@@ -106,6 +106,7 @@ import { calcularVozHogar, type VozEstadoHogar } from '@epetplace/domain';
 import { fechaCortaMono, fechaLargaHumana } from '@epetplace/i18n';
 
 import { CoachHoja } from '@/components/coach';
+import { InvitacionAvisos } from '@/components/invitacion-avisos';
 import { useTraduccion } from '@/i18n';
 import { vozServicio } from '@/lib/voz-servicio';
 import { FAMILIA_DE_TIPO, vozHecho } from '@/lib/voz-hecho';
@@ -1839,6 +1840,12 @@ export default function Hogar() {
 
 
       <CoachHoja visible={coachAbierto} onCerrar={() => setCoachAbierto(false)} mascotas={mascotas} />
+
+      {/* S89 — LA INVITACIÓN DE LA CASA (lámina firmada). Vive en el Hogar
+          porque es la primera pantalla con sesión: el SO da UN SOLO TIRO y
+          la casa explica antes de pedirlo. La pieza decide sola si aparece
+          (guardas de la lámina adentro); acá solo se monta. */}
+      <InvitacionAvisos />
 
       {carnetFirmado !== null && (
         <VisorFoto

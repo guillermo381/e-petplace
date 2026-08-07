@@ -1159,6 +1159,11 @@ export const clienteEs = {
     canalPush: 'En el teléfono',
     canalEmail: 'Por correo',
     canalWhatsapp: 'WhatsApp',
+    // S89 — la invitación de la casa antes del diálogo del SO (lámina firmada)
+    notifInvitacionTitulo: 'Avisos en tu teléfono',
+    notifInvitacionCuerpo: 'Cuando pase algo importante — una cita confirmada, una vacuna por vencer — te avisamos en el teléfono, aunque la app esté cerrada. Lo cambias cuando quieras desde Preferencias.',
+    notifInvitacionSi: 'Sí, avisarme',
+    notifInvitacionNo: 'Ahora no',
     notifPermisoNegado: 'El teléfono tiene apagadas las notificaciones de e-PetPlace. Hasta que las actives en los ajustes del sistema, los avisos en el teléfono no pueden llegar.',
     waConsentTitulo: 'Avisos por WhatsApp',
     waConsentTexto: 'Quiero recibir avisos de e-PetPlace por WhatsApp en este número. Puedo desactivarlo cuando quiera desde Preferencias.',
