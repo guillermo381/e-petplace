@@ -2303,6 +2303,105 @@ export type Database = {
           },
         ]
       }
+      certificado_salud: {
+        Row: {
+          alcance: string
+          cita_id: string | null
+          country_code: string
+          declaracion: string
+          emisor_matricula: string
+          emisor_nombre: string
+          emisor_pais: string | null
+          emitido_en: string
+          emitido_por_user_id: string
+          empleado_id: string
+          estado_vida_al_emitir: string
+          fecha_examen: string
+          id: string
+          mascota_id: string
+          negocio_direccion: string | null
+          negocio_nombre: string
+          negocio_telefono: string | null
+          prestador_id: string
+        }
+        Insert: {
+          alcance: string
+          cita_id?: string | null
+          country_code?: string
+          declaracion: string
+          emisor_matricula: string
+          emisor_nombre: string
+          emisor_pais?: string | null
+          emitido_en?: string
+          emitido_por_user_id: string
+          empleado_id: string
+          estado_vida_al_emitir: string
+          fecha_examen: string
+          id?: string
+          mascota_id: string
+          negocio_direccion?: string | null
+          negocio_nombre: string
+          negocio_telefono?: string | null
+          prestador_id: string
+        }
+        Update: {
+          alcance?: string
+          cita_id?: string | null
+          country_code?: string
+          declaracion?: string
+          emisor_matricula?: string
+          emisor_nombre?: string
+          emisor_pais?: string | null
+          emitido_en?: string
+          emitido_por_user_id?: string
+          empleado_id?: string
+          estado_vida_al_emitir?: string
+          fecha_examen?: string
+          id?: string
+          mascota_id?: string
+          negocio_direccion?: string | null
+          negocio_nombre?: string
+          negocio_telefono?: string | null
+          prestador_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificado_salud_cita_id_fkey"
+            columns: ["cita_id"]
+            isOneToOne: false
+            referencedRelation: "evento_cita_servicio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificado_salud_empleado_id_fkey"
+            columns: ["empleado_id"]
+            isOneToOne: false
+            referencedRelation: "prestador_empleados"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificado_salud_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificado_salud_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "prestadores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificado_salud_prestador_id_fkey"
+            columns: ["prestador_id"]
+            isOneToOne: false
+            referencedRelation: "v_prestadores_publicos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       checkout_sesiones: {
         Row: {
           costo_envio: number | null
@@ -17419,6 +17518,15 @@ export type Database = {
         Args: { p_email: string }
         Returns: string
       }
+      emitir_certificado_salud: {
+        Args: {
+          p_alcance: string
+          p_cita_id?: string
+          p_declaracion: string
+          p_mascota_id: string
+        }
+        Returns: Json
+      }
       emitir_token_documento: {
         Args: { p_mascota_id: string; p_ref?: string; p_tipo?: string }
         Returns: Json
@@ -17704,6 +17812,15 @@ export type Database = {
       }
       marcar_no_show_cita: { Args: { p_cita_id: string }; Returns: Json }
       mi_email: { Args: never; Returns: string }
+      mi_firma_clinica: {
+        Args: { p_prestador_id: string }
+        Returns: {
+          empleado_id: string
+          matricula: string
+          nombre: string
+          pais_emisor: string
+        }[]
+      }
       normalizar_telefono: {
         Args: { p_country_code: string; p_texto: string }
         Returns: string
@@ -17760,6 +17877,20 @@ export type Database = {
           es_tratante: boolean
           fecha_apertura: string
           horizonte_proximo_evento: string
+        }[]
+      }
+      obtener_certificados_mascota: {
+        Args: { p_mascota_id: string }
+        Returns: {
+          alcance: string
+          declaracion: string
+          emisor_matricula: string
+          emisor_nombre: string
+          emitido_en: string
+          estado_vida_al_emitir: string
+          fecha_examen: string
+          id: string
+          negocio_nombre: string
         }[]
       }
       obtener_cita_de_grooming: {

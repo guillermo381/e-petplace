@@ -96,7 +96,24 @@ export {
   type CodigoMatricula,
 } from './wrappers/empleado-matricula';
 // S89-A orden 8 ⑤ — los papeles del producto (carnet de vacunas v1)
-export { urlDocumento, type TipoDocumento, type CodigoDocumento } from './wrappers/documentos';
+export {
+  urlDocumento,
+  type TipoDocumento,
+  type TipoDocumentoExpediente,
+  type TipoDocumentoActo,
+  type CodigoDocumento,
+} from './wrappers/documentos';
+// ⚠️ S90-D · PEDIDO A A (esta pista no es dueña de packages/api — ver cabecera
+// de `wrappers/certificados.ts`).
+export {
+  emitirCertificadoSalud,
+  obtenerCertificadosMascota,
+  obtenerMiFirmaClinica,
+  type AlcanceCertificado,
+  type CertificadoEmitido,
+  type CodigoCertificado,
+  type FirmaClinica,
+} from './wrappers/certificados';
 export {
   extraerVacunasDeCarnet,
   registrarVacunasDeCarnet,

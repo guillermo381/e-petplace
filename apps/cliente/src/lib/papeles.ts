@@ -24,11 +24,15 @@
  * agregado al union, `tsc` falla nombrando este archivo.
  */
 
-import type { TipoDocumento } from '@epetplace/api';
+// S90 (merge de D, resolución de A declarada): la lista deriva del subtipo
+// EXPEDIENTE — los papeles POR ACTO (certificado_salud) no entran acá como
+// fila: hay N por mascota y su descarga nombra UN acto (letra de D en el
+// wrapper). El tripwire exhaustivo sigue vivo, ahora sobre el subtipo.
+import type { TipoDocumentoExpediente } from '@epetplace/api';
 import type { IconoNombre } from '@epetplace/ui';
 
 export interface Papel {
-  tipo: TipoDocumento;
+  tipo: TipoDocumentoExpediente;
   /** Sufijo de la key i18n (`documentos.nombre<Sufijo>`) — la voz vive en
    *  el diccionario, jamás acá (Ley 3: la pieza no habla). */
   claveVoz: 'CarnetVacunas' | 'HistoriaClinica' | 'Receta' | 'FichaIdentidad';
@@ -37,7 +41,7 @@ export interface Papel {
 }
 
 /** EXHAUSTIVO POR CONSTRUCCIÓN: un tipo nuevo sin entrada = tsc rojo. */
-const PAPELES: Record<TipoDocumento, Omit<Papel, 'tipo'>> = {
+const PAPELES: Record<TipoDocumentoExpediente, Omit<Papel, 'tipo'>> = {
   carnet_vacunas: { claveVoz: 'CarnetVacunas', icono: 'carnet' },
   historia_clinica: { claveVoz: 'HistoriaClinica', icono: 'documento' },
   // S90-A (orden 5, aplicado por A con la firma del founder sobre las VOCES;
@@ -61,5 +65,5 @@ const PAPELES: Record<TipoDocumento, Omit<Papel, 'tipo'>> = {
 /** La lista, en el orden del catálogo. Consumidores: el perfil de la
  *  mascota (sección desplegable) y Documentos del hogar. */
 export const PAPELES_DE_MASCOTA: readonly Papel[] = (
-  Object.keys(PAPELES) as TipoDocumento[]
+  Object.keys(PAPELES) as TipoDocumentoExpediente[]
 ).map((tipo) => ({ tipo, ...PAPELES[tipo] }));

@@ -311,6 +311,29 @@ export default function DetalleCitaVet() {
               </Tarjeta>
             )}
 
+            {/* S90-D · EMITIR UN CERTIFICADO DE SALUD. Vive detrás del MISMO
+                gate que atender: emitirlo es acto clínico y se gatea por
+                CHIP, no por membresía (ley madre S76). Para recepción esta
+                entrada NO SE MONTA — gate de ausencia, jamás candado (D-525).
+                La pantalla vuelve a verificar por su cuenta: esto es la
+                puerta, no el guard. */}
+            {cita.mascota && puedeAtender && (
+              <Tarjeta elevacion="reposo" relleno="ninguno">
+                <CeldaNavegacion
+                  icono="documento"
+                  registro="aa"
+                  titulo={t('certificado.entradaTitulo')}
+                  detalle={t('certificado.entradaDetalle')}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/veterinaria/certificado/[citaId]',
+                      params: { citaId: cita.id, mascotaId: cita.mascota!.id },
+                    })
+                  }
+                />
+              </Tarjeta>
+            )}
+
             {/* El expediente a un tap (patrón Zona 1 del HOY, Ley 19.1). */}
             {cita.mascota && (
               <Tarjeta elevacion="reposo" relleno="ninguno">
