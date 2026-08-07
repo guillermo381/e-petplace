@@ -8902,3 +8902,62 @@ por `prosrc` (L-120/L-129).
 una letra que las nombre productoras.
 
 **Origen: S89-A (medición D-673 §2 — la trampa del censo, evitada y cercada).**
+
+---
+
+#### D-676 — 🟠 LA MATRÍCULA ES CONDICIÓN DE ELEGIBILIDAD, NO DATO DECORATIVO (letra founder, 6/7-ago-2026)
+
+> **LA LETRA DEL FOUNDER:** «para poder asignar citas a un empleado
+> veterinario, su matrícula debe estar cargada» — y su **enmienda del 7-ago
+> (orden 14 ①): el gate SUBE A VISIBILIDAD.** *Todo vet que entre desde el
+> **15-AGO** exige documentos cargados para APARECER; sin matrícula no se
+> ofrece.* **Ofrecer a quien no puede recibir la cita es prometer.**
+
+**EL HUECO QUE LA PARIÓ (medido S89-A):** `prestador_empleados` no tenía
+NINGUNA columna de credencial — 16 medidas, ninguna. La
+`matricula_profesional` vivía en `prestadores`, **o sea EN EL NEGOCIO**:
+sirve para un consultorio unipersonal y **miente en cuanto la clínica tiene
+dos veterinarios** — el papel diría la matrícula del negocio bajo el nombre
+de otro profesional. *Lo destapó medir para la receta, no un fallo.*
+
+**CONSTRUIDO (migraciones `20260807010000` + `20260807020000`):** las dos
+columnas (`matricula_profesional` · `matricula_pais_emisor`) · el helper
+único `_empleado_matricula_ok(empleado, tipo_servicio)` — **lo no-médico
+jamás pide matrícula** (cinturón verificado) · el gate en los **tres** puntos
+de asignación **y en la vitrina** (`obtener_personas_que_atienden`) · el
+lector `vets_sin_matricula()` para que el titular vea a quién le falta.
+
+**LA TRANSICIÓN, firmada:** corte **15-ago-2026** (los vets de hoy son
+cuentas de prueba). El que **ya existía** tiene gracia hasta esa fecha; **el
+que nace desde el 7-ago nace completo**. Medición que la fundó: cero negocios
+tenían matrícula cargada y los vets vivos eran 3 — un gate duro los dejaba a
+los tres sin recibir citas.
+
+**LO QUE FALTA:** la **captura** en el alta/edición del empleado vet
+(superficie — pedido a C) · el aviso al titular antes del corte.
+**☠️ MUERTE:** un vet nuevo no puede existir sin matrícula, y el papel
+clínico dice SU nombre y SU número.
+
+**Origen: S89-A (medición de la receta, orden 11) + enmienda orden 14 ①.**
+
+---
+
+#### D-677 — 🟢 CARIÑO DE DISEÑO A LOS PAPELES: la marca de agua (letra founder)
+
+> **LA LETRA:** «cariño de diseño a los papeles — logo e-PetPlace como marca
+> de agua y adjunto, cuando el asset esté».
+
+**El insumo YA EXISTE y es el mismo del correo:** el isotipo PNG @2x hosteado
+en `marca-publica` (S89-A orden 13). Los dos papeles vivos —carnet de vacunas
+e historia clínica— tienen hoy su **banda de emisor en tinta** (que sobrevive
+al B/N, espec de B); la marca de agua es el escalón de cariño encima.
+
+**La condición que no se relaja (espec B §4):** **el matiz muere impreso**
+—verdeVital, teal y oro dan el mismo gris— así que una marca de agua a color
+se disuelve en la primera fotocopia. Va en **tinta con opacidad**, no en
+color, y **jamás porta información**: es cariño, no dato.
+
+> **☠️ DISPARO: con el asset, no antes.** **☠️ MUERTE:** los papeles llevan
+> su marca de agua y se ven bien impresos en B/N.
+
+**Origen: S89-A (orden 14 ⑤, letra del founder al ver los dos papeles).**
