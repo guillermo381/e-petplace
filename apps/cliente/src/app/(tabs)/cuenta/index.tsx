@@ -57,6 +57,9 @@ export default function Cuenta() {
     { etiqueta: t('cuenta.perfil'), ruta: '/cuenta/perfil' as const, icono: 'cuenta' as const },
     { etiqueta: t('direccion.titulo'), ruta: '/cuenta/direccion' as const, icono: 'ubicacion' as const },
     { etiqueta: t('cuenta.familia'), ruta: '/cuenta/familia' as const, icono: 'familia' as const },
+    // S89-D orden 7 ②: la casa de los papeles de TODA la familia (el
+    // perfil de cada mascota conserva los suyos, plegados).
+    { etiqueta: t('documentos.titulo'), ruta: '/cuenta/documentos' as const, icono: 'documento' as const },
     { etiqueta: t('cuenta.preferencias'), ruta: '/cuenta/preferencias' as const, icono: 'preferencias' as const },
     { etiqueta: t('cuenta.pagos'), ruta: '/cuenta/pagos' as const, icono: 'pagos' as const },
     { etiqueta: t('cuenta.ayuda'), ruta: '/cuenta/ayuda' as const, icono: 'ayuda' as const },

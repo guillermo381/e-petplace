@@ -971,6 +971,18 @@ export const clienteEn = {
     momentoHoras: '{{n}} h ago',
     momentoAyer: 'Yesterday',
   },
+  // S89-D order 7 — the papers' home (see es.ts).
+  documentos: {
+    titulo: 'Documents',
+    ley: "Your family's papers, all in one place.",
+    nombreCarnetVacunas: 'Vaccine card',
+    nombreHistoriaClinica: 'Medical history',
+    descargar: 'Download PDF',
+    vacioTitulo: 'No papers yet',
+    vacioDetalle: "Once you add a pet, their documents will live here.",
+    errorTitulo: "We couldn't load your documents",
+    errorDetalle: 'Check your connection and try again.',
+  },
   cuenta: {
     titulo: 'Your account',
     // S74 — temporary gate entry (dies with the founder's signature, Ley 37)
