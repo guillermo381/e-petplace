@@ -70,6 +70,7 @@ import {
   resolverUrlFoto,
   urlDocumento,
   type ItemTimeline,
+  type TipoDocumento,
   type PaseoConTrack,
   type PerfilMascota,
   type SenalesHogarMascota,
@@ -243,9 +244,19 @@ export default function PerfilDeMascota() {
   // §3 grooming (S60): talla y pelaje — declarados una vez, EDITABLES
   // siempre desde acá (la otra mitad del patrón P19).
   const [tallaHojaAbierta, setTallaHojaAbierta] = useState(false);
-  // S89 orden 8 ⑤ — el papel del producto
-  const [bajandoCarnet, setBajandoCarnet] = useState(false);
+  // S89 órdenes 8⑤/10① — los papeles del producto
+  const [bajandoDoc, setBajandoDoc] = useState<TipoDocumento | null>(null);
   const [fallaCarnet, setFallaCarnet] = useState<string | null>(null);
+  /** UN camino para los dos papeles: el token lo emite el server con el
+   *  mismo gate del expediente; acá solo se abre lo que devuelve. */
+  const bajarDocumento = async (tipo: TipoDocumento) => {
+    setFallaCarnet(null);
+    setBajandoDoc(tipo);
+    const r = await urlDocumento(mascotaId, tipo);
+    setBajandoDoc(null);
+    if (r.ok) await Linking.openURL(r.data);
+    else setFallaCarnet(r.mensaje);
+  };
   // Vitales (S53-B2c): paseos con track REAL → cálculo puro en domain.
   const [vitales, setVitales] = useState<VitalesPaseos | 'cargando' | 'error'>('cargando');
   const [indiceAbierto, setIndiceAbierto] = useState<'salud' | 'descanso' | null>(null);
@@ -953,36 +964,41 @@ export default function PerfilDeMascota() {
                   </CantoCurva>
                 </Pressable>
 
-                {/* S89 orden 8 ⑤ — EL PAPEL DEL PRODUCTO. Acción SIN caja
-                    (Ley 19.7: la primaria de la sección es el resumen que
-                    navega; esto EJECUTA y baja a label). El token de un
-                    solo uso lo emite el server: el JWT jamás va en una URL. */}
-                <View style={{ marginTop: spacing[3] }}>
-                  <Boton
-                    etiqueta={t('perfil.descargarCarnet')}
-                    variante="sinCaja"
-                    bloque
-                    cargando={bajandoCarnet}
-                    onPress={() => {
-                      void (async () => {
-                        setFallaCarnet(null);
-                        setBajandoCarnet(true);
-                        const r = await urlDocumento(mascota.id);
-                        setBajandoCarnet(false);
-                        if (r.ok) await Linking.openURL(r.data);
-                        else setFallaCarnet(r.mensaje);
-                      })();
-                    }}
-                  />
-                  {/* Ley 13: el fallo DICE que es fallo, jamás silencio */}
-                  {fallaCarnet !== null ? (
-                    <View style={{ paddingTop: spacing[2] }}>
-                      <Texto variante="dato" color="danger">{fallaCarnet}</Texto>
-                    </View>
-                  ) : null}
-                </View>
               </>
             )}
+          </View>
+        </View>
+
+        {/* ── S89 órdenes 8⑤/10① · LOS PAPELES DEL PRODUCTO ──────────────
+            Los documentos viven JUNTOS: un solo lugar donde la familia sabe
+            que están sus papeles. El botón del carnet salió de la sección
+            Vacunas a propósito — ahí competía con "Ver el carnet completo"
+            (Chanel: un gesto por sección).
+            Cada papel se emite con un token de UN SOLO USO: el JWT jamás
+            viaja en una URL, y un link reenviado ya no sirve. */}
+        <View style={{ marginTop: spacing[8] }}>
+          <RotuloSeccion titulo={t('perfil.documentos')} cuenta={null} />
+          <View style={{ paddingHorizontal: spacing[5] }}>
+            <Boton
+              etiqueta={t('perfil.descargarCarnet')}
+              variante="sinCaja"
+              bloque
+              cargando={bajandoDoc === 'carnet_vacunas'}
+              onPress={() => { void bajarDocumento('carnet_vacunas'); }}
+            />
+            <Boton
+              etiqueta={t('perfil.descargarHistoria')}
+              variante="sinCaja"
+              bloque
+              cargando={bajandoDoc === 'historia_clinica'}
+              onPress={() => { void bajarDocumento('historia_clinica'); }}
+            />
+            {/* Ley 13: el fallo DICE que es fallo, jamás silencio */}
+            {fallaCarnet !== null ? (
+              <View style={{ paddingTop: spacing[2] }}>
+                <Texto variante="dato" color="danger">{fallaCarnet}</Texto>
+              </View>
+            ) : null}
           </View>
         </View>
 

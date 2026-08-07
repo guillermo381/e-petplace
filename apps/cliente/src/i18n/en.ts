@@ -247,6 +247,8 @@ export const clienteEn = {
     verCarnetCompleto: 'See the full card',
     // S89 order 8 ⑤ — the product's paper (real download)
     descargarCarnet: 'Download the card',
+    descargarHistoria: 'Download the medical record',
+    documentos: 'Documents',
     descargarCarnetFalla: "We couldn't prepare the card. Please try again.",
     vacunasResumenUna: '1 vaccine on their card',
     vacunasResumen: '{{n}} vaccines on their card',

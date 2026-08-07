@@ -5,7 +5,8 @@
 // documento con ese token. La Edge Function lo valida y lo QUEMA en el mismo
 // acto — un link reenviado a un tercero ya no sirve.
 //
-// v1: `carnet_vacunas`. Historia clínica y certificados heredan el molde.
+// v1: `carnet_vacunas` (S89 orden 8⑤) + `historia_clinica` (orden 10①).
+// Los certificados heredan el mismo molde cuando toquen.
 
 import { getClient, uidActual } from '../client';
 import type { ResultadoWrapper } from '../resultado';
@@ -24,7 +25,13 @@ function falla(codigo: CodigoDocumento): Falla {
   return { ok: false, codigo, mensaje: MENSAJES[codigo] };
 }
 
-export type TipoDocumento = 'carnet_vacunas';
+export type TipoDocumento = 'carnet_vacunas' | 'historia_clinica';
+
+/** Cada papel tiene su función; el token es del tipo que se pidió. */
+const FUNCION: Record<TipoDocumento, string> = {
+  carnet_vacunas: 'documento-carnet',
+  historia_clinica: 'documento-historia-clinica',
+};
 
 /** Devuelve la URL LISTA PARA ABRIR del documento (token de un solo uso
  *  adentro). Quien la reciba después de usada, recibe un rebote — por
@@ -51,5 +58,5 @@ export async function urlDocumento(
 
   const base = process.env.EXPO_PUBLIC_SUPABASE_URL;
   if (typeof base !== 'string' || base.length === 0) return falla('error_desconocido');
-  return { ok: true, data: `${base}/functions/v1/documento-carnet?t=${token}` };
+  return { ok: true, data: `${base}/functions/v1/${FUNCION[tipo]}?t=${token}` };
 }
