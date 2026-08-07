@@ -760,3 +760,66 @@ llegó nada.
 
 > ### **EL MOTOR ENTERO CONSTRUIDO, GATEADO Y VIVO — Y EL AVISO MÁS OBVIO DEL OFICIO NO EXISTE, PORQUE NADIE TOCA EL TIMBRE.**
 > **No falta voz. No falta canal. Falta el PRODUCTOR.** (D-673, encabeza S89.)
+
+---
+
+# S89 — LO QUE ESTA SESIÓN DEJÓ EN ESTE MODELO
+
+> **Estado al 7-ago-2026, medido contra el objeto al cerrar.**
+
+## ① LA VARA MUTÓ — el RÉGIMEN DE PRUEBAS (firma founder)
+
+**MUERE:** «el primer envío real de cada tipo lleva el ojo del founder».
+**RIGE:** un tipo puede estar **abierto** si tiene **voz firmada + productor
+real + kill switch vivo**. Los avisos se revelan EN EL USO; un texto
+imperfecto se corrige cuando aparece, no antes. *El ojo del founder firma
+DISEÑO en sesiones de lote, no envíos.*
+
+**La red ya no es la sombra: es el freno de mano** (kill switch por alcance +
+techo duro). Y el techo **se ejerció de verdad** en la primera tanda: dos
+muestras quedaron `diferida` al tocar el límite de `operacion`. *Un techo que
+nunca corta no es un techo.*
+
+**Quedan en sombra SOLO** los tipos **sin productor** (avisarían mentiras) y
+los que toquen **plata real de terceros**.
+
+## ② LA SEMÁNTICA DE LA VISITA — la huella mide LO NUEVO
+
+**Letra founder:** la campana registra la **última visita** y la huella
+pregunta si hay algo **posterior** a ella. **Entrar a `/avisos` deposita la
+visita. El estado leído POR AVISO no cambia** — *leído y visto son cosas
+distintas, y la campana distingue las dos.*
+
+**La visita lleva el eje APP** (`notificacion_campana_visita(user_id, app)`):
+visitar la campana del cliente **no** apaga la huella del prestador. Las dos
+RPCs (`registrar_visita_campana(app)` · `hay_novedades(app)`) son la única
+puerta; `hay_avisos_sin_leer` queda **deprecada viva** — los bundles
+publicados la llaman, y muere cuando ninguno la consulte (P5 del censo lo
+dirá).
+
+## ③ EL CANAL PUSH — su estado REAL, sin adornos
+
+| pieza | estado al cierre |
+|---|---|
+| binario | **FCM horneado y verificado** en las dos APKs (`google_app_id` + receptor `MESSAGING_EVENT` + ícono y color de notificación) |
+| invitación | **construida y aceptada** (lámina firmada; cliente) — el prestador la espera (D-680) |
+| token | **`push_tokens` = 1**: el aparato registró su token por el camino real, vía `registrar_push_token` (idempotente; un token que cambia de dueño se reasigna) |
+| **transporte** | **NO CONSTRUIDO** — nada envía a FCM todavía |
+| **`transporte_vivo`** | **`false`, sin tocar.** El flip es el ÚLTIMO acto: encenderlo sin transporte haría que el motor entregue a un tren que no existe, **sin fallar y sin rastro rojo** (la ley de secuencia de S88 sigue rigiendo) |
+
+> **El gate del primer push real NO ocurrió: el teléfono no vibró.** Falta el
+> vagón del transporte; con él, el flip es un UPDATE de una fila.
+
+## ④ LA LEY DEL VOCABULARIO, verificada en las dos casas
+
+**«Push» jamás en superficie** (§7). Barrido por grep en los dos
+diccionarios: **cero ocurrencias en valores de cara al usuario** — los hits
+son comentarios que citan la propia ley.
+
+## ⑤ EL CORREO — transporte vivo y con cara
+
+Apex `epetplace.com` **verificado**, remitente firmado **`hola@epetplace.com`**,
+`transporte_vivo = true`, **31 entregas hoy**. La plantilla consume la espec
+de B: isotipo hosted sin tracking con wordmark de texto como fallback, **la
+casa heredada entera** (tapiz + CTA + link por audiencia), y **`lang` según
+el idioma del destinatario**.

@@ -8979,3 +8979,105 @@ build nativa y viaja con cualquier otra deuda de binario que se acumule
 > **☠️ MUERTE:** el launcher del prestador dice «ePetPlace CARE».
 
 **Origen: S89-A orden 17 (firma posterior al lanzamiento de las builds).**
+
+---
+
+#### D-679 — 🟠 EL TIPO `cita_iniciada` NO EXISTE: el dueño no sabe que la atención empezó
+
+**Del último barrido del founder (S89, 7-ago).** El motor **inicia** la
+atención (`iniciar_atencion_paseo` · `_grooming` · `_adiestramiento` ·
+`iniciar_atencion_cita`) y el dueño **no se entera por ningún canal**: el
+tipo no está en el catálogo, así que no hay nada que sacar de sombra.
+
+*Es hermano de D-673 en su forma —falta el HECHO, no la voz— pero un piso más
+arriba: acá falta hasta el tipo.* **Lo que sí existe** es la superficie EN
+VIVO del dueño (S59), o sea el destino ya está construido: el aviso llevaría
+a una pantalla que ya sabe contar el paseo en curso.
+
+**Lo que hay que hacer:** el tipo en `cat_notificacion_tipos` (audiencia
+`cliente`, categoría `operacion`) · **su voz A FIRMA** · el productor en las
+cuatro puertas de inicio · y su par mirando la sombra real (L-207).
+
+> **☠️ DISPARO: con la próxima tanda de voces a firma.**
+> **☠️ MUERTE:** el dueño recibe el aviso cuando la atención de su mascota
+> empieza de verdad.
+
+**Origen: S89 (barrido del founder al cierre).**
+
+---
+
+#### D-680 — 🟠 LA INVITACIÓN DE AVISOS SOLO EXISTE EN EL CLIENTE
+
+**La pieza `InvitacionAvisos` (lámina firmada) se construyó y montó en el
+CLIENTE** (S89-A, tren de push). **El prestador no la tiene** — y su casa
+recibe avisos que le importan tanto o más: la reserva que le cae, el registro
+que se completó.
+
+**Es copia con una diferencia declarada, no construcción nueva:** la pieza es
+la misma; cambian el punto de montaje (la primera pantalla con sesión de su
+casa) y el acento de su tema. Las voces ya están firmadas en la lámina —
+**no vuelven a firmarse por cambiar de casa**.
+
+> **☠️ DISPARO: el cierre del tren de push** (va en el mismo vagón que el
+> transporte). **☠️ MUERTE:** el titular de un negocio recibe la invitación
+> en su primer arranque y su token viaja al motor.
+
+**Origen: S89 (barrido del founder al cierre).**
+
+---
+
+#### D-681 — 🟡 LA PASADA DE DISEÑO SOBRE LOS PDFs — la espec de B, entera
+
+**Los dos papeles vivos salieron en un día y se ven dignos, pero la espec de
+B (`2026-08-06-s89b-ESPEC-cara-documentos.md`) tiene MÁS de lo que se cableó.**
+Lo aplicado hoy: tinta · el filete magenta como único color · la banda de
+emisor · procedencia por fila · B/N-safe. **Lo que la espec pide y todavía no
+está**, sin inventar cuál importa más: la revisión completa de jerarquía,
+aire y tipografía sobre papel de impresión, con el ojo del founder sobre el
+papel REAL —no sobre una demo HTML—, porque *un papel se juzga impreso*.
+
+**Cruza con D-677** (la marca de agua, que espera el asset): conviene que las
+dos entren en la misma pasada — abrir el PDF dos veces para dos retoques es
+pagar dos veces el mismo gate.
+
+> **☠️ DISPARO: junto con la receta** (el tercer papel; ahí el molde se toca
+> igual). **☠️ MUERTE:** el founder mira los tres papeles impresos y no pide
+> nada más.
+
+**Origen: S89 (barrido del founder al cierre).**
+
+---
+
+#### D-682 — 🟡 LA UI DE DOCUMENTOS: la tarjeta del perfil y el «>» del hogar
+
+**Enmienda de forma del founder sobre las superficies publicadas** (S89, las
+de D): en el **perfil de la mascota**, la sección de documentos pide
+**tarjeta + chevron** (la anatomía de la casa para lo que despliega); en
+**Documentos del hogar**, las filas piden su **«>»**.
+
+*Es acabado sobre algo que YA FUNCIONA y ya está en el teléfono* — por eso es
+🟡 y no bloquea: los papeles se descargan hoy.
+
+> **☠️ DISPARO: la próxima tanda de UI del cliente.**
+> **☠️ MUERTE:** las dos superficies usan la anatomía firmada de la casa.
+
+**Origen: S89 (barrido del founder sobre el bundle publicado).**
+
+---
+
+#### D-683 — ⚪ AGRUPAR LOS PAPELES POR CATEGORÍA — con disparo por NÚMERO
+
+**Letra del founder con su umbral firmado: cuando los papeles lleguen a
+OCHO**, la lista plana deja de servir y se agrupan por categoría (salud ·
+certificados · administrativos…).
+
+**Por qué el disparo es un número y no una fecha:** hoy son **dos** (carnet ·
+historia clínica) y agrupar dos papeles es inventar una jerarquía que nadie
+necesita. *Con ocho, la lista plana es el problema; con dos, la agrupación lo
+sería.* **El número decide, no el gusto** — y por eso queda escrito acá en vez
+de discutirse cada vez que nace un papel.
+
+> **☠️ DISPARO: el papel número 8.**
+> **☠️ MUERTE:** los papeles se leen por categoría y nadie busca de más.
+
+**Origen: S89 (barrido del founder al cierre, con su umbral).**
