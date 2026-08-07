@@ -2222,4 +2222,38 @@ export const prestadorEn = {
     resenasTitulo: 'What families say about you',
     resenasCuerpo: 'When a family leaves their first review, it will live here.',
   },
+  // ── S90-D · THE HEALTH CERTIFICATE ────────────────────── LOTE S90, GATE
+  // PENDIENTE. Same rule as the Spanish: the voice names what the
+  // PROFESSIONAL does, never what the system concludes.
+  certificado: {
+    titulo: 'Health certificate',
+    limiteTitulo: 'What this document is — and isn’t',
+    limiteDetalle:
+      'It is a record of a clinical examination that you issue, under your professional responsibility. It is NOT the official movement certificate: that one is issued by the health authority (in Ecuador, Agrocalidad). The document says so in print.',
+    faltaMatriculaTitulo: 'Your professional licence is missing',
+    faltaMatriculaDetalle:
+      'A certificate is signed by a person with a licence, not by a business. Add it to your team profile and come back: without it, the document would not say who signed.',
+    faltaMatriculaCorto: 'Your professional licence is missing.',
+    alcanceLabel: 'What are you issuing it for?',
+    alcance_viaje: 'Travel',
+    alcance_hospedaje: 'Boarding',
+    alcance_guarderia: 'Daycare',
+    alcance_constancia: 'Record of care',
+    memorialDetalle:
+      'For {{nombre}} only a record of care can be issued: travel, boarding and daycare certify something that is going to happen.',
+    declaracionLabel: 'Your statement',
+    declaracionPlaceholder: 'What you examined and what you conclude, in your own words.',
+    declaracionAyuda: 'This is printed exactly as written, with your name and licence below it.',
+    faltaAlcance: 'Say what you are issuing it for.',
+    faltaDeclaracion: 'Your statement is missing.',
+    emitir: 'Issue and open the certificate',
+    emitidosTitulo: '{{nombre}}’s certificates',
+    emitidoPor: '{{nombre}} · licence {{matricula}}',
+    abrir: 'Open',
+    sinPermisoTitulo: 'Issuing a certificate is a clinical act',
+    sinPermisoDetalle:
+      'It is issued by whoever provides care. Your role at this business does not include the clinical side.',
+    entradaTitulo: 'Issue a health certificate',
+    entradaDetalle: 'A record of clinical examination, with your signature.',
+  },
 } as const satisfies Espejo<typeof prestadorEs>;

@@ -8962,6 +8962,17 @@ color, y **jamás porta información**: es cariño, no dato.
 
 **Origen: S89-A (orden 14 ⑤, letra del founder al ver los dos papeles).**
 
+> **➕ S90-A — CONSTRUIDA, gate impreso PENDIENTE.** La marca de agua vive en
+> la plantilla compartida `supabase/functions/_shared/papel.ts` y sale en los
+> CUATRO papeles (carnet · historia clínica · receta · ficha de identidad):
+> el isotipo grande al centro, EN TINTA al 6%, jamás portando información.
+> **Decisión de motor, medida y declarada:** el asset PNG @2x hosteado es el
+> isotipo EN GRADIENTE a 128×88 px — en color contradice la firma («en tinta
+> con opacidad») y a ese tamaño pixela sobre un A4; el MISMO isotipo se
+> dibuja del path oficial del Manual de Marca (la fuente de
+> `packages/ui/src/brand/Isotipo.tsx`), vectorial. **La muerte la firma el
+> founder con el papel impreso en la mano — no antes.**
+
 ---
 
 #### D-678 — ⚪ EL LAUNCHER DEL PRESTADOR DICE «Pro» Y LA FIRMA ES «CARE»
@@ -9045,6 +9056,16 @@ pagar dos veces el mismo gate.
 > nada más.
 
 **Origen: S89 (barrido del founder al cierre).**
+
+> **➕ S90-A — LA PASADA CORRIÓ, gate impreso PENDIENTE.** El molde duplicado
+> murió: la cara entera vive en `supabase/functions/_shared/papel.ts` y los
+> cuatro papeles la consumen. Aplicado contra la espec de B: título 16/600
+> (era 24) · rótulos 9/600 en mayúsculas tinta .65 · cuerpo 10.5/15 ·
+> metadata y pie 8.5 · márgenes 20 mm · dato exacto en mono · dos fechas ·
+> separación solo por hairline. **Declarado sin hacer:** DM Sans no se
+> embebió (la espec lo deja como decisión abierta — Helvetica «imprime
+> digno»). **La muerte es del founder, sobre papel REAL: el gate de los
+> cinco papeles es UNO y es impreso.**
 
 ---
 

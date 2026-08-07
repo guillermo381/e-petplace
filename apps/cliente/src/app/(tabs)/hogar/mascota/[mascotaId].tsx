@@ -987,24 +987,34 @@ export default function PerfilDeMascota() {
             escalaban — con receta y certificados serían cuatro tapices
             apilados en el perfil. La lista sale del catálogo DERIVADO
             (`lib/papeles.ts`), jamás escrita acá. */}
-        <View style={{ marginTop: spacing[8] }}>
-          <Pressable
-            onPress={() => setDocsAbiertos((v) => !v)}
-            accessibilityRole="button"
-            accessibilityState={{ expanded: docsAbiertos }}
-            accessibilityLabel={t('perfil.documentos')}
-          >
-            <RotuloSeccion
+        {/* S90-C · ENMIENDA DE FORMA DEL FOUNDER: TARJETA + CHEVRON.
+            La sección DESPLIEGA, así que viste la anatomía de la casa
+            para lo que despliega — `CeldaNavegacion` con `direccion`
+            (E14: ⌄ revela · ⌃ pliega). Esa prop nació en S83-B12
+            declarando su condición de muerte del clon: *«la anatomía
+            local se retira y consume esta prop»*. Esto es esa muerte —
+            muere el `Pressable` + `RotuloSeccion` que hacía de
+            encabezado desplegable a mano.
+            UNA sola Tarjeta, no dos (precedente medido en
+            `perfil-piezas.tsx`, S89-D): `elevacion="reposo"` es una
+            SOMBRA, y dos sombras pegadas dibujan un borde donde no hay
+            frontera — el contenido de una sección es su encabezado
+            desplegado, no otra cosa.
+            CHANEL (Ley 16): se fue el CONTADOR de papeles. Cerrado no
+            es accionable, y abierto repite lo que las filas ya dicen —
+            era el elemento haciendo doble turno (Ley 17.6). */}
+        <View style={{ marginTop: spacing[8], paddingHorizontal: spacing[5] }}>
+          <Tarjeta relleno="ninguno" elevacion="reposo">
+            <CeldaNavegacion
               titulo={t('perfil.documentos')}
-              cuenta={String(PAPELES_DE_MASCOTA.length)}
+              registro="tinta"
+              direccion={docsAbiertos ? 'arriba' : 'abajo'}
+              onPress={() => setDocsAbiertos((v) => !v)}
             />
-          </Pressable>
-          <View style={{ paddingHorizontal: spacing[5] }}>
-            {docsAbiertos ? (
-              <Tarjeta relleno="ninguno" elevacion="reposo">
-                {PAPELES_DE_MASCOTA.map((papel, i) => (
+            {docsAbiertos
+              ? PAPELES_DE_MASCOTA.map((papel) => (
                   <View key={papel.tipo}>
-                    {i > 0 ? <Separador /> : null}
+                    <Separador />
                     <FilaDocumento
                       icono={papel.icono}
                       nombre={t(`documentos.nombre${papel.claveVoz}`)}
@@ -1015,16 +1025,15 @@ export default function PerfilDeMascota() {
                       }}
                     />
                   </View>
-                ))}
-              </Tarjeta>
-            ) : null}
-            {/* Ley 13: el fallo DICE que es fallo, jamás silencio */}
-            {fallaCarnet !== null ? (
-              <View style={{ paddingTop: spacing[2] }}>
-                <Texto variante="dato" color="danger">{fallaCarnet}</Texto>
-              </View>
-            ) : null}
-          </View>
+                ))
+              : null}
+          </Tarjeta>
+          {/* Ley 13: el fallo DICE que es fallo, jamás silencio */}
+          {fallaCarnet !== null ? (
+            <View style={{ paddingTop: spacing[2] }}>
+              <Texto variante="dato" color="danger">{fallaCarnet}</Texto>
+            </View>
+          ) : null}
         </View>
 
         {/* ── ⑥ SU HISTORIA — dentro de la ficha lleva UN SOLO EJE: el de

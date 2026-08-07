@@ -1061,6 +1061,9 @@ export const clienteEs = {
     ley: 'Los papeles de tu familia, todos acá.',
     nombreCarnetVacunas: 'Carnet de vacunas',
     nombreHistoriaClinica: 'Historia clínica',
+    // S90-A orden 5 — voces FIRMADAS por el founder (llegaron con la orden).
+    nombreReceta: 'Receta',
+    nombreFichaIdentidad: 'Ficha de identidad',
     /** El acto, bajo el nombre del papel: sostiene el affordance hasta
      *  que exista el glifo de descarga (pedido a B — Ley 12: no se
      *  presta un glifo que significa otra cosa). */

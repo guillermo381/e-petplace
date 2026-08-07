@@ -29,6 +29,7 @@ import {
   Boton,
   Campo,
   Celda,
+  CeldaNavegacion,
   Encabezado,
   EsperaDeMarca,
   EstadoVacio,
@@ -784,6 +785,29 @@ export default function ConsultaVeterinaria() {
                   <Texto variante="seccion">{t('consulta.proximoTitulo')}</Texto>
                   <Texto variante="apoyo">{t('consulta.proximoDetalle', { control: nota.proximoControl })}</Texto>
                 </View>
+              </Tarjeta>
+            ) : null}
+            {/* S90-D · EL CERTIFICADO, en el momento en que tiene sentido:
+                la consulta ya sedimentó, el examen acaba de ocurrir y el vet
+                todavía tiene el caso fresco. Es una SEGUNDA acción, no la
+                primaria: la mayoría de las consultas terminan sin papel, y
+                ponerlo arriba insinuaría que falta emitir algo.
+                Llega hasta acá quien ya pasó el gate clínico —esta pantalla
+                es el Durante— y la de emisión vuelve a verificarlo igual. */}
+            {mascotaId ? (
+              <Tarjeta elevacion="reposo" relleno="ninguno">
+                <CeldaNavegacion
+                  icono="documento"
+                  registro="aa"
+                  titulo={t('certificado.entradaTitulo')}
+                  detalle={t('certificado.entradaDetalle')}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/veterinaria/certificado/[citaId]',
+                      params: { citaId, mascotaId },
+                    })
+                  }
+                />
               </Tarjeta>
             ) : null}
             <Boton variante="primario" bloque etiqueta={t('consulta.cerrar')} onPress={() => router.back()} />
