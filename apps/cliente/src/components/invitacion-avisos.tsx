@@ -6,6 +6,22 @@
  * diálogo del sistema, no hay segunda oportunidad dentro de la app. La
  * invitación de la casa protege ese tiro: explica antes de pedir.
  *
+ * ⭐ CURA S90-B (territorio cruzado, declarado — la escribió la pista B,
+ * dueña de `packages/ui` y del lint, y va coordinada con A). Son DOS
+ * guardas de §2 que esta pieza NO cumplía, halladas al portarla al
+ * prestador — la misma pieza al revés:
+ *  ① LA SONDA. Hacía `import * as Notifications` EN EL TOPE, y eso evalúa
+ *     la cadena entera del paquete en el arranque sobre un APK que puede
+ *     no traer el nativo — el modo de falla exacto que L-190 midió como
+ *     causa del crash del founder, y que `permiso-push` v2 existe para no
+ *     repetir. Ahora el módulo se pide por la sonda: sin nativo, la
+ *     invitación NO EXISTE (§2) en vez de aparecer rota.
+ *  ② EL PERMISO YA DENEGADO. La pieza invitaba igual — y el diálogo del
+ *     SO con permiso denegado no se abre: devuelve `denied` en el acto.
+ *     Era MANDAR A UN MURO, que es literalmente lo que §2 prohíbe. Ahora
+ *     no se invita; el camino honesto vive en Preferencias con
+ *     `notifPermisoNegado`, voz ya firmada.
+ *
  * LO QUE LA LÁMINA EXIGE Y ACÁ SE CUMPLE:
  *  · «Ahora no» SIEMPRE visible, con la anatomía del secundario (jamás una
  *    ✕ chiquita, jamás pre-marcado nada) — anti-dark-patterns exigible.
@@ -19,10 +35,11 @@
 import { useEffect, useState } from 'react';
 import { Platform, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Notifications from 'expo-notifications';
 import * as Updates from 'expo-updates';
 import { Boton, Hoja, Texto, spacing } from '@epetplace/ui';
 import { registrarTokenDeAparato } from '@epetplace/api';
+
+import { moduloAvisosSiHayNativo } from '@/lib/permiso-push';
 import { useTraduccion } from '@/i18n';
 
 const CLAVE = 'epetplace.avisos.invitacion';
@@ -44,9 +61,11 @@ async function leerMarca(): Promise<Marca> {
  *  un aviso que no llega — sin ruido para nadie. */
 export async function sincronizarTokenSiHayPermiso(): Promise<void> {
   try {
-    const { status } = await Notifications.getPermissionsAsync();
+    const modulo = moduloAvisosSiHayNativo();
+    if (modulo === null) return;
+    const { status } = await modulo.getPermissionsAsync();
     if (status !== 'granted') return;
-    const t = await Notifications.getDevicePushTokenAsync();
+    const t = await modulo.getDevicePushTokenAsync();
     if (typeof t?.data === 'string' && t.data.length > 0) {
       await registrarTokenDeAparato(t.data, Platform.OS === 'ios' ? 'ios' : 'android');
     }
@@ -63,13 +82,23 @@ export function InvitacionAvisos() {
   useEffect(() => {
     let vivo = true;
     void (async () => {
+      // §2 — LA SONDA PRIMERO: sin el nativo, la invitación NO EXISTE.
+      const modulo = moduloAvisosSiHayNativo();
+      if (modulo === null) return;
+
       const m = await leerMarca();
       if (!vivo) return;
       setMarca(m);
 
+      const { status } = await modulo
+        .getPermissionsAsync()
+        .catch(() => ({ status: 'undetermined' }));
+
       // El permiso ya concedido: nada que invitar — solo mantener el token.
-      const { status } = await Notifications.getPermissionsAsync().catch(() => ({ status: 'undetermined' as const }));
       if (status === 'granted') { await sincronizarTokenSiHayPermiso(); return; }
+      // §2 — DENEGADO a nivel SO: el único tiro ya se gastó. Invitar acá
+      // sería mandar a un muro; el camino vive en Preferencias.
+      if (status === 'denied') return;
 
       // Las guardas de la lámina, en orden:
       if (m.decidido) return;                     // decidió con la puerta grande
@@ -96,8 +125,10 @@ export function InvitacionAvisos() {
   const aceptar = async () => {
     setAbierta(false);
     await guardar({});
+    const modulo = moduloAvisosSiHayNativo();
+    if (modulo === null) return;
     // El único tiro del SO — y recién después de que la casa explicó.
-    const { status } = await Notifications.requestPermissionsAsync();
+    const { status } = await modulo.requestPermissionsAsync();
     if (status === 'granted') await sincronizarTokenSiHayPermiso();
     // Si deniega: la casa NO insiste. Preferencias lo dice con
     // `notifPermisoNegado`, voz ya firmada.
