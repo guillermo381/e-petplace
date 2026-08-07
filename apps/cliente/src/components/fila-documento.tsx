@@ -1,7 +1,7 @@
 /**
  * FILA DE DOCUMENTO — la anatomía firmada (S89-D orden 7, firma del
  * founder sobre capturas): **fila con el glifo del papel + su nombre +
- * el CTA de descarga. ☠️ MUERE EL BOTÓN TAPIZ** (los dos `Boton bloque`
+ * el acto de descarga. ☠️ MURIÓ EL BOTÓN TAPIZ** (los dos `Boton bloque`
  * que S89-A dejó en el perfil: un botón a ancho completo por papel no
  * escala — con receta y certificados serían cuatro tapices apilados).
  *
@@ -10,79 +10,71 @@
  * piezas manda promover a `packages/ui` con el consumidor de OTRA casa,
  * y el prestador no tiene esta fila.
  *
- * ⚠️ EL GLIFO DEL CTA NO EXISTE Y NO SE SUSTITUYE — pedido a B (76b).
- * Medido en el registry (6-ago): no hay `descargar`. El vecino más
- * cercano, `compartir` («la flecha que SALE de la bandeja»), significa
- * OTRA COSA, y prestarlo es la sustitución genérica que la **Ley 12**
- * prohíbe — el propio `Icono.tsx` registra tres frenos idénticos
- * (lápiz/compartir en r7, vacuna en r10, bitácora en r34).
- * **Mientras tanto el acto lo dice la VOZ** (`documentos.descargar` bajo
- * el nombre del papel): affordance honesto, jamás un glifo que miente.
- * `iconoCta` ya está cableado: el día que B entregue el glifo, se monta
- * en UNA línea y la voz de apoyo queda o se retira en su gate.
+ * ── S90-C · LA ENMIENDA DE FORMA DEL FOUNDER: LA FILA GANA SU «›» ──────
+ *
+ * **Y por eso esta pieza dejó de dibujar su propia anatomía: ahora
+ * CONSUME `CeldaNavegacion`.** No es refactor de gusto — es la única
+ * salida legal. El chevron de la casa vive en `chevron.ts`, que **no se
+ * exporta a propósito** y lo dice en su cabecera: *«una pantalla que
+ * necesite un chevron usa la PIEZA que lo porta, jamás el path suelto —
+ * que es el defecto que este archivo cierra»*. Dibujarlo acá habría sido
+ * la quinta copia del mismo trazo, que es exactamente lo que **L-175**
+ * prohíbe.
+ *
+ * **`direccion="derecha"` y no `abajo`, por E14:** abrir un papel LLEVA
+ * (se va del producto al PDF); no despliega nada en el lugar. La
+ * dirección codifica una verdad del contenido (Ley 18).
+ *
+ * ☠️ **MUERE `iconoCta`** (Ley 37: el slot no lo consumía NADIE — medido,
+ * cero callers). Nació como puente mientras no existía el glifo de
+ * descarga, y **el glifo hoy EXISTE**: B depositó `descargar` en el
+ * registry en S89. **Igual gana el chevron, y la razón es Chanel (Ley
+ * 16): el founder pidió «›», y una fila con glifo de papel + glifo de
+ * descarga + chevron son tres marcas para un solo acto.** Si el founder
+ * prefiere el glifo, es cambiar `direccion` por el `iconoCta` — pero es
+ * uno O el otro, jamás los dos.
+ *
+ * `registro="tinta"` conserva el tratamiento plano que el founder firmó
+ * en S89 (el glifo del papel no compite con el nombre); `'capa'` habría
+ * traído color de capa a una fila que nadie pidió recolorear.
  */
 
-import { Icono, Texto, spacing, useTheme, usePresionado } from '@epetplace/ui';
+import { CeldaNavegacion, opacity } from '@epetplace/ui';
 import type { IconoNombre } from '@epetplace/ui';
-import Animated from 'react-native-reanimated';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
 export function FilaDocumento({
   icono,
   nombre,
   apoyo,
   cargando,
-  iconoCta = null,
   onPress,
 }: {
   /** El glifo del PAPEL (el objeto), del catálogo derivado. */
   icono: IconoNombre;
   nombre: string;
-  /** La voz del acto — hoy sostiene el affordance que el glifo dará. */
+  /** La voz del acto, bajo el nombre del papel. */
   apoyo: string;
   cargando: boolean;
-  /** El CTA de descarga: null hasta que B entregue su glifo. */
-  iconoCta?: IconoNombre | null;
   onPress: () => void;
 }) {
-  const { theme } = useTheme();
-  const presion = usePresionado();
-
   return (
-    <Pressable
-      {...presion.handlers}
-      onPress={onPress}
-      disabled={cargando}
-      accessibilityRole="button"
-      /* El acto entero en el label: el lector no depende del glifo que
-         todavía no existe. */
-      accessibilityLabel={`${nombre} · ${apoyo}`}
-      accessibilityState={{ disabled: cargando }}
+    /* La descarga en vuelo: la fila se atenúa y deja de responder. El
+       `pointerEvents` es lo que de verdad frena el segundo toque —
+       apagar solo el `onPress` dejaría la fila reaccionando al pressed
+       de `CeldaNavegacion` y diría que algo pasa cuando no pasa nada. */
+    <View
+      style={{ opacity: cargando ? opacity.disabled : 1 }}
+      pointerEvents={cargando ? 'none' : 'auto'}
     >
-      <Animated.View
-        style={[
-          presion.estiloPresionado,
-          {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: spacing[4],
-            paddingVertical: spacing[4],
-            paddingHorizontal: spacing[5],
-            opacity: cargando ? 0.6 : 1,
-          },
-        ]}
-      >
-        <Icono nombre={icono} tamano={24} tinta={theme.text.secondary} />
-        <View style={{ flex: 1 }}>
-          <Texto variante="cuerpo">{nombre}</Texto>
-          <Texto variante="dato" color="secondary">
-            {apoyo}
-          </Texto>
-        </View>
-        {iconoCta !== null ? (
-          <Icono nombre={iconoCta} tamano={21} tinta={theme.accent.control} />
-        ) : null}
-      </Animated.View>
-    </Pressable>
+      <CeldaNavegacion
+        icono={icono}
+        titulo={nombre}
+        detalle={apoyo}
+        registro="tinta"
+        direccion="derecha"
+        onPress={onPress}
+      />
+    </View>
   );
 }
