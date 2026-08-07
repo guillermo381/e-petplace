@@ -10,16 +10,16 @@
  * piezas manda promover a `packages/ui` con el consumidor de OTRA casa,
  * y el prestador no tiene esta fila.
  *
- * ⚠️ EL GLIFO DEL CTA NO EXISTE Y NO SE SUSTITUYE — pedido a B (76b).
- * Medido en el registry (6-ago): no hay `descargar`. El vecino más
- * cercano, `compartir` («la flecha que SALE de la bandeja»), significa
- * OTRA COSA, y prestarlo es la sustitución genérica que la **Ley 12**
- * prohíbe — el propio `Icono.tsx` registra tres frenos idénticos
- * (lápiz/compartir en r7, vacuna en r10, bitácora en r34).
- * **Mientras tanto el acto lo dice la VOZ** (`documentos.descargar` bajo
- * el nombre del papel): affordance honesto, jamás un glifo que miente.
- * `iconoCta` ya está cableado: el día que B entregue el glifo, se monta
- * en UNA línea y la voz de apoyo queda o se retira en su gate.
+ * ✅ EL GLIFO DEL CTA — PEDIDO PAGADO EN EL DÍA (S89-B orden 9). Esta
+ * fila nació con `iconoCta` cableado y en `null` porque `descargar` NO
+ * existía, y prestarle `compartir` era la sustitución genérica que la
+ * **Ley 12** prohíbe (el propio `Icono.tsx` registra tres frenos
+ * idénticos: lápiz/compartir r7 · vacuna r10 · bitácora r34). B lo
+ * dibujó como hermano de `compartir` —flecha invertida, bandeja
+ * byte-idéntica— y hoy es el default.
+ * **La voz de apoyo QUEDA** («Descargar PDF»): el glifo dice el acto a
+ * quien mira, la voz a quien lee — y el gate por ícono a 21px sigue
+ * siendo de B, no de esta fila.
  */
 
 import { Icono, Texto, spacing, useTheme, usePresionado } from '@epetplace/ui';
@@ -32,7 +32,7 @@ export function FilaDocumento({
   nombre,
   apoyo,
   cargando,
-  iconoCta = null,
+  iconoCta = 'descargar',
   onPress,
 }: {
   /** El glifo del PAPEL (el objeto), del catálogo derivado. */
@@ -41,7 +41,9 @@ export function FilaDocumento({
   /** La voz del acto — hoy sostiene el affordance que el glifo dará. */
   apoyo: string;
   cargando: boolean;
-  /** El CTA de descarga: null hasta que B entregue su glifo. */
+  /** El CTA de descarga. Default: el glifo `descargar` que B entregó
+   *  (S89-B orden 9, pedido de esta lámina) — hermano exacto de
+   *  `compartir` con la flecha INVERTIDA y la bandeja byte-idéntica. */
   iconoCta?: IconoNombre | null;
   onPress: () => void;
 }) {
