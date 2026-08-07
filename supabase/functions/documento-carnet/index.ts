@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
   const { data: vacunas } = await supabase
     .from('evento_vacuna_aplicada')
     .select(
-      'nombre_vacuna, fecha_aplicada, fecha_proxima, lote, veterinario_nombre_externo, prestador_id, evento_id',
+      'nombre_vacuna, fecha_aplicada, fecha_proxima, lote, veterinario_nombre_externo, prestador_id, evento_id, archivo_url',
     )
     .eq('mascota_id', fila.mascota_id)
     .order('fecha_aplicada', { ascending: false });
@@ -149,6 +149,45 @@ Deno.serve(async (req) => {
   papel.pie(
     `Emitido por e-PetPlace (hola@epetplace.com) · folio ${fila.folio ?? '—'} · emisión ${fechaLarga(new Date().toISOString())} · último registro ${ultima ?? '—'} · ${filas.length} vacuna(s)`,
   );
+
+  // ── EL ANEXO: la foto del carnet escaneado (gate impreso ②, firma founder:
+  // ANEXA AL FINAL, en su propia página, con su rótulo). El porqué de la
+  // ubicación es letra firmada (MODELO_VETERINARIA §13): la imagen es
+  // EVIDENCIA DE PROCEDENCIA, no dato clínico verificado — pegada a las
+  // filas validadas haría que TODO el papel parezca respaldado por el
+  // original, y alguien va a llevarlo a una frontera.
+  const archivos = [...new Set((vacunas ?? []).map((v) => v.archivo_url).filter(Boolean))] as string[];
+  for (const ruta of archivos) {
+    const { data: blob } = await supabase.storage.from('mascotas').download(ruta);
+    if (!blob) continue; // un adjunto que no baja no rompe el papel: el anexo se omite
+    const imgBytes = new Uint8Array(await blob.arrayBuffer());
+    if (imgBytes.length < 8) continue;
+    const esPng = imgBytes[0] === 0x89 && imgBytes[1] === 0x50;
+    const esJpg = imgBytes[0] === 0xff && imgBytes[1] === 0xd8;
+    if (!esPng && !esJpg) continue;
+    try {
+      const img = esPng ? await papel.pdf.embedPng(imgBytes) : await papel.pdf.embedJpg(imgBytes);
+      papel.nuevaPagina();
+      // El rótulo FIRMADO, verbatim — preside la página del anexo.
+      papel.texto('ANEXO', MX, 9, { font: papel.f.sansBold, color: TINTA_65 });
+      papel.y -= 15;
+      papel.texto(
+        'Documento aportado por la familia — no verificado por e-PetPlace',
+        MX, 10.5, { font: papel.f.sansBold },
+      );
+      papel.y -= 16;
+      papel.hairline(papel.y + 6);
+      papel.y -= 10;
+      const maxW = 595.28 - MX * 2;
+      const maxH = papel.y - 60;
+      const esc = Math.min(maxW / img.width, maxH / img.height);
+      const w = img.width * esc;
+      const h = img.height * esc;
+      papel.page.drawImage(img, { x: (595.28 - w) / 2, y: papel.y - h, width: w, height: h });
+    } catch (_e) {
+      // una imagen que no embebe no rompe el papel
+    }
+  }
 
   const bytes = await papel.bytes();
   return new Response(bytes, {

@@ -57,10 +57,17 @@ export function fechaLarga(iso: string | null): string {
   return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`;
 }
 
-/** LA OPACIDAD DE LA MARCA DE AGUA — verificada en pantalla, NO en papel
- *  todavía (orden 9 ③): si en el gate impreso no se ve, subir este número es
- *  un ajuste de UNA línea, no un rediseño. Vive SOLO acá. */
+/** LA OPACIDAD DE LA MARCA DE AGUA — ✅ GATE IMPRESO PASADO (firma founder,
+ *  7-ago: «se ve bien en papel»). FIRMADA: no se toca. Vive SOLO acá. */
 export const OPACIDAD_MARCA_AGUA = 0.06;
+
+/** EL AIRE ENTRE EL FILETE Y EL TÍTULO — corrección ① del gate impreso
+ *  (letra founder: «debe haber espacio libre entre la línea magenta y la
+ *  letra, se ve feo pegado»). Vive SOLO acá, como la opacidad: el próximo
+ *  ajuste es una línea, no cuatro papeles. El certificado ya traía su aire
+ *  (el render de D midió el ascendente y colocó su filete con ~12pt libres)
+ *  y su cara no se toca. */
+export const AIRE_BAJO_FILETE = 10;
 
 /** LA MARCA DE AGUA (D-677, firma founder 7-ago): el isotipo GRANDE AL
  *  CENTRO, EN TINTA con opacidad — jamás en color (el matiz muere impreso) y
@@ -143,9 +150,11 @@ export class Papel {
    *  — la voz de máquina de la casa para el dato exacto. NULL honesto: una
    *  emisión anterior al folio no inventa uno. */
   cabecera(titulo: string, notas: string[], folio?: string | null): void {
+    // El filete sube AIRE_BAJO_FILETE por encima de las mayúsculas del
+    // título (cap de 16pt ≈ 12) — gate impreso ①: pegado se ve feo.
     this.page.drawLine({
-      start: { x: MX, y: this.y + 12 },
-      end: { x: A4[0] - MX, y: this.y + 12 },
+      start: { x: MX, y: this.y + 12 + AIRE_BAJO_FILETE },
+      end: { x: A4[0] - MX, y: this.y + 12 + AIRE_BAJO_FILETE },
       thickness: 2,
       color: MAGENTA,
     });
