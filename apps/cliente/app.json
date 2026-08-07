@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "cliente",
+    "name": "ePetPlace",
     "slug": "cliente",
     "version": "1.0.3",
     "orientation": "portrait",
@@ -13,10 +13,9 @@
     "android": {
       "package": "com.epetplace.cliente",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "monochromeImage": "./assets/images/android-icon-monochrome.png",
+        "backgroundColor": "#050508"
       },
       "predictiveBackGestureEnabled": false
     },
@@ -26,7 +25,13 @@
     },
     "plugins": [
       "expo-router",
-      "expo-notifications",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#8E1F68"
+        }
+      ],
       [
         "expo-splash-screen",
         {
