@@ -3877,6 +3877,44 @@ export type Database = {
           },
         ]
       }
+      documento_token: {
+        Row: {
+          created_at: string
+          expira_en: string
+          id: string
+          mascota_id: string
+          tipo: string
+          usado_en: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expira_en: string
+          id?: string
+          mascota_id: string
+          tipo: string
+          usado_en?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expira_en?: string
+          id?: string
+          mascota_id?: string
+          tipo?: string
+          usado_en?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documento_token_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       donaciones: {
         Row: {
           created_at: string | null
@@ -17330,6 +17368,10 @@ export type Database = {
       email_status_para_invitacion: {
         Args: { p_email: string }
         Returns: string
+      }
+      emitir_token_documento: {
+        Args: { p_mascota_id: string; p_tipo?: string }
+        Returns: Json
       }
       empleado_es_mostrador_o_gestion: {
         Args: { p_prestador_id: string }

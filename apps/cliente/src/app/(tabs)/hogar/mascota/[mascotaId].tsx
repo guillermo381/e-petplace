@@ -26,7 +26,7 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
-import { Platform, Pressable, ScrollView, Share, StatusBar, Text, View } from 'react-native';
+import { Linking, Platform, Pressable, ScrollView, Share, StatusBar, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
@@ -68,6 +68,7 @@ import {
   obtenerPaseosConTrack,
   obtenerPerfilMascota,
   resolverUrlFoto,
+  urlDocumento,
   type ItemTimeline,
   type PaseoConTrack,
   type PerfilMascota,
@@ -242,6 +243,9 @@ export default function PerfilDeMascota() {
   // §3 grooming (S60): talla y pelaje — declarados una vez, EDITABLES
   // siempre desde acá (la otra mitad del patrón P19).
   const [tallaHojaAbierta, setTallaHojaAbierta] = useState(false);
+  // S89 orden 8 ⑤ — el papel del producto
+  const [bajandoCarnet, setBajandoCarnet] = useState(false);
+  const [fallaCarnet, setFallaCarnet] = useState<string | null>(null);
   // Vitales (S53-B2c): paseos con track REAL → cálculo puro en domain.
   const [vitales, setVitales] = useState<VitalesPaseos | 'cargando' | 'error'>('cargando');
   const [indiceAbierto, setIndiceAbierto] = useState<'salud' | 'descanso' | null>(null);
@@ -948,6 +952,35 @@ export default function PerfilDeMascota() {
                     </View>
                   </CantoCurva>
                 </Pressable>
+
+                {/* S89 orden 8 ⑤ — EL PAPEL DEL PRODUCTO. Acción SIN caja
+                    (Ley 19.7: la primaria de la sección es el resumen que
+                    navega; esto EJECUTA y baja a label). El token de un
+                    solo uso lo emite el server: el JWT jamás va en una URL. */}
+                <View style={{ marginTop: spacing[3] }}>
+                  <Boton
+                    etiqueta={t('perfil.descargarCarnet')}
+                    variante="sinCaja"
+                    bloque
+                    cargando={bajandoCarnet}
+                    onPress={() => {
+                      void (async () => {
+                        setFallaCarnet(null);
+                        setBajandoCarnet(true);
+                        const r = await urlDocumento(mascota.id);
+                        setBajandoCarnet(false);
+                        if (r.ok) await Linking.openURL(r.data);
+                        else setFallaCarnet(r.mensaje);
+                      })();
+                    }}
+                  />
+                  {/* Ley 13: el fallo DICE que es fallo, jamás silencio */}
+                  {fallaCarnet !== null ? (
+                    <View style={{ paddingTop: spacing[2] }}>
+                      <Texto variante="dato" color="danger">{fallaCarnet}</Texto>
+                    </View>
+                  ) : null}
+                </View>
               </>
             )}
           </View>

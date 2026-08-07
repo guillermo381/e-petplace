@@ -67,7 +67,43 @@ type Datos = {
   mensaje?: string;
   codigo?: string;
   codigo_vigencia_min?: number | string;
+  // S89 orden 8 ④ — el detalle de los tipos de cita (los productores los
+  // portan como claves desde 20260806250000; sin ellas, cero bloque).
+  mascota_nombre?: string;
+  negocio?: string;
+  fecha?: string;
+  hora?: string;
 };
+
+/** El bloque de detalle de la cita — proporciones de la espec: etiqueta 13px
+ *  tinta.65, valor 16px tinta, LA HORA EN MONO (voz de máquina de la casa).
+ *  Solo se pinta con datos reales; jamás inventa una fila vacía. */
+function bloqueDetalle(d: Datos): string {
+  const filas: Array<[string, string, boolean]> = [];
+  if (d.mascota_nombre) filas.push(['Mascota', d.mascota_nombre, false]);
+  if (d.negocio) filas.push(['Con', d.negocio, false]);
+  if (d.fecha) filas.push(['Fecha', d.fecha, true]);
+  if (d.hora) filas.push(['Hora', d.hora, true]);
+  if (filas.length === 0) return '';
+  const filasHtml = filas
+    .map(
+      ([et, val, mono]) => `
+        <tr>
+          <td style="font-family:${SANS};font-size:13px;line-height:22px;color:${TINTA_65};padding-right:16px;white-space:nowrap;">${escaparHtml(et)}</td>
+          <td class="texto" style="font-family:${mono ? MONO : SANS};font-size:16px;line-height:22px;color:${TINTA};">${escaparHtml(val)}</td>
+        </tr>`,
+    )
+    .join('');
+  return `
+      <tr><td style="padding:16px 32px 0 32px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="caja-codigo" style="background:${TAPIZ};border:1px solid ${HAIRLINE};border-radius:10px;">
+          <tr><td style="padding:14px 18px;">
+            <table role="presentation" cellpadding="0" cellspacing="0">${filasHtml}
+            </table>
+          </td></tr>
+        </table>
+      </td></tr>`;
+}
 
 function plantillaHtml(d: Datos): string {
   const titulo = escaparHtml(d.titulo ?? 'Tienes una novedad en e-PetPlace');
@@ -122,6 +158,7 @@ function plantillaHtml(d: Datos): string {
   <tr><td style="padding:12px 32px 0 32px;">
     <p class="texto" style="font-family:${SANS};font-size:16px;line-height:24px;color:${TINTA};margin:0;">${mensaje}</p>
   </td></tr>
+  ${bloqueDetalle(d)}
   ${bloqueCodigo}
   <tr><td style="padding:28px 32px 24px 32px;">
     <p class="texto-pie" style="font-family:${SANS};font-size:13px;line-height:20px;color:${TINTA_65};margin:0;">
@@ -142,6 +179,13 @@ function plantillaTexto(d: Datos): string {
     '',
     d.mensaje ?? 'Abre la app para verla.',
   ];
+  const det = [
+    d.mascota_nombre && `Mascota: ${d.mascota_nombre}`,
+    d.negocio && `Con: ${d.negocio}`,
+    d.fecha && `Fecha: ${d.fecha}`,
+    d.hora && `Hora: ${d.hora}`,
+  ].filter(Boolean);
+  if (det.length) partes.push('', ...det as string[]);
   if (d.codigo) {
     partes.push('', `Código: ${agrupar(d.codigo)}`);
     if (d.codigo_vigencia_min) partes.push(`Vale por ${d.codigo_vigencia_min} minutos.`);

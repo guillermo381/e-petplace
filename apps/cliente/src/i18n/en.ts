@@ -245,6 +245,9 @@ export const clienteEn = {
     // r5 — mirror of es.ts (Espejo enforces parity).
     vacunas: 'Vaccines',
     verCarnetCompleto: 'See the full card',
+    // S89 order 8 ⑤ — the product's paper (real download)
+    descargarCarnet: 'Download the card',
+    descargarCarnetFalla: "We couldn't prepare the card. Please try again.",
     vacunasResumenUna: '1 vaccine on their card',
     vacunasResumen: '{{n}} vaccines on their card',
     hoySinRegistroLinea: 'No record yet: {{lista}}',

@@ -795,8 +795,19 @@ export default function Cuenta() {
               "update 6aab7106" corriendo el bundle embebido). El
               discriminador es isEmbeddedLaunch, no la nulidad (L-160). */}
           <Texto variante="dato">
+            {/* S89 orden 7: EL SELLO — id corto + canal + FECHA del update.
+                Verificar un bundle = leer este código; ningún diagnóstico de
+                OTA vuelve a empezar por «¿qué bundle corre?». */}
             {!Updates.isEmbeddedLaunch && Updates.updateId !== null
-              ? `update ${Updates.updateId.slice(0, 8)} · ${Updates.channel ?? 'sin canal'}`
+              ? `update ${Updates.updateId.slice(0, 8)} · ${Updates.channel ?? 'sin canal'}${
+                  Updates.createdAt
+                    ? ` · ${String(Updates.createdAt.getDate()).padStart(2, '0')}/${String(
+                        Updates.createdAt.getMonth() + 1,
+                      ).padStart(2, '0')} ${String(Updates.createdAt.getHours()).padStart(2, '0')}:${String(
+                        Updates.createdAt.getMinutes(),
+                      ).padStart(2, '0')}`
+                    : ''
+                }`
               : 'bundle embebido / dev'}
           </Texto>
 

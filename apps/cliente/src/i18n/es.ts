@@ -285,6 +285,9 @@ export const clienteEs = {
     // de tiempo de la historia.
     vacunas: 'Vacunas',
     verCarnetCompleto: 'Ver el carnet completo',
+    // S89 orden 8 ⑤ — el papel del producto (descarga real)
+    descargarCarnet: 'Descargar el carnet',
+    descargarCarnetFalla: 'No pudimos preparar el carnet. Prueba de nuevo.',
     vacunasResumenUna: '1 vacuna en su carnet',
     vacunasResumen: '{{n}} vacunas en su carnet',
     hoySinRegistroLinea: 'Sin registro todavía: {{lista}}',

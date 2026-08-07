@@ -84,6 +84,8 @@ export {
   type CodigoErrorOnboarding,
 } from './wrappers/onboarding';
 export { resolverUrlFoto, resolverUrlsFotos } from './wrappers/fotos';
+// S89-A orden 8 ⑤ — los papeles del producto (carnet de vacunas v1)
+export { urlDocumento, type TipoDocumento, type CodigoDocumento } from './wrappers/documentos';
 export {
   extraerVacunasDeCarnet,
   registrarVacunasDeCarnet,
