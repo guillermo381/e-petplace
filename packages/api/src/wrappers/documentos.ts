@@ -98,6 +98,52 @@ export async function urlDocumento(
   return { ok: true, data: `${base}/functions/v1/${fila.funcion}?t=${fila.token}` };
 }
 
+export interface ConsultaConReceta {
+  citaId: string;
+  fecha: string;
+  hora: string | null;
+  negocio: string | null;
+  profesional: string | null;
+  medicamentos: number;
+}
+
+/** Las consultas de una mascota que PUEDEN emitir receta (S90, lector de C
+ *  aplicado por A). El predicado es EL MISMO de `emitir_token_documento`:
+ *  elegir acá jamás rebota allá. El nombre del profesional y del negocio
+ *  salen de LAS MISMAS fuentes que la receta imprime — el selector y el
+ *  papel no pueden decir nombres distintos. */
+export async function obtenerConsultasConReceta(
+  mascotaId: string,
+): Promise<ResultadoWrapper<ConsultaConReceta[], CodigoDocumento>> {
+  if ((await uidActual()) === null) return falla('sin_sesion');
+
+  const { data, error } = await getClient().rpc('obtener_consultas_con_receta', {
+    p_mascota_id: mascotaId,
+  });
+
+  if (error) {
+    if (error.message.startsWith('no_access_to_mascota')) return falla('sin_acceso');
+    if (error.message.startsWith('auth_required')) return falla('sin_sesion');
+    return falla('error_desconocido');
+  }
+  if (!Array.isArray(data)) return falla('datos_inconsistentes');
+  const filas: ConsultaConReceta[] = [];
+  for (const f of data) {
+    if (typeof f?.cita_id !== 'string' || typeof f?.fecha !== 'string' || typeof f?.medicamentos !== 'number') {
+      return falla('datos_inconsistentes');
+    }
+    filas.push({
+      citaId: f.cita_id,
+      fecha: f.fecha,
+      hora: typeof f.hora === 'string' ? f.hora : null,
+      negocio: typeof f.negocio === 'string' ? f.negocio : null,
+      profesional: typeof f.profesional === 'string' ? f.profesional : null,
+      medicamentos: f.medicamentos,
+    });
+  }
+  return { ok: true, data: filas };
+}
+
 export interface PapelDelCatalogo {
   codigo: string;
   requiereRef: boolean;

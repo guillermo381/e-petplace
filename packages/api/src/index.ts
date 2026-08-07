@@ -99,6 +99,8 @@ export {
 export {
   urlDocumento,
   listarPapelesDeMascota,
+  obtenerConsultasConReceta,
+  type ConsultaConReceta,
   type PapelDelCatalogo,
   type TipoDocumento,
   type TipoDocumentoExpediente,

@@ -4010,6 +4010,7 @@ export type Database = {
         Row: {
           created_at: string
           expira_en: string
+          folio: string | null
           id: string
           mascota_id: string
           ref_id: string | null
@@ -4020,6 +4021,7 @@ export type Database = {
         Insert: {
           created_at?: string
           expira_en: string
+          folio?: string | null
           id?: string
           mascota_id: string
           ref_id?: string | null
@@ -4030,6 +4032,7 @@ export type Database = {
         Update: {
           created_at?: string
           expira_en?: string
+          folio?: string | null
           id?: string
           mascota_id?: string
           ref_id?: string | null
@@ -16843,6 +16846,7 @@ export type Database = {
         Args: { p_cita_id: string; p_empleado_id: string }
         Returns: boolean
       }
+      _corte_matricula: { Args: never; Returns: string }
       _crear_evento_padre_auto: {
         Args: {
           p_country_code: string
@@ -17914,6 +17918,17 @@ export type Database = {
           servicio_nombre: string
           tipo_servicio: string
           total_congelado: number
+        }[]
+      }
+      obtener_consultas_con_receta: {
+        Args: { p_mascota_id: string }
+        Returns: {
+          cita_id: string
+          fecha: string
+          hora: string
+          medicamentos: number
+          negocio: string
+          profesional: string
         }[]
       }
       obtener_contacto_reserva_cita: {
