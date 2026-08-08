@@ -981,6 +981,11 @@ export const clienteEn = {
     nombreReceta: 'Prescription',
     nombreFichaIdentidad: 'Pet ID',
     descargar: 'Download PDF',
+    // S91-C — the prescription picker (mirror of es.ts).
+    recetaElegirTitulo: 'From which visit?',
+    recetaElegirVoz: 'Every prescription belongs to one visit. Pick the one you want.',
+    recetaConsultaSinNegocio: 'Veterinary visit',
+    recetaSinConsultas: 'No prescriptions yet. One shows up here when a vet prescribes medication.',
     vacioTitulo: 'No papers yet',
     vacioDetalle: "Once you add a pet, their documents will live here.",
     errorTitulo: "We couldn't load your documents",

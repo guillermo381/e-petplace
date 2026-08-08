@@ -47,15 +47,17 @@ import {
   getEstadoOnboardingDueno,
   obtenerMascotasDeFamilia,
   resolverUrlFoto,
-  urlDocumento,
   listarPapelesDeMascota,
-  type TipoDocumento,
+  type ConsultaConReceta,
+  type TipoDocumentoExpediente,
 } from '@epetplace/api';
 import { Linking } from 'react-native';
 
 import { useTraduccion } from '@/i18n';
 import { PAPELES_DE_MASCOTA, componerPapeles } from '@/lib/papeles';
+import { abrirReceta, resolverDescarga, type Descarga } from '@/lib/descarga-papel';
 import { FilaDocumento } from '@/components/fila-documento';
+import { HojaReceta } from '@/components/hoja-receta';
 
 interface MascotaConFoto {
   id: string;
@@ -101,6 +103,12 @@ export default function DocumentosDelHogar() {
   /** La descarga en vuelo, por mascota+papel: dos filas distintas pueden
    *  pedirse sin que la segunda apague el spinner de la primera. */
   const [bajando, setBajando] = useState<string | null>(null);
+  /** S91-C: la consulta de la que sale la receta. Lleva `mascotaId`
+   *  porque acá conviven TODAS las mascotas de la familia. */
+  const [eligiendo, setEligiendo] = useState<{
+    mascotaId: string;
+    consultas: ConsultaConReceta[];
+  } | null>(null);
 
   useEffect(() => {
 
@@ -155,14 +163,37 @@ export default function DocumentosDelHogar() {
     };
   }, []);
 
-  async function bajar(mascotaId: string, tipo: TipoDocumento) {
-    const clave = `${mascotaId}:${tipo}`;
-    setBajando(clave);
-    const r = await urlDocumento(mascotaId, tipo);
+  /** Ejecuta lo que la resolución decidió. Ley 13: el fallo DICE que es
+   *  fallo — y la AUSENCIA dice que es ausencia, en voz neutra: pintar de
+   *  rojo «todavía no hay recetas» sería mentir sobre qué pasó. */
+  async function ejecutar(d: Descarga) {
+    if (d.modo === 'abrir') await Linking.openURL(d.url);
+    else if (d.modo === 'falla') mostrar({ texto: d.mensaje, variante: 'error' });
+    else if (d.modo === 'sinActos')
+      mostrar({ texto: t('documentos.recetaSinConsultas'), variante: 'neutro' });
+  }
+
+  async function bajar(mascotaId: string, tipo: TipoDocumentoExpediente) {
+    setBajando(`${mascotaId}:${tipo}`);
+    const d = await resolverDescarga(mascotaId, tipo);
     setBajando(null);
-    // Ley 13: el fallo DICE que es fallo — jamás un toque que no hace nada.
-    if (r.ok) await Linking.openURL(r.data);
-    else mostrar({ texto: r.mensaje, variante: 'error' });
+    // El único modo que esta pantalla retiene: la elección necesita saber
+    // DE QUÉ MASCOTA es (acá conviven varias — ésa es la casa de todas).
+    if (d.modo === 'elegir') {
+      setEligiendo({ mascotaId, consultas: d.consultas });
+      return;
+    }
+    await ejecutar(d);
+  }
+
+  async function elegirConsulta(citaId: string) {
+    const ctx = eligiendo;
+    if (ctx === null) return;
+    setEligiendo(null);
+    setBajando(`${ctx.mascotaId}:receta`);
+    const d = await abrirReceta(ctx.mascotaId, citaId);
+    setBajando(null);
+    await ejecutar(d);
   }
 
   const lista = Array.isArray(mascotas) ? mascotas : [];
@@ -248,6 +279,12 @@ export default function DocumentosDelHogar() {
           </>
         )}
       </ScrollView>
+
+      <HojaReceta
+        consultas={eligiendo?.consultas ?? null}
+        onElegir={(citaId) => void elegirConsulta(citaId)}
+        onCerrar={() => setEligiendo(null)}
+      />
     </View>
   );
 }

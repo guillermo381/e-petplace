@@ -57,6 +57,7 @@ import {
   radius,
   spacing,
   typography,
+  useAviso,
   usePresionado,
   useTheme,
   type IconoNombre,
@@ -68,10 +69,10 @@ import {
   obtenerPaseosConTrack,
   obtenerPerfilMascota,
   resolverUrlFoto,
-  urlDocumento,
   listarPapelesDeMascota,
+  type ConsultaConReceta,
   type ItemTimeline,
-  type TipoDocumento,
+  type TipoDocumentoExpediente,
   type PaseoConTrack,
   type PerfilMascota,
   type SenalesHogarMascota,
@@ -87,8 +88,10 @@ import {
 } from '@epetplace/domain';
 import { FAMILIA_DE_TIPO, vozHecho } from '@/lib/voz-hecho';
 import { PAPELES_DE_MASCOTA, componerPapeles } from '@/lib/papeles';
+import { abrirReceta, resolverDescarga, type Descarga } from '@/lib/descarga-papel';
 import { CantoCurva } from '@/components/canto-curva';
 import { FilaDocumento } from '@/components/fila-documento';
+import { HojaReceta } from '@/components/hoja-receta';
 import { FiltroPills } from '@/components/filtro-pills';
 
 /** @override-s82c — SERIF LOCAL hasta la pieza de B (candidata; el
@@ -239,6 +242,7 @@ export default function PerfilDeMascota() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { t, idioma } = useTraduccion();
+  const { mostrar } = useAviso();
   const { mascotaId } = useLocalSearchParams<{ mascotaId: string }>();
 
   const [perfil, setPerfil] = useState<PerfilMascota | 'cargando' | 'error'>('cargando');
@@ -248,7 +252,11 @@ export default function PerfilDeMascota() {
   // siempre desde acá (la otra mitad del patrón P19).
   const [tallaHojaAbierta, setTallaHojaAbierta] = useState(false);
   // S89 órdenes 8⑤/10① — los papeles del producto
-  const [bajandoDoc, setBajandoDoc] = useState<TipoDocumento | null>(null);
+  const [bajandoDoc, setBajandoDoc] = useState<TipoDocumentoExpediente | null>(null);
+  /** S91-C: las consultas entre las que la familia elige su receta.
+   *  `null` = la Hoja está cerrada. Acá la mascota es UNA (la de la
+   *  ruta), así que el contexto no necesita llevar su id. */
+  const [eligiendoReceta, setEligiendoReceta] = useState<ConsultaConReceta[] | null>(null);
   /** S89-D ①: la sección de papeles nace PLEGADA — el perfil es de la
    *  mascota; sus documentos se piden, no presiden. */
   const [docsAbiertos, setDocsAbiertos] = useState(false);
@@ -265,15 +273,41 @@ export default function PerfilDeMascota() {
     };
   }, []);
   const [fallaCarnet, setFallaCarnet] = useState<string | null>(null);
-  /** UN camino para los dos papeles: el token lo emite el server con el
-   *  mismo gate del expediente; acá solo se abre lo que devuelve. */
-  const bajarDocumento = async (tipo: TipoDocumento) => {
+  /** UN camino para TODOS los papeles: el token lo emite el server con el
+   *  mismo gate del expediente; acá solo se abre lo que devuelve.
+   *
+   *  S91-C: la decisión de CÓMO se baja cada papel vive en
+   *  `lib/descarga-papel` — la comparte con Cuenta → Documentos del hogar,
+   *  que baja los mismos papeles. Duplicarla acá dejaría media cura. */
+  const ejecutarDescarga = async (d: Descarga) => {
+    if (d.modo === 'abrir') await Linking.openURL(d.url);
+    // Ley 13: el fallo DICE que es fallo. La AUSENCIA no: «todavía no hay
+    // recetas» no es un error del que disculparse — va en voz neutra y
+    // fuera de la línea roja de esta sección.
+    else if (d.modo === 'falla') setFallaCarnet(d.mensaje);
+    else if (d.modo === 'sinActos')
+      mostrar({ texto: t('documentos.recetaSinConsultas'), variante: 'neutro' });
+  };
+
+  const bajarDocumento = async (tipo: TipoDocumentoExpediente) => {
     setFallaCarnet(null);
     setBajandoDoc(tipo);
-    const r = await urlDocumento(mascotaId, tipo);
+    const d = await resolverDescarga(mascotaId, tipo);
     setBajandoDoc(null);
-    if (r.ok) await Linking.openURL(r.data);
-    else setFallaCarnet(r.mensaje);
+    if (d.modo === 'elegir') {
+      setEligiendoReceta(d.consultas);
+      return;
+    }
+    await ejecutarDescarga(d);
+  };
+
+  const elegirConsultaDeReceta = async (citaId: string) => {
+    setEligiendoReceta(null);
+    setFallaCarnet(null);
+    setBajandoDoc('receta');
+    const d = await abrirReceta(mascotaId, citaId);
+    setBajandoDoc(null);
+    await ejecutarDescarga(d);
   };
   // Vitales (S53-B2c): paseos con track REAL → cálculo puro en domain.
   const [vitales, setVitales] = useState<VitalesPaseos | 'cargando' | 'error'>('cargando');
@@ -1401,6 +1435,15 @@ export default function PerfilDeMascota() {
           />
         </View>
       </Hoja>
+
+      {/* S91-C · ¿DE QUÉ CONSULTA? — la receta se emite sobre UN acto y
+          la familia elige cuál. Solo se monta con 2+ (con una se descarga
+          sola; con ninguna habla la voz neutra). */}
+      <HojaReceta
+        consultas={eligiendoReceta}
+        onElegir={(citaId) => void elegirConsultaDeReceta(citaId)}
+        onCerrar={() => setEligiendoReceta(null)}
+      />
     </View>
   );
 }

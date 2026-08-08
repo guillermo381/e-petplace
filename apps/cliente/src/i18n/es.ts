@@ -1068,6 +1068,18 @@ export const clienteEs = {
      *  que exista el glifo de descarga (pedido a B — Ley 12: no se
      *  presta un glifo que significa otra cosa). */
     descargar: 'Descargar PDF',
+    // S91-C — EL SELECTOR DE LA RECETA. La receta se emite sobre UNA
+    // consulta: la superficie pregunta cuál en vez de rebotar, y jamás
+    // adivina (Thor tiene dos, y «la última» habría entregado la
+    // equivocada la mitad de las veces).
+    recetaElegirTitulo: '¿De qué consulta?',
+    recetaElegirVoz: 'Cada receta pertenece a una consulta. Elige de cuál la quieres.',
+    /** Nulo honesto: el papel existe aunque el negocio no tenga nombre. */
+    recetaConsultaSinNegocio: 'Consulta veterinaria',
+    /** AUSENCIA, jamás fallo — se dice en voz NEUTRA. No ofrece camino
+     *  porque la familia no emite recetas: dice qué la hace aparecer,
+     *  que es lo más cerca de un camino que esta verdad admite. */
+    recetaSinConsultas: 'Todavía no hay ninguna receta. Aparece acá cuando un veterinario prescriba medicación.',
     vacioTitulo: 'Todavía no hay papeles',
     vacioDetalle: 'Cuando agregues una mascota, sus documentos van a vivir acá.',
     errorTitulo: 'No pudimos cargar tus documentos',
