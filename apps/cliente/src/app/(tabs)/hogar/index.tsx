@@ -31,7 +31,7 @@
  * tracking (escala fuera de `dato`).
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StatusBar, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -603,6 +603,14 @@ export default function Hogar() {
   const pressedCoach = usePresionado(0.97);
 
   const [mascotas, setMascotas] = useState<EstadoMascotas>('cargando');
+  /** S91 · id → nombre, para la voz del hito «{nombre} llegó a la familia».
+   *  El timeline del hogar es MULTI-MASCOTA y su ítem trae `mascota_id` pero
+   *  no el nombre; acá el nombre ya está cargado, así que no se pide de nuevo
+   *  (D-497: el piso de performance no paga un viaje por un sustantivo). */
+  const nombrePorMascota = useMemo(
+    () => new Map(Array.isArray(mascotas) ? mascotas.map((m) => [m.id, m.nombre]) : []),
+    [mascotas],
+  );
   const [fotos, setFotos] = useState<Record<string, string>>({});
   const [estadoHogar, setEstadoHogar] = useState<EstadoHogar | null>(null);
 
@@ -1767,7 +1775,7 @@ export default function Hogar() {
                             <EventoVida
                               key={it.evento_id}
                               color={color}
-                              titulo={vozHecho(it, t)}
+                              titulo={vozHecho(it, t, nombrePorMascota.get(it.mascota_id) ?? '')}
                               meta={metaHecho(it, idioma)}
                               navega={navega}
                               expandido={expandible ? abierto : undefined}

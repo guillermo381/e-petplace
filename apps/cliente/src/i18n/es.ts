@@ -231,6 +231,12 @@ export const clienteEs = {
     hechoVacuna: 'Recibió la vacuna {{nombre}}',
     hechoVacunaSinNombre: 'Recibió una vacuna',
     hechoConsulta: 'Visita al veterinario',
+    // S91 · LOS HITOS. Voces FIRMADAS verbatim (founder, 8-ago-2026).
+    // Solo la de llegada lleva {{nombre}}: «Una vida nueva empieza» sobre la
+    // ficha de Thor no necesita decir Thor — así está firmado.
+    hechoHitoVidaNueva: 'Una vida nueva empieza',
+    hechoHitoLlegoALaFamilia: '{{nombre}} llegó a la familia',
+    hechoHitoMundoNuevo: 'Un mundo nuevo empieza',
     hechoMomento: 'Momento de cuidado',
     vidaCargarMas: 'Cargar más',
     acordeonCargando: 'Cargando el momento',
