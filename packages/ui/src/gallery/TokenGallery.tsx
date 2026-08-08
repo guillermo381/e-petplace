@@ -1120,7 +1120,11 @@ function EjemploSetBPrima() {
     // entienda solo, sino que el nuevo NO se confunda con los dos que ya
     // están** — porque nace justamente de que `documento` hace triple
     // turno. `caso` (carpeta) queda al lado por la misma razón.
-    'documentos', 'documentosSobre', 'documento', 'carnet', 'caso',
+    'documentos', 'documento', 'carnet', 'caso',
+    // S91-B: 'correo' (ex candidato B) queda al final y APARTE — su
+    // comparación con Documentos TERMINÓ; vive acá solo para que la
+    // reserva se pueda mirar, no para elegir entre ellos.
+    'correo',
     // S84-B5: CONTACTO — FIRMADO (el globo). Su candidato rival murió en
     // el gate; el porqué vive en el registry, no acá.
     'contacto',

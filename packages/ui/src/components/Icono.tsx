@@ -86,7 +86,19 @@ export type IconoNombre =
   //    EL OBJETO NO ES «un papel»: es DÓNDE VIVEN LOS PAPELES, y el plural
   //    es lo que lo distingue de `documento` (que es UNA cédula con
   //    retrato). Gate por ícono a 21px PENDIENTE (§2.9).
-  | 'documentos' | 'documentosSobre'
+  | 'documentos'
+  // ── S91-B · `correo` — NACIÓ COMO CANDIDATO B DE «Documentos» Y PERDIÓ
+  //    SU GATE, y NO muere: el founder lo pasó a RESERVA DECLARADA.
+  //    Su riesgo era que a 21px se lee «correo» antes que «documentos» —
+  //    el rasterizado lo confirmó— y la firma lo dio vuelta: **esa lectura
+  //    deja de ser el riesgo y pasa a ser el DESTINO**, para el centro de
+  //    avisos cuando crezca.
+  //    ⚠️ POR ESO SE RENOMBRA, y no es cosmética: `documentosSobre` decía
+  //    «documentos» y el dibujo dice «correo». Un nombre que contradice a
+  //    su dibujo es la clase de dato que esta casa caza (misma disciplina
+  //    con la que `mascotaId` pasó a `sujetoId`). **CERO consumidores hoy,
+  //    a propósito: está en reserva, no en uso.**
+  | 'correo'
   // ── S84-B4/B5: CONTACTO — FIRMADO (founder, S84-B5: el GLOBO).
   //    Nace porque la sección "Cómo te contactan" del perfil quedó SIN
   //    glifo mientras sus hermanas tienen el suyo — y las dos salidas
@@ -799,16 +811,15 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
       <Huella color={huella} x={1.8} y={14.8} escala={0.3} />
     </>
   ),
-  // ── S91-B · CANDIDATO B — EL SOBRE. Silueta LIBRE en todo el registry
-  // (rectángulo + V), y la más legible a 21px de las dos: la V es un
-  // gesto grande, no un detalle.
-  // ⚠️ SU RIESGO, y es de SIGNIFICADO, no de tamaño — **CONFIRMADO en el
-  // rasterizado a 21px, que es lo que lo vuelve un dato y no una opinión:
-  // se lee nítido y se lee «correo».** El sobre es más legible que el
-  // apilado; lo que dice está mal. Y arrastra un costo que el founder
-  // decide, no yo: si gana, la casa se queda sin su glifo de correo para
-  // el día que el centro de avisos crezca.
-  documentosSobre: ({ tinta, huella }) => (
+  // ── S91-B · EL SOBRE — hoy `correo`, EN RESERVA DECLARADA (sin
+  // consumidores). Silueta LIBRE en todo el registry (rectángulo + V) y
+  // la más legible del par: la V es un gesto grande, no un detalle.
+  // ⚠️ LO QUE ERA SU RIESGO ES HOY SU RAZÓN DE SER. En el gate se declaró
+  // que a 21px «se lee nítido y se lee CORREO» —confirmado rasterizando,
+  // no supuesto— y eso lo descalificaba para Documentos. La firma del
+  // founder lo dio vuelta: se retira SIN cablear y queda para el centro de
+  // avisos. **El dibujo no cambió ni un punto; cambió qué nombra.**
+  correo: ({ tinta, huella }) => (
     <>
       <Path d="M6.5 5.5H21V16H6.5Z" {...trazo(tinta)} />
       <Path d="M6.5 5.5 13.75 11.5 21 5.5" {...trazo(tinta)} />
@@ -1128,7 +1139,10 @@ export function Icono({
     // S91-B: los papeles del hogar son del EXPEDIENTE — misma capa que sus
     // hermanos (`documento`, `carnet`, `receta`), no una categoría nueva.
     documentos: identidad,
-    documentosSobre: identidad,
+    // `correo` es un canal, no expediente — pero su capa se decide con su
+    // primer consumidor REAL, no ahora: hoy hereda `identidad` para no
+    // fabricar una decisión de taxonomía que nadie pidió (Ley 10).
+    correo: identidad,
     // GLIFOS DE CONTROL (S82-B r7): TINTA en los dos registros — un
     // control no pertenece a una capa (no hay oficio del que tomar
     // color) y su huella no se dibuja. El `registro="capa"` de un
