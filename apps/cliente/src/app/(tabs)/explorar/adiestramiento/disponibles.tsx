@@ -42,6 +42,7 @@ import {
   type PerfilPublico,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
+import { tomarPedido } from '@/lib/senal-reserva';
 import { PreviewPrestador } from '@/components/preview-prestador';
 import { vozServicio } from '@/lib/voz-servicio';
 
@@ -93,6 +94,21 @@ export default function AdiestramientoDisponibles() {
       setDisponibles(r.ok ? r.data.filter((o) => o.comprable === comprable) : 'error');
     });
   }, [fecha, hora, mascotaId, comprable]);
+
+  // S91-C · EL PEDIDO QUE VUELVE DEL DETALLE. La barra fija de
+  // `/prestador/[id]` no reserva: PIDE. Acá se toma UNA vez (la lectura
+  // es destructiva) y se ejecuta EL MISMO camino del botón de la fila —
+  // un solo flujo de reserva en toda la app.
+  useFocusEffect(
+    useCallback(() => {
+      const pedida = tomarPedido();
+      if (pedida === null || !Array.isArray(disponibles)) return;
+      const oferta = disponibles.find((o) => o.prestador_servicio_id === pedida);
+      // Si la oferta ya no está (se ocupó el slot mientras miraba), no se
+      // reserva a ciegas: la lista habla sola en su próximo refresh.
+      if (oferta !== undefined) void reservarSesion(oferta);
+    }, [disponibles]),
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -220,6 +236,7 @@ export default function AdiestramientoDisponibles() {
                 {o.comprable === 'sesion' ? (
                   <PreviewPrestador
                     prestadorId={o.prestador_id}
+                  ofertaId={o.prestador_servicio_id}
                     nombre={o.prestador_nombre}
                     oficio={t('hogar.railAdiestramiento')}
                     contexto={o.direccion !== null

@@ -47,6 +47,7 @@ import { useTraduccion } from '@/i18n';
 
 export function PreviewPrestador({
   prestadorId,
+  ofertaId,
   nombre,
   oficio,
   precio,
@@ -56,6 +57,10 @@ export function PreviewPrestador({
   etiquetaReservar,
 }: {
   prestadorId: string;
+  /** LA OFERTA CONCRETA que esta fila representa. Viaja al detalle para
+   *  que su barra fija sepa QUÉ se reserva — sin ella el detalle no
+   *  monta barra, porque no hay nada que reservar (Ley 23). */
+  ofertaId?: string;
   /** Del lector de disponibilidad — está SIEMPRE, aunque el perfil tarde. */
   nombre: string;
   /** Lo pone la pantalla (ver cabecera): ella sabe de qué oficio viene. */
@@ -78,7 +83,10 @@ export function PreviewPrestador({
   const router = useRouter();
   const { t } = useTraduccion();
   const abrirPerfil = () =>
-    router.push({ pathname: '/prestador/[prestadorId]', params: { prestadorId } });
+    router.push({
+      pathname: '/prestador/[prestadorId]',
+      params: { prestadorId, ...(ofertaId !== undefined ? { ofertaId } : {}) },
+    });
 
   const resenas = perfil?.total_resenas ?? 0;
   const nota = perfil?.calificacion_promedio ?? null;

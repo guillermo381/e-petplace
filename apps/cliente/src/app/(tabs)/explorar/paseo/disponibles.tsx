@@ -56,6 +56,7 @@ import {
 import { PlanHoja } from '@/components/plan-hoja';
 import { PaseoSocialHoja } from '@/components/paseo-social-hoja';
 import { useTraduccion } from '@/i18n';
+import { tomarPedido } from '@/lib/senal-reserva';
 import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { PreviewPrestador } from '@/components/preview-prestador';
 
@@ -126,6 +127,21 @@ export default function PaseoDisponibles() {
       setDisponibles(r.ok ? r.data : 'error');
     });
   }, [fecha, hora, duracion]);
+
+  // S91-C · EL PEDIDO QUE VUELVE DEL DETALLE. La barra fija de
+  // `/prestador/[id]` no reserva: PIDE. Acá se toma UNA vez (la lectura
+  // es destructiva) y se ejecuta EL MISMO camino del botón de la fila —
+  // un solo flujo de reserva en toda la app.
+  useFocusEffect(
+    useCallback(() => {
+      const pedida = tomarPedido();
+      if (pedida === null || !Array.isArray(disponibles)) return;
+      const oferta = disponibles.find((p) => p.prestador_servicio_id === pedida);
+      // Si la oferta ya no está (se ocupó el slot mientras miraba), no se
+      // reserva a ciegas: la lista habla sola en su próximo refresh.
+      if (oferta !== undefined) alElegir(oferta);
+    }, [disponibles]),
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -369,6 +385,7 @@ export default function PaseoDisponibles() {
                 {i > 0 ? <Separador /> : null}
                 <PreviewPrestador
                   prestadorId={p.prestador_id}
+                  ofertaId={p.prestador_servicio_id}
                   nombre={p.prestador_nombre}
                   oficio={t('hogar.railPaseos')}
                   contexto={p.servicio_nombre}

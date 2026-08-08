@@ -43,6 +43,7 @@ import { ScrollView, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  Boton,
   Encabezado,
   Esqueleto,
   EsqueletoGrupo,
@@ -60,6 +61,7 @@ import {
 
 import { useTraduccion } from '@/i18n';
 import { vozDeOficios } from '@/lib/voz-oficio';
+import { pedirReserva } from '@/lib/senal-reserva';
 
 /** Mismo bucket y misma forma que resuelve el espejo del prestador
  *  (`lib/subir-galeria`): la pieza no toca storage — recibe URLs listas. */
@@ -72,7 +74,15 @@ export default function PerfilPublicoPrestador() {
   const { theme } = useTheme();
   const { t } = useTraduccion();
   const insets = useSafeAreaInsets();
-  const { prestadorId } = useLocalSearchParams<{ prestadorId: string }>();
+  const { prestadorId, ofertaId } = useLocalSearchParams<{
+    prestadorId: string;
+    ofertaId?: string;
+  }>();
+  /** S91-C · LA BARRA FIJA (firma founder, anatomía Airbnb). Solo se monta
+   *  si esta pantalla se abrió DESDE una oferta: entrando por Explorar no
+   *  hay nada que reservar y una barra que promete sin poder cumplir es la
+   *  Ley 23 al revés. */
+  const puedeReservar = typeof ofertaId === 'string' && ofertaId.length > 0;
 
   const [estado, setEstado] = useState<'cargando' | 'listo' | 'vacio' | 'error'>('cargando');
   const [perfil, setPerfil] = useState<PerfilPublico | null>(null);
@@ -133,7 +143,13 @@ export default function PerfilPublicoPrestador() {
           />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + spacing[6] }}>
+        <ScrollView
+          contentContainerStyle={{
+            // el alto de la barra + su aire: sin esto la barra TAPA el
+            // último bloque, que es el defecto clásico de una barra fija.
+            paddingBottom: insets.bottom + (puedeReservar ? 96 : spacing[6]),
+          }}
+        >
           <FichaPrestador
             nombre={perfil.nombre_comercial}
             cohorte={perfil.cohorte}
@@ -150,6 +166,38 @@ export default function PerfilPublicoPrestador() {
           />
         </ScrollView>
       )}
+
+      {/* LA BARRA FIJA — abajo de la PANTALLA, no al final del scroll
+          (letra del founder). El detalle NO reserva: PIDE y vuelve, y la
+          lista —única que sabe reservar— ejecuta su camino de siempre
+          (ver `lib/senal-reserva`). Clonar el flujo acá habría duplicado
+          el selector de mascota, el guard social y el saldo. */}
+      {estado === 'listo' && puedeReservar && ofertaId !== undefined ? (
+        <View
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            paddingHorizontal: spacing[5],
+            paddingTop: spacing[3],
+            paddingBottom: insets.bottom + spacing[3],
+            backgroundColor: theme.bg.base,
+            borderTopWidth: 1,
+            borderTopColor: theme.bg.border,
+          }}
+        >
+          <Boton
+            variante="primario"
+            bloque
+            etiqueta={t('perfilPrestador.reservar')}
+            onPress={() => {
+              pedirReserva(ofertaId);
+              router.back();
+            }}
+          />
+        </View>
+      ) : null}
     </View>
   );
 }
