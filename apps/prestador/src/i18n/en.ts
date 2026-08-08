@@ -2264,6 +2264,10 @@ export const prestadorEn = {
     reintentar: 'Try again',
   },
   historico: {
+    buscarLabel: 'Find a pet',
+    buscarPlaceholder: 'Start typing their name',
+    buscarAyuda: 'Two letters is enough.',
+    buscarSinCoincidencia: 'No pet in this period starts with "{{texto}}".',
     rangoMes: 'This month',
     rango30: '30 days',
     rango90: '90 days',

@@ -196,7 +196,24 @@ export function FiltroPills<C extends string>({ opciones, activo, onCambio, onLi
 // ═══════════════════ EL FILTRO DE MASCOTAS ═══════════════════
 
 export interface FiltroMascotasProps {
-  mascotas: { id: string; nombre: string; fotoUrl?: string }[]
+  /** ⚠️ EL NOMBRE DEL PROP ES HISTÓRICO y se conserva a propósito: desde
+   *  S91-B la hilera puede llevar PERSONAS además de mascotas (el tipeo del
+   *  histórico sugiere de los dos mundos por firma del founder). Renombrarlo
+   *  tocaría a sus consumidores vivos sin ganar nada, y partir la pieza en
+   *  dos sería el clon que §6 prohíbe — la FORMA es la misma hilera de chips
+   *  elegibles; lo que cambia es la marca del sujeto, y eso es una prop. */
+  mascotas: {
+    id: string
+    nombre: string
+    fotoUrl?: string
+    /** QUÉ MARCA LLEVA EL CHIP. Default `'mascota'` — cero consumidor
+     *  existente cambia. `'persona'` dibuja la INICIAL en vez del avatar,
+     *  y no es cosmético: `AvatarMascota` sin foto cae a la HUELLA DIGNA,
+     *  y una pata sobre el nombre de un humano dice que es un animal. El
+     *  monograma como fallback honesto ya es la letra de `LogoNegocio`
+     *  ("jamás huella") — acá se aplica el mismo criterio al sujeto. */
+    sujeto?: 'mascota' | 'persona'
+  }[]
   /** null = NINGUNA elegida (el log entra sin filtro y muestra todo). Se
    *  LEE porque ningún chip queda activo — el chip "Todas" murió, el
    *  comportamiento no. */
@@ -278,7 +295,32 @@ export function FiltroMascotas({ mascotas, elegida, onElegir }: FiltroMascotasPr
           m.id,
           elegida === m.id,
           <>
-            <AvatarMascota nombre={m.nombre} fotoUrl={m.fotoUrl} tamano="xs" anidadoEn="chip" />
+            {m.sujeto === 'persona' ? (
+              // LA INICIAL — mismo diámetro que el avatar xs para que la
+              // hilera no cambie de ritmo al mezclar sujetos.
+              <View
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: radius.full,
+                  backgroundColor: theme.bg.overlay,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Text
+                  style={{
+                    fontFamily: typography.family.sans.medium,
+                    fontSize: typography.size.sm,
+                    color: theme.text.secondary,
+                  }}
+                >
+                  {m.nombre.trim().charAt(0).toUpperCase()}
+                </Text>
+              </View>
+            ) : (
+              <AvatarMascota nombre={m.nombre} fotoUrl={m.fotoUrl} tamano="xs" anidadoEn="chip" />
+            )}
             <Text
               style={{
                 fontFamily: typography.family.sans.medium,
