@@ -9635,3 +9635,46 @@ oportunidad de escribirla.
 **Nota honesta de A:** el hash fantasma **no llegó a ningún documento**
 (verificado por grep en `docs/` y `CLAUDE.md`) — vivió solo en dos mensajes
 de coordinación. Que no haya contaminado el canon fue suerte, no diseño.
+
+#### D-692 — ⚪ CONEJO, ROEDOR Y PERRO NO TIENEN NINGÚN CHIP PROPIO (registro por firma, no defecto)
+
+**Medido al firmar el paquete del vocabulario (S91, 8-ago-2026):** chips
+propios de una sola especie, por especie —
+
+| especie | chips propios |
+|---|:-:|
+| **gato** | **5** (desde esta firma) |
+| ave | 1 (`se_arranco_plumas`) |
+| **perro · conejo · roedor** | **0** |
+
+**Cómo apareció:** el founder percibió los chips del gato «inclinados a
+perro» sin poder señalar cuál. La medición le dio razón **y encontró que la
+causa era una AUSENCIA**: las 10 conductas originales nacieron de la vida de
+un perro (su origen fue el adiestramiento), S91 universalizó las PALABRAS
+—bien— pero **universalizar palabras no agrega los gestos que solo tiene una
+especie.** El gato ya recibió los suyos. Los otros tres no.
+
+**⚠️ ESTO ESTÁ REGISTRADO POR FIRMA, NO ABIERTO COMO DEFECTO.** Letra del
+founder al cerrar el paquete: ***«el mínimo digno de hoy ya es digno»***, y
+**no se inventan chips por simetría** — un catálogo que crece para que las
+columnas queden parejas es un catálogo que nadie lee.
+
+**El caso más interesante, y el que conviene mirar primero cuando esto se
+abra: el PERRO.** Tiene cero chips propios **porque las 16 se escribieron
+desde su vida** — o sea que su vocabulario está completo por origen, no por
+diseño. *Si un día se le dan chips propios, la pregunta no es «qué le falta»
+sino «qué de lo universal era en realidad suyo».*
+
+**Conejo y roedor son el caso urgente-cuando-llegue:** son especies PRESA, y
+sus dos señales más informativas —dejar de comer y esconderse— **ya están**
+cubiertas por `no_quiso_comer` y `se_escondio` (las dos entraron en S91
+precisamente por ellas). Lo que les falta es fino: bruxismo, postura
+encorvada, estasis. **Nada de eso se propone acá.**
+
+> **☠️ DISPARO: mesa futura** — cuando el producto tenga usuarios reales de
+> alguna de las tres especies, o cuando el Coach necesite el vocabulario fino.
+> **☠️ MUERTE:** la mesa firma el vocabulario propio de las tres, **o firma
+> que el universal les alcanza** — y esta ficha se retira por decisión.
+
+**Origen: S91 (gate de strings del gato; la pregunta la abrió A midiendo y el
+founder la registró en vez de resolverla).**
