@@ -271,6 +271,17 @@ export interface MascotaResumen {
   sujeto: 'individuo' | 'acuario';
   /** Solo acuarios; null en todo lo demás. */
   tipo_agua: 'dulce' | 'marino' | null;
+  /** S91 (A6, pedido de D) · la raza DECLARADA, tal cual la escribió la
+   *  familia. */
+  raza: string | null;
+  /** S91 (A6) · el path de la cara de galería, resuelto por LOOKUP contra
+   *  `cat_razas` (`especie` + `nombre` exacto, que es UNIQUE) — **jamás
+   *  derivado del texto tipeado**: slugificar «Pastor Alemán» a mano puede
+   *  dar `pastor-aleman` (existe) o `ovejero-aleman` (no), y una URL que
+   *  acierta A VECES muestra LA CARA DE OTRA RAZA — peor que ninguna.
+   *  null = la raza no está en el catálogo (o no hay raza) ⇒ la superficie
+   *  cae al genérico de la especie, que es la verdad disponible. */
+  raza_ruta_imagen: string | null;
 }
 
 /** Mascotas de una familia (Home del dueño). Reader: mismas claves
@@ -281,13 +292,32 @@ export async function obtenerMascotasDeFamilia(
   const { data, error } = await getClient()
     .from('mascotas')
     .select(
-      'id, nombre, especie, foto_url, paseo_social_ok, talla, pelaje, estado_vida, sujeto, tipo_agua',
+      'id, nombre, especie, foto_url, paseo_social_ok, talla, pelaje, estado_vida, sujeto, tipo_agua, raza',
     )
     .eq('familia_id', familiaId)
     .order('fecha_alta', { ascending: true });
 
   if (error) return mapeoErrorAResultado(error.message);
   if (!Array.isArray(data)) return mapeoErrorAResultado('datos_inconsistentes');
+
+  // A6 · EL LOOKUP, en UN viaje para todo el hogar (jamás uno por mascota):
+  // (especie, nombre) es UNIQUE en `cat_razas`, así que el match es
+  // determinista. Lo que NO coincide vuelve null y la superficie cae al
+  // genérico — D lo declaró bien: media cura es inconsistencia nueva.
+  const declaradas = [
+    ...new Set(
+      data.map((m) => m.raza).filter((r): r is string => typeof r === 'string' && r.length > 0),
+    ),
+  ];
+  const rutaPorRaza = new Map<string, string>();
+  if (declaradas.length > 0) {
+    const { data: razas } = await getClient()
+      .from('cat_razas')
+      .select('especie, nombre, ruta_imagen')
+      .in('nombre', declaradas);
+    for (const r of razas ?? []) rutaPorRaza.set(`${r.especie}|${r.nombre}`, r.ruta_imagen);
+  }
+
   return {
     ok: true,
     data: data.map((m) => ({
@@ -307,6 +337,8 @@ export async function obtenerMascotasDeFamilia(
       // — el default del schema y el caso de TODAS las filas vivas.
       sujeto: m.sujeto === 'acuario' ? 'acuario' : 'individuo',
       tipo_agua: m.tipo_agua === 'dulce' || m.tipo_agua === 'marino' ? m.tipo_agua : null,
+      raza: m.raza ?? null,
+      raza_ruta_imagen: rutaPorRaza.get(`${m.especie}|${m.raza ?? ''}`) ?? null,
     })),
   };
 }
