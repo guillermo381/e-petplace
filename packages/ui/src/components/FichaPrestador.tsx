@@ -47,6 +47,8 @@
 
 import { useRef, useState, type ReactNode } from 'react'
 import { Image, ScrollView, Text, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { LinearGradient } from 'expo-linear-gradient'
 
 import { Boton } from './Boton'
 import { ClipSesion } from './ClipSesion'
@@ -55,6 +57,8 @@ import { LogoNegocio } from './LogoNegocio'
 import { MapaZona } from './MapaZona'
 import { Texto } from './Texto'
 import { opacity } from '../tokens/opacity'
+import { palette } from '../tokens/palette'
+import { typography } from '../tokens/typography'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
 import { useTheme } from '../ThemeProvider'
@@ -166,6 +170,39 @@ export interface FichaPrestadorProps {
    *  El espejo muestra entonces algo que la familia no ve, y está BIEN:
    *  la invitación es affordance DEL ESPEJO, no contenido de la vitrina. */
   onAgregarFotos?: () => void
+  /** ── S91-B · LA PORTADA A SANGRE (pedido de C, firma de mesa) ────────
+   *  El founder: el carrusel debe cubrir HASTA EL TECHO y de borde a borde;
+   *  hoy queda una franja blanca arriba con el nombre.
+   *
+   *  ⚠️ LA FRANJA NO NACÍA ACÁ, y se dice porque cambia quién la cura: la
+   *  raíz de esta pieza YA empieza en el carrusel. La franja la pone el
+   *  CONSUMIDOR, que monta un `Encabezado` encima — su propio comentario lo
+   *  dice («acá el inset superior ya lo pone el Encabezado»). Así que la
+   *  pieza no puede taparla sola: gana la CAPACIDAD de vivir en el techo, y
+   *  el consumidor retira su encabezado. Las dos mitades, o no funciona.
+   *
+   *  Con `aSangre`, lo que la pieza asume es la SAFE AREA: la imagen sangra
+   *  bajo la barra de estado y lo que flota encima baja `insets.top`, para
+   *  que la barra siga legible. Default `false` = los consumidores de hoy no
+   *  se mueven. */
+  aSangre?: boolean
+  /** DÓNDE VIVE LA VOZ DEL NOMBRE — las dos variantes van al gate del
+   *  founder, y las dos están construidas porque salían casi al mismo
+   *  precio (la orden decía "si es barato, mostrá las dos"):
+   *   · `'bloque'` (default, lo de hoy) — el nombre baja al bloque de
+   *     identidad debajo del carrusel; sobre la imagen no queda nada más
+   *     que lo que el consumidor flote (`sobrePortada`).
+   *   · `'sobrePortada'` — el nombre va SOBRE la imagen, con degradado
+   *     inferior para que se lea con cualquier foto. Y entonces NO se
+   *     repite abajo: dos veces el mismo dato es la regla Chanel directa.
+   *     La cohorte SIGUE en el bloque de identidad en las dos: su porqué
+   *     está escrito arriba —sobre la foto una pastilla habla del HOY y la
+   *     cohorte es un hecho fijo— y no cambia porque el nombre se mueva. */
+  vozNombre?: 'bloque' | 'sobrePortada'
+  /** LO QUE FLOTA SOBRE LA PORTADA — del consumidor, jamás de la pieza: una
+   *  flecha de volver es NAVEGACIÓN, y esta pieza no sabe de dónde la
+   *  abrieron. Se posiciona sola respetando la safe area. */
+  sobrePortada?: ReactNode
   /** El anticipo del espejo ("así se va a ver"), al pie. Del consumidor:
    *  la pieza no sabe si la están mirando en un espejo o en una vitrina. */
   pie?: ReactNode
@@ -173,6 +210,9 @@ export interface FichaPrestadorProps {
 
 export function FichaPrestador({
   nombre,
+  aSangre = false,
+  vozNombre = 'bloque',
+  sobrePortada,
   cohorte,
   cohorteAnio,
   logoUrl,
@@ -198,6 +238,7 @@ export function FichaPrestador({
   const [ancho, setAncho] = useState(0)
   const [activa, setActiva] = useState(0)
   const riel = useRef<ScrollView>(null)
+  const insets = useSafeAreaInsets()
 
   // LAS POSICIONES DEL CARRUSEL: las fotos en su orden + el clip al
   // final si hay póster. Una lista sola, porque el clip es "una posición
@@ -311,6 +352,37 @@ export function FichaPrestador({
               </View>
             ))}
           </ScrollView>
+          {/* S91-B · LO QUE VIVE SOBRE LA PORTADA. Va DENTRO del contenedor
+              del carrusel para que sangre con él; su posición respeta la
+              safe area cuando la pieza está en el techo. */}
+          {sobrePortada ? (
+            <View style={{ position: 'absolute', left: spacing[3], top: (aSangre ? insets.top : 0) + spacing[3] }}>
+              {sobrePortada}
+            </View>
+          ) : null}
+          {vozNombre === 'sobrePortada' && nombre ? (
+            <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0 }} pointerEvents="none">
+              {/* EL DEGRADADO NO ES ADORNO: es lo que hace legible el nombre
+                  sobre CUALQUIER foto — sin él la voz depende de la suerte
+                  de la imagen. Va de transparente a tinta, no a negro puro:
+                  el negro puro no es un color de esta casa. */}
+              <LinearGradient
+                colors={['transparent', palette.tinta]}
+                style={{ paddingTop: spacing[8], paddingHorizontal: spacing[4], paddingBottom: spacing[3] }}
+              >
+                <Text
+                  numberOfLines={2}
+                  style={{
+                    fontFamily: typography.family.sans.light,
+                    fontSize: typography.size.lg,
+                    color: palette.light0,
+                  }}
+                >
+                  {nombre}
+                </Text>
+              </LinearGradient>
+            </View>
+          ) : null}
 
           {cicla ? (
             <View
