@@ -19,6 +19,11 @@ export {
   obtenerEspeciesElegibles,
   // S91 · D-379: el catálogo que SUGIERE razas (el dueño confirma).
   obtenerRazasDeEspecie,
+  // S91 · la galería especies-razas: DOS pretendientes (el chip del alta de D
+  // y el filtro por especie de B) ⇒ una sola pieza, en la puerta única.
+  resolverUrlRaza,
+  resolverUrlGenericaEspecie,
+  resolverUrlRutaEspecies,
   type EspecieCatalogo,
   type NovedadPaseoCatalogo,
   type RazaCatalogo,
@@ -632,6 +637,7 @@ export {
 // ── La bitácora de la familia (S63-A, §7 — hunk Sesión A) ───────────────────
 export {
   obtenerVocabularioBitacora,
+  type FiltroVocabularioBitacora,
   registrarBitacoraFamilia,
   obtenerBitacora,
   type BitacoraRegistrada,

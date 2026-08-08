@@ -102,6 +102,56 @@ export async function obtenerRazasDeEspecie(
   };
 }
 
+// ── S91 · LOS RESOLVERS DE LA GALERÍA `especies-razas` ────────────────
+// Hermanos de `resolverUrlLogoNegocio` / `resolverUrlGaleriaPrestador`
+// (`wrappers/prestador.ts`) y con SU MISMO CUERPO: el SDK resuelve la URL
+// pública. No se arma el string a mano desde `process.env` — dos maneras de
+// componer la misma URL es como nacen las divergencias que nadie ve hasta
+// que una de las dos queda vieja.
+//
+// POR QUÉ NACEN ACÁ Y NO EN LA PANTALLA: tenían DOS pretendientes a la vez
+// —el chip de raza del alta (D, que dejó un puente declarado en
+// `apps/cliente/src/components/alta/imagen-raza.ts`) y el filtro por especie
+// del histórico (B, que lo ELEVÓ en vez de improvisarlo con un glifo
+// cualquiera)—. Dos consumidores de la misma URL en dos apps distintas es
+// exactamente la definición de pieza compartida.
+//
+// El bucket es PÚBLICO (111 objetos: 105 razas + 6 genéricos, origen-IA
+// firmado — ficha D-288), así que esto no pega a la red: compone.
+
+const BUCKET_ESPECIES_RAZAS = 'especies-razas';
+
+/** La cara de UNA raza. `slug` es el del catálogo (`cat_razas.slug`),
+ *  JAMÁS uno derivado del texto que alguien tipeó: «Pastor Alemán» a mano
+ *  puede dar `pastor-aleman` (existe) o `ovejero-aleman` (no), y una URL que
+ *  acierta a veces muestra una cara equivocada — peor que ninguna. */
+export function resolverUrlRaza(
+  especie: string | null,
+  slug: string | null,
+): string | null {
+  if (!especie || !slug) return null;
+  return resolverUrlRutaEspecies(`${especie}/${slug}.webp`);
+}
+
+/** La cara de la ESPECIE — el escalón de fallback cuando hay especie pero no
+ *  raza elegida.
+ *  ⚠️ Medido al sembrar: las SEIS especies que el alta ofrece tienen su
+ *  `generico.webp`; **`reptil` NO lo tiene** (404 verificado) — y desde S91
+ *  reptil está apagado estructuralmente, así que no debería llegar acá. */
+export function resolverUrlGenericaEspecie(especie: string | null): string | null {
+  if (!especie) return null;
+  return resolverUrlRutaEspecies(`${especie}/generico.webp`);
+}
+
+/** Desde el PATH que el catálogo YA trae (`cat_razas.ruta_imagen`).
+ *  Se prefiere sobre `resolverUrlRaza` cuando la fila está a mano: ahí el
+ *  path es un DATO, no una convención re-armada de dos pedazos — si mañana
+ *  una raza tuviera su imagen en otro lado, ésta la encuentra y la otra no. */
+export function resolverUrlRutaEspecies(ruta: string | null): string | null {
+  if (ruta === null || ruta.length === 0) return null;
+  return getClient().storage.from(BUCKET_ESPECIES_RAZAS).getPublicUrl(ruta).data.publicUrl;
+}
+
 /** MODELO_PASEO v1.4 §1bis — especies elegibles de una CATEGORÍA de
  *  servicio (fuente de verdad: tipos_servicio.especies_elegibles).
  *  null = todas las especies (multi-especie de nacimiento). La UI

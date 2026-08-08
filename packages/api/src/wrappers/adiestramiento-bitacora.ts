@@ -76,19 +76,44 @@ export interface ChipVocabularioAgrupado extends ChipVocabulario {
   nivel: NivelCurriculum | null;
 }
 
+/** S91 · el contexto que la bitácora HEREDA del perfil de la mascota.
+ *  Nunca se le pregunta a nadie: el perfil ya lo sabe. */
+export interface FiltroVocabularioBitacora {
+  /** `mascotas.especie` — código de cat_especies. */
+  especie?: string;
+  /** `mascotas.sujeto` — 'individuo' | 'acuario' (cláusula del pez). */
+  sujeto?: string;
+}
+
 /** Los chips disponibles para registrar: conductas observadas del hogar
  *  primero (el vocabulario propio de la familia), objetivos del
  *  currículum después ("ya lo hace en casa"), cada uno con su grupo. */
-export async function obtenerVocabularioBitacora(): Promise<
-  ResultadoWrapper<ChipVocabularioAgrupado[], CodigoErrorBitacora>
-> {
+export async function obtenerVocabularioBitacora(
+  filtro?: FiltroVocabularioBitacora,
+): Promise<ResultadoWrapper<ChipVocabularioAgrupado[], CodigoErrorBitacora>> {
   const cliente = getClient();
+  // S91 (firma founder): LA BITÁCORA NACE SABIENDO. Los chips llegan YA
+  // filtrados por especie y por sujeto — un gato jamás ve «Ladró», un
+  // acuario jamás ve conductas de individuo. El filtro se aplica ACÁ, en la
+  // puerta única, y no en la pantalla: si viviera en la pantalla, la
+  // siguiente superficie que lea el catálogo volvería a mostrarlo entero.
+  //
+  // Sin filtro devuelve TODO (el taller del prestador y la galería lo
+  // necesitan). Ausencia de filtro NO es «todas las especies»: es «no
+  // filtres» — dos cosas distintas que se confunden fácil.
+  let qConductas = cliente
+    .from('cat_conductas_bitacora')
+    .select('codigo, nombre_familia, nombre_familia_en')
+    .eq('activo', true)
+    .order('orden_display', { ascending: true });
+  if (filtro?.especie !== undefined) {
+    qConductas = qConductas.contains('especies_aplicables', [filtro.especie]);
+  }
+  if (filtro?.sujeto !== undefined) {
+    qConductas = qConductas.contains('sujetos_aplicables', [filtro.sujeto]);
+  }
   const [conductas, objetivos, curriculum] = await Promise.all([
-    cliente
-      .from('cat_conductas_bitacora')
-      .select('codigo, nombre_familia, nombre_familia_en')
-      .eq('activo', true)
-      .order('orden_display', { ascending: true }),
+    qConductas,
     cliente
       .from('cat_objetivos_adiestramiento')
       .select('codigo, nombre_familia, nombre_familia_en')

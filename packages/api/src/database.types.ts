@@ -1129,11 +1129,13 @@ export type Database = {
           created_at: string
           descripcion: string | null
           es_seed_preliminar: boolean
+          especies_aplicables: string[] | null
           nombre: string
           nombre_familia: string
           nombre_familia_en: string
           orden_display: number
           pais_codigo: string | null
+          sujetos_aplicables: string[] | null
           updated_at: string
         }
         Insert: {
@@ -1142,11 +1144,13 @@ export type Database = {
           created_at?: string
           descripcion?: string | null
           es_seed_preliminar?: boolean
+          especies_aplicables?: string[] | null
           nombre: string
           nombre_familia: string
           nombre_familia_en: string
           orden_display?: number
           pais_codigo?: string | null
+          sujetos_aplicables?: string[] | null
           updated_at?: string
         }
         Update: {
@@ -1155,11 +1159,13 @@ export type Database = {
           created_at?: string
           descripcion?: string | null
           es_seed_preliminar?: boolean
+          especies_aplicables?: string[] | null
           nombre?: string
           nombre_familia?: string
           nombre_familia_en?: string
           orden_display?: number
           pais_codigo?: string | null
+          sujetos_aplicables?: string[] | null
           updated_at?: string
         }
         Relationships: []
@@ -16968,6 +16974,14 @@ export type Database = {
       _cita_despegable: {
         Args: { p_cita_id: string; p_empleado_id: string }
         Returns: boolean
+      }
+      _clave_hito_alta: {
+        Args: {
+          p_fecha_nacimiento: string
+          p_precision: string
+          p_sujeto: string
+        }
+        Returns: string
       }
       _corte_matricula: { Args: never; Returns: string }
       _crear_evento_padre_auto: {

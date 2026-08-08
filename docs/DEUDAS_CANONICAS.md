@@ -9212,6 +9212,19 @@ Con imágenes **generadas por IA**, un rótulo que no corresponde al dibujo es
 ese mismo lote, no exige uno propio.
 Origen: S90-C (publicación de la galería especie/raza).
 
+> **➕ ENMIENDA S91 (hallazgo del founder en dispositivo, 8-ago-2026):**
+> **`perro/generico.webp` trae el DAMERO horneado como píxeles** — el
+> patrón de transparencia del editor quedó pintado dentro de la imagen.
+> **`gato/generico.webp` está limpio: NO es sistémico**, es esa pieza.
+>
+> *Y el detalle que lo vuelve peor de lo que suena: el genérico de perro es
+> el fallback MÁS usado de la galería* — es lo que ve toda alta de perro sin
+> raza elegida y sin foto, que es el caso más frecuente del producto.
+>
+> Entra a esta ficha y no a una nueva porque es **la misma causa**: la
+> generación de la galería. Se arregla en la MISMA pasada.
+> **☠️ DISPARO (compartido): la regeneración de cualquier imagen de la
+> galería.**
 #### D-685 — 🟡 EL ACUARIO: EL SUJETO ES EL SISTEMA, NO EL INDIVIDUO
 
 **La única de las siete familias donde el sujeto del producto no es el
@@ -9503,3 +9516,30 @@ miente: dice que quedó residuo.*
 
 **Origen: S91-A (hallazgo del chequeo de residuo del E2E). Letra ratificada
 por mesa y FIRMADA en el gate del founder, 8-ago-2026.**
+
+#### D-691 — ⚪ EL CHIP DE ENTIDAD TRUNCA LOS NOMBRES LARGOS («Labrador retrie…»)
+
+**Reporte del founder en dispositivo (8-ago-2026), sobre los chips vivos del
+alta.** El nombre firmado no entra: se corta a mitad de palabra.
+
+**Por qué aparece AHORA y no antes:** hasta S91 los chips de entidad
+mostraban nombres de mascota (cortos por naturaleza). El catálogo de razas
+metió nombres de **hasta 19 caracteres** («Labrador retriever»,
+«Yorkshire terrier», «Guacamayo Azul y Amarillo» son 25) en el mismo ancho
+que se calibró para «Thor». *No es que el chip se haya roto: es que le
+llegó un contenido que nunca tuvo.*
+
+**Territorio: B** (`packages/ui` — la geometría del chip de entidad y su
+tipografía). Es calibración de ancho/tipografía, no un componente nuevo.
+
+**Lo que NO se decide acá, y es de arte:** si el nombre largo se resuelve
+ensanchando, bajando el cuerpo tipográfico, envolviendo a dos líneas o
+truncando **con criterio** (que también es una decisión: truncar por el
+final no es lo mismo que truncar la segunda palabra). La proporción del
+entity chip viene PROVISIONAL desde S73 (52/44) — esto la toca.
+
+> **☠️ DISPARO: ya sonó** — el founder lo vio en el gate del alta.
+> **☠️ MUERTE:** el nombre de raza más largo del catálogo se lee entero, o
+> su corte es una decisión firmada y no un accidente de ancho.
+
+**Origen: S91 (gate del founder en dispositivo). Adjudicado a B por A.**
