@@ -9274,6 +9274,58 @@ ARCO PROPIO que lo corrige, no una espera que lo bloquea.
 > decisiones de la lámina NO se re-abren; solo esa cláusula cambia, y cambia
 > escrita en los dos lugares donde alguien la va a leer.*
 
+> ### 📜 LETRA FUNDACIONAL DEL ARCO — FIRMA DEL FOUNDER (8-ago-2026)
+>
+> **VERBATIM:** *«el perfil del acuario integrará la LISTA de sus peces como
+> MIEMBROS del sistema — identidad ligera, listable. PERO: servicios, comida,
+> bitácora y todo lo contratable aplican SIEMPRE al ACUARIO, jamás a un pez
+> particular. El pez se mira; el sistema se cuida.»*
+>
+> **Va al arco propio (post-S91). NO se construye ahora.**
+>
+> ── POR QUÉ ESTA LETRA RESUELVE EL NUDO DEL ARCO, y no solo lo describe ────
+>
+> El arco tenía una pregunta sin respuesta: *si el sujeto es el sistema, ¿los
+> peces existen o no existen?* Las dos salidas obvias eran malas — negarlos
+> deja al dueño sin poder nombrar al que le importa; darles entidad completa
+> multiplica todo el producto por N y vuelve a poner el sujeto en el
+> individuo. **La firma corta por un tercer lugar: existen para MIRARSE, no
+> para contratarse.** *«El pez se mira; el sistema se cuida»* es la frase que
+> hace decidible cada caso futuro sin volver a la mesa.
+>
+> ── LO QUE LA LETRA YA DECIDE, sin escribir una línea de código ────────────
+>
+> | pregunta | respuesta que la letra da |
+> |---|---|
+> | ¿el pez tiene ficha? | **identidad LIGERA**, listable — no un perfil |
+> | ¿se le reserva un servicio? | **NO.** Todo contratable es del acuario |
+> | ¿la comida se le compra a él? | **NO.** Se compra para el sistema |
+> | ¿tiene bitácora propia? | **NO.** La bitácora es del acuario |
+> | ¿puede tener su hito? | *lo abre el arco; la letra no lo cierra* |
+>
+> ── LO QUE ESTA LETRA **CONFIRMA** DEL MOTOR YA CONSTRUIDO ─────────────────
+>
+> Lo que S91 dejó apunta al mismo lado, y eso es señal de que la cláusula del
+> pez estaba bien orientada: `mascotas.sujeto = 'acuario'` es **la fila
+> contratable**; el vocabulario de bitácora del acuario tiene sus **3
+> conductas de sistema** (agua · habitante · alimentación del conjunto) y el
+> motor **rechaza tipado** una conducta de individuo sobre un acuario. *Un
+> pez-miembro no va a poder recibir una bitácora ni el día que exista: la
+> puerta ya está cerrada por construcción, no por convención.*
+>
+> ── LA CONSECUENCIA TÉCNICA QUE EL ARCO VA A TENER QUE MIRAR ───────────────
+>
+> «Identidad ligera, listable» **no es una fila de `mascotas`** —eso les daría
+> todo lo que la letra les niega, empezando por poder ser sujeto de una cita—.
+> Es una tabla propia colgada del acuario. **No se diseña acá**; se nombra
+> para que el arco no empiece por el camino fácil y equivocado.
+>
+> **Y el borde honesto que la letra deja abierto:** un pez que muere. Hoy
+> `estado_vida` es de la fila `mascotas`, o sea **del acuario**. Un miembro
+> que muere no puede usar ese campo sin declarar muerto al sistema entero.
+> *Es exactamente la clase de caso que el arco tiene que resolver, y por eso
+> queda escrito acá y no se improvisa el día que pase.*
+
 > **☠️ DISPARO: el arco del acuario de S91 (prioridad 3 del brief).**
 > **☠️ MUERTE:** el sistema existe como entidad con sus hitos **y sus
 > habitantes** (los peces del v1 ya no son un problema de migración: nunca
