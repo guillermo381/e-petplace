@@ -69,6 +69,32 @@ que queda abajo como foto de S87, con su nota.)*
 
 ---
 
+## 0quater. S91 (8-ago-2026) — CAE UNA ESPERA, NO TRES *(medición de C, depositada verbatim)*
+
+> **Texto de C, VERBATIM (llegado por literal de mesa; A no lo reescribe):**
+>
+> «S91 · CAE UNA ESPERA, NO TRES. Meta aprobó las plantillas (palabra del
+> founder, 8-ago-2026). El canal sigue APAGADO y no por olvido: medido contra
+> el objeto el mismo día — cero credencial de Meta en los secrets, cero
+> `despachar-whatsapp` en `supabase/functions/`, y 1 fila de consentimiento
+> con 0 habilitadas. `cat_notificacion_canales.whatsapp` sigue
+> `transporte_vivo = false` · `exige_evidencia = true`. **La aprobación de
+> plantillas desbloquea la espera de Meta; no enciende el canal.**»
+
+**Por qué esta distinción es la que importa, y no un matiz de redacción:** el
+canon venía tratando «lo de WhatsApp» como UNA espera —Meta— y por lo tanto
+como algo que se resolvía afuera. **Son tres, y dos son nuestras**: la
+credencial (que carga el founder, patrón FCM de S90) y el transporte (que se
+construye). *Una espera ajena justifica no hacer nada; dos propias no.*
+
+**Y encaja exacto con la ley de secuencia de §0ter:** lector → pieza → gate →
+flip. La aprobación de plantillas es insumo del LECTOR (las plantillas son lo
+que el transporte manda); el flip de `transporte_vivo` sigue siendo el último
+acto y sigue esperando su go con destinatario de prueba propio — igual que
+push, que fue el primer canal que la casa abrió entero.
+
+---
+
 ## 0bis. LO MEDIDO — el censo de S87 contra la DB viva *(ENMIENDA S87)*
 
 > **Acta completa con su literal:
