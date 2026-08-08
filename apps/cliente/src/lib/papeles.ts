@@ -44,21 +44,29 @@ export interface Papel {
 const PAPELES: Record<TipoDocumentoExpediente, Omit<Papel, 'tipo'>> = {
   carnet_vacunas: { claveVoz: 'CarnetVacunas', icono: 'carnet' },
   historia_clinica: { claveVoz: 'HistoriaClinica', icono: 'documento' },
-  // S90-A (orden 5, aplicado por A con la firma del founder sobre las VOCES;
-  // el tripwire de arriba sonó y esto lo apaga). LOS GLIFOS SON PROVISIONALES
-  // Y SU TENSIÓN ESTÁ MEDIDA, no escondida: la lista tiene CUATRO filas y el
-  // set vivo ofrece TRES dibujos viables en esta app — presupuesto ya vive en
-  // hogar/index.tsx:931, bitacora en adiestramiento.tsx:215, documento ya es
-  // doble (acá + cuenta/index.tsx:62). El casillero no da: falta UN glifo y
-  // dibujarlo es de B (hoja de contacto pedida en el reporte S90-A orden 5).
-  //   · receta → 'caso': la carpeta clínica — la receta nace de esa consulta;
-  //     libre en el cliente, préstamo declarado.
+  // ✅ S91-C — EL PRÉSTAMO DE LA RECETA SE RETIRA (firma del founder,
+  // 7-ago-2026: «GLIFO RECETA FIRMADO — el préstamo receta→'caso' se
+  // retira»; pedido literal de A en
+  // `docs/relevamientos/2026-08-07-s91a-FIRMAS-DE-MESA.md` §②).
+  // La receta tiene su DIBUJO PROPIO: la cápsula que B construyó en S90-B,
+  // ya viva en el registry. El riesgo que B declaró sin disimular —«puede
+  // leerse *medicación* antes que *receta*»— era justo lo que el gate a
+  // 21px tenía que mirar, y lo miró: por eso hay firma y no supuesto.
+  // `'caso'` NO queda huérfano (Ley 37 no dispara): medido, sigue con tres
+  // consumidores propios en `apps/prestador`.
+  //
+  // ⚠️ LA TENSIÓN QUE **NO** CIERRA CON ESTA FIRMA, con su cuenta RE-MEDIDA
+  // contra el objeto (la anterior decía «documento ya es doble» y estaba
+  // corta): CUATRO filas, TRES dibujos distintos — `documento` hace triple
+  // turno (`historia_clinica` acá · `ficha_identidad` acá ·
+  // `cuenta/index.tsx:62`, la entrada a Documentos del hogar). Retirar este
+  // préstamo deja **UNO** vivo, no cero:
   //   · ficha_identidad → 'documento': el objeto EXACTO del registry
   //     («identificación», cédula con RETRATO — y la ficha lleva foto). Que
   //     quede VECINA de historia_clinica con el mismo dibujo es Ley 12 en su
   //     forma vecina: PROVISIONAL A PROPÓSITO, la alternativa era mentir el
   //     objeto. Se resuelve cuando B entregue el glifo que falta.
-  receta: { claveVoz: 'Receta', icono: 'caso' },
+  receta: { claveVoz: 'Receta', icono: 'receta' },
   ficha_identidad: { claveVoz: 'FichaIdentidad', icono: 'documento' },
 };
 
