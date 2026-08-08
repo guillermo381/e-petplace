@@ -16795,6 +16795,7 @@ export type Database = {
           acepta_telemedicina: boolean | null
           calificacion_promedio: number | null
           ciudad: string | null
+          clip_url: string | null
           cohorte: string | null
           cohorte_anio: number | null
           country_code: string | null
@@ -16802,6 +16803,7 @@ export type Database = {
           foto_url: string | null
           id: string | null
           nombre_comercial: string | null
+          portadas: Json | null
           radio_cobertura_km: number | null
           sector: string | null
           servicios: Json | null
@@ -16812,6 +16814,56 @@ export type Database = {
           zona_lat: number | null
           zona_lon: number | null
           zona_radio_m: number | null
+        }
+        Insert: {
+          acepta_emergencias?: boolean | null
+          acepta_telemedicina?: boolean | null
+          calificacion_promedio?: number | null
+          ciudad?: string | null
+          clip_url?: string | null
+          cohorte?: string | null
+          cohorte_anio?: number | null
+          country_code?: string | null
+          descripcion?: string | null
+          foto_url?: string | null
+          id?: string | null
+          nombre_comercial?: string | null
+          portadas?: never
+          radio_cobertura_km?: number | null
+          sector?: string | null
+          servicios?: never
+          tipo?: string | null
+          total_citas?: number | null
+          total_resenas?: number | null
+          user_id?: string | null
+          zona_lat?: never
+          zona_lon?: never
+          zona_radio_m?: never
+        }
+        Update: {
+          acepta_emergencias?: boolean | null
+          acepta_telemedicina?: boolean | null
+          calificacion_promedio?: number | null
+          ciudad?: string | null
+          clip_url?: string | null
+          cohorte?: string | null
+          cohorte_anio?: number | null
+          country_code?: string | null
+          descripcion?: string | null
+          foto_url?: string | null
+          id?: string | null
+          nombre_comercial?: string | null
+          portadas?: never
+          radio_cobertura_km?: number | null
+          sector?: string | null
+          servicios?: never
+          tipo?: string | null
+          total_citas?: number | null
+          total_resenas?: number | null
+          user_id?: string | null
+          zona_lat?: never
+          zona_lon?: never
+          zona_radio_m?: never
         }
         Relationships: [
           {
