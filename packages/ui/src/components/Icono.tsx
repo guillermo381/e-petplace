@@ -128,6 +128,28 @@ export type IconoNombre =
   //    y `cuenta` lo usa la celda vecina (Ley 12 directa).
   //    EL OBJETO ES IDENTIFICACIÓN (cédula · RUC · NIT), no una carpeta
   //    ni un archivo genérico. GATE POR ÍCONO A 21px PENDIENTE (§2.9).
+  //
+  //    ⚠️ S91-B · SU DOBLE TURNO, MEDIDO — Y EL PRESTADO NO ES EL QUE SE
+  //    CREÍA. Tras cablear el apilado, `documento` queda en DOS usos:
+  //    `historia_clinica` y `ficha_identidad` (`apps/cliente/src/lib/
+  //    papeles.ts`). La mesa preguntó si nace el glifo propio de
+  //    `ficha_identidad` o su préstamo se declara permanente — y contra el
+  //    objeto la pregunta está AL REVÉS:
+  //      · **`ficha_identidad` NO es la prestataria: es la dueña.** El
+  //        objeto declarado dos líneas arriba es «identificación, cédula
+  //        CON RETRATO», y la ficha de identidad de una mascota es
+  //        exactamente eso — lleva foto. El propio `papeles.ts` ya lo dice
+  //        («el objeto EXACTO del registry»).
+  //      · **La que presta es `historia_clinica`.** Una historia clínica
+  //        NO es una cédula: no identifica, registra. Ahí el dibujo miente
+  //        el objeto, que es lo que la Ley 12 persigue.
+  //    ⇒ **El glifo que faltaría es el de la HISTORIA CLÍNICA**, y darle
+  //    uno propio a `ficha_identidad` dejaría a la dueña con dibujo nuevo
+  //    y a la prestataria con el que no le corresponde — el problema
+  //    intacto y una pieza más en el registry.
+  //    NO SE DIBUJA NADA HASTA QUE LA MESA RE-APUNTE: dibujar para el
+  //    objetivo equivocado es más caro que no dibujar (§6b, la regla de
+  //    economía: un glifo que nadie va a montar no se pide).
   | 'documento'
   // ── S84-B21: FISCAL y BANCARIO — las otras dos secciones de "Datos
   //    comerciales". Nacen JUNTAS y con `documento` porque el founder

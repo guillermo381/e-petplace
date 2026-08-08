@@ -356,12 +356,19 @@ export function Boton({
      otros tres solo — verificado: ningún consumidor pasa `iconoIzq` ni
      nada que pinte a la izquierda.
 
+     ⏪ S91-B · SE LLAMABA `flechaAcento` Y DEJÓ DE SER CIERTO. El nombre
+     describía su ÚNICA condición de entonces (`variante === 'acento'`);
+     desde que D destrabó `chevron`, la flecha es del BOTÓN y su dueño es
+     lo que la acción HACE. Un nombre que sobrevive a su propia condición
+     manda a leer el código equivocado — es la misma disciplina con la que
+     `mascotaId` pasó a `sujetoId` cuando empezó a llevar personas.
+
      Geometría: `CHEVRON.derecha` de la casa (S83-B12) a 20px y trazo 2,
      los mismos números que `CeldaNavegacion` y `PieRevelar` — jamás un
      path ni una escala nuevos (L-175). El color sale de `c.texto`, o sea
      del MISMO slot que el label: la flecha es parte del control, no un
      adorno con vida propia, y sobre el muro invierte con él. */
-  const flechaAcento =
+  const flecha =
     (chevron ?? variante === 'acento') ? (
       <View
         style={[
@@ -404,7 +411,7 @@ export function Boton({
       >
         {etiqueta}
       </Text>
-      {flechaAcento}
+      {flecha}
       {mostrarSpinner ? (
         <View style={{ position: 'absolute', alignSelf: 'center' }}>
           <ActivityIndicator size="small" color={c.texto} />
