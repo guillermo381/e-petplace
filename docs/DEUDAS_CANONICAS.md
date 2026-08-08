@@ -9276,3 +9276,46 @@ de discutirse cada vez que nace un papel.
 > **☠️ MUERTE:** los papeles se leen por categoría y nadie busca de más.
 
 **Origen: S89 (barrido del founder al cierre, con su umbral).**
+
+### Deudas de Sesión 91 (7 Ago 2026)
+
+#### D-686 — 🟠 L-140 TIENE UNA VERSIÓN DE TABLA, Y EL BARRIDO LEGACY NO SE HIZO
+
+**Lo que se descubrió construyendo (S91-A):** las tres tablas nuevas
+(`cat_razas`, `cat_hitos_narrativos`, `evento_hito_narrativo`) **nacieron con
+`ALL` para `anon` Y `authenticated`** — SELECT, INSERT, UPDATE, DELETE,
+TRUNCATE, REFERENCES, TRIGGER. Es **exactamente el mecanismo que L-140
+documentó para FUNCIONES** (los default privileges de Supabase conceden en el
+`CREATE`), aplicado a tablas — y hasta hoy nadie lo había escrito.
+
+**Las tres nuevas quedaron cerradas** a `SELECT` para `authenticated`
+(migración `20260807190000`), siguiendo el precedente más nuevo y más angosto
+de la casa: `cat_documentos_mascota` (S90). **El barrido de las LEGACY NO se
+hizo, y se declara en vez de darse por hecho.**
+
+**Medido al declararla (muestra, no censo):** `cat_especies` ·
+`cat_novedades_paseo` · `evento_cambio_nombre` · `evento_bitacora_familia`
+tienen las siete privilegios para `anon` y `authenticated`. **El censo
+completo no está hecho** — decir «son N tablas» sería el número inventado que
+este canon existe para no tener.
+
+**Por qué es 🟠 y no 🔴:** hoy la **RLS las salva** — sin policy de
+INSERT/UPDATE, la escritura rebota igual. El problema es que **la defensa
+queda en UNA capa**: el día que alguien agregue una policy permisiva pensando
+solo en `authenticated`, el grant de tabla ya está puesto y nadie lo va a
+mirar. *Un grant que nadie decidió es un grant que nadie puede auditar.*
+
+**Por qué NO se barre a ciegas:** revocar `anon` en una tabla legacy puede
+romper una lectura pre-login real (`cat_especies` la lee Explorar). El barrido
+exige **censo de lectores anon por tabla**, y eso es una tanda con su
+medición, no un `REVOKE` masivo. *La cura barata acá es la peligrosa.*
+
+> **☠️ DISPARO: el loop de seguridad de S92** (donde ya esperan los 10
+> hallazgos probados / 7 rojos del censo servido). Entra ahí porque es la
+> misma pregunta: qué puede tocar `anon` que nadie decidió que pudiera.
+> **☠️ MUERTE:** todas las tablas de `public` declaran sus grants de `anon` y
+> `authenticated` **por decisión escrita**, y una tabla nueva no puede nacer
+> floja sin que un guard lo diga (el mecanismo mecanizado, no la vigilancia).
+
+**Origen: S91-A (hallazgo al medir los grants de las tablas que acababa de
+crear; el barrido legacy quedó declarado por orden de mesa).**
