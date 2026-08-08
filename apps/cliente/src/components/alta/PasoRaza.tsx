@@ -36,7 +36,7 @@ import {
   EvitaTeclado,
   SelectorOpcion,
   Texto,
-  coincidenciasPrimero,
+  sugerir,
   spacing,
   useTheme,
 } from '@epetplace/ui';
@@ -44,7 +44,7 @@ import { obtenerRazasDeEspecie, type RazaCatalogo } from '@epetplace/api';
 
 import { esEspecieUi } from '@/lib/params';
 import { useTraduccion } from '@/i18n';
-import { caraDelAlta, urlDeRutaGaleria, urlGenericaDeEspecie } from './imagen-raza';
+import { caraDeMascota, urlDeRutaGaleria, urlGenericaDeEspecie } from '@/lib/cara-mascota';
 import { esAcuario, TIPOS_DE_AGUA, type BorradorAlta, type EspecieUi } from './tipos';
 
 /**
@@ -139,32 +139,40 @@ export function PasoRaza({
   }, [acuario, borrador.especie]);
 
   /**
-   * EL TIPEO PREDICTIVO — la pieza de B, con SUS DOS PERILLAS MOVIDAS JUNTAS.
+   * EL TIPEO **FILTRA** — enmienda del founder en el gate.
    *
-   * `minimoDeLetras: 3` + `modo: 'empieza'`, y las dos van de la mano porque
-   * B lo dejó escrito en su propia cabecera: bajar el mínimo SIN cambiar el
-   * modo sería peor que no bajarlo — con `'contiene'`, «lab» matchearía
-   * cualquier nombre que lleve esas letras en el medio. `'empieza'` exige
-   * que lo tecleado sea PREFIJO de alguna palabra del nombre, que es como se
-   * busca un nombre. Los defaults (4 · 'contiene') son los de la bitácora,
-   * que matchea FRASES: acá el corpus son NOMBRES.
+   * Antes usaba `coincidenciasPrimero`, que sube lo que coincide y deja el
+   * resto abajo. La letra de B lo defiende con un argumento bueno («esconder
+   * lo que no matchea castiga al que se equivocó de palabra») y para el filtro
+   * de la bitácora es cierto: ahí el corpus son 33 chips que el dueño ya vio.
    *
-   * Y se usa `coincidenciasPrimero` y NO `sugerir`, que es la otra mitad de
-   * la letra de B: **mostrar primero, jamás esconder.** La lista se ve entera
-   * desde el arranque —con su cara, que es el escaparate que pidió el
-   * founder— y tipear REORDENA, subiendo lo que coincide. `sugerir` habría
-   * devuelto vacío con el campo en blanco, y ahí no habría escaparate ninguno.
+   * Acá son 44 razas: quien teclea «lab» no está afinando una lista que
+   * conoce — está BUSCANDO. Con 44 items debajo, subir Labrador al primer
+   * lugar y dejar 43 abajo se lee igual que no haber filtrado nada.
+   *
+   * Por eso `sugerir`, que devuelve SOLO las que coinciden. Y con el campo
+   * vacío devuelve `[]` a propósito («una lista que aparece sola no es una
+   * sugerencia, es ruido»), así que el catálogo entero se muestra mientras
+   * nadie tecleó y se angosta al primer trazo.
+   *
+   * Las dos perillas siguen moviéndose juntas: `minimoDeLetras: 3` +
+   * `modo: 'empieza'` (con 'contiene', «lab» matchearía cualquier nombre con
+   * esas letras en el medio).
    */
-  const sugerencias = useMemo(
-    () =>
-      coincidenciasPrimero(catalogo ?? [], {
-        texto: raza,
-        vozDe: (r) => r.nombre,
-        minimoDeLetras: 3,
-        modo: 'empieza',
-      }),
-    [catalogo, raza],
-  );
+  const sugerencias = useMemo(() => {
+    const todas = catalogo ?? [];
+    if (raza.trim().length === 0) return todas;
+    const filtradas = sugerir(todas, {
+      texto: raza,
+      vozDe: (r) => r.nombre,
+      minimoDeLetras: 3,
+      modo: 'empieza',
+      tope: todas.length,
+    });
+    // Menos de 3 letras no filtra (la perilla): `sugerir` devuelve vacío y
+    // vaciar la pantalla por teclear una letra sería peor que no filtrar.
+    return filtradas.length === 0 && raza.trim().length < 3 ? todas : filtradas;
+  }, [catalogo, raza]);
 
   /**
    * LOS CHIPS — los dos de primera clase primero, y después el catálogo.
@@ -176,7 +184,7 @@ export function PasoRaza({
    */
   const chips = useMemo(() => {
     const generico = urlGenericaDeEspecie(borrador.especie);
-    return [
+    const primeraClase = [
       {
         codigo: CODIGO_MESTIZO,
         etiqueta: t('alta.razaMestizo'),
@@ -187,11 +195,21 @@ export function PasoRaza({
         etiqueta: t('alta.razaNoSe'),
         avatar: { nombre: t('alta.razaNoSe'), fotoUrl: generico },
       },
+    ];
+    // ⚠️ ENMIENDA DEL FOUNDER (gate): los dos de primera clase van SIEMPRE
+    // VISIBLES pero **ABAJO** del listado filtrado. Estaban arriba por la
+    // letra anterior de mesa. Y el cambio tiene sentido con el filtro puesto:
+    // arriba de una lista que se angosta al teclear, «Mestizo» empuja hacia
+    // abajo justo lo que la persona está buscando. Abajo siguen siendo
+    // primera clase —no se filtran, no desaparecen nunca— sin competir con
+    // el resultado.
+    return [
       ...sugerencias.map((r) => ({
         codigo: r.slug,
         etiqueta: r.nombre,
         avatar: { nombre: r.nombre, fotoUrl: urlDeRutaGaleria(r.ruta_imagen) },
       })),
+      ...primeraClase,
     ];
   }, [sugerencias, borrador.especie, t]);
 
@@ -242,12 +260,12 @@ export function PasoRaza({
               acompaña a la elección es el que en el paso 4 ocupa el lugar de
               la foto. Hoy muestra el genérico de la especie; cuando exista el
               catálogo, mostrará la cara de la raza elegida sin tocar nada
-              de acá — `caraDelAlta` ya resuelve los dos casos. */}
+              de acá — `caraDeMascota` ya resuelve los dos casos. */}
           <View style={{ alignItems: 'center', paddingTop: spacing[2] }}>
             <AvatarMascota
               nombre={nombre}
               especie={especieUi}
-              fotoUrl={caraDelAlta({ especie: borrador.especie, razaSlug: slug })}
+              fotoUrl={caraDeMascota({ especie: borrador.especie, razaSlug: slug })}
               tamano="lg"
             />
           </View>
@@ -307,6 +325,11 @@ export function PasoRaza({
               <SelectorOpcion
                 acento="control"
                 entidad
+                // G4 (gate founder): el elegido se SELLA con la pata de la
+                // casa. `MarcaEleccion` ya marcaba en FiltroPills,
+                // FiltroMascotas y SelectorSegmentado — este es el quinto
+                // control y la importa, no la reinventa.
+                marcaPata
                 etiqueta={t('alta.razaSugerencias')}
                 opciones={chips}
                 seleccionada={elegido}

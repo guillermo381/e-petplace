@@ -30,6 +30,7 @@ import Animated from 'react-native-reanimated'
 
 import { usePresionado } from './usePresionado'
 import { AvatarMascota, TALLA_AVATAR_ENTIDAD } from './AvatarMascota'
+import { MarcaEleccion } from '../brand/MarcaEleccion'
 
 import { typography } from '../tokens/typography'
 import { spacing } from '../tokens/spacing'
@@ -133,6 +134,7 @@ export interface SelectorOpcionProps {
    *  espec propia (S73) y no consume esta prop. Memorial degrada a
    *  contorno solo (sin tinte — patrón 'capaBg' in theme). */
   naturaleza?: 'existe' | 'seFija'
+  marcaPata?: boolean
   /** ⚠️ S81 — LA CLASE «ELEGIDOR» (la respuesta de Campo sinCaja,
    *  generalizada): el elegidor SOLITARIO — una decisión suelta en su
    *  pantalla (talla/pelaje, franjas de seccion-horarios, bancarios) —
@@ -164,6 +166,7 @@ function Chip({
   modo,
   acento,
   naturaleza,
+  marcaPata,
   solitario,
 }: {
   opcion: SelectorOpcionItem
@@ -178,6 +181,7 @@ function Chip({
   acento: 'capa' | 'control' | 'oficio'
   naturaleza: 'existe' | 'seFija'
   solitario: boolean
+  marcaPata: boolean
 }) {
   const { theme } = useTheme()
   // S63 (D-401): el clon muere — la física vive en LA primitiva
@@ -357,6 +361,10 @@ function Chip({
           ...estiloPresionado,
         }}
       >
+        {/* S91 — la pata pisa al elegido. Solo en el elegido: la huella en
+            TODOS no puede señalar a UNO (S80 lo midió). */}
+        {marcaPata && seleccionada ? <MarcaEleccion color={theme.accent.control} /> : null}
+
         {/* S62 (receta Boton): en carga, adorno y label quedan MONTADOS
             invisibles — preservan el ancho exacto, cero layout shift. */}
         {entidad && opcion.avatar ? (
@@ -412,6 +420,7 @@ export function SelectorOpcion({
   etiquetaVisible = true,
   naturaleza = 'seFija',
   solitario = false,
+  marcaPata = false,
 }: SelectorOpcionProps) {
   const { theme } = useTheme()
 
@@ -429,6 +438,7 @@ export function SelectorOpcion({
       modo={multiple ? 'checkbox' : 'radio'}
       acento={acento}
       naturaleza={naturaleza}
+      marcaPata={marcaPata === true}
       solitario={solitario}
     />
   ))

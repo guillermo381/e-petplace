@@ -1,5 +1,12 @@
 /**
- * S91-D · LA GALERÍA — la cara de la raza mientras no hay foto.
+ * S91-D · LA CARA DE UNA MASCOTA — la galería mientras no hay foto propia.
+ *
+ * ⚠️ VIVE EN `lib/` Y NO EN `components/alta/` DESDE EL GATE DEL FOUNDER: el
+ * PERFIL la necesita igual. Su observación fue exacta —«la foto del chip no
+ * viaja al perfil»— y la causa era ésta: la regla del fallback vivía adentro
+ * del alta, así que la cara que ilustraba el alta se evaporaba al terminarla.
+ * Una regla de presentación que solo conoce una pantalla no es un fallback de
+ * la casa: es un adorno de esa pantalla.
  *
  * Bucket `especies-razas`, PÚBLICO, sembrado en S90-C: 111 objetos
  * (105 razas + 6 genéricos), origen-IA firmado, ficha D-288.
@@ -82,10 +89,11 @@ export function urlGenericaDeEspecie(especie: string | undefined): string | unde
  *
  * «Un elemento, dos trabajos» (lámina §paso 2): el mismo círculo que
  * acompaña a la sugerencia mientras elegís es el que después ocupa el lugar
- * de la foto. Por eso esto devuelve una URL y no un componente: lo consumen
- * dos tamaños distintos del MISMO `AvatarMascota`.
+ * de la foto — **y el que queda en su perfil si nunca subís una**. Por eso
+ * devuelve una URL y no un componente: lo consumen tres tamaños distintos del
+ * MISMO `AvatarMascota`.
  */
-export function caraDelAlta(args: {
+export function caraDeMascota(args: {
   especie: string | undefined;
   razaSlug: string | undefined;
   /** Si ya hay foto real, gana siempre: la galería es un mientras tanto. */

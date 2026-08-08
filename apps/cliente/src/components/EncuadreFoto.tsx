@@ -252,27 +252,7 @@ export function EncuadreFoto({ uri, dim, inicial, nombre, onCambio, onInteraccio
         </Texto>
       )}
 
-      {/* Así lo vas a ver — las superficies de la lámina, EN VIVO */}
-      <View style={{ gap: spacing[1] }}>
-        <Texto variante="seccion">{t('fotoEncuadre.asiSeVe')}</Texto>
-        <Texto variante="apoyo">{t('fotoEncuadre.asiSeVeDetalle')}</Texto>
-      </View>
-
-      {/* fila 1: perfil (aire 1.75) · hogar · sala vet — sueltos, squircle */}
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing[4] }}>
-        <View style={{ alignItems: 'center', gap: spacing[2] }}>
-          <MarcoVivo uri={uri} dim={dim} cx={cx} cy={cy} z={z} lado={TAMANO_SUPERFICIE.perfil} aire={AIRE.perfil} fondo={theme.bg.overlay} />
-          <Text style={vozChica}>{t('fotoEncuadre.enPerfil')}</Text>
-        </View>
-        <View style={{ alignItems: 'center', gap: spacing[2], maxWidth: 110 }}>
-          <MarcoVivo uri={uri} dim={dim} cx={cx} cy={cy} z={z} lado={TAMANO_SUPERFICIE.hogar} fondo={theme.bg.overlay} />
-          <Text style={vozChica}>{t('fotoEncuadre.enHogar')}</Text>
-        </View>
-        <View style={{ alignItems: 'center', gap: spacing[2], maxWidth: 100 }}>
-          <MarcoVivo uri={uri} dim={dim} cx={cx} cy={cy} z={z} lado={TAMANO_SUPERFICIE.salaVet} fondo={theme.bg.overlay} />
-          <Text style={vozChica}>{t('fotoEncuadre.enSalaVet')}</Text>
-        </View>
-      </View>
+      <PreviewSuperficies uri={uri} dim={dim} cx={cx} cy={cy} z={z} />
 
       {/* fila 2: el entity chip — reposo y elegido (controlLleno; memorial
           degrada al chip sereno, patrón SelectorOpcion: narrow por 'in') */}
@@ -396,6 +376,71 @@ export function EncuadreFoto({ uri, dim, inicial, nombre, onCambio, onInteraccio
         </View>
         <Text style={vozChica}>{t('fotoEncuadre.leyendaFila')}</Text>
       </View>
+    </View>
+  );
+}
+
+/**
+ * S91 · GATE DEL FOUNDER — EL ESCAPARATE, CON DOS FUENTES DE IMAGEN.
+ *
+ * «El preview de chips va en AMBOS caminos»: aparecía solo cuando el dueño
+ * subía SU foto, y la letra firmada dice que es el escaparate indirecto de los
+ * otros servicios — o sea que tiene que aparecer igual cuando la imagen viene
+ * de la galería por el chip de raza. Un escaparate que solo se abre para
+ * quien ya trajo su foto le muestra el producto a quien menos lo necesita.
+ *
+ * UN componente, dos fuentes: con foto propia recibe su `dim` y su encuadre
+ * vivo; con la cara de la galería recibe un cuadrado y el encuadre neutro
+ * —las imágenes del bucket son 1:1 y no hay nada que encuadrar—.
+ */
+export function PreviewSuperficies({
+  uri,
+  dim,
+  cx,
+  cy,
+  z,
+}: {
+  uri: string;
+  dim: DimFoto;
+  /** VIVOS: las previews corren en el UI thread (Reanimated), así que el
+   *  encuadre llega como SharedValue y no como número. Para la cara de la
+   *  galería se pasan tres constantes envueltas — no hay gesto que seguir. */
+  cx: SharedValue<number>;
+  cy: SharedValue<number>;
+  z: SharedValue<number>;
+}) {
+  const { theme } = useTheme();
+  const { t } = useTraduccion();
+  const vozChica = {
+    fontFamily: typography.family.sans.regular,
+    fontSize: typography.size.xs,
+    color: theme.text.tertiary,
+    textAlign: 'center' as const,
+  };
+  return (
+    <View style={{ gap: spacing[4] }}>
+      {/* Así lo vas a ver — las superficies de la lámina, EN VIVO */}
+      <View style={{ gap: spacing[1] }}>
+        <Texto variante="seccion">{t('fotoEncuadre.asiSeVe')}</Texto>
+        <Texto variante="apoyo">{t('fotoEncuadre.asiSeVeDetalle')}</Texto>
+      </View>
+
+      {/* fila 1: perfil (aire 1.75) · hogar · sala vet — sueltos, squircle */}
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: spacing[4] }}>
+        <View style={{ alignItems: 'center', gap: spacing[2] }}>
+          <MarcoVivo uri={uri} dim={dim} cx={cx} cy={cy} z={z} lado={TAMANO_SUPERFICIE.perfil} aire={AIRE.perfil} fondo={theme.bg.overlay} />
+          <Text style={vozChica}>{t('fotoEncuadre.enPerfil')}</Text>
+        </View>
+        <View style={{ alignItems: 'center', gap: spacing[2], maxWidth: 110 }}>
+          <MarcoVivo uri={uri} dim={dim} cx={cx} cy={cy} z={z} lado={TAMANO_SUPERFICIE.hogar} fondo={theme.bg.overlay} />
+          <Text style={vozChica}>{t('fotoEncuadre.enHogar')}</Text>
+        </View>
+        <View style={{ alignItems: 'center', gap: spacing[2], maxWidth: 100 }}>
+          <MarcoVivo uri={uri} dim={dim} cx={cx} cy={cy} z={z} lado={TAMANO_SUPERFICIE.salaVet} fondo={theme.bg.overlay} />
+          <Text style={vozChica}>{t('fotoEncuadre.enSalaVet')}</Text>
+        </View>
+      </View>
+
     </View>
   );
 }

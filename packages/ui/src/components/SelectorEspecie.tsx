@@ -44,6 +44,9 @@ export interface SelectorEspecieOpcion {
   /** Código real de cat_especies (las 6 familias F1 post-D-287). */
   codigo: AvatarMascotaEspecie
   nombre: string
+  /** S91 (gate founder) — LA CARA DE LA ESPECIE. Ausente = la huella de
+   *  siempre, así que la ficha no cambia para quien no la pase. */
+  fotoUrl?: string
 }
 
 export interface SelectorEspecieProps {
@@ -84,7 +87,12 @@ function Ficha({
   // elección sigue escalando por el BORDE de capa (espec S45 intacta).
   // Con 6 hermanos rige L-b: intermedio, jamás pleno. Memorial queda en
   // contorno por el mismo gate 'capaBg' in theme (sin tinta).
-  const rellenoCatalogo = !seleccionada && 'capaBg' in theme
+  // ⚠️ S91 (gate founder): EL RELLENO DEL REPOSO SE APAGA CUANDO HAY CARA.
+  // El tinte de catálogo (7bis) existe para que una ficha SIN contenido no se
+  // lea como un hueco. Con la foto adentro ya no hay hueco: el verde deja de
+  // ser sistema y pasa a ser un velo sobre la imagen — que es exactamente lo
+  // que el founder vio y llamó bug. Sin foto, la regla de 7bis sigue intacta.
+  const rellenoCatalogo = !seleccionada && 'capaBg' in theme && opcion.fotoUrl === undefined
   const fondo = conCapa || rellenoCatalogo ? theme.capaBg.identidad : fondoReposo
   const borde = conCapa
     ? theme.capa.identidad
@@ -120,7 +128,12 @@ function Ficha({
           transitionTimingFunction: cubicBezier(...motion.easing.spring.bezier),
         }}
       >
-        <AvatarMascota nombre={opcion.nombre} especie={opcion.codigo} tamano="md" />
+        <AvatarMascota
+          nombre={opcion.nombre}
+          especie={opcion.codigo}
+          {...(opcion.fotoUrl !== undefined ? { fotoUrl: opcion.fotoUrl } : null)}
+          tamano="md"
+        />
         <Text
           numberOfLines={1}
           style={{

@@ -77,6 +77,7 @@ import {
   type PerfilMascota,
   type SenalesHogarMascota,
   obtenerHistoriaPeso,
+  obtenerRazasDeEspecie,
   type PesoDeLaSerie,
 } from '@epetplace/api';
 import {
@@ -94,6 +95,7 @@ import { abrirReceta, resolverDescarga, type Descarga } from '@/lib/descarga-pap
 import { CantoCurva } from '@/components/canto-curva';
 import { FilaDocumento } from '@/components/fila-documento';
 import { vozEdad, vozNacimiento, vozOrigen } from '@/lib/voz-mascota';
+import { caraDeMascota } from '@/lib/cara-mascota';
 import { RegistrarPesoHoja } from '@/components/registrar-peso-hoja';
 import { HojaReceta } from '@/components/hoja-receta';
 import { FiltroPills } from '@/components/filtro-pills';
@@ -422,6 +424,39 @@ export default function PerfilDeMascota() {
           void resolverUrlFoto(r.data.mascota.foto_url).then((url) => {
             if (vigente) setFotoFirmada(url ?? undefined);
           });
+        } else {
+          /**
+           * 🔴 S91 · GATE — LA CARA DE LA GALERÍA SE QUEDA.
+           *
+           * Sin foto propia, el perfil quedaba SIN IMAGEN: la cara que había
+           * ilustrado el alta —la de su raza, o la genérica de su especie— se
+           * evaporaba al terminar el alta. El founder lo vio así y tenía
+           * razón: es la misma mascota, y la casa ya sabía cómo se ve.
+           *
+           * El slug se resuelve por NOMBRE contra el catálogo porque
+           * `mascotas` guarda la raza como TEXTO (letra S59: texto libre) y
+           * no su slug. Si no matchea —una raza escrita a mano que el
+           * catálogo no tiene— cae al genérico de la especie, que sigue
+           * siendo verdad. **No se slugifica el texto tipeado**: acertaría a
+           * veces y traería la cara de otra raza, que es peor que el genérico.
+           *
+           * Solo se consulta cuando NO hay foto: quien subió la suya no paga
+           * este viaje (D-497).
+           */
+          const m = r.data.mascota;
+          void (async () => {
+            let slug: string | undefined;
+            if (m.raza !== null && m.raza.length > 0) {
+              const cat = await obtenerRazasDeEspecie(m.especie);
+              if (cat.ok) {
+                slug = cat.data.find(
+                  (x) => x.nombre.toLowerCase() === (m.raza ?? '').toLowerCase(),
+                )?.slug;
+              }
+            }
+            if (!vigente) return;
+            setFotoFirmada(caraDeMascota({ especie: m.especie, razaSlug: slug }));
+          })();
         }
         void cargarPrimeraPagina(mascotaId);
         void obtenerEstadoHogar([mascotaId]).then((eh) => {
@@ -1337,8 +1372,20 @@ export default function PerfilDeMascota() {
                       <>
                         {visibles.map((it) => {
                           const familia = FAMILIA_DE_TIPO[it.tipo];
-                          const color =
-                            familia === 'salud' ? theme.capa.identidad : familia !== undefined ? theme.capa.cuidado : null;
+                          // S91 (gate): EL HITO ES UN MOMENTO DE IDENTIDAD y
+                          // se lee como tal. No entra a `FAMILIA_DE_TIPO`
+                          // porque ésa es la taxonomía de SERVICIOS y un hito
+                          // no es un servicio — pero sin canto quedaba como
+                          // una fila anónima entre las demás, que es media
+                          // explicación de «no apareció».
+                          const esHito = it.tipo === 'hito_narrativo';
+                          const color = esHito
+                            ? theme.capa.identidad
+                            : familia === 'salud'
+                              ? theme.capa.identidad
+                              : familia !== undefined
+                                ? theme.capa.cuidado
+                                : null;
                           const glifoFila: IconoNombre | null =
                             familia === 'salud'
                               ? 'veterinaria'

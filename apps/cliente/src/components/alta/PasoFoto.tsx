@@ -23,6 +23,7 @@
  */
 
 import { useRef, useState } from 'react';
+import { useSharedValue } from 'react-native-reanimated';
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -35,12 +36,12 @@ import {
   type FotoCapturada,
 } from '@epetplace/ui';
 
-import { EncuadreFoto } from '@/components/EncuadreFoto';
+import { EncuadreFoto, PreviewSuperficies } from '@/components/EncuadreFoto';
 import { HojaFotoMascota } from '@/components/HojaFotoMascota';
 import { ENCUADRE_DEFAULT, type Encuadre } from '@/components/foto-encuadre';
 import { esEspecieUi } from '@/lib/params';
 import { useTraduccion } from '@/i18n';
-import { caraDelAlta } from './imagen-raza';
+import { caraDeMascota } from '@/lib/cara-mascota';
 import type { BorradorAlta } from './tipos';
 
 export function PasoFoto({
@@ -66,6 +67,16 @@ export function PasoFoto({
   // El encuadre vigente NO re-renderiza la pantalla: vive en ref y las
   // previews viven en el UI thread (EncuadreFoto).
   const encuadreRef = useRef<Encuadre>(ENCUADRE_DEFAULT);
+
+  /** G5 (gate founder) — EL ESCAPARATE TAMBIÉN SIN FOTO PROPIA.
+   *  Las imágenes del bucket son 1:1 (medido: 1254×1254 en origen), así que
+   *  el encuadre neutro las muestra centradas y completas. Son constantes
+   *  envueltas porque la pieza lee SharedValues: las previews viven en el UI
+   *  thread y no se les cambia el contrato por este caso. */
+  const cxFijo = useSharedValue(ENCUADRE_DEFAULT.cx);
+  const cyFijo = useSharedValue(ENCUADRE_DEFAULT.cy);
+  const zFijo = useSharedValue(1);
+  const caraGaleria = caraDeMascota({ especie: borrador.especie, razaSlug: borrador.razaSlug });
 
   const avanzar = () =>
     onAvanzar(
@@ -102,7 +113,7 @@ export function PasoFoto({
             <AvatarMascota
               nombre={nombre}
               especie={esEspecieUi(borrador.especie) ? borrador.especie : undefined}
-              fotoUrl={caraDelAlta({ especie: borrador.especie, razaSlug: borrador.razaSlug })}
+              fotoUrl={caraDeMascota({ especie: borrador.especie, razaSlug: borrador.razaSlug })}
               tamano="lg"
             />
             <Texto variante="apoyo" centrado>
@@ -119,6 +130,19 @@ export function PasoFoto({
               etiqueta={t('fotoEncuadre.elegirFoto')}
               onPress={() => setHojaAbierta(true)}
             />
+
+            {/* G5: el MISMO componente, con la cara de la galería. Antes esto
+                solo existía tras subir una foto propia — y es justamente el
+                escaparate de los otros servicios (letra firmada). */}
+            {caraGaleria !== undefined ? (
+              <PreviewSuperficies
+                uri={caraGaleria}
+                dim={{ iw: 1254, ih: 1254 }}
+                cx={cxFijo}
+                cy={cyFijo}
+                z={zFijo}
+              />
+            ) : null}
             {/* La salida, siempre visible y sin competir (ver cabecera ②). */}
             <Boton variante="ghost" etiqueta={t('alta.ahoraNo')} onPress={avanzar} />
           </View>
