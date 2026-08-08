@@ -10424,6 +10424,7 @@ export type Database = {
           estado_vida_desde: string
           familia_id: string
           fecha_alta: string
+          fecha_montaje: string | null
           fecha_nacimiento: string | null
           fecha_nacimiento_precision: string | null
           foto_cx: number
@@ -10455,6 +10456,7 @@ export type Database = {
           estado_vida_desde?: string
           familia_id: string
           fecha_alta?: string
+          fecha_montaje?: string | null
           fecha_nacimiento?: string | null
           fecha_nacimiento_precision?: string | null
           foto_cx?: number
@@ -10486,6 +10488,7 @@ export type Database = {
           estado_vida_desde?: string
           familia_id?: string
           fecha_alta?: string
+          fecha_montaje?: string | null
           fecha_nacimiento?: string | null
           fecha_nacimiento_precision?: string | null
           foto_cx?: number
@@ -17245,6 +17248,10 @@ export type Database = {
         }[]
       }
       actualizar_nombre_comercial: { Args: { p_nombre: string }; Returns: Json }
+      actualizar_raza_mascota: {
+        Args: { p_mascota_id: string; p_raza: string }
+        Returns: Json
+      }
       agregar_incidencia_atencion: {
         Args: {
           p_atencion_id: string
@@ -17257,6 +17264,7 @@ export type Database = {
       agregar_mascota_a_familia: {
         Args: {
           p_especie: string
+          p_fecha_montaje?: string
           p_fecha_nacimiento?: string
           p_foto_url?: string
           p_nombre_mascota: string
@@ -17536,6 +17544,7 @@ export type Database = {
       crear_familia_con_primera_mascota: {
         Args: {
           p_especie: string
+          p_fecha_montaje?: string
           p_fecha_nacimiento?: string
           p_foto_url?: string
           p_nombre_familia: string
@@ -18388,6 +18397,15 @@ export type Database = {
       obtener_resumen_dia_grooming: {
         Args: { p_fecha: string; p_prestador_id: string }
         Returns: Json
+      }
+      obtener_serie_peso: {
+        Args: { p_limite?: number; p_mascota_id: string }
+        Returns: {
+          fecha: string
+          metodo: string
+          origen: string
+          peso_kg: number
+        }[]
       }
       obtener_slots_disponibles: {
         Args: {

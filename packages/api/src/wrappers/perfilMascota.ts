@@ -318,3 +318,55 @@ export async function declararFotoMascota(
   }
   return { ok: true, data: { mascota_id: o.mascota_id, cx: o.cx, cy: o.cy, z: o.z } };
 }
+
+// ── S91 (P3 de la lámina del perfil) · LA PUERTA DE EDICIÓN DE RAZA ────
+// El alta la escribe; el perfil necesitaba SU puerta. Angosta: un campo.
+//
+// TEXTO LIBRE Y SIN VALIDAR CONTRA EL CATÁLOGO, y eso es la LETRA (S59), no
+// una omisión: validarlo mataría «Mestizo», «No sé» y la raza que el
+// catálogo no tiene. El catálogo SUGIERE (`obtenerRazasDeEspecie`), el dueño
+// CONFIRMA. Hay un cinturón en la migración que rebota si alguien
+// «mejorara» la RPC agregándole el chequeo.
+
+export type CodigoRazaMascota =
+  | 'no_autenticado'
+  | 'sin_acceso'
+  | 'raza_no_aplica_acuario'
+  | 'error';
+
+/** Vacío o solo espacios = borrar la raza, y es legítimo: «no sé» después
+ *  de haber dicho algo es una respuesta, no un error. */
+export async function actualizarRazaMascota(
+  mascotaId: string,
+  raza: string | null,
+): Promise<ResultadoWrapper<{ raza: string | null }, CodigoRazaMascota>> {
+  const { data, error } = await getClient().rpc('actualizar_raza_mascota', {
+    p_mascota_id: mascotaId,
+    // La RPC no le da DEFAULT a `p_raza` (es requerido), así que «borrar»
+    // viaja como cadena VACÍA — y el motor la normaliza con
+    // `nullif(btrim(...))`. No es un atajo: es el mismo camino que el
+    // fixture probó con '   '.
+    p_raza: raza ?? '',
+  });
+  if (error) {
+    const m = error.message;
+    const codigo: CodigoRazaMascota = m.startsWith('no_autenticado')
+      ? 'no_autenticado'
+      : m.startsWith('raza_no_aplica_acuario')
+        ? 'raza_no_aplica_acuario'
+        : m.startsWith('sin_acceso')
+          ? 'sin_acceso'
+          : 'error';
+    return {
+      ok: false,
+      codigo,
+      mensaje:
+        codigo === 'raza_no_aplica_acuario'
+          ? 'Un acuario no tiene raza.'
+          : 'No pudimos guardar la raza. Probá de nuevo.',
+    };
+  }
+  const o = data as Record<string, unknown> | null;
+  const r = o !== null && typeof o.raza === 'string' && o.raza.length > 0 ? o.raza : null;
+  return { ok: true, data: { raza: r } };
+}

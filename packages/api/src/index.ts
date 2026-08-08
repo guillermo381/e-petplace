@@ -232,6 +232,9 @@ export { mascotasElegibles, type EstadoVidaMascota } from './wrappers/_mascotas-
 export {
   obtenerPerfilMascota,
   declararFotoMascota,
+  // S91 (P3): la puerta de EDICIÓN de raza del perfil.
+  actualizarRazaMascota,
+  type CodigoRazaMascota,
   type PerfilMascota,
   type UmbralesEspecie,
   type VacunaDeMascota,
@@ -246,6 +249,9 @@ export {
   registrarDesparasitacion,
   declararSinAlergiasConocidas,
   registrarPesoMascota,
+  // S91 (P2): la CURVA de peso, no el vigente.
+  obtenerSeriePeso,
+  type MedicionPeso,
   obtenerHistoriaPeso,
   type CodigoErrorSalud,
   type TipoDesparasitacion,
