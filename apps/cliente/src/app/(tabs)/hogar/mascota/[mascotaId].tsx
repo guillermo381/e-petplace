@@ -52,6 +52,7 @@ import {
   Isotipo,
   PieRevelar,
   Separador,
+  ChipEntidad,
   Tarjeta,
   Texto,
   radius,
@@ -78,6 +79,8 @@ import {
   type SenalesHogarMascota,
   obtenerHistoriaPeso,
   obtenerRazasDeEspecie,
+  obtenerCensoDelAcuario,
+  type CensoDelAcuario,
   obtenerSolicitudesPendientesDueno,
   obtenerPresupuestosFamilia,
   obtenerCitasActivasHogar,
@@ -92,14 +95,16 @@ import {
   type MomentoVital,
   type VitalesPaseos,
 } from '@epetplace/domain';
-import { FAMILIA_DE_TIPO, vozHecho } from '@/lib/voz-hecho';
+import { FAMILIA_DE_TIPO, capaDeHecho, vozHecho } from '@/lib/voz-hecho';
 import { PAPELES_DE_MASCOTA, componerPapeles } from '@/lib/papeles';
 import { abrirReceta, resolverDescarga, type Descarga } from '@/lib/descarga-papel';
 import { CantoCurva } from '@/components/canto-curva';
 import { FilaDocumento } from '@/components/fila-documento';
 import { vozEdad, vozNacimiento, vozOrigen } from '@/lib/voz-mascota';
 import { contarPendientesDe } from '@/lib/pendientes';
-import { caraDeMascota } from '@/lib/cara-mascota';
+import { composicionDe } from '@/lib/composicion-sujeto';
+import { HabitantesAcuarioHoja } from '@/components/habitantes-acuario-hoja';
+import { caraDeMascota, urlDeRutaGaleria } from '@/lib/cara-mascota';
 import { RegistrarPesoHoja } from '@/components/registrar-peso-hoja';
 import { EditarRazaHoja } from '@/components/editar-raza-hoja';
 import { HojaReceta } from '@/components/hoja-receta';
@@ -269,6 +274,10 @@ export default function PerfilDeMascota() {
   /** S89-D ①: la sección de papeles nace PLEGADA — el perfil es de la
    *  mascota; sus documentos se piden, no presiden. */
   const [docsAbiertos, setDocsAbiertos] = useState(false);
+  /** S91-D · «Quiénes viven acá» — el censo del acuario, del motor de A.
+   *  `null` = todavía no se pudo leer, y NO es «cero habitantes» (L-178). */
+  const [censo, setCenso] = useState<CensoDelAcuario | null>(null);
+  const [habitantesHoja, setHabitantesHoja] = useState(false);
   // S90 (firma founder): la lista deriva del CATÁLOGO VIVO; arranca con el
   // respaldo de compilación (la misma foto al día del build).
   const [papeles, setPapeles] = useState(PAPELES_DE_MASCOTA);
@@ -472,6 +481,11 @@ export default function PerfilDeMascota() {
           })();
         }
         void cargarPrimeraPagina(mascotaId);
+        // «Quiénes viven acá» — el censo del sistema.
+        void obtenerCensoDelAcuario(mascotaId).then((c) => {
+          if (!vigente) return;
+          setCenso(c.ok ? c.data : null);
+        });
         void obtenerEstadoHogar([mascotaId]).then((eh) => {
           if (!vigente || !eh.ok) return;
           setSenal(eh.data.senales.find((x) => x.mascota_id === mascotaId) ?? null);
@@ -588,17 +602,45 @@ export default function PerfilDeMascota() {
    *
    * Memorial apaga, igual que en el Hogar y por la misma razón estructural.
    */
+  /** ⚠️ SUBE ACÁ, arriba de todo lo que deriva de ella: la cuenta de
+   *  pendientes y la razón de «Lo próximo» la consumen, y una composición
+   *  declarada DESPUÉS de sus consumidores no compone nada. */
+  const esAcuario = mascota.sujeto === 'acuario';
+  /**
+   * LA COMPOSICIÓN NO SE DECLARA ACÁ — se consulta. Vivía inline en esta
+   * pantalla, y por eso el Hogar (que habla de la misma mascota) no podía
+   * consultarla y componía por su cuenta: el acuario terminó pidiendo carnet
+   * de vacunas en «Ponte al día». **Arriba de la pantalla no alcanza: tiene
+   * que estar arriba de TODAS.** Ver `lib/composicion-sujeto.ts`.
+   */
+  const monta = composicionDe(mascota.sujeto);
+
   const pendientes = esMemorial
     ? 0
     : contarPendientesDe(mascota.id, {
         solicitudes,
         presupuestos,
         porCoordinar,
+        /**
+         * ⚠️ LA COMPOSICIÓN TIENE QUE LLEGAR HASTA ACÁ, y no llegaba.
+         *
+         * Lo destapó la captura del gate: el acuario decía «1 por resolver», y
+         * ese 1 era **el carnet de vacunas** — la misma sección que P7 ya había
+         * quitado de la pantalla. Quitar la SECCIÓN y dejar que su ausencia
+         * siga contando como pendiente es media composición: el dueño de un
+         * acuario ve una cuenta que no puede resolver ni encontrar.
+         *
+         * **La lección, que es la que vale:** una composición que solo apaga
+         * secciones deja vivas las voces DERIVADAS de ellas. Las dos clases de
+         * vacuna se apagan acá con la misma constante que apaga sus secciones,
+         * en vez de con dos condiciones nuevas.
+         */
         tieneAlertaDeVacuna:
+          monta.vacunas &&
           vozEstadoHogar !== null &&
           vozEstadoHogar.voz === 'pideAtencion' &&
           vozEstadoHogar.causa !== 'emergencia',
-        sinNingunaVacuna: senal !== null && senal.vacunas_total === 0,
+        sinNingunaVacuna: monta.vacunas && senal !== null && senal.vacunas_total === 0,
       });
   const momento =
     umbrales !== null
@@ -635,39 +677,6 @@ export default function PerfilDeMascota() {
    * equivalentes hoy por construcción del motor, pero `sujeto` es LA columna
    * que declara qué clase de cosa es esta fila. El día que haya un terrario
    * que no sea 'pez', esta línea ya está bien.
-   */
-  const esAcuario = mascota.sujeto === 'acuario';
-
-  /**
-   * QUÉ MONTA ESTE PERFIL — la decisión, UNA vez y acá arriba.
-   *
-   * Letra de mesa (8-ago): la ausencia del acuario se resuelve por
-   * COMPOSICIÓN, jamás por `if` repartidos abajo. El porqué es de §6 y se
-   * paga siempre igual: ocho condiciones esparcidas por mil líneas son ocho
-   * lugares donde el próximo sujeto —un terrario, una colmena— se olvida en
-   * uno solo. Y ese olvido no rompe nada: pinta «peso» sobre un acuario y
-   * sigue compilando.
-   *
-   * Leer esta constante es leer la ficha entera de un sujeto.
-   */
-  const monta = esAcuario
-    ? { comoEstaHoy: false, hechos: false, vacunas: false, vitales: false, documentos: false }
-    : { comoEstaHoy: true, hechos: true, vacunas: true, vitales: true, documentos: true };
-  /**
-   * 🔎 `documentos: false` — re-gate del founder: **el acuario ofrecía CARNET
-   * DE VACUNAS**. La composición de P7 alcanza también a los papeles, y esto
-   * es la línea que lo dice: entra ARRIBA, con sus hermanas, y no como un `if`
-   * suelto abajo (§6 — ocho condiciones repartidas es como una se olvida, que
-   * es literalmente lo que pasó con ésta).
-   *
-   * **Por qué la sección ENTERA y no solo el carnet:** los cuatro papeles de
-   * hoy son de un INDIVIDUO —carnet de vacunas, historia clínica, receta y
-   * ficha de identidad—. Dejar la ficha sola imprimiría especie, sexo y
-   * microchip de un acuario, que es la misma clase de mentira con otro papel.
-   *
-   * ⚠️ NO decide que un acuario no tenga papeles nunca: decide que **los que
-   * hay hoy no son suyos**. Sus papeles necesitan su propia letra y viven en
-   * el arco del acuario (D-685). Hasta entonces: ausente, no vacío.
    */
 
   const tipoAgua = mascota.tipo_agua;
@@ -1388,6 +1397,51 @@ export default function PerfilDeMascota() {
             puso: lo que la familia observa es historia, no una sección aparte.
             Ley 37: acá no queda un hueco, queda nada. */}
 
+        {/* ── «QUIÉNES VIVEN ACÁ» — LA COMPOSICIÓN DEL SISTEMA (firma founder).
+            Monta SOLO para el acuario, por la misma constante que gobierna al
+            resto de P7: la composición va ARRIBA, jamás un `if` suelto acá
+            abajo (§6). Es un CENSO POR ESPECIE — nunca peces individuales:
+            «el pez se mira; el sistema se cuida». */}
+        {monta.habitantes ? (
+          <View style={{ marginTop: spacing[8], paddingHorizontal: spacing[5], gap: spacing[3] }}>
+            <Texto variante="seccion">{t('perfil.habitantes')}</Texto>
+            {censo === null ? (
+              /* Ley 13 + L-178: «todavía no puedo preguntar» NO se disfraza de
+                 «no hay habitantes». Un vacío fingido acá haría creer al dueño
+                 que su censo se borró. */
+              <Texto variante="apoyo">{t('perfil.habitantesSinLeer')}</Texto>
+            ) : censo.habitantes.length === 0 ? (
+              <Texto variante="apoyo">{t('perfil.habitantesVacio')}</Texto>
+            ) : (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2] }}>
+                {censo.habitantes.map((h) => {
+                  // La cara solo si el motor da ruta. `esDelCatalogo` NO se
+                  // infiere de acá (aviso literal de A): una raza del catálogo
+                  // puede no tener imagen todavía y sigue siendo del catálogo.
+                  const url = urlDeRutaGaleria(h.rutaImagen ?? undefined);
+                  return (
+                    <View key={h.razaSlug ?? h.nombre} style={{ flexBasis: '47%', flexGrow: 1 }}>
+                      <ChipEntidad
+                        nombre={`${h.nombre} · ${h.cantidad}`}
+                        {...(url !== undefined ? { fotoUrl: url } : null)}
+                        sujeto="cosa"
+                        tamano="general"
+                        elegido={false}
+                        onPress={() => setHabitantesHoja(true)}
+                      />
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+            <CeldaNavegacion
+              titulo={t('perfil.habitantesDeclarar')}
+              registro="tinta"
+              onPress={() => setHabitantesHoja(true)}
+            />
+          </View>
+        ) : null}
+
         {monta.documentos ? (
         <View style={{ marginTop: spacing[8], paddingHorizontal: spacing[5] }}>
           <Tarjeta relleno="ninguno" elevacion="reposo">
@@ -1540,20 +1594,16 @@ export default function PerfilDeMascota() {
                       <>
                         {visibles.map((it) => {
                           const familia = FAMILIA_DE_TIPO[it.tipo];
-                          // S91 (gate): EL HITO ES UN MOMENTO DE IDENTIDAD y
-                          // se lee como tal. No entra a `FAMILIA_DE_TIPO`
-                          // porque ésa es la taxonomía de SERVICIOS y un hito
-                          // no es un servicio — pero sin canto quedaba como
-                          // una fila anónima entre las demás, que es media
-                          // explicación de «no apareció».
-                          const esHito = it.tipo === 'hito_narrativo';
-                          const color = esHito
-                            ? theme.capa.identidad
-                            : familia === 'salud'
-                              ? theme.capa.identidad
-                              : familia !== undefined
-                                ? theme.capa.cuidado
-                                : null;
+                          // S91 (re-gate): EL CANTO SALE DEL EJE. Acá vivía un
+                          // caso especial para `hito_narrativo` —cura de SITIO,
+                          // escrita cuando el hito era el único que se veía sin
+                          // canto—. La medición mostró que eran SIETE tipos, no
+                          // uno: el hito fue el síntoma que asomó primero.
+                          // `capaDeHecho` cura la causa y se lleva el parche
+                          // puesto (Ley 37: lo que sobrevive a su razón es
+                          // basura que nadie se anima a tocar).
+                          const capa = capaDeHecho(it.eje_jtbd);
+                          const color = capa === null ? null : theme.capa[capa];
                           const glifoFila: IconoNombre | null =
                             familia === 'salud'
                               ? 'veterinaria'
@@ -1783,8 +1833,14 @@ export default function PerfilDeMascota() {
                   {(() => {
                     const hoyIso2 = new Intl.DateTimeFormat('en-CA').format(hoy);
                     const pv2 = senal?.proxima_vacuna ?? null;
-                    if (pv2 !== null && pv2.fecha < hoyIso2) return t('perfil.pieRazonVacuna', { vacuna: pv2.nombre });
-                    if (senal !== null && senal.vacunas_total === 0) return t('perfil.pieRazonSinCarnet', { nombre: mascota.nombre });
+                    // MISMA composición, mismo motivo (ver la cuenta arriba):
+                    // a un acuario no se le dice «todavía no hay vacunas
+                    // cargadas». No es una vacuna que falta — es una categoría
+                    // que no le aplica, y nombrarla le inventa una carencia.
+                    if (monta.vacunas) {
+                      if (pv2 !== null && pv2.fecha < hoyIso2) return t('perfil.pieRazonVacuna', { vacuna: pv2.nombre });
+                      if (senal !== null && senal.vacunas_total === 0) return t('perfil.pieRazonSinCarnet', { nombre: mascota.nombre });
+                    }
                     return t('perfil.pieRazonGeneral', { nombre: mascota.nombre });
                   })()}
                 </Texto>
@@ -1837,6 +1893,24 @@ export default function PerfilDeMascota() {
         onCerrar={() => setRazaHoja(false)}
         onGuardada={(raza) => setRazaLocal(raza)}
       />
+
+      {/* «Quiénes viven acá» — la Hoja del censo. Se monta siempre que la
+          sección exista: montarla condicionada al acuario DOS veces sería
+          repetir la composición en dos lugares. */}
+      {monta.habitantes ? (
+        <HabitantesAcuarioHoja
+          visible={habitantesHoja}
+          mascotaId={mascota.id}
+          nombre={mascota.nombre}
+          actuales={censo?.habitantes ?? []}
+          onCerrar={() => setHabitantesHoja(false)}
+          onDeclarado={() => {
+            // Se RE-LEE del motor en vez de creerle al borrador local: el
+            // motor resuelve identidad, orden y total, y el cliente no.
+            void obtenerCensoDelAcuario(mascota.id).then((c) => setCenso(c.ok ? c.data : null));
+          }}
+        />
+      ) : null}
 
       {/* §3 grooming (S60): la MISMA Hoja de la reserva — editable siempre */}
       <TallaPelajeHoja

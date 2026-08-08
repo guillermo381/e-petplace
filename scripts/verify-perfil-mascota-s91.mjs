@@ -18,11 +18,14 @@ const check = (c, n) => { console.log(`${c ? '  ok  ' : '  EN ROJO  '}${n}`); if
 const CASOS = [
   { id: 'perro', especie: 'perro', nombre: 'PerfilThor', raza: 'Labrador retriever', origen: 'adoptado',
     presentes: ['Cómo está hoy', 'Peso', 'Vacunas', 'Registrar el de hoy', 'Cuéntanos algo de'],
-    ausentes: [] },
+    // La composición corta en LOS DOS sentidos: el acuario pierde lo del
+    // individuo Y el individuo no gana lo del sistema. Un assert que solo
+    // mirara las ausencias del acuario no vería una sección que se cuela.
+    ausentes: ['Quiénes viven acá'] },
   { id: 'gato', especie: 'gato', nombre: 'PerfilMishi', raza: 'Gato Común', origen: 'encontrado',
-    presentes: ['Cómo está hoy', 'Cuéntanos algo de'], ausentes: [] },
+    presentes: ['Cómo está hoy', 'Cuéntanos algo de'], ausentes: ['Quiénes viven acá'] },
   { id: 'acuario', especie: 'pez', nombre: 'PerfilAcuario', agua: 'dulce',
-    presentes: ['Agua', 'Cuéntanos algo de'],
+    presentes: ['Agua', 'Cuéntanos algo de', 'Quiénes viven acá'],
     // P7 · lo que un acuario NO tiene. Ausentes, no apagados.
     // 'Documentos' entra al re-gate del founder: el acuario OFRECÍA carnet de
     // vacunas. Los cuatro papeles de hoy son de un individuo, así que la
@@ -154,6 +157,16 @@ for (const caso of CASOS) {
     cadena.forEach((l) => console.log('   ', l));
     console.log('');
   }
+  // ⚠️ ANTES DE TODA CAPTURA, no solo en una rama: el `#error-overlay` de
+  // expo-web (dev) se dibuja encima y deja la foto NEGRA. Ya se colaron dos
+  // tandas de capturas basura a commits — y el verificador seguía VERDE,
+  // porque afirma sobre `innerText` y el overlay no lo toca. **Una suite verde
+  // no garantiza que sus capturas muestren algo.**
+  await page.evaluate(() => {
+    document
+      .querySelectorAll('#error-overlay, #error-toast, [class*="LogBox"]')
+      .forEach((n) => n.remove());
+  });
   await page.screenshot({ path: `scripts/capturas/s91d-perfil-${caso.id}.png`, fullPage: true });
   await ctx.close();
 }

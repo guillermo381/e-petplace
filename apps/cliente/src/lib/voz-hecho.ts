@@ -89,3 +89,61 @@ export const FAMILIA_DE_TIPO: Record<
   vacuna_aplicada: 'salud',
   historia_clinica_registrada: 'salud',
 };
+
+/**
+ * EL CANTO DE UNA FILA DE VIDA — DERIVADO DEL EJE, NO DE UN MAPA DE TIPOS.
+ *
+ * ── EL DEFECTO QUE ESTO CIERRA ──────────────────────────────────────────────
+ * El color del canto salía de `FAMILIA_DE_TIPO`, que es un mapa a mano de SEIS
+ * tipos. Medido contra la DB viva: hay **catorce** tipos, y el timeline sirve
+ * trece (solo excluye `cita_servicio`). O sea que **siete tipos vivos caían al
+ * `undefined` y se dibujaban SIN canto** — `peso_medicion` (4) ·
+ * `medicacion_prescrita` (4) · `alta_asistida_pendiente_creada` (3) ·
+ * `caso_clinico_abierto` (2) · `alta_asistida_completada_por_cliente` (1) ·
+ * `examen_diagnostico` (1) · `hito_narrativo` (1). El founder vio uno de ellos
+ * («Momento de cuidado» sin borde) y tenía razón: era la punta de siete.
+ *
+ * ── POR QUÉ NO SE AGREGAN SIETE FILAS AL MAPA ───────────────────────────────
+ * Porque el defecto no son los siete: **es que el mapa envejece por TIPO**, y
+ * los tipos los crea el motor. Agregar siete entradas deja el mismo agujero
+ * abierto para el octavo, y su modo de falla es el silencio — `undefined` en un
+ * `Record<string, …>` no rompe ningún typecheck, solo dibuja una fila sin canto
+ * (mi propio hallazgo con `bitacora_familia`, que costó una letra).
+ *
+ * **El eje YA VIENE EN LA FILA**: `eventos_mascota.eje_jtbd`, que el lector
+ * selecciona y `ItemTimeline` expone. Es un dato que el motor estampa al nacer
+ * el evento — un tipo nuevo llega con su eje puesto y su canto sale solo. Se
+ * cura la CAUSA, no los siete sitios (L-185).
+ *
+ * ⚠️ `FAMILIA_DE_TIPO` NO MUERE y no es duplicación: gobierna los CHIPS DE
+ * FILTRO, que son categorías de PRODUCTO (paseos · estética · adiestramiento ·
+ * salud · bitácora) y no ejes del expediente. Dos preguntas distintas, dos
+ * mapas — lo que estaba mal era usar el de filtros para pintar.
+ *
+ * ⚠️ CAMBIO DE COLOR DECLARADO: la bitácora pasa de `cuidado` a `identidad`.
+ * No es un ajuste al pasar: su eje es `identidad` y el propio perfil ya la
+ * declara así («lo que la familia observa es del EXPEDIENTE, no de un
+ * servicio»). El Home era el que discrepaba.
+ */
+const CAPA_DE_EJE: Record<string, 'identidad' | 'cuidado'> = {
+  // El expediente: lo que la mascota ES y lo que le pasó a su cuerpo.
+  salud: 'identidad',
+  identidad: 'identidad',
+  // Lo que alguien HACE por ella.
+  cuidado_externo: 'cuidado',
+  comportamiento: 'cuidado',
+  // Los papeles del vínculo (altas asistidas): son de identidad — cuentan cómo
+  // esta mascota entró al expediente, no un servicio prestado.
+  administrativo: 'identidad',
+};
+
+/**
+ * `null` = sin canto, y es una respuesta honesta: un evento sin eje (la columna
+ * es nullable) no tiene de dónde sacar su capa, y **inventarle una sería peor
+ * que no pintarla** — el canto significa algo. Medido hoy: cero filas vivas sin
+ * eje, así que este `null` es una red, no un caso.
+ */
+export function capaDeHecho(ejeJtbd: string | null): 'identidad' | 'cuidado' | null {
+  if (ejeJtbd === null) return null;
+  return CAPA_DE_EJE[ejeJtbd] ?? null;
+}
