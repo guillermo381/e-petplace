@@ -69,7 +69,12 @@ que queda abajo como foto de S87, con su nota.)*
 
 ---
 
-## 0quater. S91 (8-ago-2026) — CAE UNA ESPERA, NO TRES *(medición de C, depositada verbatim)*
+## 0quater. S91 (8-ago-2026) — CAE UNA ESPERA, NO TRES → y AL CIERRE DEL DÍA LA LÍNEA SE CONGELA *(medición de C + decisión founder, ambas verbatim)*
+
+> ⚠️ **Este § tiene DOS momentos del MISMO día y hay que leer los dos.** Abre con
+> la medición de C (Meta aprobó las plantillas ⇒ caía una espera) y **cierra con
+> la decisión del founder: Meta tiene un problema con las plantillas y la línea
+> se congela** (🧊 al final del §). **Vale el cierre, no la apertura.**
 
 > **Texto de C, VERBATIM (llegado por literal de mesa; A no lo reescribe):**
 >
@@ -133,6 +138,57 @@ flip. La aprobación de plantillas es insumo del LECTOR (las plantillas son lo
 que el transporte manda); el flip de `transporte_vivo` sigue siendo el último
 acto y sigue esperando su go con destinatario de prueba propio — igual que
 push, que fue el primer canal que la casa abrió entero.
+
+### 🧊 EL CIERRE DE LA LÍNEA EN S91 — WHATSAPP QUEDA ARMADO Y APAGADO *(decisión founder, 8-ago-2026; texto de mesa VERBATIM)*
+
+> «**S91 · WHATSAPP QUEDA ARMADO Y APAGADO, esperando a Meta.** Lo construido y
+> verificado: transporte `despachar-whatsapp` en modo sombra (195 líneas,
+> gemelo de push, reporta `habria_entregado` · `sin_telefono` ·
+> `telefono_no_e164`) · opt-in con evidencia vivo desde S88-D · secrets con
+> nombres de contrato cargados (`META_WHATSAPP_TOKEN` **pendiente de recarga**:
+> el valor actual **no es un token de Meta** — 23 chars, no empieza con `EAA`;
+> el bueno es el System User token de 200+) · **L-201 depositada** (E.164 en el
+> motor, **backfill prohibido sin país** — P21) · **§11bis en
+> `MODELO_FINANCIERO`** (1-oct Meta cobra utility, EC ~17× CO).
+>
+> **Las esperas, TODAS externas o del founder:** (a) **Meta resuelve su problema
+> con las plantillas**, (b) **re-categorización marketing→utility — CRÍTICA
+> antes de encender**: un aviso de cita como marketing es para Meta marketing
+> no solicitado, y **un número pausado se recupera por apelación, no por
+> corrección**, (c) el token bueno al secret, (d) el **go del founder con
+> destinatario de prueba propio**. `transporte_vivo = false`, cola en 0, **nada
+> puede salir**.
+>
+> **EL RETOME:** recargar token → correr la sombra (la llamada está en el
+> volcado de A) → leer plantillas/verificación/tres números → **decisión de
+> encendido con datos**.»
+
+**⇒ La línea WhatsApp queda CERRADA en S91.** No cuenta como trabajo pendiente
+del acta: cuenta como **espera externa documentada con su retome escrito**.
+
+> **Dos notas de A sobre el depósito de arriba (la letra NO se toca; esto se
+> anota al lado, que es lo que corresponde con un texto firmado):**
+>
+> 1. **El transporte mide 285 líneas, no 195** (`wc -l
+>    supabase/functions/despachar-whatsapp/index.ts`, 8-ago). La diferencia son
+>    los ~90 del modo `?verificar=1` —el que lee plantillas y número de Meta sin
+>    mandar nada— y el diagnóstico de FORMA del token, que se construyeron
+>    DESPUÉS de que el número entrara a la letra. *Se anota porque un contador
+>    congelado dentro de una letra firmada es exactamente L-141, y el canon ya
+>    pagó cuatro veces por números que envejecieron adentro de un texto que
+>    nadie volvía a medir.*
+> 2. **La espera (a) SUPERSEDE la apertura de este mismo §0quater**, y conviene
+>    decirlo porque las dos cosas pasaron el MISMO día: arriba, C depositó «Meta
+>    aprobó las plantillas»; después el founder reportó que **Meta tiene un
+>    problema con ellas**. No es una contradicción del doc — es un estado que
+>    cambió en horas. *Quien lea §0quater completo debe tomar el cierre, no la
+>    apertura.*
+>
+> **Y el diagnóstico del token, para que el retome no lo re-descubra:** la forma
+> se midió sin exponer el valor (largo 23 · `empieza_con_EAA` false · sin
+> comillas · sin salto de línea) ⇒ **no está truncado por un copiado sucio: se
+> cargó otra cosa en ese campo.** Meta contesta 401 «Cannot parse access token»
+> para plantillas **y** número, así que la recarga es la única puerta.
 
 ---
 
