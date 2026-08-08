@@ -3273,6 +3273,41 @@ function GaleriaInterna() {
             exportado quede sin poder firmarse. */}
         <Seccion titulo="FichaPrestador — la vitrina del negocio, UNA sola vez (cliente + espejo). Los tres casos: completo · sin fotos · sin historia">
           <View style={{ gap: spacing[5] }}>
+            <Texto variante="seccion">S91-B · LA VOZ DEL NOMBRE — las dos variantes al gate</Texto>
+            <Texto variante="apoyo">
+              Las dos van con `aSangre` (la portada llega al techo y lo que flota respeta la safe area).
+              ⚠️ La franja blanca que el founder vio NO nace en esta pieza: la pone el consumidor con su
+              `Encabezado` encima. La pieza gana la CAPACIDAD de vivir en el techo; el consumidor retira
+              su encabezado. Las dos mitades, o no funciona — y ésa es la parte que C verifica.
+            </Texto>
+            <Texto variante="apoyo">(a) el nombre BAJA al bloque de identidad · sobre la imagen, solo lo que flote:</Texto>
+            <View style={{ borderRadius: radius.md, overflow: 'hidden', borderWidth: 1, borderColor: theme.border.default }}>
+              <FichaPrestador
+                aSangre
+                vozNombre="bloque"
+                nombre="Paseos Andrés"
+                cohorte="fundador"
+                cohorteAnio={2026}
+                ciudad="Quito"
+                portadas={['https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800']}
+                sobrePortada={<Icono nombre="cuenta" tamano={24} />}
+                servicios={['Paseo']}
+              />
+            </View>
+            <Texto variante="apoyo">(b) el nombre SOBRE la imagen con degradado inferior (y entonces NO se repite abajo):</Texto>
+            <View style={{ borderRadius: radius.md, overflow: 'hidden', borderWidth: 1, borderColor: theme.border.default }}>
+              <FichaPrestador
+                aSangre
+                vozNombre="sobrePortada"
+                nombre="Paseos Andrés"
+                cohorte="fundador"
+                cohorteAnio={2026}
+                ciudad="Quito"
+                portadas={['https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800']}
+                sobrePortada={<Icono nombre="cuenta" tamano={24} />}
+                servicios={['Paseo']}
+              />
+            </View>
             <View style={{ borderRadius: radius.md, overflow: 'hidden', borderWidth: 1, borderColor: theme.border.default }}>
               <FichaPrestador
                 nombre="Paseos Andrés"
