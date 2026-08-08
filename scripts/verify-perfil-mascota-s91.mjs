@@ -95,6 +95,29 @@ for (const caso of CASOS) {
   if (caso.id === 'acuario') check(t.includes('Dulce'), 'P7 · el tipo de agua en Identidad');
 
   /**
+   * ⚠️ P7 EN EL HOGAR — LA SUPERFICIE QUE ESTE VERIFICADOR NO MIRABA.
+   *
+   * Mi assert decía «el acuario no monta Documentos» y era CIERTO — pero solo
+   * del PERFIL, que es la única pantalla que este script abría. El founder vio
+   * el pedido de carnet en «Ponte al día», que vive en el HOGAR, y ahí la
+   * composición no llegaba. **Un verificador que solo abre una pantalla no
+   * puede afirmar nada sobre una ley que rige en varias** — daba verde y
+   * miraba al lado, y eso no es un assert flojo: es un assert de otra cosa.
+   *
+   * Por eso el recorrido sigue hasta el Hogar. Lo que se afirma acá es lo que
+   * la composición promete: a un SISTEMA no se le pide carnet ni se le avisa
+   * de vacunas.
+   */
+  if (caso.id === 'acuario') {
+    await page.goto(`${P}/hogar`, { waitUntil: 'networkidle', timeout: 120000 });
+    await page.waitForTimeout(6000); // Ponte al día compone tras varios lectores
+    const h = await cuerpo();
+    check(!h.includes('Cargar el carnet'), 'P7 · el HOGAR no le pide carnet a un acuario');
+    check(!h.includes('le vence'), 'P7 · el HOGAR no le avisa vencimientos de vacuna a un acuario');
+    check(h.includes(caso.nombre), 'P7 · y sin embargo el acuario SÍ está en el Hogar (no se cayó de la casa)');
+  }
+
+  /**
    * SONDA DE LA CAJA DE LA PUERTA (re-gate del founder, ley A6 «sin caja»).
    *
    * Tres lecturas del ÁRBOL dijeron que la puerta no tiene fondo
@@ -168,6 +191,23 @@ for (const caso of CASOS) {
       .forEach((n) => n.remove());
   });
   await page.screenshot({ path: `scripts/capturas/s91d-perfil-${caso.id}.png`, fullPage: true });
+
+  /**
+   * EL CONTRASTE QUE VUELVE DISCRIMINANTE AL ASSERT DE ARRIBA.
+   *
+   * El perro de este fixture también tiene CERO vacunas, así que a él el Hogar
+   * SÍ tiene que pedirle el carnet. Sin este par, «el acuario no ve el carnet»
+   * pasaría también si la fila no existiera para NADIE —por un lector caído,
+   * por un rename, por un filtro de más— y el verde no probaría la
+   * composición: probaría una ausencia cualquiera.
+   */
+  if (caso.id === 'perro') {
+    await page.goto(`${P}/hogar`, { waitUntil: 'networkidle', timeout: 120000 });
+    await page.waitForTimeout(6000);
+    const h = await cuerpo();
+    check(h.includes('Cargar el carnet'), 'P7 · contraste: al PERRO el Hogar SÍ le pide el carnet');
+  }
+
   await ctx.close();
 }
 
