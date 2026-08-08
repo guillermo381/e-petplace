@@ -21,7 +21,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { router, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   Boton,
   Campo,
@@ -89,7 +89,16 @@ export default function BitacoraFamilia() {
   const [mascotas, setMascotas] = useState<MascotaResumen[]>([]);
   const [vocabulario, setVocabulario] = useState<ChipVocabularioAgrupado[]>([]);
   const [hojaAbierta, setHojaAbierta] = useState(false);
-  const [mascotaId, setMascotaId] = useState<string | null>(null);
+  // S91-C · LA BITÁCORA NACE SABIENDO (letra madre del founder). Cuando
+  // se entra DESDE EL PERFIL, la mascota llega en la ruta y el contexto
+  // se HEREDA: la pantalla no vuelve a preguntar lo que el perfil ya
+  // sabía. Entrando por adiestramiento (sin param) se comporta como
+  // siempre — la entrada vieja no se rompe.
+  const { mascotaId: mascotaDeRuta } = useLocalSearchParams<{ mascotaId?: string }>();
+  const conContexto = typeof mascotaDeRuta === 'string' && mascotaDeRuta.length > 0;
+  const [mascotaId, setMascotaId] = useState<string | null>(
+    conContexto ? mascotaDeRuta : null,
+  );
   const [chips, setChips] = useState<string[]>([]);
   const [texto, setTexto] = useState('');
   const [guardando, setGuardando] = useState(false);
@@ -106,22 +115,37 @@ export default function BitacoraFamilia() {
     useCallback(() => {
       cargar();
       let vigente = true;
-      void obtenerVocabularioBitacora().then((r) => {
-        if (vigente && r.ok) setVocabulario(r.data);
-      });
       void (async () => {
         const estado = await getEstadoOnboardingDueno();
         if (!vigente || !estado.ok || !estado.data.familia_id) return;
         const r = await obtenerMascotasDeFamilia(estado.data.familia_id);
-        if (vigente && r.ok) setMascotas(r.data);
+        if (!vigente || !r.ok) return;
+        setMascotas(r.data);
+        // ⚠️ EL VOCABULARIO SE PIDE DESPUÉS DE CONOCER A LA MASCOTA, y ése
+        // es el punto entero: los chips llegan YA FILTRADOS por especie y
+        // sujeto desde la puerta única (contrato de A,
+        // `FiltroVocabularioBitacora`). El filtro NO se hace acá — si
+        // viviera en la pantalla, la próxima superficie que lea el
+        // catálogo volvería a mostrarlo entero.
+        //
+        // Sin mascota resuelta se pide SIN filtro, que en ese contrato
+        // significa «no filtres» y no «todas las especies»: la pantalla
+        // todavía no sabe de quién habla, y filtrar por una especie
+        // adivinada sería peor que no filtrar.
+        const suya = r.data.find((m) => m.id === mascotaId);
+        const voc = await obtenerVocabularioBitacora(
+          suya ? { especie: suya.especie, sujeto: suya.sujeto } : undefined,
+        );
+        if (vigente && voc.ok) setVocabulario(voc.data);
       })();
       return () => {
         vigente = false;
       };
-    }, [cargar]),
+    }, [cargar, mascotaId]),
   );
 
-  // con UNA mascota, elegida sola (cero fricción)
+  // con UNA mascota, elegida sola (cero fricción). Con contexto de ruta
+  // ya viene elegida y este efecto no tiene nada que hacer.
   useEffect(() => {
     if (mascotaId === null && mascotas.length === 1) setMascotaId(mascotas[0].id);
   }, [mascotas, mascotaId]);
@@ -266,7 +290,11 @@ export default function BitacoraFamilia() {
       >
         <HojaScroll>
           <View style={{ gap: spacing[4], paddingBottom: spacing[2] }}>
-            {mascotas.length > 1 ? (
+            {/* El selector SOLO cuando hay algo que elegir Y nadie lo
+                eligió ya: entrando desde el perfil, preguntar «¿de quién?»
+                sería pedir un dato que la pantalla anterior ya tenía en
+                la mano (Ley 23 — la puerta no pregunta lo que sabe). */}
+            {mascotas.length > 1 && !conContexto ? (
               <SelectorOpcion
                 acento="control"
                 etiqueta={t('adiestramiento.paraQuien')}

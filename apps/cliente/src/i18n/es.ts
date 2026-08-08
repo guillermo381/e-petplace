@@ -354,6 +354,10 @@ export const clienteEs = {
     descargarCarnet: 'Descargar el carnet',
     descargarHistoria: 'Descargar la historia clínica',
     documentos: 'Documentos',
+    // S91-C — la entrada a la bitácora desde el perfil. La voz habla de
+    // OBSERVAR, no de adiestrar: el Eje 6 es del dueño, no de un oficio.
+    bitacora: 'Su bitácora',
+    bitacoraDetalle: 'Anota lo que ves en casa',
     descargarCarnetFalla: 'No pudimos preparar el carnet. Prueba de nuevo.',
     vacunasResumenUna: '1 vacuna en su carnet',
     vacunasResumen: '{{n}} vacunas en su carnet',

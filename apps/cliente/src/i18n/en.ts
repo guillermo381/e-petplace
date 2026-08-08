@@ -289,6 +289,9 @@ export const clienteEn = {
     descargarCarnet: 'Download the card',
     descargarHistoria: 'Download the medical record',
     documentos: 'Documents',
+    // S91-C — mirror of es.ts.
+    bitacora: 'Their logbook',
+    bitacoraDetalle: 'Jot down what you see at home',
     descargarCarnetFalla: "We couldn't prepare the card. Please try again.",
     vacunasResumenUna: '1 vaccine on their card',
     vacunasResumen: '{{n}} vaccines on their card',

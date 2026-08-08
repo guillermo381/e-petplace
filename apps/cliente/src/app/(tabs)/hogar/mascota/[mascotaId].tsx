@@ -1050,6 +1050,28 @@ export default function PerfilDeMascota() {
             CHANEL (Ley 16): se fue el CONTADOR de papeles. Cerrado no
             es accionable, y abierto repite lo que las filas ya dicen —
             era el elemento haciendo doble turno (Ley 17.6). */}
+        {/* S91-C · LA BITÁCORA NACE SABIENDO (letra madre del founder).
+            Vive ACÁ, en el perfil, y se lleva el contexto en la ruta: la
+            pantalla de destino ya no pregunta de quién es. Hasta hoy su
+            ÚNICA entrada era `/hogar/adiestramiento` — medido: la
+            observación del hogar estaba encerrada en un oficio, cuando el
+            Eje 6 del Bio-Expediente declara al dueño como productor sin
+            pedirle que haya contratado nada.
+            Un toque desde el perfil, cero formulario. */}
+        <View style={{ marginTop: spacing[8], paddingHorizontal: spacing[5] }}>
+          <Tarjeta relleno="ninguno" elevacion="reposo">
+            <CeldaNavegacion
+              icono="bitacora"
+              titulo={t('perfil.bitacora')}
+              detalle={t('perfil.bitacoraDetalle')}
+              registro="tinta"
+              onPress={() =>
+                router.push({ pathname: '/hogar/bitacora', params: { mascotaId } })
+              }
+            />
+          </Tarjeta>
+        </View>
+
         <View style={{ marginTop: spacing[8], paddingHorizontal: spacing[5] }}>
           <Tarjeta relleno="ninguno" elevacion="reposo">
             <CeldaNavegacion
