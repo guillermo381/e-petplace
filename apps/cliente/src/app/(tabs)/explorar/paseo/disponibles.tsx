@@ -56,6 +56,7 @@ import {
 import { PlanHoja } from '@/components/plan-hoja';
 import { PaseoSocialHoja } from '@/components/paseo-social-hoja';
 import { useTraduccion } from '@/i18n';
+import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { tomarPedido } from '@/lib/senal-reserva';
 import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { PreviewPrestador } from '@/components/preview-prestador';
@@ -327,7 +328,7 @@ export default function PaseoDisponibles() {
                 paraQuien !== null ? (
                   // xs, no sm: la columna del metadataMono es intocable y con
                   // sm el titulo colapsaba a cero en 420 (hallazgo M3 S73).
-                  <AvatarMascota nombre={paraQuien.nombre} fotoUrl={fotos[paraQuien.id]} tamano="xs" />
+                  <AvatarMascota nombre={paraQuien.nombre} fotoUrl={caraDeMascotaPorRuta({ especie: paraQuien.especie, rutaImagen: paraQuien.raza_ruta_imagen, fotoUri: fotos[paraQuien.id] })} tamano="xs" />
                 ) : undefined
               }
               titulo={
@@ -391,8 +392,6 @@ export default function PaseoDisponibles() {
                   contexto={p.servicio_nombre}
                   precio={`$${p.precio.toFixed(2)} · ${p.duracion_minutos} min`}
                   perfil={perfiles[p.prestador_id]}
-                  etiquetaReservar={t('perfilPrestador.reservar')}
-                  onReservar={() => alElegir(p)}
                 />
               </View>
             ))}
@@ -412,7 +411,7 @@ export default function PaseoDisponibles() {
               {i > 0 ? <Separador /> : null}
               <Celda
                 titulo={m.nombre}
-                inicio={<AvatarMascota nombre={m.nombre} fotoUrl={fotos[m.id]} tamano="sm" />}
+                inicio={<AvatarMascota nombre={m.nombre} fotoUrl={caraDeMascotaPorRuta({ especie: m.especie, rutaImagen: m.raza_ruta_imagen, fotoUri: fotos[m.id] })} tamano="sm" />}
                 interactiva
                 accessibilityRole="button"
                 onPress={() => {

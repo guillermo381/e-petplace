@@ -1,7 +1,17 @@
 /**
  * EL PREVIEW DEL PASO QUIÉN — la fila con cara (S91-C, letra firmada).
  *
- * ── LA ANATOMÍA, Y POR QUÉ SON DOS BLANCOS Y NO UNO (firma founder, (a)) ─
+ * ── ANATOMÍA AIRBNB (enmienda del founder, y ES MÁS LIMPIA) ─────────────
+ * LA TARJETA ENTERA abre el perfil. NO hay botón de reservar acá: reservar
+ * vive SOLO en el detalle, en barra fija. **Un destino por superficie: la
+ * lista lleva a mirar, el detalle reserva.**
+ *
+ * Esto DESHACE la mitad-CTA de la anatomía anterior, y está bien que así
+ * sea: aquella partía la fila en dos blancos para que mirar no tomara un
+ * hold. La enmienda resuelve el mismo problema mejor —sacando el hold de
+ * la lista— y de paso mata la ambigüedad de tener dos targets en una fila.
+ *
+ * ── (histórico, por qué existió la versión de dos blancos) ──────────────
  * La fila vieja era UNA `Celda` cuyo toque RESERVABA — tomaba un hold de
  * 15 minutos. Con preview enriquecido (foto, ★, «desde») la gente va a
  * tocar para MIRAR, no para reservar, así que el toque suelto pasó a ser
@@ -38,9 +48,9 @@
  * rehén al principal.
  */
 
-import { View } from 'react-native';
+import { Image, Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Boton, Celda, LogoNegocio, Texto, spacing } from '@epetplace/ui';
+import { Celda, LogoNegocio, Texto, radius, spacing } from '@epetplace/ui';
 import { resolverUrlLogoNegocio, type PerfilPublico } from '@epetplace/api';
 
 import { useTraduccion } from '@/i18n';
@@ -53,8 +63,6 @@ export function PreviewPrestador({
   precio,
   contexto,
   perfil,
-  onReservar,
-  etiquetaReservar,
 }: {
   prestadorId: string;
   /** LA OFERTA CONCRETA que esta fila representa. Viaja al detalle para
@@ -77,8 +85,6 @@ export function PreviewPrestador({
   contexto?: string | null;
   /** Enriquecimiento de la vista pública. `undefined` = todavía no llegó. */
   perfil?: PerfilPublico;
-  onReservar: () => void;
-  etiquetaReservar: string;
 }) {
   const router = useRouter();
   const { t } = useTraduccion();
@@ -102,8 +108,39 @@ export function PreviewPrestador({
 
   const lugar = contexto ?? perfil?.sector ?? perfil?.ciudad ?? null;
 
+  // LA COHORTE = «antigüedad», confirmada por el founder: CUÁNDO ENTRÓ A LA
+  // PLATAFORMA. Los años de oficio NO existen en ninguna columna y no se
+  // inventan — quedan como deuda de vitrina (pedido al prestador).
+  // Los DOS tienen que venir: un «fundador» sin año diría menos que el dato.
+  const cohorte =
+    perfil?.cohorte != null && perfil.cohorte_anio != null
+      ? t(perfil.cohorte === 'fundador' ? 'perfilPrestador.cohorteFundador' : 'perfilPrestador.cohortePionero', {
+          anio: String(perfil.cohorte_anio),
+        })
+      : null;
+
   return (
     <View style={{ paddingVertical: spacing[2] }}>
+      {/* LA PORTADA PRESIDE — `portadas[0]` ES la portada por contrato de
+          `listarFotosGaleria` (viene ordenada), así que no se pregunta
+          aparte. Sin portada NO se monta una caja vacía: la tarjeta cae a
+          su fila de identidad, que es lo que el negocio siempre tiene. */}
+      {perfil !== undefined && perfil.portadas.length > 0 ? (
+        <Pressable accessibilityRole="button" accessibilityLabel={t('perfilPrestador.verPerfilDe', { nombre })} onPress={abrirPerfil}>
+          {/* `Image` de RN, igual que la pieza: la casa no tiene
+              componente de imagen y no se inventa uno acá (Ley 11). */}
+          <Image
+            source={{ uri: perfil.portadas[0] }}
+            style={{
+              height: 168,
+              borderRadius: radius.md,
+              marginHorizontal: spacing[5],
+              marginBottom: spacing[2],
+            }}
+            resizeMode="cover"
+          />
+        </Pressable>
+      ) : null}
       {/* ① MIRAR — nunca toma un hold.
           `Celda interactiva` YA es el tocable y trae su propia física de
           presión: envolverla en un `Pressable` habría anidado dos
@@ -124,24 +161,15 @@ export function PreviewPrestador({
         onPress={abrirPerfil}
       />
 
-      {/* La confianza, en voz de dato — jamás estrellas vacías. */}
-      {confianza !== null ? (
-        <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[2] }}>
-          <Texto variante="dato" color="secondary">
-            {confianza}
-          </Texto>
-        </View>
-      ) : null}
-
-      {/* ② RESERVAR — explícito, con su consecuencia dicha en el precio. */}
+      {/* LA LÍNEA DE META: confianza · cohorte · precio. Cada pieza se monta
+          solo si existe — con `.filter(Boolean)` el separador nunca queda
+          huérfano, que es el defecto clásico de una línea compuesta. */}
       <View style={{ paddingHorizontal: spacing[5], paddingBottom: spacing[2] }}>
-        <Boton
-          variante="primario"
-          bloque
-          etiqueta={`${etiquetaReservar} · ${precio}`}
-          onPress={onReservar}
-        />
+        <Texto variante="dato" color="secondary">
+          {[confianza, cohorte, precio].filter(Boolean).join(' · ')}
+        </Texto>
       </View>
+
     </View>
   );
 }

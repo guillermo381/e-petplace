@@ -244,8 +244,6 @@ export default function AdiestramientoDisponibles() {
                         : t('adiestramiento.lugarPorConfirmar')}
                     precio={`$${o.precio.toFixed(2)} · ${o.duracion_minutos} min`}
                     perfil={perfiles[o.prestador_id]}
-                    etiquetaReservar={t('perfilPrestador.reservar')}
-                    onReservar={() => void reservarSesion(o)}
                   />
                 ) : (
                   // FIRMA: el programa dice QUÉ es (nombre + nivel + N)

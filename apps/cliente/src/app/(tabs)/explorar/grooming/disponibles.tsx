@@ -230,8 +230,6 @@ export default function GroomingDisponibles() {
                       : t('grooming.enSuLocal')}
                     precio={`$${g.precio.toFixed(2)} · ${g.duracion_minutos} min`}
                     perfil={perfiles[g.prestador_id]}
-                    etiquetaReservar={t('perfilPrestador.reservar')}
-                  onReservar={() => void crearHold(g)}
                 />
               </View>
             ))}

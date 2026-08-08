@@ -1053,6 +1053,8 @@ export const clienteEn = {
     verPerfilDe: "View {{nombre}}'s profile",
     reservar: 'Book',
     volver: 'Back',
+    cohorteFundador: 'Founder since {{anio}}',
+    cohortePionero: 'Pioneer since {{anio}}',
     citas: '{{n}} completed visits',
   },
   documentos: {

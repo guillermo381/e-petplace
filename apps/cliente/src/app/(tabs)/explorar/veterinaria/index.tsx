@@ -56,6 +56,7 @@ import {
   mascotasElegibles,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
+import { caraDeMascotaPorRuta } from '@/lib/cara-mascota';
 import { ofrecibles, useEspeciesElegibles } from '@/lib/especies-elegibles';
 import { FiltroMascotas } from '@/components/filtro-pills';
 import { CabezalOficio, GrillaElegir, PieReserva, SelectorDia } from '@/components/reserva-piezas';
@@ -316,7 +317,19 @@ export default function VeterinariaCuando() {
             {mascota === null ? (
               <View style={{ marginHorizontal: -spacing[4] }}>
                 <FiltroMascotas
-                  mascotas={elegibles.map((m) => ({ id: m.id, nombre: m.nombre, fotoUrl: fotos[m.id] }))}
+                  mascotas={elegibles.map((m) => ({
+                    id: m.id,
+                    nombre: m.nombre,
+                    // S91-C · LA ESCALERA DE LA CARA, reusada del Hogar: foto
+                    // propia → imagen de su RAZA → genérico de su especie. El
+                    // chip salía pelado porque se quedaba en el primer escalón,
+                    // y `raza_ruta_imagen` (A6) tenía UN solo consumidor.
+                    fotoUrl: caraDeMascotaPorRuta({
+                      especie: m.especie,
+                      rutaImagen: m.raza_ruta_imagen,
+                      fotoUri: fotos[m.id],
+                    }),
+                  }))}
                   elegida={mascotaId}
                   onElegir={setMascotaId}
                 />

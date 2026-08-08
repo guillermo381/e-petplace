@@ -1180,6 +1180,8 @@ export const clienteEs = {
     verPerfilDe: 'Ver el perfil de {{nombre}}',
     reservar: 'Reservar',
     volver: 'Volver',
+    cohorteFundador: 'Fundador desde {{anio}}',
+    cohortePionero: 'Pionero desde {{anio}}',
     citas: '{{n}} citas completadas',
   },
   documentos: {

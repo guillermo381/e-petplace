@@ -283,8 +283,6 @@ export default function VeterinariaDisponibles() {
                         : t('veterinaria.enSuClinica')}
                     precio={`$${v.precio.toFixed(2)} · ${v.duracion_minutos} min`}
                     perfil={perfiles[v.prestador_id]}
-                    etiquetaReservar={t('perfilPrestador.reservar')}
-                  onReservar={() => void tocarNegocio(v)}
                 />
               </View>
             ))}
