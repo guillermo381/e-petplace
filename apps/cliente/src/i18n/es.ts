@@ -222,6 +222,7 @@ export const clienteEs = {
     filtroTodo: 'Todo',
     filtroSalud: 'Salud',
     filtroPaseos: 'Paseos',
+    filtroBitacora: 'Bitácora',
     filtroAdiestramiento: 'Adiestramiento',
     filtroEstetica: 'Estética',
     filtroSinMomentos: 'Nada por acá con ese filtro.',
@@ -318,6 +319,19 @@ export const clienteEs = {
     edadAnios: '{{anios}} años',
     edadUnAnio: '1 año',
     edadMeses: '{{meses}} meses',
+    // S91 · P1 — la edad HONESTA por precisión (lámina firmada).
+    edadAprox: '~{{edad}}',
+    edadHacia: 'hacia {{anio}}',
+    // S91 · P1 — el origen en voz humana. `desconocido` NO tiene voz: el
+    // silencio no se comenta.
+    origenAdoptado: 'Lo adoptaron',
+    origenRefugio: 'Llegó de un refugio',
+    origenNacidoEnCasa: 'Nació en casa',
+    origenEncontrado: 'Lo encontraron',
+    origenCriadero: 'Llegó de un criadero',
+    origenComprado: 'Llegó de otra familia',
+    origenTransferido: 'Llegó de otra familia',
+    origenAltaAsistida: 'Lo registró su veterinaria',
     edadUnMes: '1 mes',
     // ── secciones de la pila ──
     // S82-C (imagen-acuerdo del perfil): la sección pasa a SU HISTORIA;
@@ -340,6 +354,19 @@ export const clienteEs = {
     hoyTitulo: 'Cómo está hoy',
     hoyDesparasitacion: 'Desparasitación',
     hoyAlergias: 'Alergias',
+    // S91 · P2 — el peso con su fecha y su puerta.
+    pesoMedidoEl: 'medido el {{fecha}}',
+    pesoRegistrar: 'Registrar el de hoy',
+    hoySinRegistroCorto: 'Sin registro',
+    pesoHojaTitulo: 'El peso de {{nombre}}',
+    pesoHojaPorQue:
+      'Cada peso se guarda con su fecha y los anteriores no se borran: así se ve cómo cambia, que es lo que sirve en una consulta.',
+    pesoHojaLabel: '¿Cuánto pesa hoy?',
+    pesoHojaPlaceholder: 'ej: 12,4',
+    pesoHojaMetodo: '¿Cómo lo supiste?',
+    pesoMetodoBascula: 'Con una báscula',
+    pesoMetodoEstimado: 'Es un estimado',
+    pesoHojaGuardar: 'Guardar el peso de hoy',
     hoySinRegistro: 'Sin registro',
     hoySinFechaRefuerzo: 'Sin fecha de refuerzo',
     ventanaHoy: 'Hoy',
@@ -375,6 +402,21 @@ export const clienteEs = {
     // dice POR QUÉ reservar (la razón sale del expediente).
     vozExpediente: 'Su expediente se completa de a poco. Cada dato que sumas es uno menos que hay que adivinar en una urgencia.',
     indicesTodavia: 'Índice de salud y descanso se construyen con su expediente. Todavía no hay con qué.',
+    // S91 · P5 — la narrativa del vínculo, en VOZ. El número que la elige
+    // NUNCA se muestra (MODELO_LOYALTY §2: ni score, ni barra, ni checklist).
+    vinculoMucho: 'Ya conocemos a {{nombre}} casi como vos.',
+    vinculoAlgo: 'Vamos conociendo a {{nombre}}. Cada dato que sumas es uno menos que hay que adivinar en una urgencia.',
+    vinculoPoco: 'Todavía estamos conociendo a {{nombre}}. Su expediente se completa de a poco.',
+    // S91 · P7 — el acuario: su campo dos y su fecha propia.
+    // S91 · P3 — la raza editable, con la gramática del alta.
+    // S91 · P4 — la puerta de la bitácora, en Su historia.
+    bitacoraEntrada: 'Contanos algo de hoy',
+    razaHojaTitulo: '¿De qué raza es {{nombre}}?',
+    razaHojaGuardar: 'Guardar',
+    tipoAgua: 'Agua',
+    aguaDulce: 'Dulce',
+    aguaMarino: 'Marino',
+    montadoEl: 'Montado el',
     pieRotulo: 'Lo próximo',
     pieRazonVacuna: 'Su {{vacuna}} está vencida. Un control lo pone al día.',
     pieRazonSinCarnet: 'Todavía no hay vacunas cargadas de {{nombre}}. Un control abre su historia clínica.',

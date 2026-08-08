@@ -104,12 +104,37 @@ export default function BitacoraFamilia() {
   const [guardando, setGuardando] = useState(false);
   const [filtro, setFiltro] = useState('');
 
+  /**
+   * 🔴 S91 · GATE — LA BITÁCORA MEZCLABA MASCOTAS, y la causa medida es ésta.
+   *
+   * `obtenerBitacora(mascotaId?)` SÍ filtra —`if (mascotaId !== undefined) q =
+   * q.eq('mascota_id', mascotaId)`, línea 230 de su wrapper—; **la pantalla
+   * nunca le pasaba el id.** Sin argumento, el lector devuelve las últimas 30
+   * entradas de TODA la familia, y la pantalla las pintaba enteras cualquiera
+   * fuera la mascota elegida. El defecto era del llamador, no del lector.
+   *
+   * Y el filtro tiene que ir A LA CONSULTA, no al arreglo ya traído: el
+   * `limit(30)` es de la QUERY. Filtrando después, una mascota con entradas
+   * más viejas que las últimas treinta de la casa se quedaría sin las suyas —
+   * la misma pantalla se vería «vacía» y sería mentira.
+   *
+   * `cargar` depende de `mascotaId` a propósito: cambiar de mascota RE-CONSULTA.
+   * Antes su lista de dependencias estaba vacía y por eso, aunque el id hubiera
+   * viajado, la consulta no se repetía.
+   */
   const cargar = useCallback(() => {
+    if (mascotaId === null) {
+      // Sin mascota resuelta no se pide «todo»: se pide NADA. Mostrar las
+      // entradas de la casa mientras el selector está en blanco es
+      // exactamente el bug que este comentario explica.
+      setEntradas([]);
+      return;
+    }
     setEntradas('cargando');
-    void obtenerBitacora().then((r) => {
+    void obtenerBitacora(mascotaId).then((r) => {
       setEntradas(r.ok ? r.data : 'error');
     });
-  }, []);
+  }, [mascotaId]);
 
   useFocusEffect(
     useCallback(() => {

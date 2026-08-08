@@ -119,11 +119,17 @@ export function PasoCierre({ modo, borrador }: { modo: ModoAlta; borrador: Borra
       const comunes = {
         nombre_mascota: borrador.nombre ?? '',
         especie: borrador.especie ?? '',
+        // P7: al acuario la fecha le entra por `fecha_montaje`, no por
+        // `fecha_nacimiento` — un acuario no nace, se monta, y el motor rebota
+        // tipado si se cruzan (`fecha_montaje_solo_acuario`). La pantalla
+        // pregunta «¿cuándo lo montaste?»; acá se manda a su columna.
         ...(borrador.fecha
-          ? {
-              fecha_nacimiento: borrador.fecha,
-              ...(esPrecision(borrador.precision) ? { precision_fecha: borrador.precision } : null),
-            }
+          ? esAcuario(borrador.especie)
+            ? { fecha_montaje: borrador.fecha }
+            : {
+                fecha_nacimiento: borrador.fecha,
+                ...(esPrecision(borrador.precision) ? { precision_fecha: borrador.precision } : null),
+              }
           : null),
         ...(esSexo(borrador.sexo) ? { sexo: borrador.sexo } : null),
         ...(fotoPath !== undefined ? { foto_url: fotoPath } : null),

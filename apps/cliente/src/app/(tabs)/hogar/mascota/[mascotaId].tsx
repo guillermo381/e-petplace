@@ -76,6 +76,9 @@ import {
   type PaseoConTrack,
   type PerfilMascota,
   type SenalesHogarMascota,
+  obtenerHistoriaPeso,
+  obtenerRazasDeEspecie,
+  type PesoDeLaSerie,
 } from '@epetplace/api';
 import {
   calcularMomentoVital,
@@ -91,6 +94,10 @@ import { PAPELES_DE_MASCOTA, componerPapeles } from '@/lib/papeles';
 import { abrirReceta, resolverDescarga, type Descarga } from '@/lib/descarga-papel';
 import { CantoCurva } from '@/components/canto-curva';
 import { FilaDocumento } from '@/components/fila-documento';
+import { vozEdad, vozNacimiento, vozOrigen } from '@/lib/voz-mascota';
+import { caraDeMascota } from '@/lib/cara-mascota';
+import { RegistrarPesoHoja } from '@/components/registrar-peso-hoja';
+import { EditarRazaHoja } from '@/components/editar-raza-hoja';
 import { HojaReceta } from '@/components/hoja-receta';
 import { FiltroPills } from '@/components/filtro-pills';
 
@@ -104,7 +111,7 @@ const SERIF_LOCAL = Platform.select({ ios: 'Georgia', default: 'serif' });
 /** El eje del filtro de la historia DENTRO de la ficha: SOLO servicio
  *  (el tramo temporal vive en la pantalla completa — contrato de la
  *  lámina 02, contexto 2). */
-type FiltroHistoria = 'todo' | 'salud' | 'paseos' | 'estetica' | 'adiestramiento';
+type FiltroHistoria = 'todo' | 'salud' | 'paseos' | 'estetica' | 'adiestramiento' | 'bitacora';
 
 /** r10-5 · el eje TEMPORAL de Vitales — el mismo que ya usa Su
  *  historia, con FiltroPills. NOTA DE API declarada: `calcularVitales`
@@ -203,11 +210,9 @@ function GlifoInfo({ color }: { color: string }) {
   );
 }
 
-function vozEdad(meses: number, t: TraductorPerfil): string {
-  if (meses < 12) return meses === 1 ? t('perfil.edadUnMes') : t('perfil.edadMeses', { meses });
-  const anios = Math.floor(meses / 12);
-  return anios === 1 ? t('perfil.edadUnAnio') : t('perfil.edadAnios', { anios });
-}
+// S91 · P1 — la voz de la edad y del origen vive en `lib/voz-mascota`:
+// dos pantallas que escriben la misma regla divergen (letra de mesa, 8-ago;
+// precedente `voz-hecho.ts`). Acá solo se consume.
 
 // Motivos en trazo de los guijarros (§4: el motivo va ENCIMA del tinte).
 const trazoMotivo = (color: string) => ({
@@ -263,6 +268,9 @@ export default function PerfilDeMascota() {
   // S90 (firma founder): la lista deriva del CATÁLOGO VIVO; arranca con el
   // respaldo de compilación (la misma foto al día del build).
   const [papeles, setPapeles] = useState(PAPELES_DE_MASCOTA);
+  /** S91 · P2 — el disparador de la re-lectura de la serie de peso. */
+  const [recargaPeso, setRecargaPeso] = useState(0);
+
   useEffect(() => {
     let vivo = true;
     void listarPapelesDeMascota().then((r) => {
@@ -272,6 +280,21 @@ export default function PerfilDeMascota() {
       vivo = false;
     };
   }, []);
+
+  /** S91 · P2 — la serie de peso. Se re-lee tras registrar (`recargaPeso`):
+   *  el dato recién cargado tiene que verse sin salir y volver a entrar.
+   *  Un fallo deja `pesos` en null y la celda muestra el snapshot sin fecha —
+   *  degrada a lo de antes, no a una mentira. */
+  useEffect(() => {
+    if (mascotaId === undefined) return;
+    let vivo = true;
+    void obtenerHistoriaPeso(mascotaId).then((r) => {
+      if (vivo && r.ok) setPesos(r.data);
+    });
+    return () => {
+      vivo = false;
+    };
+  }, [mascotaId, recargaPeso]);
   const [fallaCarnet, setFallaCarnet] = useState<string | null>(null);
   /** UN camino para TODOS los papeles: el token lo emite el server con el
    *  mismo gate del expediente; acá solo se abre lo que devuelve.
@@ -336,6 +359,14 @@ export default function PerfilDeMascota() {
   const [senal, setSenal] = useState<SenalesHogarMascota | null>(null);
   // r5: vacunas agrupadas-colapsadas + historia colapsada con filtros
   const [historiaRevelada, setHistoriaRevelada] = useState(false);
+  /** S91 · P2 — la SERIE de peso. El perfil mostraba el número del snapshot y
+   *  no su fecha: «12 kg» sin cuándo no distingue una medición de hoy de una
+   *  de hace dos años. */
+  const [pesos, setPesos] = useState<PesoDeLaSerie[] | null>(null);
+  const [pesoHoja, setPesoHoja] = useState(false);
+  const [razaHoja, setRazaHoja] = useState(false);
+  /** P3: la raza recién guardada, para re-pintar sin re-cargar el perfil. */
+  const [razaLocal, setRazaLocal] = useState<string | null | undefined>(undefined);
   const [filtroHistoria, setFiltroHistoria] = useState<FiltroHistoria>('todo');
   const [ventana, setVentana] = useState<VentanaVitales>('semana');
   // los paseos crudos: la ventana se computa acá (ver nota de API)
@@ -397,6 +428,39 @@ export default function PerfilDeMascota() {
           void resolverUrlFoto(r.data.mascota.foto_url).then((url) => {
             if (vigente) setFotoFirmada(url ?? undefined);
           });
+        } else {
+          /**
+           * 🔴 S91 · GATE — LA CARA DE LA GALERÍA SE QUEDA.
+           *
+           * Sin foto propia, el perfil quedaba SIN IMAGEN: la cara que había
+           * ilustrado el alta —la de su raza, o la genérica de su especie— se
+           * evaporaba al terminar el alta. El founder lo vio así y tenía
+           * razón: es la misma mascota, y la casa ya sabía cómo se ve.
+           *
+           * El slug se resuelve por NOMBRE contra el catálogo porque
+           * `mascotas` guarda la raza como TEXTO (letra S59: texto libre) y
+           * no su slug. Si no matchea —una raza escrita a mano que el
+           * catálogo no tiene— cae al genérico de la especie, que sigue
+           * siendo verdad. **No se slugifica el texto tipeado**: acertaría a
+           * veces y traería la cara de otra raza, que es peor que el genérico.
+           *
+           * Solo se consulta cuando NO hay foto: quien subió la suya no paga
+           * este viaje (D-497).
+           */
+          const m = r.data.mascota;
+          void (async () => {
+            let slug: string | undefined;
+            if (m.raza !== null && m.raza.length > 0) {
+              const cat = await obtenerRazasDeEspecie(m.especie);
+              if (cat.ok) {
+                slug = cat.data.find(
+                  (x) => x.nombre.toLowerCase() === (m.raza ?? '').toLowerCase(),
+                )?.slug;
+              }
+            }
+            if (!vigente) return;
+            setFotoFirmada(caraDeMascota({ especie: m.especie, razaSlug: slug }));
+          })();
         }
         void cargarPrimeraPagina(mascotaId);
         void obtenerEstadoHogar([mascotaId]).then((eh) => {
@@ -472,25 +536,106 @@ export default function PerfilDeMascota() {
       : null;
   const chipMomento = momento !== null ? vozMomento(momento, t) : null;
 
+  /** S91 · P1 — EL ORIGEN, leído con rojo honesto.
+   *
+   *  `IdentidadMascota` todavía NO trae `origen`: el lector del perfil no lo
+   *  selecciona (medido: `perfilMascota.ts:114`). El pedido está con A. Se lee
+   *  defensivamente para que **el día que A lo sirva la línea aparezca sola**,
+   *  sin tocar esta pantalla — y mientras tanto no se pinta nada, que es la
+   *  verdad de hoy.
+   *
+   *  ⚠️ EL CAST SE RETIRA CUANDO EL CAMPO ENTRE AL TIPO. Está acá con nombre y
+   *  fecha para que no se vuelva permanente por costumbre. */
+  /**
+   * S91 · P7 — EL ACUARIO POR LA MISMA PANTALLA (firma de mesa).
+   *
+   * El sujeto es EL SISTEMA, no un individuo: no tiene sexo, ni raza, ni peso,
+   * ni vacunas, ni paseos. Y la letra es precisa sobre CÓMO no los tiene:
+   * **AUSENTES, no apagados ni explicados.** Nada de filas en gris ni de «no
+   * aplica» — el silencio no se comenta en superficie. Una ficha que enumera
+   * lo que su sujeto no puede tener le está pidiendo perdón al dueño por
+   * haberle preguntado mal.
+   *
+   * Se decide por `sujeto` —que A ya sirve— y no por la especie: son
+   * equivalentes hoy por construcción del motor, pero `sujeto` es LA columna
+   * que declara qué clase de cosa es esta fila. El día que haya un terrario
+   * que no sea 'pez', esta línea ya está bien.
+   */
+  const esAcuario = mascota.sujeto === 'acuario';
+
+  /**
+   * QUÉ MONTA ESTE PERFIL — la decisión, UNA vez y acá arriba.
+   *
+   * Letra de mesa (8-ago): la ausencia del acuario se resuelve por
+   * COMPOSICIÓN, jamás por `if` repartidos abajo. El porqué es de §6 y se
+   * paga siempre igual: ocho condiciones esparcidas por mil líneas son ocho
+   * lugares donde el próximo sujeto —un terrario, una colmena— se olvida en
+   * uno solo. Y ese olvido no rompe nada: pinta «peso» sobre un acuario y
+   * sigue compilando.
+   *
+   * Leer esta constante es leer la ficha entera de un sujeto.
+   */
+  const monta = esAcuario
+    ? { comoEstaHoy: false, hechos: false, vacunas: false, vitales: false }
+    : { comoEstaHoy: true, hechos: true, vacunas: true, vitales: true };
+
+  const tipoAgua = mascota.tipo_agua;
+
+  /** El origen en humano. `desconocido` no tiene voz y por eso no se pinta —
+   *  es el default HONESTO de la columna, no una respuesta. */
+  const lineaOrigen = vozOrigen(mascota.origen, t);
+
   // Identidad progresiva: SOLO lo cargado (L-139 — nada fake).
-  const datosIdentidad: Array<{ etiqueta: string; valor: string; mono?: boolean }> = [];
-  if (mascota.raza !== null && mascota.raza.length > 0) {
-    datosIdentidad.push({ etiqueta: t('perfil.raza'), valor: mascota.raza });
-  }
-  if (mascota.sexo === 'macho' || mascota.sexo === 'hembra') {
+  const datosIdentidad: Array<{ etiqueta: string; valor: string; mono?: boolean; editable?: 'raza' }> = [];
+  if (esAcuario) {
+    // P7 · el acuario: su campo dos y cuándo se montó. Nada más — y lo que
+    // falta no se nombra.
+    if (tipoAgua !== null) {
+      datosIdentidad.push({
+        etiqueta: t('perfil.tipoAgua'),
+        valor: tipoAgua === 'marino' ? t('perfil.aguaMarino') : t('perfil.aguaDulce'),
+      });
+    }
+    // ⚠️ «MONTADO EL» ESPERA UN CAMPO EN EL LECTOR. `mascotas.fecha_montaje`
+    // existe (date) y el alta ya la escribe por su parámetro propio, pero
+    // `obtenerPerfilMascota` todavía no la selecciona — pedido a A, medido.
+    // NO se pinta `fecha_nacimiento` con el rótulo «Montado el»: un acuario no
+    // nace, y rotular una fecha con lo que no es sería peor que no mostrarla.
+    // Hasta que llegue, la fila simplemente no existe — que es la letra de P7.
+  } else {
+    // P3: la raza SIEMPRE tiene fila, también vacía — la puerta de edición
+    // tiene que estar donde está la ausencia (mismo criterio que el peso).
+    const razaVista = razaLocal !== undefined ? razaLocal : mascota.raza;
     datosIdentidad.push({
-      etiqueta: t('perfil.sexo'),
-      valor: mascota.sexo === 'macho' ? t('perfil.sexoMacho') : t('perfil.sexoHembra'),
+      etiqueta: t('perfil.raza'),
+      valor: razaVista !== null && razaVista.length > 0 ? razaVista : t('perfil.hoySinRegistroCorto'),
+      editable: 'raza',
     });
-  }
-  if (mascota.fecha_nacimiento !== null) {
-    datosIdentidad.push({ etiqueta: t('perfil.nacimiento'), valor: fechaCortaMono(mascota.fecha_nacimiento, idioma), mono: true });
-  }
-  if (peso_clinico_kg !== null) {
-    datosIdentidad.push({ etiqueta: t('perfil.peso'), valor: `${peso_clinico_kg} kg`, mono: true });
-  }
-  if (mascota.microchip !== null && mascota.microchip.length > 0) {
-    datosIdentidad.push({ etiqueta: t('perfil.microchip'), valor: mascota.microchip, mono: true });
+    if (mascota.sexo === 'macho' || mascota.sexo === 'hembra') {
+      datosIdentidad.push({
+        etiqueta: t('perfil.sexo'),
+        valor: mascota.sexo === 'macho' ? t('perfil.sexoMacho') : t('perfil.sexoHembra'),
+      });
+    }
+    if (mascota.fecha_nacimiento !== null) {
+      // P3 · la fila de nacimiento habla la MISMA voz de precisión que la
+      // cabecera (P1): una fecha estimada pintada como `01 ene 2019` es la
+      // peor versión del problema — el día y el mes los puso el motor para
+      // poder ordenar y ahí se leen como si alguien los hubiera declarado.
+      datosIdentidad.push({
+        etiqueta: t('perfil.nacimiento'),
+        valor: vozNacimiento(mascota.fecha_nacimiento, mascota.fecha_nacimiento_precision, t, (iso) =>
+          fechaCortaMono(iso, idioma),
+        ),
+        mono: true,
+      });
+    }
+    if (peso_clinico_kg !== null) {
+      datosIdentidad.push({ etiqueta: t('perfil.peso'), valor: `${peso_clinico_kg} kg`, mono: true });
+    }
+    if (mascota.microchip !== null && mascota.microchip.length > 0) {
+      datosIdentidad.push({ etiqueta: t('perfil.microchip'), valor: mascota.microchip, mono: true });
+    }
   }
 
   return (
@@ -698,6 +843,27 @@ export default function PerfilDeMascota() {
               >
                 {mascota.nombre}
               </Text>
+
+              {/* S91 · P1 — EL ORIGEN EN HUMANO, bajo el nombre.
+                  Va en SANS y no en la línea mono de abajo a propósito: esa
+                  línea es METADATO (raza · edad · peso) y ésta es una FRASE.
+                  Mezclarlas convertiría «Llegó de un criadero» en un dato más.
+                  Ausente cuando nadie lo declaró — el silencio no se comenta. */}
+              {lineaOrigen !== null ? (
+                <Text
+                  style={{
+                    fontFamily: typography.family.sans.regular,
+                    fontSize: typography.size.base,
+                    textAlign: 'center',
+                    color: sobreMarca,
+                    opacity: esMemorial ? 1 : 0.9,
+                    marginTop: spacing[1.5],
+                  }}
+                >
+                  {lineaOrigen}
+                </Text>
+              ) : null}
+
               <Text
                 style={{
                   fontFamily: typography.family.mono.regular,
@@ -710,9 +876,20 @@ export default function PerfilDeMascota() {
                 }}
               >
                 {[
-                  mascota.raza,
-                  meses !== null ? vozEdad(meses, t) : null,
-                  peso_clinico_kg !== null ? `${peso_clinico_kg} kg` : null,
+                  esAcuario ? (tipoAgua === 'marino' ? t('perfil.aguaMarino') : tipoAgua === 'dulce' ? t('perfil.aguaDulce') : null) : mascota.raza,
+                  esAcuario || meses === null
+                    ? null
+                    : meses !== null
+                    ? vozEdad(
+                        meses,
+                        mascota.fecha_nacimiento_precision,
+                        mascota.fecha_nacimiento !== null
+                          ? Number(mascota.fecha_nacimiento.slice(0, 4))
+                          : null,
+                        t,
+                      )
+                      : null,
+                  esAcuario ? null : peso_clinico_kg !== null ? `${peso_clinico_kg} kg` : null,
                 ]
                   .filter((x): x is string => x !== null && x !== '')
                   .join(' · ')
@@ -738,7 +915,7 @@ export default function PerfilDeMascota() {
         {/* ── ② LA TARJETA QUE MONTA EL BORDE (patrón 1 — el solape que
             r3 dejó declarado esperando la imagen). DOS hechos reales:
             "dos hechos reales valen más que tres con uno inventado". */}
-        {perfil.paseos_total > 0 || vacunas.length > 0 ? (
+        {monta.hechos && (perfil.paseos_total > 0 || vacunas.length > 0) ? (
           <View style={{ paddingHorizontal: spacing[5], marginTop: -spacing[8], zIndex: 2 }}>
             <Tarjeta elevacion="elevada">
               <View style={{ flexDirection: 'row', alignItems: 'stretch' }}>
@@ -765,7 +942,7 @@ export default function PerfilDeMascota() {
             "cuatro tarjetas para la ausencia"). El rótulo lleva su
             CUENTA. "Cargar el carnet" vive ACÁ, en la fila de la falta
             — por eso muere el segundo CTA de Vacunas. */}
-        {(() => {
+        {monta.comoEstaHoy ? (() => {
           // r10-2 · LOS TRES CASOS de vacunas (la celda medía mal y la
           // pantalla se contradecía: decía "sin registro" con 8 vacunas
           // en el carnet abajo). La celda mide si sabemos el ESTADO:
@@ -803,11 +980,32 @@ export default function PerfilDeMascota() {
           } else {
             faltan.push(t('perfil.hechosVacunas').toLowerCase());
           }
-          if (peso_clinico_kg !== null) {
-            celdas.push({ key: 'peso', rotulo: t('perfil.peso'), valor: `${peso_clinico_kg} kg`, detalle: null, estado: 'alDia' });
-          } else {
-            faltan.push(t('perfil.peso').toLowerCase());
-          }
+          // S91 · P2 — EL PESO GANA SU FECHA Y SU PUERTA.
+          //
+          // Y la celda existe SIEMPRE, también sin dato: antes, una mascota sin
+          // peso solo aparecía nombrada en la fila de «Sin registro», que dice
+          // qué falta y no ofrece dónde ponerlo. La puerta tiene que estar
+          // donde está la ausencia — si no, el dueño lee su carencia y no
+          // tiene qué hacer con ella.
+          const ultimoPeso = pesos !== null && pesos.length > 0 ? pesos[0] : null;
+          celdas.push(
+            ultimoPeso !== null
+              ? {
+                  key: 'peso',
+                  rotulo: t('perfil.peso'),
+                  valor: `${ultimoPeso.peso_kg} kg`,
+                  detalle: t('perfil.pesoMedidoEl', {
+                    fecha: fechaCortaMono(ultimoPeso.fecha.slice(0, 10), idioma),
+                  }),
+                  estado: 'alDia',
+                }
+              : peso_clinico_kg !== null
+                ? // El snapshot sin serie: pasó por acá antes de que existiera
+                  // el lector, o la lectura falló. Se muestra el número y NO se
+                  // le inventa una fecha.
+                  { key: 'peso', rotulo: t('perfil.peso'), valor: `${peso_clinico_kg} kg`, detalle: null, estado: 'alDia' }
+                : { key: 'peso', rotulo: t('perfil.peso'), valor: t('perfil.hoySinRegistroCorto'), detalle: t('perfil.pesoRegistrar'), estado: 'sinSaber' },
+          );
           faltan.push(t('perfil.hoyDesparasitacion').toLowerCase(), t('perfil.hoyAlergias').toLowerCase());
           return (
             <View style={{ marginTop: spacing[8] }}>
@@ -844,6 +1042,12 @@ export default function PerfilDeMascota() {
                             estaba VIVA E INALCANZABLE: ninguna superficie la
                             enlazaba. La de peso no navega (no tiene destino
                             propio: su historia vive en el expediente). */}
+                        {/* S91 · P2 — LA MISMA GRAMÁTICA PARA LAS DOS: cada
+                            celda lleva a SU acto. La de vacunas al plan; la de
+                            peso a registrar el de hoy. El comentario de r8
+                            decía que el peso «no tiene destino propio» — lo
+                            tiene desde que existe la serie: su acto no es
+                            mirar, es SUMAR un punto. */}
                         {c.key === 'vac' ? (
                           <Pressable
                             accessibilityRole="button"
@@ -854,6 +1058,14 @@ export default function PerfilDeMascota() {
                                 params: { mascotaId: mascota.id, nombre: mascota.nombre },
                               })
                             }
+                          >
+                            {cuerpo}
+                          </Pressable>
+                        ) : c.key === 'peso' ? (
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={`${c.rotulo}, ${c.valor}. ${t('perfil.pesoRegistrar')}`}
+                            onPress={() => setPesoHoja(true)}
                           >
                             {cuerpo}
                           </Pressable>
@@ -887,22 +1099,14 @@ export default function PerfilDeMascota() {
                   </CantoCurva>
                 </View>
               ) : null}
-              <Text
-                style={{
-                  fontFamily: SERIF_LOCAL,
-                  fontStyle: 'italic',
-                  fontSize: typography.size.md,
-                  lineHeight: Math.round(typography.size.md * 1.5),
-                  color: theme.text.secondary,
-                  paddingHorizontal: spacing[5],
-                  marginTop: spacing[4],
-                }}
-              >
-                {t('perfil.vozExpediente')}
-              </Text>
+              {/* S91 · P5 — LA LÍNEA EDITORIAL SE MUDÓ. Vivía suelta acá y
+                  «Lo próximo» vivía abajo: DOS fragmentos del mismo vínculo,
+                  separados por media pantalla. La narrativa y su próximo paso
+                  son UNA cosa (MODELO_LOYALTY §2) y ahora viven juntos, al
+                  pie. Ley 37: acá no queda un hueco, queda nada. */}
             </View>
           );
-        })()}
+        })() : null}
 
         {/* ── ④ IDENTIDAD sin caja por dato (lámina: "hoy son seis
             mini-tarjetas dentro de una tarjeta"): UNA superficie con
@@ -923,7 +1127,20 @@ export default function PerfilDeMascota() {
               {datosIdentidad.map((d, i) => (
                 <View key={d.etiqueta}>
                   {i > 0 ? <Separador /> : null}
-                  <FilaIdentidad etiqueta={d.etiqueta} valor={d.valor} mono={d.mono === true} />
+                  {/* P3: la fila de raza LLEVA a su edición. Las demás son
+                      lectura — su productor vive en otro lado (el peso en P2,
+                      el microchip en la consulta). */}
+                  {d.editable === 'raza' ? (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={`${d.etiqueta}, ${d.valor}`}
+                      onPress={() => setRazaHoja(true)}
+                    >
+                      <FilaIdentidad etiqueta={d.etiqueta} valor={d.valor} mono={d.mono === true} />
+                    </Pressable>
+                  ) : (
+                    <FilaIdentidad etiqueta={d.etiqueta} valor={d.valor} mono={d.mono === true} />
+                  )}
                 </View>
               ))}
               {mascota.especie === 'perro' ? (
@@ -965,6 +1182,7 @@ export default function PerfilDeMascota() {
         {/* ── ⑤ VACUNAS — el resumen en UNA fila con el canto de SALUD y
             el pie que revela. "Cargar carnet" ya NO vive acá (se mudó a
             la fila de la ausencia): un solo gesto por sección. */}
+        {monta.vacunas ? (
         <View style={{ marginTop: spacing[8] }}>
           <RotuloSeccion titulo={t('perfil.vacunas')} cuenta={String(vacunas.length)} />
           <View style={{ paddingHorizontal: spacing[5] }}>
@@ -1020,6 +1238,7 @@ export default function PerfilDeMascota() {
             )}
           </View>
         </View>
+        ) : null}
 
         {/* ── S89 órdenes 8⑤/10① · LOS PAPELES DEL PRODUCTO ──────────────
             Los documentos viven JUNTOS: un solo lugar donde la familia sabe
@@ -1160,6 +1379,12 @@ export default function PerfilDeMascota() {
                 { codigo: 'paseos', etiqueta: t('hogar.filtroPaseos'), icono: 'paseo', capa: 'cuidado' },
                 { codigo: 'estetica', etiqueta: t('hogar.filtroEstetica'), icono: 'grooming', capa: 'cuidado' },
                 { codigo: 'adiestramiento', etiqueta: t('hogar.filtroAdiestramiento'), icono: 'training', capa: 'cuidado' },
+                // P4 · LA BITÁCORA ENTRA POR SU HISTORIA. Su chip vive en la
+                // MISMA fila que los oficios y se dibuja con la misma regla
+                // (Ley 23: la puerta no ofrece lo que no tiene) — solo si hay
+                // entradas. Su capa es identidad y no cuidado: lo que la
+                // familia observa es del EXPEDIENTE, no de un servicio.
+                { codigo: 'bitacora', etiqueta: t('hogar.filtroBitacora'), icono: 'caso', capa: 'identidad' },
               ];
               const presentes = FAMILIAS.filter((f) => items.some((it) => FAMILIA_DE_TIPO[it.tipo] === f.codigo));
               const filtrados = filtroHistoria === 'todo' ? items : items.filter((it) => FAMILIA_DE_TIPO[it.tipo] === filtroHistoria);
@@ -1167,6 +1392,28 @@ export default function PerfilDeMascota() {
               return (
                 <>
                   <RotuloSeccion titulo={t('perfil.vida')} cuenta={String(items.length)} />
+
+                  {/* P4 · LA PUERTA DE LA BITÁCORA — un toque visible junto a
+                      Su historia. Hasta hoy la bitácora tenía UNA sola entrada
+                      en toda la app y era `/hogar/adiestramiento`: desde el
+                      perfil de la mascota no se llegaba (medido en el censo).
+                      Contar algo de hoy es del expediente de ESA mascota, así
+                      que su puerta vive donde vive su historia — y va con su
+                      `mascotaId` para que la pantalla no tenga que adivinar de
+                      quién se habla. */}
+                  <View style={{ paddingHorizontal: spacing[5], marginBottom: spacing[3] }}>
+                    <CeldaNavegacion
+                      icono="caso"
+                      titulo={t('perfil.bitacoraEntrada')}
+                      detalle={t('perfil.bitacoraDetalle', { nombre: mascota.nombre })}
+                      onPress={() =>
+                        router.push({
+                          pathname: '/hogar/bitacora',
+                          params: { mascotaId: mascota.id },
+                        })
+                      }
+                    />
+                  </View>
                   {presentes.length > 1 ? (
                     <FiltroPills
                       activo={filtroHistoria}
@@ -1184,8 +1431,20 @@ export default function PerfilDeMascota() {
                       <>
                         {visibles.map((it) => {
                           const familia = FAMILIA_DE_TIPO[it.tipo];
-                          const color =
-                            familia === 'salud' ? theme.capa.identidad : familia !== undefined ? theme.capa.cuidado : null;
+                          // S91 (gate): EL HITO ES UN MOMENTO DE IDENTIDAD y
+                          // se lee como tal. No entra a `FAMILIA_DE_TIPO`
+                          // porque ésa es la taxonomía de SERVICIOS y un hito
+                          // no es un servicio — pero sin canto quedaba como
+                          // una fila anónima entre las demás, que es media
+                          // explicación de «no apareció».
+                          const esHito = it.tipo === 'hito_narrativo';
+                          const color = esHito
+                            ? theme.capa.identidad
+                            : familia === 'salud'
+                              ? theme.capa.identidad
+                              : familia !== undefined
+                                ? theme.capa.cuidado
+                                : null;
                           const glifoFila: IconoNombre | null =
                             familia === 'salud'
                               ? 'veterinaria'
@@ -1371,32 +1630,66 @@ export default function PerfilDeMascota() {
           })()
         ) : null}
 
-        {/* ── ⑧ EL PIE QUE DICE POR QUÉ (propuesta de la lámina: "un
-            botón al final del scroll no es una invitación, es un
-            botón"). Rótulo mono + una razón que sale del EXPEDIENTE +
-            el CTA en degradado. La razón la calcula la PANTALLA. */}
-        <View style={{ paddingHorizontal: spacing[5], marginTop: spacing[8] }}>
-          <Tarjeta elevacion="elevada">
-            <View style={{ gap: spacing[3] }}>
-              <Texto variante="apoyo">{t('perfil.pieRotulo')}</Texto>
-              <Texto variante="apoyo">
-                {(() => {
-                  const hoyIso2 = new Intl.DateTimeFormat('en-CA').format(hoy);
-                  const pv2 = senal?.proxima_vacuna ?? null;
-                  if (pv2 !== null && pv2.fecha < hoyIso2) return t('perfil.pieRazonVacuna', { vacuna: pv2.nombre });
-                  if (senal !== null && senal.vacunas_total === 0) return t('perfil.pieRazonSinCarnet', { nombre: mascota.nombre });
-                  return t('perfil.pieRazonGeneral', { nombre: mascota.nombre });
-                })()}
-              </Texto>
-              <Boton
-                variante="marca"
-                bloque
-                etiqueta={t('perfil.reservarServicioDe', { nombre: mascota.nombre })}
-                onPress={() => router.navigate('/explorar')}
-              />
-            </View>
-          </Tarjeta>
-        </View>
+        {/* ── ⑧ S91 · P5 — LA TARJETA DEL VÍNCULO. UNA, no dos.
+            Narrativa + UN próximo paso con su ganancia visible
+            (MODELO_LOYALTY §2). Y la letra que gobierna lo que NO puede
+            ser: «jamás una checklist de tareas — la checklist es la
+            chorificación del cuidado y el dark pattern que mata el alma
+            del producto». Tampoco barra ni «perfil 40% completo».
+
+            Por eso el progreso se dice en VOZ y el número que lo calcula
+            NUNCA se muestra: existe para elegir la frase y muere ahí.
+
+            ⚠️ P8 · EL MEMORIAL LA APAGA ENTERA, y es apagado ESTRUCTURAL:
+            la tarjeta no se monta. No es un filtro ni una variante gris —
+            invitar a reservar un servicio para quien ya no está es la
+            clase de error que no se arregla pidiendo perdón. */}
+        {!esMemorial ? (
+          <View style={{ paddingHorizontal: spacing[5], marginTop: spacing[8] }}>
+            <Tarjeta elevacion="elevada">
+              <View style={{ gap: spacing[3] }}>
+                <Texto variante="apoyo">{t('perfil.pieRotulo')}</Texto>
+
+                {/* LA NARRATIVA — cuánto conoce la casa a esta mascota, dicho
+                    como se lo diría una persona. Los «capítulos» que cuentan
+                    son hechos del expediente, no tareas de una lista. */}
+                <Texto variante="cuerpo">
+                  {(() => {
+                    const capitulos = [
+                      senal !== null && senal.vacunas_total > 0,
+                      pesos !== null ? pesos.length > 0 : peso_clinico_kg !== null,
+                      perfil.paseos_total > 0,
+                      perfil.consultas_total > 0,
+                      mascota.raza !== null && mascota.raza.length > 0,
+                      mascota.fecha_nacimiento !== null,
+                    ].filter(Boolean).length;
+                    if (capitulos >= 5) return t('perfil.vinculoMucho', { nombre: mascota.nombre });
+                    if (capitulos >= 3) return t('perfil.vinculoAlgo', { nombre: mascota.nombre });
+                    return t('perfil.vinculoPoco', { nombre: mascota.nombre });
+                  })()}
+                </Texto>
+
+                {/* EL PASO, con su ganancia. La razón sale del EXPEDIENTE. */}
+                <Texto variante="apoyo">
+                  {(() => {
+                    const hoyIso2 = new Intl.DateTimeFormat('en-CA').format(hoy);
+                    const pv2 = senal?.proxima_vacuna ?? null;
+                    if (pv2 !== null && pv2.fecha < hoyIso2) return t('perfil.pieRazonVacuna', { vacuna: pv2.nombre });
+                    if (senal !== null && senal.vacunas_total === 0) return t('perfil.pieRazonSinCarnet', { nombre: mascota.nombre });
+                    return t('perfil.pieRazonGeneral', { nombre: mascota.nombre });
+                  })()}
+                </Texto>
+
+                <Boton
+                  variante="marca"
+                  bloque
+                  etiqueta={t('perfil.reservarServicioDe', { nombre: mascota.nombre })}
+                  onPress={() => router.navigate('/explorar')}
+                />
+              </View>
+            </Tarjeta>
+          </View>
+        ) : null}
 
       </ScrollView>
 
@@ -1410,6 +1703,30 @@ export default function PerfilDeMascota() {
             typeof prev === 'object' ? { ...prev, mascota: { ...prev.mascota, paseo_social_ok: ok } } : prev,
           );
         }}
+      />
+
+      {/* S91 · P2 — la puerta del peso. El motor existía completo desde
+          S66/S70 (evento_peso_medicion + sus triggers); lo único que faltaba
+          era esto. */}
+      <RegistrarPesoHoja
+        visible={pesoHoja}
+        nombre={mascota.nombre}
+        mascotaId={mascota.id}
+        onCerrar={() => setPesoHoja(false)}
+        onRegistrado={() => setRecargaPeso((n) => n + 1)}
+      />
+
+      {/* P3 · la MISMA pieza del paso 2 del alta (§6: se comparte, no se
+          clona). No valida lo escrito: `mascotas.raza` es texto libre por la
+          letra de S59 y la RPC la respeta. */}
+      <EditarRazaHoja
+        visible={razaHoja}
+        mascotaId={mascota.id}
+        nombre={mascota.nombre}
+        especie={mascota.especie}
+        razaActual={razaLocal !== undefined ? razaLocal : mascota.raza}
+        onCerrar={() => setRazaHoja(false)}
+        onGuardada={(raza) => setRazaLocal(raza)}
       />
 
       {/* §3 grooming (S60): la MISMA Hoja de la reserva — editable siempre */}
