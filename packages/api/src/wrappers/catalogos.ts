@@ -58,6 +58,50 @@ export async function obtenerEspeciesActivas(): Promise<
   return { ok: true, data: data.map((e) => ({ codigo: e.codigo, nombre: e.nombre })) };
 }
 
+// ── S91 · D-379: el catálogo de razas ────────────────────────────────
+// LA LETRA, antes que el código: el catálogo SUGIERE, el dueño CONFIRMA.
+// Este lector alimenta el tipeo predictivo del alta; lo que el dueño
+// escriba viaja TEXTO LIBRE a la RPC (`raza`), se parezca o no a una
+// fila de acá — «Mestizo» y «No sé» son respuesta de primera clase.
+// Un acuario NO usa este lector (su campo dos es el tipo de agua).
+
+export interface RazaCatalogo {
+  slug: string;
+  /** Nombre VERBATIM del mapeo, con sus acentos y ñ. Jamás
+   *  des-slugificado: es «Cacatúa Alba», no «Cacatua Alba». */
+  nombre: string;
+  /** Path en el bucket público `especies-razas`:
+   *  '<especie>/<slug>.webp'. La URL la compone la superficie. */
+  ruta_imagen: string;
+}
+
+/** Razas activas de UNA especie, alfabéticas por nombre.
+ *  RLS: cat_razas_select_publica. Especie sin razas = lista vacía
+ *  (no es error: la superficie ofrece «Mestizo / No sé» igual). */
+export async function obtenerRazasDeEspecie(
+  especie: string,
+): Promise<ResultadoWrapper<RazaCatalogo[], 'error_catalogo'>> {
+  const { data, error } = await getClient()
+    .from('cat_razas')
+    .select('slug, nombre, ruta_imagen')
+    .eq('especie', especie)
+    .eq('activo', true)
+    .order('nombre', { ascending: true });
+
+  if (error) return { ok: false, codigo: 'error_catalogo', mensaje: MENSAJE_ERROR };
+  if (!Array.isArray(data)) {
+    return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJE_ERROR };
+  }
+  return {
+    ok: true,
+    data: data.map((r) => ({
+      slug: r.slug,
+      nombre: r.nombre,
+      ruta_imagen: r.ruta_imagen,
+    })),
+  };
+}
+
 /** MODELO_PASEO v1.4 §1bis — especies elegibles de una CATEGORÍA de
  *  servicio (fuente de verdad: tipos_servicio.especies_elegibles).
  *  null = todas las especies (multi-especie de nacimiento). La UI

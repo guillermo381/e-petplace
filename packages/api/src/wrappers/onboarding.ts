@@ -19,6 +19,10 @@ const CODIGOS_ERROR_ONBOARDING = [
   'sexo_invalido',
   'precision_fecha_invalida',
   'precision_sin_fecha',
+  // S91 · cláusula del pez (firma founder 7-ago-2026)
+  'raza_no_aplica_acuario',
+  'tipo_agua_invalida',
+  'tipo_agua_solo_pez',
 ] as const;
 
 export type CodigoErrorOnboarding = (typeof CODIGOS_ERROR_ONBOARDING)[number];
@@ -36,6 +40,9 @@ const MENSAJES_ERROR_ONBOARDING: Record<
   sexo_invalido:               'El sexo elegido no es válido.',
   precision_fecha_invalida:    'La precisión de la fecha no es válida.',
   precision_sin_fecha:         'Elegí una fecha para poder guardar su precisión.',
+  raza_no_aplica_acuario:      'Un acuario no tiene raza — contanos su tipo de agua.',
+  tipo_agua_invalida:          'El tipo de agua tiene que ser dulce o marino.',
+  tipo_agua_solo_pez:          'El tipo de agua es solo para acuarios.',
   datos_inconsistentes:        'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:           'Ocurrió un error inesperado. Probá de nuevo.',
 };
@@ -58,6 +65,10 @@ function mapeoErrorAResultado<T>(
 /** Espejo de chk_mascotas_fecha_nacimiento_precision. */
 export type PrecisionFechaNacimiento = 'exacta' | 'aproximada' | 'estimada';
 
+/** S91 · cláusula del pez: el campo dos del alta de un acuario, en
+ *  espejo de la raza (que un acuario no tiene). */
+export type TipoAguaAcuario = 'dulce' | 'marino';
+
 export interface InputCrearFamiliaConPrimeraMascota {
   nombre_familia: string;
   nombre_mascota: string;
@@ -69,6 +80,15 @@ export interface InputCrearFamiliaConPrimeraMascota {
   sexo?: 'macho' | 'hembra' | 'desconocido';
   /** URL pública del avatar ya subido a mascotas/{uid}/… (S45-B4.1). */
   foto_url?: string;
+  /** S91 · D-379: TEXTO LIBRE. El catálogo (obtenerRazasDeEspecie)
+   *  SUGIERE y el dueño CONFIRMA — «Mestizo» y «No sé» son respuesta
+   *  de primera clase y por eso NO se valida contra el catálogo.
+   *  Ilegal en especie 'pez' (raza_no_aplica_acuario). */
+  raza?: string;
+  /** S91 · solo especie 'pez'. En cualquier otra rebota
+   *  (tipo_agua_solo_pez). La marca sujeto='acuario' la estampa el
+   *  MOTOR: el cliente jamás la manda. */
+  tipo_agua?: TipoAguaAcuario;
 }
 
 export interface FamiliaCreada {
@@ -92,6 +112,8 @@ export async function crearFamiliaConPrimeraMascota(
     p_precision_fecha:  input.precision_fecha ?? undefined,
     p_sexo:             input.sexo ?? undefined,
     p_foto_url:         input.foto_url ?? undefined,
+    p_raza:             input.raza ?? undefined,
+    p_tipo_agua:        input.tipo_agua ?? undefined,
   });
 
   if (error) return mapeoErrorAResultado(error.message);
@@ -130,6 +152,11 @@ export interface InputAgregarMascotaAFamilia {
   sexo?: 'macho' | 'hembra' | 'desconocido';
   /** Path del avatar ya subido a mascotas/{uid}/… (S47: jamás URL). */
   foto_url?: string;
+  /** S91 · D-379: texto libre — el catálogo sugiere, el dueño confirma.
+   *  Ilegal en 'pez' (raza_no_aplica_acuario). */
+  raza?: string;
+  /** S91 · solo 'pez' (tipo_agua_solo_pez en cualquier otra). */
+  tipo_agua?: TipoAguaAcuario;
 }
 
 export interface MascotaAgregada {
@@ -152,6 +179,8 @@ export async function agregarMascotaAFamilia(
     p_precision_fecha:  input.precision_fecha ?? undefined,
     p_sexo:             input.sexo ?? undefined,
     p_foto_url:         input.foto_url ?? undefined,
+    p_raza:             input.raza ?? undefined,
+    p_tipo_agua:        input.tipo_agua ?? undefined,
   });
 
   if (error) return mapeoErrorAResultado(error.message);
@@ -193,6 +222,12 @@ export interface MascotaResumen {
    *  estructural, jamás if de UI). null = fuera del CHECK (angostado
    *  honesto) y la elegibilidad falla cerrada. */
   estado_vida: EstadoVidaMascota | null;
+  /** S91 · cláusula del pez: 'acuario' = la fila registra el SISTEMA,
+   *  no un individuo. La superficie que no lo mire tratará al acuario
+   *  como mascota — que es exactamente lo que la firma quiso evitar. */
+  sujeto: 'individuo' | 'acuario';
+  /** Solo acuarios; null en todo lo demás. */
+  tipo_agua: 'dulce' | 'marino' | null;
 }
 
 /** Mascotas de una familia (Home del dueño). Reader: mismas claves
@@ -202,7 +237,9 @@ export async function obtenerMascotasDeFamilia(
 ): Promise<ResultadoWrapper<MascotaResumen[], CodigoErrorOnboarding>> {
   const { data, error } = await getClient()
     .from('mascotas')
-    .select('id, nombre, especie, foto_url, paseo_social_ok, talla, pelaje, estado_vida')
+    .select(
+      'id, nombre, especie, foto_url, paseo_social_ok, talla, pelaje, estado_vida, sujeto, tipo_agua',
+    )
     .eq('familia_id', familiaId)
     .order('fecha_alta', { ascending: true });
 
@@ -223,6 +260,10 @@ export async function obtenerMascotasDeFamilia(
         m.estado_vida === 'activa' || m.estado_vida === 'perdida' || m.estado_vida === 'fallecida'
           ? m.estado_vida
           : null,
+      // Angostado verificando: un sujeto desconocido cae a 'individuo'
+      // — el default del schema y el caso de TODAS las filas vivas.
+      sujeto: m.sujeto === 'acuario' ? 'acuario' : 'individuo',
+      tipo_agua: m.tipo_agua === 'dulce' || m.tipo_agua === 'marino' ? m.tipo_agua : null,
     })),
   };
 }

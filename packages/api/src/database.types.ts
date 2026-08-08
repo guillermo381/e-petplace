@@ -1461,6 +1461,30 @@ export type Database = {
         }
         Relationships: []
       }
+      cat_hitos_narrativos: {
+        Row: {
+          activo: boolean
+          clave: string
+          created_at: string
+          descripcion: string
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          clave: string
+          created_at?: string
+          descripcion: string
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          clave?: string
+          created_at?: string
+          descripcion?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cat_incidencias_grooming: {
         Row: {
           activo: boolean
@@ -1858,6 +1882,44 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      cat_razas: {
+        Row: {
+          activo: boolean
+          created_at: string
+          especie: string
+          nombre: string
+          ruta_imagen: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          especie: string
+          nombre: string
+          ruta_imagen: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          especie?: string
+          nombre?: string
+          ruta_imagen?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cat_razas_especie_fkey"
+            columns: ["especie"]
+            isOneToOne: false
+            referencedRelation: "cat_especies"
+            referencedColumns: ["codigo"]
+          },
+        ]
       }
       cat_restricciones_servicio: {
         Row: {
@@ -7003,6 +7065,61 @@ export type Database = {
           },
         ]
       }
+      evento_hito_narrativo: {
+        Row: {
+          clave: string
+          contexto: Json
+          country_code: string
+          created_at: string
+          evento_id: string
+          id: string
+          mascota_id: string
+          updated_at: string
+        }
+        Insert: {
+          clave: string
+          contexto?: Json
+          country_code: string
+          created_at?: string
+          evento_id: string
+          id?: string
+          mascota_id: string
+          updated_at?: string
+        }
+        Update: {
+          clave?: string
+          contexto?: Json
+          country_code?: string
+          created_at?: string
+          evento_id?: string
+          id?: string
+          mascota_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evento_hito_narrativo_clave_fkey"
+            columns: ["clave"]
+            isOneToOne: false
+            referencedRelation: "cat_hitos_narrativos"
+            referencedColumns: ["clave"]
+          },
+          {
+            foreignKeyName: "evento_hito_narrativo_evento_id_fkey"
+            columns: ["evento_id"]
+            isOneToOne: true
+            referencedRelation: "eventos_mascota"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evento_hito_narrativo_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       evento_identidad_personal: {
         Row: {
           activo: boolean
@@ -10317,7 +10434,9 @@ export type Database = {
           raza: string | null
           refugio_id: string | null
           sexo: string | null
+          sujeto: string
           talla: string | null
+          tipo_agua: string | null
           updated_at: string
           user_id: string | null
         }
@@ -10346,7 +10465,9 @@ export type Database = {
           raza?: string | null
           refugio_id?: string | null
           sexo?: string | null
+          sujeto?: string
           talla?: string | null
+          tipo_agua?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -10375,7 +10496,9 @@ export type Database = {
           raza?: string | null
           refugio_id?: string | null
           sexo?: string | null
+          sujeto?: string
           talla?: string | null
+          tipo_agua?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -17124,7 +17247,9 @@ export type Database = {
           p_foto_url?: string
           p_nombre_mascota: string
           p_precision_fecha?: string
+          p_raza?: string
           p_sexo?: string
+          p_tipo_agua?: string
         }
         Returns: Json
       }
@@ -17401,7 +17526,9 @@ export type Database = {
           p_nombre_familia: string
           p_nombre_mascota: string
           p_precision_fecha?: string
+          p_raza?: string
           p_sexo?: string
+          p_tipo_agua?: string
         }
         Returns: Json
       }

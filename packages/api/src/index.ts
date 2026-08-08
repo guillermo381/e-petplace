@@ -17,8 +17,11 @@ export {
   obtenerEspeciesActivas,
   obtenerCatalogoNovedadesPaseo,
   obtenerEspeciesElegibles,
+  // S91 · D-379: el catálogo que SUGIERE razas (el dueño confirma).
+  obtenerRazasDeEspecie,
   type EspecieCatalogo,
   type NovedadPaseoCatalogo,
+  type RazaCatalogo,
 } from './wrappers/catalogos';
 export {
   leerTimelineMascota,
@@ -81,6 +84,8 @@ export {
   type EstadoOnboardingDueno,
   type MascotaResumen,
   type PrecisionFechaNacimiento,
+  // S91 · cláusula del pez (firma founder): el campo dos del acuario.
+  type TipoAguaAcuario,
   type CodigoErrorOnboarding,
 } from './wrappers/onboarding';
 export { resolverUrlFoto, resolverUrlsFotos } from './wrappers/fotos';
