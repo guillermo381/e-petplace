@@ -22,7 +22,7 @@ import { PDFDocument, StandardFonts, rgb } from './deps.ts';
 // plantilla compartida. Montarla acá es exactamente lo que el punto de
 // montaje de abajo pedía; dibujarla a ojo sería el «cada uno la suya» que
 // §6 del método evita. (El verify local la resuelve con el mismo hook.)
-import { marcaDeAgua } from '../_shared/papel.ts';
+import { marcaDeAgua, AIRE_BAJO_FILETE } from '../_shared/papel.ts';
 
 const TINTA = rgb(0.133, 0.118, 0.098); // #221E19 — 16.56:1 sobre blanco
 const TINTA_SUAVE = rgb(0.435, 0.427, 0.416); // #6F6D6A — 5.16:1, AA
@@ -185,9 +185,18 @@ export async function componerCertificado(d: DatosCertificado): Promise<Uint8Arr
   // ── EL FILETE: el ÚNICO magenta del papel ───────────────────────────────
   // Va ARRIBA del título con aire: a +16 la línea corta las mayúsculas de un
   // título de 22pt (medido — el ascendente de Helvetica a 22 llega a ~16).
+  //
+  // S91: el 28 era un NÚMERO MÁGICO desacoplado de la letra firmada. Se
+  // descompone en sus dos partes SIN mover un píxel: 18 es la altura de
+  // mayúscula del título de 22pt (este papel lo tiene más grande que los
+  // otros cuatro, por eso su base es 18 y no 12), y el aire viene de la
+  // CONSTANTE FIRMADA compartida. 18 + 10 = 28: el resultado impreso que el
+  // founder aprobó no cambia, pero el día que la letra del aire se enmiende,
+  // este filete se entera. *Un valor que coincide con la ley por casualidad
+  // deja de coincidir en la primera enmienda.*
   page.drawLine({
-    start: { x: MX, y: y + 28 },
-    end: { x: A4[0] - MX, y: y + 28 },
+    start: { x: MX, y: y + 18 + AIRE_BAJO_FILETE },
+    end: { x: A4[0] - MX, y: y + 18 + AIRE_BAJO_FILETE },
     thickness: 2,
     color: MAGENTA,
   });

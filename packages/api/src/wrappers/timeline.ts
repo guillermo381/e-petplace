@@ -44,6 +44,14 @@ export interface ItemTimeline {
   duracion_min: number | null;
   atencion_id: string | null;
   fotos_count: number;
+  /** Solo tipo=hito_narrativo: `datos->>'clave_hito'` — cuál de los
+   *  hitos es (`vida_nueva_empieza` · `llego_a_la_familia` ·
+   *  `mundo_nuevo_empieza`). LA VOZ NO VIENE DE ACÁ: la pone la pantalla
+   *  (Ley 3). Viaja en `datos` y no por join con la tabla tipada porque
+   *  este lector no la toca — mismo motivo y mismo patrón que
+   *  `vacuna_nombre`. Una clave que el bundle no conozca cae al nodo
+   *  genérico por eje, que es degradación honesta. */
+  hito_clave: string | null;
   /** Solo tipo=vacuna_aplicada: eventos_mascota.datos->>'vacuna' (lo
    *  escribe el trigger _trg_vacuna_crear_evento) — insumo de la voz
    *  "Recibió la vacuna {nombre}" de LineaDeVida (S47-B1.2 C). */
@@ -132,6 +140,10 @@ async function _timeline(
     }
     const datos = e.datos as Record<string, unknown> | null;
     const vacuna = e.tipo === 'vacuna_aplicada' && datos && typeof datos.vacuna === 'string' ? datos.vacuna : null;
+    const hito =
+      e.tipo === 'hito_narrativo' && datos && typeof datos.clave_hito === 'string'
+        ? datos.clave_hito
+        : null;
     return {
       evento_id: e.id,
       mascota_id: e.mascota_id,
@@ -143,6 +155,7 @@ async function _timeline(
       atencion_id: at?.id ?? null,
       fotos_count: fotosPorEvento.get(e.id) ?? 0,
       vacuna_nombre: vacuna,
+      hito_clave: hito,
       // La vacuna es fecha-sola POR TIPO (el carnet registra días, no
       // momentos). S82 r4: nació el SEGUNDO tipo fecha-sola
       // (desparasitación) — EL DISPARO DE D-312 SONÓ: llevar la

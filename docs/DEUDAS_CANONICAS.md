@@ -9428,50 +9428,78 @@ mueva el filtro y encienda `recursosUi` sin saber por qué estaba afuera.
 
 **Origen: S91-B (medición de B sobre su propio guard, elevada a mesa).**
 
-#### D-690 — 🟡 BORRAR UNA MASCOTA DEVUELVE ÉXITO Y NO BORRA NADA (el silencio, no la denegación)
+#### D-690 — ✅ FIRMADA: EL EXPEDIENTE NO SE ELIMINA (y el defecto real es el silencio)
 
 **Descubierto intentándolo (S91-A, el E2E de razas/acuario):** el dueño llama
 `from('mascotas').delete().eq('id', …)` con su propia mascota, **PostgREST
-responde 200 sin error y no se borra ni una fila**. El script lo cazó solo
-porque tiene un chequeo de RESIDUO — sin ese chequeo, el borrado habría
-pasado por hecho.
+responde 200 sin error y no se borra ni una fila**. Lo cazó el chequeo de
+RESIDUO del script; sin él, el borrado se daba por hecho.
 
-**Medido, la causa exacta:** `mascotas` tiene DOS policies DELETE —
+---
+
+### LA LETRA, FIRMADA (mesa 8-ago-2026 + gate del founder)
+
+> **① EL EXPEDIENTE JAMÁS SE ELIMINA.** No es una limitación: es la ley. El
+> camino es el **MEMORIAL**, y *corregir es AGREGAR* (D-544).
+> **NO se agrega policy DELETE para el titular.**
+>
+> **② LOS DOS CAMINOS QUE SÍ EXISTEN** (letra vigente; su construcción es de
+> otra sesión): el cliente puede **OCULTAR** la mascota, y existe la
+> **ADOPCIÓN por otra familia** — la mascota cambia de hogar sin perder su
+> vida documentada. *Una mascota que se va no se borra: se muda.*
+>
+> **③ EL DEFECTO REAL, y es el único que se cura acá: el intento responde
+> ÉXITO SILENCIOSO.** Todo camino de borrado —si alguna superficie llega a
+> ofrecerlo— **rebota TIPADO diciendo el porqué y ofreciendo el memorial**.
+> Jamás un 200 con cero filas leído como éxito.
+
+---
+
+### LO MEDIDO QUE SOSTIENE LA LEY (y la vuelve obvia)
+
+**79 tablas tienen FK a `mascotas`** — censo completo por `pg_constraint`,
+8-ago-2026 — y **más de 30 en CASCADE**: vacunas, historia clínica,
+certificados emitidos, tracks de paseo, bitácora, telemetría del wearable.
+*Borrar una mascota no borra una fila: destruye una vida documentada en
+treinta lugares a la vez, en silencio.* **El schema ya decía la ley; lo que
+faltaba era escribirla.**
+
+**Por qué el borrado no ocurre hoy:** `mascotas` tiene DOS policies DELETE —
 `mascotas_delete_admin` (`is_admin()`) y `mascotas_delete_codueño`
-(`_user_es_codueño_mascota(id, auth.uid())`, la tabla **LEGACY** de codueños
-que el alta por RPC **no puebla**). El titular de la familia no entra por
-ninguna de las dos. Bajo RLS, una fila que no matchea no es un rechazo: es
-una fila que **no existe** para ese caller — y borrar cero filas es un éxito
-perfectamente válido para Postgres.
+(`_user_es_codueño_mascota`, sobre la tabla **LEGACY** `mascota_codueño`, que
+el alta por RPC no puebla). El titular no entra por ninguna. Bajo RLS, una
+fila que no matchea **no es un rechazo: no existe** — y borrar cero filas es
+un éxito perfectamente válido para Postgres. Es **L-192 en su forma exacta**:
+una operación cuyo modo de falla es el silencio.
 
-**⚠️ Y LA LECTURA FÁCIL ES PROBABLEMENTE LA EQUIVOCADA: esto casi seguro NO
-es un permiso faltante.** El expediente de una mascota **no es borrable por
-diseño** — el camino de la casa es el MEMORIAL, y la ley de correcciones dice
-que *corregir es AGREGAR* (D-544). *Si eso es así, la ausencia de policy es
-la letra, igual que la ausencia del FK en `cat_razas`.*
+**El costo real no es este script** — es la próxima pantalla que ofrezca
+«eliminar» y muestre un toast de éxito sobre una fila que sigue viva.
 
-**Lo que SÍ es defecto, sin depender de esa decisión: que el intento no lo
-diga.** Es L-192 en su forma exacta —una operación cuyo modo de falla es el
-silencio— y su costo real no es este script: es la próxima superficie que
-ofrezca «eliminar» y muestre un toast de éxito sobre una fila que sigue viva.
+### 🔒 LA PIEZA PARA EL LOOP DE S92 (orden de mesa), con su número
 
-**LAS DOS MITADES, separadas porque tienen dueños distintos:**
-- **(a) DE LETRA (mesa):** ¿el dueño puede borrar una mascota, o el camino es
-  memorial y nada más? Roza **D-337** (eliminar cuenta, requisito de tiendas)
-  y **D-544**. Hasta que se firme, nadie construye un botón de borrar.
-- **(b) DE MOTOR (A), y NO espera a (a):** el borrado que no puede ocurrir
-  tiene que **decirlo**. Sea con un guard tipado en un wrapper, sea con la
-  regla escrita de que esa tabla no se borra desde el producto.
+`mascotas_delete_codueño` **es una puerta viva que la ley recién firmada no
+contempla**. Medido: **2 filas vigentes** en `mascota_codueño`, **2 usuarios,
+2 mascotas** (`Test-RLS-Firulais` de `nuevo_test2@…` · `Jack` de
+`guillo381+9@…`).
 
-**Mitigación vigente, declarada:** el fixture
-`scripts/verify-razas-acuario-s91.mjs` mide el residuo, **imprime los ids** y
-se pone ROJO cuando no pudo limpiar; la limpieza se hace SERVER-SIDE por A
-(relevando FKs antes, regla 41). *El gate no miente: dice que quedó residuo.*
+**El matiz que cambia la lectura, y por eso se mide antes de alarmar: en los
+dos casos el codueño ES EL PROPIO DUEÑO** (`es_tambien_el_dueño = true`).
+**Nadie ajeno tiene poder de borrado sobre la mascota de otro.** Lo que hay
+son dos usuarios con un camino que la ley dice que no debería existir —
+riesgo acotado, pero es exactamente la clase de puerta que un censo de
+seguridad tiene que ver. *Un agujero de dos filas es fácil de cerrar; el
+problema es no saber que está.*
 
-> **☠️ DISPARO: la primera superficie que ofrezca borrar una mascota** — o el
-> loop de seguridad de S92, que ya mira esta clase de agujeros silenciosos.
-> **☠️ MUERTE:** intentar borrar una mascota que no se puede borrar devuelve
-> un error TIPADO, y la letra de si se puede o no está firmada.
+> **☠️ DISPARO: la primera superficie que ofrezca «eliminar mascota», o el
+> arco del memorial — lo que llegue primero.** La pieza legacy va al **loop
+> de seguridad S92**, junto a D-686.
+> **☠️ MUERTE:** intentar borrar rebota TIPADO ofreciendo el memorial, y la
+> policy legacy de codueños está revisada y resuelta.
 
-**Origen: S91-A (hallazgo del chequeo de residuo del E2E — el borrado se creía
-hecho desde que el script existe).**
+**Mitigación vigente, declarada:** `scripts/verify-razas-acuario-s91.mjs` mide
+el residuo, **imprime los ids** y se pone ROJO cuando no pudo limpiar; la
+limpieza es SERVER-SIDE por A relevando FKs antes (regla 41). *El gate no
+miente: dice que quedó residuo.*
+
+**Origen: S91-A (hallazgo del chequeo de residuo del E2E). Letra ratificada
+por mesa y FIRMADA en el gate del founder, 8-ago-2026.**
