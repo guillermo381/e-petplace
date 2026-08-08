@@ -2263,4 +2263,16 @@ export const prestadorEn = {
     fallo: "We couldn't check whether this visit has a prescription.",
     reintentar: 'Try again',
   },
+  historico: {
+    titulo: 'Your history',
+    entrada: 'Your history',
+    entradaDetalle: 'Past visits and appointments',
+    verMas: 'See {{n}} more days',
+    desde: "You're seeing from {{fecha}}",
+    vacioTitulo: 'Nothing here yet',
+    vacioDetalle: 'No visits since {{fecha}}. You can keep looking further back.',
+    errorTitulo: "We couldn't load your history",
+    errorDetalle: 'Check your connection and try again.',
+    reintentar: 'Try again',
+  },
 } as const satisfies Espejo<typeof prestadorEs>;

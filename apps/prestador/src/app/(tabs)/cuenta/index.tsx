@@ -698,6 +698,34 @@ export default function Cuenta() {
             </Tarjeta>
           )}
 
+          {/* S91-B (firma founder 8-ago-2026) · EL HISTÓRICO NAVEGABLE.
+              Nace de un hallazgo de gate: la relectura de la receta estaba
+              bien montada y era INALCANZABLE — el HOY lee `hoy-3..hoy+6` y
+              no había NINGÚN otro camino a una cita más vieja.
+
+              POR QUÉ ACÁ, y no se dedujo: la firma dijo «la sección Datos»,
+              y el literal que define esa frontera vive en `negocio.tsx` —
+              **«DATOS consulta · NEGOCIO configura»**, la razón por la que
+              «El movimiento» se mudó a esta pantalla. Un histórico es
+              consulta pura, así que queda de hermano suyo. *(Se midió
+              primero la otra lectura posible: «Datos comerciales» es la
+              pantalla FISCAL/BANCARIA del Perfil — un archivo de trabajo
+              al lado de la cuenta bancaria habría chocado de contenido.)*
+
+              SIN GATE DE OFICIO, a diferencia de su hermana: el histórico
+              lee los CUATRO oficios y un paseador tiene tanto pasado como
+              un vet. El gate que sí rige es el de los propios lectores
+              (verdad firme + `prestador_id`), que no se re-implementa acá. */}
+          <Tarjeta relleno="ninguno" elevacion="reposo">
+            <CeldaNavegacion
+              icono="mes"
+              registro="aa"
+              titulo={t('historico.entrada')}
+              detalle={t('historico.entradaDetalle')}
+              onPress={() => router.push('/historico')}
+            />
+          </Tarjeta>
+
           {/* ⭐ S85-C11 — LA GALERÍA SUBE, ARRIBA DE "Sesión y cuenta".
               El founder no encontró los dos emblemas, y la medición dijo
               que NO era alcanzabilidad: la entrada estaba viva y sin

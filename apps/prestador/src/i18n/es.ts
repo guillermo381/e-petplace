@@ -2755,4 +2755,20 @@ export const prestadorEs = {
     fallo: 'No pudimos comprobar si esta consulta tiene receta.',
     reintentar: 'Reintentar',
   },
+  // S91-B (firma founder 8-ago-2026) · EL HISTÓRICO NAVEGABLE. Nace de un
+  // hallazgo de gate: no había CERO caminos a una cita de más de 3 días
+  // atrás (el HOY lee hoy-3..hoy+6 y el historial del expediente no es
+  // tapeable). Voz de ARCHIVO, no de agenda: acá no se acciona, se vuelve.
+  historico: {
+    titulo: 'Tu histórico',
+    entrada: 'Tu histórico',
+    entradaDetalle: 'Las atenciones y citas que ya pasaron',
+    verMas: 'Ver {{n}} días más',
+    desde: 'Estás viendo desde el {{fecha}}',
+    vacioTitulo: 'Nada por acá todavía',
+    vacioDetalle: 'No hay atenciones desde el {{fecha}}. Puedes seguir mirando hacia atrás.',
+    errorTitulo: 'No pudimos traer tu histórico',
+    errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
+    reintentar: 'Reintentar',
+  },
 } as const;
