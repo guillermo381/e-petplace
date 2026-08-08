@@ -94,14 +94,21 @@ let texto = await ir('/onboarding', '¿Quién se suma a tu casa?');
 check(texto.includes('¿Quién se suma a tu casa?'), 'Paso 1 · el título de la lámina firmada');
 check(texto.includes('¿Qué especie es?'), 'Paso 1 · el catálogo REAL de especies cargó');
 check(
-  ['Perro', 'Gato', 'Conejo', 'Ave', 'Roedor', 'Pez'].every((e) => texto.includes(e)),
-  'Paso 1 · las SEIS especies de la grilla',
+  ['Perro', 'Gato', 'Conejo', 'Ave', 'Roedor'].every((e) => texto.includes(e)),
+  'Paso 1 · las cinco especies que se llaman por su nombre',
+);
+// (4) FIRMA FOUNDER: la sexta tile NO dice «Pez» — dice «Acuario». El assert
+// va en las DOS direcciones a propósito: sin el `!includes('Pez')` pasaría
+// igual si la tile dijera las dos cosas.
+check(
+  texto.includes('Acuario') && !texto.includes('Pez'),
+  'Paso 1 · la tile del pez dice «Acuario» (firma founder)',
 );
 check(!texto.includes('Reptil'), 'Paso 1 · reptil NO se ofrece (firma founder)');
 check(texto.includes('¿Cómo se llama?'), 'Paso 1 · sin especie elegida, el nombre es el genérico');
 
 // ── EL CONTRASTE ①: PEZ → el sujeto es el ACUARIO ───────────────────────────
-await page.getByText('Pez', { exact: true }).first().click();
+await page.getByText('Acuario', { exact: true }).first().click();
 texto = await esperar(page, '¿Cómo se llama el acuario?');
 check(
   texto.includes('¿Cómo se llama el acuario?'),
@@ -140,7 +147,7 @@ texto = await ir('/onboarding/raza?nombre=Zeus&especie=perro', '¿De qué raza e
 check(texto.includes('¿De qué raza es Zeus?'), 'Paso 2 · el título lleva el nombre');
 check(
   texto.includes('Mestizo') && texto.includes('No sé'),
-  'Paso 2 · «Mestizo» y «No sé» SON BOTONES A LA VISTA (lámina, literal)',
+  'Paso 2 · «Mestizo» y «No sé» son CHIPS de primera clase, visibles sin tipear',
 );
 // D-379 vivo: el catálogo de A sembrado (44 razas de perro medidas en DB).
 // Se prueba con una raza SANA a propósito: siete nombres del catálogo vienen

@@ -72,6 +72,7 @@ export function PasoFoto({
       foto !== null
         ? {
             fotoUri: foto.uri,
+            conFoto: '1',
             cx: String(encuadreRef.current.cx),
             cy: String(encuadreRef.current.cy),
             z: String(encuadreRef.current.z),

@@ -14,25 +14,15 @@
  * momento, mismo destino. Y es una elección cerrada de dos, no texto libre:
  * no hay «mestizo» de agua.
  *
- * ── LO QUE HAY Y LO QUE FALTA, sin disimulo ─────────────────────────────────
- * **Las sugerencias YA VIVEN**: el catálogo de A (`obtenerRazasDeEspecie`,
- * D-379, 105 filas sembradas) se lee y se pinta con SU IMAGEN, que es el
- * círculo del que habla la lámina.
+ * ── LAS TRES PIEZAS, YA JUNTAS ──────────────────────────────────────────────
+ * El catálogo es de A (`obtenerRazasDeEspecie`, D-379 · 105 filas sembradas),
+ * el matching es de B (`sugerencias.ts`) y el render del chip es de acá. Cada
+ * una en su territorio y ninguna clonada.
  *
- * **Lo que falta es FILTRAR MIENTRAS SE TIPEA.** El matching vive en
- * `packages/ui/src/components/sugerencias.ts` (B) y **medido en esta sesión NO
- * está en `origin/main`** — existe en `origin/pista/s91-b`, sin mergear
- * (`git ls-tree -r origin/main | grep sugerenc` → vacío; mi HEAD contiene
- * `origin/main` entero, verificado por `merge-base --is-ancestor`).
- *
- * Hasta que entre, la lista se muestra COMPLETA. **No se escribió un
- * normalizador local**: es exactamente el clon que §6 prohíbe, y el mismo
- * matching ya vive probado en `bitacora.tsx`. El día que B llegue, el cambio
- * es envolver `razas` en su filtro — una línea, en el `useMemo` marcado.
- *
- * Y la regla firmada rige igual en los dos estados: **el catálogo SUGIERE, el
- * dueño CONFIRMA.** Escribir algo que la lista no tiene sigue siendo una
- * respuesta válida y se guarda tal cual.
+ * Y la regla firmada rige igual con lista o sin ella: **el catálogo SUGIERE,
+ * el dueño CONFIRMA.** Escribir algo que la lista no tiene sigue siendo una
+ * respuesta válida y se guarda tal cual — por eso el campo de texto no
+ * desaparece cuando hay chips.
  */
 
 import { useEffect, useMemo, useState } from 'react';
@@ -46,6 +36,7 @@ import {
   EvitaTeclado,
   SelectorOpcion,
   Texto,
+  coincidenciasPrimero,
   spacing,
   useTheme,
 } from '@epetplace/ui';
@@ -53,7 +44,7 @@ import { obtenerRazasDeEspecie, type RazaCatalogo } from '@epetplace/api';
 
 import { esEspecieUi } from '@/lib/params';
 import { useTraduccion } from '@/i18n';
-import { caraDelAlta, urlDeRutaGaleria } from './imagen-raza';
+import { caraDelAlta, urlDeRutaGaleria, urlGenericaDeEspecie } from './imagen-raza';
 import { esAcuario, TIPOS_DE_AGUA, type BorradorAlta, type EspecieUi } from './tipos';
 
 /**
@@ -75,6 +66,11 @@ type ClaveTitulo =
   | 'alta.paso2TipoAve'
   | 'alta.paso2TipoRoedor'
   | 'alta.paso2Agua';
+
+/** Los dos de primera clase. El `__` los aísla del espacio de slugs del
+ *  catálogo — ver el comentario de `chips`. */
+const CODIGO_MESTIZO = '__mestizo';
+const CODIGO_NO_SE = '__no_se';
 
 const CLAVE_TITULO: Record<EspecieUi, ClaveTitulo> = {
   perro: 'alta.paso2Raza',
@@ -116,6 +112,10 @@ export function PasoRaza({
     (TIPOS_DE_AGUA as readonly string[]).includes(borrador.raza ?? '') ? borrador.raza : undefined,
   );
   const [catalogo, setCatalogo] = useState<RazaCatalogo[] | null>(null);
+  /** Qué chip está marcado con la pata. Vive aparte de `raza` porque «No sé»
+   *  es una elección SIN texto: sin este estado, el chip quedaría tocable y
+   *  sin marca. */
+  const [elegido, setElegido] = useState<string | undefined>(undefined);
 
   const titulo = t(especieUi ? CLAVE_TITULO[especieUi] : 'alta.paso2Raza', { nombre });
 
@@ -138,11 +138,83 @@ export function PasoRaza({
     };
   }, [acuario, borrador.especie]);
 
-  /** ⬅ EL PUNTO EXACTO DONDE ENTRA EL FILTRO DE B.
-   *  Hoy la lista se muestra ENTERA. Cuando `sugerencias.ts` esté en `main`,
-   *  esto pasa a ser `filtrarSugerencias(catalogo, raza, …)` y nada más de
-   *  este archivo cambia. */
-  const sugerencias = useMemo(() => catalogo ?? [], [catalogo]);
+  /**
+   * EL TIPEO PREDICTIVO — la pieza de B, con SUS DOS PERILLAS MOVIDAS JUNTAS.
+   *
+   * `minimoDeLetras: 3` + `modo: 'empieza'`, y las dos van de la mano porque
+   * B lo dejó escrito en su propia cabecera: bajar el mínimo SIN cambiar el
+   * modo sería peor que no bajarlo — con `'contiene'`, «lab» matchearía
+   * cualquier nombre que lleve esas letras en el medio. `'empieza'` exige
+   * que lo tecleado sea PREFIJO de alguna palabra del nombre, que es como se
+   * busca un nombre. Los defaults (4 · 'contiene') son los de la bitácora,
+   * que matchea FRASES: acá el corpus son NOMBRES.
+   *
+   * Y se usa `coincidenciasPrimero` y NO `sugerir`, que es la otra mitad de
+   * la letra de B: **mostrar primero, jamás esconder.** La lista se ve entera
+   * desde el arranque —con su cara, que es el escaparate que pidió el
+   * founder— y tipear REORDENA, subiendo lo que coincide. `sugerir` habría
+   * devuelto vacío con el campo en blanco, y ahí no habría escaparate ninguno.
+   */
+  const sugerencias = useMemo(
+    () =>
+      coincidenciasPrimero(catalogo ?? [], {
+        texto: raza,
+        vozDe: (r) => r.nombre,
+        minimoDeLetras: 3,
+        modo: 'empieza',
+      }),
+    [catalogo, raza],
+  );
+
+  /**
+   * LOS CHIPS — los dos de primera clase primero, y después el catálogo.
+   *
+   * Sus códigos llevan `__` para que no puedan colisionar con un slug real:
+   * el catálogo los genera desde el nombre del archivo y ninguno empieza así.
+   * Sin ese cuidado, una raza llamada «mestizo» —que es plausible— habría
+   * secuestrado el chip de primera clase.
+   */
+  const chips = useMemo(() => {
+    const generico = urlGenericaDeEspecie(borrador.especie);
+    return [
+      {
+        codigo: CODIGO_MESTIZO,
+        etiqueta: t('alta.razaMestizo'),
+        avatar: { nombre: t('alta.razaMestizo'), fotoUrl: generico },
+      },
+      {
+        codigo: CODIGO_NO_SE,
+        etiqueta: t('alta.razaNoSe'),
+        avatar: { nombre: t('alta.razaNoSe'), fotoUrl: generico },
+      },
+      ...sugerencias.map((r) => ({
+        codigo: r.slug,
+        etiqueta: r.nombre,
+        avatar: { nombre: r.nombre, fotoUrl: urlDeRutaGaleria(r.ruta_imagen) },
+      })),
+    ];
+  }, [sugerencias, borrador.especie, t]);
+
+  /** Tocar un chip. Elegir del catálogo PISA el texto con el nombre firmado,
+   *  con su acento: quien tipeó «aleman» ve escrito «Pastor alemán» y no su
+   *  propio typo. */
+  const elegirChip = (codigo: string) => {
+    setElegido(codigo);
+    if (codigo === CODIGO_MESTIZO) {
+      setRaza(t('alta.razaMestizoValor'));
+      setSlug(undefined);
+      return;
+    }
+    if (codigo === CODIGO_NO_SE) {
+      setRaza('');
+      setSlug(undefined);
+      return;
+    }
+    const elegida = sugerencias.find((r) => r.slug === codigo);
+    if (elegida === undefined) return;
+    setSlug(codigo);
+    setRaza(elegida.nombre);
+  };
 
   /** Un solo lugar decide qué se guarda.
    *  `razaSlug` SOLO se pone si la persona ELIGIÓ del catálogo — escribir a
@@ -209,81 +281,50 @@ export function PasoRaza({
                   setRaza(v);
                   // Tipear a mano DESHACE la elección: si el texto ya no es el
                   // de la sugerencia, su slug tampoco es suyo — y con él se
-                  // iría la cara equivocada al paso 4.
+                  // iría la cara equivocada al paso 4. La pata se apaga con él:
+                  // un chip marcado sobre un texto que ya no es el suyo miente.
                   setSlug(undefined);
+                  setElegido(undefined);
                 }}
                 autoCapitalize="words"
               />
 
-              {/* LAS SUGERENCIAS, CON SU CARA — selección única (lámina: «cada
-                  sugerencia lleva SU IMAGEN en círculo de 32»; acá va `xs`=28,
-                  que es la talla de la casa más cercana: un 32 crudo violaría
-                  la Ley 1. Los 4px al gate).
-                  Elegir PISA el texto con el nombre del catálogo, con su
-                  acento — quien tipeó «aleman» ve escrito «Pastor alemán» y no
-                  su propio typo. */}
-              {sugerencias.length > 0 ? (
-                <SelectorOpcion
-                  acento="control"
-                  etiqueta={t('alta.razaSugerencias')}
-                  disposicion="columnas"
-                  opciones={sugerencias.map((r) => ({
-                    codigo: r.slug,
-                    etiqueta: r.nombre,
-                    adorno: (
-                      <AvatarMascota
-                        nombre={r.nombre}
-                        especie={especieUi}
-                        fotoUrl={urlDeRutaGaleria(r.ruta_imagen)}
-                        tamano="xs"
-                      />
-                    ),
-                  }))}
-                  seleccionada={slug}
-                  onSelect={(codigo) => {
-                    const elegida = sugerencias.find((r) => r.slug === codigo);
-                    if (elegida === undefined) return;
-                    setSlug(codigo);
-                    setRaza(elegida.nombre);
-                  }}
-                />
-              ) : null}
+              {/* EL CHIP DE MASCOTA, CON LA RAZA ADENTRO (firma de mesa,
+                  8-ago-2026). No nace un componente: es el chip de entidad que
+                  ya existe —foto + nombre, magenta y pata al seleccionar— con
+                  otro contenido. `SelectorOpcionItem.avatar.fotoUrl` YA admitía
+                  fuente externa (medido antes de pedir nada), así que no hubo
+                  ni que generalizar la prop.
 
-              {/* «MESTIZO» Y «NO SÉ» SON BOTONES A LA VISTA (lámina, literal):
-                  jamás la última fila de una lista. D-379 los declara respuesta
-                  legítima de PRIMERA CLASE, y esconderlos los vuelve premio
-                  consuelo — que es el punto entero.
+                  «MESTIZO» Y «NO SÉ» VAN PRIMEROS Y SIEMPRE, sin tipear, con su
+                  imagen genérica: son respuesta de PRIMERA CLASE y jamás
+                  resultado de búsqueda. Por eso viven DENTRO de la misma lista
+                  y no en una fila de botones aparte — un chip al lado de los
+                  otros dice «esto también es una respuesta»; dos botones abajo
+                  decían «esto es lo que te queda».
 
-                  Lo que escribe cada uno, declarado: «Mestizo» ES una respuesta
-                  y se guarda. «No sé» NO inventa un valor de raza — avanza sin
-                  dato. No saber no es un dato; que la pantalla lo trate como
-                  una salida de un toque es lo que lo vuelve primera clase. */}
-              <View style={{ flexDirection: 'row', gap: spacing[3] }}>
-                <View style={{ flex: 1 }}>
-                  <Boton
-                    variante="secundario"
-                    bloque
-                    etiqueta={t('alta.razaMestizo')}
-                    onPress={() => avanzarCon(t('alta.razaMestizoValor'))}
-                  />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Boton
-                    variante="secundario"
-                    bloque
-                    etiqueta={t('alta.razaNoSe')}
-                    onPress={() => avanzarCon(undefined)}
-                  />
-                </View>
-              </View>
+                  El flujo firmado: tipeo filtra → chip presenta → pata cierra. */}
+              <SelectorOpcion
+                acento="control"
+                entidad
+                etiqueta={t('alta.razaSugerencias')}
+                opciones={chips}
+                seleccionada={elegido}
+                onSelect={elegirChip}
+              />
 
               <Texto variante="apoyo">{t('alta.razaAyuda')}</Texto>
 
               <Boton
                 etiqueta={t('alta.continuar')}
                 bloque
-                deshabilitado={raza.trim().length === 0}
-                onPress={() => avanzarCon(raza.trim(), slug)}
+                // «No sé» habilita el paso sin escribir nada: no saber ES una
+                // respuesta. Sin esta segunda pata, el chip de primera clase
+                // habría quedado tocable y mudo.
+                deshabilitado={raza.trim().length === 0 && elegido !== CODIGO_NO_SE}
+                onPress={() =>
+                  elegido === CODIGO_NO_SE ? avanzarCon(undefined) : avanzarCon(raza.trim(), slug)
+                }
               />
             </>
           )}
