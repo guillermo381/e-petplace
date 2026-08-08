@@ -38,7 +38,32 @@ hash real fue `5012db53`.
 
 ## ② LOS DOS PUBLISHES EN COLA
 
-### CLIENTE — espera a D
+> **✅ GATEADO VERDE POR EL FOUNDER (8-ago) — el prestador queda CERRADO en el
+> acta.** El asterisco de arriba se conserva escrito: el gate verde no lo borra,
+> lo vuelve inofensivo.
+
+### CLIENTE — espera el CABLEADO de C *(y esto no es una demora: es L-161)*
+
+**Medido antes de bundlear, y por eso no salió:**
+
+```
+navegación a /prestador/[prestadorId]  →  SOLO desde preview-prestador.tsx:81
+consumidores de preview-prestador       →  CERO
+```
+
+⇒ **la vitrina del cliente es INALCANZABLE en el build.** C lo declaró en su
+propio commit con regla 77 (*«esto es LA PIEZA. El cableado a las CUATRO filas
+NO entra en este commit»*), así que publicar ahora habría metido el arco entero
+al bundle **sin puerta**: exactamente L-161, la ley que nació porque el founder
+buscó un tab «Tokens» que nunca existió. *Un gate sobre una pantalla que no se
+puede abrir no es un gate: es una hora perdida del founder.*
+
+**Ya mergeado y esperando en `main`:** la cadena de D (`2e2de411`, verificada
+por contenido, tres typechecks en 0) y las dos mitades de C (`38aed580` ·
+`2f4b588f`). **Falta solo el cableado de las cuatro filas** → árbol quieto →
+`publicar-ota.mjs --app cliente`.
+
+### ~~CLIENTE — espera a D~~ *(superseded)*
 
 - **Último publicado:** group `999d87e8-2dff-45fc-aec5-46e56ec1e765` ·
   android `019fe24e-3918-71b9-a54c-34c623054b38` · runtime **1.0.3** ·
@@ -192,6 +217,38 @@ perro, `origen=alta_asistida`, 20-jul — el censo **aborta** si entra en una
 lista de borrado).
 **⚠️ Quedan 6 mascotas de prueba de D** («Familia de Perfil D» ×2, altas de
 17:38 y 17:40) — **NO las borré: son de su gate y nadie las mandó limpiar.**
+
+> ### ✅ LIMPIADAS (orden de mesa) — **y eran 19, no 6: el número de arriba es MÍO y estaba viejo**
+>
+> **L-141 en mi propio volcado, y vale más que el borrado:** conté 6 a las
+> 17:40 y **D siguió gateando hasta las 18:40** — aparecieron 13 más (18:11 ·
+> 18:15 · 18:36 · 18:38-18:40). *Un residuo declarado con número es un número
+> que envejece igual que cualquier otro; lo que no envejece es el CRITERIO.* Por
+> eso la limpieza no seleccionó por lista de ids sino por criterio medido:
+> nombre `Perfil%` **Y** titular `s91d-%@epetplace.dev`.
+>
+> **Cada alta creó su PROPIA familia** (19 mascotas en 19 familias, 1 humano
+> cada una) — no eran duplicados dentro de una familia. Eso confirma lo que ya
+> estaba dicho para la idempotencia: **una clave natural `(familia_id, nombre,
+> especie)` no habría cazado ninguno.**
+>
+> **Ejecución, con censo dinámico sobre las 79 FKs de `mascotas`:**
+>
+> | paso | resultado |
+> |---|---|
+> | tres cinturones (objetivo ≠ 0 · Jack fuera · todo titular es fixture de D) | pasaron, 19 objetivos |
+> | `mascota_perfil_vigente.ultimo_evento_id` · `evento_hito_narrativo.evento_id` | 19 + 19 |
+> | `eventos_mascota` (su FK a `mascotas` es **RESTRICT**: hay que vaciar el árbol primero) | 19 |
+> | `mascotas` | 19 |
+> | **residuo en las 79 FKs** | **0** |
+> | Jack del mostrador `9a6ba106…` | **VIVO** |
+> | familia del founder | **2 mascotas** (Thor y Zeus) |
+>
+> **Lo que NO se tocó, a propósito:** las 19 filas de `familia`, sus
+> `familia_miembro` y los 19 `auth.users` de fixture. *Borrar la familia
+> dejando al usuario vivo lo pondría en un estado que la app no produce nunca;
+> un usuario descartable con familia vacía es el estado normal de post-registro.*
+> La orden era sobre las mascotas y el alcance se respetó.
 
 ### 3. La sombra con credencial — bloqueada por el token (ver ③)
 
