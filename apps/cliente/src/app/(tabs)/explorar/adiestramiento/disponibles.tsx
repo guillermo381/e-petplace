@@ -15,7 +15,7 @@
  * (jerarquía del contenido sobre el número).
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
@@ -38,8 +38,11 @@ import {
   crearBloqueoAgenda,
   obtenerAdiestradoresDisponibles,
   type OfertaAdiestrador,
+  obtenerPerfilesPublicos,
+  type PerfilPublico,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
+import { PreviewPrestador } from '@/components/preview-prestador';
 import { vozServicio } from '@/lib/voz-servicio';
 
 export default function AdiestramientoDisponibles() {
@@ -62,6 +65,27 @@ export default function AdiestramientoDisponibles() {
 
   const [disponibles, setDisponibles] = useState<OfertaAdiestrador[] | 'cargando' | 'error'>('cargando');
   const [creandoHold, setCreandoHold] = useState(false);
+  /** S91-C · el enriquecimiento del preview, de `v_prestadores_publicos`
+   *  (jamás la tabla). Carga SECUNDARIA: la fila se pinta con lo que el
+   *  lector de disponibilidad ya trajo y se completa cuando llega — hacer
+   *  esperar la disponibilidad por una foto sería D-531 otra vez. */
+  const [perfiles, setPerfiles] = useState<Record<string, PerfilPublico>>({});
+
+  // Los perfiles de los que SE ESTÁN OFRECIENDO — ni uno más.
+  useEffect(() => {
+    if (!Array.isArray(disponibles)) return;
+    const ids = [...new Set(disponibles.map((x) => x.prestador_id))];
+    if (ids.length === 0) return;
+    let vigente = true;
+    void obtenerPerfilesPublicos(ids).then((r) => {
+      if (!vigente || !r.ok) return;
+      setPerfiles(Object.fromEntries(r.data.map((p) => [p.id, p])));
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [disponibles]);
+
 
   const cargar = useCallback(() => {
     setDisponibles('cargando');
@@ -194,17 +218,17 @@ export default function AdiestramientoDisponibles() {
               <View key={`${o.prestador_servicio_id}-${o.programa_id ?? 'sesion'}`}>
                 {i > 0 ? <Separador /> : null}
                 {o.comprable === 'sesion' ? (
-                  <Celda
-                    titulo={o.prestador_nombre}
-                    subtitulo={
-                      o.direccion !== null
+                  <PreviewPrestador
+                    prestadorId={o.prestador_id}
+                    nombre={o.prestador_nombre}
+                    oficio={t('hogar.railAdiestramiento')}
+                    contexto={o.direccion !== null
                         ? [o.direccion, o.ciudad].filter(Boolean).join(' · ')
-                        : t('adiestramiento.lugarPorConfirmar')
-                    }
-                    metadataMono={`$${o.precio.toFixed(2)} · ${o.duracion_minutos} min`}
-                    interactiva
-                    accessibilityRole="button"
-                    onPress={() => void reservarSesion(o)}
+                        : t('adiestramiento.lugarPorConfirmar')}
+                    precio={`$${o.precio.toFixed(2)} · ${o.duracion_minutos} min`}
+                    perfil={perfiles[o.prestador_id]}
+                    etiquetaReservar={t('perfilPrestador.reservar')}
+                    onReservar={() => void reservarSesion(o)}
                   />
                 ) : (
                   // FIRMA: el programa dice QUÉ es (nombre + nivel + N)

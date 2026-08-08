@@ -13,7 +13,7 @@
  * la elegibilidad (§1bis).
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
@@ -43,8 +43,11 @@ import {
   type PersonaQueAtiende,
   type PerfilMascota,
   type VeterinarioDisponible,
+  obtenerPerfilesPublicos,
+  type PerfilPublico,
 } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
+import { PreviewPrestador } from '@/components/preview-prestador';
 import { vozServicio } from '@/lib/voz-servicio';
 
 export default function VeterinariaDisponibles() {
@@ -64,6 +67,27 @@ export default function VeterinariaDisponibles() {
   const [perfil, setPerfil] = useState<PerfilMascota | 'cargando' | 'error'>('cargando');
   const [disponibles, setDisponibles] = useState<VeterinarioDisponible[] | 'cargando' | 'error'>('cargando');
   const [creandoHold, setCreandoHold] = useState(false);
+  /** S91-C · el enriquecimiento del preview, de `v_prestadores_publicos`
+   *  (jamás la tabla). Carga SECUNDARIA: la fila se pinta con lo que el
+   *  lector de disponibilidad ya trajo y se completa cuando llega — hacer
+   *  esperar la disponibilidad por una foto sería D-531 otra vez. */
+  const [perfiles, setPerfiles] = useState<Record<string, PerfilPublico>>({});
+
+  // Los perfiles de los que SE ESTÁN OFRECIENDO — ni uno más.
+  useEffect(() => {
+    if (!Array.isArray(disponibles)) return;
+    const ids = [...new Set(disponibles.map((x) => x.prestador_id))];
+    if (ids.length === 0) return;
+    let vigente = true;
+    void obtenerPerfilesPublicos(ids).then((r) => {
+      if (!vigente || !r.ok) return;
+      setPerfiles(Object.fromEntries(r.data.map((p) => [p.id, p])));
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [disponibles]);
+
   // S78-A7 (LETRA_VITRINA): qué negocios exponen a sus personas. `null` =
   // no cargó o falló — la pantalla DEGRADA al camino de siempre (hold
   // directo), decisión declarada en el M1: la elección es ACCESORIA por
@@ -231,19 +255,19 @@ export default function VeterinariaDisponibles() {
             {disponibles.map((v, i) => (
               <View key={v.prestador_servicio_id}>
                 {i > 0 ? <Separador /> : null}
-                <Celda
-                  titulo={v.prestador_nombre}
-                  subtitulo={
-                    esDomicilio
+                <PreviewPrestador
+                    prestadorId={v.prestador_id}
+                    nombre={v.prestador_nombre}
+                    oficio={t('hogar.railVet')}
+                    contexto={esDomicilio
                       ? t('veterinaria.vaAlHogar')
                       : v.direccion !== null
                         ? [v.direccion, v.ciudad].filter(Boolean).join(' · ')
-                        : t('veterinaria.enSuClinica')
-                  }
-                  metadataMono={`$${v.precio.toFixed(2)} · ${v.duracion_minutos} min`}
-                  interactiva
-                  accessibilityRole="button"
-                  onPress={() => void tocarNegocio(v)}
+                        : t('veterinaria.enSuClinica')}
+                    precio={`$${v.precio.toFixed(2)} · ${v.duracion_minutos} min`}
+                    perfil={perfiles[v.prestador_id]}
+                    etiquetaReservar={t('perfilPrestador.reservar')}
+                  onReservar={() => void tocarNegocio(v)}
                 />
               </View>
             ))}

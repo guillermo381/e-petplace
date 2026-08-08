@@ -16,7 +16,7 @@
  *    enriquece por dato cuando existan, no por versión.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
@@ -51,10 +51,13 @@ import {
   type MascotaResumen,
   type PaseadorDisponible,
   mascotasElegibles,
+  obtenerPerfilesPublicos,
+  type PerfilPublico,
 } from '@epetplace/api';
 import { PlanHoja } from '@/components/plan-hoja';
 import { PaseoSocialHoja } from '@/components/paseo-social-hoja';
 import { useTraduccion } from '@/i18n';
+import { PreviewPrestador } from '@/components/preview-prestador';
 
 export default function PaseoDisponibles() {
   const { theme } = useTheme();
@@ -87,6 +90,27 @@ export default function PaseoDisponibles() {
   // paquete o pagar suelto. Opciones PAREJAS, cero dark patterns.
   const [conSaldo, setConSaldo] = useState<{ paseador: PaseadorDisponible; mascotaId: string; saldo: number } | null>(null);
   const [reservando, setReservando] = useState(false);
+  /** S91-C · el enriquecimiento del preview, de `v_prestadores_publicos`
+   *  (jamás la tabla). Carga SECUNDARIA: la fila se pinta con lo que el
+   *  lector de disponibilidad ya trajo y se completa cuando llega — hacer
+   *  esperar la disponibilidad por una foto sería D-531 otra vez. */
+  const [perfiles, setPerfiles] = useState<Record<string, PerfilPublico>>({});
+
+  // Los perfiles de los que SE ESTÁN OFRECIENDO — ni uno más.
+  useEffect(() => {
+    if (!Array.isArray(disponibles)) return;
+    const ids = [...new Set(disponibles.map((x) => x.prestador_id))];
+    if (ids.length === 0) return;
+    let vigente = true;
+    void obtenerPerfilesPublicos(ids).then((r) => {
+      if (!vigente || !r.ok) return;
+      setPerfiles(Object.fromEntries(r.data.map((p) => [p.id, p])));
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [disponibles]);
+
   // P19 (S59-A4): la pregunta única salta ANTES del checkout cuando la
   // mascota aún no respondió (null); el NO frena con voz honesta con
   // camino — el guard server (paseo_social_no) es el cinturón.
@@ -346,13 +370,15 @@ export default function PaseoDisponibles() {
             {disponibles.map((p, i) => (
               <View key={p.prestador_servicio_id}>
                 {i > 0 ? <Separador /> : null}
-                <Celda
-                  titulo={p.prestador_nombre}
-                  subtitulo={p.servicio_nombre}
-                  metadataMono={`$${p.precio.toFixed(2)} · ${p.duracion_minutos} min`}
-                  interactiva
-                  accessibilityRole="button"
-                  onPress={() => alElegir(p)}
+                <PreviewPrestador
+                  prestadorId={p.prestador_id}
+                  nombre={p.prestador_nombre}
+                  oficio={t('hogar.railPaseos')}
+                  contexto={p.servicio_nombre}
+                  precio={`$${p.precio.toFixed(2)} · ${p.duracion_minutos} min`}
+                  perfil={perfiles[p.prestador_id]}
+                  etiquetaReservar={t('perfilPrestador.reservar')}
+                  onReservar={() => alElegir(p)}
                 />
               </View>
             ))}

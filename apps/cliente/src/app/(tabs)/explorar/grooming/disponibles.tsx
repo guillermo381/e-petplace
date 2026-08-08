@@ -20,7 +20,7 @@
  * gobiernan el precio pintado.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
@@ -45,9 +45,12 @@ import {
   obtenerPerfilMascota,
   type GroomerDisponible,
   type PerfilMascota,
+  obtenerPerfilesPublicos,
+  type PerfilPublico,
 } from '@epetplace/api';
 import { TallaPelajeHoja } from '@/components/talla-pelaje-hoja';
 import { useTraduccion } from '@/i18n';
+import { PreviewPrestador } from '@/components/preview-prestador';
 import { vozServicio } from '@/lib/voz-servicio';
 
 export default function GroomingDisponibles() {
@@ -67,6 +70,27 @@ export default function GroomingDisponibles() {
   const [disponibles, setDisponibles] = useState<GroomerDisponible[] | 'cargando' | 'error'>('cargando');
   const [tallaHoja, setTallaHoja] = useState(false);
   const [creandoHold, setCreandoHold] = useState(false);
+  /** S91-C · el enriquecimiento del preview, de `v_prestadores_publicos`
+   *  (jamás la tabla). Carga SECUNDARIA: la fila se pinta con lo que el
+   *  lector de disponibilidad ya trajo y se completa cuando llega — hacer
+   *  esperar la disponibilidad por una foto sería D-531 otra vez. */
+  const [perfiles, setPerfiles] = useState<Record<string, PerfilPublico>>({});
+
+  // Los perfiles de los que SE ESTÁN OFRECIENDO — ni uno más.
+  useEffect(() => {
+    if (!Array.isArray(disponibles)) return;
+    const ids = [...new Set(disponibles.map((x) => x.prestador_id))];
+    if (ids.length === 0) return;
+    let vigente = true;
+    void obtenerPerfilesPublicos(ids).then((r) => {
+      if (!vigente || !r.ok) return;
+      setPerfiles(Object.fromEntries(r.data.map((p) => [p.id, p])));
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [disponibles]);
+
 
   const cargarGroomers = useCallback(() => {
     setDisponibles('cargando');
@@ -180,17 +204,17 @@ export default function GroomingDisponibles() {
             {disponibles.map((g, i) => (
               <View key={g.prestador_servicio_id}>
                 {i > 0 ? <Separador /> : null}
-                <Celda
-                  titulo={g.prestador_nombre}
-                  subtitulo={
-                    g.direccion !== null
+                <PreviewPrestador
+                    prestadorId={g.prestador_id}
+                    nombre={g.prestador_nombre}
+                    oficio={t('hogar.railEstetica')}
+                    contexto={g.direccion !== null
                       ? [g.direccion, g.ciudad].filter(Boolean).join(' · ')
-                      : t('grooming.enSuLocal')
-                  }
-                  metadataMono={`$${g.precio.toFixed(2)} · ${g.duracion_minutos} min`}
-                  interactiva
-                  accessibilityRole="button"
-                  onPress={() => void crearHold(g)}
+                      : t('grooming.enSuLocal')}
+                    precio={`$${g.precio.toFixed(2)} · ${g.duracion_minutos} min`}
+                    perfil={perfiles[g.prestador_id]}
+                    etiquetaReservar={t('perfilPrestador.reservar')}
+                  onReservar={() => void crearHold(g)}
                 />
               </View>
             ))}
