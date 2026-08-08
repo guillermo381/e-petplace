@@ -54,17 +54,16 @@
  * esta pieza viven en la misma casa.
  */
 
-import { Pressable, ScrollView, Text, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
 import Svg from 'react-native-svg'
 
-import { AvatarMascota } from './AvatarMascota'
 import { Icono, type IconoNombre } from './Icono'
 import { Texto } from './Texto'
 import { Huella } from '../brand/Huella'
 import { MarcaEleccion } from '../brand/MarcaEleccion'
+import { ChipEntidad } from './ChipEntidad'
 import { radius } from '../tokens/radius'
 import { spacing } from '../tokens/spacing'
-import { typography } from '../tokens/typography'
 import { useTheme } from '../ThemeProvider'
 
 export type OpcionFiltro<C extends string> = {
@@ -229,54 +228,6 @@ export interface FiltroMascotasProps {
  *  por FORMA no hay relleno que dosificar. La ley sigue rigiendo donde
  *  haya relleno; acá no hay. */
 export function FiltroMascotas({ mascotas, elegida, onElegir }: FiltroMascotasProps) {
-  const { theme } = useTheme()
-
-  const chip = (
-    key: string,
-    activo: boolean,
-    contenido: React.ReactNode,
-    onPress: () => void,
-    etiqueta: string,
-  ) => (
-    <Pressable
-      key={key}
-      onPress={onPress}
-      accessibilityRole="radio"
-      accessibilityState={{ selected: activo }}
-      accessibilityLabel={etiqueta}
-      style={{
-        height: 44,
-        borderRadius: radius.full,
-        // ✅ FIRMADO: LA PATA PISA Y EL CHIP CEDE. Lo que se hunde no
-        // proyecta — pierde la elevación, baja al slot `bg.hundido` y se
-        // ACHICA en vez de crecer. Las otras dos candidatas murieron CON
-        // SU MAQUINARIA (Ley 37: el gate ocurrió; nada queda "por si
-        // acaso").
-        backgroundColor: activo ? theme.bg.hundido : theme.bg.card,
-        boxShadow: activo ? 'none' : theme.elevacion.reposo,
-        transform: [{ scale: activo ? 0.98 : 1 }],
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing[2],
-        paddingLeft: spacing[1.5],
-        paddingRight: spacing[4],
-      }}
-    >
-      {contenido}
-      {/* LA PATA SOBRE EL CANTO — la MISMA pieza que en FiltroPills, no una
-          copia. Su porqué, que es lo que ganó el gate: la huella ADENTRO
-          competía con la foto EN EL MISMO PLANO; sobre el canto es otro
-          objeto en otro plano. Y aparece SOLO en la elegida, que es lo
-          único que la vuelve señal (S80 midió que la huella en TODAS no
-          puede señalar a una). */}
-      {activo ? <MarcaEleccion color={theme.accent.control} /> : null}
-    </Pressable>
-  )
-
-  // el label acompaña a la marca: en el elegido, el acento; en el resto,
-  // tinta. Sin rama por cantidad — la pata marca igual con 2 que con 8.
-  const colorLabel = (activo: boolean) => (activo ? theme.accent.control : theme.text.primary)
-
   return (
     <ScrollView
       horizontal
@@ -290,51 +241,22 @@ export function FiltroMascotas({ mascotas, elegida, onElegir }: FiltroMascotasPr
         paddingBottom: spacing[1],
       }}
     >
-      {mascotas.map((m) =>
-        chip(
-          m.id,
-          elegida === m.id,
-          <>
-            {m.sujeto === 'persona' ? (
-              // LA INICIAL — mismo diámetro que el avatar xs para que la
-              // hilera no cambie de ritmo al mezclar sujetos.
-              <View
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: radius.full,
-                  backgroundColor: theme.bg.overlay,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Text
-                  style={{
-                    fontFamily: typography.family.sans.medium,
-                    fontSize: typography.size.sm,
-                    color: theme.text.secondary,
-                  }}
-                >
-                  {m.nombre.trim().charAt(0).toUpperCase()}
-                </Text>
-              </View>
-            ) : (
-              <AvatarMascota nombre={m.nombre} fotoUrl={m.fotoUrl} tamano="xs" anidadoEn="chip" />
-            )}
-            <Text
-              style={{
-                fontFamily: typography.family.sans.medium,
-                fontSize: typography.size.sm,
-                color: colorLabel(elegida === m.id),
-              }}
-            >
-              {m.nombre}
-            </Text>
-          </>,
-          () => onElegir(elegida === m.id ? null : m.id),
-          m.nombre,
-        ),
-      )}
+      {/* S91-B · CONSUME `ChipEntidad` — LA CASA TIENE UN SOLO CHIP.
+          Acá vivía la copia; el chip se extrajo tal cual (la referencia
+          firmada de «Mis paseos» ES este dibujo) y esta hilera pasó a ser
+          lo único que le queda de propio: LA DISPOSICIÓN. Sigue en
+          `compacto`, el tamaño de siempre — el founder pidió que el chip
+          creciera para su USO NUEVO (alta/perfil), no acá. */}
+      {mascotas.map((m) => (
+        <ChipEntidad
+          key={m.id}
+          nombre={m.nombre}
+          fotoUrl={m.fotoUrl}
+          sujeto={m.sujeto ?? 'mascota'}
+          elegido={elegida === m.id}
+          onPress={() => onElegir(elegida === m.id ? null : m.id)}
+        />
+      ))}
     </ScrollView>
   )
 }

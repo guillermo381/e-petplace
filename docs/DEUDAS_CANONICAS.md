@@ -9274,6 +9274,58 @@ ARCO PROPIO que lo corrige, no una espera que lo bloquea.
 > decisiones de la lámina NO se re-abren; solo esa cláusula cambia, y cambia
 > escrita en los dos lugares donde alguien la va a leer.*
 
+> ### 📜 LETRA FUNDACIONAL DEL ARCO — FIRMA DEL FOUNDER (8-ago-2026)
+>
+> **VERBATIM:** *«el perfil del acuario integrará la LISTA de sus peces como
+> MIEMBROS del sistema — identidad ligera, listable. PERO: servicios, comida,
+> bitácora y todo lo contratable aplican SIEMPRE al ACUARIO, jamás a un pez
+> particular. El pez se mira; el sistema se cuida.»*
+>
+> **Va al arco propio (post-S91). NO se construye ahora.**
+>
+> ── POR QUÉ ESTA LETRA RESUELVE EL NUDO DEL ARCO, y no solo lo describe ────
+>
+> El arco tenía una pregunta sin respuesta: *si el sujeto es el sistema, ¿los
+> peces existen o no existen?* Las dos salidas obvias eran malas — negarlos
+> deja al dueño sin poder nombrar al que le importa; darles entidad completa
+> multiplica todo el producto por N y vuelve a poner el sujeto en el
+> individuo. **La firma corta por un tercer lugar: existen para MIRARSE, no
+> para contratarse.** *«El pez se mira; el sistema se cuida»* es la frase que
+> hace decidible cada caso futuro sin volver a la mesa.
+>
+> ── LO QUE LA LETRA YA DECIDE, sin escribir una línea de código ────────────
+>
+> | pregunta | respuesta que la letra da |
+> |---|---|
+> | ¿el pez tiene ficha? | **identidad LIGERA**, listable — no un perfil |
+> | ¿se le reserva un servicio? | **NO.** Todo contratable es del acuario |
+> | ¿la comida se le compra a él? | **NO.** Se compra para el sistema |
+> | ¿tiene bitácora propia? | **NO.** La bitácora es del acuario |
+> | ¿puede tener su hito? | *lo abre el arco; la letra no lo cierra* |
+>
+> ── LO QUE ESTA LETRA **CONFIRMA** DEL MOTOR YA CONSTRUIDO ─────────────────
+>
+> Lo que S91 dejó apunta al mismo lado, y eso es señal de que la cláusula del
+> pez estaba bien orientada: `mascotas.sujeto = 'acuario'` es **la fila
+> contratable**; el vocabulario de bitácora del acuario tiene sus **3
+> conductas de sistema** (agua · habitante · alimentación del conjunto) y el
+> motor **rechaza tipado** una conducta de individuo sobre un acuario. *Un
+> pez-miembro no va a poder recibir una bitácora ni el día que exista: la
+> puerta ya está cerrada por construcción, no por convención.*
+>
+> ── LA CONSECUENCIA TÉCNICA QUE EL ARCO VA A TENER QUE MIRAR ───────────────
+>
+> «Identidad ligera, listable» **no es una fila de `mascotas`** —eso les daría
+> todo lo que la letra les niega, empezando por poder ser sujeto de una cita—.
+> Es una tabla propia colgada del acuario. **No se diseña acá**; se nombra
+> para que el arco no empiece por el camino fácil y equivocado.
+>
+> **Y el borde honesto que la letra deja abierto:** un pez que muere. Hoy
+> `estado_vida` es de la fila `mascotas`, o sea **del acuario**. Un miembro
+> que muere no puede usar ese campo sin declarar muerto al sistema entero.
+> *Es exactamente la clase de caso que el arco tiene que resolver, y por eso
+> queda escrito acá y no se improvisa el día que pase.*
+
 > **☠️ DISPARO: el arco del acuario de S91 (prioridad 3 del brief).**
 > **☠️ MUERTE:** el sistema existe como entidad con sus hitos **y sus
 > habitantes** (los peces del v1 ya no son un problema de migración: nunca
@@ -9517,7 +9569,7 @@ miente: dice que quedó residuo.*
 **Origen: S91-A (hallazgo del chequeo de residuo del E2E). Letra ratificada
 por mesa y FIRMADA en el gate del founder, 8-ago-2026.**
 
-#### D-691 — ⚪ EL CHIP DE ENTIDAD TRUNCA LOS NOMBRES LARGOS («Labrador retrie…»)
+#### D-691 — ☠️ MUERTA (S91-B, `c94e1ca0`): nace `ChipEntidad`, UN solo chip en toda la casa
 
 **Reporte del founder en dispositivo (8-ago-2026), sobre los chips vivos del
 alta.** El nombre firmado no entra: se corta a mitad de palabra.
@@ -9583,3 +9635,57 @@ oportunidad de escribirla.
 **Nota honesta de A:** el hash fantasma **no llegó a ningún documento**
 (verificado por grep en `docs/` y `CLAUDE.md`) — vivió solo en dos mensajes
 de coordinación. Que no haya contaminado el canon fue suerte, no diseño.
+
+> ### ☠️ CERRADA EN EL MISMO DÍA EN QUE NACIÓ (S91-B, `c94e1ca0`)
+>
+> B no calibró el ancho del chip existente: **unificó todos los chips de
+> entidad de la casa en uno** (`ChipEntidad`, sobre la referencia firmada por
+> el founder). Contador de `packages/ui` re-medido por ella: **52 → 53**.
+>
+> *La lección de la ficha se sostiene igual, y vale más que la cura: el chip
+> no se había roto — le llegó un contenido que nunca había tenido.* Un ancho
+> calibrado para «Thor» recibió «Yorkshire terrier» el día que el catálogo de
+> razas existió. **Cuando una pieza empieza a fallar sin haber cambiado, lo
+> que cambió es lo que le entra.**
+#### D-692 — ⚪ CONEJO, ROEDOR Y PERRO NO TIENEN NINGÚN CHIP PROPIO (registro por firma, no defecto)
+
+**Medido al firmar el paquete del vocabulario (S91, 8-ago-2026):** chips
+propios de una sola especie, por especie —
+
+| especie | chips propios |
+|---|:-:|
+| **gato** | **5** (desde esta firma) |
+| ave | 1 (`se_arranco_plumas`) |
+| **perro · conejo · roedor** | **0** |
+
+**Cómo apareció:** el founder percibió los chips del gato «inclinados a
+perro» sin poder señalar cuál. La medición le dio razón **y encontró que la
+causa era una AUSENCIA**: las 10 conductas originales nacieron de la vida de
+un perro (su origen fue el adiestramiento), S91 universalizó las PALABRAS
+—bien— pero **universalizar palabras no agrega los gestos que solo tiene una
+especie.** El gato ya recibió los suyos. Los otros tres no.
+
+**⚠️ ESTO ESTÁ REGISTRADO POR FIRMA, NO ABIERTO COMO DEFECTO.** Letra del
+founder al cerrar el paquete: ***«el mínimo digno de hoy ya es digno»***, y
+**no se inventan chips por simetría** — un catálogo que crece para que las
+columnas queden parejas es un catálogo que nadie lee.
+
+**El caso más interesante, y el que conviene mirar primero cuando esto se
+abra: el PERRO.** Tiene cero chips propios **porque las 16 se escribieron
+desde su vida** — o sea que su vocabulario está completo por origen, no por
+diseño. *Si un día se le dan chips propios, la pregunta no es «qué le falta»
+sino «qué de lo universal era en realidad suyo».*
+
+**Conejo y roedor son el caso urgente-cuando-llegue:** son especies PRESA, y
+sus dos señales más informativas —dejar de comer y esconderse— **ya están**
+cubiertas por `no_quiso_comer` y `se_escondio` (las dos entraron en S91
+precisamente por ellas). Lo que les falta es fino: bruxismo, postura
+encorvada, estasis. **Nada de eso se propone acá.**
+
+> **☠️ DISPARO: mesa futura** — cuando el producto tenga usuarios reales de
+> alguna de las tres especies, o cuando el Coach necesite el vocabulario fino.
+> **☠️ MUERTE:** la mesa firma el vocabulario propio de las tres, **o firma
+> que el universal les alcanza** — y esta ficha se retira por decisión.
+
+**Origen: S91 (gate de strings del gato; la pregunta la abrió A midiendo y el
+founder la registró en vez de resolverla).**

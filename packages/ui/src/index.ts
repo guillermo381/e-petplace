@@ -228,6 +228,22 @@ export { TresNumeros, type TresNumerosProps, type ColumnaTecho } from './compone
 // los números salieron de un gate en dispositivo y viajaron verbatim.
 export { SelectorDia, type SelectorDiaProps, type DiaOpcion } from './components/SelectorDia'
 
+// ChipEntidad — S91-B (junta D-691): EL CHIP DE ENTIDAD, UNO SOLO EN TODA
+// LA CASA. La referencia es la firmada por el founder (el chip de «Mis
+// paseos»: avatar + nombre + pata magenta); esta pieza es ESE chip,
+// extraído de `FiltroMascotas` —que ahora lo consume— para que D lo use en
+// el selector de raza sin clonarlo. Sube el CHIP y no el contenedor a
+// propósito: la hilera es horizontal y la grilla de razas no, así que el
+// seam correcto es la unidad. `tamano='general'` es el punto que el
+// founder pidió que creciera para alta/perfil; `compacto` (default) deja
+// intactos a los consumidores vivos.
+export {
+  ChipEntidad,
+  type ChipEntidadProps,
+  type ChipEntidadTamano,
+  type ChipEntidadSujeto,
+} from './components/ChipEntidad'
+
 export {
   FiltroPills,
   type FiltroPillsProps,

@@ -1716,11 +1716,13 @@ export type Database = {
           created_at: string
           descripcion: string | null
           es_seed_preliminar: boolean
+          especies_aplicables: string[] | null
           nombre: string
           nombre_familia: string
           nombre_familia_en: string
           orden_display: number
           pais_codigo: string | null
+          sujetos_aplicables: string[] | null
           updated_at: string
         }
         Insert: {
@@ -1729,11 +1731,13 @@ export type Database = {
           created_at?: string
           descripcion?: string | null
           es_seed_preliminar?: boolean
+          especies_aplicables?: string[] | null
           nombre: string
           nombre_familia: string
           nombre_familia_en: string
           orden_display?: number
           pais_codigo?: string | null
+          sujetos_aplicables?: string[] | null
           updated_at?: string
         }
         Update: {
@@ -1742,11 +1746,13 @@ export type Database = {
           created_at?: string
           descripcion?: string | null
           es_seed_preliminar?: boolean
+          especies_aplicables?: string[] | null
           nombre?: string
           nombre_familia?: string
           nombre_familia_en?: string
           orden_display?: number
           pais_codigo?: string | null
+          sujetos_aplicables?: string[] | null
           updated_at?: string
         }
         Relationships: []
