@@ -52,6 +52,7 @@ import { FilaCita } from '../components/FilaCita'
 import { PieRevelar } from '../components/PieRevelar'
 import { PieReserva } from '../components/PieReserva'
 import { FiltroPills, FiltroMascotas } from '../components/FiltroPills'
+import { ChipEntidad } from '../components/ChipEntidad'
 import { SelectorDia } from '../components/SelectorDia'
 import { TresNumeros } from '../components/TresNumeros'
 import { MarcaEleccion } from '../brand/MarcaEleccion'
@@ -2231,6 +2232,29 @@ function GaleriaInterna() {
               elegida="1"
               onElegir={() => {}}
             />
+          </View>
+          <View style={{ height: spacing[4] }} />
+          <Texto variante="seccion">ChipEntidad — el chip, sin su hilera (S91-B, D-691)</Texto>
+          <Texto variante="apoyo">
+            La MISMA pieza que consume `FiltroMascotas` arriba. Se expone sola para que una GRILLA
+            (el selector de raza del alta) use el chip firmado sin clonarlo. Abajo, los dos calibres
+            y el caso que parió D-691: un nombre de 18 caracteres que en `SelectorOpcion` se cortaba
+            a «Labrador retrie…» y acá envuelve a dos líneas.
+          </Texto>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2.5], alignItems: 'flex-start' }}>
+            <ChipEntidad nombre="Thor" elegido={false} onPress={() => {}} />
+            <ChipEntidad nombre="Thor" elegido onPress={() => {}} />
+            <ChipEntidad nombre="Guillermo Prueba 8" sujeto="persona" elegido={false} onPress={() => {}} />
+          </View>
+          <View style={{ height: spacing[3] }} />
+          <Texto variante="apoyo">tamano="general" — el punto que creció, para alta/perfil:</Texto>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing[2.5], alignItems: 'flex-start' }}>
+            <View style={{ width: 170 }}>
+              <ChipEntidad nombre="Labrador retriever" sujeto="cosa" tamano="general" elegido={false} onPress={() => {}} />
+            </View>
+            <View style={{ width: 170 }}>
+              <ChipEntidad nombre="Guacamayo Azul y Amarillo" sujeto="cosa" tamano="general" elegido onPress={() => {}} />
+            </View>
           </View>
           <View style={{ height: spacing[3] }} />
           <Texto variante="apoyo">
