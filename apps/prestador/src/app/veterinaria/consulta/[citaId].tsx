@@ -71,6 +71,7 @@ import { EvitaTeclado } from '@/components/evita-teclado';
 import { verificarSesion } from '@/lib/api';
 import { vozErrorVet } from '@/lib/voz-error-vet';
 import { useTraduccion } from '@/i18n';
+import { RecetaDeLaConsulta } from '@/components/receta-de-la-consulta';
 import { DictadoEnVivo } from '@/components/dictado-en-vivo';
 
 // FormulaConfirmada/VitalesConfirmados no se re-exportan del index — se
@@ -794,8 +795,14 @@ export default function ConsultaVeterinaria() {
                 ponerlo arriba insinuaría que falta emitir algo.
                 Llega hasta acá quien ya pasó el gate clínico —esta pantalla
                 es el Durante— y la de emisión vuelve a verificarlo igual. */}
+            {/* S91-B (firma founder 7-ago-2026) · LOS PAPELES DE ESTA
+                CONSULTA, EN UNA SOLA TARJETA. La receta va ARRIBA porque ya
+                EXISTE —se re-abre— y el certificado abajo porque se EMITE:
+                primero el hecho, después el acto. Si no hubo medicación la
+                fila no se monta y la tarjeta queda exactamente como estaba. */}
             {mascotaId ? (
               <Tarjeta elevacion="reposo" relleno="ninguno">
+                <RecetaDeLaConsulta mascotaId={mascotaId} citaId={citaId} conSeparadorAbajo />
                 <CeldaNavegacion
                   icono="documento"
                   registro="aa"

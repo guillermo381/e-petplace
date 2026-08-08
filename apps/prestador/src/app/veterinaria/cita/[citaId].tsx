@@ -58,6 +58,7 @@ import { fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
 import { verificarSesion } from '@/lib/api';
 import { vozCitaVet } from '@/lib/voz-cita-vet';
 import { useTraduccion } from '@/i18n';
+import { RecetaDeLaConsulta } from '@/components/receta-de-la-consulta';
 import { vozErrorVet } from '@/lib/voz-error-vet';
 
 type Pantalla =
@@ -317,8 +318,24 @@ export default function DetalleCitaVet() {
                 entrada NO SE MONTA — gate de ausencia, jamás candado (D-525).
                 La pantalla vuelve a verificar por su cuenta: esto es la
                 puerta, no el guard. */}
+            {/* S91-B (firma founder 7-ago-2026) · LA RECETA ENTRA A ESTA
+                MISMA TARJETA — los papeles de la consulta viven juntos.
+                ⚠️ RATIFICABLE: la firma nombró «la consulta sedimentada», y
+                ahí también se montó. Acá TAMBIÉN porque se midió que la
+                consulta solo llega a su fase `despues` en la sesión del
+                dictado (al re-entrar arranca en `antes`): sin este montaje
+                el papel sería alcanzable unos minutos y nunca más, y el caso
+                de uso es re-imprimir meses después. Si el founder quiso
+                estrictamente un sitio, borrar este bloque es una línea.
+                Hereda el gate clínico de la tarjeta: leer una receta es
+                acto clínico igual que emitir un certificado. */}
             {cita.mascota && puedeAtender && (
               <Tarjeta elevacion="reposo" relleno="ninguno">
+                <RecetaDeLaConsulta
+                  mascotaId={cita.mascota.id}
+                  citaId={cita.id}
+                  conSeparadorAbajo
+                />
                 <CeldaNavegacion
                   icono="documento"
                   registro="aa"
