@@ -95,6 +95,22 @@ for (const caso of CASOS) {
   if (caso.id === 'acuario') check(t.includes('Dulce'), 'P7 · el tipo de agua en Identidad');
 
   /**
+   * A8 × P7 — LA CUENTA TAMBIÉN SE COMPONE.
+   *
+   * El acuario del fixture no tiene solicitudes, ni presupuestos, ni citas por
+   * coordinar: sus ÚNICOS pendientes posibles eran los dos de vacuna, que P7
+   * apaga. Así que su pastilla NO debe llevar cuenta. Antes del barrido decía
+   * «1 por resolver» — y ese 1 era el carnet, una categoría que no le aplica:
+   * un pendiente que el dueño no puede resolver ni encontrar.
+   *
+   * El PERRO es el contraste: mismas cero vacunas, y a él la cuenta SÍ le
+   * corresponde. Sin el par, «el acuario no cuenta» pasaría también si la
+   * cuenta estuviera rota para todos.
+   */
+  if (caso.id === 'acuario') check(!t.includes('por resolver'), 'A8×P7 · el acuario no cuenta pendientes que no le aplican');
+  if (caso.id === 'perro') check(t.includes('por resolver'), 'A8×P7 · contraste: al perro la cuenta SÍ le corresponde');
+
+  /**
    * ⚠️ P7 EN EL HOGAR — LA SUPERFICIE QUE ESTE VERIFICADOR NO MIRABA.
    *
    * Mi assert decía «el acuario no monta Documentos» y era CIERTO — pero solo
