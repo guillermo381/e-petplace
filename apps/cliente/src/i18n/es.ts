@@ -1151,6 +1151,15 @@ export const clienteEs = {
   // capturas). Los nombres de papel se resuelven por `claveVoz` del
   // catálogo derivado (`lib/papeles.ts`) — un papel nuevo sin voz rompe
   // el typecheck, jamás sale mudo. VOCES CANDIDATAS al próximo lote.
+  perfilPrestador: {
+    titulo: 'El negocio',
+    errorTitulo: 'No pudimos cargar el perfil',
+    errorDetalle: 'Revisa tu conexión y prueba de nuevo.',
+    vacioTitulo: 'Este negocio no está disponible',
+    vacioDetalle: 'Puede haber pausado su atención. Prueba con otro.',
+    desde: 'desde {{precio}}',
+    citas: '{{n}} citas completadas',
+  },
   documentos: {
     titulo: 'Documentos',
     ley: 'Los papeles de tu familia, todos acá.',

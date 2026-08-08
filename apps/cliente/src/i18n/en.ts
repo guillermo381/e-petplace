@@ -1026,6 +1026,15 @@ export const clienteEn = {
     momentoAyer: 'Yesterday',
   },
   // S89-D order 7 — the papers' home (see es.ts).
+  perfilPrestador: {
+    titulo: 'The business',
+    errorTitulo: "We couldn't load the profile",
+    errorDetalle: 'Check your connection and try again.',
+    vacioTitulo: 'This business is unavailable',
+    vacioDetalle: 'They may have paused bookings. Try another one.',
+    desde: 'from {{precio}}',
+    citas: '{{n}} completed visits',
+  },
   documentos: {
     titulo: 'Documents',
     ley: "Your family's papers, all in one place.",
