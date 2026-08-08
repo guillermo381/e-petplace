@@ -16,13 +16,24 @@
 // CHANEL: no se lista la medicación acá. La pantalla que la muestra ya
 //   existe; repetirla sería dos veces el mismo dato, y el papel es el papel.
 //
-// ── LO QUE NO DECIDE ESTA PIEZA, y por qué está escrito ───────────────
-// ⚠️ SU UBICACIÓN ESPERA FIRMA DEL FOUNDER (orden de mesa, 7-ago-2026). Por
-// eso es un COMPONENTE y no una pantalla: se monta donde el founder diga con
-// una línea, y mientras tanto no inventa una entrada. **Consecuencia honesta
-// que se declara en vez de disimularse: hasta que se monte, esta pieza es
-// INALCANZABLE y por lo tanto NO GATEABLE (L-161).** El veredicto de su
-// orden es PARCIAL por regla 77, con esto nombrado como lo que falta.
+// ── SU UBICACIÓN, FIRMADA (founder, 7-ago-2026) ──────────────────────
+// «dentro de la consulta sedimentada, junto al certificado que ya alcanza —
+// un solo lugar donde viven los papeles de esa consulta». Así se montó: NO
+// nace una tarjeta nueva, esta fila entra a la MISMA que ya tenía el
+// certificado. Los papeles de una consulta viven juntos o no viven.
+//
+// ⚠️ Y SE MONTÓ EN LOS DOS SITIOS DONDE ESA TARJETA EXISTE, con su medición
+// —porque montarla solo en la consulta habría cumplido la letra y fallado el
+// propósito—: `veterinaria/consulta/[citaId]` llega a `fase='despues'` SOLO
+// por `setFase` después de dictar; al re-entrar arranca en `'antes'` (la
+// pantalla no lee la HC existente al montar). O sea que ahí el papel es
+// alcanzable durante los minutos posteriores al dictado y nunca más — y el
+// caso de uso entero es volver a imprimir MESES después.
+// `veterinaria/cita/[citaId]` es la que sí alcanza siempre, y es donde el
+// certificado «ya alcanza» de verdad.
+// **El segundo montaje se declara RATIFICABLE: si el founder quiso
+// estrictamente uno, borrarlo es una línea.** Lo que no era defendible era
+// entregar una pieza que se ve una vez y parece hecha.
 //
 // ── POR QUÉ SE ANCLA A LA CITA Y NO A LA MASCOTA ─────────────────────
 // El lector `obtener_consultas_con_receta` devuelve TODAS las consultas con
@@ -45,20 +56,26 @@
 import { useCallback, useState } from 'react';
 import { Linking, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
-import { CeldaNavegacion, Texto, spacing, useAviso } from '@epetplace/ui';
+import { CeldaNavegacion, Separador, Texto, spacing, useAviso } from '@epetplace/ui';
 import { obtenerConsultasConReceta, urlDocumento } from '@epetplace/api';
 import { useTraduccion } from '@/i18n';
 
 interface Props {
   mascotaId: string;
   citaId: string;
+  /** Comparte tarjeta con el certificado, que va DEBAJO. El separador lo
+   *  dibuja esta pieza porque es la única que sabe si se montó: dejárselo al
+   *  padre pondría una línea suelta arriba del certificado en toda consulta
+   *  sin medicación, que son la mayoría (el patrón `{i > 0 && <Separador/>}`
+   *  de las listas no sirve acá — el padre no puede saber el índice). */
+  conSeparadorAbajo?: boolean;
 }
 
 /** Los tres estados son EXCLUYENTES y ninguno se disfraza del otro (Ley 13):
  *  `null` = todavía no sé · `false` = sé que NO hay · number = hay N. */
 type Estado = null | 'error' | false | number;
 
-export function RecetaDeLaConsulta({ mascotaId, citaId }: Props) {
+export function RecetaDeLaConsulta({ mascotaId, citaId, conSeparadorAbajo = false }: Props) {
   const { t } = useTraduccion();
   const { mostrar } = useAviso();
   const [estado, setEstado] = useState<Estado>(null);
@@ -108,15 +125,18 @@ export function RecetaDeLaConsulta({ mascotaId, citaId }: Props) {
   }
 
   return (
-    <CeldaNavegacion
-      icono="receta"
-      titulo={t('receta.ver')}
-      detalle={
-        estado === 1
-          ? t('receta.unMedicamento')
-          : t('receta.variosMedicamentos', { n: estado })
-      }
-      onPress={() => void abrir()}
-    />
+    <>
+      <CeldaNavegacion
+        icono="receta"
+        titulo={t('receta.ver')}
+        detalle={
+          estado === 1
+            ? t('receta.unMedicamento')
+            : t('receta.variosMedicamentos', { n: estado })
+        }
+        onPress={() => void abrir()}
+      />
+      {conSeparadorAbajo ? <Separador /> : null}
+    </>
   );
 }
