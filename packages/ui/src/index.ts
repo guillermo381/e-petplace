@@ -235,3 +235,28 @@ export {
   type FiltroMascotasProps,
   type OpcionFiltro,
 } from './components/FiltroPills'
+
+// sugerencias — S91-B: EL TIPEO PREDICTIVO, la FORMA una sola vez. El
+// patrón vivía INLINE en `hogar/bitacora.tsx` desde S65 (probado en
+// dispositivo, gate pasado) y el alta de mascota lo necesita para la
+// RAZA: se GENERALIZA, no se clona (§6 del método). Lo que sube es el
+// MATCHING; el render y la voz quedan en cada casa — la bitácora propone
+// chips que se marcan de a muchos, el alta propone UNA raza que llena un
+// campo, y un componente habría sido el de la bitácora.
+//
+// ⚠️ EXENTA DE R17 CON SU RAZÓN, y por eso paga otro gate: esta pieza NO
+// TIENE PÍXELES. Montarla en la galería exigiría construirle un tocable
+// de ejemplo — o sea CLONAR la interacción, que es exactamente lo que
+// R17 prohíbe («una galería que muestra un botón que no es EL botón hace
+// firmar algo que no corre»). Es la misma clase que `usePresionado`. Su
+// verificación es `scripts/verify-sugerencias.ts`, con el brazo de
+// REGRESIÓN sobre el vocabulario vivo: no menos gate, otro gate.
+export {
+  sugerir,
+  coincidenciasPrimero,
+  normalizarVoz,
+  palabrasDeBusqueda,
+  puntajeDeCoincidencia,
+  type MatchingDeTexto,
+  type ModoDeCoincidencia,
+} from './components/sugerencias'

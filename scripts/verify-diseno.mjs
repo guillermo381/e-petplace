@@ -1077,6 +1077,27 @@ const EXENTOS_R17 = new Set([
   // el filtro de identificador): el día que el filtro se ensanche, la
   // declaración ya está y nadie tiene que re-decidir por qué está exento.
   'ALTO_PIE_CAMPO',
+  // S91-B · EL TIPEO PREDICTIVO — misma clase que `usePresionado`, y por
+  // el mismo criterio literal de esta lista: mostrarlo exige construirle
+  // un campo y unos chips de ejemplo, o sea CLONAR la interacción de la
+  // bitácora. Y las dos interacciones que lo consumen NO son la misma
+  // (la bitácora marca de a muchos; el alta llena un campo con UNA), así
+  // que la galería mostraría la de una casa como si fuera la pieza.
+  // Su gate es `scripts/verify-sugerencias.ts` — con brazo de REGRESIÓN
+  // contra la implementación vieja sobre el vocabulario VIVO.
+  //
+  // ⚠️ ESTAS CINCO NO SE DISPARAN HOY, y se dice para que nadie las lea
+  // como cobertura: el parseo de abajo admite SOLO `PascalCase` y `useX`,
+  // así que un nombre camelCase JAMÁS entra al corpus — no está exento,
+  // está INVISIBLE. Se declaran igual por el mismo precedente y la misma
+  // razón que `ALTO_PIE_CAMPO` (el día que el filtro se ensanche, la
+  // decisión ya está tomada y nadie la re-discute). MEDIDO S91-B: hoy son
+  // **30 los exports invisibles** de 105 —tokens, temas e infra de
+  // captura/archivos, más estas cinco—, y `recursosUi` ya estaba en esta
+  // lista siendo invisible SIN decirlo. Ensanchar el filtro encendería
+  // 25 preexistentes de una vez: es decisión de mesa, no de esta tanda.
+  'sugerir', 'coincidenciasPrimero', 'normalizarVoz', 'palabrasDeBusqueda',
+  'puntajeDeCoincidencia',
 ]);
 /** VACÍO desde S82-B r17: las NUEVE ganaron su entrada en la misma
  *  tanda que la regla las enumeró — importadas, jamás reimplementadas.
