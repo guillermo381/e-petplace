@@ -68,7 +68,7 @@ export default function Registro() {
       router.replace('/login');
       return;
     }
-    router.replace('/onboarding/mascota');
+    router.replace('/onboarding');
   }
 
   return (

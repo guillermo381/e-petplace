@@ -63,27 +63,81 @@ export const clienteEs = {
   },
   // S55-A A3 (D-315): onboarding S45 al riel. Voz de marca APROBADA
   // por founder (lote S55, es y en).
-  onboarding: {
-    titulo: '¿Quién vive contigo?',
-    // S82 (vara ALTA: presentar, no formulario): la voz pregunta como se
-    // pregunta por alguien — el label de formulario murió.
-    nombreLabel: '¿Cómo se llama?',
-    nombrePlaceholder: 'ej: Zeus',
+  // ══ S91-D · EL ALTA DE MASCOTA — UNA voz para las DOS entradas ═══════════
+  // Hasta S90 esta voz vivía DOS VECES (`onboarding.*` y `agregarMascota.*`)
+  // con 23 de 24 claves idénticas palabra por palabra: el calco de las
+  // pantallas se había copiado también al diccionario. §6 del método protege
+  // la voz cuando cambia según QUIÉN la lee — acá la lee la MISMA persona, en
+  // la misma casa, contestando la misma pregunta. No eran dos voces: era una
+  // voz escrita dos veces, y por eso se unifica sin perder nada.
+  //
+  // ⚠️ LOTE S91 · GATE PENDIENTE. Y DOS DECISIONES DE VOZ QUE EL GATE ARBITRA,
+  // declaradas para que no pasen de contrabando:
+  //   ① TUTEO, no el voseo de la lámina. La lámina firmada dice «Contanos» y
+  //      «¿Querés completar…?» — es el DICTADO del founder, y los dictados
+  //      viajan en voseo (L-148). El acento de esta casa es tuteo neutro y lo
+  //      re-firmó la pasada única de S89. Las palabras y el argumento del
+  //      modal son los firmados; lo único que cambió es el acento. Si el gate
+  //      prefiere el voseo del dictado, son TRES strings.
+  //   ② LA VOZ DEL ACUARIO ES PROPUESTA, NO LETRA. La mesa firmó la cláusula
+  //      (7-ago: el sujeto es el sistema, el campo dos es el tipo de agua) y
+  //      dejó dicho que la voz se firma en el gate de pantalla.
+  alta: {
+    // ── paso 1/4
+    paso1Titulo: '¿Quién se suma a tu casa?',
     especieEtiqueta: '¿Qué especie es?',
     cargandoEspecies: 'Cargando especies',
     reintentar: 'Reintentar',
-    continuar: 'Continuar',
+    nombreLabel: '¿Cómo se llama?',
+    nombrePlaceholder: 'ej: Zeus',
+    nombreAcuarioLabel: '¿Cómo se llama el acuario?',
+    nombreAcuarioPlaceholder: 'ej: El de la sala',
+    acuarioPorQue:
+      'Un acuario se cuida entero: el agua, las plantas y quienes viven en ella. Por eso registramos el acuario, y no cada pez por separado.',
     presentar: 'Presentar a {{nombre}}',
-    tituloSobre: 'Sobre {{nombre}}',
+    registrarAcuario: 'Registrar el acuario',
+    continuar: 'Continuar',
     tuMascota: 'tu mascota',
+    // ── paso 2/4 · el título cambia por especie (firma founder)
+    paso2Raza: '¿De qué raza es {{nombre}}?',
+    paso2TipoAve: '¿Qué tipo de ave es {{nombre}}?',
+    paso2TipoRoedor: '¿Qué tipo de roedor es {{nombre}}?',
+    paso2Agua: '¿Cómo es el agua de {{nombre}}?',
+    // Neutral: para las especies que hoy NO se ofrecen (reptil, otro). El mapa
+    // de PasoRaza es TOTAL, así que ninguna cae en la pregunta de otra.
+    paso2Tipo: '¿Qué tipo es {{nombre}}?',
+    razaLabel: 'Su raza',
+    razaPlaceholder: 'Escríbela como la conozcas',
+    razaSugerencias: 'O elige una de estas',
+    razaMestizo: 'Mestizo',
+    // El VALOR que se guarda cuando se elige el botón — se traduce al
+    // guardarse, como el nombre de la familia (dato persistido).
+    razaMestizoValor: 'Mestizo',
+    razaNoSe: 'No sé',
+    razaAyuda: 'No hace falta que aciertes: esto se puede cambiar siempre desde su perfil.',
+    aguaEtiqueta: 'El agua del acuario',
+    aguaDulce: 'Dulce',
+    aguaMarino: 'Marino',
+    // ── paso 3/4
+    paso3Titulo: 'Cuéntanos de su historia',
     fechaLabel: '¿Cuándo nació?',
-    fechaAyuda: 'Si no sabes el día exacto, no pasa nada.',
+    fechaAcuarioLabel: '¿Cuándo lo montaste?',
+    fechaPlaceholder: 'Elige una fecha',
+    fechaAyuda: 'Si no sabes el día exacto, ábrelo y elige «No sé la fecha»: puedes decir solo su etapa.',
     sexoEtiqueta: '¿Es macho o hembra?',
     sexoMacho: 'Macho',
     sexoHembra: 'Hembra',
     sexoNoSe: 'No sé',
-    tituloFoto: 'La cara de {{nombre}}',
-    // nombre de familia GENERADO (dato persistido — se traduce al crearse)
+    origenEtiqueta: '¿Cómo llegó a tu casa?',
+    origenAdoptado: 'Lo adopté',
+    origenRefugio: 'Vino de un refugio',
+    origenNacidoEnCasa: 'Nació en casa',
+    origenEncontrado: 'Lo encontré',
+    origenCriadero: 'Vino de un criadero',
+    // ── paso 4/4
+    paso4Titulo: 'Una foto de {{nombre}}',
+    ahoraNo: 'Ahora no',
+    // ── el cierre
     nombreFamilia: 'Familia de {{nombre}}',
     nombreFamiliaFallback: 'Mi familia',
     guardando: 'Preparando el lugar de {{nombre}}',
@@ -91,6 +145,15 @@ export const clienteEs = {
     errorFoto: 'La foto no se pudo subir. Puedes probar de nuevo o seguir sin ella por ahora.',
     probarDeNuevo: 'Probar de nuevo',
     continuarSinFoto: 'Continuar sin foto',
+    // ── el modal al crear (lámina: texto firmado; ver ① arriba)
+    modalTitulo: '¿Quieres completar el perfil de {{nombre}}?',
+    modalCuerpo:
+      'Cuanto más sabemos de él, mejor lo podemos cuidar — y mejor le explicamos a quien lo atienda quién es.',
+    modalCuando: 'Puedes hacerlo ahora o cuando quieras desde su perfil.',
+    modalCompletar: 'Completar ahora',
+    modalMasTarde: 'Más tarde',
+    // ── la celda de entrada en el Hogar (vivía en `agregarMascota`)
+    entradaDetalle: 'Cada quien con su propia historia.',
   },
   hogar: {
     titulo: 'Tu hogar',
@@ -1005,32 +1068,6 @@ export const clienteEs = {
     proximamenteTitulo: 'Los refugios llegan pronto',
     proximamenteDetalle:
       'Estamos sumando refugios a e-PetPlace. Cuando estén acá, vas a conocer a sus mascotas en adopción y podrás darles familia.',
-  },
-  agregarMascota: {
-    entradaTitulo: 'Agregar mascota',
-    entradaDetalle: 'Cada quien con su propia historia.',
-    titulo: '¿Quién más vive contigo?',
-    // S82 (vara ALTA): espejo del onboarding — presentar, no formulario.
-    nombreLabel: '¿Cómo se llama?',
-    nombrePlaceholder: 'ej: Zeus',
-    especieEtiqueta: '¿Qué especie es?',
-    cargandoEspecies: 'Cargando especies',
-    reintentar: 'Reintentar',
-    continuar: 'Continuar',
-    presentar: 'Presentar a {{nombre}}',
-    tituloSobre: 'Sobre {{nombre}}',
-    fechaLabel: '¿Cuándo nació?',
-    fechaAyuda: 'Si no sabes el día exacto, no pasa nada.',
-    sexoEtiqueta: '¿Es macho o hembra?',
-    sexoMacho: 'Macho',
-    sexoHembra: 'Hembra',
-    sexoNoSe: 'No sé',
-    tituloFoto: 'La cara de {{nombre}}',
-    guardando: 'Preparando el lugar de {{nombre}}',
-    errorTitulo: 'No pudimos guardar todavía',
-    errorFoto: 'La foto no se pudo subir. Puedes probar de nuevo o seguir sin ella por ahora.',
-    probarDeNuevo: 'Probar de nuevo',
-    continuarSinFoto: 'Continuar sin foto',
   },
   // S55-A B3 — Cuenta v1 (ciclo §3.5 adelantado). Voz completa
   // APROBADA por founder (lote S55, es y en).
