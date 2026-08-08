@@ -147,9 +147,26 @@ export type IconoNombre =
   //    uno propio a `ficha_identidad` dejaría a la dueña con dibujo nuevo
   //    y a la prestataria con el que no le corresponde — el problema
   //    intacto y una pieza más en el registry.
-  //    NO SE DIBUJA NADA HASTA QUE LA MESA RE-APUNTE: dibujar para el
-  //    objetivo equivocado es más caro que no dibujar (§6b, la regla de
-  //    economía: un glifo que nadie va a montar no se pide).
+  //
+  //    ✅ RATIFICADO POR LA MESA (8-ago-2026), con su letra: «la
+  //    prestataria es HISTORIA_CLINICA, no ficha_identidad — una historia
+  //    clínica no identifica, REGISTRA; la ficha de identidad SÍ es
+  //    identificación con retrato, es dueña legítima del dibujo». Y la
+  //    decisión de NO dibujar quedó firmada como correcta: **dibujar para
+  //    el objetivo equivocado es más caro que no dibujar** (§6b, la regla
+  //    de economía: un glifo que nadie va a montar no se pide).
+  //
+  //    ☠️ DISPARO DEL GLIFO DE HISTORIA CLÍNICA — firmado, y con sus dos
+  //    exclusiones explícitas para que nadie lo adelante por entusiasmo:
+  //    **el próximo arco que toque LOS PAPELES o EL REGISTRY DE GLIFOS.**
+  //    NO S91 (nada nuevo se abre) · NO S92 (loop de seguridad, sin
+  //    features). Cuando llegue: DOS candidatos con hoja de contacto a
+  //    21px, misma disciplina que «Documentos» —riesgo declarado por
+  //    variante, rasterizados y MIRADOS antes de dejarlos— y el gate por
+  //    ícono del founder decide.
+  //    ☠️ MUERTE: el día que `historia_clinica` deje de pintar el dibujo
+  //    de una cédula. Hasta entonces el préstamo VIVE y está declarado —
+  //    que es distinto de estar escondido: `ficha_identidad` NO se toca.
   | 'documento'
   // ── S84-B21: FISCAL y BANCARIO — las otras dos secciones de "Datos
   //    comerciales". Nacen JUNTAS y con `documento` porque el founder
