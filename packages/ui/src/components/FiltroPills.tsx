@@ -79,11 +79,22 @@ export type OpcionFiltro<C extends string> = {
 
 export interface FiltroPillsProps<C extends string> {
   opciones: OpcionFiltro<C>[]
-  activo: C
+  /** S91-B: acepta `null` = NINGUNO elegido. Nació para el histórico, donde
+   *  un eje puede estar SIN filtrar — el mismo estado que `FiltroMascotas`
+   *  ya expresaba con `elegida: null` cuando mató el chip «Todas». Los
+   *  consumidores que pasan `C` no cambian: es un ensanche, no un cambio. */
+  activo: C | null
   onCambio: (c: C) => void
+  /** S91-B · LIMPIAR DE A UNO (letra del founder). Si se pasa, tocar el chip
+   *  YA ELEGIDO lo suelta en vez de re-elegirlo. Es OPCIONAL a propósito:
+   *  sin ella el componente se comporta como siempre —un eje donde algo
+   *  SIEMPRE está activo (el log) no debe poder quedarse sin nada—, y con
+   *  ella el eje se puede apagar. La diferencia es del consumidor, no de
+   *  la pieza. */
+  onLimpiar?: () => void
 }
 
-export function FiltroPills<C extends string>({ opciones, activo, onCambio }: FiltroPillsProps<C>) {
+export function FiltroPills<C extends string>({ opciones, activo, onCambio, onLimpiar }: FiltroPillsProps<C>) {
   const { theme } = useTheme()
 
   return (
@@ -113,7 +124,7 @@ export function FiltroPills<C extends string>({ opciones, activo, onCambio }: Fi
         return (
           <Pressable
             key={o.codigo}
-            onPress={() => onCambio(o.codigo)}
+            onPress={() => (elegido && onLimpiar ? onLimpiar() : onCambio(o.codigo))}
             accessibilityRole="radio"
             accessibilityState={{ selected: elegido }}
             accessibilityLabel={o.etiqueta}
