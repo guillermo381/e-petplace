@@ -1158,6 +1158,12 @@ export const clienteEs = {
     vacioTitulo: 'Este negocio no está disponible',
     vacioDetalle: 'Puede haber pausado su atención. Prueba con otro.',
     desde: 'desde {{precio}}',
+    // La escalera de confianza: reseñas > citas > silencio. Con 0
+    // reseñas NO hay estrellas vacías — serían un juicio que nadie emitió.
+    confianzaResenas: '★ {{nota}} · {{n}} reseñas',
+    confianzaCitas: '{{n}} citas completadas',
+    verPerfilDe: 'Ver el perfil de {{nombre}}',
+    reservar: 'Reservar',
     citas: '{{n}} citas completadas',
   },
   documentos: {

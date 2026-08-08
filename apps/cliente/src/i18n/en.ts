@@ -1033,6 +1033,10 @@ export const clienteEn = {
     vacioTitulo: 'This business is unavailable',
     vacioDetalle: 'They may have paused bookings. Try another one.',
     desde: 'from {{precio}}',
+    confianzaResenas: '★ {{nota}} · {{n}} reviews',
+    confianzaCitas: '{{n}} completed visits',
+    verPerfilDe: "View {{nombre}}'s profile",
+    reservar: 'Book',
     citas: '{{n}} completed visits',
   },
   documentos: {
