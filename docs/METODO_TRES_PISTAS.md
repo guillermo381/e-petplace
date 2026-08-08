@@ -21,7 +21,7 @@
 |---|---|
 | **A** | `main` · la **DB** (migraciones, RPCs) · `packages/api` · `packages/domain` · **`docs/`** · **el merge y el push** |
 | **B** | `packages/ui` · los **tokens** · el **lint** (`verify-diseno.mjs`, `verdicto.mjs`) — **exclusivo** |
-| **C** | `apps/prestador` · **`apps/cliente`** · **el canal OTA** (los dos) |
+| **C** | `apps/prestador` · **`apps/cliente`** · **la superficie de los dos canales** |
 
 > **⚠️ ENMIENDA S91 (hallazgo de C, depositada por A — `docs/` es de A):**
 > esta tabla tenía un HUECO: **`apps/cliente` no estaba asignada a ninguna
@@ -36,6 +36,19 @@
 >
 > Cuando una pista trabaja **las dos apps a la vez**, sigue rigiendo 76(f2):
 > commit por pathspec, una app por commit — el índice es UNO por repo.
+>
+> **⚠️ Y SE CORRIGE UNA CONTRADICCIÓN QUE ESTA MISMA TABLA INTRODUJO (S91):**
+> la fila de C decía «**el canal OTA**» y el §2 dice «A conduce … el publish,
+> **NADIE MÁS PUBLICA**». **Dos líneas firmadas que se contradicen son peores
+> que una equivocada** — cualquiera cita la que le conviene y está «en regla»
+> (mismo precedente que el magenta de S83 y la plata del titular).
+>
+> **Resuelto, y con el argumento de los hechos de hoy: el ACTO de publicar es
+> de A; la SUPERFICIE de los dos canales es de C.** Los tres choques de S91
+> pasaron todos porque **el que publicaba y el que dominaba el árbol eran
+> personas distintas** — y el publish atómico (`publicar-ota.mjs`) exige
+> justamente que sean la misma: quien bundlea es el único que puede garantizar
+> que el árbol no se mueva, porque es quien mergea.
 
 **El corte no es por comodidad: es por DÓNDE VIVE LA VERDAD DE CADA COSA.**
 

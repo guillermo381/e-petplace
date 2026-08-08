@@ -71,8 +71,15 @@ const pub = spawnSync(
    '--message', mensajeFinal, '--non-interactive'],
   { cwd: `apps/${app}`, encoding: 'utf8' },
 );
-const salida = `${pub.stdout ?? ''}${pub.stderr ?? ''}`;
-console.log(salida);
+// ⚠️ EL CLI ENVUELVE SUS ETIQUETAS EN CÓDIGOS ANSI (`\x1b[2mCommit\x1b[22m`),
+// así que un `/Commit\s+hash/` NO matchea: entre la palabra y el dato hay un
+// escape. Se descubrió en el ESTRENO de este script — el publish salió limpio
+// y el parser gritó «no pude leer el ancla». **Un guard que grita cuando no
+// pasa nada se vuelve ruido y en dos sesiones nadie lo mira**, así que la
+// cura es acá y no en la costumbre de ignorarlo.
+const SIN_ANSI = /\x1b\[[0-9;]*m/g;
+const salida = `${pub.stdout ?? ''}${pub.stderr ?? ''}`.replace(SIN_ANSI, '');
+console.log(`${pub.stdout ?? ''}${pub.stderr ?? ''}`);
 if (pub.status !== 0) {
   console.log('🚫 el publish FALLÓ — nada se subió.');
   process.exit(1);
