@@ -244,6 +244,14 @@ export {
   type VacunaDeMascota,
   type CodigoErrorFotoMascota,
   type EncuadreFotoDeclarado,
+  // El censo del acuario (S91, enmienda firmada a D-685): especies y cuántos,
+  // JAMÁS peces con identidad.
+  obtenerCensoDelAcuario,
+  declararCensoDelAcuario,
+  type CensoDelAcuario,
+  type HabitanteDelCenso,
+  type ResultadoDeclaracion,
+  type CodigoCensoAcuario,
 } from './wrappers/perfilMascota';
 export type { IdentidadMascota, AlergiasEstado, DesparasitacionDeMascota } from './wrappers/perfilMascota';
 

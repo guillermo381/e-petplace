@@ -376,3 +376,152 @@ export async function actualizarRazaMascota(
   const r = o !== null && typeof o.raza === 'string' && o.raza.length > 0 ? o.raza : null;
   return { ok: true, data: { raza: r } };
 }
+
+// ════════════════════════════════════════════════════════════════════════════
+// EL CENSO DEL ACUARIO — S91, enmienda firmada a D-685
+//
+// «el acuario declara su composición como CENSO POR ESPECIE. NO nacen peces
+//  individuales: ni identidad ligera, ni nombre, ni fila propia. Todo lo
+//  contratable/comprable/clínico sigue siendo DEL SISTEMA, jamás de un pez.»
+//
+// Por eso acá no hay ningún tipo `Pez` ni nada con `id` de pez: el censo es una
+// lista de (especie, cuántos). Si algún día aparece un tipo con identidad de pez
+// en este archivo, la letra se rompió antes que el código.
+// ════════════════════════════════════════════════════════════════════════════
+
+export interface HabitanteDelCenso {
+  /** Slug de `cat_razas` (especie='pez') cuando viene del catálogo; `null`
+   *  cuando el dueño la escribió libre. */
+  razaSlug: string | null;
+  /** Ya resuelto por el motor: el nombre del catálogo o el texto del dueño. */
+  nombre: string;
+  /** Ruta en el bucket `especies-razas`. `null` si no hay cara — y ahí la
+   *  superficie NO dibuja imagen en vez de dibujar un placeholder. */
+  rutaImagen: string | null;
+  /** Lo dice el motor, no se infiere de `rutaImagen`: una raza del catálogo
+   *  podría no tener imagen todavía y seguiría siendo del catálogo. */
+  esDelCatalogo: boolean;
+  cantidad: number;
+  declaradoEn: string;
+}
+
+export interface CensoDelAcuario {
+  habitantes: HabitanteDelCenso[];
+  /** Suma de las cantidades vigentes. Es un dato del SISTEMA, no de sus peces. */
+  totalHabitantes: number;
+}
+
+/** El censo VIGENTE. Las especies que llegaron a 0 no vienen: viven en la
+ *  historia, no en la vitrina del perfil. */
+export async function obtenerCensoDelAcuario(
+  mascotaId: string,
+): Promise<ResultadoWrapper<CensoDelAcuario, 'no_autenticado' | 'sin_acceso' | 'error'>> {
+  const { data, error } = await getClient().rpc('obtener_composicion_acuario', {
+    p_mascota_id: mascotaId,
+  });
+  if (error) {
+    const m = error.message;
+    const codigo = m.startsWith('no_autenticado')
+      ? 'no_autenticado'
+      : m.startsWith('sin_acceso')
+        ? 'sin_acceso'
+        : 'error';
+    return { ok: false, codigo, mensaje: 'No pudimos cargar el censo del acuario.' };
+  }
+  const filas = Array.isArray(data) ? data : [];
+  const habitantes: HabitanteDelCenso[] = filas.map((f) => ({
+    razaSlug: typeof f.raza_slug === 'string' ? f.raza_slug : null,
+    nombre: typeof f.nombre === 'string' ? f.nombre : '',
+    rutaImagen: typeof f.ruta_imagen === 'string' ? f.ruta_imagen : null,
+    esDelCatalogo: f.es_del_catalogo === true,
+    cantidad: typeof f.cantidad === 'number' ? f.cantidad : 0,
+    declaradoEn: typeof f.declarado_en === 'string' ? f.declarado_en : '',
+  }));
+  return {
+    ok: true,
+    data: {
+      habitantes,
+      totalHabitantes: habitantes.reduce((s, h) => s + h.cantidad, 0),
+    },
+  };
+}
+
+export type CodigoCensoAcuario =
+  | 'no_autenticado'
+  | 'sin_acceso'
+  | 'composicion_solo_acuario'
+  | 'cantidad_invalida'
+  | 'especie_no_declarada'
+  | 'especie_ambigua'
+  | 'especie_desconocida'
+  | 'error';
+
+export interface ResultadoDeclaracion {
+  /** `true` cuando la cantidad ya era esa: el motor NO escribió. La superficie
+   *  puede tratarlo igual que un éxito — porque lo es. */
+  sinCambio: boolean;
+  cantidad: number;
+  cantidadPrevia: number | null;
+  totalHabitantes: number | null;
+}
+
+/**
+ * Declarar o ajustar cuántos hay de UNA especie. Es la puerta única: la tabla
+ * no tiene grants, así que no existe otro camino desde el cliente.
+ *
+ * La especie viaja por UNA de dos vías y nunca por las dos: `razaSlug` (del
+ * catálogo, con su cara) o `nombreLibre` (lo que el catálogo no tiene todavía).
+ * `cantidad: 0` es la forma de sacar una especie del censo sin borrar que
+ * estuvo.
+ */
+export async function declararCensoDelAcuario(
+  mascotaId: string,
+  cantidad: number,
+  especie: { razaSlug: string } | { nombreLibre: string },
+): Promise<ResultadoWrapper<ResultadoDeclaracion, CodigoCensoAcuario>> {
+  const { data, error } = await getClient().rpc('declarar_composicion_acuario', {
+    p_mascota_id: mascotaId,
+    p_cantidad: cantidad,
+    // `undefined`, jamás `null`: los tipos generados declaran estos dos como
+    // opcionales (tienen DEFAULT en la RPC), así que la vía no usada se OMITE
+    // del cuerpo y el motor aplica su DEFAULT NULL. Mandar `null` explícito no
+    // compila — y es correcto que no compile: el XOR lo decide el motor.
+    p_raza_slug: 'razaSlug' in especie ? especie.razaSlug : undefined,
+    p_nombre_libre: 'nombreLibre' in especie ? especie.nombreLibre : undefined,
+  });
+  if (error) {
+    const m = error.message;
+    const conocidos: CodigoCensoAcuario[] = [
+      'no_autenticado',
+      'sin_acceso',
+      'composicion_solo_acuario',
+      'cantidad_invalida',
+      'especie_no_declarada',
+      'especie_ambigua',
+      'especie_desconocida',
+    ];
+    const codigo = conocidos.find((c) => m.startsWith(c)) ?? 'error';
+    return {
+      ok: false,
+      codigo,
+      mensaje:
+        codigo === 'composicion_solo_acuario'
+          ? 'Solo un acuario tiene composición.'
+          : codigo === 'especie_desconocida'
+            ? 'Esa especie no está en el catálogo.'
+            : codigo === 'cantidad_invalida'
+              ? 'La cantidad no puede ser negativa.'
+              : 'No pudimos guardar el censo. Probá de nuevo.',
+    };
+  }
+  const o = (data ?? {}) as Record<string, unknown>;
+  return {
+    ok: true,
+    data: {
+      sinCambio: o.sin_cambio === true,
+      cantidad: typeof o.cantidad === 'number' ? o.cantidad : cantidad,
+      cantidadPrevia: typeof o.cantidad_previa === 'number' ? o.cantidad_previa : null,
+      totalHabitantes: typeof o.total_habitantes === 'number' ? o.total_habitantes : null,
+    },
+  };
+}
