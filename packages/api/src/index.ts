@@ -86,6 +86,8 @@ export {
   type PrecisionFechaNacimiento,
   // S91 · cláusula del pez (firma founder): el campo dos del acuario.
   type TipoAguaAcuario,
+  // S91 · el origen del paso 3 (espejo del CHECK de mascotas.origen)
+  type OrigenMascota,
   type CodigoErrorOnboarding,
 } from './wrappers/onboarding';
 export { resolverUrlFoto, resolverUrlsFotos } from './wrappers/fotos';

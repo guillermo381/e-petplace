@@ -23,6 +23,8 @@ const CODIGOS_ERROR_ONBOARDING = [
   'raza_no_aplica_acuario',
   'tipo_agua_invalida',
   'tipo_agua_solo_pez',
+  // S91 · el origen del paso 3 del alta (🔴 medido por D)
+  'origen_invalido',
 ] as const;
 
 export type CodigoErrorOnboarding = (typeof CODIGOS_ERROR_ONBOARDING)[number];
@@ -43,6 +45,7 @@ const MENSAJES_ERROR_ONBOARDING: Record<
   raza_no_aplica_acuario:      'Un acuario no tiene raza — contanos su tipo de agua.',
   tipo_agua_invalida:          'El tipo de agua tiene que ser dulce o marino.',
   tipo_agua_solo_pez:          'El tipo de agua es solo para acuarios.',
+  origen_invalido:             'Ese origen no es válido.',
   datos_inconsistentes:        'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:           'Ocurrió un error inesperado. Probá de nuevo.',
 };
@@ -69,6 +72,25 @@ export type PrecisionFechaNacimiento = 'exacta' | 'aproximada' | 'estimada';
  *  espejo de la raza (que un acuario no tiene). */
 export type TipoAguaAcuario = 'dulce' | 'marino';
 
+/** Espejo EXACTO del CHECK de `mascotas.origen` (9 valores, medido).
+ *  El alta ofrece cinco (lámina S91): adoptado · refugio · nacido_en_casa ·
+ *  encontrado · criadero. Los otros cuatro los escriben otros caminos
+ *  (alta asistida del prestador, transferencia, compra) o son el default.
+ *  ⚠️ `refugio` y `criadero` se guardan SIN entidad: desde S91 el CHECK de
+ *  coherencia ya no exige `refugio_id`/`criadero_id` — «lo adopté de un
+ *  refugio» es un hecho verdadero aunque la plataforma no tenga ese refugio
+ *  registrado (hoy: 0 de cada uno). */
+export type OrigenMascota =
+  | 'criadero'
+  | 'refugio'
+  | 'adoptado'
+  | 'comprado_particular'
+  | 'nacido_en_casa'
+  | 'encontrado'
+  | 'transferido'
+  | 'desconocido'
+  | 'alta_asistida';
+
 export interface InputCrearFamiliaConPrimeraMascota {
   nombre_familia: string;
   nombre_mascota: string;
@@ -89,6 +111,9 @@ export interface InputCrearFamiliaConPrimeraMascota {
    *  (tipo_agua_solo_pez). La marca sujeto='acuario' la estampa el
    *  MOTOR: el cliente jamás la manda. */
   tipo_agua?: TipoAguaAcuario;
+  /** S91 · paso 3 del alta (🔴 de D: el dato se perdía en el viaje).
+   *  Ausente = 'desconocido'. */
+  origen?: OrigenMascota;
 }
 
 export interface FamiliaCreada {
@@ -114,6 +139,7 @@ export async function crearFamiliaConPrimeraMascota(
     p_foto_url:         input.foto_url ?? undefined,
     p_raza:             input.raza ?? undefined,
     p_tipo_agua:        input.tipo_agua ?? undefined,
+    p_origen:           input.origen ?? undefined,
   });
 
   if (error) return mapeoErrorAResultado(error.message);
@@ -157,6 +183,10 @@ export interface InputAgregarMascotaAFamilia {
   raza?: string;
   /** S91 · solo 'pez' (tipo_agua_solo_pez en cualquier otra). */
   tipo_agua?: TipoAguaAcuario;
+  /** S91 · paso 3 del alta. Sin él, el origen elegido SE PERDÍA en el viaje
+   *  (la RPC lo tenía hardcodeado en 'desconocido' desde S45 — 🔴 medido por
+   *  D). Ausente = 'desconocido', que es el default honesto. */
+  origen?: OrigenMascota;
 }
 
 export interface MascotaAgregada {
@@ -181,6 +211,7 @@ export async function agregarMascotaAFamilia(
     p_foto_url:         input.foto_url ?? undefined,
     p_raza:             input.raza ?? undefined,
     p_tipo_agua:        input.tipo_agua ?? undefined,
+    p_origen:           input.origen ?? undefined,
   });
 
   if (error) return mapeoErrorAResultado(error.message);

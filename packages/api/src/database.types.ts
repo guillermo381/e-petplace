@@ -17246,6 +17246,7 @@ export type Database = {
           p_fecha_nacimiento?: string
           p_foto_url?: string
           p_nombre_mascota: string
+          p_origen?: string
           p_precision_fecha?: string
           p_raza?: string
           p_sexo?: string
@@ -17525,6 +17526,7 @@ export type Database = {
           p_foto_url?: string
           p_nombre_familia: string
           p_nombre_mascota: string
+          p_origen?: string
           p_precision_fecha?: string
           p_raza?: string
           p_sexo?: string
