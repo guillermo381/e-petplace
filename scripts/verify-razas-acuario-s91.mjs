@@ -13,6 +13,8 @@ import {
   obtenerRazasDeEspecie,
   agregarMascotaAFamilia,
   obtenerMascotasDeFamilia,
+  obtenerCensoDelAcuario,
+  declararCensoDelAcuario,
 } from '../packages/api/src/index.ts';
 
 const env = Object.fromEntries(
@@ -147,6 +149,66 @@ if (perroConAgua.ok) creadas.push(perroConAgua.data.mascota_id);
 // Y ojo con la lectura fácil: probablemente NO sea un bug. El expediente de
 // una mascota no es borrable por diseño (el camino de la casa es el
 // memorial, y «corregir es AGREGAR» — D-544). Lo que sí es defecto es que
+// ── T5 · EL CENSO DEL ACUARIO por la puerta real (enmienda firmada a D-685)
+// «5 neones, 3 corydoras» — especies y cuántos, JAMÁS peces con identidad.
+if (acuario.ok) {
+  const AC = acuario.data.mascota_id;
+
+  const d1 = await declararCensoDelAcuario(AC, 5, { razaSlug: 'tetra-neon' });
+  check(d1.ok && d1.data.sinCambio === false && d1.data.totalHabitantes === 5,
+    'T5 declarar 5 neones', d1.ok ? `total ${d1.data.totalHabitantes}` : `${d1.codigo}: ${d1.mensaje}`);
+
+  const d2 = await declararCensoDelAcuario(AC, 3, { razaSlug: 'corydora' });
+  check(d2.ok && d2.data.totalHabitantes === 8, 'T5b + 3 corydoras ⇒ 8 habitantes',
+    d2.ok ? `total ${d2.data.totalHabitantes}` : d2.codigo);
+
+  const censo = await obtenerCensoDelAcuario(AC);
+  const primero = censo.ok ? censo.data.habitantes[0] : null;
+  check(
+    censo.ok && censo.data.habitantes.length === 2 && primero?.razaSlug === 'tetra-neon' &&
+      primero?.esDelCatalogo === true && primero?.rutaImagen !== null,
+    'T5c el lector trae 2 especies, la más poblada primero, CON su cara',
+    censo.ok ? `${censo.data.habitantes.map((h) => h.nombre + '×' + h.cantidad).join(' · ')}` : censo.codigo,
+  );
+
+  // IDEMPOTENCIA: repetir la misma cantidad no ensucia la historia.
+  const d3 = await declararCensoDelAcuario(AC, 5, { razaSlug: 'tetra-neon' });
+  check(d3.ok && d3.data.sinCambio === true, 'T5d repetir la misma cantidad ⇒ sinCambio, NO escribe',
+    d3.ok ? `sinCambio=${d3.data.sinCambio}` : d3.codigo);
+
+  // A 0: SALE del censo. Lo que llegó a cero vive en la historia, no en la vitrina.
+  const d4 = await declararCensoDelAcuario(AC, 0, { razaSlug: 'tetra-neon' });
+  const censo2 = await obtenerCensoDelAcuario(AC);
+  check(d4.ok && censo2.ok && censo2.data.habitantes.length === 1 && censo2.data.totalHabitantes === 3,
+    'T5e cantidad 0 ⇒ la especie SALE del censo (y la historia la conserva)',
+    censo2.ok ? `quedan ${censo2.data.habitantes.length}` : 'error');
+
+  // Texto libre: lo que el catálogo no tiene todavía entra, y SIN cara.
+  const d5 = await declararCensoDelAcuario(AC, 2, { nombreLibre: 'Caracol manzana' });
+  const censo3 = await obtenerCensoDelAcuario(AC);
+  const libre = censo3.ok ? censo3.data.habitantes.find((h) => h.nombre === 'Caracol manzana') : null;
+  check(d5.ok && libre?.esDelCatalogo === false && libre?.rutaImagen === null,
+    'T5f texto libre entra y el lector DICE que no es del catálogo (ley S59)',
+    d5.ok ? 'ok' : d5.codigo);
+
+  // ROJOS PRODUCIDOS por la puerta real
+  const rNeg = await declararCensoDelAcuario(AC, -1, { razaSlug: 'koi' });
+  check(!rNeg.ok && rNeg.codigo === 'cantidad_invalida', 'T5g cantidad negativa rebota TIPADO',
+    rNeg.ok ? 'PASÓ (mal)' : rNeg.codigo);
+
+  const rDesc = await declararCensoDelAcuario(AC, 2, { razaSlug: 'tiburon-blanco' });
+  check(!rDesc.ok && rDesc.codigo === 'especie_desconocida', 'T5h especie fuera del catálogo rebota TIPADO',
+    rDesc.ok ? 'PASÓ (mal)' : rDesc.codigo);
+}
+
+// T5i · EL CINTURÓN DE SUJETO por la puerta real: un perro no tiene censo.
+if (conRaza.ok) {
+  const rPerro = await declararCensoDelAcuario(conRaza.data.mascota_id, 1, { razaSlug: 'koi' });
+  check(!rPerro.ok && rPerro.codigo === 'composicion_solo_acuario',
+    'T5i un PERRO no puede tener composición (rebote tipado)',
+    rPerro.ok ? 'PASÓ (mal)' : rPerro.codigo);
+}
+
 // el intento no lo diga. Ficha: D-690.
 for (const id of creadas) {
   const { error } = await getClient().from('mascotas').delete().eq('id', id);

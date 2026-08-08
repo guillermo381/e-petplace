@@ -143,6 +143,57 @@ export type Database = {
           },
         ]
       }
+      acuario_composicion: {
+        Row: {
+          cantidad: number
+          declarado_en: string
+          declarado_por: string | null
+          especie_catalogo: string
+          id: string
+          mascota_id: string
+          nombre_libre: string | null
+          raza_slug: string | null
+          seq: number
+        }
+        Insert: {
+          cantidad: number
+          declarado_en?: string
+          declarado_por?: string | null
+          especie_catalogo?: string
+          id?: string
+          mascota_id: string
+          nombre_libre?: string | null
+          raza_slug?: string | null
+          seq?: never
+        }
+        Update: {
+          cantidad?: number
+          declarado_en?: string
+          declarado_por?: string | null
+          especie_catalogo?: string
+          id?: string
+          mascota_id?: string
+          nombre_libre?: string | null
+          raza_slug?: string | null
+          seq?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: "acuario_composicion_mascota_id_fkey"
+            columns: ["mascota_id"]
+            isOneToOne: false
+            referencedRelation: "mascotas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "acuario_composicion_raza_fk"
+            columns: ["especie_catalogo", "raza_slug"]
+            isOneToOne: false
+            referencedRelation: "cat_razas"
+            referencedColumns: ["especie", "slug"]
+          },
+        ]
+      }
       admin_permisos: {
         Row: {
           accion: string
@@ -17690,6 +17741,15 @@ export type Database = {
         }[]
       }
       debug_session: { Args: never; Returns: Json }
+      declarar_composicion_acuario: {
+        Args: {
+          p_cantidad: number
+          p_mascota_id: string
+          p_nombre_libre?: string
+          p_raza_slug?: string
+        }
+        Returns: Json
+      }
       declarar_dia_cerrado: {
         Args: {
           p_cerrado: boolean
@@ -18128,6 +18188,17 @@ export type Database = {
           servicio_nombre: string
           tipo_servicio: string
           total_congelado: number
+        }[]
+      }
+      obtener_composicion_acuario: {
+        Args: { p_mascota_id: string }
+        Returns: {
+          cantidad: number
+          declarado_en: string
+          es_del_catalogo: boolean
+          nombre: string
+          raza_slug: string
+          ruta_imagen: string
         }[]
       }
       obtener_consultas_con_receta: {

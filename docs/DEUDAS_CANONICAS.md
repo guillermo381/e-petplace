@@ -9354,10 +9354,87 @@ ARCO PROPIO que lo corrige, no una espera que lo bloquea.
 > *Es exactamente la clase de caso que el arco tiene que resolver, y por eso
 > queda escrito acá y no se improvisa el día que pase.*
 
+> ### ✏️✏️ ENMIENDA S91 · LA COMPOSICIÓN COMO **CENSO POR ESPECIE** — y es una enmienda que SIMPLIFICA (firma founder, 8-ago-2026)
+>
+> **VERBATIM:** *«el acuario declara su composición como CENSO POR ESPECIE —
+> cuántos peces de cada especie/variedad hay ("5 neones, 3 corydoras"). NO
+> nacen peces individuales: ni identidad ligera, ni nombre, ni fila propia.
+> Todo lo contratable/comprable/clínico sigue siendo DEL SISTEMA, jamás de un
+> pez.»*
+>
+> **☠️ LA «IDENTIDAD LIGERA» MUERE ANTES DE NACER.** La letra fundacional de
+> arriba (misma fecha, horas antes) la nombraba, y **su propio texto ya había
+> declarado las dos trampas que nadie sabía resolver**: que «identidad ligera»
+> **no podía ser una fila de `mascotas`** sin darles todo lo que la letra les
+> niega, y que **un pez que muere no puede usar `estado_vida`** porque ese
+> campo es del acuario.
+>
+> **El censo hace desaparecer las dos preguntas en vez de contestarlas.** Si un
+> neón muere, el número baja de 5 a 4: no hay registro de vida que cerrar, no
+> hay fila huérfana, no hay tabla de miembros. *Es la segunda vez en esta misma
+> deuda que una firma la ACHICA en lugar de agrandarla — la primera mató la
+> migración de peces v1, esta mata la entidad-miembro.*
+>
+> **La tabla de decisiones de la letra fundacional, con su fila corregida:**
+>
+> | pregunta | ~~letra fundacional~~ → **CENSO** |
+> |---|---|
+> | ¿el pez tiene ficha? | ~~identidad ligera, listable~~ → **NO EXISTE como fila. Existe el NÚMERO de su especie** |
+> | ¿se le reserva un servicio? | NO — *sin cambio* |
+> | ¿la comida se le compra a él? | NO — *sin cambio* |
+> | ¿tiene bitácora propia? | NO — *sin cambio* |
+> | ¿puede tener su hito? | **la pregunta se disuelve**: sin individuo no hay a quién ponerle un hito |
+>
+> **CONSTRUIDO EN S91-A** (migraciones `20260808110000` + `20260808120000`):
+> `acuario_composicion` **APPEND-ONLY** (cada fila es una declaración con su
+> fecha; el censo vigente se DERIVA de la última por especie) · RPC de **puerta
+> única** `declarar_composicion_acuario` con siete rebotes tipados · lector
+> `obtener_composicion_acuario` · wrappers `obtenerCensoDelAcuario` /
+> `declararCensoDelAcuario`. **Fixture 14/14 con JWT+ROLE y ROLLBACK.**
+>
+> **Los cinturones que la firma pidió, con su forma real:**
+> - *un perro jamás tiene composición* → **TRIGGER** (el dato vive en otra
+>   tabla, así que un CHECK no alcanza) + gate en la RPC. Probado por los DOS
+>   caminos: por la RPC y por INSERT directo.
+> - *cantidades ≥ 0* → CHECK, y **`0` es legal y significativo**: es cómo una
+>   especie SALE del censo sin borrar que estuvo.
+> - *el censo jamás vuelve al acuario contratable pez por pez* → cinturón que
+>   **aborta la migración si alguna FK apunta a `acuario_composicion`**, y
+>   además la tabla **no tiene grants**: PostgREST no la ve, la puerta es la
+>   RPC. *La ley no está escrita solo en prosa: está en un guard que corre.*
+>
+> **ADAPTACIÓN DECLARADA (no la esconde este párrafo):** la firma dice «especie
+> del catálogo vivo» y el catálogo tiene HOY **10 razas de pez**. Un acuario con
+> una especie fuera de esas 10 no habría podido declarar nada, y el dueño
+> elegiría una equivocada para poder seguir. Así que la especie viaja por **XOR**:
+> slug del catálogo (con su cara, que es el punto de la firma) **o** texto libre.
+> **Es la misma ley S59 que ya rige la raza: el catálogo SUGIERE, el dueño
+> CONFIRMA.** El lector devuelve `es_del_catalogo` para que la superficie sepa
+> si puede dibujar imagen.
+>
+> **⚠️ Y UN BUG QUE EL FIXTURE PRODUJO, que vale más que la feature:** el orden
+> «última declaración» era `declarado_en DESC, id DESC` — y eso es **no
+> determinista**, porque **`now()` es constante dentro de una transacción**
+> (L-122a) y el desempate caía en un **uuid aleatorio**. El fixture declaró 5
+> neones, ajustó a 3 en la misma txn y el total salió **8 en vez de 6**. Curado
+> con `seq` IDENTITY (monótono incluso dentro de una transacción) y un cinturón
+> que rebota si alguna de las dos funciones vuelve a desempatar por fecha o por
+> uuid. *No daba síntoma en la pantalla feliz —cada toque es su propia
+> transacción— y habría aparecido el día que una superficie declarara varias
+> especies de una vez, que es exactamente lo que una pantalla de censo hace.*
+>
+> **LO QUE SIGUE VIVO DEL ARCO:** los **parámetros del agua** y los **hitos de
+> sistema**; la bitácora que hoy cuelga de UNA fila
+> (`evento_bitacora_familia.mascota_id` NOT NULL — medición intacta). **La
+> membresía ya NO está viva: la firma la cerró.**
+>
+> **Superficie: de D**, cuando cierre sus dos curas. El contrato está servido.
+
 > **☠️ DISPARO: el arco del acuario de S91 (prioridad 3 del brief).**
-> **☠️ MUERTE:** el sistema existe como entidad con sus hitos **y sus
-> habitantes** (los peces del v1 ya no son un problema de migración: nunca
-> existieron como individuos).
+> **☠️ MUERTE:** el sistema existe como entidad con sus hitos **y su censo de
+> habitantes** (los peces del v1 nunca existieron como individuos, y desde la
+> firma del censo **no van a existir nunca**: la mitad de «habitantes» se pagó
+> en S91).
 
 **Origen: S90 (lámina del alta + brief S91, firma founder; medición A).
 Enmendada S91-A con la cláusula del pez firmada.**
