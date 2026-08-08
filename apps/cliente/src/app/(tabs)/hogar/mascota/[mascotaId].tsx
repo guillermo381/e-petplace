@@ -1392,6 +1392,7 @@ export default function PerfilDeMascota() {
         <View style={{ marginTop: spacing[8], paddingHorizontal: spacing[5] }}>
           <Tarjeta relleno="ninguno" elevacion="reposo">
             <CeldaNavegacion
+              icono="documentos"
               titulo={t('perfil.documentos')}
               registro="tinta"
               direccion={docsAbiertos ? 'arriba' : 'abajo'}
@@ -1500,7 +1501,16 @@ export default function PerfilDeMascota() {
                       que su puerta vive donde vive su historia — y va con su
                       `mascotaId` para que la pantalla no tenga que adivinar de
                       quién se habla. */}
-                  <View style={{ paddingHorizontal: spacing[5], marginBottom: spacing[3] }}>
+                  {/* S91-C (gate del founder) · EL AIRE QUE LA CAJA APORTABA
+                      Y NADIE REPUSO. Medido, no estimado: lo que pisaba el
+                      subtítulo NO era la sección siguiente — era LA PATA del
+                      chip activo de `FiltroPills`, que por letra de B «MONTA
+                      el canto» y sobresale hacia arriba (su propio
+                      `paddingTop: 12` existe para no cortarse a sí misma).
+                      Con `marginBottom: 12` la pata aterrizaba justo sobre
+                      «Lo que ves en casa…». Sube a 20: separación real, y la
+                      caja NO vuelve (A6 pide sin superficie, no sin aire). */}
+                  <View style={{ paddingHorizontal: spacing[5], marginBottom: spacing[5] }}>
                     <CeldaNavegacion
                       icono="caso"
                       titulo={t('perfil.bitacoraEntrada', { nombre: mascota.nombre })}
