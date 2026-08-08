@@ -363,6 +363,7 @@ export const prestadorEn = {
     clipGrandeSinMedir: "The clip is over 10 MB. We couldn't tell before uploading — try a shorter one.",
 
     clipVacio: 'A short video of your place: what a photo cannot show.',
+    volver: 'Back',
     verComoTeVen: 'See how they see you',
     verComoTeVenNota: "This is how a family who finds you will see you. We're still building the directory.",
 

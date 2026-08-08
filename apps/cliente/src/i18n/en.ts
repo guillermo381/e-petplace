@@ -1052,6 +1052,7 @@ export const clienteEn = {
     confianzaCitas: '{{n}} completed visits',
     verPerfilDe: "View {{nombre}}'s profile",
     reservar: 'Book',
+    volver: 'Back',
     citas: '{{n}} completed visits',
   },
   documentos: {

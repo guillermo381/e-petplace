@@ -1179,6 +1179,7 @@ export const clienteEs = {
     confianzaCitas: '{{n}} citas completadas',
     verPerfilDe: 'Ver el perfil de {{nombre}}',
     reservar: 'Reservar',
+    volver: 'Volver',
     citas: '{{n}} citas completadas',
   },
   documentos: {

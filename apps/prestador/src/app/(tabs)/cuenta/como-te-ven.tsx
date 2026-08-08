@@ -47,7 +47,6 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
-  Encabezado,
   EsqueletoGrupo,
   Esqueleto,
   EstadoVacio,
@@ -70,6 +69,7 @@ import {
 import { resolverUrlFotoGaleria } from '@/lib/subir-galeria';
 
 import { useTraduccion } from '@/i18n';
+import { FlechaVolver } from '@/components/flecha-volver';
 
 export default function ComoTeVen() {
   const router = useRouter();
@@ -137,15 +137,8 @@ export default function ComoTeVen() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
       <MarcaDeAgua />
-      <Encabezado
-        variante="navegacion"
-        titulo={t('perfilNegocio.verComoTeVen')}
-        atras
-        onAtras={() => router.back()}
-      />
-
       {estado === 'cargando' && (
-        <View style={{ padding: spacing[5] }}>
+        <View style={{ padding: spacing[5], paddingTop: insets.top + spacing[5] }}>
           <EsqueletoGrupo>
             <View style={{ gap: spacing[4] }}>
               <Esqueleto forma="bloque" ancho="100%" alto={176} />
@@ -172,20 +165,27 @@ export default function ComoTeVen() {
           ① LA PIEZA NO SCROLLEA (flex:1, sin ScrollView) — con historia
              larga el contenido se corta. B lo dejó afuera A PROPÓSITO,
              y tiene razón: solo el consumidor sabe si alrededor hay pie
-             fijo, header o Hoja. Acá hay un `Encabezado` arriba y nada
-             abajo, así que el scroll es simple y va con `flexGrow:1`
-             para que la ficha siga ocupando la pantalla cuando el
-             contenido es corto (sin eso, el fondo se corta a media
-             altura y se ve un escalón).
-          ② NO TOMA SAFE AREA — la portada SANGRA al borde a propósito.
-             Acá el inset superior ya lo pone el `Encabezado`, y el de
-             abajo va en el `contentContainerStyle`.
+             fijo, header o Hoja. Acá NO hay nada arriba ni abajo, así
+             que el scroll es simple y va con `flexGrow:1` para que la
+             ficha siga ocupando la pantalla cuando el contenido es
+             corto (sin eso, el fondo se corta a media altura).
+          ② ✅ S91-C — LA SAFE AREA YA LA TOMA LA PIEZA. Esta línea decía
+             «el inset superior ya lo pone el `Encabezado`» y ese
+             encabezado MURIÓ: era él quien ponía la franja blanca sobre
+             el carrusel (firma del founder). Con `aSangre` la pieza
+             sangra al techo y baja sola lo que flota, para que la barra
+             de estado siga legible. Se reescribe en vez de dejarse: una
+             cadena que declara NUESTRO estado envejece sola.
+             El inset de abajo sigue en el `contentContainerStyle`.
           Las dos son ensanchables y B prefiere ensanchar; hoy NO hacen
           falta, así que no se piden. Un ensanche sin consumidor es una
           prop que alguien va a tener que mantener sin saber por qué. */}
       {estado === 'listo' && prestador !== null && (
         <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom }}>
         <FichaPrestador
+          aSangre
+          vozNombre="bloque"
+          sobrePortada={<FlechaVolver onPress={() => router.back()} etiqueta={t('perfilNegocio.volver')} />}
           nombre={prestador.nombre_comercial}
           /* ⚠️ `foto_url` y NO `logo_url` — el aviso de B, y es de los
              que ahorran una hora: `logo_url` existe pero es de

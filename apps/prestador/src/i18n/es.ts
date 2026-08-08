@@ -507,6 +507,7 @@ export const prestadorEs = {
     clipGrandeSinMedir: 'El clip pesa más de 10 MB. No pudimos saberlo antes de subirlo — probá con uno más corto.',
 
     clipVacio: 'Un video corto de tu espacio: lo que una foto no alcanza a mostrar.',
+    volver: 'Volver',
     verComoTeVen: 'Ver cómo te ven',
     verComoTeVenNota: 'Así te va a ver una familia que te encuentra. Todavía estamos armando el directorio.',
 

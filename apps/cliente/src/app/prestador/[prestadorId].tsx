@@ -44,7 +44,6 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Boton,
-  Encabezado,
   Esqueleto,
   EsqueletoGrupo,
   EstadoVacio,
@@ -62,6 +61,7 @@ import {
 import { useTraduccion } from '@/i18n';
 import { vozDeOficios } from '@/lib/voz-oficio';
 import { pedirReserva } from '@/lib/senal-reserva';
+import { FlechaVolver } from '@/components/flecha-volver';
 
 /** Mismo bucket y misma forma que resuelve el espejo del prestador
  *  (`lib/subir-galeria`): la pieza no toca storage — recibe URLs listas. */
@@ -109,15 +109,8 @@ export default function PerfilPublicoPrestador() {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg.base }}>
-      <Encabezado
-        variante="navegacion"
-        titulo={perfil?.nombre_comercial ?? t('perfilPrestador.titulo')}
-        atras
-        onAtras={() => router.back()}
-      />
-
       {estado === 'cargando' ? (
-        <View style={{ padding: spacing[5] }}>
+        <View style={{ padding: spacing[5], paddingTop: insets.top + spacing[5] }}>
           <EsqueletoGrupo>
             <View style={{ gap: spacing[4] }}>
               <Esqueleto forma="bloque" ancho="100%" alto={180} />
@@ -127,7 +120,7 @@ export default function PerfilPublicoPrestador() {
           </EsqueletoGrupo>
         </View>
       ) : estado === 'error' ? (
-        <View style={{ padding: spacing[5] }}>
+        <View style={{ padding: spacing[5], paddingTop: insets.top + spacing[5] }}>
           <EstadoVacio
             registro="pantalla"
             titulo={t('perfilPrestador.errorTitulo')}
@@ -135,7 +128,7 @@ export default function PerfilPublicoPrestador() {
           />
         </View>
       ) : estado === 'vacio' || perfil === null ? (
-        <View style={{ padding: spacing[5] }}>
+        <View style={{ padding: spacing[5], paddingTop: insets.top + spacing[5] }}>
           <EstadoVacio
             registro="pantalla"
             titulo={t('perfilPrestador.vacioTitulo')}
@@ -151,6 +144,9 @@ export default function PerfilPublicoPrestador() {
           }}
         >
           <FichaPrestador
+            aSangre
+            vozNombre="bloque"
+            sobrePortada={<FlechaVolver onPress={() => router.back()} etiqueta={t('perfilPrestador.volver')} />}
             nombre={perfil.nombre_comercial}
             cohorte={perfil.cohorte}
             cohorteAnio={perfil.cohorte_anio}
