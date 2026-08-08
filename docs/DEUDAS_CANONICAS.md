@@ -9871,3 +9871,57 @@ en el primer envío real.
 **Su disparo: la construcción del trigger de normalización** (motor, con su
 rebote tipado) — precondición del encendido del canal, junto con la
 credencial.
+
+---
+
+#### D-694 — 🟡 EL ACUARIO NO SE OFERTA POR **AUSENCIA DE OFERTA**, NO POR DISEÑO
+
+**Declaración de D al cerrar su tanda del acuario (S91), verificada por A
+contra la DB viva.** Al construir la superficie del censo, D notó que un
+acuario nunca aparece como sujeto reservable — y que **el mecanismo que hoy lo
+impide no es el que uno supondría**: no lo frena la composición ni la marca
+`sujeto`, lo frena `tipos_servicio.especies_elegibles`. *Funciona. Pero
+funciona por dónde no se está mirando.*
+
+**LA MEDICIÓN AGRANDA LA DECLARACIÓN, y por eso se mide antes de escribir la
+ficha** (8-ago-2026):
+
+| | |
+|---|---|
+| servicios que **listan `'pez'` explícitamente** | **15** — todo el mundo clínico: `consulta_general` · `vacunacion` · `cirugia` · `ecografia` · `emergencia` · `telemedicina` · `laboratorio` · `radiografia` · `procedimiento` · las dos urgencias · los tres certificados |
+| servicios con `especies_elegibles = NULL`, que significa **TODAS** | **7** — `hotel` · `hotel_dia` · `hotel_noche` · `guarderia_dia` · `guarderia_mensual` · `servicio_exequial` · `registro_evento` |
+
+⇒ **La afirmación «el pez no es elegible» es FALSA en 22 de las filas del
+catálogo.** Lo que hoy impide que un acuario se ofrezca **no es la
+elegibilidad: es que ningún prestador tiene esos servicios activos con oferta
+reservable.** La puerta está cerrada **por ausencia de oferta**, y una ausencia
+no es un guard: se llena sola el día que alguien cargue su oferta.
+
+**POR QUÉ NO SE CURA HOY, y la razón no es pereza:** no hay caso — cero
+acuarios con cita, cero prestadores ofertando esos servicios — y la orden de
+mesa para el cierre de S91 es explícita: *cualquier hallazgo nuevo se registra
+con dueño y disparo, no se construye.* **Curar esto a esta altura sería tocar
+el catálogo de servicios el día del gate final.**
+
+**Y hay una razón de FONDO para no curarlo a las apuradas, que es la que
+importa:** la respuesta correcta probablemente **no** sea sacar `'pez'` de los
+quince. Un acuario **sí** puede necesitar una consulta veterinaria —el sistema
+enferma— y el arco del acuario (D-685) va a querer justamente eso. *El eje que
+falta no es «pez sí / pez no»: es que el motor no distingue **especie** de
+**sujeto**.* `especies_elegibles` responde «¿esta especie?» cuando la pregunta
+verdadera es «¿este servicio aplica a un SISTEMA o a un INDIVIDUO?». Un baño y
+un paseo son del individuo; una consulta puede ser del sistema.
+
+**Lo que ya está protegido y no hay que re-verificar:** la bitácora sí discrimina
+por sujeto (`sujetos_aplicables`, S91) y **rebota tipado** una conducta de
+individuo sobre un acuario. *El motor ya tiene el eje correcto — en la bitácora.
+Le falta en la oferta.*
+
+> **Dueño: A** (es catálogo + motor).
+> **☠️ DISPARO — el primero que ocurra:** (a) el **arco del acuario (D-685)**,
+> que va a tener que decidir qué servicios aplican a un sistema, o (b) **el
+> primer prestador que active una oferta reservable de cualquiera de las 22**
+> — ahí deja de ser hipótesis y se vuelve una pantalla que ofrece un baño para
+> un acuario.
+> **☠️ MUERTE:** `tipos_servicio` distingue **sujeto** además de especie, y la
+> elegibilidad del acuario se decide por ese eje.
