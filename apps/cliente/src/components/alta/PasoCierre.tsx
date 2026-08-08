@@ -40,7 +40,7 @@ import {
 import { esPrecision, esSexo } from '@/lib/params';
 import { subirAvatar } from '@/lib/subir-avatar';
 import { useTraduccion } from '@/i18n';
-import { esAcuario, esTipoDeAgua, MODO, type BorradorAlta, type ModoAlta } from './tipos';
+import { esAcuario, esOrigen, esTipoDeAgua, MODO, type BorradorAlta, type ModoAlta } from './tipos';
 
 export function PasoCierre({ modo, borrador }: { modo: ModoAlta; borrador: BorradorAlta }) {
   const router = useRouter();
@@ -98,14 +98,12 @@ export function PasoCierre({ modo, borrador }: { modo: ModoAlta; borrador: Borra
           ? { raza: borrador.raza }
           : null;
 
-      // ⚠️ `origen` VIAJA DESDE LA PANTALLA Y TODAVÍA NO LLEGA. Medido contra
-      // la migración que A aplicó: `p_origen` aparece **cero veces**
-      // (`grep -c p_origen` sobre 20260807183000 → 0), y las dos firmas vivas
-      // confirman que ganaron `p_raza` y `p_tipo_agua` y nada más. La columna
-      // `mascotas.origen` existe con su CHECK de nueve valores desde antes.
-      // ⇒ El paso 3 pregunta cómo llegó a la casa y la respuesta se pierde en
-      // el viaje. **Está declarado, no disimulado** — es el primer pedido
-      // pendiente a A, y del lado de acá es UNA línea acá abajo.
+      // ✅ S91-C · `origen` YA LLEGA. La deuda que este bloque declaraba
+      // («el paso 3 pregunta cómo llegó a la casa y la respuesta se pierde
+      // en el viaje») queda pagada: A sumó `p_origen` a las dos RPCs y su
+      // wrapper, y acá se consume. Verificado contra la DB VIVA en el
+      // momento de cablearlo, no contra la migración: las dos firmas
+      // devuelven `tiene_p_origen = true`.
       const comunes = {
         nombre_mascota: borrador.nombre ?? '',
         especie: borrador.especie ?? '',
@@ -117,6 +115,12 @@ export function PasoCierre({ modo, borrador }: { modo: ModoAlta; borrador: Borra
           : null),
         ...(esSexo(borrador.sexo) ? { sexo: borrador.sexo } : null),
         ...(fotoPath !== undefined ? { foto_url: fotoPath } : null),
+        // POR GUARD, no por «si tiene algo»: el borrador viaja por params y
+        // `borrador.origen` es `string`. El literal del pedido
+        // (`borrador.origen ? …`) NO COMPILA contra `OrigenMascota` — rojo
+        // producido antes de desviarse. `esOrigen` es el mismo patrón que
+        // las tres líneas de arriba (`esPrecision`, `esSexo`, `esTipoDeAgua`).
+        ...(esOrigen(borrador.origen) ? { origen: borrador.origen } : null),
         ...campoDos,
       };
 

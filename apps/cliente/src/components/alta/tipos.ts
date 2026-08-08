@@ -157,6 +157,20 @@ export const ORIGENES = [
 ] as const;
 export type OrigenOfrecido = (typeof ORIGENES)[number];
 
+/** El guard del origen — HERMANO EXACTO de `esTipoDeAgua`, y existe por la
+ *  misma razón que su comentario ya explica: el borrador viaja por params,
+ *  así que `?origen=lo-que-sea` es alcanzable, y sin guard llegaría a la RPC
+ *  para volver como `origen_invalido` — un rebote de servidor por algo que
+ *  la pantalla podía ver.
+ *
+ *  Narra a los CINCO ofrecidos, no a los nueve del CHECK: el alta no debe
+ *  poder mandar un origen que nunca ofreció (`alta_asistida` es del
+ *  prestador, `transferido` de otro camino). Es la Ley 23 al revés — la
+ *  puerta tampoco MANDA lo que no ofreció. */
+export function esOrigen(v: string | undefined): v is OrigenOfrecido {
+  return v !== undefined && (ORIGENES as readonly string[]).includes(v);
+}
+
 /** Espejo del `esEspecieUi` de `@/lib/params`, re-exportado para que los
  *  pasos no dependan de dos fuentes distintas para la misma pregunta. */
 export type EspecieUi = AvatarMascotaEspecie;
