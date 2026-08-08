@@ -9749,3 +9749,48 @@ mostrada», que es el peor de los tres: ni cerrada ni usada.
 **Origen: S91-A (la cura de la fuga obligó a mirar las 39 columnas una por
 una; ésta es la única que quedó sin decisión y se registra en vez de
 resolverse de costado).**
+
+#### L-201 — LA NORMALIZACIÓN E.164 VIVE EN EL MOTOR, JAMÁS EN CADA SUPERFICIE QUE CAPTURA TELÉFONOS
+
+**Origen: S91-A, midiendo para el transporte de WhatsApp.** Estado real de
+`profiles.telefono`, contra el objeto: **24 con teléfono · 16 con `+` · 9
+FUERA de E.164** (regex `^\+[1-9][0-9]{7,14}$`). Una de cada tres filas no
+sirve para WhatsApp, **y ninguna superficie lo sabe.**
+
+**La pieza YA EXISTE:** `normalizar_telefono(p_texto, p_country_code)` vive en
+la DB desde S69. **Lo que no existe es que RIJA:** nada la invoca al escribir
+`profiles.telefono`, así que cada superficie que captura un teléfono guarda lo
+que el usuario tipeó. *Una función de normalización que nadie llama no
+normaliza nada — es letra muerta con nombre tranquilizador.*
+
+**LA REGLA:** *la normalización y la validación de un teléfono viven EN EL
+MOTOR —al escribir y al leer—, jamás en la superficie.* Con N superficies de
+captura hay N versiones de «qué es un teléfono válido», y la que se equivoca
+no da síntoma hasta que un canal externo lo rechaza. **Es el mismo argumento
+del filtro de la bitácora** (que se puso en la puerta única y no en la
+pantalla), y el mismo de `derecha` en las URLs de bucket: **una regla en la
+frontera o N reglas divergentes.**
+
+**⚠️ Y SU LÍMITE, que es lo que hace que esto no sea un `UPDATE` masivo:
+normalizar exige SABER EL PAÍS, y P21 (letra Uber, S70) PROHÍBE derivarlo** —
+*el teléfono no implica país; el founder en EC con línea CO es el caso
+canónico.* De las filas fuera de E.164, las que no declararon país **no se
+pueden arreglar sin inventar el dato.** ⇒ el backfill **no se hace**, y eso se
+declara: el motor normaliza lo NUEVO (con su país declarado) y rebota tipado
+lo que no puede; las viejas se curan cuando su dueño las toque.
+
+**Cómo lo trata el transporte mientras tanto, y es la conducta correcta:**
+`despachar-whatsapp` **valida y NO arregla** — un número fuera de E.164 se
+SALTEA con su contador propio (`telefono_no_e164`), no se marca `fallida`.
+*Un teléfono que no sirve es un dato NUESTRO que falta, no una entrega que
+falló por culpa del destinatario: marcarlo fallida quemaría la intención por
+un defecto propio.*
+
+**Mecanizado en el modo sombra:** el reporte del transporte apagado dice
+`habria_entregado` · `sin_telefono` · `telefono_no_e164` — **los tres, antes
+de encender**, para que el número de la sorpresa aparezca en un reporte y no
+en el primer envío real.
+
+**Su disparo: la construcción del trigger de normalización** (motor, con su
+rebote tipado) — precondición del encendido del canal, junto con la
+credencial.
