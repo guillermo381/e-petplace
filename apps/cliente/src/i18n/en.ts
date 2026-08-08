@@ -318,7 +318,7 @@ export const clienteEn = {
     documentos: 'Documents',
     // S91-C — mirror of es.ts.
     bitacora: 'Their logbook',
-    bitacoraDetalle: 'Jot down what you see at home',
+    bitacoraDetalle: 'What you see at home fills in their record and helps care for them better.',
     descargarCarnetFalla: "We couldn't prepare the card. Please try again.",
     vacunasResumenUna: '1 vaccine on their card',
     vacunasResumen: '{{n}} vaccines on their card',
@@ -331,7 +331,7 @@ export const clienteEn = {
     vinculoMucho: 'We know {{nombre}} almost as well as you do.',
     vinculoAlgo: "We're getting to know {{nombre}}. Every detail you add is one less to guess in an emergency.",
     vinculoPoco: "We're still getting to know {{nombre}}. Their record fills in little by little.",
-    bitacoraEntrada: 'Tell us about today',
+    bitacoraEntrada: 'Tell us about {{nombre}}',
     razaHojaTitulo: 'What breed is {{nombre}}?',
     razaHojaGuardar: 'Save',
     tipoAgua: 'Water',

@@ -180,18 +180,46 @@ export default function BitacoraFamilia() {
   // conductas son su propio catálogo; los objetivos, el nivel que el
   // currículum ya les asigna. Grupo vacío no se monta (Ley 18: la
   // sección existe solo si existe para el usuario).
+  /** El SUJETO de la mascota elegida — `MascotaResumen` lo trae (A lo sirvió
+   *  con la cláusula del pez). Decide qué vocabulario tiene sentido ofrecer. */
+  const sujetoActivo = useMemo(
+    () => mascotas.find((m) => m.id === mascotaId)?.sujeto,
+    [mascotas, mascotaId],
+  );
+
   const gruposVocabulario = useMemo(() => {
     const definiciones: Array<{ clave: string; etiqueta: string; pertenece: (v: ChipVocabularioAgrupado) => boolean }> = [
       { clave: 'casa', etiqueta: t('adiestramiento.bitacoraGrupoCasa'), pertenece: (v) => v.tipo === 'conducta' },
+      // 🔴 S91 · GATE — EL ACUARIO NO VE OBJETIVOS DE ADIESTRAMIENTO.
+      //
+      // La causa medida, y no era la que se sospechaba: NO hay un seed viejo
+      // ni una lista inline. El catálogo de CONDUCTAS está impecable y ya
+      // universalizado («Ladra» no existe con ese texto en ningún lado: la
+      // fila dice «Hizo más ruido de lo normal»). La segunda fuente es el OTRO
+      // catálogo del mismo wrapper: `cat_objetivos_adiestramiento` se trae SIN
+      // filtro — y no por olvido, sino porque **no tiene columnas de
+      // aplicabilidad** (medido: 11 columnas, ninguna de especie ni sujeto).
+      // Sus 23 filas caían enteras sobre cualquier sujeto.
+      //
+      // ⚠️ ESTA CURA ES PARCIAL Y SE DICE: cierra el caso del acuario, que es
+      // el del gate. **No cierra el caso general** — un gato sin programa de
+      // adiestramiento sigue viendo «Camina pegado a tu paso», y eso también
+      // está mal. La cura completa es darle aplicabilidad al catálogo de
+      // objetivos (columnas + seed): es DB, está pedida, y el día que llegue
+      // esta condición se retira porque el filtro va a vivir en la puerta.
+      ...(sujetoActivo === 'acuario'
+        ? []
+        : ([
       { clave: 'basico', etiqueta: t('adiestramiento.bitacoraGrupoBasico'), pertenece: (v) => v.tipo === 'objetivo' && v.nivel === 'basico' },
       { clave: 'medio', etiqueta: t('adiestramiento.bitacoraGrupoMedio'), pertenece: (v) => v.tipo === 'objetivo' && v.nivel === 'medio' },
       { clave: 'experto', etiqueta: t('adiestramiento.bitacoraGrupoExperto'), pertenece: (v) => v.tipo === 'objetivo' && v.nivel === 'experto' },
       { clave: 'otros', etiqueta: t('adiestramiento.bitacoraGrupoOtros'), pertenece: (v) => v.tipo === 'objetivo' && v.nivel === null },
+          ] as Array<{ clave: string; etiqueta: string; pertenece: (v: ChipVocabularioAgrupado) => boolean }>)),
     ];
     return definiciones
       .map((d) => ({ clave: d.clave, etiqueta: d.etiqueta, items: vocabulario.filter(d.pertenece) }))
       .filter((g) => g.items.length > 0);
-  }, [vocabulario, t]);
+  }, [vocabulario, t, sujetoActivo]);
 
   // §7 (S65) — el texto libre autocompleta sobre el vocabulario VIGENTE
   // (jamás propone vocabulario nuevo): las palabras escritas se comparan
