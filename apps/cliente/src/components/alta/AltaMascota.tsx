@@ -30,6 +30,7 @@ import {
   aParams,
   esPaso,
   leerBorrador,
+  nuevoTokenIntento,
   MODO,
   siguiente,
   type BorradorAlta,
@@ -52,9 +53,18 @@ export function AltaMascota({ modo, pasoFijo }: { modo: ModoAlta; pasoFijo?: Pas
   const avanzar = (parcial: BorradorAlta) => {
     const proximo = siguiente(paso);
     if (proximo === null) return;
+    // EL TOKEN DEL INTENTO nace en el primer avance y de ahí viaja solo (ver
+    // `tokenIntento` en tipos.ts). Acá y no en el cierre: en el cierre ya sería
+    // tarde —cada re-montaje generaría uno nuevo y no habría nada que
+    // reconocer—, y acá el `...borrador` de los pasos siguientes lo conserva.
+    const conToken: BorradorAlta = {
+      ...borrador,
+      ...parcial,
+      tokenIntento: borrador.tokenIntento ?? nuevoTokenIntento(),
+    };
     router.push({
       pathname: rutaPaso,
-      params: { ...aParams({ ...borrador, ...parcial }), paso: proximo },
+      params: { ...aParams(conToken), paso: proximo },
     });
   };
 

@@ -85,6 +85,26 @@ export interface BorradorAlta {
   cx?: string;
   cy?: string;
   z?: string;
+  /**
+   * 🔴 EL TOKEN DEL INTENTO — la identidad de ESTE llenado del formulario.
+   *
+   * Nace al primer avance y viaja con el borrador hasta el cierre. Su trabajo
+   * es que el motor pueda reconocer una re-sumisión del MISMO intento y
+   * devolver la mascota que ya creó, en vez de crear otra.
+   *
+   * ── POR QUÉ UN TOKEN Y NO UNA CLAVE NATURAL ────────────────────────────
+   * Lo decidió la medición de A, no el gusto: **los 19 duplicados vivos
+   * crearon 19 FAMILIAS distintas** — una clave natural (familia + nombre +
+   * especie) no habría cazado ninguno. Y la re-sumisión humana fue **a 1-2
+   * minutos**, así que una ventana de segundos tampoco los ve. Lo único
+   * estable entre las dos escrituras es que **son el mismo intento**, y eso
+   * hay que decirlo explícito porque no se deduce de los datos.
+   *
+   * ⚠️ Vive en los params junto al resto del borrador a propósito: si viviera
+   * en un `useRef` moriría con el re-montaje, que es exactamente el evento
+   * contra el que existe.
+   */
+  tokenIntento?: string;
 }
 
 /** Params → borrador. Un `''` es ausencia, no un valor (expo-router puede
@@ -108,6 +128,7 @@ export function leerBorrador(params: Record<string, string | string[] | undefine
     cx: uno('cx'),
     cy: uno('cy'),
     z: uno('z'),
+    tokenIntento: uno('tokenIntento'),
   };
 }
 
@@ -119,6 +140,15 @@ export function aParams(b: BorradorAlta): Record<string, string> {
     if (typeof v === 'string' && v.length > 0) out[k] = v;
   }
   return out;
+}
+
+/**
+ * EL TOKEN DE UN INTENTO. No necesita ser criptográfico —no es un secreto ni
+ * autoriza nada—: solo tiene que ser distinto entre dos llenados del
+ * formulario. Reloj + azar alcanza y no arrastra dependencia nueva.
+ */
+export function nuevoTokenIntento(): string {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 /**
