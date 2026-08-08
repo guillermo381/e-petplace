@@ -2760,6 +2760,13 @@ export const prestadorEs = {
   // atrás (el HOY lee hoy-3..hoy+6 y el historial del expediente no es
   // tapeable). Voz de ARCHIVO, no de agenda: acá no se acciona, se vuelve.
   historico: {
+    especie_perro: 'Perros',
+    especie_gato: 'Gatos',
+    especie_ave: 'Aves',
+    especie_pez: 'Peces',
+    especie_roedor: 'Roedores',
+    especie_reptil: 'Reptiles',
+    especie_conejo: 'Conejos',
     buscarLabel: 'Buscar una mascota',
     buscarPlaceholder: 'Empieza a escribir su nombre',
     buscarAyuda: 'Con dos letras alcanza.',
