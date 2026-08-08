@@ -72,7 +72,7 @@ export default function ParteAdiestramientoPantalla() {
   const nombre =
     typeof params.mascotaNombre === 'string' && params.mascotaNombre.length > 0
       ? params.mascotaNombre
-      : t('onboarding.tuMascota');
+      : t('alta.tuMascota');
 
   const [parte, setParte] = useState<ParteAdiestramiento | 'cargando' | 'error'>('cargando');
   const [clipUrls, setClipUrls] = useState<Record<string, string>>({});

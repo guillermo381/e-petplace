@@ -128,7 +128,7 @@ export default function FotoMascota() {
       const subida = await subirAvatar({ uri: fotoNueva.uri, userId: sesion.data.user_id });
       if (!subida.ok) {
         setGuardando(false);
-        setErrorGuardar(t('onboarding.errorFoto'));
+        setErrorGuardar(t('alta.errorFoto'));
         return;
       }
       fotoPath = subida.path;

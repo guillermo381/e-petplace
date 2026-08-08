@@ -115,7 +115,7 @@ export default function CarnetDeVacunas() {
   const { mostrar } = useAviso();
   const params = useLocalSearchParams<{ mascotaId?: string; nombre?: string }>();
   const mascotaId = params.mascotaId ?? '';
-  const nombre = params.nombre ?? t('onboarding.tuMascota');
+  const nombre = params.nombre ?? t('alta.tuMascota');
 
   const [fase, setFase] = useState<Fase>({ t: 'captura' });
   const [foto, setFoto] = useState<FotoCapturada | null>(null);

@@ -1647,7 +1647,7 @@ export default function Hogar() {
             // agregar-mascota habla de la familia; refugio, de adoptar.
             icono="familia"
             titulo={t('hogar.agregarMascotaCelda')}
-            detalle={t('agregarMascota.entradaDetalle')}
+            detalle={t('alta.entradaDetalle')}
             chevron={false}
             onPress={() => router.push('/hogar/agregar')}
           />

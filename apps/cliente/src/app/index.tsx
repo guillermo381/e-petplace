@@ -2,7 +2,7 @@
  * Entrada del app del dueño (S45-B4 → fix S45-splash) — routing por
  * estado real:
  *   sin sesión → /bienvenida
- *   sesión sin familia → /onboarding/mascota
+ *   sesión sin familia → /onboarding
  *   sesión con familia → /home
  * URL-reconstruible: esta ruta no guarda nada, decide y redirige.
  * Regla 36: si el estado no llega (red muerta, backend caído), esto
@@ -61,7 +61,7 @@ export default function Entrada() {
         setColgado(true);
         return;
       }
-      router.replace(estado.data.tiene_familia ? '/hogar' : '/onboarding/mascota');
+      router.replace(estado.data.tiene_familia ? '/hogar' : '/onboarding');
     })();
 
     return () => {
