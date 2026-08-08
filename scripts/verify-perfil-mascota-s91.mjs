@@ -120,6 +120,36 @@ for (const caso of CASOS) {
       }
       return salida;
     });
+    /**
+     * LA CAPTURA DEL CHIP CON CARA (re-gate ①) — y por qué se toma ACÁ.
+     *
+     * El verificador del alta NO puede mostrarla: `cat_razas` concede SELECT
+     * solo a `authenticated` (`grant_anon=0`, medido) y ese arnés corre sin
+     * sesión, así que la grilla le sale vacía. Este arnés SÍ tiene sesión —
+     * crea sus cuentas—, y el perfil monta EL MISMO `SelectorDeRaza` en su
+     * Hoja de edición. La misma foto prueba dos cosas: la cara en el chip y
+     * que la Hoja de A5 ya scrollea sin tapar el campo.
+     */
+    /**
+     * ⚠️ EL OVERLAY SE RETIRA ANTES DE TOCAR, no antes de disparar.
+     * `#error-overlay` de expo-web (dev) **intercepta los pointer events**:
+     * dejó tres capturas negras y, cuando quise capturar el chip, se comió el
+     * click entero (60 reintentos de Playwright contra él). Es la trampa que
+     * S53 ya había registrado — *el overlay no tapa la foto: tapa el dedo*.
+     * Es andamio del entorno, jamás producto.
+     */
+    const sinOverlay = () =>
+      page.evaluate(() => {
+        document
+          .querySelectorAll('#error-overlay, #error-toast, [class*="LogBox"]')
+          .forEach((n) => n.remove());
+      });
+    await sinOverlay();
+    await page.getByText('Raza', { exact: false }).first().click();
+    await new Promise((r) => setTimeout(r, 2800));
+    await sinOverlay();
+    await page.screenshot({ path: 'scripts/capturas/s91d-chip-con-cara.png', fullPage: true });
+
     console.log('\n  -- sonda de la caja de la puerta --');
     cadena.forEach((l) => console.log('   ', l));
     console.log('');

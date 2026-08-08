@@ -366,7 +366,6 @@ export default function PerfilDeMascota() {
   const [solicitudes, setSolicitudes] = useState<{ mascotaId: string | null }[]>([]);
   const [presupuestos, setPresupuestos] = useState<{ mascotaId: string | null }[]>([]);
   const [porCoordinar, setPorCoordinar] = useState<{ mascotaId: string | null }[]>([]);
-  const [tieneProximaCita, setTieneProximaCita] = useState(false);
   // r5: vacunas agrupadas-colapsadas + historia colapsada con filtros
   const [historiaRevelada, setHistoriaRevelada] = useState(false);
   /** S91 · P2 — la SERIE de peso. El perfil mostraba el número del snapshot y
@@ -476,7 +475,6 @@ export default function PerfilDeMascota() {
         void obtenerEstadoHogar([mascotaId]).then((eh) => {
           if (!vigente || !eh.ok) return;
           setSenal(eh.data.senales.find((x) => x.mascota_id === mascotaId) ?? null);
-          setTieneProximaCita(Boolean(eh.data.proxima_cita_por_mascota[mascotaId]));
         });
         /**
          * A8 — LAS TRES FUENTES QUE ESTA PANTALLA NO TENÍA.
@@ -600,7 +598,6 @@ export default function PerfilDeMascota() {
           vozEstadoHogar !== null &&
           vozEstadoHogar.voz === 'pideAtencion' &&
           vozEstadoHogar.causa !== 'emergencia',
-        tieneProximaCita,
         sinNingunaVacuna: senal !== null && senal.vacunas_total === 0,
       });
   const momento =

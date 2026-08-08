@@ -1069,7 +1069,6 @@ export default function Hogar() {
       presupuestos: presupuestosPend,
       porCoordinar,
       tieneAlertaDeVacuna: voz !== null && voz.voz === 'pideAtencion' && voz.causa !== 'emergencia',
-      tieneProximaCita: Boolean(estadoHogar?.proxima_cita_por_mascota[id]),
       sinNingunaVacuna: s !== undefined && s.vacunas_total === 0,
     };
   };
@@ -1092,7 +1091,15 @@ export default function Hogar() {
    */
   if (__DEV__) {
     for (const m of Array.isArray(mascotas) ? mascotas : []) {
-      const porFilas = filasReco.filter((f) => f.mascotaId === m.id).length;
+      // ⚠️ `cita-` SE EXCLUYE del cotejo, por firma de mesa: la fila SIGUE
+      // existiendo en «Ponte al día» (una cita agendada es información que el
+      // dueño quiere ver) pero NO cuenta como pendiente, porque «N por
+      // resolver» no puede incluir algo que no se resuelve. La lista y el
+      // contador dejan de ser lo mismo, y por eso el cotejo lo dice acá en vez
+      // de disparar un falso aviso en cada arranque.
+      const porFilas = filasReco.filter(
+        (f) => f.mascotaId === m.id && !f.key.startsWith('cita-'),
+      ).length;
       const porLib = pendientesDe(m.id);
       if (porFilas !== porLib) {
         console.warn(

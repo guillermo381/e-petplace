@@ -10,29 +10,33 @@
  * alguien agrega una clase de pendiente en una y no en la otra, y **las dos
  * siguen compilando y las dos siguen mostrando un número creíble**.
  *
- * ── ⚠️ SON SEIS CLASES, NO TRES — corrección de mi propia medición ──────────
+ * ── ⚠️ LA MEDICIÓN QUE CORRIGIÓ A MI PROPIA LETRA ──────────────────────────
  * Mi volcado del 8-ago decía que el badge contaba `sol-` · `pre-` · `coord-`.
- * **Es falso: el código siempre contó seis.** Leí las tres primeras del `map`
- * y no seguí hasta el final del arreglo. Es el caso limpio de L-198 —*una letra
- * que describe de MENOS es la que ningún guard puede ver*, porque todo lo que
- * mide compara contra lo que la letra dice, no contra lo que el motor hace.
- * Por eso las seis están enumeradas acá abajo, con su nombre y su fuente.
+ * **Era falso: el código contaba SEIS.** Leí las tres primeras del `map` y no
+ * seguí hasta el final del arreglo. Es el caso limpio de L-198 —*una letra que
+ * describe de MENOS es la que ningún guard puede ver*, porque todo lo que mide
+ * compara contra lo que la letra dice, no contra lo que el motor hace. Por eso
+ * las clases están ENUMERADAS acá abajo, una por una: el conteo que no se
+ * puede leer no se puede auditar.
  *
- * ── 🔎 HALLAZGO DECLARADO, NO RESUELTO (va al gate) ─────────────────────────
- * De las seis, **`cita` es INFORMACIÓN, no una acción pendiente**: una cita ya
- * agendada no espera nada del dueño. Entra en la cuenta porque el badge del
- * Hogar siempre significó *«hay N cosas tuyas en esta lista»*, no *«tenés N
- * cosas por resolver»* — y esa superficie ya pasó gate del founder.
+ * ── ✅ FIRMADO: SON CINCO, PORQUE LA VOZ LO DECIDIÓ ─────────────────────────
+ * El conteo nació con SEIS clases y yo declaré el roce sin resolverlo: **`cita`
+ * es INFORMACIÓN, no una acción pendiente** — una cita ya agendada no espera
+ * nada del dueño. Entraba porque el badge del Hogar significaba *«hay N cosas
+ * tuyas en esta lista»*, y esa superficie ya había pasado gate.
  *
- * **No lo cambio por mi cuenta y ésa es la decisión**: angostar la definición
- * movería un número que el founder ya aceptó en el Hogar. Lo que sí depende de
- * esto es **la VOZ** de la cuenta en el perfil, y por eso la voz va como
- * propuesta al gate y no como hecho: si el founder elige «N por resolver», hay
- * que sacar `cita` de la cuenta; si elige «N cosas de {nombre}», la definición
- * queda como está. **Una sola pregunta decide las dos.**
+ * La mesa firmó **«N por resolver»**, y esa voz obliga: lo que se nombra
+ * *resolver* no puede incluir algo que no se resuelve. **`cita` SALE.** Por eso
+ * la pregunta era una sola y decidía las dos cosas — la voz y la definición no
+ * son capas separadas: **una voz honesta es una restricción sobre el dato**.
+ *
+ * ⚠️ Y sale para LAS DOS superficies, no solo para el perfil: el badge del
+ * Hogar consume esta misma pieza. Dejar que el Hogar contara seis y el perfil
+ * cinco sería exactamente la divergencia que esta lib existe para impedir —
+ * con el agravante de que esta vez la habría metido yo, a sabiendas.
  */
 
-/** Las seis clases, con el prefijo de `key` que usan las filas del Hogar. */
+/** LAS CINCO, con el prefijo de `key` que usan las filas del Hogar. */
 export type ClasePendiente =
   /** `sol-` · autorización del mostrador esperando al dueño. */
   | 'solicitud'
@@ -42,8 +46,6 @@ export type ClasePendiente =
   | 'porCoordinar'
   /** `vac-` · vacuna venciendo o vencida (jamás emergencia: ésa no es fila). */
   | 'vacuna'
-  /** `cita-` · la próxima cita. ⚠️ INFORMACIÓN — ver el hallazgo de arriba. */
-  | 'cita'
   /** `carnet-` · todavía sin una sola vacuna cargada. */
   | 'carnet';
 
@@ -59,18 +61,20 @@ export interface FuentesDePendientes {
   solicitudes: readonly { readonly mascotaId: string | null }[];
   presupuestos: readonly { readonly mascotaId: string | null }[];
   porCoordinar: readonly { readonly mascotaId: string | null }[];
-  /** Las tres derivadas salen de `obtenerEstadoHogar`, ya resueltas por quien
+  /** Las dos derivadas salen de `obtenerEstadoHogar`, ya resueltas por quien
    *  llama — acá no se re-calcula `calcularVozHogar`: esa voz es del riel del
-   *  Hogar y duplicarla sería el mismo error que esta pieza viene a evitar. */
+   *  Hogar y duplicarla sería el mismo error que esta pieza viene a evitar.
+   *
+   *  ⚠️ `tieneProximaCita` YA NO ESTÁ, y su ausencia es la firma: una cita
+   *  agendada no se resuelve. Si vuelve, vuelve con su voz. */
   tieneAlertaDeVacuna: boolean;
-  tieneProximaCita: boolean;
   sinNingunaVacuna: boolean;
 }
 
 /**
  * Qué clases están pendientes para UNA mascota. Devuelve la lista y no un
  * número porque **el número solo se puede auditar si se puede ver de qué está
- * hecho**: un `3` no dice nada; `['presupuesto','vacuna','cita']` se discute.
+ * hecho**: un `3` no dice nada; `['presupuesto','vacuna','carnet']` se discute.
  */
 export function pendientesDeMascota(
   mascotaId: string,
@@ -81,7 +85,6 @@ export function pendientesDeMascota(
   for (const p of fuentes.presupuestos) if (p.mascotaId === mascotaId) clases.push('presupuesto');
   for (const c of fuentes.porCoordinar) if (c.mascotaId === mascotaId) clases.push('porCoordinar');
   if (fuentes.tieneAlertaDeVacuna) clases.push('vacuna');
-  if (fuentes.tieneProximaCita) clases.push('cita');
   if (fuentes.sinNingunaVacuna) clases.push('carnet');
   return clases;
 }
