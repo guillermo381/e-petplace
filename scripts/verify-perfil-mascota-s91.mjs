@@ -17,14 +17,18 @@ const check = (c, n) => { console.log(`${c ? '  ok  ' : '  EN ROJO  '}${n}`); if
 
 const CASOS = [
   { id: 'perro', especie: 'perro', nombre: 'PerfilThor', raza: 'Labrador retriever', origen: 'adoptado',
-    presentes: ['Cómo está hoy', 'Peso', 'Vacunas', 'Registrar el de hoy', 'Contanos algo de hoy'],
+    presentes: ['Cómo está hoy', 'Peso', 'Vacunas', 'Registrar el de hoy', 'Cuéntanos algo de'],
     ausentes: [] },
   { id: 'gato', especie: 'gato', nombre: 'PerfilMishi', raza: 'Gato Común', origen: 'encontrado',
-    presentes: ['Cómo está hoy', 'Contanos algo de hoy'], ausentes: [] },
+    presentes: ['Cómo está hoy', 'Cuéntanos algo de'], ausentes: [] },
   { id: 'acuario', especie: 'pez', nombre: 'PerfilAcuario', agua: 'dulce',
-    presentes: ['Agua', 'Contanos algo de hoy'],
+    presentes: ['Agua', 'Cuéntanos algo de'],
     // P7 · lo que un acuario NO tiene. Ausentes, no apagados.
-    ausentes: ['¿Es macho o hembra?', 'Peso', 'Vacunas', 'Raza'] },
+    // 'Documentos' entra al re-gate del founder: el acuario OFRECÍA carnet de
+    // vacunas. Los cuatro papeles de hoy son de un individuo, así que la
+    // sección entera no se monta — y esto lo prueba POR SECCIÓN, que es lo
+    // único que caza una composición declarada y no cableada.
+    ausentes: ['¿Es macho o hembra?', 'Peso', 'Vacunas', 'Raza', 'Documentos'] },
 ];
 
 const browser = await chromium.launch({ channel: 'chrome', headless: true });

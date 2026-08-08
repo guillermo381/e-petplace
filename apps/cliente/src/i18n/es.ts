@@ -341,7 +341,7 @@ export const clienteEs = {
     volver: 'Volver',
     compartir: 'Compartir',
     compartirMensaje: 'Conoce a {{nombre}} en e-PetPlace',
-    pastillaAlDia: 'Al día',
+    pastillaAlDia: 'Cuidado al día',
     // r3 ③④ (literal transcrito, GATE EXIGIBLE — el founder confirma):
     // la voz del MOMENTO (M3 = el literal de la captura de Zeus; jamás
     // desempeño ni progreso — LOYALTY §3, guard R11) + la grilla de hoy.
@@ -394,7 +394,7 @@ export const clienteEs = {
     // voseo y la app habla de tú («Ponte al día», «Elige», «Arrastra»); y el
     // subtítulo dice el PORQUÉ, que es lo que convierte un pedido en una
     // invitación.
-    bitacoraDetalle: 'Lo que ves en casa completa su expediente y ayuda a cuidarlo mejor.',
+    bitacoraDetalle: 'Lo que ves en casa completa su expediente.',
     descargarCarnetFalla: 'No pudimos preparar el carnet. Prueba de nuevo.',
     vacunasResumenUna: '1 vacuna en su carnet',
     vacunasResumen: '{{n}} vacunas en su carnet',
@@ -428,6 +428,8 @@ export const clienteEs = {
     reservarServicioDe: 'Reservar un servicio para {{nombre}}',
     pastillaAtencion: 'Necesita atención',
     pastillaConociendo: 'Conociéndolo',
+    pastillaPendientesUno: '1 por revisar',
+    pastillaPendientes: '{{n}} por revisar',
     hechosPaseos: 'Paseos',
     hechosVacunas: 'Vacunas',
     reservarServicio: 'Reservar un servicio',
