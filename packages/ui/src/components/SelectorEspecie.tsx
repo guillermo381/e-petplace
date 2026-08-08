@@ -93,9 +93,31 @@ function Ficha({
   // ser sistema y pasa a ser un velo sobre la imagen — que es exactamente lo
   // que el founder vio y llamó bug. Sin foto, la regla de 7bis sigue intacta.
   const rellenoCatalogo = !seleccionada && 'capaBg' in theme && opcion.fotoUrl === undefined
-  const fondo = conCapa || rellenoCatalogo ? theme.capaBg.identidad : fondoReposo
+
+  // ⚠️ S91 (gate founder, 2ª pasada): LA ELECCIÓN SE MARCA CON EL COLOR DE
+  // ELECCIÓN DE LA CASA, no con la capa de identidad.
+  //
+  // La tile elegida se pintaba VERDE —fondo `capaBg.identidad` y borde
+  // `capa.identidad`, que es verdeVital— porque la espec S45 marcaba la
+  // elección «escalando por el BORDE de capa». Eso tenía sentido cuando la
+  // ficha era un catálogo sin contenido; hoy es la ÚNICA superficie de la app
+  // donde elegir algo no se ve magenta, y el founder lo leyó como bug dos
+  // veces seguidas. `accent.control` es lo que marca la elección en todo el
+  // resto (Ley 22, `SelectorOpcion`, `FiltroPills`, la pata).
+  //
+  // Memorial degrada solo, como siempre: sin `capaBg` no hay tinte y la
+  // señal vuelve al borde sereno (Ley 8 intacta).
+  const acentoEleccion = 'control' in theme.accent ? theme.accent.control : theme.capa.identidad
+  const fondo = conCapa
+    ? // el tinte de la capa MARCA/AFECTO — el mismo que `SelectorOpcion`
+      // usa para `acento="control"`, así los dos selectores del alta se
+      // marcan igual (era el pedido: misma gramática en los dos pasos).
+      theme.capaBg.comunidad
+    : rellenoCatalogo
+      ? theme.capaBg.identidad
+      : fondoReposo
   const borde = conCapa
-    ? theme.capa.identidad
+    ? acentoEleccion
     : rellenoCatalogo
       ? 'transparent'
       : seleccionada
