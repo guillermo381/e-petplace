@@ -159,7 +159,36 @@ function RotuloSeccion({ titulo, cuenta }: { titulo: string; cuenta: string | nu
  *  rótulo mono a la IZQUIERDA con ancho fijo + valor a la derecha. Es
  *  la variante `sinCaja` apilada que la lámina propone para FilaDato —
  *  candidata a B (packages/ui no es territorio de esta pista). */
-function FilaIdentidad({ etiqueta, valor, mono }: { etiqueta: string; valor: string; mono?: boolean }) {
+/**
+ * EL CHEVRON DE ESTA PANTALLA — una copia, no dos.
+ *
+ * ⚠️ SE DIBUJA ACÁ Y ES UN HALLAZGO, no una preferencia: la tabla única del
+ * trazo (`packages/ui/.../chevron.ts`) **no se exporta a las apps** a propósito
+ * —«una pantalla que necesite un chevron usa la PIEZA que lo porta»— y las
+ * piezas que lo portan son `CeldaNavegacion`, `PieRevelar` y `FilaCita`.
+ * Ninguna sirve para una fila etiqueta-valor ni para una celda de dashboard.
+ *
+ * Este path ya vivía INLINE en esta pantalla (la fila de historia). Extraerlo
+ * no agrega una copia: **junta la que había** y le da un nombre. Pero el hueco
+ * de contrato queda declarado para B: hoy no hay vía legal de tener un chevron
+ * fuera de esas tres piezas.
+ */
+function ChevronDerecha({ color }: { color: string }) {
+  return (
+    <Svg width={19} height={19} viewBox="0 0 24 24" aria-hidden>
+      <Path d="M9 5l7 7-7 7" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </Svg>
+  );
+}
+
+/**
+ * `accion` = ESTA FILA HACE ALGO, y por eso lleva su flecha (E14: información
+ * despliega · acción LLEVA). Las de solo lectura NO la llevan — si todas la
+ * tuvieran, dejaría de señalar cuáles se pueden tocar, que es exactamente lo
+ * que el founder no podía saber.
+ */
+function FilaIdentidad({ etiqueta, valor, mono, accion }: { etiqueta: string; valor: string; mono?: boolean; accion?: boolean }) {
+  const { theme } = useTheme();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing[3], paddingHorizontal: spacing[4], paddingVertical: spacing[3], minHeight: 44 }}>
       <View style={{ width: 112 }}>
@@ -168,6 +197,7 @@ function FilaIdentidad({ etiqueta, valor, mono }: { etiqueta: string; valor: str
       <View style={{ flex: 1 }}>
         <Texto variante={mono === true ? 'dato' : 'cuerpo'} color="primary">{valor}</Texto>
       </View>
+      {accion === true ? <ChevronDerecha color={theme.text.tertiary} /> : null}
     </View>
   );
 }
@@ -1148,7 +1178,17 @@ export default function PerfilDeMascota() {
                         }
                       >
                         <View style={{ padding: spacing[3], gap: spacing[1.5], minHeight: 44 }}>
-                          <Texto variante="apoyo">{c.rotulo}</Texto>
+                          {/* La flecha va en la línea del RÓTULO y no al pie:
+                              acompaña al nombre de la celda, que es lo que se
+                              lee primero, y no empuja el dato ni el detalle. */}
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing[1] }}>
+                            <View style={{ flex: 1, minWidth: 0 }}>
+                              <Texto variante="apoyo" numberOfLines={1}>{c.rotulo}</Texto>
+                            </View>
+                            {c.key === 'vac' || c.key === 'peso' ? (
+                              <ChevronDerecha color={theme.text.tertiary} />
+                            ) : null}
+                          </View>
                           <Text style={{ fontFamily: typography.family.sans.medium, fontSize: typography.size.md, color: theme.text.primary }}>
                             {c.valor}
                           </Text>
@@ -1257,7 +1297,7 @@ export default function PerfilDeMascota() {
                       accessibilityLabel={`${d.etiqueta}, ${d.valor}`}
                       onPress={() => setRazaHoja(true)}
                     >
-                      <FilaIdentidad etiqueta={d.etiqueta} valor={d.valor} mono={d.mono === true} />
+                      <FilaIdentidad etiqueta={d.etiqueta} valor={d.valor} mono={d.mono === true} accion />
                     </Pressable>
                   ) : (
                     <FilaIdentidad etiqueta={d.etiqueta} valor={d.valor} mono={d.mono === true} />
@@ -1277,6 +1317,7 @@ export default function PerfilDeMascota() {
                             ? t('paseoSocial.estadoSi')
                             : t('paseoSocial.estadoNo')
                       }
+                      accion
                     />
                   </Pressable>
                 </>
@@ -1292,6 +1333,7 @@ export default function PerfilDeMascota() {
                           ? t('grooming.tallaEstadoSinDeclarar')
                           : `${t(mascota.talla === 'S' ? 'grooming.tallaS' : mascota.talla === 'M' ? 'grooming.tallaM' : 'grooming.tallaL')}${mascota.pelaje === 'largo' ? ` · ${t('grooming.pelajeLargoCorto')}` : ''}`
                       }
+                      accion
                     />
                   </Pressable>
                 </>
@@ -1638,9 +1680,7 @@ export default function PerfilDeMascota() {
                               </View>
                               {glifoFila !== null ? <Icono nombre={glifoFila} tamano={26} /> : null}
                               {destino !== null ? (
-                                <Svg width={19} height={19} viewBox="0 0 24 24">
-                                  <Path d="M9 5l7 7-7 7" stroke={theme.text.tertiary} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                                </Svg>
+                                <ChevronDerecha color={theme.text.tertiary} />
                               ) : null}
                             </View>
                           );
