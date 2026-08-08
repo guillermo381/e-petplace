@@ -74,8 +74,8 @@ export type IconoNombre =
   // ── S90-B: LA RECETA — el catálogo de papeles pasó de 2 a 4 y el set
   //    ofrecía TRES dibujos viables; A dejó `receta → 'caso'` como
   //    PRÉSTAMO DECLARADO (compila y no miente) hasta que exista el
-  //    propio. Éste es el propio. Gate por ícono a 21px PENDIENTE —
-  //    entra al gate de esta familia, no aparte.
+  //    propio. Éste es el propio. ✅ FIRMADO por la mesa el 7-ago-2026 y
+  //    el préstamo RETIRADO en S91-B (`apps/cliente/src/lib/papeles.ts`).
   | 'receta'
   // ── S84-B4/B5: CONTACTO — FIRMADO (founder, S84-B5: el GLOBO).
   //    Nace porque la sección "Cómo te contactan" del perfil quedó SIN
@@ -756,7 +756,13 @@ const DIBUJANTES: Record<IconoNombre, (p: Pincel) => React.JSX.Element> = {
   // ⚠️ EL RIESGO, declarado y no disimulado (§6b paso 3): puede leerse
   // «medicación» antes que «receta». Vive mitigado por su vecindad (una
   // LISTA de papeles rotulados por voz), pero es el riesgo real y es lo
-  // que el gate del founder tiene que mirar.
+  // que el gate del founder tenía que mirar.
+  //
+  // ✅ FIRMADO (mesa, 7-ago-2026): «el glifo receta firmado — la cápsula
+  // construida en S90-B rige; el préstamo receta→'caso' se retira». El
+  // riesgo de arriba se conserva ESCRITO a propósito: la firma dice que
+  // se acepta, no que no existía. Si algún día la lista de papeles deja
+  // de rotularse por voz, la mitigación se cae y esto vuelve a la mesa.
   //
   // ANATOMÍA PARA 21px: DOS trazos (densidad 2 — el piso del rango 2-4,
   // igual que la jeringa después de su Chanel). Cápsula a 45° + la línea

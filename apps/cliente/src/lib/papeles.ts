@@ -44,28 +44,39 @@ export interface Papel {
 const PAPELES: Record<TipoDocumentoExpediente, Omit<Papel, 'tipo'>> = {
   carnet_vacunas: { claveVoz: 'CarnetVacunas', icono: 'carnet' },
   historia_clinica: { claveVoz: 'HistoriaClinica', icono: 'documento' },
-  // ✅ S91-C — EL PRÉSTAMO DE LA RECETA SE RETIRA (firma del founder,
-  // 7-ago-2026: «GLIFO RECETA FIRMADO — el préstamo receta→'caso' se
-  // retira»; pedido literal de A en
-  // `docs/relevamientos/2026-08-07-s91a-FIRMAS-DE-MESA.md` §②).
+  // ✅ EL PRÉSTAMO DE LA RECETA SE RETIRA (firma del founder, 7-ago-2026:
+  // «GLIFO RECETA FIRMADO — el préstamo receta→'caso' se retira»).
+  // *Nota de la fusión (A, conductora): C y B retiraron este préstamo por
+  // separado el mismo día — C acá y B en su rama. No fue un choque de
+  // contenido (las dos filas quedan idénticas) sino de PROSA, y la cuenta
+  // de la tensión que queda divergía. Se adjudicó MIDIENDO, no eligiendo
+  // pista: gana la cuenta re-medida.*
+  //
   // La receta tiene su DIBUJO PROPIO: la cápsula que B construyó en S90-B,
-  // ya viva en el registry. El riesgo que B declaró sin disimular —«puede
-  // leerse *medicación* antes que *receta*»— era justo lo que el gate a
-  // 21px tenía que mirar, y lo miró: por eso hay firma y no supuesto.
+  // ya viva en el registry y en la galería — lo que faltaba era la firma.
+  // El riesgo que B declaró sin disimular —«a 21px puede leerse
+  // *medicación* antes que *receta*»— era justo lo que el gate tenía que
+  // mirar, y lo miró: por eso hay firma y no supuesto. Si esa lista deja de
+  // estar rotulada por voz, el riesgo vuelve a la mesa.
   // `'caso'` NO queda huérfano (Ley 37 no dispara): medido, sigue con tres
   // consumidores propios en `apps/prestador`.
   //
-  // ⚠️ LA TENSIÓN QUE **NO** CIERRA CON ESTA FIRMA, con su cuenta RE-MEDIDA
-  // contra el objeto (la anterior decía «documento ya es doble» y estaba
-  // corta): CUATRO filas, TRES dibujos distintos — `documento` hace triple
-  // turno (`historia_clinica` acá · `ficha_identidad` acá ·
-  // `cuenta/index.tsx:62`, la entrada a Documentos del hogar). Retirar este
-  // préstamo deja **UNO** vivo, no cero:
+  // ⚠️ LA TENSIÓN QUE **NO** CIERRA CON ESTA FIRMA, con su cuenta MEDIDA
+  // contra el objeto al fusionar (la versión de B decía «documento ya es
+  // doble» y estaba corta): CUATRO filas, TRES dibujos distintos —
+  // `documento` hace TRIPLE turno (`historia_clinica` acá ·
+  // `ficha_identidad` acá · `cuenta/index.tsx:62`, la entrada a Documentos
+  // del hogar; `presupuesto` vive en `hogar/index.tsx:931` y `bitacora` en
+  // `adiestramiento.tsx:215`). Retirar este préstamo deja **UNO** vivo, no
+  // cero — y escribir «resuelto» acá haría que el próximo lector no vuelva
+  // a mirar:
   //   · ficha_identidad → 'documento': el objeto EXACTO del registry
   //     («identificación», cédula con RETRATO — y la ficha lleva foto). Que
   //     quede VECINA de historia_clinica con el mismo dibujo es Ley 12 en su
   //     forma vecina: PROVISIONAL A PROPÓSITO, la alternativa era mentir el
-  //     objeto. Se resuelve cuando B entregue el glifo que falta.
+  //     objeto. Sigue esperando decisión, y son DOS salidas distintas: o
+  //     nace un cuarto dibujo (B), o la mesa firma que estas dos filas
+  //     comparten glifo a propósito.
   receta: { claveVoz: 'Receta', icono: 'receta' },
   ficha_identidad: { claveVoz: 'FichaIdentidad', icono: 'documento' },
 };

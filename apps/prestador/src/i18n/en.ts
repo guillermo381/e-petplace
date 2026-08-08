@@ -2256,4 +2256,11 @@ export const prestadorEn = {
     entradaTitulo: 'Issue a health certificate',
     entradaDetalle: 'A record of clinical examination, with your signature.',
   },
+  receta: {
+    ver: 'View the prescription',
+    unMedicamento: '1 medication prescribed',
+    variosMedicamentos: '{{n}} medications prescribed',
+    fallo: "We couldn't check whether this visit has a prescription.",
+    reintentar: 'Try again',
+  },
 } as const satisfies Espejo<typeof prestadorEs>;

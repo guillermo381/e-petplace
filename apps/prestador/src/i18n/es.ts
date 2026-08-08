@@ -2743,4 +2743,16 @@ export const prestadorEs = {
     entradaTitulo: 'Emitir un certificado de salud',
     entradaDetalle: 'Constancia de examen clínico, con tu firma.',
   },
+  // S91-B — LA RELECTURA DE LA RECETA. El vet EMITE bien (la medicación
+  // nace de `sedimentar_nota_clinica`), pero no podía volver a imprimir lo
+  // que recetó: cero superficie en toda la app. Esta voz es del acto de
+  // RE-ABRIR, no de emitir — por eso no hay ni un verbo de creación acá.
+  receta: {
+    ver: 'Ver la receta',
+    unMedicamento: '1 medicamento recetado',
+    variosMedicamentos: '{{n}} medicamentos recetados',
+    // Ley 13: un fallo de lectura JAMÁS se disfraza de "no hay receta".
+    fallo: 'No pudimos comprobar si esta consulta tiene receta.',
+    reintentar: 'Reintentar',
+  },
 } as const;
