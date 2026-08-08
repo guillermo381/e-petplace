@@ -26,6 +26,7 @@ import {
   Insignia,
   MarcaDeAgua,
   Separador,
+  CeldaNavegacion,
   Tarjeta,
   Texto,
   spacing,
@@ -285,6 +286,32 @@ export default function CuentaComercial() {
             <SeccionDocumentos prestadorId={prestadorId} tipoFiscal={cuenta.tipoFiscal} />
           )}
         </SeccionDesplegable>
+
+        {/* S91-B (firma founder 8-ago-2026) · LA SEGUNDA ENTRADA AL
+            HISTÓRICO. Es ESPEJO, cero clon: misma ruta `/historico`, misma
+            pantalla, ninguna lógica duplicada.
+
+            POR QUÉ HAY DOS, y está ratificado: la primera vive en la raíz de
+            Cuenta —al lado de «El movimiento», por «DATOS consulta · NEGOCIO
+            configura»— y ésta en la sección que se LLAMA «Datos comerciales»,
+            que es donde el founder lo pensaba. Dos caminos al mismo sitio no
+            incomodan; la duplicación que sí duele es la de código, y acá no
+            la hay.
+
+            ⚠️ Queda declarado el roce que se midió y el founder resolvió: el
+            contenido de esta pantalla es FISCAL/BANCARIO, y un archivo de
+            trabajo es de otra naturaleza. Va como CELDA SUELTA fuera de las
+            tres secciones desplegables, no adentro de ninguna — para que se
+            lea como una salida y no como un dato de la cuenta. */}
+        <Tarjeta relleno="ninguno" elevacion="reposo">
+          <CeldaNavegacion
+            icono="mes"
+            registro="aa"
+            titulo={t('historico.entrada')}
+            detalle={t('historico.entradaDetalle')}
+            onPress={() => router.push('/historico')}
+          />
+        </Tarjeta>
       </ScrollView>
     </View>
   );
