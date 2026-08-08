@@ -9543,3 +9543,43 @@ entity chip viene PROVISIONAL desde S73 (52/44) — esto la toca.
 > su corte es una decisión firmada y no un accidente de ancho.
 
 **Origen: S91 (gate del founder en dispositivo). Adjudicado a B por A.**
+
+#### L-200 — UN HASH QUE NO SE LEYÓ NO SE ESCRIBE: EL PIPE QUE TRUNCA LA LÍNEA QUE IMPORTA
+
+**Origen: S91-A, error propio de A, cazado por C.** A reportó
+`origin/main = d4bfe5f5` en dos mensajes de coordinación. **`d4bfe5f5` no es
+un objeto del repo** (`git cat-file -t` → *Not a valid object name*; cero
+ocurrencias en todas las ramas). El commit real era **`011abae0`** — el mismo
+que C midió con `fetch` y el mismo que el guard había impreso.
+
+**Cómo se fabricó, y es lo que hay que evitar:** A corrió el guard con
+`| tail -3`, **el pipe cortó exactamente la línea del ancla**, y A completó
+el hueco con un hash que **nunca leyó**. No fue un typo de transcripción: fue
+escribir un dato que no existía en ninguna salida.
+
+**Por qué es su propia lección y no una nota al pie:** es **L-166 al revés**.
+L-166 dice *«todo dato vivo se lee al momento de usarlo, jamás de un reporte
+anterior»* — acá el dato no venía de un reporte viejo: **no venía de ningún
+lado**. Y el modo de falla es el peor de los tres que la casa conoce: un hash
+irresoluble **no da síntoma en el momento** —se ve igual que uno bueno— y
+**envenena a quien lo obedezca después**: un `merge-base` contra él no da
+rojo, da *fatal*, y quien lo cite en un acta manda a la próxima sesión a
+buscar algo que no existe.
+
+**LA REGLA, en dos partes:**
+1. **Un identificador (hash, group, updateId, folio) se PEGA de la salida que
+   lo produjo, nunca se escribe de memoria ni se completa.** Si la salida no
+   está a la vista, se vuelve a pedir.
+2. **`| tail -N` sobre una salida que contiene el dato que vas a citar es una
+   trampa** — es hermana de L-191 (*el exit code se lee del comando, jamás
+   del pipe*): el pipe también trunca DATOS, no solo códigos de salida.
+   Cuando la salida trae un identificador, se lee entera o se filtra POR EL
+   PATRÓN del dato (`grep -i ancla`), jamás por número de líneas.
+
+**Mecanizado en el mismo acto:** `scripts/publicar-ota.mjs` **imprime el
+ancla real y la pone él mismo en el mensaje** — el humano dejó de tener la
+oportunidad de escribirla.
+
+**Nota honesta de A:** el hash fantasma **no llegó a ningún documento**
+(verificado por grep en `docs/` y `CLAUDE.md`) — vivió solo en dos mensajes
+de coordinación. Que no haya contaminado el canon fue suerte, no diseño.

@@ -25,6 +25,8 @@ const CODIGOS_ERROR_ONBOARDING = [
   'tipo_agua_solo_pez',
   // S91 · el origen del paso 3 del alta (🔴 medido por D)
   'origen_invalido',
+  // S91 (P7): la fecha de montaje es del acuario y de nadie más.
+  'fecha_montaje_solo_acuario',
 ] as const;
 
 export type CodigoErrorOnboarding = (typeof CODIGOS_ERROR_ONBOARDING)[number];
@@ -46,6 +48,7 @@ const MENSAJES_ERROR_ONBOARDING: Record<
   tipo_agua_invalida:          'El tipo de agua tiene que ser dulce o marino.',
   tipo_agua_solo_pez:          'El tipo de agua es solo para acuarios.',
   origen_invalido:             'Ese origen no es válido.',
+  fecha_montaje_solo_acuario:  'La fecha de montaje es solo para acuarios.',
   datos_inconsistentes:        'La respuesta del servidor no tiene la forma esperada.',
   error_desconocido:           'Ocurrió un error inesperado. Probá de nuevo.',
 };
@@ -114,6 +117,11 @@ export interface InputCrearFamiliaConPrimeraMascota {
   /** S91 · paso 3 del alta (🔴 de D: el dato se perdía en el viaje).
    *  Ausente = 'desconocido'. */
   origen?: OrigenMascota;
+  /** S91 (P7) · cuándo se MONTÓ el acuario. Solo especie 'pez' — en
+   *  cualquier otra rebota `fecha_montaje_solo_acuario`. NO es la fecha de
+   *  alta: registrarse en e-PetPlace y montarse son dos hechos. ISO
+   *  'YYYY-MM-DD'. */
+  fecha_montaje?: string;
 }
 
 export interface FamiliaCreada {
@@ -140,6 +148,7 @@ export async function crearFamiliaConPrimeraMascota(
     p_raza:             input.raza ?? undefined,
     p_tipo_agua:        input.tipo_agua ?? undefined,
     p_origen:           input.origen ?? undefined,
+    p_fecha_montaje:    input.fecha_montaje ?? undefined,
   });
 
   if (error) return mapeoErrorAResultado(error.message);
@@ -187,6 +196,8 @@ export interface InputAgregarMascotaAFamilia {
    *  (la RPC lo tenía hardcodeado en 'desconocido' desde S45 — 🔴 medido por
    *  D). Ausente = 'desconocido', que es el default honesto. */
   origen?: OrigenMascota;
+  /** S91 (P7) · cuándo se MONTÓ el acuario (solo 'pez'). ISO 'YYYY-MM-DD'. */
+  fecha_montaje?: string;
 }
 
 export interface MascotaAgregada {
@@ -212,6 +223,7 @@ export async function agregarMascotaAFamilia(
     p_raza:             input.raza ?? undefined,
     p_tipo_agua:        input.tipo_agua ?? undefined,
     p_origen:           input.origen ?? undefined,
+    p_fecha_montaje:    input.fecha_montaje ?? undefined,
   });
 
   if (error) return mapeoErrorAResultado(error.message);

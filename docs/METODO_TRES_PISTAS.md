@@ -21,7 +21,7 @@
 |---|---|
 | **A** | `main` · la **DB** (migraciones, RPCs) · `packages/api` · `packages/domain` · **`docs/`** · **el merge y el push** |
 | **B** | `packages/ui` · los **tokens** · el **lint** (`verify-diseno.mjs`, `verdicto.mjs`) — **exclusivo** |
-| **C** | `apps/prestador` · **`apps/cliente`** · **el canal OTA** (los dos) |
+| **C** | `apps/prestador` · **`apps/cliente`** · **la superficie de los dos canales** |
 
 > **⚠️ ENMIENDA S91 (hallazgo de C, depositada por A — `docs/` es de A):**
 > esta tabla tenía un HUECO: **`apps/cliente` no estaba asignada a ninguna
@@ -36,6 +36,19 @@
 >
 > Cuando una pista trabaja **las dos apps a la vez**, sigue rigiendo 76(f2):
 > commit por pathspec, una app por commit — el índice es UNO por repo.
+>
+> **⚠️ Y SE CORRIGE UNA CONTRADICCIÓN QUE ESTA MISMA TABLA INTRODUJO (S91):**
+> la fila de C decía «**el canal OTA**» y el §2 dice «A conduce … el publish,
+> **NADIE MÁS PUBLICA**». **Dos líneas firmadas que se contradicen son peores
+> que una equivocada** — cualquiera cita la que le conviene y está «en regla»
+> (mismo precedente que el magenta de S83 y la plata del titular).
+>
+> **Resuelto, y con el argumento de los hechos de hoy: el ACTO de publicar es
+> de A; la SUPERFICIE de los dos canales es de C.** Los tres choques de S91
+> pasaron todos porque **el que publicaba y el que dominaba el árbol eran
+> personas distintas** — y el publish atómico (`publicar-ota.mjs`) exige
+> justamente que sean la misma: quien bundlea es el único que puede garantizar
+> que el árbol no se mueva, porque es quien mergea.
 
 **El corte no es por comodidad: es por DÓNDE VIVE LA VERDAD DE CADA COSA.**
 
@@ -131,12 +144,47 @@ en el contrato):*
    > limpio — prueba que nadie lo escribió.*
    > (Enmienda gemela en `CONTRATO_TRABAJO`, enmienda S83 de la regla 82.)
    >
-   > **Su límite, declarado:** el guard mira el árbol **en el instante en que
-   > corre**. Si alguien escribe entre el guard y el `eas update`, no lo ve.
-   > El intervalo es de segundos y la cura sería un lock en el repo que todos
-   > tendrían que respetar —o sea, otro aviso—. *Se deja así a propósito: un
-   > mecanismo que cubre el 95% y lo dice es mejor que uno que promete el
-   > 100% apoyado en que todos se acuerden.*
+   > ### ✏️ ENMIENDA S91 bis — EL GUARD SOLO NO ALCANZÓ: SE PUBLICA CON `publicar-ota.mjs`
+   >
+   > **El límite que este archivo declaró unas líneas arriba COBRÓ EL MISMO
+   > DÍA, con el guard puesto.** La veda salió verde e imprimió un ancla, otra
+   > pista commiteó en el hueco, y el bundle salió de un commit distinto del
+   > verificado. *Verificar-imprimir-y-soltar no cierra una ventana* — y un
+   > límite declarado no deja de ser un agujero por estar declarado.
+   >
+   > **DECISIÓN DE MESA FIRMADA (8-ago-2026). El publish pasa a ser UN SOLO
+   > ACTO:**
+   >
+   > ```
+   > node scripts/publicar-ota.mjs --app <cliente|prestador> --mensaje "qué cambió"
+   > ```
+   >
+   > **⚠️ El `--mensaje` NO lleva el ancla: la pone el script.** Ese fue el
+   > choque ③, cerrado en su origen.
+   >
+   > **Hace las TRES cosas, y las tres son necesarias:**
+   >
+   > 1. **Corre la veda por el MISMO guard** (`verify-veda-publish.mjs` como
+   >    hijo, no re-implementado: una sola fuente de la verdad). Rojo → no
+   >    publica.
+   > 2. **Publica en el mismo acto**, sin devolver el control en el medio.
+   > 3. **Re-verifica DESPUÉS y GRITA**: si HEAD se movió, si el ancla real
+   >    del CLI no es la verificada, o si el ancla trae asterisco. Y **imprime
+   >    el ancla REAL, el group y el runtime** para copiar al acta.
+   >
+   > **Por qué el ③ no es redundante con el ②, que es la parte no obvia: el
+   > bundling tarda ~60 segundos.** Ni un acto atómico puede impedir que
+   > alguien commitee mientras corre. **Lo único garantizable no es evitar la
+   > carrera: es que sea IMPOSIBLE NO ENTERARSE.** Por eso el script termina
+   > en exit ≠ 0 cuando algo cambió, aunque el OTA ya esté arriba — no se
+   > puede deshacer un publish, pero sí se puede obligar a decirlo.
+   >
+   > **Y la razón por la que esto no es opcional (medido S91):** el registro
+   > publicado **no guarda el estado del árbol**. Un publish sucio **es
+   > inauditable después**. Este script es la única oportunidad de saberlo.
+   >
+   > *El guard suelto (`verify-veda-publish.mjs`) sigue existiendo y sirve
+   > para mirar antes de empezar. Lo que ya no alcanza es usarlo SOLO.*
 3. **VERIFICAR EL GROUP** antes de declarar cerrado — con `update:view`, **nunca
    `update:list`**, que no muestra el `gitCommitHash`. **Y CORRER EL GUARD
    (§3bis): el group prueba QUÉ GUARDASTE; el guard prueba QUÉ SE SIRVE.

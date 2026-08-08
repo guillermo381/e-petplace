@@ -74,6 +74,10 @@ export {
   type PrimerIngreso,
   // S78-A8 (pedido de B): el lector del gate de la vitrina.
   puedeEncenderVitrina,
+  // S91 (pedido de B): el nombre de quien reservó, por lote de citas.
+  obtenerNombresReservadorPorCita,
+  type NombreReservador,
+  type CodigoReservador,
 } from './wrappers/prestador';
 // S76-B2 (D-525): el gate de PRODUCTO de la superficie de atender.
 export { puedoAtenderClinico } from './wrappers/acceso-clinico';
@@ -228,6 +232,9 @@ export { mascotasElegibles, type EstadoVidaMascota } from './wrappers/_mascotas-
 export {
   obtenerPerfilMascota,
   declararFotoMascota,
+  // S91 (P3): la puerta de EDICIÓN de raza del perfil.
+  actualizarRazaMascota,
+  type CodigoRazaMascota,
   type PerfilMascota,
   type UmbralesEspecie,
   type VacunaDeMascota,
@@ -242,6 +249,9 @@ export {
   registrarDesparasitacion,
   declararSinAlergiasConocidas,
   registrarPesoMascota,
+  // S91 (P2): la CURVA de peso, no el vigente.
+  obtenerSeriePeso,
+  type MedicionPeso,
   obtenerHistoriaPeso,
   type CodigoErrorSalud,
   type TipoDesparasitacion,

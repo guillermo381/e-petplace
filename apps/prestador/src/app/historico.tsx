@@ -48,6 +48,41 @@
 // lo que queda tras el filtro de OFICIO, y los oficios de lo que queda tras
 // el de MASCOTA. Así ninguna opción ofrecida da cero — que es la letra.
 //
+// ── ENMIENDA DE LETRA (founder, 8-ago-2026, tras el gate de la mecánica) ──
+// El v1 pasó pero **no escala de decenas a cientos de clientes**. La regla
+// que gobierna desde ahora, y es lo que hay que leer antes de agregar un
+// filtro nuevo:
+//
+//   ### ENUMERABLE → CHIPS · SIN TECHO → TIPEO
+//
+// · **Mascota NO tiene techo** ⇒ el chip-menú deja de listarlas todas: la
+//   puerta es un CAMPO, y los chips quedan como SELLO de lo elegido, como
+//   lo que el tipeo filtró, o como accesos recientes cuando son pocas.
+//   Gramática del alta: tipear filtra → chip presenta → elegir sella.
+// · **Oficio y servicio SÍ enumeran** dentro de un rango ⇒ siguen en chips.
+//
+// ── EL TIPEO BUSCA EN LOS DOS MUNDOS (firma founder, resuelta) ────────
+// Un solo campo sugiere por NOMBRE —de la mascota o de su pet parent— y el
+// chip sellado dice cuál es cuál: avatar para la mascota, INICIAL para la
+// persona (una pata sobre el nombre de un humano diría que es un animal).
+//
+// ✅ **LA FRONTERA DE S74 SE CONSERVA ENTERA: el CORREO no se expone.** El
+// founder la ratificó y el motor la hace cumplir — `obtener_nombres_
+// reservador_por_cita` (A, molde S71) devuelve SOLO nombre, con el gate de
+// S74 espejado y un cinturón que rebota si su cuerpo llegara a nombrar
+// teléfono o correo.
+//
+// EL CAMINO QUE **NO** SE PUDO TOMAR, y por qué el pedido fue una función y
+// no una columna: `profiles_select` es `auth.uid() = id` —cada quien lee
+// SOLO su propia fila—, así que un embed `profiles(nombre)` desde estos
+// lectores volvería VACÍO, no un nombre. Por eso S74 hizo DEFINER; no fue
+// preferencia.
+//
+// ⚠️ **EL PRECIO EXACTO, pagado a sabiendas:** el contrato expone el nombre
+// y NINGÚN id de persona —que es el dato que la frontera protege—, así que
+// dos homónimos del mismo negocio colapsan en un chip. La alternativa era
+// pedir identidad del pet parent. Se eligió el colapso.
+//
 // ⚠️ **ESPECIE: NO SE CONSTRUYÓ, SE ELEVA** (regla del propio founder: lo
 // que exige algo que no existe se declara, no se hace en silencio). El dato
 // SÍ viaja (`mascota.especie`), pero la firma pide **especie con su imagen
@@ -68,6 +103,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   Boton,
+  Campo,
   CampoFecha,
   Encabezado,
   Esqueleto,
@@ -83,6 +119,7 @@ import {
   Tarjeta,
   Texto,
   spacing,
+  sugerir,
   useTheme,
   type AvatarMascotaEspecie,
   type CampoFechaValor,
@@ -95,6 +132,7 @@ import {
   obtenerCitasPaseoDelDia,
   obtenerCitasVetDelDia,
   obtenerMiPrestador,
+  obtenerNombresReservadorPorCita,
   resolverUrlFoto,
   type CitaAgendaPaseo,
 } from '@epetplace/api';
@@ -151,9 +189,33 @@ export default function Historico() {
   const [aMedidaAbierta, setAMedidaAbierta] = useState(false);
   const [borradorDesde, setBorradorDesde] = useState<CampoFechaValor | undefined>();
   const [borradorHasta, setBorradorHasta] = useState<CampoFechaValor | undefined>();
-  // Los dos ejes que particionan.
+  // Los ejes que particionan.
   const [oficio, setOficio] = useState<Oficio | null>(null);
-  const [mascotaId, setMascotaId] = useState<string | null>(null);
+  const [servicio, setServicio] = useState<string | null>(null);
+  /** EL SUJETO ELEGIDO — hoy puede ser una MASCOTA o una PERSONA, así que
+   *  la clave dejó de ser un `mascotaId` y se dice: una mascota se
+   *  identifica por su id; una persona, por `persona:<nombre>`.
+   *
+   *  ⚠️ POR QUÉ LA PERSONA NO TIENE ID, y no es un atajo: el lector de A
+   *  expone SOLO el nombre — a propósito, para no filtrar identidad del pet
+   *  parent al prestador (frontera S74). Sin id, dos personas homónimas del
+   *  mismo negocio colapsan en un chip. **Es el precio EXACTO de no exponer
+   *  identidad, y se paga a sabiendas:** la alternativa era pedir un id de
+   *  persona, que es justo el dato que la frontera protege. */
+  const [sujetoId, setSujetoId] = useState<string | null>(null);
+  const esPersona = (clave: string) => clave.startsWith('persona:');
+  const nombreDePersona = (clave: string) => clave.slice('persona:'.length);
+  /** citaId → nombre del reservador. Solo las que TIENEN nombre: una fila
+   *  con `nombre: null` (walk-in o perfil sin nombre) no puede ofrecerse
+   *  como chip, y la AUSENCIA de fila significa otra cosa distinta —que esa
+   *  cita no es de un negocio donde tengas rol— que acá no puede ocurrir
+   *  porque las citas salieron de tus propios lectores. */
+  const [nombresPorCita, setNombresPorCita] = useState<Map<string, string>>(new Map());
+  /** EL TIPEO — la puerta principal de lo que NO tiene techo (enmienda de
+   *  letra del founder, 8-ago-2026: «enumerable → chips; sin techo → tipeo»).
+   *  Las mascotas de un negocio crecen de decenas a cientos: un chip-menú
+   *  que las lista todas deja de ser un menú y pasa a ser una pared. */
+  const [busqueda, setBusqueda] = useState('');
 
   const traer = useCallback(async (d: string, h: string) => {
     const sesion = await verificarSesion();
@@ -191,14 +253,37 @@ export default function Historico() {
     );
   }, []);
 
+  /** LOS NOMBRES, en UN viaje por ventana (batch, jamás N+1). Se pide
+   *  después de tener las citas porque el lector es keyed por sus ids. */
+  const traerNombres = useCallback(async (citas: CitaConOficio[]) => {
+    if (citas.length === 0) return new Map<string, string>();
+    const r = await obtenerNombresReservadorPorCita(citas.map((j) => j.cita.id));
+    if (!r.ok) return new Map<string, string>();
+    const m = new Map<string, string>();
+    for (const fila of r.data) {
+      // `nombre: null` es honesto y NO es un chip: walk-in o perfil sin
+      // nombre. La AUSENCIA de fila significa otra cosa (cita de un negocio
+      // sin rol) y acá no puede pasar — estas citas salieron de tus lectores.
+      if (fila.nombre !== null && fila.nombre.trim().length > 0) {
+        m.set(fila.cita_id, fila.nombre.trim());
+      }
+    }
+    return m;
+  }, []);
+
   const consultar = useCallback(
     (d: string, h: string) => {
       setEstado({ fase: 'cargando' });
-      void traer(d, h).then((r) =>
-        setEstado(r === null ? { fase: 'error' } : { fase: 'listo', citas: r }),
-      );
+      void traer(d, h).then((r) => {
+        setEstado(r === null ? { fase: 'error' } : { fase: 'listo', citas: r });
+        if (r === null) {
+          setNombresPorCita(new Map());
+          return;
+        }
+        void traerNombres(r).then(setNombresPorCita);
+      });
     },
-    [traer],
+    [traer, traerNombres],
   );
 
   useFocusEffect(
@@ -232,6 +317,9 @@ export default function Historico() {
       setDesde(d);
       setAtajo('aMedida');
       setEstado({ fase: 'listo', citas: r });
+      // La ventana creció: los nombres la siguen o el chip de persona
+      // quedaría hablando de un conjunto que ya no es el que se ve.
+      void traerNombres(r).then(setNombresPorCita);
     }
   };
 
@@ -240,19 +328,82 @@ export default function Historico() {
   // LOS CHIPS SALEN DE LO QUE HAY, Y CRUZADO: las mascotas se derivan de lo
   // que sobrevive al filtro de oficio y viceversa — así ninguna opción
   // ofrecida daría cero (letra del founder).
-  const opcionesMascota = useMemo(() => {
-    const base = oficio === null ? todas : todas.filter((j) => j.oficio === oficio);
-    const vistas = new Map<string, { id: string; nombre: string; fotoUrl?: string }>();
-    for (const j of base) {
+  /** UN SOLO SITIO DECIDE QUÉ PASA CADA EJE — y las opciones de cada uno se
+   *  derivan aplicando TODOS MENOS ÉL MISMO. Con dos ejes se podía escribir
+   *  a mano; con tres, hacerlo a mano es cómo aparece la opción que da cero
+   *  (la letra: «ninguna opción ofrecida da cero»). */
+  const pasa = useCallback(
+    (j: CitaConOficio, ejes: { oficio?: boolean; servicio?: boolean; mascota?: boolean }) =>
+      (ejes.oficio === false || oficio === null || j.oficio === oficio) &&
+      (ejes.servicio === false || servicio === null || (j.cita.tipo?.nombre ?? null) === servicio) &&
+      (ejes.mascota === false ||
+        sujetoId === null ||
+        (esPersona(sujetoId)
+          ? nombresPorCita.get(j.cita.id) === nombreDePersona(sujetoId)
+          : j.cita.mascota?.id === sujetoId)),
+    [oficio, servicio, sujetoId, nombresPorCita],
+  );
+
+  /** EL CORPUS DEL TIPEO — UN SOLO CAMPO, DOS MUNDOS (firma del founder):
+   *  se busca por NOMBRE, sea de la mascota o de su pet parent, y el chip
+   *  sellado dice cuál es cuál (avatar / inicial).
+   *
+   *  ⚠️ EL MUNDO «PERSONA» ESTÁ ESTRUCTURALMENTE PRESENTE Y HOY VACÍO, y
+   *  eso es la entrega honesta, no un olvido: **el nombre del pet parent NO
+   *  viaja en los lectores del histórico** — medido, cero `profiles` en los
+   *  cuatro. Lo pedido a A es una DEFINER batcheada
+   *  (`obtener_nombres_reservador_por_cita(uuid[])`, molde exacto de
+   *  `obtener_nombres_negocio_por_presupuesto` de S71). Cuando llegue, el
+   *  encendido es ESTA función y nada más — la búsqueda, el sello y el
+   *  chip con inicial ya están construidos y no se tocan.
+   *
+   *  Y por qué NO se resolvió con un embed, que es lo que cualquiera
+   *  probaría primero: `profiles_select` es `auth.uid() = id` —cada quien
+   *  lee SOLO su propia fila—, así que `profiles(nombre)` desde el lector
+   *  volvería VACÍO, no un nombre. Por eso S74 hizo DEFINER: no fue gusto.
+   *  **La frontera de S74 se conserva entera: el CORREO no se expone.** */
+  type Sujeto = { id: string; nombre: string; fotoUrl?: string; sujeto?: 'mascota' | 'persona' };
+
+  const opcionesMascota = useMemo<Sujeto[]>(() => {
+    const vistas = new Map<string, Sujeto>();
+    for (const j of todas.filter((x) => pasa(x, { mascota: false }))) {
       const m = j.cita.mascota;
-      if (m && !vistas.has(m.id)) vistas.set(m.id, { id: m.id, nombre: m.nombre, fotoUrl: j.fotoUrl });
+      if (m && !vistas.has(m.id)) {
+        vistas.set(m.id, { id: m.id, nombre: m.nombre, fotoUrl: j.fotoUrl, sujeto: 'mascota' });
+      }
     }
     return [...vistas.values()];
-  }, [todas, oficio]);
+  }, [todas, pasa]);
+
+  /** Las PERSONAS del rango — ENCENDIDO S91-B sobre el lector de A
+   *  (`obtenerNombresReservadorPorCita`, molde S71, gate S74 espejado, SOLO
+   *  nombre). Se dedupe POR NOMBRE porque el contrato no expone id de
+   *  persona, que es exactamente la frontera que protege.
+   *
+   *  Su fallo NO tumba nada ni se disfraza (Ley 13): si el lector falla, el
+   *  mapa queda vacío y la hilera no ofrece personas — el tipeo sigue
+   *  encontrando mascotas. Lo que NUNCA hace es inventar un nombre. */
+  const opcionesPersona = useMemo<Sujeto[]>(() => {
+    const vistos = new Set<string>();
+    for (const j of todas.filter((x) => pasa(x, { mascota: false }))) {
+      const n = nombresPorCita.get(j.cita.id);
+      if (n) vistos.add(n);
+    }
+    return [...vistos].sort().map((n) => ({
+      id: `persona:${n}`,
+      nombre: n,
+      sujeto: 'persona' as const,
+    }));
+  }, [todas, pasa, nombresPorCita]);
+
+  /** Lo que el tipeo mira: los dos mundos, un solo corpus. */
+  const corpusBusqueda = useMemo<Sujeto[]>(
+    () => [...opcionesMascota, ...opcionesPersona],
+    [opcionesMascota, opcionesPersona],
+  );
 
   const opcionesOficio = useMemo(() => {
-    const base = mascotaId === null ? todas : todas.filter((j) => j.cita.mascota?.id === mascotaId);
-    const vistos = new Set<Oficio>(base.map((j) => j.oficio));
+    const vistos = new Set<Oficio>(todas.filter((x) => pasa(x, { oficio: false })).map((j) => j.oficio));
     const ORDEN: Oficio[] = ['veterinaria', 'grooming', 'paseo', 'adiestramiento'];
     return ORDEN.filter((o) => vistos.has(o)).map<OpcionFiltro<Oficio>>((o) => ({
       codigo: o,
@@ -261,21 +412,58 @@ export default function Historico() {
       // Ley 10 — SALUD es identidad; el resto, cuidado.
       capa: o === 'veterinaria' ? 'identidad' : 'cuidado',
     }));
-  }, [todas, mascotaId, t]);
+  }, [todas, pasa, t]);
 
-  // ANIDADOS (Y, jamás O).
-  const visibles = useMemo(
-    () =>
-      todas
-        .filter((j) => (oficio === null ? true : j.oficio === oficio))
-        .filter((j) => (mascotaId === null ? true : j.cita.mascota?.id === mascotaId)),
-    [todas, oficio, mascotaId],
-  );
+  /** EL SERVICIO FINO (enmienda del founder): «consulta vs control · corte
+   *  vs baño». VIAJA HOY —`tipo:tipos_servicio!inner(nombre)` en el SELECT
+   *  de los cuatro lectores—, así que es cero motor: se agrupa lo vivo.
+   *  Enumera bien dentro de un rango (un negocio no tiene cientos de tipos)
+   *  ⇒ por la regla firmada le corresponden CHIPS, no tipeo. */
+  const opcionesServicio = useMemo(() => {
+    const vistos = new Set<string>();
+    for (const j of todas.filter((x) => pasa(x, { servicio: false }))) {
+      const n = j.cita.tipo?.nombre;
+      if (n) vistos.add(n);
+    }
+    return [...vistos].sort().map<OpcionFiltro<string>>((n) => ({
+      codigo: n,
+      etiqueta: n,
+      icono: null,
+      capa: null,
+    }));
+  }, [todas, pasa]);
 
-  const hayFiltro = oficio !== null || mascotaId !== null;
+  /** LAS MASCOTAS QUE SE DIBUJAN — la letra: el chip-menú deja de listarlas
+   *  todas. Queda el SELLO de lo elegido, lo que el tipeo filtró, o los
+   *  accesos recientes cuando son pocos. */
+  const TECHO_CHIPS = 6;
+  const chipsMascota = useMemo(() => {
+    if (sujetoId !== null) return opcionesMascota.filter((m) => m.id === sujetoId);
+    if (busqueda.trim().length > 0) {
+      // La pieza de packages/ui, con las perillas que nacieron para esto:
+      // «Th» son DOS letras (el default 4 no la vería) y `empieza` evita
+      // que matchee en el medio de cualquier nombre. Corre sobre LOS DOS
+      // MUNDOS — el mismo matcher, un solo campo.
+      return sugerir(corpusBusqueda, {
+        texto: busqueda,
+        vozDe: (m) => m.nombre,
+        minimoDeLetras: 2,
+        modo: 'empieza',
+        tope: 6,
+      });
+    }
+    return opcionesMascota.length <= TECHO_CHIPS ? opcionesMascota : [];
+  }, [opcionesMascota, corpusBusqueda, sujetoId, busqueda]);
+
+  // ANIDADOS (Y, jamás O) — los tres ejes a la vez.
+  const visibles = useMemo(() => todas.filter((j) => pasa(j, {})), [todas, pasa]);
+
+  const hayFiltro = oficio !== null || servicio !== null || sujetoId !== null;
   const limpiarTodo = () => {
     setOficio(null);
-    setMascotaId(null);
+    setServicio(null);
+    setSujetoId(null);
+    setBusqueda('');
   };
 
   const porFecha = useMemo(
@@ -329,8 +517,47 @@ export default function Historico() {
             onLimpiar={() => setOficio(null)}
           />
         ) : null}
-        {opcionesMascota.length > 1 ? (
-          <FiltroMascotas mascotas={opcionesMascota} elegida={mascotaId} onElegir={setMascotaId} />
+        {opcionesServicio.length > 1 ? (
+          <FiltroPills
+            opciones={opcionesServicio}
+            activo={servicio}
+            onCambio={setServicio}
+            onLimpiar={() => setServicio(null)}
+          />
+        ) : null}
+        {/* EL TIPEO — puerta principal de la mascota. Va SIEMPRE, no bajo un
+            umbral: la regla firmada es «sin techo → tipeo», y esconderlo
+            cuando hoy hay pocas lo volvería una puerta que aparece sola el
+            día que ya no se necesita descubrirla. Los chips de abajo son el
+            atajo, no la puerta. */}
+        <View style={{ paddingHorizontal: spacing[4], paddingTop: spacing[2] }}>
+          <Campo
+            label={t('historico.buscarLabel')}
+            placeholder={t('historico.buscarPlaceholder')}
+            ayuda={t('historico.buscarAyuda')}
+            value={busqueda}
+            onChangeText={setBusqueda}
+            autoCapitalize="none"
+          />
+        </View>
+        {chipsMascota.length > 0 ? (
+          <FiltroMascotas
+            mascotas={chipsMascota}
+            elegida={sujetoId}
+            onElegir={(id) => {
+              setSujetoId(id);
+              // Elegir SELLA: el tipeo ya hizo su trabajo y el campo se
+              // vacía para que el chip quede como la única marca del estado
+              // (dos marcas para un mismo estado es el peso que no informa).
+              if (id !== null) setBusqueda('');
+            }}
+          />
+        ) : busqueda.trim().length > 0 ? (
+          <View style={{ paddingHorizontal: spacing[4], paddingTop: spacing[1] }}>
+            <Texto variante="apoyo" color="tertiary">
+              {t('historico.buscarSinCoincidencia', { texto: busqueda.trim() })}
+            </Texto>
+          </View>
         ) : null}
       </View>
 
@@ -439,7 +666,7 @@ export default function Historico() {
                         // Con la mascota ya elegida arriba, repetir su cara en
                         // cada fila es decir dos veces lo mismo (regla Chanel
                         // — el mismo criterio del log).
-                        cara={mascotaId === null}
+                        cara={sujetoId === null}
                         direccion="derecha"
                         fin={
                           <Icono

@@ -36,6 +36,16 @@ export interface IdentidadMascota {
   microchip: string | null;
   foto_url: string | null;
   estado_vida: string | null;
+  /** S91 · el ORIGEN declarado en el alta (paso 3). Espejo del CHECK de
+   *  `mascotas.origen`; 'desconocido' es el default HONESTO y no una
+   *  ausencia: quiere decir que nadie lo declaró todavía. */
+  origen: string | null;
+  /** S91 · cláusula del pez: 'acuario' = la fila registra el SISTEMA. Una
+   *  pantalla que no lo mire va a tratar a un acuario como mascota. */
+  sujeto: 'individuo' | 'acuario';
+  /** S91 · solo acuarios: 'dulce' | 'marino'. Es el campo dos del alta de
+   *  pez, en espejo de la raza (que un acuario no tiene). */
+  tipo_agua: 'dulce' | 'marino' | null;
   /** P19 (S59): socialización del paseo grupal — null = sin responder. */
   paseo_social_ok: boolean | null;
   /** §3 grooming (S60): talla del perfil — null honesto hasta declarar.
@@ -111,7 +121,12 @@ export async function obtenerPerfilMascota(
   // sin acceso la fila no existe para este user — error honesto.
   const mascota = await cliente
     .from('mascotas')
-    .select('id, nombre, especie, raza, sexo, fecha_nacimiento, fecha_nacimiento_precision, microchip, foto_url, estado_vida, paseo_social_ok, talla, pelaje, foto_cx, foto_cy, foto_z')
+    .select(
+      // S91 (pedido de D para la lámina del perfil): `origen` · `sujeto` ·
+      // `tipo_agua`. Los tres YA existían en la fila y el perfil no los
+      // traía — el dato estaba y la pantalla no podía verlo.
+      'id, nombre, especie, raza, sexo, fecha_nacimiento, fecha_nacimiento_precision, microchip, foto_url, estado_vida, paseo_social_ok, talla, pelaje, foto_cx, foto_cy, foto_z, origen, sujeto, tipo_agua',
+    )
     .eq('id', mascotaId)
     .maybeSingle();
   if (mascota.error) return { ok: false, codigo: 'error_perfil', mensaje: MENSAJE_ERROR };
@@ -186,6 +201,15 @@ export async function obtenerPerfilMascota(
         microchip: mascota.data.microchip,
         foto_url: mascota.data.foto_url,
         estado_vida: mascota.data.estado_vida,
+        origen: mascota.data.origen ?? null,
+        // Angostado verificando (regla 34): un sujeto desconocido cae a
+        // 'individuo', que es el default del schema y el caso de todas las
+        // filas vivas menos los acuarios.
+        sujeto: mascota.data.sujeto === 'acuario' ? 'acuario' : 'individuo',
+        tipo_agua:
+          mascota.data.tipo_agua === 'dulce' || mascota.data.tipo_agua === 'marino'
+            ? mascota.data.tipo_agua
+            : null,
         paseo_social_ok: mascota.data.paseo_social_ok ?? null,
         // Angostado verificando, jamás cast (regla 34): el CHECK de DB ya
         // garantiza estos valores; un dato fuera del CHECK se trata como
@@ -293,4 +317,56 @@ export async function declararFotoMascota(
     return { ok: false, codigo: 'desconocido', mensaje: MENSAJE_ERROR_FOTO };
   }
   return { ok: true, data: { mascota_id: o.mascota_id, cx: o.cx, cy: o.cy, z: o.z } };
+}
+
+// ── S91 (P3 de la lámina del perfil) · LA PUERTA DE EDICIÓN DE RAZA ────
+// El alta la escribe; el perfil necesitaba SU puerta. Angosta: un campo.
+//
+// TEXTO LIBRE Y SIN VALIDAR CONTRA EL CATÁLOGO, y eso es la LETRA (S59), no
+// una omisión: validarlo mataría «Mestizo», «No sé» y la raza que el
+// catálogo no tiene. El catálogo SUGIERE (`obtenerRazasDeEspecie`), el dueño
+// CONFIRMA. Hay un cinturón en la migración que rebota si alguien
+// «mejorara» la RPC agregándole el chequeo.
+
+export type CodigoRazaMascota =
+  | 'no_autenticado'
+  | 'sin_acceso'
+  | 'raza_no_aplica_acuario'
+  | 'error';
+
+/** Vacío o solo espacios = borrar la raza, y es legítimo: «no sé» después
+ *  de haber dicho algo es una respuesta, no un error. */
+export async function actualizarRazaMascota(
+  mascotaId: string,
+  raza: string | null,
+): Promise<ResultadoWrapper<{ raza: string | null }, CodigoRazaMascota>> {
+  const { data, error } = await getClient().rpc('actualizar_raza_mascota', {
+    p_mascota_id: mascotaId,
+    // La RPC no le da DEFAULT a `p_raza` (es requerido), así que «borrar»
+    // viaja como cadena VACÍA — y el motor la normaliza con
+    // `nullif(btrim(...))`. No es un atajo: es el mismo camino que el
+    // fixture probó con '   '.
+    p_raza: raza ?? '',
+  });
+  if (error) {
+    const m = error.message;
+    const codigo: CodigoRazaMascota = m.startsWith('no_autenticado')
+      ? 'no_autenticado'
+      : m.startsWith('raza_no_aplica_acuario')
+        ? 'raza_no_aplica_acuario'
+        : m.startsWith('sin_acceso')
+          ? 'sin_acceso'
+          : 'error';
+    return {
+      ok: false,
+      codigo,
+      mensaje:
+        codigo === 'raza_no_aplica_acuario'
+          ? 'Un acuario no tiene raza.'
+          : 'No pudimos guardar la raza. Probá de nuevo.',
+    };
+  }
+  const o = data as Record<string, unknown> | null;
+  const r = o !== null && typeof o.raza === 'string' && o.raza.length > 0 ? o.raza : null;
+  return { ok: true, data: { raza: r } };
 }

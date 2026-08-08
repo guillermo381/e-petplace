@@ -32,6 +32,10 @@ export type CodigoErrorSalud =
 function codigoSalud(mensaje: string): CodigoErrorSalud {
   if (mensaje.startsWith('auth_required')) return 'sin_sesion';
   if (mensaje.startsWith('no_access_to_mascota')) return 'sin_acceso';
+  // S91: `obtener_serie_peso` levanta 'sin_acceso' directo (el código de la
+  // casa). Las dos formas se normalizan al mismo código del wrapper: la UI
+  // no debería tener que saber cuál RPC eligió qué palabra.
+  if (mensaje.startsWith('sin_acceso')) return 'sin_acceso';
   if (mensaje.startsWith('producto_requerido')) return 'producto_requerido';
   if (mensaje.startsWith('tipo_invalido')) return 'tipo_invalido';
   if (mensaje.startsWith('fecha_futura')) return 'fecha_futura';
@@ -221,4 +225,53 @@ export async function obtenerPlanVacunal(
     });
   }
   return { ok: true, data: filas };
+}
+
+// ── S91 (P2 de la lámina del perfil) · LA CURVA, no el vigente ─────────
+// El motor de escritura ya existía (`registrarPesoMascota`, arriba): una
+// FILA por medición, con su fecha y su método. Lo que faltaba era LEER la
+// serie — el perfil traía `peso_clinico_kg`, que es el VIGENTE, así que la
+// curva que la letra promete a Coach y vet no tenía de dónde leerse.
+
+export interface MedicionPeso {
+  /** ISO — `evento_peso_medicion.fecha_medicion`. */
+  fecha: string;
+  peso_kg: number;
+  /** 'bascula_casa' · 'bascula_clinica' · … — el método declarado. */
+  metodo: string | null;
+  /** DERIVADO de quién lo registró, y no es adorno: una curva que mezcla
+   *  báscula de casa con báscula de clínica sin decir cuál es cuál invita a
+   *  leer una tendencia que no existe. */
+  origen: 'familia' | 'prestador';
+}
+
+/** La serie de peso, de la más reciente a la más vieja.
+ *  Serie vacía NO es error: una mascota sin pesajes es el caso normal. */
+export async function obtenerSeriePeso(
+  mascotaId: string,
+  limite = 60,
+): Promise<ResultadoWrapper<MedicionPeso[], CodigoErrorSalud>> {
+  const { data, error } = await getClient().rpc('obtener_serie_peso', {
+    p_mascota_id: mascotaId,
+    p_limite: limite,
+  });
+  if (error) return { ok: false, codigo: codigoSalud(error.message), mensaje: MENSAJE_ERROR };
+  if (!Array.isArray(data)) {
+    return { ok: false, codigo: 'error_lectura', mensaje: MENSAJE_ERROR };
+  }
+  return {
+    ok: true,
+    data: data.flatMap((f) => {
+      const peso = typeof f.peso_kg === 'number' ? f.peso_kg : Number(f.peso_kg);
+      // Una fila sin fecha o sin peso no es una medición: se OMITE en vez de
+      // viajar como null y romper la curva del consumidor.
+      if (typeof f.fecha !== 'string' || !Number.isFinite(peso)) return [];
+      return [{
+        fecha: f.fecha,
+        peso_kg: peso,
+        metodo: typeof f.metodo === 'string' ? f.metodo : null,
+        origen: f.origen === 'prestador' ? ('prestador' as const) : ('familia' as const),
+      }];
+    }),
+  };
 }
