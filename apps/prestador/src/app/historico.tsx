@@ -285,14 +285,47 @@ export default function Historico() {
     [oficio, servicio, mascotaId],
   );
 
-  const opcionesMascota = useMemo(() => {
-    const vistas = new Map<string, { id: string; nombre: string; fotoUrl?: string }>();
+  /** EL CORPUS DEL TIPEO — UN SOLO CAMPO, DOS MUNDOS (firma del founder):
+   *  se busca por NOMBRE, sea de la mascota o de su pet parent, y el chip
+   *  sellado dice cuál es cuál (avatar / inicial).
+   *
+   *  ⚠️ EL MUNDO «PERSONA» ESTÁ ESTRUCTURALMENTE PRESENTE Y HOY VACÍO, y
+   *  eso es la entrega honesta, no un olvido: **el nombre del pet parent NO
+   *  viaja en los lectores del histórico** — medido, cero `profiles` en los
+   *  cuatro. Lo pedido a A es una DEFINER batcheada
+   *  (`obtener_nombres_reservador_por_cita(uuid[])`, molde exacto de
+   *  `obtener_nombres_negocio_por_presupuesto` de S71). Cuando llegue, el
+   *  encendido es ESTA función y nada más — la búsqueda, el sello y el
+   *  chip con inicial ya están construidos y no se tocan.
+   *
+   *  Y por qué NO se resolvió con un embed, que es lo que cualquiera
+   *  probaría primero: `profiles_select` es `auth.uid() = id` —cada quien
+   *  lee SOLO su propia fila—, así que `profiles(nombre)` desde el lector
+   *  volvería VACÍO, no un nombre. Por eso S74 hizo DEFINER: no fue gusto.
+   *  **La frontera de S74 se conserva entera: el CORREO no se expone.** */
+  type Sujeto = { id: string; nombre: string; fotoUrl?: string; sujeto?: 'mascota' | 'persona' };
+
+  const opcionesMascota = useMemo<Sujeto[]>(() => {
+    const vistas = new Map<string, Sujeto>();
     for (const j of todas.filter((x) => pasa(x, { mascota: false }))) {
       const m = j.cita.mascota;
-      if (m && !vistas.has(m.id)) vistas.set(m.id, { id: m.id, nombre: m.nombre, fotoUrl: j.fotoUrl });
+      if (m && !vistas.has(m.id)) {
+        vistas.set(m.id, { id: m.id, nombre: m.nombre, fotoUrl: j.fotoUrl, sujeto: 'mascota' });
+      }
     }
     return [...vistas.values()];
   }, [todas, pasa]);
+
+  /** Las PERSONAS del rango. Vacío hasta que exista el lector de A — y
+   *  vacío NO es un estado degradado acá: la hilera simplemente no las
+   *  ofrece, y el tipeo sigue encontrando mascotas. Nada miente. */
+  const opcionesPersona = useMemo<Sujeto[]>(() => [], []);
+
+  /** Lo que el tipeo mira: los dos mundos, un solo corpus. */
+  const corpusBusqueda = useMemo<Sujeto[]>(
+    () => [...opcionesMascota, ...opcionesPersona],
+    [opcionesMascota, opcionesPersona],
+  );
 
   const opcionesOficio = useMemo(() => {
     const vistos = new Set<Oficio>(todas.filter((x) => pasa(x, { oficio: false })).map((j) => j.oficio));
@@ -334,8 +367,9 @@ export default function Historico() {
     if (busqueda.trim().length > 0) {
       // La pieza de packages/ui, con las perillas que nacieron para esto:
       // «Th» son DOS letras (el default 4 no la vería) y `empieza` evita
-      // que matchee en el medio de cualquier nombre.
-      return sugerir(opcionesMascota, {
+      // que matchee en el medio de cualquier nombre. Corre sobre LOS DOS
+      // MUNDOS — el mismo matcher, un solo campo.
+      return sugerir(corpusBusqueda, {
         texto: busqueda,
         vozDe: (m) => m.nombre,
         minimoDeLetras: 2,
@@ -344,7 +378,7 @@ export default function Historico() {
       });
     }
     return opcionesMascota.length <= TECHO_CHIPS ? opcionesMascota : [];
-  }, [opcionesMascota, mascotaId, busqueda]);
+  }, [opcionesMascota, corpusBusqueda, mascotaId, busqueda]);
 
   // ANIDADOS (Y, jamás O) — los tres ejes a la vez.
   const visibles = useMemo(() => todas.filter((j) => pasa(j, {})), [todas, pasa]);
