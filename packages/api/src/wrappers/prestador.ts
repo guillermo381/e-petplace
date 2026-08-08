@@ -656,3 +656,58 @@ export async function actualizarNombreComercial(
   }
   return { ok: true, data: { nombre: d.nombre } };
 }
+
+// ── S91 · EL NOMBRE DE QUIEN RESERVÓ, POR CITA (pedido de B) ──────────
+// Alimenta el chip de PERSONA del histórico del prestador.
+//
+// POR QUÉ ES UNA RPC Y NO UN EMBED, que es lo que cualquiera probaría
+// primero: `profiles_select` es `auth.uid() = id` —cada quien lee SOLO su
+// propia fila—, así que `profiles(nombre)` desde el lector del histórico
+// devolvería **VACÍO, no un nombre**. Un dato ausente que parece un dato
+// ausente es el modo de falla más difícil de diagnosticar. B lo midió; por
+// eso S74 hizo DEFINER y por eso esto es función.
+//
+// LA FRONTERA DE S74 SE CONSERVA ENTERA: **solo el nombre.** Sin teléfono y
+// sin correo — qué del pet parent ve un prestador es decisión de LETRA, y
+// está elevada a la mesa. Hay un cinturón en la migración que rebota si el
+// cuerpo de la función llegara a nombrar `telefono` o `email`.
+
+/** Union PROPIO y angosto, mismo criterio que los códigos de la sede
+ *  (S79-T4.1): no se ensancha el de lectura de `prestadores` para un
+ *  lector que no lee `prestadores`. */
+const CODIGOS_RESERVADOR = ['error', 'datos_inconsistentes'] as const;
+export type CodigoReservador = (typeof CODIGOS_RESERVADOR)[number];
+
+const MENSAJE_RESERVADOR = 'No pudimos cargar los nombres. Probá de nuevo.';
+
+export interface NombreReservador {
+  cita_id: string;
+  /** null HONESTO en dos casos distintos que la fila NO distingue a
+   *  propósito, porque para el chip son el mismo: walk-in (la cita no tiene
+   *  reservador) y perfil sin nombre. La ausencia de FILA, en cambio, sí
+   *  significa otra cosa: esa cita no es de un negocio donde tengas rol. */
+  nombre: string | null;
+}
+
+/** Nombres de quienes reservaron, por lote de citas.
+ *  El gate es POR CITA: las de otro negocio se OMITEN (no rebotan el lote
+ *  entero, que lo volvería inútil, ni se devuelven, que sería la fuga). */
+export async function obtenerNombresReservadorPorCita(
+  citaIds: readonly string[],
+): Promise<ResultadoWrapper<NombreReservador[], CodigoReservador>> {
+  if (citaIds.length === 0) return { ok: true, data: [] };
+  const { data, error } = await getClient().rpc('obtener_nombres_reservador_por_cita', {
+    p_cita_ids: [...citaIds],
+  });
+  if (error) return { ok: false, codigo: 'error', mensaje: MENSAJE_RESERVADOR };
+  if (!Array.isArray(data)) {
+    return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJE_RESERVADOR };
+  }
+  return {
+    ok: true,
+    data: data.map((f) => ({
+      cita_id: String(f.cita_id),
+      nombre: typeof f.nombre === 'string' && f.nombre.length > 0 ? f.nombre : null,
+    })),
+  };
+}

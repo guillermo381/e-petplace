@@ -18234,6 +18234,13 @@ export type Database = {
           presupuesto_id: string
         }[]
       }
+      obtener_nombres_reservador_por_cita: {
+        Args: { p_cita_ids: string[] }
+        Returns: {
+          cita_id: string
+          nombre: string
+        }[]
+      }
       obtener_oferta_adiestramiento_publica: {
         Args: never
         Returns: {

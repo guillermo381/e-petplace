@@ -36,6 +36,16 @@ export interface IdentidadMascota {
   microchip: string | null;
   foto_url: string | null;
   estado_vida: string | null;
+  /** S91 · el ORIGEN declarado en el alta (paso 3). Espejo del CHECK de
+   *  `mascotas.origen`; 'desconocido' es el default HONESTO y no una
+   *  ausencia: quiere decir que nadie lo declaró todavía. */
+  origen: string | null;
+  /** S91 · cláusula del pez: 'acuario' = la fila registra el SISTEMA. Una
+   *  pantalla que no lo mire va a tratar a un acuario como mascota. */
+  sujeto: 'individuo' | 'acuario';
+  /** S91 · solo acuarios: 'dulce' | 'marino'. Es el campo dos del alta de
+   *  pez, en espejo de la raza (que un acuario no tiene). */
+  tipo_agua: 'dulce' | 'marino' | null;
   /** P19 (S59): socialización del paseo grupal — null = sin responder. */
   paseo_social_ok: boolean | null;
   /** §3 grooming (S60): talla del perfil — null honesto hasta declarar.
@@ -111,7 +121,12 @@ export async function obtenerPerfilMascota(
   // sin acceso la fila no existe para este user — error honesto.
   const mascota = await cliente
     .from('mascotas')
-    .select('id, nombre, especie, raza, sexo, fecha_nacimiento, fecha_nacimiento_precision, microchip, foto_url, estado_vida, paseo_social_ok, talla, pelaje, foto_cx, foto_cy, foto_z')
+    .select(
+      // S91 (pedido de D para la lámina del perfil): `origen` · `sujeto` ·
+      // `tipo_agua`. Los tres YA existían en la fila y el perfil no los
+      // traía — el dato estaba y la pantalla no podía verlo.
+      'id, nombre, especie, raza, sexo, fecha_nacimiento, fecha_nacimiento_precision, microchip, foto_url, estado_vida, paseo_social_ok, talla, pelaje, foto_cx, foto_cy, foto_z, origen, sujeto, tipo_agua',
+    )
     .eq('id', mascotaId)
     .maybeSingle();
   if (mascota.error) return { ok: false, codigo: 'error_perfil', mensaje: MENSAJE_ERROR };
@@ -186,6 +201,15 @@ export async function obtenerPerfilMascota(
         microchip: mascota.data.microchip,
         foto_url: mascota.data.foto_url,
         estado_vida: mascota.data.estado_vida,
+        origen: mascota.data.origen ?? null,
+        // Angostado verificando (regla 34): un sujeto desconocido cae a
+        // 'individuo', que es el default del schema y el caso de todas las
+        // filas vivas menos los acuarios.
+        sujeto: mascota.data.sujeto === 'acuario' ? 'acuario' : 'individuo',
+        tipo_agua:
+          mascota.data.tipo_agua === 'dulce' || mascota.data.tipo_agua === 'marino'
+            ? mascota.data.tipo_agua
+            : null,
         paseo_social_ok: mascota.data.paseo_social_ok ?? null,
         // Angostado verificando, jamás cast (regla 34): el CHECK de DB ya
         // garantiza estos valores; un dato fuera del CHECK se trata como
