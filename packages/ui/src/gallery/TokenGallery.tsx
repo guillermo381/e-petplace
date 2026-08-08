@@ -1114,6 +1114,17 @@ function EjemploSetBPrima() {
     // la jeringa no se confundan entre sí. Y queda a un paso de `caso`,
     // que es el préstamo que viene a reemplazar.
     'vacuna', 'bitacora', 'receta',
+    // ── S91-B · LA HOJA DE CONTACTO DE «DOCUMENTOS» (§6b), dos candidatos.
+    // Van PEGADOS a `documento` y `carnet` a propósito, que es lo único
+    // que este montaje tiene que dejar ver a 21px: **no que cada uno se
+    // entienda solo, sino que el nuevo NO se confunda con los dos que ya
+    // están** — porque nace justamente de que `documento` hace triple
+    // turno. `caso` (carpeta) queda al lado por la misma razón.
+    'documentos', 'documento', 'carnet', 'caso',
+    // S91-B: 'correo' (ex candidato B) queda al final y APARTE — su
+    // comparación con Documentos TERMINÓ; vive acá solo para que la
+    // reserva se pueda mirar, no para elegir entre ellos.
+    'correo',
     // S84-B5: CONTACTO — FIRMADO (el globo). Su candidato rival murió en
     // el gate; el porqué vive en el registry, no acá.
     'contacto',

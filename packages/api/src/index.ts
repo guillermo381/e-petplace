@@ -76,6 +76,10 @@ export {
   puedeEncenderVitrina,
   // S91 (pedido de B): el nombre de quien reservó, por lote de citas.
   obtenerNombresReservadorPorCita,
+  // S91 (pedido de C): la ficha PÚBLICA, por la vista y jamás por la tabla.
+  obtenerPerfilesPublicos,
+  type PerfilPublico,
+  type ServicioPublico,
   type NombreReservador,
   type CodigoReservador,
 } from './wrappers/prestador';

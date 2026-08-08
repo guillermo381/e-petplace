@@ -2264,6 +2264,13 @@ export const prestadorEn = {
     reintentar: 'Try again',
   },
   historico: {
+    especie_perro: 'Dogs',
+    especie_gato: 'Cats',
+    especie_ave: 'Birds',
+    especie_pez: 'Fish',
+    especie_roedor: 'Rodents',
+    especie_reptil: 'Reptiles',
+    especie_conejo: 'Rabbits',
     buscarLabel: 'Find a pet',
     buscarPlaceholder: 'Start typing their name',
     buscarAyuda: 'Two letters is enough.',

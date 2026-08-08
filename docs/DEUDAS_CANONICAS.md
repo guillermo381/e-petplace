@@ -9195,7 +9195,7 @@ de D): en el **perfil de la mascota**, la sección de documentos pide
 
 ---
 
-#### D-684 — `pez/koi` de la galería no corresponde a su rótulo ⚪ REGISTRO
+#### D-684 — ☠️ MUERTA (S91: el bucket sirve la imagen curada) — `pez/koi` de la galería no corresponde a su rótulo ⚪ REGISTRO
 ⚪ BAJA. **La imagen publicada como `pez/koi.webp` no es un koi:** el koi es
 una carpa alargada de patrón blanco/naranja/negro, y la imagen lee como
 CÍCLIDO (cuerpo corto, iridiscencia azul/roja). **Origen: hallazgo de C al
@@ -9225,6 +9225,34 @@ Origen: S90-C (publicación de la galería especie/raza).
 > generación de la galería. Se arregla en la MISMA pasada.
 > **☠️ DISPARO (compartido): la regeneración de cualquier imagen de la
 > galería.**
+
+> ### ☠️ MUERTA — S91, con su verificación por md5 (8-ago-2026)
+>
+> **La condición que C escribió se cumplió: el bucket sirve los 7.628 bytes.**
+> No se verificó por `content-length` solamente —eso probaría el tamaño, no el
+> contenido— sino **bajando el objeto y comparando md5**:
+> `b4e4eebad8afacf6c0dbc3c316ee6957`, idéntico al del archivo curado.
+>
+> **Subida a los DOS destinos, y el segundo es el que la mesa vio y yo no
+> habría visto: `perro/generico.webp` Y `perro/criollo.webp`** — el damero
+> vivía en los dos con md5 idéntico, y *Criollo es de las razas más elegidas
+> en Ecuador*, así que curar solo el genérico habría dejado el defecto en la
+> cara más pedida.
+>
+> **El reparto que lo resolvió:** C midió y curó la imagen pero **no puede
+> escribir al bucket** (cero policies de escritura: solo `service_role`), así
+> que dejó el archivo curado en el repo con su condición de muerte escrita y A
+> lo subió con `x-upsert: true`. *Los dos intentos por CLI que C registró son
+> su propia lección: `cp` rebota 409 y `rm` devuelve `{"deleted":[]}` SIN
+> error — un no-op silencioso de la familia L-192.*
+>
+> **Verificado además: 111 objetos en el bucket** (el upsert reemplazó, no
+> duplicó) y `gato/generico` intacto como control. La carpeta de rescate se
+> borró en el mismo acto — Ley 37, lo que ya no tiene trabajo no se queda.
+>
+> **Alcance que NO cierra con esto, dicho por C y conservado:** el defecto no
+> es sistémico (gato está limpio) pero **las otras cuatro genéricas no se
+> midieron.**
 #### D-685 — 🟡 EL ACUARIO: EL SUJETO ES EL SISTEMA, NO EL INDIVIDUO
 
 **La única de las siete familias donde el sujeto del producto no es el
@@ -9721,3 +9749,48 @@ mostrada», que es el peor de los tres: ni cerrada ni usada.
 **Origen: S91-A (la cura de la fuga obligó a mirar las 39 columnas una por
 una; ésta es la única que quedó sin decisión y se registra en vez de
 resolverse de costado).**
+
+#### L-201 — LA NORMALIZACIÓN E.164 VIVE EN EL MOTOR, JAMÁS EN CADA SUPERFICIE QUE CAPTURA TELÉFONOS
+
+**Origen: S91-A, midiendo para el transporte de WhatsApp.** Estado real de
+`profiles.telefono`, contra el objeto: **24 con teléfono · 16 con `+` · 9
+FUERA de E.164** (regex `^\+[1-9][0-9]{7,14}$`). Una de cada tres filas no
+sirve para WhatsApp, **y ninguna superficie lo sabe.**
+
+**La pieza YA EXISTE:** `normalizar_telefono(p_texto, p_country_code)` vive en
+la DB desde S69. **Lo que no existe es que RIJA:** nada la invoca al escribir
+`profiles.telefono`, así que cada superficie que captura un teléfono guarda lo
+que el usuario tipeó. *Una función de normalización que nadie llama no
+normaliza nada — es letra muerta con nombre tranquilizador.*
+
+**LA REGLA:** *la normalización y la validación de un teléfono viven EN EL
+MOTOR —al escribir y al leer—, jamás en la superficie.* Con N superficies de
+captura hay N versiones de «qué es un teléfono válido», y la que se equivoca
+no da síntoma hasta que un canal externo lo rechaza. **Es el mismo argumento
+del filtro de la bitácora** (que se puso en la puerta única y no en la
+pantalla), y el mismo de `derecha` en las URLs de bucket: **una regla en la
+frontera o N reglas divergentes.**
+
+**⚠️ Y SU LÍMITE, que es lo que hace que esto no sea un `UPDATE` masivo:
+normalizar exige SABER EL PAÍS, y P21 (letra Uber, S70) PROHÍBE derivarlo** —
+*el teléfono no implica país; el founder en EC con línea CO es el caso
+canónico.* De las filas fuera de E.164, las que no declararon país **no se
+pueden arreglar sin inventar el dato.** ⇒ el backfill **no se hace**, y eso se
+declara: el motor normaliza lo NUEVO (con su país declarado) y rebota tipado
+lo que no puede; las viejas se curan cuando su dueño las toque.
+
+**Cómo lo trata el transporte mientras tanto, y es la conducta correcta:**
+`despachar-whatsapp` **valida y NO arregla** — un número fuera de E.164 se
+SALTEA con su contador propio (`telefono_no_e164`), no se marca `fallida`.
+*Un teléfono que no sirve es un dato NUESTRO que falta, no una entrega que
+falló por culpa del destinatario: marcarlo fallida quemaría la intención por
+un defecto propio.*
+
+**Mecanizado en el modo sombra:** el reporte del transporte apagado dice
+`habria_entregado` · `sin_telefono` · `telefono_no_e164` — **los tres, antes
+de encender**, para que el número de la sorpresa aparezca en un reporte y no
+en el primer envío real.
+
+**Su disparo: la construcción del trigger de normalización** (motor, con su
+rebote tipado) — precondición del encendido del canal, junto con la
+credencial.

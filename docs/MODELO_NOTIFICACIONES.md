@@ -83,9 +83,50 @@ que queda abajo como foto de S87, con su nota.)*
 
 **Por qué esta distinción es la que importa, y no un matiz de redacción:** el
 canon venía tratando «lo de WhatsApp» como UNA espera —Meta— y por lo tanto
-como algo que se resolvía afuera. **Son tres, y dos son nuestras**: la
-credencial (que carga el founder, patrón FCM de S90) y el transporte (que se
-construye). *Una espera ajena justifica no hacer nada; dos propias no.*
+como algo que se resolvía afuera. **Los bloqueos reales son DOS, y los dos son
+NUESTROS**: la credencial (que carga el founder, patrón FCM de S90) y el
+transporte (que se construye). *Una espera ajena justifica no hacer nada; dos
+propias no.*
+
+> ### ✏️ ENMIENDA — LA TERCERA PATA NO ES UN BLOQUEO: YA EXISTE
+>
+> **Corrección al depósito de arriba (mesa, 8-ago-2026).** El literal de C
+> dice «1 fila de consentimiento con 0 habilitadas», y eso **se puede leer
+> como una pieza que falta. No falta.** El opt-in con evidencia **existe desde
+> S88-D** y C lo midió línea por línea: **superficie + registro de evidencia +
+> guard del motor rebotando `opt_in_sin_evidencia`.**
+>
+> **«0 habilitadas» es un ESTADO VACÍO, no un hueco.** Nadie dio su
+> consentimiento todavía porque el canal nunca se ofreció — la máquina está
+> entera y sin usar. *Confundir «nadie lo usó» con «no está construido» es la
+> misma clase de error que leer un contador en cero como una falla; y en un
+> plan de canal, esa confusión agrega un mes de trabajo que no existe.*
+>
+> ⇒ **Quedan DOS bloqueos, no tres:** la credencial y el transporte.
+
+> ### 📅 Y NACE UNA ESPERA DEL FOUNDER, con su porqué — LAS 6 PLANTILLAS ESTÁN MAL CATEGORIZADAS
+>
+> **Hallazgo del founder (8-ago-2026): las 6 plantillas aprobadas están en
+> categoría MARKETING y tienen que ser UTILITY.**
+>
+> **Es tarea suya y no se puede delegar: sin credencial nadie más llega a la
+> consola de Meta.** Y no es un detalle administrativo — cambia tres cosas a
+> la vez:
+>
+> 1. **EL PRECIO.** Utility cuesta **varias veces menos** que marketing por
+>    mensaje. Sobre un canal cuyo primer número entra al modelo financiero
+>    ANTES del encendido (ver `MODELO_FINANCIERO`), arrancar en la categoría
+>    cara falsearía el número desde el día uno.
+> 2. **LAS REGLAS DE VENTANA.** Utility puede entrar fuera de la ventana de
+>    24 h de servicio al cliente; marketing no, y además exige opt-in
+>    explícito de marketing —distinto del que la casa ya construyó—.
+> 3. **EL RIESGO DE PAUSA.** Un aviso de cita enviado como MARKETING es, para
+>    Meta, marketing no solicitado: el camino corto a que **pausen el número**.
+>    *Y un número pausado no se recupera con una corrección: se recupera con
+>    una apelación.*
+>
+> **Lo que esto NO cambia:** el contenido de las plantillas está aprobado y no
+> se re-escribe. Es una re-categorización, no un rediseño.
 
 **Y encaja exacto con la ley de secuencia de §0ter:** lector → pieza → gate →
 flip. La aprobación de plantillas es insumo del LECTOR (las plantillas son lo

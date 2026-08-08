@@ -83,18 +83,15 @@
 // dos homónimos del mismo negocio colapsan en un chip. La alternativa era
 // pedir identidad del pet parent. Se eligió el colapso.
 //
-// ⚠️ **ESPECIE: NO SE CONSTRUYÓ, SE ELEVA** (regla del propio founder: lo
-// que exige algo que no existe se declara, no se hace en silencio). El dato
-// SÍ viaja (`mascota.especie`), pero la firma pide **especie con su imagen
-// de la galería especies-razas**, y eso hoy no existe en ninguna capa:
-// `especies-razas` tiene **CERO consumidores** en `packages/api` y en las
-// dos apps (grep), así que falta (a) un resolver de URL pública —territorio
-// de A, hermano de los dos que ya viven en `prestador.ts`— y (b) un chip de
-// filtro con IMAGEN: `FiltroPills` toma glifo y `FiltroMascotas` toma
-// avatar de mascota. Construirlo con un glifo cualquiera habría cumplido
-// la lista y roto la firma. **Nota de alcance, no excusa:** elegir a Thor
-// ya fija su especie, así que el hueco muerde en el caso «todos mis gatos»,
-// no en el del gate.
+// ✅ **ESPECIE — CONSTRUIDA, y así se cierra la letra de los filtros.** Se
+// ELEVÓ en su momento en vez de improvisarla con un glifo cualquiera: la
+// firma pedía la IMAGEN de la galería `especies-razas` y ese bucket no
+// tenía consumidores en ninguna capa. Elevarlo pagó de más: el resolver
+// nació en `packages/api` con DOS pretendientes —el chip de raza del alta
+// (D) y este filtro— y por eso vive compartido en vez de duplicado.
+// Acá se CONSUME (`resolverUrlGenericaEspecie`), jamás se re-arma la URL:
+// componer la misma URL en dos lados es como nacen las divergencias que
+// nadie ve hasta que una queda vieja.
 // ─────────────────────────────────────────────────────────────────────
 
 import { useCallback, useMemo, useState } from 'react';
@@ -134,6 +131,7 @@ import {
   obtenerMiPrestador,
   obtenerNombresReservadorPorCita,
   resolverUrlFoto,
+  resolverUrlGenericaEspecie,
   type CitaAgendaPaseo,
 } from '@epetplace/api';
 import { fechaCortaMono, fechaDiaSemanaHumana, type IdiomaSoportado } from '@epetplace/i18n';
@@ -192,6 +190,7 @@ export default function Historico() {
   // Los ejes que particionan.
   const [oficio, setOficio] = useState<Oficio | null>(null);
   const [servicio, setServicio] = useState<string | null>(null);
+  const [especie, setEspecie] = useState<string | null>(null);
   /** EL SUJETO ELEGIDO — hoy puede ser una MASCOTA o una PERSONA, así que
    *  la clave dejó de ser un `mascotaId` y se dice: una mascota se
    *  identifica por su id; una persona, por `persona:<nombre>`.
@@ -333,15 +332,16 @@ export default function Historico() {
    *  a mano; con tres, hacerlo a mano es cómo aparece la opción que da cero
    *  (la letra: «ninguna opción ofrecida da cero»). */
   const pasa = useCallback(
-    (j: CitaConOficio, ejes: { oficio?: boolean; servicio?: boolean; mascota?: boolean }) =>
+    (j: CitaConOficio, ejes: { oficio?: boolean; servicio?: boolean; especie?: boolean; mascota?: boolean }) =>
       (ejes.oficio === false || oficio === null || j.oficio === oficio) &&
       (ejes.servicio === false || servicio === null || (j.cita.tipo?.nombre ?? null) === servicio) &&
+      (ejes.especie === false || especie === null || (j.cita.mascota?.especie ?? null) === especie) &&
       (ejes.mascota === false ||
         sujetoId === null ||
         (esPersona(sujetoId)
           ? nombresPorCita.get(j.cita.id) === nombreDePersona(sujetoId)
           : j.cita.mascota?.id === sujetoId)),
-    [oficio, servicio, sujetoId, nombresPorCita],
+    [oficio, servicio, especie, sujetoId, nombresPorCita],
   );
 
   /** EL CORPUS DEL TIPEO — UN SOLO CAMPO, DOS MUNDOS (firma del founder):
@@ -433,6 +433,56 @@ export default function Historico() {
     }));
   }, [todas, pasa]);
 
+  /** LAS ESPECIES DEL RANGO — el eje que esta misma pantalla ELEVÓ cuando
+   *  no existía el resolver, y que ahora se construye consumiéndolo.
+   *
+   *  La cara sale de `resolverUrlGenericaEspecie` (A, `packages/api`) — NO
+   *  se re-deriva la URL acá: componer la misma URL en dos lados es como
+   *  nacen las divergencias que nadie ve hasta que una queda vieja (su
+   *  propia cabecera lo dice, y es la razón de que naciera compartido).
+   *
+   *  ⚠️ Van con `sujeto: 'mascota'` A PROPÓSITO, y no es un atajo: una
+   *  ESPECIE **es** un animal, así que el fallback de `AvatarMascota` —la
+   *  huella digna cuando no hay imagen— es HONESTO acá. Por eso no nace un
+   *  cuarto `sujeto`: la inicial es para lo que no es animal (una persona,
+   *  una raza como concepto), y una especie sin foto merece su pata.
+   *  *(Medido por A al sembrar: las seis especies del alta tienen su
+   *  `generico.webp`; `reptil` no —404— pero está apagado desde S91.)* */
+  // El riel de keys TIPADAS no acepta una key armada por template —y hace
+  // bien: una key inexistente tiene que romper el typecheck, no aparecer en
+  // pantalla. Así que el mapa es LITERAL y el compilador lo verifica; una
+  // especie que el catálogo sume y esta tabla no conozca cae a su código
+  // crudo, que es feo pero HONESTO — jamás un nombre inventado (L-139).
+  const vozEspecie = useCallback(
+    (e: string): string => {
+      const VOCES: Record<string, string> = {
+        perro: t('historico.especie_perro'),
+        gato: t('historico.especie_gato'),
+        ave: t('historico.especie_ave'),
+        pez: t('historico.especie_pez'),
+        roedor: t('historico.especie_roedor'),
+        reptil: t('historico.especie_reptil'),
+        conejo: t('historico.especie_conejo'),
+      };
+      return VOCES[e] ?? e;
+    },
+    [t],
+  );
+
+  const opcionesEspecie = useMemo<Sujeto[]>(() => {
+    const vistas = new Set<string>();
+    for (const j of todas.filter((x) => pasa(x, { especie: false }))) {
+      const e = j.cita.mascota?.especie;
+      if (e) vistas.add(e);
+    }
+    return [...vistas].sort().map((e) => ({
+      id: e,
+      nombre: vozEspecie(e),
+      fotoUrl: resolverUrlGenericaEspecie(e) ?? undefined,
+      sujeto: 'mascota' as const,
+    }));
+  }, [todas, pasa, vozEspecie]);
+
   /** LAS MASCOTAS QUE SE DIBUJAN — la letra: el chip-menú deja de listarlas
    *  todas. Queda el SELLO de lo elegido, lo que el tipeo filtró, o los
    *  accesos recientes cuando son pocos. */
@@ -458,10 +508,11 @@ export default function Historico() {
   // ANIDADOS (Y, jamás O) — los tres ejes a la vez.
   const visibles = useMemo(() => todas.filter((j) => pasa(j, {})), [todas, pasa]);
 
-  const hayFiltro = oficio !== null || servicio !== null || sujetoId !== null;
+  const hayFiltro = oficio !== null || servicio !== null || especie !== null || sujetoId !== null;
   const limpiarTodo = () => {
     setOficio(null);
     setServicio(null);
+    setEspecie(null);
     setSujetoId(null);
     setBusqueda('');
   };
@@ -524,6 +575,11 @@ export default function Historico() {
             onCambio={setServicio}
             onLimpiar={() => setServicio(null)}
           />
+        ) : null}
+        {/* LA ESPECIE — chips CON IMAGEN de la galería. Enumera bien (seis
+            como techo) ⇒ por la regla firmada le tocan chips, no tipeo. */}
+        {opcionesEspecie.length > 1 ? (
+          <FiltroMascotas mascotas={opcionesEspecie} elegida={especie} onElegir={setEspecie} />
         ) : null}
         {/* EL TIPEO — puerta principal de la mascota. Va SIEMPRE, no bajo un
             umbral: la regla firmada es «sin techo → tipeo», y esconderlo

@@ -719,3 +719,112 @@ export async function obtenerNombresReservadorPorCita(
     })),
   };
 }
+
+// ── S91 · LA FICHA PÚBLICA (pedido de C) ──────────────────────────────
+// Lee `v_prestadores_publicos` y **JAMÁS la tabla `prestadores`**: desde S91
+// la tabla no es legible por clientes (cerró una fuga que entregaba la
+// lat/lon exacta, la dirección y el email de negocios ajenos), y la vista es
+// LA única puerta pública. *Si algún día esto necesita un campo que la vista
+// no tiene, se ensancha la VISTA — no se vuelve a la tabla.*
+
+export interface PerfilPublico {
+  id: string;
+  nombre_comercial: string;
+  foto_url: string | null;
+  ciudad: string | null;
+  sector: string | null;
+  descripcion: string | null;
+  cohorte: 'fundador' | 'pionero' | null;
+  cohorte_anio: number | null;
+  /** La ZONA aproximada, no la coordenada: centro desplazado estable por id
+   *  (S84). Un ofuscado que variara no ofuscaría — promediaría. */
+  zona_lat: number | null;
+  zona_lon: number | null;
+  zona_radio_m: number | null;
+  calificacion_promedio: number | null;
+  total_resenas: number | null;
+  total_citas: number | null;
+  /** Cada servicio trae su `categoria` (de `tipos_servicio`), que es lo que
+   *  permite componer la voz de oficio SIN re-implementar el mapa de 29
+   *  códigos en el cliente — la segunda verdad que diverge sola. */
+  servicios: ServicioPublico[];
+  /** En el orden de `orden`: **[0] es la portada** (contrato de
+   *  `listarFotosGaleria`; acá se respeta, no se re-decide). */
+  portadas: string[];
+  clip_url: string | null;
+}
+
+export interface ServicioPublico {
+  id: string;
+  tipo: string;
+  nombre: string;
+  precio: number | null;
+  duracion_minutos: number | null;
+  /** `veterinaria` · `paseo` · `grooming` · `adiestramiento` … */
+  categoria: string | null;
+}
+
+/** Fichas públicas por lote. Lote vacío = lista vacía, sin viaje.
+ *  Un id que no está en la vista (negocio no activo) simplemente NO viene:
+ *  su ausencia es la respuesta, no un error. */
+export async function obtenerPerfilesPublicos(
+  ids: readonly string[],
+): Promise<ResultadoWrapper<PerfilPublico[], CodigoReservador>> {
+  if (ids.length === 0) return { ok: true, data: [] };
+  const { data, error } = await getClient()
+    .from('v_prestadores_publicos')
+    // ⚠️ EN UNA SOLA CADENA LITERAL, no concatenada: supabase-js infiere el
+    // tipo de la fila PARSEANDO el string en tiempo de tipos, y una
+    // concatenación lo vuelve `string` genérico ⇒ toda la fila cae a
+    // `GenericStringError` y se pierde el chequeo entero. (Medido: el primer
+    // intento partía el select en tres líneas con `+` y tsc marcó las 17
+    // propiedades como inexistentes.)
+    .select(
+      'id, nombre_comercial, foto_url, ciudad, sector, descripcion, cohorte, cohorte_anio, zona_lat, zona_lon, zona_radio_m, calificacion_promedio, total_resenas, total_citas, servicios, portadas, clip_url',
+    )
+    .in('id', [...ids]);
+  if (error) return { ok: false, codigo: 'error', mensaje: MENSAJE_RESERVADOR };
+  if (!Array.isArray(data)) {
+    return { ok: false, codigo: 'datos_inconsistentes', mensaje: MENSAJE_RESERVADOR };
+  }
+  return {
+    ok: true,
+    data: data.map((f) => ({
+      id: String(f.id),
+      nombre_comercial: String(f.nombre_comercial ?? ''),
+      foto_url: f.foto_url ?? null,
+      ciudad: f.ciudad ?? null,
+      sector: f.sector ?? null,
+      descripcion: f.descripcion ?? null,
+      // Estrechada con la MISMA pieza que el resto del archivo, no con un
+      // cast: un cast diría «confío», `estrecharCohorte` VERIFICA.
+      cohorte: estrecharCohorte(f.cohorte),
+      cohorte_anio: typeof f.cohorte_anio === 'number' ? f.cohorte_anio : null,
+      zona_lat: typeof f.zona_lat === 'number' ? f.zona_lat : null,
+      zona_lon: typeof f.zona_lon === 'number' ? f.zona_lon : null,
+      zona_radio_m: typeof f.zona_radio_m === 'number' ? f.zona_radio_m : null,
+      calificacion_promedio:
+        typeof f.calificacion_promedio === 'number' ? f.calificacion_promedio : null,
+      total_resenas: typeof f.total_resenas === 'number' ? f.total_resenas : null,
+      total_citas: typeof f.total_citas === 'number' ? f.total_citas : null,
+      // Guard de shape sobre jsonb (L-124): una fila con forma inesperada se
+      // OMITE en vez de viajar a medias y romper la ficha del consumidor.
+      servicios: (Array.isArray(f.servicios) ? f.servicios : []).flatMap((s) => {
+        const o = s as Record<string, unknown>;
+        if (typeof o?.id !== 'string' || typeof o?.tipo !== 'string') return [];
+        return [{
+          id: o.id,
+          tipo: o.tipo,
+          nombre: typeof o.nombre === 'string' ? o.nombre : o.tipo,
+          precio: typeof o.precio === 'number' ? o.precio : null,
+          duracion_minutos: typeof o.duracion_minutos === 'number' ? o.duracion_minutos : null,
+          categoria: typeof o.categoria === 'string' ? o.categoria : null,
+        }];
+      }),
+      portadas: (Array.isArray(f.portadas) ? f.portadas : []).filter(
+        (u): u is string => typeof u === 'string' && u.length > 0,
+      ),
+      clip_url: f.clip_url ?? null,
+    })),
+  };
+}

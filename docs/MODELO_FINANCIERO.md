@@ -1047,6 +1047,63 @@ Todas las tablas operativas en 0 filas. fee_configs_historial preserva 12 entrad
 
 ---
 
+## 11bis. EL COSTO DEL CANAL WHATSAPP — el primer número, ANTES del encendido *(S91, 8-ago-2026)*
+
+**Por qué entra al modelo antes de que el canal exista:** hasta hoy notificar
+costaba **cero variable** —push es gratis, el correo es casi gratis—, así que
+el modelo nunca tuvo una línea de costo por AVISAR. **WhatsApp la crea**, y un
+canal que se enciende sin su número en el modelo se descubre caro en la
+factura, que es el peor lugar.
+
+### Las tres cosas que hay que saber, con su fecha
+
+| # | el hecho | cuándo |
+|---|---|---|
+| ① | **Meta empieza a cobrar los mensajes `utility`** | **desde el 1-oct-2026** |
+| ② | **Ecuador cuesta ~17× lo que cuesta Colombia** por mensaje | ya |
+| ③ | Las 6 plantillas están categorizadas **MARKETING** y deben ser **UTILITY** | tarea del founder |
+
+**El ② es el que cambia decisiones y el que nadie esperaba.** El precio de
+WhatsApp es **por país de destino**, y Ecuador —nuestro primer mercado— está
+en una banda cara: **~17 veces Colombia.** *Un modelo que estimara el costo
+del canal con números de la región, o con el promedio de LatAm, se
+equivocaría por más de un orden de magnitud en el único país donde hoy
+operamos.*
+
+**El ③ multiplica el ①:** `marketing` cuesta **varias veces** más que
+`utility` por mensaje. Sobre la banda de Ecuador, arrancar mal categorizado
+sería el peor de los dos mundos — el país caro con la tarifa cara.
+
+### Lo que esto le exige al modelo
+
+1. **El aviso deja de ser gratis y pasa a tener COSTO MARGINAL POR ENVÍO**, y
+   por lo tanto una decisión de negocio detrás de cada uno: *¿este aviso vale
+   su costo?* — una pregunta que push nunca obligó a hacer.
+2. **El techo por categoría de `cat_notificacion_categorias` deja de ser solo
+   una protección de la ATENCIÓN del usuario y pasa a ser también un control
+   de GASTO.** *La pieza ya existe y ya rige; lo que cambia es que ahora
+   también cuida la plata.*
+3. **La elección de canal es económica, no solo de alcance:** push gratis vs
+   WhatsApp caro deja de ser «cuál llega mejor» y pasa a ser «cuál llega mejor
+   por lo que cuesta». La preferencia del usuario sigue mandando —eso es
+   letra—, pero el DEFAULT es una decisión con precio.
+
+### Lo que NO se estima acá, y por qué
+
+**Ningún número de gasto proyectado.** Falta el volumen —cuántos avisos por
+familia por mes— y ese dato **no existe todavía**: el canal nunca corrió.
+*Estimar un gasto sobre un volumen inventado es exactamente el tipo de número
+que este modelo existe para no tener.* La línea entra al modelo cuando el
+canal tenga un mes de operación real, y hasta entonces esta sección es **la
+advertencia, no el cálculo**.
+
+**Estado del canal al escribir esto:** APAGADO. `transporte_vivo = false`; el
+transporte existe en modo sombra (`despachar-whatsapp`) y los dos bloqueos son
+nuestros (credencial + normalización E.164 en el motor, L-201). Detalle en
+`MODELO_NOTIFICACIONES` §0quater.
+
+---
+
 ## 12. Lo que este documento NO resuelve
 
 - Política operativa de saldos negativos persistentes.
