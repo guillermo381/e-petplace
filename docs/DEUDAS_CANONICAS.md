@@ -9363,3 +9363,67 @@ libre y sin FK, por la letra de D-379).
 > olvido.
 
 **Origen: S91-A (medición al aplicar la firma de mesa de las 7 razas).**
+
+#### D-688 — ⚪ EL PRÉSTAMO VECINO QUE QUEDA: `ficha_identidad` comparte dibujo con `historia_clinica`
+
+**Depósito de mesa (hallazgo de B, S91).** Retirar el préstamo de la receta
+—que tenía firma— **cerró la tensión a la mitad, no del todo**:
+`ficha_identidad` sigue usando `'documento'`, **el mismo glifo que
+`historia_clinica`**, y las dos filas quedan VECINAS en la misma lista.
+
+**Medido al fusionar (S91-A, contra el objeto):** `'documento'` hace **triple
+turno** en `apps/cliente` — `papeles.ts` para `historia_clinica`, `papeles.ts`
+para `ficha_identidad`, y `cuenta/index.tsx:62` (la entrada a Documentos del
+hogar). Los otros dos dibujos del casillero también están ocupados:
+`presupuesto` en `hogar/index.tsx:931` y `bitacora` en
+`adiestramiento.tsx:215`. **Cuatro filas, tres dibujos.** *(La versión de B
+decía «documento ya es doble» y estaba corta — se adjudicó midiendo.)*
+
+**Por qué es PROVISIONAL A PROPÓSITO y no un error:** el objeto exacto del
+registry para la ficha es «identificación» —cédula con RETRATO, y la ficha
+lleva foto—, así que el préstamo **no miente el objeto**. La alternativa era
+elegir un dibujo que sí mintiera.
+
+**Las DOS salidas, que son decisiones distintas** (por eso es de mesa y no de
+una pista): **(a)** nace un cuarto dibujo (B, con su hoja de contacto y su
+gate POR ÍCONO a 21px), o **(b)** la mesa firma que estas dos filas comparten
+glifo a propósito y la ficha se retira por decisión.
+
+> **☠️ DISPARO: el próximo glifo que se dibuje para el set** — cuando B abra
+> el lápiz, éste entra en el mismo viaje (dibujar de a uno paga la hoja de
+> contacto cada vez).
+> **☠️ MUERTE:** las cuatro filas tienen dibujo propio, **o** existe la firma
+> que dice que dos lo comparten.
+
+**Origen: S91-B (declarado por B en su commit del glifo, sin disimularlo);
+cuenta re-medida por A al fusionar.**
+
+#### D-689 — 🟢 R17 ES CIEGA A 30 DE 105 EXPORTS, Y UNA EXENCIÓN NO SE DICE
+
+**Depósito de mesa (hallazgo de B, S91).** El guard **R17** —el que exige que
+toda pieza exportada de `packages/ui` esté MOSTRADA en la galería— **no mira
+30 de los 105 exports**: tokens, temas e infraestructura quedan fuera del
+filtro, y **`recursosUi` está exenta SIN DECIRLO** (la exención vive en la
+FORMA del filtro, no en una línea que la declare).
+
+**El número que ordena la decisión: ensanchar el filtro enciende 25 hallazgos
+PREEXISTENTES.** El guard no está roto — está **angosto**, y ensancharlo no
+es un cambio de una línea sino abrir 25 items que hoy nadie ve. *Es la misma
+clase que D-606/D-590/D-599: un corpus de verificación armado a mano no ve lo
+que no se le agregó.*
+
+**Por qué NO se ensancha solo:** un guard que empieza a fallar por 25 cosas a
+la vez es un guard que alguien apaga.
+
+**Y la mitad que importa igual, separada para que se pueda pagar barato:**
+*una exención que no se declara no es una exención, es un agujero con suerte.*
+Que **la exención se ESCRIBA** (una línea que diga qué queda fuera y por qué),
+sin tocar el filtro, cuesta nada y mata el modo de falla peor: que alguien
+mueva el filtro y encienda `recursosUi` sin saber por qué estaba afuera.
+
+> **☠️ DISPARO: la mesa que decida el saneo de verificadores** (donde ya
+> esperan el corpus manual de `verify-contrast` y los pares gráficos).
+> **☠️ MUERTE:** R17 declara su alcance y sus exenciones POR ESCRITO, y lo que
+> queda fuera queda fuera por decisión medida — no por la forma de un filtro.
+
+**Origen: S91-B (medición de B sobre su propio guard, elevada a mesa).**
